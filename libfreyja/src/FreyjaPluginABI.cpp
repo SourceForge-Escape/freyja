@@ -573,7 +573,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 		v = 0.5 * ((float)i/(float)segments) + 0.5;
 
 		r = sin(helDegToRad(180 * ((float)i/(float)segments)));
-		(i > segments/2) ? y = height*(1.0-r)+y*r : y *= r;;
+		(i > segments/2) ? y = height*(1.0-r)+y*r : y *= r;
 
 		if (i == 0)
 		{
@@ -590,7 +590,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 		}
 		else if (i == segments-1)
 		{
-			top = freyjaVertex3f(origin[0], origin[1]+y, origin[2]);
+			top = freyjaVertex3f(origin[0], origin[1]+height, origin[2]);
 			freyjaVertexNormal3f(top, 0.0, 1.0, 0.0);
 		}
 
@@ -601,9 +601,9 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 
 			u = 1.0 * ((float)j/(float)count);
 
-			nx = x * 0.5;
-			ny = 0.0;
-			nz = z * 0.5;
+			nx = x * r;
+			ny = (1.0 - r) * (i < segments/2) ? -0.3 : 0.3; // soften the halves
+			nz = z * r;
 
 			x *= r * radius;
 			z *= r * radius;
@@ -678,7 +678,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 		}
 		else if (i == segments-2)
 		{
-			index = count * i;
+			index = count * (i + 1);
 
 			for (j = 0; j < count; ++j)
 			{
