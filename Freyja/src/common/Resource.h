@@ -366,6 +366,7 @@ class Resource
 	bool Lookup(char *symbol, arg_list_t **adt);
 	bool Lookup(char *symbol, float *f);
 	bool Lookup(char *symbol, int *i);
+	bool Lookup(char *symbol, char **s);
   /*------------------------------------------------------
    * Pre  : 
 	*

@@ -39,6 +39,11 @@
 (setq GRID_ON true)            ; Toggle edit grid rendering
 (setq PATH "~/.freyja")        ; Set initial data path
 
+(setq HELP_MESSAGE "There is no online help as yet.¶¶If you'd like to work on documentation email me.¶¶Send bug reports and feature requests:¶<small>  * http://icculus.org/freyja¶  * irc://irc.freenode.net/#freyja¶  * mongoose@icculus.org</small>")
+
+(setq ABOUT_MESSAGE "<big>ᚠᚱᛖᛃᚨ Freyja 0.3.5</big>¶Freyja is an Open Source 3d modeling system.¶<small>Freyja Copyright © 2002-2004 by Terry 'Mongoose' Hendrix II</small>")
+
+
 
 ;; Custom colors
 (color COLOR_EDIT_GRID_8            0.2  0.2  0.2)
@@ -121,12 +126,12 @@
 				(menu_item "_Material"	10 FREYJA_MODE_RENDER_MATERIAL))
 			(menu_item "_Skeleton"		10 FREYJA_MODE_RENDER_BONETAG)
 			(submenu "_Joint"
-				(menu_item "_Point"		ePointJoint		" ")
-				(menu_item "_Sphere"	eSphereJoint	" ")
-				(menu_item "_Axes"		eAxisJoint		" "))
+				(menu_item "_Point"		ePointJoint		"gtk-blanked")
+				(menu_item "_Sphere"	eSphereJoint	"gtk-blanked")
+				(menu_item "_Axes"		eAxisJoint		"gtk-blanked"))
 			(submenu "_Bone"
-				(menu_item "_Line"		eLineBone		" ")
-				(menu_item "_PolyMesh" 	ePolyMeshBone	" ")))
+				(menu_item "_Line"		eLineBone		"gtk-blanked")
+				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
 
 		(submenu "_Tools"
@@ -158,7 +163,6 @@
 				(menu_item "_Rotate"  EVENT_MESH  CMD_MESH_ROTATE)
 				(menu_item "S_cale"   EVENT_MESH  CMD_MESH_SCALE)
 				(menu_item "_Mirror"  EVENT_MESH  CMD_MESH_MIRROR)
-				(menu_item "_Clone"   EVENT_MESH  CMD_MESH_CLONE)
 				(menu_item "C_enter"  EVENT_MESH  CMD_MESH_MOVE_CENTER))
 
 			(submenu "_Bone"
@@ -251,7 +255,7 @@
 								EVENT_MISC CMD_MISC_BBOX_SELECT)
 
 							(toolbar_button 
-								"clone.png" "Clone"	"Clone object" 
+								"clone.png" "Copy"	"Copy object" 
 								EVENT_MAIN eNone)
 
 							(toolbar_button
@@ -379,7 +383,7 @@
 			  (tab "Animation" FREYJA_MODE_ANIMATION
 
 					(hbox 1 0 0 1 0 
-						(label "Bg color" 0.0 0.5)
+						(label "Background color" 0.0 0.5)
 						(colorbutton 1 10000))
 
 					(animation_tab_hack)

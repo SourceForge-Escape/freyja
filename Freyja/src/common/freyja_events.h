@@ -71,7 +71,7 @@ void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
 
-void freyja_event_info_dialog(char *message);
+void freyja_event_info_dialog(char *icon, char *message);
 void freyja_event_file_dialog(char *title);
 void freyja_event_fullscreen();
 void freyja_event_unfullscreen();
@@ -399,5 +399,7 @@ int confirmDialog(char *dialog_icon,
 				  char *question_message,
 				  char *cancel_icon, char *cancel_text,
 				  char *accept_icon, char *accept_text);
+
+void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 
 #endif
