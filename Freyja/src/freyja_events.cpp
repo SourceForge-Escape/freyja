@@ -262,7 +262,9 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eGenerateNormals", eGenerateNormals);
 	r.RegisterInt("eGenerateCube", eGenerateCube);
-	r.RegisterInt("eGenerateTriStrip", eGenerateTriStrip);
+	r.RegisterInt("eGenerateTube", eGenerateTube);
+	r.RegisterInt("eGenerateCircle", eGenerateCircle);
+	r.RegisterInt("eGeneratePlane", eGeneratePlane);
 	r.RegisterInt("eGenerateCylinder", eGenerateCylinder);
 	r.RegisterInt("eGenerateSphere", eGenerateSphere);
 	r.RegisterInt("eGenerateCone", eGenerateCone);
