@@ -26,6 +26,7 @@
 #include <math.h>
 
 #include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 
 #include "Nod.h"
 
@@ -104,7 +105,37 @@ void Nod::print()
 	printf("header2.NumVertices = %i\n", header2.NumVertices);
 	printf("header2.NumFaces = %i\n", header2.NumFaces);
 	printf("header2.NumGroups = %i\n", header2.NumGroups);
-	printf("header2.ModelFlags = %i\n", header2.ModelFlags);
+	printf("header2.ModelFlags = {\n");
+
+	if (!header2.ModelFlags)
+		printf("NONE ");
+			  
+	if (header2.ModelFlags & NOD_MF_HASLOD)
+	{
+		printf("NOD_MF_HASLOD ");
+	}
+			  
+	if (header2.ModelFlags & NOD_MF_INLINE)
+	{
+		printf("NOD_MF_INLINE ");
+	}
+			  
+	if (header2.ModelFlags & NOD_MF_STATIC)
+	{
+		printf("NOD_MF_STATIC ");
+	}
+			  
+	if (header2.ModelFlags & NOD_MF_RESERVED1)
+	{
+		printf("NOD_MF_RESERVED1 ");
+	}
+			  
+	if (header2.ModelFlags & NOD_MF_RESERVED1)
+	{
+		printf("NOD_MF_RESERVED1 ");
+	}
+
+	printf("}\n");
 
 	printf("header2.Bounds[] = {");
 
@@ -114,7 +145,6 @@ void Nod::print()
 	}
 
 	printf("}\n");
-
 
 	for (i = 0; i < header2.NumBones; ++i)
 	{
@@ -146,7 +176,6 @@ void Nod::print()
 			   i, meshes[i].MeshName);
 		
 	}
-
 
 	for (i = 0; i < header2.NumVertices; ++i)
 	{
@@ -304,6 +333,131 @@ bool Nod::load(const char *filename)
 }
 
 
+bool Nod::save(const char *filename)
+{
+#ifdef FIXME
+	FreyjaFileWriter w;
+	long i, j, k;
+
+
+	if (!r.openFile(filename))
+		return false;
+
+	header1.Version = r.readLong();
+	header1.NumMaterials = r.readLong();
+
+
+	materials = new nod_material_t[header1.NumMaterials];
+
+	for (i = 0; i < header1.NumMaterials; ++i)
+	{
+		r.readCharString(32, materials[i].MaterialName);
+	}
+
+	header2.NumBones = r.readInt16();
+	header2.NumMeshs = r.readInt16();
+	header2.NumVertices = r.readLong();
+	header2.NumFaces = r.readLong();
+	header2.NumGroups = r.readInt16();
+	header2.ModelFlags = r.readLong();
+
+	for (i = 0; i < 6; ++i)
+	{
+		header2.Bounds[i] = r.readFloat32();
+	}
+
+
+	bones = new nod_bone_t[header2.NumBones];
+
+	for (i = 0; i < header2.NumBones; ++i)
+	{
+		bones[i].RestTranslate[0] = r.readFloat32();
+		bones[i].RestTranslate[1] = r.readFloat32();
+		bones[i].RestTranslate[2] = r.readFloat32();
+
+		for (j = 0; j < 3; ++j)
+		{
+			for (k = 0; k < 4; ++k)
+			{
+				bones[i].RestMatrixInverse[j][k] = r.readFloat32();
+			}
+		}
+
+		bones[i].SiblingID = r.readInt16();
+		bones[i].ChildID = r.readInt16();
+		bones[i].ParentID = r.readInt16();
+	}
+
+
+	meshes = new nod_mesh_t[header2.NumMeshs];
+
+	for (i = 0; i < header2.NumMeshs; ++i)
+	{
+		r.readCharString(32, meshes[i].MeshName);
+	}
+
+	vertices = new nod_vertex_t[header2.NumVertices];
+
+	for (i = 0; i < header2.NumVertices; ++i)
+	{
+		vertices[i].Pos[0] = r.readFloat32();
+		vertices[i].Pos[1] = r.readFloat32();
+		vertices[i].Pos[2] = r.readFloat32();
+
+		vertices[i].Norm[0] = r.readFloat32();
+		vertices[i].Norm[1] = r.readFloat32();
+		vertices[i].Norm[2] = r.readFloat32();
+
+		vertices[i].UV[0] = r.readFloat32();
+		vertices[i].UV[1] = r.readFloat32();
+
+		vertices[i].Weight = r.readFloat32();
+
+		vertices[i].BoneNum = r.readLong();
+	}
+
+
+	if (header2.ModelFlags & NOD_MF_HASLOD)
+	{
+		for (i = 0; i < header2.NumVertices; ++i)
+		{
+			r.readInt16();  // ?
+		}
+	}
+
+	faces = new nod_face_t[header2.NumFaces];
+
+	for (i = 0; i < header2.NumFaces; ++i)
+	{
+		faces[i].indices[0] = r.readInt16();
+		faces[i].indices[1] = r.readInt16();
+		faces[i].indices[2] = r.readInt16();
+	}
+
+	mesh_groups = new nod_meshgroup_t[header2.NumGroups];
+ 
+	for (i = 0; i < header2.NumGroups; ++i)
+	{
+		mesh_groups[i].MaterialID = r.readLong();
+		r.readBufferUnsignedChar(12, mesh_groups[i].RESERVED);
+		mesh_groups[i].NumFaces = r.readInt16();
+		mesh_groups[i].NumVertices = r.readInt16();
+		mesh_groups[i].MinVertices = r.readInt16();
+		mesh_groups[i].dummy = r.readInt16();
+		mesh_groups[i].GroupFlags = r.readInt16();
+		mesh_groups[i].BoneNum = r.readInt8U();
+		mesh_groups[i].MeshNum = r.readInt8U();
+	}
+
+	r.closeFile();
+	
+	return true;
+#else
+	return false;
+#endif
+}
+
+
 ////////////////////////////////////////////////////////////
 // Special Interface code
 ////////////////////////////////////////////////////////////
@@ -363,9 +517,10 @@ int freyja_model__nod_check(char *filename)
 int freyja_model__nod_import(char *filename)
 {
 	const vec_t scale = 0.25;
-	Map<unsigned int, unsigned int> trans;
-	int i, j, b;
+	Vector<long> vertices;
 	Nod nod;
+	long index, num_verts = 0, num_faces = 0;
+	int i, j, b;
 	char name[64];
 	Matrix matrix;
 	vec3_t pos, rot;
@@ -430,11 +585,6 @@ int freyja_model__nod_import(char *filename)
 	freyjaEnd(); // FREYJA_SKELETON
 
 
-#define USE_GROUPS
-#ifdef USE_GROUPS
-	Vector<long> vertices;
-	long index, num_verts = 0, num_faces = 0;
-
 
 	for (i = 0; i < nod.header2.NumGroups; ++i)
 	{  
@@ -490,65 +640,6 @@ int freyja_model__nod_import(char *filename)
 		num_verts += nod.mesh_groups[i].NumVertices;
 		num_faces += nod.mesh_groups[i].NumFaces;
 	}
-
-#else
-	int v, t;
-
-
-	// Start a new mesh
-	freyjaBegin(FREYJA_MESH);
-    
-	// Start a new vertex group
-	freyjaBegin(FREYJA_VERTEX_GROUP);
-
-	for (j = 0; j < nod.header2.NumVertices; j++)
-	{
-		pos[0] = nod.vertices[j].Pos[0];
-		pos[1] = nod.vertices[j].Pos[1];
-		pos[2] = nod.vertices[j].Pos[2];
-		
-		b = nod.vertices[j].BoneNum;
-		
-		nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
-			
-		matrix.setIdentity();
-		matrix.translate(nod.bones[b].RestTranslate[0],
-						 nod.bones[b].RestTranslate[1],
-						 nod.bones[b].RestTranslate[2]);
-		matrix.rotate(rot[0], rot[1], rot[2]);
-		matrix.multiply3v(pos, pos);
-		
-		// Store vertices and texels in group
-		v = freyjaVertex3f(pos[0], pos[1], pos[2]);		
-		t = freyjaTexCoord2f(nod.vertices[j].UV[0],1.0 - nod.vertices[j].UV[1]);
-		
-		// Generates id translator list 
-		// (In NOD texel and vertex are in the same referenced structure,
-		//  so only one mapping needed )
-		trans.Add(j, v);
-	}
-
-	freyjaEnd(); // FREYJA_GROUP
-
-	for (j = 0; j < nod.header2.NumFaces; j++)
-	{
-		// Start a new polygon
-		freyjaBegin(FREYJA_POLYGON);
-
-		freyjaPolygonVertex1i(trans[nod.faces[j].indices[0]]);
-		freyjaPolygonTexCoord1i(trans[nod.faces[j].indices[0]]);
-		freyjaPolygonVertex1i(trans[nod.faces[j].indices[1]]);
-		freyjaPolygonTexCoord1i(trans[nod.faces[j].indices[1]]);
-		freyjaPolygonVertex1i(trans[nod.faces[j].indices[2]]);
-		freyjaPolygonTexCoord1i(trans[nod.faces[j].indices[2]]);
-
-		freyjaPolygonMaterial1i(0);
-		
-		freyjaEnd(); // FREYJA_POLYGON
-	}
-    
-	freyjaEnd(); // FREYJA_MESH
-#endif
 
 	freyjaEnd(); // FREYJA_MODEL
 
