@@ -55,6 +55,21 @@ public:
 		printf("\n");
 	}
 
+	FreyjaKeyFrame(vec_t time, Vector3d position, Quaternion orientation)
+	{
+		mOrientation = orientation;
+		mPosition = position;
+		setTime(time);
+	}
+
+	FreyjaKeyFrame(vec_t time, const vec3_t xyz, const vec4_t wxyz)
+	{
+		setOrientationByQuaternion(wxyz);
+		setPosition(xyz);
+		setTime(time);
+	}
+
+
 	void getOrientationEuler(vec3_t xyz)
 	{
 		mOrientation.getEulerAngles(xyz+0, xyz+1, xyz+2);
@@ -98,7 +113,7 @@ public:
 		mOrientation = Quaternion(wxyz);
 	}
 
-	void setPosition(vec3_t xyz)
+	void setPosition(const vec3_t xyz)
 	{
 		mPosition = Vector3d(xyz);
 	}
@@ -124,11 +139,53 @@ public:
 	class FreyjaBoneKeyFrame
 	{
 	public:
+		FreyjaBoneKeyFrame(const char *name, long boneIndex)
+		{
+			setName(name);
+			mBoneIndex = boneIndex;
+		}
+
+		long addKeyFrame(vec_t time, Vector3d position, Quaternion orientation)
+		{
+			long frame = mKeyFrames.size();
+
+			mKeyFrames.pushBack(new FreyjaKeyFrame(time,position, orientation));
+
+			return frame;
+		}
+
 		void setName(const char *name)
 		{
 			strncpy(mName, name, 64);
 			mName[63] = 0;
 		}
+
+		void updateBoneIndex(long boneIndex)
+		{
+			mBoneIndex = boneIndex;
+		}
+
+
+		char *getName()
+		{
+			return mName;
+		}
+
+		long getBoneIndex()
+		{
+			return mBoneIndex;
+		}
+
+		FreyjaKeyFrame *getKeyFrame(long keyframeIndex)
+		{
+			if (keyframeIndex > -1 && keyframeIndex < (long)mKeyFrames.size())
+			{
+				return mKeyFrames[keyframeIndex];
+			}
+
+			return 0x0;
+		}
+		
 
 		char mName[64];				/* Used to double check 
 										skeleton <--> keyframe matches */
@@ -138,12 +195,102 @@ public:
 	};
 
 
+	long getBoneCount()
+	{
+		return mBoneKeyFrames.size();
+	}
+
+	FreyjaBoneKeyFrame *getBone(long boneIndex)
+	{
+		if (boneIndex > -1 && boneIndex < (long)mBoneKeyFrames.size())
+		{
+			return mBoneKeyFrames[boneIndex];
+		}
+
+		return 0x0;
+	}
+
+	FreyjaKeyFrame *getBoneKeyFrame(long boneIndex, long keyframeIndex)
+	{
+		FreyjaBoneKeyFrame *bone = getBone(boneIndex);
+
+		if (bone)
+		{
+			return bone->getKeyFrame(keyframeIndex);
+		}
+
+		return 0x0;
+	}	
+
+	long getKeyFrameCountForBone(long boneIndex)
+	{
+		FreyjaBoneKeyFrame *frame = mBoneKeyFrames[boneIndex];
+		
+		if (frame)
+		{
+			return frame->mKeyFrames.size();
+		}
+
+		return 0;
+		
+	}
+
+	void setBoneName(long boneIndex, const char *name)
+	{
+		FreyjaBoneKeyFrame *frame = mBoneKeyFrames[boneIndex];
+		
+		if (frame)
+		{
+			return frame->setName(name);
+		}
+	}
+
 	void setName(const char *name)
 	{
 		strncpy(mName, name, 64);
 		mName[63] = 0;
 	}
 	
+	long newKeyFrame(long boneKeyFrameIndex, vec_t time, 
+					 Vector3d xyz, Quaternion wxyz)
+	{
+		FreyjaBoneKeyFrame *frame = mBoneKeyFrames[boneKeyFrameIndex];
+		
+		if (frame)
+		{
+			return frame->addKeyFrame(time, xyz, wxyz);
+		}
+
+		return -1;
+	}
+
+	long newKeyFrame(long boneKeyFrameIndex, vec_t time,vec3_t xyz, vec4_t wxyz)
+	{
+		FreyjaBoneKeyFrame *frame = mBoneKeyFrames[boneKeyFrameIndex];
+		
+		if (frame)
+		{
+			return frame->addKeyFrame(time, Vector3d(xyz), Quaternion(wxyz));
+		}
+
+		return -1;
+	}
+
+	long newBoneKeyFrame(const char *name, long boneIndex)
+	{
+		long frameIndex = mBoneKeyFrames.size();
+
+		mBoneKeyFrames.pushBack(new FreyjaBoneKeyFrame(name, boneIndex));
+
+		return frameIndex;
+	}
+
+	long getBoneKeyFrameCount(long boneIndex)
+	{
+		if (boneIndex > 0 && boneIndex < (int)mBoneKeyFrames.size())
+			return mBoneKeyFrames[boneIndex]->mKeyFrames.size();
+	}
+
 	long mId;
 
 	char mName[64];
@@ -162,7 +309,7 @@ public:
 
 	vec_t mLastTime;    // render use mostly
 
-	Vector<FreyjaBoneKeyFrame *> mKeyFrames; 
+	Vector<FreyjaBoneKeyFrame *> mBoneKeyFrames; 
 };
 
 

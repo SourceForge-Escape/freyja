@@ -705,9 +705,33 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 * Pre  : 
 	 * Post : Creates a new Freyja Animation object
 	 *        Returns the new Animation's index or -1 on error
+	 *
+	 * NOTES: The new skeletal animation system allows for
+	 *        sharing (subset) animations across multiple
+	 *        skeletons using name matching to assure the
+	 *        skeletons match. 
 	 ------------------------------------------------------*/
 
-	
+	long freyjaAnimationBoneCreate(long animationIndex,
+								   const char *name, long boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : Creates a new Freyja Animation Bone object
+	 *        Returns the new Bone's index or -1 on error
+	 ------------------------------------------------------*/
+
+	long freyjaAnimationBoneKeyFrameCreate(long animationIndex,
+										   long boneIndex,
+										   vec_t time, vec3_t xyz, vec4_t wxyz);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 *        Animation Bone <boneIndex> exists
+	 *
+	 * Post : Returns the keyframe's local Animation's Bone's
+	 *        Keyframe element index or -1 on error
+	 ------------------------------------------------------*/
+
+
 	/* Animation Accessors */
 
 	long freyjaGetAnimationCount();
@@ -716,18 +740,22 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 * Post : Returns the number of Animations being managed
 	 ------------------------------------------------------*/
 
-	long freyjaGetAnimationKeyFrameCount(long animationIndex);
+	long freyjaGetAnimationBoneCount(long animationIndex);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
+	 * Post : Returns the number of bones or -1 on error
+	 ------------------------------------------------------*/
+
+	long freyjaGetAnimationBoneKeyFrameCount(long animationIndex, 
+											 long boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 *        Animation Bone <boneIndex> exists
+	 *
 	 * Post : Returns the number of keyframes or -1 on error
 	 ------------------------------------------------------*/
 
-	//long freyjaGetAnimationKeyFrameIndex(long animationIndex, long element);
-	/*------------------------------------------------------
-	 * Pre  : Animation <animationIndex> exists
-	 * Post : Returns the gobal object index ( from the local
-	 *        Animation element index ) or -1 on error
-	 ------------------------------------------------------*/
+	// Finish me
 
 
 	/* Animation Mutators */
@@ -735,6 +763,14 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	void freyjaAnimationName(long animationIndex, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
+	 * Post : Sets human readable animation name
+	 ------------------------------------------------------*/
+
+	void freyjaAnimationBoneName(long animationIndex, long boneIndex,
+								 const char *name);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 *        Animation Bone <boneIndex> exists
 	 * Post : Sets human readable animation name
 	 ------------------------------------------------------*/
 
@@ -756,34 +792,22 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaAnimationSubsetCount(long animationIndex, long boneCount);
-	/*------------------------------------------------------
-	 * Pre  : Animation <animationIndex> exists
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	long freyjaAnimationKeyFrameCreate(long animationIndex);
-	/*------------------------------------------------------
-	 * Pre  : Animation <animationIndex> exists
-	 * Post : Returns the keyframe's local Animation element
-	 *        index or -1 on error
-	 ------------------------------------------------------*/
-
-	void freyjaAnimationKeyFrameTime(long animationIndex, 
+	void freyjaAnimationKeyFrameTime(long animationIndex, long boneIndex,
 									 long keyFrameIndex, vec_t time);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
 	 * Post : Sets time for <keyFrameIndex> keyframe in animation
 	 ------------------------------------------------------*/
 
-	void freyjaAnimationKeyFramePosition(long animationIndex, 
+	void freyjaAnimationKeyFramePosition(long animationIndex, long boneIndex, 
 										 long keyFrameIndex, vec3_t position);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
 	 * Post : Sets <keyFrameIndex> keyframe's position in animation
 	 ------------------------------------------------------*/
 
-	void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex, 
+	void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex,
+											   long boneIndex, 
 											   long keyFrameIndex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
@@ -791,7 +815,8 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 *        by Euler angles
 	 ------------------------------------------------------*/
 
-	void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex, 
+	void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex,
+												long boneIndex,
 												long keyFrameIndex,vec4_t wxyz);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
@@ -1091,6 +1116,8 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	//   If used externally you'll likely get a lot of breakage or
 	//   slower and possibly incorrect object states.
 	///////////////////////////////////////////////////////////////////////
+
+	// FreyjaSkeletalAnimation *freyjaGetAnimation(long animationIndex);
 
 	void freyja__MeshUpdateMappings(long meshIndex);
 	/*------------------------------------------------------
