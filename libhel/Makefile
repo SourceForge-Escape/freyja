@@ -171,6 +171,7 @@ install-lib:
 		$(INSTALL_LIB_DIR)
 	@-ln -sf $(INSTALL_LIB_DIR)/lib$(NAME)$(API).so.$(VERSION) \
 		$(INSTALL_LIB_DIR)/lib$(NAME)$(API).so
+	./libsetup.sh
 	@-echo "[done]"
 
 install-headers:
