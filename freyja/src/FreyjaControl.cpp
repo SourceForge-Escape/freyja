@@ -1383,6 +1383,10 @@ bool FreyjaControl::event(int command)
 
 		
 	/* MESHES */
+	case eMeshGenerateNormals:
+		freyjaGenerateMeshVertexNormals(mModel->getCurrentMesh());
+		freyja_event_gl_refresh();
+		break;
 	case eMeshNew:
 		mTransformMode = FreyjaModel::TransformMesh;
 		addObject();
