@@ -226,12 +226,15 @@ DEB_DIR=/tmp/$(NAME).deb
 NAME_DEB=libmgtk
 VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
 
-DESTDIR=/usr/local
-INSTALL_BIN=$(DESTDIR)/bin
-INSTALL_LIB=$(DESTDIR)/lib
-INSTALL_DOC=$(DESTDIR)/share/doc/$(NAME)
-INSTALL_SHARE=$(DESTDIR)/share/$(NAME)
-INSTALL_INCLUDE=$(DESTDIR)/include
+DESTDIR =
+NO_DEB=
+NO_DEB=local/
+INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
+INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
+INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
+INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
+INSTALL_INCLUDE=$(DESTDIR)/usr/$(NO_DEB)include
+INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
 clean-deb:
 	@-echo -n "Cleaning DEBs                                "

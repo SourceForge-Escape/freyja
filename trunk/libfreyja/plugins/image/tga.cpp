@@ -37,6 +37,10 @@ extern "C" {
   int import_image(char *filename, unsigned char **image, 
 		   unsigned int *w, unsigned int *h, 
 		   char *type);
+
+  int freyja_image_export__tga(char *filename, unsigned char *image, 
+			       unsigned int w, unsigned int h, 
+			       char type);
 }
 
 int check(FILE *f)
@@ -353,6 +357,31 @@ int import_image(char *filename, unsigned char **image,
 
 
 int mtk_image__tga_save(FILE *f, unsigned char *image,
+			unsigned int width, unsigned int height, char type);
+
+int freyja_image_export__tga(char *filename, unsigned char *image, 
+			     unsigned int w, unsigned int h, char bbp)
+{
+  long ret;
+  FILE *f;
+
+  f = fopen(filename, "wb");
+
+  if (!f)
+  {
+    perror(filename);
+    return -1;
+  }
+
+  ret = mtk_image__tga_save(f, image, w, h, bbp);
+
+  fclose(f);
+
+  return ret;
+}
+
+
+int mtk_image__tga_save(FILE *f, unsigned char *image,
 			unsigned int width, unsigned int height, char type)
 {
   mtk_image_tga_t header;
@@ -361,7 +390,7 @@ int mtk_image__tga_save(FILE *f, unsigned char *image,
   char comment[64];
 
 
-  if (!f || !image || !width || !height) // || type != 2)
+  if (!f || !image || !width || !height)
   {
     fprintf(stderr, "mtk_image__tga_save> Invalid parameters.\n");
     return -1;
@@ -381,13 +410,21 @@ int mtk_image__tga_save(FILE *f, unsigned char *image,
   header.width = width;
   header.height = height;
 
-
-  if (type == 2)
+  switch (type)
+  {
+  case 4:
     header.bpp = 32;
-  else
-    header.bpp = 24;
+    break;
 
-  header.desc_flags = 0;
+  case 3:
+    header.bpp = 24;
+    break;
+
+  default:
+    header.bpp = 24; // so wrong
+  }
+
+  header.desc_flags = 32; // flip me vertically on load he says
 
   // Write TGA header
   fwrite(&header.comment_lenght, 1, 1, f);
@@ -420,6 +457,8 @@ int mtk_image__tga_save(FILE *f, unsigned char *image,
       image[i + 2] = tmp;
     }
     break;
+
+
   case 24:
     size = header.width * header.height * 3;
  

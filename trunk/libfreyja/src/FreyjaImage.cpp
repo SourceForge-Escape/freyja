@@ -574,6 +574,92 @@ int FreyjaImage::loadPaletteMTK(const char *filename)
 
 int FreyjaImage::saveImage(const char *filename, const char *module_name)
 {
+
+#ifdef FREYJAIMAGE_PLUGINS
+	FreyjaFileReader reader;
+	char symbol[256];
+	int (*export_img)(char *filename, unsigned char *image,
+					  unsigned int width, unsigned int height, 
+					  char type);
+	bool done = false;
+	char *module_filename;
+	void *handle;
+	char *error;
+
+
+	print("[FreyjaImage plugin system invoked]");
+
+	if (!reader.openDirectory(PLUGIN_IMAGE_DIR))
+	{
+		printError("Couldn't access image plugin directory");
+		return -2;
+	}
+
+	while (!done && (module_filename = reader.getNextDirectoryListing()))
+	{
+		if (reader.isDirectory(module_filename))
+			continue;
+
+		//#define DISABLE_MODULES
+#ifdef DISABLE_MODULES
+		print("Disabled load of '%s'", module_filename);
+		continue; // Disabled plugin loading for now
+#endif
+
+		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+		{
+			printError("In module '%s'.", module_filename);
+
+			if ((error = dlerror()) != NULL)  
+			{
+				printError("%s", error);
+			}
+
+			continue; /* Try the next plugin, even after a bad module load */
+		}
+		else
+		{
+			print("Module '%s' opened.", module_filename);
+
+			snprintf(symbol, 256, "freyja_image_export__%s", module_name);
+
+			export_img = (int (*)(char *filename, unsigned char *image,
+								  unsigned int width, unsigned int height, 
+								  char type))dlsym(handle, symbol);
+
+			if ((error = dlerror()) != NULL)  
+			{
+				printError("%s", error);
+				dlclose(handle);
+				continue;
+			}
+			
+			done = !(*export_img)((char*)filename, 
+								  _image, _width, _height, 
+								  ((_color_mode == RGBA_32) ? 4 :
+								   (_color_mode == RGB_24) ? 3 : 1));
+
+			if ((error = dlerror()) != NULL) 
+			{
+				printError("%s", error);
+				dlclose(handle);
+				continue;
+			}
+
+			dlclose(handle);
+		}
+	}
+
+	reader.closeDirectory();
+
+	print("[FreyjaPlugin module loader sleeps now]\n");
+
+	if (done)
+		return 0;
+#else
+	print("FreyjaImage: This build was compiled w/o plugin support");
+#endif
+
 	return -1;
 }
 

@@ -124,6 +124,11 @@ public:
 		mExtention[63] = 0;
 	}
 
+	void setId(long id)
+	{
+		mId = id;
+	}
+
 	long getId()
 	{
 		return mId;
@@ -141,6 +146,131 @@ public:
 						   (mExportFlags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
 						   (mExportFlags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 	}
+
+
+	long getIntArg(const char *name)
+	{
+		long i, l;
+
+		if (!name || !name[0])
+			return -1; // oh well
+
+		l = strnlen(name, 64);
+
+		for (i = mIntArgsDesc.begin(); i < (long)mIntArgsDesc.end(); ++i)
+		{
+			if (!strncmp(name, mIntArgsDesc[i], l))
+				return mIntArgs[i];
+		}
+
+		return -1;
+	}
+
+
+	float getFloatArg(const char *name)
+	{
+		long i, l;
+
+		if (!name || !name[0])
+			return -1; // oh well
+
+		l = strnlen(name, 64);
+
+		for (i = mFloatArgsDesc.begin(); i < (long)mFloatArgsDesc.end(); ++i)
+		{
+			if (!strncmp(name, mFloatArgsDesc[i], l))
+				return mFloatArgs[i];
+		}
+
+		return -1;
+	}
+
+
+	char *getStringArg(const char *name)
+	{
+		long i, l;
+
+		if (!name || !name[0])
+			return 0x0; // oh well
+
+		l = strnlen(name, 64);
+
+		for (i = mStringArgsDesc.begin(); i < (long)mStringArgsDesc.end(); ++i)
+		{
+			if (!strncmp(name, mStringArgsDesc[i], l))
+				return mStringArgs[i];
+		}
+
+		return 0x0;
+	}
+
+	void addIntArg(const char *name, long data)
+	{
+		char *s;
+		long l = 0;
+
+		if (!name || !name[0])
+			return;
+
+		l = strnlen(name, 64);
+		s = new char[64];
+		strncpy(s, name, 64);
+		s[63] = 0;
+
+		mIntArgs.pushBack(data);
+		mIntArgsDesc.pushBack(s);
+	}
+
+
+	void addFloatArg(const char *name, float data)
+	{
+		char *s;
+		long l = 0;
+
+		if (!name || !name[0])
+			return;
+
+		l = strnlen(name, 64);
+		s = new char[64];
+		strncpy(s, name, 64);
+		s[63] = 0;
+
+		mFloatArgs.pushBack(data);
+		mFloatArgsDesc.pushBack(s);
+	}
+
+
+	void addStringArg(const char *name, const char *data)
+	{
+		char *s;
+		long l = 0;
+
+		if (!name || !name[0])
+			return;
+
+		l = strnlen(name, 64);
+		s = new char[64];
+		strncpy(s, name, 64);
+		s[63] = 0;
+
+		mStringArgsDesc.pushBack(s);
+
+		if (data && data[0])
+		{
+			l = strnlen(name, 64);
+			s = new char[l+1];
+			strncpy(s, data, l);
+			s[l-1] = 0;
+		}
+		else
+		{
+			s = new char[64];
+			s[0] = 0;
+		}
+
+		mStringArgs.pushBack(s);
+	}
+
 
 	char *mFilename;
 
@@ -771,8 +901,13 @@ public:
 	void addPluginArgInt(const char *name, long defaults);
 	void addPluginArgFloat(const char *name, float defaults);
 	void addPluginArgString(const char *name, const char *defaults);
+	long getPluginArgInt(long pluginIndex, const char *name);
+	float getPluginArgFloat(long pluginIndex, const char *name);
+	char *getPluginArgString(long pluginIndex, const char *name);
 	FreyjaPluginDesc *getPluginDesc(long pluginIndex);
+	FreyjaPluginDesc *getPluginDesc(const char *name);
 	long getPluginDescCount();
+	long getPluginId();
 
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 

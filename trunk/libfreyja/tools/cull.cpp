@@ -1,16 +1,16 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 
 /* A simple program for culling data out of model files/paks */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <freyja8/EggFileReader.h>
-#include <freyja8/EggFileWriter.h>
+#include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 
 int main(int argc, char *argv[])
 {
-	EggFileWriter w;
-	EggFileReader r;
+	FreyjaFileWriter w;
+	FreyjaFileReader r;
 	unsigned char *buffer;
 	unsigned int offset, size;
 
