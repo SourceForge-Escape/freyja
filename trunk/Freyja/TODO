@@ -17,6 +17,8 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Deform skelmesh in bone transform
+	o Vertex extrude with quads
 	o Multi window editing using python via calls to FreyjaRender
 	o Deform vertices render option ( disables mesh editing )
 	o Skeletal Ref -> Skeletal Keyframe ( dup | edit ) -> Skel Keyframe |
@@ -34,8 +36,6 @@
 	  hehehe
 	o Animation save doesn't warn on overwrite -- do that
 	o Curved surfaces in backend, remove patch test
-	o CLI libfreyja util tool, freyja import foo.mdl export bar.smd
-	  this will greatly aid in testing
 	o Fix bones/skeletal system backend or even switch to umbra
 	o Face selection and grouping for operations like normal generation
 	o Relative/Ray based light movement with mouse in animator tab
@@ -45,9 +45,6 @@
 	o Make plugin to load Egg 8.12 models independent of backend
 	o Vertex morphing animation as extension ( was removed during fork )
 	o Remove all unused/obsolete events, functions, and cmds
-	o Bounding box selection made into 2 events:
-	   1. bounding box selection
-	   2. operation on selection ( not just vertex buffer default )
 	o Object Copy/Cut/Paste for more than just meshes
 	o Undo system
 	o Recently used files list
