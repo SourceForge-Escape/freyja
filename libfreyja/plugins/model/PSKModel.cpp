@@ -2613,6 +2613,7 @@ int main(int argc, char *argv[])
 #include <freyja/FreyjaPlugin.h>
 #include <mstl/Map.h>
 #include <hel/Matrix.h>
+#include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 
 
@@ -2666,6 +2667,8 @@ int freyja_model__psk_import(char *filename)
 	unsigned int i, j, v, t, m;
 	const float scale = 0.1f;
 	Vector<unsigned int> transV;
+	Quaternion q;
+	Vector3d u;
 
 
 	if (freyja_model__psk_check(filename) < 0)
@@ -2771,37 +2774,44 @@ int freyja_model__psk_import(char *filename)
 		}
 #   else
 		// eular angles
-		quaternion_to_euler_angles(psk.mBones[i].restDir[0],
+		quaternion_to_euler_angles(psk.mBones[i].restDir[3],
+								   psk.mBones[i].restDir[0],
 								   psk.mBones[i].restDir[1],
 								   psk.mBones[i].restDir[2],
-								   psk.mBones[i].restDir[3],
 								   &rotation[0],  // x
 								   &rotation[1],  // y
 								   &rotation[2]); // z
-			
-		// Convert radians to degrees
-		rotation[0] *= 57.295779513082323;
-		rotation[1] *= 57.295779513082323;
-		rotation[2] *= 57.295779513082323;
 
 		//freyjaBoneRotateQuaternion4f(psk.mBones[i].restDir[3],
 		//						 psk.mBones[i].restDir[0],
 		//						 psk.mBones[i].restDir[1],
 		//						 psk.mBones[i].restDir[2]);
 
+		q = Quaternion(psk.mBones[i].restDir[3],
+					   psk.mBones[i].restDir[0],
+					   psk.mBones[i].restDir[1],
+					   psk.mBones[i].restDir[2]);
+
+		//q.getEulerAngles(rotation+0, rotation+1, rotation+2);
+
+		/* Convert radians to degrees */
+		rotation[0] *= 57.295779513082323;
+		rotation[1] *= 57.295779513082323;
+		rotation[2] *= 57.295779513082323;
+
 		if (i == 0)
 		{
 			freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
 							psk.mBones[i].restLoc[2]*scale,
-							psk.mBones[i].restLoc[1]*scale);
+							-psk.mBones[i].restLoc[1]*scale);
 			
-			freyjaBoneRotate3f(rotation[0], rotation[1], rotation[2]);
+			freyjaBoneRotate3f(rotation[0], rotation[2], rotation[1]);
 		}
 		else
 		{
-			freyjaBonePos3f(-psk.mBones[i].restLoc[0]*scale,
-							-psk.mBones[i].restLoc[1]*scale,
-							-psk.mBones[i].restLoc[2]*scale);
+			freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
+							psk.mBones[i].restLoc[2]*scale,
+							psk.mBones[i].restLoc[1]*scale);
 
 			freyjaBoneRotate3f(rotation[0], rotation[1], rotation[2]);
 		}

@@ -1560,7 +1560,7 @@ void Md3AnimModel::renderTag(unsigned int id)
 #include <GL/glu.h>
 #include <GL/gl.h>
 #include <SDL/SDL.h>
-#include "Texture.h"
+#include "SDLUnitTest.h"
 
 void updateTitle();
 void updateWindowTitle(char *title);
