@@ -1336,22 +1336,21 @@ void FreyjaModel::TexelMove(float s, float t)
 	egg_texel_t *texel = _egg->getTexel(getCurrentTexCoord());
   
 
-	if (!texel)
+	if (texel)
+	{
+		texel->st[0] = s;
+		texel->st[1] = t;
+	}
+	else
 	{
 		egg_vertex_t *vertex = _egg->getVertex(getCurrentVertex());
 		
-		vertex->uv[0] = s;
-		vertex->uv[1] = t;
-		return;
+		if (vertex)
+		{
+			vertex->uv[0] = s;
+			vertex->uv[1] = t;
+		}
 	}
-
-#ifdef DEBUG_TEXELMOVE
-	printf("Moving texel[%u] (%f, %f) -> (%f, %f)\n", 
-		   texel->id, texel->st[0], texel->st[1], s, t);
-#endif
-
-	texel->st[0] = s;
-	texel->st[1] = t;
 }
 
 void FreyjaModel::TagNew(float x, float y, float z, unsigned char flag)

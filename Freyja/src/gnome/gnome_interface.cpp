@@ -444,7 +444,6 @@ GtkWidget *mgtk_create_fileselection(char *title)
 	GtkWidget *fileselection;
 	GtkWidget *ok_button;
 	GtkWidget *cancel_button;
-	GtkWidget *main_vbox;
 
 
 	fileselection = gtk_file_selection_new(title);
@@ -478,19 +477,6 @@ GtkWidget *mgtk_create_fileselection(char *title)
 	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
 					   GTK_SIGNAL_FUNC(fileselection_cancel_event),
 					   NULL);
-
-#define EXTEND_FILE_TEST
-#ifdef EXTEND_FILE_TEST
-	GtkWidget *widget;
-
-	main_vbox = GTK_FILE_SELECTION(fileselection)->main_vbox;
-
-	widget = mgtk_create_label(main_vbox, "lab1", 
-							   "This is a fileselection extention test",
-							   0.0, 0.0);
-
-	gtk_box_pack_start(GTK_BOX(main_vbox), widget, TRUE, TRUE, FALSE);
-#endif
 
 	return fileselection;
 }

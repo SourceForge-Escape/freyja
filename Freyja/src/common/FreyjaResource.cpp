@@ -220,6 +220,7 @@ FreyjaResource::FreyjaResource()
 	RegisterFunction("toolbar_box", freyja_rc_toolbar_box);
 	RegisterFunction("toolbar_togglebutton", freyja_rc_toolbar_togglebutton);
 	RegisterFunction("toolbar_button", freyja_rc_toolbar_button);
+
 	//printf("FreyjaResource> Done\n");
 
 	//printf("FreyjaResource> Bind Resource and C++ symbols\n");
@@ -285,9 +286,14 @@ FreyjaResource::FreyjaResource()
 	RegisterCPPInt("CMD_MISC_VERTEX_UV", CMD_MISC_VERTEX_UV);
 	RegisterCPPInt("CMD_MISC_DISPLAY_INFO", CMD_MISC_DISPLAY_INFO);
 	RegisterCPPInt("CMD_MISC_ABOUT", CMD_MISC_ABOUT);
+	RegisterCPPInt("VIEW_JOINT1", VIEW_JOINT1);
+	RegisterCPPInt("VIEW_JOINT2", VIEW_JOINT2);
+	RegisterCPPInt("VIEW_JOINT3", VIEW_JOINT3);
+	RegisterCPPInt("VIEW_BONE1", VIEW_BONE1);
+	RegisterCPPInt("VIEW_BONE2", VIEW_BONE2);
+
 
 	RegisterCPPInt("EVENT_MATERIAL", EVENT_MATERIAL);
-
 
 	RegisterCPPInt("EVENT_FREYJA_MODE", EVENT_FREYJA_MODE);
 	RegisterCPPInt("FREYJA_MODE_MODEL_EDIT", FREYJA_MODE_MODEL_EDIT);
