@@ -25,8 +25,8 @@
  ================================================================*/
 
 
-#ifndef __FREYJA_MONGOOSE_MD3ANIMMODEL_H_
-#define __FREYJA_MONGOOSE_MD3ANIMMODEL_H_
+#ifndef GUARD__FREYJA_MONGOOSE_MD3ANIMMODEL_H_
+#define GUARD__FREYJA_MONGOOSE_MD3ANIMMODEL_H_
 
 #include "Md3.h"
 
