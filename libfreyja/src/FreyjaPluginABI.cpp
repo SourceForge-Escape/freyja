@@ -2434,71 +2434,66 @@ void freyja__GetDifferenceOfPolygonReferences(long vertexA, long vertexB,
 
 void freyjaPolygonSplit(long meshIndex, long polygonIndex)
 {
-#ifdef FIXME
 	Vector<unsigned int> common, face;
 	Vector<long> ref;
-	vec3_t xyz;
-	vec2_t uv;
-	unsigned int j;
-	long A, B, C, D, i, material, count;
+	Vector3d a, b, c, d, m1, m2, n1, n2, n;
+	vec2_t uv1, uv2, uv;
+	long A, B, C, D, M1, M2, material, count;
 
 
 	material = freyjaGetPolygonMaterial(polygonIndex);
 	count = freyjaGetPolygonVertexCount(polygonIndex);
 
 	if (!count)
-		return -1;
+		return;
 
-	for (i = 0; i < count; ++i)
+	switch (count)
 	{
-		/* 1. Make duplicate vertices with same wind for 'face' */
-		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
-		freyjaGetVertexXYZ3fv(A, xyz);
-		B = freyjaVertex3fv(xyz);
-		freyjaGetVertexTexCoordUV2fv(A, uv);
-		freyjaVertexTexCoord2fv(B, uv);
-		freyjaGetVertexNormalXYZ3fv(A, xyz);
-		freyjaVertexNormal3fv(B, xyz);
-		
-		face.pushBack(B);
+	case 4:
 
+		// 1. Generate midpoint vertices
+		A = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+		freyjaGetVertexXYZ3fv(A, a.mVec);
+		B = freyjaGetPolygonVertexIndex(polygonIndex, 1);
+		freyjaGetVertexXYZ3fv(B, b.mVec);
+		C = freyjaGetPolygonVertexIndex(polygonIndex, 2);
+		freyjaGetVertexXYZ3fv(C, c.mVec);
+		D = freyjaGetPolygonVertexIndex(polygonIndex, 3);
+		freyjaGetVertexXYZ3fv(D, d.mVec);
 
-		/* 2. Replace all references to A with B ( dupe of A ), 
-		 * except polygonIndex */
-		freyjaGetVertexPolygonRef1i(A, ref);
+		helMidpoint3v(a.mVec, b.mVec, m1.mVec);
+		M1 = freyjaVertex3fv(m1.mVec);
+		freyjaGetVertexTexCoordUV2fv(A, uv1);
+		freyjaGetVertexTexCoordUV2fv(B, uv2);
+		uv[0] = (uv1[0] + uv2[0]) / 2;
+		uv[1] = (uv1[1] + uv2[1]) / 2;
+		freyjaVertexTexCoord2fv(M1, uv);
+		freyjaGetVertexNormalXYZ3fv(A, n1.mVec);
+		freyjaGetVertexNormalXYZ3fv(B, n2.mVec);
+		n = n1 + n2;
+		n.normalize();
+		freyjaVertexNormal3fv(M1, n.mVec);
 
-		for (j = ref.begin(); j < ref.end(); ++j)
-		{
-			if (ref[j] != polygonIndex)
-			{
-				freyja__PolygonReplaceReference(ref[j], A, B);
-			}
-		}
-	}
+		helMidpoint3v(c.mVec, d.mVec, m2.mVec);
+		M2 = freyjaVertex3fv(m2.mVec);
+		freyjaGetVertexTexCoordUV2fv(C, uv1);
+		freyjaGetVertexTexCoordUV2fv(D, uv2);
+		uv[0] = (uv1[0] + uv2[0]) / 2;
+		uv[1] = (uv1[1] + uv2[1]) / 2;
+		freyjaVertexTexCoord2fv(M2, uv);
+		freyjaGetVertexNormalXYZ3fv(C, n1.mVec);
+		freyjaGetVertexNormalXYZ3fv(D, n2.mVec);
+		n = n1 + n2;
+		n.normalize();
+		freyjaVertexNormal3fv(M2, n.mVec);
 
-	for (i = 0; i < count; ++i)
-	{
-		// 3. Generate new quad ABCD connecting 'face' and ploygonIndex vertices
-		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
-		B = face[i];
-
-		if (i+1 < count)
-		{
-			C = freyjaGetPolygonVertexIndex(polygonIndex, i+1);
-			D = face[i+1];
-		}
-		else
-		{
-			C = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-			D = face[0];
-		}
-
+		// 2. Generate the 2 new quad faces
 		freyjaBegin(FREYJA_POLYGON);
 		freyjaPolygonMaterial1i(material);
 		freyjaPolygonVertex1i(A);
-		freyjaPolygonVertex1i(C);
+		freyjaPolygonVertex1i(M1);
+		freyjaPolygonVertex1i(M2);
 		freyjaPolygonVertex1i(D);
-		freyjaPolygonVertex1i(B);
 
 		// FIXME: Should be able to generate mixing both uvs
 		if (freyjaGetPolygonTexCoordCount(polygonIndex))
@@ -2510,12 +2505,32 @@ void freyjaPolygonSplit(long meshIndex, long polygonIndex)
 		}
 
 		freyjaEnd();
-	}
 
-	freyjaMeshRemovePolygon(meshIndex, polygonIndex);
-#else
-#   warning FIXME
-#endif
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonMaterial1i(material);
+		freyjaPolygonVertex1i(B);
+		freyjaPolygonVertex1i(M1);
+		freyjaPolygonVertex1i(M2);
+		freyjaPolygonVertex1i(C);
+
+		// FIXME: Should be able to generate mixing both uvs
+		if (freyjaGetPolygonTexCoordCount(polygonIndex))
+		{
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.5));
+		}
+
+		freyjaEnd();
+
+		// 3. Remove old face we split
+		freyjaMeshRemovePolygon(meshIndex, polygonIndex);
+		break;
+
+	default:
+		;
+	}
 }
 
 

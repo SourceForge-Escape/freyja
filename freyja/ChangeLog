@@ -30,8 +30,9 @@
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
 	o Please report any issues including performance affected by this release
-	o FileChooser support
+	o FileChooser support, with texture preview using image plugins
 	o Extrude face tool added, now new extrude face is set as vertex list
+	o Face splitter
 	o Recently opened files, and persistant recent files list
 	o Mesh normal generation, tesselation, and normal flipping made easier
 	o Fix for initial editing state invokation ( object move )
