@@ -656,6 +656,7 @@ public:
 
 	void setPrinter(FreyjaPrinter *printer);
 
+	bool checkModel(const char *filename);
 	bool saveModel(const char *filename);
 	bool loadModel(const char *filename);
 
