@@ -48,7 +48,7 @@ void GLMModel::print()
 	long i, j, k, bone, weightCount;
 
 
-	printf("mMDXMHeader.ident = %i\n", mMDXMHeader.ident);
+	printf("mMDXMHeader.ident = 0x%x\n", mMDXMHeader.ident);
 	printf("mMDXMHeader.version = %i\n", mMDXMHeader.version);
 	printf("mMDXMHeader.name = '%s'\n", mMDXMHeader.name);
 	printf("mMDXMHeader.animName = '%s'\n", mMDXMHeader.animName);
@@ -304,17 +304,31 @@ bool GLMModel::load(const char *filename)
 			mMDXMeshes[i].texcoords[j].texCoords[1] = r.readFloat32();
 		}
 
-		printf("@ %i, expected %li\n", 
-			   r.getFileOffset(), tell + mMDXMSurfaces[i].ofsEnd);
+		for (j = 0; j < mMDXMSurfaces[i].numBoneReferences; ++j)
+		{
+			k = r.readLongU(); /* Bone references aren't stored, just read */
+		}
+
+		if ((int)r.getFileOffset() != tell + mMDXMSurfaces[i].ofsEnd)
+		{
+			printf("@ %i, expected %li\n", 
+				   r.getFileOffset(), tell + mMDXMSurfaces[i].ofsEnd);
+		}
 
 		r.setFileOffset(tell + mMDXMSurfaces[i].ofsEnd);
 	}
 
 	//////////////
 
-	if (r.readLongU() == MDXA_IDENT)
+	printf("@ %i \n", r.getFileOffset());
+
+	if ((i = r.readLongU()) == MDXA_IDENT)
 	{
 		printf("FOUNDMDXA_IDENT \n");
+	}
+	else
+	{
+		printf("%li 0x%lx\n", i, i);
 	}
 
 
@@ -344,6 +358,7 @@ int runGLMModelUnitTest(int argc, char *argv[])
 	GLMModel test;
 
 	test.load(argv[1]);
+	test.print();
 
 	return 0;
 }
