@@ -91,6 +91,25 @@ typedef struct {
 } mdx_seqs_t;
 
 
+int readChunkId(FILE *f, char *looking, int size)
+{
+	char buffer[size+8];
+
+	fread(&buffer, 1, size, f);
+	if (!strncmp(looking, buffer, size))
+	{
+		printf("%s [OK]\n", looking);
+		return 0;
+	}
+	else
+	{
+		printf("%s [FAILED] @ %lu\n", looking, ftell(f));
+	}
+
+	fclose(f);
+	return -1;
+}
+
 int freyja_model__mdx_import(char *filename)
 {
 	FILE *f;
@@ -376,7 +395,7 @@ int freyja_model__mdx_import(char *filename)
 		return -1;
 	}
 
-	fread(&count, 4, 1, f);
+	eRead_Small_uint32(&count, f);
 	printf("count = %d, faceCount = %d\n", count, faceCount);
 	unsigned short int *tris = new unsigned short int[count];
 
@@ -396,9 +415,59 @@ int freyja_model__mdx_import(char *filename)
 		eggEnd(); // POLYGON
 	}
 
+	eggEnd(); // MESH
+
+	if (readChunkId(f, "GNDX", 4) < 0)
+		return -1;
+
+	eRead_Small_uint32(&count, f);
+	printf("count = %d\n", count);
+	fseek(f, count, SEEK_CUR);
+
+	if (readChunkId(f, "MTGC", 4) < 0)
+		return -1;
+
+	eRead_Small_uint32(&count, f);
+	printf("count = %d\n", count);
+	fseek(f, count*4, SEEK_CUR);
+
+	if (readChunkId(f, "MATS", 4) < 0)
+		return -1;
+
+	eRead_Small_uint32(&count, f);
+	printf("count = %d\n", count);
+	fseek(f, count*8, SEEK_CUR);
+
+	if (readChunkId(f, "UVAS", 4) < 0)
+		return -1;
+
+	eRead_Small_uint32(&count, f);
+	printf("count = %d\n", count);
+
+	if (readChunkId(f, "UVBS", 4) < 0)
+		return -1;
+
+	eRead_Small_uint32(&count, f);
+	printf("count = %d\n", count);
+
+	unsigned int *uvI = new unsigned int[count*2];
+	float *uv = new float[count*2];
+
+	for (i = 0; i < count; ++i)
+	{
+		eRead_Small_uint32(uvI+i*2, f);
+		eRead_Small_float(uv+i*2, f);
+		eRead_Small_uint32(uvI+i*2+1, f);
+		eRead_Small_float(uv+i*2+1, f);
+	}
+
+	if (readChunkId(f, "VRTX", 4) < 0)
+		//return -1;
+
+	//	printf("%lu\n", ftell(f));
 	// ...
 
-	eggEnd(); // MESH
+
 
 	fclose(f);
 	return 0;
@@ -406,9 +475,11 @@ int freyja_model__mdx_import(char *filename)
 
 
 #ifdef NOTES
-'MDLXVERS'  '0x00040000' ( 4 ) '0x03200000' ( 800 )
+8 bytes 'MDLXVERS'  
+4 bytes '0x4' ( 4 ) 
+4 bytes '0x320' ( 800 )
 
-'MODL'  
+4 bytes 'MODL'  
 
 uint32 stringLen? '0x017400' ( 372 )
 
@@ -416,48 +487,43 @@ char modelName[stringLen?]  @ 0x18
 
 byte unknown[]   @ 0x118
 
-'SEQS'           @ 0x18c  ( 396 bytes offset )
+4 bytes 'SEQS'           @ 0x18c  ( 396 bytes offset )
 uint32 seqsCount   '0x0b5800' ( 2094 )
 {
 	char Name[]
 } 132 bytes?  ( might use a 2 byte 'QC' mini chunk marker )
 
 
-'MTLS'
+4 bytes 'MTLS'
 
+4 bytes 'LAYS'  44 bytes + 4byte marker?
 
-'LAYS'  44 bytes + 4byte marker?
+4 bytes 'TEXS'
 
-TEXS
+4 bytes 'GEOS'
 
-GEOS
-
-VRTX
+4 bytes 'VRTX'
 
 4 btyes 'PTYP'
 
 4 bytes 'PCNT'
-
 uint32  '1'
-
 unit32  '234'
 
 4 bytes 'PVTX'
+shorts 
 
-NDXI
+'GNDX'
 
-MTGC
+'MTGC'
 
-MATSC
+'MATS'
 
+'UVAS'
 
-UVAS
+'UVBS'
 
-
-UVBS
-
-
-VRTX
+'VRTX'
 
 ...
 
