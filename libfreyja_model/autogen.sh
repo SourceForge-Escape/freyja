@@ -10,6 +10,7 @@
 make debug
 #make install
 echo
-echo Now do make install && make plugins && make install-plugins
+echo Now do make install
+# && make plugins && make install-plugins
 #make plugins
 #make install-plugins

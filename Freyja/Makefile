@@ -12,11 +12,11 @@ MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
 PRE=
-BUILD_ID=20040416
+BUILD_ID=20040420
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(PRE)
 BUILD_HOST=`uname -n -m -s -p -r`
-URL=http://icculus.org/unraider/
-EMAIL=mongoose@users.sourceforge.net
+URL=http://icculus.org/freyja
+EMAIL=mongoose@icculus.org
 
 ################################################################
 
