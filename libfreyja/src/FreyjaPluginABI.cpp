@@ -2436,6 +2436,7 @@ void freyja__PolygonReplaceReference(long polygonIndex,
 	egg_polygon_t *polygon = 0x0;
 	unsigned int i;
 
+
 	if (EggPlugin::mEggPlugin)
 	{
 		a = EggPlugin::mEggPlugin->getVertex(vertexA);
@@ -2444,7 +2445,9 @@ void freyja__PolygonReplaceReference(long polygonIndex,
 	}
 	
 	if (!a || !b || !polygon)
+	{
 		return;
+	}
 
 	// Replace A with B to match sorted list ids to form same edge
 	polygon->vertex.Replace(vertexA, vertexB);
@@ -2463,6 +2466,36 @@ void freyja__PolygonReplaceReference(long polygonIndex,
 
 	a->ref.clear();
 	a->ref.copy(ref);
+}
+
+
+void freyja__GetCommonPolygonReferences(long vertexA, long vertexB,
+										Vector<unsigned int> &common)
+{
+	egg_vertex_t *a, *b;
+	unsigned i, j, countA, countB;
+
+	
+	if (EggPlugin::mEggPlugin)
+	{
+		a = EggPlugin::mEggPlugin->getVertex(vertexA);
+		b = EggPlugin::mEggPlugin->getVertex(vertexB);
+
+		if (a && b)
+		{
+			countA = a->ref.end();
+			countB = b->ref.end();
+
+			for (i = a->ref.begin(); i < countA; ++i)
+			{
+				for (j = b->ref.begin(); j < countB; ++j)
+				{
+					if (a->ref[i] == b->ref[j])
+						common.pushBack(a->ref[i]);
+				}
+			}
+		}
+	}
 }
 
 
@@ -2522,10 +2555,10 @@ long freyjaVertexXYZ3fv(long vertexIndex, vec3_t xyz)
 //        uses currently existing data structures
 int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 {
-	Vector<unsigned int> *refLA, *refLB;
+	Vector<unsigned int> common;
 	vec3_t xyz;
 	vec2_t uv;
-	unsigned int j, k, jend, kend, refA, refB;
+	unsigned int j, commonCount;
 	long A, B, C, D, i, material, count;
 
 
@@ -2538,9 +2571,8 @@ int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 	for (i = 0; i < count; ++i)
 	{
 		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
-		refLA = freyja__VertexPolygonReference(A);
 
-		if ((i + 1) > count)
+		if ((i + 1) >= count)
 		{
 			B = freyjaGetPolygonVertexIndex(polygonIndex, 0);
 		}
@@ -2549,57 +2581,55 @@ int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 			B = freyjaGetPolygonVertexIndex(polygonIndex, i+1);
 		}
 
-		refLB = freyja__VertexPolygonReference(B);
+		// 1. Find common polygons besides polygonIndex
+		common.clear();
+		freyja__GetCommonPolygonReferences(A, B, common);
+		commonCount = common.end();
 
-		jend = refLA->end();
-		kend = refLB->end();
-
-		for (j = 0; j < jend; ++j)
+		for (j = 0; j < commonCount; ++j)
 		{
-			refA = (*refLA)[j];
+			if ((int)common[j] == polygonIndex)
+				continue;
 
-			for (k = 0; k < kend; ++k)
+			// 2. Generate a quad ABCD to bridge the 'gap' C dupes A, D dupes B
+			freyjaGetVertexXYZ3fv(A, xyz);
+			C = freyjaVertex3fv(xyz);
+			freyjaGetVertexTexCoordUV2fv(A, uv);
+			freyjaVertexTexCoord2fv(C, uv);
+			freyjaGetVertexNormalXYZ3fv(A, xyz);
+			freyjaVertexNormal3fv(C, xyz);
+
+			freyjaGetVertexXYZ3fv(B, xyz);
+			D = freyjaVertex3fv(xyz);
+			freyjaGetVertexTexCoordUV2fv(B, uv);
+			freyjaVertexTexCoord2fv(D, uv);
+			freyjaGetVertexNormalXYZ3fv(B, xyz);
+			freyjaVertexNormal3fv(D, xyz);
+
+
+			// 3. Replace references to A & B with C & D in face
+			freyja__PolygonReplaceReference(common[j], A, C);
+			freyja__PolygonReplaceReference(common[j], B, D);
+
+			// 4. Generate new quad ABCD
+			freyjaBegin(FREYJA_POLYGON);
+			freyjaPolygonMaterial1i(material);
+			freyjaPolygonVertex1i(A);
+			freyjaPolygonVertex1i(C);
+			freyjaPolygonVertex1i(D);
+			freyjaPolygonVertex1i(B);
+
+			// FIXME: Should be able to generate mixing both uvs
+			if (freyjaGetPolygonTexCoordCount(polygonIndex))
 			{
-				refB = (*refLB)[k];
-
-				// 1. Find common polygons besides polygonIndex
-				if (refA == refB &&	(int)refA != polygonIndex)
-				{
-					// 2. Generate a quad ABCD to bridge the 'gap'
-					//   C dupes A, D dupes B
-					freyjaGetVertexXYZ3fv(A, xyz);
-					C = freyjaVertex3fv(xyz);
-					freyjaGetVertexTexCoordUV2fv(A, uv);
-					freyjaVertexTexCoord2fv(C, uv);
-					freyjaGetVertexNormalXYZ3fv(A, xyz);
-					freyjaVertexNormal3fv(C, xyz);
-
-					freyjaGetVertexXYZ3fv(B, xyz);
-					D = freyjaVertex3fv(xyz);
-					freyjaGetVertexTexCoordUV2fv(B, uv);
-					freyjaVertexTexCoord2fv(D, uv);
-					freyjaGetVertexNormalXYZ3fv(B, xyz);
-					freyjaVertexNormal3fv(D, xyz);
-
-
-					// 3. Replace references to A & B with C & D in face
-					freyja__PolygonReplaceReference(refA, A, C);
-					freyja__PolygonReplaceReference(refA, B, D);
-
-					// 4. Generate new quad ABCD
-					freyjaBegin(FREYJA_POLYGON);
-					freyjaPolygonMaterial1i(material);
-					freyjaPolygonVertex1i(A);
-					freyjaPolygonVertex1i(C);
-					freyjaPolygonVertex1i(D);
-					freyjaPolygonVertex1i(B);
-					freyjaEnd();
-				}
+				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.25));
+				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.25));
+				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
+				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.5));
 			}
-		}
 
-		delete refLB;
-		delete refLA;
+			freyjaEnd();
+		}
 	}
 
 
