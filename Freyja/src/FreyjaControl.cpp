@@ -185,6 +185,13 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
+	case ePolygonSize:
+		mModel->setCurrentPolygonEdgeCount(value);
+		freyja_print("Polygons creation using %i sides",
+					 mModel->getCurrentPolygonEdgeCount());
+		break;
+
+
 	case eAnimationSlider:
 		if (value != mModel->getCurrentAnimationFrame())
 		{
@@ -201,7 +208,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 			mModel->setCurrentBone(value);
 
-			if (value == mModel->getCurrentBone())
+			if (value == mModel->getCurrentBone() &&
+				mModel->isCurrentBoneAllocated())
 			{
 				/* Mongoose 2002.08.31, Update spin buttons dependent 
 				 * on this one */
@@ -382,6 +390,28 @@ bool FreyjaControl::event(int event, vec_t value)
 		ptr = mModel->GetLight0Pos();
 		ptr[event - 800] = value;
 		freyja_event_gl_refresh();
+		break;
+
+
+	/* Move/Rotate/Scale generics are used by a larger event as a vector */
+	case eMoveBone_X:
+	case eMoveBone_Y:
+	case eMoveBone_Z:
+		break;
+
+	case eMove_X:
+	case eMove_Y:
+	case eMove_Z:
+		break;
+
+	case eRotate_X:
+	case eRotate_Y:
+	case eRotate_Z:
+		break;
+
+	case eScale_X:
+	case eScale_Y:
+	case eScale_Z:
 		break;
 
 
@@ -1159,6 +1189,7 @@ bool FreyjaControl::event(int command)
 		addObject();
 		mCleared = false;
 		break;
+	case eMeshCenter:
 	case eTransformMeshPivot:
 		mTransformMode = FreyjaModel::TransformMesh;
 		mEventMode = MESH_MOVE_CENTER;
@@ -1210,26 +1241,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case eMoveBone_X:
-	case eMoveBone_Y:
-	case eMoveBone_Z:
-		break;
 
-
-	case eMove_X:
-	case eMove_Y:
-	case eMove_Z:
-		break;
-
-	case eRotate_X:
-	case eRotate_Y:
-	case eRotate_Z:
-		break;
-
-	case eScale_X:
-	case eScale_Y:
-	case eScale_Z:
-		break;
 
 
 	case CMD_MISC_BBOX_SELECT:

@@ -73,7 +73,7 @@ public:
 };
 
 
-// FIXME: Dumps animation frames
+// FIXME: Drops any vertex animation frames
 class CopyMesh
 {
 public:
@@ -103,6 +103,8 @@ public:
 	vec3_t center;
 	unsigned int flags;
 };
+
+
 
 
 class FreyjaEgg : public Egg
@@ -281,6 +283,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	bool isCurrentBoneAllocated();
 	unsigned int getCurrentBone();
 	/*------------------------------------------------------
 	 * Pre  : 

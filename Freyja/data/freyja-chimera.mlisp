@@ -418,7 +418,7 @@
 					(animation_tab_hack)
 
 					(hbox 1 0 0 1 0 
-						(label "Select Bone" 0.0 0.5) 
+						(label "Select Bone" 0.0 0.5)
 						(spinbutton 0 0 100 eBoneIterator))
 
 					(hbox 1 0 0 1 0
@@ -660,6 +660,10 @@ Send bug reports and feature requests:
 	(vbox 0 0 0 0 0
 		(hbox 1 0 0 1 0
 			(icon "freyja.png" IconSize_Dialog))
+
+		(hbox 1 0 0 1 0
+			(label "Polygon # of sides "  0.0 0.5) 
+			(spinbutton 0 3 6 ePolygonSize))
 
 		(hbox 1 0 0 1 2 
 			(label "Background color " 0.0 0.5)

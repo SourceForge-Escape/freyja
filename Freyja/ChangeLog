@@ -27,6 +27,16 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041203) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Polygon side count back in GUI under prefs dialog
+	o Mesh center move event from menu fixed
+	o Bone iterator ( spinbutton ) crash fixed with a safety check
+	o Transform box child events handled in proper handler now
+	  ( basically all this means is no 'unhandled event' messages
+	o Normal generation fixed
+
+
  Freyja (0.3.5-20041201) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o Insanity at it's finest: exhaustively complex file dialogs

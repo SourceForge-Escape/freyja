@@ -17,27 +17,30 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
-	o FIX normal gen using mesh center points
+	o Remove all unused/obsolete events, functions, and cmds
 	o Bounding box selection made into 2 events:
 	   1. bounding box selection
 	   2. operation on selection ( not just vertex buffer default )
-	o Object Copy / Cut / Paste for more than just meshes
+	o Object Copy/Cut/Paste for more than just meshes
 	o Undo system, refine event system
 	o Interactive plugins
 	o Recently used files list
-	o Light editing mode
-	o Remove all unused/obsolete events and cmds
-	o Mouse interface needs to replace plane based editing
+	o Light editing mode backport
+	o Mouse interface needs to replace purely plane based editing
 	o Vertex morphing animation ( was removed during fork )
-	o Matrix palette skinning ( not supported due to old Egg backend )
+	o Skeletal mesh deform edit/render/off toggles to solve interface issue?
+	o Matrix palette skinning 
+	  ( Not supported in Egg backend, but I think it can be done
+	    via my old metadata system -- yay for thinking ahead or an extension )
 
   Interface
 	o Make tree labels updatable w/o reloading the entire tree
 	o Animation playback
-	o Make new mesh for new polygon when none exist
-	o Generated Spheres use duplicate vertices, unexpected by users
+	o Make new mesh for new polygon when none exist?
+	  ( could be bad or good, perhaps allow a freyja.mlisp toggle for it )
+	o Generated Spheres use duplicate vertex rings toggle for solid?
+	  ( unexpected by users? )
 	o Arcball for mouse rotation
-	o Generic rotate/translate/scale mouse interface (mesh/tag/etc)
 	o Use event timer for idle rotation and animation display
 	o Add multiwindow modeling support back?
 
