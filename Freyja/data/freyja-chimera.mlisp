@@ -110,6 +110,7 @@
 			(menu_seperator)
 			(menu_item "_Grid"			eMode	eRenderGrid)
 			(menu_item "_Camera"		eMode	eCamera)
+			(menu_item "P_atch"			eMode	eRenderPatch)
 			(submenu "_Mesh"
 				(menu_item "_Points"	eMode	eRenderVertex)
 				(menu_item "_Wireframe"	eMode	eRenderWireframe)
@@ -207,6 +208,9 @@
 
 				(toolbar_togglebutton false "material.png" "Material"
 					"Material used when rendering"	eMode	eRenderMaterial)
+
+				(toolbar_togglebutton false "patch.png" "Patch"
+					"Render/enable patch tool"	eMode	eRenderPatch)
 
 				(toolbar_togglebutton true "bone-tag.png" "Bones"
 					"Show bones when rendering"		eMode	eRenderSkeleton)
@@ -346,6 +350,9 @@
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
+
+					(hbox 1 0 0 1 0 
+						(button "Mesh from Patch"  eMode eGeneratePatchMesh))
 
 					(hbox 1 0 0 1 0
 						(label "Zoom"  0.0 0.5) 
