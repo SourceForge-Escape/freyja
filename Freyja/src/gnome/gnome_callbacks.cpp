@@ -799,6 +799,9 @@ gint aframe_adj_event(GtkWidget *widget, GdkEventButton *event)
 
 void event_send_color(GtkWidget *colorbutton, gpointer id)
 {
+#ifdef DISABLE_GTK_COLORBUTTON
+	return;
+#else
 	GdkColor color;
 	guint16 alpha;
 	float r, g, b, a;
@@ -817,6 +820,7 @@ void event_send_color(GtkWidget *colorbutton, gpointer id)
 
 	//HACK
 	refresh_material_interface();
+#endif
 }
 
 
