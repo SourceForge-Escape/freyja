@@ -103,6 +103,7 @@ void mgtk_event_homedir(GtkWidget *file, void *data)
 }
 
 
+GtkWidget *HACK_FILE_DROP_DOWN_MENU = NULL;
 GtkWidget *getGtkFileSelectionWidget()
 {
 	static GtkWidget *file = NULL;
@@ -148,11 +149,28 @@ GtkWidget *getGtkFileSelectionWidget()
 
 		GtkWidget *optionmenu_menu = gtk_menu_new();
 		gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
-		
+		HACK_FILE_DROP_DOWN_MENU = optionmenu_menu;
 #endif
 	}
 
 	return file;
+}
+
+void appendFilePattern(char *label, char *pattern)
+{
+	GtkWidget *menu = HACK_FILE_DROP_DOWN_MENU;
+	GtkWidget *item;
+
+	if (!menu)
+		return;
+
+	item = gtk_image_menu_item_new_with_label(label);	
+	gtk_menu_append(GTK_MENU(menu), item);
+	gtk_widget_show(item);
+	
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+					   GTK_SIGNAL_FUNC(freyja_event_file_dialog_pattern), 
+					   pattern);
 }
 
 
@@ -1910,7 +1928,7 @@ arg_list_t *freyja_rc_menu_seperator(arg_list_t *container)
 arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 {
 	GtkWidget *item;
-	arg_list_t *text, *event, *cmd, *ret;
+	arg_list_t *text, *event, *cmd, *accel, *ret;
 	void (*agtk_event)(GtkWidget *, void *);
 
 
@@ -1929,15 +1947,26 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 	}
 
 	text = symbol();
+	accel = symbol();
 	event = symbol();
-	cmd = symbol();
+
+	if (accel->type == CSTRING)
+	{
+		cmd = symbol();
+	}
+	else
+	{
+		cmd = event;
+		event = accel;
+		accel = 0x0;
+	}
 	ret = NULL;
 
 	arg_enforce_type(&text,  CSTRING);
 	arg_enforce_type(&event, INT);
-	arg_enforce_type(&cmd,   INT);
+	// arg_enforce_type(&cmd,   INT);
 
-	if (!text || !event || !cmd)
+	if (!text || !event || cmd->type != INT && cmd->type != CSTRING)
 	{
 		if (!text)
 			rc_assertion_error("menu_item", "text == CSTRING");
@@ -1946,12 +1975,41 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 			rc_assertion_error("menu_item", "event == INT");
 
 		if (!cmd)
-			rc_assertion_error("menu_item", "cmd == INT");
+			rc_assertion_error("menu_item", "cmd == INT || CSTRING");
 	}
 	else
 	{
-		item = gtk_image_menu_item_new_with_label((char *)text->data);	
-		
+		item = gtk_image_menu_item_new_with_mnemonic((char *)text->data);
+
+		if (cmd->type == CSTRING)
+		{
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item),
+										  mgtk_create_icon((char *)cmd->data, 
+														   GTK_ICON_SIZE_MENU));
+
+			printf("*** %p\n", accel);
+#define ACCEL_SUPPORT_ON
+#ifdef ACCEL_SUPPORT_ON
+			if (accel != 0 &&
+				accel->data != 0 &&
+				((char *)accel->data)[0] != 0 &&
+				!strncmp((char *)(accel->data), "C-o", 3))
+			{  
+				printf("*** %s\n", (char *)(accel->data));
+				GtkAccelGroup *accel_group;
+				
+				/* Add code here to translate accel string to GDK key / mods */
+
+				accel_group = gtk_accel_group_new();
+  
+				gtk_widget_add_accelerator(item, "activate", accel_group,
+										   //get_int(key), get_int(mod),
+										   GDK_O, GDK_CONTROL_MASK,
+										   GTK_ACCEL_VISIBLE);
+			}
+#endif
+		}
+
 		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
 		
 		gtk_menu_append(GTK_MENU(menu->data), item);
@@ -1990,11 +2048,18 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 			agtk_event = NULL;
 		}
 		
+		if (cmd->type == CSTRING)
+		{
+			agtk_event = main_event;
+			// agtk_event = generic_event;
+		}
+
 		if (agtk_event)
 		{
 			gtk_signal_connect(GTK_OBJECT(item), "activate",
-									 GTK_SIGNAL_FUNC(agtk_event), 
-									 GINT_TO_POINTER(get_int(cmd)));
+							   GTK_SIGNAL_FUNC(agtk_event), 
+							   GINT_TO_POINTER(((cmd->type == INT) ? 
+												get_int(cmd) : get_int(event))));
 		}
 	}
 
@@ -2038,9 +2103,10 @@ arg_list_t *freyja_rc_submenu(arg_list_t *menu)
 	}
 	else
 	{
-		item = gtk_menu_item_new_with_label((char *)label->data);
+		item = gtk_image_menu_item_new_with_mnemonic((char *)label->data);
 		submenu = gtk_menu_new();
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+		//gtk_label_set_mnemonic_widget(GTK_MENU(item)->label, submenu);
 
 		if (GTK_IS_MENU_BAR(menu->data))
 		{

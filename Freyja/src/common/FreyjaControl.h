@@ -72,7 +72,7 @@ typedef enum freyja_control_mode             /* Minor control modes */
 
 typedef enum freyja_edit_mode                /* Major control modes */
 {
-	TEXTURE_EDIT_MODE  = 0,
+	TEXTURE_EDIT_MODE  = 0,  // FIXME: Mesh / Skeletal / UV / etc
 	MODEL_VIEW_MODE    = 1,
 	MAP_VIEW_MODE      = 2,
 	MODEL_EDIT_MODE    = 3,

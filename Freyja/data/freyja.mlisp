@@ -76,22 +76,23 @@
 	;; Menubar
 	(handlebox 1
 	(menubar
-		(submenu "File"
-			(submenu "Model"
-				(menu_item "Erase"   EVENT_MAIN  CMD_MAIN_NEW_MODEL)
-				(menu_item "Open"    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
-				(menu_item "Save As" EVENT_MAIN  CMD_MAIN_SAVE_MODEL))
-			(submenu "Material"
-				(menu_item "New"     EVENT_MAIN  -1)
-				(menu_item "Open"    EVENT_MAIN  CMD_MAIN_OPEN_MATERIAL)
-				(menu_item "Save As" EVENT_MAIN  CMD_MAIN_SAVE_MATERIAL))
+		(submenu "_File"
+			(menu_item "_New"        "C-n"		CMD_MAIN_NEW_MODEL  "gtk-new")
+			(menu_item "_Open..."    "C-o"		CMD_MAIN_OPEN_MODEL "gtk-open")
+			(menu_item "Ap_pend..."  			-1 "gtk-paste")
 			(menu_seperator)
-			(menu_item "Open Texture"   EVENT_MAIN  CMD_MAIN_OPEN_TEXTURE)
-			(menu_item "Open Pallette"  EVENT_MAIN  CMD_MAIN_OPEN_PALETTE)
+			(menu_item "_Save"       "C-s"		-1 "gtk-save")
+			(menu_item "Save _As..." "S-C-s"	CMD_MAIN_SAVE_MODEL "gtk-save-as")
+			(menu_item "_Revert"     			-1 "gtk-revert-to-saved")
 			(menu_seperator)
-			(menu_item "Quit"          EVENT_MAIN  CMD_MAIN_SHUTDOWN))
+			(menu_item "_Import"     "S-C-z"	-1 "gtk-redo")
+			(menu_item "_Export"     "C-z"		-1 "gtk-undo")
+			(menu_seperator)
+			(menu_item "_Close"      "C-w"		-1 "gtk-close")
+			(menu_item "_Quit"       "C-q"		CMD_MAIN_SHUTDOWN "gtk-quit"))
 
-		(submenu "View"
+		(submenu "_View"
+			(menu_item "Take _Screenshot"  CMD_MISC_SCREENSHOT "gtk-screenshot")
 			(menu_item "Info"			EVENT_MISC  CMD_MISC_DISPLAY_INFO)
 			(menu_seperator)
 			(submenu "Joint"
@@ -100,8 +101,8 @@
 				(menu_item "Axes"		EVENT_MISC  VIEW_JOINT3))
 			(submenu "Bone"
 				(menu_item "Line"		EVENT_MISC  VIEW_BONE1)
-				(menu_item "PolyMesh"	EVENT_MISC  VIEW_BONE2))
-			(menu_item "Fullscreen"		EVENT_MAIN	CMD_TOGGLE_FULLSCREEN))
+				(menu_item "PolyMesh" 	EVENT_MISC  VIEW_BONE2))
+			(menu_item "Fullscreen"		"A-Enter"	CMD_TOGGLE_FULLSCREEN "gtk-fullscreen"))
 
 		(menu_seperator)
 
@@ -109,15 +110,15 @@
 			(menu_item "New"     EVENT_POINT  CMD_POINT_ADD)
 			(menu_item "Move"    EVENT_POINT  CMD_POINT_MOVE)
 			(menu_item "Delete"  EVENT_POINT  CMD_POINT_DELETE)
-			(menu_item "Combine" EVENT_POINT  CMD_POINT_COMBINE))
+			(menu_item "Combine"  EVENT_POINT  CMD_POINT_COMBINE))
 
 		(submenu "Polygon"
 			(menu_item "New"    EVENT_POLYGON  CMD_POLYGON_ADD)
-			(menu_item "Select" EVENT_POLYGON  CMD_POLYGON_SELECT)
-			(menu_item "Delete" EVENT_POLYGON  CMD_POLYGON_DELETE))
+			(menu_item "Select"  EVENT_POLYGON  CMD_POLYGON_SELECT)
+			(menu_item "Delete"  EVENT_POLYGON  CMD_POLYGON_DELETE))
 
 		(submenu "Mesh"
-			(menu_item "New"     EVENT_MESH  CMD_MESH_ADD)
+			(menu_item "New"      EVENT_MESH  CMD_MESH_ADD)
 			(menu_item "Delete"  EVENT_MESH  CMD_MESH_DELETE)
 			(menu_item "Move"    EVENT_MESH  CMD_MESH_MOVE)
 			(menu_item "Select"  EVENT_MESH  CMD_MESH_SELECT)
@@ -142,14 +143,30 @@
 
 		(menu_seperator)
 
-		(submenu "Misc"
-			(menu_item "Screen shot"  EVENT_MISC CMD_MISC_SCREENSHOT)
-			(menu_item "About"  EVENT_MISC CMD_MISC_ABOUT))))
+		(submenu "_Help"
+			(menu_item "_Contents"  "F1" -1 "gtk-help")
+			(menu_item "_About"  CMD_MISC_ABOUT "gtk-about"))))
 
-		;; Toolbar visible from all modes
+		;; Toolbar visible from all modes		
+	    (handlebox 1 
+        (vbox 0 0 0 1 0
 		(hbox 0 1 0 1 0
 
 			(toolbar
+
+				(toolbar_button "gtk-new" "New"
+					"Create new material"
+				    EVENT_MAIN  CMD_MAIN_NEW_MATERIAL)
+
+				(toolbar_button "gtk-open" "Open..."
+					"Open material"
+				    EVENT_MAIN  CMD_MAIN_OPEN_MATERIAL)
+
+				(toolbar_button "gtk-save" "Save"
+					"Save material"
+				    EVENT_MAIN  CMD_MAIN_SAVE_MATERIAL)
+
+
 				(toolbar_button "open-model.png" "Open Model"
 					"Open Model file(s)"
 				    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
@@ -188,7 +205,7 @@
 
 				(toolbar_togglebutton true "grid.png" "Grid"
 					"Toggle plane grid rendering"
-					EVENT_FREYJA_MODE FREYJA_MODE_RENDER_GRID)))
+					EVENT_FREYJA_MODE FREYJA_MODE_RENDER_GRID)))))
 
 		;; Main window body
 		(hbox 0 1 1 1 1
@@ -279,10 +296,10 @@
 
 					(hbox 1 0 0 1 0
 						(optionmenu EVENT_MISC eNONE
-							(menu_item "Object" EVENT_MISC eNONE)
-							(menu_item "Scene" EVENT_MISC eNONE)
-							(menu_item "Mesh" EVENT_MISC eNONE)
-							(menu_item "Vertex" EVENT_MISC eNONE)))
+							(menu_item "Object"  EVENT_MISC eNONE)
+							(menu_item "Scene"  EVENT_MISC eNONE)
+							(menu_item "Mesh"  EVENT_MISC eNONE)
+							(menu_item "Vertex"  EVENT_MISC eNONE)))
 
 					;(hbox 1 1 0 1 1
 					;	(button "Translate" EVENT_MISC eNONE)
@@ -502,11 +519,11 @@
 
 					 (hbox 1 0 0 1 0
 							 (optionmenu EVENT_MATERIAL 780
-											 (menu_item "GL_ZERO" 
+											 (menu_item "GL_ZERO"
 															EVENT_MATERIAL 100)
 											 (menu_item "GL_ONE"
 															EVENT_MATERIAL 101)
-											 (menu_item "GL_SRC_COLOR" 
+											 (menu_item "GL_SRC_COLOR"
 															EVENT_MATERIAL 102)
 											 (menu_item "GL_ONE_MINUS_SRC_COLOR"
 															EVENT_MATERIAL 103)

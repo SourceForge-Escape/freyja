@@ -107,6 +107,15 @@ void FreyjaControl::eventMain(int command)
 {
 	switch (command)
 	{
+
+	case CMD_MISC_ABOUT:
+		freyja_event_info_dialog(ABOUT_MESSAGE);
+		break;   
+
+	case CMD_MISC_SCREENSHOT:
+		mRender->ScreenShot();
+		break;
+
 	case CMD_MAIN_OPEN_MODEL:
 		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 		freyja_event_file_dialog("Open Model");
@@ -414,6 +423,10 @@ void FreyjaControl::eventMisc(int command)
 		freyja_event_info_dialog(ABOUT_MESSAGE);
 		break;   
 
+	case CMD_MISC_SCREENSHOT:
+		mRender->ScreenShot();
+		break;
+
 	case CMD_MISC_GEN_NORMALS:
 		eggGenerateVertexNormals();
 		break;
@@ -446,9 +459,6 @@ void FreyjaControl::eventMisc(int command)
 		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
 					   !(mRender->Flags() & FreyjaRender::RENDER_CAMERA));
 		break;  
-	case CMD_MISC_SCREENSHOT:
-		mRender->ScreenShot();
-		break;
 	case CMD_MISC_TEX_SLOT_LOAD:
 		event_set_load_texture_to_slot(!query_load_texture_to_slot());
 		event_print("Texture loading to current slot [%s]",
@@ -459,18 +469,19 @@ void FreyjaControl::eventMisc(int command)
 		event_print("Scene rotate mode");
 		break;
 	case CMD_MISC_SELECT:
-		event_print("eventMisc> Pure soft ABI CMD_MISC_SELECT (generic) disabled");
-// 		switch (last_event)
-// 		{
-// 		case EVENT_BONE:
-// 			event_print("Select tag by center point");
-// 			_minor_mode = BONE_SELECT_MODE;
-// 			break;
-// 		case EVENT_MESH:
-// 			event_print("Select mesh by center point");
-// 			_minor_mode = MESH_SELECT_MODE;
-// 			break;
-// 		}
+
+ 		switch (_major_mode)
+ 		{
+ 		case MODEL_VIEW_MODE:
+ 			event_print("Select tag by center point");
+ 			_minor_mode = BONE_SELECT_MODE;
+ 			break;
+ 		case MODEL_EDIT_MODE:
+ 			event_print("Select mesh by center point");
+ 			_minor_mode = MESH_SELECT_MODE;
+ 			break;
+ 		}
+
 		break;
 	case CMD_MISC_BBOX_SELECT:
 		if (_minor_mode == VERTEX_BBOX_SELECT_MODE)
@@ -1119,9 +1130,10 @@ bool FreyjaControl::Motion(int x, int y)
 }
 
 
-bool FreyjaControl::Mouse(int btn, int state, int mod,  int x, int y)
+bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 {
 	freyja_control_mode_t mode = _minor_mode;
+
 
 	BTN_HACK = btn;
 	// Mongoose 2002.01.12, Allow temp mode override
