@@ -29,6 +29,8 @@
 
  Freyja (0.3.5-20041201) 'Chimera' Mongoose <mongoose@icculus.org>
 
+	o Menu actions that aren't done but hooked up: undo, redo, selectall
+	o All menus should have actions now, eg: revert, append, etc
 	o Fix for infamous null polygon render crash ( Egg issue )
 	o Fix for 'bone name update overwrite' bug
 	o NULL bone names no longer allowed

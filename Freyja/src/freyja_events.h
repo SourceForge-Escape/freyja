@@ -37,6 +37,11 @@ typedef enum {
 	eSaveFile,
 	eCloseFile,
 	eOpenFileTexture,
+	eAppendFile,
+	eRevertFile,
+	eExportFile,
+	eImportFile,
+
 	eHelp,
 	eInfo,
 	eAbout,
@@ -82,6 +87,9 @@ typedef enum {
 	eCopy,
 	eCut,
 	ePaste,
+	eUndo,
+	eRedo,
+	eSelectAll,
 
 	eAddObject,
 	eMoveObject,
