@@ -59,6 +59,8 @@ typedef enum {
 
 	ePolygonSize,
 
+	eGeneratePatchMesh,
+
 	eMeshNew,
 	eMeshDelete,
 	eMeshMove,
@@ -186,6 +188,7 @@ typedef enum {
 	FREYJA_MODE_RENDER_NORMALS,
 	FREYJA_MODE_RENDER_BONETAG,
 	FREYJA_MODE_RENDER_GRID,
+	eRenderPatch,
 
 	FREYJA_MODE_LOAD_MODEL,
 	FREYJA_MODE_SAVE_MODEL,

@@ -37,7 +37,7 @@ extern "C" {
 
 int freyja_model__obj_check(char *filename)
 {
-	if (EggFileReader::compareFilenameExtention(filename, ".smd") == 0)
+	if (EggFileReader::compareFilenameExtention(filename, ".obj") == 0)
 		return 0;
 
 	return -1;
@@ -48,9 +48,11 @@ int freyja_model__obj_import(char *filename)
 {
 	EggFileReader r;
 	Vector <unsigned int> transV;
+	Vector <unsigned int> transT;
 	char *symbol;
-	vec_t x, y, z;
-	int i, a, b, c;
+	vec_t x, y, z, u, v;
+	int i, index;
+	bool hasUV = false;
 
 
 	if (!r.openFile(filename))
@@ -63,7 +65,7 @@ int freyja_model__obj_import(char *filename)
 	eggBegin(FREYJA_MESH);
 	eggBegin(FREYJA_GROUP);
 
-	while ((symbol = r.parseSymbol()))
+	while ((symbol = r.parseSymbol()) && !r.endOfFile())
 	{
 		if (!strncmp(symbol, "v", 1))
 		{
@@ -73,26 +75,37 @@ int freyja_model__obj_import(char *filename)
 
 			transV.pushBack(eggVertexStore3f(x, y, z));
 		}
+		if (!strncmp(symbol, "vt", 1))
+		{
+			u = r.parseFloat();
+			v = r.parseFloat();
+			hasUV = true;
+
+			transT.pushBack(eggTexCoordStore2f(u, v));
+		}
 		else if (!strncmp(symbol, "f", 1))
 		{
 			// Start a new polygon
 			eggBegin(FREYJA_POLYGON);
 
-			// Format doesn't have UVWs
-			i = eggTexCoordStore2f(0.5, 0.5);
-			eggTexCoord1i(i);
-			i = eggTexCoordStore2f(0.25, 0.25);
-			eggTexCoord1i(i);
-			i = eggTexCoordStore2f(0.5, 0.25);
-			eggTexCoord1i(i);
+			for (i = 0; i < 3; ++i)
+			{
+				if (hasUV)
+				{
+					index = r.parseInteger();
+					r.readInt8(); // '/'
+				}
+				else
+				{
+					index = eggTexCoordStore2f(0.5, 0.5);
+				}
 
-			a = r.parseInteger();
-			b = r.parseInteger();
-			c = r.parseInteger();
+				eggTexCoord1i(index);
 
-			eggVertex1i(transV[a]);
-			eggVertex1i(transV[b]);
-			eggVertex1i(transV[c]);
+				index = r.parseInteger();
+
+				eggVertex1i(transV[index]);
+			}
 
 			eggTexture1i(0);
 

@@ -33,6 +33,7 @@
 #include "FreyjaModel.h"
 #include "freyja_events.h"
 
+extern BezierPatch gTestPatch;
 
 
 FreyjaModel::FreyjaModel()
@@ -54,7 +55,7 @@ FreyjaModel::FreyjaModel()
 	_plugin->addModule("grn");
 	_plugin->addModule("md5");
 	_plugin->addModule("smd");
-	//_plugin->addModule("obj");
+	_plugin->addModule("obj");
 
 	delete [] pluginDir;
 
@@ -444,6 +445,7 @@ void FreyjaModel::setCurrentAnimation(unsigned int index)
 	}
 }
 
+
 void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
 {
 	egg_animation_t *animation_frame;
@@ -479,7 +481,7 @@ void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
 void FreyjaModel::deleteAnimationFrame(unsigned int index)
 {
 	egg_animation_t *animation;
-	unsigned int i, j;
+	unsigned int i;
 	int frame_index = -1;
 
 	animation = _egg->getAnimation(getCurrentAnimation());
@@ -795,6 +797,52 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 		texels.clear();
 		vertices.clear();
 	}
+}
+
+
+bool FreyjaModel::pasteSelectedPatch()
+{
+	Vector<unsigned int> transV;
+	unsigned int index, i, n;
+
+
+	gTestPatch.generatePolygonMesh(7);
+
+	eggBegin(FREYJA_MESH);
+	eggMeshFlags1u(0x0);
+
+	eggBegin(FREYJA_GROUP);
+	eggGroupCenter3f(0, 0, 0);
+
+	for (i = gTestPatch.vertices.begin(); i < gTestPatch.vertices.end(); ++i)
+	{
+		index = eggVertexStore3f(gTestPatch.vertices[i]->mVec[0],
+								 gTestPatch.vertices[i]->mVec[1],
+								 gTestPatch.vertices[i]->mVec[2]);
+		eggVertexNormalStore3f(index, 0, 1, 0); // FIXME
+		eggVertexUVStore2f(index, gTestPatch.texcoords[i]->mVec[0],
+						   gTestPatch.texcoords[i]->mVec[1]);
+		transV.pushBack(index);
+	}
+
+	eggEnd(); // FREYJA_GROUP
+
+	n = gTestPatch.vertices.end() - 2;
+	for (i = gTestPatch.vertices.begin(); i < n; ++i)
+	{
+		eggBegin(FREYJA_POLYGON);
+		eggTexture1i(gTestPatch.texture);
+		eggVertex1i(transV[i]);
+		eggVertex1i(transV[i+1]);
+		eggVertex1i(transV[i+2]);
+		eggEnd(); // FREYJA_POLYGON
+	}
+
+	eggEnd(); // FREYJA_MESH
+
+	freyja_print("Mesh generated from patch...");
+
+	return true;
 }
 
 
@@ -1297,6 +1345,77 @@ void FreyjaModel::VertexCombine(float xx, float yy)
 }
 
 
+void FreyjaModel::selectPatchControlPoint(float xx, float yy)
+{
+	unsigned int besti = 0, bestj = 0, i, j, x, y;
+	Vector3d u, v;
+	vec_t dist, closest = 99999;
+
+
+	switch (CurrentPlane())
+	{
+	case Egg::PLANE_XY:
+		x = 0;
+		y = 1;
+		break;
+
+	case Egg::PLANE_XZ:
+		x = 0;
+		y = 2;
+		break;
+
+	case Egg::PLANE_YZ:
+		x = 1;
+		y = 2;
+		break;
+	}
+
+	for (i = 0; i < 4; ++i)
+	{
+		for (j = 0; j < 4; ++j)
+		{
+			v = Vector3d(xx, yy, 0);
+			u = Vector3d(gTestPatch.control[i][j].mVec[x], 
+						 gTestPatch.control[i][j].mVec[y], 0);
+			dist = helDist3v(v.mVec, u.mVec);
+			
+			if (dist < closest)
+			{
+				closest = dist;
+
+				besti = i;
+				bestj = j;
+			}
+		}
+	}
+
+	gTestPatch.x = besti;
+	gTestPatch.y = bestj;
+}
+
+
+void FreyjaModel::movePatchControlPoint(float xx, float yy)
+{
+	switch (CurrentPlane())
+	{
+	case Egg::PLANE_XY:
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[0] = xx;
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[1] = yy;
+		break;
+
+	case Egg::PLANE_XZ:
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[0] = xx;
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = yy;
+		break;
+
+	case Egg::PLANE_YZ:
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[1] = xx;
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = yy;
+		break;
+	}
+}
+
+
 void FreyjaModel::VertexMove(float xx, float yy)
 {
 	if (!_cached_vertex)
@@ -1333,6 +1452,7 @@ void FreyjaModel::VertexSelect(float xx, float yy)
 
 	_cached_vertex = _egg->getNearestVertex(frame, xx, yy, CurrentPlane());
 }
+
 
 void FreyjaModel::Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list)
 {

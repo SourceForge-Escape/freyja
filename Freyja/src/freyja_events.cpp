@@ -382,6 +382,9 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eModeSkin", FREYJA_MODE_TEXTURE_EDIT);
 	r.RegisterInt("eModeAnimation", FREYJA_MODE_MODEL_VIEW);
 
+	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
+
+	r.RegisterInt("eRenderPatch", eRenderPatch);
 	r.RegisterInt("eRenderWireframe",FREYJA_MODE_RENDER_WIREFRAME);
 	r.RegisterInt("eRenderFace", FREYJA_MODE_RENDER_FACE);
 	r.RegisterInt("eRenderVertex", FREYJA_MODE_RENDER_POINTS);

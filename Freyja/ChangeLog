@@ -27,6 +27,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041207) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o smd and obj plugins written last night are now offical plugins
+	o Patch mesh tool
+
+
  Freyja (0.3.5-20041203) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o More menu/ui updates
