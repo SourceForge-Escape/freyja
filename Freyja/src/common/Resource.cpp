@@ -584,6 +584,16 @@ arg_list_t *Resource::Function(arg_list_t *arg)
 }
 
 
+void Resource::RegisterInt(char *symbol, int value)
+{
+	if (RegisterSymbol(symbol, INT, &value))
+	{
+		printf("ERROR couldn't register new resource symbol %s\n",
+				 symbol);
+	}
+}
+
+
 void Resource::Bind(arg_list_t *symbol, arg_list_t *data)
 {
 	arg_list_t *sym_tab;

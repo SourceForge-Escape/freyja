@@ -169,8 +169,7 @@ OBJS = \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \
 	$(BUILD_DIR)/FreyjaEvent.o \
-	$(BUILD_DIR)/FreyjaModel.o \
-	$(BUILD_DIR)/FreyjaResource.o
+	$(BUILD_DIR)/FreyjaModel.o
 
 
 $(BUILD_DIR)/$(NAME) : $(OBJS) 
