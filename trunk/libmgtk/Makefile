@@ -25,7 +25,6 @@ EMAIL=mongoose@icculus.org
 ################################################################
 
 INSTALL_DIR=/usr/local/bin
-TREE_DIR=$(NAME)
 #$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 SRC_DIR=src
 PACKAGE_DIR=/tmp/package/$(NAME)
@@ -64,8 +63,8 @@ BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
 INSTALL_BIN=/usr/local/bin
-INSTALL_LIB=/usr/local/lib
-INSTALL_INCLUDE=/usr/local/include
+#INSTALL_LIB=/usr/local/lib
+#INSTALL_INCLUDE=/usr/local/include
 PLUGIN_INSTALL_DIR=$(INSTALL_LIB)/$(NAME)/modules
 CC=gcc
 
@@ -221,12 +220,49 @@ clean-build:
 	@-echo "[done]"
 
 
+#################################################################
+
+DEB_DIR=/tmp/$(NAME).deb
+NAME_DEB=libmgtk
+VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
+
+DESTDIR=/usr/local
+INSTALL_BIN=$(DESTDIR)/bin
+INSTALL_LIB=$(DESTDIR)/lib
+INSTALL_DOC=$(DESTDIR)/share/doc/$(NAME)
+INSTALL_SHARE=$(DESTDIR)/share/$(NAME)
+INSTALL_INCLUDE=$(DESTDIR)/include
+
+clean-deb:
+	@-echo -n "Cleaning DEBs                                "
+	@-rm -rf $(DEB_DIR)
+	@-echo "[DONE]"
+
+debian-package:
+	$(MAKE) clean-deb
+	$(MAKE) tarball
+	mkdir -p $(DEB_DIR)
+	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
+	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
+
+deb-init:
+	dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	@-cp debian/control debian/control.old
+	@-sed -e "s/<insert up to 60 chars description>/MLISP gtk+ binding/g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+	@-cp debian/control debian/control.old
+	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+
+deb:
+	dpkg-buildpackage -rfakeroot
+
 ################################################################
 
 install:
 	@-echo -n "Installing selected build                     "
-	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)
-	@-mkdir -p $(INSTALL_LIB)/$(NAME)
+	@-mkdir -p  $(INSTALL_LIB)
+	@-cp bin/debug/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
 	@-echo "[done]"
 	@-$(MAKE) install-link
 	@-$(MAKE) install-headers
@@ -234,9 +270,7 @@ install:
 
 install-link:
 	@-echo -n "New soft links                               "
-	@-rm -f $(INSTALL_LIB)/lib$(NAME)$(EXT)
-	@-ln -s $(INSTALL_LIB)/lib$(NAME)$(SHLIBEXT) \
-	$(INSTALL_LIB)/lib$(NAME)$(EXT)
+	@-cd $(INSTALL_LIB) && ln -sf libmgtk$(SHLIBEXT) libmgtk.so
 	@-echo "[done]"
 
 install-headers:
@@ -275,7 +309,7 @@ backup:
 	&& cp $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 ~/Backup
 
 
-##########################################################################
+################################################################
 # Unit tests
 ################################################################
 
@@ -289,3 +323,6 @@ Resource.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	gcc -Wall -g -DUNIT_TEST_RESOURCE -DDEBUG -Isrc -lstdc++ \
 	src/Resource.cpp -o $(BUILD_TEST_DIR)/Resource.test  
+
+
+

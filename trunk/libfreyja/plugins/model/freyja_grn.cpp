@@ -93,6 +93,7 @@ int freyja_model__grn_import(char *filename)
 	cGrannyFile grn;
 	unsigned int i, j;
 	string out;
+	long index;
 
 
 	grn.load(filename, "");
@@ -213,8 +214,9 @@ int freyja_model__grn_import(char *filename)
 			{
 				freyjaPrintMessage("ERROR: NULL GRN bone!\n");
 				freyjaBegin(FREYJA_BONE);
-				freyjaBoneFlags1u(0x0);
-				freyjaBoneName("ERROR: NULL!");
+				index = freyjaGetCurrent(FREYJA_BONE);
+				freyjaBoneFlags1i(index, 0x0);
+				freyjaBoneName1s(index, "ERROR: NULL!");
 				freyjaEnd();
 
 				continue;
@@ -224,27 +226,69 @@ int freyja_model__grn_import(char *filename)
 			dword id = boneTies.boneObjects[bone->id];
 			dword anmNm = grn.findString("__ObjectName");
 			dword textId = grn.getValue(id, anmNm);
-			std::string boneStr = grn.findID( textId );
-			
-
+			std::string boneStr = grn.findID(textId);
 			snprintf(boneName, 64, "%s", boneStr.data());
-			//snprintf(boneName, 64, "bone%04ld", bone->id);
 
-			freyjaPrintMessage("bone[%i] = '%s', parent = %u\n", i, boneName, bone->parent);
+			freyjaPrintMessage("bone[%i] = '%s', parent = %u\n",
+							   i, boneName, bone->parent);
 
 			freyjaBegin(FREYJA_BONE);
-			freyjaBoneFlags1u(0x0);
-			freyjaBoneName(boneName);
-			freyjaBoneParent(bone->parent);
+			index = freyjaGetCurrent(FREYJA_BONE);
+			freyjaBoneFlags1i(index, 0x0);
+			freyjaBoneName1s(index, boneName);
+			freyjaBoneParent1i(index, bone->parent);
 
-			freyjaBonePos3f(bone->translate.points[0]*scale, 
-							bone->translate.points[2]*scale, 
-							-bone->translate.points[1]*scale);
+			if (!i)
+			{
+				freyjaBoneTranslate3f(index,
+									  bone->translate.points[0]*scale, 
+									  bone->translate.points[1]*scale, 
+									  bone->translate.points[2]*scale);
+			}
+			else
+			{
+				freyjaBoneTranslate3f(index,
+									  bone->translate.points[0]*scale, 
+									  bone->translate.points[2]*scale, 
+									  -bone->translate.points[1]*scale);
+			}
 
-			freyjaBoneRotateQuaternion4f(bone->quaternion.points[3], // wxyz 
-										 bone->quaternion.points[0], 
-										 bone->quaternion.points[1],
-										 bone->quaternion.points[2]);
+			Quaternion r, r2, q;
+			vec4_t wxyz;
+			q = Quaternion(bone->quaternion.points[3], // wxyz 
+						   bone->quaternion.points[0], 
+						   bone->quaternion.points[1],
+						   bone->quaternion.points[2]);
+
+			long nxt = i;
+			r.setIdentity();
+			while (nxt > -1)
+			{
+				Bone *child = bones.bones[nxt];
+				nxt = child->parent;
+
+				if (nxt == 0 || nxt == (int)child->parent) nxt = -1;
+
+				r2 = Quaternion(child->quaternion.points[3], // wxyz 
+								child->quaternion.points[0], 
+								child->quaternion.points[1],
+								child->quaternion.points[2]);
+				//	r2.normalize();
+				r = r * r2;
+			}
+			
+			q = r * q;
+			freyjaBoneRotateQuatWXYZ4f(index,
+									   bone->quaternion.points[3], // wxyz 
+									   bone->quaternion.points[0], 
+									   bone->quaternion.points[1],
+									   bone->quaternion.points[2]);
+
+			q.getQuaternion4fv(wxyz);
+			freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+
+			if (bone->parent == bone->id)
+				freyjaBoneParent1i(index, -1);
 
 			for (j = 0; j < bones.bones.size(); ++j)
 			{
@@ -252,7 +296,8 @@ int freyja_model__grn_import(char *filename)
 
 				if (child->parent == bone->id && child->id != bone->id)
 				{
-					freyjaBoneAddChild1u(child->id);
+					printf("+child %li\n", child->id);
+					freyjaBoneAddChild1i(index, child->id);
 				}
 			}
 

@@ -481,7 +481,7 @@ void FreyjaModel::generateUVMap()
 			}
 			else
 			{
-				texel = _egg->getTexel(j);
+				texel = _egg->getTexel(poly->texel[j]);
 			}
 			
 			if (!texel)
