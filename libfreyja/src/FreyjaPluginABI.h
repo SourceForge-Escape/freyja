@@ -709,6 +709,13 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	// Polygon
 	///////////////////////////////////////////////////////////////////////
 
+	void freyjaPolygonSplit(long meshIndex, long polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *
+	 * Post : Polygon is split into 2 smaller polygons 
+	 ------------------------------------------------------*/
+
 	void freyjaPolygonTexCoordPurge(long polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
@@ -1019,6 +1026,12 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's bit <flags> are set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialTextureFilename(long materialIndex, const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material textures's <filename> id is set
 	 ------------------------------------------------------*/
 
 	void freyjaMaterialTexture(long materialIndex, long textureIndex);

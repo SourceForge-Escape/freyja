@@ -98,8 +98,36 @@ int FreyjaImage::getOriginalHeight()
 
 void FreyjaImage::setColorMode(colormode_t mode)
 {
-	fprintf(stderr, "FreyjaImage::Mode> ERROR not implemented, %s:%i\n",
-			  __FILE__, __LINE__);
+	unsigned char *image;
+	unsigned int i, size;
+
+
+	if (!_image || _width < 1 || _height < 1)
+		return;
+
+	if (mode == RGB_24)
+	{
+		if (_color_mode == RGB_24)
+		{
+			return;
+		}
+		else if (_color_mode == RGBA_32)
+		{
+			size = _width * _height;
+			image = new unsigned char[size*3];
+			
+			for (i = 0; i < size; ++i)
+			{
+				image[i*3] = _image[i*4];
+				image[i*3+1] = _image[i*4+1];
+				image[i*3+2] = _image[i*4+2];
+				// alpha not used
+			}
+
+			_image = image;
+			_color_mode = RGB_24;
+		}
+	}
 }
 
 
@@ -152,7 +180,9 @@ int FreyjaImage::loadIndexedPixmap(unsigned char *image, int width, int height)
     index = image[i];
 
     if (index * 3 + 2 > 768)
+	{
       printf("Index outside of palette!\n");
+	}
     else
     {
       _image[i*3] = _palette[index*3];
