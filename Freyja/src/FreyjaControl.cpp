@@ -26,6 +26,8 @@
 #include <stdarg.h> 
 #include <string.h>
 
+#include <freyja8/EggFileReader.h>
+
 #include "FreyjaControl.h"
 
 extern unsigned int gBoneRenderType;
@@ -96,6 +98,12 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mRender->Init(width, height, true);
 	mRender->Reshape(width, height);
 	mMaterial = MaterialManager::Instance();
+
+	// handle loaded from system call
+	if (!eggGetNum(FREYJA_BONE) && !eggGetNum(FREYJA_VERTEX))
+		mCleared = true;
+	else
+		mCleared = false;
 }
 
 
@@ -585,6 +593,7 @@ bool FreyjaControl::event(int command)
 				mModel->Clear();
 				freyja_print("Closing Model...");
 				freyja_set_main_window_title(BUILD_NAME);
+				mCleared = true;
 			}
 			break;
 		case MATERIAL_EDIT_MODE:
@@ -623,6 +632,7 @@ bool FreyjaControl::event(int command)
 				mModel->Clear();
 				freyja_print("Closing Model...");
 				freyja_set_main_window_title(BUILD_NAME);
+				mCleared = true;
 			}
 			break;
 		case MATERIAL_EDIT_MODE:
@@ -654,8 +664,26 @@ bool FreyjaControl::event(int command)
 			freyja_event_file_dialog("Open map...");
 			break;
 		case MODEL_EDIT_MODE:
-			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-			freyja_event_file_dialog("Open model...");
+			if (!mCleared)
+			{
+				if (freyja_create_confirm_dialog("gtk-dialog-question",
+												 "You must close the current model to open a new one.",
+												 "Open the new model and lose unsaved changes?",
+												 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
+				{
+					mModel->Clear();
+					freyja_print("Closing Model...");
+					freyja_set_main_window_title(BUILD_NAME);
+
+					mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+					freyja_event_file_dialog("Open model...");
+				}
+			}
+			else
+			{
+				mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+				freyja_event_file_dialog("Open model...");
+			}
 			break;
 		case MATERIAL_EDIT_MODE:
 			mFileDialogMode = FREYJA_MODE_LOAD_MATERIAL;
@@ -665,7 +693,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case eSaveFile:
+	case eSaveAsFile:
 		switch (mEditorMode)
 		{
 		case TEXTURE_EDIT_MODE:
@@ -675,6 +703,51 @@ bool FreyjaControl::event(int command)
 		case MODEL_EDIT_MODE:
 			mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
 			freyja_event_file_dialog("Save model as...");
+			break;
+		case MAP_EDIT_MODE:
+			//mFileDialogMode = FREYJA_MODE_SAVE_MAP;
+			//freyja_event_file_dialog("Save map as...");
+			break;
+		case ANIMATION_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_SAVE_ANIMATION;
+			freyja_event_file_dialog("Save animation as...");
+			break;
+		case MATERIAL_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_SAVE_MATERIAL;
+			freyja_event_file_dialog("Save material as...");
+			break;
+		}
+		break;
+
+	case eSaveFile:
+		switch (mEditorMode)
+		{
+		case TEXTURE_EDIT_MODE:
+			//mFileDialogMode = FREYJA_MODE_SAVE_TEXTURE;
+			//freyja_event_file_dialog("Save texture as...");
+			break;
+		case MODEL_EDIT_MODE:
+			if (mCleared) // safety
+			{
+				freyja_print("We don't save empty files anymore");
+				break;
+			}
+
+			if (mRecentFiles.empty())
+			{
+				mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+				freyja_event_file_dialog("Save model as...");				
+			}
+			else
+			{
+				if (!mModel->saveModel(mRecentFiles[mRecentFiles.end()-1]))
+					freyja_print("Model '%s' Saved",
+								 mRecentFiles[mRecentFiles.end()-1]);
+				else
+					freyja_print("Model '%s' failed to save",
+								 mRecentFiles[mRecentFiles.end()-1]);
+			}
+			break;
 		case MAP_EDIT_MODE:
 			//mFileDialogMode = FREYJA_MODE_SAVE_MAP;
 			//freyja_event_file_dialog("Save map as...");
@@ -710,8 +783,11 @@ bool FreyjaControl::event(int command)
 		{
 			mModel->Clear();
 			freyja_print("Reverting Model...");
+			mCleared = true;
 			freyja_set_main_window_title(BUILD_NAME);
-			mModel->loadModel(mRecentFiles[mRecentFiles.end()-1]);
+
+			if (!mModel->loadModel(mRecentFiles[mRecentFiles.end()-1]))
+				mCleared = false;
 		}
 		break;
 
@@ -729,7 +805,8 @@ bool FreyjaControl::event(int command)
 
 
 	case eShutdown:
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
+		if (mCleared ||
+			freyja_create_confirm_dialog("gtk-dialog-question",
 						  "If you exit you will lose any unsaved data.",
 						  "Would you like to exit?", 
 						  "gtk-cancel", "_Cancel", "gtk-quit", "_Exit"))
@@ -784,24 +861,28 @@ bool FreyjaControl::event(int command)
 
 
 	case eGenerateCylinder:
+		mCleared = false;
 		eggGenerateCylinder(4, 16, 8.0, 4.0);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eGenerateSphere:
+		mCleared = false;
 		eggGenerateSphere(16, 16, 8.0);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eGenerateCube:
+		mCleared = false;
 		eggGenerateCube(8.0);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eGenerateTriStrip:
+		mCleared = false;
 		eggGenerateTriangleStrip(10, 8.0);
 		freyja_event_gl_refresh();
 		break;
@@ -887,6 +968,7 @@ bool FreyjaControl::event(int command)
 
 	case eAddObject:
 		addObject();
+		mCleared = false;
 		break;
 
 	case eCopyAppendMode:
@@ -1001,6 +1083,7 @@ bool FreyjaControl::event(int command)
 		freyja_print("Select vertex to delete...");
 		break;
 	case CMD_POINT_ADD:
+		mCleared = false;
 		mEventMode = POINT_ADD_MODE;
 		freyja_print("Select point in space to create a vertex...");
 		break;    
@@ -1028,6 +1111,7 @@ bool FreyjaControl::event(int command)
 	case CMD_BONE_NEW:
 		mTransformMode = FreyjaModel::TransformBone;
 		addObject();
+		mCleared = false;
 		//freyja_print("Select new child bone placement directly...");
 		//mEventMode = BONE_ADD_MODE;
 		break;
@@ -1073,6 +1157,7 @@ bool FreyjaControl::event(int command)
 	case eMeshNew:
 		mTransformMode = FreyjaModel::TransformMesh;
 		addObject();
+		mCleared = false;
 		break;
 	case eTransformMeshPivot:
 		mTransformMode = FreyjaModel::TransformMesh;
@@ -1383,11 +1468,12 @@ void FreyjaControl::handleFilename(const char *filename)
 		{
 			char title[1024];
 
-
 			snprintf(title, 1024, "%s - Freyja", filename);
 			freyja_set_main_window_title(title);
 
 			addRecentFilename(filename);
+
+			mCleared = false;
 		}
 
 		type = 2;
@@ -1400,9 +1486,24 @@ void FreyjaControl::handleFilename(const char *filename)
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_SAVE_MODEL:
-		failed = mModel->saveModel(filename);
-		type = 2;
-		type2 = 0;
+		if (EggFileReader::doesFileExist(filename))
+		{
+			if (freyja_create_confirm_dialog("gtk-dialog-question",
+											 "You are about to overwrite an existing file.",
+											 "Would you like to replace the existing model with your current model?",
+											 "gtk-cancel", "_Cancel", "gtk-replace", "_Replace"))
+			{
+				failed = mModel->saveModel(filename);
+				type = 2;
+				type2 = 0;
+			}
+		}
+		else
+		{
+			failed = mModel->saveModel(filename);
+			type = 2;
+			type2 = 0;
+		}
 		break;
 
 
@@ -1430,7 +1531,7 @@ void FreyjaControl::handleFilename(const char *filename)
 					(type == 2) ? "Model" : 
 					(type == 3) ? "Animation" :
 					(type == 4) ?"Palette" :
-					"ERROR: No event for ",
+					"!ERROR: No event for ",
 					basename(filename),
 					(type2 == 0) ? "save " : "load ",
 					(failed == 0) ? "[sucess]" : "[failed]");

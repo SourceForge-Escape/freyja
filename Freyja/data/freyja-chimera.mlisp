@@ -69,16 +69,20 @@
 			(menu_item "_New"			"C-n"	eNewFile	"gtk-new")
 			(menu_item "_Open..."		"C-o"	eOpenFile	"gtk-open")
 			(menu_item "Ap_pend..."  			eAppendFile	"gtk-paste")
+
 			(menu_seperator)
+
 			(menu_item "_Save"			"C-s"	eSaveFile	"gtk-save")
-			(menu_item "Save _As..."	"S-C-s"	eSaveFile	"gtk-save-as")
+			(menu_item "Save _As..."	"S-C-s"	eSaveAsFile	"gtk-save-as")
 			(menu_item "_Revert"     			eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
-			(menu_item "Proper_ties"		eInfo		"gtk-properties")
 
+			(menu_item "Proper_ties"		eInfo		"gtk-properties")
 			(menu_item "_Import"		"C-i"	eImportFile	"gtk-go-forward")
 			(menu_item "_Export"		"C-e"	eExportFile	"gtk-go-back")
+
 			(menu_seperator)
+
 			(menu_item "_Close"			"C-w"	eCloseFile	"gtk-close")
 			(menu_item "_Quit"			"C-q"	eShutdown	"gtk-quit"))
 
@@ -234,7 +238,7 @@
 							(toolbar_button "gtk-open" "Open..."
 								"Open document..."	eMode  eOpenFile)
 
-							(toolbar_button "gtk-save-as" "Save"
+							(toolbar_button "gtk-save" "Save"
 								"Save document"		eMode  eSaveFile)
 
 							(toolbar_togglebutton true

@@ -438,6 +438,8 @@ private:
 	char mScratchTextBuffer[1024];
 
 	unsigned int mTransformMode;
+
+	bool mCleared;
 };
 
 #endif
