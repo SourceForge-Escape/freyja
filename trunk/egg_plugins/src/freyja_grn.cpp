@@ -122,7 +122,8 @@ int freyja_model__grn_import(char *filename)
 		for (j = 0; j < mesh.normals.size(); ++j)
 		{
 			Point p = mesh.normals[j];
-			eggVertexNormalStore3f(j, p.points[0], p.points[2], -p.points[1]);
+			eggVertexNormalStore3f(transXYZ[j], 
+								   p.points[0], p.points[2], -p.points[1]);
 		}
 
 		for (j = 0; j < mesh.textureMap.size(); ++j)
@@ -154,6 +155,8 @@ int freyja_model__grn_import(char *filename)
 
 		eggEnd(); // MESH
 
+		transXYZ.Clear();
+		transUV.Clear();
 
 		/* Weights */
 		for (i = 0; i < mesh.weights.size(); ++i)
@@ -165,6 +168,7 @@ int freyja_model__grn_import(char *filename)
 				eggVertexWeightStore(i, w.weights[j], w.bones[j]);
 			}
 		}
+
 
 		/* Skeleton */
 		eggBegin(FREYJA_BONE_FRAME); // FREYJA_SKELETON

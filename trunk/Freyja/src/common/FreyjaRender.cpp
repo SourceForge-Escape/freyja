@@ -834,7 +834,7 @@ void FreyjaRender::Display()
 
 		glLineWidth(2.0f); 
 
-		if (mRenderMode & RENDER_EDIT_GRID)
+		if (!(mRenderMode & RENDER_EDIT_GRID))
 		{
 			mglDrawGrid(50.0f, 2.0f, 1.0f);
 			mglDrawAxis(0.25f, 1.2f, 0.872f);
@@ -1574,7 +1574,7 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 		return;
    }
 
-   if (mRenderMode & RENDER_EDIT_GRID)
+   if (!(mRenderMode & RENDER_EDIT_GRID))
    {
 		glLineWidth(1.0);
 
