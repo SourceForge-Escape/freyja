@@ -43,6 +43,9 @@
  Annoying
  ------------------
 
+ o 2004.12.13-1:
+	Polygon rendered bones only display correctly in meshtree type animations.
+
  o 2004.12.09-1:
 	Gentoo users still can't build freyja without using DISABLE_MULTITEXTURE
 	flag in Makefile

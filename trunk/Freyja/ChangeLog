@@ -27,6 +27,22 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041213) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Win32 builds for some libs ( without module support )
+	o Mousable lighting added back ( middle button in anim view )
+	o Vertex list generic transforms
+	o Vertex list/buffer aka 'selected vertices' can do partial
+	  copy/pastes of meshes -- no culling yet due to Egg polygon removal
+
+
+ Freyja (0.3.5-20041213) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o VERY hacky 'blended plane' editing in free mode 
+	o vertex selection by bounding box fixed
+	o tombraider.so changes: broke animation fixed space translator
+
+
  Freyja (0.3.5-20041211) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o Rendering changes for grid system to aid 'to scale' editing

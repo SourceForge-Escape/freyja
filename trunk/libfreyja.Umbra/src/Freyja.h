@@ -350,6 +350,8 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	bool exportScene(const char *filename);
+
 	void translate(vec_t x, vec_t y, vec_t z);
 
 	void erase();

@@ -865,7 +865,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int importModel(char *filename);
+	int importModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Imports model and returns 0, or
@@ -877,7 +877,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int exportModel(char *filename, char *type);
+	int exportModel(const char *filename, char *type);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Exports model of type and returns 0, or

@@ -404,6 +404,8 @@ private:
 	 * Mongoose - Created from old stand alone function
 	 ------------------------------------------------------*/
 
+	void getFreeWorldFromScreen(int x, int y, vec3_t p);
+
 
 	Vector<FreyjaEvent *> mEvents;          /* Command pattern event system */
 

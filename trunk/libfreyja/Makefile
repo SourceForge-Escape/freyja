@@ -24,22 +24,33 @@ MINOR_VERSION=8
 MICRO_VERSION=14
 BUILD_ID=20040823
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
-EXT=.so
 TREE_DIR=libfreyja
 TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
 
 ################################################################
-
+# UNIX
 CC=gcc
+BUILD_BASE_DIR=bin
+FLAGS=
+EXT=.so
+LDFLAGS_CORE=-ldl
 
+########################################
+# WIN32
+#CC=i586-mingw32msvc-g++
+#CPP=i586-mingw32msvc-cpp
+#LD=i586-mingw32msvc-ld
+#BUILD_BASE_DIR=bin.win32
+#FLAGS=-I/usr/local/include/ -L/usr/local/lib/
+#EXT=.dll
+#LDFLAGS_CORE=-lhel0 -lstdc++
 ################################################################
 
-
-BUILD_DEBUG_DIR=bin/debug
-BUILD_RELEASE_DIR=bin/release
-BUILD_PROF_DIR=bin/prof
-BUILD_TEST_DIR=bin/test
-BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
+BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/debug
+BUILD_RELEASE_DIR=$(BUILD_BASE_DIR)/release
+BUILD_PROF_DIR=$(BUILD_BASE_DIR)/prof
+BUILD_TEST_DIR=$(BUILD_BASE_DIR)/test
+BUILD_INSTALL_DIR=$(BUILD_BASE_DIR)/$(BUILD_SELECT)
 
 INSTALL_BIN=/usr/local/bin
 INSTALL_LIB=/usr/local/lib
@@ -55,13 +66,13 @@ CONFIGURE_LNK=
 
 ################################################################
 
-BASE_CFLAGS=-Wall -Isrc/lib -Isrc/utils \
+BASE_CFLAGS=$(FLAGS) -Wall -Isrc/lib -Isrc/utils \
 	$(CONFIGURE_DEF) \
 	-DPLUGIN_IMAGE_DIR=\"\\\"$(PLUGIN_INSTALL_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
 	$(BASE_DEFS)
 
-LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
+LDFLAGS=$(CONFIGURE_LNK) $(LDFLAGS_CORE) -lm
 #LDFLAGS += -Wl,-z,defs
 #LDFLAGS += -Wl,-O1
 RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \

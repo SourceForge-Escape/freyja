@@ -26,6 +26,7 @@
 
 #include <hel/math.h>
 #include <hel/Vector3d.h>
+#include <hel/Matrix.h>
 #include <freyja8/EggFileReader.h> 
 
 #include "MaterialManager.h"
@@ -442,10 +443,25 @@ void FreyjaModel::setCurrentAnimation(unsigned int index)
 	{
 		_current_animation_frame = index;
 		setCurrentSkeleton(0);
-		
+
 		freyja_print("Animation[%i] Frame[%i]", 
 					_current_animation_frame, _current_frame);
 	}
+}
+
+unsigned int FreyjaModel::getAnimationFramesIn(unsigned int animationIndex)
+{
+	egg_animation_t *animation_frame;
+
+
+	animation_frame = _egg->getAnimation(getCurrentAnimation());
+
+	if (animation_frame && animation_frame->frame.size())
+	{
+		return animation_frame->frame.size();
+	}
+	
+	return 0;
 }
 
 
@@ -588,10 +604,62 @@ void FreyjaModel::transform(int mode, enum Egg::egg_transform type,
 		break;
 
 	case FreyjaModel::TransformBone:
-		if (type != Egg::ROTATE)
-			_egg->Transform(CachedTag(), type, x, y, z);
-		else
-			_egg->TagRotateAbout(getCurrentBone(), x, y, z);
+		{
+			if (type != Egg::ROTATE)
+				_egg->Transform(CachedTag(), type, x, y, z);
+			else
+				_egg->TagRotateAbout(getCurrentBone(), x, y, z);
+			
+			if (_defaults & fDeformBoneVertices)
+			{
+				
+			}
+		}
+		break;
+
+	case TransformSelectedVertices:
+		if (!mList.empty())
+		{
+			egg_vertex_t *vertex;
+			Matrix m, inverse, normalTransform;
+			unsigned int i;
+
+
+			m.setIdentity();
+
+			switch (type)
+			{
+			case Egg::SCALE:
+				m.scale(x, y, z);
+				break;
+			case Egg::ROTATE:
+				x = helDegToRad(x);
+				y = helDegToRad(y);
+				z = helDegToRad(z);
+				m.rotate(x, y, z);
+				break;
+			case Egg::TRANSLATE:
+				m.translate(x, y, z);
+				break;
+			default:
+				return;
+			}
+
+			m.getInvert(inverse.mMatrix);
+			inverse.getTransposeMatrix(normalTransform.mMatrix);
+			normalTransform.setMatrix(inverse.mMatrix);
+
+			for (i = mList.begin(); i < mList.end(); ++i)
+			{
+				vertex = _egg->getVertex(mList[i]);
+				
+				if (!vertex)
+					continue;
+				
+				m.multiply3v(vertex->pos, vertex->pos);
+				normalTransform.multiply3v(vertex->norm, vertex->norm);
+			}
+		}
 		break;
 
 	case FreyjaModel::TransformScene:
@@ -1039,26 +1107,183 @@ bool FreyjaModel::copySelectedMesh()
 }
 
 
-void FreyjaModel::MeshCopy()
+void FreyjaModel::cullUsingVertexBuffer()
 {
-	egg_mesh_t *mesh = CachedMesh();
-	egg_group_t *grp = CachedGroup();
-	bool whole = false;
+	freyja_print("Culling using vertex buffer not yet implemented\n");
+}
 
 
-	// Mongoose 2002.07.07, If empty copy the whole thing
-	if (mList.empty() && grp)
+void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
+{
+	unsigned int i;
+	egg_vertex_t *v;
+
+
+	if (mList.empty())
+		return;
+
+	for (i = mList.begin(); i < mList.end(); ++i)
 	{
-		mList.copy(grp->vertex);
-		whole = true;
+		v = _egg->getVertex(mList[i]);
+
+		if (y)
+			v->pos[0] = -v->pos[0];
+
+		if (x)
+			v->pos[1] = -v->pos[1];      
+
+		if (z)
+			v->pos[2] = -v->pos[2];      
+	}
+}
+
+
+bool FreyjaModel::copyVertexBuffer()
+{
+	Vector<unsigned int> polygonList;
+	CopyVertex *v;
+	CopyTexCoord *t;
+	CopyPolygon *p;
+	egg_mesh_t *mesh;
+	egg_group_t *group;
+	egg_polygon_t *polygon;
+	egg_vertex_t *vertex;
+	egg_texel_t *texel;
+	unsigned long i, j, k, r;
+	long index, index2;
+	Vector3d min, max, center;
+
+
+	mesh = CachedMesh();
+	group = CachedGroup();
+
+	if (!mesh || !group || mList.empty())
+		return false;
+
+	// FIXME: You can add a back buffer stack/list here
+	if (!appendMode)
+		mCopyMesh.erase();
+
+	min = Vector3d(999999.0f, 999999.0f, 999999.0f);
+	max = Vector3d(-999999.0f, -999999.0f, -999999.0f);
+
+	mCopyMesh.flags = mesh->flags;
+	mCopyMesh.center[0] = group->center[0];
+	mCopyMesh.center[1] = group->center[1];
+	mCopyMesh.center[2] = group->center[2];
+
+	for (i = mList.begin(); i < mList.end(); ++i)
+	{
+		index = mList[i];
+		vertex = _egg->getVertex(index);
+
+		if (!vertex)
+			continue;
+
+		for (k = 0; k < 3; ++k)
+		{
+			if (vertex->pos[k] < min.mVec[k])
+				min.mVec[k] = vertex->pos[k];
+
+			if (vertex->pos[k] > max.mVec[k])
+				max.mVec[k] = vertex->pos[k];
+		}
+
+		for (r = vertex->ref.begin(); r < vertex->ref.end(); ++r)
+		{
+			index2 = vertex->ref[r];
+
+			for (j = polygonList.begin(); j < polygonList.end(); ++j)
+			{
+				if (index2 == (int)polygonList[j])
+				{
+					index2 = -1;
+					break;
+				}
+			}	
+			
+			if (index2 > -1)
+			{
+				polygonList.pushBack(index2);
+			}
+		}
 	}
 
-	if (mesh && !mList.empty())
+	center = (min + max) / 2;
+
+	mCopyMesh.center[0] = center.mVec[0];
+	mCopyMesh.center[1] = center.mVec[1];
+	mCopyMesh.center[2] = center.mVec[2];
+
+	for (i = polygonList.begin(); i < polygonList.end(); ++i)
 	{
-		freyja_print("New %s mesh cloned", whole ? "whole" : "partial");
-		_egg->MeshCopy(mesh, &mList);
-		mList.clear();
-	}
+		index = polygonList[i];
+		polygon = _egg->getPolygon(index);
+
+		if (!polygon)
+			continue;
+
+		p = new CopyPolygon();
+		p->material = polygon->shader;
+
+		for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
+		{
+			index = polygon->vertex[j];
+			vertex = _egg->getVertex(index);
+
+			v = new CopyVertex();
+
+			if (vertex)  // This is to handle a whacky uv alignment issue
+			{
+				v->pos[0] = vertex->pos[0];
+				v->pos[1] = vertex->pos[1];
+				v->pos[2] = vertex->pos[2];
+				v->uv[0] = vertex->uv[0];
+				v->uv[1] = vertex->uv[1];
+				v->norm[0] = vertex->norm[0];
+				v->norm[1] = vertex->norm[1];
+				v->norm[2] = vertex->norm[2];
+			}
+			else
+			{
+				freyja_print("Selected mesh to copy has invalid vertex %i", 
+							 index);
+			}
+
+			//FIXME: Add weight copy here, but this build handles
+			//       weights so poorly no need until they're fixed
+
+			mCopyMesh.vertices.pushBack(v);
+			p->vertices.pushBack(mCopyMesh.vertices.end()-1);
+		}
+
+		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
+		{
+			index = polygon->texel[j];
+			texel = _egg->getTexel(index);
+
+			t = new CopyTexCoord();
+			
+			if (texel)
+			{
+				t->uv[0] = texel->st[0];
+				t->uv[1] = texel->st[1];
+			}
+			else
+			{
+				freyja_print("Selected mesh to copy has invalid texcoord %i", 
+							 index);
+			}
+
+			mCopyMesh.texcoords.pushBack(t);
+			p->texcoords.pushBack(mCopyMesh.texcoords.end()-1);	
+		}
+
+		mCopyMesh.polygons.pushBack(p);
+	}	
+
+	freyja_print("Vertex buffer copied...", mesh->id);
+	return true;
 }
 
 
@@ -1348,6 +1573,67 @@ void FreyjaModel::VertexCombine(float xx, float yy)
 }
 
 
+void FreyjaModel::selectPatchControlPoint(Vector3d xyz)
+{
+	unsigned int besti = 0, bestj = 0, i, j;
+	Vector3d u, v;
+	vec_t dist, closest = 99999;
+
+
+	for (i = 0; i < 4; ++i)
+	{
+		for (j = 0; j < 4; ++j)
+		{
+			v = xyz;
+			u = Vector3d(gTestPatch.control[i][j]);
+			dist = helDist3v(v.mVec, u.mVec);
+			
+			if (dist < closest)
+			{
+				closest = dist;
+
+				besti = i;
+				bestj = j;
+			}
+		}
+	}
+
+	gTestPatch.x = besti;
+	gTestPatch.y = bestj;
+}
+
+
+void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
+{
+	Vector3d v;
+	egg_tag_t *bone;
+
+	switch (type)
+	{
+	case FreyjaModel::TransformBone:
+		if (!(bone = CachedTag()))
+			return;
+
+		v = Vector3d(bone->center);
+		
+		xyz = xyz - v;
+		
+		transform(FreyjaModel::TransformBone, Egg::TRANSLATE, 
+				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
+		break;
+
+	default:
+		;
+	}
+}
+
+
+void FreyjaModel::movePatchControlPoint(Vector3d xyz)
+{
+	gTestPatch.control[gTestPatch.x][gTestPatch.y] = xyz;
+}
+
+
 void FreyjaModel::selectPatchControlPoint(float xx, float yy)
 {
 	unsigned int besti = 0, bestj = 0, i, j, x, y;
@@ -1561,19 +1847,11 @@ void FreyjaModel::BBoxMove(float xx, float yy)
 void FreyjaModel::BBoxListBuild()
 {
 	Vector<unsigned int> *list;
-	egg_group_t *grp;
 
 
 	mList.clear();
-
-	grp = CachedGroup();
-
-	if (!grp)
-		return;
-
-	list = eggFindVerticesInBox(mSelectBBox, grp->vertex);
-	mList = *list;
-	//	mList.print(__print_unsigned_int);
+	list = eggFindVerticesByBox(mSelectBBox);
+	mList.copy(*list);
 }
 
 

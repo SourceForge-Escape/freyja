@@ -17,6 +17,12 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Multi window editing using python via calls to FreyjaRender
+	o Deform vertices render option ( disables mesh editing )
+	o Skeletal Ref -> Skeletal Keyframe ( dup | edit ) -> Skel Keyframe |
+	  vertex morph frame 
+	o Bounding box vertex selector for bones
+	o GRN edit / export request -- fix GRN animation import
 	o Tightening up import / export -- if it's not 100% or close
 	  it's going to get disabled or feature locked till it is
 	o Propagate import / export list up to Freyja to make menus

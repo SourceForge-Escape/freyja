@@ -198,10 +198,10 @@ public:
 	char name[64];                    /* Name of frame if any */
 	int id;                           /* Index of frame */
 
-	//Vector3d bboxMin;                 /* Min corner of bounding box */
-	//Vector3d bboxMax;                 /* Max corner of bounding box */
+	//Vector3d bboxMin;               /* Min corner of bounding box */
+	//Vector3d bboxMax;               /* Max corner of bounding box */
 
-	//Vector3d center;                  /* Center of bounding volume */
+	//Vector3d center;                /* Center of bounding volume */
 	vec_t radius;                     /* Radius of bounding sphere if used */
 };
 

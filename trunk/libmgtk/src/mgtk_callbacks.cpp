@@ -371,6 +371,24 @@ int mgtk_event_set_range(int event, unsigned int value,
 			return spinbutton_uint_set_range(GTK_SPIN_BUTTON(test),
 											 value, min, max);
 		}
+#define ADJUSTMENT_RANGE_TEST
+#ifdef ADJUSTMENT_RANGE_TEST
+		else if (test && GTK_IS_ADJUSTMENT(test))
+		{
+			gdouble oldMax = GTK_ADJUSTMENT(test)->upper;
+
+			GTK_ADJUSTMENT(test)->upper = max;
+			GTK_ADJUSTMENT(test)->lower = min;
+
+			//if (value > max)
+			//	GTK_ADJUSTMENT(test)->value = max;
+
+			if (oldMax < value)
+				return 1;
+
+			return 0;
+		}
+#endif
 		else
 		{
 			mgtk_print("mgtk_event_set_range> %i:%d failed", event, i);
