@@ -600,10 +600,15 @@ int freyja_model__md5_import(char *filename)
 						md5.mJoints[j].rotate[1],
 						md5.mJoints[j].rotate[2]);
 
+		eggPrintMessage("[%i]", j);   
+
 		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{
-			if (md5.mJoints[j].parent == j)
+			if (md5.mJoints[j2].parent == j)
+			{
+				eggPrintMessage(" |-- %i", j2);   
 				eggTagAddSlave1u(j2);
+			}
 		}
 
 		eggEnd(); // FREYJA_TAG
