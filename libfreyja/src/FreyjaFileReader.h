@@ -37,6 +37,14 @@ class FreyjaFileReader
 {
  public:
 
+	typedef enum {
+
+		BIG = 1,
+		LITTLE
+
+	} byte_order_t;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -130,6 +138,17 @@ class FreyjaFileReader
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void bigEndianMode();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reads in big endian order
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.26:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void closeDirectory();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -166,6 +185,17 @@ class FreyjaFileReader
 	 *-- History ------------------------------------------
 	 *
 	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void littleEndianMode();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reads in little endian order
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.26:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -391,7 +421,7 @@ class FreyjaFileReader
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-
+	byte_order_t mOrder;
 
 	FILE *mFileHandle;                /* File cruft */
 	char *mTempBufferHack;
