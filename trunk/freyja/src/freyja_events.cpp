@@ -22,6 +22,7 @@
  ==========================================================================*/
 
 #include <mgtk/mgtk_events.h>
+#include <freyja/FreyjaImage.h>
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
@@ -50,10 +51,37 @@ void setColor(vec4_t dest, vec4_t color)
 // MGtk wrappers
 ///////////////////////////////////////////////////////////////////////
 
+
+void mgtk_callback_get_image_data_rgb24(const char *filename, 
+										unsigned char **image, 
+										int *width, int *height)
+{
+	FreyjaImage img;
+	unsigned char *swap;
+
+	*image = 0x0;
+	*width = 0;
+	*height = 0;
+
+	if (!img.loadImage(filename))
+	{
+		img.setColorMode(FreyjaImage::RGB_24);
+		img.scaleImage();
+		img.getImage(&swap);
+		*image = swap;
+		*width = img.getWidth();
+		*height = img.getHeight();
+
+		printf("SUCCESS freyja\n");
+	}
+}
+
+
 void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree)
 {
 	freyja_print("FIXME: mgtk_update_tree() not in libmgtk yet");
 }
+
 
 void mgtk_handle_application_window_close()
 {

@@ -29,6 +29,9 @@
 
 /* Handle mgtk widget events by implementing these functions in your code */
 /* Repeat: You have to implement these following call backs */
+void mgtk_callback_get_image_data_rgb24(const char *filename, 
+										unsigned char **image, 
+										int *width, int *height);
 void mgtk_handle_application_window_close();
 void mgtk_handle_color(int id, float r, float g, float b, float a);
 void mgtk_handle_command(int command);
