@@ -40,7 +40,7 @@ extern "C" {
 		   char *type);
 }
 
-int check_jpeg(FILE *f)
+int mtk_image__jpeg_check(FILE *f)
 {
 #ifdef LIB_JPEG
   unsigned char buffer[16];
@@ -85,7 +85,7 @@ int import_image(char *filename, unsigned char **imageRET,
     return -1;
   }
 
-  if (check_jpeg(f))
+  if (mtk_image__jpeg_check(f))
   {
     fclose(f);
     return -1;

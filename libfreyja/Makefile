@@ -181,8 +181,8 @@ tga.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 
-# dds.so jpeg.so 
-plugins: pcx.so ppm.so png.so tga.so
+# jpeg.so 
+plugins: dds.so pcx.so ppm.so png.so tga.so
 
 clean-plugins:
 	@-echo -n "Cleaning plugins                             "
