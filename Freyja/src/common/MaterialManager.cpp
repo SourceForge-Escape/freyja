@@ -102,6 +102,13 @@ void MaterialManager::applyEffectGL(unsigned int index)
 		mat->applyEffectGL();
 }
 
+unsigned int MaterialManager::createNewMaterial()
+{
+	mMaterials.pushBack(new Material);
+
+	return mMaterials.end() - 1;
+}
+
 unsigned int MaterialManager::getBlendSourceIndex()
 {
 	Material *mat = mMaterials[mCurrent];
@@ -220,7 +227,6 @@ int MaterialManager::save(const char *filename)
 		
 	return -1;
 }
-
 
 void MaterialManager::takeScreenshot(const char *filename, 
 									 unsigned int width, unsigned int height)
@@ -443,7 +449,8 @@ void MaterialManager::setBlendDest(unsigned int blend)
 
 void MaterialManager::setCurrent(unsigned int index)
 {
-	mCurrent = index;
+	if (index < mMaterials.size())
+		mCurrent = index;
 }
 
 void MaterialManager::setColor(eColorTypes type, vec4_t color)
