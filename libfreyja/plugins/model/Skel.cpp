@@ -388,7 +388,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("SKEL Reference (*.skel)");
-	freyjaPluginAddExtention1s("skel");
+	freyjaPluginAddExtention1s("*.skel");
 	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_SKELETON);
 }

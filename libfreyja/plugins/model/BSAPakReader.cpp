@@ -362,7 +362,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("Morrowind Pak (*.BSA)");
-	freyjaPluginAddExtention1s("bsa");
+	freyjaPluginAddExtention1s("*.bsa");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }

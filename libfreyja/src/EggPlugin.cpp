@@ -1048,8 +1048,8 @@ void EggPlugin::setupPlugins()
 	mCurrentPlugin = new FreyjaPluginDesc();
 	mPlugins.pushBack(mCurrentPlugin);
 	freyjaPluginBegin();
-	freyjaPluginDescription1s("Freyja Model (*.ja)");
-	freyjaPluginAddExtention1s("ja");
+	freyjaPluginDescription1s("All files (*.*)");
+	freyjaPluginAddExtention1s("*.*");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 						 FREYJA_PLUGIN_SKELETON |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);
@@ -1062,7 +1062,7 @@ void EggPlugin::setupPlugins()
 	mPlugins.pushBack(mCurrentPlugin);
 	freyjaPluginBegin();
 	freyjaPluginDescription1s("Freyja Model (*.ja)");
-	freyjaPluginAddExtention1s("ja");
+	freyjaPluginAddExtention1s("*.ja");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 						 FREYJA_PLUGIN_SKELETON |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);
@@ -1075,7 +1075,7 @@ void EggPlugin::setupPlugins()
 	mPlugins.pushBack(mCurrentPlugin);
 	freyjaPluginBegin();
 	freyjaPluginDescription1s("GooseEgg 8 Model (*.egg)");
-	freyjaPluginAddExtention1s("egg");
+	freyjaPluginAddExtention1s("*.egg");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 						 FREYJA_PLUGIN_SKELETON |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);

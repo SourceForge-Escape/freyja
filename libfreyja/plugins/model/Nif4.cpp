@@ -168,7 +168,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("NetImmerse 4 Model (*.nif)");
-	freyjaPluginAddExtention1s("nif");
+	freyjaPluginAddExtention1s("*.nif");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }

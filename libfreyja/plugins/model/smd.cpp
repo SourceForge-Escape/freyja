@@ -39,7 +39,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("SMD model (*.smd)");
-	freyjaPluginAddExtention1s("smd");
+	freyjaPluginAddExtention1s("*.smd");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_SKELETON);
 }

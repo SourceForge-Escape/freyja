@@ -2630,7 +2630,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("UE2 Intermediate (*.psk)");
-	freyjaPluginAddExtention1s("psk");
+	freyjaPluginAddExtention1s("*.psk");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }
