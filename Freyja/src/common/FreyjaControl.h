@@ -44,18 +44,15 @@ typedef enum freyja_control_mode             /* Minor control modes */
 	MESH_DEL_MODE,
 	MESH_MOVE_CENTER,
 	MESH_LOAD_MODE,
-	MESH_MOVE,
 	MESH_COPY_MODE,
 	MESH_CUT_MODE,
 	MESH_PASTE_MODE,
 	POINT_ADD_MODE,
 	POINT_DEL_MODE,
-	VERTEX_MOVE,
 	POLYGON_ADD_MODE,
 	POLYGON_DEL_MODE,
 	BONE_CONNECT_MODE,
 	BONE_DISCONNECT_MODE,
-	TAG_MOVE,
 	TAG_MOVE_CENTER,
 	BONE_SELECT_MODE,
 	MESH_SELECT_MODE,
@@ -65,9 +62,10 @@ typedef enum freyja_control_mode             /* Minor control modes */
 	VERTEX_BBOX_SELECT_MODE,
 	POLYGON_SELECT_MODE,
 
-	// Generic transforms
-	MODEL_ROTATE, 
-	MODEL_SCALE
+	/* Generic transforms */
+	modeMove,
+	modeRotate,
+	modeScale
 
 } freyja_control_mode_t;
 
@@ -223,6 +221,7 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	void moveObject(int x, int y, Egg::egg_plane plane);
 	void rotateObject(int x, int y, Egg::egg_plane plane);
 	void scaleObject(int x, int y, Egg::egg_plane plane);
 
@@ -272,6 +271,8 @@ private:
 	bool mFullScreen;
 
 	char mScratchTextBuffer[1024];
+
+	unsigned int mTransformMode;
 };
 
 #endif

@@ -132,7 +132,6 @@ void FreyjaModel::Clear()
 
 void FreyjaModel::printInfo()
 {
-
 	event_print("%d bones, %d meshes, %d polygons, %d vertices",
 				_egg->getTagCount(), 
 				_egg->getMeshCount(), 
@@ -521,20 +520,10 @@ void FreyjaModel::Transform(int mode, enum Egg::egg_transform type,
 {
 	switch (mode)
 	{
-	case FreyjaModel::TransformVertexFrame:
+	case FreyjaModel::TransformVertexFrame:	
 		_egg->Transform(CachedGroup(), type, x, y, z);
 		break;
 	case FreyjaModel::TransformMesh:
-		if (type == Egg::ROTATE)
-		{
-			type = Egg::ROTATE_ABOUT_CENTER;
-
-			// Mongoose 2002.01.18, Scaled rotation for better control
-			x *= 5;
-			y *= 5;
-			z *= 5;
-		}
-
 		_egg->Transform(CachedMesh(), type, x, y, z);
 		break;
 	case FreyjaModel::TransformBone:
@@ -714,17 +703,6 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 	}
 }
 
-void FreyjaModel::MeshCut()
-{
-	/***************
-  egg_mesh_t *mesh = CachedMesh();
-  _egg->AddMesh(_egg->MeshSplit(mesh, _list));
-  _list.Clear();
-	***************/
-
-	fprintf(stderr,"FreyjaModel::MeshCut> Not implemented, %s:%i\n",
-			__FILE__, __LINE__);
-}
 
 void FreyjaModel::MeshCopy()
 {
@@ -748,27 +726,17 @@ void FreyjaModel::MeshCopy()
 	}
 }
 
+
 void FreyjaModel::TagDisconnect(unsigned int master, unsigned int slave)
 {
 	_egg->TagDisconnect(master, slave);
 }
 
+
 void FreyjaModel::MeshDel()
 {
 	event_print("Mesh[%u] deleted\n", _current_mesh);
 	_egg->delMesh(_current_mesh);
-}
-
-void FreyjaModel::TagDel()
-{
-	fprintf(stderr,"FreyjaModel::TagDel> Not implemented, %s:%i\n",
-			__FILE__, __LINE__);
-}
-
-void FreyjaModel::MeshMirror(unsigned int id)
-{
-	fprintf(stderr,"FreyjaModel::MeshMirror> Not implemented, %s:%i\n",
-			__FILE__, __LINE__); 
 }
 
 
@@ -860,6 +828,20 @@ void FreyjaModel::MeshMove(float xx, float yy)
 	}
 
 	Transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);  
+}
+
+
+void FreyjaModel::getCurrentMeshCenter(vec3_t center)
+{
+	egg_group_t *mesh = CachedGroup();
+
+
+	if (!mesh)
+		return;
+	
+	center[0] = mesh->center[0];
+	center[1] = mesh->center[1];
+	center[2] = mesh->center[2];
 }
 
 
@@ -1186,20 +1168,6 @@ void FreyjaModel::VertexDelete()
 		_egg->delVertex(_cached_vertex->id);  
 		_cached_vertex = NULL;
 	}
-}
-
-
-void FreyjaModel::MeshFrameClone(unsigned int mesh, unsigned int grp)
-{
-	fprintf(stderr,"FreyjaModel::MeshFrameClone> Not implemented, %s:%i\n",
-			__FILE__, __LINE__);
-}
-
-
-void FreyjaModel::GroupClone(unsigned int grp)
-{
-	fprintf(stderr,"FreyjaModel::GroupClone> Not implemented, %s:%i\n",
-			__FILE__, __LINE__);
 }
 
 
@@ -1578,6 +1546,50 @@ int FreyjaModel::saveModel(const char *filename)
 	}
 
 	ret = _plugin->exportModel((char *)filename, ext);
+
+	if (ret)
+	{
+		event_print("Unknown file export extention: '%s', try using '.egg'", 
+					ext);
+		return ret;
+	}
+  
+	return 0;
+}
+
+
+int FreyjaModel::saveAnimation(const char *filename)
+{
+	unsigned int l, s, i;
+	int ret;
+	char ext[32];
+
+
+  
+	if (!filename)
+		return -1000;
+
+	l = strlen(filename);
+  
+	for (s = l; s > 0; s--)
+	{
+		if (filename[s] == '.')
+			break;
+	}
+
+	if (s == 0 || (l - s) > 30)
+		return -100;
+
+	s++;
+
+	memset(ext, 0, 32);
+
+	for (i = 0; s < l; s++, i++)
+	{
+		ext[i] = filename[s];
+	}
+
+	ret = _plugin->exportModel((char *)filename, "skel"); // ext);
 
 	if (ret)
 	{
