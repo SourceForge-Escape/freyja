@@ -21,21 +21,15 @@
 
  Milestones ( Public snapshot releases )
 
- [0.3.8] ( Projected release date:  )
+ [0.3.8] ( Projected release date: 2004.08.31 )
   * Bug fix focus
-
-
- [0.3.5] ( Projected release date: 2002.03.23 )
-  * Transition to libfreyja backend complete
-  * New backend system based on CVS UML design
-  * All possible widgets mlisp controled
   * Full skeletal editing ( deforms, blending, etc )
   * Better Light and Camera editing
-
+  * Shader editor
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- [Deleveribles/Fixes for next Release]
+ [Deleveribles/Fixes for 0.3.8 ]
   * Recalc normals when transforming meshes
   * Undo/Redo Stacks, key commands, and menu interface
   * More buttons for menu current mesh operations
@@ -43,12 +37,11 @@
   * New light and camera 3d "icons", eg directional and point
   * Light editing tab
   * Camera editing tab
+  * Shader editor
   * Texture to store filename strings/keys (maybe even image 
     buffers to allow for saving) for material use
-  * Animation playback support
+  * Better animation playback support
   * Prompt to ask for file overwrite and close w/o saving
-  * Mlisp support for toolbar and slider
-  * Backport bone joint support from libfreyja?
 
 
  [General]

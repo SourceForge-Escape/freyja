@@ -28,8 +28,14 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- Freyja (0.3.5-20040730) Mongoose <mongoose@icculus.org>
-	
+
+ Freyja (0.3.5-20040801) Mongoose <mongoose@icculus.org>
+
+	* Mouse motion event code not restored yet
+	o Accel keys 100% functional	
+	o Context sensitive file operations done
+	o Disabled mouse event system to be rewritten
+	o Disabled GL widget's key capturing
 	o Removed more 'dead' events
 	o New context sensitive menus and toolbars start
 	o New Menu HIGness: icons, accels, etc
