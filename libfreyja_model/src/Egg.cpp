@@ -2120,6 +2120,7 @@ egg_tag_t *Egg::addTag(vec_t x, vec_t y, vec_t z, char flag)
 	tag->center[1] = y;
 	tag->center[2] = z;
 	tag->flag = flag;
+	tag->parent = -1;
 	m.setIdentity();
 	m.getMatrix(tag->transform);
 
@@ -2356,6 +2357,7 @@ void Egg::connectTag(unsigned int master, unsigned int slave)
 	if (!tagA || !tagB)
 		return;
 
+	tagB->parent = master;
 	tagA->slave.pushBack(slave);
 }
 

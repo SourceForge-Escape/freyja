@@ -402,7 +402,8 @@ enum custom_color                   /* Custom GUI colors */
   COLOR_VIEW_TEXT                = 4096,
   COLOR_EDIT_GRID_AXIS_Y         = 8192,
   COLOR_EDIT_GRID_AXIS_Z         = 16384,
-  COLOR_EDIT_GRID_8              = 32768
+  COLOR_EDIT_GRID_8              = 32768,
+  Color_Animation_Grid           = 65536
 };
 
 int confirmDialog(char *dialog_icon,

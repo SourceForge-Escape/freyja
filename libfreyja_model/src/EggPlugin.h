@@ -578,6 +578,13 @@ unsigned int eggCriticalSection(egg_lock_t request);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+// New API soon -- let's break a little with naming here
+unsigned int eggGetBoneName(unsigned int index, unsigned int size, char *name);
+int eggGetBoneParent(unsigned int index);
+void eggSetBoneParent(int index);
+unsigned int eggGetBoneRotationXYZW4fv(unsigned int index, vec4_t xyzw);
+unsigned int eggGetBoneTranslation3fv(unsigned int index, vec3_t xyz);
+
 unsigned int eggGetTagMesh1u(unsigned int item, unsigned int *value);
 /*------------------------------------------------------
  * Pre  : Tag selected
@@ -979,6 +986,7 @@ public:
 	 ------------------------------------------------------*/
 
 	egg_vertex_t *eggGetVertex(unsigned int index);
+	egg_tag_t *eggGetBone(unsigned int index);
 
 	void eggVertex1i(unsigned int egg_id);
 	/*------------------------------------------------------

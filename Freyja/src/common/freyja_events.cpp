@@ -63,6 +63,9 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	case 10000:
 		RENDER->setColor(COLOR_VIEW_BG, color);
 		break;
+	case 10001:
+		RENDER->setColor(Color_Animation_Grid, color);
+		break;
 	}
 }
 

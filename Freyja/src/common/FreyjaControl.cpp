@@ -1560,6 +1560,7 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float t = 1.0f, m = 1.0f;
+	float xr, yr, zr;
 	float xf, yf, zf;
 	int swap;
 	Egg::egg_transform rotate;
@@ -1591,6 +1592,22 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformBone:
+		mModel->getBoneRotation(&xr, &yr, &zr);
+		mModel->setBoneRotation(xr + xf, yr + yf, zr + zf);
+		mModel->getBoneRotation(&xr, &yr, &zr);
+
+		if (xr > 180.0f)
+			mModel->setBoneRotation(-180.0f, yr, zr);
+
+		if (xr > 180.0f)
+			mModel->setBoneRotation(xr, -180.0f, zr);
+
+		if (xr > 180.0f)
+			mModel->setBoneRotation(xr, yr, -180.0f);			
+		break;
+
+
 	case FreyjaModel::TransformMesh:
 		/* Mongoose: Scaled rotation for better response */
 		xf *= 5.0f;
@@ -1599,6 +1616,8 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 
 		rotate = Egg::ROTATE_ABOUT_CENTER;
 		break;
+
+
 	default:
 		rotate = Egg::ROTATE;
 	}

@@ -61,10 +61,10 @@ public:
 		RENDER_BBOX             = 512,        /* Rendering bounding box */
 		RENDER_NORMAL           = 1024, 
 		RENDER_NORMALS          = 2048, 
-		//RENDER_RESERVED2        = 4096, 
+		fHightlightPolygonWireframe = 4096, 
 		RENDER_BBOX_SEL         = 8192,
 		//RENDER_RESERVED3        = 16384,
-		RENDER_POINTS           = 32768
+		RENDER_POINTS           = 32768,
 	} flags_t;
 
 
@@ -319,7 +319,7 @@ public:
 	float getZoom();
 	
 	void getColor(int id, vec4_t rgba);
-	void setColor(int id, vec4_t rgba);
+	void setColor(int id, const vec4_t rgba);
 
 private:    
 
@@ -496,6 +496,8 @@ private:
 	float _view_text_color[4];
 	float _buffer_vertex_color[4];
 	float _texture_edit_line_color[4];
+
+	float ColorAnimationGrid[4];
 	
 	float _bone_line_width;                    /* Custom artifact size */
 	float _bone_point_size;
