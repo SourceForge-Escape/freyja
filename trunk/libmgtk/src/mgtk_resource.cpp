@@ -84,18 +84,33 @@ GtkWidget *mgtk_get_fileselection_widget()
 
 	if (!file)
 	{
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 		file = mgtk_create_fileselection("Select file");
+#else
+		file = mgtk_create_filechooser("Select file");
+#endif
 		path = mgtk_rc_map("/");
 		
 		if (path)
 		{
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 			gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), path);
+#else
+			gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(file), path);
+			gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(file), path,
+												 NULL);
+			gtk_file_chooser_set_action(GTK_FILE_CHOOSER(file), GTK_FILE_CHOOSER_ACTION_SAVE);
+#endif
 			delete [] path;
 		}
 
 #ifdef EXTEND_FILE_TEST
 		GtkWidget *homeButton;
+#   ifdef USE_OLD_FILE_SELECTION_WIDGET
 		GtkWidget *vbox = GTK_FILE_SELECTION(file)->main_vbox;
+#   else
+		GtkWidget *vbox = GTK_DIALOG(file)->vbox;
+#   endif
 		GtkWidget *hbox = mgtk_create_hbox(vbox, "hbox", 0, 0, 0, 0, 0);
 
 		homeButton = gtk_button_new_with_label("Home");
