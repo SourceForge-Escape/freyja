@@ -287,6 +287,100 @@ void mglDrawBbox(const vec3_t min, const vec3_t max,
 }
 
 
+void mglDrawSelectBox(const vec3_t min, const vec3_t max, const vec4_t lineColor)
+{
+	vec_t w = (max[0] - min[0]);
+	vec_t h = (max[1] - min[1]);
+	vec_t d = (max[2] - min[2]);
+	vec_t sw = w * 0.33;
+	vec_t sh = h * 0.33;
+	vec_t sd = d * 0.33;
+
+
+	glColor4fv(lineColor);
+
+	//glBegin(GL_POINTS);
+	//glVertex3f(max[0], max[1], max[2]);
+	//glVertex3f(min[0], min[1], min[2]);
+	//glVertex3f(max[0], min[1], max[2]);
+	//glVertex3f(min[0], max[1], max[2]);
+	//glVertex3f(max[0], max[1], min[2]);
+	//glVertex3f(min[0], min[1], max[2]);
+	//glVertex3f(min[0], max[1], min[2]);
+	//glVertex3f(max[0], min[1], min[2]);
+	//glEnd();
+
+
+	glBegin(GL_LINES);
+
+	// A
+	glVertex3f(min[0], max[1], min[2]);
+	glVertex3f(min[0] + sw, max[1], min[2]);
+	glVertex3f(min[0], max[1], min[2]);
+	glVertex3f(min[0], max[1] - sh, min[2]);
+	glVertex3f(min[0], max[1], min[2]);
+	glVertex3f(min[0], max[1], min[2] + sd);
+
+	// B
+	glVertex3f(min[0], max[1], max[2]);
+	glVertex3f(min[0] + sw, max[1], max[2]);
+	glVertex3f(min[0], max[1], max[2]);
+	glVertex3f(min[0], max[1] - sh, max[2]);
+	glVertex3f(min[0], max[1], max[2]);
+	glVertex3f(min[0], max[1], max[2] -sd);
+
+	// C ( max )
+	glVertex3f(max[0], max[1], max[2]);
+	glVertex3f(max[0] - sw, max[1], max[2]);
+	glVertex3f(max[0], max[1], max[2]);
+	glVertex3f(max[0], max[1] - sh, max[2]);
+	glVertex3f(max[0], max[1], max[2]);
+	glVertex3f(max[0], max[1], max[2] - sd);
+
+	// D
+	glVertex3f(max[0], max[1], min[2]);
+	glVertex3f(max[0] - sw, max[1], min[2]);
+	glVertex3f(max[0], max[1], min[2]);
+	glVertex3f(max[0], max[1] - sh, min[2]);
+	glVertex3f(max[0], max[1], min[2]);
+	glVertex3f(max[0], max[1], min[2] + sd);
+
+	// E ( min )
+	glVertex3f(min[0], min[1], min[2]);
+	glVertex3f(min[0] + sw, min[1], min[2]);
+	glVertex3f(min[0], min[1], min[2]);
+	glVertex3f(min[0], min[1] + sh, min[2]);
+	glVertex3f(min[0], min[1], min[2]);
+	glVertex3f(min[0], min[1], min[2] + sd);
+
+	// F
+	glVertex3f(min[0], min[1], max[2]);
+	glVertex3f(min[0] + sw, min[1], max[2]);
+	glVertex3f(min[0], min[1], max[2]);
+	glVertex3f(min[0], min[1] + sh, max[2]);
+	glVertex3f(min[0], min[1], max[2]);
+	glVertex3f(min[0], min[1], max[2] - sd);
+
+	// G
+	glVertex3f(max[0], min[1], max[2]);
+	glVertex3f(max[0] - sw, min[1], max[2]);
+	glVertex3f(max[0], min[1], max[2]);
+	glVertex3f(max[0], min[1] + sh, max[2]);
+	glVertex3f(max[0], min[1], max[2]);
+	glVertex3f(max[0], min[1], max[2] - sd);
+	
+	//H
+	glVertex3f(max[0], min[1], min[2]);
+	glVertex3f(max[0] - sw, min[1], min[2]);
+	glVertex3f(max[0], min[1], min[2]);
+	glVertex3f(max[0], min[1] + sh, min[2]);
+	glVertex3f(max[0], min[1], min[2]);
+	glVertex3f(max[0], min[1], min[2] + sd);
+
+	glEnd();
+}
+
+
 void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
 {
 	glBegin(GL_LINES);
@@ -445,7 +539,61 @@ void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 }
 
 
-#warning FIXME Uses Egg to render skeleton
+#ifdef FIXME_REMOVE_EGG_USE_IN_RENDERER
+void renderSkeleton(RenderSkeleton &skeleton, 
+					unsigned int currentBone,
+					vec_t scale)
+{
+	const unsigned char x = 0, y = 1, z = 2;
+	const unsigned char xr = 0, yr = 1, zr = 2;
+	RenderBone &bone;
+	Vector3d pos;
+	unsigned int i, index;
+
+
+	if (skeleton.boneCount == 0)
+		return;
+
+	// ...
+
+	/* Scale bones to match mesh scaling */
+	pos = bone.translate * scale;
+
+	/* Render bone and joint */
+	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(RED) : glColor3fv(GREEN);
+	mglDrawJoint(FreyjaRender::mJointRenderType, pos);
+
+	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(CYAN) : glColor3fv(WHITE);
+	mglDrawBone(FreyjaRender::mBoneRenderType, pos);
+
+	/* Transform children bones */
+	glPushMatrix();
+	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
+	glRotatef(tag->rot[zr], 0, 0, 1);
+	glRotatef(tag->rot[yr], 0, 1, 0);
+	glRotatef(tag->rot[xr], 1, 0, 0);
+
+	if (tag->slave.empty())
+	{
+		glPopMatrix();
+		return;
+	}
+
+	for (i = tag->slave.begin(); i < tag->slave.end(); ++i)
+	{
+		index = tag->slave[i];
+		tag2 = (*taglist)[index];
+		
+		if (!tag2)
+			continue;
+
+		drawSkeleton2(taglist, index, scale);
+	}
+
+	glPopMatrix();
+}
+#else
+#   warning FIXME Uses Egg to render skeleton
 void drawSkeleton2(Vector<egg_tag_t *> *taglist, 
 				   unsigned int currentBone,
 				   vec_t scale)
@@ -503,6 +651,7 @@ void drawSkeleton2(Vector<egg_tag_t *> *taglist,
 
 	glPopMatrix();
 }
+#endif
 
 
 void getOpenGLViewport(int *viewportXYWH) // int[4]
@@ -527,7 +676,7 @@ void getOpenGLProjectionMatrix(double *projection) // double[16]
 FreyjaRender::FreyjaRender()
 {
 	mModel = NULL;
-	mRenderMode = 0 | fRenderBonesClearedZBuffer;
+	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer;
 	mWidth = 640;
 	mHeight = 480;
 	_view_mode = VIEWMODE_MODEL_VIEW;
@@ -1108,8 +1257,8 @@ void FreyjaRender::toggleFlag(flags_t flag)
 
 void FreyjaRender::renderBox(vec3_t min, vec3_t max)
 {
-	//if (mRenderMode & RENDER_BBOX)
-	mglDrawBbox(min, max, RED, mColorWireframe);
+	mglDrawSelectBox(min, max, WHITE);
+	// mglDrawBbox(min, max, RED, mColorWireframe);
 }
 
 
@@ -1215,11 +1364,18 @@ void FreyjaRender::renderModel(RenderModel &model)
 	/* Highlight current vertex group
 	 * -- this should be model specific later:
 	 * eg mModel->getCurrentGroup() -> model.index */
-	if (mRenderMode & RENDER_POINTS)
+	if (mRenderMode & RENDER_BBOX)
 	{
 		/* Render bounding box */
 		mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
 		renderBox(min, max);
+	}
+
+	if (mRenderMode & RENDER_POINTS)
+	{
+		/* Render bounding box */
+		//mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
+		//renderBox(min, max);
 
 		/* Render actual vertices */
 		mModel->getMeshVertices(mModel->getCurrentGroup(), &list);
