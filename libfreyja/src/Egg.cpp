@@ -1034,6 +1034,30 @@ int Egg::loadFile(char *filename)
 		addTag(tag);
 	}
 
+	for (i = mTags.begin(); i < mTags.end(); ++i)
+	{
+		if (mTags[i])
+		{
+			mTags[i]->parent = -1;
+		}
+	}
+
+	for (i = mTags.begin(); i < mTags.end(); ++i)
+	{
+		if (mTags[i])
+		{
+			for (j = mTags[i]->slave.begin(); j < mTags[i]->slave.end(); ++j)
+			{	
+				n = mTags[i]->slave[j];
+
+				if (mTags[n])
+				{
+					mTags[n]->parent = mTags[i]->id;
+				}
+			}
+		}
+	}
+
 	for (i = 0; i < num_frame; ++i)
 	{
 		boneframe = BoneFrameLoad(f);
@@ -2055,6 +2079,36 @@ egg_mesh_t *Egg::MeshLoad(FILE *f)
 
 /// Tags //////////////////////////////////////////////////
 
+void Egg::updateBones()
+{
+	unsigned int i, j, n;
+
+
+	for (i = mTags.begin(); i < mTags.end(); ++i)
+	{
+		if (mTags[i])
+		{
+			mTags[i]->parent = -1;
+		}
+	}
+
+	for (i = mTags.begin(); i < mTags.end(); ++i)
+	{
+		if (mTags[i])
+		{
+			for (j = mTags[i]->slave.begin(); j < mTags[i]->slave.end(); ++j)
+			{	
+				n = mTags[i]->slave[j];
+
+				if (mTags[n])
+				{
+					mTags[n]->parent = mTags[i]->id;
+				}
+			}
+		}
+	}
+}
+
 unsigned int Egg::getTagCount()
 {
 	return mTags.size();
@@ -2063,7 +2117,7 @@ unsigned int Egg::getTagCount()
 
 egg_tag_t *Egg::getTag(unsigned int id)
 {
-	if (mTags.empty())
+	if (mTags.empty() || id >= mTags.size())
 		return NULL;
 
 	return mTags[id];

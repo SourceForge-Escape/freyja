@@ -916,6 +916,8 @@ public:
 
 	/// TAGS //////////////////////////////////////
 
+	void updateBones();
+
 	unsigned int getTagCount();
 	/*-----------------------------------------
 	 * Created  : 2000-10-25, Mongoose
