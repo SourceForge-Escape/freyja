@@ -77,8 +77,7 @@ VERSION_DEB=$(VERSION).$(BUILD_ID)
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
 # -Weffc++ -Wall -pedantic -std=c99
-BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic -std=c99 
-
+BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-Wall -Isrc \

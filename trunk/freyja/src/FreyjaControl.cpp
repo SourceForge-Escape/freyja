@@ -650,6 +650,11 @@ bool FreyjaControl::event(int command)
 		freyja_print("eSkeletalDeform is currently not implemented in modeler");
 		break;
 
+	case ePolygonSplit:
+		freyjaPolygonSplit(mModel->getCurrentMesh(), mModel->getCurrentPolygon());
+		freyja_print("Splitting polygon[%i]", mModel->getCurrentPolygon());
+		break;
+
 	case eMeshFlipNormals:
 		freyjaMeshNormalFlip(mModel->getCurrentMesh());
 		freyja_print("Flipping normals for mesh[%i]", mModel->getCurrentMesh());

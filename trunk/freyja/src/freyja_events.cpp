@@ -306,6 +306,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eGenerateSphere", eGenerateSphere);
 	r.RegisterInt("eGenerateCone", eGenerateCone);
 
+	r.RegisterInt("ePolygonSplit", ePolygonSplit);
+
 	r.RegisterInt("eMeshNew", eMeshNew);
 	r.RegisterInt("eMeshDelete", eMeshDelete);
 	r.RegisterInt("eMeshSelect", eMeshSelect);

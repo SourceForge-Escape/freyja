@@ -17,7 +17,6 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
-	o Add scaling for preview images in FreyjaImage, Fix FreyjaImage colorspace conversion
 	o 'Viewport' editing
 	o Face object/texcoord transforms 
 	o Allow faces/vertex buffer selections to use seperate texcoord maps, etc
