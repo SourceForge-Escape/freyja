@@ -193,6 +193,7 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	/* Move into RenderModel class */
 	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
 
 	unsigned int getAnimationFramesIn(unsigned int animationIndex);
@@ -965,7 +966,7 @@ class RenderModel
 {
 public:
 
-#warning Exposes Egg to renderer
+	//#warning FIXME Exposes Egg to renderer
 	Vector<egg_tag_t *> *getSkeleton()
 	{
 		return mEgg->TagList();

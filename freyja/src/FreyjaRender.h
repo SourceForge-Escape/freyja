@@ -175,23 +175,29 @@ public:
 	 ------------------------------------------------------*/
 
 
-	///////// Refactoring below here still...
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
 
-	void Register(FreyjaModel *model);
+	void clearFlag(flags_t flag);
+	/*------------------------------------------------------
+	 * Pre  : Flag is valid
+	 * Post : Clears control flag for model
+	 *
+	 ------------------------------------------------------*/
+
+	void display();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Hook into data model
+	 * Post : Renders a frame to GL context
 	 *
 	 *-- History ------------------------------------------
-	 *
-	 * 2001.04.11:
-	 * Mongoose - Use FreyjaModel instead of Egg directly
 	 *
 	 * 2000.08.25:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void Init(int width, int height, bool fast_card);
+	void initContext(unsigned int width, unsigned int height, bool fast_card);
 	/*------------------------------------------------------
 	 * Pre  : Width and Height are the GL context dim 
     *        Fast_card is true if GL hw accel is present
@@ -203,87 +209,8 @@ public:
 	 * 2002.02.02:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-	
-	void Reset();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Reset to inital state
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
-	void Flags(flags_t flag, int op);
-	/*------------------------------------------------------
-	 * Pre  : The Flag and Operator are valid
-	 *        Op { 0 = clear, 1 = set }
-	 *
-	 * Post : Sets control flags for model
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.09: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void RotateAmount(float n);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set rotate amount
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Rotate(int flags, float n);
-	/*------------------------------------------------------
-	 * Pre  : Flags are valid XYZ flags
-	 * Post : Rotate on axis n degrees
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	float RotateAmount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Return incremental rotate amount
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void ViewMode(int mode);
-	/*------------------------------------------------------
-	 * Pre  : Mode are valid view_mode(s)
-	 * Post : Sets viewing options
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Display();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renders and rasters a frame to GL context
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Reshape(unsigned int w, unsigned int h);
+	void resizeContext(unsigned int width, unsigned int height);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Resizes GL context
@@ -294,8 +221,56 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setZoom(float zoom);
+	void setFlag(flags_t flag);
+	/*------------------------------------------------------
+	 * Pre  : Flag is valid
+	 * Post : Sets control flag for model
+	 *
+	 ------------------------------------------------------*/
 
+	void setSceneData(FreyjaModel *model);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Hook into data model for the scene
+	 *
+	 ------------------------------------------------------*/
+
+	void setViewMode(int mode);
+	/*------------------------------------------------------
+	 * Pre  : Mode are valid view_mode(s)
+	 * Post : Sets viewing options
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void setZoom(float zoom);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set current zoom factor for the scene
+	 *
+	 ------------------------------------------------------*/
+
+	void toggleFlag(flags_t flag);
+	/*------------------------------------------------------
+	 * Pre  : Flag is valid
+	 * Post : Toggles control flag for model
+	 *
+	 ------------------------------------------------------*/
+
+	// FIXME to be replaced by Arcball most likely
+	void Rotate(int flags, float n);
+	/*------------------------------------------------------
+	 * Pre  : Flags are valid XYZ flags
+	 * Post : Rotate on axis n degrees
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	static vec4_t mColorBackground;
 	static vec4_t mColorGridLine;
@@ -317,6 +292,53 @@ public:
 
 private:    
 
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
+
+	void renderBox(vec3_t min, vec3_t max);
+	/*------------------------------------------------------
+	 * Pre  : Group exists
+	 * Post : Renders bounding box in default color, etc
+	 *
+	 ------------------------------------------------------*/
+
+	void renderLights();
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders light symbol and does lighting setup
+	 *
+	 ------------------------------------------------------*/
+
+	void renderMesh(RenderMesh &mesh);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders mesh
+	 *
+	 ------------------------------------------------------*/
+
+	void renderModel(RenderModel &model);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders model
+	 *
+	 ------------------------------------------------------*/
+
+	void renderPolygon(RenderPolygon &face);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders polygon
+	 *
+	 ------------------------------------------------------*/
+
+
+	///////// Refactoring below here still...
+
 	void DrawQuad(float x, float y, float w, float h);
 	/*------------------------------------------------------
 	 * Pre  : X, Y, W, H define a 2d quad
@@ -326,50 +348,6 @@ private:
 	 *-- History ------------------------------------------
 	 *
 	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void renderPolygon(RenderPolygon &face);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders polygon
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void renderMesh(RenderMesh &mesh);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders mesh
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void renderModel(RenderModel &model);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders model
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void renderBox(vec3_t min, vec3_t max);
-	/*------------------------------------------------------
-	 * Pre  : Group exists
-	 * Post : Renders bounding box in default color, etc
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.??.??:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -419,7 +397,6 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	
 	void Rotate(float n, int axis);
 	/*------------------------------------------------------
 	 * Pre  : Axis is 0 = x, 1 = y, 2 = z
@@ -442,39 +419,29 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	// START HACKS for new features / roll overs
-	void drawLights();
-	// END HACKS
 
+	FreyjaModel *mModel;                       /* Scene data model */
 
-	Matrix mModelViewMatrixInverse;
+	unsigned int mWidth;                       /* Width of context */
 
-	vec4_t mViewports[4];
+	unsigned int mHeight;                      /* Height of context */
 
-	vec_t mAspectRatio;                        /* Cached aspect ratio */
+	vec_t mAspectRatio;                        /* Cached context aspect ratio */
 
-	FreyjaModel *_model;                       /* Backend agent */
+	vec4_t mViewports[4];                      /* Size and offset of viewports
+															  * if enabled */
 	
 	unsigned int mRenderMode;                  /* Rendering mode */
 
+	float mZoom;                               /* Used to cache zoom */
+
 	unsigned int _texture;                     /* Currently bound texture */
-
-	unsigned int _width;                       /* Width of 3d window */
-
-	unsigned int _height;                      /* Height of 3d window */
-
-	bool _fast_card;                           /* Using a fast GL card? */
 
 	bool _init;                                /* OpenGL context started? */
 
 	int _view_mode;                            /* View mode */
 
-	float _rotate_amount;                      /* Degrees to rotate per
-																 call to rotate */
-
 	float _scroll[3];                          /* Used to cache scroll */
-
-	float mZoom;                               /* Used to cache zoom */
 
 	float _angles[3];                          /* Used to rotate the scene */
 
