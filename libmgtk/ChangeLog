@@ -1,0 +1,19 @@
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+  File     : ChangeLog
+  Author   : Terry 'Mongoose' Hendrix II
+  Project  : libmgtk
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+ libmgtk (0.1.0-20041107) Mongoose <mongoose@icculus.org>
+
+	o Windows now callback on window close event
+	o Dialogs now hide on window close event
+
+ libmgtk (0.1.0-20041106) Mongoose <mongoose@icculus.org>
+
+	o New generic dialog widget starts
+	o New icon widget support
+	o New build system
+	o Fork completed from Freyja "Umbra tracer" build
+
