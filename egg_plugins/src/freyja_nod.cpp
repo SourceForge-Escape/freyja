@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <freyja_model/EggPlugin.h>
+#include <hel/Matrix.h>
 #include "Nod.h"
 
 
@@ -73,7 +74,7 @@ int freyja_model__nod_import(char *filename)
   nod_meshgroup_t *mesh_groups;
   nod_face_t *faces;
 #ifdef NO_BONES
-  matrix_t hack;
+  Matrix matrix;
   vec3_t pos, rot;
   int b;
 #endif
@@ -129,14 +130,12 @@ int freyja_model__nod_import(char *filename)
 	printf("nod_import>   rotate <%f %f %f>\n",
 	       rot[0], rot[1], rot[2]);
 
-	mtkMatrixIdentity(hack);
-	mtkMatrixTranslate(hack, 
-			   bones[b].RestTranslate[0],
-			   bones[b].RestTranslate[1],
-			   bones[b].RestTranslate[2]);
-
-	mtkMatrixRotate(hack, rot[0], rot[1], rot[2]);
-	mtkMatrixTransform(hack, pos);
+	matrix.setIdentity();
+	matrix.translate(bones[b].RestTranslate[0],
+			 bones[b].RestTranslate[1],
+			 bones[b].RestTranslate[2]);
+	matrix.rotate(rot[0], rot[1], rot[2]);
+	matrix.multiply3v(pos, pos);
       }
       else
 	printf("nod_import> xxx bone[%i]...\n", b);
