@@ -91,7 +91,8 @@ public:
 	FreyjaPluginDesc()
 	{
 		mFilename = 0x0;
-		
+		mId = mNextId;
+		++mNextId;
 	}
 
 	~FreyjaPluginDesc()
@@ -122,8 +123,22 @@ public:
 	}
 
 	char *mFilename;
+
 	char mDescription[64];
+
 	char mExtention[64];
+
+	Vector<float> mFloatArgs;
+
+	Vector<long> mIntArgs;
+
+	Vector<char *> mStringArgs;
+
+private:
+
+	static long mNextId;
+
+	long mId;
 };
 
 

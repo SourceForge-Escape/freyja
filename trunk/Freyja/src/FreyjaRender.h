@@ -66,7 +66,7 @@ public:
 		RENDER_NORMALS          = 2048, 
 		fHightlightPolygonWireframe = 4096, 
 		RENDER_BBOX_SEL         = 8192,
-		//RENDER_RESERVED3        = 16384,
+		fSkeletalVertexBlending     = 16384,
 		RENDER_POINTS           = 32768,
 	} flags_t;
 

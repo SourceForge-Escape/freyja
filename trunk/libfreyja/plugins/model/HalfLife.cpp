@@ -495,6 +495,7 @@ int freyja_model__halflife_import(char *filename)
 	float u, v, w, h;
 	short s, t;
 	vec_t scale = 0.5; // DoD needs 0.5
+	long idx;
 
 
 	if (hl.load(filename) < 0)
@@ -601,33 +602,38 @@ int freyja_model__halflife_import(char *filename)
 	for (b = 0; b < hl.mBoneCount; ++b)
 	{
 		freyjaBegin(FREYJA_BONE);
-		freyjaBoneParent(hl.mBones[b].parent);
-		freyjaBoneName(hl.mBones[b].name);
+		idx = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneParent1i(idx, hl.mBones[b].parent);
+		freyjaBoneName1s(idx, hl.mBones[b].name);
 
 		if (b == 0)
 		{
-			freyjaBonePos3f(hl.mBones[b].value[0]*scale, 
-							hl.mBones[b].value[2]*scale, 
-							hl.mBones[b].value[1]*scale);
-			freyjaBoneRotate3f(hl.mBones[b].value[3]*57.295779513082323, 
-							   hl.mBones[b].value[4]*57.295779513082323 -90.0, 
-							   hl.mBones[b].value[5]*57.295779513082323);
+			freyjaBoneTranslate3f(idx,
+								  hl.mBones[b].value[0]*scale, 
+								  hl.mBones[b].value[2]*scale, 
+								  hl.mBones[b].value[1]*scale);
+			freyjaBoneRotateEulerXYZ3f(idx,
+									   hl.mBones[b].value[3]*57.295779513082323, 
+									   hl.mBones[b].value[4]*57.295779513082323 -90.0, 
+									   hl.mBones[b].value[5]*57.295779513082323);
 		}
 		else
 		{
-			freyjaBonePos3f(hl.mBones[b].value[0]*scale, 
-							hl.mBones[b].value[1]*scale, 
-							hl.mBones[b].value[2]*scale);
-			freyjaBoneRotate3f(hl.mBones[b].value[3]*57.295779513082323, 
-							   hl.mBones[b].value[4]*57.295779513082323, 
-							   hl.mBones[b].value[5]*57.295779513082323);
+			freyjaBoneTranslate3f(idx,
+								  hl.mBones[b].value[0]*scale, 
+								  hl.mBones[b].value[1]*scale, 
+								  hl.mBones[b].value[2]*scale);
+			freyjaBoneRotateEulerXYZ3f(idx,
+									   hl.mBones[b].value[3]*57.295779513082323, 
+									   hl.mBones[b].value[4]*57.295779513082323, 
+									   hl.mBones[b].value[5]*57.295779513082323);
 		}
 
 		for (i = 0; i < hl.mBoneCount; ++i)
 		{
 			if (hl.mBones[i].parent == (int)b)
 			{ 
-				freyjaBoneAddChild1u(i);
+				freyjaBoneAddChild1i(idx, i);
 			}
 		}
 

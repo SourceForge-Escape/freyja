@@ -1807,13 +1807,14 @@ Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2])
 
 	list = new Vector<unsigned int>();
 
-	if (count == FREYJA_PLUGIN_ERROR)
+	if (count < 1)
 	{
+		/* Return empty list */
 		return list;
 	}
 
 
-	/* Using egg iterator interface */
+	/* Using freyja iterator interface */
 	freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_RESET);
 	
 	for (i = 0; i < count; ++i)
@@ -1824,7 +1825,7 @@ Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2])
 		{
 			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
 			{
-				if (xyz[0] >= bbox[0][2] && xyz[0] <= bbox[1][2])
+				if (xyz[2] >= bbox[0][2] && xyz[2] <= bbox[1][2])
 				{
 					list->pushBack(freyjaIterator(FREYJA_VERTEX, 
 												  FREYJA_LIST_CURRENT));
@@ -1865,7 +1866,7 @@ Vector<unsigned int> *eggFindVerticesInBox(vec3_t bbox[2],
 		{
 			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
 			{
-				if (xyz[0] >= bbox[0][2] && xyz[0] <= bbox[1][2])
+				if (xyz[2] >= bbox[0][2] && xyz[2] <= bbox[1][2])
 				{
 					list->pushBack(freyjaIterator(FREYJA_VERTEX, 
 												  FREYJA_LIST_CURRENT));
@@ -2221,6 +2222,18 @@ void freyjaVertexNormal3f(long vIndex, vec_t x, vec_t y, vec_t z)
 }
 
 
+void freyjaPolygonAddVertex1i(long polygonIndex, long vertexIndex)
+{
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+
+		if (polygon)
+			polygon->vertex.pushBack(vertexIndex);
+	}
+}
+
+
 void freyjaPolygonVertex1i(long egg_id)
 {
 	if (EggPlugin::mEggPlugin)
@@ -2228,10 +2241,34 @@ void freyjaPolygonVertex1i(long egg_id)
 }
 
 
+void freyjaPolygonAddTexCoord1i(long polygonIndex, long texcoordIndex)
+{
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+
+		if (polygon)
+			polygon->texel.pushBack(texcoordIndex);
+	}
+}
+
+
 void freyjaPolygonTexCoord1i(long egg_id)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaPolygonTexCoord1i(egg_id);
+}
+
+
+void freyjaPolygonSetMaterial1i(long polygonIndex, long materialIndex)
+{
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+
+		if (polygon)
+			polygon->shader = materialIndex;
+	}
 }
 
 
@@ -2759,31 +2796,31 @@ void freyjaPluginBegin()
 
 void freyjaPluginFilename1s(char *filename)
 {
-
+	// ATM this does nothing, just here for reserved use
 }
 
 
 void freyjaPluginDescription1s(char *info_line)
 {
-
+	// ATM this does nothing, just here for reserved use
 }
 
 
 void freyjaPluginAddExtention1s(char *ext)
 {
-
+	// ATM this does nothing, just here for reserved use
 }
 
 
 void freyjaPluginImport1i(long flags)
 {
-
+	// ATM this does nothing, just here for reserved use
 }
 
 
 void freyjaPluginExport1i(long flags)
 {
-
+	// ATM this does nothing, just here for reserved use
 }
 
 void freyjaPluginEnd()
@@ -2794,23 +2831,34 @@ void freyjaPluginEnd()
 
 long freyjaGetPluginId()
 {
+	// ATM this does nothing, just here for reserved use
+	return -1;
+}
+
+
+int freyjaGetPluginArg1i(long pluginId, char *name, char &arg)
+{
+	// ATM this does nothing, just here for reserved use
 	return -1;
 }
 
 
 int freyjaGetPluginArg1f(long pluginId, char *name, float &arg)
 {
+	// ATM this does nothing, just here for reserved use
 	return -1;
 }
 
 
 int freyjaGetPluginArg1i(long pluginId, char *name, long &arg)
 {
+	// ATM this does nothing, just here for reserved use
 	return -1;
 }
 
 
 int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg)
 {
+	// ATM this does nothing, just here for reserved use
 	return -1;
 }

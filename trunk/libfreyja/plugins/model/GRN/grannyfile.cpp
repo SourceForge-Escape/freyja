@@ -232,10 +232,12 @@ void calculateBoneRests( Bone *bone )
 	printf("Without OpenGL bone rests are not set for now\n");
 #endif
 
+#ifdef HAVE_OPENGL
 	bone->matrix=matrix;
 	bone->matrix.invert();
 	bone->curMatrix=matrix;
 	bone->curMatrix*=bone->matrix;
+#endif
 
 	vector<Bone *>::iterator ibone;
 	for (ibone=bone->children.begin();
