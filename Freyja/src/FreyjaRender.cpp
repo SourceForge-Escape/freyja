@@ -1691,16 +1691,16 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 		break;
 
 
-   case Egg::PLANE_YZ:
-		x = (int)_scroll[1];
-		y = (int)_scroll[2];
+   case Egg::PLANE_ZY:
+	   x = (int)_scroll[2];
+	   y = (int)_scroll[1];
 
 		glBegin(GL_LINES); 
-		glColor3fv(FreyjaRender::mColorAxisY);
+		glColor3fv(FreyjaRender::mColorAxisZ);
 		glVertex2i(-w, y);
 		glVertex2i(w, y);
     
-		glColor3fv(FreyjaRender::mColorAxisZ);
+		glColor3fv(FreyjaRender::mColorAxisY);
 		glVertex2i(x, -h);
 		glVertex2i(x, h);
 		glEnd(); 
@@ -1774,9 +1774,8 @@ void FreyjaRender::DrawWindow(int plane)
 	case Egg::PLANE_XZ:
 		glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
-	case Egg::PLANE_YZ:
-		glRotatef(-90.0, 0.0, 1.0, 0.0);
-		glRotatef(-90.0, 1.0, 0.0, 0.0);
+	case Egg::PLANE_ZY:
+		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
 	}
 
@@ -1788,17 +1787,16 @@ void FreyjaRender::DrawWindow(int plane)
 
 	switch (plane)
 	{
-	case Egg::PLANE_XY:
+	case Egg::PLANE_XY: // front
 		glTranslatef(_scroll[0], _scroll[1], 0.0);
 		break;
-	case Egg::PLANE_XZ:
+	case Egg::PLANE_XZ: // top
 		glTranslatef(_scroll[0], _scroll[2], 0.0);
 		glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
-	case Egg::PLANE_YZ:
-		glTranslatef(_scroll[1], _scroll[2], 0.0);
-		glRotatef(-90.0, 0.0, 1.0, 0.0);
-		glRotatef(-90.0, 1.0, 0.0, 0.0);
+	case Egg::PLANE_ZY: // side
+		glTranslatef(_scroll[2], _scroll[1], 0.0);
+		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
 	}
 

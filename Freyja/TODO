@@ -17,10 +17,13 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o New chunk file format -- fix Egg8 plugin import
+	o IK solver
 	o Catmull-Clark for subdiv
 	o Viewportbackground 'diagram' for mesh creation
 	o Deform skelmesh in bone transform
-	o Proper vertex extrude with quads
+	o Proper vertex extrude with quad faces
+	o Tesselation tool
 	o Multi window editing using python via calls to FreyjaRender
 	o Deform vertices render option ( disables mesh editing )
 	o Skeletal Ref -> Skeletal Keyframe ( dup | edit ) -> Skel Keyframe |

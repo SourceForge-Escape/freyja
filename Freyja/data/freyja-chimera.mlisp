@@ -286,9 +286,9 @@
 					(hbox 1 0 0 1 0
 						(label "Select edit plane: "  0.0 0.5)
 						(optionmenu		eMode	eNone
-							(menu_item	"XY                "	eMode	FREYJA_MODE_PLANE_XY)
-				  			(menu_item	"YZ"	eMode	FREYJA_MODE_PLANE_YZ)
-				  			(menu_item	"XZ"	eMode	FREYJA_MODE_PLANE_XZ)))
+							(menu_item	"Front               "	eMode	FREYJA_MODE_PLANE_XY)
+				  			(menu_item	"Side"	eMode	FREYJA_MODE_PLANE_YZ)
+				  			(menu_item	"Top"	eMode	FREYJA_MODE_PLANE_XZ)))
 
 
 					;; Seperator

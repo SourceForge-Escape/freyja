@@ -1473,8 +1473,8 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_PLANE_YZ:
-		freyja_print("Plane YZ");      
-		mModel->CurrentPlane(Egg::PLANE_YZ);
+		freyja_print("Plane ZY");      
+		mModel->CurrentPlane(Egg::PLANE_ZY);
 		freyja_event_gl_refresh();
 		break;
 
@@ -1935,9 +1935,8 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 		*y = z;
 		break;
 		
-	case Egg::PLANE_YZ:
-		*x = *y;
-		*y = z;
+	case Egg::PLANE_ZY: // side
+		*x = z;
 		break;
 	}
 }
@@ -1980,9 +1979,9 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 		*y = 0.0f;
 		break;
 
-	case Egg::PLANE_YZ:
-		*z = *y - scroll[2] * invz;
-		*y = *x - scroll[1] * invz;
+	case Egg::PLANE_ZY: // side ZY! change
+		*z = *x - scroll[2] * invz;
+		*y -= scroll[1] * invz;
 		*x = 0.0f;
 		break;
 	}
@@ -2051,8 +2050,8 @@ void FreyjaControl::deleteSelectedObject()
 	case FreyjaModel::TransformSelectedVertices:
 		if (freyja_create_confirm_dialog("gtk-dialog-question",
 										 "You are about to delete the selected vertices.",
-										 "Are you sure you want to cull these vertices?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "Hells _Yeah"))
+										 "Are you sure you want to delete these vertices?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Delete"))
 		{
 			mModel->cullUsingVertexBuffer();
 		}
@@ -2174,10 +2173,10 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
-	case Egg::PLANE_YZ:
+	case Egg::PLANE_ZY: // side
 		xf = 0;
-		yf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
+		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		break;
 	}
 
@@ -2220,10 +2219,10 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 			yf = 0;
 			zf = yy - center[2];
 			break;
-		case Egg::PLANE_YZ:
+		case Egg::PLANE_ZY: // side
 			xf = 0;
-			yf = xx - center[1];
-			zf = yy - center[2];
+			zf = xx - center[2];
+			yf = yy - center[1];
 			break;
 		}
 		
@@ -2268,10 +2267,10 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
-	case Egg::PLANE_YZ:
+	case Egg::PLANE_ZY: //side
 		xf = 0;
-		yf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
+		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		break;
 	}
 
@@ -2329,8 +2328,8 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		case Egg::PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
-		case Egg::PLANE_YZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
+		case Egg::PLANE_ZY: // side
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
 			break;
 		}
 	}
@@ -2344,8 +2343,8 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		case Egg::PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 			break;
-		case Egg::PLANE_YZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
+		case Egg::PLANE_ZY: // side
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
 		}
 	}
 	
@@ -2359,8 +2358,8 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		case Egg::PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
 			break;
-		case Egg::PLANE_YZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
+		case Egg::PLANE_ZY: // side
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
 		}
 	}
@@ -2374,8 +2373,8 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		case Egg::PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
 			break;
-		case Egg::PLANE_YZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
+		case Egg::PLANE_ZY: // side
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 		}
 	}
 	
@@ -2420,8 +2419,8 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 			mModel->adjustSceneTranslation(xyz[0], xyz[2], xyz[1]);
 			break;
 
-		case Egg::PLANE_YZ:
-			mModel->adjustSceneTranslation(xyz[2], xyz[0], xyz[1]);
+		case Egg::PLANE_ZY: // side
+			mModel->adjustSceneTranslation(xyz[2], xyz[1], xyz[0]);
 			break;
 		}
 
@@ -2498,10 +2497,10 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		xyz[1] = 0;
 		xyz[2] = yy;
 		break;
-	case Egg::PLANE_YZ:
+	case Egg::PLANE_ZY: // side
 		xyz[0] = 0;
-		xyz[1] = xx;
-		xyz[2] = yy;
+		xyz[1] = yy;
+		xyz[2] = xx;
 		break;
 	}
 
