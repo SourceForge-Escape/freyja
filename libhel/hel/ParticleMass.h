@@ -26,7 +26,7 @@
 #ifndef __HEL_MONGOOSE_PARTICLEMASS_H_
 #define __HEL_MONGOOSE_PARTICLEMASS_H_
 
-#include <hel/Mass.h>
+#include "hel/Mass.h"
 
 
 class ParticleMass

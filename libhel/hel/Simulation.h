@@ -32,9 +32,9 @@
 #define GUARD__HEL_MONGOOSE_SIMULATION_H_
 
 #include <mstl/Vector.h>
-#include <hel/CollisionObject.h>
-#include <hel/Mass.h>
-#include <hel/math.h>
+#include "hel/CollisionObject.h"
+#include "hel/Mass.h"
+#include "hel/math.h"
 
 
 class Simulation
