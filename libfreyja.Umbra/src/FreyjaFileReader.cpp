@@ -115,6 +115,12 @@ int FreyjaFileReader::compareFilenameExtention(const char *filename, const char 
 }
 
 
+bool FreyjaFileReader::endOfFile()
+{
+	return (feof(mFileHandle) != 0);
+}
+
+
 bool FreyjaFileReader::doesFileExist(const char *filename)
 {
 	if (!filename || !filename[0])

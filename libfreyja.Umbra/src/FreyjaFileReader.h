@@ -3,8 +3,8 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaFileReader
  * License : No use w/o permission (C) 2004 Mongoose
  * Comments: Reads file data from bin/text files for model parsers
@@ -78,6 +78,17 @@ class FreyjaFileReader
 	 *
 	 * 2004.08.21: 
 	 * Mongoose - Created, from old, old GooseEgg function
+	 ------------------------------------------------------*/
+
+	bool endOfFile();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if at end of file 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.07:
+	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	static bool doesFileExist(const char *filename);

@@ -982,11 +982,10 @@ FreyjaPlugin::FreyjaPlugin(FreyjaScene *scene, char *plugin_dir)
 	else
 	{
 		mPluginDir = new char[64];
-		strcpy(mPluginDir, "/usr/share/freyja/plugins/");    
+		strcpy(mPluginDir, "/usr/local/lib/freyja/modules/model/");    
 	}
 
 	addPluginDirectory("/usr/local/lib/freyja/modules/model");
-	//addPluginDirectory("/usr/local/lib/freyja/modules/image/");
 	addPluginDirectory("/usr/share/freyja/plugins");
 
 	FreyjaPlugin::mPlugin = this;
@@ -1924,7 +1923,7 @@ void FreyjaPlugin::importPlugins()
 }
 
 
-int FreyjaPlugin::importModel(char *filename)
+int FreyjaPlugin::importModel(const char *filename)
 {
 #ifdef FREYJA_PLUGINS
 	FreyjaFileReader reader;
@@ -2022,9 +2021,10 @@ int FreyjaPlugin::importModel(char *filename)
 }
 
 
-int FreyjaPlugin::exportModel(char *filename, char *type)
+int FreyjaPlugin::exportModel(const char *filename, char *type)
 {
 #ifdef FREYJA_PLUGINS
+	FreyjaFileReader reader;
 	bool saved = false;
 	char module_filename[128];
 	char module_export[128];
@@ -2032,51 +2032,65 @@ int FreyjaPlugin::exportModel(char *filename, char *type)
 	int (*export_mdl)(char *filename);
 	void *handle;
 	char *error;
+	unsigned long i;
 
 
 	if (!type || !filename)
 		return -100;
 
-	// FIXME: no internal default atm
-	//if (strcmp(type, "freyja") == 0)
-	//	return mFreyja->saveFile(filename);
+	if (strcmp(type, "native") == 0)
+	{
+		return mScene->exportScene(filename);
+	}
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
 
 	name = type;
 
-	sprintf(module_filename, "%slibfreyja_loader-%s.so", mPluginDir, name);
-	sprintf(module_export, "freyja_model__%s_export", name);
-
-	if (!(handle = dlopen(module_filename, RTLD_NOW)))
+	for (i = mPluginDirectories.begin(); i < mPluginDirectories.end(); ++i)
 	{
-		freyjaPrintError("\tERROR: In module '%s'.\n", module_filename);
-
-		if ((error = dlerror()) != NULL)  
+		if (!reader.openDirectory(mPluginDirectories[i]))
 		{
-			freyjaPrintError("\tERROR: %s\n", error);
+			freyjaPrintError("Couldn't access plugin directory");
+			continue;
 		}
-	}
-	else
-	{
-		freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
+
+		sprintf(module_filename, "%s/%s.so", mPluginDirectories[i], name);
+		sprintf(module_export, "%s_export", name);  // use 'model_export'?
+
+		if (!(handle = dlopen(module_filename, RTLD_NOW)))
+		{
+			freyjaPrintError("\tERROR: In module '%s'.\n", module_filename);
+
+			if ((error = dlerror()) != NULL)  
+			{
+				freyjaPrintError("\tERROR: %s\n", error);
+			}
+		}
+		else
+		{
+			freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
     
-		export_mdl = (int (*)(char * filename))dlsym(handle, module_export);
+			export_mdl = (int (*)(char * filename))dlsym(handle, module_export);
 
-		if ((error = dlerror()) != NULL)  
-		{
-			freyjaPrintError("\tERROR: %s\n", error);
+			if ((error = dlerror()) != NULL)  
+			{
+				freyjaPrintError("\tERROR: %s\n", error);
+				dlclose(handle);
+			}
+
+			saved = (!(*export_mdl)((char*)filename));
+
+			if ((error = dlerror()) != NULL) 
+			{
+				dlclose(handle);
+			}
+
 			dlclose(handle);
 		}
 
-		saved = (!(*export_mdl)(filename));
-
-		if ((error = dlerror()) != NULL) 
-		{
-			dlclose(handle);
-		}
-
-		dlclose(handle);
+		if (saved)
+			break;
 	}
 
 	freyjaPrintMessage("[FreyjaPlugin module loader sleeps now]\n");

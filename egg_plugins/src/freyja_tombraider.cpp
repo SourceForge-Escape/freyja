@@ -26,7 +26,7 @@
  ==========================================================================*/
 
 #define TR_MAP_SUPPORT
-#define TEST_PONYTAIL_MESH
+//#define TEST_PONYTAIL_MESH
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -42,6 +42,8 @@
 
 #include "TombRaider.h"
 
+
+vec_t gTRScaling = 0.05f;
 
 // Export functions
 extern "C" {
@@ -186,21 +188,21 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 
 		// Store vertices
 		v = meshes[index].textured_triangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].textured_triangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].textured_triangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 
@@ -234,27 +236,27 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 
 		// Store vertices
 		v = meshes[index].textured_rectangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].textured_rectangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].textured_rectangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].textured_rectangles[i].vertices[3];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-										  meshes[index].vertices[v].y,
-										  meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+										  -meshes[index].vertices[v].y*gTRScaling,
+										  meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		
@@ -287,21 +289,21 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 
 		// Store vertices
 		v = meshes[index].coloured_triangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].coloured_triangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].coloured_triangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		
@@ -342,27 +344,27 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 
 		// Store vertices
 		v = meshes[index].coloured_rectangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].coloured_rectangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].coloured_rectangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		v = meshes[index].coloured_rectangles[i].vertices[3];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x,
-									 meshes[index].vertices[v].y,
-									 meshes[index].vertices[v].z);
+		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+									 -meshes[index].vertices[v].y*gTRScaling,
+									 meshes[index].vertices[v].z*gTRScaling);
 		eggVertex1i(vertex);
 
 		// Store texels
@@ -529,9 +531,9 @@ int load_animation(TombRaider &tombraider,
 		}
 
 		// Generate bone frames and tags per frame ////////////
-		eggMeshTreeAddFrame3f((short)frame[frame_offset + 6],
-									 (short)frame[frame_offset + 7],
-									 (short)frame[frame_offset + 8]);
+		eggMeshTreeAddFrame3f((short)frame[frame_offset + 6]*gTRScaling,
+									 -(short)frame[frame_offset + 7]*gTRScaling,
+									 (short)frame[frame_offset + 8]*gTRScaling);
 		
 #ifdef DEBUG_TR_FRAMES
 		printf("\nf[%i]", frame_offset);
@@ -625,7 +627,7 @@ int load_animation(TombRaider &tombraider,
 																+ ((j - 1) * 4)];
 				
 				eggIterator(FREYJA_BONE, tag);
-				eggTagPos3f(mesh_tree->x, mesh_tree->y, mesh_tree->z);
+				eggTagPos3f(mesh_tree->x*gTRScaling, -mesh_tree->y*gTRScaling, -mesh_tree->z*gTRScaling);
 				eggTagFlags1u(mesh_tree->flags);
 			}
 			
@@ -655,7 +657,7 @@ int load_animation(TombRaider &tombraider,
 				rot[2] = angle;
 
 				eggIterator(FREYJA_BONE, tag);
-				eggTagRotate3f(rot[0], rot[1], rot[2]);
+				eggTagRotate3f(-rot[0], rot[1], -rot[2]);
 			}
 			else if (itmp & 0xc000) 
 			{ 
@@ -689,7 +691,7 @@ int load_animation(TombRaider &tombraider,
 					break;
 				}
 
-				eggTagRotate3f(rot[0], rot[1], rot[2]);
+				eggTagRotate3f(-rot[0], rot[1], -rot[2]);
 			}
 			else    // TR2, TR3, TR4 - three axes
 			{
@@ -710,7 +712,7 @@ int load_animation(TombRaider &tombraider,
 				rot[2] = angle;
 
 				eggIterator(FREYJA_BONE, tag);
-				eggTagRotate3f(rot[0], rot[1], rot[2]);
+				eggTagRotate3f(-rot[0], rot[1], -rot[2]);
 			}
 		}
 
@@ -742,15 +744,15 @@ int load_animation(TombRaider &tombraider,
 			switch (k)
 			{
 			case 0:
-				eggTagPos3f(0.0, -16.0, -32.0);
+				eggTagPos3f(0.0, -16.0*gTRScaling, -32.0*gTRScaling);
 				eggTagRotate3f(60.0, 0.0, 0.0);
 				break;
 			case 1:
-				eggTagPos3f(0.0, 0.0, 32.0);
+				eggTagPos3f(0.0, 0.0, 32.0*gTRScaling);
 				//eggTagRotate3f(5.0, 0.0, 0.0);
 				break;
 			default:
-				eggTagPos3f(0.0, 0.0, 32.0);
+				eggTagPos3f(0.0, 0.0, 32.0*gTRScaling);
 				//eggTagRotate3f(1.0, 0.0, 0.0);
 			}
 

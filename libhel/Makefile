@@ -26,23 +26,32 @@ SRC_DIR=hel
 API=0
 
 ################################################################
-
-BUILD_DEBUG_DIR=bin/prof
-BUILD_DEBUG_DIR=bin/debug
-BUILD_RELEASE_DIR=bin/release
-BUILD_TEST_DIR=bin/test
-BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
-
-################################################################
-
+# UNIX
 CC=gcc
 JAVAC=javac
 FLAGS=
+BUILD_BASE_DIR=bin
+EXT=so
+
+########################################
+# WIN32
+#CC=i586-mingw32msvc-g++
+#CPP=i586-mingw32msvc-cpp
+#LD=i586-mingw32msvc-ld
+#FLAGS=-I/usr/local/include/
+#BUILD_BASE_DIR=bin.win32
+#EXT=dll
 
 ################################################################
 
+BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/prof
+BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/debug
+BUILD_RELEASE_DIR=$(BUILD_BASE_DIR)/release
+BUILD_TEST_DIR=$(BUILD_BASE_DIR)/test
+BUILD_INSTALL_DIR=$(BUILD_BASE_DIR)/$(BUILD_SELECT)
+
+################################################################
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
-#-DVECTOR_H_OLD_INTERNAL_ITERATOR 
 
 BASE_CFLAGS=$(FLAGS) -Wall -I. -I../libhel \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -64,7 +73,7 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 ################################################################
 
 
-TARGETS=$(BUILDDIR)/lib$(NAME)$(API).so.$(VERSION)
+TARGETS=$(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION)
 
 auto: $(BUILD_SELECT)
 
@@ -114,7 +123,7 @@ OBJS = \
 	$(BUILDDIR)/Quaternion.o \
 	$(BUILDDIR)/math.o
 
-$(BUILDDIR)/lib$(NAME)$(API).so.$(VERSION) : $(OBJS) 
+$(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION) : $(OBJS) 
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
 
 ################################################################
@@ -168,10 +177,10 @@ install-bin:
 
 install-lib:
 	@-echo -n "Installing lib                              "
-	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(API).so.$(VERSION) \
+	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(API).$(EXT).$(VERSION) \
 		$(INSTALL_LIB_DIR)
-	@-ln -sf $(INSTALL_LIB_DIR)/lib$(NAME)$(API).so.$(VERSION) \
-		$(INSTALL_LIB_DIR)/lib$(NAME)$(API).so
+	@-ln -sf $(INSTALL_LIB_DIR)/lib$(NAME)$(API).$(EXT).$(VERSION) \
+		$(INSTALL_LIB_DIR)/lib$(NAME)$(API).$(EXT)
 	./libsetup.sh
 	@-echo "[done]"
 
@@ -185,7 +194,7 @@ install-headers:
 
 uninstall-lib:
 	@-echo -n "Uninstalling                                "
-	@-rm -f $(INSTALL_DIR)/lib$(NAME)$(API).so.$(VERSION)
+	@-rm -f $(INSTALL_DIR)/lib$(NAME)$(API).$(EXT).$(VERSION)
 	@-echo "[done]"
 
 ################################################################

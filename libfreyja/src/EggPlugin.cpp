@@ -21,13 +21,20 @@
  *
  ==========================================================================*/
 
-#include <dlfcn.h> 
 #include <sys/types.h>
 #include <dirent.h>
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifdef WIN32
+#   undef MODEL_PLUGINS
+#endif
+
+#ifdef MODEL_PLUGINS
+#   include <dlfcn.h> 
+#endif
 
 #include <hel/math.h>
 #include <hel/Quaternion.h>
@@ -540,12 +547,14 @@ Vector<unsigned int> *eggFindVerticesByBox(bbox_t bbox)
 
 	count = eggGetNum(FREYJA_VERTEX); 
 
+	list = new Vector<unsigned int>();
+
+
 	if (count == PLUGIN_ERROR)
 	{
-		return 0x0;
+		return list;
 	}
 
-	list = new Vector<unsigned int>();
 
 	/* Using egg iterator interface */
 	eggIterator(FREYJA_VERTEX, FREYJA_LIST_RESET);
@@ -1925,9 +1934,9 @@ int EggPlugin::importModel(char *filename)
 	if (loaded)
 		return 0; // sucess
 #else
-	if (!mEgg->Check(filename))
+	if (!mEgg->checkFile(filename))
 	{
-		if (!mEgg->Load(filename))
+		if (!mEgg->loadFile(filename))
 			return 0;
 		else
 			return -2;

@@ -335,12 +335,21 @@ raw2riff.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja8"
 
-Freyja.test:
+FreyjaUtil:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Freyja.o $(BUILD_TEST_DIR)/FreyjaPlugin.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJA $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=FreyjaUtil \
+	OBJS="$(BUILD_TEST_DIR)/FreyjaUtil.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
+	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja"
+
+python.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=python \
+	OBJS="$(BUILD_TEST_DIR)/python.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PYTHON" \
+	LD_FLAGS="-lm -lhel0 -lfreyja -lpython2.3 -lstdc++"
 
 $(BUILDDIR)/$(NAME).test : $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)

@@ -1594,6 +1594,34 @@ void FreyjaRender::DrawModel(Egg *egg)
 	}    
 
 
+	if (mRenderMode & RENDER_POINTS)
+	{
+		static float foo = 2.0f;
+
+		foo += 0.25;
+
+		if (foo > 1.75f)
+			foo = 0.0f;
+
+		glPointSize(7.0-foo);
+		glBegin(GL_POINTS);
+		glColor3fv(RED);
+
+		for (i = _model->mList.begin(); i < _model->mList.end(); ++i)
+		{
+			int index = _model->mList[i];
+			egg_vertex_t *vertex = egg->getVertex(index);
+
+			if (vertex)
+			{
+				glVertex3fv(vertex->pos);
+			}
+		}
+
+		glEnd();
+		glPointSize(_default_point_size);
+	}
+
 	/* Draw meshes */
 	meshlist = egg->MeshList();
 
@@ -2019,12 +2047,14 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 	glPopMatrix();
 }
 
+
 void FreyjaRender::getRotation(vec3_t v)
 {
 	v[0] = _angles[0];
 	v[1] = _angles[1];
 	v[2] = _angles[2];
 }
+
 
 /* Mongoose 2004.03.26, 
  * You have to be kidding me 

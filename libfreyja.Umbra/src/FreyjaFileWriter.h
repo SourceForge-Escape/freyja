@@ -1,23 +1,26 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Freyja
+ * Project : libfreyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaFileWriter
  * License : No use w/o permission (C) 2004 Mongoose
  * Comments: This class provides disk file write access
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- Test Defines -----------------------------------------------
  *           
  * UNIT_TEST_FREYJAFILEWRITER - Builds FreyjaFileWriter class unit test 
  *
  *-- History ------------------------------------------------ 
+ *
+ * 2004.12.14: 
+ * Mongoose - Fixed generated code for binary file I/O
  *
  * 2004.08.21:
  * Mongoose - Created
@@ -170,7 +173,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	float writeFloat32();
+	void writeFloat32(float r);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 32bit float
@@ -181,7 +184,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	char writeInt8();
+	void writeInt8(char i);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 8bit signed int
@@ -192,7 +195,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned char writeInt8U();
+	void writeInt8U(unsigned char u);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 8bit unsigned int
@@ -203,7 +206,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	short writeInt16();
+	void writeInt16(short i);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 16bit signed int
@@ -214,7 +217,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned short writeInt16U();
+	void writeInt16U(unsigned short u);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 16bit unsigned int
@@ -225,7 +228,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int writeInt32();
+	void writeInt32(int i);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 32bit signed int
@@ -236,7 +239,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int writeInt32U();
+	void writeInt32U(unsigned int u);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary write of small endian 32bit unsigned int
@@ -246,6 +249,11 @@ class FreyjaFileWriter
 	 * 2004.08.13:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	void writeLong(long l);
+
+	void writeLongU(unsigned long l);
+
 
  private:
 

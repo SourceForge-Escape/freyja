@@ -195,9 +195,10 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
-	case eAnimationSlider:
+	case eAnimationSlider: // FIXME: Wrapping and bounds 
 		if (value != mModel->getCurrentAnimationFrame())
 		{
+			freyja_event_set_range(event, value, 0, mModel->getAnimationFramesIn(mModel->getCurrentAnimation()));
 			mModel->setCurrentAnimationFrame(value);	
 			freyja_event_gl_refresh();
 		}
@@ -973,7 +974,9 @@ bool FreyjaControl::event(int command)
 					MaterialManager::fLoadTextureInSlot ? "on" : "off");
 		break;
 
-
+	case eTransformSelectedVertices:
+		mTransformMode = FreyjaModel::TransformSelectedVertices;
+		break;
 	case eTransformGroup:
 		mTransformMode = FreyjaModel::TransformVertexFrame;
 		break;
@@ -1203,7 +1206,7 @@ bool FreyjaControl::event(int command)
 		freyja_print("Select object mesh...");
 		break;
 	case eMeshMirror:
-		freyja_print("Mesh mirror disabled in this build");
+		mModel->mirrorUsingVertexBuffer(false, true, false);
 		break;
 	case eTransformMeshPivot:
 		mTransformMode = FreyjaModel::TransformMesh;
@@ -1628,6 +1631,78 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 }
 
 
+void FreyjaControl::getFreeWorldFromScreen(int xx, int yy, vec3_t xyz)
+{
+	vec_t x = xx, y = yy, width, height, invz, fs;
+	vec3_t scroll, rotate, xy, yz, xz;
+
+
+	width = mRender->Width();
+	height = mRender->Height();
+	mModel->getSceneTranslation(scroll);
+	mRender->getRotation(rotate);
+
+	invz = (1.0 / mRender->getZoom());
+	fs = (40.0 * invz) / height;  // fov 40?
+
+	x = (x - width / 2.0) * fs;
+	y = -(y - height / 2.0) * fs;
+
+	xy[0] = x - scroll[0] * invz;
+	xy[1] = y - scroll[1] * invz;
+	xy[2] = 0.0f;
+
+	xz[0] = x - scroll[0] * invz;
+	xz[2] = y - scroll[2] * invz;
+	xz[1] = 0.0f;
+
+	yz[2] = y - scroll[2] * invz;
+	yz[1] = x - scroll[1] * invz;
+	yz[0] = 0.0f;
+
+
+	// FIXME only considers up Y atm
+	if (rotate[1] < 90) // ~0
+	{
+		xyz[0] = xy[0];
+		xyz[1] = xy[1];
+		xyz[2] = xy[2];
+	}
+	else if (rotate[1] >= 260) // ~270
+	{
+		xyz[0] = yz[0];
+		xyz[1] = yz[2] + 18;
+		xyz[2] = -(yz[1] - 18);
+	}
+	else if (rotate[1] >= 170) // ~180
+	{
+		xyz[0] = -xy[0];
+		xyz[1] = xy[1];
+		xyz[2] = xy[2];
+	}
+	else if (rotate[1] >= 60) // ~90
+	{
+		xyz[0] = yz[0];
+		xyz[1] = yz[2] + 18;
+		xyz[2] = yz[1] - 18;
+	}
+	else if (rotate[1] >= 40) // ~45
+	{
+		xyz[0] = xy[0]/2 + yz[0]/2;
+		xyz[1] = xy[1]/2 + (yz[2] + 18)/2;
+		xyz[2] = xy[2]/2 + (yz[1] - 18)/2;
+	}
+	else // FIXME
+	{
+		xyz[0] = xy[0];
+		xyz[1] = xy[1];
+		xyz[2] = xy[2];
+	}
+
+	//printf("r %f\n", rotate[1]);
+}
+
+
 bool FreyjaControl::motionEvent(int x, int y)
 {
 	static int old_y = 0, old_x = 0;
@@ -1654,9 +1729,37 @@ bool FreyjaControl::motionEvent(int x, int y)
 			break;
 
 		case MOUSE_BTN_MIDDLE:
+			{
+				Vector3d xyz;
+				vec_t *ptr = mModel->GetLight0Pos();
+
+				getFreeWorldFromScreen(x, y, xyz.mVec);
+
+				ptr[0] = xyz.mVec[0];
+				ptr[1] = xyz.mVec[1];
+				ptr[2] = xyz.mVec[2];
+
+				freyja_event_set_float(800, xyz.mVec[0]);
+				freyja_event_set_float(801, xyz.mVec[1]);
+				freyja_event_set_float(802, xyz.mVec[2]);
+				freyja_event_gl_refresh();
+			}
 			break;
-			
+
+
 		case MOUSE_BTN_LEFT:
+			{
+				Vector3d xyz;
+
+				getFreeWorldFromScreen(x, y, xyz.mVec);
+
+				if (gPatchDisplayList)
+					mModel->movePatchControlPoint(xyz);
+
+				if (mTransformMode == FreyjaModel::TransformBone)
+					mModel->moveObject(FreyjaModel::TransformBone, xyz);
+				
+			}
 			break;
 		}
 		
@@ -1719,7 +1822,34 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 			freyja_print("Zoom out");
 		}
 
+		switch (btn)
+		{
+		case MOUSE_BTN_MIDDLE:
+			{
+				vec3_t pos;
+
+				getFreeWorldFromScreen(x, y, pos);
+
+				_mouse_state = 1;
+			}
+			break;
+		case MOUSE_BTN_LEFT:
+			{
+				vec3_t pos;
+
+				getFreeWorldFromScreen(x, y, pos);
+		
+				if (gPatchDisplayList)
+					mModel->selectPatchControlPoint(pos);
+
+				_mouse_state = 1;
+			}
+			break;
+		}
+
 		break;
+
+
 	case TEXTURE_EDIT_MODE:
 		if (_tex_state)
 		{
@@ -1871,6 +2001,10 @@ bool FreyjaControl::copySelectedObject()
 {
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformSelectedVertices:
+		return mModel->copyVertexBuffer();
+		break;
+
 	case FreyjaModel::TransformMesh:
 		return mModel->copySelectedMesh();
 		break;
@@ -1888,6 +2022,10 @@ bool FreyjaControl::pasteSelectedObject()
 {
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformSelectedVertices:
+		return mModel->pasteSelectedMesh(); // vertexbuffercopy shares buf
+		break;
+
 	case FreyjaModel::TransformMesh:
 		return mModel->pasteSelectedMesh();
 		break;
@@ -1908,6 +2046,10 @@ void FreyjaControl::deleteSelectedObject()
 	{
 	case FreyjaModel::TransformPoint:
 		mEventMode = POINT_DEL_MODE;
+		break;
+
+	case FreyjaModel::TransformVertexFrame:
+		mModel->cullUsingVertexBuffer();
 		break;
 
 	case FreyjaModel::TransformBone:

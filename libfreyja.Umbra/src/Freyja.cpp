@@ -33,7 +33,9 @@
 
 #include <assert.h>
 
+#include "FreyjaFileWriter.h"
 #include "Freyja.h"
+
 
 
 ////////////////////////////////////////////////////////////
@@ -55,6 +57,15 @@ FreyjaScene::~FreyjaScene()
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
+
+bool FreyjaScene::exportScene(const char *filename)
+{
+	FreyjaFileWriter w;
+
+	// FIXME: not implemented
+
+	return false;
+}
 
 unsigned int FreyjaScene::getMeshCount() { return meshes.end(); }
 unsigned int FreyjaScene::getSkeletonCount() { return skeletons.end(); }

@@ -157,11 +157,13 @@
 				(menu_item "_Select"	eMode	ePolygonSelect)
 				(menu_item "_Delete"	eMode	ePolygonDelete))
 
+			(submenu "_Vertices..."
+				(menu_item "_Mirror"	eMode	eMeshMirror))
+
 			(submenu "_Mesh"
 				(menu_item "_New"		eMode	eMeshNew)
 				(menu_item "_Delete"	eMode	eMeshDelete)
 				(menu_item "_Select"	eMode	eMeshSelect)
-				(menu_item "_Mirror"	eMode	eMeshMirror)
 				(menu_item "Re_center"	eMode	eTransformMeshPivot))
 
 			(submenu "_Bone"
@@ -211,6 +213,9 @@
 
 				(toolbar_togglebutton false "patch.png" "Patch"
 					"Render/enable patch tool"	eMode	eRenderPatch)
+
+				;(toolbar_togglebutton false "mesh.png" "BoundingBox"
+				;	"Render Bounding boxes"	eMode	eRenderBbox)
 
 				(toolbar_togglebutton true "bone-tag.png" "Bones"
 					"Show bones when rendering"		eMode	eRenderSkeleton)
@@ -319,6 +324,7 @@
 							(menu_item	"Bone"		eMode eTransformBone)
 							(menu_item	"Group"		eMode eTransformGroup)
 							(menu_item	"Vertex"	eMode eTransformPoint)
+							(menu_item	"Vertex List"	eMode eTransformSelectedVertices)
 							(menu_item	"MeshPivot"	eMode eTransformMeshPivot))
 
 						(optionmenu		eMode	eNone
@@ -424,11 +430,15 @@
 
 					(hbox 1 0 0 1 0 
 						(label "Select Bone" 0.0 0.5)
-						(spinbutton 0 0 100 eBoneIterator))
+						(spinbutton 0 0 200 eBoneIterator))
 
 					(hbox 1 0 0 1 0
 						(label "Bone Name: " 0.0 0.5) 
 						(textbox eSetCurrentBoneName))
+
+					;(hbox 1 0 0 1 0
+					;	(label "Bone Parent: " 0.0 0.5) 
+					;	(spinbutton 0 0 200 eSetCurrentBoneParent))
 
 					(hbox 1 0 0 1 0 
 						(label "To be replaced with transformbox:" 0.0 0.5))
@@ -443,9 +453,9 @@
 					;; Replace usage with generic transform box later
 					(hbox 1 0 0 1 0 
 						(label "Rotate" 0.0 0.5) 
-						(spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 520)
-						(spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 521)
-						(spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 522))
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 520)
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 521)
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 522))
 
 					(hbox 1 1 0 1 1	(hsep))
 
