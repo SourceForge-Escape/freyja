@@ -380,6 +380,39 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 }
 
 
+vec3_t *EggPlugin::freyjaGetVertexXYZ(long vertexIndex)
+{
+	egg_vertex_t *vertex = mEgg->getVertex(vertexIndex);
+			 
+	if (vertex)
+		return &(vertex->pos);
+
+	return 0x0;
+}
+
+
+vec2_t *EggPlugin::freyjaGetVertexUV(long vertexIndex)
+{
+	egg_vertex_t *vertex = mEgg->getVertex(vertexIndex);
+			 
+	if (vertex)
+		return &(vertex->uv);
+
+	return 0x0;
+}
+
+
+vec2_t *EggPlugin::freyjaGetTexCoordUV(long texcoordIndex)
+{
+	egg_texel_t *texel = mEgg->getTexel(texcoordIndex);
+			 
+	if (texel)
+		return &(texel->st); // really uv
+
+	return 0x0;
+}
+
+
 void EggPlugin::freyjaGetVertex(vec3_t xyz)
 {
 	Vector<egg_vertex_t *> *vertex;
@@ -917,6 +950,51 @@ bool EggPlugin::saveModel(const char *filename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void EggPlugin::fixTexCoords()
+{
+	unsigned int i;
+	egg_texel_t *t;
+	egg_vertex_t *v;
+
+
+	for (i = 0; i < mEgg->getTexelCount(); ++i)
+	{
+		t = mEgg->getTexel(i);
+
+		if (t)
+		{
+			if (t->st[0] < 0.0f)
+				t->st[0] = 0.0f;
+			else if (t->st[0] > 1.0f)
+				t->st[0] = 1.0f;
+
+			if (t->st[1] < 0.0f)
+				t->st[1] = 0.0f;
+			else if (t->st[1] > 1.0f)
+				t->st[1] = 1.0f;
+		}
+	}
+
+	for (i = 0; i < mEgg->getVertexCount(); ++i)
+	{
+		v = mEgg->getVertex(i);
+
+		if (v)
+		{
+			if (v->uv[0] < 0.0f)
+				v->uv[0] = 0.0f;
+			else if (v->uv[0] > 1.0f)
+				v->uv[0] = 1.0f;
+
+			if (v->uv[1] < 0.0f)
+				v->uv[1] = 0.0f;
+			else if (v->uv[1] > 1.0f)
+				v->uv[1] = 1.0f;
+		}
+	}
+}
+
+
 bool EggPlugin::loadModel(const char *filename)
 {
 	if (freyjaCheckModel(filename) == 0)
@@ -942,12 +1020,11 @@ void EggPlugin::setPrinter(FreyjaPrinter *printer)
 
 void EggPlugin::addPluginDirectory(const char *dir)
 {
-	FreyjaFileReader r;
 	unsigned int l;
 	char *dir2;
 
 
-	if (!dir || !dir[0] || !r.isDirectory(dir))
+	if (!dir || !dir[0] || !FreyjaFileReader::isDirectory(dir))
 		return;
 
 	l = strlen(dir);

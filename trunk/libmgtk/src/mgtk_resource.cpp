@@ -2322,7 +2322,8 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 	GtkWidget *submenu = NULL;
 	GtkWidget *item = NULL;
 	arg_list_t *label, *ret;
-	
+	int id = -1;
+
 
 	if (!menu)
 	{
@@ -2339,6 +2340,13 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 	}
 
 	label = symbol();
+
+	if (label->type == INT)
+	{
+		id = get_int(label);
+		label = symbol();
+	}
+
 	arg_enforce_type(&label, CSTRING);
 	ret = NULL;
 
@@ -2365,6 +2373,14 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 
 		gtk_widget_show(item);
 		
+
+		if (id != -1)
+		{
+			// Mongoose 2002.02.14, Add this widget to a special 
+			//   lookup table by it's event id
+			mgtk_event_subscribe_gtk_widget(id, submenu);
+		}
+
 		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)submenu);
 	}
 

@@ -2728,6 +2728,33 @@ void freyjaGetTexCoord2fv(long index, vec2_t uv)
 }
 
 
+vec3_t *freyjaGetVertexXYZ(long vertexIndex)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetVertexXYZ(vertexIndex);
+
+	return 0x0;
+}
+
+
+vec2_t *freyjaGetVertexUV(long vertexIndex)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetVertexUV(vertexIndex);
+
+	return 0x0;
+}
+
+
+vec2_t *freyjaGetTexCoordUV(long texcoordIndex)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetTexCoordUV(texcoordIndex);
+
+	return 0x0;
+}
+
+
 void freyjaGetVertex3fv(vec3_t xyz)
 {
 	if (EggPlugin::mEggPlugin)
