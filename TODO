@@ -1,6 +1,6 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO  ( Last Audit: 2004.05.04 )
+  File     : TODO  ( Last Update: 2004.06.01 )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : freyja
 
@@ -9,21 +9,13 @@
 
  TODO
 
- Design
-
-	o gnome_interface.cpp
-		o Remove last 2 freyja_ calls in 
-		o Remove gdk event code, hook up singals in resource
-	o Mlisp doesn't lookup symbols for like "true" if just setq
+ General
+	o Material plugins
+	o Egg editor util plugins 
 	o freyja_, mgtk_, etc function names to denote API
-	o Split mlisp-gtk+ and Freyja
-	o Remove more unused events / handlers
-	o Reduce Gtk+ hooks, singals, and handlers
-	o Move Mlisp into it's on library
-	o Milsp garbage collection / more fully featured
+	o Soft ABI for Mlisp hooks only
 	o Move Material system into it's on library
 	o Library for Egg rendering?
-	o Make a pure Mlisp-gtk+ binding as a library
 	o FreyjaModel shouldn't handle mouse clicks
 	o FreyjaControl still sends 2d planar events to FreyjaModel
 	o Replace FreyjaModel (xx, yy) handlers with objects or 3d events
@@ -33,9 +25,18 @@
 	o Observer and Command patterns
 	o Event logger system Undo / Redo / Macro / Playback
 	o Hard ABI with stricter event control
-	o Soft ABI for Mlisp hooks only
 
- Backend
+ mlisp-mgtk+
+	o Remove gdk event code, hook up signals in resource
+	o slider widget
+	o Mlisp doesn't lookup symbols for like "true" if just setq
+	o Split mlisp-mgtk+ and Freyja
+	o Remove more unused events / handlers
+	o Reduce Gtk+ hooks, singals, and handlers
+	o Move Mlisp into it's on library
+	o Milsp garbage collection / more fully featured
+
+ libfreyja_model
 
 	o Documentation
 	o Add polymesh CSG back 
@@ -47,14 +48,14 @@
 	o Polygon groups
 	o Cone and Torus mesh generation
 
- Plugins
+ egg_plugins
 	
 	o More unit testing
 	o Finish PSK export
 	o UTX export
 	o Scaling and conversion to Freyja improved
 
- Interface
+ Freyja
 
 	o Documentation
 	o View > Joint > Render Type
