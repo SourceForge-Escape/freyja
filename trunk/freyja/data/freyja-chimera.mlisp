@@ -149,19 +149,10 @@
 				) ;; submenu Create
 
 		(submenu "_Tools"
-			(submenu "_Generate"
-				(menu_item "_UV by XY Plane"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+			(submenu "_Scene"
 				(menu_seperator)
-				(menu_item "_Normals"	eGenerateNormals	"gtk-polygon")
-				(menu_seperator)
-				(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
-				(menu_item "_Plane"		eGeneratePlane		"gtk-polygon")
-				(menu_item "_Tube"		eGenerateTube		"gtk-polygon")
-				(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
-				(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
-				(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
+				(menu_item "_Normals"	eGenerateNormals	"gtk-polygon"))
 
-			(menu_item "_Extrude face"	"F4" eExtrude		"gtk-polygon")
 
 			;; Transforms
 			(submenu "_Transforms"
@@ -180,7 +171,8 @@
 			(submenu "_Polygon"
 				(menu_item "_New"		eMode	ePolygonNew)
 				(menu_item "_Select"	eMode	ePolygonSelect)
-				(menu_item "_Delete"	eMode	ePolygonDelete))
+				(menu_item "_Delete"	eMode	ePolygonDelete)
+				(menu_item "_Extrude"	"F4" eExtrude		"gtk-polygon"))
 
 			(submenu "_Vertices..."
 				(menu_item "Mirror_X"	eMode	eMeshMirrorX)
@@ -192,7 +184,9 @@
 				(menu_item "_Delete"	eMode	eMeshDelete)
 				(menu_item "_Select"	eMode	eMeshSelect)
 				(menu_item "Re_center"	eMode	eTransformMeshPivot)
-				(menu_item "_Flip normals"	eMode	eMeshFlipNormals))
+				(menu_item "_UV by XY Plane"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+				(menu_item "_Generate Normals"	eMode	eMeshGenerateNormals)
+				(menu_item "_Flip Normals"	eMode	eMeshFlipNormals))
 
 			(submenu "_Bone"
 				(menu_item "_New"			eMode	eBoneNew)
