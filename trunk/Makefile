@@ -65,6 +65,3 @@ user-install:
 	@-cd Freyja; ./setup-freyja.sh
 	@-cd ..
 
-	@-printf "Installing freyja user plugins\n"
-	@-cd egg_plugins; make; make install
-	@-cd ..
