@@ -67,6 +67,9 @@ FreyjaControl::FreyjaControl()
 
 	ReadRC();
 
+
+	mLastEvent = EVENT_MESH;
+	mLastCommand = CMD_MESH_SELECT;
 	setZoom(1.0f);
 	mFullScreen = false;
 	mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
@@ -112,47 +115,79 @@ void FreyjaControl::eventMain(int command)
 		freyja_event_info_dialog(ABOUT_MESSAGE);
 		break;   
 
+
 	case CMD_MISC_SCREENSHOT:
 		mRender->ScreenShot();
 		break;
 
-	case CMD_MAIN_OPEN_MODEL:
-		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-		freyja_event_file_dialog("Open Model");
+
+	case EVENT_NEW_FILE:
+		mModel->Clear();
+		event_print("Erasing Model...");
 		break;
-	case CMD_MAIN_SAVE_MODEL:
-		mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-		freyja_event_file_dialog("Save Model As...");
+
+
+	case EVENT_OPEN_FILE:
+		switch (_major_mode)
+		{
+		case TEXTURE_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_LOAD_TEXTURE;
+			freyja_event_file_dialog("Open texture...");
+			break;
+		case ANIMATION_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_LOAD_ANIMATION;
+			freyja_event_file_dialog("Open animation...");
+			break;
+		case MAP_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_LOAD_MAP;
+			freyja_event_file_dialog("Open map...");
+			break;
+		case MODEL_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+			freyja_event_file_dialog("Open model...");
+			break;
+		case MATERIAL_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_LOAD_MATERIAL;
+			freyja_event_file_dialog("Open material...");
+			break;
+		}
 		break;
-	case CMD_MAIN_OPEN_MATERIAL:
-		mFileDialogMode = FREYJA_MODE_LOAD_MATERIAL;
-		freyja_event_file_dialog("Open Material");
+
+
+	case EVENT_SAVE_FILE:
+		switch (_major_mode)
+		{
+		case TEXTURE_EDIT_MODE:
+			//mFileDialogMode = FREYJA_MODE_SAVE_TEXTURE;
+			//freyja_event_file_dialog("Save texture as...");
+			break;
+		case MODEL_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+			freyja_event_file_dialog("Save model as...");
+		case MAP_EDIT_MODE:
+			//mFileDialogMode = FREYJA_MODE_SAVE_MAP;
+			//freyja_event_file_dialog("Save map as...");
+			break;
+		case ANIMATION_EDIT_MODE:
+			//mFileDialogMode = FREYJA_MODE_SAVE_ANIMATION;
+			//freyja_event_file_dialog("Save animation as...");
+			break;
+		case MATERIAL_EDIT_MODE:
+			mFileDialogMode = FREYJA_MODE_SAVE_MATERIAL;
+			freyja_event_file_dialog("Save material as...");
+			break;
+		}
 		break;
-	case CMD_MAIN_SAVE_MATERIAL:
-		mFileDialogMode = FREYJA_MODE_SAVE_MATERIAL;
-		freyja_event_file_dialog("Save Material As...");
-		break;
-	case CMD_MAIN_OPEN_PALETTE:
-		mFileDialogMode = FREYJA_MODE_LOAD_PALETTE;
-		freyja_event_file_dialog("Open Palette");
-		break;
-	case CMD_MAIN_OPEN_TEXTURE:
-		mFileDialogMode = FREYJA_MODE_LOAD_TEXTURE;
-		freyja_event_file_dialog("Open texture");
-		break;
+
+
 	case CMD_MAIN_SHUTDOWN:
 		freyja_event_exit();
 		break;
 
+
 	case CMD_MAIN_DEBUG_EGG:
 		mModel->Debug(!mModel->Debug());
 		event_print("Egg debug [%s]", mModel->Debug() ? "ON" : "OFF");
-		break;
-
-
-	case CMD_MAIN_NEW_MODEL:
-		mModel->Clear();
-		event_print("Erasing Model...");
 		break;
 
 
@@ -437,7 +472,7 @@ void FreyjaControl::eventMisc(int command)
 
  		switch (_major_mode)
  		{
- 		case MODEL_VIEW_MODE:
+ 		case ANIMATION_EDIT_MODE:
  			event_print("Select tag by center point");
  			_minor_mode = BONE_SELECT_MODE;
  			break;
@@ -540,193 +575,13 @@ void FreyjaControl::eventMisc(int command)
 	}   
 }
 
-#ifdef DEAD_CODE
-void FreyjaControl::nullEvent(int command)
-{
-	switch (command)
-	{
-// 	case CMD_MESH_CLONE:
-// 		if (1)
-// 		{
-// 			egg_mesh_t *mesh = mModel->CachedMesh();
-// 			egg_group_t *grp;
-			
-			
-// 			if (mesh && (grp = _egg->getGroup(mesh->group[0])))
-// 			{
-// 				mList.copy(grp->vertex);
-				
-// 				if (!mList.empty())
-// 				{
-// 					event_print("Mesh cloned");
-// 					_egg->addMesh(_egg->MeshCopy(mesh, &mList));
-// 				}
-// 			}
-// 		}
-// 		break;
-//	case CMD_MESH_ROTATE:
-//		_edit_mode = FreyjaModel::TransformMesh;
-//		break;
-//	case CMD_MESH_COPY2:
-//		MeshCopy();
-//		break;
-//	case CMD_MESH_CUT:
-//		event_print("Mesh partially cut (split)");
-//		MeshCut();
-//		break;
-//	case CMD_MESH_PASTE:
-//		_egg->AddMesh(_egg->MeshMerge(_egg->MeshNew(), _list, CachedMesh()));
-//		_list.Clear();
-//		break;
-
-
-		case CMD_MISC_TEXTURE_NEXT:
-			mModel->setCurrentTextureIndex(mModel->getCurrentTextureIndex() + 1);
-			event_print("Texture[%i] in edit mode", mModel->getCurrentTextureIndex());
-			break;
-
-		case CMD_MISC_TEXTURE_PREV:
-			if (mModel->getCurrentTextureIndex())
-			{
-				mModel->setCurrentTextureIndex(mModel->getCurrentTextureIndex() - 1);
-			}
-
-			event_print("Texture[%i] in edit mode", mModel->getCurrentTextureIndex());
-			break;
-
-	case CMD_MISC_CAMMODE:
-		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_CAMERA));
-		break;  
-
-// 		case CMD_MISC_LOAD_MAP:
-// 			mModel->setFlags(FL_LOAD_MAP, !(mModel->getFlags() & FL_LOAD_MAP));
-// 			break;
-
-// 		case CMD_MISC_EDITMODE:
-// 			_edit_mode++;
-//     
-// 			if (_edit_mode == 3)
-// 				_edit_mode = 0;
-//     
-// 			switch (_edit_mode)
-// 			{
-// 			case FreyjaModel::TransformMesh:
-// 				event_print("Edit mode set to MESH");
-// 				break;
-// 			case FreyjaModel::TransformVertexFrame:
-// 				event_print("Edit mode set to FRAME");
-// 				break;
-// 			case FreyjaModel::TransformScene:
-// 				event_print("Edit mode set to SCENE");
-// 				break;	   
-// 			}
-// 			break;
-
-// 		case CMD_MISC_SCENE_ROTATE:
-// 			_edit_mode = FreyjaModel::TransformScene;
-// 			break;
-
-// 		case CMD_MISC_VERTEX_UV:
-// 			mModel->setFlags(FL_VERTEX_UV, !(mModel->getFlags() & FL_VERTEX_UV));
-// 			event_print("Vertex with UV texels [%s]", 
-// 						(mModel->getFlags() & FL_VERTEX_UV) ? "on" : "off");
-// 			break;
-
-// 		case CMD_MISC_DUMPTEXTURE:
-// 			mModel->setFlags(FL_DUMP_TEXTURE, !(mModel->getFlags() & FL_DUMP_TEXTURE));
-// 			break;
-
-		case CMD_MISC_SCROLL_UP_X:
-			mModel->adjustSceneTranslation(1.0, 0.0, 0.0);
-			break;
-		case CMD_MISC_SCROLL_DOWN_X:
-			mModel->adjustSceneTranslation(-1.0, 0.0, 0.0);
-			break;
-		case CMD_MISC_SCROLL_UP_Y:
-			mModel->adjustSceneTranslation(0.0, 1.0, 0.0);
-			break;
-		case CMD_MISC_SCROLL_DOWN_Y:
-			mModel->adjustSceneTranslation(0.0, -1.0, 0.0);
-			break;
-		case CMD_MISC_SCROLL_UP_Z:
-			mModel->adjustSceneTranslation(0.0, 0.0, 1.0);
-			break;
-		case CMD_MISC_SCROLL_DOWN_Z:
-			mModel->adjustSceneTranslation(0.0, 0.0, -1.0);
-			break;
-		case CMD_MISC_SCROLL_UP:
-			switch (mModel->CurrentPlane())
-			{
-			case Egg::PLANE_XY:
-				eventMisc(CMD_MISC_SCROLL_UP_Y);
-				break;
-			case Egg::PLANE_XZ:
-				eventMisc(CMD_MISC_SCROLL_UP_Z);
-				break;
-			case Egg::PLANE_YZ:
-				eventMisc(CMD_MISC_SCROLL_UP_Z);
-				break;
-			}
-			break;
-		case CMD_MISC_SCROLL_DOWN:
-			switch (mModel->CurrentPlane())
-			{
-			case Egg::PLANE_XY:
-				eventMisc(CMD_MISC_SCROLL_DOWN_Y);
-				break;
-			case Egg::PLANE_XZ:
-				eventMisc(CMD_MISC_SCROLL_DOWN_Z);
-				break;
-			case Egg::PLANE_YZ:
-				eventMisc(CMD_MISC_SCROLL_DOWN_Z);
-				break;
-			}
-			break;
-		case CMD_MISC_SCROLL_RIGHT:
-			switch (mModel->CurrentPlane())
-			{
-			case Egg::PLANE_XY:
-				eventMisc(CMD_MISC_SCROLL_DOWN_X);
-				break;
-			case Egg::PLANE_XZ:
-				eventMisc(CMD_MISC_SCROLL_DOWN_X);
-				break;
-			case Egg::PLANE_YZ:
-				eventMisc(CMD_MISC_SCROLL_DOWN_Y);
-				break;
-			}
-			break;
-		case CMD_MISC_SCROLL_LEFT:
-			switch (mModel->CurrentPlane())
-			{
-			case Egg::PLANE_XY:
-				eventMisc(CMD_MISC_SCROLL_UP_X);
-				break;
-			case Egg::PLANE_XZ:
-				eventMisc(CMD_MISC_SCROLL_UP_X);
-				break;
-			case Egg::PLANE_YZ:
-				eventMisc(CMD_MISC_SCROLL_UP_Y);
-				break;
-			}
-			break;
-	default:
-		event_print("!Unhandled eventMisc(%d)", command);
-	}   
-}
-#endif
 
 void FreyjaControl::handleEvent(int mode, int cmd)
 {
-	static int last_event = EVENT_MESH;
-	static int last_cmd = CMD_MESH_SELECT;
-	
-	
 	if (mode == EVENT_REDO_LAST)
 	{
-		mode = last_event;
-		cmd = last_cmd;
+		mode = mLastEvent;
+		cmd = mLastCommand;
 	}
 	
 	switch (mode)
@@ -834,28 +689,24 @@ void FreyjaControl::handleEvent(int mode, int cmd)
 			event_refresh();
 			event_print("Texture Edit");
 			_major_mode = TEXTURE_EDIT_MODE;
-			event_set_mouse_active(true);
 			break;
 		case FREYJA_MODE_MODEL_EDIT:
 			mRender->ViewMode(VIEWMODE_MODEL_EDIT);
 			event_refresh();
 			event_print("Model Edit");
 			_major_mode = MODEL_EDIT_MODE;
-			event_set_mouse_active(true);
 			break;
 		case FREYJA_MODE_MODEL_VIEW:
 			mRender->ViewMode(VIEWMODE_MODEL_VIEW);
 			event_refresh();
 			event_print("Animation View");
-			_major_mode = MODEL_VIEW_MODE;
-			event_set_mouse_active(true);
+			_major_mode = ANIMATION_EDIT_MODE;
 			break;
 		case FREYJA_MODE_MATERIAL_EDIT:
 			mRender->ViewMode(VIEWMODE_MATERIAL_EDIT);
 			event_refresh();
 			event_print("Material Edit");
 			_major_mode = MATERIAL_EDIT_MODE;
-			event_set_mouse_active(false);
 			break;
 		case FREYJA_MODE_PLANE_XY:
 			event_print("Plane XY");      
@@ -931,8 +782,8 @@ void FreyjaControl::handleEvent(int mode, int cmd)
 		event_print("!UnHandled mode %d and command %d", mode, cmd);
 	}
 
-	last_event = mode;
-	last_cmd = cmd;
+	mLastEvent = mode;
+	mLastCommand = cmd;
 }
 
 
@@ -970,12 +821,14 @@ void FreyjaControl::handleFilename(const char *filename)
 		type = 2;
 		type2 = 0;
 		break;
+		/*
 	case FREYJA_MODE_LOAD_PALETTE:
 		failed = 0;
 		mMaterial->loadTexturePalette(filename);
 		type = 4;
 		type2 = 0;
 		break;
+		*/
 	}
 
 	// Mongoose 2002.02.02, Reduce text segment size some  =)
@@ -1110,7 +963,7 @@ bool FreyjaControl::Motion(int x, int y)
 	
 	switch (_major_mode)
 	{
-	case MODEL_VIEW_MODE:
+	case ANIMATION_EDIT_MODE:
 		if (BTN_HACK & MOUSE_BTN_RIGHT)
 		{
 			if (x > old_x)
@@ -1174,7 +1027,7 @@ bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 
 	switch (_major_mode)
 	{
-	case MODEL_VIEW_MODE:
+	case ANIMATION_EDIT_MODE:
 		if (btn == MOUSE_BTN_4 && state == MOUSE_BTN_STATE_PRESSED)
 		{
 			freyja_event2i(EVENT_MISC, CMD_MISC_ZOOM_IN);
@@ -1257,6 +1110,8 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 	switch (_minor_mode)
 	{
 	case MODEL_ROTATE: 
+
+		event_print("DEBUG MotionEdit, MODEL_ROTATE: %f %f", x, y);
 
 		if (x > old_x)
 		{

@@ -162,14 +162,17 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 						  GDK_POINTER_MOTION_HINT_MASK |
 						  GDK_MOTION_NOTIFY);
 
-
+	/* Mouse */
 	gtk_signal_connect(GTK_OBJECT(glarea), "motion_notify_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_mouse_motion), NULL);
+
+	/* Keyboard */
 	gtk_signal_connect(GTK_OBJECT(glarea), "button_press_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_button_press), NULL);
 	gtk_signal_connect(GTK_OBJECT(glarea), "button_release_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_button_release), NULL);
 
+	/* Misc */
 	gtk_signal_connect(GTK_OBJECT(glarea), "expose_event",
 					   GTK_SIGNAL_FUNC(mgtk_expose_glarea), NULL);
 	gtk_signal_connect(GTK_OBJECT(glarea), "configure_event",

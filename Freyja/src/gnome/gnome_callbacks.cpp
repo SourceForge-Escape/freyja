@@ -221,6 +221,7 @@ void event_refresh()
 	}
 }
 
+// FIXME: factor out key mapping from GDK and mgtk!
 
 void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 {
@@ -270,8 +271,6 @@ void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 		button |= MOUSE_BTN_5;
 	}
 
-	event_set_mouse_button(button);
-
 #ifdef DEBUG_GTK_MOUSE
 	char foo[32];
 	sprintf(foo, "MOUSE_BTN_%i", button);
@@ -286,6 +285,7 @@ void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 					(btn_state==MOUSE_BTN_STATE_PRESSED)?"MOUSE_BTN_STATE_PRESSED":
 					"MOUSE_BTN_STATE_NONE");
 #endif
+
 	event_mouse(button, btn_state, mod, x, y);
 	mgtk_refresh_glarea(widget); // Seems a little much
 }
@@ -293,7 +293,8 @@ void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 
 void mgtk_event_button_release(GtkWidget *widget, GdkEventButton *event)
 {
-	event_set_mouse_button(0);
+	//mgtk_callback_mouse_button_release(); /* assumes no chording */
+	event_mouse(0, 0, 0, 0, 0);
 }
 
 
@@ -387,19 +388,18 @@ void mgtk_event_key_press(GtkWidget *widget, GdkEventKey *event)
 #ifdef DEBUG_GTK_KEYS
 	event_print("*** key_press_event> %i (%c) : %i\n", key, key, mod);
 #endif
-	freyja_event_key_press(key, mod);
 
-	if (gtk_accelerator_valid(event->keyval, (GdkModifierType)0))
-		return;
+	freyja_event_key_press(key, mod);
 }
 
 
 void mgtk_event_key_release(GtkWidget *widget, GdkEventKey *event)
 {
-	//event_print("*** key_release_event> %i : %i\n", key, mod);
+#ifdef DEBUG_GTK_KEYS
+	event_print("*** key_release_event> %i : %i\n", key, mod);
+#endif
 
-	/* Prevent the default handler from being run */
-	//gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_release_event");
+	//freyja_event_key_release(key, mod);
 }
 
 
@@ -409,9 +409,6 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 	GdkModifierType state;
 	glarea_window_state_t *gl_state;
 
-
-	if (!query_mouse_active())
-		return;
 
 	gl_state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget),
 																			 "gl_window_state");
@@ -427,38 +424,10 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 		state = (GdkModifierType)event->state;
 	}
 
-	if (query_mouse_button())
-	{
-		if (query_mouse_button() & MOUSE_BTN_MIDDLE)
-		{
-#warning "FIXME SOON, mouse movement code"
-#ifdef FIXME
-			if (x > gl_state->mouse_x)
-				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_LEFT);
-			else if (x < gl_state->mouse_x)
-				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_RIGHT);
-
-			if (y < gl_state->mouse_y)
-				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_UP);
-			else if (y > gl_state->mouse_y)
-				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_DOWN);
-
-			gl_state->mouse_x = x;
-			gl_state->mouse_y = y;
-			mgtk_refresh_glarea(widget);			
-#endif
-		}
-		else
-		{
-#ifdef DEBUG_GTK_MOUSE
-			event_print("Gnome sending event_motion %i, %i\n", x, y);
-#endif
-			gl_state->mouse_x = x;
-			gl_state->mouse_y = y;
-			event_motion(x, y);
-			mgtk_refresh_glarea(widget);
-		}
-	}
+	gl_state->mouse_x = x;
+	gl_state->mouse_y = y;
+	event_motion(x, y);
+	mgtk_refresh_glarea(widget);
 }
 
 

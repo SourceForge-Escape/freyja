@@ -1997,7 +1997,7 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 				unsigned int i, len, key, mod;
 				char *s = (char *)(accel->data);
 
-				printf("*** %s\n", (char *)(accel->data));
+				event_print("Key accel %s\n", (char *)(accel->data));
 
 				len = strlen(s);
 
@@ -2020,11 +2020,24 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 						i = len + 8;
 						break;
 					case 'F':
-						/* FIXME: handle func keys > 4, etc */
 						switch (s[i+1])
 						{
 						case '1':
-							key = GDK_F1;
+							switch (s[i+2])
+							{
+							case '0':
+								key = GDK_F10;
+								break;
+							case '1':
+								key = GDK_F11;
+								break;
+							case '2':
+								key = GDK_F12;
+								break;
+							default:
+								key = GDK_F1;
+								break;
+							}
 							break;
 						case '2':
 							key = GDK_F2;
@@ -2034,6 +2047,21 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 							break;
 						case '4':
 							key = GDK_F4;
+							break;
+						case '5':
+							key = GDK_F5;
+							break;
+						case '6':
+							key = GDK_F6;
+							break;
+						case '7':
+							key = GDK_F7;
+							break;
+						case '8':
+							key = GDK_F8;
+							break;
+						case '9':
+							key = GDK_F9;
 							break;
 						}
 
@@ -2053,11 +2081,13 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
   
 				// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
 
-				gtk_widget_add_accelerator(item, "activate", accel_group,
-										   //get_int(key), get_int(mod),
-										   key, //GDK_O, 
-										   (GdkModifierType)mod, //GDK_CONTROL_MASK,
+				gtk_widget_add_accelerator(item, "activate", 
+										   accel_group,
+										   key, (GdkModifierType)mod,
 										   GTK_ACCEL_VISIBLE);
+
+				gtk_window_add_accel_group(GTK_WINDOW(getGtkMainWindow()),
+										   accel_group);
 			}
 #endif
 		}
