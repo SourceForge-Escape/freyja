@@ -17,6 +17,7 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o 'Viewport' editing
 	o Use new skeletal system backend w/ matrix palette skinning
 	o Polygon winding support
 	o Make system for plugins seperate from libfreyja's
