@@ -29,6 +29,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.9.0-20041224) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o MilkShape plugin added
+	o Python plugin search functionally added
+
+
  libfreyja (0.9.0-20041223) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o New ABI and Egg backend support for vertex morph frames

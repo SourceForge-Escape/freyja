@@ -6,7 +6,7 @@
  * Website : http://icculus.org/~mongoose
  * Email   : mongoose@icculus.org
  * Object  : 
- * Comments: This is the demo plugin for the python system.
+ * Comments: This is the template plugin for the python system.
  * 
  *-- History ---------------------------------------------------------- 
  *
@@ -24,6 +24,8 @@ import types
 
 def importmodel(filename):
 
+	setImportValid(-1)
+
 	try:
 		f = open(filename, "r")
 
@@ -31,9 +33,9 @@ def importmodel(filename):
 		print "ERROR opening file"
 		return -1
 
-	print "\t Sorry the roundabout plugin loader isn't here yet"
-
 	f.close()
+
+	setImportValid(-1)
 
 	return 0
 

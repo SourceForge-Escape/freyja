@@ -3,10 +3,10 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://gooseegg.sourceforge.net
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org
+ * Email   : mongoose@icculus.org
  * Object  : 
- * Comments: This is the Obj plug-in module
+ * Comments: This is the SMD plug-in module
  *
  *           See file COPYING for license details.
  *
@@ -16,7 +16,7 @@
  *
  *-- History ---------------------------------------------------------- 
  *
- * 2001-05-09:
+ * 200?.??.??:
  * Mongoose - Created
  ==========================================================================*/
 
