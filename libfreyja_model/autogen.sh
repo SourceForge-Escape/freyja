@@ -7,6 +7,7 @@
 # 
 # /bin/sh INSTALL
 
+rm -f depend
 make debug
 #make install
 echo

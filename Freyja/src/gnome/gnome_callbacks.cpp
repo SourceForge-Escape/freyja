@@ -331,6 +331,9 @@ void freyja_event2i_interface_listener(int event, int cmd)
 	case EVENT_MISC:
 		switch (cmd)
 		{
+		case CMD_MISC_ABOUT:
+			dialog_about_create();
+			break;
 		case 1000:
 			gFreyjaModel->Transform(FreyjaModel::TransformMesh, Egg::SCALE,
 									spinbutton_value_get_float(1001, &error),
@@ -462,8 +465,8 @@ gint window_destroy(GtkWidget *widget)
 
 void animation_tree_item_selected(GtkWidget *item, gpointer event_id)
 {
-  event_print("animation_tree_item_selected> got id %i", 
-				  GPOINTER_TO_INT(event_id));
+	event_print("animation_tree_item_selected> got id %i",
+				GPOINTER_TO_INT(event_id));
 }
 
 
@@ -908,18 +911,13 @@ void file_dialog_event(char *title, int mode)
 
 void new_model_event(GtkMenuItem *menuitem, gpointer user_data)
 {
-  freyja_event2i(EVENT_MAIN, CMD_MAIN_NEW_MODEL);
+	freyja_event2i(EVENT_MAIN, CMD_MAIN_NEW_MODEL);
 }
 
 
 void open_palette_event(GtkMenuItem *menuitem, gpointer user_data)
 {
 	file_dialog_event("Open Palette", FREYJA_MODE_LOAD_PALETTE);
-}
-
-void open_emitter_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Open Emitter", FREYJA_MODE_LOAD_EMITTER);
 }
 
 
@@ -959,45 +957,9 @@ void save_as_material_event(GtkMenuItem *menuitem, gpointer user_data)
 }
 
 
-void save_as_emitter_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Save Emitter As...", FREYJA_MODE_SAVE_EMITTER);
-}
-
-
 void exit_event(GtkMenuItem *menuitem, gpointer user_data)
 {
 	gtk_guard_shutdown();
-}
-
-
-void cut_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-}
-
-
-void copy_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-}
-
-
-void paste_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-}
-
-
-void clear_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-}
-
-
-void properties_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-}
-
-
-void preferences_event(GtkMenuItem *menuitem, gpointer user_data)
-{
 }
 
 
@@ -1006,7 +968,7 @@ void about_event(GtkMenuItem *menuitem, gpointer user_data)
 	GtkWidget *about;
 
 
-	about = about_create();
+	about = dialog_about_create();
 	gtk_widget_show(about);
 }
 

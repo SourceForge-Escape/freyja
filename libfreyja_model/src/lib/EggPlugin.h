@@ -49,12 +49,14 @@
 #include "Egg.h"
 
 
+// Texel -> TexCoord ( I don't use texels anymore for years! )
+
 #define GEGG_PLUGIN_VERSION  "0.0.3"
 #define FREYJA_LIST_RESET    -2
 #define FREYJA_LIST_NEXT     -1
 #define FREYJA_LIST_CURRENT  -3
 #define FREYJA_LIST_SIZE     -4
-#define PLUGIN_ERROR         4294967295U
+#define PLUGIN_ERROR         4294967295U  // FREYJA_ERROR
 
 
 typedef enum {
@@ -72,7 +74,8 @@ typedef enum {
 	FREYJA_GROUP,
 	FREYJA_VERTEX,
 	FREYJA_TEXEL,
-	FREYJA_MESHTREE_ANIM
+	FREYJA_MESHTREE_ANIM//,
+	//FREYJA_VERTEX_FRAME
 	
 } egg_plugin_t;
 

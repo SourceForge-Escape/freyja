@@ -39,9 +39,9 @@
 #include "gnome_resource.h"
 #include "freyja_events.h"
 
-#define AUTHOR "Terry 'Mongoose' Hendrix II <mongoose@users.sourceforge.net>"
-#define COPYRIGHT_NOTICE "Copyright (c) 2000-2002 by Terry 'Mongoose' Hendrix II"
-#define ABOUT_RANT "Freyja is an Open Source 3d modeler, animator, and particle editor.\nSend bug reports and feature requests via email, irc, or use the bug forms at the web site:\n* http://gooseegg.sourceforge.net\n* irc://irc.linux.com/#freyja\n* mongoose@users.sourceforge.net"
+#define AUTHOR "Terry 'Mongoose' Hendrix II <mongoose@icculus.org>"
+#define COPYRIGHT_NOTICE "Freyja Copyright (c) 2002-2004 by Terry 'Mongoose' Hendrix II"
+#define ABOUT_MESSAGE "Freyja is an Open Source 3d modeling system.\nSend bug reports and feature requests:\n<small>  * http://icculus.org/freyja\n  * irc://irc.freenode.net/#freyja\n  * mongoose@icculus.org</small>"
 
 
 // Mongoose 2002.01.21, FIXME should use rc_mapped pathname
@@ -55,9 +55,69 @@ void demangle_pixmap_name(char *dest, char *icon_name)
 #endif
 }
 
-
+/////////////////////////////////////////////////////////////
+// Dialogs
 /////////////////////////////////////////////////////////////
 
+GtkWidget* dialog_about_create()
+{
+	GtkWidget *about, *version, *author, *message, *copyright;
+	
+	about = gtk_dialog_new();
+	version = gtk_label_new(BUILD_NAME);
+	author = gtk_label_new(AUTHOR);
+	gtk_label_set_selectable(GTK_LABEL(author), TRUE);
+	message = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(message), ABOUT_MESSAGE);
+	gtk_label_set_selectable(GTK_LABEL(message), TRUE);
+	copyright = gtk_label_new(COPYRIGHT_NOTICE);
+
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), version);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), message);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), copyright);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), author);
+	gtk_dialog_add_button(GTK_DIALOG(about), GTK_STOCK_CLOSE, 1);
+	gtk_widget_show_all(about);
+
+
+	// Force user to close this 
+	gtk_dialog_run(GTK_DIALOG(about));
+	gtk_widget_destroy(about);
+
+	return NULL; //about;
+}
+
+
+GtkWidget *dialog_color_picker_create(char *title, void *event_func)
+{
+	GtkWidget *dialog =  gtk_color_selection_dialog_new(title);
+	gtk_widget_show(dialog);
+
+	if (event_func)
+	{
+		gtk_signal_connect(GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(dialog)->cancel_button),
+						   "pressed",
+						   GTK_SIGNAL_FUNC(event_func),
+						   GINT_TO_POINTER(0));
+
+		gtk_signal_connect(GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(dialog)->ok_button),
+						   "pressed",
+						   GTK_SIGNAL_FUNC(event_func),
+						   GINT_TO_POINTER(1));
+
+		gtk_signal_connect(GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(dialog)->help_button), 
+						   "pressed",
+						   GTK_SIGNAL_FUNC(event_func),
+						   GINT_TO_POINTER(2));
+	}
+
+	return dialog;
+}
+
+
+/////////////////////////////////////////////////////////////
+// Widgets
+/////////////////////////////////////////////////////////////
 
 GtkWidget *text_entry_create(GtkWidget *box)
 {
@@ -349,13 +409,6 @@ GtkWidget *toolbar_btn(GtkWidget *toolbar,
 }
 
 
-#if defined(USING_GTK_1_2) || defined(USING_GTK_2_0)
-GtkWidget* about_create()
-{
-	return NULL;
-}
-
-
 FILE *get_log_file()
 {
 	static FILE *f = fopen("/tmp/Freyja.log", "w");
@@ -473,7 +526,6 @@ GtkWidget *window_create()
 
 	return window;
 }
-#endif
 
 
 int main(int argc, char *argv[])

@@ -767,7 +767,7 @@ int freyja_model__ase_import(char *filename)
 		/* Generates id translator list */
 		trans2.Add(i, t);
 	}
-	
+
 	for (i = 0; (int)i < ase.mFaceCount; ++i)
 	{
 		/* Start a new polygon */
@@ -775,11 +775,21 @@ int freyja_model__ase_import(char *filename)
 
 		/* Store vertices and texels by true id, using translator lists */
 		eggVertex1i(trans[ase.mFaces[i].vertIndex[0]]);
-		eggTexel1i(trans2[ase.mFaces[i].uvwIndex[0]]);
 		eggVertex1i(trans[ase.mFaces[i].vertIndex[1]]);
-		eggTexel1i(trans2[ase.mFaces[i].uvwIndex[1]]);
 		eggVertex1i(trans[ase.mFaces[i].vertIndex[2]]);
-		eggTexel1i(trans2[ase.mFaces[i].uvwIndex[2]]);
+
+		if (!ase.mUVWCount)
+		{
+			eggTexel1i(eggTexelStore2f(0.0, 0.5));
+			eggTexel1i(eggTexelStore2f(0.5, 0.5));
+			eggTexel1i(eggTexelStore2f(0.0, 0.0));			
+		}
+		else
+		{
+			eggTexel1i(trans2[ase.mFaces[i].uvwIndex[0]]);
+			eggTexel1i(trans2[ase.mFaces[i].uvwIndex[1]]);
+			eggTexel1i(trans2[ase.mFaces[i].uvwIndex[2]]);
+		}
 		
 		eggTexture1i(textureId);
 		

@@ -23,11 +23,9 @@
 #include <freyja_model/EggPlugin.h>
 #include <stdio.h>
 
-//extern "C" {
-#include <lib3ds/file.h>
-#include <lib3ds/mesh.h>
-#include <lib3ds/vector.h>
-	//}
+#include "3ds.h"
+
+
 
 /* Export as C functions */
 extern "C" {
@@ -36,6 +34,7 @@ extern "C" {
 	int freyja_model__3ds_import(char *filename);
 	int freyja_model__3ds_export(char *filename);
 }
+
 
 int freyja_model__3ds_check(char *filename)
 {
@@ -66,26 +65,35 @@ int freyja_model__3ds_import(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
 	Map<unsigned int, unsigned int> trans2;
-	Lib3dsMesh *m;
-	Lib3dsVector pos;
-	Lib3dsFile *f = NULL;
-	int points = 0;
-	int faces = 0;
-	unsigned int i, t, v;
+	unsigned int i, t, v, o;
 
-
-	f = lib3ds_file_load(filename);
 	
-	if (!f)
+	if (freyja_model__3ds_check(filename) < 0)
 	{
 		fprintf(stderr, "freyja_model__3ds_import> Failed to load file\n");
 		return -1;
 	}
-  
-	lib3ds_file_eval(f, 0);
 
-	for (m = f->meshes; m; m = m->next) 
+	File3ds tds(filename);
+
+	//word		numFaces		(word object);
+	//word		numVertices		(word object);
+	//XYZ3DS	getOrigin		(word object);
+	//XYZ3DS	getMidpoint		(word object);
+	//char* 	getName			(word object);
+	//Face3DS*	getFaceHead		(word object);
+	//XYZ3DS*	getVertexHead	(word object);
+	//MatMap*	getMatMap		(word object);
+	
+	for (o = 0; o < tds.numObjects(); ++o) 
 	{
+        XYZ3DS *verts = tds.getVertexHead(o);
+		MatMap *uvs = tds.getMatMap(o);
+		Face3DS *faces = tds.getFaceHead(o);
+		unsigned int vertCount = tds.numVertices(o);
+		unsigned int faceCount = tds.numFaces(o);
+		
+
 		// Start a new mesh
 		eggBegin(FREYJA_MESH);
 		
@@ -94,64 +102,64 @@ int freyja_model__3ds_import(char *filename)
 		
 		// Clear for each group
 		trans.Clear();
-        
-		for (i = 0; i < m->points; i++) 
+
+		for (i = 0; i < vertCount; i++) 
 		{
-			lib3ds_vector_transform(pos, m->matrix, m->pointL[i].pos);
-			
 			// Store vertices in group
-			v = eggVertexStore3f(pos[0], pos[1], pos[2]);
+			v = eggVertexStore3f(verts[i].x, verts[i].z, -verts[i].y); // XZY
 			
 			// Generates id translator list
 			trans.Add(i, v);
 		}
 		
-		if (m->texels)
-		{
-			for (i = 0; i < m->texels; i++) 
-			{
-				t = eggTexelStore2f(m->texelL[i][0], m->texelL[i][1]);
-				trans2.Add(i, t);
-			}
-		}
-		else
-		{
-			for (i = 0; i < m->points; i++) 
-			{
-				t = eggTexelStore2f(0.5, 0.5);
-				trans2.Add(i, t);
-			}
-		}
+		eggEnd(); // GROUP
 		
-		eggEnd(); // group
-		
-		for (i = 0; i < m->faces; i++) 
+		for (i = 0; i < faceCount; i++) 
 		{
 			// Start a new polygon
 			eggBegin(FREYJA_POLYGON);
 			
 			// Store vertices by true id, using translator list
-			eggVertex1i(trans[m->faceL[i].points[0]]);
-			eggVertex1i(trans[m->faceL[i].points[1]]);
-			eggVertex1i(trans[m->faceL[i].points[2]]);
+			eggVertex1i(trans[faces[i].vcA]);
+			eggVertex1i(trans[faces[i].vcB]);
+			eggVertex1i(trans[faces[i].vcC]);
 
 			// Store texels by true id, using translator list
-			eggTexel1i(trans2[m->faceL[i].points[0]]);
-			eggTexel1i(trans2[m->faceL[i].points[1]]);
-			eggTexel1i(trans2[m->faceL[i].points[2]]);
+			if (uvs)
+			{
+				t = eggTexelStore2f(uvs[faces[i].vcA].U, uvs[faces[i].vcA].V);
+				eggTexel1i(t);
+				t = eggTexelStore2f(uvs[faces[i].vcB].U, uvs[faces[i].vcB].V);
+				eggTexel1i(t);
+				t = eggTexelStore2f(uvs[faces[i].vcC].U, uvs[faces[i].vcC].V);
+				eggTexel1i(t);				
+			}
+			else
+			{
+				t = eggTexelStore2f(0.0, 0.5);
+				eggTexel1i(t);
+				t = eggTexelStore2f(0.5, 0.5);
+				eggTexel1i(t);
+				t = eggTexelStore2f(0.0, 0.0);
+				eggTexel1i(t);
+			}
 
-			eggTexture1i(0);
+			if (faces[i].material)
+			{
+				t = eggTextureStoreFilename(faces[i].material->texture1.filename);
+				eggTexture1i(t);
+			}
+			else
+			{
+				eggTexture1i(0);
+			}
 
 			eggEnd(); // polygon
 		}
 
 		eggEnd(); // mesh
-
-		points += m->points;
-		faces += m->faces;
 	}
 
-	lib3ds_file_free(f);
 	return 0;
 }
 

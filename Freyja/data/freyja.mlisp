@@ -132,8 +132,6 @@
 			(menu_item "Select"    EVENT_BONE CMD_BONE_SELECT)
 			(menu_item "Move"      EVENT_BONE CMD_BONE_MOVE_PIVOT))
 
-		(menu_seperator)
-
 		(submenu "Generate Mesh"
 			(menu_item "Generate Normals"  EVENT_MISC CMD_MISC_GEN_NORMALS)
 			(menu_item "Cube"     EVENT_MESH  CMD_MESH_GENERATE_CUBE)
@@ -141,8 +139,11 @@
 			(menu_item "Cylinder" EVENT_MESH  CMD_MESH_GENERATE_CAN)
 			(menu_item "Sphere"   EVENT_MESH  CMD_MESH_GENERATE_SPHERE))
 
+		(menu_seperator)
+
 		(submenu "Misc"
-			(menu_item "Screen shot"  EVENT_MISC CMD_MISC_SCREENSHOT))))
+			(menu_item "Screen shot"  EVENT_MISC CMD_MISC_SCREENSHOT)
+			(menu_item "About"  EVENT_MISC CMD_MISC_ABOUT))))
 
 		;; Toolbar visible from all modes
 		(hbox 0 1 0 1 0
@@ -159,6 +160,10 @@
 				(toolbar_togglebutton false "wireframe.png" "Wireframe" 
 					"Wireframe render mode"
 					EVENT_FREYJA_MODE FREYJA_MODE_RENDER_WIREFRAME)
+
+				(toolbar_togglebutton false "normals.png" "Normals" 
+					"Normals render mode"
+					EVENT_FREYJA_MODE FREYJA_MODE_RENDER_NORMALS)
 
 				(toolbar_togglebutton true "solid.png" "Faces"
 					"Solid face render mode" 

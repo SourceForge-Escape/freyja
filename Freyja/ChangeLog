@@ -28,6 +28,9 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+	* About dialog back
+	* Normal vector rendering mode
+	
  Freyja (0.3.5-20040422) Mongoose <mongoose@icculus.org>
 	
 	* New material managing system starting

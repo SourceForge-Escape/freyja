@@ -60,7 +60,6 @@ Matrix::~Matrix()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-
 bool Matrix::getInvert(matrix_t out)
 {
 	matrix_t m;
@@ -195,7 +194,7 @@ void Matrix::getMatrix(matrix_t mat)
 	copy(mMatrix, mat);
 }
 
-
+// row order - returns col
 void Matrix::getTransposeMatrix(matrix_t m)
 {
 	m[ 0]= mMatrix[0]; m[ 1]= mMatrix[4]; m[ 2]= mMatrix[ 8]; m[ 3]=mMatrix[12];
@@ -229,50 +228,50 @@ Vector3d Matrix::operator *(Vector3d v)
 
 #ifdef COLUMN_ORDER
 	// Column order
-	return Vector3d(mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12],
-						 mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13],
-						 mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14]);
+	return Vector3d(mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[ 3],
+					mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[ 7],
+					mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[11]);
 #else
 	// Row order
-	return Vector3d(mMatrix[0]*x + mMatrix[1]*y + mMatrix[ 2]*z + mMatrix[ 3],
-						 mMatrix[4]*x + mMatrix[5]*y + mMatrix[ 6]*z + mMatrix[ 7],
-						 mMatrix[8]*x + mMatrix[9]*y + mMatrix[10]*z + mMatrix[11]);
+	return Vector3d(mMatrix[0]*x + mMatrix[1]*y + mMatrix[ 2]*z + mMatrix[12],
+					mMatrix[4]*x + mMatrix[5]*y + mMatrix[ 6]*z + mMatrix[13],
+					mMatrix[8]*x + mMatrix[9]*y + mMatrix[10]*z + mMatrix[14]);
 #endif
 }
 
 
+// row order
 void Matrix::multiply3v(vec3_t v, vec3_t result)
 {
 	vec_t x = v[0], y = v[1], z = v[2];
 
 
-   result[0] = mMatrix[0]*x + mMatrix[1]*y + mMatrix[ 2]*z + mMatrix[ 3];
-	result[1] = mMatrix[4]*x + mMatrix[5]*y + mMatrix[ 6]*z + mMatrix[ 7];
-	result[2] = mMatrix[8]*x + mMatrix[9]*y + mMatrix[10]*z + mMatrix[11];
+	result[0] = mMatrix[0]*x + mMatrix[1]*y + mMatrix[ 2]*z + mMatrix[12];
+	result[1] = mMatrix[4]*x + mMatrix[5]*y + mMatrix[ 6]*z + mMatrix[13];
+	result[2] = mMatrix[8]*x + mMatrix[9]*y + mMatrix[10]*z + mMatrix[14];
 }
 
-
+// row order
 void Matrix::multiply4d(double *v, double *result)
 {
 	double x = v[0], y = v[1], z = v[2], w = v[3];
 
 
-   result[0] = mMatrix[ 0]*x + mMatrix[ 1]*y + mMatrix[ 2]*z + mMatrix[ 3]*w;
-	result[1] = mMatrix[ 4]*x + mMatrix[ 5]*y + mMatrix[ 6]*z + mMatrix[ 7]*w;
-	result[2] = mMatrix[ 8]*x + mMatrix[ 9]*y + mMatrix[10]*z + mMatrix[11]*w;
-	result[3] = mMatrix[12]*x + mMatrix[13]*y + mMatrix[14]*z + mMatrix[15]*w;
+	result[0] = mMatrix[ 0]*x + mMatrix[ 1]*y + mMatrix[ 2]*z + mMatrix[12]*w;
+	result[1] = mMatrix[ 4]*x + mMatrix[ 5]*y + mMatrix[ 6]*z + mMatrix[13]*w;
+	result[2] = mMatrix[ 8]*x + mMatrix[ 9]*y + mMatrix[10]*z + mMatrix[14]*w;
+	result[3] = mMatrix[ 3]*x + mMatrix[ 7]*y + mMatrix[11]*z + mMatrix[15]*w;
 }
 
-
+// row order
 void Matrix::multiply4v(vec4_t v, vec4_t result)
 {
 	vec_t x = v[0], y = v[1], z = v[2], w = v[3];
-
 	
-   result[0] = mMatrix[ 0]*x + mMatrix[ 1]*y + mMatrix[ 2]*z + mMatrix[ 3]*w;
-	result[1] = mMatrix[ 4]*x + mMatrix[ 5]*y + mMatrix[ 6]*z + mMatrix[ 7]*w;
-	result[2] = mMatrix[ 8]*x + mMatrix[ 9]*y + mMatrix[10]*z + mMatrix[11]*w;
-	result[3] = mMatrix[12]*x + mMatrix[13]*y + mMatrix[14]*z + mMatrix[15]*w;
+	result[0] = mMatrix[ 0]*x + mMatrix[ 1]*y + mMatrix[ 2]*z + mMatrix[12]*w;
+	result[1] = mMatrix[ 4]*x + mMatrix[ 5]*y + mMatrix[ 6]*z + mMatrix[13]*w;
+	result[2] = mMatrix[ 8]*x + mMatrix[ 9]*y + mMatrix[10]*z + mMatrix[14]*w;
+	result[3] = mMatrix[ 3]*x + mMatrix[ 7]*y + mMatrix[11]*z + mMatrix[15]*w;
 }
 
 
@@ -293,12 +292,12 @@ void Matrix::print()
 #endif
 }
 
-
+// row order
 bool Matrix::isIdentity()
 {
 	// Hhhmm... floating point using direct comparisions
 	if (mMatrix[ 0] == 1 && mMatrix[ 1] == 0 && mMatrix[ 2] == 0 && 
-		 mMatrix[ 3] == 0 &&	mMatrix[ 4] == 0 && mMatrix[ 5] == 1 && 
+		 mMatrix[ 3] == 0 && mMatrix[ 4] == 0 && mMatrix[ 5] == 1 && 
 		 mMatrix[ 6] == 0 && mMatrix[ 7] == 0 && mMatrix[ 8] == 0 && 
 		 mMatrix[ 9] == 0 && mMatrix[10] == 1 && mMatrix[11] == 0 &&
 		 mMatrix[12] == 0 && mMatrix[13] == 0 && mMatrix[14] == 0 && 
@@ -318,7 +317,7 @@ void Matrix::setMatrix(matrix_t mat)
 	copy(mat, mMatrix);
 }
 
-
+// row order
 void Matrix::setIdentity()
 {
 	mMatrix[ 0] = 1; mMatrix[ 1] = 0; mMatrix[ 2] = 0; mMatrix[ 3] = 0;
@@ -328,12 +327,12 @@ void Matrix::setIdentity()
 }
 
 
-void Matrix::scale(const vec_t *xyz)
+void Matrix::scale(const vec3_t xyz)
 {
 	scale(xyz[0], xyz[1], xyz[2]);
 }
 
-
+// row order
 void Matrix::scale(vec_t sx, vec_t sy, vec_t sz)
 {
    matrix_t smatrix;
@@ -350,12 +349,13 @@ void Matrix::scale(vec_t sx, vec_t sy, vec_t sz)
 }
 
 
-void Matrix::rotate(const vec_t *xyz)
+void Matrix::rotate(const vec3_t xyz)
 {
 	rotate(xyz[0], xyz[1], xyz[2]);
 }
 
 
+// row order
 void Matrix::rotate(vec_t ax, vec_t ay, vec_t az)
 {
    matrix_t xmat, ymat, zmat, tmp, tmp2;
@@ -382,12 +382,12 @@ void Matrix::rotate(vec_t ax, vec_t ay, vec_t az)
 }
 
 
-void Matrix::translate(const vec_t *xyz)
+void Matrix::translate(const vec3_t xyz)
 {
 	translate(xyz[0], xyz[1], xyz[2]);
 }
 
-
+// row order
 void Matrix::translate(vec_t tx, vec_t ty, vec_t tz)
 {
    matrix_t tmat, tmp;
@@ -398,8 +398,8 @@ void Matrix::translate(vec_t tx, vec_t ty, vec_t tz)
    tmat[ 8]=0;  tmat[ 9]=0;  tmat[10]=1;  tmat[11]=0;
    tmat[12]=tx; tmat[13]=ty; tmat[14]=tz; tmat[15]=1;
 
-	copy(mMatrix, tmp);
-	multiply(tmp, tmat, mMatrix);
+	multiply(mMatrix, tmat, tmp);
+	copy(tmp, mMatrix);
 }
 
 
@@ -427,8 +427,8 @@ void Matrix::copy(matrix_t source, matrix_t dest)
 	dest[ 6] = source[ 6];
 	dest[ 7] = source[ 7];
 
-	dest[ 8] = source[8];
-	dest[ 9] = source[9];
+	dest[ 8] = source[ 8];
+	dest[ 9] = source[ 9];
 	dest[10] = source[10];
 	dest[11] = source[11];
 

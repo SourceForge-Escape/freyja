@@ -32,6 +32,7 @@ enum
 };
 
 
+GtkWidget *getGtkMainWindow();
 GtkWidget *getGtkGLAreaWidget();
 GtkWidget *getGtkStatusBarWidget();
 

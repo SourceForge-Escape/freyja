@@ -170,6 +170,14 @@ void FreyjaControl::Event(int mode, int cmd)
 							"ON" : "OFF");
 			event_refresh();
 			break;
+		case FREYJA_MODE_RENDER_NORMALS:
+			_render->Flags(FreyjaRender::RENDER_NORMALS, 
+								!(_render->Flags() & FreyjaRender::RENDER_NORMALS));
+			event_print("Normal Rendering [%s]", 
+							(_render->Flags() & FreyjaRender::RENDER_NORMALS) ? 
+							"ON" : "OFF");
+			event_refresh();
+			break;
 		case FREYJA_MODE_RENDER_LIGHTING:
 			_render->Flags(FreyjaRender::RENDER_NORMAL, 
 								!(_render->Flags() & FreyjaRender::RENDER_NORMAL));
