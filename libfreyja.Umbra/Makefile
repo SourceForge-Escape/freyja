@@ -262,6 +262,60 @@ et.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+grn.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=grn \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/freyja_grn.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/grannyfile.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/GrannyStream.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnanim.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnbones.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnboneties.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnitemlist.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnmatrix.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnmeshes.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnobjects.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grntextchunk.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grntextureinfos.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grntextures.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnunhandled.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+grnX.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=grnX \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/GRNModel.p" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+halflifeX.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=halflifeX \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/MDLModel.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/MathLib.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+halflife.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=halflife \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/HalfLife.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+lwo.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=lwo \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Lwo.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
 md2.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -294,13 +348,13 @@ meshgen.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
-python.so:
+nod.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=python \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/python.o" \
+	MOD_NAME=nod \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/nod.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3 -z defs"
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 obj.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -310,6 +364,22 @@ obj.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+psk.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=psk \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/PSKModel.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+python.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=python \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/python.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3 -z defs"
+
 smd.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -318,7 +388,29 @@ smd.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
-plugins-model: 3ds.so ase.so eggv7.so et.so md2.so md5.so python.so obj.so smd.so
+tombraider.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=tombraider \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/TombRaider.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/tombraider.o" \
+	CFLAGS="$(MODULE_CFLAGS) -DZLIB_SUPPORT" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lz -lm"
+
+trmesh.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=trmesh \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/trmesh.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+
+plugins-model-exp2: grnX.so halflifeX.so
+
+plugins-model-exp: eggv8.so lwo.so nod.so tombraider.so trmesh.so
+
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so md2.so md5.so psk.so python.so obj.so smd.so
 
 
 ######################################################################
