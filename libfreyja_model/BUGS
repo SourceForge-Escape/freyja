@@ -1,69 +1,14 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : BUGS  ( Last Audit: 2001-11-03 )
+  File     : BUGS  ( Last Audit: 2004.05.04 )
   Author   : Terry 'Mongoose' Hendrix II
-  Project  : Freyja
+  Project  : libfreyja_model
 
    Sending Bug reports:
    Send your system.info file and any other specs that would be helpful
    including: stack trace, libc version, graphics driver,  windowing 
-   system version, and distrobution/OS.  Please note all code that 
-   requires the tag EXPERIMENTAL is considered unstable and may not be 
-   listed here.
-
-   If your bug is listed send the bug id and number below as well as any
-   new data.  Please submit the bug to the web site's bug db if you can.  
-
-   http://gooseegg.sourceforge.net
+   system version, and distrobution/OS.
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- ----------------------------------------------------------
-   O P E N
 
-   id. Date opened
-       Description of bug
- ----------------------------------------------------------
-
-  019. 2001.11.03 Mongoose
-       ASE export doesn't handle n:1 texels to vertices
-
-
-  019. 2001.10.29 Mongoose
-       NOB import is broken...
-
-
-  017. 2001.10.29 Mongoose
-       Turns out HalfLife/CS specs are grossly invalid, so
-       I'm dropping support CLOSES 004
-       
-
-  016. ?? Mongoose
-       MDL export isn't ported to EggPlugin (disabled)
-       MDL export isn't complete
-       + Work around: Load the just saved MDL, then
-         save it agian ( This realigns the vertices 
-         and bbox correctly, and reload texture
-         to avoid the black 'wash' out )
-       + Maybe if I checked for st polys crossing
-         w/2 I could find 'onseam' polygons and remap
-
- ----------------------------------------------------------
-   C L O S E D
-
-   id. Date closed / opened
-       Description of bug
- ----------------------------------------------------------
-
-  018. 2001.10.31 / 2001.10.29 Mongoose
-       LWO import is broken...
-
-
-  015. 2001.11.03 / ?? Mongoose
-       ASE export isn't complete
-       + One problem is that I don't even have full specs
-       + Having problems with texel indeces saving too
-
-
-  004. 2001.10.29 / ?? Mongoose
-       Bad trifan loading in EXP HalfLife::Load() ?

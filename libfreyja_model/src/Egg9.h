@@ -87,47 +87,34 @@
 
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
-
 #include <hel/math.h>
+#include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 
 
-#define EGG_LIB_VERSION        0x30302E39  // '9.00'
+#define EGG_LIB_VERSION 0x30302E39  /* Library ABI Version '9.00' */
 
-/* File header, versioning */
-#define EGG_FILE               0x20676745  // 'EGG '
-#define EGG_VERSION            0x30302E39  // '9.00'
-#define EGG_8_12               0x32312E38  // '8.12'
+typedef enum {
+	EGG_MAGIC      = 0x20676745,  /* File header, versioning 'EGG ' */
+	EGG_VERSION    = 0x30302E39,  /* '9.00' */
 
-/* Atomic model componets */
-#define EGG_VERT_CHUNK_START   0x54524556
-#define EGG_VERT_CHUNK_END     0x56455254
-#define EGG_TEXL_CHUNK_START   0x4C584554
-#define EGG_TEXL_CHUNK_END     0x5445584C
-#define EGG_MARK_CHUNK_START   0x4B52414D
-#define EGG_MARK_CHUNK_END     0x4D41524B
+	EGG_VERT_CHUNK = 0x54524556,  /* Atomic model componets */
+	EGG_UVWS_CHUNK = 0x53575655,
+	EGG_NORM_CHUNK = 0x4D524F4E,
+	EGG_META_CHUNK = 0x4154454D,
 
-/* Polygon Mesh */
-#define EGG_POLY_CHUNK_START   0x594C4F50
-#define EGG_POLY_CHUNK_END     0x504F4C59
-#define EGG_MESH_CHUNK_START   0x4853454D
-#define EGG_MESH_CHUNK_END     0x4D455348
+	EGG_POLY_CHUNK = 0x594C4F50,  /* Polygon mesh */
+	EGG_MESH_CHUNK = 0x4853454D,
 
-/* Tags aka 'bolt ons' */
-#define EGG_BTAG_CHUNK_START   0x47415442
-#define EGG_BTAG_CHUNK_END     0x42544147
-#define EGG_TFRM_CHUNK_START   0x4D524654
-#define EGG_TFRM_CHUNK_END     0x5446524D
-#define EGG_AFRM_CHUNK_START   0x4D524641
-#define EGG_AFRM_CHUNK_END     0x4146524D
+	EGG_BONE_CHUNK = 0x454E4F42,  /* Skeletal system */
+	EGG_SKEL_CHUNK = 0x4C454B53,
+	EGG_WGHT_CHUNK = 0x54484757,
 
-/* 'Real' bones aka skeletal models w/ weighted vertices */
-#define EGG_BONE_CHUNK_START   0x454E4F42
-#define EGG_BONE_CHUNK_END     0x424F4E45
-#define EGG_BFRM_CHUNK_START   0x4D524642
-#define EGG_BFRM_CHUNK_END     0x4246524D
-#define EGG_WGHT_CHUNK_START   0x54484757
-#define EGG_WGHT_CHUNK_END     0x57474854
+	EGG_BTAG_CHUNK = 0x47415442,  /* Mesh tree system */
+	EGG_TFRM_CHUNK = 0x4D524654,
+	EGG_AFRM_CHUNK = 0x4D524641
+
+} egg_chunk_t;
 
 
 typedef struct {
@@ -135,9 +122,10 @@ typedef struct {
 
 	unsigned int type;
 	unsigned int size;
-
+	void *data;
 
 } egg_metadata_t;
+
 
 typedef struct {
 	vec_t weight;                     /* Weight for vertex use */
@@ -209,10 +197,8 @@ typedef struct egg_bone_s {
 	Vector <unsigned int> children;  /* Children bones */
 	Vector <unsigned int> meshes;    /* Meshes bound to this bone */
 
-	Vector3d position;               /* Pivot point, center of rotation */
-	Vector3d rotation;               /* Rotation on XYZ axies in degrees  */
-
-	Matrix matrix;                   /* Transform mesh/slaves by this matrix */
+	Matrix matrix;
+	Matrix transform;                /* Transform mesh/children */
 } egg_bone_t;
 
 
@@ -245,23 +231,10 @@ typedef struct {
 	// bones
 	// animations
 	// metadata
+	// materials
 
 } egg_model_t;
 
-#ifndef __print_unsigned_int
-void __print_unsigned_int(unsigned int u);
-#endif
-void __print_egg_vertex_t(egg_vertex_t *v);
-void __print_egg_texcoord_t(egg_texcoord_t *t);
-void __print_egg_polygon_t(egg_polygon_t *p);
-/*!----------------------------------------
- * Created  : 2001-05-15, Mongoose
- * Modified : 
- * 
- * Pre  : 
- * Post : Various List support functions
- *        for local data types
- -----------------------------------------*/
 
 class Egg
 {
@@ -412,15 +385,21 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void combine(egg_type_t type, unsigned int a, unsigned int b);
+	bool combineTexcoords(unsigned int a, unsigned int b);
+	bool combineVertices(unsigned int a, unsigned int b);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Combines TYPE object A and B in model
+	 * Post : Combines object A and B in model
 	 *
 	 *        Destroys A and B then replaces them with new 
 	 *        object with index A where: A = A + B
 	 *
+	 *        Returns true on sucess
+	 *
 	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.04:
+	 * Mongoose - Hard ABI back
 	 *
 	 * 2004.04.08:
 	 * Mongoose - New generic API that supports all types 
@@ -1093,12 +1072,27 @@ private:
 	 * Post : Loads tag chunk from disk file
 	 -----------------------------------------*/
 
-	void printDebug(unsigned int level, char *s, ...);
+	bool isDebugLevel(unsigned int level);
 	/*------------------------------------------------------
-	 * Pre  : String, level, and args are valid
-	 * Post : Report debug messages to stdout
+	 * Pre  : 
+	 * Post : Returns true if debug level is greater or equal
 	 *
 	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Created, split from printDebug
+	 ------------------------------------------------------*/
+
+	virtual void print(char *s, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Removed internal level check for speed
+	 *            and lower overhead, new ABI was printDebug
 	 *
 	 * 2002.07.05: 
 	 * Mongoose - Debug level
@@ -1110,9 +1104,9 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void printError(char *s, ...);
+	virtual void printError(char *s, ...);
 	/*------------------------------------------------------
-	 * Pre  : String and args are valid
+	 * Pre  : Format string and args are valid
 	 * Post : Report an error to stderr
 	 *
 	 *-- History ------------------------------------------
@@ -1173,5 +1167,21 @@ private:
 
 	unsigned int mDebugLevel;                /* Set debug output at runtime */
 };
+
+
+#ifndef __print_unsigned_int
+void __print_unsigned_int(unsigned int u);
+#endif
+void __print_egg_vertex_t(egg_vertex_t *v);
+void __print_egg_texcoord_t(egg_texcoord_t *t);
+void __print_egg_polygon_t(egg_polygon_t *p);
+/*!----------------------------------------
+ * Created  : 2001-05-15, Mongoose
+ * Modified : 
+ * 
+ * Pre  : 
+ * Post : Various List support functions
+ *        for local data types
+ -----------------------------------------*/
 
 #endif

@@ -54,8 +54,8 @@ CONFIGURE_LNK=
 
 ################################################################
 
-BASE_CFLAGS=-Wall -Isrc/lib -Isrc/ds \
-	-Isrc/utils $(CONFIGURE_DEF) \
+BASE_CFLAGS=-Wall -Isrc/lib -Isrc/utils \
+	$(CONFIGURE_DEF) \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
 	$(BASE_DEFS)
 
@@ -135,6 +135,7 @@ clean-obj:
 	@-rm -f $(BUILD_PROF_DIR)/*.o
 	@-rm -f $(BUILD_DEBUG_DIR)/*.o
 	@-rm -f $(BUILD_RELEASE_DIR)/*.o
+	@-rm -f $(BUILD_TEST_DIR)/*.o
 	@-echo "[DONE]"
 
 clean-emacs:
@@ -209,14 +210,29 @@ backup:
 	&& cp $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 ~/Backup
 
 
-################################################################
+##########################################################################
 # Unit tests
-################################################################
+##########################################################################
+TEST=$(BUILDDIR)/$(NAME).test
+
+test: $(TEST)
 
 Egg.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) tests NAME=egg BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Egg.o $(BUILD_TEST_DIR)/mtk3d.o" \
-	CFLAGS="$(BASE_CFLAGS) -g -O0 -DUNIT_TEST_EGG" \
-	LD_FLAGS="-lm -lstdc++"
+	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/Egg.o $(BUILD_TEST_DIR)/EggPlugin.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
+
+Egg9.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/Egg9.o $(BUILD_TEST_DIR)/EggPlugin9.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
+
+$(BUILDDIR)/$(NAME).test : $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
+
+##########################################################################
 

@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
@@ -23,7 +23,7 @@
  *
  * 1999-07-31:
  * Mongoose - Created ( After prototyping in C for a week )
- ==============================================================*/
+ ==========================================================================*/
 
 #include <sys/types.h>
 #include <stdarg.h>
@@ -1159,6 +1159,7 @@ void Egg::delVertex(unsigned int id)
 void Egg::delVertex(egg_vertex_t *v)
 {
 	egg_group_t *grp;
+	unsigned int index;
 
 
 	if (!v)
@@ -1183,6 +1184,9 @@ void Egg::delVertex(egg_vertex_t *v)
 	{
 		grp = mGroups.current();
 
+		if (!grp)
+			continue;
+
 		for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
 		{
 			if (grp->vertex.current() == v->id)
@@ -1192,9 +1196,9 @@ void Egg::delVertex(egg_vertex_t *v)
 		}
 	}
 
-	mVertices.remove(v->id);
-
+	index = v->id;
 	delete v;
+	mVertices.assign(index, 0x0);
 }
 
 
@@ -1206,8 +1210,8 @@ unsigned int Egg::getPolygonCount()
 
 egg_polygon_t *Egg::getPolygon(unsigned int id)
 {
-	if (mPolygons.empty())
-		return NULL;
+	if (mPolygons.empty() || id > mPolygons.end())
+		return 0x0;
   
 	return mPolygons[id];
 }
@@ -1287,7 +1291,9 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 
 void Egg::delPolygon(unsigned int polygon)
 {
-	delPolygon(getPolygon(polygon));
+	egg_polygon_t *poly = getPolygon(polygon);
+
+	delPolygon(poly);
 }
 
 
@@ -1304,6 +1310,10 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 	for (mMeshes.start(); mMeshes.forward(); mMeshes.next())
 	{
 		mesh = mMeshes.current();
+
+		if (!mesh)
+			continue;
+
 		mesh->polygon.remove(polygon->id);
 	}
 
@@ -1323,8 +1333,9 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 			delTexel(texel);
 	}
 
-	mPolygons.remove(polygon->id);  
+	unsigned int index = polygon->id;
 	delete polygon;
+	mPolygons.remove(index);  
 }
 
 
@@ -1415,7 +1426,8 @@ void Egg::delGroup(egg_group_t *group)
 	//        by another group ( but groups may be obsoleted soon )
 	for (group->vertex.start(); group->vertex.forward(); group->vertex.next())
 	{
-		delVertex(group->vertex.current());
+
+		// delVertex(group->vertex.current());
 	}
 
    mGroups.remove(group->id);
@@ -1783,7 +1795,7 @@ void Egg::delMesh(egg_mesh_t *mesh)
 	if (!mesh)
 		return;
 
-	// Unlink groups/frames ( Assumes sole ownder )
+	// Unlink groups/frames ( Assumes sole owner )
 	for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
 	{
 		delGroup(mesh->group.current());
@@ -1794,19 +1806,16 @@ void Egg::delMesh(egg_mesh_t *mesh)
 		delPolygon(mesh->polygon.current());
 	}
 
-	mMeshes.remove(mesh->id);  // unlink from list
-	////////////////////////////////////////////////////////////
-	// Private
-	////////////////////////////////////////////////////////////
-
+	unsigned int index = mesh->id;
 	delete mesh; // delete mesh
+	mMeshes.remove(index);  // unlink from list
 }
 
 
 egg_mesh_t *Egg::getMesh(unsigned int id)
 {
-	if (mMeshes.empty())
-		return NULL;
+	if (mMeshes.empty() || id > mMeshes.end())
+		return 0x0;
 
 	return mMeshes[id];
 }
@@ -2878,7 +2887,7 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 			{
 				vert = getVertex(grp->vertex.current());
 
-				if (!grp)
+				if (!vert)
 					continue;
 
 				m.multiply3v(vert->pos, vert->pos);
@@ -2896,7 +2905,9 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 					count++;
 				}
 				else
+				{
 					resizeBoundingBox(grp, vert->pos);
+				}
 			}
 		}
 	}
@@ -3104,6 +3115,65 @@ void Egg::printError(char *s, ...)
 ////////////////////////////////////////////////////////////
 
 #ifdef UNIT_TEST_EGG
+
+#include "EggPlugin.h"
+
+// Random calls really
+void driver(Egg *egg)
+{
+	unsigned int j, i;
+
+
+	printf("[Egg driver]\n");
+
+	EggPlugin(egg, "~/.freyja/plugins/");
+
+	for (i = 0; i < 20; ++i)
+	{
+		printf("Making sphere %d\n", i);
+		eggGenerateSphere(20, 20, 30);
+		printf("Deleting sphere %d\n", i);
+		egg->delMesh(i);
+	}
+
+	eggGenerateVertexNormals();
+
+	printf("==========================================\n");
+
+	for (i = 0; i < 20; ++i)
+	{
+		printf("Making sphere %d\n", i);
+		eggGenerateSphere(20, 20, 30);
+	}
+
+	printf("==========================================\n");
+
+	for (j = 0; j < 45; ++j)
+	{
+		printf("Deleting sphere %d\n", j);
+		egg->delMesh(j);
+	}
+
+	eggGenerateVertexNormals();
+
+	printf("==========================================\n");
+
+	for (i = 0; i < 20; ++i)
+	{
+		printf("Making sphere %d\n", i);
+		eggGenerateSphere(20, 20, 30);
+
+		for (j = 0; j < 45; ++j)
+		{
+			printf("Deleting sphere %d\n", j);
+			egg->delMesh(j);
+		}
+	}
+
+	eggGenerateVertexNormals();
+}
+
+
 int main(int argc, char *argv[])
 {
 	Egg egg;
@@ -3118,6 +3188,7 @@ int main(int argc, char *argv[])
 		{
 			if (!egg.loadFile(argv[2]))
 				printf("main: Load reports success.\n");
+			return 0;
 		}
 		else if (strcmp(argv[1], "save") == 0)
 		{
@@ -3125,27 +3196,29 @@ int main(int argc, char *argv[])
 
 			if (!egg.saveFile(argv[2]))
 				printf("main: Save reports success.\n");
+			return 0;
 		}
-		else if (strcmp(argv[1], "test") == 0 && argc > 3)
+		else if (strcmp(argv[1], "iotest") == 0 && argc > 3)
 		{
+			driver(&egg);
+
 			if (!egg.loadFile(argv[2]))
 				printf("main: Load reports success.\n");
 			if (!egg.saveFile(argv[3]))
 				printf("main: Save reports success.\n");
 			if (!egg.loadFile(argv[3]))
 				printf("main: Load reports success.\n");
-		}
-		else
-		{
-			printf("\n\n%s [save | load | test] filename.egg [testout.egg]\n", 
-					 argv[0]);
+			
+			return 0;
 		}
 	}
-	else
+	else if (!strcmp(argv[1], "test"))
 	{
-		printf("\n\n%s [save | load | test] filename.egg [testout.egg]\n", 
-				 argv[0]);
+		driver(&egg);
 	}
+	
+	printf("\n\n%s [save | load | test | iotest] filename.egg [iotestout.egg]\n", 
+			 argv[0]);
 
 	return 0;
 }
