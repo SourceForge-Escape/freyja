@@ -116,6 +116,12 @@ int EggFileReader::compareFilenameExtention(const char *filename, const char *ex
 }
 
 
+bool EggFileReader::endOfFile()
+{
+	return (feof(mFileHandle) != 0);
+}
+
+
 bool EggFileReader::doesFileExist(const char *filename)
 {
 	if (!filename || !filename[0])

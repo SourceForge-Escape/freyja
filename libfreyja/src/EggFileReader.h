@@ -80,6 +80,17 @@ class EggFileReader
 	 * Mongoose - Created, from old, old GooseEgg function
 	 ------------------------------------------------------*/
 
+	bool endOfFile();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if at end of file 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.07:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	static bool doesFileExist(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Opens a disk file to determine if it exists

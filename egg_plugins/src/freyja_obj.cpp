@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*==========================================================================
  * 
  * Project : Freyja
@@ -21,105 +22,88 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
+#include <freyja8/EggFileReader.h>
 
 
 extern "C" {
 
-  int freyja_model__obj_check(char *filename);
-  int freyja_model__obj_import(char *filename);
-  int freyja_model__obj_export(char *filename);
+	int freyja_model__obj_check(char *filename);
+	int freyja_model__obj_import(char *filename);
+	int freyja_model__obj_export(char *filename);
 }
 
 
 
 int freyja_model__obj_check(char *filename)
 {
-   unsigned int len_f, len_e;
-  char *ext = ".obj";
+	if (EggFileReader::compareFilenameExtention(filename, ".smd") == 0)
+		return 0;
 
- 
-  len_f = strlen(filename) - 1;
-  len_e = strlen(ext) - 1;
-
-  while (len_f+1 && len_e+1)
-  {
-    if (filename[len_f] == ext[len_e])
-    {
-      if (ext[len_e] == '.')
-      {
-        return 0;
-      }
-    }
-    else if (filename[len_f] < ext[len_e])
-      return -1;
-    else if (filename[len_f] > ext[len_e])
-      return 1;
-
-    len_f--;
-    len_e--;
-  }
-
-  return -1;
+	return -1;
 }
 
 
 int freyja_model__obj_import(char *filename)
 {
-	FILE *f;
-	char t;
-	float x, y, z;
-	int a, b, c;
-	unsigned int i;
+	EggFileReader r;
+	Vector <unsigned int> transV;
+	char *symbol;
+	vec_t x, y, z;
+	int i, a, b, c;
 
-	f = fopen (filename, "rb");
 
-	if (!f)
+	if (!r.openFile(filename))
+	{
 		return -1;
+	}
+
 
 	// Start a new mesh
 	eggBegin(FREYJA_MESH);
+	eggBegin(FREYJA_GROUP);
 
-	while (fscanf(f, "%c", &t) != EOF && t == 'v')
+	while ((symbol = r.parseSymbol()))
 	{
-		// Start a new vertex group
-		eggBegin(FREYJA_GROUP);
+		if (!strncmp(symbol, "v", 1))
+		{
+			x = r.parseFloat();
+			y = r.parseFloat();
+			z = r.parseFloat();
 
-		fscanf(f, "%f %f %f", &x, &y, &z);
-		eggVertexStore3f(x, y, z);
+			transV.pushBack(eggVertexStore3f(x, y, z));
+		}
+		else if (!strncmp(symbol, "f", 1))
+		{
+			// Start a new polygon
+			eggBegin(FREYJA_POLYGON);
 
-		eggEnd(); // FREYJA_GROUP
+			// Format doesn't have UVWs
+			i = eggTexCoordStore2f(0.5, 0.5);
+			eggTexCoord1i(i);
+			i = eggTexCoordStore2f(0.25, 0.25);
+			eggTexCoord1i(i);
+			i = eggTexCoordStore2f(0.5, 0.25);
+			eggTexCoord1i(i);
+
+			a = r.parseInteger();
+			b = r.parseInteger();
+			c = r.parseInteger();
+
+			eggVertex1i(transV[a]);
+			eggVertex1i(transV[b]);
+			eggVertex1i(transV[c]);
+
+			eggTexture1i(0);
+
+			eggEnd(); // FREYJA_POLYGON
+		}
 	}
 
-	while (fscanf(f, "%c", &t) != EOF && t == 'f')
-	{
-		// Start a new polygon
-		eggBegin(FREYJA_POLYGON);
-
-		// Format doesn't have texels
-		i = eggTexelStore2f(0.5, 0.5);
-		eggTexel1i(i);
-		i = eggTexelStore2f(0.5, 0.5);
-		eggTexel1i(i);
-		i = eggTexelStore2f(0.5, 0.5);
-		eggTexel1i(i);
-		
-		fscanf(f, "%i %i %i", &a, &b, &c);
-
-		eggVertex1i(a);
-		eggVertex1i(b);
-		eggVertex1i(c);
-
-		eggTexture1i(0);
-
-		eggEnd(); // FREYJA_POLYGON
-	}
-
+	eggEnd(); // FREYJA_GROUP
 	eggEnd(); // FREYJA_MESH
 
-	fclose(f);
-
-	return 1;
+	return 0;
 }
 
 

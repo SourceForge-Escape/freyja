@@ -17,6 +17,10 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o SMD import/export plugin
+	o Make Egg/Freyja backend's plugins ABI compatible and merge them
+	  into a shared branch
+	o Make plugin to load Egg 8.12 models independent of backend
 	o Vertex morphing animation as extension ( was removed during fork )
 	o Remove all unused/obsolete events, functions, and cmds
 	o Bounding box selection made into 2 events:

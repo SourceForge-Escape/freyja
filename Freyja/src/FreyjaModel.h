@@ -649,6 +649,8 @@ public:
 	bool copySelectedMesh();
 	bool pasteSelectedMesh();
 
+	void deleteAnimationFrame(unsigned int frame);
+
 
 	///////////////////////////////////////////////////////
 	/// FIXME: decide where to put these, then doc ////////

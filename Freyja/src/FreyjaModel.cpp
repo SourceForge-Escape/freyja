@@ -53,6 +53,8 @@ FreyjaModel::FreyjaModel()
 	_plugin->addModule("mdx");
 	_plugin->addModule("grn");
 	_plugin->addModule("md5");
+	_plugin->addModule("smd");
+	//_plugin->addModule("obj");
 
 	delete [] pluginDir;
 
@@ -473,6 +475,30 @@ void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
 				getCurrentSkeleton());
 }
 
+
+void FreyjaModel::deleteAnimationFrame(unsigned int index)
+{
+	egg_animation_t *animation;
+	unsigned int i, j;
+	int frame_index = -1;
+
+	animation = _egg->getAnimation(getCurrentAnimation());
+
+	if (animation && animation->frame.size() && index < animation->frame.size())
+	{
+		frame_index = animation->frame[index];
+
+		for (i = animation->frame.begin(); i+1 < animation->frame.end(); ++i)
+		{
+			if (i >= index)
+			{
+				animation->frame.assign(i, i+1);
+			}
+		}
+
+		//FIXME _egg->deleteBoneFrame(frame_index);
+	}
+}
 
 
 
