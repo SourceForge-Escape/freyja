@@ -1173,6 +1173,18 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void importPlugins(char *directory);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads all plugins in a directory
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.xx.xx:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 
 

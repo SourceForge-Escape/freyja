@@ -42,6 +42,7 @@ FLAGS=
 ################################################################
 
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
+#-DVECTOR_H_OLD_INTERNAL_ITERATOR 
 
 BASE_CFLAGS=$(FLAGS) -Wall -I. \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \

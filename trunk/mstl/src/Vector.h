@@ -299,55 +299,58 @@ public:
 	}
 
 
+#ifdef VECTOR_H_OLD_INTERNAL_ITERATOR
 	// Built-in iterator methods ////////////////////////////////
 
-// 	unsigned int mIndex;
+ 	unsigned int mIndex;
 
-// 	void start()
-// 	{
-// 		mIndex = begin();
-// 	}
-
-
-// 	void finish()
-// 	{
-// 		mIndex = end() - 1;
-// 	}
+ 	void start()
+ 	{
+ 		mIndex = begin();
+ 	}
 
 
-// 	bool forward()
-// 	{
-// 		return (mIndex < end());
-// 	}
+ 	void finish()
+ 	{
+ 		mIndex = end() - 1;
+ 	}
 
 
-// 	bool backward()
-// 	{
-// 		return (mIndex + 1 > begin());
-// 	}
+ 	bool forward()
+ 	{
+ 		return (mIndex < end());
+ 	}
 
 
-// 	void next()
-// 	{
-// 		++mIndex;
-// 	}
-
-// 	void prev()
-// 	{
-// 		--mIndex;
-// 	}
+ 	bool backward()
+ 	{
+ 		return (mIndex + 1 > begin());
+ 	}
 
 
-// 	unsigned int currentIndex()
-// 	{
-// 			return mIndex;
-// 	}
+ 	void next()
+ 	{
+ 		++mIndex;
+ 	}
+
+ 	void prev()
+ 	{
+ 		--mIndex;
+ 	}
 
 
-// 	Object current()
-// 	{
-// 			return mData[mIndex];
-// 	}
+ 	unsigned int currentIndex()
+ 	{
+ 			return mIndex;
+ 	}
+
+
+ 	Object current()
+ 	{
+ 			return mData[mIndex];
+ 	}
+
+#endif
 
 
 	// Instead of appending objects this apptempts replacing 'removed' objects
@@ -391,9 +394,11 @@ private:
 	unsigned int mExpand;
 };
 
-#ifdef FIXME
-#define VECTOR_ITERATE_BEGIN(v) for (v.start(); v.forward(); v.end()){
-#define VECTOR_ITERATE_END }
+
+
+
+#define VectorIterator_BEGIN(v) for (v.start(); v.forward(); v.end()) {
+#define VectorIterator_END }
 
 template <class Object> class VectorIterator
 {
@@ -439,12 +444,10 @@ public:
 		--mIndex;
 	}
 
-
-	unsigned int currentIndex()
+	unsigned int index()
 	{
 		return mIndex;
 	}
-
 
 	Object current()
 	{
@@ -455,6 +458,6 @@ public:
 	Vector<Object> *mVector;
 	unsigned int mIndex;
 };
-#endif
+
 
 #endif

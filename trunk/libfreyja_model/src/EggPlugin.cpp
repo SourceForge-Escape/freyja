@@ -21,7 +21,10 @@
  *
  ==========================================================================*/
 
-#include <dlfcn.h>
+#include <dlfcn.h> 
+#include <sys/types.h>
+#include <dirent.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -1046,7 +1049,7 @@ EggPlugin::EggPlugin(Egg *egg, char *plugin_dir)
 	else
 	{
 		mPluginDir = new char[64];
-		strcpy(mPluginDir, "/usr/local/lib/egg/");    
+		strcpy(mPluginDir, "/usr/share/freyja/plugins/");    
 	}
 
 
@@ -1590,6 +1593,58 @@ void EggPlugin::eggPrintMessage(char *format, va_list *args)
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void EggPlugin::importPlugins(char *directory)
+{
+#ifdef FIXME
+	DIR *dir;
+	struct dirent *d_ptr;
+	struct stat status;
+	char filename[1024];
+
+  
+	dir = opendir(directory);
+
+	if (dir)
+	{
+		while ((d_ptr = readdir(dir)))
+		{
+			snprintf(filename, "%s/%s", directory, d_ptr->d_name);
+			stat(filename, &status);
+
+#ifdef WIN32
+			if (status.st_mode & _S_IFDIR)
+#else
+			if (S_ISDIR(status.st_mode))
+#endif
+			{
+				/* Directories not used here */
+			}
+			else
+			{
+				switch (validateModule(filename))
+				{
+				case IMPORT:
+					addImportPlugin(filename);
+				case EXPORT:
+					addExportPlugin(filename);
+				case MISC:
+					addMiscPlugin(filename);
+				default:
+					;
+				}
+			}      
+		}
+		
+		closedir(dir);
+	}
+	else
+	{
+		eggPrintError("opendir(%s) failed\n", directory);
+	}
+#endif
+}
+
 
 int EggPlugin::importModel(char *filename)
 {
