@@ -218,6 +218,8 @@ int import(const char *filename, unsigned char **image,
 		fprintf(stderr, "mtk_image__png_load> DEBUG %s %ix%i@%ibpp\n", 
 				  (*type == MTK_RGB) ? "RBG" : "RBGA", *w, *h, depth);
 
+		*type--;
+
 		return 0;
 #else
 		return -100;

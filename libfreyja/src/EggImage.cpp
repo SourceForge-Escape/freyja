@@ -413,7 +413,7 @@ int EggImage::loadImage(const char *filename)
 	int (*import)(const char *filename, unsigned char **image,
 					  unsigned int *width, unsigned int *height, 
 					  char *type);
-	bool loaded = false;
+	bool done = false;
 	char *module_filename;
 	void *handle;
 	char *error;
@@ -436,7 +436,7 @@ int EggImage::loadImage(const char *filename)
 		return -2;
 	}
 
-	while ((module_filename = reader.getNextDirectoryListing()))
+	while (!done && (module_filename = reader.getNextDirectoryListing()))
 	{
 		if (reader.isDirectory(module_filename))
 			continue;
@@ -454,7 +454,7 @@ int EggImage::loadImage(const char *filename)
 		}
 		else
 		{
-			print("\tModule '%s' opened.", module_filename);
+			print("Module '%s' opened.", module_filename);
     
 			import = (int (*)(const char *filename, unsigned char **image,
 									unsigned int *width, unsigned int *height, 
@@ -467,8 +467,7 @@ int EggImage::loadImage(const char *filename)
 				continue;
 			}
 
-	      loaded = (loaded || (!(*import)(filename, &image, 
-													  &width, &height, &type)));
+	      done = (!(*import)(filename, &image, &width, &height, &type));
 
 			if ((error = dlerror()) != NULL) 
 			{
@@ -484,7 +483,9 @@ int EggImage::loadImage(const char *filename)
 
 	print("[EggPlugin module loader sleeps now]\n");
 
-	if (loaded)
+	return -1; // Bad bad buffer corruption -- disable buffer load
+
+	if (done && width > 0 && height > 0 && type > 1 && type < 4)
 	{
 		loadPixmap(image, width, height, (EggImage::colormode_t)type);
 
@@ -796,7 +797,7 @@ void EggImage::print(char *s, ...)
 	va_list args;
 
 	va_start(args, s);
-	fprintf(stdout, "EggImage::");
+	fprintf(stdout, "EggImage> ");
 	vfprintf(stdout, s, args);
 	fprintf(stdout, "\n");
 	va_end(args);
@@ -808,7 +809,7 @@ void EggImage::printError(char *s, ...)
 	va_list args;
 	
 	va_start(args, s);
-	fprintf(stderr, "EggImage::");
+	fprintf(stderr, "EggImage> ");
 	vfprintf(stderr, s, args);
 	fprintf(stderr, "\n");
 	va_end(args);
