@@ -425,6 +425,7 @@ void freyjaPrintMessage(const char *format, ...);
 ///////////////////////////////////////////////////////////////////////
 
 
+void freyjaMeshNormalFlip(long meshIndex);
 long freyjaMeshPosition(long meshIndex, vec3_t xyz);
 
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
@@ -434,7 +435,7 @@ void freyjaSetTexCoord2f(unsigned int index, vec_t u, vec_t v);
 void freyjaSetTexCoord2fv(unsigned int index, vec2_t uv);
 
 void freyjaSetVertex3f(unsigned int index, vec_t x, vec_t y, vec_t z);
-void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
+	//void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
 
 long freyjaNormal3f(vec_t x, vec_t y, vec_t z);
 long freyjaNormal3fv(vec3_t xyz);
@@ -462,11 +463,13 @@ long freyjaTexCoord2fv(vec2_t uv);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaVertexNormalFlip(long index);
 void freyjaVertexTexCoord2f(long index, vec_t u, vec_t v);
 void freyjaVertexTexCoord2fv(long index, vec2_t uv);
 void freyjaVertexNormal3f(long index, vec_t nx, vec_t ny, vec_t nz);
 void freyjaVertexNormal3fv(long index, vec3_t nxyz);
 long freyjaVertex3f(vec_t x, vec_t y, vec_t z);
+long freyjaVertexXYZ3fv(long vertexIndex, vec3_t xyz);
 long freyjaVertex3fv(vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_GROUP);
@@ -658,6 +661,34 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	///////////////////////////////////////////////////////////////////////
 	// Polygon
 	///////////////////////////////////////////////////////////////////////
+
+	int freyjaPolygonExtrudeQuad1f(long polygonIndex, vec_t dist);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *        the 'normal' is the vector you wish to follow with extrude
+	 *
+	 * Post : Adds a quad where every edge is on this face by
+	 *        extruding by face normal scaled by dist
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.03.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *        the 'normal' is the vector you wish to follow with extrude
+	 *
+	 * Post : Adds a quad where every edge is on this face by
+	 *        extruding by 'normal'
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.03.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void freyjaPolygonAddVertex1i(long polygonIndex, long vertexIndex);
 	void freyjaPolygonVertex1i(long index);  // DEPRECATED
