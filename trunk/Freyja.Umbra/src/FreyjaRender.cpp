@@ -384,26 +384,26 @@ void drawSkeleton(Vector<FreyjaBone *> *bonelist,
 			glColor3fv(OpenGLFreyjaScene::mWhite);
 		}
 		
-		mglDrawJoint(gJointRenderType, bone->position);
+		mglDrawJoint(gJointRenderType, bone->mTranslate.mVec);
 		
-		if (bone->children.empty())
+		if (bone->mChildren.empty())
 			continue;
 
-		for (j = bone->children.begin(); j < bone->children.end(); ++j)
+		for (j = bone->mChildren.begin(); j < bone->mChildren.end(); ++j)
 		{
-			index = bone->children[j];
+			index = bone->mChildren[j];
 			bone2 = (*bonelist)[index];
 			
 			if (!bone2)
 				continue; 
 			glBegin(GL_LINES);
 
-			glVertex3f(bone->position[0] * scale, 
-					   bone->position[1] * scale,
-					   bone->position[2] * scale);
-			glVertex3f(bone2->position[0] * scale, 
-					   bone2->position[1] * scale,
-					   bone2->position[2] * scale);
+			glVertex3f(bone->mTranslate.mVec[0] * scale, 
+					   bone->mTranslate.mVec[1] * scale,
+					   bone->mTranslate.mVec[2] * scale);
+			glVertex3f(bone2->mTranslate.mVec[0] * scale, 
+					   bone2->mTranslate.mVec[1] * scale,
+					   bone2->mTranslate.mVec[2] * scale);
 			glEnd();
 		}
 	}
@@ -431,9 +431,9 @@ void drawSkeleton2(Vector<FreyjaBone *> *bonelist,
 		return;
 	
 	/* Scale bones to match mesh scaling */
-	pos[0] = bone->position[0] * scale; 
-	pos[1] = bone->position[1] * scale;
-	pos[2] = bone->position[2] * scale;
+	pos[0] = bone->mTranslate.mVec[0] * scale; 
+	pos[1] = bone->mTranslate.mVec[1] * scale;
+	pos[2] = bone->mTranslate.mVec[2] * scale;
 
 	/* Render bone and joint */
 	(gSelectedBone == currentBone) ? glColor3fv(OpenGLFreyjaScene::mRed) : 
@@ -447,20 +447,20 @@ void drawSkeleton2(Vector<FreyjaBone *> *bonelist,
 	/* Transform children bones */
 	glPushMatrix();
 	glTranslatef(pos[x], pos[y], pos[z]);
-	bone->rotation.getEulerAngles(eular, eular+1, eular+2);
+	bone->mRotate.getEulerAngles(eular);
 	glRotatef(eular[zr], 0, 0, 1);
 	glRotatef(eular[yr], 0, 1, 0);
 	glRotatef(eular[xr], 1, 0, 0);
 
-	if (bone->children.empty())
+	if (bone->mChildren.empty())
 	{
 		glPopMatrix();
 		return;
 	}
 
-	for (i = bone->children.begin(); i < bone->children.end(); ++i)
+	for (i = bone->mChildren.begin(); i < bone->mChildren.end(); ++i)
 	{
-		index = bone->children[i];
+		index = bone->mChildren[i];
 		bone2 = (*bonelist)[index];
 		
 		if (!bone2)
@@ -1224,7 +1224,7 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 			if ((grp = egg->getGroup(mesh.group[i])))
 			{
 				glColor3fv(RED);
-				glVertex3fv(grp->position);
+				glVertex3fv(grp->mTranslate.mVec);
 			}
 		}
 
@@ -1354,18 +1354,21 @@ void FreyjaRender::DrawModel(FreyjaModel *model)
 
 			if (i == 0)
 			{
+				vec3_t rotation;
+				bone->mRotate.getEulerAngles(rotation);
+
 				glTranslatef(skeleton->position[0], 
 							 skeleton->position[1], 
 							 skeleton->position[2]);
 
-				if (bone->rotation[0])
-					glRotatef(bone->rotation[0], 1, 0, 0);
+				if (rotation[0])
+					glRotatef(rotation[0], 1, 0, 0);
 
-				if (bone->rotation[1])
-					glRotatef(bone->rotation[1], 0, 1, 0);
+				if (rotation[1])
+					glRotatef(rotation[1], 0, 1, 0);
 	
-				if (bone->rotation[2])
-					glRotatef(bone->rotation[2], 0, 0, 1);
+				if (rotation[2])
+					glRotatef(rotation[2], 0, 0, 1);
 			
 				glPushMatrix();
 			}
@@ -1381,10 +1384,10 @@ void FreyjaRender::DrawModel(FreyjaModel *model)
 				{
 					glColor3fv(WHITE);
 					mglDrawBone((bone->id == (int)current_bone) ? 2 : 1, 
-								bone->position);
+								bone->mTranslate.mVec);
 				}
 
-				glTranslatef(bone->position[0], bone->position[1], bone->position[2]);
+				glTranslatef(bone->mTranslate.mVec[0], bone->mTranslate.mVec[1], bone->mTranslate.mVec[2]);
 
 				/* Mongoose 2004.03.30, 
 				 * Was 0 2 1 */

@@ -54,10 +54,10 @@ FreyjaControl::FreyjaControl(Resource *rc)
 
 	mModel->setPrinter(new FreyjaAppPrinter());
 
-	if (strncmp(FREYJA_PLUGIN_VERSION, "0.0.9", 5))
+	if (strncmp(FREYJA_PLUGIN_VERSION, "Freyja 0.9.1", 12))
 	{
 		freyja_print("FreyjaControl::FreyjaControl> Assertion failure");
-		freyja_print("*** You must upgrade libfreyja_model to v8.12");
+		freyja_print("*** You must upgrade libfreyja to v0.9.1");
 		printf("Please read the /tmp/Freyja.log for errors.\n");
 		exit(-1);
 	}
@@ -398,7 +398,10 @@ bool FreyjaControl::eventMain(int event)
 			freyjaEnd();
 		}
 
-		freyjaGenerateCube(8.0f);
+		{
+			vec3_t pos = {0.0f, 0.0f, 0.0f};
+			freyjaGenerateQuadCubeMesh(pos, 8.0f);
+		}
 		freyja_event_gl_refresh();
 		break;
 
@@ -784,13 +787,14 @@ bool FreyjaControl::event(int command, vec_t value)
 
 	case CMD_BONE_ADD_MESH:
 		mTransformMode = fTransformBone;
+		// OBSOLETE
 		//mModel->addMeshToBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
-		freyjaIterator(FREYJA_BONE, freyjaGetCurrent(FREYJA_BONE));
-		freyjaBoneAddMesh1u(freyjaGetCurrent(FREYJA_MESH));
+		//freyjaIterator(FREYJA_BONE, freyjaGetCurrent(FREYJA_BONE));
+		//freyjaBoneAddMesh1u(freyjaGetCurrent(FREYJA_MESH));
 		
-		freyja_print("New Bone[%i] now contains mesh %i",
-					 freyjaGetCurrent(FREYJA_BONE), 
-					 freyjaGetCurrent(FREYJA_MESH));
+		//freyja_print("New Bone[%i] now contains mesh %i",
+		//			 freyjaGetCurrent(FREYJA_BONE), 
+		//			 freyjaGetCurrent(FREYJA_MESH));
 		break;
 
 
@@ -1512,7 +1516,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 			if (t < 0.0) t = 0.0;
 			
 			//mModel->TexelMove(s, t);
-			freyjaSetTexCoord2f(freyjaGetCurrent(FREYJA_TEXCOORD), s, t);
+			//FIXME: freyjaSetTexCoord2f(freyjaGetCurrent(FREYJA_TEXCOORD), s, t);
 			return true;
 		}
 		break;
