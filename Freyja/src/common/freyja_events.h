@@ -76,6 +76,20 @@ char *freyja_rc_map(char *s);
 	 *  Mongoose - Created
 	 ------------------------------------------------------*/
 
+char *freyja_rc_map(char *s);
+/*------------------------------------------------------
+ * Pre  : s is a valid filename or path/filename 
+ *        under resouce dir
+ *
+ * Post : Returns full path filename as string or 
+ *        NULL on error
+ *
+ *-- History ------------------------------------------
+ *
+ * 2002.01.12: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
 //////////////////////////////////////////////////////////////////////////////
 
 void event_swap_buffers();
