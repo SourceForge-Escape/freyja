@@ -50,7 +50,7 @@ FreyjaControl::FreyjaControl(Resource *r)
 	/* Hook up the backend and user interface */
 	mModel = new FreyjaModel();
 	mRender = new FreyjaRender();
-	mRender->Register(mModel);
+	mRender->setSceneData(mModel);
 
 	if (!mModel || !mRender)
 	{
@@ -82,8 +82,8 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 
 	/* Mongoose 2002.02.23, Tell renderer to start up */
-	mRender->Init(width, height, true);
-	mRender->Reshape(width, height);
+	mRender->initContext(width, height, true);
+	mRender->resizeContext(width, height);
 	mMaterial = MaterialManager::Instance();
 
 	// handle loaded from system call
@@ -140,7 +140,7 @@ void FreyjaControl::updateDisplay()
 {
 	if (mRender)
 	{
-		mRender->Display();
+		mRender->display();
 	}
 	else
 	{
@@ -153,7 +153,7 @@ void FreyjaControl::resizeDisplay(unsigned int width, unsigned int height)
 {
 	if (mRender)
 	{
-		mRender->Reshape(width, height);
+		mRender->resizeContext(width, height);
 	}
 	else
 	{
@@ -892,16 +892,14 @@ bool FreyjaControl::event(int command)
 
 
 	case eCamera:
-		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_CAMERA));
+		mRender->toggleFlag(FreyjaRender::RENDER_CAMERA);
 		freyja_print("Camera rendering [%s]", 
 					(mRender->getFlags() & FreyjaRender::RENDER_CAMERA) ? 
 					"ON" : "OFF");
 		break;
 
 	case eViewports:
-		mRender->Flags(FreyjaRender::fViewports, 
-					   !(mRender->getFlags() & FreyjaRender::fViewports));
+		mRender->toggleFlag(FreyjaRender::fViewports);
 		freyja_print("Viewport rendering [%s]", 
 					(mRender->getFlags() & FreyjaRender::fViewports) ? 
 					"ON" : "OFF");
@@ -1043,8 +1041,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eRenderBbox:
-		mRender->Flags(FreyjaRender::RENDER_BBOX, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_BBOX));
+		mRender->toggleFlag(FreyjaRender::RENDER_BBOX);
 		freyja_print("BoundingBox rendering [%s]", 
 					(mRender->getFlags() & FreyjaRender::RENDER_BBOX) ? 
 					"ON" : "OFF");
@@ -1405,14 +1402,14 @@ bool FreyjaControl::event(int command)
 		if (mEventMode == VERTEX_BBOX_SELECT_MODE)
 		{
 			mEventMode = modeNone;
-			mRender->Flags(FreyjaRender::RENDER_BBOX_SEL, 0);
+			mRender->clearFlag(FreyjaRender::RENDER_BBOX_SEL);
 			mModel->BBoxListBuild();
 			freyja_print("Vertex box select: Vertex list built");
 		}
 		else
 		{
 			mEventMode = VERTEX_BBOX_SELECT_MODE;
-			mRender->Flags(FreyjaRender::RENDER_BBOX_SEL, 1);
+			mRender->setFlag(FreyjaRender::RENDER_BBOX_SEL);
 			freyja_print("Vertex box select: Press agian to end selection");
 		}
 		break;
@@ -1503,114 +1500,119 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case FREYJA_MODE_RENDER_BONETAG:
-		mRender->Flags(FreyjaRender::RENDER_BONES, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_BONES));
+		mRender->toggleFlag(FreyjaRender::RENDER_BONES);
 		freyja_print("Bone Rendering [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_BONES) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_POINTS:
-		mRender->Flags(FreyjaRender::RENDER_POINTS, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_POINTS));
+		mRender->toggleFlag(FreyjaRender::RENDER_POINTS);
 		freyja_print("Point Rendering [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_POINTS) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_WIREFRAME:
-		mRender->Flags(FreyjaRender::RENDER_WIREFRAME, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_WIREFRAME));
+		mRender->toggleFlag(FreyjaRender::RENDER_WIREFRAME);
 		freyja_print("Wireframe Rendering [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_FACE:
-		mRender->Flags(FreyjaRender::RENDER_FACE, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_FACE));
+		mRender->toggleFlag(FreyjaRender::RENDER_FACE);
 		freyja_print("Face Rendering [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_FACE) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_NORMALS:
-		mRender->Flags(FreyjaRender::RENDER_NORMALS, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_NORMALS));
+		mRender->toggleFlag(FreyjaRender::RENDER_NORMALS);
 		freyja_print("Normal Rendering [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_NORMALS) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_LIGHTING:
-		mRender->Flags(FreyjaRender::RENDER_NORMAL, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_NORMAL));
-		mRender->Flags(FreyjaRender::RENDER_LIGHTING, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_LIGHTING));
+		mRender->toggleFlag(FreyjaRender::RENDER_NORMAL);
+		mRender->toggleFlag(FreyjaRender::RENDER_LIGHTING);
 		freyja_print("GL Lighting is [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_LIGHTING) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_TEXTURE:
-		mRender->Flags(FreyjaRender::RENDER_TEXTURE, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_TEXTURE));
+		mRender->toggleFlag(FreyjaRender::RENDER_TEXTURE);
 		freyja_print("Texture rendering is [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_TEXTURE) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_MATERIAL:
-		mRender->Flags(FreyjaRender::RENDER_MATERIAL, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_MATERIAL));
+		mRender->toggleFlag(FreyjaRender::RENDER_MATERIAL);
 		freyja_print("Material rendering is [%s]", 
 					 (mRender->getFlags() & FreyjaRender::RENDER_MATERIAL) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_RENDER_GRID:
-		mRender->Flags(FreyjaRender::RENDER_EDIT_GRID, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID));
+		mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
 		freyja_print("Edit Grid rendering [%s]",
 					 (mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
+
 	case FREYJA_MODE_TEXTURE_EDIT:
-		mRender->ViewMode(VIEWMODE_TEXTURE_EDIT);
+		mRender->setViewMode(VIEWMODE_TEXTURE_EDIT);
 		freyja_event_gl_refresh();
 		freyja_print("Texture Edit");
 		mEditorMode = TEXTURE_EDIT_MODE;
 		break;
+
 	case FREYJA_MODE_MODEL_EDIT:
-		mRender->ViewMode(VIEWMODE_MODEL_EDIT);
+		mRender->setViewMode(VIEWMODE_MODEL_EDIT);
 		freyja_event_gl_refresh();
 		freyja_print("Model Edit");
 		mEditorMode = MODEL_EDIT_MODE;
 		break;
+
 	case FREYJA_MODE_MODEL_VIEW:
-		mRender->ViewMode(VIEWMODE_MODEL_VIEW);
+		mRender->setViewMode(VIEWMODE_MODEL_VIEW);
 		freyja_event_gl_refresh();
 		freyja_print("Animation View");
 		mEditorMode = ANIMATION_EDIT_MODE;
 		break;
+
 	case FREYJA_MODE_MATERIAL_EDIT:
-		mRender->ViewMode(VIEWMODE_MATERIAL_EDIT);
+		mRender->setViewMode(VIEWMODE_MATERIAL_EDIT);
 		freyja_event_gl_refresh();
 		freyja_print("Material Edit");
 		mEditorMode = MATERIAL_EDIT_MODE;
 		break;
+
 	case FREYJA_MODE_PLANE_XY:
 		freyja_print("Plane XY");      
 		mModel->CurrentPlane(PLANE_XY);
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_PLANE_XZ:
 		freyja_print("Plane XZ");      
 		mModel->CurrentPlane(PLANE_XZ);
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_PLANE_YZ:
 		freyja_print("Plane ZY");      
 		mModel->CurrentPlane(PLANE_ZY);
@@ -1854,14 +1856,14 @@ bool FreyjaControl::motionEvent(int x, int y)
 		{
 		case MOUSE_BTN_RIGHT:
 			if (x > old_x)
-				mRender->Rotate(Y_F, -mRender->RotateAmount());
+				mRender->Rotate(Y_F, -1.0f);
 			else if (x < old_x)
-				mRender->Rotate(Y_F, mRender->RotateAmount());
+				mRender->Rotate(Y_F, 1.0f);
 			
 			if (y > old_y)
-				mRender->Rotate(X_F, -mRender->RotateAmount());
+				mRender->Rotate(X_F, -1.0f);
 			else if (y < old_y)
-				mRender->Rotate(X_F, mRender->RotateAmount());
+				mRender->Rotate(X_F, 1.0f);
 
 			old_x = x;
 			old_y = y;
@@ -2905,13 +2907,7 @@ void FreyjaControl::loadResource()
 
 	if (mResource->Lookup("GRID_ON", &i) && i)
 	{
-		mRender->Flags(FreyjaRender::RENDER_EDIT_GRID, 
-					   !(mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID));
-	}
-
-	if (mResource->Lookup("ROTATE_AMOUNT", &f))
-	{
-		mRender->RotateAmount(f);
+		mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
 	}
 
 	if (mResource->Lookup("FLUSH_RESOURCE", &i) && i)
