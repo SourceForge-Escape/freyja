@@ -281,14 +281,16 @@ class ViewVolume
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-	Matrix mProjection;       	/* Projection matrix */
+	Matrix mProjection;       	 /* Projection matrix */
 
 	Matrix mModel;         	    /* Model matrix */
 
-	Matrix mClip;	            /* Clipping matrix */
+	Matrix mClip;	             /* Clipping matrix */
 
 	vec_t mFrustum[6][4];       /* View volume */
+
+	//vec4_t mPickVector;         /* For picking from screen plane via mouse */
+	//vec4_t mPickPoint;
 };
 
 #endif

@@ -156,9 +156,12 @@ public:
 
 	unsigned int chunkHeader;        /* This is used to identify a chunk 
 									  * in binary mode */
+
+	unsigned int chunkFooter;        /* Used for checking chunk reads */
 };
 
 
+/* Likey to replace with EggImage*/
 class TextureData
 {
 public:
@@ -176,14 +179,14 @@ public:
 	
 	unsigned char pixelDepth; /* 3 - RGB24bit, 4 - RGBA32bit */
 	
-	unsigned int id;       /* OpenGL texture id use */
+	unsigned int id;          /* OpenGL texture id use */
 };
 
 
 class Material
 {
 public:
-	Vector<unsigned int> textures;    /* Textures used by this material */
+	Vector<unsigned int> textures;    /* Texture indices used by material */
 
 	char *name;                /* Material name */
 
@@ -201,14 +204,14 @@ public:
 
 	unsigned int blend_dest;   /* Blend destination factor */
 
-	int parent;       /* Linked material id */
+	int parent;                /* Linked material id */
 
-	int child;        /* Linked material id */
+	int children;              /* Linked materials count */
 
-	bool hasAlphaChannel;
+	bool hasAlphaChannel;      /* For depth sorting use */
 
 private:
-	unsigned int id;           /* Unique identifier */
+	unsigned int id;                 /* Unique identifier */
 
 	static unsigned int id_counter;  /* Id system use */
 };
@@ -253,7 +256,7 @@ public:
 	int material;                     /* Material id, if (mat != mesh.mat)
 									   * to support multimaterial meshes */
 
-	Vector <unsigned int> vertices;     /* Vertices composing polygon */
+	Vector <unsigned int> vertices;   /* Vertices composing polygon */
 
 	Vector <unsigned int> texcoords;  /* If non-empty this polygon uses
 									   * it's own texcoords in place of
@@ -269,9 +272,10 @@ public:
 	Vector <unsigned int> vertex;     /* Vertices composing group */
 	Vector3d bboxMin;                 /* Min corner of bounding box */
 	Vector3d bboxMax;                 /* Max corner of bounding box */
-	Vector3d center;                  /* Center / bolt-on binding */
 
-	//	vec_t scale;                      /* Scaling of group */
+	Vector3d center;                  /* Center of bounding volume */
+
+	vec_t radius;                     /* Radius of bounding sphere if used */
 };
 
 
@@ -295,6 +299,7 @@ public:
 
 
 /* Vertex no longer a primative object class/type */
+/* Move csg to plugin maybe child class of Mesh, CSGMesh */
 class Mesh
 {
 public:
@@ -303,6 +308,8 @@ public:
 	void rotateAboutPoint(vec3_t point, vec_t x, vec_t y, vec_t z);
 
 	void scale(vec_t x, vec_t y, vec_t z);
+
+	void transform();
 
 	void translate(vec_t x, vec_t y, vec_t z);
 
@@ -349,6 +356,30 @@ public:
 
 		return true;
 	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Combines object A and B in model
+	 *
+	 *        Destroys A and B then replaces them with new 
+	 *        object with index A where: A = A + B
+	 *
+	 *        Returns true on sucess
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.04:
+	 * Mongoose - Hard ABI back
+	 *
+	 * 2004.04.08:
+	 * Mongoose - New generic API that supports all types 
+	 *            in one method
+	 *
+	 * 2000.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	bool combineTexcoords(unsigned int a, unsigned int b);
+	bool combineVertices(unsigned int a, unsigned int b);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Combines object A and B in model
@@ -418,7 +449,8 @@ public:
 	// instead of reference counting via scoring invalid ids
 	Vector <unsigned int> refVertices;  /* Vertex pool helper, tracks use */   
 
-	Vector<vec_t> vertices;             /* Vertex array */
+	Vector<vec_t> vertices;             /* Vertex array, could be replaced 
+										 * with VertexFrame's vertices */
 
 	Vector<vec_t> texcoords;            /* Texcoord array */
 
@@ -442,16 +474,17 @@ public:
 	void translate();
 	void rotate();
 
-	unsigned int id;                  /* Unique identifier */
+	unsigned int id;                 /* Unique identifier */
 
-	unsigned int parent;
-	char name[64];
+	char name[64];                   /* Human readable identifier */
+
+	int parent;                      /* Parent of this bone */
 
 	Vector <unsigned int> children;  /* Children bones */
-	Vector <unsigned int> meshes;    /* Meshes bound to this bone if
-									  * meshtree*/
 
-	Matrix matrix;
+	Vector <unsigned int> meshes;    /* Meshes are bound to bone if meshtree */
+
+	Matrix matrix;                   /* Cached matrix */
 	Matrix transform;                /* Transform mesh/children */
 };
 
@@ -484,10 +517,6 @@ public:
 	Vector<unsigned int> frames;  /* vertexframes / skeletalframes */
 };
 
-
-// skeletal mesh
-// meshtree
-// ...
 
 class Model
 {
@@ -607,29 +636,6 @@ public:
 	 ------------------------------------------------------*/
 
 #ifdef FIXME
-	bool combineTexcoords(unsigned int a, unsigned int b);
-	bool combineVertices(unsigned int a, unsigned int b);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Combines object A and B in model
-	 *
-	 *        Destroys A and B then replaces them with new 
-	 *        object with index A where: A = A + B
-	 *
-	 *        Returns true on sucess
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.04:
-	 * Mongoose - Hard ABI back
-	 *
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	unsigned int csg(egg_type_t type, egg_csg_t operation,
 					 unsigned int a, unsigned int b);

@@ -564,8 +564,12 @@ GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 
 GtkWidget *mgtk_create_color_button(void *func, int id)
 {
-#ifdef DISABLE_GTK_COLORBUTTON
-	return 0x0;
+#ifdef DISABLE_GTK_COLORBUTTON	
+	GtkWidget *label = gtk_label_new(NULL);
+
+	gtk_label_set_markup(GTK_LABEL(label), "ColorButton disabled");
+	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+	return label;
 #else
 	GtkWidget *colorbutton;
 

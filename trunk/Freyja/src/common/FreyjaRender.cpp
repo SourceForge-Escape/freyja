@@ -506,6 +506,11 @@ void FreyjaRender::Flags(flags_t flag, int op)
 	{
 		mRenderMode ^= flag;
 	}
+
+	if (flag & RENDER_CAMERA && op)
+	{
+		Reshape(_width, _height);
+	}
 }
 
 
@@ -932,7 +937,12 @@ void FreyjaRender::Display()
 		break;
 	case VIEWMODE_MODEL_EDIT:
 		glPushMatrix();
-		DrawGrid(Width(), Height(), 8);
+
+		if (!(mRenderMode & RENDER_EDIT_GRID))
+		{
+			DrawGrid(Width(), Height(), 8);
+		}
+
 		DrawWindow(_model->CurrentPlane());
 		glPopMatrix();
 		break;
@@ -973,23 +983,26 @@ void FreyjaRender::Reshape(unsigned int w, unsigned int h)
 	default:
 		if (mRenderMode & RENDER_CAMERA)
 		{
-			gluPerspective(FOV_Y, ((GLdouble)w)/((GLdouble)h), NEAR*100, FAR*100);
+			gluPerspective(FOV_Y, 
+						   ((GLdouble)w)/((GLdouble)h), 
+						   NEAR*100, 
+						   FAR*100);
 		}
-		else if (w <= h) 
-		{
-			glOrtho(-SCALE_ENV, 
-					  SCALE_ENV, -SCALE_ENV * (GLfloat) h / (GLfloat) w, 
-					  SCALE_ENV * (GLfloat) h / (GLfloat) w, 
-					  -400.0,
-					  400.0); 
-		}
+// 		else if (w <= h) 
+// 		{
+// 			glOrtho(-SCALE_ENV, 
+// 					SCALE_ENV, -SCALE_ENV * (GLfloat) h / (GLfloat) w, 
+// 					SCALE_ENV * (GLfloat) h / (GLfloat) w, 
+// 					-400.0,
+// 					400.0); 
+// 		}
 		else 
 		{
 			glOrtho(-SCALE_ENV * (GLfloat) w / (GLfloat) h, 
-					  SCALE_ENV * (GLfloat) w / (GLfloat) h, 
-					  -SCALE_ENV, SCALE_ENV, 
-					  -400.0, 
-					  400.0);
+					SCALE_ENV * (GLfloat) w / (GLfloat) h, 
+					-SCALE_ENV, SCALE_ENV, 
+					-400.0, 
+					400.0);
 		}
 	}
 

@@ -115,7 +115,8 @@
 			(menu_seperator)
 			(menu_item "_Fullscreen" "M-E"		eFullscreen	"gtk-fullscreen")
 			(menu_seperator)
-			(menu_item "_Grid"	10 FREYJA_MODE_RENDER_GRID)
+			(menu_item "_Grid"			10 FREYJA_MODE_RENDER_GRID)
+			(menu_item "_Camera"		EVENT_MAIN eCamera)
 			(submenu "_Mesh"
 				(menu_item "_Points"	10 FREYJA_MODE_RENDER_POINTS)
 				(menu_item "_Wireframe"	10 FREYJA_MODE_RENDER_WIREFRAME)
