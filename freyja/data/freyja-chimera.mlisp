@@ -171,6 +171,7 @@
 				(menu_item "_New"		eMode	ePolygonNew)
 				(menu_item "_Select"	eMode	ePolygonSelect)
 				(menu_item "_Delete"	eMode	ePolygonDelete)
+				(menu_item "_Split"		eMode	ePolygonSplit)
 				(menu_item "_Extrude"	"F4" eExtrude		"gtk-polygon"))
 
 			(submenu "_Vertices..."
