@@ -57,6 +57,7 @@ FreyjaModel::FreyjaModel()
 	_plugin->addModule("md5");
 	_plugin->addModule("smd");
 	_plugin->addModule("obj");
+	_plugin->addModule("mdm");
 	_plugin->addModule("halflife");
 
 	delete [] pluginDir;
@@ -1387,9 +1388,9 @@ void FreyjaModel::moveBoneCenter(float xx, float yy)
 		bone->center[0] = xx;
 		bone->center[2] = yy;
 		break;
-	case Egg::PLANE_YZ:
-		bone->center[1] = xx;
-		bone->center[2] = yy;
+	case Egg::PLANE_ZY: // side
+		bone->center[2] = xx;
+		bone->center[1] = yy;
 		break;
 	}
 }
@@ -1417,10 +1418,10 @@ void FreyjaModel::moveBone(float xx, float yy)
 		y = 0;
 		z = yy - bone->center[2];
 		break;
-	case Egg::PLANE_YZ:
+	case Egg::PLANE_ZY: //side
 		x = 0;
-		y = xx - bone->center[1];
-		z = yy - bone->center[2];
+		y = yy - bone->center[1];
+		z = xx - bone->center[2];
 		break;
 	}
   
@@ -1449,10 +1450,10 @@ void FreyjaModel::MeshMove(float xx, float yy)
 		y = 0;
 		z = yy - mesh->center[2];
 		break;
-	case Egg::PLANE_YZ:
+	case Egg::PLANE_ZY: // side
 		x = 0;
-		y = xx - mesh->center[1];
-		z = yy - mesh->center[2];
+		y = yy - mesh->center[1];
+		z = xx - mesh->center[2];
 		break;
 	}
 
@@ -1492,9 +1493,9 @@ void FreyjaModel::MeshMoveCenter(float xx, float yy)
 		frame->center[0] = xx;
 		frame->center[2] = yy;
 		break;
-	case Egg::PLANE_YZ:
-		frame->center[1] = xx;
-		frame->center[2] = yy;
+	case Egg::PLANE_ZY: // side
+		frame->center[2] = xx;
+		frame->center[1] = yy;
 		break;
 	}
 }
@@ -1525,8 +1526,8 @@ void FreyjaModel::VertexNew(float xx, float yy)
 		if (_cached_vertex)
 			frame->vertex.add(_cached_vertex->id);
 		break;
-	case Egg::PLANE_YZ:
-		_cached_vertex = _egg->addVertex(0.0, xx, yy);
+	case Egg::PLANE_ZY: // side
+		_cached_vertex = _egg->addVertex(0.0, yy, xx);
     
 		if (_cached_vertex)
 			frame->vertex.add(_cached_vertex->id);
@@ -1662,9 +1663,9 @@ void FreyjaModel::selectPatchControlPoint(float xx, float yy)
 		y = 2;
 		break;
 
-	case Egg::PLANE_YZ:
-		x = 1;
-		y = 2;
+	case Egg::PLANE_ZY: // side
+		x = 2;
+		y = 1;
 		break;
 	}
 
@@ -1706,9 +1707,9 @@ void FreyjaModel::movePatchControlPoint(float xx, float yy)
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = yy;
 		break;
 
-	case Egg::PLANE_YZ:
-		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[1] = xx;
-		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = yy;
+	case Egg::PLANE_ZY: // side
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = xx;
+		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[1] = yy;
 		break;
 	}
 }
@@ -1732,9 +1733,9 @@ void FreyjaModel::VertexMove(float xx, float yy)
 		_cached_vertex->pos[0] = xx;
 		_cached_vertex->pos[2] = yy;
 		break;
-	case Egg::PLANE_YZ:
-		_cached_vertex->pos[1] = xx;               
-		_cached_vertex->pos[2] = yy;
+	case Egg::PLANE_ZY: // side
+		_cached_vertex->pos[2] = xx;               
+		_cached_vertex->pos[1] = yy;
 		break;
 	}
 }
@@ -1783,9 +1784,9 @@ void FreyjaModel::BBoxSelect(float xx, float yy)
 		y = 2;
 		break;
 	default:
-		//case Egg::PLANE_YZ:
-		x = 1; 
-		y = 2;
+		//case Egg::PLANE_YZ: // side
+		x = 2; 
+		y = 1;
 		break;
 	}
 
@@ -1818,9 +1819,9 @@ void FreyjaModel::BBoxMove(float xx, float yy)
 		mSelectBBox[_bbox][0] = xx;
 		mSelectBBox[_bbox][2] = yy;
 		break;
-	case Egg::PLANE_YZ:
-		mSelectBBox[_bbox][1] = xx;               
-		mSelectBBox[_bbox][2] = yy;
+	case Egg::PLANE_ZY: // side
+		mSelectBBox[_bbox][2] = xx;               
+		mSelectBBox[_bbox][1] = yy;
 		break;
 	}
 
