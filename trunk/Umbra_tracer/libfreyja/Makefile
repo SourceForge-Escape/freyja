@@ -245,7 +245,15 @@ md3.so:
 	MOD_NAME=md3 \
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -z defs"
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -z defs"
+
+md5.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=md5 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md5.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 meshgen.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -263,7 +271,7 @@ python.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3 -z defs"
 
-plugins-model: 3ds.so ase.so md2.so meshgen.so python.so
+plugins-model: 3ds.so ase.so md2.so md5.so meshgen.so python.so
 
 
 ######################################################################

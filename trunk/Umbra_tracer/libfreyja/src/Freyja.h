@@ -108,6 +108,22 @@
 class FreyjaTexture
 {
 public:
+
+	FreyjaTexture()
+	{
+		name = 0x0;
+		filename = 0x0;
+	}
+
+	~FreyjaTexture()
+	{
+		if (name)
+			delete [] name;
+
+		if (filename)
+			delete [] filename;
+	}
+
 	char *name;                /* Texture name */
 	
 	char *filename;            /* Filename of image */
@@ -129,6 +145,17 @@ public:
 class FreyjaMaterial
 {
 public:
+
+	FreyjaMaterial()
+	{
+		name = 0x0;
+	}
+
+	~FreyjaMaterial()
+	{
+		if (name)
+			delete [] name;
+	}
 
 	char *name;                /* Material name */
 
@@ -163,6 +190,26 @@ public:
 class FreyjaMetaData /* For storing ASCII files as strings, textures, etc */
 {
 public:
+
+	FreyjaMetaData()
+	{
+		symbol = 0x0;
+		description = 0x0;
+		data = 0x0;
+	}
+
+	~FreyjaMetaData()
+	{
+		if (symbol)
+			delete [] symbol;
+
+		if (description)
+			delete [] description;
+
+		//if (data)
+		//	delete data;
+	}
+
 	unsigned int id;                  /* Unique identifier */
 
 	unsigned int type;
@@ -248,6 +295,9 @@ public:
 	} freyja_csg_t;
 #endif
 
+
+	/* Mongoose 2004.11.27, 
+	 * This needs a tree structure and data pad of models per branch */
 	class SceneGraph
 	{
 	public:

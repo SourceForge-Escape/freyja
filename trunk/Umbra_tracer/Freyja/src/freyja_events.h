@@ -161,6 +161,9 @@ typedef enum {
 	eColorMesh,
 	eColorMeshHighlight,
 
+	eModelIterator,
+	eMeshIterator,
+
 	/* Events to be rolled over */
 	//CMD_MISC_FPS,
 	//CMD_MISC_WIDGETSHOWN,

@@ -20,8 +20,7 @@
  ==========================================================================*/
 
 #include <stdlib.h>
-
-#include <freyja8/EggFileReader.h>
+#include <freyja/FreyjaFileReader.h>
 
 #include "Md5.h"
 
@@ -83,7 +82,7 @@ bool Md5::isMd5Model(const char *filename)
 
 bool Md5::loadModel(const char *filename)
 {
-	EggFileReader r;
+	FreyjaFileReader r;
 	int i, j;  /* I hate everyone that uses signed indices in file formats */
 
 
@@ -308,14 +307,24 @@ bool Md5::loadModel(const char *filename)
 // Special Interface code
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA_MODEL_PLUGINS
-#include <freyja8/EggPlugin.h>
+#ifdef FREYJA_PLUGINS
+#include <freyja/FreyjaPlugin.h>
 
 extern "C" {
 
 	int freyja_model__md5_check(char *filename);
 	int freyja_model__md5_import(char *filename);
 	int freyja_model__md5_export(char *filename);
+	int import_model(char *filename);
+}
+
+
+int import_model(char *filename)
+{
+	if (freyja_model__md5_check(filename) == true)
+		return freyja_model__md5_import(filename);
+
+	return -1;
 }
 
 
@@ -341,6 +350,9 @@ int freyja_model__md5_import(char *filename)
 	if (md5.loadModel(filename) == false)
 		return -1;
 
+	/* Start a new model */
+	freyjaBegin(FREYJA_MODEL);
+
 	for (m = 0; m < md5.mNumMeshes; ++m)
 	{
 		Vector<unsigned int> vertices;
@@ -348,28 +360,28 @@ int freyja_model__md5_import(char *filename)
 
 
 		/* Start a new mesh */
-		eggBegin(FREYJA_MESH);
+		freyjaBegin(FREYJA_MESH);
 	
 		/* Start a new vertex group */
-		eggBegin(FREYJA_GROUP);
+		//freyjaBegin(FREYJA_GROUP);
 
 		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
 			w = md5.mMeshes[m].verts[v].weight;
 
 			/* Store vertices in group */
-			vertex = eggVertexStore3f(md5.mMeshes[m].weights[w].pos[0], 
-									  -md5.mMeshes[m].weights[w].pos[1], 
-									  md5.mMeshes[m].weights[w].pos[2]);
+			vertex = freyjaVertex3f(md5.mMeshes[m].weights[w].pos[0], 
+									-md5.mMeshes[m].weights[w].pos[1], 
+									md5.mMeshes[m].weights[w].pos[2]);
 
-		//eggPrintMessage("%i\t[%i] %f %f %f\t", vertex, v, 
+		//freyjaPrintMessage("%i\t[%i] %f %f %f\t", vertex, v, 
 		//			md5.mMeshes[m].weights[w].pos[0],
 		//			md5.mMeshes[m].weights[w].pos[1],
 		//			md5.mMeshes[m].weights[w].pos[2]);  
 
 			/* Store texels */
-			texcoord = eggTexCoordStore2f(md5.mMeshes[m].verts[v].uv[0],
-										  md5.mMeshes[m].verts[v].uv[1]);
+			texcoord = freyjaTexCoord2f(md5.mMeshes[m].verts[v].uv[0],
+										md5.mMeshes[m].verts[v].uv[1]);
 			
 			/* Generates id translator list */
 			vertices.pushBack(vertex);
@@ -379,23 +391,23 @@ int freyja_model__md5_import(char *filename)
 		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
 		{
 			/* Start a new polygon */
-			eggBegin(FREYJA_POLYGON);
+			freyjaBegin(FREYJA_POLYGON);
 			
 			/* Store vertices and texels by true id, using translator lists */
-			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[0]]);
-			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[1]]);
-			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[2]]);
-			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[0]]);
-			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[1]]);
-			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[2]]);
+			freyjaPolygonVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[0]]);
+			freyjaPolygonVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[1]]);
+			freyjaPolygonVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[2]]);
+			freyjaPolygonTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[0]]);
+			freyjaPolygonTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[1]]);
+			freyjaPolygonTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[2]]);
 
-			eggTexture1i(m); // mMeshes[m].shader
+			freyjaPolygonMaterial1i(m); // mMeshes[m].shader
 			
-			eggEnd(); // FREYJA_POLYGON
+			freyjaEnd(); // FREYJA_POLYGON
 		}
 
-		eggEnd(); // FREYJA_GROUP
-		eggEnd(); // FREYJA_MESH
+		//freyjaEnd(); // FREYJA_GROUP
+		freyjaEnd(); // FREYJA_MESH
 	}
 
 
@@ -406,27 +418,29 @@ int freyja_model__md5_import(char *filename)
 		{
 			w = md5.mMeshes[m].verts[v].weight;
 
-			eggVertexWeightStore(v, 
-								 md5.mMeshes[m].weights[w].weight,
-								 md5.mMeshes[m].weights[w].joint);
+			freyjaVertexWeight(v, 
+							   md5.mMeshes[m].weights[w].weight,
+							   md5.mMeshes[m].weights[w].joint);
 
 			/* Generates id translator list */
 			weights.pushBack(md5.mMeshes[m].weights[w].index);
 		}
 	}
 
-	eggBegin(FREYJA_SKELETON);
+	freyjaEnd(); // FREYJA_MODEL
+
+	freyjaBegin(FREYJA_SKELETON);
 
 	for (j = 0; j < md5.mNumJoints; ++j)
 	{
 		/* Start a new tag */
-		eggBegin(FREYJA_BONE);
-		eggTagFlags1u(0x0);
-		eggTagName(md5.mJoints[j].name);
-		eggTagPos3f(md5.mJoints[j].translate[0],
+		freyjaBegin(FREYJA_BONE);
+		//freyjaBoneFlags1u(0x0);
+		freyjaBoneName(md5.mJoints[j].name);
+		freyjaBonePos3f(md5.mJoints[j].translate[0],
 					-md5.mJoints[j].translate[1],
 					md5.mJoints[j].translate[2]);
-		eggTagRotate3f(md5.mJoints[j].rotate[0],
+		freyjaBoneRotate3f(md5.mJoints[j].rotate[0],
 					  	-md5.mJoints[j].rotate[1],
 						md5.mJoints[j].rotate[2]); 
 
@@ -434,17 +448,17 @@ int freyja_model__md5_import(char *filename)
 		{
 			if (md5.mJoints[j2].parent == j)
 			{ 
-				eggTagAddSlave1u(j2);
+				freyjaBoneAddChild1u(j2);
 			}
 		}
 
-		eggEnd(); // FREYJA_TAG
+		freyjaEnd(); // FREYJA_TAG
 	}
 
-	eggEnd(); // FREYJA_SKELETON
+	freyjaEnd(); // FREYJA_SKELETON
 
 
-	eggPrintMessage("The Doom3 plugin sez: FINISH ME!!!");
+	freyjaPrintMessage("The Doom3 plugin sez: FINISH ME!!!");
 
 	return 0;
 }
@@ -452,7 +466,7 @@ int freyja_model__md5_import(char *filename)
 
 int freyja_model__md5_export(char *filename)
 {
-	eggPrintError("md5_export> ERROR: Not implemented.\n");
+	freyjaPrintError("md5_export> ERROR: Not implemented.\n");
 	return -1;
 }
 #endif

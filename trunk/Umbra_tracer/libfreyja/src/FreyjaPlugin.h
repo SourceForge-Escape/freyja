@@ -414,6 +414,8 @@ void freyjaBoneRotateQuaternion4fv(vec4_t wxyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaGenerateCube(vec_t size);
+
 //void freyjaMeshFlags1u(unsigned int flags);
 /*------------------------------------------------------
  * Pre  : Pass valid freyja_mesh_flags_t's bitmap
@@ -775,6 +777,16 @@ public:
 	 ------------------------------------------------------*/
 
 	void setTransformPoint(vec3_t p);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets transform() pivot/origin for '...AboutPoint'
+	 *        operations
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.10.26:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void setMeshPolygonsMaterial(unsigned int index, int material);
 	/*------------------------------------------------------

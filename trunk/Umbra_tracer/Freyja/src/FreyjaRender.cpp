@@ -276,6 +276,45 @@ void mglDrawJoint(unsigned char type, const vec3_t pos)
 }
 
 
+void mglDrawGround(vec3_t color, vec_t size, vec_t step, vec_t scale)
+{
+	vec_t x, z;
+
+
+	/* Draw grid without using GL Scaling, which is 'teh bad' */
+	glPushMatrix();
+	glColor3fv(color);
+
+	for (x = -size; x < size; x += step)
+	{
+		glBegin(GL_QUADS);
+ 
+		for (z = -size; z < size; z += step)
+		{
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(0, 0);
+			glVertex3f((x + step) * scale, 0.0f, z * scale);	
+ 
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(0, 1);
+			glVertex3f(x * scale, 0.0f, z * scale);	
+ 
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(1, 1);
+			glVertex3f(x * scale, 0.0f, (z + step) * scale);
+ 
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(1, 0);
+			glVertex3f((x + step) * scale, 0.0f, (z + step) * scale);
+		}
+		
+		glEnd();
+	}
+
+	glPopMatrix();
+}
+
+
 void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 {
 	vec_t x, z;
@@ -698,7 +737,19 @@ void FreyjaRender::Display()
 
 		if (OpenGLFreyjaScene::mRenderMode & OpenGLFreyjaScene::fGrid)
 		{
-			mglDrawGrid(OpenGLFreyjaScene::mColorGridLine, 50.0f, 2.0f, 1.0f);
+			if (OpenGLFreyjaScene::mColorGridLine[3] > 0.9999f)
+			{
+				// FIXME: if (mEnabled & grid_light)
+				//OpenGLFreyjaScene::mMaterialLight.enable();
+				mglDrawGround(OpenGLFreyjaScene::mColorGridLine,
+							  50.0f, 2.0f, 1.0f);
+			}
+			else
+			{
+				mglDrawGrid(OpenGLFreyjaScene::mColorGridLine,
+							50.0f, 2.0f, 1.0f);
+			}
+
 			mglDrawAxis(0.25f, 1.2f, 0.872f);
 		}
 
