@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <freyja_model/EggPlugin.h>
+#include <hel/Matrix.h>
 
 #include "Md3.h"
 
@@ -72,7 +73,7 @@ int freyja_model__md3_import(char *filename)
 	md3_bone_t *md3_bone;
 	md3_tag_t *md3_tag;
 	float s, t;
-	matrix_t mt;
+	Matrix matrix;
 	float pos[3];
 	Md3 md3;
 	Map<unsigned int, unsigned int> trans;
@@ -96,7 +97,7 @@ int freyja_model__md3_import(char *filename)
      
 		for (f = 0, v = 0; f < md3_mesh[m].num_frames; f++)
 		{  
-			mtkIdentity(mt);
+			matrix.setIdentity();
 
 			/***************
        mt[0][0] = tag[f].rotation[0][0];
@@ -121,8 +122,7 @@ int freyja_model__md3_import(char *filename)
 				pos[1] = md3_mesh[m].vertex[v].pos[1];
 				pos[2] = md3_mesh[m].vertex[v].pos[2];
 
-				mtkTransform(mt, pos);
-
+				matrix.multiply3v(pos, pos);
 
 				// Store vertices in group
 				vertex = eggVertexStore3f(pos[0], pos[1], pos[2]);
