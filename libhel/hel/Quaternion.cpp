@@ -202,6 +202,17 @@ Quaternion Quaternion::conjugate()
 }
 
 
+Vector3d Quaternion::rotate(const Vector3d &v)
+{
+	Quaternion vec = Quaternion(0, v.mVec[0], v.mVec[1], v.mVec[2]);
+	Quaternion q = *this;
+	Quaternion qinv = q.conjugate();
+	Quaternion vec2 = q * vec * qinv;
+
+	return Vector3d(vec2.mX, vec2.mY, vec2.mZ);
+}
+
+
 Quaternion Quaternion::scale(vec_t s)
 {
    return Quaternion(mW * s, mX * s, mY * s, mZ * s);
