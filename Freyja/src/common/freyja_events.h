@@ -144,6 +144,8 @@ char *freyja_rc_map(char *s);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyja_set_main_window_title(char *title);
+
 //////////////////////////////////////////////////////////////////////////////
 
 void event_swap_buffers();
@@ -311,9 +313,7 @@ enum freyja_event_bone_cmd
 enum freyja_event_mesh_cmd
 {
 	CMD_MESH_ADD = 1,
-	CMD_MESH_MOVE_CENTER,
-	CMD_MESH_PREV,
-	CMD_MESH_NEXT
+	CMD_MESH_MOVE_CENTER
 };
 
 
@@ -330,13 +330,6 @@ enum freyja_event_misc_cmd
 	CMD_MISC_FPS,
 	CMD_MISC_WIDGETSHOWN,
 
-	CMD_MISC_RENDER_ROT_Z_P,
-	CMD_MISC_RENDER_ROT_Z_M,
-	CMD_MISC_RENDER_ROT_Y_P,
-	CMD_MISC_RENDER_ROT_Y_M,
-	CMD_MISC_RENDER_ROT_X_P,
-
-	CMD_MISC_RENDER_ROT_X_M,
 	CMD_MISC_TEXEL_COMBINE,
 	CMD_MISC_BBOX_SELECT,
 	CMD_MISC_GEN_TEXMAP_XY,

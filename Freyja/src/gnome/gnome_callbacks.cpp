@@ -170,6 +170,10 @@ void mgtk_guard_shutdown()
 	gtk_exit(0);
 }
 
+void set_main_window_title(char *title)
+{
+	gtk_window_set_title(GTK_WINDOW(getGtkMainWindow()), title);
+}
 
 void mgtk_destroy_window(GtkWidget *widget)
 {

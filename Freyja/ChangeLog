@@ -29,7 +29,13 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
 	o FIXME: Crash on mesh delete for char models
-	o FIXME: Broke some index selectors
+
+ Freyja (0.3.5-20040815) Mongoose <mongoose@icculus.org>
+
+	o Removed many events
+	o Released more doom3 support
+	o New screen to world coord
+	o Window title change with model load
 
  Freyja (0.3.5-20040809) Mongoose <mongoose@icculus.org>
 
