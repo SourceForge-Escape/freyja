@@ -871,7 +871,7 @@ int freyja_model__ase_export(char *filename)
 	Map<unsigned int, unsigned int> trans;
 	unsigned int vert;
 	float st[2];
-	int v, t, texel;
+	int b, v, t, texel;
 	Ase ase;
 	
 
@@ -946,6 +946,39 @@ int freyja_model__ase_export(char *filename)
 		eggIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
 	}
 	
+
+#ifdef FIXME
+	/* SKELETON */
+	eggIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
+
+	ase.skel.mBoneCount = eggGetNum(FREYJA_BONE);
+	ase.skel.mBones = new ase_bone_EXT_t[ase.skel.mBoneCount];
+	eggIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+	
+	for (b = 0; b < ase.skel.mBoneCount; ++b)
+	{
+		ase.skel.mBones[b].parent = eggGetBoneParent();
+		eggGetBoneRotationXYZW4f(ase.skel.mBones[b].rotation);
+		eggGetBoneTranslation3f(ase.skel.mBones[b].translation);
+		eggGetBoneName(ase.skel.mBones[b].name);
+
+		// Use translator list
+		bone = eggIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+		trans.Add(bone, b);
+		
+		printf("trans.Add(%i, %i)\n", bone, b);
+		eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+
+		ase.skel.mBones[ase.skel.mBones[b].parent].childrenCount++
+	}
+
+	// Loop to populate children lists here
+	for (b = 0; b < ase.skel.mBoneCount; ++b)
+	{
+		
+	}
+#endif
+
 	eggCriticalSection(EGG_WRITE_UNLOCK);
 	
 	return (ase.save(filename));

@@ -37,6 +37,7 @@ void mgtk_event_key_release(GtkWidget *widget, GdkEventKey *event);
 void mgtk_event_key_press(GtkWidget *widget, GdkEventKey *event);
 
 // Mongoose 2002.01.12, Freyja event from Gnome widget callbacks
+void mgtk_handle_text(int event, char *text);
 void main_event(GtkWidget *widget, gpointer user_data);
 void mode_event(GtkWidget *widget, gpointer user_data);
 void misc_event(GtkWidget *widget, gpointer user_data);

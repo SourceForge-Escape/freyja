@@ -89,7 +89,15 @@ typedef enum {
 	eScale_Z,
 	eMoveBone_X,
 	eMoveBone_Y,
-	eMoveBone_Z
+	eMoveBone_Z,
+
+	/* Text events */
+	eSetCurrentBoneName,
+	eSetTextureNameA,
+	eSetTextureNameB,
+
+	/* Misbehaved text events */
+	eSetMaterialName = 799
 
 
 } event_subject_id;

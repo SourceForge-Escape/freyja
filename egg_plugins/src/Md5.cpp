@@ -539,6 +539,11 @@ int freyja_model__md5_import(char *filename)
 									  -md5.mMeshes[m].weights[w].pos[1], 
 									  md5.mMeshes[m].weights[w].pos[2]);
 
+		//eggPrintMessage("%i\t[%i] %f %f %f\t", vertex, v, 
+		//			md5.mMeshes[m].weights[w].pos[0],
+		//			md5.mMeshes[m].weights[w].pos[1],
+		//			md5.mMeshes[m].weights[w].pos[2]);  
+
 			/* Store texels */
 			texcoord = eggTexCoordStore2f(md5.mMeshes[m].verts[v].uv[0],
 										  md5.mMeshes[m].verts[v].uv[1]);
@@ -600,9 +605,7 @@ int freyja_model__md5_import(char *filename)
 					md5.mJoints[j].translate[2]);
 		eggTagRotate3f(md5.mJoints[j].rotate[0],
 					  	-md5.mJoints[j].rotate[1],
-						md5.mJoints[j].rotate[2]);
-
-		eggPrintMessage("[%i]", j);   
+						md5.mJoints[j].rotate[2]); 
 
 		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{

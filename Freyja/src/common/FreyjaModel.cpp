@@ -516,7 +516,7 @@ void FreyjaModel::setBoneRotation(float x, float y, float z)
 }
 
 
-void FreyjaModel::Transform(int mode, enum Egg::egg_transform type, 
+void FreyjaModel::transform(int mode, enum Egg::egg_transform type, 
 							float x, float y, float z)
 {
 	switch (mode)
@@ -524,15 +524,18 @@ void FreyjaModel::Transform(int mode, enum Egg::egg_transform type,
 	case FreyjaModel::TransformVertexFrame:	
 		_egg->Transform(CachedGroup(), type, x, y, z);
 		break;
+
 	case FreyjaModel::TransformMesh:
 		_egg->Transform(CachedMesh(), type, x, y, z);
 		break;
+
 	case FreyjaModel::TransformBone:
 		if (type != Egg::ROTATE)
 			_egg->Transform(CachedTag(), type, x, y, z);
 		else
 			_egg->TagRotateAbout(getCurrentBone(), x, y, z);
 		break;
+
 	case FreyjaModel::TransformScene:
 		_egg->Transform(type, x, y, z);
 		break;
@@ -561,7 +564,30 @@ void FreyjaModel::getSceneTranslation(vec3_t scroll)
 	scroll[2] = _scroll[2];
 }
 
-void FreyjaModel::TagSelect(float xx, float yy)
+
+//// BONES /////////////////////////////////////////
+unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
+{
+	egg_tag_t *tag;
+	tag = _egg->addTag(x, y, z, flag);
+
+	return tag->id;
+}
+
+
+void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
+{
+	_egg->TagAddMesh(CachedTag(), getCurrentMesh());
+}
+
+
+void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
+{
+	_egg->TagDelMesh(CachedTag(), getCurrentMesh());
+}
+
+
+void FreyjaModel::selectBone(float xx, float yy)
 {
 	egg_tag_t *bone;
 
@@ -571,10 +597,11 @@ void FreyjaModel::TagSelect(float xx, float yy)
 		setCurrentBone(bone->id);
 }
 
-void FreyjaModel::TagConnect(unsigned int master, unsigned int slave)
+void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
 {
 	_egg->connectTag(master, slave);
 }
+
 
 void FreyjaModel::VertexBuffer(float xx, float yy)
 {
@@ -728,12 +755,6 @@ void FreyjaModel::MeshCopy()
 }
 
 
-void FreyjaModel::TagDisconnect(unsigned int master, unsigned int slave)
-{
-	_egg->TagDisconnect(master, slave);
-}
-
-
 void FreyjaModel::MeshDel()
 {
 	event_print("Mesh[%u] deleted\n", _current_mesh);
@@ -741,7 +762,46 @@ void FreyjaModel::MeshDel()
 }
 
 
-void FreyjaModel::TagMoveCenter(float xx, float yy)
+void FreyjaModel::nameBone(unsigned int bone, const char *name)
+{
+}
+
+
+void FreyjaModel::disconnectBone(unsigned int master, unsigned int slave)
+{
+	_egg->TagDisconnect(master, slave);
+}
+
+
+void addVertexToBone(unsigned int bone, unsigned int vertex)
+{
+	eggVertexWeightStore(vertex, 1.0f, bone);
+}
+
+
+void FreyjaModel::removeVertexFromBone(unsigned int bone, unsigned int vertex)
+{
+	egg_vertex_t *vert = _egg->getVertex(vertex);
+	egg_weight_t *weight;
+	unsigned int i;
+
+
+	if (vert)
+	{
+		for (i = vert->weights.begin(); i < vert->weights.end(); ++i)
+		{
+			weight = vert->weights[i];
+
+			if (weight && weight->bone == bone)
+			{
+				delete vert->weights[i];  /* Safe to null this out?  */
+			}
+		}
+	}
+}
+
+
+void FreyjaModel::moveBoneCenter(float xx, float yy)
 {
 	egg_tag_t *bone;
 
@@ -768,7 +828,7 @@ void FreyjaModel::TagMoveCenter(float xx, float yy)
 
 
 
-void FreyjaModel::TagMove(float xx, float yy)
+void FreyjaModel::moveBone(float xx, float yy)
 {
 	vec_t x = 0, y = 0, z = 0;
 	egg_tag_t *bone;
@@ -796,7 +856,7 @@ void FreyjaModel::TagMove(float xx, float yy)
 		break;
 	}
   
-	Transform(FreyjaModel::TransformBone, Egg::TRANSLATE, x, y, z);
+	transform(FreyjaModel::TransformBone, Egg::TRANSLATE, x, y, z);
 }
 
 
@@ -828,7 +888,7 @@ void FreyjaModel::MeshMove(float xx, float yy)
 		break;
 	}
 
-	Transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);  
+	transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);  
 }
 
 
@@ -1319,21 +1379,6 @@ void FreyjaModel::TexelMove(float s, float t)
 			vertex->uv[1] = t;
 		}
 	}
-}
-
-void FreyjaModel::TagNew(float x, float y, float z, unsigned char flag)
-{
-	_egg->addTag(x, y, z, flag);
-}
-
-void FreyjaModel::TagAddMesh(unsigned int tag, unsigned int mesh)
-{
-	_egg->TagAddMesh(CachedTag(), getCurrentMesh());
-}
-
-void FreyjaModel::TagDelMesh(unsigned int tag, unsigned int mesh)
-{
-	_egg->TagDelMesh(CachedTag(), getCurrentMesh());
 }
 
 

@@ -218,6 +218,17 @@ class FreyjaControl
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void handleTextEvent(int event, const char *text);
+	/*------------------------------------------------------
+	 * Pre  : text is valid
+	 * Post : Processes event using text given
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.16:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void setZoom(float zoom);
 	/*------------------------------------------------------
 	 * Pre  : ZOOM is a number greater than 0.0

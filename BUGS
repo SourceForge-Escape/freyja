@@ -23,8 +23,8 @@
 
  Backend
 
+	o Crash on null file loads?
 	o Tree STL broken?
-	o Egg8 loses bone names on save
 	o Normal generation not interpolating correctly
 	o Generated Spheres use duplicate vertices
 
