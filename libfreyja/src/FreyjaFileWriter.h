@@ -99,6 +99,28 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	static void getBasename(const char *filename, char *basename, long size);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.02.01:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	static bool copyFileToPath(const char *filename, const char *path);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if success
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.02.01:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators

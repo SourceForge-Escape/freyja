@@ -1117,8 +1117,6 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	//   slower and possibly incorrect object states.
 	///////////////////////////////////////////////////////////////////////
 
-	// FreyjaSkeletalAnimation *freyjaGetAnimation(long animationIndex);
-
 	void freyja__MeshUpdateMappings(long meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : Only use this if you're a core developer writing
@@ -1127,13 +1125,13 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 * Post : Updates Egg backend egg_mesh_t to simulate
 	 *        FreyjaMesh local vertex mappings
 	 ------------------------------------------------------*/
-
 }
 
 
 /* Mongoose 2004.12.19, 
  * C++ fun */
 
+// FreyjaSkeletalAnimation *freyjaGetAnimation(long animationIndex);
 
 Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 

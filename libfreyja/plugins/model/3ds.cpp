@@ -58,8 +58,8 @@ File3ds::File3ds(char *fname)
 
 File3ds::~File3ds() 
 {
-	if (headMaterial) DeleteMaterial	(headMaterial);
-	if (headObject) DeleteObject  		(headObject);
+	if (headMaterial) DeleteMaterial(headMaterial);
+	if (headObject) DeleteObject(headObject);
 }
 // **********************************
 
@@ -854,6 +854,7 @@ int freyja_model__3ds_import(char *filename)
 				t = freyjaTexCoord2f(0.0, 0.0);
 				freyjaPolygonTexCoord1i(t);
 			}
+
 
 			if (faces[i].material)
 			{

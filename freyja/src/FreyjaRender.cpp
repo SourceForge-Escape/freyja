@@ -37,7 +37,6 @@
 #ifdef HAVE_OPENGL
 #   ifdef MACOSX
 #      include <OpenGL/OpenGL.h>
-//#      include <OpenGL/Glu.h>
 #   else
 #      include <GL/gl.h>
 #      include <GL/glu.h>
@@ -857,31 +856,8 @@ void FreyjaRender::ViewMode(int mode)
 }
 
 
-void FreyjaRender::Display() 
-{ 
-	if (!_init)
-	{ 
-		return;
-	}
-	
-	// Mongoose 2002.02.02, Cache for use in calls from here
-	_model->getSceneTranslation(_scroll);
-	
-	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
-				 1.0);
-	
-	glDisable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glLoadIdentity();
-	
-	switch (_view_mode)
-	{
-	case VIEWMODE_MODEL_VIEW:
-		glPushMatrix();
+void FreyjaRender::drawFreeWindow()
+{
 		glRotatef(_angles[0], 1.0, 0.0, 0.0);
 		glRotatef(_angles[1], 0.0, 1.0, 0.0);
 		glRotatef(_angles[2], 0.0, 0.0, 1.0);
@@ -942,18 +918,115 @@ void FreyjaRender::Display()
 		glScalef(mZoom, mZoom, mZoom);
 
 		DrawModel(_model->getCurrentEgg());
+}
+
+
+void FreyjaRender::Display() 
+{ 
+	if (!_init)
+	{ 
+		return;
+	}
+	
+	// Mongoose 2002.02.02, Cache for use in calls from here
+	_model->getSceneTranslation(_scroll);
+	
+	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
+				 1.0);
+	
+	glDisable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+
+#define VIEWPORT_TEST
+#ifdef VIEWPORT_TEST
+    GLint vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);    
+    long width = vp[2] / 2;
+    long height = vp[3];
+#endif
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glLoadIdentity();
+	
+	switch (_view_mode)
+	{
+	case VIEWMODE_MODEL_VIEW:
+		glPushMatrix();
+		drawFreeWindow();
 		glPopMatrix();
 		break;
+
 	case VIEWMODE_MODEL_EDIT:
-		glPushMatrix();
-
-		if (mRenderMode & RENDER_EDIT_GRID)
+#ifdef VIEWPORT_TEST
+		if (mRenderMode & fViewports)
 		{
-			DrawGrid(Width(), Height(), 10);
-		}
+			mViewports[0][0] = 0;
+			mViewports[0][1] = 0;
+			mViewports[0][2] = width;
+			mViewports[0][3] = height/2;
 
-		DrawWindow(_model->CurrentPlane());
+			// Viewport ( front )
+			glViewport(0, 0, width, height/2);
+			glPushMatrix();
+			drawWindow(PLANE_XY);
+			glPopMatrix();
+
+			mViewports[1][0] = width;
+			mViewports[1][1] = 0;
+			mViewports[1][2] = width;
+			mViewports[1][3] = height/2;
+
+			// Viewport ( side )
+			glViewport(width, 0, width, height/2);
+			glPushMatrix();
+			drawWindow(PLANE_ZY);
+			glPopMatrix();
+
+			mViewports[2][0] = width;
+			mViewports[2][1] = height/2;
+			mViewports[2][2] = width;
+			mViewports[2][3] = height/2;
+
+			// Viewport ( top )
+			glViewport(width, height/2, width, height/2);
+			glPushMatrix();
+			drawWindow(PLANE_XZ);
+			glPopMatrix();
+
+			mViewports[3][0] = 0;
+			mViewports[3][1] = height/2;
+			mViewports[3][2] = width;
+			mViewports[3][3] = height/2;
+
+			// Viewport ( free )
+			glViewport(0, height/2, width, height/2);
+			glPushMatrix();
+			drawFreeWindow();
+			glPopMatrix();
+
+			glViewport(vp[0], vp[1], vp[2], vp[3]);
+		
+			glBegin(GL_LINES);
+			glColor3fv(BLACK);
+			glVertex2f(width, 0);
+			glVertex2f(width, height);
+			glVertex2f(0, height/2);
+			glVertex2f(width, height/2);
+			glEnd();
+		}
+		else
+		{
+			glPushMatrix();
+			drawWindow(_model->CurrentPlane());
+			glPopMatrix();
+		}
+#else
+		glPushMatrix();
+		drawWindow(_model->CurrentPlane());
 		glPopMatrix();
+#endif
 		break;
 	case VIEWMODE_TEXTURE_EDIT:
 		DrawTextureEditWindow(Width(), Height());
@@ -1671,7 +1744,7 @@ void FreyjaRender::DrawBbox(egg_group_t *group)
 }
 
 
-void FreyjaRender::DrawGrid(int w, int h, int size)
+void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 {
 	static int x, y, offset_x, offset_y;
 
@@ -1679,7 +1752,7 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
    glPushMatrix();
    glLineWidth(2.0);
 
-   switch (_model->CurrentPlane())
+   switch (plane)
    {
    case PLANE_XY:
 		x = (int)_scroll[0];
@@ -1783,8 +1856,11 @@ float FreyjaRender::getZoom()
 	return mZoom;
 }
 
-void FreyjaRender::DrawWindow(int plane)
+void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
+	if (mRenderMode & RENDER_EDIT_GRID)
+		DrawGrid(plane, Width(), Height(), 10);
+
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
 	glTranslatef(-20.0, -17.0, 10.0);

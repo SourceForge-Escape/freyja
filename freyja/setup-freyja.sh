@@ -21,7 +21,7 @@ cp ./data/icons/* ~/.freyja/icons/
 
 # GNOME Setup
 #cp ./data/freyja.desktop /usr/share/applications/
-cp ./data/freyja.desktop /usr/share/applnk/Graphics/
+#cp ./data/freyja.desktop /usr/share/applnk/Graphics/
 cp ./data/freyja.desktop ~/.gnome2/vfolders/applications/
 cp ./data/icons/freyja.png ~/.icons/
 
