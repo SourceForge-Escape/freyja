@@ -132,6 +132,8 @@ class FreyjaMaterial
 
 	vec_t mTransparency;        /* Alpha 0.0 - 1.0 */
 
+	vec4_t mColor;              /* Solid color */
+
 	unsigned long mBlendSrc;    /* Blend source factor */
 
 	unsigned long mBlendDest;   /* Blend destination factor */
