@@ -28,6 +28,13 @@
 
  libfreyja (0.9.0-20050103) "Umbra" Mongoose <mongoose@icculus.org>
 
+	o Milkshape plugin export "filename.milkshape" to use
+	o Obj plugin export "filename.obj" to use
+	o New ABI to make export much easier ( no translator lists needed )
+
+
+ libfreyja (0.9.0-20050104) "Umbra" Mongoose <mongoose@icculus.org>
+
 	o Fix for milkshape 3d skeletal and mesh import
 	o Tools update: cull fixes, freyjaimageutil to convert image formats
 	o Plugin interaction system done ( plugins can request user input )

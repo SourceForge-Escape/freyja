@@ -24,6 +24,7 @@
 #include <string.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 
 
 extern "C" {
@@ -40,7 +41,7 @@ void freyja_init()
 	freyjaPluginDescription1s("Milkshape Model (*.ms3d)");
 	freyjaPluginAddExtention1s("*.ms3d");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
-	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 }
 
 
@@ -435,6 +436,8 @@ int freyja_model__milkshape_import(char *filename)
 	r.closeFile();
 
 
+	/// Import ///////////////////////////////////////
+
 	Vector<long> transV;
 	long index;
 
@@ -453,10 +456,12 @@ int freyja_model__milkshape_import(char *filename)
 		transV.pushBack(index);
 	}
 
+	// Should use groups ( like freyja meshes )
+
 	for (i = 0; i < mdl.nNumTriangles; ++i)
 	{			
 		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(index);
+		freyjaPolygonMaterial1i(0);
 
 		for (j = 0; j < 3; ++j)
 		{
@@ -522,7 +527,228 @@ int freyja_model__milkshape_import(char *filename)
 
 int freyja_model__milkshape_export(char *filename)
 {
-	printf("freyja_model__milkshape_export> Not implemented, %s:%i\n", 
-			 __FILE__, __LINE__);
-	return -1;
+	const vec_t scale = 2.5;
+	FreyjaFileWriter w;
+	char name[128];
+	long modelIndex = 0;    // make plugin option
+	long skeletonIndex = 0; // make plugin option
+	long i, j, k;
+	long meshCount, meshIndex;
+	long vertexCount, vertexIndex;
+	long polygonCount, polygonIndex, faceVertexCount, faceVertex;
+	vec3_t xyz;
+	vec2_t uv;
+
+
+	if (!w.openFile(filename))
+	{
+		return -1;
+	}
+
+	w.writeCharString(10, "MS3D000000");
+	w.writeLong(4);
+
+	meshCount = freyjaGetModelMeshCount(modelIndex);
+
+	for (vertexCount = 0, polygonCount = 0, i = 0; i < meshCount; ++i)
+	{
+		meshIndex = freyjaGetModelMeshIndex(modelIndex, i);
+		vertexCount += freyjaGetMeshVertexCount(meshIndex);
+		polygonCount += freyjaGetMeshPolygonCount(meshIndex);
+	}
+
+	w.writeInt16U(vertexCount);
+
+	for (i = 0; i < meshCount; ++i)
+	{
+		meshIndex = freyjaGetModelMeshIndex(modelIndex, i);
+		vertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
+			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+			w.writeInt8U(0); // flags
+			w.writeFloat32(xyz[0]*scale); // x
+			w.writeFloat32(xyz[1]*scale); // y
+			w.writeFloat32(xyz[2]*scale); // z
+			w.writeInt8(-1); // boneId ( Only 1:1 vertex:bone, so for now skip )
+			w.writeInt8U(0); // refCount
+		}
+	}
+
+	w.writeInt16U(polygonCount);
+	
+	for (i = 0; i < meshCount; ++i)
+	{
+		meshIndex = freyjaGetModelMeshIndex(modelIndex, i);
+		polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+		for (j = 0; j < polygonCount; ++j)
+		{
+			polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, j);
+			faceVertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+			faceVertexCount = 3; /* Milkshape only handles triangles,
+								  * make user tesselate model to triangles
+								  * to avoid 'write' to model state from here
+								  * or handle it here, don't fuck with freyja 
+								  * object state from export plugins! */
+
+			w.writeInt16(0); // flags
+
+			for (k = 0; k < faceVertexCount; ++k)
+			{
+				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				w.writeInt16(vertexIndex);
+			}
+
+			for (k = 0; k < faceVertexCount; ++k)
+			{
+				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
+				
+				w.writeFloat32(xyz[0]);
+				w.writeFloat32(xyz[1]);
+				w.writeFloat32(xyz[2]);
+			}
+
+			for (k = 0; k < faceVertexCount; ++k)
+			{
+				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+				
+				w.writeFloat32(uv[0]);
+			}
+
+			for (k = 0; k < faceVertexCount; ++k)
+			{
+				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+				
+				w.writeFloat32(uv[1]);
+			}
+
+			w.writeInt8U(0); // smoothingGroup
+			w.writeInt8U(i);
+		}
+	}
+
+
+	w.writeInt16U(meshCount);
+
+	for (k = 0, i = 0; i < meshCount; ++i)
+	{
+		polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+		snprintf(name, 32, "mesh%li", i);
+
+		w.writeInt8U(0); // flags
+		w.writeCharString(32, name); // name
+		w.writeInt16U(polygonCount);  // tris count
+
+		for (j = 0; j < polygonCount; ++j, ++k)
+		{
+			w.writeInt16U(j+k); // tris indeices
+		}
+
+		w.writeInt8(-1); // materialIndex
+	}
+
+
+	w.writeInt16U(0); // materialCount
+ 
+	for (i = 0; i < 0; ++i)
+	{
+		snprintf(name, 32, "mat%li", i);
+		w.writeCharString(32, name);
+
+		w.writeFloat32(0); // ambient
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0); // diffuse
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0); // specular
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0); // emissive
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0);
+		w.writeFloat32(0); // shininess
+		w.writeFloat32(0); // transparency
+
+		w.writeInt8(0); // mode
+		
+		snprintf(name, 128, "texturemap.png"); // he he he
+		w.writeCharString(128, name); // texturemap
+
+		snprintf(name, 128, "alphamap.png");
+		w.writeCharString(128, name); // alphamap
+	}
+
+	w.writeFloat32(30.0f); // fAnimationFPS
+	w.writeFloat32(0.0f);  // fCurrentTime
+	w.writeLong(0);        // iTotalFrames
+
+	long boneIndex;
+	long boneCount = freyjaGetSkeletonBoneCount(skeletonIndex);
+
+	w.writeInt16U(boneCount); // boneCount
+
+	for (i = 0; i < boneCount; ++i)
+	{
+		boneIndex = freyjaGetSkeletonBoneIndex(skeletonIndex, i);
+
+		w.writeInt8(0); // flags
+
+		freyjaGetBoneName(boneIndex, 32, name);
+		w.writeCharString(32, name); // this bone's name
+
+		name[0] = 0;
+		freyjaGetBoneName(freyjaGetBoneParent(boneIndex), 32, name);
+		w.writeCharString(32, name); // parent name
+
+		freyjaGetBoneRotationXYZ3fv(boneIndex, xyz);
+		w.writeFloat32(helDegToRad(xyz[0]));
+		w.writeFloat32(helDegToRad(xyz[1]));
+		w.writeFloat32(helDegToRad(xyz[2]));
+
+		freyjaGetBoneTranslation3fv(boneIndex, xyz);
+		w.writeFloat32(xyz[0]*scale);
+		w.writeFloat32(xyz[1]*scale);
+		w.writeFloat32(xyz[2]*scale);
+
+		w.writeInt16U(0); // numRotationKeyframes
+		w.writeInt16U(0); // numPositionKeyframes
+
+		for (j = 0; j < 0; ++j) // numRotationKeyframes
+		{
+			w.writeFloat32(0.0f);  // time
+			w.writeFloat32(0.0f);  // x
+			w.writeFloat32(0.0f);  // y
+			w.writeFloat32(0.0f);  // z
+		}
+
+		for (j = 0; j < 0; ++j) // numPositionKeyframes
+		{
+			w.writeFloat32(0.0f);  // time
+			w.writeFloat32(0.0f);  // x
+			w.writeFloat32(0.0f);  // y
+			w.writeFloat32(0.0f);  // z
+		}
+	}
+
+	w.closeFile();
+
+	return 0;
 }

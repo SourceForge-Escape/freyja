@@ -57,6 +57,12 @@ public:
 		index_t mBone;             /* Bone id */
 	};
 
+	FreyjaVertex()
+	{
+		mIndex = mGobalMap.size();
+		mGobalMap.pushBack(this);
+	}
+
 	index_t mesh, id;              /* Unique identifier, mesh[i].vertices[j] */
 	vec3_t xyz;                    /* Position in 3 space */
 	vec3_t normal;                 /* Normal vector */
@@ -64,7 +70,13 @@ public:
 
 	Vector<Weight *> weights;      /* Vector of weights */
 
+	Vector <vec3_t *> frames; 
+
 	Vector <index_t> polygonRef;   /* Ids of polygons referencing vertex */
+
+private:
+	long mIndex;
+	static Vector<FreyjaVertex *> mGobalMap;
 };
 
 class FreyjaPolygon

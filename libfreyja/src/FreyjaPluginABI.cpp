@@ -2972,6 +2972,50 @@ long freyjaGetMeshPolygonCount(long meshIndex)
 }
 
 
+long freyjaGetMeshPolygonVertexIndex(long meshIndex, long faceVertexIndex)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+
+	if (mesh && 
+		faceVertexIndex > -1 && faceVertexIndex < (long)mesh->verticesMap.size())
+	{
+		return mesh->verticesMap[faceVertexIndex];
+	}
+
+	return -1;
+}
+
+
+long freyjaGetMeshVertexIndex(long meshIndex, long element)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+
+	if (mesh && 
+		element > -1 && element < (long)mesh->vertices.size())
+	{
+		return mesh->vertices[element];
+	}
+
+	return -1;
+}
+
+
+long freyjaGetMeshVertexCount(long meshIndex)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		freyja__MeshUpdateMappings(meshIndex); // Setup Egg mesh for export
+		return mesh->vertices.size();
+	}
+
+	return 0;
+}
+
+
 long freyjaGetMeshVertexGroupCount(long meshIndex)
 {
 	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
@@ -3079,6 +3123,26 @@ long freyjaCriticalSection(freyja_lock_t request)
 	//				   __FILE__, __LINE__);
 
 	return FREYJA_PLUGIN_ERROR;
+}
+
+
+long freyjaGetSkeletonBoneCount(long skeletonIndex)
+{
+	return freyjaGetCount(FREYJA_BONE); // Atm all one big reference skeleton in Egg backend
+}
+
+
+long freyjaGetSkeletonBoneIndex(long skeletonIndex, long element)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(element);
+	// Atm all one big reference skeleton in Egg backend
+
+	if (bone)
+	{
+		return bone->id;
+	}
+
+	return -1;
 }
 
 
@@ -3322,6 +3386,110 @@ void freyjaPakEnd(long pakIndex)
 {
 	// ATM this does nothing, just here for reserved use
 }
+
+
+///////////////////////////////////////////////////////////////////////
+//  Internal ABI calls 
+///////////////////////////////////////////////////////////////////////
+
+void freyja__MeshUpdateMappings(long meshIndex)
+{
+	Vector<long> polygons, texcoords;
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	long i, j, k, count, idx, vertex, texcoord;
+	long polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+	long vertexCount = 0;
+	long texCoordCount = 0;
+
+
+	if (!mesh || polygonCount < 1)
+		return;
+
+	/* Polygons, filtered by mesh */
+	for (i = 0, count = 0; i < polygonCount; ++i)
+	{
+		idx = freyjaGetMeshPolygonIndex(meshIndex, i);
+		count = freyjaGetPolygonEdgeCount(idx);
+
+		/* Weed out invalid polygons */
+		//if (count < 3) 
+		//{
+		//	continue;
+		//}
+
+		polygons.pushBack(idx);
+	}
+
+	polygonCount = polygons.end();
+
+	/* Vertices and polymapped TexCoords, filtered by filtered polygons */
+	mesh->vertices.clear();
+	mesh->verticesMap.clear();
+	mesh->texcoordsMap.clear();
+	mesh->verticesMap.reserve(freyjaGetCount(FREYJA_VERTEX) + 1);
+	mesh->texcoordsMap.reserve(freyjaGetCount(FREYJA_TEXCOORD) + 1);
+
+	count = freyjaGetCount(FREYJA_VERTEX);
+	for (i = 0; i < count; ++i)
+		mesh->verticesMap.pushBack(-1);
+
+	count = freyjaGetCount(FREYJA_TEXCOORD);
+	for (i = 0; i < count; ++i)
+		mesh->texcoordsMap.pushBack(-1);
+
+	for (i = polygons.begin(); i < (long)polygons.end(); ++i)
+	{
+		idx = polygons[i];
+		count = freyjaGetPolygonVertexCount(idx);
+
+		for (j = 0; j < count; ++j)
+		{
+			vertex = freyjaGetPolygonVertexIndex(idx, j);
+
+			for (k = mesh->vertices.begin(); k < (long)mesh->vertices.end(); ++k)
+			{
+				if (vertex == mesh->vertices[k])
+				{
+					vertex = -2;
+					break;
+				}
+			}
+
+			if (vertex > -2)
+			{
+				/* This generates a 2-way mapping to Egg and mesh ids */
+				mesh->verticesMap.assign(vertex, mesh->vertices.size());
+				mesh->vertices.pushBack(vertex);
+				++vertexCount;
+			}
+		}
+
+
+		count = freyjaGetPolygonTexCoordCount(idx);
+
+		for (j = 0; j < count; ++j)
+		{
+			texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
+
+			for (k = texcoords.begin(); k < (long)texcoords.end(); ++k)
+			{
+				if (texcoord == texcoords[k])
+				{
+					texcoord = -2;
+					break;
+				}
+			}
+
+			if (texcoord > -2)
+			{
+				mesh->texcoordsMap.assign(texcoord, texCoordCount);
+				++texCoordCount;
+				texcoords.pushBack(texcoord);
+			}
+		}
+	}
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////
