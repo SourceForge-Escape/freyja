@@ -19,7 +19,7 @@ BUILD_HOST=`uname -n -m -s`
 URL=http://icculus.org/freyja
 EMAIL=mongoose@icculus.org
 EXT=.so
-TREE_DIR=libfreyja.Umbra
+TREE_DIR=libfreyja
 TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
 
 ################################################################
