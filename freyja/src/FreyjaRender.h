@@ -228,17 +228,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void EditTexture(int n);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set texture to render on a full window quad
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.10.07:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	void RotateAmount(float n);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -249,7 +238,7 @@ public:
 	 * 2000.08.25:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-	
+
 	void Rotate(int flags, float n);
 	/*------------------------------------------------------
 	 * Pre  : Flags are valid XYZ flags
@@ -305,14 +294,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	// FIXME
-
-	Matrix getModelViewMatrixInverse()
-	{
-		return mModelViewMatrixInverse;
-	}
-
 	void setZoom(float zoom);
+
 
 	static vec4_t mColorBackground;
 	static vec4_t mColorGridLine;
@@ -347,9 +330,6 @@ private:
 	 ------------------------------------------------------*/
 
 	void renderPolygon(RenderPolygon &face);
-#ifdef DISABLED	
-	void DrawPolygon(egg_polygon_t &polygon, long frame);
-#endif
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders polygon
@@ -360,7 +340,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void DrawMesh(egg_mesh_t &mesh);
+	void renderMesh(RenderMesh &mesh);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders mesh
@@ -371,7 +351,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void DrawModel(Egg *egg);
+	void renderModel(RenderModel &model);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders model
@@ -382,10 +362,10 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void DrawBbox(egg_group_t *group);
+	void renderBox(vec3_t min, vec3_t max);
 	/*------------------------------------------------------
 	 * Pre  : Group exists
-	 * Post : Renders any group's bounding box
+	 * Post : Renders bounding box in default color, etc
 	 *
 	 *-- History ------------------------------------------
 	 *

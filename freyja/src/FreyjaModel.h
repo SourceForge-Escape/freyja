@@ -43,25 +43,17 @@
 #include "freyja_events.h"
 
 
-
-/* This class sheilds FreyjaRender from Egg use for polygons. 
- * It only uses all natural, wholesome Hel math types. */
-class RenderPolygon  
-{
-public:
-	/* I've limited the renderer to 6-side polygons recently, so deal */
-	Vector3d vertices[6];
-	Vector3d texcoords[6];
-	Vector3d normals[6];
-	vec4_t colors[6];
-	long material;
-	unsigned int count; // vertex count
-};
-
-void createRenderPolygon(RenderPolygon &face,
-						 egg_polygon_t &polygon, long frame);
+typedef enum { 
+	
+	PLANE_XY = 0, 
+	PLANE_ZY = 1, 
+	PLANE_XZ = 2
+} freyja_plane_t;
 
 
+/* Oh noes! You know something is up when you see predecs of classes */
+class RenderMesh;
+class RenderModel;
 
 class FreyjaModelPrinter : public FreyjaPrinter
 {
@@ -78,82 +70,6 @@ class FreyjaModelPrinter : public FreyjaPrinter
 		freyja_print_args(format, args);
 	}
 };
-
-
-class CopyGroup
-{
-public:
-	Vector <unsigned int> vertices;     /* Vertices composing group */	
-	vec3_t center;
-};
-
-
-// FIXME: dumps vertex weights and for now
-// Polygon, etc references are never copied -- since objects will be duped
-class CopyVertex
-{
-public:
-	vec3_t pos;
-	vec3_t uv;       /* Remember only uv is used in this build */
-	vec3_t norm;
-	// vec4_t color;  // In this build color is func of polymapped face
-};
-
-
-class CopyTexCoord
-{
-public:
-	vec2_t uv;
-};
-
-
-class CopyPolygon
-{
-public:
-	Vector <unsigned int> vertices;
-	Vector <unsigned int> texcoords; // this build also uses this for color
-	int material;
-};
-
-
-// FIXME: Drops any vertex animation frames
-class CopyMesh
-{
-public:
-	CopyMesh()
-	{
-		flags = 0;
-	}
-
-	~CopyMesh()
-	{
-		erase();
-	}
-
-	void erase()
-	{
-		flags = 0;
-		vertices.erase();
-		texcoords.erase();
-		polygons.erase();
-		groups.erase();
-	}
-
-	Vector <CopyVertex *> vertices;
-	Vector <CopyTexCoord *> texcoords;
-	Vector <CopyPolygon *> polygons;
-	Vector <CopyGroup *> groups;
-	vec3_t center;
-	unsigned int flags;
-};
-
-
-typedef enum { 
-	
-	PLANE_XY = 0, 
-	PLANE_ZY = 1, 
-	PLANE_XZ = 2
-} freyja_plane_t;
 
 
 class FreyjaModel
@@ -177,6 +93,73 @@ public:
 		fDontUpdateBoneName = 16,
 		fDeformBoneVertices = 32
 	} option_flag_t;
+
+	class CopyGroup
+	{
+	public:
+		Vector <unsigned int> vertices;     /* Vertices composing group */	
+		vec3_t center;
+	};
+
+
+	// FIXME: dumps vertex weights and for now
+	// Polygon, etc references are never copied -- since objects will be duped
+	class CopyVertex
+	{
+	public:
+		vec3_t pos;
+		vec3_t uv;       /* Remember only uv is used in this build */
+		vec3_t norm;
+		// vec4_t color;  // In this build color is func of polymapped face
+	};
+
+
+	class CopyTexCoord
+	{
+	public:
+		vec2_t uv;
+	};
+
+
+	class CopyPolygon
+	{
+	public:
+		Vector <unsigned int> vertices;
+		Vector <unsigned int> texcoords; // this build also uses this for color
+		int material;
+	};
+
+
+	// FIXME: Drops any vertex animation frames
+	class CopyMesh
+	{
+	public:
+		CopyMesh()
+		{
+			flags = 0;
+		}
+
+		~CopyMesh()
+		{
+			erase();
+		}
+
+		void erase()
+		{
+			flags = 0;
+			vertices.erase();
+			texcoords.erase();
+			polygons.erase();
+			groups.erase();
+		}
+
+		Vector <CopyVertex *> vertices;
+		Vector <CopyTexCoord *> texcoords;
+		Vector <CopyPolygon *> polygons;
+		Vector <CopyGroup *> groups;
+		vec3_t center;
+		unsigned int flags;
+	};
 
 
 	////////////////////////////////////////////////////////////
@@ -209,6 +192,8 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
+
+	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
 
 	unsigned int getAnimationFramesIn(unsigned int animationIndex);
 
@@ -397,6 +382,49 @@ public:
 	 * 2004.04.01:
 	 * Mongoose - Created, replaces old API 'Scroll' methods
 	 ------------------------------------------------------*/
+
+	void getVertexSelection(vec3_t min, vec3_t max,
+							Vector<unsigned int> **list);
+
+	unsigned int getModelCount();
+
+	void getModel(RenderModel &model, unsigned int index);
+
+	void getMeshBoundingBox(long index, vec3_t min, vec3_t max);
+	/*------------------------------------------------------
+	 * Pre  : index is query for 'mesh' by index
+	 *
+	 * Post : This replaces the old Egg mesh -> group export
+	 *        it pulls 'editable' vertices' bounding box.
+	 *
+	 ------------------------------------------------------*/
+
+	void getMeshVertices(long index, Vector<unsigned int> **list);
+	/*------------------------------------------------------
+	 * Pre  : index is query for 'mesh' by index
+	 *
+	 * Post : Returns list of currently 'editable' vertices
+	 *        of that mesh OR Null. 
+	 *
+	 *        This replaces the old Egg mesh -> group export
+	 *        it pulls 'editable' vertices out of given mesh.
+	 *
+	 *        It does this without exposing groups, and makes
+	 *        Egg removable again.
+	 *
+	 ------------------------------------------------------*/
+
+	Egg *getCurrentEgg();
+
+	vec3_t *getVertexXYZ(long index)
+	{
+		egg_vertex_t *vertex = _egg->getVertex(index);
+			 
+		if (vertex)
+			return &(vertex->pos);
+
+		return 0x0;
+	}
 
 	bool isCurrentBoneAllocated();
 
@@ -720,14 +748,10 @@ public:
 	void connectBone(unsigned int master, unsigned int slave);
 	void disconnectBone(unsigned int master, unsigned int slave);
 
-	Egg *getCurrentEgg();
-
 
 	///////////////////////////////////////////////////////
 
 	FreyjaModelPrinter mPrinter;
-
-	Vector<unsigned int> mList;         /* Temp generic vertex list buffer */
 
 	Vector<long> mUVMap;
 
@@ -829,6 +853,8 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 	
 	Egg *_egg;                      /* The 3d model */
 	
@@ -850,9 +876,7 @@ private:
 	unsigned int _bbox;                 /* Used to determine bbox min/max 
 										   points */
   
-	Vector<unsigned int> _selection_list; /* Temp generic vertex list buffer */
-
-	freyja_plane_t _current_plane;           /* Which plane view is this? */
+	freyja_plane_t _current_plane;      /* Which plane view is this? */
 
 	unsigned int _poly_sz;              /* Number of edges for a new polygon */
 	
@@ -884,5 +908,106 @@ private:
 	
 	float _scroll[3];                   /* Scrolling in edit planes */
 };
+
+
+
+/* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
+ * They only use all natural, wholesome Hel math types. */
+class RenderPolygon  
+{
+public:
+	/* I've limited the renderer to 6-side polygons recently, so deal */
+	Vector3d vertices[6];
+	Vector3d texcoords[6];
+	Vector3d normals[6];
+	vec4_t colors[6];
+	long material;
+	unsigned int count; // vertex count
+};
+
+class RenderMesh
+{
+public:
+
+	Vector3d getGroupCenter(unsigned int i)
+	{
+		Vector3d v;
+		egg_group_t *grp;
+
+		if ((grp = mEgg->getGroup(mMesh->group[i])))
+		{
+			return Vector3d(grp->center);
+		}
+
+		v.zero();
+		return v;
+	}
+
+	void setEgg(Egg *egg, egg_mesh_t *mesh)
+	{
+		mEgg = egg;
+		mMesh = mesh;
+	}
+
+	long id;
+	Vector<egg_polygon_t *> *polygon;
+	long frame;
+
+	unsigned int gbegin, gend;
+
+private:
+	Egg *mEgg; // For sheilding renderer from egg calls for groups in mesh
+	egg_mesh_t *mMesh;
+};
+
+
+class RenderModel
+{
+public:
+
+#warning Exposes Egg to renderer
+	Vector<egg_tag_t *> *getSkeleton()
+	{
+		return mEgg->TagList();
+	}
+
+	unsigned int getMeshCount()
+	{
+		if (mMeshlist->empty())
+			return 0;
+
+		return mMeshlist->end();
+	}
+
+	void getMesh(unsigned int index, RenderMesh &mesh)
+	{
+		egg_mesh_t *m = (*mMeshlist)[index]; 
+
+		if (m)
+		{
+			mModel->createRenderMesh(mesh, *m);
+		}
+	}
+
+	void setEgg(Egg *egg, FreyjaModel *model)
+	{
+		mEgg = egg;
+		mMeshlist = egg->MeshList();
+		mModel = model;
+	}
+
+	long index;
+
+private:
+
+	Vector<egg_mesh_t *> *mMeshlist;
+	Egg *mEgg;
+	FreyjaModel *mModel;
+};
+
+
+void createRenderPolygon(RenderPolygon &face,
+						 egg_polygon_t &polygon, long frame);
+
 
 #endif
