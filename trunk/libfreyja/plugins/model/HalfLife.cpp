@@ -522,7 +522,7 @@ int freyja_model__halflife_import(char *filename)
 	printf("Processing HalfLife bodyparts...\n");
 
 	// DISABLE FOR NOW 
-	if (0)
+	//if (0)
 	for (b = 0; b < hl.mBodyPartCount; ++b)
 	{
 		freyjaBegin(FREYJA_MESH);
@@ -538,6 +538,7 @@ int freyja_model__halflife_import(char *filename)
 			vert = freyjaVertex3f(hl.mBodyParts[b].models[mdl].vertices[i*3][0],
 								  hl.mBodyParts[b].models[mdl].vertices[i*3][1],
 								  hl.mBodyParts[b].models[mdl].vertices[i*3][2]);
+			//freyjaVertexNormal3fv(vert, hl.mBodyParts[b].models[mdl].normals[i*3]);
 			
 			// Mongoose 2002.02.09, Generates id translator list
 			trans.Add(i, vert);	
