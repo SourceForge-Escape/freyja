@@ -516,6 +516,19 @@ unsigned int eggGetVertex3f(float *xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+unsigned int eggGetVertexNormal3f(float *xyz);
+/*------------------------------------------------------
+ * Pre  : Current vertex exists
+ * Post : Sets passed float array to vertex pos
+ *        Returns internal id value
+ *        Returns PLUGIN_ERROR on error
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.11.03: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
 unsigned int eggGetPolygon1u(egg_plugin_t type, int item, 
 							 unsigned int *value);
 /*------------------------------------------------------
@@ -677,6 +690,9 @@ public:
 	 ------------------------------------------------------*/
 
 	unsigned int eggGetVertex(float *xyz);
+	unsigned int eggGetVertexNormal(float *xyz);
+	unsigned int eggGetVertexWeights(Vector<unsigned int> &bones,
+									 Vector<float> &weights);
 	/*------------------------------------------------------
 	 * Pre  : Current vertex exists
 	 * Post : Sets passed float array to vertex pos

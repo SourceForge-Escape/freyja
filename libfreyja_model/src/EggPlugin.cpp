@@ -954,6 +954,15 @@ unsigned int eggGetVertex3f(float *xyz)
 }
 
 
+unsigned int eggGetVertexNormal3f(float *xyz)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->eggGetVertexNormal(xyz);
+
+	return PLUGIN_ERROR;
+}
+
+
 unsigned int eggGetPolygon1u(egg_plugin_t type, int item, 
 							 unsigned int *value)
 {
@@ -1361,6 +1370,30 @@ unsigned int EggPlugin::eggGetVertex(float *xyz)
 	xyz[0] = vert->pos[0];
 	xyz[1] = vert->pos[1];
 	xyz[2] = vert->pos[2];
+
+	return vert->id;
+}
+
+
+unsigned int EggPlugin::eggGetVertexNormal(float *xyz)
+{
+	Vector<egg_vertex_t *> *vertex;
+	egg_vertex_t *vert;
+
+
+	vertex = mEgg->VertexList();
+
+	if (!vertex || mIndexVertex >= vertex->end())
+		return PLUGIN_ERROR;
+ 
+	vert = (*vertex)[mIndexVertex];
+
+	if (!vert)
+		return PLUGIN_ERROR;
+
+	xyz[0] = vert->norm[0];
+	xyz[1] = vert->norm[1];
+	xyz[2] = vert->norm[2];
 
 	return vert->id;
 }
