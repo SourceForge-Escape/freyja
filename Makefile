@@ -14,7 +14,7 @@ lazybuild:
 	@-cd libmgtk && ./autogen.sh && make && make install
 
 	@-printf "Installing Freyja\n"
-	@-cd Freyja && ./autogen.sh && make && make install
+	@-cd freyja && ./autogen.sh && make && make install
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -30,18 +30,18 @@ clean:
 	@-cd libhel && make clean
 	@-cd libmgtk && make clean
 	@-cd libfreyja && make clean
-	@-cd Freyja && make clean
+	@-cd freyja && make clean
 
 tarball:
 	@-cd mstl && make tarball
 	@-cd libhel && make tarball
 	@-cd libfreyja && make tarball
 	@-cd libmgtk && make tarball
-	@-cd Freyja && make tarball
+	@-cd freyja && make tarball
 
 user-install:
 	@-printf "Installing freyja user files\n"
-	@-cd Freyja; ./setup-freyja.sh
+	@-cd freyja; ./setup-freyja.sh
 	@-cd ..
 
 
