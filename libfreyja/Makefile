@@ -418,7 +418,7 @@ plugins-model-exp2: grnX.so halflifeX.so
 
 plugins-model-exp: eggv8.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so lwo.so md2.so md5.so nod.so psk.so python.so obj.so smd.so trmesh.so
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so lwo.so md2.so md5.so nod.so psk.so python.so obj.so smd.so trmesh.so glm.so
 
 
 ######################################################################
@@ -460,6 +460,13 @@ ase.test:
 	$(MAKE) test NAME=ase BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/Ase.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+
+glm.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=glm BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/GLMModel.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_GLMMODEL $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 nod.test:

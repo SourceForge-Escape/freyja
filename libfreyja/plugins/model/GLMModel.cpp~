@@ -1,0 +1,271 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
+ * 
+ * Project : Freyja
+ * Author  : Terry 'Mongoose' Hendrix II
+ * Website : http://www.icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
+ * Object  : GLMModel
+ * License : No use w/o permission (C) 2004 Mongoose
+ * Comments: GHOUL 2 model format plugin for freyja.
+ *
+ *
+ *           This file was generated using Mongoose's C++ 
+ *           template generator script.  <mongoose@icculus.org>
+ * 
+ *-- History ------------------------------------------------- 
+ *
+ * 2004.12.22:
+ * Mongoose - Created
+ ==========================================================================*/
+
+#include <freyja/FreyjaFileReader.h>
+
+#include "GLMModel.h"
+
+
+
+////////////////////////////////////////////////////////////
+// Constructors
+////////////////////////////////////////////////////////////
+
+GLMModel::GLMModel()
+{
+}
+
+
+GLMModel::~GLMModel()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+// Public Accessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
+
+bool GLMModel::load(const char *filename)
+{
+	FreyjaFileReader r;
+	long i, j;
+
+	
+	if (!r.openFile(filename))
+		return false;
+
+	mMDXMHeader.ident = r.readLong();
+	mMDXMHeader.version = r.readLong();
+	r.readCharString(MAX_QPATH, mMDXMHeader.name);
+	r.readCharString(MAX_QPATH, mMDXMHeader.animName);
+	mMDXMHeader.animIndex = r.readLong();
+	mMDXMHeader.numBones = r.readLong();
+	mMDXMHeader.numLODs = r.readLong();
+	mMDXMHeader.ofsLODs = r.readLong();
+	mMDXMHeader.numSurfaces = r.readLong();
+	mMDXMHeader.ofsSurfHierarchy = r.readLong();
+	mMDXMHeader.ofsEnd = r.readLong();
+
+
+	printf("mMDXMHeader.ident = %i\n", mMDXMHeader.ident);
+	printf("mMDXMHeader.version = %i\n", mMDXMHeader.version);
+	printf("mMDXMHeader.name = '%s'\n", mMDXMHeader.name);
+	printf("mMDXMHeader.animName = '%s'\n", mMDXMHeader.animName);
+	printf("mMDXMHeader.animIndex = %i\n", mMDXMHeader.animIndex);
+	printf("mMDXMHeader.numBones = %i\n", mMDXMHeader.numBones);
+	printf("mMDXMHeader.numLODs = %i\n", mMDXMHeader.numLODs);
+	printf("mMDXMHeader.ofsLODs = %i\n", mMDXMHeader.ofsLODs);
+	printf("mMDXMHeader.numSurfaces = %i\n", mMDXMHeader.numSurfaces);
+	printf("mMDXMHeader.ofsSurfHierarchy = %i\n", mMDXMHeader.ofsSurfHierarchy);
+	printf("mMDXMHeader.ofsEnd = %i\n", mMDXMHeader.ofsEnd);
+
+
+	if (mMDXMHeader.ident != MDXM_IDENT)
+	{
+		r.closeFile();
+		return false;
+	}
+
+	mMDXMHierarchyOffsets = new mdxmHierarchyOffsets_t[mMDXMHeader.numSurfaces];
+
+	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
+	{
+		mMDXMHierarchyOffsets[i].offsets = r.readLong();
+	}
+
+	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
+	{
+		printf("mMDXMHierarchyOffsets[%li] = %i\n", i,
+		mMDXMHierarchyOffsets[i].offsets);
+	}
+
+
+	//r.setFileOffset(mMDXMHeader.ofsSurfHierarchy);
+	mMDXMHierarchy = new mdxmSurfHierarchy_t[mMDXMHeader.numSurfaces];
+
+	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
+	{
+		r.readCharString(MAX_QPATH, mMDXMHierarchy[i].name);
+		mMDXMHierarchy[i].flags = r.readLong();
+		r.readCharString(MAX_QPATH, mMDXMHierarchy[i].shader);
+		mMDXMHierarchy[i].shaderIndex = r.readLong();
+		mMDXMHierarchy[i].parentIndex = r.readLong();
+		mMDXMHierarchy[i].numChildren = r.readLong();
+		mMDXMHierarchy[i].childIndexes = new int[mMDXMHierarchy[i].numChildren];
+
+		for (j = 0; j < mMDXMHierarchy[i].numChildren; ++j)
+			mMDXMHierarchy[i].childIndexes[j] = r.readLong();
+	}
+
+	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
+	{
+		printf("mMDXMHierarchy[%li].name = '%s'\n", i,
+			   mMDXMHierarchy[i].name);
+		printf("mMDXMHierarchy[%li].flags = %i\n", i,
+			   mMDXMHierarchy[i].flags);
+		printf("mMDXMHierarchy[%li].shader = '%s'\n", i,
+			   mMDXMHierarchy[i].shader);
+		printf("mMDXMHierarchy[%li].shaderIndex = %i\n", i,
+			   mMDXMHierarchy[i].shaderIndex);
+		printf("mMDXMHierarchy[%li].parentIndex = %i\n", i,
+			   mMDXMHierarchy[i].parentIndex);
+		printf("mMDXMHierarchy[%li].numChildren = %i\n", i,
+			   mMDXMHierarchy[i].numChildren);
+		printf("mMDXMHierarchy[%li].childIndexes = {", i);
+
+		for (j = 0; j < mMDXMHierarchy[i].numChildren; ++j)
+			printf("%i ", mMDXMHierarchy[i].childIndexes[j]);
+
+		printf("}\n");
+	}
+
+	mdxmLOD_t mMDXMLODs[mMDXMHeader.numLODs];
+	mdxmLODSurfOffset_t mMDXMSurfOffsets[mMDXMHeader.numLODs];
+	
+
+	for (i = 0; i < mMDXMHeader.numLODs; ++i)
+	{
+		mMDXMLODs[i].ofsEnd = r.readLong();
+
+		mMDXMSurfOffsets[i].offsets = new int[mMDXMHeader.numSurfaces];
+		
+		for (j = 0; j < mMDXMHeader.numSurfaces; ++j)
+			mMDXMSurfOffsets[i].offsets[j] = r.readLong();
+	}
+
+	for (i = 0; i < mMDXMHeader.numLODs; ++i)
+	{
+		printf("mMDXMLODs[%li].ofsEnd = %i\n", i,
+			   mMDXMLODs[i].ofsEnd);
+		
+		printf("mMDXMSurfOffsets[%li].offsets ={", i);
+
+		for (j = 0; j < mMDXMHeader.numSurfaces; ++j)
+			printf("%i ", mMDXMSurfOffsets[i].offsets[j]);
+
+		printf("\n");
+	}
+
+
+	// for each LOD...  (mdxmHeader_t->numLODs)
+// {
+// mdxLOD_t - this contains the header for this LOD. Contains num of surfaces, offset to surfaces and offset to next LOD. Surfaces are shader sorted, so each surface = 1 shader
+typedef struct {
+	// (used to contain numSurface/ofsSurfaces fields, but these are same per LOD level now)
+	//
+	int			ofsEnd;				// offset to next LOD
+} mdxmLOD_t;
+
+typedef struct {	// added in GLM version 3 for ingame use at Jake's request
+	int offsets[1];		// variable sized (mdxmHeader_t->numSurfaces), each offset points to surfaces below
+} mdxmLODSurfOffset_t;
+
+// for each surface... (mdxmHeader_t->numSurfaces)
+// {
+// mdxSurface_t - reuse of header format containing surface name, number of bones, offset to poly data and number of polys, offset to vertex information, and number of verts. NOTE offsets are relative to this header.
+typedef struct {
+	int			ident;				// this one field at least should be kept, since the game-engine may switch-case (but currently=0 in carcass)
+	int			thisSurfaceIndex;	// 0...mdxmHeader_t->numSurfaces-1 (because of how ingame renderer works)
+	int			ofsHeader;			// this will be a negative number, pointing back to main header
+	int			numVerts;
+	int			ofsVerts;
+	int			numTriangles;
+	int			ofsTriangles;
+	// Bone references are a set of ints representing all the bones
+	// present in any vertex weights for this surface.  This is
+	// needed because a model may have surfaces that need to be
+	// drawn at different sort times, and we don't want to have
+	// to re-interpolate all the bones for each surface.
+	//
+	int			numBoneReferences;
+	int			ofsBoneReferences;
+	int			ofsEnd;				// next surface follows
+} mdxmSurface_t;
+
+// for each triangle...	(mdxmSurface_t->numTriangles)
+// {
+// mdxTriangle_t - contains indexes into verts. One struct entry per poly.
+typedef struct {
+	int			indexes[3];
+} mdxmTriangle_t;
+// }
+				
+// for each vert... (mdxmSurface_t->numVerts)
+// {
+// mdxVertex_t - this is an array with number of verts from the surface definition as its bounds. It contains normal info, texture coors and number of weightings for this bone
+// (this is now kept at 32 bytes for cache-aligning)
+typedef struct {
+	vec3_t			normal;
+	vec3_t			vertCoords;
+	// packed int...
+	unsigned int	uiNmWeightsAndBoneIndexes;	// 32 bits.  format:
+	// 31 & 30:  0..3 (= 1..4) weight count
+	// 29 & 28 (spare)
+	//	2 bit pairs at 20,22,24,26 are 2-bit overflows from 4 BonWeights below (20=[0], 22=[1]) etc)
+	//  5-bits each (iG2_BITS_PER_BONEREF) for boneweights
+	// effectively a packed int, each bone weight converted from 0..1 float to 0..255 int...
+	//  promote each entry to float and multiply by fG2_BONEWEIGHT_RECIPROCAL_MULT to convert.
+	byte			BoneWeightings[iMAX_G2_BONEWEIGHTS_PER_VERT];	// 4
+} mdxmVertex_t;
+
+	r.closeFile();
+
+	return false;
+}
+
+
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Unit Test code
+////////////////////////////////////////////////////////////
+
+#ifdef UNIT_TEST_GLMMODEL
+int runGLMModelUnitTest(int argc, char *argv[])
+{
+	GLMModel test;
+
+	test.load(argv[1]);
+
+	return 0;
+}
+
+
+int main(int argc, char *argv[])
+{
+	printf("[GLMModel class test]\n");
+
+	return runGLMModelUnitTest(argc, argv);
+}
+#endif

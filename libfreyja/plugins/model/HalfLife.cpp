@@ -522,7 +522,7 @@ int freyja_model__halflife_import(char *filename)
 	printf("Processing HalfLife bodyparts...\n");
 
 	// DISABLE FOR NOW 
-	//if (0)
+	if (0)
 	for (b = 0; b < hl.mBodyPartCount; ++b)
 	{
 		freyjaBegin(FREYJA_MESH);
