@@ -143,6 +143,11 @@ void FreyjaFileWriter::printString(const char *s)
 }
 
 
+void  FreyjaFileWriter::writeBuffer(unsigned int length, unsigned char *buffer)
+{
+	fwrite(buffer, length, 1, mFileHandle);  // heh, yeah
+}
+
 void FreyjaFileWriter::writeBufferUnsignedChar(unsigned int length, 
 											unsigned char *buffer)
 {

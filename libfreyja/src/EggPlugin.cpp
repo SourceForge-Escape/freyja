@@ -987,6 +987,9 @@ void EggPlugin::setupPlugins()
 			if (reader.isDirectory(module_filename))
 				continue;
 
+#ifdef MACOSX
+#endif
+
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
 
 			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
