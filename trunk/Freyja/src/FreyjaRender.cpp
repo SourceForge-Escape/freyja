@@ -1090,28 +1090,27 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 /* This polygon renderer now only handles 6 edges max */
 void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 {
-	Vector3d vertices[6];
-	Vector3d texcoords[6];
-	Vector3d normals[6];
-	vec4_t colors[6];
-	vec_t *mpos;
-	Vector3d u, v, w;
-	unsigned int i, j, n;
-	egg_vertex_t *vertex;
-	egg_texel_t *texel;
-	egg_texel_t *texel2;
-	bool external_texel = false;
+	static Vector3d vertices[6];
+	static Vector3d texcoords[6];
+	static Vector3d normals[6];
+	static vec4_t colors[6];
+	static vec_t *mpos;
+	static Vector3d u, v, w;
+	static unsigned int i, j, n;
+	static egg_vertex_t *vertex;
+	static egg_texel_t *texel;
+	static egg_texel_t *texel2;
+	static bool external_texel;
 
 
 	external_texel = !polygon.r_texel.empty();
 
-	if (polygon.r_vertex.empty() || polygon.r_vertex.end() > 6 ||
+	if (polygon.r_vertex.empty() ||
 		(!external_texel && polygon.shader == COLORED_POLYGON))
 	{
 		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon malformed\n");
 		return;
 	}
-
 
 	/* Mongoose 2004.12.23, 
 	 * Setup vertex morphing for egg backend polygon */
@@ -1175,10 +1174,6 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		++n;
 	}
 
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-
 	/* Render wireframe */
 	if (mRenderMode & RENDER_WIREFRAME)
 	{
@@ -1195,6 +1190,11 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 
 		glLineWidth(_default_line_width);
 
+
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+
 		glBegin(GL_LINE_LOOP);
 
 		for (i = 0; i < n; ++i)
@@ -1205,6 +1205,8 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		}
 	  
 		glEnd();
+
+		glPopAttrib();
 	}
 
 
@@ -1227,8 +1229,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		glEnd();
 	}
 
-
-	// Render points
+	// Render points, remove this for speed -- move up to mesh level draw by grp
 	if (mRenderMode & RENDER_POINTS)
 	{
 		glColor3fv(mColorVertex);
@@ -1242,8 +1243,6 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 
 		glEnd();   
 	}
-
-	glPopAttrib();
 
 
 	/* Render face */
@@ -1259,7 +1258,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		{
 			if (mRenderMode & RENDER_MATERIAL)
 			{
-				glPushAttrib(GL_ENABLE_BIT);
+				//glPushAttrib(GL_ENABLE_BIT);
 				gMaterialManager->applyEffectGL(polygon.shader);
 			}
 
@@ -1324,7 +1323,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 
 		if (mRenderMode & RENDER_MATERIAL)
 		{
-			glPopAttrib();
+			//glPopAttrib();
 		}
 	}
 }
