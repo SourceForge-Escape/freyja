@@ -1381,8 +1381,11 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 	if (mRenderMode & RENDER_WIREFRAME)
 	{
 		// Update wireframe color
-		if (mRenderMode & fHightlightPolygonWireframe)
-			//polygon.id == mModel->getCurrentPolygon())
+		if (face.id == (int)mModel->getCurrentPolygon())
+		{
+			glColor3fv(RED);
+		}
+		else if (mRenderMode & fHightlightPolygonWireframe)
 		{
 			glColor3fv(mColorWireframeHighlight);    
 		}

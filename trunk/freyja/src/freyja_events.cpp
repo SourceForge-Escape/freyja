@@ -281,7 +281,9 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshNew", eMeshNew);
 	r.RegisterInt("eMeshDelete", eMeshDelete);
 	r.RegisterInt("eMeshSelect", eMeshSelect);
-	r.RegisterInt("eMeshMirror", eMeshMirror);
+	r.RegisterInt("eMeshMirrorX", eMeshMirrorX);
+	r.RegisterInt("eMeshMirrorY", eMeshMirrorY);
+	r.RegisterInt("eMeshMirrorZ", eMeshMirrorZ);
 	//r.RegisterInt("eMeshMove", eMeshMove);
 	//r.RegisterInt("eMeshRotate", eMeshRotate);
 	//r.RegisterInt("eMeshScale", eMeshScale);
@@ -317,6 +319,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMoveObject", eMoveObject);
 	r.RegisterInt("eRotateObject", eRotateObject);
 	r.RegisterInt("eScaleObject", eScaleObject);
+
+	r.RegisterInt("eExtrude", eExtrude);
 
 	r.RegisterInt("eTransformMenu", eTransformMenu);
 	r.RegisterInt("eTransformSelectedVertices", eTransformSelectedVertices);

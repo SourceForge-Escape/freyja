@@ -106,7 +106,9 @@ typedef enum {
 	eOpenGLBlend,
 	eDebug,
 	eGenerateCone,
-	eMeshMirror,
+	eMeshMirrorX,
+	eMeshMirrorY,
+	eMeshMirrorZ,
 	eMeshSelect,
 
 	eCopyAppendMode,
@@ -140,6 +142,8 @@ typedef enum {
 	ePolyMeshBone,
 	eRenderBbox,
 	eCamera,
+	
+	eExtrude,
 
 	eGenerateNormals,
 	eGenerateCube,
