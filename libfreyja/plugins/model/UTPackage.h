@@ -636,6 +636,7 @@ class UTPackage
 
 	utx_header_t mHeader;         /* Package header, holds tables, ver, etc */
 
+	char *mDecyrptFilename;
 
  private:
 

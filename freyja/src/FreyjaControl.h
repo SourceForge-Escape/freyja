@@ -271,6 +271,9 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
+	Vector3d getPickRay(float mouseX, float mouseY, vec3_t xyz);
+	void getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz);
+
 	void getScreenToWorldOBSOLETE(float *x, float *y);
 	/*------------------------------------------------------
 	 * Pre  : Emulates the old ScreenToWorld() method behavior

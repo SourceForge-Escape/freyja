@@ -273,13 +273,13 @@ class MaterialManager
 						unsigned int width, unsigned int height);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Dumps screenshot to <filename> 
-	 *        Returns 0 on success
+	 * Post : Generates a screenshot of GL context
+	 *        with an auto timestamped name to <filename> base
 	 *
 	 *-- History ------------------------------------------
 	 *
 	 * 2004.03.27:
-	 * Mongoose - Created
+	 * Mongoose - Created, based on old ScreenShot() from 2000
 	 ------------------------------------------------------*/
 
 

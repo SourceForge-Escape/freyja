@@ -43,6 +43,26 @@
 #include "freyja_events.h"
 
 
+
+/* This class sheilds FreyjaRender from Egg use for polygons. 
+ * It only uses all natural, wholesome Hel math types. */
+class RenderPolygon  
+{
+public:
+	/* I've limited the renderer to 6-side polygons recently, so deal */
+	Vector3d vertices[6];
+	Vector3d texcoords[6];
+	Vector3d normals[6];
+	vec4_t colors[6];
+	long material;
+	unsigned int count; // vertex count
+};
+
+void createRenderPolygon(RenderPolygon &face,
+						 egg_polygon_t &polygon, long frame);
+
+
+
 class FreyjaModelPrinter : public FreyjaPrinter
 {
  public:
@@ -571,11 +591,11 @@ public:
 
 	void setSceneTranslation(vec_t x, vec_t y, vec_t z);
 
-	void transform(int mode, Egg::egg_transform type, 
+	void transform(int mode, freyja_transform_action_t action, 
 				   float x, float y, float z);
 	/*------------------------------------------------------
 	 * Pre  : mode is {FRAME, MESH, SCENE, BONE, etc}
-	 *        type is {SCALE, ROTATE, TRANSLATE}
+	 *        action is { fTranslate, fRotate, fScale, etc }
 	 *        x, y, z are in degrees or units
 	 *
 	 * Post : Transform is performed
