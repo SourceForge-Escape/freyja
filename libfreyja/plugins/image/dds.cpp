@@ -15,13 +15,16 @@
  * 
  *-- History -------------------------------------------------------------- 
  *
+ * 2004.08.24:
+ * Mongoose -  Decompression algorithms patterned after those in DevIL --
+ *             couldn't find specs on msdn as it was 404
+ *
  * 2004.08.23:
  * Mongoose - Created, used mdsn spec as a guide 
  *            ( and some comments from spec for bitflags )
  ==========================================================================*/
 
 #include <stdio.h>
-
 #include <freyja8/EggFileReader.h>
 
 extern "C" {

@@ -155,6 +155,14 @@ PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
 
 plug-ins: $(PLUGINS)
 
+bmp.so:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=bmp \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/bmp.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 dds.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
@@ -212,7 +220,7 @@ meshgen.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-plugins: dds.so jpg.so pcx.so ppm.so png.so tga.so
+plugins: bmp.so dds.so jpg.so pcx.so ppm.so png.so tga.so
 
 clean-plugins:
 	@-echo -n "Cleaning plugins                             "
