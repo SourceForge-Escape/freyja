@@ -910,7 +910,9 @@ int freyjaGetBoneTranslation3fv(unsigned int index, vec3_t xyz)
 
 unsigned int freyjaGetBoneMesh1u(unsigned int item, unsigned int *value)
 {
-	return FreyjaPlugin::mPlugin->getBoneMesh(item, value);
+	*value = FreyjaPlugin::mPlugin->getBoneMeshIndex(item);
+
+	return *value;
 }
 
 
@@ -931,7 +933,7 @@ unsigned int freyjaGetCurrentIndex(freyja_object_t type)
 //}
 
 
-unsigned int FreyjaPlugin::getBoneMesh(unsigned int item, unsigned int *value)
+long FreyjaPlugin::getBoneMeshIndex(long item)
 {
 	
 	printError("FreyjaPlugin::getBoneMesh is not implemented");

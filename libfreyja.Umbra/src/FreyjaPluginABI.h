@@ -27,6 +27,7 @@
 
 #include <stdarg.h>
 #include <hel/math.h>
+#include <mstl/Vector.h>
 
 
 extern "C" {
@@ -97,6 +98,18 @@ typedef enum {
 	
 } freyja_transform_action_t;
 
+typedef enum {
+
+	FREYJA_CHUNK_MAGIC    = 0x59455246,
+	FREYJA_CHUNK_VERSION  = 0x30302E39,
+	FREYJA_CHUNK_MODEL    = 0x204C444D,
+	FREYJA_CHUNK_MESH     = 0x4853454D,
+	FREYJA_CHUNK_SKELETON,
+	FREYJA_CHUNK_MATERIAL,
+	FREYJA_CHUNK_TEXTURE,
+	FREYJA_CHUNK_METADATA
+
+} freyja_file_chunk_t;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -190,7 +203,7 @@ void freyjaGetTexCoord2fv(unsigned int index, vec2_t uv);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaGetVertex3fv(unsigned int index, vec3_t xyz);
+void freyjaGetVertex3fv(long index, vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : vertex[index] exists
  * Post : Sets passed float array to vertex pos
@@ -363,7 +376,10 @@ unsigned int freyjaTexCoord2fv(vec2_t uv);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+long freyjaVertexTexCoord2f(long index, vec_t u, vec_t v);
+long freyjaVertexTexCoord2fv(long index, vec2_t uv);
 long freyjaVertexNormal3f(long index, vec_t nx, vec_t ny, vec_t nz);
+long freyjaVertexNormal3fv(long index, vec3_t nxyz);
 long freyjaVertex3f(vec_t x, vec_t y, vec_t z);
 long freyjaVertex3fv(vec3_t xyz);
 /*------------------------------------------------------
@@ -518,7 +534,7 @@ void freyjaBoneRotateQuaternion4fv(vec4_t wxyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaGenerateQuadCubeMesh(vec_t side);
+void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
 
 //void freyjaMeshFlags1u(unsigned int flags);
 /*------------------------------------------------------
@@ -532,5 +548,7 @@ void freyjaGenerateQuadCubeMesh(vec_t side);
  ------------------------------------------------------*/
 
 }
+
+Vector<long> &freyjaVertexPolygonRef();
 
 #endif
