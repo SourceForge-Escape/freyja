@@ -74,6 +74,7 @@ class Quaternion
 	 * Mongoose - Created, who still uses Euler angles?  ;)
 	 ------------------------------------------------------*/
 
+	Quaternion(const vec4_t wxyz);
 	Quaternion(vec4_t wxyz);
 	/*------------------------------------------------------
 	 * Pre  : v { w, x, y, z }
@@ -112,6 +113,7 @@ class Quaternion
 	 * Mongoose - Created, yeah this should've been in a while
 	 ------------------------------------------------------*/
 
+	void getEulerAngles(vec3_t xyz); // pitch roll yaw order
 	void getEulerAngles(vec_t *heading, vec_t *bank, vec_t *attitude);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -315,6 +317,9 @@ class Quaternion
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void setByEulerAngles(const vec3_t xyz);
+	void setByEulerAngles(vec_t pitch, vec_t roll, vec_t yaw);
+	void setByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z);
 	void set(vec_t angle, vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : 

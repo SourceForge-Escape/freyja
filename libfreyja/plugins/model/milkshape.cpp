@@ -439,9 +439,66 @@ int freyja_model__milkshape_import(char *filename)
 	/// Import ///////////////////////////////////////
 
 	Vector<long> transV;
-	long index;
+	long index, materialIndex;
 
-	
+	/* ABI 0.9.3 Calls BEGIN */
+	for (i = 0; i < mdl.nNumMaterials; ++i)
+	{
+		materialIndex = freyjaMaterialCreate();
+
+		freyjaMaterialName(materialIndex, mdl.materials[i].name);
+		freyjaMaterialAmbient(materialIndex, mdl.materials[i].ambient);
+		freyjaMaterialDiffuse(materialIndex, mdl.materials[i].diffuse);
+		freyjaMaterialSpecular(materialIndex, mdl.materials[i].specular);
+		freyjaMaterialEmissive(materialIndex, mdl.materials[i].emissive);
+		freyjaMaterialShininess(materialIndex, mdl.materials[i].shininess);
+		freyjaMaterialTransparency(materialIndex,mdl.materials[i].transparency);
+		freyjaMaterialTexture(materialIndex, i); // should use texture below
+
+		// mdl.materials[i].mode; // Not used, milkshape flag
+		// mdl.materials[i].texture; // Not used, texture filename
+		// mdl.materials[i].alphamap; // Not used, mask filename
+	}
+
+	// Test for keyframe import
+	long animationIndex, keyFrameIndex, frame, frameCount;
+
+	frameCount = 1;
+
+	for (frame = 0; frame < frameCount; ++frame)
+	{
+		animationIndex = freyjaAnimationCreate();
+		//freyjaAnimationFrameRate(animationIndex, mdl.fAnimationFPS);
+
+		for (i = 0; i < mdl.nNumJoints; ++i)
+		{
+			keyFrameIndex = freyjaAnimationKeyFrameCreate(animationIndex);
+
+			if (frame < mdl.joints[i].numRotationKeyframes)
+			{
+				freyjaAnimationKeyFrameTime(animationIndex, 
+											keyFrameIndex,
+											mdl.joints[i].keyFramesRot[frame].time);
+				freyjaAnimationKeyFrameOrientationXYZ(animationIndex, 
+													  keyFrameIndex,
+													  mdl.joints[frame].keyFramesRot[j].rotation);
+			}
+
+			if (frame < mdl.joints[i].numPositionKeyframes)
+			{
+				freyjaAnimationKeyFrameTime(animationIndex, 
+											keyFrameIndex,
+											mdl.joints[i].keyFramesPos[frame].time);
+				freyjaAnimationKeyFramePosition(animationIndex,
+												keyFrameIndex,
+												mdl.joints[i].keyFramesPos[frame].position);
+			}
+		}
+	}
+
+	/* ABI 0.9.3 Calls END */
+
+
 	freyjaBegin(FREYJA_MODEL);
 
 	freyjaBegin(FREYJA_MESH);
