@@ -579,8 +579,17 @@ extern "C" {
 	int freyja_model__lwo_import(char *filename);
 	int freyja_model__lwo_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
 
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Lightwave Object (*.lwo)");
+	freyjaPluginAddExtention1s("lwo");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
 
 int import_model(char *filename)
 {

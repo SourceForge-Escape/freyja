@@ -456,6 +456,17 @@ extern "C" {
 	int freyja_model__md2_check(char *filename);
 	int freyja_model__md2_import(char *filename);
 	int freyja_model__md2_export(char *filename);
+	void freyja_init();
+}
+
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Quake2 Model (*.md2)");
+	freyjaPluginAddExtention1s("md2");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_VERTEX_MORPHING);
+	//freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }
 
 

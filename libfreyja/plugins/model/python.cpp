@@ -35,10 +35,15 @@ extern "C" {
 	void import_functions();
 	int import_model(char *filename);
 	int export_model(char *filename);
-
+	void freyja_init();
 	long gPYTHON_PLUGIN_SUCCESS = -1;
 }
 
+void freyja_init()
+{
+	// Isn't an a model importer/exporter directly
+	freyjaPluginDescription1s("Python language binding");
+}
 
 void import_functions()
 {

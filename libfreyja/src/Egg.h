@@ -84,6 +84,7 @@
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
 #include <hel/math.h>
+#include <hel/Vector3d.h>
 
 #include "FreyjaPrinter.h"
 
@@ -250,7 +251,9 @@ typedef struct egg_mesh_s {
 
 	Vector<EggUVMap *> uvs;
 
-	Vector<long> vertices; // TODO mesh:vertex mapping
+	Vector<long> vertices; // Direct mesh:vertex mapping to replace group use
+
+	Vector3d position;
 	/* End Ext */
 
 } egg_mesh_t;

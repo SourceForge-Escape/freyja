@@ -125,8 +125,11 @@ long EggPlugin::freyjaGetCount(freyja_object_t type)
 		return mEgg->getAnimationCount();
 		break;
 
-	case FREYJA_VERTEX_FRAME:
 	case FREYJA_TEXTURE:
+		return mTextures.size();
+		break;
+
+	case FREYJA_VERTEX_FRAME:
 	case FREYJA_ANIMATION:
 	case FREYJA_MATERIAL:
 	case FREYJA_MESHTREE_TAG:
@@ -841,7 +844,7 @@ long EggPlugin::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
 }
 
 	
-void EggPlugin::freyjaPrintError(char *format, ...)
+void EggPlugin::freyjaPrintError(const char *format, ...)
 {
 	va_list args;
 	
@@ -851,7 +854,7 @@ void EggPlugin::freyjaPrintError(char *format, ...)
 }
 
 
-void EggPlugin::freyjaPrintError(char *format, va_list *args)
+void EggPlugin::freyjaPrintError(const char *format, va_list *args)
 {
 	if (mPrinter)
 	{
@@ -865,7 +868,7 @@ void EggPlugin::freyjaPrintError(char *format, va_list *args)
 }
 
 
-void EggPlugin::freyjaPrintMessage(char *format, ...)
+void EggPlugin::freyjaPrintMessage(const char *format, ...)
 {
 	va_list args;
 	
@@ -875,7 +878,7 @@ void EggPlugin::freyjaPrintMessage(char *format, ...)
 }
 
 
-void EggPlugin::freyjaPrintMessage(char *format, va_list *args)
+void EggPlugin::freyjaPrintMessage(const char *format, va_list *args)
 {
 	if (mPrinter)
 	{
@@ -891,10 +894,10 @@ void EggPlugin::freyjaPrintMessage(char *format, va_list *args)
 
 bool EggPlugin::checkModel(const char *filename)
 {
-	if (freyjaCheckModel((char *)filename) == 0)
+	if (freyjaCheckModel(filename) == 0)
 		return true;
 
-	if (Egg::checkFile((char *)filename) == 0)
+	if (Egg::checkFile((char*)filename) == 0)
 		return true;
 
 	return false;
@@ -903,7 +906,7 @@ bool EggPlugin::checkModel(const char *filename)
 
 bool EggPlugin::saveModel(const char *filename)
 {
-	if (freyjaSaveModel((char*)filename) == 0)
+	if (freyjaSaveModel(filename) == 0)
 		return true;
 
 	return false;
@@ -916,14 +919,14 @@ bool EggPlugin::saveModel(const char *filename)
 
 bool EggPlugin::loadModel(const char *filename)
 {
-	if (freyjaCheckModel((char *)filename) == 0)
+	if (freyjaCheckModel(filename) == 0)
 	{
-		if (freyjaLoadModel((char *)filename) == 0)
+		if (freyjaLoadModel(filename) == 0)
 			return true;
 	}
 	else
 	{
-		if (mEgg->loadFile((char *)filename) == 0)
+		if (mEgg->loadFile((char*)filename) == 0)
 			return true;
 	}
 
@@ -957,13 +960,80 @@ void EggPlugin::addPluginDirectory(const char *dir)
 }
 
 
+void EggPlugin::setPluginDescription(const char *info_line)
+{
+	if (mCurrentPlugin)
+	{
+		mCurrentPlugin->setDescription(info_line);
+	}
+}
+
+
+void EggPlugin::setPluginImportFlags(long flags)
+{
+	if (mCurrentPlugin)
+	{
+		mCurrentPlugin->mImportFlags = flags;
+	}
+}
+
+
+void EggPlugin::setPluginExportFlags(long flags)
+{
+	if (mCurrentPlugin)
+	{
+		mCurrentPlugin->mExportFlags = flags;
+	}
+}
+
+void EggPlugin::setPluginExtention(const char *ext)
+{
+	if (mCurrentPlugin)
+	{
+		mCurrentPlugin->setExtention(ext);
+	}
+}
+
+
+long EggPlugin::getPluginDescCount()
+{
+	return mPlugins.end();
+}
+
+
+FreyjaPluginDesc *EggPlugin::getPluginDesc(long pluginIndex)
+{
+	if (pluginIndex > 0 && pluginIndex < (long)mPlugins.end())
+	{
+		return mPlugins[pluginIndex];
+	}
+
+	return 0x0;
+}
+
+
+void EggPlugin::addPluginArgInt(const char *name, long defaults)
+{
+	// Not implemented
+}
+
+void EggPlugin::addPluginArgFloat(const char *name, float defaults)
+{
+	// Not implemented
+}
+
+void EggPlugin::addPluginArgString(const char *name, const char *defaults)
+{
+	// Not implemented
+}
+
+
 void EggPlugin::setupPlugins()
 {
 #ifdef FREYJA_PLUGINS
 	FreyjaFileReader reader;
-	bool loaded = false, done = false;
 	char *module_filename;
-	int (*import)(char *filename);
+	void (*import)();
 	void *handle;
 	char *error;
 	unsigned int i;
@@ -971,7 +1041,7 @@ void EggPlugin::setupPlugins()
 
 	mPlugins.erase();
 
-	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader invoked]");
+	//freyjaPrintMessage("[FreyjaPlugin (Egg) module loader invoked]");
 
 	/* Check for other format */
 	for (i = mPluginDirectories.begin(); i < mPluginDirectories.end(); ++i)
@@ -982,7 +1052,7 @@ void EggPlugin::setupPlugins()
 			continue;
 		}
 
-		while (!done && (module_filename = reader.getNextDirectoryListing()))
+		while ((module_filename = reader.getNextDirectoryListing()))
 		{
 			if (reader.isDirectory(module_filename))
 				continue;
@@ -1005,9 +1075,9 @@ void EggPlugin::setupPlugins()
 			}
 			else
 			{
-				freyjaPrintMessage("Module '%s' opened.", module_filename);
+				//freyjaPrintMessage("Module '%s' opened.", module_filename);
 
-				import = (int (*)(char *filename))dlsym(handle, "plugin_properities");
+				import = (void (*)())dlsym(handle, "freyja_init");
 
 				if ((error = dlerror()) != NULL)  
 				{
@@ -1015,14 +1085,14 @@ void EggPlugin::setupPlugins()
 					dlclose(handle);
 					continue;
 				}
-				
-				done = !(*import)((char*)module_filename);
 
-				if (done)
-				{
-					loaded = true;
-					freyjaPrintMessage("Module '%s' success.", module_filename);
-				}
+				mCurrentPlugin = new FreyjaPluginDesc();
+				mPlugins.pushBack(mCurrentPlugin);
+				freyjaPluginBegin();
+				mCurrentPlugin->setFilename(module_filename);
+				//freyjaPluginFilename1s(module_filename);
+				(*import)();
+				freyjaPluginEnd();
 
 				if ((error = dlerror()) != NULL) 
 				{
@@ -1036,14 +1106,40 @@ void EggPlugin::setupPlugins()
 		}
 
 		reader.closeDirectory();
-
-		if (done)
-		{
-			break;
-		}
 	}
 
-	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader sleeps now]\n");
+
+	/* Mongoose 2005.01.03, 
+	 * Internal reporting - if filename == 0x0 internal */
+	mCurrentPlugin = new FreyjaPluginDesc();
+	mPlugins.pushBack(mCurrentPlugin);
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("Freyja Model (*.ja)");
+	freyjaPluginAddExtention1s("ja");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+			     FREYJA_PLUGIN_SKELETON |
+			     FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+			     FREYJA_PLUGIN_SKELETON |
+			     FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+	mCurrentPlugin = new FreyjaPluginDesc();
+	mPlugins.pushBack(mCurrentPlugin);
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("GooseEgg 8 Model (*.egg)");
+	freyjaPluginAddExtention1s("egg");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+			     FREYJA_PLUGIN_SKELETON |
+			     FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+			     FREYJA_PLUGIN_SKELETON |
+			     FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+	mCurrentPlugin = 0x0;
+
+	//freyjaPrintMessage("[FreyjaPlugin (Egg) module loader sleeps now]\n");
 #endif
 }
 
@@ -1417,8 +1513,9 @@ long EggPlugin::freyjaGetTextureFilename(long index, char **filename)
 	*filename = 0x0;
 
 
-	if (mTextureFiles.empty() || index > (int)mTextureFiles.size()-1)
-		return -1;
+	if (mTextureFiles.empty() || 
+		index < 0 || index > (int)mTextureFiles.size()-1)
+		return FREYJA_PLUGIN_ERROR;
 
 	*filename = mTextureFiles[index];
 
@@ -1436,7 +1533,7 @@ long EggPlugin::freyjaGetTextureImage(long index,
 
 
 	if (mTextures.empty() || index > (int)mTextures.size()-1)
-		return -1;
+		return FREYJA_PLUGIN_ERROR;
 
 	t = mTextures[index];
 
@@ -1448,7 +1545,7 @@ long EggPlugin::freyjaGetTextureImage(long index,
 	*h = 0x0;
 
 	if (!t)
-		return -1;
+		return FREYJA_PLUGIN_ERROR;
 
 	if (t->mImage && t->mWidth && t->mHeight && t->mBitDepth)
 	{
@@ -1461,7 +1558,7 @@ long EggPlugin::freyjaGetTextureImage(long index,
 		return 0;
 	}
   
-	return -1;
+	return FREYJA_PLUGIN_ERROR;
 }
 
 
@@ -1480,6 +1577,9 @@ long EggPlugin::freyjaVertex3f(vec_t x, vec_t y, vec_t z)
 
 	if (vert)
 	{
+		if (mMesh)
+			mMesh->vertices.pushBack(vert->id);
+
 		if (mGroup)
 		{
 			mGroup->vertex.pushBack(vert->id);

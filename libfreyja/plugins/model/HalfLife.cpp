@@ -447,8 +447,17 @@ extern "C" {
 	int freyja_model__halflife_check(char *filename);
 	int freyja_model__halflife_import(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
 
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Halflife model (*.mdl)");
+	freyjaPluginAddExtention1s("mdl");
+	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
 
 int import_model(char *filename)
 {

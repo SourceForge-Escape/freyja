@@ -284,8 +284,16 @@ extern "C" {
 	int freyja_model__sims_import(char *filename);
 	int freyja_model__sims_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
 
+void freyja_init()
+{
+	freyjaPluginDescription1s("SIMS Pak (*.iff)");
+	freyjaPluginAddExtention1s("iff");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
 
 int import_model(char *filename)
 {

@@ -33,21 +33,15 @@ extern "C" {
 	int freyja_model__smd_import(char *filename);
 	int freyja_model__smd_export(char *filename);
 	int import_model(char *filename);
-	int plugin_properities();
+	void freyja_init();
 }
 
-
-int plugin_properites(char *this_filename)
+void freyja_init()
 {
-	freyjaPluginBegin();
-	freyjaPluginFilename1s(this_filename);
 	freyjaPluginDescription1s("SMD model (*.smd)");
 	freyjaPluginAddExtention1s("smd");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_SKELETON);
-	freyjaPluginEnd();
-
-	return 0;
 }
 
 

@@ -90,6 +90,8 @@ public:
 	
 	FreyjaPluginDesc()
 	{
+		mImportFlags = FREYJA_PLUGIN_NONE;
+		mExportFlags = FREYJA_PLUGIN_NONE;
 		mFilename = 0x0;
 		mId = mNextId;
 		++mNextId;
@@ -101,7 +103,7 @@ public:
 		
 	}
 
-	void setFilename(char *filename)
+	void setFilename(const char *filename)
 	{
 		if (filename && filename[0])
 		{
@@ -110,16 +112,34 @@ public:
 		}
 	}
 
-	void setDescription(char *s)
+	void setDescription(const char *s)
 	{
 		strncpy(mDescription, s, 64);
 		mDescription[63] = 0;
 	}
 
-	void setExtention(char *s)
+	void setExtention(const char *s)
 	{
 		strncpy(mExtention, s, 64);
 		mExtention[63] = 0;
+	}
+
+	long getId()
+	{
+		return mId;
+	}
+
+	void print()
+	{
+		freyjaPrintMessage("%s", mDescription);
+		freyjaPrintMessage("\tImport: %s%s%s",
+						   (mImportFlags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
+						   (mImportFlags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
+						   (mImportFlags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
+		freyjaPrintMessage("\tExport: %s%s%s",
+						   (mExportFlags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
+						   (mExportFlags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
+						   (mExportFlags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 	}
 
 	char *mFilename;
@@ -128,10 +148,17 @@ public:
 
 	char mExtention[64];
 
+	long mImportFlags;
+
+	long mExportFlags;
+
+	Vector<char *> mFloatArgsDesc;
 	Vector<float> mFloatArgs;
 
+	Vector<char *> mIntArgsDesc;
 	Vector<long> mIntArgs;
 
+	Vector<char *> mStringArgsDesc;
 	Vector<char *> mStringArgs;
 
 private:
@@ -331,8 +358,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaPrintError(char *format, ...);
-	virtual void freyjaPrintError(char *format, va_list *args);
+	void freyjaPrintError(const char *format, ...);
+	virtual void freyjaPrintError(const char *format, va_list *args);
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages
@@ -346,8 +373,8 @@ public:
 	 * Mongoose - Created, split from Egg9 experimental 
 	 ------------------------------------------------------*/
 
-	void freyjaPrintMessage(char *format, ...);
-	virtual void freyjaPrintMessage(char *format, va_list *args);
+	void freyjaPrintMessage(const char *format, ...);
+	virtual void freyjaPrintMessage(const char *format, va_list *args);
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report error messages
@@ -737,6 +764,15 @@ public:
 	bool saveModel(const char *filename);
 	bool loadModel(const char *filename);
 
+	void setPluginDescription(const char *info_line);
+	void setPluginImportFlags(long flags);
+	void setPluginExportFlags(long flags);
+	void setPluginExtention(const char *ext);
+	void addPluginArgInt(const char *name, long defaults);
+	void addPluginArgFloat(const char *name, float defaults);
+	void addPluginArgString(const char *name, const char *defaults);
+	FreyjaPluginDesc *getPluginDesc(long pluginIndex);
+	long getPluginDescCount();
 
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 

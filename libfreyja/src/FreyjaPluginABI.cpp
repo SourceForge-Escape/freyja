@@ -33,10 +33,11 @@
 #include "FreyjaPluginABI.h"
 
 
-long freyjaCheckModel(char *filename)
+long freyjaCheckModel(const char *filename)
 {
 	FreyjaFileReader r;
 	freyja_file_header_t header;
+	long offset;
 
 
 	if (!r.openFile(filename))
@@ -46,14 +47,11 @@ long freyjaCheckModel(char *filename)
 	r.littleEndianMode();
 
 	/* Read header */
-	r.readCharString(8, header.magic);
-	header.version = r.readLong();
-	header.flags = r.readLong();
-	header.reserved = r.readLong();
-	r.readCharString(64, header.comment);	
+	offset = r.getFileOffset();
+	r.readCharString(16, header.magic);
 	r.closeFile();
 
-	if (!strncmp(header.magic, FREYJA_FILE_MAGIC, 7))
+	if (!strncmp(header.magic, FREYJA_PLUGIN_VERSION, 7)) // 'Freyja '
 	{
 		return 0;
 	}
@@ -434,7 +432,7 @@ long freyjaSaveMeshChunkV1(FreyjaFileWriter &w, long meshIndex)
 }
 
 
-long freyjaLoadModel(char *filename)
+long freyjaLoadModel(const char *filename)
 {
 	FreyjaFileReader r;
 	freyja_file_header_t header;
@@ -456,13 +454,22 @@ long freyjaLoadModel(char *filename)
 	r.littleEndianMode();
 
 	/* Read header */
+	offset = r.getFileOffset();
 	r.readCharString(8, header.magic);
 	header.version = r.readLong();
+
+	if (header.version != 1)
+	{
+		r.setFileOffset(offset);
+		r.readCharString(16, header.magic);
+		header.version = r.readLong();
+	}
+
 	header.flags = r.readLong();
 	header.reserved = r.readLong();
 	r.readCharString(64, header.comment);	
 
-	if (strncmp(header.magic, FREYJA_FILE_MAGIC, 7))
+	if (strncmp(header.magic, FREYJA_PLUGIN_VERSION, 7))
 	{
 		return -1;
 	}
@@ -558,7 +565,7 @@ long freyjaLoadModel(char *filename)
 }
 
 
-long freyjaSaveModel(char *filename)
+long freyjaSaveModel(const char *filename)
 {
 	Vector<long> vertices, texcoords;
 	FreyjaFileWriter w;
@@ -567,16 +574,16 @@ long freyjaSaveModel(char *filename)
 	vec3_t xyz;
 	//vec4_t wxyz;
 	char buffer[64];
-	long i, j, index, idx, count;
+	long i, j, index, idx, count, meshIndex;
 
 
 	if (!w.openFile(filename))
 		return -1;
 
-	memset(header.magic, 0, 8);
+	memset(header.magic, 0, 16);
 	memset(header.comment, 0, 64);
-	strncpy(header.magic, FREYJA_FILE_MAGIC, 7);
-	header.version = FREYJA_FILE_VERSION;
+	strncpy(header.magic, FREYJA_PLUGIN_VERSION, 12);
+	header.version = 2;
 	header.flags = 0x0;
 	header.reserved = 0x0;
 	strcpy(header.comment, "Freyja 3d: http://icculus.org/freyja");
@@ -585,7 +592,7 @@ long freyjaSaveModel(char *filename)
 	w.littleEndianMode();
 
 	/* Write header */
-	w.writeCharString(8, header.magic);
+	w.writeCharString(16, header.magic);
 	w.writeLong(header.version);
 	w.writeLong(header.flags);
 	w.writeLong(header.reserved);
@@ -657,14 +664,14 @@ long freyjaSaveModel(char *filename)
 
 
 	/* Meshes */
-	freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
-	index = freyjaGetCurrent(FREYJA_MESH);
-	count = freyjaGetCount(FREYJA_MESH);
-
-	for (i = 0; i < count+1; ++i)
+	count = freyjaGetModelMeshCount(0);
+	printf("***count = %li\n", count);
+	for (i = 0; i < count; ++i)
 	{
-		freyjaSaveMeshChunkV1(w, index);
-		index = freyjaIterator(FREYJA_MESH, FREYJA_LIST_NEXT);
+		meshIndex = freyjaGetModelMeshIndex(0, i);
+
+		printf("***%li / %li -> %li\n", i, count, meshIndex);
+		freyjaSaveMeshChunkV1(w, meshIndex);
 	}
 
 
@@ -2031,7 +2038,7 @@ Vector<unsigned int> *eggFindVerticesInBox(vec3_t bbox[2],
 }
 
 
-void freyjaPrintMessage(char *format, ...)
+void freyjaPrintMessage(const char *format, ...)
 {
 	va_list args;
 	
@@ -2041,7 +2048,7 @@ void freyjaPrintMessage(char *format, ...)
 }
 
 
-void freyjaPrintError(char *format, ...)
+void freyjaPrintError(const char *format, ...)
 {
 	va_list args;
 	
@@ -2110,9 +2117,9 @@ void freyjaGenerateVertexNormals()
 		freyjaGetPolygon1u(FREYJA_VERTEX, 2, &v2);
 
 		freyjaPrintMessage("<%d %d %d>", v0, v1, v2);
-		freyjaGetVertexByIndex3fv(v0, a.mVec);
-		freyjaGetVertexByIndex3fv(v1, b.mVec);
-		freyjaGetVertexByIndex3fv(v2, c.mVec);
+		freyjaGetVertexXYZ3fv(v0, a.mVec);
+		freyjaGetVertexXYZ3fv(v1, b.mVec);
+		freyjaGetVertexXYZ3fv(v2, c.mVec);
 
 		/* Compute 2 vectors from the triangle face */	
 		//aa = b - a;
@@ -2190,7 +2197,7 @@ Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(BoundingVolume &vol)
 	{
 		index = freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);
 
-		freyjaGetVertexByIndex3fv(index, xyz);
+		freyjaGetVertexXYZ3fv(index, xyz);
 		
 		if (vol.isVertexInside(xyz))
 		{
@@ -2225,7 +2232,7 @@ Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
 			continue;
 
 		index = freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);
-		freyjaGetVertexByIndex3fv(index, xyz);
+		freyjaGetVertexXYZ3fv(index, xyz);
 		
 		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
 		{
@@ -2438,6 +2445,20 @@ unsigned long freyjaGetFlags()
 }
 
 
+long freyjaMeshPosition(long meshIndex, vec3_t xyz)
+{
+	// Not Implemented properly due to Egg backend use ( not scene based )
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		mesh->position = Vector3d(xyz);
+	}
+
+	return 0;
+}
+
+
 void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z)
 {
 	if (EggPlugin::mEggPlugin)
@@ -2602,7 +2623,7 @@ int freyjaGetTextureImage(unsigned int index, unsigned int *w, unsigned int *h,
 }
 
 
-long freyjaTextureFilename1s(char *filename)
+long freyjaTextureFilename1s(const char *filename)
 {
 	if (EggPlugin::mEggPlugin)
 		return EggPlugin::mEggPlugin->freyjaTextureStoreFilename(filename);
@@ -2649,13 +2670,6 @@ void freyjaGetTexCoord2fv(long index, vec2_t uv)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaGetTexCoord(index, uv);
-}
-
-
-void freyjaGetVertexByIndex3fv(long index, vec3_t xyz)
-{
-	if (EggPlugin::mEggPlugin)
-		EggPlugin::mEggPlugin->freyjaGetVertexByIndex(index, xyz);
 }
 
 
@@ -2836,6 +2850,53 @@ long freyjaGetVertexFlags(long vertexIndex)
 	if (vertex)
 	{
 		return vertex->flags;
+	}
+
+	return 0;
+}
+
+
+long freyjaGetModelFlags(long modelIndex)
+{
+	return 0x0;  // Not Implemented due to Egg backend use
+}
+
+
+long freyjaGetModelMeshIndex(long modelIndex, long element)
+{
+	// Not Implemented properly due to Egg backend use ( not scene based )
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(element);
+
+	if (mesh)
+	{
+		return mesh->id;
+	}
+
+	return 0;
+}
+
+
+long freyjaGetModelMeshCount(long modelIndex)
+{
+	// Not Implemented properly due to Egg backend use ( not scene based )
+
+	if (modelIndex == 0)
+		return freyjaGetCount(FREYJA_MESH);
+	
+	return 0;
+}
+
+
+long freyjaGetMeshPosition(long meshIndex, vec3_t xyz)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		xyz[0] = mesh->position.mVec[0];
+		xyz[1] = mesh->position.mVec[1];
+		xyz[2] = mesh->position.mVec[2];
+		return mesh->id;
 	}
 
 	return 0;
@@ -3112,37 +3173,12 @@ long freyjaGetBoneTranslation3fv(long index, vec3_t xyz)
 }
 
 
-long freyjaGetBoneMeshIndex(long element)
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetBoneMeshIndex(element);
-
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
 long freyjaGetCurrent(freyja_object_t type)
 {
 	if (EggPlugin::mEggPlugin)
 		return EggPlugin::mEggPlugin->freyjaGetCurrent(type);
 
 	return FREYJA_PLUGIN_ERROR;
-}
-
-
-long freyjaGetBoneMeshCount()
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetBoneMeshCount();
-
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
-void freyjaGetBoneRotate3f(vec_t *x, vec_t *y, vec_t *z)
-{
-	if (EggPlugin::mEggPlugin)
-		EggPlugin::mEggPlugin->freyjaGetBoneRotate(x, y, z);
 }
 
 
@@ -3165,33 +3201,36 @@ void freyjaPluginBegin()
 }
 
 
-void freyjaPluginFilename1s(char *filename)
+void freyjaPluginDescription1s(const char *info_line)
 {
-	// ATM this does nothing, just here for reserved use
+	EggPlugin::mEggPlugin->setPluginDescription(info_line);
+	//freyjaPrintMessage("\t%s", info_line);
 }
 
 
-void freyjaPluginDescription1s(char *info_line)
+void freyjaPluginAddExtention1s(const char *ext)
 {
-	// ATM this does nothing, just here for reserved use
-}
-
-
-void freyjaPluginAddExtention1s(char *ext)
-{
-	// ATM this does nothing, just here for reserved use
+	EggPlugin::mEggPlugin->setPluginExtention(ext);
 }
 
 
 void freyjaPluginImport1i(long flags)
 {
-	// ATM this does nothing, just here for reserved use
+	EggPlugin::mEggPlugin->setPluginImportFlags(flags);
+	//freyjaPrintMessage("\tImport: %s%s%s",
+	//				   (flags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
+	//				   (flags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
+	//				   (flags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 }
 
 
 void freyjaPluginExport1i(long flags)
 {
-	// ATM this does nothing, just here for reserved use
+	EggPlugin::mEggPlugin->setPluginExportFlags(flags);
+	//freyjaPrintMessage("\tExport: %s%s%s",
+	//				   (flags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
+	//				   (flags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
+	//				   (flags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 }
 
 void freyjaPluginEnd()
@@ -3207,28 +3246,29 @@ long freyjaGetPluginId()
 }
 
 
-int freyjaGetPluginArg1i(long pluginId, char *name, char &arg)
+int freyjaGetPluginArg1i(long pluginId, const char *name, char &arg)
 {
 	// ATM this does nothing, just here for reserved use
 	return -1;
 }
 
 
-int freyjaGetPluginArg1f(long pluginId, char *name, float &arg)
+int freyjaGetPluginArg1f(long pluginId, const char *name, float &arg)
 {
 	// ATM this does nothing, just here for reserved use
 	return -1;
 }
 
 
-int freyjaGetPluginArg1i(long pluginId, char *name, long &arg)
+int freyjaGetPluginArg1i(long pluginId, const char *name, long &arg)
 {
 	// ATM this does nothing, just here for reserved use
 	return -1;
 }
 
 
-int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg)
+int freyjaGetPluginArg1s(long pluginId, const char *name, 
+						 long len, const char *arg)
 {
 	// ATM this does nothing, just here for reserved use
 	return -1;
@@ -3239,7 +3279,7 @@ int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg)
 //  Pak VFS 
 ///////////////////////////////////////////////////////////////////////
 
-long freyjaPakBegin(char *filename)
+long freyjaPakBegin(const char *filename)
 {
 	// ATM this does nothing, just here for reserved use
 	return -1;
@@ -3247,7 +3287,7 @@ long freyjaPakBegin(char *filename)
 
 
 long freyjaPakAddFullPathFile(long pakIndex,
-							  char *vfsFilename, long offset, long size)
+							  const char *vfsFilename, long offset, long size)
 {
 	// ATM this does nothing, just here for reserved use
 	return -1;
@@ -3258,3 +3298,27 @@ void freyjaPakEnd(long pakIndex)
 {
 	// ATM this does nothing, just here for reserved use
 }
+
+
+///////////////////////////////////////////////////////////////////////
+//  Deprecated ABI 
+///////////////////////////////////////////////////////////////////////
+
+#ifdef DEPRECATED_FREYJA_PLUGIN_ABI
+long freyjaGetBoneMeshCount()
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetBoneMeshCount();
+
+	return FREYJA_PLUGIN_ERROR;
+}
+
+
+long freyjaGetBoneMeshIndex(long element)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetBoneMeshIndex(element);
+
+	return FREYJA_PLUGIN_ERROR;
+}
+#endif

@@ -67,7 +67,7 @@ class FreyjaPrinter
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	static void print(char *format, ...)
+	static void print(const char *format, ...)
 	{
 		va_list args;
 		char buffer[1024];
@@ -91,7 +91,7 @@ class FreyjaPrinter
 	}
 
 
-	virtual void errorArgs(char *format, va_list *args)
+	virtual void errorArgs(const char *format, va_list *args)
 	{
 		char buffer[1024];
 		unsigned int l;
@@ -112,7 +112,7 @@ class FreyjaPrinter
 	}
 
 	
-	virtual void messageArgs(char *format, va_list *args)
+	virtual void messageArgs(const char *format, va_list *args)
 	{
 		char buffer[1024];
 		unsigned int l;
