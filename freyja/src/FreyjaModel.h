@@ -508,6 +508,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	//void boxSelection(vec3_t min, vec3_t max, Vector<unsigned int> &list);
+
+	void boxSelectionListBuild();
+
 	void clear();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -779,8 +783,6 @@ public:
 
 	void BBoxSelect(float xx, float yy);
 	void BBoxMove(float xx, float yy);
-	void Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list);
-	void BBoxListBuild();
 
 	void MeshSelect(float xx, float yy);
 	void MeshMove(float xx, float yy);

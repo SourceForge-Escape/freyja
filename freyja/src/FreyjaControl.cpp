@@ -1403,7 +1403,7 @@ bool FreyjaControl::event(int command)
 		{
 			mEventMode = modeNone;
 			mRender->clearFlag(FreyjaRender::RENDER_BBOX_SEL);
-			mModel->BBoxListBuild();
+			mModel->boxSelectionListBuild();
 			freyja_print("Vertex box select: Vertex list built");
 		}
 		else
@@ -1949,7 +1949,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 
 		case MOUSE_BTN_LEFT:
-			if (_tex_state)
+			if (mUVMouseState)
 			{
 				float s;
 				float t;
@@ -2014,7 +2014,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 				getFreeWorldFromScreen(x, y, pos);
 
-				_mouse_state = 1;
+				mXYZMouseState = 1;
 			}
 			break;
 		case MOUSE_BTN_LEFT:
@@ -2026,7 +2026,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 				if (FreyjaRender::mPatchDisplayList)
 					mModel->selectPatchControlPoint(pos);
 
-				_mouse_state = 1;
+				mXYZMouseState = 1;
 			}
 			break;
 		}
@@ -2035,9 +2035,9 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 
 	case TEXTURE_EDIT_MODE:
-		if (_tex_state)
+		if (mUVMouseState)
 		{
-			_tex_state = false;
+			mUVMouseState = false;
 			return true;
 		}
 		else if (btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED)
@@ -2063,7 +2063,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 				mModel->TexelSelect(s, t);
 			}
 			
-			_tex_state = true;
+			mUVMouseState = true;
 			return true;
 		}
 		break;
@@ -2777,7 +2777,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	switch(mEventMode)
 	{
 	case modeMove:
-		//if (_mouse_state == 0)
+		//if (mXYZMouseState == 0)
 		//{
 		xxx = xx;  yyy = yy;
 		freyja_print("store state: %f, %f", xxx, yyy);
@@ -2786,11 +2786,11 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		if (FreyjaRender::mPatchDisplayList)
 			mModel->selectPatchControlPoint(xx, yy);
 
-		_mouse_state = 1;
+		mXYZMouseState = 1;
 		//}
 		//else
 		//{
-		//	_mouse_state = 0;
+		//	mXYZMouseState = 0;
 		//}
 		break;
 
@@ -2800,24 +2800,24 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 
 
 	case VERTEX_COMBINE:
-		if (_mouse_state == 0)
+		if (mXYZMouseState == 0)
 		{
 			mModel->VertexCombine(xx, yy);
-			 _mouse_state = 1;
+			 mXYZMouseState = 1;
 		}
 		else
 		{
-			_mouse_state = 0;
+			mXYZMouseState = 0;
 		}
 		break;
 	case VERTEX_BBOX_SELECT_MODE:
-		if (_mouse_state == 0)
+		if (mXYZMouseState == 0)
 		{
 			mModel->BBoxSelect(xx, yy);
-			_mouse_state = 1;
+			mXYZMouseState = 1;
 		}
 		else
-			_mouse_state = 0;
+			mXYZMouseState = 0;
       break;
 	case POINT_DEL_MODE:
 		mModel->VertexSelect(xx, yy);
@@ -2836,10 +2836,10 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		mModel->setCurrentBone(master_tag);
 		break;
 	case MESH_MOVE_CENTER:
-		if (_mouse_state == 0)
-			_mouse_state = 1;
+		if (mXYZMouseState == 0)
+			mXYZMouseState = 1;
 		else
-			_mouse_state = 0;
+			mXYZMouseState = 0;
 		break;
 	case POINT_ADD_MODE: 
 		mModel->VertexNew(xx, yy);

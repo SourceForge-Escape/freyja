@@ -2417,7 +2417,7 @@ void FreyjaModel::BBoxMove(float xx, float yy)
 	//freyja_print("Vertex bbox select is %i @ %f,%f", mSelectionBoxOrdering, xx, yy);
 }	
 
-void FreyjaModel::BBoxListBuild()
+void FreyjaModel::boxSelectionListBuild()
 {
 	Vector<unsigned int> *list;
 
