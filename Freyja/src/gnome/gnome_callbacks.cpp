@@ -431,6 +431,8 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 	{
 		if (query_mouse_button() & MOUSE_BTN_MIDDLE)
 		{
+#warning "FIXME SOON, mouse movement code"
+#ifdef FIXME
 			if (x > gl_state->mouse_x)
 				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_LEFT);
 			else if (x < gl_state->mouse_x)
@@ -441,11 +443,10 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 			else if (y > gl_state->mouse_y)
 				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_DOWN);
 
-			//gtk_ruler_set_range(GTK_RULER(hruler), x1, x2, 0, x2);
-
 			gl_state->mouse_x = x;
 			gl_state->mouse_y = y;
 			mgtk_refresh_glarea(widget);			
+#endif
 		}
 		else
 		{

@@ -85,11 +85,71 @@
 			(menu_item "Save _As..." "S-C-s"	CMD_MAIN_SAVE_MODEL "gtk-save-as")
 			(menu_item "_Revert"     			-1 "gtk-revert-to-saved")
 			(menu_seperator)
-			(menu_item "_Import"     "S-C-z"	-1 "gtk-redo")
-			(menu_item "_Export"     "C-z"		-1 "gtk-undo")
+			(menu_item "_Import"     "C-i"		-1 "gtk-redo")
+			(menu_item "_Export"     "C-e"		-1 "gtk-undo")
 			(menu_seperator)
 			(menu_item "_Close"      "C-w"		-1 "gtk-close")
 			(menu_item "_Quit"       "C-q"		CMD_MAIN_SHUTDOWN "gtk-quit"))
+
+
+		(submenu "_Edit"
+
+
+			(menu_item "_Undo"     "C-z"		-1 "gtk-undo")
+			(menu_item "_Redo"     "S-C-z"		-1 "gtk-redo")
+
+			(menu_seperator)
+
+			(menu_item "Cu_t"     	"C-x"		-1 "gtk-cut")
+			(menu_item "_Copy" 	    "C-c"		-1 "gtk-copy")
+			(menu_item "_Paste"     "C-v"		-1 "gtk-paste")
+			(menu_item "_Delete"    "C-d"		-1 "gtk-delete")
+
+			(menu_seperator)
+
+			(menu_item "Select _All" "C-a"		-1 "gtk-delete")
+
+			(menu_seperator)
+
+			(submenu "_Generate"
+				(menu_item "_Normals"  EVENT_MISC  CMD_MISC_GEN_NORMALS)
+				(menu_item "_Cube"     EVENT_MESH  CMD_MESH_GENERATE_CUBE)
+				(menu_item "_TriSrip"  EVENT_MESH  CMD_MESH_GENERATE_TRIS)
+				(menu_item "C_ylinder" EVENT_MESH  CMD_MESH_GENERATE_CYLINDER)
+				(menu_item "_Sphere"   EVENT_MESH  CMD_MESH_GENERATE_SPHERE))
+
+			(submenu "_Vertex"
+				(menu_item "_New"     EVENT_POINT  CMD_POINT_ADD)
+				(menu_item "_Move"    EVENT_POINT  CMD_POINT_MOVE)
+				(menu_item "_Delete"  EVENT_POINT  CMD_POINT_DELETE)
+				(menu_item "_Combine"  EVENT_POINT  CMD_POINT_COMBINE))
+
+			(submenu "_Polygon"
+				(menu_item "_New"    EVENT_POLYGON  CMD_POLYGON_ADD)
+				(menu_item "_Select"  EVENT_POLYGON  CMD_POLYGON_SELECT)
+				(menu_item "_Delete"  EVENT_POLYGON  CMD_POLYGON_DELETE))
+
+			(submenu "_Mesh"
+				(menu_item "_New"     EVENT_MESH  CMD_MESH_ADD)
+				(menu_item "_Delete"  EVENT_MESH  CMD_MESH_DELETE)
+				(menu_item "_Move"    EVENT_MESH  CMD_MESH_MOVE)
+				(menu_item "_Select"  EVENT_MESH  CMD_MESH_SELECT)
+				(menu_item "_Rotate"  EVENT_MESH  CMD_MESH_ROTATE)
+				(menu_item "S_cale"   EVENT_MESH  CMD_MESH_SCALE)
+				(menu_item "_Mirror"  EVENT_MESH  CMD_MESH_MIRROR)
+				(menu_item "_Clone"   EVENT_MESH  CMD_MESH_CLONE)
+				(menu_item "C_enter"  EVENT_MESH  CMD_MESH_MOVE_CENTER))
+
+			(submenu "_Bone"
+				(menu_item "_New"       EVENT_BONE CMD_BONE_NEW)
+				(menu_item "_Add mesh"  EVENT_BONE CMD_BONE_ADD_MESH)
+				(menu_item "_Select"    EVENT_BONE CMD_BONE_SELECT)
+				(menu_item "_Move"      EVENT_BONE CMD_BONE_MOVE_PIVOT))
+
+			(menu_seperator)
+
+			(menu_item "Pr_eferences"    		-1 "gtk-preferences"))
+
 
 		(submenu "_View"
 			(menu_item "Take _Screenshot"  CMD_MISC_SCREENSHOT "gtk-screenshot")
@@ -102,44 +162,8 @@
 			(submenu "Bone"
 				(menu_item "Line"		EVENT_MISC  VIEW_BONE1)
 				(menu_item "PolyMesh" 	EVENT_MISC  VIEW_BONE2))
-			(menu_item "Fullscreen"		"A-Enter"	CMD_TOGGLE_FULLSCREEN "gtk-fullscreen"))
+			(menu_item "Fullscreen"		"M-E"	CMD_TOGGLE_FULLSCREEN "gtk-fullscreen"))
 
-		(menu_seperator)
-
-		(submenu "Vertex"
-			(menu_item "New"     EVENT_POINT  CMD_POINT_ADD)
-			(menu_item "Move"    EVENT_POINT  CMD_POINT_MOVE)
-			(menu_item "Delete"  EVENT_POINT  CMD_POINT_DELETE)
-			(menu_item "Combine"  EVENT_POINT  CMD_POINT_COMBINE))
-
-		(submenu "Polygon"
-			(menu_item "New"    EVENT_POLYGON  CMD_POLYGON_ADD)
-			(menu_item "Select"  EVENT_POLYGON  CMD_POLYGON_SELECT)
-			(menu_item "Delete"  EVENT_POLYGON  CMD_POLYGON_DELETE))
-
-		(submenu "Mesh"
-			(menu_item "New"      EVENT_MESH  CMD_MESH_ADD)
-			(menu_item "Delete"  EVENT_MESH  CMD_MESH_DELETE)
-			(menu_item "Move"    EVENT_MESH  CMD_MESH_MOVE)
-			(menu_item "Select"  EVENT_MESH  CMD_MESH_SELECT)
-			(menu_item "Rotate"  EVENT_MESH  CMD_MESH_ROTATE)
-			(menu_item "Scale"   EVENT_MESH  CMD_MESH_SCALE)
-			(menu_item "Mirror"  EVENT_MESH  CMD_MESH_MIRROR)
-			(menu_item "Clone"   EVENT_MESH  CMD_MESH_CLONE)
-			(menu_item "Center"  EVENT_MESH  CMD_MESH_MOVE_CENTER))
-
-		(submenu "Bone"
-			(menu_item "New"       EVENT_BONE CMD_BONE_NEW)
-			(menu_item "Add mesh"  EVENT_BONE CMD_BONE_ADD_MESH)
-			(menu_item "Select"    EVENT_BONE CMD_BONE_SELECT)
-			(menu_item "Move"      EVENT_BONE CMD_BONE_MOVE_PIVOT))
-
-		(submenu "Generate Mesh"
-			(menu_item "Generate Normals"  EVENT_MISC CMD_MISC_GEN_NORMALS)
-			(menu_item "Cube"     EVENT_MESH  CMD_MESH_GENERATE_CUBE)
-			(menu_item "TriSrip"  EVENT_MESH  CMD_MESH_GENERATE_TRIS)
-			(menu_item "Cylinder" EVENT_MESH  CMD_MESH_GENERATE_CAN)
-			(menu_item "Sphere"   EVENT_MESH  CMD_MESH_GENERATE_SPHERE))
 
 		(menu_seperator)
 
@@ -155,21 +179,21 @@
 			(toolbar
 
 				(toolbar_button "gtk-new" "New"
-					"Create new material"
-				    EVENT_MAIN  CMD_MAIN_NEW_MATERIAL)
+					"New"
+				    EVENT_MAIN  -1)
 
 				(toolbar_button "gtk-open" "Open..."
-					"Open material"
-				    EVENT_MAIN  CMD_MAIN_OPEN_MATERIAL)
+					"Open..."
+				    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
 
 				(toolbar_button "gtk-save" "Save"
-					"Save material"
-				    EVENT_MAIN  CMD_MAIN_SAVE_MATERIAL)
+					"Save"
+				    EVENT_MAIN  CMD_MAIN_SAVE_MODEL)
 
 
-				(toolbar_button "open-model.png" "Open Model"
-					"Open Model file(s)"
-				    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
+				;(toolbar_button "open-model.png" "Open Model"
+				;	"Open Model file(s)"
+				;   EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
 
 				(toolbar_togglebutton true "point.png" "Points" 
 					"Point render mode" 
@@ -263,7 +287,7 @@
 						(button "Sphere" 
 							EVENT_MESH  CMD_MESH_GENERATE_SPHERE)
 						(button "Cylinder" 
-							EVENT_MESH  CMD_MESH_GENERATE_CAN))
+							EVENT_MESH  CMD_MESH_GENERATE_CYLINDER))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
