@@ -30,6 +30,8 @@
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
 	o Please report any issues including performance affected by this release
+	o FileChooser support
+	o Recently opened files
 	o Fix for rendering bug on mesh delete using translator
 	o Fix for mesh rotate on top view
 	o New renderer updates to make editing easier

@@ -174,6 +174,12 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	// 'Fast' export for modeler use
+	void fixTexCoords();
+	vec3_t *freyjaGetVertexXYZ(long vertexIndex);
+	vec2_t *freyjaGetVertexUV(long vertexIndex);
+	vec2_t *freyjaGetTexCoordUV(long texcoordIndex);
+
 	void freyjaGetVertex(vec3_t xyz);
 	void freyjaGetVertexNormal(vec3_t nxyz);
 	void freyjaGetVertexTexCoord(vec2_t uv);

@@ -71,6 +71,10 @@
 
 			(menu_seperator)
 
+			(submenu eRecentFiles "Recent...")			
+
+			(menu_seperator)
+
 			(menu_item "_Save"			"C-s"	eSaveFile	"gtk-save")
 			(menu_item "Save _As..."	"S-C-s"	eSaveAsFile	"gtk-save-as")
 			(menu_item "_Revert"     			eRevertFile	"gtk-revert-to-saved")
@@ -322,7 +326,7 @@
 					(hbox 1 0 0 1 0
 						(label "Transform: " 0.0 0.5)
 
-						(optionmenu		eMode	eNone
+						(optionmenu		eMode	eTransformMenu
 							(menu_item	"Scene"		eMode eTransformScene)
 							(menu_item	"Mesh"		eMode eTransformMesh)
 							(menu_item	"Bone"		eMode eTransformBone)
@@ -331,7 +335,7 @@
 							(menu_item	"Vertex List"	eMode eTransformSelectedVertices)
 							(menu_item	"MeshPivot"	eMode eTransformMeshPivot))
 
-						(optionmenu		eMode	eNone
+						(optionmenu		eMode	eObjectMenu
 							(menu_item "Move"    eMode	eMoveObject)
 				  			(menu_item "Rotate"  eMode	eRotateObject)
 				  			(menu_item "Scale"   eMode	eScaleObject)

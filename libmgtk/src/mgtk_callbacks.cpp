@@ -317,6 +317,43 @@ float spinbutton_value_get_float(int event, bool *error)
 }
 
 
+int mgtk_append_item_to_menu(int event, const char *label, int item_event)
+{
+	Vector<GtkWidget*> *widgets;
+	GtkWidget *menu, *item;
+	unsigned int i;
+
+
+	widgets = gWidgetMap[event];
+
+	if (!widgets)
+		return 0;
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		menu = (*widgets)[i];
+		
+		if (menu && GTK_IS_MENU(menu))
+		{
+			item = gtk_menu_item_new_with_label(label);
+			gtk_menu_append(GTK_MENU(menu), item);
+			gtk_widget_show(item);
+		
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_command), 
+							   GINT_TO_POINTER(item_event));
+			return 1;
+		}
+		else
+		{
+			mgtk_print("mgtk_append_item_to_menu> %i:%d failed", event, i);
+		}
+	}
+
+	return 0;
+}
+
+
 int spinbutton_value_get_int(int event, bool *error)
 {
 	Vector<GtkWidget*> *widgets;

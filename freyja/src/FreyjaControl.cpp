@@ -172,12 +172,17 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		return;
 	}
 
+#warning FIXME Add look for dupes and a size limit here
+
 	l = strlen(filename);
 	dupe = new char[l+1];
 	strncpy(dupe, filename, l);
 	dupe[l] = 0;
 
 	mRecentFiles.pushBack(dupe);
+
+	freyja_append_item_to_menu(eRecentFiles, dupe, 
+							   (eRecentFiles + mRecentFiles.size()));
 }
 
 
@@ -1620,6 +1625,13 @@ bool FreyjaControl::event(int command)
 		break;
 
 	default:
+
+		if ((command - eRecentFiles - 1) <mRecentFiles.size())
+		{
+			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+			handleFilename(mRecentFiles[(command - eRecentFiles - 1)]);
+		}
+
 		freyja_print("!Unhandled event(%d)", command);
 		return false;
 	}   
