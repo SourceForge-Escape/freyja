@@ -172,11 +172,11 @@ char *EggFileReader::getNextDirectoryListing()
 	{
 		unsigned int length;
 
-		length = strlen(mDirectoryName) + strlen(d_ptr->d_name);
+		length = strlen(mDirectoryName) + strlen(d_ptr->d_name) + 2;
 		mDirectoryListing = new char[length+1];
 		snprintf(mDirectoryListing, length, "%s/%s",  
 				 mDirectoryName, d_ptr->d_name);
-		mDirectoryListing[length] = 0;
+		mDirectoryListing[length+1] = 0;
 	}
 
 	return mDirectoryListing;

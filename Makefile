@@ -10,14 +10,17 @@ lazybuild:
 
 	@-printf "Installing libfreyja\n"
 	@-cd libfreyja; ./autogen.sh; make; make install
+	@-make plugins; make install-plugins
 	@-cd ..
 
 	@-printf "Installing Freyja\n"
-	@-cd Freyja; make; make install
+	@-cd Freyja; ./autogen.sh; make; make install
 	@-cd ..
 
 	@-printf "\n\n o If your build failed make sure you have a complete glext.h header\n"
 	@-printf "\n\n o Now 'make user-install' as a user\n\n"
+
+#	@-/sbin/ldconfig
 
 clean:
 	@-cd mstl; make clean
