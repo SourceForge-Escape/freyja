@@ -168,7 +168,7 @@ void event_filename(int mode, char *filename)
 					(type == 3) ? "Emitter" :
 					(type == 4) ?"Palette" :
 					"ERROR: No event for ",
-					filename,
+					basename(filename),
 					(type2 == 0) ? "save " : "load ",
 					(failed == 0) ? "[sucess]" : "[failed]");
 }

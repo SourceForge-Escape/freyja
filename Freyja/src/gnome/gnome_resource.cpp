@@ -1822,7 +1822,7 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 	}
 	else
 	{
-		item = gtk_menu_item_new_with_label((char *)text->data);	
+		item = gtk_image_menu_item_new_with_label((char *)text->data);	
 		
 		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
 		
