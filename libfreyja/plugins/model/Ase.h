@@ -98,82 +98,6 @@ typedef struct
 } ase_texture_t;
 
 
-/* EXT are not part of ASE, but extentions I made for conveince
- * for skeletal animation modelers and animators */
-typedef struct ase_weight_EXT_s
-{
-	vec_t weight;
-	int boneId;
-
-	struct ase_weight_EXT_s *next;
-
-} ase_weight_EXT_t;
-
-
-typedef struct ase_bone_EXT_s
-{
-	char name[64];
-	unsigned int id;
-	int parent;
-	unsigned int childrenCount; 
-	unsigned int *children;
-
-	vec3_t translation;     /* XYZ */
-	vec4_t rotation;        /* XYZW Quaterion*/
-
-} ase_bone_EXT_t;
-
-
-class AseSkelEXT
-{
-public:
-
-	AseSkelEXT();
-
-	~AseSkelEXT();
-
-	void print();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Prints out description of AseSkelEXT
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.24:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int load(char *filename);
-	/*------------------------------------------------------
-	 * Pre  : <filename> is valid string
-	 * Post : Returns 0 if load is successful
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.22:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int save(char *filename);
-	/*------------------------------------------------------
-	 * Pre  : <filename> is valid string
-	 * Post : Returns 0 if load is successful
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.24:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	char mName[64];
-	unsigned int mBoneCount;
-	unsigned int mWeightCount;
-	
-	ase_weight_EXT_t *mWeights;
-	ase_bone_EXT_t *mBones;
-};
-
-
 class Ase
 {
  public:
@@ -300,7 +224,6 @@ class Ase
 
 	ase_texture_t mTexture; /* Texture information */
 
-	AseSkelEXT skel;
 
  private:
 

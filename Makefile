@@ -1,26 +1,20 @@
 
 lazybuild:
 	@-printf "Installing mstl\n"
-	@-cd mstl; make install
-	@-cd ..
+	@-cd mstl && make install
 
 	@-printf "Installing libhel\n"
-	@-cd libhel; ./autogen.sh; make; make install
-	@-cd ..
+	@-cd libhel && ./autogen.sh && make && make install
 
 	@-printf "Installing libfreyja\n"
-	@-cd libfreyja; ./autogen.sh; make; make install
-	@-cd ..
-	@-cd libfreyja; make plugins; make install-plugins
-	@-cd ..
+	@-cd libfreyja && ./autogen.sh && make && make install
+	@-cd libfreyja && make plugins && make install-plugins
 
 	@-printf "Installing libmgtk\n"
-	@-cd libmgtk; ./autogen.sh; make; make install
-	@-cd ..
+	@-cd libmgtk && ./autogen.sh && make && make install
 
 	@-printf "Installing Freyja\n"
-	@-cd Freyja; ./autogen.sh; make && make install
-	@-cd ..
+	@-cd Freyja && ./autogen.sh && make && make install
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -29,36 +23,16 @@ lazybuild:
 
 
 clean:
-	@-cd mstl; make clean
-	@-cd ..
-
-	@-cd libhel; make clean
-	@-cd ..
-
-	@-cd libfreyja; make clean
-	@-cd ..
-
-	@-cd Freyja; make clean
-	@-cd ..
-
-	@-cd egg_plugins; make clean
-	@-cd ..
+	@-cd mstl && make clean
+	@-cd libhel && make clean
+	@-cd libfreyja && make clean
+	@-cd Freyja && make clean
 
 tarball:
-	@-cd mstl; make tarball
-	@-cd ..
-
-	@-cd libhel; make tarball
-	@-cd ..
-
-	@-cd libfreyja; make tarball
-	@-cd ..
-
-	@-cd Freyja; make tarball
-	@-cd ..
-
-	@-cd egg_plugins; make tarball
-	@-cd ..
+	@-cd mstl && make tarball
+	@-cd libhel && make tarball
+	@-cd libfreyja && make tarball
+	@-cd Freyja && make tarball
 
 user-install:
 	@-printf "Installing freyja user files\n"

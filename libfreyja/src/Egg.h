@@ -154,6 +154,8 @@ typedef struct egg_vertex_s {
 	Vector <vec3_t *> frames; 
 	Vector <long> frameId; 
 
+	long flags;
+
 } egg_vertex_t;
 
 
@@ -170,6 +172,8 @@ typedef struct egg_polygon_s {
 	Vector <unsigned int> vertex;     /* Vertices composing polygon */
 	Vector <unsigned int> texel;      /* Texels */
 	int shader;                       /* Shader id */
+
+	long mesh; // TODO mesh:vertex mapping
 
 	Vector <egg_vertex_t *> r_vertex;
 	Vector <egg_texel_t *> r_texel;
@@ -245,6 +249,8 @@ typedef struct egg_mesh_s {
 	Vector<EggVertexAnimationFrame *> frames;
 
 	Vector<EggUVMap *> uvs;
+
+	Vector<long> vertices; // TODO mesh:vertex mapping
 	/* End Ext */
 
 } egg_mesh_t;
