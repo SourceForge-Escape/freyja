@@ -77,6 +77,54 @@ GtkWidget *mgtk_get_fileselection_pattern_widget()
 }
 
 
+void mgtk_callback_free_image_data(guchar *pixels, gpointer data)
+{
+	if (pixels)
+		delete [] (unsigned char *)pixels;
+}
+
+
+void mgtk_update_filechooser_preview(GtkFileChooser *file_chooser, 
+									 gpointer data)
+{
+	GtkWidget *preview;
+	char *filename;
+	GdkPixbuf *pixbuf;
+	gboolean have_preview;
+
+	preview = GTK_WIDGET(data);
+	filename = gtk_file_chooser_get_preview_filename(file_chooser);
+
+	/*
+	pixbuf = gdk_pixbuf_new_from_data(const guchar *image,
+									  GdkColorspace colorspace,
+									  gboolean has_alpha,
+									  int bits_per_sample,
+									  int width,
+									  int height,
+									  int rowstride,
+									  GdkPixbufDestroyNotify destroy_fn,
+									  gpointer destroy_fn_data);
+	*/
+	unsigned char *image;
+	int width, height;
+
+	mgtk_callback_get_image_data_rgb24(filename, &image, &width, &height);
+	pixbuf = gdk_pixbuf_new_from_data(image, GDK_COLORSPACE_RGB, FALSE, 8,
+									  width, height, width*3, 
+									  mgtk_callback_free_image_data, data);
+	have_preview = (pixbuf != NULL);
+	g_free(filename);
+
+	gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);
+
+	if (pixbuf)
+		gdk_pixbuf_unref(pixbuf);
+
+	gtk_file_chooser_set_preview_widget_active(file_chooser, have_preview);
+}
+
+
 GtkWidget *mgtk_get_fileselection_widget()
 {
 	static GtkWidget *file = NULL;
@@ -141,6 +189,12 @@ GtkWidget *mgtk_get_fileselection_widget()
 		gtk_widget_set_usize(sep, 164, 1);
 #   else
 		//GtkWidget *vbox = GTK_DIALOG(file)->vbox;
+		GtkWidget *preview;
+
+		preview = gtk_image_new();
+		gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(file), preview);
+		g_signal_connect(file, "update-preview",
+						 G_CALLBACK (mgtk_update_filechooser_preview), preview);
 #   endif
 #endif
 	}

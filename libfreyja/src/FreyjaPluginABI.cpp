@@ -2432,6 +2432,93 @@ void freyja__GetDifferenceOfPolygonReferences(long vertexA, long vertexB,
 }
 
 
+void freyjaPolygonSplit(long meshIndex, long polygonIndex)
+{
+#ifdef FIXME
+	Vector<unsigned int> common, face;
+	Vector<long> ref;
+	vec3_t xyz;
+	vec2_t uv;
+	unsigned int j;
+	long A, B, C, D, i, material, count;
+
+
+	material = freyjaGetPolygonMaterial(polygonIndex);
+	count = freyjaGetPolygonVertexCount(polygonIndex);
+
+	if (!count)
+		return -1;
+
+	for (i = 0; i < count; ++i)
+	{
+		/* 1. Make duplicate vertices with same wind for 'face' */
+		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
+		freyjaGetVertexXYZ3fv(A, xyz);
+		B = freyjaVertex3fv(xyz);
+		freyjaGetVertexTexCoordUV2fv(A, uv);
+		freyjaVertexTexCoord2fv(B, uv);
+		freyjaGetVertexNormalXYZ3fv(A, xyz);
+		freyjaVertexNormal3fv(B, xyz);
+		
+		face.pushBack(B);
+
+
+		/* 2. Replace all references to A with B ( dupe of A ), 
+		 * except polygonIndex */
+		freyjaGetVertexPolygonRef1i(A, ref);
+
+		for (j = ref.begin(); j < ref.end(); ++j)
+		{
+			if (ref[j] != polygonIndex)
+			{
+				freyja__PolygonReplaceReference(ref[j], A, B);
+			}
+		}
+	}
+
+	for (i = 0; i < count; ++i)
+	{
+		// 3. Generate new quad ABCD connecting 'face' and ploygonIndex vertices
+		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
+		B = face[i];
+
+		if (i+1 < count)
+		{
+			C = freyjaGetPolygonVertexIndex(polygonIndex, i+1);
+			D = face[i+1];
+		}
+		else
+		{
+			C = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+			D = face[0];
+		}
+
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonMaterial1i(material);
+		freyjaPolygonVertex1i(A);
+		freyjaPolygonVertex1i(C);
+		freyjaPolygonVertex1i(D);
+		freyjaPolygonVertex1i(B);
+
+		// FIXME: Should be able to generate mixing both uvs
+		if (freyjaGetPolygonTexCoordCount(polygonIndex))
+		{
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.5));
+		}
+
+		freyjaEnd();
+	}
+
+	freyjaMeshRemovePolygon(meshIndex, polygonIndex);
+#else
+#   warning FIXME
+#endif
+}
+
+
 int freyjaPolygonExtrudeQuad1f(long polygonIndex, vec_t dist)
 {
 	Vector3d faceNormal, a, b, c;
@@ -4310,6 +4397,20 @@ long freyjaGetMaterialFlags(long materialIndex)
 	}	
 
 	return -1;
+}
+
+
+void freyjaMaterialTextureFilename(long materialIndex, const char *filename)
+{
+#ifdef FIXME
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			gFreyjaMaterials[materialIndex]->setTextureFilename(filename);
+	}
+#else
+#   warning FIXME
+#endif
 }
 
 

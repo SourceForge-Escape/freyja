@@ -71,7 +71,7 @@
 
 			(menu_seperator)
 
-			(submenu eRecentFiles "Recent...")			
+			(submenu eRecentFiles "R_ecent Models...")			
 
 			(menu_seperator)
 
@@ -200,7 +200,7 @@
 				(menu_item "_Select"		eMode	eBoneSelect)
 				(menu_item "_Move"			eMode	eBoneMoveJoint)))
 
-		(submenu ePluginMenu "Plugins")	
+		(submenu ePluginMenu "_Plugins")	
 
 		(menu_seperator)
 
@@ -418,6 +418,10 @@
 					 (hbox 1 0 0 1 0 
 							 (label "Texture index: " 0.0 0.5) 
 							 (spinbutton 0 0 100 503))
+
+					(hbox 1 0 0 1 0
+						(label "Face index:" 0.0 0.5) 
+						(spinbutton 0 0 100 ePolygonIterator))
 
 					 (hbox 1 0 0 1 0
 							 (label "Mesh index: " 0.0 0.5) 
