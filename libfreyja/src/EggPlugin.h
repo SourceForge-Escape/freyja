@@ -582,7 +582,8 @@ unsigned int eggCriticalSection(egg_lock_t request);
 unsigned int eggGetBoneName(unsigned int index, unsigned int size, char *name);
 int eggGetBoneParent(unsigned int index);
 void eggSetBoneParent(int index);
-unsigned int eggGetBoneRotationXYZW4fv(unsigned int index, vec4_t xyzw);
+unsigned int eggGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz);
+unsigned int eggGetBoneRotationXYZ3fv(unsigned int index, vec3_t xyz);
 unsigned int eggGetBoneTranslation3fv(unsigned int index, vec3_t xyz);
 
 unsigned int eggGetTagMesh1u(unsigned int item, unsigned int *value);

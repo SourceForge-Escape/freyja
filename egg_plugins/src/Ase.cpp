@@ -871,6 +871,7 @@ int freyja_model__ase_export(char *filename)
 	Map<unsigned int, unsigned int> trans;
 	unsigned int vert;
 	float st[2];
+	vec_t swap;
 	int v, t, texel;
 	unsigned int i, j, b, bone;
 	Ase ase;
@@ -970,7 +971,12 @@ int freyja_model__ase_export(char *filename)
 			bone = eggGetCurrent(FREYJA_BONE);
 
 			ase.skel.mBones[b].parent = eggGetBoneParent(bone);
-			eggGetBoneRotationXYZW4fv(bone, ase.skel.mBones[b].rotation);
+			eggGetBoneRotationWXYZ4fv(bone, ase.skel.mBones[b].rotation);
+			swap = ase.skel.mBones[b].rotation[0];
+			ase.skel.mBones[b].rotation[0] = ase.skel.mBones[b].rotation[1];
+			ase.skel.mBones[b].rotation[1] = ase.skel.mBones[b].rotation[2];
+			ase.skel.mBones[b].rotation[2] = ase.skel.mBones[b].rotation[3];
+			ase.skel.mBones[b].rotation[3] = swap;
 			eggGetBoneTranslation3fv(bone, ase.skel.mBones[b].translation);
 			eggGetBoneName(bone, 64, ase.skel.mBones[b].name);
 

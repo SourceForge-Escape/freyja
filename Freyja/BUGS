@@ -20,6 +20,11 @@
  Show Stoppers
  ------------------
 
+ o 2004.12.08-1 ( Related: 2004.12.03-1 )
+	SMD plugin generates corrupt parent ids in skeleton and no other errors.
+	This can lead to crash on load.  Backend ( libfreyja ) is at fault.
+
+
  o 2004.12.03-1
 	New file save corruption bug. Meshes can be saved with some corrupt
 	or invalid polygons.  They render as just vertices and constanty
@@ -38,6 +43,14 @@
  Annoying
  ------------------
 
+ o 2004.12.09-1:
+	Gentoo users still can't build freyja without using DISABLE_MULTITEXTURE
+	flag in Makefile
+
+ o 2004.12.07-1:
+	Patch mesh generator makes complete strip, where one end has polymesh to
+	other.
+
  o 2003.12.03-a2
 	Some plugins don't handle untesselated (nontriangle) meshes
 	Also the normal generator doesn't account for polygons other than tris
@@ -49,7 +62,7 @@
 	Vertex combine doesn't check if two vertices share a face? wtf =/
 
  o 2004.12.02-a1
-	ASE PLUGIN mesh import fucks up UV and coord translation -
+	ASE PLUGIN mesh import fucks up UV coord and XYZ pos translation -
 	eg model that stands up is imported as lying down ( Y = Z )
 
  o 2004.12.01-a1

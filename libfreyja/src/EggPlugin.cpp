@@ -1042,21 +1042,30 @@ int eggGetBoneParent(unsigned int index)
 	return -2;
 }
 
-unsigned int eggGetBoneRotationXYZW4fv(unsigned int index, vec4_t xyzw)
+unsigned int eggGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
 	
 	if (bone)
 	{
 		Quaternion q = Quaternion(bone->rot[0], bone->rot[1], bone->rot[2]);
-		vec4_t wxyz;
-
 		q.getQuaternion4fv(wxyz);
-		
-		xyzw[0] = wxyz[0];
-		xyzw[1] = wxyz[1];
-		xyzw[2] = wxyz[2];
-		xyzw[3] = wxyz[3];
+
+		return bone->id;
+	}
+
+	return PLUGIN_ERROR;
+}
+
+unsigned int eggGetBoneRotationXYZ3fv(unsigned int index, vec3_t xyz)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
+	
+	if (bone)
+	{
+		xyz[0] = bone->rot[0];
+		xyz[1] = bone->rot[1];
+		xyz[2] = bone->rot[2];
 
 		return bone->id;
 	}
@@ -1379,6 +1388,7 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 
 		if (mIndexBone < tag->end())
 		{
+			mTag = (*tag)[mIndexBone];
 			return mIndexBone;
 		}
 		break;
