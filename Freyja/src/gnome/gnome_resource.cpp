@@ -15,6 +15,8 @@
  * Mongoose - Created
  =================================================================*/
 
+#include <string.h>
+
 #include <gtk/gtk.h>
 
 #include "gnome_interface.h"
@@ -237,11 +239,15 @@ arg_list_t *freyja_rc_window(arg_list_t *container)
 {
 	arg_list_t *ret;
 	GtkWidget *window;
+	char icon_filename[1024];
 
+	// FIXME: Should be removed and replaced with lisp function
+	freyja_get_pixmap_filename(icon_filename, 1024, "freyja.png");
+	icon_filename[1023] = 0;
 
 	ret = NULL;
 
-	window = mgtk_create_window(BUILD_NAME, "Freyja", "freyja.png");
+	window = mgtk_create_window(BUILD_NAME, "Freyja", icon_filename);
 	
 	if (!GTK_MAIN_WINDOW)
 	{
@@ -339,62 +345,6 @@ arg_list_t *freyja_rc_gl_widget(arg_list_t *box)
 	
 	gtk_widget_show(gl);
 	
-
-#ifdef I_WANT_SCROLLBARS_BAD	
-	GtkWidget *h_scroll, *v_scroll, *vruler1, *hruler1;
-	GtkObject *v_adj, *h_adj;
-
-	/* Scrollbars */
-	h_adj = gtk_adjustment_new(0.0, 0.0, 1.0, 0.01, 0.1, 0.1);
-	gtk_signal_connect_object(GTK_OBJECT(h_adj), "value_changed", 
-							  (GtkSignalFunc)h_scroll_event, NULL);
-	h_scroll = gtk_hscrollbar_new(GTK_ADJUSTMENT(h_adj));
-	gtk_table_attach (GTK_TABLE(table), h_scroll, 1, 2, 2, 3,
-					  GTK_FILL, GTK_FILL, 0, 0);
-	gtk_widget_show(h_scroll); 
-	
-	
-	v_adj = gtk_adjustment_new (0.0, 0.0, 1.0, 0.01, 0.1, 0.1);
-	gtk_signal_connect_object(GTK_OBJECT(v_adj), "value_changed", 
-							  (GtkSignalFunc)v_scroll_event, NULL);
-	v_scroll = gtk_vscrollbar_new(GTK_ADJUSTMENT(v_adj));
-	gtk_table_attach(GTK_TABLE(table), v_scroll, 2, 3, 1, 2,
-					 GTK_FILL, GTK_FILL, 0, 0);
-	gtk_widget_show(v_scroll);
-	
-	gtk_object_set_data_full (GTK_OBJECT (hbox), "h_scroll", h_scroll,
-							  (GtkDestroyNotify) gtk_widget_unref);
-	
-	gtk_object_set_data_full (GTK_OBJECT (hbox), "v_scroll", v_scroll,
-							  (GtkDestroyNotify) gtk_widget_unref);
-	
-	// VRuler 
-	vruler1 = gtk_vruler_new();
-	gtk_widget_ref(vruler1);
-	gtk_object_set_data_full(GTK_OBJECT (hbox), "vruler1", vruler1,
-							 (GtkDestroyNotify) gtk_widget_unref);
-	gtk_widget_show(vruler1);
-	gtk_table_attach(GTK_TABLE (table), vruler1, 0, 1, 1, 2,
-					 (GtkAttachOptions)(GTK_FILL),
-					 //(GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-					 (GtkAttachOptions)(GTK_FILL), 0, 0);
-	gtk_ruler_set_range(GTK_RULER(vruler1), 
-						-get_int(height)/2, get_int(height)/2, 
-						0, get_int(height)/2);
-	
-	// HRuler
-	hruler1 = gtk_hruler_new ();
-	gtk_widget_ref (hruler1);
-	gtk_object_set_data_full (GTK_OBJECT (hbox), "hruler1", hruler1,
-							  (GtkDestroyNotify) gtk_widget_unref);
-	gtk_widget_show (hruler1);
-	gtk_table_attach (GTK_TABLE (table), hruler1, 1, 2, 0, 1,
-					  (GtkAttachOptions) (GTK_FILL),
-					  (GtkAttachOptions) (GTK_FILL), 0, 0);
-	gtk_ruler_set_range(GTK_RULER(hruler1), 
-						-get_int(width)/2, get_int(width)/2, 
-						0, get_int(width)/2);
-#endif
 
 	// Mongoose 2002.07.07, Add status bar here as simple label for now
 	//GTK_STATUS_BAR_HACK = label_create(hbox, "foo", "status bar", 0.0, 0.0);
@@ -543,10 +493,24 @@ arg_list_t *freyja_rc_toolbar_togglebutton(arg_list_t *box)
 			event_cmd += 700;
 		}
 
+		// FIXME: Should be removed and replaced with lisp function
+		char icon_filename[1024];
+
+		if (!strncmp(get_string(icon), "gtk", 3))
+		{
+			strncpy(icon_filename, get_string(icon), 1024);
+			icon_filename[1023] = 0;
+		}
+		else
+		{
+			freyja_get_pixmap_filename(icon_filename, 1024, get_string(icon));
+			icon_filename[1023] = 0;
+		}
+
 		toggle_button =
 		mgtk_create_toolbar_toogle_button((GtkWidget *)box->data, 
 										  get_int(toggled), 
-										  get_string(icon), get_string(label),
+										  icon_filename, get_string(label),
 										  get_string(help),
 										  event_func, event_cmd);
 		
@@ -621,8 +585,22 @@ arg_list_t *freyja_rc_toolbar_button(arg_list_t *box)
 			event_cmd += 700;
 		}
 
+		// FIXME: Should be removed and replaced with lisp function
+		char icon_filename[1024];
+
+		if (!strncmp(get_string(icon), "gtk", 3))
+		{
+			strncpy(icon_filename, get_string(icon), 1024);
+			icon_filename[1023] = 0;
+		}
+		else
+		{
+			freyja_get_pixmap_filename(icon_filename, 1024, get_string(icon));
+			icon_filename[1023] = 0;
+		}
+
 		button =
-		mgtk_create_toolbar_button((GtkWidget *)box->data, get_string(icon), 
+		mgtk_create_toolbar_button((GtkWidget *)box->data, icon_filename, 
 								   get_string(label), get_string(help),
 								   event_func, event_cmd);
 		

@@ -416,7 +416,8 @@ private:
 	 * 2002.02.02:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
+	
+	mObject *evalFunction(mObjectList *stack, mObject *func);
 	void eval();
 	/*------------------------------------------------------
 	 * Pre  : 
