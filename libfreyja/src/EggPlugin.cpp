@@ -43,7 +43,7 @@
 #include "FreyjaFileReader.h"
 #include "EggPlugin.h"
 
-
+long FreyjaPluginDesc::mNextId = 1;
 EggPlugin *EggPlugin::mEggPlugin = 0x0;
 
 

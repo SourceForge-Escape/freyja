@@ -27,8 +27,11 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- Freyja (0.3.5-20041226) 'Chimera' Mongoose <mongoose@icculus.org>
+ Freyja (0.3.5-20041228) 'Chimera' Mongoose <mongoose@icculus.org>
 
+	o 
+	o 'Top' view is now actually a top view ( still used bottom )
+	o Mesh bounding box rendering tied to point rendering control
 	o Fix for polymapped UV generation from XY plane
 
 

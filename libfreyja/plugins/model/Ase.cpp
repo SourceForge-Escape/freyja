@@ -724,6 +724,7 @@ int freyja_model__ase_import(char *filename)
 	Map<unsigned int, unsigned int> trans;
 	Map<unsigned int, unsigned int> trans2;
 	unsigned int i, j, v, t, textureId;
+	long idx;
 
 
 	if (ase.load(filename))
@@ -845,12 +846,14 @@ int freyja_model__ase_import(char *filename)
 		{
 			/* Start a new tag */
 			freyjaBegin(FREYJA_BONE);
-			//freyjaTagFlags1u(0x0);
-			freyjaBoneName(ase.skel.mBones[i].name);
-			freyjaBonePos3f(ase.skel.mBones[i].translation[0],
-						   ase.skel.mBones[i].translation[1],
-						   ase.skel.mBones[i].translation[2]);
-			freyjaBoneRotateQuaternion4f(ase.skel.mBones[i].rotation[0], // w?
+			idx = freyjaGetCurrent(FREYJA_BONE);
+			freyjaBoneFlags1i(idx, 0x0);
+			freyjaBoneName1s(idx, ase.skel.mBones[i].name);
+			freyjaBoneTranslate3f(idx, 
+								  ase.skel.mBones[i].translation[0],
+								  ase.skel.mBones[i].translation[1],
+								  ase.skel.mBones[i].translation[2]);
+			freyjaBoneRotateQuatWXYZ4f(idx, ase.skel.mBones[i].rotation[0], // w?
 										 ase.skel.mBones[i].rotation[1],
 										 ase.skel.mBones[i].rotation[2],
 										 ase.skel.mBones[i].rotation[3]);
@@ -860,7 +863,7 @@ int freyja_model__ase_import(char *filename)
 			for (j = 0; j <  ase.skel.mBones[i].childrenCount; ++j)
 			{
 				printf("%d ", ase.skel.mBones[i].children[j]);
-				freyjaBoneAddChild1u(ase.skel.mBones[i].children[j]);
+				freyjaBoneAddChild1i(idx, ase.skel.mBones[i].children[j]);
 			}
 			
 			printf("\n");

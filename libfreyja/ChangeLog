@@ -28,6 +28,7 @@
 
  libfreyja (0.9.0-20041228) "Umbra" Mongoose <mongoose@icculus.org>
 
+	o Fix for vertex bbox selector
 	o Import/export refinement
 
 
