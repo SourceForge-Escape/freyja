@@ -3,8 +3,8 @@
  * 
  * Project : Freyja, GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://gooseegg.sourceforge.net
- * Email   : mongoose@users.sourceforge.net
+ * Website : http://icculus.org/freyja
+ * Email   : mongoose@icculus.org
  * Object  : Plugin
  * License : GPL, also (C) 2000 Mongoose
  * Comments: This is the python plugin handler class
@@ -279,7 +279,7 @@ void freyjaVertexWeight(unsigned int index, vec_t weight, unsigned int bone);
  * Pre  : <weight> of influence of <bone> on vertex[<index>]
  *
  * Post : Vertex <index> in the model gets weight added
- *        to influence list, if their is a weight for the
+ *        to influence list, if there is a weight for the
  *        corresponding bone it is replaced
  *
  *        <weight> <= 0.0 removes weight
@@ -471,7 +471,7 @@ unsigned int freyjaGetCurrent(freyja_object_t type);
 
 int freyjaGetBoneName(unsigned int index, unsigned int size, char *name);
 int freyjaGetBoneParent(unsigned int index);
-int freyjaGetBoneRotationXYZW4fv(unsigned int index, vec4_t xyzw);
+int freyjaGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz);
 int freyjaGetBoneTranslation3fv(unsigned int index, vec3_t xyz);
 
 unsigned int freyjaGetBoneMesh1u(unsigned int item, unsigned int *value);
@@ -1268,7 +1268,8 @@ private:
 	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
 										 * accumulation modes and etc */
 
-	FreyjaPrinter *mPrinter;
+	FreyjaPrinter *mPrinter;            /* Printer handles logging and
+										 * message/error output */
 
 
 	vec3_t mPoint;                      /* Used to mutate transform origin */
@@ -1308,13 +1309,13 @@ private:
 	unsigned int mIndexVertexFrame;
 	unsigned int mIndexPolygon;
 
-	FreyjaSkeleton *mSkeleton;                /* Current Skeleton of Scene */
+	FreyjaSkeleton *mSkeleton;          /* Current Skeleton of Scene */
 
-	FreyjaBone *mBone;                        /* Current Bone of Skeleton */
+	FreyjaBone *mBone;                  /* Current Bone of Skeleton */
 
 	unsigned int mIndexBone;            /* Current sub-Skeleton references */
 
-	FreyjaAnimation *mAnimation;              /* Current Animation of Scene */
+	FreyjaAnimation *mAnimation;        /* Current Animation of Scene */
 
 	////////////////////////////////////////////////////////////////////////
 

@@ -61,7 +61,6 @@
 #ifdef HAVE_OPENGL
 #   include <GL/gl.h>
 #   include <GL/glu.h>
-#   include "Texture.h"
 #endif
 
 #ifdef HAVE_UTPACKAGE
@@ -71,8 +70,8 @@
 #include "PSKModel.h"
 
 
-#define FUDGE_BONE_RENDER
-#define INTERACTIVE_BONE_RENDER
+//#define FUDGE_BONE_RENDER
+//#define INTERACTIVE_BONE_RENDER
 
 
 void multiply_matrix(float *a, float *b, float *result)
@@ -1204,7 +1203,7 @@ void PSKModelRenderer::render()
 	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glPushMatrix();
-	glRotatef(-90.0f,  1, 0, 0);  /* Make model stand up in our Y */
+	//glRotatef(-90.0f,  1, 0, 0);  /* Make model stand up in our Y */
 	//glTranslatef(0, 0, 2);
 
 	if (mFlags & fRenderBones)
@@ -1218,12 +1217,22 @@ void PSKModelRenderer::render()
 	if (mFlags & fRenderPoints)
 	{	
 		glBegin(GL_POINTS);
-		
+
 		for (i = 0; i < mNumVertices*3; i+= 3)
 		{
-			glVertex3fv(mVertexTransformCache+i);
+			//glVertex3fv(mVertexTransformCache+i);
+
+			glVertex3f(-mVertexTransformCache[i+0],
+					   mVertexTransformCache[i+2],
+					   mVertexTransformCache[i+1]); 
+			glVertex3f(-mVertexTransformCache[i+0],
+					   mVertexTransformCache[i+2],
+					   mVertexTransformCache[i+1]); 
+			glVertex3f(-mVertexTransformCache[i+0],
+					   mVertexTransformCache[i+2],
+					   mVertexTransformCache[i+1]); 
 		}
-		
+
 		glEnd();
 	}
 
@@ -1283,9 +1292,18 @@ void PSKModelRenderer::render()
 				 glColor3f(0.0f, 0.0f, (((float)i)/(float)mNumFaces)*.5+.25) :
 				 glColor3f(0.0f, (((float)i)/(float)mNumFaces)*.5+.25, 0.0f));
 
-				glVertex3fv(mVertexTransformCache+index[0]); 
-				glVertex3fv(mVertexTransformCache+index[1]); 
-				glVertex3fv(mVertexTransformCache+index[2]); 
+				//glVertex3fv(mVertexTransformCache+index[0]); 
+				//glVertex3fv(mVertexTransformCache+index[1]); 
+				//glVertex3fv(mVertexTransformCache+index[2]); 
+				glVertex3f(-mVertexTransformCache[index[0]+0],
+						   mVertexTransformCache[index[0]+2],
+						   mVertexTransformCache[index[0]+1]); 
+				glVertex3f(-mVertexTransformCache[index[1]+0],
+						   mVertexTransformCache[index[1]+2],
+						   mVertexTransformCache[index[1]+1]); 
+				glVertex3f(-mVertexTransformCache[index[2]+0],
+						   mVertexTransformCache[index[2]+2],
+						   mVertexTransformCache[index[2]+1]); 
 			}
 
 			glEnd();
@@ -1339,10 +1357,10 @@ void PSKModelRenderer::renderBone(unsigned int id)
 	{
 		glPointSize(8.0);
 #ifdef FUDGE_BONE_RENDER
-		glTranslatef(16.0, 16.0, 0.0);
-		glRotatef(180, 0, 0, 1);
-		glRotatef(5, 0, 1, 0);
-		glRotatef(-5, 1, 0, 0);
+		//glTranslatef(16.0, 16.0, 0.0);
+		//glRotatef(180, 0, 0, 1);
+		//glRotatef(-90, 0, 1, 0);
+		//glRotatef(-90, 1, 0, 0);
 		glPushMatrix();
 #endif
 	}
@@ -1367,9 +1385,28 @@ void PSKModelRenderer::renderBone(unsigned int id)
 		posB[1] = -mBones[id].restLoc[1];
 		posB[2] = -mBones[id].restLoc[2];
 		
-		glTranslatef(mBones[id].restLoc[0],
-					 mBones[id].restLoc[1],
-					 mBones[id].restLoc[2]);
+		if (id == 0)
+		{
+			posB[0] = -mBones[id].restLoc[0];
+			posB[1] = -mBones[id].restLoc[2];
+			posB[2] = -mBones[id].restLoc[1];
+
+			glTranslatef(mBones[id].restLoc[0],
+						 mBones[id].restLoc[2],
+						 mBones[id].restLoc[1]);
+		}
+		else
+		{
+			glTranslatef(mBones[id].restLoc[0],
+						 mBones[id].restLoc[1],
+						 mBones[id].restLoc[2]);
+		}
+
+		if (id == 1)
+		{
+			glRotatef(90, 0, 1, 0);
+		}
+
 	}
 
 	/* Draw a visible 'bone',
@@ -2147,7 +2184,7 @@ void initScene(int argc, char *argv[])
 	printf(" done\n\n");
 
 #ifdef HAVE_SDL_TTF
-	ut.mTexture.loadFontTTF("data/Fonts/Playstation.ttf", 32, 126 - 32);
+	ut.mTexture.loadFontTTF("font.ttf", 32, 126 - 32);
 	bufferedPrintf(ut.mMessage, 256, "PSKModel Unit Test");
 #endif
 
@@ -2452,7 +2489,7 @@ int runPSKModelUnitTest(int argc, char *argv[])
 	ut.mResource.registerSymbolValue("EVENT_RES800x600",   SDLK_F10);
 	ut.mResource.registerSymbolValue("EVENT_RES1024x768",  SDLK_F11);
 	ut.mResource.registerSymbolValue("EVENT_RES1280x1024", SDLK_F12);
-	ut.mResource.evalFile("data/Scripts/PSKModelUnitTest.lsp");
+	ut.mResource.evalFile("src/PSKModelUnitTest.lsp");
 
 	ut.mFlags |= SDLUnitTest::fAutoRotate;
 	ut.mYaw = 0.0f;
@@ -2575,6 +2612,9 @@ int main(int argc, char *argv[])
 #ifdef FREYJA_MODEL_PLUGINS
 #include <freyja8/EggPlugin.h>
 #include <mstl/Map.h>
+#include <hel/Matrix.h>
+#include <hel/Quaternion.h>
+
 
 extern "C" {
 
@@ -2615,7 +2655,7 @@ int freyja_model__psk_import(char *filename)
 	PSKModel psk;
 	unsigned int i, j, v, t, m;
 	const float scale = 0.1f;
-	Map<unsigned int, unsigned int> trans;
+	Vector<unsigned int> transV;
 
 
 	if (freyja_model__psk_check(filename) < 0)
@@ -2638,7 +2678,7 @@ int freyja_model__psk_import(char *filename)
 							 -psk.mVertices[i*3+1]*scale);
 		
 		/* Generates id translator list */
-		trans.Add(i, v);
+		transV.pushBack(v);
 	}
 	
 	eggEnd(); // FREYJA_GROUP
@@ -2658,19 +2698,19 @@ int freyja_model__psk_import(char *filename)
 		eggBegin(FREYJA_POLYGON);
 
 		/* Store vertices and texels by true id, using translator lists */
-		eggVertex1i(trans[psk.mVTXWs[psk.mFaces[i].x].vertex]);
+		eggVertex1i(transV[psk.mVTXWs[psk.mFaces[i].x].vertex]);
 		t = eggTexCoordStore2f(psk.mVTXWs[psk.mFaces[i].x].uv[0], 
-							psk.mVTXWs[psk.mFaces[i].x].uv[1]);
+							   psk.mVTXWs[psk.mFaces[i].x].uv[1]);
 		eggTexCoord1i(t);
 
-		eggVertex1i(trans[psk.mVTXWs[psk.mFaces[i].y].vertex]);
+		eggVertex1i(transV[psk.mVTXWs[psk.mFaces[i].y].vertex]);
 		t = eggTexCoordStore2f(psk.mVTXWs[psk.mFaces[i].y].uv[0], 
-							psk.mVTXWs[psk.mFaces[i].y].uv[1]);
+							   psk.mVTXWs[psk.mFaces[i].y].uv[1]);
 		eggTexCoord1i(t);
 
-		eggVertex1i(trans[psk.mVTXWs[psk.mFaces[i].z].vertex]);
+		eggVertex1i(transV[psk.mVTXWs[psk.mFaces[i].z].vertex]);
 		t = eggTexCoordStore2f(psk.mVTXWs[psk.mFaces[i].z].uv[0], 
-							psk.mVTXWs[psk.mFaces[i].z].uv[1]);
+							   psk.mVTXWs[psk.mFaces[i].z].uv[1]);
 		eggTexCoord1i(t);
 		
 		eggTexture1i(psk.mFaces[i].material);
@@ -2692,6 +2732,7 @@ int freyja_model__psk_import(char *filename)
 
 	eggBegin(FREYJA_SKELETON);
 
+
 	for (i = 0; i < psk.mNumBones; ++i)
 	{
 		/* Start a new tag */
@@ -2699,24 +2740,60 @@ int freyja_model__psk_import(char *filename)
 		eggTagFlags1u(0x0);
 		eggTagName(psk.mBones[i].name);
 
-//#define THE_OLD_PSK_SWITCHERO
+#define THE_OLD_PSK_SWITCHERO
 #ifdef THE_OLD_PSK_SWITCHERO
-		eggTagPos3f(psk.mBones[i].restLoc[0]*scale,
-					psk.mBones[i].restLoc[2]*scale,
-					-psk.mBones[i].restLoc[1]*scale);
+		vec3_t rotation;
 
-		eggTagRotateQuaternion4f(psk.mBones[i].restDir[3],
-								 psk.mBones[i].restDir[0],
-								 psk.mBones[i].restDir[2],
-								 psk.mBones[i].restDir[1]);
+#   ifdef MATRIX_STACK_SET
+		Matrix matrix, trans;
+		Quaternion q;
 
-		if (!i)
+		matrix.setIdentity();
+
+		j = 0;
+		while (j == 0 || i == 0)
+		{
+			j = psk.mBones[i].parentIndex;
+
+			Quaternion();
+		}
+#   else
+		// eular angles
+		quaternion_to_euler_angles(psk.mBones[i].restDir[0],
+								   psk.mBones[i].restDir[1],
+								   psk.mBones[i].restDir[2],
+								   psk.mBones[i].restDir[3],
+								   &rotation[0],  // x
+								   &rotation[1],  // y
+								   &rotation[2]); // z
+			
+		// Convert radians to degrees
+		rotation[0] *= 57.295779513082323;
+		rotation[1] *= 57.295779513082323;
+		rotation[2] *= 57.295779513082323;
+
+		//eggTagRotateQuaternion4f(psk.mBones[i].restDir[3],
+		//						 psk.mBones[i].restDir[0],
+		//						 psk.mBones[i].restDir[1],
+		//						 psk.mBones[i].restDir[2]);
+
+		if (i == 0)
 		{
 			eggTagPos3f(psk.mBones[i].restLoc[0]*scale,
 						psk.mBones[i].restLoc[2]*scale,
 						psk.mBones[i].restLoc[1]*scale);
-			eggTagRotate3f(-90, -90, 0);
+			
+			eggTagRotate3f(rotation[0], rotation[1], rotation[2]);
 		}
+		else
+		{
+			eggTagPos3f(-psk.mBones[i].restLoc[0]*scale,
+						-psk.mBones[i].restLoc[1]*scale,
+						-psk.mBones[i].restLoc[2]*scale);
+
+			eggTagRotate3f(rotation[0], rotation[1], rotation[2]);
+		}
+#   endif
 #else
 		vec3_t xyz;
 		vec_t s;

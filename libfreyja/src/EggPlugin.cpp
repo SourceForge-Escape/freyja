@@ -879,9 +879,9 @@ unsigned int eggTagRotateQuaternion4f(vec_t w, vec_t x, vec_t y, vec_t z)
 
 	// For now just switch to eular ( ew ) and do I have this right?
 	if (EggPlugin::mEggPlugin) // h b a; a b h
-		return EggPlugin::mEggPlugin->eggTagRotate(attitude*57.295779513082323,
+		return EggPlugin::mEggPlugin->eggTagRotate(heading*57.295779513082323,
 												   bank*57.295779513082323, 
-												   heading*57.295779513082323);
+												   attitude*57.295779513082323);
 
 	return PLUGIN_ERROR;
 }

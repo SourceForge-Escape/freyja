@@ -135,7 +135,7 @@ eggv7.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=eggv7 \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_eggv7.o" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/eggv7.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -226,6 +226,7 @@ nif3.so:
 	MOD_OBJS="$(BUILD_DEBUG_DIR)/Nif3.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 nif4.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
@@ -254,7 +255,7 @@ obj.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=obj \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_obj.o" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/obj.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -509,16 +510,16 @@ SDLUNIT_OBJS=$(BUILD_TEST_DIR)/mtk_tga.o \
 
 Md3AnimModel.test:
 	mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) tests NAME=Md3AnimModel.test BUILD_DIR=$(BUILD_TEST_DIR) \
+	$(MAKE) tests NAME=Md3AnimModel BUILD_DIR=$(BUILD_TEST_DIR) \
 	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/Md3.o $(BUILD_TEST_DIR)/Md3AnimModel.o" \
 	CFLAGS=" -Wall -O0 -g $(BASE_INC) $(SDLUNIT_CFLAGS) -DUNIT_TEST_MD3ANIMMODEL" \
 	LD_FLAGS="$(SDLUNIT_LDFLAGS) -lhel0 -lfreyja_model"
 
 PSKModel.test:
 	mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) tests NAME=PSKModel.test BUILD_DIR=$(BUILD_TEST_DIR) \
+	$(MAKE) tests NAME=PSKModel BUILD_DIR=$(BUILD_TEST_DIR) \
 	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/PSKModel.o $(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
-	CFLAGS="-Wall -O0 -g $(SDLUNIT_CFLAGS) -DUNIT_TEST_PSKMODEL" \
+	CFLAGS="-Wall -O0 -g $(SDLUNIT_CFLAGS) -DUNIT_TEST_PSKMODEL -DHAVE_UTPACKAGE" \
 	LD_FLAGS="$(SDLUNIT_LDFLAGS)"
 
 MDLModel.test:

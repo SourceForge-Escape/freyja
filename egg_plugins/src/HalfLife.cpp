@@ -289,36 +289,46 @@ int HalfLife::load(const char *filename)
 			for (j = 0; (int)j < model.nummesh; ++j)
 			{
 				size = sizeof(mstudio_mesh_t);
-
 				fseek(f, model.meshindex + j * size, SEEK_SET);
 				fread(&mesh, size, 1, f);
 
-				printf("    mesh[%i].faces = %li...\n", j, mesh.numtris);
-
-				mBodyParts[i].models[m].meshes[j].faceCount = mesh.numtris;
-				mBodyParts[i].models[m].meshes[j].faces = new hl_face_t[mesh.numtris];
-				mBodyParts[i].models[m].meshes[j].normalCount = mesh.numnorms;
-				mBodyParts[i].models[m].meshes[j].material = mesh.skinref;
-
-				fseek(f, mesh.triindex, SEEK_SET);
-
-				size = sizeof(mstudio_trivert_t);
-
-#define HALFLIFE_EASY_FACE
-#ifdef HALFLIFE_EASY_FACE
 				// Hacky stack space jujitsu to avoid more vectors/arrays
-				short numFaces, vertex, light, st1, st2;
+				short numFaces, vertex, norm, st1, st2;
 				short centervertex, lastvertex, lastlastvertex;
 				short centerst1, lastst1, lastlastst1;
 				short centerst2, lastst2, lastlastst2;
+				short centernorm, lastnorm, lastlastnorm;
+				short normA, vertexA, st1A, st2A;
 				unsigned int t, tn, tri;
 
+
 				/* Face loader: triangle fans and strips */
-				for (k = 0; (int)k < mesh.numtris; ++k)
+				printf("Reading %li faces...\n", mesh.numtris);
+
+				for (tri = 0, k = 0; (int)k < mesh.numtris; ++k)
 				{
 					fseek(f, mesh.triindex + 2*k, SEEK_SET);
 					fread(&numFaces, 1, 2, f);
 
+					tri += (numFaces > 0) ? numFaces : -numFaces;
+				}
+
+				printf("Expecting %i actual faces...\n", tri);
+
+				//printf("    mesh[%i].faces = %li...\n", j, mesh.numtris);
+
+				mBodyParts[i].models[m].meshes[j].faceCount = mesh.numtris;
+				mBodyParts[i].models[m].meshes[j].faces = new hl_face_t[tri];
+				mBodyParts[i].models[m].meshes[j].normalCount = mesh.numnorms;
+				mBodyParts[i].models[m].meshes[j].material = mesh.skinref;
+
+
+				for (tri = 0, k = 0; (int)k < mesh.numtris; ++k)
+				{
+					fseek(f, mesh.triindex + 2*k, SEEK_SET);
+					fread(&numFaces, 1, 2, f);
+
+//#define DEBUG_HALFLIFE_FACETS
 #ifdef DEBUG_HALFLIFE_FACETS
 					printf("Reading %i %s...\n",
 						   (numFaces > 0) ? numFaces : -numFaces, 
@@ -326,51 +336,85 @@ int HalfLife::load(const char *filename)
 #endif
 					tn = (numFaces > 0) ? numFaces : -numFaces;
 
-					for (tri = 0, t = 0; t < tn; ++t)
+					for (t = 0; t < tn; ++t)
 					{
 						fread(&vertex, 1, 2, f);
-						fread(&light, 1, 2, f);
+						fread(&norm, 1, 2, f);
 						fread(&st1, 1, 2, f);
 						fread(&st2, 1, 2, f);
 
 						if (t == 0)
 						{
 							centervertex = vertex;
+							centernorm = norm;
 							centerst1 = st1;
 							centerst2 = st2;
 						}
-						else if (numFaces > 0 && t > 2) // fan -> triangle
+						else if (t > 2)
 						{
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[0].vertindex = centervertex;
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[1].vertindex = lastvertex;
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[2].vertindex = vertex;
-							//printf("f %i %i %i\n", 
-							//	   centervertex, lastvertex, vertex);
+							mstudio_trivert_t *vert;
+							vert = mBodyParts[i].models[m].meshes[j].faces[tri].vertex; // Yeah, yeah -- it works
 
-							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[0].s = centerst1;
-							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[0].t = centerst2;
-							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[1].s = lastst1;
-							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[1].t = lastst2;
-							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[2].s = st1;
-							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[2].t = st2;
+							if (numFaces > 0)  // fan -> triangle
+							{
+								vertexA = centervertex;
+								normA = centernorm;
+								st1A = centerst1;
+								st2A = centerst2;
+							}
+							else if (numFaces < 0) // strip -> triangle
+							{
+								vertexA = lastlastvertex;
+								normA = lastlastnorm;
+								st1A = lastlastst1;
+								st2A = lastlastst2;
+							}
+
+							vert[0].vertindex = vertexA;
+							vert[1].vertindex = lastvertex;
+							vert[2].vertindex = vertex;
+
+							vert[0].normindex = normA;
+							vert[1].normindex = lastnorm;
+							vert[2].normindex = norm;
+
+							vert[0].s = st1A;
+							vert[0].t = st2A;
+							vert[1].s = lastst1;
+							vert[1].t = lastst2;
+							vert[2].s = st1;
+							vert[2].t = st2;
+
+#ifdef DEBUG_HALFLIFE_FACETS
+							printf("%i/%li\n%c %i %i %i\n",
+								   tri, mesh.numtris,
+								   (numFaces > 0) ? 'f' : 's',
+								   //vertexA, lastvertex, vertex);
+
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[0].vertindex,
+							
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[1].vertindex,
+		   
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[2].vertindex);
+#endif
 
 							++tri;
 						}
-						else if (numFaces < 0 && t > 2) // strip -> triangle
-						{
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[0].vertindex = lastlastvertex;
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[1].vertindex = lastvertex;
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[2].vertindex = vertex;
-							//printf("s %i %i %i\n", 
-							//	   lastlastvertex, lastvertex, vertex);
 
-							++tri;
-						}
+						lastlastst1 = lastst1;
+						lastlastst2 = lastst2;
+						lastst1 = st1;
+						lastst2 = st2;
+
+						lastlastnorm = lastnorm;
+						lastnorm = norm;
 
 						lastlastvertex = lastvertex;
 						lastvertex = vertex;
 					}
 				}
+
+				//printf("%li == %i\n", mesh.numtris, triCounter);
 			}
 		}
 	}
@@ -459,24 +503,28 @@ int freyja_model__halflife_import(char *filename)
 		return -1;
 	}
 
-
+#ifdef FIXME_ENABLE_TEXTURE
 	/* Read texture data */
-	printf("Processing HalfLife textures: ");
+	printf("Processing HalfLife textures...\n");
 
-	for (i = 10; i < hl.mTextureCount; ++i)
+	for (i = 0; i < hl.mTextureCount; ++i)
 	{
 		if (hl.mImages[i].image && hl.mImages[i].w > 0 && hl.mImages[i].h > 0)
 		{
-			eggTextureStoreBuffer(hl.mImages[i].image, 3, 
+			eggTextureStoreBuffer(hl.mImages[i].image, 4, 
 								  hl.mImages[i].w, hl.mImages[i].h,
-								  EGG_COLORMODE_RGB);
+								  EGG_COLORMODE_RGBA);
+			printf("%i/%i\n", i, hl.mTextureCount);
 		}
 	}
+#endif
 
 
 	/* Read mesh data */
-	printf("Processing HalfLife bodyparts:\n");
+	printf("Processing HalfLife bodyparts...\n");
 
+	// DISABLE FOR NOW 
+	if (0)
 	for (b = 0; b < hl.mBodyPartCount; ++b)
 	{
 		eggBegin(FREYJA_MESH);
@@ -600,128 +648,8 @@ int freyja_model__halflife_export(char *filename)
 
 	return -1;
 }
-
-
-// FIXME: Finish porting EggPlugin code
-#ifdef FIXME
-void FreyjaModel::HalfLifeImport(HalfLife *hl)
-{
-  Map<unsigned int> trans;
-  egg_mesh_t *mesh;
-  egg_tag_t *tag;
-  egg_group_t *grp;
-  egg_vertex_t *vert;
-  MtkImage img;
-  int b, t, m, v, i;
-  float st[2];
-  studiohdr_t *hl_header;
-  vec3_t **hl_verts;
-  mstudiomesh_t **hl_mesh;
-  mstudiomodel_t *hl_mdl;
-  trisy_keen_dood_t ***hl_tris;
-  hlskin_t *hl_skin;
-  char buffer[64];
-
-
-  if (!_egg || !hl)
-    return;
-
-  hl_skin = hl.Skin();
-  hl_header = hl.Header();
-  hl_mesh = hl.Meshes();
-  hl_mdl = hl.Mdls();
-  hl_verts = hl.Vertices();
-  hl_tris = hl.Tris();
-
-
-  /* Read texture data */
-  for (i = 0; i < hl_header->numtextures; i++)
-  {
-    eggTextureStoreBuffer(hl_skin[i].image, 3, hl_skin[i].w, hl_skin[i].h, 
-			  EGG_COLORMODE_RGB);
-  }
-
-
-  /* Read mesh data */
-  for (b = 0; b < hl_header->numbodyparts; b++)
-  {
-    eggBegin(FREYJA_BONE_FRAME);
-    eggBegin(FREYJA_BONE_TAG);
-
-    eggTagCenter(0.0, 0.0, 0.0);
-
-    trans.Clear();
-
-    for (v = 0; v < hl_mdl[b].numverts; v++)
-    {
-      vert = _egg->VertexAdd(hl_verts[b][v][0], hl_verts[b][v][1], 
-			     hl_verts[b][v][2]);
-
-      
-      trans.Add(v, vert->id);
-    }
-
-    for (m = 0; m < hl_mdl[b].nummesh; m++)
-    {
-      mesh = _egg->MeshNew();
-      _egg->MeshAdd(mesh);
-      _egg->TagAddMesh(tag, mesh->id);
-      grp = _egg->GroupNew();
-      _egg->GroupAdd(grp);
-      mesh->group.Add(grp->id);
-
-      for (t = 0; t < hl_mesh[b][m].numtris; t++)
-      {
-	// Clear the dictionary/indexed lists
-	vertex.Clear();
-	texel.Clear();
-
-        if (grp->vertex.SearchKey(trans[hl_tris[b][m][t].tri[0]]) == UINT_MAX)
-          grp->vertex.Add(trans[hl_tris[b][m][t].tri[0]]);
-
-        if (grp->vertex.SearchKey(trans[hl_tris[b][m][t].tri[1]]) == UINT_MAX)
-          grp->vertex.Add(trans[hl_tris[b][m][t].tri[1]]);
-
-        if (grp->vertex.SearchKey(trans[hl_tris[b][m][t].tri[2]]) == UINT_MAX)
-          grp->vertex.Add(trans[hl_tris[b][m][t].tri[2]]);
-
-	// Store vertices by true id, using translation table
-	vertex.Add(trans[hl_tris[b][m][t].tri[0]]);
-	vertex.Add(trans[hl_tris[b][m][t].tri[1]]);
-	vertex.Add(trans[hl_tris[b][m][t].tri[2]]);
-
-	st[0] = hl_tris[b][m][t].st[0][0] / 
-	  (float)hl_skin[hl_mesh[b][m].skinref].w;
-	st[1] = hl_tris[b][m][t].st[0][1] / 
-	  (float)hl_skin[hl_mesh[b][m].skinref].h;
-	texel.Add(_egg->TexelAdd(st[0], st[1]));
-	//printf("st = %f %f\n", st[0], st[1]);
-
-	st[0] = hl_tris[b][m][t].st[1][0] / 
-	  (float)hl_skin[hl_mesh[b][m].skinref].w;
-	st[1] = hl_tris[b][m][t].st[1][1] / 
-	  (float)hl_skin[hl_mesh[b][m].skinref].h;
-	texel.Add(_egg->TexelAdd(st[0], st[1]));
-	//printf("st = %f %f\n", st[0], st[1]);
-
-	st[0] = hl_tris[b][m][t].st[2][0] / 
-	  (float)hl_skin[hl_mesh[b][m].skinref].w;
-	st[1] = hl_tris[b][m][t].st[2][1] / 
-	  (float)hl_skin[hl_mesh[b][m].skinref].h;
-	texel.Add(_egg->TexelAdd(st[0], st[1]));
-	//printf("st = %f %f\n", st[0], st[1]);
-
-	mesh->polygon.Add(_egg->PolygonAdd(&vertex, &texel, 
-					   hl_mesh[b][m].skinref));
-      }
-    }
-  }
-
-  return 0;
-}
 #endif
 
-#endif
 
 #ifdef UNIT_TEST_HALFLIFE
 int main(int argc, char *argv[])

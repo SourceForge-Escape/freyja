@@ -35,7 +35,7 @@ void ItemList::load(cGrannyStream * file)
 void ItemList::loadList(dword peers,cGrannyStream * file)
 {
 //  assert(file);
-	for (int i=0;i<peers;)
+  for (int i=0;i<(int)peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();

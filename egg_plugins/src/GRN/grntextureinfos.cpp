@@ -16,7 +16,7 @@ TextureInfo::~TextureInfo()
 void TextureInfo::load( cGrannyStream * file, dword tiOffset, dword baseOffset, dword peers )
 {
 	dword oldPos;
-	for (int i=0;i<peers;)
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();
@@ -66,7 +66,7 @@ void TextureInfos::load(cGrannyStream * file,dword texOffset,
 {
 	dword oldPos;
 	TextureInfo *texture;
-	for (int i=0;i<peers;)
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();

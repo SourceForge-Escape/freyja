@@ -17,6 +17,8 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Tightening up import / export -- if it's not 100% or close
+	  it's going to get disabled or feature locked till it is
 	o Propagate import / export list up to Freyja to make menus
 	o Merge down umbra system over stable to make ABI/API compatible
 	  plugins
