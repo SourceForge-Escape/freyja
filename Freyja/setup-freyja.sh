@@ -5,6 +5,7 @@ echo "Installing Freyja user directories and custom data"
 
 mkdir -p ~/.freyja
 mkdir -p ~/.freyja/models/
+mkdir -p ~/.freyja/models/python/
 mkdir -p ~/.freyja/palettes/
 mkdir -p ~/.freyja/prefabs/
 mkdir -p ~/.freyja/textures/

@@ -373,6 +373,14 @@ meshgen.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+milkshape.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=milkshape \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/milkshape.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
 nod.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -403,7 +411,8 @@ python.so:
 	MOD_NAME=python \
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/python.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3 -z defs"
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3"
+# -z defs
 
 skn.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -441,7 +450,7 @@ trmesh.so:
 
 plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so nif4.so skn.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so nod.so psk.so obj.so smd.so trmesh.so python.so 
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nod.so psk.so obj.so smd.so trmesh.so python.so 
 
 
 ######################################################################
