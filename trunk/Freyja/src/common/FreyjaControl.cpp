@@ -955,7 +955,7 @@ void FreyjaControl::ScreenToWorld(float *x, float *y)
 	}
 }
 
-int BTN_HACK;
+
 bool FreyjaControl::Motion(int x, int y)
 {
 	static int old_y = 0, old_x = 0;
@@ -964,7 +964,7 @@ bool FreyjaControl::Motion(int x, int y)
 	switch (_major_mode)
 	{
 	case ANIMATION_EDIT_MODE:
-		if (BTN_HACK & MOUSE_BTN_RIGHT)
+		if (mMouseButton & MOUSE_BTN_RIGHT)
 		{
 			if (x > old_x)
 				freyja_event2i(EVENT_MISC, CMD_MISC_RENDER_ROT_Y_M);
@@ -979,37 +979,35 @@ bool FreyjaControl::Motion(int x, int y)
 			old_x = x;
 			old_y = y;
 		}
-		else if (0) // don't edit mesh in animation view 
+		break;
+	case TEXTURE_EDIT_MODE:
+		if (_tex_state)
 		{
-			MotionEdit(x, y, mModel->CurrentPlane());
-		}
-    break;
-  case TEXTURE_EDIT_MODE:
-	  if (_tex_state)
-	  {
-		  float s;
-		  float t;
-
-		  s = (float)x / (float)mRender->Width();
-		  t = (float)y / (float)mRender->Height();
-		  
-		  if (s > 1.0) s = 1.0;
-		  if (s < 0.0) s = 0.0;
-		  if (t > 1.0) t = 1.0;
-		  if (t < 0.0) t = 0.0;
-		  
-		  mModel->TexelMove(s, t);
-		  return true;
+			float s;
+			float t;
+			
+			s = (float)x / (float)mRender->Width();
+			t = (float)y / (float)mRender->Height();
+			
+			if (s > 1.0) s = 1.0;
+			if (s < 0.0) s = 0.0;
+			if (t > 1.0) t = 1.0;
+			if (t < 0.0) t = 0.0;
+			
+			mModel->TexelMove(s, t);
+			return true;
 	  }
-    break;
-  case MODEL_EDIT_MODE:
-    MotionEdit(x, y, mModel->CurrentPlane());
-    break;
-  default:
-    ;
-  }
+		break;
+	case MODEL_EDIT_MODE:
+		MotionEdit(x, y, mModel->CurrentPlane());
+		break;
+	default:
+		;
+	}
+	
+	//	event_print("motion -> %i, %i", x, y);
 
-  return true;
+	return true;
 }
 
 
@@ -1018,23 +1016,19 @@ bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 	freyja_control_mode_t mode = _minor_mode;
 
 
-	BTN_HACK = btn;
-	// Mongoose 2002.01.12, Allow temp mode override
-	if (mod & KEY_RCTRL)
-	{
-		handleEvent(EVENT_MISC, CMD_MISC_SELECT);
-	}
+	mMouseButton = btn;
+	mModKey = mod;
 
 	switch (_major_mode)
 	{
 	case ANIMATION_EDIT_MODE:
-		if (btn == MOUSE_BTN_4 && state == MOUSE_BTN_STATE_PRESSED)
+		if (btn == MOUSE_BTN_UP && state == MOUSE_BTN_STATE_PRESSED)
 		{
 			freyja_event2i(EVENT_MISC, CMD_MISC_ZOOM_IN);
 			event_print("Zoom in");
 		}
 		
-		if (btn == MOUSE_BTN_5 && state == MOUSE_BTN_STATE_PRESSED)
+		if (btn == MOUSE_BTN_DOWN && state == MOUSE_BTN_STATE_PRESSED)
 		{
 			freyja_event2i(EVENT_MISC, CMD_MISC_ZOOM_OUT);
 			event_print("Zoom out");
@@ -1074,6 +1068,12 @@ bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 		}
 		break;
 	case MODEL_EDIT_MODE:
+		// Mongoose 2002.01.12, Allow temp mode override
+		if (mod & KEY_RCTRL)
+		{
+			handleEvent(EVENT_MISC, CMD_MISC_SELECT);
+		}
+
 		MouseEdit(btn, state, mod, x, y, mModel->CurrentPlane());
 		break;
 	default:
@@ -1097,15 +1097,17 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 	static int old_y = 0, old_x = 0;
 	float xx = x, yy = y;
   
-	
+
 	// Mongoose: Convert screen to world system
 	ScreenToWorld(&xx, &yy);
 
 	// Mongoose: No click and release
-	if (_mouse_state != 1)
+	if (!mMouseButton & MOUSE_BTN_RIGHT)
 	{
 		return;
 	}
+
+	//event_print("* motion -> %i, %i", x, y);
 
 	switch (_minor_mode)
 	{
