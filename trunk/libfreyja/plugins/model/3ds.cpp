@@ -765,11 +765,11 @@ int freyja_model__3ds_import(char *filename)
 	
 	if (freyja_model__3ds_check(filename) < 0)
 	{
-		freyjaPrintError("freyja_model__3ds_import> Failed to load file\n");
+		//freyjaPrintError("freyja_model__3ds_import> Failed to load file\n");
 		return -1;
 	}
 
-	freyjaPrintMessage("freyja_model__3ds_import> entry!");
+	//freyjaPrintMessage("freyja_model__3ds_import> entry!");
 
 
 	File3ds tds(filename);

@@ -73,7 +73,7 @@ int freyja_model__grn_check(char *filename)
 
 	if (!grn.initialized())
 	{
-		fprintf(stderr, "grn_import> Failed to load file\n");
+		//fprintf(stderr, "grn_import> Failed to load file\n");
 		return -1;
 	}	
 
@@ -99,7 +99,7 @@ int freyja_model__grn_import(char *filename)
 
 	if (!grn.initialized())
 	{
-		fprintf(stderr, "grn_import> Failed to load file\n");
+		//fprintf(stderr, "grn_import> Failed to load file\n");
 		return -1;
 	}
 

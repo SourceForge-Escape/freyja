@@ -2652,7 +2652,7 @@ int freyja_model__psk_check(char *filename)
 
 	if (strncmp("ACTRHEAD", buffer, 8) != 0)
 	{
-		printf("Not a valid PSK Model\n");
+		//printf("Not a valid PSK Model\n");
 		return -1;
 	}																		   
 
