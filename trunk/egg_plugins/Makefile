@@ -273,7 +273,7 @@ plugins: mdl.so md2.so md3.so \
 	ase.so eggv7.so lwo.so \
 	trmesh.so tombraider.so  \
 	nod.so psk.so 3ds.so \
-	mdx.so grn.so
+	mdx.so grn.so md5.so
 
 ################################################################
 

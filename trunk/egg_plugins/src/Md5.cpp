@@ -549,7 +549,7 @@ int freyja_model__md5_import(char *filename)
 	Map<unsigned int, unsigned int> trans2;
 	Md5 md5;
 	unsigned int vertex, texcoord;
-	int m, v, i;
+	int m, v, i, t;
 
 
 	if (md5.loadModel(filename) == false)
@@ -585,6 +585,25 @@ int freyja_model__md5_import(char *filename)
 			trans2.Add(v, texcoord);
 		}
 	
+		
+		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
+		{
+			/* Start a new polygon */
+			eggBegin(FREYJA_POLYGON);
+			
+			/* Store vertices and texels by true id, using translator lists */
+			eggVertex1i(trans[md5.mMeshes[m].triangles[t].vertex[0]]);
+			eggVertex1i(trans[md5.mMeshes[m].triangles[t].vertex[1]]);
+			eggVertex1i(trans[md5.mMeshes[m].triangles[t].vertex[2]]);
+			eggTexCoord1i(trans2[md5.mMeshes[m].triangles[t].vertex[0]]);
+			eggTexCoord1i(trans2[md5.mMeshes[m].triangles[t].vertex[1]]);
+			eggTexCoord1i(trans2[md5.mMeshes[m].triangles[t].vertex[2]]);
+			
+			eggTexture1i(0); // shader
+			
+			eggEnd(); // FREYJA_POLYGON
+		}
+
 		eggEnd(); // FREYJA_GROUP
 		eggEnd(); // FREYJA_MESH
 	}
