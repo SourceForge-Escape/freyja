@@ -20,6 +20,14 @@
 
 #include "image_pcx.h"
 
+extern "C" {
+
+  //int check(FILE *f);
+  
+  int import_image(char *filename, unsigned char **image, 
+		   unsigned int *w, unsigned int *h, 
+		   char *type);
+}
 
 int mtk_image__pcx_check(FILE *f)
 {
@@ -39,7 +47,7 @@ int mtk_image__pcx_check(FILE *f)
 
   if ((signature != 0x0a) || (version != 5))
   {
-    fprintf(stderr, "pcx_load> Unknown image format.\n");
+    printf("pcx.so: Invalid or unknown PCX format.\n");
     return -2;
   }
 
@@ -47,9 +55,10 @@ int mtk_image__pcx_check(FILE *f)
 }
 
 
-int mtk_image__pcx_load(FILE *f, unsigned char **image, 
-			unsigned int *w, unsigned int *h, char *type)
+int import_image(char *filename, unsigned char **image, 
+		 unsigned int *w, unsigned int *h, char *type)
 {
+  FILE *f = fopen(filename, "rb");
    unsigned char *indexed_image = NULL;
    unsigned char *palette = NULL;
    pcx_header_t header;
@@ -64,6 +73,12 @@ int mtk_image__pcx_load(FILE *f, unsigned char **image,
       return -2;
    }
 
+   if (mtk_image__pcx_check(f))
+   {
+     fclose(f);
+     return -1;
+   }
+
    *image = NULL;
 
    fseek(f, 0, SEEK_SET);
@@ -71,7 +86,8 @@ int mtk_image__pcx_load(FILE *f, unsigned char **image,
 
    if ((header.signature != 0x0a) || (header.version != 5))
    {
-     printf("pcx_load> ERROR Can't read this PCX format.\n");
+     printf("pcx.so: ERROR Can't read this PCX format.\n");
+     fclose(f);
      return -3;
    }
    else
@@ -89,7 +105,8 @@ int mtk_image__pcx_load(FILE *f, unsigned char **image,
 
      if (!indexed_image)
      {
-       printf("mtk_image__pcx_load> ERROR Malloc failed for indexed_image.\n");
+       printf("pcx.so: ERROR Malloc failed for indexed_image.\n");
+       fclose(f);
        return -4;
      }
 
@@ -135,6 +152,7 @@ int mtk_image__pcx_load(FILE *f, unsigned char **image,
 	 delete [] indexed_image;
 
        printf("pcx_load> ERROR Malloc failed for palette.\n");
+       fclose(f);
        return -5;
      }
 
@@ -150,6 +168,7 @@ int mtk_image__pcx_load(FILE *f, unsigned char **image,
        if (palette)
 	 delete [] palette;
 
+     fclose(f);
        return -5;
      }
 
@@ -173,7 +192,7 @@ int mtk_image__pcx_load(FILE *f, unsigned char **image,
 
      fclose(f);
 
-     *type = 1;
+     *type = 3;
      return 0;
    }
 

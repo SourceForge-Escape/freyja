@@ -31,8 +31,16 @@ extern "C"
 }
 #endif
 
+extern "C" {
 
-int mtk_image__jpeg_check(FILE *f)
+  //int check(FILE *f);
+  
+  int import_image(char *filename, unsigned char **image, 
+		   unsigned int *w, unsigned int *h, 
+		   char *type);
+}
+
+int check_jpeg(FILE *f)
 {
 #ifdef LIB_JPEG
   unsigned char buffer[16];
@@ -40,7 +48,7 @@ int mtk_image__jpeg_check(FILE *f)
 
   if (!f)
   {
-    perror("jpeg_check> ERROR opening file\n");
+    perror("jpeg.so: ERROR opening file\n");
     return -1;
   }
 
@@ -49,20 +57,19 @@ int mtk_image__jpeg_check(FILE *f)
 
   if (buffer[0] == 0xff && buffer[1] == 0xd8)
     return 0;
-  else
-    fprintf(stderr, "jpeg_load> Unknown image format.\n");
+
+  printf("jpeg.so: Inavlid or unknown JPEG format.\n");
+#endif
 
   return -2;
-#else
-  return -100;
-#endif
 }
 
 
-int mtk_image__jpeg_load(FILE *f, unsigned char **imageRET, 
-			 unsigned int *w, unsigned int *h, char *type)
+int import_image(char *filename, unsigned char **imageRET, 
+		 unsigned int *w, unsigned int *h, char *type)
 {
 #ifdef LIB_JPEG
+  FILE *f = fopen(filename, "rb");
   unsigned char *buffer = NULL;
   unsigned char *imageb = NULL;
   unsigned char *palette = NULL;
@@ -74,13 +81,18 @@ int mtk_image__jpeg_load(FILE *f, unsigned char **imageRET,
 
   if (!f)
   {
-    perror("jpeg_load> ERROR:\n");
+    perror("jpeg.so: ERROR\n");
+    return -1;
+  }
+
+  if (check_jpeg(f))
+  {
+    fclose(f);
     return -1;
   }
 
   fseek(f, 0, SEEK_SET);
 
-  *type = 1;
   bpp = 16; // hack hack, fix for 011. loss of color in release build
 
   image.err = jpeg_std_error(&error);
@@ -92,7 +104,10 @@ int mtk_image__jpeg_load(FILE *f, unsigned char **imageRET,
   *h = image.image_height;
 
   if (!*w || !*h)
+  {
+    fclose(f);
     return -2;
+  }
 
   if (bpp <= 8)
   {
@@ -114,7 +129,6 @@ int mtk_image__jpeg_load(FILE *f, unsigned char **imageRET,
   buffer = new unsigned char[*w * image.output_components];
 
   jpeg_start_decompress(&image);
-
 
   switch (bpp)
   {
@@ -188,8 +202,12 @@ int mtk_image__jpeg_load(FILE *f, unsigned char **imageRET,
   jpeg_finish_decompress(&image);
   jpeg_destroy_decompress(&image);
 
+  *type = 3; // 1;
   *imageRET = imageb;
+
+  fclose(f);
   return 0;
+
 #else
   printf("JPEG support not in this build\n");
   return -100;

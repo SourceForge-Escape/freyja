@@ -132,6 +132,38 @@ PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
 
 plug-ins: $(PLUGINS)
 
+dds.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
+	MOD_NAME=image_dds \
+	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_dds.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+jpeg.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
+	MOD_NAME=image_jpeg \
+	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_jpeg.o" \
+	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -ljpeg"
+
+pcx.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
+	MOD_NAME=image_pcx \
+	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_pcx.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+ppm.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
+	MOD_NAME=image_ppm \
+	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_ppm.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 png.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
@@ -149,14 +181,20 @@ tga.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 
-plugins: png.so tga.so
+# dds.so jpeg.so 
+plugins: pcx.so ppm.so png.so tga.so
+
+clean-plugins:
+	@-echo -n "Cleaning plugins                             "
+	@-rm -f $(PLUGIN_BUILD_DIR)/*.o $(PLUGIN_BUILD_DIR)/*.so
+	@-echo "[done]"
 
 install-plugins:
 	@-echo -n "Installing plugins                           "
 	@-mkdir -p $(PLUGIN_INSTALL_DIR)/image
 	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model
 	@-cp $(PLUGIN_BUILD_DIR)/image*.so $(PLUGIN_INSTALL_DIR)/image/
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 #	@-cp $(PLUGIN_BUILD_DIR)/model*.so $(PLUGIN_INSTALL_DIR)/model/
 
@@ -187,12 +225,12 @@ $(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 
 #################################################################
 
-clean: clean-emacs clean-build clean-test clean-obj
+clean: clean-emacs clean-build clean-test clean-obj clean-plugins
 
 clean-test:
 	@-echo -n "Cleaning test builds                         "
 	@-rm -f $(BUILD_TEST_DIR)/*.test
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 clean-obj:
 	@-echo -n "Cleaning objects                             "
@@ -200,12 +238,12 @@ clean-obj:
 	@-rm -f $(BUILD_DEBUG_DIR)/*.o
 	@-rm -f $(BUILD_RELEASE_DIR)/*.o
 	@-rm -f $(BUILD_TEST_DIR)/*.o
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 clean-emacs:
 	@-echo -n "Cleaning emacs files                         "
 	@-rm -f `find . -name "*~" -print`
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 clean-build:
 	@-echo -n "Cleaning builds                              "
@@ -216,7 +254,7 @@ clean-build:
 	@-rm -f $(BUILD_DEBUG_DIR)/*.so
 	@-rm -f $(BUILD_RELEASE_DIR)/*.so
 	@-rm -f $(BUILD_DEBUG_DIR)/*.test
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 
 ################################################################
@@ -225,7 +263,7 @@ install:
 	@-echo -n "Installing selected build                     "
 	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)
 	@-mkdir -p $(INSTALL_LIB)/$(NAME)
-	@-echo "[DONE]"
+	@-echo "[done]"
 	@-$(MAKE) install-link
 	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
@@ -235,13 +273,13 @@ install-link:
 	@-rm -f $(INSTALL_LIB)/lib$(NAME)$(EXT)
 	@-ln -s $(INSTALL_LIB)/lib$(NAME)$(SHLIBEXT) \
 	$(INSTALL_LIB)/lib$(NAME)$(EXT)
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 install-headers:
 	@-echo -n "Installing headers                           "
 	@-mkdir -p $(INSTALL_INCLUDE)/$(NAME)
 	@-cp -f src/*.h $(INSTALL_INCLUDE)/$(NAME)
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 
 ################################################################
@@ -253,7 +291,7 @@ uninstall:
 	@-rm -f $(INSTALL_BIN)/$(NAME)
 	@-rm -rf $(INSTALL_LIB)/$(NAME)
 	@-rm -rf $(INSTALL_INCLUDE)/$(NAME)
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 
 ################################################################
@@ -263,7 +301,7 @@ tarball:
 	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz $(TREE_DIR) \
 		--exclude bin --exclude CVS --exclude *~ --exclude contrib \
 		--totals
-	@-echo "[DONE]"
+	@-echo "[done]"
 
 backup:
 	@-$(MAKE) clean
