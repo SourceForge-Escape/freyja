@@ -33,8 +33,20 @@ extern "C" {
   int freyja_model__eggv7_import(char *filename);
   int freyja_model__eggv7_export(char *filename);
   int import_model(char *filename);
+  void freyja_init();
 }
 
+void freyja_init()
+{
+	freyjaPluginDescription1s("GooseEgg 7 Model (*.egg)");
+	freyjaPluginAddExtention1s("egg");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+			     FREYJA_PLUGIN_SKELETON |
+			     FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+			     FREYJA_PLUGIN_SKELETON |
+			     FREYJA_PLUGIN_VERTEX_MORPHING);
+}
 
 int import_model(char *filename)
 {

@@ -990,8 +990,17 @@ extern "C" {
 	int freyja_model__md3_import(char *filename);
 	int freyja_model__md3_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
 
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Quake3 Model (*.md3)");
+	freyjaPluginAddExtention1s("md3");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_VERTEX_MORPHING);
+}
 
 int import_model(char *filename)
 {

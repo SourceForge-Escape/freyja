@@ -119,7 +119,12 @@ GtkWidget *mgtk_get_fileselection_widget()
 
 		GtkWidget *optionmenu_menu = gtk_menu_new();
 		gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
+		//mgtk_event_subscribe_gtk_widget(0, optionmenu);
 		GTK_FILESELECTION_DROP_DOWN_MENU = optionmenu_menu;
+
+	GtkWidget *sep = gtk_menu_item_new();
+	gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), sep);
+	gtk_widget_show(sep);
 #endif
 	}
 
@@ -2037,6 +2042,26 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 
 	delete_arg(&event);
 	delete_arg(&cmd);
+
+	return ret;
+}
+
+
+// Hacky extention
+arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box)
+{
+	arg_list_t *ret = NULL;
+	
+	mgtk_print("fileselection_drop_down_menu entry");
+
+	if (!GTK_FILESELECTION_DROP_DOWN_MENU)
+	{
+		rc_assertion_error("fileselection_drop_down_menu", "container != NULL");
+		return NULL;
+	}
+
+	new_adt(&ret, ARG_GTK_MENU_WIDGET,
+			(void *)GTK_FILESELECTION_DROP_DOWN_MENU);
 
 	return ret;
 }

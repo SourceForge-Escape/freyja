@@ -662,6 +662,16 @@ extern "C" {
 	int freyja_model__ase_import(char *filename);
 	int freyja_model__ase_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
+}
+
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("ASE model (*.ase)");
+	freyjaPluginAddExtention1s("ase");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH);
 }
 
 

@@ -32,7 +32,17 @@ extern "C" {
 	int freyja_model__milkshape_import(char *filename);
 	int freyja_model__milkshape_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Milkshape Model (*.ms3d)");
+	freyjaPluginAddExtention1s("ms3d");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
+
 
 #define MAX_VERTICES    8192
 #define MAX_TRIANGLES   16384

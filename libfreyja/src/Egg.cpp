@@ -1612,7 +1612,21 @@ void Egg::delMesh(egg_mesh_t *mesh)
 
 	unsigned int index = mesh->id;
 	delete mesh; // delete mesh
-	mMeshes.remove(index);  // unlink from list
+	mMeshes.assign(index, 0x0);  // unlink from list
+	//mMeshes.remove(index);
+
+#ifdef EGG_REORDER_MESH_ON_DELETE
+	Vector<egg_mesh_t *> tmp;
+
+
+	for (i = mMeshes.begin(); i < i = mMeshes.end(); ++i)
+	{
+		if (mMeshes[i])
+			tmp.pushBack(mMeshes[i]);
+	}
+
+	mMeshes.copy(tmp);
+#endif
 }
 
 

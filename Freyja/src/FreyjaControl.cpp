@@ -737,6 +737,14 @@ bool FreyjaControl::event(int command)
 			freyja_event_file_dialog("Open map...");
 			break;
 		case MODEL_EDIT_MODE:
+			{
+				char buffer[1024];
+				snprintf(buffer, 1024, ";;\n\n  (dialog \"Freyja :: Preferences\" ePreferencesDialog 0)\n (fileselection_hack eMode eNone\n  (menu_item \"test\" eMode 70000)\n  (menu_item \"test2\" eMode 70001)\n  (menu_item \"test2\" eMode 70002))\n   \n ");
+			
+				if (!mResource->Eval(buffer))
+					printf("mlisp eval success\n");
+			}
+
 			if (!mCleared)
 			{
 				if (freyja_create_confirm_dialog("gtk-dialog-question",
@@ -2826,7 +2834,7 @@ void FreyjaControl::loadResource()
 	if (mResource->Lookup("GRID_ON", &i) && i)
 	{
 		mRender->Flags(FreyjaRender::RENDER_EDIT_GRID, 
-							!(mRender->Flags() & FreyjaRender::RENDER_EDIT_GRID));
+					   !(mRender->Flags() & FreyjaRender::RENDER_EDIT_GRID));
 	}
 
 	if (mResource->Lookup("ROTATE_AMOUNT", &f))

@@ -54,7 +54,7 @@ Skel::~Skel()
 
 int Skel::check(char *filename)
 {
-	if (!FreyjaFileReader::compareFilenameExtention(filename, "skel"))
+	if (FreyjaFileReader::compareFilenameExtention(filename, "skel") == 0)
 		return 0;
 
 	return -1;
@@ -353,6 +353,9 @@ int runSkelUnitTest(int argc, char *argv[])
 {
 	Skel test;
 
+	if (argc > 2)
+		test.load(argv[1]);
+
 	return 0;
 }
 
@@ -379,8 +382,16 @@ extern "C" {
 	int freyja_model__skel_import(char *filename);
 	int freyja_model__skel_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
 
+void freyja_init()
+{
+	freyjaPluginDescription1s("SKEL Reference (*.skel)");
+	freyjaPluginAddExtention1s("skel");
+	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_SKELETON);
+}
 
 int freyja_model__skel_check(char *filename)
 {

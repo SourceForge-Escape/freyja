@@ -2623,8 +2623,17 @@ extern "C" {
 	int freyja_model__psk_import(char *filename);
 	int freyja_model__psk_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
 }
 
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("UE2 Intermediate (*.psk)");
+	freyjaPluginAddExtention1s("psk");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
 
 
 int import_model(char *filename)

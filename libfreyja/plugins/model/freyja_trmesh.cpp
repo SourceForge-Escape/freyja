@@ -31,6 +31,16 @@ extern "C" {
   int freyja_model__trmesh_import(char *filename);
   int freyja_model__trmesh_export(char *filename);
   int import_model(char *filename);
+  void freyja_init();
+}
+
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("OpenRaider Mesh (*.tr)");
+	freyjaPluginAddExtention1s("tr");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }
 
 

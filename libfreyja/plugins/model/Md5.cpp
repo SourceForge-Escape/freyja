@@ -339,6 +339,16 @@ extern "C" {
 	int freyja_model__md5_import(char *filename);
 	int freyja_model__md5_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
+}
+
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Doom3 Mesh (*.md5)");
+	freyjaPluginAddExtention1s("md5");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }
 
 

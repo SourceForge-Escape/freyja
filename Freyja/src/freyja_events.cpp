@@ -457,7 +457,7 @@ void mgtk_handle_resource_start()
 	//freyja_event_fileselection_append_pattern("ASE (3ds max)", "ase");
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
-	atexit(freyja_event_shutdown);	
+	atexit(freyja_event_shutdown);
 }
 
 
