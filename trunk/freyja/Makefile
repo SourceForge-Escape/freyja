@@ -77,9 +77,8 @@ VERSION_DEB=$(VERSION).$(BUILD_ID)
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
 # -Weffc++
-BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated \
-		-DUSING_GTK_2_0 \
-		$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
+BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated
+
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-Wall -Isrc \
@@ -93,22 +92,11 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 
 #-framework OpenGL
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
-		-lstdc++ \
-		-lGL -lGLU -lm -lz -lhel0 -lfreyja -lmgtk
+		-lstdc++ -lGL -lGLU -lm -lz \
+		-lhel0 -lfreyja -lmgtk \
+		$(shell pkg-config --libs gtk+-2.0) -lgtkgl-2.0
 LD_FLAGS += -Wl,-z,defs
 LD_FLAGS += -Wl,-O1
-
-GTK2_CFLAGS=-DUSING_GTK_2_0 -I/usr/X11R6/include -I/usr/include/gtkgl-2.0/ \
-		$(shell pkg-config --cflags gtk+-2.0 gtkgl-2.0)
-GTK2_LDFLAGS=$(shell pkg-config --libs gtk+-2.0)
-
-
-GTK_GLAREA2_CFLAGS=-DGTK_GLAREA_GL -I/usr/local/include/gtkgl-2.0
-GTK_GLAREA2_LD_FLAGS=-lgtkgl-2.0
-
-
-GTK_GLAREA_CFLAGS=-DGTK_GLAREA_GL -I/usr/local/include/gtkgl
-GTK_GLAREA_LD_FLAGS=-lgtkgl
 
 ################################################################
 
@@ -145,29 +133,6 @@ prof:
 	$(MAKE) targets BUILD_DIR=$(BUILD_PROF_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DNDEBUG -pg" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -pg"
-
-################################################################
-# GTK+ 1.2
-
-gtk1.2: debug-gtk1.2
-
-debug-gtk1.2:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) targets BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) $(GNOME_CFLAGS) $(GTK_GLAREA_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GNOME_LDFLAGS) $(GTK_GLAREA_LD_FLAGS)"
-
-release-gtk1.2:
-	@-mkdir -p $(BUILD_RELEASE_DIR)
-	$(MAKE) targets BUILD_DIR=$(BUILD_RELEASE_DIR) \
-	CFLAGS="$(RELEASE_CFLAGS) $(GNOME_CFLAGS) $(GTK_GLAREA_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GNOME_LDFLAGS) $(GTK_GLAREA_LD_FLAGS)"
-
-prof-gtk1.2: 
-	@-mkdir -p $(BUILD_PROF_DIR)
-	$(MAKE) targets BUILD_DIR=$(BUILD_PROF_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) $(GNOME_CFLAGS) $(GTK_GLAREA_CFLAGS) -pg" \
-	LD_FLAGS="$(LD_FLAGS) $(GNOME_LDFLAGS) $(GTK_GLAREA_LD_FLAGS) -pg"
 
 ########################################################################
 
@@ -291,6 +256,14 @@ install:
 	@-echo -n "Installing                                  "
 	@-mkdir -p  $(INSTALL_BIN)
 	@-cp bin/debug/freyja $(INSTALL_BIN)
+	@-mkdir -p /usr/share/freyja/
+	@-cp data/*.mlisp /usr/share/freyja/
+	@-mkdir -p /usr/share/freyja/materials/
+	@-cp data/materials/*.mat /usr/share/freyja/materials/
+	@-mkdir -p /usr/share/freyja/icons/
+	@-cp data/icons/*.png /usr/share/freyja/icons/
+	@-mkdir -p /usr/share/freyja/palettes/
+	@-cp data/palettes/*.pal /usr/share/freyja/palettes/
 	@-echo [done]
 
 install-debug:

@@ -1,10 +1,10 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : SDL/GLUT template
+ * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : 
  * License : No use w/o permission (C) 2001 Mongoose
  * Comments: This is the common event system interface
@@ -13,7 +13,7 @@
  *           It's independent of the widget set, etc
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -214,6 +214,13 @@ void mgtk_handle_key_press(int key, int mod)
 
 void mgtk_handle_resource_init(Resource &r)
 {
+#ifdef TEST_FREYJA_EVENTS
+	FreyjaEvent *event;
+	event = new FreyjaEventNormalGeneration(&r, "eGenerateNormals");
+#else
+	r.RegisterInt("eGenerateNormals", eGenerateNormals);
+#endif
+
 	/* Mongoose 2002.01.12, 
 	 * Bind script functions to C/C++ functions */
 	r.RegisterFunction("color", freyja_rc_color);
@@ -260,7 +267,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eDebug", eDebug);
 	r.RegisterInt("eFullscreen", eFullscreen);
 
-	r.RegisterInt("eGenerateNormals", eGenerateNormals);
 	r.RegisterInt("eGenerateCube", eGenerateCube);
 	r.RegisterInt("eGenerateTube", eGenerateTube);
 	r.RegisterInt("eGenerateCircle", eGenerateCircle);
@@ -368,6 +374,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
 	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
 
+	r.RegisterInt("eViewports", eViewports);
 
 	r.RegisterInt("eMode", EVENT_MISC); // Hack to fake 2i event to eventMisc
 	r.RegisterInt("eVertexNew", CMD_POINT_ADD);
@@ -435,6 +442,9 @@ void mgtk_handle_resource_start()
 
 	mgtk_handle_resource_init(gResource);
 
+	if (!freyja_is_user_installed())
+		freyja_install_user();
+
 	gFreyjaControl = new FreyjaControl(&gResource);
 
 	/* Build the user interface from lisp, and load user preferences */
@@ -492,6 +502,221 @@ char *mgtk_rc_map(char *filename_or_dirname)
 ///////////////////////////////////////////////////////////////////////
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
+
+#include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
+
+void freyja_get_rc_path(char *s, long sz)
+{
+	char *env;
+	long len;
+
+
+	s[0] = 0;
+
+#ifdef unix
+	env = getenv("HOME");
+
+	if (!env || !env[0])
+	{
+		printf("ERROR: Bad HOME envronment\n");
+		return;
+	}
+
+	len = strlen(env) + strlen("/.freyja/");
+
+	if (sz < len)
+		return;
+
+	snprintf(s, len, "%s/.freyja/", env);
+#else
+	len = strlen("C:/freyja/");
+
+	if (sz < len)
+		return;
+	
+	snprintf(s, len, "C:/freyja/");
+#endif
+}
+
+
+void freyja_get_share_path(char *s, long sz)
+{
+	if (sz < 64)
+		return;
+
+#ifdef unix
+	snprintf(s, strlen("/usr/share/freyja/"), "/usr/share/freyja/");
+#else
+	snprintf(s, strlen("C:/freyja/"), "C:/freyja/");
+#endif
+}
+
+
+void freyja_get_rc_filename(char *s, const char *filename, long sz)
+{
+	char *env;
+	long len;
+
+
+	s[0] = 0;
+
+#ifdef unix
+	env = getenv("HOME");
+
+	if (!env || !env[0])
+	{
+		printf("ERROR: Bad HOME envronment\n");
+		return;
+	}
+
+	len = strlen(env) + strlen("/.freyja/") + strlen(filename);
+
+	if (sz < len)
+		return;
+
+	snprintf(s, len, "%s/.freyja/%s", env, filename);
+#else
+	len = strlen("C:/freyja/") + strlen(filename);
+
+	if (sz < len)
+		return;
+	
+	snprintf(s, len, "C:/freyja/%s", filename);
+#endif
+}
+
+
+void freyja_get_share_filename(char *s, const char *filename, long sz)
+{
+	long len;
+
+
+	s[0] = 0;
+
+#ifdef unix
+	len = strlen("/usr/share/freyja/") + strlen(filename);
+
+	if (sz < len)
+		return;
+
+	snprintf(s, len, "/usr/share/freyja/%s", filename);
+#else
+	len = strlen("C:/freyja/") + strlen(filename);
+
+	if (sz < len)
+		return;
+	
+	snprintf(s, len, "C:/freyja/%s", filename);
+#endif
+}
+
+
+char freyja_is_user_installed()
+{
+	FreyjaFileReader r;
+	char path[128];
+
+	freyja_get_rc_path(path, 128);
+
+	return (r.doesFileExist(path));
+}
+
+
+void freyja_install_user()
+{
+	FreyjaFileReader r;
+	FreyjaFileWriter w;
+	char rc[512];
+	char share[512];
+	char *filename;
+
+
+	/* Copy top level rc files */
+	freyja_get_rc_path(rc, 512);
+	freyja_get_share_path(share, 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	if (r.openDirectory(share))
+	{
+		while ((filename = r.getNextDirectoryListing()))
+		{
+			if (r.isDirectory(filename))
+				continue;
+
+			w.copyFileToPath(filename, rc);
+		}
+	}
+
+
+	/* Copy icon files */
+	freyja_get_rc_filename(rc, "icons/", 512);
+	freyja_get_share_filename(share, "icons/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	if (r.openDirectory(share))
+	{
+		while ((filename = r.getNextDirectoryListing()))
+		{
+			if (r.isDirectory(filename))
+				continue;
+
+			w.copyFileToPath(filename, rc);
+		}
+	}
+
+
+	/* Copy material files */
+	freyja_get_rc_filename(rc, "materials/", 512);
+	freyja_get_share_filename(share, "materials/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	if (r.openDirectory(share))
+	{
+		while ((filename = r.getNextDirectoryListing()))
+		{
+			if (r.isDirectory(filename))
+				continue;
+
+			w.copyFileToPath(filename, rc);
+		}
+	}
+
+
+	/* Copy palettes files */
+	freyja_get_rc_filename(rc, "palettes/", 512);
+	freyja_get_share_filename(share, "palettes/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	if (r.openDirectory(share))
+	{
+		while ((filename = r.getNextDirectoryListing()))
+		{
+			if (r.isDirectory(filename))
+				continue;
+
+			w.copyFileToPath(filename, rc);
+		}
+	}
+
+
+	/* Misc */
+	freyja_get_rc_filename(rc, "models/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	freyja_get_rc_filename(rc, "animations/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	freyja_get_rc_filename(rc, "textures/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+
+	//freyja_get_rc_filename(rc, "particles/", 512);
+	//FreyjaFileWriter::createDirectory(rc);
+
+	freyja_get_rc_filename(rc, "plugins/", 512);
+	FreyjaFileWriter::createDirectory(rc);
+}
+
 
 void freyja_event_file_dialog(char *s)
 {

@@ -52,14 +52,6 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mRender = new FreyjaRender();
 	mRender->Register(mModel);
 
-	if (EGG_LIB_VERSION != 0x32312E38)
-	{
-		freyja_print("FreyjaControl::FreyjaControl> Assertion failure");
-		freyja_print("*** You must upgrade libfreyja_model to v8.12");
-		printf("Please read the /tmp/Freyja.log for errors.\n");
-		exit(-1);
-	}
-
 	if (!mModel || !mRender)
 	{
 		freyja_print("FreyjaControl::FreyjaControl> Assertion failure");
@@ -70,7 +62,7 @@ FreyjaControl::FreyjaControl(Resource *r)
 		if (!mModel)
 			freyja_print("FreyjaControl::FreyjaControl> FreyjaModel = 0x0");
 
-		printf("Please read the /tmp/Freyja.log for errors.\n");
+		printf("Please read ~/.freyja/Freyja.log for errors.\n");
 		exit(-1);
 	}
 		
@@ -479,6 +471,10 @@ bool FreyjaControl::event(int command)
 {
 	unsigned int i, flags;
 
+#ifdef TEST_FREYJA_EVENTS
+	if (FreyjaEvent::listen(command))
+		return true;
+#endif
 
 	switch (command)
 	{
@@ -574,6 +570,12 @@ bool FreyjaControl::event(int command)
 	case 2014:
 		gMaterialManager->setBlendDest(GL_ONE_MINUS_CONSTANT_ALPHA);
 		break;
+
+#ifndef TEST_FREYJA_EVENTS
+	case eGenerateNormals:
+		freyjaGenerateVertexNormals();
+		break;
+#endif
 
 	case eMaterialTex:
 		flags = gMaterialManager->getFlags();
@@ -897,10 +899,17 @@ bool FreyjaControl::event(int command)
 					"ON" : "OFF");
 		break;
 
+	case eViewports:
+		mRender->Flags(FreyjaRender::fViewports, 
+					   !(mRender->Flags() & FreyjaRender::fViewports));
+		freyja_print("Viewport rendering [%s]", 
+					(mRender->Flags() & FreyjaRender::fViewports) ? 
+					"ON" : "OFF");
+		break;
 
-	case eDebugEgg:
+	case eDebugBackend:
 		mModel->setDebug(!mModel->getDebug());
-		freyja_print("Egg debug [%s]", mModel->getDebug() ? "ON" : "OFF");
+		freyja_print("Backend debug [%s]", mModel->getDebug() ? "ON" : "OFF");
 		break;
 
 
@@ -920,11 +929,6 @@ bool FreyjaControl::event(int command)
 
 	case eScreenShot:
 		mRender->ScreenShot();
-		break;
-
-
-	case eGenerateNormals:
-		freyjaGenerateVertexNormals();
 		break;
 
 

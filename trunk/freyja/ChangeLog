@@ -27,6 +27,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+
+	o FreyjaEvent system actually used in test
+	o Automatic user install from /usr/share data
+	o Freyja d-bus prototyping in python
+
+
  Freyja (0.3.5-20050103) "Chimera" Mongoose <mongoose@icculus.org>
 
 	o Auto update filedialog optionmenu added

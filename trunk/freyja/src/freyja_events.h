@@ -1,10 +1,10 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : SDL/GLUT template
+ * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : 
  * License : No use w/o permission (C) 2001 Mongoose
  * Comments: This is the common event system interface
@@ -13,7 +13,7 @@
  *           It's independent of the widget set, etc
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -26,7 +26,27 @@
 
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
+#include <freyja/FreyjaPluginABI.h>
 
+//#define TEST_FREYJA_EVENTS
+#ifdef TEST_FREYJA_EVENTS
+#include "FreyjaEvent.h"
+
+class FreyjaEventNormalGeneration : public FreyjaEvent
+{
+public:
+	FreyjaEventNormalGeneration(Resource *rcSys, const char *name) :
+		FreyjaEvent(rcSys, name)
+	{
+	}
+
+	bool action()
+	{
+		freyjaGenerateVertexNormals();
+		return true;
+	}
+};
+#endif
 
 typedef enum {
 
@@ -46,7 +66,7 @@ typedef enum {
 	eHelp,
 	eInfo,
 	eAbout,
-	eDebugEgg,
+	eDebugBackend,
 	eFullscreen,
 	eScreenShot,
 
@@ -137,6 +157,8 @@ typedef enum {
 	eTmpUVMapOn,
 	eTmpUVMapOff,
 	eTextureSlotLoad,
+
+	eViewports,
 
 	/* Widget interaction events */
 	eZoom,
@@ -351,7 +373,12 @@ void callback_update_skeleton(callback_bone_t *bone);
 //////////////////////////////////////////////////////////
 
 
-
+char freyja_is_user_installed();
+void freyja_install_user();
+void freyja_get_rc_path(char *s, long sz);
+void freyja_get_share_path(char *s, long sz);
+void freyja_get_rc_filename(char *s, const char *filename, long sz);
+void freyja_get_share_filename(char *s, const char *filename, long sz);
 
 
 void freyja_handle_color(int id, float r, float g, float b, float a);

@@ -1,7 +1,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO ( 2004.12.04 last update )
+  File     : TODO ( 2005.02.02 last update )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : Freyja 0.3.x
 
@@ -17,32 +17,31 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Use new skeletal system backend w/ matrix palette skinning
 	o Polygon winding support
 	o Make system for plugins seperate from libfreyja's
-	o New chunk file format -- fix Egg8 plugin import
 	o IK solver
 	o Smoothing groups tools
 	o Catmull-Clark for subdiv
 	o Viewportbackground 'diagram' for mesh creation
 	o Deform skelmesh in bone transform
 	o Proper vertex extrude with quad faces
-	o Tesselation tool
+	o 3d Mesh polygon/edge/etc selection and editing ( request ) 
+	o Advanced Subdivision/Tesselation tools
 	o Multi window editing using python via calls to FreyjaRender
-	o Deform vertices render option ( disables mesh editing )
+	o Deform vertices render option ( Should disable mesh editing when on )
 	o Skeletal Ref -> Skeletal Keyframe ( dup | edit ) -> Skel Keyframe |
 	  vertex morph frame 
 	o Bounding box vertex selector for bones
-	o GRN edit / export request -- fix GRN animation import
+	o GRN edit / export; fix GRN animation import ( request )
 	o Tightening up import / export -- if it's not 100% or close
 	  it's going to get disabled or feature locked till it is
 	o Propagate import / export list up to Freyja to make menus
 	o OO event system may need to come online right after release
 	o Python extention to mgtk/Freyja for interactive plugins
-	o <Mongoose> someone should write a perlin vol texture plugin for freyja
-	  hehehe
+	o Perlin volume texture plugin
 	o Animation save doesn't warn on overwrite -- do that
 	o Curved surfaces in backend, remove patch test
-	o Fix bones/skeletal system backend or even switch to umbra
 	o Face selection and grouping for operations like normal generation
 	o Relative/Ray based light movement with mouse in animator tab
 	o Full MDL(HL), GRN, PSK import/export support
@@ -57,10 +56,7 @@
 	o Instead of 'mCleared' events focus on 'mModified' events in Control
 	o Light editing mode backport
 	o Mouse interface needs to replace purely plane based editing
-	o Skeletal mesh deform edit/render/off toggles to solve interface issue?
-	o Matrix palette skinning 
-	  ( Not supported in Egg backend, but I think it can be done
-	    via my old metadata system -- yay for thinking ahead or an extension )
+
 
   Interface
 	o Make tree labels updatable w/o reloading the entire tree
