@@ -415,6 +415,9 @@
 					;	(label "Grid color" 0.0 0.5)
 					;	(colorbutton 1 eColorGrid))
 
+					(hbox 1 0 0 1 0
+						(label "Mesh Frame/Group #" 0.0 0.5) 
+						(spinbutton 0 0 100 eGroupIterator))
 
 			    	(handlebox 1 
         				(vbox 0 0 0 1 0

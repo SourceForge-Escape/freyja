@@ -29,6 +29,7 @@
 
  Freyja (0.3.5-20041223) 'Chimera' Mongoose <mongoose@icculus.org>
 
+	o UVMap editing support starts - testing with per polygon UV transforms
 	o Fixed 'hopping' bug -- caused by attrib stack use, my irc comments:
 	  <Mongoose> <opengl> if you can alter this bit in my stack before
 	             I pop the frame you are a master!

@@ -2044,6 +2044,70 @@ void FreyjaModel::TexelSelect(float s, float t)
 }
 
 
+void FreyjaModel::UVMapMotion(float s, float t)
+{
+	egg_polygon_t *poly;
+	egg_texel_t *texel = _egg->getTexel(getCurrentTexCoord());
+	egg_texel_t *tex;
+	Vector3d u, v;
+	long i, j;
+
+	u = Vector3d(s, t, 0);
+
+	if (texel)
+	{
+		v = Vector3d(texel->st[0], texel->st[1], 0);
+		u -= v;
+
+		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
+		{
+			poly = _egg->getPolygon(texel->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = _egg->getTexel(poly->texel[j]);
+
+					if (!tex) 
+						continue;
+
+					tex->st[0] += u.mVec[0];
+					tex->st[1] += u.mVec[1];
+				}
+			}
+		}
+	}
+	else
+	{
+		egg_vertex_t *vertex = _egg->getVertex(getCurrentVertex());
+		egg_vertex_t *vert;
+
+		v = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		u -= v;
+
+		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
+		{
+			poly = _egg->getPolygon(vertex->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
+				{
+					vert = _egg->getVertex(poly->vertex[j]);
+
+					if (!vert) 
+						continue;
+
+					vert->uv[0] += u.mVec[0];
+					vert->uv[1] += u.mVec[1];
+				}
+			}
+		}
+	}	
+}
+
+
 /* Mongoose 2004.04.19, 
  * This is like one of the first methods to die when v9 goes public */
 void FreyjaModel::TexelMove(float s, float t)

@@ -53,7 +53,7 @@ BUILD_INSTALL_DIR=$(BUILD_BASE_DIR)/$(BUILD_SELECT)
 ################################################################
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
-BASE_CFLAGS=$(FLAGS) -Wall -I. -I../libhel \
+BASE_CFLAGS=$(FLAGS) -Wall -I. -I../libhel/ \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\"
