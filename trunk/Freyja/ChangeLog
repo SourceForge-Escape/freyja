@@ -28,6 +28,7 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+	o FIXME: Crash on mesh delete for char models
 	o FIXME: Broke some index selectors
 
  Freyja (0.3.5-20040809) Mongoose <mongoose@icculus.org>

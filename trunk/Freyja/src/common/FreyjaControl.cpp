@@ -109,16 +109,18 @@ void setupResource(Resource &r)
 	r.RegisterInt("eCut", eNone);
 	r.RegisterInt("eCopy", eNone);
 	r.RegisterInt("ePaste", eNone);
-	r.RegisterInt("eDelete", eNone);
 	r.RegisterInt("eConfig", eNone);
 	r.RegisterInt("eSelectAll", eNone);
 	r.RegisterInt("eAppendFile", eNone);
 	r.RegisterInt("eRevertFile", eNone);
 	r.RegisterInt("eExportFile", eNone);
 	r.RegisterInt("eImportFile", eNone);
-	r.RegisterInt("eCloseFile", eNone);
 	r.RegisterInt("eRedo", eNone);
 	r.RegisterInt("eUndo", eNone);
+
+	r.RegisterInt("eCloseFile", eCloseFile);
+	r.RegisterInt("eDelete", eDelete);
+	r.RegisterInt("eSelect", eSelect);
 
 	r.RegisterInt("eScreenShot", eScreenShot);
 	r.RegisterInt("eShutdown", eShutdown);
@@ -147,6 +149,7 @@ void setupResource(Resource &r)
 	r.RegisterInt("eSetMeshTexture", eSetMeshTexture);
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 
+	r.RegisterInt("eAddObject", eAddObject);
 	r.RegisterInt("eMoveObject", eMoveObject);
 	r.RegisterInt("eRotateObject", eRotateObject);
 	r.RegisterInt("eScaleObject", eScaleObject);
@@ -156,6 +159,8 @@ void setupResource(Resource &r)
 	r.RegisterInt("eTransformMesh", eTransformMesh);
 	r.RegisterInt("eTransformPoint", eTransformPoint);
 
+
+	/* Widget events ( widgets hold data like spinbuttons, etc ) */
 	r.RegisterInt("eScale", eScale);
 	r.RegisterInt("eScale_X", eScale_X);
 	r.RegisterInt("eScale_Y", eScale_Y);
@@ -172,35 +177,30 @@ void setupResource(Resource &r)
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
 
-
+	/* TODO:
+	 * 1. Remove events below here and replace with new events
+	 * 2. Then replace all the numbered gnome_callback events
+	 * 3. Then refactor the new event groupings in plugins  */
 	r.RegisterInt("EVENT_MAIN", EVENT_MAIN);
 
 	r.RegisterInt("EVENT_POINT", EVENT_POINT);
 	r.RegisterInt("CMD_POINT_ADD", CMD_POINT_ADD);
-	r.RegisterInt("CMD_POINT_DELETE", CMD_POINT_DELETE);
 	r.RegisterInt("CMD_POINT_COMBINE", CMD_POINT_COMBINE);
 
 	r.RegisterInt("EVENT_POLYGON", EVENT_POLYGON);
 	r.RegisterInt("CMD_POLYGON_ADD", CMD_POLYGON_ADD);
-	r.RegisterInt("CMD_POLYGON_SELECT", CMD_POLYGON_SELECT);
 	r.RegisterInt("CMD_POLYGON_DELETE", CMD_POLYGON_DELETE);	
 
 	r.RegisterInt("EVENT_MESH", EVENT_MESH);
-	r.RegisterInt("CMD_MESH_ADD", CMD_MESH_ADD);
-	r.RegisterInt("CMD_MESH_DELETE", CMD_MESH_DELETE);
-	r.RegisterInt("CMD_MESH_SELECT", CMD_MESH_SELECT);
 	r.RegisterInt("CMD_MESH_MOVE_CENTER", CMD_MESH_MOVE_CENTER);
 	
 	r.RegisterInt("EVENT_BONE", EVENT_BONE);
-	r.RegisterInt("CMD_BONE_NEW", CMD_BONE_NEW);
 	r.RegisterInt("CMD_BONE_ADD_MESH", CMD_BONE_ADD_MESH);
-	r.RegisterInt("CMD_BONE_SELECT", CMD_BONE_SELECT);
 	r.RegisterInt("CMD_BONE_MOVE_PIVOT", CMD_BONE_MOVE_PIVOT);
 
 	r.RegisterInt("EVENT_MISC", EVENT_MISC);
 	r.RegisterInt("CMD_MISC_ZOOM_IN", CMD_MISC_ZOOM_IN);
 	r.RegisterInt("CMD_MISC_ZOOM_OUT", CMD_MISC_ZOOM_OUT);
-	r.RegisterInt("CMD_MISC_SELECT", CMD_MISC_SELECT);
 	r.RegisterInt("CMD_MISC_BBOX_SELECT", CMD_MISC_BBOX_SELECT);
 	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
 	r.RegisterInt("CMD_MISC_VERTEX_UV", CMD_MISC_VERTEX_UV);
@@ -224,9 +224,6 @@ void setupResource(Resource &r)
 	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
 	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
-
-
-	//printf("FreyjaResource> Done\n");
 }
 
 
@@ -266,8 +263,8 @@ FreyjaControl::FreyjaControl()
 	ReadRC();
 
 	mTransformMode = FreyjaModel::TransformMesh;
-	mLastEvent = EVENT_MESH;
-	mLastCommand = CMD_MESH_SELECT;
+	mLastEvent = EVENT_MAIN;
+	mLastCommand = eSelect;
 	setZoom(1.0f);
 	mFullScreen = false;
 	mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
@@ -351,6 +348,33 @@ void FreyjaControl::eventMain(int event)
 		break;   
 
 
+	case eCloseFile:
+		switch (_major_mode)
+		{
+		case TEXTURE_EDIT_MODE:
+			break;
+		case ANIMATION_EDIT_MODE:
+			break;
+		case MAP_EDIT_MODE:
+			break;
+		case MODEL_EDIT_MODE:
+			if (confirmDialog("gtk-dialog-question",
+							  "You must close the currently open model to create a new model.",
+							  "Would you like to close the model and lose unsaved changes?",
+							  "gtk-cancel", "_Cancel", "gtk-close", "C_lose"))
+			{
+				mModel->Clear();
+				event_print("Closing Model...");
+			}
+			break;
+		case MATERIAL_EDIT_MODE:
+			i = gMaterialManager->createNewMaterial();
+			event_print("New material [%i] created.", i);
+			break;
+		}
+		break;
+
+
 	case eNewFile:
 		switch (_major_mode)
 		{
@@ -377,7 +401,7 @@ void FreyjaControl::eventMain(int event)
 				//}
 
 				mModel->Clear();
-				event_print("Erasing Model...");
+				event_print("Closing Model...");
 			}
 			break;
 		case MATERIAL_EDIT_MODE:
@@ -572,6 +596,15 @@ void FreyjaControl::eventMain(int event)
 		mTransformMode = FreyjaModel::TransformMesh;
 		break;
 
+
+	case eDelete:
+		deleteSelectedObject();
+		break;
+
+	case eAddObject:
+		addObject();
+		break;
+
 	case eMoveObject:
 		_minor_mode = modeMove;
 		event_print("Move object...");
@@ -585,6 +618,11 @@ void FreyjaControl::eventMain(int event)
 	case eRotateObject:
 		_minor_mode = modeRotate;
 		event_print("Rotate object...");
+		break;
+
+	case eSelect:
+		_minor_mode = modeSelect;
+		event_print("Select object...");
 		break;
 
 
@@ -624,7 +662,6 @@ void FreyjaControl::eventMain(int event)
 		freyja_event_set_float(eScale_Z, 1.0f);
 		break;
 
-
 	default:
 		event_print("!Unhandled Event(%d)", event);
 	}	
@@ -637,10 +674,6 @@ void FreyjaControl::eventBone(int command)
 	
 	switch (command)
 	{
-	case CMD_BONE_SELECT:
-		event_print("Select bone by pivot");
-		_minor_mode = BONE_SELECT_MODE;
-		break;
 	case CMD_BONE_CONNECT:
 		event_print("Select bone to connect to current");
 		_minor_mode = BONE_CONNECT_MODE;
@@ -656,10 +689,6 @@ void FreyjaControl::eventBone(int command)
 		if (mModel->getCurrentBone())
 			mModel->setCurrentBone(mModel->getCurrentBone() - 1);
 		break;
-	case CMD_BONE_NEW:
-		mModel->TagNew(0.0, 0.0, 0.0, 0x0);
-		event_print("New Bone Tag");
-		break;
 	case CMD_BONE_ADD_MESH:
 		mModel->TagAddMesh(mModel->getCurrentBone(), mModel->getCurrentMesh());
 		event_print("New Bone[%i] now contains mesh %i",
@@ -669,9 +698,6 @@ void FreyjaControl::eventBone(int command)
 		mModel->TagDelMesh(mModel->getCurrentBone(), mModel->getCurrentMesh());
 		event_print("New Bone[%i] no longer contains mesh %i",
 						mModel->getCurrentBone(), mModel->getCurrentMesh());
-		break;
-	case CMD_BONE_DELETE:
-		event_print("NOT IMPLEMENTED: Deleting Bone Tag %d", mModel->getCurrentBone());
 		break;
 	default:
 		event_print("!Unhandled boneEvent(%d)", command);
@@ -685,10 +711,6 @@ void FreyjaControl::eventMesh(int command)
 
 	switch (command)
 	{
-	case CMD_MESH_SELECT:
-		_minor_mode = MESH_SELECT_MODE;
-		event_print("Select mesh by center point");
-		break;
 	case CMD_MESH_MOVE_CENTER:
 		_minor_mode = MESH_MOVE_CENTER;
 		event_print("Reposition mesh center point");
@@ -699,12 +721,6 @@ void FreyjaControl::eventMesh(int command)
 	case CMD_MESH_PREV:
 		if (mModel->getCurrentMesh())
 			mModel->setCurrentMesh(mModel->getCurrentMesh() - 1);
-		break;
-	case CMD_MESH_ADD:
-		mModel->MeshNew();
-		break;
-	case CMD_MESH_DELETE:
-		mModel->MeshDel();
 		break;
 	default:
 		event_print("Unhandled meshEvent(%d)", command);
@@ -745,21 +761,28 @@ void FreyjaControl::eventMisc(int command)
 	switch (command)
 	{
 	case 500:
-		if (1)//!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_MESH)))
+		i = (int)freyja_event_get_float(command);
+
+		if (!freyja_event_set_range(command, i, 0, eggGetNum(FREYJA_MESH)))
 		{
-			i = (int)freyja_event_get_float(command);
 			mModel->setCurrentMesh(i);			
 			event_refresh();
 		}
 		break;
+
+
 	case 501:
-		if (1)//!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_GROUP)))
+		i = (int)freyja_event_get_float(command);
+
+		if (!freyja_event_set_range(command, i, 0, eggGetNum(FREYJA_GROUP)))
 		{
 			i = (int)freyja_event_get_float(command);
 			mModel->setCurrentGroup(i);
 			event_refresh();
 		}
 		break;
+
+
 	case 503:
 		i = (int)freyja_event_get_float(command);
 
@@ -873,23 +896,6 @@ void FreyjaControl::eventMisc(int command)
 		break;
 	case CMD_MISC_RENDER_ROT_X_P:
 		mRender->Rotate(X_F, mRender->RotateAmount());
-		break;
-	case CMD_MISC_SELECT:
-
- 		switch (_major_mode)
- 		{
- 		case ANIMATION_EDIT_MODE:
- 			event_print("Select tag by center point");
- 			_minor_mode = BONE_SELECT_MODE;
- 			break;
- 		case MODEL_EDIT_MODE:
- 			event_print("Select mesh by center point");
- 			_minor_mode = MESH_SELECT_MODE;
- 			break;
-		default:
-			event_print("WARNING: Selection undefined for this mode");
- 		}
-
 		break;
 	case CMD_MISC_BBOX_SELECT:
 		if (_minor_mode == VERTEX_BBOX_SELECT_MODE)
@@ -1481,13 +1487,13 @@ bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 		break;
 	case MODEL_EDIT_MODE:
 		// Mongoose 2002.01.12, Allow temp mode override
-		if (mod & KEY_RCTRL)
+		if (mod & KEY_LCTRL)
 		{
-			handleEvent(EVENT_MISC, CMD_MISC_SELECT);
+			handleEvent(EVENT_MAIN, eSelect);
 		}
-		else if (mod & KEY_RSHIFT)
+		else if (mod & KEY_LSHIFT)
 		{
-			handleEvent(EVENT_MISC, CMD_MISC_SELECT);
+			handleEvent(EVENT_MAIN, eRotate);
 		}
 
 		MouseEdit(btn, state, mod, x, y, mModel->CurrentPlane());
@@ -1506,6 +1512,63 @@ bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 //////////////////////////////////////////////////////////////
 // Private methods
 //////////////////////////////////////////////////////////////
+
+// FIXME: (int x, int y, Egg::egg_plane plane) for vertex / texel / polygon
+void FreyjaControl::deleteSelectedObject()
+{
+	switch (mTransformMode)
+	{
+	case FreyjaModel::TransformBone:
+		event_print("NOT IMPLEMENTED: Deleting Bone Tag %d", 
+					mModel->getCurrentBone());
+		break;
+
+	case FreyjaModel::TransformMesh:
+		mModel->MeshDel();
+		break;
+	}
+}
+
+
+// FIXME: (int x, int y, Egg::egg_plane plane) for vertex / texel / polygon
+void FreyjaControl::addObject()
+{
+	switch (mTransformMode)
+	{
+	case FreyjaModel::TransformBone:
+		mModel->TagNew(0.0, 0.0, 0.0, 0x0);
+		event_print("New Bone Tag");
+		break;
+	case FreyjaModel::TransformMesh:
+		mModel->MeshNew();
+		break;
+	}
+}
+
+
+void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
+{
+	float xx = x, yy = y;
+
+
+	/* Mongoose: Convert screen to world coordinate system */
+	ScreenToWorld(&xx, &yy);
+
+	switch (mTransformMode)
+	{
+	case FreyjaModel::TransformPoint:
+		mModel->VertexSelect(xx, yy);
+		break;
+	case FreyjaModel::TransformMesh:
+		mModel->MeshSelect(xx, yy);
+		break;
+	case FreyjaModel::TransformBone:
+		mModel->TagSelect(xx, yy);
+	default:
+		event_print("WARNING: Selection undefined for this mode");
+	}
+}
+
 
 void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 {
@@ -1804,37 +1867,54 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 
 
 void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y, 
-										Egg::egg_plane plane) 
+							  Egg::egg_plane plane) 
 { 
 	float xx = x, yy = y;
 	unsigned int master_tag;
-	
+	static float xxx, yyy;
 	
 	ScreenToWorld(&xx, &yy);
 	
 	if (!(btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED))
-	{
+	{	
+		switch(_minor_mode)
+		{
+		case modeMove:
+			event_print("moved: %f, %f", xx-xxx, yy-yyy);
+			break;
+		default:
+			;
+		}
+
 		return;
 	}
 
 	switch(_minor_mode)
 	{
+	case modeMove:
+		//	if (_mouse_state == 0)
+		//{
+		xxx = xx;  yyy = yy;
+		event_print("store state: %f, %f", xxx, yyy);
+		mModel->VertexSelect(xx, yy);
+		_mouse_state = 1;
+		//}
+		//else
+		//{
+		//	_mouse_state = 0;
+		//}
+		break;
+
+	case modeSelect:
+		selectObject(x, y, plane);
+		break;
+
+
 	case VERTEX_COMBINE:
 		if (_mouse_state == 0)
 		{
 			mModel->VertexCombine(xx, yy);
 			 _mouse_state = 1;
-		}
-		else
-		{
-			_mouse_state = 0;
-		}
-		break;
-	case modeMove:
-		if (_mouse_state == 0)
-		{
-			mModel->VertexSelect(xx, yy);
-			_mouse_state = 1;
 		}
 		else
 		{
@@ -1850,15 +1930,9 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		else
 			_mouse_state = 0;
       break;
-	case MESH_SELECT_MODE:
-		mModel->MeshSelect(xx, yy);
-		break;
 	case POINT_DEL_MODE:
 		mModel->VertexSelect(xx, yy);
 		mModel->VertexDelete();
-		break;
-	case BONE_SELECT_MODE:
-		mModel->TagSelect(xx, yy);
 		break;
 	case BONE_CONNECT_MODE:
 		master_tag = mModel->getCurrentBone();
@@ -1890,14 +1964,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	case POLYGON_SELECT_MODE:
 		mModel->PolygonSelectVertex(xx, yy);
 		break;
-	case MESH_WHOLE_COPY_MODE:
-		break;
-	case MESH_PASTE_MODE:
-		event_print("Mesh paste not impelmented\n");
-		break;
-	case MESH_COPY_MODE:
-	case MESH_CUT_MODE:
-		mModel->VertexBuffer(xx, yy);
 	default:
 		;
 	}

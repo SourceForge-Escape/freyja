@@ -22,6 +22,9 @@
  Milestones ( Public snapshot releases )
 
  [0.3.6] ( Projected release date: 2004.08.31 )
+  * Regroup by skin and vv
+  * EggPlugin for file access
+  * TransformMode -> Object Types
   * Generic new/select/delete & copy/cut/paste
   * Group rotate should pivot on center
   * C-mouse1 to select object

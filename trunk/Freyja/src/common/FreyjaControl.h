@@ -65,7 +65,8 @@ typedef enum freyja_control_mode             /* Minor control modes */
 	/* Generic transforms */
 	modeMove,
 	modeRotate,
-	modeScale
+	modeScale,
+	modeSelect
 
 } freyja_control_mode_t;
 
@@ -220,6 +221,10 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	void addObject();
+	void deleteSelectedObject();
+	void selectObject(int x, int y, Egg::egg_plane plane);
 
 	void moveObject(int x, int y, Egg::egg_plane plane);
 	void rotateObject(int x, int y, Egg::egg_plane plane);

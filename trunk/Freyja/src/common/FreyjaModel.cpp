@@ -50,6 +50,7 @@ FreyjaModel::FreyjaModel()
 	_plugin->addModule("nod");
 	_plugin->addModule("mdx");
 	_plugin->addModule("grn");
+	_plugin->addModule("md5");
 
 	delete [] pluginDir;
 
