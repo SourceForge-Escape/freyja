@@ -165,8 +165,6 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	/* Mouse */
 	gtk_signal_connect(GTK_OBJECT(glarea), "motion_notify_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_mouse_motion), NULL);
-
-	/* Keyboard */
 	gtk_signal_connect(GTK_OBJECT(glarea), "button_press_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_button_press), NULL);
 	gtk_signal_connect(GTK_OBJECT(glarea), "button_release_event",
@@ -245,6 +243,7 @@ GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size)
 
 	/* If there is a leading "gtk" assume it's stock, since there is no path */
 	if (!strncmp("gtk", icon_filename, 3))
+		//		!strncmp("gnome-", icon_filename, 6))
 	{
 		icon = gtk_image_new_from_stock(icon_filename, icon_size);
 	}

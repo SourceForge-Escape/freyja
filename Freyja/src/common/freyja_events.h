@@ -29,7 +29,15 @@
 
 typedef enum {
 
+	eScale = 1000,
+	eScale_X = 1001,
+	eScale_Y = 1002,
+	eScale_Z = 1003,
+
 	eZOOM = 1004,
+
+
+
 	eNONE = 9999
 
 } event_subject_id;
@@ -166,8 +174,8 @@ typedef enum
 	MOUSE_BTN_RIGHT    =   1,
 	MOUSE_BTN_LEFT     =   2,
 	MOUSE_BTN_MIDDLE   =   4,
-	MOUSE_BTN_4        =   8,
-	MOUSE_BTN_5        =  16
+	MOUSE_BTN_UP       =   8,
+	MOUSE_BTN_DOWN     =  16
 
 } mouse_key_t;
 
@@ -209,6 +217,7 @@ enum freyja_event_main_cmd
 	EVENT_NEW_FILE,
 	EVENT_OPEN_FILE,
 	EVENT_SAVE_FILE,
+	EVENT_HELP,
 	CMD_MAIN_DEBUG_EGG,
 	CMD_TOGGLE_FULLSCREEN
 };

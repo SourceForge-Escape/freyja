@@ -226,14 +226,22 @@ FreyjaResource::FreyjaResource()
 	//printf("FreyjaResource> Bind Resource and C++ symbols\n");
 	// Mongoose 2002.01.21, Bind some script vars to matching name in C/C++
 
+	RegisterCPPInt("eScale", eScale);
+	RegisterCPPInt("eScale_X", eScale_X);
+	RegisterCPPInt("eScale_Y", eScale_Y);
+	RegisterCPPInt("eScale_Z", eScale_Z);
+
 	RegisterCPPInt("eZOOM", eZOOM);
 	RegisterCPPInt("eNONE", eNONE);
 
-
-	RegisterCPPInt("EVENT_MAIN", EVENT_MAIN);
 	RegisterCPPInt("EVENT_NEW_FILE",      EVENT_NEW_FILE);
 	RegisterCPPInt("EVENT_OPEN_FILE",     EVENT_OPEN_FILE);
 	RegisterCPPInt("EVENT_SAVE_FILE",     EVENT_SAVE_FILE);
+	RegisterCPPInt("EVENT_HELP",          EVENT_HELP);
+
+
+
+	RegisterCPPInt("EVENT_MAIN", EVENT_MAIN);
 	RegisterCPPInt("CMD_MAIN_SHUTDOWN",      CMD_MAIN_SHUTDOWN);
 	RegisterCPPInt("CMD_TOGGLE_FULLSCREEN",  CMD_TOGGLE_FULLSCREEN);
 

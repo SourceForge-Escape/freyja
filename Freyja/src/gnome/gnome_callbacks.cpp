@@ -263,12 +263,12 @@ void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 
 	if (state & GDK_BUTTON4_MASK)
 	{
-		button |= MOUSE_BTN_4;
+		button |= MOUSE_BTN_UP;
 	}
 
 	if (state & GDK_BUTTON5_MASK)
 	{
-		button |= MOUSE_BTN_5;
+		button |= MOUSE_BTN_DOWN;
 	}
 
 #ifdef DEBUG_GTK_MOUSE
