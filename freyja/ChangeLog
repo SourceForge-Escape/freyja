@@ -30,6 +30,7 @@
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
 	o Please report any issues including performance affected by this release
+	o Fix for rendering bug on mesh delete using translator
 	o Moving more and more stuff behind libfreyja facade so I can do a rewrite
 	o Some FreyjaModel API clean up, and code style/comment updates
 	o New 'selected' box rendering ( cuter )
