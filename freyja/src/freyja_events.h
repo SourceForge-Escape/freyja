@@ -324,6 +324,7 @@ void freyja_event_unfullscreen();
 
 void freyja_event_file_dialog_notify(char *filename);
 
+long freyja_get_new_plugin_eventid();
 void freyja_append_eventid(char *symbol, int eventid);
 int freyja_append_item_to_menu(int event, const char *label, int item_event);
 int freyja_remove_all_items_to_menu(int event);

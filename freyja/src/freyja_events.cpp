@@ -524,6 +524,13 @@ char *mgtk_rc_map(char *filename_or_dirname)
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 
+long PLUGIN_EVENT_COUNTER = ePluginEventBase;
+
+long freyja_get_new_plugin_eventid()
+{
+	return PLUGIN_EVENT_COUNTER++;
+}
+
 
 void freyja_append_eventid(char *symbol, int eventid)
 {
