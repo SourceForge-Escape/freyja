@@ -855,6 +855,7 @@ long EggPlugin::importModel(const char *filename)
 
 				if (done)
 				{
+					loaded = true;
 					freyjaPrintMessage("Module '%s' success.", module_filename);
 				}
 

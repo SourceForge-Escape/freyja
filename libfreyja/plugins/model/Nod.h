@@ -198,6 +198,8 @@ class Nod
 
 	bool load(const char *filename);
 
+	bool save(const char *filename);
+
 	nod_header1_t header1;
 	nod_material_t *materials;
 	nod_header2_t header2;
