@@ -71,6 +71,17 @@ FreyjaModel::~FreyjaModel()
 }
 
 
+vec3_t *FreyjaModel::getVertexXYZ(long index)
+{
+	egg_vertex_t *vertex = _egg->getVertex(index);
+			 
+	if (vertex)
+		return &(vertex->pos);
+
+	return 0x0;
+}
+
+
 unsigned int FreyjaModel::getModelCount()
 {
 	return 1;  // Egg backend use only allows 1 model, but soon we can replace Egg   =)

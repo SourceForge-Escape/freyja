@@ -48,6 +48,24 @@
 
 #include "FreyjaRender.h"
 
+#define GL_LIST_AXIS     1
+#define AXIS_ICON_MIN  4.0
+#define AXIS_ICON_MID 20.0
+#define AXIS_ICON_MAX 15.0
+
+
+const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
+const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
+const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
+const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
+const float ORANGE[]       = {  1.0,  0.0,  7.0, 1.0 };
+const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
+const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
+const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
+const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
+const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
+
+
 vec4_t FreyjaRender::mColorBackground;
 vec4_t FreyjaRender::mColorText;
 vec4_t FreyjaRender::mColorWireframe;
@@ -65,28 +83,12 @@ unsigned int FreyjaRender::mBoneRenderType = 1;
 unsigned char FreyjaRender::mJointRenderType = 1;
 int FreyjaRender::mPatchDisplayList = -1;
 
+vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
+vec_t FreyjaRender::mBonePointSize = 5.0;
+vec_t FreyjaRender::mDefaultPointSize = 3.5;
+vec_t FreyjaRender::mDefaultLineWidth = 1.0;
+vec_t FreyjaRender::mVertexPointSize = 3.5;
 
-#define SCALE_ENV   20.0
-#define FAR       6000.0
-#define NEAR         0.1
-#define FOV_Y       40.0
-
-#define GL_LIST_AXIS 1
-
-#define AXIS_ICON_MIN 4.0
-#define AXIS_ICON_MID 20.0
-#define AXIS_ICON_MAX 15.0
-
-const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
-const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
-const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
-const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
-const float ORANGE[]       = {  1.0,  0.0,  7.0, 1.0 };
-const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
-const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
-const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
-const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
-const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
 
 
 void drawPatch(BezierPatch &patch)
@@ -539,119 +541,53 @@ void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 }
 
 
-#ifdef FIXME_REMOVE_EGG_USE_IN_RENDERER
 void renderSkeleton(RenderSkeleton &skeleton, 
 					unsigned int currentBone,
 					vec_t scale)
 {
 	const unsigned char x = 0, y = 1, z = 2;
 	const unsigned char xr = 0, yr = 1, zr = 2;
-	RenderBone &bone;
+	RenderBone bone, child;
 	Vector3d pos;
-	unsigned int i, index;
+	unsigned int i, n, index;
 
 
-	if (skeleton.boneCount == 0)
+	if (!skeleton.getBoneCount())
 		return;
 
-	// ...
+	if (!skeleton.getBone(currentBone, bone))
+		return;
 
 	/* Scale bones to match mesh scaling */
 	pos = bone.translate * scale;
 
-	/* Render bone and joint */
-	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(RED) : glColor3fv(GREEN);
-	mglDrawJoint(FreyjaRender::mJointRenderType, pos);
+	/* Render bone joint */
+	((FreyjaRender::mSelectedBone == currentBone) ? 
+	 glColor3fv(RED) : glColor3fv(GREEN));
+	mglDrawJoint(FreyjaRender::mJointRenderType, pos.mVec);
 
-	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(CYAN) : glColor3fv(WHITE);
-	mglDrawBone(FreyjaRender::mBoneRenderType, pos);
+	/* Render bone */
+	((FreyjaRender::mSelectedBone == currentBone) ? 
+	 glColor3fv(CYAN) : glColor3fv(WHITE));
+	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
 
-	/* Transform children bones */
+	/* Transform child bones */
 	glPushMatrix();
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
-	glRotatef(tag->rot[zr], 0, 0, 1);
-	glRotatef(tag->rot[yr], 0, 1, 0);
-	glRotatef(tag->rot[xr], 1, 0, 0);
+	glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
+	glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
+	glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
 
-	if (tag->slave.empty())
+	n = bone.getChildrenCount();
+
+	for (i = 0; i < n; ++i)
 	{
-		glPopMatrix();
-		return;
-	}
-
-	for (i = tag->slave.begin(); i < tag->slave.end(); ++i)
-	{
-		index = tag->slave[i];
-		tag2 = (*taglist)[index];
-		
-		if (!tag2)
-			continue;
-
-		drawSkeleton2(taglist, index, scale);
+		index = bone.getBoneIndex(i);
+		renderSkeleton(skeleton, index, scale);
 	}
 
 	glPopMatrix();
 }
-#else
-#   warning FIXME Uses Egg to render skeleton
-void drawSkeleton2(Vector<egg_tag_t *> *taglist, 
-				   unsigned int currentBone,
-				   vec_t scale)
-{
-	const unsigned char x = 0, y = 1, z = 2;
-	const unsigned char xr = 0, yr = 1, zr = 2;
-	egg_tag_t *tag, *tag2;
-	vec3_t pos;
-	unsigned int i, index;
-
-
-	if (taglist->empty())
-		return;
-
-	tag = (*taglist)[currentBone];
-	
-	if (!tag)
-		return;
-	
-	/* Scale bones to match mesh scaling */
-	pos[0] = tag->center[0] * scale; 
-	pos[1] = tag->center[1] * scale;
-	pos[2] = tag->center[2] * scale;
-
-	/* Render bone and joint */
-	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(RED) : glColor3fv(GREEN);
-	mglDrawJoint(FreyjaRender::mJointRenderType, pos);
-
-	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(CYAN) : glColor3fv(WHITE);
-	mglDrawBone(FreyjaRender::mBoneRenderType, pos);
-
-	/* Transform children bones */
-	glPushMatrix();
-	glTranslatef(pos[x], pos[y], pos[z]);
-	glRotatef(tag->rot[zr], 0, 0, 1);
-	glRotatef(tag->rot[yr], 0, 1, 0);
-	glRotatef(tag->rot[xr], 1, 0, 0);
-
-	if (tag->slave.empty())
-	{
-		glPopMatrix();
-		return;
-	}
-
-	for (i = tag->slave.begin(); i < tag->slave.end(); ++i)
-	{
-		index = tag->slave[i];
-		tag2 = (*taglist)[index];
-		
-		if (!tag2)
-			continue;
-
-		drawSkeleton2(taglist, index, scale);
-	}
-
-	glPopMatrix();
-}
-#endif
 
 
 void getOpenGLViewport(int *viewportXYWH) // int[4]
@@ -679,17 +615,12 @@ FreyjaRender::FreyjaRender()
 	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer;
 	mWidth = 640;
 	mHeight = 480;
-	_view_mode = VIEWMODE_MODEL_VIEW;
-	_init = false;
-	_bone_line_width = 3.0;
-	_bone_point_size = 5.0;
-	_default_point_size = 3.5;
-	_default_line_width = 1.0;
-	_vertex_point_size = 3.5;
-	_angles[0] = 18.0f;
-	_angles[1] = 42.0f;
-	_angles[2] = 0.0f;
-	_texture = 0;
+	mViewMode = VIEWMODE_MODEL_VIEW;
+	mInitContext = false;
+	mAngles[0] = 18.0f;
+	mAngles[1] = 42.0f;
+	mAngles[2] = 0.0f;
+	mTextureId = 0;
 
 	for (long i = 0; i < 3; ++i)
 	{
@@ -697,6 +628,11 @@ FreyjaRender::FreyjaRender()
 		mColorAxisY[i] = GREEN[i] * 0.75f;
 		mColorAxisZ[i] = BLUE[i] * 0.75f;
 	}
+
+	mScaleEnv = 20.0;
+	mFar = 6000.0;
+	mNear = 0.1;
+	mFovY = 40.0;
 }
 
 
@@ -717,9 +653,9 @@ unsigned int FreyjaRender::getFlags()
 
 void FreyjaRender::getRotation(vec3_t v)
 {
-	v[0] = _angles[0];
-	v[1] = _angles[1];
-	v[2] = _angles[2];
+	v[0] = mAngles[0];
+	v[1] = mAngles[1];
+	v[2] = mAngles[2];
 }
 
 
@@ -752,15 +688,15 @@ float FreyjaRender::getZoom()
  * Replace with quarternion/matrix and change API  */
 void FreyjaRender::Rotate(float n, int axis)
 {
-	_angles[axis] += n;
+	mAngles[axis] += n;
 
-	if (_angles[axis] >= 360.0)
+	if (mAngles[axis] >= 360.0)
 	{
-		_angles[axis] = 0.0;
+		mAngles[axis] = 0.0;
 	}
-	else if (_angles[axis] < 0.0)
+	else if (mAngles[axis] < 0.0)
 	{
-		_angles[axis] = 360.0;
+		mAngles[axis] = 360.0;
 	}
 }
 
@@ -783,11 +719,11 @@ void FreyjaRender::drawFreeWindow()
 	unsigned int i;
 
 
-	glRotatef(_angles[0], 1.0, 0.0, 0.0);
-	glRotatef(_angles[1], 0.0, 1.0, 0.0);
-	glRotatef(_angles[2], 0.0, 0.0, 1.0);
+	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glTranslatef(_scroll[0], _scroll[1], _scroll[2]);
+	glTranslatef(mScroll[0], mScroll[1], mScroll[2]);
 
 	glPushMatrix();
 
@@ -848,7 +784,7 @@ void FreyjaRender::BindTexture(unsigned int texture)
 	static int hack = 0;
 
 
-	if (mRenderMode & RENDER_TEXTURE && texture != _texture)
+	if (mRenderMode & RENDER_TEXTURE && texture != mTextureId)
 	{
 		if ((int)texture == COLORED_POLYGON)
 		{
@@ -863,7 +799,7 @@ void FreyjaRender::BindTexture(unsigned int texture)
 				glEnable(GL_TEXTURE_2D);
 			}
 
-			_texture = texture;  // First texture is white for colored_poly
+			mTextureId = texture;  // First texture is white for colored_poly
 			glBindTexture(GL_TEXTURE_2D, texture+1);
 		}
 	}
@@ -1044,19 +980,19 @@ void FreyjaRender::initContext(unsigned int width, unsigned int height, bool fas
 
 	mWidth = width;
 	mHeight = height;
-	_init = true;
+	mInitContext = true;
 }
 
 
 void FreyjaRender::display() 
 { 
-	if (!_init)
+	if (!mInitContext)
 	{ 
 		return;
 	}
 	
 	// Mongoose 2002.02.02, Cache for use in calls from here
-	mModel->getSceneTranslation(_scroll);
+	mModel->getSceneTranslation(mScroll);
 	
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
 				 1.0);
@@ -1077,7 +1013,7 @@ void FreyjaRender::display()
 	glDisable(GL_LIGHTING);
 	glLoadIdentity();
 	
-	switch (_view_mode)
+	switch (mViewMode)
 	{
 	case VIEWMODE_MODEL_VIEW:
 		glPushMatrix();
@@ -1188,16 +1124,13 @@ void FreyjaRender::resizeContext(unsigned int width, unsigned int height)
 
 	if (mRenderMode & RENDER_CAMERA)
 	{
-		gluPerspective(FOV_Y, 
-					   ((GLdouble)width) / ((GLdouble)height), 
-					   NEAR*100, 
-					   FAR*100);
+		gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
 	}
 	else 
 	{
-		glOrtho(-SCALE_ENV * (GLfloat)width / (GLfloat)height, 
-				SCALE_ENV * (GLfloat)width / (GLfloat)height, 
-				-SCALE_ENV, SCALE_ENV, 
+		glOrtho(-mScaleEnv * mAspectRatio,
+				mScaleEnv * mAspectRatio, 
+				-mScaleEnv, mScaleEnv, 
 				-400.0, 
 				400.0);
 	}
@@ -1225,7 +1158,7 @@ void FreyjaRender::setSceneData(FreyjaModel *model)
 
 void FreyjaRender::setViewMode(int mode)
 {
-	_view_mode = mode;
+	mViewMode = mode;
 }
 
 
@@ -1301,7 +1234,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		}
 
 		glEnd();
-		glPointSize(_default_point_size);
+		glPointSize(mDefaultPointSize);
 	}
 
 	if (mesh.getPolygonCount())
@@ -1321,7 +1254,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			mRenderMode |= fHightlightPolygonWireframe;
 		}
 
-		_default_line_width *= 2;
+		mDefaultLineWidth *= 2;
 
 		for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
 		{
@@ -1334,7 +1267,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			mRenderMode ^= fHightlightPolygonWireframe;
 		}
 
-		_default_line_width /= 2;
+		mDefaultLineWidth /= 2;
 		
 		if (mRenderMode & RENDER_TEXTURE)
 		{
@@ -1382,7 +1315,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 
 		if (list && !list->empty())
 		{
-			glPointSize(_default_point_size);
+			glPointSize(mDefaultPointSize);
 			glColor3fv(mColorVertexHighlight);
 			glBegin(GL_POINTS);
 
@@ -1413,7 +1346,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 		/* Render selected vertices */
 		if (list && !list->empty())
 		{
-			glPointSize(_default_point_size);
+			glPointSize(mDefaultPointSize);
 			glColor3fv(GREEN);
 			glBegin(GL_POINTS);
 		 
@@ -1451,7 +1384,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 		}
 
 		FreyjaRender::mSelectedBone = mModel->getCurrentBone();
-		drawSkeleton2(model.getSkeleton(), 0, mZoom);
+		renderSkeleton(model.getSkeleton(), 0, mZoom);
 	}
 
 	glPopMatrix();
@@ -1478,7 +1411,7 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 			glColor3fv(mColorWireframe);
 		}
 
-		glLineWidth(_default_line_width);
+		glLineWidth(mDefaultLineWidth);
 
 
 		glPushAttrib(GL_ENABLE_BIT);
@@ -1619,8 +1552,8 @@ void FreyjaRender::renderUVWindow(unsigned int width, unsigned int height)
 
 	gl_resize_2d(width, height);
 	glDisable(GL_TEXTURE_2D);
-	glLineWidth(_default_line_width);
-	glPointSize(_default_point_size);
+	glLineWidth(mDefaultLineWidth);
+	glPointSize(mDefaultPointSize);
 
 	if (!mModel->getRenderMesh(mModel->getCurrentMesh(), mesh))
 	{
@@ -1744,8 +1677,8 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
    switch (plane)
    {
    case PLANE_XY:
-		x = (int)_scroll[0];
-		y = (int)_scroll[1];
+		x = (int)mScroll[0];
+		y = (int)mScroll[1];
 
 		glBegin(GL_LINES); 
 		glColor3fv(FreyjaRender::mColorAxisX);
@@ -1760,8 +1693,8 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 
    case PLANE_XZ:
-		x = (int)_scroll[0];
-		y = (int)_scroll[2];
+		x = (int)mScroll[0];
+		y = (int)mScroll[2];
 
 		glBegin(GL_LINES); 
 		glColor3fv(FreyjaRender::mColorAxisX);
@@ -1776,8 +1709,8 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 
    case PLANE_ZY:
-	   x = (int)_scroll[2];
-	   y = (int)_scroll[1];
+	   x = (int)mScroll[2];
+	   y = (int)mScroll[1];
 
 		glBegin(GL_LINES); 
 		glColor3fv(FreyjaRender::mColorAxisZ);
@@ -1870,14 +1803,14 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	switch (plane)
 	{
 	case PLANE_XY: // front
-		glTranslatef(_scroll[0], _scroll[1], 0.0);
+		glTranslatef(mScroll[0], mScroll[1], 0.0);
 		break;
 	case PLANE_XZ: // top
-		glTranslatef(_scroll[0], _scroll[2], 0.0);
+		glTranslatef(mScroll[0], mScroll[2], 0.0);
 		glRotatef(90.0, 1.0, 0.0, 0.0);
 		break;
 	case PLANE_ZY: // side
-		glTranslatef(_scroll[2], _scroll[1], 0.0);
+		glTranslatef(mScroll[2], mScroll[1], 0.0);
 		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
 	}
