@@ -703,122 +703,6 @@ long freyjaSaveModel(const char *filename)
 
 // TODO parent plugin class
 
-/* UVMap generation utils */
-void freyjaGenerateUVMapsFromMesh(long meshIndex)
-{
-#ifdef FIXME
-	egg_texel_t *t = EggPlugin::mEggPlugin->getTexel(freyjaGetCurrent(FREYJA_VERTEX));
-	Vector<long> seen;
-	egg_polygon_t *poly;
-	egg_texel_t *texel = _egg->getTexel(texCoordIndex);
-	egg_texel_t *tex;
-	Vector3d u, trans, min;
-	long i, j, k;
-
-
-	if (texel)
-	{
-		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
-		{
-			poly = _egg->getPolygon(texel->ref[i]);
-
-			if (poly)
-			{
-				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
-				{
-					tex = _egg->getTexel(poly->texel[j]);
-
-					for (k = seen.begin(); k < (int)seen.end(); ++k)
-					{
-						if (seen[k] == (int)poly->texel[j])
-						{
-							tex = 0x0;
-							break;
-						}
-					}
-
-					if (!tex) 
-						continue;
-
-					u = Vector3d(tex->st[0], tex->st[1], 0);
-
-					if (u.mVec[0] < trans.mVec[0])
-						trans.mVec[0] = u.mVec[0];
-
-					if (u.mVec[1] < trans.mVec[1])
-						trans.mVec[1] = u.mVec[1];
-
-					if (x) tex->st[0] = -tex->st[0];
-					if (y) tex->st[1] = -tex->st[1];
-
-					u = Vector3d(tex->st[0], tex->st[1], 0);
-
-					if (u.mVec[0] < min.mVec[0])
-						min.mVec[0] = u.mVec[0];
-
-					if (u.mVec[1] < min.mVec[1])
-						min.mVec[1] = u.mVec[1];
-
-					seen.pushBack(poly->texel[j]);
-				}
-			}
-		}
-
-		u = trans;
-		trans = trans - min;
-		//trans += Vector3d(u.mVec[0]/2, u.mVec[1]/2, 0);
-
-		for (k = seen.begin(); k < (int)seen.end(); ++k)
-		{
-			tex = _egg->getTexel(seen[k]);
-
-			if (tex)
-			{
-				u = Vector3d(tex->st[0], tex->st[1], 0) + trans;
-
-				tex->st[0] = u.mVec[0];
-				tex->st[1] = u.mVec[1];
-			}
-		}
-	}
-	else
-	{
-		egg_vertex_t *vertex = _egg->getVertex(getCurrentVertex());
-		egg_vertex_t *vert;
-
-		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
-		{
-			poly = _egg->getPolygon(vertex->ref[i]);
-
-			if (poly)
-			{
-				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
-				{
-					vert = _egg->getVertex(poly->vertex[j]);
-
-					for (k = seen.begin(); k < (int)seen.end(); ++k)
-					{
-						if (seen[k] == (int)poly->vertex[j])
-						{
-							vert = 0x0;
-							break;
-						}
-					}
-
-					if (!vert) 
-						continue;
-
-					if (x) vert->uv[0] = -vert->uv[0];
-					if (y) vert->uv[1] = -vert->uv[1];
-					seen.pushBack(poly->vertex[j]);
-				}
-			}
-		}
-	}
-
-#endif
-}
-
 
 /* Mesh generation utils */
 void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side)
@@ -2108,78 +1992,6 @@ void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 }
 
 
-void freyjaGenerateMeshVertexNormals(long meshIndex)
-{
-	Vector <Vector3d *> faceNormals;
-	Vector <long> ref;
-	Vector3d a, b, c, aa, bb, normal;
-	long v0, v1, v2, i, j, vertexIndex, polygonIndex, meshVertexCount, polygonCount, vertexCount;
-
-
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-	meshVertexCount = freyjaGetMeshVertexCount(meshIndex);
-
-	if (!meshVertexCount || !polygonCount)
-		return;
-
-    for (i = 0; i < polygonCount; ++i)
-    {
-		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-		
-		/* Just need 3 sides -- assume all coplanar these are simple polygons,
-		 * so just take first 3 vertices to make 2 edge vectors */
-		v0 = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-		v1 = freyjaGetPolygonVertexIndex(polygonIndex, 1);
-		v2 = freyjaGetPolygonVertexIndex(polygonIndex, 2);
-
-		freyjaPrintMessage("%i <%d %d %d>", polygonIndex, v0, v1, v2);
-		freyjaGetVertexXYZ3fv(v0, a.mVec);
-		freyjaGetVertexXYZ3fv(v1, b.mVec);
-		freyjaGetVertexXYZ3fv(v2, c.mVec);
-
-		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
-		faceNormals.pushBack(new Vector3d(normal));
-	}
-
-
-	/* Compute vertex normals */
-    for (i = 0; i < meshVertexCount; ++i)
-    {
-		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
-
-		if (vertexIndex < 0)
-		{
-			freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad vertex\n");
-			continue;
-		}
-
-		normal.zero();
-
-		freyjaGetVertexPolygonRef1i(vertexIndex, ref);
-
-		for (j = ref.begin(); j < (int)ref.end(); ++j)
-		{
-			if (ref[j] > polygonCount)
-			{
-				freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad face\n");
-				continue;
-			}
-
-			normal += *faceNormals[ref[j]];
-		}
-
-		normal.normalize();
-
-		freyjaVertexNormal3fv(vertexIndex, normal.mVec);
-    }
-
-	faceNormals.erase();
-}
-
-
 void freyjaGenerateVertexNormals()
 {
 	Vector <Vector3d *> faceNormals;
@@ -2984,6 +2796,318 @@ long freyjaGetMeshName1s(long meshIndex, long lenght, char *name)
 	}
 
 	return -1;
+}
+
+
+void freyjaPolygonTexCoordPurge(long polygonIndex)
+{
+	egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+
+	if (polygon)
+	{
+		polygon->texel.clear();
+		polygon->r_texel.clear();
+	}
+}
+
+
+void freyjaMeshUVMapSphericalPolyMapped(long meshIndex)
+{
+	Vector<long> ref;
+	vec2_t uv;
+	long i, j, k, texcoordIndex, vertexCount, vertexIndex;
+	long polygonIndex, polygonCount;
+
+
+	// 1. Compute texcoords for vertex UVs
+	freyjaMeshUVMapCylindrical(meshIndex);
+
+	// 2. Update matching polymapped texcoords with newly computed vertex UVs	
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+    for (i = 0; i < polygonCount; ++i)
+    {
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+			// NOTE: I just update all UV -> polymapp to avoid corrupt 
+			//       'texture faces' eg not completely polymapped
+			freyjaPolygonTexCoordPurge(polygonIndex);
+
+			for (k = 0; k < vertexCount; ++k) 
+			{
+				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+
+				texcoordIndex = freyjaTexCoord2fv(uv);
+				freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
+			}
+		}
+	}
+}
+
+
+void freyjaMeshUVMapSpherical(long meshIndex)
+{
+	long i, vertexCount, vertexIndex;
+	vec_t longitude, latitude;
+	vec3_t xyz;
+	vec3_t uv;
+
+
+	vertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+		
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+		longitude = atan2((float)-xyz[0], xyz[2]);
+		latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+
+		longitude = 1.0 - longitude / (HEL_2_PI);
+		latitude = fabs(0.5 - latitude / HEL_PI);
+
+		uv[0] = longitude - floor(longitude);
+		uv[1] = latitude;
+
+		freyjaVertexTexCoord2fv(vertexIndex, uv);
+	}
+}
+
+
+void freyjaMeshUVMapCylindrical(long meshIndex)
+{
+	long i, j, vertexCount, vertexIndex;
+	vec_t longitude, latitude, ysize;
+	vec3_t xyz;
+	vec3_t min = {999999.0f, 999999.0f, 999999.0f};
+	vec3_t max = {-999999.0f, -999999.0f, -999999.0f};
+	vec2_t uv;
+	
+
+	vertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+		for (j = 0; j < 3; ++j)
+		{
+			if (xyz[j] < min[j])
+				min[j] = xyz[j];
+
+			if (xyz[j] > max[j])
+				max[j] = xyz[j];
+		}
+	}
+
+	if (max[1] >= 0)
+	{
+		if (min[1] >= 0)
+		{
+			ysize = max[1] - min[1];
+		}
+		else
+		{
+			ysize = max[1] + -min[1];
+		}
+	}
+	else
+	{
+		ysize = -max[1] + min[1];
+	}
+
+	if (ysize < 0.0001 && ysize > -0.0001)
+		ysize = 1.0f;
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+		longitude = atan2((float)-xyz[0], xyz[2]);
+		latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+
+		longitude = 1.0 - longitude / (HEL_2_PI);
+		latitude = fabs(0.5 - latitude / HEL_PI);
+
+		uv[0] = longitude - floor(longitude);
+		uv[1] = xyz[1] / ysize;
+
+		freyjaVertexTexCoord2fv(vertexIndex, uv);
+	}
+}
+
+
+int freyjaGetMeshBoundingBox(long meshIndex, vec3_t min, vec3_t max)
+{
+	//FIXME Not Implemented due to framing usage in current API
+	return 0;
+}
+
+
+void freyjaMeshGenerateVertexNormals(long meshIndex)
+{
+	Vector <Vector3d *> faceNormals;
+	Vector <long> ref;
+	Vector3d a, b, c, aa, bb, normal;
+	long v0, v1, v2, i, j, vertexIndex, polygonIndex, meshVertexCount, polygonCount, vertexCount;
+
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+	meshVertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+	if (!meshVertexCount || !polygonCount)
+		return;
+
+    for (i = 0; i < polygonCount; ++i)
+    {
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+		
+		/* Just need 3 sides -- assume all coplanar these are simple polygons,
+		 * so just take first 3 vertices to make 2 edge vectors */
+		v0 = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+		v1 = freyjaGetPolygonVertexIndex(polygonIndex, 1);
+		v2 = freyjaGetPolygonVertexIndex(polygonIndex, 2);
+
+		freyjaPrintMessage("%i <%d %d %d>", polygonIndex, v0, v1, v2);
+		freyjaGetVertexXYZ3fv(v0, a.mVec);
+		freyjaGetVertexXYZ3fv(v1, b.mVec);
+		freyjaGetVertexXYZ3fv(v2, c.mVec);
+
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
+		faceNormals.pushBack(new Vector3d(normal));
+	}
+
+
+	/* Compute vertex normals */
+    for (i = 0; i < meshVertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+
+		if (vertexIndex < 0)
+		{
+			freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad vertex\n");
+			continue;
+		}
+
+		normal.zero();
+
+		freyjaGetVertexPolygonRef1i(vertexIndex, ref);
+
+		for (j = ref.begin(); j < (int)ref.end(); ++j)
+		{
+			if (ref[j] > polygonCount)
+			{
+				freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad face\n");
+				continue;
+			}
+
+			normal += *faceNormals[ref[j]];
+		}
+
+		normal.normalize();
+
+		freyjaVertexNormal3fv(vertexIndex, normal.mVec);
+    }
+
+	faceNormals.erase();
+}
+
+
+void freyjaMeshTesselateTriangles(long meshIndex)
+{
+	long i, j, polygonCount, polygonIndex, vertexCount, vertexIndex;
+	long a, b, c, d, ta, tb, tc, td, material;
+
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+	for (i = 0; i < polygonCount; ++i)
+	{
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		material = freyjaGetPolygonMaterial(polygonIndex);
+
+		if (polygonIndex > -1)
+		{
+			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+			if (vertexCount < 4)
+				continue;
+			
+			if (vertexCount == 4)
+			{
+				/* 1. Get ABCD quad vertices */
+				a = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+				b = freyjaGetPolygonVertexIndex(polygonIndex, 1);
+				c = freyjaGetPolygonVertexIndex(polygonIndex, 2);
+				d = freyjaGetPolygonVertexIndex(polygonIndex, 3);
+
+				if (freyjaGetPolygonTexCoordCount(polygonIndex))
+				{
+					ta = freyjaGetPolygonTexCoordIndex(polygonIndex, 0);
+					tb = freyjaGetPolygonTexCoordIndex(polygonIndex, 1);
+					tc = freyjaGetPolygonTexCoordIndex(polygonIndex, 2);
+					td = freyjaGetPolygonTexCoordIndex(polygonIndex, 3);
+				}
+
+
+				/* 2. Make ABC ACD triangles */
+				freyjaBegin(FREYJA_POLYGON);
+				freyjaPolygonMaterial1i(material);
+				freyjaPolygonVertex1i(a);
+				freyjaPolygonVertex1i(b);
+				freyjaPolygonVertex1i(c);
+
+				if (freyjaGetPolygonTexCoordCount(polygonIndex))
+				{
+					freyjaPolygonTexCoord1i(ta);
+					freyjaPolygonTexCoord1i(tb);
+					freyjaPolygonTexCoord1i(tc);
+				}
+
+				freyjaEnd();
+
+				freyjaBegin(FREYJA_POLYGON);
+				freyjaPolygonMaterial1i(material);
+				freyjaPolygonVertex1i(a);
+				freyjaPolygonVertex1i(c);
+				freyjaPolygonVertex1i(d);
+
+				if (freyjaGetPolygonTexCoordCount(polygonIndex))
+				{
+					freyjaPolygonTexCoord1i(ta); // should dupe a?
+					freyjaPolygonTexCoord1i(tc);
+					freyjaPolygonTexCoord1i(td);
+				}
+
+				freyjaEnd();
+
+
+				/* 3. Remove ABCD polygon and update references */
+#warning FIXME				
+			}
+			else
+			{
+				for (j = 0; j < vertexCount; ++j)
+				{
+					// 0 1 2, 0 2 3, ..
+#warning FIXME
+					vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
+				}
+			}
+		}
+	}
 }
 
 

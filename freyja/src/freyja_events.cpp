@@ -284,7 +284,9 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshMirrorX", eMeshMirrorX);
 	r.RegisterInt("eMeshMirrorY", eMeshMirrorY);
 	r.RegisterInt("eMeshMirrorZ", eMeshMirrorZ);
-	//r.RegisterInt("eMeshMove", eMeshMove);
+	r.RegisterInt("eMeshTexcoordSpherical",eMeshTexcoordSpherical);
+	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
+	r.RegisterInt("eMeshTesselate", eMeshTesselate);
 	//r.RegisterInt("eMeshRotate", eMeshRotate);
 	//r.RegisterInt("eMeshScale", eMeshScale);
 
