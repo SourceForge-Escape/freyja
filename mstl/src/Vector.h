@@ -280,12 +280,6 @@ public:
 	}
 
 
-	Object operator [] (unsigned int index)
-	{
-		return mData[index];
-	}
-
-
 	void print(void (*print_func)(Object))
 	{
 		unsigned int i;
