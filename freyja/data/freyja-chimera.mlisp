@@ -172,7 +172,8 @@
 				(menu_item "_New"		eMode	eMeshNew)
 				(menu_item "_Delete"	eMode	eMeshDelete)
 				(menu_item "_Select"	eMode	eMeshSelect)
-				(menu_item "Re_center"	eMode	eTransformMeshPivot))
+				(menu_item "Re_center"	eMode	eTransformMeshPivot)
+				(menu_item "_Flip normals"	eMode	eMeshFlipNormals))
 
 			(submenu "_Bone"
 				(menu_item "_New"			eMode	eBoneNew)
@@ -192,7 +193,10 @@
 			(menu_item "_About"  			eAboutDialog "gtk-about"))))
 
 
-		;; Toolbar
+		;; Toolbars
+		(hbox 0 1 0 1 0
+
+		;; Toolbar View
 	    (handlebox 1 
         (vbox 0 0 0 1 0
 		(hbox 0 1 0 1 0
@@ -230,7 +234,18 @@
 					"Show bones when rendering"		eMode	eRenderSkeleton)
 
 				(toolbar_togglebutton true "grid.png" "Grid"
-					"Toggle plane grid rendering"	eMode eRenderGrid)))))
+					"Toggle plane grid rendering"	eMode eRenderGrid) ) )))
+
+		;; Toolbar Edit
+	    (handlebox 1 
+        (vbox 0 0 0 1 0
+		(hbox 0 1 0 1 0
+
+			(toolbar
+				(toolbar_togglebutton false "deform.png" "Skeletal deform"
+					"Deform using skeleton"		eMode	eSkeletalDeform) ) )))
+
+		) ;; End toolbars
 
 
 		;; Main window body
