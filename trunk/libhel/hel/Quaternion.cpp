@@ -155,6 +155,13 @@ void Quaternion::getMatrix(matrix_t m)
 }
 
 
+//Quaternion Quaternion::operator =(const Matrix &mat)
+//{
+//	setByMatrix(mat.mMatrix);
+//	return (*this);
+//}
+
+
 Quaternion Quaternion::operator =(const Quaternion &q)
 {
 	mW = q.mW;
