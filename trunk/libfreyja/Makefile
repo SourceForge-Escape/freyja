@@ -256,6 +256,14 @@ plugins-image: bmp.so dds.so jpg.so pcx.so ppm.so png.so tga.so
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+bsa.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=bsa \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/BSAPakReader.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 ase.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -574,6 +582,13 @@ ase.test:
 	$(MAKE) test NAME=ase BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/Ase.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+
+bsa.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=bsa BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/BSAPakReader.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_BSAPAKREADER $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 glm.test:
