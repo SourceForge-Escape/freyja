@@ -3233,6 +3233,25 @@ void freyjaPluginExport1i(long flags)
 	//				   (flags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 }
 
+
+void freyjaPluginArg1i(const char *name, long defaults)
+{
+	EggPlugin::mEggPlugin->addPluginArgInt(name, defaults);
+}
+
+
+void freyjaPluginArg1f(const char *name, float defaults)
+{
+	EggPlugin::mEggPlugin->addPluginArgFloat(name, defaults);
+}
+
+
+void freyjaPluginArg1s(const char *name, const char *defaults)
+{
+	EggPlugin::mEggPlugin->addPluginArgString(name, defaults);
+}
+
+
 void freyjaPluginEnd()
 {
 	// ATM this does nothing, just here for reserved use
@@ -3241,37 +3260,42 @@ void freyjaPluginEnd()
 
 long freyjaGetPluginId()
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	return EggPlugin::mEggPlugin->getPluginId();
 }
 
 
-int freyjaGetPluginArg1i(long pluginId, const char *name, char &arg)
+int freyjaGetPluginArg1f(long pluginId, const char *name, float *arg)
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	*arg = EggPlugin::mEggPlugin->getPluginArgFloat(pluginId, name);
+	 return -1;
 }
 
 
-int freyjaGetPluginArg1f(long pluginId, const char *name, float &arg)
+int freyjaGetPluginArg1i(long pluginId, const char *name, long *arg)
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	*arg = EggPlugin::mEggPlugin->getPluginArgInt(pluginId, name);
+	 return -1;
 }
 
 
-int freyjaGetPluginArg1i(long pluginId, const char *name, long &arg)
+int freyjaGetPluginArg1s(long pluginId, const char *name, char **arg)
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	*arg = EggPlugin::mEggPlugin->getPluginArgString(pluginId, name);
+	return 0;
 }
 
 
-int freyjaGetPluginArg1s(long pluginId, const char *name, 
-						 long len, const char *arg)
+int freyjaGetPluginArgString(long pluginId, const char *name, 
+							 long len, char *arg)
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	char *s = EggPlugin::mEggPlugin->getPluginArgString(pluginId, name);
+
+	if (!s || !s[0])
+		return 0x0;
+
+	strncpy(arg, s, len);
+
+	return 0;
 }
 
 

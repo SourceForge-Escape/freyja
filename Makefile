@@ -23,8 +23,12 @@ lazybuild:
 
 
 clean:
+	@-echo -n "Cleaning emacs files                         "
+	@-rm -f `find . -name "*~" -print`
+	@-echo "[done]"
 	@-cd mstl && make clean
 	@-cd libhel && make clean
+	@-cd libmgtk && make clean
 	@-cd libfreyja && make clean
 	@-cd Freyja && make clean
 
@@ -32,6 +36,7 @@ tarball:
 	@-cd mstl && make tarball
 	@-cd libhel && make tarball
 	@-cd libfreyja && make tarball
+	@-cd libmgtk && make tarball
 	@-cd Freyja && make tarball
 
 user-install:
