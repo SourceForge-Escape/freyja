@@ -11,6 +11,14 @@
 
  Design
 
+	o gnome_interface.cpp
+		o Remove last 2 freyja_ calls in 
+		o Remove gdk event code, hook up singals in resource
+	o Mlisp doesn't lookup symbols for like "true" if just setq
+	o freyja_, mgtk_, etc function names to denote API
+	o Split mlisp-gtk+ and Freyja
+	o Remove more unused events / handlers
+	o Reduce Gtk+ hooks, singals, and handlers
 	o Move Mlisp into it's on library
 	o Milsp garbage collection / more fully featured
 	o Move Material system into it's on library
@@ -20,8 +28,6 @@
 	o FreyjaControl still sends 2d planar events to FreyjaModel
 	o Replace FreyjaModel (xx, yy) handlers with objects or 3d events
 	o Add camera editing back, try to be as flexible as lightwave
-	o Remove more unused events / handlers
-	o Reduce Gtk+ hooks, singals, and handlers
 	o Move selections outside model?
 	o Make sure order doesn't matter where Vector<> is used
 	o Observer and Command patterns
@@ -51,6 +57,8 @@
  Interface
 
 	o Documentation
+	o View > Joint > Render Type
+	o View > Bone > Render Type
 	o Normal map, DOT3, and matrix palette skinning support
 	o glColorMaterial use
 	o Polygon creation from vertex selection should be seperate from creation

@@ -139,6 +139,17 @@ class Mlisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	mObject *getSymbol(const char *symbol);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns Object bound to symbol or NULL ( 0x0 )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	int getSymbolData(char *symbol, unsigned int type, void **data);
 	/*------------------------------------------------------
 	 * Pre  : CAUTION

@@ -35,8 +35,9 @@ typedef enum {
 } event_subject_id;
 
 
-void freyja_event_start();
-void freyja_event_shutdown();
+void freyja_event_start();       /* Starts up Freyja subsystems */
+void freyja_event_exit();        /* Calls shutdown and exits GUI */
+void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
 

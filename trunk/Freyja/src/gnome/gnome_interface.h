@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -16,7 +16,7 @@
  *
  * 2001.??.??:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJA_INTERFACE_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJA_INTERFACE_H_

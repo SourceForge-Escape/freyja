@@ -2614,6 +2614,7 @@ int freyja_model__psk_import(char *filename)
 {
 	PSKModel psk;
 	unsigned int i, j, v, t, m;
+	const float scale = 0.1f;
 	Map<unsigned int, unsigned int> trans;
 
 
@@ -2632,9 +2633,9 @@ int freyja_model__psk_import(char *filename)
 	for (i = 0; i < psk.mNumVertices; ++i)
 	{
 		/* Store vertices in group as freyja XYZ */
-		v = eggVertexStore3f(psk.mVertices[i*3+0], 
-							 psk.mVertices[i*3+2], 
-							 -psk.mVertices[i*3+1]);
+		v = eggVertexStore3f(psk.mVertices[i*3+0]*scale, 
+							 psk.mVertices[i*3+2]*scale, 
+							 -psk.mVertices[i*3+1]*scale);
 		
 		/* Generates id translator list */
 		trans.Add(i, v);
@@ -2698,9 +2699,9 @@ int freyja_model__psk_import(char *filename)
 		eggTagFlags1u(0x0);
 		eggTagName(psk.mBones[i].name);
 
-		eggTagPos3f(psk.mBones[i].restLoc[0],
-					psk.mBones[i].restLoc[2],
-					-psk.mBones[i].restLoc[1]);
+		eggTagPos3f(psk.mBones[i].restLoc[0]*scale,
+					psk.mBones[i].restLoc[2]*scale,
+					-psk.mBones[i].restLoc[1]*scale);
 
 		eggTagRotateQuaternion4f(psk.mBones[i].restDir[3],
 								 psk.mBones[i].restDir[0],
