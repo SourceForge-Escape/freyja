@@ -114,7 +114,7 @@ typedef struct ase_bone_EXT_s
 {
 	char name[64];
 	unsigned int id;
-	unsigned int parent;
+	int parent;
 	unsigned int childrenCount; 
 	unsigned int *children;
 

@@ -871,7 +871,8 @@ int freyja_model__ase_export(char *filename)
 	Map<unsigned int, unsigned int> trans;
 	unsigned int vert;
 	float st[2];
-	int b, v, t, texel;
+	int v, t, texel;
+	unsigned int i, j, b, bone;
 	Ase ase;
 	
 
@@ -908,7 +909,7 @@ int freyja_model__ase_export(char *filename)
 		vert = eggIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);
 		trans.Add(vert, v);
 		
-		printf("trans.Add(%i, %i)\n", vert, v);
+		//printf("trans.Add(%i, %i)\n", vert, v);
 		eggIterator(FREYJA_VERTEX, FREYJA_LIST_NEXT);
 	}
 	
@@ -949,37 +950,54 @@ int freyja_model__ase_export(char *filename)
 	}
 	
 
-#ifdef FIXME
 	/* SKELETON */
 	eggIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
 
 	ase.skel.mBoneCount = eggGetNum(FREYJA_BONE);
 	ase.skel.mBones = new ase_bone_EXT_t[ase.skel.mBoneCount];
 	eggIterator(FREYJA_BONE, FREYJA_LIST_RESET);
-	
+
 	for (b = 0; b < ase.skel.mBoneCount; ++b)
 	{
-		ase.skel.mBones[b].parent = eggGetBoneParent();
-		eggGetBoneRotationXYZW4f(ase.skel.mBones[b].rotation);
-		eggGetBoneTranslation3f(ase.skel.mBones[b].translation);
-		eggGetBoneName(ase.skel.mBones[b].name);
+		ase.skel.mBones[b].childrenCount = 0;
+	}
+
+	for (b = 0; b < ase.skel.mBoneCount; ++b)
+	{
+		bone = eggIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+		bone = eggGetCurrent(FREYJA_BONE);
+
+		ase.skel.mBones[b].parent = eggGetBoneParent(bone);
+		eggGetBoneRotationXYZW4fv(bone, ase.skel.mBones[b].rotation);
+		eggGetBoneTranslation3fv(bone, ase.skel.mBones[b].translation);
+		eggGetBoneName(bone, 64, ase.skel.mBones[b].name);
+
+		ase.skel.mBones[ase.skel.mBones[b].parent].childrenCount++;
+
+		printf("ase.so: bone[%i].parent = %i\n", 
+			   b, ase.skel.mBones[b].parent);
 
 		// Use translator list
-		bone = eggIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
-		trans.Add(bone, b);
-		
-		printf("trans.Add(%i, %i)\n", bone, b);
-		eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+		//trans.Add(bone, b);
+		//printf("trans.Add(%i, %i)\n", bone, b);
 
-		ase.skel.mBones[ase.skel.mBones[b].parent].childrenCount++
+		eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
 	}
 
 	// Loop to populate children lists here
 	for (b = 0; b < ase.skel.mBoneCount; ++b)
 	{
-		
+		if (ase.skel.mBones[b].childrenCount == 0)
+			continue;
+
+		ase.skel.mBones[b].children = new unsigned int[ase.skel.mBones[b].childrenCount];
+
+		for (i = 0, j  = 0; i < ase.skel.mBoneCount; ++i)
+		{
+			if (ase.skel.mBones[i].parent == (int)b)
+				ase.skel.mBones[b].children[j++] = i;
+		}
 	}
-#endif
 
 	eggCriticalSection(EGG_WRITE_UNLOCK);
 	
@@ -1162,7 +1180,7 @@ int AseSkelEXT::load(char *filename)
 
 			for (j = 0, k = 0; j < mBoneCount; ++j)
 			{
-				if (mBones[j].parent == i)// && k < mBones[i].childrenCount)
+				if (mBones[j].parent == (int)i)// && k < mBones[i].childrenCount)
 				{
 					if (j == i) // Don't self link, jesus
 					{

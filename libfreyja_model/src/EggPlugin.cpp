@@ -989,6 +989,84 @@ unsigned int eggCriticalSection(egg_lock_t request)
 	return PLUGIN_ERROR;
 }
 
+unsigned int eggGetBoneName(unsigned int index, unsigned int size, char *name)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
+		
+	if (bone)
+	{
+		strncpy(name, bone->name, size);
+
+		return bone->id;
+	}
+
+	return PLUGIN_ERROR;
+}
+
+
+void eggSetBoneParent(int index)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
+
+
+	if (bone)
+	{
+		bone->parent = index;
+	}	
+}
+
+
+int eggGetBoneParent(unsigned int index)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
+
+
+	if (bone)
+	{
+		return bone->parent;
+	}
+
+	return -2;
+}
+
+unsigned int eggGetBoneRotationXYZW4fv(unsigned int index, vec4_t xyzw)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
+	
+	if (bone)
+	{
+		Quaternion q = Quaternion(bone->rot[0], bone->rot[1], bone->rot[2]);
+		vec4_t wxyz;
+
+		q.getQuaternion4fv(wxyz);
+		
+		xyzw[0] = wxyz[0];
+		xyzw[1] = wxyz[1];
+		xyzw[2] = wxyz[2];
+		xyzw[3] = wxyz[3];
+
+		return bone->id;
+	}
+
+	return PLUGIN_ERROR;
+}
+
+unsigned int eggGetBoneTranslation3fv(unsigned int index, vec3_t xyz)
+{
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_tag_t *bone = EggPlugin::mEggPlugin->eggGetBone(index);
+
+		xyz[0] = bone->center[0];
+		xyz[1] = bone->center[1];
+		xyz[2] = bone->center[2];
+
+		return bone->id;
+	}
+
+	return PLUGIN_ERROR;
+}
+
 
 unsigned int eggGetTagMesh1u(unsigned int item, unsigned int *value)
 {
@@ -1444,6 +1522,22 @@ unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item,
 	}
 
 	return PLUGIN_ERROR;
+}
+
+
+egg_tag_t *EggPlugin::eggGetBone(unsigned int index)
+{
+	Vector<egg_tag_t *> *bones;
+	egg_tag_t *bone;
+	
+	bones = mEgg->TagList();
+
+	if (!bones || bones->empty() || index > bones->size()-1)
+		return 0x0;
+
+	bone = (*bones)[index];
+
+	return bone;
 }
 
 
@@ -2384,6 +2478,11 @@ unsigned int EggPlugin::eggTagAddSlave(unsigned int tag)
 		}
 		else 
 		{
+			//egg_tag_t *child =  mEgg->getTag(tag);
+			//
+			//			if (child)
+			//	child->parent = eggGetCurrent(FREYJA_BONE);
+
 			mTag->slave.pushBack(tag);
 		}
 	}

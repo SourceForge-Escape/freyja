@@ -211,6 +211,7 @@ typedef struct egg_tag_s {
 	vec3_t center;                    /* Pivot point, center of rotation */
 	matrix_t transform;               /* Transform mesh/slaves by this matrix */
 	float rot[3];
+	int parent;  // Ext for 8.12, 20040917 ( not stored to disk )
 } egg_tag_t;
 
 

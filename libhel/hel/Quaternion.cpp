@@ -93,6 +93,15 @@ Quaternion::~Quaternion()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+void Quaternion::getQuaternion4fv(vec4_t wxyz)
+{
+	wxyz[0] = mW;
+	wxyz[1] = mX;
+	wxyz[2] = mY;
+	wxyz[3] = mZ;
+}
+
+
 void Quaternion::getAxisAngles(vec4_t axyz)
 {
 	vec_t theta;

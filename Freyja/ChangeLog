@@ -39,6 +39,10 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040817) Mongoose <mongoose@icculus.org>
+
+	o Full mesh highlight for current mesh back ( less confusing )
+
  Freyja (0.3.5-20040815) Mongoose <mongoose@icculus.org>
 
 	o Skeletal creation ability back ( limited )

@@ -389,6 +389,10 @@
 						(label "Background color" 0.0 0.5)
 						(colorbutton 1 10000))
 
+					(hbox 1 0 0 1 0 
+						(label "Grid color" 0.0 0.5)
+						(colorbutton 1 10001))
+
 					(animation_tab_hack)
 					 
 					(vbox 1 0 0 1 0 
