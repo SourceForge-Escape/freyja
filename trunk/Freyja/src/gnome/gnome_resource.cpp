@@ -67,7 +67,7 @@ GtkWidget *getGtkStatusBarWidget()
 void application_window_fullscreen()
 {
 	if (GTK_MAIN_WINDOW)
-		gtk_window_unfullscreen(GTK_WINDOW(GTK_MAIN_WINDOW));
+		gtk_window_fullscreen(GTK_WINDOW(GTK_MAIN_WINDOW));
 }
 
 void application_window_unfullscreen()
