@@ -443,7 +443,7 @@ public:
 	int saveModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : filename is valid
-	 * Post : Model is saved as EGG format
+	 * Post : Model is saved as format defined by extention
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -487,8 +487,7 @@ public:
 	int loadModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : filename is valid, model format supported
-	 * Post : Model is translated to Egg format and loaded
-	 *        into data structures
+	 * Post : Model is imported from disk
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -859,7 +858,7 @@ private:
 
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 	
-	Egg *_egg;                      /* The 3d model */
+	Egg *mEgg;                      /* The 3d model */
 	
 	EggPlugin *mPlugin;             /* Model plugin system */
 
@@ -870,11 +869,13 @@ private:
 									 * but the backend can't in this build for
 									 * copy/cut/paste */
 
+	bool mEggDebug;                 /* Egg debugging? on/off */
+
+	bbox_t mSelectBBox;             /* 3d selection box using 2 vertices */
+
 	char *_palette_filename;            /* Current palette */
 
 	egg_vertex_t *_cached_vertex;       /* Current vertex ( cached ) */
-
-	bbox_t mSelectBBox;                 /* 3d selection box using 2 vertices */
 
 	unsigned int _bbox;                 /* Used to determine bbox min/max 
 										   points */
@@ -902,10 +903,6 @@ private:
 	unsigned int _current_tag;          /* Currently selected bone tag id */
 	
 	unsigned int _current_bone_frame;   /* Currently selected skeletal frame */
-
-	//	unsigned int _current_morph_frame;  /* Current vertexmorph frame */
-	
-	bool _egg_debug;                    /* Debugging egg? cached query */
 	
 	float _zoom;                        /* Scaling of scene */
 	
@@ -1077,12 +1074,6 @@ public:
 		mSkeleton.setTags(mEgg->TagList());
 		return mSkeleton;
 	}
-
-	//#warning FIXME Exposes Egg to renderer
-	//Vector<egg_tag_t *> *getSkeleton()
-	//{
-	//	return mEgg->TagList();
-	//}
 
 	unsigned int getMeshCount()
 	{

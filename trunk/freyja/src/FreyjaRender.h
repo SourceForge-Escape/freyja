@@ -341,6 +341,14 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void renderSkeleton(RenderSkeleton &skeleton, unsigned int currentBone,
+							  vec_t scale);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders skeleton
+	 *
+	 ------------------------------------------------------*/
+
 	void renderUVWindow(unsigned int width, unsigned int height);
 	/*------------------------------------------------------
 	 * Pre  : 
