@@ -928,7 +928,15 @@ void FreyjaModel::transform(int mode, enum Egg::egg_transform type,
 		break;
 
 	case FreyjaModel::TransformMesh:
-		_egg->Transform(getCachedMesh(), type, x, y, z);
+		{
+			_egg->Transform(getCachedMesh(), type, x, y, z);
+
+			egg_group_t *group = getCachedGroup();
+			egg_mesh_t *mesh = getCachedMesh();
+
+			if (group && mesh)
+				mesh->position = Vector3d(group->center);
+		}
 		break;
 
 	case FreyjaModel::TransformBone:
@@ -1257,6 +1265,7 @@ bool FreyjaModel::pasteSelectedMesh()
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaMeshFlags1u(mCopyMesh.flags);
+	freyjaMeshPosition(freyjaGetCurrent(FREYJA_MESH), mCopyMesh.center);
 
 	freyjaBegin(FREYJA_VERTEX_GROUP);
 	freyjaGroupCenter3f(mCopyMesh.center[0], 
@@ -1781,7 +1790,7 @@ void FreyjaModel::MeshMove(float xx, float yy)
 		break;
 	}
 
-	transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);  
+	transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);
 }
 
 

@@ -12,6 +12,13 @@
  *           
  *-- History ------------------------------------------------ 
  *
+ * 2005.01.03: (v0.9.1)
+ * Mongoose - Using Freyja versioning numbers for ABI reporting.
+ *
+ *            Lots of pruning and documentation updates to the ABI.  Also
+ *            some new features to go with the refactoring.
+ *
+ *
  * 2004.12.17: (v0.0.9)
  * Mongoose -  Created, FreyjaPlugin ABI interface defination refinement
  *             based on FreyjaPlugin and EggPlugin.
@@ -29,13 +36,9 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
-#define FREYJA_FILE_MAGIC    "Freyja "
-#define FREYJA_FILE_VERSION  1
-
-
 extern "C" {
 
-#define FREYJA_PLUGIN_VERSION   "0.0.9"
+#define FREYJA_PLUGIN_VERSION   "Freyja 0.9.1"
 #define FREYJA_LIST_RESET       -2
 #define FREYJA_LIST_NEXT        -1
 #define FREYJA_LIST_CURRENT     -3
@@ -104,7 +107,7 @@ typedef enum {
 
 typedef struct {
 
-	char magic[8];
+	char magic[16];
 	long version;
 	long flags;
 	long reserved;
@@ -145,153 +148,174 @@ typedef enum {
 } freyja_file_chunk_type_t;
 
 
-///////////////////////////////////////////////////////////////////////
-// Accessor functions to read data from Scene
-///////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////
+	// Freyja Iterator functions
+	//
+	///////////////////////////////////////////////////////////////////////
 
-unsigned int freyjaFlags();
-/*------------------------------------------------------
- * Pre  : 
- * Post : Gets flags from FreyjaPlugin
- *
- *-- History ------------------------------------------
- *
- * 2001.05.16:
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBegin(freyja_object_t type);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 * Post : A new object of type is constructed.
+	 ------------------------------------------------------*/
 
-long freyjaGetCount(freyja_object_t type);
-/*------------------------------------------------------
- * Pre  : Type is valid freyja plugin enum
- * Post : Returns total number of objects of type in 
- *        parent frame type eg [model]'s meshes
- *        Returns FREYJA_PLUGIN_ERROR on error
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaEnd();
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(...) is called to start the state
+	 * Post : The object is finialized and construction ends
+	 ------------------------------------------------------*/
 
-long freyjaGetCurrent(freyja_object_t type);
-/*------------------------------------------------------
- * Pre  : Complex type passed
- * Post : Returns id of current internal complex type
- *        ( last generated )
- *        Returns FREYJA_PLUGIN_ERROR on error
- *
- *-- History ------------------------------------------
- *
- * 2001.11.21: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	long freyjaIterator(freyja_object_t type, long item);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 *        <item> is a FREYJA_LIST_... command or item index
+	 *
+	 * Post : Sets current item in internal iterator to
+	 *        do operations on util a new construction or
+	 *        iterator operation of the same type is done.
+	 *
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
 
-int freyjaGetTextureFilename(unsigned int index, char **filename);
+	long freyjaCriticalSection(freyja_lock_t request);
+	/*------------------------------------------------------
+	 * Pre  : FreyjaPlugin singleton exists
+	 *
+	 * Post : Returns 0 on sucess
+	 *        Returns FREYJA_PLUGIN_ERROR on fail
+	 *
+	 *        If FreyjaPlugin is locked this will block
+	 *        in the future. For now it's just to test if
+	 *        the singleton is up and running.
+	 ------------------------------------------------------*/
 
-int freyjaGetTextureImage(unsigned int index, unsigned int *w, unsigned int *h, 
-						  unsigned int *depth,  unsigned int *type,
-						  unsigned char **image);
+	long freyjaGetCount(freyja_object_t type);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 * Post : Returns total number of objects of type in 
+	 *        parent frame type eg [model]'s meshes
+	 *
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
 
-long freyjaGetBoneName(long index, unsigned int size, char *name);
+	long freyjaGetCurrent(freyja_object_t type);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 * Post : Returns index of current internal complex type
+	 *        ( Last constructed or iterated )
+	 *
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
 
-long freyjaGetBoneParent(long index);
 
-long freyjaGetBoneRotationWXYZ4fv(long index, vec4_t wxyz);
+	///////////////////////////////////////////////////////////////////////
+	// libfreyja plugin ABI 0.9.1 object accessors
+	///////////////////////////////////////////////////////////////////////
 
-long freyjaGetBoneRotationXYZ3fv(long index, vec3_t xyz);
+	// FREYJA_TEXTURE Accessors ///////////////////////////////////////////
 
-long freyjaGetBoneTranslation3fv(long index, vec3_t xyz);
+	int freyjaGetTextureFilename(unsigned int index, char **filename);
+	/*------------------------------------------------------
+	 * Pre  : Do not attempt to alter <filename> on return
+	 *
+	 * Post : Gets a pointer to the filename of texture[index]
+	 *        Returns 0 on success.
+	 ------------------------------------------------------*/
 
-long freyjaGetBoneMeshIndex(long element);
-/*------------------------------------------------------
- * Pre  : Bone selected
- *        Value set to Mesh id of Bone's mesh_list[item]
- * Post : Returns PLUGIN_ERROR if Bone doesn't exist
- *        or if item is invalid
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	int freyjaGetTextureImage(unsigned int index,
+							  unsigned int *w, unsigned int *h, 
+							  unsigned int *depth,  unsigned int *type,
+							  unsigned char **image);
+	/*------------------------------------------------------
+	 * Pre  : Do not attempt to alter <image> on return
+	 *
+	 * Post : Gets pointers to texture[index]'s data members
+	 *        Returns 0 on success.
+	 ------------------------------------------------------*/
 
-long freyjaGetBoneMeshCount();
-/*------------------------------------------------------
- * Pre  : Bone selected
- * Post : Returns number of Meshes in this Bone
- *        Returns FREYJA_PLUGIN_ERROR if Bone doesn't exist
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
 
-void freyjaGetBoneRotate3f(vec_t *x, vec_t *y, vec_t *z);
-/*------------------------------------------------------
- * Pre  : Bone selected
- * Post : Gets current tag's rotation in eular angles
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	// FREYJA_BONE Accessors //////////////////////////////////////////////
 
-void freyjaGetVertexTexCoord2fv(vec2_t uv);
-void freyjaGetVertexNormal3fv(vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : normal[index] exists
- * Post : Sets passed float array to normal <x, y, z>
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	long freyjaGetBoneName(long boneIndex, unsigned int size, char *name);
+	/*------------------------------------------------------
+	 * Pre  : <name> must be allocated to <size> width
+	 *        A <size> of 64 is recommended
+	 *
+	 * Post : Gets bone[index]'s name as '\0' terminated string
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
 
-void freyjaGetTexCoord2fv(long texcoordIndex, vec2_t uv);
-/*------------------------------------------------------
- * Pre  : texcoord[index] exists
- * Post : Sets passed float array to texcoord u, v
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	long freyjaGetBoneParent(long boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns bone[index]'s parent id
+	 *        Returns -2 on error
+	 ------------------------------------------------------*/
 
-void freyjaGetVertexByIndex3fv(long index, vec3_t xyz);
-void freyjaGetVertex3fv(vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : vertex[index] exists
- * Post : Sets passed float array to vertex pos
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	long freyjaGetBoneRotationWXYZ4fv(long boneIndex, vec4_t wxyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s orientation as a Quaternion
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
 
-// FREYJA_VERTEX Accessors
-long freyjaGetVertexTexCoordUV2fv(long vertexIndex, vec2_t uv);
-long freyjaGetVertexNormalXYZ3fv(long vertexIndex, vec3_t nxyz);
-long freyjaGetVertexXYZ3fv(long vertexIndex, vec3_t xyz);
-long freyjaGetVertexFrame(long vertexIndex, long element,
-						  long *frameIndex, vec3_t xyz);
-long freyjaGetVertexFrameCount(long vertexIndex);
-long freyjaGetVertexWeight(long vertexIndex, long element,
-						   long *bone, vec_t *weight);
-long freyjaGetVertexWeightCount(long vertexIndex);
-long freyjaGetVertexFlags(long vertexIndex);
+	long freyjaGetBoneRotationXYZ3fv(long boneIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s orientation in Euler angles
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+	long freyjaGetBoneTranslation3fv(long index, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s position
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+
+	// FREYJA_TEXCOORD Accessors //////////////////////////////////////////
+
+	void freyjaGetTexCoord2fv(long texcoordIndex, vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : texcoord[index] exists
+	 * Post : Sets passed float array to texcoord u, v
+	 ------------------------------------------------------*/
+
+
+	// FREYJA_VERTEX Accessors ////////////////////////////////////////////
+
+	void freyjaGetVertexTexCoord2fv(vec2_t uv);
+	void freyjaGetVertexNormal3fv(vec3_t xyz);
+	void freyjaGetVertex3fv(vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : freyjaIterator has initialized a vertex
+	 *
+	 * Post : Sets vertex[FREYJA_LIST_CURRENT]'s
+	 *        position, normal, or texcoord
+	 *
+	 *        This is deprecated
+	 ------------------------------------------------------*/
+
+	long freyjaGetVertexTexCoordUV2fv(long vertexIndex, vec2_t uv);
+	long freyjaGetVertexNormalXYZ3fv(long vertexIndex, vec3_t nxyz);
+	long freyjaGetVertexXYZ3fv(long vertexIndex, vec3_t xyz);
+	long freyjaGetVertexFrame(long vertexIndex, long element,
+							  long *frameIndex, vec3_t xyz);
+	long freyjaGetVertexFrameCount(long vertexIndex);
+	long freyjaGetVertexWeight(long vertexIndex, long element,
+							   long *bone, vec_t *weight);
+	long freyjaGetVertexWeightCount(long vertexIndex);
+	long freyjaGetVertexFlags(long vertexIndex);
 
 // FREYJA_MODEL Accessors
-long freyjaGetModelFlags(long modelIndex); // Not Implemented
-long freyjaGetModelMeshIndex(long modelIndex, long element); // Not Implemented
-long freyjaGetModelMeshCount(long modelIndex); // Not Implemented
+long freyjaGetModelFlags(long modelIndex);
+long freyjaGetModelMeshIndex(long modelIndex, long element);
+long freyjaGetModelMeshCount(long modelIndex);
 
 // FREYJA_MESH Accessors
 long freyjaGetMeshFlags(long meshIndex);
+long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
 long freyjaGetMeshVertexIndex(long meshIndex, long element); // Not Implemented
 long freyjaGetMeshVertexCount(long meshIndex); // Not Implemented
 long freyjaGetMeshPolygonIndex(long meshIndex, long element);
@@ -342,7 +366,7 @@ long freyjaGetPolygon3f(freyja_object_t type, long item, vec_t *value);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaPrintError(char *format, ...);
+void freyjaPrintError(const char *format, ...);
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout
@@ -353,7 +377,7 @@ void freyjaPrintError(char *format, ...);
  * Mongoose - Created, split from experimental branch
  ------------------------------------------------------*/
 
-void freyjaPrintMessage(char *format, ...);
+void freyjaPrintMessage(const char *format, ...);
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout
@@ -369,58 +393,8 @@ void freyjaPrintMessage(char *format, ...);
 // Mutator functions to operate on Scene
 ///////////////////////////////////////////////////////////////////////
 
-void freyjaBegin(freyja_object_t type);
-/*------------------------------------------------------
- * Pre  : Type is valid freyja plugin enum
- * Post : A new data object had begun construction
- *        Returns an object id
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
 
-void freyjaEnd();
-/*------------------------------------------------------
- * Pre  : 
- * Post : A data object has finished construction
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
-
-long freyjaIterator(freyja_object_t type, long item);
-/*------------------------------------------------------
- * Pre  : Type is valid freyja plugin enum 
- *        Item is either LIST command or item id
- * Post : Sets current item in internal iterator
- *        Returns FREYJA_PLUGIN_ERROR on error
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-long freyjaCriticalSection(freyja_lock_t request);
-/*------------------------------------------------------
- * Pre  : FreyjaPlugin singleton exists
- *
- * Post : Returns 0 on sucess
- *        Returns FREYJA_PLUGIN_ERROR on fail
- *
- *        If FreyjaPlugin is locked this will block
- *        in the future. For now it's just to test if
- *        the singleton is up and running.
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
+long freyjaMeshPosition(long meshIndex, vec3_t xyz);
 
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
@@ -514,7 +488,7 @@ void freyjaMeshTreeFrameAddBone(long tag);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-long freyjaTextureFilename1s(char *filename);
+long freyjaTextureFilename1s(const char *filename);
 
 long freyjaTextureStoreBuffer(unsigned char *image, unsigned int depth,
 							  unsigned int width, unsigned int height,
@@ -646,9 +620,11 @@ void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
 void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
-long freyjaCheckModel(char *filename);
-long freyjaLoadModel(char *filename);
-long freyjaSaveModel(char *filename);
+	long freyjaCheckModel(const char *filename);
+
+	long freyjaLoadModel(const char *filename);
+
+	long freyjaSaveModel(const char *filename);
 
 	///////////////////////////////////////////////////////////////////////
 	// Polygon
@@ -697,30 +673,30 @@ long freyjaSaveModel(char *filename);
 
 	typedef enum {
 		
-		FREYJA_PLUGIN_NONE     = 0,
-		FREYJA_PLUGIN_MESH     = 1,
-		FREYJA_PLUGIN_SKELETON = 2
+		FREYJA_PLUGIN_NONE            = 0,
+		FREYJA_PLUGIN_MESH            = 1,
+		FREYJA_PLUGIN_SKELETON        = 2,
+		FREYJA_PLUGIN_VERTEX_MORPHING = 4,
+		FREYJA_PLUGIN_VERTEX_BLENDING = 8
 
 	} freyja_plugin_options_t;
 
 
 	void freyjaPluginBegin();
 
-	void freyjaPluginFilename1s(char *filename);
+	void freyjaPluginDescription1s(const char *info_line);
 
-	void freyjaPluginDescription1s(char *info_line);
-
-	void freyjaPluginAddExtention1s(char *ext);
+	void freyjaPluginAddExtention1s(const char *ext);
 
 	void freyjaPluginImport1i(long flags);
 
 	void freyjaPluginExport1i(long flags);
 
-	void freyjaPluginArgInt(char *name, long defaults);
+	void freyjaPluginArgInt(const char *name, long defaults);
 
-	void freyjaPluginArgFloat(char *name, float defaults);
+	void freyjaPluginArgFloat(const char *name, float defaults);
 
-	void freyjaPluginArgString(char *name, char *defaults);
+	void freyjaPluginArgString(const char *name, const char *defaults);
 
 	void freyjaPluginEnd();
 
@@ -731,20 +707,19 @@ long freyjaSaveModel(char *filename);
 
 	long freyjaGetPluginId();
 
-	int freyjaGetPluginArg1b(long pluginId, char *name, char &arg); // bool
+	int freyjaGetPluginArg1f(long pluginId, const char *name, float &arg);
 
-	int freyjaGetPluginArg1f(long pluginId, char *name, float &arg);
+	int freyjaGetPluginArg1i(long pluginId, const char *name, long &arg);
 
-	int freyjaGetPluginArg1i(long pluginId, char *name, long &arg);
-
-	int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg);
+	int freyjaGetPluginArg1s(long pluginId, const char *name, 
+							 long len, const char *arg);
 
 
 	///////////////////////////////////////////////////////////////////////
 	//  Pak VFS 
 	///////////////////////////////////////////////////////////////////////
 
-	long freyjaPakBegin(char *filename);
+	long freyjaPakBegin(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Starts a new VFS from a 'pak file'
@@ -758,7 +733,8 @@ long freyjaSaveModel(char *filename);
 	 ------------------------------------------------------*/
 
 	long freyjaPakAddFullPathFile(long pakIndex,
-								  char *vfsFilename, long offset, long size);
+								  const char *vfsFilename,
+								  long offset, long size);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Adds a new entry to VFS mapping a chunk from

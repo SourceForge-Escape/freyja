@@ -40,6 +40,18 @@ extern "C" {
 	int freyja_model__skn_import(char *filename);
 	int freyja_model__skn_export(char *filename);
 	int import_model(char *filename);
+	void freyja_init();
+}
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("SIMS ASII Model (*.skn)");
+	freyjaPluginAddExtention1s("skn");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+	
+	freyjaPluginArgInt("Use adult skeleton?", 1);
 }
 
 int import_model(char *filename)

@@ -107,8 +107,16 @@ extern "C" {
 	int freyja_model__nif3_check(char *filename);
 	int freyja_model__nif3_import(char *filename);
 	int freyja_model__nif3_export(char *filename);
+	void freyja_init();
 }
 
+void freyja_init()
+{
+	freyjaPluginDescription1s("NetImmerse 3 Model (*.nif)");
+	freyjaPluginAddExtention1s("nif");
+	freyjaPluginImport1i(FREYJA_PLUGIN_NONE);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
 
 int freyja_model__nif3_check(char *filename)
 {	

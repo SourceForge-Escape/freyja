@@ -12,9 +12,9 @@ NAME=libfreyja
 BASE_NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=9
-MICRO_VERSION=0
+MICRO_VERSION=1
 BRANCH=
-BUILD_ID=20041231
+BUILD_ID=20050103
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -539,7 +539,7 @@ install-tools:
 	@-cp bin/test/bsa.test $(INSTALL_BIN)/bsa
 	@-cp bin/test/cull.test $(INSTALL_BIN)/cull
 	@-cp bin/test/raw2riff.test $(INSTALL_BIN)/raw2riff
-	
+
 
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)

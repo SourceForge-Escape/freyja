@@ -26,6 +26,19 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.9.0-20050103) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o Updated all plugins to use freyja_init() feature reporting subsystem
+	o Fixed ja format file save issue with 'mesh missing bug'
+	o Removing MeshTree ABI functions, please switch all your meshtrees
+	  calls to use vertex weights ( translate to blending on import )
+	o ABI documentation in header change -- no longer keeping history
+	  to improve readability
+	o Trimming up some ABI functions, so you might need to check your
+	  plugins to make sure they weren't using the deprecated and now
+	  dead functions
+
+
  libfreyja (0.9.0-20041231) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o Massive ja chunk revamp

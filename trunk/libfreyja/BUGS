@@ -11,5 +11,4 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- o ja save causes last mesh to translate oddly - mesh centers not saved/loaded
- o quaterion init from eular is broke due to using diff notation that get
+ o quaterion init from eular is broke due to using diff notation than get

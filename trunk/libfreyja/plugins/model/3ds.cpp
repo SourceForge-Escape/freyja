@@ -716,7 +716,17 @@ extern "C" {
 	int freyja_model__3ds_check(char *filename);
 	int freyja_model__3ds_import(char *filename);
 	int freyja_model__3ds_export(char *filename);
+	void freyja_init();
 }
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("3ds model (*.3ds)");
+	freyjaPluginAddExtention1s("3ds");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
+
 
 
 int import_model(char *filename)
