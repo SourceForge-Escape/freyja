@@ -330,7 +330,7 @@ gint glarea_key_press_event(GtkWidget *widget, GdkEventKey *event)
 #ifdef DEBUG_GTK_KEYS
 	event_print("*** key_press_event> %i (%c) : %i\n", key, key, mod);
 #endif
-	event_key(key, mod);
+	freyja_event_key_press(key, mod);
 
 	if (gtk_accelerator_valid(event->keyval, (GdkModifierType)0))
 		return TRUE;
