@@ -78,7 +78,6 @@ typedef enum {
 	eOpenGLBlend,
 	eDebug,
 	eGenerateCone,
-	eMeshCenter,
 	eMeshMirror,
 	eMeshSelect,
 

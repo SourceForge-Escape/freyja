@@ -1,7 +1,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO ( 2004.11.29 last update )
+  File     : TODO ( 2004.12.04 last update )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : Freyja 0.3.x
 
@@ -17,17 +17,17 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Vertex morphing animation as extension ( was removed during fork )
 	o Remove all unused/obsolete events, functions, and cmds
 	o Bounding box selection made into 2 events:
 	   1. bounding box selection
 	   2. operation on selection ( not just vertex buffer default )
 	o Object Copy/Cut/Paste for more than just meshes
-	o Undo system, refine event system
-	o Interactive plugins
+	o Undo system
 	o Recently used files list
+	o Instead of 'mCleared' events focus on 'mModified' events in Control
 	o Light editing mode backport
 	o Mouse interface needs to replace purely plane based editing
-	o Vertex morphing animation ( was removed during fork )
 	o Skeletal mesh deform edit/render/off toggles to solve interface issue?
 	o Matrix palette skinning 
 	  ( Not supported in Egg backend, but I think it can be done
