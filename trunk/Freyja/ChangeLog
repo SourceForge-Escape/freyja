@@ -28,6 +28,12 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040605) Mongoose <mongoose@icculus.org>
+
+	o New skeletal view type interface
+	o Fixed null mesh skin edit crash
+	o New filedialog button to go back to freyja homedir
+
  Freyja (0.3.5-20040601) Mongoose <mongoose@icculus.org>
 
 	o Fixed Mlisp scoping and ordering issue

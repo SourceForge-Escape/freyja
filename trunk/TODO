@@ -58,8 +58,6 @@
  Freyja
 
 	o Documentation
-	o View > Joint > Render Type
-	o View > Bone > Render Type
 	o Normal map, DOT3, and matrix palette skinning support
 	o glColorMaterial use
 	o Polygon creation from vertex selection should be seperate from creation

@@ -91,6 +91,17 @@ void application_window_role(char *role)
 }
 
 
+void mgtk_event_homedir(GtkWidget *file, void *data)
+{		
+	char *path = freyja_rc_map("/");
+	
+	if (path)
+	{
+		gtk_file_selection_set_filename(GTK_FILE_SELECTION(data), path);
+		delete [] path;
+	}
+}
+
 
 GtkWidget *getGtkFileSelectionWidget()
 {
@@ -107,10 +118,43 @@ GtkWidget *getGtkFileSelectionWidget()
 			gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), path);
 			delete [] path;
 		}
+
+#define EXTEND_FILE_TEST
+#ifdef EXTEND_FILE_TEST
+		GtkWidget *homeButton;
+		GtkWidget *vbox = GTK_FILE_SELECTION(file)->main_vbox;
+		GtkWidget *hbox = mgtk_create_hbox(vbox, "hbox", 0, 0, 0, 0, 0);
+
+		homeButton = gtk_button_new_with_label("Home");
+		//homeButton = gtk_button_new_from_stock("gtk-open");
+		//gtk_button_set_label(GTK_BUTTON(homeButton), "Freyja");
+		gtk_widget_ref(homeButton);
+		gtk_object_set_data_full(GTK_OBJECT(hbox), 
+								 "home_button", homeButton,
+								 (GtkDestroyNotify)gtk_widget_unref);
+		gtk_widget_show(homeButton);
+		gtk_box_pack_start(GTK_BOX(hbox), homeButton, TRUE, TRUE, FALSE);
+		
+		gtk_signal_connect(GTK_OBJECT(homeButton), "pressed",
+						   GTK_SIGNAL_FUNC(mgtk_event_homedir), 
+						   GINT_TO_POINTER(file));
+
+		GtkWidget *optionmenu = gtk_option_menu_new();
+		gtk_widget_ref(optionmenu);
+		gtk_object_set_data_full(GTK_OBJECT(hbox), "optionmenu", optionmenu,
+								 (GtkDestroyNotify)gtk_widget_unref);
+		gtk_widget_show(optionmenu);
+		gtk_box_pack_start(GTK_BOX(hbox), optionmenu, TRUE, TRUE, 0);
+
+		GtkWidget *optionmenu_menu = gtk_menu_new();
+		gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
+		
+#endif
 	}
 
 	return file;
 }
+
 
 ////////////////////////////////////////////////////////////////
 // File dialog support func

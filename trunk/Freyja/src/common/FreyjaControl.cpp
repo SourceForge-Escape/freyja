@@ -375,10 +375,29 @@ void FreyjaControl::eventAnimation(int command)
 }
 
 
+extern unsigned int gBoneRenderType;
+extern unsigned char gJointRenderType;
 void FreyjaControl::eventMisc(int command)
 {
 	switch (command)
 	{
+	case VIEW_JOINT1:
+		gJointRenderType = 1;
+		break;
+	case VIEW_JOINT2:
+		gJointRenderType = 2;
+		break;
+	case VIEW_JOINT3:
+		gJointRenderType = 3;
+		break;
+
+	case VIEW_BONE1:
+		gBoneRenderType = 1;
+		break;
+	case VIEW_BONE2:
+		gBoneRenderType = 2;
+		break;
+
 	case 1000:
 		mModel->Transform(FreyjaModel::TransformMesh, Egg::SCALE,
 						  freyja_event_get_float(1001),

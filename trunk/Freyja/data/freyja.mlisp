@@ -98,6 +98,13 @@
 			(menu_item "Quit"          EVENT_MAIN  CMD_MAIN_SHUTDOWN))
 
 		(submenu "View"
+			(submenu "Joint"
+				(menu_item "Point"     EVENT_MISC  VIEW_JOINT1)
+				(menu_item "Sphere"    EVENT_MISC  VIEW_JOINT2)
+				(menu_item "Axies" EVENT_MISC  VIEW_JOINT3))
+			(submenu "Bone"
+				(menu_item "Line"     EVENT_MISC  VIEW_BONE1)
+				(menu_item "PolyMesh" EVENT_MISC  VIEW_BONE2))
 			(menu_item "Fullscreen"	EVENT_MAIN	CMD_TOGGLE_FULLSCREEN))
 
 		(menu_seperator)
