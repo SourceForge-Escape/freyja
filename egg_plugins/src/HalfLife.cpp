@@ -28,8 +28,9 @@
 
 HalfLife::HalfLife()
 {
-	memset(&mHeader, 0, sizeof(studiohdr_t));
-
+#ifdef BUFFERED_READ
+	mHeader = 0x0;
+#endif
 	mBodyParts = 0x0;
 	mModels = 0x0;
 	mMeshes = 0x0;
@@ -69,10 +70,12 @@ HalfLife::~HalfLife()
 }
 
 
-int HalfLife::load(const char *filename)
+#ifdef BUFFERED_READ
+int HalfLife::loadBuffered(const char *filename)
 {
 	FILE *f;
-	unsigned int i, j, k; //, count, offset;
+	unsigned char *buffer;
+	long size, magic;
 
 
 	f = fopen(filename, "rb");
@@ -85,18 +88,55 @@ int HalfLife::load(const char *filename)
 		return -1;
 	}
 
-	fread(&mHeader, 1, sizeof(studiohdr_t), f);
+	fread(&magic, 4, 1, f);
+
+	if (magic != 0x54534449)
+	{
+		printf("Not a valid halflife model\n");
+		fclose(f);
+
+		return -2;
+	}
+
+	fseek(f, 0, SEEK_END);
+	size = ftell(f);
+	buffer = new unsigned char[size];
+	rewind(f);
+	fread(buffer, size, 1, f);
+	fclose(f);
+}
+#endif
+
+
+int HalfLife::load(const char *filename)
+{
+	FILE *f;
+	unsigned int i, j, k, m;
+
+
+	f = fopen(filename, "rb");
+
+	if (!f)
+	{
+		printf("HalfLife::load> Couldn't load file.\n");
+		perror(filename);
+
+		return -1;
+	}
+
+	fread(&mHeader, sizeof(studiohdr_t), 1, f);
 
 	if (mHeader.id != 0x54534449)
 	{
 		printf("Not a valid halflife model\n");
 		fclose(f);
+
 		return -2;
 	}
 
 	printf("Halflife {\n");
-	printf("\tversion = 0x%x\n", mHeader.id);
-	printf("\tname = '%s'\n", mHeader.name);
+	printf(" version = 0x%lx\n", mHeader.id);
+	printf(" name = '%s'\n", mHeader.name);
 
 	printf(" eyepos <%g %g %g>\n min <%g %g %g>\n max <%g %g %g>\n",
 		   mHeader.eyeposition[0], mHeader.eyeposition[1],
@@ -108,11 +148,11 @@ int HalfLife::load(const char *filename)
 		   mHeader.bbmin[0], mHeader.bbmin[1], mHeader.bbmin[2],
 		   mHeader.bbmax[0], mHeader.bbmax[1], mHeader.bbmax[2]);
 
-	printf(" flags %i\n", mHeader.flags);
-	printf(" bones %i\n boneindex %i\n", mHeader.numbones, mHeader.boneindex);
-	printf(" numseqgroups %i \n", mHeader.numseqgroups);
-	printf(" seqgroupindex %i\n", mHeader.seqgroupindex);
-	printf(" bodyparts %i\n bodypartindex %i\n}\n\n",
+	printf(" flags %li\n", mHeader.flags);
+	printf(" bones %li\n boneindex %li\n", mHeader.numbones, mHeader.boneindex);
+	printf(" numseqgroups %li \n", mHeader.numseqgroups);
+	printf(" seqgroupindex %li\n", mHeader.seqgroupindex);
+	printf(" bodyparts %li\n bodypartindex %li\n}\n\n",
 		   mHeader.numbodyparts, mHeader.bodypartindex);
 
 
@@ -183,13 +223,13 @@ int HalfLife::load(const char *filename)
 	mstudio_bodyparts_t bodyPart;
 	mstudio_model_t model;
 	mstudio_mesh_t mesh;
-	mstudio_trivert_t vertex;
+	//mstudio_trivert_t vertex;
 	unsigned int size;
 
 	mBodyPartCount = mHeader.numbodyparts;
+	printf("Reading %li bodyparts...\n", mHeader.numbodyparts);
+
 	mBodyParts = new hl_bodypart_t[mBodyPartCount];
-	
-	printf("Reading %d bodyparts\n\n", mHeader.numbodyparts);
 
 	for (i = 0; i < mBodyPartCount; ++i)
 	{
@@ -199,131 +239,136 @@ int HalfLife::load(const char *filename)
 		fread(&bodyPart, 1, size, f);
 
 		printf("mBodyParts[%i].name = '%s'\n", i, bodyPart.name);
+		printf("mBodyParts[%i].nummodels = %li\n", i, bodyPart.nummodels);
 
-		fseek(f, bodyPart.modelindex, SEEK_SET);
-		fread(&model, 1, sizeof(mstudio_model_t), f);
+		mBodyParts[i].modelCount = bodyPart.nummodels;
+		mBodyParts[i].models = new hl_model_t[bodyPart.nummodels];
 
-		if (model.numverts < 0)
+		for (m = 0; (int)m < bodyPart.nummodels; ++m)
 		{
-			mBodyParts[i].meshCount = 0;
-			mBodyParts[i].meshes = 0x0;
-			mBodyParts[i].groupCount = 0;
-			mBodyParts[i].groups = 0x0;
-			mBodyParts[i].vertexCount = 0;
-			mBodyParts[i].vertices = 0x0;
-			mBodyParts[i].normalCount = 0;
-			mBodyParts[i].normals = 0x0;
-			continue;
-		}
+			//bodyPart.modelindex
+			fseek(f, bodyPart.modelindex+((i/bodyPart.base)%bodyPart.nummodels), SEEK_SET);
+			fseek(f, m*sizeof(mstudio_model_t), SEEK_CUR);
+			fread(&model, 1, sizeof(mstudio_model_t), f);
 
-		mBodyParts[i].meshCount = model.nummesh;
-		mBodyParts[i].meshes = new hl_mesh_t[mBodyParts[i].meshCount];
-		mBodyParts[i].groupCount = model.numgroups;
-		mBodyParts[i].groups = new hl_group_t[mBodyParts[i].groupCount];
-		mBodyParts[i].vertexCount = model.numverts;
-		mBodyParts[i].vertices = new vec3_t[mBodyParts[i].vertexCount];
-		mBodyParts[i].normalCount = model.numnorms;
-		mBodyParts[i].normals = new vec3_t[mBodyParts[i].normalCount];
+			printf("  model.name = '%s'\n", model.name);
+			printf("  model.nummesh = %li\n", model.nummesh);
+			printf("  model.numverts = %li\n", model.numverts);
 
-		fseek(f, model.vertindex, SEEK_SET);
-		fread(mBodyParts[i].vertices, sizeof(vec3_t), mBodyParts[i].vertexCount, f);
-
-		/*
-		for (j = 0; j < mBodyParts[i].vertexCount; ++j)
-		{
-			size = sizeof(vec_t);
-
-			fread(&mBodyParts[i].vertices[j][0], size, 1, f);
-			fread(&mBodyParts[i].vertices[j][1], size, 1, f);
-			fread(&mBodyParts[i].vertices[j][2], size, 1, f);
-		}
-		*/
-
-		short cmd;
-		unsigned int aa, bb, a, b, c;
-
-		for (j = 0; j < mBodyParts[i].meshCount; ++j)
-		{
-			size = sizeof(mstudio_mesh_t);
-
-			fseek(f, model.meshindex + j * size, SEEK_SET);
-			fread(&mesh, size, 1, f);
-
-			mBodyParts[i].meshes[j].faceCount = mesh.numtris;
-			mBodyParts[i].meshes[j].faces = new hl_face_t[mBodyParts[i].meshes[j].faceCount];
-			mBodyParts[i].meshes[j].normalCount = mesh.numnorms;
-			mBodyParts[i].meshes[j].material = mesh.skinref;
-
-			fseek(f, mesh.triindex, SEEK_SET);
-
-			size = sizeof(mstudio_trivert_t);
-
-			/* Face loader: triangle fans and strips */
-			for (k = 0; cmd && k < mBodyParts[i].meshes[j].faceCount; )
+			if (model.nummesh < 0 || model.numverts < 0)
 			{
-				fread(&cmd, 1, 2, f);
+				mBodyParts[i].models[m].meshCount = 0;
+				mBodyParts[i].models[m].meshes = 0x0;
+				mBodyParts[i].models[m].groupCount = 0;
+				mBodyParts[i].models[m].groups = 0x0;
+				mBodyParts[i].models[m].vertexCount = 0;
+				mBodyParts[i].models[m].vertices = 0x0;
+				mBodyParts[i].models[m].normalCount = 0;
+				mBodyParts[i].models[m].normals = 0x0;
+				continue;
+			}
 
-				if (cmd < 0)
+			mBodyParts[i].models[m].meshCount = model.nummesh;
+			mBodyParts[i].models[m].meshes = new hl_mesh_t[model.nummesh];
+			mBodyParts[i].models[m].groupCount = model.numgroups;
+			mBodyParts[i].models[m].groups = new hl_group_t[model.numgroups];
+			mBodyParts[i].models[m].vertexCount = model.numverts;
+			mBodyParts[i].models[m].vertices = new vec3_t[model.numverts];
+			mBodyParts[i].models[m].normalCount = model.numnorms;
+			mBodyParts[i].models[m].normals = new vec3_t[model.numnorms];
+
+			fseek(f, model.vertindex, SEEK_SET);
+			fread(mBodyParts[i].models[m].vertices, sizeof(vec3_t),
+				  model.numverts, f);
+			fseek(f, model.normindex, SEEK_SET);
+			fread(mBodyParts[i].models[m].normals, sizeof(vec3_t),
+				  model.numnorms, f);
+
+			printf("    Reading %li meshes...\n", model.nummesh);
+
+			for (j = 0; (int)j < model.nummesh; ++j)
+			{
+				size = sizeof(mstudio_mesh_t);
+
+				fseek(f, model.meshindex + j * size, SEEK_SET);
+				fread(&mesh, size, 1, f);
+
+				printf("    mesh[%i].faces = %li...\n", j, mesh.numtris);
+
+				mBodyParts[i].models[m].meshes[j].faceCount = mesh.numtris;
+				mBodyParts[i].models[m].meshes[j].faces = new hl_face_t[mesh.numtris];
+				mBodyParts[i].models[m].meshes[j].normalCount = mesh.numnorms;
+				mBodyParts[i].models[m].meshes[j].material = mesh.skinref;
+
+				fseek(f, mesh.triindex, SEEK_SET);
+
+				size = sizeof(mstudio_trivert_t);
+
+#define HALFLIFE_EASY_FACE
+#ifdef HALFLIFE_EASY_FACE
+				// Hacky stack space jujitsu to avoid more vectors/arrays
+				short numFaces, vertex, light, st1, st2;
+				short centervertex, lastvertex, lastlastvertex;
+				short centerst1, lastst1, lastlastst1;
+				short centerst2, lastst2, lastlastst2;
+				unsigned int t, tn, tri;
+
+				/* Face loader: triangle fans and strips */
+				for (k = 0; (int)k < mesh.numtris; ++k)
 				{
-					cmd =- cmd;
-					aa = bb = k;
+					fseek(f, mesh.triindex + 2*k, SEEK_SET);
+					fread(&numFaces, 1, 2, f);
 
-					fread(&mBodyParts[i].meshes[j].faces[k].vertex[0], 
-						  size, 1, f);
-					fread(&mBodyParts[i].meshes[j].faces[k].vertex[1], 
-						  size, 1, f);
+#ifdef DEBUG_HALFLIFE_FACETS
+					printf("Reading %i %s...\n",
+						   (numFaces > 0) ? numFaces : -numFaces, 
+						   (numFaces > 0) ? "triangle fans" : "triangle strips");
+#endif
+					tn = (numFaces > 0) ? numFaces : -numFaces;
 
-					a = mBodyParts[i].meshes[j].faces[k].vertex[0].vertindex;
-					b = mBodyParts[i].meshes[j].faces[k].vertex[1].vertindex;
-
-					for (cmd -= 3; cmd > 0; --cmd, ++k)
+					for (tri = 0, t = 0; t < tn; ++t)
 					{
-						fread(&mBodyParts[i].meshes[j].faces[k].vertex[2], 
-							  size, 1, f);
+						fread(&vertex, 1, 2, f);
+						fread(&light, 1, 2, f);
+						fread(&st1, 1, 2, f);
+						fread(&st2, 1, 2, f);
 
-						c=mBodyParts[i].meshes[j].faces[k].vertex[2].vertindex;
+						if (t == 0)
+						{
+							centervertex = vertex;
+							centerst1 = st1;
+							centerst2 = st2;
+						}
+						else if (numFaces > 0 && t > 2) // fan -> triangle
+						{
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[0].vertindex = centervertex;
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[1].vertindex = lastvertex;
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[2].vertindex = vertex;
+							//printf("f %i %i %i\n", 
+							//	   centervertex, lastvertex, vertex);
 
-						mBodyParts[i].meshes[j].faces[k].vertex[0].vertindex =
-						a;
-						mBodyParts[i].meshes[j].faces[k].vertex[1].vertindex =
-						b;
-						mBodyParts[i].meshes[j].faces[k].vertex[2].vertindex =
-						c;
+							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[0].s = centerst1;
+							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[0].t = centerst2;
+							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[1].s = lastst1;
+							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[1].t = lastst2;
+							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[2].s = st1;
+							hl.mBodyParts[b].models[mdl].meshes[m].faces[tri].vertex[2].t = st2;
 
-						bb = k;
-						b = c;
-					}
-				}
-				else
-				{
-					aa = bb = k;
+							++tri;
+						}
+						else if (numFaces < 0 && t > 2) // strip -> triangle
+						{
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[0].vertindex = lastlastvertex;
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[1].vertindex = lastvertex;
+							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[2].vertindex = vertex;
+							//printf("s %i %i %i\n", 
+							//	   lastlastvertex, lastvertex, vertex);
 
-					fread(&mBodyParts[i].meshes[j].faces[k].vertex[0], 
-						  size, 1, f);
-					fread(&mBodyParts[i].meshes[j].faces[k].vertex[1], 
-						  size, 1, f);						
-					
-					a = mBodyParts[i].meshes[j].faces[k].vertex[0].vertindex;
-					b = mBodyParts[i].meshes[j].faces[k].vertex[1].vertindex;
+							++tri;
+						}
 
-					for (cmd -= 3; cmd > 0; cmd--, k++)
-					{	
-						fread(&mBodyParts[i].meshes[j].faces[k].vertex[2], 
-							  size, 1, f);
-
-						c=mBodyParts[i].meshes[j].faces[k].vertex[2].vertindex;
-
-						mBodyParts[i].meshes[j].faces[k].vertex[0].vertindex =
-						a;
-						mBodyParts[i].meshes[j].faces[k].vertex[1].vertindex =
-						b;
-						mBodyParts[i].meshes[j].faces[k].vertex[2].vertindex =
-						c;
-
-						aa = bb;
-						bb = k;						
-						a = b;
-						b = c;
+						lastlastvertex = lastvertex;
+						lastvertex = vertex;
 					}
 				}
 			}
@@ -331,164 +376,28 @@ int HalfLife::load(const char *filename)
 	}
 
 	mBoneCount = mHeader.numbones;
- 	mBones = new mstudio_bone_t[mBoneCount];
+ 	mBones = new mstudio_bone_t[mHeader.numbones];
+	printf("Reading %li bones...\n", mHeader.numbones);
+	fseek(f, mHeader.boneindex, SEEK_SET);
+	fread(mBones, 1, mHeader.numbones*sizeof(mstudio_bone_t), f);
 
-
-#ifdef OBSOLETE
-	for (i = 0; i < mHeader.numbodyparts; ++i)
+#ifdef HALFLIFE_DEBUG_LOG
+	for (i = 0; (int)i < mHeader.numbones; ++i)
 	{
+		printf("bone[%i]\n", i);
 
-		for (j = 0; j < _mdl[i].nummesh; j++)
+		for (j = 0; (int)j < 6; ++j)
 		{
-
-			////////////////////FIXME???
-			if (mTextures[_mesh[i][j].skinref].flags & STUDIO_NF_CHROME)
-			{
-				short cmd;
-				short a,b,c;
-				int aa, bb;
-	    
-
-				k = 0;
-
-				fseek(f, _mesh[i][j].triindex, SEEK_SET);
-				fread(&cmd, 1, 2, f);
-
-				// Trifan loader        
-				while (cmd)
-				{
-					if (cmd < 0)
-					{
-						cmd =- cmd;
-						fread(&a, 1, 2, f);
-						fread(&_tris[i][j][k].norm[0], 1, 2, f);
-						fread(&_tris[i][j][k].st[0], 1, 4, f);
-
-						aa = k;
-
-						fread(&b, 1, 2, f);
-						fread(&_tris[i][j][k].norm[1], 1, 2, f);
-						fread(&_tris[i][j][k].st[1], 1, 4, f);
-
-						bb = k;
-
-						for (cmd -= 2; cmd > 0; cmd--, k++)
-						{
-#ifdef UNIT_TEST_HALFLIFE
-							printf("^ cmd %i\n", cmd);
-#endif
-
-							fread(&c, 1, 2, f);
-							fread(&_tris[i][j][k].norm[2], 1, 2, f);
-							fread(&_tris[i][j][k].st[2], 1, 4, f);
-   
-							_tris[i][j][k].tri[0] = a;
-							_tris[i][j][k].tri[1] = b;
-							_tris[i][j][k].tri[2] = c;
-
-							_tris[i][j][k].st[0][0] = _tris[i][j][aa].st[0][0];
-							_tris[i][j][k].st[0][1] = _tris[i][j][aa].st[0][1];
-							_tris[i][j][k].st[1][0] = _tris[i][j][bb].st[1][0];
-							_tris[i][j][k].st[1][1] = _tris[i][j][bb].st[1][1];
-
-#ifdef UNIT_TEST_HALFLIFE
-							printf("triangle[%i][%i][%i] {\n  verts %i, %i, %i\n", 
-								   i, j, k, a, b, c);
-							printf("  norms %i, %i, %i\n", 
-								   _tris[i][j][k].norm[0],
-								   _tris[i][j][k].norm[1],
-								   _tris[i][j][k].norm[2]);
-							printf("  st %i,%i %i,%i %i,%i\n}\n\n",
-								   _tris[i][j][k].st[0][0],
-								   _tris[i][j][k].st[0][1],
-								   _tris[i][j][k].st[1][0],
-								   _tris[i][j][k].st[1][1],
-								   _tris[i][j][k].st[2][0],
-								   _tris[i][j][k].st[2][1]);
-#endif
-
-							bb = k;
-							b = c;
-						}
-					}
-					else
-					{
-						fread(&a, 1, 2, f);
-						fread(&_tris[i][j][k].norm[0], 1, 2, f);
-						fread(&_tris[i][j][k].st[0], 1, 4, f);
-
-						aa = k;
-
-						fread(&b, 1, 2, f);
-						fread(&_tris[i][j][k].norm[1], 1, 2, f);
-						fread(&_tris[i][j][k].st[1], 1, 4, f);
-	    
-						bb = k;
-
-						for (cmd -= 2; cmd > 0; cmd--, k++)
-						{
-#ifdef UNIT_TEST_HALFLIFE
-							printf("V cmd %i\n", cmd);
-#endif
-
-							fread(&c, 1, 2, f);
-							fread(&_tris[i][j][k].norm[2], 1, 2, f);
-							fread(&_tris[i][j][k].st[2], 1, 4, f);
-   
-							_tris[i][j][k].tri[0] = a;
-							_tris[i][j][k].tri[1] = b;
-							_tris[i][j][k].tri[2] = c;
-	      
-							_tris[i][j][k].st[0][0] = _tris[i][j][aa].st[0][0];
-							_tris[i][j][k].st[0][1] = _tris[i][j][aa].st[0][1];
-							_tris[i][j][k].st[1][0] = _tris[i][j][bb].st[1][0];
-							_tris[i][j][k].st[1][1] = _tris[i][j][bb].st[1][1];
-
-#ifdef UNIT_TEST_HALFLIFE
-							printf("triangle[%i][%i][%i] {\n  verts %i, %i, %i\n", 
-								   i, j, k, a, b, c);
-							printf("  norms %i, %i, %i\n", 
-								   _tris[i][j][k].norm[0],
-								   _tris[i][j][k].norm[1],
-								   _tris[i][j][k].norm[2]);
-							printf("  st %i,%i %i,%i %i,%i\n}\n\n",
-								   _tris[i][j][k].st[0][0],
-								   _tris[i][j][k].st[0][1],
-								   _tris[i][j][k].st[1][0],
-								   _tris[i][j][k].st[1][1],
-								   _tris[i][j][k].st[2][0],
-								   _tris[i][j][k].st[2][1]);
-#endif	      
-
-							aa = bb;
-							bb = k;
-
-							a = b;
-							b = c;
-						}
-					}
-	  
-#ifdef UNIT_TEST_HALFLIFE
-					printf("\n");
-#endif
-	  
-					fread(&cmd,1,2,f);
-				}
-			}
-
-			// just to be sure
-			if (_mesh[i][j].numtris != k)
-			{
-				_mesh[i][j].numtris = k;  
-				printf("HalfLife::Load> ERROR: mesh triangle load fubar\n");
-				return -2;
-			}
+			printf(" %f", mBones[i].value[j]);
 		}
+
+		printf("\n");
 	}
 #endif
 
 	return 0;
 }
+
 
 ////////////////////////////////////////////////////////////
 // Special Interface code
@@ -542,6 +451,7 @@ int freyja_model__halflife_import(char *filename)
 	unsigned int i, b, f, m, vert;
 	float u, v, w, h;
 	short s, t;
+	vec_t scale = 0.5; // DoD needs 0.5
 
 
 	if (hl.load(filename) < 0)
@@ -549,6 +459,8 @@ int freyja_model__halflife_import(char *filename)
 		return -1;
 	}
 
+
+	/* Read texture data */
 	printf("Processing HalfLife textures: ");
 
 	for (i = 10; i < hl.mTextureCount; ++i)
@@ -561,19 +473,25 @@ int freyja_model__halflife_import(char *filename)
 		}
 	}
 
+
+	/* Read mesh data */
 	printf("Processing HalfLife bodyparts:\n");
 
 	for (b = 0; b < hl.mBodyPartCount; ++b)
 	{
 		eggBegin(FREYJA_MESH);
+
+		for (unsigned int mdl = 0; mdl < hl.mBodyParts[b].modelCount; ++mdl)
+		{
+
 		eggBegin(FREYJA_GROUP);	
 		trans.Clear();
 
-		for (i = 0; i < hl.mBodyParts[b].vertexCount; ++i)
+		for (i = 0; i < hl.mBodyParts[b].models[mdl].vertexCount; ++i)
 		{
-			vert = eggVertexStore3f(hl.mBodyParts[b].vertices[i*3][0],
-									hl.mBodyParts[b].vertices[i*3][1], 
-									hl.mBodyParts[b].vertices[i*3][2]);
+			vert = eggVertexStore3f(hl.mBodyParts[b].models[mdl].vertices[i*3][0],
+									hl.mBodyParts[b].models[mdl].vertices[i*3][1], 
+									hl.mBodyParts[b].models[mdl].vertices[i*3][2]);
 			
 			// Mongoose 2002.02.09, Generates id translator list
 			trans.Add(i, vert);	
@@ -581,52 +499,95 @@ int freyja_model__halflife_import(char *filename)
 
 		eggEnd(); // FREYJA_GROUP
 
-		for (m = 0; m < hl.mBodyParts[b].meshCount; ++m)
+		for (m = 0; m < hl.mBodyParts[b].models[mdl].meshCount; ++m)
 		{
-			for (f = 0; f < hl.mBodyParts[b].meshes[m].faceCount; ++f)
+			for (f = 0; f < hl.mBodyParts[b].models[mdl].meshes[m].faceCount; ++f)
 			{
 				// Start a new polygon
 				eggBegin(FREYJA_POLYGON);
 
 				// Store vertices by true id, using translation table
-				eggVertex1i(trans[hl.mBodyParts[b].meshes[m].faces[f].vertex[0].vertindex]);
-				eggVertex1i(trans[hl.mBodyParts[b].meshes[m].faces[f].vertex[1].vertindex]);
-				eggVertex1i(trans[hl.mBodyParts[b].meshes[m].faces[f].vertex[2].vertindex]);
+				eggVertex1i(trans[hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[0].vertindex]);
+				eggVertex1i(trans[hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].vertindex]);
+				eggVertex1i(trans[hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].vertindex]);
 
 
 				/* Generate, Store, and link UVs to polygon */
 				if (hl.mImages) // should only be null while fixing this plugin
 				{
-					w = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].w;
-					h = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].h;
+					w = (float)hl.mImages[hl.mBodyParts[b].models[mdl].meshes[m].material].w;
+					h = (float)hl.mImages[hl.mBodyParts[b].models[mdl].meshes[m].material].h;
 
-					s = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].s;
-					t = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].t;
+					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[0].s;
+					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[0].t;
 					u = s / w;
 					v = t / h;
 					eggTexCoord1i(eggTexCoordStore2f(u, v));
 
-					s = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].s;
-					t = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].t;
+					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].s;
+					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].t;
 					u = s / w;
 					v = t / h;
 					eggTexCoord1i(eggTexCoordStore2f(u, v));
 
-					s = hl.mBodyParts[b].meshes[m].faces[f].vertex[2].s;
-					t = hl.mBodyParts[b].meshes[m].faces[f].vertex[2].t;
+					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].s;
+					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].t;
 					u = s / w;
 					v = t / h;
 					eggTexCoord1i(eggTexCoordStore2f(u, v));
 
-					eggTexture1i(hl.mBodyParts[b].meshes[m].material);
-
-					eggEnd(); // FREYJA_POLYGON
+					eggTexture1i(hl.mBodyParts[b].models[mdl].meshes[m].material);
 				}
+
+				eggEnd(); // FREYJA_POLYGON
 			}
+		}
 		}
 
 		eggEnd(); // FREYJA_MESH
 	}
+
+
+	eggBegin(FREYJA_SKELETON);
+
+	
+	for (b = 0; b < hl.mBoneCount; ++b)
+	{
+		eggBegin(FREYJA_BONE);
+		eggSetBoneParent(hl.mBones[b].parent);
+		eggTagName(hl.mBones[b].name);
+
+		if (b == 0)
+		{
+			eggTagPos3f(hl.mBones[b].value[0]*scale, 
+						hl.mBones[b].value[2]*scale, 
+						hl.mBones[b].value[1]*scale);
+			eggTagRotate3f(hl.mBones[b].value[3]*57.295779513082323, 
+						   hl.mBones[b].value[4]*57.295779513082323 -90.0, 
+						   hl.mBones[b].value[5]*57.295779513082323);
+		}
+		else
+		{
+			eggTagPos3f(hl.mBones[b].value[0]*scale, 
+						hl.mBones[b].value[1]*scale, 
+						hl.mBones[b].value[2]*scale);
+			eggTagRotate3f(hl.mBones[b].value[3]*57.295779513082323, 
+						   hl.mBones[b].value[4]*57.295779513082323, 
+						   hl.mBones[b].value[5]*57.295779513082323);
+		}
+
+		for (i = 0; i < hl.mBoneCount; ++i)
+		{
+			if (hl.mBones[i].parent == (int)b)
+			{ 
+				eggTagAddSlave1u(i);
+			}
+		}
+
+		eggEnd(); // FREYJA_BONE
+	}
+
+	eggEnd(); // FREYJA_SKELETON
 
 	return 0;
 }
@@ -634,11 +595,12 @@ int freyja_model__halflife_import(char *filename)
 
 int freyja_model__halflife_export(char *filename)
 {
-  printf("freyja_model__halflife_export> Not implemented, %s:%i\n", 
-	 __FILE__, __LINE__);
+	printf("freyja_model__halflife_export> Not implemented, %s:%i\n", 
+		   __FILE__, __LINE__);
 
-  return -1;
+	return -1;
 }
+
 
 // FIXME: Finish porting EggPlugin code
 #ifdef FIXME
@@ -672,27 +634,15 @@ void FreyjaModel::HalfLifeImport(HalfLife *hl)
   hl_tris = hl.Tris();
 
 
-  // FIXME: Texture code not supported yet ////////////////////////////////
-#ifdef FIXME
-  mtkTextureClear();
-  mtkTextureSetNum(hl_header->numtextures);
-
+  /* Read texture data */
   for (i = 0; i < hl_header->numtextures; i++)
   {
-    mtkTextureLoadBuffer(hl_skin[i].image, hl_skin[i].w, hl_skin[i].h,
-			 COLORMODE_RGB);
-
-    if (_defaults & FL_DUMP_TEXTURE)
-    {
-      img.Load(hl_skin[i].image, hl_skin[i].w, hl_skin[i].h, COLORMODE_RGB);
-      sprintf(buffer, "textures/hl-%i.tga", i);
-      img.Save(freyja_rc_map(buffer), "tga");
-    }
+    eggTextureStoreBuffer(hl_skin[i].image, 3, hl_skin[i].w, hl_skin[i].h, 
+			  EGG_COLORMODE_RGB);
   }
-#endif
-  ///////////////////////////////////////////////////////////////////////
 
 
+  /* Read mesh data */
   for (b = 0; b < hl_header->numbodyparts; b++)
   {
     eggBegin(FREYJA_BONE_FRAME);

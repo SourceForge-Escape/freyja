@@ -17,6 +17,7 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Animation save doesn't warn on overwrite -- do that
 	o Curved surfaces in backend, remove patch test
 	o CLI libfreyja util tool, freyja import foo.mdl export bar.smd
 	  this will greatly aid in testing
