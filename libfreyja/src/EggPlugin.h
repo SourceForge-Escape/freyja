@@ -1,7 +1,7 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : GooseEgg
+ * Project : Freyja, GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://gooseegg.sourceforge.net
  * Email   : mongoose@users.sourceforge.net
@@ -39,8 +39,8 @@
  *
  ==========================================================================*/
 
-#ifndef GUARD__MONGOOSE_GOOSEEGG_EGGPLUGIN_H
-#define GUARD__MONGOOSE_GOOSEEGG_EGGPLUGIN_H
+#ifndef GUARD__MONGOOSE_FREYJA_EGGPLUGIN_H
+#define GUARD__MONGOOSE_FREYJA_EGGPLUGIN_H
 
 #include <stdarg.h>
 #include <mstl/Stack.h>

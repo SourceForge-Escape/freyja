@@ -371,7 +371,8 @@ public:
 
 	void remove(unsigned int index)
 	{
-		mData[index] = 0x0;  // No, just invalidate it
+		if (index < end())
+			mData[index] = 0x0;  // No, just invalidate it
 
 		// Hhhmm... dangerous and fun - this gets your data out of order	
 		//mData[index] = mData[begin()];
