@@ -104,6 +104,12 @@ int freyja_model__obj_import(char *filename)
 					break;
 			}
 		}
+		else if (!strncmp(symbol, "mtllib", 6))
+		{
+			// Filename of the material
+			symbol = r.parseSymbol();
+			freyjaPrintMessage("FIXME: Material '%s' is not used\n", symbol);
+		}
 		else if (!strncmp(symbol, "usemtl", 6))
 		{
 			// Filename of the material
