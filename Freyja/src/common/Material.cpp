@@ -689,7 +689,11 @@ void Material::applyEffectGL()
 	if (m_flags & fEnable_Blending)
 	{
 		glBlendFunc(blend_src, blend_dest);
-		//glEnable(GL_BLEND);
+		glEnable(GL_BLEND);
+	}
+	else
+	{
+		glDisable(GL_BLEND);
 	}
 #endif
 }

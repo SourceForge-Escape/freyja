@@ -117,14 +117,18 @@ typedef enum {
 } egg_chunk_t;
 
 
-typedef struct {
+class EggMetaData
+{
+public:
 	unsigned int id;               /* Unique identifier */
 
 	unsigned int type;
 	unsigned int size;
+	char *symbol;
+	char *description;
 	void *data;
 
-} egg_metadata_t;
+};
 
 
 typedef struct {

@@ -132,7 +132,7 @@ void FreyjaControl::eventMain(int command)
 		freyja_event_file_dialog("Open texture");
 		break;
 	case CMD_MAIN_SHUTDOWN:
-		freyja_event_shutdown();
+		freyja_event_exit();
 		break;
 
 	case CMD_MAIN_DEBUG_EGG:

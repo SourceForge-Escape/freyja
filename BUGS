@@ -17,13 +17,23 @@
 	o Mesh copy / cut / paste
 	o LOAD_MAP / FL_VERTEX_UV / DUMP_TEXTURE
 
+ Mlisp
+
+	o Eval function objects have no symbol set
+	o Eval shouldn't buffer the way it does - setq's
+      bind in reverse order eg not line 1, 2, 3 but 3, 2, 1
+	  ( FIX by executing in true scopes )
+
  Backend
 
 	o Egg8 loses bone names on save
 	o Normal generation not interpolating correctly
+	o Generated Spheres use duplicate vertices
 
  Interface
 
+	o mgtk+ glarea button events mapped twice it seems
+	o Segfault on exit after 20040524 build
 	o Crash skin edit no skin
 	o Check RTS order in renderer
 	o Some mesh events don't update with event_refresh()

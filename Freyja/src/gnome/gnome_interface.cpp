@@ -191,7 +191,53 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 #endif
 
 
-GtkWidget *mgtk_create_icon(char *icon_name)
+GdkPixbuf *mgtk_create_pixbuf(char *icon_name)
+{
+	char icon_filename[1024];
+	GdkPixbuf *icon = NULL;
+
+	// FIXME: Should be removed
+	freyja_get_pixmap_filename(icon_filename, 1024, icon_name);
+	icon_filename[1023] = 0;
+
+	if (icon_filename && icon_filename[0])
+	{
+		GError *error = NULL;
+
+		icon = gdk_pixbuf_new_from_file(icon_filename, &error);
+
+		if (!icon)
+		{
+			fprintf(stderr, "Failed to load icon file: %s: %s\n",
+					  icon_filename, error->message);
+			g_error_free(error);
+		}
+	}
+
+	return icon;
+}
+
+
+void mgtk_create_window_icon(GtkWidget *window, GdkPixbuf *icon)
+{
+	if (window && icon)
+	{
+      gtk_window_set_icon(GTK_WINDOW(window), icon);
+      gdk_pixbuf_unref(icon);
+	}
+}
+
+
+void mgtk_destroy_pixbuf(GdkPixbuf *icon)
+{
+	if (icon)
+	{
+      gdk_pixbuf_unref(icon);
+	}
+}
+
+
+GtkWidget *mgtk_create_icon(char *icon_name) // , int icon_size)
 {
 	GtkWidget *icon = NULL;
 	char filename[1024];
@@ -204,6 +250,7 @@ GtkWidget *mgtk_create_icon(char *icon_name)
 	}
 	else
 	{
+		// FIXME: Should be removed
 		freyja_get_pixmap_filename(filename, 1024, icon_name);
 		filename[1023] = 0;
 		icon = gtk_image_new_from_file(filename);
@@ -555,8 +602,7 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
 GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_name)
 {
 	GtkWidget *window;
-	char icon_filename[1024];
-	GdkPixbuf *icon = NULL;
+	GdkPixbuf *icon;
 
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -569,28 +615,9 @@ GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_name)
 	gtk_widget_set_events(GTK_WIDGET(window),
 						  GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);
 
-	freyja_get_pixmap_filename(icon_filename, 1024, icon_name);
-	icon_filename[1023] = 0;
-
-	if (icon_filename && icon_filename[0])
-	{
-		GError *error = NULL;
-
-		icon = gdk_pixbuf_new_from_file(icon_filename, &error);
-
-		if (!icon)
-		{
-			fprintf(stderr, "Failed to load icon file: %s: %s\n",
-					  icon_filename, error->message);
-			g_error_free(error);
-		}
-	}
-
-	if (icon)
-	{
-      gtk_window_set_icon(GTK_WINDOW(window), icon);
-      gdk_pixbuf_unref(icon);
-	}
+	icon = mgtk_create_pixbuf(icon_name);
+	mgtk_create_window_icon(window, icon);
+	//mgtk_destroy_pixbuf(icon);
 
 	return window;
 }

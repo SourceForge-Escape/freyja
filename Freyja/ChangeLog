@@ -28,6 +28,15 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040526) Mongoose <mongoose@icculus.org>
+
+	o Some more Mlisp debugging
+	o Blending reenabled, but not fixed properly
+
+ Freyja (0.3.5-20040525) Mongoose <mongoose@icculus.org>
+
+	o Fixed segfault on EVENT_SHUTDOWN in new shutdown event
+
  Freyja (0.3.5-20040524) Mongoose <mongoose@icculus.org>
 
 	o Decoupling more gtk+ widgets interface and freyja event system

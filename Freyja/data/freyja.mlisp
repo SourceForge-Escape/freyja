@@ -294,7 +294,7 @@
 					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE))
 
 					(hbox 1 1 0 1 1
-						(button "Scale" EVENT_MISC eNONE)
+						(button "Scale" EVENT_MISC 1000)
 						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1001)
 						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1002)
 						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1003))
