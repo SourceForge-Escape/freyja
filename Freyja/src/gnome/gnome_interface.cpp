@@ -311,10 +311,18 @@ GtkWidget *toolbar_btn(GtkWidget *toolbar,
 	GtkWidget *button;
 	GtkWidget *toolbar_icon;
 	
-
-	demangle_pixmap_name(icon_name, icon);
 	
-	toolbar_icon = gtk_image_new_from_file(icon_name);
+	if (!strncmp("gtk", icon, 3))
+	{
+		toolbar_icon = gtk_image_new_from_stock(icon, 
+												GTK_ICON_SIZE_SMALL_TOOLBAR);
+	}
+	else
+	{
+		demangle_pixmap_name(icon_name, icon);
+		toolbar_icon = gtk_image_new_from_file(icon_name);
+	}
+
 	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 										GTK_TOOLBAR_CHILD_BUTTON,
 										NULL,

@@ -19,6 +19,11 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ freyja_model (0.8.14-20040422) Mongoose <mongoose@users.sourceforge.net>
+
+	* New normal generation system
+	* Fix for bad index catch in EggPlugin's Texture system
+	
  freyja_model (0.8.14-20040403) Mongoose <mongoose@users.sourceforge.net>
 
 	* Using mstl headers now instead of local copies

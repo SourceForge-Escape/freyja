@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
@@ -17,11 +17,11 @@
  *
  * 2001.07.04:
  * Mongoose - Created, based on viewer code from anonymous
- ================================================================*/
+ ==========================================================================*/
 
 
-#ifndef __FREYJA_MONGOOSE_NOD_H_
-#define __FREYJA_MONGOOSE_NOD_H_
+#ifndef GUARD__FREYJA_MONGOOSE_NOD_H
+#define GUARD__FREYJA_MONGOOSE_NOD_H
 
 #ifndef color_t
 typedef float color_t[4];

@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
@@ -17,7 +17,7 @@
  *
  * 2001.07.04:
  * Mongoose - Created, based on viewer code from anonymous
- ================================================================*/
+ ==========================================================================*/
 
 
 #include <stdio.h>
@@ -288,7 +288,7 @@ nod_bone_t *Nod::Bones()
 }
 
 
-#ifdef TEST_NOD
+#ifdef UNIT_TEST_NOD
 int main(int argc, char *argv[])
 {
 	int i, j, num_verts, num_faces;

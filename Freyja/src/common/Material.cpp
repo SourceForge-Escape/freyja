@@ -204,6 +204,9 @@ void Material::setFlag(MaterialFlags_t flag)
 #ifdef HAVE_OPENGL
 	switch (flag)
 	{
+		//case fEnable_Blending:
+		//	glEnable(GL_BLEND);
+		//	break;
 	case fEnable_Normalize:
 		glEnable(GL_NORMALIZE);
 		break;
@@ -222,6 +225,9 @@ void Material::clearFlag(MaterialFlags_t flag)
 #ifdef HAVE_OPENGL
 	switch (flag)
 	{
+		//case fEnable_Blending:
+		//	glDisable(GL_BLEND);
+		//	break;
 	case fEnable_Normalize:
 		glDisable(GL_NORMALIZE);
 		break;
@@ -683,7 +689,7 @@ void Material::applyEffectGL()
 	if (m_flags & fEnable_Blending)
 	{
 		glBlendFunc(blend_src, blend_dest);
-		glEnable(GL_BLEND);
+		//glEnable(GL_BLEND);
 	}
 #endif
 }

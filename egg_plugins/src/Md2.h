@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
 /*==========================================================================
  * 
  * Project : MDDC
@@ -104,6 +105,7 @@ typedef struct MD2_s
 
 } MD2_t;
 
+
 class Md2
 {
 private:
@@ -124,11 +126,13 @@ public:
  
     ~Md2();
 
-    
-
     MD2_t *Header();
 
     VertexIndex_t *Frame(int n);
+
+	AliasFrame_t *getFrame(unsigned int frame);
+
+	unsigned int getNumFrames();
 
     void BoundingBox_Update(const float x, const float y, const float z);
 
@@ -143,6 +147,11 @@ public:
     void TexCoords(short *s, short *t, int tri, int vert);
 
     double GetRadius();
+
+
+#ifdef USING_OPENGL
+	void render(unsigned int frame, unsigned int texture);
+#endif
 };
 
 #endif

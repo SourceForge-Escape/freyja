@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja_egg/EggPlugin.h>
+#include <freyja_model/EggPlugin.h>
 //#include "Milkshape.h"
 
 
@@ -141,8 +141,8 @@ int freyja_model__milkshape_check(char *filename)
 	fclose(f);
 
 	// MilkShape 1.3 or 1.4 model?
-	if ((strncmp(pHeader->id, "MS3D000000", 10) == 0) &&
-		 header->version == 3 || header->version == 4))
+	if ((strncmp(header.id, "MS3D000000", 10) == 0) &&
+		 header.version == 3 || header.version == 4)
 		return 0;
 
 	return -2;
@@ -170,7 +170,7 @@ int freyja_model__milkshape_import(char *filename)
 
 	fseek(f, 0, SEEK_END);
 	sz = ftell(f);
-	fseek(f, 0, SEEK_SET)
+	fseek(f, 0, SEEK_SET);
 
 	buffer = new byte[sz];
 	
@@ -181,6 +181,8 @@ int freyja_model__milkshape_import(char *filename)
 
 	header = (ms3d_header_t *)offset;
 	offset += sizeof(ms3d_header_t);
+
+	printf("Doh I never finished this!!!\n");
 
 	/////////////////////////////////////////////////////////////////
 

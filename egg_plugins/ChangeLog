@@ -1,4 +1,24 @@
 
+20040422, Mongoose:
 
-	PSKModel 20040422, Mongoose
+	UnReal
+	* Imported Midgard UT texture, mesh, and package support
+
+	GRNModel
+	* Imported Midgard version
+
+	Mdl
+	* Plugin loads both a hexen2 and quake paletted texture
+	* New texture in model loading system loads a
+	* Convert to freyja coordinate space
+	
+	Md2
+	* Convert to freyja coordinate space
+	* Imported Midgard version
+
+	Md3, Md3AnimModel
+	* Still no Md3AnimModel yet plugin sorry
+	* Imported Midgard versions
+	
+	PSKModel
 	* Fixed material id load bug

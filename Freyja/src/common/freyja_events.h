@@ -256,7 +256,9 @@ enum freyja_event_misc_cmd
 
 	CMD_MISC_RENDER_GRID     = 40,
 	CMD_MISC_LOAD_MAP        = 41,
-	CMD_MISC_DISPLAY_INFO    = 42
+	CMD_MISC_DISPLAY_INFO    = 42,
+	
+	CMD_MISC_GEN_NORMALS
 };
 
 enum freyja_event_mesh_cmd

@@ -568,8 +568,8 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 		if (value != gFreyjaModel->getCurrentTextureIndex())
 		{
 			gFreyjaModel->setCurrentTextureIndex(value);
-			value = gFreyjaModel->getCurrentTextureIndex();
-			spinbutton_value_set(event, value);
+			//value = gFreyjaModel->getCurrentTextureIndex();
+			//spinbutton_value_set(event, value);
 			event_refresh();
 		}
 		break;
