@@ -578,7 +578,7 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 		break;
 	case 504:
 		if (!spinbutton_uint_set_range(spin, 
-									  value, 0, eggGetNum(FREYJA_BONE_TAG)))
+									  value, 0, eggGetNum(FREYJA_BONE)))
 		{
 			gFreyjaModel->setCurrentBone(value);
 			//value = gFreyjaModel->getCurrentBone();

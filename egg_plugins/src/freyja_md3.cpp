@@ -165,7 +165,7 @@ int freyja_model__md3_import(char *filename)
 					t = md3_mesh[m].texel[md3_mesh[m].tris[p].triangle[i]].st[1];
 				}
 
-				eggTexel1i(eggTexelStore2f(s, t));
+				eggTexCoord1i(eggTexCoordStore2f(s, t));
 			}
 
 #ifdef FIXME

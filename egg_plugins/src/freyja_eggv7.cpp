@@ -186,7 +186,7 @@ int freyja_model__eggv7_import(char *filename)
 	 //printf("%i\n", id);
 
 	 eggVertex1i(id);  
-	 eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	 eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
        }
        
        if (!bad_poly)
@@ -240,7 +240,7 @@ int freyja_model__eggv7_import(char *filename)
      printf(" center ( %f %f %f )\n", pos[0], pos[1], pos[2]);
 
      // Start bone tag/bolton
-     transT.Add(id, eggBegin(FREYJA_BONE_TAG));
+     transT.Add(id, eggBegin(FREYJA_BONE));
 
      eggTagPos3f(pos[0], pos[1], pos[2]);
      eggTagFlags1u(0x00);

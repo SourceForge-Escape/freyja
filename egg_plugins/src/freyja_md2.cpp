@@ -132,17 +132,17 @@ int freyja_model__md2_import(char *filename)
       md2.TexCoords(&ss, &tt, p, 0);
       s = (float)ss / (float)md2_header->skinWidth;
       t = (float)tt / (float)md2_header->skinHeight;
-      eggTexel1i(eggTexelStore2f(s, t));
+      eggTexCoord1i(eggTexCoordStore2f(s, t));
       
       md2.TexCoords(&ss, &tt, p, 1);
       s = (float)ss / (float)md2_header->skinWidth;
       t = (float)tt / (float)md2_header->skinHeight;
-      eggTexel1i(eggTexelStore2f(s, t));
+      eggTexCoord1i(eggTexCoordStore2f(s, t));
       
       md2.TexCoords(&ss, &tt, p, 2);
       s = (float)ss / (float)md2_header->skinWidth;
       t = (float)tt / (float)md2_header->skinHeight;
-      eggTexel1i(eggTexelStore2f(s, t));
+      eggTexCoord1i(eggTexCoordStore2f(s, t));
       
       eggTexture1i(0);
       

@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
@@ -37,7 +37,7 @@
  * 2001.02.24:
  * Mongoose - Created, based on python test code
  *
- ==============================================================*/
+ ==========================================================================*/
 
 #ifndef GUARD__MONGOOSE_GOOSEEGG_EGGPLUGIN_H
 #define GUARD__MONGOOSE_GOOSEEGG_EGGPLUGIN_H
@@ -69,13 +69,14 @@ typedef enum {
 typedef enum {
 	FREYJA_MESH = 1,
 	FREYJA_POLYGON,
-	FREYJA_BONE_TAG,
-	FREYJA_BONE_FRAME,
-	FREYJA_GROUP,
+	FREYJA_BONE,
+	FREYJA_SKELETON,
+	FREYJA_GROUP,   /* Vertex group/frame */
 	FREYJA_VERTEX,
-	FREYJA_TEXEL,
-	FREYJA_MESHTREE_ANIM//,
-	//FREYJA_VERTEX_FRAME
+	FREYJA_TEXCOORD,
+	//	FREYJA_VERTEX_FRAME,
+	//	FREYJA_VERTEX_ANIM,
+	FREYJA_SKEL_ANIM
 	
 } egg_plugin_t;
 
@@ -192,7 +193,7 @@ int eggTextureStore(EggTextureData *textureData);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int eggTexelStore2f(float s, float t);
+unsigned int eggTexCoordStore2f(float s, float t);
 /*------------------------------------------------------
  * Pre  : s, t are 0.0 to 1.0 texels
  * Post : A new texel is created in the model
@@ -270,7 +271,7 @@ void eggVertex1i(unsigned int egg_id);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void eggTexel1i(unsigned int egg_id);
+void eggTexCoord1i(unsigned int egg_id);
 /*------------------------------------------------------
  * Pre  : eggBegin(FREYJA_POLYGON);
  *        Egg_id is the native index
@@ -831,7 +832,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int eggTexelStore2f(float s, float t);
+	unsigned int eggTexCoordStore2f(float s, float t);
 	/*------------------------------------------------------
 	 * Pre  : s, t are 0.0 to 1.0 texels
 	 * Post : A new texel is created in the model
@@ -913,7 +914,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void eggTexel1i(unsigned int egg_id);
+	void eggTexCoord1i(unsigned int egg_id);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_POLYGON);
 	 *        Egg_id is the native index
@@ -1114,21 +1115,21 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Egg *mEgg;                          /* Pointer to the modeler backend  */
-
 	Vector<char *> mModules;            /* Names of plugin modules managed by 
 										 * EggPlugin class */
-
-	Vector<unsigned int> mVertexList;   /* Current polygon's vertex list */
-
-	Vector<unsigned int> mTexelList;    /* Current polygon's texel list */
 
 	Vector<EggTextureData *> mTextures; /* Texture data list */
 
 	Vector<char *> mTextureFiles;       /* Texture filename list */
 
+	Vector<unsigned int> mVertexList;   /* Current polygon's vertex list */
+
+	Vector<unsigned int> mTexCoordList; /* Current polygon's texel list */
+
 	Stack<egg_plugin_t> mStack;         /* Object stack to keep up with 
 										 * accumulation modes and etc */
+
+	Egg *mEgg;                          /* Pointer to the modeler backend  */
 
 	egg_tag_t *mTag;                    /* Current tag/bolt-on */
 
@@ -1139,6 +1140,15 @@ private:
 	egg_boneframe_t *mBoneFrame;        /* MeshTree animation frame */
 
 	egg_animation_t *mAnimation;        /* MeshTree animation group */
+
+	unsigned int mIndexVertex;
+	unsigned int mIndexTexCoord;
+	unsigned int mIndexPolygon;
+	unsigned int mIndexGroup;
+	unsigned int mIndexMesh;
+	unsigned int mIndexBone;
+	unsigned int mIndexSkeleton;
+	unsigned int mIndexSkeletonAnim;
 
 	unsigned int mFlags;                /* Plugins' option flags */
 

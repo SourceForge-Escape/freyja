@@ -90,7 +90,7 @@ public:
 	{
 		unsigned int i;
 
-		for (i = begin(); forward(); ++i)
+		for (i = begin(); i< end(); ++i)
 		{
 			if (mData[i] == oldObj)
 			{
@@ -103,7 +103,7 @@ public:
 	{
 		unsigned int i;
 
-		for (i = begin(); forward(); ++i)
+		for (i = begin(); i < end(); ++i)
 		{
 			if (mData[i] == obj)
 			{
@@ -125,11 +125,14 @@ public:
 
 	void erase()
 	{
-		for (start(); forward(); next())
+		unsigned int i;
+
+
+		for (i = begin(); i < end(); ++i)
 		{
-			if (current())
+			if (mData[i])
 			{
-				delete current();
+				delete mData[i];
 			}
 		}
 		
@@ -298,52 +301,53 @@ public:
 
 	// Built-in iterator methods ////////////////////////////////
 
+// 	unsigned int mIndex;
 
-	void start()
-	{
-		mIndex = begin();
-	}
-
-
-	void finish()
-	{
-		mIndex = end() - 1;
-	}
+// 	void start()
+// 	{
+// 		mIndex = begin();
+// 	}
 
 
-	bool forward()
-	{
-		return (mIndex < end());
-	}
+// 	void finish()
+// 	{
+// 		mIndex = end() - 1;
+// 	}
 
 
-	bool backward()
-	{
-		return (mIndex + 1 > begin());
-	}
+// 	bool forward()
+// 	{
+// 		return (mIndex < end());
+// 	}
 
 
-	void next()
-	{
-		++mIndex;
-	}
-
-	void prev()
-	{
-		--mIndex;
-	}
+// 	bool backward()
+// 	{
+// 		return (mIndex + 1 > begin());
+// 	}
 
 
-	unsigned int currentIndex()
-	{
-		return mIndex;
-	}
+// 	void next()
+// 	{
+// 		++mIndex;
+// 	}
+
+// 	void prev()
+// 	{
+// 		--mIndex;
+// 	}
 
 
-	Object current()
-	{
-		return mData[mIndex];
-	}
+// 	unsigned int currentIndex()
+// 	{
+// 			return mIndex;
+// 	}
+
+
+// 	Object current()
+// 	{
+// 			return mData[mIndex];
+// 	}
 
 
 	// Instead of appending objects this apptempts replacing 'removed' objects
@@ -376,7 +380,6 @@ public:
 		return mData;
 	}
 	
-	unsigned int mIndex;
 
 private:
 
@@ -396,7 +399,7 @@ template <class Object> class VectorIterator
 {
 public:
 
-	VectorIterator(Vector<Object> &vector)
+	VectorIterator(Vector<Object> *vector)
 	{
 		mVector = vector;
 		mIndex = 0;
@@ -404,25 +407,25 @@ public:
 
 	void start()
 	{
-		mIndex = mVector.begin();
+		mIndex = mVector->begin();
 	}
 
 
 	void finish()
 	{
-		mIndex = mVector.end() - 1;
+		mIndex = mVector->end() - 1;
 	}
 
 
 	bool forward()
 	{
-		return (mIndex < mVector.end());
+		return (mIndex < mVector->end());
 	}
 
 
 	bool backward()
 	{
-		return (mIndex + 1 > mVector.begin());
+		return (mIndex + 1 > mVector->begin());
 	}
 
 
@@ -445,11 +448,11 @@ public:
 
 	Object current()
 	{
-		return mVector[mIndex];
+		return (*mVector)[mIndex];
 	}
 
 
-	Vector<Object> &mVector;
+	Vector<Object> *mVector;
 	unsigned int mIndex;
 };
 #endif

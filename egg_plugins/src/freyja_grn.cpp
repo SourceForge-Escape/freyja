@@ -129,7 +129,7 @@ int freyja_model__grn_import(char *filename)
 		for (j = 0; j < mesh.textureMap.size(); ++j)
 		{
 			Point p = mesh.textureMap[j];
-			i = eggTexelStore2f(p.points[0], p.points[1]);
+			i = eggTexCoordStore2f(p.points[0], p.points[1]);
 
 			// Generates id translator list
 			transUV.Add(j, i);
@@ -145,9 +145,9 @@ int freyja_model__grn_import(char *filename)
 			eggVertex1i(transXYZ[p.nodes[1]]);
 			eggVertex1i(transXYZ[p.nodes[2]]);
 
-			eggTexel1i(transUV[textures.polygons[j].nodes[1]]);
-			eggTexel1i(transUV[textures.polygons[j].nodes[2]]);
-			eggTexel1i(transUV[textures.polygons[j].nodes[3]]);
+			eggTexCoord1i(transUV[textures.polygons[j].nodes[1]]);
+			eggTexCoord1i(transUV[textures.polygons[j].nodes[2]]);
+			eggTexCoord1i(transUV[textures.polygons[j].nodes[3]]);
 
 			eggTexture1i(textureIndex);
 			eggEnd(); // FREYJA_POLYGON
@@ -171,7 +171,7 @@ int freyja_model__grn_import(char *filename)
 
 
 		/* Skeleton */
-		eggBegin(FREYJA_BONE_FRAME); // FREYJA_SKELETON
+		eggBegin(FREYJA_SKELETON);
 
 		for (i = 0; i < bones.bones.size(); ++i)
 		{
@@ -181,7 +181,7 @@ int freyja_model__grn_import(char *filename)
 
 			snprintf(boneName, 64, "bone%04ld", bone->id);
 
-			eggBegin(FREYJA_BONE_TAG);
+			eggBegin(FREYJA_BONE);
 			eggTagFlags1u(0x0);
 			eggTagName(boneName);
 
@@ -208,7 +208,7 @@ int freyja_model__grn_import(char *filename)
 				}
 			}
 
-			eggEnd(); // FREYJA_TAG
+			eggEnd(); // FREYJA_BONE
 		}
 
 		eggEnd(); // FREYJA_SKELETON
