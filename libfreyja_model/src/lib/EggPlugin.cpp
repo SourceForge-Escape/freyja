@@ -28,6 +28,7 @@
 
 #include <hel/math.h>
 #include <hel/Quaternion.h>
+#include <hel/Vector3d.h>
 
 #include "EggPlugin.h"
 
@@ -579,9 +580,8 @@ Vector<unsigned int> *eggFindVerticesInBox(bbox_t bbox,
 
 void eggGenerateVertexNormals()
 {
-	Vector <vec_t> normals, faceNormals;
-    vec3_t a, b, c, vA, vB;
-	vec_t s, x, y, z;
+	Vector <Vector3d *> faceNormals;
+	Vector3d a, b, c, aa, bb, normal;
 	unsigned int i, v0, v1, v2, vertexCount, faceCount;
 
 
@@ -598,30 +598,22 @@ void eggGenerateVertexNormals()
 		eggGetPolygon1u(FREYJA_VERTEX, 1, &v1);
 		eggGetPolygon1u(FREYJA_VERTEX, 2, &v2);
 
+		printf("<%d %d %d>\n", v0, v1, v2);
 		eggIterator(FREYJA_VERTEX, v0);
-		eggGetVertex3f(a);
+		eggGetVertex3f(a.mVec);
 		eggIterator(FREYJA_VERTEX, v1);
-		eggGetVertex3f(b);
+		eggGetVertex3f(b.mVec);
 		eggIterator(FREYJA_VERTEX, v2);
-		eggGetVertex3f(c);
+		eggGetVertex3f(c.mVec);
 
-		/* Compute 2 vectors from the triangle face */		
-		vA[0] = a[0] - b[0];
-		vA[1] = a[1] - b[1];
-		vA[2] = a[2] - b[2];
 
-		vB[0] = c[0] - b[0];
-		vB[1] = c[1] - b[1];
-		vB[2] = c[2] - b[2];
+		/* Compute 2 vectors from the triangle face */	
+		//aa = b - a;
+		//bb = b - c;
 		
-		/* Compute normal for the face */
-		x = vA[1] * vB[2] - vA[2] * vB[1];
-		y = vA[2] * vB[0] - vA[0] * vB[2];
-		z = vA[0] * vB[1] - vA[1] * vB[0];
-
-		faceNormals.pushBack(x);
-		faceNormals.pushBack(y);
-		faceNormals.pushBack(z);
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(b - a, b - c);
+		faceNormals.pushBack(new Vector3d(normal));
 
 		eggIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
 	}
@@ -640,34 +632,28 @@ void eggGenerateVertexNormals()
 			continue;
 		}
 
-		x = y = z = 0.0f;
+		normal.zero();
 
+		printf("%d :: %d faces\n", vertex->id, vertex->ref.size());
 		for (vertex->ref.start(); vertex->ref.forward(); vertex->ref.next())
 		{
-			x += faceNormals[vertex->ref.currentIndex()*3];
-			y += faceNormals[vertex->ref.currentIndex()*3+1];
-			z += faceNormals[vertex->ref.currentIndex()*3+2];
+			normal += *faceNormals[vertex->ref.currentIndex()];
 		}
 
-		/* Average normals */
-		//x /= vertex->ref.size();
-		//y /= vertex->ref.size();
-		//z /= vertex->ref.size();
+		normal.normalize();
 
-		/* Normalize */
-		s = sqrt(x * x + y * y + z * z);
+		vertex->norm[0] = normal.mVec[0];
+		vertex->norm[1] = normal.mVec[1];
+		vertex->norm[2] = normal.mVec[2];
 
-		x /= s;
-		y /= s;
-		z /= s;
-
-		vertex->norm[0] = x;
-		vertex->norm[1] = y;
-		vertex->norm[2] = z;
-
-		printf("%d :: %f %f %f\n", vertex->id, x, y, z);
+		printf("%d :: %f %f %f\n", vertex->id, 
+			   normal.mVec[0],
+			   normal.mVec[1],
+			   normal.mVec[2]);
     }
 
+	faceNormals.erase();
+	
 	eggCriticalSection(EGG_WRITE_UNLOCK);
 }
 
