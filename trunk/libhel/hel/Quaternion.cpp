@@ -76,6 +76,15 @@ Quaternion::Quaternion(vec_t roll, vec_t pitch, vec_t yaw)
 }
 
 
+Quaternion::Quaternion(const vec4_t wxyz)
+{
+	mW = wxyz[0];
+	mX = wxyz[1];
+	mY = wxyz[2];
+	mZ = wxyz[3];
+}
+
+
 Quaternion::Quaternion(vec4_t wxyz)
 {
 	mW = wxyz[0];
@@ -116,6 +125,19 @@ void Quaternion::getAxisAngles(vec4_t axyz)
 	axyz[1] = mX / scale;
 	axyz[2] = mY / scale;
 	axyz[3] = mZ / scale;
+}
+
+
+void Quaternion::getEulerAngles(vec3_t xyz)
+{
+	double qw2 = mW*mW;
+	double qx2 = mX*mX;
+	double qy2 = mY*mY;
+	double qz2 = mZ*mZ;
+
+	xyz[2] = atan(2.0 * (mY*mZ+mX*mW)/(-qx2 - qy2 + qz2 + qw2));
+	xyz[0] = asin(-2.0 * (mX*mZ-mY*mW));
+	xyz[1] = atan(2.0 * (mX*mY+mZ*mW)/(qx2 - qy2 + qz2 + qw2));
 }
 
 
@@ -255,6 +277,64 @@ void Quaternion::setIdentity()
 	mX = 0.0;
 	mY = 0.0;
 	mZ = 0.0;
+}
+
+
+void Quaternion::setByEulerAngles(const vec3_t xyz)
+{
+	vec_t pitch = xyz[0], roll = xyz[2], yaw = xyz[1];
+	double cr, cp, cy, sr, sp, sy, cpcy, spsy;
+
+	/* Want to use half of the values in equations from here on */
+	roll *= 0.5;
+	pitch *= 0.5;
+	yaw *= 0.5;
+
+	cr = cos(roll);
+	cp = cos(pitch);
+	cy = cos(yaw);
+
+	sr = sin(roll);
+	sp = sin(pitch);
+	sy = sin(yaw);
+
+	cpcy = cp * cy;
+	spsy = sp * sy;
+
+	mW = cr * cpcy + sr * spsy;
+	mX = sr * cpcy - cr *spsy;
+	mY = cr * sp * cy + sr * cp * sy;
+	mZ = cr * cp * sy - sr * sp * cy;
+
+	normalize();
+}
+
+
+void Quaternion::setByEulerAngles(vec_t x, vec_t y, vec_t z)
+{
+	*this = Quaternion(x, y, z);
+}
+
+
+void Quaternion::setByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
+{
+	vec_t temp, dist;
+
+	
+	// Normalize
+	temp = x*x + y*y + z*z;
+	
+	dist = (float)(1.0 / sqrt(temp));
+	
+	x *= dist;
+	y *= dist;
+	z *= dist;
+	
+	mX = x;
+	mY = y;
+	mZ = z;
+	
+	mW = (float)cos(angle / 2.0f);
 }
 
 

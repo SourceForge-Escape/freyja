@@ -1323,9 +1323,9 @@ void FreyjaPlugin::freyjaBegin(freyja_object_t type)
 		mStack.push(FREYJA_ANIMATION);
 		mAnimation = new FreyjaAnimation();
 		mScene->animations.pushBack(mAnimation);
-		mAnimation->id = mScene->animations.end() - 1;
-		mModel->animations.pushBack(mAnimation->id);
-		mIndexAnimation = mAnimation->id;
+		mAnimation->mId = mScene->animations.end() - 1;
+		mModel->animations.pushBack(mAnimation->mId);
+		mIndexAnimation = mAnimation->mId;
 		break;
 
 
