@@ -32,8 +32,9 @@
 #ifndef GUARD__FREYJA_MONGOOSE_NIF4_H_
 #define GUARD__FREYJA_MONGOOSE_NIF4_H_
 
+#include <freyja8/EggFileReader.h>
+
 #include <mstl/Vector.h>
-#include "EggFileReader.h"
 
 
 #define NIF4_HEADER_START "NetImmerse File Format, Version 4.0.0.2"
@@ -54,10 +55,10 @@ class Nif4
 
 		bool readHeader(EggFileReader &r)
 		{
-			len = r.getInt32();
+			len = r.readInt32();
 			name = new char[len];
-			r.getCharString(len, name);
-			id = r.getInt32();
+			r.readCharString(len, name);
+			id = r.readInt32();
 
 			return true;
 		}
@@ -75,48 +76,48 @@ class Nif4
 			unsigned int i, n;
 
 
-			 len = r.getInt32();
+			 len = r.readInt32();
 			 node_name = new char[len];
-			 r.getCharString(len, node_name);
-			 associated_keyframe_controller_id = r.getInt32U();
-			 associated_lookat_controller_id = r.getInt32U();
-			 unknown = r.getInt16();
-			 x = r.getFloat32();
-			 y = r.getFloat32();
-			 z = r.getFloat32();
-			 vector_x_axis_x = r.getFloat32();
-			 vector_x_axis_y = r.getFloat32();
-			 vector_x_axis_z = r.getFloat32();
-			 vector_y_axis_x = r.getFloat32();
-			 vector_y_axis_y = r.getFloat32();
-			 vector_y_axis_z = r.getFloat32();
-			 vector_z_axis_x = r.getFloat32();
-			 vector_z_axis_y = r.getFloat32();
-			 vector_z_axis_z = r.getFloat32();
-			 unknown2[0] = r.getFloat32();
-			 unknown2[1] = r.getFloat32();
-			 unknown2[2] = r.getFloat32();
-			 unknown3 = r.getInt32();
+			 r.readCharString(len, node_name);
+			 associated_keyframe_controller_id = r.readInt32U();
+			 associated_lookat_controller_id = r.readInt32U();
+			 unknown = r.readInt16();
+			 x = r.readFloat32();
+			 y = r.readFloat32();
+			 z = r.readFloat32();
+			 vector_x_axis_x = r.readFloat32();
+			 vector_x_axis_y = r.readFloat32();
+			 vector_x_axis_z = r.readFloat32();
+			 vector_y_axis_x = r.readFloat32();
+			 vector_y_axis_y = r.readFloat32();
+			 vector_y_axis_z = r.readFloat32();
+			 vector_z_axis_x = r.readFloat32();
+			 vector_z_axis_y = r.readFloat32();
+			 vector_z_axis_z = r.readFloat32();
+			 unknown2[0] = r.readFloat32();
+			 unknown2[1] = r.readFloat32();
+			 unknown2[2] = r.readFloat32();
+			 unknown3 = r.readInt32();
 
-			 num_properties = r.getInt32();
+			 num_properties = r.readInt32();
 			 propertyIDs = new unsigned int[num_properties];
 			 
 			 for (i = 0, n = num_properties; i < n; ++i)
-				 propertyIDs[i]  = r.getInt32U();
+				 propertyIDs[i]  = r.readInt32U();
 
-			 unkn2 = r.getInt32U();
+			 unkn2 = r.readInt32U();
 			 
-			 num_children = r.getInt32();
+			 num_children = r.readInt32();
 			 childrenIDs = new unsigned int[num_children];
 			 
 			 for (i = 0, n = num_children; i < n; ++i)
-				 childrenIDs[i]  = r.getInt32U();
+				 childrenIDs[i]  = r.readInt32U();
 			 
-			 num_blocks = r.getInt32();
+			 num_blocks = r.readInt32();
 			 blockIDs = new unsigned int[num_blocks];
 
 			 for (i = 0, n = num_blocks; i < n; ++i)
-				 blockIDs[i]  = r.getInt32U();
+				 blockIDs[i]  = r.readInt32U();
 
 			 return true;
 		}
@@ -237,24 +238,24 @@ class Nif4
 		
 		bool readChunk(EggFileReader &r)
 		{	
-			type = r.getInt8U();
+			type = r.readInt8U();
 			
 			if (type == 0)
 			{
-				associated_raw_image_data_id = r.getInt32U();
+				associated_raw_image_data_id = r.readInt32U();
 				file_len = 0;
 				filename = 0x0;
 			}
 			else // 1 only?
 			{
 				associated_raw_image_data_id = 0;
-				file_len = r.getInt32();
+				file_len = r.readInt32();
 				filename = new char[file_len];
-				r.getCharString(file_len, filename);
+				r.readCharString(file_len, filename);
 			}
 
-			unknown = r.getInt32();
-			unknown2 = r.getFloat();
+			unknown = r.readInt32();
+			unknown2 = r.readFloat32();
 
 			return true;
 		}
@@ -282,20 +283,20 @@ class Nif4
 		{
 			unsigned int i, n;
 
-			w = r.getInt32();
-			h = r.getInt32();
-			type = r.getInt32();  // 1 for RGB, 2 for RGBA
+			w = r.readInt32();
+			h = r.readInt32();
+			type = r.readInt32();  // 1 for RGB, 2 for RGBA
 			pixels = new pixel_t[w*h];
 
 			for (i = 0, n = w*h; i < n; ++i)
 			{
-				pixels[i].r = r.getInt8();
-				pixels[i].g = r.getInt8();
-				pixels[i].b = r.getInt8();
+				pixels[i].r = r.readInt8();
+				pixels[i].g = r.readInt8();
+				pixels[i].b = r.readInt8();
 				pixels[i].a = 255;
 
 				if (type == 2) 
-					pixels[i].a =r.getInt8();
+					pixels[i].a =r.readInt8();
 			}
 
 			return true;
@@ -314,11 +315,11 @@ class Nif4
 		
 		bool readChunk(EggFileReader &r)
 		{
-			unknown = r.getInt32();
-			unknown2 = r.getInt32();
-			len = r.getInt32();
+			unknown = r.readInt32();
+			unknown2 = r.readInt32();
+			len = r.readInt32();
 			string = new char[len];
-			r.getCharString(len, string);
+			r.readCharString(len, string);
 
 			return true;
 		}
@@ -354,33 +355,33 @@ class Nif4
 		{
 			unsigned int i, n, j, jn;
 
-			num_vertices = r.getInt16();
-			id_of_vertices = r.getInt32U();
+			num_vertices = r.readInt16();
+			id_of_vertices = r.readInt32U();
 			coordinates = new vertex_t[num_vertices];
 
 			for (i = 0, n = num_vertices; i < n; ++i)
 			{
-				coordinates[i].x = r.getFloat32();
-				coordinates[i].y = r.getFloat32();
-				coordinates[i].z = r.getFloat32();
+				coordinates[i].x = r.readFloat32();
+				coordinates[i].y = r.readFloat32();
+				coordinates[i].z = r.readFloat32();
 			}
 
-			id_of_normals = r.getInt32U();
+			id_of_normals = r.readInt32U();
 
 			for (i = 0, n = num_vertices; i < n; ++i)
 			{
-				normals[i].x = r.getFloat32();
-				normals[i].y = r.getFloat32();
-				normals[i].z = r.getFloat32();
+				normals[i].x = r.readFloat32();
+				normals[i].y = r.readFloat32();
+				normals[i].z = r.readFloat32();
 			}
 
-			unknown[0] = r.getInt32();
-			unknown[1] = r.getInt32();
-			unknown1[0] = r.getInt32U();
-			unknown1[1] = r.getInt32U();
-			unknown2 = r.getInt32();
-			num_uv_sets = r.getInt16U();
-			unknown3 = r.getInt32U();
+			unknown[0] = r.readInt32();
+			unknown[1] = r.readInt32();
+			unknown1[0] = r.readInt32U();
+			unknown1[1] = r.readInt32U();
+			unknown2 = r.readInt32();
+			num_uv_sets = r.readInt16U();
+			unknown3 = r.readInt32U();
 
 			uv_set = new uv_set_t[num_uv_sets];
 
@@ -390,37 +391,37 @@ class Nif4
 				
 				for (j = 0, jn = num_vertices; j < jn; ++j)
 				{
-					uv_set[i].textureinfo[j].u = r.getFloat32();
-					uv_set[i].textureinfo[j].v = r.getFloat32();
+					uv_set[i].textureinfo[j].u = r.readFloat32();
+					uv_set[i].textureinfo[j].v = r.readFloat32();
 				}
 			}
 		
 			if (num_uv_sets == 0) 
-				unknown4 = r.getInt32();
+				unknown4 = r.readInt32();
 			
-			num_triangles = r.getInt16U();
-			unknown5 = r.getInt32U(); // num_trianges*3?
+			num_triangles = r.readInt16U();
+			unknown5 = r.readInt32U(); // num_trianges*3?
 			
 			triangles = new triangle_t[num_triangles];
 
 			for (i = 0, n = num_triangles; i < n; ++i)
 			{
-				triangles[i].v[0] = r.getInt16U();
-				triangles[i].v[1] = r.getInt16U();
-				triangles[i].v[2] = r.getInt16U();
+				triangles[i].v[0] = r.readInt16U();
+				triangles[i].v[1] = r.readInt16U();
+				triangles[i].v[2] = r.readInt16U();
 			}
 
-			num_something_3 = r.getInt16U();  	// 0 or num_vertices?
+			num_something_3 = r.readInt16U();  	// 0 or num_vertices?
 			something = new unknown_t[num_something_3];	
 
 			for (i = 0, n = num_something_3; i < n; ++i)
 			{
-				something[i].len = r.getInt16U();
+				something[i].len = r.readInt16U();
 				something[i].unknown = new short[something[i].len];
 
 				for (j = 0, jn = something[i].len; j < jn; ++j)
 				{
-					something[i].unknown[j] = r.getInt16U();
+					something[i].unknown[j] = r.readInt16U();
 				}
 			}
 

@@ -600,7 +600,7 @@ class PSKModelRenderer
 
 	unsigned int mNumWeights;
 
-	PSKModel *mModel;							/* Current PSK model to render */
+	PSKModel *mModel;						/* Current PSK model to render */
 
 	PSAAnimation *mAnimation;				/* Current PSA anim to render */
 
@@ -608,7 +608,7 @@ class PSKModelRenderer
 
 	psk_face_t *mFaces;						/* The triangle mesh */
 
-	psk_material_t *mMaterials;			/* Materials/textures */
+	psk_material_t *mMaterials;		 	    /* Materials/textures */
 
 	psk_bone_t *mBones;						/* The bones of the model */
 
