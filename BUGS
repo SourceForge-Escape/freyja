@@ -1,0 +1,36 @@
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+  File     : BUGS  ( Last Audit: 2004.05.04 )
+  Author   : Terry 'Mongoose' Hendrix II
+  Project  : freyja
+
+   Sending Bug reports:
+   Send your system.info file and any other specs that would be helpful
+   including: stack trace, libc version, graphics driver,  windowing 
+   system version, and distrobution/OS.
+
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+ Disabled
+
+	o Scene / Mesh / Frame editing modes
+	o Mesh copy / cut / paste
+	o LOAD_MAP / FL_VERTEX_UV / DUMP_TEXTURE
+
+ Backend
+
+	o Egg8 loses bone names on save
+	o Normal generation not interpolating correctly
+
+ Interface
+
+	o Crash skin edit no skin
+	o Check RTS order in renderer
+	o Some mesh events don't update with event_refresh()
+	o Material system has blending disabled
+	o Material texture/texture index race condition
+	o Material system use needs rewrite - rebind on material id
+	o Mesh selection box is really for groups which is unclear
+	o Make new mesh for new polygon when none exist
+
+ 

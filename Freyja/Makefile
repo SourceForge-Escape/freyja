@@ -70,6 +70,8 @@ LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ \
 		-lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja_model -lfreyja_image
+LD_FLAGS += -Wl,-z,defs
+LD_FLAGS += -Wl,-O1
 
 GTK2_CFLAGS=-DUSING_GTK_2_0 -I/usr/X11R6/include -I/usr/include/gtkgl-2.0/ \
 		$(shell pkg-config --cflags gtk+-2.0 gtkgl-2.0)
