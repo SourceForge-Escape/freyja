@@ -20,15 +20,15 @@
  Show Stoppers
  ------------------
 
- o 2004.12.03-1
-	New file save corruption bug.
+ o 2004.12.15-1
+	File save corruption bug, caused by deletion of an object.
 
 	The fix for corrupt/invalid saves only adressed NULL elements by
 	not saving them to disk.  Unfortunately the Egg backend depends on
-	data structures holding on to NULL elements for indexing.
-
-	This doesn't always cause a crash, but it can lead to one.
-
+	data structures holding on to NULL elements for indexing.  The fix for
+	delete vertex -> delete polygon -> clean up mesh/group bug seems to make
+	extra objects cull once saved to disk now.  This bug corrupts data, but
+	can't cause a crash.
 
  --------------------------------------------------------------------------
 
