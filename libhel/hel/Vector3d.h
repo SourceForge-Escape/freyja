@@ -30,6 +30,7 @@
 
 #include "hel/math.h"
 
+
 class Vector3d
 {
  public:
@@ -49,6 +50,7 @@ class Vector3d
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	Vector3d(const vec3_t v);
 	Vector3d(vec3_t v);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -109,6 +111,12 @@ class Vector3d
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void getXYZ(vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns position of vector
+	 ------------------------------------------------------*/
+
 	vec_t magnitude();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -129,6 +137,12 @@ class Vector3d
 	 *
 	 * 2002.05.08:
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void setXYZ(const vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets the vector position
 	 ------------------------------------------------------*/
 
 	static Vector3d zeroVector();

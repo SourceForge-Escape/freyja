@@ -33,6 +33,14 @@ Vector3d::Vector3d()
 }
 
 
+Vector3d::Vector3d(const vec3_t v)
+{
+	mVec[0] = v[0];
+	mVec[1] = v[1];
+	mVec[2] = v[2];
+}
+
+
 Vector3d::Vector3d(vec3_t v)
 {
 	mVec[0] = v[0];
@@ -69,6 +77,14 @@ Vector3d Vector3d::cross(const Vector3d &u, const Vector3d &v)
 	return Vector3d(u.mVec[1] * v.mVec[2] - u.mVec[2] * v.mVec[1],
 						 u.mVec[2] * v.mVec[0] - u.mVec[0] * v.mVec[2],
 						 u.mVec[0] * v.mVec[1] - u.mVec[1] * v.mVec[0]);
+}
+
+
+void Vector3d::getXYZ(vec3_t xyz)
+{
+	xyz[0] = mVec[0];
+	xyz[1] = mVec[1];
+	xyz[2] = mVec[2];
 }
 
 
