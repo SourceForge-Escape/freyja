@@ -1377,6 +1377,10 @@ void FreyjaControl::deleteSelectedObject()
 {
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformPoint:
+		mEventMode = POINT_DEL_MODE;
+		break;
+
 	case FreyjaModel::TransformBone:
 		event_print("NOT IMPLEMENTED: Deleting Bone Tag %d", 
 					mModel->getCurrentBone());
@@ -1397,6 +1401,10 @@ void FreyjaControl::addObject()
 
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformPoint:
+		mEventMode = POINT_ADD_MODE;
+		break;
+
 	case FreyjaModel::TransformBone:
 		index = mModel->newBone(0.0, 0.0, 0.0, 0x0);
 
@@ -1438,6 +1446,8 @@ void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		mModel->MeshSelect(xx, yy);
 		// mModel->selectMesh(plane, xx, yy, zz);
+		event_print("Selected Mesh[%i]", 
+					mModel->getCurrentMesh());
 		break;
 
 	case FreyjaModel::TransformBone:
@@ -1446,6 +1456,9 @@ void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		mModel->selectBone(xx, yy);
 		// mModel->selectTag(plane, xx, yy, zz);
+		event_print("Selected Bone[%i] ( Still buggy? )", 
+					mModel->getCurrentBone());
+		break;
 
 	default:
 		event_print("WARNING: Selection undefined for this mode");
