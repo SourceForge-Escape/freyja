@@ -47,7 +47,7 @@
 #   include <GL/gl.h>
 #endif
 
-#include <freyja_model/mendian.h>
+#include <freyja8/mendian.h>
 #define fread_int_small eRead_Small_int32
 #define fread_u_int_small eRead_Small_uint32
 #define fread_float_small eRead_Small_float

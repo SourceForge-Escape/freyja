@@ -1257,6 +1257,7 @@ void FreyjaModel::TexelSelect(float s, float t)
 {
 	egg_mesh_t *mesh = CachedMesh();
 	egg_polygon_t *polygon = NULL;
+	egg_polygon_t *best_polygon = NULL;
 	egg_texel_t *texel = NULL;
 	egg_texel_t *best_texel = NULL;
 	egg_vertex_t *best_vertex = NULL;
@@ -1306,6 +1307,7 @@ void FreyjaModel::TexelSelect(float s, float t)
 		
 			if (best_texel == NULL)
 			{ 
+				best_polygon = polygon;
 				best_texel = texel;
 				best_dist = dist;
 
@@ -1333,6 +1335,7 @@ void FreyjaModel::TexelSelect(float s, float t)
 				
 				if (best_vertex == NULL)
 				{ 
+					best_polygon = polygon;
 					best_vertex = vertex;
 					best_dist = dist;
 					
@@ -1348,12 +1351,16 @@ void FreyjaModel::TexelSelect(float s, float t)
 
 	if (best_vertex)
 	{
+		_current_polygon = best_polygon->id;
 		_current_vertex = best_vertex->id;
 		return;
 	}
 
 	if (best_texel)
+	{
+		_current_polygon = best_polygon->id;
 		_current_texel = best_texel->id;
+	}
 }
 
 

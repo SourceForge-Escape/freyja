@@ -33,7 +33,7 @@
 
  libfreyja (0.8.14-20040823) Mongoose <mongoose@icculus.org>
 
-	o Image plugins ported so far: jpeg, pcx, ppm, png, tga
+	o Image plugins ported so far: dds, jpeg, pcx, ppm, png, tga
 	o New image plugin system finished
 
 

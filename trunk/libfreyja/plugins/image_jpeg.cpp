@@ -1,4 +1,5 @@
-/*================================================================
+/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -16,231 +17,157 @@
  *
  * 2000-10-15:
  * Mongoose - Created
- ================================================================*/
-
-
-#include "image_jpeg.h"
+ ==========================================================================*/
 
 #ifdef LIB_JPEG
 extern "C" 
 {
   #include <ctype.h>
   #include <string.h>
+  #include <stdio.h>
+  #include <stdlib.h>
   #include <unistd.h>
   #include <jpeglib.h>
 }
 #endif
 
-extern "C" {
 
-  //int check(FILE *f);
-  
-  int import_image(char *filename, unsigned char **image, 
-		   unsigned int *w, unsigned int *h, 
-		   char *type);
+extern "C" {
+	int import_image(char *filename, unsigned char **image, 
+						  unsigned int *w, unsigned int *h, char *bpp);
 }
+
 
 int mtk_image__jpeg_check(FILE *f)
 {
 #ifdef LIB_JPEG
-  unsigned char buffer[16];
+	unsigned char buffer[16];
 
 
-  if (!f)
-  {
-    perror("jpeg.so: ERROR opening file\n");
-    return -1;
-  }
+	if (!f)
+	{
+		perror("jpeg.so: ERROR opening file\n");
+		return -1;
+	}
 
-  fseek(f, 0, SEEK_SET);
-  fread(buffer, 1, 6, f);
+	fseek(f, 0, SEEK_SET);
+	fread(buffer, 1, 6, f);
+	fseek(f, 0, SEEK_SET);
 
-  if (buffer[0] == 0xff && buffer[1] == 0xd8)
-    return 0;
+	if (buffer[0] == 0xff && buffer[1] == 0xd8)
+		return 0;
 
-  printf("jpeg.so: Inavlid or unknown JPEG format.\n");
+	printf("jpeg.so: Inavlid or unknown JPEG format.\n");
 #endif
 
-  return -2;
+	return -2;
 }
 
 
 int import_image(char *filename, unsigned char **imageRET, 
-		 unsigned int *w, unsigned int *h, char *type)
+					  unsigned int *w, unsigned int *h, char *bpp)
 {
 #ifdef LIB_JPEG
-  FILE *f = fopen(filename, "rb");
-  unsigned char *buffer = NULL;
-  unsigned char *imageb = NULL;
-  unsigned char *palette = NULL;
-  struct jpeg_decompress_struct image;
-  struct jpeg_error_mgr error;
-  unsigned int i, j;
-  int r, b, g, bpp;
+	struct jpeg_decompress_struct image;
+	struct jpeg_error_mgr error;
+	JSAMPROW buffer[1], bptr;
+	unsigned char *imageb = NULL;
+	FILE *f;
+	unsigned int i, j, width, height;
+	
+	
+	f = fopen(filename, "rb");
 
-
-  if (!f)
-  {
-    perror("jpeg.so: ERROR\n");
-    return -1;
-  }
-
-  if (mtk_image__jpeg_check(f))
-  {
-    fclose(f);
-    return -1;
-  }
-
-  fseek(f, 0, SEEK_SET);
-
-  bpp = 16; // hack hack, fix for 011. loss of color in release build
-
-  image.err = jpeg_std_error(&error);
-  jpeg_create_decompress(&image);
-  jpeg_stdio_src(&image, f);
-  jpeg_read_header(&image, true);
-  
-  *w = image.image_width;
-  *h = image.image_height;
-
-  if (!*w || !*h)
-  {
-    fclose(f);
-    return -2;
-  }
-
-  if (bpp <= 8)
-  {
-    image.quantize_colors = true;
-    image.dither_mode = JDITHER_FS;
-    image.desired_number_of_colors = 255;
-  }
-  
-  jpeg_calc_output_dimensions(&image);
-  
-  /*
-  while ((_width > 255) || (_height > 255)) 
-  {
-    image.scale_denom++;
-    jpeg_calc_output_dimensions(&image);
-  }
-  */
-
-  buffer = new unsigned char[*w * image.output_components];
-
-  jpeg_start_decompress(&image);
-
-  switch (bpp)
-  {
-  case 8:
-    //printf("8bit JPEG.\n");
-    //_color_mode = GL_RGB;
-    //_palette_bpp = 24;
-    
-    j = image.actual_number_of_colors;
-    palette = new unsigned char[j*3];
-
-
-    for (i = 0; i < j; i++) 
-    {
-      palette[i*3]   = image.colormap[0][i];// << 8;
-      palette[i*3+1] = image.colormap[1][i];// << 8;
-      palette[i*3+2] = image.colormap[2][i];// << 8;
-    }
-
-    imageb = new unsigned char[*w * *h * 3];
-          
-    i = 0;
-      
-    // FIXME: This should put colored pixels in, not indexed
-    while (image.output_scanline < (unsigned)*h)
-    {
-      jpeg_read_scanlines(&image, &buffer, 1);
-      
-      memcpy(&imageb[i * *w], buffer, *w);
-      i++;
-    }
-  default:
-    //printf("16+bit JPEG.\n");
-    //   _color_mode = GL_RGB;
-    //   _palette_bpp = 24;
-
-    imageb = new unsigned char[*w * *h * 3];
-
-    j = 0;
-
-    while (image.output_scanline < (unsigned)*h) 
-    {
-      jpeg_read_scanlines(&image, &buffer, 1);
-                        
-      for (i = 0; i < *w; i++) 
-      {
-	r = buffer[i * image.output_components];// << 8;
-
-	if (image.output_components ^ 1) 
+	if (!f)
 	{
-	  g = buffer[(i * image.output_components) + 1];//  << 8;
-	  b = buffer[(i * image.output_components) + 2];//  << 8;
-        } 
-	else 
-	  g = b = r;
+		perror("jpeg.so: ERROR\n");
+		return -1;
+	}
 
-	imageb[j*3] = (unsigned char)r;
-	imageb[j*3+1] = (unsigned char)g;
-	imageb[j*3+2] = (unsigned char)b;
-	j++;
-      }
-    }
-  }
+	if (mtk_image__jpeg_check(f))
+	{
+		fclose(f);
+		return -1;
+	}
 
-  if (buffer)  
-    delete [] buffer; 
+	fseek(f, 0, SEEK_SET);
 
-  if (palette)  
-    delete [] palette; 
+	image.err = jpeg_std_error(&error);
+	jpeg_create_decompress(&image);
+	jpeg_stdio_src(&image, f);
+	jpeg_read_header(&image, TRUE);
+  
+	if (image.image_width < 1 || image.image_height < 1)
+	{
+		fclose(f);
+		return -2;
+	}
 
-  jpeg_finish_decompress(&image);
-  jpeg_destroy_decompress(&image);
+   switch (image.jpeg_color_space)
+	{
+	case JCS_GRAYSCALE:
+		//image.out_color_space = JCS_GRAYSCALE;
+		//break;
+	default:		 
+		image.out_color_space = JCS_RGB;
+	}
 
-  *type = 3; // 1;
-  *imageRET = imageb;
+	image.quantize_colors = FALSE;
+	image.do_fancy_upsampling = FALSE;
+	image.do_block_smoothing = FALSE;
+	jpeg_calc_output_dimensions(&image);
+  
+	bptr = buffer[0] = (JSAMPROW)malloc(image.image_width*image.num_components);
 
-  fclose(f);
-  return 0;
+	if (!buffer[0])
+	{
+		fclose(f);
+		return -1;
+	}
 
+	jpeg_start_decompress(&image);
+
+	width = image.image_width;
+	height = image.image_height;
+	imageb = new unsigned char[image.image_width * image.image_height * 3];
+		
+	j = 0;
+	
+	while (image.output_scanline < image.output_height) 
+	{
+		jpeg_read_scanlines(&image, buffer, (JDIMENSION)1);
+
+		bptr = buffer[0];
+
+		for (i = 0; i < image.image_width; ++i) 
+		{
+			imageb[j*3] = (unsigned char)bptr[i*3];
+			imageb[j*3+1] = (unsigned char)bptr[i*3+1];
+			imageb[j*3+2] = (unsigned char)bptr[i*3+2];
+			j++;
+		}
+	}
+
+	/* Clean up */
+	jpeg_finish_decompress(&image);
+	jpeg_destroy_decompress(&image);
+	fclose(f);
+
+	if (buffer[0])
+		free(buffer[0]); 
+
+
+	/* Return new RBG pixmap */
+	*w = width;
+	*h = height;
+	*imageRET = imageb;
+	*bpp = 3;
+
+	return 0;
+	
 #else
-  printf("JPEG support not in this build\n");
-  return -100;
+	printf("JPEG support not in this build\n");
+	return -100;
 #endif
 }
 
-#ifdef TEST_JPEG
-int main(int argc, char *argv[])
-{
-  unsigned char *image;
-  int w, h, bpp, i;
-
-
-  if (argc > 1)
-  {
-    image = read_jpeg(argv[1], &w, &h, &bpp);
-   
-    printf("P3\n");  // ASCII PPM header
-    printf("# CREATOR Mongoose, from %s\n", argv[1]);
-    printf("%i %i\n", w, h);
-    printf("255\n");
-
-    if (image)
-    {
-      for (i = 0; i < w*h; i++)
-	printf("%i\n%i\n%i\n",  image[i*3], image[i*3+1], image[i*3+2]);
-
-      delete [] image;
-    }
-  }
-  else
-    printf("%s filename.jpeg > filename.ppm\n", argv[0]);
-
-  return 0;
-}
-#endif

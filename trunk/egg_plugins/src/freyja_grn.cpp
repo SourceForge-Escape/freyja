@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <iostream>
 
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 
 /* Export as C functions */
 extern "C" {

@@ -25,7 +25,7 @@
 
 
 #ifdef HAVE_MTKIMAGE
-#   include <freyja_image/MtkImage.h>
+#   include <freyja8/EggImage.h>
 #endif
 
 #include "URTexture.h"
@@ -385,12 +385,12 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 
 			if (1)
 			{
-				MtkImage img;
+				EggImage img;
 				char filenameTGA[512];
 				snprintf(filenameTGA, 512, "/tmp/utpak/Texture/%s-%i.tga", 
 							pak.mHeader.nameTable[index].objName, i);
-				img.Load(imageRGBA, w, h, COLORMODE_RGBA);
-				img.Save(filenameTGA, "tga");
+				img.loadPixmap(imageRGBA, w, h, EggImage::RGBA_32);
+				img.saveImage(filenameTGA, "tga");
 			}
 #else
 #   warning HAVE_MTKIMAGE undefined - No image export support
@@ -434,13 +434,13 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 #ifdef HAVE_MTKIMAGE
 			if (1)
 			{
-				MtkImage img;
+				EggImage img;
 				char filenameTGA[512];
 				snprintf(filenameTGA, 512, "/tmp/utpak/Texture/%s-%i.tga", 
 							pak.mHeader.nameTable[index].objName, i);
-				img.Load(imageRGBA, w, h, 
-							(byteperpixel == 3) ? COLORMODE_RGB : COLORMODE_RGBA);
-				img.Save(filenameTGA, "tga");
+				img.loadPixmap(imageRGBA, w, h, 
+								  (byteperpixel == 3) ? EggImage::RGB_24 : EggImage::RGBA_32);
+				img.saveImage(filenameTGA, "tga");
 			}
 #else
 #   warning HAVE_MTKIMAGE undefined - No image export support

@@ -33,9 +33,9 @@
 
 #include <mstl/List.h>
 
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 #ifdef ENDIAN
-#   include <freyja_model/mendian.h>
+#   include <freyja8/mendian.h>
 #endif
 
 #include <hel/Matrix.h>

@@ -26,12 +26,6 @@
 #include <stdarg.h>
 #include <math.h>
 
-#ifdef HAVE_MTK_IMAGE2
-#   include "mtk_tga.h"
-#   include "mtk_image.h"
-#endif
-
-
 #include "URTexture.h"
 
 #include "UTPackage.h"

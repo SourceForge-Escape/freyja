@@ -386,25 +386,25 @@ enum freyja_event_freyja_mode
 
 void freyja_handle_color(int id, float r, float g, float b, float a);
 
-enum custom_color                   /* Custom GUI colors */
+typedef enum                  /* Custom GUI colors */
 {
-  COLOR_EDIT_POLYGON             = 1,
-  COLOR_EDIT_LINE                = 2,
-  COLOR_EDIT_LINE_HIGHLIGHT      = 4,
-  COLOR_EDIT_VERTEX              = 8,
-  COLOR_EDIT_VERTEX_HIGHLIGHT    = 16,
-  COLOR_EDIT_BBOX                = 32,
-  COLOR_EDIT_BG                  = 64,
-  COLOR_EDIT_GRID                = 128,
-  COLOR_EDIT_GRID_AXIS_X         = 256,
-  COLOR_EDIT_TEXT                = 1024,
-  COLOR_VIEW_BG                  = 2048,
-  COLOR_VIEW_TEXT                = 4096,
-  COLOR_EDIT_GRID_AXIS_Y         = 8192,
-  COLOR_EDIT_GRID_AXIS_Z         = 16384,
-  COLOR_EDIT_GRID_8              = 32768,
-  Color_Animation_Grid           = 65536
-};
+	COLOR_EDIT_POLYGON = 1,
+	COLOR_EDIT_LINE,
+	COLOR_EDIT_LINE_HIGHLIGHT,
+	COLOR_EDIT_VERTEX,
+	COLOR_EDIT_VERTEX_HIGHLIGHT,
+	COLOR_EDIT_BBOX,
+	COLOR_EDIT_BG,
+	COLOR_EDIT_GRID,
+	COLOR_EDIT_GRID_AXIS_X,
+	COLOR_EDIT_TEXT,
+	COLOR_VIEW_BG,
+	COLOR_VIEW_TEXT,
+	COLOR_EDIT_GRID_AXIS_Y,
+	COLOR_EDIT_GRID_AXIS_Z,
+	COLOR_EDIT_GRID_8,
+	Color_Animation_Grid
+} freyja_color_t;
 
 int confirmDialog(char *dialog_icon,
 				  char *information_message, 

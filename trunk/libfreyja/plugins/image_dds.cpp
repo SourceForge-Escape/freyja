@@ -245,6 +245,7 @@ int import_image(char *filename, unsigned char **image,
 
 	if (dds.magic != 0x20534444)
 	{
+		printf("dds.so: Inavlid or unknown DDS format.\n");
 		r.closeFile();
 		return -2;
 	}
@@ -254,6 +255,7 @@ int import_image(char *filename, unsigned char **image,
 
 	if (dds.header.size != 124)
 	{
+		printf("dds.so: Inavlid or unknown DDS format.\n");
 		r.closeFile();
 		return -2;
 	}
@@ -272,6 +274,7 @@ int import_image(char *filename, unsigned char **image,
 
 	if (dds.header.pixelformat.size != 32)
 	{
+		printf("dds.so: Inavlid or unknown DDS format.\n");
 		r.closeFile();
 		return -2;
 	}
@@ -329,6 +332,12 @@ int import_image(char *filename, unsigned char **image,
 
 
 	default:
+		printf("dds.so: Unsupported DDS format %c%c%c%c.\n", 
+			 ((char*)(&dds.header.pixelformat.encoding))[0],
+			 ((char*)(&dds.header.pixelformat.encoding))[1],
+			 ((char*)(&dds.header.pixelformat.encoding))[2],
+			 ((char*)(&dds.header.pixelformat.encoding))[3]);
+
 		if (dds.surface_data)
 			delete [] dds.surface_data;
 

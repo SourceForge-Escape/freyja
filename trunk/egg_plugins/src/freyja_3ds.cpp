@@ -20,7 +20,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 #include <stdio.h>
 
 #include "3ds.h"
