@@ -1,5 +1,7 @@
 /* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
 
+/* A simple program for culling data out of model files/paks */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <freyja8/EggFileReader.h>
