@@ -59,7 +59,7 @@ BASE_CFLAGS=-Wall -Isrc/plug-ins -Isrc/ds \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
 	$(BASE_DEFS)
 
-LDFLAGS=$(CONFIGURE_LNK) -lm -ldl -lhel0
+LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
 RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
 	-fomit-frame-pointer -fexpensive-optimizations -O2
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g $(DEBUG_DEFS)
