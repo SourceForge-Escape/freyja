@@ -914,21 +914,50 @@ bool FreyjaControl::event(int command)
 
 
 	case eGenerateCone:
-		freyja_print("eGenerateCone not backported");
+		{
+			Vector3d v;
+
+			v.zero();
+			mCleared = false;
+			freyjaGenerateConeMesh(v.mVec, 6.0f, 16);
+			freyja_event_gl_refresh();
+		}
 		break;
 
 
 	case eGenerateCylinder:
-		mCleared = false;
-		//FIXME freyjaGenerateCylinder(4, 16, 8.0, 4.0);
-		freyja_event_gl_refresh();
+		{
+			Vector3d v;
+
+			v.zero();
+			mCleared = false;
+			freyjaGenerateCylinderMesh(v.mVec, 8.0f, 16, 4);
+			freyja_event_gl_refresh();
+		}
+		break;
+
+
+	case eGenerateTube:
+		{
+			Vector3d v;
+
+			v.zero();
+			mCleared = false;
+			freyjaGenerateTubeMesh(v.mVec, 8.0f, 16, 4);
+			freyja_event_gl_refresh();
+		}
 		break;
 
 
 	case eGenerateSphere:
-		mCleared = false;
-		//FIXME freyjaGenerateSphere(16, 16, 8.0);
-		freyja_event_gl_refresh();
+		{
+			Vector3d v;
+
+			v.zero();
+			mCleared = false;
+			freyjaGenerateSphereMesh(v.mVec, 8.0f, 16, 16);
+			freyja_event_gl_refresh();
+		}
 		break;
 
 
@@ -937,7 +966,6 @@ bool FreyjaControl::event(int command)
 			Vector3d v;
 
 			v.zero();
-
 			mCleared = false;
 			freyjaGenerateQuadCubeMesh(v.mVec, 8.0f);
 			freyja_event_gl_refresh();
@@ -945,10 +973,27 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case eGenerateTriStrip:
-		mCleared = false;
-		//FIXME eggGenerateTriangleStrip(10, 8.0);
-		freyja_event_gl_refresh();
+	case eGeneratePlane:
+		{
+			Vector3d v;
+
+			v.zero();
+			mCleared = false;
+			freyjaGenerateQuadPlaneMesh(v.mVec, 8.0f);
+			freyja_event_gl_refresh();
+		}
+		break;
+
+
+	case eGenerateCircle:
+		{
+			Vector3d v;
+
+			v.zero();
+			mCleared = false;
+			freyjaGenerateCircleMesh(v.mVec, 16);
+			freyja_event_gl_refresh();
+		}
 		break;
 
 	case ePointJoint:

@@ -565,7 +565,22 @@ void freyjaBoneRotateQuaternion4fv(vec4_t wxyz);
 
 void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
 
+void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side);
+
 void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
+
+void freyjaGenerateCircleMesh(vec3_t origin, long count); // radius
+
+void freyjaGenerateConeMesh(vec3_t origin, vec_t height, long count); // radius
+
+void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
+								long count, long segments); // radius
+
+void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
+							  long count, long segments);
+
+void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
+							long count, long segments); // radius
 
 void freyjaMeshFlags1u(unsigned int flags);
 /*------------------------------------------------------
