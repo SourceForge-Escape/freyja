@@ -2136,7 +2136,7 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
 {
    egg_tag_t *etag;
    float x, y, z;
-   Matrix transform;
+   Matrix transform, inverse, normalTransform;
    egg_mesh_t *mesh;
    egg_group_t *grp;
    egg_vertex_t *vert;
@@ -2158,6 +2158,11 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
 
    transform.setIdentity();
    transform.rotate(xr, yr, zr);
+	/* Since we only do rotation here we can use vertex transform
+	   for normals too */
+	//transform.getInvert(inverse.mMatrix);
+	//inverse.getTransposeMatrix(normalTransform.mMatrix);
+	normalTransform.setMatrix(transform.mMatrix);
 
    for (i = etag->mesh.begin(); i < etag->mesh.end(); ++i)
    {
@@ -2189,6 +2194,9 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
 				vert->pos[0] += etag->center[0];
 				vert->pos[1] += etag->center[1];
 				vert->pos[2] += etag->center[2];
+
+				normalTransform.multiply3v(vert->norm, vert->norm);
+
 			 
 				if (count == 0)
 				{
@@ -2585,7 +2593,7 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 						  vec_t x, vec_t y, vec_t z)
 {
 	egg_vertex_t *vert;
-	Matrix m;
+	Matrix m, inverse, normalTransform;
 	unsigned int i;
 
 
@@ -2612,6 +2620,10 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 		return;
 	}
 
+	m.getInvert(inverse.mMatrix);
+	inverse.getTransposeMatrix(normalTransform.mMatrix);
+	normalTransform.setMatrix(inverse.mMatrix);
+
 	for (i = list->begin(); i < list->end(); ++i)
 	{
 		vert = (*list)[i];
@@ -2620,6 +2632,7 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 			continue;
 
 		m.multiply3v(vert->pos, vert->pos);
+		normalTransform.multiply3v(vert->norm, vert->norm);
 	}
 }
 

@@ -1,6 +1,6 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : BUGS  ( Last Audit: 2004.05.04 )
+  File     : BUGS  ( Last Audit: 2004.06.01 )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : freyja
 
@@ -33,11 +33,9 @@
  Interface
 
 	o mgtk+ glarea button events mapped twice it seems
-	o Segfault on exit after 20040524 build
 	o Crash skin edit no skin
 	o Check RTS order in renderer
 	o Some mesh events don't update with event_refresh()
-	o Material system has blending disabled
 	o Material texture/texture index race condition
 	o Material system use needs rewrite - rebind on material id
 	o Mesh selection box is really for groups which is unclear
