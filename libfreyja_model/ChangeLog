@@ -19,6 +19,12 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+
+ Freyja (0.3.5-20040815) Mongoose <mongoose@icculus.org>
+
+	o Fix for bone names via extention for 8.12 model spec
+
+
  freyja_model (0.9.0-20040506) Mongoose <mongoose@users.sourceforge.net>
 
 	* More work on Egg9
