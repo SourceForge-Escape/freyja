@@ -18,7 +18,7 @@
  * Mongoose - Created
  ================================================================*/
 
-#include "mtk_pcx.h"
+#include "image_pcx.h"
 
 
 int mtk_image__pcx_check(FILE *f)
