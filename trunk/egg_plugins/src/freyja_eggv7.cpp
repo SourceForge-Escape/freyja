@@ -24,7 +24,7 @@
 
 #include <mstl/List.h>
 
-#include "EggPlugin.h"
+#include <freyja_model/EggPlugin.h>
 
 
 extern "C" {

@@ -22,7 +22,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "EggPlugin.h"
+#include <freyja_model/EggPlugin.h>
 #include "Md3.h"
 
 
