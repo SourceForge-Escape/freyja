@@ -36,12 +36,177 @@ void event_register_render(FreyjaRender *r);
 void event_register_model(FreyjaModel *m);
 void event_register_control(FreyjaControl *c);
 
+// Mongoose 2002.01.12, Interfaces for FreyjaResource
+//   must be implmented for each interface ( gtk, win32, etc )
+arg_list_t *freyja_rc_window(arg_list_t *args);
+arg_list_t *freyja_rc_gl_widget(arg_list_t *args);
+arg_list_t *freyja_rc_notebook(arg_list_t *args);
+arg_list_t *freyja_rc_tab(arg_list_t *args);
+arg_list_t *freyja_rc_textbox(arg_list_t *args);
+arg_list_t *freyja_rc_hsep(arg_list_t *args);
+arg_list_t *freyja_rc_vsep(arg_list_t *args);
+arg_list_t *freyja_rc_hbox(arg_list_t *args);
+arg_list_t *freyja_rc_vbox(arg_list_t *args);
+arg_list_t *freyja_rc_handlebox(arg_list_t *args);
+arg_list_t *freyja_rc_label(arg_list_t *args);
+arg_list_t *freyja_rc_button(arg_list_t *args);
+arg_list_t *freyja_rc_colorbutton(arg_list_t *args);
+arg_list_t *freyja_rc_togglebutton(arg_list_t *args);
+arg_list_t *freyja_rc_spinbutton(arg_list_t *args);
+arg_list_t *freyja_rc_spinbutton2(arg_list_t *args);
+arg_list_t *freyja_rc_submenu(arg_list_t *args);
+arg_list_t *freyja_rc_menu_seperator(arg_list_t *args);
+arg_list_t *freyja_rc_menu_item(arg_list_t *args);
+arg_list_t *freyja_rc_optionmenu(arg_list_t *args);
+arg_list_t *freyja_rc_popup_menu(arg_list_t *args);
+arg_list_t *freyja_rc_menubar(arg_list_t *args);
+arg_list_t *freyja_rc_animation_tab_hack(arg_list_t *args);
+arg_list_t *freyja_rc_toolbar(arg_list_t *args);
+arg_list_t *freyja_rc_toolbar_togglebutton(arg_list_t *args);
+arg_list_t *freyja_rc_toolbar_button(arg_list_t *args);
+arg_list_t *freyja_rc_toolbar_box(arg_list_t *args);
+arg_list_t *freyja_rc_color(arg_list_t *args);
+
+void setupResource(Resource &r)
+{
+	//printf("\nFreyjaResource> Bind Resource and C++ function names\n");
+
+	// Mongoose 2002.01.12, Bind script functions to C/C++ functions
+	r.RegisterFunction("window", freyja_rc_window);
+	r.RegisterFunction("gl_widget", freyja_rc_gl_widget);
+	r.RegisterFunction("notebook", freyja_rc_notebook);
+	r.RegisterFunction("tab", freyja_rc_tab);
+	r.RegisterFunction("hsep", freyja_rc_hsep);
+	r.RegisterFunction("vsep", freyja_rc_vsep);
+	r.RegisterFunction("vbox", freyja_rc_vbox);
+	r.RegisterFunction("hbox", freyja_rc_hbox);
+	r.RegisterFunction("handlebox", freyja_rc_handlebox);
+	r.RegisterFunction("textbox", freyja_rc_textbox);
+	r.RegisterFunction("label", freyja_rc_label);
+	r.RegisterFunction("colorbutton", freyja_rc_colorbutton);
+	r.RegisterFunction("button", freyja_rc_button);
+	r.RegisterFunction("togglebutton", freyja_rc_togglebutton);
+	r.RegisterFunction("spinbutton", freyja_rc_spinbutton);
+	r.RegisterFunction("spinbutton2", freyja_rc_spinbutton2);
+	r.RegisterFunction("color", freyja_rc_color);
+	r.RegisterFunction("menu_item", freyja_rc_menu_item);
+	r.RegisterFunction("submenu", freyja_rc_submenu);
+	r.RegisterFunction("menu_seperator", freyja_rc_menu_seperator);
+	r.RegisterFunction("optionmenu", freyja_rc_optionmenu);
+	r.RegisterFunction("popup_menu", freyja_rc_popup_menu);
+	r.RegisterFunction("menubar", freyja_rc_menubar);
+	r.RegisterFunction("animation_tab_hack", freyja_rc_animation_tab_hack);
+	r.RegisterFunction("toolbar", freyja_rc_toolbar);
+	r.RegisterFunction("toolbar_box", freyja_rc_toolbar_box);
+	r.RegisterFunction("toolbar_togglebutton", freyja_rc_toolbar_togglebutton);
+	r.RegisterFunction("toolbar_button", freyja_rc_toolbar_button);
+
+	//printf("FreyjaResource> Done\n");
+
+	//printf("FreyjaResource> Bind Resource and C++ symbols\n");
+	// Mongoose 2002.01.21, Bind some script vars to matching name in C/C++
+
+	r.RegisterInt("eScale", eScale);
+	r.RegisterInt("eScale_X", eScale_X);
+	r.RegisterInt("eScale_Y", eScale_Y);
+	r.RegisterInt("eScale_Z", eScale_Z);
+
+	r.RegisterInt("eZOOM", eZOOM);
+	r.RegisterInt("eNONE", eNONE);
+
+	r.RegisterInt("EVENT_NEW_FILE",      EVENT_NEW_FILE);
+	r.RegisterInt("EVENT_OPEN_FILE",     EVENT_OPEN_FILE);
+	r.RegisterInt("EVENT_SAVE_FILE",     EVENT_SAVE_FILE);
+	r.RegisterInt("EVENT_HELP",          EVENT_HELP);
+
+
+
+	r.RegisterInt("EVENT_MAIN", EVENT_MAIN);
+	r.RegisterInt("CMD_MAIN_SHUTDOWN",      CMD_MAIN_SHUTDOWN);
+	r.RegisterInt("CMD_TOGGLE_FULLSCREEN",  CMD_TOGGLE_FULLSCREEN);
+
+	r.RegisterInt("EVENT_POINT", EVENT_POINT);
+	r.RegisterInt("CMD_POINT_ADD", CMD_POINT_ADD);
+	r.RegisterInt("CMD_POINT_MOVE", CMD_POINT_MOVE);
+	r.RegisterInt("CMD_POINT_DELETE", CMD_POINT_DELETE);
+	r.RegisterInt("CMD_POINT_COMBINE", CMD_POINT_COMBINE);
+
+	r.RegisterInt("EVENT_POLYGON", EVENT_POLYGON);
+	r.RegisterInt("CMD_POLYGON_ADD", CMD_POLYGON_ADD);
+	r.RegisterInt("CMD_POLYGON_SELECT", CMD_POLYGON_SELECT);
+	r.RegisterInt("CMD_POLYGON_DELETE", CMD_POLYGON_DELETE);	
+
+	r.RegisterInt("EVENT_MESH", EVENT_MESH);
+	r.RegisterInt("CMD_MESH_ADD", CMD_MESH_ADD);
+	r.RegisterInt("CMD_MESH_DELETE", CMD_MESH_DELETE);
+	r.RegisterInt("CMD_MESH_MOVE", CMD_MESH_MOVE);
+	r.RegisterInt("CMD_MESH_SELECT", CMD_MESH_SELECT);
+	r.RegisterInt("CMD_MESH_ROTATE", CMD_MESH_ROTATE);
+	r.RegisterInt("CMD_MESH_SCALE", CMD_MESH_SCALE);
+	r.RegisterInt("CMD_MESH_MIRROR", CMD_MESH_MIRROR);
+	r.RegisterInt("CMD_MESH_MOVE_CENTER", CMD_MESH_MOVE_CENTER);
+	r.RegisterInt("CMD_MESH_GENERATE_CUBE", CMD_MESH_GENERATE_CUBE);
+	r.RegisterInt("CMD_MESH_GENERATE_TRIS", CMD_MESH_GENERATE_TRIS);
+	r.RegisterInt("CMD_MESH_GENERATE_SPHERE", CMD_MESH_GENERATE_SPHERE);
+	r.RegisterInt("CMD_MESH_GENERATE_CYLINDER", CMD_MESH_GENERATE_CYLINDER);
+
+	r.RegisterInt("EVENT_BONE", EVENT_BONE);
+	r.RegisterInt("CMD_BONE_NEW", CMD_BONE_NEW);
+	r.RegisterInt("CMD_BONE_ADD_MESH", CMD_BONE_ADD_MESH);
+	r.RegisterInt("CMD_BONE_SELECT", CMD_BONE_SELECT);
+	r.RegisterInt("CMD_BONE_MOVE_PIVOT", CMD_BONE_MOVE_PIVOT);
+
+	r.RegisterInt("EVENT_MISC", EVENT_MISC);
+	r.RegisterInt("CMD_MISC_GEN_NORMALS", CMD_MISC_GEN_NORMALS);
+	r.RegisterInt("CMD_MISC_ZOOM_IN", CMD_MISC_ZOOM_IN);
+	r.RegisterInt("CMD_MISC_ZOOM_OUT", CMD_MISC_ZOOM_OUT);
+	r.RegisterInt("CMD_MISC_SCREENSHOT", CMD_MISC_SCREENSHOT);
+	r.RegisterInt("CMD_MISC_SELECT", CMD_MISC_SELECT);
+	r.RegisterInt("CMD_MISC_BBOX_SELECT", CMD_MISC_BBOX_SELECT);
+	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
+	r.RegisterInt("CMD_MISC_VERTEX_UV", CMD_MISC_VERTEX_UV);
+	r.RegisterInt("CMD_MISC_DISPLAY_INFO", CMD_MISC_DISPLAY_INFO);
+	r.RegisterInt("CMD_MISC_ABOUT", CMD_MISC_ABOUT);
+	r.RegisterInt("VIEW_JOINT1", VIEW_JOINT1);
+	r.RegisterInt("VIEW_JOINT2", VIEW_JOINT2);
+	r.RegisterInt("VIEW_JOINT3", VIEW_JOINT3);
+	r.RegisterInt("VIEW_BONE1", VIEW_BONE1);
+	r.RegisterInt("VIEW_BONE2", VIEW_BONE2);
+
+
+	r.RegisterInt("EVENT_MATERIAL", EVENT_MATERIAL);
+
+	r.RegisterInt("EVENT_FREYJA_MODE", EVENT_FREYJA_MODE);
+	r.RegisterInt("FREYJA_MODE_MODEL_EDIT", FREYJA_MODE_MODEL_EDIT);
+	r.RegisterInt("FREYJA_MODE_MATERIAL_EDIT", FREYJA_MODE_MATERIAL_EDIT);
+	r.RegisterInt("FREYJA_MODE_TEXTURE_EDIT", FREYJA_MODE_TEXTURE_EDIT);
+	r.RegisterInt("FREYJA_MODE_ANIMATION", FREYJA_MODE_ANIMATION);
+	r.RegisterInt("FREYJA_MODE_RENDER_WIREFRAME",FREYJA_MODE_RENDER_WIREFRAME);
+	r.RegisterInt("FREYJA_MODE_RENDER_FACE", FREYJA_MODE_RENDER_FACE);
+	r.RegisterInt("FREYJA_MODE_RENDER_POINTS", FREYJA_MODE_RENDER_POINTS);
+	r.RegisterInt("FREYJA_MODE_RENDER_NORMALS", FREYJA_MODE_RENDER_NORMALS);
+	r.RegisterInt("FREYJA_MODE_RENDER_TEXTURE", FREYJA_MODE_RENDER_TEXTURE);
+	r.RegisterInt("FREYJA_MODE_RENDER_LIGHTING", FREYJA_MODE_RENDER_LIGHTING);
+	r.RegisterInt("FREYJA_MODE_RENDER_MATERIAL", FREYJA_MODE_RENDER_MATERIAL);
+	r.RegisterInt("FREYJA_MODE_RENDER_BONETAG",FREYJA_MODE_RENDER_BONETAG);
+	r.RegisterInt("FREYJA_MODE_RENDER_GRID", FREYJA_MODE_RENDER_GRID);
+	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
+	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
+	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
+
+
+	//printf("FreyjaResource> Done\n");
+}
+
+
 
 FreyjaControl::FreyjaControl()
 {
 	unsigned int width = 740;
 	unsigned int height = 560;
 
+
+	setupResource(mResource);
 
 	mModel = new FreyjaModel();
 	mRender = new FreyjaRender();
@@ -329,19 +494,19 @@ void FreyjaControl::eventMesh(int command)
 
 
 	case CMD_MESH_GENERATE_CYLINDER:
-		eggGenerateCylinder(4, 16, 64.0, 32.0);
+		eggGenerateCylinder(4, 16, 8.0, 4.0);
 		event_refresh();
 		break;
 	case CMD_MESH_GENERATE_SPHERE:
-		eggGenerateSphere(16, 16, 64.0);
+		eggGenerateSphere(16, 16, 8.0);
 		event_refresh();
 		break;
 	case CMD_MESH_GENERATE_CUBE:
-		eggGenerateCube(64.0);
+		eggGenerateCube(8.0);
 		event_refresh();
 		break;
 	case CMD_MESH_GENERATE_TRIS:
-		eggGenerateTriangleStrip(10, 64.0);
+		eggGenerateTriangleStrip(10, 8.0);
 		event_refresh();
 		break;
 

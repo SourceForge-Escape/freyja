@@ -218,6 +218,16 @@ class Resource
    * Mongoose - Created
    ------------------------------------------------------*/
 
+	void RegisterInt(char *symbol, int value);
+	/*------------------------------------------------------
+	 * Pre  : Symbol is valid and matches Value
+	 * Post : Binds symbol to matching variable name in resource
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.01.21:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void String(char *string, int len);
   /*------------------------------------------------------

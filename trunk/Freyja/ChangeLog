@@ -30,6 +30,9 @@
 
  Freyja (0.3.5-20040802) Mongoose <mongoose@icculus.org>
 
+	o Generated meshes now sized to default zoom level
+	o Fix for skin tab events
+	o Mouse editing back to old keys
 	o Color button from new gtk+ added to mgtk interface
 	o Misc minor event system changes
 	o Mouse motion event code restored in new way

@@ -316,3 +316,125 @@ void freyja_event_start()
 }
 
 
+
+char *freyja_rc_map(char *s)
+{
+	char *rc = NULL;
+	char *path = "freyja";
+	char *env;
+	unsigned int len;
+	
+	
+	if (!s || !s[0])
+	{
+		return NULL;
+	}
+
+	len = strlen(s) + strlen(path);
+  
+#ifdef unix
+	env = getenv("HOME");
+
+	if (!env || !env[0])
+	{
+		printf("ERROR: Bad HOME envronment\n");
+		return NULL;
+	}
+
+	len += strlen(env) + 8;
+
+   rc = new char[len + 1];
+   snprintf(rc, len, "%s/.%s/%s", env, path, s);
+#else
+	len += 8;
+
+   rc = new char[len + 1];
+   snprintf(rc, len, "C:/%s/%s", path, s);
+#endif
+	
+	return rc;
+}
+
+
+arg_list_t *freyja_rc_color(arg_list_t *args)
+{
+	arg_list_t *sym, *r, *g, *b;
+
+	sym = symbol();
+	symbol_enforce_type(&r, FLOAT);
+	symbol_enforce_type(&g, FLOAT);
+	symbol_enforce_type(&b, FLOAT);
+
+	// Call event func here - simulated with printf in tests
+	if (sym && r && g && b)
+	{
+#ifdef DEBUG_RESOURCE_COLOR
+		printf("extern \"C\" { color(%s, %f, %f, %f); }\n",
+				 get_string(sym),
+				 get_float(r), get_float(g), get_float(b));
+#endif
+
+      if (strcmp(get_string(sym), "COLOR_EDIT_BBOX") == 0)
+      {
+			event_custom_color(COLOR_EDIT_BBOX, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_BG") == 0)
+      {			
+			event_custom_color(COLOR_EDIT_BG, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_VIEW_BG") == 0)
+      {
+			event_custom_color(COLOR_VIEW_BG, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_POLYGON") == 0)
+      {
+			event_custom_color(COLOR_EDIT_POLYGON,
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_LINE") == 0)
+      {
+			event_custom_color(COLOR_EDIT_LINE, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_TEXT") == 0)
+      {
+			event_custom_color(COLOR_EDIT_TEXT, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_GRID_8") == 0)
+      {
+			event_custom_color(COLOR_EDIT_GRID_8, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_LINE_HIGHLIGHT") == 0)
+      {
+			event_custom_color(COLOR_EDIT_LINE_HIGHLIGHT, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_VERTEX") == 0)
+      {
+			event_custom_color(COLOR_EDIT_VERTEX, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+      else if (strcmp(get_string(sym), "COLOR_EDIT_VERTEX_HIGHLIGHT") == 0)
+      {
+			event_custom_color(COLOR_EDIT_VERTEX_HIGHLIGHT, 
+									  get_float(r), get_float(g), get_float(b));
+      }
+	}
+	else
+	{
+		printf("color> Failed to extract strict typed data from script\n");
+	}
+
+	delete_arg(&sym);
+	delete_arg(&r);
+	delete_arg(&g);
+	delete_arg(&b);
+
+	return NULL;
+}
+

@@ -81,7 +81,7 @@ void FreyjaEvent::setName(char *name)
 	mName = new char[l+1];
 	strncpy(mName, name, l);
 	mName[l] = 0;
-	mResource->RegisterCPPInt(mName, mId);
+	mResource->RegisterInt(mName, mId);
 }
 
 

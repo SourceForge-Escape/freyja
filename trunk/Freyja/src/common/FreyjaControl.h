@@ -247,7 +247,7 @@ private:
 
 	unsigned int mMouseButton, mModKey;
 
-	FreyjaResource mResource;               /* Resource system */
+	Resource mResource;                     /* Resource system */
 
 	MaterialManager *mMaterial;             /* Material manager */
 
