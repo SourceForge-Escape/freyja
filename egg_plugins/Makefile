@@ -25,8 +25,8 @@ MICRO_VERSION=99
 BUILD_ID=20040406
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 EXT=.so
-TREE_DIR=libfreyja_model
-TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
+TREE_DIR=egg_plugins
+TARBALL_NAME=$(TREE_DIR)-$(VERSION).$(BUILD_ID)
 
 ################################################################
 
@@ -144,14 +144,21 @@ trmesh.so:
 	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_trmesh.o \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+grn.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=grn \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_grn.o $(BUILD_DEBUG_DIR)/grannyfile.o $(BUILD_DEBUG_DIR)/GrannyStream.o $(BUILD_DEBUG_DIR)/grnanim.o  $(BUILD_DEBUG_DIR)/grnbones.o  $(BUILD_DEBUG_DIR)/grnboneties.o  $(BUILD_DEBUG_DIR)/grnitemlist.o  $(BUILD_DEBUG_DIR)/grnmatrix.o  $(BUILD_DEBUG_DIR)/grnmeshes.o  $(BUILD_DEBUG_DIR)/grnobjects.o  $(BUILD_DEBUG_DIR)/grntextchunk.o  $(BUILD_DEBUG_DIR)/grntextureinfos.o  $(BUILD_DEBUG_DIR)/grntextures.o  $(BUILD_DEBUG_DIR)/grnunhandled.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 3ds.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=3ds \
-	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_3ds.o \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_3ds.o $(BUILD_DEBUG_DIR)/3ds.o" \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB3DS_SUPPORT" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -l3ds"
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 tombraider.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
@@ -192,6 +199,14 @@ mdl.so:
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=mdl \
 	MOD_OBJS="$(BUILD_DEBUG_DIR)/Mdl.o $(BUILD_DEBUG_DIR)/freyja_mdl.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+mdx.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=mdl \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_mdx.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
