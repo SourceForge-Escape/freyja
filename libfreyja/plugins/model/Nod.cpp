@@ -162,11 +162,23 @@ void Nod::print()
 			   vertices[i].BoneNum);
 	}
 
-
 	for (i = 0; i < header2.NumFaces; ++i)
 	{
 		printf("face[%li] = { %i %i %i}\n", i,
 			   faces[i].indices[0], faces[i].indices[1], faces[i].indices[2]);
+	}
+
+	for (i = 0; i < header2.NumGroups; ++i)
+	{
+		printf("mesh_groups[%li].MaterialID = %i", i, mesh_groups[i].MaterialID);
+		printf("mesh_groups[%li].RESERVED = ?", i);
+		printf("mesh_groups[%li].NumFace = %is", i, mesh_groups[i].NumFaces);
+		printf("mesh_groups[%li].NumVertices = %i", i, mesh_groups[i].NumVertices);
+		printf("mesh_groups[%li].MinVertices = %i", i, mesh_groups[i].MinVertices);
+		printf("mesh_groups[%li].dummy = %i", i, mesh_groups[i].dummy);
+		printf("mesh_groups[%li].GroupFlags = 0x%x", i, mesh_groups[i].GroupFlags);
+		printf("mesh_groups[%li].BoneNum = %i", i, mesh_groups[i].BoneNum);
+		printf("mesh_groups[%li].MeshNum = %i", i, mesh_groups[i].MeshNum);
 	}
 }
 
@@ -254,6 +266,14 @@ bool Nod::load(const char *filename)
 	}
 
 
+	if (header2.ModelFlags & NOD_MF_HASLOD)
+	{
+		for (i = 0; i < header2.NumVertices; ++i)
+		{
+			r.readInt16();  // ?
+		}
+	}
+
 	faces = new nod_face_t[header2.NumFaces];
 
 	for (i = 0; i < header2.NumFaces; ++i)
@@ -263,6 +283,20 @@ bool Nod::load(const char *filename)
 		faces[i].indices[2] = r.readInt16();
 	}
 
+	mesh_groups = new nod_meshgroup_t[header2.NumGroups];
+ 
+	for (i = 0; i < header2.NumGroups; ++i)
+	{
+		mesh_groups[i].MaterialID = r.readLong();
+		r.readBufferUnsignedChar(12, mesh_groups[i].RESERVED);
+		mesh_groups[i].NumFaces = r.readInt16();
+		mesh_groups[i].NumVertices = r.readInt16();
+		mesh_groups[i].MinVertices = r.readInt16();
+		mesh_groups[i].dummy = r.readInt16();
+		mesh_groups[i].GroupFlags = r.readInt16();
+		mesh_groups[i].BoneNum = r.readInt8U();
+		mesh_groups[i].MeshNum = r.readInt8U();
+	}
 
 	r.closeFile();
 	
@@ -424,6 +458,57 @@ int freyja_model__nod_import(char *filename)
 
 	freyjaEnd(); // FREYJA_GROUP
 
+#ifdef USE_GROUPS
+	num_verts = num_faces = 0;
+			  
+	for (i = 0; i < header2->NumGroups; i++)
+	{  
+		printf("group[%02i].mesh = '%s'\n",
+			   i, meshes[mesh_groups[i].MeshNum].MeshName);
+
+		printf("group[%02i].flags = {", i);
+		
+		if (!mesh_groups[i].GroupFlags)
+			printf("NONE ");
+		
+		if (mesh_groups[i].GroupFlags & NOD_GF_HASLOD)
+			printf("NOD_GF_HASLOD ");
+
+		if (mesh_groups[i].GroupFlags & NOD_GF_NOWEIGHTS)
+			printf("NOD_GF_NOWEIGHTS ");
+		
+		if (mesh_groups[i].GroupFlags & NOD_GF_NOSKINNING)
+			printf("NOD_GF_NOSKINNING ");
+		
+		if (mesh_groups[i].GroupFlags & NOD_GF_MULTITEXTURE)
+			printf("NOD_GF_MULTITEXTURE ");
+		
+		printf("}\n");
+		
+		for (j = 0; j < mesh_groups[i].NumVertices; j++)
+		{
+			printf("group[%02i].vertex[%04i] { pos %.3f %.3f %.3f; \tuv %.3f %.3f }\n",
+				   i, j, 
+				   vertices[num_verts + j].Pos[0],
+				   vertices[num_verts + j].Pos[1],
+				   vertices[num_verts + j].Pos[2],
+				   vertices[num_verts + j].UV[0],
+				   1.0 - vertices[num_verts + j].UV[1]);
+		}
+		
+		for (j = 0; j < mesh_groups[i].NumFaces; j++)
+		{
+			printf("group[%02i].tris[%04i] { %u, %u, %u }\n",
+				   i, j, 
+				   faces[num_faces + j].indices[0],
+				   faces[num_faces + j].indices[1],
+				   faces[num_faces + j].indices[2]);
+		}
+		
+		num_verts += mesh_groups[i].NumVertices;
+		num_faces += mesh_groups[i].NumFaces;
+	}
+#endif
 
 	for (j = 0; j < nod.header2.NumFaces; j++)
 	{
@@ -481,18 +566,18 @@ int main(int argc, char *argv[])
 	{
 		if (strcmp(argv[1], "load") == 0)
 		{
-		  if (!nod.Load(argv[2]))
+		  if (nod.load(argv[2]))
 		  {
 			  printf("main: Nod::Load(%s) reports success.\n", argv[2]);
 			  
-			  header1 = nod.Header1();
-			  materials = nod.Materials();
-			  header2 = nod.Header2();
-			  bones = nod.Bones();
-			  meshes = nod.Meshes();
-			  vertices = nod.Vertices();
-			  mesh_groups = nod.MeshGroups();
-			  faces = nod.Faces();
+			  header1 = &nod.header1;
+			  materials = nod.materials;
+			  header2 = &nod.header2;
+			  bones = nod.bones;
+			  meshes = nod.meshes;
+			  vertices = nod.vertices;
+			  mesh_groups = nod.mesh_groups;
+			  faces = nod.faces;
 			  
 			  printf("\n\n%s\n", argv[1]);
 			  
@@ -605,6 +690,8 @@ int main(int argc, char *argv[])
 				  num_faces += mesh_groups[i].NumFaces;
 			  }
 		  }
+
+		  printf("num_verts = %i, num_faces = %i\n", num_verts, num_faces);
 	  }
 	  else
 		  printf("\n\n%s [ load ] filename.nod\n", argv[0]);

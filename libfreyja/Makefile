@@ -454,6 +454,13 @@ ase.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
+nod.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=nod BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/Nod.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_NOD $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+
 jpeg.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
