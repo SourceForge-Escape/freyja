@@ -1201,12 +1201,12 @@ int freyja_model__md3_export(char *filename)
     
 		/* Add 1 for non morphed vertices ( Would be frame[0] )
 		 * Note all this code assumes TRIANGLES -- THREE EDGES! 3! 3! 3! */
-		num_frames = 1;//(freyjaGetMeshVertexFrameCount(transM[k]) + 1);
-		freyjaPrintMessage("Exporting %i frames...\n", num_frames);
+		num_frames = (freyjaGetMeshVertexFrameCount(transM[k]) + 1);
+		freyjaPrintMessage("Exporting %i frames...", num_frames);
 		mesh[k].num_frames = num_frames;
-		mesh[k].num_vertices = mesh[k].num_triangles * 3 * num_frames;
-		mesh[k].vertex = new md3_vertex_t[mesh[k].num_vertices*num_frames];
-		mesh[k].texel = new md3_texel_t[mesh[k].num_vertices*num_frames];
+		mesh[k].num_vertices = mesh[k].num_triangles * 3;
+		mesh[k].vertex = new md3_vertex_t[mesh[k].num_vertices * num_frames];
+		mesh[k].texel = new md3_texel_t[mesh[k].num_vertices * num_frames];
 		mesh[k].tris = new md3_tri_index_t[mesh[k].num_triangles];
 
 		// frame[0], also sets up mesh faces
@@ -1266,65 +1266,67 @@ int freyja_model__md3_export(char *filename)
 		}
 
 
-#ifdef MD3_EXPORT_FRAMES
 		// frame[1..n], WARNING Uses v from last loop
 		for (f = 1; f < mesh[k].num_frames; ++f)
-		for (i = 0; i < mesh[k].num_triangles; ++i)
 		{
-			freyjaPrintMessage("Exporting frame %li/%i...\n",
+
+			freyjaPrintMessage("Exporting frame %li/%i...",
 							   f, mesh[k].num_frames);
-			idx = freyjaGetMeshPolygonIndex(transM[k], i);
 
-			for (j = 0; j < 3; ++j, ++v)
+			for (i = 0; i < mesh[k].num_triangles; ++i)
 			{
-				vertex = freyjaGetPolygonVertexIndex(idx, j);
+				idx = freyjaGetMeshPolygonIndex(transM[k], i);
 
-				// FIXME: May need bounds ckecking/scaling for short
-				freyjaGetVertexFrame(vertex, f-1, &frameIndex, xyz);
-				mesh[k].vertex[v].pos[0] = (short)(xyz[x]*scale);
-				mesh[k].vertex[v].pos[1] = (short)(xyz[y]*scale);
-				mesh[k].vertex[v].pos[2] = (short)(xyz[z]*scale);
-
-				// Normal isn't actually stored in md3's vertex.norm
-				// it must be encoded into the 'vertex.st' normal
-				freyjaGetVertexNormalXYZ3fv(vertex, xyz);
-				mesh[k].vertex[v].norm[0] = (short)xyz[x];
-				mesh[k].vertex[v].norm[1] = (short)xyz[y];
-				mesh[k].vertex[v].norm[2] = (short)xyz[z];
-				lng = acos(xyz[z]);
-				lat = acos(xyz[x]/sin(lng)); 
-				lat = (lat * 255.0) / (2 * M_PI);
-				lng = (lng * 255.0) / (2 * M_PI);
-				mesh[k].vertex[v].st[0] = (unsigned char)lat;  
-				mesh[k].vertex[v].st[1] = (unsigned char)lng;
-
-				// Modeler must use VertexUV, not polymapping for best results
-				if (freyjaGetPolygonFlags(idx) & fPolygon_VertexUV)
+				for (j = 0; j < 3; ++j, ++v)
 				{
-					freyjaGetVertexTexCoordUV2fv(vertex, uv);
-					mesh[k].texel[v].st[0] = uv[0];
-					mesh[k].texel[v].st[1] = uv[1];
-				}
-				else if (freyjaGetPolygonFlags(idx) & fPolygon_PolyMappedUV)
-				{
-					// This will make 'interesting' UVMaps in some cases
-					// You can't fit more UVs than Vertices in md3!
-					texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
-					freyjaGetTexCoord2fv(texcoord, uv);
-					mesh[k].texel[v].st[0] = uv[0];
-					mesh[k].texel[v].st[1] = uv[1];
-				}
-				else // Color info only?  Grab the vertex uv anyway then
-				{
-					freyjaGetVertexTexCoordUV2fv(vertex, uv);
-					mesh[k].texel[v].st[0] = uv[0];
-					mesh[k].texel[v].st[1] = uv[1];
-				}
+					vertex = freyjaGetPolygonVertexIndex(idx, j);
 
-				transV.pushBack(vertex); // transV[v] -> vertex
-			}
-		}		
-#endif
+					// FIXME: May need bounds ckecking/scaling for short
+					freyjaGetVertexFrame(vertex, f-1, &frameIndex, xyz);
+					mesh[k].vertex[v].pos[0] = (short)(xyz[x]*scale);
+					mesh[k].vertex[v].pos[1] = (short)(xyz[y]*scale);
+					mesh[k].vertex[v].pos[2] = (short)(xyz[z]*scale);
+
+					// Normal isn't actually stored in md3's vertex.norm
+					// it must be encoded into the 'vertex.st' normal
+					freyjaGetVertexNormalXYZ3fv(vertex, xyz);
+					mesh[k].vertex[v].norm[0] = (short)xyz[x];
+					mesh[k].vertex[v].norm[1] = (short)xyz[y];
+					mesh[k].vertex[v].norm[2] = (short)xyz[z];
+					lng = acos(xyz[z]);
+					lat = acos(xyz[x]/sin(lng)); 
+					lat = (lat * 255.0) / (2 * M_PI);
+					lng = (lng * 255.0) / (2 * M_PI);
+					mesh[k].vertex[v].st[0] = (unsigned char)lat;  
+					mesh[k].vertex[v].st[1] = (unsigned char)lng;
+
+					// Use VertexUV, not polymapping for best results
+					if (freyjaGetPolygonFlags(idx) & fPolygon_VertexUV)
+					{
+						freyjaGetVertexTexCoordUV2fv(vertex, uv);
+						mesh[k].texel[v].st[0] = uv[0];
+						mesh[k].texel[v].st[1] = uv[1];
+					}
+					else if (freyjaGetPolygonFlags(idx) & fPolygon_PolyMappedUV)
+					{
+						// This will make 'interesting' UVMaps in some cases
+						// You can't fit more UVs than Vertices in md3!
+						texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
+						freyjaGetTexCoord2fv(texcoord, uv);
+						mesh[k].texel[v].st[0] = uv[0];
+						mesh[k].texel[v].st[1] = uv[1];
+					}
+					else // Color info only?  Grab the vertex uv anyway then
+					{
+						freyjaGetVertexTexCoordUV2fv(vertex, uv);
+						mesh[k].texel[v].st[0] = uv[0];
+						mesh[k].texel[v].st[1] = uv[1];
+					}
+
+					transV.pushBack(vertex); // transV[v] -> vertex
+				}
+			}		
+		}
 
 		//FIXME: add skin info here
 		mesh[k].skin = NULL;
