@@ -28,6 +28,16 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040522) Mongoose <mongoose@icculus.org>
+
+	o Fixed MaterialManager after move to FreyjaControl
+	o FreyjaControl takes over removed events handling
+	o New generic widget interface for FreyjaControl use
+	o scrollbar events removed
+	o freyja_event_interface_listener() 
+	o file dialog wrappers removed
+	o Event system trimming and refactoring continues
+
  Freyja (0.3.5-20040515) Mongoose <mongoose@icculus.org>
 
 	* Event reporting from moudles to libs to app

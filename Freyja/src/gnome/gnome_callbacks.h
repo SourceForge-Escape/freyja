@@ -28,6 +28,8 @@
 
 void freyja_event_subscribe_gtk_widget(int id, GtkWidget *widget);
 
+
+
 // Mongoose 2002.01.12, Freyja event from Gnome widget callbacks
 void main_event(GtkWidget *widget, gpointer user_data);
 void mode_event(GtkWidget *widget, gpointer user_data);
@@ -51,7 +53,7 @@ gint spinbutton_float_event(GtkSpinButton *spin, gpointer event_id);
 gint aframe_adj_event(GtkWidget *widget, GdkEventButton *event);
 
 
-void fileselection_open_event();
+void fileselection_action_event();
 void fileselection_cancel_event();
 void notebook_switch_page_event(GtkNotebook *notebook, GtkNotebookPage *page,
 										  gint page_num, gpointer user_data);
@@ -60,15 +62,6 @@ void animation_tree_item_selected_event(GtkWidget *item);
 gint popup_menu_handler_event(GtkWidget *widget, GdkEventButton *event);
 void popup_menu_detacher_event(GtkWidget *attach_widget,GtkMenu *menu);
 
-void new_model_event(GtkMenuItem *menuitem, gpointer user_data);
-void open_palette_event(GtkMenuItem *menuitem, gpointer user_data);
-void open_model_event(GtkMenuItem *menuitem, gpointer user_data);
-void open_texture_event(GtkMenuItem *menuitem, gpointer user_data);
-void save_model_event(GtkMenuItem *menuitem, gpointer user_data);
-void save_as_model_event(GtkMenuItem *menuitem, gpointer user_data);
-void open_material_event(GtkMenuItem *menuitem, gpointer user_data);
-void save_as_material_event(GtkMenuItem *menuitem, gpointer user_data);
-void exit_event(GtkMenuItem *menuitem, gpointer user_data);
 
 // Mongoose 2002.01.12, Misc/toolkit functions
 GtkWidget *setup_tree_root(char *label, GtkWidget *tree);
