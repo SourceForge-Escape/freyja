@@ -357,6 +357,28 @@ class FreyjaFileReader
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	long readLong();
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Binary read of small endian 32bit signed int
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	unsigned long readLongU();
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Binary read of small endian 32bit unsigned int
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 
  private:
 
