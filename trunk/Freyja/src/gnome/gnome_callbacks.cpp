@@ -64,6 +64,23 @@ Map<int, GtkWidget *> WIDGET_MAP;
 Map<int, int> NOTEBOOK_EVENT;
 
 
+//////////////////////////////////////////////////////////////////////////
+
+
+void freyja_event_fullscreen()
+{
+	application_window_fullscreen();
+}
+
+void freyja_event_unfullscreen()
+{
+	application_window_unfullscreen();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
 void callback_update_skeleton_ui_gtk(callback_bone_t *bone, 
 									 GtkTreeStore *store, GtkTreeIter root)
 {

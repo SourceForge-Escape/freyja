@@ -28,6 +28,11 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040510) Mongoose <mongoose@icculus.org>
+
+	* Quick add back of mesh mouse based scale/rotate
+	* All Freyja event handlers moved back into FreyjaControl
+	* Removing more and more of event system for rewrite
 
  Freyja (0.3.5-20040506) Mongoose <mongoose@icculus.org>	
 

@@ -722,6 +722,7 @@ void colorCopyHelper(vec3_t colorSource, vec3_t colorDest)
 	colorDest[0] = colorSource[0];
 	colorDest[1] = colorSource[1];
 	colorDest[2] = colorSource[2];
+	colorDest[3] = 1.0f;
 }
 
 
@@ -738,7 +739,7 @@ void FreyjaRender::CustomColor(int flags, float r, float g, float b)
 
 	if (flags & COLOR_EDIT_LINE)
 		colorCopyHelper(color, _edit_line_color);
-      
+
 	if (flags & COLOR_EDIT_LINE_HIGHLIGHT)
 		colorCopyHelper(color, _edit_line_highlight_color);
 
