@@ -24,7 +24,7 @@ MINOR_VERSION=8
 MICRO_VERSION=14
 BUILD_ID=20040823
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
-TREE_DIR=libfreyja
+TREE_DIR=libfreyja8
 TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
 
 ################################################################

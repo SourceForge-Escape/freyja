@@ -933,9 +933,15 @@ bool FreyjaControl::event(int command)
 
 
 	case eGenerateCube:
-		mCleared = false;
-		//FIXME eggGenerateCube(8.0);
-		freyja_event_gl_refresh();
+		{
+			Vector3d v;
+
+			v.zero();
+
+			mCleared = false;
+			freyjaGenerateQuadCubeMesh(v.mVec, 8.0f);
+			freyja_event_gl_refresh();
+		}
 		break;
 
 
