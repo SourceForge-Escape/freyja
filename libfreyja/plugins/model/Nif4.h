@@ -459,6 +459,7 @@ class Nif4
 
 		bool readChunk(FreyjaFileReader &r)
 		{
+#ifdef NIF4_CORRECT_TESTING
 			long i;
 
 			r.readLong(); // 0
@@ -482,7 +483,22 @@ class Nif4
 			}
 
 			printf("@ %i\n", r.getFileOffset());
+#else
+			bool done = false;
+			char c, lc;
 
+			while (!done && !r.endOfFile())
+			{
+				c = r.readInt8();
+
+				if (c == 'i' && lc == 'N')
+					done = true;
+
+				lc = c;
+			}
+
+			r.setFileOffset(r.getFileOffset() - (2+4));
+#endif
 			return (!r.endOfFile());
 		}
 
@@ -497,6 +513,7 @@ class Nif4
 
 		bool readChunk(FreyjaFileReader &r)
 		{
+#ifdef NIF4_CORRECT_TESTING
 			len = r.readLong();
 
 			//for (i = 0; i < len; ++i)
@@ -504,6 +521,22 @@ class Nif4
 			r.setFileOffset(r.getFileOffset() + 4187*len);
 
 			//printf("@ %i\n", r.getFileOffset());
+#else
+			bool done = false;
+			char c, lc;
+
+			while (!done && !r.endOfFile())
+			{
+				c = r.readInt8();
+
+				if (c == 'i' && lc == 'N')
+					done = true;
+
+				lc = c;
+			}
+
+			r.setFileOffset(r.getFileOffset() - (2+4));
+#endif
 			return (!r.endOfFile());
 		}
 
