@@ -104,7 +104,7 @@ public:
 
 	/*** Public Accessors *********************************/
 
-	virtual bool saveFile(EggFileWriter &r) = 0;
+	virtual bool saveFile(EggFileWriter &w) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Saves a model to disk file
@@ -115,7 +115,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual bool saveTextFile(EggFileWriter &r) = 0;
+	virtual bool saveTextFile(EggFileWriter &w) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Saves a model to disk file as UTF-8 text
@@ -162,6 +162,8 @@ public:
 class Material
 {
 public:
+	char *name;                /* Material name */
+
 	float ambient[4];          /* Ambient color */
 
 	float diffuse[4];          /* Diffuse color */
@@ -172,9 +174,9 @@ public:
 
 	float shininess;           /* Specular exponent */
 
-	unsigned int texture;      /* Texture id */
+	char *texture_name;        /* Texture name */
 
-	unsigned int texture2;     /* Detail Texture id */
+	unsigned int texture;      /* Texture id */
 
 	unsigned int blend_src;    /* Blend source factor */
 
@@ -270,8 +272,7 @@ class VertexFrame
 {
 public:
 	unsigned int mesh;                /* Mesh using this frame */
-	Vector<vec3_t> frame;             /* Vertex animation frames */
-
+	Vector<vec3_t> frame;             /* Vertex animation frame */
 };
 
 

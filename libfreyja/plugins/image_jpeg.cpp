@@ -19,18 +19,16 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifdef LIB_JPEG
-extern "C" 
-{
-  #include <ctype.h>
-  #include <string.h>
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <unistd.h>
-  #include <jpeglib.h>
-}
-#endif
 
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <setjmp.h>
+
+#ifdef LIB_JPEG
+#   include <jpeglib.h>
+#endif
 
 extern "C" {
 	int import_image(char *filename, unsigned char **image, 
@@ -64,16 +62,35 @@ int mtk_image__jpeg_check(FILE *f)
 }
 
 
+typedef struct stupid_jpeg_error_mgr 
+{
+  struct jpeg_error_mgr dickheads;
+  jmp_buf setjmp_buffer;
+  int padding[8];
+
+} stupid_jpeg_error_mgr_t;
+
+void stupid_jpeg_error_exit(j_common_ptr image)
+{
+   stupid_jpeg_error_mgr_t *err = (stupid_jpeg_error_mgr_t *)image->err;
+
+	(*image->err->output_message)(image);
+
+	longjmp(err->setjmp_buffer, 1);
+}
+
+
 int import_image(char *filename, unsigned char **imageRET, 
 					  unsigned int *w, unsigned int *h, char *bpp)
 {
 #ifdef LIB_JPEG
 	struct jpeg_decompress_struct image;
-	struct jpeg_error_mgr error;
-	JSAMPROW buffer[1], bptr;
-	unsigned char *imageb = NULL;
+	struct stupid_jpeg_error_mgr jerr;
+	//JSAMPROW rows[1], bptr;
+	JSAMPARRAY buffer;
+	unsigned char *imageb = 0x0;
 	FILE *f;
-	unsigned int i, j, width, height;
+	unsigned int i, j, width, height, depth;
 	
 	
 	f = fopen(filename, "rb");
@@ -91,59 +108,92 @@ int import_image(char *filename, unsigned char **imageRET,
 	}
 
 	fseek(f, 0, SEEK_SET);
-
-	image.err = jpeg_std_error(&error);
+	image.err = jpeg_std_error(&jerr.dickheads);
+	jerr.dickheads.error_exit = stupid_jpeg_error_exit;
+	
+	if (setjmp(jerr.setjmp_buffer)) 
+	{
+		printf("jpeg.so: stupid_jpeg jmp called\n");
+		jpeg_destroy_decompress(&image);
+		fclose(f);
+		return -1;
+	}
+	
 	jpeg_create_decompress(&image);
 	jpeg_stdio_src(&image, f);
 	jpeg_read_header(&image, TRUE);
   
 	if (image.image_width < 1 || image.image_height < 1)
-	{
+	{    
+		printf("jpeg.so: ERROR invalid image.\n");
+		jpeg_destroy_decompress(&image);
 		fclose(f);
 		return -2;
 	}
 
    switch (image.jpeg_color_space)
 	{
+	case JCS_RGB:
+		break;
 	case JCS_GRAYSCALE:
-		//image.out_color_space = JCS_GRAYSCALE;
-		//break;
-	default:		 
 		image.out_color_space = JCS_RGB;
+		break;
+	default:
+		printf("jpeg.so: Unknown colorspace.\n");
+		//image.out_color_space = JCS_RGB;
+		//return -1;
 	}
 
 	image.quantize_colors = FALSE;
 	image.do_fancy_upsampling = FALSE;
 	image.do_block_smoothing = FALSE;
 	jpeg_calc_output_dimensions(&image);
-  
-	bptr = buffer[0] = (JSAMPROW)malloc(image.image_width*image.num_components);
+	jpeg_start_decompress(&image);
 
-	if (!buffer[0])
+	width = image.output_width;
+	height = image.output_height;
+	depth = image.output_components;
+
+	if (width < 1 || height < 1 || depth < 3)
 	{
+		printf("jpeg.so: ERROR libjpeg refuses to output color image.\n");
+		jpeg_destroy_decompress(&image);
+		fclose(f);
+		return -2;
+	}
+
+	buffer = ((*image.mem->alloc_sarray)
+				 ((j_common_ptr)&image, JPOOL_IMAGE, width * depth, 1));
+	//bptr = rows[0] = (JSAMPROW)malloc(width * depth);
+
+	if (!buffer)
+	//if (!rows[0])
+	{
+		printf("jpeg.so: ERROR libjpeg didn't allocate scanline memory.\n");
+		jpeg_destroy_decompress(&image);
 		fclose(f);
 		return -1;
 	}
 
-	jpeg_start_decompress(&image);
-
-	width = image.image_width;
-	height = image.image_height;
-	imageb = new unsigned char[image.image_width * image.image_height * 3];
+	imageb = new unsigned char[width * height * 3];
 		
 	j = 0;
 	
-	while (image.output_scanline < image.output_height) 
+	while (image.output_scanline < height) 
 	{
-		jpeg_read_scanlines(&image, buffer, (JDIMENSION)1);
+		jpeg_read_scanlines(&image, buffer/*rows*/, 1); //(JDIMENSION)1);
 
-		bptr = buffer[0];
+		//	bptr = rows[0];
 
-		for (i = 0; i < image.image_width; ++i) 
+		for (i = 0; i < width && j < width * height; ++i) 
 		{
-			imageb[j*3] = (unsigned char)bptr[i*3];
-			imageb[j*3+1] = (unsigned char)bptr[i*3+1];
-			imageb[j*3+2] = (unsigned char)bptr[i*3+2];
+			//imageb[j*3] = (unsigned char)*bptr++;
+			//imageb[j*3+1] = (unsigned char)*bptr++;
+			//imageb[j*3+2] = (unsigned char)*bptr++;
+
+			imageb[j*3] = (unsigned char)buffer[0][i*3];
+			imageb[j*3+1] = (unsigned char)buffer[0][i*3+1];
+			imageb[j*3+2] = (unsigned char)buffer[0][i*3+2];
 			j++;
 		}
 	}
@@ -151,10 +201,11 @@ int import_image(char *filename, unsigned char **imageRET,
 	/* Clean up */
 	jpeg_finish_decompress(&image);
 	jpeg_destroy_decompress(&image);
-	fclose(f);
 
-	if (buffer[0])
-		free(buffer[0]); 
+
+	//free(rows[0]);
+
+	fclose(f);
 
 
 	/* Return new RBG pixmap */
@@ -162,6 +213,8 @@ int import_image(char *filename, unsigned char **imageRET,
 	*h = height;
 	*imageRET = imageb;
 	*bpp = 3;
+
+	imageb = 0x0;
 
 	return 0;
 	

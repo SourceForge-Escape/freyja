@@ -385,6 +385,13 @@ tests: $(TESTS)
 
 ################################################################
 
+nif4:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) tests NAME=nif4 BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	OBJS="$(BUILD_DEBUG_DIR)/Nif4.o" \
+	CFLAGS="$(BASE_CFLAGS) -g -DUNIT_TEST_NIF4" \
+	LD_FLAGS="-lm -lfreyja8 -lhel0 -lstdc++"
+
 mdl:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) tests NAME=mdl BUILD_DIR=$(BUILD_DEBUG_DIR) \

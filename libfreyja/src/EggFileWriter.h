@@ -66,7 +66,7 @@ class EggFileWriter
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	bool doesFileExist(const char *filename);
+	static bool doesFileExist(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Opens a disk file to determine if it exists
 	 * Post : Returns true if file exists
@@ -141,6 +141,17 @@ class EggFileWriter
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Writes string to text file
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void writeBufferUnsignedChar(unsigned int length, unsigned char *buffer);
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Binary write of buffer to file
 	 *
 	 *-- History ------------------------------------------
 	 *
