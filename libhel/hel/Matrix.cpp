@@ -215,6 +215,25 @@ Matrix Matrix::multiply(const Matrix &a, const Matrix &b)
 }
 
 
+Matrix Matrix::operator =(const Matrix &mat)
+{
+	setMatrix((vec_t*)mat.mMatrix);
+	return (*this);
+}
+
+
+Matrix Matrix::operator =(const Quaternion &q)
+{
+	Quaternion tmp = q;
+	matrix_t m;
+
+	tmp.getMatrix(m);
+	setMatrix(m);
+
+	return (*this);
+}
+
+
 Matrix Matrix::operator *(const Matrix &a)
 {
 	return multiply(a, *this);
@@ -311,6 +330,12 @@ bool Matrix::isIdentity()
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+bool Matrix::invert()
+{
+	return getInvert(mMatrix); // it copies before it inverts
+}
+
 
 void Matrix::setMatrix(matrix_t mat)
 {

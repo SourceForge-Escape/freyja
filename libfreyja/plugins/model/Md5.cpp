@@ -370,12 +370,9 @@ int freyja_model__md5_import(char *filename)
 	unsigned int vertex, texcoord;
 	int i, m, v, w, t, j, index;
 	float qw;
-	vec_t x, y, z, a;
-	vec3_t xyz;
 	vec4_t wxyz;
-	Quaternion q;
+	Quaternion q, q2;
 	Matrix mat, mat2;
-	matrix_t matt;
 	Vector3d vec3, tmp;
 
 
@@ -414,14 +411,8 @@ int freyja_model__md5_import(char *filename)
 							   md5.mJoints[j].rotate[0],
 							   md5.mJoints[j].rotate[1],
 							   md5.mJoints[j].rotate[2]);
-#ifdef MAT_TRANSFORMS
-				q.getMatrix(matt);
-				mat = Matrix(matt);	
-				mat.multiply3v(md5.mMeshes[m].weights[w].pos, xyz);
-				tmp = Vector3d(xyz);
-#else
-				tmp = q.rotate(md5.mMeshes[m].weights[w].pos);
-#endif		
+
+				tmp = q.rotate(md5.mMeshes[m].weights[w].pos);		
 				tmp += Vector3d(md5.mJoints[j].translate[0],
 								md5.mJoints[j].translate[1],
 								md5.mJoints[j].translate[2]);
@@ -486,6 +477,36 @@ int freyja_model__md5_import(char *filename)
 
 	freyjaBegin(FREYJA_SKELETON);
 
+	Vector3d transforms[md5.mNumJoints];
+	Vector3d origin;
+
+	for (j = 0; j < md5.mNumJoints; ++j)
+	{
+		transforms[j].zero();
+	}
+
+	/* Mongoose 2004.12.21, 
+	 * Md5 stores absolution bone pos -- make them offsets from parent */
+	for (j = 0; j < md5.mNumJoints; ++j)
+	{
+		vec3 = Vector3d(md5.mJoints[j].translate[0],
+						md5.mJoints[j].translate[1],
+						md5.mJoints[j].translate[2]);
+		printf("%3i   %.3f %.3f %.3f\n", j,
+			   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
+		index = j;
+
+		while (index > -1)
+		{
+			vec3 -= transforms[index];
+			index = md5.mJoints[index].parent;
+		}
+
+		transforms[j] = vec3;
+		printf("->    %.3f %.3f %.3f\n",
+			   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
+	}
+
 	for (j = 0; j < md5.mNumJoints; ++j)
 	{
 		/* Start a new tag */
@@ -494,57 +515,45 @@ int freyja_model__md5_import(char *filename)
 		freyjaBoneParent(md5.mJoints[j].parent);
 		freyjaBoneName(md5.mJoints[j].name);
 
-		/* Mongoose 2004.12.21, 
-		 * Md5 stores absolution bone pos */
-		x = md5.mJoints[j].translate[0]*scale;
-		y = md5.mJoints[j].translate[1]*scale;
-		z = md5.mJoints[j].translate[2]*scale;
-		index = j;
+		/* Translate */
+		vec3 = transforms[j];
+		vec3 *= scale;
 
-		while (index > 0)
+		if (!j || 1)
 		{
-			index = md5.mJoints[index].parent;
-			x -= md5.mJoints[index].translate[0]*scale;
-			y -= md5.mJoints[index].translate[1]*scale;
-			z -= md5.mJoints[index].translate[2]*scale;
+			freyjaBonePos3f(vec3.mVec[0], vec3.mVec[2], vec3.mVec[1]);
+		}
+		else
+		{
+			freyjaBonePos3f(vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
 		}
 
-		freyjaBonePos3f(x, y, z);
-
+		/* Scale */
 		index = j;
+		mat.setIdentity();
 
-		qw = md5.decodeIdQuaternion(md5.mJoints[index].rotate[0],
-									md5.mJoints[index].rotate[1],
-									md5.mJoints[index].rotate[2]);
-		q = Quaternion(qw, 
-					   md5.mJoints[index].rotate[0],
-					   md5.mJoints[index].rotate[1],
-					   md5.mJoints[index].rotate[2]);
-		q.getMatrix(matt);
-		mat = Matrix(matt);
-			mat2 = mat * mat2;
-		
-
-		while (index > 0)
+		while (index > -1)
 		{
 			index = md5.mJoints[index].parent;
-			qw = md5.decodeIdQuaternion(md5.mJoints[index].rotate[0],
-										md5.mJoints[index].rotate[1],
-										md5.mJoints[index].rotate[2]);
-			q = Quaternion(qw, 
-						   md5.mJoints[index].rotate[0],
-						   md5.mJoints[index].rotate[1],
-						   md5.mJoints[index].rotate[2]);
-			q.getMatrix(matt);
-			mat = Matrix(matt);
-			mat2 = mat * mat2;
+
+			q2 = Quaternion(qw, 
+							md5.mJoints[index].rotate[0],
+							md5.mJoints[index].rotate[1],
+							md5.mJoints[index].rotate[2]);
+			mat2 = q2;
+			mat = mat * mat2;
 		}
 
-		mat2.getMatrix(matt);
-		q.setByMatrix(matt);
+		mat.invert();
+		mat2 = Quaternion(qw, 
+						  md5.mJoints[j].rotate[0],
+						  md5.mJoints[j].rotate[1],
+						  md5.mJoints[j].rotate[2]);
+		mat = mat * mat2;
+		q.setByMatrix(mat.mMatrix);
 		q.getQuaternion4fv(wxyz);
 
-		freyjaBoneRotateQuaternion4fv(wxyz);
+		//freyjaBoneRotateQuaternion4fv(wxyz);
 
 		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{
