@@ -27,6 +27,11 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.8.14-20041215) Mongoose <mongoose@icculus.org>
+
+ 	o Fix for vertex -> polygon delete affecting mesh render list
+
+
  libfreyja (0.8.14-20041209) Mongoose <mongoose@icculus.org>
 
 	o Fix for bone skeleton parent setup in EggPlugin
