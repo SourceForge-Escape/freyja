@@ -169,6 +169,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaImage.o \
 	$(BUILDDIR)/FreyjaLight.o \
 	$(BUILDDIR)/FreyjaMesh.o \
+	$(BUILDDIR)/FreyjaMaterial.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaSkeleton.o 
 

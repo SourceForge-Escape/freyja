@@ -38,24 +38,19 @@ class FreyjaVertex
 {
 public:
 
-	~FreyjaVertex()
-	{
-		weights.erase();
-		polygonRef.erase();
-	}
-
 	class Weight
 	{
 	public:
 		Weight(index_t bone, vec_t weight)
 		{
-			mBone = bone;
+			mBoneIndex = bone;
 			mWeight = weight;
 		}
 
 		vec_t mWeight;             /* Weight for vertex use */
-		index_t mBone;             /* Bone id */
+		index_t mBoneIndex;             /* Bone id */
 	};
+
 
 	FreyjaVertex()
 	{
@@ -63,10 +58,20 @@ public:
 		mGobalMap.pushBack(this);
 	}
 
+	~FreyjaVertex()
+	{
+		weights.erase();
+		frames.erase();
+		polygonRef.erase();
+	}
+
+	unsigned char flags;
 	index_t mesh, id;              /* Unique identifier, mesh[i].vertices[j] */
 	vec3_t xyz;                    /* Position in 3 space */
 	vec3_t normal;                 /* Normal vector */
 	vec3_t uvw;                    /* Texture coordinates */
+
+	//vec4_t color, specular;
 
 	Vector<Weight *> weights;      /* Vector of weights */
 
