@@ -19,7 +19,7 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Misc defines I want to use
+;; Misc defines and varabiles
 (setq true 1)
 (setq false 0)
 
@@ -37,6 +37,7 @@
 (setq NOTEBOOK_HEIGHT HEIGHT)
 (setq PATH "~/.freyja")        ; Set initial data path
 
+
 ;; Custom colors
 (color COLOR_EDIT_GRID_8            0.2  0.2  0.2)
 (color COLOR_EDIT_BG                0.5  0.5  0.5) 
@@ -48,14 +49,6 @@
 (color COLOR_EDIT_VERTEX            0.2  1.0  1.0)
 (color COLOR_EDIT_LINE_HIGHLIGHT    0.2  0.2  1.0)
 (color COLOR_EDIT_VERTEX_HIGHLIGHT  1.0  1.0  0.0)
-
-;; Key commands
-;(key 43 EVENT_TRANSFORM CMD_TRANSFORM_SCALE_UP_XYZ)   ; +
-;(key 45 EVENT_TRANSFORM CMD_TRANSFORM_SCALE_DOWN_XYZ) ; -
-;(key 122 EVENT_MISC CMD_MISC_ZOOM_OUT) ; z
-;(key 122 EVENT_MISC CMD_MISC_UNDO) ; z
-;(key 114 EVENT_MISC CMD_MISC_REDO) ; r
-;(key 115 EVENT_MISC CMD_MISC_SCREENSHOT) ; s
 
 
 ;; Gtk+ Interface
@@ -85,6 +78,8 @@
 			(menu_item "Save _As..." "S-C-s"	EVENT_SAVE_FILE "gtk-save-as")
 			(menu_item "_Revert"     			-1 "gtk-revert-to-saved")
 			(menu_seperator)
+			(menu_item "Proper_ties"	 CMD_MISC_DISPLAY_INFO "gtk-properties")
+
 			(menu_item "_Import"     "C-i"		-1 "gtk-redo")
 			(menu_item "_Export"     "C-e"		-1 "gtk-undo")
 			(menu_seperator)
@@ -117,16 +112,37 @@
 			(menu_item "Pr_eferences"    		-1 "gtk-preferences"))
 
 		(submenu "_View"
-			(menu_item "Info"			CMD_MISC_DISPLAY_INFO "gtk-dialog-info")
+
 			(menu_seperator)
-			(submenu "Joint"
-				(menu_item "Point"		EVENT_MISC  VIEW_JOINT1)
-				(menu_item "Sphere"		EVENT_MISC  VIEW_JOINT2)
-				(menu_item "Axes"		EVENT_MISC  VIEW_JOINT3))
-			(submenu "Bone"
-				(menu_item "Line"		EVENT_MISC  VIEW_BONE1)
-				(menu_item "PolyMesh" 	EVENT_MISC  VIEW_BONE2))
-			(menu_item "Fullscreen"		"M-E"	CMD_TOGGLE_FULLSCREEN "gtk-fullscreen"))
+
+			(menu_item "_Fullscreen" "M-E" CMD_TOGGLE_FULLSCREEN
+				"gtk-fullscreen")
+
+			(menu_seperator)
+
+			;; These should use check menus!
+			(menu_item "_Grid"	10 FREYJA_MODE_RENDER_GRID)
+
+			(submenu "_Mesh"
+				(menu_item "_Points"	10 FREYJA_MODE_RENDER_POINTS)
+				(menu_item "_Wireframe"	10 FREYJA_MODE_RENDER_WIREFRAME)
+				(menu_item "_Normals"	10 FREYJA_MODE_RENDER_NORMALS)
+				(menu_item "_Faces"		10 FREYJA_MODE_RENDER_FACE)
+				(menu_item "_Texture"	10 FREYJA_MODE_RENDER_TEXTURE)
+				(menu_item "_Lighting"	10 FREYJA_MODE_RENDER_LIGHTING)
+				(menu_item "_Material"	10 FREYJA_MODE_RENDER_MATERIAL))
+
+			(menu_item "_Skeleton"		10 FREYJA_MODE_RENDER_BONETAG)
+
+			(submenu "_Joint"
+				(menu_item "_Point"		EVENT_MISC  VIEW_JOINT1)
+				(menu_item "_Sphere"		EVENT_MISC  VIEW_JOINT2)
+				(menu_item "_Axes"		EVENT_MISC  VIEW_JOINT3))
+
+			(submenu "_Bone"
+				(menu_item "_Line"		EVENT_MISC  VIEW_BONE1)
+				(menu_item "_PolyMesh" 	EVENT_MISC  VIEW_BONE2)))
+
 
 		(submenu "_Tools"
 			(submenu "_Generate"
@@ -166,15 +182,15 @@
 				(menu_item "_Select"    EVENT_BONE CMD_BONE_SELECT)
 				(menu_item "_Move"      EVENT_BONE CMD_BONE_MOVE_PIVOT)))
 
-
 		(menu_seperator)
 
 		(submenu "_Help"
-			(menu_item "_Contents"	"F1"	CMD_MISC_ABOUT "gtk-help")
-			(menu_item "_Help chat"			CMD_MISC_ABOUT "gtk-chat")
+			(menu_item "_Contents"	"F1"	EVENT_HELP "gtk-help")
+			; (menu_item "_Help chat"			CMD_MISC_IRC_HELP "gtk-chat")
 			(menu_item "_About"  			CMD_MISC_ABOUT "gtk-about"))))
 
-		;; Toolbar visible from all modes		
+
+		;; Toolbar
 	    (handlebox 1 
         (vbox 0 0 0 1 0
 		(hbox 0 1 0 1 0
@@ -192,7 +208,6 @@
 				(toolbar_button "gtk-save" "Save"
 					"Save document"
 				    EVENT_MAIN  EVENT_SAVE_FILE)
-
 
 
 				(toolbar_togglebutton true "point.png" "Points" 
@@ -326,22 +341,22 @@
 							(menu_item "Vertex"  EVENT_MISC eNONE)))
 
 					;(hbox 1 1 0 1 1
-					;	(button "Translate" EVENT_MISC eNONE)
-					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eNONE)
-					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eNONE)
-					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eNONE))
+					;	(button "Translate" EVENT_MISC eTranslate)
+					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eTranslate_X)
+					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eTranslate_Y)
+					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eTranslate_Z))
 
 					;(hbox 1 1 0 1 1
-					;	(button "Rotate" EVENT_MISC eNONE)
-					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE)
-					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE)
-					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE))
+					;	(button "Rotate" EVENT_MISC eRotate)
+					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eRotate_X)
+					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eRotate_Y)
+					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eRotate_Z))
 
 					(hbox 1 1 0 1 1
-						(button "Scale" EVENT_MISC 1000)
-						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1001)
-						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1002)
-						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1003))
+						(button "Scale" EVENT_MISC eScale)
+						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eScale_X)
+						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eScale_Y)
+						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eScale_Z))
 
 					(hbox 1 0 0 1 0 (hsep))
 					(hbox 1 0 0 1 0

@@ -30,6 +30,7 @@
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
+#include "FreyjaEvent.h"
 #include "FreyjaResource.h"
 #include "freyja_events.h"
 
@@ -80,6 +81,7 @@ typedef enum freyja_edit_mode                /* Major control modes */
 	MATERIAL_EDIT_MODE
 
 } freyja_edit_mode_t;
+
 
 
 class FreyjaControl
@@ -242,6 +244,8 @@ private:
 	//	Vector<Event *> mEvents;
 
 	unsigned int mLastEvent, mLastCommand;
+
+	unsigned int mMouseButton, mModKey;
 
 	FreyjaResource mResource;               /* Resource system */
 
