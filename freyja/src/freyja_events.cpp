@@ -616,6 +616,12 @@ int freyja_append_item_to_menu(int event, const char *label, int item_event)
 }
 
 
+int freyja_remove_all_items_to_menu(int event)
+{
+	return mgtk_remove_all_items_to_menu(event);
+}
+
+
 void freyja_get_share_filename(char *s, const char *filename, long sz)
 {
 	long len;

@@ -33,6 +33,7 @@
 	o FileChooser support
 	o Extrude face tool added, now new extrude face is set as vertex list
 	o Recently opened files, and persistant recent files list
+	o Many fixes for recently opened files list
 	o Fix for initial editing state invokation ( object move )
 	o Fix for rendering bug on mesh delete using translator
 	o Fix for mesh rotate on top view

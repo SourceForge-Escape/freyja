@@ -72,6 +72,7 @@ void mgtk_event_swap_gl_buffers();
 void mgtk_event_gl_refresh();
 void mgtk_event_shutdown();
 
+int mgtk_remove_all_items_to_menu(int event);
 int mgtk_append_item_to_menu(int event, const char *label, int item_event);
 
 int mgtk_init(int argc, char *argv[]);
