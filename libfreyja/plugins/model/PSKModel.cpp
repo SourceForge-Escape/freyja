@@ -2671,6 +2671,7 @@ int freyja_model__psk_import(char *filename)
 	Vector3d u;
 	Matrix M;
 	vec4_t wxyz;
+	long index;
 
 
 	if (freyja_model__psk_check(filename) < 0)
@@ -2768,12 +2769,13 @@ int freyja_model__psk_import(char *filename)
 
 		/* Start a new bone */
 		freyjaBegin(FREYJA_BONE);
-		freyjaBoneFlags1u(0x0);
-		freyjaBoneName(psk.mBones[i].name);
-
-		freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
-						psk.mBones[i].restLoc[1]*scale,
-						psk.mBones[i].restLoc[2]*scale);
+		index = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneFlags1i(index, 0x0);
+		freyjaBoneName1s(index, psk.mBones[i].name);
+		freyjaBoneTranslate3f(index, 
+							  psk.mBones[i].restLoc[0]*scale,
+							  psk.mBones[i].restLoc[1]*scale,
+							  psk.mBones[i].restLoc[2]*scale);
 
 		j = i;
 		r.setIdentity();
@@ -2801,35 +2803,24 @@ int freyja_model__psk_import(char *filename)
 		//	q.normalize();
 		q = q * r.conjugate();
 		q.getQuaternion4fv(wxyz);
-		freyjaBoneRotateQuaternion4fv(wxyz);
+		freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
 
 		switch (i)
 		{
 		case 0:
 			{
-				freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
-								psk.mBones[i].restLoc[2]*scale,
-								psk.mBones[i].restLoc[1]*scale);
-				vec3_t rotation;
-				long index = freyjaGetCurrent(FREYJA_BONE);
-				freyjaGetBoneRotationXYZ3fv(index, rotation);
-				freyjaBoneRotate3f(rotation[0]-90, rotation[2]-90, rotation[1]);
+				freyjaBoneTranslate3f(index,
+									  psk.mBones[i].restLoc[0]*scale,
+									  psk.mBones[i].restLoc[2]*scale,
+									  psk.mBones[i].restLoc[1]*scale);
 			}
 			break;
 		case 1:
 			{
-#define EULER_CHECK
-#ifdef EULER_CHECK
-				vec3_t rotation;
-				long index = freyjaGetCurrent(FREYJA_BONE);
-				freyjaGetBoneRotationXYZ3fv(index, rotation);
-				freyjaBoneRotate3f(rotation[0]+90, rotation[1], rotation[2]);
-#else
-				r.set(90.0f*0.017453292519943295, 1, 0, 0);
+				r.set(helDegToRad(90.0f), 0, 1, 0);
 				q = r * q;
 				q.getQuaternion4fv(wxyz);
-				freyjaBoneRotateQuaternion4fv(wxyz);
-#endif
+				freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
 			}
 			break;
 		default:
@@ -2841,7 +2832,7 @@ int freyja_model__psk_import(char *filename)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
-				freyjaBoneAddChild1u(j);
+				freyjaBoneAddChild1i(index, j);
 			}
 		}
 

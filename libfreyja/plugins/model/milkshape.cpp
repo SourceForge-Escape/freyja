@@ -466,25 +466,25 @@ int freyja_model__milkshape_import(char *filename)
 	for (i = 0; i < mdl.nNumJoints; ++i)
 	{
 		freyjaBegin(FREYJA_BONE);
-		freyjaBoneFlags1u(0x0);
-		freyjaBoneName(mdl.joints[i].name);
-		freyjaBonePos3f(mdl.joints[i].position[0]*scale,
-							 mdl.joints[i].position[1]*scale,
-							 mdl.joints[i].position[2]*scale);
-		freyjaBoneRotate3f(mdl.joints[i].rotation[0],
-								 mdl.joints[i].rotation[1],
-								 mdl.joints[i].rotation[2]);
+		index = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneFlags1i(index, 0x0);
+		freyjaBoneName1s(index, mdl.joints[i].name);
+		freyjaBoneTranslate3f(index,
+							  mdl.joints[i].position[0]*scale,
+							  mdl.joints[i].position[1]*scale,
+							  mdl.joints[i].position[2]*scale);
+		freyjaBoneRotateEulerXYZ3fv(index, mdl.joints[i].rotation);
 
 		for (j = 0; j < mdl.nNumJoints; ++j)
 		{
 			if (!strncmp(mdl.joints[i].name, mdl.joints[j].parentName, 32))
 			{
-				freyjaBoneAddChild1u(j);
+				freyjaBoneAddChild1i(index, j);
 			}
 			
 			if (!strncmp(mdl.joints[i].parentName, mdl.joints[j].name, 32))
 			{
-				freyjaBoneParent(j);
+				freyjaBoneParent1i(index, j);
 			}
 		}
 

@@ -24,7 +24,7 @@
 
 #include <mstl/List.h>
 
-#include <freyja/FreyjaPlugin.h>
+#include <freyja8/EggPlugin.h>
 
 
 extern "C" {
@@ -32,17 +32,8 @@ extern "C" {
   int freyja_model__eggv7_check(char *filename);
   int freyja_model__eggv7_import(char *filename);
   int freyja_model__eggv7_export(char *filename);
-  int import_model(char *filename);
 }
 
-
-int import_model(char *filename)
-{
-  if (!freyja_model__eggv7_check(filename))
-    return freyja_model__eggv7_import(filename);
-
-  return -1;
-}
 
 
 int freyja_model__eggv7_check(char *filename)
@@ -88,7 +79,6 @@ int freyja_model__eggv7_import(char *filename)
   Map<unsigned int, unsigned int> transM;
   Map<unsigned int, unsigned int> transT;
   unsigned int vertex, vt;
-  long index;
 
 
   f = fopen(filename, "rb");
@@ -113,8 +103,6 @@ int freyja_model__eggv7_import(char *filename)
   fread(&bone_count, sizeof(int), 1, f);
   fread(&animation_count, sizeof(int), 1, f);
 
-  freyjaBegin(FREYJA_MODEL);
-
   for (m = 0; m < mesh_count; m++)
   {
     fread(&header, 8, 1, f);
@@ -125,8 +113,8 @@ int freyja_model__eggv7_import(char *filename)
       return -3;
     }
 
-    freyjaBegin(FREYJA_MESH);
-    transM.Add(m, freyjaGetCurrent(FREYJA_MESH));
+    // Start a new mesh
+    transM.Add(m, eggBegin(FREYJA_MESH));
 
     fread(&frame_count, sizeof(int), 1, f);    
     fread(&marker_count, sizeof(int), 1, f);
@@ -148,8 +136,8 @@ int freyja_model__eggv7_import(char *filename)
       printf("LoadV7> group[%i] { %i vertices }\n", i, vertex_count);
 
       // Start a new vertex group
-      freyjaBegin(FREYJA_VERTEX_GROUP);
-      freyjaGroupCenter3f(center[0], center[1], center[2]);
+      eggBegin(FREYJA_GROUP);
+      eggGroupCenter3f(center[0], center[1], center[2]);
 
       // ALL frames (groups) have same number of vertices in V7
       for (ii = 0; ii < vertex_count; ii++)
@@ -160,7 +148,7 @@ int freyja_model__eggv7_import(char *filename)
 	fread(&id, sizeof(int), 1, f);
 	
 	// Store vertices in group
-	vertex = freyjaVertex3f(pos[0], pos[1], pos[2]);
+	vertex = eggVertexStore3f(pos[0], pos[1], pos[2]);
 	
 	// Mongoose: Here I track the loaded id and actual id vs the ii id
 	//           You fear it, I'm sure... this let's us map on 1:n 
@@ -172,13 +160,13 @@ int freyja_model__eggv7_import(char *filename)
       }
 
       // End FREYJA_GROUP
-      freyjaEnd();
+      eggEnd();
     }
     
     for (ii = 0; ii < polygon_count; ii++)
     {      
       // Start a new polygon
-      freyjaBegin(FREYJA_POLYGON);
+      eggBegin(FREYJA_POLYGON);
       
        fread(&size, sizeof(int), 1, f);
        fread(&texture, sizeof(int), 1, f);
@@ -197,16 +185,16 @@ int freyja_model__eggv7_import(char *filename)
          id = actual[trans.SearchKey(id)];
 	 //printf("%i\n", id);
 
-	 freyjaPolygonVertex1i(id);  
-	 freyjaPolygonTexCoord1i(freyjaTexCoord2f(st[0], st[1]));
+	 eggVertex1i(id);  
+	 eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
        }
        
        if (!bad_poly)
        {
-	 freyjaPolygonMaterial1i(texture);
+	 eggTexture1i(texture);
 	 
 	 // End FREYJA_POLYGON
-	 freyjaEnd();
+	 eggEnd();
        }
      }
 
@@ -227,7 +215,7 @@ int freyja_model__eggv7_import(char *filename)
      }
 
      // End FREYJA_MESH
-     freyjaEnd();
+     eggEnd();
    }
 
    for (j = 0; j < bone_count; j++)
@@ -252,11 +240,10 @@ int freyja_model__eggv7_import(char *filename)
      printf(" center ( %f %f %f )\n", pos[0], pos[1], pos[2]);
 
      // Start bone tag/bolton
-     freyjaBegin(FREYJA_BONE);
-     index = freyjaGetCurrent(FREYJA_BONE);
-     transT.Add(id, index);
-     freyjaBoneTranslate3fv(index, pos);
-     freyjaBoneFlags1i(index, 0x00);
+     transT.Add(id, eggBegin(FREYJA_BONE));
+
+     eggTagPos3f(pos[0], pos[1], pos[2]);
+     eggTagFlags1u(0x00);
 
      printf(" %i meshes:\n   ", mesh_count);
 
@@ -265,7 +252,7 @@ int freyja_model__eggv7_import(char *filename)
        fread(&id, sizeof(int), 1, f);
        printf(" %i", id);
 
-       freyjaBoneAddMesh1i(index, transM[id]);
+       eggTagAddMesh1u(transM[id]);
      }
 
      printf("\n %i slaves:\n   ", slaves);
@@ -275,16 +262,31 @@ int freyja_model__eggv7_import(char *filename)
        fread(&id, sizeof(int), 1, f);
        printf(" %i", id);
 
-       freyjaBoneAddChild1i(index, transT[id]);
+#ifdef FIXME
+       slave = new slave_t;
+
+#else
+       eggTagAddSlave1u(transT[id]);
+#endif
      }
 
      printf("\n}\n");
 
      // End FREYJA_BONE_TAG
-     freyjaEnd();
+     eggEnd();
    }
 
-   freyjaEnd(); // FREYJA_MODEL
+#ifdef FIXME
+   for (tag.Reset(); tag.CurrentExists(); tag++)
+   {
+     eggIterator(FREYJA_BONE_TAG, tag.Current());
+     
+     for (slave->Reset(); slave->CurrentExists(); slave->Next())
+     {
+       eggTagAddSlave1u(transT[slave->Current()]);
+     }
+   }
+#endif
 
    fclose(f);
    return 0;

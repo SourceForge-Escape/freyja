@@ -60,7 +60,7 @@ Vector.test:
 ########################################################
 
 tarball:
-	cd .. && tar zcvf $(TARBALL_NAME).tar.gz $(TREE)
+	cd .. && tar zcvf $(TARBALL_NAME).tar.gz --exclude .svn $(TREE)
 
 install: install-headers
 

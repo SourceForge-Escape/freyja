@@ -34,6 +34,7 @@
 
 FreyjaFileWriter::FreyjaFileWriter()
 {
+	mOrder = LITTLE;
 	mFileHandle = 0x0;
 	mTempBufferHackSz = 2047;
 	mTempBufferHack = new char[mTempBufferHackSz+1];
@@ -75,6 +76,12 @@ bool FreyjaFileWriter::doesFileExist(const char *filename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void FreyjaFileWriter::bigEndianMode()
+{
+	mOrder = BIG;
+}
+
+
 void FreyjaFileWriter::closeFile()
 {
 	if (mFileHandle)
@@ -82,6 +89,12 @@ void FreyjaFileWriter::closeFile()
 		fclose(mFileHandle);
 		mFileHandle = 0x0;
 	}
+}
+
+
+void FreyjaFileWriter::littleEndianMode()
+{
+	mOrder = LITTLE;
 }
 
 

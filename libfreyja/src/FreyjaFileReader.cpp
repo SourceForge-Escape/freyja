@@ -419,6 +419,12 @@ char *FreyjaFileReader::parseSymbol()
 }
 
 
+bool FreyjaFileReader::readBuffer(unsigned long length, unsigned char *buffer)
+{
+	return (fread(buffer, length, 1, mFileHandle) == 1);	
+}
+
+
 bool FreyjaFileReader::readBufferUnsignedChar(unsigned long length, 
 											  unsigned char *buffer)
 {
@@ -547,7 +553,7 @@ long FreyjaFileReader::readLong()
 		FIX_INT(*ptr);
 #else
 	if (mOrder == BIG)
-		i = SWAP_4(i);
+		FIX_INT(*(unsigned int*)ptr);//i = SWAP_4(i);
 #endif
 	return i;
 }

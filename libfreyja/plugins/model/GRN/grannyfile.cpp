@@ -386,7 +386,7 @@ void cGrannyAnimation::Assign (cGrannyFile * model)
 		std::string boneStr = findID( textId );
 
 		/* WTF? This will never execute guys if find() returns 0..n */
-		if( boneStr.find( "mesh" ) != -1 || boneStr.find( "master" ) != -1 )
+		if( (int)boneStr.find( "mesh" ) != -1 || (int)boneStr.find( "master" ) != -1 )
 			boneId = abone;
 		else
 		{

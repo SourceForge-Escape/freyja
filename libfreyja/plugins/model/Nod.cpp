@@ -548,21 +548,24 @@ int freyja_model__nod_import(char *filename)
 		nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
 
 		freyjaBegin(FREYJA_BONE);
-		//index = freyjaGetCurrent(FREYJA_BONE); // transB[] use
-		freyjaBoneFlags1u(0x0);
-		freyjaBoneParent(nod.bones[b].ParentID);
-		freyjaBoneName(name);
-		freyjaBonePos3f(nod.bones[b].RestTranslate[0]*scale,
-						nod.bones[b].RestTranslate[1]*scale,
-						nod.bones[b].RestTranslate[2]*scale);
-		freyjaBoneRotate3f(rot[0], rot[1], rot[2]);
+		index = freyjaGetCurrent(FREYJA_BONE); // transb[] 
+		freyjaBoneFlags1i(index, 0x0);
+		freyjaBoneParent1i(index, nod.bones[b].ParentID);
+		freyjaBoneName1s(index, name);
+		freyjaBoneTranslate3f(index, 
+							  nod.bones[b].RestTranslate[0]*scale,
+							  nod.bones[b].RestTranslate[1]*scale,
+							  nod.bones[b].RestTranslate[2]*scale);
+		freyjaBoneRotateEulerXYZ3fv(index, rot);
 		
 		if (!b)
 		{
-			freyjaBonePos3f(nod.bones[b].RestTranslate[0]*scale,
-							nod.bones[b].RestTranslate[2]*scale,
-							nod.bones[b].RestTranslate[1]*scale);
-			freyjaBoneRotate3f(rot[0] - 90, rot[2] + 180, rot[1]);
+			freyjaBoneTranslate3f(index,
+								  nod.bones[b].RestTranslate[0]*scale,
+								  nod.bones[b].RestTranslate[2]*scale,
+								  nod.bones[b].RestTranslate[1]*scale);
+			freyjaBoneRotateEulerXYZ3f(index, 
+									   rot[0] - 90, rot[2] + 180, rot[1]);
 		}
 
 		freyjaPrintMessage("bone[%i].rotate = %f %f %f", b, 
@@ -578,7 +581,7 @@ int freyja_model__nod_import(char *filename)
 		for (i = 0; i < nod.header2.NumBones; ++i)
 		{
 			if (nod.bones[i].ParentID == b)
-				freyjaBoneAddChild1u(i);
+				freyjaBoneAddChild1i(index, i);
 		}
 	}
 

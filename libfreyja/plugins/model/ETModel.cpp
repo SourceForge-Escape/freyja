@@ -257,9 +257,9 @@ int freyja_model__mdm_check(char *filename)
 
 int freyja_model__mdm_import(char *filename)
 {
+	Vector<long> transV;
 	MDMModel mdm;
-	long i, j, k, b;
-	unsigned int index;
+	long i, j, k, b, index;
 	float x, y, z, w;
 	float xx, yy, zz;
 	float *mat;
@@ -269,9 +269,6 @@ int freyja_model__mdm_import(char *filename)
 		return -1;
 
 	mdm.print();
-
-
-	Vector<unsigned int> transV;
 
 	freyjaBegin(FREYJA_MODEL);
 
@@ -332,13 +329,11 @@ int freyja_model__mdm_import(char *filename)
 		printf("b '%s', %li\n", mdm.mTags[i].name, mdm.mTags[i].attach_bone_number);
 
 		freyjaBegin(FREYJA_BONE);
-		freyjaBoneFlags1u(0x0);
-		freyjaBoneParent(mdm.mTags[i].attach_bone_number);
-		freyjaBoneName(mdm.mTags[i].name);
-
-		freyjaBonePos3f(mdm.mTags[i].tag_pos_vector_to_bone[0],
-					mdm.mTags[i].tag_pos_vector_to_bone[1],
-					mdm.mTags[i].tag_pos_vector_to_bone[2]);
+		index = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneFlags1i(index, 0x0);
+		freyjaBoneParent1i(index, mdm.mTags[i].attach_bone_number);
+		freyjaBoneName1s(index, mdm.mTags[i].name);
+		freyjaBoneTranslate3fv(index, mdm.mTags[i].tag_pos_vector_to_bone);
 
 		printf("%f %f %f\n",
 			   mdm.mTags[i].tag_pos_vector_to_bone[0],
@@ -358,14 +353,14 @@ int freyja_model__mdm_import(char *filename)
 
 		printf("%f %f %f\n", xx, yy, zz);
 
-		freyjaBoneRotate3f(xx, yy, zz);
+		freyjaBoneRotateEulerXYZ3f(index, xx, yy, zz);
  
 		for (j = 0; j < mdm.mHeader.numTags; ++j)
 		{
 			if (mdm.mTags[j].attach_bone_number == i)
 			{
 				printf("%li %li  %li\n", j, i, mdm.mTags[j].attach_bone_number);
-				freyjaBoneAddChild1u(i);
+				freyjaBoneAddChild1i(index, i);
 			}
 		}
 		

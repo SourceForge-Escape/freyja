@@ -29,6 +29,9 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
+#define FREYJA_FILE_MAGIC    "Freyja "
+#define FREYJA_FILE_VERSION  1
+
 
 extern "C" {
 
@@ -98,25 +101,46 @@ typedef enum {
 	
 } freyja_transform_action_t;
 
-typedef enum {
 
-	FREYJA_CHUNK_MAGIC    = 0x59455246,
-	FREYJA_CHUNK_VERSION  = 0x30302E39,
-	FREYJA_CHUNK_MODEL    = 0x204C444D,
-	FREYJA_CHUNK_MESH     = 0x4853454D,
-	FREYJA_CHUNK_SKELETON,
-	FREYJA_CHUNK_MATERIAL,
-	FREYJA_CHUNK_TEXTURE,
-	FREYJA_CHUNK_METADATA
+typedef struct {
+
+	char magic[8];
+	long version;
+	long flags;
+	long reserved;
+	char comment[64];
+
+} freyja_file_header_t;
+
+
+typedef struct {
+
+	long type;
+	long size;
+	long flags;
+	long version;
 
 } freyja_file_chunk_t;
 
 
-///////////////////////////////////////////////////////////////////////
-// Interactive plugin function system
-///////////////////////////////////////////////////////////////////////
+#define fPolygon_PolyMapped    8
+#define fPolygon_ColorMapped   16
 
-/* Removed from this version, use pygtk/python opengl plugins instead */
+
+typedef enum {
+
+	FREYJA_CHUNK_MODEL    = 0x204C444D,
+	FREYJA_CHUNK_MESH     = 0x4853454D,
+	FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
+	FREYJA_CHUNK_VERTICES = 0x54524556,
+	FREYJA_CHUNK_POLYGONS = 0x594C4F50,
+	FREYJA_CHUNK_SKELETON = 0x4C454B53,
+	FREYJA_CHUNK_BONE     = 0x454E4F42,
+	FREYJA_CHUNK_MATERIAL = 0x5454414D,
+	FREYJA_CHUNK_TEXTURE  = 0x54584554,
+	FREYJA_CHUNK_METADATA = 0x4154454D
+
+} freyja_file_chunk_type_t;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -212,6 +236,7 @@ void freyjaGetBoneRotate3f(vec_t *x, vec_t *y, vec_t *z);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaGetVertexTexCoord2fv(vec2_t uv);
 void freyjaGetVertexNormal3fv(vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : normal[index] exists
@@ -245,6 +270,18 @@ void freyjaGetVertex3fv(vec3_t xyz);
  * 2001.11.03: 
  * Mongoose - Created
  ------------------------------------------------------*/
+
+long freyjaGetMeshPolygonCount(long meshIndex);
+long freyjaGetMeshVertexGroupCount(long meshIndex);
+long freyjaGetMeshPolygonIndex(long meshIndex, long element);
+long freyjaGetMeshVertexGroupIndex(long meshIndex, long element);
+
+long freyjaGetPolygonMaterial(long polygonIndex);
+long freyjaGetPolygonFlags(long polygonIndex);
+long freyjaGetPolygonEdgeCount(long polygonIndex);
+long freyjaGetPolygonVertexIndex(long polygonIndex, long element);
+long freyjaGetPolygonTexCoordIndex(long polygonIndex, long element);
+
 
 long freyjaGetPolygon1u(freyja_object_t type, long item, long *value);
 /*------------------------------------------------------
@@ -356,6 +393,15 @@ long freyjaCriticalSection(freyja_lock_t request);
  * 2001.11.03: 
  * Mongoose - Created
  ------------------------------------------------------*/
+
+void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
+void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
+
+void freyjaSetTexCoord2f(unsigned int index, vec_t u, vec_t v);
+void freyjaSetTexCoord2fv(unsigned int index, vec2_t uv);
+
+void freyjaSetVertex3f(unsigned int index, vec_t x, vec_t y, vec_t z);
+void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
 
 long freyjaNormal3f(vec_t x, vec_t y, vec_t z);
 long freyjaNormal3fv(vec3_t xyz);
@@ -482,24 +528,10 @@ long freyjaTextureStoreBuffer(unsigned char *image, unsigned int depth,
 							  unsigned int width, unsigned int height,
 							  freyja_colormode_t type);
 
-void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
-void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
-
-void freyjaSetTexCoord2f(unsigned int index, vec_t u, vec_t v);
-void freyjaSetTexCoord2fv(unsigned int index, vec2_t uv);
-
-void freyjaSetVertex3f(unsigned int index, vec_t x, vec_t y, vec_t z);
-void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
-
-
-void freyjaBoneParent(long index);
-
-void freyjaBoneName(char *name);
-
-void freyjaBonePos3f(vec_t x, vec_t y, vec_t z);
+void freyjaBoneFlags1i(long boneIndex, long flags);
 /*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_TAG);
- * Post : Current tag's origin is set
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Set bone flags
  *
  *-- History ------------------------------------------
  *
@@ -507,14 +539,14 @@ void freyjaBonePos3f(vec_t x, vec_t y, vec_t z);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaBoneFlags1u(unsigned int flags);
+void freyjaBoneParent1i(long boneIndex, long parentIndex);
 /*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_TAG);
- * Post : Current tag's mesh/tag tree flag is set
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Set bone parent
  *
- *        0x00 - push
- *        0x01 - pop
- *
+ *        This doesn't affect skeleton, a follow up
+ *        call to freyjaBoneAddChild1i is needed after
+ *        all bones in skeleton are allocated
  *
  *-- History ------------------------------------------
  *
@@ -522,10 +554,10 @@ void freyjaBoneFlags1u(unsigned int flags);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaBoneAddMesh1u(unsigned int mesh);
+void freyjaBoneName1s(long boneIndex, char *name);
 /*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_TAG);
- * Post : mesh added to current tag's mesh list
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Set human readable bone name
  *
  *-- History ------------------------------------------
  *
@@ -533,10 +565,13 @@ void freyjaBoneAddMesh1u(unsigned int mesh);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaBoneAddChild1u(unsigned int tag);
+void freyjaBoneAddMesh1i(long boneIndex, long meshIndex);
 /*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_TAG);
- * Post : mesh added to current tag's slave tag list
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Mesh is added to Bone's child list
+ *
+ *        Either makes mesh tree connection or
+ *        simulates by vertex weights and pivots
  *
  *-- History ------------------------------------------
  *
@@ -544,10 +579,36 @@ void freyjaBoneAddChild1u(unsigned int tag);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaBoneRotate3f(vec_t x, vec_t y, vec_t z);
+void freyjaBoneAddChild1i(long boneIndex, long childIndex);
 /*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_TAG);
- * Post : Sets tag rotation with eular angles
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Child is added to Bone's child list
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.10.27: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyjaBoneTranslate3f(long boneIndex, vec_t x, vec_t y, vec_t z);
+void freyjaBoneTranslate3fv(long boneIndex, vec3_t xyz);
+/*------------------------------------------------------
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Set bone relative position
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.10.27: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyjaBoneRotateEulerXYZ3f(long boneIndex, vec_t x, vec_t y, vec_t z);
+void freyjaBoneRotateEulerXYZ3fv(long boneIndex, vec3_t xyz);
+void freyjaBoneRotateQuatWXYZ4f(long boneIndex,vec_t w,vec_t x,vec_t y,vec_t z);
+void freyjaBoneRotateQuatWXYZ4fv(long boneIndex, vec4_t wxyz);
+/*------------------------------------------------------
+ * Pre  : freyjaBegin(FREYJA_BONE);
+ * Post : Set bone orientation
  *
  *-- History ------------------------------------------
  *
@@ -555,17 +616,6 @@ void freyjaBoneRotate3f(vec_t x, vec_t y, vec_t z);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaBoneRotateQuaternion4f(vec_t w, vec_t x, vec_t y, vec_t z);
-void freyjaBoneRotateQuaternion4fv(vec4_t wxyz);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_TAG);
- * Post : Sets tag rotation with quaterion
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
 
 void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
 
@@ -604,6 +654,56 @@ void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
 void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
+long freyjaCheckModel(char *filename);
+long freyjaLoadModel(char *filename);
+long freyjaSaveModel(char *filename);
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Plugin import/export iteraction setup
+	///////////////////////////////////////////////////////////////////////
+
+	typedef enum {
+		
+		FREYJA_PLUGIN_NONE     = 0,
+		FREYJA_PLUGIN_MESH     = 1,
+		FREYJA_PLUGIN_SKELETON = 2
+
+	} freyja_plugin_options_t;
+
+
+	void freyjaPluginBegin();
+
+	void freyjaPluginFilename1s(char *filename);
+
+	void freyjaPluginDescription1s(char *info_line);
+
+	void freyjaPluginAddExtention1s(char *ext);
+
+	void freyjaPluginImport1i(long flags);
+
+	void freyjaPluginExport1i(long flags);
+
+	void freyjaPluginArgInt(char *name, long defaults);
+
+	void freyjaPluginArgFloat(char *name, float defaults);
+
+	void freyjaPluginArgString(char *name, char *defaults);
+
+	void freyjaPluginEnd();
+
+
+	///////////////////////////////////////////////////////////////////////
+	//  Plugin import/export iteraction
+	///////////////////////////////////////////////////////////////////////
+
+	long freyjaGetPluginId();
+
+	int freyjaGetPluginArg1f(long pluginId, char *name, float &arg);
+
+	int freyjaGetPluginArg1i(long pluginId, char *name, long &arg);
+
+	int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg);
 }
 
 
