@@ -203,6 +203,8 @@ typedef enum {
 	eTransformMenu,
 	eObjectMenu,
 
+	eSkeletalDeform,
+
 	/* Text events */
 	eSetCurrentBoneName,
 	eSetTextureNameA,
@@ -284,6 +286,7 @@ typedef enum {
 	CMD_MISC_SCENE_ROTATE,
 
 	EVENT_MISC,
+	eMeshFlipNormals,
 	eRecentFiles,
 	ePluginEventBase = 10000,
 

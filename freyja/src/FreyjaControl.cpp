@@ -178,13 +178,13 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	char *dupe;
 	bool found;
 
-	if (!filename || !filename[0])
+
+	if (!filename || !filename[0] || !FreyjaFileReader::doesFileExist(filename))
 	{
 		return;
 	}
 
 	// FIXME: Add a size limit here
-
 	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
 	{
 		if (strcmp(filename, mRecentFiles[i]) == 0)
@@ -194,8 +194,20 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		}
 	}
 
+	// NOTE: Can change data order -- but can't update menus from here yet
 	if (found) // FIXME: Should 'boost' this file to top slot
 	{
+		//char *swap = mRecentFiles[0];
+		//mRecentFiles.assign(0, mRecentFiles[i]);
+		//mRecentFiles.assign(i, swap);
+
+		//for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+		//{
+		//	char *swap = mRecentFiles[0];
+		//	mRecentFiles.assign(0, mRecentFiles[i]);
+		//	mRecentFiles.assign(i, swap);	
+		//}
+
 		return;
 	}
 
@@ -606,6 +618,15 @@ bool FreyjaControl::event(int command)
 		freyjaGenerateVertexNormals();
 		break;
 #endif
+
+	case eSkeletalDeform:
+		freyja_print("eSkeletalDeform is currently not implemented in modeler");
+		break;
+
+	case eMeshFlipNormals:
+		freyjaMeshNormalFlip(mModel->getCurrentMesh());
+		freyja_print("Flipping normals for mesh[%i]", mModel->getCurrentMesh());
+		break;
 
 	case eMaterialTex:
 		flags = gMaterialManager->getFlags();
