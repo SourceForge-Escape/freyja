@@ -225,7 +225,8 @@ int mtk_image__tga_load(FILE *f, unsigned char **image,
     {
       swap_row = new unsigned char [header.width * 4];
       
-      for (i = 0, (int)j = header.height-1; (int)i < header.height/2; i++, j--)
+      for (i = 0, j = ((header.height < 2) ? 0 : header.height - 1); 
+			(int)i < header.height/2; i++, j--)
       {
 	memcpy(swap_row, &(*image)[i*header.width*4], header.width*4);
 	memcpy(&(*image)[i*header.width*4], &(*image)[j*header.width*4], 

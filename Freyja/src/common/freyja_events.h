@@ -34,6 +34,7 @@ typedef enum {
 	eNewFile,
 	eOpenFile,
 	eSaveFile,
+	eCloseFile,
 	eHelp,
 	eInfo,
 	eAbout,
@@ -41,6 +42,10 @@ typedef enum {
 	eFullscreen,
 	eScreenShot,
 
+	eDelete,
+	eSelect,
+
+	eAddObject,
 	eMoveObject,
 	eRotateObject,
 	eScaleObject,
@@ -104,6 +109,8 @@ void freyja_event_file_dialog_notify(char *filename);
 
 float freyja_event_get_float(int event);
 void freyja_event_set_float(int event, float value);
+int freyja_event_set_range(int event, unsigned int value,
+						   unsigned int min, unsigned int max);
 
 void freyja_event_notify_view_log(const char *message);
 
@@ -294,23 +301,17 @@ enum freyja_event_bone_cmd
 
 	CMD_BONE_ADD_MESH        = 10,
 	CMD_BONE_DELETE_MESH     = 15,
-
-	CMD_BONE_SELECT          = 20,
 	CMD_BONE_CONNECT         = 25,
 
 	CMD_BONE_DISCONNECT      = 30,
-	CMD_BONE_MOVE_PIVOT      = 35,
-
-	CMD_BONE_DELETE          = 40
+	CMD_BONE_MOVE_PIVOT      = 35
 };
 
 
 enum freyja_event_mesh_cmd
 {
 	CMD_MESH_ADD = 1,
-	CMD_MESH_DELETE,
 	CMD_MESH_MOVE_CENTER,
-	CMD_MESH_SELECT,
 	CMD_MESH_PREV,
 	CMD_MESH_NEXT
 };
@@ -338,7 +339,6 @@ enum freyja_event_misc_cmd
 	CMD_MISC_RENDER_ROT_X_M,
 	CMD_MISC_TEXEL_COMBINE,
 	CMD_MISC_BBOX_SELECT,
-	CMD_MISC_SELECT,
 	CMD_MISC_GEN_TEXMAP_XY,
 	CMD_MISC_VERTEX_UV,
 	CMD_MISC_SCENE_ROTATE

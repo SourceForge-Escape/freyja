@@ -156,8 +156,7 @@ public:
 										 const Vector3d &velocity, 
 										 vec_t length, vec_t stiffness, vec_t friction)
 	{
-		VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
-		unsigned int i;
+		unsigned int i, j;
 		Mass *a, *b;
 
 
@@ -171,9 +170,9 @@ public:
 											Vector3d(0, 0, 0));
 
 		/* 2003.06.08, Mongoose - Setup lengths here ( Dependent on index ) */
-		for (iter.start(), i = 0; iter.forward(); iter.next(), ++i)
+		for (j = mMasses.begin(), i = 0; j < mMasses.end(); ++j, ++i)
 		{
-			b = iter.current();
+			b = mMasses[j];
 
 			b->mPos.mVec[0] = length * i;
 
