@@ -123,7 +123,9 @@ bool Nif4::loadModel(const char *filename)
 		}
 		else
 		{
-			printf("Ni Chunk: '%s', %i @ %inot implemented\n", chunk.name, chunk.len, r.getFileOffset());
+			printf("Ni Chunk: '%s', %i @ %inot implemented\n",
+				   chunk.name, chunk.len, r.getFileOffset());
+
 			r.closeFile();
 			break;
 		}

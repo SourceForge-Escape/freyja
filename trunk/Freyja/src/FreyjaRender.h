@@ -68,6 +68,7 @@ public:
 		RENDER_BBOX_SEL         = 8192,
 		fSkeletalVertexBlending     = 16384,
 		RENDER_POINTS           = 32768,
+		fRenderBonesClearedZBuffer = 65536
 	} flags_t;
 
 

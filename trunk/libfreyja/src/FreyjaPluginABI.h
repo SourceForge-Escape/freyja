@@ -738,6 +738,50 @@ long freyjaSaveModel(char *filename);
 	int freyjaGetPluginArg1i(long pluginId, char *name, long &arg);
 
 	int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg);
+
+
+	///////////////////////////////////////////////////////////////////////
+	//  Pak VFS 
+	///////////////////////////////////////////////////////////////////////
+
+	long freyjaPakBegin(char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Starts a new VFS from a 'pak file'
+	 *
+	 *        Returns vfs index
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.01.02:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	long freyjaPakAddFullPathFile(long pakIndex,
+								  char *vfsFilename, long offset, long size);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Adds a new entry to VFS mapping a chunk from
+	 *        offset to offset+size as a file named vfsFilename
+	 *
+	 *        Returns vfs file entry index
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.01.02:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void freyjaPakEnd(long pakIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Finalizes VFS for pakIndex
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.01.02:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 }
 
 

@@ -22,6 +22,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -69,6 +70,12 @@ bool FreyjaFileWriter::doesFileExist(const char *filename)
 	}
 
 	return false;
+}
+
+
+bool FreyjaFileWriter::createDirectory(const char *dir)
+{
+	return (mkdir(dir, S_IRWXU | S_IRWXG) == 0);
 }
 
 
