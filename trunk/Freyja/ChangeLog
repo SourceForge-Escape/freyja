@@ -28,6 +28,12 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040524) Mongoose <mongoose@icculus.org>
+
+	o Decoupling more gtk+ widgets interface and freyja event system
+	o More decoupling of mlisp-gtk and Freyja
+	o Moved more event/control back into Freyja core
+
  Freyja (0.3.5-20040522) Mongoose <mongoose@icculus.org>
 
 	o Fixed MaterialManager after move to FreyjaControl

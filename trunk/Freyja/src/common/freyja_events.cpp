@@ -122,7 +122,7 @@ void freyja_event_file_dialog_notify(char *filename)
 }
 
 
-void event_display()
+void mgtk_event_gldisplay()
 {
 	if (RENDER)
 	{
@@ -135,7 +135,7 @@ void event_display()
 }
 
 
-void event_resize(int width, int height)
+void mgtk_event_glresize(unsigned int width, unsigned int height)
 {
 	if (RENDER)
 	{
@@ -181,7 +181,72 @@ void event_mouse(int button, int state, int mod, int x, int y)
 	}
 }
 
-void event_shutdown()
+FILE *get_log_file()
+{
+	static FILE *f = fopen("/tmp/Freyja.log", "w");
+
+	return f;
+}
+
+
+void close_log_file()
+{
+	if (get_log_file())
+		fclose(get_log_file());
+}
+
+
+void event_print_args(char *format, va_list *args)
+{
+	FILE *f = get_log_file();
+	char buffer[1024];
+	unsigned int l;
+
+
+	// Strip message of an trailing carrage return 
+	//  and print to stdout and the status bar
+	vsnprintf(buffer, 1024, format, *args);
+	
+	l = strlen(buffer);
+  
+	if (!l || !buffer[0])
+		return;
+
+	if (buffer[l-1] == '\n')
+		buffer[l-1] = 0;
+
+#ifdef DEBUG_EVENT_PRINT
+	fprintf(stdout, "DEBUG> %s\n", buffer);
+#endif
+
+	if (buffer[0] == '!')
+	{
+		buffer[0] = ' ';
+		fprintf(stderr, "%s\n", buffer);
+	}
+
+	freyja_event_notify_view_log(buffer);
+
+	if (f)
+	{
+		fprintf(f, "> ");
+		vfprintf(f, format, *args);
+		fprintf(f, "\n");
+	}
+}
+
+
+void event_print(char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	event_print_args(format, &args);
+	va_end(args);
+}
+
+
+void freyja_event_shutdown()
 {
 	if (RENDER)
 	{
@@ -198,11 +263,13 @@ void event_shutdown()
 		delete gFreyjaControl;
 	}
 
-	printf("\n\n\tThanks for using %s\n", PROGRAM_NAME);
-	printf("\tBuild date: %s @ %s\n", __DATE__, __TIME__);
-	printf("\tBuild host: %s\n", BUILD_HOST);
-	printf("\tEmail addr: %s\n", EMAIL_ADDRESS);
-	printf("\tWeb site  : %s\n\n", PROJECT_URL);
+	event_print("!Thanks for using %s", PROGRAM_NAME);
+	event_print("!   Build date: %s @ %s", __DATE__, __TIME__);
+	event_print("!   Build host: %s", BUILD_HOST);
+	event_print("!   Email addr: %s", EMAIL_ADDRESS);
+	event_print("!   Web site  : %s", PROJECT_URL);
+
+	close_log_file();
 }
 
 
@@ -228,7 +295,7 @@ void freyja_event_start()
 	event_print("Welcome to Freyja %s-%s, %s", VERSION, BUILD_ID, __DATE__);
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
-	atexit(event_shutdown);
+	atexit(freyja_event_shutdown);
 }
 
 

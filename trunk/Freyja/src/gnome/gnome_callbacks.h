@@ -24,11 +24,17 @@
 #define GUARD_MONGOOSE__GNOME_CALLBACKS_H_
 
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include "freyja_events.h"
 
 void freyja_event_subscribe_gtk_widget(int id, GtkWidget *widget);
+void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 
-
+void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event);
+void mgtk_event_button_release(GtkWidget *widget, GdkEventButton *event);
+void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event);
+void mgtk_event_key_release(GtkWidget *widget, GdkEventKey *event);
+void mgtk_event_key_press(GtkWidget *widget, GdkEventKey *event);
 
 // Mongoose 2002.01.12, Freyja event from Gnome widget callbacks
 void main_event(GtkWidget *widget, gpointer user_data);
@@ -48,10 +54,7 @@ gint spinbutton_int_event(GtkSpinButton *spin, gpointer event_id);
 gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id);
 gint spinbutton_float_event(GtkSpinButton *spin, gpointer event_id);
 
-
-
 gint aframe_adj_event(GtkWidget *widget, GdkEventButton *event);
-
 
 void fileselection_action_event();
 void fileselection_cancel_event();

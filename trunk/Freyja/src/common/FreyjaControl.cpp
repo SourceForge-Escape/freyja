@@ -28,6 +28,7 @@
 
 #include "FreyjaControl.h"
 
+#define ABOUT_MESSAGE "Freyja is an Open Source 3d modeling system.\nSend bug reports and feature requests:\n<small>  * http://icculus.org/freyja\n  * irc://irc.freenode.net/#freyja\n  * mongoose@icculus.org</small>\nFreyja Copyright (c) 2002-2004 by Terry 'Mongoose' Hendrix II\nTerry 'Mongoose' Hendrix II mongoose@icculus.org"
 
 void event_register_render(FreyjaRender *r);
 void event_register_model(FreyjaModel *m);
@@ -131,7 +132,7 @@ void FreyjaControl::eventMain(int command)
 		freyja_event_file_dialog("Open texture");
 		break;
 	case CMD_MAIN_SHUTDOWN:
-		freyja_event_exit();
+		freyja_event_shutdown();
 		break;
 
 	case CMD_MAIN_DEBUG_EGG:
@@ -391,7 +392,7 @@ void FreyjaControl::eventMisc(int command)
 		break;
 
 	case CMD_MISC_ABOUT:
-		freyja_event_about_dialog();
+		freyja_event_info_dialog(ABOUT_MESSAGE);
 		break;   
 
 	case CMD_MISC_GEN_NORMALS:
@@ -952,7 +953,7 @@ void FreyjaControl::ReadRC()
 	if (failed)
 	{
 		printf("FreyjaControl::ReadRC> ERROR: Couldn't find '%s'\n", s);
-		event_shutdown();
+		freyja_event_shutdown();
 	}
 
 

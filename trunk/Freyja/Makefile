@@ -42,7 +42,7 @@ BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 # DEBUG_EVENT_PRINT
 CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
 		-DHAVE_FREYJA_IMAGE -DFORCE_GLAREA_GTK_2_0 \
-		-DHAVE_OPENGL
+		-DHAVE_OPENGL -DHAVE_GTKGL
 #-DUSE_ARB_MULTITEXTURE 
 
 CONFIGURE_LDFLAGS=
@@ -54,7 +54,7 @@ DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
 # -Weffc++
 BASE_DEFS=-Isrc/common -Isrc/gnome $(CONFIGURE_CFLAGS) -Wno-deprecated \
-		-DUSING_GTK_2_0  -DGTK_GLAREA_GL \
+		-DUSING_GTK_2_0 \
 		$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
@@ -154,7 +154,6 @@ all: debug release prof
 targets: $(TARGETS)
 
 OBJS = \
-	$(BUILD_DIR)/gnome_gtkglarea.o \
 	$(BUILD_DIR)/gnome_resource.o \
 	$(BUILD_DIR)/gnome_callbacks.o \
 	$(BUILD_DIR)/gnome_interface.o \

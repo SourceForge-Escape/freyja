@@ -24,7 +24,6 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
 #define GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
 
-
 #include <stdarg.h>
 
 
@@ -37,11 +36,11 @@ typedef enum {
 
 
 void freyja_event_start();
-void freyja_event_exit();
+void freyja_event_shutdown();
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
 
-void freyja_event_about_dialog();
+void freyja_event_info_dialog(char *message);
 void freyja_event_file_dialog(char *title);
 void freyja_event_fullscreen();
 void freyja_event_unfullscreen();
@@ -51,38 +50,11 @@ void freyja_event_file_dialog_notify(char *filename);
 float freyja_event_get_float(int event);
 void freyja_event_set_float(int event, float value);
 
-//////////////////////////////////////////////////////////////////////////////
-
+void freyja_event_notify_view_log(const char *message);
 
 void freyja_event_key_press(int key, int mod);
-
-void event_swap_buffers();
-void event_shutdown(int code);
-void event_print(char *format, ...);
-void event_print_args(char *format, va_list *args); // only works for glibc!
-void event_refresh();
-void event_custom_color(int custom_color_flags, float r, float g, float b);
-void event_display();
-void event_shutdown();
-void event_resize(int width, int height);
-void event_motion(int x_delta, int y_delta);
-void event_mouse(int button, int state, int mod, int x, int y);
-
-
-//////////////////////////////////////////////
-
-int query_mouse_active();
-int query_mouse_button();
-int query_load_texture_to_slot();
-
-void event_set_mouse_active(bool b);
-void event_set_mouse_button(int i);
-void event_set_load_texture_to_slot(int i);
 void freyja_event_new_key_cmd(int key, int event, int cmd);
-
 char *freyja_rc_map(char *s);
-
-//////////////////////////////////////////////
 
 	void freyja_event2i(int event, int cmd);
 	/*------------------------------------------------------
@@ -95,27 +67,31 @@ char *freyja_rc_map(char *s);
 	 *  Mongoose - Created
 	 ------------------------------------------------------*/
 
-   void refresh_material_interface();
-	/*------------------------------------------------------
-	 * Pre  : This listener is implmented by interface
-	 * Post : Interface syncs interface to backend values
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.12:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
+//////////////////////////////////////////////////////////////////////////////
 
-   void refresh_emitter_interface();
-	/*------------------------------------------------------
-	 * Pre  : This listener is implmented by interface
-	 * Post : Interface syncs interface to backend values
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.12:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
+void event_swap_buffers();
+void event_print(char *format, ...);
+void event_print_args(char *format, va_list *args); // only works for glibc!
+void event_custom_color(int custom_color_flags, float r, float g, float b);
+void event_display();
+void event_resize(int width, int height);
+void event_motion(int x_delta, int y_delta);
+void event_mouse(int button, int state, int mod, int x, int y);
+
+int query_mouse_active();
+int query_mouse_button();
+int query_load_texture_to_slot();
+
+void event_set_mouse_active(bool b);
+void event_set_mouse_button(int i);
+void event_set_load_texture_to_slot(int i);
+
+
+//////////////////////////////////////////////////////////////////////////////
+// External, old API /////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+void event_refresh();
 
 typedef struct callback_bone_s 
 {
@@ -129,6 +105,18 @@ typedef struct callback_bone_s
 
 void callback_update_skeleton(callback_bone_t *bone);
 
+	void refresh_material_interface();
+	/*------------------------------------------------------
+	 * Pre  : This listener is implmented by interface
+	 * Post : Interface syncs interface to backend values
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.02.12:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 #define EVENT_FREYJA         -1000

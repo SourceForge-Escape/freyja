@@ -273,11 +273,32 @@
 					(hbox 1 0 0 1 0
 						(label "Current Frame #" 0.0 0.5) 
 						(spinbutton 0 0 100 501))
+
+					(hbox 1 0 0 1 0
+						(optionmenu EVENT_MISC eNONE
+							(menu_item "Object" EVENT_MISC eNONE)
+							(menu_item "Scene" EVENT_MISC eNONE)
+							(menu_item "Mesh" EVENT_MISC eNONE)
+							(menu_item "Vertex" EVENT_MISC eNONE)))
+
+					;(hbox 1 1 0 1 1
+					;	(button "Translate" EVENT_MISC eNONE)
+					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eNONE)
+					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eNONE)
+					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eNONE))
+
+					;(hbox 1 1 0 1 1
+					;	(button "Rotate" EVENT_MISC eNONE)
+					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE)
+					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE)
+					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eNONE))
+
 					(hbox 1 1 0 1 1
-						(button "Scale" EVENT_MISC 1000)
+						(button "Scale" EVENT_MISC eNONE)
 						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1001)
 						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1002)
 						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 1003))
+
 					(hbox 1 0 0 1 0 (hsep))
 					(hbox 1 0 0 1 0
 						(button "New"     EVENT_MESH  CMD_MESH_ADD)
