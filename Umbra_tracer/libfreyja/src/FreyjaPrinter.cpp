@@ -1,38 +1,37 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
- * Project : libHel
+ * Project : libfreyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
- * Object  : BoundingVolume
- * License : No use w/o permission (C) 2002 Mongoose
- * Comments: Bounding volume class for world/vis 
- *           culling/clipping/collision stuff
+ * Website : http://www.icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
+ * Object  : FreyjaPrinter
+ * License : No use w/o permission (C) 2004 Mongoose
+ * Comments: This is for rerouting output and error messages.
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
- * 2002.11.27:
+ * 2004.10.30:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
-#include "BoundingVolume.h"
+#include "FreyjaPrinter.h"
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-BoundingVolume::BoundingVolume()
+FreyjaPrinter::FreyjaPrinter()
 {
 }
 
 
-BoundingVolume::~BoundingVolume()
+FreyjaPrinter::~FreyjaPrinter()
 {
 }
 
@@ -41,12 +40,6 @@ BoundingVolume::~BoundingVolume()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA9
-bool BoundingVolume::isVertexInside(vec3_t vertex)
-{
-	return false;
-}
-#endif
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
@@ -67,10 +60,10 @@ bool BoundingVolume::isVertexInside(vec3_t vertex)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_BOUNDINGVOLUME
-int runBoundingVolumeUnitTest()
+#ifdef UNIT_TEST_FREYJAPRINTER
+int runFreyjaPrinterUnitTest(int argc, char *argv[])
 {
-	BoundingVolume vol;
+	FreyjaPrinter test;
 
 	return 0;
 }
@@ -78,10 +71,8 @@ int runBoundingVolumeUnitTest()
 
 int main(int argc, char *argv[])
 {
-	printf("[BoundingVolume class test]\n");
+	printf("[FreyjaPrinter class test]\n");
 
-	runBoundingVolumeUnitTest();
-
-	return 0;
+	return runFreyjaPrinterUnitTest(argc, argv);
 }
 #endif

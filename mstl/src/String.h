@@ -73,6 +73,22 @@ class String
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	static char *String::strdup(const char *src)
+	{
+		char *dest = NULL;
+		int len;
+		
+		
+		if (!src || !src[0])
+			return NULL;
+		
+		len = strlen(src);
+		dest = new char[len + 1];
+		strncpy(dest, src, len);
+		dest[len] = 0;
+		
+		return dest;
+	}
 
 
 	////////////////////////////////////////////////////////////
