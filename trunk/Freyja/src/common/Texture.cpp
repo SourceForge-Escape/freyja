@@ -57,7 +57,7 @@
 #endif
 
 #ifdef HAVE_FREYJA_IMAGE
-#   include <freyja_image/MtkImage.h>
+#   include <freyja8/EggImage.h>
 #endif
 
 #include "Texture.h"
@@ -253,7 +253,7 @@ void glPrint3d(float x, float y, float z,
 
 
 int Texture::loadFontTTF(char *filename, 
-								 unsigned int utf8Offset, unsigned int count)
+						 unsigned int utf8Offset, unsigned int count)
 {
 	ttf_texture_t *texture;
 	unsigned char rgb[3] = {0xff, 0xff, 0xff};

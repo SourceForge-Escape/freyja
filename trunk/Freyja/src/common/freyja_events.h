@@ -30,7 +30,7 @@
 typedef enum {
 
 	eNone = 0,
-	eShutdown,
+	eShutdown = 1,
 	eNewFile,
 	eOpenFile,
 	eSaveFile,
