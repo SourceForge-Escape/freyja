@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "mtk_ppm.h"
+#include "image_ppm.h"
 
 
 int mtk_image__ppm_check(FILE *f)

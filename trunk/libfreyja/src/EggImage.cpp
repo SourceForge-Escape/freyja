@@ -410,7 +410,7 @@ int EggImage::loadImage(const char *filename)
 {
 #ifdef EGGIMAGE_PLUGINS
 	EggFileReader reader;
-	int (*import)(const char *filename, unsigned char *image,
+	int (*import)(const char *filename, unsigned char **image,
 					  unsigned int *width, unsigned int *height, 
 					  char *type);
 	bool loaded = false;
@@ -430,7 +430,7 @@ int EggImage::loadImage(const char *filename)
 
 	print("[EggImage plugin system invoked]");
 
-	if (!reader.openDirectory("/usr/local/lib/freyja8/modules/image/"))
+	if (!reader.openDirectory("/usr/local/lib/freyja8/modules/image"))
 	{
 		printError("Couldn't access image plugin directory");
 		return -2;
@@ -438,6 +438,9 @@ int EggImage::loadImage(const char *filename)
 
 	while ((module_filename = reader.getNextDirectoryListing()))
 	{
+		if (reader.isDirectory(module_filename))
+			continue;
+
 		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
 		{
 			printError("In module '%s'.", module_filename);
@@ -453,7 +456,7 @@ int EggImage::loadImage(const char *filename)
 		{
 			print("\tModule '%s' opened.", module_filename);
     
-			import = (int (*)(const char *filename, unsigned char *image,
+			import = (int (*)(const char *filename, unsigned char **image,
 									unsigned int *width, unsigned int *height, 
 									char *type))dlsym(handle, "import");
 
@@ -464,7 +467,7 @@ int EggImage::loadImage(const char *filename)
 				continue;
 			}
 
-	      loaded = (loaded || (!(*import)(filename, image, 
+	      loaded = (loaded || (!(*import)(filename, &image, 
 													  &width, &height, &type)));
 
 			if ((error = dlerror()) != NULL) 
@@ -487,9 +490,9 @@ int EggImage::loadImage(const char *filename)
 
 		return 0; /* Success! */
 	}
-#endif
-
+#else
 	print("EggImage: This build was compiled w/o plugin support");
+#endif
 
 	return -1;
 }

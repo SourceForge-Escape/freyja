@@ -19,7 +19,7 @@
  ================================================================*/
 
 
-#include "mtk_jpeg.h"
+#include "image_jpeg.h"
 
 #ifdef LIB_JPEG
 extern "C" 

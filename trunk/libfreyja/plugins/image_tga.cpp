@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "mtk_tga.h"
+#include "image_tga.h"
 
 
 int mtk_image__tga_check(FILE *f)

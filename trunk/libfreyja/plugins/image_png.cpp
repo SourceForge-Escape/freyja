@@ -31,7 +31,16 @@ extern "C" {
 #define MTK_RGBA           4
 #define PNG_BYTES_TO_CHECK 4
 
-int mtk_image__png_check(FILE *f)
+extern "C" {
+
+	int check(FILE *f);
+
+	int import(const char *filename, unsigned char **image, 
+			  unsigned int *w, unsigned int *h, 
+			  char *type);
+}
+
+int check(FILE *f)
 {
 #ifdef LIB_PNG
 	char buffer[PNG_BYTES_TO_CHECK];
@@ -68,11 +77,12 @@ int mtk_image__png_check(FILE *f)
 }
 
 
-int mtk_image__png_load(FILE *f, unsigned char **image, 
-								unsigned int *w, unsigned int *h, 
-								char *type)
+int import(const char *filename, unsigned char **image, 
+			  unsigned int *w, unsigned int *h, 
+			  char *type)
 {
 #ifdef LIB_PNG
+	FILE *f = fopen(filename, "rbx");
    int interlace_type, color_type, depth;
    png_uint_32 width, height;
    png_structp png_ptr;
@@ -87,6 +97,14 @@ int mtk_image__png_load(FILE *f, unsigned char **image,
 		perror("mtk_image__png_load> ERROR: Opening file\n");
 		return -1;
    }
+
+	if (check(f) < 0)
+	{
+		if (f)
+			fclose(f);
+
+		return -100;
+	}
 
    fseek(f, 0, SEEK_SET);
 
@@ -144,6 +162,8 @@ int mtk_image__png_load(FILE *f, unsigned char **image,
 		if (!*w || !*h)
 		{
 			fprintf(stderr, "mtk_image__png_load> ERROR: Invalid dimensions\n");
+
+			fclose(f);
 			return -5;
 		}
 

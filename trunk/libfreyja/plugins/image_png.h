@@ -18,14 +18,12 @@
  * Mongoose - Created
  ================================================================*/
 
-#ifndef __MONGOOSE_PNG_H
-#define __MONGOOSE_PNG_H
+#ifndef GUARD__MONGOOSE_PNG_H
+#define GUARD__MONGOOSE_PNG_H
 
 #include <stdio.h>
 
-int mtk_image__png_check(FILE *f);
-
-int mtk_image__png_load(FILE *f, unsigned char **image, 
-			 unsigned int *width, unsigned int *height, char *type);
+int import(const char *filename, unsigned char **image, 
+	   unsigned int *width, unsigned int *height, char *type);
 
 #endif
