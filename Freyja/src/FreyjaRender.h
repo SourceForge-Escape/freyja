@@ -340,7 +340,7 @@ private:
 	 ------------------------------------------------------*/
 
 	
-	void DrawPolygon(egg_polygon_t &polygon);
+	void DrawPolygon(egg_polygon_t &polygon, long frame);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders polygon

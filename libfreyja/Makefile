@@ -296,7 +296,7 @@ grnX.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
 	MOD_NAME=grnX \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/GRNModel.p" \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/GRNModel.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
@@ -325,6 +325,14 @@ lwo.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+mdl.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=mdl \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Mdl.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 md2.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -339,7 +347,15 @@ md3.so:
 	MOD_NAME=md3 \
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -z defs"
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+md3anim.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=md3 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3Anim.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 md5.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -415,11 +431,9 @@ trmesh.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 
-plugins-model-exp2: grnX.so halflifeX.so
+plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so nif4.so tombraider.so 
 
-plugins-model-exp: eggv8.so tombraider.so 
-
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so lwo.so md2.so md5.so nod.so psk.so python.so obj.so smd.so trmesh.so glm.so
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so lwo.so mdl.so md2.so md3.so md5.so nod.so psk.so python.so obj.so smd.so trmesh.so glm.so
 
 
 ######################################################################

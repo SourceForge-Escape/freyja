@@ -278,6 +278,9 @@ void mgtk_handle_resource_init(Resource &r)
 	//r.RegisterInt("eMeshScale", eMeshScale);
 
 	r.RegisterInt("ePolygonSize", ePolygonSize);
+	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
+	r.RegisterInt("eGenMeshCount", eGenMeshCount);
+	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
 
 	r.RegisterInt("ePointJoint", ePointJoint);
 	r.RegisterInt("eSphereJoint", eSphereJoint);

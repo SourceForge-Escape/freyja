@@ -215,6 +215,15 @@ Matrix Matrix::multiply(const Matrix &a, const Matrix &b)
 }
 
 
+Quaternion Matrix::getQuat()
+{
+	Quaternion q;
+
+	q.setByMatrix(mMatrix);
+	return q;
+}
+
+
 Matrix Matrix::operator =(const Matrix &mat)
 {
 	setMatrix((vec_t*)mat.mMatrix);

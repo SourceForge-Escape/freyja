@@ -232,6 +232,7 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 			return mIndexMesh;
 		}
 		break;
+	case FREYJA_VERTEX_FRAME:
 	case FREYJA_VERTEX_GROUP:
 		group = mEgg->GroupList();
     
@@ -364,7 +365,6 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 		}
 		break;
 
-	case FREYJA_VERTEX_FRAME:
 	case FREYJA_MATERIAL:
 	case FREYJA_TEXTURE:
 	case FREYJA_ANIMATION:
@@ -618,6 +618,7 @@ long EggPlugin::freyjaGetCurrent(freyja_object_t type)
 			return mMesh->id;
 		break;
 
+	case FREYJA_VERTEX_FRAME:
 	case FREYJA_VERTEX_GROUP:
 		if (mGroup)
 			return mGroup->id;
@@ -643,7 +644,6 @@ long EggPlugin::freyjaGetCurrent(freyja_object_t type)
 			return mAnimation->id;
 		break;
 
-	case FREYJA_VERTEX_FRAME:
 	case FREYJA_MODEL:
 	case FREYJA_MATERIAL:
 	case FREYJA_TEXTURE:
@@ -1157,6 +1157,8 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 		mMesh = mEgg->newMesh();
 		mEgg->addMesh(mMesh);
 		break;
+
+	case FREYJA_VERTEX_FRAME:
 	case FREYJA_VERTEX_GROUP:
 		mStack.push(FREYJA_VERTEX_GROUP);
 
@@ -1167,8 +1169,15 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 		else
 		{
 			mGroup = mEgg->newGroup();
+			mGroup->flags = 0x0;
 			mEgg->addGroup(mGroup);
 			mMesh->group.pushBack(mGroup->id); 
+			mGroup->mesh = mMesh->id;
+
+			if (type == FREYJA_VERTEX_FRAME)
+			{
+				mGroup->flags = 0xBADA55;
+			}
 		}
 		break;
 

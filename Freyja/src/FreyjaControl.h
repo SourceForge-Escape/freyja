@@ -447,6 +447,10 @@ private:
 	unsigned int mTransformMode;
 
 	bool mCleared;
+
+	float mGenMeshHeight;
+	unsigned long mGenMeshCount;
+	unsigned long mGenMeshSegements;
 };
 
 #endif

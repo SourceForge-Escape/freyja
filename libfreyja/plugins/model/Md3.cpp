@@ -933,11 +933,11 @@ void Md3::createBones(unsigned int num)
 // Special Interface code
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA_MODEL_PLUGINS
+#ifdef FREYJA_PLUGINS
 
 #include <string.h>
 #include <stdio.h>
-#include <freyja8/EggPlugin.h>
+#include <freyja/FreyjaPlugin.h>
 #include <hel/Matrix.h>
 
 #include "Md3.h"
@@ -949,8 +949,17 @@ extern "C" {
 	int freyja_model__md3_check(char *filename);
 	int freyja_model__md3_import(char *filename);
 	int freyja_model__md3_export(char *filename);
+	int import_model(char *filename);
 }
 
+
+int import_model(char *filename)
+{
+	if (!freyja_model__md3_check(filename))
+		return freyja_model__md3_import(filename);
+
+	return -1;
+}
 
 
 int freyja_model__md3_check(char *filename)
@@ -985,7 +994,7 @@ int freyja_model__md3_import(char *filename)
 {
 	const float scale = 0.01;
 	unsigned int i, m;
-	int v, p, f, num_texels;
+	int v, p, f, off, num_texels;
 	md3_mesh_t *md3_mesh;
 	md3_bone_t *md3_bone;
 	md3_tag_t *md3_tag;
@@ -993,7 +1002,7 @@ int freyja_model__md3_import(char *filename)
 	//Matrix matrix;
 	float pos[3];
 	Md3 md3;
-	Map<unsigned int, unsigned int> trans;
+	Vector<long> transV;
 	unsigned int vertex;
 
 
@@ -1006,62 +1015,51 @@ int freyja_model__md3_import(char *filename)
 
 	for (m = 0; m < md3.getNumMeshes(); ++m)
 	{
-		// Start a new mesh
-		eggBegin(FREYJA_MESH);
-		eggMeshFlags1u(FL_MESH__VERTEX_FRAME_GROUPS);
+		freyjaBegin(FREYJA_MESH);
 
-		for (f = 0, v = 0; f < 1/*md3_mesh[m].num_frames*/; ++f)
+		for (f = 0; f < md3_mesh[m].num_frames; ++f)
 		{  
-			eggPrintMessage("Importing mesh: %d, frame: %d of %d\n", 
+			freyjaPrintMessage("Importing mesh: %d, frame: %d of %d", 
 							m, f, md3_mesh[m].num_frames);
 
-			//matrix.setIdentity();
-			
-			/***************
-			mt[0][0] = tag[f].rotation[0][0];
-			mt[0][1] = tag[f].rotation[0][1];
-			mt[0][2] = tag[f].rotation[0][2];
-			
-			mt[1][0] = tag[f].rotation[1][0];
-			mt[1][1] = tag[f].rotation[1][1];
-			mt[1][2] = tag[f].rotation[1][2];
-			
-			mt[2][0] = tag[f].rotation[2][0];
-			mt[2][1] = tag[f].rotation[2][1];
-			mt[2][2] = tag[f].rotation[2][2];
-			***************/
-
-			// Start a new vertex group
-			eggBegin(FREYJA_GROUP);
-
-			for (; v < md3_mesh[m].num_vertices * (f+1); ++v)
+			if (!f)
 			{
-				pos[0] = md3_mesh[m].vertex[v].pos[0] * scale;
-				pos[1] = md3_mesh[m].vertex[v].pos[1] * scale;
-				pos[2] = md3_mesh[m].vertex[v].pos[2] * scale;
-
-				//matrix.multiply3v(pos, pos);
-
-				// Store vertices in group
-				vertex = eggVertexStore3f(pos[1], pos[2], pos[0]); // XZY
-      
-				// Generates id translator  table for this vertex morph frame
-				trans.Add(v, vertex);
-
-				eggVertexNormalStore3f(vertex, 
-									   md3_mesh[m].vertex[v].norm[1], 
-									   md3_mesh[m].vertex[v].norm[2], 
-									   md3_mesh[m].vertex[v].norm[0]);
+				freyjaBegin(FREYJA_VERTEX_GROUP);  
+			}
+			else
+			{
+				freyjaBegin(FREYJA_VERTEX_FRAME);
 			}
 
-			eggGroupCenter3f(md3_bone[f].center[0]*scale, 
-							 md3_bone[f].center[1]*scale, 
-							 md3_bone[f].center[2]*scale);
+			off = f * md3_mesh[m].num_vertices;
 
-			// End FREYJA_GROUP
-			eggEnd();
+			for (v = 0; v < md3_mesh[m].num_vertices; ++v)
+			{
+				pos[0] = md3_mesh[m].vertex[v+off].pos[0] * scale;
+				pos[1] = md3_mesh[m].vertex[v+off].pos[1] * scale;
+				pos[2] = md3_mesh[m].vertex[v+off].pos[2] * scale;
 
-			// FIXME: Handle Tags
+				if (!f)
+				{
+					vertex = freyjaVertex3f(pos[1], pos[2], pos[0]); // XZY
+					freyjaVertexNormal3f(vertex, 
+										 md3_mesh[m].vertex[v].norm[1], 
+										 md3_mesh[m].vertex[v].norm[2], 
+										 md3_mesh[m].vertex[v].norm[0]);
+					transV.pushBack(vertex);
+				}
+				else
+				{
+					freyjaVertexFrame3f(transV[v],
+										pos[1], pos[2], pos[0]);
+				}
+			}
+
+			freyjaGroupCenter3f(md3_bone[f].center[0]*scale, 
+								md3_bone[f].center[1]*scale, 
+								md3_bone[f].center[2]*scale);
+
+			freyjaEnd(); // End FREYJA_GROUP
 		}
 
 		num_texels = md3_mesh[m].num_vertices * md3_mesh[m].num_frames;
@@ -1069,12 +1067,12 @@ int freyja_model__md3_import(char *filename)
 		for (p = 0; p < md3_mesh[m].num_triangles; p++)
 		{
 			// Start a new polygon
-			eggBegin(FREYJA_POLYGON);
+			freyjaBegin(FREYJA_POLYGON);
 
 			for (i = 0; i < 3; i++)
 			{
 				// Store vertices by true id, using translation table
-				eggVertex1i(trans[md3_mesh[m].tris[p].triangle[i]]);
+				freyjaPolygonVertex1i(transV[md3_mesh[m].tris[p].triangle[i]]);
 	
 				if (md3_mesh[m].tris[p].triangle[i] > num_texels)
 				{
@@ -1088,25 +1086,24 @@ int freyja_model__md3_import(char *filename)
 					t = md3_mesh[m].texel[md3_mesh[m].tris[p].triangle[i]].st[1];
 				}
 
-				eggTexCoord1i(eggTexCoordStore2f(s, t));
+				freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
 			}
 
 #ifdef FIXME
 			// FIXME: Handle texture/shader loading
-			eggShaderStore(md3_mesh[m].skin[s].name, ...);
+			freyjaShaderStore(md3_mesh[m].skin[s].name, ...);
 #endif
 
-			eggTexture1i(0);
+			freyjaPolygonMaterial1i(0);
       
 			// End FREYJA_POLYGON
-			eggEnd(); 
+			freyjaEnd(); 
 		}
 
 		// End FREYJA_MESH
-		eggEnd();
+		freyjaEnd();
 
-		// Clear vertex index translation table
-		trans.Clear();
+		transV.clear();
 	}
 
 	return 0;
@@ -1124,7 +1121,7 @@ int freyja_model__md3_export(char *filename)
 	Md3 md3;
 
 
-	num_meshes = eggGetNum(FREYJA_MESH);
+	num_meshes = freyjaGetNum(FREYJA_MESH);
 
 	if (!num_meshes)
 	{
@@ -1133,7 +1130,7 @@ int freyja_model__md3_export(char *filename)
 
 	// Don't allow use of internal iterators or
 	// changes of data by other processes
-	eggCriticalSection(WRITE_LOCK);
+	freyjaCriticalSection(WRITE_LOCK);
 
 	// Meshes ////////////////////////
 
@@ -1144,26 +1141,26 @@ int freyja_model__md3_export(char *filename)
 	md3.NumMeshes(num_meshes);
 
 	// Using list interface, as opposed to array
-	eggIterator(FREYJA_MESH, FREYJA_LIST_RESET);
+	freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
 
 	for (k = 0; k < num_meshes; k++)
 	{
-		transM.Add(eggIterator(FREYJA_MESH, FREYJA_LIST_CURRENT), k);
+		transM.Add(freyjaIterator(FREYJA_MESH, FREYJA_LIST_CURRENT), k);
 
 		strcpy(mesh[k].name, "freyja-test");
 		mesh[k].num_frames = 0; 
 		mesh[k].num_vertices = 0;
 		mesh[k].num_skins = 0;
-		mesh[k].num_triangles = eggMeshIterator(FREYJA_POLYGON, FREYJA_LIST_SIZE);
+		mesh[k].num_triangles = freyjaMeshIterator(FREYJA_POLYGON, FREYJA_LIST_SIZE);
     
-		num_frames = eggMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_SIZE);
-		eggMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_RESET);
+		num_frames = freyjaMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_SIZE);
+		freyjaMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_RESET);
 
 		for (f = 0, v = 0; f < num_frames; f++)
 		{
-			eggMeshIterator(FREYJA_MESH_FRAME, f);
+			freyjaMeshIterator(FREYJA_MESH_FRAME, f);
        
-			if (eggMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_CURRENT_EXIST))
+			if (freyjaMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_CURRENT_EXIST))
 			{
 				mesh[k].num_frames++;
 				mesh[k].num_vertices += eframe->vertex_count; 
@@ -1174,13 +1171,13 @@ int freyja_model__md3_export(char *filename)
     
 		for (f = 0, v = 0; f < mesh[k].num_frames; f++)
 		{
-			eframe = _egg->FindFrame(emesh, f);
+			eframe = _freyja->FindFrame(emesh, f);
       
 			for (; v < mesh[k].num_vertices*(f+1); v++)
 			{
 				if (eframe)
 				{
-					vert = _egg->FindVertex(eframe, v);
+					vert = _freyja->FindVertex(eframe, v);
 
 					if (vert)
 					{
@@ -1233,7 +1230,7 @@ int freyja_model__md3_export(char *filename)
 
 		md3.Bone(bone);
 
-		//FIXME: Add converted bone frames from egg to bone
+		//FIXME: Add converted bone frames from freyja to bone
    }
    else
 		md3.Bone(NULL);
@@ -1251,7 +1248,7 @@ int freyja_model__md3_export(char *filename)
 
 		md3.Tag(tag);
 
-		//FIXME: Add converted bone tags from egg to bone
+		//FIXME: Add converted bone tags from freyja to bone
    }
    else
 	{
@@ -1260,7 +1257,7 @@ int freyja_model__md3_export(char *filename)
 
    md3.NumTags(num_tags);
 
-   eggCriticalSection(WRITE_UNLOCK);
+   freyjaCriticalSection(WRITE_UNLOCK);
 
    return md3.Save(filename);
 #else

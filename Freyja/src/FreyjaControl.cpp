@@ -99,6 +99,10 @@ FreyjaControl::FreyjaControl(Resource *r)
 		mCleared = true;
 	else
 		mCleared = false;
+
+	mGenMeshHeight = 8.0f;
+	mGenMeshCount = 16;
+	mGenMeshSegements = 4;
 }
 
 
@@ -300,6 +304,14 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
+	case eGenMeshCount:
+		mGenMeshCount = value;
+		break;
+
+	case eGenMeshSegements:
+		mGenMeshSegements = value;
+		break;
+
 	default:
 		freyja_print("!Unhandled { event = %d, value = %u }", event, value);
 		return false;
@@ -449,6 +461,9 @@ bool FreyjaControl::event(int event, vec_t value)
 		freyja_event_gl_refresh();
 		break;
 
+	case eGenMeshHeight:
+		mGenMeshHeight = value;
+		break;
 
 	default:
 		freyja_print("!Unhandled { event = %d, value = %f }", event, value);
@@ -919,7 +934,7 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateConeMesh(v.mVec, 6.0f, 16);
+			freyjaGenerateConeMesh(v.mVec, mGenMeshHeight, mGenMeshCount);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -931,7 +946,8 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateCylinderMesh(v.mVec, 8.0f, 16, 4);
+			freyjaGenerateCylinderMesh(v.mVec, mGenMeshHeight, 
+									   mGenMeshCount, mGenMeshSegements);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -943,7 +959,8 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateTubeMesh(v.mVec, 8.0f, 16, 4);
+			freyjaGenerateTubeMesh(v.mVec, mGenMeshHeight, 
+								   mGenMeshCount, mGenMeshSegements);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -955,7 +972,8 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateSphereMesh(v.mVec, 8.0f, 16, 16);
+			freyjaGenerateSphereMesh(v.mVec, mGenMeshHeight, 
+									 mGenMeshCount, mGenMeshCount);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -967,7 +985,7 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateQuadCubeMesh(v.mVec, 8.0f);
+			freyjaGenerateQuadCubeMesh(v.mVec, mGenMeshHeight);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -979,7 +997,7 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateQuadPlaneMesh(v.mVec, 8.0f);
+			freyjaGenerateQuadPlaneMesh(v.mVec, mGenMeshHeight);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -991,10 +1009,11 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateCircleMesh(v.mVec, 16);
+			freyjaGenerateCircleMesh(v.mVec, mGenMeshCount);
 			freyja_event_gl_refresh();
 		}
 		break;
+
 
 	case ePointJoint:
 		FreyjaRender::mJointRenderType = 1;

@@ -219,7 +219,7 @@ int Md2::Load(char *filename)
       the functionality, but it would be trivial to do so. */
    for (i = 0; i < _header.numSkins; i++) 
    {
-      fread(&(_skins[i]), MD2_MAX_SKINNAME, 1, f);
+      fread(_skins[i], MD2_MAX_SKINNAME, 1, f);
    }
 
    printf(" |- Read %i skins.\n", i);   
@@ -504,6 +504,8 @@ int freyja_model__md2_check(char *filename)
 
 int freyja_model__md2_import(char *filename)
 {
+	const float scale = 0.5, transY = 12.0f;
+	Vector<long> transV;
 	MD2_t *md2_header;
 	VertexIndex_t *md2_vertex;
 	int f, v, p;
@@ -528,39 +530,49 @@ int freyja_model__md2_import(char *filename)
 	freyjaBegin(FREYJA_MODEL);
 	freyjaBegin(FREYJA_MESH);
 
-	for (f = 0; f < md2_header->numFrames; f++)
+	freyjaBegin(FREYJA_VERTEX_GROUP);
+	md2_vertex = md2.Frame(0);
+
+	for (v = 0; v < md2_header->numXYZ; v++)
+	{
+		// Swap Y and Z for freyja
+		vertex = freyjaVertex3f(md2_vertex[v].x*scale, 
+										md2_vertex[v].z*scale + transY,
+										md2_vertex[v].y*scale);
+		transV.pushBack(vertex);
+	}
+		
+	freyjaEnd(); // FREYJA_VERTEX_GROUP
+
+	for (f = 1; f < md2_header->numFrames; ++f)
 	{
 		md2_vertex = md2.Frame(f);
 		    
-		if (f != 0)
-			freyjaBegin(FREYJA_VERTEX_GROUP);
+		freyjaBegin(FREYJA_VERTEX_FRAME);
 
-		for (v = 0; v < md2_header->numXYZ; v++)
+		for (v = 0; v < md2_header->numXYZ; ++v)
 		{
-			// Store vertices in group
-			vertex = freyjaVertex3f(md2_vertex[v].x, 
-											md2_vertex[v].z, 
-											md2_vertex[v].y);  // Swap Y and Z for freyja
-			
-			// Generates id translator  table for this vertex morph frame
-			//trans.Add(v, vertex);
+			// Store vertices in frame, swap Y and Z for freyja
+			freyjaVertexFrame3f(transV[v],
+									  md2_vertex[v].x*scale,
+									  md2_vertex[v].z*scale + transY,
+									  md2_vertex[v].y*scale);
 		}
 		
-		if (f != 0)
-			freyjaEnd(); // FREYJA_VERTEX_GROUP
+		freyjaEnd(); // FREYJA_VERTEX_FRAME
 	}
 
 	// Md2 uses symetric vertex morph frames, so only need it once
-	for (p = 0; f == 0 && p < md2_header->numTris; p++)
+	for (p = 0; p < md2_header->numTris; ++p)
 	{
       // Start a new polygon
       freyjaBegin(FREYJA_POLYGON);
       
 		// REMOVED trans[] use
       // Store vertices by true id, using translation table
-      freyjaPolygonVertex1i(md2_header->tris[p].v[0]);
-      freyjaPolygonVertex1i(md2_header->tris[p].v[1]);
-      freyjaPolygonVertex1i(md2_header->tris[p].v[2]);
+      freyjaPolygonVertex1i(transV[md2_header->tris[p].v[0]]);
+      freyjaPolygonVertex1i(transV[md2_header->tris[p].v[1]]);
+      freyjaPolygonVertex1i(transV[md2_header->tris[p].v[2]]);
       
        // Store texels into model and polygon ( store both at once in MD2 )
       md2.TexCoords(&ss, &tt, p, 0);

@@ -66,11 +66,13 @@ int import_model(char *filename)
 	Py_Initialize();
 	module = initPlugins();
 
+	freyjaPrintMessage("[Module '%s' invoked.]", plugin);
+
 	f = fopen(plugin, "r");
 
 	if (!f)
 	{
-		printf("\n'%s' failed to load...\n", plugin);
+		freyjaPrintError("[Module '%s' failed to load.]", plugin);
 		perror(plugin);
 	}
 	else
@@ -82,9 +84,8 @@ int import_model(char *filename)
 		PyDict_SetItemString(dict, "FreyjaImportFilename", tmp);
 		Py_DECREF(tmp);
 
-		printf("\t[Running '%s'...]\n", plugin);
+		freyjaPrintMessage("[Module '%s' opened.]", plugin);
 		PyRun_SimpleFile(f, plugin);
-		printf("\t[done]\n");
 	}
 
 	Py_Finalize();

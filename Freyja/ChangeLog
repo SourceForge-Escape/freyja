@@ -27,6 +27,11 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041223) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Vertex morphing back -- use group iterator to cycle frames
+
+
  Freyja (0.3.5-20041215) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o Culling for vertex list enabled!
