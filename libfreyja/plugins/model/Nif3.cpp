@@ -5,9 +5,9 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.westga.edu/~stu7440/
  * Email   : stu7440@westga.edu
- * Object  : Nif4
+ * Object  : Nif3
  * License : No use w/o permission (C) 2004 Mongoose
- * Comments: NetImmerse Model 4.0 class
+ * Comments: NetImmerse Model 3.x class
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -19,21 +19,21 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include "Nif4.h"
+#include "Nif3.h"
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Nif4::Nif4()
+Nif3::Nif3()
 {
 	mHeader[0] = 0;
 	mHeaderSz = 48; /* 38? This was 128 in 3.x */
 }
 
 
-Nif4::~Nif4()
+Nif3::~Nif3()
 {
 }
 
@@ -47,7 +47,7 @@ Nif4::~Nif4()
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool Nif4::loadModel(const char *filename)
+bool Nif3::loadModel(const char *filename)
 {
 	EggFileReader r;
 	Vector<NiNode *> ninodes;
@@ -61,7 +61,7 @@ bool Nif4::loadModel(const char *filename)
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
 	r.readCharString(mHeaderSz, mHeader);
 
-	if (strncmp(NIF4_HEADER_START, mHeader, 34))
+	if (strncmp(NIF3_HEADER_START, mHeader, 34))
 		return false;
 
 	while (!done && chunk.readHeader(r))
@@ -104,13 +104,13 @@ bool Nif4::loadModel(const char *filename)
 
 extern "C" {
 
-	int freyja_model__nif4_check(char *filename);
-	int freyja_model__nif4_import(char *filename);
-	int freyja_model__nif4_export(char *filename);
+	int freyja_model__nif3_check(char *filename);
+	int freyja_model__nif3_import(char *filename);
+	int freyja_model__nif3_export(char *filename);
 }
 
 
-int freyja_model__nif4_check(char *filename)
+int freyja_model__nif3_check(char *filename)
 {	
 	EggFileReader r;
 	char header[48];
@@ -123,22 +123,22 @@ int freyja_model__nif4_check(char *filename)
 	r.readCharString(headerSz, header);
 	r.closeFile();
 
-	if (strncmp(NIF4_HEADER_START, header, 34))
+	if (strncmp(NIF3_HEADER_START, header, 34))
 		return -1;
 
 	return 0;
 }
 
 
-int freyja_model__nif4_import(char *filename)
+int freyja_model__nif3_import(char *filename)
 {
-	Nif4 nif4;
+	Nif3 nif3;
 	//Vector<unsigned int> weights;
 	//unsigned int vertex, texcoord;
 	//int m, v, w, t, j;
 
 
-	if (nif4.loadModel(filename) == false)
+	if (nif3.loadModel(filename) == false)
 		return -1;
 
 	return 0;
@@ -255,9 +255,9 @@ int freyja_model__nif4_import(char *filename)
 }
 
 
-int freyja_model__nif4_export(char *filename)
+int freyja_model__nif3_export(char *filename)
 {
-	eggPrintError("nif4_export> ERROR: Not implemented.\n");
+	eggPrintError("nif3_export> ERROR: Not implemented.\n");
 	return -1;
 }
 #endif
@@ -267,12 +267,12 @@ int freyja_model__nif4_export(char *filename)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_NIF4
-int runNif4UnitTest(int argc, char *argv[])
+#ifdef UNIT_TEST_NIF3
+int runNif3UnitTest(int argc, char *argv[])
 {
-	Nif4 nif4;
+	Nif3 nif3;
 
-	if (nif4.loadModel(argv[1]) == false)
+	if (nif3.loadModel(argv[1]) == false)
 		return -1;
 
 	return 0;
@@ -281,8 +281,8 @@ int runNif4UnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[Nif4 class test]\n");
+	printf("[Nif3 class test]\n");
 
-	return runNif4UnitTest(argc, argv);
+	return runNif3UnitTest(argc, argv);
 }
 #endif

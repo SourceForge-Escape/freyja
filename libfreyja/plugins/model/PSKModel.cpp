@@ -278,7 +278,7 @@ void quaternion_to_matrix(float mW, float mX, float mY, float mZ, float *m)
 
 
 void quaternion_to_axis_angles(float qw, float qx, float qy, float qz, 
-										 float *theta, float *x, float *y, float *z)
+							   float *theta, float *x, float *y, float *z)
 {
 	*theta = (float)acos(qw) * 2.0;
 
@@ -293,7 +293,7 @@ void quaternion_to_axis_angles(float qw, float qx, float qy, float qz,
 
 
 void quaternion_to_euler_angles(float qw, float qx, float qy, float qz, 
-										  float *x, float *y, float *z)
+								float *x, float *y, float *z)
 {
 	double qw2 = qw*qw;
 	double qx2 = qx*qx;
@@ -2667,8 +2667,10 @@ int freyja_model__psk_import(char *filename)
 	unsigned int i, j, v, t, m;
 	const float scale = 0.1f;
 	Vector<unsigned int> transV;
-	Quaternion q;
+	Quaternion q, r, r2;
 	Vector3d u;
+	Matrix M;
+	vec4_t wxyz;
 
 
 	if (freyja_model__psk_check(filename) < 0)
@@ -2739,7 +2741,7 @@ int freyja_model__psk_import(char *filename)
 
 	for (i = 0; i < psk.mNumWeights; ++i)
 	{
-		freyjaVertexWeight(psk.mWeights[i].vertexIndex, 
+		freyjaVertexWeight(transV[psk.mWeights[i].vertexIndex], 
 						   psk.mWeights[i].weight,
 						   psk.mWeights[i].boneIndex);
 	}
@@ -2747,116 +2749,106 @@ int freyja_model__psk_import(char *filename)
 
 	freyjaBegin(FREYJA_SKELETON);
 
-
 	for (i = 0; i < psk.mNumBones; ++i)
 	{
-		/* Start a new tag */
-		freyjaBegin(FREYJA_BONE);
-		freyjaBoneFlags1u(0x0);
-		freyjaBoneName(psk.mBones[i].name);
-
-#define THE_OLD_PSK_SWITCHERO
-#ifdef THE_OLD_PSK_SWITCHERO
-		vec3_t rotation;
-
-#   ifdef MATRIX_STACK_SET
-		Matrix matrix, trans;
-		Quaternion q;
-
-		matrix.setIdentity();
-
-		j = 0;
-		while (j == 0 || i == 0)
+		if (!i)
 		{
-			j = psk.mBones[i].parentIndex;
-
-			Quaternion();
-		}
-#   else
-		// eular angles
-		quaternion_to_euler_angles(psk.mBones[i].restDir[3],
-								   psk.mBones[i].restDir[0],
-								   psk.mBones[i].restDir[1],
-								   psk.mBones[i].restDir[2],
-								   &rotation[0],  // x
-								   &rotation[1],  // y
-								   &rotation[2]); // z
-
-		//freyjaBoneRotateQuaternion4f(psk.mBones[i].restDir[3],
-		//						 psk.mBones[i].restDir[0],
-		//						 psk.mBones[i].restDir[1],
-		//						 psk.mBones[i].restDir[2]);
-
-		q = Quaternion(psk.mBones[i].restDir[3],
-					   psk.mBones[i].restDir[0],
-					   psk.mBones[i].restDir[1],
-					   psk.mBones[i].restDir[2]);
-
-		//q.getEulerAngles(rotation+0, rotation+1, rotation+2);
-
-		/* Convert radians to degrees */
-		rotation[0] *= 57.295779513082323;
-		rotation[1] *= 57.295779513082323;
-		rotation[2] *= 57.295779513082323;
-
-		if (i == 0)
-		{
-			freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
-							psk.mBones[i].restLoc[2]*scale,
-							-psk.mBones[i].restLoc[1]*scale);
-			
-			freyjaBoneRotate3f(rotation[0], rotation[2], rotation[1]);
+			q = Quaternion(psk.mBones[i].restDir[3],   // qw
+						   -psk.mBones[i].restDir[0],  // qx
+						    psk.mBones[i].restDir[1],  // qy
+						   -psk.mBones[i].restDir[2]); // qz
 		}
 		else
 		{
-			freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
-							psk.mBones[i].restLoc[2]*scale,
-							psk.mBones[i].restLoc[1]*scale);
-
-			freyjaBoneRotate3f(rotation[0], rotation[1], rotation[2]);
+			q = Quaternion(psk.mBones[i].restDir[3],  // qw
+						   psk.mBones[i].restDir[0],  // qx
+						   psk.mBones[i].restDir[1],  // qy
+						   psk.mBones[i].restDir[2]); // qz
 		}
-#   endif
-#else
-		vec3_t xyz;
-		vec_t s;
+
+		/* Start a new bone */
+		freyjaBegin(FREYJA_BONE);
+		freyjaBoneFlags1u(0x0);
+		freyjaBoneName(psk.mBones[i].name);
 
 		freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
 						psk.mBones[i].restLoc[1]*scale,
 						psk.mBones[i].restLoc[2]*scale);
 
-		quaternion_to_euler_angles(psk.mBones[i].restDir[0],
-								   psk.mBones[i].restDir[1],
-								   psk.mBones[i].restDir[2],
-								   psk.mBones[i].restDir[3],
-								   &xyz[0],  // x
-								   &xyz[1],  // y
-								   &xyz[2]); // z
-
-		s = 57.295779513082323;
-		freyjaBoneRotate3f(xyz[0]*s, xyz[1]*s, xyz[2]*s);
-
-		if (!i)
+		j = i;
+		r.setIdentity();
+		printf("%i> ", 1);
+		while (j > 0)
 		{
-			freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
-							psk.mBones[i].restLoc[2]*scale,
-							psk.mBones[i].restLoc[1]*scale);
-			freyjaBoneRotate3f(-90, -90, 0);
-		}
-#endif
+			j = psk.mBones[j].parentIndex;  
 
+			if (j == 1)
+			{
+				break;
+			}
+
+			printf("%i ", j);
+
+			r2 = Quaternion(psk.mBones[j].restDir[3],  // qw
+							psk.mBones[j].restDir[0],  // qx
+							psk.mBones[j].restDir[1],  // qy
+							psk.mBones[j].restDir[2]); // qz
+			//	r2.normalize();
+			r = r * r2;
+		}
+		printf("\n");
+
+		//	q.normalize();
+		q = q * r.conjugate();
+		q.getQuaternion4fv(wxyz);
+		freyjaBoneRotateQuaternion4fv(wxyz);
+
+		switch (i)
+		{
+		case 0:
+			{
+				freyjaBonePos3f(psk.mBones[i].restLoc[0]*scale,
+								psk.mBones[i].restLoc[2]*scale,
+								psk.mBones[i].restLoc[1]*scale);
+				vec3_t rotation;
+				long index = freyjaGetCurrent(FREYJA_BONE);
+				freyjaGetBoneRotationXYZ3fv(index, rotation);
+				freyjaBoneRotate3f(rotation[0]-90, rotation[2]-90, rotation[1]);
+			}
+			break;
+		case 1:
+			{
+#define EULER_CHECK
+#ifdef EULER_CHECK
+				vec3_t rotation;
+				long index = freyjaGetCurrent(FREYJA_BONE);
+				freyjaGetBoneRotationXYZ3fv(index, rotation);
+				freyjaBoneRotate3f(rotation[0]+90, rotation[1], rotation[2]);
+#else
+				r.set(90.0f*0.017453292519943295, 1, 0, 0);
+				q = r * q;
+				q.getQuaternion4fv(wxyz);
+				freyjaBoneRotateQuaternion4fv(wxyz);
+#endif
+			}
+			break;
+		default:
+			;
+		}
+
+		/* Setup children */
 		for (j = 0; j < psk.mNumBones; ++j)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
-				//printf("%d ", j);
 				freyjaBoneAddChild1u(j);
 			}
 		}
 
-		freyjaEnd(); // FREYJA_TAG
+		freyjaEnd(); // FREYJA_BONE
 	}
 
-	freyjaEnd(); // FREYJA_BONE_FRAME
+	freyjaEnd(); // FREYJA_SKELETON
 
 	return 0;
 }
@@ -2864,8 +2856,8 @@ int freyja_model__psk_import(char *filename)
 
 int freyja_model__psk_export(char *filename)
 {
-	printf("freyja_model__psk_export> Not implemented, %s:%i\n", 
-		   __FILE__, __LINE__);
+	freyjaPrintError("freyja_model__psk_export> Not implemented, %s:%i\n", 
+					 __FILE__, __LINE__);
 
 	return -1;
 }

@@ -1087,29 +1087,101 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 }
 
 
-void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
+/* This polygon renderer now only handles 6 edges max */
+void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 {
+	Vector3d vertices[6];
+	Vector3d texcoords[6];
+	Vector3d normals[6];
+	vec4_t colors[6];
+	vec_t *mpos;
+	Vector3d u, v, w;
+	unsigned int i, j, n;
 	egg_vertex_t *vertex;
 	egg_texel_t *texel;
 	egg_texel_t *texel2;
-	float color[4];
 	bool external_texel = false;
-	unsigned int i, j;
 
 
-	if (polygon.r_vertex.empty())
+	external_texel = !polygon.r_texel.empty();
+
+	if (polygon.r_vertex.empty() || polygon.r_vertex.end() > 6 ||
+		(!external_texel && polygon.shader == COLORED_POLYGON))
 	{
-		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, bad polygon\n");
+		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon malformed\n");
 		return;
 	}
 
-	// Render wireframe
+
+	/* Mongoose 2004.12.23, 
+	 * Setup vertex morphing for egg backend polygon */
+	for (n = 0, i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+	{
+		vertex = polygon.r_vertex[i];
+
+		if (!vertex)
+			continue;
+
+		mpos = vertex->pos;
+
+		if (frame > -1)
+		{
+			for (j = vertex->frameId.begin(); j < vertex->frameId.end(); ++j)
+			{
+				if (vertex->frameId[j] == frame)
+				{
+					mpos = *(vertex->frames[j]);
+					break;
+				}
+			}
+
+		}
+
+		vertices[i] = Vector3d(mpos);
+		normals[i] = Vector3d(vertex->norm);
+		texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+
+		if (external_texel && polygon.r_texel[i])
+		{
+			if (polygon.shader == COLORED_POLYGON)
+			{
+				texel = polygon.r_texel[i*2];
+				texel2 = polygon.r_texel[i*2+1];
+	
+				if (texel && texel2)
+				{
+					colors[i][0] = texel->st[0];
+					colors[i][1] = texel->st[1];
+					colors[i][2] = texel2->st[0];
+					colors[i][3] = texel2->st[1];
+				}
+				else
+				{
+					colors[i][0] = colors[i][1] = colors[i][2] = 1.0;
+					colors[i][3] = 0.75;
+				}
+			}
+			else
+			{
+				texel = polygon.r_texel[i];
+				texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
+			}
+		}
+		else
+		{
+			texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		}
+
+		++n;
+	}
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+
+	/* Render wireframe */
 	if (mRenderMode & RENDER_WIREFRAME)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-
 		// Update wireframe color
 		if (mRenderMode & fHightlightPolygonWireframe)
 			//polygon.id == _model->getCurrentPolygon())
@@ -1125,21 +1197,14 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 
 		glBegin(GL_LINE_LOOP);
 
-		for(i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+		for (i = 0; i < n; ++i)
 		{
-			vertex = polygon.r_vertex[i];
-		  
-			if (vertex)
-			{
-				// Mongoose: 2001.10.28 Scaling replaced by mul ops
-				glVertex3f(vertex->pos[0] * 1.0001, 
-						   vertex->pos[1] * 1.0001, 
-						   vertex->pos[2] * 1.0001);
-			}
+			u = vertices[i];
+			u *= 1.0001;
+			glVertex3fv(u.mVec);
 		}
 	  
 		glEnd();
-		glPopAttrib();
 	}
 
 
@@ -1147,17 +1212,16 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	{
 		glBegin(GL_LINES);
 		glColor3f(0.2, 0.2, 0.8);
-		
-		for(i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+	
+		for (i = 0; i < n; ++i)
 		{
-			vertex = polygon.r_vertex[i];
+			u = vertices[i];
+			v = normals[i];
+			v *= (2 * (1 / mZoom));
+			v += u;
 
-			glVertex3f(vertex->pos[0],
-					   vertex->pos[1],
-					   vertex->pos[2]);
-			glVertex3f(vertex->pos[0] + vertex->norm[0] * 2 * 1/mZoom, 
-					   vertex->pos[1] + vertex->norm[1] * 2 * 1/mZoom, 
-					   vertex->pos[2] + vertex->norm[2] * 2 * 1/mZoom);
+			glVertex3fv(u.mVec);
+			glVertex3fv(v.mVec);
 		}
 		
 		glEnd();
@@ -1168,32 +1232,34 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	if (mRenderMode & RENDER_POINTS)
 	{
 		glColor3fv(mColorVertex);
-
 		glBegin(GL_POINTS);
-	  
-		for (i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+
+		for (i = 0; i < n; ++i)
 		{
-			vertex = polygon.r_vertex[i];
-		  
-			if (vertex)
-			{
-				glVertex3fv(vertex->pos);
-			}
+			u = vertices[i];
+			glVertex3fv(u.mVec);
 		}
 
 		glEnd();   
 	}
 
+	glPopAttrib();
+
 
 	/* Render face */
 	if (mRenderMode & RENDER_FACE)
 	{
+		if (mRenderMode & RENDER_TEXTURE)
+		{
+			glEnable(GL_TEXTURE_2D);
+		}
+
 		// Call shader/texture ( no shader support yet )
 		if (mRenderMode & RENDER_TEXTURE && polygon.shader != COLORED_POLYGON)
 		{
 			if (mRenderMode & RENDER_MATERIAL)
 			{
-				//glPushAttrib(GL_ENABLE_BIT);
+				glPushAttrib(GL_ENABLE_BIT);
 				gMaterialManager->applyEffectGL(polygon.shader);
 			}
 
@@ -1202,20 +1268,19 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 		else
 		{
 			BindTexture(0);//COLORED_POLYGON);
+			glDisable(GL_TEXTURE_2D);
 		}
 
 		glColor3fv(WHITE);
 
-		external_texel = !polygon.r_texel.empty();
-
-		if (!external_texel && polygon.shader == COLORED_POLYGON)
+		switch (n) //polygon.r_vertex.size())
 		{
-			printf("PolygonDraw> can't draw malformed COLORED_POLYGON\n");
-			return;
-		}
-
-		switch (polygon.r_vertex.size())
-		{
+		case 1:
+			glBegin(GL_POINTS); // error
+			break;
+		case 2:
+			glBegin(GL_LINES); // error
+			break;
 		case 3:
 			glBegin(GL_TRIANGLES);
 			break;
@@ -1226,93 +1291,40 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 			glBegin(GL_POLYGON);
 		}
 
-		if (external_texel)
+		for (i = 0; i < n; ++i)
 		{
-			for (i = polygon.r_texel.begin(), j = polygon.r_vertex.begin(); 
-				  i < polygon.r_texel.end() && 
-				  j < polygon.r_vertex.end();
-				  ++i, ++j)
+			u = vertices[i];
+			v = normals[i];
+			w = texcoords[i];
+
+			if (mRenderMode & RENDER_NORMAL)
 			{
-				texel = polygon.r_texel[i];
-				vertex = polygon.r_vertex[j];
-
-				if (texel && vertex)
-				{
-					if (mRenderMode & RENDER_NORMAL)
-					{
-						glNormal3fv(vertex->norm);
-					}
-				 
-					if (polygon.shader == COLORED_POLYGON)
-					{
-						glDisable(GL_TEXTURE_2D);
-						glColor3fv(WHITE);
-					 
-						++i;
-						texel2 = polygon.r_texel[i];
-					 
-						color[0] = texel->st[0];
-						color[1] = texel->st[1];
-	  
-						if (texel2)
-						{
-							color[2] = texel2->st[0];
-							color[3] = texel2->st[1];
-						}
-				 
-						glColor4fv(color);
-					}
-					else if (mRenderMode & RENDER_TEXTURE)
-					{
-						glEnable(GL_TEXTURE_2D);
-						glColor3f(1.0, 1.0, 1.0);
-						glTexCoord2f(texel->st[0], texel->st[1]);
-					}
-					else
-					{
-						glColor3fv(WHITE);
-						glColor4f(texel->st[0], texel->st[1], 0.5, 1.0);
-					}
-
-					glVertex3fv(vertex->pos);
-				}
+				glNormal3fv(v.mVec);
 			}
-		}
-		else
-		{
-			for (i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+
+			if (polygon.shader == COLORED_POLYGON)
 			{
-				vertex = polygon.r_vertex[i];
-			 
-				if (vertex)
-				{
-					if (mRenderMode & RENDER_NORMAL)
-					{
-						glNormal3fv(vertex->norm);
-					}
-				 
-					if (mRenderMode & RENDER_TEXTURE)
-					{
-						glEnable(GL_TEXTURE_2D);
-						glColor3f(1.0, 1.0, 1.0);
-						glTexCoord2f(vertex->uv[0], vertex->uv[1]);
-					}
-					else
-					{
-						glColor3fv(WHITE);
-						glColor4f(vertex->uv[0], vertex->uv[1], 0.5, 1.0);
-					}
-
-					glVertex3fv(vertex->pos);
-				}
+				glColor4fv(colors[i]);
 			}
+			else if (mRenderMode & RENDER_TEXTURE)
+			{
+				glColor3f(1.0, 1.0, 1.0);
+				glTexCoord2fv(w.mVec);
+			}
+			else
+			{
+				glColor3fv(WHITE);
+				glColor4f(w.mVec[0], w.mVec[1], 0.5, 1.0);
+			}
+
+			glVertex3fv(u.mVec);
 		}
-	 
+
 		glEnd();
 
 		if (mRenderMode & RENDER_MATERIAL)
 		{
-			//glPopAttrib();
+			glPopAttrib();
 		}
 	}
 }
@@ -1324,6 +1336,13 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 	egg_polygon_t *polygon;
 	egg_group_t *grp;
 	unsigned int i;
+	long frame = -1;
+
+
+	/* Vertex morph frame fu */
+	grp = egg->getGroup(_model->getCurrentGroup());
+	if (grp && grp->flags == 0xBADA55)
+		frame = grp->id;
 
 
 	/* Mongoose 2004.03.26, 
@@ -1390,8 +1409,8 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 				freyja_print("FIXME: NULL Polygon in list %s:%i\n", __FILE__, __LINE__);
 				continue;
 			}
-			
-			DrawPolygon(*polygon);    
+				
+			DrawPolygon(*polygon, frame);    
 		}
 		
 		if ((int)mesh.id == (int)_model->getCurrentMesh())

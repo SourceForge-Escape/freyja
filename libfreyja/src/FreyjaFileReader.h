@@ -246,7 +246,7 @@ class FreyjaFileReader
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void readBufferUnsignedChar(unsigned int length, unsigned char *buffer);
+	bool readBufferUnsignedChar(unsigned long length, unsigned char *buffer);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary read into buffer from file
@@ -257,7 +257,7 @@ class FreyjaFileReader
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void readCharString(unsigned int length, char *buffer);
+	bool readCharString(unsigned long length, char *buffer);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
 	 * Post : Binary read of string into buffer

@@ -5,9 +5,9 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.westga.edu/~stu7440/
  * Email   : stu7440@westga.edu
- * Object  : Nif4
+ * Object  : Nif3
  * License : No use w/o permission (C) 2004 Mongoose
- * Comments: NetImmerse Model 4.0 class for Morrowind ( 4.0.0.2 )
+ * Comments: NetImmerse Model 3.x class for Morrowind ( 4.0.0.2 )
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -15,12 +15,12 @@
  * 
  *-- Test Defines -----------------------------------------------
  *           
- * UNIT_TEST_NIF4 - Builds Nif4 class as a console unit test 
+ * UNIT_TEST_NIF3 - Builds Nif3 class as a console unit test 
  *
  *-- History ------------------------------------------------ 
  *
  * 2004.08.16:
- * Mongoose - Created, based on my reverse engineering which is based off:
+ * Mongoose - Created, based on:
  *
  *            NetImmerse 3.0 Fileformat Spec By:
  *               Chris Graham (gameRevolt@assimsoft.com)
@@ -29,11 +29,10 @@
  ==========================================================================*/
 
 
-#ifndef GUARD__FREYJA_MONGOOSE_NIF4_H_
-#define GUARD__FREYJA_MONGOOSE_NIF4_H_
+#ifndef GUARD__FREYJA_MONGOOSE_NIF3_H_
+#define GUARD__FREYJA_MONGOOSE_NIF3_H_
 
-#include <freyja8/EggFileReader.h>
-
+#include <freyja/FreyjaFileReader.h>
 #include <mstl/Vector.h>
 
 

@@ -149,7 +149,10 @@ typedef struct egg_vertex_s {
 	Vector<egg_weight_t *> weights;   /* Vector of weights */
 
 	unsigned int id;                  /* Unique identifier */
-	Vector <unsigned int> ref;        /* Ids of polygons referencing vertex */ 
+	Vector <unsigned int> ref;        /* Ids of polygons referencing vertex */
+
+	Vector <vec3_t *> frames; 
+	Vector <long> frameId; 
 
 } egg_vertex_t;
 
@@ -181,6 +184,9 @@ typedef struct egg_group_s {
 	vec3_t bbox_max;                  /* Max corner of bounding box */
 	vec3_t center;                    /* Center of rotation | bolt-on binding */
 	float scale;                      /* Scaling of group */
+
+	long flags;
+	long mesh;
 
 } egg_group_t;
 

@@ -600,6 +600,10 @@ void freyjaMeshFlags1u(unsigned int flags);
 void freyjaGenerateVertexNormals();
 
 void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
+
+
+void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
+
 }
 
 

@@ -406,16 +406,16 @@ char *FreyjaFileReader::parseSymbol()
 }
 
 
-void FreyjaFileReader::readBufferUnsignedChar(unsigned int length, 
-										   unsigned char *buffer)
+bool FreyjaFileReader::readBufferUnsignedChar(unsigned long length, 
+											  unsigned char *buffer)
 {
-	fread(buffer, length, 1, mFileHandle);  // heh, yeah
+	return (fread(buffer, length, 1, mFileHandle) == 1);
 }
 
 
-void FreyjaFileReader::readCharString(unsigned int length, char *buffer)
+bool FreyjaFileReader::readCharString(unsigned long length, char *buffer)
 {
-	fread(buffer, length, 1, mFileHandle);  // heh, yeah
+	return (fread(buffer, length, 1, mFileHandle) == 1);
 }
 
 
