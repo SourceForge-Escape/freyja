@@ -68,7 +68,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ \
 		-lGL -lGLU -lm -lz \
-		-lfreyja_model -lfreyja_image -lhel0
+		-lfreyja_model -lfreyja_image
 
 GTK2_CFLAGS=-DUSING_GTK_2_0 -I/usr/X11R6/include -I/usr/include/gtkgl-2.0/ \
 		$(shell pkg-config --cflags gtk+-2.0 gtkgl-2.0)
@@ -96,7 +96,6 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 TARGETS=$(BUILD_DIR)/$(NAME)
 
-all: auto
 auto: $(BUILD_SELECT)
 
 ################################################################
