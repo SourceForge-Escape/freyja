@@ -35,6 +35,10 @@
 
 /* TODO:
  *
+ * 	o Eval shouldn't buffer the way it does - setq's
+ *    bind in reverse order eg not line 1, 2, 3 but 3, 2, 1
+ *	  ( FIX by executing in true scopes )
+ *
  * Add quote support and execution stack use
  * Handle scoping?
  * True function parm matching
@@ -720,6 +724,33 @@ void Mlisp::dumpSymbols()
 }
 
 
+mObject *Mlisp::getSymbol(const char *symbol)
+{
+	mObjectList *current;
+	mObject *obj;
+	
+
+	if (!symbol || !symbol[0])
+		return 0x0;
+
+	current = mSymbolTable;
+
+	while (current)
+	{
+		obj = objPeek(current);
+		current = current->next;
+
+		// Mongoose 2002.01.12, FIXME, string
+		if (strcmp(symbol, obj->symbol) == 0)
+		{
+			return obj;
+		}
+	}
+
+	return 0x0;
+}
+
+
 int Mlisp::getSymbolData(char *symbol, unsigned int type, void **data)
 {
 	mObjectList *current;
@@ -1072,7 +1103,7 @@ void Mlisp::eval()
 
 				if (!objTypeP(obj, BEGIN))
 				{
-					printf("FATAL ERROR: Lisp data stack corupt... BEGIN !=");
+					printf("FATAL ERROR: Lisp data stack corrupt... BEGIN !=");
 					printObj(obj);
 				}
 
@@ -1107,6 +1138,8 @@ void Mlisp::eval()
 				}
 				//printf("=\n");
 
+				printf("FUNC: calling %s\n", obj->symbol);
+
 				/* 3. Call C function implementation, or method */
 				switch (obj->type)
 				{
@@ -1119,7 +1152,7 @@ void Mlisp::eval()
 					//mObject *(Mlisp::*func)(mObjectList *);
 					//func =(mObject *(Mlisp::*)(mObjectList *))(*(obj->data));
 					//result = (this->*func)(parms);
-					
+					printf("BUILTINFUNC: calling %s\n", obj->symbol);
 					result = builtin_setq(parms);
 					break;
 					//default:
@@ -1717,15 +1750,27 @@ int Mlisp::registerSymbolValue(const char *symbol, int i)
 // Should dupe data pointer for fear of GC
 mObject *Mlisp::builtin_setq(mObjectList *parms)
 {
-	mObject *symbol, *data;
+	mObject *symbol, *data, *obj;
 
 
 	symbol = objPop(&parms);
 	data = objPop(&parms);
+	obj = 0x0;
+	
+	if (data->type == CSTRING)
+	{
+		obj = getSymbol((char *)data->data);
+	}
 
-
-	//registerSymbolObject((char *)symbol->data, data);
-	registerSymbol((char *)symbol->data, data->type, data->data);
+	if (obj)
+	{
+		registerSymbol((char *)symbol->data, obj->type, obj->data);
+	}
+	else
+	{
+		//registerSymbolObject((char *)symbol->data, data);
+		registerSymbol((char *)symbol->data, data->type, data->data);
+	}
 
 	return NULL;
 }

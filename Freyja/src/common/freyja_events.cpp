@@ -181,9 +181,15 @@ void event_mouse(int button, int state, int mod, int x, int y)
 	}
 }
 
+
 FILE *get_log_file()
 {
-	static FILE *f = fopen("/tmp/Freyja.log", "w");
+	static FILE *f = 0x0;
+
+	if (!f)
+	{
+		f = fopen("/tmp/Freyja.log", "w");
+	}
 
 	return f;
 }
