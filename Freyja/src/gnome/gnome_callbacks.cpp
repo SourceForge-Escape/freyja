@@ -51,6 +51,11 @@ typedef struct gtk_anim_tree_s
 
 void spinbutton_value_set(int event, float val);
 float spinbutton_value_get_float(int event, bool *error);
+int spinbutton_uint_set_range(GtkSpinButton *spin, 
+							  unsigned int value,
+							  unsigned int min, unsigned int max);
+
+
 
 // Mongoose 2002.02.01, Gobals used from other files, try to 
 //   reduce these as much as you can with gtk+ use
@@ -194,6 +199,16 @@ float freyja_event_get_float(int event)
 }
 
 
+int freyja_event_set_range(int event, unsigned int value,
+						   unsigned int min, unsigned int max)
+{
+	GtkWidget *test;
+
+	test = WIDGET_MAP[event];
+	return spinbutton_uint_set_range(GTK_SPIN_BUTTON(test), value, min, max);
+}
+
+
 void freyja_event_set_float(int event, float value)
 {
 	spinbutton_value_set(event, value);
@@ -243,7 +258,10 @@ void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 	mod = 0;
 
 	if (event->state & GDK_CONTROL_MASK)
-		mod |= KEY_RCTRL;
+		mod |= KEY_LCTRL;
+
+	if (event->state & GDK_SHIFT_MASK)
+		mod |= KEY_LSHIFT;
 
 	if (state & GDK_BUTTON1_MASK)
 	{

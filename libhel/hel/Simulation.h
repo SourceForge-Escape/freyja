@@ -240,13 +240,13 @@ public:
 	virtual void solve()                                                    
 	{
 		Mass *m;
-		VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
+		unsigned int i;
 
 
 		// Apply gravitational force to each mass
-		for (iter.start(); iter.forward(); iter.next())
+		for (i = mMasses.begin(); i < mMasses.end(); ++i)
 		{
-			m = iter.current();
+			m = mMasses[i];
 
 			// Gravitational force, Force = (Mass)(Gravity)
 			m->applyForce(gravitation * m->mMass);
@@ -284,13 +284,13 @@ public:
 	virtual void solve()
 	{
 		Mass *m;
-		VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
+		unsigned int i;
 
 
 		// Apply spring force to each mass
-		for (iter.start(); iter.forward(); iter.next())
+		for (i = mMasses.begin(); i < mMasses.end(); ++i)
 		{
-			m = iter.current();
+			m = mMasses[i];
 
 			// Vector from mass to spring connection
 			Vector3d springVector = m->mPos - connectionPos;

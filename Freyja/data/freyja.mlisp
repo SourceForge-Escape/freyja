@@ -39,7 +39,7 @@
 (setq GRID_ON true)            ; Toggle edit grid rendering
 (setq PATH "~/.freyja")        ; Set initial data path
 
-(setq HELP_MESSAGE "There is no online help as yet.¶¶If you'd like to work on documentation email me.¶¶Send bug reports and feature requests:¶<small>  * http://icculus.org/freyja¶  * irc://irc.freenode.net/#freyja¶  * mongoose@icculus.org</small>")
+(setq HELP_MESSAGE "There is no online help as yet.¶¶If you'd like to work on documentation email me.¶¶Send bug reports and feature requests:¶<small>  · http://icculus.org/freyja¶  · irc://irc.freenode.net/#freyja¶  · mongoose@icculus.org</small>")
 
 (setq ABOUT_MESSAGE "<big>ᚠᚱᛖᛃᚨ Freyja 0.3.5</big>¶Freyja is an Open Source 3d modeling system.¶<small>Freyja Copyright © 2002-2004 by Terry 'Mongoose' Hendrix II</small>")
 
@@ -248,7 +248,7 @@
 						(toolbar 
 							(toolbar_togglebutton true
 								"cursor-select.png" "Select" "Select by pointer"
-								EVENT_MISC CMD_MISC_SELECT)
+								EVENT_MAIN eSelect)
 
 							(toolbar_togglebutton false
 								"bbox-select.png" "Select" "Select by bounding box" 
@@ -302,13 +302,13 @@
 						(label "Object operations" 0.0 0.5))
 					(hbox 1 0 0 1 0 (hsep))
 					(hbox 1 0 0 1 0
-						(label "Current Mesh #"  0.0 0.5) 
+						(label "Current Mesh  #"  0.0 0.5) 
 						(spinbutton 0 0 100 500))
 					(hbox 1 0 0 1 0
 						(label "Current Group #" 0.0 0.5) 
 						(spinbutton 0 0 100 501))
 					(hbox 1 0 0 1 0
-						(label "Current Bone #" 0.0 0.5) 
+						(label "Current Bone  #" 0.0 0.5) 
 						(spinbutton 0 0 100 504))
 
 					(hbox 1 0 0 1 0 (hsep))
@@ -320,6 +320,8 @@
 							(menu_item "Mesh      "	EVENT_MAIN eTransformMesh)
 							(menu_item "Group"	EVENT_MAIN eTransformGroup)
 							(menu_item "Vertex"	EVENT_MAIN eTransformPoint)))
+
+					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 1 0 1 1
 						(button "Move" EVENT_MAIN eMove)
@@ -340,10 +342,12 @@
 						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Z))
 
 					(hbox 1 0 0 1 0 (hsep))
+
 					(hbox 1 0 0 1 0
-						(button "New"     EVENT_MESH  CMD_MESH_ADD)		;eAddObject
-						(button "Delete"  EVENT_MESH  CMD_MESH_DELETE)	;eRemoveObject
-			  			(button "Select"  EVENT_MESH  CMD_MESH_SELECT))	;eSelectObject
+						(button "New"     EVENT_MAIN  eAddObject)
+						(button "Delete"  EVENT_MAIN  eDelete)
+			  			(button "Select"  EVENT_MAIN  eSelect))
+
 					(hbox 1 0 0 1 0
 						(button "Move"    EVENT_MAIN	eMoveObject)
 			  			(button "Rotate"  EVENT_MAIN	eRotateObject)
