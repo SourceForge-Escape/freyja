@@ -160,6 +160,12 @@ long freyjaGetCurrent(freyja_object_t type);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+int freyjaGetTextureFilename(unsigned int index, char **filename);
+
+int freyjaGetTextureImage(unsigned int index, unsigned int *w, unsigned int *h, 
+						  unsigned int *depth,  unsigned int *type,
+						  unsigned char **image);
+
 long freyjaGetBoneName(long index, unsigned int size, char *name);
 
 long freyjaGetBoneParent(long index);
@@ -572,11 +578,17 @@ void freyjaMeshFlags1u(unsigned int flags);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaGenerateVertexNormals();
+
+void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 }
 
 
 /* Mongoose 2004.12.19, 
  * C++ fun */
+
+Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
+
 
 void freyjaGetVertexPolygonRef(Vector<long> &polygons);
 /*------------------------------------------------------

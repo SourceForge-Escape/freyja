@@ -83,8 +83,10 @@
 
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
-
 #include <hel/math.h>
+
+#include "FreyjaPrinter.h"
+
 
 typedef vec_t bbox_t[3][3];
 
@@ -351,6 +353,8 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	void setPrinter(FreyjaPrinter *printer);
 
 	void setDebugLevel(unsigned int n);
 	/*------------------------------------------------------
@@ -1383,6 +1387,8 @@ private:
 	Vector<egg_boneframe_t *> mBoneFrames;   /* BoneFrame list */
 	
 	Vector<egg_animation_t *> mAnimations;   /* Animation list */
+
+	FreyjaPrinter *mPrinter;
 
 	unsigned int mDebugLevel;                /* Set debug output at runtime */
 };

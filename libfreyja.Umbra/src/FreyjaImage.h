@@ -26,6 +26,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAIMAGE_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJAIMAGE_H_
 
+#include <stdarg.h>
+
 
 class FreyjaImage
 {

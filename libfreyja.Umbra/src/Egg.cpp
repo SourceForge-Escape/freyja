@@ -80,7 +80,7 @@ void __print_egg_polygon_t(egg_polygon_t *p)
 Egg::Egg()
 {
 	mDebugLevel = 0;
-
+	mPrinter = 0x0;
 	mVertices.reserve(256);
 	mTexels.reserve(256);
 	mAnimations.reserve(32);
@@ -183,14 +183,27 @@ bool Egg::isDebugLevel(unsigned int level)
 }
 
 
+void Egg::setPrinter(FreyjaPrinter *printer)
+{
+	mPrinter = printer;
+}
+
+
 void Egg::print(char *s, ...)
 {
 	va_list args;
 
 	va_start(args, s);
-	fprintf(stdout, "Egg::");
-	vfprintf(stdout, s, args);
-	fprintf(stdout, "\n");
+	if (mPrinter)
+	{
+		mPrinter->messageArgs(s, &args);
+	}
+	else
+	{
+		fprintf(stdout, "Egg::");
+		vfprintf(stdout, s, args);
+		fprintf(stdout, "\n");
+	}
 	va_end(args);
 }
 
@@ -2950,9 +2963,16 @@ void Egg::printError(char *s, ...)
 	va_list args;
 	
 	va_start(args, s);
-	fprintf(stderr, "Egg::");
-	vfprintf(stderr, s, args);
-	fprintf(stderr, "\n");
+	if (mPrinter)
+	{
+		mPrinter->errorArgs(s, &args);
+	}
+	else
+	{
+		fprintf(stderr, "Egg::");
+		vfprintf(stderr, s, args);
+		fprintf(stderr, "\n");
+	}
 	va_end(args);
 }
 

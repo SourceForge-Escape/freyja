@@ -27,7 +27,7 @@
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
-#include <freyja8/EggFileReader.h> 
+#include <freyja/FreyjaFileReader.h> 
 
 #include "MaterialManager.h"
 
@@ -47,18 +47,11 @@ FreyjaModel::FreyjaModel()
 
 	pluginDir = freyja_rc_map("plugins/");
 
-	_egg = new FreyjaEgg();
-	mPlugin = new FreyjaEggPlugin(_egg, pluginDir);
-
-	mPlugin->addModule("psk");
-	mPlugin->addModule("nod");
-	mPlugin->addModule("mdx");
-	mPlugin->addModule("grn");
-	mPlugin->addModule("md5");
-	mPlugin->addModule("smd");
-	mPlugin->addModule("obj");
-	mPlugin->addModule("mdm");
-	mPlugin->addModule("halflife");
+	_egg = new Egg();
+	_egg->setPrinter(&mPrinter);
+	mPlugin = new EggPlugin(_egg);
+	mPlugin->addPluginDirectory(pluginDir);
+	mPlugin->setPrinter(&mPrinter);
 
 	delete [] pluginDir;
 
@@ -93,7 +86,7 @@ void FreyjaModel::setFlags(option_flag_t flag, int op)
 		freyja_print("TombRaider Map loading is %s", op ? "on" : "off");
 
 		if (mPlugin)
-			mPlugin->eggFlags(FL_EGGP_LOAD_MAP);
+			mPlugin->freyjaFlags(FL_LOAD_MAP); // unsafe
 	}
 }
 
@@ -210,7 +203,7 @@ void FreyjaModel::generateUVMap()
 				continue;
 
 			// Mongoose 2002.01.18, Generate UV from vertex XYZ
-			eggGenerateUVFromXYZ(vertex->pos, &u, &v);
+			freyjaGenerateUVFromXYZ(vertex->pos, &u, &v);
 
 #ifdef DEBUG_GEN_TEXEL
 			freyja_print("FreyjaModel::generateUVMap> %f %f\n", u, v);
@@ -853,7 +846,7 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 			if (vertex)
 			{
 				// Mongoose 2002.01.18, Generate UV from vertex XYZ
-				eggGenerateUVFromXYZ(vertex->pos, &vertex->uv[0], &vertex->uv[1]);
+				freyjaGenerateUVFromXYZ(vertex->pos, &vertex->uv[0], &vertex->uv[1]);
 			}
 			else
 			{
@@ -887,37 +880,34 @@ bool FreyjaModel::pasteSelectedPatch()
 
 	gTestPatch.generatePolygonMesh(7);
 
-	eggBegin(FREYJA_MESH);
-	eggMeshFlags1u(0x0);
+	freyjaBegin(FREYJA_MESH);
+	freyjaMeshFlags1u(0x0);
 
-	eggBegin(FREYJA_GROUP);
-	eggGroupCenter3f(0, 0, 0);
+	freyjaBegin(FREYJA_VERTEX_GROUP);
+	freyjaGroupCenter3f(0, 0, 0);
 
 	for (i = gTestPatch.vertices.begin(); i < gTestPatch.vertices.end(); ++i)
 	{
-		index = eggVertexStore3f(gTestPatch.vertices[i]->mVec[0],
-								 gTestPatch.vertices[i]->mVec[1],
-								 gTestPatch.vertices[i]->mVec[2]);
-		eggVertexNormalStore3f(index, 0, 1, 0); // FIXME
-		eggVertexUVStore2f(index, gTestPatch.texcoords[i]->mVec[0],
-						   gTestPatch.texcoords[i]->mVec[1]);
+		index = freyjaVertex3fv(gTestPatch.vertices[i]->mVec);
+		freyjaVertexNormal3f(index, 0, 1, 0);
+		freyjaVertexTexCoord2fv(index, gTestPatch.texcoords[i]->mVec);
 		transV.pushBack(index);
 	}
 
-	eggEnd(); // FREYJA_GROUP
+	freyjaEnd(); // FREYJA_GROUP
 
 	n = gTestPatch.vertices.end() - 2;
 	for (i = gTestPatch.vertices.begin(); i < n; ++i)
 	{
-		eggBegin(FREYJA_POLYGON);
-		eggTexture1i(gTestPatch.texture);
-		eggVertex1i(transV[i]);
-		eggVertex1i(transV[i+1]);
-		eggVertex1i(transV[i+2]);
-		eggEnd(); // FREYJA_POLYGON
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonMaterial1i(gTestPatch.texture);
+		freyjaPolygonVertex1i(transV[i]);
+		freyjaPolygonVertex1i(transV[i+1]);
+		freyjaPolygonVertex1i(transV[i+2]);
+		freyjaEnd(); // FREYJA_POLYGON
 	}
 
-	eggEnd(); // FREYJA_MESH
+	freyjaEnd(); // FREYJA_MESH
 
 	freyja_print("Mesh generated from patch...");
 
@@ -938,13 +928,13 @@ bool FreyjaModel::pasteSelectedMesh()
 	if (mCopyMesh.vertices.empty() || mCopyMesh.polygons.empty())
 		return false;
 
-	eggBegin(FREYJA_MESH);
-	eggMeshFlags1u(mCopyMesh.flags);
+	freyjaBegin(FREYJA_MESH);
+	freyjaMeshFlags1u(mCopyMesh.flags);
 
-	eggBegin(FREYJA_GROUP);
-	eggGroupCenter3f(mCopyMesh.center[0], 
-					 mCopyMesh.center[1],
-					 mCopyMesh.center[2]);
+	freyjaBegin(FREYJA_VERTEX_GROUP);
+	freyjaGroupCenter3f(mCopyMesh.center[0], 
+						mCopyMesh.center[1],
+						mCopyMesh.center[2]);
 
 	for (i = mCopyMesh.vertices.begin(); i < mCopyMesh.vertices.end(); ++i)
 	{
@@ -953,15 +943,15 @@ bool FreyjaModel::pasteSelectedMesh()
 
 		if (v)
 		{
-			index = eggVertexStore3f(v->pos[0], v->pos[1], v->pos[2]);
-			eggVertexNormalStore3f(index, v->norm[0], v->norm[1], v->norm[2]);
-			eggVertexUVStore2f(index, v->uv[0], v->uv[1]);
+			index = freyjaVertex3fv(v->pos);
+			freyjaVertexNormal3fv(index, v->norm);
+			freyjaVertexTexCoord2fv(index, v->uv);
 		}
 
 		transV.pushBack(index);
 	}
 
-	eggEnd(); // FREYJA_GROUP
+	freyjaEnd(); // FREYJA_GROUP
 
 	for (i = mCopyMesh.texcoords.begin(); i < mCopyMesh.texcoords.end(); ++i)
 	{
@@ -970,7 +960,7 @@ bool FreyjaModel::pasteSelectedMesh()
 
 		if (t)
 		{
-			index = eggTexCoordStore2f(t->uv[0], t->uv[1]);
+			index = freyjaTexCoord2f(t->uv[0], t->uv[1]);
 		}
 
 		transT.pushBack(index);
@@ -983,21 +973,21 @@ bool FreyjaModel::pasteSelectedMesh()
 		if (!p)
 			continue;
 
-		eggBegin(FREYJA_POLYGON);
+		freyjaBegin(FREYJA_POLYGON);
 
-		eggTexture1i(p->material);
+		freyjaPolygonMaterial1i(p->material);
 
 		for (j = p->vertices.begin(); j < p->vertices.end(); ++j)
-			eggVertex1i(transV[p->vertices[j]]);
+			freyjaPolygonVertex1i(transV[p->vertices[j]]);
 
 		for (j = p->texcoords.begin(); j < p->texcoords.end(); ++j)
-			eggTexCoord1i(transT[p->texcoords[j]]);
+			freyjaPolygonTexCoord1i(transT[p->texcoords[j]]);
 
-		eggEnd(); // FREYJA_POLYGON
+		freyjaEnd(); // FREYJA_POLYGON
 	}
 	
 
-	eggEnd(); // FREYJA_MESH
+	freyjaEnd(); // FREYJA_MESH
 
 	freyja_print("Mesh pasted...");
 
@@ -1351,7 +1341,7 @@ void FreyjaModel::disconnectBone(unsigned int master, unsigned int slave)
 
 void addVertexToBone(unsigned int bone, unsigned int vertex)
 {
-	eggVertexWeightStore(vertex, 1.0f, bone);
+	freyjaVertexWeight(vertex, 1.0f, bone);
 }
 
 
@@ -1545,8 +1535,9 @@ void FreyjaModel::VertexNew(float xx, float yy)
 	{
 		if (mFlags & FL_VERTEX_UV)
 		{
-			eggGenerateUVFromXYZ(_cached_vertex->pos, 
-						  &_cached_vertex->uv[0], &_cached_vertex->uv[1]);
+			freyjaGenerateUVFromXYZ(_cached_vertex->pos, 
+									&_cached_vertex->uv[0],
+									&_cached_vertex->uv[1]);
 			//vertex_uv_gen(_cached_vertex, &u, &v);
 			//_cached_vertex->texel = _egg->TexelAdd(u, v);
 		}
@@ -1880,7 +1871,7 @@ void FreyjaModel::BBoxListBuild()
 
 
 	mList.clear();
-	list = eggFindVerticesByBox(mSelectBBox);
+	list = freyjaFindVerticesByBox(mSelectBBox);
 	mList.copy(*list);
 }
 
@@ -2290,7 +2281,7 @@ int FreyjaModel::loadModel(const char *filename)
 		char *textureFilename = 0x0; /* Texture filename */
 
 		/* Texture image was stored as external file from model */
-		for (i = 0; !eggGetTextureFilename(i, &textureFilename); ++i)
+		for (i = 0; !freyjaGetTextureFilename(i, &textureFilename); ++i)
 		{
 			if (textureFilename && textureFilename[0])
 			{
@@ -2303,22 +2294,22 @@ int FreyjaModel::loadModel(const char *filename)
 		}
 	 
 		/* Texture image was stored as raw buffer */
-		for (i = 0; !eggGetTextureImage(i, &w, &h, &bpp, &type, &image); ++i)
+		for (i = 0; !freyjaGetTextureImage(i, &w, &h, &bpp, &type, &image); ++i)
 		{
 			if (!image)
 				continue;
 
 			switch (type)
 			{
-			case EGG_COLORMODE_RGBA:
+			case RGBA_32:
 				gMaterialManager->loadTextureBuffer(image, w, h, 32, 
 													Texture::RGBA);
 				break;
-			case EGG_COLORMODE_RGB:
+			case RGB_24:
 				gMaterialManager->loadTextureBuffer(image, w, h, 24,
 													Texture::RGB);
 				break;
-			case EGG_COLORMODE_INDEXED:
+			case INDEXED_8:
 				gMaterialManager->loadTextureBuffer(image, w, h, 8, 
 													Texture::INDEXED);
 				break;

@@ -57,7 +57,7 @@
 #endif
 
 #ifdef HAVE_FREYJA_IMAGE
-#   include <freyja8/EggImage.h>
+#   include <freyja/FreyjaImage.h>
 #endif
 
 #include "Texture.h"
