@@ -488,7 +488,6 @@ unsigned short EggFileReader::readInt16U()
 	return u;
 }
 
-
 int EggFileReader::readInt32()
 {
 	int i;
@@ -508,6 +507,38 @@ int EggFileReader::readInt32()
 unsigned int EggFileReader::readInt32U()
 {
 	unsigned int u;
+	void *ptr = &u;
+	size_t sz = fread(ptr, 4, 1, mFileHandle);
+
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 32bit uint\n");
+
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
+	return u;
+}
+
+
+long EggFileReader::readLong()
+{
+	long i;
+	void *ptr = &i;
+	size_t sz = fread(ptr, 4, 1, mFileHandle);
+
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 32bit int\n");
+
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
+	return i;
+}
+
+
+unsigned long EggFileReader::readLongU()
+{
+	unsigned long u;
 	void *ptr = &u;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
