@@ -421,7 +421,9 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void generateUVMap();
+	void createPolyMappedUVMap(long seedPolygon);
+
+	void generateUVMap(); // texture projection
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : This currently doesn't actually use a true
@@ -706,6 +708,8 @@ public:
 	FreyjaModelPrinter mPrinter;
 
 	Vector<unsigned int> mList;         /* Temp generic vertex list buffer */
+
+	Vector<long> mUVMap;
 
 	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
 

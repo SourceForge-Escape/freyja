@@ -661,7 +661,7 @@ long freyjaSaveModel(char *filename)
 	index = freyjaGetCurrent(FREYJA_MESH);
 	count = freyjaGetCount(FREYJA_MESH);
 
-	for (i = 0; i < count; ++i)
+	for (i = 0; i < count+1; ++i)
 	{
 		freyjaSaveMeshChunkV1(w, index);
 		index = freyjaIterator(FREYJA_MESH, FREYJA_LIST_NEXT);
@@ -2758,16 +2758,28 @@ long freyjaGetVertexFrame(long vertexIndex, long element,
 {
 	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
 
-	if (vertex && element > -1 && element < (int)vertex->frames.end())
+
+	if (vertex)
 	{
-		vec_t *v = *(vertex->frames[element]);
+		if (element > -1 && element < (int)vertex->frames.end())
+		{
+			vec_t *v = *(vertex->frames[element]);
 
-		if (element < (int)vertex->frameId.end())
-			*frameIndex = vertex->frameId[element];
+			if (element < (int)vertex->frameId.end())
+				*frameIndex = vertex->frameId[element];
 
-		xyz[0] = v[0];
-		xyz[1] = v[1];
-		xyz[2] = v[2];
+			xyz[0] = v[0];
+			xyz[1] = v[1];
+			xyz[2] = v[2];
+
+			return 0;
+		}
+
+		/* Invalid indices return orignal position, so you don't get holes */
+		xyz[0] = vertex->pos[0];
+		xyz[1] = vertex->pos[1];
+		xyz[2] = vertex->pos[2];
+
 		return 0;
 	}
 
@@ -2840,6 +2852,49 @@ long freyjaGetMeshFlags(long meshIndex)
 	}
 
 	return 0;
+}
+
+
+long freyjaGetMeshVertexFrameIndex(long meshIndex, long element)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		// Not Implemented
+	}
+
+	return 0;
+}
+
+
+long freyjaGetMeshVertexFrameCount(long meshIndex)
+{
+	long polygonCount = freyjaGetMeshVertexFrameCount(meshIndex);
+	long i, j, frames, maxFrames = 0, polygonIndex;
+	long vertexIndex, vertexCount;
+
+	/* Mongoose 2005.01.01, 
+	 * Vertex frames are stored in the vertices themselves, find the 
+	 * max frame count -- indexing greater than frame count will
+	 * return frame[0] position in vertices with less than maxFrames
+	 * frame, so it's safe and does what one would expect asymmetrically */
+	for (i = 0; i < polygonCount; ++i)
+	{
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
+			frames = freyjaGetMeshVertexFrameCount(vertexIndex);
+
+			if (frames > maxFrames)
+				maxFrames = frames;
+		}
+	}
+
+	return maxFrames;
 }
 
 

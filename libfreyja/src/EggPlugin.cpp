@@ -562,11 +562,20 @@ long EggPlugin::getPolygonFlags(long polygonIndex)
 	if (!polygon)
 		return 0; 
 
+	// Currently using Egg backend -- it can't do more than one UV type
+	// or coloring
 	if (polygon->vertex.end() == polygon->texel.end())
+	{
 		flags |= fPolygon_PolyMapped;
-
-	if (polygon->vertex.end() == polygon->texel.end()*2)
+	}
+	else if (polygon->vertex.end() == polygon->texel.end()*2)
+	{
 		flags |= fPolygon_ColorMapped;
+	}
+	else
+	{
+		flags |= fPolygon_VertexUV;
+	}
 
 	return flags;
 }
