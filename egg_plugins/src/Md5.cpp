@@ -160,7 +160,7 @@ bool Md5::loadModel(const char *filename)
 		for (i = 0; i < mNumJoints; ++i)
 		{
 			mJoints[i].name = getString();
-			mJoints[i].index = getInteger();
+			mJoints[i].parent = getInteger();
 
 			/* translate X Y Z */
 			if (!matchSymbol("("))
@@ -377,42 +377,6 @@ char *Md5::getString()
 	s = new char[l+1];
 	strncpy(s, mTempBufferHack, l);
 	s[l] = 0;
-
-	/*
-	char *sym = getSymbol();
-	unsigned int j;
-
-
-	l = strlen(sym);
-	s = new char[l+1];
-	s[l] = 0;
-
-	for (i = 0, j = 0; i < l && l < mTempBufferHackSz; ++i)
-	{
-		switch (state)
-		{
-		case 0:
-			if (c == '"')
-				state = 1;
-			break;
-		case 1:
-			if (c == '"' && lc != '\\')  // Allow quote escapes?
-			{
-				l = mTempBufferHackSz;
-			}
-			else
-			{
-				s[j++] = sym[i];
-				s[j] = 0;
-			}
-			break;
-		}
-
-		lc = c;
-	}
-	*/
-
-
 	//printf("** \"%s\"\n", mTempBufferHack);
 
 	return s;
@@ -546,8 +510,9 @@ int freyja_model__md5_check(char *filename)
 int freyja_model__md5_import(char *filename)
 {
 	Md5 md5;
+	Vector<unsigned int> weights;
 	unsigned int vertex, texcoord;
-	int m, v, i, t;
+	int m, v, w, t, j;
 
 
 	if (md5.loadModel(filename) == false)
@@ -555,52 +520,48 @@ int freyja_model__md5_import(char *filename)
 
 	for (m = 0; m < md5.mNumMeshes; ++m)
 	{
-		Map<unsigned int, unsigned int> trans;
-		Map<unsigned int, unsigned int> trans2;
+		Vector<unsigned int> vertices;
+		Vector<unsigned int> texcoords;
+
 
 		/* Start a new mesh */
 		eggBegin(FREYJA_MESH);
 	
 		/* Start a new vertex group */
 		eggBegin(FREYJA_GROUP);
-	
 
 		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
-			i = md5.mMeshes[m].verts[v].weight;
+			w = md5.mMeshes[m].verts[v].weight;
 
 			/* Store vertices in group */
-			vertex = eggVertexStore3f(md5.mMeshes[m].weights[i].pos[0], 
-									  md5.mMeshes[m].weights[i].pos[1], 
-									  md5.mMeshes[m].weights[i].pos[2]);
-			
-			/* Generates id translator list */
-			trans.Add(v, vertex);
+			vertex = eggVertexStore3f(md5.mMeshes[m].weights[w].pos[0], 
+									  md5.mMeshes[m].weights[w].pos[1], 
+									  md5.mMeshes[m].weights[w].pos[2]);
 
-			
 			/* Store texels */
 			texcoord = eggTexCoordStore2f(md5.mMeshes[m].verts[v].uv[0],
 										  md5.mMeshes[m].verts[v].uv[1]);
 			
 			/* Generates id translator list */
-			trans2.Add(v, texcoord);
+			vertices.pushBack(vertex);
+			texcoords.pushBack(texcoord);
 		}
-	
-		
+
 		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
 		{
 			/* Start a new polygon */
 			eggBegin(FREYJA_POLYGON);
 			
 			/* Store vertices and texels by true id, using translator lists */
-			eggVertex1i(trans[md5.mMeshes[m].triangles[t].vertex[0]]);
-			eggVertex1i(trans[md5.mMeshes[m].triangles[t].vertex[1]]);
-			eggVertex1i(trans[md5.mMeshes[m].triangles[t].vertex[2]]);
-			eggTexCoord1i(trans2[md5.mMeshes[m].triangles[t].vertex[0]]);
-			eggTexCoord1i(trans2[md5.mMeshes[m].triangles[t].vertex[1]]);
-			eggTexCoord1i(trans2[md5.mMeshes[m].triangles[t].vertex[2]]);
-			
-			eggTexture1i(0); // shader
+			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[0]]);
+			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[1]]);
+			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[2]]);
+			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[0]]);
+			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[1]]);
+			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[2]]);
+
+			eggTexture1i(m); // mMeshes[m].shader
 			
 			eggEnd(); // FREYJA_POLYGON
 		}
@@ -608,6 +569,48 @@ int freyja_model__md5_import(char *filename)
 		eggEnd(); // FREYJA_GROUP
 		eggEnd(); // FREYJA_MESH
 	}
+
+
+	/* Load skeleton */
+	for (m = 0, w = 0; m < md5.mNumMeshes; ++m)
+	{
+		for (; w < md5.mMeshes[m].numweights; ++w)
+		{
+			eggVertexWeightStore(w, 
+								 md5.mMeshes[m].weights[w].weight,
+								 md5.mMeshes[m].weights[w].joint);
+
+			/* Generates id translator list */
+			weights.pushBack(md5.mMeshes[m].weights[w].index);
+		}
+	}
+
+	eggBegin(FREYJA_SKELETON);
+
+	for (j = 0; j < md5.mNumJoints; ++j)
+	{
+		/* Start a new tag */
+		eggBegin(FREYJA_BONE);
+		eggTagFlags1u(0x0);
+		eggTagName(md5.mJoints[j].name);
+		eggTagPos3f(md5.mJoints[j].translate[0],
+					md5.mJoints[j].translate[1],
+					md5.mJoints[j].translate[2]);
+		eggTagRotate3f(md5.mJoints[j].rotate[0],
+						md5.mJoints[j].rotate[1],
+						md5.mJoints[j].rotate[2]);
+
+		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
+		{
+			if (md5.mJoints[j].parent == j)
+				eggTagAddSlave1u(j2);
+		}
+
+		eggEnd(); // FREYJA_TAG
+	}
+
+	eggEnd(); // FREYJA_SKELETON
+
 
 	eggPrintMessage("The Doom3 plugin sez: FINISH ME!!!");
 
