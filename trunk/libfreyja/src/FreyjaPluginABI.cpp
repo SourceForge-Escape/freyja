@@ -2870,7 +2870,7 @@ long freyjaGetMeshVertexFrameIndex(long meshIndex, long element)
 
 long freyjaGetMeshVertexFrameCount(long meshIndex)
 {
-	long polygonCount = freyjaGetMeshVertexFrameCount(meshIndex);
+	long polygonCount = freyjaGetMeshPolygonCount(meshIndex);
 	long i, j, frames, maxFrames = 0, polygonIndex;
 	long vertexIndex, vertexCount;
 
@@ -2887,7 +2887,7 @@ long freyjaGetMeshVertexFrameCount(long meshIndex)
 		for (j = 0; j < vertexCount; ++j)
 		{
 			vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
-			frames = freyjaGetMeshVertexFrameCount(vertexIndex);
+			frames = freyjaGetVertexFrameCount(vertexIndex);
 
 			if (frames > maxFrames)
 				maxFrames = frames;
