@@ -22,11 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "image_ppm.h"
-
 extern "C" {
-
-  //int mtk_image__ppm_check(FILE *f);
   
   int import_image(char *filename, unsigned char **image, 
 		   unsigned int *w, unsigned int *h, 

@@ -114,6 +114,9 @@ egg9:
 	CFLAGS="$(DEBUG_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)"
 
+depend-tools:
+	@-find ./tools -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
+
 depend-plugins:
 	@-find ./plugins -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
 
@@ -123,6 +126,7 @@ depend:
 	@-find ./src -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
 	@-echo "       [done]"
 	$(MAKE) depend-plugins
+	$(MAKE) depend-tools
 
 targets: $(TARGETS)
 
@@ -196,7 +200,7 @@ tga.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-# jpeg.so -- Looks like libjpeg hates dlopen or something like that
+# jpeg.so -- disabled
 plugins: dds.so pcx.so ppm.so png.so tga.so
 
 clean-plugins:
@@ -233,6 +237,13 @@ jpeg.test:
 	OBJS="$(BUILD_TEST_DIR)/image_test.o $(BUILD_TEST_DIR)/image_jpeg.o" \
 	CFLAGS="-Wall -g -O0 -DLIB_JPEG" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
+
+cull.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=cull BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/cull.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja8"
 
 Egg.test:
 	@-mkdir -p $(BUILD_TEST_DIR)

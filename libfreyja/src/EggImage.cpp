@@ -302,48 +302,43 @@ int EggImage::loadPixmap(unsigned char *image,
 								 unsigned int w, unsigned int h,
 								 colormode_t mode)
 {
-  switch (mode)
-  {
-  case INDEXED_8:
-    return loadIndexedPixmap(image, w, h);
-    break;
-  case RGB_24:
-    if (!image || !w || !h || image == _image)
-      return -1;  
+	if (!image || !w || !h || image == _image)
+      return -1;
+	
+	if (_image)
+	{
+		delete [] _image;
+		_image = 0x0;
+	}
 
-    _width = _original_width = w;
-    _height = _original_height = h;
-
-    if (_image)
-      delete [] _image;
-
-    _color_mode = RGB_24;
-
-    _image = new unsigned char[w * h * 3];
-    memcpy(_image, image, w * h * 3);
-
-    return 0;
-    break;
-  case RGBA_32:
-    if (!image || !w || !h || image == _image)
-      return -1;  
-
-    _width = _original_width = w;
-    _height = _original_height = h;
-
-    if (_image)
-      delete [] _image;
-
-    _color_mode = RGBA_32;
-
-    _image = new unsigned char[w * h * 4];
-    memcpy(_image, image, w * h * 4);
-
-    return 0;
-    break;
-  }
-
-  return -1;
+	switch (mode)
+	{
+	case INDEXED_8:
+		return loadIndexedPixmap(image, w, h);
+		break;
+		
+		
+	case RGB_24:
+		_color_mode = RGB_24;
+		_width = _original_width = w;
+		_height = _original_height = h;
+		_image = new unsigned char[w * h * 3];
+		memcpy(_image, image, w * h * 3);
+		return 0;
+		break;
+		
+		
+	case RGBA_32:
+		_color_mode = RGBA_32;
+		_width = _original_width = w;
+		_height = _original_height = h;		
+		_image = new unsigned char[w * h * 4];
+		memcpy(_image, image, w * h * 4);
+		return 0;
+		break;
+	}
+	
+	return -1;
 }
 
 
@@ -498,10 +493,12 @@ int EggImage::loadImage(const char *filename)
 		{
 		case 3:
 			loadPixmap(image, width, height, RGB_24);
+			delete [] image;
 			return 0; /* Success! */
 			break;
 		case 4:
 			loadPixmap(image, width, height, RGBA_32);
+			delete [] image;
 			return 0; /* Success! */
 			break;
 		default:

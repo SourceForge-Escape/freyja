@@ -91,6 +91,17 @@ class EggFileReader
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	unsigned int getFileOffset();
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Returns current offset in open file
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	static bool isDirectory(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -320,6 +331,18 @@ class EggFileReader
 	 *-- History ------------------------------------------
 	 *
 	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	bool setFileOffset(unsigned int offset);
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Seeks in opened file
+	 *        Returns true if succedes
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.25:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 

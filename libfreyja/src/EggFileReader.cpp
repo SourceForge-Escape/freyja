@@ -129,6 +129,12 @@ bool EggFileReader::doesFileExist(const char *filename)
 }
 
 
+unsigned int EggFileReader::getFileOffset()
+{
+	return ftell(mFileHandle);
+}
+
+
 bool EggFileReader::isDirectory(const char *filename)
 {
   struct stat status;
@@ -503,6 +509,13 @@ unsigned int EggFileReader::readInt32U()
 #endif
 	return u;
 }
+
+
+bool EggFileReader::setFileOffset(unsigned int offset)
+{
+	return (fseek(mFileHandle, offset, SEEK_SET) == 0);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Private Accessors
