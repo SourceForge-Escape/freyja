@@ -563,7 +563,10 @@ GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 	gtk_widget_show(toolbar);
 
 	gtk_box_pack_start(GTK_BOX(box), toolbar, 1, 1, 0);
+
+#ifdef FORCE_ICON_TOOLBAR
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+#endif
 
 	return toolbar;
 }

@@ -25,7 +25,7 @@
 #include "FreyjaEvent.h"
 
 
-unsigned int FreyjaEvent::mNextId = 0;
+unsigned long FreyjaEvent::mNextId = 0;
 Vector<FreyjaEvent*> FreyjaEvent::mEventStore;
 
 
@@ -33,11 +33,11 @@ Vector<FreyjaEvent*> FreyjaEvent::mEventStore;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaEvent::FreyjaEvent(Resource *rcSys, char *name)
+FreyjaEvent::FreyjaEvent(Resource *rcSys, const char *name)
 {
 	mResource = rcSys;
 
-	mId = ++mNextId;
+	mId = mNextId++;
 	mName = 0x0;
 	setName(name);
 
@@ -59,7 +59,148 @@ FreyjaEvent::~FreyjaEvent()
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaEvent::setName(char *name)
+bool FreyjaEvent::action(long value)
+{
+	return false;
+}
+
+
+bool FreyjaEvent::action(long *value, unsigned long size)
+{
+	return false;
+}
+
+
+bool FreyjaEvent::action(float value)
+{
+	return false;
+}
+
+
+bool FreyjaEvent::action(float *value, unsigned long size)
+{
+	return false;
+}
+
+
+bool FreyjaEvent::action(char *value)
+{
+	return false;
+}
+
+
+
+
+bool FreyjaEvent::listen(unsigned long event)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action();
+	}
+
+	return false;
+}
+
+
+bool FreyjaEvent::listen(unsigned long event, long value)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value);
+	}
+
+	return false;
+}
+
+
+bool FreyjaEvent::listen(unsigned long event, long *value, unsigned long size)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value, size);
+	}
+
+	return false;
+}
+
+
+bool FreyjaEvent::listen(unsigned long event, float value)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value);
+	}
+
+	return false;
+}
+
+
+bool FreyjaEvent::listen(unsigned long event, float *value, unsigned long size)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value, size);
+	}
+
+	return false;
+}
+
+
+bool FreyjaEvent::listen(unsigned long event, char *value)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value);
+	}
+
+	return false;
+}
+
+
+bool FreyjaEvent::redo()
+{
+	return false;
+}
+
+
+bool FreyjaEvent::undo()
+{
+	return false;
+}
+
+
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
+
+FreyjaEvent *FreyjaEvent::getEventById(unsigned long id)
+{
+	if (id < mEventStore.size())
+	{
+		return mEventStore[id];
+	}
+
+	return 0x0;
+}
+
+
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
+
+void FreyjaEvent::setName(const char *name)
 {
 	unsigned int l;
 
@@ -82,17 +223,9 @@ void FreyjaEvent::setName(char *name)
 	strncpy(mName, name, l);
 	mName[l] = 0;
 	mResource->RegisterInt(mName, mId);
+
+	printf("'%s' <- %lu\n", mName, mId);
 }
-
-
-////////////////////////////////////////////////////////////
-// Private Accessors
-////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////
-// Private Mutators
-////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////

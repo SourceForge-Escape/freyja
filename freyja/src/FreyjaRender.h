@@ -68,7 +68,8 @@ public:
 		RENDER_BBOX_SEL         = 8192,
 		fSkeletalVertexBlending     = 16384,
 		RENDER_POINTS           = 32768,
-		fRenderBonesClearedZBuffer = 65536
+		fRenderBonesClearedZBuffer = 65536,
+		fViewports              = 131072
 	} flags_t;
 
 
@@ -325,6 +326,8 @@ public:
 	static unsigned char mJointRenderType;
 	static int mPatchDisplayList;
 
+	vec4_t mViewports[4];
+
 
 private:    
 
@@ -385,7 +388,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void DrawGrid(int w, int h, int size);
+	void DrawGrid(freyja_plane_t plane, int w, int h, int size);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Renders a grid orthogal to gl context
@@ -397,7 +400,8 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void DrawWindow(int plane);
+	void drawFreeWindow();
+	void drawWindow(freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Renders 3d model/particles/etc editor
