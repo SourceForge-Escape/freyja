@@ -1500,7 +1500,7 @@ void FreyjaRender::renderUVWindow(unsigned int width, unsigned int height)
 
 	for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
 	{
-		if (!mesh.getPolygon(i, 0, face))
+		if (!mesh.getPolygon(i, face))
 			continue;
 		
 		if (face.material != (int)mModel->getCurrentTextureIndex())
