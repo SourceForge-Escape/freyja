@@ -245,6 +245,9 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eImportFile", eImportFile);
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenFileTexture", eOpenFileTexture);
+	r.RegisterInt("eOpenFileModel", eOpenFileModel);
+	r.RegisterInt("ePluginMenu", ePluginMenu);
+
 
 	// dialogs
 	r.RegisterInt("ePreferencesDialog", ePreferencesDialog);
@@ -452,24 +455,21 @@ void mgtk_handle_resource_start()
 
 	/* Build the user interface from lisp, and load user preferences */
 	gFreyjaControl->loadResource();
-	//gFreyjaControl->initOpenGL();
-	//gFreyjaRender->Init(740, 560, true);
 
+	/* Setup material interface */
 	freyja_refresh_material_interface();
+
+	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eTransformMenu, 1);
 	mgtk_option_menu_value_set(eObjectMenu, 0);
-	freyja_set_main_window_title(BUILD_NAME);
-
-	/* Mongoose 2002.01.23, Switch to mesh mode */
-	//freyja_event2i(EVENT_MISC, FREYJA_MODE_MODEL_EDIT);
 	freyja_event2i(EVENT_MISC, FREYJA_MODE_MODEL_EDIT);
+	gFreyjaControl->event(eTransformMesh);
+	gFreyjaControl->event(eMoveObject);
+
+	freyja_set_main_window_title(BUILD_NAME);
 	mgtk_event_gl_refresh();
 
 	freyja_print("Welcome to Freyja %s-%s, %s", VERSION, BUILD_ID, __DATE__);
-
-	/* Mongoose 2004.10.29, 
-	 * Temp test of pattern system */
-	//freyja_event_fileselection_append_pattern("ASE (3ds max)", "ase");
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
 	atexit(freyja_event_shutdown);
@@ -510,6 +510,13 @@ char *mgtk_rc_map(char *filename_or_dirname)
 
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
+
+
+void freyja_append_eventid(char *symbol, int eventid)
+{
+	gResource.RegisterInt(symbol, eventid);
+}
+
 
 void freyja_get_rc_path(char *s, long sz)
 {
