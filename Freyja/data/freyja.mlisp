@@ -77,35 +77,31 @@
 	(handlebox 1
 	(menubar
 		(submenu "File"
-			(menu_item "Info"          EVENT_MISC  CMD_MISC_DISPLAY_INFO)
-
 			(submenu "Model"
 				(menu_item "Erase"   EVENT_MAIN  CMD_MAIN_NEW_MODEL)
 				(menu_item "Open"    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
 				(menu_item "Save As" EVENT_MAIN  CMD_MAIN_SAVE_MODEL))
-
 			(submenu "Material"
 				(menu_item "New"     EVENT_MAIN  -1)
 				(menu_item "Open"    EVENT_MAIN  CMD_MAIN_OPEN_MATERIAL)
 				(menu_item "Save As" EVENT_MAIN  CMD_MAIN_SAVE_MATERIAL))
-
 			(menu_seperator)
-
 			(menu_item "Open Texture"   EVENT_MAIN  CMD_MAIN_OPEN_TEXTURE)
 			(menu_item "Open Pallette"  EVENT_MAIN  CMD_MAIN_OPEN_PALETTE)
-
 			(menu_seperator)
 			(menu_item "Quit"          EVENT_MAIN  CMD_MAIN_SHUTDOWN))
 
 		(submenu "View"
+			(menu_item "Info"			EVENT_MISC  CMD_MISC_DISPLAY_INFO)
+			(menu_seperator)
 			(submenu "Joint"
-				(menu_item "Point"     EVENT_MISC  VIEW_JOINT1)
-				(menu_item "Sphere"    EVENT_MISC  VIEW_JOINT2)
-				(menu_item "Axies" EVENT_MISC  VIEW_JOINT3))
+				(menu_item "Point"		EVENT_MISC  VIEW_JOINT1)
+				(menu_item "Sphere"		EVENT_MISC  VIEW_JOINT2)
+				(menu_item "Axes"		EVENT_MISC  VIEW_JOINT3))
 			(submenu "Bone"
-				(menu_item "Line"     EVENT_MISC  VIEW_BONE1)
-				(menu_item "PolyMesh" EVENT_MISC  VIEW_BONE2))
-			(menu_item "Fullscreen"	EVENT_MAIN	CMD_TOGGLE_FULLSCREEN))
+				(menu_item "Line"		EVENT_MISC  VIEW_BONE1)
+				(menu_item "PolyMesh"	EVENT_MISC  VIEW_BONE2))
+			(menu_item "Fullscreen"		EVENT_MAIN	CMD_TOGGLE_FULLSCREEN))
 
 		(menu_seperator)
 
