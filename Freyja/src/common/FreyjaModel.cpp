@@ -30,7 +30,6 @@
 #include "MaterialManager.h"
 
 #include "FreyjaModel.h"
-#include "FreyjaResource.h"
 #include "freyja_events.h"
 #include "utils.h"
 
