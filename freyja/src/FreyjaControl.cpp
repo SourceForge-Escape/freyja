@@ -164,7 +164,7 @@ void FreyjaControl::resizeDisplay(unsigned int width, unsigned int height)
 
 void FreyjaControl::addRecentFilename(const char *filename)
 {
-	unsigned int l;
+	unsigned int i, l;
 	char *dupe;
 
 	if (!filename || !filename[0])
@@ -173,6 +173,13 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	}
 
 #warning FIXME Add look for dupes and a size limit here
+
+
+	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+	{
+		if (strcmp(filename, mRecentFiles[i]) == 0)
+			return;
+	}
 
 	l = strlen(filename);
 	dupe = new char[l+1];
