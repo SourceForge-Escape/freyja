@@ -1,29 +1,20 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*===========================================================================
+/*================================================================
  * 
- * Project : Freyja, GooseEgg
+ * Project : GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://gooseegg.sourceforge.net
  * Email   : mongoose@users.sourceforge.net
  * Object  : Egg
- * License : GPL, also (C) 2000-2004 Mongoose
+ * License : GPL, also (C) 2000-2002 Mongoose
  * Comments: This is the data model agent of Egg models
  *
  * 
- *-- Test Defines ----------------------------------------------------
+ *-- Test Defines -------------------------------------------
  *           
- * UNIT_TEST_EGG  - Builds module as test code as a console program
+ * TEST_EGG  Builds module as test code as a console program
  *
- *-- History --------------------------------------------------------- 
- *
- * 2004.04.08:
- * Mongoose - All new API using Hel math/physics lib, endian safe
- *            file I/O, and generic methods.
- *
- *            Removed a ton of code.
- *
- *            Renamed texels to texcoords, since they haven't been
- *            texels for several years now.
+ *-- History ------------------------------------------------ 
  *
  * 2004.03.15:
  * Mongoose - Replaced List collection use with Vector
@@ -78,7 +69,7 @@
  * 2000-09-15:
  * Mongoose - API change!  Transforms have 1 new API call
  *            The 3 old methods per mesh, frame, list are gone
- ===========================================================================*/
+ ==============================================================*/
 
 #ifndef GUARD__MONGOOSE_GOOSEEGG_EGG_H
 #define GUARD__MONGOOSE_GOOSEEGG_EGG_H
@@ -86,8 +77,7 @@
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
 
-#include <hel/math.h>
-#include <hel/Matrix.h>
+#include "mtk3d.h"
 
 
 #define EGG_LIB_VERSION        0x32312E38  // '8.12'
@@ -129,8 +119,7 @@
 #define EGG_WGHT_CHUNK_END     0x57474854
 
 
-
-typedef vec3_t bbox_t[2];
+#define COLORED_POLYGON -1
 
 
 typedef struct {
@@ -141,112 +130,107 @@ typedef struct {
 
 
 typedef struct egg_vertex_s {
-	unsigned int id;                  /* Unique identifier */
-	Vector <unsigned int> ref;        /* Ids of polygons referencing vertex */ 
-
 	vec3_t pos;                       /* Position in 3 space (XYZ) */
 	vec3_t norm;                      /* Normal vector */
-	vec3_t uv;                        /* TexCoord coordinate */
+	vec2_t uv;                        /* Texel coordinate */
 
 	Vector<egg_weight_t *> weights;   /* Vector of weights */
+
+	unsigned int id;                  /* Unique identifier */
+	Vector <unsigned int> ref;        /* Ids of polygons referencing vertex */ 
 
 } egg_vertex_t;
 
 
-typedef struct egg_texcoord_s {
-	unsigned int id;                 /* Unique identifier */
-	Vector <unsigned int> ref;       /* Ids of polygons referencing texcoord */
+typedef struct egg_texel_s {
+	unsigned int id;                   /* Unique identifier */
+	Vector <unsigned int> ref;         /* Ids of polygons referencing texel */ 
+	vec2_t st;                         /* Position on texmap */
 
-	vec2_t uv;                       /* Position on texmap */
-
-} egg_texcoord_t;
+} egg_texel_t;
 
 
 typedef struct egg_polygon_s {
 	unsigned int id;                  /* Unique identifier */
-
-	int material;                     /* Material id */
 	Vector <unsigned int> vertex;     /* Vertices composing polygon */
-	Vector <unsigned int> texcoord;      /* TexCoords */
+	Vector <unsigned int> texel;      /* Texels */
+	int shader;                       /* Shader id */
 
-	Vector <egg_vertex_t *> r_vertex; /* Used by renderer */
-	Vector <egg_texcoord_t *> r_texcoord;   /* Used by renderer */
+	Vector <egg_vertex_t *> r_vertex;
+	Vector <egg_texel_t *> r_texel;
 
 } egg_polygon_t;
 
 
 typedef struct egg_group_s {
 	int id;                           /* Unique identifier */
-
 	Vector <unsigned int> vertex;     /* Vertices composing group */
-	Vector3d bboxMin;                 /* Min corner of bounding box */
-	Vector3d bboxMax;                 /* Max corner of bounding box */
-	Vector3d center;                  /* Center / bolt-on binding */
-
-	vec_t scale;                      /* Scaling of group */
+	vec3_t bbox_min;                  /* Min corner of bounding box */
+	vec3_t bbox_max;                  /* Max corner of bounding box */
+	vec3_t center;                    /* Center of rotation | bolt-on binding */
+	float scale;                      /* Scaling of group */
 
 } egg_group_t;
 
 
-typedef struct egg_vertexframe_s {
-
-	unsigned int mesh;                /* Mesh using this frame */
-	Vector<vec3_t> frame;             /* Vertex animation frames */
-
-} egg_vertexframe_t;
-
-
+// Mongoose 2002.03.02, add map for vertex translation from world to local ids
 typedef struct egg_mesh_s {
 	int id;                             /* Unique identifier */
 	Vector <unsigned int> group;        /* Groups/Frames of this mesh */
 	Vector <unsigned int> polygon;      /* Polygons of this mesh */
 
-	unsigned int currentFrame;          /* Vertex morph frames */
-	Vector <egg_vertexframe_t *> frames;
-	Vector <egg_polygon_t *> r_polygon; /* Renderer use */
+	Vector <egg_polygon_t *> r_polygon;
 
 } egg_mesh_t;
 
 
+// egg_tag mixed with egg_bone
 typedef struct egg_tag_s {
-	int id;                          /* Unique identifier */
-	unsigned int parent;
+	int id;                           /* Unique identifier */
 	char name[64];
-
-	Vector <unsigned int> slave;     /* Slave tags */
-	Vector <unsigned int> mesh;      /* List of meshes bound to this */
-	unsigned char flag;              /* Rendering flag, special use */
-
-	Vector3d position;               /* Pivot point, center of rotation */
-	Vector3d rotation;               /* Rotation on XYZ axies in degrees  */
-
-	Matrix matrix;                   /* Transform mesh/slaves by this matrix */
+	Vector <unsigned int> slave;      /* Slave tags */
+	Vector <unsigned int> mesh;       /* List of meshes bound to this */
+	unsigned char flag;               /* Rendering flag, special use */
+	vec3_t center;                    /* Pivot point, center of rotation */
+	matrix_t transform;               /* Transform mesh/slaves by this matrix */
+	float rot[3];
 } egg_tag_t;
 
 
+// egg_meshtree_anim_frame
 typedef struct egg_boneframe_s {
 	int id;                           /* Unique identifier */
-
 	Vector<unsigned int> tag;         /* Bone Tags in this list */
-	Vector3d center;                  /* Pivot point, center of rotation */
-
+	vec3_t center;                    /* Pivot point, center of rotation */
 } egg_boneframe_t;
 
 
+// egg_meshtree_anim
 typedef struct egg_animation_s {
-	int id;                         /* Unique identifier */
-
-	Vector<unsigned int> frame;     /* boneFrames in this aniamtion */
+	int id;                             /* Unique identifier */
+	Vector<unsigned int> frame;         /* BoneFrames in this aniamtion */
 
 } egg_animation_t;
 
+
+class EggPolygon
+{
+public:
+	unsigned int id;                  /* Unique identifier */
+	Vector <unsigned int> vertex;     /* Vertices composing polygon */
+	Vector <unsigned int> texel;      /* Texels */
+	int shader;                       /* Shader id */
+
+	Vector <egg_vertex_t *> r_vertex;
+	Vector <egg_texel_t *> r_texel;
+};
 
 
 #ifndef __print_unsigned_int
 void __print_unsigned_int(unsigned int u);
 #endif
 void __print_egg_vertex_t(egg_vertex_t *v);
-void __print_egg_texcoord_t(egg_texcoord_t *t);
+void __print_egg_texel_t(egg_texel_t *t);
 void __print_egg_polygon_t(egg_polygon_t *p);
 /*!----------------------------------------
  * Created  : 2001-05-15, Mongoose
@@ -261,35 +245,21 @@ class Egg
 {
 public:
 
-	typedef enum {
-		VERTEX = 1,
-		TEXCOORD,
-		POLYGON,
-		GROUP,
-		MESH,
-		BONETAG,
-		BONEFRAME,
-		ANIMATION
-		
-	} egg_type_t;
-
-
-	typedef enum {
+	typedef enum egg_transform	{
 		
 		SCALE               = 0, 
 		ROTATE              = 1, 
 		TRANSLATE           = 2, 
 		ROTATE_ABOUT_CENTER = 3,
 		SCALE_ABOUT_CENTER  = 4
-	} egg_transform_t;
+	};
 	
-
-	typedef enum {
-		UNION = 1,
-        INTERSECTION,
-		DIFFERENCE
+	typedef enum egg_plane { 
 		
-	} egg_csg_t;
+		PLANE_XY = 0, 
+		PLANE_YZ = 1, 
+		PLANE_XZ = 2
+	};
 
 
 	////////////////////////////////////////////////////////////
@@ -323,7 +293,56 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	int checkFile(const char *filename);
+	egg_group_t *getNearestGroup(unit_t x, unit_t y, egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns nearest group to x, y in given plane
+	 *        ( XY, YZ, XZ )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.11.29: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	egg_tag_t *getNearestTag(unit_t x, unit_t y, egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns nearest tag to x, y in given plane
+	 *        ( XY, YZ, XZ )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.11.29: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	egg_vertex_t *getNearestVertex(egg_group_t *group, 
+								   unit_t x, unit_t y, egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns nearest vertex to x, y in given plane
+	 *        ( XY, YZ, XZ )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.11.29: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void print();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : if debugging dumps partial ASCII representation 
+	 *        of model to stdout
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.05.15:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	static int checkFile(char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Checks to see if it's valid model file
@@ -335,153 +354,12 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getCount(egg_type_t type);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest TYPE object id to given point
-	 *
-	 *-- History ------------------------------------------
-	 * 
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - API update to use unsigned count
-	 *
-	 * 1999.08.01:
-	 * Mongoose - Created ( As separate methods per type )
-	 ------------------------------------------------------*/
-
-	unsigned int getNearest(egg_type_t type, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest TYPE object id to given point
-	 *
-	 *-- History ------------------------------------------
-	 * 
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int saveFileASCII(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int saveFile(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Saves model to disk file
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.08.01:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void erase();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post :  All data is reset and cleared
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.08.01:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void combine(egg_type_t type, unsigned int a, unsigned int b);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Combines TYPE object A and B in model
-	 *
-	 *        Destroys A and B then replaces them with new 
-	 *        object with index A where: A = A + B
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int csg(egg_type_t type, egg_csg_t operation,
-					 unsigned int a, unsigned int b);
-	/*------------------------------------------------------
-	 * Pre  : Don't count on more than simple vertex culling now
-	 *
-	 * Post : OPERATION on TYPE object A and B in model
-	 *
-	 *        A and B are perserved, creates new object C 
-	 *        where: C = A OPERATION B
-	 *
-	 *        UNION        : C = A u B
-	 *                       if A eq B then copy of A is made
-	 *
-	 *        INTERSECTION : C = A n B
-	 *                       if A eq B then copy of A is made
-	 *
-	 *        DIFFERENCE   : C = A - B
-	 *                       B culls A, order matters
-	 *                       if A eq B then undefined behavior
-	 *
-	 *        Returns C's index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - Created with new generic API based on mtk
-	 ------------------------------------------------------*/
-
-	void remove(egg_type_t type, unsigned int index);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Remove TYPE object[index] from model
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void transform(egg_type_t type, egg_transform_t transform, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setDebugLevel(unsigned int level);
+	void setDebugLevel(unsigned int n);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Debugging is set 0 ( Off ) to 5 ( Highest )
@@ -492,6 +370,28 @@ public:
 	 * Mongoose - Now supports multiple levels 
 	 *
 	 * 2001.01.31: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void clear();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post :  All data is reset and cleared
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.08.01:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	int saveFile(char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Saves model to disk file
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.08.01:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -508,10 +408,10 @@ public:
 
 	// Mongoose 2002.07.05, Reorder from here down later... to be broken up
 
-	egg_texcoord_t *getTexCoord(unsigned int id);
+	unsigned int getTexelCount();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Return texcoord by id
+	 * Post : Return number of texels
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -519,10 +419,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int addTexCoord(vec_t u, vec_t v);
+	egg_texel_t *getTexel(unsigned int id);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Add a new texcoord, return id
+	 * Post : Return texel by id
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -530,14 +430,71 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void delTexCoord(egg_texcoord_t *t);
+	unsigned int addTexel(float s, float t);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Delete texcoord by data value
+	 * Post : Add a new texel, return id
 	 *
 	 *-- History ------------------------------------------
 	 *
 	 * 2000.11.30:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void delTexel(unsigned int id);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Delete texel by id
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.11.30:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void delTexel(egg_texel_t *t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Delete texel by data value
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.11.30:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void combineTexels(unsigned int A, unsigned int B);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Delete texel B and replace references to B with A
+	 *        ( The texels are combined into one )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.02.26:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	unsigned int getVertexCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Return number of vertices
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.11.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void combineVertices(unsigned int A, unsigned int B);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Delete vertex B and replace references to B with A
+	 *        ( The vertices are combined into one )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.02.26:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -550,13 +507,13 @@ public:
 	 * Post : Return vertex with id
 	 -----------------------------------------*/
 
-	egg_vertex_t *addVertex(vec_t x, vec_t y, vec_t z,
-							vec_t nx, vec_t ny, vec_t nz,
-							vec_t u, vec_t v);
+	egg_vertex_t *addVertex(unit_t x, unit_t y, unit_t z,
+							unit_t nx, unit_t ny, unit_t nz,
+							unit_t u, unit_t v);
 	/*------------------------------------------------------
 	 * Pre  : x, y, z is position in 3 space 
 	 *        nx, ny, nz is normal vector
-	 *        u, v is the texcoord coord
+	 *        u, v is the texel coord
 	 *
 	 * Post : Generates a new vertex and returns a 
 	 *        pointer to it
@@ -567,13 +524,22 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	egg_vertex_t *addVertex(vec_t x, vec_t y, vec_t z);
+	egg_vertex_t *addVertex(unit_t x, unit_t y, unit_t z);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
 	 * 
 	 * Pre  :
 	 * Post : Add a new vertex, return id
+	 -----------------------------------------*/
+
+	void delVertex(unsigned int id);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  :
+	 * Post : Delete vertex by id
 	 -----------------------------------------*/
 
 	void delVertex(egg_vertex_t *v);
@@ -585,6 +551,17 @@ public:
 	 * Post : Delete vertex by data
 	 -----------------------------------------*/
 
+
+	unsigned int getPolygonCount();
+	/*-----------------------------------------
+	 * Created  : 2000-10-25, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : 
+	 * Post : Return number of polygons
+	 -----------------------------------------*/
+
+
 	egg_polygon_t *getPolygon(unsigned int);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
@@ -595,18 +572,18 @@ public:
 	 -----------------------------------------*/
 
 	unsigned int addPolygon(Vector<unsigned int> &vertex, 
-							Vector<unsigned int> &texcoord, 
+							Vector<unsigned int> &texel, 
 							int shader);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
 	 * 
-	 * Pre  : vertex and texcoord lists are valid
+	 * Pre  : vertex and texel lists are valid
 	 *        shader/texture id is valid
 	 * Post : Add a new polygon, return id
 	 -----------------------------------------*/
 
-	unsigned int selectPolygon(Vector<unsigned int> &list);
+	unsigned int selectPolygon(Vector<unsigned int> *list);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
@@ -616,7 +593,7 @@ public:
 	 *        vertex list
 	 -----------------------------------------*/
 
-	void delPolygon(Vector<unsigned int> &list);
+	void delPolygon(Vector<unsigned int> *list);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
@@ -646,6 +623,15 @@ public:
 
 
 	/// GROUPS ////////////////////////////////////
+
+	unsigned int getGroupCount();
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : 
+	 * Post : Return number of vertex groupings
+	 -----------------------------------------*/
 
 	egg_group_t *getGroup(unsigned int id);
 	/*-----------------------------------------
@@ -677,7 +663,80 @@ public:
 	void delGroup(unsigned int group);
 	void delGroup(egg_group_t *group);
 
+	void copyGroup(unsigned int group);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : This buffers a copy of this
+	 *            group internally in Egg
+	 -----------------------------------------*/
+
+	void pasteGroup(unsigned int group);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : ( paste into another group )
+	 *            This takes the group_buffer
+	 *            internally in Egg and merges
+	 *            it with the linked group
+	 *            with id 'group' 
+	 -----------------------------------------*/
+
+	void cutGroup(unsigned int group);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : This buffers a copy of this
+	 *            group internally in Egg,
+	 *            and unlinks it from Egg list
+	 -----------------------------------------*/
+
+	void GroupTransform(unsigned int group, enum egg_transform type, 
+						unit_t x, unit_t y, unit_t z);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : Performs matrix transform 
+	 *            on group
+	 *
+	 *            Also See Transform()
+	 -----------------------------------------*/
+
+	void GroupMirror(unsigned int group, bool x, bool y, bool z);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : Mirror this group on x, y,
+	 *            and/or z axes
+	 -----------------------------------------*/
+
+	egg_group_t *GroupUnion(unsigned int groupA, unsigned int groupB);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : Return a new group that is
+	 *            the union of A and B
+	 -----------------------------------------*/
+
+	egg_group_t *GroupIntersection(unsigned int groupA, unsigned int groupB);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : group is valid group id
+	 * Comments : Return a new group that is
+	 *            the intersection of A and B
+	 -----------------------------------------*/
+
+
 	/// MESHES ////////////////////////////////////
+
+	unsigned int getMeshCount();
+	/*-----------------------------------------
+	 * Created  : 2000-10-25, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : 
+	 * Post : Return number of meshes
+	 -----------------------------------------*/
 
 	egg_mesh_t *newMesh();
 	/*-----------------------------------------
@@ -725,15 +784,127 @@ public:
 	 * Post : Returns mesh with id from model
 	 -----------------------------------------*/
 
+	int MeshSave(egg_mesh_t *mesh, FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid mesh chunk
+	 * Post : Saves mesh chunk to disk file
+	 -----------------------------------------*/
 
+	egg_mesh_t *MeshLoad(FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid mesh chunk
+	 * Post : Loads mesh chunk from disk file 
+	 -----------------------------------------*/
     
+	void MeshMirror(egg_mesh_t *mesh);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh is a valid mesh
+	 * Post : Mirrors the mesh over the y axis
+	 -----------------------------------------*/
 
+	void MeshGenerateDuplicateFrame(int frame_id);
+	/*-----------------------------------------
+	 * Created  : 2000-10-17, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : frame_id is a vliad frame id
+	 *        
+	 * Post : Makes a new vertex frame for all
+	 *        meshs, using it's frame[frame_id]
+	 *        to a copy from
+	 -----------------------------------------*/
 
+	void MeshGenerateDuplicateFrame(egg_mesh_t *mesh, int frame_id);
+	/*-----------------------------------------
+	 * Created  : 2000-10-17, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh is a valid mesh
+	 *        frame_id is a vliad frame id
+	 * Post : Makes a new vertex frame for this
+	 *        mesh, it's a copy of frame_id
+	 -----------------------------------------*/
+
+	egg_mesh_t *MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *list);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh is a valid mesh
+	 *        list is a valid vertex list of mesh
+	 * Post : Returns newly allocated mesh
+	 *        that is a copy of mesh 
+	 *        determined by the list
+	 -----------------------------------------*/
+
+	egg_mesh_t *MeshMerge(egg_mesh_t *meshA, Vector<egg_vertex_t *> *list, 
+						  egg_mesh_t *meshB);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : meshA is a valid mesh
+	 *        list is a valid vertex list of meshA
+	 *        meshB is a valid mesh
+	 * Post : Makes one mesh of of two, by
+	 *        merging vertices in list with B
+	 *        and removing from A 
+	 *
+	 *        Passing all vertices makes a 
+	 *        full merge
+	 -----------------------------------------*/
+
+	egg_mesh_t *MeshSplit(egg_mesh_t *mesh, Vector<egg_vertex_t *> *list);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh is a valid mesh
+	 *        list is a valid vertex list of mesh
+	 * Post : Removes the vertices in list
+	 *        from mesh, then generates a new
+	 *        mesh ( splits one mesh into two )
+	 *        The newly made mesh is returned
+	 -----------------------------------------*/    
 
 
 	/// TAGS //////////////////////////////////////
 
+	unsigned int getTagCount();
+	/*-----------------------------------------
+	 * Created  : 2000-10-25, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : 
+	 * Post : Return number of bone tags
+	 -----------------------------------------*/
 
+	int saveTag(egg_tag_t *bone, FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid tag chunk
+	 * Post : Saves tag chunk to disk file
+	 -----------------------------------------*/
+
+	egg_tag_t *loadTag(FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid tag chunk
+	 * Post : Loads tag chunk from disk file
+	 -----------------------------------------*/
 
 	void delTag(unsigned int id);
 	/*-----------------------------------------
@@ -771,7 +942,7 @@ public:
 	 * Post : Connects slave to master
 	 -----------------------------------------*/
  
-	void disconnectTag(unsigned int master, unsigned int slave);
+	void TagDisconnect(unsigned int master, unsigned int slave);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -780,7 +951,7 @@ public:
 	 * Post : Disconnects slave from master
 	 -----------------------------------------*/
 
-	egg_tag_t *addTag(vec_t x, vec_t y, vec_t z, char flag);
+	egg_tag_t *addTag(unit_t x, unit_t y, unit_t z, char flag);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -802,7 +973,7 @@ public:
 	 * Post : tag is added to the bone list
 	 -----------------------------------------*/
   
-	void rotateTagAboutOrigin(unsigned int tag, vec_t rx, vec_t ry, vec_t rz);
+	void TagRotateAbout(unsigned int tag, unit_t rx, unit_t ry, unit_t rz);
 	/*--------------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -816,8 +987,9 @@ public:
 	 *        to this bone and slave bones
 	 --------------------------------------------*/
 
-	void rotateTagAboutPoint(unsigned int bone, vec3_t p,
-							 vec_t rx, vec_t ry, vec_t rz);
+
+	void TagRotateAboutPoint(unsigned int bone, vec3_t p,
+							 unit_t rx, unit_t ry, unit_t rz);
 	/*--------------------------------------------
 	 * Created  : ????-??-??, Mongoose
 	 * Modified : 
@@ -832,7 +1004,7 @@ public:
 	 *        to this bone and slave bones
 	 --------------------------------------------*/
 
-	void rotateTag(int bone, int frame, vec_t rx, vec_t ry, vec_t rz);
+	void TagRotate(int bone, int frame, unit_t rx, unit_t ry, unit_t rz);
 	/*-----------------------------------------
 	 * Created  : ????-??-??, Mongoose
 	 * Modified : 
@@ -843,7 +1015,7 @@ public:
 	 * Post : Rotates bone by rx,ry,rz in frame
 	 -----------------------------------------*/
 
-	void addTagMesh(egg_tag_t *bone, unsigned int mesh);
+	void TagAddMesh(egg_tag_t *bone, unsigned int mesh);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -853,7 +1025,7 @@ public:
 	 * Post : mesh is added to the bone's mesh list
 	 -----------------------------------------*/
 
-	void delTagMesh(egg_tag_t *bone, unsigned int mesh);
+	void TagDelMesh(egg_tag_t *bone, unsigned int mesh);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -866,9 +1038,37 @@ public:
 
 	/// BoneFrame ///////////////////
 
-	void addBoneFrame(egg_boneframe_t *boneframe);
 
-	unsigned int addBoneFrame(vec_t x, vec_t y, vec_t z);
+	unsigned int getBoneFrameCount();
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : 
+	 * Post : Returns number of bone frames
+	 -----------------------------------------*/
+
+	void BoneFrameAdd(egg_boneframe_t *boneframe);
+
+	int BoneFrameSave(egg_boneframe_t *frame, FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid frame chunk
+	 * Post : Saves frame chunk to disk file
+	 -----------------------------------------*/
+
+	egg_boneframe_t *BoneFrameLoad(FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid frame chunk
+	 * Post : Loads frame chunk to disk file
+	 -----------------------------------------*/
+
+	unsigned int BoneFrameAdd(unit_t x, unit_t y, unit_t z);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -878,7 +1078,7 @@ public:
 	 *        frame
 	 -----------------------------------------*/
 
-	egg_boneframe_t *getBoneFrame(unsigned int frame);
+	egg_boneframe_t *BoneFrame(unsigned int frame);
 	/*-----------------------------------------
 	 * Created  : Mongoose, ??
 	 * Modified : 
@@ -890,51 +1090,119 @@ public:
 
 	// Animations ///////////////////
 
-	void addAnimation(egg_animation_t *a);
-	/*-----------------------------------------
-	 * Created  : Mongoose, ??
+	unsigned int getAnimationCount();
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
-	 *
+	 * 
 	 * Pre  : 
-	 * Post : Creates new animframe
+	 * Post : Returns number of bone animframes
 	 -----------------------------------------*/
+
+	void addAnimation(egg_animation_t *a);
 
 	egg_animation_t *getAnimation(unsigned int frame);
-	/*-----------------------------------------
-	 * Created  : Mongoose, ??
+
+	int AnimationSave(egg_animation_t *frame, FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
-	 *
-	 * Pre  : frame is valid animframe id
-	 * Post : Returns boneframe
+	 * 
+	 * Pre  : f is set to start of valid frame chunk
+	 * Post : Saves aframe chunk to disk file
 	 -----------------------------------------*/
 
+	egg_animation_t *AnimationLoad(FILE *f);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid frame chunk
+	 * Post : Loads aframe chunk from disk file
+	 -----------------------------------------*/
 
+	////////////////////////////////////////////////
+	// Transforms
+	////////////////////////////////////////////////
 
+	void Transform(egg_tag_t *tag, enum egg_transform type,
+				   unit_t x, unit_t y, unit_t z);
+	/*--------------------------------------------
+	 * Created  : 2000-09-15 by Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : tag exists
+	 *        Var type E { ROTATE, SCALE, TRANSLATE }
+	 *        Vars x, y, z are valid for type
+	 *
+	 * Post : Transform 'type' is done to tag
+	 --------------------------------------------*/
+
+	void Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
+				   unit_t x, unit_t y, unit_t z);
+	/*--------------------------------------------
+	 * Created  : 2000-09-15 by Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : list exists
+	 *        Var type E { ROTATE, SCALE, TRANSLATE }
+	 *        Vars x, y, z are valid for type
+	 *
+	 * Post : Transform 'type' is done to list
+	 --------------------------------------------*/
+
+	void Transform(egg_group_t *frame, enum egg_transform type, 
+				   unit_t x, unit_t y, unit_t z);
+	/*--------------------------------------------
+	 * Created  : 2000-09-15 by Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : frame exists
+	 *        Var type E { ROTATE, SCALE, TRANSLATE }
+	 *        Vars x, y, z are valid for type
+	 *
+	 * Post : Transform 'type' is done to frame
+	 --------------------------------------------*/
+
+	void Transform(egg_mesh_t *mesh, enum egg_transform type, 
+				   unit_t x, unit_t y, unit_t z);
+	/*--------------------------------------------
+	 * Created  : 2000-09-15 by Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh exists
+	 *        Var type E { ROTATE, SCALE, TRANSLATE }
+	 *        Vars x, y, z are valid for type
+	 *
+	 * Post : Transform 'type' is done to mesh
+	 --------------------------------------------*/
+
+	void Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z);
+	/*--------------------------------------------
+	 * Created  : 2000-07-31 by Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : Var type E { ROTATE, SCALE, TRANSLATE }
+	 *        Vars x, y, z are valid for type
+	 *
+	 * Post : Transform 'type' is done to entire scene
+	 --------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public, but should be protected Mutators  ;)
 	////////////////////////////////////////////////////////////
 
-	Vector <egg_texcoord_t *> *getTexCoordList();
+	Vector <egg_texel_t *> *TexelList();
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
 	 * 
 	 * Pre  :
-	 * Post : Return texcoord list
+	 * Post : Return texel list
 	 -----------------------------------------*/
 
-	Vector <egg_vertex_t *> *getVertexList();
-	/*-----------------------------------------
-	 * Created  : 2000-11-30, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  :
-	 * Post : Return vertex list
-	 -----------------------------------------*/
-
-	Vector<egg_polygon_t *> *getPolygonList();
+	Vector <egg_vertex_t *> *VertexList();
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
@@ -943,7 +1211,7 @@ public:
 	 * Post : Return vertex list
 	 -----------------------------------------*/
 
-	Vector<egg_group_t *> *getGroupList();
+	Vector<egg_polygon_t *> *PolygonList();
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
@@ -952,7 +1220,16 @@ public:
 	 * Post : Return vertex list
 	 -----------------------------------------*/
 
-	Vector<egg_mesh_t *> *getMeshList();
+	Vector<egg_group_t *> *GroupList();
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  :
+	 * Post : Return vertex list
+	 -----------------------------------------*/
+
+	Vector<egg_mesh_t *> *MeshList();
 	/*-----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -961,7 +1238,7 @@ public:
 	 * Post : Return mesh list
 	 -----------------------------------------*/
 
-	Vector<egg_tag_t *> *getTagList();
+	Vector<egg_tag_t *> *TagList();
 	/*-----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -970,7 +1247,7 @@ public:
 	 * Post : Return bone list
 	 -----------------------------------------*/
 
-	Vector<egg_boneframe_t *> *getBoneFrameList();
+	Vector<egg_boneframe_t *> *BoneFrameList();
 	/*-----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -984,48 +1261,11 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	int saveAnimation(egg_animation_t *frame, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Saves aframe chunk to disk file
-	 -----------------------------------------*/
-
-	int saveBoneFrame(egg_boneframe_t *frame, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Saves frame chunk to disk file
-	 -----------------------------------------*/
-
-	int saveMesh(egg_mesh_t *mesh, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid mesh chunk
-	 * Post : Saves mesh chunk to disk file
-	 -----------------------------------------*/
-
-	int saveTag(egg_tag_t *bone, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid tag chunk
-	 * Post : Saves tag chunk to disk file
-	 -----------------------------------------*/
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	bool isMatchForPolygon(Vector<unsigned int> &list, 
-						   egg_polygon_t *polygon);
+	bool PolygonMatch(Vector<unsigned int> *list, egg_polygon_t *polygon);
 	/*-----------------------------------------
 	 * Created  : 2001-02-03, Mongoose
 	 * Modified : 
@@ -1036,7 +1276,7 @@ private:
 	 *        matches the one used by the polygon
 	 -----------------------------------------*/
 
-	bool isVertexInPolygon(unsigned int vertex, egg_polygon_t *polygon);
+	bool VertexInPolygon(unsigned int vertex, egg_polygon_t *polygon);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -1047,40 +1287,27 @@ private:
 	 *        the polygon
 	 -----------------------------------------*/
 
-	egg_animation_t *loadAnimation(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Loads aframe chunk from disk file
+	void resizeBoundingBox(egg_group_t *grp, vec3_t p);
+	/*-----------------------------------------
+	 * Created  : 2000-10-14, Mongoose
+	 * Modified : 2001-01-31, Mongoose
+	 *            + Eggv8 port
+	 *
+	 * Pre  : grp and point are valid
+	 * Post : Resizes the bounding box of
+	 *        group, given a newly added point
+	 *        as the only changed vertex
 	 -----------------------------------------*/
 
-	egg_boneframe_t *loadBoneFrame(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Loads frame chunk to disk file
-	 -----------------------------------------*/
-
-	egg_mesh_t *loadMesh(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid mesh chunk
-	 * Post : Loads mesh chunk from disk file 
-	 -----------------------------------------*/
-
-	egg_tag_t *loadTag(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid tag chunk
-	 * Post : Loads tag chunk from disk file
+	void resizeBoundingBox(egg_group_t *grp);
+	/*-----------------------------------------
+	 * Created  : 2000-10-14, Mongoose
+	 * Modified : 2001-01-31, Mongoose
+	 *            + Eggv8 port
+	 *
+	 * Pre  : grp is valid
+	 * Post : Resizes the bounding box of
+	 *        group, doing a full reclaculation
 	 -----------------------------------------*/
 
 	void printDebug(unsigned int level, char *s, ...);
@@ -1111,32 +1338,9 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void resizeBoundingBox(egg_group_t *grp, vec3_t p);
-	/*-----------------------------------------
-	 * Created  : 2000-10-14, Mongoose
-	 * Modified : 2001-01-31, Mongoose
-	 *            + Eggv8 port
-	 *
-	 * Pre  : grp and point are valid
-	 * Post : Resizes the bounding box of
-	 *        group, given a newly added point
-	 *        as the only changed vertex
-	 -----------------------------------------*/
-
-	void resizeBoundingBox(egg_group_t *grp);
-	/*-----------------------------------------
-	 * Created  : 2000-10-14, Mongoose
-	 * Modified : 2001-01-31, Mongoose
-	 *            + Eggv8 port
-	 *
-	 * Pre  : grp is valid
-	 * Post : Resizes the bounding box of
-	 *        group, doing a full reclaculation
-	 -----------------------------------------*/
-
 	Vector<egg_vertex_t *> mVertices;        /* Vertex list */
 
-	Vector<egg_texcoord_t *> mTexCoords;     /* TexCoord list */
+	Vector<egg_texel_t *> mTexels;           /* Texel list */
 	
 	Vector<egg_polygon_t *> mPolygons;       /* Polygon list */
 	

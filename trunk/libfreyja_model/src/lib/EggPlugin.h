@@ -46,12 +46,10 @@
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
 
-#include <hel/Quaternion.h>
-
 #include "Egg.h"
 
 
-#define GEGG_PLUGIN_VERSION  "0.0.4"
+#define GEGG_PLUGIN_VERSION  "0.0.3"
 #define FREYJA_LIST_RESET    -2
 #define FREYJA_LIST_NEXT     -1
 #define FREYJA_LIST_CURRENT  -3
@@ -984,15 +982,6 @@ public:
 	 ------------------------------------------------------*/
 
 	unsigned int eggTagName(char *name);
-	/*------------------------------------------------------
-	 * Pre  : eggBegin(FREYJA_TAG);
-	 * Post : Current tag's name is set
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.10.27: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	unsigned int eggTagPos(float x, float y, float z);
 	/*------------------------------------------------------
@@ -1052,10 +1041,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int eggTagRotate(Quaternion &q);
+	unsigned int eggTagRotate(float x, float y, float z);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_TAG);
-	 * Post : Sets tag rotation with Quaternion
+	 * Post : Sets tag rotation with eular angles
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -1120,9 +1109,16 @@ private:
 
 	Egg *mEgg;                          /* Pointer to the modeler backend  */
 
+	Vector<char *> mModules;            /* Names of plugin modules managed by 
+										 * EggPlugin class */
+
 	Vector<unsigned int> mVertexList;   /* Current polygon's vertex list */
 
 	Vector<unsigned int> mTexelList;    /* Current polygon's texel list */
+
+	Vector<EggTextureData *> mTextures; /* Texture data list */
+
+	Vector<char *> mTextureFiles;       /* Texture filename list */
 
 	Stack<egg_plugin_t> mStack;         /* Object stack to keep up with 
 										 * accumulation modes and etc */
@@ -1136,14 +1132,6 @@ private:
 	egg_boneframe_t *mBoneFrame;        /* MeshTree animation frame */
 
 	egg_animation_t *mAnimation;        /* MeshTree animation group */
-
-
-	Vector<char *> mModules;            /* Names of plugin modules managed by 
-										 * EggPlugin class */
-
-	Vector<EggTextureData *> mTextures; /* Texture data list */
-
-	Vector<char *> mTextureFiles;       /* Texture filename list */
 
 	unsigned int mFlags;                /* Plugins' option flags */
 
