@@ -545,8 +545,6 @@ int freyja_model__md5_check(char *filename)
 
 int freyja_model__md5_import(char *filename)
 {
-	Map<unsigned int, unsigned int> trans;
-	Map<unsigned int, unsigned int> trans2;
 	Md5 md5;
 	unsigned int vertex, texcoord;
 	int m, v, i, t;
@@ -557,6 +555,9 @@ int freyja_model__md5_import(char *filename)
 
 	for (m = 0; m < md5.mNumMeshes; ++m)
 	{
+		Map<unsigned int, unsigned int> trans;
+		Map<unsigned int, unsigned int> trans2;
+
 		/* Start a new mesh */
 		eggBegin(FREYJA_MESH);
 	
