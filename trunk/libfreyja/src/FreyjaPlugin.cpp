@@ -1256,7 +1256,7 @@ void FreyjaPlugin::freyjaBegin(freyja_object_t type)
 
 	case FREYJA_MODEL:
 		mStack.push(FREYJA_MODEL);
-		mModel = new FreyjaModel();
+		mModel = new Freyja3dModel();
 		mScene->models.pushBack(mModel);
 		mModel->id = mScene->models.end() - 1;
 		mIndexModel = mModel->id;

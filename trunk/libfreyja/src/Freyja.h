@@ -181,7 +181,7 @@ public:
 };
 
 
-class FreyjaModel
+class Freyja3dModel
 {
 public:
 
@@ -409,7 +409,7 @@ public:
 
 	SceneGraph mModelGraph;
 
-	Vector<FreyjaModel *> models;         /* Model container */
+	Vector<Freyja3dModel *> models;         /* Model container */
 
 	Vector<FreyjaMaterial *> materials;   /* Material container */
 

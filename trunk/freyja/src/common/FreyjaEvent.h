@@ -1,13 +1,13 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
- * Project : MSTL
+ * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.westga.edu/~stu7440/
  * Email   : stu7440@westga.edu
- * Object  : String
- * License : No use w/o permission (C) 2003 Mongoose
- * Comments: 
+ * Object  : FreyjaEvent
+ * License : No use w/o permission (C) 2004 Mongoose
+ * Comments: This is the plugin event class
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -15,26 +15,24 @@
  * 
  *-- Test Defines -----------------------------------------------
  *           
- * UNIT_TEST_STRING - Builds String class as a console unit test 
+ * UNIT_TEST_FREYJAEVENT - Builds FreyjaEvent class as a console unit test 
  *
  *-- History ------------------------------------------------ 
  *
- * 2003.07.05:
+ * 2004.08.02:
  * Mongoose - Created
- ================================================================*/
+ ==========================================================================*/
 
 
-#ifndef GUARD__MSTL_MONGOOSE_STRING_H_
-#define GUARD__MSTL_MONGOOSE_STRING_H_
-
-#include <string.h>
+#ifndef GUARD__FREYJA_MONGOOSE_FREYJAEVENT_H_
+#define GUARD__FREYJA_MONGOOSE_FREYJAEVENT_H_
 
 
-//#ifndef strnlen
-//#   define strnlen(s, maxlen) char *s__s; long s__maxlen; for (s__s = s, s__maxlen = maxlen; s__s && s__maxlen;  ++s__s, --s__maxlen) ; (!s__s) ? 0 : (s__maxlen > 0) ? 1 : -1
-//#endif
+#include <mstl/Vector.h>
+#include "Resource.h"
 
-class String
+
+class FreyjaEvent
 {
  public:
 
@@ -42,35 +40,25 @@ class String
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	String()
-	{
-		mString = 0x0;
-		mLength = 0;
-	}
+	FreyjaEvent(Resource *rcSys, char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of String
+	 * Post : Constructs an object of FreyjaEvent
 	 *
 	 *-- History ------------------------------------------
 	 *
-	 * 2003.07.05: 
+	 * 2004.08.02: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~String()
-	{
-		if (mString)
-		{
-			delete [] mString;
-		}
-	}
+	virtual ~FreyjaEvent();
 	/*------------------------------------------------------
-	 * Pre  : String object is allocated
-	 * Post : Deconstructs an object of String
+	 * Pre  : FreyjaEvent object is allocated
+	 * Post : Deconstructs an object of FreyjaEvent
 	 *
 	 *-- History ------------------------------------------
 	 *
-	 * 2003.07.05: 
+	 * 2004.08.02: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -79,39 +67,24 @@ class String
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	// This is better than the GNU extention   ;)
-	static size_t String::strnlen(const char *s, size_t maxlen)
-	{
-		size_t i;
-
-		for (i = 0; s[i] && maxlen; ++i, --maxlen)
-			;
-
-		return i;
-	}
-
-
-	static char *String::strdup(const char *src)
-	{
-		char *dest = NULL;
-		int len;
-		
-		
-		if (!src || !src[0])
-			return NULL;
-		
-		len = strlen(src);
-		dest = new char[len + 1];
-		strncpy(dest, src, len);
-		dest[len] = 0;
-		
-		return dest;
-	}
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	void setName(char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets name and exports it to resource system
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.02:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual void action() = 0;
 
 
  private:
@@ -125,10 +98,15 @@ class String
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	Resource *mResource;            /* Resource system pointer */
 
-	char *mString;             /*  */
+	unsigned int mId;               /* Numeric id of event */
 
-	unsigned int mLength;      /*  */
+	char *mName;                    /* Symbolic name of event */
+
+	static unsigned int mNextId;    /* Simple UID generator scheme */
+
+	static Vector<FreyjaEvent*> mEventStore; /* Event store for control use */
 };
 
 #endif
