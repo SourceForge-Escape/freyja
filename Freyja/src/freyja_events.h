@@ -75,6 +75,7 @@ typedef enum {
 	eMeshSelect,
 
 	eCopyAppendMode,
+	eSplitObject,
 
 	eDelete,
 	eSelect,
@@ -203,6 +204,7 @@ typedef enum {
 	CMD_BONE_PREV,
 	CMD_BONE_NEXT,
 	CMD_BONE_NEW,
+	CMD_BONE_SELECT,
 	CMD_BONE_ADD_MESH,
 	CMD_BONE_DELETE_MESH,
 	CMD_BONE_CONNECT,
@@ -237,7 +239,6 @@ typedef enum {
 #define freyja_event_file_dialog mgtk_event_file_dialog
 #define freyja_event_get_float mgtk_event_get_float
 #define freyja_event_set_range mgtk_event_set_range
-
 
 void freyja_event_start();       /* Starts up Freyja subsystems */
 void freyja_event_exit();        /* Calls shutdown and exits GUI */

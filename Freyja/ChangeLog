@@ -27,6 +27,20 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041201) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Fix for infamous null polygon render crash ( Egg issue )
+	o Fix for 'bone name update overwrite' bug
+	o NULL bone names no longer allowed
+	o Bone tree widget should now properly update skeleton changes
+	o Lots of the bone editing iterface fixed
+	o Generic Transform submenu for Tools with key shortcuts 
+	o Bone naming back in interface
+	o Several missing interface options returned
+	o VertexCombine back in interface, oops
+	o Tons of iterface fixes 
+
+	
  Freyja (0.3.5-20041130) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o Redraw on copy/cut/paste

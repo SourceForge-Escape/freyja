@@ -10,6 +10,8 @@
  TODO
 
  General
+	o Umbra - edits models and has decentralized data structures
+	o Chimera - for single character model editing
 	o Merge plugins for Egg / Freyja?
 	o Make a command pattern test with colors system
 	o Replace event:command events with eEvent use
