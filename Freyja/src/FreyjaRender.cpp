@@ -273,7 +273,6 @@ void mglDrawBone(unsigned char type, const vec3_t pos)
 		break;
 	case 2:
 		glBegin(GL_LINE_STRIP);
-
 		glVertex3f(0.0,   min,  0.0);     // 0
 		glVertex3f(-max,  0.0, -max);     // 1
 		glVertex3f( max,  0.0, -max);     // 2
@@ -288,7 +287,6 @@ void mglDrawBone(unsigned char type, const vec3_t pos)
 		glVertex3fv(pos);                 // Base
 		glVertex3f( max,  0.0, max);      // 3
 		glVertex3f(-max,  0.0, max);      // 4
-
 		glEnd();
 		break;
 	}

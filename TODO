@@ -10,6 +10,7 @@
  TODO
 
  General
+	o Merge plugins for Egg / Freyja?
 	o Make a command pattern test with colors system
 	o Replace event:command events with eEvent use
 	o Material plugins
