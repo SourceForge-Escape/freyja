@@ -105,12 +105,10 @@ GtkWidget *mgtk_get_fileselection_widget()
 		}
 
 #ifdef EXTEND_FILE_TEST
-		GtkWidget *homeButton;
 #   ifdef USE_OLD_FILE_SELECTION_WIDGET
+		GtkWidget *homeButton;
 		GtkWidget *vbox = GTK_FILE_SELECTION(file)->main_vbox;
-#   else
-		GtkWidget *vbox = GTK_DIALOG(file)->vbox;
-#   endif
+
 		GtkWidget *hbox = mgtk_create_hbox(vbox, "hbox", 0, 0, 0, 0, 0);
 
 		homeButton = gtk_button_new_with_label("Home");
@@ -137,10 +135,13 @@ GtkWidget *mgtk_get_fileselection_widget()
 		//mgtk_event_subscribe_gtk_widget(0, optionmenu);
 		GTK_FILESELECTION_DROP_DOWN_MENU = optionmenu_menu;
 
-	GtkWidget *sep = gtk_menu_item_new();
-	gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), sep);
-	gtk_widget_show(sep);
-	gtk_widget_set_usize(sep, 164, 1);
+		GtkWidget *sep = gtk_menu_item_new();
+		gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), sep);
+		gtk_widget_show(sep);
+		gtk_widget_set_usize(sep, 164, 1);
+#   else
+		//GtkWidget *vbox = GTK_DIALOG(file)->vbox;
+#   endif
 #endif
 	}
 
