@@ -108,7 +108,7 @@ FreyjaControl::~FreyjaControl()
 
 	w.openFile(filename);
 
-	for (i = mRecentFiles.begin(); i <  mRecentFiles.end(); ++i)
+	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
 	{
 		//freyja_print("(add_recent_file \"%s\")\n", mRecentFiles[i]);
 		w.print("%s\n", mRecentFiles[i]);
@@ -176,19 +176,27 @@ void FreyjaControl::addRecentFilename(const char *filename)
 {
 	unsigned int i, l;
 	char *dupe;
+	bool found;
 
 	if (!filename || !filename[0])
 	{
 		return;
 	}
 
-#warning FIXME Add a size limit here
-
+	// FIXME: Add a size limit here
 
 	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
 	{
 		if (strcmp(filename, mRecentFiles[i]) == 0)
-			return;
+		{
+			found = true;
+			break;
+		}
+	}
+
+	if (found) // FIXME: Should 'boost' this file to top slot
+	{
+		return;
 	}
 
 	l = strlen(filename);
@@ -1643,7 +1651,7 @@ bool FreyjaControl::event(int command)
 
 	default:
 
-		if ((command - eRecentFiles - 1) <mRecentFiles.size())
+		if ((command - eRecentFiles - 1) < (int)mRecentFiles.size())
 		{
 			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 			handleFilename(mRecentFiles[(command - eRecentFiles - 1)]);
@@ -2186,7 +2194,7 @@ void FreyjaControl::getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz)
 
 Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
 {
-#warning FIXME This does nothing atm
+	// FIXME: This does nothing atm
 #ifdef FIXME
 	vec_t nearHeight = 400; // fluff filler for now
 	vec_t zNear = 0.1;
