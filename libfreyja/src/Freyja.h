@@ -105,8 +105,6 @@
 #include "FreyjaSkeleton.h"
 
 
-
-
 class FreyjaTexture
 {
 public:
@@ -141,7 +139,7 @@ public:
 	unsigned int imageHeight;
 	
 	unsigned char mipmaps;
-	
+
 	unsigned char pixelDepth; /* 3 - RGB24bit, 4 - RGBA32bit */
 	
 	unsigned int id;          /* OpenGL texture id use */
@@ -154,42 +152,43 @@ public:
 
 	FreyjaMaterial()
 	{
-		name = 0x0;
+		mId = -1;
+		mName[0] = 0;
+		mFlags = 0;
+		mParent = -1;
 	}
 
 	~FreyjaMaterial()
 	{
-		if (name)
-			delete [] name;
 	}
 
-	char *name;                /* Material name */
+	long mId;                   /* Unique identifier */
 
-	vec4_t ambient;            /* Ambient color */
+	char mName[64];             /* Material name */
 
-	vec4_t diffuse;            /* Diffuse color */
+	long mFlags;                /* Bit flags */
 
-	vec4_t specular;           /* Specular color */
+	long mParent;               /* Linked material id, for shader use */
 
-	vec4_t emissive;           /* Emissive color */
+	vec4_t mAmbient;            /* Ambient color */
 
-	vec_t shininess;           /* Specular exponent */
+	vec4_t mDiffuse;            /* Diffuse color */
 
-	unsigned int blendSrc;     /* Blend source factor */
+	vec4_t mSpecular;           /* Specular color */
 
-	unsigned int blendDest;    /* Blend destination factor */
+	vec4_t mEmissive;           /* Emissive color */
 
-	unsigned int flags;        /* MULTI_TEXTURE_ONLY, etc */
+	vec_t mShininess;           /* Specular exponent */
 
-	int parent;                /* Linked material id */
+	vec_t mTransparency;        /* Alpha 0.0 - 1.0 */
 
-	int children;              /* Linked materials count */
+	unsigned long mBlendSrc;    /* Blend source factor */
 
-	unsigned int texture;      /* TextureData index */
+	unsigned long mBlendDest;   /* Blend destination factor */
 
-	bool hasAlphaChannel;      /* For depth sorting use */
+	long mTexture;              /* TextureData index */
 
-	unsigned int id;           /* Unique identifier */
+	bool mHasAlphaChannel;      /* For depth sorting use */
 };
 
 
@@ -199,45 +198,93 @@ public:
 
 	FreyjaMetaData()
 	{
-		symbol = 0x0;
-		description = 0x0;
-		data = 0x0;
+		id = -1;
+		mBoneIndex = -1;
+		mSymbol[0] = 0;
+		mDescription[0] = 0;
+		mTypeId = 0;
+		mDataSize = 0;
+		mData = 0x0;
 	}
 
 	~FreyjaMetaData()
 	{
-		if (symbol)
-			delete [] symbol;
-
-		if (description)
-			delete [] description;
-
-		//if (data)
-		//	delete data;
+		if (mData)
+			delete mData;
 	}
 
-	unsigned int id;                  /* Unique identifier */
+	
 
-	unsigned int type;
-	unsigned int size;
-	char *symbol;
-	char *description;
-	void *data;
+	long id;                  /* Unique identifier */
+
+	char mSymbol[64];
+
+	char mDescription[64];
+
+	long mBoneIndex;         /* If 'tagged' to a bone this is 
+								the id or it's ( -1 ) */
+
+	long mTypeId;
+
+	unsigned long mDataSize;
+
+	unsigned char *mData;
+};
+
+
+class FreyjaKeyFrame
+{
+public:
+
+	void setOrientationByEuler(const vec3_t xyz)
+	{
+	}
+
+	void setOrientationByAxisAngles(const vec4_t axyz)
+	{
+	}
+
+	void setOrientationByQuaternion(const vec4_t wxyz)
+	{
+	}
+
+	void getOrientationEuler(vec3_t xyz)
+	{
+	}
+
+	vec_t time;
+
+	vec3_t position;
+
+	vec4_t orientation;
 };
 
 
 class FreyjaAnimation
 {
 public:
-	int id;                           /* Unique identifier */
+	
+	long id;
 
-	unsigned int frameRate;
-	unsigned int currentFrame;
-	unsigned int lastFrame;
-	vec_t time;
-	vec_t lastTime;
+	char name[64];
 
-	Vector<unsigned int> frames;  /* vertexframes / skeletalframes */
+	long mCurrentFrame;
+
+	long mLastFrame;
+
+	vec_t mFrameRate;
+
+	vec_t mTime;
+
+	vec_t mLastTime;
+
+	bool mSkipRoot;
+
+	long mStartBone;          /* For animation blending (subsets) use */
+
+	long mBoneCount;
+
+	Vector<FreyjaKeyFrame *> mKeyFrames;
 };
 
 

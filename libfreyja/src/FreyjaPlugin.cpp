@@ -1241,8 +1241,8 @@ void FreyjaPlugin::freyjaBegin(freyja_object_t type)
 		mStack.push(FREYJA_MATERIAL);
 		mMaterial = new FreyjaMaterial();
 		mScene->materials.pushBack(mMaterial);
-		mMaterial->id = mScene->materials.end() - 1;
-		mIndexMaterial = mMaterial->id;
+		mMaterial->mId = mScene->materials.end() - 1;
+		mIndexMaterial = mMaterial->mId;
 		break;
 
 
