@@ -903,8 +903,8 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 	if (!type || !filename)
 		return -100;
 
-	/* Check for native format */
-	if (strcmp(type, "native") == 0)
+	/* Check for native format | temp use of EGG */
+	if (strcmp(type, "native") == 0 || strcmp(type, "egg") == 0)
 	{
 		return saveModel(filename);
 	}
