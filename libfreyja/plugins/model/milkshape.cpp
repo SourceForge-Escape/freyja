@@ -169,6 +169,8 @@ public:
 		groups = 0x0;
 		materials = 0x0;
 		joints = 0x0;
+
+		nNumJoints = 0;
 	}
 
 	~Ms3dModel()
@@ -266,7 +268,8 @@ int freyja_model__milkshape_check(char *filename)
 	fclose(f);
 
 	/* MilkShape 1.3 or 1.4 model check */
-	if (!strncmp(header.id, "MS3D000000", 10) &&  header.version == 3)
+	if (!strncmp(header.id, "MS3D000000", 10) && 
+		header.version == 3 || header.version == 4)
 		return 0;
 
 	return -2;
@@ -293,11 +296,13 @@ int freyja_model__milkshape_import(char *filename)
 	r.readCharString(10, mdl.header.id);
 	mdl.header.version = r.readLong();
 
+	/* No use checking twice
 	if (strncmp(mdl.header.id, "MS3D000000", 10) || mdl.header.version != 3)
 	{
 		r.closeFile();
 		return -1;
 	}
+	*/
 
 	mdl.nNumVertices = r.readInt16U();
 	mdl.vertices = new ms3d_vertex_t[mdl.nNumVertices];
@@ -317,10 +322,10 @@ int freyja_model__milkshape_import(char *filename)
 	
 	for (i = 0; i < mdl.nNumTriangles; ++i)
 	{
-		mdl.tris[i].flags = r.readInt8U();
-		mdl.tris[i].vertexIndices[0] = r.readInt8U();
-		mdl.tris[i].vertexIndices[1] = r.readInt8U();
-		mdl.tris[i].vertexIndices[2] = r.readInt8U();
+		mdl.tris[i].flags = r.readInt16();
+		mdl.tris[i].vertexIndices[0] = r.readInt16();
+		mdl.tris[i].vertexIndices[1] = r.readInt16();
+		mdl.tris[i].vertexIndices[2] = r.readInt16();
 	
 		for (j = 0; j < 3; ++j)
 		{
@@ -438,12 +443,12 @@ int freyja_model__milkshape_import(char *filename)
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
-	
+
 	for (i = 0; i < mdl.nNumVertices; ++i)
 	{
 		index = freyjaVertex3f(mdl.vertices[i].vertex[0]*scale,
-									  mdl.vertices[i].vertex[1]*scale,
-									  mdl.vertices[i].vertex[2]*scale);
+								mdl.vertices[i].vertex[1]*scale,
+								mdl.vertices[i].vertex[2]*scale);
 		freyjaVertexWeight(index, 1.0f, mdl.vertices[i].boneId);
 		transV.pushBack(index);
 	}
@@ -458,13 +463,14 @@ int freyja_model__milkshape_import(char *filename)
 			index = transV[mdl.tris[i].vertexIndices[j]];
 			freyjaPolygonVertex1i(index);
 			freyjaVertexNormal3f(index, 
-										mdl.tris[i].vertexNormals[j][0],
-										mdl.tris[i].vertexNormals[j][1],
-										mdl.tris[i].vertexNormals[j][2]);
+									mdl.tris[i].vertexNormals[j][0],
+									mdl.tris[i].vertexNormals[j][1],
+									mdl.tris[i].vertexNormals[j][2]);
 			freyjaPolygonTexCoord1i(freyjaTexCoord2f(mdl.tris[i].s[j],
-																  mdl.tris[i].t[j]));
+														mdl.tris[i].t[j]));
 
 		}
+
 		freyjaEnd(); // FREYJA_POLYGON
 	}
 		
@@ -483,7 +489,12 @@ int freyja_model__milkshape_import(char *filename)
 							  mdl.joints[i].position[0]*scale,
 							  mdl.joints[i].position[1]*scale,
 							  mdl.joints[i].position[2]*scale);
-		freyjaBoneRotateEulerXYZ3fv(index, mdl.joints[i].rotation);
+		
+
+		freyjaBoneRotateEulerXYZ3f(index,
+									helRadToDeg(mdl.joints[i].rotation[0]),
+									helRadToDeg(mdl.joints[i].rotation[1]),
+									helRadToDeg(mdl.joints[i].rotation[2]));
 
 		for (j = 0; j < mdl.nNumJoints; ++j)
 		{
