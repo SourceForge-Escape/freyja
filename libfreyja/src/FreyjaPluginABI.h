@@ -633,12 +633,18 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
 							long count, long segments); // radius
 
-	void freyjaMeshUVMapSphericalPolyMapped(long meshIndex);
+	void freyjaMeshPromoteTexcoordsToPloymapping(long meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
-	 * Post : Polygon mapped texcoords computed with 
-	 *        Spherical mapping algorithm
-	 *
+	 * Post : Takes vertex UVs and promotes them to polymapped
+	 *        texcoords ( stored in polygon ala texture polygons )
+	 ------------------------------------------------------*/
+
+	int freyjaMeshRemovePolygon(long meshIndex, long polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Removes references to polygonIndex in mesh, but
+	 *        it doesn't free the allocated polygon
 	 ------------------------------------------------------*/
 
 	void freyjaMeshUVMapSpherical(long meshIndex);

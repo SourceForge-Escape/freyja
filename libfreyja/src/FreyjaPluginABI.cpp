@@ -2811,46 +2811,6 @@ void freyjaPolygonTexCoordPurge(long polygonIndex)
 }
 
 
-void freyjaMeshUVMapSphericalPolyMapped(long meshIndex)
-{
-	Vector<long> ref;
-	vec2_t uv;
-	long i, j, k, texcoordIndex, vertexCount, vertexIndex;
-	long polygonIndex, polygonCount;
-
-
-	// 1. Compute texcoords for vertex UVs
-	freyjaMeshUVMapCylindrical(meshIndex);
-
-	// 2. Update matching polymapped texcoords with newly computed vertex UVs	
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-
-    for (i = 0; i < polygonCount; ++i)
-    {
-		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
-		for (j = 0; j < vertexCount; ++j)
-		{
-			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
-			// NOTE: I just update all UV -> polymapp to avoid corrupt 
-			//       'texture faces' eg not completely polymapped
-			freyjaPolygonTexCoordPurge(polygonIndex);
-
-			for (k = 0; k < vertexCount; ++k) 
-			{
-				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
-
-				texcoordIndex = freyjaTexCoord2fv(uv);
-				freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
-			}
-		}
-	}
-}
-
-
 void freyjaMeshUVMapSpherical(long meshIndex)
 {
 	long i, vertexCount, vertexIndex;
@@ -2863,7 +2823,7 @@ void freyjaMeshUVMapSpherical(long meshIndex)
 
     for (i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
 		
 		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
@@ -2895,7 +2855,7 @@ void freyjaMeshUVMapCylindrical(long meshIndex)
 
     for (i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
 		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
 		for (j = 0; j < 3; ++j)
@@ -2929,7 +2889,7 @@ void freyjaMeshUVMapCylindrical(long meshIndex)
 
     for (i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
 		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
 		longitude = atan2((float)-xyz[0], xyz[2]);
@@ -2942,6 +2902,40 @@ void freyjaMeshUVMapCylindrical(long meshIndex)
 		uv[1] = xyz[1] / ysize;
 
 		freyjaVertexTexCoord2fv(vertexIndex, uv);
+	}
+}
+
+
+void freyjaMeshPromoteTexcoordsToPloymapping(long meshIndex)
+{
+	vec2_t uv;
+	long i, j, k, vertexCount, vertexIndex, texcoordIndex, polygonIndex, polygonCount;
+
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+    for (i = 0; i < polygonCount; ++i)
+    {
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+			// NOTE: I just update all UV -> polymapp to avoid corrupt 
+			//       'texture faces' eg not completely polymapped
+			freyjaPolygonTexCoordPurge(polygonIndex);
+
+			for (k = 0; k < vertexCount; ++k) 
+			{
+				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+
+				texcoordIndex = freyjaTexCoord2fv(uv);
+				freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
+			}
+		}
 	}
 }
 
@@ -3027,8 +3021,10 @@ void freyjaMeshGenerateVertexNormals(long meshIndex)
 
 void freyjaMeshTesselateTriangles(long meshIndex)
 {
+	Vector<long> purge;
 	long i, j, polygonCount, polygonIndex, vertexCount, vertexIndex;
 	long a, b, c, d, ta, tb, tc, td, material;
+	unsigned int ii;
 
 
 	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
@@ -3094,20 +3090,62 @@ void freyjaMeshTesselateTriangles(long meshIndex)
 				freyjaEnd();
 
 
-				/* 3. Remove ABCD polygon and update references */
-#warning FIXME				
+				/* 3. Prepare to remove ABCD polygon and update references */
+				purge.pushBack(polygonIndex);
 			}
-			else
+			else  // Hhhhmm... can of worms...  doesn't touch polygons atm
 			{
 				for (j = 0; j < vertexCount; ++j)
 				{
 					// 0 1 2, 0 2 3, ..
-#warning FIXME
+#warning FIXME No Implementation due to lack of constraints on 5+ edges
 					vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
 				}
 			}
 		}
 	}
+
+	for (ii = purge.begin(); ii < purge.end(); ++ii)
+	{
+		freyjaMeshRemovePolygon(meshIndex, purge[ii]);
+	}
+}
+
+
+// FIXME: This is a horrible algorithm, but works with Vector for same ordering
+int freyjaMeshRemovePolygon(long meshIndex, long polygonIndex)
+{
+	Vector<long> keep;
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	long i, count;
+
+
+	if (mesh)
+	{
+		count = mesh->polygon.end();
+
+		for (i = mesh->polygon.begin(); i < count; ++i)
+		{
+			if ((int)mesh->polygon[i] != polygonIndex)
+			{
+				keep.pushBack(mesh->polygon[i]);
+			}
+		}
+
+		mesh->polygon.clear();
+		mesh->r_polygon.clear();
+		count = keep.end();
+
+		for (i = keep.begin(); i < count; ++i)
+		{
+			mesh->polygon.pushBack(keep[i]);
+			mesh->r_polygon.pushBack(EggPlugin::mEggPlugin->getPolygon(keep[i]));
+		}
+
+		return 1;
+	}
+
+	return 0;
 }
 
 
