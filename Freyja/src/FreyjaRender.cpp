@@ -923,6 +923,9 @@ void FreyjaRender::Display()
 		{
 			glLineWidth(3.0f);
 			FreyjaRender::mSelectedBone = _model->getCurrentBone();
+
+			//if (mRenderMode & fRenderBonesClearedZBuffer)
+			//	glClear( GL_DEPTH_BUFFER_BIT);
 			drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
 
 			glLineWidth(_default_line_width);
@@ -1814,17 +1817,26 @@ void FreyjaRender::DrawWindow(int plane)
 		break;
 	}
 
-	if (mRenderMode & RENDER_BONES)
-	{
-		FreyjaRender::mSelectedBone = _model->getCurrentBone();
-		drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
-	}
+	//if (mRenderMode & RENDER_BONES)
+	//{
+	//	FreyjaRender::mSelectedBone = _model->getCurrentBone();
+	//	drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
+	//}
 
 	drawLights();
 
 	glScalef(mZoom, mZoom, mZoom);
 
 	DrawModel(_model->getCurrentEgg());
+
+	if (mRenderMode & RENDER_BONES)
+	{
+		if (mRenderMode & fRenderBonesClearedZBuffer)
+			glClear( GL_DEPTH_BUFFER_BIT);
+
+		FreyjaRender::mSelectedBone = _model->getCurrentBone();
+		drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
+	}
 }
 
 

@@ -132,7 +132,6 @@ bool BSAPakReader::load(const char *filename)
 
 #ifdef UNIT_TEST_BSAPAKREADER
 #include <mstl/Vector.h>
-#include <sys/stat.h>
 
 void bsa_get_command(char *cmd, long size)
 {
@@ -164,8 +163,6 @@ void bsa_get_command(char *cmd, long size)
 			cmd[i] = 0;
 		}
 	}
-
-	printf("\n");
 }
 
 
@@ -182,7 +179,10 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 	long i, count, len;
 
 
-	if (argc < 2 || !bsa.load(argv[1]))
+	if (argc < 2)
+		return -1;
+
+	if (!bsa.load(argv[1]))
 		return -1;
 
 	if (!r.openFile(argv[1]))
@@ -194,6 +194,8 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 	{
 		printf("bsa:\\%s$ ", dir);
 		bsa_get_command(cmd, 128);
+		printf("\n");
+
 		cache.clear();
 
 		len = 0;
@@ -205,13 +207,57 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 		{
 			break;
 		}
+		else if (!strncmp(cmd, "help", 4))
+		{
+			printf("exit - exit bsa shell\n");
+			printf("cd - vfs change directory\n");
+			printf("ls - vfs list directory\n");
+			printf("x - extract filename ( full bsa path )\n");
+		}
 		else if (!strncmp(cmd, "cd ", 3))
 		{
 			s = cmd+3;
-			strcpy(dir, s);
 
 			if (s[0] == '\\')
-				dir[0] = 0;
+			{
+				if (s[1] == 0)
+				{
+					dir[0] = 0;
+				}
+				else
+				{
+					s++;
+					strcpy(dir, s);
+				}
+			}
+			else if (s[0] == '.')
+			{
+				if (s[1] == '.')
+				{
+					char *last = dir;
+
+					for (s = dir; s[0]; ++s)
+					{
+						if (s[0] == '\\')
+						{
+							last = s;
+						}
+					}
+
+					last[0] = 0;
+				}
+			}
+			else
+			{
+				sprintf(dir, "%s\\%s", dir, s);
+
+				if (dir[0] == '\\')
+				{
+					s = dir;
+					s++;
+					sprintf(dir, "%s", s);
+				}
+			}
 
 		}
 		else if (!strncmp(cmd, "ls", 2))
@@ -233,6 +279,9 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 		{
 			s = cmd+2;
 
+			if (s[0] == '\\')
+				++s;
+
 			for (i = 0; i < bsa.mHeader.mFileCount; ++i)
 			{
 				if (!strcmp(s, bsa.mTable[i].mFilename))
@@ -248,7 +297,7 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 						if (s[0] == '\\')
 						{
 							s[0] = 0;
-							mkdir(filename, S_IRWXU | S_IRWXG);
+							FreyjaFileWriter::createDirectory(filename);
 							s[0] = '/';
 						}
 					}
@@ -346,14 +395,35 @@ int import_model(char *filename)
 int freyja_model__bsa_import(char *filename)
 {
 	BSAPakReader bsa;
+	char file[1024];
+	char *s;
+	long i, pakIndex, vfsFileIndex;
 
 
 	if (bsa.load(filename))
 	{
-	//freyjaPakReaderBegin();
-	//freyjaPakReaderAddFilenameWithPath("/", 0x2342b1);
-	//freyjaPakReaderEnd();
+		pakIndex = freyjaPakBegin(filename);
 
+		for (i = 0; i < bsa.mHeader.mFileCount; ++i)
+		{
+			strcpy(file, bsa.mTable[i].mFilename);
+
+			for (s = file; s[0]; ++s)
+			{
+				if (s[0] == '\\')
+				{
+					s[0] = '/';
+				}
+			}
+
+			vfsFileIndex = freyjaPakAddFullPathFile(pakIndex, 
+													file,
+													(bsa.mDataOffset +
+													 bsa.mTable[i].mOffset),
+													bsa.mTable[i].mSize);
+		}
+
+		freyjaPakEnd(pakIndex);
 		return 0;
 	}
 

@@ -419,7 +419,7 @@ int freyja_model__skel_import(char *filename)
 		
 		for (i = 0; i < skel.mWeightCount; ++i)
 		{
-			weight = &skel.mWeights[i];
+			weight = &(skel.mWeights[i]);
 			
 			while (weight)
 			{
