@@ -460,6 +460,7 @@ int freyja_model__milkshape_import(char *filename)
 		// mdl.materials[i].alphamap; // Not used, mask filename
 	}
 
+#ifdef SKELANIM_TEST
 	// Test for keyframe import
 	long animationIndex, keyFrameIndex, frame, frameCount;
 
@@ -495,6 +496,7 @@ int freyja_model__milkshape_import(char *filename)
 			}
 		}
 	}
+#endif
 
 	/* ABI 0.9.3 Calls END */
 
