@@ -177,6 +177,7 @@ UTPackage::UTPackage()
 	mOffset = 0;
 	mRootDir = NULL;
 	mStream = NULL;
+	mDecyrptFilename = NULL;
 }
 
 
@@ -671,7 +672,16 @@ int UTPackage::load(const char *filename)
 		if (mFlags & fDecryptOnly)
 		{
 			printf("Writing decrypted file to /tmp/utpak.decrypted\n");
-			decryptDumpXOR("/tmp/utpak.decrypted", mKeyXOR, mStream);
+
+			if (mDecyrptFilename && mDecyrptFilename[0])
+			{
+				decryptDumpXOR(mDecyrptFilename, mKeyXOR, mStream);
+			}
+			else
+			{
+				decryptDumpXOR("/tmp/utpak.decrypted", mKeyXOR, mStream);
+			}
+
 			fclose(mStream);
 			return 0;
 		}
@@ -1517,6 +1527,12 @@ int runUTPackageUnitTest(int argc, char *argv[])
 				break;
 			case 'x':  /* Bindump UTX to disk decrypted */
 				utpak.setFlags(UTPackage::fDecryptOnly);
+				
+				if (argc > 3)
+				{
+					utpak.mDecyrptFilename = argv[3];
+				}
+
 				utpak.load(argv[2]);
 				return 0;
 				break;

@@ -46,6 +46,10 @@ enum rotate_flags {
 	Z_F = 4
 };
 
+void getOpenGLViewport(int *viewportXYWH); // int[4]
+void getOpenGLModelviewMatrix(double *modelview); // double[16]
+void getOpenGLProjectionMatrix(double *projection); // double[16]
+
 
 class FreyjaRender
 {
@@ -98,6 +102,81 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	unsigned int getFlags();
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : Returns control flags for model
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.09: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void getRotation(vec3_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 *
+	 * Post : Return present rotation angles in Euler 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	vec_t getWindowAspectRatio();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get GL context window aspect ratio
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created, was public data member
+	 ------------------------------------------------------*/
+
+	unsigned int getWindowWidth();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get GL context window width 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	unsigned int getWindowHeight();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get GL context window height
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	float getZoom();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get current zoom factor for the scene
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+	///////// Refactoring below here still...
+
 	void Register(FreyjaModel *model);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -149,17 +228,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int Flags();
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Returns control flags for model
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.09: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	void EditTexture(int n);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -204,66 +272,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void getRotation(vec3_t v);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 *
-	 * Post : Return present rotation angles in Euler 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	void ViewMode(int mode);
 	/*------------------------------------------------------
 	 * Pre  : Mode are valid view_mode(s)
 	 * Post : Sets viewing options
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int Width();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get GL context window width 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int Height();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get GL context window height
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Width(unsigned int i);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set GL context window width 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Height(unsigned int i);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set GL context window height
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -293,21 +305,14 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void ScreenShot();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Generates a screenshot of just GL context
-	 *        with an auto timestamped name
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.??.??:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	// FIXME
+
+	Matrix getModelViewMatrixInverse()
+	{
+		return mModelViewMatrixInverse;
+	}
+
 	void setZoom(float zoom);
-	float getZoom();
 
 	static vec4_t mColorBackground;
 	static vec4_t mColorGridLine;
@@ -326,8 +331,6 @@ public:
 	static unsigned char mJointRenderType;
 	static int mPatchDisplayList;
 
-	vec4_t mViewports[4];
-
 
 private:    
 
@@ -343,8 +346,10 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	
+	void renderPolygon(RenderPolygon &face);
+#ifdef DISABLED	
 	void DrawPolygon(egg_polygon_t &polygon, long frame);
+#endif
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders polygon
@@ -404,7 +409,7 @@ private:
 	void drawWindow(freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Renders 3d model/particles/etc editor
+	 * Post : Renders 3d model/particles/etc editor in viewports
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -461,6 +466,13 @@ private:
 	void drawLights();
 	// END HACKS
 
+
+	Matrix mModelViewMatrixInverse;
+
+	vec4_t mViewports[4];
+
+	vec_t mAspectRatio;                        /* Cached aspect ratio */
+
 	FreyjaModel *_model;                       /* Backend agent */
 	
 	unsigned int mRenderMode;                  /* Rendering mode */
@@ -476,8 +488,6 @@ private:
 	bool _init;                                /* OpenGL context started? */
 
 	int _view_mode;                            /* View mode */
-
-	float _aspect_ratio;                       /* Cached aspect ratio */
 
 	float _rotate_amount;                      /* Degrees to rotate per
 																 call to rotate */

@@ -71,6 +71,95 @@ FreyjaModel::~FreyjaModel()
 }
 
 
+// Gets polygon for given egg polygon for given vertex animation frame
+void createRenderPolygon(RenderPolygon &face,
+						 egg_polygon_t &polygon, long frame)
+{
+	static vec_t *mpos;
+	static Vector3d u, v, w;
+	static unsigned int i, j, n;
+	static egg_vertex_t *vertex;
+	static egg_texel_t *texel;
+	static egg_texel_t *texel2;
+	static bool external_texel;
+
+
+	external_texel = !polygon.r_texel.empty();
+
+	if (polygon.r_vertex.empty() ||
+		(!external_texel && polygon.shader == COLORED_POLYGON))
+	{
+		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
+		return;
+	}
+
+	/* Mongoose 2004.12.23, 
+	 * Setup vertex morphing for egg backend polygon */
+	for (n = 0, i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+	{
+		vertex = polygon.r_vertex[i];
+
+		if (!vertex)
+			continue;
+
+		mpos = vertex->pos;
+
+		if (frame > -1)
+		{
+			for (j = vertex->frameId.begin(); j < vertex->frameId.end(); ++j)
+			{
+				if (vertex->frameId[j] == frame)
+				{
+					mpos = *(vertex->frames[j]);
+					break;
+				}
+			}
+
+		}
+
+		face.vertices[i] = Vector3d(mpos);
+		face.normals[i] = Vector3d(vertex->norm);
+		face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+
+		if (external_texel && polygon.r_texel[i])
+		{
+			if (polygon.shader == COLORED_POLYGON)
+			{
+				texel = polygon.r_texel[i*2];
+				texel2 = polygon.r_texel[i*2+1];
+	
+				if (texel && texel2)
+				{
+					face.colors[i][0] = texel->st[0];
+					face.colors[i][1] = texel->st[1];
+					face.colors[i][2] = texel2->st[0];
+					face.colors[i][3] = texel2->st[1];
+				}
+				else
+				{
+					face.colors[i][0] = face.colors[i][1] = face.colors[i][2] = 1.0;
+					face.colors[i][3] = 0.75;
+				}
+			}
+			else
+			{
+				texel = polygon.r_texel[i];
+				face.texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
+			}
+		}
+		else
+		{
+			face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		}
+
+		++n;
+	}
+
+	face.material = polygon.shader;
+	face.count = n;
+}
+
+
 void FreyjaModel::setFlags(option_flag_t flag, int op)
 {
 	mFlags |= flag;
@@ -918,9 +1007,37 @@ void FreyjaModel::setBoneRotation(float x, float y, float z)
 }
 
 
-void FreyjaModel::transform(int mode, enum Egg::egg_transform type, 
+void FreyjaModel::transform(int mode, freyja_transform_action_t action, 
 							float x, float y, float z)
 {
+	enum Egg::egg_transform type;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyja_print("FreyjaModel::transform> No appropreiate wrapper file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+
 	switch (mode)
 	{
 	case FreyjaModel::TransformVertexFrame:	
@@ -1758,7 +1875,7 @@ void FreyjaModel::moveBone(float xx, float yy)
 		break;
 	}
   
-	transform(FreyjaModel::TransformBone, Egg::TRANSLATE, x, y, z);
+	transform(FreyjaModel::TransformBone, fTranslate, x, y, z);
 }
 
 
@@ -1790,7 +1907,7 @@ void FreyjaModel::MeshMove(float xx, float yy)
 		break;
 	}
 
-	transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);
+	transform(FreyjaModel::TransformMesh, fTranslate, x, y, z);
 }
 
 
@@ -1962,7 +2079,7 @@ void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
 		
 		xyz = xyz - v;
 		
-		transform(FreyjaModel::TransformBone, Egg::TRANSLATE, 
+		transform(FreyjaModel::TransformBone, fTranslate, 
 				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
 		break;
 
