@@ -2290,7 +2290,6 @@ bool FreyjaControl::pasteSelectedObject()
 }
 
 
-// FIXME: (int x, int y, Egg::egg_plane plane) for vertex / texel / polygon
 void FreyjaControl::deleteSelectedObject()
 {
 	switch (mTransformMode)
@@ -2321,7 +2320,6 @@ void FreyjaControl::deleteSelectedObject()
 }
 
 
-// FIXME: (int x, int y, Egg::egg_plane plane) for vertex / texel / polygon
 void FreyjaControl::addObject()
 {
 	unsigned int index;
