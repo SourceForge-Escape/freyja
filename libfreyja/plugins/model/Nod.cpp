@@ -362,7 +362,7 @@ int freyja_model__nod_check(char *filename)
 
 int freyja_model__nod_import(char *filename)
 {
-	const vec_t scale = 0.5;
+	const vec_t scale = 0.25;
 	Map<unsigned int, unsigned int> trans;
 	int i, j, b;
 	Nod nod;
@@ -402,6 +402,13 @@ int freyja_model__nod_import(char *filename)
 						nod.bones[b].RestTranslate[2]*scale);
 		freyjaBoneRotate3f(rot[0], rot[1], rot[2]);
 		
+		if (!b)
+		{
+			freyjaBonePos3f(nod.bones[b].RestTranslate[0]*scale,
+							nod.bones[b].RestTranslate[2]*scale,
+							nod.bones[b].RestTranslate[1]*scale);
+			freyjaBoneRotate3f(rot[0] - 90, rot[2] + 180, rot[1]);
+		}
 
 		freyjaPrintMessage("bone[%i].rotate = %f %f %f", b, 
 						   rot[0], rot[1], rot[2]);
