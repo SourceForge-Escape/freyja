@@ -564,6 +564,9 @@ GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 
 GtkWidget *mgtk_create_color_button(void *func, int id)
 {
+#ifdef DISABLE_GTK_COLORBUTTON
+	return 0x0;
+#else
 	GtkWidget *colorbutton;
 
 	colorbutton = gtk_color_button_new();
@@ -578,6 +581,7 @@ GtkWidget *mgtk_create_color_button(void *func, int id)
 					   GINT_TO_POINTER(id));
 
 	return colorbutton;
+#endif
 }
 
 
