@@ -456,7 +456,7 @@ void Texture::initFonts()
 		atexit(TTF_Quit);
 	}
 #else
-#   error "Not implemented"
+	//#   error "Not implemented"
 #endif
 }
 

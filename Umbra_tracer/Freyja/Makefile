@@ -205,12 +205,12 @@ clean-conf:
 
 install:
 	@-echo -n "Installing                                  "
-	@-cp $(BUILD_INSTALL_DIR)/$(NAME) $(INSTALL_DIR)
+	@-cp $(BUILD_INSTALL_DIR)/$(NAME) $(INSTALL_DIR)/$(NAME)9
 	@-echo [done]
 
 install-debug:
 	@-echo -n "Installing debug                            "
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(INSTALL_DIR)
+	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(INSTALL_DIR)/$(NAME)9
 	@-echo [done]
 
 
