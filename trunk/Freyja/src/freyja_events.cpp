@@ -290,6 +290,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eRenderBbox", eRenderBbox);
 
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
+	r.RegisterInt("eTmpUVMapOff",eTmpUVMapOff);
+	r.RegisterInt("eTmpUVMapOn",eTmpUVMapOn);
 	r.RegisterInt("eMirrorUV_X", eMirrorUV_X);
 	r.RegisterInt("eMirrorUV_Y", eMirrorUV_Y);
 	r.RegisterInt("eTranslateUV", eTranslateUV);

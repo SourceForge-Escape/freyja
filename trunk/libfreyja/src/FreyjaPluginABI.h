@@ -123,7 +123,9 @@ typedef struct {
 } freyja_file_chunk_t;
 
 
+#define fPolygon_VertexUV      2
 #define fPolygon_PolyMapped    8
+#define fPolygon_PolyMappedUV  8
 #define fPolygon_ColorMapped   16
 
 
@@ -271,6 +273,7 @@ void freyjaGetVertex3fv(vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+// FREYJA_VERTEX Accessors
 long freyjaGetVertexTexCoordUV2fv(long vertexIndex, vec2_t uv);
 long freyjaGetVertexNormalXYZ3fv(long vertexIndex, vec3_t nxyz);
 long freyjaGetVertexXYZ3fv(long vertexIndex, vec3_t xyz);
@@ -282,14 +285,23 @@ long freyjaGetVertexWeight(long vertexIndex, long element,
 long freyjaGetVertexWeightCount(long vertexIndex);
 long freyjaGetVertexFlags(long vertexIndex);
 
+// FREYJA_MODEL Accessors
+long freyjaGetModelFlags(long modelIndex); // Not Implemented
+long freyjaGetModelMeshIndex(long modelIndex, long element); // Not Implemented
+long freyjaGetModelMeshCount(long modelIndex); // Not Implemented
+
+// FREYJA_MESH Accessors
 long freyjaGetMeshFlags(long meshIndex);
 long freyjaGetMeshVertexIndex(long meshIndex, long element); // Not Implemented
 long freyjaGetMeshVertexCount(long meshIndex); // Not Implemented
-long freyjaGetMeshPolygonCount(long meshIndex);
-long freyjaGetMeshVertexGroupCount(long meshIndex);
 long freyjaGetMeshPolygonIndex(long meshIndex, long element);
+long freyjaGetMeshPolygonCount(long meshIndex);
 long freyjaGetMeshVertexGroupIndex(long meshIndex, long element);
+long freyjaGetMeshVertexGroupCount(long meshIndex);
+long freyjaGetMeshVertexFrameIndex(long meshIndex, long element); // Not Implemented
+long freyjaGetMeshVertexFrameCount(long meshIndex); // Not Implemented
 
+// FREYJA_POLYGON Accessors
 long freyjaGetPolygonMaterial(long polygonIndex);
 long freyjaGetPolygonFlags(long polygonIndex);
 long freyjaGetPolygonEdgeCount(long polygonIndex);

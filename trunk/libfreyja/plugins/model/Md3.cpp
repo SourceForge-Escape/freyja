@@ -237,6 +237,44 @@ void Md3::setDebug(unsigned char level)
 }
 
 
+void Md3::setMeshes(md3_mesh_t *meshes, unsigned long count)
+{
+	long i;
+
+
+	if (m_meshes)
+	{
+		for (i = 0; i < m_num_meshes; ++i)
+		{
+			if (m_meshes[i].skin)
+			{
+				delete [] m_meshes[i].skin;
+			}
+
+			if (m_meshes[i].tris)
+			{
+				delete [] m_meshes[i].tris;
+			}
+
+			if (m_meshes[i].texel)
+			{
+				delete [] m_meshes[i].texel;
+			}
+
+			if (m_meshes[i].vertex)
+			{
+				delete [] m_meshes[i].vertex;
+			}
+		}
+
+		delete [] m_meshes;
+	}
+
+	m_meshes = meshes;
+	m_num_meshes = count;
+}
+
+
 // FIXME: Only partial endian support
 int Md3::load(char *filename)
 {
@@ -617,91 +655,91 @@ int Md3::load(char *filename)
 
 int Md3::save(char *filename)
 {
-  FILE *f;
-  int i, ii, tmp, hms;
-  int32_t si;
+	FILE *f;
+	int i, ii, tmp, hms;
+	int32_t si;
   
 
-  if ((!m_tags && m_num_tags) || (!m_bones && m_num_bones) || 
+	if ((!m_tags && m_num_tags) || (!m_bones && m_num_bones) || 
 		(!m_meshes && m_num_meshes))
-  {
-    printError("save", "invalid md3\n");
-    return -1;
-  }
+	{
+		printError("save", "invalid md3\n");
+		return -1;
+	}
 
-  f = fopen(filename, "wb");
+	f = fopen(filename, "wb");
 
-  if (!f)
-  {
-    perror("Md3::Save> \n");
-    return -1;
-  }
+	if (!f)
+	{
+		perror("Md3::Save> \n");
+		return -1;
+	}
 
-  // Start Header ////////////////
-  si = m_id;
-  fwrite(&si, 4, 1, f);
-  printDebug("save", "id = 0x%x\n", m_id);
+	// Start Header ////////////////
+	si = m_id = MD3_IDALIASHEADER;
+	fwrite(&si, 4, 1, f);
+	printDebug("save", "id = 0x%x\n", m_id);
   
-  m_version = MD3_ALIAS_VERSION;
+	m_version = MD3_ALIAS_VERSION;
 
-  fwrite(&m_version, 4, 1, f);
-  printDebug("save", "version = %i\n", m_version);
+	fwrite(&m_version, 4, 1, f);
+	printDebug("save", "version = %i\n", m_version);
 
-  fwrite(&m_filename, sizeof(m_filename), 1, f);
-  printDebug("save", "filename = '%s'\n", m_filename);
+	fwrite(&m_filename, 68, 1, f);
+	printDebug("save", "filename = '%s'\n", m_filename);
 
-  fwrite(&m_num_bones, 4, 1, f);
-  printDebug("save", "num_bones = %i\n", m_num_bones);
+	fwrite(&m_num_bones, 4, 1, f);
+	printDebug("save", "num_bones = %i\n", m_num_bones);
 
-  fwrite(&m_num_tags, 4, 1, f);
-  printDebug("save", "num_tags = %i\n", m_num_tags);
+	fwrite(&m_num_tags, 4, 1, f);
+	printDebug("save", "num_tags = %i\n", m_num_tags);
 
-  fwrite(&m_num_meshes, 4, 1, f);
-  printDebug("save", "num_meshes = %i\n", m_num_meshes);
+	fwrite(&m_num_meshes, 4, 1, f);
+	printDebug("save", "num_meshes = %i\n", m_num_meshes);
 
-  fwrite(&m_max_skins, 4, 1, f);
-  printDebug("save", "max_skins = %i\n", m_max_skins);
+	fwrite(&m_max_skins, 4, 1, f);
+	printDebug("save", "max_skins = %i\n", m_max_skins);
 
-  // Seek back and write in actual value later
-  // store file postion for now
-  m_header_length = ftell(f);
-  fwrite(&m_header_length, 4, 1, f);
+	// Seek back and write in actual value later
+	// store file postion for now
+	m_header_length = ftell(f);
+	fwrite(&m_header_length, 4, 1, f);
 
-  // Seek back and write in actual value later
-  // store file postion for now
-  m_tag_start = ftell(f);
-  fwrite(&m_tag_start, 4, 1, f);
+	// Seek back and write in actual value later
+	// store file postion for now
+	m_tag_start = ftell(f);
+	fwrite(&m_tag_start, 4, 1, f);
 
-  // Seek back and write in actual value later
-  // store file postion for now
-  m_surfaces_start = ftell(f);
-  fwrite(&m_surfaces_start, 4, 1, f);
+	// Seek back and write in actual value later
+	// store file postion for now
+	m_surfaces_start = ftell(f);
+	fwrite(&m_surfaces_start, 4, 1, f);
 
-  // Seek back and write in actual value later
-  // store file postiion for now
-  m_file_size = ftell(f);
-  fwrite(&m_file_size, 4, 1, f);
+	// Seek back and write in actual value later
+	// store file postiion for now
+	m_file_size = ftell(f);
+	fwrite(&m_file_size, 4, 1, f);
  
-  // End Header //////////////////
-  tmp = m_header_length;
-  m_header_length = ftell(f);
-  fseek(f, tmp, SEEK_SET);
-  fwrite(&m_header_length, 4, 1, f);
-  printDebug("save", "header_length = %i\n", m_header_length);
-  fseek(f, m_header_length, SEEK_SET);
+	// End Header //////////////////
+	tmp = m_header_length;
+	m_header_length = ftell(f);
+	fseek(f, tmp, SEEK_SET);
+	fwrite(&m_header_length, 4, 1, f);
+	printDebug("save", "header_length = %i\n", m_header_length);
+	fseek(f, m_header_length, SEEK_SET);
 
-  for (i = 0; i < m_num_bones; ++i)
-  {
-    fwrite(&m_bones[i].mins, sizeof(m_bones[i].mins), 1, f);
-    fwrite(&m_bones[i].maxs, sizeof(m_bones[i].maxs), 1, f);
-    fwrite(&m_bones[i].center, sizeof(m_bones[i].center), 1, f);
-    fwrite(&m_bones[i].scale, sizeof(float), 1, f);
-    fwrite(&m_bones[i].creator, 16, 1, f);
+	for (i = 0; i < m_num_bones; ++i)
+	{
+		fwrite(&m_bones[i].mins, sizeof(m_bones[i].mins), 1, f);
+		fwrite(&m_bones[i].maxs, sizeof(m_bones[i].maxs), 1, f);
+		fwrite(&m_bones[i].center, sizeof(m_bones[i].center), 1, f);
+		fwrite(&m_bones[i].scale, sizeof(float), 1, f);
+		fwrite(&m_bones[i].creator, 16, 1, f);
 
-    printDebug("save", "bone[%i].creator = '%s'\n", i, m_bones[i].creator);
-  }
+		printDebug("save", "bone[%i].creator = '%s'\n", i, m_bones[i].creator);
+	}
 
-  printDebug("save", "Saving %i tags\n", m_num_tags * m_num_bones);
+	printDebug("save", "Saving %i tags\n", m_num_tags * m_num_bones);
 
   // Start Tags ////////////////
   tmp = m_tag_start;
@@ -732,6 +770,8 @@ int Md3::save(char *filename)
   {
     // Start Mesh Header /////////////////
     hms = ftell(f);
+
+	strncpy(m_meshes[i].id, "IDP3", 4);
 
     fwrite(&m_meshes[i].id, 4, 1, f);
     fwrite(&m_meshes[i].name, 68, 1, f);
@@ -807,9 +847,9 @@ int Md3::save(char *filename)
 	   i,m_meshes[i].texel_offset);
     fseek(f, tmp, SEEK_SET);   
 
-    for(ii = 0; ii < m_meshes[i].num_vertices; ++ii)
+    for (ii = 0; ii < m_meshes[i].num_vertices; ++ii)
     {
-      fwrite(&m_meshes[i].texel[ii].st, sizeof(m_meshes[i].texel[ii].st), 1, f);
+		fwrite(&m_meshes[i].texel[ii].st, 8, 1, f);
     }
 
     // Vertex Start //////////////
@@ -937,7 +977,7 @@ void Md3::createBones(unsigned int num)
 
 #include <string.h>
 #include <stdio.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/FreyjaPluginABI.h>
 #include <hel/Matrix.h>
 
 #include "Md3.h"
@@ -1112,16 +1152,22 @@ int freyja_model__md3_import(char *filename)
 
 int freyja_model__md3_export(char *filename)
 {
-#ifdef EXPERIMENTAL_FIXME
-	int num_bone_frames, num_tags, num_meshes, num_frames;
-	int k, v, t, f;
+#ifdef MD3_EXPORT_ENABLED
+	const float scale = 100.0f;
+	const int x = 2, y = 0, z = 1;
+	Vector<long> transM, transV;
 	md3_mesh_t *mesh;
-	md3_boneframe_t *bone;
-	md3_tag_t *tag;
+	//md3_bone_t *bone;
+	//md3_tag_t *tag;
 	Md3 md3;
+	long num_meshes, num_frames;
+	long i, j, k, v, f, vertex, idx, texcoord, frameIndex;
+	vec3_t xyz;
+	vec2_t uv;
+	vec_t lat, lng;
 
 
-	num_meshes = freyjaGetNum(FREYJA_MESH);
+	num_meshes = freyjaGetCount(FREYJA_MESH);
 
 	if (!num_meshes)
 	{
@@ -1130,97 +1176,163 @@ int freyja_model__md3_export(char *filename)
 
 	// Don't allow use of internal iterators or
 	// changes of data by other processes
-	freyjaCriticalSection(WRITE_LOCK);
+	freyjaCriticalSection(FREYJA_WRITE_LOCK);
 
-	// Meshes ////////////////////////
+	// Don't write edges > 3, tesselate to triangles
+	//freyjaTesselation(FREYJA_TRIANGLES);
 
 	mesh = new md3_mesh_t[num_meshes];
 	memset(mesh, 0, sizeof(md3_mesh_t) * num_meshes);
-
-	md3.Mesh(mesh);
-	md3.NumMeshes(num_meshes);
+	md3.setMeshes(mesh, num_meshes);
 
 	// Using list interface, as opposed to array
 	freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
 
 	for (k = 0; k < num_meshes; k++)
 	{
-		transM.Add(freyjaIterator(FREYJA_MESH, FREYJA_LIST_CURRENT), k);
+		transM.pushBack(freyjaIterator(FREYJA_MESH, FREYJA_LIST_CURRENT));
+		freyjaIterator(FREYJA_MESH, FREYJA_LIST_NEXT);
 
-		strcpy(mesh[k].name, "freyja-test");
+		strcpy(mesh[k].name, "Freyja-test");
 		mesh[k].num_frames = 0; 
 		mesh[k].num_vertices = 0;
 		mesh[k].num_skins = 0;
-		mesh[k].num_triangles = freyjaMeshIterator(FREYJA_POLYGON, FREYJA_LIST_SIZE);
+		mesh[k].num_triangles = freyjaGetMeshPolygonCount(transM[k]);
     
-		num_frames = freyjaMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_SIZE);
-		freyjaMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_RESET);
-
-		for (f = 0, v = 0; f < num_frames; f++)
-		{
-			freyjaMeshIterator(FREYJA_MESH_FRAME, f);
-       
-			if (freyjaMeshIterator(FREYJA_MESH_FRAME, FREYJA_LIST_CURRENT_EXIST))
-			{
-				mesh[k].num_frames++;
-				mesh[k].num_vertices += eframe->vertex_count; 
-			}
-		}
-    
-		mesh[k].vertex = new md3_vertex_t[mesh[k].num_vertices];
-    
-		for (f = 0, v = 0; f < mesh[k].num_frames; f++)
-		{
-			eframe = _freyja->FindFrame(emesh, f);
-      
-			for (; v < mesh[k].num_vertices*(f+1); v++)
-			{
-				if (eframe)
-				{
-					vert = _freyja->FindVertex(eframe, v);
-
-					if (vert)
-					{
-						// FIXME: may need bounds ckecking for short
-						mesh[k].vertex[v].pos[0] = (short)vert->pos[0];
-						mesh[k].vertex[v].pos[1] = (short)vert->pos[1];
-						mesh[k].vertex[v].pos[2] = (short)vert->pos[2];
-
-						// FIXME: env texels need real values
-						mesh[k].vertex[v].st[0] = 128;  
-						mesh[k].vertex[v].st[1] = 128;  
-					}
-				}
-			}
-		}
-
-		mesh[k].texel = new md3_texel_t[mesh[k].num_vertices*mesh[k].num_frames];
+		/* Add 1 for non morphed vertices ( Would be frame[0] )
+		 * Note all this code assumes TRIANGLES -- THREE EDGES! 3! 3! 3! */
+		num_frames = 1;//(freyjaGetMeshVertexFrameCount(transM[k]) + 1);
+		freyjaPrintMessage("Exporting %i frames...\n", num_frames);
+		mesh[k].num_frames = num_frames;
+		mesh[k].num_vertices = mesh[k].num_triangles * 3 * num_frames;
+		mesh[k].vertex = new md3_vertex_t[mesh[k].num_vertices*num_frames];
+		mesh[k].texel = new md3_texel_t[mesh[k].num_vertices*num_frames];
 		mesh[k].tris = new md3_tri_index_t[mesh[k].num_triangles];
 
-		poly = emesh->polys;
-
-		for (t = 0; t < mesh[k].num_triangles; t++)
+		// frame[0], also sets up mesh faces
+		for (i = 0, v = 0; i < mesh[k].num_triangles; ++i)
 		{
-			mesh[k].tris[t].triangle[0] = poly->poly->index_list[0];
-			mesh[k].tris[t].triangle[1] = poly->poly->index_list[1];
-			mesh[k].tris[t].triangle[2] = poly->poly->index_list[2];
+			idx = freyjaGetMeshPolygonIndex(transM[k], i);
 
-			mesh[k].texel[mesh[k].tris[t].triangle[0]].st[0] = poly->poly->st[0];
-			mesh[k].texel[mesh[k].tris[t].triangle[0]].st[1] = poly->poly->st[1];
-			mesh[k].texel[mesh[k].tris[t].triangle[1]].st[0] = poly->poly->st[2];
-			mesh[k].texel[mesh[k].tris[t].triangle[1]].st[1] = poly->poly->st[3];
-			mesh[k].texel[mesh[k].tris[t].triangle[2]].st[0] = poly->poly->st[4];
-			mesh[k].texel[mesh[k].tris[t].triangle[2]].st[1] = poly->poly->st[5];
+			for (j = 0; j < 3; ++j, ++v)
+			{
+				vertex = freyjaGetPolygonVertexIndex(idx, j);
 
-			poly = poly->next;
+				// FIXME: May need bounds ckecking/scaling for short
+				freyjaGetVertexXYZ3fv(vertex, xyz);
+				mesh[k].vertex[v].pos[0] = (short)(xyz[x]*scale);
+				mesh[k].vertex[v].pos[1] = (short)(xyz[y]*scale);
+				mesh[k].vertex[v].pos[2] = (short)(xyz[z]*scale);
+
+				// Normal isn't actually stored in md3's vertex.norm
+				// it must be encoded into the 'vertex.st' normal
+				freyjaGetVertexNormalXYZ3fv(vertex, xyz);
+				mesh[k].vertex[v].norm[0] = (short)xyz[x];
+				mesh[k].vertex[v].norm[1] = (short)xyz[y];
+				mesh[k].vertex[v].norm[2] = (short)xyz[z];
+				lng = acos(xyz[z]);
+				lat = acos(xyz[x]/sin(lng)); 
+				lat = (lat * 255.0) / (2 * M_PI);
+				lng = (lng * 255.0) / (2 * M_PI);
+				mesh[k].vertex[v].st[0] = (unsigned char)lat;  
+				mesh[k].vertex[v].st[1] = (unsigned char)lng;
+
+				// Modeler must use VertexUV, not polymapping for best results
+				if (freyjaGetPolygonFlags(idx) & fPolygon_VertexUV)
+				{
+					freyjaGetVertexTexCoordUV2fv(vertex, uv);
+					mesh[k].texel[v].st[0] = uv[0];
+					mesh[k].texel[v].st[1] = uv[1];
+				}
+				else if (freyjaGetPolygonFlags(idx) & fPolygon_PolyMappedUV)
+				{
+					// This will make 'interesting' UVMaps in some cases
+					// You can't fit more UVs than Vertices in md3!
+					texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
+					freyjaGetTexCoord2fv(texcoord, uv);
+					mesh[k].texel[v].st[0] = uv[0];
+					mesh[k].texel[v].st[1] = uv[1];
+				}
+				else // Color info only?  Grab the vertex uv anyway then
+				{
+					freyjaGetVertexTexCoordUV2fv(vertex, uv);
+					mesh[k].texel[v].st[0] = uv[0];
+					mesh[k].texel[v].st[1] = uv[1];
+				}
+
+				transV.pushBack(vertex); // transV[v] -> vertex
+				mesh[k].tris[i].triangle[j] = v;
+			}
 		}
+
+
+#ifdef MD3_EXPORT_FRAMES
+		// frame[1..n], WARNING Uses v from last loop
+		for (f = 1; f < mesh[k].num_frames; ++f)
+		for (i = 0; i < mesh[k].num_triangles; ++i)
+		{
+			freyjaPrintMessage("Exporting frame %li/%i...\n",
+							   f, mesh[k].num_frames);
+			idx = freyjaGetMeshPolygonIndex(transM[k], i);
+
+			for (j = 0; j < 3; ++j, ++v)
+			{
+				vertex = freyjaGetPolygonVertexIndex(idx, j);
+
+				// FIXME: May need bounds ckecking/scaling for short
+				freyjaGetVertexFrame(vertex, f-1, &frameIndex, xyz);
+				mesh[k].vertex[v].pos[0] = (short)(xyz[x]*scale);
+				mesh[k].vertex[v].pos[1] = (short)(xyz[y]*scale);
+				mesh[k].vertex[v].pos[2] = (short)(xyz[z]*scale);
+
+				// Normal isn't actually stored in md3's vertex.norm
+				// it must be encoded into the 'vertex.st' normal
+				freyjaGetVertexNormalXYZ3fv(vertex, xyz);
+				mesh[k].vertex[v].norm[0] = (short)xyz[x];
+				mesh[k].vertex[v].norm[1] = (short)xyz[y];
+				mesh[k].vertex[v].norm[2] = (short)xyz[z];
+				lng = acos(xyz[z]);
+				lat = acos(xyz[x]/sin(lng)); 
+				lat = (lat * 255.0) / (2 * M_PI);
+				lng = (lng * 255.0) / (2 * M_PI);
+				mesh[k].vertex[v].st[0] = (unsigned char)lat;  
+				mesh[k].vertex[v].st[1] = (unsigned char)lng;
+
+				// Modeler must use VertexUV, not polymapping for best results
+				if (freyjaGetPolygonFlags(idx) & fPolygon_VertexUV)
+				{
+					freyjaGetVertexTexCoordUV2fv(vertex, uv);
+					mesh[k].texel[v].st[0] = uv[0];
+					mesh[k].texel[v].st[1] = uv[1];
+				}
+				else if (freyjaGetPolygonFlags(idx) & fPolygon_PolyMappedUV)
+				{
+					// This will make 'interesting' UVMaps in some cases
+					// You can't fit more UVs than Vertices in md3!
+					texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
+					freyjaGetTexCoord2fv(texcoord, uv);
+					mesh[k].texel[v].st[0] = uv[0];
+					mesh[k].texel[v].st[1] = uv[1];
+				}
+				else // Color info only?  Grab the vertex uv anyway then
+				{
+					freyjaGetVertexTexCoordUV2fv(vertex, uv);
+					mesh[k].texel[v].st[0] = uv[0];
+					mesh[k].texel[v].st[1] = uv[1];
+				}
+
+				transV.pushBack(vertex); // transV[v] -> vertex
+			}
+		}		
+#endif
 
 		//FIXME: add skin info here
 		mesh[k].skin = NULL;
-   }
+	}
 
+
+#ifdef OLD_OLD_PLUGIN_DEAD_DEAD_DEAD
    // Bone frames ////////////////////////
-
    num_bone_frames = 0;
 
    if (num_bone_frames)
@@ -1228,17 +1340,16 @@ int freyja_model__md3_export(char *filename)
 		bone = new md3_boneframe_t[num_bone_frames];
 		memset(bone, 0, sizeof(md3_boneframe_t) * num_bone_frames);
 
-		md3.Bone(bone);
+		md3.setBones(bone, num_bone_frames);
 
 		//FIXME: Add converted bone frames from freyja to bone
    }
    else
-		md3.Bone(NULL);
-
-   md3.NumBones(num_bone_frames);
+   {
+	   md3.setBones(NULL, 0);
+   }
 
    // Bone tags aka Bolt-ons ////////////////////////
-
    num_tags = 0;
 
    if (num_tags)
@@ -1246,20 +1357,19 @@ int freyja_model__md3_export(char *filename)
 		tag = new md3_tag_t[num_tags * num_bone_frames];
 		memset(tag, 0, sizeof(md3_tag_t) * num_tags * num_bone_frames);
 
-		md3.Tag(tag);
+		md3.setTags(tag, num_tags * num_bone_frames);
 
 		//FIXME: Add converted bone tags from freyja to bone
    }
    else
-	{
-		md3.Tag(NULL);
-	}
+   {
+	   md3.setTags(NULL, 0);
+   }
+#endif
 
-   md3.NumTags(num_tags);
+   freyjaCriticalSection(FREYJA_WRITE_UNLOCK);
 
-   freyjaCriticalSection(WRITE_UNLOCK);
-
-   return md3.Save(filename);
+   return md3.save(filename);
 #else
 	printf("md3_export> Not enabled in this build\n");
 	return -1;

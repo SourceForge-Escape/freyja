@@ -134,6 +134,8 @@ typedef enum {
 	eTranslateUV,
 	eRotateUV,
 	eScaleUV,
+	eTmpUVMapOn,
+	eTmpUVMapOff,
 	eTextureSlotLoad,
 
 	/* Widget interaction events */
