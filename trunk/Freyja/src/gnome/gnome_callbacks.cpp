@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -21,7 +21,7 @@
  *
  * 2000.09.16:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
 #include <stdio.h>
 
@@ -35,6 +35,7 @@
 
 #include "freyja_events.h"
 #include "FreyjaModel.h"
+#include "FreyjaControl.h"
 #include "MaterialManager.h"
 
 #include "gnome_callbacks.h"
@@ -57,14 +58,16 @@ typedef struct gtk_anim_tree_s
 //   reduce these as much as you can with gtk+ use
 extern GtkWidget *GTK_GLAREA_WINDOW;
 extern FreyjaModel *gFreyjaModel;
+extern FreyjaControl *gFreyjaControl;
 
 // Mongoose 2002.02.01, Gobals only accessed in this file
 int FILE_MODE = FREYJA_MODE_LOAD_MODEL;
 Map<int, GtkWidget *> WIDGET_MAP;
 Map<int, int> NOTEBOOK_EVENT;
 
-
 //////////////////////////////////////////////////////////////////////////
+
+Map<int, Vector<GtkWidget *> *> gObserverGtkWigets;
 
 
 void freyja_event_fullscreen()
@@ -72,9 +75,74 @@ void freyja_event_fullscreen()
 	application_window_fullscreen();
 }
 
+
 void freyja_event_unfullscreen()
 {
 	application_window_unfullscreen();
+}
+
+
+void freyja_event_subscribe_gtk_widget(int index, GtkWidget *widget)
+{
+	Vector<GtkWidget *> *widgets = gObserverGtkWigets[index];
+
+
+	if (!widgets)
+	{
+		widgets = new Vector<GtkWidget *>;
+		gObserverGtkWigets.Add(index, widgets);
+	}
+
+	widgets->pushBack(widget);
+
+	event_print("%d. $%d <- %p\t#%d\n", 
+		   gObserverGtkWigets.NumItems(),
+		   index, widget, widgets->size());
+}
+
+
+void freyja_event_notify_observer1f(event_subject_id id, float r)
+{
+	Vector<GtkWidget *> *widgets;
+	GtkWidget *widget;
+	unsigned int i;
+
+	widgets = gObserverGtkWigets[id];
+
+	if (!widgets)
+	{
+		event_print("freyja_event_notify_observer1f> ERROR, unknown id %d\n",
+					id);
+		return;
+	}
+
+	event_print("!!!!\n");
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		widget = (*widgets)[i];
+
+		if (!widget)
+			continue;
+
+		if (GTK_IS_SPIN_BUTTON(widget))
+		{
+			GtkAdjustment *adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(widget));
+			
+			// gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget), r);
+			
+			if (adj)
+			{
+				gtk_adjustment_set_value(adj, r);
+				event_print("$@ %d <- %p\n", id, widget);
+			}
+		}
+		else
+		{
+			event_print("freyja_event_notify_observer1f> ERROR, unknown widget\n");
+			return;
+		}
+	}
 }
 
 
@@ -98,7 +166,7 @@ void callback_update_skeleton_ui_gtk(callback_bone_t *bone,
 	if (bone->id == 0) // Root bone
 	{
 		store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
-											G_TYPE_STRING,   /* Bone Name */
+								   G_TYPE_STRING,   /* Bone Name */
     	                           G_TYPE_INT);     /* Bone Id */
 
 		gtk_tree_store_append(store, &root, NULL);
@@ -760,8 +828,8 @@ gint spinbutton_float_event(GtkSpinButton *spin, gpointer event_id)
 		test[GPOINTER_TO_INT(event_id)-800] = new_value;
 		event_refresh();
 		break;
-	case 1004:
-		gFreyjaModel->setZoom(new_value);
+	case eZOOM:
+		gFreyjaControl->setZoom(new_value);
 		event_refresh();
 		break;
 	default:

@@ -47,9 +47,10 @@ int freyja_model__md3_check(char *filename)
    f = fopen(filename, "rb");
 
    if (!f)
-   {
-		perror("mdl_check> fopen failed");
-		return -1;
+   { 
+	   //sys_errlist[errno]
+	   perror("mdl_check> fopen failed");
+	   return -1;
    }
 
    fread(&header, 32, 1, f);      
@@ -73,7 +74,7 @@ int freyja_model__md3_import(char *filename)
 	md3_bone_t *md3_bone;
 	md3_tag_t *md3_tag;
 	float s, t;
-	Matrix matrix;
+	//Matrix matrix;
 	float pos[3];
 	Md3 md3;
 	Map<unsigned int, unsigned int> trans;
@@ -87,63 +88,69 @@ int freyja_model__md3_import(char *filename)
 	md3_bone = md3.getBones();
 	md3_tag = md3.getTags(); 
 
-	for (m = 0; m < md3.getNumMeshes(); m++)
+	for (m = 0; m < md3.getNumMeshes(); ++m)
 	{
 		// Start a new mesh
 		eggBegin(FREYJA_MESH);
+		eggMeshFlags1u(FL_MESH__VERTEX_FRAME_GROUPS);
 
-		// Clear vertex index translation table
-		trans.Clear();
-     
-		for (f = 0, v = 0; f < md3_mesh[m].num_frames; f++)
+		for (f = 0, v = 0; f < md3_mesh[m].num_frames; ++f)
 		{  
-			matrix.setIdentity();
+			eggPrintMessage("Importing mesh: %d, frame: %d of %d\n", 
+							m, f, md3_mesh[m].num_frames);
 
+			//matrix.setIdentity();
+			
 			/***************
-       mt[0][0] = tag[f].rotation[0][0];
-       mt[0][1] = tag[f].rotation[0][1];
-       mt[0][2] = tag[f].rotation[0][2];
-
-       mt[1][0] = tag[f].rotation[1][0];
-       mt[1][1] = tag[f].rotation[1][1];
-       mt[1][2] = tag[f].rotation[1][2];
-
-       mt[2][0] = tag[f].rotation[2][0];
-       mt[2][1] = tag[f].rotation[2][1];
-       mt[2][2] = tag[f].rotation[2][2];
+			mt[0][0] = tag[f].rotation[0][0];
+			mt[0][1] = tag[f].rotation[0][1];
+			mt[0][2] = tag[f].rotation[0][2];
+			
+			mt[1][0] = tag[f].rotation[1][0];
+			mt[1][1] = tag[f].rotation[1][1];
+			mt[1][2] = tag[f].rotation[1][2];
+			
+			mt[2][0] = tag[f].rotation[2][0];
+			mt[2][1] = tag[f].rotation[2][1];
+			mt[2][2] = tag[f].rotation[2][2];
 			***************/
 
 			// Start a new vertex group
 			eggBegin(FREYJA_GROUP);
 
-			for (; v < md3_mesh[m].num_vertices * (f+1); v++)
+			for (; v < md3_mesh[m].num_vertices * (f+1); ++v)
 			{
 				pos[0] = md3_mesh[m].vertex[v].pos[0];
 				pos[1] = md3_mesh[m].vertex[v].pos[1];
 				pos[2] = md3_mesh[m].vertex[v].pos[2];
 
-				matrix.multiply3v(pos, pos);
+				//matrix.multiply3v(pos, pos);
 
 				// Store vertices in group
-				vertex = eggVertexStore3f(pos[0], pos[1], pos[2]);
+				vertex = eggVertexStore3f(pos[1], pos[2], pos[0]); // XZY
       
 				// Generates id translator  table for this vertex morph frame
-				trans.Add(v, vertex);	
+				trans.Add(v, vertex);
+
+				eggVertexNormalStore3f(vertex, 
+									   md3_mesh[m].vertex[v].norm[1], 
+									   md3_mesh[m].vertex[v].norm[2], 
+									   md3_mesh[m].vertex[v].norm[0]);
 			}
 
 			eggGroupCenter3f(md3_bone[f].center[0], 
-								  md3_bone[f].center[1], 
-								  md3_bone[f].center[2]);
+							 md3_bone[f].center[1], 
+							 md3_bone[f].center[2]);
 
 			// End FREYJA_GROUP
 			eggEnd();
-      
+
 			// FIXME: Handle Tags
 		}
 
 		num_texels = md3_mesh[m].num_vertices * md3_mesh[m].num_frames;
 
-		for (p = 0; p < md3_mesh[m].num_triangles; p++)
+		for (p = 0; f == 0 && p < md3_mesh[m].num_triangles; p++)
 		{
 			// Start a new polygon
 			eggBegin(FREYJA_POLYGON);
@@ -181,6 +188,9 @@ int freyja_model__md3_import(char *filename)
 
 		// End FREYJA_MESH
 		eggEnd();
+
+		// Clear vertex index translation table
+		trans.Clear();
 	}
 
 	return 0;

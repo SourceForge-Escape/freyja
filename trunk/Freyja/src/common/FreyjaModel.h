@@ -32,8 +32,86 @@
 
 #include <freyja_model/EggPlugin.h>
 #include <freyja_model/Egg.h>
-
 #include "Light.h"
+#include "freyja_events.h"
+
+
+class FreyjaEgg : public Egg
+{
+public:
+	FreyjaEgg::FreyjaEgg() : Egg()
+	{
+	}
+
+
+	virtual void print(char *format, ...)
+	{	
+		va_list args;
+
+		va_start(args, format);
+		event_print_args(format, &args);
+		va_end(args);
+	}
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Removed internal level check for speed
+	 *            and lower overhead, new ABI was printDebug
+	 *
+	 * 2002.07.05: 
+	 * Mongoose - Debug level
+	 *
+	 * 2001.01.31: 
+	 * Mongoose - Debug toggle
+	 *
+	 * 1999.07.31: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual void printError(char *format, ...)
+	{	
+		va_list args;
+
+		va_start(args, format);
+		event_print_args(format, &args);
+		va_end(args);
+	}
+	/*------------------------------------------------------
+	 * Pre  : String and args are valid
+	 * Post : Report an error to stderr
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+};
+
+class FreyjaEggPlugin : public EggPlugin
+{
+public:
+	FreyjaEggPlugin(FreyjaEgg *egg, char *plugindir) : 
+		EggPlugin(egg, plugindir)
+	{
+	}
+
+	
+	virtual void eggPrintError(char *format, va_list *args)
+	{
+		event_print_args(format, args);
+	}
+
+	
+	virtual void eggPrintMessage(char *format, va_list *args)
+	{
+		event_print_args(format, args);
+	}
+};
+
 
 class FreyjaModel
 {
@@ -267,17 +345,6 @@ public:
 	 * Mongoose - Created, replaces old API 'Scroll' methods
 	 ------------------------------------------------------*/
 
-	float getZoom();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns current viewing zoom of scene
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * ????.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	int saveModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : filename is valid
@@ -434,17 +501,6 @@ public:
 	 ------------------------------------------------------*/
 
 	void setSceneTranslation(vec_t x, vec_t y, vec_t z);
-
-	void setZoom(float zoom);
-	/*------------------------------------------------------
-	 * Pre  : ZOOM is a number greater than 0.0
-	 * Post : Sets current viewing zoom of scene
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * ????.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////////////////
@@ -626,9 +682,9 @@ private:
 	////////////////////////////////////////////////////////////
 
 	
-	Egg *_egg;                          /* The 3d model */
+	FreyjaEgg *_egg;                    /* The 3d model */
 	
-	EggPlugin *_plugin;                 /* Model plugin system */
+	FreyjaEggPlugin *_plugin;           /* Model plugin system */
 
 	char *_palette_filename;            /* Current palette */
 

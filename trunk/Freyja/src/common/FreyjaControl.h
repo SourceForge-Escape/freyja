@@ -79,31 +79,13 @@ typedef enum freyja_edit_mode                /* Major control modes */
 } freyja_edit_mode_t;
 
 
-// Mongoose 2002.02.21, HHhhhhmmm.... Tracer event testing
-class FreyjaEvent
-{
-public:
-	FreyjaEvent();
-
-	~FreyjaEvent();
-
-	void AddEvent(int e, int c);
-	
-	void Emit();
-
-private:
-
-	void *_func_event;
-
-	bool _pair_active;
-
-	int _pair_event[2];
-};
-
-
 class FreyjaControl
 {
  public:
+
+	////////////////////////////////////////////////////////////
+	// Constructors
+	////////////////////////////////////////////////////////////
 
 	FreyjaControl();
 	/*--------------------------------------------
@@ -121,21 +103,40 @@ class FreyjaControl
 	 * Post     : FreyjaControl object is deconstructed
 	 --------------------------------------------*/
 
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	float getZoom();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns current viewing zoom of scene
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * ????.??.??: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
+
 	void eventAnimation(int command);
 	void eventBone(int command);
 	void eventMain(int command);
 	void eventMesh(int command);
 	void eventMisc(int command);
 
-	void Event(int event, int command);
+	void handleEvent(int event, int command);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
 	 * Modified : 
 	 * Pre      : 
 	 * Post     : Process menu input
 	 --------------------------------------------*/
-	
-
 
 	void ReadRC();
 	/*--------------------------------------------
@@ -145,6 +146,19 @@ class FreyjaControl
 	 * Post     : Reads RC file, updates the new 
 	 *            keymap, color scheme, etc
 	 --------------------------------------------*/
+
+	void setZoom(float zoom);
+	/*------------------------------------------------------
+	 * Pre  : ZOOM is a number greater than 0.0
+	 * Post : Sets current viewing zoom of scene
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * ????.??.??: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
 	
 	bool Mouse(int btn, int state, int mod, int x, int y);
 	/*--------------------------------------------
@@ -182,6 +196,15 @@ class FreyjaControl
 	 -----------------------------------------*/
 
 private:
+
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
 
 	void MotionEdit(int x, int y, Egg::egg_plane plane);
 	/*--------------------------------------------

@@ -35,6 +35,27 @@
 
 EggPlugin *EggPlugin::mEggPlugin = 0x0;
 
+
+void eggPrintMessage(char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	EggPlugin::mEggPlugin->eggPrintMessage(format, &args);
+	va_end(args);
+}
+
+
+void eggPrintError(char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	EggPlugin::mEggPlugin->eggPrintError(format, &args);
+	va_end(args);
+}
+
+
 int eggGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 {
 	vec_t s;
@@ -992,6 +1013,11 @@ unsigned int eggGetTagRotate3f(float *x, float *y, float *z)
 	return PLUGIN_ERROR;
 }
 
+void eggMeshFlags1u(unsigned int flags)
+{
+	if (EggPlugin::mEggPlugin)
+		EggPlugin::mEggPlugin->eggMeshFlags1u(flags);	
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -1022,6 +1048,10 @@ EggPlugin::EggPlugin(Egg *egg, char *plugin_dir)
 		mPluginDir = new char[64];
 		strcpy(mPluginDir, "/usr/local/lib/egg/");    
 	}
+
+
+	/* Mongoose 2004.05.18, 
+	 * Add dir search check and sort import / export / etc */
 
 	/* Load some default plugins they should have */
 	addModule("eggv7");
@@ -1524,6 +1554,38 @@ unsigned int EggPlugin::eggGetTagRotate(float *x, float *y, float *z)
 	return PLUGIN_ERROR;
 }
 
+	
+void EggPlugin::eggPrintError(char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	eggPrintError(format, &args);
+	va_end(args);
+}
+
+
+void EggPlugin::eggPrintError(char *format, va_list *args)
+{
+	vfprintf(stderr, format, *args);
+}
+
+
+void EggPlugin::eggPrintMessage(char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	eggPrintMessage(format, &args);
+	va_end(args);
+}
+
+
+void EggPlugin::eggPrintMessage(char *format, va_list *args)
+{
+	vfprintf(stdout, format, *args);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
@@ -1552,7 +1614,7 @@ int EggPlugin::importModel(char *filename)
 			return -2;
 	}
 
-	printf("[EggPlugin module loader invoked]\n");
+	eggPrintMessage("[EggPlugin module loader invoked]\n");
 
 	for (i = mModules.begin(); i < mModules.end(); ++i)
 	{
@@ -1564,11 +1626,11 @@ int EggPlugin::importModel(char *filename)
 
 		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
 		{
-			fprintf(stderr, "\tERROR: In module '%s'.\n", module_filename);
+			eggPrintError("\tERROR: In module '%s'.\n", module_filename);
 
 			if ((error = dlerror()) != NULL)  
 			{
-				fprintf (stderr, "\tERROR: %s\n", error);
+				eggPrintError("\tERROR: %s\n", error);
 				//return -5;
 			}
 
@@ -1577,13 +1639,13 @@ int EggPlugin::importModel(char *filename)
 		}
 		else
 		{
-			printf("\tModule '%s' opened.\n", module_filename);
+			eggPrintMessage("\tModule '%s' opened.\n", module_filename);
     
 			check = (int (*)(char *filename))dlsym(handle, module_check);
 
 			if ((error = dlerror()) != NULL)  
 			{
-				fprintf (stderr, "\tERROR: %s\n", error);
+				eggPrintError("\tERROR: %s\n", error);
 				//return -5;
 				dlclose(handle);
 				continue;
@@ -1593,7 +1655,7 @@ int EggPlugin::importModel(char *filename)
 
 			if ((error = dlerror()) != NULL)  
 			{
-				fprintf (stderr, "\tERROR: %s\n", error);
+				eggPrintError("\tERROR: %s\n", error);
 				//return -5;
 				dlclose(handle);
 				continue;
@@ -1612,7 +1674,7 @@ int EggPlugin::importModel(char *filename)
 		}
 	}
 
-	printf("[EggPlugin module loader sleeps now]\n");
+	eggPrintMessage("[EggPlugin module loader sleeps now]\n");
 
 	if (loaded)
 		return 0; // sucess
@@ -1735,7 +1797,6 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 	case FREYJA_BONE:
 		mStack.push(FREYJA_BONE);
 		mTag = mEgg->addTag(0.0, 0.0, 0.0, 0x00);
-		//mEgg->addTag(mTag);
 		mTag->name[0] = 0;
 		break;
 	case FREYJA_SKELETON:
@@ -1951,8 +2012,8 @@ void EggPlugin::eggVertexWeightStore(unsigned int index,
 		return;
 
 	if (total + weight > 1.0)  // Just give a warning for now
-		printf("WARNING: Weight overflow not handled here %s:%d\n", 
-			   __FILE__, __LINE__);
+		eggPrintError("WARNING: Weight overflow not handled here %s:%d\n", 
+					  __FILE__, __LINE__);
 
 	vWeight = new egg_weight_t;
 	vWeight->weight = weight;
@@ -2015,6 +2076,20 @@ void EggPlugin::eggVertex1i(unsigned int egg_id)
 	{
 		fprintf(stderr, 
 				"EggPlugin::eggVertex1i> Vertex defined outside POLYGON!\n");
+	}
+}
+
+
+void EggPlugin::eggMeshFlags1u(unsigned int flags)
+{
+	if (mStack.peek() == FREYJA_MESH || !mMesh)
+	{
+		mMesh->flags = flags;
+	}
+	else
+	{
+		fprintf(stderr, 
+				"EggPlugin::eggMeshFlags1u> Flag defined outside MESH!\n");
 	}
 }
 
