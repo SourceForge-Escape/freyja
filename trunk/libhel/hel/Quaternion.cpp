@@ -457,6 +457,13 @@ Quaternion Quaternion::multiply(Quaternion a, Quaternion b)
 							a.mW * b.mX + a.mX * b.mW + a.mY * b.mZ - a.mZ * b.mY,
 							a.mW * b.mY + a.mY * b.mW + a.mZ * b.mX - a.mX * b.mZ,
 							a.mW * b.mZ + a.mZ * b.mW + a.mX * b.mY - a.mY * b.mX);
+#ifdef SLEEPYME
+	vec_t a, b, c, d, e, f, g, h;
+
+
+	a = (a.mW + a.mX) * (b.mW + b.mX);
+	b = (a.mZ - a.mY) * (b.mY - b.mZ);
+#endif
 }
 
 

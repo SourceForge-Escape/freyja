@@ -1540,6 +1540,25 @@ long freyjaVertex3fv(vec3_t xyz)
 }
 
 
+void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z)
+{
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_vertex_t *v = EggPlugin::mEggPlugin->getVertex(index);
+
+		if (v)
+		{
+			vec_t *xyz = new vec3_t;
+			xyz[0] = x;
+			xyz[1] = y;
+			xyz[2] = z;
+			v->frameId.pushBack(freyjaGetCurrent(FREYJA_VERTEX_FRAME));
+			v->frames.pushBack((vec3_t *)xyz);
+		}
+	}
+}
+
+
 long freyjaVertex3f(vec_t x, vec_t y, vec_t z)
 {
 	if (EggPlugin::mEggPlugin)

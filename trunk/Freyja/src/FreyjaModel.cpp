@@ -345,31 +345,6 @@ void FreyjaModel::setCurrentGroup(unsigned int index)
 	{
 		_current_group = index;
 		freyja_print("Group[%i]", getCurrentGroup());
-
-#ifdef FIXME
-		if (0) // this is the old egg way of vertex morph frame anim
-		{
-			egg_mesh_t *mesh = _egg->getMesh(getCurrentMesh());
-			unsigned int i, j;
-
-			for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
-			{
-				if (mesh->group[i] && mesh->group[i] == getCurrentGroup())
-				{
-					if (mesh->flags & FL_MESH__VERTEX_FRAME_GROUPS)
-					{
-						// blah
-						
-						for (j = mesh->polygon.begin(); j < mesh->polygon.end(); ++i)
-						{
-
-						mesh->r_polygon.clear(); // force render recache
-					}
-				}
-			}
-			
-		}
-#endif
 	}
 }
 

@@ -14,6 +14,9 @@
  *
  *-- History ---------------------------------------------------------- 
  *
+ * 2004.12.23:
+ * MEndian replaced with FreyjaFileWriter/Reader use
+ *
  * 2004.04.22:
  * Mongoose - RGB Texture generation and internal palettes
  *
@@ -24,12 +27,8 @@
 
 #include <stdio.h>
 #include <string.h>
-
-#include <freyja8/mendian.h>
-
-#define fread_int_small eRead_Small_int32
-#define fread_u_int_small eRead_Small_uint32
-#define fread_float_small eRead_Small_float
+#include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 
 #include "Mdl.h"
 
@@ -918,15 +917,40 @@ int Mdl::Save(char *filename)
 	return 0;
 }
 
+bool fread_int_small(int *ptr, FreyjaFileReader &r)
+{
+	*ptr = r.readInt32();
+	return !r.endOfFile();
+}
+
+
+bool fread_u_int_small(unsigned int *ptr, FreyjaFileReader &r)
+{
+	*ptr = r.readInt32U();
+	return !r.endOfFile();
+}
+
+
+bool fread_float_small(float *ptr, FreyjaFileReader &r)
+{
+	*ptr = r.readFloat32();
+	return !r.endOfFile();
+}
+
+bool fread_buffer(unsigned char *buffer, unsigned long sz, FreyjaFileReader &r)
+{
+	return !r.readBufferUnsignedChar(sz, buffer);
+}
+
+
 int Mdl::Load(char *filename)
 {
-	FILE *f;
+	FreyjaFileReader f;
 	int i, skin_sz;
 	unsigned j;
 
-	f = fopen(filename, "rb");
 
-	if (!f)
+	if (!f.openFile(filename))
 	{
 		printf("Mdl::Load> File '%s' not found.\n", filename);
 		return -1;
@@ -1023,9 +1047,9 @@ int Mdl::Load(char *filename)
 		{
 			_skin[i].pixmap = new unsigned char[skin_sz];
 
-			if (fread(_skin[i].pixmap, skin_sz, 1, f) != 1)
+			if (fread_buffer(_skin[i].pixmap, skin_sz, f))
 			{
-				printf("Mdl::Load> Error in skin fread.\n");
+				printf("Mdl::Load> Error in skin fread %ibytes.\n", skin_sz);
 				return -26;
 			}
 
@@ -1056,7 +1080,7 @@ int Mdl::Load(char *filename)
 			{
 				_skin[i].gskin[j].pixmap = new unsigned char[skin_sz];
 
-				if (fread(_skin[i].gskin[j].pixmap, skin_sz, 1, f) != 1)
+				if (fread_buffer(_skin[i].gskin[j].pixmap, skin_sz, f))
 				{
 					printf("Mdl::Load> Error in group skin fread.\n");
 					return -29;
@@ -1122,19 +1146,19 @@ int Mdl::Load(char *filename)
 
 		if (_frame[i].type == 0)
 		{
-			if (fread(&_frame[i].sframe.bboxmin, 4, 1, f) != 1)
+			if (fread_buffer((unsigned char*)&_frame[i].sframe.bboxmin, 4, f))
 			{
 				printf("Mdl::Load> frame bbox min fread failed.\n");
 				return -38;
 			}
 
-			if (fread(&_frame[i].sframe.bboxmax, 4, 1, f) != 1)
+			if (fread_buffer((unsigned char*)&_frame[i].sframe.bboxmax, 4, f))
 			{
 				printf("Mdl::Load> frame bbox max fread failed.\n");
 				return -39;
 			}
 
-			if (fread(_frame[i].sframe.name, 16, 1, f) != 1)
+			if (fread_buffer((unsigned char*)_frame[i].sframe.name, 16, f))
 			{
 				printf("Mdl::Load> frame name fread failed.\n");
 				return -40;
@@ -1144,7 +1168,7 @@ int Mdl::Load(char *filename)
 
 			_frame[i].sframe.tv = new trivertex_t[_numverts];
 
-			if (fread(_frame[i].sframe.tv, 4 * _numverts, 1, f) != 1)
+			if (fread_buffer((unsigned char*)_frame[i].sframe.tv, 4 * _numverts, f))
 			{
 				printf("Mdl::Load> Frame vertex[%i] fread failed.\n", i);
 				return -41;
@@ -1155,10 +1179,10 @@ int Mdl::Load(char *filename)
 			if (!fread_u_int_small(&_frame[i].gframe.num_gsframes, f))
 				return -42;
 
-			if (fread(&_frame[i].gframe.bboxmin, 4, 1, f) != 1)
+			if (fread_buffer((unsigned char*)&_frame[i].gframe.bboxmin, 4, f))
 				return -43;
 
-			if (fread(&_frame[i].gframe.bboxmax, 4, 1, f) != 1)
+			if (fread_buffer((unsigned char*)&_frame[i].gframe.bboxmax, 4, f))
 				return -44;
 
 			_frame[i].gframe.gsframe_interval = 
@@ -1175,13 +1199,13 @@ int Mdl::Load(char *filename)
 
 			for (j = 0; j < _frame[i].gframe.num_gsframes; j++)
 			{
-				if (fread(&_frame[i].gframe.gsframe[j].bboxmin, 4, 1, f) != 1)
+				if (fread_buffer((unsigned char*)&_frame[i].gframe.gsframe[j].bboxmin, 4, f))
 					return -46;
 
-				if (fread(&_frame[i].gframe.gsframe[j].bboxmax, 4, 1, f) != 1)
+				if (fread_buffer((unsigned char*)&_frame[i].gframe.gsframe[j].bboxmax, 4, f))
 					return -47;
 
-				if (fread(&_frame[i].gframe.gsframe[j].name, 16, 1, f) != 1)
+				if (fread_buffer((unsigned char*)&_frame[i].gframe.gsframe[j].name, 16, f))
 					return -48;
 				else
 					printf("Mdl::Load> GFrame[%i][%i] %s\n", 
@@ -1189,13 +1213,13 @@ int Mdl::Load(char *filename)
 
 				_frame[i].gframe.gsframe[j].tv = new trivertex_t[_numverts];
 
-				if (fread(&_frame[i].gframe.gsframe[j].tv,1,4*_numverts,f) != 1)
+				if (fread_buffer((unsigned char*)&_frame[i].gframe.gsframe[j].tv,4*_numverts,f))
 					return -49;
 			}
 		}
 	}
 
-	fclose(f);
+	f.closeFile();
 
 	return 0;
 }
@@ -1205,20 +1229,28 @@ int Mdl::Load(char *filename)
 // Special Interface code
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA_MODEL_PLUGINS
+#ifdef FREYJA_PLUGINS
 
 #include <string.h>
 #include <stdio.h>
-#include <freyja8/EggPlugin.h>
+#include <freyja/FreyjaPlugin.h>
 
 extern "C" {
 
   int freyja_model__mdl_check(char *filename);
   int freyja_model__mdl_import(char *filename);
   int freyja_model__mdl_export(char *filename);
+  int import_model(char *filename);
 }
 
 
+int import_model(char *filename)
+{
+	if (!freyja_model__mdl_check(filename))
+		return freyja_model__mdl_import(filename);
+
+	return -1;
+}
 
 int freyja_model__mdl_check(char *filename)
 {
@@ -1249,130 +1281,138 @@ int freyja_model__mdl_check(char *filename)
 
 int freyja_model__mdl_import(char *filename)
 {
-  float x, y, z, s, t;
-  int i, f, v, num_frames;
-  MDL_t *header;
-  dtriangle_t *tris;
-  MDL_Frame_t *frame;
-  stvert_t *st_vert;
-  Mdl mdl;
-  Map<unsigned int, unsigned int> trans;
-  unsigned int vertex;
-  unsigned char *image;
+	float x, y, z, s, t;
+	int i, f, v, num_frames;
+	MDL_t *header;
+	dtriangle_t *tris;
+	MDL_Frame_t *frame;
+	stvert_t *st_vert;
+	Mdl mdl;
+	Vector<long> transV;
+	unsigned int vertex;
+	unsigned char *image;
 
 
-  if (mdl.Load(filename))
-    return -1;
+	if (mdl.Load(filename))
+		return -1;
 
+	/* Mongoose 2004.04.22, 
+	 * Store both a Quake and Hexen2 texture for now */
+	image = mdl.getTextureRGB24(Mdl::Quake, 0);
 
-
-/* Mongoose 2004.04.22, 
- * Store both a Quake and Hexen2 texture for now */
-  image = mdl.getTextureRGB24(Mdl::Quake, 0);
-
-  if (image)
-  {
-    eggTextureStoreBuffer(image, 3,
-			  mdl.getTextureWidth(), mdl.getTextureHeight(), 
-			  EGG_COLORMODE_RGB);
-  }
+	if (image)
+	{
+		freyjaTextureStoreBuffer(image, 3,
+								 mdl.getTextureWidth(), mdl.getTextureHeight(),
+								 RGB_24);
+	}
   
-  image = mdl.getTextureRGB24(Mdl::Hexen2, 0);
+	image = mdl.getTextureRGB24(Mdl::Hexen2, 0);
+	
+	if (image)
+	{
+		freyjaTextureStoreBuffer(image, 3,
+								 mdl.getTextureWidth(), mdl.getTextureHeight(), 
+								 RGB_24);
+	}
 
-  if (image)
-  {
-    eggTextureStoreBuffer(image, 3,
-			  mdl.getTextureWidth(), mdl.getTextureHeight(), 
-			  EGG_COLORMODE_RGB);
-  }
+	header = mdl.Header();
+	frame = mdl.Frame();
+	tris = mdl.Triangle();
+	st_vert = mdl.Vertex();
 
-  header = mdl.Header();
-  frame = mdl.Frame();
-  tris = mdl.Triangle();
-  st_vert = mdl.Vertex();
+	num_frames = header->numframes;
 
-  num_frames = header->numframes;
+	// Start a new mesh
+	freyjaBegin(FREYJA_MESH);
 
-  // Start a new mesh
-  eggBegin(FREYJA_MESH);
-  eggMeshFlags1u(FL_MESH__VERTEX_FRAME_GROUPS);
+	for (f = 0; f < num_frames; ++f)
+	{
+		// Start a new vertex group
+		if (!f)
+		{
+			freyjaBegin(FREYJA_VERTEX_GROUP);  
+		}
+		else
+		{
+			freyjaBegin(FREYJA_VERTEX_FRAME);
+		}
 
-  for (f = 0; f < num_frames; f++)
-  {
-    // Start a new vertex group
-    eggBegin(FREYJA_GROUP);  
+		for (v = 0; v < header->numverts; v++)
+		{
+			x = frame[f].sframe.tv[v].v[0] * header->scale[0]+header->scale_origin[0];
+			y = frame[f].sframe.tv[v].v[1] * header->scale[1]+header->scale_origin[1];
+			z = frame[f].sframe.tv[v].v[2] * header->scale[2]+header->scale_origin[2];
+			
+			if (!f)
+			{
+				// Store vertices in group
+				vertex = freyjaVertex3f(x, z, y); // freyja coordinates
 
-    // Clear for each group
-    trans.Clear();
+				// Generates id translator list
+				transV.pushBack(vertex);
+			}
+			else
+			{
+				freyjaVertexFrame3f(transV[v], x, z, y);
+			}
+		}
 
-    for (v = 0; v < header->numverts; v++)
-    {
-      x = frame[f].sframe.tv[v].v[0] * header->scale[0]+header->scale_origin[0];
-      y = frame[f].sframe.tv[v].v[1] * header->scale[1]+header->scale_origin[1];
-      z = frame[f].sframe.tv[v].v[2] * header->scale[2]+header->scale_origin[2];
+		// End FREYJA_GROUP
+		freyjaEnd(); 
+	}
 
-      // Store vertices in group
-      vertex = eggVertexStore3f(x, z, y); // freyja coordinates
+    for (i = 0; i < header->numtris; ++i)
+	{
+		// Start a new polygon
+		freyjaBegin(FREYJA_POLYGON);
 
-      // Generates id translator list
-      trans.Add(v, vertex);
-    }
+		// Store vertices by true id, using translator list
+		freyjaPolygonVertex1i(transV[tris[i].vertindex[0]]);
+		freyjaPolygonVertex1i(transV[tris[i].vertindex[1]]);
+		freyjaPolygonVertex1i(transV[tris[i].vertindex[2]]);
 
-    // End FREYJA_GROUP
-    eggEnd(); 
-
-    for (i = 0; f == 0 && i < header->numtris; i++)
-    {
-      // Start a new polygon
-      eggBegin(FREYJA_POLYGON);
-
-      // Store vertices by true id, using translator list
-      eggVertex1i(trans[tris[i].vertindex[0]]);
-      eggVertex1i(trans[tris[i].vertindex[1]]);
-      eggVertex1i(trans[tris[i].vertindex[2]]);
-
-      // Store texels into model and polygon ( store both at once in MDL )
-      s = (float)st_vert[tris[i].vertindex[0]].s / (float)mdl.getTextureWidth();
-      t = (float)st_vert[tris[i].vertindex[0]].t / (float)mdl.getTextureHeight();
+		// Store texels into model and polygon ( store both at once in MDL )
+		s = (float)st_vert[tris[i].vertindex[0]].s/(float)mdl.getTextureWidth();
+		t = (float)st_vert[tris[i].vertindex[0]].t/(float)mdl.getTextureHeight();
       
-      if (st_vert[tris[i].vertindex[0]].onseam == MDL_ALIAS_ONSEAM &&
-	  tris[i].facesfront == 0)
-	s = (float)(st_vert[tris[i].vertindex[0]].s + mdl.getTextureWidth()/2) / 
-	  (float)mdl.getTextureWidth();
+		if (st_vert[tris[i].vertindex[0]].onseam == MDL_ALIAS_ONSEAM &&
+			tris[i].facesfront == 0)
+			s = (float)(st_vert[tris[i].vertindex[0]].s + mdl.getTextureWidth()/2) / 
+			(float)mdl.getTextureWidth();
 
-      eggTexCoord1i(eggTexCoordStore2f(s, t));
+		freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
       
-      s = (float)st_vert[tris[i].vertindex[1]].s / (float)mdl.getTextureWidth();
-      t = (float)st_vert[tris[i].vertindex[1]].t / (float)mdl.getTextureHeight();
+		s = (float)st_vert[tris[i].vertindex[1]].s / (float)mdl.getTextureWidth();
+		t = (float)st_vert[tris[i].vertindex[1]].t / (float)mdl.getTextureHeight();
 
-      if (st_vert[tris[i].vertindex[1]].onseam == MDL_ALIAS_ONSEAM &&
-	  tris[i].facesfront == 0)
-	s = (float)(st_vert[tris[i].vertindex[1]].s + mdl.getTextureWidth()/2) / 
-	  (float)mdl.getTextureWidth();
+		if (st_vert[tris[i].vertindex[1]].onseam == MDL_ALIAS_ONSEAM &&
+			tris[i].facesfront == 0)
+			s = (float)(st_vert[tris[i].vertindex[1]].s + mdl.getTextureWidth()/2) / 
+			(float)mdl.getTextureWidth();
+		
+		freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
 
-      eggTexCoord1i(eggTexCoordStore2f(s, t));
+		s = (float)st_vert[tris[i].vertindex[2]].s / (float)mdl.getTextureWidth();
+		t = (float)st_vert[tris[i].vertindex[2]].t / (float)mdl.getTextureHeight();
 
-      s = (float)st_vert[tris[i].vertindex[2]].s / (float)mdl.getTextureWidth();
-      t = (float)st_vert[tris[i].vertindex[2]].t / (float)mdl.getTextureHeight();
-
-      if (st_vert[tris[i].vertindex[2]].onseam == MDL_ALIAS_ONSEAM &&
-	  tris[i].facesfront == 0)
-	s = (float)(st_vert[tris[i].vertindex[2]].s + mdl.getTextureWidth()/2) / 
-	  (float)mdl.getTextureWidth();
-
-      eggTexCoord1i(eggTexCoordStore2f(s, t));
-
-      eggTexture1i(0);
-
-      // End FREYJA_POLYGON
-      eggEnd();
-    }
-  }
-
-  // End FREYJA_MESH
-  eggEnd();
-
-  return 0;
+		if (st_vert[tris[i].vertindex[2]].onseam == MDL_ALIAS_ONSEAM &&
+			tris[i].facesfront == 0)
+			s = (float)(st_vert[tris[i].vertindex[2]].s + mdl.getTextureWidth()/2) / 
+			(float)mdl.getTextureWidth();
+		
+		freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+		
+		freyjaPolygonMaterial1i(0);
+		
+		// End FREYJA_POLYGON
+		freyjaEnd();
+	}
+	
+	// End FREYJA_MESH
+	freyjaEnd();
+	
+	return 0;
 }
 
 
@@ -1392,23 +1432,23 @@ int freyja_model__mdl_export(char *filename)
   dtriangle_t *triangle;
   MDL_Frame_t *frame;
   MDL_Skin_t *qskin;
-  egg_vertex_list_t *evertex;
-  egg_frame_list_t *eframe;
-  egg_polygon_list_t *polygon;
+  freyja_vertex_list_t *evertex;
+  freyja_frame_list_t *eframe;
+  freyja_polygon_list_t *polygon;
   char buffer[32];
   int i, j;
   float radius;
   int skin_w;
   int skin_h;
   unsigned char *skin;
-  egg_mesh_t *mesh;
+  freyja_mesh_t *mesh;
   int err = 0;
   float bbox_min[3];
   float epos[3] = {0.0, 64.0, 0.0}; // FIXME: Hack
   bool a, b, c;
 
 
-  mesh = egg->FindMesh(mesh_id);
+  mesh = freyja->FindMesh(mesh_id);
 
   // Load texture
   img.Load(freyja_rc_map("textures/mdltest.pcx"));
@@ -1450,7 +1490,7 @@ int freyja_model__mdl_export(char *filename)
   }
 
   // Force all polygons to triangles
-  //egg->tesselate(mesh); 
+  //freyja->tesselate(mesh); 
 
   // Initialize MDL header
   mdl = new MDL_t;
@@ -1596,7 +1636,7 @@ int freyja_model__mdl_export(char *filename)
     eframe = eframe->next;
   }
 
-  egg->Transform(mesh, TRANSLATE, 
+  freyja->Transform(mesh, TRANSLATE, 
 		  fabs(bbox_min[0]), fabs(bbox_min[1]), fabs(bbox_min[2]));
 
   eframe = mesh->frames;
@@ -1673,7 +1713,7 @@ int freyja_model__mdl_export(char *filename)
 //#define DEBUG_MDL_BBOX
 #ifdef DEBUG_MDL_BBOX
     // DEBUG: Dump bbox info to console
-    printf("egg bbox ( %.0f, %.0f, %.0f), ( %.0f, %.0f, %.0f)\n",
+    printf("freyja bbox ( %.0f, %.0f, %.0f), ( %.0f, %.0f, %.0f)\n",
 	   eframe->frame->bbox_min[0], 
 	   eframe->frame->bbox_min[1],
 	   eframe->frame->bbox_min[2],

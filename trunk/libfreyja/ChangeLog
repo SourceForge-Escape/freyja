@@ -29,6 +29,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.9.0-20041223) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o New ABI and Egg backend support for vertex morph frames
+	o GLM support was added to svn yesterday
+
+
  libfreyja (0.9.0-20041221) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o Updates and fixes for MD5, NOD, and other plugins

@@ -58,6 +58,10 @@ typedef enum {
 	eMaterialTex,
 
 	ePolygonSize,
+	eGenMeshHeight,
+	eGenMeshCount,
+	eGenMeshSegements,
+
 
 	eGeneratePatchMesh,
 
