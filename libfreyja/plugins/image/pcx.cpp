@@ -18,7 +18,7 @@
  * Mongoose - Created
  ================================================================*/
 
-#include "image_pcx.h"
+#include "pcx.h"
 
 extern "C" {
 

@@ -110,7 +110,7 @@ egg9:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	NAME="Egg" SHLIBEXT="$(EXT).0.9.0"\
-	PROG_OBJS="$(BUILD_DEBUG_DIR)/Egg9.o $(BUILD_DEBUG_DIR)/EggImage.o $(BUILD_DEBUG_DIR)/EggFileReader.o $(BUILD_DEBUG_DIR)/EggPlugin.o" \
+	PROG_OBJS="$(BUILD_DEBUG_DIR)/Egg9.o $(BUILD_DEBUG_DIR)/EggPlugin9.o $(BUILD_DEBUG_DIR)/EggImage.o $(BUILD_DEBUG_DIR)/EggFileReader.o" \
 	CFLAGS="$(DEBUG_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)"
 
@@ -118,7 +118,8 @@ depend-tools:
 	@-find ./tools -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
 
 depend-plugins:
-	@-find ./plugins -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
+	@-find ./plugins/image -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
+	@-find ./plugins/model -name "*.cpp" -exec ./deps.sh $(BASE_DEFS) -Isrc/lib -Isrc/ds -Isrc/utils {} \; >> depend
 
 depend:
 	@-echo -n Making deps...
@@ -147,83 +148,86 @@ $(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 ##########################################################################
 
 PLUGIN_BUILD_DIR=bin/plugins
-PLUGIN_IMAGE_TEST_OBJ=$(PLUGIN_BUILD_DIR)/image_test.o
+IMAGE_PLUGIN_BUILD_DIR=$(PLUGIN_BUILD_DIR)/image
+MODEL_PLUGIN_BUILD_DIR=$(PLUGIN_BUILD_DIR)/model
+IMAGE_PLUGIN_TEST_OBJ=$(IMAGE_PLUGIN_BUILD_DIR)/image_test.o
 PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
 
 plug-ins: $(PLUGINS)
 
 dds.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_dds \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_dds.o" \
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=dds \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/dds.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-jpeg-pipe.so:
-	$(MAKE) jpeg.test
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_jpg \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_jpeg.o" \
-	CFLAGS="$(MODULE_CFLAGS) -DJPEG_BY_PIPES" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-jpeg.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_jpg \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_jpeg.o" \
+jpg.so:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=jpg \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/jpeg.o" \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -ljpeg"
 
 pcx.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_pcx \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_pcx.o" \
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=pcx \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/pcx.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 ppm.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_ppm \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_ppm.o" \
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=ppm \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/ppm.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 png.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_png \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_png.o" \
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=png \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/png.o" \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_PNG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lpng -lz"
 
 tga.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_tga \
-	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_tga.o" \
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=tga \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/tga.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-plugins: dds.so jpeg.so pcx.so ppm.so png.so tga.so
+# Model plugins
+meshgen.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=meshgen \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/meshgen.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+plugins: dds.so jpg.so pcx.so ppm.so png.so tga.so
 
 clean-plugins:
 	@-echo -n "Cleaning plugins                             "
-	@-rm -f $(PLUGIN_BUILD_DIR)/*.o $(PLUGIN_BUILD_DIR)/*.so
+	@-rm -f $(IMAGE_PLUGIN_BUILD_DIR)/*.o $(IMAGE_PLUGIN_BUILD_DIR)/*.so
+	@-rm -f $(MODEL_PLUGIN_BUILD_DIR)/*.o $(MODEL_PLUGIN_BUILD_DIR)/*.so
 	@-echo "[done]"
 
 install-plugins:
 	@-echo -n "Installing plugins                           "
 	@-mkdir -p $(PLUGIN_INSTALL_DIR)/image
 	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model
-	@-cp $(PLUGIN_BUILD_DIR)/image*.so $(PLUGIN_INSTALL_DIR)/image/
+	@-cp $(IMAGE_PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)/image/
+	@-cp $(MODEL_PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)/model/
 	@-echo "[done]"
 
-#	@-cp $(PLUGIN_BUILD_DIR)/model*.so $(PLUGIN_INSTALL_DIR)/model/
 
 
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
@@ -250,6 +254,13 @@ cull.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=cull BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/cull.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja8"
+
+raw2riff.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=raw2riff BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/raw2riff.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja8"
 

@@ -159,30 +159,53 @@ public:
 };
 
 
+class TextureData
+{
+public:
+	char *name;                /* Texture name */
+	
+	char *filename;
+	
+	unsigned char *image;      /* RGB(A) Texture data */
+	
+	unsigned int imageWidth;
+	
+	unsigned int imageHeight;
+	
+	unsigned char mipmaps;
+	
+	unsigned char pixelDepth; /* 3 - RGB24bit, 4 - RGBA32bit */
+	
+	unsigned int id;       /* OpenGL texture id use */
+};
+
+
 class Material
 {
 public:
+	Vector<unsigned int> textures;    /* Textures used by this material */
+
 	char *name;                /* Material name */
 
-	float ambient[4];          /* Ambient color */
+	vec4_t ambient;            /* Ambient color */
 
-	float diffuse[4];          /* Diffuse color */
+	vec4_t diffuse;            /* Diffuse color */
 
-	float specular[4];         /* Specular color */
+	vec4_t specular;           /* Specular color */
 
-	float emissive[4];         /* Emissive color */
+	vec4_t emissive;           /* Emissive color */
 
-	float shininess;           /* Specular exponent */
-
-	char *texture_name;        /* Texture name */
-
-	unsigned int texture;      /* Texture id */
+	vec_t shininess;           /* Specular exponent */
 
 	unsigned int blend_src;    /* Blend source factor */
 
 	unsigned int blend_dest;   /* Blend destination factor */
 
-	unsigned int child;        /* Linked material id + 1 */
+	int parent;       /* Linked material id */
+
+	int child;        /* Linked material id */
+
+	bool hasAlphaChannel;
 
 private:
 	unsigned int id;           /* Unique identifier */
@@ -191,7 +214,7 @@ private:
 };
 
 
-class MetaData // Useful for storing ASCII files as strings, textures, etc
+class MetaData /* Useful for storing ASCII files as strings, textures, etc */
 {
 public:
 	unsigned int id;                  /* Unique identifier */
@@ -212,31 +235,25 @@ public:
 };
 
 
-// class VertexArray { pos[], texcoord[], norm[], etc }
-
-class Vertex 
+class VertexWeight
 {
 public:
-	unsigned int id;                  /* Unique identifier */
-	Vector <unsigned int> refPolygon; /* Polygons referencing this vertex */ 
-
-	unsigned int pos;                 /* Index to Vertex position */
-	unsigned int normal;              /* Index to Normal vector */
-	unsigned int uvw;                 /* Index of TexCoord coordinate */
-
-	Vector<Weight *> weights;         /* Vector of weights */
+	Vector <Weight *> weights;
 };
 
 
 class Polygon
 {
 public:
+
+	unsigned int flags;
+
 	unsigned int id;                  /* Unique identifier */
 
 	int material;                     /* Material id, if (mat != mesh.mat)
 									   * to support multimaterial meshes */
 
-	Vector <unsigned int> vertex;     /* Vertices composing polygon */
+	Vector <unsigned int> vertices;     /* Vertices composing polygon */
 
 	Vector <unsigned int> texcoords;  /* If non-empty this polygon uses
 									   * it's own texcoords in place of
@@ -244,7 +261,7 @@ public:
 };
 
 
-class Group
+class VertexGroup
 {
 public:
 	int id;                           /* Unique identifier */
@@ -254,47 +271,177 @@ public:
 	Vector3d bboxMax;                 /* Max corner of bounding box */
 	Vector3d center;                  /* Center / bolt-on binding */
 
-	vec_t scale;                      /* Scaling of group */
-
+	//	vec_t scale;                      /* Scaling of group */
 };
 
 
 class UVMap
 {
 public:
-	int id;                           /* Unique identifier */
+	void transform();
 
-	Vector <unsigned int> polygons;   /* Contains TexCoords composing group */
+	Vector <unsigned int> polygons;   /* Contains TexCoords composing group
+									   * either polymapped or by vertex */
 };
 
 
 class VertexFrame
 {
 public:
-	unsigned int mesh;                /* Mesh using this frame */
-	Vector<vec3_t> frame;             /* Vertex animation frame */
+	void transform();
+
+	Vector<vec_t> vertices;           /* Vertex animation frame */
 };
 
 
+/* Vertex no longer a primative object class/type */
 class Mesh
 {
 public:
+	void rotate(vec_t x, vec_t y, vec_t z);
+
+	void rotateAboutPoint(vec3_t point, vec_t x, vec_t y, vec_t z);
+
+	void scale(vec_t x, vec_t y, vec_t z);
+
+	void translate(vec_t x, vec_t y, vec_t z);
+
+	bool combineTexcoords(unsigned int a, unsigned int b)
+	{
+		Polygon *polygon;
+		unsigned int i;
+
+
+		// Make all polygons referencing A point to B
+		for (i = polygons.begin(); i < polygons.end(); ++i)
+		{
+			polygon = polygons[i];
+
+			if (polygon && polygon->texcoords[i] == a)
+				polygon->texcoords.assign(i, b);
+		}
+
+		// Mark A as unused in the texcoord array reference
+		//usedTexCoord.pushBack(a);
+
+		return true;
+	}
+
+	bool combineVertices(unsigned int a, unsigned int b)
+	{
+		Polygon *polygon;
+		unsigned int i;
+
+
+		// Make all polygons referencing A point to B
+		for (i = polygons.begin(); i < polygons.end(); ++i)
+		{
+			polygon = polygons[i];
+
+			if (polygon && polygon->vertices[i] == a)
+				polygon->vertices.assign(i, b);
+		}
+
+		// Mark A as unused in the texcoord array reference
+		//usedVertex.pushBack(a);
+
+		// Don't bother touching weights, they aren't managed
+
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Combines object A and B in model
+	 *
+	 *        Destroys A and B then replaces them with new 
+	 *        object with index A where: A = A + B
+	 *
+	 *        Returns true on sucess
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.04:
+	 * Mongoose - Hard ABI back
+	 *
+	 * 2004.04.08:
+	 * Mongoose - New generic API that supports all types 
+	 *            in one method
+	 *
+	 * 2000.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	Mesh *csgUnion(Mesh *a, Mesh *b);
+	Mesh *csgIntersection(Mesh *a, Mesh *b);
+	Mesh *csgDifference(Mesh *a, Mesh *b);
+	//unsigned int csg(egg_type_t type, egg_csg_t operation,
+	//				 unsigned int a, unsigned int b);
+	/*------------------------------------------------------
+	 * Pre  : Don't count on more than simple vertex culling now
+	 *
+	 * Post : OPERATION on TYPE object A and B in model
+	 *
+	 *        A and B are perserved, creates new object C 
+	 *        where: C = A OPERATION B
+	 *
+	 *        UNION        : C = A u B
+	 *                       if A eq B then copy of A is made
+	 *
+	 *        INTERSECTION : C = A n B
+	 *                       if A eq B then copy of A is made
+	 *
+	 *        DIFFERENCE   : C = A - B
+	 *                       B culls A, order matters
+	 *                       if A eq B then undefined behavior
+	 *
+	 *        Returns C's index
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.04.08:
+	 * Mongoose - Created with new generic API based on mtk
+	 ------------------------------------------------------*/
+
+	Vector<Polygon *> polygons;        /* Polygons of this mesh */
+
+	Vector<VertexFrame *> frames;       /* Vertex morph frames */
+
+	Vector<Material *> materials;       /* Material data */
+
+	Vector<UVMap *> uvmaps;             /* UVMaps of this mesh */
+
+	Vector<VertexWeight *> weights;     /* Vertex weights */
+
+	Vector <unsigned int> groups;       /* Vertex groups of this mesh */
+
+	// Could make a class/struct to hold full references to polygons, etc
+	// instead of reference counting via scoring invalid ids
+	Vector <unsigned int> refVertices;  /* Vertex pool helper, tracks use */   
+
+	Vector<vec_t> vertices;             /* Vertex array */
+
+	Vector<vec_t> texcoords;            /* Texcoord array */
+
+	Vector<vec_t> normals;              /* Normal array */
+
+	Vector3d center;
+
 	unsigned int id;                    /* Unique identifier */
 
-	int material;                       /* Material id */
+	unsigned int texcoordDepth;         /* 1d, 2d, 3d */
 
-	Vector <unsigned int> groups;       /* Groups/Frames of this mesh */
-	Vector <unsigned int> polygons;     /* Polygons of this mesh */
+	int material;                       /* Base material id */
 
-	unsigned int currentFrame;          /* Vertex morph frames */
-	Vector <VertexFrame *> frames;
-
+	unsigned int currentFrame;          /* Current vertex morph frame */
 };
 
 
 class Bone 
 {
 public:
+	void translate();
+	void rotate();
+
 	unsigned int id;                  /* Unique identifier */
 
 	unsigned int parent;
@@ -314,8 +461,10 @@ class Skeleton
 public:
 	int id;                           /* Unique identifier */
 
+	Vector<Bone *> bones;             /* Bones in this skeleton */
+	Vector<Weight *> weights;         /* Weights for skeleton use */
+
 	unsigned int root;                /* Root bone index */
-	Vector<unsigned int> bones;       /* Bones in this skeleton */
 	Vector3d center;                  /* Position */
 };
 
@@ -326,24 +475,32 @@ class Animation
 public:
 	int id;                           /* Unique identifier */
 
+	unsigned int frameRate;
+	unsigned int currentFrame;
+	unsigned int lastFrame;
 	vec_t time;
-	vec_t time2;
+	vec_t lastTime;
 
-	Vector<unsigned int> boneframes; 
-	Vector<unsigned int> meshframes;
+	Vector<unsigned int> frames;  /* vertexframes / skeletalframes */
 };
 
+
+// skeletal mesh
+// meshtree
+// ...
 
 class Model
 {
 public:
-	int id;                           /* Unique identifier */
+	Vector<Animation *> animations;   /* Animation data */
 
-	Skeleton skeleton;
-	Vector<Animation *> animations;
-	Vector<Mesh *> meshes;
-	Vector<Material *> materials;
-	Vector<MetaData *> metadata;
+	Vector<Skeleton*> skeletons;      /* Skeletal data for this model */
+
+	Vector<Mesh *> meshes;            /* Geometery structure */
+
+	Vector<MetaData *> metadata;      /* Metadata for external use */
+
+	int id;                           /* Unique identifier */
 };
 
 
@@ -419,73 +576,6 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-#ifdef FIXME
-	int checkFile(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Checks to see if it's valid model file
-	 *        Returns 0 if valid and no error ocurred
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCount(egg_type_t type);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest TYPE object id to given point
-	 *
-	 *-- History ------------------------------------------
-	 * 
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - API update to use unsigned count
-	 *
-	 * 1999.08.01:
-	 * Mongoose - Created ( As separate methods per type )
-	 ------------------------------------------------------*/
-
-	unsigned int getNearest(egg_type_t type, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest TYPE object id to given point
-	 *
-	 *-- History ------------------------------------------
-	 * 
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int saveFileASCII(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int saveFile(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Saves model to disk file
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.08.01:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-#endif
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -1091,43 +1181,6 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Accessors
 	////////////////////////////////////////////////////////////
-#ifdef FIXME
-	int saveAnimation(egg_animation_t *frame, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Saves aframe chunk to disk file
-	 -----------------------------------------*/
-
-	int saveBoneFrame(egg_skeleton_t *frame, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Saves frame chunk to disk file
-	 -----------------------------------------*/
-
-	int saveMesh(egg_mesh_t *mesh, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid mesh chunk
-	 * Post : Saves mesh chunk to disk file
-	 -----------------------------------------*/
-
-	int saveTag(egg_bone_t *bone, FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid tag chunk
-	 * Post : Saves tag chunk to disk file
-	 -----------------------------------------*/
-#endif
 
 
 	////////////////////////////////////////////////////////////
@@ -1177,119 +1230,9 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-#ifdef FIXME
-	bool isMatchForPolygon(Vector<unsigned int> &list, 
-						   egg_polygon_t *polygon);
-	/*-----------------------------------------
-	 * Created  : 2001-02-03, Mongoose
-	 * Modified : 
-	 *
-	 * Pre  : list is valid
-	 *        polygon is valid
-	 * Post : True if the vertex index list
-	 *        matches the one used by the polygon
-	 -----------------------------------------*/
+	Vector<Model *> mModels;         /* Vertex containers */
 
-	bool isVertexInPolygon(unsigned int vertex, egg_polygon_t *polygon);
-	/*-----------------------------------------
-	 * Created  : 2001-01-31, Mongoose
-	 * Modified : 
-	 *
-	 * Pre  : Vertex id vertex is valid
-	 *        polygon is valid
-	 * Post : True if the vertex is used by 
-	 *        the polygon
-	 -----------------------------------------*/
-
-	egg_animation_t *loadAnimation(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Loads aframe chunk from disk file
-	 -----------------------------------------*/
-
-	egg_skeleton_t *loadBoneFrame(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid frame chunk
-	 * Post : Loads frame chunk to disk file
-	 -----------------------------------------*/
-
-	egg_mesh_t *loadMesh(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid mesh chunk
-	 * Post : Loads mesh chunk from disk file 
-	 -----------------------------------------*/
-
-	egg_bone_t *loadTag(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid tag chunk
-	 * Post : Loads tag chunk from disk file
-	 -----------------------------------------*/
-
-	void resizeBoundingBox(egg_group_t *grp, vec3_t p);
-	/*-----------------------------------------
-	 * Created  : 2000-10-14, Mongoose
-	 * Modified : 2001-01-31, Mongoose
-	 *            + Eggv8 port
-	 *
-	 * Pre  : grp and point are valid
-	 * Post : Resizes the bounding box of
-	 *        group, given a newly added point
-	 *        as the only changed vertex
-	 -----------------------------------------*/
-
-	void resizeBoundingBox(egg_group_t *grp);
-	/*-----------------------------------------
-	 * Created  : 2000-10-14, Mongoose
-	 * Modified : 2001-01-31, Mongoose
-	 *            + Eggv8 port
-	 *
-	 * Pre  : grp is valid
-	 * Post : Resizes the bounding box of
-	 *        group, doing a full reclaculation
-	 -----------------------------------------*/
-
-	/* The arrays are pointers to the data in the vectors for speed */
-
-
-	Vector<egg_vertex_t *> mVertices;        /* Vertex containers */
-	Vector<vec_t> mVertexVector;             /* XYZ position of vertex */
-	Vector<unsigned int> mDeadVertex;        /* Indices of unreferenced data */
-	vec3_t *mVertexArray;                    /* Pointer to data vector array */
-
-	Vector<vec_t> mTexCoordVector;
-	vec3_t *mTexCoordArray;
-
-	Vector<vec_t> mNormalVector;
-	vec3_t *mNormalArray;
-
-	Vector<egg_texcoord_t *> mTexCoords;     /* TexCoord list */
-	
-	Vector<egg_polygon_t *> mPolygons;       /* Polygon list */
-	
-	Vector<egg_group_t *> mGroups;           /* Group list */
-	
-	Vector<egg_mesh_t *> mMeshes;            /* Mesh list */
-	
-	Vector<egg_bone_t *> mTags;               /* Bone tag list */
-	
-	Vector<egg_skeleton_t *> mBoneFrames;   /* BoneFrame list */
-	
-	Vector<egg_animation_t *> mAnimations;   /* Animation list */
-#endif
-
-	unsigned int mDebugLevel;                /* Set debug output at runtime */
+	unsigned int mDebugLevel;        /* Set debug output at runtime */
 };
 
 #endif
