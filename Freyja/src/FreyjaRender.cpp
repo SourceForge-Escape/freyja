@@ -1209,7 +1209,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		glPopAttrib();
 	}
 
-
+	// Render normals, remove this for speed -- move up to model or mesh
 	if (mRenderMode & RENDER_NORMALS)
 	{
 		glBegin(GL_LINES);
@@ -1245,7 +1245,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 	}
 
 
-	/* Render face */
+	/* Render face with material, color, or something */
 	if (mRenderMode & RENDER_FACE)
 	{
 		if (mRenderMode & RENDER_TEXTURE)

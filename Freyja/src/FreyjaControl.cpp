@@ -1863,22 +1863,65 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 
 	case TEXTURE_EDIT_MODE:
-		if (_tex_state)
+		switch (mMouseButton)
 		{
-			float s;
-			float t;
-			
-			s = (float)x / (float)mRender->Width();
-			t = (float)y / (float)mRender->Height();
-			
-			if (s > 1.0) s = 1.0;
-			if (s < 0.0) s = 0.0;
-			if (t > 1.0) t = 1.0;
-			if (t < 0.0) t = 0.0;
-			
-			mModel->TexelMove(s, t);
-			return true;
-	  }
+		case MOUSE_BTN_RIGHT:
+			{
+				float s;
+				float t;
+				
+				s = (float)x / (float)mRender->Width();
+				t = (float)y / (float)mRender->Height();
+
+				if (s > 1.0) s = 1.0;
+				if (s < 0.0) s = 0.0;
+				if (t > 1.0) t = 1.0;
+				if (t < 0.0) t = 0.0;
+				
+				mModel->TexelMove(s, t);
+				return true;
+			}
+			break;
+
+
+		case MOUSE_BTN_MIDDLE:
+			{
+				float s;
+				float t;
+				
+				s = (float)x / (float)mRender->Width();
+				t = (float)y / (float)mRender->Height();
+
+				if (s > 1.0) s = 1.0;
+				if (s < 0.0) s = 0.0;
+				if (t > 1.0) t = 1.0;
+				if (t < 0.0) t = 0.0;
+				
+				mModel->UVMapMotion(s, t);
+				return true;
+			}
+			break;
+
+
+		case MOUSE_BTN_LEFT:
+			if (_tex_state)
+			{
+				float s;
+				float t;
+				
+				s = (float)x / (float)mRender->Width();
+				t = (float)y / (float)mRender->Height();
+				
+				if (s > 1.0) s = 1.0;
+				if (s < 0.0) s = 0.0;
+				if (t > 1.0) t = 1.0;
+				if (t < 0.0) t = 0.0;
+				
+				mModel->TexelMove(s, t);
+				return true;
+			}
+			break;
+		}
 		break;
 
 
