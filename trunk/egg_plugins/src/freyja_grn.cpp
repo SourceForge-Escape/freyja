@@ -214,6 +214,8 @@ int freyja_model__grn_import(char *filename)
 									 bone->quaternion.points[2],
 									 bone->quaternion.points[3]);
 				
+			eggSetBoneParent(bone->parent);
+
 			for (j = 0; j < bones.bones.size(); ++j)
 			{
 				Bone *child = bones.bones[j];

@@ -67,7 +67,7 @@ const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
 const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
 const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
 const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
-
+const float LIGHT_NEXT_PURPLE[] = {0.4f, 0.4f, 0.6f, 1.0f};
 
 unsigned int gSelectedBone = 0;
 unsigned int gBoneRenderType = 1;
@@ -203,7 +203,7 @@ void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
 }
 
 
-// Based on draw_sphere (public domain), 1995, David G Yu 
+/* Based on draw_sphere (public domain), 1995, David G Yu */
 void mglDrawSphere(int numMajor, int numMinor, float radius)
 {
 	double majorStep = (M_PI / numMajor);
@@ -301,14 +301,14 @@ void mglDrawJoint(unsigned char type, const vec3_t pos)
 }
 
 
-void mglDrawGrid(vec_t size, vec_t step, vec_t scale)
+void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 {
 	vec_t x, z;
 
 
 	/* Draw grid without using GL Scaling, which is 'teh bad' */
 	glPushMatrix();
-	glColor3f(0.4f, 0.4f, 0.6f);
+	glColor3fv(color);
 
 	for (x = -size; x < size; x += step)
 	{
@@ -486,6 +486,7 @@ FreyjaRender::FreyjaRender()
 	CustomColor(COLOR_EDIT_GRID_AXIS_Y, 0.0, 0.6, 0.0);
 	CustomColor(COLOR_EDIT_GRID_AXIS_Z, 0.0, 0.0, 0.5);
 	CustomColor(COLOR_EDIT_GRID, 0.3, 0.3, 0.3);
+	setColor(Color_Animation_Grid, LIGHT_NEXT_PURPLE);
 
 	Reset();
 }
@@ -771,10 +772,15 @@ void FreyjaRender::getColor(int id, vec4_t rgba)
 		break;
 	case COLOR_VIEW_TEXT:
 		colorCopyHelper(_view_text_color, rgba);
+		break;
+
+	case Color_Animation_Grid:
+		colorCopyHelper(ColorAnimationGrid, rgba);
+		break;
 	}
 }
 
-void FreyjaRender::setColor(int id, vec4_t rgba)
+void FreyjaRender::setColor(int id, const vec4_t rgba)
 {
 	CustomColor(id, rgba[0], rgba[1], rgba[2]);
 }
@@ -892,7 +898,7 @@ void FreyjaRender::Display()
 
 		if (!(mRenderMode & RENDER_EDIT_GRID))
 		{
-			mglDrawGrid(50.0f, 2.0f, 1.0f);
+			mglDrawGrid(ColorAnimationGrid, 50.0f, 2.0f, 1.0f);
 			mglDrawAxis(0.25f, 1.2f, 0.872f);
 		}
 
@@ -1066,7 +1072,6 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	unsigned int i, j;
 
 
-
 	if (polygon.r_vertex.empty())
 	{
 		printf("FreyjaRender::DrawPolygon> Assertion failure, bad polygon\n");
@@ -1077,9 +1082,10 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	if (mRenderMode & RENDER_WIREFRAME)
 	{
 		// Update wireframe color
-		if (polygon.id == _model->getCurrentPolygon())
+		if (mRenderMode & fHightlightPolygonWireframe)
+			//polygon.id == _model->getCurrentPolygon())
 		{
-			glColor3fv(RED);    
+			glColor3fv(_edit_line_highlight_color);    
 		}
 		else
 		{
@@ -1131,7 +1137,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	// Render points
 	if (mRenderMode & RENDER_POINTS)
 	{
-		glColor3fv(CYAN);
+		glColor3fv(_edit_vertex_color);
 
 		glBegin(GL_POINTS);
 	  
@@ -1339,25 +1345,31 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 		}
 		
 		if ((int)mesh.id == (int)_model->getCurrentMesh())
-			_default_line_width *= 2;
-		
+		{
+			mRenderMode |= fHightlightPolygonWireframe;
+		}
+
+		_default_line_width *= 2;
+
 		for (i = mesh.r_polygon.begin(); i < mesh.r_polygon.end(); ++i)
 		{
 			polygon = mesh.r_polygon[i];
 			
 			if (!polygon)
 			{
-				printf("FIXME: %s:%i\n", __FILE__, __LINE__);
+				event_print("FIXME: %s:%i\n", __FILE__, __LINE__);
 				continue;
 			}
-
-			
 			
 			DrawPolygon(*polygon);    
 		}
 		
 		if ((int)mesh.id == (int)_model->getCurrentMesh())
-			_default_line_width /= 2;
+		{
+			mRenderMode ^= fHightlightPolygonWireframe;
+		}
+
+		_default_line_width /= 2;
 		
 		if (mRenderMode & RENDER_TEXTURE)
 		{
