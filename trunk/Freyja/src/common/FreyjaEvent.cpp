@@ -33,7 +33,7 @@ Vector<FreyjaEvent*> FreyjaEvent::mEventStore;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaEvent::FreyjaEvent(FreyjaResource *rcSys, char *name)
+FreyjaEvent::FreyjaEvent(Resource *rcSys, char *name)
 {
 	mResource = rcSys;
 
