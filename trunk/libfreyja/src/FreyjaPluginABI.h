@@ -344,7 +344,7 @@ typedef enum {
 	 * Pre  : 
 	 * Post : Returns the index of local vertices
 	 *        for mesh <meshIndex> with local
-	 *        mapping from polygon to mesh ids or 0 on error
+	 *        mapping from polygon to mesh ids or -1 on error
 	 *
 	 ------------------------------------------------------*/
 	
@@ -649,6 +649,8 @@ void freyjaMeshFlags1u(unsigned int flags);
  * 2004.05.16:
  * Mongoose - Created
  ------------------------------------------------------*/
+
+	void freyjaGenerateMeshVertexNormals(long meshIndex);
 
 void freyjaGenerateVertexNormals();
 
@@ -1176,7 +1178,7 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
 Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 
-
+void freyjaGetVertexPolygonRef1i(long vertexIndex, Vector<long> &polygons);
 void freyjaGetVertexPolygonRef(Vector<long> &polygons);
 /*------------------------------------------------------
  * Pre  : 
