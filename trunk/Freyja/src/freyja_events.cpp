@@ -493,6 +493,34 @@ char *mgtk_rc_map(char *filename_or_dirname)
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
 
+void freyja_event_file_dialog(char *s)
+{
+	static bool on = 0;
+
+
+	mgtk_event_file_dialog(s);
+
+	if (!on)
+	{
+		extern void mgtk_add_menu_item(char *text, long event);
+		long i, count = EggPlugin::mEggPlugin->getPluginDescCount();
+
+		mgtk_add_menu_item("All Files (*.*)", 9000);
+
+		for (i = 0; i < count; ++i)
+		{
+			FreyjaPluginDesc *plugin = EggPlugin::mEggPlugin->getPluginDesc(i);
+			
+			if (plugin && plugin->mImportFlags)
+				mgtk_add_menu_item(plugin->mDescription, 9001+i);
+		}
+		
+		
+		on = 1;
+	}
+}
+
+
 void freyja_application_window_move(int x, int y)
 {
 	mgtk_application_window_move(x, y);

@@ -264,13 +264,14 @@ typedef enum {
 
 } event_subject_id;
 
-#define freyja_event_file_dialog mgtk_event_file_dialog
 #define freyja_event_get_float mgtk_event_get_float
 #define freyja_event_set_range mgtk_event_set_range
 
 void freyja_event_start();       /* Starts up Freyja subsystems */
 void freyja_event_exit();        /* Calls shutdown and exits GUI */
 void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
+
+void freyja_event_file_dialog(char *s);
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
 

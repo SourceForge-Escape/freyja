@@ -125,6 +125,7 @@ GtkWidget *mgtk_get_fileselection_widget()
 	GtkWidget *sep = gtk_menu_item_new();
 	gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), sep);
 	gtk_widget_show(sep);
+	gtk_widget_set_usize(sep, 164, 1);
 #endif
 	}
 
