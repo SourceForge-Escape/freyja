@@ -45,6 +45,11 @@ GtkWidget *GTK_MAIN_WINDOW = 0x0;
 GtkWidget *GTK_GL_AREA_WIDGET = 0x0;
 GtkWidget *GTK_STATUS_BAR_WIDGET = 0x0;
 
+GtkWidget *getGtkMainWindow()
+{
+	return GTK_MAIN_WINDOW;
+}
+
 GtkWidget *getGtkGLAreaWidget()
 {
 	return GTK_GL_AREA_WIDGET;
@@ -54,6 +59,10 @@ GtkWidget *getGtkStatusBarWidget()
 {
 	return GTK_STATUS_BAR_WIDGET;
 }
+
+
+/////////////////////////////////////////////////////////////
+
 
 void application_window_fullscreen()
 {

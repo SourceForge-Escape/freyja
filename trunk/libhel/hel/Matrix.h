@@ -273,7 +273,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void rotate(const vec_t *xyz);
+	void rotate(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : Rotates object in 3 space, Radian input
 	 * Post : Returns true on sucess
@@ -295,7 +295,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void scale(const vec_t *xyz);
+	void scale(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Scales object in 3 space
@@ -317,7 +317,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void translate(const vec_t *xyz);
+	void translate(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Translates ( moves ) object in 3 space

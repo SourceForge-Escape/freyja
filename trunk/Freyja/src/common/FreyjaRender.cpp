@@ -832,9 +832,13 @@ void FreyjaRender::Display()
 
 		glPushMatrix();
 
-		glLineWidth(2.0f);
-		mglDrawGrid(50.0f, 2.0f, 1.0f);
-		mglDrawAxis(0.25f, 1.2f, 0.872f);
+		glLineWidth(2.0f); 
+
+		if (mRenderMode & RENDER_EDIT_GRID)
+		{
+			mglDrawGrid(50.0f, 2.0f, 1.0f);
+			mglDrawAxis(0.25f, 1.2f, 0.872f);
+		}
 
 		if (mRenderMode & RENDER_BONES)
 		{
@@ -1042,6 +1046,27 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 			}
 		}
 	  
+		glEnd();
+	}
+
+
+	if (mRenderMode & RENDER_NORMALS)
+	{
+		glBegin(GL_LINES);
+		glColor3f(0.2, 0.2, 0.8);
+		
+		for(polygon.r_vertex.start(); polygon.r_vertex.forward();
+			polygon.r_vertex.next())
+		{
+			vertex = polygon.r_vertex.current();
+			glVertex3f(vertex->pos[0],
+					   vertex->pos[1],
+					   vertex->pos[2]);
+			glVertex3f(vertex->pos[0] + vertex->norm[0] * 2 * 1/_zoom, 
+					   vertex->pos[1] + vertex->norm[1] * 2 * 1/_zoom, 
+					   vertex->pos[2] + vertex->norm[2] * 2 * 1/_zoom);
+		}
+		
 		glEnd();
 	}
 
@@ -1259,6 +1284,9 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 		gMaterialManager->applyEffectGL();
 	}
 
+	if ((int)mesh.id == (int)_model->getCurrentMesh())
+		_default_line_width *= 2;
+
 	for (mesh.r_polygon.start(); mesh.r_polygon.forward(); 
 		  mesh.r_polygon.next())
 	{ 
@@ -1272,6 +1300,9 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 
 		DrawPolygon(*polygon);    
 	}
+
+	if ((int)mesh.id == (int)_model->getCurrentMesh())
+		_default_line_width /= 2;
 
 	if (mRenderMode & RENDER_TEXTURE)
 	{
@@ -1287,7 +1318,7 @@ void FreyjaRender::DrawModel(Egg *egg)
 	egg_tag_t *tag = NULL;
 	egg_boneframe_t *boneframe = NULL;
 	egg_vertex_t *vertex = NULL;
-	point_t min, max;
+	vec3_t min, max;
 	unsigned int current_tag;
 
 
@@ -1480,7 +1511,7 @@ void FreyjaRender::DrawModel(Egg *egg)
 
 void FreyjaRender::DrawBbox(egg_group_t *group)
 {
-	if (!(group && mRenderMode & RENDER_BBOX))
+	if (!group)// && mRenderMode & RENDER_BBOX))
 		return;
 
 	mglDrawBbox(group->bbox_min, group->bbox_max, RED, _edit_line_color);

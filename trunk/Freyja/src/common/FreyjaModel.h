@@ -569,7 +569,7 @@ public:
 	}
 #endif
 
-	void Bbox(point_t min, point_t max, Vector<unsigned int> **list);
+	void Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list);
 	void BBoxListBuild();
 	void VertexDelete();
 	void TagConnect(unsigned int master, unsigned int slave);
@@ -625,7 +625,7 @@ private:
 	void MeshCut();
 	void MeshCopy();
 	void MeshMirror(unsigned int id);
-	void TagNew(unit_t x, unit_t y, unit_t z, unsigned char flag);
+	void TagNew(vec_t x, vec_t y, vec_t z, unsigned char flag);
 	void TagDel();
 	void TagAddMesh(unsigned int tag, unsigned int mesh);
 	void TagDelMesh(unsigned int tag, unsigned int mesh);

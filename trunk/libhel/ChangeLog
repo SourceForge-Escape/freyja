@@ -1,1 +1,4 @@
 
+
+ * TODO: Matrix needs to be redone to only do column order!
+ * Fixed Matrix vec3_t multiply to use correct translation indices

@@ -29,14 +29,8 @@
 #ifndef GUARD__MIDGARD_MONGOOSE_MATERIALMANAGER_H_
 #define GUARD__MIDGARD_MONGOOSE_MATERIALMANAGER_H_
 
-#ifdef HAVE_HEL
-#   include <hel/math.h>
-#else
-#   include <freyja_model/mtk3d.h>
-#endif
-
 #include <mstl/Vector.h>
-
+#include <hel/math.h>
 #include "Material.h"
 #include "Texture.h"
 #include "Light.h"

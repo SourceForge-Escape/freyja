@@ -12,9 +12,9 @@ MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
 PRE=
-BUILD_ID=20040420
+BUILD_ID=20040429
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(PRE)
-BUILD_HOST=`uname -n -m -s -p -r`
+BUILD_HOST=`uname -n -m -s`
 URL=http://icculus.org/freyja
 EMAIL=mongoose@icculus.org
 
@@ -41,7 +41,8 @@ BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 # HAVE_HEL
 CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
 		-DHAVE_FREYJA_IMAGE -DFORCE_GLAREA_GTK_2_0 \
-		-DHAVE_OPENGL -DUSE_ARB_MULTITEXTURE 
+		-DHAVE_OPENGL 
+#-DUSE_ARB_MULTITEXTURE 
 
 CONFIGURE_LDFLAGS=
 
@@ -68,7 +69,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ \
 		-lGL -lGLU -lm -lz \
-		-lfreyja_model -lfreyja_image
+		-lhel0 -lfreyja_model -lfreyja_image
 
 GTK2_CFLAGS=-DUSING_GTK_2_0 -I/usr/X11R6/include -I/usr/include/gtkgl-2.0/ \
 		$(shell pkg-config --cflags gtk+-2.0 gtkgl-2.0)

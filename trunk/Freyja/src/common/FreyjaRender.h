@@ -60,7 +60,7 @@ public:
 		RENDER_CAMERA           = 256,        /* Enable panning  */
 		RENDER_BBOX             = 512,        /* Rendering bounding box */
 		RENDER_NORMAL           = 1024, 
-		//RENDER_RESERVED1        = 2048, 
+		RENDER_NORMALS          = 2048, 
 		//RENDER_RESERVED2        = 4096, 
 		RENDER_BBOX_SEL         = 8192,
 		//RENDER_RESERVED3        = 16384,

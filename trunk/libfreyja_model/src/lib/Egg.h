@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
@@ -15,6 +15,13 @@
  * TEST_EGG  Builds module as test code as a console program
  *
  *-- History ------------------------------------------------ 
+ *
+ * 2004.04.29:
+ * Mongoose - Removed mtk3d support and replaced with libhel,
+ *            so transition to Egg v9 will be smoother.
+ *
+ *            Lots of legacy stuff changed, but this is not
+ *            a true 8/9 hybrid like I've released before.
  *
  * 2004.03.15:
  * Mongoose - Replaced List collection use with Vector
@@ -69,7 +76,7 @@
  * 2000-09-15:
  * Mongoose - API change!  Transforms have 1 new API call
  *            The 3 old methods per mesh, frame, list are gone
- ==============================================================*/
+ ==========================================================================*/
 
 #ifndef GUARD__MONGOOSE_GOOSEEGG_EGG_H
 #define GUARD__MONGOOSE_GOOSEEGG_EGG_H
@@ -77,7 +84,9 @@
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
 
-#include "mtk3d.h"
+#include <hel/math.h>
+
+typedef vec_t bbox_t[3][3];
 
 
 #define EGG_LIB_VERSION        0x32312E38  // '8.12'
@@ -293,7 +302,7 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	egg_group_t *getNearestGroup(unit_t x, unit_t y, egg_plane plane);
+	egg_group_t *getNearestGroup(vec_t x, vec_t y, egg_plane plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns nearest group to x, y in given plane
@@ -305,7 +314,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	egg_tag_t *getNearestTag(unit_t x, unit_t y, egg_plane plane);
+	egg_tag_t *getNearestTag(vec_t x, vec_t y, egg_plane plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns nearest tag to x, y in given plane
@@ -318,7 +327,7 @@ public:
 	 ------------------------------------------------------*/
 
 	egg_vertex_t *getNearestVertex(egg_group_t *group, 
-								   unit_t x, unit_t y, egg_plane plane);
+								   vec_t x, vec_t y, egg_plane plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns nearest vertex to x, y in given plane
@@ -507,9 +516,9 @@ public:
 	 * Post : Return vertex with id
 	 -----------------------------------------*/
 
-	egg_vertex_t *addVertex(unit_t x, unit_t y, unit_t z,
-							unit_t nx, unit_t ny, unit_t nz,
-							unit_t u, unit_t v);
+	egg_vertex_t *addVertex(vec_t x, vec_t y, vec_t z,
+							vec_t nx, vec_t ny, vec_t nz,
+							vec_t u, vec_t v);
 	/*------------------------------------------------------
 	 * Pre  : x, y, z is position in 3 space 
 	 *        nx, ny, nz is normal vector
@@ -524,7 +533,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	egg_vertex_t *addVertex(unit_t x, unit_t y, unit_t z);
+	egg_vertex_t *addVertex(vec_t x, vec_t y, vec_t z);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : 
@@ -692,7 +701,7 @@ public:
 	 -----------------------------------------*/
 
 	void GroupTransform(unsigned int group, enum egg_transform type, 
-						unit_t x, unit_t y, unit_t z);
+						vec_t x, vec_t y, vec_t z);
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose
 	 * Modified : group is valid group id
@@ -951,7 +960,7 @@ public:
 	 * Post : Disconnects slave from master
 	 -----------------------------------------*/
 
-	egg_tag_t *addTag(unit_t x, unit_t y, unit_t z, char flag);
+	egg_tag_t *addTag(vec_t x, vec_t y, vec_t z, char flag);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -973,7 +982,7 @@ public:
 	 * Post : tag is added to the bone list
 	 -----------------------------------------*/
   
-	void TagRotateAbout(unsigned int tag, unit_t rx, unit_t ry, unit_t rz);
+	void TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz);
 	/*--------------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -989,14 +998,14 @@ public:
 
 
 	void TagRotateAboutPoint(unsigned int bone, vec3_t p,
-							 unit_t rx, unit_t ry, unit_t rz);
+							 vec_t rx, vec_t ry, vec_t rz);
 	/*--------------------------------------------
 	 * Created  : ????-??-??, Mongoose
 	 * Modified : 
 	 *
 	 * Pre  : bone is valid bone id
 	 *        frame is valid frame id
-	 *        p is a valid mtk point
+	 *        p is a valid point in 3 space
 	 *        r(x, y, z) are in degrees
 	 *
 	 * Post : Rotates 'banded' bone on point p,
@@ -1004,7 +1013,7 @@ public:
 	 *        to this bone and slave bones
 	 --------------------------------------------*/
 
-	void TagRotate(int bone, int frame, unit_t rx, unit_t ry, unit_t rz);
+	void TagRotate(int bone, int frame, vec_t rx, vec_t ry, vec_t rz);
 	/*-----------------------------------------
 	 * Created  : ????-??-??, Mongoose
 	 * Modified : 
@@ -1068,7 +1077,7 @@ public:
 	 * Post : Loads frame chunk to disk file
 	 -----------------------------------------*/
 
-	unsigned int BoneFrameAdd(unit_t x, unit_t y, unit_t z);
+	unsigned int BoneFrameAdd(vec_t x, vec_t y, vec_t z);
 	/*-----------------------------------------
 	 * Created  : 2001-01-31, Mongoose
 	 * Modified : 
@@ -1126,7 +1135,7 @@ public:
 	////////////////////////////////////////////////
 
 	void Transform(egg_tag_t *tag, enum egg_transform type,
-				   unit_t x, unit_t y, unit_t z);
+				   vec_t x, vec_t y, vec_t z);
 	/*--------------------------------------------
 	 * Created  : 2000-09-15 by Mongoose
 	 * Modified : 
@@ -1139,7 +1148,7 @@ public:
 	 --------------------------------------------*/
 
 	void Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
-				   unit_t x, unit_t y, unit_t z);
+				   vec_t x, vec_t y, vec_t z);
 	/*--------------------------------------------
 	 * Created  : 2000-09-15 by Mongoose
 	 * Modified : 
@@ -1152,7 +1161,7 @@ public:
 	 --------------------------------------------*/
 
 	void Transform(egg_group_t *frame, enum egg_transform type, 
-				   unit_t x, unit_t y, unit_t z);
+				   vec_t x, vec_t y, vec_t z);
 	/*--------------------------------------------
 	 * Created  : 2000-09-15 by Mongoose
 	 * Modified : 
@@ -1165,7 +1174,7 @@ public:
 	 --------------------------------------------*/
 
 	void Transform(egg_mesh_t *mesh, enum egg_transform type, 
-				   unit_t x, unit_t y, unit_t z);
+				   vec_t x, vec_t y, vec_t z);
 	/*--------------------------------------------
 	 * Created  : 2000-09-15 by Mongoose
 	 * Modified : 
@@ -1177,7 +1186,7 @@ public:
 	 * Post : Transform 'type' is done to mesh
 	 --------------------------------------------*/
 
-	void Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z);
+	void Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z);
 	/*--------------------------------------------
 	 * Created  : 2000-07-31 by Mongoose
 	 * Modified : 

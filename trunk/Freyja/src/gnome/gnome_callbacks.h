@@ -67,17 +67,7 @@ void save_model_event(GtkMenuItem *menuitem, gpointer user_data);
 void save_as_model_event(GtkMenuItem *menuitem, gpointer user_data);
 void open_material_event(GtkMenuItem *menuitem, gpointer user_data);
 void save_as_material_event(GtkMenuItem *menuitem, gpointer user_data);
-void open_emitter_event(GtkMenuItem *menuitem, gpointer user_data);
-void save_as_emitter_event(GtkMenuItem *menuitem, gpointer user_data);
 void exit_event(GtkMenuItem *menuitem, gpointer user_data);
-void about_event(GtkMenuItem *menuitem, gpointer user_data);
-void cut_event(GtkMenuItem *menuitem, gpointer user_data);
-void copy_event(GtkMenuItem *menuitem, gpointer user_data);
-void paste_event(GtkMenuItem *menuitem, gpointer user_data);
-void clear_event(GtkMenuItem *menuitem, gpointer user_data);
-void properties_event(GtkMenuItem *menuitem, gpointer user_data);
-void preferences_event(GtkMenuItem *menuitem, gpointer user_data);
-
 
 // Mongoose 2002.01.12, Misc/toolkit functions
 GtkWidget *setup_tree_root(char *label, GtkWidget *tree);

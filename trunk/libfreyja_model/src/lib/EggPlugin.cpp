@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <hel/math.h>
+#include <hel/Quaternion.h>
+
 #include "EggPlugin.h"
 
 
@@ -304,7 +307,7 @@ void eggGenerateCylinder(unsigned int major, unsigned int minor,
 	Vector<unsigned int> vertices;
 	unsigned int i, j, k, v;
 	double majorStep = height / major;
-	double minorStep = 2.0 * MTK_PI / minor;
+	double minorStep = 2.0 * HEL_PI / minor;
 
 
 	eggBegin(FREYJA_MESH);
@@ -412,8 +415,9 @@ void eggGenerateSphere(unsigned int major, unsigned int minor, vec_t radius)
 	Vector<unsigned int> vertices;
 	unsigned int i, j, k, v;
 	vec_t x, y;
-	double majorStep = (MTK_PI / major);
-	double minorStep = (2.0 * MTK_PI / minor);
+	double majorStep = (HEL_PI / major);
+	double minorStep = (2.0 * HEL_PI / minor);
+	vec_t nx, ny, nz, ns;
 
 
 	eggBegin(FREYJA_MESH);
@@ -440,19 +444,29 @@ void eggGenerateSphere(unsigned int major, unsigned int minor, vec_t radius)
 
 			v = eggVertexStore3f(x * r0, y * r0, z0);
 			eggVertexUVStore2f(v, j / (vec_t)minor, i / (vec_t)major);
-			eggVertexNormalStore3f(v, 
-								   (x * r0) / radius,
-								   (y * r0) / radius, 
-								   z0 / radius);
+			nx = (x * r0) / radius;
+			ny = (y * r0) / radius;
+			nz = z0 / radius;
+			ns = sqrt(nx * nx + ny * ny + nz * nz);
+			nx /= ns;
+			ny /= ns;
+			nz /= ns;
+			// printf("1: %f %f %f\n", nx, ny, nz);
+			eggVertexNormalStore3f(v, nx, ny, nz);
 			vertices.pushBack(v);
 
 
 			v = eggVertexStore3f(x * r1, y * r1, z1);
 			eggVertexUVStore2f(v, j / (vec_t)minor, (i + 1) / (vec_t)major);
-			eggVertexNormalStore3f(v, 
-								   (x * r1) / radius,
-								   (y * r1) / radius, 
-								   z0 / radius);
+			nx = (x * r1) / radius;
+			ny = (y * r1) / radius;
+			nz = z0 / radius;
+			ns = sqrt(nx * nx + ny * ny + nz * nz);
+			nx /= ns;
+			ny /= ns;
+			nz /= ns;
+			// printf("2: %f %f %f\n", nx, ny, nz);
+			eggVertexNormalStore3f(v, nx, ny, nz);
 			vertices.pushBack(v);
 		}
 
@@ -596,9 +610,9 @@ void eggGenerateVertexNormals()
 		vA[1] = a[1] - b[1];
 		vA[2] = a[2] - b[2];
 
-		vB[0] = b[0] - c[0];
-		vB[1] = b[1] - c[1];
-		vB[2] = b[2] - c[2];
+		vB[0] = c[0] - b[0];
+		vB[1] = c[1] - b[1];
+		vB[2] = c[2] - b[2];
 		
 		/* Compute normal for the face */
 		x = vA[1] * vB[2] - vA[2] * vB[1];
@@ -618,6 +632,7 @@ void eggGenerateVertexNormals()
     for (i = 0; i < vertexCount; ++i)
     {
 		egg_vertex_t *vertex = EggPlugin::mEggPlugin->eggGetVertex(eggIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT));
+		eggIterator(FREYJA_VERTEX, FREYJA_LIST_NEXT);
 
 		if (!vertex)
 		{
@@ -635,9 +650,9 @@ void eggGenerateVertexNormals()
 		}
 
 		/* Average normals */
-		x /= vertex->ref.size();
-		y /= vertex->ref.size();
-		z /= vertex->ref.size();
+		//x /= vertex->ref.size();
+		//y /= vertex->ref.size();
+		//z /= vertex->ref.size();
 
 		/* Normalize */
 		s = sqrt(x * x + y * y + z * z);
@@ -650,9 +665,7 @@ void eggGenerateVertexNormals()
 		vertex->norm[1] = y;
 		vertex->norm[2] = z;
 
-		eggIterator(FREYJA_VERTEX, FREYJA_LIST_NEXT);
-
-		printf("%f %f %f\n", x, y, z);
+		printf("%d :: %f %f %f\n", vertex->id, x, y, z);
     }
 
 	eggCriticalSection(EGG_WRITE_UNLOCK);
@@ -833,8 +846,9 @@ unsigned int eggTagRotate3f(float x, float y, float z)
 unsigned int eggTagRotateQuaternion4f(vec_t x, vec_t y, vec_t z, vec_t w)
 {
 	vec_t heading, bank, attitude;
-	
-	mtkQuaternionToEuler(x, y, z, w, &heading, &bank, &attitude);
+	Quaternion q = Quaternion(x, y, z, w);
+
+	q.getEulerAngles(&heading, &bank, &attitude);
 
 	// For now just switch to eular ( ew ) and do I have this right?
 	if (EggPlugin::mEggPlugin) // h b a; a b h
@@ -1764,6 +1778,20 @@ int EggPlugin::eggTextureStore(EggTextureData *textureData)
 
 unsigned int EggPlugin::eggTextureStoreFilename(const char *filename)
 {
+	if (!filename || !filename[0])
+	{
+		return 0;
+	}
+
+	if (!mTextureFiles.empty())
+	{
+		for (mTextureFiles.start(); 
+			 mTextureFiles.forward(); mTextureFiles.next())
+		{
+			if (!strcmp(mTextureFiles.current(), filename))
+				return mTextureFiles.currentIndex();
+		}
+	}
 
 	mTextureFiles.pushBack(strdup(filename));
 	return mTextureFiles.size() - 1;
@@ -1774,7 +1802,7 @@ int EggPlugin::eggGetTextureFilename(unsigned int index, char **filename)
 	*filename = 0x0;
 
 
-	if (mTextureFiles.empty() || index > mTextureFiles.size())
+	if (mTextureFiles.empty() || index > mTextureFiles.size()-1)
 		return -1;
 
 	*filename = mTextureFiles[index];
