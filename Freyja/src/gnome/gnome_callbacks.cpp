@@ -26,6 +26,8 @@
 #include <stdio.h>
 
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+
 #include <mstl/Map.h>
 
 #include "freyja_events.h"
@@ -34,7 +36,6 @@
 #include "MaterialManager.h"
 
 #include "gnome_callbacks.h"
-#include "gnome_gtkglarea.h"
 #include "gnome_interface.h"
 #include "gnome_resource.h"
 
@@ -53,7 +54,6 @@ float spinbutton_value_get_float(int event, bool *error);
 
 // Mongoose 2002.02.01, Gobals used from other files, try to 
 //   reduce these as much as you can with gtk+ use
-extern GtkWidget *GTK_GLAREA_WINDOW;
 extern FreyjaModel *gFreyjaModel;
 extern FreyjaControl *gFreyjaControl;
 
@@ -151,12 +151,17 @@ void freyja_event_file_dialog(char *title)
 	gtk_widget_show(file);
 }
 
-
+/* Shutdown / exit handlers */
 void gtk_guard_shutdown()
 {
-  event_print("@Gtk+ shuting down...");
-  close_log_file();
-  gtk_exit(0);
+	event_print("@Gtk+ shuting down...");
+	gtk_exit(0);
+}
+
+
+void mgtk_destroy_window(GtkWidget *widget)
+{
+	gtk_guard_shutdown();
 }
 
 
@@ -166,13 +171,9 @@ void freyja_event_exit()
 }
 
 
-void freyja_event_about_dialog()
+void freyja_event_info_dialog(char *message)
 {
-	GtkWidget *about;
-
-
-	about = dialog_about_create();
-	gtk_widget_show(about);
+	mgtk_create_info_dialog(message);
 }
 
 
@@ -194,6 +195,263 @@ void freyja_event_set_float(int event, float value)
 
 
 //////////////////////////////////////////////////////////////////////////
+
+
+
+void event_swap_buffers()
+{
+	/* Hhhmm...  nothing really needed here, swapping is handled in 
+	 * the gtk glarea interfacing code after draw requests */
+	usleep(500); // Hhmm...
+}
+
+
+void event_refresh()
+{
+	if (getGtkGLAreaWidget())
+	{
+		mgtk_refresh_glarea(getGtkGLAreaWidget());
+	}
+}
+
+
+void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
+{
+	GdkModifierType state;
+	glarea_window_state_t *gl_state;
+	int x, y, mod, btn_state, button;
+
+
+	gl_state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget),
+																			 "gl_window_state");
+	
+	/* Beginning of drag, reset mouse position */
+	gdk_window_get_pointer(event->window, &x, &y, &state);
+  
+	gl_state->mouse_x = x;
+	gl_state->mouse_y = y;
+
+	btn_state = MOUSE_BTN_STATE_PRESSED;
+	button = 0;
+	mod = 0;
+
+	if (event->state & GDK_CONTROL_MASK)
+		mod |= KEY_RCTRL;
+
+	if (state & GDK_BUTTON1_MASK)
+	{
+		button |= MOUSE_BTN_LEFT;
+	}
+
+	if (state & GDK_BUTTON2_MASK)
+	{
+		button |= MOUSE_BTN_MIDDLE;
+	}
+
+	if (state & GDK_BUTTON3_MASK)
+	{
+		button |= MOUSE_BTN_RIGHT;
+	}
+
+	if (state & GDK_BUTTON4_MASK)
+	{
+		button |= MOUSE_BTN_4;
+	}
+
+	if (state & GDK_BUTTON5_MASK)
+	{
+		button |= MOUSE_BTN_5;
+	}
+
+	event_set_mouse_button(button);
+
+#ifdef DEBUG_GTK_MOUSE
+	char foo[32];
+	sprintf(foo, "MOUSE_BTN_%i", button);
+	event_print("Sending mouse event to Freya; x: %i y: %i, %s, %s\n", 
+					x, y, 
+					(button == MOUSE_BTN_LEFT) ? "MOUSE_BTN_LEFT" :
+					(button == MOUSE_BTN_RIGHT) ? "MOUSE_BTN_RIGHT" :
+					(button == MOUSE_BTN_MIDDLE) ? "MOUSE_BTN_MIDDLE" :
+					(button == MOUSE_BTN_4) ? "MOUSE_BTN_4" :
+					(button == MOUSE_BTN_5) ? "MOUSE_BTN_5" :
+					foo, 
+					(btn_state==MOUSE_BTN_STATE_PRESSED)?"MOUSE_BTN_STATE_PRESSED":
+					"MOUSE_BTN_STATE_NONE");
+#endif
+	event_mouse(button, btn_state, mod, x, y);
+	mgtk_refresh_glarea(widget); // Seems a little much
+}
+
+
+void mgtk_event_button_release(GtkWidget *widget, GdkEventButton *event)
+{
+	event_set_mouse_button(0);
+}
+
+
+void mgtk_event_key_press(GtkWidget *widget, GdkEventKey *event)
+{
+	unsigned int mod = 0;
+	int key = -1;
+
+
+	//gtk_widget_add_accelerator(item, "activate_item", accel, 
+	//                           tmp_key, GDK_MOD1_MASK, (GtkAccelFlags)0);
+
+	if (event->state & GDK_CONTROL_MASK)
+	{
+		mod |= KEY_RCTRL;
+	}
+
+	if (event->state & GDK_SHIFT_MASK)
+	{
+		mod |= KEY_RSHIFT;
+	}
+
+	switch (event->keyval)
+	{
+	case GDK_Left:
+		key = KEY_LEFT;
+		break;
+	case GDK_Right:
+		key = KEY_RIGHT;
+		break;
+	case GDK_Up:
+		key = KEY_UP;
+		break;
+	case GDK_space:
+		key = KEY_SPACE;
+		break;
+	case GDK_Down:
+		key = KEY_DOWN;
+		break;
+	case GDK_F1:
+		key = KEY_F1;
+		break;		
+	case GDK_F2:
+		key = KEY_F2;
+		break;		
+	case GDK_F3:
+		key = KEY_F3;
+		break;		
+	case GDK_F4:
+		key = KEY_F4;
+		break;
+	case GDK_F5:
+		key = KEY_F5;
+		break;		
+	case GDK_F6:
+		key = KEY_F6;
+		break;		
+	case GDK_F7:
+		key = KEY_F7;
+		break;
+	case GDK_F8:
+		key = KEY_F8;
+		break;		
+	case GDK_F9:
+		key = KEY_F9;
+		break;
+	case GDK_F10:
+		key = KEY_F10;
+		break;		
+	case GDK_F11:
+		key = KEY_F11;
+		break;		
+	case GDK_F12:
+		key = KEY_F12;
+		break;
+	default:
+		if ((unsigned char)event->keyval < 128)
+		{
+			key = (unsigned char)event->keyval;
+		}
+	}
+
+	/* Prevent the default handler from being run */
+	//gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_press_event");
+
+	if (key < 0)
+	{
+		return;
+	}
+
+#ifdef DEBUG_GTK_KEYS
+	event_print("*** key_press_event> %i (%c) : %i\n", key, key, mod);
+#endif
+	freyja_event_key_press(key, mod);
+
+	if (gtk_accelerator_valid(event->keyval, (GdkModifierType)0))
+		return;
+}
+
+
+void mgtk_event_key_release(GtkWidget *widget, GdkEventKey *event)
+{
+	//event_print("*** key_release_event> %i : %i\n", key, mod);
+
+	/* Prevent the default handler from being run */
+	//gtk_signal_emit_stop_by_name(GTK_OBJECT(widget), "key_release_event");
+}
+
+
+void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
+{
+	int x, y;
+	GdkModifierType state;
+	glarea_window_state_t *gl_state;
+
+
+	if (!query_mouse_active())
+		return;
+
+	gl_state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget),
+																			 "gl_window_state");
+
+	if (event->is_hint)
+	{
+		gdk_window_get_pointer(event->window, &x, &y, &state);
+	} 
+	else 
+	{
+		x = (int)event->x;
+		y = (int)event->y;
+		state = (GdkModifierType)event->state;
+	}
+
+	if (query_mouse_button())
+	{
+		if (query_mouse_button() & MOUSE_BTN_MIDDLE)
+		{
+			if (x > gl_state->mouse_x)
+				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_LEFT);
+			else if (x < gl_state->mouse_x)
+				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_RIGHT);
+
+			if (y < gl_state->mouse_y)
+				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_UP);
+			else if (y > gl_state->mouse_y)
+				freyja_event2i(EVENT_MISC, CMD_MISC_SCROLL_DOWN);
+
+			//gtk_ruler_set_range(GTK_RULER(hruler), x1, x2, 0, x2);
+
+			gl_state->mouse_x = x;
+			gl_state->mouse_y = y;
+			mgtk_refresh_glarea(widget);			
+		}
+		else
+		{
+#ifdef DEBUG_GTK_MOUSE
+			event_print("Gnome sending event_motion %i, %i\n", x, y);
+#endif
+			gl_state->mouse_x = x;
+			gl_state->mouse_y = y;
+			event_motion(x, y);
+			mgtk_refresh_glarea(widget);
+		}
+	}
+}
 
 
 void callback_update_skeleton_ui_gtk(callback_bone_t *bone, 
@@ -513,13 +771,6 @@ void refresh_material_interface()
 
 void popup_menu_detacher_event(GtkWidget *attach_widget,GtkMenu *menu)
 {
-}
-
-
-gint window_destroy(GtkWidget *widget)
-{
-	gtk_guard_shutdown();
-	return TRUE;
 }
 
 
@@ -1052,4 +1303,70 @@ void animation_event(GtkWidget *widget, gpointer user_data)
 {
 	freyja_event2i(EVENT_ANIMATION, GPOINTER_TO_INT(user_data));
 	event_refresh();
+}
+
+
+
+
+/* Mongoose 2004.05.24, 
+ * All this below here goes into gtk_freyja.cpp post split */
+void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
+{
+#ifdef unix
+	snprintf(dest, size, "%s/.freyja/icons/%s",
+			 (char *)getenv("HOME"), icon_name);
+#else
+	strcpy(dest, "data/icons/%s", icon_name);
+#endif
+}
+
+
+void freyja_event_notify_view_log(const char *message)
+{
+	GtkWidget *widget = getGtkStatusBarWidget();
+
+
+	if (widget)
+	{
+		if (GTK_IS_STATUSBAR(widget))
+		{
+			gtk_statusbar_push(GTK_STATUSBAR(widget), 0, message);
+		}
+		else if (GTK_IS_LABEL(widget))
+		{
+			gtk_label_set_text(GTK_LABEL(widget), message);
+		}
+	}
+}
+
+
+int main(int argc, char *argv[])
+{
+#ifdef ENABLE_NLS
+	bindtextdomain(PACKAGE, PACKAGE_LOCALE_DIR);
+	textdomain(PACKAGE);
+#endif
+
+	gtk_init(&argc, &argv);
+
+	event_print("@GTK+ interface started...");	
+	event_print("Email bug reports to %s", EMAIL_ADDRESS);
+
+	/* Mongoose 2002.02.23, 
+	 * Start Freyja which builds the widgets from a script */
+	freyja_event_start();
+
+	/* Mongoose 2002.02.23, 
+	 * Load file passed by command line args */
+	if (argc > 1)
+	{
+		fileselection_dir_set_event(argv[1]);
+		freyja_event_file_dialog_notify(argv[1]);
+	}
+
+	//gdk_threads_enter();
+	gtk_main();
+	//gdk_threads_leave();
+
+	return 0;
 }

@@ -15,17 +15,10 @@
  * Mongoose - Created
  =================================================================*/
 
-#ifdef USING_GTK_1_2
-#   include <gtk/gtk.h>
-#elif USING_GTK_2_0
-#   include <gtk/gtk.h>
-#else
-#   error "This MLISP wrapper only supports GTK+ 1.2, and GTK+ 2.0"
-#endif
+#include <gtk/gtk.h>
 
 #include "gnome_interface.h"
 #include "gnome_callbacks.h"
-#include "gnome_gtkglarea.h"
 #include "gnome_resource.h"
 
 #include "FreyjaResource.h"
@@ -104,7 +97,7 @@ GtkWidget *getGtkFileSelectionWidget()
 
 	if (!file)
 	{
-		file = fileselection_create("Select file");
+		file = mgtk_create_fileselection("Select file");
 		path = freyja_rc_map("/");
 		
 		if (path)
@@ -248,7 +241,7 @@ arg_list_t *freyja_rc_window(arg_list_t *container)
 
 	ret = NULL;
 
-	window = window_create();
+	window = mgtk_create_window(BUILD_NAME, "Freyja", "freyja.png");
 	
 	if (!GTK_MAIN_WINDOW)
 	{
@@ -300,28 +293,38 @@ arg_list_t *freyja_rc_gl_widget(arg_list_t *box)
 		return NULL;
 	}
 
-#ifdef GTK_GLAREA_GL
+#ifdef HAVE_GTKGL
 	/* Gtk GL Area widget */
-	gl = glarea_create(get_int(width), get_int(height));
+	gl = mgtk_create_glarea(get_int(width), get_int(height));
+
+	if (!gl)
+	{
+		event_print("!ERROR: OpenGL display not supported by this system?\n");
+	}
+	else
+	{
+		event_print("@Gtk+ GL context started...");
+	}
+
 	state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(gl),
 														"gl_window_state");
 	GTK_GL_AREA_WIDGET = gl;
 	state->appbar = NULL;
 	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "key_press_event",
-					   GTK_SIGNAL_FUNC(glarea_key_press_event), NULL);
+					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
 	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "key_release_event",
-					   GTK_SIGNAL_FUNC(glarea_key_release_event), NULL);
+					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "destroy",
-					   GTK_SIGNAL_FUNC(window_destroy), NULL);
+					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
 #else
-#   warning "main> FIXME: No gtkglarea widget support?"
-	gl = label_create(GTK_WIDGET(box->data), "lab1", "No gtkglarea widget support in this build\nAdd -DGTK_GLAREA_GL to CONFIGURE_CFLAGS in Makefile.am to force build to use gtkglarea widget", 0.5, 0.5);
+#   warning "FIXME: No gtkglarea widget support?"
+	gl = label_create(GTK_WIDGET(box->data), "lab1", "No gtkglarea widget support in this build\nAdd -DHAVE_GTKGL to CONFIGURE_CFLAGS in Makefile to force build to use gtkglarea widget", 0.5, 0.5);
 	gtk_widget_set_usize(gl, get_int(width), get_int(height));
 #endif
 	
 	/* Editing window */
 	//hbox = packed_hbox_create(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
-	hbox = packed_vbox_create(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
+	hbox = mgtk_create_vbox(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
 	
 	table = gtk_table_new(3, 3, FALSE);
 	gtk_widget_ref(table);
@@ -430,11 +433,11 @@ arg_list_t *freyja_rc_toolbar(arg_list_t *box)
 
 	ret = NULL;
  
-	toolbar = toolbar_create((GtkWidget *)box->data);
+	toolbar = mgtk_create_toolbar((GtkWidget *)box->data);
 	gtk_widget_ref(toolbar);
 	gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)box->data), "tool", 
-									 toolbar,
-									 (GtkDestroyNotify)gtk_widget_unref);
+							 toolbar,
+							 (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(toolbar);
 
 	new_adt(&ret, ARG_GTK_TOOLBOX_WIDGET, (void *)toolbar);
@@ -541,9 +544,11 @@ arg_list_t *freyja_rc_toolbar_togglebutton(arg_list_t *box)
 		}
 
 		toggle_button =
-		toolbar_toogle_btn((GtkWidget *)box->data, get_int(toggled), 
-								 get_string(icon), get_string(label), get_string(help),
-								 event_func, event_cmd);
+		mgtk_create_toolbar_toogle_button((GtkWidget *)box->data, 
+										  get_int(toggled), 
+										  get_string(icon), get_string(label),
+										  get_string(help),
+										  event_func, event_cmd);
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)toggle_button);
 	}
@@ -617,9 +622,9 @@ arg_list_t *freyja_rc_toolbar_button(arg_list_t *box)
 		}
 
 		button =
-		toolbar_btn((GtkWidget *)box->data, get_string(icon), 
-					get_string(label), get_string(help),
-					event_func, event_cmd);
+		mgtk_create_toolbar_button((GtkWidget *)box->data, get_string(icon), 
+								   get_string(label), get_string(help),
+								   event_func, event_cmd);
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
 	}
@@ -757,11 +762,11 @@ arg_list_t *freyja_rc_tab(arg_list_t *notebook)
 	{
 		vbox = gtk_vbox_new(FALSE, 0);
 		
-		item = tab_create((GtkWidget *)notebook->data, 
-								get_string(label), 
-								vbox,	
-								get_string(label), 
-								page);
+		item = mgtk_create_tab((GtkWidget *)notebook->data, 
+							   get_string(label), 
+							   vbox,	
+							   get_string(label), 
+							   page);
 
 		// Mongoose 2002.02.21, Event system for tabs - could add/sub 
 		//   notebook event for multiple notebooks
@@ -824,13 +829,13 @@ arg_list_t *freyja_rc_vbox(arg_list_t *box)
 	}
 	else
 	{
-		vbox = packed_vbox_create((GtkWidget *)box->data,
-										  "vbox", 
-										  get_int(homogeneous),
-										  get_int(spacing),
-										  get_int(expand),
-										  get_int(fill),
-										  get_int(pading));
+		vbox = mgtk_create_vbox((GtkWidget *)box->data,
+								"vbox", 
+								get_int(homogeneous),
+								get_int(spacing),
+								get_int(expand),
+								get_int(fill),
+								get_int(pading));
 
 		if (box->type == ARG_GTK_WINDOW)
 		{
@@ -896,13 +901,13 @@ arg_list_t *freyja_rc_hbox(arg_list_t *box)
 	}
 	else
 	{
-		hbox = packed_hbox_create((GtkWidget *)box->data,
-										  "hbox", 
-										  get_int(homogeneous),
-										  get_int(spacing),
-										  get_int(expand),
-										  get_int(fill),
-										  get_int(pading));
+		hbox = mgtk_create_hbox((GtkWidget *)box->data,
+								"hbox", 
+								get_int(homogeneous),
+								get_int(spacing),
+								get_int(expand),
+								get_int(fill),
+								get_int(pading));
 
 		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)hbox);
 	}
@@ -1223,7 +1228,7 @@ arg_list_t *freyja_rc_textbox(arg_list_t *container)
 	}
 	else
 	{
-		item = text_entry_create((GtkWidget *)container->data);
+		item = mgtk_create_text_entry((GtkWidget *)container->data);
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_TEXTENTRY_WIDGET
 
 		gtk_signal_connect(GTK_OBJECT(item), "changed",
@@ -1349,11 +1354,11 @@ arg_list_t *freyja_rc_label(arg_list_t *container)
 	}
 	else
 	{
-		item = label_create((GtkWidget *)container->data, 
-								  get_string(label), // name
-								  get_string(label), // label text
-								  get_float(x_align),
-								  get_float(y_align));
+		item = mgtk_create_label((GtkWidget *)container->data, 
+								 get_string(label), // name
+								 get_string(label), // label text
+								 get_float(x_align),
+								 get_float(y_align));
 		
 		gtk_box_pack_start(GTK_BOX((GtkWidget *)container->data), 
 								 item, TRUE, TRUE, 0);
@@ -1414,11 +1419,11 @@ arg_list_t *freyja_rc_spinbutton(arg_list_t *container)
 	}
 	else
 	{
-		item = spinbutton_create((GtkWidget *)container->data, 
-										 "sbtn",
-										 get_number(start),
-										 get_number(min),
-										 get_number(max));
+		item = mgtk_create_spinbutton((GtkWidget *)container->data, 
+									  "sbtn",
+									  get_number(start),
+									  get_number(min),
+									  get_number(max));
 
 		gtk_box_pack_start(GTK_BOX((GtkWidget *)container->data), 
 								 item, TRUE, TRUE, 0);
@@ -1522,15 +1527,15 @@ arg_list_t *freyja_rc_spinbutton2(arg_list_t *container)
 	}
 	else
 	{
-		item = spinbutton2_create((GtkWidget *)container->data, 
-										  "sbtn2",
-										  get_number(start),
-										  get_number(min),
-										  get_number(max),
-										  get_number(step),
-										  get_number(page),
-										  get_number(page_sz),
-										  get_int(digit));
+		item = mgtk_create_spinbutton2((GtkWidget *)container->data, 
+									   "sbtn2",
+									   get_number(start),
+									   get_number(min),
+									   get_number(max),
+									   get_number(step),
+									   get_number(page),
+									   get_number(page_sz),
+									   get_int(digit));
 
 		gtk_box_pack_start(GTK_BOX((GtkWidget *)container->data), 
 								 item, TRUE, TRUE, 0);
