@@ -198,6 +198,9 @@ typedef enum {
 	eGroupIterator,
 	eBoneIterator,
 
+	eTransformMenu,
+	eObjectMenu,
+
 	/* Text events */
 	eSetCurrentBoneName,
 	eSetTextureNameA,
@@ -279,6 +282,7 @@ typedef enum {
 	CMD_MISC_SCENE_ROTATE,
 
 	EVENT_MISC,
+	eRecentFiles,
 
 
 	/* Misbehaved text events */
@@ -303,6 +307,8 @@ void freyja_event_fullscreen();
 void freyja_event_unfullscreen();
 
 void freyja_event_file_dialog_notify(char *filename);
+
+int freyja_append_item_to_menu(int event, const char *label, int item_event);
 
 float freyja_event_get_float(int event);
 void freyja_event_set_float(int event, float value);

@@ -307,11 +307,13 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eSetPolygonTexture", eSetPolygonTexture);
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 
+	r.RegisterInt("eObjectMenu", eObjectMenu);
 	r.RegisterInt("eAddObject", eAddObject);
 	r.RegisterInt("eMoveObject", eMoveObject);
 	r.RegisterInt("eRotateObject", eRotateObject);
 	r.RegisterInt("eScaleObject", eScaleObject);
 
+	r.RegisterInt("eTransformMenu", eTransformMenu);
 	r.RegisterInt("eTransformSelectedVertices", eTransformSelectedVertices);
 	r.RegisterInt("eTransformGroup", eTransformGroup);
 	r.RegisterInt("eTransformScene", eTransformScene);
@@ -320,6 +322,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eTransformBone", eTransformBone);
 	r.RegisterInt("eTransformPoint", eTransformPoint);
 
+	r.RegisterInt("eRecentFiles", eRecentFiles);
 
 	r.RegisterInt("eAnimationNext", eAnimationNext);
 	r.RegisterInt("eAnimationPrev", eAnimationPrev);
@@ -453,6 +456,8 @@ void mgtk_handle_resource_start()
 	//gFreyjaRender->Init(740, 560, true);
 
 	freyja_refresh_material_interface();
+	mgtk_option_menu_value_set(eTransformMenu, 1);
+	mgtk_option_menu_value_set(eObjectMenu, 0);
 	freyja_set_main_window_title(BUILD_NAME);
 
 	/* Mongoose 2002.01.23, Switch to mesh mode */
@@ -584,6 +589,12 @@ void freyja_get_rc_filename(char *s, const char *filename, long sz)
 	
 	snprintf(s, len, "C:/freyja/%s", filename);
 #endif
+}
+
+
+int freyja_append_item_to_menu(int event, const char *label, int item_event)
+{
+	mgtk_append_item_to_menu(event, label, item_event);
 }
 
 
@@ -742,8 +753,7 @@ void freyja_event_file_dialog(char *s)
 				mgtk_event_fileselection_append_pattern(plugin->mDescription,
 														plugin->mExtention);
 		}
-		
-		
+
 		on = 1;
 	}
 }
