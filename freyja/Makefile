@@ -9,7 +9,7 @@
 ################################################################
 
 NAME=freyja
-BASE_NAME=Freyja
+BASE_NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
@@ -20,7 +20,7 @@ BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
 EMAIL="mongoose@icculus.org"
 EXT=
-TREE_DIR=Freyja
+TREE_DIR=freyja
 TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
 LICENSE=
 
@@ -54,7 +54,7 @@ BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 SRC_DIR=src
 
 DESTDIR =
-NO_DEB=
+#NO_DEB=
 NO_DEB=local/
 INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
 INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
