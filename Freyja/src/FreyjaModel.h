@@ -34,13 +34,30 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 #define GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 
-#include <freyja8/EggPlugin.h>
-#include <freyja8/Egg.h>
+#include <freyja/EggPlugin.h>
+#include <freyja/Egg.h>
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
 #include "BezierPatch.h"
 #include "Light.h"
 #include "freyja_events.h"
+
+
+class FreyjaModelPrinter : public FreyjaPrinter
+{
+ public:
+
+	virtual void errorArgs(char *format, va_list *args)
+	{
+		freyja_print_args(format, args);
+	}
+
+
+	virtual void messageArgs(char *format, va_list *args)
+	{
+		freyja_print_args(format, args);
+	}
+};
 
 
 class CopyGroup
@@ -110,83 +127,6 @@ public:
 	unsigned int flags;
 };
 
-
-class FreyjaEgg : public Egg
-{
-public:
-	FreyjaEgg::FreyjaEgg() : Egg()
-	{
-	}
-
-
-	virtual void print(char *format, ...)
-	{	
-		va_list args;
-
-		va_start(args, format);
-		freyja_print_args(format, &args);
-		va_end(args);
-	}
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report messages to stdout
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.06:
-	 * Mongoose - Removed internal level check for speed
-	 *            and lower overhead, new ABI was printDebug
-	 *
-	 * 2002.07.05: 
-	 * Mongoose - Debug level
-	 *
-	 * 2001.01.31: 
-	 * Mongoose - Debug toggle
-	 *
-	 * 1999.07.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	virtual void printError(char *format, ...)
-	{	
-		va_list args;
-
-		va_start(args, format);
-		freyja_print_args(format, &args);
-		va_end(args);
-	}
-	/*------------------------------------------------------
-	 * Pre  : String and args are valid
-	 * Post : Report an error to stderr
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-};
-
-
-class FreyjaEggPlugin : public EggPlugin
-{
-public:
-	FreyjaEggPlugin(FreyjaEgg *egg, char *plugindir) : 
-		EggPlugin(egg, plugindir)
-	{
-	}
-
-	
-	virtual void eggPrintError(char *format, va_list *args)
-	{
-		freyja_print_args(format, args);
-	}
-
-	
-	virtual void eggPrintMessage(char *format, va_list *args)
-	{
-		freyja_print_args(format, args);
-	}
-};
 
 typedef enum { 
 	
@@ -755,6 +695,8 @@ public:
 
 	///////////////////////////////////////////////////////
 
+	FreyjaModelPrinter mPrinter;
+
 	Vector<unsigned int> mList;         /* Temp generic vertex list buffer */
 
 	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
@@ -856,9 +798,9 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 	
-	FreyjaEgg *_egg;                /* The 3d model */
+	Egg *_egg;                      /* The 3d model */
 	
-	FreyjaEggPlugin *mPlugin;       /* Model plugin system */
+	EggPlugin *mPlugin;             /* Model plugin system */
 
 	unsigned int mFlags;            /* Stores option flags as bitmap */
 
