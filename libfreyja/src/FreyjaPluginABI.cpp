@@ -54,31 +54,31 @@ void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side)
 	vertices.pushBack(index);
 
 	index = freyjaVertex3f(origin[0] + side, origin[1] + side, origin[2] + 0.0);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, 0.33, 0.33, -0.33);
 	vertices.pushBack(index);
 
 	index = freyjaVertex3f(origin[0] + side, origin[1] + 0.0, origin[2] + 0.0);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, 0.33, -0.33, -0.33);
 	vertices.pushBack(index);
 
 	index = freyjaVertex3f(origin[0] + 0.0, origin[1] + 0.0, origin[2] + 0.0);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, -0.33, -0.33, -0.33);
 	vertices.pushBack(index);
 
 	index = freyjaVertex3f(origin[0] + 0.0, origin[1] + side, origin[2] + side);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, -0.33, 0.33, 0.33);
 	vertices.pushBack(index);
 
 	index =freyjaVertex3f(origin[0] + side, origin[1] + side, origin[2] + side);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, 0.33, 0.33, 0.33);
 	vertices.pushBack(index);
 
 	index = freyjaVertex3f(origin[0] + side, origin[1] + 0.0, origin[2] + side);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, 0.33, -0.33, 0.33);
 	vertices.pushBack(index);
 
 	index = freyjaVertex3f(origin[0] + 0.0, origin[1] + 0.0, origin[2] + side);
-	freyjaVertexNormal3f(index, 0.0, 1.0, 0.0);
+	freyjaVertexNormal3f(index, -0.33, -0.33, 0.33);
 	vertices.pushBack(index);
 
 	freyjaEnd(); // FREYJA_VERTEX_GROUP 
