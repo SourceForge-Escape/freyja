@@ -2417,7 +2417,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 	/* Mongoose: Compute a relative movement value too here */
 	y = -y;
-	
+
 	switch (plane)
 	{
 	case PLANE_XY:
@@ -2425,10 +2425,13 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0;
 		break;
+
 	case PLANE_XZ:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		break;
+
 	case PLANE_ZY: // side
 		xf = 0;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
@@ -2519,10 +2522,13 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0;
 		break;
+
 	case PLANE_XZ:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? m : ((y > old_y+t) ? -m : 0));
+		break;
+
 	case PLANE_ZY: //side
 		xf = 0;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
@@ -2667,11 +2673,11 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 
 		switch (mModel->getCurrentPlane())
 		{
-		case PLANE_XY:
+		case PLANE_XY: // front
 			mModel->adjustSceneTranslation(xyz[0], xyz[1], xyz[2]);
 			break;
 
-		case PLANE_XZ:
+		case PLANE_XZ: // top
 			mModel->adjustSceneTranslation(xyz[0], xyz[2], xyz[1]);
 			break;
 
