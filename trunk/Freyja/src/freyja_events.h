@@ -57,6 +57,8 @@ typedef enum {
 	eMaterialMultiTex,
 	eMaterialTex,
 
+	ePolygonSize,
+
 	eMeshNew,
 	eMeshDelete,
 	eMeshMove,

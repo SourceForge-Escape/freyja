@@ -31,6 +31,10 @@
 
  libfreyja (0.8.14-20041202) Mongoose <mongoose@icculus.org>
 
+	o Fix for normal generation ( yes Egg indices were to blame )
+
+ libfreyja (0.8.14-20041202) Mongoose <mongoose@icculus.org>
+
 	o Fix for Egg::delPolygon not clearing render polygon list in meshes
 	o Fixed Vector::remove last week, which fixed many bugs here
 	o jpeg plugin was fixed in this branch many months back

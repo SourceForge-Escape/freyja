@@ -276,6 +276,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshMirror", eMeshMirror);
 	r.RegisterInt("eMeshCenter", eMeshCenter);
 
+	r.RegisterInt("ePolygonSize", ePolygonSize);
+
 	r.RegisterInt("ePointJoint", ePointJoint);
 	r.RegisterInt("eSphereJoint", eSphereJoint);
 	r.RegisterInt("eAxisJoint", eAxisJoint);

@@ -1631,7 +1631,7 @@ mgtk_tree_t *generateSkeletalUI(Egg *egg, egg_tag_t *tag,
 
 	if (!tag)
 	{
-		printf("ERROR: NULL skeletal bone_tag!\n");
+		freyja_print("!ERROR: NULL skeletal bone_tag!\n");
 		return 0x0;
 	}
 
@@ -1691,10 +1691,10 @@ void testBone(mgtk_tree_t *bone, unsigned int space)
 
 	for (i = 0; i < space; ++i)
 	{
-		printf(" ");
+		freyja_print(" ");
 	}
 
-	printf("+ T_BONE %d\n", bone->id);
+	freyja_print("+ T_BONE %d\n", bone->id);
 
 	for (i = 0; i < bone->numChildren; ++i)
 	{
@@ -1712,18 +1712,18 @@ void updateSkeletonUI(Egg *egg)
 	for (i = 0; i < egg->getTagCount(); ++i)
 	{
 #ifdef DEBUG_BONE_LOAD
-		printf("TAG %d :: ", i);
+		freyja_print("TAG %d :: ", i);
 #endif
 		egg_tag_t *tag = egg->getTag(i);
 
 		for (j = tag->slave.begin(); j < tag->slave.end(); ++j)
 		{
 #ifdef DEBUG_BONE_LOAD
-			printf("%d ", tag->slave[j]);
+			freyja_print("%d ", tag->slave[j]);
 #endif
 		}
 #ifdef DEBUG_BONE_LOAD
-		printf("\n");
+		freyja_print("\n");
 #endif
 	}
 
@@ -1940,6 +1940,13 @@ int FreyjaModel::saveAnimation(const char *filename)
   
 	return 0;
 }
+
+
+bool FreyjaModel::isCurrentBoneAllocated()
+{
+	return (_egg->getTag(getCurrentBone()) != 0x0);
+}
+
 
 
 /////// PRIVATE METHODS //////////////////////////////////////
