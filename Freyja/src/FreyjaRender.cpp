@@ -590,7 +590,7 @@ void drawSkeleton2(Vector<egg_tag_t *> *taglist,
 FreyjaRender::FreyjaRender()
 {
 	_model = NULL;
-	mRenderMode = 0;
+	mRenderMode = 0 | fRenderBonesClearedZBuffer;
 	_view_mode = VIEWMODE_MODEL_VIEW;
 	_init = false;
 

@@ -49,13 +49,16 @@ BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
 SRC_DIR=src
 
-DESTDIR=/usr/local
-INSTALL_BIN=$(DESTDIR)/bin
-INSTALL_LIB=$(DESTDIR)/lib
-INSTALL_DOC=$(DESTDIR)/share/doc/$(NAME)
-INSTALL_SHARE=$(DESTDIR)/share/$(NAME)
-INSTALL_INCLUDE=$(DESTDIR)/include
+DESTDIR =
+NO_DEB=
+NO_DEB=local/
+INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
+INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
+INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
+INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
+INSTALL_INCLUDE=$(DESTDIR)/usr/$(NO_DEB)include
 INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
+
 
 ################################################################
 # Debian package setup
@@ -509,7 +512,7 @@ plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.s
 
 plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
 
-tools: FreyjaUtil.test bsa.test raw2riff.test cull.test
+tools: FreyjaUtil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
 
 
 ######################################################################
@@ -539,7 +542,7 @@ install-tools:
 	@-cp bin/test/bsa.test $(INSTALL_BIN)/bsa
 	@-cp bin/test/cull.test $(INSTALL_BIN)/cull
 	@-cp bin/test/raw2riff.test $(INSTALL_BIN)/raw2riff
-
+	@-cp bin/test/freyjaimageutil.test $(INSTALL_BIN)/freyjaimageutil
 
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
@@ -622,12 +625,19 @@ jpeg.test:
 	CFLAGS="-Wall -g -O0 -DLIB_JPEG" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
 
+freyjaimageutil.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=freyjaimageutil BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/freyjaimageutil.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_DDS2TGA $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+
 cull.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=cull BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/cull.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja8"
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_CULL $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 raw2riff.test:
 	@-mkdir -p $(BUILD_TEST_DIR)

@@ -28,6 +28,12 @@
 
  libfreyja (0.9.0-20050103) "Umbra" Mongoose <mongoose@icculus.org>
 
+	o Tools update: cull fixes, freyjaimageutil to convert image formats
+	o Plugin interaction system done ( plugins can request user input )
+
+
+ libfreyja (0.9.0-20050103) "Umbra" Mongoose <mongoose@icculus.org>
+
 	o Updated all plugins to use freyja_init() feature reporting subsystem
 	o Fixed ja format file save issue with 'mesh missing bug'
 	o Removing MeshTree ABI functions, please switch all your meshtrees

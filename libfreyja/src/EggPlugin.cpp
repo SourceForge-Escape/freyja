@@ -1001,6 +1001,31 @@ long EggPlugin::getPluginDescCount()
 }
 
 
+FreyjaPluginDesc *EggPlugin::getPluginDesc(const char *name)
+{
+	long i, l;
+
+	if (!name || !name[0])
+		return 0x0;
+
+	l = strnlen(name, 8192);
+
+	for (i = mPlugins.begin(); i < (long)mPlugins.end(); ++i)
+	{
+		if (mPlugins[i] && 
+			mPlugins[i]->mFilename && mPlugins[i]->mFilename[0])
+		{
+			if (!strncmp(mPlugins[i]->mFilename, name, l))
+			{
+				return mPlugins[i];
+			}
+		}
+	}
+
+	return 0x0;
+}
+
+
 FreyjaPluginDesc *EggPlugin::getPluginDesc(long pluginIndex)
 {
 	if (pluginIndex > 0 && pluginIndex < (long)mPlugins.end())
@@ -1014,17 +1039,66 @@ FreyjaPluginDesc *EggPlugin::getPluginDesc(long pluginIndex)
 
 void EggPlugin::addPluginArgInt(const char *name, long defaults)
 {
-	// Not implemented
+	if (mCurrentPlugin)
+		mCurrentPlugin->addIntArg(name, defaults);
 }
+
 
 void EggPlugin::addPluginArgFloat(const char *name, float defaults)
 {
-	// Not implemented
+	if (mCurrentPlugin)
+		mCurrentPlugin->addFloatArg(name, defaults);
 }
+
 
 void EggPlugin::addPluginArgString(const char *name, const char *defaults)
 {
-	// Not implemented
+	if (mCurrentPlugin)
+		mCurrentPlugin->addStringArg(name, defaults);
+}
+
+long EggPlugin::getPluginId()
+{
+	if (mCurrentPlugin)
+		return mCurrentPlugin->getId();
+
+	return -1;
+}
+
+long EggPlugin::getPluginArgInt(long pluginIndex, const char *name)
+{
+	FreyjaPluginDesc *plugin = getPluginDesc(pluginIndex);
+	long ret = -1;
+
+	if (plugin)
+		ret = plugin->getIntArg(name);
+
+	printf("%li = EggPlugin::getPluginArgInt(%li, '%s')\n", 
+		   ret, pluginIndex, name);
+
+	return ret;
+}
+
+
+float EggPlugin::getPluginArgFloat(long pluginIndex, const char *name)
+{
+	FreyjaPluginDesc *plugin = getPluginDesc(pluginIndex);
+
+	if (plugin)
+		return plugin->getFloatArg(name);
+
+	return -1;
+}
+
+
+char *EggPlugin::getPluginArgString(long pluginIndex, const char *name)
+{
+	FreyjaPluginDesc *plugin = getPluginDesc(pluginIndex);
+
+	if (plugin)
+		return plugin->getStringArg(name);
+
+	return 0x0;
 }
 
 
@@ -1129,6 +1203,7 @@ void EggPlugin::setupPlugins()
 				}
 
 				mCurrentPlugin = new FreyjaPluginDesc();
+				mCurrentPlugin->setId(mPlugins.size());
 				mPlugins.pushBack(mCurrentPlugin);
 				freyjaPluginBegin();
 				mCurrentPlugin->setFilename(module_filename);
@@ -1240,8 +1315,12 @@ long EggPlugin::importModel(const char *filename)
 					dlclose(handle);
 					continue;
 				}
-				
+
+				mCurrentPlugin = getPluginDesc(module_filename);
+
 				done = !(*import)((char*)filename);
+
+				mCurrentPlugin = 0x0;
 
 				if (done)
 				{
@@ -1341,7 +1420,11 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 				dlclose(handle);
 			}
 
+			mCurrentPlugin = getPluginDesc(module_filename); 
+
 			saved = (!(*export_mdl)((char*)filename));
+
+			mCurrentPlugin = 0x0;
 
 			if ((error = dlerror()) != NULL) 
 			{

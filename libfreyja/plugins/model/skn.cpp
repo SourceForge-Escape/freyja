@@ -51,7 +51,9 @@ void freyja_init()
 						 FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 	
-	freyjaPluginArgInt("Use adult skeleton?", 1);
+	freyjaPluginArg1i("Use adult skeleton?", 1);
+	freyjaPluginArg1f("Scaling", 0.5f);
+	freyjaPluginArg1s("Material name", "x");
 }
 
 int import_model(char *filename)
@@ -131,7 +133,6 @@ void cmx_bone_set(cmx_bone_t &bone,
 void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 {
 	const vec_t scale = 5.0;
-	//	cmx_bone_t skeleton[29];
 	long i, j, idx;
 
 
@@ -374,7 +375,7 @@ int freyja_model__skn_import(char *filename)
 	char *symbol;
 	char name[64];
 	char material[64];
-	long i, j, k, index;
+	long i, j, k, index, pluginId;
 
 
 	if (freyja_model__skn_check(filename) < 0 || !r.openFile(filename))
@@ -382,6 +383,25 @@ int freyja_model__skn_import(char *filename)
 		return -1;
 	}
 
+	/* Testing for plugin feedback */
+	pluginId = freyjaGetPluginId();
+
+	if (pluginId > -1)
+	{
+		char *pMaterial;
+		float pScale;
+		long pUseAdult, e;
+
+		e = freyjaGetPluginArg1s(pluginId, "Material name", &pMaterial);
+		e = freyjaGetPluginArg1f(pluginId, "Scaling", &pScale);
+		e = freyjaGetPluginArg1i(pluginId, "Use adult skeleton?", &pUseAdult);
+	
+		printf("freyja_model__skn_import> %li :: '%s' %f %li\n", 
+			   pluginId, pMaterial, pScale, pUseAdult);
+	}
+
+
+	// Currently only have adult reference skeleton, so use it anyway
 	cmx_import_adult_skeleton(skeleton);
 
 	symbol = r.parseSymbol();
@@ -395,7 +415,7 @@ int freyja_model__skn_import(char *filename)
 
 	long boneCount = r.parseInteger();
 	skn_bone_t bones[boneCount];
-	printf("boneCount = %li\n", boneCount);
+	freyjaPrintMessage("boneCount = %li\n", boneCount);
 
 	for (i = 0; i < boneCount; ++i)
 	{
@@ -407,7 +427,7 @@ int freyja_model__skn_import(char *filename)
 
 	long trisCount = r.parseInteger();
 	long tris[trisCount][3];
-	printf("trisCount = %li\n", trisCount);
+	freyjaPrintMessage("trisCount = %li\n", trisCount);
 
 	for (i = 0; i < trisCount; ++i)
 	{
@@ -419,7 +439,7 @@ int freyja_model__skn_import(char *filename)
 
 	long bindingCount = r.parseInteger();
 	skn_bone_binding_t bindings[bindingCount];
-	printf("bindingCount = %li\n", bindingCount);
+	freyjaPrintMessage("bindingCount = %li\n", bindingCount);
 
 	for (i = 0; i < bindingCount; ++i)
 	{
@@ -429,7 +449,7 @@ int freyja_model__skn_import(char *filename)
 		bindings[i].blendedVertexOffset = r.parseInteger();
 		bindings[i].blendedVertexCount = r.parseInteger();
 
-		printf("binding[%li] = { %li Vert @ %li x %li, Blended Vert @ %li x %li}\n", i,
+		freyjaPrintMessage("binding[%li] = { %li Vert @ %li x %li, Blended Vert @ %li x %li}\n", i,
 			   bindings[i].boneIndex, 
 			   bindings[i].vertexOffset, 
 			   bindings[i].vertexCount,
@@ -440,7 +460,7 @@ int freyja_model__skn_import(char *filename)
 	
 	long texcoordCount = r.parseInteger();
 	vec2_t texcoords[texcoordCount];
-	printf("texcoordCount = %li\n", texcoordCount);
+	freyjaPrintMessage("texcoordCount = %li\n", texcoordCount);
 
 	for (i = 0; i < texcoordCount; ++i)
 	{
@@ -451,7 +471,7 @@ int freyja_model__skn_import(char *filename)
 	
 	long blendDataCount = r.parseInteger();
 	skn_blend_data_t blenddata[blendDataCount];
-	printf("blendDataCount = %li\n", blendDataCount);
+	freyjaPrintMessage("blendDataCount = %li\n", blendDataCount);
 
 	for (i = 0; i < blendDataCount; ++i)
 	{
@@ -463,7 +483,7 @@ int freyja_model__skn_import(char *filename)
 	long vertexCount = r.parseInteger();
 	vec3_t vertices[vertexCount];
 	vec3_t normals[vertexCount];
-	printf("vertexCount = %li\n", vertexCount);
+	freyjaPrintMessage("vertexCount = %li\n", vertexCount);
 
 	for (i = 0; i < vertexCount; ++i)
 	{
@@ -489,7 +509,8 @@ int freyja_model__skn_import(char *filename)
 		{
 			if (!strcmp(bones[index].name, skeleton[j].name))
 			{
-				printf("%s %s\n", bones[index].name, skeleton[j].name);
+				freyjaPrintMessage("%s %s\n",
+								   bones[index].name, skeleton[j].name);
 				index = j;
 				break;
 			}

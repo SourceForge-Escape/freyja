@@ -692,11 +692,11 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
 	void freyjaPluginExport1i(long flags);
 
-	void freyjaPluginArgInt(const char *name, long defaults);
+	void freyjaPluginArg1i(const char *name, long defaults);
 
-	void freyjaPluginArgFloat(const char *name, float defaults);
+	void freyjaPluginArg1f(const char *name, float defaults);
 
-	void freyjaPluginArgString(const char *name, const char *defaults);
+	void freyjaPluginArg1s(const char *name, const char *defaults);
 
 	void freyjaPluginEnd();
 
@@ -707,13 +707,14 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
 	long freyjaGetPluginId();
 
-	int freyjaGetPluginArg1f(long pluginId, const char *name, float &arg);
+	int freyjaGetPluginArg1f(long pluginId, const char *name, float *arg);
 
-	int freyjaGetPluginArg1i(long pluginId, const char *name, long &arg);
+	int freyjaGetPluginArg1i(long pluginId, const char *name, long *arg);
 
-	int freyjaGetPluginArg1s(long pluginId, const char *name, 
-							 long len, const char *arg);
+	int freyjaGetPluginArg1s(long pluginId, const char *name, char **arg);
 
+	int freyjaGetPluginArgString(long pluginId, const char *name, 
+								 long len, char *arg);
 
 	///////////////////////////////////////////////////////////////////////
 	//  Pak VFS 
