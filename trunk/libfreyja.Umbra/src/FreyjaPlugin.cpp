@@ -1,13 +1,13 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : GooseEgg
+ * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://gooseegg.sourceforge.net
- * Email   : mongoose@users.sourceforge.net
+ * Website : http://icculus.org/freyja
+ * Email   : mongoose@icculus.org
  * Object  : Plugin
  * License : GPL, also (C) 2000 Mongoose
- * Comments: This is the python plugin handler class
+ * Comments: This is the plugin system with C exported API.
  *
  * 
  *-- Test Defines -------------------------------------------
@@ -16,7 +16,7 @@
  *
  *-- History ------------------------------------------------ 
  *
- * 2001-02-24:
+ * 2001.02.24:
  * Mongoose - Created, based on python test code
  *
  ==========================================================================*/
@@ -880,21 +880,14 @@ int freyjaGetBoneParent(unsigned int index)
 }
 
 
-int freyjaGetBoneRotationXYZW4fv(unsigned int index, vec4_t xyzw)
+int freyjaGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz)
 {
 	FreyjaBone *bone = FreyjaPlugin::mPlugin->getBone(index);
 	
 	if (bone)
 	{
 		Quaternion q = bone->rotation;
-		vec4_t wxyz;
-
 		q.getQuaternion4fv(wxyz);
-		
-		xyzw[0] = wxyz[0];
-		xyzw[1] = wxyz[1];
-		xyzw[2] = wxyz[2];
-		xyzw[3] = wxyz[3];
 
 		return bone->id;
 	}

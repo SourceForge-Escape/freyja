@@ -15,7 +15,8 @@ void Unhandled::load( cGrannyStream * file, dword uoffset, dword baseOffset, dwo
 		dword d;
 		float f;
 	} df;
-  for (int i=0;i<peers;)
+
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();

@@ -16,7 +16,11 @@
  *
  *-- History ---------------------------------------------------------- 
  *
- * 2001-05-09:
+ * 2004.12.11:
+ * Mongoose - Updated specs from
+ *            http://netghost.narod.ru/gff/graphics/summary/waveobj.htm
+ *
+ * 2001.05.09:
  * Mongoose - Created
  ==========================================================================*/
 
@@ -24,6 +28,7 @@
 #include <string.h>
 #include <freyja8/EggPlugin.h>
 #include <freyja8/EggFileReader.h>
+#include <freyja8/EggFileWriter.h>
 
 
 extern "C" {
@@ -87,6 +92,14 @@ int freyja_model__obj_import(char *filename)
 			symbol = r.parseSymbol();
 			eggPrintMessage("FIXME: Material '%s' is not used\n", symbol);
 		}
+		else if (!strncmp(symbol, "mg", 2))
+		{
+			eggPrintMessage("FIXME: Merging Groups is not used\n");
+		}
+		else if (!strncmp(symbol, "vp", 2))
+		{
+			eggPrintMessage("FIXME: Parameter space vertices are not used\n");
+		}
 		else if (!strncmp(symbol, "vt", 2))
 		{
 			u = r.parseFloat();
@@ -113,15 +126,22 @@ int freyja_model__obj_import(char *filename)
 
 			transV.pushBack(eggVertexStore3f(x, y, z));
 		}
+		else if (!strncmp(symbol, "o", 1))
+		{
+			// Name of the new group, but no used here
+			symbol = r.parseSymbol();
+			eggPrintMessage("FIXME: Object name '%s' is not used\n", symbol);
+		}
 		else if (!strncmp(symbol, "g", 1))
 		{
 			// Name of the new group, but no used here
 			symbol = r.parseSymbol();
-			eggPrintMessage("FIXME: Group '%s' is not used\n", symbol);
+			eggPrintMessage("FIXME: Group name '%s' is not used\n", symbol);
 		}
 		else if (!strncmp(symbol, "s", 1))
 		{
-			index = r.parseInteger();  // Don't know what this is
+			index = r.parseInteger();
+			eggPrintMessage("FIXME: Smoothing Group %i is not used\n", i);
 		}
 		else if (!strncmp(symbol, "f", 1))
 		{
@@ -204,8 +224,116 @@ int freyja_model__obj_import(char *filename)
 
 int freyja_model__obj_export(char *filename)
 {
-	printf("freyja_model__obj_export> Not implemented, %s:%i\n", 
-		   __FILE__, __LINE__);
+	EggFileWriter w;
+	int index;
+	unsigned int j, k, n, group;
+	vec3_t vert;
+	vec2_t uv;
+	vec_t scale = 0.5;
 
 	return -1;
+
+	if (!w.openFile(filename))
+	{
+		return -1;
+	}
+
+	/* Comment */
+	w.print("# Exported from Freyja, not even tested code\n");
+
+#ifdef BONE_EXT_BREAK_COMPATIBILITY
+	char name[64];
+	vec_t d2r = 0.017453292519943295;
+	vec3_t translation, rotation;
+
+
+	if (eggGetNum(FREYJA_BONE))
+	{
+		eggIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
+		eggIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+		n = eggGetNum(FREYJA_BONE);
+
+		for (i = 0; i < n; ++i)
+		{
+			index = eggIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+			index = eggGetCurrent(FREYJA_BONE);
+
+			eggGetBoneName(index, 64, name);
+			eggGetBoneTranslation3fv(index, translation);
+			eggGetBoneRotationXYZ3fv(index, rotation);
+
+			translation[0] *= scale; 
+			translation[2] *= scale; 
+			translation[1] *= scale; 
+
+			if (!i)
+			{
+				rotation[1] += 90.0;
+
+				w.print("b %3i \"%s\" %i %f %f %f %f %f %f\n", i,
+						name, eggGetBoneParent(index),
+						translation[0], translation[2], translation[1], 
+						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
+			}
+			else
+			{
+				w.print("b %3i \"%s\" %i %f %f %f %f %f %f\n", i,
+						name, eggGetBoneParent(index),
+						translation[0], translation[1], translation[2], 
+						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
+			}
+
+			eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+		}
+	}
+#endif
+
+
+	/* Meshes */
+	if (eggGetNum(FREYJA_POLYGON))
+	{
+		eggIterator(FREYJA_MESH, FREYJA_LIST_RESET);
+		eggIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
+		n = eggGetNum(FREYJA_POLYGON);
+
+		group = 0;
+
+		//unsigned int meshCount = eggGetNum(FREYJA_MESH);
+		//for (i = 0; i < meshCount; ++i, group = i) // send all meshes
+		//{
+			//w.print("g %3i\n", group);
+
+			for (j = 0; j < n; ++j)
+			{
+				index = eggIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT);
+				index = eggGetCurrent(FREYJA_POLYGON);
+				
+				for (k = 0; k < 3; ++k)
+				{
+					eggGetPolygon3f(FREYJA_VERTEX, j, vert);
+					
+					w.print("v %f %f %f\n",
+							vert[0]*scale, vert[2]*scale, vert[1]*scale);
+				}
+
+				for (k = 0; k < 3; ++k)
+				{
+					eggGetPolygon3f(FREYJA_TEXCOORD, j, uv);
+					
+					w.print("vt %f %f\n",
+							uv[0], uv[1]);
+				}
+
+				w.print("f %i/%i %i/%i %i/%i", 
+						j*3+1, j*3+1, j*3+2, j*3+2, j*3+3, j*3+3);
+	
+				eggIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
+			}
+		//}
+	}
+
+	w.closeFile();
+
+	return 0;
 }
+

@@ -22,7 +22,7 @@ void Object::addValue(dword key,dword value)
 
 dword Object::getValue(dword key)
 {
-	for (int i=0;i<numKeys;i++)
+	for (dword i=0;i<numKeys;i++)
 		if (keys[i]==key)
 			return values[i];
 	return 0;
@@ -30,7 +30,7 @@ dword Object::getValue(dword key)
 
 bool Object::findValue(dword key,dword value)
 {
-	for (int i=0;i<numKeys;i++)
+	for (dword i=0;i<numKeys;i++)
 		if (keys[i]==key && values[i]==value)
 			return true;
 	return false;
@@ -48,7 +48,7 @@ static dword objNum=1;
 void Objects::load( cGrannyStream * file, dword objOffset, dword baseOffset, dword peers )
 {
 	dword oldOfs,val;
-	for (int i=0;i<peers;)
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();

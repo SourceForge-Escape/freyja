@@ -19,7 +19,7 @@ void Textures::load( cGrannyStream * file, dword tOffset, dword baseOffset, dwor
 	dword x;
 	dword oldPos;
 	dword numPolys;
-	for( int i = 0; i < peers ; )
+	for(dword i = 0; i < peers ; )
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();
