@@ -116,6 +116,18 @@ class Md5
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	float decodeIdQuaternion(float qx, float qy, float qz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.21:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
 	bool isMd5Model(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Checks to see if file is an Md5mesh model

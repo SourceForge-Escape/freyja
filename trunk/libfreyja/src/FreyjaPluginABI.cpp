@@ -1671,6 +1671,12 @@ void freyjaBoneRotate3f(vec_t x, vec_t y, vec_t z)
 }
 
 
+void freyjaBoneRotateQuaternion4fv(vec4_t wxyz)
+{
+	freyjaBoneRotateQuaternion4f(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);	
+}
+
+
 void freyjaBoneRotateQuaternion4f(vec_t w, vec_t x, vec_t y, vec_t z)
 {
 	vec_t heading, bank, attitude;
