@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 
 
 extern "C" {

@@ -211,8 +211,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-	void CustomColor(int flags, float r, float g, float b);
+	void setColor(freyja_color_t color, float r, float g, float b, float a);
 	/*------------------------------------------------------
 	 * Pre  : Flags are vaild color flag(s) ( ORable ),
 	 *        you can set more than one color at once
@@ -318,8 +317,8 @@ public:
 	void setZoom(float zoom);
 	float getZoom();
 	
-	void getColor(int id, vec4_t rgba);
-	void setColor(int id, const vec4_t rgba);
+	void getColor(freyja_color_t color, vec4_t rgba);
+	void setColor(freyja_color_t color, const vec4_t rgba);
 
 private:    
 

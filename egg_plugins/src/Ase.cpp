@@ -694,7 +694,7 @@ void Ase::readModelData(FILE *f)
 
 #ifdef FREYJA_MODEL_PLUGINS
 
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 
 extern "C" {
 

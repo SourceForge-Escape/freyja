@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 #include "Mdl.h"
 
 
