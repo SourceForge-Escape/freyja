@@ -204,6 +204,14 @@ void FreyjaControl::Event(int mode, int cmd)
 							"ON" : "OFF");
 			event_refresh();
 			break;
+		case FREYJA_MODE_RENDER_GRID:
+			_render->Flags(FreyjaRender::RENDER_EDIT_GRID, 
+								!(_render->Flags() & FreyjaRender::RENDER_EDIT_GRID));
+			event_print("Edit Grid rendering [%s]",
+						(_render->Flags() & FreyjaRender::RENDER_EDIT_GRID) ? 
+							"ON" : "OFF");
+			event_refresh();
+			break;
 
 		case FREYJA_MODE_TEXTURE_EDIT:
 			_render->ViewMode(VIEWMODE_TEXTURE_EDIT);
@@ -389,14 +397,6 @@ void FreyjaControl::Event(int mode, int cmd)
 			event_print("BoundingBox rendering [%s]", 
 							(_render->Flags() & FreyjaRender::RENDER_BBOX) ? 
 							"ON" : "OFF");
-			break;
-		case CMD_MISC_RENDER_GRID:
-			_render->Flags(FreyjaRender::RENDER_EDIT_GRID, 
-								!(_render->Flags() & FreyjaRender::RENDER_EDIT_GRID));
-			event_print("Edit Grid rendering [%s]",
-						(_render->Flags() & FreyjaRender::RENDER_EDIT_GRID) ? 
-							"ON" : "OFF");
-			event_refresh();
 			break;
 		case CMD_MISC_RENDER_ROT_Z_M:
 			_render->Rotate(Z_F, -_render->RotateAmount());

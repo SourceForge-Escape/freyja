@@ -82,7 +82,7 @@
 			(menu_item "Info"          EVENT_MISC  CMD_MISC_DISPLAY_INFO)
 
 			(submenu "Model"
-				(menu_item "New"     EVENT_MAIN  CMD_MAIN_NEW_MODEL)
+				(menu_item "Erase"   EVENT_MAIN  CMD_MAIN_NEW_MODEL)
 				(menu_item "Open"    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
 				(menu_item "Save As" EVENT_MAIN  CMD_MAIN_SAVE_MODEL))
 
@@ -185,9 +185,9 @@
 					"Show bones when rendering"
 					EVENT_FREYJA_MODE FREYJA_MODE_RENDER_BONETAG)
 
-				(toolbar_togglebutton false "grid.png" "Grid"
+				(toolbar_togglebutton true "grid.png" "Grid"
 					"Toggle plane grid rendering"
-					EVENT_MISC CMD_MISC_RENDER_GRID)))
+					EVENT_FREYJA_MODE FREYJA_MODE_RENDER_GRID)))
 
 		;; Main window body
 		(hbox 0 1 1 1 1
