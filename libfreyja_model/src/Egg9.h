@@ -16,6 +16,9 @@
  *
  *-- History --------------------------------------------------------- 
  *
+ * 2004.08.12:
+ * Mongoose - Eggv9 implementation hammered out, now I have some free time
+ *
  * 2004.04.08:
  * Mongoose - All new API using Hel math/physics lib, endian safe
  *            file I/O, and generic methods.
@@ -91,76 +94,157 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 
-
-#define EGG_LIB_VERSION 0x30302E39  /* Library ABI Version '9.00' */
-
-typedef enum {
-	EGG_MAGIC      = 0x20676745,  /* File header, versioning 'EGG ' */
-	EGG_VERSION    = 0x30302E39,  /* '9.00' */
-
-	EGG_VERT_CHUNK = 0x54524556,  /* Atomic model componets */
-	EGG_UVWS_CHUNK = 0x53575655,
-	EGG_NORM_CHUNK = 0x4D524F4E,
-	EGG_META_CHUNK = 0x4154454D,
-
-	EGG_POLY_CHUNK = 0x594C4F50,  /* Polygon mesh */
-	EGG_MESH_CHUNK = 0x4853454D,
-
-	EGG_BONE_CHUNK = 0x454E4F42,  /* Skeletal system */
-	EGG_SKEL_CHUNK = 0x4C454B53,
-	EGG_WGHT_CHUNK = 0x54484757,
-
-	EGG_BTAG_CHUNK = 0x47415442,  /* Mesh tree system */
-	EGG_TFRM_CHUNK = 0x4D524654,
-	EGG_AFRM_CHUNK = 0x4D524641
-
-} egg_chunk_t;
+#include "EggFileReader.h"
+#include "EggFileWriter.h"
 
 
-class EggMetaData
+class EggChunk
 {
 public:
-	unsigned int id;               /* Unique identifier */
+
+	/*** Public Accessors *********************************/
+
+	virtual bool saveFile(EggFileWriter &r) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Saves a model to disk file
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.08.01:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual bool saveTextFile(EggFileWriter &r) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Saves a model to disk file as UTF-8 text
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.04.08:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+	/*** Public Mutators ***********************************/
+
+	virtual bool loadFile(EggFileReader &r) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads a model from a disk file
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.08.01:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual bool loadTextFile(EggFileReader &r) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads a model from a UTF-8 text disk file
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.04.08:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+	unsigned int id;                 /* Unique identifier */
+
+	unsigned int chunkHeader;        /* This is used to identify a chunk 
+									  * in binary mode */
+};
+
+
+class Material
+{
+public:
+	float ambient[4];          /* Ambient color */
+
+	float diffuse[4];          /* Diffuse color */
+
+	float specular[4];         /* Specular color */
+
+	float emissive[4];         /* Emissive color */
+
+	float shininess;           /* Specular exponent */
+
+	unsigned int texture;      /* Texture id */
+
+	unsigned int texture2;     /* Detail Texture id */
+
+	unsigned int blend_src;    /* Blend source factor */
+
+	unsigned int blend_dest;   /* Blend destination factor */
+
+	unsigned int child;        /* Linked material id + 1 */
+
+private:
+	unsigned int id;           /* Unique identifier */
+
+	static unsigned int id_counter;  /* Id system use */
+};
+
+
+class MetaData // Useful for storing ASCII files as strings, textures, etc
+{
+public:
+	unsigned int id;                  /* Unique identifier */
 
 	unsigned int type;
 	unsigned int size;
 	char *symbol;
 	char *description;
 	void *data;
-
 };
 
 
-typedef struct {
+class Weight
+{
+public:
 	vec_t weight;                     /* Weight for vertex use */
 	unsigned int bone;                /* Bone id */
-
-} egg_weight_t;
-
-
-typedef struct egg_vertex_s {
-	unsigned int id;                 /* Unique identifier */
-	Vector <unsigned int> ref;       /* Polygons referencing this vertex */ 
-
-	unsigned int pos;                /* Index to Vertex position */
-	unsigned int normal;             /* Index to Normal vector */
-	unsigned int uvw;                /* Index of TexCoord coordinate */
-
-	Vector<egg_weight_t *> weights;  /* Vector of weights */
-
-} egg_vertex_t;
+};
 
 
-typedef struct egg_polygon_s {
+// class VertexArray { pos[], texcoord[], norm[], etc }
+
+class Vertex 
+{
+public:
+	unsigned int id;                  /* Unique identifier */
+	Vector <unsigned int> refPolygon; /* Polygons referencing this vertex */ 
+
+	unsigned int pos;                 /* Index to Vertex position */
+	unsigned int normal;              /* Index to Normal vector */
+	unsigned int uvw;                 /* Index of TexCoord coordinate */
+
+	Vector<Weight *> weights;         /* Vector of weights */
+};
+
+
+class Polygon
+{
+public:
 	unsigned int id;                  /* Unique identifier */
 
-	int material;                     /* Material id */
+	int material;                     /* Material id, if (mat != mesh.mat)
+									   * to support multimaterial meshes */
+
 	Vector <unsigned int> vertex;     /* Vertices composing polygon */
 
-} egg_polygon_t;
+	Vector <unsigned int> texcoords;  /* If non-empty this polygon uses
+									   * it's own texcoords in place of
+									   * vertices's texcoords (polymapped) */
+};
 
 
-typedef struct egg_group_s {
+class Group
+{
+public:
 	int id;                           /* Unique identifier */
 
 	Vector <unsigned int> vertex;     /* Vertices composing group */
@@ -170,74 +254,96 @@ typedef struct egg_group_s {
 
 	vec_t scale;                      /* Scaling of group */
 
-} egg_group_t;
+};
 
 
-typedef struct egg_vertexframe_s {
+class UVMap
+{
+public:
+	int id;                           /* Unique identifier */
 
+	Vector <unsigned int> polygons;   /* Contains TexCoords composing group */
+};
+
+
+class VertexFrame
+{
+public:
 	unsigned int mesh;                /* Mesh using this frame */
 	Vector<vec3_t> frame;             /* Vertex animation frames */
 
-} egg_vertexframe_t;
+};
 
 
-typedef struct egg_mesh_s {
-	int id;                             /* Unique identifier */
+class Mesh
+{
+public:
+	unsigned int id;                    /* Unique identifier */
+
+	int material;                       /* Material id */
+
 	Vector <unsigned int> groups;       /* Groups/Frames of this mesh */
 	Vector <unsigned int> polygons;     /* Polygons of this mesh */
 
 	unsigned int currentFrame;          /* Vertex morph frames */
-	Vector <egg_vertexframe_t *> frames;
+	Vector <VertexFrame *> frames;
 
-} egg_mesh_t;
+};
 
 
-typedef struct egg_bone_s {
-	int id;                          /* Unique identifier */
+class Bone 
+{
+public:
+	unsigned int id;                  /* Unique identifier */
 
 	unsigned int parent;
 	char name[64];
 
 	Vector <unsigned int> children;  /* Children bones */
-	Vector <unsigned int> meshes;    /* Meshes bound to this bone */
+	Vector <unsigned int> meshes;    /* Meshes bound to this bone if
+									  * meshtree*/
 
 	Matrix matrix;
 	Matrix transform;                /* Transform mesh/children */
-} egg_bone_t;
+};
 
 
-typedef struct egg_skeleton_s {
+class Skeleton
+{
+public:
 	int id;                           /* Unique identifier */
 
 	unsigned int root;                /* Root bone index */
 	Vector<unsigned int> bones;       /* Bones in this skeleton */
 	Vector3d center;                  /* Position */
-
-} egg_skeleton_t;
-
+};
 
 
-typedef struct egg_animation_s {
+
+class Animation
+{
+public:
 	int id;                           /* Unique identifier */
 
 	vec_t time;
 	vec_t time2;
 
 	Vector<unsigned int> boneframes; 
-	Vector<unsigned int> meshframes; 
+	Vector<unsigned int> meshframes;
+};
 
-} egg_animation_t;
 
+class Model
+{
+public:
+	int id;                           /* Unique identifier */
 
-typedef struct {
-
-	// meshes
-	// bones
-	// animations
-	// metadata
-	// materials
-
-} egg_model_t;
+	Skeleton skeleton;
+	Vector<Animation *> animations;
+	Vector<Mesh *> meshes;
+	Vector<Material *> materials;
+	Vector<MetaData *> metadata;
+};
 
 
 class Egg
@@ -245,16 +351,22 @@ class Egg
 public:
 
 	typedef enum {
+		EGG_VERSION    = 0x30302E39,  /* Library ABI Version '9.00' */
+		EGG_MAGIC      = 0x20676745,  /* File header, versioning 'EGG ' */
+	} egg_magic_t;
+
+	typedef enum {
 		VERTEX     = 0x54524556,
 		TEXCOORD   = 0x54455843,
+		NORMAL     = 0x4D524F4E,
+		WEIGHT     = 0x54484757,
 		POLYGON    = 0x504F4C59,
 		GROUP      = 0x56475250,
 		MESH       = 0x4D455348,
-		BONE       = 0x424F4E45,
 		SKELETON   = 0x534B454C,
+		BONE       = 0x424F4E45,
 		ANIMATION  = 0x414E494D,
 		METADATA   = 0x4D455441
-		
 	} egg_type_t;
 
 
@@ -263,8 +375,8 @@ public:
 		SCALE               = 0, 
 		ROTATE              = 1, 
 		TRANSLATE           = 2, 
-		ROTATE_ABOUT_CENTER = 3,
-		SCALE_ABOUT_CENTER  = 4
+		ROTATE_ABOUT_POINT  = 3,
+		SCALE_ABOUT_POINT   = 4
 	} egg_transform_t;
 	
 
@@ -272,7 +384,6 @@ public:
 		UNION = 1,
         INTERSECTION,
 		DIFFERENCE
-		
 	} egg_csg_t;
 
 
@@ -291,7 +402,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~Egg();
+	virtual ~Egg();
 	/*------------------------------------------------------
 	 * Pre  : This object is allocated
 	 * Post : Deconstructs the Egg object
@@ -307,6 +418,7 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+#ifdef FIXME
 	int checkFile(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -372,7 +484,7 @@ public:
 	 * 1999.08.01:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
+#endif
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -389,6 +501,21 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void setDebugLevel(unsigned int level);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Debugging is set 0 ( Off ) to 5 ( Highest )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.07.05:
+	 * Mongoose - Now supports multiple levels 
+	 *
+	 * 2001.01.31: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+#ifdef FIXME
 	bool combineTexcoords(unsigned int a, unsigned int b);
 	bool combineVertices(unsigned int a, unsigned int b);
 	/*------------------------------------------------------
@@ -468,20 +595,6 @@ public:
 	 *            in one method
 	 *
 	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setDebugLevel(unsigned int level);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Debugging is set 0 ( Off ) to 5 ( Highest )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.07.05:
-	 * Mongoose - Now supports multiple levels 
-	 *
-	 * 2001.01.31: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -971,12 +1084,13 @@ public:
 	 * Pre  :
 	 * Post : Return BoneFrame list
 	 -----------------------------------------*/
+#endif
 
 private:
 	////////////////////////////////////////////////////////////
 	// Private Accessors
 	////////////////////////////////////////////////////////////
-
+#ifdef FIXME
 	int saveAnimation(egg_animation_t *frame, FILE *f);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
@@ -1012,11 +1126,57 @@ private:
 	 * Pre  : f is set to start of valid tag chunk
 	 * Post : Saves tag chunk to disk file
 	 -----------------------------------------*/
+#endif
+
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	bool isDebugLevel(unsigned int level);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if debug level is greater or equal
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Created, split from printDebug
+	 ------------------------------------------------------*/
+
+	virtual void print(char *s, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Removed internal level check for speed
+	 *            and lower overhead, new ABI was printDebug
+	 *
+	 * 2002.07.05: 
+	 * Mongoose - Debug level
+	 *
+	 * 2001.01.31: 
+	 * Mongoose - Debug toggle
+	 *
+	 * 1999.07.31: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual void printError(char *s, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report an error to stderr
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+#ifdef FIXME
 	bool isMatchForPolygon(Vector<unsigned int> &list, 
 						   egg_polygon_t *polygon);
 	/*-----------------------------------------
@@ -1076,49 +1236,6 @@ private:
 	 * Post : Loads tag chunk from disk file
 	 -----------------------------------------*/
 
-	bool isDebugLevel(unsigned int level);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if debug level is greater or equal
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.06:
-	 * Mongoose - Created, split from printDebug
-	 ------------------------------------------------------*/
-
-	virtual void print(char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report messages to stdout
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.06:
-	 * Mongoose - Removed internal level check for speed
-	 *            and lower overhead, new ABI was printDebug
-	 *
-	 * 2002.07.05: 
-	 * Mongoose - Debug level
-	 *
-	 * 2001.01.31: 
-	 * Mongoose - Debug toggle
-	 *
-	 * 1999.07.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	virtual void printError(char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report an error to stderr
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	void resizeBoundingBox(egg_group_t *grp, vec3_t p);
 	/*-----------------------------------------
 	 * Created  : 2000-10-14, Mongoose
@@ -1144,6 +1261,7 @@ private:
 
 	/* The arrays are pointers to the data in the vectors for speed */
 
+
 	Vector<egg_vertex_t *> mVertices;        /* Vertex containers */
 	Vector<vec_t> mVertexVector;             /* XYZ position of vertex */
 	Vector<unsigned int> mDeadVertex;        /* Indices of unreferenced data */
@@ -1168,24 +1286,9 @@ private:
 	Vector<egg_skeleton_t *> mBoneFrames;   /* BoneFrame list */
 	
 	Vector<egg_animation_t *> mAnimations;   /* Animation list */
+#endif
 
 	unsigned int mDebugLevel;                /* Set debug output at runtime */
 };
-
-
-#ifndef __print_unsigned_int
-void __print_unsigned_int(unsigned int u);
-#endif
-void __print_egg_vertex_t(egg_vertex_t *v);
-void __print_egg_texcoord_t(egg_texcoord_t *t);
-void __print_egg_polygon_t(egg_polygon_t *p);
-/*!----------------------------------------
- * Created  : 2001-05-15, Mongoose
- * Modified : 
- * 
- * Pre  : 
- * Post : Various List support functions
- *        for local data types
- -----------------------------------------*/
 
 #endif

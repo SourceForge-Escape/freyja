@@ -1811,7 +1811,8 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		glLineWidth(_default_line_width);
 		glBegin(GL_LINE_LOOP);
 		
-		if (poly->id == _model->getCurrentPolygon())
+		if (mesh.id == (int)_model->getCurrentMesh())
+			//poly->id == _model->getCurrentPolygon())
 		{
 			glColor3fv(RED);    
 		}
@@ -1885,9 +1886,6 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 					switch (j)
 					{
 					case 0:
-						glColor3fv(RED);
-						break;
-					case 1:
 						glColor3fv(GREEN);
 						break;
 					case 2:

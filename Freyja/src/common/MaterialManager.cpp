@@ -21,7 +21,7 @@
  ==========================================================================*/
 
 #ifdef HAVE_FREYJA_IMAGE
-#   include <freyja_image/MtkImage.h>
+#   include <freyja8/EggImage.h>
 #endif
 
 #include "utils.h" // Only provides extcheck()
@@ -293,7 +293,7 @@ int MaterialManager::load(const char *filename)
 int MaterialManager::loadTexturePalette(const char *filename)
 {
 #ifdef HAVE_FREYJA_IMAGE
-	MtkImage img;
+	EggImage img;
 #endif
 	int loadError = -1;
 	
@@ -302,8 +302,8 @@ int MaterialManager::loadTexturePalette(const char *filename)
 		delete [] mPalette;
 	
 #ifdef HAVE_FREYJA_IMAGE
-	loadError = img.PaletteLoad((char *)filename);
-	img.Palette(&mPalette);
+	loadError = img.loadPaletteMTK((char *)filename);
+	img.getPalette(&mPalette);
 #else
 #   warning MaterialManager::loadTexturePalette() Will be disabled
 #endif
@@ -314,7 +314,7 @@ int MaterialManager::loadTexturePalette(const char *filename)
 
 int MaterialManager::loadTexture(const char *filename)
 {
-	MtkImage img;
+	EggImage img;
 	unsigned char *image;
 	unsigned int w, h;
 
@@ -369,24 +369,27 @@ int MaterialManager::loadTexture(const char *filename)
 	printf("[MaterialManager::loadTexture]\n");
 	printf(" Loading texture '%s'\n", filename);
 
-	if (!img.Load((char *)filename))
+	if (!img.loadImage(filename))
 	{
-		img.Image(&image);
-		w = img.Width();
-		h = img.Height();
+		img.getImage(&image);
+		w = img.getWidth();
+		h = img.getHeight();
 
 
-		switch (img.Mode())
+		switch (img.getColorMode())
 		{
-		case COLORMODE_RGBA:
+		case EggImage::RGBA_32:
 			loadTextureBuffer(image, w, h, 32, Texture::RGBA);
 			break;
-		case COLORMODE_RGB:
+		case EggImage::RGB_24:
 			loadTextureBuffer(image, w, h, 24, Texture::RGB);
 			break;
 		default:
-			printf("ERROR Loading Texture with MtkImage!\n");
-			delete [] image;
+			printf("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
+			
+			if (image)
+				delete [] image;
+
 			return -2;
 		}
 		
