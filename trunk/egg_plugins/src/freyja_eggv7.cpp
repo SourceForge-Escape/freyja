@@ -126,9 +126,9 @@ int freyja_model__eggv7_import(char *filename)
 
     for (i = 0; i < frame_count; i++)
     {
-      fread(&center[0], sizeof(unit_t), 1, f);
-      fread(&center[1], sizeof(unit_t), 1, f);
-      fread(&center[2], sizeof(unit_t), 1, f);
+      fread(&center[0], sizeof(vec_t), 1, f);
+      fread(&center[1], sizeof(vec_t), 1, f);
+      fread(&center[2], sizeof(vec_t), 1, f);
 
       fread(&tmp, sizeof(int), 1, f);
       fread(&vertex_count, sizeof(int), 1, f);
@@ -142,9 +142,9 @@ int freyja_model__eggv7_import(char *filename)
       // ALL frames (groups) have same number of vertices in V7
       for (ii = 0; ii < vertex_count; ii++)
       {
-	fread(&pos[0], sizeof(unit_t), 1, f);
-	fread(&pos[1], sizeof(unit_t), 1, f);
-	fread(&pos[2], sizeof(unit_t), 1, f);
+	fread(&pos[0], sizeof(vec_t), 1, f);
+	fread(&pos[1], sizeof(vec_t), 1, f);
+	fread(&pos[2], sizeof(vec_t), 1, f);
 	fread(&id, sizeof(int), 1, f);
 	
 	// Store vertices in group
@@ -206,9 +206,9 @@ int freyja_model__eggv7_import(char *filename)
      {
        fread(&id, sizeof(int), 1, f);
        fread(&type, sizeof(unsigned char), 1, f);
-       fread(&pos[0], sizeof(unit_t), 1, f);
-       fread(&pos[1], sizeof(unit_t), 1, f);
-       fread(&pos[2], sizeof(unit_t), 1, f);
+       fread(&pos[0], sizeof(vec_t), 1, f);
+       fread(&pos[1], sizeof(vec_t), 1, f);
+       fread(&pos[2], sizeof(vec_t), 1, f);
        
        // FIXME: No support for markers, but never used as far as I rememeber
        printf("eggv7_import> Eggv7 Metadata not supported in EggPlugin API\n");
@@ -232,9 +232,9 @@ int freyja_model__eggv7_import(char *filename)
        return -5;
 
      fread(&slaves, sizeof(int), 1, f);
-     fread(&pos[0], sizeof(unit_t), 1, f);
-     fread(&pos[1], sizeof(unit_t), 1, f);
-     fread(&pos[2], sizeof(unit_t), 1, f);
+     fread(&pos[0], sizeof(vec_t), 1, f);
+     fread(&pos[1], sizeof(vec_t), 1, f);
+     fread(&pos[2], sizeof(vec_t), 1, f);
 
      printf("tag[%i] {\n", id);
      printf(" center ( %f %f %f )\n", pos[0], pos[1], pos[2]);
