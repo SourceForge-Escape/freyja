@@ -5,6 +5,8 @@
 # Autocrap!!!  run run!
 ###################################################
 
+rm -f depend
+
 ARG1=$1
 
 make debug

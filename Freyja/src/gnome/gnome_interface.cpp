@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -17,15 +17,7 @@
  *
  * ????.??.??:
  * Mongoose - Created
- =================================================================*/
-
-#ifdef USING_GTK_1_2
-#   include <gtk/gtk.h>
-#elif USING_GTK_2_0
-#   include <gtk/gtk.h>
-#else
-#   error "This MLISP wrapper only supports GTK+ 1.2 and GTK+ 2.x"
-#endif
+ ==========================================================================*/
 
 #include <sys/types.h>
 #include <sys/stat.h> 
@@ -33,65 +25,224 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "gnome_callbacks.h"
-#include "gnome_interface.h"
-#include "gnome_gtkglarea.h"
-#include "gnome_resource.h"
-#include "freyja_events.h"
 
-#define AUTHOR "Terry 'Mongoose' Hendrix II <mongoose@icculus.org>"
-#define COPYRIGHT_NOTICE "Freyja Copyright (c) 2002-2004 by Terry 'Mongoose' Hendrix II"
-#define ABOUT_MESSAGE "Freyja is an Open Source 3d modeling system.\nSend bug reports and feature requests:\n<small>  * http://icculus.org/freyja\n  * irc://irc.freenode.net/#freyja\n  * mongoose@icculus.org</small>"
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 
+#ifdef HAVE_OPENGL
+#   include <GL/gl.h>
+#   include <GL/glu.h>
 
-// Mongoose 2002.01.21, FIXME should use rc_mapped pathname
-void demangle_pixmap_name(char *dest, char *icon_name)
-{
-#ifdef unix
-	snprintf(dest, 254, "%s/.freyja/icons/%s", 
-			  (char *)getenv("HOME"), icon_name);
-#else
-	strcpy(dest, "data/icons/%s", icon_name);
+#   ifdef HAVE_GTKGL
+#      include <gtkgl/gtkglarea.h>
+#   endif
 #endif
+
+#include "gnome_interface.h"
+#include "gnome_callbacks.h"
+#include "gnome_resource.h"
+
+
+#ifdef HAVE_GTKGL
+void mgtk_refresh_glarea(GtkWidget *widget)
+{
+	GdkRectangle area;
+
+
+	area.x = 0;
+	area.y = 0;
+	area.width  = widget->allocation.width;
+	area.height = widget->allocation.height;
+
+	gtk_widget_draw(widget, &area);
 }
+
+
+void mgtk_init_glarea(GtkWidget* widget)
+{
+	glarea_window_state_t *state;
+
+
+	state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget), 
+														"gl_window_state");
+
+	if (gtk_gl_area_make_current(GTK_GL_AREA(widget))) 
+	{
+		/* Initialization */
+		if (!state->init) 
+		{
+			//event_render_init(state->width, state->height);
+			//event_resize(state->width, state->height);
+			state->init = true;
+		}
+	}
+}
+
+
+void mgtk_expose_glarea(GtkWidget *widget, GdkEventExpose *event)
+{
+	GtkGLArea *glarea = GTK_GL_AREA(widget);
+
+	
+	/* draw only last expose */
+	if (event->count > 0) 
+	{
+		return;
+	}
+
+	/* OpenGL calls can be done only if make_current returns true */
+	if (gtk_gl_area_make_current(glarea)) 
+	{
+		/* Call modeler's renderer */
+		mgtk_event_gldisplay();
+		
+		/* Swap buffers to rasterize */
+		gtk_gl_area_swapbuffers(glarea);
+	}
+}
+
+
+void mgtk_resize_glarea(GtkWidget *widget, GdkEventConfigure *event)
+{
+	/* OpenGL calls can be done only if make_current returns true */
+	if (gtk_gl_area_make_current(GTK_GL_AREA(widget))) 
+	{
+		//glViewport(0, 0, widget->allocation.width, widget->allocation.height);
+		mgtk_event_glresize(widget->allocation.width, widget->allocation.height);
+	}
+}
+
+
+void mgtk_destroy_glarea(GtkWidget *widget)
+{
+	glarea_window_state_t *state;
+
+
+	state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget),
+														"gl_window_state");
+
+	if (state) 
+	{
+		delete state;
+	}
+}
+
+
+GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
+{
+	GtkWidget *glarea;
+	glarea_window_state_t *state;
+
+
+	if (gdk_gl_query() == FALSE)
+	{
+		return NULL;
+	}
+
+	glarea = gtk_gl_area_new_vargs(NULL,
+								   GDK_GL_RGBA,
+								   GDK_GL_RED_SIZE,1,
+								   GDK_GL_GREEN_SIZE,1,
+								   GDK_GL_BLUE_SIZE,1,
+								   GDK_GL_DEPTH_SIZE,1,
+								   GDK_GL_DOUBLEBUFFER,
+								   GDK_GL_NONE);
+
+	gtk_gl_area_size(GTK_GL_AREA(glarea), width, height);
+
+	/* Set up events and signals for OpenGL widget */
+	gtk_widget_set_events(GTK_WIDGET(glarea),
+						  GDK_EXPOSURE_MASK |
+						  GDK_BUTTON_PRESS_MASK |
+						  GDK_BUTTON_RELEASE_MASK |
+						  GDK_POINTER_MOTION_MASK |
+						  GDK_POINTER_MOTION_HINT_MASK |
+						  GDK_MOTION_NOTIFY);
+
+
+	gtk_signal_connect(GTK_OBJECT(glarea), "motion_notify_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_mouse_motion), NULL);
+	gtk_signal_connect(GTK_OBJECT(glarea), "button_press_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_button_press), NULL);
+	gtk_signal_connect(GTK_OBJECT(glarea), "button_release_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_button_release), NULL);
+
+	gtk_signal_connect(GTK_OBJECT(glarea), "expose_event",
+					   GTK_SIGNAL_FUNC(mgtk_expose_glarea), NULL);
+	gtk_signal_connect(GTK_OBJECT(glarea), "configure_event",
+					   GTK_SIGNAL_FUNC(mgtk_resize_glarea), NULL);
+	gtk_signal_connect(GTK_OBJECT(glarea), "realize",
+					   GTK_SIGNAL_FUNC(mgtk_init_glarea), NULL);
+	gtk_signal_connect(GTK_OBJECT(glarea), "destroy",
+					   GTK_SIGNAL_FUNC(mgtk_destroy_glarea), NULL);
+
+	/* Setup GL window state */
+	state = new glarea_window_state_t;
+	state->init = false;
+	state->plane = 0;
+	state->mouse_x = 0;
+	state->mouse_y = 0;
+	state->width = width;
+	state->height = height;
+	gtk_object_set_data(GTK_OBJECT(glarea), "gl_window_state", state);
+
+	return glarea;
+}
+#endif
+
+
+GtkWidget *mgtk_create_icon(char *icon_name)
+{
+	GtkWidget *icon = NULL;
+	char filename[1024];
+
+
+	if (!strncmp("gtk", icon_name, 3))
+	{
+		icon = gtk_image_new_from_stock(icon_name, 
+										GTK_ICON_SIZE_SMALL_TOOLBAR);
+	}
+	else
+	{
+		freyja_get_pixmap_filename(filename, 1024, icon_name);
+		filename[1023] = 0;
+		icon = gtk_image_new_from_file(filename);
+	}
+
+	return icon;
+}
+
 
 /////////////////////////////////////////////////////////////
 // Dialogs
 /////////////////////////////////////////////////////////////
 
-GtkWidget* dialog_about_create()
+void mgtk_create_info_dialog(char *message)
 {
-	GtkWidget *about, *version, *author, *message, *copyright;
-	
-	about = gtk_dialog_new();
-	version = gtk_label_new(BUILD_NAME);
-	author = gtk_label_new(AUTHOR);
-	gtk_label_set_selectable(GTK_LABEL(author), TRUE);
-	message = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(message), ABOUT_MESSAGE);
-	gtk_label_set_selectable(GTK_LABEL(message), TRUE);
-	copyright = gtk_label_new(COPYRIGHT_NOTICE);
+	GtkWidget *about, *label;
 
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), version);
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), message);
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), copyright);
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), author);
+
+	about = gtk_dialog_new();
+
+	label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), message);
+	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), label);
 	gtk_dialog_add_button(GTK_DIALOG(about), GTK_STOCK_CLOSE, 1);
 	gtk_widget_show_all(about);
 
-
-	// Force user to close this 
+	/* Force user to close this dialog by stopping other events */
 	gtk_dialog_run(GTK_DIALOG(about));
 	gtk_widget_destroy(about);
-
-	return NULL; //about;
 }
 
 
-GtkWidget *dialog_color_picker_create(char *title, void *event_func)
+GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func)
 {
 	GtkWidget *dialog =  gtk_color_selection_dialog_new(title);
 	gtk_widget_show(dialog);
+
 
 	if (event_func)
 	{
@@ -119,7 +270,7 @@ GtkWidget *dialog_color_picker_create(char *title, void *event_func)
 // Widgets
 /////////////////////////////////////////////////////////////
 
-GtkWidget *text_entry_create(GtkWidget *box)
+GtkWidget *mgtk_create_text_entry(GtkWidget *box)
 {
 	GtkWidget *entry;
 
@@ -135,9 +286,9 @@ GtkWidget *text_entry_create(GtkWidget *box)
 }
 
 
-GtkWidget *packed_vbox_create(GtkWidget *box, char *name, 
-										bool homogeneous, int spacing,
-										bool expand, bool fill, int pading)
+GtkWidget *mgtk_create_vbox(GtkWidget *box, char *name, 
+							bool homogeneous, int spacing,
+							bool expand, bool fill, int pading)
 {
 	GtkWidget *vbox;
 
@@ -154,9 +305,9 @@ GtkWidget *packed_vbox_create(GtkWidget *box, char *name,
 }
 
 
-GtkWidget *packed_hbox_create(GtkWidget *box, char *name, 
-										bool homogeneous, int spacing,
-										bool expand, bool fill, int pading)
+GtkWidget *mgtk_create_hbox(GtkWidget *box, char *name, 
+							bool homogeneous, int spacing,
+							bool expand, bool fill, int pading)
 {
 	GtkWidget *hbox;
 	
@@ -165,46 +316,47 @@ GtkWidget *packed_hbox_create(GtkWidget *box, char *name,
 
 	gtk_widget_ref(hbox);
 	gtk_object_set_data_full(GTK_OBJECT(box), name, hbox,
-									 (GtkDestroyNotify) gtk_widget_unref);
+							 (GtkDestroyNotify) gtk_widget_unref);
 	gtk_widget_show(hbox);
 
 	gtk_box_pack_start(GTK_BOX(box), 
-							 hbox, expand ? TRUE : FALSE, 
-							 fill ? TRUE : FALSE, 
-							 pading);
+					   hbox, expand ? TRUE : FALSE, 
+					   fill ? TRUE : FALSE, 
+					   pading);
 
 	return hbox;
 }
 
 
-GtkWidget *spinbutton2_create(GtkWidget *master, char *name, 
-										float val, float min, float max,
-										float step, float page, float page_sz, int digits)
+GtkWidget *mgtk_create_spinbutton2(GtkWidget *master, char *name, 
+								   float val, float min, float max,
+								   float step, float page, float page_sz, 
+								   int digits)
 {  
-  GtkObject *spinbutton_adj;
-  GtkWidget *spinbutton;
+	GtkObject *spinbutton_adj;
+	GtkWidget *spinbutton;
 
 
-  spinbutton_adj = gtk_adjustment_new(val, min, max, step, page, page_sz);
-  spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(spinbutton_adj), 1, digits);
-  gtk_widget_ref(spinbutton);
-  gtk_object_set_data_full(GTK_OBJECT(master), name, spinbutton,
-			   (GtkDestroyNotify)gtk_widget_unref);
-  gtk_widget_show(spinbutton);
+	spinbutton_adj = gtk_adjustment_new(val, min, max, step, page, page_sz);
+	spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(spinbutton_adj), 1, digits);
+	gtk_widget_ref(spinbutton);
+	gtk_object_set_data_full(GTK_OBJECT(master), name, spinbutton,
+							 (GtkDestroyNotify)gtk_widget_unref);
+	gtk_widget_show(spinbutton);
 
-  return spinbutton;
+	return spinbutton;
 }
 
 
-GtkWidget *spinbutton_create(GtkWidget *master, char *name, 
-									  float val, float min, float max)
+GtkWidget *mgtk_create_spinbutton(GtkWidget *master, char *name, 
+								  float val, float min, float max)
 {
-	return spinbutton2_create(master, name, val, min, max, 1, 10, 10, 0);
+	return mgtk_create_spinbutton2(master, name, val, min, max, 1, 10, 10, 0);
 }
 
 
-GtkWidget *label_create(GtkWidget *master, char *name, 
-								char *text, float x_align, float y_align)
+GtkWidget *mgtk_create_label(GtkWidget *master, char *name, 
+							 char *text, float x_align, float y_align)
 {
   GtkWidget *label;
 
@@ -221,8 +373,9 @@ GtkWidget *label_create(GtkWidget *master, char *name,
 }
 
 
-GtkWidget *tab_create(GtkWidget *notebook,  char *name, 
-					  GtkWidget *tab_contents, char *label_text, int tab_num)
+GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name, 
+						   GtkWidget *tab_contents, char *label_text,
+						   int tab_num)
 {
 	GtkWidget *label;
 
@@ -237,7 +390,7 @@ GtkWidget *tab_create(GtkWidget *notebook,  char *name,
 	
 
 	// Tab setup in notebook
-	label = label_create(notebook, name, label_text, 0, 0.5);
+	label = mgtk_create_label(notebook, name, label_text, 0, 0.5);
 	gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook),
 							   gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook),
 														tab_num), label);
@@ -245,7 +398,7 @@ GtkWidget *tab_create(GtkWidget *notebook,  char *name,
 }
 
 
-GtkWidget *fileselection_create(char *title)
+GtkWidget *mgtk_create_fileselection(char *title)
 {
 	GtkWidget *fileselection;
 	GtkWidget *ok_button;
@@ -270,20 +423,20 @@ GtkWidget *fileselection_create(char *title)
 	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
 
 	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
-							 GTK_SIGNAL_FUNC(fileselection_action_event),
-							 NULL);
+					   GTK_SIGNAL_FUNC(fileselection_action_event),
+					   NULL);
 
 
 	// Cancel button
 	cancel_button = GTK_FILE_SELECTION(fileselection)->cancel_button;
 	gtk_object_set_data(GTK_OBJECT(fileselection), "cancel_button", 
-							  cancel_button);
+						cancel_button);
 	gtk_widget_show(cancel_button);
 	GTK_WIDGET_SET_FLAGS(cancel_button, GTK_CAN_DEFAULT);
 	
 	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
-							 GTK_SIGNAL_FUNC(fileselection_cancel_event),
-							 NULL);
+					   GTK_SIGNAL_FUNC(fileselection_cancel_event),
+					   NULL);
 
 #define EXTEND_FILE_TEST
 #ifdef EXTEND_FILE_TEST
@@ -291,8 +444,9 @@ GtkWidget *fileselection_create(char *title)
 
 	main_vbox = GTK_FILE_SELECTION(fileselection)->main_vbox;
 
-	widget = label_create(main_vbox, "lab1", "This is a fileselection extention test",
-								 0.0, 0.0);
+	widget = mgtk_create_label(main_vbox, "lab1", 
+							   "This is a fileselection extention test",
+							   0.0, 0.0);
 
 	gtk_box_pack_start(GTK_BOX(main_vbox), widget, TRUE, TRUE, FALSE);
 #endif
@@ -301,7 +455,7 @@ GtkWidget *fileselection_create(char *title)
 }
 
 
-GtkWidget *toolbar_create(GtkWidget *box)
+GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 {
 	GtkWidget *toolbar;
 
@@ -320,18 +474,17 @@ GtkWidget *toolbar_create(GtkWidget *box)
 }
 
 
-GtkWidget *toolbar_toogle_btn(GtkWidget *toolbar,  bool toggled,
-							  char *icon, char *label, char *help, 
-							  void *event_func, int event_cmd)
+GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
+											 char *icon, char *label,
+											 char *help, 
+											 void *event_func, int event_cmd)
 {
-	char icon_name[256];
 	GtkWidget *togglebutton;
 	GtkWidget *toolbar_icon;
 	
 
-	demangle_pixmap_name(icon_name, icon);
-	
-	toolbar_icon = gtk_image_new_from_file(icon_name);
+	toolbar_icon = mgtk_create_icon(icon);
+
 	togglebutton = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 											  GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
 											  NULL,
@@ -363,25 +516,15 @@ GtkWidget *toolbar_toogle_btn(GtkWidget *toolbar,  bool toggled,
 }
 
 
-GtkWidget *toolbar_btn(GtkWidget *toolbar,
-					   char *icon, char *label, char *help, 
-					   void *event_func, int event_cmd)
+GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
+									  char *icon, char *label, char *help, 
+									  void *event_func, int event_cmd)
 {
-	char icon_name[256];
 	GtkWidget *button;
 	GtkWidget *toolbar_icon;
 	
 	
-	if (!strncmp("gtk", icon, 3))
-	{
-		toolbar_icon = gtk_image_new_from_stock(icon, 
-												GTK_ICON_SIZE_SMALL_TOOLBAR);
-	}
-	else
-	{
-		demangle_pixmap_name(icon_name, icon);
-		toolbar_icon = gtk_image_new_from_file(icon_name);
-	}
+	toolbar_icon = mgtk_create_icon(icon);
 
 	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 										GTK_TOOLBAR_CHILD_BUTTON,
@@ -409,105 +552,25 @@ GtkWidget *toolbar_btn(GtkWidget *toolbar,
 }
 
 
-FILE *get_log_file()
-{
-	static FILE *f = fopen("/tmp/Freyja.log", "w");
-
-	return f;
-}
-
-
-void close_log_file()
-{
-	if (get_log_file())
-		fclose(get_log_file());
-}
-
-
-void event_print_args(char *format, va_list *args)
-{
-	FILE *f = get_log_file();
-	char buffer[1024];
-	unsigned int l;
-
-
-	// Strip message of an trailing carrage return 
-	//  and print to stdout and the status bar
-	vsnprintf(buffer, 1024, format, *args);
-	
-	l = strlen(buffer);
-  
-	if (!l || !buffer[0])
-		return;
-
-	if (buffer[l-1] == '\n')
-		buffer[l-1] = 0;
-
-	if (getGtkStatusBarWidget())
-	{
-		if (GTK_IS_STATUSBAR(getGtkStatusBarWidget()))
-		{
-			gtk_statusbar_push(GTK_STATUSBAR(getGtkStatusBarWidget()),
-							   0, buffer);
-		}
-		else
-		{
-			gtk_label_set_text(GTK_LABEL(getGtkStatusBarWidget()), buffer);
-		}
-	}
-
-#ifdef DEBUG_EVENT_PRINT
-	fprintf(stdout, "> %s\n",  buffer);
-#endif
-
-	if (f)
-	{
-		fprintf(f, "> ");
-		vfprintf(f, format, *args);
-		fprintf(f, "\n");
-	}
-}
-
-
-void event_print(char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	event_print_args(format, &args);
-	va_end(args);
-}
-
-
-GtkWidget *window_create()
+GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_name)
 {
 	GtkWidget *window;
+	char icon_filename[1024];
+	GdkPixbuf *icon = NULL;
 
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_object_set_data(GTK_OBJECT(window), "window", window);
 	gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
-	gtk_window_set_wmclass(GTK_WINDOW(window), "Freyja", "Freyja");
-	gtk_window_set_title(GTK_WINDOW(window), BUILD_NAME);
+	gtk_window_set_wmclass(GTK_WINDOW(window), wmclass, wmclass);
+	gtk_window_set_title(GTK_WINDOW(window), title);
 
 	/* Setup events for this window */
 	gtk_widget_set_events(GTK_WIDGET(window),
-								 GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);
-  
+						  GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);
 
-#ifdef USING_GTK_1_2
-	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "key_press_event",
-							 GTK_SIGNAL_FUNC(glarea_key_press_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "key_release_event",
-							 GTK_SIGNAL_FUNC(glarea_key_release_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "destroy",
-							 GTK_SIGNAL_FUNC(window_destroy), NULL);
-#else
-	char icon_filename[256];
-	GdkPixbuf *icon = NULL;
-
-
-	demangle_pixmap_name(icon_filename, "freyja.png");
+	freyja_get_pixmap_filename(icon_filename, 1024, icon_name);
+	icon_filename[1023] = 0;
 
 	if (icon_filename && icon_filename[0])
 	{
@@ -528,38 +591,6 @@ GtkWidget *window_create()
       gtk_window_set_icon(GTK_WINDOW(window), icon);
       gdk_pixbuf_unref(icon);
 	}
-#endif
 
 	return window;
-}
-
-
-int main(int argc, char *argv[])
-{
-#ifdef ENABLE_NLS
-	bindtextdomain(PACKAGE, PACKAGE_LOCALE_DIR);
-	textdomain(PACKAGE);
-#endif
-
-	gtk_init(&argc, &argv);
-
-	event_print("@GTK+ interface started...");	
-	event_print("Email bug reports to %s", EMAIL_ADDRESS);
-
-	/* Mongoose 2002.02.23, Start Freyja which 
-	   builds the widgets from a script */
-	freyja_event_start();
-
-	// Mongoose 2002.02.23, Load file passed by command line
-	if (argc > 1)
-	{
-		fileselection_dir_set_event(argv[1]);
-		freyja_event_file_dialog_notify(argv[1]);
-	}
-
-	//gdk_threads_enter();
-	gtk_main();
-	//gdk_threads_leave();
-
-	return 0;
 }
