@@ -23,7 +23,7 @@ Mesh::~Mesh()
 void Mesh::load( cGrannyStream * file, dword meshOffset, dword baseOffset, dword peers )
 {
 	dword oldPos;
-	for (int i=0;i<peers;)
+	for (int i=0;i<(int)peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();
@@ -87,7 +87,7 @@ void Mesh::loadPoints( cGrannyStream * file )
 		return;
 	dword oldPos=file->tellg();
 	file->seekg(pointOffset);
-	for (int i=0;i<(normalOffset-pointOffset)/12;i++)
+	for (dword i=0;i<(normalOffset-pointOffset)/12;i++)
 	{
 		Point *point=new Point();
 		for (int x=0;x<3;x++)
@@ -110,7 +110,7 @@ void Mesh::loadNormals( cGrannyStream * file )
 		return;
 	dword oldPos=file->tellg();
 	file->seekg(normalOffset);
-	for (int i=0;i<(textureOffset-normalOffset)/12;i++)
+	for (dword i=0;i<(textureOffset-normalOffset)/12;i++)
 	{
 		Point *point=new Point();
 		for (int x=0;x<3;x++)
@@ -136,7 +136,7 @@ void Mesh::loadTextureMap(cGrannyStream * file)
 	dword oldPos=file->tellg();
 	file->seekg(textureOffset);
 	dword num=file->readDword();	//unknown
-	for (int i=0;i<(weightOffset-(textureOffset+4))/12;i++)
+	for (dword i=0;i<(weightOffset-(textureOffset+4))/12;i++)
 	{
 		Point *point=new Point();
 		for (int x=0;x<2;x++)
@@ -165,11 +165,11 @@ void Mesh::loadWeights(cGrannyStream * file)
 	dword size=file->readDword();
 	file->readDword();		//unknown
 	file->readDword();		//unknown
-	for (int i=0;i<size;i++)
+	for (dword i=0;i<size;i++)
 	{
 		dword numBones=file->readDword();
 		BoneWeight *boneWeight=new BoneWeight();
-		for (int x=0;x<numBones;x++)
+		for (dword x=0;x<numBones;x++)
 		{
 			dword bone=file->readDword();
 			fd.d=file->readDword();
@@ -186,7 +186,7 @@ void Mesh::loadPolygons(cGrannyStream * file)
 		return;
 	dword oldPos=file->tellg();
 	file->seekg(polygonOffset);
-	for (int i=0;i<(meshIDOffset-polygonOffset)/24;i++)
+	for (dword i=0;i<(meshIDOffset-polygonOffset)/24;i++)
 	{
 		gPolygon *polygon=new gPolygon();
 		for (int x=0;x<6;x++)
@@ -208,7 +208,7 @@ Meshes::~Meshes()
 
 void Meshes::load(cGrannyStream * file,dword meshOffset,dword baseOffset,dword peers)
 {
-	for (int i=0;i<peers;)
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();

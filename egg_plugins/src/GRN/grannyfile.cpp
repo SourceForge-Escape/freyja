@@ -229,6 +229,7 @@ void calculateBoneRests( Bone *bone )
 	glGetFloatv(GL_MODELVIEW_MATRIX,matrix.matrix);
 #else
 //#   warning "Without OpenGL bone rests are not set for now"
+	printf("Without OpenGL bone rests are not set for now\n");
 #endif
 
 	bone->matrix=matrix;
@@ -384,7 +385,7 @@ void cGrannyAnimation::Assign (cGrannyFile * model)
 		dword textId = getValue( id, anmNm );
 		std::string boneStr = findID( textId );
 
-		/* WTF? This will never execute guys */
+		/* WTF? This will never execute guys if find() returns 0..n */
 		if( boneStr.find( "mesh" ) != -1 || boneStr.find( "master" ) != -1 )
 			boneId = abone;
 		else

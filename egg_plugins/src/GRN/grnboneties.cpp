@@ -25,14 +25,15 @@ BoneTies::~BoneTies()
 void BoneTies::load(cGrannyStream * file,dword boneOffset,dword baseOffset,dword peers)
 {
 //    assert(file);
-	int x,j;
+	int x;
+	dword j;
 	union {
 		dword d;
 		float f;
 	} fd;
 	dword oldPos;
 	BoneTie *bonetie;
-	for (int i=0;i<peers;)
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();

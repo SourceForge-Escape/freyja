@@ -98,6 +98,7 @@ int freyja_model__grn_import(char *filename)
     Bones bones = grn.getBones();
 	string texture = grn.getTextureName();
 
+
 	// printf("%i meshes\n", meshes.meshes.size());
 
 #ifdef EGGV9
@@ -195,33 +196,48 @@ int freyja_model__grn_import(char *filename)
 			Bone* bone = bones.bones[i];
 			char boneName[64];
 
+			if (!bone) // depends on bones[] type if this ever happens
+			{
+				eggPrintMessage("ERROR: NULL GRN bone!\n");
+				eggBegin(FREYJA_BONE);
+				eggTagFlags1u(0x0);
+				eggTagName("ERROR: NULL!");
+				eggEnd();
 
-			snprintf(boneName, 64, "bone%04ld", bone->id);
+				continue;
+			}
+
+			BoneTies &boneTies = grn.getTies();
+			dword id = boneTies.boneObjects[bone->id];
+			dword anmNm = grn.findString("__ObjectName");
+			dword textId = grn.getValue(id, anmNm);
+			std::string boneStr = grn.findID( textId );
+			
+
+			snprintf(boneName, 64, "%s", boneStr.data());
+			//snprintf(boneName, 64, "bone%04ld", bone->id);
+
+			eggPrintMessage("bone[%i] = '%s', parent = %u\n", i, boneName, bone->parent);
 
 			eggBegin(FREYJA_BONE);
 			eggTagFlags1u(0x0);
 			eggTagName(boneName);
+			eggSetBoneParent(bone->parent);
 
-			if (!bone)
-				continue;
-				
 			eggTagPos3f(bone->translate.points[0]*scale, 
 						bone->translate.points[2]*scale, 
 						-bone->translate.points[1]*scale);
 
-			eggTagRotateQuaternion4f(bone->quaternion.points[0], 
-									 bone->quaternion.points[1], 
-									 bone->quaternion.points[2],
-									 bone->quaternion.points[3]);
-				
-			eggSetBoneParent(bone->parent);
+			eggTagRotateQuaternion4f(bone->quaternion.points[3], // wxyz 
+									 bone->quaternion.points[0], 
+									 bone->quaternion.points[1],
+									 bone->quaternion.points[2]);
 
 			for (j = 0; j < bones.bones.size(); ++j)
 			{
 				Bone *child = bones.bones[j];
 
-				if (child->parent == bone->id && 
-					child->id != bone->id)
+				if (child->parent == bone->id && child->id != bone->id)
 				{
 					eggTagAddSlave1u(child->id);
 				}

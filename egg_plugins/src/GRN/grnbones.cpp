@@ -32,7 +32,7 @@ void Bones::load(cGrannyStream * file,dword boneOffset,dword baseOffset,dword pe
 	} fd;
 	dword oldPos;
 	Bone *bone;
-	for (int i=0;i<peers;)
+	for (dword i=0;i<peers;)
 	{
 		dword chunk=file->readDword();
 		dword offset=file->readDword();
