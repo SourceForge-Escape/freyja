@@ -29,6 +29,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.8.14-20040823) Mongoose <mongoose@icculus.org>
+
+	o Image plugins ported so far: png, tga
+	o New image plugin system finished
+
+
  libfreyja (0.8.14 | 0.9.0 20040821) Mongoose <mongoose@icculus.org>
 
 	o EggFileWriter and EggFileReader don't use memmapping as yet

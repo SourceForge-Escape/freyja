@@ -131,7 +131,8 @@ bool EggFileReader::doesFileExist(const char *filename)
 
 bool EggFileReader::isDirectory(const char *filename)
 {
-  struct stat status;  
+  struct stat status;
+
 
   stat(filename, &status);
 
@@ -145,15 +146,27 @@ bool EggFileReader::isDirectory(const char *filename)
 
 void EggFileReader::closeDirectory()
 {
+	if (mDirectoryListing)
+	{
+		delete [] mDirectoryListing;
+		mDirectoryListing = 0x0;
+	}
+
 	if (mDirectory)
+	{
 		closedir(mDirectory);
+		mDirectory = 0x0;
+	}
 }
 
 
 void EggFileReader::closeFile()
 {
 	if (mFileHandle)
+	{
 		fclose(mFileHandle);
+		mFileHandle = 0x0;
+	}
 }
 
 
