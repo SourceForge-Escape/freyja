@@ -660,6 +660,7 @@ public:
 	void TexelCombine(float s, float t);
 	void TexelSelect(float s, float t);
 	void TexelMove(float s, float t);
+	void UVMapMotion(float s, float t);
 
 	void PolygonAddVertex(float xx, float yy);
 	void PolygonDelVertex(float xx, float yy);

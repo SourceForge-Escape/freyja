@@ -213,6 +213,12 @@ public:
 	vec_t radius;                     /* Radius of bounding sphere if used */
 };
 
+class EggUVMap
+{
+public:
+	Vector <unsigned int> polygons;   /* Contains TexCoords composing group
+									   * either polymapped or by vertex */
+};
 
 typedef enum {
 	FL_MESH__VERTEX_FRAME_GROUPS = 1
@@ -237,6 +243,8 @@ typedef struct egg_mesh_s {
 	vec_t time;
 	vec_t lastTime;
 	Vector<EggVertexAnimationFrame *> frames;
+
+	Vector<EggUVMap *> uvs;
 	/* End Ext */
 
 } egg_mesh_t;
