@@ -1956,6 +1956,16 @@ unsigned int FreyjaPlugin::freyjaNormal3fv(vec3_t xyz)
 
 unsigned int FreyjaPlugin::freyjaTexCoord2fv(vec2_t uv)
 {
+	if (uv[0] < 0.0f)
+		uv[0] = 0.0f;
+	else if (uv[0] > 1.0f)
+		uv[0] = 1.0f;
+	
+	if (uv[1] < 0.0f)
+		uv[1] = 0.0f;
+	else if (uv[1] > 1.0f)
+		uv[1] = 1.0f;
+
 	return mMesh->addTexCoord(uv);
 }
 
@@ -1981,6 +1991,16 @@ void FreyjaPlugin::freyjaSetNormal3fv(unsigned int index, vec3_t xyz)
 
 void FreyjaPlugin::freyjaSetTexCoord2fv(unsigned int index, vec2_t uv)
 {
+	if (uv[0] < 0.0f)
+		uv[0] = 0.0f;
+	else if (uv[0] > 1.0f)
+		uv[0] = 1.0f;
+	
+	if (uv[1] < 0.0f)
+		uv[1] = 0.0f;
+	else if (uv[1] > 1.0f)
+		uv[1] = 1.0f;
+
 	return mMesh->setTexCoord(index, uv);
 }
 
