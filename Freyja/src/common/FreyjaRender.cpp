@@ -473,20 +473,21 @@ FreyjaRender::FreyjaRender()
 	Height(480);
 	RotateAmount(1.0);
 
-	CustomColor(COLOR_VIEW_TEXT|COLOR_EDIT_TEXT, 1.0, 1.0, 1.0);
-	CustomColor(COLOR_EDIT_POLYGON, 0.2, 0.2, 0.7);
-	CustomColor(COLOR_EDIT_LINE, 0.1, 0.1, 0.9);
-	CustomColor(COLOR_EDIT_LINE_HIGHLIGHT, 0.2, 0.2, 1.0);
-	CustomColor(COLOR_EDIT_VERTEX, 0.2, 1.0, 1.0);
-	CustomColor(COLOR_EDIT_VERTEX_HIGHLIGHT, 1.0, 1.0, 0.0);
-	CustomColor(COLOR_EDIT_BG, 0.5, 0.5, 0.5);
-	CustomColor(COLOR_EDIT_BBOX, 0.2, 0.5, 0.2);
-	CustomColor(COLOR_VIEW_BG, 0.3, 0.3, 0.5);
-	CustomColor(COLOR_EDIT_GRID_AXIS_X, 0.5, 0.0, 0.0);
-	CustomColor(COLOR_EDIT_GRID_AXIS_Y, 0.0, 0.6, 0.0);
-	CustomColor(COLOR_EDIT_GRID_AXIS_Z, 0.0, 0.0, 0.5);
-	CustomColor(COLOR_EDIT_GRID, 0.3, 0.3, 0.3);
-	setColor(Color_Animation_Grid, LIGHT_NEXT_PURPLE);
+	setColor(COLOR_VIEW_TEXT, 1.0, 1.0, 1.0, 1.0f);
+	setColor(COLOR_EDIT_TEXT, 1.0, 1.0, 1.0, 1.0f);
+	setColor(COLOR_EDIT_POLYGON, 0.2, 0.2, 0.7, 1.0f);
+	setColor(COLOR_EDIT_LINE, 0.1, 0.1, 0.9, 1.0f);
+	setColor(COLOR_EDIT_LINE_HIGHLIGHT, 0.2, 0.2, 1.0, 1.0f);
+	setColor(COLOR_EDIT_VERTEX, 0.2, 1.0, 1.0, 1.0f);
+	setColor(COLOR_EDIT_VERTEX_HIGHLIGHT, 1.0, 1.0, 0.0, 1.0f);
+	setColor(COLOR_EDIT_BG, 0.5, 0.5, 0.5, 1.0f);
+	setColor(COLOR_EDIT_BBOX, 0.2, 0.5, 0.2, 1.0f);
+	setColor(COLOR_VIEW_BG, 0.3, 0.3, 0.5, 1.0f);
+	setColor(COLOR_EDIT_GRID_AXIS_X, 0.5, 0.0, 0.0, 1.0f);
+	setColor(COLOR_EDIT_GRID_AXIS_Y, 0.0, 0.6, 0.0, 1.0f);
+	setColor(COLOR_EDIT_GRID_AXIS_Z, 0.0, 0.0, 0.5, 1.0f);
+	setColor(COLOR_EDIT_GRID, 0.3, 0.3, 0.3, 1.0f);
+	setColor(Color_Animation_Grid, 0.4, 0.4, 0.6, 1.0f);
 
 	Reset();
 }
@@ -715,18 +716,18 @@ float FreyjaRender::RotateAmount()
 }
 
 
-void colorCopyHelper(vec3_t colorSource, vec3_t colorDest)
+void colorCopyHelper(vec4_t colorSource, vec4_t colorDest)
 {
 	colorDest[0] = colorSource[0];
 	colorDest[1] = colorSource[1];
 	colorDest[2] = colorSource[2];
-	colorDest[3] = 1.0f;
+	colorDest[3] = colorSource[3];
 }
 
 
-void FreyjaRender::getColor(int id, vec4_t rgba)
+void FreyjaRender::getColor(freyja_color_t color, vec4_t rgba)
 {
-	switch (id)
+	switch (color)
 	{
 	case COLOR_EDIT_POLYGON:
 		colorCopyHelper(_edit_polygon_color, rgba);
@@ -773,71 +774,81 @@ void FreyjaRender::getColor(int id, vec4_t rgba)
 	case COLOR_VIEW_TEXT:
 		colorCopyHelper(_view_text_color, rgba);
 		break;
-
 	case Color_Animation_Grid:
 		colorCopyHelper(ColorAnimationGrid, rgba);
 		break;
 	}
 }
 
-void FreyjaRender::setColor(int id, const vec4_t rgba)
+void FreyjaRender::setColor(freyja_color_t color, const vec4_t rgba)
 {
-	CustomColor(id, rgba[0], rgba[1], rgba[2]);
+	setColor(color, rgba[0], rgba[1], rgba[2], rgba[3]);
 }
 
 
-void FreyjaRender::CustomColor(int flags, float r, float g, float b)
+void FreyjaRender::setColor(freyja_color_t colorId, 
+							float r, float g, float b, float a)
 {
 	vec3_t color;
 
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
+	color[3] = a;
 
-	if (flags & COLOR_EDIT_POLYGON)
+	switch (colorId)
+	{
+	case COLOR_EDIT_POLYGON:
 		colorCopyHelper(color, _edit_polygon_color);
-
-	if (flags & COLOR_EDIT_LINE)
+		break;
+	case COLOR_EDIT_LINE:
 		colorCopyHelper(color, _edit_line_color);
-
-	if (flags & COLOR_EDIT_LINE_HIGHLIGHT)
+		break;
+	case COLOR_EDIT_LINE_HIGHLIGHT:
 		colorCopyHelper(color, _edit_line_highlight_color);
-
-	if (flags & COLOR_EDIT_GRID_8)
+		break;
+	case COLOR_EDIT_GRID_8:
 		colorCopyHelper(color,_edit_grid_8_color);
-
-	if (flags & COLOR_EDIT_VERTEX)
+		break;
+	case COLOR_EDIT_VERTEX:
 		colorCopyHelper(color,_edit_vertex_color);
-   
-	if (flags & COLOR_EDIT_VERTEX_HIGHLIGHT)
+		break;
+	case COLOR_EDIT_VERTEX_HIGHLIGHT:
 		colorCopyHelper(color,_edit_vertex_highlight_color);
-
-	if (flags & COLOR_EDIT_BBOX)
+		break;
+	case COLOR_EDIT_BBOX:
 		colorCopyHelper(color,_edit_bbox_color);
-      
-	if (flags & COLOR_EDIT_BG)
+		break;
+	case COLOR_EDIT_BG:
 		colorCopyHelper(color,_edit_bg_color);
-       
-	if (flags & COLOR_EDIT_GRID)
+		break;
+	case COLOR_EDIT_GRID:
 		colorCopyHelper(color,_edit_grid_color);
-
-	if (flags & COLOR_EDIT_GRID_AXIS_X)
+		break;
+	case COLOR_EDIT_GRID_AXIS_X:
 		colorCopyHelper(color,_edit_grid_x_axis_color);
-
-	if (flags & COLOR_EDIT_GRID_AXIS_Y)
+		break;
+	case COLOR_EDIT_GRID_AXIS_Y:
 		colorCopyHelper(color,_edit_grid_y_axis_color);
-
-	if (flags & COLOR_EDIT_GRID_AXIS_Z)
+		break;
+	case COLOR_EDIT_GRID_AXIS_Z:
 		colorCopyHelper(color,_edit_grid_z_axis_color);
-
-	if (flags & COLOR_EDIT_TEXT)
+		break;
+	case COLOR_EDIT_TEXT:
 		colorCopyHelper(color,_edit_text_color);
-       
-	if (flags & COLOR_VIEW_BG)
+		break;
+	case COLOR_VIEW_BG:
 		colorCopyHelper(color,_view_bg_color);
-          
-	if (flags & COLOR_VIEW_TEXT)
+		break;
+	case COLOR_VIEW_TEXT:
 		colorCopyHelper(color,_view_text_color);
+		break;
+	case Color_Animation_Grid:
+		colorCopyHelper(color, ColorAnimationGrid);
+		break;
+	default:
+		;
+	}
 }
 
 
@@ -1812,9 +1823,11 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		glBegin(GL_LINE_LOOP);
 		
 		if (mesh.id == (int)_model->getCurrentMesh())
-			//poly->id == _model->getCurrentPolygon())
 		{
-			glColor3fv(RED);    
+			if (poly->id == _model->getCurrentPolygon())
+				glColor3fv(RED);    
+			else
+				glColor3fv(CYAN);
 		}
 		else
 		{

@@ -486,7 +486,7 @@ bool Md5::matchSymbol(const char *symbol)
 ////////////////////////////////////////////////////////////
 
 #ifdef FREYJA_MODEL_PLUGINS
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 
 extern "C" {
 

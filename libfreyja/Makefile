@@ -124,10 +124,26 @@ depend:
 	@-echo "       [done]"
 	$(MAKE) depend-plugins
 
+targets: $(TARGETS)
 
-################################################################
+PROG_OBJS = \
+	$(BUILDDIR)/mendian.o \
+	$(BUILDDIR)/EggFileReader.o \
+	$(BUILDDIR)/EggFileWriter.o \
+	$(BUILDDIR)/EggImage.o \
+	$(BUILDDIR)/Egg.o \
+	$(BUILDDIR)/EggPlugin.o
+
+$(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
+	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
+
+
+##########################################################################
+# Image plugins
+##########################################################################
 
 PLUGIN_BUILD_DIR=bin/plugins
+PLUGIN_IMAGE_TEST_OBJ=$(PLUGIN_BUILD_DIR)/image_test.o
 PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
 
 plug-ins: $(PLUGINS)
@@ -180,8 +196,7 @@ tga.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-
-# jpeg.so 
+# jpeg.so -- Looks like libjpeg hates dlopen or something like that
 plugins: dds.so pcx.so ppm.so png.so tga.so
 
 clean-plugins:
@@ -199,31 +214,51 @@ install-plugins:
 #	@-cp $(PLUGIN_BUILD_DIR)/model*.so $(PLUGIN_INSTALL_DIR)/model/
 
 
-################################################################
-
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
 
-################################################################
 
-targets: $(TARGETS)
+##########################################################################
+# Unit tests
+##########################################################################
 
-PROG_OBJS = \
-	$(BUILDDIR)/mendian.o \
-	$(BUILDDIR)/EggFileReader.o \
-	$(BUILDDIR)/EggFileWriter.o \
-	$(BUILDDIR)/EggImage.o \
-	$(BUILDDIR)/Egg.o \
-	$(BUILDDIR)/EggPlugin.o
+TEST=$(BUILDDIR)/$(NAME).test
 
-$(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
-	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
+test: $(TEST)
 
-#################################################################
+jpeg.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=jpeg \
+	OBJS="$(BUILD_TEST_DIR)/image_test.o $(BUILD_TEST_DIR)/image_jpeg.o" \
+	CFLAGS="-Wall -g -O0 -DLIB_JPEG" \
+	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
+
+Egg.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/Egg.o $(BUILD_TEST_DIR)/EggPlugin.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
+
+Egg9.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/Egg9.o $(BUILD_TEST_DIR)/EggPlugin9.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
+
+$(BUILDDIR)/$(NAME).test : $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
+
+
+##########################################################################
+# Object dependency include
+##########################################################################
 
 -include depend
 
-#################################################################
+##########################################################################
 
 clean: clean-emacs clean-build clean-test clean-obj clean-plugins
 
@@ -310,30 +345,6 @@ backup:
 	--exclude bin --exclude *~ --totals \
 	&& cp $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 ~/Backup
 
-
-##########################################################################
-# Unit tests
-##########################################################################
-TEST=$(BUILDDIR)/$(NAME).test
-
-test: $(TEST)
-
-Egg.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Egg.o $(BUILD_TEST_DIR)/EggPlugin.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
-
-Egg9.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=Egg BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Egg9.o $(BUILD_TEST_DIR)/EggPlugin9.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0"
-
-$(BUILDDIR)/$(NAME).test : $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
 
 ##########################################################################
 

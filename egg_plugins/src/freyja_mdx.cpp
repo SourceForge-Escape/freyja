@@ -22,8 +22,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja_model/EggPlugin.h>
-#include <freyja_model/mendian.h>
+#include <freyja8/EggPlugin.h>
+#include <freyja8/mendian.h>
 
 #define fread_int_small eRead_Small_int32
 #define fread_u_int_small eRead_Small_uint32

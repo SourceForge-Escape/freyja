@@ -453,7 +453,7 @@ UTPackage.test:
 	$(MAKE) tests NAME=UTPackage BUILD_DIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
 	CFLAGS="-Wall -O0 -g $(BASE_INC) -DUNIT_TEST_UTPACKAGE -DHAVE_MTKIMAGE" \
-	LD_FLAGS="-lm -lstdc++ -lfreyja_image"
+	LD_FLAGS="-lm -lstdc++ -lfreyja8 -lhel0"
 
 GRNModel.test:
 	@-echo "Building GRNModel unit test"

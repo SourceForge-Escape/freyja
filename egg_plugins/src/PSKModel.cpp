@@ -2573,7 +2573,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef FREYJA_MODEL_PLUGINS
-#include <freyja_model/EggPlugin.h>
+#include <freyja8/EggPlugin.h>
 #include <mstl/Map.h>
 
 extern "C" {

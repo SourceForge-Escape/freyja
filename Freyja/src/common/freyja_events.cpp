@@ -95,10 +95,10 @@ void event_register_model(FreyjaModel *m)
 }
 
 
-void event_custom_color(int custom_color_flags, float r, float g, float b)
+void event_custom_color(freyja_color_t color, float r, float g, float b)
 {
 	if (RENDER)
-		RENDER->CustomColor(custom_color_flags, r, g, b);
+		RENDER->setColor(color, r, g, b, 1.0f);
 }
 
 
