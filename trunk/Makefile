@@ -10,13 +10,14 @@ lazybuild:
 
 	@-printf "Installing libfreyja\n"
 	@-cd libfreyja; ./autogen.sh; make; make install
-	@-make plugins; make install-plugins
 	@-cd ..
 
-	@-printf "Building Freyja\n"
-	@-cd Freyja; ./autogen.sh; make
+	@-printf "Installing libmgtk\n"
+	@-cd libmgtk; ./autogen.sh; make; make install
+	@-cd ..
+
 	@-printf "Installing Freyja\n"
-	@-make install
+	@-cd Freyja; ./autogen.sh; make && make install
 	@-cd ..
 
 	@-printf "\n\n o If your build failed:\n"
