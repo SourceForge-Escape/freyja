@@ -242,6 +242,22 @@ psk.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+obj.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=obj \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_obj.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+smd.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=smd \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/smd.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 tombraider.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
@@ -279,7 +295,7 @@ plugins: mdl.so md2.so md3.so \
 	ase.so eggv7.so lwo.so \
 	trmesh.so tombraider.so  \
 	nod.so psk.so 3ds.so \
-	mdx.so grn.so md5.so
+	mdx.so grn.so md5.so smd.so
 
 ################################################################
 
