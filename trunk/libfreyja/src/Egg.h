@@ -222,6 +222,7 @@ typedef struct egg_mesh_s {
 
 
 	/* Ext to 8.12 for better vertex morph animation */
+	char name[64];  // human readable
 
 	Vector<EggUVMap *> uvMaps;  // 
 

@@ -180,13 +180,16 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 
 
 	if (argc < 2)
+	{
+		printf("%s pak_filename\n", argv[0]);
 		return -1;
+	}
 
-	if (!bsa.load(argv[1]))
+	if (!bsa.load(argv[1]) || !r.openFile(argv[1]))
+	{
+		printf("Couldn't load pakfile %s \n", argv[1]);
 		return -1;
-
-	if (!r.openFile(argv[1]))
-		return -2;
+	}
 
 	dir[0] = 0;
 
