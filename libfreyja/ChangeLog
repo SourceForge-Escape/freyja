@@ -28,6 +28,7 @@
 
  libfreyja (0.9.0-20050107) "Umbra" Mongoose <mongoose@icculus.org>
 
+	o FreyjaSkeletalAnimation added to svn
 	o FreyjaMaterial (ABI 0.9.3, doesn't use freyjaIterator) added
 
 

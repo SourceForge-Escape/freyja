@@ -32,6 +32,10 @@
 #include "EggPlugin.h" // temp for testing
 #include "FreyjaPluginABI.h"
 #include "Freyja.h"
+#include "FreyjaCamera.h"
+#include "FreyjaLight.h"
+#include "FreyjaSkeleton.h"
+#include "FreyjaMaterial.h"
 
 
 /* Until Freyja replaces Egg backend, let these vectors float here */
@@ -3341,6 +3345,66 @@ long freyjaGetAnimationKeyFrameCount(long animationIndex)
 
 
 /* Animation Mutators */
+
+void freyjaAnimationName(long animationIndex, const char *name)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+		{
+			gFreyjaAnimations[animationIndex]->setName(name);
+		}
+	}
+}
+
+
+void freyjaAnimationFrameRate(long animationIndex, vec_t frameRate)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+		{
+			gFreyjaAnimations[animationIndex]->mFrameRate = frameRate;
+		}
+	}
+}
+
+
+void freyjaAnimationTime(long animationIndex, vec_t time)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+		{
+			gFreyjaAnimations[animationIndex]->mTime = time;
+		}
+	}
+}
+
+
+void freyjaAnimationSubsetRoot(long animationIndex, long startBone)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+		{
+			gFreyjaAnimations[animationIndex]->mStartBone = startBone;
+		}
+	}
+}
+
+
+void freyjaAnimationSubsetCount(long animationIndex, long boneCount)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+		{
+			gFreyjaAnimations[animationIndex]->mBoneCount = boneCount;
+		}
+	}
+}
+
 
 long freyjaAnimationKeyFrameCreate(long animationIndex)
 {

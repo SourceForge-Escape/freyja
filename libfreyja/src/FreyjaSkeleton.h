@@ -26,6 +26,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJASKELETON_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJASKELETON_H_
 
+#include <string.h>
+
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
@@ -34,32 +36,155 @@
 #include <mstl/Vector.h>
 
 
+class FreyjaKeyFrame
+{
+public:
+
+	FreyjaKeyFrame()
+	{
+		vec3_t xyz;
+
+		xyz[0] = HEL_DEG_TO_RAD(30.0f);
+		xyz[1] = HEL_DEG_TO_RAD(15.0f);
+		xyz[2] = HEL_DEG_TO_RAD(7.5f);
+
+		mOrientation.setByEulerAngles(xyz);
+		printf("C 0. %f %f %f\n", xyz[0], xyz[1], xyz[2]);
+		mOrientation.getEulerAngles(xyz);
+		printf("C 1. %f %f %f\n", xyz[0], xyz[1], xyz[2]);
+		printf("\n");
+	}
+
+	void getOrientationEuler(vec3_t xyz)
+	{
+		mOrientation.getEulerAngles(xyz+0, xyz+1, xyz+2);
+	}
+
+	Quaternion getOrientation()
+	{
+		Quaternion q = mOrientation;
+		return q;
+	}
+
+	void getPosition(vec3_t xyz)
+	{
+		mPosition.getXYZ(xyz);
+	}
+
+	Vector3d getPosition()
+	{
+		Vector3d v = mPosition;
+		return v;
+	}
+
+	vec_t getTime()
+	{
+		return mTime;
+	}
+
+
+	void setOrientationByEuler(const vec3_t xyz) // must be radians
+	{
+		mOrientation.setByEulerAngles(xyz);
+	}
+
+	void setOrientationByAxisAngles(const vec4_t axyz)
+	{
+		mOrientation.setByAxisAngles(axyz[0], axyz[1], axyz[2], axyz[3]);
+	}
+
+	void setOrientationByQuaternion(const vec4_t wxyz)
+	{
+		mOrientation = Quaternion(wxyz);
+	}
+
+	void setPosition(vec3_t xyz)
+	{
+		mPosition = Vector3d(xyz);
+	}
+
+	void setTime(vec_t time)
+	{
+		mTime = time;
+	}
+
+	vec_t mTime;                /* Time to next keyframe */
+
+	Vector3d mPosition;
+
+	Quaternion mOrientation;
+};
+
+
+// This class handles unpadded keyframes, adds string checking, etc
+class FreyjaSkeletalAnimation
+{
+public:
+
+	class FreyjaBoneKeyFrame
+	{
+	public:
+		void setName(const char *name)
+		{
+			strncpy(mName, name, 64);
+			mName[63] = 0;
+		}
+
+		char mName[64];				/* Used to double check 
+										skeleton <--> keyframe matches */
+		long mBoneIndex;
+
+		Vector<FreyjaKeyFrame *> mKeyFrames; 
+	};
+
+
+	void setName(const char *name)
+	{
+		strncpy(mName, name, 64);
+		mName[63] = 0;
+	}
+	
+	long mId;
+
+	char mName[64];
+
+	vec_t mFrameRate;
+
+	vec_t mTime;
+
+	long mStartBone;          /* For animation blending (subsets) use */
+
+	long mBoneCount;
+
+	long mCurrentFrame; // render use mostly
+
+	long mLastFrame;    // render use mostly
+
+	vec_t mLastTime;    // render use mostly
+
+	Vector<FreyjaBoneKeyFrame *> mKeyFrames; 
+};
+
+
 class FreyjaBone 
 {
 public:
-	void translate(vec3_t xyz);
-	void rotate(vec3_t xyz);
 
-	void setName(const char *name);
+	long mId;                        /* Unique identifier */
 
+	unsigned long flags;             /* Options */
 
-	unsigned int id;                 /* Unique identifier */
+	char mName[64];                  /* Human readable identifier */
 
-	unsigned int flags;              /* For special external use, may remove */
+	long mParent;                    /* Parent of this bone */
 
-	char name[64];                   /* Human readable identifier */
+	Vector <long> mChildren;         /* Children bones */
 
-	int parent;                      /* Parent of this bone */
+	Quaternion mRotate;              /* Cached for editing use */
 
-	Vector <unsigned int> children;  /* Children bones */
+	Matrix mWorld;                   /* Transform use */
 
-	Vector <unsigned int> meshes;    /* Meshes are bound to bone if meshtree */
-
-	Quaternion rotation;             /* Cached for editing use */
-	vec3_t position;
-
-	Matrix matrix;                   /* Cached matrix for mesh deform use */
-	Matrix transform;                /* Transform mesh/children */
+	Vector3d mTranslate;
 };
 
 
@@ -121,11 +246,16 @@ class FreyjaSkeleton
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	int mId;                          /* Unique identifier */
+	long mId;                         /* Unique identifier */
+
+	char mName[64];                   /* Human readable identifier */
 
 	Vector<FreyjaBone *> mBones;      /* Bones in this skeleton */
 
-	unsigned int mRoot;               /* Root bone index */
+	long mRoot;                       /* Root bone index */
+
+
+	// Remove this later
 
 	Vector3d mPosition;               /* Position of skeleton */
 
