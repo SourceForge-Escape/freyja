@@ -682,6 +682,8 @@ void FreyjaRender::drawFreeWindow()
 
 	if (mRenderMode & RENDER_EDIT_GRID)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
 		glLineWidth(1.25f);
 		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
 
@@ -710,6 +712,8 @@ void FreyjaRender::drawFreeWindow()
 			glVertex3f(50.0f, 0.0f, x);
 		}
 		glEnd();
+		
+		glPopAttrib();
 	}
 
 	glPopMatrix();
@@ -1245,10 +1249,13 @@ void FreyjaRender::renderModel(RenderModel &model)
 	}
 
 
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+
 	/* Highlight current vertex group
 	 * -- this should be model specific later:
 	 * eg mModel->getCurrentGroup() -> model.index */
-	if (mRenderMode & RENDER_BBOX)
+	if (mRenderMode & RENDER_BBOX && model.getMeshCount() > 0)
 	{
 		/* Render bounding box */
 		mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
@@ -1313,6 +1320,8 @@ void FreyjaRender::renderModel(RenderModel &model)
 		glEnd();
 		glPointSize(mDefaultPointSize);
 	}
+
+	glPopAttrib();
 
 
 	/* Render meshes */
@@ -1670,12 +1679,12 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 	static int x, y, offset_x, offset_y;
 
 
-   glPushMatrix();
-   glLineWidth(2.0);
+	glPushMatrix();
+	glLineWidth(2.0);
 
-   switch (plane)
-   {
-   case PLANE_XY:
+	switch (plane)
+	{
+	case PLANE_XY:
 		x = (int)mScroll[0];
 		y = (int)mScroll[1];
 
@@ -1691,7 +1700,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		break;
 
 
-   case PLANE_XZ:
+	case PLANE_XZ:
 		x = (int)mScroll[0];
 		y = (int)mScroll[2];
 
@@ -1707,7 +1716,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		break;
 
 
-   case PLANE_ZY:
+	case PLANE_ZY:
 	   x = (int)mScroll[2];
 	   y = (int)mScroll[1];
 
@@ -1721,6 +1730,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		glVertex2i(x, h);
 		glEnd(); 
 		break;
+
 	default:
 		return;
    }
@@ -1774,6 +1784,9 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	unsigned int i;
 
 
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+
 	if (mRenderMode & RENDER_EDIT_GRID)
 		DrawGrid(plane, getWindowWidth(), getWindowHeight(), 10);
 
@@ -1798,6 +1811,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	mglDrawAxis(0.5f, 2.4f, 1.744f);
 	glPopMatrix();
 #endif
+
+   glPopAttrib();
 
 	switch (plane)
 	{
