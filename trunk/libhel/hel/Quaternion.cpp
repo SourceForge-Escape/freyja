@@ -69,7 +69,7 @@ Quaternion::Quaternion(vec_t roll, vec_t pitch, vec_t yaw)
 
 	mW = cr * cpcy + sr * spsy;
 	mX = sr * cpcy - cr *spsy;
-	mY = cr * sp + sr * cp * sy;
+	mY = cr * sp * cy + sr * cp * sy;
 	mZ = cr * cp * sy - sr * sp * cy;
 
 	normalize();

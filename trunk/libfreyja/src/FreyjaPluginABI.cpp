@@ -62,16 +62,387 @@ long freyjaCheckModel(char *filename)
 }
 
 
+long freyjaLoadMeshChunkV1(FreyjaFileReader &r)
+{
+	Vector<long> verticesMap, texcoordsMap;
+	vec3_t xyz;
+	vec2_t uv;
+	vec_t weight;
+	long bone, frame, material;
+	long i, j, count, idx, flags;
+	long polygonCount;
+	long vertexGroupCount;
+	long meshFlags;
+	long vertexCount;
+	long vertexWeightCount;
+	long vertexFrameCount;
+	long texCoordCount;
+
+
+	/* Read from diskfile */
+	meshFlags = r.readLong();
+	vertexCount = r.readLong();
+	vertexWeightCount = r.readLong();
+	vertexFrameCount = r.readLong();
+	texCoordCount = r.readLong();
+	polygonCount = r.readLong();
+	vertexGroupCount = r.readLong();
+
+	freyjaBegin(FREYJA_MESH);
+	freyjaBegin(FREYJA_VERTEX_GROUP);
+	
+	/* Vertices */
+	for (i = 0; i < vertexCount; ++i)
+	{
+		flags = r.readLong();
+
+		for (j = 0; j < 3; ++j)
+			xyz[j] = r.readFloat32();
+
+		idx = freyjaVertex3fv(xyz);
+
+		for (j = 0; j < 3; ++j)
+			xyz[j] = r.readFloat32();
+
+		freyjaVertexNormal3fv(idx, xyz);
+
+		for (j = 0; j < 2; ++j)
+			uv[j] = r.readFloat32();
+		
+		freyjaVertexTexCoord2fv(idx, uv);
+
+		verticesMap.pushBack(idx);
+	}
+
+	freyjaEnd(); // FREYJA_VERTEX_GROUP
+
+	/* VertexWeights */
+	for (i = 0; i < vertexWeightCount; ++i)
+	{
+		idx = r.readLong();
+		bone = r.readLong();
+		weight = r.readFloat32();
+		
+		freyjaVertexWeight(verticesMap[idx], weight, bone);
+	}
+
+	/* VertexFrames */
+	for (i = 0; i < vertexFrameCount; ++i)
+	{
+		idx = r.readLong();
+		frame = r.readLong(); // Reserved use
+		for (j = 0; j < 3; ++j)
+			xyz[j] = r.readFloat32();
+		
+		freyjaVertexFrame3f(verticesMap[idx], xyz[0], xyz[1], xyz[2]);
+	}
+
+	/* TexCoords */
+	for (i = 0; i < texCoordCount; ++i)
+	{
+		for (j = 0; j < 2; ++j)
+			uv[j] = r.readFloat32();
+
+		idx = freyjaTexCoord2fv(uv);
+
+		texcoordsMap.pushBack(idx);
+	}
+
+	/* Polygons */
+	for (i = 0; i < polygonCount; ++i)
+	{
+		freyjaBegin(FREYJA_POLYGON);
+		flags = r.readLong();
+		material = r.readLong();
+		freyjaPolygonMaterial1i(material);
+
+		count = r.readLong();
+
+		for (j = 0; j < count; ++j)
+		{
+			idx = r.readLong();
+			freyjaPolygonVertex1i(verticesMap[idx]);
+		}
+
+		count = r.readLong();
+
+		for (j = 0; j < count; ++j)
+		{
+			idx = r.readLong();
+			freyjaPolygonTexCoord1i(texcoordsMap[idx]);
+		}
+
+		freyjaEnd(); // FREYJA_POLYGON
+	}
+
+	freyjaEnd(); // FREYJA_MESH
+
+	return 0;
+}
+
+
+/* This is to fix all the problems with the backend delete corruption
+ * It filters and realigns indices to only save valid data, not
+ * the entire junky backend cruft like undo data which remains
+ *
+ * Vector maps are very memory wasteful */
+long freyjaSaveMeshChunkV1(FreyjaFileWriter &w, long meshIndex)
+{
+	const long version = 1;
+	Vector<long> polygons, vertices, texcoords;
+	Vector<long> verticesMap, texcoordsMap;
+	freyja_file_chunk_t chunk;
+	vec3_t xyz;
+	vec2_t uv;
+	vec_t weight;
+	long flags, bone, frame, material;
+	long i, j, k, count, idx, vertex, texcoord;
+	long polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+	long vertexGroupCount = freyjaGetMeshVertexGroupCount(meshIndex);
+	long byteSize = 0;
+	long meshFlags = freyjaGetMeshFlags(meshIndex);
+	long vertexCount = 0;
+	long vertexWeightCount = 0;
+	long vertexFrameCount = 0;
+	long texCoordCount = 0;
+
+
+	if (polygonCount < 1)
+		return -1;
+
+	byteSize += 4; // meshFlags
+	byteSize += 4; // vertexCount
+	byteSize += 4; // vertexWeightCount
+	byteSize += 4; // vertexFrameCount
+	byteSize += 4; // texCoordCount
+	byteSize += 4; // polygonCount
+	byteSize += 4; // vertexGroupCount
+
+	/* Polygons, filtered by mesh */
+	for (i = 0, count = 0; i < polygonCount; ++i)
+	{
+		idx = freyjaGetMeshPolygonIndex(meshIndex, i);
+		count = freyjaGetPolygonEdgeCount(idx);
+
+		/* Weed out invalid polygons */
+		if (count < 3) 
+		{
+			continue;
+		}
+
+		polygons.pushBack(idx);
+	}
+
+	polygonCount = polygons.end();
+
+
+	/* Vertices and polymapped TexCoords, filtered by filtered polygons */
+	verticesMap.reserve(freyjaGetCount(FREYJA_VERTEX) + 1);
+	texcoordsMap.reserve(freyjaGetCount(FREYJA_TEXCOORD) + 1);
+
+	count = freyjaGetCount(FREYJA_VERTEX);
+	for (i = 0; i < count; ++i)
+		verticesMap.pushBack(0);
+
+	count = freyjaGetCount(FREYJA_TEXCOORD);
+	for (i = 0; i < count; ++i)
+		texcoordsMap.pushBack(0);
+
+	for (i = polygons.begin(); i < (long)polygons.end(); ++i)
+	{
+		idx = polygons[i];
+		count = freyjaGetPolygonVertexCount(idx);
+
+		byteSize += 4 + 4 + 4 + 4; // flags vertCount texCount material
+		byteSize += (freyjaGetPolygonVertexCount(idx) * 4 +
+					 freyjaGetPolygonTexCoordCount(idx) * 4);
+
+		for (j = 0; j < count; ++j)
+		{
+			vertex = freyjaGetPolygonVertexIndex(idx, j);
+
+			for (k = vertices.begin(); k < (long)vertices.end(); ++k)
+			{
+				if (vertex == vertices[k])
+				{
+					vertex = -2;
+					break;
+				}
+			}
+
+			if (vertex > -2)
+			{
+				verticesMap.assign(vertex, vertexCount);
+				++vertexCount;
+				vertices.pushBack(vertex);
+				byteSize += (4 + 12 + 12 + 8); // flags xyz nxyz uv
+
+				vertexWeightCount += freyjaGetVertexWeightCount(vertex);
+				byteSize += 12 * freyjaGetVertexWeightCount(vertex); // vidx weight bone
+				vertexFrameCount += freyjaGetVertexFrameCount(vertex);
+				byteSize += 20 * freyjaGetVertexFrameCount(vertex); // vidx frame xyz
+			}
+		}
+
+		count = freyjaGetPolygonTexCoordCount(idx);
+
+		for (j = 0; j < count; ++j)
+		{
+			texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
+
+			for (k = texcoords.begin(); k < (long)texcoords.end(); ++k)
+			{
+				if (texcoord == texcoords[k])
+				{
+					texcoord = -2;
+					break;
+				}
+			}
+
+			if (texcoord > -2)
+			{
+				texcoordsMap.assign(texcoord, texCoordCount);
+				++texCoordCount;
+				texcoords.pushBack(texcoord);
+				byteSize += 8; // uv
+			}
+		}
+	}
+
+
+	/* Groups WARNING currently not written to disk */
+	for (i = 0; i < vertexGroupCount; ++i)
+	{
+		idx = freyjaGetMeshVertexGroupIndex(meshIndex, i);
+	}
+
+	vertexGroupCount = 0;
+
+	/* Write to diskfile */
+	chunk.type = FREYJA_CHUNK_MESH;
+	chunk.size = byteSize;
+	chunk.flags = 0x0;
+	chunk.version = version;
+
+	w.writeLong(chunk.type);
+	w.writeLong(chunk.size);
+	w.writeLong(chunk.flags);
+	w.writeLong(chunk.version);
+
+	w.writeLong(meshFlags);
+	w.writeLong(vertexCount);
+	w.writeLong(vertexWeightCount);
+	w.writeLong(vertexFrameCount);
+	w.writeLong(texCoordCount);
+	w.writeLong(polygonCount);
+	w.writeLong(vertexGroupCount);
+
+	/* Vertices */
+	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
+	{
+		vertex = vertices[i];
+
+		flags = freyjaGetVertexFlags(vertex);
+		w.writeLong(flags);
+
+		freyjaGetVertexXYZ3fv(vertex, xyz);
+		for (j = 0; j < 3; ++j)
+			w.writeFloat32(xyz[j]);
+
+		freyjaGetVertexNormalXYZ3fv(vertex, xyz);
+		for (j = 0; j < 3; ++j)
+			w.writeFloat32(xyz[j]);
+
+		freyjaGetVertexTexCoordUV2fv(vertex, uv);
+		for (j = 0; j < 2; ++j)
+			w.writeFloat32(uv[j]);
+	}
+
+	/* VertexWeights */
+	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
+	{
+		vertex = vertices[i];
+		count = freyjaGetVertexWeightCount(vertex);
+
+		for (j = 0; j < count; ++j)
+		{
+			freyjaGetVertexWeight(vertex, j, &bone, &weight);
+			w.writeLong(verticesMap[vertex]);
+			w.writeLong(bone); // boneIndex -- FIXME: Should be translated
+			w.writeFloat32(weight);
+		}
+	}
+
+	/* VertexFrames */
+	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
+	{
+		vertex = vertices[i];
+		count = freyjaGetVertexFrameCount(vertex);
+
+		for (j = 0; j < count; ++j)
+		{
+			freyjaGetVertexFrame(vertex, j, &frame, xyz);
+			w.writeLong(verticesMap[vertex]);
+			w.writeLong(frame); // frameIndex -- FIXME: Should be translated
+			for (k = 0; k < 3; ++k)
+				w.writeFloat32(xyz[k]);
+		}
+	}
+
+	/* TexCoords */
+	for (i = texcoords.begin(); i < (long)texcoords.end(); ++i)
+	{
+		texcoord = texcoords[i];
+
+		freyjaGetTexCoord2fv(texcoord, uv);
+
+		for (j = 0; j < 2; ++j)
+			w.writeFloat32(uv[j]);
+	}
+
+	/* Polygons */
+	for (i = polygons.begin(); i < (long)polygons.end(); ++i)
+	{
+		idx = polygons[i];
+
+		flags = freyjaGetPolygonFlags(idx);
+		w.writeLong(flags);
+
+		material= freyjaGetPolygonMaterial(idx);
+		w.writeLong(material);
+
+		count = freyjaGetPolygonVertexCount(idx);
+		w.writeLong(count);
+
+		for (j = 0; j < count; ++j)
+		{
+			vertex = freyjaGetPolygonVertexIndex(idx, j);
+			w.writeLong(verticesMap[vertex]);
+		}
+
+		count = freyjaGetPolygonTexCoordCount(idx);
+		w.writeLong(count);
+
+		for (j = 0; j < count; ++j)
+		{
+			texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
+			w.writeLong(texcoordsMap[texcoord]);
+		}
+	}
+
+	return 0;
+}
+
+
 long freyjaLoadModel(char *filename)
 {
 	FreyjaFileReader r;
 	freyja_file_header_t header;
-	Vector<long> vertices, texcoords;
+	Vector<long> vertices, texcoords, bones;
 	freyja_file_chunk_t chunk;
-	long offset, i, j, n, flags, index, count;
+	long offset, i, j, index, flags;
 	vec4_t wxyz;
 	vec3_t xyz;
-	vec2_t uv;
 	char buffer[64];
 
 
@@ -107,120 +478,51 @@ long freyjaLoadModel(char *filename)
 		switch (chunk.type)
 		{
 		case FREYJA_CHUNK_BONE:
-			printf("BONE\n");
-			memset(buffer, 0, 64);
-			r.readCharString(64, buffer);
-
 			freyjaBegin(FREYJA_BONE);
 			index = freyjaGetCurrent(FREYJA_BONE);
+			bones.pushBack(index);
+
+			memset(buffer, 0, 64);
+			r.readCharString(64, buffer);
+			freyjaBoneName1s(index, buffer);
 			freyjaBoneFlags1i(index, 0x0);
 			freyjaBoneParent1i(index, r.readLong());
-			freyjaBoneName1s(index, buffer);
-		
+			flags = r.readLong();
+ 
 			for (j = 0; j < 3; ++j)
 				xyz[j] = r.readFloat32();
 
 			freyjaBoneTranslate3fv(index, xyz);
-
-			for (j = 0; j < 4; ++j)
-				wxyz[j] = r.readFloat32();
-
-			freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
-			break;
-
-
-		case FREYJA_CHUNK_VERTICES:
-			printf("VERT\n");
-			count = r.readLong();
-
-			for (i = 0; i < count; ++i)
+			
+			if (flags & 32)
 			{
-				for (j = 0; j < 3; ++j)
-					xyz[j] = r.readFloat32();
-				index = freyjaVertex3fv(xyz);
+				r.readLong();
 
 				for (j = 0; j < 3; ++j)
 					xyz[j] = r.readFloat32();
-				freyjaVertexNormal3fv(index, xyz);
 
-				for (j = 0; j < 2; ++j)
-					uv[j] = r.readFloat32();
-				freyjaVertexTexCoord2fv(index, uv);
-
-				vertices.pushBack(index);
+				freyjaBoneRotateEulerXYZ3fv(index, xyz);
 			}
-			break;
-
-
-		case FREYJA_CHUNK_TEXCOORDS:
-			printf("COOR\n");
-			count = r.readLong();
-
-			for (i = 0; i < count; ++i)
+			else
 			{
-				for (j = 0; j < 2; ++j)
-					uv[j] = r.readFloat32();
+				for (j = 0; j < 4; ++j)
+					wxyz[j] = r.readFloat32();
 
-				index = freyjaTexCoord2fv(uv);
-				texcoords.pushBack(index);
+				freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
 			}
-			break;
 
+			freyjaEnd(); // FREYJA_BONE
 
-		case FREYJA_CHUNK_POLYGONS:
-			printf("POLY\n");
-			count = r.readLong();
-
-			for (i = 0; i < count; ++i)
-			{
-				freyjaBegin(FREYJA_POLYGON);
-
-				freyjaPolygonMaterial1i(r.readLong());
-				flags = r.readLong();
-				n = r.readLong();
-
-				for (j = 0; j < n; ++j)
-				{
-					index = r.readLong();
-					freyjaPolygonVertex1i(index);//vertices[index]);
-				}
-
-				if (flags & fPolygon_PolyMapped)
-				{
-					n = r.readLong();
-
-					for (j = 0; j < n; ++j)
-					{
-						index = r.readLong();
-						freyjaPolygonTexCoord1i(index);//vertices[index]);
-					}
-				}
-				else if  (flags & fPolygon_ColorMapped)
-				{
-					n = r.readLong() * 2;
-
-					for (j = 0; j < n; ++j)
-					{
-						index = r.readLong();
-						freyjaPolygonTexCoord1i(index);//vertices[index]);
-					}
-				}
-
-				freyjaEnd();
-			}
+			if ((long)r.getFileOffset() != offset)
+				printf("BONE @ %i not %li!\n", r.getFileOffset(), offset);
 			break;
 
 
 		case FREYJA_CHUNK_MESH:
-			flags = r.readLong();
+			freyjaLoadMeshChunkV1(r);
 
-			count = r.readLong();
-			for (j = 0; j < count; ++j)
-				;//freyjaMeshPolygon1u(r.readLong());
-
-			count = r.readLong();
-			for (j = 0; j < count; ++j)
-				;//freyjaMeshGroup1u(r.readLong());
+			if ((long)r.getFileOffset() != offset)
+				printf("MESH @ %i not %li!\n", r.getFileOffset(), offset);
 			break;
 
 
@@ -229,6 +531,25 @@ long freyjaLoadModel(char *filename)
 		}
 
 		r.setFileOffset(offset);
+	}
+
+
+	if (!bones.empty())
+	{
+		freyjaBegin(FREYJA_SKELETON);
+
+		for (i = bones.begin(); i < (long)bones.end(); ++i)
+		{
+			for (j = bones.begin(); j < (long)bones.end(); ++j)
+			{
+				if (bones[i] == freyjaGetBoneParent(bones[j]))
+				{
+					freyjaBoneAddChild1i(bones[i], bones[j]);
+				}
+			} 		
+		} 
+
+		freyjaEnd(); // FREYJA_SKELETON
 	}
 
 	r.closeFile();
@@ -244,11 +565,9 @@ long freyjaSaveModel(char *filename)
 	freyja_file_header_t header;
 	freyja_file_chunk_t chunk;
 	vec3_t xyz;
-	vec4_t wxyz;
+	//vec4_t wxyz;
 	char buffer[64];
-	long i, j, n, index, idx;
-	long count, flags, material;
-	vec2_t uv;
+	long i, j, index, idx, count;
 
 
 	if (!w.openFile(filename))
@@ -290,7 +609,7 @@ long freyjaSaveModel(char *filename)
 			idx = freyjaGetBoneParent(index);
 
 			chunk.type = FREYJA_CHUNK_BONE;
-			chunk.size = 64 + 4 + 12 + 16;
+			chunk.size = 64 + 4 + 4 + 12 + 16;
 			chunk.flags = 0x0;
 			chunk.version = 1;
 
@@ -300,177 +619,35 @@ long freyjaSaveModel(char *filename)
 			w.writeLong(chunk.version);
 			w.writeCharString(64, buffer);
 			w.writeLong(idx);
+#ifdef QUAT_BACKEND
+			w.writeLong(0x0);
+#else
+			w.writeLong(32); // Flag 32 - Using euler angles
+#endif
 
 			freyjaGetBoneTranslation3fv(index, xyz);
 
 			for (j = 0; j < 3; ++j)
 				w.writeFloat32(xyz[j]);
 
+#ifdef QUAT_BACKEND
 			freyjaGetBoneRotationWXYZ4fv(index, wxyz);
-
+			
 			for (j = 0; j < 4; ++j)
 				w.writeFloat32(wxyz[j]);
+#else
+			freyjaGetBoneRotationXYZ3fv(index, xyz);
+			w.writeLong(0x0); // pad out
+			for (j = 0; j < 3; ++j)
+				w.writeFloat32(xyz[j]);
+#endif
 
 			index = freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
 		}
 	}
 
 
-	/* Vertices */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_RESET);
-	index = freyjaGetCurrent(FREYJA_VERTEX);
-	count = freyjaGetCount(FREYJA_VERTEX);
-
-	chunk.type = FREYJA_CHUNK_VERTICES;
-	chunk.size = 4 + count * (12 + 12 + 8);
-	chunk.flags = 0x0;
-	chunk.version = 1;
-
-	w.writeLong(chunk.type);
-	w.writeLong(chunk.size);
-	w.writeLong(chunk.flags);
-	w.writeLong(chunk.version);
-
-	w.writeLong(count);
-
-	for (i = 0; i < count; ++i)
-	{
-		freyjaGetVertex3fv(xyz);
-		for (j = 0; j < 3; ++j)
-			w.writeFloat32(xyz[j]);
-
-		freyjaGetVertexNormal3fv(xyz);
-		for (j = 0; j < 3; ++j)
-			w.writeFloat32(xyz[j]);
-
-		freyjaGetVertexTexCoord2fv(uv);
-		for (j = 0; j < 2; ++j)
-			w.writeFloat32(uv[j]);
-
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);
-		vertices.pushBack(index);
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_NEXT);
-	}
-
-
-	/* Vertex Frames */
-	// FIXME
-
-
-	/* Vertex Weights */
-	// FIXME
-	
-
-	/* Texcoords */
-	freyjaIterator(FREYJA_TEXCOORD, FREYJA_LIST_RESET);
-	index = freyjaGetCurrent(FREYJA_TEXCOORD);
-	count = freyjaGetCount(FREYJA_TEXCOORD);
-
-	chunk.type = FREYJA_CHUNK_TEXCOORDS;
-	chunk.size = 4 + count * 8;
-	chunk.flags = 0x0;
-	chunk.version = 1;
-
-	w.writeLong(chunk.type);
-	w.writeLong(chunk.size);
-	w.writeLong(chunk.flags);
-	w.writeLong(chunk.version);
-
-	w.writeLong(count);
-
-	for (i = 0; i < count; ++i)
-	{
-		freyjaGetTexCoord2fv(index, uv);
-		for (j = 0; j < 2; ++j)
-			w.writeFloat32(uv[j]);
-
-		index = freyjaIterator(FREYJA_TEXCOORD, FREYJA_LIST_CURRENT);
-		texcoords.pushBack(index);
-
-		freyjaIterator(FREYJA_TEXCOORD, FREYJA_LIST_NEXT);
-	}
-
-
-	/* Polygons */
-	freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
-	index = freyjaGetCurrent(FREYJA_POLYGON);
-	n = freyjaGetCount(FREYJA_POLYGON);
-
-	chunk.type = FREYJA_CHUNK_POLYGONS;
-	chunk.size = 4;
-	chunk.flags = 0x0;
-	chunk.version = 1;
-
-
-	for (i = 0; i < n; ++i)
-	{
-		count = freyjaGetPolygonEdgeCount(index);
-		chunk.size += 12;
-		chunk.size += count * 4;
-
-		if (flags & fPolygon_PolyMapped)
-		{
-			chunk.size += count * 4;
-		}
-		else if  (flags & fPolygon_ColorMapped)
-		{
-			chunk.size += count * 8;
-		}
-
-		index = freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
-	}
-
-	w.writeLong(chunk.type);
-	w.writeLong(chunk.size);
-	w.writeLong(chunk.flags);
-	w.writeLong(chunk.version);
-
-	freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
-	index = freyjaGetCurrent(FREYJA_POLYGON);
-	n = freyjaGetCount(FREYJA_POLYGON);
-
-	w.writeLong(n);
-
-	for (i = 0; i < n; ++i)
-	{
-		material = freyjaGetPolygonMaterial(index);
-		flags = freyjaGetPolygonFlags(index);
-		count = freyjaGetPolygonEdgeCount(index);
-
-		w.writeLong(material);
-		w.writeLong(flags);
-		w.writeLong(count);
-
-		for (j = 0; j < count; ++j)
-		{
-			idx = freyjaGetPolygonVertexIndex(index, j);
-			w.writeLong(vertices[idx]);
-		}
-
-		if (flags & fPolygon_PolyMapped)
-		{
-			w.writeLong(count);
-
-			for (j = 0; j < count; ++j)
-			{
-				idx = freyjaGetPolygonTexCoordIndex(index, j);
-				w.writeLong(texcoords[idx]);
-			}
-		}
-		else if  (flags & fPolygon_ColorMapped)
-		{
-			w.writeLong(count);
-
-			for (j = 0; j < count*2; ++j)
-			{
-				idx = freyjaGetPolygonTexCoordIndex(index, j);
-				w.writeLong(texcoords[idx]);
-			}
-		}
-
-		index = freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
-	}
+	/* Skeletons */
 
 
 	/* Materials */
@@ -482,38 +659,11 @@ long freyjaSaveModel(char *filename)
 	/* Meshes */
 	freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
 	index = freyjaGetCurrent(FREYJA_MESH);
-	n = freyjaGetCount(FREYJA_MESH);
+	count = freyjaGetCount(FREYJA_MESH);
 
-	for (i = 0; i < n; ++i)
+	for (i = 0; i < count; ++i)
 	{
-		if (freyjaGetMeshPolygonCount(index) < 1)
-			continue;
-
-		count = (4 + freyjaGetMeshPolygonCount(index) * 4 +
-				 freyjaGetMeshVertexGroupCount(index) * 4);
-
-		chunk.type = FREYJA_CHUNK_MESH;
-		chunk.size = count;
-		chunk.flags = 0x0;
-		chunk.version = 1;
-
-		w.writeLong(chunk.type);
-		w.writeLong(chunk.size);
-		w.writeLong(chunk.flags);
-		w.writeLong(chunk.version);
-
-		w.writeLong(0); // FIXME: Flags
-
-		count = freyjaGetMeshPolygonCount(index);
-		w.writeLong(count);
-		for (j = 0; j < count; ++j)
-			w.writeLong(freyjaGetMeshPolygonIndex(index, j));
-
-		count = freyjaGetMeshVertexGroupCount(index);
-		w.writeLong(count);
-		for (j = 0; j < count; ++j)
-			w.writeLong(freyjaGetMeshVertexGroupIndex(index, j));
-		
+		freyjaSaveMeshChunkV1(w, index);
 		index = freyjaIterator(FREYJA_MESH, FREYJA_LIST_NEXT);
 	}
 
@@ -2529,6 +2679,170 @@ void freyjaGetVertexNormal3fv(vec3_t nxyz)
 		EggPlugin::mEggPlugin->freyjaGetVertexNormal(nxyz);
 }
 
+
+long freyjaGetPolygonVertexCount(long polygonIndex)
+{
+	egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+
+	if (polygon)
+	{
+		return polygon->vertex.end();
+	}
+
+	return 0;
+}
+
+
+long freyjaGetPolygonTexCoordCount(long polygonIndex)
+{
+	egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+
+	if (polygon)
+	{
+		return polygon->texel.end();
+	}
+
+	return 0;
+}
+
+
+long freyjaGetVertexTexCoordUV2fv(long vertexIndex, vec2_t uv)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		uv[0] = vertex->uv[0];
+		uv[1] = vertex->uv[1];
+		return 0;
+	}
+
+	return -1;
+}
+
+
+long freyjaGetVertexNormalXYZ3fv(long vertexIndex, vec3_t nxyz)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		nxyz[0] = vertex->norm[0];
+		nxyz[1] = vertex->norm[1];
+		nxyz[2] = vertex->norm[2];
+		return 0;
+	}
+
+	return -1;
+}
+
+
+long freyjaGetVertexXYZ3fv(long vertexIndex, vec3_t xyz)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		xyz[0] = vertex->pos[0];
+		xyz[1] = vertex->pos[1];
+		xyz[2] = vertex->pos[2];
+		return 0;
+	}
+
+	return -1;
+}
+
+
+long freyjaGetVertexFrame(long vertexIndex, long element,
+						  long *frameIndex, vec3_t xyz)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex && element > -1 && element < (int)vertex->frames.end())
+	{
+		vec_t *v = *(vertex->frames[element]);
+
+		if (element < (int)vertex->frameId.end())
+			*frameIndex = vertex->frameId[element];
+
+		xyz[0] = v[0];
+		xyz[1] = v[1];
+		xyz[2] = v[2];
+		return 0;
+	}
+
+	return -1;
+}
+
+
+long freyjaGetVertexFrameCount(long vertexIndex)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		return vertex->frames.end();
+	}
+
+	return 0;
+}
+
+
+long freyjaGetVertexWeight(long vertexIndex, long element,
+						   long *bone, vec_t *weight)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex && element > -1 && element < (int)vertex->weights.end())
+	{
+		*bone = vertex->weights[element]->bone;
+		*weight = vertex->weights[element]->weight;
+		return 0;
+	}
+
+	return -1;
+}
+
+
+long freyjaGetVertexWeightCount(long vertexIndex)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		return vertex->weights.end();
+	}
+
+	return 0;
+}
+
+
+long freyjaGetVertexFlags(long vertexIndex)
+{
+	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		return vertex->flags;
+	}
+
+	return 0;
+}
+
+
+long freyjaGetMeshFlags(long meshIndex)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		return mesh->flags;
+	}
+
+	return 0;
+}
+
+
 long freyjaGetMeshPolygonCount(long meshIndex)
 {
 	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
@@ -2540,6 +2854,7 @@ long freyjaGetMeshPolygonCount(long meshIndex)
 
 	return 0;
 }
+
 
 long freyjaGetMeshVertexGroupCount(long meshIndex)
 {
@@ -2553,11 +2868,12 @@ long freyjaGetMeshVertexGroupCount(long meshIndex)
 	return 0;
 }
 
+
 long freyjaGetMeshPolygonIndex(long meshIndex, long element)
 {
 	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
 
-	if (mesh && element > 0 && element < (int)mesh->polygon.end())
+	if (mesh && element > -1 && element < (int)mesh->polygon.end())
 	{
 		return mesh->polygon[element];
 	}
@@ -2569,7 +2885,7 @@ long freyjaGetMeshVertexGroupIndex(long meshIndex, long element)
 {
 	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
 
-	if (mesh && element > 0 && element < (int)mesh->group.end())
+	if (mesh && element > -1 && element < (int)mesh->group.end())
 	{
 		return mesh->group[element];
 	}
@@ -2669,7 +2985,6 @@ void freyjaBoneParent(long index)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(freyjaGetCurrent(FREYJA_BONE));
 
-
 	if (bone)
 	{
 		bone->parent = index;
@@ -2680,7 +2995,6 @@ void freyjaBoneParent(long index)
 long freyjaGetBoneParent(long index)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
-
 
 	if (bone)
 	{
@@ -2697,7 +3011,9 @@ long freyjaGetBoneRotationWXYZ4fv(long index, vec4_t wxyz)
 	
 	if (bone)
 	{
-		Quaternion q = Quaternion(bone->rot[0], bone->rot[1], bone->rot[2]);
+		Quaternion q = Quaternion(helDegToRad(bone->rot[2]), // roll
+								  helDegToRad(bone->rot[0]), // pitch
+								  helDegToRad(bone->rot[1]));// yaw
 		q.getQuaternion4fv(wxyz);
 
 		return bone->id;

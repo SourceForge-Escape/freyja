@@ -114,6 +114,22 @@ public:
 		return UINT_MAX;
 	}
 
+
+	long findFirstMatch(Object obj)
+	{
+		unsigned int i;
+
+		for (i = begin(); i < end(); ++i)
+		{
+			if (mData[i] == obj)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
 	////////////////////////////////////////////
 
 

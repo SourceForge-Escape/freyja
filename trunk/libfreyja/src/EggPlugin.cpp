@@ -627,7 +627,8 @@ egg_polygon_t *EggPlugin::getPolygon(long index)
 	
 	polygons = mEgg->PolygonList();
 
-	if (!polygons || polygons->empty() || index > (int)polygons->size()-1)
+	if (!polygons || polygons->empty() || index > (int)polygons->size()-1 ||
+		index < 0)
 		return 0x0;
 
 	poly = (*polygons)[index];
@@ -643,7 +644,8 @@ egg_mesh_t *EggPlugin::getMesh(long index)
 	
 	meshes = mEgg->MeshList();
 
-	if (!meshes || meshes->empty() || index > (int)meshes->size()-1)
+	if (!meshes || meshes->empty() || index > (int)meshes->size()-1 ||
+		index < 0)
 		return 0x0;
 
 	mesh = (*meshes)[index];
@@ -659,7 +661,8 @@ egg_tag_t *EggPlugin::getBone(long index)
 	
 	bones = mEgg->TagList();
 
-	if (!bones || bones->empty() || index > (int)bones->size()-1)
+	if (!bones || bones->empty() || index > (int)bones->size()-1 ||
+		index < 0)
 		return 0x0;
 
 	bone = (*bones)[index];
@@ -675,7 +678,8 @@ egg_vertex_t *EggPlugin::getVertex(long index)
 	
 	vertex = mEgg->VertexList();
 
-	if (!vertex || vertex->empty() || index > (int)vertex->size()-1)
+	if (!vertex || vertex->empty() || index > (int)vertex->size()-1 ||
+		index < 0)
 		return 0x0;
 
 	v = (*vertex)[index];
@@ -941,7 +945,6 @@ void EggPlugin::addPluginDirectory(const char *dir)
 	dir2[l] = 0;
 
 	mPluginDirectories.pushBack(dir2);
-	setupPlugins();
 }
 
 
