@@ -1,12 +1,12 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : GooseEgg
+ * Project : Freyja, GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://gooseegg.sourceforge.net
  * Email   : mongoose@users.sourceforge.net
  * Object  : Egg
- * License : GPL, also (C) 2000-2002 Mongoose
+ * License : GPL, also (C) 2000-2004 Mongoose
  * Comments: This is the data model agent of Egg models
  *
  * 
@@ -76,7 +76,7 @@
  * 2000-09-15:
  * Mongoose - API change!  Transforms have 1 new API call
  *            The 3 old methods per mesh, frame, list are gone
- ==========================================================================*/
+ ===========================================================================*/
 
 #ifndef GUARD__MONGOOSE_GOOSEEGG_EGG_H
 #define GUARD__MONGOOSE_GOOSEEGG_EGG_H
@@ -210,7 +210,7 @@ typedef struct egg_tag_s {
 	unsigned char flag;               /* Rendering flag, special use */
 	vec3_t center;                    /* Pivot point, center of rotation */
 	matrix_t transform;               /* Transform mesh/slaves by this matrix */
-	float rot[3];
+	vec3_t rot;
 	int parent;  // Ext for 8.12, 20040917 ( not stored to disk )
 } egg_tag_t;
 

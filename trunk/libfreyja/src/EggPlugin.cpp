@@ -33,6 +33,7 @@
 #include <hel/Quaternion.h>
 #include <hel/Vector3d.h>
 
+#include "EggFileReader.h"
 #include "EggPlugin.h"
 
 
@@ -66,7 +67,7 @@ int eggGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 
 	if (!u || !v)
 	{
-		printf("eggGenerateUVFromXYZ> ERROR: Passed invalid data");
+		eggPrintMessage("eggGenerateUVFromXYZ> ERROR: Passed invalid data");
 		return -1;
 	}
 
@@ -633,7 +634,7 @@ void eggGenerateVertexNormals()
 		eggGetPolygon1u(FREYJA_VERTEX, 1, &v1);
 		eggGetPolygon1u(FREYJA_VERTEX, 2, &v2);
 
-		printf("<%d %d %d>\n", v0, v1, v2);
+		eggPrintMessage("<%d %d %d>\n", v0, v1, v2);
 		eggIterator(FREYJA_VERTEX, v0);
 		eggGetVertex3f(a.mVec);
 		eggIterator(FREYJA_VERTEX, v1);
@@ -663,13 +664,13 @@ void eggGenerateVertexNormals()
 
 		if (!vertex)
 		{
-			printf("ERROR\n");
+			eggPrintMessage("ERROR\n");
 			continue;
 		}
 
 		normal.zero();
 
-		printf("%d :: %d faces\n", vertex->id, vertex->ref.size());
+		eggPrintMessage("%d :: %d faces\n", vertex->id, vertex->ref.size());
 		for (j = vertex->ref.begin(); j < vertex->ref.end(); ++j)
 		{
 			normal += *faceNormals[j];
@@ -681,7 +682,7 @@ void eggGenerateVertexNormals()
 		vertex->norm[1] = normal.mVec[1];
 		vertex->norm[2] = normal.mVec[2];
 
-		printf("%d :: %f %f %f\n", vertex->id, 
+		eggPrintMessage("%d :: %f %f %f\n", vertex->id, 
 			   normal.mVec[0],
 			   normal.mVec[1],
 			   normal.mVec[2]);
@@ -990,7 +991,7 @@ unsigned int eggGetPolygon3f(egg_plugin_t type, int item, float *value)
 
 unsigned int eggCriticalSection(egg_lock_t request)
 {
-	printf("eggCriticalSection> Not implemented, %s:%i\n", 
+	eggPrintMessage("eggCriticalSection> Not implemented, %s:%i\n", 
 		   __FILE__, __LINE__);
 
 	return PLUGIN_ERROR;
@@ -1647,26 +1648,33 @@ unsigned int EggPlugin::eggGetCurrent(egg_plugin_t type)
 	{
 	case FREYJA_VERTEX:
 		break;
+
 	case FREYJA_TEXCOORD:
 		break;
+
 	case FREYJA_MESH:
 		if (mMesh)
 			return mMesh->id;
 		break;
+
 	case FREYJA_GROUP:
 		if (mGroup)
 			return mGroup->id;
 		break;
+
 	case FREYJA_POLYGON:
 		break;
+
 	case FREYJA_BONE:
 		if (mTag)
 			return mTag->id;
 		break;
+
 	case FREYJA_SKELETON:
 		if (mBoneFrame)
 			return mBoneFrame->id;
 		break;
+
 	case FREYJA_SKEL_ANIM:
 		if (mAnimation)
 			return mAnimation->id;
@@ -1730,52 +1738,86 @@ void EggPlugin::eggPrintMessage(char *format, va_list *args)
 
 void EggPlugin::importPlugins(char *directory)
 {
-#ifdef FIXME
-	DIR *dir;
-	struct dirent *d_ptr;
-	struct stat status;
-	char filename[1024];
+#ifdef INTERACTIVE_PLUGINS
+	EggFileReader reader;
+	int (*import)(char *filename);
+	int (*check)(char *filename);
+	bool done = false;
+	char *module_filename;
+	void *handle;
+	char *error;
+	unsigned char *image = 0x0;
+	unsigned int width = 0, height = 0;
+	char type = 0;
 
-  
-	dir = opendir(directory);
 
-	if (dir)
+	if (!reader.doesFileExist(filename))
 	{
-		while ((d_ptr = readdir(dir)))
-		{
-			snprintf(filename, "%s/%s", directory, d_ptr->d_name);
-			stat(filename, &status);
+		print("File '%s' couldn't be accessed.", filename);
+		return -1;
+	}
 
-#ifdef WIN32
-			if (status.st_mode & _S_IFDIR)
-#else
-			if (S_ISDIR(status.st_mode))
-#endif
+	print("[EggImage plugin system invoked]");
+
+	for (i = mPluginDirectorys.begin(); i < mPluginDirectorys.end(); ++i)
+	{
+		if (!reader.openDirectory(mPluginDir))
+		{
+			eggPrintError("Couldn't access image plugin directory");
+			continue;
+		}
+
+		while (!done && (module_filename = reader.getNextDirectoryListing()))
+		{
+			if (reader.isDirectory(module_filename))
+				continue;
+
+			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
 			{
-				/* Directories not used here */
+				printError("In module '%s'.", module_filename);
+				
+				if ((error = dlerror()) != NULL)  
+				{
+					printError("%s", error);
+				}
+
+				continue; /* Try the next plugin, after a bad module load */
 			}
 			else
 			{
-				switch (validateModule(filename))
+				print("Module '%s' opened.", module_filename);
+				
+				import = (int (*)(char *filename))dlsym(handle, "import_model");
+
+				if ((error = dlerror()) != NULL)  
 				{
-				case IMPORT:
-					addImportPlugin(filename);
-				case EXPORT:
-					addExportPlugin(filename);
-				case MISC:
-					addMiscPlugin(filename);
-				default:
-					;
+					printError("%s", error);
+					dlclose(handle);
+					continue;
 				}
-			}      
+				
+				done = !(*import)((char*)filename);
+				
+				if ((error = dlerror()) != NULL) 
+				{
+					printError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+				
+				dlclose(handle);
+			}
 		}
-		
-		closedir(dir);
+
+		reader.closeDirectory();
+
+		if (done)
+			break;
 	}
-	else
-	{
-		eggPrintError("opendir(%s) failed\n", directory);
-	}
+
+	eggPrintMessage("[EggPlugin module loader sleeps now]\n");
+#else
+	eggPrintMessage("EggPlugin: This build was compiled w/o plugin support");
 #endif
 }
 
@@ -1898,7 +1940,7 @@ int EggPlugin::exportModel(char *filename, char *type)
 	if (strcmp(type, "egg") == 0)
 		return mEgg->saveFile(filename);
 
-	printf("[EggPlugin module loader invoked]\n");
+	eggPrintMessage("[EggPlugin module loader invoked]\n");
 
 	name = type;
 
@@ -1907,22 +1949,22 @@ int EggPlugin::exportModel(char *filename, char *type)
 
 	if (!(handle = dlopen(module_filename, RTLD_NOW)))
 	{
-		fprintf(stderr, "\tERROR: In module '%s'.\n", module_filename);
+		eggPrintError("\tERROR: In module '%s'.\n", module_filename);
 
 		if ((error = dlerror()) != NULL)  
 		{
-			fprintf (stderr, "\tERROR: %s\n", error);
+			eggPrintError("\tERROR: %s\n", error);
 		}
 	}
 	else
 	{
-		printf("\tModule '%s' opened.\n", module_filename);
+		eggPrintMessage("\tModule '%s' opened.\n", module_filename);
     
 		export_mdl = (int (*)(char * filename))dlsym(handle, module_export);
 
 		if ((error = dlerror()) != NULL)  
 		{
-			fprintf (stderr, "\tERROR: %s\n", error);
+			eggPrintError("\tERROR: %s\n", error);
 			dlclose(handle);
 		}
 
@@ -1936,7 +1978,7 @@ int EggPlugin::exportModel(char *filename, char *type)
 		dlclose(handle);
 	}
 
-	printf("[EggPlugin module loader sleeps now]\n");
+	eggPrintMessage("[EggPlugin module loader sleeps now]\n");
 
 	if (saved)
 		return 0; // sucess
@@ -1964,7 +2006,7 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 
 		if (!mMesh)
 		{
-			fprintf(stderr, "EggPlugin::eggBegin> GROUP defined outside MESH.");
+			eggPrintError("EggPlugin::eggBegin> GROUP defined outside MESH.");
 		}
 		else
 		{
@@ -1980,7 +2022,7 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 
 		if (!mMesh)
 		{
-			fprintf(stderr, "EggPlugin::eggEnd> Polygon defined outside MESH!");
+			eggPrintError("EggPlugin::eggEnd> Polygon defined outside MESH!");
 		}
 		break;
 	case FREYJA_BONE:
@@ -2015,7 +2057,7 @@ unsigned int EggPlugin::eggEnd()
 
 		if (polygon == UINT_MAX)
 		{
-			printf("EggPlugin::eggEnd> Polygon is invalid\n");
+			eggPrintMessage("EggPlugin::eggEnd> Polygon is invalid\n");
 			return PLUGIN_ERROR;
 		}
 
@@ -2026,7 +2068,7 @@ unsigned int EggPlugin::eggEnd()
 		}
 		else
 		{
-			fprintf(stderr, "EggPlugin::eggEnd> Polygon defined outside MESH!");
+			eggPrintError("EggPlugin::eggEnd> Polygon defined outside MESH!");
 		}
 		break;
 	default:
@@ -2146,8 +2188,7 @@ unsigned int EggPlugin::eggVertexStore3f(float x, float y, float z)
 		}
 		else
 		{
-			fprintf(stderr, 
-					"EggPlugin::eggVertexStore3f> Vertex outside GROUP!");
+			eggPrintError("EggPlugin::eggVertexStore3f> Vertex outside GROUP!");
 		}
 
 		return vert->id;
@@ -2263,8 +2304,7 @@ void EggPlugin::eggVertex1i(unsigned int egg_id)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggVertex1i> Vertex defined outside POLYGON!\n");
+		eggPrintError("EggPlugin::eggVertex1i> Vertex defined outside POLYGON!\n");
 	}
 }
 
@@ -2277,8 +2317,7 @@ void EggPlugin::eggMeshFlags1u(unsigned int flags)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggMeshFlags1u> Flag defined outside MESH!\n");
+		eggPrintError("EggPlugin::eggMeshFlags1u> Flag defined outside MESH!\n");
 	}
 }
 
@@ -2291,8 +2330,7 @@ void EggPlugin::eggTexCoord1i(unsigned int egg_id)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTexCoord1i> Texel defined outside POLYGON!\n");
+		eggPrintError("EggPlugin::eggTexCoord1i> Texel defined outside POLYGON!\n");
 	}
 }
 
@@ -2305,8 +2343,7 @@ void EggPlugin::eggTexture1i(int id)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTexture1i> Texture defined outside POLYGON!\n");
+		eggPrintError("EggPlugin::eggTexture1i> Texture defined outside POLYGON!\n");
 	}
 }
 
@@ -2329,8 +2366,7 @@ unsigned int EggPlugin::eggGroupCenter(float x, float y, float z)
 	{
 		if (!mGroup)
 		{
-			fprintf(stderr, 
-					"EggPlugin::eggGroupCenter> GROUP isn't allocated!\n");
+			eggPrintError("EggPlugin::eggGroupCenter> GROUP isn't allocated!\n");
 			return PLUGIN_ERROR;
 		}
 		else 
@@ -2342,8 +2378,7 @@ unsigned int EggPlugin::eggGroupCenter(float x, float y, float z)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggGroupCenter> Center defined outside GROUP!\n");
+		eggPrintError("EggPlugin::eggGroupCenter> Center defined outside GROUP!\n");
 		return PLUGIN_ERROR;
 	}
 
@@ -2357,8 +2392,7 @@ unsigned int EggPlugin::eggTagName(char *name)
 	{
 		if (!mTag)
 		{
-			fprintf(stderr, 
-					"EggPlugin::eggTagPos> BONEMTAG isn't allocated!\n");
+			eggPrintError("EggPlugin::eggTagPos> BONEMTAG isn't allocated!\n");
 			return PLUGIN_ERROR;
 		}
 		else 
@@ -2369,8 +2403,7 @@ unsigned int EggPlugin::eggTagName(char *name)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTagPos> Pos defined outside BONEMTAG!\n");
+		eggPrintError("EggPlugin::eggTagPos> Pos defined outside BONEMTAG!\n");
 		return PLUGIN_ERROR;
 	}
 
@@ -2384,8 +2417,7 @@ unsigned int EggPlugin::eggTagPos(float x, float y, float z)
 	{
 		if (!mTag)
 		{
-			fprintf(stderr, 
-					"EggPlugin::eggTagPos> BONEMTAG isn't allocated!\n");
+			eggPrintError("EggPlugin::eggTagPos> BONEMTAG isn't allocated!\n");
 			return PLUGIN_ERROR;
 		}
 		else 
@@ -2403,8 +2435,7 @@ unsigned int EggPlugin::eggTagPos(float x, float y, float z)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTagPos> Pos defined outside BONEMTAG!\n");
+		eggPrintError("EggPlugin::eggTagPos> Pos defined outside BONEMTAG!\n");
 		return PLUGIN_ERROR;
 	}
 
@@ -2418,8 +2449,7 @@ unsigned int EggPlugin::eggTagFlags(unsigned int flags)
 	{
 		if (!mTag)
 		{
-			fprintf(stderr, 
-					"EggPlugin::eggTagFlags> BONEMTAG isn't allocated!\n");
+			eggPrintError("EggPlugin::eggTagFlags> BONEMTAG isn't allocated!\n");
 			return PLUGIN_ERROR;
 		}
 		else 
@@ -2433,8 +2463,7 @@ unsigned int EggPlugin::eggTagFlags(unsigned int flags)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTagFlags> Flag defined outside BONEMTAG!\n");
+		eggPrintError("EggPlugin::eggTagFlags> Flag defined outside BONEMTAG!\n");
 		return PLUGIN_ERROR;
 	}
 
@@ -2448,7 +2477,7 @@ unsigned int EggPlugin::eggTagAddMesh(unsigned int mesh)
 	{
 		if (!mTag)
 		{
-			fprintf(stderr, 
+			eggPrintError( 
 					"EggPlugin::eggTagAddMesh> BONEMTAG isn't allocated!\n");
 			return PLUGIN_ERROR;
 		}
@@ -2463,8 +2492,7 @@ unsigned int EggPlugin::eggTagAddMesh(unsigned int mesh)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTagAddMesh> Mesh defined outside BONEMTAG!\n");
+		eggPrintError("EggPlugin::eggTagAddMesh> Mesh defined outside BONEMTAG!\n");
 		return PLUGIN_ERROR;
 	}
 
@@ -2478,8 +2506,7 @@ unsigned int EggPlugin::eggTagAddSlave(unsigned int tag)
 	{
 		if (!mTag)
 		{
-			fprintf(stderr, 
-					"EggPlugin::eggTagAddSlave> BONEMTAG isn't allocated!\n");
+			eggPrintError("EggPlugin::eggTagAddSlave> BONEMTAG isn't allocated!\n");
       
 			return PLUGIN_ERROR;
 		}
@@ -2495,8 +2522,7 @@ unsigned int EggPlugin::eggTagAddSlave(unsigned int tag)
 	}
 	else
 	{
-		fprintf(stderr, 
-				"EggPlugin::eggTagAddSlave> Slave defined outside BONEMTAG!\n");
+		eggPrintError("EggPlugin::eggTagAddSlave> Slave defined outside BONEMTAG!\n");
 
 		return PLUGIN_ERROR;
 	}

@@ -29,6 +29,9 @@
 
  Freyja (0.3.5-20041130) 'Chimera' Mongoose <mongoose@icculus.org>
 
+	o Redraw on copy/cut/paste
+	o Attempt to fix crash, fixed mstl Vector::remove to avoid
+	  bad indices
 	o Lame UV  XY plane gen back in interface
 	o Removed utils.o dep
 	o Multicopy mesh mode ( Appends each copied polymesh to buffer )

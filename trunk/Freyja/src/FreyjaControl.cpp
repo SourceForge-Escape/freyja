@@ -830,6 +830,7 @@ bool FreyjaControl::event(int command)
 
 	case eDelete:
 		deleteSelectedObject();
+		freyja_event_gl_refresh();
 		break;
 
 	case eAddObject:
@@ -843,12 +844,15 @@ bool FreyjaControl::event(int command)
 	case eCut:
 		if (copySelectedObject())
 			deleteSelectedObject();
+		freyja_event_gl_refresh();
 		break;
 	case eCopy:
 		copySelectedObject();
+		freyja_event_gl_refresh();
 		break;
 	case ePaste:
 		pasteSelectedObject();
+		freyja_event_gl_refresh();
 		break;
 
 
