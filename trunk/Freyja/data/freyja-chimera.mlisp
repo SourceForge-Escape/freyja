@@ -160,10 +160,8 @@
 				(menu_item "_New"		eMode	eMeshNew)
 				(menu_item "_Delete"	eMode	eMeshDelete)
 				(menu_item "_Select"	eMode	eMeshSelect)
-				(menu_item "_Rotate"	eMode	eMeshRotate)
-				(menu_item "S_cale"		eMode	eMeshScale)
 				(menu_item "_Mirror"	eMode	eMeshMirror)
-				(menu_item "Move C_enter"	eMode	eMeshCenter))
+				(menu_item "Re_center"	eMode	eTransformMeshPivot))
 
 			(submenu "_Bone"
 				(menu_item "_New"			eMode	eBoneNew)

@@ -231,17 +231,6 @@ typedef struct egg_animation_s {
 } egg_animation_t;
 
 
-class EggPolygon
-{
-public:
-	unsigned int id;                  /* Unique identifier */
-	Vector <unsigned int> vertex;     /* Vertices composing polygon */
-	Vector <unsigned int> texel;      /* Texels */
-	int shader;                       /* Shader id */
-
-	Vector <egg_vertex_t *> r_vertex;
-	Vector <egg_texel_t *> r_texel;
-};
 
 
 

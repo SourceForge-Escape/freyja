@@ -29,6 +29,13 @@
 
  Freyja (0.3.5-20041203) 'Chimera' Mongoose <mongoose@icculus.org>
 
+	o More menu/ui updates
+	o Some TODO items removed for this build's goals -- due to Umbra
+
+
+ Freyja (0.3.5-20041203) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Fixed ASE export crash with skel mesh models?
 	o Polygon side count back in GUI under prefs dialog
 	o Mesh center move event from menu fixed
 	o Bone iterator ( spinbutton ) crash fixed with a safety check

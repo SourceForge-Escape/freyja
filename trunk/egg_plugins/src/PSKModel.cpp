@@ -2699,6 +2699,8 @@ int freyja_model__psk_import(char *filename)
 		eggTagFlags1u(0x0);
 		eggTagName(psk.mBones[i].name);
 
+#define THE_OLD_PSK_SWITCHERO
+#ifdef THE_OLD_PSK_SWITCHERO
 		eggTagPos3f(psk.mBones[i].restLoc[0]*scale,
 					psk.mBones[i].restLoc[2]*scale,
 					-psk.mBones[i].restLoc[1]*scale);
@@ -2707,6 +2709,27 @@ int freyja_model__psk_import(char *filename)
 								 psk.mBones[i].restDir[0],
 								 psk.mBones[i].restDir[2],
 								 psk.mBones[i].restDir[1]);
+#else
+		vec3_t xyz;
+		vec_t s;
+
+		eggTagPos3f(psk.mBones[i].restLoc[0]*scale,
+					psk.mBones[i].restLoc[1]*scale,
+					psk.mBones[i].restLoc[2]*scale);
+
+		quaternion_to_euler_angles(psk.mBones[i].restDir[0],
+								   psk.mBones[i].restDir[1],
+								   psk.mBones[i].restDir[2],
+								   psk.mBones[i].restDir[3],
+								   &xyz[0],  // x
+								   &xyz[1],  // y
+								   &xyz[2]); // z
+
+		//s = scale;
+		s = 57.295779513082323 * scale;
+
+		eggTagRotate3f(xyz[0]*s, xyz[1]*s, xyz[2]*s);
+#endif
 
 		printf("++ Bone[%d] :: ", i);
 

@@ -1189,7 +1189,19 @@ bool FreyjaControl::event(int command)
 		addObject();
 		mCleared = false;
 		break;
-	case eMeshCenter:
+	case eMeshDelete:
+		mTransformMode = FreyjaModel::TransformMesh;
+		deleteSelectedObject();
+		mCleared = false;
+		break;
+	case eMeshSelect:
+		mTransformMode = FreyjaModel::TransformMesh;
+		mEventMode = modeSelect;
+		freyja_print("Select object mesh...");
+		break;
+	case eMeshMirror:
+		freyja_print("Mesh mirror disabled in this build");
+		break;
 	case eTransformMeshPivot:
 		mTransformMode = FreyjaModel::TransformMesh;
 		mEventMode = MESH_MOVE_CENTER;

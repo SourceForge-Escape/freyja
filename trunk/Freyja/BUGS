@@ -33,10 +33,6 @@
 	This doesn't always cause a crash, but it can lead to one.
 
 
- o 2004.12.02-3
-	Crash on skeletal mesh model save in ASE PLUGIN export of SKEL
-
-
  --------------------------------------------------------------------------
 
  Annoying

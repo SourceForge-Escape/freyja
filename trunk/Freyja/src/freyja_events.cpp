@@ -269,12 +269,11 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eMeshNew", eMeshNew);
 	r.RegisterInt("eMeshDelete", eMeshDelete);
-	r.RegisterInt("eMeshMove", eMeshMove);
 	r.RegisterInt("eMeshSelect", eMeshSelect);
-	r.RegisterInt("eMeshRotate", eMeshRotate);
-	r.RegisterInt("eMeshScale", eMeshScale);
 	r.RegisterInt("eMeshMirror", eMeshMirror);
-	r.RegisterInt("eMeshCenter", eMeshCenter);
+	//r.RegisterInt("eMeshMove", eMeshMove);
+	//r.RegisterInt("eMeshRotate", eMeshRotate);
+	//r.RegisterInt("eMeshScale", eMeshScale);
 
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 
