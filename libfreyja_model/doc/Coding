@@ -1,0 +1,12 @@
+---------
+ Coding
+---------
+
+ 1. Use the C++ template generator for new classes.
+ 2. Document all methods with Pre/Post conditions.
+ 3. Use *tabs, not spaces.
+ 4. Use a newline on a new scope, don't do K&R.
+ 5. Use FIXME marker for code that needs fixing.
+ 6. Use EXPERIMENTAL marker for test code.
+ 7. Use OBSOLETE #ifdef to comment out old code.
+ 8. Only put comments in source if it's needed.
