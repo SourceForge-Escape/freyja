@@ -7,7 +7,7 @@ cd libfreyja_image; ./autogen.sh; make; make install
 cd ..
 
 printf "Installing libhel\n"
-cd libhel; make; ./autogen.sh; make install
+cd libhel; ./autogen.sh; make; make install
 cd ..
 
 printf "Installing libfreyja_model\n"
@@ -28,3 +28,6 @@ cd Freyja; setup-freyja.sh
 
 printf "Installing freyja user plugins\n"
 cd egg_plugins; make; make install
+
+
+printf "If your build failed make sure you have a complete glext.h header\n"

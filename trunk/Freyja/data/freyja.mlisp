@@ -448,19 +448,17 @@
 						
 					(hbox 0 1 0 1 1
 						(label "Name" 0.0 0.5)
-						(textbox 799))
+						(textbox eSetMaterialName))
 
 					(hbox 0 1 0 1 1
 						(label "Texture1" 0.0 0.5) 
-						(textbox 798)
-						(button "..." 
-							EVENT_MAIN	eNone)) ;CMD_MAIN_OPEN_TEXTURE))
+						(textbox eSetTextureNameA)
+						(button "..." EVENT_MAIN eNone)) ; OPEN_TEXTURE))
 
 					(hbox 0 1 0 1 0 
 						(label "Texture2" 0.0 0.5) 
-						(textbox 797)
-						(button "..." 
-							EVENT_MAIN	eNone)); CMD_MAIN_OPEN_TEXTURE2))
+						(textbox eSetTextureNameB)
+						(button "..." EVENT_MAIN eNone)); OPEN_TEXTURE2))
 
 					(hbox 1 0 0 1 0 
 						(label "Texture1 ID" 0.0 0.5) 
