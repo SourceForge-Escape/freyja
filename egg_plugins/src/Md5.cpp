@@ -19,6 +19,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <stdlib.h>
+
 #include "Md5.h"
 
 
@@ -36,8 +38,8 @@ Md5::Md5()
 	mMeshes = 0x0;
 
 	mFileHandle = 0x0;
-	mTempBufferHackSz = 2048;
-	mTempBufferHack = new char[mTempBufferHackSz];
+	mTempBufferHackSz = 2047;
+	mTempBufferHack = new char[mTempBufferHackSz+1];
 }
 
 
@@ -71,9 +73,10 @@ bool Md5::isMd5Model(const char *filename)
 	
 	if (!strncmp("MD5Version", buffer, 10))
 	{
-		printf("Not a valid md5 model file.\n");
 		return true;
 	}
+
+	printf("<Md5> Not a valid md5 model file.\n");
 
 	return false;
 }
@@ -95,11 +98,8 @@ bool Md5::loadModel(const char *filename)
 	if (loadFile(filename) == false)
 		return false;
 
-	symbol = getSymbol();	
-	if (strncmp("MD5Version", symbol, 10))
-	{
-		return false;	
-	}
+	if (!matchSymbol("MD5Version"))
+		return false;
 
 	mVersion = getInteger();
 
@@ -108,35 +108,54 @@ bool Md5::loadModel(const char *filename)
 	case 10:
 		break;
 	default:
-		printf("Don't know version %i.\n", mVersion);
+		printf("<Md5> Don't know this version %i.\n", mVersion);
 		return false;
 	}
 
-	symbol = getSymbol();	
-	if (strncmp("commandline", symbol, 11))
-	{
-		return false;	
-	}	
 
-	/* Chunk/command style reads later instead of this order? */
+	/* Some Id thingys */
+	if (!matchSymbol("commandline"))
+		return false;
+
 	mCommandLine = getString();
+
+
+	/* Joint setup */
+	if (!matchSymbol("numJoints"))
+		return false;
 
 	mNumJoints = getInteger();
 
 	if (mNumJoints < 0)
+	{
 		mNumJoints = 0;
+	}
+	else
+	{
+		mJoints = new Md5Joint[mNumJoints];
+	}
+
+
+	/* Mesh setup */
+	if (!matchSymbol("numMeshes"))
+		return false;
 
 	mNumMeshes = getInteger();
 
 	if (mNumMeshes < 0)
-		mNumMeshes = 0;
-
-	symbol = getSymbol();	
-	if (!strncmp("joints", symbol, 6))
 	{
-		symbol = getSymbol();
-		
-		if (strncmp("{", symbol, 1))
+		mNumMeshes = 0;
+	}
+	else
+	{
+		mMeshes = new Md5Mesh[mNumMeshes];
+	}
+
+
+	/* Joint data */
+	if (mNumJoints && matchSymbol("joints"))
+	{
+		if (!matchSymbol("{"))
 			return false;
 			
 		for (i = 0; i < mNumJoints; ++i)
@@ -145,25 +164,32 @@ bool Md5::loadModel(const char *filename)
 			mJoints[i].index = getInteger();
 
 			/* translate X Y Z */
-			getSymbol(); // '('
+			if (!matchSymbol("("))
+				return false;
+
 			mJoints[i].translate[0] = getFloat();
 			mJoints[i].translate[1] = getFloat();
 			mJoints[i].translate[2] = getFloat();
-			getSymbol(); // ')'
+
+			if (!matchSymbol(")"))
+				return false;
+
 
 			/* rotate X Y Z */
-			getSymbol(); // '('
+			if (!matchSymbol("("))
+				return false;
+			
 			mJoints[i].rotate[0] = getFloat();
 			mJoints[i].rotate[1] = getFloat();
 			mJoints[i].rotate[2] = getFloat();
-			getSymbol(); // ')'
 
-			// FIXME: Look for comment at end of line and save here?
+			if (!matchSymbol(")"))
+				return false;
+
+			// FIXME: Save comment at end of line for something?
 		}
-
-		symbol = getSymbol();
 		
-		if (strncmp("}", symbol, 1))
+		if (!matchSymbol("}"))
 			return false;
 	}
 	else
@@ -174,15 +200,19 @@ bool Md5::loadModel(const char *filename)
 	
 	for (i = 0; i < mNumMeshes; ++i)
 	{
-		symbol = getSymbol();	
-		if (!strncmp("mesh", symbol, 4))
+		if (matchSymbol("mesh"))
 		{
-			symbol = getSymbol();
-		
-			if (strncmp("{", symbol, 1))
+			if (!matchSymbol("{"))
+				return false;
+
+			if (!matchSymbol("shader"))
 				return false;
 
 			mMeshes[i].shader = getString();
+
+			if (!matchSymbol("numverts"))
+				return false;
+
 			mMeshes[i].numverts = getInteger();
 
 			if (mMeshes[i].numverts < 0)
@@ -196,54 +226,74 @@ bool Md5::loadModel(const char *filename)
 
 			for (j = 0; j < mMeshes[i].numverts; ++j)
 			{
-				getSymbol(); // 'vert'
+				if (!matchSymbol("vert"))
+					return false;
+
 				mMeshes[i].verts[j].index = getInteger();
 
-				getSymbol(); // '('
+				if (!matchSymbol("("))
+					return false;
+
 				mMeshes[i].verts[j].uv[0] = getFloat(); 
 				mMeshes[i].verts[j].uv[1] = getFloat();
-				getSymbol(); // ')' 
+
+				if (!matchSymbol(")"))
+					return false;
 				
 				mMeshes[i].verts[j].weight = getInteger();
 				mMeshes[i].verts[j].numbones = getInteger();
 			}
 
+			if (!matchSymbol("numtris"))
+				return false;
+
 			mMeshes[i].numtriangles = getInteger();
 			mMeshes[i].triangles = new Md5Triangle[mMeshes[i].numtriangles];
 
-			for (j = 0; j < mMeshes[i].numweights; ++j)
+			for (j = 0; j < mMeshes[i].numtriangles; ++j)
 			{
-				getSymbol(); // 'tri'
+				if (!matchSymbol("tri"))
+					return false;
+				
 				getInteger(); // integer == j
 				mMeshes[i].triangles[j].vertex[0] = getInteger();
 				mMeshes[i].triangles[j].vertex[1] = getInteger();
 				mMeshes[i].triangles[j].vertex[2] = getInteger();
 			}
 
+			if (!matchSymbol("numweights"))
+				return false;
+
 			mMeshes[i].numweights = getInteger();
 			mMeshes[i].weights = new Md5Weight[mMeshes[i].numweights];
 
 			for (j = 0; j < mMeshes[i].numweights; ++j)
 			{
+				if (!matchSymbol("weight"))
+					return false;
+
 				mMeshes[i].weights[j].index = getInteger();
 				mMeshes[i].weights[j].joint = getInteger();
 				mMeshes[i].weights[j].weight = getFloat();
 
-				getSymbol(); // '('
+				if (!matchSymbol("("))
+					return false;
+
 				mMeshes[i].weights[j].pos[0] = getFloat();
 				mMeshes[i].weights[j].pos[1] = getFloat();
 				mMeshes[i].weights[j].pos[2] = getFloat();
-				getSymbol(); // ')'
+
+				if (!matchSymbol(")"))
+					return false;
 			}
 			
 		}
-
-		symbol = getSymbol();
 		
-		if (strncmp("}", symbol, 1))
+		if (!matchSymbol("}"))
 			return false;
 	}
 
+	closeFile();
 
 	return true;
 }
@@ -265,14 +315,16 @@ void Md5::closeFile()
 }
 
 
-float Md5::getFloat()
+double Md5::getFloat()
 {
-	float r;
+	double r;
 
 
 	// ugly fscanf use for temp hack
-	fscanf(mFileHandle, "%f", &r);
+	fscanf(mFileHandle, "%lf", &r);
+	//r = atof(getSymbol());
 
+	printf("** %f\n", r);
 	return r;
 }
 
@@ -284,31 +336,154 @@ int Md5::getInteger()
 
 	// ugly fscanf use for temp hack
 	fscanf(mFileHandle, "%i", &i);
+	//i = atoi(getSymbol());
 
+	printf("** %i\n", i);
 	return i;
 }
 
 
 char *Md5::getString()
 {
-	unsigned int l;
+	unsigned int l, i = 0, state = 0;
 	char *s;
-
-
+	char c, lc = 0;
+	
 	// ugly fscanf use for temp hack
-	fscanf(mFileHandle, "%s", mTempBufferHack);
+	while (i < mTempBufferHackSz && fscanf(mFileHandle, "%c", &c) != EOF)
+	{
+		switch (state)
+		{
+		case 0:
+			if (c == '"')
+				state = 1;
+			break;
+		case 1:
+			if (c == '"' && lc != '\\')  // Allow quote escapes?
+			{
+				i = mTempBufferHackSz;
+			}
+			else
+			{
+				mTempBufferHack[i++] = c;
+				mTempBufferHack[i] = 0;
+			}
+			break;
+		}
+
+		lc = c;
+	}
 	
 	l = strlen(mTempBufferHack);
 	s = new char[l+1];
-	
+	strncpy(s, mTempBufferHack, l);
+	s[l] = 0;
+
+	/*
+	char *sym = getSymbol();
+	unsigned int j;
+
+
+	l = strlen(sym);
+	s = new char[l+1];
+	s[l] = 0;
+
+	for (i = 0, j = 0; i < l && l < mTempBufferHackSz; ++i)
+	{
+		switch (state)
+		{
+		case 0:
+			if (c == '"')
+				state = 1;
+			break;
+		case 1:
+			if (c == '"' && lc != '\\')  // Allow quote escapes?
+			{
+				l = mTempBufferHackSz;
+			}
+			else
+			{
+				s[j++] = sym[i];
+				s[j] = 0;
+			}
+			break;
+		}
+
+		lc = c;
+	}
+	*/
+
+
+	printf("** \"%s\"\n", mTempBufferHack);
+
 	return s;
 }
 
 
 char *Md5::getSymbol()
 {
+	unsigned int i = 0, state = 0;
+	char c;
+
+
+	mTempBufferHack[0] = 'F';
+	mTempBufferHack[1] = 'U';
+	mTempBufferHack[2] = 0;
+
 	// ugly fscanf use for temp hack
-	fscanf(mFileHandle, "%s", mTempBufferHack);
+	while (i < mTempBufferHackSz && fscanf(mFileHandle, "%c", &c) != EOF)
+	{
+		switch (state)
+		{
+		case 0:
+			if (c == '/')
+			{
+				state = 1;
+				mTempBufferHack[i++] = c;
+				mTempBufferHack[i] = 0;	
+			}
+			else if (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+			{
+				if (i > 0)
+					i = mTempBufferHackSz;
+			}
+			else
+			{
+				mTempBufferHack[i++] = c;
+				mTempBufferHack[i] = 0;
+			}
+			break;
+		case 1:
+			if (c == '/')
+			{
+				state = 2;
+				--i;
+				mTempBufferHack[i] = 0;
+			}
+			else
+			{
+				state = 0;
+				mTempBufferHack[i++] = c;
+				mTempBufferHack[i] = 0;
+			}
+			break;
+		case 2:
+			if (c == '\n')
+			{
+				/* Only wrap lines when given a only comment line(s) */
+				if (i > 0)
+					i = mTempBufferHackSz;
+				else
+					state = 0;
+			}
+			break;
+		}
+	}
+
+	// ugly fscanf use for temp hack
+	//	fscanf(mFileHandle, "%s", mTempBufferHack);
+   	printf("\n** <%s>\n", mTempBufferHack);
+	
 	return mTempBufferHack;
 }
 
@@ -324,6 +499,22 @@ bool Md5::loadFile(const char *filename)
 	}
 
 	return true;
+}
+
+
+bool Md5::matchSymbol(const char *symbol)
+{
+	unsigned int l = strlen(symbol); /* Assumes !(!symbol) && !(!symbol[0]) */
+	char *sym = getSymbol();
+	bool test = (!strncmp(symbol, sym, l));
+
+	
+	if (!test)
+	{
+		printf("Not matched: '%s' != '%s'\n", symbol, sym);
+	}
+
+	return test;
 }
 
 
@@ -346,7 +537,10 @@ int freyja_model__md5_check(char *filename)
 {
 	Md5 md5;
 
-	return (!md5.isMd5Model(filename) == true); /* 0 is no error */
+	if (md5.isMd5Model(filename) == true)
+		return 0; /* 0 is no error */
+
+	return -1;
 }
 
 

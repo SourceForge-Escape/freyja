@@ -76,8 +76,8 @@ class Md5Joint
  public:
 	char *name;
 	int index;
-	float translate[3];
-	float rotate[3];
+	double translate[3];
+	double rotate[3];
 };
 
 
@@ -166,7 +166,7 @@ class Md5
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	float getFloat();
+	double getFloat();
 	/*------------------------------------------------------
 	 * Pre  : loadFile must have been sucessful, etc
 	 * Post : Returns a parsed float
@@ -214,6 +214,17 @@ class Md5
 	/*------------------------------------------------------
 	 * Pre  : Loads a file from filename
 	 * Post : Returns true if sucessful
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	bool matchSymbol(const char *symbol);
+	/*------------------------------------------------------
+	 * Pre  : loadFile must have been sucessful, etc
+	 * Post : Returns true if symbol found matches string
 	 *
 	 *-- History ------------------------------------------
 	 *
