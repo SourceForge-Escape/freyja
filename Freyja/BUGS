@@ -35,10 +35,6 @@
  Annoying
  ------------------
 
- o 2004.14.24-1:
-	New vertex morphing rendering causes scene offset to change oddly, and
-	switching to Skin ( UV edit ) mode and back fixes it... yeah.
-
  o 2004.12.13-1:
 	Polygon rendered bones only display correctly in meshtree type animations.
 
