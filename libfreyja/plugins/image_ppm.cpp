@@ -23,7 +23,6 @@
 #include <stdio.h>
 
 extern "C" {
-  
   int import_image(char *filename, unsigned char **image, 
 		   unsigned int *w, unsigned int *h, 
 		   char *type);

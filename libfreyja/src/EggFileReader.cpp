@@ -175,7 +175,7 @@ void EggFileReader::closeFile()
 	}
 }
 
-
+/* TODO - check for buffer size errors */
 char *EggFileReader::getNextDirectoryListing()
 {
 	struct dirent *d_ptr;
