@@ -321,7 +321,7 @@ extern "C" {
 
 int import_model(char *filename)
 {
-	if (freyja_model__md5_check(filename) == true)
+	if (!freyja_model__md5_check(filename))
 		return freyja_model__md5_import(filename);
 
 	return -1;
@@ -363,7 +363,7 @@ int freyja_model__md5_import(char *filename)
 		freyjaBegin(FREYJA_MESH);
 	
 		/* Start a new vertex group */
-		//freyjaBegin(FREYJA_GROUP);
+		freyjaBegin(FREYJA_VERTEX_GROUP);
 
 		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
@@ -388,6 +388,8 @@ int freyja_model__md5_import(char *filename)
 			texcoords.pushBack(texcoord);
 		}
 
+		freyjaEnd(); // FREYJA_GROUP
+
 		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
 		{
 			/* Start a new polygon */
@@ -406,7 +408,6 @@ int freyja_model__md5_import(char *filename)
 			freyjaEnd(); // FREYJA_POLYGON
 		}
 
-		//freyjaEnd(); // FREYJA_GROUP
 		freyjaEnd(); // FREYJA_MESH
 	}
 
