@@ -359,7 +359,7 @@ backup:
 
 
 ################################################################
-# Test module builds
+# Unit Tests
 #
 # These test plugins and componets as console programs
 ################################################################
@@ -429,28 +429,49 @@ $(BUILD_DIR)/$(NAME).test : $(OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(OBJS)
 
 
-################################################################
-# Unit tests
-################################################################
+###########################################################################
 
-Vector.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(CC) $(BASE_CFLAGS) -g -O0 -lstdc++ -Isrc/ds \
-	src/ds/vector_test.cpp -o $(BUILD_TEST_DIR)/vector.test
+UTPackage.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) tests NAME=UTPackage BUILD_DIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
+	CFLAGS="-Wall -O0 -g $(BASE_INC) -DUNIT_TEST_UTPACKAGE -DHAVE_MTKIMAGE" \
+	LD_FLAGS="-lm -lstdc++ -lfreyja_image"
 
-Egg.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) tests NAME=egg BUILD_DIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Egg.o $(BUILD_TEST_DIR)/mtk3d.o" \
-	CFLAGS="$(BASE_CFLAGS) -g -O0 -DUNIT_TEST_EGG" \
-	LD_FLAGS="-lm -lstdc++"
+GRNModel.test:
+	@-echo "Building GRNModel unit test"
+	mkdir -p $(BUILD_TEST_DIR)
+	$(CC) -Wall -g -DUNIT_TEST_GRNMODEL $(BASE_INC) -lm -lstdc++ \
+	src/model/GRNModel.cpp \
+	-o $(BUILD_TEST_DIR)/GRNModel.test
 
-Map.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	gcc -Wall -g -D__TEST__ -lstdc++ \
-	src/ds/Map.cpp -o $(BUILD_TEST_DIR)/Map.test
+#################################################################
+# SDLUnitTest - Used by OpenGL based UnitTests
+#################################################################
 
-Tree.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	gcc -Wall -g -D__TEST__ -lstdc++ \
-	src/ds/Tree.cpp -o $(BUILD_TEST_DIR)/Tree.test
+SDLUNIT_CFLAGS=$(BASE_INC) $(shell sdl-config --cflags) \
+                -DHAVE_SDL -DHAVE_OPENGL -DHAVE_SDL_TTF -DUSING_MTK_TGA
+SDLUNIT_LDFLAGS=$(shell sdl-config --libs) -lSDL_ttf \
+                -lGL -lGLU -lm -lstdc++
+SDLUNIT_OBJS=$(BUILD_TEST_DIR)/mtk_tga.o \
+                $(BUILD_TEST_DIR)/mtk_png.o \
+                $(BUILD_TEST_DIR)/mtk_image.o \
+                $(BUILD_TEST_DIR)/SDLUnitTest.o \
+                $(BUILD_TEST_DIR)/Texture.o \
+                $(BUILD_TEST_DIR)/Resource.o
+
+#################################################################
+
+Md3AnimModel.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) tests NAME=Md3AnimModel.test BUILD_DIR=$(BUILD_TEST_DIR) \
+	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/Md3.o $(BUILD_TEST_DIR)/Md3AnimModel.o" \
+	CFLAGS=" -Wall -O0 -g $(BASE_INC) $(SDLUNIT_CFLAGS) -DUNIT_TEST_MD3ANIMMODEL" \
+	LD_FLAGS="$(SDLUNIT_LDFLAGS) -lhel0 -lfreyja_model"
+
+PSKModel.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) tests NAME=PSKModel.test BUILD_DIR=$(BUILD_TEST_DIR) \
+	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/PSKModel.o $(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
+	CFLAGS="-Wall -O0 -g $(SDLUNIT_CFLAGS) -DUNIT_TEST_PSKMODEL" \
+	LD_FLAGS="$(SDLUNIT_LDFLAGS)"

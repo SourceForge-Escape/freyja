@@ -1271,42 +1271,42 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 		glPointSize(_default_point_size);
 	}
 
-	if (mesh.r_polygon.empty())
-		return;
-
-	if (mRenderMode & RENDER_TEXTURE)
+	if (!mesh.r_polygon.empty())
 	{
-		glEnable(GL_TEXTURE_2D);
-	}
-
-	if (mRenderMode & RENDER_MATERIAL)
-	{
-		gMaterialManager->applyEffectGL();
-	}
-
-	if ((int)mesh.id == (int)_model->getCurrentMesh())
-		_default_line_width *= 2;
-
-	for (mesh.r_polygon.start(); mesh.r_polygon.forward(); 
-		  mesh.r_polygon.next())
-	{ 
-		polygon = mesh.r_polygon.current();
-
-		if (!polygon)
+		if (mRenderMode & RENDER_TEXTURE)
 		{
-			printf("FIXME: %s:%i\n", __FILE__, __LINE__);
-			continue;
+			glEnable(GL_TEXTURE_2D);
 		}
-
-		DrawPolygon(*polygon);    
-	}
-
-	if ((int)mesh.id == (int)_model->getCurrentMesh())
-		_default_line_width /= 2;
-
-	if (mRenderMode & RENDER_TEXTURE)
-	{
-		glDisable(GL_TEXTURE_2D);
+		
+		if (mRenderMode & RENDER_MATERIAL)
+		{
+			gMaterialManager->applyEffectGL();
+		}
+		
+		if ((int)mesh.id == (int)_model->getCurrentMesh())
+			_default_line_width *= 2;
+		
+		for (mesh.r_polygon.start(); mesh.r_polygon.forward(); 
+			 mesh.r_polygon.next())
+		{ 
+			polygon = mesh.r_polygon.current();
+			
+			if (!polygon)
+			{
+				printf("FIXME: %s:%i\n", __FILE__, __LINE__);
+				continue;
+			}
+			
+			DrawPolygon(*polygon);    
+		}
+		
+		if ((int)mesh.id == (int)_model->getCurrentMesh())
+			_default_line_width /= 2;
+		
+		if (mRenderMode & RENDER_TEXTURE)
+		{
+			glDisable(GL_TEXTURE_2D);
+		}
 	}
 }
 

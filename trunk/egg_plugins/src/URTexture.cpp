@@ -20,10 +20,12 @@
  =================================================================*/
 
 #include <math.h>
+#include <string.h>
+#include <stdio.h>
 
-#ifdef HAVE_MTK_IMAGE2
-#   include "mtk_tga.h"
-#   include "mtk_image.h"
+
+#ifdef HAVE_MTKIMAGE
+#   include "MtkImage.h"
 #endif
 
 #include "URTexture.h"
@@ -377,11 +379,22 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 				imageRGBA[j*4+3] = palette[image[j]*4+3];
 			}
 
+#ifdef HAVE_MTKIMAGE
 			printf("\tWriting /tmp/utpak/Texture/%s-%i.tga...\n", 
 					 pak.mHeader.nameTable[index].objName, i);
-			mtk_image__save_filename(imageRGBA, w, h, 32, "tga",
-											 "/tmp/utpak/Texture/%s-%i.tga", 
-											 pak.mHeader.nameTable[index].objName, i);
+
+			if (1)
+			{
+				MtkImage img;
+				char filenameTGA[512];
+				snprintf(filenameTGA, 512, "/tmp/utpak/Texture/%s-%i.tga", 
+							pak.mHeader.nameTable[index].objName, i);
+				img.Load(imageRGBA, w, h, COLORMODE_RGBA);
+				img.Save(filenameTGA, "tga");
+			}
+#else
+#   warning HAVE_MTKIMAGE undefined - No image export support
+#endif
 
 			if (imageRGBA)
 				delete [] imageRGBA;
@@ -418,10 +431,20 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 
 			printf("\tWriting /tmp/utpak/Texture/%s-%i.tga...\n", 
 					 pak.mHeader.nameTable[index].objName, i);
-			mtk_image__save_filename(data, w, h, byteperpixel*8, "tga",
-											 "/tmp/utpak/Texture/%s-%i.tga", 
-											 pak.mHeader.nameTable[index].objName, i);
-						
+#ifdef HAVE_MTKIMAGE
+			if (1)
+			{
+				MtkImage img;
+				char filenameTGA[512];
+				snprintf(filenameTGA, 512, "/tmp/utpak/Texture/%s-%i.tga", 
+							pak.mHeader.nameTable[index].objName, i);
+				img.Load(imageRGBA, w, h, 
+							(byteperpixel == 3) ? COLORMODE_RGB : COLORMODE_RGBA);
+				img.Save(filenameTGA, "tga");
+			}
+#else
+#   warning HAVE_MTKIMAGE undefined - No image export support
+#endif						
 			delete [] data;
 					
 			printf("\n");
