@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <assert.h>
 #include <stdlib.h> 
 #include <stdio.h> 
 #include <math.h> 
@@ -31,47 +32,6 @@
 void event_register_render(FreyjaRender *r);
 void event_register_model(FreyjaModel *m);
 void event_register_control(FreyjaControl *c);
-
-
-
-FreyjaEvent::FreyjaEvent()
-{
-	_func_event = NULL;
-
-	_pair_active = false;
-	_pair_event[0] = 0;
-	_pair_event[1] = 0;
-}
-
-
-FreyjaEvent::~FreyjaEvent()
-{
-}
-
-
-void FreyjaEvent::AddEvent(int e, int c)
-{
-	_pair_event[0] = e;
-	_pair_event[1] = c;
-	_pair_active = true;
-}
-
-	
-void FreyjaEvent::Emit()
-{
-	if (_func_event)
-	{
-		//(*_func_event)();
-	}
-
-	if (_pair_active)
-	{
-		freyja_event2i(_pair_event[0], _pair_event[1]);
-	}
-}
-
-
-////////////////////////////////////////////////////////////////
 
 
 FreyjaControl::FreyjaControl()
@@ -100,14 +60,32 @@ FreyjaControl::FreyjaControl()
 	event_register_model(_model);
 	event_register_control(this);
 
-	mFullScreen = false;
-
 	ReadRC();
+
+	setZoom(1.0f);
+	mFullScreen = false;
 }
 
 
 FreyjaControl::~FreyjaControl()
 {
+}
+
+
+void FreyjaControl::setZoom(float zoom)
+{
+	assert(zoom > 0.0f);
+
+	freyja_event_notify_observer1f(eZOOM, zoom);
+
+	_render->setZoom(zoom);
+	event_print("Zoom set to %f", _render->getZoom());
+}
+
+
+float FreyjaControl::getZoom()
+{
+	return _render->getZoom();
 }
 
 
@@ -518,25 +496,25 @@ void FreyjaControl::eventMisc(int command)
 // 			_model->setFlags(FL_DUMP_TEXTURE, !(_model->getFlags() & FL_DUMP_TEXTURE));
 // 			break;
 		case CMD_MISC_ZOOM_IN:
-			if (_model->getZoom() <= 0.02)
+			if (_render->getZoom() <= 0.02)
 			{
-				_model->setZoom(_model->getZoom() + 0.0001);
+				_render->setZoom(_render->getZoom() + 0.0001);
 			}
 			else
 			{
-				_model->setZoom(_model->getZoom() + 0.01);
+				_render->setZoom(_render->getZoom() + 0.01);
 			}
 
 			event_refresh();
 			break;
 		case CMD_MISC_ZOOM_OUT:
-			if (_model->getZoom() <= 0.02)
+			if (_render->getZoom() <= 0.02)
 			{
-				_model->setZoom(_model->getZoom() - 0.0001);
+				_render->setZoom(_render->getZoom() - 0.0001);
 			}
 			else
 			{
-				_model->setZoom(_model->getZoom() - 0.01);
+				_render->setZoom(_render->getZoom() - 0.01);
 			}
 
 			event_refresh();
@@ -621,7 +599,7 @@ void FreyjaControl::eventMisc(int command)
 }
 
 
-void FreyjaControl::Event(int mode, int cmd)
+void FreyjaControl::handleEvent(int mode, int cmd)
 {
 	static int last_event = EVENT_MESH;
 	static int last_cmd = CMD_MESH_SELECT;
@@ -931,7 +909,7 @@ void FreyjaControl::ScreenToWorld(float *x, float *y)
 			 scroll[0], scroll[1], scroll[2]);
 #endif
 
-	invz = (1.0 / _model->getZoom());
+	invz = (1.0 / _render->getZoom());
 	fs = (40.0 * invz) / height;  // fov 40?
 
 	*x = (*x - width / 2.0) * fs;
@@ -1032,7 +1010,7 @@ bool FreyjaControl::Mouse(int btn, int state, int mod,  int x, int y)
 	// Mongoose 2002.01.12, Allow temp mode override
 	if (mod & KEY_RCTRL)
 	{
-		Event(EVENT_MISC, CMD_MISC_SELECT);
+		handleEvent(EVENT_MISC, CMD_MISC_SELECT);
 	}
 
 	switch (_major_mode)

@@ -26,6 +26,7 @@
 #include <gtk/gtk.h>
 #include "freyja_events.h"
 
+void freyja_event_subscribe_gtk_widget(int id, GtkWidget *widget);
 
 // Mongoose 2002.01.12, Freyja event from Gnome widget callbacks
 void main_event(GtkWidget *widget, gpointer user_data);

@@ -182,9 +182,17 @@ typedef struct egg_group_s {
 } egg_group_t;
 
 
+typedef enum {
+	FL_MESH__VERTEX_FRAME_GROUPS = 1
+
+} egg_mesh_flags_t;
+
 // Mongoose 2002.03.02, add map for vertex translation from world to local ids
 typedef struct egg_mesh_s {
 	int id;                             /* Unique identifier */
+
+	unsigned int flags;
+
 	Vector <unsigned int> group;        /* Groups/Frames of this mesh */
 	Vector <unsigned int> polygon;      /* Polygons of this mesh */
 
@@ -235,20 +243,6 @@ public:
 };
 
 
-#ifndef __print_unsigned_int
-void __print_unsigned_int(unsigned int u);
-#endif
-void __print_egg_vertex_t(egg_vertex_t *v);
-void __print_egg_texel_t(egg_texel_t *t);
-void __print_egg_polygon_t(egg_polygon_t *p);
-/*!----------------------------------------
- * Created  : 2001-05-15, Mongoose
- * Modified : 
- * 
- * Pre  : 
- * Post : Various List support functions
- *        for local data types
- -----------------------------------------*/
 
 class Egg
 {

@@ -1370,6 +1370,7 @@ arg_list_t *freyja_rc_spinbutton(arg_list_t *container)
 		/* Mongoose 2002.02.01, Add this widget to a special 
 		 *   lookup table by it's event id */
 		index_add_gtk_widget(get_int(event), item);
+		freyja_event_subscribe_gtk_widget(get_int(event), item);
 
 		/* Mongoose 2002.01.25, Float, unsigned int, and int data */
 		if (start->type == FLOAT)
@@ -1481,6 +1482,7 @@ arg_list_t *freyja_rc_spinbutton2(arg_list_t *container)
 		// Mongoose 2002.02.01, Add this widget to a special 
 		//   lookup table by it's event id
 		index_add_gtk_widget(get_int(event), item);
+		freyja_event_subscribe_gtk_widget(get_int(event), item);
 
 		// Mongoose 2002.01.25, Float, unsigned int, and int data
 		if (get_int(digit))

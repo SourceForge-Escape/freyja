@@ -45,19 +45,16 @@
 #include "FreyjaRender.h"
 
 
-#define SCALE_ENV            20.0
-#define FAR                  6000.0
-#define NEAR                 0.1
-#define FOV_Y                40.0
+#define SCALE_ENV   20.0
+#define FAR       6000.0
+#define NEAR         0.1
+#define FOV_Y       40.0
 
-#define GL_LIST_AXIS           1
+#define GL_LIST_AXIS 1
 
-#define LIGHT_ICON_H          16.0
-#define CAMERA_ICON_H         10.0
-#define CAMERA_ICON_W          2.0
-#define AXIS_ICON_MIN          4.0
-#define AXIS_ICON_MID         20.0
-#define AXIS_ICON_MAX         15.0
+#define AXIS_ICON_MIN 4.0
+#define AXIS_ICON_MID 20.0
+#define AXIS_ICON_MAX 15.0
 
 
 
@@ -802,7 +799,6 @@ void FreyjaRender::Display()
 	
 	// Mongoose 2002.02.02, Cache for use in calls from here
 	_model->getSceneTranslation(_scroll);
-	_zoom = _model->getZoom();
 	
 	switch (_view_mode)
 	{
@@ -847,7 +843,7 @@ void FreyjaRender::Display()
 		{
 			glLineWidth(3.0f);
 			gSelectedBone = _model->getCurrentBone();
-			drawSkeleton2((_model->CurrentEgg())->TagList(), 0, _zoom);
+			drawSkeleton2((_model->CurrentEgg())->TagList(), 0, mZoom);
 
 			glLineWidth(_default_line_width);
 		}
@@ -855,7 +851,7 @@ void FreyjaRender::Display()
 		drawLights();
 		glPopMatrix();
 
-		glScalef(_zoom, _zoom, _zoom);
+		glScalef(mZoom, mZoom, mZoom);
 
 		DrawModel(_model->CurrentEgg());
 		glPopMatrix();
@@ -1065,9 +1061,9 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 			glVertex3f(vertex->pos[0],
 					   vertex->pos[1],
 					   vertex->pos[2]);
-			glVertex3f(vertex->pos[0] + vertex->norm[0] * 2 * 1/_zoom, 
-					   vertex->pos[1] + vertex->norm[1] * 2 * 1/_zoom, 
-					   vertex->pos[2] + vertex->norm[2] * 2 * 1/_zoom);
+			glVertex3f(vertex->pos[0] + vertex->norm[0] * 2 * 1/mZoom, 
+					   vertex->pos[1] + vertex->norm[1] * 2 * 1/mZoom, 
+					   vertex->pos[2] + vertex->norm[2] * 2 * 1/mZoom);
 		}
 		
 		glEnd();
@@ -1240,8 +1236,8 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 	 * This was here for vertex morph frames, still used? */
 	if (mesh.r_polygon.size() != mesh.polygon.size())
 	{
-		event_print("FreyjaRender::DrawMesh> caching %i polygons, %i cached...",
-						mesh.polygon.size(), mesh.r_polygon.size());
+		event_print("FreyjaRender::DrawMesh> %i polygons, %i cached...",
+					mesh.polygon.size(), mesh.r_polygon.size());
 
 		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
 		{
@@ -1296,6 +1292,8 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 				printf("FIXME: %s:%i\n", __FILE__, __LINE__);
 				continue;
 			}
+
+			
 			
 			DrawPolygon(*polygon);    
 		}
@@ -1605,6 +1603,15 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
    glPopMatrix();
 }
 
+void FreyjaRender::setZoom(float zoom)
+{
+	mZoom = zoom;
+}
+
+float FreyjaRender::getZoom()
+{
+	return mZoom;
+}
 
 void FreyjaRender::DrawWindow(int plane)
 {
@@ -1650,12 +1657,12 @@ void FreyjaRender::DrawWindow(int plane)
 	if (mRenderMode & RENDER_BONES)
 	{
 		gSelectedBone = _model->getCurrentBone();
-		drawSkeleton2((_model->CurrentEgg())->TagList(), 0, _zoom);
+		drawSkeleton2((_model->CurrentEgg())->TagList(), 0, mZoom);
 	}
 
 	drawLights();
 
-	glScalef(_zoom, _zoom, _zoom);
+	glScalef(mZoom, mZoom, mZoom);
 
 	DrawModel(_model->CurrentEgg());
 }

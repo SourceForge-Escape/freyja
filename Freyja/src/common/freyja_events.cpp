@@ -32,7 +32,7 @@ int MOUSE_BTN_PRESSED = 0;
 bool MOUSE_QUERY_ACTIVE = true;
 FreyjaModel   *gFreyjaModel = NULL;
 FreyjaRender  *RENDER = NULL;
-FreyjaControl *CONTROL = NULL;
+FreyjaControl *gFreyjaControl = NULL;
 
 
 
@@ -92,7 +92,7 @@ void freyja_event_new_key_cmd(int key, int event, int cmd)
 
 void event_register_control(FreyjaControl *c)
 {
-	CONTROL = c;
+	gFreyjaControl = c;
 }
 
 
@@ -187,7 +187,7 @@ void event_init(unsigned int *width, unsigned int *height,
 	*height = 560;    
 	*fullscreen = false;
 
-	CONTROL = new FreyjaControl();
+	gFreyjaControl = new FreyjaControl();
 
 	/* Mongoose 2004.03.26, 
 	 * Entry for MaterialManager test pattern */
@@ -211,9 +211,9 @@ void event_shutdown()
 		delete gFreyjaModel;
 	}
 
-	if (CONTROL)
+	if (gFreyjaControl)
 	{
-		delete CONTROL;
+		delete gFreyjaControl;
 	}
 
 	printf("\n\n\tThanks for using %s\n", PROGRAM_NAME);
@@ -272,28 +272,28 @@ void freyja_event_key_press(int key, int mod)
 
 void event_motion(int x, int y)
 {
-	if (CONTROL)
+	if (gFreyjaControl)
 	{
-		CONTROL->Motion(x, y);
+		gFreyjaControl->Motion(x, y);
 	}
 }
 
 
 void freyja_event2i(int event, int cmd)
 {
-	if (CONTROL)
+	if (gFreyjaControl)
 	{
 		freyja_event2i_interface_listener(event, cmd);
-		CONTROL->Event(event, cmd);
+		gFreyjaControl->handleEvent(event, cmd);
 	}
 }
 
 
 void event_mouse(int button, int state, int mod, int x, int y)
 {
-	if (CONTROL)
+	if (gFreyjaControl)
 	{
-		CONTROL->Mouse(button, state, mod, x, y);
+		gFreyjaControl->Mouse(button, state, mod, x, y);
 	}
 }
 
