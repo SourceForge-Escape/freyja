@@ -28,6 +28,7 @@
 
  libfreyja (0.9.0-20050103) "Umbra" Mongoose <mongoose@icculus.org>
 
+	o Fix for milkshape 3d skeletal and mesh import
 	o Tools update: cull fixes, freyjaimageutil to convert image formats
 	o Plugin interaction system done ( plugins can request user input )
 
