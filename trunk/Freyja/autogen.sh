@@ -7,6 +7,9 @@
 
 ARG1=$1
 
+make debug
+exit 0
+
 rm -f mkinstalldirs system.info configure \
 		config.status config.log Makefile \
 		autoscan.log config.cache stamp-* \

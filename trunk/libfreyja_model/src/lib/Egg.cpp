@@ -935,7 +935,7 @@ int Egg::loadFile(char *filename)
 			return -20;
 		}
 
-		printf("-- Loading Tag #%i of %i\n", i, numTags);
+		printDebug(2, "-- Loading Tag #%i of %i\n", i, numTags);
 
 		addTag(tag);
 	}
