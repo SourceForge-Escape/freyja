@@ -2140,7 +2140,7 @@ void FreyjaControl::getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz)
 	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
 	long windowHeight = mRender->getWindowHeight();
 	long windowWidth = mRender->getWindowWidth();
-	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
+	//	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
 	vec_t windowX = x - windowWidth / 2;
 	double normX = double(windowX) / double(windowWidth / 2);
 	vec_t windowY = (windowHeight - y) - windowHeight / 2;
@@ -2155,6 +2155,8 @@ void FreyjaControl::getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz)
 
 Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
 {
+#warning FIXME This does nothing atm
+#ifdef FIXME
 	vec_t nearHeight = 400; // fluff filler for now
 	vec_t zNear = 0.1;
 
@@ -2182,6 +2184,11 @@ Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
 	//Point pObjCoord = modelviewInverse * rayPointObjCoord;
 
 	//...
+#else
+	Vector3d v;
+	v.zero();
+	return v;
+#endif
 }
 
 
