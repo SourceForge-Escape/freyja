@@ -541,55 +541,6 @@ void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 }
 
 
-void renderSkeleton(RenderSkeleton &skeleton, 
-					unsigned int currentBone,
-					vec_t scale)
-{
-	const unsigned char x = 0, y = 1, z = 2;
-	const unsigned char xr = 0, yr = 1, zr = 2;
-	RenderBone bone, child;
-	Vector3d pos;
-	unsigned int i, n, index;
-
-
-	if (!skeleton.getBoneCount())
-		return;
-
-	if (!skeleton.getBone(currentBone, bone))
-		return;
-
-	/* Scale bones to match mesh scaling */
-	pos = bone.translate * scale;
-
-	/* Render bone joint */
-	((FreyjaRender::mSelectedBone == currentBone) ? 
-	 glColor3fv(RED) : glColor3fv(GREEN));
-	mglDrawJoint(FreyjaRender::mJointRenderType, pos.mVec);
-
-	/* Render bone */
-	((FreyjaRender::mSelectedBone == currentBone) ? 
-	 glColor3fv(CYAN) : glColor3fv(WHITE));
-	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
-
-	/* Transform child bones */
-	glPushMatrix();
-	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
-	glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
-	glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
-	glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
-
-	n = bone.getChildrenCount();
-
-	for (i = 0; i < n; ++i)
-	{
-		index = bone.getBoneIndex(i);
-		renderSkeleton(skeleton, index, scale);
-	}
-
-	glPopMatrix();
-}
-
-
 void getOpenGLViewport(int *viewportXYWH) // int[4]
 {
 	glGetIntegerv(GL_VIEWPORT, viewportXYWH);
@@ -1530,6 +1481,55 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 			//glPopAttrib();
 		}
 	}
+}
+
+
+void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton, 
+								  unsigned int currentBone,
+								  vec_t scale)
+{
+	const unsigned char x = 0, y = 1, z = 2;
+	const unsigned char xr = 0, yr = 1, zr = 2;
+	RenderBone bone, child;
+	Vector3d pos;
+	unsigned int i, n, index;
+
+
+	if (!skeleton.getBoneCount())
+		return;
+
+	if (!skeleton.getBone(currentBone, bone))
+		return;
+
+	/* Scale bones to match mesh scaling */
+	pos = bone.translate * scale;
+
+	/* Render bone joint */
+	((FreyjaRender::mSelectedBone == currentBone) ? 
+	 glColor3fv(RED) : glColor3fv(GREEN));
+	mglDrawJoint(FreyjaRender::mJointRenderType, pos.mVec);
+
+	/* Render bone */
+	((FreyjaRender::mSelectedBone == currentBone) ? 
+	 glColor3fv(CYAN) : glColor3fv(WHITE));
+	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
+
+	/* Transform child bones */
+	glPushMatrix();
+	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
+	glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
+	glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
+	glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
+
+	n = bone.getChildrenCount();
+
+	for (i = 0; i < n; ++i)
+	{
+		index = bone.getBoneIndex(i);
+		renderSkeleton(skeleton, index, scale);
+	}
+
+	glPopMatrix();
 }
 
 
