@@ -2030,6 +2030,7 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 			mMesh->group.pushBack(mGroup->id); 
 		}
 		break;
+
 	case FREYJA_POLYGON:
 		mStack.push(FREYJA_POLYGON);
 		mVertexList.clear();
@@ -2040,18 +2041,25 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 			eggPrintError("EggPlugin::eggEnd> Polygon defined outside MESH!");
 		}
 		break;
+
 	case FREYJA_BONE:
 		mStack.push(FREYJA_BONE);
 		mTag = mEgg->addTag(0.0, 0.0, 0.0, 0x00);
 		mTag->name[0] = 0;
+		mTag->parent = -1;
+		return mTag->id;
 		break;
+
 	case FREYJA_SKELETON:
 		mStack.push(FREYJA_SKELETON);
 		break;
+
 	case FREYJA_SKEL_ANIM:
 		mStack.push(FREYJA_SKEL_ANIM);
 		mAnimation = new egg_animation_t;
 		mEgg->addAnimation(mAnimation);
+		break;
+
 	default:
 		;
 	}
@@ -2086,6 +2094,11 @@ unsigned int EggPlugin::eggEnd()
 			eggPrintError("EggPlugin::eggEnd> Polygon defined outside MESH!");
 		}
 		break;
+
+	case FREYJA_SKELETON:
+		mEgg->updateBones();
+		break;
+
 	default:
 		;
 	}
@@ -2527,10 +2540,12 @@ unsigned int EggPlugin::eggTagAddSlave(unsigned int tag)
 		}
 		else 
 		{
-			//egg_tag_t *child =  mEgg->getTag(tag);
-			//
-			//			if (child)
-			//	child->parent = eggGetCurrent(FREYJA_BONE);
+			egg_tag_t *child =  mEgg->getTag(tag);
+			
+			if (child)
+				child->parent = mTag->id;
+
+			// If it fails here it's got to be picked up in SKELETON 
 
 			mTag->slave.pushBack(tag);
 		}
