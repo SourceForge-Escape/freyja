@@ -26,8 +26,12 @@
 #include <stdarg.h>
 #include <math.h>
 
-#include "mtk_tga.h"
-#include "mtk_image.h"
+#ifdef HAVE_MTK_IMAGE2
+#   include "mtk_tga.h"
+#   include "mtk_image.h"
+#endif
+
+
 #include "URTexture.h"
 
 #include "UTPackage.h"
@@ -83,6 +87,51 @@ int decryptDumpXOR(const char *filename, unsigned char key, FILE *in)
 	return 0;
 }
 
+
+
+int read_index(FILE *f)
+{
+	int val;
+	char b0, b1, b2, b3, b4;
+                                                                               
+	val = 0;
+   
+	fread(&b0, 1, 1, f);
+   
+	if (b0 & 0x40)
+	{
+		fread(&b1, 1, 1, f);
+ 
+		if (b1 & 0x80)
+		{
+			fread(&b2, 1, 1, f);
+ 
+			if (b2 & 0x80)
+			{
+				fread(&b3, 1, 1, f);
+ 
+				if (b3 & 0x80)
+				{
+					fread(&b4, 1, 1, f);
+					val = b4;
+				}
+				
+				val = (val << 7) + (b3 & 0x7f);
+			}
+			
+			val = (val << 7) + (b2 & 0x7f);
+		}
+		
+		val = (val << 7) + (b1 & 0x7f);
+	}
+	
+	val = (val << 6) + (b0 & 0x3f);
+   
+	if (b0 & 0x80)
+		val = -val;
+
+	return val;
+}
 
 
 //////////////////////////////////////////////////////////////////////
