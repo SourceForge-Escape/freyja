@@ -52,6 +52,7 @@ FreyjaModel::FreyjaModel()
 
 	_plugin->addModule("psk");
 	_plugin->addModule("nod");
+	_plugin->addModule("mdx");
 	_plugin->addModule("grn");
 
 	delete [] pluginDir;

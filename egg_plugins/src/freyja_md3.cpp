@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <freyja_model/EggPlugin.h>
+
 #include "Md3.h"
 
 

@@ -144,6 +144,7 @@ trmesh.so:
 	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_trmesh.o \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 grn.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
@@ -205,7 +206,7 @@ mdl.so:
 mdx.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=mdl \
+	MOD_NAME=mdx \
 	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_mdx.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"

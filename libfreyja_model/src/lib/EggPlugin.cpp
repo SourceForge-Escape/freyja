@@ -1045,10 +1045,6 @@ EggPlugin::EggPlugin(Egg *egg, char *plugin_dir)
 	addModule("trmesh");
 	addModule("lwo");
 	addModule("nod");
-	addModule("quakemap");
-	addModule("ut");
-	addModule("user1");
-	addModule("grn");
 	
 	EggPlugin::mEggPlugin = this;
 }
