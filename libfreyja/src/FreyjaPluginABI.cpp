@@ -39,7 +39,7 @@
 
 
 /* Until Freyja replaces Egg backend, let these vectors float here */
-Vector<FreyjaAnimation *> gFreyjaAnimations; 
+Vector<FreyjaSkeletalAnimation *> gFreyjaAnimations; 
 Vector<FreyjaMetaData *> gFreyjaMetaData; 
 Vector<FreyjaMaterial *> gFreyjaMaterials;
 Vector<FreyjaTexture *> gFreyjaTextures;
@@ -3312,11 +3312,14 @@ void freyjaMeshFlags1u(unsigned int flags)
 // Animation ( 0.9.3 ABI, Can't be used with freyjaIterators )
 ///////////////////////////////////////////////////////////////////////
 
+FreyjaSkeletalAnimation *freyjaGetAnimation(long animationIndex);
+
+
 long freyjaAnimationCreate()
 {
 	long animationIndex = gFreyjaAnimations.size();
 
-	gFreyjaAnimations.pushBack(new FreyjaAnimation());
+	gFreyjaAnimations.pushBack(new FreyjaSkeletalAnimation());
 	gFreyjaAnimations[animationIndex]->mId = animationIndex;
 
 	return animationIndex;
@@ -3324,7 +3327,49 @@ long freyjaAnimationCreate()
 }
 
 
+long freyjaAnimationBoneCreate(long animationIndex, 
+							   const char *name, long boneIndex)
+{
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+
+	if (anim)
+	{
+		return anim->newBoneKeyFrame(name, boneIndex);
+	}	
+
+	return -1;
+}
+
+
+long freyjaAnimationBoneKeyFrameCreate(long animationIndex, long boneIndex,
+									   vec_t time, vec3_t xyz, vec4_t wxyz)
+{
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+
+	if (anim)
+	{
+		return anim->newKeyFrame(boneIndex, time, xyz, wxyz);
+	}	
+
+	return -1;
+}
+
+
+
 /* Animation Accessors */
+
+FreyjaSkeletalAnimation *freyjaGetAnimation(long animationIndex)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		return gFreyjaAnimations[animationIndex]; 
+	}	
+
+	return 0x0;
+}
+
 
 long freyjaGetAnimationCount()
 {
@@ -3332,15 +3377,35 @@ long freyjaGetAnimationCount()
 }
 
 
-long freyjaGetAnimationKeyFrameCount(long animationIndex)
+long freyjaGetAnimationBoneCount(long animationIndex)
 {
 	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
 	{
-		if (gFreyjaAnimations[animationIndex])
-			return gFreyjaAnimations[animationIndex]->mKeyFrames.size();
+		FreyjaSkeletalAnimation *anim = gFreyjaAnimations[animationIndex];
+
+		if (anim)
+		{
+			return anim->getBoneCount();
+		}
 	}	
 
 	return -1;	
+}
+
+
+long freyjaGetAnimationBoneKeyFrameCount(long animationIndex, long boneIndex)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		FreyjaSkeletalAnimation *anim = gFreyjaAnimations[animationIndex];
+
+		if (anim)
+		{
+			return anim->getKeyFrameCountForBone(boneIndex);
+		}
+	}	
+
+	return 0;	
 }
 
 
@@ -3394,117 +3459,94 @@ void freyjaAnimationSubsetRoot(long animationIndex, long startBone)
 }
 
 
-void freyjaAnimationSubsetCount(long animationIndex, long boneCount)
+//void freyjaAnimationSubsetCount(long animationIndex, long boneCount)
+//{
+//	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+//	{
+//		if (gFreyjaAnimations[animationIndex])
+//		{
+//			gFreyjaAnimations[animationIndex]->mBoneCount = boneCount;
+//		}
+//	}
+//}
+
+
+void freyjaAnimationBoneName(long animationIndex, long boneIndex,
+							 const char *name)
 {
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+	if (anim)
 	{
-		if (gFreyjaAnimations[animationIndex])
-		{
-			gFreyjaAnimations[animationIndex]->mBoneCount = boneCount;
-		}
+		anim->setBoneName(boneIndex, name);
 	}
+	
 }
 
 
-long freyjaAnimationKeyFrameCreate(long animationIndex)
-{
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-	{
-		if (gFreyjaAnimations[animationIndex])
-		{
-			long keyFrameIndex = gFreyjaAnimations[animationIndex]->mKeyFrames.size();
-			gFreyjaAnimations[animationIndex]->mKeyFrames.pushBack(new FreyjaKeyFrame());
-			return keyFrameIndex;
-		}
-	}	
-
-	return -1;
-}
-
-
-void freyjaAnimationKeyFrameTime(long animationIndex, 
+void freyjaAnimationKeyFrameTime(long animationIndex, long boneIndex, 
 								 long keyFrameIndex, vec_t time)
 {
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+	if (anim)
 	{
-		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
+														 keyFrameIndex);
 
-		if (anim &&	keyFrameIndex > -1 && 
-			keyFrameIndex < (long)anim->mKeyFrames.size())
-		{
-			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
-
-			if (keyframe)
-			{
-				keyframe->setTime(time);
-			}
-		}
+		if (keyframe)
+			keyframe->setTime(time);
 	}
 }
 
 
-void freyjaAnimationKeyFramePosition(long animationIndex, 
+void freyjaAnimationKeyFramePosition(long animationIndex, long boneIndex, 
 									 long keyFrameIndex, vec3_t position)
 {
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+	if (anim)
 	{
-		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
+														 keyFrameIndex);
 
-		if (anim &&	keyFrameIndex > -1 && 
-			keyFrameIndex < (long)anim->mKeyFrames.size())
-		{
-			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
-
-			if (keyframe)
-			{
-				keyframe->setPosition(position);
-			}
-		}
+		if (keyframe)
+			keyframe->setPosition(position);
 	}
 }
 
 
-void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex, 
+void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex, long boneIndex, 
 										   long keyFrameIndex, vec3_t xyz)
 {
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+	if (anim)
 	{
-		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
+														 keyFrameIndex);
 
-		if (anim &&	keyFrameIndex > -1 && 
-			keyFrameIndex < (long)anim->mKeyFrames.size())
-		{
-			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
-
-			if (keyframe)
-			{
-				keyframe->setOrientationByEuler(xyz);
-			}
-		}
+		if (keyframe)
+			keyframe->setOrientationByEuler(xyz);
 	}
 }
 
 
-void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex, 
+void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex,
+											long boneIndex, 
 											long keyFrameIndex,vec4_t wxyz)
 {
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
+
+	if (anim)
 	{
-		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
+														 keyFrameIndex);
 
-		if (anim &&	keyFrameIndex > -1 && 
-			keyFrameIndex < (long)anim->mKeyFrames.size())
-		{
-			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
-
-			if (keyframe)
-			{
-				keyframe->setOrientationByQuaternion(wxyz);
-			}
-		}
+		if (keyframe)
+			keyframe->setOrientationByQuaternion(wxyz);
 	}
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////
