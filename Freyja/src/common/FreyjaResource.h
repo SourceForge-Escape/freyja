@@ -107,22 +107,6 @@ class FreyjaResource : public Resource
 	 *  Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-#ifdef __TEST__
-	int _RegressionTest(int argc, char *argv[]);
-	/*------------------------------------------------------
-	 * Pre  : argc and argv are valid
-	 * Post : Tests FreyjaResource
-	 *
-	 *        Returns 0 on sucess, or an error id
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.12: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-#endif
-
  private:
 
 	/* */

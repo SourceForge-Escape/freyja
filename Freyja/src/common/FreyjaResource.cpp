@@ -324,24 +324,3 @@ void FreyjaResource::RegisterCPPInt(char *symbol, int value)
 	}
 }
 
-////////////////////////////////////////////////////////////
-// Test code
-////////////////////////////////////////////////////////////
-
-#ifdef __TEST__
-int FreyjaResource::_RegressionTest(int argc, char *argv[])
-{
-	return 0;
-}
-
-
-int main(int argc, char *argv[])
-{
-  FreyjaResource test;
-
-
-  printf("[FreyjaResource class test]\n");
-
-  return test._RegressionTest(argc, argv);
-}
-#endif
