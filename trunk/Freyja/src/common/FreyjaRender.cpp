@@ -516,7 +516,7 @@ unsigned int  FreyjaRender::Flags()
 void FreyjaRender::Register(FreyjaModel *model)
 {
 	_model = model;
-	// printf("Render> Registered data model\n");
+	// event_print("Render> Registered data model");
 }
 
 

@@ -412,4 +412,20 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 }
 
 
+void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
+{
+	if (size < 1)
+		return;
+
+#ifdef unix
+	snprintf(dest, size, "%s/.freyja/icons/%s",
+			 (char *)getenv("HOME"), icon_name);
+#else
+	strcpy(dest, "data/icons/%s", icon_name);
+#endif
+
+	dest[size-1] = 0;
+}
+
+
 

@@ -662,7 +662,7 @@ Mlisp::Mlisp()
 	mBuffer = NULL;
 	mSymbol = NULL;
 	mBufferSize = 0;
-	mSymbolSize = 65;
+	mSymbolSize = 256;
 	mTop = 0;
 	mLook = 0;
 	mString = 0;

@@ -270,6 +270,8 @@ private:
 	unsigned int mFileDialogMode;
 
 	bool mFullScreen;
+
+	char mScratchTextBuffer[1024];
 };
 
 #endif
