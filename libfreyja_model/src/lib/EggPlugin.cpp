@@ -305,7 +305,7 @@ void eggGenerateCylinder(unsigned int major, unsigned int minor,
 	Vector<unsigned int> vertices;
 	unsigned int i, j, k, v;
 	double majorStep = height / major;
-	double minorStep = 2.0 * HEL_PI / minor;
+	double minorStep = 2.0 * MTK_PI / minor;
 
 
 	eggBegin(FREYJA_MESH);
@@ -413,8 +413,8 @@ void eggGenerateSphere(unsigned int major, unsigned int minor, vec_t radius)
 	Vector<unsigned int> vertices;
 	unsigned int i, j, k, v;
 	vec_t x, y;
-	double majorStep = (HEL_PI / major);
-	double minorStep = (2.0 * HEL_PI / minor);
+	double majorStep = (MTK_PI / major);
+	double minorStep = (2.0 * MTK_PI / minor);
 
 
 	eggBegin(FREYJA_MESH);
@@ -829,10 +829,9 @@ unsigned int eggTagRotate3f(float x, float y, float z)
 
 unsigned int eggTagRotateQuaternion4f(vec_t x, vec_t y, vec_t z, vec_t w)
 {
-	Quaternion q = Quaternion(w, x, y, z);
 	vec_t heading, bank, attitude;
 	
-	q.getEulerAngles(&heading, &bank, &attitude);
+	mtkQuaternionToEuler(x, y, z, w, &heading, &bank, &attitude);
 
 	// For now just switch to eular ( ew ) and do I have this right?
 	if (EggPlugin::mEggPlugin) // h b a; a b h
@@ -1054,28 +1053,28 @@ unsigned int EggPlugin::eggGetNum(egg_plugin_t type)
 	switch (type)
 	{
 	case FREYJA_VERTEX:
-		return mEgg->getCount(Egg::VERTEX);
+		return mEgg->getVertexCount();
 		break;
 	case FREYJA_TEXEL:
-		return mEgg->getCount(Egg::TEXCOORD);
+		return mEgg->getTexelCount();
 		break;
 	case FREYJA_MESH:
-		return mEgg->getCount(Egg::MESH);
+		return mEgg->getMeshCount();
 		break;
 	case FREYJA_GROUP:
-		return mEgg->getCount(Egg::GROUP);
+		return mEgg->getGroupCount();
 		break;
 	case FREYJA_POLYGON:
-		return mEgg->getCount(Egg::POLYGON);
+		return mEgg->getPolygonCount();
 		break;
 	case FREYJA_BONE_TAG:
-		return mEgg->getCount(Egg::BONETAG);
+		return mEgg->getTagCount();
 		break;
 	case FREYJA_BONE_FRAME:
-		return mEgg->getCount(Egg::BONEFRAME);
+		return mEgg->getBoneFrameCount();
 		break;
 	case FREYJA_MESHTREE_ANIM:
-		return mEgg->getCount(Egg::ANIMATION);
+		return mEgg->getAnimationCount();
 		break;
 	}
 
@@ -1086,7 +1085,7 @@ unsigned int EggPlugin::eggGetNum(egg_plugin_t type)
 unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 {
 	Vector<egg_vertex_t *> *vertex;
-	Vector<egg_texcoord_t *> *texcoord;
+	Vector<egg_texel_t *> *texel;
 	Vector<egg_mesh_t *> *mesh;
 	Vector<egg_group_t *> *group;
 	Vector<egg_polygon_t *> *polygon;
@@ -1097,7 +1096,7 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 	switch (type)
 	{
 	case FREYJA_VERTEX:
-		vertex = mEgg->getVertexList();
+		vertex = mEgg->VertexList();
     
 		if (!vertex)
 			return PLUGIN_ERROR;
@@ -1122,9 +1121,9 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 		}
 		break;
 	case FREYJA_TEXEL:
-		texcoord = mEgg->getTexCoordList();
+		texel = mEgg->TexelList();
     
-		if (!texcoord)
+		if (!texel)
 			return PLUGIN_ERROR;
  
 		switch (item)
@@ -1132,22 +1131,22 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 		case FREYJA_LIST_CURRENT:
 			break;
 		case FREYJA_LIST_RESET:
-			texcoord->start();
+			texel->start();
 			break;
 		case FREYJA_LIST_NEXT:
-			texcoord->next();
+			texel->next();
 			break;
 		default:
-			texcoord->mIndex = item;
+			texel->mIndex = item;
 		}
 
-		if (texcoord->forward())
+		if (texel->forward())
 		{
-			return texcoord->currentIndex();
+			return texel->currentIndex();
 		}
 		break;
 	case FREYJA_MESH:
-		mesh = mEgg->getMeshList();
+		mesh = mEgg->MeshList();
     
 		if (!mesh)
 			return PLUGIN_ERROR;
@@ -1170,7 +1169,7 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 			return mesh->currentIndex();
 		break;
 	case FREYJA_GROUP:
-		group = mEgg->getGroupList();
+		group = mEgg->GroupList();
     
 		if (!group)
 			return PLUGIN_ERROR;
@@ -1193,7 +1192,7 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 			return group->currentIndex();
 		break;
 	case FREYJA_POLYGON:
-		polygon = mEgg->getPolygonList();
+		polygon = mEgg->PolygonList();
     
 		if (!polygon)
 			return PLUGIN_ERROR;
@@ -1216,7 +1215,7 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 			return polygon->currentIndex();
 		break;
 	case FREYJA_BONE_TAG:
-		tag = mEgg->getTagList();
+		tag = mEgg->TagList();
     
 		if (!tag)
 			return PLUGIN_ERROR;
@@ -1239,7 +1238,7 @@ unsigned int EggPlugin::eggIterator(egg_plugin_t type, int item)
 			return tag->currentIndex();
 		break;
 	case FREYJA_BONE_FRAME:
-		boneframe = mEgg->getBoneFrameList();
+		boneframe = mEgg->BoneFrameList();
     
 		if (!boneframe)
 			return PLUGIN_ERROR;
@@ -1277,7 +1276,7 @@ unsigned int EggPlugin::eggGetVertex(float *xyz)
 	egg_vertex_t *vert;
 
 
-	vertex = mEgg->getVertexList();
+	vertex = mEgg->VertexList();
 
 	if (!vertex || !vertex->forward())
 		return PLUGIN_ERROR;
@@ -1301,11 +1300,11 @@ unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item,
 	Vector<egg_polygon_t *> *polygon_lst;
 	egg_polygon_t *polygon;
 	egg_vertex_t *vert;
-	egg_texcoord_t *tex;
+	egg_texel_t *tex;
 
 
 
-	polygon_lst = mEgg->getPolygonList();
+	polygon_lst = mEgg->PolygonList();
   
 	if (!polygon_lst)
 		return PLUGIN_ERROR;
@@ -1327,7 +1326,7 @@ unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item,
 		return vert->id;
 		break;
 	case FREYJA_TEXEL:
-		tex = mEgg->getTexCoord(polygon->vertex[item]);
+		tex = mEgg->getTexel(polygon->vertex[item]);
     
 		if (!tex)
 			return PLUGIN_ERROR;
@@ -1349,11 +1348,11 @@ unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item,
 	Vector<egg_polygon_t *> *polygon_lst;
 	egg_polygon_t *polygon;
 	egg_vertex_t *vert;
-	egg_texcoord_t *tex;
+	egg_texel_t *tex;
 
 
 
-	polygon_lst = mEgg->getPolygonList();
+	polygon_lst = mEgg->PolygonList();
   
 	if (!polygon_lst)
 		return PLUGIN_ERROR;
@@ -1378,13 +1377,13 @@ unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item,
 		return vert->id;
 		break;
 	case FREYJA_TEXEL:
-		tex = mEgg->getTexCoord(polygon->vertex[item]);
+		tex = mEgg->getTexel(polygon->vertex[item]);
     
 		if (!tex)
 			return PLUGIN_ERROR;
 
-		value[0] = tex->uv[0];
-		value[1] = tex->uv[1];
+		value[0] = tex->st[0];
+		value[1] = tex->st[1];
     
 		return tex->id;
 		break;
@@ -1460,9 +1459,9 @@ unsigned int EggPlugin::eggGetTagRotate(float *x, float *y, float *z)
 {
 	if (mTag)
 	{
-		*x = mTag->rotation.mVec[0];
-		*y = mTag->rotation.mVec[1];
-		*z = mTag->rotation.mVec[2];
+		*x = mTag->rot[0];
+		*y = mTag->rot[1];
+		*z = mTag->rot[2];
    
 		return 0;
 	}
@@ -1649,12 +1648,12 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 	switch (type)
 	{
 	case FREYJA_MESH:
-		mStack.Push(FREYJA_MESH);
+		mStack.push(FREYJA_MESH);
 		mMesh = mEgg->newMesh();
 		mEgg->addMesh(mMesh);
 		break;
 	case FREYJA_GROUP:
-		mStack.Push(FREYJA_GROUP);
+		mStack.push(FREYJA_GROUP);
 
 		if (!mMesh)
 		{
@@ -1668,7 +1667,7 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 		}
 		break;
 	case FREYJA_POLYGON:
-		mStack.Push(FREYJA_POLYGON);
+		mStack.push(FREYJA_POLYGON);
 		mVertexList.clear();
 		mTexelList.clear();
 
@@ -1678,16 +1677,16 @@ unsigned int EggPlugin::eggBegin(egg_plugin_t type)
 		}
 		break;
 	case FREYJA_BONE_TAG:
-		mStack.Push(FREYJA_BONE_TAG);
+		mStack.push(FREYJA_BONE_TAG);
 		mTag = mEgg->addTag(0.0, 0.0, 0.0, 0x00);
 		//mEgg->addTag(mTag);
 		mTag->name[0] = 0;
 		break;
 	case FREYJA_BONE_FRAME:
-		mStack.Push(FREYJA_BONE_FRAME);
+		mStack.push(FREYJA_BONE_FRAME);
 		break;
 	case FREYJA_MESHTREE_ANIM:
-		mStack.Push(FREYJA_MESHTREE_ANIM);
+		mStack.push(FREYJA_MESHTREE_ANIM);
 		mAnimation = new egg_animation_t;
 		mEgg->addAnimation(mAnimation);
 	default:
@@ -1703,7 +1702,7 @@ unsigned int EggPlugin::eggEnd()
 	unsigned int polygon;
 
 
-	switch (mStack.Pop())
+	switch (mStack.pop())
 	{
 	case FREYJA_POLYGON:
 		polygon = mEgg->addPolygon(mVertexList, mTexelList, mTextureId);
@@ -1804,9 +1803,9 @@ int EggPlugin::eggGetTextureImage(unsigned int index,
 }
 
 
-unsigned int EggPlugin::eggTexelStore2f(float u, float v)
+unsigned int EggPlugin::eggTexelStore2f(float s, float t)
 {
-	return mEgg->addTexCoord(u, v);
+	return mEgg->addTexel(s, t);
 }
 
 
@@ -1935,7 +1934,7 @@ void EggPlugin::eggVertexNormalStore3f(unsigned int vIndex,
 
 void EggPlugin::eggVertex1i(unsigned int egg_id)
 {
-	if (mStack.Peek() == FREYJA_POLYGON)
+	if (mStack.peek() == FREYJA_POLYGON)
 	{
 		mVertexList.pushBack(egg_id);
 	}
@@ -1949,7 +1948,7 @@ void EggPlugin::eggVertex1i(unsigned int egg_id)
 
 void EggPlugin::eggTexel1i(unsigned int egg_id)
 {
-	if (mStack.Peek() == FREYJA_POLYGON)
+	if (mStack.peek() == FREYJA_POLYGON)
 	{
 		mTexelList.pushBack(egg_id);
 	}
@@ -1963,7 +1962,7 @@ void EggPlugin::eggTexel1i(unsigned int egg_id)
 
 void EggPlugin::eggTexture1i(int id)
 {
-	if (mStack.Peek() == FREYJA_POLYGON)
+	if (mStack.peek() == FREYJA_POLYGON)
 	{
 		mTextureId = id;
 	}
@@ -1989,7 +1988,7 @@ void EggPlugin::eggFlags(unsigned int set)
 
 unsigned int EggPlugin::eggGroupCenter(float x, float y, float z)
 {
-	if (mStack.Peek() == FREYJA_GROUP)
+	if (mStack.peek() == FREYJA_GROUP)
 	{
 		if (!mGroup)
 		{
@@ -1999,7 +1998,9 @@ unsigned int EggPlugin::eggGroupCenter(float x, float y, float z)
 		}
 		else 
 		{
-			mGroup->center = Vector3d(x, y, z);
+			mGroup->center[0] = x;
+			mGroup->center[1] = y;
+			mGroup->center[2] = z;
 		}
 	}
 	else
@@ -2015,7 +2016,7 @@ unsigned int EggPlugin::eggGroupCenter(float x, float y, float z)
 
 unsigned int EggPlugin::eggTagName(char *name)
 {
-	if (mStack.Peek() == FREYJA_BONE_TAG)
+	if (mStack.peek() == FREYJA_BONE_TAG)
 	{
 		if (!mTag)
 		{
@@ -2042,7 +2043,7 @@ unsigned int EggPlugin::eggTagName(char *name)
 
 unsigned int EggPlugin::eggTagPos(float x, float y, float z)
 {
-	if (mStack.Peek() == FREYJA_BONE_TAG)
+	if (mStack.peek() == FREYJA_BONE_TAG)
 	{
 		if (!mTag)
 		{
@@ -2052,17 +2053,21 @@ unsigned int EggPlugin::eggTagPos(float x, float y, float z)
 		}
 		else 
 		{
-			mTag->position = Vector3d(x, y, z);
+			mTag->center[0] = x;
+			mTag->center[1] = y;
+			mTag->center[2] = z;
 		}
 	}
 	else if (mTag) // HACK
 	{
-		mTag->position = Vector3d(x, y, z);
+		mTag->center[0] = x;
+		mTag->center[1] = y;
+		mTag->center[2] = z;
 	}
 	else
 	{
 		fprintf(stderr, 
-				"EggPlugin::eggTagPos> Pos defined outside BONETAG!\n");
+				"EggPlugin::eggTagPos> Pos defined outside BONEMTAG!\n");
 		return PLUGIN_ERROR;
 	}
 
@@ -2072,7 +2077,7 @@ unsigned int EggPlugin::eggTagPos(float x, float y, float z)
 
 unsigned int EggPlugin::eggTagFlags(unsigned int flags)
 {
-	if (mStack.Peek() == FREYJA_BONE_TAG)
+	if (mStack.peek() == FREYJA_BONE_TAG)
 	{
 		if (!mTag)
 		{
@@ -2102,7 +2107,7 @@ unsigned int EggPlugin::eggTagFlags(unsigned int flags)
 
 unsigned int EggPlugin::eggTagAddMesh(unsigned int mesh)
 {
-	if (mStack.Peek() == FREYJA_BONE_TAG)
+	if (mStack.peek() == FREYJA_BONE_TAG)
 	{
 		if (!mTag)
 		{
@@ -2132,7 +2137,7 @@ unsigned int EggPlugin::eggTagAddMesh(unsigned int mesh)
 
 unsigned int EggPlugin::eggTagAddSlave(unsigned int tag)
 {
-	if (mStack.Peek() == FREYJA_BONE_TAG)
+	if (mStack.peek() == FREYJA_BONE_TAG)
 	{
 		if (!mTag)
 		{
@@ -2162,7 +2167,7 @@ unsigned int EggPlugin::eggMeshTreeAddFrame(float x, float y, float z)
 {
 	if (mAnimation)
 	{
-		mBoneFrame = mEgg->getBoneFrame(mEgg->addBoneFrame(x, y, z));    
+		mBoneFrame = mEgg->BoneFrame(mEgg->BoneFrameAdd(x, y, z));    
 		mAnimation->frame.pushBack(mBoneFrame->id);
    
 		return 0;
@@ -2176,7 +2181,10 @@ unsigned int EggPlugin::eggTagRotate(float x, float y, float z)
 {
 	if (mTag)
 	{
-		mTag->rotation = Vector3d(x, y, z);
+		mTag->rot[0] = x;
+		mTag->rot[1] = y;
+		mTag->rot[2] = z;
+   
 		return 0;
 	}
 
