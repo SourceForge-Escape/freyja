@@ -2446,6 +2446,9 @@ void Egg::TagDisconnect(unsigned int master, unsigned int slave)
 	if (!tagA || !tagB)
 		return;
 
+	/* Mongoose 2004.12.08, 
+	 * Mark parent as null (-1 index) */
+	tagB->parent = -1;
 	tagA->slave.remove(slave);
 }
 

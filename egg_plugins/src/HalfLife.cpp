@@ -595,30 +595,33 @@ int freyja_model__halflife_import(char *filename)
 
 
 				/* Generate, Store, and link UVs to polygon */
-				w = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].w;
-				h = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].h;
+				if (hl.mImages) // should only be null while fixing this plugin
+				{
+					w = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].w;
+					h = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].h;
 
-				s = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].s;
-				t = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].t;
-				u = s / w;
-				v = t / h;
-				eggTexCoord1i(eggTexCoordStore2f(u, v));
+					s = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].s;
+					t = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].t;
+					u = s / w;
+					v = t / h;
+					eggTexCoord1i(eggTexCoordStore2f(u, v));
 
-				s = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].s;
-				t = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].t;
-				u = s / w;
-				v = t / h;
-				eggTexCoord1i(eggTexCoordStore2f(u, v));
+					s = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].s;
+					t = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].t;
+					u = s / w;
+					v = t / h;
+					eggTexCoord1i(eggTexCoordStore2f(u, v));
 
-				s = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].s;
-				t = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].t;
-				u = s / w;
-				v = t / h;
-				eggTexCoord1i(eggTexCoordStore2f(u, v));
+					s = hl.mBodyParts[b].meshes[m].faces[f].vertex[2].s;
+					t = hl.mBodyParts[b].meshes[m].faces[f].vertex[2].t;
+					u = s / w;
+					v = t / h;
+					eggTexCoord1i(eggTexCoordStore2f(u, v));
 
-				eggTexture1i(hl.mBodyParts[b].meshes[m].material);
+					eggTexture1i(hl.mBodyParts[b].meshes[m].material);
 
-				eggEnd(); // FREYJA_POLYGON
+					eggEnd(); // FREYJA_POLYGON
+				}
 			}
 		}
 

@@ -22,6 +22,9 @@
 #ifndef GUARD__FREYJA_MONGOOSE_HALFLIFE_H
 #define GUARD__FREYJA_MONGOOSE_HALFLIFE_H
 
+//#include <vector>
+
+
 #define MAXSTUDIOTRIANGLES	20000	// TODO: tune this
 #define MAXSTUDIOVERTS		2048	// TODO: tune this
 #define MAXSTUDIOSEQUENCES	256		// Total animation sequences

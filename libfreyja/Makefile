@@ -250,6 +250,14 @@ TEST=$(BUILDDIR)/$(NAME).test
 
 test: $(TEST)
 
+FreyjaUtil:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=FreyjaUtil \
+	OBJS="$(BUILD_TEST_DIR)/FreyjaUtil.o" \
+	CFLAGS="-Wall -g -O0 -DLIB_JPEG -DUNIT_TEST_FREYJAUTIL" \
+	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
+
 jpeg.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \

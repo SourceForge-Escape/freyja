@@ -1336,7 +1336,8 @@ bool FreyjaControl::event(int command)
 
 
 	case eGeneratePatchMesh:
-		mModel->pasteSelectedPatch();
+		if (mModel->pasteSelectedPatch())
+			mCleared = false;
 		break;
 
 

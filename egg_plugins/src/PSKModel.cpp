@@ -2745,18 +2745,18 @@ int freyja_model__psk_import(char *filename)
 		}
 #endif
 
-		printf("++ Bone[%d] :: ", i);
+		//printf("++ Bone[%d] :: ", i);
 
 		for (j = 0; j < psk.mNumBones; ++j)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
-				printf("%d ", j);
+				//printf("%d ", j);
 				eggTagAddSlave1u(j);
 			}
 		}
 
-		printf("\n");
+		//printf("\n");
 
 		eggEnd(); // FREYJA_TAG
 

@@ -147,6 +147,14 @@ grn.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+halflifeX.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=halflifeX \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/MDLModel.o $(BUILD_DEBUG_DIR)/MathLib.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 halflife.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
@@ -496,8 +504,6 @@ SDLUNIT_OBJS=$(BUILD_TEST_DIR)/mtk_tga.o \
                 $(BUILD_TEST_DIR)/mtk_png.o \
                 $(BUILD_TEST_DIR)/mtk_image.o \
                 $(BUILD_TEST_DIR)/SDLUnitTest.o \
-                $(BUILD_TEST_DIR)/Texture.o \
-                $(BUILD_TEST_DIR)/Resource.o
 
 #################################################################
 
@@ -513,4 +519,11 @@ PSKModel.test:
 	$(MAKE) tests NAME=PSKModel.test BUILD_DIR=$(BUILD_TEST_DIR) \
 	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/PSKModel.o $(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
 	CFLAGS="-Wall -O0 -g $(SDLUNIT_CFLAGS) -DUNIT_TEST_PSKMODEL" \
+	LD_FLAGS="$(SDLUNIT_LDFLAGS)"
+
+MDLModel.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) tests NAME=MDLModel BUILD_DIR=$(BUILD_TEST_DIR) \
+	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/MDLModel.o $(BUILD_TEST_DIR)/MathLib.o" \
+	CFLAGS="-Wall -O0 -g $(SDLUNIT_CFLAGS) -DUNIT_TEST_MDLMODEL" \
 	LD_FLAGS="$(SDLUNIT_LDFLAGS)"

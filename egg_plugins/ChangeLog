@@ -1,4 +1,12 @@
 
+20041208:
+	* Halflife.test animator demo build done -- based on donated code
+	* SDLUnitTest got old source deps dumped into it and is free standing
+	* New CLI util for model translation and plugin testing in Chimera
+	* OBJ plugin import finally implemented
+	* SMD plugin with import/export
+	* Changelog in Freyja has updates missing here about SMD
+
 20040518:
 	* Md3 loader frames taken out, normals back, correct XYZ coord
 
