@@ -1,5 +1,5 @@
 ################################################################
-# Mongoose <stu7440@westga.edu>
+# Mongoose <mongoose@icculus.org>
 ################################################################
 # + Cleaner clean
 # + Add new include tree
@@ -14,11 +14,11 @@ MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=0
 BRANCH=
-BUILD_ID=20041216
+BUILD_ID=20041228
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
-WEBSITE=http://icculus.org/freyja
-EMAIL=mongoose@icculus.org
+WEBSITE="http://icculus.org/freyja"
+EMAIL="mongoose@icculus.org"
 EXT=.so
 TREE_DIR=libfreyja
 TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
@@ -47,6 +47,8 @@ BUILD_PROF_DIR=bin/prof
 BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
+SRC_DIR=src
+
 DESTDIR=/usr/local
 INSTALL_BIN=$(DESTDIR)/bin
 INSTALL_LIB=$(DESTDIR)/lib
@@ -61,14 +63,14 @@ INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
 DEB_DIR=/tmp/$(NAME).deb
 NAME_DEB=$(NAME)
-VERSION_DEB=$VERSION)
+VERSION_DEB=$(VERSION).$(BUILD_ID)
 # Package types: -s single bin, -l single lib, -m multiple bins
-FLAGS_DEB=-l
+FLAGS_DEB=-s
 
 
 ################################################################
 
-BASE_CFLAGS=-Wall -Isrc \
+BASE_CFLAGS=-Wall -I$(SRC_DIR) \
 	$(CONFIGURE_DEF) \
 	-DPLUGIN_IMAGE_DIR=\"\\\"$(INSTALL_PLUGIN_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -87,6 +89,7 @@ SHLIBLDFLAGS=$(LDFLAGS) -fPIC -shared
 MODULE_CFLAGS=$(BASE_CFLAGS) -g -DFREYJA_PLUGINS
 MODULE_LD_FLAGS=-lfreyja -lstdc++ -shared -fPIC -ldl -rdynamic 
 #MODULE_LD_FLAGS += --warn-unresolved-symbols -Wl -z defs
+MODULE_LD_FLAGS += --warn-unresolved-symbols -Wl
 
 ################################################################
 
@@ -661,6 +664,7 @@ clean-deb:
 	@-echo "[DONE]"
 
 debian-package:
+	$(MAKE) clean
 	$(MAKE) clean-deb
 	$(MAKE) tarball
 	mkdir -p $(DEB_DIR)

@@ -165,6 +165,44 @@ clean:
 
 ################################################################
 
+#################################################################
+
+DEB_DIR=/tmp/$(NAME).deb
+NAME_DEB=libhel
+VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
+
+# Edited for Debian GNU/Linux.
+DESTDIR=/usr/local
+INSTALL_BIN=$(DESTDIR)/bin
+INSTALL_LIB=$(DESTDIR)/lib
+INSTALL_DOC=$(DESTDIR)/share/doc/$(NAME)
+INSTALL_SHARE=$(DESTDIR)/share/$(NAME)
+INSTALL_INCLUDE=$(DESTDIR)/include
+
+clean-deb:
+	@-echo -n "Cleaning DEBs                                "
+	@-rm -rf $(DEB_DIR)
+	@-echo "[DONE]"
+
+debian-package:
+	$(MAKE) clean-deb
+	$(MAKE) tarball
+	mkdir -p $(DEB_DIR)
+	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
+	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
+
+deb-init:
+	dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	@-cp debian/control debian/control.old
+	@-sed -e "s/<insert up to 60 chars description>/Freyja math utils/g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+	@-cp debian/control debian/control.old
+	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+
+deb:
+	dpkg-buildpackage -rfakeroot
+
 install: install-lib install-headers
 
 ################################################################
@@ -177,10 +215,9 @@ install-bin:
 
 install-lib:
 	@-echo -n "Installing lib                              "
-	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(API).$(EXT).$(VERSION) \
-		$(INSTALL_LIB_DIR)
-	@-ln -sf $(INSTALL_LIB_DIR)/lib$(NAME)$(API).$(EXT).$(VERSION) \
-		$(INSTALL_LIB_DIR)/lib$(NAME)$(API).$(EXT)
+	@-mkdir -p $(INSTALL_LIB)
+	@-cp bin/debug/libhel$(API).$(EXT).$(VERSION) $(INSTALL_LIB)
+	@-cd $(INSTALL_LIB) && ln -sf lib$(NAME)$(API).$(EXT).$(VERSION) lib$(NAME)$(API).$(EXT)
 	./libsetup.sh
 	@-echo "[done]"
 
@@ -202,7 +239,7 @@ uninstall-lib:
 tarball:
 	@-$(MAKE) clean
 	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz $(TREE_DIR) \
-		--exclude bin --exclude *~ \
+		--exclude bin --exclude *~ --exclude .svn \
 		--exclude CVS --exclude *.notar --exclude spec \
 		--exclude *.log --exclude contrib \
 		--totals

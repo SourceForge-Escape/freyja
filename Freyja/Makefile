@@ -1,37 +1,57 @@
 ################################################################
-# Mongoose <stu7440@westga.edu>
+# Mongoose <mongoose@icculus.org>
 ################################################################
 # + Cleaner clean
 # + Add new include tree
 # + Add new flags
-# + Install
+# + Install/Uninstall
+# + Lots of misc new features
 ################################################################
 
 NAME=freyja
+BASE_NAME=Freyja
 MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
-PRE=
-BUILD_ID=20041130
-VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(PRE)
+BRANCH=
+BUILD_ID=20041226
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
-URL=http://icculus.org/freyja
-EMAIL=mongoose@icculus.org
+WEBSITE="http://icculus.org/freyja"
+EMAIL="mongoose@icculus.org"
+EXT=
+TREE_DIR=Freyja
+TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
+LICENSE=
 
 ################################################################
 
-INSTALL_DIR=/usr/local/bin
-TREE_DIR=Freyja
-#$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
-SRC_DIR=src
-PACKAGE_DIR=/tmp/package/$(NAME)
-
 BUILD_SELECT=debug
-BUILD_PROF_DIR=bin/prof
+
+# USE_ARB_MULTITEXTURE 
+# DISABLE_MULTITEXTURE
+# DISABLE_GTK_COLORBUTTON
+CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
+		-DHAVE_FREYJA_IMAGE -DFORCE_GLAREA_GTK_2_0 \
+		-DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL
+CONFIGURE_LDFLAGS=
+
+################################################################
+
+CC=gcc
+#CC=i586-mingw32msvc-g++
+#CPP=i586-mingw32msvc-cpp
+#LD=i586-mingw32msvc-ld
+
+################################################################
+
 BUILD_DEBUG_DIR=bin/debug
 BUILD_RELEASE_DIR=bin/release
+BUILD_PROF_DIR=bin/prof
 BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
+
+SRC_DIR=src
 
 DESTDIR=/usr/local
 INSTALL_BIN=$(DESTDIR)/bin
@@ -39,35 +59,18 @@ INSTALL_LIB=$(DESTDIR)/lib
 INSTALL_DOC=$(DESTDIR)/share/doc/$(NAME)
 INSTALL_SHARE=$(DESTDIR)/share/$(NAME)
 INSTALL_INCLUDE=$(DESTDIR)/include
+INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
 
+################################################################
+# Debian package setup
 ################################################################
 
 DEB_DIR=/tmp/$(NAME).deb
 NAME_DEB=$(NAME)
-VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
-
-
-# DEBUG_GTK_MOUSE    
-# DEBUG_GTK_KEYS
-# DEBUG_SCREEN_TO_WORLD
-# HAVE_HEL
-# DEBUG_EVENT_PRINT
-# USE_ARB_MULTITEXTURE 
-# DISABLE_MULTITEXTURE
-# DISABLE_GTK_COLORBUTTON
-CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
-		-DHAVE_FREYJA_IMAGE -DFORCE_GLAREA_GTK_2_0 \
-		-DHAVE_OPENGL -DHAVE_GTKGL
-
-
-CONFIGURE_LDFLAGS=
+VERSION_DEB=$(VERSION).$(BUILD_ID)
 
 ################################################################
-CC=gcc
-#CC=i586-mingw32msvc-g++
-#CPP=i586-mingw32msvc-cpp
-#LD=i586-mingw32msvc-ld
 
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 

@@ -30,10 +30,11 @@
 
 Quaternion::Quaternion()
 {
-	mW = 0;
-	mX = 0;
-	mY = 0;
-	mZ = 0;
+	setIdentity();
+	//mW = 0;
+	//mX = 0;
+	//mY = 0;
+	//mZ = 0;
 }
 
 

@@ -368,7 +368,7 @@ int freyja_model__md5_import(char *filename)
 	Md5 md5;
 	Vector<unsigned int> weights;
 	unsigned int vertex, texcoord;
-	int i, m, v, w, t, j, index;
+	int i, m, v, w, t, j, bindex, index;
 	float qw;
 	vec4_t wxyz;
 	Quaternion q, q2;
@@ -511,9 +511,10 @@ int freyja_model__md5_import(char *filename)
 	{
 		/* Start a new tag */
 		freyjaBegin(FREYJA_BONE);
-		freyjaBoneFlags1u(0x0);
-		freyjaBoneParent(md5.mJoints[j].parent);
-		freyjaBoneName(md5.mJoints[j].name);
+		bindex = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneFlags1i(bindex, 0x0);
+		freyjaBoneParent1i(bindex, md5.mJoints[j].parent);
+		freyjaBoneName1s(bindex, md5.mJoints[j].name);
 
 		/* Translate */
 		vec3 = transforms[j];
@@ -521,11 +522,13 @@ int freyja_model__md5_import(char *filename)
 
 		if (!j || 1)
 		{
-			freyjaBonePos3f(vec3.mVec[0], vec3.mVec[2], vec3.mVec[1]);
+			freyjaBoneTranslate3f(bindex,
+								  vec3.mVec[0], vec3.mVec[2], vec3.mVec[1]);
 		}
 		else
 		{
-			freyjaBonePos3f(vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
+			freyjaBoneTranslate3f(bindex, 
+								  vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
 		}
 
 		/* Scale */
@@ -553,13 +556,13 @@ int freyja_model__md5_import(char *filename)
 		q.setByMatrix(mat.mMatrix);
 		q.getQuaternion4fv(wxyz);
 
-		//freyjaBoneRotateQuaternion4fv(wxyz); // argh
+		//freyjaBoneRotateQuatWXYZ4fv(bindex, wxyz); // argh
 
 		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{
 			if (md5.mJoints[j2].parent == j)
 			{ 
-				freyjaBoneAddChild1u(j2);
+				freyjaBoneAddChild1i(bindex, j2);
 			}
 		}
 

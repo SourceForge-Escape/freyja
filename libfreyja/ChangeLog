@@ -20,14 +20,23 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
  TODO
-	o Rewrite all plugins to use this new library's new features
+	o ABI to use indices for accessors, avoid using internal iterators
+	  for more than getting the indices
 	o Port dRead system from my UTPackage to EggReader and move here
-	o Pull FreyjaFunction shit out of FreyjaPlugin... it doesn't seem to
-	  make sense there ( crosses too many 'package' boundaries, so it
-	  would be better to reverse dependenices and base it on top of these
-	  packages )
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+ libfreyja (0.9.0-20041228) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o Import/export refinement
+
+
+ libfreyja (0.9.0-20041227) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o ABI tweaking
+	o Native chunk file now co-exists with egg, no longer build time
+	  option -- extention 'ja'
+
 
  libfreyja (0.9.0-20041225) "Umbra" Mongoose <mongoose@icculus.org>
 

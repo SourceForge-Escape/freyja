@@ -276,6 +276,7 @@ class FreyjaFileReader
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	bool readBuffer(unsigned long length, unsigned char *buffer);
 	bool readBufferUnsignedChar(unsigned long length, unsigned char *buffer);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc

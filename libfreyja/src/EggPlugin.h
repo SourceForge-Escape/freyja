@@ -15,7 +15,7 @@
  *           and data states once EggPlugin is called on it.
  * 
  *-- Test Defines -------------------------------------------
- *           
+ *
  * UNIT_TEST_EGGPLUGIN  Builds module test code as a console program
  *
  *-- History ------------------------------------------------ 
@@ -49,6 +49,7 @@
 
 #include "FreyjaPluginABI.h"
 #include "FreyjaPrinter.h"
+#include "FreyjaFileReader.h"
 #include "Egg.h"
 
 
@@ -80,6 +81,49 @@ public:
 	unsigned int mWidth;
 	unsigned int mHeight;
 	unsigned int mBitDepth;
+};
+
+
+class FreyjaPluginDesc
+{
+public:
+	
+	FreyjaPluginDesc()
+	{
+		mFilename = 0x0;
+		
+	}
+
+	~FreyjaPluginDesc()
+	{
+		if (mFilename) delete [] mFilename;
+		
+	}
+
+	void setFilename(char *filename)
+	{
+		if (filename && filename[0])
+		{
+			if (mFilename) delete [] mFilename;
+			mFilename = strdup(filename);
+		}
+	}
+
+	void setDescription(char *s)
+	{
+		strncpy(mDescription, s, 64);
+		mDescription[63] = 0;
+	}
+
+	void setExtention(char *s)
+	{
+		strncpy(mExtention, s, 64);
+		mExtention[63] = 0;
+	}
+
+	char *mFilename;
+	char mDescription[64];
+	char mExtention[64];
 };
 
 
@@ -118,10 +162,23 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	egg_polygon_t *getPolygon(long index);  // this isn't freyja exportable
+
 	egg_vertex_t *getVertex(long index);  // this isn't freyja exportable
 
 	egg_tag_t *getBone(long index);  // this isn't freyja exportable
 
+	egg_mesh_t *getMesh(long index);  // this isn't freyja exportable
+	
+	long getPolygonVertexIndex(long polygonIndex, long element);
+
+	long getPolygonTexCoordIndex(long polygonIndex, long element);
+
+	long getPolygonMaterial(long polygonIndex);
+
+	long getPolygonEdgeCount(long polygonIndex);
+
+	long getPolygonFlags(long polygonIndex);
 
 	long freyjaGetCount(freyja_object_t type);
 	/*------------------------------------------------------
@@ -161,6 +218,7 @@ public:
 
 	void freyjaGetVertex(vec3_t xyz);
 	void freyjaGetVertexNormal(vec3_t nxyz);
+	void freyjaGetVertexTexCoord(vec2_t uv);
 	void freyjaGetVertexWeights(Vector<unsigned int> &bones,
 								Vector<float> &weights);
 	/*------------------------------------------------------
@@ -174,6 +232,8 @@ public:
 	 * 2001.11.03: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	void freyjaGetTexCoord(long index, vec2_t uv);
 
 	long freyjaGetPolygon(freyja_object_t type, long item, long *value);
 	/*------------------------------------------------------
@@ -656,10 +716,11 @@ public:
 
 	void setPrinter(FreyjaPrinter *printer);
 
+	void setupPlugins();
+
 	bool checkModel(const char *filename);
 	bool saveModel(const char *filename);
 	bool loadModel(const char *filename);
-
 
 
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
@@ -675,6 +736,10 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	FreyjaPluginDesc *mCurrentPlugin;
+
+	Vector<FreyjaPluginDesc *> mPlugins;/* Plugin infos */
 
 	Vector<char *> mPluginDirectories;  /* Search dirs for plugins */
 

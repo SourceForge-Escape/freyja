@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/FreyjaPluginABI.h>
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 
@@ -33,7 +33,23 @@ extern "C" {
 	int freyja_model__smd_import(char *filename);
 	int freyja_model__smd_export(char *filename);
 	int import_model(char *filename);
+	int plugin_properities();
 }
+
+
+int plugin_properites(char *this_filename)
+{
+	freyjaPluginBegin();
+	freyjaPluginFilename1s(this_filename);
+	freyjaPluginDescription1s("SMD model (*.smd)");
+	freyjaPluginAddExtention1s("smd");
+	freyjaPluginImport(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport(FREYJA_PLUGIN_SKELETON);
+	freyjaPluginEnd();
+
+	return 0;
+}
+
 
 int import_model(char *filename)
 {
@@ -132,21 +148,22 @@ int freyja_model__smd_import(char *filename)
 
 					freyjaBegin(FREYJA_BONE);
 					idx = freyjaGetCurrent(FREYJA_BONE);
-					freyjaBoneFlags1u(0x0);
-					freyjaBoneParent(bone->parent);
-					freyjaBoneName(bone->name);
+					freyjaBoneFlags1i(idx, 0x0);
+					freyjaBoneParent1i(idx, bone->parent);
+					freyjaBoneName1s(idx, bone->name);
 
 					//printf("%3i: %s %i\n", idx, bone->name, bone->parent);
 
 					if (!index)
 					{
-						freyjaBonePos3f(x*scale, z*scale, y*scale);
-						freyjaBoneRotate3f(rx*r2d, (ry*r2d) - 90.0, rz*r2d);
+						freyjaBoneTranslate3f(idx, x*scale, z*scale, y*scale);
+						freyjaBoneRotateEulerXYZ3f(idx, 
+												   rx*r2d,(ry*r2d)-90.0,rz*r2d);
 					}
 					else
 					{
-						freyjaBonePos3f(x*scale, y*scale, z*scale);
-						freyjaBoneRotate3f(rx*r2d, ry*r2d, rz*r2d);
+						freyjaBoneTranslate3f(idx, x*scale, y*scale, z*scale);
+						freyjaBoneRotateEulerXYZ3f(idx, rx*r2d, ry*r2d, rz*r2d);
 					}
 
 					for (i = bones.begin(); i < bones.end(); ++i)
@@ -155,7 +172,7 @@ int freyja_model__smd_import(char *filename)
 
 						if (bone && bone->parent == index)
 						{ 
-							freyjaBoneAddChild1u(i);
+							freyjaBoneAddChild1i(idx, i);
 						}
 					}
 

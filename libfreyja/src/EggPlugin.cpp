@@ -57,7 +57,7 @@ EggPlugin::EggPlugin(Egg *egg)
 	mGroup = 0x0;
 	mAnimation = 0x0;
 	mBoneFrame = 0x0;
-  
+	mCurrentPlugin = 0x0;
 	mTextureId = 0;
 
 #ifdef unix
@@ -77,6 +77,7 @@ EggPlugin::~EggPlugin()
 	mTextures.erase();
 	mTextureFiles.erase();
 	mPluginDirectories.erase();
+	mPlugins.erase();
 }
 
 
@@ -400,6 +401,29 @@ void EggPlugin::freyjaGetVertex(vec3_t xyz)
 }
 
 
+void EggPlugin::freyjaGetTexCoord(long index, vec2_t uv)
+{
+	Vector<egg_texel_t *> *texel;
+	egg_texel_t *tex;
+
+
+	texel = mEgg->TexelList();
+
+	if (!texel || index >= (int)texel->end() || index < 0)
+		return;// FREYJA_PLUGIN_ERROR;
+ 
+	tex = (*texel)[index];
+
+	if (!tex)
+		return;// FREYJA_PLUGIN_ERROR;
+
+	uv[0] = tex->st[0];
+	uv[1] = tex->st[1];
+
+	//return vert->id;
+}
+
+
 void EggPlugin::freyjaGetVertexByIndex(long index, vec3_t xyz)
 {
 	Vector<egg_vertex_t *> *vertex;
@@ -448,6 +472,106 @@ void EggPlugin::freyjaGetVertexNormal(vec3_t xyz)
 }
 
 
+void EggPlugin::freyjaGetVertexTexCoord(vec2_t uv)
+{
+	Vector<egg_vertex_t *> *vertex;
+	egg_vertex_t *vert;
+
+
+	vertex = mEgg->VertexList();
+
+	if (!vertex || mIndexVertex >= vertex->end())
+		return;// FREYJA_PLUGIN_ERROR;
+ 
+	vert = (*vertex)[mIndexVertex];
+
+	if (!vert)
+		return;// FREYJA_PLUGIN_ERROR;
+
+	uv[0] = vert->uv[0];
+	uv[1] = vert->uv[1];
+
+	//return vert->id;
+}
+
+
+long EggPlugin::getPolygonVertexIndex(long polygonIndex, long element)
+{
+	egg_polygon_t *polygon;
+
+
+	polygon = getPolygon(polygonIndex);
+
+	if (!polygon || element < 0 || element >= (int)polygon->vertex.end())
+		return -1; 
+
+	return polygon->vertex[element];
+}
+
+
+long EggPlugin::getPolygonTexCoordIndex(long polygonIndex, long element)
+{
+	egg_polygon_t *polygon;
+
+
+	polygon = getPolygon(polygonIndex);
+
+	if (!polygon || element < 0 || element >= (int)polygon->texel.end())
+		return -1; 
+
+	return polygon->texel[element];
+}
+
+
+long EggPlugin::getPolygonMaterial(long polygonIndex)
+{
+	egg_polygon_t *polygon;
+
+
+	polygon = getPolygon(polygonIndex);
+
+	if (!polygon)
+		return 0; 
+
+	return polygon->shader;
+}
+
+
+long EggPlugin::getPolygonEdgeCount(long polygonIndex)
+{
+	egg_polygon_t *polygon;
+
+
+	polygon = getPolygon(polygonIndex);
+
+	if (!polygon)
+		return 0;
+
+	return polygon->vertex.end();
+}
+
+
+long EggPlugin::getPolygonFlags(long polygonIndex)
+{
+	egg_polygon_t *polygon;
+	long flags = 0x0;
+
+
+	polygon = getPolygon(polygonIndex);
+
+	if (!polygon)
+		return 0; 
+
+	if (polygon->vertex.end() == polygon->texel.end())
+		flags |= fPolygon_PolyMapped;
+
+	if (polygon->vertex.end() == polygon->texel.end()*2)
+		flags |= fPolygon_ColorMapped;
+
+	return flags;
+}
+
+
 long EggPlugin::freyjaGetPolygon(freyja_object_t type, long item, 
 								 long *value)
 {
@@ -493,6 +617,38 @@ long EggPlugin::freyjaGetPolygon(freyja_object_t type, long item,
 	}
 
 	return FREYJA_PLUGIN_ERROR;
+}
+
+
+egg_polygon_t *EggPlugin::getPolygon(long index)
+{
+	Vector<egg_polygon_t *> *polygons;
+	egg_polygon_t *poly;
+	
+	polygons = mEgg->PolygonList();
+
+	if (!polygons || polygons->empty() || index > (int)polygons->size()-1)
+		return 0x0;
+
+	poly = (*polygons)[index];
+
+	return poly;
+}
+
+
+egg_mesh_t *EggPlugin::getMesh(long index)
+{
+	Vector<egg_mesh_t *> *meshes;
+	egg_mesh_t *mesh;
+	
+	meshes = mEgg->MeshList();
+
+	if (!meshes || meshes->empty() || index > (int)meshes->size()-1)
+		return 0x0;
+
+	mesh = (*meshes)[index];
+
+	return mesh;
 }
 
 
@@ -720,32 +876,45 @@ void EggPlugin::freyjaPrintMessage(char *format, va_list *args)
 }
 
 
-////////////////////////////////////////////////////////////
-// Public Mutators
-////////////////////////////////////////////////////////////
-
 bool EggPlugin::checkModel(const char *filename)
 {
-	freyjaPrintError("EggPlugin::checkModel> Not implemented %s:%i using Egg",
-					 __FILE__, __LINE__);
-	return (Egg::checkFile((char *)filename) == 0);
+	if (freyjaCheckModel((char *)filename) == 0)
+		return true;
+
+	if (Egg::checkFile((char *)filename) == 0)
+		return true;
+
+	return false;
 }
 
 
 bool EggPlugin::saveModel(const char *filename)
 {
-	freyjaPrintError("EggPlugin::saveModel> Not implemented %s:%i using Egg",
-					 __FILE__, __LINE__);
-	return (mEgg->saveFile((char *)filename) == 0);
+	if (freyjaSaveModel((char*)filename) == 0)
+		return true;
+
+	return false;
 }
 
 
+////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
+
 bool EggPlugin::loadModel(const char *filename)
 {
-	freyjaPrintError("EggPlugin::loadModel> Not implemented %s:%i using Egg",
-					 __FILE__, __LINE__);
+	if (freyjaCheckModel((char *)filename) == 0)
+	{
+		if (freyjaLoadModel((char *)filename) == 0)
+			return true;
+	}
+	else
+	{
+		if (mEgg->loadFile((char *)filename) == 0)
+			return true;
+	}
 
-	return (mEgg->loadFile((char *)filename) == 0);
+	return false;
 }
 
 
@@ -772,6 +941,95 @@ void EggPlugin::addPluginDirectory(const char *dir)
 	dir2[l] = 0;
 
 	mPluginDirectories.pushBack(dir2);
+	setupPlugins();
+}
+
+
+void EggPlugin::setupPlugins()
+{
+#ifdef FREYJA_PLUGINS
+	FreyjaFileReader reader;
+	bool loaded = false, done = false;
+	char *module_filename;
+	int (*import)(char *filename);
+	void *handle;
+	char *error;
+	unsigned int i;
+
+
+	mPlugins.erase();
+
+	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader invoked]");
+
+	/* Check for other format */
+	for (i = mPluginDirectories.begin(); i < mPluginDirectories.end(); ++i)
+	{
+		if (!reader.openDirectory(mPluginDirectories[i]))
+		{
+			freyjaPrintError("Couldn't access plugin directory[%d].", i);
+			continue;
+		}
+
+		while (!done && (module_filename = reader.getNextDirectoryListing()))
+		{
+			if (reader.isDirectory(module_filename))
+				continue;
+
+			freyjaPrintMessage("Module '%s' invoked.", module_filename);
+
+			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+			{
+				freyjaPrintError("In module '%s'.", module_filename);
+				
+				if ((error = dlerror()) != NULL)  
+				{
+					freyjaPrintError("%s", error);
+				}
+
+				continue; /* Try the next plugin, after a bad module load */
+			}
+			else
+			{
+				freyjaPrintMessage("Module '%s' opened.", module_filename);
+
+				import = (int (*)(char *filename))dlsym(handle, "plugin_properities");
+
+				if ((error = dlerror()) != NULL)  
+				{
+					freyjaPrintError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+				
+				done = !(*import)((char*)module_filename);
+
+				if (done)
+				{
+					loaded = true;
+					freyjaPrintMessage("Module '%s' success.", module_filename);
+				}
+
+				if ((error = dlerror()) != NULL) 
+				{
+					freyjaPrintError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+				
+				dlclose(handle);
+			}
+		}
+
+		reader.closeDirectory();
+
+		if (done)
+		{
+			break;
+		}
+	}
+
+	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader sleeps now]\n");
+#endif
 }
 
 
@@ -798,7 +1056,14 @@ long EggPlugin::importModel(const char *filename)
 	/* Check for native format */
 	if (checkModel(filename))
 	{
-		return !loadModel(filename);
+		if (loadModel(filename))
+		{
+			return 0;
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
 	/* Check for other format */
@@ -905,10 +1170,14 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 	if (!type || !filename)
 		return -100;
 
-	/* Check for native format | temp use of EGG */
-	if (strcmp(type, "native") == 0 || strcmp(type, "egg") == 0)
+	/* Check for native format or temp use of EGG here */
+	if (strcmp(type, "ja") == 0)
 	{
 		return !saveModel(filename);
+	}
+	else if (strcmp(type, "egg") == 0)
+	{
+		return mEgg->saveFile((char *)filename);
 	}
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
@@ -970,183 +1239,18 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 	if (!type || !filename)
 		return -100;
 
-	if (strcmp(type, "freyja") == 0)
-		return mFreyja->saveFile(filename);
-#endif
-	return -1;
-}
-
-#ifdef OBSOLETE
-int EggPlugin::importModelOLD(char *filename)
-{
-#ifdef MODEL_PLUGINS
-	bool loaded = false;
-	char module_filename[128];
-	char module_check[128];
-	char module_import[128];
-	char *name;
-	int (*import)(char *filename);
-	int (*check)(char *filename);
-	void *handle;
-	char *error;
-	unsigned int i;
-
-
-	if (!mEgg->checkFile(filename))
+	/* Check for native format or temp use of EGG here */
+	if (strcmp(type, "ja") == 0)
 	{
-		if (!mEgg->loadFile(filename))
-			return 0;
-		else
-			return -2;
+		return !saveModel(filename);
 	}
-
-	freyjaPrintMessage("[EggPlugin module loader invoked]\n");
-
-	for (i = mModules.begin(); i < mModules.end(); ++i)
+	else if (strcmp(type, "egg") == 0)
 	{
-		name = mModules[i];
-
-		sprintf(module_filename, "%slibfreyja_loader-%s.so", mPluginDir, name);
-		sprintf(module_import, "freyja_model__%s_import", name);
-		sprintf(module_check, "freyja_model__%s_check", name);
-
-		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
-		{
-			freyjaPrintError("\tERROR: In module '%s'.\n", module_filename);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				freyjaPrintError("\tERROR: %s\n", error);
-				//return -5;
-			}
-
-			//return -1;
-			continue;
-		}
-		else
-		{
-			freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
-    
-			check = (int (*)(char *filename))dlsym(handle, module_check);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				freyjaPrintError("\tERROR: %s\n", error);
-				//return -5;
-				dlclose(handle);
-				continue;
-			}
-
-			import = (int (*)(char * filename))dlsym(handle, module_import);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				freyjaPrintError("\tERROR: %s\n", error);
-				//return -5;
-				dlclose(handle);
-				continue;
-			}
-
-			loaded = (loaded || (!(*check)(filename) && !(*import)(filename)));
-
-			if ((error = dlerror()) != NULL) 
-			{
-				//return -10;
-				dlclose(handle);
-				continue;
-			}
-
-			dlclose(handle);
-		}
-	}
-
-	freyjaPrintMessage("[EggPlugin module loader sleeps now]\n");
-
-	if (loaded)
-		return 0; // sucess
-#else
-	if (!mEgg->checkFile(filename))
-	{
-		if (!mEgg->loadFile(filename))
-			return 0;
-		else
-			return -2;
+		return mEgg->saveFile((char *)filename);
 	}
 #endif
 	return -1;
 }
-
-
-int EggPlugin::exportModelOLD(char *filename, char *type)
-{
-#ifdef MODEL_PLUGINS
-	bool saved = false;
-	char module_filename[128];
-	char module_export[128];
-	char *name;
-	int (*export_mdl)(char *filename);
-	void *handle;
-	char *error;
-
-
-	if (!type || !filename)
-		return -100;
-
-	if (strcmp(type, "egg") == 0)
-		return mEgg->saveFile(filename);
-
-	freyjaPrintMessage("[EggPlugin module loader invoked]\n");
-
-	name = type;
-
-	sprintf(module_filename, "%slibfreyja_loader-%s.so", mPluginDir, name);
-	sprintf(module_export, "freyja_model__%s_export", name);
-
-	if (!(handle = dlopen(module_filename, RTLD_NOW)))
-	{
-		freyjaPrintError("\tERROR: In module '%s'.\n", module_filename);
-
-		if ((error = dlerror()) != NULL)  
-		{
-			freyjaPrintError("\tERROR: %s\n", error);
-		}
-	}
-	else
-	{
-		freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
-    
-		export_mdl = (int (*)(char * filename))dlsym(handle, module_export);
-
-		if ((error = dlerror()) != NULL)  
-		{
-			freyjaPrintError("\tERROR: %s\n", error);
-			dlclose(handle);
-		}
-
-		saved = (!(*export_mdl)(filename));
-
-		if ((error = dlerror()) != NULL) 
-		{
-			dlclose(handle);
-		}
-
-		dlclose(handle);
-	}
-
-	freyjaPrintMessage("[EggPlugin module loader sleeps now]\n");
-
-	if (saved)
-		return 0; // sucess
-#else
-	if (!type || !filename)
-		return -100;
-
-	if (strcmp(type, "egg") == 0)
-		return mEgg->saveFile(filename);
-#endif
-	return -1;
-}
-#endif
 
 
 void EggPlugin::freyjaBegin(freyja_object_t type)
@@ -1189,7 +1293,7 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 
 		if (!mMesh)
 		{
-			freyjaPrintError("EggPlugin::freyjaEnd> Polygon defined outside MESH!");
+			//freyjaPrintError("freyjaBegin: WARNING, POLYGON outside MESH");
 		}
 		break;
 
@@ -1244,7 +1348,7 @@ void EggPlugin::freyjaEnd()
 		}
 		else
 		{
-			freyjaPrintError("EggPlugin::freyjaEnd> Polygon defined outside MESH!");
+			freyjaPrintError("freyjaEnd: WARNING, FREYJA_POLYGON outside FREYJA_MESH");
 		}
 		break;
 
@@ -1367,7 +1471,10 @@ long EggPlugin::freyjaVertex3f(vec_t x, vec_t y, vec_t z)
 		}
 		else
 		{
-			freyjaPrintError("EggPlugin::freyjaVertexStore3f> Vertex outside GROUP!");
+#ifdef EGGPLUGIN_WARN_VERTEX_OUTSIDE_GROUP
+			freyjaPrintError("freyjaVertex3f: WARNING Vertex[%i] outside GROUP!",
+							 vert->id);
+#endif
 		}
 
 		return vert->id;

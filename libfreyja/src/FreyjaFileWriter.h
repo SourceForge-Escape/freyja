@@ -38,6 +38,14 @@ class FreyjaFileWriter
 {
  public:
 
+	typedef enum {
+
+		BIG = 1,
+		LITTLE
+
+	} byte_order_t;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -85,6 +93,17 @@ class FreyjaFileWriter
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void bigEndianMode();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reads in big endian order
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.26:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void closeFile();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -93,6 +112,17 @@ class FreyjaFileWriter
 	 *-- History ------------------------------------------
 	 *
 	 * 2004.08.13:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void littleEndianMode();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reads in little endian order
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.26:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -151,6 +181,7 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void writeBuffer(unsigned int length, unsigned char *buffer);
 	void writeBufferUnsignedChar(unsigned int length, unsigned char *buffer);
 	/*------------------------------------------------------
 	 * Pre  : openFile must have been sucessful, etc
@@ -286,6 +317,7 @@ class FreyjaFileWriter
 	////////////////////////////////////////////////////////////
 
 
+	byte_order_t mOrder;
 
 	FILE *mFileHandle;                /* File I/O cruft */
 	char *mTempBufferHack;
