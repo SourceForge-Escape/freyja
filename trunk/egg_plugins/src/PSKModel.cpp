@@ -2711,19 +2711,19 @@ int freyja_model__psk_import(char *filename)
 
 #define FUCK_WITH_ROTATION
 #ifdef FUCK_WITH_ROTATION
-		eggTagRotateQuaternion4f(psk.mBones[i].restDir[2],
+		eggTagRotateQuaternion4f(-psk.mBones[i].restDir[3],
+								 psk.mBones[i].restDir[2],
 								 psk.mBones[i].restDir[0],
-								 psk.mBones[i].restDir[1],
-								 -psk.mBones[i].restDir[3]);
+								 psk.mBones[i].restDir[1]);
 #else
 		vec_t x, y, z;
 
 
 		/* Convert quaternion to Euler angles */
-		quaternion_to_euler_angles(psk.mBones[i].restDir[0],
+		quaternion_to_euler_angles(psk.mBones[i].restDir[3],
+								   psk.mBones[i].restDir[0],
 								   psk.mBones[i].restDir[1],
 								   psk.mBones[i].restDir[2],
-								   psk.mBones[i].restDir[3],
 								   &x, &y, &z);
 		
 		/* Convert radians to degrees */

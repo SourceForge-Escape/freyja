@@ -839,7 +839,7 @@ int freyja_model__ase_import(char *filename)
 		eggTagPos3f(ase.skel.mBones[i].translation[0],
 					ase.skel.mBones[i].translation[1],
 					ase.skel.mBones[i].translation[2]);
-		eggTagRotateQuaternion4f(ase.skel.mBones[i].rotation[0],
+		eggTagRotateQuaternion4f(ase.skel.mBones[i].rotation[0], // w?
 								 ase.skel.mBones[i].rotation[1],
 								 ase.skel.mBones[i].rotation[2],
 								 ase.skel.mBones[i].rotation[3]);
