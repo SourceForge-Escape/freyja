@@ -302,6 +302,7 @@ typedef enum {
 
 } event_subject_id;
 
+
 #define freyja_event_get_float mgtk_event_get_float
 #define freyja_event_set_range mgtk_event_set_range
 
@@ -322,6 +323,7 @@ void freyja_event_file_dialog_notify(char *filename);
 
 void freyja_append_eventid(char *symbol, int eventid);
 int freyja_append_item_to_menu(int event, const char *label, int item_event);
+int freyja_remove_all_items_to_menu(int event);
 
 float freyja_event_get_float(int event);
 void freyja_event_set_float(int event, float value);

@@ -106,16 +106,17 @@ FreyjaControl::~FreyjaControl()
 	unsigned int i;
 
 
-	w.openFile(filename);
-
-	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+	/* Save recent_files to disk */
+	if (w.openFile(filename))
 	{
-		//freyja_print("(add_recent_file \"%s\")\n", mRecentFiles[i]);
-		w.print("%s\n", mRecentFiles[i]);
-		delete [] mRecentFiles[i];
-	}
+		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+		{
+			w.print("%s\n", mRecentFiles[i]);
+			delete [] mRecentFiles[i];
+		}
 
-	w.closeFile();
+		w.closeFile();
+	}
 
 	if (filename)
 		delete [] filename;
@@ -176,7 +177,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 {
 	unsigned int i, l;
 	char *dupe;
-	bool found;
+	bool found = false;
 
 
 	if (!filename || !filename[0] || !FreyjaFileReader::doesFileExist(filename))
@@ -184,7 +185,6 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		return;
 	}
 
-	// FIXME: Add a size limit here
 	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
 	{
 		if (strcmp(filename, mRecentFiles[i]) == 0)
@@ -194,32 +194,49 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		}
 	}
 
-	// NOTE: Can change data order -- but can't update menus from here yet
-	if (found) // FIXME: Should 'boost' this file to top slot
+	// FIXME: Should 'boost' this file to top slot
+	if (found)
 	{
-		//char *swap = mRecentFiles[0];
-		//mRecentFiles.assign(0, mRecentFiles[i]);
-		//mRecentFiles.assign(i, swap);
+#ifdef FIXME
+		char *swap = mRecentFiles[0];
+		mRecentFiles.assign(0, mRecentFiles[i]);
+		mRecentFiles.assign(i, swap);
 
-		//for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
-		//{
-		//	char *swap = mRecentFiles[0];
-		//	mRecentFiles.assign(0, mRecentFiles[i]);
-		//	mRecentFiles.assign(i, swap);	
-		//}
-
+		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+		{
+			char *swap = mRecentFiles[0];
+			mRecentFiles.assign(0, mRecentFiles[i]);
+			mRecentFiles.assign(i, swap);	
+		}
+#endif
 		return;
 	}
+	else
+	{
+		l = strlen(filename);
+		dupe = new char[l+1];
+		strncpy(dupe, filename, l);
+		dupe[l] = 0;
 
-	l = strlen(filename);
-	dupe = new char[l+1];
-	strncpy(dupe, filename, l);
-	dupe[l] = 0;
+		mRecentFiles.pushBack(dupe);
+	}
 
-	mRecentFiles.pushBack(dupe);
+	// FIXME: Add a recently used file size limit here
 
-	freyja_append_item_to_menu(eRecentFiles, dupe, 
-							   (eRecentFiles + mRecentFiles.size()));
+	// FIXME: Should reorder files LRU to bottom, drop last with limit
+
+	// FIXME: If you reorder remember to update all the code else where using
+	//        'last' file by ending index instead of begining
+
+
+	/* Rebuild menu in order of mRecentFiles */
+	freyja_remove_all_items_to_menu(eRecentFiles);
+
+	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+	{	
+		freyja_append_item_to_menu(eRecentFiles, mRecentFiles[i], 
+								   (eRecentFiles + i + 1));
+	}
 }
 
 
@@ -3021,15 +3038,21 @@ void FreyjaControl::loadResource()
 	/* Recent files persistance test */
 	FreyjaFileReader r;
 	s = freyja_rc_map("recent_files");
-	r.openFile(s);
-	if (s) delete [] s;
-	
-	for (i = 0; i < 5 && !r.endOfFile(); ++i)
-	{
-		s = r.parseSymbol();
 
-		if (FreyjaFileReader::doesFileExist(s))
+	if (r.openFile(s))
+	{
+		if (s) 
+		{
+			delete [] s;
+		}
+
+		for (i = 0; i < 5 && !r.endOfFile(); ++i)
+		{
+			s = r.parseSymbol();
 			addRecentFilename(s);
+		}
+
+		r.closeFile();
 	}
 }
 
