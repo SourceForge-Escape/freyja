@@ -2048,8 +2048,14 @@ void FreyjaControl::deleteSelectedObject()
 		mEventMode = POINT_DEL_MODE;
 		break;
 
-	case FreyjaModel::TransformVertexFrame:
-		mModel->cullUsingVertexBuffer();
+	case FreyjaModel::TransformSelectedVertices:
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You are about to delete the selected vertices.",
+										 "Are you sure you want to cull these vertices?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "Hells _Yeah"))
+		{
+			mModel->cullUsingVertexBuffer();
+		}
 		break;
 
 	case FreyjaModel::TransformBone:
