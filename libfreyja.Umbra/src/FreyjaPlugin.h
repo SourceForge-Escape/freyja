@@ -700,7 +700,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getBoneMesh(unsigned int item, unsigned int *value);
+	long getBoneMeshIndex(long element);
 	/*------------------------------------------------------
 	 * Pre  : Bone selected
 	 *        Value set to Mesh id of Bone's mesh_list[item]
