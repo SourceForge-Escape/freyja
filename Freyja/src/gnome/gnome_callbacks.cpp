@@ -65,7 +65,7 @@ Map<int, int> NOTEBOOK_EVENT;
 
 
 void callback_update_skeleton_ui_gtk(callback_bone_t *bone, 
-												 GtkTreeStore *store, GtkTreeIter root)
+									 GtkTreeStore *store, GtkTreeIter root)
 {
 	GtkTreeIter child;
 	unsigned int i;
@@ -515,6 +515,22 @@ gint spinbutton_int_event(GtkSpinButton *spin, gpointer event_id)
 }
 
 
+int spinbutton_uint_set_range(GtkSpinButton *spin, 
+							  unsigned int value,
+							  unsigned int min, unsigned int max)
+{
+	gtk_spin_button_set_range(spin, -1, 100);
+
+	if (value > max)
+	{
+		gtk_spin_button_set_range(spin, min, max);
+		return 1;
+	}	
+
+	return 0;
+}
+
+
 gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 {
 	unsigned int event;
@@ -524,8 +540,8 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 
 	if (!spin)
 	{
-		event_print("spinbutton_uint_event> ERROR: Assertion '%s' failed",
-					"spin != NULL");
+		event_print("ERROR: Assertion '%s' failed %s:%d",
+					"spin != NULL", __FILE__, __LINE__);
 		return TRUE;
 	}
 
@@ -535,22 +551,19 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 	switch (event)
 	{
 	case 500:
-		if (value != gFreyjaModel->getCurrentMesh())
+		if (!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_MESH)))
 		{
 			gFreyjaModel->setCurrentMesh(value);			
-			value = gFreyjaModel->getCurrentMesh();
-			spinbutton_value_set(event, value);
-			event_refresh();
-		}			
-		break;
-	case 501:
-		if (value != gFreyjaModel->getCurrentGroup())
-		{
-			gFreyjaModel->setCurrentGroup(value);
-			value = gFreyjaModel->getCurrentGroup();
-			spinbutton_value_set(event, value);
 			event_refresh();
 		}
+		break;
+	case 501:
+		if (!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_GROUP)))
+		{
+			gFreyjaModel->setCurrentGroup(value);
+			event_refresh();
+		}
+		break;
 	case 503:
 		if (value != gFreyjaModel->getCurrentTextureIndex())
 		{
@@ -561,11 +574,12 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 		}
 		break;
 	case 504:
-		if (value != gFreyjaModel->getCurrentBone())
+		if (!spinbutton_uint_set_range(spin, 
+									  value, 0, eggGetNum(FREYJA_BONE_TAG)))
 		{
 			gFreyjaModel->setCurrentBone(value);
-			value = gFreyjaModel->getCurrentBone();
-			spinbutton_value_set(event, value);
+			//value = gFreyjaModel->getCurrentBone();
+			//spinbutton_value_set(event, value);
 
 			/* Mongoose 2002.08.31, Update spin buttons dependent 
 			 * on this one */

@@ -41,9 +41,55 @@
 #define ARG_GTK_TOOLBOX_WIDGET   4096
 
 
-GtkWidget *GTK_MAIN_WINDOW = NULL;
+GtkWidget *GTK_MAIN_WINDOW = 0x0;
+GtkWidget *GTK_GL_AREA_WIDGET = 0x0;
+GtkWidget *GTK_STATUS_BAR_WIDGET = 0x0;
+
+GtkWidget *getGtkGLAreaWidget()
+{
+	return GTK_GL_AREA_WIDGET;
+}
+
+GtkWidget *getGtkStatusBarWidget()
+{
+	return GTK_STATUS_BAR_WIDGET;
+}
+
+
+void application_window_fullscreen()
+{
+	if (GTK_MAIN_WINDOW)
+		gtk_window_unfullscreen(GTK_WINDOW(GTK_MAIN_WINDOW));
+}
+
+void application_window_unfullscreen()
+{
+	if (GTK_MAIN_WINDOW)
+		gtk_window_unfullscreen(GTK_WINDOW(GTK_MAIN_WINDOW));
+}
+
+void application_window_move(int x, int y)
+{
+	if (GTK_MAIN_WINDOW)
+		gtk_window_move(GTK_WINDOW(GTK_MAIN_WINDOW), x, y);
+}
+
+void application_window_resize(int width, int height)
+{
+	if (GTK_MAIN_WINDOW)
+		gtk_window_resize(GTK_WINDOW(GTK_MAIN_WINDOW), width, height);
+}
+
+
+void application_window_role(char *role)
+{
+	if (GTK_MAIN_WINDOW)
+		gtk_window_set_role(GTK_WINDOW(GTK_MAIN_WINDOW), role);
+}
+
 
 ////////////////////////////////////////////////////////////////
+
 
 void rc_assertion_error(char *widget_name, char *error)
 {
@@ -137,31 +183,18 @@ arg_list_t *freyja_rc_window(arg_list_t *container)
 	ret = NULL;
 
 	window = window_create();
-	gtk_widget_show(window);
 	
 	if (!GTK_MAIN_WINDOW)
 	{
 		GTK_MAIN_WINDOW = window;
+		gtk_window_set_role(GTK_WINDOW(window), "Freyja");
 	}
+
+	gtk_widget_show(window);
 
 	new_adt(&ret, ARG_GTK_WINDOW, (void *)window);
 
 	return ret;
-}
-
-
-// Mongoose 2002.07.02, Added to access directly for Gtk+ 2.0 key fix
-GtkWidget *GTK_GL_AREA_HACK = 0;
-GtkWidget *GTK_STATUS_BAR_HACK = 0;
-
-GtkWidget *getGtkGLAreaWidget()
-{
-	return GTK_GL_AREA_HACK;
-}
-
-GtkWidget *getGtkStatusBarWidget()
-{
-	return GTK_STATUS_BAR_HACK;
 }
 
 
@@ -206,7 +239,7 @@ arg_list_t *freyja_rc_gl_widget(arg_list_t *box)
 	gl = glarea_create(get_int(width), get_int(height));
 	state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(gl),
 														"gl_window_state");
-	GTK_GL_AREA_HACK = gl;
+	GTK_GL_AREA_WIDGET = gl;
 	state->appbar = NULL;
 	gtk_signal_connect(GTK_OBJECT(getGtkGLAreaWidget()), "key_press_event",
 					   GTK_SIGNAL_FUNC(glarea_key_press_event), NULL);
@@ -297,10 +330,10 @@ arg_list_t *freyja_rc_gl_widget(arg_list_t *box)
 	// Mongoose 2002.07.07, Add status bar here as simple label for now
 	//GTK_STATUS_BAR_HACK = label_create(hbox, "foo", "status bar", 0.0, 0.0);
 
-	GTK_STATUS_BAR_HACK = gtk_statusbar_new();
-	gtk_widget_show(GTK_STATUS_BAR_HACK);
+	GTK_STATUS_BAR_WIDGET = gtk_statusbar_new();
+	gtk_widget_show(GTK_STATUS_BAR_WIDGET);
 
-	gtk_box_pack_start(GTK_BOX(hbox), GTK_STATUS_BAR_HACK, 0, 0, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), GTK_STATUS_BAR_WIDGET, 0, 0, 0);
 	
 	delete_arg(&width);
 	delete_arg(&height);

@@ -24,16 +24,22 @@
 #ifndef GUARD__FREYJA_MONGOOSE_GNOME_RESOURCE_H_
 #define GUARD__FREYJA_MONGOOSE_GNOME_RESOURCE_H_
 
-GtkWidget *getGtkGLAreaWidget();
-GtkWidget *getGtkStatusBarWidget();
-
-
 enum
 {
    NAME_COLUMN = 0,
    ID_COLUMN,
    N_COLUMNS
 };
+
+
+GtkWidget *getGtkGLAreaWidget();
+GtkWidget *getGtkStatusBarWidget();
+
+void application_window_fullscreen();
+void application_window_unfullscreen();
+void application_window_move(int x, int y);
+void application_window_resize(int width, int height);
+void application_window_role(char *role);
 
 void resource_rebuild_skeleton_treeview(GtkTreeModel *model);
 
