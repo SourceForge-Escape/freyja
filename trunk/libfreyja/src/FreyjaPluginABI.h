@@ -317,6 +317,7 @@ typedef enum {
 	long freyjaGetModelMeshCount(long modelIndex);
 
 	// FREYJA_MESH Accessors
+	//int freyjaGetMeshBoundingBox(long meshIndex, vec3_t min, vec3_t max);
 	long freyjaGetMeshFlags(long meshIndex);
 	long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
 	char *freyjaGetMeshNameString(long meshIndex); // don't alter string
@@ -423,10 +424,6 @@ void freyjaPrintMessage(const char *format, ...);
 ///////////////////////////////////////////////////////////////////////
 // Mutator functions to operate on Scene
 ///////////////////////////////////////////////////////////////////////
-
-
-void freyjaMeshNormalFlip(long meshIndex);
-long freyjaMeshPosition(long meshIndex, vec3_t xyz);
 
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
@@ -636,6 +633,50 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
 							long count, long segments); // radius
 
+	void freyjaMeshUVMapSphericalPolyMapped(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Polygon mapped texcoords computed with 
+	 *        Spherical mapping algorithm
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMeshUVMapSpherical(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Texcoords computed with Spherical mapping algorithm
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMeshUVMapCylindrical(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Texcoords computed with Cylindrical mapping algorithm
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMeshTesselateTriangles(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Divides all polygons in mesh into triangles
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMeshNormalFlip(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Flips all vertex normals in mesh
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMeshGenerateVertexNormals(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Recalculates all vertex normals in mesh
+	 *
+	 ------------------------------------------------------*/
+
+long freyjaMeshPosition(long meshIndex, vec3_t xyz);
 
 void freyjaMeshName1s(long meshIndex, const char *name);
 
@@ -650,8 +691,6 @@ void freyjaMeshFlags1u(unsigned int flags);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-	void freyjaGenerateMeshVertexNormals(long meshIndex);
-
 void freyjaGenerateVertexNormals();
 
 void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
@@ -663,6 +702,13 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	///////////////////////////////////////////////////////////////////////
 	// Polygon
 	///////////////////////////////////////////////////////////////////////
+
+	void freyjaPolygonTexCoordPurge(long polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *
+	 * Post : All polymapped texcoords are dereferenced
+	 ------------------------------------------------------*/
 
 	int freyjaPolygonExtrudeQuad1f(long polygonIndex, vec_t dist);
 	/*------------------------------------------------------
