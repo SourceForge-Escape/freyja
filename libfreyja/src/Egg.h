@@ -134,7 +134,6 @@ typedef vec_t bbox_t[3][3];
 #define COLORED_POLYGON -1
 
 
-
 typedef struct {
 	vec_t weight;                     /* Weight for vertex use */
 	unsigned int bone;                /* Bone id */

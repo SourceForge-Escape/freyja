@@ -246,9 +246,13 @@ int freyja_model__nwnascii_import(char *filename)
 				freyjaPolygonVertex1i(transV[a]);
 				freyjaPolygonVertex1i(transV[b]);
 				freyjaPolygonVertex1i(transV[c]);
-				freyjaPolygonTexCoord1i(transT[ta]);
-				freyjaPolygonTexCoord1i(transT[tb]);
-				freyjaPolygonTexCoord1i(transT[tc]);
+
+				if (!transT.empty())
+				{
+					freyjaPolygonTexCoord1i(transT[ta]);
+					freyjaPolygonTexCoord1i(transT[tb]);
+					freyjaPolygonTexCoord1i(transT[tc]);
+				}
 				freyjaEnd(); // FREYJA_POLYGON
 			}
 

@@ -31,6 +31,17 @@
 #include "FreyjaFileWriter.h"
 #include "EggPlugin.h" // temp for testing
 #include "FreyjaPluginABI.h"
+#include "Freyja.h"
+
+
+/* Until Freyja replaces Egg backend, let these vectors float here */
+Vector<FreyjaAnimation *> gFreyjaAnimations; 
+Vector<FreyjaMetaData *> gFreyjaMetaData; 
+Vector<FreyjaMaterial *> gFreyjaMaterials;
+Vector<FreyjaTexture *> gFreyjaTextures;
+Vector<FreyjaSkeleton *>  gFreyjaSkeletons;
+Vector<FreyjaCamera *>  gFreyjaCamera;
+Vector<FreyjaLight *>  gFreyjaLight;
 
 
 long freyjaCheckModel(const char *filename)
