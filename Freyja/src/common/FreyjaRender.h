@@ -26,6 +26,9 @@
 #ifndef GUARD__MONGOOSE_FREYJA_FREYJARENDER_H_
 #define GUARD__MONGOOSE_FREYJA_FREYJARENDER_H_
 
+
+#include <hel/ViewVolume.h>
+
 #include "FreyjaModel.h"
 
 

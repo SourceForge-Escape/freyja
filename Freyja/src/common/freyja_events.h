@@ -62,6 +62,7 @@ typedef enum {
 	eLineBone,
 	ePolyMeshBone,
 	eRenderBbox,
+	eCamera,
 
 	eGenerateNormals,
 	eGenerateCube,

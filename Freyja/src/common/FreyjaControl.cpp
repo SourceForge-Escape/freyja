@@ -340,6 +340,15 @@ void FreyjaControl::eventMain(int event)
 		break;
 
 
+	case eCamera:
+		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
+					   !(mRender->Flags() & FreyjaRender::RENDER_CAMERA));
+		event_print("Camera rendering [%s]", 
+					(mRender->Flags() & FreyjaRender::RENDER_CAMERA) ? 
+					"ON" : "OFF");
+		break;
+
+
 	case eDebugEgg:
 		mModel->Debug(!mModel->Debug());
 		event_print("Egg debug [%s]", mModel->Debug() ? "ON" : "OFF");
@@ -2088,6 +2097,7 @@ void FreyjaControl::setupResource(Resource &r)
 	r.RegisterInt("eRotate_Y", eRotate_Y);
 	r.RegisterInt("eRotate_Z", eRotate_Z);
 	r.RegisterInt("eZoom", eZoom);
+	r.RegisterInt("eCamera", eCamera);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
 	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);

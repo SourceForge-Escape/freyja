@@ -490,6 +490,285 @@ int HalfLife::load(const char *filename)
 	return 0;
 }
 
+////////////////////////////////////////////////////////////
+// Special Interface code
+////////////////////////////////////////////////////////////
+
+#ifdef FREYJA_MODEL_PLUGINS
+
+#include <freyja8/EggPlugin.h>
+
+
+extern "C" {
+
+	int freyja_model__halflife_check(char *filename);
+	int freyja_model__halflife_import(char *filename);
+}
+
+
+
+int freyja_model__halflife_check(char *filename)
+{
+	FILE *f;
+	char header[32];
+
+
+	f = fopen(filename, "rb");
+
+	if (!f)
+	{
+		perror("mdl_check> fopen failed");
+		return -1;
+	}
+
+	fread(&header, 32, 1, f);      
+	fclose(f);
+
+	header[4] = 0;
+
+	// HalfLife
+	if (strcmp(header, "IDST") == 0)
+	{
+		return 0;
+	}
+	return -2;
+}
+
+
+int freyja_model__halflife_import(char *filename)
+{
+	HalfLife hl;
+	Map<unsigned int, unsigned int> trans;
+	unsigned int i, b, f, m, vert;
+	float u, v, w, h;
+	short s, t;
+
+
+	if (hl.load(filename) < 0)
+	{
+		return -1;
+	}
+
+	printf("Processing HalfLife textures: ");
+
+	for (i = 10; i < hl.mTextureCount; ++i)
+	{
+		if (hl.mImages[i].image && hl.mImages[i].w > 0 && hl.mImages[i].h > 0)
+		{
+			eggTextureStoreBuffer(hl.mImages[i].image, 3, 
+								  hl.mImages[i].w, hl.mImages[i].h,
+								  EGG_COLORMODE_RGB);
+		}
+	}
+
+	printf("Processing HalfLife bodyparts:\n");
+
+	for (b = 0; b < hl.mBodyPartCount; ++b)
+	{
+		eggBegin(FREYJA_MESH);
+		eggBegin(FREYJA_GROUP);	
+		trans.Clear();
+
+		for (i = 0; i < hl.mBodyParts[b].vertexCount; ++i)
+		{
+			vert = eggVertexStore3f(hl.mBodyParts[b].vertices[i*3][0],
+									hl.mBodyParts[b].vertices[i*3][1], 
+									hl.mBodyParts[b].vertices[i*3][2]);
+			
+			// Mongoose 2002.02.09, Generates id translator list
+			trans.Add(i, vert);	
+		}
+
+		eggEnd(); // FREYJA_GROUP
+
+		for (m = 0; m < hl.mBodyParts[b].meshCount; ++m)
+		{
+			for (f = 0; f < hl.mBodyParts[b].meshes[m].faceCount; ++f)
+			{
+				// Start a new polygon
+				eggBegin(FREYJA_POLYGON);
+
+				// Store vertices by true id, using translation table
+				eggVertex1i(trans[hl.mBodyParts[b].meshes[m].faces[f].vertex[0].vertindex]);
+				eggVertex1i(trans[hl.mBodyParts[b].meshes[m].faces[f].vertex[1].vertindex]);
+				eggVertex1i(trans[hl.mBodyParts[b].meshes[m].faces[f].vertex[2].vertindex]);
+
+
+				/* Generate, Store, and link UVs to polygon */
+				w = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].w;
+				h = (float)hl.mImages[hl.mBodyParts[b].meshes[m].material].h;
+
+				s = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].s;
+				t = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].t;
+				u = s / w;
+				v = t / h;
+				eggTexCoord1i(eggTexCoordStore2f(u, v));
+
+				s = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].s;
+				t = hl.mBodyParts[b].meshes[m].faces[f].vertex[1].t;
+				u = s / w;
+				v = t / h;
+				eggTexCoord1i(eggTexCoordStore2f(u, v));
+
+				s = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].s;
+				t = hl.mBodyParts[b].meshes[m].faces[f].vertex[0].t;
+				u = s / w;
+				v = t / h;
+				eggTexCoord1i(eggTexCoordStore2f(u, v));
+
+				eggTexture1i(hl.mBodyParts[b].meshes[m].material);
+
+				eggEnd(); // FREYJA_POLYGON
+			}
+		}
+
+		eggEnd(); // FREYJA_MESH
+	}
+
+	return 0;
+}
+
+
+int freyja_model__halflife_export(char *filename)
+{
+  printf("freyja_model__halflife_export> Not implemented, %s:%i\n", 
+	 __FILE__, __LINE__);
+
+  return -1;
+}
+
+// FIXME: Finish porting EggPlugin code
+#ifdef FIXME
+void FreyjaModel::HalfLifeImport(HalfLife *hl)
+{
+  Map<unsigned int> trans;
+  egg_mesh_t *mesh;
+  egg_tag_t *tag;
+  egg_group_t *grp;
+  egg_vertex_t *vert;
+  MtkImage img;
+  int b, t, m, v, i;
+  float st[2];
+  studiohdr_t *hl_header;
+  vec3_t **hl_verts;
+  mstudiomesh_t **hl_mesh;
+  mstudiomodel_t *hl_mdl;
+  trisy_keen_dood_t ***hl_tris;
+  hlskin_t *hl_skin;
+  char buffer[64];
+
+
+  if (!_egg || !hl)
+    return;
+
+  hl_skin = hl.Skin();
+  hl_header = hl.Header();
+  hl_mesh = hl.Meshes();
+  hl_mdl = hl.Mdls();
+  hl_verts = hl.Vertices();
+  hl_tris = hl.Tris();
+
+
+  // FIXME: Texture code not supported yet ////////////////////////////////
+#ifdef FIXME
+  mtkTextureClear();
+  mtkTextureSetNum(hl_header->numtextures);
+
+  for (i = 0; i < hl_header->numtextures; i++)
+  {
+    mtkTextureLoadBuffer(hl_skin[i].image, hl_skin[i].w, hl_skin[i].h,
+			 COLORMODE_RGB);
+
+    if (_defaults & FL_DUMP_TEXTURE)
+    {
+      img.Load(hl_skin[i].image, hl_skin[i].w, hl_skin[i].h, COLORMODE_RGB);
+      sprintf(buffer, "textures/hl-%i.tga", i);
+      img.Save(freyja_rc_map(buffer), "tga");
+    }
+  }
+#endif
+  ///////////////////////////////////////////////////////////////////////
+
+
+  for (b = 0; b < hl_header->numbodyparts; b++)
+  {
+    eggBegin(FREYJA_BONE_FRAME);
+    eggBegin(FREYJA_BONE_TAG);
+
+    eggTagCenter(0.0, 0.0, 0.0);
+
+    trans.Clear();
+
+    for (v = 0; v < hl_mdl[b].numverts; v++)
+    {
+      vert = _egg->VertexAdd(hl_verts[b][v][0], hl_verts[b][v][1], 
+			     hl_verts[b][v][2]);
+
+      
+      trans.Add(v, vert->id);
+    }
+
+    for (m = 0; m < hl_mdl[b].nummesh; m++)
+    {
+      mesh = _egg->MeshNew();
+      _egg->MeshAdd(mesh);
+      _egg->TagAddMesh(tag, mesh->id);
+      grp = _egg->GroupNew();
+      _egg->GroupAdd(grp);
+      mesh->group.Add(grp->id);
+
+      for (t = 0; t < hl_mesh[b][m].numtris; t++)
+      {
+	// Clear the dictionary/indexed lists
+	vertex.Clear();
+	texel.Clear();
+
+        if (grp->vertex.SearchKey(trans[hl_tris[b][m][t].tri[0]]) == UINT_MAX)
+          grp->vertex.Add(trans[hl_tris[b][m][t].tri[0]]);
+
+        if (grp->vertex.SearchKey(trans[hl_tris[b][m][t].tri[1]]) == UINT_MAX)
+          grp->vertex.Add(trans[hl_tris[b][m][t].tri[1]]);
+
+        if (grp->vertex.SearchKey(trans[hl_tris[b][m][t].tri[2]]) == UINT_MAX)
+          grp->vertex.Add(trans[hl_tris[b][m][t].tri[2]]);
+
+	// Store vertices by true id, using translation table
+	vertex.Add(trans[hl_tris[b][m][t].tri[0]]);
+	vertex.Add(trans[hl_tris[b][m][t].tri[1]]);
+	vertex.Add(trans[hl_tris[b][m][t].tri[2]]);
+
+	st[0] = hl_tris[b][m][t].st[0][0] / 
+	  (float)hl_skin[hl_mesh[b][m].skinref].w;
+	st[1] = hl_tris[b][m][t].st[0][1] / 
+	  (float)hl_skin[hl_mesh[b][m].skinref].h;
+	texel.Add(_egg->TexelAdd(st[0], st[1]));
+	//printf("st = %f %f\n", st[0], st[1]);
+
+	st[0] = hl_tris[b][m][t].st[1][0] / 
+	  (float)hl_skin[hl_mesh[b][m].skinref].w;
+	st[1] = hl_tris[b][m][t].st[1][1] / 
+	  (float)hl_skin[hl_mesh[b][m].skinref].h;
+	texel.Add(_egg->TexelAdd(st[0], st[1]));
+	//printf("st = %f %f\n", st[0], st[1]);
+
+	st[0] = hl_tris[b][m][t].st[2][0] / 
+	  (float)hl_skin[hl_mesh[b][m].skinref].w;
+	st[1] = hl_tris[b][m][t].st[2][1] / 
+	  (float)hl_skin[hl_mesh[b][m].skinref].h;
+	texel.Add(_egg->TexelAdd(st[0], st[1]));
+	//printf("st = %f %f\n", st[0], st[1]);
+
+	mesh->polygon.Add(_egg->PolygonAdd(&vertex, &texel, 
+					   hl_mesh[b][m].skinref));
+      }
+    }
+  }
+
+  return 0;
+}
+#endif
+
+#endif
 
 #ifdef UNIT_TEST_HALFLIFE
 int main(int argc, char *argv[])

@@ -13,14 +13,17 @@ lazybuild:
 	@-make plugins; make install-plugins
 	@-cd ..
 
+	@-printf "Building Freyja\n"
+	@-cd Freyja; ./autogen.sh; make
 	@-printf "Installing Freyja\n"
-	@-cd Freyja; ./autogen.sh; make; make install
+	@-make install
 	@-cd ..
 
-	@-printf "\n\n o If your build failed make sure you have a complete glext.h header\n"
+	@-printf "\n\n o If your build failed:\n"
+	@-printf "       * Make sure you have a complete glext.h header\n"
+	@-printf "       * Look in Freyja/Makefile for options to disable\n"
 	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
-#	@-/sbin/ldconfig
 
 clean:
 	@-cd mstl; make clean
@@ -33,6 +36,25 @@ clean:
 	@-cd ..
 
 	@-cd Freyja; make clean
+	@-cd ..
+
+	@-cd egg_plugins; make clean
+	@-cd ..
+
+tarball:
+	@-cd mstl; make tarball
+	@-cd ..
+
+	@-cd libhel; make tarball
+	@-cd ..
+
+	@-cd libfreyja; make tarball
+	@-cd ..
+
+	@-cd Freyja; make tarball
+	@-cd ..
+
+	@-cd egg_plugins; make tarball
 	@-cd ..
 
 user-install:
