@@ -193,9 +193,10 @@ int freyja_model__nif4_check(char *filename)
 
 int freyja_model__nif4_import(char *filename)
 {
+	Vector<unsigned int> vertices;
+	Vector<unsigned int> texcoords;
 	Nif4 nif4;
 	long i, j, idx;
-
 
 
 	if (nif4.loadModel(filename) == false)
@@ -203,15 +204,16 @@ int freyja_model__nif4_import(char *filename)
 
 	freyjaBegin(FREYJA_MODEL);
 
-	for (i = nif4.mNiTriShapeData.begin(); i < (long)nif4.mNiTriShapeData.end(); ++i)
-	{
-		Vector<unsigned int> vertices;
-		Vector<unsigned int> texcoords;
 
+	for (i = nif4.mNiTriShapeData.begin(); i < (int)nif4.mNiTriShapeData.end(); ++i)
+	{
 		Nif4::NiTriShapeData *data = nif4.mNiTriShapeData[i];
 
 		if (!data)
 			continue;
+
+		vertices.clear();
+		texcoords.clear();
 
 		freyjaBegin(FREYJA_MESH);
 		freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -219,13 +221,13 @@ int freyja_model__nif4_import(char *filename)
 		for (j = 0; j < data->num_vertices; ++j)
 		{
 			idx = freyjaVertex3f(data->coordinates[j].x,
-								 data->coordinates[j].y,
-								 data->coordinates[j].z);
+								 data->coordinates[j].z,
+								 data->coordinates[j].y);
 
 			freyjaVertexNormal3f(idx,
 								 data->normals[j].x,
-								 data->normals[j].y,
-								 data->normals[j].z);
+								 data->normals[j].z,
+								 data->normals[j].y);
 
 			if (data->num_uv_sets > 0)
 			{
@@ -239,13 +241,13 @@ int freyja_model__nif4_import(char *filename)
 
 		freyjaEnd(); // FREYJA_VERTEX_GROUP
 
-		for (i = 0; i < data->num_triangles; ++i)
+		for (j = 0; j < data->num_triangles; ++j)
 		{
 			freyjaBegin(FREYJA_POLYGON);
 			freyjaPolygonMaterial1i(0);
-			freyjaPolygonVertex1i(vertices[data->triangles[i].v[0]]);
-			freyjaPolygonVertex1i(vertices[data->triangles[i].v[1]]);
-			freyjaPolygonVertex1i(vertices[data->triangles[i].v[2]]);
+			freyjaPolygonVertex1i(vertices[data->triangles[j].v[0]]);
+			freyjaPolygonVertex1i(vertices[data->triangles[j].v[1]]);
+			freyjaPolygonVertex1i(vertices[data->triangles[j].v[2]]);
 			freyjaEnd(); // FREYJA_POLYGON
 		}
 
