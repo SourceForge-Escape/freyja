@@ -701,7 +701,7 @@ void mgtk_event_update_gtk_tree(mgtk_tree_t *tree,
 	}
 	else if (!store)
 	{
-		mgtk_print("mgtk_event_update_gtk_tree> ERROR: Invalid skeleton\n");
+		mgtk_print("mgtk_event_update_gtk_tree> ERROR: Invalid tree model\n");
 	}
 	else
 	{
@@ -719,13 +719,96 @@ void mgtk_event_update_gtk_tree(mgtk_tree_t *tree,
 }
 
 
-/* Mongoose 2004.10.28, 
- * FIXME Id should reference a certain treeview widget */
+void mgtk_event_update_gtk_tree_generic(GtkTreeView *gtktree, mgtk_tree_t *tree,
+										GtkTreeStore *store, GtkTreeIter root)
+{
+	GtkTreeIter child;
+	unsigned int i;
+	
+	
+	if (!tree)
+		return;
+	
+#ifdef DEBUG_UPDATE_GTK_TREE
+	mgtk_print("mgtk_event_update_gtk_tree_generic %d::\n", tree->id);
+#endif
+
+	if (tree->id == 0) // Root bone
+	{
+		store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
+								   G_TYPE_STRING,   /* Bone Name */
+    	                           G_TYPE_INT);     /* Bone Id */
+
+		gtk_tree_store_append(store, &root, NULL);
+		gtk_tree_store_set(store, &root,
+						   NAME_COLUMN, tree->label,
+						   ID_COLUMN, tree->id,
+						   -1);
+
+		for (i = 0; i < tree->numChildren; ++i)
+		{
+			mgtk_event_update_gtk_tree_generic(gtktree,
+											   &tree->children[i], store, root);
+		}
+
+		if (gtktree && store)
+		{
+			gtk_tree_view_set_model(gtktree, GTK_TREE_MODEL(store));
+		}
+	}
+	else if (!store)
+	{
+		mgtk_print("mgtk_event_update_gtk_tree_generic> ERROR: Invalid tree model\n");
+	}
+	else
+	{
+		gtk_tree_store_append(store, &child, &root);
+		gtk_tree_store_set(store, &child,
+						   NAME_COLUMN, tree->label,
+						   ID_COLUMN, tree->id,
+						   -1);
+
+		for (i = 0; i < tree->numChildren; ++i)
+		{
+			mgtk_event_update_gtk_tree_generic(gtktree,
+											   &tree->children[i], store, child);
+		}
+	}
+}
+
+
 void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree)
 {
+#ifdef GENERIC_TREE
+	Vector<GtkWidget*> *widgets;
+	GtkTreeIter root;
+	GtkWidget *test;
+	unsigned int i;
+
+
+	widgets = gWidgetMap[dialog];
+
+	if (!widgets)
+		return;
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		test = (*widgets)[i];
+
+		if (test && GTK_IS_TREE_VIEW(test))
+		{
+			mgtk_event_update_gtk_tree_generic(test, tree, NULL, root);
+		}
+		else
+		{
+			mgtk_print("mgtk_event_update_tree> %i:%p failed", id, tree);
+		}
+	}
+#else
 	GtkTreeIter root;
 
 	mgtk_event_update_gtk_tree(tree, NULL, root);
+#endif
 }
 
 

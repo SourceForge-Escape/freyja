@@ -5,6 +5,10 @@
   Project  : libmgtk
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libmgtk (0.1.0-20041126) Mongoose <mongoose@icculus.org>
+
+ 	o Genric tree widget build time option
+
  libmgtk (0.1.0-20041107) Mongoose <mongoose@icculus.org>
 
 	o Windows now callback on window close event

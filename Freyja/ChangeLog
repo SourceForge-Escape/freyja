@@ -2,8 +2,8 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   File     : ChangeLog
+  Project  : Freyja 0.3.5 'Chimera'
   Author   : Terry 'Mongoose' Hendrix II
-  Project  : Freyja
 
   Release cycle notes
      EVEN numbered releases are STABLE
@@ -23,21 +23,23 @@
  program halts, so watch your ass and use the DBC which are clearly listed
  in class headers.  If you get assertion errors testing, then email them.
 
- There is now a hacky little /tmp/Freyja.log that can be sent in with bug
- reports to help trace errors.
-	
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
-
- FIXME 
-
-	o Fork Bone model from model into seperate wrapper class for exp
-	o Merge filename and text event handlers in Control?
-	o Move more control 'stuff' out of Model into Control
-	o Bones recursively adjust on generic rotation
-	o Bones react oddly to scaling as well in scene mode
-	o Crash on mesh delete for char models
+ There is now a ~/.freyja/Freyja-chimera.log you send in with bug reports.
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+ Freyja (0.3.5-20041129) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o 'Chimera' build done now replaces this build as stable
+	o Many minor fixes, and perhaps a few regressions
+    o One day test/fix cycle for all known regressions
+    o BUGS updated
+	o New log file is now stored in ~/.freyja/ instead of /tmp
+	o Many changes to event system
+	o New color system
+	o New preferences dialog
+	o New interface
+	o New libmgtk+ widget support backported from Umbra
+
 
  Freyja (0.3.5-20041110) Mongoose <mongoose@icculus.org>
 

@@ -168,12 +168,44 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 	switch (event)
 	{
-	case eAnimationSlider:
-		if (!freyja_event_set_range(event, value, 0, eggGetNum(FREYJA_SKEL_ANIM)))
+	case 503:
+		if (value != mModel->getCurrentTextureIndex())
 		{
-			mModel->setCurrentAnimation(value);			
+			mModel->setCurrentTextureIndex(value);
 			freyja_event_gl_refresh();
-			freyja_print("Selecting animation[%i] ...", value);
+		}
+		break;
+
+
+	case eAnimationSlider:
+		if (value != mModel->getCurrentAnimationFrame())
+		{
+			mModel->setCurrentAnimationFrame(value);	
+			freyja_event_gl_refresh();
+		}
+		break;
+
+
+	case eBoneIterator:
+		if (!freyja_event_set_range(event, value, 0, eggGetNum(FREYJA_BONE)))
+		{
+			mModel->setCurrentBone(value);
+			//value = gFreyjaModel->getCurrentBone();
+			//spinbutton_value_set(event, value);
+
+			/* Mongoose 2002.08.31, Update spin buttons dependent 
+			 * on this one */
+			mModel->getBoneRotation(&x, &y, &z);
+			freyja_event_set_float(520, x);
+			freyja_event_set_float(521, y);
+			freyja_event_set_float(522, z);
+			
+			mModel->getBoneTranslation(&x, &y, &z);
+			freyja_event_set_float(510, x);
+			freyja_event_set_float(511, y);
+			freyja_event_set_float(512, z);
+			freyja_event_gl_refresh();
+			freyja_print("Selecting bone[%i] ...", value);
 		}
 		break;
 
@@ -198,35 +230,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
-	case 503:
-		if (value != mModel->getCurrentTextureIndex())
-		{
-			mModel->setCurrentTextureIndex(value);
-			freyja_event_gl_refresh();
-		}
-		break;
-
-
-	case 504:
-		if (1)//!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_BONE)))
-		{
-			mModel->setCurrentBone(value);
-			//value = gFreyjaModel->getCurrentBone();
-			//spinbutton_value_set(event, value);
-
-			/* Mongoose 2002.08.31, Update spin buttons dependent 
-			 * on this one */
-			mModel->getBoneRotation(&x, &y, &z);
-			freyja_event_set_float(520, x);
-			freyja_event_set_float(521, y);
-			freyja_event_set_float(522, z);
-			
-			mModel->getBoneTranslation(&x, &y, &z);
-			freyja_event_set_float(510, x);
-			freyja_event_set_float(511, y);
-			freyja_event_set_float(512, z);
-			freyja_event_gl_refresh();
-		}
+	case eSelectLight:
+		freyja_print("Light editing not backported");
 		break;
 
 
@@ -257,15 +262,6 @@ bool FreyjaControl::event(int event, vec_t value)
 
 	switch (event)
 	{
-	case 800:
-	case 801:
-	case 802:
-		ptr = mModel->GetLight0Pos();
-		ptr[event - 800] = value;
-		freyja_event_gl_refresh();
-		break;
-
-
 	case 510:
 	case 511:
 	case 512:
@@ -356,6 +352,15 @@ bool FreyjaControl::event(int event, vec_t value)
 
 	case 716:
 		gMaterialManager->setShininess(value);
+		freyja_event_gl_refresh();
+		break;
+
+
+	case 800:
+	case 801:
+	case 802:
+		ptr = mModel->GetLight0Pos();
+		ptr[event - 800] = value;
 		freyja_event_gl_refresh();
 		break;
 
@@ -616,6 +621,11 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+	case eOpenFileTexture:
+		mFileDialogMode = FREYJA_MODE_LOAD_TEXTURE;
+		freyja_event_file_dialog("Open texture...");
+		break;
+
 	case eOpenFile:
 		switch (mEditorMode)
 		{
@@ -716,6 +726,11 @@ bool FreyjaControl::event(int command)
 
 	case eGenerateNormals:
 		eggGenerateVertexNormals();
+		break;
+
+
+	case eGenerateCone:
+		freyja_print("eGenerateCone not backported");
 		break;
 
 
@@ -1009,6 +1024,8 @@ bool FreyjaControl::event(int command)
 			freyja_print("Vertex box select: Press agian to end selection");
 		}
 		break;
+
+
 	case CMD_MISC_TEXEL_COMBINE:
 		if (mEventMode != TEXEL_COMBINE)
 		{
@@ -1025,47 +1042,47 @@ bool FreyjaControl::event(int command)
 
 
 
-		case CMD_MISC_GEN_TEXMAP_XY:
-			mModel->generateUVMap();
-			break;
+	case CMD_MISC_GEN_TEXMAP_XY:
+		mModel->generateUVMap();
+		break;
 
 
-		case CMD_MISC_SIDES_M:
-			mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()-1);
-			freyja_print("Making %i sided polygons", 
-						mModel->getCurrentPolygonEdgeCount());
-			break;
-		case CMD_MISC_SIDES_P:
-			mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()+1);
-			freyja_print("Making %i sided polygons", 
-						mModel->getCurrentPolygonEdgeCount());
-			break;
+	case CMD_MISC_SIDES_M:
+		mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()-1);
+		freyja_print("Making %i sided polygons", 
+					 mModel->getCurrentPolygonEdgeCount());
+		break;
+	case CMD_MISC_SIDES_P:
+		mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()+1);
+		freyja_print("Making %i sided polygons", 
+					 mModel->getCurrentPolygonEdgeCount());
+		break;
 
-		case CMD_MISC_ZOOM_IN:
-			if (mRender->getZoom() <= 0.02)
-			{
-				mRender->setZoom(mRender->getZoom() + 0.0001);
-			}
-			else
-			{
-				mRender->setZoom(mRender->getZoom() + 0.01);
-			}
+	case CMD_MISC_ZOOM_IN:
+		if (mRender->getZoom() <= 0.02)
+		{
+			mRender->setZoom(mRender->getZoom() + 0.0001);
+		}
+		else
+		{
+			mRender->setZoom(mRender->getZoom() + 0.01);
+		}
 
-			freyja_event_gl_refresh();
-			break;
+		freyja_event_gl_refresh();
+		break;
 
-		case CMD_MISC_ZOOM_OUT:
-			if (mRender->getZoom() <= 0.02)
-			{
-				mRender->setZoom(mRender->getZoom() - 0.0001);
-			}
-			else
-			{
-				mRender->setZoom(mRender->getZoom() - 0.01);
-			}
+	case CMD_MISC_ZOOM_OUT:
+		if (mRender->getZoom() <= 0.02)
+		{
+			mRender->setZoom(mRender->getZoom() - 0.0001);
+		}
+		else
+		{
+			mRender->setZoom(mRender->getZoom() - 0.01);
+		}
 
-			freyja_event_gl_refresh();
-			break;
+		freyja_event_gl_refresh();
+		break;
 
 
 	case FREYJA_MODE_RENDER_BONETAG:

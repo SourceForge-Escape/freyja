@@ -1,117 +1,46 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO ( 2002.01.21 last update )
+  File     : TODO ( 2004.04.13 last update )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : Freyja 0.3.x
 
  ---------------------------------------------------------------
+	Design by contract ( DBC )
+	Do no Repeat Yourself ( DRY )
 
-  Programming wish list guidelines:
-    1. Remove duplicate functionality
-    2. Fix all FIXMEs when possible
-    3. Check assertions, when assertions are made
-    4. Audit memory managment code regularly
-    5. Replace temporary hacks with robust, clean code
-    6. Make and use test code per module/class
-    7. Abstraction is law, or something
-    8. Document as code is written
+     1. Remove duplicate functionality ( DRY )
+     2. Enforce assertions, when assertions are made ( DBC )
+     3. Audit memory managment code regularly
+     4. Unit testing
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+  General
 
- Milestones ( Public snapshot releases )
-
- [0.3.6] ( Projected release date: 2004.08.31 )
-  * API clean up!!!
-  * Colors, zoom, etc not stored with renderer
-  * Regroup by skin and vv
-  * EggPlugin for file access
-  * TransformMode -> Object Types
-  * Generic new/select/delete & copy/cut/paste
-  * Group rotate should pivot on center
-  * C-mouse1 to select object
-  * mouse1 to move object
-  * mouse2 to rotate object
-  * S-mouse1 to scale object?
-  * Generic transforms: bone / mesh / skin
-  * Skybox support?
-  * Finish Light class: applyEffect() / flickers & fx settings
-  * FileDialog import/export types dropdown use
-  * Commit generic dialogs to svn
-  * Generic editing events ( eg Select/Move/Copy object )
-  * Bug fix focus
-  * Full skeletal editing ( deforms, blending, etc )
-    * skeletal animation
-  * Better Light and Camera editing
-  * Shader editor
-  * mlisp events use only FE symbols ( will fix bugs )
-  * multiple lights and materials/shaders
-  * store texture in model
-  * add 'scrolling' back
-  * Get mesh editing back to 100%
-  * Recalc/maintain normals when rotating meshes
-  * Undo/Redo Stacks
-  * Add back Particles with GL_TRISTRIP/GL_POINTS/GL_LINES 
-  * New light and camera 3d "icons", eg directional and point
-  * Light editing tab
-  * Camera editing tab
-  * Shader editor
-  * Texture to store filename strings/keys (maybe even image 
-    buffers to allow for saving) for material use
-  * Better animation playback support
-  * Prompt to ask for file overwrite and close w/o saving
-
-
- [General]
-  * Roll over to new backend:
-    libfreyja_model, libfreyja_particle, libfreyja_render, etc
-  * Replace freyja_egg Camera and Light classes with libfreyja_*
-  * Replace freyja_egg Particle class with libfreyja_particle
-  * Seperate skeletal animation type for static, blending, and deforms?
-  * Rewrite all entry code to focus on backend as main entry 
-    and start interface from it, most likey using resource
-    for total gui control
-  * Bone editing support just does view/edit not create in interface
-  * Resolve animation/model editing interface/rendering
-    eg meshes can't be edited w/ boneframes loaded
-  * Control::Event should be able to control the
-    event system to be able to consume events
-  * Normals editing support
-  * Edit by vertex groups
-  * Also add interactive sphere primative generation as an egg plugin
-    It's a good time to flesh out plugin's interactive API
-  * Bbox selected vertex 'group' (list) operations
-  * Recently used files menu list
-  * Material support does support bump/env mapping
-  * CSG support?
-
-
- [Event system]
-  * Prune events down
-  * Wrap Resource to hide more of the event system from interface
-    programmer
-  * Replace gobal extern data use with event_ and querey_ func
-  * Add modifer key support to Resource
-  * Refine event system to capture it more acurately for Undo/Redo
+  * Move to Egg v9.00 and drop all the problems with 8.10
+  * Undo system, refine event system
+  * Interactive plugins
+  * Recently used files list
+  * Light editing mode
   * Remove all unused/obsolete events and cmds
-  * Pull view stuff out of model (eg zoom, plane)
-  * Pull model stuff out of view (eg polybuild, etc )
-  * Replace model editing system mouse interface and projection
+  * Mouse interface needs to replace plane based editing
 
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+  Backend
 
- [Backend]
   * Bring file format export support at least up to GooseEgg's level
   * List interface to objects (only allow switching to next existing)
-  * PKZIP file browsing ( for compressed files )
-  * Generate vertices in XY plane from image alpha/color
-    ( Generate a 3d sprite from an image )
-  * Model editing util plugin interface ( tool plugins )
+  * Model editing util plugin interface
+  * Undo system
+  * Class EggNetPlugin - TCP/IP message passing for modules
+  * Egg v9.00 prototype migration, replace v8.xx API
 
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+  Interface
 
- [Interface]
-  * Trackball emulation for mouse rotation?
-  * Cache the mesh/scene transforms
-  * Event timer to stop blocking events when modeler is slow
+  * Arcball for mouse rotation
+  * Generic rotate/translate/scale mouse interface (mesh/tag/etc)
+  * Use event timer for idle rotation and animation display
   * Add multiwindow modeling support back?
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
