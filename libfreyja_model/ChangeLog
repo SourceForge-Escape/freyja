@@ -2,7 +2,7 @@
 
   File     : ChangeLog
   Author   : Terry 'Mongoose' Hendrix II
-  Project  : libFreyja_Egg
+  Project  : libfreyja
 
         Release cycle notes
           EVEN numbered releases are STABLE
@@ -19,8 +19,27 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ TODO
+	o Port Freyja to this new library
+	o Rename this source tree in svn
+	o Rewrite plugins to use this new library's new features
+	o Move plugin source tree under this source tree
+	o Move old freyja_image plugins to plugins
+	o Port dRead system from my UTPackage to EggReader and move here
 
- Freyja (0.3.5-20040815) Mongoose <mongoose@icculus.org>
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+ libfreyja (0.8.14 | 0.9.0 20040821) Mongoose <mongoose@icculus.org>
+
+	o EggFileWriter and EggFileReader don't use memmapping as yet
+	o EggFileWriter, EggFileReader, EggImage commited to svn
+	o libfreyja 0.8.14: libfreyja_model 0.8.12 + libfreyja_image merge
+	o Lots of clean up in tree for public release ( removed dead code )
+	o Egg 9 spec extended with UVMap and other content creation types
+	o libfreyja 0.9.0: libfreyja_model 0.9.0 + libfreyja_image merge
+
+
+ freyja_model (0.8.12-20040815) Mongoose <mongoose@icculus.org>
 
 	o Fix for bone names via extention for 8.12 model spec
 

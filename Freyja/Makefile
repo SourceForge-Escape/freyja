@@ -74,8 +74,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ \
-		-lGL -lGLU -lm -lz \
-		-lhel0 -lfreyja_model -lfreyja_image
+		-lGL -lGLU -lm -lz -lhel0 -lfreyja8
 LD_FLAGS += -Wl,-z,defs
 LD_FLAGS += -Wl,-O1
 

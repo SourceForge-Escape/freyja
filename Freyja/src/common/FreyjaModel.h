@@ -30,8 +30,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 #define GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 
-#include <freyja_model/EggPlugin.h>
-#include <freyja_model/Egg.h>
+#include <freyja8/EggPlugin.h>
+#include <freyja8/Egg.h>
 #include "Light.h"
 #include "freyja_events.h"
 
