@@ -56,6 +56,10 @@ vec4_t FreyjaRender::mColorVertexHighlight;
 vec4_t FreyjaRender::mColorAxisX;
 vec4_t FreyjaRender::mColorAxisY;
 vec4_t FreyjaRender::mColorAxisZ;
+unsigned int FreyjaRender::mSelectedBone = 0;
+unsigned int FreyjaRender::mBoneRenderType = 1;
+unsigned char FreyjaRender::mJointRenderType = 1;
+int FreyjaRender::mPatchDisplayList = -1;
 
 
 #define SCALE_ENV   20.0
@@ -69,8 +73,6 @@ vec4_t FreyjaRender::mColorAxisZ;
 #define AXIS_ICON_MID 20.0
 #define AXIS_ICON_MAX 15.0
 
-
-
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
 const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
@@ -80,15 +82,7 @@ const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
 const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
 const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
 const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
-const float LIGHT_NEXT_PURPLE[] = {0.4f, 0.4f, 0.6f, 1.0f};
-
-unsigned int gSelectedBone = 0;
-unsigned int gBoneRenderType = 1;
-unsigned char gJointRenderType = 1;
-int gPatchDisplayList = -1;
-
-BezierPatch gTestPatch;
-
+const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
 
 
 void drawPatch(BezierPatch &patch)
@@ -203,8 +197,8 @@ unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs)
 
 void test_patch()
 {
-	gPatchDisplayList = 1;
-	generate_bezier_patch_list(gTestPatch, 7);
+	FreyjaRender::mPatchDisplayList = 1;
+	generate_bezier_patch_list(FreyjaModel::gTestPatch, 7);
 }
 
 
@@ -465,7 +459,7 @@ void FreyjaRender::drawLights()
 {
 	if (mRenderMode & RENDER_LIGHTING)
 	{
-		float *test = _model->GetLight0Pos();
+		float *test = _model->mLight0Pos;
 		
 		glPushMatrix();
 		glTranslated(test[0], test[1], test[2]);
@@ -474,7 +468,7 @@ void FreyjaRender::drawLights()
 		glPopMatrix();
 		
 		glEnable(GL_LIGHTING);
-		glLightfv(GL_LIGHT0, GL_POSITION, _model->GetLight0Pos());
+		glLightfv(GL_LIGHT0, GL_POSITION, _model->mLight0Pos);
 	}
 }
 
@@ -505,7 +499,7 @@ void drawSkeleton(Vector<egg_tag_t *> *taglist,
 			glColor3fv(WHITE);
 		}
 		
-		mglDrawJoint(gJointRenderType, tag->center);
+		mglDrawJoint(FreyjaRender::mJointRenderType, tag->center);
 		
 		if (tag->slave.empty())
 			continue;
@@ -556,11 +550,11 @@ void drawSkeleton2(Vector<egg_tag_t *> *taglist,
 	pos[2] = tag->center[2] * scale;
 
 	/* Render bone and joint */
-	(gSelectedBone == currentBone) ? glColor3fv(RED) : glColor3fv(GREEN);
-	mglDrawJoint(gJointRenderType, pos);
+	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(RED) : glColor3fv(GREEN);
+	mglDrawJoint(FreyjaRender::mJointRenderType, pos);
 
-	(gSelectedBone == currentBone) ? glColor3fv(CYAN) : glColor3fv(WHITE);
-	mglDrawBone(gBoneRenderType, pos);
+	(FreyjaRender::mSelectedBone == currentBone) ? glColor3fv(CYAN) : glColor3fv(WHITE);
+	mglDrawBone(FreyjaRender::mBoneRenderType, pos);
 
 	/* Transform children bones */
 	glPushMatrix();
@@ -928,8 +922,8 @@ void FreyjaRender::Display()
 		if (mRenderMode & RENDER_BONES)
 		{
 			glLineWidth(3.0f);
-			gSelectedBone = _model->getCurrentBone();
-			drawSkeleton2((_model->CurrentEgg())->TagList(), 0, mZoom);
+			FreyjaRender::mSelectedBone = _model->getCurrentBone();
+			drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
 
 			glLineWidth(_default_line_width);
 		}
@@ -939,7 +933,7 @@ void FreyjaRender::Display()
 
 		glScalef(mZoom, mZoom, mZoom);
 
-		DrawModel(_model->CurrentEgg());
+		DrawModel(_model->getCurrentEgg());
 		glPopMatrix();
 		break;
 	case VIEWMODE_MODEL_EDIT:
@@ -1326,7 +1320,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 
 void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 {
-	Egg *egg = _model->CurrentEgg();
+	Egg *egg = _model->getCurrentEgg();
 	egg_polygon_t *polygon;
 	egg_group_t *grp;
 	unsigned int i;
@@ -1431,10 +1425,10 @@ void FreyjaRender::DrawModel(Egg *egg)
 
 	current_tag = _model->getCurrentBone();
 
-	if (gPatchDisplayList > 0)
+	if (FreyjaRender::mPatchDisplayList > 0)
 	{
-		glCallList(gTestPatch.displayList);
-		drawPatch(gTestPatch);
+		glCallList(FreyjaModel::gTestPatch.displayList);
+		drawPatch(FreyjaModel::gTestPatch);
 	}
 
 	glPushMatrix();
@@ -1659,7 +1653,7 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 
    switch (_model->CurrentPlane())
    {
-   case Egg::PLANE_XY:
+   case PLANE_XY:
 		x = (int)_scroll[0];
 		y = (int)_scroll[1];
 
@@ -1675,7 +1669,7 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 		break;
 
 
-   case Egg::PLANE_XZ:
+   case PLANE_XZ:
 		x = (int)_scroll[0];
 		y = (int)_scroll[2];
 
@@ -1691,7 +1685,7 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 		break;
 
 
-   case Egg::PLANE_ZY:
+   case PLANE_ZY:
 	   x = (int)_scroll[2];
 	   y = (int)_scroll[1];
 
@@ -1769,12 +1763,12 @@ void FreyjaRender::DrawWindow(int plane)
 
 	switch (plane)
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
-	case Egg::PLANE_ZY:
+	case PLANE_ZY:
 		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
 	}
@@ -1787,14 +1781,14 @@ void FreyjaRender::DrawWindow(int plane)
 
 	switch (plane)
 	{
-	case Egg::PLANE_XY: // front
+	case PLANE_XY: // front
 		glTranslatef(_scroll[0], _scroll[1], 0.0);
 		break;
-	case Egg::PLANE_XZ: // top
+	case PLANE_XZ: // top
 		glTranslatef(_scroll[0], _scroll[2], 0.0);
 		glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		glTranslatef(_scroll[2], _scroll[1], 0.0);
 		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
@@ -1802,15 +1796,15 @@ void FreyjaRender::DrawWindow(int plane)
 
 	if (mRenderMode & RENDER_BONES)
 	{
-		gSelectedBone = _model->getCurrentBone();
-		drawSkeleton2((_model->CurrentEgg())->TagList(), 0, mZoom);
+		FreyjaRender::mSelectedBone = _model->getCurrentBone();
+		drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
 	}
 
 	drawLights();
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	DrawModel(_model->CurrentEgg());
+	DrawModel(_model->getCurrentEgg());
 }
 
 
@@ -1844,7 +1838,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 void FreyjaRender::DrawTextureEditWindow(unsigned int width, 
 										 unsigned int height)
 {
-	Egg *egg = _model->CurrentEgg();
+	Egg *egg = _model->getCurrentEgg();
 	egg_texel_t *texel = NULL;
 	egg_polygon_t *poly = NULL;
 	float x, y;

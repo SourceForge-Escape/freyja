@@ -31,6 +31,61 @@
 
 #include <mstl/Vector.h>
 
+typedef long index_t;
+
+#ifdef POST_CHIMERA_PLUS_UMBRA
+class FreyjaVertex
+{
+public:
+
+	~FreyjaVertex()
+	{
+		weights.erase();
+		polygonRef.erase();
+	}
+
+	class Weight
+	{
+	public:
+		Weight(index_t bone, vec_t weight)
+		{
+			mBone = bone;
+			mWeight = weight;
+		}
+
+		vec_t mWeight;             /* Weight for vertex use */
+		index_t mBone;             /* Bone id */
+	};
+
+	index_t mesh, id;              /* Unique identifier, mesh[i].vertices[j] */
+	vec3_t xyz;                    /* Position in 3 space */
+	vec3_t normal;                 /* Normal vector */
+	vec3_t uvw;                    /* Texture coordinates */
+
+	Vector<Weight *> weights;      /* Vector of weights */
+
+	Vector <index_t> polygonRef;   /* Ids of polygons referencing vertex */
+};
+
+class FreyjaPolygon
+{
+public:
+
+	unsigned long flags;
+
+	index_t mesh, id;                 /* Unique identifier */
+
+	index_t material;                 /* Material id, if (mat != mesh.mat)
+									   * to support multimaterial meshes */
+
+	Vector <index_t> vertices;        /* Vertices composing polygon */
+
+	Vector <vec3_t *> texcoords;      /* Polymapped Texcoords (optional) */
+
+	Vector <vec4_t *> colors;         /* Colors for polygon (optional) */
+};
+#endif
+
 
 class FreyjaWeight
 {
@@ -163,7 +218,7 @@ class FreyjaMesh
 
 	void getNormal(unsigned int index, vec3_t xyz)
 	{
-		if (index*3 > normals.end())
+		if (index*3 > normals.end() || !getNormalCount())
 			return;
 
 		vec_t *array = normals.getVectorArray();
@@ -175,7 +230,7 @@ class FreyjaMesh
 
 	void getTexCoord(unsigned int index, vec2_t uv)
 	{
-		if (index*2 > texcoords.end())
+		if (index*2 > texcoords.end() || !getTexCoordCount())
 			return;
 
 		vec_t *array = texcoords.getVectorArray();
@@ -186,7 +241,7 @@ class FreyjaMesh
 
 	void getVertex(unsigned int index, vec3_t xyz)
 	{
-		if (index*3 > vertices.end())
+		if (index*3 > vertices.end() || !getVertexCount())
 			return;
 
 		vec_t *array = vertices.getVectorArray();

@@ -28,14 +28,13 @@
 #include "MaterialManager.h"
 #include "freyja_events.h"
 
+
 arg_list_t *freyja_rc_color(arg_list_t *args);
 
-int gSkelTreeWidgetIndex;
 
 Resource gResource;
-FreyjaModel *gFreyjaModel = 0x0;
-FreyjaRender *gFreyjaRender = 0x0;
 FreyjaControl *gFreyjaControl = 0x0;
+int gSkelTreeWidgetIndex;
 
 
 void setColor(vec4_t dest, vec4_t color)
@@ -195,14 +194,15 @@ void mgtk_handle_file_dialog_selection(char *filename)
 
 void mgtk_handle_gldisplay()
 {
-	gFreyjaRender->Display();
+	if (gFreyjaControl)
+		gFreyjaControl->updateDisplay();
 }
 
 
 void mgtk_handle_glresize(unsigned int width, unsigned int height)
 {
 	if (gFreyjaControl)
-		gFreyjaRender->Reshape(width, height);
+		gFreyjaControl->resizeDisplay(width, height);
 }
 
 
@@ -676,16 +676,6 @@ void freyja_print(char *format, ...)
 
 void freyja_event_shutdown()
 {
-	if (gFreyjaRender)
-	{
-		delete gFreyjaRender;
-	}
-
-	if (gFreyjaModel)
-	{
-		delete gFreyjaModel;
-	}
-
 	if (gFreyjaControl)
 	{
 		delete gFreyjaControl;
@@ -911,18 +901,6 @@ void event_register_control(FreyjaControl *c)
 }
 
 
-void event_register_render(FreyjaRender *r)
-{
-	gFreyjaRender = r;
-}
-
-
-void event_register_model(FreyjaModel *m)
-{
-	gFreyjaModel = m;
-}
-
-
 void freyja_event_file_dialog_notify(char *filename)
 {
 	if (gFreyjaControl)
@@ -932,27 +910,15 @@ void freyja_event_file_dialog_notify(char *filename)
 
 void mgtk_event_gldisplay()
 {
-	if (gFreyjaRender)
-	{
-		gFreyjaRender->Display();
-	}
-	else
-	{
-		printf("event_display> Call to NULL Renderer\n");
-	}
+	if (gFreyjaControl)
+		gFreyjaControl->updateDisplay();
 }
 
 
 void mgtk_event_glresize(unsigned int width, unsigned int height)
 {
-	if (gFreyjaRender)
-	{
-		gFreyjaRender->Reshape(width, height);
-	}
-	else
-	{
-		printf("!event_resize> Call to NULL Renderer\n");
-	}
+	if (gFreyjaControl)
+		gFreyjaControl->resizeDisplay(width, height);
 }
 
 

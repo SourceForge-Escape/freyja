@@ -291,13 +291,6 @@ public:
 		SCALE_ABOUT_CENTER  = 4
 	};
 	
-	typedef enum egg_plane { 
-		
-		PLANE_XY = 0, 
-		PLANE_ZY = 1, 
-		PLANE_XZ = 2
-	};
-
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -329,43 +322,6 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
-
-	egg_group_t *getNearestGroup(vec_t x, vec_t y, egg_plane plane);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest group to x, y in given plane
-	 *        ( XY, YZ, XZ )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	egg_tag_t *getNearestTag(vec_t x, vec_t y, egg_plane plane);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest tag to x, y in given plane
-	 *        ( XY, YZ, XZ )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	egg_vertex_t *getNearestVertex(egg_group_t *group, 
-								   vec_t x, vec_t y, egg_plane plane);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns nearest vertex to x, y in given plane
-	 *        ( XY, YZ, XZ )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.11.29: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	void print();
 	/*------------------------------------------------------
