@@ -134,12 +134,12 @@ unsigned int freyjaFlags();
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaGetCount(freyja_object_t type);
+long freyjaGetCount(freyja_object_t type);
 /*------------------------------------------------------
  * Pre  : Type is valid freyja plugin enum
  * Post : Returns total number of objects of type in 
  *        parent frame type eg [model]'s meshes
- *        Returns PLUGIN_ERROR on error
+ *        Returns FREYJA_PLUGIN_ERROR on error
  *
  *-- History ------------------------------------------
  *
@@ -147,12 +147,12 @@ unsigned int freyjaGetCount(freyja_object_t type);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaGetCurrent(freyja_object_t type);
+long freyjaGetCurrent(freyja_object_t type);
 /*------------------------------------------------------
  * Pre  : Complex type passed
  * Post : Returns id of current internal complex type
  *        ( last generated )
- *        Returns PLUGIN_ERROR on error
+ *        Returns FREYJA_PLUGIN_ERROR on error
  *
  *-- History ------------------------------------------
  *
@@ -168,7 +168,7 @@ long freyjaGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz);
 
 long freyjaGetBoneTranslation3fv(unsigned int index, vec3_t xyz);
 
-long freyjaGetBoneMesh1u(unsigned int item, unsigned int *value);
+long freyjaGetBoneMeshIndex(unsigned int element);
 /*------------------------------------------------------
  * Pre  : Bone selected
  *        Value set to Mesh id of Bone's mesh_list[item]
@@ -203,7 +203,8 @@ void freyjaGetTexCoord2fv(unsigned int index, vec2_t uv);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaGetVertex3fv(long index, vec3_t xyz);
+void freyjaGetVertexByIndex3fv(long index, vec3_t xyz);
+void freyjaGetVertex3fv(vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : vertex[index] exists
  * Post : Sets passed float array to vertex pos
@@ -214,8 +215,7 @@ void freyjaGetVertex3fv(long index, vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaGetPolygon1u(freyja_object_t type, int item, 
-								unsigned int *value);
+long freyjaGetPolygon1u(freyja_object_t type, long item, long *value);
 /*------------------------------------------------------
  * Pre  : Type is either vertex or texel
  *        Item is index into polygon's type list 
@@ -246,11 +246,11 @@ unsigned int freyjaGetPolygon3f(freyja_object_t type, int item, float *value);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaGetBoneMeshCount();
+long freyjaGetBoneMeshCount();
 /*------------------------------------------------------
  * Pre  : Bone selected
  * Post : Returns number of Meshes in this Bone
- *        Returns PLUGIN_ERROR if Bone doesn't exist
+ *        Returns FREYJA_PLUGIN_ERROR if Bone doesn't exist
  *
  *-- History ------------------------------------------
  *
@@ -258,11 +258,10 @@ unsigned int freyjaGetBoneMeshCount();
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaGetBoneRotate3f(float *x, float *y, float *z);
+void freyjaGetBoneRotate3f(vec_t *x, vec_t *y, vec_t *z);
 /*------------------------------------------------------
  * Pre  : Bone selected
  * Post : Gets current tag's rotation in eular angles
- *        Returns PLUGIN_ERROR if Bone doesn't exist
  *
  *-- History ------------------------------------------
  *
@@ -350,8 +349,8 @@ long freyjaCriticalSection(freyja_lock_t request);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaNormal3f(vec_t x, vec_t y, vec_t z);
-unsigned int freyjaNormal3fv(vec3_t xyz);
+long freyjaNormal3f(vec_t x, vec_t y, vec_t z);
+long freyjaNormal3fv(vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : (x,y,z) is a valid normal vector
  * Post : A new normal is created in the mesh
@@ -363,8 +362,8 @@ unsigned int freyjaNormal3fv(vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaTexCoord2f(vec_t u, vec_t v);
-unsigned int freyjaTexCoord2fv(vec2_t uv);
+long freyjaTexCoord2f(vec_t u, vec_t v);
+long freyjaTexCoord2fv(vec2_t uv);
 /*------------------------------------------------------
  * Pre  : s, t are 0.0 to 1.0 texels
  * Post : A new texel is created in the model
@@ -447,6 +446,28 @@ void freyjaPolygonMaterial1i(long id);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaMeshTreeAddFrame(vec_t x, vec_t y, vec_t z);
+/*------------------------------------------------------
+ * Pre  : freyjaBegin(FREYJA_MESHTREE_ANIM);
+ * Post : Adds a new meshtree frame to meshtree
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.11.18: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyjaMeshTreeFrameAddBone(long tag);
+/*------------------------------------------------------
+ * Pre  : eggBegin(FREYJA_MESHTREE_ANIM_FRAME);
+ * Post : Appends tag to mesh tree frame
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.11.18: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
 int freyjaTextureFilename1s(char *string);
 
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
@@ -459,7 +480,7 @@ void freyjaSetVertex3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
 
 
-void freyjaBoneParent(int index);
+void freyjaBoneParent(long index);
 
 void freyjaBoneName(char *name);
 
@@ -536,7 +557,7 @@ void freyjaBoneRotateQuaternion4fv(vec4_t wxyz);
 
 void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
 
-//void freyjaMeshFlags1u(unsigned int flags);
+void freyjaMeshFlags1u(unsigned int flags);
 /*------------------------------------------------------
  * Pre  : Pass valid freyja_mesh_flags_t's bitmap
  * Post : Sets flags for current mesh
@@ -549,6 +570,26 @@ void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
 
 }
 
-Vector<long> &freyjaVertexPolygonRef();
+
+/* Mongoose 2004.12.19, 
+ * C++ fun */
+
+Vector<long> &freyjaGetVertexPolygonRef();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns a list of indices of polygons that
+ *        use current vertex in iterator
+ *
+ *        List can be empty
+ *
+ *-- History ------------------------------------------
+ *
+ * 2004.12.17:
+ * Mongoose - Created, wrapper for old Egg style
+ *            reverse reference system ( very handy )
+ ------------------------------------------------------*/
+
+
+
 
 #endif
