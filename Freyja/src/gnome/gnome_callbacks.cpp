@@ -1054,7 +1054,7 @@ gint spinbutton_float_event(GtkSpinButton *spin, gpointer event_id)
 		test[GPOINTER_TO_INT(event_id)-800] = new_value;
 		event_refresh();
 		break;
-	case eZOOM:
+	case eZoom:
 		gFreyjaControl->setZoom(new_value);
 		event_refresh();
 		break;
@@ -1369,4 +1369,18 @@ int main(int argc, char *argv[])
 	//gdk_threads_leave();
 
 	return 0;
+}
+
+
+int confirmDialog(char *dialog_icon,
+				  char *information_message, 
+				  char *question_message,
+				  char *cancel_icon, char *cancel_text,
+				  char *accept_icon, char *accept_text)
+{
+	return mgtk_create_confirm_dialog(dialog_icon,
+									  information_message, 
+									  question_message,
+									  cancel_icon, cancel_text,
+									  accept_icon, accept_text);
 }

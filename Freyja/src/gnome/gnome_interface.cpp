@@ -260,6 +260,62 @@ GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size)
 // Dialogs
 /////////////////////////////////////////////////////////////
 
+int mgtk_create_confirm_dialog(char *dialog_icon,
+							   char *information_message, 
+							   char *question_message,
+							   char *cancel_icon, char *cancel_text,
+							   char *accept_icon, char *accept_text)
+{
+	GtkWidget *dialog, *icon, *info, *question, *cancel, *accept, *hbox;
+	int ret = 0;
+
+	dialog = gtk_dialog_new();
+
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_ref(hbox);
+	gtk_object_set_data_full(GTK_OBJECT(GTK_DIALOG(dialog)->vbox), 
+							 "hbox1", hbox, (GtkDestroyNotify)gtk_widget_unref);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), 
+					   hbox, FALSE, TRUE, 0);
+
+	icon = mgtk_create_icon(dialog_icon, GTK_ICON_SIZE_DIALOG);
+
+	info = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(info), information_message);
+	gtk_label_set_selectable(GTK_LABEL(info), TRUE);
+
+	question = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(question), question_message);
+	gtk_label_set_selectable(GTK_LABEL(question), TRUE);
+
+	gtk_container_add(GTK_CONTAINER(hbox), icon);
+	gtk_container_add(GTK_CONTAINER(hbox), info);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), question);
+	cancel = gtk_dialog_add_button(GTK_DIALOG(dialog), cancel_text, 0);
+	accept = gtk_dialog_add_button(GTK_DIALOG(dialog), accept_text, GTK_RESPONSE_ACCEPT);
+	// FIXME: Add icons to buttons here, or roll own dialog button code
+	gtk_widget_show_all(dialog);
+
+
+	/* Force user to close this dialog by stopping other events */
+	switch (gtk_dialog_run(GTK_DIALOG(dialog)))
+	{      
+	case GTK_RESPONSE_ACCEPT:
+		ret = 1;
+		break;
+	default:
+		ret = 0;
+	}
+
+	gtk_widget_destroy(dialog);
+
+	return ret;
+}
+
+
+
 void mgtk_create_info_dialog(char *message)
 {
 	GtkWidget *about, *label;

@@ -72,59 +72,45 @@
 	(handlebox 1
 	(menubar
 		(submenu "_File"
-			(menu_item "_New"        "C-n"		EVENT_NEW_FILE  "gtk-new")
-			(menu_item "_Open..."    "C-o"		EVENT_OPEN_FILE "gtk-open")
-			(menu_item "Ap_pend..."  			-1 "gtk-paste")
+			(menu_item "_New"        "C-n"		eNewFile	"gtk-new")
+			(menu_item "_Open..."    "C-o"		eOpenFile	"gtk-open")
+			(menu_item "Ap_pend..."  			eAppendFile	"gtk-paste")
 			(menu_seperator)
-			(menu_item "_Save"       "C-s"		EVENT_SAVE_FILE "gtk-save")
-			(menu_item "Save _As..." "S-C-s"	EVENT_SAVE_FILE "gtk-save-as")
-			(menu_item "_Revert"     			-1 "gtk-revert-to-saved")
+			(menu_item "_Save"       "C-s"		eSaveFile	"gtk-save")
+			(menu_item "Save _As..." "S-C-s"	eSaveFile	"gtk-save-as")
+			(menu_item "_Revert"     			eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
-			(menu_item "Proper_ties"	 CMD_MISC_DISPLAY_INFO "gtk-properties")
+			(menu_item "Proper_ties"			eInfo		"gtk-properties")
 
-			(menu_item "_Import"     "C-i"		-1 "gtk-redo")
-			(menu_item "_Export"     "C-e"		-1 "gtk-undo")
+			(menu_item "_Import"     "C-i"		eImportFile	"gtk-redo")
+			(menu_item "_Export"     "C-e"		eExportFile	"gtk-undo")
 			(menu_seperator)
-			(menu_item "_Close"      "C-w"		-1 "gtk-close")
-			(menu_item "_Quit"       "C-q"		CMD_MAIN_SHUTDOWN "gtk-quit"))
+			(menu_item "_Close"      "C-w"		eCloseFile	"gtk-close")
+			(menu_item "_Quit"       "C-q"		eShutdown	"gtk-quit"))
 
 
 		(submenu "_Edit"
-
-			(menu_item "Take _Screenshot"  CMD_MISC_SCREENSHOT "gtk-screenshot")
-
+			(menu_item "Take _Screenshot" 		eScreenShot	"gtk-screenshot")
 			(menu_seperator)
-
-			(menu_item "_Undo"     "C-z"		-1 "gtk-undo")
-			(menu_item "_Redo"     "S-C-z"		-1 "gtk-redo")
-
+			(menu_item "_Undo"		"C-z"		eUndo		"gtk-undo")
+			(menu_item "_Redo"		"S-C-z"		eRedo		"gtk-redo")
 			(menu_seperator)
-
-			(menu_item "Cu_t"     	"C-x"		-1 "gtk-cut")
-			(menu_item "_Copy" 	    "C-c"		-1 "gtk-copy")
-			(menu_item "_Paste"     "C-v"		-1 "gtk-paste")
-			(menu_item "_Delete"    "C-d"		-1 "gtk-delete")
-
+			(menu_item "Cu_t"     	"C-x"		eCut		"gtk-cut")
+			(menu_item "_Copy" 	    "C-c"		eCopy		"gtk-copy")
+			(menu_item "_Paste"     "C-v"		ePaste		"gtk-paste")
+			(menu_item "_Delete"    "C-d"		eDelete		"gtk-delete")
 			(menu_seperator)
-
-			(menu_item "Select _All" "C-a"		-1 "gtk-select-table")
-
+			(menu_item "Select _All" "C-a"		eSelectAll	"gtk-select-table")
 			(menu_seperator)
+			(menu_item "Pr_eferences"    		eConfig		"gtk-preferences"))
 
-			(menu_item "Pr_eferences"    		-1 "gtk-preferences"))
 
 		(submenu "_View"
-
+			;; These should use check menus here -- they are toggles!
 			(menu_seperator)
-
-			(menu_item "_Fullscreen" "M-E" CMD_TOGGLE_FULLSCREEN
-				"gtk-fullscreen")
-
+			(menu_item "_Fullscreen" "M-E"		eFullscreen	"gtk-fullscreen")
 			(menu_seperator)
-
-			;; These should use check menus!
 			(menu_item "_Grid"	10 FREYJA_MODE_RENDER_GRID)
-
 			(submenu "_Mesh"
 				(menu_item "_Points"	10 FREYJA_MODE_RENDER_POINTS)
 				(menu_item "_Wireframe"	10 FREYJA_MODE_RENDER_WIREFRAME)
@@ -133,26 +119,23 @@
 				(menu_item "_Texture"	10 FREYJA_MODE_RENDER_TEXTURE)
 				(menu_item "_Lighting"	10 FREYJA_MODE_RENDER_LIGHTING)
 				(menu_item "_Material"	10 FREYJA_MODE_RENDER_MATERIAL))
-
 			(menu_item "_Skeleton"		10 FREYJA_MODE_RENDER_BONETAG)
-
 			(submenu "_Joint"
-				(menu_item "_Point"		EVENT_MISC  VIEW_JOINT1)
-				(menu_item "_Sphere"		EVENT_MISC  VIEW_JOINT2)
-				(menu_item "_Axes"		EVENT_MISC  VIEW_JOINT3))
-
+				(menu_item "_Point"		ePointJoint		" ")
+				(menu_item "_Sphere"	eSphereJoint	" ")
+				(menu_item "_Axes"		eAxisJoint		" "))
 			(submenu "_Bone"
-				(menu_item "_Line"		EVENT_MISC  VIEW_BONE1)
-				(menu_item "_PolyMesh" 	EVENT_MISC  VIEW_BONE2)))
+				(menu_item "_Line"		eLineBone		" ")
+				(menu_item "_PolyMesh" 	ePolyMeshBone	" ")))
 
 
 		(submenu "_Tools"
 			(submenu "_Generate"
-				(menu_item "_Normals"  EVENT_MISC  CMD_MISC_GEN_NORMALS)
-				(menu_item "_Cube"     EVENT_MESH  CMD_MESH_GENERATE_CUBE)
-				(menu_item "_TriSrip"  EVENT_MESH  CMD_MESH_GENERATE_TRIS)
-				(menu_item "C_ylinder" EVENT_MESH  CMD_MESH_GENERATE_CYLINDER)
-				(menu_item "_Sphere"   EVENT_MESH  CMD_MESH_GENERATE_SPHERE))
+				(menu_item "_Normals"	eGenerateNormals	"gtk-polygon")
+				(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
+				(menu_item "_TriSrip"	eGenerateTriStrip	"gtk-polygon")
+				(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
+				(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
 
 			(menu_seperator)
 
@@ -187,9 +170,8 @@
 		(menu_seperator)
 
 		(submenu "_Help"
-			(menu_item "_Contents"	"F1"	EVENT_HELP "gtk-help")
-			; (menu_item "_Help chat"			CMD_MISC_IRC_HELP "gtk-chat")
-			(menu_item "_About"  			CMD_MISC_ABOUT "gtk-about"))))
+			(menu_item "_Contents"	"F1"	eHelp "gtk-help")
+			(menu_item "_About"  			eAbout "gtk-about"))))
 
 
 		;; Toolbar
@@ -199,17 +181,14 @@
 
 			(toolbar
 
-				(toolbar_button "gtk-new" "New"
-					"New document"
-				    EVENT_MAIN  EVENT_NEW_FILE)
+				(toolbar_button "gtk-new" "New"	
+					"New document"		EVENT_MAIN eNewFile)
 
 				(toolbar_button "gtk-open" "Open..."
-					"Open document..."
-				    EVENT_MAIN  EVENT_OPEN_FILE)
+					"Open document..."	EVENT_MAIN  eOpenFile)
 
 				(toolbar_button "gtk-save" "Save"
-					"Save document"
-				    EVENT_MAIN  EVENT_SAVE_FILE)
+					"Save document"		EVENT_MAIN  eSaveFile)
 
 
 				(toolbar_togglebutton true "point.png" "Points" 
@@ -294,17 +273,17 @@
 												EVENT_MISC CMD_MISC_VERTEX_UV)))
 
 					;; Mesh generation ;;;;;;;;;;;;;;;;;;;;;;;;;;
-					(hbox 1 0 0 1 0
-						(label "Generate a mesh"  0.0 0.5))
-					(hbox 1 0 0 1 0
-						(button "Cube" 
-							EVENT_MESH  CMD_MESH_GENERATE_CUBE)
-						(button "Strip" 
-							EVENT_MESH  CMD_MESH_GENERATE_TRIS)
-						(button "Sphere" 
-							EVENT_MESH  CMD_MESH_GENERATE_SPHERE)
-						(button "Cylinder" 
-							EVENT_MESH  CMD_MESH_GENERATE_CYLINDER))
+					;(hbox 1 0 0 1 0
+					;	(label "Generate a mesh"  0.0 0.5))
+					;(hbox 1 0 0 1 0
+					;	(button "Cube" 
+					;		EVENT_MESH  CMD_MESH_GENERATE_CUBE)
+					;	(button "Strip" 
+					;		EVENT_MESH  CMD_MESH_GENERATE_TRIS)
+					;	(button "Sphere" 
+					;		EVENT_MESH  CMD_MESH_GENERATE_SPHERE)
+					;	(button "Cylinder" 
+					;		EVENT_MESH  CMD_MESH_GENERATE_CYLINDER))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
@@ -336,11 +315,11 @@
 						(spinbutton 0 0 100 501))
 
 					(hbox 1 0 0 1 0
-						(optionmenu EVENT_MISC eNONE
-							(menu_item "Object"  EVENT_MISC eNONE)
-							(menu_item "Scene"  EVENT_MISC eNONE)
-							(menu_item "Mesh"  EVENT_MISC eNONE)
-							(menu_item "Vertex"  EVENT_MISC eNONE)))
+						(optionmenu EVENT_MISC eNone
+							(menu_item "Object"  EVENT_MISC eNone)
+							(menu_item "Scene"  EVENT_MISC eNone)
+							(menu_item "Mesh"  EVENT_MISC eNone)
+							(menu_item "Vertex"  EVENT_MISC eNone)))
 
 					;(hbox 1 1 0 1 1
 					;	(button "Translate" EVENT_MISC eTranslate)
@@ -384,7 +363,7 @@
 
 				(hbox 1 0 0 1 0
 					(label "Zoom"  0.0 0.5) 
-					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZOOM))
+					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom))
 				(hbox 1 1 0 1 1
 					(label "Light0 position" 0.0 0.5))
 				(hbox 1 1 0 1 1
@@ -423,7 +402,7 @@
 
 					(hbox 1 0 0 1 0 
 						(label "Parent" 0.0 0.5) 
-						(spinbutton 0 0 100 eNONE))
+						(spinbutton 0 0 100 eNone))
 
 					(hbox 1 0 0 1 0 
 						(label "Translate" 0.0 0.5) 
@@ -441,21 +420,21 @@
 
 					(hbox 1 0 0 1 0 
 						(label "Weight" 0.0 0.5) 
-						(spinbutton 0 0 100 eNONE))
+						(spinbutton 0 0 100 eNone))
 
 					(hbox 1 0 0 1 0 
 						(label "Bone" 0.0 0.5) 
-						(spinbutton 0 0 100 eNONE))
+						(spinbutton 0 0 100 eNone))
 
 					(hbox 1 0 0 1 0 
 							 (label "Influece" 0.0 0.5) 
-							 (spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 eNONE))
+							 (spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 eNone))
 
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0
 						(label "Zoom"  0.0 0.5) 
-						(spinbutton2 0.1 0.0001 1000.0 0.001 0.01 0.01 3 eZOOM))
+						(spinbutton2 0.1 0.0001 1000.0 0.001 0.01 0.01 3 eZoom))
 					(hbox 1 1 0 1 1
 						(label "Light0 position" 0.0 0.5))
 					(hbox 1 1 0 1 1
@@ -468,7 +447,7 @@
 
 					(hbox 1 1 0 1 1
 						(label "Current Material" 0.0 0.5)
-						(spinbutton 0 100 0 eNONE))
+						(spinbutton 0 100 0 eNone))
 
 					(hbox 0 1 0 1 1
 						(label "Name" 0.0 0.5)
@@ -478,13 +457,13 @@
 						(label "Texture1" 0.0 0.5) 
 						(textbox 798)
 						(button "..." 
-							EVENT_MAIN	-1)) ;CMD_MAIN_OPEN_TEXTURE))
+							EVENT_MAIN	eNone)) ;CMD_MAIN_OPEN_TEXTURE))
 
 					(hbox 0 1 0 1 0 
 						(label "Texture2" 0.0 0.5) 
 						(textbox 797)
 						(button "..." 
-							EVENT_MAIN	-1)); CMD_MAIN_OPEN_TEXTURE2))
+							EVENT_MAIN	eNone)); CMD_MAIN_OPEN_TEXTURE2))
 
 					(hbox 1 0 0 1 0 
 						(label "Texture1 ID" 0.0 0.5) 
