@@ -797,7 +797,7 @@ long EggPlugin::importModel(const char *filename)
 	/* Check for native format */
 	if (checkModel(filename))
 	{
-		return loadModel(filename);
+		return !loadModel(filename);
 	}
 
 	/* Check for other format */
@@ -906,7 +906,7 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 	/* Check for native format | temp use of EGG */
 	if (strcmp(type, "native") == 0 || strcmp(type, "egg") == 0)
 	{
-		return saveModel(filename);
+		return !saveModel(filename);
 	}
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
