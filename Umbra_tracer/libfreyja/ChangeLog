@@ -20,19 +20,27 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
  TODO
-	o Port Freyja to this new library
-	o Rename this source tree in svn
-	o Rewrite plugins to use this new library's new features
-	o Move plugin source tree under this source tree
-	o Move old freyja_image plugins to plugins
+	o Rewrite all plugins to use this new library's new features
 	o Port dRead system from my UTPackage to EggReader and move here
+	o Pull FreyjaFunction shit out of FreyjaPlugin... it doesn't seem to
+	  make sense there ( crosses too many 'package' boundaries, so it
+	  would be better to reverse dependenices and base it on top of these
+	  packages )
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
  libfreyja (0.9.0-20041110) "Umbra tracer" Mongoose <mongoose@icculus.org>
 
+	o CubeGen back in for testing
+	o Implemented scene clear and supporting methods
+
+
+ libfreyja (0.9.0-20041110) "Umbra tracer" Mongoose <mongoose@icculus.org>
+
 	o Umbra tracer made public changes:
 	o UV limit check in plugin layer
+	o New libfreyja ABI/API for new backend
+	o Many I/O class fixes
 	o jpeg plugin fix
 	o bmp plugin
 

@@ -302,6 +302,9 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eCamera", eCamera);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
+	r.RegisterInt("eModelIterator", eModelIterator);
+	r.RegisterInt("eMeshIterator", eMeshIterator);
+
 	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
 	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);

@@ -728,13 +728,13 @@ int freyja_model__ase_import(char *filename)
 
 	if (ase.load(filename))
 	{
-		fprintf(stderr, "ase_import> ERROR Failed to load file.\n");
+		freyjaPrintError("ase_import> ERROR Failed to load file.\n");
 		return -1;
 	}
 
 	ase.printInfo();
 	
-	printf("ase_import> WARNING Not fully implemented\n");
+	freyjaPrintMessage("ase_import> WARNING Not fully implemented\n");
 
 	/* Start a new model */
 	freyjaBegin(FREYJA_MODEL);
@@ -853,7 +853,7 @@ int freyja_model__ase_import(char *filename)
 										 ase.skel.mBones[i].rotation[2],
 										 ase.skel.mBones[i].rotation[3]);
 			
-			printf("++ Bone[%d] :: ", i);
+			freyjaPrintMessage("++ Bone[%d] :: ", i);
 			
 			for (j = 0; j <  ase.skel.mBones[i].childrenCount; ++j)
 			{
@@ -885,7 +885,7 @@ int freyja_model__ase_export(char *filename)
 	Ase ase;
 	
 
-	printf("ase_export> WARNING Not fully implemented\n");
+	freyjaPrintMessage("ase_export> WARNING Not fully implemented\n");
 	
 	if (!freyjaGetCount(FREYJA_MESH))
 	{
@@ -983,7 +983,7 @@ int freyja_model__ase_export(char *filename)
 
 		ase.skel.mBones[ase.skel.mBones[b].parent].childrenCount++;
 
-		printf("ase.so: bone[%i].parent = %i\n", 
+		freyjaPrintMessage("ase.so: bone[%i].parent = %i\n", 
 			   b, ase.skel.mBones[b].parent);
 
 		// Use translator list

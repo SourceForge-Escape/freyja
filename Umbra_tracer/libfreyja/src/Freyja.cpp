@@ -77,6 +77,16 @@ void FreyjaScene::setDebugLevel(unsigned int n)
 
 void FreyjaScene::erase()
 {
+	models.erase();
+	materials.erase();
+	textures.erase();
+	animations.erase();
+	skeletons.erase();
+	meshes.erase();
+	metadata.erase();
+	lights.erase();
+	cameras.erase();
+	vertexgroups.erase();
 }
 
 

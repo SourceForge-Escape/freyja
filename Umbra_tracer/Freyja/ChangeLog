@@ -39,6 +39,15 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.7-20041127) "Umbra tracer" Mongoose <mongoose@icculus.org>
+
+	o Minor interface tweaks
+	o Disabled japanese preference dialog test
+	o Preparing to repalce old interactive plugin system ( dead stubs now )
+	o Lots of little changes
+	o Cube gen back in for testing only
+
+
  Freyja (0.3.7-20041106) "Umbra tracer" Mongoose <mongoose@icculus.org>
 
 	o Updated Makefiles for Freyja, libmgtk

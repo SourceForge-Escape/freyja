@@ -18,6 +18,10 @@
  * 
  *-- History ------------------------------------------------- 
  *
+ * 2004.10.31:
+ * Mongoose - Fixed flaw in string creation for dir listing system
+ *            Backported fix from Freyja 9 alpha
+ *
  * 2004.08.16:
  * Mongoose - Created, based on my mendian reader
  ==========================================================================*/
@@ -193,9 +197,9 @@ char *EggFileReader::getNextDirectoryListing()
 
 		length = strlen(mDirectoryName) + strlen(d_ptr->d_name) + 2;
 		mDirectoryListing = new char[length+1];
-		snprintf(mDirectoryListing, length, "%s/%s",  
+		snprintf(mDirectoryListing, length, "%s/%s",
 				 mDirectoryName, d_ptr->d_name);
-		mDirectoryListing[length+1] = 0;
+		mDirectoryListing[length] = 0;
 	}
 
 	return mDirectoryListing;

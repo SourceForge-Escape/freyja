@@ -41,12 +41,11 @@ BoundingVolume::~BoundingVolume()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA9
 bool BoundingVolume::isVertexInside(vec3_t vertex)
 {
 	return false;
 }
-#endif
+
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
