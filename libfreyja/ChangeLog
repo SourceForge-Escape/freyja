@@ -20,14 +20,18 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
  TODO
-	o Port Freyja to this new library
-	o Rename this source tree in svn
 	o Rewrite plugins to use this new library's new features
 	o Move plugin source tree under this source tree
-	o Move old freyja_image plugins to plugins
 	o Port dRead system from my UTPackage to EggReader and move here
+	o If no group make group for FREYJA_MESH does Egg backend require one?
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+ libfreyja (0.8.14-20041209) Mongoose <mongoose@icculus.org>
+
+	o python.test unit test with demo.py module
+	o Backport of python.so language binding plugin from umbra
+
 
  libfreyja (0.8.14-20041202) Mongoose <mongoose@icculus.org>
 
