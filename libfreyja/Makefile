@@ -406,6 +406,14 @@ milkshape.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+nif4.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=nif4 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nif4.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
+
 nod.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -483,7 +491,7 @@ trmesh.so:
 
 plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so nif4.so skn.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nod.so psk.so obj.so sims.so smd.so trmesh.so python.so 
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nod.so psk.so obj.so sims.so smd.so trmesh.so python.so 
 
 
 ######################################################################

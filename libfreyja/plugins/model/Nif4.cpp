@@ -49,10 +49,9 @@ Nif4::~Nif4()
 
 bool Nif4::loadModel(const char *filename)
 {
-	EggFileReader r;
+	FreyjaFileReader r;
 	Vector<NiNode *> ninodes;
 	Chunk chunk;
-	bool done = false;
 
 
 	if (r.openFile(filename) == false)
@@ -64,17 +63,69 @@ bool Nif4::loadModel(const char *filename)
 	if (strncmp(NIF4_HEADER_START, mHeader, 34))
 		return false;
 
-	while (!done && chunk.readHeader(r))
+	while (chunk.readHeader(r) && !r.endOfFile())
 	{
+		printf("Ni Chunk: '%s'\n", chunk.name);
+
 		if (!strncmp(chunk.name, "NiNode", 6))
 		{
 			NiNode *ninode = new NiNode();			
 			ninodes.pushBack(ninode);
 			ninode->readChunk(r);
 		}
+		else if (!strncmp(chunk.name, "NiTextKeyExtraData", 18))
+		{
+			NiTextKeyExtraData *chunk = new NiTextKeyExtraData();			
+			//mNiTextKeyExtraData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiTriShapeData", 14))
+		{
+			NiTriShapeData *chunk = new NiTriShapeData();			
+			mNiTriShapeData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiTriShape", 10))
+		{
+			NiTriShape *nitrishape = new NiTriShape();			
+			//nitrishapes.pushBack(nitrishape);
+			nitrishape->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiGeomMorpherController", 23))
+		{
+			 NiGeomMorpherController *chunk = new NiGeomMorpherController();			
+			//mNiTextKeyExtraData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiMorphData", 11))
+		{
+			 NiMorphData *chunk = new NiMorphData();			
+			//mNiTextKeyExtraData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiTexturingProperty", 19))
+		{
+			 NiTexturingProperty *chunk = new NiTexturingProperty();			
+			//mNiTextKeyExtraData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiSourceTexture", 15))
+		{
+			 NiSourceTexture *chunk = new NiSourceTexture();			
+			//mNiTextKeyExtraData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
+		else if (!strncmp(chunk.name, "NiMaterialProperty", 18))
+		{
+			 NiMaterialProperty *chunk = new NiMaterialProperty();			
+			//mNiTextKeyExtraData.pushBack(chunk);
+			chunk->readChunk(r);
+		}
 		else
 		{
-			return false;
+			printf("Ni Chunk: '%s', %i @ %inot implemented\n", chunk.name, chunk.len, r.getFileOffset());
+			r.closeFile();
+			break;
 		}
 	}
 
@@ -99,20 +150,30 @@ bool Nif4::loadModel(const char *filename)
 // Plugin hooks
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA_MODEL_PLUGINS
-#include <freyja8/EggPlugin.h>
+#ifdef FREYJA_PLUGINS
+#include <freyja/FreyjaPluginABI.h>
 
 extern "C" {
 
 	int freyja_model__nif4_check(char *filename);
 	int freyja_model__nif4_import(char *filename);
 	int freyja_model__nif4_export(char *filename);
+	int import_model(char *filename);
+}
+
+
+int import_model(char *filename)
+{
+	if (!freyja_model__nif4_check(filename))
+		return freyja_model__nif4_import(filename);
+
+	return -1;
 }
 
 
 int freyja_model__nif4_check(char *filename)
 {	
-	EggFileReader r;
+	FreyjaFileReader r;
 	char header[48];
 	unsigned int headerSz = 48;
 
@@ -133,131 +194,73 @@ int freyja_model__nif4_check(char *filename)
 int freyja_model__nif4_import(char *filename)
 {
 	Nif4 nif4;
-	//Vector<unsigned int> weights;
-	//unsigned int vertex, texcoord;
-	//int m, v, w, t, j;
+	long i, j, idx;
+
 
 
 	if (nif4.loadModel(filename) == false)
 		return -1;
 
-	return 0;
-#ifdef FIXME
-	for (m = 0; m < md5.mNumMeshes; ++m)
+	freyjaBegin(FREYJA_MODEL);
+
+	for (i = nif4.mNiTriShapeData.begin(); i < (long)nif4.mNiTriShapeData.end(); ++i)
 	{
 		Vector<unsigned int> vertices;
 		Vector<unsigned int> texcoords;
 
+		Nif4::NiTriShapeData *data = nif4.mNiTriShapeData[i];
 
-		/* Start a new mesh */
-		eggBegin(FREYJA_MESH);
-	
-		/* Start a new vertex group */
-		eggBegin(FREYJA_GROUP);
+		if (!data)
+			continue;
 
-		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
+		freyjaBegin(FREYJA_MESH);
+		freyjaBegin(FREYJA_VERTEX_GROUP);
+
+		for (j = 0; j < data->num_vertices; ++j)
 		{
-			w = md5.mMeshes[m].verts[v].weight;
+			idx = freyjaVertex3f(data->coordinates[j].x,
+								 data->coordinates[j].z,
+								 data->coordinates[j].y);
 
-			/* Store vertices in group */
-			vertex = eggVertexStore3f(md5.mMeshes[m].weights[w].pos[0], 
-									  -md5.mMeshes[m].weights[w].pos[1], 
-									  md5.mMeshes[m].weights[w].pos[2]);
+			freyjaVertexNormal3f(idx,
+								 data->normals[j].x,
+								 data->normals[j].z,
+								 data->normals[j].y);
 
-		//eggPrintMessage("%i\t[%i] %f %f %f\t", vertex, v, 
-		//			md5.mMeshes[m].weights[w].pos[0],
-		//			md5.mMeshes[m].weights[w].pos[1],
-		//			md5.mMeshes[m].weights[w].pos[2]);  
-
-			/* Store texels */
-			texcoord = eggTexCoordStore2f(md5.mMeshes[m].verts[v].uv[0],
-										  md5.mMeshes[m].verts[v].uv[1]);
-			
-			/* Generates id translator list */
-			vertices.pushBack(vertex);
-			texcoords.pushBack(texcoord);
-		}
-
-		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
-		{
-			/* Start a new polygon */
-			eggBegin(FREYJA_POLYGON);
-			
-			/* Store vertices and texels by true id, using translator lists */
-			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[0]]);
-			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[1]]);
-			eggVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[2]]);
-			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[0]]);
-			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[1]]);
-			eggTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[2]]);
-
-			eggTexture1i(m); // mMeshes[m].shader
-			
-			eggEnd(); // FREYJA_POLYGON
-		}
-
-		eggEnd(); // FREYJA_GROUP
-		eggEnd(); // FREYJA_MESH
-	}
-
-
-	/* Load skeleton */
-	for (m = 0; m < md5.mNumMeshes; ++m)
-	{
-		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
-		{
-			w = md5.mMeshes[m].verts[v].weight;
-
-			eggVertexWeightStore(v, 
-								 md5.mMeshes[m].weights[w].weight,
-								 md5.mMeshes[m].weights[w].joint);
-
-			/* Generates id translator list */
-			weights.pushBack(md5.mMeshes[m].weights[w].index);
-		}
-	}
-
-	eggBegin(FREYJA_SKELETON);
-
-	for (j = 0; j < md5.mNumJoints; ++j)
-	{
-		/* Start a new tag */
-		eggBegin(FREYJA_BONE);
-		eggTagFlags1u(0x0);
-		eggTagName(md5.mJoints[j].name);
-		eggTagPos3f(md5.mJoints[j].translate[0],
-					-md5.mJoints[j].translate[1],
-					md5.mJoints[j].translate[2]);
-		eggTagRotate3f(md5.mJoints[j].rotate[0],
-					  	-md5.mJoints[j].rotate[1],
-						md5.mJoints[j].rotate[2]); 
-
-		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
-		{
-			if (md5.mJoints[j2].parent == j)
-			{ 
-				eggTagAddSlave1u(j2);
+			if (data->num_uv_sets > 0)
+			{
+				freyjaVertexTexCoord2f(idx,
+									   data->uv_set[0].textureinfo[j].u,
+									   data->uv_set[0].textureinfo[j].v);
 			}
+
+			vertices.pushBack();
 		}
 
-		eggEnd(); // FREYJA_TAG
+		freyjaEnd(); // FREYJA_VERTEX_GROUP
+
+		for (i = 0; i < data->num_triangles; ++i)
+		{
+			freyjaBegin(FREYJA_POLYGON);
+			freyjaPolygonMaterial1i(0);
+			freyjaPolygonVertex1i(data->triangles[i].v[0]);
+			freyjaPolygonVertex1i(data->triangles[i].v[1]);
+			freyjaPolygonVertex1i(data->triangles[i].v[2]);
+			freyjaEnd(); // FREYJA_POLYGON
+		}
+
+		freyjaEnd(); // FREYJA_MESH		
 	}
 
-	eggEnd(); // FREYJA_SKELETON
-
-
-	eggPrintMessage("The Doom3 plugin sez: FINISH ME!!!");
+	freyjaEnd(); // FREYJA_MODEL
 
 	return 0;
-#endif
-
-	return -1;
 }
 
 
 int freyja_model__nif4_export(char *filename)
 {
-	eggPrintError("nif4_export> ERROR: Not implemented.\n");
+	freyjaPrintError("nif4_export> ERROR: Not implemented.\n");
 	return -1;
 }
 #endif
