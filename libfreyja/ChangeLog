@@ -29,6 +29,18 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.9.0-20041221) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o Updates and fixes for MD5, NOD, and other plugins
+	o Fixes for missing ABI functions
+
+
+ libfreyja (0.9.0-20041220) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o Umbra becomes new stable branch for libfreyja
+	o New plugin ABI merge/port finished ( See svn for changes )
+
+	
  libfreyja (0.9.0-20041110) "Umbra tracer" Mongoose <mongoose@icculus.org>
 
 	o CubeGen back in for testing

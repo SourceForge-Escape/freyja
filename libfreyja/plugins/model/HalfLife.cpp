@@ -157,7 +157,8 @@ int HalfLife::load(const char *filename)
 
 
 	/* Load Textures */
-	if (mHeader.textureindex > 0 && mHeader.numtextures <= MAXSTUDIOSKINS)
+	//	if (0) // disabled for now
+	if (mHeader.textureindex != 0 && mHeader.numtextures <= MAXSTUDIOSKINS)
 	{
 		byte palette[768]; // 256 RGB colors
 		byte *image = 0x0;
@@ -174,32 +175,21 @@ int HalfLife::load(const char *filename)
     
 		for (i = 0; i < mTextureCount; ++i)
 		{
-			printf("Texture[%i] %ix%i index= %i\n", 
+			fseek(f, mTextures[i].index, SEEK_SET);
+
+			printf("Texture[%i] %lix%li @ offset = %li\n", 
 				   i, 
 				   mTextures[i].width, mTextures[i].height,
 				   mTextures[i].index);
 
-			if (mTextures[i].width < 1 || mTextures[i].height < 1)
-			{
-				mImages[i].image = 0x0;
-				mImages[i].w = 0;
-				mImages[i].h = 0;
-				continue;
-			}
-
-			size = mImages[i].w * mImages[i].h;
-
 			mImages[i].w = mTextures[i].width;
 			mImages[i].h = mTextures[i].height;
+			size = mImages[i].w * mImages[i].h;
 			mImages[i].image = new byte[size * 3];
 
 			image = new byte[size];
-
-			fseek(f, mTextures[i].index, SEEK_SET);
 			fread(image, size, 1, f);
-
-			fseek(f, mTextures[i].index + size, SEEK_SET);
-			fread(palette, 1, 768, f);
+			fread(palette, 768, 1, f);
 
 			/* Convert indexed image to RGB image using palette */
 			for (j = 0; j < size; ++j)
@@ -514,7 +504,6 @@ int freyja_model__halflife_import(char *filename)
 
 	freyjaBegin(FREYJA_MODEL);
 
-#ifdef FIXME_ENABLE_TEXTURE
 	/* Read texture data */
 	printf("Processing HalfLife textures...\n");
 
@@ -522,13 +511,11 @@ int freyja_model__halflife_import(char *filename)
 	{
 		if (hl.mImages[i].image && hl.mImages[i].w > 0 && hl.mImages[i].h > 0)
 		{
-			freyjaTextureStoreBuffer(hl.mImages[i].image, 4, 
-								  hl.mImages[i].w, hl.mImages[i].h,
-								  EGG_COLORMODE_RGBA);
+			freyjaTextureStoreBuffer(hl.mImages[i].image, 3, 
+								  hl.mImages[i].w, hl.mImages[i].h, RGB_24);
 			printf("%i/%i\n", i, hl.mTextureCount);
 		}
 	}
-#endif
 
 
 	/* Read mesh data */
