@@ -98,7 +98,7 @@ int freyja_model__grn_import(char *filename)
 		for (j = 0; j < mesh.normals.size(); ++j)
 		{
 			Point p = mesh.normals[j];
-			eggVertexNormalStore3f(j, p.points[0], p.points[1], p.points[2]);
+			eggVertexNormalStore3f(j, p.points[0], p.points[2], -p.points[1]);
 		}
 
 		for (j = 0; j < mesh.textureMap.size(); ++j)
