@@ -29,7 +29,9 @@
 
  libfreyja (0.8.14-20041209) Mongoose <mongoose@icculus.org>
 
-	o python.test unit test with demo.py module
+	o Fix for bone skeleton parent setup in EggPlugin
+	o Fix for bone parent setup on Egg::load ( mainly effects plugins )
+	o python.test unit test with demo.py and a template import.py
 	o Backport of python.so language binding plugin from umbra
 
 
