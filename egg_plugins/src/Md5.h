@@ -75,7 +75,7 @@ class Md5Joint
 {
  public:
 	char *name;
-	int index;
+	int parent;
 	double translate[3];
 	double rotate[3];
 };
