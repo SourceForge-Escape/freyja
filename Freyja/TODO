@@ -17,6 +17,13 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Propagate import / export list up to Freyja to make menus
+	o Merge down umbra system over stable to make ABI/API compatible
+	  plugins
+	o OO event system may need to come online right after release
+	o Python extention to mgtk/Freyja for interactive plugins
+	o <Mongoose> someone should write a perlin vol texture plugin for freyja
+	  hehehe
 	o Animation save doesn't warn on overwrite -- do that
 	o Curved surfaces in backend, remove patch test
 	o CLI libfreyja util tool, freyja import foo.mdl export bar.smd

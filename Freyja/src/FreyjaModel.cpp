@@ -127,8 +127,10 @@ void FreyjaModel::Clear()
 	mSelectBBox[0][0] = mSelectBBox[0][1] = mSelectBBox[0][2] = -16.0;
 	mSelectBBox[1][0] = mSelectBBox[1][1] = mSelectBBox[1][2] = 16.0;
 	
-	_light0_pos[0] = _light0_pos[0] = _light0_pos[0] = 0.0;
-	_light0_pos[0] = 0.0;
+	_light0_pos[0] = 0.0f;
+	_light0_pos[1] = 1.0f;
+	_light0_pos[2] = 0.0;
+	_light0_pos[3] = 0.0;
 
 	if (_egg)
 	{
