@@ -247,9 +247,9 @@ void dds_decompress_DXT1(dds_image_t &dds,
 					{
 						offset = (z * sz) + ((y + j) * bps) + ((x + i) * bpp);
 
-						image[offset + 0] = col->r;
+						image[offset + 0] = col->b;
 						image[offset + 1] = col->g;
-						image[offset + 2] = col->b;
+						image[offset + 2] = col->r;
 						image[offset + 3] = col->a;
 					}
 				}
@@ -327,9 +327,9 @@ void dds_decompress_DXT3(dds_image_t &dds,
 						 ((y + j) < dds.header.height))
 					{
 						offset = z * sz + (y + j) * bps + (x + i) * bpp;
-						image[offset + 0] = col->r;
+						image[offset + 0] = col->b;
 						image[offset + 1] = col->g;
-						image[offset + 2] = col->b;
+						image[offset + 2] = col->r;
 					}
 				}
 			}
