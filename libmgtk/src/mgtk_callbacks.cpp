@@ -401,15 +401,24 @@ int mgtk_event_set_range(int event, unsigned int value,
 
 void mgtk_gtk_event_fileselection_pattern(GtkWidget *widget, gpointer data)
 {
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 	mgtk_event_fileselection_pattern((char*)data);
+#else
+#endif
 }
 
 
 void mgtk_event_fileselection_pattern(char *pattern)
 {
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 	GtkWidget *file = mgtk_get_fileselection_widget();
 
 	gtk_file_selection_complete(GTK_FILE_SELECTION(file), pattern);
+#else
+	GtkWidget *file = mgtk_get_fileselection_widget();
+	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(file), 
+								gtk_file_chooser_get_filter(GTK_FILE_CHOOSER(file)));
+#endif
 }
 
 
@@ -842,7 +851,12 @@ void mgtk_event_fileselection_homedir(GtkWidget *file, void *data)
 	
 	if (path)
 	{
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 		gtk_file_selection_set_filename(GTK_FILE_SELECTION(data), path);
+#else
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(data), path);
+#endif
+
 		delete [] path;
 	}
 }
@@ -1124,6 +1138,15 @@ void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 					   GTK_SIGNAL_FUNC(mgtk_gtk_event_fileselection_pattern), 
 					   (gpointer)pattern);
+
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
+#else
+	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkFileFilter *filter = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filter, (char*)pattern);
+	gtk_file_filter_set_name(filter, (char*)label);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file), filter);
+#endif
 }
 
 
@@ -1156,7 +1179,11 @@ void mgtk_event_fileselection_action()
 	GtkWidget *file = mgtk_get_fileselection_widget();
 	char *filename;
 
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 	filename = (char *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(file));
+#else
+	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
+#endif
 
 	mgtk_handle_file_dialog_selection(filename);
 	gtk_widget_hide(file);
@@ -1178,8 +1205,12 @@ void mgtk_event_fileselection_set_dir(char *dir)
 	{
 		return;
 	}
-	
+
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 	gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), dir);
+#else
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(file), dir);
+#endif
 }
 
 
