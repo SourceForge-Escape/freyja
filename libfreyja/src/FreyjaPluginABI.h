@@ -248,7 +248,7 @@ void freyjaGetVertexNormal3fv(vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaGetTexCoord2fv(long index, vec2_t uv);
+void freyjaGetTexCoord2fv(long texcoordIndex, vec2_t uv);
 /*------------------------------------------------------
  * Pre  : texcoord[index] exists
  * Post : Sets passed float array to texcoord u, v
@@ -271,6 +271,20 @@ void freyjaGetVertex3fv(vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+long freyjaGetVertexTexCoordUV2fv(long vertexIndex, vec2_t uv);
+long freyjaGetVertexNormalXYZ3fv(long vertexIndex, vec3_t nxyz);
+long freyjaGetVertexXYZ3fv(long vertexIndex, vec3_t xyz);
+long freyjaGetVertexFrame(long vertexIndex, long element,
+						  long *frameIndex, vec3_t xyz);
+long freyjaGetVertexFrameCount(long vertexIndex);
+long freyjaGetVertexWeight(long vertexIndex, long element,
+						   long *bone, vec_t *weight);
+long freyjaGetVertexWeightCount(long vertexIndex);
+long freyjaGetVertexFlags(long vertexIndex);
+
+long freyjaGetMeshFlags(long meshIndex);
+long freyjaGetMeshVertexIndex(long meshIndex, long element); // Not Implemented
+long freyjaGetMeshVertexCount(long meshIndex); // Not Implemented
 long freyjaGetMeshPolygonCount(long meshIndex);
 long freyjaGetMeshVertexGroupCount(long meshIndex);
 long freyjaGetMeshPolygonIndex(long meshIndex, long element);
@@ -279,6 +293,8 @@ long freyjaGetMeshVertexGroupIndex(long meshIndex, long element);
 long freyjaGetPolygonMaterial(long polygonIndex);
 long freyjaGetPolygonFlags(long polygonIndex);
 long freyjaGetPolygonEdgeCount(long polygonIndex);
+long freyjaGetPolygonVertexCount(long polygonIndex);
+long freyjaGetPolygonTexCoordCount(long polygonIndex);
 long freyjaGetPolygonVertexIndex(long polygonIndex, long element);
 long freyjaGetPolygonTexCoordIndex(long polygonIndex, long element);
 
@@ -715,6 +731,7 @@ long freyjaSaveModel(char *filename);
 
 /* Mongoose 2004.12.19, 
  * C++ fun */
+
 
 Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 

@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=0
 BRANCH=
-BUILD_ID=20041228
+BUILD_ID=20041231
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -455,6 +455,14 @@ sims.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+skel.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=skel \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Skel.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
 skn.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -489,9 +497,9 @@ trmesh.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 
-plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so nif4.so skn.so tombraider.so 
+plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nod.so psk.so obj.so sims.so smd.so trmesh.so python.so 
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so python.so 
 
 
 ######################################################################

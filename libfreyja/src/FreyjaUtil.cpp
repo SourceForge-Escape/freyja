@@ -53,6 +53,7 @@ FreyjaUtil::FreyjaUtil()
 	mEgg = new Egg();
 	mEggPlugin = new EggPlugin(mEgg);
 	mEggPlugin->setPrinter(&mPrinter);
+	mEggPlugin->setupPlugins();
 }
 
 

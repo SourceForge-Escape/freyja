@@ -52,6 +52,7 @@ FreyjaModel::FreyjaModel()
 	mPlugin = new EggPlugin(_egg);
 	mPlugin->addPluginDirectory(pluginDir);
 	mPlugin->setPrinter(&mPrinter);
+	mPlugin->setupPlugins();
 
 	delete [] pluginDir;
 
@@ -2657,7 +2658,7 @@ int FreyjaModel::loadModel(const char *filename)
 int FreyjaModel::saveModel(const char *filename)
 {
 	unsigned int l, s, i;
-	int ret;
+	int ret = -1;
 	char ext[32];
 
 
@@ -2673,23 +2674,33 @@ int FreyjaModel::saveModel(const char *filename)
 			break;
 	}
 
-	if (s == 0 || (l - s) > 30)
-		return -100;
-
-	s++;
-
-	memset(ext, 0, 32);
-
-	for (i = 0; s < l; s++, i++)
+	if (!s) /* No extention given */
 	{
-		ext[i] = filename[s];
+		char buffer[4096];
+		snprintf(buffer, 4095, "%s.ja", filename);
+		buffer[4095] = 0;
+		ret = mPlugin->exportModel(buffer, "ja");
 	}
+	else
+	{
+		if (s == 0 || (l - s) > 30)
+			return -100;
 
-	ret = mPlugin->exportModel((char *)filename, ext);
+		s++;
+
+		memset(ext, 0, 32);
+
+		for (i = 0; s < l; s++, i++)
+		{
+			ext[i] = filename[s];
+		}
+
+		ret = mPlugin->exportModel((char *)filename, ext);
+	}
 
 	if (ret)
 	{
-		freyja_print("Unknown file export extention: '%s', try using '.egg'", 
+		freyja_print("Unknown file export extention: '%s', try using '.ja'", 
 					ext);
 		return ret;
 	}
