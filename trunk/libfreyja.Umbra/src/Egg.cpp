@@ -1547,7 +1547,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 		
 		if (poly2 != UINT_MAX)
 			continue;
-		
+
 		msh->polygon.pushBack(poly2);
 	}
 

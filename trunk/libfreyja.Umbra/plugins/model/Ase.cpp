@@ -907,10 +907,10 @@ int freyja_model__ase_export(char *filename)
 	ase.mNormals = new vec3_t[ase.mVertexCount];
 	ase.mFaces = new ase_triangle_t[ase.mUVWCount];
 	ase.mUVWs = new vec3_t[ase.mUVWCount];
-	
+
 	/* Using freyja iterator interface */
 	freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_RESET);
-	
+
 	for (v = 0; v < ase.mVertexCount; ++v)
 	{
 		freyjaGetVertex3fv(ase.mVertices[v]);
@@ -926,14 +926,19 @@ int freyja_model__ase_export(char *filename)
 	
 	// Using list interface, as opposed to array
 	freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
-	
+
 	for (t = 0, texel = 0; t < ase.mFaceCount; ++t)
 	{
+		if (freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT) < 0)
+		{
+			freyjaPrintError("Bad polygon!");
+			continue;
+		}
+
+		//freyjaPrintMessage("%i / %i\n", t, ase.mFaceCount);
+
 		// Use translator list
 		freyjaGetPolygon1u(FREYJA_VERTEX, 0, &vert);
-		
-		//printf("trans[%i] = %i\n", vert, trans[vert]);
-		
 		ase.mFaces[t].vertIndex[0] = trans[vert];
 		freyjaGetPolygon1u(FREYJA_VERTEX, 1, &vert);
 		ase.mFaces[t].vertIndex[1] = trans[vert];
@@ -959,7 +964,7 @@ int freyja_model__ase_export(char *filename)
 		// Using list interface, as opposed to array
 		freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
 	}
-	
+
 
 	/* SKELETON */
 	freyjaIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);

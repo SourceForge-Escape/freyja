@@ -568,6 +568,13 @@ void freyjaVertexWeight(long index, vec_t weight, long bone)
 }
 
 
+void freyjaVertexTexCoord2fv(long vIndex, vec2_t uv)
+{
+	if (EggPlugin::mEggPlugin)
+		EggPlugin::mEggPlugin->freyjaVertexTexCoord2f(vIndex, uv[0], uv[1]);
+}
+
+
 void freyjaVertexTexCoord2f(long vIndex, vec_t u, vec_t v)
 {
 	if (EggPlugin::mEggPlugin)
@@ -805,8 +812,8 @@ long freyjaGetPolygon3f(freyja_object_t type, long item, vec_t *value)
 
 long freyjaCriticalSection(freyja_lock_t request)
 {
-	freyjaPrintMessage("freyjaCriticalSection> Not implemented, %s:%i\n", 
-					   __FILE__, __LINE__);
+	//freyjaPrintMessage("freyjaCriticalSection> Not implemented, %s:%i\n", 
+	//				   __FILE__, __LINE__);
 
 	return FREYJA_PLUGIN_ERROR;
 }
@@ -827,9 +834,9 @@ long freyjaGetBoneName(long index, unsigned int size, char *name)
 }
 
 
-void freyjaSetBoneParent(long index)
+void freyjaBoneParent(long index)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(freyjaGetCurrent(FREYJA_BONE));
 
 
 	if (bone)

@@ -35,7 +35,7 @@ def importmodel(filename):
 
 	f.close()
 
-	return -1
+	return 0
 
 
 importmodel(FreyjaImportFilename)
