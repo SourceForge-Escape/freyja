@@ -473,23 +473,23 @@ private:
 
 	float _angles[3];                          /* Used to rotate the scene */
 
-	float _edit_polygon_color[3];              /* Custom color support */
-	float _edit_line_color[3];
-	float _edit_line_highlight_color[3];
-	float _edit_vertex_color[3];
-	float _edit_vertex_highlight_color[3];
-	float _edit_bbox_color[3];
-	float _edit_bg_color[3];
-	float _edit_grid_color[3];
-	float _edit_grid_x_axis_color[3];
-	float _edit_grid_y_axis_color[3];
-	float _edit_grid_z_axis_color[3];
-	float _edit_grid_8_color[3];
-	float _edit_text_color[3];
-	float _view_bg_color[3];
-	float _view_text_color[3];
-	float _buffer_vertex_color[3];
-	float _texture_edit_line_color[3];
+	float _edit_polygon_color[4];              /* Custom color support */
+	float _edit_line_color[4];
+	float _edit_line_highlight_color[4];
+	float _edit_vertex_color[4];
+	float _edit_vertex_highlight_color[4];
+	float _edit_bbox_color[4];
+	float _edit_bg_color[4];
+	float _edit_grid_color[4];
+	float _edit_grid_x_axis_color[4];
+	float _edit_grid_y_axis_color[4];
+	float _edit_grid_z_axis_color[4];
+	float _edit_grid_8_color[4];
+	float _edit_text_color[4];
+	float _view_bg_color[4];
+	float _view_text_color[4];
+	float _buffer_vertex_color[4];
+	float _texture_edit_line_color[4];
 	
 	float _bone_line_width;                    /* Custom artifact size */
 	float _bone_point_size;

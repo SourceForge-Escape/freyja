@@ -169,7 +169,7 @@ arg_list_t *freyja_rc_key(arg_list_t *args)
 		printf("extern \"C\" { key(%i, %i, %i); }\n",
 				 get_int(code), get_int(event), get_int(cmd));
 #endif
-		event_new_key_cmd(get_int(code), get_int(event), get_int(cmd));
+		freyja_event_new_key_cmd(get_int(code), get_int(event), get_int(cmd));
 	}
 	else
 	{
@@ -302,9 +302,6 @@ FreyjaResource::FreyjaResource()
 	RegisterCPPInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	RegisterCPPInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
 
-	RegisterCPPInt("EVENT_TRANSFORM", EVENT_TRANSFORM);
-	RegisterCPPInt("CMD_TRANSFORM_SCALE_DOWN_XYZ",CMD_TRANSFORM_SCALE_DOWN_XYZ);
-	RegisterCPPInt("CMD_TRANSFORM_SCALE_UP_XYZ", CMD_TRANSFORM_SCALE_UP_XYZ);
 
 	//printf("FreyjaResource> Done\n");
 }

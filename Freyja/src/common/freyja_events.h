@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : SDL/GLUT template
  * Author  : Mongoose
@@ -19,17 +19,101 @@
  *
  * 2001.06.26:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_EVENT_H_
-#define GUARD__FREYJA_MONGOOSE_EVENT_H_
+#ifndef GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
+#define GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
 
-#define EVENT_FREYJA         -1000
-#define EVENT_REDO_LAST      -5
-#define CMD_FREYJA_EXIT      0
-#define CMD_FREYJA_GL_INIT   1
-#define CMD_NULL             0
 
+void freyja_event_fullscreen();
+void freyja_event_unfullscreen();
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+void freyja_event_key_press(int key, int mod);
+
+void event_swap_buffers();
+void event_shutdown(int code);
+void event_print(char *s, ...);
+void event_filename(int mode, char *filename);
+void event_load_model(char *filename);
+void event_refresh();
+void event_custom_color(int custom_color_flags, float r, float g, float b);
+void event_init(unsigned int *width, unsigned int *height, 
+					 bool *fullscreen, char **driver);
+void event_render_init(unsigned int width, unsigned int height);
+void event_display();
+void event_shutdown();
+void event_resize(int width, int height);
+void event_motion(int x_delta, int y_delta);
+void event_mouse(int button, int state, int mod, int x, int y);
+
+
+//////////////////////////////////////////////
+
+int query_mouse_active();
+int query_mouse_button();
+int query_load_texture_to_slot();
+
+void event_set_mouse_active(bool b);
+void event_set_mouse_button(int i);
+void event_set_load_texture_to_slot(int i);
+void freyja_event_new_key_cmd(int key, int event, int cmd);
+
+char *freyja_rc_map(char *s);
+
+//////////////////////////////////////////////
+
+	void freyja_event2i(int event, int cmd);
+	/*------------------------------------------------------
+	 * Pre  : Event and Cmd are valid event pair
+	 * Post : Broadcasts event to all freyja agents/listeners
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.01.19:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+	void freyja_event2i_interface_listener(int event, int cmd);
+	/*------------------------------------------------------
+	 * Pre  : Event and Cmd are valid event pair
+	 *        broadcast from freyja_event2i
+	 *
+	 *        This listener is implmented by interface
+	 *
+	 * Post : Interface recieves event, so it may handle it 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.01.19:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
+
+   void refresh_material_interface();
+	/*------------------------------------------------------
+	 * Pre  : This listener is implmented by interface
+	 * Post : Interface syncs interface to backend values
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.02.12:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+   void refresh_emitter_interface();
+	/*------------------------------------------------------
+	 * Pre  : This listener is implmented by interface
+	 * Post : Interface syncs interface to backend values
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.02.12:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 typedef struct callback_bone_s 
 {
@@ -43,6 +127,11 @@ typedef struct callback_bone_s
 
 void callback_update_skeleton(callback_bone_t *bone);
 
+#define EVENT_FREYJA         -1000
+#define EVENT_REDO_LAST      -5
+#define CMD_FREYJA_EXIT      0
+#define CMD_FREYJA_GL_INIT   1
+#define CMD_NULL             0
 
 typedef enum
 {
@@ -110,7 +199,6 @@ enum freyja_event_type
 	EVENT_POINT         =  4,
 	EVENT_MISC          =  5,
 	EVENT_GROUP         =  6,
-	EVENT_TRANSFORM     =  7,
 	EVENT_ANIMATION     =  8,
 	EVENT_FREYJA_MODE   = 10,
 	EVENT_MATERIAL      = 11
@@ -124,32 +212,6 @@ enum freyja_event_animation_cmd
 	CMD_ANIMATION_STOP = 4
 };
 
-enum freyja_event_transform_cmd
-{
-	CMD_TRANSFORM_SCALE_DOWN_X = 1,
-	CMD_TRANSFORM_SCALE_UP_X   = 2,
-	CMD_TRANSFORM_SCALE_DOWN_Y = 3,
-	CMD_TRANSFORM_SCALE_UP_Y   = 4,
-	CMD_TRANSFORM_SCALE_DOWN_Z = 5,
-	CMD_TRANSFORM_SCALE_UP_Z   = 6,
-	
-	CMD_TRANSFORM_ROT_DOWN_X  = 11,
-	CMD_TRANSFORM_ROT_UP_X    = 12,
-	CMD_TRANSFORM_ROT_DOWN_Y  = 13,
-	CMD_TRANSFORM_ROT_UP_Y    = 14,
-	CMD_TRANSFORM_ROT_DOWN_Z  = 15,
-	CMD_TRANSFORM_ROT_UP_Z    = 16,
-	
-	CMD_TRANSFORM_TRANS_DOWN_X = 21,
-	CMD_TRANSFORM_TRANS_UP_X   = 22,
-	CMD_TRANSFORM_TRANS_DOWN_Y = 23,
-	CMD_TRANSFORM_TRANS_UP_Y   = 24,
-	CMD_TRANSFORM_TRANS_DOWN_Z = 25,
-	CMD_TRANSFORM_TRANS_UP_Z   = 26,
-
-	CMD_TRANSFORM_SCALE_DOWN_XYZ = 30, 
-	CMD_TRANSFORM_SCALE_UP_XYZ   = 31
-};
 
 enum freyja_event_main_cmd
 {
@@ -355,90 +417,5 @@ enum custom_color                   /* Custom GUI colors */
   COLOR_EDIT_GRID_AXIS_Z         = 16384,
   COLOR_EDIT_GRID_8              = 32768
 };
-
-//////////////////////////////////////////////
-
-int query_mouse_active();
-int query_mouse_button();
-int query_load_texture_to_slot();
-
-void event_set_mouse_active(bool b);
-void event_set_mouse_button(int i);
-void event_set_load_texture_to_slot(int i);
-void event_new_key_cmd(int key, int event, int cmd);
-
-//////////////////////////////////////////////
-
-	void freyja_event2i(int event, int cmd);
-	/*------------------------------------------------------
-	 * Pre  : Event and Cmd are valid event pair
-	 * Post : Broadcasts event to all freyja agents/listeners
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.19:
-	 *  Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	void freyja_event2i_interface_listener(int event, int cmd);
-	/*------------------------------------------------------
-	 * Pre  : Event and Cmd are valid event pair
-	 *        broadcast from freyja_event2i
-	 *
-	 *        This listener is implmented by interface
-	 *
-	 * Post : Interface recieves event, so it may handle it 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.19:
-	 *  Mongoose - Created
-	 ------------------------------------------------------*/
-
-   void refresh_material_interface();
-	/*------------------------------------------------------
-	 * Pre  : This listener is implmented by interface
-	 * Post : Interface syncs interface to backend values
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.12:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-   void refresh_emitter_interface();
-	/*------------------------------------------------------
-	 * Pre  : This listener is implmented by interface
-	 * Post : Interface syncs interface to backend values
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.12:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-char *freyja_rc_map(char *s);
-
-
-void event_swap_buffers();
-void event_shutdown(int code);
-void event_print(char *s, ...);
-void event_filename(int mode, char *filename);
-void event_load_model(char *filename);
-void event_popup_menu(int x, int y);
-void event_refresh();
-void event_custom_color(int custom_color_flags, float r, float g, float b);
-void event_init(unsigned int *width, unsigned int *height, 
-					 bool *fullscreen, char **driver);
-void event_render_init(unsigned int width, unsigned int height);
-void event_display();
-void event_shutdown();
-void event_resize(int width, int height);
-void event_key(int key, int mod);
-void event_motion(int x_delta, int y_delta);
-void event_mouse(int button, int state, int mod, int x, int y);
-
 
 #endif

@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : SDL/GLUT template
  * Author  : Mongoose
@@ -19,7 +19,7 @@
  *
  * 2001.06.26:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
@@ -83,12 +83,10 @@ void event_set_load_texture_to_slot(int i)
 	}
 }
 
-void event_new_key_cmd(int key, int event, int cmd)
+void freyja_event_new_key_cmd(int key, int event, int cmd)
 {
-	if (CONTROL)
-	{
-		CONTROL->AddKeyCommand(key, event, cmd);
-	}
+	printf("freyja_event_new_key_cmd> Has been removed, %s:%d\n", 
+			 __FILE__, __LINE__);
 }
 
 
@@ -265,12 +263,10 @@ void event_resize(int width, int height)
 }
 
 
-void event_key(int key, int mod)
+void freyja_event_key_press(int key, int mod)
 {
-	if (CONTROL)
-	{
-		CONTROL->Key(key, 0, 0, mod);
-	}
+	printf("freyja_event_key_press> Has been removed, %s:%d\n", 
+			 __FILE__, __LINE__);
 }
 
 

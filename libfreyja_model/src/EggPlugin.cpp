@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : GooseEgg
  * Author  : Terry 'Mongoose' Hendrix II
@@ -19,7 +19,7 @@
  * 2001-02-24:
  * Mongoose - Created, based on python test code
  *
- ==============================================================*/
+ ==========================================================================*/
 
 #include <dlfcn.h>
 #include <string.h>
@@ -390,6 +390,10 @@ void eggGenerateTriangleStrip(unsigned int count, vec_t sz)
 		}
 
 		// Mongoose 2002.01.18, Generate UV from vertex XY
+		xyz[0] = x;
+		xyz[1] = y;
+		xyz[2] = 0;
+		
 		eggGenerateUVFromXYZ(xyz, uv+0, uv+1);
 		eggVertexUVStore2f(v, uv[0], uv[1]);
 	}

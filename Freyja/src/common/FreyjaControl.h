@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -17,11 +17,11 @@
  *
  * 2000-09-10:
  * Mongoose - Created
- ================================================================*/
+ ==========================================================================*/
 
 
-#ifndef __FREYJA_MONGOOSE_FREYJACONTROL_H_
-#define __FREYJA_MONGOOSE_FREYJACONTROL_H_
+#ifndef GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
+#define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
 #include <mstl/Map.h>
 
@@ -120,7 +120,13 @@ class FreyjaControl
 	 * Pre      : FreyjaControl object is allocated
 	 * Post     : FreyjaControl object is deconstructed
 	 --------------------------------------------*/
-	
+
+	void eventAnimation(int command);
+	void eventBone(int command);
+	void eventMain(int command);
+	void eventMesh(int command);
+	void eventMisc(int command);
+
 	void Event(int event, int command);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
@@ -129,16 +135,7 @@ class FreyjaControl
 	 * Post     : Process menu input
 	 --------------------------------------------*/
 	
-	void AddKeyCommand(int key, int event, int command);
-	/*------------------------------------------------------
-	 * Pre  : Key is valid ascii code, Event, Command valid pair
-	 * Post : Makes <ctrl> key press generate event pair
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.21:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
+
 
 	void ReadRC();
 	/*--------------------------------------------
@@ -204,7 +201,6 @@ private:
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
 
-	Map <int, FreyjaEvent *> _key;          /* Keyboard commands */
 
 	FreyjaResource _resource;               /* Resource agent */
 	
@@ -219,6 +215,8 @@ private:
 	int _tex_state;                         /* Mouse state on texture canvas */
 	
 	int _mouse_state;                       /* Mouse state on modeler canvas */
+
+	bool mFullScreen;
 };
 
 #endif

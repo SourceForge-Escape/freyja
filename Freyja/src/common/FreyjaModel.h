@@ -320,17 +320,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int handleEvent(int mode, int cmd);
-	/*------------------------------------------------------
-	 * Pre  : mode:cmd is a valid Model event
-	 * Post : Event is handled
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.10.30: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	int loadModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : filename is valid, model format supported
@@ -569,11 +558,28 @@ public:
 	}
 #endif
 
+	void printInfo();
+
 	void Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list);
 	void BBoxListBuild();
 	void VertexDelete();
 	void TagConnect(unsigned int master, unsigned int slave);
 	void TagDisconnect(unsigned int master, unsigned int slave);
+
+
+	void TagNew(vec_t x, vec_t y, vec_t z, unsigned char flag);
+	void TagDel();
+	void TagAddMesh(unsigned int tag, unsigned int mesh);
+	void TagDelMesh(unsigned int tag, unsigned int mesh);
+	void TextureShift();
+	void MeshNew();
+	void MeshDel();
+	void MeshCut();
+	void MeshCopy();
+	void MeshMirror(unsigned int id);
+	void MeshFrameClone(unsigned int mesh, unsigned int grp);
+	void GroupClone(unsigned int grp);
+
 
 private:
 
@@ -618,19 +624,6 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	void TextureShift();
-	void MeshNew();
-	void MeshDel();
-	void MeshCut();
-	void MeshCopy();
-	void MeshMirror(unsigned int id);
-	void TagNew(vec_t x, vec_t y, vec_t z, unsigned char flag);
-	void TagDel();
-	void TagAddMesh(unsigned int tag, unsigned int mesh);
-	void TagDelMesh(unsigned int tag, unsigned int mesh);
-	void MeshFrameClone(unsigned int mesh, unsigned int grp);
-	void GroupClone(unsigned int grp);
 
 	
 	Egg *_egg;                          /* The 3d model */
@@ -681,8 +674,6 @@ private:
 	float _zoom;                        /* Scaling of scene */
 	
 	float _scroll[3];                   /* Scrolling in edit planes */
-
-	int _edit_mode;
 
 	float _light0_pos[4];               /* Testing for light system */
 };
