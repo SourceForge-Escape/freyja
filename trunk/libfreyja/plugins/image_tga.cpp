@@ -30,8 +30,16 @@
 
 #include "image_tga.h"
 
+extern "C" {
 
-int mtk_image__tga_check(FILE *f)
+  int check(FILE *f);
+  
+  int import_image(char *filename, unsigned char **image, 
+		   unsigned int *w, unsigned int *h, 
+		   char *type);
+}
+
+int check(FILE *f)
 {
   char buffer[10];
 
@@ -59,9 +67,10 @@ int mtk_image__tga_check(FILE *f)
 }
 
 
-int mtk_image__tga_load(FILE *f, unsigned char **image, 
-			unsigned int *width, unsigned int *height, char *type)
+int import_image(char *filename, unsigned char **image, 
+		 unsigned int *width, unsigned int *height, char *type)
 {
+  FILE *f = fopen(filename, "rb");
   mtk_image_tga_t header;
   char comment[256];
   unsigned char pixel[4];
@@ -72,7 +81,7 @@ int mtk_image__tga_load(FILE *f, unsigned char **image,
   unsigned int i, j;
 
 
-  if (!f)
+  if (!f || check(f))
   {
     fprintf(stderr, "mtk_image__tga_load> Invalid parameters.\n");
     return -1;
@@ -117,13 +126,13 @@ int mtk_image__tga_load(FILE *f, unsigned char **image,
   switch (header.bpp)
   {
   case 32:
-    *type = 2;//32;
+    *type = 4;//32;
     break;
   case 24:
-    *type = 1;//24;
+    *type = 3;//24;
     break;
   case 8:
-    *type = 0;//8;
+    *type = 1;//8;
     break;
   default:
     *type = 0;

@@ -44,6 +44,7 @@ BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 INSTALL_BIN=/usr/local/bin
 INSTALL_LIB=/usr/local/lib
 INSTALL_INCLUDE=/usr/local/include
+PLUGIN_INSTALL_DIR=$(INSTALL_LIB)/$(NAME)/modules
 
 ################################################################
 
@@ -56,6 +57,7 @@ CONFIGURE_LNK=
 
 BASE_CFLAGS=-Wall -Isrc/lib -Isrc/utils \
 	$(CONFIGURE_DEF) \
+	-DPLUGIN_IMAGE_DIR=\"\\\"$(PLUGIN_INSTALL_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
 	$(BASE_DEFS)
 
@@ -126,7 +128,6 @@ depend:
 ################################################################
 
 PLUGIN_BUILD_DIR=bin/plugins
-PLUGIN_INSTALL_DIR=$(INSTALL_LIB)/$(NAME)/modules/image
 PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
 
 plug-ins: $(PLUGINS)
@@ -136,16 +137,28 @@ png.so:
 	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
 	MOD_NAME=image_png \
 	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_png.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
+	CFLAGS="$(MODULE_CFLAGS) -DLIB_PNG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lpng -lz"
 
-plugins: png.so
+tga.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
+	MOD_NAME=image_tga \
+	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_tga.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+
+plugins: png.so tga.so
 
 install-plugins:
 	@-echo -n "Installing plugins                           "
-	@-mkdir -p $(PLUGIN_INSTALL_DIR)
-	@-cp $(PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)
+	@-mkdir -p $(PLUGIN_INSTALL_DIR)/image
+	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model
+	@-cp $(PLUGIN_BUILD_DIR)/image*.so $(PLUGIN_INSTALL_DIR)/image/
 	@-echo "[DONE]"
+
+#	@-cp $(PLUGIN_BUILD_DIR)/model*.so $(PLUGIN_INSTALL_DIR)/model/
 
 
 ################################################################
@@ -212,7 +225,6 @@ install:
 	@-echo -n "Installing selected build                     "
 	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)
 	@-mkdir -p $(INSTALL_LIB)/$(NAME)
-	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)/$(NAME)
 	@-echo "[DONE]"
 	@-$(MAKE) install-link
 	@-$(MAKE) install-headers

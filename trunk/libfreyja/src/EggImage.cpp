@@ -410,16 +410,16 @@ int EggImage::loadImage(const char *filename)
 {
 #ifdef EGGIMAGE_PLUGINS
 	EggFileReader reader;
-	int (*import)(const char *filename, unsigned char **image,
+	int (*import_img)(char *filename, unsigned char **image,
 					  unsigned int *width, unsigned int *height, 
 					  char *type);
 	bool done = false;
 	char *module_filename;
 	void *handle;
 	char *error;
-	unsigned char *image;
-	unsigned int width, height;
-	char type;
+	unsigned char *image = 0x0;
+	unsigned int width = 0, height = 0;
+	char type = 0;
 
 
 	if (!reader.doesFileExist(filename))
@@ -430,7 +430,7 @@ int EggImage::loadImage(const char *filename)
 
 	print("[EggImage plugin system invoked]");
 
-	if (!reader.openDirectory("/usr/local/lib/freyja8/modules/image"))
+	if (!reader.openDirectory(PLUGIN_IMAGE_DIR))
 	{
 		printError("Couldn't access image plugin directory");
 		return -2;
@@ -440,6 +440,12 @@ int EggImage::loadImage(const char *filename)
 	{
 		if (reader.isDirectory(module_filename))
 			continue;
+
+		//#define DISABLE_MODULES
+#ifdef DISABLE_MODULES
+		print("Disabled load of '%s'", module_filename);
+		continue; // Disabled plugin loading for now
+#endif
 
 		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
 		{
@@ -456,9 +462,9 @@ int EggImage::loadImage(const char *filename)
 		{
 			print("Module '%s' opened.", module_filename);
     
-			import = (int (*)(const char *filename, unsigned char **image,
-									unsigned int *width, unsigned int *height, 
-									char *type))dlsym(handle, "import");
+			import_img = (int (*)(char *filename, unsigned char **image,
+										 unsigned int *width, unsigned int *height, 
+										 char *type))dlsym(handle, "import_image");
 
 			if ((error = dlerror()) != NULL)  
 			{
@@ -467,10 +473,11 @@ int EggImage::loadImage(const char *filename)
 				continue;
 			}
 
-	      done = (!(*import)(filename, &image, &width, &height, &type));
+	      done = !(*import_img)((char*)filename, &image, &width, &height, &type);
 
 			if ((error = dlerror()) != NULL) 
 			{
+				printError("%s", error);
 				dlclose(handle);
 				continue;
 			}
@@ -483,13 +490,23 @@ int EggImage::loadImage(const char *filename)
 
 	print("[EggPlugin module loader sleeps now]\n");
 
-	return -1; // Bad bad buffer corruption -- disable buffer load
-
-	if (done && width > 0 && height > 0 && type > 1 && type < 4)
+	if (done && image && width > 0 && height > 0)
 	{
-		loadPixmap(image, width, height, (EggImage::colormode_t)type);
+		print("%p - %ux%ux%ibpp", image, width, height, type*8);
 
-		return 0; /* Success! */
+		switch (type)
+		{
+		case 3:
+			loadPixmap(image, width, height, RGB_24);
+			return 0; /* Success! */
+			break;
+		case 4:
+			loadPixmap(image, width, height, RGBA_32);
+			return 0; /* Success! */
+			break;
+		default:
+			;
+		}
 	}
 #else
 	print("EggImage: This build was compiled w/o plugin support");

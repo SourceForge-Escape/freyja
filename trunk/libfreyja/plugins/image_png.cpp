@@ -35,9 +35,9 @@ extern "C" {
 
 	int check(FILE *f);
 
-	int import(const char *filename, unsigned char **image, 
-			  unsigned int *w, unsigned int *h, 
-			  char *type);
+	int import_image(char *filename, unsigned char **image, 
+						  unsigned int *w, unsigned int *h, 
+						  char *type);
 }
 
 int check(FILE *f)
@@ -77,12 +77,12 @@ int check(FILE *f)
 }
 
 
-int import(const char *filename, unsigned char **image, 
-			  unsigned int *w, unsigned int *h, 
-			  char *type)
+int import_image(char *filename, unsigned char **image, 
+					  unsigned int *w, unsigned int *h, 
+					  char *type)
 {
 #ifdef LIB_PNG
-	FILE *f = fopen(filename, "rbx");
+	FILE *f = fopen(filename, "rb");
    int interlace_type, color_type, depth;
    png_uint_32 width, height;
    png_structp png_ptr;
@@ -92,9 +92,11 @@ int import(const char *filename, unsigned char **image,
    //unsigned int sig_read = 0;
 
 
+	printf("png.so: import_image invoked\n");
+
    if (!f)
    {
-		perror("mtk_image__png_load> ERROR: Opening file\n");
+		perror("png.so: ERROR: Opening file\n");
 		return -1;
    }
 
@@ -113,7 +115,7 @@ int import(const char *filename, unsigned char **image,
    if (!png_ptr)
    {
 		fclose(f);
-		fprintf(stderr, "mtk_image__png_load> ERROR: Creating png read struct\n");
+		fprintf(stderr, "png.so: ERROR: Creating png read struct\n");
 		return -2;
    }
 
@@ -123,7 +125,7 @@ int import(const char *filename, unsigned char **image,
    {
       fclose(f);
       png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
-      fprintf(stderr, "mtk_image__png_load> ERROR: Creating png info struct\n");
+      fprintf(stderr, "png.so: ERROR: Creating png info struct\n");
       return -3;
    }
 
@@ -132,7 +134,7 @@ int import(const char *filename, unsigned char **image,
    {
       png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
       fclose(f);
-      fprintf(stderr, "mtk_image__png_load> ERROR: Can't set jmp\n");
+      fprintf(stderr, "png.so: ERROR: Can't set jmp\n");
       return -4;
    }
 
@@ -161,7 +163,7 @@ int import(const char *filename, unsigned char **image,
 
 		if (!*w || !*h)
 		{
-			fprintf(stderr, "mtk_image__png_load> ERROR: Invalid dimensions\n");
+			fprintf(stderr, "png.so: ERROR: Invalid dimensions\n");
 
 			fclose(f);
 			return -5;
@@ -215,10 +217,8 @@ int import(const char *filename, unsigned char **image,
 
 		fclose(f);
 
-		fprintf(stderr, "mtk_image__png_load> DEBUG %s %ix%i@%ibpp\n", 
+		fprintf(stderr, "png.so: image loaded was %s %ix%i@%ibpp\n", 
 				  (*type == MTK_RGB) ? "RBG" : "RBGA", *w, *h, depth);
-
-		*type--;
 
 		return 0;
 #else
