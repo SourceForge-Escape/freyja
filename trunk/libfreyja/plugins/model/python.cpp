@@ -25,6 +25,7 @@
 
 #include <python2.3/Python.h>
 #include <freyja/FreyjaPlugin.h>
+#include <freyja/FreyjaFileReader.h>
 
 PyObject *initPlugins();
 
@@ -34,6 +35,8 @@ extern "C" {
 	void import_functions();
 	int import_model(char *filename);
 	int export_model(char *filename);
+
+	long gPYTHON_PLUGIN_SUCCESS = -1;
 }
 
 
@@ -54,45 +57,93 @@ int export_model(char *filename)
 
 int import_model(char *filename)
 {
+	Vector <char *> pyPluginDirectories;
+	FreyjaFileReader reader;
 	int ret = -1;
 	FILE *f;
-#ifdef UNIT_TEST_PYTHON
-	char *plugin = "plugins/model/demo.py";
-#else
-	char *plugin = "/usr/local/lib/freyja/modules/model/python/import.py";
-#endif
+	//char *plugin = "/usr/local/lib/freyja/modules/model/python/import.py";
+	char *plugin;
 	PyObject *module, *dict, *tmp;
+	unsigned long i;
 
-	Py_Initialize();
-	module = initPlugins();
 
-	freyjaPrintMessage("[Module '%s' invoked.]", plugin);
+	pyPluginDirectories.pushBack("/usr/local/lib/freyja/modules/model/python");
+#ifdef unix
+	char rc[1024];
+	char *env = getenv("HOME");
 
-	f = fopen(plugin, "r");
-
-	if (!f)
+	if (env && env[0])
 	{
-		freyjaPrintError("[Module '%s' failed to load.]", plugin);
-		perror(plugin);
+		snprintf(rc, 1024, "%s/.freyja/plugins/python", env);
+		pyPluginDirectories.pushBack(rc);
 	}
-	else
+#endif
+
+	/* Check for python plugins! */
+	for (i = pyPluginDirectories.begin(); i < pyPluginDirectories.end(); ++i)
 	{
-		dict = PyModule_GetDict(module);
+		if (!reader.openDirectory(pyPluginDirectories[i]))
+		{
+			freyjaPrintError("Couldn't access python plugin directory[%d].", i);
+			continue;
+		}
 
-		/* Append gobal constants */
-		tmp = PyString_FromFormat(filename);
-		PyDict_SetItemString(dict, "FreyjaImportFilename", tmp);
-		Py_DECREF(tmp);
+		while ((plugin = reader.getNextDirectoryListing()))
+		{
+			if (reader.isDirectory(plugin))
+				continue;
 
-		freyjaPrintMessage("[Module '%s' opened.]", plugin);
-		PyRun_SimpleFile(f, plugin);
+			gPYTHON_PLUGIN_SUCCESS = -1;
+
+			freyjaPrintMessage("[Module '%s' invoked.]", plugin);
+			f = fopen(plugin, "r");
+
+			if (!f)
+			{
+				freyjaPrintError("[Module '%s' failed to load.]", plugin);
+				perror(plugin);
+			}
+			else
+			{
+				/* Start up python */
+				Py_Initialize();
+				module = initPlugins();
+				dict = PyModule_GetDict(module);
+
+				/* Append gobal constants */
+				tmp = PyString_FromFormat(filename);
+				PyDict_SetItemString(dict, "FreyjaImportFilename", tmp);
+				Py_DECREF(tmp);
+
+				freyjaPrintMessage("[Module '%s' opened.]", plugin);
+				PyRun_SimpleFile(f, plugin);
+				Py_Finalize();
+			}
+
+			ret = gPYTHON_PLUGIN_SUCCESS;
+			//printf("%li\n", gPYTHON_PLUGIN_SUCCESS);
+
+			if (ret == 0)
+			{
+				return 0;
+			}
+		}
 	}
 
-	Py_Finalize();
+	return -1;
+}
 
-	// FIXME: Call to functions in python modules and get return values
 
-	return ret;
+PyObject *py_setImportValid(PyObject *self, PyObject *args)
+{
+	int index;
+
+	if (!PyArg_ParseTuple(args, "i", &index))
+		return NULL;
+
+	gPYTHON_PLUGIN_SUCCESS = index;
+
+	return PyInt_FromLong(0);
 }
 
 
@@ -235,6 +286,7 @@ PyObject *py_freyjaPolygonMaterial1i(PyObject *self, PyObject *args)
 
 PyMethodDef Plugin_methods[] = 
 {
+	{ "setImportValid", py_setImportValid, METH_VARARGS },
 	{ "freyjaBegin", py_freyjaBegin, METH_VARARGS },
 	{ "freyjaEnd", py_freyjaEnd, METH_VARARGS },
 	{ "freyjaVertex3f", py_freyjaVertex3f, METH_VARARGS },
@@ -284,24 +336,34 @@ PyObject *initPlugins()
 
 
 #ifdef UNIT_TEST_PYTHON
-
+#include <freyja/FreyjaPlugin.h>
 #include <freyja/EggPlugin.h>
+#include <freyja/Egg.h>
 
 int main(int argc, char *argv[])
 {
 	Egg egg;
 	EggPlugin plugin(&egg);
 
+
 	if (argc > 2)
 	{
-		import_model(argv[1]);
+		printf("Loading '%s' saving '%s'...\n", argv[1], argv[3]);
+
+		if (!import_model(argv[1]))
+			plugin.exportModel(argv[3], argv[2]);
+	}
+	else if (argc > 1)
+	{
+		printf("Loading '%s'...\n", argv[1]);
+
+		if (!import_model(argv[1]))
+			printf("Success!\n");
 	}
 	else
 	{
-		import_model("test.smd");
+		printf("%s import_model [format export_model]\n", argv[0]);
 	}
-
-	plugin.exportModel("python.ase", "ase");
 
 	return 0;
 }
