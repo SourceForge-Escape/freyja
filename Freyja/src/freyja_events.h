@@ -35,6 +35,7 @@ typedef enum {
 	eNewFile,
 	eOpenFile,
 	eSaveFile,
+	eSaveAsFile,
 	eCloseFile,
 	eOpenFileTexture,
 	eAppendFile,

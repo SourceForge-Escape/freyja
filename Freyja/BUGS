@@ -32,6 +32,8 @@
 	Saved egg files can cause lockup if they contain lots of
 	cut and paste bugged meshes
 
+	FIX?: Try to prune out dead elements more proactively in Egg
+
     Seems to be caused by dead polygons being saved... Egg.cpp:802
 	Egg tries to load 10M+ vertex indices per polygon ( rollover -1 )
 
