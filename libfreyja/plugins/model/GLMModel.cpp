@@ -480,8 +480,8 @@ int freyja_model__glm_import(char *filename)
 
 			if (glm.mMDXMHierarchy[i].shaderIndex-1 < 0)
 			{
-#define USE_COLOURS
-#ifdef USE_COLOURS
+//#define GLMMODEL_USE_COLOURS
+#ifdef GLMMODEL_USE_COLOURS
 				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.0, 1.0));
 				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.0, 1.0));
 				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.0, 1.0));

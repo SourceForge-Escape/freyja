@@ -35,6 +35,9 @@
  Annoying
  ------------------
 
+ o 2004.12.29-1:
+	Vertex bounding box selector no longer seems to work properly.
+
  o 2004.12.13-1:
 	Polygon rendered bones only display correctly in meshtree type animations.
 
@@ -48,7 +51,8 @@
 
  o 2003.12.03-a2
 	Some plugins don't handle untesselated (nontriangle) meshes
-	Also the normal generator doesn't account for polygons other than tris
+	Also the normal generator doesn't account for polygons other than tris and
+	only one winding supported
 
  o 2004.12.03-a1
 	ERROR: NULL skeletal bone_tag! in FreyjaModel might actually be bug

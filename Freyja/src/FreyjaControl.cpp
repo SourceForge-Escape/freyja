@@ -2097,7 +2097,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 		break;
 		
 	case PLANE_XZ:
-		*y = z;
+		*y = -z;
 		break;
 		
 	case PLANE_ZY: // side

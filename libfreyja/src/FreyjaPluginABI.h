@@ -464,42 +464,6 @@ void freyjaVertexWeight(long index, vec_t weight, long bone);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaPolygonVertex1i(long index);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_POLYGON);
- *        Index is the native index
- * Post : Adds a vertex to a polygon
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaPolygonTexCoord1i(long index);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_POLYGON);
- *        Index is the native index
- * Post : Adds a texel to a polygon
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaPolygonMaterial1i(long id);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_POLYGON);
- *        Freyja_id is the native index
- * Post : Adds a texture to a polygon
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
-
 void freyjaMeshTreeAddFrame(vec_t x, vec_t y, vec_t z);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_MESHTREE_ANIM);
@@ -658,6 +622,46 @@ long freyjaCheckModel(char *filename);
 long freyjaLoadModel(char *filename);
 long freyjaSaveModel(char *filename);
 
+	///////////////////////////////////////////////////////////////////////
+	// Polygon
+	///////////////////////////////////////////////////////////////////////
+
+	void freyjaPolygonAddVertex1i(long polygonIndex, long vertexIndex);
+	void freyjaPolygonVertex1i(long index);  // DEPRECATED
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 * Post : Adds a vertex to a polygon
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonAddTexCoord1i(long polygonIndex, long texcoordIndex);
+	void freyjaPolygonTexCoord1i(long index);  // DEPRECATED
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 * Post : Adds a texcoord to a polygon
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonSetMaterial1i(long polygonIndex, long materialIndex);
+	void freyjaPolygonMaterial1i(long id);  // DEPRECATED
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 * Post : Sets material for a polygon
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 
 	///////////////////////////////////////////////////////////////////////
 	// Plugin import/export iteraction setup
@@ -698,6 +702,8 @@ long freyjaSaveModel(char *filename);
 	///////////////////////////////////////////////////////////////////////
 
 	long freyjaGetPluginId();
+
+	int freyjaGetPluginArg1b(long pluginId, char *name, char &arg); // bool
 
 	int freyjaGetPluginArg1f(long pluginId, char *name, float &arg);
 

@@ -12,7 +12,7 @@
  *           This is based on my Model class in GooseEgg
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------ 
  *

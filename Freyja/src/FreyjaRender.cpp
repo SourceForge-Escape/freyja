@@ -1108,7 +1108,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 	if (polygon.r_vertex.empty() ||
 		(!external_texel && polygon.shader == COLORED_POLYGON))
 	{
-		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon malformed\n");
+		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
 		return;
 	}
 
@@ -1581,7 +1581,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 	/* Highlight current vertex group */
 	grp = egg->getGroup(_model->getCurrentGroup());
 
-	DrawBbox(grp);
+	
+	if (mRenderMode & RENDER_POINTS)
+		DrawBbox(grp);
 
 	if (grp && !grp->vertex.empty() && (mRenderMode & RENDER_POINTS))
 	{
@@ -1784,7 +1786,7 @@ void FreyjaRender::DrawWindow(int plane)
 	case PLANE_XY:
 		break;
 	case PLANE_XZ:
-		glRotatef(-90.0, 1.0, 0.0, 0.0);
+		glRotatef(90.0, 1.0, 0.0, 0.0);
 		break;
 	case PLANE_ZY:
 		glRotatef(90.0, 0.0, 1.0, 0.0);
@@ -1804,7 +1806,7 @@ void FreyjaRender::DrawWindow(int plane)
 		break;
 	case PLANE_XZ: // top
 		glTranslatef(_scroll[0], _scroll[2], 0.0);
-		glRotatef(-90.0, 1.0, 0.0, 0.0);
+		glRotatef(90.0, 1.0, 0.0, 0.0);
 		break;
 	case PLANE_ZY: // side
 		glTranslatef(_scroll[2], _scroll[1], 0.0);
