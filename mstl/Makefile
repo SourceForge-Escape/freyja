@@ -48,9 +48,13 @@ clean-build:
 
 ########################################################
 
+CFLAGS=-Wall -g 
+LDFLAGS=-lstdc++
+
 Vector.test:
 	mkdir -p $(BUILD_TEST_DIR)
-	$(CC) -Wall -g -o $(BUILD_TEST_DIR)/Vector.test src/test_vector.cpp
+	$(CC) $(CFLAGS) $(LDFLAGS) \
+		-o $(BUILD_TEST_DIR)/Vector.test src/test_vector.cpp
 
 
 ########################################################

@@ -795,6 +795,9 @@ void event_send_color(GtkWidget *colorbutton, gpointer id)
 	a = alpha / 65535.0;
 
 	freyja_handle_color(GPOINTER_TO_INT(id), r, g, b, a);
+
+	//HACK
+	refresh_material_interface();
 }
 
 
@@ -923,38 +926,6 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 	}
 
 	return TRUE;
-}
-
-
-
-void freyja_handle_color(int id, float r, float g, float b, float a)
-{
-	vec4_t color;
-
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = a;
-
-	switch (id)
-	{
-	case 9000:
-		gMaterialManager->setColor(MaterialManager::eAmbient, color);
-		event_refresh();
-		break;
-	case 9001:
-		gMaterialManager->setColor(MaterialManager::eDiffuse, color);
-		event_refresh();
-		break;
-	case 9002:
-		gMaterialManager->setColor(MaterialManager::eSpecular, color);
-		event_refresh();
-		break;
-	case 9003:
-		gMaterialManager->setColor(MaterialManager::eEmissive, color);
-		event_refresh();
-		break;
-	}
 }
 
 

@@ -156,6 +156,7 @@ public:
 										 const Vector3d &velocity, 
 										 vec_t length, vec_t stiffness, vec_t friction)
 	{
+		VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
 		unsigned int i;
 		Mass *a, *b;
 
@@ -170,9 +171,9 @@ public:
 											Vector3d(0, 0, 0));
 
 		/* 2003.06.08, Mongoose - Setup lengths here ( Dependent on index ) */
-		for (mMasses.start(), i = 0; mMasses.forward(); mMasses.next(), ++i)
+		for (iter.start(), i = 0; iter.forward(); iter.next(), ++i)
 		{
-			b = mMasses.current();
+			b = iter.current();
 
 			b->mPos.mVec[0] = length * i;
 
@@ -198,6 +199,7 @@ public:
 
 	void solve()
 	{
+		VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
 		unsigned int i = 0;
 		Mass *m, *last = 0x0;
 		vec_t mass = 0.0;
@@ -210,9 +212,9 @@ public:
 		}
 
 		/* Apply common forces  */
-		for (mMasses.finish(); mMasses.backward(); mMasses.prev())
+		for (iter.finish(); iter.backward(); iter.prev())
 		{
-			m = mMasses.current();
+			m = iter.current();
 
 			if (last)
 			{

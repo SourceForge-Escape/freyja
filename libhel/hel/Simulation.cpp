@@ -66,14 +66,16 @@ void Simulation::clear()
 
 bool Simulation::collisionDetected(Mass *mass)
 {
+	VectorIterator<CollisionObject *> objs = VectorIterator<CollisionObject *>(&mObjects);
 	bool detected = false;
 
-	for (mObjects.start(); mObjects.forward(); mObjects.next())
+
+	for (objs.start(); objs.forward(); objs.next())
 	{
-		if ((mObjects.current())->intersectPoint(mass->mPos))
+		if ((objs.current())->intersectPoint(mass->mPos))
 		{
 			detected = true; 
-			resolveCollision(mass, mObjects.current());
+			resolveCollision(mass, objs.current());
 		}
 	}
 
@@ -106,11 +108,12 @@ void Simulation::generateMasses(unsigned int count, vec_t mass,
 
 void Simulation::init()
 {
+	VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
 	Mass *m;
 
-	for (mMasses.start(); mMasses.forward(); mMasses.next())
+	for (iter.start(); iter.forward(); iter.next())
 	{
-		m = mMasses.current();
+		m = iter.current();
 
 		if (!m)
 			continue;
@@ -142,11 +145,12 @@ void Simulation::run(vec_t timeDelta)
 
 void Simulation::simulate(vec_t timeDelta)
 {
+	VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
 	Mass *m;
 
-	for (mMasses.start(); mMasses.forward(); mMasses.next())
+	for (iter.start(); iter.forward(); iter.next())
 	{
-		m = mMasses.current();
+		m = iter.current();
 
 		if (!m)
 			continue;

@@ -37,7 +37,6 @@
 	o Milsp garbage collection / more fully featured
 
  libfreyja_model
-
 	o Documentation
 	o Add polymesh CSG back 
 	o Subdivision Loop and Sabin/Doo surfaces
@@ -49,14 +48,13 @@
 	o Cone and Torus mesh generation
 
  egg_plugins
-	
 	o More unit testing
 	o Finish PSK export
 	o UTX export
 	o Scaling and conversion to Freyja improved
 
  Freyja
-
+	o Context sensitive menus
 	o Documentation
 	o Normal map, DOT3, and matrix palette skinning support
 	o glColorMaterial use
