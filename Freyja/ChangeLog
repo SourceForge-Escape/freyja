@@ -28,6 +28,10 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040420) Mongoose <mongoose@icculus.org>
+
+	* Fix for spinner bug?
+
  Freyja (0.3.5-20040419) Mongoose <mongoose@icculus.org>
 
 	* Model info command

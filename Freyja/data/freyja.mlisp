@@ -96,6 +96,9 @@
 			(menu_seperator)
 			(menu_item "Quit"          EVENT_MAIN  CMD_MAIN_SHUTDOWN))
 
+		(submenu "View"
+			(menu_item "Fullscreen"	EVENT_MAIN	CMD_TOGGLE_FULLSCREEN))
+
 		(menu_seperator)
 
 		(submenu "Vertex"

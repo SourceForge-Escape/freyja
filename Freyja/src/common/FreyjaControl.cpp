@@ -120,13 +120,21 @@ void FreyjaControl::Event(int mode, int cmd)
 		mode = last_event;
 		cmd = last_cmd;
 	}
-	
-	
+
 	// Mongoose 2002.01.12, Bcast event
 	_model->handleEvent(mode, cmd);
 	
 	switch (mode)
 	{
+// 	case EVENT_MAIN:
+// 		switch (cmd)
+// 		{
+// 		case CMD_TOGGLE_FULLSCREEN: 
+// 			application_window_fullscreen();
+// 			break;
+// 		}
+// 		break;
+
 	case EVENT_FREYJA_MODE:
 		switch (cmd)
 		{

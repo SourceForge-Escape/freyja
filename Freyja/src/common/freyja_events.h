@@ -165,7 +165,8 @@ enum freyja_event_main_cmd
 	CMD_MAIN_NEW_MATERIAL,
 	CMD_MAIN_UNUSED1,
 	CMD_MAIN_DEBUG_EGG,
-	CMD_MAIN_OPEN_PALETTE
+	CMD_MAIN_OPEN_PALETTE,
+	CMD_TOGGLE_FULLSCREEN
 };
 
 enum freyja_event_polygon_cmd
