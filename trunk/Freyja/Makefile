@@ -49,6 +49,9 @@ CONFIGURE_LDFLAGS=
 
 ################################################################
 CC=gcc
+#CC=i586-mingw32msvc-g++
+#CPP=i586-mingw32msvc-cpp
+#LD=i586-mingw32msvc-ld
 
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 

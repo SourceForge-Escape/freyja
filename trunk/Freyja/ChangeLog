@@ -28,6 +28,12 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040601) Mongoose <mongoose@icculus.org>
+
+	o Fixed Mlisp scoping and ordering issue
+	o A little more interface trimming and decoupling
+	o Updated freyja BUGS / TODO
+
  Freyja (0.3.5-20040526) Mongoose <mongoose@icculus.org>
 
 	o Some more Mlisp debugging
