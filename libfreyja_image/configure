@@ -1,0 +1,238 @@
+#!/bin/sh
+# Mongoose 
+# A lame configurelike script for lazy people
+#
+# Now dumps some system info into a file for easier
+# bug reports
+###################################################
+
+ARG1=$1
+ARG2=$2
+ARG3=$3
+
+if [ ! $1 ]
+then
+    ARG1="nil"
+fi
+
+if [ $ARG1 = "--help" ]
+then
+    echo "     --clean      Remove config.cache"
+    echo "     --info       Makes system.info with ldd info of ARG2"
+    echo "     --help       Read this help"
+    exit 0
+fi
+
+
+if [ $ARG1 = "--clean" ]
+then
+    rm -f config.cache
+fi
+
+
+if [ $ARG1 = "--info" ]
+then
+
+    echo == System information ======================================== > system.info
+    echo `uname -a` >> system.info
+    echo >> system.info
+    echo CPU >> system.info
+    grep -i "model name" /proc/cpuinfo >> system.info
+    grep -i "cpu MHz" /proc/cpuinfo >> system.info
+    grep -i "cache size" /proc/cpuinfo >> system.info
+	grep -i "_bug" /proc/cpuinfo >> system.info
+    echo >> system.info
+    echo AGP devices >> system.info
+    grep -i "AGP" /proc/pci >> system.info
+    echo >> system.info
+    echo 3dfx devices >> system.info
+    grep -i "3dfx" /proc/pci >> system.info
+	echo >> system.info
+    echo VGA devices >> system.info
+    grep -i "VGA" /proc/pci >> system.info
+    echo =============================================================== >> system.info
+    echo >> system.info
+
+    echo >> system.info
+    echo CC INFO >> system.info
+    cc -v >> system.info 2>> system.info
+    echo >> system.info
+    
+    echo >> system.info
+    echo MAKE INFO >> system.info
+    echo `make -v` >> system.info
+    echo >> system.info
+
+    echo >> system.info
+    echo "config.cache INFO " >> system.info
+    cat config.cache >> system.info
+
+    if [ ! $2 ]
+    then
+	echo
+	echo
+	echo "You didn't pass a binary so no ldd output appened to system.info"
+	echo
+	echo
+    else
+	echo >> system.info
+	echo "LDD INFO " >> system.info
+	echo $2 >> system.info
+	date >> system.info
+	ldd $2 >> system.info
+    fi
+
+    exit 0
+fi
+
+
+if test -e config.cache  > /dev/null
+then
+    echo ===============================================================
+    echo "=    Found config.cache - Skipping bulid configuration        ="
+    echo "=    If you would like to reconfigure, use --clean            ="   
+    echo "=       Example:   ./configure --clean                        ="
+    echo ===============================================================
+    exit 0
+fi
+
+echo
+echo [   Mongoose configure-like hack     ]
+echo == System information ======================================== > system.info
+echo `uname -a` >> system.info
+echo >> system.info
+echo CPU >> system.info
+grep -i "model name" /proc/cpuinfo >> system.info
+grep -i "cpu MHz" /proc/cpuinfo >> system.info
+grep -i "cache size" /proc/cpuinfo >> system.info
+grep -i "_bug" /proc/cpuinfo >> system.info
+echo >> system.info
+echo AGP devices >> system.info
+grep -i "AGP" /proc/pci >> system.info
+echo >> system.info
+echo 3dfx devices >> system.info
+grep -i "3dfx" /proc/pci >> system.info
+echo >> system.info
+echo VGA devices >> system.info
+grep -i "VGA" /proc/pci >> system.info
+echo =============================================================== >> system.info
+echo >> system.info
+
+cat system.info
+
+echo >> system.info
+echo CC INFO >> system.info
+cc -v >> system.info 2>> system.info
+echo >> system.info
+
+echo >> system.info
+echo MAKE INFO >> system.info
+echo `make -v` >> system.info
+echo >> system.info
+
+echo > config.lnk
+echo > config.def
+
+#################################################################
+echo -n "Checking to see if you are root                        "
+if whoami | grep root > /dev/null
+then
+    echo [YES]
+else
+    echo [NO]
+fi
+
+#################################################################
+echo -n "Checking to see if you have libstdc++ installed        "
+
+if make -f config.mak cpp > /dev/null 2> /dev/null
+then
+    CPP="YES"
+else
+    CPP="NO"
+fi
+
+echo [$CPP]
+
+if [ $CPP = "YES" ]
+then
+    echo -n "-lstdc++ " >> config.lnk
+else
+    echo "     STL is not needed"
+
+#    echo "     You need libstdc++ to build Freyja now"
+#    echo "     Please install the C++ lib development kit"
+#    exit 0 
+fi
+
+#################################################################
+echo -n "Checking to see if you have libz installed             "
+
+if make -f config.mak zlib > /dev/null 2> /dev/null
+then
+    ZLIB="YES"
+else
+    ZLIB="NO"
+fi
+
+echo [$ZLIB]
+
+if [ $ZLIB = "YES" ]
+then
+    echo -n "-DLIB_Z " >> config.def
+    echo -n "-lz " >> config.lnk
+else
+    echo "     You need zlib-devel for compressed file support" 
+fi
+
+#################################################################
+echo -n "Checking to see if you have libpng installed           "
+
+if make -f config.mak png > /dev/null 2> /dev/null
+then
+    PNG="YES"
+else
+    PNG="NO"
+fi
+
+echo [$PNG]
+
+if [ $PNG = "YES" ]
+then
+    echo -n "-DLIB_PNG " >> config.def
+    echo -n "-lpng " >> config.lnk
+else
+    echo "     You need png-devel for PNG file support" 
+fi
+
+#################################################################
+
+echo -n "Checking to see if you have libjpeg installed          "
+
+if make -f config.mak jpeg > /dev/null 2> /dev/null
+then
+    JPEG="YES"
+else
+    JPEG="NO"
+fi
+
+echo [$JPEG]
+
+if [ $JPEG = "YES" ]
+then
+    echo -n "-DLIB_JPEG " >> config.def
+    echo -n "-ljpeg " >> config.lnk
+else
+    echo "     You need jpeg-devel for JPEG file support" 
+fi
+
+#################################################################
+
+echo "-DBUILD_HOST=\"\\\"`uname -s -n -r -m`\\\"\"" >> config.def
+cat config.def > config.cache
+cat config.lnk >> config.cache
+
+rm -f config.def config.lnk
+
+echo 
+echo

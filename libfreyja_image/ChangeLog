@@ -1,0 +1,16 @@
+
+ libfreyja_image (0.1.1-20040403) Mongoose <mongoose@users.sourceforge.net>
+
+	* GCC 3.x fixes
+	* Name change
+
+ mtk_image (0.1.1-20011101) Mongoose <mongoose@users.sourceforge.net>
+
+	* Mongoose config system setup
+	* DL module support partially fixed ( Finish this later )
+	* FTX loader still disabled b/c requires guessing based
+	  on filename ( FTX files are kind of like TGAs w/o headers )
+	* Fixed ftx loader to match naming scheme
+	* Removed MtkImage from Freyja/OpenRaider and set it up
+	  as a library agian
+	* MtkImage is once agian a seperate entity  =)
