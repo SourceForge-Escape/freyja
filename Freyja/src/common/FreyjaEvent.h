@@ -27,6 +27,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAEVENT_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJAEVENT_H_
 
+
+#include <mstl/Vector.h>
 #include "FreyjaResource.h"
 
 
@@ -103,6 +105,8 @@ class FreyjaEvent
 	char *mName;                    /* Symbolic name of event */
 
 	static unsigned int mNextId;    /* Simple UID generator scheme */
+
+	static Vector<FreyjaEvent*> mEventStore; /* Event store for control use */
 };
 
 #endif

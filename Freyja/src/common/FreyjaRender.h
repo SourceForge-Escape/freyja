@@ -318,6 +318,9 @@ public:
 	void setZoom(float zoom);
 	float getZoom();
 	
+	void getColor(int id, vec4_t rgba);
+	void setColor(int id, vec4_t rgba);
+
 private:    
 
 	void DrawQuad(float x, float y, float w, float h);
