@@ -1,4 +1,4 @@
-;; -*- Mode: Lisp -*-
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Project: Freyja
@@ -133,11 +133,17 @@
 				(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
 				(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
 
+			;; Transforms
+			(submenu "_Transforms"
+				(menu_item "Move"    "F5"	eMoveObject "gtk-polygon")
+				(menu_item "Rotate"  "F6"	eRotateObject "gtk-polygon")
+				(menu_item "Scale"   "F7"	eScaleObject "gtk-polygon")
+				(menu_item "Select"  "F8"	eSelect "gtk-polygon"))
+
 			(menu_seperator)
 
 			(submenu "_Vertex"
 				(menu_item "_New"		eMode  eVertexNew)
-				(menu_item "_Move"		eMode  eVertexMove)
 				(menu_item "_Delete"	eMode  eVertexDelete)
 				(menu_item "_Combine"	eMode  eVertexCombine))
 
@@ -149,18 +155,21 @@
 			(submenu "_Mesh"
 				(menu_item "_New"		eMode	eMeshNew)
 				(menu_item "_Delete"	eMode	eMeshDelete)
-				(menu_item "_Move"		eMode	eMeshMove)
 				(menu_item "_Select"	eMode	eMeshSelect)
 				(menu_item "_Rotate"	eMode	eMeshRotate)
 				(menu_item "S_cale"		eMode	eMeshScale)
 				(menu_item "_Mirror"	eMode	eMeshMirror)
-				(menu_item "C_enter"	eMode	eMeshCenter))
+				(menu_item "Move C_enter"	eMode	eMeshCenter))
 
 			(submenu "_Bone"
-				(menu_item "_New"       eMode CMD_BONE_NEW)
-				(menu_item "_Add mesh"  eMode CMD_BONE_ADD_MESH)
-				(menu_item "_Select"    eMode CMD_BONE_SELECT)
-				(menu_item "_Move"      eMode CMD_BONE_MOVE_PIVOT)))
+				(menu_item "_New"			eMode	eBoneNew)
+				(menu_item "_Link child"	eMode	eBoneLinkChild)
+				(menu_item "_Unlink child"	eMode	eBoneUnLinkChild)
+				(menu_item "L_ink mesh"		eMode	eBoneLinkMesh)
+				(menu_item "U_nlink mesh"	eMode	eBoneUnLinkMesh)
+				(menu_item "_Select"		eMode	eBoneSelect)
+				(menu_item "_Move"			eMode	eBoneMoveJoint)))
+
 
 		(menu_seperator)
 
@@ -225,7 +234,7 @@
 							(toolbar_button "gtk-open" "Open..."
 								"Open document..."	eMode  eOpenFile)
 
-							(toolbar_button "gtk-save" "Save"
+							(toolbar_button "gtk-save-as" "Save"
 								"Save document"		eMode  eSaveFile)
 
 							(toolbar_togglebutton true
@@ -242,7 +251,7 @@
 
 							(toolbar_button
 								"split.png" "Split" "Split object" 
-								eMode eNone)
+								eMode eSplitObject)
 
 							(toolbar_button
 								"texmap.png" "TexelGen" "Texture Map, XY Plane"
@@ -343,20 +352,16 @@
 
 			(tab "Skin" eModeSkin
 
-				(hbox 1 0 0 1 0 
-					(toolbar
+				 (hbox 1 0 0 1 0
+					   (toolbar
 						(toolbar_button "gtk-new" "New"	
-							"New document"		eMode eNewFile)
+								"New document"		eMode eNewFile)
+						
+						(toolbar_button "gtk-open" "Open"
+								"Open texture file"	eMode	eOpenFileTexture)
 
-						(toolbar_button "gtk-open" "Open..."
-							"Open document..."	eMode  eOpenFile)
-
-						(toolbar_button "gtk-save" "Save"
-							"Save document"		eMode  eSaveFile))
-
-						(toolbar
-							(toolbar_button "gtk-open" "Open"
-								"Open texture file"	eMode	eOpenFileTexture)))
+						(toolbar_button "gtk-save-as" "Save"
+								"Save document"		eMode  eSaveFile)))
 
 					 (hbox 1 0 0 1 0 
 							 (togglebutton "Merge" 0 eMode CMD_MISC_TEXEL_COMBINE)
@@ -380,7 +385,7 @@
 						(toolbar_button "gtk-open" "Open..."
 							"Open document..."	eMode  eOpenFile)
 
-						(toolbar_button "gtk-save" "Save"
+						(toolbar_button "gtk-save-as" "Save"
 							"Save document"		eMode  eSaveFile)))
 
 					;(hbox 1 0 0 1 0 
@@ -407,10 +412,14 @@
 										"Next" eMode eAnimationNext)))))
 
 					(animation_tab_hack)
-					 
+
 					(hbox 1 0 0 1 0 
 						(label "Select Bone" 0.0 0.5) 
 						(spinbutton 0 0 100 eBoneIterator))
+
+					(hbox 1 0 0 1 0
+						(label "Bone Name: " 0.0 0.5) 
+						(textbox eSetCurrentBoneName))
 
 					(hbox 1 0 0 1 0 
 						(label "To be replaced with transformbox:" 0.0 0.5))

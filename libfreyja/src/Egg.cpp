@@ -1300,7 +1300,7 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 {
 	egg_mesh_t *mesh;
 	egg_texel_t *texel;
-	unsigned int i;
+	unsigned int i, j;
 
 
 	if (!polygon)
@@ -1314,6 +1314,14 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 		if (!mesh)
 			continue;
 
+		// Remove from render list first
+		for (j = mesh->r_polygon.begin(); j < mesh->r_polygon.end(); ++j)
+		{
+			if (mesh->r_polygon[j] && mesh->r_polygon[j] == polygon)
+				mesh->r_polygon.assign(j, 0x0);
+		}
+
+		// data model 
 		mesh->polygon.remove(polygon->id);
 	}
 

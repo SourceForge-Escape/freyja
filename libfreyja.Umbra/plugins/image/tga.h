@@ -1,9 +1,10 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http:/icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : 
  * License : GPL See file COPYING, also (C) 2000 Mongoose
  * Comments: TGA plug-in
@@ -18,8 +19,8 @@
  * Mongoose - Created
  ================================================================*/
 
-#ifndef __MONGOOSE_TGA_H
-#define __MONGOOSE_TGA_H
+#ifndef GUARD_FREYJA__MONGOOSE_MTK_TGA_H
+#define GUARD_FREYJA__MONGOOSE_MTK_TGA_H
 
 #include <stdio.h>
 

@@ -1,7 +1,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : BUGS  ( Last Audit: 2004.11.29 )
+  File     : BUGS  ( Last Audit: 2004.12.02 )
   Project  : Freyja 0.3.x
   Author   : Terry 'Mongoose' Hendrix II
 
@@ -18,24 +18,65 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
  Show Stoppers
-	o Crash on cut / paste cycles
-	o Crash on mesh delete for some character models, which
-      looks like something to do with aging Egg backend data structures
-	o Crash on NULL file loads ( I can't reproduce this )
-	o Crash on delete single object ( Rare, Hard to reproduce )
+ ------------------
 
- Editing
-	o Normal generation not interpolating correctly
-	o Bones recursively adjust on generic rotation
-	o Bones react oddly to scaling
+ o 2004.12.02-5 ( Related 2004.12.02-1 )  FIXED?
+	Vertex delete on polygon can cause same crash as 2004.12.02-1
+	Polygon delete can cause same crash as 2004.12.02-1
+	See log error in BUG 2004.12.02-1
 
- Animation
-	o Animation playback removed from this release.
-	o Tree for browsing/editing animations ( DnD ) isn't implemented.
-	o No vertex morphing animation removed in this release.
-	o Matrix palette skinning not supported due to old Egg backend.
+ o 2004.12.02-4
+	Crash on bone selection via iterator/spinbutton with null skeleton
 
- Misc
-	o Material texture/texture index race condition?
+ o 2004.12.02-3
+	Crash on skeletal mesh model save in ASE PLUGIN export of SKEL
+
+ o 2004.12.02-2 ( Related: 2004.12.02-1 )
+	Saved egg files can cause lockup if they contain lots of
+	cut and paste bugged meshes
+
+ o 2004.12.02-1  ( Related: 2004.11.29-2?, 2004.11.29-1? )  FIXED?
+	Cut/Delete can cause crash in renderer?  
+
+	FIX?: Unlink meshes from render list before it's elements are
+	      Add group merging to paste code, so all vertices contained
+
+	Looks like multi group meshes like spheres/cylinders to blame?
+
+	Log entry below:
+		FreyjaRender::DrawPolygon> Assertion failure, bad polygon 
+
+ o 2004.11.29-2  FIXED?
+	Crash on delete single object ( Rare, Hard to reproduce )
+
+ o 2004.11.29-1  FIXED?
+	Crash on mesh delete for some character models, which
+	looks like something to do with aging Egg data structures
+
+ --------------------------------------------------------------------------
+
+ Annoying
+ ------------------
+
+ o 2004.12.02-a2
+	Vertex combine doesn't check if two vertices share a face? wtf =/
+
+ o 2004.12.02-a1
+	ASE PLUGIN mesh import fucks up UV and coord translation -
+	eg model that stands up is imported as lying down ( Y = Z )
+
+ o 2004.12.01-a1
+	Possible regression with material+light rendering
+
+ o 2004.11.29-a1
+	Normal generation not interpolating correctly
+
+ o 2004.11.29-a2
+	Bones scale oddly in bone mode, but not scene mode
+
+ o 2004.11.29-a3
+	Material texture/texture index race condition?
+
+ o 2004.11.29-a4
 	o Full disk write fail not reported for screen shot.
 

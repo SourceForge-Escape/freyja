@@ -948,7 +948,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 
 	if (polygon.r_vertex.empty())
 	{
-		printf("FreyjaRender::DrawPolygon> Assertion failure, bad polygon\n");
+		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, bad polygon\n");
 		return;
 	}
 
@@ -1236,7 +1236,7 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 			
 			if (!polygon)
 			{
-				freyja_print("FIXME: %s:%i\n", __FILE__, __LINE__);
+				freyja_print("FIXME: NULL Polygon in list %s:%i\n", __FILE__, __LINE__);
 				continue;
 			}
 			

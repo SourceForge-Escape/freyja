@@ -11,6 +11,8 @@ lazybuild:
 	@-printf "Installing libfreyja\n"
 	@-cd libfreyja; ./autogen.sh; make; make install
 	@-cd ..
+	@-cd libfreyja; make plugins; make install-plugins
+	@-cd ..
 
 	@-printf "Installing libmgtk\n"
 	@-cd libmgtk; ./autogen.sh; make; make install

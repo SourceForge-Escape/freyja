@@ -571,7 +571,17 @@ void FreyjaModel::getSceneTranslation(vec3_t scroll)
 unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 {
 	egg_tag_t *tag;
+	char name[64];
+
 	tag = _egg->addTag(x, y, z, flag);
+
+	if (tag->id == 0)
+		snprintf(name, 64, "root");
+	else
+		snprintf(name, 64, "bone %i", tag->id);
+
+	setNameBone(tag->id, name);
+	updateSkeletalUI();
 
 	return tag->id;
 }
@@ -580,12 +590,14 @@ unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
 {
 	_egg->TagAddMesh(CachedTag(), getCurrentMesh());
+	updateSkeletalUI();
 }
 
 
 void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
 {
 	_egg->TagDelMesh(CachedTag(), getCurrentMesh());
+	updateSkeletalUI();
 }
 
 
@@ -602,6 +614,7 @@ void FreyjaModel::selectBone(float xx, float yy)
 void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
 {
 	_egg->connectTag(master, slave);
+	updateSkeletalUI();
 }
 
 
@@ -954,14 +967,41 @@ void FreyjaModel::MeshDel()
 }
 
 
-void FreyjaModel::nameBone(unsigned int bone, const char *name)
+void FreyjaModel::setNameBone(unsigned int bone, const char *name)
 {
+	egg_tag_t *boneA = _egg->getTag(bone);
+
+	if (getFlags() & fDontUpdateBoneName)
+		return;
+
+	if (boneA && boneA->id == (int)bone && name && name[1])
+	{
+		if (strncmp(boneA->name, name, 64) != 0)
+		{
+			strncpy(boneA->name, name, 64);
+			freyja_print("bone[%i].name = '%s'", bone, name);
+			updateSkeletalUI();
+		}
+	}
+}
+
+const char *FreyjaModel::getNameBone(unsigned int bone)
+{
+	egg_tag_t *boneA = _egg->getTag(bone);
+
+	if (boneA)
+	{
+		return boneA->name;
+	}
+
+	return 0x0;
 }
 
 
 void FreyjaModel::disconnectBone(unsigned int master, unsigned int slave)
 {
 	_egg->TagDisconnect(master, slave);
+	updateSkeletalUI();
 }
 
 
@@ -1736,6 +1776,12 @@ void fixTexCoordsHACK(Egg *egg)
 				v->uv[1] = 1.0f;
 		}
 	}
+}
+
+
+void FreyjaModel::updateSkeletalUI()
+{
+	updateSkeletonUI(_egg);
 }
 
 
