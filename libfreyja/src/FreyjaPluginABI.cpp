@@ -2409,25 +2409,6 @@ void freyjaVertexNormal3f(long vIndex, vec_t x, vec_t y, vec_t z)
 }
 
 
-Vector<unsigned int> *freyja__VertexPolygonReference(long vertexIndex)
-{
-	Vector<unsigned int> *ref = new Vector<unsigned int>();
-	egg_vertex_t *v;
-	
-	if (EggPlugin::mEggPlugin)
-	{
-		v = EggPlugin::mEggPlugin->getVertex(vertexIndex);
-
-		if (v)
-		{
-			ref->copy(v->ref);
-		}
-	}
-
-	return ref;
-}
-
-
 void freyja__PolygonReplaceReference(long polygonIndex, 
 									 long vertexA, long vertexB)
 {
@@ -2451,6 +2432,13 @@ void freyja__PolygonReplaceReference(long polygonIndex,
 
 	// Replace A with B to match sorted list ids to form same edge
 	polygon->vertex.Replace(vertexA, vertexB);
+
+	polygon->r_vertex.clear();
+
+	for (i = polygon->vertex.begin(); i < polygon->vertex.end(); ++i)
+	{
+		polygon->r_vertex.pushBack(EggPlugin::mEggPlugin->getVertex(polygon->vertex[i]));
+	}
 
 	// Add polygonIndex to B's reference list
 	b->ref.pushBack(polygonIndex);
