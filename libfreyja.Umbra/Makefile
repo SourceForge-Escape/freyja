@@ -352,9 +352,9 @@ nod.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
 	MOD_NAME=nod \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/nod.o" \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nod.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
 
 obj.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -401,16 +401,16 @@ trmesh.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
 	MOD_NAME=trmesh \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/trmesh.o" \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/freyja_trmesh.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 
 plugins-model-exp2: grnX.so halflifeX.so
 
-plugins-model-exp: eggv8.so lwo.so nod.so tombraider.so trmesh.so
+plugins-model-exp: eggv8.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so md2.so md5.so psk.so python.so obj.so smd.so
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so grn.so lwo.so md2.so md5.so nod.so psk.so python.so obj.so smd.so trmesh.so
 
 
 ######################################################################
