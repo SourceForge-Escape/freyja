@@ -1981,6 +1981,11 @@ int Egg::saveTag(egg_tag_t *tag, FILE *f)
 	lu = EGG_BTAG_CHUNK_START;
 	fwrite(&lu, 4, 1, f);
 
+	/* Extention to 8.12 format!!! */
+	lu = 0x454D414E;
+	fwrite(&lu, 4, 1, f);
+	fwrite(tag->name, 64, 1, f);
+
 	li = tag->id;
 	fwrite(&li, 4, 1, f);
 
@@ -2042,6 +2047,15 @@ egg_tag_t *Egg::loadTag(FILE *f)
 
 	fread(&li, 4, 1, f);
 	tag->id = li;
+
+	/* Extention to 8.12 format!!! */
+	if (li == 0x454D414E)
+	{
+		fread(tag->name, 64, 1, f);
+
+		fread(&li, 4, 1, f);
+		tag->id = li;
+	}
 
 	fread(&lu, 4, 1, f);
 	n = lu;
