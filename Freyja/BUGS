@@ -18,6 +18,7 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
  Show Stoppers
+	o Crash on cut / paste cycles
 	o Crash on mesh delete for some character models, which
       looks like something to do with aging Egg backend data structures
 	o Crash on NULL file loads ( I can't reproduce this )
