@@ -697,6 +697,257 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
 
 	///////////////////////////////////////////////////////////////////////
+	// Animation ( 0.9.3 ABI, Can't be used with freyjaIterators )
+	///////////////////////////////////////////////////////////////////////
+
+	long freyjaAnimationCreate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Creates a new Freyja Animation object
+	 *        Returns the new Animation's index or -1 on error
+	 ------------------------------------------------------*/
+
+	
+	/* Animation Accessors */
+
+	long freyjaGetAnimationCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the number of Animations being managed
+	 ------------------------------------------------------*/
+
+	long freyjaGetAnimationKeyFrameCount(long animationIndex);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : Returns the number of keyframes or -1 on error
+	 ------------------------------------------------------*/
+
+	//long freyjaGetAnimationKeyFrameIndex(long animationIndex, long element);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : Returns the gobal object index ( from the local
+	 *        Animation element index ) or -1 on error
+	 ------------------------------------------------------*/
+
+
+	/* Animation Mutators */
+
+#ifdef NOT_IMPLEMENTED
+	void freyjaAnimationName(long animationIndex, const char *name);
+	void freyjaAnimationFrameRate(long animationIndex, vec_t frameRate);
+	void freyjaAnimationTime(long animationIndex, vec_t time);
+	void freyjaAnimationSubsetRoot(long animationIndex, long startBone);
+	void freyjaAnimationSubsetCount(long animationIndex, long boneCount);
+#endif
+
+	long freyjaAnimationKeyFrameCreate(long animationIndex);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : Returns the keyframe's local Animation element
+	 *        index or -1 on error
+	 ------------------------------------------------------*/
+
+	void freyjaAnimationKeyFrameTime(long animationIndex, 
+									 long keyFrameIndex, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
+	 * Post : Sets time for <keyFrameIndex> keyframe in animation
+	 ------------------------------------------------------*/
+
+	void freyjaAnimationKeyFramePosition(long animationIndex, 
+										 long keyFrameIndex, vec3_t position);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
+	 * Post : Sets <keyFrameIndex> keyframe's position in animation
+	 ------------------------------------------------------*/
+
+	void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex, 
+											   long keyFrameIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
+	 * Post : Sets <keyFrameIndex> keyframe's orienation in animation
+	 *        by Euler angles
+	 ------------------------------------------------------*/
+
+	void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex, 
+												long keyFrameIndex,vec4_t wxyz);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
+	 * Post : Sets <keyFrameIndex> keyframe's orienation in animation
+	 *        by Quaternion ( note the w, xyz order )
+	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Material ( 0.9.3 ABI, Can't be used with freyjaIterators )
+	///////////////////////////////////////////////////////////////////////
+
+	long freyjaMaterialCreate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Creates a new Freyja Material object
+	 *        Returns the new Material's index or -1 on error
+	 ------------------------------------------------------*/
+
+
+	/* Material Accessors */
+
+	long freyjaGetMaterialCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the number of Materials being managed
+	 ------------------------------------------------------*/
+
+	long freyjaGetMaterialIndex(long materialIndex, long element);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns the gobal object index ( from the local
+	 *        Material element index ) or -1 on error
+	 ------------------------------------------------------*/
+
+	char *freyjaGetMaterialName(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 *        Don't alter the returned string
+	 *
+	 * Post : Returns a pointer to NULL terminated name string
+	 *        Returns 0x0 on error
+	 ------------------------------------------------------*/
+
+	long freyjaGetMaterialFlags(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns flags or -1 on error
+	 ------------------------------------------------------*/
+
+	long freyjaGetMaterialTexture(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns texture index or -1 for error or no texture
+	 ------------------------------------------------------*/
+
+	void freyjaGetMaterialAmbient(long materialIndex, vec4_t ambient);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns <ambient> color
+	 ------------------------------------------------------*/
+
+	void freyjaGetMaterialDiffuse(long materialIndex, vec4_t diffuse);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns <diffuse> color
+	 ------------------------------------------------------*/
+
+	void freyjaGetMaterialSpecular(long materialIndex, vec4_t specular);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns <specular> color
+	 ------------------------------------------------------*/
+
+	void freyjaGetMaterialEmissive(long materialIndex, vec4_t emissive);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns <emissive> color
+	 ------------------------------------------------------*/
+
+	vec_t freyjaGetMaterialShininess(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns specular exponent or -1.0 on error
+	 ------------------------------------------------------*/
+
+	vec_t freyjaGetMaterialTransparency(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns transparency or -1.0 on error
+	 ------------------------------------------------------*/
+
+	long freyjaGetMaterialBlendSource(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns blend source factor or -1 on error
+	 ------------------------------------------------------*/
+
+	vec_t freyjaGetMaterialBlendDestination(long materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Returns blend destination factor or -1 on error
+	 ------------------------------------------------------*/
+
+
+	/* Material Mutators */
+
+	void freyjaMaterialName(long materialIndex, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's <name> id is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialFlags(long materialIndex, long flags);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's bit <flags> are set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialTexture(long materialIndex, long textureIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's <texture> index is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialAmbient(long materialIndex, const vec4_t ambient);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's <ambient> color is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialDiffuse(long materialIndex, const vec4_t diffuse);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's <diffuse> color is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSpecular(long materialIndex, const vec4_t specular);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's <specular> color is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialEmissive(long materialIndex, const vec4_t emissive);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's <emissive> color is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialShininess(long materialIndex, vec_t exponent);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's Specular <exponent> is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialTransparency(long materialIndex, vec_t transparency);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 *        <transparency> is a value from 0.0 to 1.0
+	 *
+	 * Post : Material's <transparency> is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialBlendSource(long materialIndex, unsigned long factor);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's blend source <factor> is set
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialBlendDestination(long materialIndex,
+										unsigned long factor);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material's blend destination <factor> is set
+	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
 	// Plugin import/export iteraction setup
 	///////////////////////////////////////////////////////////////////////
 

@@ -26,8 +26,14 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.9.0-20050107) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o FreyjaMaterial (ABI 0.9.3, doesn't use freyjaIterator) added
+
+
  libfreyja (0.9.0-20050105-6) "Umbra" Mongoose <mongoose@icculus.org>
 
+	o ABI update using Freyja objects
 	o Neverwinter nights ASCII importer ( just for kicks, not useful )
 	o Milkshape plugin export "filename.milkshape" to use
 	o Obj plugin export "filename.obj" to use

@@ -3304,6 +3304,474 @@ void freyjaMeshFlags1u(unsigned int flags)
 }
 
 
+///////////////////////////////////////////////////////////////////////
+// Animation ( 0.9.3 ABI, Can't be used with freyjaIterators )
+///////////////////////////////////////////////////////////////////////
+
+long freyjaAnimationCreate()
+{
+	long animationIndex = gFreyjaAnimations.size();
+
+	gFreyjaAnimations.pushBack(new FreyjaAnimation());
+	gFreyjaAnimations[animationIndex]->mId = animationIndex;
+
+	return animationIndex;
+	
+}
+
+
+/* Animation Accessors */
+
+long freyjaGetAnimationCount()
+{
+	return gFreyjaAnimations.size();
+}
+
+
+long freyjaGetAnimationKeyFrameCount(long animationIndex)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+			return gFreyjaAnimations[animationIndex]->mKeyFrames.size();
+	}	
+
+	return -1;	
+}
+
+
+/* Animation Mutators */
+
+long freyjaAnimationKeyFrameCreate(long animationIndex)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		if (gFreyjaAnimations[animationIndex])
+		{
+			long keyFrameIndex = gFreyjaAnimations[animationIndex]->mKeyFrames.size();
+			gFreyjaAnimations[animationIndex]->mKeyFrames.pushBack(new FreyjaKeyFrame());
+			return keyFrameIndex;
+		}
+	}	
+
+	return -1;
+}
+
+
+void freyjaAnimationKeyFrameTime(long animationIndex, 
+								 long keyFrameIndex, vec_t time)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+
+		if (anim &&	keyFrameIndex > -1 && 
+			keyFrameIndex < (long)anim->mKeyFrames.size())
+		{
+			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
+
+			if (keyframe)
+			{
+				keyframe->setTime(time);
+			}
+		}
+	}
+}
+
+
+void freyjaAnimationKeyFramePosition(long animationIndex, 
+									 long keyFrameIndex, vec3_t position)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+
+		if (anim &&	keyFrameIndex > -1 && 
+			keyFrameIndex < (long)anim->mKeyFrames.size())
+		{
+			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
+
+			if (keyframe)
+			{
+				keyframe->setPosition(position);
+			}
+		}
+	}
+}
+
+
+void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex, 
+										   long keyFrameIndex, vec3_t xyz)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+
+		if (anim &&	keyFrameIndex > -1 && 
+			keyFrameIndex < (long)anim->mKeyFrames.size())
+		{
+			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
+
+			if (keyframe)
+			{
+				keyframe->setOrientationByEuler(xyz);
+			}
+		}
+	}
+}
+
+
+void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex, 
+											long keyFrameIndex,vec4_t wxyz)
+{
+	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
+	{
+		FreyjaAnimation *anim = gFreyjaAnimations[animationIndex];
+
+		if (anim &&	keyFrameIndex > -1 && 
+			keyFrameIndex < (long)anim->mKeyFrames.size())
+		{
+			FreyjaKeyFrame *keyframe = anim->mKeyFrames[keyFrameIndex];
+
+			if (keyframe)
+			{
+				keyframe->setOrientationByQuaternion(wxyz);
+			}
+		}
+	}
+}
+
+
+
+///////////////////////////////////////////////////////////////////////
+// Material ( 0.9.3 ABI, Can't be used with freyjaIterators )
+///////////////////////////////////////////////////////////////////////
+
+long freyjaMaterialCreate()
+{
+	long materialIndex = gFreyjaMaterials.size();
+
+	gFreyjaMaterials.pushBack(new FreyjaMaterial());
+	gFreyjaMaterials[materialIndex]->mId = materialIndex;
+
+	return materialIndex;
+}
+
+
+/* Material Accessors */
+
+long freyjaGetMaterialCount()
+{
+	return gFreyjaMaterials.size();
+}
+
+
+long freyjaGetMaterialIndex(long materialIndex, long element)
+{
+	// This is mainly reserved for future use
+
+	if (element > -1 && element < (long)gFreyjaMaterials.size())
+	{
+		return element;
+	}
+
+	return -1;
+}
+
+
+char *freyjaGetMaterialName(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mName;
+	}	
+
+	return 0x0;
+}
+
+
+long freyjaGetMaterialFlags(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mFlags;
+	}	
+
+	return -1;
+}
+
+
+long freyjaGetMaterialTexture(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mTexture;
+	}	
+
+	return -1;
+}
+
+
+void freyjaGetMaterialAmbient(long materialIndex, vec4_t ambient)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			ambient[i] = gFreyjaMaterials[materialIndex]->mAmbient[i];
+	}
+}
+
+
+void freyjaGetMaterialDiffuse(long materialIndex, vec4_t diffuse)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			diffuse[i] = gFreyjaMaterials[materialIndex]->mDiffuse[i];
+	}
+}
+
+
+void freyjaGetMaterialSpecular(long materialIndex, vec4_t specular)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			specular[i] = gFreyjaMaterials[materialIndex]->mSpecular[i];
+	}
+}
+
+
+void freyjaGetMaterialEmissive(long materialIndex, vec4_t emissive)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			emissive[i] = gFreyjaMaterials[materialIndex]->mEmissive[i];
+	}
+}
+
+
+vec_t freyjaGetMaterialShininess(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mShininess;
+	}	
+
+	return -1.0f;
+}
+
+
+vec_t freyjaGetMaterialTransparency(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mTransparency;
+	}	
+
+	return -1.0f;
+}
+
+
+long freyjaGetMaterialBlendSource(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mBlendSrc;
+	}	
+
+	return -1;
+}
+
+
+vec_t freyjaGetMaterialBlendDestination(long materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mBlendDest;
+	}	
+
+	return -1;
+}
+
+
+
+/* Material Mutators */
+
+void freyjaMaterialName(long materialIndex, const char *name)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		strncpy(gFreyjaMaterials[materialIndex]->mName, name, 64);
+		gFreyjaMaterials[materialIndex]->mName[63] = 0;
+	}	
+}
+
+
+void freyjaMaterialFlags(long materialIndex, long flags)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mFlags = flags;
+	}
+}
+
+
+void freyjaMaterialTexture(long materialIndex, long textureIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mTexture = textureIndex;
+	}
+}
+
+
+void freyjaMaterialAmbient(long materialIndex, const vec4_t ambient)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			gFreyjaMaterials[materialIndex]->mAmbient[i] = ambient[i];
+	}
+}
+
+
+void freyjaMaterialDiffuse(long materialIndex, const vec4_t diffuse)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			gFreyjaMaterials[materialIndex]->mDiffuse[i] = diffuse[i];
+	}
+}
+
+
+void freyjaMaterialSpecular(long materialIndex, const vec4_t specular)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			gFreyjaMaterials[materialIndex]->mSpecular[i] = specular[i];
+	}
+}
+
+
+void freyjaMaterialEmissive(long materialIndex, const vec4_t emissive)
+{
+	long i;
+
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		for (i = 0; i < 4; ++i)
+			gFreyjaMaterials[materialIndex]->mEmissive[i] = emissive[i];
+	}
+}
+
+
+void freyjaMaterialShininess(long materialIndex, vec_t exponent)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mShininess = exponent;
+	}
+}
+
+
+void freyjaMaterialTransparency(long materialIndex, vec_t transparency)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mTransparency = transparency;
+	}
+}
+
+
+void freyjaMaterialBlendSource(long materialIndex, unsigned long factor)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mBlendSrc = factor;
+	}
+}
+
+
+void freyjaMaterialBlendDestination(long materialIndex,	unsigned long factor)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mBlendDest = factor;
+	}
+}
+
+
+
 //////////////////////////////////////////////////////////////////////
 // Plugin import / export nicities
 //////////////////////////////////////////////////////////////////////
