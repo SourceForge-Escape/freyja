@@ -1288,6 +1288,7 @@ void Egg::delVertex(unsigned int id)
 
 void Egg::delVertex(egg_vertex_t *v)
 {
+	Vector<unsigned int> tmp;
 	egg_group_t *grp;
 	unsigned int i, j, index;
 
@@ -1317,11 +1318,16 @@ void Egg::delVertex(egg_vertex_t *v)
 		if (!grp)
 			continue;
 
-		for (j = grp->vertex.begin(); j < grp->vertex.end(); ++j)
+		// Data model and render list update
+		tmp.clear();
+		tmp.copy(grp->vertex);
+		grp->vertex.clear();   /* You can't erase non allocated types */
+
+		for (j = tmp.begin(); j < tmp.end(); ++j)
 		{
-			if (grp->vertex[j] == v->id)
+			if (tmp[j] != v->id && getVertex(tmp[j]))
 			{
-				grp->vertex.remove(j);
+				grp->vertex.pushBack(tmp[j]);
 			}
 		}
 	}
@@ -1422,6 +1428,7 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 	egg_mesh_t *mesh;
 	egg_texel_t *texel;
 	unsigned int i, j;
+	Vector<unsigned int> tmp;
 
 
 	if (!polygon)
@@ -1435,15 +1442,21 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 		if (!mesh)
 			continue;
 
-		// Remove from render list first
-		for (j = mesh->r_polygon.begin(); j < mesh->r_polygon.end(); ++j)
-		{
-			if (mesh->r_polygon[j] && mesh->r_polygon[j] == polygon)
-				mesh->r_polygon.assign(j, 0x0);
-		}
+		// Data model and render list update
+		tmp.clear();
+		tmp.copy(mesh->polygon);
+		mesh->r_polygon.clear(); /* Don't erase here b/c these pointers are
+										  * allocated and controlled outside the mesh */
+		mesh->polygon.clear();   /* You can't erase non allocated types */
 
-		// data model 
-		mesh->polygon.remove(polygon->id);
+		for (j = tmp.begin(); j < tmp.end(); ++j)
+		{
+			if (tmp[j] != polygon->id && getPolygon(tmp[j]))
+			{
+				mesh->polygon.pushBack(tmp[j]);
+				mesh->r_polygon.pushBack(getPolygon(tmp[j]));
+			}
+		}
 	}
 
 	// Remove texels used by polygon
