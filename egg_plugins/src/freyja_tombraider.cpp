@@ -33,9 +33,9 @@
 
 #include <mstl/List.h>
 
-#include "EggPlugin.h"
+#include <freyja_model/EggPlugin.h>
 #ifdef ENDIAN
-#   include "mendian.h"
+#   include <freyja_model/mendian.h>
 #endif
 
 #include "TombRaider.h"
