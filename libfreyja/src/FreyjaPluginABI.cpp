@@ -2445,6 +2445,46 @@ unsigned long freyjaGetFlags()
 }
 
 
+char *freyjaGetMeshNameString(long meshIndex)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		return mesh->name;
+	}
+
+	return 0x0;
+}
+
+
+long freyjaGetMeshName1s(long meshIndex, long lenght, char *name)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		strncpy(name, mesh->name, lenght);
+		name[lenght-1] = 0;
+		return 0;
+	}
+
+	return -1;
+}
+
+
+void freyjaMeshName1s(long meshIndex, const char *name)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		strncpy(mesh->name, name, 64);
+		mesh->name[63] = 0;
+	}
+}
+
+
 long freyjaMeshPosition(long meshIndex, vec3_t xyz)
 {
 	// Not Implemented properly due to Egg backend use ( not scene based )
