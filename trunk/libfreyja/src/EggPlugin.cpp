@@ -723,11 +723,28 @@ void EggPlugin::freyjaPrintMessage(char *format, va_list *args)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+bool EggPlugin::checkModel(const char *filename)
+{
+	freyjaPrintError("EggPlugin::checkModel> Not implemented %s:%i using Egg",
+					 __FILE__, __LINE__);
+	return (Egg::checkFile((char *)filename) == 0);
+}
+
+
 bool EggPlugin::saveModel(const char *filename)
 {
-	freyjaPrintError("EggPlugin::saveModel> Not implemented %s:%i",
+	freyjaPrintError("EggPlugin::saveModel> Not implemented %s:%i using Egg",
 					 __FILE__, __LINE__);
-	return false;
+	return (mEgg->saveFile((char *)filename) == 0);
+}
+
+
+bool EggPlugin::loadModel(const char *filename)
+{
+	freyjaPrintError("EggPlugin::loadModel> Not implemented %s:%i using Egg",
+					 __FILE__, __LINE__);
+
+	return (mEgg->loadFile((char *)filename) == 0);
 }
 
 
@@ -777,6 +794,13 @@ long EggPlugin::importModel(const char *filename)
 		return -1;
 	}
 
+	/* Check for native format */
+	if (checkModel(filename))
+	{
+		return loadModel(filename);
+	}
+
+	/* Check for other format */
 	for (i = mPluginDirectories.begin(); i < mPluginDirectories.end(); ++i)
 	{
 		if (!reader.openDirectory(mPluginDirectories[i]))
@@ -879,6 +903,7 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 	if (!type || !filename)
 		return -100;
 
+	/* Check for native format */
 	if (strcmp(type, "native") == 0)
 	{
 		return saveModel(filename);
@@ -888,6 +913,7 @@ long EggPlugin::exportModel(const char *filename, const char *type)
 
 	name = (char*)type;
 
+	/* Check for other format */
 	for (i = mPluginDirectories.begin(); i < mPluginDirectories.end(); ++i)
 	{
 		if (!reader.openDirectory(mPluginDirectories[i]))
