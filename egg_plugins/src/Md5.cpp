@@ -536,7 +536,7 @@ int freyja_model__md5_import(char *filename)
 
 			/* Store vertices in group */
 			vertex = eggVertexStore3f(md5.mMeshes[m].weights[w].pos[0], 
-									  md5.mMeshes[m].weights[w].pos[1], 
+									  -md5.mMeshes[m].weights[w].pos[1], 
 									  md5.mMeshes[m].weights[w].pos[2]);
 
 			/* Store texels */
@@ -572,11 +572,13 @@ int freyja_model__md5_import(char *filename)
 
 
 	/* Load skeleton */
-	for (m = 0, w = 0; m < md5.mNumMeshes; ++m)
+	for (m = 0; m < md5.mNumMeshes; ++m)
 	{
-		for (; w < md5.mMeshes[m].numweights; ++w)
+		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
-			eggVertexWeightStore(w, 
+			w = md5.mMeshes[m].verts[v].weight;
+
+			eggVertexWeightStore(v, 
 								 md5.mMeshes[m].weights[w].weight,
 								 md5.mMeshes[m].weights[w].joint);
 
@@ -594,10 +596,10 @@ int freyja_model__md5_import(char *filename)
 		eggTagFlags1u(0x0);
 		eggTagName(md5.mJoints[j].name);
 		eggTagPos3f(md5.mJoints[j].translate[0],
-					md5.mJoints[j].translate[1],
+					-md5.mJoints[j].translate[1],
 					md5.mJoints[j].translate[2]);
 		eggTagRotate3f(md5.mJoints[j].rotate[0],
-						md5.mJoints[j].rotate[1],
+					  	-md5.mJoints[j].rotate[1],
 						md5.mJoints[j].rotate[2]);
 
 		eggPrintMessage("[%i]", j);   
@@ -605,8 +607,7 @@ int freyja_model__md5_import(char *filename)
 		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{
 			if (md5.mJoints[j2].parent == j)
-			{
-				eggPrintMessage(" |-- %i", j2);   
+			{ 
 				eggTagAddSlave1u(j2);
 			}
 		}
