@@ -422,6 +422,68 @@ int freyja_model__nod_import(char *filename)
 	freyjaEnd(); // FREYJA_SKELETON
 
 
+#define USE_GROUPS
+#ifdef USE_GROUPS
+	Vector<long> vertices;
+	long index, num_verts = 0, num_faces = 0;
+
+
+	for (i = 0; i < nod.header2.NumGroups; ++i)
+	{  
+		// Start a new mesh
+		freyjaBegin(FREYJA_MESH);
+    
+		// Start a new vertex group
+		freyjaBegin(FREYJA_VERTEX_GROUP);
+
+		for (j = 0; j < nod.mesh_groups[i].NumVertices; j++)
+		{
+			pos[0] = nod.vertices[num_verts + j].Pos[0];
+			pos[1] = nod.vertices[num_verts + j].Pos[1];
+			pos[2] = nod.vertices[num_verts + j].Pos[2];
+		
+			b = nod.vertices[j].BoneNum;
+		
+			nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
+			
+			matrix.setIdentity();
+			matrix.translate(nod.bones[b].RestTranslate[0],
+							 nod.bones[b].RestTranslate[1],
+							 nod.bones[b].RestTranslate[2]);
+			matrix.rotate(rot[0], rot[1], rot[2]);
+			matrix.multiply3v(pos, pos);
+		
+			// Store vertices and texels in group
+			index = freyjaVertex3f(pos[0], pos[1], pos[2]);	
+			freyjaVertexNormal3fv(index, nod.vertices[num_verts + j].Norm);
+			freyjaVertexTexCoord2f(index,
+								   nod.vertices[num_verts + j].UV[0],
+								   1.0 - nod.vertices[num_verts + j].UV[1]);
+			vertices.pushBack(index);
+		}
+		
+		freyjaEnd(); // FREYJA_GROUP
+
+		for (j = 0; j < nod.mesh_groups[i].NumFaces; j++)
+		{
+			// Start a new polygon
+			freyjaBegin(FREYJA_POLYGON);
+			freyjaPolygonVertex1i(vertices[nod.faces[num_faces+j].indices[0]]);
+			freyjaPolygonVertex1i(vertices[nod.faces[num_faces+j].indices[1]]);
+			freyjaPolygonVertex1i(vertices[nod.faces[num_faces+j].indices[2]]);
+			freyjaPolygonMaterial1i(0);
+			freyjaEnd(); // FREYJA_POLYGON
+		}
+		
+		freyjaEnd(); // FREYJA_MESH
+
+		vertices.clear();
+
+		num_verts += nod.mesh_groups[i].NumVertices;
+		num_faces += nod.mesh_groups[i].NumFaces;
+	}
+
+#else
 
 	// Start a new mesh
 	freyjaBegin(FREYJA_MESH);
@@ -458,58 +520,6 @@ int freyja_model__nod_import(char *filename)
 
 	freyjaEnd(); // FREYJA_GROUP
 
-#ifdef USE_GROUPS
-	num_verts = num_faces = 0;
-			  
-	for (i = 0; i < header2->NumGroups; i++)
-	{  
-		printf("group[%02i].mesh = '%s'\n",
-			   i, meshes[mesh_groups[i].MeshNum].MeshName);
-
-		printf("group[%02i].flags = {", i);
-		
-		if (!mesh_groups[i].GroupFlags)
-			printf("NONE ");
-		
-		if (mesh_groups[i].GroupFlags & NOD_GF_HASLOD)
-			printf("NOD_GF_HASLOD ");
-
-		if (mesh_groups[i].GroupFlags & NOD_GF_NOWEIGHTS)
-			printf("NOD_GF_NOWEIGHTS ");
-		
-		if (mesh_groups[i].GroupFlags & NOD_GF_NOSKINNING)
-			printf("NOD_GF_NOSKINNING ");
-		
-		if (mesh_groups[i].GroupFlags & NOD_GF_MULTITEXTURE)
-			printf("NOD_GF_MULTITEXTURE ");
-		
-		printf("}\n");
-		
-		for (j = 0; j < mesh_groups[i].NumVertices; j++)
-		{
-			printf("group[%02i].vertex[%04i] { pos %.3f %.3f %.3f; \tuv %.3f %.3f }\n",
-				   i, j, 
-				   vertices[num_verts + j].Pos[0],
-				   vertices[num_verts + j].Pos[1],
-				   vertices[num_verts + j].Pos[2],
-				   vertices[num_verts + j].UV[0],
-				   1.0 - vertices[num_verts + j].UV[1]);
-		}
-		
-		for (j = 0; j < mesh_groups[i].NumFaces; j++)
-		{
-			printf("group[%02i].tris[%04i] { %u, %u, %u }\n",
-				   i, j, 
-				   faces[num_faces + j].indices[0],
-				   faces[num_faces + j].indices[1],
-				   faces[num_faces + j].indices[2]);
-		}
-		
-		num_verts += mesh_groups[i].NumVertices;
-		num_faces += mesh_groups[i].NumFaces;
-	}
-#endif
-
 	for (j = 0; j < nod.header2.NumFaces; j++)
 	{
 		// Start a new polygon
@@ -528,6 +538,7 @@ int freyja_model__nod_import(char *filename)
 	}
     
 	freyjaEnd(); // FREYJA_MESH
+#endif
 
 	freyjaEnd(); // FREYJA_MODEL
 
