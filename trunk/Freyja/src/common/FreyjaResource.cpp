@@ -203,6 +203,7 @@ FreyjaResource::FreyjaResource()
 	RegisterFunction("handlebox", freyja_rc_handlebox);
 	RegisterFunction("textbox", freyja_rc_textbox);
 	RegisterFunction("label", freyja_rc_label);
+	RegisterFunction("colorbutton", freyja_rc_colorbutton);
 	RegisterFunction("button", freyja_rc_button);
 	RegisterFunction("togglebutton", freyja_rc_togglebutton);
 	RegisterFunction("spinbutton", freyja_rc_spinbutton);
