@@ -297,11 +297,11 @@ clean-build:
 
 ################################################################
 
-install-plugins:
+install:
 	@-mkdir -p $(HOME)/.freyja/plugins/
 	@cp -f $(BUILD_INSTALL_DIR)/libfreyja_loader* ~/.freyja/plugins/
 
-install:
+installaaaaaimsleepya:
 	@-echo -n "Installing selected build                     "
 	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)
 	@-mkdir -p $(INSTALL_LIB)/$(NAME)
