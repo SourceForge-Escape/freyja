@@ -2632,6 +2632,8 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 	default:  
 		/* Relative movement based on mouse tracking */
+		if (plane == PLANE_XZ) zf = -zf;
+
 		mModel->transform(mTransformMode, fTranslate, xf, yf, zf);
 		break;
 	}
