@@ -84,6 +84,9 @@ class BoundingVolume
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+#ifdef FREYJA9
+	virtual bool isVertexInside(vec3_t vertex);
+#endif
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -108,5 +111,100 @@ class BoundingVolume
 
 	/* */
 };
+
+#ifdef FREYJA9
+
+class BoundingSphere : public BoundingVolume
+{
+public:
+
+	BoundingSphere(vec3_t center, vec_t radius)
+	{
+		mCenter[0] = center[0];
+		mCenter[1] = center[1];
+		mCenter[2] = center[2];
+
+		mRadius = radius;
+	}
+
+
+	bool isVertexInside(vec3_t vertex)
+	{
+		if (helDist3v(mCenter, vertex) <= mRadius)
+			return true;
+
+		return false;
+	}
+
+	vec3_t mCenter;            /* Center of bounding sphere */
+
+	vec_t mRadius;             /* Raduis of bounding sphere */	
+};
+
+
+class BoundingBox : public BoundingVolume
+{
+public:
+
+	BoundingBox(vec3_t min, vec3_t max)
+	{
+		mMin[0] = min[0];	
+		mMin[1] = min[1];	
+		mMin[2] = min[2];
+
+		mMax[0] = max[0];	
+		mMax[1] = max[1];	
+		mMax[2] = max[2];	
+	}
+
+
+	bool isVertexInside(vec3_t vertex)
+	{
+		if (vertex[0] >= mMin[0] && vertex[0] <= mMax[0])
+		{
+			if (vertex[1] >= mMin[1] && vertex[1] <= mMax[1])
+			{
+				if (vertex[0] >= mMin[2] && vertex[0] <= mMax[2])
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	vec3_t mMin;           /* Bounding box MIN point */
+
+	vec3_t mMax;           /* Bounding box MAX point */
+};
+
+
+class BoundingBoxCombo : public BoundingVolume
+{
+public:
+
+	BoundingBoxCombo(BoundingSphere &s, BoundingBox &b)
+	{
+		mSphere = s;
+		mBox = b;
+	}
+
+
+	bool isVertexInside(vec3_t vertex)
+	{
+		if (mSphere.isVertexInside(vertex) &&
+			 mBox.isVertexInside(vertex))
+			return true;
+
+		return false;
+	}
+
+
+	BoundingSphere mSphere;    /* Bounding sphere of this volume */
+	
+	BoundingBox mBox;          /* Bounding box of this volume */
+};
+#endif
 
 #endif
