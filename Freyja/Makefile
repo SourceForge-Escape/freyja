@@ -115,7 +115,7 @@ release:
 prof: 
 	@-mkdir -p $(BUILD_PROF_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_PROF_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) -DNDEBUG $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -pg" \
+	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DNDEBUG -pg" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -pg"
 
 ################################################################
