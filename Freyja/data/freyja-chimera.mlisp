@@ -126,6 +126,7 @@
 
 		(submenu "_Tools"
 			(submenu "_Generate"
+				(menu_item "_UV XY Plane"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
 				(menu_item "_Normals"	eGenerateNormals	"gtk-polygon")
 				(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
 				(menu_item "_TriSrip"	eGenerateTriStrip	"gtk-polygon")

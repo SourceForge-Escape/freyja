@@ -3,7 +3,7 @@
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
+ * Website : http://www.wetga.edu/~stu7440/
  * Email   : stu7440@westga.edu
  * Object  : FreyjaControl
  * License : No use w/o permission (C) 2000 Mongoose

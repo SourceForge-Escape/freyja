@@ -29,6 +29,8 @@
 
  Freyja (0.3.5-20041130) 'Chimera' Mongoose <mongoose@icculus.org>
 
+	o Lame UV  XY plane gen back in interface
+	o Removed utils.o dep
 	o Multicopy mesh mode ( Appends each copied polymesh to buffer )
 	o Mesh mode copy/cut/paste finally reimplemented
 
@@ -37,8 +39,8 @@
 
 	o 'Chimera' build done now replaces this build as stable
 	o Many minor fixes, and perhaps a few regressions
-    o One day test/fix cycle for all known regressions
-    o BUGS updated
+	o One day test/fix cycle for all known regressions
+	o BUGS updated
 	o New log file is now stored in ~/.freyja/ instead of /tmp
 	o Many changes to event system
 	o New color system
