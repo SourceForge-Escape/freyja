@@ -56,6 +56,8 @@ GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_filename);
 
 GtkWidget *mgtk_create_fileselection(char *title);
 
+GtkWidget *mgtk_create_filechooser(char *title);
+
 GtkWidget *mgtk_create_text_entry(GtkWidget *box);
 
 GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size);

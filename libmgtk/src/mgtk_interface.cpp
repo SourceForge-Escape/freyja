@@ -550,6 +550,51 @@ GtkWidget *mgtk_create_fileselection(char *title)
 }
 
 
+GtkWidget *mgtk_create_filechooser(char *title)
+{
+	GtkWidget *filechooser;
+	GtkWidget *vbox;
+	GtkWidget *action_area;
+	GtkWidget *cancel_button;
+	GtkWidget *ok_button;
+
+
+	filechooser = gtk_file_chooser_dialog_new(title, NULL, GTK_FILE_CHOOSER_ACTION_OPEN, NULL);
+	gtk_window_set_type_hint(GTK_WINDOW(filechooser), GDK_WINDOW_TYPE_HINT_DIALOG);
+
+	vbox = GTK_DIALOG(filechooser)->vbox;
+	gtk_widget_show(vbox);
+
+	action_area = GTK_DIALOG(filechooser)->action_area;
+	gtk_widget_show(action_area);
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(action_area), GTK_BUTTONBOX_END);
+
+	/* Add cancel button */
+	cancel_button = gtk_button_new_from_stock("gtk-cancel");
+	gtk_widget_show(cancel_button);
+	gtk_dialog_add_action_widget(GTK_DIALOG(filechooser), cancel_button, GTK_RESPONSE_CANCEL);
+	GTK_WIDGET_SET_FLAGS(cancel_button, GTK_CAN_DEFAULT);
+
+	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
+					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_cancel),
+					   NULL);
+
+	/* Add ok button -- this is used due to multiuse of single filedialog in mtk */
+	ok_button = gtk_button_new_from_stock("gtk-ok");
+	gtk_widget_show(ok_button);
+	gtk_dialog_add_action_widget(GTK_DIALOG(filechooser), ok_button, GTK_RESPONSE_OK);
+	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
+
+	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
+					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_action),
+					   NULL);
+
+	gtk_widget_grab_default(ok_button);
+
+	return filechooser;
+}
+
+
 GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 {
 	GtkWidget *toolbar;
