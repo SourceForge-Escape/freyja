@@ -21,8 +21,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "EggPlugin.h"
 
+#include <freyja_model/EggPlugin.h>
 
 
 extern "C" {

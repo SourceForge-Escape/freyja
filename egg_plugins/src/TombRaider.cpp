@@ -3160,7 +3160,7 @@ void TombRaider::ComputeRotationAngles(unsigned short **frame,
 
 void TombRaider::ComputeUV(tr2_object_texture_vert_t *st, float *u, float *v)
 {
-	unsigned char x, y;
+	//	unsigned char x, y;
 
 	
 	if (!st || !u || !v)
