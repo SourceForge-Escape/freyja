@@ -43,8 +43,8 @@ int plugin_properites(char *this_filename)
 	freyjaPluginFilename1s(this_filename);
 	freyjaPluginDescription1s("SMD model (*.smd)");
 	freyjaPluginAddExtention1s("smd");
-	freyjaPluginImport(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
-	freyjaPluginExport(FREYJA_PLUGIN_SKELETON);
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_SKELETON);
 	freyjaPluginEnd();
 
 	return 0;
