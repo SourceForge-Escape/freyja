@@ -20,7 +20,6 @@
  *                     by Janne Löf <jlof@mail.student.oulu.fi>
  =================================================================*/
 
-// FIXME: Replace all the stupid realloc() use with Lists
 // FIMXE: Add endian support back later
 
 #include <sys/types.h>
@@ -42,7 +41,6 @@
 #define ID_SURF MK_ID('S','U','R','F')
 #define ID_POLS MK_ID('P','O','L','S')
 #define ID_COLR MK_ID('C','O','L','R')
-
 
 
 int read_char(FILE *f)
@@ -113,25 +111,6 @@ Lwo::Lwo()
 
 Lwo::~Lwo()
 {
-#ifdef OBSOLETE
-	int i;
-
-
-	if (_face) 
-	{
-		for (i = 0; i < _face_count; i++)
-		{
-			delete _face[i].index;
-		}
-		
-		delete [] _face;
-	}
-
-	if (_material)
-	{
-		delete [] _material;
-	}
-#else
 	lw_face_t *face;
 	lw_material_t *material;
 
@@ -163,7 +142,6 @@ Lwo::~Lwo()
 
 		delete material;
 	}
-#endif
 
 	if (_vertex)
 	{
@@ -210,11 +188,7 @@ lw_face_t *Lwo::Face(int i)
 	if (i < 0 || i > _face_count)
 		return NULL;
 
-#ifdef OBSOLETE
-	return _face + i;
-#else
 	return _face_map[i];
-#endif
 }
 
 
@@ -223,11 +197,7 @@ lw_material_t *Lwo::Material(int i)
 	if (i < 0 || i > _material_count)
 		return NULL;
 
-#ifdef OBSOLETE
-	return _material + i;
-#else
 	return _mat_map[i];
-#endif
 }
 
 
@@ -396,25 +366,12 @@ void Lwo::Scale(float scale)
 
 void Lwo::ReadSrfs(FILE *f, int nbytes)
 {
-#ifdef OBSOLETE
-	int guess_cnt = _material_count;
-#endif
 	lw_material_t *material = NULL;
 	lw_material_t *head = NULL;
 
 
 	while (nbytes > 0) 
 	{
-#ifdef OBSOLETE
-		/* Allocate more memory for materials if needed */
-		if (guess_cnt <= _material_count) 
-		{
-			guess_cnt += guess_cnt/2 + 4;
-			_material = (lw_material_t*)realloc(_material, sizeof(lw_material_t) * guess_cnt);
-		}
-		
-		material = _material + _material_count++;
-#else
 		// Mongoose: 2001.11.01 Better than that realloc crap
 		if (!material)
 		{
@@ -429,7 +386,6 @@ void Lwo::ReadSrfs(FILE *f, int nbytes)
 
 		material->next = NULL;
 		_material_count++;
-#endif
 
 		/* Read name */
 		nbytes -= read_string(f, material->name);
@@ -441,9 +397,6 @@ void Lwo::ReadSrfs(FILE *f, int nbytes)
 		material->a = 0.0; // Mongoose: You need alpha you silly foo  =)
 	}
 
-#ifdef OBSOLETE
-	_material = (lw_material_t*)realloc(_material, sizeof(lw_material_t) * _material_count);
-#else
 	if (!_material)
 	{
 		_material = head;
@@ -459,15 +412,11 @@ void Lwo::ReadSrfs(FILE *f, int nbytes)
 		
 		material->next = head;
 	}
-#endif
 }
 
 
 void Lwo::ReadSurf(FILE *f, int nbytes)
 {
-#ifdef OBSOLETE
-	int i;
-#endif
 	char name[LW_MAX_NAME_LEN];
 	lw_material_t *material = NULL;
 
@@ -475,17 +424,6 @@ void Lwo::ReadSurf(FILE *f, int nbytes)
 	/* Read surface name */
 	nbytes -= read_string(f, name);
 
-#ifdef OBSOLETE
-	/* Find material */
-	for (i = 0; i < _material_count; i++) 
-	{
-		if (strcmp(_material[i].name, name) == 0) 
-		{
-			material = &_material[i];
-			break;
-		}
-	}
-#else
 	material = _material;
 	
 	while (material)
@@ -497,7 +435,6 @@ void Lwo::ReadSurf(FILE *f, int nbytes)
 
 		material = material->next;
 	}
-#endif
 
 	if (!material)
 	{
@@ -531,26 +468,14 @@ void Lwo::ReadSurf(FILE *f, int nbytes)
 
 void Lwo::ReadPols(FILE *f, int nbytes)
 {
-#ifdef OBSOLETE
-	int guess_cnt = _face_count;
-#endif
 	lw_face_t *face = NULL;
 	lw_face_t *head;
 	int i;
   
 
 	while (nbytes > 0) 
-	{	
-#ifdef OBSOLETE	
-		/* Allocate more memory for polygons if necessary */
-		if (guess_cnt <= _face_count) 
-		{
-			guess_cnt += guess_cnt + 4;
-			_face = (lw_face_t*)realloc(_face, sizeof(lw_face_t) * guess_cnt);
-		}
-		
-		face = _face + _face_count++;
-#else		// Mongoose: 2001.11.01 Better than that realloc crap
+	{
+		// Mongoose: 2001.11.01 Better than that realloc crap
 		if (!face)
 		{
 			face = new lw_face_t;
@@ -564,7 +489,6 @@ void Lwo::ReadPols(FILE *f, int nbytes)
 
 		face->next = NULL;
 		_face_count++;
-#endif
 
 		/* Number of points in this face */
 		face->index_cnt = read_short(f);
@@ -605,10 +529,6 @@ void Lwo::ReadPols(FILE *f, int nbytes)
 		face->material -= 1;
   }
 
-#ifdef OBSOLETE
-  /* Readjust to true size */
-  _face = (lw_face_t*)realloc(_face, sizeof(lw_face_t) * _face_count);
-#else
  	if (!_face)
 	{
 		_face = head;
@@ -624,7 +544,6 @@ void Lwo::ReadPols(FILE *f, int nbytes)
 		
 		face->next = head;
 	} 
-#endif
 }
 
 
@@ -675,7 +594,7 @@ int import_model(char *filename)
 int freyja_model__lwo_check(char *filename)
 {
 	Lwo lwo;
-  
+
 	return lwo.Check(filename);
 }
 

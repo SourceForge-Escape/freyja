@@ -67,6 +67,7 @@ int import_model(char *filename)
 	unsigned long i;
 
 
+	pyPluginDirectories.pushBack("/usr/lib/freyja/modules/model/python");
 	pyPluginDirectories.pushBack("/usr/local/lib/freyja/modules/model/python");
 #ifdef unix
 	char rc[1024];

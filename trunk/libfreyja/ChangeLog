@@ -29,6 +29,14 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (0.9.0-20041225) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o Endian support improves
+	o SIMS ( mac ) support in private branch
+	o Fixs for Makefile for normal source installs not using debs
+	o Debian package generation added to Makefile
+
+
  libfreyja (0.9.0-20041224) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o MilkShape plugin added
