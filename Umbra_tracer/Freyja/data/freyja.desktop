@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Freyja 3d Modeler
+Comment=3d modeler for game models
+Exec=Freyja %F
+TryExec=Freyja
+Terminal=false
+Type=Application
+Icon=freyja.png
+Categories=Application;Graphics;RasterGraphics;

@@ -1,14 +1,13 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
- * Project : libHel
+ * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
- * Object  : BoundingVolume
- * License : No use w/o permission (C) 2002 Mongoose
- * Comments: Bounding volume class for world/vis 
- *           culling/clipping/collision stuff
+ * Website : http://www.icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
+ * Object  : FreyjaMesh
+ * License : No use w/o permission (C) 2004 Mongoose
+ * Comments: This is the FreyjaMesh and classes that compose it.
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -16,23 +15,23 @@
  * 
  *-- History ------------------------------------------------- 
  *
- * 2002.11.27:
+ * 2004.10.22:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
-#include "BoundingVolume.h"
+#include "FreyjaMesh.h"
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-BoundingVolume::BoundingVolume()
+FreyjaMesh::FreyjaMesh()
 {
 }
 
 
-BoundingVolume::~BoundingVolume()
+FreyjaMesh::~FreyjaMesh()
 {
 }
 
@@ -41,12 +40,6 @@ BoundingVolume::~BoundingVolume()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-#ifdef FREYJA9
-bool BoundingVolume::isVertexInside(vec3_t vertex)
-{
-	return false;
-}
-#endif
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
@@ -67,10 +60,10 @@ bool BoundingVolume::isVertexInside(vec3_t vertex)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_BOUNDINGVOLUME
-int runBoundingVolumeUnitTest()
+#ifdef UNIT_TEST_FREYJAMESH
+int runFreyjaMeshUnitTest(int argc, char *argv[])
 {
-	BoundingVolume vol;
+	FreyjaMesh test;
 
 	return 0;
 }
@@ -78,10 +71,8 @@ int runBoundingVolumeUnitTest()
 
 int main(int argc, char *argv[])
 {
-	printf("[BoundingVolume class test]\n");
+	printf("[FreyjaMesh class test]\n");
 
-	runBoundingVolumeUnitTest();
-
-	return 0;
+	return runFreyjaMeshUnitTest(argc, argv);
 }
 #endif
