@@ -17,7 +17,7 @@ class cGrannyFile
 public:
 	cGrannyFile();
 	virtual ~cGrannyFile();
-	void load( std::string filename, std::string basepath );
+	int load( std::string filename, std::string basepath );
 	void addTime( float t );
 	virtual void getSkeleton( Bone *bone, float & curTime );
 	std::string getTextureName();

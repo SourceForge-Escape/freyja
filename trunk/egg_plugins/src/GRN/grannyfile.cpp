@@ -25,13 +25,13 @@ cGrannyFile::~cGrannyFile()
 #endif
 }
 
-void cGrannyFile::load( std::string filename, std::string basepath )
+int cGrannyFile::load( std::string filename, std::string basepath )
 {
     std::fstream * file = new fstream( filename.c_str(), ios::in|ios::binary );	
 
 	if( !file->is_open() ) {
 		printf("Error: File not found: %s\n", filename.c_str());
-		return;
+		return -1;
 	}
 	
 
@@ -53,7 +53,7 @@ void cGrannyFile::load( std::string filename, std::string basepath )
 	default:
 		hex( cerr );
 		cerr << "Unknown main chunk: " << chunk << endl;
-		exit( 1 );
+		return -1;
 	}
 
 	if( getTextureName() != "" )
@@ -68,6 +68,8 @@ void cGrannyFile::load( std::string filename, std::string basepath )
 	delete stream;
 	stream = NULL;
 	m_initialized = true;
+
+	return 0;
 }
 
 void cGrannyFile::addTime( float t )
