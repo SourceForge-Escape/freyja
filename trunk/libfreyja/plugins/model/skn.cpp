@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <hel/Matrix.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
@@ -79,10 +80,21 @@ typedef struct {
 
 typedef struct {
 
+	long vertexIndex;
+	long weight;
+
+} skn_blend_data_t;
+
+
+typedef struct {
+
 	char name[16];
 	long parent;
 	vec3_t xyz;
 	vec4_t wxyz;
+
+	Matrix mat;
+	Matrix cMat;
 
 } cmx_bone_t;
 
@@ -104,10 +116,10 @@ void cmx_bone_set(cmx_bone_t &bone,
 }
 
 
-void cmx_import_adult_skeleton()
+void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 {
 	const vec_t scale = 5.0;
-	cmx_bone_t skeleton[29];
+	//	cmx_bone_t skeleton[29];
 	long i, j, idx;
 
 
@@ -253,6 +265,11 @@ void cmx_import_adult_skeleton()
 									  skeleton[i].xyz[0] * scale, 
 									  skeleton[i].xyz[1] * scale,
 									  skeleton[i].xyz[2] * scale);
+
+				skeleton[i].mat.translate(xyz[0], xyz[1], xyz[2]);
+				skeleton[i].mat.rotate(skeleton[i].xyz[0],
+									   skeleton[i].xyz[1],
+									   skeleton[i].xyz[2]);
 			}
 			break;
 
@@ -260,7 +277,14 @@ void cmx_import_adult_skeleton()
 			{
 				vec3_t xyz;
 
-				freyjaBoneRotateQuatWXYZ4fv(idx, skeleton[i].wxyz);
+
+				freyjaBoneTranslate3f(idx, 
+									  skeleton[i].xyz[0] * scale, 
+									  skeleton[i].xyz[2] * scale,
+									  skeleton[i].xyz[1] * scale);
+
+				skeleton[i].mat.translate(xyz[0], xyz[1], xyz[2]);
+
 
 				if (i == 2 || i == 8)
 				{
@@ -269,6 +293,9 @@ void cmx_import_adult_skeleton()
 					xyz[1] -= 180.0f;
 					xyz[2] += 0.0f;
 					freyjaBoneRotateEulerXYZ3f(idx, xyz[2], xyz[0], xyz[1]);
+					skeleton[i].mat.rotate(skeleton[i].xyz[2],
+										   skeleton[i].xyz[0],
+										   skeleton[i].xyz[1]);
 				}
 				else if (i == 19)
 				{
@@ -277,6 +304,9 @@ void cmx_import_adult_skeleton()
 					xyz[1] -= 90.0f;
 					xyz[2] += 0.0f;
 					freyjaBoneRotateEulerXYZ3f(idx, xyz[0], xyz[1], xyz[2]);
+					skeleton[i].mat.rotate(skeleton[i].xyz[0],
+										   skeleton[i].xyz[1],
+										   skeleton[i].xyz[2]);
 				}
 				else if (i == 24)
 				{
@@ -285,12 +315,18 @@ void cmx_import_adult_skeleton()
 					xyz[1] += 90.0f;
 					xyz[2] += 0.0f;
 					freyjaBoneRotateEulerXYZ3f(idx, xyz[0], xyz[1], xyz[2]);
+					skeleton[i].mat.rotate(skeleton[i].xyz[0],
+										   skeleton[i].xyz[1],
+										   skeleton[i].xyz[2]);
 				}
-
-				freyjaBoneTranslate3f(idx, 
-									  skeleton[i].xyz[0] * scale, 
-									  skeleton[i].xyz[2] * scale,
-									  skeleton[i].xyz[1] * scale);
+				else
+				{
+					freyjaBoneRotateQuatWXYZ4fv(idx, skeleton[i].wxyz);	
+					freyjaGetBoneRotationXYZ3fv(idx, xyz);
+					skeleton[i].mat.rotate(skeleton[i].xyz[0],
+										   skeleton[i].xyz[1],
+										   skeleton[i].xyz[2]);
+				}
 			}
 		}
 
@@ -305,6 +341,14 @@ void cmx_import_adult_skeleton()
 		freyjaEnd(); // FREYJA_BONE
 	}
 
+	for (i = 1; i < 29; ++i)
+	{
+		//Matrix m = skeleton[skeleton[i].parent].mat * skeleton[i].mat;
+		//skeleton[i].mat = m;
+		//skeleton[i].mat.invert(); // inverse actually
+		//skeleton[i].cMat = m * skeleton[i].mat;
+	}
+
 	freyjaEnd();
 }
 
@@ -314,10 +358,11 @@ int freyja_model__skn_import(char *filename)
 	const vec_t scale = 5.0;
 	Vector <unsigned int> transV, transT;
 	FreyjaFileReader r;
+	cmx_bone_t skeleton[29];
 	char *symbol;
 	char name[64];
 	char material[64];
-	long i, index;
+	long i, j, k, index;
 
 
 	if (freyja_model__skn_check(filename) < 0 || !r.openFile(filename))
@@ -325,7 +370,7 @@ int freyja_model__skn_import(char *filename)
 		return -1;
 	}
 
-	cmx_import_adult_skeleton();
+	cmx_import_adult_skeleton(skeleton);
 
 	symbol = r.parseSymbol();
 	strncpy(name, symbol, 64);
@@ -392,14 +437,14 @@ int freyja_model__skn_import(char *filename)
 	}
 
 	
-	long q2Count = r.parseInteger();
-	long q2[q2Count][2];
-	printf("q2Count = %li\n", q2Count);
+	long blendDataCount = r.parseInteger();
+	skn_blend_data_t blenddata[blendDataCount];
+	printf("blendDataCount = %li\n", blendDataCount);
 
-	for (i = 0; i < q2Count; ++i)
+	for (i = 0; i < blendDataCount; ++i)
 	{
-		q2[i][0] = r.parseInteger();
-		q2[i][1] = r.parseInteger();
+		blenddata[i].vertexIndex = r.parseInteger();
+		blenddata[i].weight = r.parseInteger();
 	}
 
 
@@ -420,6 +465,66 @@ int freyja_model__skn_import(char *filename)
 	}
 
 
+	/*** Vertex blending setup ***********************/
+
+#define NONONO
+#ifdef NONONO
+	for (i = 0; i < bindingCount; ++i)
+	{
+		index = bindings[i].boneIndex;
+
+		for (j = 0; j < 29/*boneCount*/; ++j)
+		{
+			if (!strcmp(bones[index].name, skeleton[j].name))
+			{
+				printf("%s %s\n", bones[index].name, skeleton[j].name);
+				index = j;
+				break;
+			}
+		}
+
+		for (j = bindings[i].vertexOffset; j < bindings[i].vertexCount; ++j)
+		{
+			k = index;
+
+			skeleton[k].mat.multiply3v(vertices[j], vertices[j]);
+#ifdef OLD
+			while (k > -1)
+			{
+				vertices[j][0] += skeleton[k].xyz[0];
+				vertices[j][1] += skeleton[k].xyz[1];
+				vertices[j][2] += skeleton[k].xyz[2];
+
+				k =  skeleton[k].parent;
+			}
+#endif
+		}
+
+		//bindings[i].blendedVertexOffset;
+		//bindings[i].blendedVertexCount;
+	}
+#else
+	for (i = 0; i < blendDataCount; ++i)
+	{
+		index = blenddata[i].vertexIndex;
+
+		for (j = 0; j < bindingCount; ++j)
+		{
+			if (index >= bindings[j].blendedVertexOffset &&
+				index <= (bindings[j].blendedVertexOffset + 
+						  bindings[i].blendedVertexCount))
+			{
+				long bid = 
+
+				vertices[index][0] += skeleton[bid].xyz[0];
+				vertices[index][1] += skeleton[bid].xyz[2];
+				vertices[index][2] += skeleton[bid].xyz[1];
+			}
+		//blenddata[i].weight;
+		//vertices[index];
+	}
+#endif
+
 	freyjaBegin(FREYJA_MODEL);
 
 	freyjaBegin(FREYJA_MESH);
@@ -427,9 +532,9 @@ int freyja_model__skn_import(char *filename)
 
 	for (i = 0; i < vertexCount; ++i)
 	{
-		index = freyjaVertex3f(vertices[i][0]*scale,
-							   vertices[i][2]*scale,
-							   vertices[i][1]*scale);
+		index = freyjaVertex3f(vertices[i][0] * scale,
+							   vertices[i][2] * scale,
+							   vertices[i][1] * scale);
 
 		freyjaVertexNormal3f(index, 
 							 normals[i][0],
@@ -448,6 +553,9 @@ int freyja_model__skn_import(char *filename)
 
 	for (i = 0; i < trisCount; ++i)
 	{
+		// FIXME: If i > numTexCoords, then use 0, 0 UV ( part of SKN spec )
+
+
 		freyjaBegin(FREYJA_POLYGON);
 		freyjaPolygonMaterial1i(0);
 		freyjaPolygonVertex1i(transV[tris[i][0]]);
@@ -469,132 +577,5 @@ int freyja_model__skn_import(char *filename)
 
 int freyja_model__skn_export(char *filename)
 {
-	FreyjaFileWriter w;
-	char name[64];
-	int index;
-	unsigned int i, n;
-	vec_t scale = 1.0 / 0.15;
-	vec_t d2r = 0.017453292519943295;
-	vec3_t translation, rotation;
-
-
-	if (!w.openFile(filename))
-	{
-		return -1;
-	}
-
-	/* version */
-	w.print("version 1\n");
-
-	/* nodes */
-	w.print("nodes\n");
-
-	if (freyjaGetCount(FREYJA_BONE))
-	{
-		freyjaIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_BONE, FREYJA_LIST_RESET);
-		n = freyjaGetCount(FREYJA_BONE);
-
-		for (i = 0; i < n; ++i)
-		{
-			index = freyjaIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
-			index = freyjaGetCurrent(FREYJA_BONE);
-
-			freyjaGetBoneName(index, 64, name);
-			w.print("%3i \"%s\" %i\n", i, name, freyjaGetBoneParent(index));
-
-			freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
-		}
-	}
-
-	w.print("end\n"); // nodes
-
-	/* skeleton */
-	w.print("skeleton\n");
-	w.print("time 0\n");
-
-	if (freyjaGetCount(FREYJA_BONE))
-	{
-		freyjaIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_BONE, FREYJA_LIST_RESET);
-		n = freyjaGetCount(FREYJA_BONE);
-
-		for (i = 0; i < n; ++i)
-		{
-			index = freyjaIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
-			index = freyjaGetCurrent(FREYJA_BONE);
-
-			freyjaGetBoneTranslation3fv(index, translation);
-			freyjaGetBoneRotationXYZ3fv(index, rotation);
-
-			translation[0] *= scale; 
-			translation[2] *= scale; 
-			translation[1] *= scale; 
-
-			if (!i)
-			{
-				rotation[1] += 90.0;
-
-				w.print("%3i %f %f %f %f %f %f\n", i,
-						translation[0], translation[2], translation[1], 
-						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
-			}
-			else
-			{
-				w.print("%3i %f %f %f %f %f %f\n", i,
-						translation[0], translation[1], translation[2], 
-						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
-			}
-
-			freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
-		}
-	}
-	w.print("end\n");
-
-	/* triangles */
-	w.print("triangles\n");
-#ifdef SKN_MESH_EXPORT
-	unsigned int j, k, group;
-	vec3_t vert;
-	vec2_t uv;
-
-
-	if (freyjaGetNum(FREYJA_POLYGON))
-	{
-		freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
-		n = freyjaGetNum(FREYJA_POLYGON);
-
-		group = 0;
-
-#ifdef SKN_MESH_EXPORT_ALL
-		unsigned int meshCount = freyjaGetNum(FREYJA_MESH);
-		for (i = 0; i < meshCount; ++i, group = i) // send all meshes
-#endif
-		for (j = 0; j < n; ++j)
-		{
-			index = freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT);
-			index = freyjaGetCurrent(FREYJA_POLYGON);
-
-			for (j = 0; j < n; ++j)
-			{
-				freyjaGetPolygon3f(FREYJA_VERTEX, j, &vert);
-				freyjaGetPolygon3f(FREYJA_TEXCOORD, j, &uv);
-
-				w.print("null.png");
-				w.print("%3i  %f %f %f  %f %f %f  %f %f\n", group,
-						vert[0]*scale, vert[2]*scale, vert[1]*scale, 
-						norm[0], norm[2], norm[1],
-						uv[0], uv[1]);
-			}
-
-			freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
-		}
-	}
-#endif
-	w.print("end\n");
-
-	w.closeFile();
-
-	return 0;
+	return -1;
 }

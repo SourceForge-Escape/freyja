@@ -32,7 +32,7 @@
 #ifndef GUARD__FREYJA_MONGOOSE_NIF4_H_
 #define GUARD__FREYJA_MONGOOSE_NIF4_H_
 
-#include <freyja8/EggFileReader.h>
+#include <freyja/FreyjaFileReader.h>
 
 #include <mstl/Vector.h>
 
@@ -53,14 +53,15 @@ class Nif4
 	class Chunk {
 	public:           /* unsigned or signed? */
 
-		bool readHeader(EggFileReader &r)
+		bool readHeader(FreyjaFileReader &r)
 		{
 			len = r.readInt32();
-			name = new char[len];
+			name = new char[len+1];
 			r.readCharString(len, name);
-			id = r.readInt32();
+			name[len] = 0;
+			//id = r.readInt32();
 
-			return true;
+			return (!r.endOfFile());
 		}
 
 		int len;
@@ -71,7 +72,7 @@ class Nif4
 	class NiNode {
 	public:
 
-		bool readChunk(EggFileReader &r)
+		bool readChunk(FreyjaFileReader &r)
 		{
 			unsigned int i, n;
 
@@ -119,7 +120,7 @@ class Nif4
 			 for (i = 0, n = num_blocks; i < n; ++i)
 				 blockIDs[i]  = r.readInt32U();
 
-			 return true;
+			 return (!r.endOfFile());
 		}
 
 		int len;
@@ -154,6 +155,52 @@ class Nif4
 	class NiTriShape {
 	public:
 		int len;
+
+		bool readChunk(FreyjaFileReader &r)
+		{
+			long i;
+
+			len = r.readLong();
+			mesh_name = new char[len];
+			r.readCharString(len, mesh_name);
+			unknown = r.readLongU();
+			associated_skin_controller_id = r.readLongU();
+			unknown1 = r.readInt16();
+
+			x = r.readFloat32();
+			y = r.readFloat32();
+			z = r.readFloat32();
+			 
+			vector_x_axis_x = r.readFloat32();
+			vector_x_axis_y = r.readFloat32();
+			vector_x_axis_z = r.readFloat32();
+			vector_y_axis_x = r.readFloat32();
+			vector_y_axis_y = r.readFloat32();
+			vector_y_axis_z = r.readFloat32();
+			vector_z_axis_x = r.readFloat32();
+			vector_z_axis_y = r.readFloat32();
+			vector_z_axis_z = r.readFloat32();
+			unknown2[0] = r.readFloat32();
+			unknown2[1] = r.readFloat32();
+			unknown2[2] = r.readFloat32();
+
+			r.readLongU(); // ?!
+
+			num_properties = r.readLongU();
+
+			propertyIDs = new long[num_properties];
+			 
+			for (i = 0; i < num_properties; ++i)
+				propertyIDs[i] = r.readLong();
+			 
+			unknown3 = r.readLongU();//=0;
+			associated_trishape_data_id = r.readLongU();
+
+			r.readLongU(); // -1 ?!
+
+			return (!r.endOfFile());
+		}
+
 		char *mesh_name; //char[len];
 		int unknown; //=0;
 		unsigned int associated_skin_controller_id; // Set to zero if there is none
@@ -172,7 +219,7 @@ class Nif4
 		float vector_z_axis_z;
 		float unknown2[3];//={1,0,0}; // Like a spare vector: maybe an artifact from a matrix
 		int num_properties;
-		unsigned int *propertyIDs;//word[num_properties];
+		long *propertyIDs;//word[num_properties];
 		int unknown3;//=0;
 		unsigned int associated_trishape_data_id; // The mesh
 	};
@@ -220,6 +267,34 @@ class Nif4
 	public:
 		//This sets up a material.
 		
+		bool readChunk(FreyjaFileReader &r)
+		{
+			long i;
+			len = r.readLong();
+			material_name = new char[len];
+			r.readCharString(len, material_name);
+			unknown[0] = r.readLong();
+			unknown[1] = r.readLong();
+			unknown1 = r.readInt16();
+
+			for (i = 0; i < 3; ++i)
+				ambient_color[i] = r.readFloat32();
+
+			for (i = 0; i < 3; ++i)
+				diffuse_color[i] = r.readFloat32();
+
+			for (i = 0; i < 3; ++i)
+				specular_color[i] = r.readFloat32();
+
+			for (i = 0; i < 3; ++i)
+				unknown2[i] = r.readLong();
+
+			glossiness = r.readFloat32();
+			opacity = r.readFloat32();
+
+			return (!r.endOfFile());
+		}
+
 		int len; 
 		char *material_name;//char[len];
 		int unknown[2];//=0;
@@ -236,7 +311,7 @@ class Nif4
 	class NiImage {
 	public:
 		
-		bool readChunk(EggFileReader &r)
+		bool readChunk(FreyjaFileReader &r)
 		{	
 			type = r.readInt8U();
 			
@@ -279,7 +354,7 @@ class Nif4
 		} pixel_t;
 
 
-		bool readChunk(EggFileReader &r)
+		bool readChunk(FreyjaFileReader &r)
 		{
 			unsigned int i, n;
 
@@ -310,10 +385,165 @@ class Nif4
 	};
 
 
+	class NiTextKeyExtraData { // New chunk for morrowind/NIF4?
+	public:
+
+		typedef struct {
+			long unknown;
+			long len;
+			char *s;
+		} stuff_t;
+
+		bool readChunk(FreyjaFileReader &r)
+		{
+			long i;
+
+			unknown = r.readLong();
+			unknown2 = r.readLong();
+			len = r.readLong();
+			stuffs = new stuff_t[len];
+
+			for (i = 0; i < len; ++i)
+			{
+				stuffs[i].unknown = r.readLong();
+				stuffs[i].len = r.readLong();
+				stuffs[i].s = new char[stuffs[i].len];
+				r.readCharString(stuffs[i].len, stuffs[i].s);
+			}
+
+			return (!r.endOfFile());
+		}
+
+		long unknown;
+		long unknown2;
+		long len;
+		stuff_t *stuffs;
+	};
+
+
+	class NiSourceTexture { // New chunk for morrowind/NIF4?
+	public:
+
+		bool readChunk(FreyjaFileReader &r)
+		{
+			r.readLong(); // 0
+			r.readLong(); // -1
+			r.readLong(); // -1
+			r.readInt8();
+			len = r.readLong();
+			filename = new char[len];
+			r.readCharString(len, filename);
+
+			long count = r.readLong();
+			--count;
+
+			while (count)
+			{
+				r.readInt16();
+				--count;
+			}
+
+			r.readInt8();
+			
+			return (!r.endOfFile());
+		}
+
+		long unknown;
+		long len;
+		char *filename;
+	};
+
+
+	class NiTexturingProperty { // New chunk for morrowind/NIF4?
+	public:
+
+		bool readChunk(FreyjaFileReader &r)
+		{
+			long i;
+
+			r.readLong(); // 0
+			r.readLong(); // -1
+			r.readLong(); // -1
+			r.readInt16(); // 0x0
+			r.readLong(); // 2
+			r.readLong(); // 7
+			r.readLong(); // float?
+			long kore = r.readLong();
+			r.readLong(); // 3
+			r.readLong(); // 2
+			r.readLong(); // 0
+			r.readLong(); // 0xFFB500 flag?
+
+			printf("%li\n", kore);
+			for (i = 0; i < kore; ++i)
+			{
+				r.readLong(); // ?
+				r.readLong(); // ?
+			}
+
+			printf("@ %i\n", r.getFileOffset());
+
+			return (!r.endOfFile());
+		}
+
+		long unknown;
+		long len;
+		float *unknown2;
+	};
+
+
+	class NiMorphData { // New chunk for morrowind/NIF4?
+	public:
+
+		bool readChunk(FreyjaFileReader &r)
+		{
+			len = r.readLong();
+
+			//for (i = 0; i < len; ++i)
+			
+			r.setFileOffset(r.getFileOffset() + 4187*len);
+
+			//printf("@ %i\n", r.getFileOffset());
+			return (!r.endOfFile());
+		}
+
+		long unknown;
+		long len;
+		float *unknown2;
+	};
+
+
+	class NiGeomMorpherController { // New chunk for morrowind/NIF4?
+	public:
+
+		bool readChunk(FreyjaFileReader &r)
+		{
+			long i;
+
+			unknown = r.readLong();  // -1 ?!
+			len = r.readLong();
+			r.readInt8(); // This byte here or after array?
+			--len;
+			unknown2 = new short[len];
+
+			for (i = 0; i < len; ++i)
+			{
+				unknown2[i] = r.readInt16();
+			}
+
+			return (!r.endOfFile());
+		}
+
+		long unknown;
+		long len;
+		short *unknown2;
+	};
+
+
 	class NiStringExtraData {
 	public:
 		
-		bool readChunk(EggFileReader &r)
+		bool readChunk(FreyjaFileReader &r)
 		{
 			unknown = r.readInt32();
 			unknown2 = r.readInt32();
@@ -351,7 +581,7 @@ class Nif4
 		} unknown_t;
 
 
-		bool readChunk(EggFileReader &r)
+		bool readChunk(FreyjaFileReader &r)
 		{
 			unsigned int i, n, j, jn;
 
@@ -359,20 +589,33 @@ class Nif4
 			id_of_vertices = r.readInt32U();
 			coordinates = new vertex_t[num_vertices];
 
+			//printf("@ %i %i vertices\n", r.getFileOffset(), num_vertices);
+
 			for (i = 0, n = num_vertices; i < n; ++i)
 			{
 				coordinates[i].x = r.readFloat32();
 				coordinates[i].y = r.readFloat32();
 				coordinates[i].z = r.readFloat32();
+
+#ifdef NIF4_DUMP_OBJ
+				fprintf(stderr, "v %f %f %f\n", 
+					   coordinates[i].x, coordinates[i].y, coordinates[i].z);
+#endif
 			}
 
 			id_of_normals = r.readInt32U();
+			normals = new vertex_t[num_vertices];
 
 			for (i = 0, n = num_vertices; i < n; ++i)
 			{
 				normals[i].x = r.readFloat32();
 				normals[i].y = r.readFloat32();
 				normals[i].z = r.readFloat32();
+
+#ifdef NIF4_DUMP_OBJ
+				fprintf(stderr, "vn %f %f %f\n",
+						normals[i].x, normals[i].y, normals[i].z);
+#endif
 			}
 
 			unknown[0] = r.readInt32();
@@ -393,6 +636,12 @@ class Nif4
 				{
 					uv_set[i].textureinfo[j].u = r.readFloat32();
 					uv_set[i].textureinfo[j].v = r.readFloat32();
+
+#ifdef NIF4_DUMP_OBJ
+					fprintf(stderr, "vt %f %f\n",
+							uv_set[i].textureinfo[j].u,
+							uv_set[i].textureinfo[j].v);
+#endif
 				}
 			}
 		
@@ -409,6 +658,12 @@ class Nif4
 				triangles[i].v[0] = r.readInt16U();
 				triangles[i].v[1] = r.readInt16U();
 				triangles[i].v[2] = r.readInt16U();
+#ifdef NIF4_DUMP_OBJ
+				fprintf(stderr, "f %i/%i/%i %i/%i/%i %i/%i/%i\n",
+						triangles[i].v[0]+1,triangles[i].v[0]+1,triangles[i].v[0]+1,
+						triangles[i].v[1]+1,triangles[i].v[1]+1,triangles[i].v[1]+1,
+						triangles[i].v[2]+1,triangles[i].v[2]+1,triangles[i].v[2]+1);
+#endif
 			}
 
 			num_something_3 = r.readInt16U();  	// 0 or num_vertices?
@@ -447,7 +702,7 @@ class Nif4
 		int unknown5; // value varies a lot: might be num_trianges*3
 		triangle_t *triangles;
 		
-		short num_something_3;  	// This seems to be either 0 or num_vertices
+		short num_something_3; // This seems to be either 0 or num_vertices
 		unknown_t *something;
 	};
 
@@ -749,6 +1004,7 @@ class Nif4
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	Vector <NiTriShapeData *> mNiTriShapeData;
 
  private:
 
@@ -765,7 +1021,7 @@ class Nif4
 
 	char mHeader[48];	              /* Header is just a string */
 
-	EggFileReader mReader;
+	FreyjaFileReader mReader;
 };
 
 #endif
