@@ -1,16 +1,19 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Freyja
+ * Project : mlisp-mgtk+
  * Author  : Mongoose
  * Website : http://www.westga.edu/~stu7440/
  * Email   : stu7440@westga.edu
  * Object  : 
- * License : GPL See file COPYING, also (C) 2000, 2001 Mongoose
+ * License : GPL See file COPYING, also (C) 2000-2004 Mongoose
  * Comments: This is the main client entry.
  *
  * 
  *-- History ------------------------------------------------- 
+ *
+ * 2004.06.01:
+ * Mongoose - Last of freyja use removed, project desn changed
  *
  * 2004.04.11:
  * Mongoose - Removed GNOME support
@@ -191,14 +194,9 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 #endif
 
 
-GdkPixbuf *mgtk_create_pixbuf(char *icon_name)
+GdkPixbuf *mgtk_create_pixbuf(char *icon_filename)
 {
-	char icon_filename[1024];
 	GdkPixbuf *icon = NULL;
-
-	// FIXME: Should be removed
-	freyja_get_pixmap_filename(icon_filename, 1024, icon_name);
-	icon_filename[1023] = 0;
 
 	if (icon_filename && icon_filename[0])
 	{
@@ -237,23 +235,19 @@ void mgtk_destroy_pixbuf(GdkPixbuf *icon)
 }
 
 
-GtkWidget *mgtk_create_icon(char *icon_name) // , int icon_size)
+GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size)
 {
 	GtkWidget *icon = NULL;
-	char filename[1024];
 
 
-	if (!strncmp("gtk", icon_name, 3))
+	/* If there is a leading "gtk" assume it's stock, since there is no path */
+	if (!strncmp("gtk", icon_filename, 3))
 	{
-		icon = gtk_image_new_from_stock(icon_name, 
-										GTK_ICON_SIZE_SMALL_TOOLBAR);
+		icon = gtk_image_new_from_stock(icon_filename, icon_size);
 	}
 	else
 	{
-		// FIXME: Should be removed
-		freyja_get_pixmap_filename(filename, 1024, icon_name);
-		filename[1023] = 0;
-		icon = gtk_image_new_from_file(filename);
+		icon = gtk_image_new_from_file(icon_filename);
 	}
 
 	return icon;
@@ -530,7 +524,7 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 	GtkWidget *toolbar_icon;
 	
 
-	toolbar_icon = mgtk_create_icon(icon);
+	toolbar_icon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
 
 	togglebutton = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 											  GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
@@ -571,7 +565,7 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
 	GtkWidget *toolbar_icon;
 	
 	
-	toolbar_icon = mgtk_create_icon(icon);
+	toolbar_icon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
 
 	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 										GTK_TOOLBAR_CHILD_BUTTON,

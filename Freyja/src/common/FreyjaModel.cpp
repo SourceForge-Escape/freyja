@@ -35,6 +35,7 @@
 #include "utils.h"
 
 
+
 FreyjaModel::FreyjaModel()
 {
 	char *pluginDir;

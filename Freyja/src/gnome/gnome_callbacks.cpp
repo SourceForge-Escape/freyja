@@ -152,7 +152,7 @@ void freyja_event_file_dialog(char *title)
 }
 
 /* Shutdown / exit handlers */
-void gtk_guard_shutdown()
+void mgtk_guard_shutdown()
 {
 	event_print("@Gtk+ shuting down...");
 	gtk_exit(0);
@@ -161,13 +161,13 @@ void gtk_guard_shutdown()
 
 void mgtk_destroy_window(GtkWidget *widget)
 {
-	gtk_guard_shutdown();
+	mgtk_guard_shutdown();
 }
 
 
 void freyja_event_exit()
 {
-	gtk_guard_shutdown();
+	mgtk_guard_shutdown();
 }
 
 
