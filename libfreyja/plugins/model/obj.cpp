@@ -233,14 +233,14 @@ int freyja_model__obj_import(char *filename)
 
 int freyja_model__obj_export(char *filename)
 {
+#ifdef OBJ_EXPORT_ENABLED
 	FreyjaFileWriter w;
 	int index;
-	unsigned int j, k, n, group;
+	unsigned int j, k, n, group, count;
 	vec3_t vert;
 	vec2_t uv;
 	vec_t scale = 0.5;
 
-	return -1;
 
 	if (!w.openFile(filename))
 	{
@@ -316,16 +316,18 @@ int freyja_model__obj_export(char *filename)
 			{
 				index = freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT);
 				index = freyjaGetCurrent(FREYJA_POLYGON);
-				
-				for (k = 0; k < 3; ++k)
+
+				count = freyjaGetPolygonVertexCount(index);
+
+				for (k = 0; k < count; ++k)
 				{
 					freyjaGetPolygon3f(FREYJA_VERTEX, j, vert);
 					
 					w.print("v %f %f %f\n",
 							vert[0]*scale, vert[2]*scale, vert[1]*scale);
 				}
-
-				for (k = 0; k < 3; ++k)
+#ifdef FIXME
+				for (k = 0; k < count; ++k)
 				{
 					freyjaGetPolygon3f(FREYJA_TEXCOORD, j, uv);
 					
@@ -335,7 +337,10 @@ int freyja_model__obj_export(char *filename)
 
 				w.print("f %i/%i %i/%i %i/%i", 
 						j*3+1, j*3+1, j*3+2, j*3+2, j*3+3, j*3+3);
-	
+#else
+				w.print("f %i %i %i", 
+						j*3+1, j*3+2, j*3+3);				
+#endif
 				freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
 			}
 		//}
@@ -344,5 +349,8 @@ int freyja_model__obj_export(char *filename)
 	w.closeFile();
 
 	return 0;
+#else
+	return -1;
+#endif
 }
 

@@ -344,6 +344,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void setMeshes(md3_mesh_t *meshes, unsigned long count);
+
 	int load(char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 

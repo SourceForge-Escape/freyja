@@ -296,6 +296,74 @@ void FreyjaModel::mirrorTexCoord(long texCoordIndex, bool x, bool y)
 	Vector3d u, trans, min;
 	long i, j, k;
 
+	if (texel && !mUVMap.empty())
+	{
+		for (i = mUVMap.begin(); i < (int)mUVMap.end(); ++i)
+		{
+			poly = _egg->getPolygon(mUVMap[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = _egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < trans.mVec[0])
+						trans.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < trans.mVec[1])
+						trans.mVec[1] = u.mVec[1];
+
+					if (x) tex->st[0] = -tex->st[0];
+					if (y) tex->st[1] = -tex->st[1];
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < min.mVec[0])
+						min.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < min.mVec[1])
+						min.mVec[1] = u.mVec[1];
+
+					seen.pushBack(poly->texel[j]);
+				}
+			}
+		}
+
+		u = trans;
+		trans = trans - min;
+		//trans += Vector3d(u.mVec[0]/2, u.mVec[1]/2, 0);
+
+		for (k = seen.begin(); k < (int)seen.end(); ++k)
+		{
+			tex = _egg->getTexel(seen[k]);
+
+			if (tex)
+			{
+				u = Vector3d(tex->st[0], tex->st[1], 0) + trans;
+
+				tex->st[0] = u.mVec[0];
+				tex->st[1] = u.mVec[1];
+			}
+		}
+
+		return;
+	}
+
 
 	if (texel)
 	{
@@ -403,7 +471,24 @@ void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
 {
 	egg_polygon_t *poly;
 
-	
+
+	// HACKY entry
+	long i;
+	if (!mUVMap.empty())
+	{
+		for (i = mUVMap.begin(); i < (int)mUVMap.end(); ++i)
+		{
+			poly = _egg->getPolygon(mUVMap[i]);
+
+			if (poly)
+			{
+				poly->shader = material;
+			}
+		}
+
+		return;
+	}
+
 	poly = _egg->getPolygon(polygonIndex);
 
 	if (poly)
@@ -2131,6 +2216,7 @@ void FreyjaModel::MeshNew()
   
 	mesh->group.pushBack(grp->id);
 
+
 	freyja_print("Mesh[%i] made with group %i", mesh->id, grp->id);
 }
 
@@ -2323,6 +2409,43 @@ void FreyjaModel::UVMapMotion(float s, float t)
 
 	u = Vector3d(s, t, 0);
 
+	if (texel && !mUVMap.empty())
+	{
+		v = Vector3d(texel->st[0], texel->st[1], 0);
+		u -= v;
+
+		for (i = mUVMap.begin(); i < (int)mUVMap.end(); ++i)
+		{
+			poly = _egg->getPolygon(mUVMap[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = _egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					tex->st[0] += u.mVec[0];
+					tex->st[1] += u.mVec[1];
+					seen.pushBack(poly->texel[j]);
+				}
+			}
+		}
+
+		return;
+	}
+
 	if (texel)
 	{
 		v = Vector3d(texel->st[0], texel->st[1], 0);
@@ -2394,6 +2517,145 @@ void FreyjaModel::UVMapMotion(float s, float t)
 			}
 		}
 	}	
+}
+
+
+void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
+{
+	Vector<long> uvMap, pending, tmp;
+	egg_polygon_t *poly;
+	egg_texel_t *texel;
+	long i, j, k;
+
+
+	if (seedPolygon == -1)
+	{
+		mUVMap.clear();
+		return;
+	}
+
+	// I want to stress your CPU for sure 'selection sort-o-rama'
+	pending.pushBack(seedPolygon);
+
+	while (!pending.empty())
+	{
+		poly = _egg->getPolygon(pending[0]);
+
+		printf("pending -> %li\n", pending[0]);
+
+		uvMap.pushBack(pending[0]);
+		tmp.clear();
+		for (i = pending.begin(); i < (int)pending.end(); ++i)
+		{
+			for (j = uvMap.begin(); j < (int)uvMap.end(); ++j)
+			{
+				if (uvMap[j] == pending[i])
+				{
+					j = -1;
+					break;
+				}
+			}
+
+			if (i > 0 && j > -1)
+				tmp.pushBack(pending[i]);
+		}
+		pending.copy(tmp);
+		tmp.clear();
+
+		for (k = pending.begin(); k < (int)pending.end(); ++k)
+			printf("%li ", pending[k]);
+		printf("\n");
+
+		if (!poly)
+		{
+			continue;
+		}
+
+		for (i = poly->texel.begin(); i < (int)poly->texel.end(); ++i)
+		{
+			texel = _egg->getTexel(poly->texel[i]);
+
+			if (!texel)
+				continue;
+
+			for (j = texel->ref.begin(); j < (int)texel->ref.end(); ++j)
+			{
+				for (k = pending.begin(); k < (int)pending.end(); ++k)
+				{
+					if (pending[k] == (int)texel->ref[j])
+					{
+						k = -1;
+						break;
+					}
+				}
+
+				if (k == -1)
+					continue;
+
+				pending.pushBack(texel->ref[j]);
+			}
+		}
+
+		tmp.clear();
+
+		for (i = pending.begin(); i < (int)pending.end(); ++i)
+		{
+			if (!i)
+				continue;
+
+			for (j = uvMap.begin(); j < (int)uvMap.end(); ++j)
+			{
+				if (uvMap[j] == pending[i])
+				{
+					j = -1;
+					break;
+				}
+			}
+
+			if (j == -1)
+				continue;
+
+			for (k = tmp.begin(); k < (int)tmp.end(); ++k)
+			{
+				if (tmp[k] == pending[i])
+				{
+					k = -1;
+					break;
+				}
+			}
+
+			if (k == -1)
+				continue;
+
+			tmp.pushBack(pending[i]);
+		}
+
+		pending.copy(tmp);
+	}
+
+
+	long swap;
+
+	for (i = uvMap.begin(); i < (int)uvMap.end(); ++i)
+	{
+		for (j = i; j < (int)uvMap.end(); ++j)
+		{
+			if (uvMap[j] < uvMap[i])
+			{
+				swap = uvMap[i];
+				uvMap.assign(i, uvMap[j]);
+				uvMap.assign(j, swap);
+			}
+		}
+	}
+
+	printf("UVMap: {");
+	for (i = uvMap.begin(); i < (int)uvMap.end(); ++i)
+		printf(" %li", uvMap[i]);
+
+	printf("}\n");
+
+	mUVMap.copy(uvMap);
 }
 
 

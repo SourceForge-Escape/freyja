@@ -371,7 +371,7 @@ md3.so:
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
 	MOD_NAME=md3 \
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
+	CFLAGS="$(MODULE_CFLAGS) -DMD3_EXPORT_ENABLED" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 md3anim.so:
@@ -711,7 +711,8 @@ install:
 	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
 	@-echo $(MAKE) plugins
-	@-echo $(MAKE) install-plugins	
+	@-echo $(MAKE) install-plugins
+	@-cp bin/test/FreyjaUtil.test $(INSTALL_BIN)/freyjautil
 
 install-link:
 	@-echo -n "New soft links                               "

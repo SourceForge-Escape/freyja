@@ -1885,6 +1885,64 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		return;
 	}
 
+	for (i = _model->mUVMap.begin();  i < _model->mUVMap.end(); ++i)
+	{
+		poly = egg->getPolygon(_model->mUVMap[i]);
+		
+		if (!poly)
+			continue;
+
+		if (poly->shader != (int)_model->getCurrentTextureIndex())
+			continue;
+
+		glLineWidth(_default_line_width);
+		glBegin(GL_LINE_LOOP);
+		glColor3fv(BLUE);    
+		
+		/* Mongoose 2004.03.26, 
+		 * Use Vertex UV if no external texels */
+		if (poly->texel.empty())
+		{
+			egg_vertex_t *vertex;
+			
+			for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
+			{
+				vertex = egg->getVertex(poly->vertex[j]);
+				
+					if (!vertex)
+					{
+						continue;
+					}
+					
+					x = vertex->uv[0] * width;
+					y = vertex->uv[1] * height;
+					
+					glVertex2f(x, height - y);
+			}
+			
+			glEnd();
+		}
+		else
+		{
+			for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
+			{
+				texel = egg->getTexel(poly->texel[j]);
+				
+				if (!texel)
+				{
+					continue;
+				}
+				
+				x = texel->st[0] * width;
+				y = texel->st[1] * height;
+				
+				glVertex2f(x, height - y);
+			}
+			
+			glEnd();
+		}
+	}
+
 	egg_mesh_t mesh = *meshPtr;
 	
 	for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)

@@ -399,7 +399,8 @@
 						(label "Polyon op:" 0.0 0.5)
 						(vbox 1 0 0 1 0
 							(button "Set texture" eMode eSetPolygonTexture)
-							;(button "Rotate" eMode eRotateUV)
+							(button "Generate UVMap" eMode eTmpUVMapOn)
+							(button "Clear UVMap" eMode eTmpUVMapOff)
 							(button "Mirror X" eMode eMirrorUV_X)
 							(button "Mirror Y" eMode eMirrorUV_Y))))
 

@@ -1053,14 +1053,25 @@ bool FreyjaControl::event(int command)
 		mModel->mirrorTexCoord(mModel->getCurrentTexCoord(), false, true);
 		freyja_event_gl_refresh();
 		break;
+	case eTmpUVMapOn:
+		mModel->createPolyMappedUVMap(mModel->getCurrentPolygon());
+		freyja_event_gl_refresh();
+		break;
+	case eTmpUVMapOff:
+		mModel->createPolyMappedUVMap(-1);
+		freyja_event_gl_refresh();
+		break;
 	case eTranslateUV:
 		break;
 	case eRotateUV:
-		mModel->transformTexCoord(mModel->getCurrentTexCoord(),
-								  fRotateAboutPoint, 45, 0); 
+		mModel->createPolyMappedUVMap(mModel->getCurrentPolygon());
+		//mModel->transformTexCoord(mModel->getCurrentTexCoord(),
+		//						  fRotateAboutPoint, 45, 0); 
 		freyja_event_gl_refresh();
 		break;
 	case eScaleUV:
+		mModel->transformTexCoord(mModel->getCurrentTexCoord(),
+								  fScale, 0.5, 0.5);
 		break;
 
 	case eSetMeshTexture:
@@ -2431,7 +2442,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	case PLANE_XZ:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
-		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		zf = ((y < old_y-t) ? m : ((y > old_y+t) ? -m : 0));
 	case PLANE_ZY: //side
 		xf = 0;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
@@ -2491,7 +2502,7 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
 			break;
 		case PLANE_XZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 			break;
 		case PLANE_ZY: // side
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
@@ -2506,7 +2517,7 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
 			break;
 		case PLANE_XZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
 		case PLANE_ZY: // side
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
