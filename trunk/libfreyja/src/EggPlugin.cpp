@@ -1158,7 +1158,7 @@ EggPlugin::EggPlugin(Egg *egg, char *plugin_dir)
 	else
 	{
 		mPluginDir = new char[64];
-		strcpy(mPluginDir, "/usr/share/freyja/plugins/");    
+		strcpy(mPluginDir, "/usr/local/freyja8/plugins/model/");    
 	}
 
 
