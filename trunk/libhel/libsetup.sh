@@ -12,18 +12,19 @@ fi
 echo " "
 echo "libsetup.sh: Caching libs in given path"
 echo " "
-echo -n "Checking to see if you are root                          "
 
-if whoami | grep root > /dev/null
-then
-    echo OK
-else
-    echo WARNING
-    echo "   You are not root, attempting to update libraries anyway"
-#    echo "   You must be root to edit your library data"
-#    echo "   User install support will come out later"
-#    exit 0
-fi
+#echo -n "Checking to see if you are root                          "
+#
+#if whoami | grep root > /dev/null
+#then
+#    echo OK
+#else
+#    echo WARNING
+#    echo "   You are not root, attempting to update libraries anyway"
+##    echo "   You must be root to edit your library data"
+##    echo "   User install support will come out later"
+##    exit 0
+#fi
 
 echo -n "Checking for '${LIB_PATH}' in '/etc/ld.so.conf'       "
 

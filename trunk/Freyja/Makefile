@@ -91,6 +91,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
 		-DBUILD_HOST=\"\\\"$(BUILD_HOST)\\\"\"
 
+#-framework OpenGL
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ \
 		-lGL -lGLU -lm -lz -lhel0 -lfreyja -lmgtk

@@ -58,7 +58,9 @@ BASE_CFLAGS=$(FLAGS) -Wall -I. -I../libhel/ \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\"
 
-LD_FLAGS=-lm -shared -fPIC
+LD_FLAGS=-lm -shared -lstdc++ -fPIC
+#LD_FLAGS += -dynamiclib
+#LD_FLAGS += -shared
 
 RELEASE_CFLAGS=$(BASE_CFLAGS) \
 	-ffast-math -funroll-loops \
