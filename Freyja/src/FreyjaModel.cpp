@@ -26,12 +26,12 @@
 
 #include <hel/math.h>
 #include <hel/Vector3d.h>
+#include <freyja8/EggFileReader.h> 
 
 #include "MaterialManager.h"
 
 #include "FreyjaModel.h"
 #include "freyja_events.h"
-#include "utils.h"
 
 
 

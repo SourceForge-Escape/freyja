@@ -326,6 +326,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eBoneIterator", eBoneIterator);
 
 	r.RegisterInt("CMD_MISC_TEXEL_COMBINE", CMD_MISC_TEXEL_COMBINE);
+	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
 
 	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
