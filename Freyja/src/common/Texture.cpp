@@ -608,7 +608,10 @@ void Texture::disableMultiTexture()
 	mTextureId2 = -1;
 
 	glDisable(GL_TEXTURE_2D);
+
+#ifndef DISABLE_MULTITEXTURE
 	glActiveTexture(GL_TEXTURE0_ARB);
+#endif
 }
 
 
@@ -617,8 +620,10 @@ void Texture::useMultiTexture(float aU, float aV, float bU, float bV)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
+#ifndef DISABLE_MULTITEXTURE
 	glMultiTexCoord2f(GL_TEXTURE0_ARB, aU, aV);
 	glMultiTexCoord2f(GL_TEXTURE1_ARB, bU, bV);
+#endif
 }
 
 
@@ -627,8 +632,10 @@ void Texture::useMultiTexture(float u, float v)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
+#ifndef DISABLE_MULTITEXTURE
 	glMultiTexCoord2f(GL_TEXTURE0_ARB, u, v);
 	glMultiTexCoord2f(GL_TEXTURE1_ARB, u, v);
+#endif
 }
 
 
@@ -646,6 +653,7 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 	mTextureId  = texture0;
 	mTextureId2 = texture1;
 
+#ifndef DISABLE_MULTITEXTURE
 	glActiveTexture(GL_TEXTURE0_ARB);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, mTextureIds[texture0]);
@@ -653,6 +661,7 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 	glActiveTexture(GL_TEXTURE1_ARB);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, mTextureIds[texture1]);
+#endif
 }
 
 

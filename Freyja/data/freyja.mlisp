@@ -243,47 +243,37 @@
 					(hbox 0 0 0 1 0 
 						(toolbar 
 							(toolbar_togglebutton true
-												"cursor-select.png" "Select"
-												"Select by pointer"
-												EVENT_MISC CMD_MISC_SELECT)
+								"cursor-select.png" "Select" "Select by pointer"
+								EVENT_MISC CMD_MISC_SELECT)
 
 							(toolbar_togglebutton false
-												"bbox-select.png" "Select"
-												"Select by bounding box" 
-												EVENT_MISC CMD_MISC_BBOX_SELECT)
+								"bbox-select.png" "Select" "Select by bounding box" 
+								EVENT_MISC CMD_MISC_BBOX_SELECT)
 
 							(toolbar_button 
-												"clone.png" "Clone"
-												"Clone object" 
-												0 -1)
+								"clone.png" "Clone"	"Clone object" 
+								EVENT_MAIN eNone)
 
 							(toolbar_button
-												"split.png" "Split"
-												"Split object" 
-												0 -1)
+								"split.png" "Split" "Split object" 
+								EVENT_MAIN eNone)
 
 							(toolbar_button
-												"texmap.png" "TexelGen" 
-												"Generate XY texmap hack"
-												EVENT_MISC CMD_MISC_GEN_TEXMAP_XY)
+								"texmap.png" "TexelGen" "Texture Map, XY Plane"
+								EVENT_MISC CMD_MISC_GEN_TEXMAP_XY)
 
 							(toolbar_togglebutton true
-												"mesh.png" "VertexUV"
-												"Vertices with texels" 
-												EVENT_MISC CMD_MISC_VERTEX_UV)))
+								"mesh.png" "VertexUV" "Vertices with texels" 
+								EVENT_MISC CMD_MISC_VERTEX_UV)))
 
 					;; Mesh generation ;;;;;;;;;;;;;;;;;;;;;;;;;;
-					;(hbox 1 0 0 1 0
-					;	(label "Generate a mesh"  0.0 0.5))
-					;(hbox 1 0 0 1 0
-					;	(button "Cube" 
-					;		EVENT_MESH  CMD_MESH_GENERATE_CUBE)
-					;	(button "Strip" 
-					;		EVENT_MESH  CMD_MESH_GENERATE_TRIS)
-					;	(button "Sphere" 
-					;		EVENT_MESH  CMD_MESH_GENERATE_SPHERE)
-					;	(button "Cylinder" 
-					;		EVENT_MESH  CMD_MESH_GENERATE_CYLINDER))
+					(hbox 1 0 0 1 0
+						(label "Generate a mesh"  0.0 0.5))
+					(hbox 1 0 0 1 0
+						(button "Cube"		EVENT_MAIN		eGenerateCube)
+						(button "Strip" 	EVENT_MAIN  	eGenerateTriStrip)
+						(button "Sphere"	EVENT_MAIN		eGenerateSphere)
+						(button "Cylinder"	EVENT_MAIN		eGenerateCylinder))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
@@ -376,8 +366,8 @@
 
 					 (hbox 1 0 0 1 0 
 							 (togglebutton "Merge" 0 EVENT_MISC 31)
-							 (togglebutton "Slot Load" 0 EVENT_MISC 38)
-							 (button "Set Tex" EVENT_MISC 37))
+							 (togglebutton "Slot Load" 0 EVENT_MAIN eTextureSlotLoad)
+							 (button "Set Tex" EVENT_MAIN eSetMeshTexture))
 					 
 					 (hbox 1 0 0 1 0 
 							 (label "Texture" 0.0 0.5) 
