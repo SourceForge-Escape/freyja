@@ -1500,6 +1500,51 @@ void updateSkeletonUI(Egg *egg)
 }
 
 
+void fixTexCoordsHACK(Egg *egg)
+{
+	unsigned int i;
+	egg_texel_t *t;
+	egg_vertex_t *v;
+
+
+	for (i = 0; i < egg->getTexelCount(); ++i)
+	{
+		t = egg->getTexel(i);
+
+		if (t)
+		{
+			if (t->st[0] < 0.0f)
+				t->st[0] = 0.0f;
+			else if (t->st[0] > 1.0f)
+				t->st[0] = 1.0f;
+
+			if (t->st[1] < 0.0f)
+				t->st[1] = 0.0f;
+			else if (t->st[1] > 1.0f)
+				t->st[1] = 1.0f;
+		}
+	}
+
+	for (i = 0; i < egg->getVertexCount(); ++i)
+	{
+		v = egg->getVertex(i);
+
+		if (v)
+		{
+			if (v->uv[0] < 0.0f)
+				v->uv[0] = 0.0f;
+			else if (v->uv[0] > 1.0f)
+				v->uv[0] = 1.0f;
+
+			if (v->uv[1] < 0.0f)
+				v->uv[1] = 0.0f;
+			else if (v->uv[1] > 1.0f)
+				v->uv[1] = 1.0f;
+		}
+	}
+}
+
+
 int FreyjaModel::loadModel(const char *filename)
 {
 	int err;
@@ -1516,6 +1561,8 @@ int FreyjaModel::loadModel(const char *filename)
 	}
 	else
 	{
+		fixTexCoordsHACK(_egg);
+
 		unsigned int i, w, h, bpp, type;
 		unsigned char *image = 0x0;
 		char *textureFilename = 0x0; /* Texture filename */
