@@ -67,33 +67,6 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 }
 
 
-int query_load_texture_to_slot()
-{
-	unsigned int flags;
-
-	flags = gMaterialManager->getGeneralFlags();
-	return flags;
-}
-
-
-/* Mongoose 2004.03.26, 
- * This is really a toggle action */
-void event_set_load_texture_to_slot(int i)
-{
-	unsigned int flags;
-
-	flags = gMaterialManager->getGeneralFlags();
-
-	if (i)
-	{
-		gMaterialManager->setGeneralFlag(MaterialManager::fLoadTextureInSlot);
-	}
-	else
-	{
-		gMaterialManager->clearGeneralFlag(MaterialManager::fLoadTextureInSlot);
-	}
-}
-
 void freyja_event_new_key_cmd(int key, int event, int cmd)
 {
 	printf("freyja_event_new_key_cmd> Has been removed, %s:%d\n", 

@@ -51,12 +51,16 @@ typedef enum {
 	eAxisJoint,
 	eLineBone,
 	ePolyMeshBone,
+	eRenderBbox,
 
 	eGenerateNormals,
 	eGenerateCube,
 	eGenerateTriStrip,
 	eGenerateCylinder,
-	eGenerateSphere
+	eGenerateSphere,
+
+	eSetMeshTexture,
+	eTextureSlotLoad
 
 } event_subject_id;
 
@@ -300,16 +304,7 @@ enum freyja_event_misc_cmd
 	CMD_MISC_SELECT,
 	CMD_MISC_GEN_TEXMAP_XY,
 	CMD_MISC_VERTEX_UV,
-	CMD_MISC_SCENE_ROTATE,
-	CMD_MISC_TEXTURE_SET = 37,
-	CMD_MISC_TEX_SLOT_LOAD = 38,
-	CMD_MISC_RENDER_BBOX,
-
-	VIEW_JOINT1,
-	VIEW_JOINT2,
-	VIEW_JOINT3,
-	VIEW_BONE1,
-	VIEW_BONE2,
+	CMD_MISC_SCENE_ROTATE
 };
 
 enum freyja_event_mesh_cmd
