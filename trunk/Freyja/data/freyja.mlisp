@@ -39,7 +39,7 @@
 (setq GRID_ON true)            ; Toggle edit grid rendering
 (setq PATH "~/.freyja")        ; Set initial data path
 
-(setq HELP_MESSAGE "There is no online help as yet.¶¶If you'd like to work on documentation email me.¶¶Send bug reports and feature requests:¶<small>  · http://icculus.org/freyja¶  · irc://irc.freenode.net/#freyja¶  · mongoose@icculus.org</small>")
+(setq HELP_MESSAGE "Use the object drop down to select edit mode.¶¶If you'd like to work on documentation email me.¶¶Send bug reports and feature requests:¶<small>  · http://icculus.org/freyja¶  · irc://irc.freenode.net/#freyja¶  · mongoose@icculus.org</small>")
 
 (setq ABOUT_MESSAGE "<big>ᚠᚱᛖᛃᚨ Freyja 0.3.5</big>¶Freyja is an Open Source 3d modeling system.¶<small>Freyja Copyright © 2002-2004 by Terry 'Mongoose' Hendrix II</small>")
 
