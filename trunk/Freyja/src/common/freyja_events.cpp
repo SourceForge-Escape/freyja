@@ -428,4 +428,10 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 }
 
 
+extern void set_main_window_title(char *title);
+
+void freyja_set_main_window_title(char *title)
+{
+	set_main_window_title(title);
+}
 

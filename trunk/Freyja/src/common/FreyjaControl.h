@@ -15,7 +15,10 @@
  * 
  *-- History ------------------------------------------------ 
  *
- * 2000-09-10:
+ * 2004.08.14:
+ * Mongoose - Documentation update and Freyja coding guidelines ( finally )
+ *
+ * 2000.09.10:
  * Mongoose - Created
  ==========================================================================*/
 
@@ -35,77 +38,69 @@
 #include "freyja_events.h"
 
 
-typedef enum freyja_control_mode             /* Minor control modes */
-{
-	NO_MODE = 1,
-	SAVE_FILE_MODE,
-	MESH_SAVE_MODE,
-	MESH_ADD_MODE,
-	MESH_DEL_MODE,
-	MESH_MOVE_CENTER,
-	MESH_LOAD_MODE,
-	MESH_COPY_MODE,
-	MESH_CUT_MODE,
-	MESH_PASTE_MODE,
-	POINT_ADD_MODE,
-	POINT_DEL_MODE,
-	POLYGON_ADD_MODE,
-	POLYGON_DEL_MODE,
-	BONE_CONNECT_MODE,
-	BONE_DISCONNECT_MODE,
-	TAG_MOVE_CENTER,
-	BONE_SELECT_MODE,
-	MESH_SELECT_MODE,
-	MESH_WHOLE_COPY_MODE,
-	TEXEL_COMBINE,
-	VERTEX_COMBINE,
-	VERTEX_BBOX_SELECT_MODE,
-	POLYGON_SELECT_MODE,
-
-	/* Generic transforms */
-	modeMove,
-	modeRotate,
-	modeScale,
-	modeSelect
-
-} freyja_control_mode_t;
-
-
-typedef enum freyja_edit_mode                /* Major control modes */
-{
-	TEXTURE_EDIT_MODE = 0, 
-	ANIMATION_EDIT_MODE,
-	MAP_EDIT_MODE,
-	MODEL_EDIT_MODE,
-	MATERIAL_EDIT_MODE
-
-} freyja_edit_mode_t;
-
-
-
 class FreyjaControl
 {
  public:
+
+	typedef enum {                              /* Editor modes */
+		TEXTURE_EDIT_MODE = 0, 
+		ANIMATION_EDIT_MODE,
+		MAP_EDIT_MODE,
+		MODEL_EDIT_MODE,
+		MATERIAL_EDIT_MODE
+		
+	} EditorMode;
+
+	typedef enum {                              /* Editor event modes */
+		modeNone = 1,
+		SAVE_FILE_MODE,
+		MESH_MOVE_CENTER,
+		POINT_ADD_MODE,
+		POINT_DEL_MODE,
+		POLYGON_ADD_MODE,
+		POLYGON_DEL_MODE,
+		BONE_CONNECT_MODE,
+		BONE_DISCONNECT_MODE,
+		TAG_MOVE_CENTER,
+		TEXEL_COMBINE,
+		VERTEX_COMBINE,
+		VERTEX_BBOX_SELECT_MODE,
+		POLYGON_SELECT_MODE,
+		
+		/* Generic transforms */
+		modeMove,
+		modeRotate,
+		modeScale,
+		modeSelect
+		
+	} EventMode;
+
 
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
 	FreyjaControl();
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : model and render must exist
-	 * Post     : FreyjaControl object is constructed
-	 --------------------------------------------*/
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : FreyjaControl object is constructed
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	~FreyjaControl();
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : FreyjaControl object is allocated
-	 * Post     : FreyjaControl object is deconstructed
-	 --------------------------------------------*/
+	/*------------------------------------------------------
+	 * Pre  : FreyjaControl object is allocated
+	 * Post : FreyjaControl object is deconstructed
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -119,8 +114,8 @@ class FreyjaControl
 	 *
 	 *-- History ------------------------------------------
 	 *
-	 * ????.??.??: 
-	 * Mongoose - Created
+	 * 2000.08.25: 
+	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
 
@@ -128,19 +123,82 @@ class FreyjaControl
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void addRecentFilename(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Appends filename to recently opened file list
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.14: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void eventAnimation(int command);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 200X.XX.XX: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void eventBone(int command);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 200X.XX.XX: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void eventMain(int command);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 200X.XX.XX: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void eventMesh(int command);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 200X.XX.XX: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void eventMisc(int command);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 200X.XX.XX: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void handleEvent(int event, int command);
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : 
-	 * Post     : Process menu input
-	 --------------------------------------------*/
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Process event input, such as from a menu
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void handleFilename(const char *filename);
 	/*------------------------------------------------------
@@ -153,16 +211,6 @@ class FreyjaControl
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-	void ReadRC();
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : 
-	 * Post     : Reads RC file, updates the new 
-	 *            keymap, color scheme, etc
-	 --------------------------------------------*/
-
 	void setZoom(float zoom);
 	/*------------------------------------------------------
 	 * Pre  : ZOOM is a number greater than 0.0
@@ -170,12 +218,10 @@ class FreyjaControl
 	 *
 	 *-- History ------------------------------------------
 	 *
-	 * ????.??.??: 
-	 * Mongoose - Created
+	 * 2000.08.25: 
+	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
-
-	
 	bool Mouse(int btn, int state, int mod, int x, int y);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
@@ -201,15 +247,6 @@ class FreyjaControl
 	 *            input
 	 --------------------------------------------*/
 
-	void ScreenToWorld(float *x, float *y);
-	/*-----------------------------------------
-	 * Created  : 2000-08-25 by Mongoose
-	 * Modified : 
-	 *
-	 * Pre  : x and y are valid float pointers
-	 * Post : Convert from screen to 
-	 *        world coordinates 
-	 -----------------------------------------*/
 
 private:
 
@@ -217,19 +254,100 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
+	void getScreenToWorldOBSOLETE(float *x, float *y);
+	/*------------------------------------------------------
+	 * Pre  : Emulates the old ScreenToWorld() method behavior
+	 * Post : This function will be removed after the Model rewrite
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.15: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void getWorldFromScreen(float *x, float *y, float *z);
+	/*------------------------------------------------------
+	 * Pre  : X and Y are the mouse position
+	 *
+	 * Post : Converts x,y on screen to x,y,z in world
+	 *        for whichever plane was last selected
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25: 
+	 * Mongoose - Created from ScreenToWorld from GooseEgg
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
 	void addObject();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.01: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void deleteSelectedObject();
-	void selectObject(int x, int y, Egg::egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.01: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void moveObject(int x, int y, Egg::egg_plane plane);
-	void rotateObject(int x, int y, Egg::egg_plane plane);
-	void scaleObject(int x, int y, Egg::egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.01: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
+	void rotateObject(int x, int y, Egg::egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.01: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void selectObject(int x, int y, Egg::egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.01: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void scaleObject(int x, int y, Egg::egg_plane plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.01: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void MotionEdit(int x, int y, Egg::egg_plane plane);
 	/*--------------------------------------------
@@ -249,11 +367,32 @@ private:
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
 
+	void loadResource();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads the Resource file from disk and sets cvars
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created from GooseEgg
+	 ------------------------------------------------------*/
+
+	void setupResource(Resource &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns current viewing zoom of scene
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.14: 
+	 * Mongoose - Created from old stand alone function
+	 ------------------------------------------------------*/
+
+
 	//	Vector<Event *> mEvents;
 
-	unsigned int mLastEvent, mLastCommand;
-
-	unsigned int mMouseButton, mModKey;
+	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 
 	Resource mResource;                     /* Resource system */
 
@@ -262,10 +401,16 @@ private:
 	FreyjaModel *mModel;                    /* Data model */
 	
 	FreyjaRender *mRender;                  /* OpenGL renderer */
-	
-	freyja_control_mode_t _minor_mode;      /* Minor mode of the controler */
 
-	freyja_edit_mode_t _major_mode;         /* Major mode of the controler */
+	unsigned int mLastEvent, mLastCommand;  /* The last command pair recieved*/
+
+	unsigned int mMouseButton, mModKey;     /* Cached mouse button event */
+
+	unsigned int mMouseState;
+
+	EditorMode mEditorMode;                 /* Mode of the editor */
+
+	EventMode mEventMode;                   /* Mode of generic event handler */
 	
 	int _tex_state;                         /* Mouse state on texture canvas */
 	

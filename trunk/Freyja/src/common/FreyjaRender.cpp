@@ -338,7 +338,7 @@ void FreyjaRender::drawLights()
 		glPushMatrix();
 		glTranslated(test[0], test[1], test[2]);
 		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-		mglDrawSphere(32, 32, 2.5f);
+		mglDrawSphere(16, 16, 0.75f);
 		glPopMatrix();
 		
 		glEnable(GL_LIGHTING);

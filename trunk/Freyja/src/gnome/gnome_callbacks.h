@@ -74,4 +74,6 @@ void fileselection_dir_set_event(char *dir);
 void index_add_gtk_widget(int event, GtkWidget *widget);
 void index_add_notebook_event(int page, int event);
 
+void set_main_window_title(char *title);
+
 #endif
