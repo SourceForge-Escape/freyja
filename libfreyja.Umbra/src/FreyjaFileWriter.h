@@ -251,8 +251,27 @@ class FreyjaFileWriter
 	 ------------------------------------------------------*/
 
 	void writeLong(long l);
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Binary write of small endian 32bit signed int
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.14:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	void writeLongU(unsigned long l);
+	/*------------------------------------------------------
+	 * Pre  : openFile must have been sucessful, etc
+	 * Post : Binary write of small endian 32bit unsigned int
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.14:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 
 
  private:

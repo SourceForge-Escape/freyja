@@ -1506,7 +1506,7 @@ int FreyjaPlugin::getPolygon(freyja_object_t obj, int item, vec_t *value)
 	switch (obj)
 	{
 	case FREYJA_VERTEX:
-		if (item > (int)polygon->vertices.end())
+		if (item > (int)polygon->vertices.end() || polygon->vertices.empty())
 			return -1;
 
 		index = polygon->vertices[item];
@@ -1516,7 +1516,7 @@ int FreyjaPlugin::getPolygon(freyja_object_t obj, int item, vec_t *value)
 
 
 	case FREYJA_TEXCOORD:
-		if (item > (int)polygon->texcoords.end())
+		if (item > (int)polygon->texcoords.end() || polygon->texcoords.empty())
 			return -1;
 
 		index = polygon->texcoords[item];
@@ -2056,7 +2056,7 @@ int FreyjaPlugin::exportModel(const char *filename, char *type)
 		}
 
 		sprintf(module_filename, "%s/%s.so", mPluginDirectories[i], name);
-		sprintf(module_export, "%s_export", name);  // use 'model_export'?
+		sprintf(module_export, "freyja_model__%s_export", name);  // use 'model_export'?
 
 		if (!(handle = dlopen(module_filename, RTLD_NOW)))
 		{

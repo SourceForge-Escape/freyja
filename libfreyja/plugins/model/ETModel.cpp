@@ -152,7 +152,6 @@ bool MDMModel::load(const char *filename)
 			mSurfaces[i].map[j] = r.readLong();
 		}	
 
-
 		/* Bone refs */
 		printf("@ %u, bone off = %li?\n",
 			   r.getFileOffset(), mSurfaces[i].header.offset_bonerefs);
@@ -162,6 +161,7 @@ bool MDMModel::load(const char *filename)
 		for (j = 0; j < mSurfaces[i].header.number_bonerefs; ++j)
 		{
 			mSurfaces[i].bonerefs[j] = r.readLong();
+			printf("%li\n", mSurfaces[i].bonerefs[j]);
 		}
 
 		printf("@ %u, offset_surface_data_end = %li?\n",
@@ -181,7 +181,7 @@ bool MDMModel::load(const char *filename)
 
 		mTags[i].attach_bone_number = r.readLong();
 
-		printf("bone '%s', parent = %li\n", 
+		printf("bone[%li] '%s', parent = %li\n", i,
 			   mTags[i].name, mTags[i].attach_bone_number);
 
 		mTags[i].tag_pos_vector_to_bone[0] = r.readFloat32();
