@@ -21,6 +21,8 @@
 
 #include <stdlib.h>
 
+#include <freyja8/EggFileReader.h>
+
 #include "Md5.h"
 
 
@@ -36,10 +38,6 @@ Md5::Md5()
 	mNumMeshes = 0;
 	mJoints = 0x0;
 	mMeshes = 0x0;
-
-	mFileHandle = 0x0;
-	mTempBufferHackSz = 2047;
-	mTempBufferHack = new char[mTempBufferHackSz+1];
 }
 
 
@@ -53,9 +51,6 @@ Md5::~Md5()
 	
 	if (mMeshes)
 		delete [] mMeshes;
-
-	if (mTempBufferHack)
-		delete [] mTempBufferHack;
 }
 
 
@@ -88,19 +83,20 @@ bool Md5::isMd5Model(const char *filename)
 
 bool Md5::loadModel(const char *filename)
 {
+	EggFileReader r;
 	int i, j;  /* I hate everyone that uses signed indices in file formats */
 
 
 	if (isMd5Model(filename) == false)
 		return false;
 
-	if (loadFile(filename) == false)
+	if (r.openFile(filename) == false)
 		return false;
 
-	if (!matchSymbol("MD5Version"))
+	if (!r.parseMatchingSymbol("MD5Version"))
 		return false;
 
-	mVersion = getInteger();
+	mVersion = r.parseInteger();
 
 	switch (mVersion)
 	{
@@ -113,17 +109,17 @@ bool Md5::loadModel(const char *filename)
 
 
 	/* Some Id thingys */
-	if (!matchSymbol("commandline"))
+	if (!r.parseMatchingSymbol("commandline"))
 		return false;
 
-	mCommandLine = getString();
+	mCommandLine = r.parseString();
 
 
 	/* Joint setup */
-	if (!matchSymbol("numJoints"))
+	if (!r.parseMatchingSymbol("numJoints"))
 		return false;
 
-	mNumJoints = getInteger();
+	mNumJoints = r.parseInteger();
 
 	if (mNumJoints < 0)
 	{
@@ -136,10 +132,10 @@ bool Md5::loadModel(const char *filename)
 
 
 	/* Mesh setup */
-	if (!matchSymbol("numMeshes"))
+	if (!r.parseMatchingSymbol("numMeshes"))
 		return false;
 
-	mNumMeshes = getInteger();
+	mNumMeshes = r.parseInteger();
 
 	if (mNumMeshes < 0)
 	{
@@ -152,43 +148,43 @@ bool Md5::loadModel(const char *filename)
 
 
 	/* Joint data */
-	if (mNumJoints && matchSymbol("joints"))
+	if (mNumJoints && r.parseMatchingSymbol("joints"))
 	{
-		if (!matchSymbol("{"))
+		if (!r.parseMatchingSymbol("{"))
 			return false;
 			
 		for (i = 0; i < mNumJoints; ++i)
 		{
-			mJoints[i].name = getString();
-			mJoints[i].parent = getInteger();
+			mJoints[i].name = r.parseString();
+			mJoints[i].parent = r.parseInteger();
 
 			/* translate X Y Z */
-			if (!matchSymbol("("))
+			if (!r.parseMatchingSymbol("("))
 				return false;
 
-			mJoints[i].translate[0] = getFloat();
-			mJoints[i].translate[1] = getFloat();
-			mJoints[i].translate[2] = getFloat();
+			mJoints[i].translate[0] = r.parseFloat();
+			mJoints[i].translate[1] = r.parseFloat();
+			mJoints[i].translate[2] = r.parseFloat();
 
-			if (!matchSymbol(")"))
+			if (!r.parseMatchingSymbol(")"))
 				return false;
 
 
 			/* rotate X Y Z */
-			if (!matchSymbol("("))
+			if (!r.parseMatchingSymbol("("))
 				return false;
 			
-			mJoints[i].rotate[0] = getFloat();
-			mJoints[i].rotate[1] = getFloat();
-			mJoints[i].rotate[2] = getFloat();
+			mJoints[i].rotate[0] = r.parseFloat();
+			mJoints[i].rotate[1] = r.parseFloat();
+			mJoints[i].rotate[2] = r.parseFloat();
 
-			if (!matchSymbol(")"))
+			if (!r.parseMatchingSymbol(")"))
 				return false;
 
 			// FIXME: Save comment at end of line for something?
 		}
 		
-		if (!matchSymbol("}"))
+		if (!r.parseMatchingSymbol("}"))
 			return false;
 	}
 	else
@@ -199,20 +195,20 @@ bool Md5::loadModel(const char *filename)
 	
 	for (i = 0; i < mNumMeshes; ++i)
 	{
-		if (matchSymbol("mesh"))
+		if (r.parseMatchingSymbol("mesh"))
 		{
-			if (!matchSymbol("{"))
+			if (!r.parseMatchingSymbol("{"))
 				return false;
 
-			if (!matchSymbol("shader"))
+			if (!r.parseMatchingSymbol("shader"))
 				return false;
 
-			mMeshes[i].shader = getString();
+			mMeshes[i].shader = r.parseString();
 
-			if (!matchSymbol("numverts"))
+			if (!r.parseMatchingSymbol("numverts"))
 				return false;
 
-			mMeshes[i].numverts = getInteger();
+			mMeshes[i].numverts = r.parseInteger();
 
 			if (mMeshes[i].numverts < 0)
 			{
@@ -225,74 +221,74 @@ bool Md5::loadModel(const char *filename)
 
 			for (j = 0; j < mMeshes[i].numverts; ++j)
 			{
-				if (!matchSymbol("vert"))
+				if (!r.parseMatchingSymbol("vert"))
 					return false;
 
-				mMeshes[i].verts[j].index = getInteger();
+				mMeshes[i].verts[j].index = r.parseInteger();
 
-				if (!matchSymbol("("))
+				if (!r.parseMatchingSymbol("("))
 					return false;
 
-				mMeshes[i].verts[j].uv[0] = getFloat(); 
-				mMeshes[i].verts[j].uv[1] = getFloat();
+				mMeshes[i].verts[j].uv[0] = r.parseFloat(); 
+				mMeshes[i].verts[j].uv[1] = r.parseFloat();
 
-				if (!matchSymbol(")"))
+				if (!r.parseMatchingSymbol(")"))
 					return false;
 				
-				mMeshes[i].verts[j].weight = getInteger();
-				mMeshes[i].verts[j].numbones = getInteger();
+				mMeshes[i].verts[j].weight = r.parseInteger();
+				mMeshes[i].verts[j].numbones =r. parseInteger();
 			}
 
-			if (!matchSymbol("numtris"))
+			if (!r.parseMatchingSymbol("numtris"))
 				return false;
 
-			mMeshes[i].numtriangles = getInteger();
+			mMeshes[i].numtriangles = r.parseInteger();
 			mMeshes[i].triangles = new Md5Triangle[mMeshes[i].numtriangles];
 
 			for (j = 0; j < mMeshes[i].numtriangles; ++j)
 			{
-				if (!matchSymbol("tri"))
+				if (!r.parseMatchingSymbol("tri"))
 					return false;
 				
-				getInteger(); // integer == j
-				mMeshes[i].triangles[j].vertex[0] = getInteger();
-				mMeshes[i].triangles[j].vertex[1] = getInteger();
-				mMeshes[i].triangles[j].vertex[2] = getInteger();
+				r.parseInteger(); // integer == j
+				mMeshes[i].triangles[j].vertex[0] = r.parseInteger();
+				mMeshes[i].triangles[j].vertex[1] = r.parseInteger();
+				mMeshes[i].triangles[j].vertex[2] = r.parseInteger();
 			}
 
-			if (!matchSymbol("numweights"))
+			if (!r.parseMatchingSymbol("numweights"))
 				return false;
 
-			mMeshes[i].numweights = getInteger();
+			mMeshes[i].numweights = r.parseInteger();
 			mMeshes[i].weights = new Md5Weight[mMeshes[i].numweights];
 
 			for (j = 0; j < mMeshes[i].numweights; ++j)
 			{
-				if (!matchSymbol("weight"))
+				if (!r.parseMatchingSymbol("weight"))
 					return false;
 
-				mMeshes[i].weights[j].index = getInteger();
-				mMeshes[i].weights[j].joint = getInteger();
-				mMeshes[i].weights[j].weight = getFloat();
+				mMeshes[i].weights[j].index = r.parseInteger();
+				mMeshes[i].weights[j].joint = r.parseInteger();
+				mMeshes[i].weights[j].weight = r.parseFloat();
 
-				if (!matchSymbol("("))
+				if (!r.parseMatchingSymbol("("))
 					return false;
 
-				mMeshes[i].weights[j].pos[0] = getFloat();
-				mMeshes[i].weights[j].pos[1] = getFloat();
-				mMeshes[i].weights[j].pos[2] = getFloat();
+				mMeshes[i].weights[j].pos[0] = r.parseFloat();
+				mMeshes[i].weights[j].pos[1] = r.parseFloat();
+				mMeshes[i].weights[j].pos[2] = r.parseFloat();
 
-				if (!matchSymbol(")"))
+				if (!r.parseMatchingSymbol(")"))
 					return false;
 			}
 			
 		}
 		
-		if (!matchSymbol("}"))
+		if (!r.parseMatchingSymbol("}"))
 			return false;
 	}
 
-	closeFile();
+	r.closeFile();
 
 	return true;
 }
@@ -306,179 +302,6 @@ bool Md5::loadModel(const char *filename)
 ////////////////////////////////////////////////////////////
 // Private Mutators
 ////////////////////////////////////////////////////////////
-
-void Md5::closeFile()
-{
-	if (mFileHandle)
-		fclose(mFileHandle);
-}
-
-
-double Md5::getFloat()
-{
-	double r;
-
-
-	// ugly fscanf use for temp hack
-	fscanf(mFileHandle, "%lf", &r);
-	//r = atof(getSymbol());
-
-	//printf("** %f\n", r);
-	return r;
-}
-
-
-int Md5::getInteger()
-{
-	int i;
-
-
-	// ugly fscanf use for temp hack
-	fscanf(mFileHandle, "%i", &i);
-	//i = atoi(getSymbol());
-
-	//printf("** %i\n", i);
-	return i;
-}
-
-
-char *Md5::getString()
-{
-	unsigned int l, i = 0, state = 0;
-	char *s;
-	char c, lc = 0;
-	
-	// ugly fscanf use for temp hack
-	while (i < mTempBufferHackSz && fscanf(mFileHandle, "%c", &c) != EOF)
-	{
-		switch (state)
-		{
-		case 0:
-			if (c == '"')
-				state = 1;
-			break;
-		case 1:
-			if (c == '"' && lc != '\\')  // Allow quote escapes?
-			{
-				i = mTempBufferHackSz;
-			}
-			else
-			{
-				mTempBufferHack[i++] = c;
-				mTempBufferHack[i] = 0;
-			}
-			break;
-		}
-
-		lc = c;
-	}
-	
-	l = strlen(mTempBufferHack);
-	s = new char[l+1];
-	strncpy(s, mTempBufferHack, l);
-	s[l] = 0;
-	//printf("** \"%s\"\n", mTempBufferHack);
-
-	return s;
-}
-
-
-char *Md5::getSymbol()
-{
-	unsigned int i = 0, state = 0;
-	char c;
-
-
-	mTempBufferHack[0] = 'F';
-	mTempBufferHack[1] = 'U';
-	mTempBufferHack[2] = 0;
-
-	// ugly fscanf use for temp hack
-	while (i < mTempBufferHackSz && fscanf(mFileHandle, "%c", &c) != EOF)
-	{
-		switch (state)
-		{
-		case 0:
-			if (c == '/')
-			{
-				state = 1;
-				mTempBufferHack[i++] = c;
-				mTempBufferHack[i] = 0;	
-			}
-			else if (c == ' ' || c == '\r' || c == '\n' || c == '\t')
-			{
-				if (i > 0)
-					i = mTempBufferHackSz;
-			}
-			else
-			{
-				mTempBufferHack[i++] = c;
-				mTempBufferHack[i] = 0;
-			}
-			break;
-		case 1:
-			if (c == '/')
-			{
-				state = 2;
-				--i;
-				mTempBufferHack[i] = 0;
-			}
-			else
-			{
-				state = 0;
-				mTempBufferHack[i++] = c;
-				mTempBufferHack[i] = 0;
-			}
-			break;
-		case 2:
-			if (c == '\n')
-			{
-				/* Only wrap lines when given a only comment line(s) */
-				if (i > 0)
-					i = mTempBufferHackSz;
-				else
-					state = 0;
-			}
-			break;
-		}
-	}
-
-	// ugly fscanf use for temp hack
-	//	fscanf(mFileHandle, "%s", mTempBufferHack);
-   	//printf("\n** <%s>\n", mTempBufferHack);
-	
-	return mTempBufferHack;
-}
-
-
-bool Md5::loadFile(const char *filename)
-{
-	mFileHandle = fopen(filename, "rb");
-	
-	if (!mFileHandle)
-	{
-		perror(filename);
-		return false;
-	}
-
-	return true;
-}
-
-
-bool Md5::matchSymbol(const char *symbol)
-{
-	unsigned int l = strlen(symbol); /* Assumes !(!symbol) && !(!symbol[0]) */
-	char *sym = getSymbol();
-	bool test = (!strncmp(symbol, sym, l));
-
-	
-	if (!test)
-	{
-		printf("Not matched: '%s' != '%s'\n", symbol, sym);
-	}
-
-	return test;
-}
 
 
 ////////////////////////////////////////////////////////////
