@@ -84,7 +84,7 @@ const float LIGHT_NEXT_PURPLE[] = {0.4f, 0.4f, 0.6f, 1.0f};
 
 unsigned int gSelectedBone = 0;
 unsigned int gBoneRenderType = 1;
-unsigned char gJointRenderType = 3;
+unsigned char gJointRenderType = 1;
 int gPatchDisplayList = -1;
 
 BezierPatch gTestPatch;
@@ -604,6 +604,14 @@ FreyjaRender::FreyjaRender()
 	Width(640);
 	Height(480);
 	RotateAmount(1.0);
+
+	for (long i = 0; i < 3; ++i)
+	{
+		mColorAxisX[i] = RED[i] * 0.75f;
+		mColorAxisY[i] = GREEN[i] * 0.75f;
+		mColorAxisZ[i] = BLUE[i] * 0.75f;
+	}
+
 	Reset();
 }
 
@@ -769,7 +777,9 @@ void FreyjaRender::Reset()
 	_default_line_width = 1.0;
 	_vertex_point_size = 3.5;
 
-	_angles[0] = _angles[1] = _angles[2] = 0.0;
+	_angles[0] = 18.0f;
+	_angles[1] = 42.0f;
+	_angles[2] = 0.0f;
 
 	_texture = 0;
 }
@@ -885,8 +895,34 @@ void FreyjaRender::Display()
 
 		if (mRenderMode & RENDER_EDIT_GRID)
 		{
+			glLineWidth(1.25f);
 			mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
+
+			glLineWidth(2.0f);
 			mglDrawAxis(0.25f, 1.2f, 0.872f);
+
+			glLineWidth(1.75f);
+			glBegin(GL_LINES);
+			glColor3fv(RED);
+			glVertex3f(-50.0f, 0.0f, 0.0f);	
+			glVertex3f(50.0f, 0.0f, 0.0f);
+			glColor3fv(BLUE);
+			glVertex3f(0.0f, 0.0f, -50.0f);	
+			glVertex3f(0.0f, 0.0f, 50.0f);
+
+			glColor3fv(mColorGridLine);
+
+			for (float x = -50.0f; x < 60.0f; x += 10.f)
+			{
+				if (x < 10.0f && x > -10.0f) 
+					continue;
+
+				glVertex3f(x, 0.0f, -50.0f);	
+				glVertex3f(x, 0.0f, 50.0f);
+				glVertex3f(-50.0f, 0.0f, x);	
+				glVertex3f(50.0f, 0.0f, x);
+			}
+			glEnd();
 		}
 
 		if (mRenderMode & RENDER_BONES)
@@ -911,7 +947,7 @@ void FreyjaRender::Display()
 
 		if (mRenderMode & RENDER_EDIT_GRID)
 		{
-			DrawGrid(Width(), Height(), 8);
+			DrawGrid(Width(), Height(), 10);
 		}
 
 		DrawWindow(_model->CurrentPlane());
@@ -1600,41 +1636,45 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 		y = (int)_scroll[1];
 
 		glBegin(GL_LINES); 
-      glColor3fv(mColorAxisX);
-      glVertex2i(-w, y);
-      glVertex2i(w, y);
+		glColor3fv(FreyjaRender::mColorAxisX);
+		glVertex2i(-w, y);
+		glVertex2i(w, y);
     
-      glColor3fv(mColorAxisY);
-      glVertex2i(x, -h);
-      glVertex2i(x, h);
+		glColor3fv(FreyjaRender::mColorAxisY);
+		glVertex2i(x, -h);
+		glVertex2i(x, h);
 		glEnd();
 		break;
+
+
    case Egg::PLANE_XZ:
 		x = (int)_scroll[0];
 		y = (int)_scroll[2];
 
 		glBegin(GL_LINES); 
-      glColor3fv(mColorAxisX);
-      glVertex2i(-w, y);
-      glVertex2i(w, y);
+		glColor3fv(FreyjaRender::mColorAxisX);
+		glVertex2i(-w, y);
+		glVertex2i(w, y);
     
-      glColor3fv(mColorAxisZ);
-      glVertex2i(x, -h);
-      glVertex2i(x, h);
+		glColor3fv(FreyjaRender::mColorAxisZ);
+		glVertex2i(x, -h);
+		glVertex2i(x, h);
 		glEnd();
 		break;
+
+
    case Egg::PLANE_YZ:
 		x = (int)_scroll[1];
 		y = (int)_scroll[2];
 
 		glBegin(GL_LINES); 
-      glColor3fv(mColorAxisY);
-      glVertex2i(-w, y);
-      glVertex2i(w, y);
+		glColor3fv(FreyjaRender::mColorAxisY);
+		glVertex2i(-w, y);
+		glVertex2i(w, y);
     
-      glColor3fv(mColorAxisZ);
-      glVertex2i(x, -h);
-      glVertex2i(x, h);
+		glColor3fv(FreyjaRender::mColorAxisZ);
+		glVertex2i(x, -h);
+		glVertex2i(x, h);
 		glEnd(); 
 		break;
 	default:
@@ -1643,31 +1683,36 @@ void FreyjaRender::DrawGrid(int w, int h, int size)
 
    if (mRenderMode & RENDER_EDIT_GRID)
    {
-		glLineWidth(1.0);
-
 		offset_x = (x % size) - w;
 		offset_y = (y % size) - h;
 
+		glLineWidth(1.0);
 		glColor3fv(mColorGridLine);
 
 		glBegin(GL_LINES);
 		for (y = offset_y; y < w; y++)
 		{
-			if ((y % size) == 0)
-			{
-				glColor3fv(mColorGridSeperator);
-				glVertex2i(-w, y);
-				glVertex2i(w, y);
-				glColor3fv(mColorGridLine);
-			}
-			else
-			{
-				glVertex2i(-w, y);
-				glVertex2i(w, y);
-			}
+			glVertex2i(-w, y);
+			glVertex2i(w, y);
 		}
 
 		for (x = offset_x; x < h; x++)
+		{
+			glVertex2i(x, -h);
+			glVertex2i(x, h);
+		}
+		glEnd();
+
+		glLineWidth(1.75);
+		glColor3fv(mColorGridSeperator);
+		glBegin(GL_LINES);
+		for (y = offset_y; y < w; y+=10)
+		{
+			glVertex2i(-w, y);
+			glVertex2i(w, y);
+		}
+
+		for (x = offset_x; x < h; x+=10)
 		{
 			glVertex2i(x, -h);
 			glVertex2i(x, h);
