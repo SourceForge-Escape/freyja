@@ -12,7 +12,15 @@
  *
  *           This file was generated using Mongoose's C++ 
  *           template generator script.  <stu7440@westga.edu>
- * 
+ *
+ *-- TODO --------------------------------------------------- 
+ *
+ * + Remove Egg dependence ( planes ) 
+ *
+ * + 3d events to Model facade
+ *
+ * + Command pattern event refactoring
+ *
  *-- History ------------------------------------------------ 
  *
  * 2004.08.14:
@@ -53,7 +61,6 @@ class FreyjaControl
 
 	typedef enum {                              /* Editor event modes */
 		modeNone = 1,
-		SAVE_FILE_MODE,
 		MESH_MOVE_CENTER,
 		POINT_ADD_MODE,
 		POINT_DEL_MODE,
@@ -359,7 +366,7 @@ private:
 	 --------------------------------------------*/
 	
 	void MouseEdit(int btn, int state, int mod, int x, int y, 
-						Egg::egg_plane plane);
+				   Egg::egg_plane plane);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
 	 * Modified : 
@@ -390,7 +397,7 @@ private:
 	 ------------------------------------------------------*/
 
 
-	//	Vector<Event *> mEvents;
+	Vector<FreyjaEvent *> mEvents;          /* Command pattern event system */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 

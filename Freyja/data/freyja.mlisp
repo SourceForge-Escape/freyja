@@ -316,8 +316,9 @@
 					(hbox 1 0 0 1 0
 						(label "Object Transform: " 0.0 0.5)
 						(optionmenu	EVENT_MAIN	eNone
-							(menu_item "Scene     "	EVENT_MAIN eTransformScene)
-							(menu_item "Mesh      "	EVENT_MAIN eTransformMesh)
+							(menu_item "Scene"	EVENT_MAIN eTransformScene)
+							(menu_item "Mesh"	EVENT_MAIN eTransformMesh)
+							(menu_item "Bone"	EVENT_MAIN eTransformBone)
 							(menu_item "Group"	EVENT_MAIN eTransformGroup)
 							(menu_item "Vertex"	EVENT_MAIN eTransformPoint)))
 

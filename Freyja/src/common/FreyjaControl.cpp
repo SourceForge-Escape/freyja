@@ -459,6 +459,9 @@ void FreyjaControl::eventMain(int event)
 	case eTransformMesh:
 		mTransformMode = FreyjaModel::TransformMesh;
 		break;
+	case eTransformBone:
+		mTransformMode = FreyjaModel::TransformBone;
+		break;
 
 
 	case eDelete:
@@ -1283,8 +1286,6 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 		*y = z;
 		break;
 	}
-
-	event_print("%f %f %f", *x, *y, z);
 }
 
 
@@ -2000,6 +2001,7 @@ void FreyjaControl::setupResource(Resource &r)
 	r.RegisterInt("eTransformGroup", eTransformGroup);
 	r.RegisterInt("eTransformScene", eTransformScene);
 	r.RegisterInt("eTransformMesh", eTransformMesh);
+	r.RegisterInt("eTransformBone", eTransformBone);
 	r.RegisterInt("eTransformPoint", eTransformPoint);
 
 

@@ -53,6 +53,7 @@ typedef enum {
 	eTransformGroup,
 	eTransformScene,
 	eTransformMesh,
+	eTransformBone,
 	eTransformPoint,
 
 	ePointJoint,
