@@ -260,6 +260,11 @@ class FreyjaControl
 	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
+	void resizeDisplay(unsigned int width, unsigned int height);
+
+	void updateDisplay();
+
+
 private:
 
 	////////////////////////////////////////////////////////////
@@ -329,7 +334,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void moveObject(int x, int y, Egg::egg_plane plane);
+	void moveObject(int x, int y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -340,7 +345,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void rotateObject(int x, int y, Egg::egg_plane plane);
+	void rotateObject(int x, int y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -351,7 +356,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void selectObject(int x, int y, Egg::egg_plane plane);
+	void selectObject(int x, int y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -362,7 +367,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void scaleObject(int x, int y, Egg::egg_plane plane);
+	void scaleObject(int x, int y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -373,7 +378,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void MotionEdit(int x, int y, Egg::egg_plane plane);
+	void MotionEdit(int x, int y, freyja_plane_t plane);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
 	 * Modified : 
@@ -383,7 +388,7 @@ private:
 	 --------------------------------------------*/
 	
 	void MouseEdit(int btn, int state, int mod, int x, int y, 
-				   Egg::egg_plane plane);
+				   freyja_plane_t plane);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
 	 * Modified : 

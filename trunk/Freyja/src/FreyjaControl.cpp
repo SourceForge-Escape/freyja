@@ -31,14 +31,8 @@
 #include "FreyjaControl.h"
 
 
-extern unsigned int gBoneRenderType;
-extern unsigned char gJointRenderType;
-extern int gPatchDisplayList;
-
 void test_patch();
 unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
-void event_register_render(FreyjaRender *r);
-void event_register_model(FreyjaModel *m);
 void event_register_control(FreyjaControl *c);
 
 
@@ -80,8 +74,6 @@ FreyjaControl::FreyjaControl(Resource *r)
 		exit(-1);
 	}
 		
-	event_register_render(mRender);
-	event_register_model(mModel);
 	event_register_control(this);
 
 	/* Build the user interface from lisp, and load user preferences */
@@ -122,6 +114,12 @@ FreyjaControl::~FreyjaControl()
 		delete [] mRecentFiles[i];
 	}
 
+	if (mRender)
+		delete mRender;
+
+	if (mModel)
+		delete mModel;
+
 	/* Mongoose 2004.03.26, 
 	 * Entry for MaterialManager test pattern */
 	MaterialManager::DestroyInstance();
@@ -141,6 +139,32 @@ float FreyjaControl::getZoom()
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void FreyjaControl::updateDisplay()
+{
+	if (mRender)
+	{
+		mRender->Display();
+	}
+	else
+	{
+		freyja_print("!updateDisplay> Call to NULL Renderer\n");
+	}
+}
+
+
+void FreyjaControl::resizeDisplay(unsigned int width, unsigned int height)
+{
+	if (mRender)
+	{
+		mRender->Reshape(width, height);
+	}
+	else
+	{
+		freyja_print("!resizeDisplay> Call to NULL Renderer\n");
+	}
+}
+
 
 void FreyjaControl::addRecentFilename(const char *filename)
 {
@@ -391,7 +415,7 @@ bool FreyjaControl::event(int event, vec_t value)
 	case 800:
 	case 801:
 	case 802:
-		ptr = mModel->GetLight0Pos();
+		ptr = mModel->mLight0Pos;
 		ptr[event - 800] = value;
 		freyja_event_gl_refresh();
 		break;
@@ -860,8 +884,8 @@ bool FreyjaControl::event(int command)
 
 
 	case eDebugEgg:
-		mModel->Debug(!mModel->Debug());
-		freyja_print("Egg debug [%s]", mModel->Debug() ? "ON" : "OFF");
+		mModel->setDebug(!mModel->getDebug());
+		freyja_print("Egg debug [%s]", mModel->getDebug() ? "ON" : "OFF");
 		break;
 
 
@@ -922,23 +946,23 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case ePointJoint:
-		gJointRenderType = 1;
+		FreyjaRender::mJointRenderType = 1;
 		break;
 
 	case eSphereJoint:
-		gJointRenderType = 2;
+		FreyjaRender::mJointRenderType = 2;
 		break;
 
 	case eAxisJoint:
-		gJointRenderType = 3;
+		FreyjaRender::mJointRenderType = 3;
 		break;
 
 	case eLineBone:
-		gBoneRenderType = 1;
+		FreyjaRender::mBoneRenderType = 1;
 		break;
 
 	case ePolyMeshBone:
-		gBoneRenderType = 2;
+		FreyjaRender::mBoneRenderType = 2;
 		break;
 
 
@@ -952,9 +976,11 @@ bool FreyjaControl::event(int command)
 
 
 	case eSetMeshTexture:
-		freyja_print("Switching all of mesh %i ploygons to texture %i",
-					mModel->getCurrentMesh(), mModel->getCurrentTextureIndex());
-		mModel->TextureShift();
+		freyja_print("Switching all of mesh[%i]'s ploygons to material %i",
+					 mModel->getCurrentMesh(),
+					 mModel->getCurrentTextureIndex());
+		mModel->setMeshMaterial(mModel->getCurrentMesh(),
+								mModel->getCurrentTextureIndex());
 		break;
 
 
@@ -1008,7 +1034,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eCopyAppendMode:
-		mModel->appendMode = !mModel->appendMode;
+		mModel->mAppendMode = !mModel->mAppendMode;
 		break;
 
 	case eSplitObject:
@@ -1345,21 +1371,21 @@ bool FreyjaControl::event(int command)
 
 
 	case eRenderPatch:
-		if (gPatchDisplayList == -1)
+		if (FreyjaRender::mPatchDisplayList == -1)
 		{
 			test_patch();
-			gPatchDisplayList = 0;
+			FreyjaRender::mPatchDisplayList = 0;
 		}
 
-		gPatchDisplayList = !gPatchDisplayList;
+		FreyjaRender::mPatchDisplayList = !FreyjaRender::mPatchDisplayList;
 		
-		if (gPatchDisplayList)
+		if (FreyjaRender::mPatchDisplayList)
 		{
 			test_patch(); // hack for update
 		}
 
 		freyja_print("Patch Rendering [%s], Use Vertex:Move to edit...", 
-					 (gPatchDisplayList) ? "ON" : "OFF");
+					 (FreyjaRender::mPatchDisplayList) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
@@ -1464,17 +1490,17 @@ bool FreyjaControl::event(int command)
 		break;
 	case FREYJA_MODE_PLANE_XY:
 		freyja_print("Plane XY");      
-		mModel->CurrentPlane(Egg::PLANE_XY);
+		mModel->CurrentPlane(PLANE_XY);
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_PLANE_XZ:
 		freyja_print("Plane XZ");      
-		mModel->CurrentPlane(Egg::PLANE_XZ);
+		mModel->CurrentPlane(PLANE_XZ);
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_PLANE_YZ:
 		freyja_print("Plane ZY");      
-		mModel->CurrentPlane(Egg::PLANE_ZY);
+		mModel->CurrentPlane(PLANE_ZY);
 		freyja_event_gl_refresh();
 		break;
 
@@ -1731,7 +1757,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 		case MOUSE_BTN_MIDDLE:
 			{
 				Vector3d xyz;
-				vec_t *ptr = mModel->GetLight0Pos();
+				vec_t *ptr = mModel->mLight0Pos;
 
 				getFreeWorldFromScreen(x, y, xyz.mVec);
 
@@ -1753,7 +1779,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 				getFreeWorldFromScreen(x, y, xyz.mVec);
 
-				if (gPatchDisplayList)
+				if (FreyjaRender::mPatchDisplayList)
 					mModel->movePatchControlPoint(xyz);
 
 				if (mTransformMode == FreyjaModel::TransformBone)
@@ -1839,7 +1865,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 				getFreeWorldFromScreen(x, y, pos);
 		
-				if (gPatchDisplayList)
+				if (FreyjaRender::mPatchDisplayList)
 					mModel->selectPatchControlPoint(pos);
 
 				_mouse_state = 1;
@@ -1927,15 +1953,15 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 
 	switch (mModel->CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		/* Nothing to do for XY */
 		break;
 		
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		*y = z;
 		break;
 		
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		*x = z;
 		break;
 	}
@@ -1967,19 +1993,19 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 	
 	switch (mModel->CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		*x -= scroll[0] * invz;
 		*y -= scroll[1] * invz;
 		*z = 0.0f;
 		break;
 
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		*x -= scroll[0] * invz;
 		*z = *y - scroll[2] * invz;
 		*y = 0.0f;
 		break;
 
-	case Egg::PLANE_ZY: // side ZY! change
+	case PLANE_ZY: // side ZY! change
 		*z = *x - scroll[2] * invz;
 		*y -= scroll[1] * invz;
 		*x = 0.0f;
@@ -2100,7 +2126,7 @@ void FreyjaControl::addObject()
 }
 
 
-void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
+void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 {
 	float xx = x, yy = y, zz;
 
@@ -2115,7 +2141,7 @@ void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
 		yy = y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
 
-		if (gPatchDisplayList > 0)
+		if (FreyjaRender::mPatchDisplayList > 0)
 			mModel->selectPatchControlPoint(xx, yy);
 		else
 			mModel->VertexSelect(xx, yy);
@@ -2148,7 +2174,7 @@ void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
 }
 
 
-void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
+void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float t = 2.0f, m = 0.5f;
@@ -2164,16 +2190,16 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 	
 	switch (plane)
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		xf = 0;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
@@ -2187,7 +2213,7 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 		xx = x; 
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
-		if (gPatchDisplayList > 0)
+		if (FreyjaRender::mPatchDisplayList > 0)
 			mModel->movePatchControlPoint(xx, yy);
 		else
 			mModel->VertexMove(xx, yy);
@@ -2209,17 +2235,17 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 		/* Exact movement based on center of object */
 		switch (plane)
 		{
-		case Egg::PLANE_XY:
+		case PLANE_XY:
 			xf = xx - center[0];
 			yf = yy - center[1];
 			zf = 0;
 			break;
-		case Egg::PLANE_XZ:
+		case PLANE_XZ:
 			xf = xx - center[0];
 			yf = 0;
 			zf = yy - center[2];
 			break;
-		case Egg::PLANE_ZY: // side
+		case PLANE_ZY: // side
 			xf = 0;
 			zf = xx - center[2];
 			yf = yy - center[1];
@@ -2241,7 +2267,7 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 }
 
 
-void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
+void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float t = 1.0f, m = 1.0f;
@@ -2258,16 +2284,16 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 	
 	switch (plane)
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
-	case Egg::PLANE_ZY: //side
+	case PLANE_ZY: //side
 		xf = 0;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
@@ -2314,7 +2340,7 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 }
 
 
-void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
+void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 
@@ -2322,13 +2348,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 	{
 		switch (plane)
 		{
-		case Egg::PLANE_XY:
+		case PLANE_XY:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
 			break;
-		case Egg::PLANE_XZ:
+		case PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
-		case Egg::PLANE_ZY: // side
+		case PLANE_ZY: // side
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
 			break;
 		}
@@ -2337,13 +2363,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 	{
 		switch (plane)
 		{
-		case Egg::PLANE_XY:
+		case PLANE_XY:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
 			break;
-		case Egg::PLANE_XZ:
+		case PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 			break;
-		case Egg::PLANE_ZY: // side
+		case PLANE_ZY: // side
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
 		}
 	}
@@ -2352,13 +2378,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 	{
 		switch (plane)
 		{
-		case Egg::PLANE_XY:
+		case PLANE_XY:
 			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
 			break;
-		case Egg::PLANE_XZ:
+		case PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
 			break;
-		case Egg::PLANE_ZY: // side
+		case PLANE_ZY: // side
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
 		}
@@ -2367,13 +2393,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 	{
 		switch (plane)
 		{
-		case Egg::PLANE_XY:
+		case PLANE_XY:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
 			break;
-		case Egg::PLANE_XZ:
+		case PLANE_XZ:
 			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
 			break;
-		case Egg::PLANE_ZY: // side
+		case PLANE_ZY: // side
 			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 		}
 	}
@@ -2383,7 +2409,7 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 }
 
 
-void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
+void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float treshold = 2.0f;
@@ -2411,15 +2437,15 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 
 		switch (mModel->CurrentPlane())
 		{
-		case Egg::PLANE_XY:
+		case PLANE_XY:
 			mModel->adjustSceneTranslation(xyz[0], xyz[1], xyz[2]);
 			break;
 
-		case Egg::PLANE_XZ:
+		case PLANE_XZ:
 			mModel->adjustSceneTranslation(xyz[0], xyz[2], xyz[1]);
 			break;
 
-		case Egg::PLANE_ZY: // side
+		case PLANE_ZY: // side
 			mModel->adjustSceneTranslation(xyz[2], xyz[1], xyz[0]);
 			break;
 		}
@@ -2475,7 +2501,7 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 
 
 void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y, 
-							  Egg::egg_plane plane) 
+							  freyja_plane_t plane) 
 { 
 	vec3_t xyz;
 	float xx = x, yy = y;
@@ -2487,17 +2513,17 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	
 	switch (plane)
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		xyz[0] = xx;
 		xyz[1] = yy;
 		xyz[2] = 0;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		xyz[0] = xx;
 		xyz[1] = 0;
 		xyz[2] = yy;
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		xyz[0] = 0;
 		xyz[1] = yy;
 		xyz[2] = xx;
@@ -2527,7 +2553,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		freyja_print("store state: %f, %f", xxx, yyy);
 		mModel->VertexSelect(xx, yy);
 		
-		if (gPatchDisplayList)
+		if (FreyjaRender::mPatchDisplayList)
 			mModel->selectPatchControlPoint(xx, yy);
 
 		_mouse_state = 1;

@@ -3,8 +3,8 @@
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaModel
  * License : GPL
  * Comments: This is the backend of the modeler
@@ -15,6 +15,10 @@
  *           template generator script.  <stu7440@westga.edu>
  * 
  *-- History ------------------------------------------------ 
+ *
+ * 2004.12.17:
+ * Mongoose - A little API clean up, due to the fact this is staying
+ *            in next release and needs to be maintained. 
  *
  * 2004.04.12:
  * Mongoose - Mostly new API, refactoring, and new dependences
@@ -184,6 +188,13 @@ public:
 	}
 };
 
+typedef enum { 
+	
+	PLANE_XY = 0, 
+	PLANE_ZY = 1, 
+	PLANE_XZ = 2
+} freyja_plane_t;
+
 
 class FreyjaModel
 {
@@ -239,6 +250,8 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	unsigned int getAnimationFramesIn(unsigned int animationIndex);
+
 	void getBoneRotation(vec_t *pitch, vec_t *yaw, vec_t *roll);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -285,7 +298,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool isCurrentBoneAllocated();
 	unsigned int getCurrentBone();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -320,7 +332,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void getCurrentMeshCenter(vec3_t center);
 	unsigned int getCurrentMesh();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -331,6 +342,8 @@ public:
 	 * 2000.09.10: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	void getCurrentMeshCenter(vec3_t center);
 
 	unsigned int getCurrentPolygon();
 	/*------------------------------------------------------
@@ -412,6 +425,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	bool getDebug();
+
 	void getSceneTranslation(vec3_t offset);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -422,6 +437,10 @@ public:
 	 * 2004.04.01:
 	 * Mongoose - Created, replaces old API 'Scroll' methods
 	 ------------------------------------------------------*/
+
+	bool isCurrentBoneAllocated();
+
+	void printInfo();
 
 	int saveAnimation(const char *filename);
 	/*------------------------------------------------------
@@ -444,9 +463,6 @@ public:
 	 * 2000.09.09: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	void updateSkeletalUI();
-	unsigned int getAnimationFramesIn(unsigned int animationIndex);
 
 
 	////////////////////////////////////////////////////////////
@@ -580,6 +596,8 @@ public:
 
 	void setCurrentVertexFrame(unsigned int index);
 
+	void setDebug(unsigned int n);
+
 	void setFlags(option_flag_t flag, int op);
 	/*------------------------------------------------------
 	 * Pre  : The flag and operator are valid
@@ -592,11 +610,42 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void setMeshMaterial(long meshIndex, long material);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets mesh[<meshIndex>] and all it's polygon's
+	 *        material ids to <material>
+	 *
+	 * Notes: 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.17: 
+	 * Mongoose - Created, an improved API for TextureShift()
+	 ------------------------------------------------------*/
+
 	void setSceneTranslation(vec_t x, vec_t y, vec_t z);
 
+	void transform(int mode, Egg::egg_transform type, 
+				   float x, float y, float z);
+	/*------------------------------------------------------
+	 * Pre  : mode is {FRAME, MESH, SCENE, BONE, etc}
+	 *        type is {SCALE, ROTATE, TRANSLATE}
+	 *        x, y, z are in degrees or units
+	 *
+	 * Post : Transform is performed
+	 *
+	 * Notes: FRAME  : Transform current frame of current mesh
+	 *        MESH   : Transform current mesh
+	 *        SCENE  : Transform entire scene
+	 *        BONETAG: Transform current bone tag
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
-	void movePatchControlPoint(float xx, float yy);
-	void selectPatchControlPoint(float xx, float yy);
+	void updateSkeletalUI();
 
 
 	////////////////////////////////////////////////////////////////////////
@@ -612,7 +661,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void CurrentPlane(Egg::egg_plane p);
+	void CurrentPlane(freyja_plane_t p);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets the current edit plane
@@ -623,30 +672,11 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	enum Egg::egg_plane CurrentPlane();
+	freyja_plane_t CurrentPlane();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the current edit plane
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void transform(int mode, Egg::egg_transform type, 
-				   float x, float y, float z);
-	/*------------------------------------------------------
-	 * Pre  : mode is {FRAME, MESH, SCENE, BONE, etc}
-	 *        type is {SCALE, ROTATE, TRANSLATE}
-	 *        x, y, z are in degrees or units
-	 *
-	 * Post : Transform is performed
-	 *
-	 * Notes: FRAME  : Transform current frame of current mesh
-	 *        MESH   : Transform current mesh
-	 *        SCENE  : Transform entire scene
-	 *        BONETAG: Transform current bone tag
 	 *-- History ------------------------------------------
 	 *
 	 * 2000.09.10: 
@@ -669,6 +699,7 @@ public:
 	void selectPatchControlPoint(Vector3d xyz);
 
 	void moveObject(transform_t type, Vector3d xyz);
+
 	void selectObject(transform_t type, Vector3d xyz);
 
 
@@ -676,7 +707,8 @@ public:
 	/// FIXME: decide where to put these, then doc ////////
 	///////////////////////////////////////////////////////
 
-	void printInfo();
+	void movePatchControlPoint(float xx, float yy);
+	void selectPatchControlPoint(float xx, float yy);
 
 	void VertexNew(float xx, float yy);
 	void VertexMove(float xx, float yy);
@@ -718,41 +750,18 @@ public:
 	void connectBone(unsigned int master, unsigned int slave);
 	void disconnectBone(unsigned int master, unsigned int slave);
 
+	Egg *getCurrentEgg();
 
 
-	void TextureShift();
 	///////////////////////////////////////////////////////
-
-
-#ifdef FIXME
-#   error "FreyjaModel.h, FIXME: Hacky stuff that's mainly temp"
-#else
-	Egg *CurrentEgg() 
-	{
-		return _egg;
-	}
-
-	void Debug(unsigned int n)
-	{
-		_egg_debug = n;
-		_egg->setDebugLevel(n);
-	}
-
-	bool Debug()
-	{
-		return _egg_debug;
-	}
-
-	float *GetLight0Pos()
-	{
-		return _light0_pos;
-	}
-#endif
-
-	bool appendMode;
 
 	Vector<unsigned int> mList;         /* Temp generic vertex list buffer */
 
+	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
+
+	vec4_t mLight0Pos;                  /* Testing for light system */
+
+	bool mAppendMode;                   /* Copy system multiobject copy state */
 
 
 private:
@@ -761,7 +770,7 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	egg_group_t *CachedGroup();
+	egg_group_t *getCachedGroup();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the current vertex grouping
@@ -772,7 +781,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	egg_tag_t *CachedTag();
+	egg_tag_t *getCachedTag();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the current bone tag
@@ -783,7 +792,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 	
-	egg_mesh_t *CachedMesh();
+	egg_mesh_t *getCachedMesh();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the current mesh
@@ -794,15 +803,64 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	egg_mesh_t *getNativeMesh(long index);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the mesh for given index or NULL
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.12.17: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	egg_group_t *getNearestGroup(vec_t x, vec_t y, freyja_plane_t plane);
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : Returns nearest group to x, y in given plane
+	 *        ( XY, ZY, XZ )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.11.29:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	egg_tag_t *getNearestTag(vec_t x, vec_t y, freyja_plane_t plane);
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : Returns nearest tag to x, y in given plane
+	 *        ( XY, ZY, XZ )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.11.29:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	egg_vertex_t *getNearestVertex(egg_group_t *group, 
+								   vec_t x, vec_t y, freyja_plane_t plane);
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : Returns nearest vertex (in group) to x, y in given plane
+	 *        ( XY, ZY, XZ )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.11.29:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+	
+	FreyjaEgg *_egg;                /* The 3d model */
+	
+	FreyjaEggPlugin *mPlugin;       /* Model plugin system */
 
-	
-	FreyjaEgg *_egg;                    /* The 3d model */
-	
-	FreyjaEggPlugin *_plugin;           /* Model plugin system */
+	unsigned int mFlags;            /* Stores option flags as bitmap */
 
 	CopyMesh mCopyMesh;             /* This is the fucking buffer for meshes
 									 * it handles things the backend should
@@ -820,9 +878,7 @@ private:
   
 	Vector<unsigned int> _selection_list; /* Temp generic vertex list buffer */
 
-	Egg::egg_plane _current_plane;           /* Which plane view is this? */
-
-	unsigned int _defaults;             /* Stores Control flags */
+	freyja_plane_t _current_plane;           /* Which plane view is this? */
 
 	unsigned int _poly_sz;              /* Number of edges for a new polygon */
 	
@@ -845,16 +901,14 @@ private:
 	unsigned int _current_tag;          /* Currently selected bone tag id */
 	
 	unsigned int _current_bone_frame;   /* Currently selected skeletal frame */
+
+	//	unsigned int _current_morph_frame;  /* Current vertexmorph frame */
 	
 	bool _egg_debug;                    /* Debugging egg? cached query */
 	
 	float _zoom;                        /* Scaling of scene */
 	
 	float _scroll[3];                   /* Scrolling in edit planes */
-
-	float _light0_pos[4];               /* Testing for light system */
 };
-
-//	unsigned int _current_morph_frame;  /* Current vertexmorph frame */
 
 #endif

@@ -62,7 +62,7 @@ tarball:
 
 user-install:
 	@-printf "Installing freyja user files\n"
-	@-cd Freyja; setup-freyja.sh
+	@-cd Freyja; ./setup-freyja.sh
 	@-cd ..
 
 	@-printf "Installing freyja user plugins\n"

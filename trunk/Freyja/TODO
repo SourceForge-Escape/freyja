@@ -17,8 +17,10 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Reshuffling libfreyja's into one composite
 	o New chunk file format -- fix Egg8 plugin import
 	o IK solver
+	o Smoothing groups tools
 	o Catmull-Clark for subdiv
 	o Viewportbackground 'diagram' for mesh creation
 	o Deform skelmesh in bone transform

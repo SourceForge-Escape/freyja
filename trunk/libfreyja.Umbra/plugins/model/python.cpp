@@ -109,6 +109,10 @@ PyObject *py_freyjaBegin(PyObject *self, PyObject *args)
 
 	switch ((freyja_object_t)type)
 	{
+	case FREYJA_MODEL:
+		s = "FREYJA_MODEL";
+		break;
+
 	case FREYJA_MESH:
 		s = "FREYJA_MESH";
 		break;
@@ -249,6 +253,10 @@ PyObject *initPlugins()
     dict = PyModule_GetDict(module);
 
 	/* Append gobal constants */
+    tmp = PyInt_FromLong(FREYJA_MODEL);
+    PyDict_SetItemString(dict, "FREYJA_MODEL", tmp);
+    Py_DECREF(tmp);
+
     tmp = PyInt_FromLong(FREYJA_MESH);
     PyDict_SetItemString(dict, "FREYJA_MESH", tmp);
     Py_DECREF(tmp);
@@ -277,7 +285,7 @@ PyObject *initPlugins()
 int main(int argc, char *argv[])
 {
 	FreyjaScene scene;
-	FreyjaPlugin plugin(&scene, "");
+	FreyjaPlugin plugin(&scene, "/usr/local/lib/freyja/modules/model/");
 
 	if (argc > 2)
 		import_model(argv[1]);

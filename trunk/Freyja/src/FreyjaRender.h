@@ -319,6 +319,10 @@ public:
 	static vec4_t mColorAxisX;
 	static vec4_t mColorAxisY;
 	static vec4_t mColorAxisZ;
+	static unsigned int mSelectedBone;
+	static unsigned int mBoneRenderType;
+	static unsigned char mJointRenderType;
+	static int mPatchDisplayList;
 
 
 private:    

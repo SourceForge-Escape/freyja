@@ -3,8 +3,8 @@
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaModel
  * License : No use w/o permission (C) 2000 Mongoose
  * Comments: This is the backend of the modeler
@@ -15,7 +15,7 @@
  * 
  *-- History ------------------------------------------------- 
  *
- * 2000-09-09:
+ * 2000.09.09:
  * Mongoose - Created
  ==========================================================================*/
 
@@ -34,31 +34,31 @@
 #include "FreyjaModel.h"
 #include "freyja_events.h"
 
-extern BezierPatch gTestPatch;
+BezierPatch FreyjaModel::gTestPatch;
 
 
 FreyjaModel::FreyjaModel()
 {
 	char *pluginDir;
 
-	appendMode = false;
+	mAppendMode = false;
 
 	_palette_filename = 0;
 
 	pluginDir = freyja_rc_map("plugins/");
 
 	_egg = new FreyjaEgg();
-	_plugin = new FreyjaEggPlugin(_egg, pluginDir);
+	mPlugin = new FreyjaEggPlugin(_egg, pluginDir);
 
-	_plugin->addModule("psk");
-	_plugin->addModule("nod");
-	_plugin->addModule("mdx");
-	_plugin->addModule("grn");
-	_plugin->addModule("md5");
-	_plugin->addModule("smd");
-	_plugin->addModule("obj");
-	_plugin->addModule("mdm");
-	_plugin->addModule("halflife");
+	mPlugin->addModule("psk");
+	mPlugin->addModule("nod");
+	mPlugin->addModule("mdx");
+	mPlugin->addModule("grn");
+	mPlugin->addModule("md5");
+	mPlugin->addModule("smd");
+	mPlugin->addModule("obj");
+	mPlugin->addModule("mdm");
+	mPlugin->addModule("halflife");
 
 	delete [] pluginDir;
 
@@ -69,8 +69,8 @@ FreyjaModel::FreyjaModel()
 
 FreyjaModel::~FreyjaModel()
 {
-	if (_plugin)
-		delete _plugin;
+	if (mPlugin)
+		delete mPlugin;
 
 	if (_egg)
 		delete _egg;
@@ -79,10 +79,10 @@ FreyjaModel::~FreyjaModel()
 
 void FreyjaModel::setFlags(option_flag_t flag, int op)
 {
-	_defaults |= flag;
+	mFlags |= flag;
 
 	if (!op)
-		_defaults ^= flag;
+		mFlags ^= flag;
 
 	// Pretty output in freyja console
 	if (flag & FL_DUMP_TEXTURE)
@@ -92,25 +92,25 @@ void FreyjaModel::setFlags(option_flag_t flag, int op)
 	{
 		freyja_print("TombRaider Map loading is %s", op ? "on" : "off");
 
-		if (_plugin)
-			_plugin->eggFlags(FL_EGGP_LOAD_MAP);
+		if (mPlugin)
+			mPlugin->eggFlags(FL_EGGP_LOAD_MAP);
 	}
 }
 
 
 unsigned int FreyjaModel::getFlags()
 {
-	return _defaults;
+	return mFlags;
 }
 
 
 void FreyjaModel::Clear()
 {
 	_cached_vertex = NULL;
-	_defaults = 0;
+	mFlags = 0;
 	_poly_sz = 3;
 	_texture_num = 0;
-	_current_plane = Egg::PLANE_XY;
+	_current_plane = PLANE_XY;
 	_current_texel = 0;
 	_current_vertex = 0;
 	_current_group = 0;
@@ -129,10 +129,10 @@ void FreyjaModel::Clear()
 	mSelectBBox[0][0] = mSelectBBox[0][1] = mSelectBBox[0][2] = -16.0;
 	mSelectBBox[1][0] = mSelectBBox[1][1] = mSelectBBox[1][2] = 16.0;
 	
-	_light0_pos[0] = 0.0f;
-	_light0_pos[1] = 1.0f;
-	_light0_pos[2] = 0.0;
-	_light0_pos[3] = 0.0;
+	mLight0Pos[0] = 0.0f;
+	mLight0Pos[1] = 1.0f;
+	mLight0Pos[2] = 0.0;
+	mLight0Pos[3] = 0.0;
 
 	if (_egg)
 	{
@@ -151,18 +151,19 @@ void FreyjaModel::printInfo()
 }
 
 
-void FreyjaModel::TextureShift()
+void FreyjaModel::setMeshMaterial(long meshIndex, long material)
 {
 	egg_mesh_t *mesh;
 	egg_polygon_t *poly;
 	unsigned int i;
 
 
-	mesh = CachedMesh();
+	mesh = getNativeMesh(meshIndex);
 
 	if (!mesh)
 	{
-		freyja_print("FreyjaModel::TextureShift> ERROR: Invalid current mesh\n");
+		freyja_print("FreyjaModel::setMeshMaterial> ERROR: Invalid mesh[%li]\n",
+					 meshIndex);
 		return;
 	}
 
@@ -173,7 +174,7 @@ void FreyjaModel::TextureShift()
 		if (!poly)
 			continue;
 
-		poly->shader = getCurrentTextureIndex();
+		poly->shader = material;
 	}
 }
 
@@ -188,7 +189,7 @@ void FreyjaModel::generateUVMap()
 	float u, v;
 
 
-	mesh = CachedMesh();
+	mesh = getCachedMesh();
 
 	if (!mesh)
 		return;
@@ -238,13 +239,13 @@ void FreyjaModel::generateUVMap()
 	}
 }
 
-void FreyjaModel::CurrentPlane(Egg::egg_plane p)
+void FreyjaModel::CurrentPlane(freyja_plane_t p)
 {
 	_current_plane = p;
 }
 
 
-enum Egg::egg_plane FreyjaModel::CurrentPlane()
+enum freyja_plane_t FreyjaModel::CurrentPlane()
 {
 	return _current_plane;
 }
@@ -327,6 +328,12 @@ void FreyjaModel::setCurrentMesh(unsigned int index)
 		
 		freyja_print("Mesh[%i]", getCurrentMesh());
 	}
+}
+
+
+Egg *FreyjaModel::getCurrentEgg()
+{
+	return _egg;
 }
 
 
@@ -597,21 +604,21 @@ void FreyjaModel::transform(int mode, enum Egg::egg_transform type,
 	switch (mode)
 	{
 	case FreyjaModel::TransformVertexFrame:	
-		_egg->Transform(CachedGroup(), type, x, y, z);
+		_egg->Transform(getCachedGroup(), type, x, y, z);
 		break;
 
 	case FreyjaModel::TransformMesh:
-		_egg->Transform(CachedMesh(), type, x, y, z);
+		_egg->Transform(getCachedMesh(), type, x, y, z);
 		break;
 
 	case FreyjaModel::TransformBone:
 		{
 			if (type != Egg::ROTATE)
-				_egg->Transform(CachedTag(), type, x, y, z);
+				_egg->Transform(getCachedTag(), type, x, y, z);
 			else
 				_egg->TagRotateAbout(getCurrentBone(), x, y, z);
 			
-			if (_defaults & fDeformBoneVertices)
+			if (mFlags & fDeformBoneVertices)
 			{
 				
 			}
@@ -714,14 +721,14 @@ unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 
 void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
 {
-	_egg->TagAddMesh(CachedTag(), getCurrentMesh());
+	_egg->TagAddMesh(getCachedTag(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
 
 void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
 {
-	_egg->TagDelMesh(CachedTag(), getCurrentMesh());
+	_egg->TagDelMesh(getCachedTag(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
@@ -730,7 +737,7 @@ void FreyjaModel::selectBone(float xx, float yy)
 {
 	egg_tag_t *bone;
 
-	bone = _egg->getNearestTag(xx, yy, CurrentPlane());
+	bone = getNearestTag(xx, yy, CurrentPlane());
 
 	if (bone)
 		setCurrentBone(bone->id);
@@ -816,7 +823,7 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 {
 	static Vector<unsigned int> vertices;
 	static Vector<unsigned int> texels;
-	egg_mesh_t *mesh = CachedMesh();
+	egg_mesh_t *mesh = getCachedMesh();
 	egg_vertex_t *vertex;
 	egg_polygon_t *polygon;
 	unsigned int i, polygonId;
@@ -1011,14 +1018,14 @@ bool FreyjaModel::copySelectedMesh()
 	unsigned int i, j, index;
 
 
-	mesh = CachedMesh();
-	group = CachedGroup();
+	mesh = getCachedMesh();
+	group = getCachedGroup();
 
 	if (!mesh || !group)
 		return false;
 
 	// FIXME: You can add a back buffer stack/list here
-	if (!appendMode)
+	if (!mAppendMode)
 		mCopyMesh.erase();
 
 	mCopyMesh.flags = mesh->flags;
@@ -1164,14 +1171,14 @@ bool FreyjaModel::copyVertexBuffer()
 	Vector3d min, max, center;
 
 
-	mesh = CachedMesh();
-	group = CachedGroup();
+	mesh = getCachedMesh();
+	group = getCachedGroup();
 
 	if (!mesh || !group || mList.empty())
 		return false;
 
 	// FIXME: You can add a back buffer stack/list here
-	if (!appendMode)
+	if (!mAppendMode)
 		mCopyMesh.erase();
 
 	min = Vector3d(999999.0f, 999999.0f, 999999.0f);
@@ -1375,20 +1382,20 @@ void FreyjaModel::moveBoneCenter(float xx, float yy)
 	egg_tag_t *bone;
 
 
-	if (!(bone = CachedTag()))
+	if (!(bone = getCachedTag()))
 		return;
   
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		bone->center[0] = xx;
 		bone->center[1] = yy;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		bone->center[0] = xx;
 		bone->center[2] = yy;
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		bone->center[2] = xx;
 		bone->center[1] = yy;
 		break;
@@ -1403,22 +1410,22 @@ void FreyjaModel::moveBone(float xx, float yy)
 	egg_tag_t *bone;
 
 
-	if (!(bone = CachedTag()))
+	if (!(bone = getCachedTag()))
 		return;
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		x = xx - bone->center[0];
 		y = yy - bone->center[1];
 		z = 0;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		x = xx - bone->center[0];
 		y = 0;
 		z = yy - bone->center[2];
 		break;
-	case Egg::PLANE_ZY: //side
+	case PLANE_ZY: //side
 		x = 0;
 		y = yy - bone->center[1];
 		z = xx - bone->center[2];
@@ -1432,7 +1439,7 @@ void FreyjaModel::moveBone(float xx, float yy)
 void FreyjaModel::MeshMove(float xx, float yy)
 {
 	vec_t x = 0, y = 0, z = 0;
-	egg_group_t *mesh = CachedGroup();
+	egg_group_t *mesh = getCachedGroup();
 
 
 	if (!mesh)
@@ -1440,17 +1447,17 @@ void FreyjaModel::MeshMove(float xx, float yy)
 	
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		x = xx - mesh->center[0];
 		y = yy - mesh->center[1];
 		z = 0;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		x = xx - mesh->center[0];
 		y = 0;
 		z = yy - mesh->center[2];
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		x = 0;
 		y = yy - mesh->center[1];
 		z = xx - mesh->center[2];
@@ -1463,7 +1470,7 @@ void FreyjaModel::MeshMove(float xx, float yy)
 
 void FreyjaModel::getCurrentMeshCenter(vec3_t center)
 {
-	egg_group_t *mesh = CachedGroup();
+	egg_group_t *mesh = getCachedGroup();
 
 
 	if (!mesh)
@@ -1480,20 +1487,20 @@ void FreyjaModel::MeshMoveCenter(float xx, float yy)
 	egg_group_t *frame;
 
 
-	if (!(frame = CachedGroup()))
+	if (!(frame = getCachedGroup()))
 		return;
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		frame->center[0] = xx;
 		frame->center[1] = yy;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		frame->center[0] = xx;
 		frame->center[2] = yy;
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		frame->center[2] = xx;
 		frame->center[1] = yy;
 		break;
@@ -1506,7 +1513,7 @@ void FreyjaModel::VertexNew(float xx, float yy)
 	egg_group_t *frame;
 
 
-	if (!(frame = CachedGroup()))
+	if (!(frame = getCachedGroup()))
 	{
 		freyja_print("FreyjaModel::VertexNew> Point requires Mesh; Try Mesh->New");
 		return;
@@ -1514,19 +1521,19 @@ void FreyjaModel::VertexNew(float xx, float yy)
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		_cached_vertex = _egg->addVertex(xx, yy, 0.0);
     
 		if (_cached_vertex)
 			frame->vertex.add(_cached_vertex->id);
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		_cached_vertex = _egg->addVertex(xx, 0.0, yy);
     
 		if (_cached_vertex)
 			frame->vertex.add(_cached_vertex->id);
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		_cached_vertex = _egg->addVertex(0.0, yy, xx);
     
 		if (_cached_vertex)
@@ -1536,7 +1543,7 @@ void FreyjaModel::VertexNew(float xx, float yy)
 
 	if (_cached_vertex)
 	{
-		if (_defaults & FL_VERTEX_UV)
+		if (mFlags & FL_VERTEX_UV)
 		{
 			eggGenerateUVFromXYZ(_cached_vertex->pos, 
 						  &_cached_vertex->uv[0], &_cached_vertex->uv[1]);
@@ -1621,7 +1628,7 @@ void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
 	switch (type)
 	{
 	case FreyjaModel::TransformBone:
-		if (!(bone = CachedTag()))
+		if (!(bone = getCachedTag()))
 			return;
 
 		v = Vector3d(bone->center);
@@ -1653,17 +1660,17 @@ void FreyjaModel::selectPatchControlPoint(float xx, float yy)
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		x = 0;
 		y = 1;
 		break;
 
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		x = 0;
 		y = 2;
 		break;
 
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		x = 2;
 		y = 1;
 		break;
@@ -1697,17 +1704,17 @@ void FreyjaModel::movePatchControlPoint(float xx, float yy)
 {
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[0] = xx;
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[1] = yy;
 		break;
 
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[0] = xx;
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = yy;
 		break;
 
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[2] = xx;
 		gTestPatch.control[gTestPatch.x][gTestPatch.y].mVec[1] = yy;
 		break;
@@ -1725,19 +1732,32 @@ void FreyjaModel::VertexMove(float xx, float yy)
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		_cached_vertex->pos[0] = xx;
 		_cached_vertex->pos[1] = yy;      
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		_cached_vertex->pos[0] = xx;
 		_cached_vertex->pos[2] = yy;
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		_cached_vertex->pos[2] = xx;               
 		_cached_vertex->pos[1] = yy;
 		break;
 	}
+}
+
+
+void FreyjaModel::setDebug(unsigned int n)
+{
+	_egg_debug = n;
+	_egg->setDebugLevel(n);
+}
+
+ 
+bool FreyjaModel::getDebug()
+{
+	return _egg_debug;
 }
 
 
@@ -1746,10 +1766,10 @@ void FreyjaModel::VertexSelect(float xx, float yy)
 	egg_group_t *frame;
 
 
-	if (!(frame = CachedGroup()))
+	if (!(frame = getCachedGroup()))
 		return;
 
-	_cached_vertex = _egg->getNearestVertex(frame, xx, yy, CurrentPlane());
+	_cached_vertex = getNearestVertex(frame, xx, yy, CurrentPlane());
 }
 
 
@@ -1775,16 +1795,16 @@ void FreyjaModel::BBoxSelect(float xx, float yy)
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		x = 0; 
 		y = 1;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		x = 0; 
 		y = 2;
 		break;
 	default:
-		//case Egg::PLANE_YZ: // side
+		//case PLANE_YZ: // side
 		x = 2; 
 		y = 1;
 		break;
@@ -1811,15 +1831,15 @@ void FreyjaModel::BBoxMove(float xx, float yy)
 
 	switch (CurrentPlane())
 	{
-	case Egg::PLANE_XY:
+	case PLANE_XY:
 		mSelectBBox[_bbox][0] = xx;
 		mSelectBBox[_bbox][1] = yy;
 		break;
-	case Egg::PLANE_XZ:
+	case PLANE_XZ:
 		mSelectBBox[_bbox][0] = xx;
 		mSelectBBox[_bbox][2] = yy;
 		break;
-	case Egg::PLANE_ZY: // side
+	case PLANE_ZY: // side
 		mSelectBBox[_bbox][2] = xx;               
 		mSelectBBox[_bbox][1] = yy;
 		break;
@@ -1890,7 +1910,7 @@ void FreyjaModel::MeshSelect(float xx, float yy)
 	unsigned int i;
 
 	
-	frame = _egg->getNearestGroup(xx, yy, CurrentPlane());
+	frame = getNearestGroup(xx, yy, CurrentPlane());
 
 	meshlst = _egg->MeshList();
 
@@ -1949,7 +1969,7 @@ void FreyjaModel::TexelCombine(float s, float t)
 
 void FreyjaModel::TexelSelect(float s, float t)
 {
-	egg_mesh_t *mesh = CachedMesh();
+	egg_mesh_t *mesh = getCachedMesh();
 	egg_polygon_t *polygon = NULL;
 	egg_polygon_t *best_polygon = NULL;
 	egg_texel_t *texel = NULL;
@@ -2252,7 +2272,7 @@ int FreyjaModel::loadModel(const char *filename)
 	int err;
 
 
-	err = _plugin->importModel((char*)filename);  // try plug-in modules last
+	err = mPlugin->importModel((char*)filename);  // try plug-in modules last
 
 	updateSkeletonUI(_egg);		
  
@@ -2347,7 +2367,7 @@ int FreyjaModel::saveModel(const char *filename)
 		ext[i] = filename[s];
 	}
 
-	ret = _plugin->exportModel((char *)filename, ext);
+	ret = mPlugin->exportModel((char *)filename, ext);
 
 	if (ret)
 	{
@@ -2391,7 +2411,7 @@ int FreyjaModel::saveAnimation(const char *filename)
 		ext[i] = filename[s];
 	}
 
-	ret = _plugin->exportModel((char *)filename, "smd"); // ext);
+	ret = mPlugin->exportModel((char *)filename, "smd"); // ext);
 
 	if (ret)
 	{
@@ -2408,25 +2428,228 @@ bool FreyjaModel::isCurrentBoneAllocated()
 {
 	return (_egg->getTag(getCurrentBone()) != 0x0);
 }
+ 
 
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
 
-
-/////// PRIVATE METHODS //////////////////////////////////////
-
-
-egg_group_t *FreyjaModel::CachedGroup()
+egg_group_t *FreyjaModel::getCachedGroup()
 {
 	return _egg->getGroup(getCurrentGroup());    
 }
 
-egg_tag_t *FreyjaModel::CachedTag()
+
+egg_tag_t *FreyjaModel::getCachedTag()
 {
 	return _egg->getTag(getCurrentBone());
 }
 
 
-egg_mesh_t *FreyjaModel::CachedMesh()
+egg_mesh_t *FreyjaModel::getCachedMesh()
 {
 	return _egg->getMesh(getCurrentMesh());
 }
+
+
+egg_mesh_t *FreyjaModel::getNativeMesh(long index)
+{
+	if (index < 0)
+		return 0x0;
+
+	return _egg->getMesh(index);
+}
+
+
+egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
+										  freyja_plane_t plane)
+{
+	Vector3d v, u;
+	egg_group_t *best = NULL;
+	egg_group_t *current = NULL;
+	vec_t dist = 0.0;
+	vec_t closest = 9999.0;
+	int xx = 0, yy = 1;
+	unsigned int i;
+
+
+	if (!_egg->GroupList())
+	{
+		return 0x0;
+	}
+
+	Vector <egg_group_t *> &groups = *(_egg->GroupList());
+
+	if (groups.empty())
+	{
+		printf("eggNearestGroup> Assertion failed, No groups\n");
+		return NULL;
+	}
+
+	/* Avoid looping branch / switch */
+	switch (plane)
+	{
+	case PLANE_XY: 
+		xx = 0;
+		yy = 1;
+		break;
+	case PLANE_XZ: 
+		xx = 0;
+		yy = 2;
+		break;
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
+		break;
+	}
+	
+	for (i = groups.begin(); i < groups.end(); ++i)
+	{
+		current = groups[i];
+
+		if (!current)
+			continue;
+
+		v = Vector3d(x, y, 0);
+		u = Vector3d(current->center[xx], current->center[yy], 0);
+		dist = helDist3v(v.mVec, u.mVec);
+
+		// printf("*** dist %f\n", dist);
+
+		if (!best || dist < closest)
+		{
+			best = current;
+			closest = dist;
+		}
+	}
+
+	return best;
+}
+
+
+egg_tag_t *FreyjaModel::getNearestTag(vec_t x, vec_t y, freyja_plane_t plane)
+{
+	egg_tag_t *best = NULL;
+	egg_tag_t *current = NULL;
+	vec_t dist = 0.0;
+	vec_t closest = 99999.0;
+	int xx = 0, yy = 1;
+	unsigned int i;
+
+
+	if (!_egg->TagList())
+	{
+		return 0x0;
+	}
+
+	Vector <egg_tag_t *> &tags = *(_egg->TagList());
+	
+
+	if (tags.empty())
+		return NULL;
+
+	// Oh how cheap it is to avoid a looping branch
+	switch (plane)
+	{
+	case PLANE_XY: 
+		xx = 0;
+		yy = 1;
+		break;
+	case PLANE_XZ: 
+		xx = 0;
+		yy = 2;
+		break;
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
+		break;
+	}
+     
+	for (i = tags.begin(); i < tags.end(); ++i)
+	{
+		current = tags[i];
+
+		if (!current)
+			continue;
+
+		dist = helDist3v((Vector3d(x, y, 0)).mVec,
+							  (Vector3d(current->center[xx],	current->center[yy],	0)).mVec);
+
+		if (!best || dist < closest)
+		{
+			best = current;
+			closest = dist;
+		}
+	}
+
+	return best;
+}
+
+
+egg_vertex_t *FreyjaModel::getNearestVertex(egg_group_t *group, 
+											vec_t x, vec_t y, freyja_plane_t plane)
+{
+	vec_t dist = 0.0;
+	vec_t closest = 0.0;
+	int xx = 0, yy = 1;
+	egg_vertex_t *best = NULL;
+	egg_vertex_t *current = NULL;
+	unsigned int i;
+
+
+	if (!_egg->VertexList())
+	{
+		return 0x0;
+	}
+
+	Vector <egg_vertex_t *> &vertices = *(_egg->VertexList());
+
+	if (vertices.empty() || !group || group->vertex.empty())
+	{
+		return NULL;
+	}
+	
+	// Oh how cheap it is to avoid a branch in loop
+	switch (plane)
+	{
+	case PLANE_XY: 
+		xx = 0;
+		yy = 1;
+		break;
+	case PLANE_XZ: 
+		xx = 0;
+		yy = 2;
+		break;
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
+		break;
+	}
+	
+	for (i = group->vertex.begin(); i < group->vertex.end(); ++i)
+	{
+		current = vertices[group->vertex[i]];
+
+		if (!current)
+		{
+			continue;
+		}
+
+		dist = helDist3v((Vector3d(x, y, 0)).mVec,
+							  (Vector3d(current->pos[xx],	current->pos[yy],	0)).mVec);
+
+		if (!best || dist < closest)
+		{
+			best = current;
+			closest = dist;
+		}
+	}
+
+	return best;
+}
+
+
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
 

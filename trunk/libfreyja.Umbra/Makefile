@@ -8,6 +8,22 @@
 # + Lots of misc new features
 ################################################################
 
+NAME=freyja
+MAJOR_VERSION=0
+MINOR_VERSION=9
+MICRO_VERSION=0
+BRANCH=Umbra
+BUILD_ID=20041216
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
+BUILD_HOST=`uname -n -m -s`
+URL=http://icculus.org/freyja
+EMAIL=mongoose@icculus.org
+EXT=.so
+TREE_DIR=libfreyja.Umbra
+TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
+
+################################################################
+
 BUILD_SELECT=debug
 
 # -DMODEL_PLUGINS
@@ -22,18 +38,6 @@ DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 #CONFIGURE_LNK=`grep -e "-l" ./config.cache`
 CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 CONFIGURE_LNK=
-
-################################################################
-
-NAME=freyja
-MAJOR_VERSION=0
-MINOR_VERSION=9
-MICRO_VERSION=0
-BUILD_ID=20041030
-VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
-EXT=.so
-TREE_DIR=libfreyja
-TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
 
 ################################################################
 
@@ -125,7 +129,10 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS = \
+	$(BUILDDIR)/Egg.o \
+	$(BUILDDIR)/EggPlugin.o \
 	$(BUILDDIR)/Freyja.o \
+	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaCamera.o \
 	$(BUILDDIR)/FreyjaPrinter.o \
 	$(BUILDDIR)/FreyjaFileReader.o \
@@ -134,7 +141,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaLight.o \
 	$(BUILDDIR)/FreyjaMesh.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
-	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaSkeleton.o 
 
 $(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
