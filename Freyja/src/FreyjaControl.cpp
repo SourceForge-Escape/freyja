@@ -697,6 +697,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eRevertFile:
+		if (mRecentFiles.empty())
+		{
+			freyja_print("Revert requires a model being previously loaded");
+			break;
+		}
+
 		if (freyja_create_confirm_dialog("gtk-dialog-question",
 										 "You will lose all changes you made by reverting.",
 										 "Would you like to revert the model and lose unsaved changes?",
