@@ -19,6 +19,13 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ freyja_model (0.9.0-20040506) Mongoose <mongoose@users.sourceforge.net>
+
+	* More work on Egg9
+	* New unit test system for Egg9
+	
+ freyja_model (0.8.14-200404XX) Mongoose <mongoose@users.sourceforge.net>
+	
 	* Egg mesh transform not using matrix math for translate ( bug ) 
 	* mtk3d dropped, goodbye old friend ( 199? - 2004 )
 	* Egg v8 now uses libhel
