@@ -47,11 +47,6 @@
 #   include <GL/gl.h>
 #endif
 
-#include <freyja8/mendian.h>
-#define fread_int_small eRead_Small_int32
-#define fread_u_int_small eRead_Small_uint32
-#define fread_float_small eRead_Small_float
-
 #include "Md3.h"
 
 
@@ -264,7 +259,7 @@ int Md3::load(char *filename)
 
 	// Start Header ////////////////
 
-	fread_int_small(&m_id, f);
+	fread(&m_id, 4, 1, f);
 	printDebug("load", "id = 0x%x\n", m_id);
   
 	if (m_id != MD3_IDALIASHEADER)
@@ -273,7 +268,7 @@ int Md3::load(char *filename)
 		return -2;
 	}
   
-	fread_int_small(&m_version, f);
+	fread(&m_version, 4, 1, f);
 	printDebug("load", "version = %i\n", m_version);
 
 	if (m_version != MD3_ALIAS_VERSION)
@@ -285,28 +280,28 @@ int Md3::load(char *filename)
 	fread(&m_filename, 68, 1, f);
 	printDebug("load", "filename = '%s'\n", m_filename);
 
-	fread_int_small(&m_num_bones, f);
+	fread(&m_num_bones, 4, 1, f);
 	printDebug("load", "num_bone_frames = %i\n", m_num_bones);
 
-	fread_int_small(&m_num_tags, f);
+	fread(&m_num_tags, 4, 1, f);
 	printDebug("load", "num_tags = %i\n", m_num_tags);
 
-	fread_int_small(&m_num_meshes, f);
+	fread(&m_num_meshes, 4, 1, f);
 	printDebug("load", "num_meshes = %i\n", m_num_meshes);
 
-	fread_int_small(&m_max_skins, f);
+	fread(&m_max_skins, 4, 1, f);
 	printDebug("load", "max_skins = %i\n", m_max_skins);
 
-	fread_int_small(&m_header_length, f);
+	fread(&m_header_length, 4, 1, f);
 	printDebug("load", "header_length = %i\n", m_header_length);
 
-	fread_int_small(&m_tag_start, f);
+	fread(&m_tag_start, 4, 1, f);
 	printDebug("load", "tag_start = %i\n", m_tag_start);
 
-	fread_int_small(&m_surfaces_start, f);
+	fread(&m_surfaces_start, 4, 1, f);
 	printDebug("load", "surfaces_start = %i\n", m_surfaces_start);
 
-	fread_int_small(&m_file_size, f);
+	fread(&m_file_size, 4, 1, f);
 	printDebug("load", "file_size = %i\n", m_file_size);
  
 	// End Header //////////////////
@@ -316,19 +311,19 @@ int Md3::load(char *filename)
 	for (i = 0; i < m_num_bones; ++i)
 	{
 		//fread(&m_bones[i].mins, 12, 1, f);
-		fread_float_small(&m_bones[i].mins[0], f);
-		fread_float_small(&m_bones[i].mins[1], f);
-		fread_float_small(&m_bones[i].mins[2], f);
+		fread(&m_bones[i].mins[0], 4, 1, f);
+		fread(&m_bones[i].mins[1], 4, 1, f);
+		fread(&m_bones[i].mins[2], 4, 1, f);
 		//fread(&m_bones[i].maxs, 12, 1, f);
-		fread_float_small(&m_bones[i].maxs[0], f);
-		fread_float_small(&m_bones[i].maxs[1], f);
-		fread_float_small(&m_bones[i].maxs[2], f);
+		fread(&m_bones[i].maxs[0], 4, 1, f);
+		fread(&m_bones[i].maxs[1], 4, 1, f);
+		fread(&m_bones[i].maxs[2], 4, 1, f);
 		//fread(&m_bones[i].center, 12, 1, f);
-		fread_float_small(&m_bones[i].center[0], f);
-		fread_float_small(&m_bones[i].center[1], f);
-		fread_float_small(&m_bones[i].center[2], f);
+		fread(&m_bones[i].center[0], 4, 1, f);
+		fread(&m_bones[i].center[1], 4, 1, f);
+		fread(&m_bones[i].center[2], 4, 1, f);
 		//fread(&m_bones[i].scale, 4, 1, f);
-		fread_float_small(&m_bones[i].scale, f);
+		fread(&m_bones[i].scale, 4, 1, f);
 		fread(&m_bones[i].creator, 16, 1, f);
 
 		if (!i && strncmp("NPherno->MD3", m_bones[i].creator, 16) == 0)
@@ -363,9 +358,9 @@ int Md3::load(char *filename)
 	{
 		fread(&m_tags[i].name, 64, 1, f);
 		//fread(&m_tags[i].center, 12, 1, f);
-		fread_float_small(&m_tags[i].center[0], f);
-		fread_float_small(&m_tags[i].center[1], f);
-		fread_float_small(&m_tags[i].center[2], f);
+		fread(&m_tags[i].center[0], 4, 1, f);
+		fread(&m_tags[i].center[1], 4, 1, f);
+		fread(&m_tags[i].center[2], 4, 1, f);
 		fread(&m_tags[i].rotation, 36, 1, f);
 
 		printDebug("load", "tag[%i].name = '%s'\n", i, m_tags[i].name);
@@ -535,8 +530,8 @@ int Md3::load(char *filename)
 
 		for (j = 0; j < m_meshes[i].num_vertices; j++)
 		{
-			fread_float_small(&m_meshes[i].texel[j].st[0], f);
-			fread_float_small(&m_meshes[i].texel[j].st[1], f);
+			fread(&m_meshes[i].texel[j].st[0], 4, 1, f);
+			fread(&m_meshes[i].texel[j].st[1], 4, 1, f);
 		}
 
 		// Start vertices /////////////////////

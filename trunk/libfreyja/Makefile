@@ -456,6 +456,39 @@ TEST=$(BUILDDIR)/$(NAME).test
 
 test: $(TEST)
 
+##########################################################################
+
+SDLUNIT_CFLAGS=$(BASE_CFLAGS) $(shell sdl-config --cflags) \
+		-DHAVE_SDL -DHAVE_OPENGL -DHAVE_SDL_TTF
+SDLUNIT_LDFLAGS=$(shell sdl-config --libs) -lSDL_ttf -lGL -lGLU -lm -lstdc++ \
+		-lhel0 -lfreyja
+SDLUNIT_OBJS=$(BUILD_TEST_DIR)/SDLUnitTest.o
+
+##########################################################################
+
+Md3AnimModel.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=Md3AnimModel BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/Md3.o $(BUILD_TEST_DIR)/Md3AnimModel.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_MD3ANIMMODEL $(SDLUNIT_CFLAGS)" \
+	LD_FLAGS="$(SDLUNIT_LDFLAGS)"
+
+PSKModel.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=PSKModel BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/PSKModel.o $(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PSKMODEL -DHAVE_UTPACKAGE $(SDLUNIT_CFLAGS)" \
+	LD_FLAGS="$(SDLUNIT_LDFLAGS)"
+
+MDLModel.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=MDLModel BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(SDLUNIT_OBJS) $(BUILD_TEST_DIR)/MDLModel.o $(BUILD_TEST_DIR)/MathLib.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_MDLMODEL $(SDLUNIT_CFLAGS)" \
+	LD_FLAGS="$(SDLUNIT_LDFLAGS)"
+
+##########################################################################
+
 ase.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=ase BUILDDIR=$(BUILD_TEST_DIR) \
