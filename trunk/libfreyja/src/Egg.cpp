@@ -205,9 +205,9 @@ egg_group_t *Egg::getNearestGroup(vec_t x, vec_t y, egg_plane plane)
 		xx = 0;
 		yy = 2;
 		break;
-	case PLANE_YZ: 
-		xx = 1;
-		yy = 2;    
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
 		break;
 	}
 	
@@ -259,9 +259,9 @@ egg_tag_t *Egg::getNearestTag(vec_t x, vec_t y, egg_plane plane)
 		xx = 0;
 		yy = 2;
 		break;
-	case PLANE_YZ: 
-		xx = 1;
-		yy = 2;    
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
 		break;
 	}
      
@@ -313,9 +313,9 @@ egg_vertex_t *Egg::getNearestVertex(egg_group_t *group,
 		xx = 0;
 		yy = 2;
 		break;
-	case PLANE_YZ: 
-		xx = 1;
-		yy = 2;    
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
 		break;
 	}
 	
@@ -638,28 +638,6 @@ int Egg::saveFile(char *filename)
 		fwrite(&vertex->norm[0], sizeof(vec_t), 1, f);
 		fwrite(&vertex->norm[1], sizeof(vec_t), 1, f);
 		fwrite(&vertex->norm[2], sizeof(vec_t), 1, f);
-
-#ifdef OBSOLETE
-		// Mongoose 2002.03.02, Texel
-		c = (unsigned char)(vertex->uv[0] / 255.0);
-		fwrite(&c, 1, 1, f);
-		c = (unsigned char)(vertex->uv[1] / 255.0);
-		fwrite(&c, 1, 1, f);
-		c = 0;
-		fwrite(&c, 1, 1, f);
-		c = 0;
-		fwrite(&c, 1, 1, f);
-
-		// Mongoose 2002.03.02, Normal vertex
-		c = (unsigned char)(vertex->norm[0] / 255.0);
-		fwrite(&c, 1, 1, f);
-		c = (unsigned char)(vertex->norm[1] / 255.0);
-		fwrite(&c, 1, 1, f);
-		c = (unsigned char)(vertex->norm[2] / 255.0);
-		fwrite(&c, 1, 1, f);
-		c = 0;
-		fwrite(&c, 1, 1, f);
-#endif
 	}
 
 	for (i = mTexels.begin(); i < mTexels.end(); ++i)
