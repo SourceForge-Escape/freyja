@@ -255,6 +255,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eNewFile", eNewFile);
 	r.RegisterInt("eOpenFile", eOpenFile);
 	r.RegisterInt("eSaveFile", eSaveFile);
+	r.RegisterInt("eSaveAsFile", eSaveAsFile);
 	r.RegisterInt("eInfo", eInfo);
 	r.RegisterInt("eDebug", eDebug);
 	r.RegisterInt("eFullscreen", eFullscreen);
