@@ -23,12 +23,14 @@
 
  Backend
 
+	o Tree STL broken?
 	o Egg8 loses bone names on save
 	o Normal generation not interpolating correctly
 	o Generated Spheres use duplicate vertices
 
  Interface
 
+	o Only supports OpenGL 1.3+
 	o mgtk+ glarea button events mapped twice it seems
 	o Check RTS order in renderer
 	o Some mesh events don't update with event_refresh()

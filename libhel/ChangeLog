@@ -1,4 +1,8 @@
 
 
- * TODO: Matrix needs to be redone to only do column order!
- * Fixed Matrix vec3_t multiply to use correct translation indices
+ 2004.08.06:
+	o Fix for new mstl interator use
+
+
+ 2004.xx.xx:
+	o Fixed Matrix vec3_t multiply to use correct translation indices
