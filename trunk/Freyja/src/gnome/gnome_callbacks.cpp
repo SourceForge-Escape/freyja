@@ -143,6 +143,13 @@ void freyja_event_notify_observer1f(event_subject_id id, float r)
 }
 
 
+void freyja_event_file_dialog_pattern(char *pattern)
+{
+	GtkWidget *file = getGtkFileSelectionWidget();
+
+	gtk_file_selection_complete(GTK_FILE_SELECTION(file), pattern);
+}
+
 void freyja_event_file_dialog(char *title)
 {
 	GtkWidget *file = getGtkFileSelectionWidget();

@@ -48,6 +48,8 @@ GtkWidget *mgtk_create_fileselection(char *title);
 
 GtkWidget *mgtk_create_text_entry(GtkWidget *box);
 
+GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size);
+
 GtkWidget *mgtk_create_vbox(GtkWidget *box, char *name, 
 							bool homogeneous, int spacing,
 							bool expand, bool fill, int pading);

@@ -28,6 +28,16 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040730) Mongoose <mongoose@icculus.org>
+	
+	o New context sensitive menus and toolbars start
+	o New Menu HIGness: icons, accels, etc
+
+ Freyja (0.3.5-20040605) Mongoose <mongoose@icculus.org>
+	
+	o File dialog pattern use
+	o Ctrl+LeftMouse click to select mesh back
+
  Freyja (0.3.5-20040605) Mongoose <mongoose@icculus.org>
 
 	o New skeletal view type interface
