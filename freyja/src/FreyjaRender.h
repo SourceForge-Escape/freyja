@@ -336,6 +336,18 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void renderUVWindow(unsigned int width, unsigned int height);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renders texel editing quad
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
 
 	///////// Refactoring below here still...
 
@@ -383,17 +395,6 @@ private:
 	 *-- History ------------------------------------------
 	 *
 	 * 2002.01.24:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void DrawTextureEditWindow(unsigned int width, unsigned int height);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renders texel editing quad
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 

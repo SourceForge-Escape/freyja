@@ -1007,7 +1007,8 @@ void FreyjaRender::display()
 #endif
 		break;
 	case VIEWMODE_TEXTURE_EDIT:
-		DrawTextureEditWindow(getWindowWidth(), getWindowHeight());
+		//DrawTextureEditWindow(getWindowWidth(), getWindowHeight());
+		renderUVWindow(getWindowWidth(), getWindowHeight());
 		break;
 	case VIEWMODE_MATERIAL_EDIT:
 		DrawMaterialEditWindow();
@@ -1135,7 +1136,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 {
 	RenderPolygon face;
 	Vector3d v;
-	unsigned int i;
+	unsigned int i, n;
 
 
 	if (mRenderMode & RENDER_POINTS)
@@ -1154,7 +1155,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		glPointSize(_default_point_size);
 	}
 
-	if (!mesh.polygon->empty())
+	if (mesh.getPolygonCount())
 	{
 		if (mRenderMode & RENDER_TEXTURE)
 		{
@@ -1173,12 +1174,10 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 		_default_line_width *= 2;
 
-		// FIXME: Move this back into a method in RenderMesh to avoid
-		//        exposing old polygon type ( like getGroupCenter() )
-		for (i = mesh.polygon->begin(); i < mesh.polygon->end(); ++i)
+		for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
 		{
-			createRenderPolygon(face, *(*mesh.polygon)[i], mesh.frame);
-			renderPolygon(face);
+			if (mesh.getPolygon(i, mesh.frame, face))
+				renderPolygon(face);
 		}
 		
 		if ((int)mesh.id == (int)mModel->getCurrentMesh())
@@ -1445,6 +1444,139 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 }
 
 
+/* Mongoose 2004.03.30, 
+ * Dependences of this method:
+ * x GL context width and height
+ * - Current mesh to skin
+ * - OpenGL 2d view helper function
+ * - Quad to render skin helper function
+ */
+void FreyjaRender::renderUVWindow(unsigned int width, unsigned int height)
+{
+	RenderMesh mesh;
+	RenderPolygon face;
+	float x = 0.0f, y = 0.0f;
+	unsigned int i, j, n;
+
+
+	glPushMatrix();
+
+	gl_resize_2d(width, height);
+	glDisable(GL_TEXTURE_2D);
+	glLineWidth(_default_line_width);
+	glPointSize(_default_point_size);
+
+	if (!mModel->getRenderMesh(mModel->getCurrentMesh(), mesh))
+	{
+		DrawQuad(0.0, 0.0, width, height);
+		resizeContext(width, height);
+		glPopMatrix();
+		return;
+	}
+
+
+	for (i = mModel->mUVMap.begin(), n = mModel->mUVMap.end();  i < n; ++i)
+	{
+		if (!mModel->getRenderPolygon(mModel->mUVMap[i], face))
+			continue;
+
+		if (face.material != (int)mModel->getCurrentTextureIndex())
+			continue;
+
+		glBegin(GL_LINE_LOOP);
+		glColor3fv(BLUE);
+
+		for (j = 0; j < face.count; ++j)
+		{
+			x = face.texcoords[j].mVec[0] * width;
+			y = face.texcoords[j].mVec[1] * height;
+					
+			glVertex2f(x, height - y);
+		}
+		
+		glEnd();
+	}
+
+
+	for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
+	{
+		if (!mesh.getPolygon(i, 0, face))
+			continue;
+		
+		if (face.material != (int)mModel->getCurrentTextureIndex())
+			continue;
+
+		if (mesh.id == (int)mModel->getCurrentMesh())
+		{
+			if (face.id == (int)mModel->getCurrentPolygon())
+				glColor3fv(RED);    
+			else
+				glColor3fv(CYAN);
+		}
+		else
+		{
+			glColor3fv(mColorWireframe);
+		}		
+
+		// Mongoose: Draw texel polygons
+		glBegin(GL_LINE_LOOP);
+		
+		for (j = 0; j < face.count; ++j)
+		{
+			x = face.texcoords[j].mVec[0] * width;
+			y = face.texcoords[j].mVec[1] * height;
+					
+			glVertex2f(x, height - y);
+		}
+			
+		glEnd();
+
+
+		// Mongoose: Draw vertices
+		glBegin(GL_POINTS);
+		
+		for (j = 0; j < face.count; ++j)
+		{
+			if ((int)mModel->getCurrentTextureIndex() == face.material)
+			{
+				switch (j)
+				{
+				case 0:
+					glColor3fv(GREEN);
+					break;
+				case 2:
+					glColor3fv(BLUE);
+					break;
+				case 3:
+					glColor3fv(ORANGE);
+					break;
+				case 4:
+					glColor3fv(WHITE);
+					break;
+				default:
+					glColor3fv(YELLOW);
+				}
+			}
+			else
+			{
+				glColor3fv(mColorVertexHighlight);
+			}
+				
+			x = face.texcoords[j].mVec[0] * width;
+			y = face.texcoords[j].mVec[1] * height;
+				
+			glVertex2f(x, height - y);
+		}
+			
+		glEnd();
+	}
+
+	DrawQuad(0.0, 0.0, width, height);
+	resizeContext(width, height);
+	glPopMatrix();
+}
+
+
 void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 {
 	static int x, y, offset_x, offset_y;
@@ -1623,276 +1755,4 @@ void FreyjaRender::DrawMaterialEditWindow()
 	mglDrawSphere(128, 128, 10.0);
 }
 
-
-/* Mongoose 2004.03.30, 
- * Dependences of this method:
- * x GL context width and height
- * - Current mesh to skin
- * - Vertex UVs of mesh
- * - External texels of mesh if applicable
- * - OpenGL 2d view helper function
- * - Quad to render skin helper function
- */
-#warning FIXME Uses Egg to generate texture polygons on the fly
-void FreyjaRender::DrawTextureEditWindow(unsigned int width, 
-										 unsigned int height)
-{
-	Egg *egg = mModel->getCurrentEgg();
-	egg_texel_t *texel = NULL;
-	egg_polygon_t *poly = NULL;
-	float x, y;
-	unsigned int i, j;
-
-	glPushMatrix();
-
-	gl_resize_2d(width, height);
-
-	x = 0.0;
-	y = 0.0;
-
-	glDisable(GL_TEXTURE_2D);
-
-	egg_mesh_t *meshPtr = NULL;
-
-	meshPtr = egg->getMesh(mModel->getCurrentMesh());
-
-	if (!meshPtr)
-	{
-		DrawQuad(0.0, 0.0, width, height);
-		resizeContext(width, height);
-		glPopMatrix();
-		return;
-	}
-
-	for (i = mModel->mUVMap.begin();  i < mModel->mUVMap.end(); ++i)
-	{
-		poly = egg->getPolygon(mModel->mUVMap[i]);
-		
-		if (!poly)
-			continue;
-
-		if (poly->shader != (int)mModel->getCurrentTextureIndex())
-			continue;
-
-		glLineWidth(_default_line_width);
-		glBegin(GL_LINE_LOOP);
-		glColor3fv(BLUE);    
-		
-		/* Mongoose 2004.03.26, 
-		 * Use Vertex UV if no external texels */
-		if (poly->texel.empty())
-		{
-			egg_vertex_t *vertex;
-			
-			for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
-			{
-				vertex = egg->getVertex(poly->vertex[j]);
-				
-					if (!vertex)
-					{
-						continue;
-					}
-					
-					x = vertex->uv[0] * width;
-					y = vertex->uv[1] * height;
-					
-					glVertex2f(x, height - y);
-			}
-			
-			glEnd();
-		}
-		else
-		{
-			for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
-			{
-				texel = egg->getTexel(poly->texel[j]);
-				
-				if (!texel)
-				{
-					continue;
-				}
-				
-				x = texel->st[0] * width;
-				y = texel->st[1] * height;
-				
-				glVertex2f(x, height - y);
-			}
-			
-			glEnd();
-		}
-	}
-
-	egg_mesh_t mesh = *meshPtr;
-	
-	for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
-	{
-		poly = egg->getPolygon(mesh.polygon[i]);
-		
-		if (!poly)
-			continue;
-		
-		if (poly->shader != (int)mModel->getCurrentTextureIndex())
-			continue;
-		
-		// Mongoose: Draw texel polygons
-		glLineWidth(_default_line_width);
-		glBegin(GL_LINE_LOOP);
-		
-		if (mesh.id == (int)mModel->getCurrentMesh())
-		{
-			if (poly->id == mModel->getCurrentPolygon())
-				glColor3fv(RED);    
-			else
-				glColor3fv(CYAN);
-		}
-		else
-		{
-			glColor3fv(mColorWireframe);
-		}
-		
-		/* Mongoose 2004.03.26, 
-		 * Use Vertex UV if no external texels */
-		if (poly->texel.empty())
-		{
-			egg_vertex_t *vertex;
-			
-			for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
-			{
-				vertex = egg->getVertex(poly->vertex[j]);
-				
-					if (!vertex)
-					{
-						continue;
-					}
-					
-					x = vertex->uv[0] * width;
-					y = vertex->uv[1] * height;
-					
-					glVertex2f(x, height - y);
-			}
-			
-			glEnd();
-		}
-		else
-		{
-			for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
-			{
-				texel = egg->getTexel(poly->texel[j]);
-				
-				if (!texel)
-				{
-					continue;
-				}
-				
-				x = texel->st[0] * width;
-				y = texel->st[1] * height;
-				
-				glVertex2f(x, height - y);
-			}
-			
-			glEnd();
-		}
-		
-		// Mongoose: Draw vertices
-		glPointSize(_default_point_size);
-		glBegin(GL_POINTS);
-		
-		if (poly->texel.empty())
-		{
-			egg_vertex_t *vertex;
-			
-			for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
-			{
-				vertex = egg->getVertex(poly->vertex[j]);
-				
-				if (!vertex)
-				{
-					continue;
-				}
-
-				if ((int)mModel->getCurrentTextureIndex() == poly->shader)
-				{
-					switch (j)
-					{
-					case 0:
-						glColor3fv(GREEN);
-						break;
-					case 2:
-						glColor3fv(BLUE);
-						break;
-					case 3:
-						glColor3fv(ORANGE);
-						break;
-					case 4:
-						glColor3fv(WHITE);
-						break;
-					default:
-						glColor3fv(YELLOW);
-					}
-				}
-				else
-				{
-					glColor3fv(mColorVertexHighlight);
-				}
-				
-				x = vertex->uv[0] * width;
-				y = vertex->uv[1] * height;
-				
-				glVertex2f(x, height - y);
-			}
-			
-			glEnd();
-		}
-		else
-		{
-			for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
-			{
-				texel = egg->getTexel(poly->texel[j]);
-					
-				if (!texel)
-					continue;
-				
-				x = texel->st[0] * width;
-				y = texel->st[1] * height;
-				
-				if ((int)mModel->getCurrentTextureIndex() == poly->shader)
-				{
-					switch (j)
-					{
-					case 0:
-						glColor3fv(RED);
-						break;
-					case 1:
-						glColor3fv(GREEN);
-						break;
-					case 2:
-						glColor3fv(BLUE);
-						break;
-					case 3:
-						glColor3fv(ORANGE);
-						break;
-					case 4:
-						glColor3fv(WHITE);
-						break;
-					default:
-						glColor3fv(YELLOW);
-					}
-				}
-				else
-				{
-					glColor3fv(mColorVertexHighlight);
-				}
-				
-				glVertex2f(x, height - y);
-			}
-			
-			glEnd();
-		}
-	}
-
-
-	DrawQuad(0.0, 0.0, width, height);
-	resizeContext(width, height);
-	glPopMatrix();
-}
 

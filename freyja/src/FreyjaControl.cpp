@@ -2868,7 +2868,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 void FreyjaControl::loadResource()
 {
 	int i, x, y;
-	float f;
 	char *s;
 	char *filename = "freyja-chimera.mlisp";
 	bool failed = true;
