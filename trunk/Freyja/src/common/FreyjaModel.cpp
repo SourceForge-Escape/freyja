@@ -39,7 +39,6 @@ FreyjaModel::FreyjaModel()
 {
 	char *pluginDir;
 
-// 	_edit_mode = FreyjaModel::TransformMesh;
 	_palette_filename = 0;
 
 	pluginDir = freyja_rc_map("plugins/");

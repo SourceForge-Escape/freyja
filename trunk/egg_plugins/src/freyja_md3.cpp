@@ -68,6 +68,7 @@ int freyja_model__md3_check(char *filename)
 
 int freyja_model__md3_import(char *filename)
 {
+	const float scale = 0.01;
 	unsigned int i, m;
 	int v, p, f, num_texels;
 	md3_mesh_t *md3_mesh;
@@ -94,7 +95,7 @@ int freyja_model__md3_import(char *filename)
 		eggBegin(FREYJA_MESH);
 		eggMeshFlags1u(FL_MESH__VERTEX_FRAME_GROUPS);
 
-		for (f = 0, v = 0; f < md3_mesh[m].num_frames; ++f)
+		for (f = 0, v = 0; f < 1/*md3_mesh[m].num_frames*/; ++f)
 		{  
 			eggPrintMessage("Importing mesh: %d, frame: %d of %d\n", 
 							m, f, md3_mesh[m].num_frames);
@@ -120,9 +121,9 @@ int freyja_model__md3_import(char *filename)
 
 			for (; v < md3_mesh[m].num_vertices * (f+1); ++v)
 			{
-				pos[0] = md3_mesh[m].vertex[v].pos[0];
-				pos[1] = md3_mesh[m].vertex[v].pos[1];
-				pos[2] = md3_mesh[m].vertex[v].pos[2];
+				pos[0] = md3_mesh[m].vertex[v].pos[0] * scale;
+				pos[1] = md3_mesh[m].vertex[v].pos[1] * scale;
+				pos[2] = md3_mesh[m].vertex[v].pos[2] * scale;
 
 				//matrix.multiply3v(pos, pos);
 
@@ -138,9 +139,9 @@ int freyja_model__md3_import(char *filename)
 									   md3_mesh[m].vertex[v].norm[0]);
 			}
 
-			eggGroupCenter3f(md3_bone[f].center[0], 
-							 md3_bone[f].center[1], 
-							 md3_bone[f].center[2]);
+			eggGroupCenter3f(md3_bone[f].center[0]*scale, 
+							 md3_bone[f].center[1]*scale, 
+							 md3_bone[f].center[2]*scale);
 
 			// End FREYJA_GROUP
 			eggEnd();
@@ -150,7 +151,7 @@ int freyja_model__md3_import(char *filename)
 
 		num_texels = md3_mesh[m].num_vertices * md3_mesh[m].num_frames;
 
-		for (p = 0; f == 0 && p < md3_mesh[m].num_triangles; p++)
+		for (p = 0; p < md3_mesh[m].num_triangles; p++)
 		{
 			// Start a new polygon
 			eggBegin(FREYJA_POLYGON);
