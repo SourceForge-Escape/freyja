@@ -56,6 +56,7 @@ FreyjaModel::FreyjaModel()
 	_plugin->addModule("md5");
 	_plugin->addModule("smd");
 	_plugin->addModule("obj");
+	_plugin->addModule("halflife");
 
 	delete [] pluginDir;
 
@@ -2100,11 +2101,11 @@ int FreyjaModel::saveAnimation(const char *filename)
 		ext[i] = filename[s];
 	}
 
-	ret = _plugin->exportModel((char *)filename, "skel"); // ext);
+	ret = _plugin->exportModel((char *)filename, "smd"); // ext);
 
 	if (ret)
 	{
-		freyja_print("Unknown file export extention: '%s', try using '.egg'", 
+		freyja_print("Unknown file export extention: '%s', try using '.smd'", 
 					ext);
 		return ret;
 	}

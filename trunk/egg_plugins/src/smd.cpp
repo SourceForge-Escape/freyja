@@ -24,6 +24,7 @@
 #include <string.h>
 #include <freyja8/EggPlugin.h>
 #include <freyja8/EggFileReader.h>
+#include <freyja8/EggFileWriter.h>
 
 
 extern "C" {
@@ -99,7 +100,7 @@ int freyja_model__smd_import(char *filename)
 
 			printf("%s = %i\n", symbol, index);
 
-			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0)
+			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.endOfFile())
 			{
 				if (!symbol)
 					break;
@@ -161,7 +162,7 @@ int freyja_model__smd_import(char *filename)
 			eggBegin(FREYJA_MESH);
 			eggBegin(FREYJA_GROUP);
 
-			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0)
+			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.endOfFile())
 			{
 				if (!symbol)
 					break;
@@ -213,8 +214,90 @@ int freyja_model__smd_import(char *filename)
 
 int freyja_model__smd_export(char *filename)
 {
-	printf("freyja_model__smd_export> Not implemented, %s:%i\n", 
-		   __FILE__, __LINE__);
+	EggFileWriter w;
+	char name[64];
+	int index;
+	unsigned int i, n;
+	vec_t scale = 1.0 / 0.15;
+	vec3_t translation, rotation;
 
-	return -1;
+
+	if (!w.openFile(filename))
+	{
+		return -1;
+	}
+
+	/* version */
+	w.print("version 1\n");
+
+	/* nodes */
+	w.print("nodes\n");
+
+	if (eggGetNum(FREYJA_BONE))
+	{
+		eggIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
+		eggIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+		n = eggGetNum(FREYJA_BONE);
+
+		for (i = 0; i < n; ++i)
+		{
+			index = eggIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+			index = eggGetCurrent(FREYJA_BONE);
+
+			eggGetBoneName(index, 64, name);
+			w.print("%3i \"%s\" %i\n", i, name, eggGetBoneParent(index));
+
+			eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+		}
+	}
+
+	w.print("end\n"); // nodes
+
+	/* skeleton */
+	w.print("skeleton\n");
+	w.print("time 0\n");
+
+	if (eggGetNum(FREYJA_BONE))
+	{
+		eggIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
+		eggIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+		n = eggGetNum(FREYJA_BONE);
+
+		for (i = 0; i < n; ++i)
+		{
+			index = eggIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+			index = eggGetCurrent(FREYJA_BONE);
+
+			eggGetBoneTranslation3fv(index, translation);
+			eggGetBoneRotationXYZ3fv(index, rotation);
+
+			if (!i)
+			{
+				rotation[0] = 90;
+				rotation[1] = 90;
+				rotation[2] = 0;
+
+				w.print("%3i %f %f %f %f %f %f\n", i,
+						translation[0]*scale, translation[2]*scale, translation[1]*scale, 
+						rotation[0]/54, rotation[1]/54, rotation[2]/54);
+			}
+			else
+			{
+				w.print("%3i %f %f %f %f %f %f\n", i,
+						translation[0]*scale, translation[1]*scale, translation[2]*scale, 
+						rotation[0]/54, rotation[1]/54, rotation[2]/54);
+			}
+
+			eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+		}
+	}
+	w.print("end\n");
+
+	/* triangles */
+	w.print("triangles\n");	
+	w.print("end\n");
+
+	w.closeFile();
+
+	return 0;
 }

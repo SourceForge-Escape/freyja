@@ -38,7 +38,10 @@ extern "C" {
 int freyja_model__obj_check(char *filename)
 {
 	if (EggFileReader::compareFilenameExtention(filename, ".obj") == 0)
+	{
+		eggPrintMessage("obj.so: '%s' is an obj model", filename);
 		return 0;
+	}
 
 	return -1;
 }
@@ -60,14 +63,37 @@ int freyja_model__obj_import(char *filename)
 		return -1;
 	}
 
-
 	// Start a new mesh
 	eggBegin(FREYJA_MESH);
 	eggBegin(FREYJA_GROUP);
 
 	while ((symbol = r.parseSymbol()) && !r.endOfFile())
 	{
-		if (!strncmp(symbol, "v", 1))
+		if (!strncmp(symbol, "#", 1))
+		{
+			char c;
+
+			while ((c = r.readInt8()) && !r.endOfFile())
+			{
+				if (c == '\n')
+					break;
+			}
+		}
+		else if (!strncmp(symbol, "usemtl", 6))
+		{
+			// Filename of the material
+			symbol = r.parseSymbol();
+			eggPrintMessage("FIXME: Material '%s' is not used\n", symbol);
+		}
+		else if (!strncmp(symbol, "vt", 2))
+		{
+			u = r.parseFloat();
+			v = r.parseFloat();
+			hasUV = true;
+
+			transT.pushBack(eggTexCoordStore2f(u, v));
+		}
+		else if (!strncmp(symbol, "v", 1))
 		{
 			x = r.parseFloat();
 			y = r.parseFloat();
@@ -75,13 +101,15 @@ int freyja_model__obj_import(char *filename)
 
 			transV.pushBack(eggVertexStore3f(x, y, z));
 		}
-		if (!strncmp(symbol, "vt", 1))
+		else if (!strncmp(symbol, "g", 1))
 		{
-			u = r.parseFloat();
-			v = r.parseFloat();
-			hasUV = true;
-
-			transT.pushBack(eggTexCoordStore2f(u, v));
+			// Name of the new group, but no used here
+			symbol = r.parseSymbol();
+			eggPrintMessage("FIXME: Group '%s' is not used\n", symbol);
+		}
+		else if (!strncmp(symbol, "s", 1))
+		{
+			index = r.parseInteger();  // Don't know what this is
 		}
 		else if (!strncmp(symbol, "f", 1))
 		{
@@ -90,21 +118,21 @@ int freyja_model__obj_import(char *filename)
 
 			for (i = 0; i < 3; ++i)
 			{
+				index = r.parseInteger();
+				eggVertex1i(transV[index-1]); // index starts at 1 not 0
+
 				if (hasUV)
 				{
+					r.readInt8(); // '/' no whitespace
 					index = r.parseInteger();
-					r.readInt8(); // '/'
+
+					index = transT[index-1]; // index starts at 1 not 0
+					eggTexCoord1i(index);
 				}
 				else
 				{
-					index = eggTexCoordStore2f(0.5, 0.5);
+					eggVertexUVStore2f(index, 0.25*i, 0.25*(i%2));
 				}
-
-				eggTexCoord1i(index);
-
-				index = r.parseInteger();
-
-				eggVertex1i(transV[index]);
 			}
 
 			eggTexture1i(0);
@@ -122,7 +150,8 @@ int freyja_model__obj_import(char *filename)
 
 int freyja_model__obj_export(char *filename)
 {
-  printf("freyja_model__obj_export> Not implemented, %s:%i\n", 
-	 __FILE__, __LINE__);
-  return -1;
+	printf("freyja_model__obj_export> Not implemented, %s:%i\n", 
+		   __FILE__, __LINE__);
+
+	return -1;
 }
