@@ -35,7 +35,7 @@ int cGrannyFile::load( std::string filename, std::string basepath )
 	}
 	
 
-	cout << "Loading file " + basepath + filename << endl;
+	//cout << "Loading file " + basepath + filename << endl;
 
 	stream = new cGrannyStream(file, filename);
 	file->close();
@@ -47,12 +47,12 @@ int cGrannyFile::load( std::string filename, std::string basepath )
 	switch (chunk)
 	{
 	case 0xCA5E0000:
-		printf("Loading main chunk\n");
+		//printf("Loading main chunk\n");
 		mainChunk();
 		break;
 	default:
 		hex( cerr );
-		cerr << "Unknown main chunk: " << chunk << endl;
+		//cerr << "Unknown main chunk: " << chunk << endl;
 		return -1;
 	}
 
