@@ -1,0 +1,12 @@
+
+To compile and install this program you need the required
+libaries and headers, read doc/FAQ for details.
+
+You should then run:
+
+   sh autogen.sh
+
+To avoid using autotools you can alternatively:
+
+   cp Makefile.am Makefile
+   make debug
