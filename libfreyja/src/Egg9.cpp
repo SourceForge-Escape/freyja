@@ -33,8 +33,6 @@
 
 #include <assert.h>
 
-#include "mendian.h"
-
 #include "Egg9.h"
 
 

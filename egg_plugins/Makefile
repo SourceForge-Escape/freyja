@@ -115,6 +115,14 @@ depend:
 
 plug-ins: $(PLUGINS)
 
+3ds.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=3ds \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/3ds.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 ase.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
@@ -123,42 +131,11 @@ ase.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-nif4.so:
+eggv7.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=nif4 \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/Nif4.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-md5.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=md5 \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md5.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-psk.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=psk \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/PSKModel.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-milkshape.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=milkshape \
-	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_milkshape.o \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-trmesh.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=trmesh \
-	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_trmesh.o \
+	MOD_NAME=eggv7 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_eggv7.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -170,37 +147,19 @@ grn.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-3ds.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=3ds \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/3ds.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-tombraider.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=tombraider \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/TombRaider.o \
-		$(BUILD_DEBUG_DIR)/freyja_tombraider.o" \
-	CFLAGS="$(MODULE_CFLAGS) -DZLIB_SUPPORT" \
-	LD_FLAGS="$(MODULE_LD_FLAGS) -lz"
-
 halflife.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=halflife \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/HalfLife.o \
-		$(BUILD_DEBUG_DIR)/freyja_halflife.o" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/HalfLife.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-md3.so:
+lwo.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=md3 \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md3.o $(BUILD_DEBUG_DIR)/freyja_md3.o" \
+	MOD_NAME=lwo \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Lwo.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -208,7 +167,31 @@ md2.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=md2 \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md2.o $(BUILD_DEBUG_DIR)/freyja_md2.o" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md2.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+md3.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=md3 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md3.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+md5.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=md5 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md5.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+milkshape.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=milkshape \
+	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_milkshape.o \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -228,11 +211,51 @@ mdx.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-eggv7.so:
+nif3.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=eggv7 \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_eggv7.o" \
+	MOD_NAME=nif3 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Nif3.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+nif4.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=nif4 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Nif4.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+nod.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=nod \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Nod.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+psk.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=psk \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/PSKModel.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+tombraider.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=tombraider \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/TombRaider.o \
+		$(BUILD_DEBUG_DIR)/freyja_tombraider.o" \
+	CFLAGS="$(MODULE_CFLAGS) -DZLIB_SUPPORT" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lz"
+
+trmesh.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=trmesh \
+	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_trmesh.o \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -241,30 +264,6 @@ unreal.so:
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=ut \
 	MOD_OBJS="$(BUILD_DEBUG_DIR)/Unreal.o $(BUILD_DEBUG_DIR)/freyja_ut.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-lwo.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=lwo \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/Lwo.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-quakemap.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=quakemap \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_quakemap.o $(BUILD_DEBUG_DIR)/QuakeMap.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-nod.so:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	MOD_NAME=nod \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_nod.o $(BUILD_DEBUG_DIR)/Nod.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
