@@ -104,13 +104,13 @@ int freyja_model__obj_import(char *filename)
 					break;
 			}
 		}
-		else if (!strncmp(symbol, "mtllib", 6))
+		else if (!strcmp(symbol, "mtllib"))
 		{
 			// Filename of the material
 			symbol = r.parseSymbol();
 			freyjaPrintMessage("FIXME: Material '%s' is not used\n", symbol);
 		}
-		else if (!strncmp(symbol, "usemtl", 6))
+		else if (!strcmp(symbol, "usemtl"))
 		{
 			// Filename of the material
 			symbol = r.parseSymbol();
@@ -124,7 +124,7 @@ int freyja_model__obj_import(char *filename)
 		{
 			freyjaPrintMessage("FIXME: Parameter space vertices are not used\n");
 		}
-		else if (!strncmp(symbol, "vt", 2))
+		else if (!strcmp(symbol, "vt"))
 		{
 			u = r.parseFloat();
 			v = r.parseFloat();
@@ -132,7 +132,7 @@ int freyja_model__obj_import(char *filename)
 
 			transT.pushBack(freyjaTexCoord2f(u, v));
 		}
-		else if (!strncmp(symbol, "vn", 2))  // Assumes normals come after v
+		else if (!strcmp(symbol, "vn"))  // Assumes normals come after v
 		{
 			x = r.parseFloat();
 			y = r.parseFloat();
@@ -144,7 +144,7 @@ int freyja_model__obj_import(char *filename)
 			normals.pushBack(y);
 			normals.pushBack(z);
 		}
-		else if (!strncmp(symbol, "v", 1))
+		else if (!strcmp(symbol, "v"))
 		{
 			x = r.parseFloat();
 			y = r.parseFloat();
@@ -152,24 +152,24 @@ int freyja_model__obj_import(char *filename)
 
 			transV.pushBack(freyjaVertex3f(x, y, z));
 		}
-		else if (!strncmp(symbol, "o", 1))
+		else if (!strcmp(symbol, "o"))
 		{
 			// Name of the new group, but no used here
 			symbol = r.parseSymbol();
 			freyjaPrintMessage("FIXME: Object name '%s' is not used\n", symbol);
 		}
-		else if (!strncmp(symbol, "g", 1))
+		else if (!strcmp(symbol, "g"))
 		{
 			// Name of the new group, but no used here
 			symbol = r.parseSymbol();
 			freyjaPrintMessage("FIXME: Group name '%s' is not used\n", symbol);
 		}
-		else if (!strncmp(symbol, "s", 1))
+		else if (!strcmp(symbol, "s"))
 		{
 			index = r.parseInteger();
 			freyjaPrintMessage("FIXME: Smoothing Group %i is not used\n", i);
 		}
-		else if (!strncmp(symbol, "f", 1))
+		else if (!strcmp(symbol, "f"))
 		{
 			// Start a new polygon
 			freyjaBegin(FREYJA_POLYGON);
