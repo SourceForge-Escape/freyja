@@ -69,9 +69,9 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 
 void setupResource(Resource &r)
 {
-	//printf("\nFreyjaResource> Bind Resource and C++ function names\n");
+	/* Mongoose 2002.01.12, 
+	 * Bind script functions to C/C++ functions */
 
-	// Mongoose 2002.01.12, Bind script functions to C/C++ functions
 	r.RegisterFunction("window", freyja_rc_window);
 	r.RegisterFunction("gl_widget", freyja_rc_gl_widget);
 	r.RegisterFunction("notebook", freyja_rc_notebook);
@@ -101,29 +101,54 @@ void setupResource(Resource &r)
 	r.RegisterFunction("toolbar_togglebutton", freyja_rc_toolbar_togglebutton);
 	r.RegisterFunction("toolbar_button", freyja_rc_toolbar_button);
 
-	//printf("FreyjaResource> Done\n");
 
-	//printf("FreyjaResource> Bind Resource and C++ symbols\n");
-	// Mongoose 2002.01.21, Bind some script vars to matching name in C/C++
+	/* Mongoose 2002.01.21, 
+	 * Bind some script vars to matching name in C/C++ */
 
+	r.RegisterInt("eNone", eNone);
+	r.RegisterInt("eCut", eNone);
+	r.RegisterInt("eCopy", eNone);
+	r.RegisterInt("ePaste", eNone);
+	r.RegisterInt("eDelete", eNone);
+	r.RegisterInt("eConfig", eNone);
+	r.RegisterInt("eSelectAll", eNone);
+	r.RegisterInt("eAppendFile", eNone);
+	r.RegisterInt("eRevertFile", eNone);
+	r.RegisterInt("eExportFile", eNone);
+	r.RegisterInt("eImportFile", eNone);
+	r.RegisterInt("eCloseFile", eNone);
+	r.RegisterInt("eRedo", eNone);
+	r.RegisterInt("eUndo", eNone);
+
+	r.RegisterInt("eScreenShot", eScreenShot);
+	r.RegisterInt("eShutdown", eShutdown);
+	r.RegisterInt("eNewFile", eNewFile);
+	r.RegisterInt("eOpenFile", eOpenFile);
+	r.RegisterInt("eSaveFile", eSaveFile);
+	r.RegisterInt("eHelp", eHelp);
+	r.RegisterInt("eInfo", eInfo);
+	r.RegisterInt("eAbout", eAbout);
+	r.RegisterInt("eDebugEgg", eDebugEgg);
+	r.RegisterInt("eFullscreen", eFullscreen);
 	r.RegisterInt("eScale", eScale);
 	r.RegisterInt("eScale_X", eScale_X);
 	r.RegisterInt("eScale_Y", eScale_Y);
 	r.RegisterInt("eScale_Z", eScale_Z);
+	r.RegisterInt("eZoom", eZoom);
 
-	r.RegisterInt("eZOOM", eZOOM);
-	r.RegisterInt("eNONE", eNONE);
+	r.RegisterInt("eGenerateNormals", eGenerateNormals);
+	r.RegisterInt("eGenerateCube", eGenerateCube);
+	r.RegisterInt("eGenerateTriStrip", eGenerateTriStrip);
+	r.RegisterInt("eGenerateCylinder", eGenerateCylinder);
+	r.RegisterInt("eGenerateSphere", eGenerateSphere);
 
-	r.RegisterInt("EVENT_NEW_FILE",      EVENT_NEW_FILE);
-	r.RegisterInt("EVENT_OPEN_FILE",     EVENT_OPEN_FILE);
-	r.RegisterInt("EVENT_SAVE_FILE",     EVENT_SAVE_FILE);
-	r.RegisterInt("EVENT_HELP",          EVENT_HELP);
-
-
+	r.RegisterInt("ePointJoint", ePointJoint);
+	r.RegisterInt("eSphereJoint", eSphereJoint);
+	r.RegisterInt("eAxisJoint", eAxisJoint);
+	r.RegisterInt("eLineBone", eLineBone);
+	r.RegisterInt("ePolyMeshBone", ePolyMeshBone);
 
 	r.RegisterInt("EVENT_MAIN", EVENT_MAIN);
-	r.RegisterInt("CMD_MAIN_SHUTDOWN",      CMD_MAIN_SHUTDOWN);
-	r.RegisterInt("CMD_TOGGLE_FULLSCREEN",  CMD_TOGGLE_FULLSCREEN);
 
 	r.RegisterInt("EVENT_POINT", EVENT_POINT);
 	r.RegisterInt("CMD_POINT_ADD", CMD_POINT_ADD);
@@ -145,11 +170,7 @@ void setupResource(Resource &r)
 	r.RegisterInt("CMD_MESH_SCALE", CMD_MESH_SCALE);
 	r.RegisterInt("CMD_MESH_MIRROR", CMD_MESH_MIRROR);
 	r.RegisterInt("CMD_MESH_MOVE_CENTER", CMD_MESH_MOVE_CENTER);
-	r.RegisterInt("CMD_MESH_GENERATE_CUBE", CMD_MESH_GENERATE_CUBE);
-	r.RegisterInt("CMD_MESH_GENERATE_TRIS", CMD_MESH_GENERATE_TRIS);
-	r.RegisterInt("CMD_MESH_GENERATE_SPHERE", CMD_MESH_GENERATE_SPHERE);
-	r.RegisterInt("CMD_MESH_GENERATE_CYLINDER", CMD_MESH_GENERATE_CYLINDER);
-
+	
 	r.RegisterInt("EVENT_BONE", EVENT_BONE);
 	r.RegisterInt("CMD_BONE_NEW", CMD_BONE_NEW);
 	r.RegisterInt("CMD_BONE_ADD_MESH", CMD_BONE_ADD_MESH);
@@ -157,16 +178,12 @@ void setupResource(Resource &r)
 	r.RegisterInt("CMD_BONE_MOVE_PIVOT", CMD_BONE_MOVE_PIVOT);
 
 	r.RegisterInt("EVENT_MISC", EVENT_MISC);
-	r.RegisterInt("CMD_MISC_GEN_NORMALS", CMD_MISC_GEN_NORMALS);
 	r.RegisterInt("CMD_MISC_ZOOM_IN", CMD_MISC_ZOOM_IN);
 	r.RegisterInt("CMD_MISC_ZOOM_OUT", CMD_MISC_ZOOM_OUT);
-	r.RegisterInt("CMD_MISC_SCREENSHOT", CMD_MISC_SCREENSHOT);
 	r.RegisterInt("CMD_MISC_SELECT", CMD_MISC_SELECT);
 	r.RegisterInt("CMD_MISC_BBOX_SELECT", CMD_MISC_BBOX_SELECT);
 	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
 	r.RegisterInt("CMD_MISC_VERTEX_UV", CMD_MISC_VERTEX_UV);
-	r.RegisterInt("CMD_MISC_DISPLAY_INFO", CMD_MISC_DISPLAY_INFO);
-	r.RegisterInt("CMD_MISC_ABOUT", CMD_MISC_ABOUT);
 	r.RegisterInt("VIEW_JOINT1", VIEW_JOINT1);
 	r.RegisterInt("VIEW_JOINT2", VIEW_JOINT2);
 	r.RegisterInt("VIEW_JOINT3", VIEW_JOINT3);
@@ -260,7 +277,7 @@ void FreyjaControl::setZoom(float zoom)
 {
 	assert(zoom > 0.0f);
 
-	freyja_event_notify_observer1f(eZOOM, zoom);
+	freyja_event_notify_observer1f(eZoom, zoom);
 
 	mRender->setZoom(zoom);
 	event_print("Zoom set to %f", mRender->getZoom());
@@ -273,36 +290,63 @@ float FreyjaControl::getZoom()
 }
 
 
-void FreyjaControl::eventMain(int command)
+extern unsigned int gBoneRenderType;
+extern unsigned char gJointRenderType;
+
+void FreyjaControl::eventMain(int event)
 {
-	switch (command)
+	switch (event)
 	{
-	case CMD_MISC_DISPLAY_INFO:
+	case eInfo:
 		mModel->printInfo();
 		break;
 
-	case EVENT_HELP:
+	case eHelp:
 		freyja_event_info_dialog(HELP_MESSAGE);
 		// system("gedit /home/mongoose/Projects/freyja/Freyja/README");
 		break; 
 
-	case CMD_MISC_ABOUT:
+	case eAbout:
 		freyja_event_info_dialog(ABOUT_MESSAGE);
 		break;   
 
 
-	case CMD_MISC_SCREENSHOT:
-		mRender->ScreenShot();
+	case eNewFile:
+		switch (_major_mode)
+		{
+		case TEXTURE_EDIT_MODE:
+			break;
+		case ANIMATION_EDIT_MODE:
+			break;
+		case MAP_EDIT_MODE:
+			break;
+		case MODEL_EDIT_MODE:
+			if (confirmDialog("gtk-dialog-question",
+							  "You must close the currently open model to create a new model.",
+							  "Would you like to close the model?",
+							  "gtk-cancel", "_Cancel", "gtk-close", "_Close"))
+			{
+				// Add check to see if the model was modified here
+				if (confirmDialog("gtk-dialog-question",
+								  "You must save the currently open model to retain modifications.",
+								  "Would you like to save the currently open model?",
+								  "gtk-cancel", "_Cancel", "gtk-save", "_Save"))
+				{
+					mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+					freyja_event_file_dialog("Save model as...");
+				}
+
+				mModel->Clear();
+				event_print("Erasing Model...");
+			}
+			break;
+		case MATERIAL_EDIT_MODE:
+			break;
+		}
 		break;
 
 
-	case EVENT_NEW_FILE:
-		mModel->Clear();
-		event_print("Erasing Model...");
-		break;
-
-
-	case EVENT_OPEN_FILE:
+	case eOpenFile:
 		switch (_major_mode)
 		{
 		case TEXTURE_EDIT_MODE:
@@ -329,7 +373,7 @@ void FreyjaControl::eventMain(int command)
 		break;
 
 
-	case EVENT_SAVE_FILE:
+	case eSaveFile:
 		switch (_major_mode)
 		{
 		case TEXTURE_EDIT_MODE:
@@ -355,18 +399,24 @@ void FreyjaControl::eventMain(int command)
 		break;
 
 
-	case CMD_MAIN_SHUTDOWN:
-		freyja_event_exit();
+	case eShutdown:
+		if (confirmDialog("gtk-dialog-question",
+						  "If you exit you will lose any unsaved data.",
+						  "Would you like to exit?", 
+						  "gtk-cancel", "_Cancel", "gtk-quit", "_Exit"))
+		{
+			freyja_event_exit();
+		}
 		break;
 
 
-	case CMD_MAIN_DEBUG_EGG:
+	case eDebugEgg:
 		mModel->Debug(!mModel->Debug());
 		event_print("Egg debug [%s]", mModel->Debug() ? "ON" : "OFF");
 		break;
 
 
-	case CMD_TOGGLE_FULLSCREEN:
+	case eFullscreen:
 		mFullScreen = !mFullScreen;
 		
 		if (mFullScreen)
@@ -380,8 +430,62 @@ void FreyjaControl::eventMain(int command)
 		break;
 
 
+	case eScreenShot:
+		mRender->ScreenShot();
+		break;
+
+
+	case eGenerateNormals:
+		eggGenerateVertexNormals();
+		break;
+
+
+	case eGenerateCylinder:
+		eggGenerateCylinder(4, 16, 8.0, 4.0);
+		event_refresh();
+		break;
+
+
+	case eGenerateSphere:
+		eggGenerateSphere(16, 16, 8.0);
+		event_refresh();
+		break;
+
+
+	case eGenerateCube:
+		eggGenerateCube(8.0);
+		event_refresh();
+		break;
+
+
+	case eGenerateTriStrip:
+		eggGenerateTriangleStrip(10, 8.0);
+		event_refresh();
+		break;
+
+	case ePointJoint:
+		gJointRenderType = 1;
+		break;
+
+	case eSphereJoint:
+		gJointRenderType = 2;
+		break;
+
+	case eAxisJoint:
+		gJointRenderType = 3;
+		break;
+
+	case eLineBone:
+		gBoneRenderType = 1;
+		break;
+
+	case ePolyMeshBone:
+		gBoneRenderType = 2;
+		break;
+
+
 	default:
-		event_print("!Unhandled mainEvent(%d)", command);
+		event_print("!Unhandled Event(%d)", event);
 	}	
 }
 
@@ -493,23 +597,6 @@ void FreyjaControl::eventMesh(int command)
 		break;
 
 
-	case CMD_MESH_GENERATE_CYLINDER:
-		eggGenerateCylinder(4, 16, 8.0, 4.0);
-		event_refresh();
-		break;
-	case CMD_MESH_GENERATE_SPHERE:
-		eggGenerateSphere(16, 16, 8.0);
-		event_refresh();
-		break;
-	case CMD_MESH_GENERATE_CUBE:
-		eggGenerateCube(8.0);
-		event_refresh();
-		break;
-	case CMD_MESH_GENERATE_TRIS:
-		eggGenerateTriangleStrip(10, 8.0);
-		event_refresh();
-		break;
-
 	case CMD_MESH_NEXT:
 		mModel->setCurrentMesh(mModel->getCurrentMesh() + 1);
 		break;
@@ -562,29 +649,10 @@ void FreyjaControl::eventAnimation(int command)
 }
 
 
-extern unsigned int gBoneRenderType;
-extern unsigned char gJointRenderType;
 void FreyjaControl::eventMisc(int command)
 {
 	switch (command)
 	{
-	case VIEW_JOINT1:
-		gJointRenderType = 1;
-		break;
-	case VIEW_JOINT2:
-		gJointRenderType = 2;
-		break;
-	case VIEW_JOINT3:
-		gJointRenderType = 3;
-		break;
-
-	case VIEW_BONE1:
-		gBoneRenderType = 1;
-		break;
-	case VIEW_BONE2:
-		gBoneRenderType = 2;
-		break;
-
 	case 1000:
 		mModel->Transform(FreyjaModel::TransformMesh, Egg::SCALE,
 						  freyja_event_get_float(1001),
@@ -597,17 +665,7 @@ void FreyjaControl::eventMisc(int command)
 		freyja_event_set_float(1003, 1.0f);
 		break;
 
-	case CMD_MISC_ABOUT:
-		freyja_event_info_dialog(ABOUT_MESSAGE);
-		break;   
 
-	case CMD_MISC_SCREENSHOT:
-		mRender->ScreenShot();
-		break;
-
-	case CMD_MISC_GEN_NORMALS:
-		eggGenerateVertexNormals();
-		break;
 	case CMD_MISC_RENDER_BBOX:
 		mRender->Flags(FreyjaRender::RENDER_BBOX, 
 					   !(mRender->Flags() & FreyjaRender::RENDER_BBOX));
@@ -896,8 +954,6 @@ void FreyjaControl::handleEvent(int mode, int cmd)
 		break;
 
 
-
-
 	case EVENT_POLYGON:
 		switch (cmd)
 		{
@@ -915,6 +971,7 @@ void FreyjaControl::handleEvent(int mode, int cmd)
 			break;
 		}
 		break;
+
 
 	case EVENT_POINT:
 		switch (cmd)
@@ -1260,28 +1317,199 @@ bool FreyjaControl::Mouse(int btn, int state, int mod, int x, int y)
 // Private methods
 //////////////////////////////////////////////////////////////
 
+void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
+{
+	static int old_y = 0, old_x = 0;
+	int t = 1;
+
+
+	//event_print("DEBUG MotionEdit, MODEL_ROTATE: %f %f", x, y);
+
+	if (x > old_x + t)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, -0.5, 0.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, 0.0, -0.5);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, 0.0, -0.5);
+			break;
+		}
+	}
+	else if (x < old_x - t)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, 0.5, 0.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, 0.0, 0.5);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, 0.0, 0.5);
+		}
+	}
+	
+	
+	if (y > old_y + t)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, -0.5, 0.0, 0.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, -0.5, 0.0, 0.0);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, -0.5, 0.0);
+			break;
+		}
+	}
+	else if (y < old_y - t)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.5, 0.0, 0.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.5, 0.0, 0.0);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::ROTATE, 0.0, 0.5, 0.0);
+		}
+		
+	}
+	
+	old_x = x;
+	old_y = y;
+}
+
+
+void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
+{
+	static int old_y = 0, old_x = 0;
+
+	if (y > old_y)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 0.99, 1.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 1.0, 0.99);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 1.0, 0.99);
+			break;
+		}
+	}
+	else if (y < old_y)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 1.01, 1.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 1.0, 1.01);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 1.0, 1.01);
+		}
+	}
+	
+	if (x < old_x)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 0.99, 1.0, 1.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+									  Egg::SCALE, 0.99, 1.0, 1.0);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 0.99, 1.0);
+			break;
+		}
+	}
+	else if (x > old_x)
+	{
+		switch (plane)
+		{
+		case Egg::PLANE_XY:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.01, 1.0, 1.0);
+			break;
+		case Egg::PLANE_XZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.01, 1.0, 1.0);
+			break;
+		case Egg::PLANE_YZ:
+			mModel->Transform(FreyjaModel::TransformMesh, 
+							  Egg::SCALE, 1.0, 1.01, 1.0);
+		}
+	}
+	
+	old_x = x;
+	old_y = y;
+}
+
 
 void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 {
 	static int old_y = 0, old_x = 0;
+	const float treshold = 2.0f;
+	float xyz[3];
 	float xx = x, yy = y;
   
 
-	if (mMouseButton == MOUSE_BTN_MIDDLE)
+	switch (mMouseButton)
 	{
-		float xyz[3];
-
-		if (x > old_x)
+	case MOUSE_BTN_MIDDLE:
+		xyz[0] = 0.0f;
+		xyz[1] = 0.0f;
+		xyz[2] = 0.0f;
+		
+		if (x > old_x + treshold)
 			xyz[0] = 1.0f;
-		else if (x < old_x)
+		else if (x < old_x - treshold)
 			xyz[0] = -1.0f;
-
-		if (y < old_y)
-			xyz[1] = 1.0f;
-		else if (y > old_y)
+		
+		if (y > old_y + treshold)
 			xyz[1] = -1.0f;
-
-		xyz[2] = 0.0f;	
+		else if (y < old_y - treshold)
+			xyz[1] = 1.0f;
+		
 
 		switch (mModel->CurrentPlane())
 		{
@@ -1300,203 +1528,59 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 
 		old_x = x;
 		old_y = y;
-		return;
-	}
-
-	// Mongoose: Convert screen to world system
-	ScreenToWorld(&xx, &yy);
+		break;
 
 
-	// Mongoose: No click and release
-	if (mMouseButton != MOUSE_BTN_LEFT)
-	{
-		return;
-	}
+	case MOUSE_BTN_RIGHT:
+		rotateObject(x, y, plane);
+		break;
 
-	//event_print("* motion -> %i, %i : %i", x, y, mMouseButton);
+	case MOUSE_BTN_LEFT:
+		// Mongoose: Convert screen to world system
+		ScreenToWorld(&xx, &yy);
 
-	switch (_minor_mode)
-	{
-	case MODEL_ROTATE: 
-
-		event_print("DEBUG MotionEdit, MODEL_ROTATE: %f %f", x, y);
-
-		if (x > old_x)
+		switch (_minor_mode)
 		{
-			switch (plane)
-			{
-			case Egg::PLANE_XY:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, -0.5, 0.0);
-				break;
-			case Egg::PLANE_XZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, 0.0, -0.5);
-				break;
-			case Egg::PLANE_YZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, 0.0, -0.5);
-				break;
-			}
-		}
-		else if (x < old_x)
-		{
-			switch (plane)
-			{
-			case Egg::PLANE_XY:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, 0.5, 0.0);
-				break;
-			case Egg::PLANE_XZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, 0.0, 0.5);
-				break;
-			case Egg::PLANE_YZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, 0.0, 0.5);
-			}
-		}
+		case MODEL_ROTATE: 
+			rotateObject(x, y, plane);
+			break;
+			
+		case MODEL_SCALE:
+			scaleObject(x, y, plane);
+			break;
 
+		case VERTEX_BBOX_SELECT_MODE:
+			mModel->BBoxMove(xx, yy);
+			break;
 
-		if (y > old_y)
-		{
-			switch (plane)
-			{
-			case Egg::PLANE_XY:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, -0.5, 0.0, 0.0);
-				break;
-			case Egg::PLANE_XZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, -0.5, 0.0, 0.0);
-				break;
-			case Egg::PLANE_YZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, -0.5, 0.0);
-				break;
-			}
-		}
-		else if (y < old_y)
-		{
-			switch (plane)
-			{
-			case Egg::PLANE_XY:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.5, 0.0, 0.0);
-				break;
-			case Egg::PLANE_XZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.5, 0.0, 0.0);
-				break;
-			case Egg::PLANE_YZ:
-				mModel->Transform(FreyjaModel::TransformMesh, 
-								  Egg::ROTATE, 0.0, 0.5, 0.0);
-			}
+		case TAG_MOVE:
+			mModel->TagMove(xx, yy);
+			break;
+			
+		case TAG_MOVE_CENTER:
+			mModel->TagMoveCenter(xx, yy);
+			break;
 
+		case MESH_MOVE:
+			mModel->MeshMove(xx, yy);
+			break;
+
+		case MESH_MOVE_CENTER: 
+			mModel->MeshMoveCenter(xx, yy);
+			break;
+
+		case VERTEX_MOVE:
+			mModel->VertexMove(xx, yy);
+			break;
+
+		default:
+			break;
 		}
 
 		old_x = x;
 		old_y = y;
 		break;
-
-		case MODEL_SCALE:
-			if (y > old_y)
-			{
-				switch (plane)
-				{
-				case Egg::PLANE_XY:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 0.99, 1.0);
-					break;
-				case Egg::PLANE_XZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 1.0, 0.99);
-					break;
-				case Egg::PLANE_YZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 1.0, 0.99);
-				break;
-				}
-			}
-			else if (y < old_y)
-			{
-				switch (plane)
-				{
-				case Egg::PLANE_XY:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 1.01, 1.0);
-					break;
-				case Egg::PLANE_XZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 1.0, 1.01);
-					break;
-				case Egg::PLANE_YZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 1.0, 1.01);
-				}
-			}
-			
-			if (x < old_x)
-			{
-				switch (plane)
-				{
-				case Egg::PLANE_XY:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 0.99, 1.0, 1.0);
-					break;
-				case Egg::PLANE_XZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 0.99, 1.0, 1.0);
-					break;
-				case Egg::PLANE_YZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 0.99, 1.0);
-					break;
-				}
-			}
-			else if (x > old_x)
-			{
-				switch (plane)
-				{
-				case Egg::PLANE_XY:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.01, 1.0, 1.0);
-					break;
-				case Egg::PLANE_XZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.01, 1.0, 1.0);
-					break;
-				case Egg::PLANE_YZ:
-					mModel->Transform(FreyjaModel::TransformMesh, 
-									  Egg::SCALE, 1.0, 1.01, 1.0);
-				}
-			}
-				
-			old_x = x;
-			old_y = y;
-			break;
-
-  case VERTEX_BBOX_SELECT_MODE:
-    mModel->BBoxMove(xx, yy);
-    break;
-  case TAG_MOVE:
-    mModel->TagMove(xx, yy);
-    break;
-  case TAG_MOVE_CENTER:
-    mModel->TagMoveCenter(xx, yy);
-    break;
-  case MESH_MOVE:
-    mModel->MeshMove(xx, yy);
-    break;
-  case MESH_MOVE_CENTER: 
-    mModel->MeshMoveCenter(xx, yy);
-    break;
-  case VERTEX_MOVE:
-    mModel->VertexMove(xx, yy);
-    break;
-  default:
-    break;
-  }
+	}
 }
 
 

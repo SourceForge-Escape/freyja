@@ -1066,6 +1066,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	unsigned int i, j;
 
 
+
 	if (polygon.r_vertex.empty())
 	{
 		printf("FreyjaRender::DrawPolygon> Assertion failure, bad polygon\n");
