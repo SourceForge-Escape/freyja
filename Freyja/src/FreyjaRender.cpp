@@ -1176,11 +1176,11 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 
 
 	/* Mongoose 2004.03.26, 
-	 * This was here for vertex morph frames, still used? */
+	 * This was here for vertex morph frames, still used for edit updates */
 	if (mesh.r_polygon.size() != mesh.polygon.size())
 	{
-		freyja_print("FreyjaRender::DrawMesh> %i polygons, %i cached...",
-					mesh.polygon.size(), mesh.r_polygon.size());
+		freyja_print("FreyjaRender::DrawMesh> mesh[%i]: %i polygons, %i cached...",
+					 mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
 
 		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
 		{

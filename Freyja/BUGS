@@ -1,7 +1,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : BUGS  ( Last Audit: 2004.12.02 )
+  File     : BUGS  ( Last Audit: 2004.12.03 )
   Project  : Freyja 0.3.x
   Author   : Terry 'Mongoose' Hendrix II
 
@@ -20,8 +20,17 @@
  Show Stoppers
  ------------------
 
- o 2004.12.02-4
-	Crash on bone selection via iterator/spinbutton with null skeleton
+ o 2004.12.03-1
+	New file save corruption bug. Meshes can be saved with some corrupt
+	or invalid polygons.  They render as just vertices and constanty
+	warns "FreyjaRender::DrawMesh> mesh[0]: 12 polygons, 0 cached..."
+	in the logs and statusbar.
+
+	The fix for corrupt/invalid saves only adressed NULL elements by
+	not saving them to disk.  Unfortunately the Egg backend depends on
+	data structures holding on to NULL elements for indexing.
+
+	This doesn't always cause a crash, but it can lead to one.
 
 
  o 2004.12.02-3
@@ -33,6 +42,13 @@
  Annoying
  ------------------
 
+ o 2003.12.03-a2
+	Some plugins don't handle untesselated (nontriangle) meshes
+	Also the normal generator doesn't account for polygons other than tris
+
+ o 2004.12.03-a1
+	ERROR: NULL skeletal bone_tag! in FreyjaModel might actually be bug
+
  o 2004.12.02-a2
 	Vertex combine doesn't check if two vertices share a face? wtf =/
 
@@ -42,9 +58,6 @@
 
  o 2004.12.01-a1
 	Possible regression with material+light rendering
-
- o 2004.11.29-a1
-	Normal generation not interpolating correctly
 
  o 2004.11.29-a2
 	Bones scale oddly in bone mode, but not scene mode

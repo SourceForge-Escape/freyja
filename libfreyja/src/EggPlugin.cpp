@@ -72,7 +72,7 @@ int eggGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 	}
 
 	*u = (xyz[0] > 0) ? xyz[0] : -xyz[0];
-	s = 0.0025;
+	s = 0.025;
   
 	while (*u > 1.0)
 	{
@@ -81,7 +81,7 @@ int eggGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 	}
   
 	*v = (xyz[1] > 0) ? xyz[1] : -xyz[1];
-	s = 0.0025;
+	s = 0.025;
   
 	while (*v > 1.0)
 	{
@@ -623,6 +623,8 @@ void eggGenerateVertexNormals()
 
 	eggCriticalSection(EGG_WRITE_LOCK);
 	
+	eggPrintMessage("eggGenerateVertexNormals()");
+
 	vertexCount = eggGetNum(FREYJA_VERTEX);
 	faceCount = eggGetNum(FREYJA_POLYGON); 
 
@@ -634,7 +636,7 @@ void eggGenerateVertexNormals()
 		eggGetPolygon1u(FREYJA_VERTEX, 1, &v1);
 		eggGetPolygon1u(FREYJA_VERTEX, 2, &v2);
 
-		eggPrintMessage("<%d %d %d>\n", v0, v1, v2);
+		eggPrintMessage("<%d %d %d>", v0, v1, v2);
 		eggIterator(FREYJA_VERTEX, v0);
 		eggGetVertex3f(a.mVec);
 		eggIterator(FREYJA_VERTEX, v1);
@@ -648,7 +650,8 @@ void eggGenerateVertexNormals()
 		//bb = b - c;
 		
 		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(b - a, b - c);
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
 		faceNormals.pushBack(new Vector3d(normal));
 
 		eggIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
@@ -664,16 +667,17 @@ void eggGenerateVertexNormals()
 
 		if (!vertex)
 		{
-			eggPrintMessage("ERROR\n");
+			eggPrintError("eggGenerateVertexNormals> ERROR bad vertex\n");
 			continue;
 		}
 
 		normal.zero();
 
-		eggPrintMessage("%d :: %d faces\n", vertex->id, vertex->ref.size());
 		for (j = vertex->ref.begin(); j < vertex->ref.end(); ++j)
 		{
-			normal += *faceNormals[j];
+			//if (EggPlugin::mEggPlugin->eggGetPolygon(vertex->ref[j]))
+				normal += *faceNormals[vertex->ref[j]];
+
 		}
 
 		normal.normalize();
@@ -682,10 +686,11 @@ void eggGenerateVertexNormals()
 		vertex->norm[1] = normal.mVec[1];
 		vertex->norm[2] = normal.mVec[2];
 
-		eggPrintMessage("%d :: %f %f %f\n", vertex->id, 
-			   normal.mVec[0],
-			   normal.mVec[1],
-			   normal.mVec[2]);
+		eggPrintMessage("%d :: %d faces :: %f %f %f", vertex->id,
+						vertex->ref.size(),
+						normal.mVec[0],
+						normal.mVec[1],
+						normal.mVec[2]);
     }
 
 	faceNormals.erase();
