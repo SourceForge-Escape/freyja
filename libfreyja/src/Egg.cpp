@@ -489,6 +489,7 @@ int Egg::saveFile(char *filename)
 	egg_polygon_t *polygon;
 	egg_group_t *group;
 	unsigned int i, j;
+	unsigned int meshCount, polygonCount, groupCount, texelCount, vertexCount;
 
 
 	f = fopen(filename, "wb");
@@ -499,29 +500,123 @@ int Egg::saveFile(char *filename)
 		return -1;
 	}
 
+ 	for (polygonCount = 0, i = mPolygons.begin(); i < mPolygons.end(); ++i)
+	{
+		if (mPolygons[i])
+			++polygonCount;
+	}
+
+ 	for (groupCount = 0, i = mGroups.begin(); i < mGroups.end(); ++i)
+	{
+		if (mGroups[i])
+			++groupCount;
+	}
+
+ 	for (meshCount = 0, i = mMeshes.begin(); i < mMeshes.end(); ++i)
+	{
+		if (mMeshes[i])
+			++meshCount;
+	}
+
+	for (vertexCount = 0, i = mVertices.begin(); i < mVertices.end(); ++i)
+	{
+		if (mVertices[i])
+			++vertexCount;
+	}
+
+	for (texelCount = 0, i = mTexels.begin(); i < mTexels.end(); ++i)
+	{
+		if (mTexels[i])
+			++texelCount;
+	}
+
+
+	// Semi-smart trimming
+	if (!meshCount)
+	{
+		polygonCount = 0; // can't have faces w/o meshes
+		groupCount = 0;   // let's force vertex frames/groups to dep on mesh
+	}
+
+	if (!polygonCount && !groupCount)
+	{
+		vertexCount = 0; // can't have vertices w/o faces OR vertex frames/groups
+	}
+
+	if (!polygonCount)
+	{
+		texelCount = 0; // can't have texcoords w/o faces
+	}
+
+	print("Egg file save header:");
 	// Header ///////////////////////////////
 	id = EGG_FILE;
 	version = EGG_VERSION;
 	fwrite(&id, 4, 1, f);
 	fwrite(&version, 4, 1, f);
 
-	u = getVertexCount();
+
+	u = vertexCount;
+	print("%i vertices", u);
+	//u = getVertexCount();
 	fwrite(&u, 4, 1, f);   
-	u = getTexelCount();
-	fwrite(&u, 4, 1, f);   
-	u = getPolygonCount();
+
+
+	u = texelCount;
+	print("%i texels", u);
+	//u = getTexelCount();
+	fwrite(&u, 4, 1, f); 
+
+
+	u = polygonCount;
+	print("%i polygons", u);
+	//u = getPolygonCount();
 	fwrite(&u, 4, 1, f);  
+
+
 	u = 0;  // Mongoose 2002.07.05, Marker system removed
 	fwrite(&u, 4, 1, f);
-	u = getGroupCount();
+
+
+	u = groupCount;
+	print("%i groups", u);
+	//u = getGroupCount();
 	fwrite(&u, 4, 1, f);
-	u = getMeshCount();
+
+
+	u = meshCount;
+	print("%i meshes", u);
+	//u = getMeshCount();
 	fwrite(&u, 4, 1, f);
-	u = getTagCount();
-	fwrite(&u, 4, 1, f);    
-	u = getBoneFrameCount();
+
+
+ 	for (u = 0, i = mTags.begin(); i < mTags.end(); ++i)
+	{
+		if (mTags[i])
+			++u;
+	}
+	print("%i tags", u);
+	//u = getTagCount();
 	fwrite(&u, 4, 1, f);
-	u = getAnimationCount();
+    
+	
+ 	for (u = 0, i = mBoneFrames.begin(); i < mBoneFrames.end(); ++i)
+	{
+		if (mBoneFrames[i])
+			++u;
+	}
+	print("%i boneframes", u);
+	//u = getBoneFrameCount();
+	fwrite(&u, 4, 1, f);
+
+	
+ 	for (u = 0, i = mAnimations.begin(); i < mAnimations.end(); ++i)
+	{
+		if (mAnimations[i])
+			++u;
+	}
+	print("%i animations", u);
+	//u = getAnimationCount();
 	fwrite(&u, 4, 1, f);
   
 	////////////////////////////////////////
@@ -530,7 +625,7 @@ int Egg::saveFile(char *filename)
 	{
 		vertex = mVertices[i];
     
-		if (!vertex)
+		if (!vertex || !vertexCount)
 			continue;
     
 		u = vertex->id;
@@ -571,7 +666,7 @@ int Egg::saveFile(char *filename)
 	{
 		texel = mTexels[i];
     
-		if (!texel)
+		if (!texel || !texelCount)
 			continue;
     
 		u = texel->id;
@@ -586,8 +681,10 @@ int Egg::saveFile(char *filename)
 	{
 		polygon = mPolygons[i];
 
-		if (!polygon)
+		if (!polygon || !polygonCount)
 			continue;
+
+		//print("polygon %i %p\n", i, polygon);
 
 		u = polygon->id;
 		fwrite(&u, 4, 1, f);
@@ -618,7 +715,7 @@ int Egg::saveFile(char *filename)
 	{
 		group = mGroups[i];
     
-		if (!group)
+		if (!group || !polygonCount)
 			continue;
     
 		u = group->id;
