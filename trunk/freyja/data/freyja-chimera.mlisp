@@ -34,7 +34,6 @@
 (setq NOTEBOOK_HEIGHT HEIGHT)
 
 (setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
-(setq ROTATE_AMOUNT 1.0)       ; Rotation increment
 (setq FAST_CARD true)          ; Toggle OpenGL accel features
 (setq GRID_ON true)            ; Toggle edit grid rendering
 (setq PATH "~/.freyja")        ; Set initial data path

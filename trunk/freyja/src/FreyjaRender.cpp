@@ -445,25 +445,6 @@ void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 }
 
 
-void FreyjaRender::drawLights()
-{
-	if (mRenderMode & RENDER_LIGHTING)
-	{
-		float *test = _model->mLight0Pos;
-		
-		glPushMatrix();
-		glTranslatef(test[0], test[1], test[2]);
-		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-		mglDrawSphere(16, 16, 0.75f);
-		glPopMatrix();
-		
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
-		glLightfv(GL_LIGHT0, GL_POSITION, _model->mLight0Pos);
-	}
-}
-
-
 #warning FIXME Uses Egg to render skeleton
 void drawSkeleton2(Vector<egg_tag_t *> *taglist, 
 				   unsigned int currentBone,
@@ -545,15 +526,21 @@ void getOpenGLProjectionMatrix(double *projection) // double[16]
 
 FreyjaRender::FreyjaRender()
 {
-	_model = NULL;
+	mModel = NULL;
 	mRenderMode = 0 | fRenderBonesClearedZBuffer;
+	mWidth = 640;
+	mHeight = 480;
 	_view_mode = VIEWMODE_MODEL_VIEW;
 	_init = false;
-
-	// Mongoose 2002.03.07, Init these various things here in contructor now
-	_width = 640;
-	_height = 480;
-	RotateAmount(1.0);
+	_bone_line_width = 3.0;
+	_bone_point_size = 5.0;
+	_default_point_size = 3.5;
+	_default_line_width = 1.0;
+	_vertex_point_size = 3.5;
+	_angles[0] = 18.0f;
+	_angles[1] = 42.0f;
+	_angles[2] = 0.0f;
+	_texture = 0;
 
 	for (long i = 0; i < 3; ++i)
 	{
@@ -561,8 +548,6 @@ FreyjaRender::FreyjaRender()
 		mColorAxisY[i] = GREEN[i] * 0.75f;
 		mColorAxisZ[i] = BLUE[i] * 0.75f;
 	}
-
-	Reset();
 }
 
 
@@ -597,13 +582,13 @@ vec_t FreyjaRender::getWindowAspectRatio()
 
 unsigned int FreyjaRender::getWindowWidth()
 {
-	return _width;
+	return mWidth;
 }
 
 
 unsigned int FreyjaRender::getWindowHeight()
 {
-	return _height;
+	return mHeight;
 }
 
 
@@ -613,47 +598,202 @@ float FreyjaRender::getZoom()
 }
 
 
+/* Mongoose 2004.03.26, 
+ * You have to be kidding me 
+ * Replace with quarternion/matrix and change API  */
+void FreyjaRender::Rotate(float n, int axis)
+{
+	_angles[axis] += n;
+
+	if (_angles[axis] >= 360.0)
+	{
+		_angles[axis] = 0.0;
+	}
+	else if (_angles[axis] < 0.0)
+	{
+		_angles[axis] = 360.0;
+	}
+}
+
+void FreyjaRender::Rotate(int flags, float n)
+{
+	if (flags & X_F)
+		Rotate(n, 0);
+
+	if (flags & Y_F)
+		Rotate(n, 1);
+
+	if (flags & Z_F)
+		Rotate(n, 2);
+}
 
 
-void FreyjaRender::Flags(flags_t flag, int op)
+void FreyjaRender::drawFreeWindow()
+{
+	RenderModel model;
+	unsigned int i;
+
+
+	glRotatef(_angles[0], 1.0, 0.0, 0.0);
+	glRotatef(_angles[1], 0.0, 1.0, 0.0);
+	glRotatef(_angles[2], 0.0, 0.0, 1.0);
+
+	glTranslatef(_scroll[0], _scroll[1], _scroll[2]);
+
+	glPushMatrix();
+
+	glLineWidth(2.0f); 
+
+	if (mRenderMode & RENDER_EDIT_GRID)
+	{
+		glLineWidth(1.25f);
+		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
+
+		glLineWidth(2.0f);
+		mglDrawAxis(0.25f, 1.2f, 0.872f);
+
+		glLineWidth(1.75f);
+		glBegin(GL_LINES);
+		glColor3fv(RED);
+		glVertex3f(-50.0f, 0.0f, 0.0f);	
+		glVertex3f(50.0f, 0.0f, 0.0f);
+		glColor3fv(BLUE);
+		glVertex3f(0.0f, 0.0f, -50.0f);	
+		glVertex3f(0.0f, 0.0f, 50.0f);
+
+		glColor3fv(mColorGridLine);
+
+		for (float x = -50.0f; x < 60.0f; x += 10.f)
+		{
+			if (x < 10.0f && x > -10.0f) 
+				continue;
+
+			glVertex3f(x, 0.0f, -50.0f);	
+			glVertex3f(x, 0.0f, 50.0f);
+			glVertex3f(-50.0f, 0.0f, x);	
+			glVertex3f(50.0f, 0.0f, x);
+		}
+		glEnd();
+	}
+
+	glPopMatrix();
+
+	renderLights();
+	glScalef(mZoom, mZoom, mZoom);
+
+	for (i = 0; i < mModel->getModelCount(); ++i)
+	{
+		mModel->getModel(model, i);
+		renderModel(model);
+	}
+}
+
+
+
+
+///////// PRIVATE METHODS ////////////////////////////////
+
+
+void FreyjaRender::BindTexture(unsigned int texture)
+{
+	static int hack = 0;
+
+
+	if (mRenderMode & RENDER_TEXTURE && texture != _texture)
+	{
+		if ((int)texture == COLORED_POLYGON)
+		{
+			hack = COLORED_POLYGON;
+			glDisable(GL_TEXTURE_2D);
+		}
+		else
+		{
+			if (hack == COLORED_POLYGON)
+			{
+				hack = 0;
+				glEnable(GL_TEXTURE_2D);
+			}
+
+			_texture = texture;  // First texture is white for colored_poly
+			glBindTexture(GL_TEXTURE_2D, texture+1);
+		}
+	}
+}
+
+
+void FreyjaRender::DrawQuad(float x, float y, float w, float h)
+{
+	if (!(mRenderMode & RENDER_TEXTURE))
+	{
+		glDisable(GL_TEXTURE_2D);
+		glColor3fv(WHITE); // BLACK
+		
+
+		glBegin(GL_QUADS);
+		glColor3f(0.0, 1.0, 0.5);
+		glVertex2f(x, y);
+		glColor3f(0.0, 0.0, 0.5);
+		glVertex2f(x, y+h);
+		glColor3f(1.0, 0.0, 0.5);
+		glVertex2f(x+w, y+h);
+		glColor3f(1.0, 1.0, 0.5);
+		glVertex2f(x+w, y);
+		glEnd();
+	}
+	else  // if texture draw texture quad
+	{
+		glColor3fv(WHITE);
+		
+		glEnable(GL_TEXTURE_2D);
+		
+		BindTexture(mModel->getCurrentTextureIndex()+1);
+		
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0, 1.0);
+		glVertex2f(x, y);
+		
+		glTexCoord2f(0.0, 0.0);
+		glVertex2f(x, y+h);
+		
+		glTexCoord2f(1.0, 0.0);
+		glVertex2f(x+w, y+h);
+		
+		glTexCoord2f(1.0, 1.0);
+		glVertex2f(x+w, y);
+		glEnd();
+	}
+}
+
+
+////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
+
+void FreyjaRender::clearFlag(flags_t flag)
 {
 	mRenderMode |= flag;
+	mRenderMode ^= flag;
 
-	if (!op)
+	if (flag & RENDER_CAMERA) /* Called for on and off */
 	{
-		mRenderMode ^= flag;
-	}
-
-	if (flag & RENDER_CAMERA && op)
-	{
-		Reshape(_width, _height);
+		resizeContext(mWidth, mHeight);
 	}
 }
 
 
-void FreyjaRender::Register(FreyjaModel *model)
-{
-	_model = model;
-	// freyja_print("Render> Registered data model");
-}
-
-
-void FreyjaRender::Init(int width, int height, bool fast_card)
+void FreyjaRender::initContext(unsigned int width, unsigned int height, bool fast_card)
 {
 	bool arb_multitexture, ext_texture_env_combine;
 
-	_width = width;
-	_height = height;
-	_fast_card = fast_card;
 
-	// Print driver support information
+	/* Log OpenGL driver support information */
 	freyja_print("[GL Driver Info]");
 	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
 	freyja_print("\tRenderer   : %s", glGetString(GL_RENDERER));
 	freyja_print("\tVersion    : %s", glGetString(GL_VERSION));
 	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
 
-	// Testing for goodies
+	/* Test for extentions */
 	arb_multitexture = gl_ext_check("GL_ARB_multitexture");
 	ext_texture_env_combine = gl_ext_check("GL_EXT_texture_env_combine");
 
@@ -718,7 +858,8 @@ void FreyjaRender::Init(int width, int height, bool fast_card)
 
 	glMatrixMode(GL_MODELVIEW);
 
-	// Axis display list
+
+	/* Generate XYZ Axis symbol display list */
 	glNewList(GL_LIST_AXIS, GL_COMPILE);
 	glBegin(GL_LINES);
       
@@ -752,119 +893,13 @@ void FreyjaRender::Init(int width, int height, bool fast_card)
 	glEndList();
 
 
+	mWidth = width;
+	mHeight = height;
 	_init = true;
 }
 
 
-void FreyjaRender::Reset()
-{
-	_bone_line_width = 3.0;
-	_bone_point_size = 5.0;
-	_default_point_size = 3.5;
-	_default_line_width = 1.0;
-	_vertex_point_size = 3.5;
-
-	_angles[0] = 18.0f;
-	_angles[1] = 42.0f;
-	_angles[2] = 0.0f;
-
-	_texture = 0;
-}
-
-
-void FreyjaRender::RotateAmount(float n)
-{
-	_rotate_amount = n;
-}
-
-
-void FreyjaRender::Rotate(int flags, float n)
-{
-	if (flags & X_F)
-		Rotate(n, 0);
-
-	if (flags & Y_F)
-		Rotate(n, 1);
-
-	if (flags & Z_F)
-		Rotate(n, 2);
-}
-
-
-float FreyjaRender::RotateAmount()
-{
-	return _rotate_amount;
-}
-
-
-void FreyjaRender::ViewMode(int mode)
-{
-	_view_mode = mode;
-}
-
-
-void FreyjaRender::drawFreeWindow()
-{
-	RenderModel model;
-	unsigned int i;
-
-
-	glRotatef(_angles[0], 1.0, 0.0, 0.0);
-	glRotatef(_angles[1], 0.0, 1.0, 0.0);
-	glRotatef(_angles[2], 0.0, 0.0, 1.0);
-
-	glTranslatef(_scroll[0], _scroll[1], _scroll[2]);
-
-	glPushMatrix();
-
-	glLineWidth(2.0f); 
-
-	if (mRenderMode & RENDER_EDIT_GRID)
-	{
-		glLineWidth(1.25f);
-		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
-
-		glLineWidth(2.0f);
-		mglDrawAxis(0.25f, 1.2f, 0.872f);
-
-		glLineWidth(1.75f);
-		glBegin(GL_LINES);
-		glColor3fv(RED);
-		glVertex3f(-50.0f, 0.0f, 0.0f);	
-		glVertex3f(50.0f, 0.0f, 0.0f);
-		glColor3fv(BLUE);
-		glVertex3f(0.0f, 0.0f, -50.0f);	
-		glVertex3f(0.0f, 0.0f, 50.0f);
-
-		glColor3fv(mColorGridLine);
-
-		for (float x = -50.0f; x < 60.0f; x += 10.f)
-		{
-			if (x < 10.0f && x > -10.0f) 
-				continue;
-
-			glVertex3f(x, 0.0f, -50.0f);	
-			glVertex3f(x, 0.0f, 50.0f);
-			glVertex3f(-50.0f, 0.0f, x);	
-			glVertex3f(50.0f, 0.0f, x);
-		}
-		glEnd();
-	}
-
-	glPopMatrix();
-
-	drawLights();
-	glScalef(mZoom, mZoom, mZoom);
-
-	for (i = 0; i < _model->getModelCount(); ++i)
-	{
-		_model->getModel(model, i);
-		renderModel(model);
-	}
-}
-
-
-void FreyjaRender::Display() 
+void FreyjaRender::display() 
 { 
 	if (!_init)
 	{ 
@@ -872,7 +907,7 @@ void FreyjaRender::Display()
 	}
 	
 	// Mongoose 2002.02.02, Cache for use in calls from here
-	_model->getSceneTranslation(_scroll);
+	mModel->getSceneTranslation(_scroll);
 	
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
 				 1.0);
@@ -962,12 +997,12 @@ void FreyjaRender::Display()
 		else
 		{
 			glPushMatrix();
-			drawWindow(_model->CurrentPlane());
+			drawWindow(mModel->CurrentPlane());
 			glPopMatrix();
 		}
 #else
 		glPushMatrix();
-		drawWindow(_model->CurrentPlane());
+		drawWindow(mModel->CurrentPlane());
 		glPopMatrix();
 #endif
 		break;
@@ -986,117 +1021,285 @@ void FreyjaRender::Display()
 }
 
 
-void FreyjaRender::Reshape(unsigned int w, unsigned int h) 
-{ 
-	if (!w || !h)
+void FreyjaRender::resizeContext(unsigned int width, unsigned int height) 
+{
+	if (!width || !height)
 	{
 		return;
 	}
 
-	_width = w;
-	_height = h;
-	mAspectRatio = (float)w/(float)h;
+	mWidth = width;
+	mHeight = height;
+	mAspectRatio = (float)width / (float)height;
 
-	glViewport(0, 0, w, h); 
+	glViewport(0, 0, width, height); 
 	glMatrixMode(GL_PROJECTION); 
 	glLoadIdentity(); 
 
-
-	switch (_view_mode)
+	if (mRenderMode & RENDER_CAMERA)
 	{
-	default:
-		if (mRenderMode & RENDER_CAMERA)
-		{
-			gluPerspective(FOV_Y, 
-						   ((GLdouble)w)/((GLdouble)h), 
-						   NEAR*100, 
-						   FAR*100);
-		}
-		else 
-		{
-			glOrtho(-SCALE_ENV * (GLfloat) w / (GLfloat) h, 
-					SCALE_ENV * (GLfloat) w / (GLfloat) h, 
-					-SCALE_ENV, SCALE_ENV, 
-					-400.0, 
-					400.0);
-		}
+		gluPerspective(FOV_Y, 
+					   ((GLdouble)width) / ((GLdouble)height), 
+					   NEAR*100, 
+					   FAR*100);
+	}
+	else 
+	{
+		glOrtho(-SCALE_ENV * (GLfloat)width / (GLfloat)height, 
+				SCALE_ENV * (GLfloat)width / (GLfloat)height, 
+				-SCALE_ENV, SCALE_ENV, 
+				-400.0, 
+				400.0);
 	}
 
 	glMatrixMode(GL_MODELVIEW);
 }
 
 
-///////// PRIVATE METHODS ////////////////////////////////
-
-
-void FreyjaRender::BindTexture(unsigned int texture)
+void FreyjaRender::setFlag(flags_t flag)
 {
-	static int hack = 0;
+	mRenderMode |= flag;
 
-
-	if (mRenderMode & RENDER_TEXTURE && texture != _texture)
+	if (flag & RENDER_CAMERA) /* Called for on and off */
 	{
-		if ((int)texture == COLORED_POLYGON)
-		{
-			hack = COLORED_POLYGON;
-			glDisable(GL_TEXTURE_2D);
-		}
-		else
-		{
-			if (hack == COLORED_POLYGON)
-			{
-				hack = 0;
-				glEnable(GL_TEXTURE_2D);
-			}
+		resizeContext(mWidth, mHeight);
+	}
+}
 
-			_texture = texture;  // First texture is white for colored_poly
-			glBindTexture(GL_TEXTURE_2D, texture+1);
+
+void FreyjaRender::setSceneData(FreyjaModel *model)
+{
+	mModel = model;
+}
+
+
+void FreyjaRender::setViewMode(int mode)
+{
+	_view_mode = mode;
+}
+
+
+void FreyjaRender::setZoom(float zoom)
+{
+	mZoom = zoom;
+}
+
+
+void FreyjaRender::toggleFlag(flags_t flag)
+{
+	mRenderMode ^= flag;
+
+	if (flag & RENDER_CAMERA) /* Called for on and off */
+	{
+		resizeContext(mWidth, mHeight);
+	}
+}
+
+
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
+
+void FreyjaRender::renderBox(vec3_t min, vec3_t max)
+{
+	//if (mRenderMode & RENDER_BBOX)
+	mglDrawBbox(min, max, RED, mColorWireframe);
+}
+
+
+void FreyjaRender::renderLights()
+{
+	if (mRenderMode & RENDER_LIGHTING)
+	{
+		float *test = mModel->mLight0Pos;
+		
+		glPushMatrix();
+		glTranslatef(test[0], test[1], test[2]);
+		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+		mglDrawSphere(16, 16, 0.75f);
+		glPopMatrix();
+		
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		glLightfv(GL_LIGHT0, GL_POSITION, mModel->mLight0Pos);
+	}
+}
+
+
+void FreyjaRender::renderMesh(RenderMesh &mesh)
+{
+	RenderPolygon face;
+	Vector3d v;
+	unsigned int i;
+
+
+	if (mRenderMode & RENDER_POINTS)
+	{
+		glPointSize(5.0);
+		glBegin(GL_POINTS);
+
+		for (i = mesh.gbegin; i < mesh.gend; ++i)
+		{
+			v = mesh.getGroupCenter(i);
+			glColor3fv(RED);
+			glVertex3fv(v.mVec);
+		}
+
+		glEnd();
+		glPointSize(_default_point_size);
+	}
+
+	if (!mesh.polygon->empty())
+	{
+		if (mRenderMode & RENDER_TEXTURE)
+		{
+			glEnable(GL_TEXTURE_2D);
+		}
+		
+		if (mRenderMode & RENDER_MATERIAL)
+		{
+			gMaterialManager->applyEffectGL();
+		}
+		
+		if ((int)mesh.id == (int)mModel->getCurrentMesh())
+		{
+			mRenderMode |= fHightlightPolygonWireframe;
+		}
+
+		_default_line_width *= 2;
+
+		// FIXME: Move this back into a method in RenderMesh to avoid
+		//        exposing old polygon type ( like getGroupCenter() )
+		for (i = mesh.polygon->begin(); i < mesh.polygon->end(); ++i)
+		{
+			createRenderPolygon(face, *(*mesh.polygon)[i], mesh.frame);
+			renderPolygon(face);
+		}
+		
+		if ((int)mesh.id == (int)mModel->getCurrentMesh())
+		{
+			mRenderMode ^= fHightlightPolygonWireframe;
+		}
+
+		_default_line_width /= 2;
+		
+		if (mRenderMode & RENDER_TEXTURE)
+		{
+			glDisable(GL_TEXTURE_2D);
 		}
 	}
 }
 
 
-void FreyjaRender::DrawQuad(float x, float y, float w, float h)
+void FreyjaRender::renderModel(RenderModel &model)
 {
-	if (!(mRenderMode & RENDER_TEXTURE))
-	{
-		glDisable(GL_TEXTURE_2D);
-		glColor3fv(WHITE); // BLACK
-		
+	Vector<unsigned int> *list = 0x0;
+	RenderMesh rmesh;
+	vec3_t min, max;
+	vec3_t *xyz;
+	unsigned int i, n;
 
-		glBegin(GL_QUADS);
-		glColor3f(0.0, 1.0, 0.5);
-		glVertex2f(x, y);
-		glColor3f(0.0, 0.0, 0.5);
-		glVertex2f(x, y+h);
-		glColor3f(1.0, 0.0, 0.5);
-		glVertex2f(x+w, y+h);
-		glColor3f(1.0, 1.0, 0.5);
-		glVertex2f(x+w, y);
-		glEnd();
-	}
-	else  // if texture draw texture quad
+
+	/* Render patch test -- this should be model specific later */ 
+	if (FreyjaRender::mPatchDisplayList > 0)
 	{
-		glColor3fv(WHITE);
-		
-		glEnable(GL_TEXTURE_2D);
-		
-		BindTexture(_model->getCurrentTextureIndex()+1);
-		
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 1.0);
-		glVertex2f(x, y);
-		
-		glTexCoord2f(0.0, 0.0);
-		glVertex2f(x, y+h);
-		
-		glTexCoord2f(1.0, 0.0);
-		glVertex2f(x+w, y+h);
-		
-		glTexCoord2f(1.0, 1.0);
-		glVertex2f(x+w, y);
-		glEnd();
+		glCallList(FreyjaModel::gTestPatch.displayList);
+		drawPatch(FreyjaModel::gTestPatch);
 	}
+
+
+	/* Highlight current vertex group
+	 * -- this should be model specific later:
+	 * eg mModel->getCurrentGroup() -> model.index */
+	if (mRenderMode & RENDER_POINTS)
+	{
+		/* Render bounding box */
+		mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
+		renderBox(min, max);
+
+		/* Render actual vertices */
+		mModel->getMeshVertices(mModel->getCurrentGroup(), &list);
+
+		if (list && !list->empty())
+		{
+			glPointSize(_default_point_size);
+			glColor3fv(mColorVertexHighlight);
+			glBegin(GL_POINTS);
+
+			for (i = list->begin(), n = list->end(); i < n; ++i)
+			{
+				xyz = mModel->getVertexXYZ((*list)[i]);
+
+				if (xyz)
+				{
+					glVertex3fv(*xyz);
+				}
+			}
+  
+			glEnd();
+		}
+	}    
+
+
+	/* Render selected vertices by bounding box
+	 *  -- this should be model specific later */
+	if (mRenderMode & RENDER_BBOX_SEL)
+	{
+		mModel->getVertexSelection(min, max, &list);
+
+		/* Render bounding box */
+		mglDrawBbox(min, max, RED, mColorWireframe);
+
+		/* Render selected vertices */
+		if (list && !list->empty())
+		{
+			glPointSize(_default_point_size);
+			glColor3fv(GREEN);
+			glBegin(GL_POINTS);
+		 
+			for (i = list->begin(), n = list->end(); i < n; ++i)
+			{
+				xyz = mModel->getVertexXYZ((*list)[i]);
+
+				if (xyz)
+				{
+					glVertex3fv(*xyz);
+				}
+			}
+		 
+			glEnd();
+		}
+	}
+
+
+	/* Render meshes */
+	for (i = 0, n = model.getMeshCount(); i < n; ++i)
+	{
+		model.getMesh(i, rmesh);
+		renderMesh(rmesh);
+	}
+
+
+	/* Render skeleton */
+	if (mRenderMode & RENDER_BONES)
+	{
+		/* Yay, let thou bones show through thine meshes 
+		 * and it was good for editing */
+		if (mRenderMode & fRenderBonesClearedZBuffer)
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
+
+		FreyjaRender::mSelectedBone = mModel->getCurrentBone();
+		drawSkeleton2(model.getSkeleton(), 0, mZoom);
+	}
+
+	glPopMatrix();
 }
 
 
@@ -1111,7 +1314,7 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 	{
 		// Update wireframe color
 		if (mRenderMode & fHightlightPolygonWireframe)
-			//polygon.id == _model->getCurrentPolygon())
+			//polygon.id == mModel->getCurrentPolygon())
 		{
 			glColor3fv(mColorWireframeHighlight);    
 		}
@@ -1242,185 +1445,6 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 }
 
 
-void FreyjaRender::renderMesh(RenderMesh &mesh)
-{
-	RenderPolygon face;
-	Vector3d v;
-	unsigned int i;
-
-
-	if (mRenderMode & RENDER_POINTS)
-	{
-		glPointSize(5.0);
-		glBegin(GL_POINTS);
-
-		for (i = mesh.gbegin; i < mesh.gend; ++i)
-		{
-			v = mesh.getGroupCenter(i);
-			glColor3fv(RED);
-			glVertex3fv(v.mVec);
-		}
-
-		glEnd();
-		glPointSize(_default_point_size);
-	}
-
-	if (!mesh.polygon->empty())
-	{
-		if (mRenderMode & RENDER_TEXTURE)
-		{
-			glEnable(GL_TEXTURE_2D);
-		}
-		
-		if (mRenderMode & RENDER_MATERIAL)
-		{
-			gMaterialManager->applyEffectGL();
-		}
-		
-		if ((int)mesh.id == (int)_model->getCurrentMesh())
-		{
-			mRenderMode |= fHightlightPolygonWireframe;
-		}
-
-		_default_line_width *= 2;
-
-		// FIXME: Move this back into a method in RenderMesh to avoid
-		//        exposing old polygon type ( like getGroupCenter() )
-		for (i = mesh.polygon->begin(); i < mesh.polygon->end(); ++i)
-		{
-			createRenderPolygon(face, *(*mesh.polygon)[i], mesh.frame);
-			renderPolygon(face);
-		}
-		
-		if ((int)mesh.id == (int)_model->getCurrentMesh())
-		{
-			mRenderMode ^= fHightlightPolygonWireframe;
-		}
-
-		_default_line_width /= 2;
-		
-		if (mRenderMode & RENDER_TEXTURE)
-		{
-			glDisable(GL_TEXTURE_2D);
-		}
-	}
-}
-
-
-void FreyjaRender::renderModel(RenderModel &model)
-{
-	Vector<unsigned int> *list = 0x0;
-	RenderMesh rmesh;
-	vec3_t min, max;
-	vec3_t *xyz;
-	unsigned int i, n;
-
-
-	/* Render patch test -- this should be model specific later */ 
-	if (FreyjaRender::mPatchDisplayList > 0)
-	{
-		glCallList(FreyjaModel::gTestPatch.displayList);
-		drawPatch(FreyjaModel::gTestPatch);
-	}
-
-
-	/* Highlight current vertex group
-	 * -- this should be model specific later:
-	 * eg _model->getCurrentGroup() -> model.index */
-	if (mRenderMode & RENDER_POINTS)
-	{
-		/* Render bounding box */
-		_model->getMeshBoundingBox(_model->getCurrentGroup(), min, max);
-		renderBox(min, max);
-
-		/* Render actual vertices */
-		_model->getMeshVertices(_model->getCurrentGroup(), &list);
-
-		if (list && !list->empty())
-		{
-			glPointSize(_default_point_size);
-			glColor3fv(mColorVertexHighlight);
-			glBegin(GL_POINTS);
-
-			for (i = list->begin(), n = list->end(); i < n; ++i)
-			{
-				xyz = _model->getVertexXYZ((*list)[i]);
-
-				if (xyz)
-				{
-					glVertex3fv(*xyz);
-				}
-			}
-  
-			glEnd();
-		}
-	}    
-
-
-	/* Render selected vertices by bounding box
-	 *  -- this should be model specific later */
-	if (mRenderMode & RENDER_BBOX_SEL)
-	{
-		_model->getVertexSelection(min, max, &list);
-
-		/* Render bounding box */
-		mglDrawBbox(min, max, RED, mColorWireframe);
-
-		/* Render selected vertices */
-		if (list && !list->empty())
-		{
-			glPointSize(_default_point_size);
-			glColor3fv(GREEN);
-			glBegin(GL_POINTS);
-		 
-			for (i = list->begin(), n = list->end(); i < n; ++i)
-			{
-				xyz = _model->getVertexXYZ((*list)[i]);
-
-				if (xyz)
-				{
-					glVertex3fv(*xyz);
-				}
-			}
-		 
-			glEnd();
-		}
-	}
-
-
-	/* Render meshes */
-	for (i = 0, n = model.getMeshCount(); i < n; ++i)
-	{
-		model.getMesh(i, rmesh);
-		renderMesh(rmesh);
-	}
-
-
-	/* Render skeleton */
-	if (mRenderMode & RENDER_BONES)
-	{
-		/* Yay, let thou bones show through thine meshes 
-		 * and it was good for editing */
-		if (mRenderMode & fRenderBonesClearedZBuffer)
-		{
-			glClear(GL_DEPTH_BUFFER_BIT);
-		}
-
-		FreyjaRender::mSelectedBone = _model->getCurrentBone();
-		drawSkeleton2(model.getSkeleton(), 0, mZoom);
-	}
-
-	glPopMatrix();
-}
-
-
-void FreyjaRender::renderBox(vec3_t min, vec3_t max)
-{
-	//if (mRenderMode & RENDER_BBOX)
-	mglDrawBbox(min, max, RED, mColorWireframe);
-}
-
-
 void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 {
 	static int x, y, offset_x, offset_y;
@@ -1523,11 +1547,6 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
    glPopMatrix();
 }
 
-void FreyjaRender::setZoom(float zoom)
-{
-	mZoom = zoom;
-}
-
 
 void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
@@ -1575,13 +1594,13 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		break;
 	}
 
-	drawLights();
+	renderLights();
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	for (i = 0; i < _model->getModelCount(); ++i)
+	for (i = 0; i < mModel->getModelCount(); ++i)
 	{
-		_model->getModel(model, i);
+		mModel->getModel(model, i);
 		renderModel(model);
 	}
 }
@@ -1618,7 +1637,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 void FreyjaRender::DrawTextureEditWindow(unsigned int width, 
 										 unsigned int height)
 {
-	Egg *egg = _model->getCurrentEgg();
+	Egg *egg = mModel->getCurrentEgg();
 	egg_texel_t *texel = NULL;
 	egg_polygon_t *poly = NULL;
 	float x, y;
@@ -1635,24 +1654,24 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 
 	egg_mesh_t *meshPtr = NULL;
 
-	meshPtr = egg->getMesh(_model->getCurrentMesh());
+	meshPtr = egg->getMesh(mModel->getCurrentMesh());
 
 	if (!meshPtr)
 	{
 		DrawQuad(0.0, 0.0, width, height);
-		Reshape(width, height);
+		resizeContext(width, height);
 		glPopMatrix();
 		return;
 	}
 
-	for (i = _model->mUVMap.begin();  i < _model->mUVMap.end(); ++i)
+	for (i = mModel->mUVMap.begin();  i < mModel->mUVMap.end(); ++i)
 	{
-		poly = egg->getPolygon(_model->mUVMap[i]);
+		poly = egg->getPolygon(mModel->mUVMap[i]);
 		
 		if (!poly)
 			continue;
 
-		if (poly->shader != (int)_model->getCurrentTextureIndex())
+		if (poly->shader != (int)mModel->getCurrentTextureIndex())
 			continue;
 
 		glLineWidth(_default_line_width);
@@ -1712,16 +1731,16 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		if (!poly)
 			continue;
 		
-		if (poly->shader != (int)_model->getCurrentTextureIndex())
+		if (poly->shader != (int)mModel->getCurrentTextureIndex())
 			continue;
 		
 		// Mongoose: Draw texel polygons
 		glLineWidth(_default_line_width);
 		glBegin(GL_LINE_LOOP);
 		
-		if (mesh.id == (int)_model->getCurrentMesh())
+		if (mesh.id == (int)mModel->getCurrentMesh())
 		{
-			if (poly->id == _model->getCurrentPolygon())
+			if (poly->id == mModel->getCurrentPolygon())
 				glColor3fv(RED);    
 			else
 				glColor3fv(CYAN);
@@ -1791,7 +1810,7 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 					continue;
 				}
 
-				if ((int)_model->getCurrentTextureIndex() == poly->shader)
+				if ((int)mModel->getCurrentTextureIndex() == poly->shader)
 				{
 					switch (j)
 					{
@@ -1836,7 +1855,7 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 				x = texel->st[0] * width;
 				y = texel->st[1] * height;
 				
-				if ((int)_model->getCurrentTextureIndex() == poly->shader)
+				if ((int)mModel->getCurrentTextureIndex() == poly->shader)
 				{
 					switch (j)
 					{
@@ -1873,26 +1892,7 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 
 
 	DrawQuad(0.0, 0.0, width, height);
-	Reshape(width, height);
+	resizeContext(width, height);
 	glPopMatrix();
 }
 
-
-
-
-/* Mongoose 2004.03.26, 
- * You have to be kidding me 
- * Replace with quarternion/matrix and change API  */
-void FreyjaRender::Rotate(float n, int axis)
-{
-	_angles[axis] += n;
-
-	if (_angles[axis] >= 360.0)
-	{
-		_angles[axis] = 0.0;
-	}
-	else if (_angles[axis] < 0.0)
-	{
-		_angles[axis] = 360.0;
-	}
-}
