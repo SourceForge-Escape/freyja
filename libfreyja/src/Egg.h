@@ -131,6 +131,7 @@ typedef vec_t bbox_t[3][3];
 #define COLORED_POLYGON -1
 
 
+
 typedef struct {
 	vec_t weight;                     /* Weight for vertex use */
 	unsigned int bone;                /* Bone id */
@@ -182,6 +183,29 @@ typedef struct egg_group_s {
 } egg_group_t;
 
 
+class EggVertexAnimationFrame
+{
+public:
+	void erase()
+	{
+		vertices.erase();
+	}
+
+	void transform();
+
+	Vector<vec3_t *> vertices;        /* Vertex frame */
+
+	char name[64];                    /* Name of frame if any */
+	int id;                           /* Index of frame */
+
+	//Vector3d bboxMin;                 /* Min corner of bounding box */
+	//Vector3d bboxMax;                 /* Max corner of bounding box */
+
+	//Vector3d center;                  /* Center of bounding volume */
+	vec_t radius;                     /* Radius of bounding sphere if used */
+};
+
+
 typedef enum {
 	FL_MESH__VERTEX_FRAME_GROUPS = 1
 
@@ -198,13 +222,22 @@ typedef struct egg_mesh_s {
 
 	Vector <egg_polygon_t *> r_polygon;
 
+	/* Ext to 8.12 for better vertex morph animation */
+	unsigned int frameRate;
+	unsigned int currentFrame;
+	unsigned int lastFrame;
+	vec_t time;
+	vec_t lastTime;
+	Vector<EggVertexAnimationFrame *> frames;
+	/* End Ext */
+
 } egg_mesh_t;
 
 
 // egg_tag mixed with egg_bone
 typedef struct egg_tag_s {
 	int id;                           /* Unique identifier */
-	char name[64];
+	char name[64];                    // Ext to 8.12 for bone name
 	Vector <unsigned int> slave;      /* Slave tags */
 	Vector <unsigned int> mesh;       /* List of meshes bound to this */
 	unsigned char flag;               /* Rendering flag, special use */
@@ -212,6 +245,8 @@ typedef struct egg_tag_s {
 	matrix_t transform;               /* Transform mesh/slaves by this matrix */
 	vec3_t rot;
 	int parent;  // Ext for 8.12, 20040917 ( not stored to disk )
+
+	// This needs a reference system to tell when no longer in use
 } egg_tag_t;
 
 
@@ -226,6 +261,15 @@ typedef struct egg_boneframe_s {
 // egg_meshtree_anim
 typedef struct egg_animation_s {
 	int id;                             /* Unique identifier */
+
+	// Ext to 8.12
+	unsigned int frameRate;
+	unsigned int currentFrame;
+	unsigned int lastFrame;
+	vec_t time;
+	vec_t lastTime;
+	// End Ext
+
 	Vector<unsigned int> frame;         /* BoneFrames in this aniamtion */
 
 } egg_animation_t;
