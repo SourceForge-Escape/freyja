@@ -25,7 +25,7 @@
 
 
 #ifdef HAVE_MTKIMAGE
-#   include "MtkImage.h"
+#   include <freyja_image/MtkImage.h>
 #endif
 
 #include "URTexture.h"
