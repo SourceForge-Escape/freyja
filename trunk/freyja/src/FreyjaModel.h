@@ -1061,6 +1061,9 @@ public:
 
 	unsigned int getPolygonCount()
 	{
+		if (mPolygons->empty()) 
+			return 0;
+
 		return mPolygons->end();
 	}
 

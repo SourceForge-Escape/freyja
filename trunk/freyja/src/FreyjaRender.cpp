@@ -1318,8 +1318,8 @@ void FreyjaRender::renderModel(RenderModel &model)
 	/* Render meshes */
 	for (i = 0, n = model.getMeshCount(); i < n; ++i)
 	{
-		model.getMesh(i, rmesh);
-		renderMesh(rmesh);
+		if (model.getMesh(i, rmesh))
+			renderMesh(rmesh);
 	}
 
 
