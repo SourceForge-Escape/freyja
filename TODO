@@ -1,6 +1,6 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO  ( Last Update: 2004.06.01 )
+  File     : TODO  ( Last Update: 2004.11.01 )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : freyja
 
@@ -10,12 +10,13 @@
  TODO
 
  General
+	o Make a command pattern test with colors system
+	o Replace event:command events with eEvent use
 	o Material plugins
-	o Egg editor util plugins 
-	o freyja_, mgtk_, etc function names to denote API
+	o Finish Freyja editor interactive plugins 
 	o Soft ABI for Mlisp hooks only
 	o Move Material system into it's on library
-	o Library for Egg rendering?
+	o Library for Egg / Freyja rendering?
 	o FreyjaModel shouldn't handle mouse clicks
 	o FreyjaControl still sends 2d planar events to FreyjaModel
 	o Replace FreyjaModel (xx, yy) handlers with objects or 3d events
@@ -26,17 +27,14 @@
 	o Event logger system Undo / Redo / Macro / Playback
 	o Hard ABI with stricter event control
 
- mlisp-mgtk+
-	o Remove gdk event code, hook up signals in resource
-	o slider widget
+ libmgtk
+	o Move Mlisp into it's own library
+	o External (un)toggle toggle button event for application use 
+	o Tree widgets (tree eAction )
 	o Mlisp doesn't lookup symbols for like "true" if just setq
-	o Split mlisp-mgtk+ and Freyja
-	o Remove more unused events / handlers
-	o Reduce Gtk+ hooks, singals, and handlers
-	o Move Mlisp into it's on library
-	o Milsp garbage collection / more fully featured
+	o Milsp wish list: garbage collection, fully featured lisp
 
- libfreyja_model
+ libfreyja
 	o Documentation
 	o Add polymesh CSG back 
 	o Subdivision Loop and Sabin/Doo surfaces
@@ -47,14 +45,20 @@
 	o Polygon groups
 	o Cone and Torus mesh generation
 
- egg_plugins
+ freyja_plugins / egg_plugins
+	o Finish porting all egg_plugins to new backend
+	o Finish Python binding plugin (python)
+	o Finish Morrowind plugin (nif4)
+	o Add support for 'nvidia' ASE skel animation (ase)
+	o Fix Doom3 plugin (md5)
+	o Finish PSK export (PSKModel)
+	o UTX export (UTPackage)
+	o Improve scaling and conversion to Freyja coords
 	o More unit testing
-	o Finish PSK export
-	o UTX export
-	o Scaling and conversion to Freyja improved
 
  Freyja
-	o Context sensitive menus
+	o Remove context sensitive new/open/save go back to old per tab toolbar
+	  it confused the hell out of users
 	o Documentation
 	o Normal map, DOT3, and matrix palette skinning support
 	o glColorMaterial use

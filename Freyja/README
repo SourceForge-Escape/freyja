@@ -1,33 +1,18 @@
 
- Freyja 0.3.1 Release ( "I gotta believe!" )
-
+ Freyja 0.3.5 Release ( "Chimera" )
  -----------------------------------------------------------
 
  Read ChangeLog for details about this and other releases.
 
  Check TODO to see when a feature you want is due.  Also
- track CVS to get sometime daily updates to the codebase.
+ track SVN to get current updates to the codebase.
 
- Read the FAQ or visit irc.linux.com #freyja for help and 
+ Read the FAQ or visit irc.freenode.net #freyja for help and 
  tips.  If you'd like to help email or visit the channel, 
  because I need help with things from writing plugins to
- more formal testing.  Read BUGS and ChangLog also.  =)
-
- -----------------------------------------------------------
-
-  Gentoo users:
-
-    http://oss.sgi.com/projects/ogl-sample/sdk.html
-
+ more formal testing.
 
  Email feature requests and bugs to:
 
-  <Mongoose> stu7440@westga.edu
+  <Mongoose> mongoose@icculus.org
 
- -----------------------------------------------------------
-
- Hardcoded key commands:
-
- <Ctrl> mouse1 allows object selection w/o switching modes
-
- 
