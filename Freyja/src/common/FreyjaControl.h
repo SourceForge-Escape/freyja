@@ -31,7 +31,7 @@
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaEvent.h"
-#include "FreyjaResource.h"
+#include "Resource.h"
 #include "freyja_events.h"
 
 

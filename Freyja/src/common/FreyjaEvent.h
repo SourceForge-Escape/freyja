@@ -29,7 +29,7 @@
 
 
 #include <mstl/Vector.h>
-#include "FreyjaResource.h"
+#include "Resource.h"
 
 
 class FreyjaEvent
@@ -40,7 +40,7 @@ class FreyjaEvent
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaEvent(FreyjaResource *rcSys, char *name);
+	FreyjaEvent(Resource *rcSys, char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaEvent
@@ -98,7 +98,7 @@ class FreyjaEvent
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	FreyjaResource *mResource;      /* Resource system pointer */
+	Resource *mResource;            /* Resource system pointer */
 
 	unsigned int mId;               /* Numeric id of event */
 

@@ -23,7 +23,7 @@
 #include "gnome_callbacks.h"
 #include "gnome_resource.h"
 
-#include "FreyjaResource.h"
+#include "Resource.h"
 #include "freyja_events.h"
 
 
