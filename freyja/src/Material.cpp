@@ -212,6 +212,7 @@ void Material::setFlag(MaterialFlags_t flag)
 		//	break;
 	case fEnable_Normalize:
 		glEnable(GL_NORMALIZE);
+		//glEnable(GL_RESCALE_NORMAL); // better but doesn't do nonuniform
 		break;
 	default:
 		;

@@ -206,20 +206,6 @@ void test_patch()
 }
 
 
-// Just for testing for now
-void setup_lights_test()
-{
-	static bool init = false;
-	
-	
-	if (init)
-		return;
-	
-	init = true;
-	glEnable(GL_LIGHT0);
-}
-
-
 bool gl_ext_check(char *ext)
 {
 	bool ret = false;
@@ -472,6 +458,7 @@ void FreyjaRender::drawLights()
 		glPopMatrix();
 		
 		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
 		glLightfv(GL_LIGHT0, GL_POSITION, _model->mLight0Pos);
 	}
 }
@@ -588,6 +575,22 @@ void drawSkeleton2(Vector<egg_tag_t *> *taglist,
 }
 
 
+void getOpenGLViewport(int *viewportXYWH) // int[4]
+{
+	glGetIntegerv(GL_VIEWPORT, viewportXYWH);
+}
+
+void getOpenGLModelviewMatrix(double *modelview) // double[16]
+{
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+}
+
+void getOpenGLProjectionMatrix(double *projection) // double[16]
+{
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+}
+
+
 ////////////////////////////////////////////////////////////////
 
 
@@ -599,8 +602,8 @@ FreyjaRender::FreyjaRender()
 	_init = false;
 
 	// Mongoose 2002.03.07, Init these various things here in contructor now
-	Width(640);
-	Height(480);
+	_width = 640;
+	_height = 480;
 	RotateAmount(1.0);
 
 	for (long i = 0; i < 3; ++i)
@@ -619,6 +622,50 @@ FreyjaRender::~FreyjaRender()
 }
 
 
+////////////////////////////////////////////////////////////
+// Public Accessors
+////////////////////////////////////////////////////////////
+
+unsigned int FreyjaRender::getFlags()
+{
+	return mRenderMode;
+}
+
+
+void FreyjaRender::getRotation(vec3_t v)
+{
+	v[0] = _angles[0];
+	v[1] = _angles[1];
+	v[2] = _angles[2];
+}
+
+
+vec_t FreyjaRender::getWindowAspectRatio()
+{
+	return mAspectRatio;
+}
+
+
+unsigned int FreyjaRender::getWindowWidth()
+{
+	return _width;
+}
+
+
+unsigned int FreyjaRender::getWindowHeight()
+{
+	return _height;
+}
+
+
+float FreyjaRender::getZoom()
+{
+	return mZoom;
+}
+
+
+
+
 void FreyjaRender::Flags(flags_t flag, int op)
 {
 	mRenderMode |= flag;
@@ -632,12 +679,6 @@ void FreyjaRender::Flags(flags_t flag, int op)
 	{
 		Reshape(_width, _height);
 	}
-}
-
-
-unsigned int  FreyjaRender::Flags()
-{
-	return mRenderMode;
 }
 
 
@@ -672,7 +713,6 @@ void FreyjaRender::Init(int width, int height, bool fast_card)
 
 	freyja_print("\tGL_EXT_texture_env_combine\t\t[%s]",
 			 ext_texture_env_combine ? "YES" : "NO");
-
 
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
@@ -783,30 +823,6 @@ void FreyjaRender::Reset()
 }
 
 
-unsigned int FreyjaRender::Width()
-{
-	return _width;
-}
-
-
-unsigned int FreyjaRender::Height()
-{
-	return _height;
-}
-
-
-void FreyjaRender::Width(unsigned int i)
-{
-	_width = i;
-}
-
-
-void FreyjaRender::Height(unsigned int i)
-{
-	_height = i;
-}
-
-
 void FreyjaRender::RotateAmount(float n)
 {
 	_rotate_amount = n;
@@ -844,12 +860,6 @@ float FreyjaRender::RotateAmount()
 }
 
 
-void FreyjaRender::ScreenShot()
-{
-	gMaterialManager->takeScreenshot("Freyja", Width(), Height());
-}
-
-
 void FreyjaRender::ViewMode(int mode)
 {
 	_view_mode = mode;
@@ -858,66 +868,66 @@ void FreyjaRender::ViewMode(int mode)
 
 void FreyjaRender::drawFreeWindow()
 {
-		glRotatef(_angles[0], 1.0, 0.0, 0.0);
-		glRotatef(_angles[1], 0.0, 1.0, 0.0);
-		glRotatef(_angles[2], 0.0, 0.0, 1.0);
+	glRotatef(_angles[0], 1.0, 0.0, 0.0);
+	glRotatef(_angles[1], 0.0, 1.0, 0.0);
+	glRotatef(_angles[2], 0.0, 0.0, 1.0);
 
-		glTranslatef(_scroll[0], _scroll[1], _scroll[2]);
+	glTranslatef(_scroll[0], _scroll[1], _scroll[2]);
 
-		glPushMatrix();
+	glPushMatrix();
 
-		glLineWidth(2.0f); 
+	glLineWidth(2.0f); 
 
-		if (mRenderMode & RENDER_EDIT_GRID)
+	if (mRenderMode & RENDER_EDIT_GRID)
+	{
+		glLineWidth(1.25f);
+		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
+
+		glLineWidth(2.0f);
+		mglDrawAxis(0.25f, 1.2f, 0.872f);
+
+		glLineWidth(1.75f);
+		glBegin(GL_LINES);
+		glColor3fv(RED);
+		glVertex3f(-50.0f, 0.0f, 0.0f);	
+		glVertex3f(50.0f, 0.0f, 0.0f);
+		glColor3fv(BLUE);
+		glVertex3f(0.0f, 0.0f, -50.0f);	
+		glVertex3f(0.0f, 0.0f, 50.0f);
+
+		glColor3fv(mColorGridLine);
+
+		for (float x = -50.0f; x < 60.0f; x += 10.f)
 		{
-			glLineWidth(1.25f);
-			mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
+			if (x < 10.0f && x > -10.0f) 
+				continue;
 
-			glLineWidth(2.0f);
-			mglDrawAxis(0.25f, 1.2f, 0.872f);
-
-			glLineWidth(1.75f);
-			glBegin(GL_LINES);
-			glColor3fv(RED);
-			glVertex3f(-50.0f, 0.0f, 0.0f);	
-			glVertex3f(50.0f, 0.0f, 0.0f);
-			glColor3fv(BLUE);
-			glVertex3f(0.0f, 0.0f, -50.0f);	
-			glVertex3f(0.0f, 0.0f, 50.0f);
-
-			glColor3fv(mColorGridLine);
-
-			for (float x = -50.0f; x < 60.0f; x += 10.f)
-			{
-				if (x < 10.0f && x > -10.0f) 
-					continue;
-
-				glVertex3f(x, 0.0f, -50.0f);	
-				glVertex3f(x, 0.0f, 50.0f);
-				glVertex3f(-50.0f, 0.0f, x);	
-				glVertex3f(50.0f, 0.0f, x);
-			}
-			glEnd();
+			glVertex3f(x, 0.0f, -50.0f);	
+			glVertex3f(x, 0.0f, 50.0f);
+			glVertex3f(-50.0f, 0.0f, x);	
+			glVertex3f(50.0f, 0.0f, x);
 		}
+		glEnd();
+	}
 
-		if (mRenderMode & RENDER_BONES)
-		{
-			glLineWidth(3.0f);
-			FreyjaRender::mSelectedBone = _model->getCurrentBone();
+	if (mRenderMode & RENDER_BONES)
+	{
+		glLineWidth(3.0f);
+		FreyjaRender::mSelectedBone = _model->getCurrentBone();
 
-			//if (mRenderMode & fRenderBonesClearedZBuffer)
-			//	glClear( GL_DEPTH_BUFFER_BIT);
-			drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
+		//if (mRenderMode & fRenderBonesClearedZBuffer)
+		//	glClear( GL_DEPTH_BUFFER_BIT);
+		drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
 
-			glLineWidth(_default_line_width);
-		}
+		glLineWidth(_default_line_width);
+	}
 
-		drawLights();
-		glPopMatrix();
+	drawLights();
+	glPopMatrix();
 
-		glScalef(mZoom, mZoom, mZoom);
+	glScalef(mZoom, mZoom, mZoom);
 
-		DrawModel(_model->getCurrentEgg());
+	DrawModel(_model->getCurrentEgg());
 }
 
 
@@ -1029,7 +1039,7 @@ void FreyjaRender::Display()
 #endif
 		break;
 	case VIEWMODE_TEXTURE_EDIT:
-		DrawTextureEditWindow(Width(), Height());
+		DrawTextureEditWindow(getWindowWidth(), getWindowHeight());
 		break;
 	case VIEWMODE_MATERIAL_EDIT:
 		DrawMaterialEditWindow();
@@ -1050,10 +1060,9 @@ void FreyjaRender::Reshape(unsigned int w, unsigned int h)
 		return;
 	}
 
-	_aspect_ratio = (float)w/(float)h;
-
-	Width(w);
-	Height(h);
+	_width = w;
+	_height = h;
+	mAspectRatio = (float)w/(float)h;
 
 	glViewport(0, 0, w, h); 
 	glMatrixMode(GL_PROJECTION); 
@@ -1070,14 +1079,6 @@ void FreyjaRender::Reshape(unsigned int w, unsigned int h)
 						   NEAR*100, 
 						   FAR*100);
 		}
-// 		else if (w <= h) 
-// 		{
-// 			glOrtho(-SCALE_ENV, 
-// 					SCALE_ENV, -SCALE_ENV * (GLfloat) h / (GLfloat) w, 
-// 					SCALE_ENV * (GLfloat) h / (GLfloat) w, 
-// 					-400.0,
-// 					400.0); 
-// 		}
 		else 
 		{
 			glOrtho(-SCALE_ENV * (GLfloat) w / (GLfloat) h, 
@@ -1129,16 +1130,14 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glDisable(GL_TEXTURE_2D);
 		glColor3fv(WHITE); // BLACK
 		
+
 		glBegin(GL_QUADS);
 		glColor3f(0.0, 1.0, 0.5);
 		glVertex2f(x, y);
-		
 		glColor3f(0.0, 0.0, 0.5);
 		glVertex2f(x, y+h);
-		
 		glColor3f(1.0, 0.0, 0.5);
 		glVertex2f(x+w, y+h);
-		
 		glColor3f(1.0, 1.0, 0.5);
 		glVertex2f(x+w, y);
 		glEnd();
@@ -1168,6 +1167,148 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 }
 
 
+void FreyjaRender::renderPolygon(RenderPolygon &face)
+{
+	static Vector3d u, v;
+	static unsigned int i;
+
+
+	/* Render wireframe */
+	if (mRenderMode & RENDER_WIREFRAME)
+	{
+		// Update wireframe color
+		if (mRenderMode & fHightlightPolygonWireframe)
+			//polygon.id == _model->getCurrentPolygon())
+		{
+			glColor3fv(mColorWireframeHighlight);    
+		}
+		else
+		{
+			glColor3fv(mColorWireframe);
+		}
+
+		glLineWidth(_default_line_width);
+
+
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+
+		glBegin(GL_LINE_LOOP);
+
+		for (i = 0; i < face.count; ++i)
+		{
+			u = face.vertices[i];
+			u *= 1.0001;
+			glVertex3fv(u.mVec);
+		}
+	  
+		glEnd();
+
+		glPopAttrib();
+	}
+
+	// Render normals, remove this for speed -- move up to model or mesh
+	if (mRenderMode & RENDER_NORMALS)
+	{
+		glBegin(GL_LINES);
+		glColor3f(0.2, 0.2, 0.8);
+	
+		for (i = 0; i < face.count; ++i)
+		{
+			u = face.vertices[i];
+			v = face.normals[i];
+			v *= (2 * (1 / mZoom));
+			v += u;
+
+			glVertex3fv(u.mVec);
+			glVertex3fv(v.mVec);
+		}
+		
+		glEnd();
+	}
+
+	/* Render face with material, color, or something */
+	if (mRenderMode & RENDER_FACE)
+	{
+		if (mRenderMode & RENDER_TEXTURE)
+		{
+			glEnable(GL_TEXTURE_2D);
+		}
+
+		// Call shader/texture ( no shader support yet )
+		if (mRenderMode & RENDER_TEXTURE && face.material != COLORED_POLYGON)
+		{
+			if (mRenderMode & RENDER_MATERIAL)
+			{
+				//glPushAttrib(GL_ENABLE_BIT);
+				gMaterialManager->applyEffectGL(face.material);
+			}
+
+			BindTexture(face.material + 1);
+		}
+		else
+		{
+			BindTexture(0);//COLORED_POLYGON);
+			glDisable(GL_TEXTURE_2D);
+		}
+
+		glColor3fv(WHITE);
+
+		switch (face.count)
+		{
+		case 1:
+			glBegin(GL_POINTS); // error
+			break;
+		case 2:
+			glBegin(GL_LINES); // error
+			break;
+		case 3:
+			glBegin(GL_TRIANGLES);
+			break;
+		case 4:
+			glBegin(GL_QUADS);
+			break;
+		default:
+			glBegin(GL_POLYGON);
+		}
+
+		for (i = 0; i < face.count; ++i)
+		{
+			if (mRenderMode & RENDER_NORMAL)
+			{
+				glNormal3fv(face.normals[i].mVec);
+			}
+
+			if (face.material == COLORED_POLYGON)
+			{
+				glColor4fv(face.colors[i]);
+			}
+			else if (mRenderMode & RENDER_TEXTURE)
+			{
+				glColor3f(1.0, 1.0, 1.0);
+				glTexCoord2fv(face.texcoords[i].mVec);
+			}
+			else
+			{
+				glColor3fv(WHITE);
+				glColor4f(face.texcoords[i].mVec[0], 
+						  face.texcoords[i].mVec[1], 0.5, 1.0);
+			}
+
+			glVertex3fv(face.vertices[i].mVec);
+		}
+
+		glEnd();
+
+		if (mRenderMode & RENDER_MATERIAL)
+		{
+			//glPopAttrib();
+		}
+	}
+}
+
+#ifdef DISABLED
 /* This polygon renderer now only handles 6 edges max */
 void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 {
@@ -1310,7 +1451,10 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		glEnd();
 	}
 
-	// Render points, remove this for speed -- move up to mesh level draw by grp
+#   ifdef DISABLED
+	/* Render points, disabled for speed -- 
+	 *  move up to mesh level draw by group to reenable 'unselected vertex'
+	 *  rendering */
 	if (mRenderMode & RENDER_POINTS)
 	{
 		glColor3fv(mColorVertex);
@@ -1324,6 +1468,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 
 		glEnd();   
 	}
+#   endif
 
 
 	/* Render face with material, color, or something */
@@ -1408,11 +1553,13 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
 		}
 	}
 }
+#endif
 
 
 void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 {
 	Egg *egg = _model->getCurrentEgg();
+	RenderPolygon face;
 	egg_polygon_t *polygon;
 	egg_group_t *grp;
 	unsigned int i;
@@ -1489,8 +1636,13 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 				freyja_print("FIXME: NULL Polygon in list %s:%i\n", __FILE__, __LINE__);
 				continue;
 			}
-				
-			DrawPolygon(*polygon, frame);    
+
+#ifdef DISABLED
+			DrawPolygon(*polygon, frame);
+#else
+			createRenderPolygon(face, *polygon, frame);
+			renderPolygon(face);
+#endif
 		}
 		
 		if ((int)mesh.id == (int)_model->getCurrentMesh())
@@ -1851,15 +2003,11 @@ void FreyjaRender::setZoom(float zoom)
 	mZoom = zoom;
 }
 
-float FreyjaRender::getZoom()
-{
-	return mZoom;
-}
 
 void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
 	if (mRenderMode & RENDER_EDIT_GRID)
-		DrawGrid(plane, Width(), Height(), 10);
+		DrawGrid(plane, getWindowWidth(), getWindowHeight(), 10);
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
@@ -1928,7 +2076,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 
 	/* Setup lighting */
 	glEnable(GL_LIGHTING);
-	setup_lights_test();	
+	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
 	/* Setup material */
@@ -2211,12 +2359,6 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 }
 
 
-void FreyjaRender::getRotation(vec3_t v)
-{
-	v[0] = _angles[0];
-	v[1] = _angles[1];
-	v[2] = _angles[2];
-}
 
 
 /* Mongoose 2004.03.26, 
@@ -2226,11 +2368,11 @@ void FreyjaRender::Rotate(float n, int axis)
 {
 	_angles[axis] += n;
 
-   if (_angles[axis] >= 360.0)
+	if (_angles[axis] >= 360.0)
 	{
-      _angles[axis] = 0.0;
+		_angles[axis] = 0.0;
 	}
-   else if (_angles[axis] < 0.0)
+	else if (_angles[axis] < 0.0)
 	{
 		_angles[axis] = 360.0;
 	}

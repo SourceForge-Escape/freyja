@@ -27,7 +27,10 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-
+	o Alternative renderer starts with translators for Egg faces
+	o Removed some junk code from FreyjaRender ( needs a rewrite )
+	o Disabled per polygon POINT rendering for vertices
+	o Remove Egg dependence in FreyjaControl
 	o FreyjaEvent system actually used in test
 	o Automatic user install from /usr/share data
 	o Freyja d-bus prototyping in python

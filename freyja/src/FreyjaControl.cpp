@@ -893,17 +893,17 @@ bool FreyjaControl::event(int command)
 
 	case eCamera:
 		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_CAMERA));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_CAMERA));
 		freyja_print("Camera rendering [%s]", 
-					(mRender->Flags() & FreyjaRender::RENDER_CAMERA) ? 
+					(mRender->getFlags() & FreyjaRender::RENDER_CAMERA) ? 
 					"ON" : "OFF");
 		break;
 
 	case eViewports:
 		mRender->Flags(FreyjaRender::fViewports, 
-					   !(mRender->Flags() & FreyjaRender::fViewports));
+					   !(mRender->getFlags() & FreyjaRender::fViewports));
 		freyja_print("Viewport rendering [%s]", 
-					(mRender->Flags() & FreyjaRender::fViewports) ? 
+					(mRender->getFlags() & FreyjaRender::fViewports) ? 
 					"ON" : "OFF");
 		break;
 
@@ -928,7 +928,9 @@ bool FreyjaControl::event(int command)
 
 
 	case eScreenShot:
-		mRender->ScreenShot();
+		gMaterialManager->takeScreenshot("Freyja", 
+										 mRender->getWindowWidth(),
+										 mRender->getWindowHeight());
 		break;
 
 
@@ -1042,9 +1044,9 @@ bool FreyjaControl::event(int command)
 
 	case eRenderBbox:
 		mRender->Flags(FreyjaRender::RENDER_BBOX, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_BBOX));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_BBOX));
 		freyja_print("BoundingBox rendering [%s]", 
-					(mRender->Flags() & FreyjaRender::RENDER_BBOX) ? 
+					(mRender->getFlags() & FreyjaRender::RENDER_BBOX) ? 
 					"ON" : "OFF");
 		break;
 
@@ -1199,7 +1201,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eMove:
-		mModel->transform(mTransformMode, Egg::TRANSLATE,
+		mModel->transform(mTransformMode, fTranslate,
 						  freyja_event_get_float(eMove_X),
 						  freyja_event_get_float(eMove_Y),
 						  freyja_event_get_float(eMove_Z));
@@ -1211,7 +1213,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eRotate:
-		mModel->transform(mTransformMode, Egg::ROTATE,
+		mModel->transform(mTransformMode, fRotate,
 						  freyja_event_get_float(eRotate_X),
 						  freyja_event_get_float(eRotate_Y),
 						  freyja_event_get_float(eRotate_Z));
@@ -1223,7 +1225,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eScale:
-		mModel->transform(mTransformMode, Egg::SCALE,
+		mModel->transform(mTransformMode, fScale,
 						  freyja_event_get_float(eScale_X),
 						  freyja_event_get_float(eScale_Y),
 						  freyja_event_get_float(eScale_Z));
@@ -1502,75 +1504,75 @@ bool FreyjaControl::event(int command)
 
 	case FREYJA_MODE_RENDER_BONETAG:
 		mRender->Flags(FreyjaRender::RENDER_BONES, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_BONES));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_BONES));
 		freyja_print("Bone Rendering [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_BONES) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_BONES) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_POINTS:
 		mRender->Flags(FreyjaRender::RENDER_POINTS, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_POINTS));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_POINTS));
 		freyja_print("Point Rendering [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_POINTS) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_POINTS) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_WIREFRAME:
 		mRender->Flags(FreyjaRender::RENDER_WIREFRAME, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_WIREFRAME));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_WIREFRAME));
 		freyja_print("Wireframe Rendering [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_WIREFRAME) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_FACE:
 		mRender->Flags(FreyjaRender::RENDER_FACE, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_FACE));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_FACE));
 		freyja_print("Face Rendering [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_FACE) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_FACE) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_NORMALS:
 		mRender->Flags(FreyjaRender::RENDER_NORMALS, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_NORMALS));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_NORMALS));
 		freyja_print("Normal Rendering [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_NORMALS) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_NORMALS) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_LIGHTING:
 		mRender->Flags(FreyjaRender::RENDER_NORMAL, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_NORMAL));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_NORMAL));
 		mRender->Flags(FreyjaRender::RENDER_LIGHTING, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_LIGHTING));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_LIGHTING));
 		freyja_print("GL Lighting is [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_LIGHTING) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_LIGHTING) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_TEXTURE:
 		mRender->Flags(FreyjaRender::RENDER_TEXTURE, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_TEXTURE));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_TEXTURE));
 		freyja_print("Texture rendering is [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_TEXTURE) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_TEXTURE) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_MATERIAL:
 		mRender->Flags(FreyjaRender::RENDER_MATERIAL, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_MATERIAL));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_MATERIAL));
 		freyja_print("Material rendering is [%s]", 
-					 (mRender->Flags() & FreyjaRender::RENDER_MATERIAL) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_MATERIAL) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_RENDER_GRID:
 		mRender->Flags(FreyjaRender::RENDER_EDIT_GRID, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_EDIT_GRID));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID));
 		freyja_print("Edit Grid rendering [%s]",
-					 (mRender->Flags() & FreyjaRender::RENDER_EDIT_GRID) ? 
+					 (mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -1774,8 +1776,8 @@ void FreyjaControl::getFreeWorldFromScreen(int xx, int yy, vec3_t xyz)
 	vec3_t scroll, rotate, xy, yz, xz;
 
 
-	width = mRender->Width();
-	height = mRender->Height();
+	width = mRender->getWindowWidth();
+	height = mRender->getWindowHeight();
 	mModel->getSceneTranslation(scroll);
 	mRender->getRotation(rotate);
 
@@ -1911,8 +1913,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 				float s;
 				float t;
 				
-				s = (float)x / (float)mRender->Width();
-				t = (float)y / (float)mRender->Height();
+				s = (float)x / (float)mRender->getWindowWidth();
+				t = (float)y / (float)mRender->getWindowHeight();
 
 				if (s > 1.0) s = 1.0;
 				if (s < 0.0) s = 0.0;
@@ -1930,8 +1932,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 				float s;
 				float t;
 				
-				s = (float)x / (float)mRender->Width();
-				t = (float)y / (float)mRender->Height();
+				s = (float)x / (float)mRender->getWindowWidth();
+				t = (float)y / (float)mRender->getWindowHeight();
 
 				if (s > 1.0) s = 1.0;
 				if (s < 0.0) s = 0.0;
@@ -1950,8 +1952,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 				float s;
 				float t;
 				
-				s = (float)x / (float)mRender->Width();
-				t = (float)y / (float)mRender->Height();
+				s = (float)x / (float)mRender->getWindowWidth();
+				t = (float)y / (float)mRender->getWindowHeight();
 				
 				if (s > 1.0) s = 1.0;
 				if (s < 0.0) s = 0.0;
@@ -2041,8 +2043,8 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 			float s, t;
 			
 			
-			s = (float)x / (float)mRender->Width();
-			t = (float)y / (float)mRender->Height();
+			s = (float)x / (float)mRender->getWindowWidth();
+			t = (float)y / (float)mRender->getWindowHeight();
 			
 			// Mongoose: Clamp texels to be bound by min and max
 			if (s > 1.0) s = 1.0;
@@ -2122,14 +2124,75 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 }
 
 
+void FreyjaControl::getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz)
+{
+#ifdef FIXME
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+
+	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
+	long windowHeight = mRender->getWindowHeight();
+	long windowWidth = mRender->getWindowWidth();
+	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
+	vec_t windowX = x - windowWidth / 2;
+	double normX = double(windowX) / double(windowWidth / 2);
+	vec_t windowY = (windowHeight - y) - windowHeight / 2;
+	double normY = double(windowY) / double(windowHeight / 2);
+	//float x = nearHeight * mRender->getAspectRatio() * normX;
+	//float y = nearHeight * normY;
+
+	printf("%f %f %f\n", xyz[0], xyz[1], xyz[2]);
+#endif
+}
+
+
+Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
+{
+	vec_t nearHeight = 400; // fluff filler for now
+	vec_t zNear = 0.1;
+
+
+	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
+	long windowHeight = mRender->getWindowHeight();
+	long windowWidth = mRender->getWindowWidth();
+	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
+	vec_t windowX = mouseX - windowWidth / 2;
+	double normX = double(windowX) / double(windowWidth / 2);
+	vec_t windowY = (windowHeight - mouseY) - windowHeight / 2;
+	double normY = double(windowY) / double(windowHeight / 2);
+	float x = nearHeight * (windowWidth/windowHeight) * normX;
+	float y = nearHeight * normY;
+
+	// Pick vector is now <x, y, -zNear> in eye coords
+	
+	Vector3d v = Vector3d(x, y, -zNear);
+	return v;
+
+	//Point rayPointObjCoord = Point(0, 0, 0);
+	//Vector3d rayVectorObjCoord = Vector3d(x, y, -nearDistance);
+
+	//Vector3d vObjCoord = modelviewInverse * rayVectorObjCoord;
+	//Point pObjCoord = modelviewInverse * rayPointObjCoord;
+
+	//...
+}
+
+
 void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 {
 	float width, height, invz, fs;
 	float scroll[3];
  
 
-	width = mRender->Width();
-	height = mRender->Height();
+	width = mRender->getWindowWidth();
+	height = mRender->getWindowHeight();
 	mModel->getSceneTranslation(scroll);
 
 #ifdef DEBUG_SCREEN_TO_WORLD
@@ -2288,6 +2351,12 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 	/* Mongoose: Convert screen to world coordinate system */
 	getWorldFromScreen(&xx, &yy, &zz);
 
+	// test
+	vec3_t xyz;
+	getWorldFromScreen(x, y, xyz);
+	printf("%f %f %f | old\n", xx, yy, zz);
+
+
 	switch (mTransformMode)
 	{
 	case FreyjaModel::TransformPoint:
@@ -2406,13 +2475,13 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 			break;
 		}
 		
-		mModel->transform(mTransformMode, Egg::TRANSLATE, xf, yf, zf); 
+		mModel->transform(mTransformMode, fTranslate, xf, yf, zf); 
 		break;
 
 
 	default:  
 		/* Relative movement based on mouse tracking */
-		mModel->transform(mTransformMode, Egg::TRANSLATE, xf, yf, zf);
+		mModel->transform(mTransformMode, fTranslate, xf, yf, zf);
 		break;
 	}
 
@@ -2428,7 +2497,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	float xr, yr, zr;
 	float xf, yf, zf;
 	int swap;
-	Egg::egg_transform rotate;
+	freyja_transform_action_t rotate;
 
 
 	/* Mongoose: Compute a relative movement value too here */
@@ -2479,12 +2548,12 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		yf *= 5.0f;
 		zf *= 5.0f;
 
-		rotate = Egg::ROTATE_ABOUT_CENTER;
+		rotate = fRotateAboutPoint;
 		break;
 
 
 	default:
-		rotate = Egg::ROTATE;
+		rotate = fRotate;
 	}
 
 	mModel->transform(mTransformMode, rotate, xf, yf, zf);
@@ -2503,13 +2572,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
+			mModel->transform(mTransformMode, fScale, 1.0, 0.99, 1.0);
 			break;
 		case PLANE_XZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
+			mModel->transform(mTransformMode, fScale, 1.0, 1.0, 1.01);
 			break;
 		case PLANE_ZY: // side
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
+			mModel->transform(mTransformMode, fScale, 1.0, 0.99, 1.0);
 			break;
 		}
 	}
@@ -2518,13 +2587,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
+			mModel->transform(mTransformMode, fScale, 1.0, 1.01, 1.0);
 			break;
 		case PLANE_XZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
+			mModel->transform(mTransformMode, fScale, 1.0, 1.0, 0.99);
 			break;
 		case PLANE_ZY: // side
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
+			mModel->transform(mTransformMode, fScale, 1.0, 1.01, 1.0);
 		}
 	}
 	
@@ -2533,13 +2602,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
+			mModel->transform(mTransformMode, fScale, 0.99, 1.0, 1.0);
 			break;
 		case PLANE_XZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
+			mModel->transform(mTransformMode, fScale, 0.99, 1.0, 1.0);
 			break;
 		case PLANE_ZY: // side
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
+			mModel->transform(mTransformMode, fScale, 1.0, 1.0, 0.99);
 			break;
 		}
 	}
@@ -2548,13 +2617,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
+			mModel->transform(mTransformMode, fScale, 1.01, 1.0, 1.0);
 			break;
 		case PLANE_XZ:
-			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
+			mModel->transform(mTransformMode, fScale, 1.01, 1.0, 1.0);
 			break;
 		case PLANE_ZY: // side
-			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
+			mModel->transform(mTransformMode, fScale, 1.0, 1.0, 1.01);
 		}
 	}
 	
@@ -2830,7 +2899,7 @@ void FreyjaControl::loadResource()
 	if (mResource->Lookup("GRID_ON", &i) && i)
 	{
 		mRender->Flags(FreyjaRender::RENDER_EDIT_GRID, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_EDIT_GRID));
+					   !(mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID));
 	}
 
 	if (mResource->Lookup("ROTATE_AMOUNT", &f))
