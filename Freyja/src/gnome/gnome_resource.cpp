@@ -1135,6 +1135,64 @@ arg_list_t *freyja_rc_togglebutton(arg_list_t *container)
 }
 
 
+arg_list_t *freyja_rc_colorbutton(arg_list_t *container)
+{
+	arg_list_t *event, *cmd, *ret;
+	GtkWidget *item;
+
+
+	if (!container)
+	{
+		rc_assertion_error("button", "container != NULL");
+		return NULL;
+	}
+
+	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
+
+	if (!container)
+	{
+		rc_assertion_error("button", "container == ARG_GTK_BOX_WIDGET");
+		return NULL;
+	}
+
+	symbol_enforce_type(&event, INT);
+	symbol_enforce_type(&cmd, INT);
+	ret = NULL;
+
+	if (!event || !cmd)
+	{
+		if (!event)
+			rc_assertion_error("button", "event == INT");
+
+		if (!cmd)
+			rc_assertion_error("button", "cmd == INT");
+	}
+	else
+	{
+		item = mgtk_create_color_button((void*)event_send_color, get_int(cmd));
+		gtk_widget_ref(item);
+		gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)container->data), 
+										 "button1", item,
+										 (GtkDestroyNotify)gtk_widget_unref);
+		gtk_widget_show(item);
+
+		gtk_box_pack_start(GTK_BOX((GtkWidget *)container->data), 
+								 item, TRUE, TRUE, 0);
+
+		// Mongoose 2002.02.01, Add this widget to a special 
+		//   lookup table by it's event id
+		index_add_gtk_widget(get_int(cmd), item);
+		
+		new_adt(&ret, ARG_GTK_WIDGET, (void *)item);
+	}
+
+	delete_arg(&event);
+	delete_arg(&cmd);
+
+	return ret;
+}
+
+
 arg_list_t *freyja_rc_button(arg_list_t *container)
 {
 	arg_list_t *label, *event, *cmd, *ret;

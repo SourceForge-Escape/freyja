@@ -503,6 +503,25 @@ GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 }
 
 
+GtkWidget *mgtk_create_color_button(void *func, int id)
+{
+	GtkWidget *colorbutton;
+
+	colorbutton = gtk_color_button_new();
+	gtk_widget_show(colorbutton);
+	gtk_color_button_set_use_alpha(GTK_COLOR_BUTTON(colorbutton), TRUE);
+
+	//g_signal_connect((gpointer)colorbutton, "color_set",
+	//				 G_CALLBACK(func), GINT_TO_POINTER(id));
+
+	gtk_signal_connect(GTK_OBJECT(colorbutton), "color_set",
+					   GTK_SIGNAL_FUNC(func), 
+					   GINT_TO_POINTER(id));
+
+	return colorbutton;
+}
+
+
 GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 											 char *icon, char *label,
 											 char *help, 

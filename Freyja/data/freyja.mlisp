@@ -24,17 +24,19 @@
 (setq false 0)
 
 ;; Program defaults
-(setq WINDOW_X 32)
+(setq WINDOW_X 32)             ; Offset of the window on load
 (setq WINDOW_Y 32)
+
+(setq WIDTH  700)              ; Set GL window width and height
+(setq HEIGHT 640)
+
+(setq NOTEBOOK_WIDTH 340)      ; Set sidebar notebook width and height
+(setq NOTEBOOK_HEIGHT HEIGHT)
 
 (setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
 (setq ROTATE_AMOUNT 1.0)       ; Rotation increment
 (setq FAST_CARD true)          ; Toggle OpenGL accel features
 (setq GRID_ON true)            ; Toggle edit grid rendering
-(setq WIDTH  700)              ; Set GL window width and height
-(setq HEIGHT 640)
-(setq NOTEBOOK_WIDTH 340)      ; Set sidebar notebook width and height
-(setq NOTEBOOK_HEIGHT HEIGHT)
 (setq PATH "~/.freyja")        ; Set initial data path
 
 
@@ -497,7 +499,8 @@
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 700)
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 701)
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 702)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 703))
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 703)
+						(colorbutton 1 9000))
 
 					(hbox 1 1 0 1 1
 						(label "Diffuse" 0.0 0.5))
@@ -506,16 +509,18 @@
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 704)
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 705)
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 706)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 707))
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 707)
+						(colorbutton 1 9001))
 
 					(hbox 1 1 0 1 1
 						(label "Specular" 0.0 0.5))
 
 					(hbox 1 1 0 1 1
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 708)
-							(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 709)
-							(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 710)
-							(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 711))
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 709)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 710)
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 711)
+						(colorbutton 1 9002))
 
 					(hbox 1 1 0 1 1
 						(label "Emissive" 0.0 0.5))
@@ -524,7 +529,8 @@
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 712)
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 713)
 						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 714)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 715))
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 715)
+						(colorbutton 1 9003))
 
 					(hbox 1 1 0 1 1
 						(label "Shininess" 0.0 0.5)

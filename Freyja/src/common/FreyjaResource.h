@@ -19,8 +19,8 @@
  ================================================================*/
 
 
-#ifndef __FREYJA_MONGOOSE_FREYJARESOURCE_H_
-#define __FREYJA_MONGOOSE_FREYJARESOURCE_H_
+#ifndef GUARD__FREYJA_MONGOOSE_FREYJARESOURCE_H_
+#define GUARD__FREYJA_MONGOOSE_FREYJARESOURCE_H_
 
 #include "Resource.h"
 
@@ -38,6 +38,7 @@ arg_list_t *freyja_rc_vbox(arg_list_t *args);
 arg_list_t *freyja_rc_handlebox(arg_list_t *args);
 arg_list_t *freyja_rc_label(arg_list_t *args);
 arg_list_t *freyja_rc_button(arg_list_t *args);
+arg_list_t *freyja_rc_colorbutton(arg_list_t *args);
 arg_list_t *freyja_rc_togglebutton(arg_list_t *args);
 arg_list_t *freyja_rc_spinbutton(arg_list_t *args);
 arg_list_t *freyja_rc_spinbutton2(arg_list_t *args);
