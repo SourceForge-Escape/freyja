@@ -57,23 +57,6 @@ class RenderMesh;
 class RenderModel;
 
 
-class FreyjaModelPrinter : public FreyjaPrinter
-{
- public:
-
-	virtual void errorArgs(char *format, va_list *args)
-	{
-		freyja_print_args(format, args);
-	}
-
-
-	virtual void messageArgs(char *format, va_list *args)
-	{
-		freyja_print_args(format, args);
-	}
-};
-
-
 class FreyjaModel
 {
 public:
@@ -95,6 +78,24 @@ public:
 		fDontUpdateBoneName = 16,
 		fDeformBoneVertices = 32
 	} option_flag_t;
+
+
+	class FreyjaModelPrinter : public FreyjaPrinter
+	{
+	public:
+
+		virtual void errorArgs(char *format, va_list *args)
+		{
+			freyja_print_args(format, args);
+		}
+
+
+		virtual void messageArgs(char *format, va_list *args)
+		{
+			freyja_print_args(format, args);
+		}
+	};
+
 
 	class CopyGroup
 	{
@@ -197,14 +198,25 @@ public:
 
 	/* Move into RenderModel class */
 	bool getRenderMesh(unsigned int index, RenderMesh &rmesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if valid RenderMesh is set.
+	 *        
+	 ------------------------------------------------------*/
+
 	bool getRenderPolygon(unsigned int index, RenderPolygon &face);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns true if valid rendermesh is returned.
+	 * Post : Returns true if valid RenderPolygon is set.
 	 *        
 	 ------------------------------------------------------*/
 
 	unsigned int getAnimationFramesIn(unsigned int animationIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns number of frames in animation
+	 *        
+	 ------------------------------------------------------*/
 
 	void getBoneRotation(vec_t *pitch, vec_t *yaw, vec_t *roll);
 	/*------------------------------------------------------
@@ -299,6 +311,17 @@ public:
 
 	void getCurrentMeshCenter(vec3_t center);
 
+	freyja_plane_t getCurrentPlane();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the current edit plane
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	unsigned int getCurrentPolygon();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -381,20 +404,6 @@ public:
 
 	bool getDebug();
 
-	void getSceneTranslation(vec3_t offset);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get the offset of the scene in X Y Z in 3 space
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.01:
-	 * Mongoose - Created, replaces old API 'Scroll' methods
-	 ------------------------------------------------------*/
-
-	void getVertexSelection(vec3_t min, vec3_t max,
-							Vector<unsigned int> **list);
-
 	unsigned int getModelCount();
 
 	void getModel(RenderModel &model, unsigned int index);
@@ -423,11 +432,42 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	vec3_t *getVertexXYZ(long index);
+	void getSceneTranslation(vec3_t offset);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get the offset of the scene in X Y Z in 3 space
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.04.01:
+	 * Mongoose - Created, replaces old API 'Scroll' methods
+	 ------------------------------------------------------*/
+
+	void getVertexSelection(vec3_t min, vec3_t max,
+							Vector<unsigned int> **list);
+
+	vec3_t *getVertexXYZ(long vertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Exports vertex via base libhel math type, or
+	 *        returns NULL if invalid vertexIndex
+	 *
+	 ------------------------------------------------------*/
 
 	bool isCurrentBoneAllocated();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if current bone index has a 
+	 *        matching allocated object
+	 *
+	 ------------------------------------------------------*/
 
 	void printInfo();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Dumps some infomation about model element counts
+	 *
+	 ------------------------------------------------------*/
 
 	int saveAnimation(const char *filename);
 	/*------------------------------------------------------
@@ -468,7 +508,35 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void clear();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Resets|Init the data controled by data model
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.09: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	bool copySelectedMesh();
+
+	bool copyVertexBuffer();
+
 	void createPolyMappedUVMap(long seedPolygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Uses an expensive algorithm to generate a UVMap
+	 *        by using edge neighbors of a seed polygon until
+	 *        no more are found
+	 *
+	 *        Here 'UVMap' is a collection of texture polygons
+	 *
+	 ------------------------------------------------------*/
+
+	void cullUsingVertexBuffer();
+
+	void deleteAnimationFrame(unsigned int frame);
 
 	void generateUVMap(); // texture projection
 	/*------------------------------------------------------
@@ -496,6 +564,22 @@ public:
 	 ------------------------------------------------------*/
 
 	void mirrorTexCoord(long texCoordIndex, bool x, bool y);
+
+	void mirrorUsingVertexBuffer(bool x, bool y, bool z);
+
+	void moveObject(transform_t type, Vector3d xyz);
+
+	void movePatchControlPoint(Vector3d xyz);
+
+	bool pasteSelectedMesh();
+
+	bool pasteVertexBuffer();
+
+	bool pasteSelectedPatch();
+
+	void selectObject(transform_t type, Vector3d xyz);
+
+	void selectPatchControlPoint(Vector3d xyz);
 
 	void setBoneRotation(float pitch, float yaw, float roll);
 	/*------------------------------------------------------
@@ -558,6 +642,17 @@ public:
 
 	void setCurrentMesh(unsigned int index);
 
+	void setCurrentPlane(freyja_plane_t p);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets the current edit plane
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void setCurrentPolygon(unsigned int index);
 
 	void setCurrentPolygonEdgeCount(unsigned int count);
@@ -601,6 +696,7 @@ public:
 	 ------------------------------------------------------*/
 
 	void setMeshMaterial(long meshIndex, long material);
+
 	void setPolygonMaterial(long polygonIndex, long material);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -643,64 +739,24 @@ public:
 	void updateSkeletalUI();
 
 
-	////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////
+	// FIXME: Might be better to nuke these in favor of direct libfreyja ABI
+	/////////////////////////////////////////////////////////////////////////
 
-	void Clear();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Resets|Init the data controled by data model
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.09: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void CurrentPlane(freyja_plane_t p);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets the current edit plane
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	freyja_plane_t CurrentPlane();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current edit plane
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	bool copySelectedMesh();
-	bool copyVertexBuffer();
-
-	bool pasteSelectedMesh();
-	bool pasteVertexBuffer();
-	bool pasteSelectedPatch();
-
-	void cullUsingVertexBuffer();
-	void mirrorUsingVertexBuffer(bool x, bool y, bool z);
-
-	void deleteAnimationFrame(unsigned int frame);
-
-	void movePatchControlPoint(Vector3d xyz);
-	void selectPatchControlPoint(Vector3d xyz);
-
-	void moveObject(transform_t type, Vector3d xyz);
-
-	void selectObject(transform_t type, Vector3d xyz);
+	unsigned int newBone(vec_t x, vec_t y, vec_t z, unsigned char flag);
+	void setNameBone(unsigned int bone, const char *name);
+	const char *getNameBone(unsigned int bone);
+	void addVertexToBone(unsigned int bone, unsigned int vertex);
+	void removeVertexFromBone(unsigned int bone, unsigned int vertex);
+	void addMeshToBone(unsigned int bone, unsigned int mesh);
+	void removeMeshFromBone(unsigned int bone, unsigned int mesh);
+	void connectBone(unsigned int master, unsigned int slave);
+	void disconnectBone(unsigned int master, unsigned int slave);
 
 
-	///////////////////////////////////////////////////////
-	/// FIXME: decide where to put these, then doc ////////
-	///////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////
+	/// FIXME: These should use an event mapping and/or selection system
+	/////////////////////////////////////////////////////////////////////////
 
 	void movePatchControlPoint(float xx, float yy);
 	void selectPatchControlPoint(float xx, float yy);
@@ -732,26 +788,15 @@ public:
 	void MeshNew();
 	void MeshDel();
 
-	/// BONES /////
-	unsigned int newBone(vec_t x, vec_t y, vec_t z, unsigned char flag);
 	void moveBoneCenter(float xx, float yy);
 	void moveBone(float xx, float yy);
 	void selectBone(float xx, float yy);
-	void setNameBone(unsigned int bone, const char *name);
-	const char *getNameBone(unsigned int bone);
-	void addVertexToBone(unsigned int bone, unsigned int vertex);
-	void removeVertexFromBone(unsigned int bone, unsigned int vertex);
-	void addMeshToBone(unsigned int bone, unsigned int mesh);
-	void removeMeshFromBone(unsigned int bone, unsigned int mesh);
-	void connectBone(unsigned int master, unsigned int slave);
-	void disconnectBone(unsigned int master, unsigned int slave);
-
 
 	///////////////////////////////////////////////////////
 
-	FreyjaModelPrinter mPrinter;
+	// FIXME: It's clear why this is bad for the API
 
-	Vector<long> mUVMap;
+	Vector<long> mUVMap;                /* 'Texture polygon' grouping */
 
 	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
 
@@ -767,51 +812,10 @@ private:
 	////////////////////////////////////////////////////////////
 
 	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
-
-	Egg *getCurrentEgg();
-
-	egg_group_t *getCachedGroup();
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current vertex grouping
+	 * Pre  :
+	 * Post : Egg realtime data translator method
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	egg_tag_t *getCachedTag();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current bone tag
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-	
-	egg_mesh_t *getCachedMesh();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current mesh
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	egg_mesh_t *getNativeMesh(long index);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the mesh for given index or NULL
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.12.17: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	egg_group_t *getNearestGroup(vec_t x, vec_t y, freyja_plane_t plane);
@@ -856,10 +860,12 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	FreyjaModelPrinter mPrinter;    /* Used to reroute logging for backend */
+
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
-	
-	Egg *mEgg;                      /* The 3d model */
-	
+
+	Egg *mEgg;                      /* The 3d data model */
+
 	EggPlugin *mPlugin;             /* Model plugin system */
 
 	unsigned int mFlags;            /* Stores option flags as bitmap */
@@ -873,40 +879,41 @@ private:
 
 	bbox_t mSelectBBox;             /* 3d selection box using 2 vertices */
 
-	char *_palette_filename;            /* Current palette */
+	freyja_plane_t mCurrentPlane;   /* Which plane view has editing control */
 
-	egg_vertex_t *_cached_vertex;       /* Current vertex ( cached ) */
+	vec3_t mScroll;                 /* Offset of scene from origin */
 
-	unsigned int _bbox;                 /* Used to determine bbox min/max 
-										   points */
-  
-	freyja_plane_t _current_plane;      /* Which plane view is this? */
+	unsigned int mTextureIndex;     /* Index to texture array */
 
-	unsigned int _poly_sz;              /* Number of edges for a new polygon */
-	
-	unsigned int _texture_num;          /* Index to texture array */
-	
-	unsigned int _current_texel;        /* Currently selected texel id */
-	
-	unsigned int _current_vertex;       /* Currently selected vertex id */
-	
-	unsigned int _current_frame;        /* Current vertex frame */
-	
-	unsigned int _current_animation_frame;  /* Current animation frame */
+	unsigned int mAnimationFrameIndex;  /* Current animation frame index */
 
-	unsigned int _current_polygon;      /* Current polygon */
-	
-	unsigned int _current_group;        /* Current vertex grouping id */
-	
-	unsigned int _current_mesh;         /* Currently selected mesh id */
-	
-	unsigned int _current_tag;          /* Currently selected bone tag id */
-	
-	unsigned int _current_bone_frame;   /* Currently selected skeletal frame */
-	
-	float _zoom;                        /* Scaling of scene */
-	
-	float _scroll[3];                   /* Scrolling in edit planes */
+	unsigned int mSelectionBoxOrdering; /* Determine bbox min/max ordering */
+
+	unsigned int mBoneIndex;        /* Currently selected bone tag id */
+
+	unsigned int mEdgeCount;        /* Number of edges for a new polygon */
+
+	unsigned int mTexCoordIndex;    /* Currently selected texel id */
+
+	unsigned int mVertexIndex;      /* Currently selected vertex id */
+
+	unsigned int mVertexFrameIndex; /* Current vertex frame */
+
+	unsigned int mPolygonIndex;     /* Current polygon */
+
+	unsigned int mGroupIndex;       /* Current vertex grouping id */
+
+	unsigned int mMeshIndex;         /* Currently selected mesh id */
+
+	unsigned int mSkeletalFrameIndex;   /* Currently selected skeletal frame */
+
+
+	egg_vertex_t *mCachedVertex;       /* Current vertex ( cached ) -
+										* This is the lynchpin and bane
+										* of this modeler at once
+										* replacing this with a new
+										* freyja centric selection system
+										* is important */
 };
 
 
@@ -941,6 +948,7 @@ public:
 private:
 	egg_tag_t *mTag;
 };
+
 
 class RenderSkeleton
 {

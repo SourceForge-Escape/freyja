@@ -1033,12 +1033,12 @@ void FreyjaRender::display()
 		else
 		{
 			glPushMatrix();
-			drawWindow(mModel->CurrentPlane());
+			drawWindow(mModel->getCurrentPlane());
 			glPopMatrix();
 		}
 #else
 		glPushMatrix();
-		drawWindow(mModel->CurrentPlane());
+		drawWindow(mModel->getCurrentPlane());
 		glPopMatrix();
 #endif
 		break;
