@@ -91,7 +91,6 @@ Egg::~Egg()
 }
 
 
-
 /* Mongoose 2004.03.27, 
  * This is here as a reminder until egg switches gears 
  * to support these features better HERE IN THIS CLASS */
