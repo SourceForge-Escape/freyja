@@ -34,6 +34,7 @@
 #include <freyja8/Egg.h>
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
+#include "BezierPatch.h"
 #include "Light.h"
 #include "freyja_events.h"
 
@@ -103,126 +104,6 @@ public:
 	Vector <CopyGroup *> groups;
 	vec3_t center;
 	unsigned int flags;
-};
-
-
-class BezierPatch
-{
-public:
-	BezierPatch()
-	{
-		texture = 0;
-		displayList = 0;
-		x = y = 0;
-
-		reset();
-	}
-
-	void generatePolygonMesh(int divs)
-	{
-		int u = 0, v;
-		vec_t py, px, pyold; 
-		Vector3d temp[4];
-		Vector3d *last = new Vector3d[divs+1];  /* Array Of Points To Mark
-												   The First Line Of Polygons */
-
-		temp[0] = control[0][3]; // The First Derived Curve (Along X-Axis)
-		temp[1] = control[1][3];
-		temp[2] = control[2][3];
-		temp[3] = control[3][3];
-
-		for (v = 0; v <= divs; ++v)
-		{
-			// Create The First Line Of Points
-			px = ((vec_t)v)/((vec_t)divs);		// Percent Along Y-Axis
-			/* Use The 4 Points From The Derived Curve To 
-			 * Calculate The Points Along That Curve */
-			last[v] = solveBernstein(px, temp);
-		}
-
-		vertices.erase();
-		texcoords.erase();
-
-		for (u = 1; u <= divs; ++u) 
-		{
-			py    = ((float)u)/((float)divs);		// Percent Along Y-Axis
-			pyold = ((float)u-1.0f)/((float)divs);	// Percent Along Old Y Axis
-
-			// Calculate New Bezier Points
-			temp[0] = solveBernstein(py, control[0]);
-			temp[1] = solveBernstein(py, control[1]);
-			temp[2] = solveBernstein(py, control[2]);
-			temp[3] = solveBernstein(py, control[3]);
-
-			for (v = 0; v <= divs; ++v)
-			{
-				px = ((float)v)/((float)divs);		// Percent Along The X-Axis
-				
-				vertices.pushBack(new Vector3d(last[v]));
-				texcoords.pushBack(new Vector3d(pyold, px, 0));
-
-				last[v] = solveBernstein(px, temp);
-				vertices.pushBack(new Vector3d(last[v]));
-				texcoords.pushBack(new Vector3d(py, px, 0));
-			}
-		}
-
-		delete [] last;
-	}
-
-	void reset()
-	{
-		unsigned int i, j;
-
-
-		control[0][0] = Vector3d(-0.75,	0.50, -0.75);
-		control[0][1] = Vector3d(-0.25,	0.00, -0.75);
-		control[0][2] = Vector3d( 0.25,	0.00, -0.75);
-		control[0][3] = Vector3d( 0.75,	0.50, -0.75);
-		control[1][0] = Vector3d(-0.75,	0.75, -0.25);
-		control[1][1] = Vector3d(-0.25,	0.50, -0.25);
-		control[1][2] = Vector3d( 0.25,	0.50, -0.25);
-		control[1][3] = Vector3d( 0.75,	0.75, -0.25);
-		control[2][0] = Vector3d(-0.75,	0.00,  0.25);
-		control[2][1] = Vector3d(-0.25,	0.50,  0.25);
-		control[2][2] = Vector3d( 0.25,	0.50,  0.25);
-		control[2][3] = Vector3d( 0.75,	0.00,  0.25);
-		control[3][0] = Vector3d(-0.75,	0.50,  0.75);
-		control[3][1] = Vector3d(-0.25,	1.00,  0.75);
-		control[3][2] = Vector3d( 0.25,	1.00,  0.75);
-		control[3][3] = Vector3d( 0.75,	0.50,  0.75);
-		
-		for (i = 0; i < 4; ++i)
-		{
-			for(j = 0; j < 4; ++j)
-				control[i][j] *= 10.0f;
-		}
-
-		vertices.erase();
-		texcoords.erase();
-	}
-
-	Vector3d solveBernstein(vec_t u, Vector3d *p)
-	{
-		Vector3d a, b, c, d, r;
-
-		a = p[0] * pow(u, 3);
-		b = p[1] * 3*pow(u, 2)*(1-u);
-		c = p[2] * 3*u*pow((1-u), 2);
-		d = p[3] * pow((1-u), 3);
-
-		r = (a + b) + (c + d);
-
-		return r;
-	}
-
-	Vector3d control[4][4];
-
-	Vector<Vector3d *> vertices;
-	Vector<Vector3d *> texcoords;
-	unsigned int texture;
-	unsigned int displayList;
-	unsigned int x, y;
 };
 
 
@@ -313,15 +194,17 @@ public:
 		TransformVertexFrame = 1,
 		TransformScene       = 2,
 		TransformBone        = 3,
-		TransformPoint
+		TransformPoint,
+		TransformSelectedVertices
 	} transform_t;
 
 	typedef enum {
 		FL_DUMP_TEXTURE  = 1,    /* Toggle image file dumps of TR textures */
 		FL_LOAD_MAP      = 2,    /* Toggle map loading in TR paks */
 		FL_QUAKE_PAL     = 4,    /* Toggle quake/hexen2 palette in mdl loads */
-		FL_VERTEX_UV     = 8,     /* Toggle polymapping of texcoords */
-		fDontUpdateBoneName = 16
+		FL_VERTEX_UV     = 8,    /* Toggle polymapping of texcoords */
+		fDontUpdateBoneName = 16,
+		fDeformBoneVertices = 32
 	} option_flag_t;
 
 
@@ -563,6 +446,7 @@ public:
 	 ------------------------------------------------------*/
 
 	void updateSkeletalUI();
+	unsigned int getAnimationFramesIn(unsigned int animationIndex);
 
 
 	////////////////////////////////////////////////////////////
@@ -770,11 +654,22 @@ public:
 	 ------------------------------------------------------*/
 
 	bool copySelectedMesh();
+	bool copyVertexBuffer();
+
 	bool pasteSelectedMesh();
+	bool pasteVertexBuffer();
+	bool pasteSelectedPatch();
+
+	void cullUsingVertexBuffer();
+	void mirrorUsingVertexBuffer(bool x, bool y, bool z);
 
 	void deleteAnimationFrame(unsigned int frame);
 
-	bool pasteSelectedPatch();
+	void movePatchControlPoint(Vector3d xyz);
+	void selectPatchControlPoint(Vector3d xyz);
+
+	void moveObject(transform_t type, Vector3d xyz);
+	void selectObject(transform_t type, Vector3d xyz);
 
 
 	///////////////////////////////////////////////////////
@@ -808,7 +703,6 @@ public:
 	void MeshMoveCenter(float xx, float yy);
 	void MeshNew();
 	void MeshDel();
-	void MeshCopy();
 
 	/// BONES /////
 	unsigned int newBone(vec_t x, vec_t y, vec_t z, unsigned char flag);
@@ -856,6 +750,9 @@ public:
 #endif
 
 	bool appendMode;
+
+	Vector<unsigned int> mList;         /* Temp generic vertex list buffer */
+
 
 
 private:
@@ -915,8 +812,6 @@ private:
 	char *_palette_filename;            /* Current palette */
 
 	egg_vertex_t *_cached_vertex;       /* Current vertex ( cached ) */
-
-	Vector<unsigned int> mList;         /* Temp generic vertex list buffer */
 
 	bbox_t mSelectBBox;                 /* 3d selection box using 2 vertices */
 

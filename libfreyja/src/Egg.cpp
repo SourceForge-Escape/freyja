@@ -361,7 +361,7 @@ void Egg::print(char *s, ...)
 
 int Egg::checkFile(char *filename)
 {
-	u_int32_t id, version;
+	unsigned long id, version;
 	FILE *f;
 
 
@@ -483,7 +483,7 @@ void Egg::clear()
 int Egg::saveFile(char *filename)
 {
 	FILE *f;
-	u_int32_t u, version, id;
+	unsigned long u, version, id;
 	egg_vertex_t *vertex;
 	egg_texel_t *texel;
 	egg_polygon_t *polygon;
@@ -759,11 +759,11 @@ int Egg::saveFile(char *filename)
 
 int Egg::loadFile(char *filename)
 {
-	int32_t si;
-	u_int32_t u, version, id, i, j, n;
+	long si;
+	unsigned long u, version, id, i, j, n;
 	float dummy;
-	u_int32_t num_vertex, num_texel, num_poly, num_marker;
-	u_int32_t num_grp, numMeshes, numTags, num_frame, num_aframe;
+	unsigned long num_vertex, num_texel, num_poly, num_marker;
+	unsigned long num_grp, numMeshes, numTags, num_frame, num_aframe;
 	FILE *f;
 	Map<unsigned int, unsigned int> transV;
 	Map<unsigned int, unsigned int> transT;
@@ -1000,7 +1000,7 @@ int Egg::loadFile(char *filename)
 
 		if (!mesh)
 		{
-			printf("EGG::Load> Error loading mesh[%i] resetting model\n", i);
+			printf("EGG::Load> Error loading mesh[%lu] resetting model\n", i);
 
 			// FIXME: Hhhmm... could be bad for prefabs... ( clears whole model )
 			clear();
@@ -1972,7 +1972,7 @@ void Egg::addMesh(egg_mesh_t *mesh)
 
 int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
 {
-	u_int32_t u;
+	unsigned long u;
 	unsigned int i;
 
 
@@ -2128,8 +2128,8 @@ egg_tag_t *Egg::getTag(unsigned int id)
 //       big endian machines at home
 int Egg::saveTag(egg_tag_t *tag, FILE *f)
 {
-	int32_t li;
-	u_int32_t lu;  
+	long li;
+	unsigned long lu;  
 	unsigned int i;
 
 
@@ -2189,8 +2189,8 @@ int Egg::saveTag(egg_tag_t *tag, FILE *f)
 egg_tag_t *Egg::loadTag(FILE *f)
 {
 	egg_tag_t *tag;
-	int32_t li;
-	u_int32_t lu;  
+	long li;
+	unsigned long lu;  
 	int i, n;
 
 
@@ -2569,8 +2569,8 @@ egg_boneframe_t *Egg::BoneFrame(unsigned int id)
 
 int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 {
-	int32_t li;
-	u_int32_t lu;  
+	long li;
+	unsigned long lu;  
 	unsigned int i;
 
 
@@ -2608,8 +2608,8 @@ int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 egg_boneframe_t *Egg::BoneFrameLoad(FILE *f)
 {
 	egg_boneframe_t *boneframe;
-	int32_t li;
-	u_int32_t lu;  
+	long li;
+	unsigned long lu;  
 	int i, n;
 
 
@@ -2692,8 +2692,8 @@ egg_animation_t *Egg::getAnimation(unsigned int frame)
 
 int Egg::AnimationSave(egg_animation_t *a, FILE *f)
 {
-	int32_t li;
-	u_int32_t lu;  
+	long li;
+	unsigned long lu;  
 	unsigned int i;
 
 	if (!a)
@@ -2726,8 +2726,8 @@ int Egg::AnimationSave(egg_animation_t *a, FILE *f)
 egg_animation_t *Egg::AnimationLoad(FILE *f)
 {
 	egg_animation_t *a;
-	int32_t li;
-	u_int32_t lu;  
+	long li;
+	unsigned long lu;  
 	int i, n;
 
 

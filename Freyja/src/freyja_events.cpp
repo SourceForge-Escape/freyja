@@ -293,6 +293,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eRotateObject", eRotateObject);
 	r.RegisterInt("eScaleObject", eScaleObject);
 
+	r.RegisterInt("eTransformSelectedVertices", eTransformSelectedVertices);
 	r.RegisterInt("eTransformGroup", eTransformGroup);
 	r.RegisterInt("eTransformScene", eTransformScene);
 	r.RegisterInt("eTransformMesh", eTransformMesh);

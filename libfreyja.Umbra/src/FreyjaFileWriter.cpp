@@ -1,19 +1,22 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Freyja
+ * Project : libfreyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaFileWriter
  * License : No use w/o permission (C) 2004 Mongoose
  * Comments: This class provides disk file write access
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
+ *
+ * 2004.12.14: 
+ * Mongoose - Fixed generated code for binary file I/O
  *
  * 2004.08.21:
  * Mongoose - Created
@@ -140,104 +143,109 @@ void FreyjaFileWriter::writeCharString(unsigned int length, char *buffer)
 }
 
 
-float FreyjaFileWriter::writeFloat32()
+void FreyjaFileWriter::writeFloat32(float r)
 {	
-	float r;
 	void *ptr = &r;
-	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
-
-	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 32bit float\n");
-
 #if HAVE_BIG_ENDIAN
 	FIX_FLOAT(*ptr)
 #endif
+	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
-	return r;
+	if (sz < 1)
+		printf("FreyjaFileReader: ERROR failed to write 32bit float\n");
 }
 
 
-char FreyjaFileWriter::writeInt8()
+void FreyjaFileWriter::writeInt8(char c)
 {
-	char c;
-
-	fwrite(&c, 1, 1, mFileHandle);  // heh, yeah
-
-	return c;
+	fwrite(&c, 1, 1, mFileHandle);
 }
 
 
-unsigned char FreyjaFileWriter::writeInt8U()
+void FreyjaFileWriter::writeInt8U(unsigned char u)
 {
-	unsigned char u;
-
 	fwrite(&u, 1, 1, mFileHandle);  // heh, yeah
-
-	return u;
 }
 
 
-short FreyjaFileWriter::writeInt16()
+void FreyjaFileWriter::writeInt16(short i)
 {
-	short int i;
 	void *ptr = &i;
+#ifdef HAVE_BIG_ENDIAN
+	FIX_SHORT(*ptr)
+#endif
 	size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
 	if (sz < 1)
 		printf("FreyjaFileReader: ERROR failed to read 16bit int\n");
-
-#ifdef HAVE_BIG_ENDIAN
-	FIX_SHORT(*ptr)
-#endif
-	return i;
 }
 
 	
-unsigned short FreyjaFileWriter::writeInt16U()
+void FreyjaFileWriter::writeInt16U(unsigned short u)
 {
-	unsigned short int u;
 	void *ptr = &u;
+#ifdef HAVE_BIG_ENDIAN
+	FIX_SHORT(*ptr)
+#endif
 	size_t sz = fread(ptr, 2, 1, mFileHandle);
 
 	if (sz < 1)
 		printf("FreyjaFileReader: ERROR failed to read 16bit uint\n");
-
-#ifdef HAVE_BIG_ENDIAN
-	FIX_SHORT(*ptr)
-#endif
-	return u;
 }
 
 
-int FreyjaFileWriter::writeInt32()
+void FreyjaFileWriter::writeInt32(int i)
 {
-	int i;
 	void *ptr = &i;
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
 		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
-
-#ifdef HAVE_BIG_ENDIAN
-	FIX_INT(*ptr)
-#endif
-	return i;
 }
 
 
-unsigned int FreyjaFileWriter::writeInt32U()
+void FreyjaFileWriter::writeInt32U(unsigned int u)
 {
-	unsigned int u;
 	void *ptr = &u;
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
 		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
+}
+
+
+void FreyjaFileWriter::writeLong(long l)
+{
+	void *ptr = &l;
+	size_t sz;
 
 #ifdef HAVE_BIG_ENDIAN
 	FIX_INT(*ptr)
 #endif
-	return u;
+
+	sz = fwrite(ptr, 4, 1, mFileHandle);
+
+	if (sz < 1)
+		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
+}
+
+
+void FreyjaFileWriter::writeLongU(unsigned long ul)
+{
+	void *ptr = &ul;
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
+	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
+
+	if (sz < 1)
+		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
 }
 
 

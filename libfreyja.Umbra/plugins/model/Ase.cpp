@@ -977,7 +977,7 @@ int freyja_model__ase_export(char *filename)
 		bone = freyjaGetCurrent(FREYJA_BONE);
 
 		ase.skel.mBones[b].parent = freyjaGetBoneParent(bone);
-		freyjaGetBoneRotationXYZW4fv(bone, ase.skel.mBones[b].rotation);
+		freyjaGetBoneRotationWXYZ4fv(bone, ase.skel.mBones[b].rotation);
 		freyjaGetBoneTranslation3fv(bone, ase.skel.mBones[b].translation);
 		freyjaGetBoneName(bone, 64, ase.skel.mBones[b].name);
 

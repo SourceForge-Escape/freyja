@@ -100,6 +100,7 @@ typedef enum {
 	eRotateObject,
 	eScaleObject,
 
+	eTransformSelectedVertices,
 	eTransformGroup,
 	eTransformScene,
 	eTransformMesh,

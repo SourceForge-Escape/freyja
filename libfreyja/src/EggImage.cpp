@@ -25,6 +25,10 @@
 #include <math.h>
 #include <stdio.h>
 
+#ifdef WIN32
+#   undef EGGIMAGE_PLUGINS
+#endif
+
 #ifdef EGGIMAGE_PLUGINS
 #   include <dlfcn.h>
 #endif
