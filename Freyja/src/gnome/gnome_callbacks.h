@@ -28,7 +28,6 @@
 #include "freyja_events.h"
 
 void freyja_event_subscribe_gtk_widget(int id, GtkWidget *widget);
-void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 void freyja_event_file_dialog_pattern(char *pattern);
 
 void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event);

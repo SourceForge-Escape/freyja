@@ -390,7 +390,7 @@ Resource::Resource()
 	_sym_tab = NULL;
 	_stack = NULL;
 	_buffer_len = 0;
-	_symbol_len = 65;
+	_symbol_len = 256;
 	_top = 0;
 	_look = 0;
 	_string = 0;
@@ -1102,6 +1102,34 @@ bool Resource::Lookup(char *symbol, arg_list_t **adt)
 			if (strcmp(symbol, sym_tab->symbol) == 0)
 			{
 				*adt = sym_tab;
+				return true;
+			}
+		}
+
+		sym_tab = sym_tab->next;
+	}
+
+	return false;
+}
+
+
+bool Resource::Lookup(char *symbol, char **s)
+{
+	arg_list_t *sym_tab;
+
+
+	if (!symbol || !symbol[0])
+		return false;
+
+	sym_tab = _sym_tab;
+
+	while (sym_tab)
+	{
+		if (sym_tab->type == CSTRING)
+		{
+			if (strcmp(symbol, sym_tab->symbol) == 0)
+			{
+				*s = get_string(sym_tab);
 				return true;
 			}
 		}

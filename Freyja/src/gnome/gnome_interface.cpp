@@ -316,17 +316,20 @@ int mgtk_create_confirm_dialog(char *dialog_icon,
 
 
 
-void mgtk_create_info_dialog(char *message)
+void mgtk_create_info_dialog(char *dialog_icon, char *message)
 {
-	GtkWidget *about, *label;
+	GtkWidget *about, *label, *icon;
 
 
 	about = gtk_dialog_new();
-
+	
+	icon = mgtk_create_icon(dialog_icon, GTK_ICON_SIZE_DIALOG);
+	
 	label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), message);
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
 
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), icon);
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(about)->vbox), label);
 	gtk_dialog_add_button(GTK_DIALOG(about), GTK_STOCK_CLOSE, 1);
 	gtk_widget_show_all(about);

@@ -28,9 +28,6 @@
 
 #include "FreyjaControl.h"
 
-#define ABOUT_MESSAGE "\t\t\t<big>Freyja 0.3.5</big>\nFreyja is an Open Source 3d modeling system.\n<small>Freyja Copyright (c) 2002-2004 by Terry 'Mongoose' Hendrix II</small>"
-
-#define HELP_MESSAGE "There is no online help as yet.\n\nIf you'd like to work on documentation email me.\n\nSend bug reports and feature requests:\n<small>  * http://icculus.org/freyja\n  * irc://irc.freenode.net/#freyja\n  * mongoose@icculus.org</small>\n"
 
 void event_register_render(FreyjaRender *r);
 void event_register_model(FreyjaModel *m);
@@ -296,6 +293,9 @@ extern unsigned char gJointRenderType;
 
 void FreyjaControl::eventMain(int event)
 {
+	char *s;
+
+
 	switch (event)
 	{
 	case eInfo:
@@ -303,12 +303,37 @@ void FreyjaControl::eventMain(int event)
 		break;
 
 	case eHelp:
-		freyja_event_info_dialog(HELP_MESSAGE);
+		mResource.Lookup("HELP_MESSAGE", &s);
+
+		for (unsigned int i = 1; i < strlen(s); ++i)
+		{
+			if (((unsigned char *)s)[i-1] == 0xC2 && 
+				((unsigned char *)s)[i] == 0xB6)
+			{
+				s[i-1] = ' ';
+				s[i] = '\n';
+			}
+		}
+
+		freyja_event_info_dialog("gtk-dialog-info", s);
 		// system("gedit /home/mongoose/Projects/freyja/Freyja/README");
 		break; 
 
 	case eAbout:
-		freyja_event_info_dialog(ABOUT_MESSAGE);
+		mResource.Lookup("ABOUT_MESSAGE", &s);
+
+		for (unsigned int i = 1; i < strlen(s); ++i)
+		{
+			if (((unsigned char *)s)[i-1] == 0xC2 && 
+				((unsigned char *)s)[i] == 0xB6)
+			{
+				s[i-1] = ' ';
+				s[i] = '\n';
+			}
+		}
+
+		freyja_get_pixmap_filename(mScratchTextBuffer, 1024, "freyja.png");
+		freyja_event_info_dialog(mScratchTextBuffer, s);
 		break;   
 
 
@@ -324,7 +349,7 @@ void FreyjaControl::eventMain(int event)
 		case MODEL_EDIT_MODE:
 			if (confirmDialog("gtk-dialog-question",
 							  "You must close the currently open model to create a new model.",
-							  "Would you like to close the model and lose changes?",
+							  "Would you like to close the model and lose unsaved changes?",
 							  "gtk-cancel", "_Cancel", "gtk-close", "C_lose"))
 			{
 				// Add check to see if the model was modified here

@@ -178,9 +178,9 @@ void freyja_event_exit()
 }
 
 
-void freyja_event_info_dialog(char *message)
+void freyja_event_info_dialog(char *icon, char *message)
 {
-	mgtk_create_info_dialog(message);
+	mgtk_create_info_dialog(icon, message);
 }
 
 
@@ -1310,17 +1310,6 @@ void animation_event(GtkWidget *widget, gpointer user_data)
 
 /* Mongoose 2004.05.24, 
  * All this below here goes into gtk_freyja.cpp post split */
-void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
-{
-#ifdef unix
-	snprintf(dest, size, "%s/.freyja/icons/%s",
-			 (char *)getenv("HOME"), icon_name);
-#else
-	strcpy(dest, "data/icons/%s", icon_name);
-#endif
-}
-
-
 void freyja_event_notify_view_log(const char *message)
 {
 	GtkWidget *widget = getGtkStatusBarWidget();
