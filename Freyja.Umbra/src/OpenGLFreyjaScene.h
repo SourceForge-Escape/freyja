@@ -186,7 +186,7 @@ class OpenGLFreyjaScene : public FreyjaScene
 	}
 
 
-	void render(FreyjaModel &model)
+	void render(Freyja3dModel &model)
 	{
 		unsigned int i;
 		
