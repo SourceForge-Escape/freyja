@@ -25,6 +25,10 @@
 #include <math.h>
 #include <stdio.h>
 
+#ifdef EGGIMAGE_PLUGINS
+#   include <dlfcn.h>
+#endif
+
 #include "EggFileReader.h"
 #include "EggFileWriter.h"
 
@@ -406,14 +410,16 @@ int EggImage::loadImage(const char *filename)
 {
 #ifdef EGGIMAGE_PLUGINS
 	EggFileReader reader;
+	int (*import)(const char *filename, unsigned char *image,
+					  unsigned int *width, unsigned int *height, 
+					  char *type);
 	bool loaded = false;
-	char module_filename[128];
-	char module_import[128];
-	char *name;
-	int (*import)(char *filename);
+	char *module_filename;
 	void *handle;
 	char *error;
-	unsigned int i;
+	unsigned char *image;
+	unsigned int width, height;
+	char type;
 
 
 	if (!reader.doesFileExist(filename))
@@ -430,7 +436,7 @@ int EggImage::loadImage(const char *filename)
 		return -2;
 	}
 
-	while ((module_filename = reader.getNextDirectoryListing(i)))
+	while ((module_filename = reader.getNextDirectoryListing()))
 	{
 		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
 		{
@@ -439,31 +445,30 @@ int EggImage::loadImage(const char *filename)
 			if ((error = dlerror()) != NULL)  
 			{
 				printError("%s", error);
-				//return -5;
 			}
 
-			//return -1;
-			continue;
+			continue; /* Try the next plugin, even after a bad module load */
 		}
 		else
 		{
 			print("\tModule '%s' opened.", module_filename);
     
-			import = (int (*)(char * filename))dlsym(handle, "import");
+			import = (int (*)(const char *filename, unsigned char *image,
+									unsigned int *width, unsigned int *height, 
+									char *type))dlsym(handle, "import");
 
 			if ((error = dlerror()) != NULL)  
 			{
 				printError("%s", error);
-				//return -5;
 				dlclose(handle);
 				continue;
 			}
 
-			loaded = (loaded || (!(*check)(filename) && !(*import)(filename)));
+	      loaded = (loaded || (!(*import)(filename, image, 
+													  &width, &height, &type)));
 
 			if ((error = dlerror()) != NULL) 
 			{
-				//return -10;
 				dlclose(handle);
 				continue;
 			}
@@ -478,6 +483,8 @@ int EggImage::loadImage(const char *filename)
 
 	if (loaded)
 	{
+		loadPixmap(image, width, height, (EggImage::colormode_t)type);
+
 		return 0; /* Success! */
 	}
 #endif

@@ -112,6 +112,23 @@ int EggFileReader::compareFilenameExtention(const char *filename, const char *ex
 }
 
 
+bool EggFileReader::doesFileExist(const char *filename)
+{
+	if (!filename || !filename[0])
+		return false;
+
+	FILE *f = fopen(filename, "rb");
+
+	if (f)
+	{
+		fclose(f);
+		return true;
+	}
+
+	return false;
+}
+
+
 bool EggFileReader::isDirectory(const char *filename)
 {
   struct stat status;  
