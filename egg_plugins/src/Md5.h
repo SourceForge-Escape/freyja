@@ -143,6 +143,18 @@ class Md5
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	int mVersion;                     /* MD5 Version */
+
+	char *mCommandLine;               /* Id cruft */
+
+	int mNumJoints;                   /* Joint count */
+
+	int mNumMeshes;                   /* Mesh count */
+
+	Md5Joint *mJoints;                /* Model skeleton */
+
+	Md5Mesh *mMeshes;                 /* Model geometery */
+
 
  private:
 
@@ -232,18 +244,6 @@ class Md5
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-	int mVersion;                     /* MD5 Version */
-
-	char *mCommandLine;               /* Id cruft */
-
-	int mNumJoints;                   /* Joint count */
-
-	int mNumMeshes;                   /* Mesh count */
-
-	Md5Joint *mJoints;                /* Model skeleton */
-
-	Md5Mesh *mMeshes;                 /* Model geometery */
 
 	FILE *mFileHandle;                /* File parsing cruft */
 	char *mTempBufferHack;

@@ -88,7 +88,6 @@ bool Md5::isMd5Model(const char *filename)
 
 bool Md5::loadModel(const char *filename)
 {
-	char *symbol;
 	int i, j;  /* I hate everyone that uses signed indices in file formats */
 
 
@@ -324,7 +323,7 @@ double Md5::getFloat()
 	fscanf(mFileHandle, "%lf", &r);
 	//r = atof(getSymbol());
 
-	printf("** %f\n", r);
+	//printf("** %f\n", r);
 	return r;
 }
 
@@ -338,7 +337,7 @@ int Md5::getInteger()
 	fscanf(mFileHandle, "%i", &i);
 	//i = atoi(getSymbol());
 
-	printf("** %i\n", i);
+	//printf("** %i\n", i);
 	return i;
 }
 
@@ -414,7 +413,7 @@ char *Md5::getString()
 	*/
 
 
-	printf("** \"%s\"\n", mTempBufferHack);
+	//printf("** \"%s\"\n", mTempBufferHack);
 
 	return s;
 }
@@ -482,7 +481,7 @@ char *Md5::getSymbol()
 
 	// ugly fscanf use for temp hack
 	//	fscanf(mFileHandle, "%s", mTempBufferHack);
-   	printf("\n** <%s>\n", mTempBufferHack);
+   	//printf("\n** <%s>\n", mTempBufferHack);
 	
 	return mTempBufferHack;
 }
@@ -546,12 +545,51 @@ int freyja_model__md5_check(char *filename)
 
 int freyja_model__md5_import(char *filename)
 {
+	Map<unsigned int, unsigned int> trans;
+	Map<unsigned int, unsigned int> trans2;
 	Md5 md5;
+	unsigned int vertex, texcoord;
+	int m, v, i;
+
 
 	if (md5.loadModel(filename) == false)
 		return -1;
 
-	eggPrintMessage("FINISH ME!!!");
+	for (m = 0; m < md5.mNumMeshes; ++m)
+	{
+		/* Start a new mesh */
+		eggBegin(FREYJA_MESH);
+	
+		/* Start a new vertex group */
+		eggBegin(FREYJA_GROUP);
+	
+
+		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
+		{
+			i = md5.mMeshes[m].verts[v].weight;
+
+			/* Store vertices in group */
+			vertex = eggVertexStore3f(md5.mMeshes[m].weights[i].pos[0], 
+									  md5.mMeshes[m].weights[i].pos[1], 
+									  md5.mMeshes[m].weights[i].pos[2]);
+			
+			/* Generates id translator list */
+			trans.Add(v, vertex);
+
+			
+			/* Store texels */
+			texcoord = eggTexCoordStore2f(md5.mMeshes[m].verts[v].uv[0],
+										  md5.mMeshes[m].verts[v].uv[1]);
+			
+			/* Generates id translator list */
+			trans2.Add(v, texcoord);
+		}
+	
+		eggEnd(); // FREYJA_GROUP
+		eggEnd(); // FREYJA_MESH
+	}
+
+	eggPrintMessage("The Doom3 plugin sez: FINISH ME!!!");
 
 	return 0;
 }
