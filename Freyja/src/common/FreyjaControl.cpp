@@ -515,6 +515,16 @@ void FreyjaControl::ReadRC()
 		event_shutdown();
 	}
 
+	int x, y;
+	if (_resource.Lookup("WINDOW_X", &x))
+	{
+		if (_resource.Lookup("WINDOW_Y", &y))
+		{
+			extern void application_window_move(int x, int y);
+			application_window_move(x, y);
+		}
+	}
+
 	if (_resource.Lookup("DUMP_SYMTAB", &i) && i)
 	{
 		_resource.Print();

@@ -24,6 +24,9 @@
 (setq false 0)
 
 ;; Program defaults
+(setq WINDOW_X 32)
+(setq WINDOW_Y 32)
+
 (setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
 (setq ROTATE_AMOUNT 1.0)       ; Rotation increment
 (setq FAST_CARD true)          ; Toggle OpenGL accel features
