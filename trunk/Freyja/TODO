@@ -17,15 +17,22 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
-	o Object Copy / Cut / Paste
+	o Bounding box selection made into 2 events:
+	   1. bounding box selection
+	   2. operation on selection ( not just vertex buffer default )
+	o Object Copy / Cut / Paste for more than just meshes
 	o Undo system, refine event system
 	o Interactive plugins
 	o Recently used files list
 	o Light editing mode
 	o Remove all unused/obsolete events and cmds
 	o Mouse interface needs to replace plane based editing
+	o Vertex morphing animation ( was removed during fork )
+	o Matrix palette skinning ( not supported due to old Egg backend )
 
   Interface
+	o Make tree labels updatable w/o reloading the entire tree
+	o Animation playback
 	o Make new mesh for new polygon when none exist
 	o Generated Spheres use duplicate vertices, unexpected by users
 	o Arcball for mouse rotation

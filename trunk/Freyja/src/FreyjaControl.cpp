@@ -189,23 +189,35 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eBoneIterator:
 		if (!freyja_event_set_range(event, value, 0, eggGetNum(FREYJA_BONE)))
 		{
-			mModel->setCurrentBone(value);
-			//value = gFreyjaModel->getCurrentBone();
-			//spinbutton_value_set(event, value);
+			char dupname[64];
 
-			/* Mongoose 2002.08.31, Update spin buttons dependent 
-			 * on this one */
-			mModel->getBoneRotation(&x, &y, &z);
-			freyja_event_set_float(520, x);
-			freyja_event_set_float(521, y);
-			freyja_event_set_float(522, z);
-			
-			mModel->getBoneTranslation(&x, &y, &z);
-			freyja_event_set_float(510, x);
-			freyja_event_set_float(511, y);
-			freyja_event_set_float(512, z);
-			freyja_event_gl_refresh();
-			freyja_print("Selecting bone[%i] ...", value);
+			mModel->setCurrentBone(value);
+
+			if (value == mModel->getCurrentBone())
+			{
+				/* Mongoose 2002.08.31, Update spin buttons dependent 
+				 * on this one */
+				mModel->getBoneRotation(&x, &y, &z);
+				freyja_event_set_float(520, x);
+				freyja_event_set_float(521, y);
+				freyja_event_set_float(522, z);
+				
+				mModel->getBoneTranslation(&x, &y, &z);
+				freyja_event_set_float(510, x);
+				freyja_event_set_float(511, y);
+				freyja_event_set_float(512, z);
+				freyja_event_gl_refresh();
+				freyja_print("Selecting bone[%i] ...", value);
+
+				/* Update any bone name listeners, 
+				 * 1. Dup string to avoid evil widgets that want to mutate it
+				 * 2. Diable event hook up in case of event loop */
+				extern void mgtk_textentry_value_set(int event, const char *s);
+				strncpy(dupname, mModel->getNameBone(value), 64);
+				mModel->setFlags(FreyjaModel::fDontUpdateBoneName, 1);
+				mgtk_textentry_value_set(eSetCurrentBoneName, dupname);
+				mModel->setFlags(FreyjaModel::fDontUpdateBoneName, 0);
+			}
 		}
 		break;
 
@@ -841,6 +853,10 @@ bool FreyjaControl::event(int command)
 		mModel->appendMode = !mModel->appendMode;
 		break;
 
+	case eSplitObject:
+		freyja_print("Object splitting removed from this build");
+		break;
+
 	case eCut:
 		if (copySelectedObject())
 			deleteSelectedObject();
@@ -914,10 +930,60 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-		/* BONES */
+	/* POLYGONS */
+	case CMD_POLYGON_DELETE:
+		mEventMode = POLYGON_DEL_MODE;
+		freyja_print("Select polygon by vertices to delete...");
+		break;
+	case CMD_POLYGON_ADD:
+		mEventMode = POLYGON_ADD_MODE;
+		freyja_print("Select vertices to create a polygon...");
+		break;
+	case CMD_POLYGON_SELECT:
+		mEventMode = POLYGON_SELECT_MODE;
+		freyja_print("Select polygon by vertices with mouse...");
+		break;
+
+
+	/* VERTICES */
+	case CMD_POINT_DELETE:
+		mEventMode = POINT_DEL_MODE;
+		freyja_print("Select vertex to delete...");
+		break;
+	case CMD_POINT_ADD:
+		mEventMode = POINT_ADD_MODE;
+		freyja_print("Select point in space to create a vertex...");
+		break;    
+	case CMD_POINT_COMBINE:
+		if (mEventMode != VERTEX_COMBINE)
+		{
+			mEventMode = VERTEX_COMBINE;
+		}
+		else
+		{	
+			mEventMode = modeNone;
+		}
+
+		freyja_print("Vertex combine mode is [%s]", 
+					 (mEventMode == VERTEX_COMBINE) ? "on" : "off");
+		break;
+
+
+	/* BONES */
+	case CMD_BONE_SELECT:
+		mTransformMode = FreyjaModel::TransformBone;
+		freyja_print("Select bone...");
+		mEventMode = modeSelect;
+		break;
+	case CMD_BONE_NEW:
+		mTransformMode = FreyjaModel::TransformBone;
+		addObject();
+		//freyja_print("Select new child bone placement directly...");
+		//mEventMode = BONE_ADD_MODE;
+		break;
 	case CMD_BONE_CONNECT:
 		mTransformMode = FreyjaModel::TransformBone;
-		freyja_print("Select bone to connect to current");
+		freyja_print("Select a bone to connect to current bone...");
 		mEventMode = BONE_CONNECT_MODE;
 		break;
 
@@ -942,18 +1008,22 @@ bool FreyjaControl::event(int command)
 		mTransformMode = FreyjaModel::TransformBone;
 		mModel->addMeshToBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
 		freyja_print("New Bone[%i] now contains mesh %i",
-						mModel->getCurrentBone(), mModel->getCurrentMesh());
+					 mModel->getCurrentBone(), mModel->getCurrentMesh());
 		break;
 	
 	case CMD_BONE_DELETE_MESH:
 		mTransformMode = FreyjaModel::TransformBone;
 		mModel->removeMeshFromBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
 		freyja_print("New Bone[%i] no longer contains mesh %i",
-						mModel->getCurrentBone(), mModel->getCurrentMesh());
+					 mModel->getCurrentBone(), mModel->getCurrentMesh());
 		break;
 
 
-		/* MESHES */
+	/* MESHES */
+	case eMeshNew:
+		mTransformMode = FreyjaModel::TransformMesh;
+		addObject();
+		break;
 	case eTransformMeshPivot:
 		mTransformMode = FreyjaModel::TransformMesh;
 		mEventMode = MESH_MOVE_CENTER;
@@ -961,7 +1031,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-		/* ANIMATIONS */
+	/* ANIMATIONS */
 	case eAnimationPlay:
 		freyja_print("eAnimationPlay disabled / no longer implemented");
 		break;
@@ -1016,12 +1086,10 @@ bool FreyjaControl::event(int command)
 	case eMove_Z:
 		break;
 
-
 	case eRotate_X:
 	case eRotate_Y:
 	case eRotate_Z:
 		break;
-
 
 	case eScale_X:
 	case eScale_Y:
@@ -1220,45 +1288,6 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-
-
-	case CMD_POLYGON_DELETE:
-		mEventMode = POLYGON_DEL_MODE;
-		freyja_print("Select polygon by vertices to delete");
-		break;
-	case CMD_POLYGON_ADD:
-		mEventMode = POLYGON_ADD_MODE;
-		freyja_print("Select vertices to create a polygon");
-		break;
-	case CMD_POLYGON_SELECT:
-		mEventMode = POLYGON_SELECT_MODE;
-		freyja_print("Select polygon by vertices to highlight it");
-		break;
-
-
-
-	case CMD_POINT_DELETE:
-		mEventMode = POINT_DEL_MODE;
-		freyja_print("Select vertex to delete");
-		break;
-	case CMD_POINT_ADD:
-		mEventMode = POINT_ADD_MODE;
-		freyja_print("Select point in space to create a vertex");
-		break;    
-	case CMD_POINT_COMBINE:
-		if (mEventMode != VERTEX_COMBINE)
-		{
-			mEventMode = VERTEX_COMBINE;
-		}
-		else
-		{	
-			mEventMode = modeNone;
-		}
-
-		freyja_print("Vertex combine [%s]", 
-					 (mEventMode == VERTEX_COMBINE) ? "on" : "off");
-		break;
-
 	default:
 		freyja_print("!Unhandled event(%d)", command);
 		return false;
@@ -1377,7 +1406,7 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		break;
 
 	case eSetCurrentBoneName:
-		mModel->nameBone(mModel->getCurrentBone(), text);
+		mModel->setNameBone(mModel->getCurrentBone(), text);
 		break;
 
 	default:
@@ -1548,7 +1577,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 	if (!warn)
 	{
 		warn = true;
-		freyja_print("WARNING: Using FreyjaControl::getScreenToWorldOBSOLETE");
+		freyja_print("Call to getScreenToWorldOBSOLETE is deprecated...");
 	}
 
 	getWorldFromScreen(x, y, &z);
@@ -1700,7 +1729,9 @@ void FreyjaControl::addObject()
 			mModel->connectBone(mModel->getCurrentBone(), index);
 		}
 		
-		freyja_print("New Bone[%u]", index);
+		freyja_event_gl_refresh();
+		freyja_print("New Bone[%u], Bone[%u].parent = %i",
+					 index, index, mModel->getCurrentBone());
 		break;
 	case FreyjaModel::TransformMesh:
 		mModel->MeshNew();
@@ -2079,12 +2110,33 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y, 
 							  Egg::egg_plane plane) 
 { 
+	vec3_t xyz;
 	float xx = x, yy = y;
-	unsigned int master_tag;
+	unsigned int master_tag, i;
 	static float xxx, yyy;
+
 	
 	getScreenToWorldOBSOLETE(&xx, &yy);
 	
+	switch (plane)
+	{
+	case Egg::PLANE_XY:
+		xyz[0] = xx;
+		xyz[1] = yy;
+		xyz[2] = 0;
+		break;
+	case Egg::PLANE_XZ:
+		xyz[0] = xx;
+		xyz[1] = 0;
+		xyz[2] = yy;
+		break;
+	case Egg::PLANE_YZ:
+		xyz[0] = 0;
+		xyz[1] = xx;
+		xyz[2] = yy;
+		break;
+	}
+
 	if (!(btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED))
 	{	
 		switch(mEventMode)
@@ -2164,6 +2216,10 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 	case POINT_ADD_MODE: 
 		mModel->VertexNew(xx, yy);
+		break;
+	case BONE_ADD_MODE:
+		i = mModel->newBone(xyz[0], xyz[1], xyz[2], 0x0);
+		freyja_print("New bone[%i] created", i);
 		break;
 	case POLYGON_ADD_MODE:
 		mModel->PolygonAddVertex(xx, yy);

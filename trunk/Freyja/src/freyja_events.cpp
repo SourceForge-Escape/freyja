@@ -227,6 +227,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
+	r.RegisterInt("eSplitObject", eSplitObject);
 	r.RegisterInt("eSelectAll", eNone);
 	r.RegisterInt("eAppendFile", eNone);
 	r.RegisterInt("eRevertFile", eNone);
@@ -328,7 +329,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("CMD_MISC_TEXEL_COMBINE", CMD_MISC_TEXEL_COMBINE);
 	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
 
-	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
 	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);
 	r.RegisterInt("eSetMaterialName", eSetMaterialName);
@@ -354,11 +354,24 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eMode", EVENT_MISC); // Hack to fake 2i event to eventMisc
 	r.RegisterInt("eVertexNew", CMD_POINT_ADD);
+	//r.RegisterInt("eVertexMove", CMD_POINT_MOVE);
 	r.RegisterInt("eVertexCombine", CMD_POINT_COMBINE);
-	r.RegisterInt("ePolygonNew", CMD_POLYGON_ADD);
-	r.RegisterInt("eVertexDelete", CMD_POLYGON_DELETE);	
+	r.RegisterInt("eVertexDelete", CMD_POINT_DELETE);
+	r.RegisterInt("ePolygonNew", CMD_POLYGON_ADD);	
+	r.RegisterInt("ePolygonDelete", CMD_POLYGON_DELETE);	
+	r.RegisterInt("ePolygonSelect", CMD_POLYGON_SELECT);	
+
+	/* Bone edit */
+	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName); // textbox
+	r.RegisterInt("eBoneNew", CMD_BONE_NEW);
+	r.RegisterInt("eBoneSelect", CMD_BONE_SELECT);
+	r.RegisterInt("eBoneLinkChild", CMD_BONE_CONNECT);
+	r.RegisterInt("eBoneUnLinkChild", CMD_BONE_DISCONNECT);
 	r.RegisterInt("eBoneLinkMesh", CMD_BONE_ADD_MESH);
+	r.RegisterInt("eBoneUnLinkMesh", CMD_BONE_DELETE_MESH);
 	r.RegisterInt("eBoneMoveJoint", CMD_BONE_MOVE_PIVOT);
+
+
 	r.RegisterInt("eSelectionByBox", CMD_MISC_BBOX_SELECT);
 	r.RegisterInt("eTextureMapProjection", CMD_MISC_GEN_TEXMAP_XY);
 	r.RegisterInt("eModeModel", FREYJA_MODE_MODEL_EDIT);

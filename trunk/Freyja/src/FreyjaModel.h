@@ -199,7 +199,8 @@ public:
 		FL_DUMP_TEXTURE  = 1,    /* Toggle image file dumps of TR textures */
 		FL_LOAD_MAP      = 2,    /* Toggle map loading in TR paks */
 		FL_QUAKE_PAL     = 4,    /* Toggle quake/hexen2 palette in mdl loads */
-		FL_VERTEX_UV     = 8     /* Toggle polymapping of texcoords */
+		FL_VERTEX_UV     = 8,     /* Toggle polymapping of texcoords */
+		fDontUpdateBoneName = 16
 	} option_flag_t;
 
 
@@ -438,6 +439,8 @@ public:
 	 * 2000.09.09: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	void updateSkeletalUI();
 
 
 	////////////////////////////////////////////////////////////
@@ -682,7 +685,8 @@ public:
 	void moveBoneCenter(float xx, float yy);
 	void moveBone(float xx, float yy);
 	void selectBone(float xx, float yy);
-	void nameBone(unsigned int bone, const char *name);
+	void setNameBone(unsigned int bone, const char *name);
+	const char *getNameBone(unsigned int bone);
 	void addVertexToBone(unsigned int bone, unsigned int vertex);
 	void removeVertexFromBone(unsigned int bone, unsigned int vertex);
 	void addMeshToBone(unsigned int bone, unsigned int mesh);
