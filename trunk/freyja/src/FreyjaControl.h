@@ -437,9 +437,9 @@ private:
 
 	EventMode mEventMode;                   /* Mode of generic event handler */
 	
-	int _tex_state;                         /* Mouse state on texture canvas */
+	int mUVMouseState;                      /* Mouse state on texture canvas */
 	
-	int _mouse_state;                       /* Mouse state on modeler canvas */
+	int mXYZMouseState;                     /* Mouse state on modeler canvas */
 
 	unsigned int mFileDialogMode;
 

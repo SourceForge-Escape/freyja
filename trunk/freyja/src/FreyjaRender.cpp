@@ -1285,34 +1285,33 @@ void FreyjaRender::renderModel(RenderModel &model)
 	}    
 
 
-	/* Render selected vertices by bounding box
-	 *  -- this should be model specific later */
+	/* Render bounding box selection */
+	mModel->getVertexSelection(min, max, &list);
+
 	if (mRenderMode & RENDER_BBOX_SEL)
 	{
-		mModel->getVertexSelection(min, max, &list);
-
-		/* Render bounding box */
 		mglDrawBbox(min, max, RED, mColorWireframe);
+	}
 
-		/* Render selected vertices */
-		if (list && !list->empty())
+	/* Render selected vertices */
+	if (list && !list->empty())
+	{
+		glPointSize(mDefaultPointSize + 2.0f);
+		glColor3fv(RED);
+		glBegin(GL_POINTS);
+		 
+		for (i = list->begin(), n = list->end(); i < n; ++i)
 		{
-			glPointSize(mDefaultPointSize);
-			glColor3fv(GREEN);
-			glBegin(GL_POINTS);
-		 
-			for (i = list->begin(), n = list->end(); i < n; ++i)
-			{
-				xyz = mModel->getVertexXYZ((*list)[i]);
+			xyz = mModel->getVertexXYZ((*list)[i]);
 
-				if (xyz)
-				{
-					glVertex3fv(*xyz);
-				}
+			if (xyz)
+			{
+				glVertex3fv(*xyz);
 			}
-		 
-			glEnd();
 		}
+		 
+		glEnd();
+		glPointSize(mDefaultPointSize);
 	}
 
 
