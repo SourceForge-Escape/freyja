@@ -280,8 +280,6 @@ int freyja_model__mdx_import(char *filename)
 	}
 	eggEnd(); // GROUP
 
-	eggEnd(); // MESH
-
 	fread(&buffer, 1, 4, f);
 	if (!strncmp("NRMS", buffer, 4))
 	{
@@ -313,12 +311,31 @@ int freyja_model__mdx_import(char *filename)
 	}
 	else
 	{
+		printf("PTYP [FAILED]\n");
 		fclose(f);
 		return -1;
 	}
 
-	eRead_Small_uint32(&count, f);
-	eRead_Small_uint32(&count, f);
+	unsigned int ptype1, ptype2;
+	eRead_Small_uint32(&ptype1, f);
+
+	//unsigned int *types = 0x0;
+
+	if (ptype1 != 4)
+	{
+		eRead_Small_uint32(&ptype2, f);
+	}
+	else
+	{
+		fseek(f, SEEK_CUR, ptype1*4 - 8);
+
+		//types = new unsigned int[ptype1];
+		//
+		//for (i = 0; i < ptype1; ++i)
+		//	eRead_Small_uint32(types+i, f);
+	}
+
+	printf("PTYP: %d %d\n", ptype1, ptype2);
 
 	fread(&buffer, 1, 4, f);
 	if (!strncmp("PCNT", buffer, 4))
@@ -327,12 +344,26 @@ int freyja_model__mdx_import(char *filename)
 	}
 	else
 	{
+		printf("PCNT [FAILED] -- @ %li\n", ftell(f));
 		fclose(f);
 		return -1;
 	}
 
+	unsigned int faceCount;
 	eRead_Small_uint32(&count, f);
-	eRead_Small_uint32(&count, f);
+
+	if (count == 1)
+	{
+		eRead_Small_uint32(&faceCount, f);
+		faceCount /= 3;
+	}
+	else
+	{
+		faceCount = count;
+		count *= 4;
+	}
+
+	printf("%d faces, %d count\n", faceCount, count);
 
 	fread(&buffer, 1, 4, f);
 	if (!strncmp("PVTX", buffer, 4))
@@ -345,7 +376,29 @@ int freyja_model__mdx_import(char *filename)
 		return -1;
 	}
 
+	fread(&count, 4, 1, f);
+	printf("count = %d, faceCount = %d\n", count, faceCount);
+	unsigned short int *tris = new unsigned short int[count];
+
+	for (i = 0; i < count; ++i)
+	{
+		fread(tris+i, 2, 1, f);
+		//printf("%d %d\n", i, tris[i]);
+	}
+
+	for (i = 0; i < faceCount; ++i)
+	{
+		printf("%d <%d %d %d>\n", i, tris[i*3], tris[i*3+1], tris[i*3+2]);
+		eggBegin(FREYJA_POLYGON);
+		eggVertex1i(tris[i*3]);
+		eggVertex1i(tris[i*3+1]);
+		eggVertex1i(tris[i*3+2]);
+		eggEnd(); // POLYGON
+	}
+
 	// ...
+
+	eggEnd(); // MESH
 
 	fclose(f);
 	return 0;
