@@ -180,7 +180,7 @@ int Ase::load(char *filename)
 
 	if (check(filename))
 	{
-		printf("Ase::load> File may not be valid ASE file.\n");
+		//printf("Ase::load> File may not be valid ASE file.\n");
 		return -1;
 	}
 	
@@ -728,7 +728,7 @@ int freyja_model__ase_import(char *filename)
 
 	if (ase.load(filename))
 	{
-		freyjaPrintError("ase_import> ERROR Failed to load file.\n");
+		//freyjaPrintError("ase_import> ERROR Failed to load file.\n");
 		return -1;
 	}
 
