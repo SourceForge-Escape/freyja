@@ -331,11 +331,11 @@ typedef struct {
 
 // skin info
 typedef struct {
-	char               name[64];
-	int                  flags;
-	int                  width;
-	int                  height;
-	int                  index;
+	char name[64];
+	long flags;
+	long width;
+	long height;
+	long index;
 } mstudio_texture_t;
 
 /* Actual data storage records */
