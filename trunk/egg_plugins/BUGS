@@ -1,3 +1,8 @@
 
 20040422:
+	* LineageII stuff only good for decryption and extraction
+	* Most UT stuff is broke now
+	* NOD is broke, and I have nothing to test with
+	* Imported Halflife rewrite, so it's broke
+	* Imported GRNModel rewrite, so it's broke
 	* Still using old tombraider classes, so no TR5 support
