@@ -123,6 +123,8 @@ public:
 
 
 /* Some helper functions for making meshes and UV generation */
+void eggGenerateVertexNormals();
+
 int eggGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
 void eggGenerateCube(vec_t sideLenght);
@@ -893,6 +895,8 @@ public:
 	 * 1999.07.31:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	egg_vertex_t *eggGetVertex(unsigned int index);
 
 	void eggVertex1i(unsigned int egg_id);
 	/*------------------------------------------------------

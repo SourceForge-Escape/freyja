@@ -372,6 +372,9 @@ void FreyjaControl::Event(int mode, int cmd)
 	case EVENT_MISC:
 		switch (cmd)
 		{    
+		case CMD_MISC_GEN_NORMALS:
+			eggGenerateVertexNormals();
+			break;
 		case CMD_MISC_RENDER_BBOX:
 			_render->Flags(FreyjaRender::RENDER_BBOX, 
 								!(_render->Flags() & FreyjaRender::RENDER_BBOX));

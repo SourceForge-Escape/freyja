@@ -107,8 +107,8 @@ int freyja_model__md2_import(char *filename)
     {
       // Store vertices in group
       vertex = eggVertexStore3f(md2_vertex[v].x, 
-				md2_vertex[v].y, 
-				md2_vertex[v].z);
+				md2_vertex[v].z, 
+				md2_vertex[v].y);  // Swap Y and Z for freyja
       
       // Generates id translator  table for this vertex morph frame
       trans.Add(v, vertex);

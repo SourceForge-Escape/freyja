@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
@@ -21,7 +21,7 @@
  * 2000.08.25:
  * Mongoose - Created, based on GooseEgg view prototype
  *
- =================================================================*/
+ ==========================================================================*/
 
 #include <sys/time.h>
 #include <stdlib.h>
@@ -780,7 +780,7 @@ void FreyjaRender::CustomColor(int flags, float r, float g, float b)
 
 void FreyjaRender::ScreenShot()
 {
-	MaterialManager::mSingleton->takeScreenshot("Freyja", Width(), Height());
+	gMaterialManager->takeScreenshot("Freyja", Width(), Height());
 }
 
 
@@ -1037,8 +1037,8 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 			{
 				// Mongoose: 2001.10.28 Scaling replaced by mul ops
 				glVertex3f(vertex->pos[0] * 1.0001, 
-							  vertex->pos[1] * 1.0001, 
-							  vertex->pos[2] * 1.0001);
+						   vertex->pos[1] * 1.0001, 
+						   vertex->pos[2] * 1.0001);
 			}
 		}
 	  
@@ -1068,7 +1068,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	}
 
 
-	// Render face
+	/* Render face */
 	if (mRenderMode & RENDER_FACE)
 	{
 		// Call shader/texture ( no shader support yet )
@@ -1076,7 +1076,8 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 		{
 			if (mRenderMode & RENDER_MATERIAL)
 			{
-				MaterialManager::mSingleton->applyEffectGL(polygon.shader);
+				//glPushAttrib(GL_ENABLE_BIT);
+				gMaterialManager->applyEffectGL(polygon.shader);
 			}
 
 			BindTexture(polygon.shader+1);
@@ -1192,6 +1193,11 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 		}
 	 
 		glEnd();
+
+		if (mRenderMode & RENDER_MATERIAL)
+		{
+			//glPopAttrib();
+		}
 	}
 }
 
@@ -1250,7 +1256,7 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 
 	if (mRenderMode & RENDER_MATERIAL)
 	{
-		MaterialManager::mSingleton->applyEffectGL();
+		gMaterialManager->applyEffectGL();
 	}
 
 	for (mesh.r_polygon.start(); mesh.r_polygon.forward(); 
@@ -1641,7 +1647,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
 	/* Setup material */
-	MaterialManager::mSingleton->applyEffectGL();
+	gMaterialManager->applyEffectGL();
 
 	/* Cast light on sphere colored/detailed by material */
 	mglDrawSphere(128, 128, 10.0);
