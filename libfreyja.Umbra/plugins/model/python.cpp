@@ -54,11 +54,12 @@ int export_model(char *filename)
 
 int import_model(char *filename)
 {
+	int ret = -1;
 	FILE *f;
 #ifdef UNIT_TEST_PYTHON
 	char *plugin = "plugins/model/demo.py";
 #else
-	char *plugin = "/usr/local/lib/freyja8/modules/model/import.py";
+	char *plugin = "/usr/local/lib/freyja/modules/model/python/import.py";
 #endif
 	PyObject *module, *dict, *tmp;
 
@@ -69,7 +70,7 @@ int import_model(char *filename)
 
 	if (!f)
 	{
-		printf("'%s' failed to load...\n", plugin);
+		printf("\n'%s' failed to load...\n", plugin);
 		perror(plugin);
 	}
 	else
@@ -81,16 +82,16 @@ int import_model(char *filename)
 		PyDict_SetItemString(dict, "FreyjaImportFilename", tmp);
 		Py_DECREF(tmp);
 
-		printf("[Running '%s'...]\n", plugin);
+		printf("\t[Running '%s'...]\n", plugin);
 		PyRun_SimpleFile(f, plugin);
-		printf("[done]\n");
+		printf("\t[done]\n");
 	}
 
 	Py_Finalize();
 
-	//FIXME: If sucess an some python module you should return 0
+	// FIXME: Call to functions in python modules and get return values
 
-	return -1;
+	return ret;
 }
 
 
@@ -187,7 +188,7 @@ PyObject *py_freyjaVertexNormal3f(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "ifff", &index, &x, &y, &z))
 		return NULL;
 
-	freyjaNormal3f(x, y, z);
+	freyjaVertexNormal3f(index, x, y, z);
 	return PyInt_FromLong(0);
 }
 
@@ -266,7 +267,7 @@ PyObject *initPlugins()
     Py_DECREF(tmp);
 
     tmp = PyInt_FromLong(FREYJA_VERTEX_GROUP);
-    PyDict_SetItemString(dict, "FREYJA_GROUP", tmp);
+    PyDict_SetItemString(dict, "FREYJA_VERTEX_GROUP", tmp);
     Py_DECREF(tmp);
 
     tmp = PyInt_FromLong(FREYJA_BONE);
@@ -282,15 +283,22 @@ PyObject *initPlugins()
 
 
 #ifdef UNIT_TEST_PYTHON
+
+#include <freyja/EggPlugin.h>
+
 int main(int argc, char *argv[])
 {
-	FreyjaScene scene;
-	FreyjaPlugin plugin(&scene, "/usr/local/lib/freyja/modules/model/");
+	Egg egg;
+	EggPlugin plugin(&egg);
 
 	if (argc > 2)
+	{
 		import_model(argv[1]);
+	}
 	else
+	{
 		import_model("test.smd");
+	}
 
 	plugin.exportModel("python.ase", "ase");
 
