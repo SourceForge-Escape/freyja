@@ -1123,6 +1123,30 @@ void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 // File dialog support func
 ////////////////////////////////////////////////////////////////
 
+void mgtk_add_menu_item(char *text, long event)
+{
+	GtkWidget *item;
+	extern GtkWidget *GTK_FILESELECTION_DROP_DOWN_MENU;
+	extern void *rc_gtk_event_func(int event);
+	void *agtk_event;
+
+	printf("%s %p\n", text, GTK_FILESELECTION_DROP_DOWN_MENU);
+
+	item = gtk_image_menu_item_new_with_mnemonic(text);		
+	gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), item);
+	gtk_widget_show(item);
+		
+	agtk_event = rc_gtk_event_func(event);
+
+	if (agtk_event)
+	{
+		gtk_signal_connect(GTK_OBJECT(item), "activate",
+						   GTK_SIGNAL_FUNC(agtk_event), 
+						   GINT_TO_POINTER(event));
+	}
+}
+
+
 void mgtk_event_fileselection_action()
 {
 	GtkWidget *file = mgtk_get_fileselection_widget();

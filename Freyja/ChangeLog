@@ -27,6 +27,11 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20050103) "Chimera" Mongoose <mongoose@icculus.org>
+
+	o Auto update filedialog optionmenu added
+
+
  Freyja (0.3.5-20041228) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o Fix for top vertexlist scaling
