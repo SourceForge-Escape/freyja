@@ -219,13 +219,13 @@ int freyja_model__nif4_import(char *filename)
 		for (j = 0; j < data->num_vertices; ++j)
 		{
 			idx = freyjaVertex3f(data->coordinates[j].x,
-								 data->coordinates[j].z,
-								 data->coordinates[j].y);
+								 data->coordinates[j].y,
+								 data->coordinates[j].z);
 
 			freyjaVertexNormal3f(idx,
 								 data->normals[j].x,
-								 data->normals[j].z,
-								 data->normals[j].y);
+								 data->normals[j].y,
+								 data->normals[j].z);
 
 			if (data->num_uv_sets > 0)
 			{
@@ -234,7 +234,7 @@ int freyja_model__nif4_import(char *filename)
 									   data->uv_set[0].textureinfo[j].v);
 			}
 
-			vertices.pushBack();
+			vertices.pushBack(idx);
 		}
 
 		freyjaEnd(); // FREYJA_VERTEX_GROUP
@@ -243,9 +243,9 @@ int freyja_model__nif4_import(char *filename)
 		{
 			freyjaBegin(FREYJA_POLYGON);
 			freyjaPolygonMaterial1i(0);
-			freyjaPolygonVertex1i(data->triangles[i].v[0]);
-			freyjaPolygonVertex1i(data->triangles[i].v[1]);
-			freyjaPolygonVertex1i(data->triangles[i].v[2]);
+			freyjaPolygonVertex1i(vertices[data->triangles[i].v[0]]);
+			freyjaPolygonVertex1i(vertices[data->triangles[i].v[1]]);
+			freyjaPolygonVertex1i(vertices[data->triangles[i].v[2]]);
 			freyjaEnd(); // FREYJA_POLYGON
 		}
 
