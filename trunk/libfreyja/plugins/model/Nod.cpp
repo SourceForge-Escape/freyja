@@ -362,8 +362,9 @@ int freyja_model__nod_check(char *filename)
 
 int freyja_model__nod_import(char *filename)
 {
+	const vec_t scale = 0.5;
 	Map<unsigned int, unsigned int> trans;
-	int i, j, b, v, t;
+	int i, j, b;
 	Nod nod;
 	char name[64];
 	Matrix matrix;
@@ -396,9 +397,9 @@ int freyja_model__nod_import(char *filename)
 		freyjaBoneFlags1u(0x0);
 		freyjaBoneParent(nod.bones[b].ParentID);
 		freyjaBoneName(name);
-		freyjaBonePos3f(nod.bones[b].RestTranslate[0],
-						nod.bones[b].RestTranslate[1],
-						nod.bones[b].RestTranslate[2]);
+		freyjaBonePos3f(nod.bones[b].RestTranslate[0]*scale,
+						nod.bones[b].RestTranslate[1]*scale,
+						nod.bones[b].RestTranslate[2]*scale);
 		freyjaBoneRotate3f(rot[0], rot[1], rot[2]);
 		
 
@@ -451,10 +452,10 @@ int freyja_model__nod_import(char *filename)
 							 nod.bones[b].RestTranslate[1],
 							 nod.bones[b].RestTranslate[2]);
 			matrix.rotate(rot[0], rot[1], rot[2]);
-			matrix.multiply3v(pos, pos);
+			//matrix.multiply3v(pos, pos);
 		
 			// Store vertices and texels in group
-			index = freyjaVertex3f(pos[0], pos[1], pos[2]);	
+			index = freyjaVertex3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
 			freyjaVertexNormal3fv(index, nod.vertices[num_verts + j].Norm);
 			freyjaVertexTexCoord2f(index,
 								   nod.vertices[num_verts + j].UV[0],
@@ -484,6 +485,8 @@ int freyja_model__nod_import(char *filename)
 	}
 
 #else
+	int v, t;
+
 
 	// Start a new mesh
 	freyjaBegin(FREYJA_MESH);
