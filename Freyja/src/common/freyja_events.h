@@ -25,9 +25,19 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
 
 
+#include <stdarg.h>
+
+
+typedef enum {
+
+	eZOOM = 1004,
+	eNONE = 9999
+
+} event_subject_id;
+
 void freyja_event_fullscreen();
 void freyja_event_unfullscreen();
-
+void freyja_event_notify_observer1f(event_subject_id id, float r);
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +46,8 @@ void freyja_event_key_press(int key, int mod);
 
 void event_swap_buffers();
 void event_shutdown(int code);
-void event_print(char *s, ...);
+void event_print(char *format, ...);
+void event_print_args(char *format, va_list *args); // only works for glibc!
 void event_filename(int mode, char *filename);
 void event_load_model(char *filename);
 void event_refresh();
@@ -126,6 +137,8 @@ typedef struct callback_bone_s
 } callback_bone_t;
 
 void callback_update_skeleton(callback_bone_t *bone);
+
+
 
 #define EVENT_FREYJA         -1000
 #define EVENT_REDO_LAST      -5

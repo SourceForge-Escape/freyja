@@ -109,6 +109,7 @@ int freyja_model__mdl_import(char *filename)
 
   // Start a new mesh
   eggBegin(FREYJA_MESH);
+  eggMeshFlags1u(FL_MESH__VERTEX_FRAME_GROUPS);
 
   for (f = 0; f < num_frames; f++)
   {

@@ -423,19 +423,16 @@ void close_log_file()
 		fclose(get_log_file());
 }
 
-
-void event_print(char *s, ...)
+void event_print_args(char *format, va_list *args)
 {
 	FILE *f = get_log_file();
 	char buffer[1024];
-	va_list args;
 	unsigned int l;
 
 
 	// Strip message of an trailing carrage return 
 	//  and print to stdout and the status bar
-	va_start(args, s);
-	vsnprintf(buffer, 1024, s, args);
+	vsnprintf(buffer, 1024, format, *args);
 	
 	l = strlen(buffer);
   
@@ -465,10 +462,18 @@ void event_print(char *s, ...)
 	if (f)
 	{
 		fprintf(f, "> ");
-		vfprintf(f, s, args);
+		vfprintf(f, format, *args);
 		fprintf(f, "\n");
 	}
+}
 
+
+void event_print(char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	event_print_args(format, &args);
 	va_end(args);
 }
 

@@ -302,7 +302,7 @@
 
 				(hbox 1 0 0 1 0
 					(label "Zoom"  0.0 0.5) 
-					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 1004))
+					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZOOM))
 				(hbox 1 1 0 1 1
 					(label "Light0 position" 0.0 0.5))
 				(hbox 1 1 0 1 1
@@ -345,7 +345,7 @@
 
 					 (hbox 1 0 0 1 0 
 							 (label "Parent" 0.0 0.5) 
-							 (spinbutton 0 0 100 999999))
+							 (spinbutton 0 0 100 eNONE))
 
 					 (hbox 1 0 0 1 0 
 							 (label "Translate" 0.0 0.5) 
@@ -363,20 +363,20 @@
 
 					 (hbox 1 0 0 1 0 
 							 (label "Weight" 0.0 0.5) 
-							 (spinbutton 0 0 100 999999))
+							 (spinbutton 0 0 100 eNONE))
 
 					 (hbox 1 0 0 1 0 
 							 (label "Bone" 0.0 0.5) 
-							 (spinbutton 0 0 100 999999))
+							 (spinbutton 0 0 100 eNONE))
 					(hbox 1 0 0 1 0 
 							 (label "Influece" 0.0 0.5) 
-							 (spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 999999))
+							 (spinbutton2 0.0 -180.0 180.0 1.0 1.0 0.1 1 eNONE))
 
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0
 						(label "Zoom"  0.0 0.5) 
-						(spinbutton2 0.1 0.0001 1000.0 0.001 0.01 0.01 3 1004))
+						(spinbutton2 0.1 0.0001 1000.0 0.001 0.01 0.01 3 eZOOM))
 					(hbox 1 1 0 1 1
 						(label "Light0 position" 0.0 0.5))
 					(hbox 1 1 0 1 1
@@ -404,7 +404,7 @@
 
 					 (hbox 1 1 0 1 1
 						(label "Current Material" 0.0 0.5)
-						(spinbutton 0 100 0 99999))
+						(spinbutton 0 100 0 eNONE))
 
 					 (hbox 1 0 0 1 0 (hsep))
 

@@ -42,10 +42,10 @@
 #ifndef GUARD__MONGOOSE_GOOSEEGG_EGGPLUGIN_H
 #define GUARD__MONGOOSE_GOOSEEGG_EGGPLUGIN_H
 
+#include <stdarg.h>
 #include <mstl/Stack.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
-
 #include "Egg.h"
 
 
@@ -154,6 +154,27 @@ int eggGetTextureImage(unsigned int index, unsigned int *w, unsigned int *h,
 
 ///////////////////////////////////////////////////////////////////////
 
+void eggPrintError(char *format, ...);
+/*------------------------------------------------------
+ * Pre  : Format string and args are valid
+ * Post : Report messages to stdout
+ *
+ *-- History ------------------------------------------
+ *
+ * 2004.05.18:
+ * Mongoose - Created, split from Egg9 experimental 
+ ------------------------------------------------------*/
+
+void eggPrintMessage(char *format, ...);
+/*------------------------------------------------------
+ * Pre  : Format string and args are valid
+ * Post : Report messages to stdout
+ *
+ *-- History ------------------------------------------
+ *
+ * 2004.05.18:
+ * Mongoose - Created, split from Egg9 experimental 
+ ------------------------------------------------------*/
 
 unsigned int eggBegin(egg_plugin_t type);
 /*------------------------------------------------------
@@ -443,6 +464,17 @@ unsigned int eggTextureStoreFilename(char *filename);
  * Mongoose - Created, to replace current texture handler
  ------------------------------------------------------*/
 
+void eggMeshFlags1u(unsigned int flags);
+/*------------------------------------------------------
+ * Pre  : Pass valid egg_mesh_flags_t's bitmap
+ * Post : Sets flags for current mesh
+ *
+ *-- History ------------------------------------------
+ *
+ * 2004.05.16:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
 
 // Accesors /////////////////////////////////////
 
@@ -603,7 +635,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~EggPlugin();
+	virtual ~EggPlugin();
 	/*------------------------------------------------------
 	 * Pre  : EggPlugin object is allocated
 	 * Post : Deconstructs an object of EggPlugin
@@ -723,7 +755,7 @@ public:
 	 *
 	 *-- History ------------------------------------------
 	 *
-	 * 2001.11.18: 
+	 * 2001.11.18:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -737,6 +769,36 @@ public:
 	 *
 	 * 2001.11.18: 
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void eggPrintError(char *format, ...);
+	virtual void eggPrintError(char *format, va_list *args);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages
+	 *
+	 *        First methot makes va_list and passes it
+	 *        to (format, arg) method to print to stdout
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.18:
+	 * Mongoose - Created, split from Egg9 experimental 
+	 ------------------------------------------------------*/
+
+	void eggPrintMessage(char *format, ...);
+	virtual void eggPrintMessage(char *format, va_list *args);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report error messages
+	 *
+	 *        First methot makes va_list and passes it
+	 *        to (format, arg) method to print to stderr
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.18:
+	 * Mongoose - Created, split from Egg9 experimental 
 	 ------------------------------------------------------*/
 
 
@@ -1016,6 +1078,17 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void eggMeshFlags1u(unsigned int flags);
+	/*------------------------------------------------------
+	 * Pre  : Pass valid egg_mesh_flags_t's bitmap
+	 * Post : Sets flags for current mesh
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.16:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	unsigned int eggTagAddMesh(unsigned int mesh);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_TAG);
@@ -1099,7 +1172,6 @@ public:
 	 * 2004.03.24:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
 
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 

@@ -224,6 +224,11 @@ FreyjaResource::FreyjaResource()
 
 	//printf("FreyjaResource> Bind Resource and C++ symbols\n");
 	// Mongoose 2002.01.21, Bind some script vars to matching name in C/C++
+
+	RegisterCPPInt("eZOOM", eZOOM);
+	RegisterCPPInt("eNONE", eNONE);
+
+
 	RegisterCPPInt("EVENT_MAIN", EVENT_MAIN);
 	RegisterCPPInt("CMD_MAIN_NEW_MODEL",     CMD_MAIN_NEW_MODEL);
 	RegisterCPPInt("CMD_MAIN_OPEN_MODEL",    CMD_MAIN_OPEN_MODEL);

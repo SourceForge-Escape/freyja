@@ -314,6 +314,9 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	// FIXME
+	void setZoom(float zoom);
+	float getZoom();
 	
 private:    
 
@@ -469,7 +472,7 @@ private:
 
 	float _scroll[3];                          /* Used to cache scroll */
 
-	float _zoom;                               /* Used to cache zoom */
+	float mZoom;                               /* Used to cache zoom */
 
 	float _angles[3];                          /* Used to rotate the scene */
 

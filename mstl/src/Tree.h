@@ -1139,6 +1139,12 @@ private:
 		{
 			grandparent = parent->GetParent();
 			
+			if (parent == _root)
+			{
+				printf("FIXME: parent == root, restore broken\n");
+				break;
+			}
+
 			if (parent == grandparent->GetLeft()) 
 			{
 				uncle = grandparent->GetRight();

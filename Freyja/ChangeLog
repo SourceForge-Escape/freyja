@@ -28,6 +28,10 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040515) Mongoose <mongoose@icculus.org>
+
+	* Tracer observer type system for events starts with zoom test
+	
  Freyja (0.3.5-20040510) Mongoose <mongoose@icculus.org>
 
 	* Quick add back of mesh mouse based scale/rotate

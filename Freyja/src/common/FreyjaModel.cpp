@@ -34,9 +34,6 @@
 #include "freyja_events.h"
 #include "utils.h"
 
-//#define WATCH_FREYJAMODEL_EVENTS
-
-
 
 FreyjaModel::FreyjaModel()
 {
@@ -47,8 +44,8 @@ FreyjaModel::FreyjaModel()
 
 	pluginDir = freyja_rc_map("plugins/");
 
-	_egg = new Egg();
-	_plugin = new EggPlugin(_egg, pluginDir);
+	_egg = new FreyjaEgg();
+	_plugin = new FreyjaEggPlugin(_egg, pluginDir);
 
 	_plugin->addModule("psk");
 	_plugin->addModule("nod");
@@ -115,7 +112,6 @@ void FreyjaModel::Clear()
 	_current_frame = 0;
 	_current_animation_frame = 0;
 	_current_polygon = 0;
-	_zoom = 0.1f;
 	_bbox = 0;
 
 	_scroll[0] = 0.0f;
@@ -554,20 +550,6 @@ void FreyjaModel::Transform(int mode, enum Egg::egg_transform type,
 	}
 }
 
-
-void FreyjaModel::setZoom(float zoom)
-{
-	assert(zoom > 0.0f);
-
-	_zoom = zoom;
-	event_print("Zoom set to %f", zoom);
-}
-
-
-float FreyjaModel::getZoom()
-{
-	return _zoom;
-}
 
 void FreyjaModel::setSceneTranslation(vec_t x, vec_t y, vec_t z)
 {
@@ -1143,7 +1125,7 @@ void FreyjaModel::BBoxListBuild()
 
 	list = eggFindVerticesInBox(mSelectBBox, grp->vertex);
 	mList = *list;
-	mList.print(__print_unsigned_int);
+	//	mList.print(__print_unsigned_int);
 }
 
 
@@ -1510,8 +1492,8 @@ int FreyjaModel::loadModel(const char *filename)
  
 	if (err)
 	{
-		printf("ERROR: File '%s' not found or unknown format\n", filename);
-		printf("ERROR CODE %i\n", err);
+		event_print("ERROR: File '%s' not found or unknown format\n", filename);
+		event_print("ERROR CODE %i\n", err);
 	}
 	else
 	{
@@ -1524,7 +1506,7 @@ int FreyjaModel::loadModel(const char *filename)
 		{
 			if (textureFilename && textureFilename[0])
 			{
-				printf("FrejaModel::loadModel> Loading texture %i from file\n", i);
+				event_print("FrejaModel::loadModel> Loading texture %i from file\n", i);
 				gMaterialManager->mTextureId = i;
 				//gMaterialManager->setGeneralFlag(MaterialManager::fLoadTextureInSlot);
 				gMaterialManager->loadTexture(textureFilename);

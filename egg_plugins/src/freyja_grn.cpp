@@ -48,6 +48,12 @@ using namespace std;
 #   define snprintf _snprintf
 #endif
 
+unsigned int freyja_model_grn_info()
+{
+	return (1 | 2 | 4);
+}
+
+
 int freyja_model__grn_check(char *filename)
 {
 	cGrannyFile grn;
@@ -72,6 +78,7 @@ int freyja_model__grn_export(char *filename)
 
 int freyja_model__grn_import(char *filename)
 {
+	const float scale = 15.0f;
 	cGrannyFile grn;
 	unsigned int i, j;
 	string out;
@@ -93,11 +100,21 @@ int freyja_model__grn_import(char *filename)
 
 	// printf("%i meshes\n", meshes.meshes.size());
 
+#ifdef EGGV9
+	eggBegin(FREYJA_MODEL);
+	eggMetaData1String(NAME, filename);
+	eggMetaData3u(WORLD_TO_FREYJA, X, Z, NY);
+	eggMetaData1f(SCALE_VERTEX, 15.0f);
+	eggMetaData1f(SCALE_BONE, 15.0f);
+#endif
+
 	for (iter = meshes.meshes.begin(); iter != meshes.meshes.end(); iter++)
 	{
 		Mesh mesh = *iter;
 		Map <unsigned int, unsigned int> transUV, transXYZ;
 		unsigned int textureIndex = 0;
+
+		eggPrintMessage("Importing mesh\n");
 
 		if (texture.c_str())
 		{
@@ -111,7 +128,7 @@ int freyja_model__grn_import(char *filename)
 		for (j = 0; j < mesh.points.size(); ++j)
 		{
 			Point p = mesh.points[j];
-			i = eggVertexStore3f(p.points[0], p.points[2], -p.points[1]);
+			i = eggVertexStore3f(p.points[0]*scale, p.points[2]*scale, -p.points[1]*scale);
 			// XZ-Y
 
 			// Generates id translator list
@@ -188,9 +205,9 @@ int freyja_model__grn_import(char *filename)
 			if (!bone)
 				continue;
 				
-			eggTagPos3f(bone->translate.points[0], 
-						bone->translate.points[2], 
-						-bone->translate.points[1]);
+			eggTagPos3f(bone->translate.points[0]*scale, 
+						bone->translate.points[2]*scale, 
+						-bone->translate.points[1]*scale);
 
 			eggTagRotateQuaternion4f(bone->quaternion.points[0], 
 									 bone->quaternion.points[1], 
@@ -213,6 +230,10 @@ int freyja_model__grn_import(char *filename)
 
 		eggEnd(); // FREYJA_SKELETON
 	}
+
+#ifdef EGGV9
+	eggEnd(); // FREYJA_MODEL
+#endif
 
 	return 0;
 }

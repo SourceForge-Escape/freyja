@@ -3127,6 +3127,19 @@ void Egg::printError(char *s, ...)
 
 #include "EggPlugin.h"
 
+void import_driver(Egg *egg, char *filename)
+{
+	char plugindir[512];
+
+	printf("[Egg import_driver]\n");
+
+	snprintf(plugindir, 512, "%s/.freyja/plugins/", getenv("HOME"));
+	EggPlugin test(egg, plugindir);
+
+	test.importModel(filename);
+}
+
+
 // Random calls really
 void driver(Egg *egg)
 {
@@ -3196,7 +3209,13 @@ int main(int argc, char *argv[])
 		if (strcmp(argv[1], "load") == 0)
 		{
 			if (!egg.loadFile(argv[2]))
+			{
 				printf("main: Load reports success.\n");
+			}
+			else
+			{
+			}
+
 			return 0;
 		}
 		else if (strcmp(argv[1], "save") == 0)
@@ -3219,6 +3238,10 @@ int main(int argc, char *argv[])
 				printf("main: Load reports success.\n");
 			
 			return 0;
+		}
+		else if (!strcmp(argv[1], "import"))
+		{
+			import_driver(&egg, argv[2]);
 		}
 	}
 	else if (!strcmp(argv[1], "test"))
