@@ -144,6 +144,272 @@ void FreyjaModel::printInfo()
 }
 
 
+void FreyjaModel::transformTexCoord(long texCoordIndex,
+									freyja_transform_action_t action,
+									vec_t x, vec_t y)
+{
+	Vector<long> seen;
+	egg_polygon_t *poly;
+	egg_texel_t *texel = _egg->getTexel(texCoordIndex);
+	egg_texel_t *tex;
+	Vector3d u, v, p;
+	long i, j, k;
+	Matrix m;
+	vec_t z;
+
+
+	if (texel)
+	{
+		p = Vector3d(texel->st[0], texel->st[1], 0);
+	}
+	else
+	{
+		egg_vertex_t *vertex = _egg->getVertex(getCurrentVertex());
+		p = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+	}
+
+	switch (action)
+	{
+	case fTranslate:
+		m.translate(x, y, 0);
+		break;
+
+	case fRotateAboutPoint:
+		m.translate(-p.mVec[0], -p.mVec[1], 0);
+		x = helDegToRad(x);
+		y = helDegToRad(0);
+		z = helDegToRad(0);
+		m.rotate(0, 0, helDegToRad(90));
+		m.rotate(x, y, z);
+		m.translate(p.mVec[0], p.mVec[1], 0);
+		break;
+
+	case fScaleAboutPoint:
+		m.translate(-p.mVec[0], -p.mVec[1], 0);
+		m.scale(x, y, 1);
+		m.translate(p.mVec[0], p.mVec[1], 0);
+		break;
+
+	case fRotate:
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(0);
+		m.rotate(x, y, z);
+		break;
+
+	case fScale:
+		m.scale(x, y, 1);
+		break;
+
+	default:
+		freyja_print("transformTexCoord: Unknown action");
+		return;
+	}
+
+
+	if (texel)
+	{
+		v = Vector3d(texel->st[0], texel->st[1], 0);
+		v = m * v;
+
+		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
+		{
+			poly = _egg->getPolygon(texel->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = _egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+					u = m * u;
+
+					tex->st[0] = u.mVec[0];
+					tex->st[1] = u.mVec[1];
+					seen.pushBack(poly->texel[i]);
+				}
+			}
+		}
+	}
+	else
+	{
+		egg_vertex_t *vertex = _egg->getVertex(getCurrentVertex());
+		egg_vertex_t *vert;
+
+		v = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		v = m * v;
+
+		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
+		{
+			poly = _egg->getPolygon(vertex->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
+				{
+					vert = _egg->getVertex(poly->vertex[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->vertex[j])
+						{
+							vert = 0x0;
+							break;
+						}
+					}
+
+					if (!vert) 
+						continue;
+
+					u = Vector3d(vert->uv[0], vert->uv[1], 0);
+					u = m * u;
+					vert->uv[0] = u.mVec[0];
+					vert->uv[1] = u.mVec[1];
+					seen.pushBack(poly->vertex[j]);
+				}
+			}
+		}
+	}
+}
+
+
+void FreyjaModel::mirrorTexCoord(long texCoordIndex, bool x, bool y)
+{
+	Vector<long> seen;
+	egg_polygon_t *poly;
+	egg_texel_t *texel = _egg->getTexel(texCoordIndex);
+	egg_texel_t *tex;
+	Vector3d u, trans, min;
+	long i, j, k;
+
+
+	if (texel)
+	{
+		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
+		{
+			poly = _egg->getPolygon(texel->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = _egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < trans.mVec[0])
+						trans.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < trans.mVec[1])
+						trans.mVec[1] = u.mVec[1];
+
+					if (x) tex->st[0] = -tex->st[0];
+					if (y) tex->st[1] = -tex->st[1];
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < min.mVec[0])
+						min.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < min.mVec[1])
+						min.mVec[1] = u.mVec[1];
+
+					seen.pushBack(poly->texel[j]);
+				}
+			}
+		}
+
+		u = trans;
+		trans = trans - min;
+		//trans += Vector3d(u.mVec[0]/2, u.mVec[1]/2, 0);
+
+		for (k = seen.begin(); k < (int)seen.end(); ++k)
+		{
+			tex = _egg->getTexel(seen[k]);
+
+			if (tex)
+			{
+				u = Vector3d(tex->st[0], tex->st[1], 0) + trans;
+
+				tex->st[0] = u.mVec[0];
+				tex->st[1] = u.mVec[1];
+			}
+		}
+	}
+	else
+	{
+		egg_vertex_t *vertex = _egg->getVertex(getCurrentVertex());
+		egg_vertex_t *vert;
+
+		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
+		{
+			poly = _egg->getPolygon(vertex->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
+				{
+					vert = _egg->getVertex(poly->vertex[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->vertex[j])
+						{
+							vert = 0x0;
+							break;
+						}
+					}
+
+					if (!vert) 
+						continue;
+
+					if (x) vert->uv[0] = -vert->uv[0];
+					if (y) vert->uv[1] = -vert->uv[1];
+					seen.pushBack(poly->vertex[j]);
+				}
+			}
+		}
+	}
+}
+
+
+void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
+{
+	egg_polygon_t *poly;
+
+	
+	poly = _egg->getPolygon(polygonIndex);
+
+	if (poly)
+		poly->shader = material;
+}
+
+
 void FreyjaModel::setMeshMaterial(long meshIndex, long material)
 {
 	egg_mesh_t *mesh;
@@ -2044,13 +2310,15 @@ void FreyjaModel::TexelSelect(float s, float t)
 }
 
 
+// FIXME: replace 'seen' hack with a capture list -> transform
 void FreyjaModel::UVMapMotion(float s, float t)
 {
+	Vector<long> seen;
 	egg_polygon_t *poly;
 	egg_texel_t *texel = _egg->getTexel(getCurrentTexCoord());
 	egg_texel_t *tex;
 	Vector3d u, v;
-	long i, j;
+	long i, j, k;
 
 	u = Vector3d(s, t, 0);
 
@@ -2069,11 +2337,21 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				{
 					tex = _egg->getTexel(poly->texel[j]);
 
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
 					if (!tex) 
 						continue;
 
 					tex->st[0] += u.mVec[0];
 					tex->st[1] += u.mVec[1];
+					seen.pushBack(poly->texel[j]);
 				}
 			}
 		}
@@ -2096,11 +2374,21 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				{
 					vert = _egg->getVertex(poly->vertex[j]);
 
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->vertex[j])
+						{
+							vert = 0x0;
+							break;
+						}
+					}
+
 					if (!vert) 
 						continue;
 
 					vert->uv[0] += u.mVec[0];
 					vert->uv[1] += u.mVec[1];
+					seen.pushBack(poly->vertex[j]);
 				}
 			}
 		}

@@ -17,7 +17,8 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
-	o Reshuffling libfreyja's into one composite
+	o Polygon winding support
+	o Make system for plugins seperate from libfreyja's
 	o New chunk file format -- fix Egg8 plugin import
 	o IK solver
 	o Smoothing groups tools
@@ -35,8 +36,6 @@
 	o Tightening up import / export -- if it's not 100% or close
 	  it's going to get disabled or feature locked till it is
 	o Propagate import / export list up to Freyja to make menus
-	o Merge down umbra system over stable to make ABI/API compatible
-	  plugins
 	o OO event system may need to come online right after release
 	o Python extention to mgtk/Freyja for interactive plugins
 	o <Mongoose> someone should write a perlin vol texture plugin for freyja

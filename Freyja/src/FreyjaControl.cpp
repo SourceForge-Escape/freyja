@@ -1045,14 +1045,40 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+	case eMirrorUV_X:
+		mModel->mirrorTexCoord(mModel->getCurrentTexCoord(), true, false);
+		freyja_event_gl_refresh();
+		break;
+	case eMirrorUV_Y:
+		mModel->mirrorTexCoord(mModel->getCurrentTexCoord(), false, true);
+		freyja_event_gl_refresh();
+		break;
+	case eTranslateUV:
+		break;
+	case eRotateUV:
+		mModel->transformTexCoord(mModel->getCurrentTexCoord(),
+								  fRotateAboutPoint, 45, 0); 
+		freyja_event_gl_refresh();
+		break;
+	case eScaleUV:
+		break;
+
 	case eSetMeshTexture:
 		freyja_print("Switching all of mesh[%i]'s ploygons to material %i",
 					 mModel->getCurrentMesh(),
 					 mModel->getCurrentTextureIndex());
 		mModel->setMeshMaterial(mModel->getCurrentMesh(),
 								mModel->getCurrentTextureIndex());
+		freyja_event_gl_refresh();
 		break;
 
+	case eSetPolygonTexture:
+		freyja_print("Switching all ploygon to material %i",
+					 mModel->getCurrentTextureIndex());
+		mModel->setPolygonMaterial(mModel->getCurrentPolygon(),
+								   mModel->getCurrentTextureIndex());
+		freyja_event_gl_refresh();
+		break;
 
 	case eTextureSlotLoad:
 		if (!mMaterial->getGeneralFlags() & 
