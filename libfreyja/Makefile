@@ -220,7 +220,16 @@ meshgen.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-plugins: bmp.so dds.so jpg.so pcx.so ppm.so png.so tga.so
+python.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=python \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/python.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3 -lstdc++ -z defs"
+
+
+plugins: bmp.so dds.so jpg.so pcx.so ppm.so png.so tga.so python.so
 
 clean-plugins:
 	@-echo -n "Cleaning plugins                             "
@@ -234,6 +243,7 @@ install-plugins:
 	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model
 	@-cp $(IMAGE_PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)/image/
 	@-cp $(MODEL_PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)/model/
+	@-cp plugins/model/*.py $(PLUGIN_INSTALL_DIR)/model/
 	@-echo "[done]"
 
 
@@ -257,6 +267,14 @@ FreyjaUtil:
 	OBJS="$(BUILD_TEST_DIR)/FreyjaUtil.o" \
 	CFLAGS="-Wall -g -O0 -DLIB_JPEG -DUNIT_TEST_FREYJAUTIL" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
+
+python.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=python \
+	OBJS="$(BUILD_TEST_DIR)/python.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PYTHON" \
+	LD_FLAGS="-lm -lhel0 -lfreyja8 -lpython2.3 -lstdc++"
 
 jpeg.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
