@@ -278,7 +278,7 @@ python.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lpython2.3 -z defs"
 
-plugins-model: 3ds.so ase.so md2.so md5.so meshgen.so python.so
+plugins-model: 3ds.so ase.so md2.so md5.so python.so
 
 
 ######################################################################
@@ -296,9 +296,11 @@ clean-plugins:
 install-plugins:
 	@-echo -n "Installing plugins                           "
 	@-mkdir -p $(PLUGIN_INSTALL_DIR)/image
-	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model
 	@-cp $(IMAGE_PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)/image/
+	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model
 	@-cp $(MODEL_PLUGIN_BUILD_DIR)/*.so $(PLUGIN_INSTALL_DIR)/model/
+	@-mkdir -p $(PLUGIN_INSTALL_DIR)/model/python
+	@-cp plugins/model/python/*.py $(PLUGIN_INSTALL_DIR)/model/python/
 	@-echo "[done]"
 
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)

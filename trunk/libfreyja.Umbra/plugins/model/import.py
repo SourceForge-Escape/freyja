@@ -19,7 +19,7 @@ import FreyjaModeler
 from FreyjaModeler import *
 
 import string
-import math
+#import math
 import types
 
 def importmodel(filename):
@@ -31,7 +31,7 @@ def importmodel(filename):
 		print "ERROR opening file"
 		return -1
 
-	print "Sorry the roundabout plugin loader isn't here yet"
+	print "\t Sorry the roundabout plugin loader isn't here yet"
 
 	f.close()
 

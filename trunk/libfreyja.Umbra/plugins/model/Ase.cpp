@@ -757,6 +757,7 @@ int freyja_model__ase_import(char *filename)
 	freyjaBegin(FREYJA_MESH);
 	
 	/* Vertices */
+	freyjaBegin(FREYJA_VERTEX_GROUP);
 	for (i = 0; (int)i < ase.mVertexCount; ++i)
 	{
 		/* Store vertices in group */
@@ -765,7 +766,8 @@ int freyja_model__ase_import(char *filename)
 		/* Generates id translator list */
 		trans.Add(i, v);
 	}
-	
+	freyjaEnd();
+
 	/* TexCoords */	
 	for (i = 0; (int)i < ase.mUVWCount; ++i)
 	{
@@ -782,7 +784,7 @@ int freyja_model__ase_import(char *filename)
 		for (i = 0; (int)i < ase.mVertexCount; ++i)
 		{
 			//freyjaVertexNormal3fv(trans[i], ase.mNormals[i]);
-			freyjaNormal3fv(ase.mNormals[i]);
+			freyjaVertexNormal3fv(trans[i], ase.mNormals[i]);
 		}
 	}
 
@@ -878,7 +880,7 @@ int freyja_model__ase_import(char *filename)
 int freyja_model__ase_export(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
-	unsigned int vert;
+	long vert;
 	float st[2];
 	int v, t, texel;
 	unsigned int i, j, b, bone;
@@ -911,8 +913,8 @@ int freyja_model__ase_export(char *filename)
 	
 	for (v = 0; v < ase.mVertexCount; ++v)
 	{
-		freyjaGetVertex3fv(freyjaGetCurrent(FREYJA_VERTEX), ase.mVertices[v]);
-		freyjaGetNormal3fv(freyjaGetCurrent(FREYJA_VERTEX), ase.mNormals[v]);
+		freyjaGetVertex3fv(ase.mVertices[v]);
+		freyjaGetVertexNormal3fv(ase.mNormals[v]);
 		
 		// Use translator list
 		vert = freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);

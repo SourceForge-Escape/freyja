@@ -30,9 +30,11 @@
 #ifndef GUARD__LIBFREYJA_MONGOOSE_FREYJAUTIL_H_
 #define GUARD__LIBFREYJA_MONGOOSE_FREYJAUTIL_H_
 
-#include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaPrinter.h>
+#include <freyja/FreyjaPlugin.h>
 #include <freyja/Freyja.h>
+#include <freyja/EggPlugin.h>
+#include <freyja/Egg.h>
 
 
 class FreyjaUtilPrinter : public FreyjaPrinter
@@ -42,12 +44,14 @@ class FreyjaUtilPrinter : public FreyjaPrinter
 	virtual void errorArgs(char *format, va_list *args)
 	{
 		vfprintf(stderr, format, *args);
+		fprintf(stderr, "\n");
 	}
 
 
 	virtual void messageArgs(char *format, va_list *args)
 	{
 		vprintf(format, *args);
+		printf("\n");
 	}
 };
 
@@ -126,9 +130,16 @@ class FreyjaUtil
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	FreyjaUtilPrinter mPrinter;
+
+
 	FreyjaScene *mScene;         /* The data model */
 	
 	FreyjaPlugin *mPlugin;       /* Standard interface to data model */
+
+	/* Old school backend testing */
+	Egg *mEgg;
+	EggPlugin *mEggPlugin;
 };
 
 #endif

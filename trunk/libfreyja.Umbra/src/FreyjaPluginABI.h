@@ -160,15 +160,15 @@ long freyjaGetCurrent(freyja_object_t type);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-long freyjaGetBoneName(unsigned int index, unsigned int size, char *name);
+long freyjaGetBoneName(long index, unsigned int size, char *name);
 
-long freyjaGetBoneParent(unsigned int index);
+long freyjaGetBoneParent(long index);
 
-long freyjaGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz);
+long freyjaGetBoneRotationWXYZ4fv(long index, vec4_t wxyz);
 
-long freyjaGetBoneTranslation3fv(unsigned int index, vec3_t xyz);
+long freyjaGetBoneTranslation3fv(long index, vec3_t xyz);
 
-long freyjaGetBoneMeshIndex(unsigned int element);
+long freyjaGetBoneMeshIndex(long element);
 /*------------------------------------------------------
  * Pre  : Bone selected
  *        Value set to Mesh id of Bone's mesh_list[item]
@@ -181,7 +181,7 @@ long freyjaGetBoneMeshIndex(unsigned int element);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaGetNormal3fv(unsigned int index, vec3_t xyz);
+void freyjaGetVertexNormal3fv(vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : normal[index] exists
  * Post : Sets passed float array to normal <x, y, z>
@@ -192,7 +192,7 @@ void freyjaGetNormal3fv(unsigned int index, vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaGetTexCoord2fv(unsigned int index, vec2_t uv);
+void freyjaGetTexCoord2fv(long index, vec2_t uv);
 /*------------------------------------------------------
  * Pre  : texcoord[index] exists
  * Post : Sets passed float array to texcoord u, v
@@ -229,7 +229,7 @@ long freyjaGetPolygon1u(freyja_object_t type, long item, long *value);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-unsigned int freyjaGetPolygon3f(freyja_object_t type, int item, float *value);
+long freyjaGetPolygon3f(freyja_object_t type, long item, vec_t *value);
 /*------------------------------------------------------
  * Pre  : Type is either vertex or texel
  *        Item is index into polygon's type list 
@@ -375,10 +375,10 @@ long freyjaTexCoord2fv(vec2_t uv);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-long freyjaVertexTexCoord2f(long index, vec_t u, vec_t v);
-long freyjaVertexTexCoord2fv(long index, vec2_t uv);
-long freyjaVertexNormal3f(long index, vec_t nx, vec_t ny, vec_t nz);
-long freyjaVertexNormal3fv(long index, vec3_t nxyz);
+void freyjaVertexTexCoord2f(long index, vec_t u, vec_t v);
+void freyjaVertexTexCoord2fv(long index, vec2_t uv);
+void freyjaVertexNormal3f(long index, vec_t nx, vec_t ny, vec_t nz);
+void freyjaVertexNormal3fv(long index, vec3_t nxyz);
 long freyjaVertex3f(vec_t x, vec_t y, vec_t z);
 long freyjaVertex3fv(vec3_t xyz);
 /*------------------------------------------------------
@@ -393,7 +393,7 @@ long freyjaVertex3fv(vec3_t xyz);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyjaVertexWeight(unsigned int index, vec_t weight, unsigned int bone);
+void freyjaVertexWeight(long index, vec_t weight, long bone);
 /*------------------------------------------------------
  * Pre  : <weight> of influence of <bone> on vertex[<index>]
  *
@@ -468,7 +468,7 @@ void freyjaMeshTreeFrameAddBone(long tag);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-int freyjaTextureFilename1s(char *string);
+long freyjaTextureFilename1s(char *filename);
 
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
@@ -574,7 +574,7 @@ void freyjaMeshFlags1u(unsigned int flags);
 /* Mongoose 2004.12.19, 
  * C++ fun */
 
-Vector<long> &freyjaGetVertexPolygonRef();
+void freyjaGetVertexPolygonRef(Vector<long> &polygons);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Returns a list of indices of polygons that
@@ -588,8 +588,6 @@ Vector<long> &freyjaGetVertexPolygonRef();
  * Mongoose - Created, wrapper for old Egg style
  *            reverse reference system ( very handy )
  ------------------------------------------------------*/
-
-
 
 
 #endif
