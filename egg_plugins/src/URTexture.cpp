@@ -21,8 +21,10 @@
 
 #include <math.h>
 
-#include "mtk_tga.h"
-#include "mtk_image.h"
+#ifdef HAVE_MTK_IMAGE2
+#   include "mtk_tga.h"
+#   include "mtk_image.h"
+#endif
 
 #include "URTexture.h"
 
