@@ -1496,9 +1496,9 @@ void updateSkeletonUI(Egg *egg)
 	}
 
 	// testBone(bone, 0);
-	extern void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree);
+	extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
 	extern int gSkelTreeWidgetIndex;
-	mgtk_update_tree(gSkelTreeWidgetIndex, bone);
+	mgtk_event_update_tree(gSkelTreeWidgetIndex, bone);
 }
 
 

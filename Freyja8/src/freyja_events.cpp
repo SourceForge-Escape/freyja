@@ -93,7 +93,7 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 		freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
-#ifdef NOT_BACKPORTED
+#ifdef BACKPORTED_LIGHTS
 	case eColorLightAmbient: 
 		setColor(OpenGLFreyjaScene::mMaterialLight.mAmbient, color);
 		freyja_event_set_color(eColorLightAmbient, r, g, b, a);
@@ -108,9 +108,12 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 		setColor(OpenGLFreyjaScene::mMaterialLight.mSpecular, color);
 		freyja_event_set_color(eColorLightSpecular, r, g, b, a);
 		break;
-
-	//case eColorLightGobalAmbient:
-		//break;
+#else
+	case eColorLightAmbient: 
+	case eColorLightDiffuse:
+	case eColorLightSpecular:
+		freyja_print("Colored lights not backported");
+		break;
 #endif
 
 	case eColorBackground:
@@ -119,7 +122,7 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 		break;
 
 	case eColorGrid:
-		//		setColor(FreyjaRender::mColorGridSeperator, color);
+		setColor(FreyjaRender::mColorGridSeperator, color);
 		setColor(FreyjaRender::mColorGridLine, color);
 		freyja_event_set_color(eColorGrid, r, g, b, a);
 		break;
@@ -317,6 +320,9 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eModelIterator", eModelIterator);
 	r.RegisterInt("eMeshIterator", eMeshIterator);
 	r.RegisterInt("eGroupIterator", eGroupIterator);
+	r.RegisterInt("eBoneIterator", eBoneIterator);
+
+	r.RegisterInt("CMD_MISC_TEXEL_COMBINE", CMD_MISC_TEXEL_COMBINE);
 
 	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);

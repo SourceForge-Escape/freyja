@@ -144,6 +144,7 @@ typedef enum {
 	eModelIterator,
 	eMeshIterator,
 	eGroupIterator,
+	eBoneIterator,
 
 	/* Text events */
 	eSetCurrentBoneName,

@@ -12,7 +12,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
 PRE=
-BUILD_ID=20040808
+BUILD_ID=20041128
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(PRE)
 BUILD_HOST=`uname -n -m -s`
 URL=http://icculus.org/freyja
@@ -59,12 +59,12 @@ CC=gcc
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
 # -Weffc++
-BASE_DEFS=-Isrc/common -Isrc/gnome $(CONFIGURE_CFLAGS) -Wno-deprecated \
+BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated \
 		-DUSING_GTK_2_0 \
 		$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
-		-Wall -Isrc/common -Isrc/gnome \
+		-Wall -Isrc \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -75,7 +75,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ \
-		-lGL -lGLU -lm -lz -lhel0 -lfreyja8
+		-lGL -lGLU -lm -lz -lhel0 -lfreyja8 -lmgtk
 LD_FLAGS += -Wl,-z,defs
 LD_FLAGS += -Wl,-O1
 
@@ -159,15 +159,11 @@ all: debug release prof
 targets: $(TARGETS)
 
 OBJS = \
-	$(BUILD_DIR)/gnome_resource.o \
-	$(BUILD_DIR)/gnome_callbacks.o \
-	$(BUILD_DIR)/gnome_interface.o \
 	$(BUILD_DIR)/freyja_events.o \
 	$(BUILD_DIR)/utils.o \
 	$(BUILD_DIR)/MaterialManager.o \
 	$(BUILD_DIR)/Material.o \
 	$(BUILD_DIR)/Texture.o \
-	$(BUILD_DIR)/Resource.o \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \
 	$(BUILD_DIR)/FreyjaEvent.o \
