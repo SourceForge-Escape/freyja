@@ -669,7 +669,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("ASE model (*.ase)");
-	freyjaPluginAddExtention1s("ase");
+	freyjaPluginAddExtention1s("*.ase");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH);
 }

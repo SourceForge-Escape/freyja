@@ -38,7 +38,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("Milkshape Model (*.ms3d)");
-	freyjaPluginAddExtention1s("ms3d");
+	freyjaPluginAddExtention1s("*.ms3d");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }

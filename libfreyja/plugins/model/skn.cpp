@@ -46,7 +46,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("SIMS ASII Model (*.skn)");
-	freyjaPluginAddExtention1s("skn");
+	freyjaPluginAddExtention1s("*.skn");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 						 FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);

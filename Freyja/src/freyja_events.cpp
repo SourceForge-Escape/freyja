@@ -505,14 +505,17 @@ void freyja_event_file_dialog(char *s)
 		extern void mgtk_add_menu_item(char *text, long event);
 		long i, count = EggPlugin::mEggPlugin->getPluginDescCount();
 
-		mgtk_add_menu_item("All Files (*.*)", 9000);
+		//mgtk_add_menu_item("All Files (*.*)", 9000);
+		mgtk_event_fileselection_append_pattern("All Files (*.*)", "*.*");
 
 		for (i = 0; i < count; ++i)
 		{
 			FreyjaPluginDesc *plugin = EggPlugin::mEggPlugin->getPluginDesc(i);
 			
 			if (plugin && plugin->mImportFlags)
-				mgtk_add_menu_item(plugin->mDescription, 9001+i);
+				//mgtk_add_menu_item(plugin->mDescription, 9001+i);
+				mgtk_event_fileselection_append_pattern(plugin->mDescription,
+														plugin->mExtention);
 		}
 		
 		
