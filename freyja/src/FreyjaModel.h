@@ -966,9 +966,28 @@ public:
 		mPolygons = polygons;
 	}
 
+
+	bool getPolygon(unsigned int index, RenderPolygon &face)
+	{
+		static egg_polygon_t *poly;
+
+		if (mPolygons)
+		{
+			poly = (*mPolygons)[index];
+			
+			if (poly)
+			{
+				return createRenderPolygon(face, *poly, -1);
+			}
+		}
+
+		return false;
+	}
+
+
 	bool getPolygon(unsigned int index, long frame, RenderPolygon &face)
 	{
-		egg_polygon_t *poly;
+		static egg_polygon_t *poly;
 
 		if (mPolygons)
 		{

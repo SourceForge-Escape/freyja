@@ -95,25 +95,30 @@ bool createRenderPolygon(RenderPolygon &face,
 {
 	static vec_t *mpos;
 	static Vector3d u, v, w;
-	static unsigned int i, j, n;
+	static unsigned int i, j, iend, jend;
 	static egg_vertex_t *vertex;
 	static egg_texel_t *texel;
 	static egg_texel_t *texel2;
 	static bool external_texel;
 
 
+	face.count = 0;
+	face.material = polygon.shader;
+	face.id = polygon.id;
+
 	external_texel = !polygon.r_texel.empty();
 
 	if (polygon.r_vertex.empty() ||
-		(!external_texel && polygon.shader == COLORED_POLYGON))
+		(!external_texel && (polygon.shader == COLORED_POLYGON)))
 	{
 		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
 		return false;
 	}
 
+
 	/* Mongoose 2004.12.23, 
 	 * Setup vertex morphing for egg backend polygon */
-	for (n = 0, i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
+	for (i = polygon.r_vertex.begin(), iend = polygon.r_vertex.end(); i < iend; ++i)
 	{
 		vertex = polygon.r_vertex[i];
 
@@ -124,7 +129,7 @@ bool createRenderPolygon(RenderPolygon &face,
 
 		if (frame > -1)
 		{
-			for (j = vertex->frameId.begin(); j < vertex->frameId.end(); ++j)
+			for (j = vertex->frameId.begin(), jend = vertex->frameId.end(); j < jend; ++j)
 			{
 				if (vertex->frameId[j] == frame)
 				{
@@ -137,9 +142,12 @@ bool createRenderPolygon(RenderPolygon &face,
 
 		face.vertices[i] = Vector3d(mpos);
 		face.normals[i] = Vector3d(vertex->norm);
-		face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
 
-		if (external_texel && polygon.r_texel[i])
+		if (!external_texel)
+		{
+			face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		}
+		else
 		{
 			if (polygon.shader == COLORED_POLYGON)
 			{
@@ -165,17 +173,10 @@ bool createRenderPolygon(RenderPolygon &face,
 				face.texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
 			}
 		}
-		else
-		{
-			face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
-		}
 
-		++n;
+		++face.count;
 	}
 
-	face.material = polygon.shader;
-	face.count = n;
-	face.id = polygon.id;
 	return true;
 }
 
