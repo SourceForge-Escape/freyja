@@ -889,9 +889,10 @@ int freyja_model__ase_export(char *filename)
 	ase.mVertexCount = eggGetNum(FREYJA_VERTEX);
 	ase.mUVWCount = eggGetNum(FREYJA_POLYGON) * 3;
 	ase.mFaceCount = eggGetNum(FREYJA_POLYGON); 
-	
+	ase.mNormalCount = ase.mVertexCount;
+
 	ase.mVertices = new vec3_t[ase.mVertexCount];
-	//ase.mNormals = new vec3_t[ase.mVertexCount];
+	ase.mNormals = new vec3_t[ase.mVertexCount];
 	ase.mFaces = new ase_triangle_t[ase.mUVWCount];
 	ase.mUVWs = new vec3_t[ase.mUVWCount];
 	
@@ -901,6 +902,7 @@ int freyja_model__ase_export(char *filename)
 	for (v = 0; v < ase.mVertexCount; ++v)
 	{
 		eggGetVertex3f(ase.mVertices[v]);
+		eggGetVertexNormal3f(ase.mNormals[v]);
 		
 		// Use translator list
 		vert = eggIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);
