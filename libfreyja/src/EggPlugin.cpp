@@ -1043,6 +1043,48 @@ void EggPlugin::setupPlugins()
 
 	//freyjaPrintMessage("[FreyjaPlugin (Egg) module loader invoked]");
 
+	/* Mongoose 2005.01.03, 
+	 * Internal reporting - if filename == 0x0 internal */
+	mCurrentPlugin = new FreyjaPluginDesc();
+	mPlugins.pushBack(mCurrentPlugin);
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("Freyja Model (*.ja)");
+	freyjaPluginAddExtention1s("ja");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+	mCurrentPlugin = new FreyjaPluginDesc();
+	mPlugins.pushBack(mCurrentPlugin);
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("Freyja Model (*.ja)");
+	freyjaPluginAddExtention1s("ja");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+	mCurrentPlugin = new FreyjaPluginDesc();
+	mPlugins.pushBack(mCurrentPlugin);
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("GooseEgg 8 Model (*.egg)");
+	freyjaPluginAddExtention1s("egg");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+
 	/* Check for other format */
 	for (i = mPluginDirectories.begin(); i < mPluginDirectories.end(); ++i)
 	{
@@ -1107,35 +1149,6 @@ void EggPlugin::setupPlugins()
 
 		reader.closeDirectory();
 	}
-
-
-	/* Mongoose 2005.01.03, 
-	 * Internal reporting - if filename == 0x0 internal */
-	mCurrentPlugin = new FreyjaPluginDesc();
-	mPlugins.pushBack(mCurrentPlugin);
-	freyjaPluginBegin();
-	freyjaPluginDescription1s("Freyja Model (*.ja)");
-	freyjaPluginAddExtention1s("ja");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
-			     FREYJA_PLUGIN_SKELETON |
-			     FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
-			     FREYJA_PLUGIN_SKELETON |
-			     FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginEnd();
-
-	mCurrentPlugin = new FreyjaPluginDesc();
-	mPlugins.pushBack(mCurrentPlugin);
-	freyjaPluginBegin();
-	freyjaPluginDescription1s("GooseEgg 8 Model (*.egg)");
-	freyjaPluginAddExtention1s("egg");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
-			     FREYJA_PLUGIN_SKELETON |
-			     FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
-			     FREYJA_PLUGIN_SKELETON |
-			     FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginEnd();
 
 	mCurrentPlugin = 0x0;
 
