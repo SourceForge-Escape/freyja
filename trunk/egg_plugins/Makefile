@@ -123,6 +123,14 @@ ase.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+md5.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=md5 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Md5.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 psk.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
