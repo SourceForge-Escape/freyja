@@ -30,7 +30,6 @@
 
 
 MaterialManager *MaterialManager::mInstance = 0x0;
-MaterialManager *MaterialManager::mSingleton = 0x0;
 
 
 ////////////////////////////////////////////////////////////
@@ -54,10 +53,7 @@ MaterialManager::MaterialManager()
 
 	mTextureId = 1;
 	mFlags = 0;
-
 	mPalette = 0x0;
-
-	mSingleton = this;
 }
 
 

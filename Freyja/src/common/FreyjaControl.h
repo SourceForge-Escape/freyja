@@ -25,6 +25,8 @@
 
 #include <mstl/Map.h>
 
+#include "MaterialManager.h"
+
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaResource.h"
@@ -138,6 +140,18 @@ class FreyjaControl
 	 * Post     : Process menu input
 	 --------------------------------------------*/
 
+	void handleFilename(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : filename is valid and mode was set
+	 * Post : Executes a file operation depending on mode
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.22:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
 	void ReadRC();
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
@@ -225,11 +239,13 @@ private:
 	 --------------------------------------------*/
 
 
-	FreyjaResource _resource;               /* Resource agent */
+	FreyjaResource mResource;               /* Resource system */
+
+	MaterialManager *mMaterial;             /* Material manager */
+
+	FreyjaModel *mModel;                    /* Data model */
 	
-	FreyjaModel *_model;                    /* Data model agent */
-	
-	FreyjaRender *_render;                  /* GL Renderer agent */
+	FreyjaRender *mRender;                  /* OpenGL renderer */
 	
 	freyja_control_mode_t _minor_mode;      /* Minor mode of the controler */
 
@@ -238,6 +254,8 @@ private:
 	int _tex_state;                         /* Mouse state on texture canvas */
 	
 	int _mouse_state;                       /* Mouse state on modeler canvas */
+
+	unsigned int mFileDialogMode;
 
 	bool mFullScreen;
 };

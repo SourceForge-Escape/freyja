@@ -38,12 +38,12 @@ FreyjaControl *gFreyjaControl = NULL;
 
 int query_mouse_active()
 {
-  return MOUSE_QUERY_ACTIVE;
+	return MOUSE_QUERY_ACTIVE;
 }
 
 int query_mouse_button()
 {
-  return MOUSE_BTN_PRESSED;
+	return MOUSE_BTN_PRESSED;
 }
 
 int query_load_texture_to_slot()
@@ -56,12 +56,12 @@ int query_load_texture_to_slot()
 
 void event_set_mouse_active(bool b)
 {
-  MOUSE_QUERY_ACTIVE = b;
+	MOUSE_QUERY_ACTIVE = b;
 }
 
 void event_set_mouse_button(int i)
 {
-  MOUSE_BTN_PRESSED = i;
+	MOUSE_BTN_PRESSED = i;
 }
 
 
@@ -115,125 +115,10 @@ void event_custom_color(int custom_color_flags, float r, float g, float b)
 }
 
 
-// Mongoose 2002.02.02, TODO prompt to ask for overwrite ;0
-void event_filename(int mode, char *filename)
+void freyja_event_file_dialog_notify(char *filename)
 {
-	int failed = 1;
-	int type = -1, type2 = -1;
-
-
-	switch (mode)
-	{
-	case FREYJA_MODE_LOAD_MATERIAL:
-		failed = gMaterialManager->load(filename);
-		type = 0;
-		type2 = 1;
-		break;
-	case FREYJA_MODE_SAVE_MATERIAL:
-		failed = gMaterialManager->save(filename);
-		type = 0;
-		type2 = 0;
-		break;
-	case FREYJA_MODE_LOAD_MODEL:
-		failed = gFreyjaModel->loadModel(filename);
-		type = 2;
-		type2 = 1;
-		break;
-	case FREYJA_MODE_LOAD_TEXTURE:
-		failed = gMaterialManager->loadTexture(filename);
-		type = 1;
-		type2 = 1;
-		event_refresh();
-		break;
-	case FREYJA_MODE_SAVE_MODEL:
-		failed = gFreyjaModel->saveModel(filename);
-		type = 2;
-		type2 = 0;
-		break;
-	case FREYJA_MODE_LOAD_PALETTE:
-		failed = 0;
-		gMaterialManager->loadTexturePalette(filename);
-		type = 4;
-		type2 = 0;
-		break;
-	}
-
-	// Mongoose 2002.02.02, Reduce text segment size some  =)
-	event_print("%s '%s' %s%s", 
-					(type == 0) ? "Material" : 
-					(type == 1) ? "Texture" : 
-					(type == 2) ? "Model" : 
-					(type == 3) ? "Emitter" :
-					(type == 4) ?"Palette" :
-					"ERROR: No event for ",
-					basename(filename),
-					(type2 == 0) ? "save " : "load ",
-					(failed == 0) ? "[sucess]" : "[failed]");
-}
-
-
-// Mongoose 2002.02.02, This is the backend entry
-//   for some damn reason it's started by the fucking
-//   gtk_glarea window 'woo hoo'
-//
-//   TODO, FIXME: Rewrite all code to focus on backend
-//                as main entry and start interface from
-//                it, most likey using resource for
-//                total gui control
-void event_init(unsigned int *width, unsigned int *height, 
-					 bool *fullscreen, char **driver)
-{
-	*width  = 740;
-	*height = 560;    
-	*fullscreen = false;
-
-	gFreyjaControl = new FreyjaControl();
-
-	/* Mongoose 2004.03.26, 
-	 * Entry for MaterialManager test pattern */
-	MaterialManager::Instance();
-}
-
-
-void event_shutdown()
-{
-	/* Mongoose 2004.03.26, 
-	 * Entry for MaterialManager test pattern */
-	MaterialManager::DestroyInstance();
-
-	if (RENDER)
-	{
-		delete RENDER;
-	}
-
-	if (gFreyjaModel)
-	{
-		delete gFreyjaModel;
-	}
-
 	if (gFreyjaControl)
-	{
-		delete gFreyjaControl;
-	}
-
-	printf("\n\n\tThanks for using %s\n", PROGRAM_NAME);
-	printf("\tBuild date: %s @ %s\n", __DATE__, __TIME__);
-	printf("\tBuild host: %s\n", BUILD_HOST);
-	printf("\tEmail addr: %s\n", EMAIL_ADDRESS);
-	printf("\tWeb site  : %s\n\n", PROJECT_URL);
-}
-
-
-void event_render_init(unsigned int width, unsigned int height)
-{
-	if (RENDER)
-	{
-		RENDER->Init(width, height, true);
-	}
-	else
-	{
-		printf("event_render_init> Call to NULL Renderer\n");
-	}
+		gFreyjaControl->handleFilename(filename);
 }
 
 
@@ -258,14 +143,14 @@ void event_resize(int width, int height)
 	}
 	else
 	{
-		printf("event_resize> Call to NULL Renderer\n");
+		printf("!event_resize> Call to NULL Renderer\n");
 	}
 }
 
 
 void freyja_event_key_press(int key, int mod)
 {
-	printf("freyja_event_key_press> Has been removed, %s:%d\n", 
+	printf("!freyja_event_key_press> Has been removed, %s:%d\n", 
 			 __FILE__, __LINE__);
 }
 
@@ -283,7 +168,6 @@ void freyja_event2i(int event, int cmd)
 {
 	if (gFreyjaControl)
 	{
-		freyja_event2i_interface_listener(event, cmd);
 		gFreyjaControl->handleEvent(event, cmd);
 	}
 }
@@ -296,4 +180,55 @@ void event_mouse(int button, int state, int mod, int x, int y)
 		gFreyjaControl->Mouse(button, state, mod, x, y);
 	}
 }
+
+void event_shutdown()
+{
+	if (RENDER)
+	{
+		delete RENDER;
+	}
+
+	if (gFreyjaModel)
+	{
+		delete gFreyjaModel;
+	}
+
+	if (gFreyjaControl)
+	{
+		delete gFreyjaControl;
+	}
+
+	printf("\n\n\tThanks for using %s\n", PROGRAM_NAME);
+	printf("\tBuild date: %s @ %s\n", __DATE__, __TIME__);
+	printf("\tBuild host: %s\n", BUILD_HOST);
+	printf("\tEmail addr: %s\n", EMAIL_ADDRESS);
+	printf("\tWeb site  : %s\n\n", PROJECT_URL);
+}
+
+
+// Mongoose 2002.02.02, This is the backend entry
+//   for some damn reason it's started by the fucking
+//   gtk_glarea window 'woo hoo'
+//
+//   Also needs no parms really
+//
+//   TODO, FIXME: Rewrite all code to focus on backend
+//                as main entry and start interface from
+//                it, most likey using resource for
+//                total gui control
+void freyja_event_start()
+{
+	event_print("@Freyja started...");
+	gFreyjaControl = new FreyjaControl();
+
+	/* Mongoose 2002.01.23, Switch to mesh mode */
+	freyja_event2i(EVENT_FREYJA_MODE, FREYJA_MODE_MODEL_EDIT);
+	event_refresh();
+
+	event_print("Welcome to Freyja %s-%s, %s", VERSION, BUILD_ID, __DATE__);
+
+	/* Mongoose 2002.02.23, Hook for exit() calls */
+	atexit(event_shutdown);
+}
+
 

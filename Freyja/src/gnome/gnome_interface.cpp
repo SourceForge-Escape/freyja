@@ -270,7 +270,7 @@ GtkWidget *fileselection_create(char *title)
 	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
 
 	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
-							 GTK_SIGNAL_FUNC(fileselection_open_event),
+							 GTK_SIGNAL_FUNC(fileselection_action_event),
 							 NULL);
 
 
@@ -423,6 +423,7 @@ void close_log_file()
 		fclose(get_log_file());
 }
 
+
 void event_print_args(char *format, va_list *args)
 {
 	FILE *f = get_log_file();
@@ -535,11 +536,6 @@ GtkWidget *window_create()
 
 int main(int argc, char *argv[])
 {
-	unsigned int width, height;
-	char *driver;
-	bool fullscreen;
-
-
 #ifdef ENABLE_NLS
 	bindtextdomain(PACKAGE, PACKAGE_LOCALE_DIR);
 	textdomain(PACKAGE);
@@ -547,36 +543,18 @@ int main(int argc, char *argv[])
 
 	gtk_init(&argc, &argv);
 
-#ifdef USING_GTK_1_2
-	event_print("@GTK+ 1.2 interface started...");
-#elif USING_GTK_2_0
-	event_print("@GTK+ 2.0 interface started...");	
-#endif
-
+	event_print("@GTK+ interface started...");	
 	event_print("Email bug reports to %s", EMAIL_ADDRESS);
 
-	// Mongoose 2002.02.23, Start Freyja MVC which 
-	//   builds the widgets from a script
-	event_init(&width, &height, &fullscreen, &driver);
-
-	// Mongoose 2002.02.23, Tell renderer to wake up
-	event_render_init(width, height);
-	event_resize(width, height);
-
-	// Mongoose 2002.01.23, Switch to mesh mode
-	freyja_event2i(EVENT_FREYJA_MODE, FREYJA_MODE_MODEL_EDIT);
-	event_refresh();
-
-	event_print("Welcome to Freyja %s-%s, %s", VERSION, BUILD_ID, __DATE__);
-
-	// Mongoose 2002.02.23, Hook for exit() calls
-	atexit(event_shutdown);
+	/* Mongoose 2002.02.23, Start Freyja which 
+	   builds the widgets from a script */
+	freyja_event_start();
 
 	// Mongoose 2002.02.23, Load file passed by command line
 	if (argc > 1)
 	{
 		fileselection_dir_set_event(argv[1]);
-		event_filename(FREYJA_MODE_LOAD_MODEL, argv[1]);
+		freyja_event_file_dialog_notify(argv[1]);
 	}
 
 	//gdk_threads_enter();

@@ -96,7 +96,65 @@ void application_window_role(char *role)
 }
 
 
+
+GtkWidget *getGtkFileSelectionWidget()
+{
+	static GtkWidget *file = NULL;
+	char *path;
+
+	if (!file)
+	{
+		file = fileselection_create("Select file");
+		path = freyja_rc_map("/");
+		
+		if (path)
+		{
+			gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), path);
+			delete [] path;
+		}
+	}
+
+	return file;
+}
+
 ////////////////////////////////////////////////////////////////
+// File dialog support func
+////////////////////////////////////////////////////////////////
+
+void fileselection_action_event()
+{
+	GtkWidget *file = getGtkFileSelectionWidget();
+	char *filename;
+
+	filename = (char *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(file));
+
+	freyja_event_file_dialog_notify(filename);
+	gtk_widget_hide(file);
+}
+
+
+void fileselection_cancel_event()
+{
+	GtkWidget *file = getGtkFileSelectionWidget();
+	gtk_widget_hide(file);
+}
+
+
+void fileselection_dir_set_event(char *dir)
+{
+	GtkWidget *file = getGtkFileSelectionWidget();
+	
+	if (!dir || !dir[0])
+	{
+		return;
+	}
+	
+	gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), dir);
+}
+
+
+
+////////////////////////////////////////////////////////////////////
 
 
 void rc_assertion_error(char *widget_name, char *error)

@@ -25,12 +25,7 @@
 
 #include <stdio.h>
 
-#ifdef USING_GTK_1_2
-#   include <gtk/gtk.h>
-#elif USING_GTK_2_0
-#   include <gtk/gtk.h>
-#endif
-
+#include <gtk/gtk.h>
 #include <mstl/Map.h>
 
 #include "freyja_events.h"
@@ -53,6 +48,8 @@ typedef struct gtk_anim_tree_s
 
 } gtk_anim_tree_t;
 
+void spinbutton_value_set(int event, float val);
+float spinbutton_value_get_float(int event, bool *error);
 
 // Mongoose 2002.02.01, Gobals used from other files, try to 
 //   reduce these as much as you can with gtk+ use
@@ -61,7 +58,6 @@ extern FreyjaModel *gFreyjaModel;
 extern FreyjaControl *gFreyjaControl;
 
 // Mongoose 2002.02.01, Gobals only accessed in this file
-int FILE_MODE = FREYJA_MODE_LOAD_MODEL;
 Map<int, GtkWidget *> WIDGET_MAP;
 Map<int, int> NOTEBOOK_EVENT;
 
@@ -95,9 +91,9 @@ void freyja_event_subscribe_gtk_widget(int index, GtkWidget *widget)
 
 	widgets->pushBack(widget);
 
-	event_print("%d. $%d <- %p\t#%d\n", 
-		   gObserverGtkWigets.NumItems(),
-		   index, widget, widgets->size());
+	event_print("(freyja_event_subscribe_gtk_widget %d %p)", 
+				//gObserverGtkWigets.NumItems(), index, widget, widgets->size()
+				index, widget);
 }
 
 
@@ -116,7 +112,7 @@ void freyja_event_notify_observer1f(event_subject_id id, float r)
 		return;
 	}
 
-	event_print("!!!!\n");
+	event_print("(freyja_event_notify_observer1f %d %f)", id, r);
 
 	for (i = widgets->begin(); i < widgets->end(); ++i)
 	{
@@ -134,16 +130,67 @@ void freyja_event_notify_observer1f(event_subject_id id, float r)
 			if (adj)
 			{
 				gtk_adjustment_set_value(adj, r);
-				event_print("$@ %d <- %p\n", id, widget);
+				event_print("(freyja_event_notify_gtk_widget %d %p)", 
+							id, widget);
 			}
 		}
 		else
 		{
 			event_print("freyja_event_notify_observer1f> ERROR, unknown widget\n");
-			return;
+			//	return;
 		}
 	}
 }
+
+
+void freyja_event_file_dialog(char *title)
+{
+	GtkWidget *file = getGtkFileSelectionWidget();
+	
+	gtk_window_set_title(GTK_WINDOW(file), title);
+	gtk_widget_show(file);
+}
+
+
+void gtk_guard_shutdown()
+{
+  event_print("@Gtk+ shuting down...");
+  close_log_file();
+  gtk_exit(0);
+}
+
+
+void freyja_event_exit()
+{
+	gtk_guard_shutdown();
+}
+
+
+void freyja_event_about_dialog()
+{
+	GtkWidget *about;
+
+
+	about = dialog_about_create();
+	gtk_widget_show(about);
+}
+
+
+float freyja_event_get_float(int event)
+{
+	float value;
+	bool error;
+
+	value = spinbutton_value_get_float(event, &error);
+	return value;
+}
+
+
+void freyja_event_set_float(int event, float value)
+{
+	spinbutton_value_set(event, value);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -376,67 +423,6 @@ int spinbutton_value_get_int(int event, bool *error)
 }
 
 
-// Mongoose 2002.01.19, Mainly for opening dialogs
-void freyja_event2i_interface_listener(int event, int cmd)
-{
-	bool error;
-
-
-	switch (event)
-	{
-	case EVENT_MAIN:
-		switch (cmd)
-		{
-		case CMD_MAIN_OPEN_MODEL:
-			open_model_event(NULL, NULL);
-			break;
-		case CMD_MAIN_SAVE_MODEL:
-			save_as_model_event(NULL, NULL);
-			break;
-		case CMD_MAIN_OPEN_MATERIAL:
-			open_material_event(NULL, NULL);
-			break;
-		case CMD_MAIN_SAVE_MATERIAL:
-			save_as_material_event(NULL, NULL);
-			break;
-		case CMD_MAIN_OPEN_PALETTE:
-			open_palette_event(NULL, NULL);
-			break;
-		case CMD_MAIN_OPEN_TEXTURE:
-			open_texture_event(NULL, NULL);
-			break;
-		case CMD_MAIN_SHUTDOWN:
-			exit_event(NULL, NULL);
-			break;
-		default:
-			;
-		}
-		break;
-
-	case EVENT_MISC:
-		switch (cmd)
-		{
-		case CMD_MISC_ABOUT:
-			dialog_about_create();
-			break;
-		case 1000:
-			gFreyjaModel->Transform(FreyjaModel::TransformMesh, Egg::SCALE,
-									spinbutton_value_get_float(1001, &error),
-									spinbutton_value_get_float(1002, &error),
-									spinbutton_value_get_float(1003, &error));
-			event_refresh();
-
-			spinbutton_value_set(1001, 1.0);
-			spinbutton_value_set(1002, 1.0);
-			spinbutton_value_set(1003, 1.0);
-			break;
-		}
-	default:
-		;
-	}
-}
-
-
 void rc_textbox_event(GtkWidget *widget, gpointer user_data)
 {
 	char *text;
@@ -527,17 +513,6 @@ void refresh_material_interface()
 
 void popup_menu_detacher_event(GtkWidget *attach_widget,GtkMenu *menu)
 {
-}
-
-
-void gtk_guard_shutdown()
-{
-  event_print("@Gtk+ shuting down...");
-
-  close_log_file();
-
-  gtk_exit(0);
-  //gtk_main_quit();
 }
 
 
@@ -869,193 +844,6 @@ void notebook_switch_page_event(GtkNotebook *notebook, GtkNotebookPage *page,
 	}
 }
 
-
-gint v_scroll_event(GtkWidget *widget, GdkEventButton *event)
-{
-	glarea_window_state_t *gl_state;
-	GtkAdjustment *adj;
-
-
-	gl_state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(GTK_GLAREA_WINDOW),
-																			 "gl_window_state");
-
-	if (gl_state)
-	{
-		// Let's avoid multiple casts early on
-		adj = GTK_ADJUSTMENT(gl_state->v_adj);
-
-		if (adj)
-		{
-			printf("--- vertical scroll adjustment request %f\n", adj->value);
-		}
-			
-		event_print("ScrollBar Event not impelemented: %s:%i\n", 
-						__FILE__, __LINE__);
-	}
-
-	return TRUE;
-}
-
-
-gint h_scroll_event(GtkWidget *widget, GdkEventButton *event)
-{
-	glarea_window_state_t *gl_state;
-	GtkAdjustment *adj;
-
-
-	gl_state = (glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(GTK_GLAREA_WINDOW),
-																			 "gl_window_state");
-
-	if (gl_state)
-	{
-		// Let's avoid multiple casts early on
-		adj = GTK_ADJUSTMENT(gl_state->h_adj);
-
-		if (adj)
-		{
-			printf("--- hortizonal scroll adjustment request %f\n", adj->value);
-		}
-
-		event_print("ScrollBar Event not impelemented: %s:%i\n", 
-						__FILE__, __LINE__);
-	}
-
-	return TRUE;
-}
-
-
-////////////////////////////////////////////////////////////////
-// File dialog support func
-////////////////////////////////////////////////////////////////
-
-GtkWidget *fileselection_spawn()
-{
-	static GtkWidget *file = NULL;
-	char *path;
-
-	if (!file)
-	{
-		file = fileselection_create("Select file");
-		path = freyja_rc_map("/");
-		
-		if (path)
-		{
-			gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), path);
-			delete [] path;
-		}
-	}
-
-	return file;
-}
-
-
-void fileselection_open_event()
-{
-	GtkWidget *file = fileselection_spawn();
-	
-	event_filename(FILE_MODE, 
-						(char *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(file)));
-	gtk_widget_hide(file);
-}
-
-
-void fileselection_cancel_event()
-{
-	GtkWidget *file = fileselection_spawn();
-	
-	gtk_widget_hide(file);
-}
-
-
-void fileselection_dir_set_event(char *dir)
-{
-	GtkWidget *file = fileselection_spawn();
-	
-	if (!dir || !dir[0])
-	{
-		return;
-	}
-	
-	gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), dir);
-}
-
-
-void file_dialog_event(char *title, int mode)
-{
-	GtkWidget *file = fileselection_spawn();
-	
-	gtk_window_set_title(GTK_WINDOW(file), title);
-	FILE_MODE = mode;
-	gtk_widget_show(file);
-}
-
-
-////////////////////////////////////////////////////////////////
-// Menu event func
-////////////////////////////////////////////////////////////////
-
-void new_model_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	freyja_event2i(EVENT_MAIN, CMD_MAIN_NEW_MODEL);
-}
-
-
-void open_palette_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Open Palette", FREYJA_MODE_LOAD_PALETTE);
-}
-
-
-void open_material_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Open Material", FREYJA_MODE_LOAD_MATERIAL);
-}
-
-
-void open_model_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Open Model", FREYJA_MODE_LOAD_MODEL);
-}
-
-
-void open_texture_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Open texture", FREYJA_MODE_LOAD_TEXTURE);
-}
-
-
-void save_model_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Save Model As...", FREYJA_MODE_SAVE_MODEL);
-}
-
-
-void save_as_model_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Save Model As...", FREYJA_MODE_SAVE_MODEL);
-}
-
-
-void save_as_material_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	file_dialog_event("Save Material As...", FREYJA_MODE_SAVE_MATERIAL);
-}
-
-
-void exit_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	gtk_guard_shutdown();
-}
-
-
-void about_event(GtkMenuItem *menuitem, gpointer user_data)
-{
-	GtkWidget *about;
-
-
-	about = dialog_about_create();
-	gtk_widget_show(about);
-}
 
 
 ////////////////////////////////////////////////////////////////
