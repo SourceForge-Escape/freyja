@@ -24,7 +24,7 @@
 #   include <freyja8/EggImage.h>
 #endif
 
-#include "utils.h" // Only provides extcheck()
+#include <freyja8/EggFileReader.h>
 
 #include "MaterialManager.h"
 
@@ -320,7 +320,7 @@ int MaterialManager::loadTexture(const char *filename)
 
 
 	// Mongoose 2002.01.10, Evil...
-	if (extcheck(filename, ".lst") == 0)
+	if (EggFileReader::compareFilenameExtention(filename, ".lst") == 0)
 	{
 		FILE *f;
 		const unsigned int bufferSize = 256;

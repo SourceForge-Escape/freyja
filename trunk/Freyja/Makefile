@@ -160,7 +160,6 @@ targets: $(TARGETS)
 
 OBJS = \
 	$(BUILD_DIR)/freyja_events.o \
-	$(BUILD_DIR)/utils.o \
 	$(BUILD_DIR)/MaterialManager.o \
 	$(BUILD_DIR)/Material.o \
 	$(BUILD_DIR)/Texture.o \
