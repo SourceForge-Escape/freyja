@@ -1,0 +1,70 @@
+# Process this file with autoconf to produce a configure script.
+AC_INIT(src/common/freyja_events.h)
+
+dnl Define the program name and extra version numbers for package
+PROGRAM="Freyja"
+MAJOR_VERSION=0
+MINOR_VERSION=3
+MICRO_VERSION=0
+VERSION="0.3.0"
+
+AC_DEFINE_UNQUOTED(PROGRAM,     "$PROGRAM")
+
+
+#AM_CONFIG_SRCDIR(src/*/*.cpp)
+#AM_CONFIG_HEADER(config.h)
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+#AC_SUBST(MAJOR_VERSION)
+#AC_SUBST(MINOR_VERSION)
+#AC_SUBST(MICRO_VERSION)
+
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lGL':
+AC_CHECK_LIB([GL], [main])
+# FIXME: Replace `main' with a function in `-lGLU':
+AC_CHECK_LIB([GLU], [main])
+# FIXME: Replace `main' with a function in `-lart_lgpl':
+AC_CHECK_LIB([art_lgpl], [main])
+
+AC_CHECK_LIB([freyja_model], [main])
+AC_CHECK_LIB([freyja_image], [main])
+AC_CHECK_LIB([hel0], [main])
+
+
+# FIXME: Replace `main' with a function in `-lglib':
+AC_CHECK_LIB([glib], [main])
+# FIXME: Replace `main' with a function in `-lgnome':
+AC_CHECK_LIB([gnome], [main])
+# FIXME: Replace `main' with a function in `-lgnomesupport':
+AC_CHECK_LIB([gnomesupport], [main])
+# FIXME: Replace `main' with a function in `-lgnomeui':
+AC_CHECK_LIB([gnomeui], [main])
+# FIXME: Replace `main' with a function in `-lgtkgl':
+AC_CHECK_LIB([gtkgl], [main])
+# FIXME: Replace `main' with a function in `-lm':
+AC_CHECK_LIB([m], [main])
+# FIXME: Replace `main' with a function in `-lstdc':
+AC_CHECK_LIB([stdc], [main])
+# FIXME: Replace `main' with a function in `-lz':
+AC_CHECK_LIB([z], [main])
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([stdlib.h string.h sys/time.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+# Checks for library functions.
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([atexit memset strdup strstr])
+
+#AC_CONFIG_FILES([Makefile])
+AC_OUTPUT(Makefile)
