@@ -21,10 +21,10 @@
  ==========================================================================*/
 
 #ifdef HAVE_FREYJA_IMAGE
-#   include <freyja8/EggImage.h>
+#   include <freyja/FreyjaImage.h>
 #endif
 
-#include <freyja8/EggFileReader.h>
+#include <freyja/FreyjaFileReader.h>
 
 #include "MaterialManager.h"
 
@@ -293,7 +293,7 @@ int MaterialManager::load(const char *filename)
 int MaterialManager::loadTexturePalette(const char *filename)
 {
 #ifdef HAVE_FREYJA_IMAGE
-	EggImage img;
+	FreyjaImage img;
 #endif
 	int loadError = -1;
 	
@@ -314,13 +314,13 @@ int MaterialManager::loadTexturePalette(const char *filename)
 
 int MaterialManager::loadTexture(const char *filename)
 {
-	EggImage img;
+	FreyjaImage img;
 	unsigned char *image;
 	unsigned int w, h;
 
 
 	// Mongoose 2002.01.10, Evil...
-	if (EggFileReader::compareFilenameExtention(filename, ".lst") == 0)
+	if (FreyjaFileReader::compareFilenameExtention(filename, ".lst") == 0)
 	{
 		FILE *f;
 		const unsigned int bufferSize = 256;
@@ -378,10 +378,10 @@ int MaterialManager::loadTexture(const char *filename)
 
 		switch (img.getColorMode())
 		{
-		case EggImage::RGBA_32:
+		case FreyjaImage::RGBA_32:
 			loadTextureBuffer(image, w, h, 32, Texture::RGBA);
 			break;
-		case EggImage::RGB_24:
+		case FreyjaImage::RGB_24:
 			loadTextureBuffer(image, w, h, 24, Texture::RGB);
 			break;
 		default:

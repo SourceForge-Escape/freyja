@@ -26,7 +26,7 @@
 #include <stdarg.h> 
 #include <string.h>
 
-#include <freyja8/EggFileReader.h>
+#include <freyja/FreyjaFileReader.h>
 
 #include "FreyjaControl.h"
 
@@ -95,7 +95,7 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mMaterial = MaterialManager::Instance();
 
 	// handle loaded from system call
-	if (!eggGetNum(FREYJA_BONE) && !eggGetNum(FREYJA_VERTEX))
+	if (!freyjaGetCount(FREYJA_BONE) && !freyjaGetCount(FREYJA_VERTEX))
 		mCleared = true;
 	else
 		mCleared = false;
@@ -230,7 +230,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eBoneIterator:
-		if (!freyja_event_set_range(event, value, 0, eggGetNum(FREYJA_BONE)))
+		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_BONE)))
 		{
 			char dupname[64];
 
@@ -267,7 +267,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eMeshIterator:
-		if (!freyja_event_set_range(event, value, 0, eggGetNum(FREYJA_MESH)))
+		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_MESH)))
 		{
 			mModel->setCurrentMesh(value);			
 			freyja_event_gl_refresh();
@@ -277,7 +277,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eGroupIterator:
-		if (!freyja_event_set_range(event, value, 0, eggGetNum(FREYJA_GROUP)))
+		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_VERTEX_GROUP)))
 		{
 			mModel->setCurrentGroup(value);
 			freyja_event_gl_refresh();
@@ -909,7 +909,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eGenerateNormals:
-		eggGenerateVertexNormals();
+		freyjaGenerateVertexNormals();
 		break;
 
 
@@ -920,28 +920,28 @@ bool FreyjaControl::event(int command)
 
 	case eGenerateCylinder:
 		mCleared = false;
-		eggGenerateCylinder(4, 16, 8.0, 4.0);
+		//FIXME freyjaGenerateCylinder(4, 16, 8.0, 4.0);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eGenerateSphere:
 		mCleared = false;
-		eggGenerateSphere(16, 16, 8.0);
+		//FIXME freyjaGenerateSphere(16, 16, 8.0);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eGenerateCube:
 		mCleared = false;
-		eggGenerateCube(8.0);
+		//FIXME eggGenerateCube(8.0);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eGenerateTriStrip:
 		mCleared = false;
-		eggGenerateTriangleStrip(10, 8.0);
+		//FIXME eggGenerateTriangleStrip(10, 8.0);
 		freyja_event_gl_refresh();
 		break;
 
@@ -1567,7 +1567,7 @@ void FreyjaControl::handleFilename(const char *filename)
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_SAVE_MODEL:
-		if (EggFileReader::doesFileExist(filename))
+		if (FreyjaFileReader::doesFileExist(filename))
 		{
 			if (freyja_create_confirm_dialog("gtk-dialog-question",
 											 "You are about to overwrite an existing file.",
