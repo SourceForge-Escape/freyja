@@ -310,6 +310,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eSetPolygonTexture", eSetPolygonTexture);
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 
+
+	r.RegisterInt("eMeshFlipNormals", eMeshFlipNormals);
 	r.RegisterInt("eObjectMenu", eObjectMenu);
 	r.RegisterInt("eAddObject", eAddObject);
 	r.RegisterInt("eMoveObject", eMoveObject);
@@ -422,6 +424,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eRenderSkeleton",FREYJA_MODE_RENDER_BONETAG);
 	r.RegisterInt("eRenderGrid", FREYJA_MODE_RENDER_GRID);
 
+	r.RegisterInt("eSkeletalDeform", eSkeletalDeform);
+
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
@@ -448,6 +452,7 @@ void mgtk_handle_resource_start()
 
 	mgtk_handle_resource_init(gResource);
 
+	/* User install of icons, samples, configs, etc */
 	if (!freyja_is_user_installed())
 		freyja_install_user();
 
