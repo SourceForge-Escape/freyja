@@ -564,6 +564,234 @@ int freyjaTextureImage(unsigned char *image, unsigned int bbp,
 }
 
 
+void freyjaGenerateCube(vec_t size)
+{
+	vec_t sz = size;
+	unsigned int v, t;
+	Map <unsigned int, unsigned int> texel;
+	Map <unsigned int, unsigned int> vertex;
+
+
+	// Start a new mesh
+	freyjaBegin(FREYJA_MESH);
+
+
+	// Allocate vertices, FIXME normals are incorrect
+	v = freyjaVertex3f(0.0, sz, 0.0);
+	freyjaNormal3f(0.0, 1.0, 0.0);
+	vertex.Add(0, v);
+
+	v = freyjaVertex3f(sz, sz, 0.0);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(1, v);
+	
+	v = freyjaVertex3f(sz, 0.0, 0.0);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(2, v);
+
+	v = freyjaVertex3f(0.0, 0.0, 0.0);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(3, v);
+
+	v = freyjaVertex3f(0.0, sz, sz);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(4, v);
+
+	v = freyjaVertex3f(sz, sz, sz);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(5, v);
+
+	v = freyjaVertex3f(sz, 0.0, sz);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(6, v);
+
+	v = freyjaVertex3f(0.0, 0.0, sz);
+	freyjaNormal3f( 0.0, 1.0, 0.0);
+	vertex.Add(7, v);
+
+	//freyjaGroupCenter3f(sz / 2.0, sz / 2.0, sz / 2.0);
+
+	//freyjaEnd(); //FREYJA_GROUP 
+
+
+	// Mongoose 2002.03.02, Allocate texels
+	t = freyjaTexCoord2f(0.0, 1.0);
+	texel.Add(0, t);
+
+	t = freyjaTexCoord2f(0.33, 1.0);
+	texel.Add(1, t);
+
+	t = freyjaTexCoord2f(0.66, 1.0);
+	texel.Add(2, t);
+
+	t = freyjaTexCoord2f(0.0, 0.66);
+	texel.Add(3, t);
+
+	t = freyjaTexCoord2f(0.33, 0.66);
+	texel.Add(4, t);
+
+	t = freyjaTexCoord2f(0.66, 0.66);
+	texel.Add(5, t);
+
+	t = freyjaTexCoord2f(0.0, 0.33);
+	texel.Add(6, t);
+
+	t = freyjaTexCoord2f(0.33, 0.33);
+	texel.Add(7, t);
+
+	t = freyjaTexCoord2f(0.66, 0.33);
+	texel.Add(8, t);
+
+	t = freyjaTexCoord2f(0.33, 0.0);
+	texel.Add(9, t);
+
+	t = freyjaTexCoord2f(0.66, 0.0);
+	texel.Add(10, t);
+
+	t = freyjaTexCoord2f(1.0, 0.66);
+	texel.Add(11, t);
+
+	t = freyjaTexCoord2f(1.0, 0.33);
+	texel.Add(12, t);
+
+	// Allocate quad faces using triangles...
+
+	// 1: 0 1 3
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[0]);
+	freyjaPolygonTexCoord1i(texel[0]);
+	freyjaPolygonVertex1i(vertex[1]);
+	freyjaPolygonTexCoord1i(texel[1]);
+	freyjaPolygonVertex1i(vertex[3]);
+	freyjaPolygonTexCoord1i(texel[3]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 1: 2 1 3
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[2]);
+	freyjaPolygonTexCoord1i(texel[4]);
+	freyjaPolygonVertex1i(vertex[1]);
+	freyjaPolygonTexCoord1i(texel[1]);
+	freyjaPolygonVertex1i(vertex[3]);
+	freyjaPolygonTexCoord1i(texel[3]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 2 : 4 5 7
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[4]);
+	freyjaPolygonTexCoord1i(texel[1]);
+	freyjaPolygonVertex1i(vertex[5]);
+	freyjaPolygonTexCoord1i(texel[2]);
+	freyjaPolygonVertex1i(vertex[7]);
+	freyjaPolygonTexCoord1i(texel[4]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 2 : 6 5 7
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[6]);
+	freyjaPolygonTexCoord1i(texel[5]);
+	freyjaPolygonVertex1i(vertex[5]);
+	freyjaPolygonTexCoord1i(texel[2]);
+	freyjaPolygonVertex1i(vertex[7]);
+	freyjaPolygonTexCoord1i(texel[4]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 3 : 0 4 3
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[0]);
+	freyjaPolygonTexCoord1i(texel[3]);
+	freyjaPolygonVertex1i(vertex[4]);
+	freyjaPolygonTexCoord1i(texel[6]);
+	freyjaPolygonVertex1i(vertex[3]);
+	freyjaPolygonTexCoord1i(texel[4]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 3 : 7 4 3
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[7]);
+	freyjaPolygonVertex1i(vertex[4]);
+	freyjaPolygonVertex1i(vertex[3]);
+	freyjaPolygonTexCoord1i(texel[7]);
+	freyjaPolygonTexCoord1i(texel[6]);
+	freyjaPolygonTexCoord1i(texel[4]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 4 : 0 1 4
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[0]);
+	freyjaPolygonVertex1i(vertex[1]);
+	freyjaPolygonVertex1i(vertex[4]);
+	freyjaPolygonTexCoord1i(texel[4]);
+	freyjaPolygonTexCoord1i(texel[7]);
+	freyjaPolygonTexCoord1i(texel[5]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 4 : 5 1 4
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[5]);
+	freyjaPolygonVertex1i(vertex[1]);
+	freyjaPolygonVertex1i(vertex[4]);
+	freyjaPolygonTexCoord1i(texel[8]);
+	freyjaPolygonTexCoord1i(texel[7]);
+	freyjaPolygonTexCoord1i(texel[5]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 5 : 3 7 2
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[3]);
+	freyjaPolygonVertex1i(vertex[7]);
+	freyjaPolygonVertex1i(vertex[2]);
+	freyjaPolygonTexCoord1i(texel[5]);
+	freyjaPolygonTexCoord1i(texel[8]);
+	freyjaPolygonTexCoord1i(texel[11]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 5 : 6 7 2
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[6]);
+	freyjaPolygonVertex1i(vertex[7]);
+	freyjaPolygonVertex1i(vertex[2]);
+	freyjaPolygonTexCoord1i(texel[12]);
+	freyjaPolygonTexCoord1i(texel[8]);
+	freyjaPolygonTexCoord1i(texel[11]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+	
+	// 6 : 1 2 5 
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[1]);
+	freyjaPolygonVertex1i(vertex[2]);
+	freyjaPolygonVertex1i(vertex[5]);
+	freyjaPolygonTexCoord1i(texel[7]);
+	freyjaPolygonTexCoord1i(texel[9]);
+	freyjaPolygonTexCoord1i(texel[8]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	// 6 : 6 2 5
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonVertex1i(vertex[6]);
+	freyjaPolygonVertex1i(vertex[2]);
+	freyjaPolygonVertex1i(vertex[5]);
+	freyjaPolygonTexCoord1i(texel[10]);
+	freyjaPolygonTexCoord1i(texel[9]);
+	freyjaPolygonTexCoord1i(texel[8]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaEnd(); // FREYJA_MESH
+}
+
+
 // Accesors /////////////////////////////////////
 
 unsigned int freyjaGetCount(freyja_object_t type)
@@ -738,16 +966,13 @@ FreyjaPlugin::FreyjaPlugin(FreyjaScene *scene, char *plugin_dir)
 
 	/* State machine's 3d model object pointers */
 	mModel = 0x0;
-
 	mMesh = 0x0;
 	mVertexFrame = 0x0;
 	mPolygon = 0x0;
 	mUVMap = 0x0;
 	mMaterial = 0x0;
-
 	mSkeleton = 0x0;
 	mBone = 0x0;
-
 	mAnimation = 0x0;
 
 	mPoint[0] = mPoint[1] = mPoint[2] = 0.0f;
@@ -810,7 +1035,11 @@ unsigned int FreyjaPlugin::getCount(freyja_object_t type)
 		break;
 
 	case FREYJA_MESH:
-		return mScene->getMeshCount();
+		if (mModel)
+		{
+			return mModel->getMeshCount();
+		}
+		return 0;
 		break;
 
 	case FREYJA_VERTEX_FRAME:
@@ -1438,6 +1667,26 @@ void FreyjaPlugin::printMessageArgs(char *format, va_list *args)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void externFunctionBegin(char *func_symbol_name)
+{
+}
+
+
+void externFunctionArg(char *arg_symbol_name, float default_value)
+{
+}
+
+
+void externFunctionArg(char *arg_symbol_name, int default_value)
+{
+}
+
+
+void externFunctionEnd()
+{
+}
+
+
 void FreyjaPlugin::setPrinter(FreyjaPrinter *printer)
 {
 	mPrinter = printer;
@@ -1472,7 +1721,19 @@ int FreyjaPlugin::setTextureFilename(const char *filename)
 
 void FreyjaPlugin::clear()
 {
-	printError("FreyjaPlugin::clear() not implemented"); 
+	mModel = 0x0;
+	mMesh = 0x0;
+	mVertexFrame = 0x0;
+	mPolygon = 0x0;
+	mUVMap = 0x0;
+	mMaterial = 0x0;
+	mSkeleton = 0x0;
+	mBone = 0x0;
+	mAnimation = 0x0;
+
+	mPoint[0] = mPoint[1] = mPoint[2] = 0.0f;
+
+	mScene->erase();
 }
 
 
@@ -1533,8 +1794,10 @@ void FreyjaPlugin::transform(freyja_transform_t object,
 	switch (object)
 	{
 	case fTransformScene:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformModel:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformMesh:
 		if (mMesh)
@@ -1550,18 +1813,25 @@ void FreyjaPlugin::transform(freyja_transform_t object,
 		}
 		break;
 	case fTransformVertexFrame:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformSkeleton:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformBone:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformUVMap:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformVertexGroup:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformVertex:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	case fTransformTexCoord:
+		printError("FreyjaPlugin::transform> Unimplemented object");
 		break;
 	default:
 		printError("FreyjaPlugin::transform> Unknown object type");

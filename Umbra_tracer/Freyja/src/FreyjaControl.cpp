@@ -170,6 +170,8 @@ bool FreyjaControl::eventMain(int event)
 	{
 	case eInfo:
 		/* FIXME: Should be per model... */
+		freyjaIterator(FREYJA_MODEL, freyjaGetCurrent(FREYJA_MODEL));
+
 		//freyja_print("%d bones, %d meshes, %d polygons, %d vertices",
 		//			mScene->getBoneCount(), 
 		//			mScene->getMeshCount(), 
@@ -390,9 +392,14 @@ bool FreyjaControl::eventMain(int event)
 
 
 	case eGenerateCube:
-		//FIXME eggGenerateCube(8.0);
-		//event_refresh();
-		freyja_print("eGenerateCube disabled in tracer build");
+		if (freyjaGetCount(FREYJA_MODEL) == 0)
+		{
+			freyjaBegin(FREYJA_MODEL);
+			freyjaEnd();
+		}
+
+		freyjaGenerateCube(8.0f);
+		freyja_event_gl_refresh();
 		break;
 
 
@@ -575,6 +582,39 @@ bool FreyjaControl::event(int event, unsigned int value)
 {
 	switch (event)
 	{
+	case 503:
+		if ((int)value != mRender->getCurrentTextureIndex())
+		{
+			mRender->setCurrentTextureIndex(value);
+			//value = mModel->getCurrentTextureIndex();
+			//spinbutton_value_set(event, value);
+			freyja_event_gl_refresh();
+			freyja_print("Selecting textureIndex[%i] ...", value);
+		}
+		break;
+
+
+	case eModelIterator:
+		if (!freyja_event_set_range(event, value, 
+									0, freyjaGetCount(FREYJA_MODEL)))
+		{
+			freyjaIterator(FREYJA_MODEL, value);
+			freyja_print("Selecting model[%i] ...", value);
+		}
+		break;
+
+
+	case eMeshIterator:
+		if (!freyja_event_set_range(event, value, 
+									0, freyjaGetCount(FREYJA_MESH)))
+		{
+			freyjaIterator(FREYJA_MESH, value);
+			freyja_event_gl_refresh();
+			freyja_print("Selecting mesh[%i] ...", value);
+		}
+		break;
+
+
 	case eSetMaterialTexture:
 		gMaterialManager->setTexture(0, value);
 		freyja_print("Set material texture to %d", value);
@@ -786,43 +826,6 @@ bool FreyjaControl::eventMisc(int command)
 
 	switch (command)
 	{
-	case 500:
-		i = (int)freyja_event_get_float(command);
-
-		if (!freyja_event_set_range(command, i, 0, freyjaGetCount(FREYJA_MESH)))
-		{
-			freyjaIterator(FREYJA_MESH, i);
-			//mModel->setCurrentMesh(i);			
-			freyja_event_gl_refresh();
-		}
-		break;
-
-
-	case 501:
-		i = (int)freyja_event_get_float(command);
-
-		if (!freyja_event_set_range(command, i, 0, freyjaGetCount(FREYJA_VERTEX_GROUP)))
-		{
-			i = (int)freyja_event_get_float(command);
-			freyjaIterator(FREYJA_VERTEX_GROUP, i);
-			//mModel->setCurrentGroup(i);
-			freyja_event_gl_refresh();
-		}
-		break;
-
-
-	case 503:
-		i = (int)freyja_event_get_float(command);
-
-		if ((int)i != mRender->getCurrentTextureIndex())
-		{
-			mRender->setCurrentTextureIndex(i);
-			//value = mModel->getCurrentTextureIndex();
-			//spinbutton_value_set(event, value);
-			freyja_event_gl_refresh();
-		}
-		break;
-
 	case 504:
 		if (1)//!spinbutton_uint_set_range(spin, value, 0, freyjaGetCount(FREYJA_BONE)))
 		{
@@ -847,17 +850,6 @@ bool FreyjaControl::eventMisc(int command)
 			freyja_event_set_float(512, z);
 			freyja_event_gl_refresh();
 		}
-		break;
-	case 717:
-	case 718:
-		i = (int)freyja_event_get_float(command);
-
-		mMaterial->setTexture(command - 717, i);
-		freyja_print("Material[%i].texture[%d] = %i",
-					mMaterial->getCurrent(), 
-					command - 717,
-					mMaterial->getTexture(command - 717));
-		freyja_event_gl_refresh();
 		break;
 
 
@@ -1958,7 +1950,7 @@ void FreyjaControl::moveObject(int x, int y, FreyjaRender::plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float t = 2.0f, m = 0.5f;
-	vec3_t center = {0, 0, 0};
+	//vec3_t center = {0, 0, 0};
 	float xx = x, yy = y, xf, yf, zf;
 
 
@@ -2053,6 +2045,7 @@ void FreyjaControl::rotateObject(int x, int y, FreyjaRender::plane_t plane)
 	float xf, yf, zf;
 	int swap;
 	freyja_transform_action_t rotate;
+	vec3_t center;
 
 
 	/* Mongoose: Compute a relative movement value too here */
@@ -2098,15 +2091,11 @@ void FreyjaControl::rotateObject(int x, int y, FreyjaRender::plane_t plane)
 
 
 	case fTransformMesh:
-#ifdef FIXME
-		/* Mongoose: Scaled rotation for better response */
-		xf *= 5.0f;
-		yf *= 5.0f;
-		zf *= 5.0f;
-
-		//FIXME rotate = ROTATE_ABOUT_CENTER;
+		// FIXME: Get center
+		mModel->setTransformPoint(center);
+		rotate = fRotate; // FIXME: fRotateAboutPoint;
 		break;
-#endif
+
 
 	default:
 		rotate = fRotate;

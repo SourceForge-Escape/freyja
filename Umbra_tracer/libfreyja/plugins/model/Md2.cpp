@@ -461,6 +461,9 @@ extern "C" {
 
 int import_model(char *filename)
 {
+	if (freyja_model__md2_check(filename) != 0)
+		return -1;
+
 	return freyja_model__md2_import(filename);
 }
 

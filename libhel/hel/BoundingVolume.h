@@ -31,6 +31,7 @@
 #include <hel/math.h>
 
 
+#ifndef FREYJA9
 class BoundingSphere
 {
 public:
@@ -47,6 +48,7 @@ public:
 
 	vec3_t mMax;           /* Bounding box MAX point */
 };
+#endif
 
 
 class BoundingVolume
@@ -68,7 +70,7 @@ class BoundingVolume
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~BoundingVolume();
+	virtual ~BoundingVolume();
 	/*------------------------------------------------------
 	 * Pre  : BoundingVolume object is allocated
 	 * Post : Deconstructs an object of BoundingVolume
@@ -84,18 +86,19 @@ class BoundingVolume
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-#ifdef FREYJA9
 	virtual bool isVertexInside(vec3_t vertex);
-#endif
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
 
+#ifndef FREYJA9
 	BoundingSphere mSphere;    /* Bounding sphere of this volume */
 
 	BoundingBox mBox;;         /* Bounding box of this volume */
+#endif
 
  private:
 
@@ -112,8 +115,8 @@ class BoundingVolume
 	/* */
 };
 
-#ifdef FREYJA9
 
+#ifdef FREYJA9
 class BoundingSphere : public BoundingVolume
 {
 public:
