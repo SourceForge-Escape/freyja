@@ -247,7 +247,6 @@ enum freyja_event_misc_cmd
 	CMD_MISC_TEX_SLOT_LOAD   = 38,
 	CMD_MISC_RENDER_BBOX     = 39,
 
-	CMD_MISC_RENDER_GRID     = 40,
 	CMD_MISC_LOAD_MAP        = 41,
 	CMD_MISC_DISPLAY_INFO    = 42,
 	
@@ -326,6 +325,7 @@ enum freyja_event_freyja_mode
 	FREYJA_MODE_MATERIAL_EDIT       = 19,
 	FREYJA_MODE_RENDER_NORMALS      = 20,
 	FREYJA_MODE_RENDER_BONETAG      = 21,
+	FREYJA_MODE_RENDER_GRID         = 22,
 
 	FREYJA_MODE_LOAD_MODEL        = 101,
 	FREYJA_MODE_SAVE_MODEL        = 102,
