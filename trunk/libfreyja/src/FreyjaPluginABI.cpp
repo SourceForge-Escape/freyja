@@ -2687,7 +2687,7 @@ int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 	Vector<long> ref;
 	vec3_t xyz;
 	vec2_t uv;
-	unsigned int j, commonCount, diffCount;
+	unsigned int j;
 	long A, B, C, D, i, material, count;
 
 
@@ -2705,7 +2705,7 @@ int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 		B = freyjaVertex3fv(xyz);
 		freyjaGetVertexTexCoordUV2fv(A, uv);
 		freyjaVertexTexCoord2fv(B, uv);
-		freyjaGetVertexNormalXYZ3fv(B, xyz);
+		freyjaGetVertexNormalXYZ3fv(A, xyz);
 		freyjaVertexNormal3fv(B, xyz);
 		
 		face.pushBack(B);
@@ -2760,101 +2760,7 @@ int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 		freyjaEnd();
 	}
 
-	// Move polygonIndex vertices by 'normal'
-	for (i = 0; i < count; ++i)
-	{
-		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
-		freyjaGetVertexXYZ3fv(A, xyz);
-		xyz[0] += normal[0];
-		xyz[1] += normal[1];
-		xyz[2] += normal[2];
-		freyjaVertexXYZ3fv(A, xyz);
-	}
-
-	return 0;
-}
-
-
-int freyjaPolygonExtrudeQuad_OLD(long polygonIndex, vec3_t normal)
-{
-	Vector<unsigned int> common, diffA, diffB;
-	vec3_t xyz;
-	vec2_t uv;
-	unsigned int j, commonCount, diffCount;
-	long A, B, C, D, i, material, count;
-
-
-	material = freyjaGetPolygonMaterial(polygonIndex);
-	count = freyjaGetPolygonVertexCount(polygonIndex);
-
-	if (!count)
-		return -1;
-
-	for (i = 0; i < count; ++i)
-	{
-		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
-
-		if ((i + 1) >= count)
-		{
-			B = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-		}
-		else
-		{
-			B = freyjaGetPolygonVertexIndex(polygonIndex, i+1);
-		}
-
-		// 1. Find common polygons besides polygonIndex
-		freyja__GetCommonPolygonReferences(A, B, common);
-		freyja__GetDifferenceOfPolygonReferences(A, B, diffA);
-		freyja__GetDifferenceOfPolygonReferences(B, A, diffB);
-		commonCount = common.end();
-		diffCount = 0;
-
-		for (j = 0; j < commonCount; ++j)
-		{
-			if ((int)common[j] == polygonIndex)
-				continue;
-
-			// 2. Generate a quad ABCD to bridge the 'gap' C dupes A, D dupes B
-			freyjaGetVertexXYZ3fv(A, xyz);
-			C = freyjaVertex3fv(xyz);
-			freyjaGetVertexTexCoordUV2fv(A, uv);
-			freyjaVertexTexCoord2fv(C, uv);
-			freyjaGetVertexNormalXYZ3fv(A, xyz);
-			freyjaVertexNormal3fv(C, xyz);
-
-			freyjaGetVertexXYZ3fv(B, xyz);
-			D = freyjaVertex3fv(xyz);
-			freyjaGetVertexTexCoordUV2fv(B, uv);
-			freyjaVertexTexCoord2fv(D, uv);
-			freyjaGetVertexNormalXYZ3fv(B, xyz);
-			freyjaVertexNormal3fv(D, xyz);
-
-
-			// 3. Replace references to A & B with C & D in face
-			freyja__PolygonReplaceReference(common[j], A, C);
-			freyja__PolygonReplaceReference(common[j], B, D);
-
-			// 4. Generate new quad ABCD
-			freyjaBegin(FREYJA_POLYGON);
-			freyjaPolygonMaterial1i(material);
-			freyjaPolygonVertex1i(A);
-			freyjaPolygonVertex1i(C);
-			freyjaPolygonVertex1i(D);
-			freyjaPolygonVertex1i(B);
-
-			// FIXME: Should be able to generate mixing both uvs
-			if (freyjaGetPolygonTexCoordCount(polygonIndex))
-			{
-				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.25));
-				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.25));
-				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
-				freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.5));
-			}
-
-			freyjaEnd();
-		}
-	}
+	// FIXME: Should recompute normals for 'face' vertices here
 
 
 	// Move polygonIndex vertices by 'normal'
@@ -2870,7 +2776,6 @@ int freyjaPolygonExtrudeQuad_OLD(long polygonIndex, vec3_t normal)
 
 	return 0;
 }
-
 
 
 void freyjaPolygonAddVertex1i(long polygonIndex, long vertexIndex)

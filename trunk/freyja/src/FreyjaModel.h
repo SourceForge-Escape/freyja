@@ -446,6 +446,8 @@ public:
 	void getVertexSelection(vec3_t min, vec3_t max,
 							Vector<unsigned int> **list);
 
+	Vector<unsigned int> &getVertexSelectionList();
+
 	vec3_t *getVertexXYZ(long vertexIndex);
 	/*------------------------------------------------------
 	 * Pre  : 

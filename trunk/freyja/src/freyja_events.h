@@ -202,6 +202,7 @@ typedef enum {
 	eColorMeshHighlight,
 
 	eModelIterator,
+	ePolygonIterator,
 	eMeshIterator,
 	eGroupIterator,
 	eBoneIterator,
