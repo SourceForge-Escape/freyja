@@ -2672,7 +2672,7 @@ int freyja_model__psk_import(char *filename)
 							psk.mVTXWs[psk.mFaces[i].z].uv[1]);
 		eggTexel1i(t);
 		
-		eggTexture1i(psk.mVTXWs[psk.mFaces[i].z].material);
+		eggTexture1i(psk.mFaces[i].material);
 		
 		eggEnd(); // FREYJA_POLYGON
 	}
