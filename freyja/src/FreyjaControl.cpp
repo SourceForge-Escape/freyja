@@ -304,6 +304,16 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
+	case ePolygonIterator:
+		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_POLYGON)))
+		{
+			mModel->setCurrentPolygon(value);			
+			freyja_event_gl_refresh();
+			freyja_print("Selecting polygon[%i] ...", value);
+		}
+		break;
+
+
 	case eMeshIterator:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_MESH)))
 		{
@@ -1377,7 +1387,22 @@ bool FreyjaControl::event(int command)
 
 
 	case eExtrude:
-		freyjaPolygonExtrudeQuad1f(mModel->getCurrentPolygon(), 5.0f);
+		freyjaPolygonExtrudeQuad1f(mModel->getCurrentPolygon(), 8.0f);
+
+		if (freyjaGetPolygonVertexCount(mModel->getCurrentPolygon()))
+		{
+			long polygonIndex = mModel->getCurrentPolygon();
+			long i, v, count = freyjaGetPolygonVertexCount(polygonIndex);
+			Vector<unsigned int> list = mModel->getVertexSelectionList();
+
+			list.clear();
+
+			for (i = 0; i < count; ++i)
+			{
+				v = freyjaGetPolygonVertexIndex(polygonIndex, i);
+				list.pushBack(v);
+			}
+		}
 		freyja_event_gl_refresh();
 		break;
 
