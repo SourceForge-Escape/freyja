@@ -17,8 +17,10 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o Catmull-Clark for subdiv
+	o Viewportbackground 'diagram' for mesh creation
 	o Deform skelmesh in bone transform
-	o Vertex extrude with quads
+	o Proper vertex extrude with quads
 	o Multi window editing using python via calls to FreyjaRender
 	o Deform vertices render option ( disables mesh editing )
 	o Skeletal Ref -> Skeletal Keyframe ( dup | edit ) -> Skel Keyframe |

@@ -20,16 +20,8 @@
  Show Stoppers
  ------------------
 
- o 2004.12.08-1 ( Related: 2004.12.03-1 )
-	SMD plugin generates corrupt parent ids in skeleton and no other errors.
-	This can lead to crash on load.  Backend ( libfreyja ) is at fault.
-
-
  o 2004.12.03-1
-	New file save corruption bug. Meshes can be saved with some corrupt
-	or invalid polygons.  They render as just vertices and constanty
-	warns "FreyjaRender::DrawMesh> mesh[0]: 12 polygons, 0 cached..."
-	in the logs and statusbar.
+	New file save corruption bug.
 
 	The fix for corrupt/invalid saves only adressed NULL elements by
 	not saving them to disk.  Unfortunately the Egg backend depends on

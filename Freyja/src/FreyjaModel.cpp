@@ -1109,7 +1109,16 @@ bool FreyjaModel::copySelectedMesh()
 
 void FreyjaModel::cullUsingVertexBuffer()
 {
-	freyja_print("Culling using vertex buffer not yet implemented\n");
+	unsigned int i;
+
+
+	if (mList.empty())
+		return;
+
+	for (i = mList.begin(); i < mList.end(); ++i)
+	{
+		_egg->delVertex(mList[i]);
+	}	
 }
 
 
