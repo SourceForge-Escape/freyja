@@ -494,7 +494,7 @@ void FreyjaControl::eventMain(int event)
 
 
 	case eMove:
-		mModel->Transform(mTransformMode, Egg::TRANSLATE,
+		mModel->transform(mTransformMode, Egg::TRANSLATE,
 						  freyja_event_get_float(eMove_X),
 						  freyja_event_get_float(eMove_Y),
 						  freyja_event_get_float(eMove_Z));
@@ -506,7 +506,7 @@ void FreyjaControl::eventMain(int event)
 		break;
 
 	case eRotate:
-		mModel->Transform(mTransformMode, Egg::ROTATE,
+		mModel->transform(mTransformMode, Egg::ROTATE,
 						  freyja_event_get_float(eRotate_X),
 						  freyja_event_get_float(eRotate_Y),
 						  freyja_event_get_float(eRotate_Z));
@@ -518,7 +518,7 @@ void FreyjaControl::eventMain(int event)
 		break;
 
 	case eScale:
-		mModel->Transform(mTransformMode, Egg::SCALE,
+		mModel->transform(mTransformMode, Egg::SCALE,
 						  freyja_event_get_float(eScale_X),
 						  freyja_event_get_float(eScale_Y),
 						  freyja_event_get_float(eScale_Z));
@@ -557,12 +557,12 @@ void FreyjaControl::eventBone(int command)
 			mModel->setCurrentBone(mModel->getCurrentBone() - 1);
 		break;
 	case CMD_BONE_ADD_MESH:
-		mModel->TagAddMesh(mModel->getCurrentBone(), mModel->getCurrentMesh());
+		mModel->addMeshToBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
 		event_print("New Bone[%i] now contains mesh %i",
 						mModel->getCurrentBone(), mModel->getCurrentMesh());
 		break;
 	case CMD_BONE_DELETE_MESH:
-		mModel->TagDelMesh(mModel->getCurrentBone(), mModel->getCurrentMesh());
+		mModel->removeMeshFromBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
 		event_print("New Bone[%i] no longer contains mesh %i",
 						mModel->getCurrentBone(), mModel->getCurrentMesh());
 		break;
@@ -1104,6 +1104,34 @@ void FreyjaControl::handleFilename(const char *filename)
 }
 
 
+void FreyjaControl::handleTextEvent(int event, const char *text)
+{
+	switch (event)
+	{
+	case eSetMaterialName:
+		mMaterial->setName(text);
+		break;
+
+	case eSetTextureNameA:
+		/* Text here is assumed to be a filename */
+		//mMaterial->loadTexture(text);
+		break;
+
+	case eSetTextureNameB:
+		/* Text here is assumed to be a filename */
+		//mMaterial->loadDetailTexture(text);
+		break;
+
+	case eSetCurrentBoneName:
+		mModel->nameBone(mModel->getCurrentBone(), text);
+		break;
+
+	default:
+		event_print("Unhandled event(%i) '%s'", event, text);
+	}
+}
+
+
 bool FreyjaControl::Motion(int x, int y)
 {
 	static int old_y = 0, old_x = 0;
@@ -1364,11 +1392,20 @@ void FreyjaControl::deleteSelectedObject()
 // FIXME: (int x, int y, Egg::egg_plane plane) for vertex / texel / polygon
 void FreyjaControl::addObject()
 {
+	unsigned int index;
+
+
 	switch (mTransformMode)
 	{
 	case FreyjaModel::TransformBone:
-		mModel->TagNew(0.0, 0.0, 0.0, 0x0);
-		event_print("New Bone Tag");
+		index = mModel->newBone(0.0, 0.0, 0.0, 0x0);
+
+		if (index > 0)
+		{
+			mModel->connectBone(mModel->getCurrentBone(), index);
+		}
+		
+		event_print("New Bone[%u]", index);
 		break;
 	case FreyjaModel::TransformMesh:
 		mModel->MeshNew();
@@ -1407,7 +1444,7 @@ void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
 		xx = x; 
 		yy = y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
-		mModel->TagSelect(xx, yy);
+		mModel->selectBone(xx, yy);
 		// mModel->selectTag(plane, xx, yy, zz);
 
 	default:
@@ -1462,7 +1499,7 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 		xx = x; 
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
-		mModel->TagMove(xx, yy);
+		mModel->moveBone(xx, yy);
 		break;			
 		
 	case FreyjaModel::TransformMesh:
@@ -1491,13 +1528,13 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 			break;
 		}
 		
-		mModel->Transform(mTransformMode, Egg::TRANSLATE, xf, yf, zf); 
+		mModel->transform(mTransformMode, Egg::TRANSLATE, xf, yf, zf); 
 		break;
 
 
 	default:  
 		/* Relative movement based on mouse tracking */
-		mModel->Transform(mTransformMode, Egg::TRANSLATE, xf, yf, zf);
+		mModel->transform(mTransformMode, Egg::TRANSLATE, xf, yf, zf);
 		break;
 	}
 
@@ -1553,7 +1590,7 @@ void FreyjaControl::rotateObject(int x, int y, Egg::egg_plane plane)
 		rotate = Egg::ROTATE;
 	}
 
-	mModel->Transform(mTransformMode, rotate, xf, yf, zf);
+	mModel->transform(mTransformMode, rotate, xf, yf, zf);
 	
 	old_x = x;
 	old_y = y;
@@ -1569,13 +1606,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		switch (plane)
 		{
 		case Egg::PLANE_XY:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
 			break;
 		case Egg::PLANE_XZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
 		case Egg::PLANE_YZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 0.99);
 			break;
 		}
 	}
@@ -1584,13 +1621,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		switch (plane)
 		{
 		case Egg::PLANE_XY:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
 			break;
 		case Egg::PLANE_XZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 			break;
 		case Egg::PLANE_YZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.0, 1.01);
 		}
 	}
 	
@@ -1599,13 +1636,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		switch (plane)
 		{
 		case Egg::PLANE_XY:
-			mModel->Transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
 			break;
 		case Egg::PLANE_XZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 0.99, 1.0, 1.0);
 			break;
 		case Egg::PLANE_YZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 0.99, 1.0);
 			break;
 		}
 	}
@@ -1614,13 +1651,13 @@ void FreyjaControl::scaleObject(int x, int y, Egg::egg_plane plane)
 		switch (plane)
 		{
 		case Egg::PLANE_XY:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
 			break;
 		case Egg::PLANE_XZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.01, 1.0, 1.0);
 			break;
 		case Egg::PLANE_YZ:
-			mModel->Transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
+			mModel->transform(mTransformMode, Egg::SCALE, 1.0, 1.01, 1.0);
 		}
 	}
 	
@@ -1702,7 +1739,7 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 			break;
 			
 		case TAG_MOVE_CENTER:
-			mModel->TagMoveCenter(xx, yy);
+			mModel->moveBoneCenter(xx, yy);
 			break;
 
 		case MESH_MOVE_CENTER: 
@@ -1790,14 +1827,14 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 	case BONE_CONNECT_MODE:
 		master_tag = mModel->getCurrentBone();
-		mModel->TagSelect(xx, yy);
-		mModel->TagConnect(master_tag, mModel->getCurrentBone());
+		mModel->selectBone(xx, yy);
+		mModel->connectBone(master_tag, mModel->getCurrentBone());
 		mModel->setCurrentBone(master_tag);
 		break;
 	case BONE_DISCONNECT_MODE:
 		master_tag = mModel->getCurrentBone();
-		mModel->TagSelect(xx, yy);
-		mModel->TagDisconnect(master_tag, mModel->getCurrentBone());
+		mModel->selectBone(xx, yy);
+		mModel->removeMeshFromBone(master_tag, mModel->getCurrentBone());
 		mModel->setCurrentBone(master_tag);
 		break;
 	case MESH_MOVE_CENTER:
@@ -2021,6 +2058,10 @@ void FreyjaControl::setupResource(Resource &r)
 	r.RegisterInt("eZoom", eZoom);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
+	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
+	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
+	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);
+	r.RegisterInt("eSetMaterialName", eSetMaterialName);
 
 	/* TODO:
 	 * 1. Remove events below here and replace with new events

@@ -91,6 +91,7 @@ public:
 	 ------------------------------------------------------*/
 };
 
+
 class FreyjaEggPlugin : public EggPlugin
 {
 public:
@@ -551,12 +552,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-
-	void Transform(int mode, Egg::egg_transform type, 
+	void transform(int mode, Egg::egg_transform type, 
 				   float x, float y, float z);
 	/*------------------------------------------------------
-	 * Pre  : mode is {FRAME, MESH, SCENE}
+	 * Pre  : mode is {FRAME, MESH, SCENE, BONE, etc}
 	 *        type is {SCALE, ROTATE, TRANSLATE}
 	 *        x, y, z are in degrees or units
 	 *
@@ -608,14 +607,20 @@ public:
 	void MeshDel();
 	void MeshCopy();
 
-	void TagMoveCenter(float xx, float yy);
-	void TagMove(float xx, float yy);
-	void TagSelect(float xx, float yy);
-	void TagNew(vec_t x, vec_t y, vec_t z, unsigned char flag);
-	void TagAddMesh(unsigned int tag, unsigned int mesh);
-	void TagDelMesh(unsigned int tag, unsigned int mesh);
-	void TagConnect(unsigned int master, unsigned int slave);
-	void TagDisconnect(unsigned int master, unsigned int slave);
+	/// BONES /////
+	unsigned int newBone(vec_t x, vec_t y, vec_t z, unsigned char flag);
+	void moveBoneCenter(float xx, float yy);
+	void moveBone(float xx, float yy);
+	void selectBone(float xx, float yy);
+	void nameBone(unsigned int bone, const char *name);
+	void addVertexToBone(unsigned int bone, unsigned int vertex);
+	void removeVertexFromBone(unsigned int bone, unsigned int vertex);
+	void addMeshToBone(unsigned int bone, unsigned int mesh);
+	void removeMeshFromBone(unsigned int bone, unsigned int mesh);
+	void connectBone(unsigned int master, unsigned int slave);
+	void disconnectBone(unsigned int master, unsigned int slave);
+
+
 
 	void TextureShift();
 	///////////////////////////////////////////////////////

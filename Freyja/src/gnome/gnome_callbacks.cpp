@@ -693,11 +693,8 @@ void rc_textbox_event(GtkWidget *widget, gpointer user_data)
 
 	switch (GPOINTER_TO_INT(user_data))
 	{
-	case 799:
-		gMaterialManager->setName(text);
-		break;
 	default:
-		;
+		mgtk_handle_text(GPOINTER_TO_INT(user_data), text);
 	}
 }
 

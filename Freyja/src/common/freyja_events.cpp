@@ -435,3 +435,11 @@ void freyja_set_main_window_title(char *title)
 	set_main_window_title(title);
 }
 
+
+void mgtk_handle_text(int event, char *text)
+{
+	if (gFreyjaControl)
+	{
+		gFreyjaControl->handleTextEvent(event, text);
+	}
+}
