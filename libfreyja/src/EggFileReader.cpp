@@ -391,6 +391,13 @@ char *EggFileReader::parseSymbol()
 }
 
 
+void EggFileReader::readBufferUnsignedChar(unsigned int length, 
+										   unsigned char *buffer)
+{
+	fread(buffer, length, 1, mFileHandle);  // heh, yeah
+}
+
+
 void EggFileReader::readCharString(unsigned int length, char *buffer)
 {
 	fread(buffer, length, 1, mFileHandle);  // heh, yeah
@@ -403,8 +410,8 @@ float EggFileReader::readFloat32()
 	void *ptr = &r;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
-	if (sz < 4)
-		printf("EggFileReader: ERROR");
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 32bit float\n");
 
 #if HAVE_BIG_ENDIAN
 	FIX_FLOAT(*ptr)
@@ -440,8 +447,8 @@ short EggFileReader::readInt16()
 	void *ptr = &i;
 	size_t sz = fread(ptr, 2, 1, mFileHandle);
 
-	if (sz < 2)
-		printf("EggFileReader: ERROR");
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 16bit int\n");
 
 #ifdef HAVE_BIG_ENDIAN
 	FIX_SHORT(*ptr)
@@ -456,8 +463,8 @@ unsigned short EggFileReader::readInt16U()
 	void *ptr = &u;
 	size_t sz = fread(ptr, 2, 1, mFileHandle);
 
-	if (sz < 2)
-		printf("EggFileReader: ERROR");
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 16bit uint\n");
 
 #ifdef HAVE_BIG_ENDIAN
 	FIX_SHORT(*ptr)
@@ -472,8 +479,8 @@ int EggFileReader::readInt32()
 	void *ptr = &i;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
-	if (sz < 4)
-		printf("EggFileReader: ERROR");
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 32bit int\n");
 
 #ifdef HAVE_BIG_ENDIAN
 	FIX_INT(*ptr)
@@ -488,8 +495,8 @@ unsigned int EggFileReader::readInt32U()
 	void *ptr = &u;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
-	if (sz < 4)
-		printf("EggFileReader: ERROR");
+	if (sz < 1)
+		printf("EggFileReader: ERROR failed to read 32bit uint\n");
 
 #ifdef HAVE_BIG_ENDIAN
 	FIX_INT(*ptr)

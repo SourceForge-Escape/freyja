@@ -167,6 +167,15 @@ class EggImage
 	 *        NOTE: tends to lean to darker shades
 	 --------------------------------------------*/
 
+   int saveImage(const char *filename, const char *module_name);
+	/*--------------------------------------------
+	 * Created  : 2000-10-05 by Mongoose
+	 * Modified : 
+	 *
+	 * Pre  :
+	 * Post : Saves image to file ( brought it back )
+	 --------------------------------------------*/
+
    int savePaletteMTK(const char *filename);
 	/*--------------------------------------------
 	 * Created  : 2000-10-05 by Mongoose

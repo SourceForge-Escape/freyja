@@ -574,6 +574,13 @@ int EggImage::loadPaletteMTK(const char *filename)
   return 1;
 }
 
+
+int EggImage::saveImage(const char *filename, const char *module_name)
+{
+	return -1;
+}
+
+
 int EggImage::savePaletteMTK(const char *filename)
 {
   FILE *f;
