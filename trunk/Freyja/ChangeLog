@@ -27,6 +27,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041130) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Multicopy mesh mode ( Appends each copied polymesh to buffer )
+	o Mesh mode copy/cut/paste finally reimplemented
+
+
  Freyja (0.3.5-20041129) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o 'Chimera' build done now replaces this build as stable

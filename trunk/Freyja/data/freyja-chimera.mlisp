@@ -235,9 +235,9 @@
 								"bbox-select.png" "Select" "Select by bounding box" 
 								eMode eSelectionByBox)
 
-							(toolbar_button 
-								"clone.png" "Copy"	"Copy object" 
-								eMode eNone)
+							(toolbar_togglebutton false 
+								"clone.png" "CopyM"	"Copy multiple objects" 
+								eMode eCopyAppendMode)
 
 							(toolbar_button
 								"split.png" "Split" "Split object" 
