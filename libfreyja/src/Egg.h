@@ -196,33 +196,12 @@ typedef struct egg_group_s {
 } egg_group_t;
 
 
-class EggVertexAnimationFrame
-{
-public:
-	void erase()
-	{
-		vertices.erase();
-	}
-
-	void transform();
-
-	Vector<vec3_t *> vertices;        /* Vertex frame */
-
-	char name[64];                    /* Name of frame if any */
-	int id;                           /* Index of frame */
-
-	//Vector3d bboxMin;               /* Min corner of bounding box */
-	//Vector3d bboxMax;               /* Max corner of bounding box */
-
-	//Vector3d center;                /* Center of bounding volume */
-	vec_t radius;                     /* Radius of bounding sphere if used */
-};
-
 class EggUVMap
 {
 public:
-	Vector <unsigned int> polygons;   /* Contains TexCoords composing group
-									   * either polymapped or by vertex */
+	Vector <long> polygons;  /* Contains TexCoords via polygons composing map
+							  * basically allows more than one grouping of
+							  * texcoords:polygons per mesh */
 };
 
 typedef enum {
@@ -241,18 +220,15 @@ typedef struct egg_mesh_s {
 
 	Vector <egg_polygon_t *> r_polygon;
 
+
 	/* Ext to 8.12 for better vertex morph animation */
-	unsigned int frameRate;
-	unsigned int currentFrame;
-	unsigned int lastFrame;
-	vec_t time;
-	vec_t lastTime;
-	Vector<EggVertexAnimationFrame *> frames;
 
-	Vector<EggUVMap *> uvs;
+	Vector<EggUVMap *> uvMaps;  // 
 
-	Vector<long> vertices; // Direct mesh:vertex mapping to replace group use
-
+	Vector<long> vertices;     /* Direct mesh:vertex 'ownership' mapping */
+	Vector<long> verticesMap;  /* Maps Egg::object ids to local ids, */
+	Vector<long> texcoordsMap; /* basically simualating FreyjaMesh local data 
+								* while possibly wasting memory */
 	Vector3d position;
 	/* End Ext */
 

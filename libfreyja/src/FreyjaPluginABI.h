@@ -236,6 +236,9 @@ typedef enum {
 
 	// FREYJA_BONE Accessors //////////////////////////////////////////////
 
+	long freyjaGetSkeletonBoneCount(long skeletonIndex);
+	long freyjaGetSkeletonBoneIndex(long skeletonIndex, long element);
+
 	long freyjaGetBoneName(long boneIndex, unsigned int size, char *name);
 	/*------------------------------------------------------
 	 * Pre  : <name> must be allocated to <size> width
@@ -308,21 +311,47 @@ typedef enum {
 	long freyjaGetVertexWeightCount(long vertexIndex);
 	long freyjaGetVertexFlags(long vertexIndex);
 
-// FREYJA_MODEL Accessors
-long freyjaGetModelFlags(long modelIndex);
-long freyjaGetModelMeshIndex(long modelIndex, long element);
-long freyjaGetModelMeshCount(long modelIndex);
+	// FREYJA_MODEL Accessors
+	long freyjaGetModelFlags(long modelIndex);
+	long freyjaGetModelMeshIndex(long modelIndex, long element);
+	long freyjaGetModelMeshCount(long modelIndex);
 
-// FREYJA_MESH Accessors
-long freyjaGetMeshFlags(long meshIndex);
-long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
-long freyjaGetMeshVertexIndex(long meshIndex, long element); // Not Implemented
-long freyjaGetMeshVertexCount(long meshIndex); // Not Implemented
-long freyjaGetMeshPolygonIndex(long meshIndex, long element);
-long freyjaGetMeshPolygonCount(long meshIndex);
-long freyjaGetMeshVertexGroupIndex(long meshIndex, long element);
-long freyjaGetMeshVertexGroupCount(long meshIndex);
-long freyjaGetMeshVertexFrameIndex(long meshIndex, long element); // Not Implemented
+	// FREYJA_MESH Accessors
+	long freyjaGetMeshFlags(long meshIndex);
+	long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
+
+	long freyjaGetMeshVertexIndex(long meshIndex, long element);
+	/*------------------------------------------------------
+	 * Pre  : freyjaGetMeshVertexCount must be called before
+	 *        this is valid while using the Egg backend
+	 *
+	 * Post : Returns the index of the local vertex <element>
+	 *        for mesh <meshIndex> or -1 on error
+	 ------------------------------------------------------*/
+
+	long freyjaGetMeshVertexCount(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the number of local vertices
+	 *        for mesh <meshIndex> or 0 on error
+	 *
+	 ------------------------------------------------------*/
+
+	long freyjaGetMeshPolygonVertexIndex(long meshIndex, long faceVertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the index of local vertices
+	 *        for mesh <meshIndex> with local
+	 *        mapping from polygon to mesh ids or 0 on error
+	 *
+	 ------------------------------------------------------*/
+	
+
+	long freyjaGetMeshPolygonIndex(long meshIndex, long element);
+	long freyjaGetMeshPolygonCount(long meshIndex);
+	long freyjaGetMeshVertexGroupIndex(long meshIndex, long element);
+	long freyjaGetMeshVertexGroupCount(long meshIndex);
+	long freyjaGetMeshVertexFrameIndex(long meshIndex, long element); // Not Implemented
 long freyjaGetMeshVertexFrameCount(long meshIndex); // Not Implemented
 
 // FREYJA_POLYGON Accessors
@@ -620,11 +649,6 @@ void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
 void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
-	long freyjaCheckModel(const char *filename);
-
-	long freyjaLoadModel(const char *filename);
-
-	long freyjaSaveModel(const char *filename);
 
 	///////////////////////////////////////////////////////////////////////
 	// Polygon
@@ -716,6 +740,7 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	int freyjaGetPluginArgString(long pluginId, const char *name, 
 								 long len, char *arg);
 
+
 	///////////////////////////////////////////////////////////////////////
 	//  Pak VFS 
 	///////////////////////////////////////////////////////////////////////
@@ -731,6 +756,16 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 *
 	 * 2005.01.02:
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Used to decrypt or uncompress files in a pak
+	 *        using an external module and one of it's
+	 *        C accessable functions using freyjaPak ABI.
+	 *
+	 *        NOT IMPLEMENTED!
 	 ------------------------------------------------------*/
 
 	long freyjaPakAddFullPathFile(long pakIndex,
@@ -759,6 +794,35 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 * 2005.01.02:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
+	//  Pak VFS 
+	///////////////////////////////////////////////////////////////////////
+
+	long freyjaCheckModel(const char *filename);
+
+	long freyjaLoadModel(const char *filename);
+
+	long freyjaSaveModel(const char *filename);
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Internal ABI calls
+	//
+	//   If used externally you'll likely get a lot of breakage or
+	//   slower and possibly incorrect object states.
+	///////////////////////////////////////////////////////////////////////
+
+	void freyja__MeshUpdateMappings(long meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : Only use this if you're a core developer writing
+	 *        special test plugins, or internal code.
+	 *
+	 * Post : Updates Egg backend egg_mesh_t to simulate
+	 *        FreyjaMesh local vertex mappings
+	 ------------------------------------------------------*/
+
 }
 
 

@@ -177,7 +177,7 @@ void FreyjaFileWriter::writeFloat32(float r)
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to write 32bit float\n");
+		printf("FreyjaFileWriter: ERROR failed to write 32bit float\n");
 }
 
 
@@ -202,7 +202,7 @@ void FreyjaFileWriter::writeInt16(short i)
 	size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 16bit int\n");
+		printf("FreyjaFileWriter: ERROR failed to write 16bit int\n");
 }
 
 	
@@ -212,10 +212,10 @@ void FreyjaFileWriter::writeInt16U(unsigned short u)
 #ifdef HAVE_BIG_ENDIAN
 	FIX_SHORT(*ptr)
 #endif
-	size_t sz = fread(ptr, 2, 1, mFileHandle);
+	size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 16bit uint\n");
+		printf("FreyjaFileWriter: ERROR failed to read 16bit uint\n");
 }
 
 
@@ -228,7 +228,7 @@ void FreyjaFileWriter::writeInt32(int i)
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
+		printf("FreyjaFileWriter: ERROR failed to read 32bit int\n");
 }
 
 
@@ -241,7 +241,7 @@ void FreyjaFileWriter::writeInt32U(unsigned int u)
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
+		printf("FreyjaFileWriter: ERROR failed to read 32bit uint\n");
 }
 
 
@@ -257,7 +257,7 @@ void FreyjaFileWriter::writeLong(long l)
 	sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
+		printf("FreyjaFileWriter: ERROR failed to read 32bit int\n");
 }
 
 
@@ -270,7 +270,7 @@ void FreyjaFileWriter::writeLongU(unsigned long ul)
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 	if (sz < 1)
-		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
+		printf("FreyjaFileWriter: ERROR failed to read 32bit uint\n");
 }
 
 

@@ -45,7 +45,7 @@ void freyja_init()
 	freyjaPluginDescription1s("Object Model (*.obj)");
 	freyjaPluginAddExtention1s("*.obj");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
-	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH);
 }
 
 int import_model(char *filename)
@@ -74,10 +74,11 @@ int freyja_model__obj_import(char *filename)
 	FreyjaFileReader r;
 	Vector <unsigned int> transV;
 	Vector <unsigned int> transT;
+	Vector <vec_t> normals;
 	//Vector <unsigned int> transN;
 	char *symbol;
 	vec_t x, y, z, u, v;
-	int i, index;
+	int i, vertexIndex, index;
 	bool hasUV = false;
 	bool hasNormal = false;
 
@@ -133,7 +134,9 @@ int freyja_model__obj_import(char *filename)
 			hasNormal = true;
 
 			// polymapped normals not in Freyja
-			//transN.pushBack(freyjaNormal3f(x, y, z));
+			normals.pushBack(x);
+			normals.pushBack(y);
+			normals.pushBack(z);
 		}
 		else if (!strncmp(symbol, "v", 1))
 		{
@@ -169,6 +172,7 @@ int freyja_model__obj_import(char *filename)
 			{
 				index = r.parseInteger();
 				freyjaPolygonVertex1i(transV[index-1]); // index starts at 1 not 0
+				vertexIndex = transV[index-1];
 
 				if (hasUV)
 				{
@@ -190,6 +194,14 @@ int freyja_model__obj_import(char *filename)
 
 					//index = transN[index-1]; // index starts at 1 not 0
 					//freyjaNormal1i(index);
+
+					if (!normals.empty())
+					{
+						freyjaVertexNormal3f(vertexIndex,
+											 normals[(index-1)*3],
+											 normals[(index-1)*3+1],
+											 normals[(index-1)*3+2]);
+					}
 				}
 			}
 
@@ -243,12 +255,15 @@ int freyja_model__obj_import(char *filename)
 int freyja_model__obj_export(char *filename)
 {
 #ifdef OBJ_EXPORT_ENABLED
+	const vec_t scale = 1.0;
 	FreyjaFileWriter w;
-	int index;
-	unsigned int j, k, n, group, count;
-	vec3_t vert;
+	long modelIndex = 0; // make plugin option
+	long i, j, k, v;
+	long meshCount, meshIndex;
+	long vertexCount, vertexIndex;
+	long polygonCount, polygonIndex, faceVertexCount, faceVertex;
+	vec3_t xyz;
 	vec2_t uv;
-	vec_t scale = 0.5;
 
 
 	if (!w.openFile(filename))
@@ -257,9 +272,85 @@ int freyja_model__obj_export(char *filename)
 	}
 
 	/* Comment */
-	w.print("# Exported from Freyja, not even tested code\n");
+	w.print("# Exported from %s\n",	FREYJA_PLUGIN_VERSION);
 
-#ifdef BONE_EXT_BREAK_COMPATIBILITY
+
+	/* Meshes */
+	meshCount = freyjaGetModelMeshCount(modelIndex);
+	v = 0;
+
+	for (i = 0; i < meshCount; ++i)
+	{
+		meshIndex = freyjaGetModelMeshIndex(modelIndex, i);
+
+		vertexCount = freyjaGetMeshVertexCount(meshIndex);
+		polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+		w.print("\ng mesh%03li\n", i);
+
+		/* Vertices */
+		w.print("\n# vertexCount %li\n", vertexCount);
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
+			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+			//w.print("# vertex %li -> %li\n", j, vertexIndex);
+			w.print("v %f %f %f\n",
+					xyz[0]*scale, xyz[1]*scale, xyz[2]*scale);
+		}
+
+		/* Normals */
+		w.print("\n# normalCount %li\n", vertexCount);
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
+			freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
+
+			w.print("vn %f %f %f\n",
+					xyz[0], xyz[1], xyz[2]);
+		}
+
+		/* Texcoords */
+		w.print("\n# texcoordCount %li\n", vertexCount);
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
+			freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+
+			w.print("vt %f %f\n", uv[0], uv[1]);
+		}
+
+		/* Faces */
+		w.print("\n# faceCount %li\n", polygonCount);
+		for (j = 0; j < polygonCount; ++j)
+		{
+			polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, j);
+			faceVertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+			w.print("f ");
+
+			for (k = 0; k < faceVertexCount; ++k)
+			{
+				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+
+				//w.print("\n# %li. %li -> %li\n", j, faceVertex, vertexIndex);
+
+				// Assumes UV mapped vertices exported
+				// Remember obj indices start at 1
+				w.print("%li/%li/%li ", 
+						v+vertexIndex+1, v+vertexIndex+1, v+vertexIndex+1);
+			}
+
+			w.print("\n");			
+		}
+
+		v += vertexCount;
+	}
+
+
+#   ifdef OBJ_EXPORT_SKELETON_AS_COMMENT
 	char name[64];
 	vec_t d2r = 0.017453292519943295;
 	vec3_t translation, rotation;
@@ -288,14 +379,14 @@ int freyja_model__obj_export(char *filename)
 			{
 				rotation[1] += 90.0;
 
-				w.print("b %3i \"%s\" %i %f %f %f %f %f %f\n", i,
+				w.print("#bone %3i \"%s\" %i %f %f %f %f %f %f\n", i,
 						name, freyjaGetBoneParent(index),
 						translation[0], translation[2], translation[1], 
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
 			else
 			{
-				w.print("b %3i \"%s\" %i %f %f %f %f %f %f\n", i,
+				w.print("#bone %3i \"%s\" %i %f %f %f %f %f %f\n", i,
 						name, freyjaGetBoneParent(index),
 						translation[0], translation[1], translation[2], 
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
@@ -304,56 +395,7 @@ int freyja_model__obj_export(char *filename)
 			freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
 		}
 	}
-#endif
-
-
-	/* Meshes */
-	if (freyjaGetCount(FREYJA_POLYGON))
-	{
-		freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
-		n = freyjaGetCount(FREYJA_POLYGON);
-
-		group = 0;
-
-		//unsigned int meshCount = freyjaGetNum(FREYJA_MESH);
-		//for (i = 0; i < meshCount; ++i, group = i) // send all meshes
-		//{
-			//w.print("g %3i\n", group);
-
-			for (j = 0; j < n; ++j)
-			{
-				index = freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT);
-				index = freyjaGetCurrent(FREYJA_POLYGON);
-
-				count = freyjaGetPolygonVertexCount(index);
-
-				for (k = 0; k < count; ++k)
-				{
-					freyjaGetPolygon3f(FREYJA_VERTEX, j, vert);
-					
-					w.print("v %f %f %f\n",
-							vert[0]*scale, vert[2]*scale, vert[1]*scale);
-				}
-#ifdef FIXME
-				for (k = 0; k < count; ++k)
-				{
-					freyjaGetPolygon3f(FREYJA_TEXCOORD, j, uv);
-					
-					w.print("vt %f %f\n",
-							uv[0], uv[1]);
-				}
-
-				w.print("f %i/%i %i/%i %i/%i", 
-						j*3+1, j*3+1, j*3+2, j*3+2, j*3+3, j*3+3);
-#else
-				w.print("f %i %i %i", 
-						j*3+1, j*3+2, j*3+3);				
-#endif
-				freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
-			}
-		//}
-	}
+#   endif
 
 	w.closeFile();
 

@@ -1187,9 +1187,6 @@ int freyja_model__md3_export(char *filename)
 	// changes of data by other processes
 	freyjaCriticalSection(FREYJA_WRITE_LOCK);
 
-	// Don't write edges > 3, tesselate to triangles
-	//freyjaTesselation(FREYJA_TRIANGLES);
-
 	mesh = new md3_mesh_t[num_meshes];
 	memset(mesh, 0, sizeof(md3_mesh_t) * num_meshes);
 	md3.setMeshes(mesh, num_meshes);
@@ -1201,6 +1198,9 @@ int freyja_model__md3_export(char *filename)
 	{
 		transM.pushBack(freyjaIterator(FREYJA_MESH, FREYJA_LIST_CURRENT));
 		freyjaIterator(FREYJA_MESH, FREYJA_LIST_NEXT);
+
+		// Don't write edges > 3, tesselate to triangles
+		//freyjaMeshTesselation(transM[k], FREYJA_TRIANGLES); //let user control
 
 		strcpy(mesh[k].name, "Freyja-test");
 		mesh[k].num_frames = 0; 
