@@ -520,6 +520,38 @@ unsigned int FreyjaFileReader::readInt32U()
 }
 
 
+long FreyjaFileReader::readLong()
+{
+	long i;
+	void *ptr = &i;
+	size_t sz = fread(ptr, 4, 1, mFileHandle);
+
+	if (sz < 1)
+		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
+
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
+	return i;
+}
+
+
+unsigned long FreyjaFileReader::readLongU()
+{
+	long u;
+	void *ptr = &u;
+	size_t sz = fread(ptr, 4, 1, mFileHandle);
+
+	if (sz < 1)
+		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
+
+#ifdef HAVE_BIG_ENDIAN
+	FIX_INT(*ptr)
+#endif
+	return u;
+}
+
+
 bool FreyjaFileReader::setFileOffset(unsigned int offset)
 {
 	return (fseek(mFileHandle, offset, SEEK_SET) == 0);

@@ -828,7 +828,12 @@ long EggPlugin::importModel(const char *filename)
 				}
 				
 				done = !(*import)((char*)filename);
-				
+
+				if (done)
+				{
+					freyjaPrintMessage("Module '%s' success.", module_filename);
+				}
+
 				if ((error = dlerror()) != NULL) 
 				{
 					freyjaPrintError("%s", error);
@@ -843,7 +848,9 @@ long EggPlugin::importModel(const char *filename)
 		reader.closeDirectory();
 
 		if (done)
+		{
 			break;
+		}
 	}
 
 	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader sleeps now]\n");
@@ -1154,7 +1161,6 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 		mTag = mEgg->addTag(0.0, 0.0, 0.0, 0x00);
 		mTag->name[0] = 0;
 		mTag->parent = -1;
-		//return mTag->id;
 		break;
 
 	case FREYJA_SKELETON:

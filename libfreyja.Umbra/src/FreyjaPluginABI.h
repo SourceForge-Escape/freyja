@@ -166,6 +166,8 @@ long freyjaGetBoneParent(long index);
 
 long freyjaGetBoneRotationWXYZ4fv(long index, vec4_t wxyz);
 
+long freyjaGetBoneRotationXYZ3fv(long index, vec3_t xyz);
+
 long freyjaGetBoneTranslation3fv(long index, vec3_t xyz);
 
 long freyjaGetBoneMeshIndex(long element);
@@ -174,6 +176,29 @@ long freyjaGetBoneMeshIndex(long element);
  *        Value set to Mesh id of Bone's mesh_list[item]
  * Post : Returns PLUGIN_ERROR if Bone doesn't exist
  *        or if item is invalid
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.11.18: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+long freyjaGetBoneMeshCount();
+/*------------------------------------------------------
+ * Pre  : Bone selected
+ * Post : Returns number of Meshes in this Bone
+ *        Returns FREYJA_PLUGIN_ERROR if Bone doesn't exist
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.11.18: 
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyjaGetBoneRotate3f(vec_t *x, vec_t *y, vec_t *z);
+/*------------------------------------------------------
+ * Pre  : Bone selected
+ * Post : Gets current tag's rotation in eular angles
  *
  *-- History ------------------------------------------
  *
@@ -243,29 +268,6 @@ long freyjaGetPolygon3f(freyja_object_t type, long item, vec_t *value);
  *-- History ------------------------------------------
  *
  * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-long freyjaGetBoneMeshCount();
-/*------------------------------------------------------
- * Pre  : Bone selected
- * Post : Returns number of Meshes in this Bone
- *        Returns FREYJA_PLUGIN_ERROR if Bone doesn't exist
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaGetBoneRotate3f(vec_t *x, vec_t *y, vec_t *z);
-/*------------------------------------------------------
- * Pre  : Bone selected
- * Post : Gets current tag's rotation in eular angles
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
  * Mongoose - Created
  ------------------------------------------------------*/
 
@@ -554,6 +556,8 @@ void freyjaBoneRotateQuaternion4fv(vec4_t wxyz);
  * 2001.11.18: 
  * Mongoose - Created
  ------------------------------------------------------*/
+
+void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
 
 void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
 
