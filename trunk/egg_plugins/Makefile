@@ -123,6 +123,13 @@ ase.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+nif4.so:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
+	MOD_NAME=nif4 \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Nif4.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
 md5.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
