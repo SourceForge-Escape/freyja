@@ -1,7 +1,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO ( 2004.04.13 last update )
+  File     : TODO ( 2004.11.29 last update )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : Freyja 0.3.x
 
@@ -15,32 +15,22 @@
      4. Unit testing
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
   General
+	o Object Copy / Cut / Paste
+	o Undo system, refine event system
+	o Interactive plugins
+	o Recently used files list
+	o Light editing mode
+	o Remove all unused/obsolete events and cmds
+	o Mouse interface needs to replace plane based editing
 
-  * Move to Egg v9.00 and drop all the problems with 8.10
-  * Undo system, refine event system
-  * Interactive plugins
-  * Recently used files list
-  * Light editing mode
-  * Remove all unused/obsolete events and cmds
-  * Mouse interface needs to replace plane based editing
-
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
-  Backend
-
-  * Bring file format export support at least up to GooseEgg's level
-  * List interface to objects (only allow switching to next existing)
-  * Model editing util plugin interface
-  * Undo system
-  * Class EggNetPlugin - TCP/IP message passing for modules
-  * Egg v9.00 prototype migration, replace v8.xx API
-
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
   Interface
-
-  * Arcball for mouse rotation
-  * Generic rotate/translate/scale mouse interface (mesh/tag/etc)
-  * Use event timer for idle rotation and animation display
-  * Add multiwindow modeling support back?
+	o Make new mesh for new polygon when none exist
+	o Generated Spheres use duplicate vertices, unexpected by users
+	o Arcball for mouse rotation
+	o Generic rotate/translate/scale mouse interface (mesh/tag/etc)
+	o Use event timer for idle rotation and animation display
+	o Add multiwindow modeling support back?
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=

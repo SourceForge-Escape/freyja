@@ -21,47 +21,6 @@
 
  Milestones ( Public snapshot releases )
 
- [0.3.6] ( Projected release date: 2004.08.31 )
-  * API clean up!!!
-  * Colors, zoom, etc not stored with renderer
-  * Regroup by skin and vv
-  * EggPlugin for file access
-  * TransformMode -> Object Types
-  * Generic new/select/delete & copy/cut/paste
-  * Group rotate should pivot on center
-  * C-mouse1 to select object
-  * mouse1 to move object
-  * mouse2 to rotate object
-  * S-mouse1 to scale object?
-  * Generic transforms: bone / mesh / skin
-  * Skybox support?
-  * Finish Light class: applyEffect() / flickers & fx settings
-  * FileDialog import/export types dropdown use
-  * Commit generic dialogs to svn
-  * Generic editing events ( eg Select/Move/Copy object )
-  * Bug fix focus
-  * Full skeletal editing ( deforms, blending, etc )
-    * skeletal animation
-  * Better Light and Camera editing
-  * Shader editor
-  * mlisp events use only FE symbols ( will fix bugs )
-  * multiple lights and materials/shaders
-  * store texture in model
-  * add 'scrolling' back
-  * Get mesh editing back to 100%
-  * Recalc/maintain normals when rotating meshes
-  * Undo/Redo Stacks
-  * Add back Particles with GL_TRISTRIP/GL_POINTS/GL_LINES 
-  * New light and camera 3d "icons", eg directional and point
-  * Light editing tab
-  * Camera editing tab
-  * Shader editor
-  * Texture to store filename strings/keys (maybe even image 
-    buffers to allow for saving) for material use
-  * Better animation playback support
-  * Prompt to ask for file overwrite and close w/o saving
-
-
  [General]
   * Roll over to new backend:
     libfreyja_model, libfreyja_particle, libfreyja_render, etc

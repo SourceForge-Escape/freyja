@@ -2,7 +2,7 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   File     : BUGS  ( Last Audit: 2004.11.29 )
-  Project  : Freyja 0.3.5 'Chimera'
+  Project  : Freyja 0.3.x
   Author   : Terry 'Mongoose' Hendrix II
 
   Sending Bug reports:
@@ -17,11 +17,14 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- Show Stoppers 
-	o Crash on mesh delete for some character models
-	o Crash on delete single object ( rare, hard to reproduce )
+ Show Stoppers
+	o Crash on mesh delete for some character models, which
+      looks like something to do with aging Egg backend data structures
+	o Crash on NULL file loads ( I can't reproduce this )
+	o Crash on delete single object ( Rare, Hard to reproduce )
 
  Editing
+	o Normal generation not interpolating correctly
 	o Bones recursively adjust on generic rotation
 	o Bones react oddly to scaling
 
@@ -32,5 +35,6 @@
 	o Matrix palette skinning not supported due to old Egg backend.
 
  Misc
+	o Material texture/texture index race condition?
 	o Full disk write fail not reported for screen shot.
 

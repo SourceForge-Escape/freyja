@@ -1,6 +1,6 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : ROADMAP  ( Last Update: 2004.06.05 )
+  File     : ROADMAP  ( Last Update: 2004.11.01 )
   Author   : Terry 'Mongoose' Hendrix II
   Project  : freyja
 
@@ -11,18 +11,49 @@
  for the public to read.  It's not finished yet, and will be replaced with
  a web page soon.
 
- [ 0.3.5 Release ]
-
-	o GUI and Interface clean up
-	o libmlisp
-	o libmlisp-mgtk
+ [0.3.8] ( Projected release date: None )
+  * API clean up!!!
+  * Colors, zoom, etc not stored with renderer
+  * Regroup by skin and vv
+  * Generic new/select/delete & copy/cut/paste
+  * Group rotate should pivot on center
+  * C-mouse1 to select object
+  * mouse1 to move object
+  * mouse2 to rotate object
+  * S-mouse1 to scale object?
+  * Generic transforms: bone / mesh / skin
+  * Skybox support?
+  * Finish Light class: applyEffect() / flickers & fx settings
+  * FileDialog import/export types dropdown use
+  * Generic editing events ( eg Select/Move/Copy object )
+  * Full skeletal editing ( deforms, blending, etc )
+    * skeletal animation
+  * Better Light and Camera editing
+  * Shader editor
+  * mlisp events use only FE symbols ( will fix bugs )
+  * multiple lights and materials/shaders
+  * store texture in model
+  * add 'scrolling' back
+  * Get mesh editing back to 100%
+  * Recalc/maintain normals when rotating meshes
+  * Undo/Redo Stacks
+  * Add back Particles with GL_TRISTRIP/GL_POINTS/GL_LINES 
+  * New light and camera 3d "icons", eg directional and point
+  * Light editing tab
+  * Camera editing tab
+  * Shader editor
+  * Texture to store filename strings/keys (maybe even image 
+    buffers to allow for saving) for material use
+  * Better animation playback support
+  * Prompt to ask for file overwrite and close w/o saving
 
 
  [ 0.4.0 Release ]
 
- Backend
-
+  Backend
 	o CSG support back
 	o Patch / curved surface support
 	o Multiple UV Mapping techniques and ability to merge to one material
-	o 
+	o Copy / Cut / Paste
+
+
