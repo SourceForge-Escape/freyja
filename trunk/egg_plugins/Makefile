@@ -298,31 +298,9 @@ clean-build:
 ################################################################
 
 install:
+	@-echo "Installing plugins to  ~/.freyja/plugins/"
 	@-mkdir -p $(HOME)/.freyja/plugins/
-	@cp -f $(BUILD_INSTALL_DIR)/libfreyja_loader* ~/.freyja/plugins/
-
-installaaaaaimsleepya:
-	@-echo -n "Installing selected build                     "
-	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)
-	@-mkdir -p $(INSTALL_LIB)/$(NAME)
-	@-cp $(BUILD_INSTALL_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)/$(NAME)
-	@-echo "[DONE]"
-	@-$(MAKE) install-link
-	@-$(MAKE) install-headers
-	@-./libsetup.sh $(INSTALL_LIB)
-
-install-link:
-	@-echo -n "New soft links                               "
-	@-rm -f $(INSTALL_LIB)/lib$(NAME)$(EXT)
-	@-ln -s $(INSTALL_LIB)/lib$(NAME)$(SHLIBEXT) \
-	$(INSTALL_LIB)/lib$(NAME)$(EXT)
-	@-echo "[DONE]"
-
-install-headers:
-	@-echo -n "Installing headers                           "
-	@-mkdir -p $(INSTALL_INCLUDE)/$(NAME)
-	@-cp -f src/*/*.h $(INSTALL_INCLUDE)/$(NAME)
-	@-echo "[DONE]"
+	@cp -f bin/debug/libfreyja_loader* ~/.freyja/plugins/
 
 
 ################################################################
