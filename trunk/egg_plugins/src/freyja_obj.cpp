@@ -52,10 +52,12 @@ int freyja_model__obj_import(char *filename)
 	EggFileReader r;
 	Vector <unsigned int> transV;
 	Vector <unsigned int> transT;
+	//Vector <unsigned int> transN;
 	char *symbol;
 	vec_t x, y, z, u, v;
 	int i, index;
 	bool hasUV = false;
+	bool hasNormal = false;
 
 
 	if (!r.openFile(filename))
@@ -92,6 +94,16 @@ int freyja_model__obj_import(char *filename)
 			hasUV = true;
 
 			transT.pushBack(eggTexCoordStore2f(u, v));
+		}
+		else if (!strncmp(symbol, "vn", 2))  // Assumes normals come after v
+		{
+			x = r.parseFloat();
+			y = r.parseFloat();
+			z = r.parseFloat();
+			hasNormal = true;
+
+			// polymapped normals not in Egg
+			//transN.pushBack(eggNormal3f(x, y, z));
 		}
 		else if (!strncmp(symbol, "v", 1))
 		{
@@ -132,6 +144,48 @@ int freyja_model__obj_import(char *filename)
 				else
 				{
 					eggVertexUVStore2f(index, 0.25*i, 0.25*(i%2));
+				}
+
+				if (hasNormal) // polymapped normals aren't in Egg atm
+				{
+					r.readInt8(); // '/' no whitespace
+					index = r.parseInteger();
+
+					//index = transN[index-1]; // index starts at 1 not 0
+					//eggNormal1i(index);
+				}
+			}
+
+			// Handle quad faces
+			i = r.getFileOffset();
+			symbol = r.parseSymbol();
+			r.setFileOffset(i);
+
+			if (isdigit(symbol[0]))
+			{
+				index = r.parseInteger();
+				eggVertex1i(transV[index-1]); // index starts at 1 not 0
+
+				if (hasUV)
+				{
+					r.readInt8(); // '/' no whitespace
+					index = r.parseInteger();
+
+					index = transT[index-1]; // index starts at 1 not 0
+					eggTexCoord1i(index);
+				}
+				else
+				{
+					eggVertexUVStore2f(index, 0.25*i, 0.25*(i%2));
+				}
+
+				if (hasNormal) // polymapped normals aren't in Egg atm
+				{
+					r.readInt8(); // '/' no whitespace
+					index = r.parseInteger();
+
+					//index = transN[index-1]; // index starts at 1 not 0
+					//eggNormal1i(index);
 				}
 			}
 

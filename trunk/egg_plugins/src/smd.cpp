@@ -60,9 +60,10 @@ int freyja_model__smd_import(char *filename)
 	Vector <smd_bone_t *> bones;
 	char *symbol;
 	vec_t x, y, z, rx, ry, rz;
-	int index;
+	int index, idx;
 	unsigned int i, n;
 	vec_t scale = 0.15;
+	vec_t r2d = 57.295779513082323;
 
 
 	if (freyja_model__smd_check(filename) < 0 || !r.openFile(filename))
@@ -121,21 +122,22 @@ int freyja_model__smd_import(char *filename)
 					ry = r.parseFloat();
 					rz = r.parseFloat();
 
-					//printf("{\n%s\n%i\n}", bone->name, bone->parent);
-					eggBegin(FREYJA_BONE);
+					idx = eggBegin(FREYJA_BONE);
 					eggTagFlags1u(0x0);
 					eggSetBoneParent(bone->parent);
 					eggTagName(bone->name);
 
+					//printf("%3i: %s %i\n", idx, bone->name, bone->parent);
+
 					if (!index)
 					{
 						eggTagPos3f(x*scale, z*scale, y*scale);
-						eggTagRotate3f(-90, -90, 0);
+						eggTagRotate3f(rx*r2d, (ry*r2d) - 90.0, rz*r2d);
 					}
 					else
 					{
 						eggTagPos3f(x*scale, y*scale, z*scale);
-						eggTagRotate3f(rx*54, ry*54, rz*54);
+						eggTagRotate3f(rx*r2d, ry*r2d, rz*r2d);
 					}
 
 					for (i = bones.begin(); i < bones.end(); ++i)
@@ -177,25 +179,31 @@ int freyja_model__smd_import(char *filename)
 				index = r.parseInteger();
 				eggTexture1i(index);
 
-				eggVertex1i(i = eggVertexStore3f(r.parseFloat(), r.parseFloat(),
-												 r.parseFloat()));
-				eggVertexNormalStore3f(i, r.parseFloat(), r.parseFloat(),
+				eggVertex1i(i = eggVertexStore3f(r.parseFloat()*scale,
+												 r.parseFloat()*scale,
+												 r.parseFloat()*scale));
+				eggVertexNormalStore3f(i, r.parseFloat(),
+									   r.parseFloat(),
 									   r.parseFloat());
 				eggVertexUVStore2f(i, r.parseFloat(), r.parseFloat());
 
 
 				index = r.parseInteger();
-				eggVertex1i(i = eggVertexStore3f(r.parseFloat(), r.parseFloat(),
-												 r.parseFloat()));
-				eggVertexNormalStore3f(i, r.parseFloat(), r.parseFloat(),
+				eggVertex1i(i = eggVertexStore3f(r.parseFloat()*scale,
+												 r.parseFloat()*scale,
+												 r.parseFloat()*scale));
+				eggVertexNormalStore3f(i, r.parseFloat(),
+									   r.parseFloat(),
 									   r.parseFloat());
 				eggVertexUVStore2f(i, r.parseFloat(), r.parseFloat());
 
 
 				index = r.parseInteger();
-				eggVertex1i(i = eggVertexStore3f(r.parseFloat(), r.parseFloat(),
-												 r.parseFloat()));
-				eggVertexNormalStore3f(i, r.parseFloat(), r.parseFloat(),
+				eggVertex1i(i = eggVertexStore3f(r.parseFloat()*scale, 
+												 r.parseFloat()*scale,
+												 r.parseFloat()*scale));
+				eggVertexNormalStore3f(i, r.parseFloat(), 
+									   r.parseFloat(),
 									   r.parseFloat());
 				eggVertexUVStore2f(i, r.parseFloat(), r.parseFloat());
 							  							  
@@ -219,6 +227,7 @@ int freyja_model__smd_export(char *filename)
 	int index;
 	unsigned int i, n;
 	vec_t scale = 1.0 / 0.15;
+	vec_t d2r = 0.017453292519943295;
 	vec3_t translation, rotation;
 
 
@@ -271,21 +280,23 @@ int freyja_model__smd_export(char *filename)
 			eggGetBoneTranslation3fv(index, translation);
 			eggGetBoneRotationXYZ3fv(index, rotation);
 
+			translation[0] *= scale; 
+			translation[2] *= scale; 
+			translation[1] *= scale; 
+
 			if (!i)
 			{
-				rotation[0] = 90;
-				rotation[1] = 90;
-				rotation[2] = 0;
+				rotation[1] += 90.0;
 
 				w.print("%3i %f %f %f %f %f %f\n", i,
-						translation[0]*scale, translation[2]*scale, translation[1]*scale, 
-						rotation[0]/54, rotation[1]/54, rotation[2]/54);
+						translation[0], translation[2], translation[1], 
+						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
 			else
 			{
 				w.print("%3i %f %f %f %f %f %f\n", i,
-						translation[0]*scale, translation[1]*scale, translation[2]*scale, 
-						rotation[0]/54, rotation[1]/54, rotation[2]/54);
+						translation[0], translation[1], translation[2], 
+						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
 
 			eggIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
@@ -294,7 +305,46 @@ int freyja_model__smd_export(char *filename)
 	w.print("end\n");
 
 	/* triangles */
-	w.print("triangles\n");	
+	w.print("triangles\n");
+#ifdef SMD_MESH_EXPORT
+	unsigned int j, k, group;
+	vec3_t vert;
+	vec2_t uv;
+
+
+	if (eggGetNum(FREYJA_POLYGON))
+	{
+		eggIterator(FREYJA_MESH, FREYJA_LIST_RESET);
+		eggIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
+		n = eggGetNum(FREYJA_POLYGON);
+
+		group = 0;
+
+#ifdef SMD_MESH_EXPORT_ALL
+		unsigned int meshCount = eggGetNum(FREYJA_MESH);
+		for (i = 0; i < meshCount; ++i, group = i) // send all meshes
+#endif
+		for (j = 0; j < n; ++j)
+		{
+			index = eggIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT);
+			index = eggGetCurrent(FREYJA_POLYGON);
+
+			for (j = 0; j < n; ++j)
+			{
+				eggGetPolygon3f(FREYJA_VERTEX, j, &vert);
+				eggGetPolygon3f(FREYJA_TEXCOORD, j, &uv);
+
+				w.print("null.png");
+				w.print("%3i  %f %f %f  %f %f %f  %f %f\n", group,
+						vert[0]*scale, vert[2]*scale, vert[1]*scale, 
+						norm[0], norm[2], norm[1],
+						uv[0], uv[1]);
+			}
+
+			eggIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
+		}
+	}
+#endif
 	w.print("end\n");
 
 	w.closeFile();
