@@ -36,7 +36,7 @@
 #include "Light.h"
 
 
-#define gMaterialManager MaterialManager::mSingleton
+#define gMaterialManager MaterialManager::mInstance
 
 
 class MaterialManager
@@ -454,10 +454,10 @@ class MaterialManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-	static MaterialManager *mSingleton;
+	static MaterialManager *mInstance;   /* Singleton instance */
 
 	unsigned int mTextureId;
+
 
  private:
 
@@ -469,8 +469,6 @@ class MaterialManager
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	static MaterialManager *mInstance;   /* Singleton instance */
 
 	Vector<Material *> mMaterials;       /* List of materials */
 

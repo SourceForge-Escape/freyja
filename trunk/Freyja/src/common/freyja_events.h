@@ -35,9 +35,21 @@ typedef enum {
 
 } event_subject_id;
 
+
+void freyja_event_start();
+void freyja_event_exit();
+
+void freyja_event_notify_observer1f(event_subject_id id, float r);
+
+void freyja_event_about_dialog();
+void freyja_event_file_dialog(char *title);
 void freyja_event_fullscreen();
 void freyja_event_unfullscreen();
-void freyja_event_notify_observer1f(event_subject_id id, float r);
+
+void freyja_event_file_dialog_notify(char *filename);
+
+float freyja_event_get_float(int event);
+void freyja_event_set_float(int event, float value);
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -48,13 +60,8 @@ void event_swap_buffers();
 void event_shutdown(int code);
 void event_print(char *format, ...);
 void event_print_args(char *format, va_list *args); // only works for glibc!
-void event_filename(int mode, char *filename);
-void event_load_model(char *filename);
 void event_refresh();
 void event_custom_color(int custom_color_flags, float r, float g, float b);
-void event_init(unsigned int *width, unsigned int *height, 
-					 bool *fullscreen, char **driver);
-void event_render_init(unsigned int width, unsigned int height);
 void event_display();
 void event_shutdown();
 void event_resize(int width, int height);
@@ -80,23 +87,7 @@ char *freyja_rc_map(char *s);
 	void freyja_event2i(int event, int cmd);
 	/*------------------------------------------------------
 	 * Pre  : Event and Cmd are valid event pair
-	 * Post : Broadcasts event to all freyja agents/listeners
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.19:
-	 *  Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	void freyja_event2i_interface_listener(int event, int cmd);
-	/*------------------------------------------------------
-	 * Pre  : Event and Cmd are valid event pair
-	 *        broadcast from freyja_event2i
-	 *
-	 *        This listener is implmented by interface
-	 *
-	 * Post : Interface recieves event, so it may handle it 
+	 * Post : Passes event to freyja control
 	 *
 	 *-- History ------------------------------------------
 	 *

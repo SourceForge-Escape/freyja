@@ -35,6 +35,7 @@ enum
 GtkWidget *getGtkMainWindow();
 GtkWidget *getGtkGLAreaWidget();
 GtkWidget *getGtkStatusBarWidget();
+GtkWidget *getGtkFileSelectionWidget();
 
 void application_window_fullscreen();
 void application_window_unfullscreen();

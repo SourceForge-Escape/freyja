@@ -67,7 +67,6 @@ GtkWidget *toolbar_btn(GtkWidget *toolbar,
 							  void *event_func, int event_cmd);
 
 gint window_destroy(GtkWidget *widget);
-gint h_scroll_event(GtkWidget *widget, GdkEventButton *event);
-gint v_scroll_event(GtkWidget *widget, GdkEventButton *event);
+
 
 #endif
