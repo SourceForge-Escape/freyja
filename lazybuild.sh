@@ -3,15 +3,15 @@ cd mstl; make install
 cd ..
 
 printf "Installing libfreyja_image\n"
-cd libfreyja_image; make; make install
+cd libfreyja_image; ./autogen.sh; make; make install
 cd ..
 
 printf "Installing libhel\n"
-cd libhel; make; make install
+cd libhel; make; ./autogen.sh; make install
 cd ..
 
 printf "Installing libfreyja_model\n"
-cd libfreyja_model; make; make install
+cd libfreyja_model; ./autogen.sh; make; make install
 cd ..
 
 printf "Installing Freyja\n"
