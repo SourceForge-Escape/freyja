@@ -160,10 +160,19 @@ dds.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+jpeg-pipe.so:
+	$(MAKE) jpeg.test
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
+	MOD_NAME=image_jpg \
+	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_jpeg.o" \
+	CFLAGS="$(MODULE_CFLAGS) -DJPEG_BY_PIPES" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 jpeg.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(PLUGIN_BUILD_DIR) \
-	MOD_NAME=image_jpeg \
+	MOD_NAME=image_jpg \
 	MOD_OBJS="$(PLUGIN_BUILD_DIR)/image_jpeg.o" \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -ljpeg"
@@ -200,8 +209,7 @@ tga.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-# jpeg.so -- disabled
-plugins: dds.so pcx.so ppm.so png.so tga.so
+plugins: dds.so jpeg.so pcx.so ppm.so png.so tga.so
 
 clean-plugins:
 	@-echo -n "Cleaning plugins                             "
