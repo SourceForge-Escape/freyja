@@ -286,7 +286,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~Egg();
+	virtual ~Egg();
 	/*------------------------------------------------------
 	 * Pre  : This object is allocated
 	 * Post : Deconstructs the Egg object
@@ -1265,6 +1265,69 @@ public:
 	 * Post : Return BoneFrame list
 	 -----------------------------------------*/
 
+	Vector<egg_animation_t *> *AnimationList();
+	/*-----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  :
+	 * Post : Return BoneFrame list
+	 -----------------------------------------*/
+
+protected:
+
+	////////////////////////////////////////////////////////////
+	// Protected Accessors
+	////////////////////////////////////////////////////////////
+
+	bool isDebugLevel(unsigned int level);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if debug level is greater or equal
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Created, split from printDebug
+	 ------------------------------------------------------*/
+
+	virtual void print(char *s, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.06:
+	 * Mongoose - Removed internal level check for speed
+	 *            and lower overhead, new ABI was printDebug
+	 *
+	 * 2002.07.05: 
+	 * Mongoose - Debug level
+	 *
+	 * 2001.01.31: 
+	 * Mongoose - Debug toggle
+	 *
+	 * 1999.07.31: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual void printError(char *s, ...);
+	/*------------------------------------------------------
+	 * Pre  : String and args are valid
+	 * Post : Report an error to stderr
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	////////////////////////////////////////////////////////////
+	// Protected Mutators
+	////////////////////////////////////////////////////////////
+
+
 private:
 	////////////////////////////////////////////////////////////
 	// Private Accessors
@@ -1318,34 +1381,6 @@ private:
 	 * Post : Resizes the bounding box of
 	 *        group, doing a full reclaculation
 	 -----------------------------------------*/
-
-	void printDebug(unsigned int level, char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : String, level, and args are valid
-	 * Post : Report debug messages to stdout
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.07.05: 
-	 * Mongoose - Debug level
-	 *
-	 * 2001.01.31: 
-	 * Mongoose - Debug toggle
-	 *
-	 * 1999.07.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void printError(char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : String and args are valid
-	 * Post : Report an error to stderr
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	Vector<egg_vertex_t *> mVertices;        /* Vertex list */
 

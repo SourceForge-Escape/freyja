@@ -586,7 +586,7 @@ arg_list_t *Resource::Function(arg_list_t *arg)
 void Resource::Bind(arg_list_t *symbol, arg_list_t *data)
 {
 	arg_list_t *sym_tab;
-	int len;
+	unsigned int len;
 
 
 	if (!symbol || !data || (symbol->type != CSTRING) ||
@@ -598,11 +598,9 @@ void Resource::Bind(arg_list_t *symbol, arg_list_t *data)
 		return;
 	}
 
-	//arg_enforce_type(&symbol, CSTRING);
-
 	// Mongoose 2002.01.12, String fix for overflow
 	len = strlen((char *)symbol->data);
-	data->symbol = new char[len + 1];
+	data->symbol = new char[len + 4];
 	strncpy(data->symbol, (char *)symbol->data, len);
 	data->symbol[len] = 0;
 

@@ -153,7 +153,7 @@ int freyja_model__mdl_import(char *filename)
 	s = (float)(st_vert[tris[i].vertindex[0]].s + mdl.getTextureWidth()/2) / 
 	  (float)mdl.getTextureWidth();
 
-      eggTexel1i(eggTexelStore2f(s, t));
+      eggTexCoord1i(eggTexCoordStore2f(s, t));
       
       s = (float)st_vert[tris[i].vertindex[1]].s / (float)mdl.getTextureWidth();
       t = (float)st_vert[tris[i].vertindex[1]].t / (float)mdl.getTextureHeight();
@@ -163,7 +163,7 @@ int freyja_model__mdl_import(char *filename)
 	s = (float)(st_vert[tris[i].vertindex[1]].s + mdl.getTextureWidth()/2) / 
 	  (float)mdl.getTextureWidth();
 
-      eggTexel1i(eggTexelStore2f(s, t));
+      eggTexCoord1i(eggTexCoordStore2f(s, t));
 
       s = (float)st_vert[tris[i].vertindex[2]].s / (float)mdl.getTextureWidth();
       t = (float)st_vert[tris[i].vertindex[2]].t / (float)mdl.getTextureHeight();
@@ -173,7 +173,7 @@ int freyja_model__mdl_import(char *filename)
 	s = (float)(st_vert[tris[i].vertindex[2]].s + mdl.getTextureWidth()/2) / 
 	  (float)mdl.getTextureWidth();
 
-      eggTexel1i(eggTexelStore2f(s, t));
+      eggTexCoord1i(eggTexCoordStore2f(s, t));
 
       eggTexture1i(0);
 

@@ -38,9 +38,6 @@
 #include "Egg.h"
 
 
-#define DEBUG_EGG_LOAD
-
-
 void __print_unsigned_int(unsigned int u)
 {
 	printf("<%u>\n", u);
@@ -120,7 +117,7 @@ void FreyjaModel::UpdateRenderList(int msh, int frame)
 	egg_group_t *grp;
 	egg_group_t *current;
 	egg_mesh_t *mesh;
-	unsigned int key, vert;
+	unsigned int i, j, key, vert;
 	
 	
 	if (_current_frame_cached == frame)
@@ -146,18 +143,18 @@ void FreyjaModel::UpdateRenderList(int msh, int frame)
 	 * then update the pointers using the vertex indices
 	 * this is how 'vertex morph framing' is done ATM
 	 ***************************************************/
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{
-		poly = _egg->getPolygon(mesh->polygon.current());
+		poly = _egg->getPolygon(i);
 
 		if (!poly)
 			continue;
 
 		vlist.clear();
 
-		for (poly->vertex.start(); poly->vertex.forward(); poly->vertex.next())
+		for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
 		{
-			key = current->vertex[poly->vertex.current()];
+			key = current->vertex[j];
 			vert = grp->vertex[key];
 			vlist.pushBack(vert);
 
@@ -166,8 +163,8 @@ void FreyjaModel::UpdateRenderList(int msh, int frame)
     
 		poly->vertex.clear();
 
-		for (vlist.start(); vlist.forward(); vlist.next())
-			poly->vertex.pushBack(vlist.current());
+		for (j = vlist.begin(); j < vlist.end(); ++j)
+			poly->vertex.pushBack(j);
 
 		//printf("-\n");
 	}
@@ -188,6 +185,7 @@ egg_group_t *Egg::getNearestGroup(vec_t x, vec_t y, egg_plane plane)
 	vec_t dist = 0.0;
 	vec_t closest = 9999.0;
 	int xx = 0, yy = 1;
+	unsigned int i;
 
 
 	if (mGroups.empty())
@@ -213,9 +211,9 @@ egg_group_t *Egg::getNearestGroup(vec_t x, vec_t y, egg_plane plane)
 		break;
 	}
 	
-	for (mGroups.start(); mGroups.forward(); mGroups.next())
+	for (i = mGroups.begin(); i < mGroups.end(); ++i)
 	{
-		current = mGroups.current();
+		current = mGroups[i];
 
 		if (!current)
 			continue;
@@ -244,6 +242,7 @@ egg_tag_t *Egg::getNearestTag(vec_t x, vec_t y, egg_plane plane)
 	vec_t dist = 0.0;
 	vec_t closest = 99999.0;
 	int xx = 0, yy = 1;
+	unsigned int i;
 
 
 	if (mTags.empty())
@@ -266,9 +265,9 @@ egg_tag_t *Egg::getNearestTag(vec_t x, vec_t y, egg_plane plane)
 		break;
 	}
      
-	for (mTags.start(); mTags.forward(); mTags.next())
+	for (i = mTags.begin(); i < mTags.end(); ++i)
 	{
-		current = mTags.current();
+		current = mTags[i];
 
 		if (!current)
 			continue;
@@ -295,7 +294,8 @@ egg_vertex_t *Egg::getNearestVertex(egg_group_t *group,
 	int xx = 0, yy = 1;
 	egg_vertex_t *best = NULL;
 	egg_vertex_t *current = NULL;
-	
+	unsigned int i;
+
 	
 	if (mVertices.empty() || !group || group->vertex.empty())
 	{
@@ -319,9 +319,9 @@ egg_vertex_t *Egg::getNearestVertex(egg_group_t *group,
 		break;
 	}
 	
-	for (group->vertex.start(); group->vertex.forward(); group->vertex.next())
+	for (i = group->vertex.begin(); i < group->vertex.end(); ++i)
 	{
-		current = mVertices[group->vertex.current()];
+		current = mVertices[group->vertex[i]];
 
 		if (!current)
 		{
@@ -341,20 +341,21 @@ egg_vertex_t *Egg::getNearestVertex(egg_group_t *group,
 	return best;
 }
 
-
-void Egg::print()
+bool Egg::isDebugLevel(unsigned int level)
 {
-	if (mDebugLevel > 0)
-	{
-		printf("List <egg_vertex_t> ");
-		mVertices.print(__print_egg_vertex_t);
+	return (mDebugLevel >= level);
+}
 
-		printf("List <egg_texel_t> ");
-		mTexels.print(__print_egg_texel_t);
 
-		printf("List <egg_polygon_t> ");
-		mPolygons.print(__print_egg_polygon_t);
-	}  
+void Egg::print(char *s, ...)
+{
+	va_list args;
+
+	va_start(args, s);
+	fprintf(stdout, "Egg::");
+	vfprintf(stdout, s, args);
+	fprintf(stdout, "\n");
+	va_end(args);
 }
 
 
@@ -406,70 +407,73 @@ void Egg::setDebugLevel(unsigned int n)
 
 void Egg::clear()
 {
-	for (mVertices.start(); mVertices.forward(); mVertices.next())
+	unsigned int i;
+
+
+	for (i = mVertices.begin(); i < mVertices.end(); ++i)
 	{
-		if (mVertices.current())
+		if (mVertices[i])
 		{
-			delete mVertices.current();
+			delete mVertices[i];
 		}
 	}  
 	
 	mVertices.clear();
 	
-	for (mTexels.start(); mTexels.forward(); mTexels.next())
+	for (i = mTexels.begin(); i < mTexels.end(); ++i)
 	{
-		if (mTexels.current())
+		if (mTexels[i])
 		{
-			delete mTexels.current();
+			delete mTexels[i];
 		}
 	}  
 	
 	mTexels.clear();
 	
-	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	for (i = mPolygons.begin(); i < mPolygons.end(); ++i)
 	{
-		if (mPolygons.current())
-			delete mPolygons.current();
+		if (mPolygons[i])
+			delete mPolygons[i];
 	}
 
 	mPolygons.clear();
 	
-	for (mGroups.start(); mGroups.forward(); mGroups.next())
+	for (i = mGroups.begin(); i < mGroups.end(); ++i)
 	{
-		if (mGroups.current())
-			delete mGroups.current();
+		if (mGroups[i])
+			delete mGroups[i];
 	}
 	
 	mGroups.clear();
 	
-	for (mMeshes.start(); mMeshes.forward(); mMeshes.next())
+	for (i = mMeshes.begin(); i < mMeshes.end(); ++i)
 	{
-		if (mMeshes.current())
-			delete mMeshes.current();
+		if (mMeshes[i])
+			delete mMeshes[i];
 	}
 	
 	mMeshes.clear();
 	
-	for (mTags.start(); mTags.forward(); mTags.next())
+	for (i = mTags.begin(); i < mTags.end(); ++i)
 	{
-		if (mTags.current())
-			delete mTags.current();
+		if (mTags[i])
+			delete mTags[i];
 	}
 	
 	mTags.clear();
 	
-	for (mBoneFrames.start(); mBoneFrames.forward(); mBoneFrames.next())
+	for (i = mBoneFrames.begin(); i < mBoneFrames.end(); ++i)
 	{
-		if (mBoneFrames.current())
-			delete mBoneFrames.current();
+		if (mBoneFrames[i])
+			delete mBoneFrames[i];
 	}
 	
 	mBoneFrames.clear();
 	
-	for (mAnimations.start(); mAnimations.forward(); mAnimations.next())
+	for (i = mAnimations.begin(); i < mAnimations.end(); ++i)
 	{
-		if (mAnimations.current())
-			delete mAnimations.current();
+		if (mAnimations[i])
+			delete mAnimations[i];
 	}
 	
 	mAnimations.clear();
@@ -480,12 +484,11 @@ int Egg::saveFile(char *filename)
 {
 	FILE *f;
 	u_int32_t u, version, id;
-	//int32_t i;
-	//unsigned char c;
 	egg_vertex_t *vertex;
 	egg_texel_t *texel;
 	egg_polygon_t *polygon;
 	egg_group_t *group;
+	unsigned int i, j;
 
 
 	f = fopen(filename, "wb");
@@ -523,9 +526,9 @@ int Egg::saveFile(char *filename)
   
 	////////////////////////////////////////
 
-	for (mVertices.start(); mVertices.forward(); mVertices.next())
+	for (i = mVertices.begin(); i < mVertices.end(); ++i)
 	{
-		vertex = mVertices.current();
+		vertex = mVertices[i];
     
 		if (!vertex)
 			continue;
@@ -564,9 +567,9 @@ int Egg::saveFile(char *filename)
 #endif
 	}
 
-	for (mTexels.start(); mTexels.forward(); mTexels.next())
+	for (i = mTexels.begin(); i < mTexels.end(); ++i)
 	{
-		texel = mTexels.current();
+		texel = mTexels[i];
     
 		if (!texel)
 			continue;
@@ -579,9 +582,9 @@ int Egg::saveFile(char *filename)
 
 	// PolyMesh //////////////////////
 
-	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	for (i = mPolygons.begin(); i < mPolygons.end(); ++i)
 	{
-		polygon = mPolygons.current();
+		polygon = mPolygons[i];
 
 		if (!polygon)
 			continue;
@@ -593,27 +596,27 @@ int Egg::saveFile(char *filename)
 		u = polygon->vertex.size();
 		fwrite(&u, 4, 1, f);
 
-		for (polygon->vertex.start(); polygon->vertex.forward(); polygon->vertex.next())
+		for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
 		{
-			u = polygon->vertex.current();
+			u = polygon->vertex[j];
 			fwrite(&u, 4, 1, f);
 		}
 
 		u = polygon->texel.size();
 		fwrite(&u, 4, 1, f);
 
-		for (polygon->texel.start(); polygon->texel.forward(); polygon->texel.next())
+		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
 		{
-			u = polygon->texel.current();
+			u = polygon->texel[j];
 			fwrite(&u, 4, 1, f);
 		}
 	}
 
 	////////////////////////////////////////
 
-	for (mGroups.start(); mGroups.forward(); mGroups.next())
+	for (i = mGroups.begin(); i < mGroups.end(); ++i)
 	{
-		group = mGroups.current();
+		group = mGroups[i];
     
 		if (!group)
 			continue;
@@ -624,31 +627,31 @@ int Egg::saveFile(char *filename)
 		u = group->vertex.size();
 		fwrite(&u, 4, 1, f);
     
-		for (group->vertex.start(); group->vertex.forward(); group->vertex.next())
+		for (j = group->vertex.begin(); j < group->vertex.end(); ++j)
 		{
-			u = group->vertex.current();
+			u = group->vertex[j];
 			fwrite(&u, 4, 1, f);
 		}
 	}
 
-   for (mMeshes.start(); mMeshes.forward(); mMeshes.next())
+   for (i = mMeshes.begin(); i < mMeshes.end(); ++i)
    {
-		MeshSave(mMeshes.current(), f);
+		MeshSave(mMeshes[i], f);
    }
 
-   for (mTags.start(); mTags.forward(); mTags.next())
+   for (i = mTags.begin(); i < mTags.end(); ++i)
    {
-		saveTag(mTags.current(), f);
+		saveTag(mTags[i], f);
    }
 
-   for (mBoneFrames.start(); mBoneFrames.forward(); mBoneFrames.next())
+   for (i = mBoneFrames.begin(); i < mBoneFrames.end(); ++i)
    {
-		BoneFrameSave(mBoneFrames.current(), f);
+		BoneFrameSave(mBoneFrames[i], f);
    }
 
-   for (mAnimations.start(); mAnimations.forward(); mAnimations.next())
+   for (i = mAnimations.begin(); i < mAnimations.end(); ++i)
    {
-		AnimationSave(mAnimations.current(), f);
+		AnimationSave(mAnimations[i], f);
    }
 
    fclose(f);
@@ -808,10 +811,11 @@ int Egg::loadFile(char *filename)
 			texellist.pushBack(transT[u]);
 		}
 
-#ifdef DEBUG_EGG_LOAD
-		printDebug(5, "*** %i %i %i %i\n", 
-					  i, id, vertexlist.size(), texellist.size());
-#endif
+		if (isDebugLevel(5))
+		{
+			print("*** %i %i %i %i\n", 
+					i, id, vertexlist.size(), texellist.size());
+		}
 
 		polygonId = addPolygon(vertexlist, texellist, shader);
 		transP.Add(id, polygonId);
@@ -925,7 +929,10 @@ int Egg::loadFile(char *filename)
 			return -20;
 		}
 
-		printDebug(2, "-- Loading Tag #%i of %i\n", i, numTags);
+		if (isDebugLevel(2))
+		{
+			print("-- Loading Tag #%i of %i\n", i, numTags);
+		}
 
 		addTag(tag);
 	}
@@ -1021,21 +1028,22 @@ void Egg::combineTexels(unsigned int A, unsigned int B)
 	egg_texel_t *a = getTexel(A);
 	egg_texel_t *b = getTexel(B);
 	egg_polygon_t *polygon;
+	unsigned int i;
 
 
 	if (!a || !b)
 		return;
 
-	for (b->ref.start(); b->ref.forward(); b->ref.next())
+	for (i = b->ref.begin(); i < b->ref.end(); ++i)
 	{
-		polygon = getPolygon(b->ref.current());
+		polygon = getPolygon(b->ref[i]);
 
 		if (polygon)
 		{
 			// Must be replace B with A to match sorted list ids
 			polygon->texel.Replace(B, A);
 
-			a->ref.pushBack(b->ref.current());
+			a->ref.pushBack(b->ref[i]);
 		}
 	}
 
@@ -1071,20 +1079,21 @@ void Egg::combineVertices(unsigned int A, unsigned int B)
 	egg_vertex_t *b = getVertex(B);
 	egg_polygon_t *polygon;
 	egg_group_t *grp;
+	unsigned int i, j;
 
 
 	if (!a || !b)
 		return;
 
-	for (b->ref.start(); b->ref.forward(); b->ref.next())
+	for (i = b->ref.begin(); i < b->ref.end(); ++i)
 	{
-		polygon = getPolygon(b->ref.current());
+		polygon = getPolygon(b->ref[i]);
 
 		if (polygon)
 		{
 			// Must be replace B with A to match sorted list ids
 			polygon->vertex.Replace(B, A);
-			a->ref.pushBack(b->ref.current());
+			a->ref.pushBack(b->ref[i]);
 		}
 	}
 
@@ -1093,24 +1102,24 @@ void Egg::combineVertices(unsigned int A, unsigned int B)
 
 	// Mongoose 2002.01.19, handle groups here
 	// Remove all references to dead vertex from groups
-	for (mGroups.start(); mGroups.forward(); mGroups.next())
+	for (i = mGroups.begin(); i < mGroups.end(); ++i)
 	{
-		grp = mGroups.current();
+		grp = mGroups[i];
 		
-		for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+		for (j = grp->vertex.begin(); j < grp->vertex.end(); ++j)
 		{
-			if (grp->vertex.current() == B)
+			if (grp->vertex[j] == B)
 			{
-				grp->vertex.remove(grp->vertex.currentIndex());
+				grp->vertex.remove(j);
 			}
 		}
 	}
 
-	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	for (i = mPolygons.begin(); i < mPolygons.end(); ++i)
 	{
-		if (VertexInPolygon(B, mPolygons.current()))
+		if (VertexInPolygon(B, mPolygons[i]))
 		{
-			(mPolygons.current())->vertex.Replace(B, A);
+			(mPolygons[i])->vertex.Replace(B, A);
 		}
 	}
 
@@ -1159,7 +1168,7 @@ void Egg::delVertex(unsigned int id)
 void Egg::delVertex(egg_vertex_t *v)
 {
 	egg_group_t *grp;
-	unsigned int index;
+	unsigned int i, j, index;
 
 
 	if (!v)
@@ -1170,28 +1179,28 @@ void Egg::delVertex(egg_vertex_t *v)
 	//        See hack in loop
 
 	// Remove all polygons using this vertex
-	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	for (i = mPolygons.begin(); i < mPolygons.end(); ++i)
 	{
-		if (VertexInPolygon(v->id, mPolygons.current()))
+		if (VertexInPolygon(v->id, mPolygons[i]))
 		{
-			delPolygon(mPolygons.current());
-			mPolygons.start(); // FIXME: hack to ensure clean all from list
+			delPolygon(mPolygons[i]);
+			i = mPolygons.begin(); // FIXME: hack to ensure clean all from list
 		}
 	}
 
 	// Remove all references to vertex from groups
-	for (mGroups.start(); mGroups.forward(); mGroups.next())
+	for (i = mGroups.begin(); i < mGroups.end(); ++i)
 	{
-		grp = mGroups.current();
+		grp = mGroups[i];
 
 		if (!grp)
 			continue;
 
-		for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+		for (j = grp->vertex.begin(); j < grp->vertex.end(); ++j)
 		{
-			if (grp->vertex.current() == v->id)
+			if (grp->vertex[j] == v->id)
 			{
-				grp->vertex.remove(grp->vertex.currentIndex());
+				grp->vertex.remove(j);
 			}
 		}
 	}
@@ -1216,8 +1225,7 @@ egg_polygon_t *Egg::getPolygon(unsigned int id)
 	return mPolygons[id];
 }
 
-/* FIXME: Really need 2 polygon types (classes?) 
- * One with and one without external texels */
+
 unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 									  Vector<unsigned int> &texel, 
 									  int shader)
@@ -1225,7 +1233,7 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 	egg_polygon_t *polygon;
 	egg_vertex_t *vert;
 	egg_texel_t *tex;
-	//int hError = 0;
+	unsigned int i;
 
 
 	if (vertex.empty())
@@ -1244,13 +1252,13 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 	polygon->id = mPolygons.size() - 1;
 	polygon->shader = shader;
 
-	for (texel.start(); texel.forward(); texel.next())
+	for (i = texel.begin(); i < texel.end(); ++i)
 	{
-		tex = getTexel(texel.current());
+		tex = getTexel(texel[i]);
 
 		if (!tex)
 		{
-			printf("Invalid texel %u\n", texel.current());
+			printf("Invalid texel %u\n", texel[i]);
 			delete polygon;
 			return UINT_MAX;
 		}
@@ -1260,13 +1268,13 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 		polygon->r_texel.pushBack(tex);
 	}
 
-	for (vertex.start(); vertex.forward(); vertex.next())
+	for (i = vertex.begin(); i < vertex.end(); ++i)
 	{
-		vert = getVertex(vertex.current());
+		vert = getVertex(vertex[i]);
 
 		if (!vert)
 		{
-			printf("Invalid vertex %u\n", vertex.current());
+			printf("Invalid vertex %u\n", vertex[i]);
 			delete polygon;
 			return UINT_MAX;
 		}
@@ -1275,15 +1283,6 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 		polygon->vertex.pushBack(vert->id);
 		polygon->r_vertex.pushBack(vert);
 	}
-
-#ifdef FIXME
-	if (mDebugLevel)
-	{
-		polygon->vertex.print(__print_unsigned_int);
-		polygon->r_vertex.print(__print_egg_vertex_t);
-		polygon->texel.print(__print_unsigned_int);
-	}
-#endif
 
 	return polygon->id;
 }
@@ -1301,15 +1300,16 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 {
 	egg_mesh_t *mesh;
 	egg_texel_t *texel;
+	unsigned int i;
 
 
 	if (!polygon)
 		return;
 
 	// Remove all references to polygon from meshes
-	for (mMeshes.start(); mMeshes.forward(); mMeshes.next())
+	for (i = mMeshes.begin(); i < mMeshes.end(); ++i)
 	{
-		mesh = mMeshes.current();
+		mesh = mMeshes[i];
 
 		if (!mesh)
 			continue;
@@ -1318,9 +1318,9 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 	}
 
 	// Remove texels used by polygon
-	for (polygon->texel.start(); polygon->texel.forward(); polygon->texel.next())
+	for (i = polygon->texel.begin(); i < polygon->texel.end(); ++i)
 	{
-		texel = getTexel(polygon->texel.current());
+		texel = getTexel(polygon->texel[i]);
 
 		if (!texel)
 			continue;
@@ -1341,11 +1341,13 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 
 void Egg::delPolygon(Vector<unsigned int> *list)
 {
-	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	unsigned int i;
+
+	for (i = mPolygons.begin(); i < mPolygons.end(); ++i)
 	{
-		if (PolygonMatch(list, mPolygons.current()))
+		if (PolygonMatch(list, mPolygons[i]))
 		{
-			delPolygon(mPolygons.current());
+			delPolygon(mPolygons[i]);
 			return;
 		}
 	}
@@ -1355,13 +1357,14 @@ void Egg::delPolygon(Vector<unsigned int> *list)
 unsigned int Egg::selectPolygon(Vector<unsigned int> *list)
 {
 	egg_polygon_t *polygon;
+	unsigned int i;
 
 
-	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	for (i = mPolygons.begin(); i < mPolygons.end(); ++i)
 	{
-		if (PolygonMatch(list, mPolygons.current()))
+		if (PolygonMatch(list, mPolygons[i]))
 		{
-			polygon = mPolygons.current();
+			polygon = mPolygons[i];
 			return polygon->id;
 		}
 	}
@@ -1419,14 +1422,17 @@ void Egg::delGroup(unsigned int id)
 
 void Egg::delGroup(egg_group_t *group)
 {
+	unsigned int i;
+
 	if (!group)
 		return;
 
 	// FIXME: Maybe it would be nice to check and see if it's used
 	//        by another group ( but groups may be obsoleted soon )
-	for (group->vertex.start(); group->vertex.forward(); group->vertex.next())
+	for (i = group->vertex.begin(); i < group->vertex.end(); ++i)
 	{
-
+		if (isDebugLevel(5))
+			print("delGroup> FIXME: Needs vertex reference counters %s:%d", __FILE__, __LINE__);
 		// delVertex(group->vertex.current());
 	}
 
@@ -1452,6 +1458,7 @@ void Egg::GroupMirror(unsigned int group, bool x, bool y, bool z)
 {
 	egg_group_t *grp;
 	egg_vertex_t *v;
+	unsigned int i;
 
   
 	grp = getGroup(group);
@@ -1459,9 +1466,9 @@ void Egg::GroupMirror(unsigned int group, bool x, bool y, bool z)
 	if (!grp)
 		return;
 
-	for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+	for (i = grp->vertex.begin(); i < grp->vertex.end(); ++i)
 	{
-		v = getVertex(grp->vertex.current());
+		v = getVertex(grp->vertex[i]);
 
 		if (y)
 			v->pos[0] = -v->pos[0];
@@ -1683,6 +1690,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 	unsigned int poly2;
 	egg_texel_t *texel;
 	bool partial = false;
+	unsigned int i, j;
 
 
 	if (!mesh || !vertices)
@@ -1698,9 +1706,9 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 	msh->group.pushBack(grp->id);
 
 	// Copy vertices, add to group|frame, and make a translation table
-	for (vertices->start(); vertices->forward(); vertices->next())
+	for (i = vertices->begin(); i < vertices->end(); ++i)
 	{
-		vert = getVertex(vertices->current());
+		vert = getVertex((*vertices)[i]);
 		
 		if (!vert)
 			continue;
@@ -1715,9 +1723,9 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 	} 
 
 	// Copy polygons, add to mesh, and use the translation table from above
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); mesh->polygon.end(); ++i)
 	{
-		poly = getPolygon(mesh->polygon.current());
+		poly = getPolygon(mesh->polygon[i]);
 		
 		if (!poly)
 			continue;
@@ -1728,25 +1736,25 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 		partial = false;
 
 		// Weed out parital polygons, since we may only have some of the vertices
-		for (poly->vertex.start(); poly->vertex.forward(); poly->vertex.next())
+		for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
 		{
-			if (trans[poly->vertex.current()] == UINT_MAX)
+			if (trans[poly->vertex[j]] == UINT_MAX)
 			{
 				partial = true;
 				break;
 			}
 			else
 			{
-				vertex_list.pushBack(trans[poly->vertex.current()]);
+				vertex_list.pushBack(trans[poly->vertex[j]]);
 			}
 		}
 		
 		if (partial)
 			continue;
 
-		for (poly->texel.start(); poly->texel.forward(); poly->texel.next())
+		for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
 		{
-			texel = getTexel(poly->texel.current());
+			texel = getTexel(poly->texel[j]);
 
 			if (!texel)
 				continue;
@@ -1792,18 +1800,20 @@ void Egg::delMesh(unsigned int mesh)
 
 void Egg::delMesh(egg_mesh_t *mesh)
 {
+	unsigned int i;
+
 	if (!mesh)
 		return;
 
 	// Unlink groups/frames ( Assumes sole owner )
-	for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
+	for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
 	{
-		delGroup(mesh->group.current());
+		delGroup(mesh->group[i]);
 	}
 
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{
-		delPolygon(mesh->polygon.current());
+		delPolygon(mesh->polygon[i]);
 	}
 
 	unsigned int index = mesh->id;
@@ -1834,6 +1844,7 @@ void Egg::addMesh(egg_mesh_t *mesh)
 int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
 {
 	u_int32_t u;
+	unsigned int i;
 
 
 	if (!mesh)
@@ -1847,9 +1858,9 @@ int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
 	u = mesh->group.size();
 	fwrite(&u, 4, 1, f);
 
-	for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
+	for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
 	{
-		u = mesh->group.current();
+		u = mesh->group[i];
 		fwrite(&u, 4, 1, f);
 	}
 
@@ -1861,9 +1872,9 @@ int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
 	u = mesh->polygon.size();
 	fwrite(&u, 4, 1, f);
 
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{
-		u = mesh->polygon.current();
+		u = mesh->polygon[i];
 		fwrite(&u, 4, 1, f);
 	}
 
@@ -1960,6 +1971,7 @@ int Egg::saveTag(egg_tag_t *tag, FILE *f)
 {
 	int32_t li;
 	u_int32_t lu;  
+	unsigned int i;
 
 
 	if (!tag)
@@ -1975,18 +1987,18 @@ int Egg::saveTag(egg_tag_t *tag, FILE *f)
 	lu = tag->slave.size();
 	fwrite(&lu, 4, 1, f);
 
-	for (tag->slave.start(); tag->slave.forward(); tag->slave.next())
+	for (i = tag->slave.begin(); i < tag->slave.end(); ++i)
 	{
-		lu = tag->slave.current();
+		lu = tag->slave[i];
 		fwrite(&lu, 4, 1, f);
 	}
 
 	lu = tag->mesh.size();
 	fwrite(&lu, 4, 1, f);
 
-	for (tag->mesh.start(); tag->mesh.forward(); tag->mesh.next())
+	for (i = tag->mesh.begin(); i < tag->mesh.end(); ++i)
 	{
-		lu = tag->mesh.current();
+		lu = tag->mesh[i];
 		fwrite(&lu, 4, 1, f);
 	}
 
@@ -2132,6 +2144,7 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
    vec_t xr = helDegToRad(rx);
    vec_t yr = helDegToRad(ry);
    vec_t zr = helDegToRad(rz);
+	unsigned int i, j, k;
 
 
    etag = getTag(tag);
@@ -2146,23 +2159,23 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
    transform.setIdentity();
    transform.rotate(xr, yr, zr);
 
-   for (etag->mesh.start(); etag->mesh.forward(); etag->mesh.next())
+   for (i = etag->mesh.begin(); i < etag->mesh.end(); ++i)
    {
-		mesh = getMesh(etag->mesh.current());
+		mesh = getMesh(etag->mesh[i]);
 
 		if (!mesh)
 			continue;
 
-		for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
+		for (j = mesh->group.begin(); j < mesh->group.end(); ++j)
 		{   
-			grp = getGroup(mesh->group.current());
+			grp = getGroup(mesh->group[j]);
 
 			if (!grp)
 				continue;
 
-			for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+			for (k = grp->vertex.begin(); k < grp->vertex.end(); ++k)
 			{
-				vert = getVertex(grp->vertex.current());
+				vert = getVertex(grp->vertex[k]);
 
 				if (!vert)
 					continue;
@@ -2195,9 +2208,9 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
 		}
    }
 	
-   for (etag->slave.start(); etag->slave.forward(); etag->slave.next())
+   for (i = etag->slave.begin(); i < etag->slave.end(); ++i)
    {
-		TagRotateAboutPoint(etag->slave.current(), etag->center, rx, ry, rz);
+		TagRotateAboutPoint(etag->slave[i], etag->center, rx, ry, rz);
    }
 }
 
@@ -2214,6 +2227,7 @@ void Egg::TagRotateAboutPoint(unsigned int tag, vec3_t p,
    vec_t xr = helDegToRad(rx);
    vec_t yr = helDegToRad(ry);
    vec_t zr = helDegToRad(rz);
+	unsigned int i, j, k;
 
 
    etag = getTag(tag);
@@ -2224,23 +2238,23 @@ void Egg::TagRotateAboutPoint(unsigned int tag, vec3_t p,
    m.setIdentity();
    m.rotate(xr, yr, zr);   
 
-   for (etag->mesh.start(); etag->mesh.forward(); etag->mesh.next())
+   for (i = etag->mesh.begin(); i < etag->mesh.end(); ++i)
    {
-		mesh = getMesh(etag->mesh.current());
+		mesh = getMesh(etag->mesh[i]);
 	  
 		if (!mesh)
 			continue;
 	  
-		for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
+		for (j = mesh->group.begin(); j < mesh->group.end(); ++j)
 		{   
-			grp = getGroup(mesh->group.current());
+			grp = getGroup(mesh->group[j]);
 		  
 			if (!grp)
 				continue;
 
-			for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+			for (k = grp->vertex.begin(); k < grp->vertex.end(); ++k)
 			{
-				vert = getVertex(grp->vertex.current());
+				vert = getVertex(grp->vertex[k]);
 			  
 				if (!vert)
 					continue;
@@ -2285,9 +2299,9 @@ void Egg::TagRotateAboutPoint(unsigned int tag, vec3_t p,
    etag->center[1] += p[1];
    etag->center[2] += p[2];  
      
-   for (etag->slave.start(); etag->slave.forward(); etag->slave.next())
+   for (i = etag->slave.begin(); i < etag->slave.end(); ++i)
    {
-		TagRotateAboutPoint(etag->slave.current(), p, rx, ry, rz);
+		TagRotateAboutPoint(etag->slave[i], p, rx, ry, rz);
    }
 }
 
@@ -2371,6 +2385,7 @@ int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 {
 	int32_t li;
 	u_int32_t lu;  
+	unsigned int i;
 
 
 	if (!boneframe)
@@ -2386,9 +2401,9 @@ int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 	lu = boneframe->tag.size();
 	fwrite(&lu, 4, 1, f);
 
-	for (boneframe->tag.start(); boneframe->tag.forward(); boneframe->tag.next())
+	for (i = boneframe->tag.begin(); i < boneframe->tag.end(); ++i)
 	{
-		lu = boneframe->tag.current();
+		lu = boneframe->tag[i];
 		fwrite(&lu, 4, 1, f);
 	}
 
@@ -2493,7 +2508,7 @@ int Egg::AnimationSave(egg_animation_t *a, FILE *f)
 {
 	int32_t li;
 	u_int32_t lu;  
-
+	unsigned int i;
 
 	if (!a)
 		return -1;
@@ -2508,9 +2523,9 @@ int Egg::AnimationSave(egg_animation_t *a, FILE *f)
 	lu = a->frame.size();
 	fwrite(&lu, 4, 1, f);
 
-	for (a->frame.start(); a->frame.forward(); a->frame.next())
+	for (i = a->frame.begin(); i < a->frame.end(); ++i)
 	{
-		lu = a->frame.current();
+		lu = a->frame[i];
 		fwrite(&lu, 4, 1, f);
 	}
 
@@ -2571,6 +2586,7 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 {
 	egg_vertex_t *vert;
 	Matrix m;
+	unsigned int i;
 
 
 	if (!list)
@@ -2596,9 +2612,9 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 		return;
 	}
 
-	for (list->start(); list->forward(); list->next())
+	for (i = list->begin(); i < list->end(); ++i)
 	{
-		vert = list->current();
+		vert = (*list)[i];
 
 		if (!vert)
 			continue;
@@ -2650,7 +2666,7 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 {
 	egg_vertex_t *vert;
 	Matrix m;
-	unsigned int count;
+	unsigned int i, count;
 
 
 	if (!grp)
@@ -2678,9 +2694,9 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 
 	m.multiply3v(grp->center, grp->center);
   
-	for (count = 0,grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+	for (count = 0, i = grp->vertex.begin(); i < grp->vertex.end(); ++i)
 	{
-		vert = getVertex(grp->vertex.current());
+		vert = getVertex(grp->vertex[i]);
 
 		if (!grp)
 			continue;
@@ -2711,7 +2727,7 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 	Matrix m;
 	egg_group_t *grp;
 	egg_vertex_t *vert;
-	int count;
+	unsigned int i, j, count;
 
 
 	if (!mesh)
@@ -2750,9 +2766,9 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 		return;
 	}
 
-	for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
+	for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
 	{
-		grp = getGroup(mesh->group.current());
+		grp = getGroup(mesh->group[i]);
 
 		if (!grp)
 			continue;
@@ -2773,9 +2789,9 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
     
 		count = 0;
 
-		for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+		for (j = grp->vertex.begin(); j < grp->vertex.end(); ++j)
 		{
-			vert = getVertex(grp->vertex.current());
+			vert = getVertex(grp->vertex[j]);
 
 			if (!grp)
 				continue;
@@ -2831,7 +2847,7 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 	egg_mesh_t *mesh;
 	egg_group_t *grp;
 	egg_vertex_t *vert;
-	int count;
+	unsigned int i, j, k, count;
 
 
 	m.setIdentity();
@@ -2855,9 +2871,9 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 		return;
 	}
 
-	for (mTags.start(); mTags.forward(); mTags.next())
+	for (i = mTags.begin(); i < mTags.end(); ++i)
 	{
-		tag = mTags.current();
+		tag = mTags[i];
 
 		if (!tag)
 			continue;  
@@ -2865,16 +2881,16 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 		m.multiply3v(tag->center, tag->center);
 	}
 
-	for (mMeshes.start(); mMeshes.forward(); mMeshes.next())
+	for (i = mMeshes.begin(); i < mMeshes.end(); ++i)
 	{
-		mesh = mMeshes.current();
+		mesh = mMeshes[i];
 
 		if (!mesh)
 			continue;
 
-		for (mesh->group.start(); mesh->group.forward(); mesh->group.next())
+		for (j = mesh->group.begin(); j < mesh->group.end(); ++j)
 		{
-			grp = getGroup(mesh->group.current());
+			grp = getGroup(mesh->group[j]);
 
 			if (!grp)
 				continue;
@@ -2883,9 +2899,9 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 
 			count = 0;
 
-			for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+			for (k = grp->vertex.begin(); k < grp->vertex.end(); ++k)
 			{
-				vert = getVertex(grp->vertex.current());
+				vert = getVertex(grp->vertex[k]);
 
 				if (!vert)
 					continue;
@@ -2954,6 +2970,11 @@ Vector <egg_boneframe_t *> *Egg::BoneFrameList()
 	return &mBoneFrames;
 }
 
+Vector<egg_animation_t *> *Egg::AnimationList()
+{
+	return &mAnimations;
+}
+
 
 ////////////////////////////////////////////////////////////
 // Private methods                                        
@@ -2962,15 +2983,18 @@ Vector <egg_boneframe_t *> *Egg::BoneFrameList()
 
 bool Egg::PolygonMatch(Vector<unsigned int> *list, egg_polygon_t *polygon)
 {
+	unsigned int i;
+
+
 	if (!list || !polygon)
 		return false;
 
 	if (list->size() != polygon->vertex.size())
 		return false;
 
-	for (list->start(); list->forward(); list->next())
+	for (i = list->begin(); i < list->end(); ++i)
 	{
-		if (!VertexInPolygon(list->current(), polygon))
+		if (!VertexInPolygon((*list)[i], polygon))
 			return false;
 	}
 
@@ -3029,14 +3053,15 @@ void Egg::resizeBoundingBox(egg_group_t *grp)
 {
 	bool init = false;
 	egg_vertex_t *vertex;
+	unsigned int i;
 
 
 	if (!grp || grp->vertex.empty())
 		return;
 
-	for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+	for (i = grp->vertex.begin(); i < grp->vertex.end(); ++i)
 	{
-		vertex = mVertices.current();
+		vertex = mVertices[i];
     
 		if (!vertex)
 			continue;
@@ -3076,22 +3101,6 @@ void Egg::resizeBoundingBox(egg_group_t *grp)
 ////////////////////////////////////////////////////////////
 // Private Accessors
 ////////////////////////////////////////////////////////////
-
-void Egg::printDebug(unsigned int level, char *s, ...)
-{
-	va_list args;
-
-
-	if (mDebugLevel >= level)
-	{
-		va_start(args, s);
-		fprintf(stdout, "Egg::");
-		vfprintf(stdout, s, args);
-		fprintf(stdout, "\n");
-		va_end(args);
-	}
-}
-
 
 void Egg::printError(char *s, ...)
 {

@@ -2658,19 +2658,19 @@ int freyja_model__psk_import(char *filename)
 
 		/* Store vertices and texels by true id, using translator lists */
 		eggVertex1i(trans[psk.mVTXWs[psk.mFaces[i].x].vertex]);
-		t = eggTexelStore2f(psk.mVTXWs[psk.mFaces[i].x].uv[0], 
+		t = eggTexCoordStore2f(psk.mVTXWs[psk.mFaces[i].x].uv[0], 
 							psk.mVTXWs[psk.mFaces[i].x].uv[1]);
-		eggTexel1i(t);
+		eggTexCoord1i(t);
 
 		eggVertex1i(trans[psk.mVTXWs[psk.mFaces[i].y].vertex]);
-		t = eggTexelStore2f(psk.mVTXWs[psk.mFaces[i].y].uv[0], 
+		t = eggTexCoordStore2f(psk.mVTXWs[psk.mFaces[i].y].uv[0], 
 							psk.mVTXWs[psk.mFaces[i].y].uv[1]);
-		eggTexel1i(t);
+		eggTexCoord1i(t);
 
 		eggVertex1i(trans[psk.mVTXWs[psk.mFaces[i].z].vertex]);
-		t = eggTexelStore2f(psk.mVTXWs[psk.mFaces[i].z].uv[0], 
+		t = eggTexCoordStore2f(psk.mVTXWs[psk.mFaces[i].z].uv[0], 
 							psk.mVTXWs[psk.mFaces[i].z].uv[1]);
-		eggTexel1i(t);
+		eggTexCoord1i(t);
 		
 		eggTexture1i(psk.mFaces[i].material);
 		
@@ -2689,12 +2689,12 @@ int freyja_model__psk_import(char *filename)
 	}
 
 
-	eggBegin(FREYJA_BONE_FRAME);
+	eggBegin(FREYJA_SKELETON);
 
 	for (i = 0; i < psk.mNumBones; ++i)
 	{
 		/* Start a new tag */
-		eggBegin(FREYJA_BONE_TAG);
+		eggBegin(FREYJA_BONE);
 		eggTagFlags1u(0x0);
 		eggTagName(psk.mBones[i].name);
 
