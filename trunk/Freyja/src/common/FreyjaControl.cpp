@@ -232,58 +232,58 @@ void FreyjaControl::eventMesh(int command)
 {
 	switch (command)
 	{
-		case CMD_MESH_SCALE:
-			_minor_mode = MODEL_SCALE;
-			event_print("Mesh scale mode");
-			break;
-		case CMD_MESH_ROTATE:
-			_minor_mode = MODEL_ROTATE;
-			event_print("Mesh rotate mode");
-			break;
-		case CMD_MESH_SELECT:
-			_minor_mode = MESH_SELECT_MODE;
-			event_print("Select mesh by center point");
-			break;
-		case CMD_MESH_MOVE:
-			_minor_mode = MESH_MOVE;
-			event_print("Mesh move mode");
-			break;
-		case CMD_MESH_MOVE_CENTER:
-			_minor_mode = MESH_MOVE_CENTER;
-			event_print("Reposition mesh center point");
-			break;
-		case CMD_MESH_GEN_FROM_FRAME:
-			event_print("FreyjaControl::Event> %s, %s:%i",
-							"CMD_MESH_GEN_FROM_FRAME no longer implemented", 
-							__FILE__, __LINE__);
-			break;
-		case CMD_MESH_FULLCOPY:
-			_minor_mode = MESH_WHOLE_COPY_MODE;      
-			event_print("FreyjaControl::Event> %s, %s:%i",
-							"CMD_MESH_FULLCOPY no longer implemented", 
-							__FILE__, __LINE__);
-			break;
-		case CMD_MESH_COPY:
-			_minor_mode = MESH_COPY_MODE;      
-			event_print("FreyjaControl::Event> %s, %s:%i",
-							"CMD_MESH_COPY no longer implemented", 
-							__FILE__, __LINE__);
-			break;
-		case CMD_MESH_SPLIT:
-			_minor_mode = MESH_CUT_MODE;      
-			event_print("FreyjaControl::Event> %s, %s:%i",
-							"CMD_MESH_SPLIT no longer implemented", 
-							__FILE__, __LINE__);
-			break;
-		case CMD_MESH_MERGE:
-			_minor_mode = MESH_PASTE_MODE;      
-			event_print("FreyjaControl::Event> %s, %s:%i",
-							"CMD_MESH_MERGE no longer implemented", 
-							__FILE__, __LINE__);
-			break;
+	case CMD_MESH_SCALE:
+		_minor_mode = MODEL_SCALE;
+		event_print("Mesh scale mode");
+		break;
+	case CMD_MESH_ROTATE:
+		_minor_mode = MODEL_ROTATE;
+		event_print("Mesh rotate mode");
+		break;
+	case CMD_MESH_SELECT:
+		_minor_mode = MESH_SELECT_MODE;
+		event_print("Select mesh by center point");
+		break;
+	case CMD_MESH_MOVE:
+		_minor_mode = MESH_MOVE;
+		event_print("Mesh move mode");
+		break;
+	case CMD_MESH_MOVE_CENTER:
+		_minor_mode = MESH_MOVE_CENTER;
+		event_print("Reposition mesh center point");
+		break;
+	case CMD_MESH_GEN_FROM_FRAME:
+		event_print("FreyjaControl::Event> %s, %s:%i",
+					"CMD_MESH_GEN_FROM_FRAME no longer implemented", 
+					__FILE__, __LINE__);
+		break;
+	case CMD_MESH_FULLCOPY:
+		_minor_mode = MESH_WHOLE_COPY_MODE;      
+		event_print("FreyjaControl::Event> %s, %s:%i",
+					"CMD_MESH_FULLCOPY no longer implemented", 
+					__FILE__, __LINE__);
+		break;
+	case CMD_MESH_COPY:
+		_minor_mode = MESH_COPY_MODE;      
+		event_print("FreyjaControl::Event> %s, %s:%i",
+					"CMD_MESH_COPY no longer implemented", 
+					__FILE__, __LINE__);
+		break;
+	case CMD_MESH_SPLIT:
+		_minor_mode = MESH_CUT_MODE;      
+		event_print("FreyjaControl::Event> %s, %s:%i",
+					"CMD_MESH_SPLIT no longer implemented", 
+					__FILE__, __LINE__);
+		break;
+	case CMD_MESH_MERGE:
+		_minor_mode = MESH_PASTE_MODE;      
+		event_print("FreyjaControl::Event> %s, %s:%i",
+					"CMD_MESH_MERGE no longer implemented", 
+					__FILE__, __LINE__);
+		break;
 
 
-	case CMD_MESH_GENERATE_CAN:
+	case CMD_MESH_GENERATE_CYLINDER:
 		eggGenerateCylinder(4, 16, 64.0, 32.0);
 		event_refresh();
 		break;
@@ -299,39 +299,7 @@ void FreyjaControl::eventMesh(int command)
 		eggGenerateTriangleStrip(10, 64.0);
 		event_refresh();
 		break;
-// 	case CMD_MESH_CLONE:
-// 		if (1)
-// 		{
-// 			egg_mesh_t *mesh = mModel->CachedMesh();
-// 			egg_group_t *grp;
-			
-			
-// 			if (mesh && (grp = _egg->getGroup(mesh->group[0])))
-// 			{
-// 				mList.copy(grp->vertex);
-				
-// 				if (!mList.empty())
-// 				{
-// 					event_print("Mesh cloned");
-// 					_egg->addMesh(_egg->MeshCopy(mesh, &mList));
-// 				}
-// 			}
-// 		}
-// 		break;
-//	case CMD_MESH_ROTATE:
-//		_edit_mode = FreyjaModel::TransformMesh;
-//		break;
-//	case CMD_MESH_COPY2:
-//		MeshCopy();
-//		break;
-//	case CMD_MESH_CUT:
-//		event_print("Mesh partially cut (split)");
-//		MeshCut();
-//		break;
-//	case CMD_MESH_PASTE:
-//		_egg->AddMesh(_egg->MeshMerge(_egg->MeshNew(), _list, CachedMesh()));
-//		_list.Clear();
-//		break;
+
 	case CMD_MESH_NEXT:
 		mModel->setCurrentMesh(mModel->getCurrentMesh() + 1);
 		break;
@@ -455,10 +423,7 @@ void FreyjaControl::eventMisc(int command)
 	case CMD_MISC_RENDER_ROT_X_P:
 		mRender->Rotate(X_F, mRender->RotateAmount());
 		break;
-	case CMD_MISC_CAMMODE:
-		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_CAMERA));
-		break;  
+
 	case CMD_MISC_TEX_SLOT_LOAD:
 		event_set_load_texture_to_slot(!query_load_texture_to_slot());
 		event_print("Texture loading to current slot [%s]",
@@ -480,6 +445,8 @@ void FreyjaControl::eventMisc(int command)
  			event_print("Select mesh by center point");
  			_minor_mode = MESH_SELECT_MODE;
  			break;
+		default:
+			event_print("WARNING: Selection undefined for this mode");
  		}
 
 		break;
@@ -519,16 +486,129 @@ void FreyjaControl::eventMisc(int command)
 		case CMD_MISC_DISPLAY_INFO:
 			mModel->printInfo();
 			break;
+
+		case CMD_MISC_TEXTURE_SET:
+			event_print("Switching all of mesh %i ploygons to texture %i",
+						mModel->getCurrentMesh(), mModel->getCurrentTextureIndex());
+			mModel->TextureShift();
+			break;
+
+		case CMD_MISC_GEN_TEXMAP_XY:
+			mModel->generateUVMap();
+			break;
+
+
+		case CMD_MISC_SIDES_M:
+			mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()-1);
+			event_print("Making %i sided polygons", 
+						mModel->getCurrentPolygonEdgeCount());
+			break;
+		case CMD_MISC_SIDES_P:
+			mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()+1);
+			event_print("Making %i sided polygons", 
+						mModel->getCurrentPolygonEdgeCount());
+			break;
+
+		case CMD_MISC_ZOOM_IN:
+			if (mRender->getZoom() <= 0.02)
+			{
+				mRender->setZoom(mRender->getZoom() + 0.0001);
+			}
+			else
+			{
+				mRender->setZoom(mRender->getZoom() + 0.01);
+			}
+
+			event_refresh();
+			break;
+
+		case CMD_MISC_ZOOM_OUT:
+			if (mRender->getZoom() <= 0.02)
+			{
+				mRender->setZoom(mRender->getZoom() - 0.0001);
+			}
+			else
+			{
+				mRender->setZoom(mRender->getZoom() - 0.01);
+			}
+
+			event_refresh();
+			break;
+
+	default:
+		event_print("!Unhandled eventMisc(%d)", command);
+	}   
+}
+
+#ifdef DEAD_CODE
+void FreyjaControl::nullEvent(int command)
+{
+	switch (command)
+	{
+// 	case CMD_MESH_CLONE:
+// 		if (1)
+// 		{
+// 			egg_mesh_t *mesh = mModel->CachedMesh();
+// 			egg_group_t *grp;
+			
+			
+// 			if (mesh && (grp = _egg->getGroup(mesh->group[0])))
+// 			{
+// 				mList.copy(grp->vertex);
+				
+// 				if (!mList.empty())
+// 				{
+// 					event_print("Mesh cloned");
+// 					_egg->addMesh(_egg->MeshCopy(mesh, &mList));
+// 				}
+// 			}
+// 		}
+// 		break;
+//	case CMD_MESH_ROTATE:
+//		_edit_mode = FreyjaModel::TransformMesh;
+//		break;
+//	case CMD_MESH_COPY2:
+//		MeshCopy();
+//		break;
+//	case CMD_MESH_CUT:
+//		event_print("Mesh partially cut (split)");
+//		MeshCut();
+//		break;
+//	case CMD_MESH_PASTE:
+//		_egg->AddMesh(_egg->MeshMerge(_egg->MeshNew(), _list, CachedMesh()));
+//		_list.Clear();
+//		break;
+
+
+		case CMD_MISC_TEXTURE_NEXT:
+			mModel->setCurrentTextureIndex(mModel->getCurrentTextureIndex() + 1);
+			event_print("Texture[%i] in edit mode", mModel->getCurrentTextureIndex());
+			break;
+
+		case CMD_MISC_TEXTURE_PREV:
+			if (mModel->getCurrentTextureIndex())
+			{
+				mModel->setCurrentTextureIndex(mModel->getCurrentTextureIndex() - 1);
+			}
+
+			event_print("Texture[%i] in edit mode", mModel->getCurrentTextureIndex());
+			break;
+
+	case CMD_MISC_CAMMODE:
+		mRender->Flags(FreyjaRender::RENDER_CAMERA, 
+					   !(mRender->Flags() & FreyjaRender::RENDER_CAMERA));
+		break;  
+
 // 		case CMD_MISC_LOAD_MAP:
 // 			mModel->setFlags(FL_LOAD_MAP, !(mModel->getFlags() & FL_LOAD_MAP));
-// 			break
-			;
+// 			break;
+
 // 		case CMD_MISC_EDITMODE:
 // 			_edit_mode++;
-     
+//     
 // 			if (_edit_mode == 3)
 // 				_edit_mode = 0;
-     
+//     
 // 			switch (_edit_mode)
 // 			{
 // 			case FreyjaModel::TransformMesh:
@@ -542,71 +622,21 @@ void FreyjaControl::eventMisc(int command)
 // 				break;	   
 // 			}
 // 			break;
+
 // 		case CMD_MISC_SCENE_ROTATE:
 // 			_edit_mode = FreyjaModel::TransformScene;
 // 			break;
-		case CMD_MISC_TEXTURE_SET:
-			event_print("Switching all of mesh %i ploygons to texture %i",
-						mModel->getCurrentMesh(), mModel->getCurrentTextureIndex());
-			mModel->TextureShift();
-			break;
-		case CMD_MISC_GEN_TEXMAP_XY:
-			mModel->generateUVMap();
-			break;
+
 // 		case CMD_MISC_VERTEX_UV:
 // 			mModel->setFlags(FL_VERTEX_UV, !(mModel->getFlags() & FL_VERTEX_UV));
 // 			event_print("Vertex with UV texels [%s]", 
 // 						(mModel->getFlags() & FL_VERTEX_UV) ? "on" : "off");
 // 			break;
-		case CMD_MISC_TEXTURE_NEXT:
-			mModel->setCurrentTextureIndex(mModel->getCurrentTextureIndex() + 1);
-			event_print("Texture[%i] in edit mode", mModel->getCurrentTextureIndex());
-			break;
-		case CMD_MISC_TEXTURE_PREV:
-			if (mModel->getCurrentTextureIndex())
-			{
-				mModel->setCurrentTextureIndex(mModel->getCurrentTextureIndex() - 1);
-			}
 
-			event_print("Texture[%i] in edit mode", mModel->getCurrentTextureIndex());
-			break;
-		case CMD_MISC_SIDES_M:
-			mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()-1);
-			event_print("Making %i sided polygons", 
-						mModel->getCurrentPolygonEdgeCount());
-			break;
-		case CMD_MISC_SIDES_P:
-			mModel->setCurrentPolygonEdgeCount(mModel->getCurrentPolygonEdgeCount()+1);
-			event_print("Making %i sided polygons", 
-						mModel->getCurrentPolygonEdgeCount());
-			break;
 // 		case CMD_MISC_DUMPTEXTURE:
 // 			mModel->setFlags(FL_DUMP_TEXTURE, !(mModel->getFlags() & FL_DUMP_TEXTURE));
 // 			break;
-		case CMD_MISC_ZOOM_IN:
-			if (mRender->getZoom() <= 0.02)
-			{
-				mRender->setZoom(mRender->getZoom() + 0.0001);
-			}
-			else
-			{
-				mRender->setZoom(mRender->getZoom() + 0.01);
-			}
 
-			event_refresh();
-			break;
-		case CMD_MISC_ZOOM_OUT:
-			if (mRender->getZoom() <= 0.02)
-			{
-				mRender->setZoom(mRender->getZoom() - 0.0001);
-			}
-			else
-			{
-				mRender->setZoom(mRender->getZoom() - 0.01);
-			}
-
-			event_refresh();
-			break;
 		case CMD_MISC_SCROLL_UP_X:
 			mModel->adjustSceneTranslation(1.0, 0.0, 0.0);
 			break;
@@ -685,7 +715,7 @@ void FreyjaControl::eventMisc(int command)
 		event_print("!Unhandled eventMisc(%d)", command);
 	}   
 }
-
+#endif
 
 void FreyjaControl::handleEvent(int mode, int cmd)
 {

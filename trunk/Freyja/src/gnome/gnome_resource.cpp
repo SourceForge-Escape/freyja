@@ -1987,24 +1987,76 @@ arg_list_t *freyja_rc_menu_item(arg_list_t *menu)
 										  mgtk_create_icon((char *)cmd->data, 
 														   GTK_ICON_SIZE_MENU));
 
-			printf("*** %p\n", accel);
 #define ACCEL_SUPPORT_ON
 #ifdef ACCEL_SUPPORT_ON
 			if (accel != 0 &&
 				accel->data != 0 &&
-				((char *)accel->data)[0] != 0 &&
-				!strncmp((char *)(accel->data), "C-o", 3))
+				((char *)accel->data)[0] != 0)
 			{  
-				printf("*** %s\n", (char *)(accel->data));
 				GtkAccelGroup *accel_group;
+				unsigned int i, len, key, mod;
+				char *s = (char *)(accel->data);
+
+				printf("*** %s\n", (char *)(accel->data));
+
+				len = strlen(s);
+
+				for (mod = 0, i = 0; i < len; ++i)
+				{
+					switch (s[i])
+					{
+					case 'C':
+						mod |= GDK_CONTROL_MASK;
+						break;
+					case 'S':
+						mod |= GDK_SHIFT_MASK;
+						break;
+					case 'M':
+						mod |= GDK_MOD1_MASK;
+						break;
+					case 'E':
+						key = GDK_Return;
+						
+						i = len + 8;
+						break;
+					case 'F':
+						/* FIXME: handle func keys > 4, etc */
+						switch (s[i+1])
+						{
+						case '1':
+							key = GDK_F1;
+							break;
+						case '2':
+							key = GDK_F2;
+							break;
+						case '3':
+							key = GDK_F3;
+							break;
+						case '4':
+							key = GDK_F4;
+							break;
+						}
+
+						i = len + 8;
+						break;
+					case '-':
+						break;
+					default:
+						key = gdk_unicode_to_keyval(s[i]);
+						break;
+					}
+				}
 				
 				/* Add code here to translate accel string to GDK key / mods */
 
 				accel_group = gtk_accel_group_new();
   
+				// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
+
 				gtk_widget_add_accelerator(item, "activate", accel_group,
 										   //get_int(key), get_int(mod),
-										   GDK_O, GDK_CONTROL_MASK,
+										   key, //GDK_O, 
+										   (GdkModifierType)mod, //GDK_CONTROL_MASK,
 										   GTK_ACCEL_VISIBLE);
 			}
 #endif
