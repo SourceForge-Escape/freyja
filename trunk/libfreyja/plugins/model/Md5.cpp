@@ -90,7 +90,7 @@ bool Md5::isMd5Model(const char *filename)
 		return true;
 	}
 
-	printf("<Md5> Not a valid md5 model file.\n");
+	//printf("<Md5> Not a valid md5 model file.\n");
 
 	return false;
 }
@@ -122,7 +122,7 @@ bool Md5::loadModel(const char *filename)
 	case 10:
 		break;
 	default:
-		printf("<Md5> Don't know this version %i.\n", mVersion);
+		//printf("<Md5> Don't know this version %i.\n", mVersion);
 		return false;
 	}
 
@@ -492,8 +492,8 @@ int freyja_model__md5_import(char *filename)
 		vec3 = Vector3d(md5.mJoints[j].translate[0],
 						md5.mJoints[j].translate[1],
 						md5.mJoints[j].translate[2]);
-		printf("%3i   %.3f %.3f %.3f\n", j,
-			   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
+		//printf("%3i   %.3f %.3f %.3f\n", j,
+		//	   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
 		index = j;
 
 		while (index > -1)
@@ -503,8 +503,8 @@ int freyja_model__md5_import(char *filename)
 		}
 
 		transforms[j] = vec3;
-		printf("->    %.3f %.3f %.3f\n",
-			   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
+		//printf("->    %.3f %.3f %.3f\n",
+		//	   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
 	}
 
 	for (j = 0; j < md5.mNumJoints; ++j)
@@ -553,7 +553,7 @@ int freyja_model__md5_import(char *filename)
 		q.setByMatrix(mat.mMatrix);
 		q.getQuaternion4fv(wxyz);
 
-		//freyjaBoneRotateQuaternion4fv(wxyz);
+		//freyjaBoneRotateQuaternion4fv(wxyz); // argh
 
 		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{

@@ -478,6 +478,10 @@ void freyjaMeshTreeFrameAddBone(long tag);
 
 long freyjaTextureFilename1s(char *filename);
 
+long freyjaTextureStoreBuffer(unsigned char *image, unsigned int depth,
+							  unsigned int width, unsigned int height,
+							  freyja_colormode_t type);
+
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
 
