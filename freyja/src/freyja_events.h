@@ -145,6 +145,8 @@ typedef enum {
 	
 	eExtrude,
 
+	eMeshGenerateNormals,
+
 	eGenerateNormals,
 	eGenerateCube,
 	eGenerateTube,

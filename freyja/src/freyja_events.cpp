@@ -313,6 +313,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 
 
+	r.RegisterInt("eMeshGenerateNormals", eMeshGenerateNormals);
 	r.RegisterInt("eMeshFlipNormals", eMeshFlipNormals);
 	r.RegisterInt("eObjectMenu", eObjectMenu);
 	r.RegisterInt("eAddObject", eAddObject);
