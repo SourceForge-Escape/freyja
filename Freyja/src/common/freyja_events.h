@@ -272,7 +272,6 @@ enum freyja_event_misc_cmd
 	CMD_MISC_SCROLL_DOWN     = 10,
 	CMD_MISC_SCROLL_LEFT     = 11,
 	CMD_MISC_SCROLL_RIGHT    = 12,
-	CMD_MISC_SCREENSHOT      = 13,
 	CMD_MISC_SIDES_P         = 14,
 	CMD_MISC_SIDES_M         = 15,
 	CMD_MISC_DUMPTEXTURE     = 16,
@@ -312,7 +311,8 @@ enum freyja_event_misc_cmd
 	VIEW_BONE2,
 
 	CMD_MISC_GEN_NORMALS,
-	CMD_MISC_ABOUT
+	CMD_MISC_ABOUT           = 70,
+	CMD_MISC_SCREENSHOT      = 71
 };
 
 enum freyja_event_mesh_cmd

@@ -19,10 +19,11 @@ cp ./data/icons/* ~/.freyja/icons/
 
 # GNOME Setup
 #cp ./data/freyja.desktop /usr/share/applications/
+cp ./data/freyja.desktop /usr/share/applnk/Graphics/
 cp ./data/freyja.desktop ~/.gnome2/vfolders/applications/
 cp ./data/icons/freyja.png ~/.icons/
 
-cp ./data/freyja.desktop ~/Desktop
+#cp ./data/freyja.desktop ~/Desktop
 
 #printf "Would you like to put Freyja icon on the desktop? [y/N]"
 #read DESKTOP_ICON
