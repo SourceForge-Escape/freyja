@@ -31,7 +31,6 @@
 
 EggPlugin *EggPlugin::mEggPlugin = 0x0;
 
-
 int eggGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 {
 	vec_t s;
@@ -566,18 +565,15 @@ Vector<unsigned int> *eggFindVerticesInBox(bbox_t bbox,
 
 void eggGenerateVertexNormals()
 {
-#ifdef FIXME_MOVE_BACK_TO_EGG
-	Vector <vec3_t *> normals, faceNormals;
-	vec3_t *normal;
+	Vector <vec_t> normals, faceNormals;
     vec3_t a, b, c, vA, vB;
-	vec_t s;
-	unsigned int i, v0, v1, v2, count;
+	vec_t s, x, y, z;
+	unsigned int i, v0, v1, v2, vertexCount, faceCount;
 
 
 	eggCriticalSection(EGG_WRITE_LOCK);
 	
 	vertexCount = eggGetNum(FREYJA_VERTEX);
-	uvCount = eggGetNum(FREYJA_POLYGON) * 3;
 	faceCount = eggGetNum(FREYJA_POLYGON); 
 
 	eggIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
@@ -605,54 +601,61 @@ void eggGenerateVertexNormals()
 		vB[2] = b[2] - c[2];
 		
 		/* Compute normal for the face */
-		normal = new vec3_t;
-		normal[0] = vA[1] * vB[2] - vA[2] * vB[1];
-		normal[1] = vA[2] * vB[0] - vA[0] * vB[2];
-		normal[2] = vA[0] * vB[1] - vA[1] * vB[0];
+		x = vA[1] * vB[2] - vA[2] * vB[1];
+		y = vA[2] * vB[0] - vA[0] * vB[2];
+		z = vA[0] * vB[1] - vA[1] * vB[0];
 
-		faceNormals.pushBack(normal);
+		faceNormals.pushBack(x);
+		faceNormals.pushBack(y);
+		faceNormals.pushBack(z);
+
+		eggIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
 	}
 
+	eggIterator(FREYJA_VERTEX, FREYJA_LIST_RESET);
 
 	/* Compute vertex normals */
     for (i = 0; i < vertexCount; ++i)
     {
-		egg_vertex_t *vertex = eggGetVertex(i);
+		egg_vertex_t *vertex = EggPlugin::mEggPlugin->eggGetVertex(eggIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT));
 
 		if (!vertex)
+		{
+			printf("ERROR\n");
 			continue;
+		}
 
-		vertex->norm[0] = vertex->norm[1] = vertex->norm[2] = 0.0f;
+		x = y = z = 0.0f;
 
 		for (vertex->ref.start(); vertex->ref.forward(); vertex->ref.next())
 		{
-			normal = faceNormals[vertex->ref.currentIndex()];
-
-			vertex->norm[0] += normal[0];
-			vertex->norm[1] += normal[1];
-			vertex->norm[2] += normal[2];
+			x += faceNormals[vertex->ref.currentIndex()*3];
+			y += faceNormals[vertex->ref.currentIndex()*3+1];
+			z += faceNormals[vertex->ref.currentIndex()*3+2];
 		}
 
 		/* Average normals */
-		normal = vertex->norm;
-		normal[0] /= vertex->ref.size();
-		normal[1] /= vertex->ref.size();
-		normal[2] /= vertex->ref.size();
+		x /= vertex->ref.size();
+		y /= vertex->ref.size();
+		z /= vertex->ref.size();
 
 		/* Normalize */
-		s = sqrt(normal[0] * normal[0] + 
-				 normal[1] * normal[1] + 
-				 normal[2] * normal[2]);
+		s = sqrt(x * x + y * y + z * z);
 
-		normal[0] /= s;
-		normal[1] /= s;
-		normal[2] /= s;
+		x /= s;
+		y /= s;
+		z /= s;
+
+		vertex->norm[0] = x;
+		vertex->norm[1] = y;
+		vertex->norm[2] = z;
+
+		eggIterator(FREYJA_VERTEX, FREYJA_LIST_NEXT);
+
+		printf("%f %f %f\n", x, y, z);
     }
 
-	faceNormals.erase();
-
 	eggCriticalSection(EGG_WRITE_UNLOCK);
-#endif
 }
 
 
@@ -1342,6 +1345,22 @@ unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item,
 }
 
 
+egg_vertex_t *EggPlugin::eggGetVertex(unsigned int index)
+{
+	Vector<egg_vertex_t *> *vertex;
+	egg_vertex_t *v;
+	
+	vertex = mEgg->VertexList();
+
+	if (!vertex || vertex->empty() || index > vertex->size()-1)
+		return 0x0;
+
+	v = (*vertex)[index];
+
+	return v;
+}
+
+
 unsigned int EggPlugin::eggGetPolygon(egg_plugin_t type, int item, 
 									  float *value)
 {
@@ -1773,7 +1792,7 @@ int EggPlugin::eggGetTextureImage(unsigned int index,
 	EggTextureData *t;
 
 
-	if (mTextures.empty())
+	if (mTextures.empty() || index > mTextures.size()-1)
 		return -1;
 
 	t = mTextures[index];
@@ -2211,13 +2230,13 @@ unsigned int EggPlugin::eggTextureStoreBuffer(unsigned char *image,
 											  egg_colormode_t type)
 {
 	EggTextureData *t;
-	unsigned int sz;
+	unsigned int size;
 
 
 	if (!image || !depth || !width || !height)
-		return  PLUGIN_ERROR;
+		return PLUGIN_ERROR;
 
-	sz = width*height*depth;
+	size = width*height*depth;
 
 	t = new EggTextureData();
  
@@ -2225,9 +2244,9 @@ unsigned int EggPlugin::eggTextureStoreBuffer(unsigned char *image,
 	t->mHeight = height;
 	t->mType = type;
 	t->mBitDepth = depth * 8;
-	t->mImage = new unsigned char[sz];
+	t->mImage = new unsigned char[size];
   
-	memcpy(t->mImage, image, sz);
+	memcpy(t->mImage, image, size);
 
 	return eggTextureStore(t);
 }

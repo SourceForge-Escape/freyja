@@ -72,47 +72,33 @@ int freyja_model__mdl_import(char *filename)
   Mdl mdl;
   Map<unsigned int, unsigned int> trans;
   unsigned int vertex;
+  unsigned char *image;
 
 
   if (mdl.Load(filename))
     return -1;
 
-#ifdef FIXME
-  eggPromptUser("Would you like to use the Quake or Hexen palette? [0/1]", &p);
 
-  // FIXME: Move palettes to internal tables in this module, from files
 
-  if (p == 1)
-    err2 = img.PaletteLoad(freyja_rc_map("palettes/hexen2.pal"));
-  else
-    err2 = img.PaletteLoad(freyja_rc_map("palettes/quake.pal"));
+/* Mongoose 2004.04.22, 
+ * Store both a Quake and Hexen2 texture for now */
+  image = mdl.getTextureRGB24(Mdl::Quake, 0);
+
+  if (image)
+  {
+    eggTextureStoreBuffer(image, 3,
+			  mdl.getTextureWidth(), mdl.getTextureHeight(), 
+			  EGG_COLORMODE_RGB);
+  }
   
-  // FIXME: Must remove MtkImage dependency by making image mode conversion here
+  image = mdl.getTextureRGB24(Mdl::Hexen2, 0);
 
-  if (err2)
+  if (image)
   {
-    printf("ERROR[%i]: Loading palette\n", err2);
+    eggTextureStoreBuffer(image, 3,
+			  mdl.getTextureWidth(), mdl.getTextureHeight(), 
+			  EGG_COLORMODE_RGB);
   }
-  else
-  {
-    img.Load(mdl->Skin(0),
-	     (unsigned int)mdl->SkinWidth(),
-	     (unsigned int)mdl->SkinHeight(),
-	     COLORMODE_INDEXED);
-    img.Mode(COLORMODE_RGB);
-    
-    img.Image(&image);
-    
-    err2 = mtkTextureLoadBuffer(image, img.Width(),img.Height(),img.Mode());
-    
-    if (image)
-      delete [] image;
-  }
-#else
-  eggTextureStoreBuffer(mdl.Skin(0),
-			1, mdl.SkinWidth(), mdl.SkinHeight(), 
-			EGG_COLORMODE_INDEXED);
-#endif
 
   header = mdl.Header();
   frame = mdl.Frame();
@@ -139,7 +125,7 @@ int freyja_model__mdl_import(char *filename)
       z = frame[f].sframe.tv[v].v[2] * header->scale[2]+header->scale_origin[2];
 
       // Store vertices in group
-      vertex = eggVertexStore3f(x, y, z);
+      vertex = eggVertexStore3f(x, z, y); // freyja coordinates
 
       // Generates id translator list
       trans.Add(v, vertex);
@@ -159,33 +145,33 @@ int freyja_model__mdl_import(char *filename)
       eggVertex1i(trans[tris[i].vertindex[2]]);
 
       // Store texels into model and polygon ( store both at once in MDL )
-      s = (float)st_vert[tris[i].vertindex[0]].s / (float)mdl.SkinWidth();
-      t = (float)st_vert[tris[i].vertindex[0]].t / (float)mdl.SkinHeight();
+      s = (float)st_vert[tris[i].vertindex[0]].s / (float)mdl.getTextureWidth();
+      t = (float)st_vert[tris[i].vertindex[0]].t / (float)mdl.getTextureHeight();
       
       if (st_vert[tris[i].vertindex[0]].onseam == MDL_ALIAS_ONSEAM &&
 	  tris[i].facesfront == 0)
-	s = (float)(st_vert[tris[i].vertindex[0]].s + mdl.SkinWidth()/2) / 
-	  (float)mdl.SkinWidth();
+	s = (float)(st_vert[tris[i].vertindex[0]].s + mdl.getTextureWidth()/2) / 
+	  (float)mdl.getTextureWidth();
 
       eggTexel1i(eggTexelStore2f(s, t));
       
-      s = (float)st_vert[tris[i].vertindex[1]].s / (float)mdl.SkinWidth();
-      t = (float)st_vert[tris[i].vertindex[1]].t / (float)mdl.SkinHeight();
+      s = (float)st_vert[tris[i].vertindex[1]].s / (float)mdl.getTextureWidth();
+      t = (float)st_vert[tris[i].vertindex[1]].t / (float)mdl.getTextureHeight();
 
       if (st_vert[tris[i].vertindex[1]].onseam == MDL_ALIAS_ONSEAM &&
 	  tris[i].facesfront == 0)
-	s = (float)(st_vert[tris[i].vertindex[1]].s + mdl.SkinWidth()/2) / 
-	  (float)mdl.SkinWidth();
+	s = (float)(st_vert[tris[i].vertindex[1]].s + mdl.getTextureWidth()/2) / 
+	  (float)mdl.getTextureWidth();
 
       eggTexel1i(eggTexelStore2f(s, t));
 
-      s = (float)st_vert[tris[i].vertindex[2]].s / (float)mdl.SkinWidth();
-      t = (float)st_vert[tris[i].vertindex[2]].t / (float)mdl.SkinHeight();
+      s = (float)st_vert[tris[i].vertindex[2]].s / (float)mdl.getTextureWidth();
+      t = (float)st_vert[tris[i].vertindex[2]].t / (float)mdl.getTextureHeight();
 
       if (st_vert[tris[i].vertindex[2]].onseam == MDL_ALIAS_ONSEAM &&
 	  tris[i].facesfront == 0)
-	s = (float)(st_vert[tris[i].vertindex[2]].s + mdl.SkinWidth()/2) / 
-	  (float)mdl.SkinWidth();
+	s = (float)(st_vert[tris[i].vertindex[2]].s + mdl.getTextureWidth()/2) / 
+	  (float)mdl.getTextureWidth();
 
       eggTexel1i(eggTexelStore2f(s, t));
 

@@ -48,6 +48,7 @@ FreyjaModel::FreyjaModel()
 	_plugin = new EggPlugin(_egg, pluginDir);
 
 	_plugin->addModule("psk");
+	_plugin->addModule("nod");
 
 	delete [] pluginDir;
 
@@ -305,9 +306,6 @@ int FreyjaModel::handleEvent(int mode, int cmd)
 			event_print("Vertex with UV texels [%s]", 
 						(getFlags() & FL_VERTEX_UV) ? "on" : "off");
 			break;
-		case CMD_MISC_PAL_NEXT:
-			setFlags(FL_QUAKE_PAL, !(getFlags() & FL_QUAKE_PAL));
-			break;
 		case CMD_MISC_TEXTURE_NEXT:
 			setCurrentTextureIndex(getCurrentTextureIndex() + 1);
 			event_print("Texture[%i] in edit mode", getCurrentTextureIndex());
@@ -519,9 +517,6 @@ void FreyjaModel::setFlags(option_flag_t flag, int op)
 		_defaults ^= flag;
 
 	// Pretty output in freyja console
-	if (flag & FL_QUAKE_PAL)
-		event_print("Using %s palette for MDLs", op ? "Quake" : "Hexen2");
-
 	if (flag & FL_DUMP_TEXTURE)
 		event_print("Texture dumping is %s", op ? "on" : "off");
 
@@ -557,7 +552,7 @@ void FreyjaModel::Clear()
 	_current_frame = 0;
 	_current_animation_frame = 0;
 	_current_polygon = 0;
-	_zoom = 1.0f;
+	_zoom = 0.1f;
 	_bbox = 0;
 
 	_scroll[0] = 0.0f;

@@ -28,6 +28,12 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20040422) Mongoose <mongoose@icculus.org>
+	
+	* New material managing system starting
+	* New GUI elements and refacoring
+	* Gtk+ stock theme support
+	
  Freyja (0.3.5-20040420) Mongoose <mongoose@icculus.org>
 
 	* Use of WM hooks to set a X, Y pos of window from mlisp

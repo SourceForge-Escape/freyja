@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
 /*==========================================================================
  * 
  * Project : MDDC 
@@ -26,6 +27,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef USING_OPENGL
+#   include <GL/gl.h>
+#endif
+
 #include "Md2.h"
 
 
@@ -68,6 +74,25 @@ VertexIndex_t *Md2::Frame(int n)
 {
   return _header.frames[n].verts;
 }
+
+
+unsigned int Md2::getNumFrames()
+{
+  return _header.numFrames;
+}
+
+
+AliasFrame_t *Md2::getFrame(unsigned int frame)
+{
+  if (frame > getNumFrames())
+  {
+    return NULL;
+  }
+
+  return _header.frames + frame;
+}
+
+
 
 void Md2::BoundingBox_Update(const float x, const float y, const float z)
 {
@@ -241,7 +266,7 @@ int Md2::Load(char *filename)
    _header.frames = new AliasFrame_t[_header.numFrames];
 
    /* Read frames. */
-   for(i = 0; i < _header.numFrames; i++) 
+   for(i = 0; i < _header.numFrames; ++i) 
    {
       float s0, s1, s2;
       float t0, t1, t2;
@@ -272,7 +297,7 @@ int Md2::Load(char *filename)
       _bbox.zMin = 0;
       _bbox.zMax = 0;
 
-      for(j = 0; j < _header.numXYZ; j++) 
+      for (j = 0; j < _header.numXYZ; ++j) 
       {
          unsigned char v;
 
@@ -359,7 +384,60 @@ double Md2::GetRadius()
 }
 
 
-#ifdef TEST_MD2
+#ifdef USING_OPENGL
+void Md2::render(unsigned int frame, unsigned int texture)
+{
+	short ss, tt;
+	unsigned int i, j;
+	MD2_t *md2_header;
+	VertexIndex_t *md2_vertex;
+	AliasFrame_t *md2_frame;
+ 
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	md2_header = Header();
+	md2_vertex = Frame(frame);
+	md2_frame = getFrame(frame);
+
+	if (!md2_frame || !md2_header)
+	{
+		return;
+	}
+    
+	glPushMatrix();
+
+	for (i = 0; (int)i < md2_header->numTris; ++i)
+	{
+		glBegin(GL_TRIANGLES);
+		
+		for (j = 0; j < 3; ++j)
+		{
+			TexCoords(&ss, &tt, i, j);
+
+			glTexCoord2f((float)ss / (float)md2_header->skinWidth,
+							 (float)tt / (float)md2_header->skinHeight);
+#ifdef OBSOLETE
+			glVertex3f(md2_frame->verts[md2_header->tris[i].v[j]].x,
+						  md2_frame->verts[md2_header->tris[i].v[j]].y,
+						  md2_frame->verts[md2_header->tris[i].v[j]].z);
+#else
+			glVertex3f(md2_vertex[md2_header->tris[i].v[j]].x*md2_frame->scale[0]+md2_frame->translate[0],
+						  md2_vertex[md2_header->tris[i].v[j]].y*md2_frame->scale[1]+md2_frame->translate[1],
+						  md2_vertex[md2_header->tris[i].v[j]].z*md2_frame->scale[2]+md2_frame->translate[2]);
+#endif
+		}
+		
+		glEnd();
+	}
+	
+	glPopMatrix();
+}
+#endif
+
+
+#ifdef UNIT_TEST_MD2
 int main(int argc, char *argv[])
 {
   Md2 md2;

@@ -135,6 +135,7 @@
 		(menu_seperator)
 
 		(submenu "Generate Mesh"
+			(menu_item "Generate Normals"  EVENT_MISC CMD_MISC_GEN_NORMALS)
 			(menu_item "Cube"     EVENT_MESH  CMD_MESH_GENERATE_CUBE)
 			(menu_item "TriSrip"  EVENT_MESH  CMD_MESH_GENERATE_TRIS)
 			(menu_item "Cylinder" EVENT_MESH  CMD_MESH_GENERATE_CAN)
@@ -150,9 +151,6 @@
 				(toolbar_button "open-model.png" "Open Model"
 					"Open Model file(s)"
 				    EVENT_MAIN  CMD_MAIN_OPEN_MODEL)
-				(toolbar_button "open-texture.png" "Open Texture"
-					"Open Textures file(s)"
-				    EVENT_MAIN  CMD_MAIN_OPEN_TEXTURE)
 
 				(toolbar_togglebutton true "point.png" "Points" 
 					"Point render mode" 
@@ -310,8 +308,14 @@
 					(spinbutton 0.0 -10000.0 10000.0 802)))
 
 
-
 			  (tab "Skin" FREYJA_MODE_TEXTURE_EDIT
+
+				(hbox 1 0 0 1 0 
+					(toolbar
+						(toolbar_button "gtk-open" "Open Texture"
+							"Open Textures file(s)"
+						    EVENT_MAIN  CMD_MAIN_OPEN_TEXTURE)))
+
 					 (hbox 1 0 0 1 0 
 							 (togglebutton "Merge" 0 EVENT_MISC 31)
 							 (togglebutton "Slot Load" 0 EVENT_MISC 38)
@@ -379,17 +383,51 @@
 
 
 				(tab "Material" FREYJA_MODE_MATERIAL_EDIT
+
+				(hbox 0 1 0 1 0 
+					(toolbar
+						(toolbar_button "gtk-new" "New Material"
+							"Create new material"
+						    EVENT_MAIN  CMD_MAIN_NEW_MATERIAL)
+
+						(toolbar_button "gtk-open" "Open Material"
+							"Open material"
+						    EVENT_MAIN  CMD_MAIN_OPEN_MATERIAL)
+
+						(toolbar_button "gtk-save-as" "Save Material As..."
+							"Save material"
+						    EVENT_MAIN  CMD_MAIN_SAVE_MATERIAL)))
+
+
+					 (hbox 1 1 0 1 1
+						(label "Current Material" 0.0 0.5)
+						(spinbutton 0 100 0 99999))
+
+					 (hbox 1 0 0 1 0 (hsep))
+
 					(hbox 0 1 0 1 1
 						(label "Name" 0.0 0.5)
-						(textbox 799) 
-						(button "..." EVENT_MAIN CMD_MAIN_OPEN_MATERIAL))
+						(textbox 799))
 
-						;(hbox 0 1 0 1 1
-						;	(button ""      EVENT_MAIN  -1)
-						;	(menu_item "New"     EVENT_MAIN  -1)
-						;	(menu_item "Open"    EVENT_MAIN  CMD_MAIN_OPEN_MATERIAL)
-						;	(menu_item "Save As" EVENT_MAIN  CMD_MAIN_SAVE_MATERIAL))
+					 (hbox 0 1 0 1 1
+							 (label "Texture1" 0.0 0.5) 
+							 (textbox 798)
+							 (button "..." 
+								EVENT_MAIN	CMD_MAIN_OPEN_TEXTURE))
+					 (hbox 0 1 0 1 0 
+							(label "Texture2" 0.0 0.5) 
+							(textbox 797)
+							(button "..." 
+								EVENT_MAIN	CMD_MAIN_OPEN_TEXTURE2))
 
+					 (hbox 1 0 0 1 0 
+							 (label "Texture1 ID" 0.0 0.5) 
+							 (spinbutton 0 0 100 717))
+					 (hbox 1 0 0 1 0 
+							 (label "Texture2 ID" 0.0 0.5)
+							 (spinbutton 0 0 100 718))
+					 
+					 ;;(hbox 1 0 0 1 0 (hsep))
 					 (hbox 1 1 0 1 1
 							 (label "Ambient" 0.0 0.5))
 					 (hbox 1 1 0 1 1
@@ -430,23 +468,7 @@
 							 (label "Shininess" 0.0 0.5)
 							 (spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 716))
 
-					 (hbox 1 0 0 1 0 
-							 (label "Texture1 ID" 0.0 0.5) 
-							 (spinbutton 0 0 100 717))
-
-					 (hbox 1 0 0 1 0 
-							 (label "Texture1" 0.0 0.5) 
-							 (textbox 798))
-
-					 (hbox 1 0 0 1 0 
-							 (label "Texture2 ID" 0.0 0.5)
-							 (spinbutton 0 0 100 718))
-
-					 (hbox 1 0 0 1 0 
-							 (label "Texture2" 0.0 0.5) 
-							 (textbox 797))
-					 
-					 (hbox 1 0 0 1 0 (hsep))
+					;;(hbox 1 0 0 1 0 (hsep))
 					 
 					 (hbox 1 0 0 1 0
 							 (label "Source" 0.0 0.5))

@@ -21,8 +21,8 @@
  ================================================================*/
 
 
-#ifndef __FREYJA_MONGOOSE_LWO_H_
-#define __FREYJA_MONGOOSE_LWO_H_
+#ifndef GUARD__FREYJA_MONGOOSE_LWO_H
+#define GUARD__FREYJA_MONGOOSE_LWO_H
 
 #include <stdio.h>
 

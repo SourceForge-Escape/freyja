@@ -2613,7 +2613,7 @@ int freyja_model__psk_check(char *filename)
 int freyja_model__psk_import(char *filename)
 {
 	PSKModel psk;
-	unsigned int i, j, v, t;
+	unsigned int i, j, v, t, m;
 	Map<unsigned int, unsigned int> trans;
 
 
@@ -2624,7 +2624,7 @@ int freyja_model__psk_import(char *filename)
 		return -2;
 	
 	/* Start a new mesh */
-	eggBegin(FREYJA_MESH);
+	m = eggBegin(FREYJA_MESH);
 	
 	/* Start a new vertex group */
 	eggBegin(FREYJA_GROUP);
@@ -2677,17 +2677,6 @@ int freyja_model__psk_import(char *filename)
 		eggEnd(); // FREYJA_POLYGON
 	}
 
-	//	if (psk.mNormalCount > 0)
-	//	{
-	//		for (i = 0; (int)i < psk.mVertexCount; ++i)
-	//		{
-	//			eggVertexNormalStore3f(trans[i],
-	//								   psk.mNormals[i][0], 
-	//								   psk.mNormals[i][1], 
-	//								   psk.mNormals[i][2]);
-	//		}
-	//	}
-	
 	eggEnd(); // FREYJA_MESH
 
 	/*** Import skeleton *********************/

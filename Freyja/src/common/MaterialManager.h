@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Midgard
  * Author  : Terry 'Mongoose' Hendrix II
@@ -23,7 +23,7 @@
  *
  * 2004.03.25:
  * Mongoose - Created
- ================================================================*/
+ =========================================================================*/
 
 
 #ifndef GUARD__MIDGARD_MONGOOSE_MATERIALMANAGER_H_
@@ -123,7 +123,7 @@ class MaterialManager
 	void applyEffectGL();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Apply material using OpenGL of current material
+	 * Post : Apply current material using OpenGL
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -134,7 +134,7 @@ class MaterialManager
 	void applyEffectGL(unsigned int index);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Apply material using OpenGL of material[index],
+	 * Post : Apply material[index] using OpenGL,
 	 *        this call doesn't affect Current index
 	 *
 	 *-- History ------------------------------------------

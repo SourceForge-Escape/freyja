@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*==========================================================================
  * 
  * Project : MDDC 
@@ -13,6 +14,9 @@
  * 
  *-- History ---------------------------------------------------------- 
  *
+ * 2004.04.22:
+ * Mongoose - RGB Texture generation and internal palettes
+ *
  * 2000-10-12:
  * Mongoose - Updated max verts
  *
@@ -20,8 +24,8 @@
  ==========================================================================*/
 
 
-#ifndef __QUAKEFORGE_MONGOOSE_MDL_H
-#define __QUAKEFORGE_MONGOOSE_MDL_H
+#ifndef GUARD__QUAKEFORGE_MONGOOSE_MDL_H
+#define GUARD__QUAKEFORGE_MONGOOSE_MDL_H
 
 /* Model general defines */
 #define MDL_IDPOLYGON         0x4F504449
@@ -158,6 +162,12 @@ class Mdl
 
 public:
 
+	typedef enum {
+		Quake = 1,
+		Hexen2
+
+	} palette_type;
+
    Mdl();
 
    Mdl(char *filename);
@@ -176,13 +186,28 @@ public:
 
    void Triangle(dtriangle_t *triangle);
 
-   unsigned char *Skin(int i);
+	unsigned char *getTextureRGB24(palette_type type, int index);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns either a quake or hexen2 palette based
+	 *        image based on internal indexed texture
+	 *
+	 *        image is RGB and 24bpp
+	 *
+	 *        You must free the returned image yourself
+	 *        when done
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.04.22:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	int getTextureWidth();
+	
+	int getTextureHeight();
 
    void Skin(MDL_Skin_t *skin);
-
-   int SkinWidth();
-
-   int SkinHeight();
 
    MDL_Frame_t *Frame();
 
@@ -195,6 +220,9 @@ public:
    int Load(char *filename);
 
 private:
+
+   static unsigned char mPaletteQuake[768];
+   static unsigned char mPaletteHexen2[768];
 
    /* Mirror of Mdl_t struct, for convence inside class */
 
