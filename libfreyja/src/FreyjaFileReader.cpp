@@ -45,6 +45,7 @@
 
 FreyjaFileReader::FreyjaFileReader()
 {
+	mOrder = LITTLE;
 	mFileHandle = 0x0;
 	mTempBufferHackSz = 2047;
 	mTempBufferHack = new char[mTempBufferHackSz+1];
@@ -159,6 +160,12 @@ bool FreyjaFileReader::isDirectory(const char *filename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void FreyjaFileReader::bigEndianMode()
+{
+	mOrder = BIG;
+}
+
+
 void FreyjaFileReader::closeDirectory()
 {
 	if (mDirectoryListing)
@@ -208,6 +215,12 @@ char *FreyjaFileReader::getNextDirectoryListing()
 	}
 
 	return mDirectoryListing;
+}
+
+
+void FreyjaFileReader::littleEndianMode()
+{
+	mOrder = LITTLE;
 }
 
 
@@ -530,7 +543,11 @@ long FreyjaFileReader::readLong()
 		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
 
 #ifdef HAVE_BIG_ENDIAN
-	FIX_INT(*ptr)
+	if (mOrder == LITTLE)
+		FIX_INT(*ptr);
+#else
+	if (mOrder == BIG)
+		i = SWAP_4(i);
 #endif
 	return i;
 }
@@ -546,7 +563,11 @@ unsigned long FreyjaFileReader::readLongU()
 		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
 
 #ifdef HAVE_BIG_ENDIAN
-	FIX_INT(*ptr)
+	if (!mOrder == LITTLE)
+		FIX_INT(*ptr);
+#else
+	if (mOrder == BIG)
+		u = SWAP_4(u);
 #endif
 	return u;
 }

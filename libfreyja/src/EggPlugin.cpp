@@ -61,6 +61,7 @@ EggPlugin::EggPlugin(Egg *egg)
 	mTextureId = 0;
 
 #ifdef unix
+   	addPluginDirectory("/usr/lib/freyja/modules/model");
    	addPluginDirectory("/usr/local/lib/freyja/modules/model");
 	addPluginDirectory("/usr/share/freyja/modules/model");
 #else
