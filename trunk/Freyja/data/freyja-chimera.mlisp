@@ -235,13 +235,13 @@
 					(hbox 0 0 0 1 0 
 						(toolbar 
 							(toolbar_button "gtk-new" "New"	
-								"New document"		eMode eNewFile)
+								"New model"		eMode eNewFile)
 
 							(toolbar_button "gtk-open" "Open..."
-								"Open document..."	eMode  eOpenFile)
+								"Open model..."	eMode  eOpenFile)
 
-							(toolbar_button "gtk-save" "Save"
-								"Save document"		eMode  eSaveFile)
+							(toolbar_button "gtk-save-as" "Save As..."
+								"Save model as..."		eMode  eSaveAsFile)
 
 							(toolbar_togglebutton true
 								"cursor-select.png" "Select" "Select by pointer"

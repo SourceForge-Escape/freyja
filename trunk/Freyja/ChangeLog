@@ -27,6 +27,13 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ Freyja (0.3.5-20041211) 'Chimera' Mongoose <mongoose@icculus.org>
+
+	o Rendering changes for grid system to aid 'to scale' editing
+	o Saving file now updates recent list and actions based on it
+	o Points new default joint render type
+	
+	
  Freyja (0.3.5-20041207) 'Chimera' Mongoose <mongoose@icculus.org>
 
 	o smd and obj plugins written last night are now offical plugins

@@ -1556,6 +1556,16 @@ void FreyjaControl::handleFilename(const char *filename)
 			type = 2;
 			type2 = 0;
 		}
+
+		if (!failed)
+		{
+			char title[1024];
+
+			snprintf(title, 1024, "%s - Freyja", filename);
+			freyja_set_main_window_title(title);
+			addRecentFilename(filename);
+			mCleared = true;
+		}
 		break;
 
 
