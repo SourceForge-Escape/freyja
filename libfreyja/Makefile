@@ -22,10 +22,10 @@ NAME=freyja8
 MAJOR_VERSION=0
 MINOR_VERSION=8
 MICRO_VERSION=14
-BUILD_ID=20040821
+BUILD_ID=20040823
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 EXT=.so
-TREE_DIR=libfreyja_model
+TREE_DIR=libfreyja
 TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
 
 ################################################################
@@ -49,7 +49,7 @@ INSTALL_INCLUDE=/usr/local/include
 
 #CONFIGURE_DEF=`grep -e "-D" ./config.cache`
 #CONFIGURE_LNK=`grep -e "-l" ./config.cache`
-CONFIGURE_DEF=
+CONFIGURE_DEF=-DEGGIMAGE_PLUGINS
 CONFIGURE_LNK=
 
 ################################################################
