@@ -38,9 +38,6 @@
 #include "Egg.h"
 
 
-#define DEBUG_EGG_LOAD
-
-
 void __print_unsigned_int(unsigned int u)
 {
 	printf("<%u>\n", u);
@@ -472,67 +469,66 @@ void Egg::transform(egg_type_t type, egg_transform_t transform, vec3_t xyz)
 }
 
 
-void Egg::combine(egg_type_t type, unsigned int A, unsigned int B)
-{
+bool Egg::combineVertices(unsigned int A, unsigned int B)
+{		
+	egg_vertex_t *a = getVertex(A);
+	egg_vertex_t *b = getVertex(B);
+	egg_polygon_t *polygon;
+	egg_group_t *grp;
+	unsigned int i, j;
 
-	switch (type)
+
+	if (A == B || !a || !b)
+		return false;
+			
+	for (i = b->ref.begin(); i < b->ref.end(); ++i)
 	{
-	case VERTEX:
-		if (A != B)
+		polygon = getPolygon(b->ref[i]);
+		
+		if (polygon)
 		{
-			egg_vertex_t *a = getVertex(A);
-			egg_vertex_t *b = getVertex(B);
-			egg_polygon_t *polygon;
-			egg_group_t *grp;
-			
-			
-			if (!a || !b)
-				return;
-			
-			for (b->ref.start(); b->ref.forward(); b->ref.next())
-			{
-				polygon = getPolygon(b->ref.current());
-				
-				if (polygon)
-				{
-					// Must be replace B with A to match sorted list ids
-					polygon->vertex.Replace(B, A);
-					a->ref.pushBack(b->ref.current());
-				}
-			}
-			
-			// Mongoose: Don't let VertexDel see we refence any polygons
-			b->ref.clear();
-			
-			// Mongoose 2002.01.19, handle groups here
-			// Remove all references to dead vertex from groups
-			for (mGroups.start(); mGroups.forward(); mGroups.next())
-			{
-				grp = mGroups.current();
-				
-				for (grp->vertex.start(); 
-					  grp->vertex.forward(); grp->vertex.next())
-				{
-					if (grp->vertex.current() == B)
-					{
-						grp->vertex.remove(grp->vertex.currentIndex());
-					}
-				}
-			}
-			
-			for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
-			{
-				if (isVertexInPolygon(B, mPolygons.current()))
-				{
-					(mPolygons.current())->vertex.Replace(B, A);
-				}
-			}
-			
-			mVertices.remove(B);
-			delete b;
+			/* Replace B with A to match sorted array ids */
+			polygon->vertex.Replace(B, A);
+			a->ref.pushBack(b->ref[i]);
 		}
-		break;
-	case TEXCOORD:
+	}
+			
+	/* Don't let VertexDel() see we refence any polygons */
+	b->ref.clear();
+			
+	// Mongoose 2002.01.19, handle groups here
+	// Remove all references to dead vertex from groups
+	for (i = mGroups.begin(); i < mGroups.end(); ++i)
+	{
+		grp = mGroups[i];
+		
+		for (j = grp->vertex.begin(); 
+			  grp->vertex.forward(); grp->vertex.next())
+		{
+			if (grp->vertex.current() == B)
+			{
+				grp->vertex.remove(grp->vertex.currentIndex());
+			}
+		}
+	}
+	
+	for (mPolygons.start(); mPolygons.forward(); mPolygons.next())
+	{
+		if (isVertexInPolygon(B, mPolygons.current()))
+		{
+			(mPolygons.current())->vertex.Replace(B, A);
+		}
+	}
+	
+	mVertices.remove(B);
+	delete b;
+
+	return true;
+}
+
+
+void Egg::combineTexcoords(unsigned int A, unsigned int B)
+{
 		if (A != B)
 		{
 			egg_texcoord_t *a = getTexCoord(A);
@@ -560,12 +556,7 @@ void Egg::combine(egg_type_t type, unsigned int A, unsigned int B)
 			b->ref.clear();
 			
 			remove(TEXCOORD, B);
-		}
-		break;
-	default:
-		printDebug(0, "combine> Not Implemented for %d type %s:%d\n",
-					  type, __FILE__, __LINE__);
-	}
+
 }
 
 
@@ -742,10 +733,11 @@ int Egg::loadFile(char *filename)
 			texcoordlist.pushBack(transT[u]);
 		}
 
-#ifdef DEBUG_EGG_LOAD
-		printDebug(5, "*** %i %i %i %i\n", 
-					  i, id, vertexlist.size(), texcoordlist.size());
-#endif
+		if (isDebugLevel(5))
+		{
+			printDebug("*** %i %i %i %i\n", 
+						  i, id, vertexlist.size(), texcoordlist.size());
+		}
 
 		polygonId = addPolygon(vertexlist, texcoordlist, material);
 		transP.Add(id, polygonId);
@@ -2114,19 +2106,21 @@ void Egg::resizeBoundingBox(egg_group_t *grp)
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-void Egg::printDebug(unsigned int level, char *s, ...)
+bool Egg::isDebugLevel(unsigned int level)
+{
+	return (mDebugLevel >= level);
+}
+
+
+void Egg::print(char *s, ...)
 {
 	va_list args;
 
-
-	if (mDebugLevel >= level)
-	{
-		va_start(args, s);
-		fprintf(stdout, "Egg::");
-		vfprintf(stdout, s, args);
-		fprintf(stdout, "\n");
-		va_end(args);
-	}
+	va_start(args, s);
+	fprintf(stdout, "Egg::");
+	vfprintf(stdout, s, args);
+	fprintf(stdout, "\n");
+	va_end(args);
 }
 
 
