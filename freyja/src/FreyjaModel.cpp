@@ -74,12 +74,16 @@ FreyjaModel::~FreyjaModel()
 
 vec3_t *FreyjaModel::getVertexXYZ(long index)
 {
+#ifdef FREYJA_ABI_BACKEND
+	return freyjaGetVertexXYZ(index);
+#else
 	egg_vertex_t *vertex = mEgg->getVertex(index);
 			 
 	if (vertex)
 		return &(vertex->pos);
 
 	return 0x0;
+#endif
 }
 
 
@@ -669,8 +673,9 @@ void FreyjaModel::mirrorTexCoord(long texCoordIndex, bool x, bool y)
 
 void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
 {
+#ifndef FREYJA_ABI_BACKEND
 	egg_polygon_t *poly;
-
+#endif
 
 	// HACKY entry
 	long i;
@@ -678,21 +683,29 @@ void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
 	{
 		for (i = mUVMap.begin(); i < (int)mUVMap.end(); ++i)
 		{
+#ifdef FREYJA_ABI_BACKEND
+	freyjaPolygonSetMaterial1i(mUVMap[i], material);
+#else
 			poly = mEgg->getPolygon(mUVMap[i]);
 
 			if (poly)
 			{
 				poly->shader = material;
 			}
+#endif
 		}
 
 		return;
 	}
 
+#ifdef FREYJA_ABI_BACKEND
+	freyjaPolygonSetMaterial1i(polygonIndex, material);
+#else
 	poly = mEgg->getPolygon(polygonIndex);
 
 	if (poly)
 		poly->shader = material;
+#endif
 }
 
 
@@ -832,8 +845,8 @@ unsigned int FreyjaModel::getCurrentVertex()
 
 unsigned int FreyjaModel::getCurrentVertexFrame()
 {
-	printf("FreyjaModel::getCurrentVertexFrame> Not Implemented %s:%d\n",
-		   __FILE__, __LINE__);
+	freyja_print("FreyjaModel::getCurrentVertexFrame> Not Implemented %s:%d\n",
+				 __FILE__, __LINE__);
 	return 0;
 }
 
@@ -939,6 +952,8 @@ void FreyjaModel::setCurrentVertex(unsigned int index)
 
 void FreyjaModel::setCurrentVertexFrame(unsigned int index)
 {
+	freyja_print("FreyjaModel::getCurrentVertexFrame> Not Implemented %s:%d\n",
+				 __FILE__, __LINE__);
 }
 
 
@@ -948,7 +963,7 @@ void FreyjaModel::setCurrentPolygonEdgeCount(unsigned int count)
 	{
 		_poly_sz = 3;
 	}
-	else if (count > 6)
+	else if (count > 6) // New 6-side limit enforced
 	{
 		_poly_sz = 6;
 	}
@@ -1056,6 +1071,14 @@ void FreyjaModel::deleteAnimationFrame(unsigned int index)
 
 void FreyjaModel::getBoneTranslation(float *x, float *y, float *z)
 {
+#ifdef FREYJA_ABI_BACKEND
+	vec3_t xyz;
+
+	freyjaGetBoneTranslation3fv(getCurrentBone(), xyz);
+	*x = xyz[0];
+	*y = xyz[1];
+	*z = xyz[2];
+#else
 	egg_tag_t *tag;
 
 
@@ -1067,11 +1090,15 @@ void FreyjaModel::getBoneTranslation(float *x, float *y, float *z)
 		*y = tag->center[1];
 		*z = tag->center[2];
 	}
+#endif
 }
 
 
 void FreyjaModel::setBoneTranslation(float x, float y, float z)
 {
+#ifdef FREYJA_ABI_BACKEND
+	freyjaBoneTranslate3f(getCurrentBone(), x, y, z);
+#else
 	egg_tag_t *tag;
 
 
@@ -1083,11 +1110,20 @@ void FreyjaModel::setBoneTranslation(float x, float y, float z)
 		tag->center[1] = y;
 		tag->center[2] = z;
 	}
+#endif
 }
 
 
 void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 {
+#ifdef FREYJA_ABI_BACKEND
+	vec3_t xyz;
+
+	freyjaGetBoneRotationXYZ3fv(getCurrentBone(), xyz);
+	*x = xyz[0];
+	*y = xyz[1];
+	*z = xyz[2];
+#else
 	egg_tag_t *tag;
 
 
@@ -1099,11 +1135,15 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 		*y = tag->rot[1];
 		*z = tag->rot[2];
 	}
+#endif
 }
 
 
 void FreyjaModel::setBoneRotation(float x, float y, float z)
 {
+#ifdef FREYJA_ABI_BACKEND
+	freyjaBoneRotateEulerXYZ3f(getCurrentBone(), x, y, z);
+#else
 	egg_tag_t *tag;
 
 
@@ -1115,6 +1155,7 @@ void FreyjaModel::setBoneRotation(float x, float y, float z)
 		tag->rot[1] = y;
 		tag->rot[2] = z;
 	}
+#endif
 }
 
 
@@ -1686,6 +1727,28 @@ void FreyjaModel::cullUsingVertexBuffer()
 
 void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 {
+#ifdef FREYJA_ABI_BACKEND
+	unsigned int i;
+	vec3_t *xyz;
+
+
+	if (mList.empty())
+		return;
+
+	for (i = mList.begin(); i < mList.end(); ++i)
+	{
+		xyz = freyjaGetVertexXYZ(mList[i]);
+
+		if (y)
+			(*xyz)[0] = -(*xyz)[0];
+
+		if (x)
+			(*xyz)[1] = -(*xyz)[1];      
+
+		if (z)
+			(*xyz)[2] = -(*xyz)[2];      
+	}
+#else
 	unsigned int i;
 	egg_vertex_t *v;
 
@@ -1706,6 +1769,7 @@ void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 		if (z)
 			v->pos[2] = -v->pos[2];      
 	}
+#endif
 }
 
 

@@ -30,6 +30,7 @@
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
 	o Please report any issues including performance affected by this release
+	o Moving more and more stuff behind libfreyja facade so I can do a rewrite
 	o New 'selected' box rendering ( cuter )
 	o Removed meshtree renderer, 'flashing selection, etc -- file request if
       you want any of that back, since I thought they weren't useful anymore
