@@ -24,6 +24,7 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
 #include <mstl/Map.h>
+#include <mstl/Vector.h>
 
 #include "MaterialManager.h"
 
@@ -72,11 +73,11 @@ typedef enum freyja_control_mode             /* Minor control modes */
 
 typedef enum freyja_edit_mode                /* Major control modes */
 {
-	TEXTURE_EDIT_MODE  = 0,  // FIXME: Mesh / Skeletal / UV / etc
-	MODEL_VIEW_MODE    = 1,
-	MAP_VIEW_MODE      = 2,
-	MODEL_EDIT_MODE    = 3,
-	MATERIAL_EDIT_MODE = 4
+	TEXTURE_EDIT_MODE = 0, 
+	ANIMATION_EDIT_MODE,
+	MAP_EDIT_MODE,
+	MODEL_EDIT_MODE,
+	MATERIAL_EDIT_MODE
 
 } freyja_edit_mode_t;
 
@@ -238,6 +239,9 @@ private:
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
 
+	//	Vector<Event *> mEvents;
+
+	unsigned int mLastEvent, mLastCommand;
 
 	FreyjaResource mResource;               /* Resource system */
 

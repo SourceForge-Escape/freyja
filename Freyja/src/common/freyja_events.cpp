@@ -28,23 +28,10 @@
 #include "freyja_events.h"
 
 
-int MOUSE_BTN_PRESSED = 0;
-bool MOUSE_QUERY_ACTIVE = true;
 FreyjaModel   *gFreyjaModel = NULL;
 FreyjaRender  *RENDER = NULL;
 FreyjaControl *gFreyjaControl = NULL;
 
-
-
-int query_mouse_active()
-{
-	return MOUSE_QUERY_ACTIVE;
-}
-
-int query_mouse_button()
-{
-	return MOUSE_BTN_PRESSED;
-}
 
 int query_load_texture_to_slot()
 {
@@ -52,16 +39,6 @@ int query_load_texture_to_slot()
 
 	flags = gMaterialManager->getGeneralFlags();
 	return flags;
-}
-
-void event_set_mouse_active(bool b)
-{
-	MOUSE_QUERY_ACTIVE = b;
-}
-
-void event_set_mouse_button(int i)
-{
-	MOUSE_BTN_PRESSED = i;
 }
 
 
@@ -164,20 +141,20 @@ void event_motion(int x, int y)
 }
 
 
-void freyja_event2i(int event, int cmd)
-{
-	if (gFreyjaControl)
-	{
-		gFreyjaControl->handleEvent(event, cmd);
-	}
-}
-
-
 void event_mouse(int button, int state, int mod, int x, int y)
 {
 	if (gFreyjaControl)
 	{
 		gFreyjaControl->Mouse(button, state, mod, x, y);
+	}
+}
+
+
+void freyja_event2i(int event, int cmd)
+{
+	if (gFreyjaControl)
+	{
+		gFreyjaControl->handleEvent(event, cmd);
 	}
 }
 

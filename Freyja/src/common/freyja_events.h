@@ -79,12 +79,9 @@ void event_resize(int width, int height);
 void event_motion(int x_delta, int y_delta);
 void event_mouse(int button, int state, int mod, int x, int y);
 
-int query_mouse_active();
-int query_mouse_button();
-int query_load_texture_to_slot();
 
-void event_set_mouse_active(bool b);
-void event_set_mouse_button(int i);
+
+int query_load_texture_to_slot();
 void event_set_load_texture_to_slot(int i);
 
 
@@ -160,7 +157,7 @@ typedef enum
 	KEY_F11        = 510,
 	KEY_F12        = 511,
 
-   KEY_SPACE      = 600
+	KEY_SPACE      = 600
 
 } key_std_t;
 
@@ -209,22 +206,11 @@ enum freyja_event_animation_cmd
 enum freyja_event_main_cmd
 {
 	CMD_MAIN_SHUTDOWN = 1,
-	CMD_MAIN_NEW_MODEL,
-	CMD_MAIN_OPEN_MODEL,
-	CMD_MAIN_SAVE_MODEL,
-	CMD_MAIN_OPEN_TEXTURE,
-	CMD_MAIN_OPEN_TEXTURE2,
-	CMD_MAIN_SELECTED_DIR,
-	CMD_MAIN_SELECTED_FILE,
-	CMD_MAIN_SAVE_MATERIAL,
-	CMD_MAIN_OPEN_MATERIAL,
-	CMD_MAIN_NEW_MATERIAL,
+	EVENT_NEW_FILE,
+	EVENT_OPEN_FILE,
+	EVENT_SAVE_FILE,
 	CMD_MAIN_DEBUG_EGG,
-	CMD_MAIN_OPEN_PALETTE,
-	CMD_TOGGLE_FULLSCREEN,
-	CMD_FILE_OPEN,
-	CMD_FILE_SAVE,
-	CMD_FILE_NEW
+	CMD_TOGGLE_FULLSCREEN
 };
 
 enum freyja_event_polygon_cmd
@@ -262,7 +248,7 @@ enum freyja_event_bone_cmd
 
 enum freyja_event_misc_cmd
 {
-	CMD_MISC_ZOOM_IN =  1,
+	CMD_MISC_ZOOM_IN = 1,
 	CMD_MISC_ZOOM_OUT,
 
 	CMD_MISC_SIDES_P,
@@ -367,7 +353,8 @@ enum freyja_event_freyja_mode
 	FREYJA_MODE_LOAD_MATERIAL     = 105,
 	FREYJA_MODE_LOAD_EMITTER      = 106,
 	FREYJA_MODE_SAVE_EMITTER      = 107,
-	FREYJA_MODE_LOAD_PALETTE      = 108
+	FREYJA_MODE_LOAD_ANIMATION,
+	FREYJA_MODE_LOAD_MAP
 };
 
 enum custom_color                   /* Custom GUI colors */
