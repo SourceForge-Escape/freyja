@@ -71,6 +71,24 @@ FreyjaModel::~FreyjaModel()
 }
 
 
+unsigned int FreyjaModel::getModelCount()
+{
+	return 1;  // Egg backend use only allows 1 model, but soon we can replace Egg   =)
+}
+
+
+void FreyjaModel::getModel(RenderModel &model, unsigned int index)
+{
+	model.index = -1;
+
+	if (index > getModelCount())
+		return;
+
+	model.index = index;
+	model.setEgg(_egg, this);
+}
+
+
 // Gets polygon for given egg polygon for given vertex animation frame
 void createRenderPolygon(RenderPolygon &face,
 						 egg_polygon_t &polygon, long frame)
@@ -157,6 +175,48 @@ void createRenderPolygon(RenderPolygon &face,
 
 	face.material = polygon.shader;
 	face.count = n;
+}
+
+
+void FreyjaModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh)
+{
+	egg_polygon_t *polygon;
+	egg_group_t *grp;
+	unsigned int i;
+	long frame = -1;
+
+
+	/* Vertex morph frame fu */
+	grp = _egg->getGroup(getCurrentGroup());
+	if (grp && grp->flags == 0xBADA55)
+		frame = grp->id;
+
+
+	/* Mongoose 2004.03.26, 
+	 * This was here for vertex morph frames, still used for edit updates */
+	if (mesh.r_polygon.size() != mesh.polygon.size())
+	{
+		freyja_print("createRenderMesh> mesh[%i]: %i polygons, %i cached...",
+					 mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
+
+		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
+		{
+			polygon = _egg->getPolygon(mesh.polygon[i]);
+			
+			if (polygon)
+			{
+				mesh.r_polygon.pushBack(polygon);
+			}
+		}
+	}
+
+	rmesh.setEgg(_egg, &mesh);
+	rmesh.gbegin = mesh.group.begin(); 
+	rmesh.gend = mesh.group.end();
+
+	rmesh.id = mesh.id;
+	rmesh.polygon = &mesh.r_polygon;
+	rmesh.frame = frame;
 }
 
 
@@ -2217,17 +2277,50 @@ void FreyjaModel::VertexSelect(float xx, float yy)
 }
 
 
-void FreyjaModel::Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list)
+void FreyjaModel::getMeshBoundingBox(long index, vec3_t min, vec3_t max)
+{
+	egg_group_t *grp = _egg->getGroup(index);
+
+	if (grp)
+	{
+		min[0] = grp->bbox_min[0];
+		min[1] = grp->bbox_min[1];	
+		min[2] = grp->bbox_min[2];
+
+		max[0] = grp->bbox_max[0];
+		max[1] = grp->bbox_max[1];	
+		max[2] = grp->bbox_max[2];
+	}
+}
+
+
+void FreyjaModel::getMeshVertices(long index, Vector<unsigned int> **list)
+{
+	egg_group_t *grp = _egg->getGroup(index);
+
+	if (grp)
+	{
+		*list = &(grp->vertex);
+	}
+	else
+	{
+		*list = 0x0;
+	}
+}
+
+
+void FreyjaModel::getVertexSelection(vec3_t min, vec3_t max,
+									 Vector<unsigned int> **list)
 {
 	min[0] = mSelectBBox[0][0];
 	min[1] = mSelectBBox[0][1];
 	min[2] = mSelectBBox[0][2];
-  
+
 	max[0] = mSelectBBox[1][0];
 	max[1] = mSelectBBox[1][1];
 	max[2] = mSelectBBox[1][2];
-  
-	*list = &_selection_list;
+
+	*list = &mList;
 }
 
 

@@ -27,10 +27,16 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-	o Alternative renderer starts with translators for Egg faces
+ freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
+
+	o Please report any issues including performance affected by this release
+	o Removed meshtree renderer, 'flashing selection, etc -- file request if
+      you want any of that back, since I thought they weren't useful anymore
+	o Folded some rendering methods into one where they were similar
+	o Alternative renderer starts with translators for Egg faces, meshes, etc
 	o Removed some junk code from FreyjaRender ( needs a rewrite )
 	o Disabled per polygon POINT rendering for vertices
-	o Remove Egg dependence in FreyjaControl
+	o Removed Egg dependence in FreyjaControl
 	o FreyjaEvent system actually used in test
 	o Automatic user install from /usr/share data
 	o Freyja d-bus prototyping in python

@@ -452,7 +452,7 @@ void FreyjaRender::drawLights()
 		float *test = _model->mLight0Pos;
 		
 		glPushMatrix();
-		glTranslated(test[0], test[1], test[2]);
+		glTranslatef(test[0], test[1], test[2]);
 		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 		mglDrawSphere(16, 16, 0.75f);
 		glPopMatrix();
@@ -464,58 +464,7 @@ void FreyjaRender::drawLights()
 }
 
 
-void drawSkeleton(Vector<egg_tag_t *> *taglist, 
-				  unsigned int currentBone, vec_t scale)
-{
-	egg_tag_t *tag, *tag2;
-	unsigned int i, j, index;
-
-
-	if (taglist->empty())
-		return;
-
-	for (i = taglist->begin(); i < taglist->end(); ++i)
-	{
-		tag = (*taglist)[i];
-		
-		if (!tag)
-			continue;
-
-		if (i == currentBone)
-		{
-			glColor3fv(GREEN);
-		}
-		else
-		{
-			glColor3fv(WHITE);
-		}
-		
-		mglDrawJoint(FreyjaRender::mJointRenderType, tag->center);
-		
-		if (tag->slave.empty())
-			continue;
-
-		for (j = tag->slave.begin(); j < tag->slave.end(); ++j)
-		{
-			index = tag->slave[j];
-			tag2 = (*taglist)[index];
-			
-			if (!tag2)
-				continue;
-
-			glBegin(GL_LINES);
-			glVertex3f(tag->center[0] * scale, 
-					   tag->center[1] * scale,
-					   tag->center[2] * scale);
-			glVertex3f(tag2->center[0] * scale, 
-					   tag2->center[1] * scale,
-					   tag2->center[2] * scale);
-			glEnd();
-		}
-	}
-}
-
-
+#warning FIXME Uses Egg to render skeleton
 void drawSkeleton2(Vector<egg_tag_t *> *taglist, 
 				   unsigned int currentBone,
 				   vec_t scale)
@@ -829,18 +778,6 @@ void FreyjaRender::RotateAmount(float n)
 }
 
 
-void FreyjaRender::EditTexture(int n)
-{
-	if (n < 0)
-	{
-		return;
-	}
-
-	_model->setCurrentTextureIndex(n);
-	freyja_print("Texture[%i] selected", _model->getCurrentTextureIndex());
-}
-
-
 void FreyjaRender::Rotate(int flags, float n)
 {
 	if (flags & X_F)
@@ -868,6 +805,10 @@ void FreyjaRender::ViewMode(int mode)
 
 void FreyjaRender::drawFreeWindow()
 {
+	RenderModel model;
+	unsigned int i;
+
+
 	glRotatef(_angles[0], 1.0, 0.0, 0.0);
 	glRotatef(_angles[1], 0.0, 1.0, 0.0);
 	glRotatef(_angles[2], 0.0, 0.0, 1.0);
@@ -910,24 +851,16 @@ void FreyjaRender::drawFreeWindow()
 		glEnd();
 	}
 
-	if (mRenderMode & RENDER_BONES)
-	{
-		glLineWidth(3.0f);
-		FreyjaRender::mSelectedBone = _model->getCurrentBone();
-
-		//if (mRenderMode & fRenderBonesClearedZBuffer)
-		//	glClear( GL_DEPTH_BUFFER_BIT);
-		drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
-
-		glLineWidth(_default_line_width);
-	}
-
-	drawLights();
 	glPopMatrix();
 
+	drawLights();
 	glScalef(mZoom, mZoom, mZoom);
 
-	DrawModel(_model->getCurrentEgg());
+	for (i = 0; i < _model->getModelCount(); ++i)
+	{
+		_model->getModel(model, i);
+		renderModel(model);
+	}
 }
 
 
@@ -1308,307 +1241,31 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 	}
 }
 
-#ifdef DISABLED
-/* This polygon renderer now only handles 6 edges max */
-void FreyjaRender::DrawPolygon(egg_polygon_t &polygon, long frame)
+
+void FreyjaRender::renderMesh(RenderMesh &mesh)
 {
-	static Vector3d vertices[6];
-	static Vector3d texcoords[6];
-	static Vector3d normals[6];
-	static vec4_t colors[6];
-	static vec_t *mpos;
-	static Vector3d u, v, w;
-	static unsigned int i, j, n;
-	static egg_vertex_t *vertex;
-	static egg_texel_t *texel;
-	static egg_texel_t *texel2;
-	static bool external_texel;
-
-
-	external_texel = !polygon.r_texel.empty();
-
-	if (polygon.r_vertex.empty() ||
-		(!external_texel && polygon.shader == COLORED_POLYGON))
-	{
-		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
-		return;
-	}
-
-	/* Mongoose 2004.12.23, 
-	 * Setup vertex morphing for egg backend polygon */
-	for (n = 0, i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
-	{
-		vertex = polygon.r_vertex[i];
-
-		if (!vertex)
-			continue;
-
-		mpos = vertex->pos;
-
-		if (frame > -1)
-		{
-			for (j = vertex->frameId.begin(); j < vertex->frameId.end(); ++j)
-			{
-				if (vertex->frameId[j] == frame)
-				{
-					mpos = *(vertex->frames[j]);
-					break;
-				}
-			}
-
-		}
-
-		vertices[i] = Vector3d(mpos);
-		normals[i] = Vector3d(vertex->norm);
-		texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
-
-		if (external_texel && polygon.r_texel[i])
-		{
-			if (polygon.shader == COLORED_POLYGON)
-			{
-				texel = polygon.r_texel[i*2];
-				texel2 = polygon.r_texel[i*2+1];
-	
-				if (texel && texel2)
-				{
-					colors[i][0] = texel->st[0];
-					colors[i][1] = texel->st[1];
-					colors[i][2] = texel2->st[0];
-					colors[i][3] = texel2->st[1];
-				}
-				else
-				{
-					colors[i][0] = colors[i][1] = colors[i][2] = 1.0;
-					colors[i][3] = 0.75;
-				}
-			}
-			else
-			{
-				texel = polygon.r_texel[i];
-				texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
-			}
-		}
-		else
-		{
-			texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
-		}
-
-		++n;
-	}
-
-	/* Render wireframe */
-	if (mRenderMode & RENDER_WIREFRAME)
-	{
-		// Update wireframe color
-		if (mRenderMode & fHightlightPolygonWireframe)
-			//polygon.id == _model->getCurrentPolygon())
-		{
-			glColor3fv(mColorWireframeHighlight);    
-		}
-		else
-		{
-			glColor3fv(mColorWireframe);
-		}
-
-		glLineWidth(_default_line_width);
-
-
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-
-		glBegin(GL_LINE_LOOP);
-
-		for (i = 0; i < n; ++i)
-		{
-			u = vertices[i];
-			u *= 1.0001;
-			glVertex3fv(u.mVec);
-		}
-	  
-		glEnd();
-
-		glPopAttrib();
-	}
-
-	// Render normals, remove this for speed -- move up to model or mesh
-	if (mRenderMode & RENDER_NORMALS)
-	{
-		glBegin(GL_LINES);
-		glColor3f(0.2, 0.2, 0.8);
-	
-		for (i = 0; i < n; ++i)
-		{
-			u = vertices[i];
-			v = normals[i];
-			v *= (2 * (1 / mZoom));
-			v += u;
-
-			glVertex3fv(u.mVec);
-			glVertex3fv(v.mVec);
-		}
-		
-		glEnd();
-	}
-
-#   ifdef DISABLED
-	/* Render points, disabled for speed -- 
-	 *  move up to mesh level draw by group to reenable 'unselected vertex'
-	 *  rendering */
-	if (mRenderMode & RENDER_POINTS)
-	{
-		glColor3fv(mColorVertex);
-		glBegin(GL_POINTS);
-
-		for (i = 0; i < n; ++i)
-		{
-			u = vertices[i];
-			glVertex3fv(u.mVec);
-		}
-
-		glEnd();   
-	}
-#   endif
-
-
-	/* Render face with material, color, or something */
-	if (mRenderMode & RENDER_FACE)
-	{
-		if (mRenderMode & RENDER_TEXTURE)
-		{
-			glEnable(GL_TEXTURE_2D);
-		}
-
-		// Call shader/texture ( no shader support yet )
-		if (mRenderMode & RENDER_TEXTURE && polygon.shader != COLORED_POLYGON)
-		{
-			if (mRenderMode & RENDER_MATERIAL)
-			{
-				//glPushAttrib(GL_ENABLE_BIT);
-				gMaterialManager->applyEffectGL(polygon.shader);
-			}
-
-			BindTexture(polygon.shader+1);
-		}
-		else
-		{
-			BindTexture(0);//COLORED_POLYGON);
-			glDisable(GL_TEXTURE_2D);
-		}
-
-		glColor3fv(WHITE);
-
-		switch (n) //polygon.r_vertex.size())
-		{
-		case 1:
-			glBegin(GL_POINTS); // error
-			break;
-		case 2:
-			glBegin(GL_LINES); // error
-			break;
-		case 3:
-			glBegin(GL_TRIANGLES);
-			break;
-		case 4:
-			glBegin(GL_QUADS);
-			break;
-		default:
-			glBegin(GL_POLYGON);
-		}
-
-		for (i = 0; i < n; ++i)
-		{
-			u = vertices[i];
-			v = normals[i];
-			w = texcoords[i];
-
-			if (mRenderMode & RENDER_NORMAL)
-			{
-				glNormal3fv(v.mVec);
-			}
-
-			if (polygon.shader == COLORED_POLYGON)
-			{
-				glColor4fv(colors[i]);
-			}
-			else if (mRenderMode & RENDER_TEXTURE)
-			{
-				glColor3f(1.0, 1.0, 1.0);
-				glTexCoord2fv(w.mVec);
-			}
-			else
-			{
-				glColor3fv(WHITE);
-				glColor4f(w.mVec[0], w.mVec[1], 0.5, 1.0);
-			}
-
-			glVertex3fv(u.mVec);
-		}
-
-		glEnd();
-
-		if (mRenderMode & RENDER_MATERIAL)
-		{
-			//glPopAttrib();
-		}
-	}
-}
-#endif
-
-
-void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
-{
-	Egg *egg = _model->getCurrentEgg();
 	RenderPolygon face;
-	egg_polygon_t *polygon;
-	egg_group_t *grp;
+	Vector3d v;
 	unsigned int i;
-	long frame = -1;
 
-
-	/* Vertex morph frame fu */
-	grp = egg->getGroup(_model->getCurrentGroup());
-	if (grp && grp->flags == 0xBADA55)
-		frame = grp->id;
-
-
-	/* Mongoose 2004.03.26, 
-	 * This was here for vertex morph frames, still used for edit updates */
-	if (mesh.r_polygon.size() != mesh.polygon.size())
-	{
-		freyja_print("FreyjaRender::DrawMesh> mesh[%i]: %i polygons, %i cached...",
-					 mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
-
-		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
-		{
-			polygon = egg->getPolygon(mesh.polygon[i]);
-			
-			if (polygon)
-			{
-				mesh.r_polygon.pushBack(polygon);
-			}
-		}
-	}
 
 	if (mRenderMode & RENDER_POINTS)
 	{
 		glPointSize(5.0);
 		glBegin(GL_POINTS);
 
-		for (i = mesh.group.begin(); i < mesh.group.end(); ++i)
+		for (i = mesh.gbegin; i < mesh.gend; ++i)
 		{
-			if ((grp = egg->getGroup(mesh.group[i])))
-			{
-				glColor3fv(RED);
-				glVertex3fv(grp->center);
-			}
+			v = mesh.getGroupCenter(i);
+			glColor3fv(RED);
+			glVertex3fv(v.mVec);
 		}
 
 		glEnd();
 		glPointSize(_default_point_size);
 	}
 
-	if (!mesh.r_polygon.empty())
+	if (!mesh.polygon->empty())
 	{
 		if (mRenderMode & RENDER_TEXTURE)
 		{
@@ -1627,22 +1284,12 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 
 		_default_line_width *= 2;
 
-		for (i = mesh.r_polygon.begin(); i < mesh.r_polygon.end(); ++i)
+		// FIXME: Move this back into a method in RenderMesh to avoid
+		//        exposing old polygon type ( like getGroupCenter() )
+		for (i = mesh.polygon->begin(); i < mesh.polygon->end(); ++i)
 		{
-			polygon = mesh.r_polygon[i];
-			
-			if (!polygon)
-			{
-				freyja_print("FIXME: NULL Polygon in list %s:%i\n", __FILE__, __LINE__);
-				continue;
-			}
-
-#ifdef DISABLED
-			DrawPolygon(*polygon, frame);
-#else
-			createRenderPolygon(face, *polygon, frame);
+			createRenderPolygon(face, *(*mesh.polygon)[i], mesh.frame);
 			renderPolygon(face);
-#endif
 		}
 		
 		if ((int)mesh.id == (int)_model->getCurrentMesh())
@@ -1660,239 +1307,117 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 }
 
 
-void FreyjaRender::DrawModel(Egg *egg)
+void FreyjaRender::renderModel(RenderModel &model)
 {
-	Vector<unsigned int> *list = NULL;
-	Vector<egg_tag_t *> tag_list;
-	egg_tag_t *tag = NULL;
-	egg_boneframe_t *boneframe = NULL;
-	egg_vertex_t *vertex = NULL;
+	Vector<unsigned int> *list = 0x0;
+	RenderMesh rmesh;
 	vec3_t min, max;
-	unsigned int i, j, current_tag;
+	vec3_t *xyz;
+	unsigned int i, n;
 
 
-	if (!egg)
-		return;
-
-	current_tag = _model->getCurrentBone();
-
+	/* Render patch test -- this should be model specific later */ 
 	if (FreyjaRender::mPatchDisplayList > 0)
 	{
 		glCallList(FreyjaModel::gTestPatch.displayList);
 		drawPatch(FreyjaModel::gTestPatch);
 	}
 
-	glPushMatrix();
 
-	// Selection bbox
-	if (mRenderMode & RENDER_BBOX_SEL)
+	/* Highlight current vertex group
+	 * -- this should be model specific later:
+	 * eg _model->getCurrentGroup() -> model.index */
+	if (mRenderMode & RENDER_POINTS)
 	{
-		_model->Bbox(min, max, &list);
-		mglDrawBbox(min, max, RED, mColorWireframe);
+		/* Render bounding box */
+		_model->getMeshBoundingBox(_model->getCurrentGroup(), min, max);
+		renderBox(min, max);
 
-		// Draw bbox selection list
+		/* Render actual vertices */
+		_model->getMeshVertices(_model->getCurrentGroup(), &list);
+
 		if (list && !list->empty())
 		{
 			glPointSize(_default_point_size);
+			glColor3fv(mColorVertexHighlight);
 			glBegin(GL_POINTS);
-			glColor3fv(GREEN);
-		 
-			for (i = list->begin(); i < list->end(); ++i)
+
+			for (i = list->begin(), n = list->end(); i < n; ++i)
 			{
-				vertex = egg->getVertex((*list)[i]);
-			 
-				if (vertex)
-					glVertex3fv(vertex->pos);
+				xyz = _model->getVertexXYZ((*list)[i]);
+
+				if (xyz)
+				{
+					glVertex3fv(*xyz);
+				}
+			}
+  
+			glEnd();
+		}
+	}    
+
+
+	/* Render selected vertices by bounding box
+	 *  -- this should be model specific later */
+	if (mRenderMode & RENDER_BBOX_SEL)
+	{
+		_model->getVertexSelection(min, max, &list);
+
+		/* Render bounding box */
+		mglDrawBbox(min, max, RED, mColorWireframe);
+
+		/* Render selected vertices */
+		if (list && !list->empty())
+		{
+			glPointSize(_default_point_size);
+			glColor3fv(GREEN);
+			glBegin(GL_POINTS);
+		 
+			for (i = list->begin(), n = list->end(); i < n; ++i)
+			{
+				xyz = _model->getVertexXYZ((*list)[i]);
+
+				if (xyz)
+				{
+					glVertex3fv(*xyz);
+				}
 			}
 		 
 			glEnd();
 		}
 	}
 
-	boneframe = egg->BoneFrame(_model->getCurrentSkeleton());
 
-	if (boneframe)
+	/* Render meshes */
+	for (i = 0, n = model.getMeshCount(); i < n; ++i)
 	{
-		// Make a copy of bone tag list
-		for (i = boneframe->tag.begin(); i < boneframe->tag.end(); ++i)
-		{
-			tag = egg->getTag(boneframe->tag[i]);
-		 
-			if (!tag)
-			{
-				printf("Error: No tags to draw!\n");
-				continue;
-			}
-
-			tag_list.pushBack(tag);
-		}
-	 
-		// Draw skeletal model using tags as meshtree 
-		for (i = boneframe->tag.begin(); i < boneframe->tag.end(); ++i)
-		{
-			tag = egg->getTag(boneframe->tag[i]);
-
-			if (!tag)
-			{
-				printf("Error: No tags to draw!\n");
-				continue;
-			}
-
-			if (i == 0)
-			{
-				glTranslatef(boneframe->center[0], 
-								 boneframe->center[1], 
-								 boneframe->center[2]);
-
-				if (tag->rot[0])
-					glRotatef(tag->rot[0], 1, 0, 0);
-
-				if (tag->rot[1])
-					glRotatef(tag->rot[1], 0, 1, 0);
-	
-				if (tag->rot[2])
-					glRotatef(tag->rot[2], 0, 0, 1);
-			
-				glPushMatrix();
-			}
-			else
-			{
-				if (tag->flag & 0x01)
-					glPopMatrix();
-	
-				if (tag->flag & 0x02)
-					glPushMatrix();
-			
-				if (mRenderMode & RENDER_WIREFRAME)
-				{
-					glColor3fv(WHITE);
-					mglDrawBone((tag->id == (int)current_tag) ? 2 : 1, 
-								tag->center);
-				}
-
-				glTranslatef(tag->center[0], tag->center[1], tag->center[2]);
-
-				/* Mongoose 2004.03.30, 
-				 * Was 0 2 1 */
-				if (tag->rot[0])
-					glRotatef(tag->rot[0], 1, 0, 0);
-	
-				if (tag->rot[1])
-					glRotatef(tag->rot[1], 0, 1, 0);
-			
-				if (tag->rot[2])
-					glRotatef(tag->rot[2], 0, 0, 1);
-			}
-		
-			for (j = tag->mesh.begin(); j < tag->mesh.end(); ++j)
-			{
-				egg_mesh_t *m = egg->getMesh(tag->mesh[j]);
-
-				if (!m)
-				{
-					printf("FIXME: %s:%i\n", __FILE__, __LINE__);
-					continue;
-				}
-
-				DrawMesh(*m);
-			}
-		}
-
-		glPopMatrix();
-	 
-		glPopMatrix(); // model end
-		return;
+		model.getMesh(i, rmesh);
+		renderMesh(rmesh);
 	}
 
-	//////////////////////////////////////////////////////////////////////////
 
-	egg_group_t *grp = NULL;
-	Vector<egg_mesh_t *> *meshlist = NULL;
-	egg_mesh_t *mesh = NULL;
-
-
-	/* Highlight current vertex group */
-	grp = egg->getGroup(_model->getCurrentGroup());
-
-	
-	if (mRenderMode & RENDER_POINTS)
-		DrawBbox(grp);
-
-	if (grp && !grp->vertex.empty() && (mRenderMode & RENDER_POINTS))
+	/* Render skeleton */
+	if (mRenderMode & RENDER_BONES)
 	{
-		// DrawVertex //////////////////////////
-		glPointSize(_default_point_size);
-		glBegin(GL_POINTS);
-
-		glColor3fv(mColorVertexHighlight);
-
-		for (i = grp->vertex.begin(); i < grp->vertex.end(); ++i)
+		/* Yay, let thou bones show through thine meshes 
+		 * and it was good for editing */
+		if (mRenderMode & fRenderBonesClearedZBuffer)
 		{
-			vertex = egg->getVertex(grp->vertex[i]);
-
-			if (vertex)
-				glVertex3fv(vertex->pos);
-		}
-  
-		glEnd();
-		////////////////////////////////////////
-
-		glPointSize(_default_point_size);
-	}    
-
-
-	if (mRenderMode & RENDER_POINTS)
-	{
-		static float foo = 2.0f;
-
-		foo += 0.25;
-
-		if (foo > 1.75f)
-			foo = 0.0f;
-
-		glPointSize(7.0-foo);
-		glBegin(GL_POINTS);
-		glColor3fv(RED);
-
-		for (i = _model->mList.begin(); i < _model->mList.end(); ++i)
-		{
-			int index = _model->mList[i];
-			egg_vertex_t *vertex = egg->getVertex(index);
-
-			if (vertex)
-			{
-				glVertex3fv(vertex->pos);
-			}
+			glClear(GL_DEPTH_BUFFER_BIT);
 		}
 
-		glEnd();
-		glPointSize(_default_point_size);
-	}
-
-	/* Draw meshes */
-	meshlist = egg->MeshList();
-
-	if (meshlist && !meshlist->empty())
-	{
-		for (i = meshlist->begin(); i < meshlist->end(); ++i)
-		{
-			mesh = (*meshlist)[i]; 
-
-			if (mesh)
-				DrawMesh(*mesh);
-		}
+		FreyjaRender::mSelectedBone = _model->getCurrentBone();
+		drawSkeleton2(model.getSkeleton(), 0, mZoom);
 	}
 
 	glPopMatrix();
 }
 
 
-void FreyjaRender::DrawBbox(egg_group_t *group)
+void FreyjaRender::renderBox(vec3_t min, vec3_t max)
 {
-	if (!group)// && mRenderMode & RENDER_BBOX))
-		return;
-
-	mglDrawBbox(group->bbox_min, group->bbox_max, RED, mColorWireframe);
+	//if (mRenderMode & RENDER_BBOX)
+	mglDrawBbox(min, max, RED, mColorWireframe);
 }
 
 
@@ -2006,6 +1531,10 @@ void FreyjaRender::setZoom(float zoom)
 
 void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
+	RenderModel model;
+	unsigned int i;
+
+
 	if (mRenderMode & RENDER_EDIT_GRID)
 		DrawGrid(plane, getWindowWidth(), getWindowHeight(), 10);
 
@@ -2046,25 +1575,14 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		break;
 	}
 
-	//if (mRenderMode & RENDER_BONES)
-	//{
-	//	FreyjaRender::mSelectedBone = _model->getCurrentBone();
-	//	drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
-	//}
-
 	drawLights();
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	DrawModel(_model->getCurrentEgg());
-
-	if (mRenderMode & RENDER_BONES)
+	for (i = 0; i < _model->getModelCount(); ++i)
 	{
-		if (mRenderMode & fRenderBonesClearedZBuffer)
-			glClear( GL_DEPTH_BUFFER_BIT);
-
-		FreyjaRender::mSelectedBone = _model->getCurrentBone();
-		drawSkeleton2((_model->getCurrentEgg())->TagList(), 0, mZoom);
+		_model->getModel(model, i);
+		renderModel(model);
 	}
 }
 
@@ -2096,6 +1614,7 @@ void FreyjaRender::DrawMaterialEditWindow()
  * - OpenGL 2d view helper function
  * - Quad to render skin helper function
  */
+#warning FIXME Uses Egg to generate texture polygons on the fly
 void FreyjaRender::DrawTextureEditWindow(unsigned int width, 
 										 unsigned int height)
 {
