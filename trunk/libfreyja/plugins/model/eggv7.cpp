@@ -39,7 +39,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("GooseEgg 7 Model (*.egg)");
-	freyjaPluginAddExtention1s("egg");
+	freyjaPluginAddExtention1s("*.egg");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 			     FREYJA_PLUGIN_SKELETON |
 			     FREYJA_PLUGIN_VERTEX_MORPHING);

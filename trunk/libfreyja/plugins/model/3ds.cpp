@@ -722,7 +722,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("3ds model (*.3ds)");
-	freyjaPluginAddExtention1s("3ds");
+	freyjaPluginAddExtention1s("*.3ds");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }

@@ -586,7 +586,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("Lightwave Object (*.lwo)");
-	freyjaPluginAddExtention1s("lwo");
+	freyjaPluginAddExtention1s("*.lwo");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }

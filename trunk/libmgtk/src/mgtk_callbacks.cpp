@@ -399,6 +399,12 @@ int mgtk_event_set_range(int event, unsigned int value,
 }
 
 
+void mgtk_gtk_event_fileselection_pattern(GtkWidget *widget, gpointer data)
+{
+	mgtk_event_fileselection_pattern((char*)data);
+}
+
+
 void mgtk_event_fileselection_pattern(char *pattern)
 {
 	GtkWidget *file = mgtk_get_fileselection_widget();
@@ -880,29 +886,6 @@ void mgtk_event_popup_menu_detacher(GtkWidget *attach_widget,GtkMenu *menu)
 }
 
 
-
-void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
-{
-	GtkWidget *menu = mgtk_get_fileselection_pattern_widget();
-	GtkWidget *item;
-
-	if (!menu)
-	{
-		mgtk_print("mgtk_event_fileselection_append_pattern> failed to append '%s':'%s'", label, pattern);
-		return;
-	}
-
-	item = gtk_image_menu_item_new_with_label(label);	
-	gtk_menu_append(GTK_MENU(menu), item);
-	gtk_widget_show(item);
-
-	gtk_signal_connect(GTK_OBJECT(item), "activate",
-					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_pattern), 
-					   pattern);
-}
-
-
-
 /* Mongoose 2004.10.29, 
  * FIXME: This is currently a noop, and doesn't generate a pair event
  *        with tree_id:event_id */
@@ -1123,6 +1106,27 @@ void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 // File dialog support func
 ////////////////////////////////////////////////////////////////
 
+void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
+{
+	GtkWidget *menu = mgtk_get_fileselection_pattern_widget();
+	GtkWidget *item;
+
+	if (!menu)
+	{
+		mgtk_print("mgtk_event_fileselection_append_pattern> failed to append '%s':'%s'", label, pattern);
+		return;
+	}
+
+	item = gtk_image_menu_item_new_with_label(label);	
+	gtk_menu_append(GTK_MENU(menu), item);
+	gtk_widget_show(item);
+
+	gtk_signal_connect(GTK_OBJECT(item), "activate",
+					   GTK_SIGNAL_FUNC(mgtk_gtk_event_fileselection_pattern), 
+					   (gpointer)pattern);
+}
+
+
 void mgtk_add_menu_item(char *text, long event)
 {
 	GtkWidget *item;
@@ -1130,7 +1134,7 @@ void mgtk_add_menu_item(char *text, long event)
 	extern void *rc_gtk_event_func(int event);
 	void *agtk_event;
 
-	printf("%s %p\n", text, GTK_FILESELECTION_DROP_DOWN_MENU);
+	//printf("%s %p\n", text, GTK_FILESELECTION_DROP_DOWN_MENU);
 
 	item = gtk_image_menu_item_new_with_mnemonic(text);		
 	gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), item);

@@ -43,7 +43,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginDescription1s("Object Model (*.obj)");
-	freyjaPluginAddExtention1s("obj");
+	freyjaPluginAddExtention1s("*.obj");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }
