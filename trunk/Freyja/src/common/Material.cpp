@@ -662,6 +662,7 @@ void Material::applyEffectGL()
 	glMaterialfv(GL_FRONT, GL_EMISSION, emissive);
 	glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
 
+#ifndef DISABLE_MULTITEXTURE
 	if (m_flags & fEnable_DetailTexture)
 	{
 		glActiveTexture(GL_TEXTURE0_ARB);
@@ -682,7 +683,9 @@ void Material::applyEffectGL()
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
 	}
-	else if (m_flags & fEnable_Texture)
+	else
+#endif
+		if (m_flags & fEnable_Texture)
 	{
 		glBindTexture(GL_TEXTURE_2D, texture);
 	}

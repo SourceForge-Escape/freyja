@@ -147,6 +147,13 @@ void setupResource(Resource &r)
 	r.RegisterInt("eAxisJoint", eAxisJoint);
 	r.RegisterInt("eLineBone", eLineBone);
 	r.RegisterInt("ePolyMeshBone", ePolyMeshBone);
+	r.RegisterInt("eRenderBbox", eRenderBbox);
+
+	r.RegisterInt("eSetMeshTexture", eSetMeshTexture);
+	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
+
+
+
 
 	r.RegisterInt("EVENT_MAIN", EVENT_MAIN);
 
@@ -184,12 +191,6 @@ void setupResource(Resource &r)
 	r.RegisterInt("CMD_MISC_BBOX_SELECT", CMD_MISC_BBOX_SELECT);
 	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
 	r.RegisterInt("CMD_MISC_VERTEX_UV", CMD_MISC_VERTEX_UV);
-	r.RegisterInt("VIEW_JOINT1", VIEW_JOINT1);
-	r.RegisterInt("VIEW_JOINT2", VIEW_JOINT2);
-	r.RegisterInt("VIEW_JOINT3", VIEW_JOINT3);
-	r.RegisterInt("VIEW_BONE1", VIEW_BONE1);
-	r.RegisterInt("VIEW_BONE2", VIEW_BONE2);
-
 
 	r.RegisterInt("EVENT_MATERIAL", EVENT_MATERIAL);
 
@@ -323,18 +324,18 @@ void FreyjaControl::eventMain(int event)
 		case MODEL_EDIT_MODE:
 			if (confirmDialog("gtk-dialog-question",
 							  "You must close the currently open model to create a new model.",
-							  "Would you like to close the model?",
-							  "gtk-cancel", "_Cancel", "gtk-close", "_Close"))
+							  "Would you like to close the model and lose changes?",
+							  "gtk-cancel", "_Cancel", "gtk-close", "C_lose"))
 			{
 				// Add check to see if the model was modified here
-				if (confirmDialog("gtk-dialog-question",
-								  "You must save the currently open model to retain modifications.",
-								  "Would you like to save the currently open model?",
-								  "gtk-cancel", "_Cancel", "gtk-save", "_Save"))
-				{
-					mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-					freyja_event_file_dialog("Save model as...");
-				}
+				//if (confirmDialog("gtk-dialog-question",
+				//				  "You must save the currently open model to retain modifications.",
+				//				  "Would you like to save the currently open model?",
+				//				  "gtk-cancel", "_Cancel", "gtk-save", "_Save"))
+				//{
+				//	mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+				//	freyja_event_file_dialog("Save model as...");
+				//}
 
 				mModel->Clear();
 				event_print("Erasing Model...");
@@ -481,6 +482,39 @@ void FreyjaControl::eventMain(int event)
 
 	case ePolyMeshBone:
 		gBoneRenderType = 2;
+		break;
+
+
+	case eRenderBbox:
+		mRender->Flags(FreyjaRender::RENDER_BBOX, 
+					   !(mRender->Flags() & FreyjaRender::RENDER_BBOX));
+		event_print("BoundingBox rendering [%s]", 
+					(mRender->Flags() & FreyjaRender::RENDER_BBOX) ? 
+					"ON" : "OFF");
+		break;
+
+
+	case eSetMeshTexture:
+		event_print("Switching all of mesh %i ploygons to texture %i",
+					mModel->getCurrentMesh(), mModel->getCurrentTextureIndex());
+		mModel->TextureShift();
+		break;
+
+
+	case eTextureSlotLoad:
+		if (!gMaterialManager->getGeneralFlags() & 
+			MaterialManager::fLoadTextureInSlot)
+		{
+			gMaterialManager->setGeneralFlag(MaterialManager::fLoadTextureInSlot);
+		}
+		else
+		{
+			gMaterialManager->clearGeneralFlag(MaterialManager::fLoadTextureInSlot);
+		}	
+
+		event_print("Texture loading to current slot [%s]",
+					gMaterialManager->getGeneralFlags() & 
+					MaterialManager::fLoadTextureInSlot ? "on" : "off");
 		break;
 
 
@@ -666,13 +700,6 @@ void FreyjaControl::eventMisc(int command)
 		break;
 
 
-	case CMD_MISC_RENDER_BBOX:
-		mRender->Flags(FreyjaRender::RENDER_BBOX, 
-					   !(mRender->Flags() & FreyjaRender::RENDER_BBOX));
-		event_print("BoundingBox rendering [%s]", 
-					(mRender->Flags() & FreyjaRender::RENDER_BBOX) ? 
-					"ON" : "OFF");
-		break;
 	case CMD_MISC_RENDER_ROT_Z_M:
 		mRender->Rotate(Z_F, -mRender->RotateAmount());
 		break;
@@ -690,12 +717,6 @@ void FreyjaControl::eventMisc(int command)
 		break;
 	case CMD_MISC_RENDER_ROT_X_P:
 		mRender->Rotate(X_F, mRender->RotateAmount());
-		break;
-
-	case CMD_MISC_TEX_SLOT_LOAD:
-		event_set_load_texture_to_slot(!query_load_texture_to_slot());
-		event_print("Texture loading to current slot [%s]",
-					query_load_texture_to_slot() ? "on" : "off");
 		break;
 	case CMD_MISC_SCENE_ROTATE:
 		_minor_mode = MODEL_ROTATE;
@@ -748,12 +769,6 @@ void FreyjaControl::eventMisc(int command)
 		break;
 
 
-
-		case CMD_MISC_TEXTURE_SET:
-			event_print("Switching all of mesh %i ploygons to texture %i",
-						mModel->getCurrentMesh(), mModel->getCurrentTextureIndex());
-			mModel->TextureShift();
-			break;
 
 		case CMD_MISC_GEN_TEXMAP_XY:
 			mModel->generateUVMap();
