@@ -30,7 +30,9 @@
 
  Freyja (0.3.5-20040420) Mongoose <mongoose@icculus.org>
 
+	* Use of WM hooks to set a X, Y pos of window from mlisp
 	* Fix for spinner bug?
+	* Implementations for window manager hooks
 
  Freyja (0.3.5-20040419) Mongoose <mongoose@icculus.org>
 
