@@ -1907,7 +1907,7 @@ void FreyjaControl::loadResource()
 	int i, x, y;
 	float f;
 	char *s;
-	char *filename = "freyja.mlisp";
+	char *filename = "freyja8.mlisp";
 	bool failed = true;
 
 	

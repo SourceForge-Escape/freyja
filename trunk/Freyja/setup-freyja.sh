@@ -12,7 +12,7 @@ mkdir -p ~/.freyja/particles/
 mkdir -p ~/.freyja/materials/
 mkdir -p ~/.freyja/icons/
 
-cp ./data/freyja.mlisp ~/.freyja/
+cp ./data/freyja8.mlisp ~/.freyja/
 cp ./data/palettes/*.pal ~/.freyja/palettes/
 cp ./data/materials/*.mat ~/.freyja/materials/
 cp ./data/icons/* ~/.freyja/icons/
