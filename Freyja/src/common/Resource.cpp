@@ -118,15 +118,16 @@ void delete_arg(arg_list_t **a)
 	if (!(*a))
 		return;
 
+	if ((*a)->symbol)
+		delete [] (char *)(*a)->symbol;
+
 	switch ((*a)->type)
 	{
-	case FUNC:
-		if ((*a)->symbol)
-			delete (char *)(*a)->symbol;		
+	case FUNC:		
 		break;
 	case CSTRING:
 		if ((*a)->data)
-			delete (char *)(*a)->data;		
+			delete [] (char *)(*a)->data;		
 		break;
 	case INT:
 		if ((*a)->data)
