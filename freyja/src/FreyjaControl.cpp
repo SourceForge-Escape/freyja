@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 
 #include "FreyjaControl.h"
 
@@ -100,15 +101,24 @@ FreyjaControl::FreyjaControl(Resource *r)
 
 FreyjaControl::~FreyjaControl()
 {
+	FreyjaFileWriter w;
+	char *filename = freyja_rc_map("recent_files");
 	unsigned int i;
 
 
+	w.openFile(filename);
+
 	for (i = mRecentFiles.begin(); i <  mRecentFiles.end(); ++i)
 	{
-		// tmp fun
-		freyja_print("(add_recent_file \"%s\")\n", mRecentFiles[i]);
+		//freyja_print("(add_recent_file \"%s\")\n", mRecentFiles[i]);
+		w.print("%s\n", mRecentFiles[i]);
 		delete [] mRecentFiles[i];
 	}
+
+	w.closeFile();
+
+	if (filename)
+		delete [] filename;
 
 	if (mRender)
 		delete mRender;
@@ -172,7 +182,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		return;
 	}
 
-#warning FIXME Add look for dupes and a size limit here
+#warning FIXME Add a size limit here
 
 
 	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
@@ -2935,6 +2945,21 @@ void FreyjaControl::loadResource()
 	if (mResource->Lookup("FLUSH_RESOURCE", &i) && i)
 	{
 		mResource->Flush();
+	}
+
+
+	/* Recent files persistance test */
+	FreyjaFileReader r;
+	s = freyja_rc_map("recent_files");
+	r.openFile(s);
+	if (s) delete [] s;
+	
+	for (i = 0; i < 5 && !r.endOfFile(); ++i)
+	{
+		s = r.parseSymbol();
+
+		if (FreyjaFileReader::doesFileExist(s))
+			addRecentFilename(s);
 	}
 }
 
