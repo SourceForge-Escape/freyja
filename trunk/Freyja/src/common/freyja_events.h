@@ -40,11 +40,15 @@ typedef enum {
 	eDebugEgg,
 	eFullscreen,
 	eScreenShot,
-	eScale,
-	eScale_X,
-	eScale_Y,
-	eScale_Z,
-	eZoom,
+
+	eMoveObject,
+	eRotateObject,
+	eScaleObject,
+
+	eTransformGroup,
+	eTransformScene,
+	eTransformMesh,
+	eTransformPoint,
 
 	ePointJoint,
 	eSphereJoint,
@@ -60,7 +64,27 @@ typedef enum {
 	eGenerateSphere,
 
 	eSetMeshTexture,
-	eTextureSlotLoad
+	eTextureSlotLoad,
+
+	/* Widget interaction events */
+	eZoom,
+	eSelectMaterial,	
+	eMove,
+	eMove_X,
+	eMove_Y,
+	eMove_Z,
+	eRotate,
+	eRotate_X,
+	eRotate_Y,
+	eRotate_Z,
+	eScale,
+	eScale_X,
+	eScale_Y,
+	eScale_Z,
+	eMoveBone_X,
+	eMoveBone_Y,
+	eMoveBone_Z
+
 
 } event_subject_id;
 
@@ -233,7 +257,7 @@ enum freyja_event_type
 	EVENT_POLYGON       =  3,
 	EVENT_POINT         =  4,
 	EVENT_MISC          =  5,
-	EVENT_GROUP         =  6,
+	//EVENT_GROUP         =  6,
 	EVENT_ANIMATION     =  8,
 	EVENT_FREYJA_MODE   = 10,
 	EVENT_MATERIAL      = 11
@@ -259,7 +283,6 @@ enum freyja_event_point_cmd
 {
 	CMD_POINT_ADD     = 1,
 	CMD_POINT_DELETE,
-	CMD_POINT_MOVE,
 	CMD_POINT_COMBINE
 };
 
@@ -280,6 +303,20 @@ enum freyja_event_bone_cmd
 
 	CMD_BONE_DELETE          = 40
 };
+
+
+enum freyja_event_mesh_cmd
+{
+	CMD_MESH_ADD = 1,
+	CMD_MESH_DELETE,
+	CMD_MESH_MOVE_CENTER,
+	CMD_MESH_SELECT,
+	CMD_MESH_PREV,
+	CMD_MESH_NEXT
+};
+
+
+
 
 enum freyja_event_misc_cmd
 {
@@ -305,35 +342,6 @@ enum freyja_event_misc_cmd
 	CMD_MISC_GEN_TEXMAP_XY,
 	CMD_MISC_VERTEX_UV,
 	CMD_MISC_SCENE_ROTATE
-};
-
-enum freyja_event_mesh_cmd
-{
-	CMD_MESH_MIRROR = 1,
-	CMD_MESH_DUP_FRAME,
-	CMD_MESH_DUP_SCENE,
-	CMD_MESH_ADD,
-	CMD_MESH_DELETE,
-	CMD_MESH_MOVE,
-	CMD_MESH_MOVE_CENTER,
-	CMD_MESH_GEN_FROM_FRAME,
-	CMD_MESH_COPY,
-	CMD_MESH_SPLIT,
-	CMD_MESH_MERGE,
-	CMD_MESH_SELECT,
-	CMD_MESH_FULLCOPY,
-	CMD_MESH_PREV,
-	CMD_MESH_NEXT,
-	CMD_MESH_ROTATE,
-	CMD_MESH_SCALE
-};
-
-enum freyja_event_group_cmd
-{
-	CMD_GRP_PREV             = 9,
-
-	CMD_GRP_NEXT             = 10,
-	CMD_GRP_MIRROR           = 20
 };
 
 enum freyja_event_freyja_mode
@@ -369,6 +377,7 @@ enum freyja_event_freyja_mode
 	FREYJA_MODE_LOAD_EMITTER      = 106,
 	FREYJA_MODE_SAVE_EMITTER      = 107,
 	FREYJA_MODE_LOAD_ANIMATION,
+	FREYJA_MODE_SAVE_ANIMATION,
 	FREYJA_MODE_LOAD_MAP
 };
 

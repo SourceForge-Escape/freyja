@@ -297,73 +297,71 @@
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
 
-					;; Mesh operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					;; Object operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					(hbox 0 0 0 1 0
-						(label "Mesh operations" 0.0 0.5))
+						(label "Object operations" 0.0 0.5))
 					(hbox 1 0 0 1 0 (hsep))
 					(hbox 1 0 0 1 0
 						(label "Current Mesh #"  0.0 0.5) 
 						(spinbutton 0 0 100 500))
 					(hbox 1 0 0 1 0
-						(label "Current Frame #" 0.0 0.5) 
+						(label "Current Group #" 0.0 0.5) 
 						(spinbutton 0 0 100 501))
+					(hbox 1 0 0 1 0
+						(label "Current Bone #" 0.0 0.5) 
+						(spinbutton 0 0 100 504))
+
+					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0
-						(optionmenu EVENT_MISC eNone
-							(menu_item "Object"  EVENT_MISC eNone)
-							(menu_item "Scene"  EVENT_MISC eNone)
-							(menu_item "Mesh"  EVENT_MISC eNone)
-							(menu_item "Vertex"  EVENT_MISC eNone)))
-
-					;(hbox 1 1 0 1 1
-					;	(button "Translate" EVENT_MISC eTranslate)
-					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eTranslate_X)
-					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eTranslate_Y)
-					;	(spinbutton2 1.0 0.0 10000.0 -10000.0 0.1 0.1 2 eTranslate_Z))
-
-					;(hbox 1 1 0 1 1
-					;	(button "Rotate" EVENT_MISC eRotate)
-					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eRotate_X)
-					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eRotate_Y)
-					;	(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eRotate_Z))
+						(label "Object Transform: " 0.0 0.5)
+						(optionmenu	EVENT_MAIN	eNone
+							(menu_item "Scene     "	EVENT_MAIN eTransformScene)
+							(menu_item "Mesh      "	EVENT_MAIN eTransformMesh)
+							(menu_item "Group"	EVENT_MAIN eTransformGroup)
+							(menu_item "Vertex"	EVENT_MAIN eTransformPoint)))
 
 					(hbox 1 1 0 1 1
-						(button "Scale" EVENT_MISC eScale)
-						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eScale_X)
-						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eScale_Y)
-						(spinbutton2 1.0 0.0 10.0 0.01 0.1 0.1 2 eScale_Z))
+						(button "Move" EVENT_MAIN eMove)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_X)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Y)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Z))
+
+					(hbox 1 1 0 1 1
+						(button "Rotate" EVENT_MAIN eRotate)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_X)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Y)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Z))
+
+					(hbox 1 1 0 1 1
+						(button "Scale" EVENT_MAIN eScale)
+						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_X)
+						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Y)
+						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Z))
 
 					(hbox 1 0 0 1 0 (hsep))
 					(hbox 1 0 0 1 0
-						(button "New"     EVENT_MESH  CMD_MESH_ADD)
-						(button "Delete"  EVENT_MESH  CMD_MESH_DELETE)
-			  			(button "Select"  EVENT_MESH  CMD_MESH_SELECT))
+						(button "New"     EVENT_MESH  CMD_MESH_ADD)		;eAddObject
+						(button "Delete"  EVENT_MESH  CMD_MESH_DELETE)	;eRemoveObject
+			  			(button "Select"  EVENT_MESH  CMD_MESH_SELECT))	;eSelectObject
 					(hbox 1 0 0 1 0
-						(button "Move"    EVENT_MESH  CMD_MESH_MOVE)
-			  			(button "Rotate"  EVENT_MESH  CMD_MESH_ROTATE)
-			  			(button "Scale"   EVENT_MESH  CMD_MESH_SCALE)
-			  			;(button "Mirror"  EVENT_MESH  CMD_MESH_MIRROR)
-			  			;(button "Clone"   EVENT_MESH  CMD_MESH_CLONE)
-			  			(button "Center"  EVENT_MESH  CMD_MESH_MOVE_CENTER))
+						(button "Move"    EVENT_MAIN	eMoveObject)
+			  			(button "Rotate"  EVENT_MAIN	eRotateObject)
+			  			(button "Scale"   EVENT_MAIN	eScaleObject)
+			  			(button "Center"  EVENT_MESH	CMD_MESH_MOVE_CENTER))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
-					 
-					 (hbox 1 0 0 1 0 
-							 (hsep))	
 
-					 (hbox 1 0 0 1 0 
-							 (hsep))
-
-				(hbox 1 0 0 1 0
-					(label "Zoom"  0.0 0.5) 
-					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom))
-				(hbox 1 1 0 1 1
-					(label "Light0 position" 0.0 0.5))
-				(hbox 1 1 0 1 1
-					(spinbutton 0.0 -10000.0 10000.0 800)
-					(spinbutton 0.0 -10000.0 10000.0 801)
-					(spinbutton 0.0 -10000.0 10000.0 802)))
+					(hbox 1 0 0 1 0
+						(label "Zoom"  0.0 0.5) 
+						(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom))
+					(hbox 1 1 0 1 1
+						(label "Light0 position" 0.0 0.5))
+					(hbox 1 1 0 1 1
+						(spinbutton 0.0 -10000.0 10000.0 800)
+						(spinbutton 0.0 -10000.0 10000.0 801)
+						(spinbutton 0.0 -10000.0 10000.0 802)))
 
 
 			  (tab "Skin" FREYJA_MODE_TEXTURE_EDIT
@@ -441,8 +439,8 @@
 
 					(hbox 1 1 0 1 1
 						(label "Current Material" 0.0 0.5)
-						(spinbutton 0 100 0 eNone))
-
+						(spinbutton 0 0 1024 eSelectMaterial))
+						
 					(hbox 0 1 0 1 1
 						(label "Name" 0.0 0.5)
 						(textbox 799))
@@ -467,7 +465,7 @@
 						(label "Texture2 ID" 0.0 0.5)
 						(spinbutton 0 0 100 718))
 					 
-					;; (hbox 1 0 0 1 0 (hsep))
+					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 1 0 1 1
 						(label "Ambient" 0.0 0.5))

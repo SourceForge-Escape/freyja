@@ -121,7 +121,8 @@ public:
 		TransformMesh        = 0,
 		TransformVertexFrame = 1,
 		TransformScene       = 2,
-		TransformBone        = 3
+		TransformBone        = 3,
+		TransformPoint
 	} transform_t;
 
 	typedef enum {
@@ -243,6 +244,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void getCurrentMeshCenter(vec3_t center);
 	unsigned int getCurrentMesh();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -343,6 +345,17 @@ public:
 	 *
 	 * 2004.04.01:
 	 * Mongoose - Created, replaces old API 'Scroll' methods
+	 ------------------------------------------------------*/
+
+	int saveAnimation(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : filename is valid
+	 * Post : Animation is saved as SKEL format
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.08.09: 
+	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	int saveModel(const char *filename);
@@ -561,33 +574,52 @@ public:
 
 
 
+
 	///////////////////////////////////////////////////////
 	/// FIXME: decide where to put these, then doc ////////
 	///////////////////////////////////////////////////////
 
-	// Mongoose 2002.02.02, Mouse interaction stuff
-	void TagMoveCenter(float xx, float yy);
-	void TagMove(float xx, float yy);
-	void MeshMove(float xx, float yy);
-	void MeshMoveCenter(float xx, float yy);
+	void printInfo();
+
 	void VertexNew(float xx, float yy);
 	void VertexMove(float xx, float yy);
 	void VertexSelect(float xx, float yy);
-	void MeshSelect(float xx, float yy);
-	void PolygonAddVertex(float xx, float yy);
-	void PolygonDelVertex(float xx, float yy);
 	void VertexBuffer(float xx, float yy);
-	void PolygonSelectVertex(float xx, float yy);
-	void BBoxSelect(float xx, float yy);
-	void BBoxMove(float xx, float yy);
-	void TagSelect(float xx, float yy);
 	void VertexCombine(float xx, float yy);
+	void VertexDelete();
+
 	void TexelCombine(float s, float t);
 	void TexelSelect(float s, float t);
 	void TexelMove(float s, float t);
 
+	void PolygonAddVertex(float xx, float yy);
+	void PolygonDelVertex(float xx, float yy);
+	void PolygonSelectVertex(float xx, float yy);
 
+	void BBoxSelect(float xx, float yy);
+	void BBoxMove(float xx, float yy);
+	void Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list);
+	void BBoxListBuild();
+
+	void MeshSelect(float xx, float yy);
+	void MeshMove(float xx, float yy);
+	void MeshMoveCenter(float xx, float yy);
+	void MeshNew();
+	void MeshDel();
+	void MeshCopy();
+
+	void TagMoveCenter(float xx, float yy);
+	void TagMove(float xx, float yy);
+	void TagSelect(float xx, float yy);
+	void TagNew(vec_t x, vec_t y, vec_t z, unsigned char flag);
+	void TagAddMesh(unsigned int tag, unsigned int mesh);
+	void TagDelMesh(unsigned int tag, unsigned int mesh);
+	void TagConnect(unsigned int master, unsigned int slave);
+	void TagDisconnect(unsigned int master, unsigned int slave);
+
+	void TextureShift();
 	///////////////////////////////////////////////////////
+
 
 #ifdef FIXME
 #   error "FreyjaModel.h, FIXME: Hacky stuff that's mainly temp"
@@ -613,28 +645,6 @@ public:
 		return _light0_pos;
 	}
 #endif
-
-	void printInfo();
-
-	void Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list);
-	void BBoxListBuild();
-	void VertexDelete();
-	void TagConnect(unsigned int master, unsigned int slave);
-	void TagDisconnect(unsigned int master, unsigned int slave);
-
-
-	void TagNew(vec_t x, vec_t y, vec_t z, unsigned char flag);
-	void TagDel();
-	void TagAddMesh(unsigned int tag, unsigned int mesh);
-	void TagDelMesh(unsigned int tag, unsigned int mesh);
-	void TextureShift();
-	void MeshNew();
-	void MeshDel();
-	void MeshCut();
-	void MeshCopy();
-	void MeshMirror(unsigned int id);
-	void MeshFrameClone(unsigned int mesh, unsigned int grp);
-	void GroupClone(unsigned int grp);
 
 
 private:

@@ -22,9 +22,20 @@
  Milestones ( Public snapshot releases )
 
  [0.3.6] ( Projected release date: 2004.08.31 )
+  * Generic new/select/delete & copy/cut/paste
+  * Group rotate should pivot on center
+  * C-mouse1 to select object
+  * mouse1 to move object
+  * mouse2 to rotate object
+  * S-mouse1 to scale object?
+  * Generic transforms: bone / mesh / skin
+  * Skybox support?
+  * Finish Light class: applyEffect() / flickers & fx settings
+  * FileDialog import/export types dropdown use
   * Commit generic dialogs to svn
   * Generic editing events ( eg Select/Move/Copy object )
   * Bug fix focus
+  * skeletal animation
   * Full skeletal editing ( deforms, blending, etc )
   * Better Light and Camera editing
   * Shader editor
@@ -32,11 +43,10 @@
   * multiple lights and materials/shaders
   * store texture in model
   * add 'scrolling' back
-  * skeletal animation
   * mesh editing
-  * Recalc normals when transforming meshes
+  * Recalc/maintain normals when rotating meshes
   * Undo/Redo Stacks
-  * Expand Particle to allow GL_POINTS/GL_LINES particles also
+  * Add back Particles with GL_TRISTRIP/GL_POINTS/GL_LINES 
   * New light and camera 3d "icons", eg directional and point
   * Light editing tab
   * Camera editing tab

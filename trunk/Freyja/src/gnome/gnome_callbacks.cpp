@@ -741,7 +741,7 @@ void refresh_material_interface()
 
 	textentry_value_set(799, gMaterialManager->getName());
 
-	event_print("refresh_material_interface> FIXME, Texture widgets not syncable yet, %s:%i", __FILE__, __LINE__);
+	// event_print("refresh_material_interface> FIXME, Texture widgets not syncable yet, %s:%i", __FILE__, __LINE__);
 }
 
 
@@ -849,7 +849,6 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 {
 	unsigned int event;
 	unsigned int value;
-	float x, y, z;
 
 
 	if (!spin)
@@ -862,68 +861,7 @@ gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id)
 	value = gtk_spin_button_get_value_as_int(spin);
 	event = GPOINTER_TO_INT(event_id);
 
-	switch (event)
-	{
-	case 500:
-		if (!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_MESH)))
-		{
-			gFreyjaModel->setCurrentMesh(value);			
-			event_refresh();
-		}
-		break;
-	case 501:
-		if (!spinbutton_uint_set_range(spin, value, 0, eggGetNum(FREYJA_GROUP)))
-		{
-			gFreyjaModel->setCurrentGroup(value);
-			event_refresh();
-		}
-		break;
-	case 503:
-		if (value != gFreyjaModel->getCurrentTextureIndex())
-		{
-			gFreyjaModel->setCurrentTextureIndex(value);
-			//value = gFreyjaModel->getCurrentTextureIndex();
-			//spinbutton_value_set(event, value);
-			event_refresh();
-		}
-		break;
-	case 504:
-		if (!spinbutton_uint_set_range(spin, 
-									  value, 0, eggGetNum(FREYJA_BONE)))
-		{
-			gFreyjaModel->setCurrentBone(value);
-			//value = gFreyjaModel->getCurrentBone();
-			//spinbutton_value_set(event, value);
-
-			/* Mongoose 2002.08.31, Update spin buttons dependent 
-			 * on this one */
-			gFreyjaModel->getBoneRotation(&x, &y, &z);
-			spinbutton_value_set(520, x);
-			spinbutton_value_set(521, y);
-			spinbutton_value_set(522, z);
-			
-			gFreyjaModel->getBoneTranslation(&x, &y, &z);
-			spinbutton_value_set(510, x);
-			spinbutton_value_set(511, y);
-			spinbutton_value_set(512, z);
-			event_refresh();
-		}
-		break;
-	case 717:
-	case 718:
-		event -= 717;
-
-		gMaterialManager->setTexture(event, value);
-		event_print("Material[%i].texture[%d] = %i",
-					gMaterialManager->getCurrent(), 
-					event,
-					gMaterialManager->getTexture(event));
-		event_refresh();
-		break;
-	default:
-		event_print("spinbutton_uint_event> event %i not handled, email bug", 
-					GPOINTER_TO_INT(event_id));
-	}
+	freyja_event2i(EVENT_MISC, GPOINTER_TO_INT(event_id));
 
 	return TRUE;
 }
@@ -951,6 +889,8 @@ gint spinbutton_float_event(GtkSpinButton *spin, gpointer event_id)
 		return TRUE;
 	}
 
+
+	// FIXME: what a load of shit -- move this into control
 	switch (GPOINTER_TO_INT(event_id))
 	{
 	case 510:
@@ -1054,13 +994,9 @@ gint spinbutton_float_event(GtkSpinButton *spin, gpointer event_id)
 		test[GPOINTER_TO_INT(event_id)-800] = new_value;
 		event_refresh();
 		break;
-	case eZoom:
-		gFreyjaControl->setZoom(new_value);
-		event_refresh();
-		break;
+
 	default:
-		event_print("spinbutton_float_event> event %i not handled, email bug", 
-						GPOINTER_TO_INT(event_id));
+		freyja_event2i(EVENT_MISC, GPOINTER_TO_INT(event_id));
 	}
 
 	return TRUE;

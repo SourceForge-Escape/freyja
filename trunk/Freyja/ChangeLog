@@ -28,8 +28,13 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- Freyja (0.3.5-20040802) Mongoose <mongoose@icculus.org>
+	o FIXME: Broke some index selectors
 
+ Freyja (0.3.5-20040809) Mongoose <mongoose@icculus.org>
+
+	o Moved most widget callbacks into control!
+	o Removed a lot of dead code
+	o Generic transforms support
 	o Moving text messages back into lisp control
 	o New mouse event code
 	o RC system reduction
