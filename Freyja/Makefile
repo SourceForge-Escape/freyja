@@ -7,7 +7,7 @@
 # + Install
 ################################################################
 
-NAME=Freyja
+NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
@@ -21,7 +21,7 @@ EMAIL=mongoose@icculus.org
 ################################################################
 
 INSTALL_DIR=/usr/local/bin
-TREE_DIR=$(NAME)
+TREE_DIR=Freyja
 #$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 SRC_DIR=src
 PACKAGE_DIR=/tmp/package/$(NAME)
@@ -33,7 +33,20 @@ BUILD_RELEASE_DIR=bin/release
 BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
+DESTDIR=/usr/local
+INSTALL_BIN=$(DESTDIR)/bin
+INSTALL_LIB=$(DESTDIR)/lib
+INSTALL_DOC=$(DESTDIR)/share/doc/$(NAME)
+INSTALL_SHARE=$(DESTDIR)/share/$(NAME)
+INSTALL_INCLUDE=$(DESTDIR)/include
+
+
 ################################################################
+
+DEB_DIR=/tmp/$(NAME).deb
+NAME_DEB=$(NAME)
+VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
+
 
 # DEBUG_GTK_MOUSE    
 # DEBUG_GTK_KEYS
@@ -240,16 +253,43 @@ clean-conf:
 		Makefile.in confdefs.h
 	@-echo [done]
 
+#################################################################
+
+clean-deb:
+	@-echo -n "Cleaning DEBs                                "
+	@-rm -rf $(DEB_DIR)
+	@-echo "[DONE]"
+
+debian-package:
+	$(MAKE) clean-deb
+	$(MAKE) tarball
+	mkdir -p $(DEB_DIR)
+	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
+	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
+
+deb-init:
+	dh_make -c lgpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	@-cp debian/control debian/control.old
+	@-sed -e "s/<insert up to 60 chars description>/Freyja 3d modeler/g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+	@-cp debian/control debian/control.old
+	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+
+deb:
+	dpkg-buildpackage -rfakeroot
+
 ################################################################
 
 install:
 	@-echo -n "Installing                                  "
-	@-cp $(BUILD_INSTALL_DIR)/$(NAME) $(INSTALL_DIR)
+	@-mkdir -p  $(INSTALL_BIN)
+	@-cp bin/debug/freyja $(INSTALL_BIN)
 	@-echo [done]
 
 install-debug:
 	@-echo -n "Installing debug                            "
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(INSTALL_DIR)
+	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(INSTALL_BIN)
 	@-echo [done]
 
 
@@ -306,9 +346,9 @@ package.tgz:
 	@-ls -l $(PACKAGE_DIR)
 
 tarball:
-	@-cd .. && tar zcvf $(NAME)-$(VERSION)-$(BUILD_ID).tar.gz \
+	@-cd .. && tar zcvf $(NAME)-$(VERSION).$(BUILD_ID).tar.gz \
 		$(TREE_DIR) \
-		--exclude bin --exclude *~ --exclude cvs  \
+		--exclude bin --exclude *~ --exclude .svn  \
 		--exclude CVS --exclude *.notar --exclude spec \
 		--exclude *.log --exclude *.tga --exclude contrib \
 		--exclude $(NAME)/data/models \

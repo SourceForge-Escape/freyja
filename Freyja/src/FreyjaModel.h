@@ -447,6 +447,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void mirrorTexCoord(long texCoordIndex, bool x, bool y);
+
 	void setBoneRotation(float pitch, float yaw, float roll);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -551,6 +553,7 @@ public:
 	 ------------------------------------------------------*/
 
 	void setMeshMaterial(long meshIndex, long material);
+	void setPolygonMaterial(long polygonIndex, long material);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets mesh[<meshIndex>] and all it's polygon's
@@ -584,6 +587,10 @@ public:
 	 * 2000.09.10: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	void transformTexCoord(long texCoordIndex,
+						   freyja_transform_action_t action,
+						   vec_t x, vec_t y);
 
 	void updateSkeletalUI();
 
