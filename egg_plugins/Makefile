@@ -150,7 +150,7 @@ trmesh.so:
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=3ds \
 	MOD_OBJS=$(BUILD_DEBUG_DIR)/freyja_3ds.o \
-	CFLAGS="$(MODULE_CFLAGS)" \
+	CFLAGS="$(MODULE_CFLAGS) -DLIB3DS_SUPPORT" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -l3ds"
 
 tombraider.so:
