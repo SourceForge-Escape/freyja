@@ -366,6 +366,9 @@ enum freyja_event_freyja_mode
 	FREYJA_MODE_LOAD_MAP
 };
 
+
+void freyja_handle_color(int id, float r, float g, float b, float a);
+
 enum custom_color                   /* Custom GUI colors */
 {
   COLOR_EDIT_POLYGON             = 1,

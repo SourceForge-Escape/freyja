@@ -50,6 +50,8 @@ void material_event(GtkWidget *widget, gpointer user_data);
 void rc_textbox_event(GtkWidget *widget, gpointer user_data);
 
 
+void event_send_color(GtkWidget *colorbutton, gpointer id);
+
 // Mongoose 2002.01.25, Spin spin sugar... replace a hundred spin functions
 gint spinbutton_int_event(GtkSpinButton *spin, gpointer event_id);
 gint spinbutton_uint_event(GtkSpinButton *spin, gpointer event_id);

@@ -85,6 +85,8 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
 									  char *icon, char *label, char *help, 
 									  void *event_func, int event_cmd);
 
+GtkWidget *mgtk_create_color_button(void *func, int id);
+
 void mgtk_destroy_window(GtkWidget *widget);
 
 void mgtk_refresh_glarea(GtkWidget *glarea);
