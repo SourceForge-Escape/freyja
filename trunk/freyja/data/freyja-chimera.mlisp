@@ -183,6 +183,7 @@
 				(menu_item "_Select"		eMode	eBoneSelect)
 				(menu_item "_Move"			eMode	eBoneMoveJoint)))
 
+		(submenu ePluginMenu "Plugins")	
 
 		(menu_seperator)
 

@@ -183,4 +183,34 @@ class FreyjaEvent
 	static Vector<FreyjaEvent*> mEventStore; /* Event store for control use */
 };
 
+
+#ifdef FIXME
+class FreyjaEventCallback : public FreyjaEvent
+{
+public:
+
+	FreyjaEventCallback(Resource *rcSys, const char *name, int *func()) :
+		FreyjaEvent(rcSys, name)
+	{
+		mFunc = func;
+	}
+
+
+	virtual bool action()
+	{
+		if (mFunc)
+		{
+			return (*mFunc)();
+		}
+
+		return false;
+	}
+
+
+private:
+
+	int *mFunc();
+};
+#endif
+
 #endif
