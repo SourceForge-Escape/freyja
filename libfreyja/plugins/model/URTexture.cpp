@@ -23,9 +23,8 @@
 #include <string.h>
 #include <stdio.h>
 
-
-#ifdef HAVE_MTKIMAGE
-#   include <freyja8/EggImage.h>
+#ifdef HAVE_FREYJA
+#   include <freyja/FreyjaImage.h>
 #endif
 
 #include "URTexture.h"
@@ -379,21 +378,21 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 				imageRGBA[j*4+3] = palette[image[j]*4+3];
 			}
 
-#ifdef HAVE_MTKIMAGE
+#ifdef HAVE_FREYJA
 			printf("\tWriting /tmp/utpak/Texture/%s-%i.tga...\n", 
 					 pak.mHeader.nameTable[index].objName, i);
 
 			if (1)
 			{
-				EggImage img;
+				FreyjaImage img;
 				char filenameTGA[512];
 				snprintf(filenameTGA, 512, "/tmp/utpak/Texture/%s-%i.tga", 
 							pak.mHeader.nameTable[index].objName, i);
-				img.loadPixmap(imageRGBA, w, h, EggImage::RGBA_32);
+				img.loadPixmap(imageRGBA, w, h, FreyjaImage::RGBA_32);
 				img.saveImage(filenameTGA, "tga");
 			}
 #else
-#   warning HAVE_MTKIMAGE undefined - No image export support
+#   warning HAVE_FREYJA undefined - No image export support
 #endif
 
 			if (imageRGBA)
@@ -431,19 +430,19 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 
 			printf("\tWriting /tmp/utpak/Texture/%s-%i.tga...\n", 
 					 pak.mHeader.nameTable[index].objName, i);
-#ifdef HAVE_MTKIMAGE
+#ifdef HAVE_FREYJA
 			if (1)
 			{
-				EggImage img;
+				FreyjaImage img;
 				char filenameTGA[512];
 				snprintf(filenameTGA, 512, "/tmp/utpak/Texture/%s-%i.tga", 
 							pak.mHeader.nameTable[index].objName, i);
 				img.loadPixmap(imageRGBA, w, h, 
-								  (byteperpixel == 3) ? EggImage::RGB_24 : EggImage::RGBA_32);
+								  (byteperpixel == 3) ? FreyjaImage::RGB_24 : FreyjaImage::RGBA_32);
 				img.saveImage(filenameTGA, "tga");
 			}
 #else
-#   warning HAVE_MTKIMAGE undefined - No image export support
+#   warning HAVE_FREYJA undefined - No image export support
 #endif						
 			delete [] data;
 					

@@ -433,6 +433,14 @@ nod.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
 
+nwnascii.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=nwnascii \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/nwnascii.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
 obj.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -510,7 +518,7 @@ trmesh.so:
 
 plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
 
 tools: FreyjaUtil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
 
@@ -661,6 +669,13 @@ python.test:
 	OBJS="$(BUILD_TEST_DIR)/python.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PYTHON" \
 	LD_FLAGS="-lm -lhel0 -lfreyja -lpython2.3 -lstdc++"
+
+UTPackage.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=UTPackage BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 $(BUILDDIR)/$(NAME).test : $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)

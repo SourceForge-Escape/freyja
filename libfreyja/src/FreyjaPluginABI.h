@@ -319,6 +319,8 @@ typedef enum {
 	// FREYJA_MESH Accessors
 	long freyjaGetMeshFlags(long meshIndex);
 	long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
+	char *freyjaGetMeshNameString(long meshIndex); // don't alter string
+	long freyjaGetMeshName1s(long meshIndex, long lenght, char *name);
 
 	long freyjaGetMeshVertexIndex(long meshIndex, long element);
 	/*------------------------------------------------------
@@ -630,6 +632,9 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 
 void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
 							long count, long segments); // radius
+
+
+void freyjaMeshName1s(long meshIndex, const char *name);
 
 void freyjaMeshFlags1u(unsigned int flags);
 /*------------------------------------------------------
