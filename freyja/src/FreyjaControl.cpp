@@ -1376,6 +1376,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+	case eExtrude:
+		freyjaPolygonExtrudeQuad1f(mModel->getCurrentPolygon(), 5.0f);
+		freyja_event_gl_refresh();
+		break;
+
+		
 	/* MESHES */
 	case eMeshNew:
 		mTransformMode = FreyjaModel::TransformMesh;
@@ -1392,8 +1398,14 @@ bool FreyjaControl::event(int command)
 		mEventMode = modeSelect;
 		freyja_print("Select object mesh...");
 		break;
-	case eMeshMirror:
+	case eMeshMirrorX:
+		mModel->mirrorUsingVertexBuffer(true, false, false);
+		break;
+	case eMeshMirrorY:
 		mModel->mirrorUsingVertexBuffer(false, true, false);
+		break;
+	case eMeshMirrorZ:
+		mModel->mirrorUsingVertexBuffer(false, false, true);
 		break;
 	case eTransformMeshPivot:
 		mTransformMode = FreyjaModel::TransformMesh;

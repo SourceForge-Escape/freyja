@@ -132,6 +132,21 @@
 				(menu_item "_Line"		eLineBone		"gtk-blanked")
 				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
+		(submenu "_Create" 
+				(submenu "_Primatives"
+						(menu_item "_Vertex"		eMode  eVertexNew)
+						(menu_item "_Polygon"		eMode  ePolygonNew)
+						(menu_item "_Bone"			eMode  eBoneNew))
+
+				(submenu "P_olygon Primatives"
+					(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
+					(menu_item "_Plane"		eGeneratePlane		"gtk-polygon")
+					(menu_item "_Tube"		eGenerateTube		"gtk-polygon")
+					(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
+					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
+					(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
+
+				) ;; submenu Create
 
 		(submenu "_Tools"
 			(submenu "_Generate"
@@ -145,6 +160,8 @@
 				(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
 				(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
 				(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
+
+			(menu_item "_Extrude face"	"F4" eExtrude		"gtk-polygon")
 
 			;; Transforms
 			(submenu "_Transforms"
@@ -166,7 +183,9 @@
 				(menu_item "_Delete"	eMode	ePolygonDelete))
 
 			(submenu "_Vertices..."
-				(menu_item "_Mirror"	eMode	eMeshMirror))
+				(menu_item "Mirror_X"	eMode	eMeshMirrorX)
+				(menu_item "Mirror_Y"	eMode	eMeshMirrorY)
+				(menu_item "Mirror_Z"	eMode	eMeshMirrorZ))
 
 			(submenu "_Mesh"
 				(menu_item "_New"		eMode	eMeshNew)
@@ -291,17 +310,6 @@
 							(toolbar_button
 								"texmap.png" "TexelGen" "Texture Map, XY Plane"
 								eMode eTextureMapProjection)))
-
-
-					;; Mesh generation ;;;;;;;;;;;;;;;;;;;;;;;;;;
-					(hbox 1 0 0 1 0
-						(label "Generate a mesh"  0.0 0.5))
-					(hbox 1 0 0 1 0
-						(button "Cube"		eMode		eGenerateCube)
-						(button "Plane" 	eMode		eGeneratePlane)
-						(button "Sphere"	eMode		eGenerateSphere)
-						(button "Cylinder"	eMode		eGenerateCylinder)
-						(button	"Cone"		eMode		eGenerateCone))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
