@@ -224,19 +224,20 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
+	r.RegisterInt("eRedo", eRedo);
+	r.RegisterInt("eUndo", eUndo);
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
+
 	r.RegisterInt("eSplitObject", eSplitObject);
-	r.RegisterInt("eSelectAll", eNone);
-	r.RegisterInt("eAppendFile", eNone);
-	r.RegisterInt("eRevertFile", eNone);
-	r.RegisterInt("eExportFile", eNone);
-	r.RegisterInt("eImportFile", eNone);
+	r.RegisterInt("eSelectAll", eSelectAll);
+	r.RegisterInt("eAppendFile", eAppendFile);
+	r.RegisterInt("eRevertFile", eRevertFile);
+	r.RegisterInt("eExportFile", eExportFile);
+	r.RegisterInt("eImportFile", eImportFile);
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenFileTexture", eOpenFileTexture);
-	r.RegisterInt("eRedo", eNone);
-	r.RegisterInt("eUndo", eNone);
 
 	// dialogs
 	r.RegisterInt("ePreferencesDialog", ePreferencesDialog);

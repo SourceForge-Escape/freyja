@@ -17,6 +17,7 @@
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
   General
+	o FIX normal gen using mesh center points
 	o Bounding box selection made into 2 events:
 	   1. bounding box selection
 	   2. operation on selection ( not just vertex buffer default )
