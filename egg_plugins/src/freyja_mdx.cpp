@@ -22,9 +22,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja_egg/EggPlugin.h>
-
+#include <freyja_model/EggPlugin.h>
 #include <freyja_model/mendian.h>
+
 #define fread_int_small eRead_Small_int32
 #define fread_u_int_small eRead_Small_uint32
 #define fread_float_small eRead_Small_float
@@ -45,8 +45,10 @@ int freyja_model__mdx_check(char *filename)
 	unsigned int version, versionMinor;
 
 
-	f = fopen(filename, "rb");
+	printf("freyja_model__mdx_check> Not implemented fully, %s:%i\n", 
+			 __FILE__, __LINE__);
 
+	f = fopen(filename, "rb");
 
 	if (!f)
 	{
@@ -54,25 +56,24 @@ int freyja_model__mdx_check(char *filename)
 		return -1;
 	}
 
-	fread(buffer, 1, 8, f);
+	fread(&buffer, 1, 8, f);
 	eRead_Small_uint32(&version, f);
 	eRead_Small_uint32(&versionMinor, f);
 
 	fclose(f);
 
-	if (!strncmp("MDLXVERS", buffer))
+	if (!strncmp("MDLXVERS", buffer, 8))
 	{
 		if (version == 0x00040000 && versionMinor == 0x03200000)
 		{
 			printf("Seems to be valid Warcraft III mdx\n");
+			return 0;
 		}
-		else
-		{
-			return -1;
-		}
+
+		return 0;
 	}
 
-	return 0;
+	return -1;
 }
 
 typedef struct {
@@ -93,8 +94,8 @@ typedef struct {
 int freyja_model__mdx_import(char *filename)
 {
 	FILE *f;
-	char buffer[256];
-	unsigned int version, versionMinor, count;
+	char buffer[512];
+	unsigned int i, version, versionMinor, count;
 
 
 	printf("freyja_model__mdx_import> Not implemented fully, %s:%i\n", 
@@ -103,31 +104,34 @@ int freyja_model__mdx_import(char *filename)
 
 	f = fopen(filename, "rb");
 
-
 	if (!f)
 	{
 		perror(filename);
 		return -1;
 	}
 
-	fread(buffer, 1, 8, f);
+	fread(&buffer, 8, 1, f);
 	eRead_Small_uint32(&version, f);
 	eRead_Small_uint32(&versionMinor, f);
 
 	if (!strncmp("MDLXVERS", buffer, 8))
 	{
-		if (version == 0x00040000 && versionMinor == 0x03200000)
+		if (version == 0x4 && versionMinor == 0x320)
 		{
-			printf("Seems to be valid Warcraft III mdx\n");
+			printf("Seems to be valid Warcraft III MDX\n");
 		}
 		else
 		{
-			fclose(f);
-			return -1;
+			printf("0x%x && 0x%x\n", version, versionMinor);
 		}
 	}
+	else
+	{
+		fclose(f);
+		return -1;
+	}
 
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 4, 1, f);
 
 	if (!strncmp("MODL", buffer, 4))
 	{
@@ -139,15 +143,13 @@ int freyja_model__mdx_import(char *filename)
 		return -1;
 	}
 
-
 	eRead_Small_uint32(&count, f);
-	fread(buffer, 1, count, f);
+	fread(&buffer, count, 1, f);
 	buffer[count-1] = 0;
 	printf("Model name = '%s'\n", buffer);
 
-	fread(buffer, 1, count, f);
+	fread(&buffer, 4, 1, f);
 
-	fread(buffer, 1, 4, f);
 	if (!strncmp("SEQS", buffer, 4))
 	{
 		printf("SEQS [OK]\n");
@@ -160,10 +162,11 @@ int freyja_model__mdx_import(char *filename)
 
 	unsigned int mtlsOffset;
 	eRead_Small_uint32(&mtlsOffset, f);
-	
+	printf("mtlsOffset = %d\n", mtlsOffset);
+
+#ifdef FIXME	
 	mdx_seqs_header_t seqh;
 	fread(&seqh, 1, 130, f);
-
 	
 	unsigned int seqsOffset = ftell(f);
 	count = (seqsOffset - mtlsOffset) / 132;
@@ -171,16 +174,22 @@ int freyja_model__mdx_import(char *filename)
 	mdx_seqs_t *seqs = new mdx_seqs_t[count];
 
 	for (i = 0; i < count; ++i)
-		fread(&seq[i], 1, 132, f);
+		fread(&seqs[i], 1, 132, f);
+#else
+	fseek(f, mtlsOffset-4, SEEK_CUR);
+	printf("Seeking to %li\n", ftell(f));
+#endif
 
+	unsigned int matsCount;
 	eRead_Small_uint32(&matsCount, f);
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 4, 1, f);
 	if (!strncmp("MTLS", buffer, 4))
 	{
 		printf("MTLS [OK]\n");
 	}
 	else
 	{
+		printf("MTLS [FAILED] -- '%s' @ %li\n", buffer, ftell(f));	
 		fclose(f);
 		return -1;
 	}
@@ -194,7 +203,7 @@ int freyja_model__mdx_import(char *filename)
 	eRead_Small_uint32(&matsCount, f);
 	eRead_Small_uint32(&matsCount, f);
 
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("LAYS", buffer, 4))
 	{
 		printf("LAYS [OK]\n");
@@ -206,9 +215,9 @@ int freyja_model__mdx_import(char *filename)
 	}
 	*/
 
-	fseek(texsOffset, SEEK_CUR, f);
+	fseek(f,  texsOffset, SEEK_CUR);
 
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("TEXS", buffer, 4))
 	{
 		printf("TEXS [OK]\n");
@@ -226,9 +235,11 @@ int freyja_model__mdx_import(char *filename)
 	  ....
 	 */
 	
-	fseek(geosOffset, SEEK_CUR, f);
+    eggBegin(FREYJA_MESH);
 
-	fread(buffer, 1, 4, f);
+	fseek(f,  geosOffset, SEEK_CUR);
+
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("GEOS", buffer, 4))
 	{
 		printf("GEOS [OK]\n");
@@ -242,7 +253,7 @@ int freyja_model__mdx_import(char *filename)
 	eRead_Small_uint32(&count, f);
 	eRead_Small_uint32(&count, f);
 
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("VRTX", buffer, 4))
 	{
 		printf("VRTX [OK]\n");
@@ -255,12 +266,23 @@ int freyja_model__mdx_import(char *filename)
 
 	eRead_Small_uint32(&count, f);
 
-	float *verts = new float[count*3]
+	float *verts = new float[count*3];
 
 	for (i = 0; i < count*3; ++i)
+	{
 		fread(verts+i, 4, 1, f);
+	}
 
-	fread(buffer, 1, 4, f);
+    eggBegin(FREYJA_GROUP);
+	for (i = 0; i < count; ++i)
+	{
+		eggVertexStore3f(verts[i*3+1], verts[i*3+2], verts[i*3+0]);	
+	}
+	eggEnd(); // GROUP
+
+	eggEnd(); // MESH
+
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("NRMS", buffer, 4))
 	{
 		printf("NRMS [OK]\n");
@@ -273,12 +295,18 @@ int freyja_model__mdx_import(char *filename)
 
 	eRead_Small_uint32(&count, f);
 
-	float *norms = new float[count*3]
+	float *norms = new float[count*3];
 
 	for (i = 0; i < count*3; ++i)
+	{
 		fread(norms+i, 4, 1, f);
+	}
 
-	fread(buffer, 1, 4, f);
+	for (i = 0; i < count; ++i)
+	{
+		eggVertexNormalStore3f(i, norms[i*3+1], norms[i*3+2], norms[i*3+0]);
+	}
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("PTYP", buffer, 4))
 	{
 		printf("PTYP [OK]\n");
@@ -292,7 +320,7 @@ int freyja_model__mdx_import(char *filename)
 	eRead_Small_uint32(&count, f);
 	eRead_Small_uint32(&count, f);
 
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("PCNT", buffer, 4))
 	{
 		printf("PCNT [OK]\n");
@@ -306,7 +334,7 @@ int freyja_model__mdx_import(char *filename)
 	eRead_Small_uint32(&count, f);
 	eRead_Small_uint32(&count, f);
 
-	fread(buffer, 1, 4, f);
+	fread(&buffer, 1, 4, f);
 	if (!strncmp("PVTX", buffer, 4))
 	{
 		printf("PVTX [OK]\n");
@@ -320,7 +348,7 @@ int freyja_model__mdx_import(char *filename)
 	// ...
 
 	fclose(f);
-	return -1; // 0;
+	return 0;
 }
 
 
