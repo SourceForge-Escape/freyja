@@ -25,8 +25,8 @@
 #include "FreyjaEvent.h"
 
 
-unsigned int FreyjaEvent::mNextId = 100000;  /* Not at zero to co-exist with
-											  * old event system for now */
+unsigned int FreyjaEvent::mNextId = 0;
+Vector<FreyjaEvent*> FreyjaEvent::mEventStore;
 
 
 ////////////////////////////////////////////////////////////
@@ -40,6 +40,8 @@ FreyjaEvent::FreyjaEvent(FreyjaResource *rcSys, char *name)
 	mId = ++mNextId;
 	mName = 0x0;
 	setName(name);
+
+	mEventStore.pushBack(this);
 }
 
 

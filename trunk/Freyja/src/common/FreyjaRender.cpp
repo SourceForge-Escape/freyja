@@ -723,6 +723,63 @@ void colorCopyHelper(vec3_t colorSource, vec3_t colorDest)
 }
 
 
+void FreyjaRender::getColor(int id, vec4_t rgba)
+{
+	switch (id)
+	{
+	case COLOR_EDIT_POLYGON:
+		colorCopyHelper(_edit_polygon_color, rgba);
+		break;
+	case COLOR_EDIT_LINE:
+		colorCopyHelper(_edit_line_color, rgba);	
+		break;
+	case COLOR_EDIT_LINE_HIGHLIGHT:
+		colorCopyHelper(_edit_line_highlight_color, rgba);
+		break;
+	case COLOR_EDIT_GRID_8:
+		colorCopyHelper(_edit_grid_8_color, rgba);
+		break;
+	case COLOR_EDIT_VERTEX:
+		colorCopyHelper(_edit_vertex_color, rgba);
+		break;
+	case COLOR_EDIT_VERTEX_HIGHLIGHT:
+		colorCopyHelper(_edit_vertex_highlight_color, rgba);
+		break;
+	case COLOR_EDIT_BBOX:
+		colorCopyHelper(_edit_bbox_color, rgba);
+		break;
+	case COLOR_EDIT_BG:
+		colorCopyHelper(_edit_bg_color, rgba);
+		break;
+	case COLOR_EDIT_GRID:
+		colorCopyHelper(_edit_grid_color, rgba);
+		break;
+	case COLOR_EDIT_GRID_AXIS_X:
+		colorCopyHelper(_edit_grid_x_axis_color, rgba);
+		break;
+	case COLOR_EDIT_GRID_AXIS_Y:
+		colorCopyHelper(_edit_grid_y_axis_color, rgba);
+		break;
+	case COLOR_EDIT_GRID_AXIS_Z:
+		colorCopyHelper(_edit_grid_z_axis_color, rgba);
+		break;
+	case COLOR_EDIT_TEXT:
+		colorCopyHelper(_edit_text_color, rgba);
+		break;
+	case COLOR_VIEW_BG:
+		colorCopyHelper(_view_bg_color, rgba);
+		break;
+	case COLOR_VIEW_TEXT:
+		colorCopyHelper(_view_text_color, rgba);
+	}
+}
+
+void FreyjaRender::setColor(int id, vec4_t rgba)
+{
+	CustomColor(id, rgba[0], rgba[1], rgba[2]);
+}
+
+
 void FreyjaRender::CustomColor(int flags, float r, float g, float b)
 {
 	vec3_t color;

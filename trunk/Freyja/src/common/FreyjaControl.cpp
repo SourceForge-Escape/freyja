@@ -1106,12 +1106,12 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 	ScreenToWorld(&xx, &yy);
 
 	// Mongoose: No click and release
-	if (!mMouseButton & MOUSE_BTN_RIGHT)
+	if (mMouseButton != MOUSE_BTN_LEFT)
 	{
 		return;
 	}
 
-	//event_print("* motion -> %i, %i", x, y);
+	event_print("* motion -> %i, %i : %i", x, y, mMouseButton);
 
 	switch (_minor_mode)
 	{

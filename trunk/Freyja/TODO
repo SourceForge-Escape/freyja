@@ -21,18 +21,19 @@
 
  Milestones ( Public snapshot releases )
 
- [0.3.8] ( Projected release date: 2004.08.31 )
+ [0.3.6] ( Projected release date: 2004.08.31 )
   * Bug fix focus
   * Full skeletal editing ( deforms, blending, etc )
   * Better Light and Camera editing
   * Shader editor
-
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
-
- [Deleveribles/Fixes for 0.3.8 ]
+  * mlisp events use only FE symbols ( will fix bugs )
+  * multiple lights and materials/shaders
+  * store texture in model
+  * add 'scrolling' back
+  * skeletal animation
+  * mesh editing
   * Recalc normals when transforming meshes
-  * Undo/Redo Stacks, key commands, and menu interface
-  * More buttons for menu current mesh operations
+  * Undo/Redo Stacks
   * Expand Particle to allow GL_POINTS/GL_LINES particles also
   * New light and camera 3d "icons", eg directional and point
   * Light editing tab
@@ -95,29 +96,5 @@
   * Cache the mesh/scene transforms
   * Event timer to stop blocking events when modeler is slow
   * Add multiwindow modeling support back?
-
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
-
- Scratch pad for final implementation candidate #1:
-
- Model :: vertex { xyz|3; w|<?>; b|<?>; } 
-
- Render :: render_vertex { xyz|3; uv|3; normal|3; w|<?>; b|<?>; }
-
- Note: Remember to enforce 'b|<0> + ... + b|<n> = 1.0' at control
-       and model level
-
- Control :: control_vertex { xyz|3; }
-
- Model :: tristrip { vertex|<?>; }
-
- Model :: mesh { tristrip|<?>;  vertex|<?> frame; }
-
- Model :: joint { matrix|1 local; matrix|1 combined; 
-                  limit_min|3; limit_max|3; quat|1;
-                  joint|1 parent; }
-
-
- * Suggest hw motion capture spec release
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
