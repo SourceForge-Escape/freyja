@@ -92,6 +92,9 @@ typedef enum {
 	eMeshMove,
 	eMeshRotate,
 	eMeshScale,
+	eMeshTexcoordSpherical,
+	eMeshTexcoordCylindrical,
+	eMeshTesselate,
 	eSetMaterialTexture,
 	eTransformMeshPivot,
 	eAnimationNext,
@@ -294,8 +297,8 @@ typedef enum {
 
 	EVENT_MISC,
 	eMeshFlipNormals,
-	eRecentFiles,
 	ePluginEventBase = 10000,
+	eRecentFiles = 100000,
 
 	/* Misbehaved text events */
 	eSetMaterialName = 799

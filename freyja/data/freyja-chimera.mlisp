@@ -149,10 +149,6 @@
 				) ;; submenu Create
 
 		(submenu "_Tools"
-			(submenu "_Scene"
-				(menu_seperator)
-				(menu_item "_Normals"	eGenerateNormals	"gtk-polygon"))
-
 
 			;; Transforms
 			(submenu "_Transforms"
@@ -162,6 +158,9 @@
 				(menu_item "Select"  "F8"	eSelect "gtk-polygon"))
 
 			(menu_seperator)
+
+			(submenu "_Scene"
+				(menu_item "Generate _Normals"	eGenerateNormals	"gtk-polygon"))
 
 			(submenu "_Vertex"
 				(menu_item "_New"		eMode  eVertexNew)
@@ -180,11 +179,15 @@
 				(menu_item "Mirror_Z"	eMode	eMeshMirrorZ))
 
 			(submenu "_Mesh"
+				(submenu "_UV Texcoord Mapping"
+					(menu_item "_Planar"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+					(menu_item "_Cylindrical" eMeshTexcoordCylindrical	"gtk-polygon")
+					(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-polygon"))
 				(menu_item "_New"		eMode	eMeshNew)
 				(menu_item "_Delete"	eMode	eMeshDelete)
 				(menu_item "_Select"	eMode	eMeshSelect)
 				(menu_item "Re_center"	eMode	eTransformMeshPivot)
-				(menu_item "_UV by XY Plane"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+				(menu_item "_Tesselate"	eMode	eMeshTesselate)
 				(menu_item "_Generate Normals"	eMode	eMeshGenerateNormals)
 				(menu_item "_Flip Normals"	eMode	eMeshFlipNormals))
 

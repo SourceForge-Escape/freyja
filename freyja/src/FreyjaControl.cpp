@@ -1425,8 +1425,17 @@ bool FreyjaControl::event(int command)
 
 		
 	/* MESHES */
+	case eMeshTesselate:
+		freyjaMeshTesselateTriangles(mModel->getCurrentMesh());
+		break;
+	case eMeshTexcoordSpherical:
+		freyjaMeshUVMapSpherical(mModel->getCurrentMesh());
+		break;
+	case eMeshTexcoordCylindrical:
+		freyjaMeshUVMapCylindrical(mModel->getCurrentMesh());
+		break;
 	case eMeshGenerateNormals:
-		freyjaGenerateMeshVertexNormals(mModel->getCurrentMesh());
+		freyjaMeshGenerateVertexNormals(mModel->getCurrentMesh());
 		freyja_event_gl_refresh();
 		break;
 	case eMeshNew:
@@ -1729,8 +1738,8 @@ bool FreyjaControl::event(int command)
 		break;
 
 	default:
-
-		if ((command - eRecentFiles - 1) < (int)mRecentFiles.size())
+		if (command > eRecentFiles &&
+			(command - eRecentFiles - 1) < (int)mRecentFiles.size())
 		{
 			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 			handleFilename(mRecentFiles[(command - eRecentFiles - 1)]);
