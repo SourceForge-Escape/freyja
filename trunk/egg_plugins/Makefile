@@ -174,8 +174,8 @@ grn.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=3ds \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_3ds.o $(BUILD_DEBUG_DIR)/3ds.o" \
-	CFLAGS="$(MODULE_CFLAGS) -DLIB3DS_SUPPORT" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/3ds.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 tombraider.so:
@@ -216,7 +216,7 @@ mdl.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=mdl \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/Mdl.o $(BUILD_DEBUG_DIR)/freyja_mdl.o" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Mdl.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -248,7 +248,7 @@ lwo.so:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	MOD_NAME=lwo \
-	MOD_OBJS="$(BUILD_DEBUG_DIR)/freyja_lwo.o $(BUILD_DEBUG_DIR)/Lwo.o" \
+	MOD_OBJS="$(BUILD_DEBUG_DIR)/Lwo.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 

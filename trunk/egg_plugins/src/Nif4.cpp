@@ -55,11 +55,11 @@ bool Nif4::loadModel(const char *filename)
 	bool done = false;
 
 
-	if (r.loadFile(filename) == false)
+	if (r.openFile(filename) == false)
 		return false;
 
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
-	r.getCharString(mHeaderSz, mHeader);
+	r.readCharString(mHeaderSz, mHeader);
 
 	if (strncmp(NIF4_HEADER_START, mHeader, 34))
 		return false;
@@ -116,11 +116,11 @@ int freyja_model__nif4_check(char *filename)
 	char header[48];
 	unsigned int headerSz = 48;
 
-	if (r.loadFile(filename) == false)
+	if (r.openFile(filename) == false)
 		return -1;
 
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
-	r.getCharString(headerSz, header);
+	r.readCharString(headerSz, header);
 	r.closeFile();
 
 	if (strncmp(NIF4_HEADER_START, header, 34))
