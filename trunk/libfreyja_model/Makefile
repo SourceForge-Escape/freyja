@@ -177,7 +177,7 @@ install-link:
 install-headers:
 	@-echo -n "Installing headers                           "
 	@-mkdir -p $(INSTALL_INCLUDE)/$(NAME)
-	@-cp -f src/*/*.h $(INSTALL_INCLUDE)/$(NAME)
+	@-cp -f src/*.h $(INSTALL_INCLUDE)/$(NAME)
 	@-echo "[DONE]"
 
 

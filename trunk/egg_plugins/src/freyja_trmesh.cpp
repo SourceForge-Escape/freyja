@@ -136,15 +136,15 @@ int freyja_model__trmesh_import(char *filename)
     // Read and store texels directly in TRMESH
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     eggTexture1i(tile);
     
@@ -200,19 +200,19 @@ int freyja_model__trmesh_import(char *filename)
     // Read and store texels directly in TRMESH
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    eggTexel1i(eggTexelStore2f(s, t));
+    eggTexCoord1i(eggTexCoordStore2f(s, t));
 
     eggTexture1i(tile);
     
@@ -261,12 +261,12 @@ int freyja_model__trmesh_import(char *filename)
     fread(&b, 4, 1, f);
     fread(&a, 4, 1, f);
 
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
 
     eggTexture1i(COLORED_POLYGON);
     
@@ -319,17 +319,17 @@ int freyja_model__trmesh_import(char *filename)
     fread(&b, 4, 1, f);
     fread(&a, 4, 1, f);
 
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
 
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
 
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
 
-    eggTexel1i(eggTexelStore2f(r, g));
-    eggTexel1i(eggTexelStore2f(a, b));
+    eggTexCoord1i(eggTexCoordStore2f(r, g));
+    eggTexCoord1i(eggTexCoordStore2f(a, b));
 
     eggTexture1i(COLORED_POLYGON);
     

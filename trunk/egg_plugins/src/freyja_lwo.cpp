@@ -105,19 +105,19 @@ int freyja_model__lwo_import(char *filename)
       if (material)
       {
 	// Generate color by texel hack, store it's index
-	t = eggTexelStore2f(material->r, material->g);
-	eggTexel1i(t);
+	t = eggTexCoordStore2f(material->r, material->g);
+	eggTexCoord1i(t);
 	
-	t = eggTexelStore2f(material->b, material->a);
-	eggTexel1i(t);
+	t = eggTexCoordStore2f(material->b, material->a);
+	eggTexCoord1i(t);
       }
       else
       {
-	t = eggTexelStore2f(0.0, 0.0);
-	eggTexel1i(t);
+	t = eggTexCoordStore2f(0.0, 0.0);
+	eggTexCoord1i(t);
 	
-	t = eggTexelStore2f(0.0, 0.0);
-	eggTexel1i(t);	
+	t = eggTexCoordStore2f(0.0, 0.0);
+	eggTexCoord1i(t);	
       }
     }
 

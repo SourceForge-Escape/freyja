@@ -206,13 +206,13 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 
 		// Store texels
 		tombraider.ComputeUV(object_texture[t_index].vertices, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+1, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+2, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		// Set texture index mapping
 		eggTexture1i(object_texture[t_index].tile);
@@ -260,16 +260,16 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		
 		// Store texels
 		tombraider.ComputeUV(object_texture[t_index].vertices, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+1, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+2, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+3, st, st+1);
-		eggTexel1i(eggTexelStore2f(st[0], st[1]));
+		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 		// Set texture index mapping
 		eggTexture1i(object_texture[t_index].tile);
@@ -318,14 +318,14 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		}
 
 		// Color texel hack
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
 
 		// Set texture index mapping
 		eggTexture1i(COLORED_POLYGON);
@@ -378,14 +378,14 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		}
 
 		// Color texel hack
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
-		eggTexel1i(eggTexelStore2f(rgba[0], rgba[1]));
-		eggTexel1i(eggTexelStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
+		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
 
 		// Set texture index mapping
 		eggTexture1i(COLORED_POLYGON);
@@ -457,8 +457,9 @@ int load_animation(TombRaider &tombraider,
 	}
 
 	// Start new mesh tree animation
-	eggBegin(FREYJA_MESHTREE_ANIM);
-	anim = eggGetCurrent(FREYJA_MESHTREE_ANIM);
+	eggBegin(FREYJA_SKEL_ANIM);
+	anim = eggGetCurrent(FREYJA_SKEL_ANIM);
+	//eggAnim1u(ANIM_MESH_TREE);
 
 	frame_count = (animation[a].frame_end - animation[a].frame_start) + 1;
 
@@ -542,13 +543,13 @@ int load_animation(TombRaider &tombraider,
 		// Run through the tags and calculate the rotation and offset
 		for (j = 0; j < (int)moveable[index].num_meshes; ++j) 
 		{ 
-			eggBegin(FREYJA_BONE_TAG);
+			eggBegin(FREYJA_BONE);
 			eggTagPos3f(0.0, 0.0, 0.0);
 			eggTagRotate3f(0.0, 0.0, 0.0);
 			eggTagFlags1u(0x00);
 			eggEnd();
 
-			tag = eggGetCurrent(FREYJA_BONE_TAG);
+			tag = eggGetCurrent(FREYJA_BONE);
 			
 			// Link to mesh tree frame
 			eggMeshTreeTag1u(tag);
@@ -565,7 +566,7 @@ int load_animation(TombRaider &tombraider,
 			{
 				model_id = load_mesh(tombraider, mesh_id, false);
 
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggTagAddMesh1u(model_id);
 
 				cache2.Add(mesh_id);
@@ -588,7 +589,7 @@ int load_animation(TombRaider &tombraider,
 				fflush(stdout);
 #endif
 
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggTagAddMesh1u(cache3[cache2.SearchKey(mesh_id)]);
 			}
 
@@ -609,7 +610,7 @@ int load_animation(TombRaider &tombraider,
 			if (j == 0)
 			{
 				// Since we use bone's offset, these aren't used
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggTagPos3f(0.0, 0.0, 0.0);
 
 				// Always push tag[0], this isn't really used either
@@ -623,7 +624,7 @@ int load_animation(TombRaider &tombraider,
 				mesh_tree = (tr2_meshtree_t *)&tree[moveable[index].mesh_tree 
 																+ ((j - 1) * 4)];
 				
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggTagPos3f(mesh_tree->x, mesh_tree->y, mesh_tree->z);
 				eggTagFlags1u(mesh_tree->flags);
 			}
@@ -653,7 +654,7 @@ int load_animation(TombRaider &tombraider,
 				angle *= 360.0 / 1024.0;
 				rot[2] = angle;
 
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggTagRotate3f(rot[0], rot[1], rot[2]);
 			}
 			else if (itmp & 0xc000) 
@@ -672,7 +673,7 @@ int load_animation(TombRaider &tombraider,
 					angle *= 360.0;
 				}
 				
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggGetTagRotate3f(&rot[0], &rot[1], &rot[2]);
 
 				switch (itmp & 0xc000)
@@ -708,7 +709,7 @@ int load_animation(TombRaider &tombraider,
 				angle *= 360.0 / 1024.0;
 				rot[2] = angle;
 
-				eggIterator(FREYJA_BONE_TAG, tag);
+				eggIterator(FREYJA_BONE, tag);
 				eggTagRotate3f(rot[0], rot[1], rot[2]);
 			}
 		}
@@ -736,7 +737,7 @@ int load_animation(TombRaider &tombraider,
 		
 		for (k = 0; k < gPonyTailCount; ++k)
 		{			
-			eggBegin(FREYJA_BONE_TAG);
+			eggBegin(FREYJA_BONE);
 			
 			switch (k)
 			{
@@ -758,10 +759,10 @@ int load_animation(TombRaider &tombraider,
 			eggEnd();
 			
 			// Link to mesh tree frame
-			eggMeshTreeTag1u(eggGetCurrent(FREYJA_BONE_TAG));
+			eggMeshTreeTag1u(eggGetCurrent(FREYJA_BONE));
 		}
 		
-		eggIterator(FREYJA_BONE_TAG, tag);
+		eggIterator(FREYJA_BONE, tag);
 #endif
 
 		// End FREYJA_MESHTREE_ANIM_FRAME
@@ -844,15 +845,15 @@ int tombraider_map_import(TombRaider *tombraider)
 
       st[0] = (float)object_texture[t_index].vertices[0].xpixel / 255.0;
       st[1] = (float)object_texture[t_index].vertices[0].ypixel / 255.0;
-      eggTexel1i(eggTexelStore2f(st[0], st[1]));
+      eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
       st[0] = (float)object_texture[t_index].vertices[1].xpixel / 255.0;
       st[1] = (float)object_texture[t_index].vertices[1].ypixel / 255.0;
-      eggTexel1i(eggTexelStore2f(st[0], st[1]));
+      eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
       st[0] = (float)object_texture[t_index].vertices[2].xpixel / 255.0;
       st[1] = (float)object_texture[t_index].vertices[2].ypixel / 255.0;
-      eggTexel1i(eggTexelStore2f(st[0], st[1]));
+      eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
       eggTexture1i(object_texture[t_index].tile);
       
@@ -895,15 +896,15 @@ int tombraider_map_import(TombRaider *tombraider)
 	// Asumming no mapping needed for tris? ( can't be complex polygons )
 	st[0] = (float)object_texture[t_index].vertices[t1_1].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t1_1].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t1_2].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t1_2].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t1_3].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t1_3].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 	// Set texture index mapping
 	eggTexture1i(object_texture[t_index].tile);
@@ -931,15 +932,15 @@ int tombraider_map_import(TombRaider *tombraider)
 	// Asumming no mapping needed for tris? ( can't be complex polygons )
 	st[0] = (float)object_texture[t_index].vertices[t2_1].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t2_1].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t2_2].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t2_2].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t2_3].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t2_3].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 
 	// Set texture index mapping
 	eggTexture1i(object_texture[t_index].tile);
@@ -968,19 +969,19 @@ int tombraider_map_import(TombRaider *tombraider)
 	// FIXME: Account for ordering later
 	st[0] = (float)object_texture[t_index].vertices[0].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[0].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 	
 	st[0] = (float)object_texture[t_index].vertices[1].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[1].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 	
 	st[0] = (float)object_texture[t_index].vertices[2].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[2].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 	
 	st[0] = (float)object_texture[t_index].vertices[3].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[3].ypixel / 255.0;
-	eggTexel1i(eggTexelStore2f(st[0], st[1]));
+	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
 	
   	// Set texture index mapping
 	eggTexture1i(object_texture[t_index].tile);
@@ -1208,7 +1209,7 @@ int freyja_model__tombraider_import(char *filename)
 
 	printf("\n");
 	printf("Loaded %i Mesh tree animations\n", 
-			 eggGetNum(FREYJA_MESHTREE_ANIM));
+			 eggGetNum(FREYJA_SKEL_ANIM));
 
 	printf("Loaded ? Mesh tree animation frames\n");//, 
 			 //eggGetNum(FREYJA_MESHTREE_ANIM_FRAME));

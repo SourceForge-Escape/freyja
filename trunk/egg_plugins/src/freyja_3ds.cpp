@@ -127,21 +127,21 @@ int freyja_model__3ds_import(char *filename)
 			// Store texels by true id, using translator list
 			if (uvs)
 			{
-				t = eggTexelStore2f(uvs[faces[i].vcA].U, uvs[faces[i].vcA].V);
-				eggTexel1i(t);
-				t = eggTexelStore2f(uvs[faces[i].vcB].U, uvs[faces[i].vcB].V);
-				eggTexel1i(t);
-				t = eggTexelStore2f(uvs[faces[i].vcC].U, uvs[faces[i].vcC].V);
-				eggTexel1i(t);				
+				t = eggTexCoordStore2f(uvs[faces[i].vcA].U, uvs[faces[i].vcA].V);
+				eggTexCoord1i(t);
+				t = eggTexCoordStore2f(uvs[faces[i].vcB].U, uvs[faces[i].vcB].V);
+				eggTexCoord1i(t);
+				t = eggTexCoordStore2f(uvs[faces[i].vcC].U, uvs[faces[i].vcC].V);
+				eggTexCoord1i(t);				
 			}
 			else
 			{
-				t = eggTexelStore2f(0.0, 0.5);
-				eggTexel1i(t);
-				t = eggTexelStore2f(0.5, 0.5);
-				eggTexel1i(t);
-				t = eggTexelStore2f(0.0, 0.0);
-				eggTexel1i(t);
+				t = eggTexCoordStore2f(0.0, 0.5);
+				eggTexCoord1i(t);
+				t = eggTexCoordStore2f(0.5, 0.5);
+				eggTexCoord1i(t);
+				t = eggTexCoordStore2f(0.0, 0.0);
+				eggTexCoord1i(t);
 			}
 
 			if (faces[i].material)

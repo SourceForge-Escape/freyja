@@ -153,7 +153,7 @@ int freyja_model__nod_import(char *filename)
 			  weight_idx);
 #endif
 
-      t = eggTexelStore2f(vertices[num_verts + j].UV[0], 
+      t = eggTexCoordStore2f(vertices[num_verts + j].UV[0], 
 			  1.0 - vertices[num_verts + j].UV[1]);
 
       // Generates id translator list 
@@ -181,18 +181,18 @@ int freyja_model__nod_import(char *filename)
 
 #ifdef TRANS
       eggVertex1i(trans[faces[num_faces + j].indices[0]]);
-      eggTexel1i(trans[faces[num_faces + j].indices[0]]);
+      eggTexCoord1i(trans[faces[num_faces + j].indices[0]]);
       eggVertex1i(trans[faces[num_faces + j].indices[1]]);
-      eggTexel1i(trans[faces[num_faces + j].indices[1]]);
+      eggTexCoord1i(trans[faces[num_faces + j].indices[1]]);
       eggVertex1i(trans[faces[num_faces + j].indices[2]]);
-      eggTexel1i(trans[faces[num_faces + j].indices[2]]);
+      eggTexCoord1i(trans[faces[num_faces + j].indices[2]]);
 #else
       eggVertex1i(faces[num_faces + j].indices[0]);
-      eggTexel1i(faces[num_faces + j].indices[0]);
+      eggTexCoord1i(faces[num_faces + j].indices[0]);
       eggVertex1i(faces[num_faces + j].indices[1]);
-      eggTexel1i(faces[num_faces + j].indices[1]);
+      eggTexCoord1i(faces[num_faces + j].indices[1]);
       eggVertex1i(faces[num_faces + j].indices[2]);
-      eggTexel1i(faces[num_faces + j].indices[2]);
+      eggTexCoord1i(faces[num_faces + j].indices[2]);
 #endif
 
       eggTexture1i(0);

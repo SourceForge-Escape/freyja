@@ -762,7 +762,7 @@ int freyja_model__ase_import(char *filename)
 	for (i = 0; (int)i < ase.mUVWCount; ++i)
 	{
 		/* Store texels */
-		t = eggTexelStore2f(ase.mUVWs[i][0], ase.mUVWs[i][1]);
+		t = eggTexCoordStore2f(ase.mUVWs[i][0], ase.mUVWs[i][1]);
 		
 		/* Generates id translator list */
 		trans2.Add(i, t);
@@ -780,15 +780,15 @@ int freyja_model__ase_import(char *filename)
 
 		if (!ase.mUVWCount)
 		{
-			eggTexel1i(eggTexelStore2f(0.0, 0.5));
-			eggTexel1i(eggTexelStore2f(0.5, 0.5));
-			eggTexel1i(eggTexelStore2f(0.0, 0.0));			
+			eggTexCoord1i(eggTexCoordStore2f(0.0, 0.5));
+			eggTexCoord1i(eggTexCoordStore2f(0.5, 0.5));
+			eggTexCoord1i(eggTexCoordStore2f(0.0, 0.0));			
 		}
 		else
 		{
-			eggTexel1i(trans2[ase.mFaces[i].uvwIndex[0]]);
-			eggTexel1i(trans2[ase.mFaces[i].uvwIndex[1]]);
-			eggTexel1i(trans2[ase.mFaces[i].uvwIndex[2]]);
+			eggTexCoord1i(trans2[ase.mFaces[i].uvwIndex[0]]);
+			eggTexCoord1i(trans2[ase.mFaces[i].uvwIndex[1]]);
+			eggTexCoord1i(trans2[ase.mFaces[i].uvwIndex[2]]);
 		}
 		
 		eggTexture1i(textureId);
@@ -828,12 +828,12 @@ int freyja_model__ase_import(char *filename)
 
 
 	if (ase.skel.mBoneCount)
-		eggBegin(FREYJA_BONE_FRAME);
+		eggBegin(FREYJA_SKELETON);
 
 	for (i = 0; i < ase.skel.mBoneCount; ++i)
 	{
 		/* Start a new tag */
-		eggBegin(FREYJA_BONE_TAG);
+		eggBegin(FREYJA_BONE);
 		eggTagFlags1u(0x0);
 		eggTagName(ase.skel.mBones[i].name);
 		eggTagPos3f(ase.skel.mBones[i].translation[0],
@@ -927,17 +927,17 @@ int freyja_model__ase_export(char *filename)
 		ase.mFaces[t].vertIndex[2] = trans[vert];
 		
 		// FIXME: Texels aren't right for multiple texels per vertex
-		eggGetPolygon3f(FREYJA_TEXEL, 0, st);
+		eggGetPolygon3f(FREYJA_TEXCOORD, 0, st);
 		ase.mFaces[t].uvwIndex[0] = texel++;
 		ase.mUVWs[ase.mFaces[t].uvwIndex[0]][0] = st[0];
 		ase.mUVWs[ase.mFaces[t].uvwIndex[0]][1] = st[1];
 		
-		eggGetPolygon3f(FREYJA_TEXEL, 1, st);
+		eggGetPolygon3f(FREYJA_TEXCOORD, 1, st);
 		ase.mFaces[t].uvwIndex[1] = texel++;
 		ase.mUVWs[ase.mFaces[t].uvwIndex[1]][0] = st[0];
 		ase.mUVWs[ase.mFaces[t].uvwIndex[1]][1] = st[1];
 		
-		eggGetPolygon3f(FREYJA_TEXEL, 2, st);
+		eggGetPolygon3f(FREYJA_TEXCOORD, 2, st);
 		ase.mFaces[t].uvwIndex[2] = texel++;
 		ase.mUVWs[ase.mFaces[t].uvwIndex[2]][0] = st[0];
 		ase.mUVWs[ase.mFaces[t].uvwIndex[2]][1] = st[1];
