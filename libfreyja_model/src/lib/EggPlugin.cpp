@@ -843,10 +843,10 @@ unsigned int eggTagRotate3f(float x, float y, float z)
 }
 
 
-unsigned int eggTagRotateQuaternion4f(vec_t x, vec_t y, vec_t z, vec_t w)
+unsigned int eggTagRotateQuaternion4f(vec_t w, vec_t x, vec_t y, vec_t z)
 {
 	vec_t heading, bank, attitude;
-	Quaternion q = Quaternion(x, y, z, w);
+	Quaternion q = Quaternion(w, x, y, z);
 
 	q.getEulerAngles(&heading, &bank, &attitude);
 

@@ -1,4 +1,29 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*==========================================================================
+ * 
+ * Project : Freyja
+ * Author  : Terry 'Mongoose' Hendrix II
+ * Website : http://gooseegg.sourceforge.net
+ * Email   : stu7440@westga.edu
+ * Object  : 
+ * Comments: This is the Template plug-in module
+ *
+ *           See file COPYING for license details.
+ *
+ *
+ *-- Test Defines -----------------------------------------------------
+ *           
+ *
+ *-- History ---------------------------------------------------------- 
+ *
+ * 2004.03.02:
+ * Mongoose - Created, using my grn2ase code as a base which uses
+ *            the grn system from a UO clone I patched up.
+ *
+ *            See GRN files for details.  This is to be replaced with
+ *            my own GRN implementation later, so it'll be cleaner for
+ *            library use.
+ ==========================================================================*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -74,7 +99,6 @@ int freyja_model__grn_import(char *filename)
 		Map <unsigned int, unsigned int> transUV, transXYZ;
 		unsigned int textureIndex = 0;
 
-
 		if (texture.c_str())
 		{
 			string texture2 = texture + ".png";
@@ -131,96 +155,59 @@ int freyja_model__grn_import(char *filename)
 		eggEnd(); // MESH
 
 
-#ifdef OBSOLETE
-		/* FIXME: Can't export weights and bones to ASE */
-		filename[len-1] = 'l';
-		filename[len-2] = 'e';
-		filename[len-3] = 'k';
-		filename[len-4] = 's';
-		f = fopen(filename, "w");
-
-		if (!f)
-		{
-			printf("Unable to save skeleton as %s\n", filename);
-			perror("Couldn't open file for writing:");
-			continue;
-		}
-
-		printf("Saving skeleton as: %s\n\n", filename);
-
-		printf("\t%i weights\n", mesh.weights.size());
-		for (i = 0, j = 0; i < mesh.weights.size(); ++i)
+		/* Weights */
+		for (i = 0; i < mesh.weights.size(); ++i)
 		{
 			BoneWeight w = mesh.weights[i];
-			j += w.numWeights;
-		}
 
-		printf("\t\t%i total weight connections\n", j);
-
-		fprintf(f, "*SKELETON {\n");
-		fprintf(f, "\t*NAME \"RestSkeleton\"\n");
-		fprintf(f, "\t*BONE_COUNT %d\n", bones.bones.size());
-		fprintf(f, "\t*WEIGHT_COUNT %d\n", mesh.weights.size());
-		fprintf(f, "\t*BONE_WEIGHTS {\n");
-
-		for (j = 0; j < mesh.weights.size(); ++j)
-		{
-			BoneWeight w = mesh.weights[j];
-
-			if (f)
+			for (j = 0; j < w.numWeights; ++j)
 			{
-				for (k = 0; k < w.numWeights && k < 10; ++k)
-				{
-					fprintf(f, "\t\t*WEIGHT %i BONE: %ld %f\n", 
-							j, w.bones[k], w.weights[k]);
-				}
+				eggVertexWeightStore(i, w.weights[j], w.bones[j]);
 			}
 		}
 
-		fprintf(f, "\t}\n");
+		/* Skeleton */
+		eggBegin(FREYJA_BONE_FRAME); // FREYJA_SKELETON
 
-		printf("\t%i bones\n", bones.bones.size());
 		for (i = 0; i < bones.bones.size(); ++i)
 		{
 			Bone* bone = bones.bones[i];
+			char boneName[64];
 
-			if (bone && f)
+
+			snprintf(boneName, 64, "bone%04ld", bone->id);
+
+			eggBegin(FREYJA_BONE_TAG);
+			eggTagFlags1u(0x0);
+			eggTagName(boneName);
+
+			if (!bone)
+				continue;
+				
+			eggTagPos3f(bone->translate.points[0], 
+						bone->translate.points[2], 
+						-bone->translate.points[1]);
+
+			eggTagRotateQuaternion4f(bone->quaternion.points[0], 
+									 bone->quaternion.points[1], 
+									 bone->quaternion.points[2],
+									 bone->quaternion.points[3]);
+				
+			for (j = 0; j < bones.bones.size(); ++j)
 			{
-				/* HELPEROBJECT won't cut it seems to make a mesh tree */
-				fprintf(f, "\t*BONE {\n");
-				fprintf(f, "\t\t*ID %ld\n", bone->id);
-				fprintf(f, "\t\t*PARENT %ld\n", bone->parent);
-				fprintf(f, "\t\t*CHILDREN_COUNT %d\n", bone->children.size());
-				fprintf(f, "\t\t*TRANSLATE_XYZ %f %f %f\n", 
-						bone->translate.points[0], 
-						bone->translate.points[1], 
-						bone->translate.points[2]);
-				fprintf(f, "\t\t*ROTATE_XYZW %f %f %f %f\n", 
-						bone->quaternion.points[0], 
-						bone->quaternion.points[1], 
-						bone->quaternion.points[2],
-						bone->quaternion.points[3]);
+				Bone *child = bones.bones[j];
 
-				// GrnMatrix matrix,curMatrix;
-				//
-				//for (j = 0; j < bone->children.size(); ++j)
-				//{
-				//	Bone* child = bone->children[i];
-				//
-				//	if (child)
-				//	{
-				//		printf("*CHILD %u\n", child->id);
-				//	}
-				//}
-
-				fprintf(f, "\t}\n");
+				if (child->parent == bone->id && 
+					child->id != bone->id)
+				{
+					eggTagAddSlave1u(child->id);
+				}
 			}
+
+			eggEnd(); // FREYJA_TAG
 		}
 
-		fprintf(f, "}\n");
-
-		fclose(f);
-#endif
+		eggEnd(); // FREYJA_SKELETON
 	}
 
 	return 0;
