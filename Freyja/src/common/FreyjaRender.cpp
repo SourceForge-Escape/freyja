@@ -1157,8 +1157,8 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 						glDisable(GL_TEXTURE_2D);
 						glColor3fv(WHITE);
 					 
-						polygon.texel.next();
-						texel2 = polygon.r_texel.current();
+						++i;
+						texel2 = polygon.r_texel[i];
 					 
 						color[0] = texel->st[0];
 						color[1] = texel->st[1];
