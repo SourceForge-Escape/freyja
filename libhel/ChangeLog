@@ -1,4 +1,14 @@
 
+ TODO
+
+	o Update Quaternion computations, add unit test
+
+ ChangeLog
+
+ libhel-0.0.1 20050108
+	o libsetup.sh update
+	o Did some tweaking to libhel Quaternion and Vector3d classes
+
  2004.12.24:
 	o Fix for include issues with GCC 3.4
 

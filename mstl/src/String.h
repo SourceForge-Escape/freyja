@@ -27,6 +27,12 @@
 #ifndef GUARD__MSTL_MONGOOSE_STRING_H_
 #define GUARD__MSTL_MONGOOSE_STRING_H_
 
+#include <string.h>
+
+
+//#ifndef strnlen
+//#   define strnlen(s, maxlen) char *s__s; long s__maxlen; for (s__s = s, s__maxlen = maxlen; s__s && s__maxlen;  ++s__s, --s__maxlen) ; (!s__s) ? 0 : (s__maxlen > 0) ? 1 : -1
+//#endif
 
 class String
 {

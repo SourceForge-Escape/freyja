@@ -35,8 +35,13 @@
 #include <assert.h>
 
 #ifdef HAVE_OPENGL
-#   include <GL/gl.h>
-#   include <GL/glu.h>
+#   ifdef MACOSX
+#      include <OpenGL/OpenGL.h>
+//#      include <OpenGL/Glu.h>
+#   else
+#      include <GL/gl.h>
+#      include <GL/glu.h>
+#   endif
 #endif
 
 #include "freyja_events.h"
