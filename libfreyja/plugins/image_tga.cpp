@@ -46,7 +46,7 @@ int check(FILE *f)
 
   if (!f)
   {
-    perror("tga_check> Passed invalid file.\n");
+    perror("tga.so: ERROR Passed invalid file.\n");
     return -1;
   }
 
@@ -59,7 +59,7 @@ int check(FILE *f)
 			   //buffer[2] == TGA_TYPE__GREYSCALE ||
 			   buffer[2] == TGA_TYPE__COLOR_RLE)))
   {
-    printf("tga_check> Inavlid or unknown TGA format.\n");
+    printf("tga.so: Inavlid or unknown TGA format.\n");
     return -2;
   }
 
@@ -81,9 +81,15 @@ int import_image(char *filename, unsigned char **image,
   unsigned int i, j;
 
 
-  if (!f || check(f))
+  if (!f)
   {
-    fprintf(stderr, "mtk_image__tga_load> Invalid parameters.\n");
+    fprintf(stderr, "mtk.so: Invalid file.\n");
+    return -1;
+  }
+
+  if (check(f))
+  {
+    fclose(f);
     return -1;
   }
 
@@ -339,6 +345,8 @@ int import_image(char *filename, unsigned char **image,
 
   printf("\n");
 #endif
+
+  fclose(f);
 
   return 0; 
 }

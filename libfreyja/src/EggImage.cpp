@@ -492,7 +492,7 @@ int EggImage::loadImage(const char *filename)
 
 	if (done && image && width > 0 && height > 0)
 	{
-		print("%p - %ux%ux%ibpp", image, width, height, type*8);
+		print("%p - %ux%u %ibpp", image, width, height, type*8);
 
 		switch (type)
 		{

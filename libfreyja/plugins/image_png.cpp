@@ -33,14 +33,14 @@ extern "C" {
 
 extern "C" {
 
-	int check(FILE *f);
+	//	int check(FILE *f);
 
 	int import_image(char *filename, unsigned char **image, 
 						  unsigned int *w, unsigned int *h, 
 						  char *type);
 }
 
-int check(FILE *f)
+int check_png(FILE *f)
 {
 #ifdef LIB_PNG
 	char buffer[PNG_BYTES_TO_CHECK];
@@ -48,7 +48,7 @@ int check(FILE *f)
 
 	if (!f)
 	{
-		perror("png_check> ERROR opening file\n");
+		perror("png.so: ERROR opening file\n");
 		return -1;
 	}
 
@@ -56,7 +56,7 @@ int check(FILE *f)
 
 	if (fread(buffer, 1, PNG_BYTES_TO_CHECK, f) != PNG_BYTES_TO_CHECK)
 	{
-		fprintf(stderr,"png_check> ERROR can't read %i bytes\n", 
+		fprintf(stderr,"png.so: ERROR can't read %i bytes\n", 
 				  PNG_BYTES_TO_CHECK);
 		return -2;
 	}
@@ -67,8 +67,10 @@ int check(FILE *f)
 	}
 	else
 	{
-		fprintf(stderr, "png_load> Unknown image format.\n");
+		//fprintf(stderr, "png.so: Unknown image format.\n");
 	}
+
+	printf("png.so: Inavlid or unknown PNG format.\n");
 
 	return -2;
 #else
@@ -92,7 +94,7 @@ int import_image(char *filename, unsigned char **image,
    //unsigned int sig_read = 0;
 
 
-	printf("png.so: import_image invoked\n");
+	//printf("png.so: import_image invoked\n");
 
    if (!f)
    {
@@ -100,12 +102,10 @@ int import_image(char *filename, unsigned char **image,
 		return -1;
    }
 
-	if (check(f) < 0)
+	if (check_png(f))
 	{
-		if (f)
-			fclose(f);
-
-		return -100;
+		fclose(f);
+		return -1;
 	}
 
    fseek(f, 0, SEEK_SET);

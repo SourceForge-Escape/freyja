@@ -24,6 +24,14 @@
 
 #include "image_ppm.h"
 
+extern "C" {
+
+  //int mtk_image__ppm_check(FILE *f);
+  
+  int import_image(char *filename, unsigned char **image, 
+		   unsigned int *w, unsigned int *h, 
+		   char *type);
+}
 
 int mtk_image__ppm_check(FILE *f)
 {
@@ -43,7 +51,7 @@ int mtk_image__ppm_check(FILE *f)
   if (buffer[0] == 'P' && (buffer[1] == '3' || buffer[1] == '6'))
     return 0;  
 
-  fprintf(stderr, "ppm_load> Unknown image format.\n");
+  printf("ppm.so: Invalid or unknown PPM format.\n");
   return -2;
 }
 
@@ -62,9 +70,10 @@ char *ppm_get_next_line(char* buffer, size_t size, FILE *f)
 }
 
 
-int mtk_image__ppm_load(FILE *f, unsigned char **image, 
-			unsigned int *w, unsigned int *h, char *type)
+int import_image(char *filename, unsigned char **image, 
+		 unsigned int *w, unsigned int *h, char *type)
 {
+  FILE *f = fopen(filename, "rb");
   int i, j, n;
   char buffer[256];
   int line;
@@ -77,8 +86,14 @@ int mtk_image__ppm_load(FILE *f, unsigned char **image,
     perror("ppm_load> Failed to open file.\n");
     return -1;
   }
-  
-  *type = 1;
+
+  if (mtk_image__ppm_check(f))
+  {
+    fclose(f);
+    return -1;
+  }
+
+  *type = 3;
 
   fseek(f, 0, SEEK_SET);
   ppm_get_next_line(buffer, sizeof(buffer), f);
@@ -124,6 +139,7 @@ int mtk_image__ppm_load(FILE *f, unsigned char **image,
       fread(&(*image)[i*3+2], 1, 1, f);
     }
 
+    fclose(f);
     return 0;
   }
   else if (strcmp(buffer, "P3\n") == 0)
@@ -142,6 +158,7 @@ int mtk_image__ppm_load(FILE *f, unsigned char **image,
     if (!image)
     { 
       printf("ERROR: Could not allocate memory!\n");
+      fclose(f);
       return 2;
     }
 
@@ -151,8 +168,10 @@ int mtk_image__ppm_load(FILE *f, unsigned char **image,
       (*image)[i] = j;
     }
 
+    fclose(f);
     return 0;
   }
 
+  fclose(f);
   return -1;
 }
