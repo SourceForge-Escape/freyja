@@ -57,6 +57,7 @@ FreyjaUtil::FreyjaUtil()
 	mEggPlugin->addModule("grn");
 	mEggPlugin->addModule("md5");
 	mEggPlugin->addModule("smd");
+	mEggPlugin->addModule("mdm");
 	mEggPlugin->addModule("obj");
 	mEggPlugin->addModule("halflife");
 }

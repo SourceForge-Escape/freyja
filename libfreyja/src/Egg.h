@@ -294,7 +294,7 @@ public:
 	typedef enum egg_plane { 
 		
 		PLANE_XY = 0, 
-		PLANE_YZ = 1, 
+		PLANE_ZY = 1, 
 		PLANE_XZ = 2
 	};
 

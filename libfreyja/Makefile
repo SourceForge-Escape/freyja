@@ -231,6 +231,14 @@ meshgen.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+mdm.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=mdm \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/ETModel.o" \
+	CFLAGS="$(MODULE_CFLAGS)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
 python.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -278,6 +286,14 @@ FreyjaUtil:
 	OBJS="$(BUILD_TEST_DIR)/FreyjaUtil.o" \
 	CFLAGS="-Wall -g -O0 -DLIB_JPEG -DUNIT_TEST_FREYJAUTIL" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
+
+mdm.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=mdm \
+	OBJS="$(BUILD_TEST_DIR)/ETModel.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ETMODEL" \
+	LD_FLAGS="-lm -lhel0 -lfreyja8 -lstdc++"
 
 python.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
