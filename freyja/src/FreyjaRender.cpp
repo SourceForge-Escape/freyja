@@ -48,11 +48,6 @@
 
 #include "FreyjaRender.h"
 
-#define GL_LIST_AXIS     1
-#define AXIS_ICON_MIN  4.0
-#define AXIS_ICON_MID 20.0
-#define AXIS_ICON_MAX 15.0
-
 
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
@@ -391,28 +386,48 @@ void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
 	glColor3fv(RED);
 	glVertex3f(-mid, 0.0, 0.0);
 	glVertex3f(mid,  0.0, 0.0);
+	//  Y arrowhead
 	glVertex3f(mid,  0.0, 0.0);
 	glVertex3f(max,  min, 0.0);
 	glVertex3f(mid,  0.0, 0.0);
 	glVertex3f(max, -min, 0.0);
-      
+	//  Z arrowhead
+	glVertex3f(mid,  0.0, 0.0);
+	glVertex3f(max,  0.0, min);
+	glVertex3f(mid,  0.0, 0.0);
+	glVertex3f(max,  0.0, -min);
+
+
 	// Y Axis, green
 	glColor3fv(GREEN);	
 	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0, -mid, 0.0);			
+	glVertex3f(0.0, -mid, 0.0);	
+	//  X arrowhead		
 	glVertex3f(0.0,  mid, 0.0);
 	glVertex3f(min,  max, 0.0);
 	glVertex3f(0.0,  mid, 0.0);
 	glVertex3f(-min, max, 0.0);
+	//  Z arrowhead
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(0.0,  max, min);
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(0.0,  max, -min);
+
       
 	// Z Axis, blue
 	glColor3fv(BLUE);
 	glVertex3f(0.0,  0.0,  mid);
 	glVertex3f(0.0,  0.0, -mid);
+	//  Y arrowhead
 	glVertex3f(0.0,  0.0,  mid);
 	glVertex3f(0.0,  min,  max);
 	glVertex3f(0.0,  0.0,  mid);
 	glVertex3f(0.0, -min,  max);
+	//  X arrowhead
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(min,  0.0,  max);
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(-min, 0.0,  max);
 	glEnd();
 }
 
@@ -898,39 +913,10 @@ void FreyjaRender::initContext(unsigned int width, unsigned int height, bool fas
 
 	glMatrixMode(GL_MODELVIEW);
 
-
-	/* Generate XYZ Axis symbol display list */
-	glNewList(GL_LIST_AXIS, GL_COMPILE);
-	glBegin(GL_LINES);
-      
-	// X Axis, red
-	glColor3fv(RED);
-	glVertex3f(-AXIS_ICON_MID, 0.0, 0.0);
-	glVertex3f(AXIS_ICON_MID,  0.0, 0.0);
-	glVertex3f(AXIS_ICON_MID,  0.0, 0.0);
-	glVertex3f(AXIS_ICON_MAX,  AXIS_ICON_MIN, 0.0);
-	glVertex3f(AXIS_ICON_MID,  0.0, 0.0);
-	glVertex3f(AXIS_ICON_MAX, -AXIS_ICON_MIN, 0.0);
-      
-	// Y Axis, green
-	glColor3fv(GREEN);	
-	glVertex3f(0.0,  AXIS_ICON_MID, 0.0);
-	glVertex3f(0.0, -AXIS_ICON_MID, 0.0);			
-	glVertex3f(0.0,  AXIS_ICON_MID, 0.0);
-	glVertex3f(AXIS_ICON_MIN,  AXIS_ICON_MAX, 0.0);
-	glVertex3f(0.0,  AXIS_ICON_MID, 0.0);
-	glVertex3f(-AXIS_ICON_MIN, AXIS_ICON_MAX, 0.0);
-      
-	// Z Axis, blue
-	glColor3fv(BLUE);
-	glVertex3f(0.0,  0.0,  AXIS_ICON_MID);
-	glVertex3f(0.0,  0.0, -AXIS_ICON_MID);
-	glVertex3f(0.0,  0.0,  AXIS_ICON_MID);
-	glVertex3f(0.0,  AXIS_ICON_MIN,  AXIS_ICON_MAX);
-	glVertex3f(0.0,  0.0,  AXIS_ICON_MID);
-	glVertex3f(0.0, -AXIS_ICON_MIN,  AXIS_ICON_MAX);
-	glEnd();
-	glEndList();
+	/* Was no longer used... Generate XYZ Axis symbol display list */
+	//glNewList(1, GL_COMPILE);
+	//mglDrawAxis(0.25f, 1.2f, 0.872f);
+	//glEndList();
 
 
 	mWidth = width;
@@ -1799,7 +1785,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	case PLANE_XY:
 		break;
 	case PLANE_XZ:
-		glRotatef(90.0, 1.0, 0.0, 0.0);
+		glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
 	case PLANE_ZY:
 		glRotatef(90.0, 0.0, 1.0, 0.0);
