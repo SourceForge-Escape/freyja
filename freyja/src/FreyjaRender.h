@@ -289,6 +289,11 @@ public:
 	static unsigned char mJointRenderType;
 	static int mPatchDisplayList;
 
+	static vec_t mBoneLineWidth;                    /* Custom artifact size */
+	static vec_t mBonePointSize;
+	static vec_t mDefaultPointSize;
+	static vec_t mDefaultLineWidth;
+	static vec_t mVertexPointSize;
 
 private:    
 
@@ -436,22 +441,21 @@ private:
 
 	float mZoom;                               /* Used to cache zoom */
 
-	unsigned int _texture;                     /* Currently bound texture */
+	unsigned int mTextureId;                   /* Currently bound texture */
 
-	bool _init;                                /* OpenGL context started? */
+	bool mInitContext;                         /* OpenGL context started? */
 
-	int _view_mode;                            /* View mode */
+	int mViewMode;                             /* View mode */
 
-	float _scroll[3];                          /* Used to cache scroll */
+	float mScroll[3];                          /* Used to cache scroll */
 
-	float _angles[3];                          /* Used to rotate the scene */
+	float mAngles[3];                          /* Used to rotate the scene */
 
+	float mScaleEnv;                           /* OpenGL context use */
+	float mFar;
+	float mNear;
+	float mFovY;
 
-	float _bone_line_width;                    /* Custom artifact size */
-	float _bone_point_size;
-	float _default_point_size;
-	float _default_line_width;
-	float _vertex_point_size;
 };
 
 #endif

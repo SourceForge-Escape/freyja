@@ -196,8 +196,6 @@ public:
 	////////////////////////////////////////////////////////////
 
 	/* Move into RenderModel class */
-	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
-
 	bool getRenderMesh(unsigned int index, RenderMesh &rmesh);
 	bool getRenderPolygon(unsigned int index, RenderPolygon &face);
 	/*------------------------------------------------------
@@ -425,17 +423,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	Egg *getCurrentEgg();
-
-	vec3_t *getVertexXYZ(long index)
-	{
-		egg_vertex_t *vertex = _egg->getVertex(index);
-			 
-		if (vertex)
-			return &(vertex->pos);
-
-		return 0x0;
-	}
+	vec3_t *getVertexXYZ(long index);
 
 	bool isCurrentBoneAllocated();
 
@@ -779,6 +767,10 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
+	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
+
+	Egg *getCurrentEgg();
+
 	egg_group_t *getCachedGroup();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -925,6 +917,64 @@ private:
 /* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
  * They only use all natural, wholesome Hel math types. */
 
+class RenderBone
+{
+public:
+
+	unsigned int getChildrenCount()
+	{
+		return mTag->slave.end();
+	}
+
+	long getBoneIndex(unsigned int index)
+	{
+		return mTag->slave[index];
+	}
+
+	void set(egg_tag_t *tag)
+	{
+		mTag = tag;
+		translate = Vector3d(tag->center);
+		rotate = Vector3d(tag->rot);
+	}
+
+	Vector3d translate;
+	Vector3d rotate;
+
+private:
+	egg_tag_t *mTag;
+};
+
+class RenderSkeleton
+{
+public:
+
+	unsigned int getBoneCount()
+	{
+		return mTags->end();
+	}
+
+	bool getBone(unsigned int index, RenderBone &bone)
+	{
+		if ((*mTags)[index])
+		{
+			bone.set((*mTags)[index]);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setTags(Vector<egg_tag_t *> *tags)
+	{
+		mTags = tags;
+	}
+
+private:
+	Vector<egg_tag_t *> *mTags;
+};
+
+
 class RenderPolygon  
 {
 public:
@@ -1022,11 +1072,17 @@ class RenderModel
 {
 public:
 
-	//#warning FIXME Exposes Egg to renderer
-	Vector<egg_tag_t *> *getSkeleton()
+	RenderSkeleton &getSkeleton()
 	{
-		return mEgg->TagList();
+		mSkeleton.setTags(mEgg->TagList());
+		return mSkeleton;
 	}
+
+	//#warning FIXME Exposes Egg to renderer
+	//Vector<egg_tag_t *> *getSkeleton()
+	//{
+	//	return mEgg->TagList();
+	//}
 
 	unsigned int getMeshCount()
 	{
@@ -1036,14 +1092,18 @@ public:
 		return mMeshlist->end();
 	}
 
-	void getMesh(unsigned int index, RenderMesh &mesh)
+	bool getMesh(unsigned int index, RenderMesh &mesh)
 	{
+#ifdef OLD_RENDERMESH_TRANSLATOR
 		egg_mesh_t *m = (*mMeshlist)[index]; 
 
 		if (m)
 		{
 			mModel->createRenderMesh(mesh, *m);
 		}
+#else
+		return mModel->getRenderMesh(index, mesh);
+#endif
 	}
 
 	void setEgg(Egg *egg, FreyjaModel *model)
@@ -1057,6 +1117,7 @@ public:
 
 private:
 
+	RenderSkeleton mSkeleton;
 	Vector<egg_mesh_t *> *mMeshlist;
 	Egg *mEgg;
 	FreyjaModel *mModel;
