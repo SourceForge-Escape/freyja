@@ -28,7 +28,9 @@
 
 #include "FreyjaControl.h"
 
-#define ABOUT_MESSAGE "Freyja is an Open Source 3d modeling system.\nSend bug reports and feature requests:\n<small>  * http://icculus.org/freyja\n  * irc://irc.freenode.net/#freyja\n  * mongoose@icculus.org</small>\nFreyja Copyright (c) 2002-2004 by Terry 'Mongoose' Hendrix II\nTerry 'Mongoose' Hendrix II mongoose@icculus.org"
+#define ABOUT_MESSAGE "\t\t\t<big>Freyja 0.3.5</big>\nFreyja is an Open Source 3d modeling system.\n<small>Freyja Copyright (c) 2002-2004 by Terry 'Mongoose' Hendrix II</small>"
+
+#define HELP_MESSAGE "There is no online help as yet.\n\nIf you'd like to work on documentation email me.\n\nSend bug reports and feature requests:\n<small>  * http://icculus.org/freyja\n  * irc://irc.freenode.net/#freyja\n  * mongoose@icculus.org</small>\n"
 
 void event_register_render(FreyjaRender *r);
 void event_register_model(FreyjaModel *m);
@@ -110,6 +112,14 @@ void FreyjaControl::eventMain(int command)
 {
 	switch (command)
 	{
+	case CMD_MISC_DISPLAY_INFO:
+		mModel->printInfo();
+		break;
+
+	case EVENT_HELP:
+		freyja_event_info_dialog(HELP_MESSAGE);
+		// system("gedit /home/mongoose/Projects/freyja/Freyja/README");
+		break; 
 
 	case CMD_MISC_ABOUT:
 		freyja_event_info_dialog(ABOUT_MESSAGE);
@@ -515,12 +525,6 @@ void FreyjaControl::eventMisc(int command)
 		break;
 
 
-
-
-
-		case CMD_MISC_DISPLAY_INFO:
-			mModel->printInfo();
-			break;
 
 		case CMD_MISC_TEXTURE_SET:
 			event_print("Switching all of mesh %i ploygons to texture %i",
