@@ -2108,6 +2108,78 @@ void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
 }
 
 
+void freyjaGenerateMeshVertexNormals(long meshIndex)
+{
+	Vector <Vector3d *> faceNormals;
+	Vector <long> ref;
+	Vector3d a, b, c, aa, bb, normal;
+	long v0, v1, v2, i, j, vertexIndex, polygonIndex, meshVertexCount, polygonCount, vertexCount;
+
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+	meshVertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+	if (!meshVertexCount || !polygonCount)
+		return;
+
+    for (i = 0; i < polygonCount; ++i)
+    {
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+		
+		/* Just need 3 sides -- assume all coplanar these are simple polygons,
+		 * so just take first 3 vertices to make 2 edge vectors */
+		v0 = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+		v1 = freyjaGetPolygonVertexIndex(polygonIndex, 1);
+		v2 = freyjaGetPolygonVertexIndex(polygonIndex, 2);
+
+		freyjaPrintMessage("%i <%d %d %d>", polygonIndex, v0, v1, v2);
+		freyjaGetVertexXYZ3fv(v0, a.mVec);
+		freyjaGetVertexXYZ3fv(v1, b.mVec);
+		freyjaGetVertexXYZ3fv(v2, c.mVec);
+
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
+		faceNormals.pushBack(new Vector3d(normal));
+	}
+
+
+	/* Compute vertex normals */
+    for (i = 0; i < meshVertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
+
+		if (vertexIndex < 0)
+		{
+			freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad vertex\n");
+			continue;
+		}
+
+		normal.zero();
+
+		freyjaGetVertexPolygonRef1i(vertexIndex, ref);
+
+		for (j = ref.begin(); j < (int)ref.end(); ++j)
+		{
+			if (ref[j] > polygonCount)
+			{
+				freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad face\n");
+				continue;
+			}
+
+			normal += *faceNormals[ref[j]];
+		}
+
+		normal.normalize();
+
+		freyjaVertexNormal3fv(vertexIndex, normal.mVec);
+    }
+
+	faceNormals.erase();
+}
+
+
 void freyjaGenerateVertexNormals()
 {
 	Vector <Vector3d *> faceNormals;
@@ -2267,6 +2339,24 @@ Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
 	freyjaCriticalSection(FREYJA_WRITE_UNLOCK);
 	
 	return list;
+}
+
+
+void freyjaGetVertexPolygonRef1i(long vertexIndex, Vector<long> &polygons)
+{
+	polygons.clear();
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_vertex_t *v = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+		unsigned int i;
+
+		if (v && !v->ref.empty())
+		{
+			for (i = v->ref.begin(); i < v->ref.end(); ++i)
+				polygons.pushBack((long)v->ref[i]);
+		}
+	}
 }
 
 
@@ -2463,7 +2553,8 @@ void freyja__GetCommonPolygonReferences(long vertexA, long vertexB,
 	egg_vertex_t *a, *b;
 	unsigned i, j, countA, countB;
 
-	
+	common.clear();
+
 	if (EggPlugin::mEggPlugin)
 	{
 		a = EggPlugin::mEggPlugin->getVertex(vertexA);
@@ -2487,10 +2578,52 @@ void freyja__GetCommonPolygonReferences(long vertexA, long vertexB,
 }
 
 
+void freyja__GetDifferenceOfPolygonReferences(long vertexA, long vertexB,
+											  Vector<unsigned int> &diffA)
+{
+	egg_vertex_t *a, *b;
+	unsigned i, j, countA, countB;
+	bool failed;
+
+	diffA.clear();
+	
+	if (EggPlugin::mEggPlugin)
+	{
+		a = EggPlugin::mEggPlugin->getVertex(vertexA);
+		b = EggPlugin::mEggPlugin->getVertex(vertexB);
+
+		if (a && b)
+		{
+			countA = a->ref.end();
+			countB = b->ref.end();
+
+			for (i = a->ref.begin(); i < countA; ++i)
+			{
+				failed = false;
+
+				for (j = b->ref.begin(); j < countB; ++j)
+				{
+					if (a->ref[i] == b->ref[j])
+					{
+						failed = true;
+						break;
+					}
+				}
+
+				if (!failed)
+				{
+					diffA.pushBack(a->ref[i]);
+				}
+			}
+		}
+	}
+}
+
+
 int freyjaPolygonExtrudeQuad1f(long polygonIndex, vec_t dist)
 {
 	Vector3d faceNormal, a, b, c;
-	long v0, v1, v2;
+	long i, v, count;
 
 	if (freyjaIterator(FREYJA_POLYGON, polygonIndex) == FREYJA_PLUGIN_ERROR)
 		return -1;
@@ -2498,14 +2631,23 @@ int freyjaPolygonExtrudeQuad1f(long polygonIndex, vec_t dist)
 	// 1. Get face normal
 	faceNormal.zero();
 
-	// FIXME: Should use vertex normals like n-patch
-	freyjaGetPolygon1u(FREYJA_VERTEX, 0, &v0);
-	freyjaGetPolygon1u(FREYJA_VERTEX, 1, &v1);
-	freyjaGetPolygon1u(FREYJA_VERTEX, 2, &v2);
-	freyjaGetVertexXYZ3fv(v0, a.mVec);
-	freyjaGetVertexXYZ3fv(v1, b.mVec);
-	freyjaGetVertexXYZ3fv(v2, c.mVec);
-	faceNormal = Vector3d::cross(a - b, c - b);
+	/* Generated face normal, which won't match preclac vertex normalsx */
+	//freyjaGetPolygon1u(FREYJA_VERTEX, 0, &v1);
+	//freyjaGetPolygon1u(FREYJA_VERTEX, 1, &v1);
+	//freyjaGetPolygon1u(FREYJA_VERTEX, 2, &v2);
+	//freyjaGetVertexXYZ3fv(v0, a.mVec);
+	//freyjaGetVertexXYZ3fv(v1, b.mVec);
+	//freyjaGetVertexXYZ3fv(v2, c.mVec);
+	//faceNormal = Vector3d::cross(a - b, c - b);
+	
+	/* Use existing vertex normals ( perfered, also like n-patch ) */
+	count = freyjaGetPolygonVertexCount(polygonIndex);
+	for (i = 0; i < count; ++i)
+	{
+		v = freyjaGetPolygonVertexIndex(polygonIndex, i);
+		freyjaGetVertexNormalXYZ3fv(v, a.mVec);
+		faceNormal += a;
+	}
 
 
 	// 2. Scale face normal by dist
@@ -2539,14 +2681,106 @@ long freyjaVertexXYZ3fv(long vertexIndex, vec3_t xyz)
 }
 
 
-// FIXME: Incredibly slow and horrible, however it was quick to spew out and
-//        uses currently existing data structures
 int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 {
-	Vector<unsigned int> common;
+	Vector<unsigned int> common, face;
+	Vector<long> ref;
 	vec3_t xyz;
 	vec2_t uv;
-	unsigned int j, commonCount;
+	unsigned int j, commonCount, diffCount;
+	long A, B, C, D, i, material, count;
+
+
+	material = freyjaGetPolygonMaterial(polygonIndex);
+	count = freyjaGetPolygonVertexCount(polygonIndex);
+
+	if (!count)
+		return -1;
+
+	for (i = 0; i < count; ++i)
+	{
+		/* 1. Make duplicate vertices with same wind for 'face' */
+		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
+		freyjaGetVertexXYZ3fv(A, xyz);
+		B = freyjaVertex3fv(xyz);
+		freyjaGetVertexTexCoordUV2fv(A, uv);
+		freyjaVertexTexCoord2fv(B, uv);
+		freyjaGetVertexNormalXYZ3fv(B, xyz);
+		freyjaVertexNormal3fv(B, xyz);
+		
+		face.pushBack(B);
+
+
+		/* 2. Replace all references to A with B ( dupe of A ), 
+		 * except polygonIndex */
+		freyjaGetVertexPolygonRef1i(A, ref);
+
+		for (j = ref.begin(); j < ref.end(); ++j)
+		{
+			if (ref[j] != polygonIndex)
+			{
+				freyja__PolygonReplaceReference(ref[j], A, B);
+			}
+		}
+	}
+
+	for (i = 0; i < count; ++i)
+	{
+		// 3. Generate new quad ABCD connecting 'face' and ploygonIndex vertices
+		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
+		B = face[i];
+
+		if (i+1 < count)
+		{
+			C = freyjaGetPolygonVertexIndex(polygonIndex, i+1);
+			D = face[i+1];
+		}
+		else
+		{
+			C = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+			D = face[0];
+		}
+
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonMaterial1i(material);
+		freyjaPolygonVertex1i(A);
+		freyjaPolygonVertex1i(C);
+		freyjaPolygonVertex1i(D);
+		freyjaPolygonVertex1i(B);
+
+		// FIXME: Should be able to generate mixing both uvs
+		if (freyjaGetPolygonTexCoordCount(polygonIndex))
+		{
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.5));
+		}
+
+		freyjaEnd();
+	}
+
+	// Move polygonIndex vertices by 'normal'
+	for (i = 0; i < count; ++i)
+	{
+		A = freyjaGetPolygonVertexIndex(polygonIndex, i);
+		freyjaGetVertexXYZ3fv(A, xyz);
+		xyz[0] += normal[0];
+		xyz[1] += normal[1];
+		xyz[2] += normal[2];
+		freyjaVertexXYZ3fv(A, xyz);
+	}
+
+	return 0;
+}
+
+
+int freyjaPolygonExtrudeQuad_OLD(long polygonIndex, vec3_t normal)
+{
+	Vector<unsigned int> common, diffA, diffB;
+	vec3_t xyz;
+	vec2_t uv;
+	unsigned int j, commonCount, diffCount;
 	long A, B, C, D, i, material, count;
 
 
@@ -2570,9 +2804,11 @@ int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal)
 		}
 
 		// 1. Find common polygons besides polygonIndex
-		common.clear();
 		freyja__GetCommonPolygonReferences(A, B, common);
+		freyja__GetDifferenceOfPolygonReferences(A, B, diffA);
+		freyja__GetDifferenceOfPolygonReferences(B, A, diffB);
 		commonCount = common.end();
+		diffCount = 0;
 
 		for (j = 0; j < commonCount; ++j)
 		{
@@ -2646,6 +2882,121 @@ void freyjaPolygonAddVertex1i(long polygonIndex, long vertexIndex)
 		if (polygon)
 			polygon->vertex.pushBack(vertexIndex);
 	}
+}
+
+
+int freyjaVertexExtrude(long vertexIndex, vec_t midpointScale, vec3_t normal)
+{
+	Vector<long> faces, edges;
+	Vector3d a, b, c, ab, ac;
+	vec3_t xyz;
+	vec2_t uv;
+	long A, B, C, i, j, material, polygonCount, polygonIndex, vertexCount, texcoordCount, v, last;
+
+
+	freyjaGetVertexPolygonRef1i(vertexIndex, faces);
+	polygonCount = faces.end();
+
+	if (!polygonCount)
+		return -1;
+
+	for (i = 0; i < polygonCount; ++i)
+	{
+		polygonIndex = faces[i];
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+		texcoordCount = freyjaGetPolygonTexCoordCount(polygonIndex);
+		material = freyjaGetPolygonMaterial(polygonIndex);
+
+
+		// 1. Get edges containing vertexIndex in ith face
+		edges.clear();
+		
+		for (j = 0, last = -1; j < vertexCount; ++j)
+		{
+			v = freyjaGetPolygonVertexIndex(polygonIndex, j);
+
+			if (v == vertexIndex)
+			{
+				if (j == vertexCount - 1)
+				{
+					A = v;
+					B = freyjaGetPolygonVertexIndex(polygonIndex, 0);
+					C = last;
+				}
+				else
+				{
+					A = v;
+					B = freyjaGetPolygonVertexIndex(polygonIndex, j+1);
+					C = last;
+
+					if (j == 0)
+					{
+						C = freyjaGetPolygonVertexIndex(polygonIndex, 
+														vertexCount - 1);
+					}
+				}
+				break;
+			}
+
+			last = v;
+		}
+
+
+		// 2. Compute midpoint of edges AB AC and scale by midpointScale
+		freyjaGetVertexXYZ3fv(A, a.mVec);
+		freyjaGetVertexXYZ3fv(B, b.mVec);
+		freyjaGetVertexXYZ3fv(C, c.mVec);
+		ab = a + b;
+		ab *= 0.5 * midpointScale;
+		ac = a + c;
+		ac *= 0.5 * midpointScale;
+
+
+		// 3. Generate new vertices at scaled midpoints of edges
+		B = freyjaVertex3fv(ab.mVec);
+		freyjaGetVertexTexCoordUV2fv(A, uv);
+		freyjaVertexTexCoord2fv(B, uv); // FIXME
+		freyjaGetVertexNormalXYZ3fv(A, xyz);
+		freyjaVertexNormal3fv(B, xyz); // FIXME
+
+		C = freyjaVertex3fv(ac.mVec);
+		freyjaGetVertexTexCoordUV2fv(A, uv);
+		freyjaVertexTexCoord2fv(C, uv); // FIXME
+		freyjaGetVertexNormalXYZ3fv(A, xyz);
+		freyjaVertexNormal3fv(C, xyz); // FIXME
+
+
+		// 4. Replace references to vertexIndex with each new vertex
+		freyja__PolygonReplaceReference(polygonIndex, A, B);
+		//freyja__PolygonInsertReferenceAfter(polygonIndex, B, C);
+
+		// 5. Generate new a face ABC for new vertices and vertexIndex
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonMaterial1i(material);
+		freyjaPolygonVertex1i(A);
+		freyjaPolygonVertex1i(B);
+		freyjaPolygonVertex1i(C);
+
+		// FIXME: Should be able to generate mixing both uvs
+		if (freyjaGetPolygonTexCoordCount(polygonIndex))
+		{
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.25, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.25));
+			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
+		}
+
+		freyjaEnd();
+	}
+
+
+	// 6. Move vertexIndex vertex by 'normal'
+	freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+	xyz[0] += normal[0];
+	xyz[1] += normal[1];
+	xyz[2] += normal[2];
+	freyjaVertexXYZ3fv(vertexIndex, xyz);
+
+	return 0;
 }
 
 
