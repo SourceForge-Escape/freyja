@@ -29,16 +29,34 @@
 
 typedef enum {
 
-	eScale = 1000,
-	eScale_X = 1001,
-	eScale_Y = 1002,
-	eScale_Z = 1003,
+	eNone = 0,
+	eShutdown,
+	eNewFile,
+	eOpenFile,
+	eSaveFile,
+	eHelp,
+	eInfo,
+	eAbout,
+	eDebugEgg,
+	eFullscreen,
+	eScreenShot,
+	eScale,
+	eScale_X,
+	eScale_Y,
+	eScale_Z,
+	eZoom,
 
-	eZOOM = 1004,
+	ePointJoint,
+	eSphereJoint,
+	eAxisJoint,
+	eLineBone,
+	ePolyMeshBone,
 
-
-
-	eNONE = 9999
+	eGenerateNormals,
+	eGenerateCube,
+	eGenerateTriStrip,
+	eGenerateCylinder,
+	eGenerateSphere
 
 } event_subject_id;
 
@@ -65,16 +83,17 @@ void freyja_event_key_press(int key, int mod);
 void freyja_event_new_key_cmd(int key, int event, int cmd);
 char *freyja_rc_map(char *s);
 
-	void freyja_event2i(int event, int cmd);
-	/*------------------------------------------------------
-	 * Pre  : Event and Cmd are valid event pair
-	 * Post : Passes event to freyja control
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.19:
-	 *  Mongoose - Created
-	 ------------------------------------------------------*/
+void freyja_event2i(int event, int cmd);
+/*------------------------------------------------------
+ * Pre  : Event and Cmd are valid event pair
+ * Post : Passes event to freyja control
+ *
+ *-- History ------------------------------------------
+ *
+ * 2002.01.19:
+ *  Mongoose - Created
+ ------------------------------------------------------*/
+
 
 char *freyja_rc_map(char *s);
 /*------------------------------------------------------
@@ -225,17 +244,6 @@ enum freyja_event_animation_cmd
 };
 
 
-enum freyja_event_main_cmd
-{
-	CMD_MAIN_SHUTDOWN = 1,
-	EVENT_NEW_FILE,
-	EVENT_OPEN_FILE,
-	EVENT_SAVE_FILE,
-	EVENT_HELP,
-	CMD_MAIN_DEBUG_EGG,
-	CMD_TOGGLE_FULLSCREEN
-};
-
 enum freyja_event_polygon_cmd
 {
 	CMD_POLYGON_ADD = 1,
@@ -297,17 +305,11 @@ enum freyja_event_misc_cmd
 	CMD_MISC_TEX_SLOT_LOAD = 38,
 	CMD_MISC_RENDER_BBOX,
 
-	CMD_MISC_DISPLAY_INFO,
-	
 	VIEW_JOINT1,
 	VIEW_JOINT2,
 	VIEW_JOINT3,
 	VIEW_BONE1,
 	VIEW_BONE2,
-
-	CMD_MISC_GEN_NORMALS,
-	CMD_MISC_ABOUT,
-	CMD_MISC_SCREENSHOT
 };
 
 enum freyja_event_mesh_cmd
@@ -328,12 +330,7 @@ enum freyja_event_mesh_cmd
 	CMD_MESH_PREV,
 	CMD_MESH_NEXT,
 	CMD_MESH_ROTATE,
-	CMD_MESH_SCALE,
-
-	CMD_MESH_GENERATE_CUBE   = 200,
-	CMD_MESH_GENERATE_TRIS   = 201,
-	CMD_MESH_GENERATE_SPHERE = 202,
-	CMD_MESH_GENERATE_CYLINDER = 203
+	CMD_MESH_SCALE
 };
 
 enum freyja_event_group_cmd
@@ -401,5 +398,11 @@ enum custom_color                   /* Custom GUI colors */
   COLOR_EDIT_GRID_AXIS_Z         = 16384,
   COLOR_EDIT_GRID_8              = 32768
 };
+
+int confirmDialog(char *dialog_icon,
+				  char *information_message, 
+				  char *question_message,
+				  char *cancel_icon, char *cancel_text,
+				  char *accept_icon, char *accept_text);
 
 #endif

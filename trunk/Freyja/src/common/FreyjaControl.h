@@ -223,6 +223,10 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	void rotateObject(int x, int y, Egg::egg_plane plane);
+	void scaleObject(int x, int y, Egg::egg_plane plane);
+
+
 	void MotionEdit(int x, int y, Egg::egg_plane plane);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose

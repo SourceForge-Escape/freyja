@@ -22,6 +22,8 @@
  Milestones ( Public snapshot releases )
 
  [0.3.6] ( Projected release date: 2004.08.31 )
+  * Commit generic dialogs to svn
+  * Generic editing events ( eg Select/Move/Copy object )
   * Bug fix focus
   * Full skeletal editing ( deforms, blending, etc )
   * Better Light and Camera editing

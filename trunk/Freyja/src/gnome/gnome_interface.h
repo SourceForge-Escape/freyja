@@ -96,4 +96,9 @@ void mgtk_event_gldisplay();
 
 void mgtk_event_glresize(unsigned int width, unsigned int height);
 
+int mgtk_create_confirm_dialog(char *dialog_icon,
+							   char *information_message, 
+							   char *question_message,
+							   char *cancel_icon, char *cancel_text,
+							   char *accept_icon, char *accept_text);
 #endif
