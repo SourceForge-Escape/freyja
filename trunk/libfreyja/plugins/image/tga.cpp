@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "image_tga.h"
+#include "tga.h"
 
 extern "C" {
 
