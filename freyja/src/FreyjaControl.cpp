@@ -665,7 +665,7 @@ bool FreyjaControl::event(int command)
 							  "Would you like to close the model and lose unsaved changes?",
 							  "gtk-cancel", "_Cancel", "gtk-close", "C_lose"))
 			{
-				mModel->Clear();
+				mModel->clear();
 				freyja_print("Closing Model...");
 				freyja_set_main_window_title(BUILD_NAME);
 				mCleared = true;
@@ -704,7 +704,7 @@ bool FreyjaControl::event(int command)
 				//	freyja_event_file_dialog("Save model as...");
 				//}
 
-				mModel->Clear();
+				mModel->clear();
 				freyja_print("Closing Model...");
 				freyja_set_main_window_title(BUILD_NAME);
 				mCleared = true;
@@ -746,7 +746,7 @@ bool FreyjaControl::event(int command)
 												 "Open the new model and lose unsaved changes?",
 												 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
 				{
-					mModel->Clear();
+					mModel->clear();
 					freyja_print("Closing Model...");
 					freyja_set_main_window_title(BUILD_NAME);
 
@@ -856,7 +856,7 @@ bool FreyjaControl::event(int command)
 										 "Would you like to revert the model and lose unsaved changes?",
 										 "gtk-cancel", "_Cancel", "gtk-revert", "_Revert"))
 		{
-			mModel->Clear();
+			mModel->clear();
 			freyja_print("Reverting Model...");
 			mCleared = true;
 			freyja_set_main_window_title(BUILD_NAME);
@@ -1603,19 +1603,19 @@ bool FreyjaControl::event(int command)
 
 	case FREYJA_MODE_PLANE_XY:
 		freyja_print("Plane XY");      
-		mModel->CurrentPlane(PLANE_XY);
+		mModel->setCurrentPlane(PLANE_XY);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_XZ:
 		freyja_print("Plane XZ");      
-		mModel->CurrentPlane(PLANE_XZ);
+		mModel->setCurrentPlane(PLANE_XZ);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_YZ:
 		freyja_print("Plane ZY");      
-		mModel->CurrentPlane(PLANE_ZY);
+		mModel->setCurrentPlane(PLANE_ZY);
 		freyja_event_gl_refresh();
 		break;
 
@@ -1971,7 +1971,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 
 	case MODEL_EDIT_MODE:
-		MotionEdit(x, y, mModel->CurrentPlane());
+		MotionEdit(x, y, mModel->getCurrentPlane());
 		break;
 	default:
 		;
@@ -2078,7 +2078,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 			handleEvent(EVENT_MISC, eRotate);
 		}
 
-		MouseEdit(btn, state, mod, x, y, mModel->CurrentPlane());
+		MouseEdit(btn, state, mod, x, y, mModel->getCurrentPlane());
 		break;
 	default:
 		;
@@ -2109,7 +2109,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 
 	getWorldFromScreen(x, y, &z);
 
-	switch (mModel->CurrentPlane())
+	switch (mModel->getCurrentPlane())
 	{
 	case PLANE_XY:
 		/* Nothing to do for XY */
@@ -2217,7 +2217,7 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 	*x = (*x - width / 2.0) * fs;
 	*y = -(*y - height / 2.0) * fs;
 	
-	switch (mModel->CurrentPlane())
+	switch (mModel->getCurrentPlane())
 	{
 	case PLANE_XY:
 		*x -= scroll[0] * invz;
@@ -2665,7 +2665,7 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 			xyz[1] = 1.0f;
 		
 
-		switch (mModel->CurrentPlane())
+		switch (mModel->getCurrentPlane())
 		{
 		case PLANE_XY:
 			mModel->adjustSceneTranslation(xyz[0], xyz[1], xyz[2]);
