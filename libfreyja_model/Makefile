@@ -22,7 +22,7 @@ NAME=freyja_model
 MAJOR_VERSION=0
 MINOR_VERSION=8
 MICRO_VERSION=14
-BUILD_ID=20040420
+BUILD_ID=20040429
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 EXT=.so
 TREE_DIR=libfreyja_model
@@ -110,7 +110,6 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS = \
-	$(BUILDDIR)/mtk3d.o \
 	$(BUILDDIR)/mendian.o \
 	$(BUILDDIR)/Egg.o \
 	$(BUILDDIR)/EggPlugin.o

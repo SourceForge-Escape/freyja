@@ -30,6 +30,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <hel/Vector3d.h>
+#include <hel/Matrix.h>
+
+
 #include "Egg.h"
 
 
@@ -170,16 +175,18 @@ void FreyjaModel::UpdateRenderList(int msh, int frame)
 
 #endif
 
+
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-egg_group_t *Egg::getNearestGroup(unit_t x, unit_t y, egg_plane plane)
+egg_group_t *Egg::getNearestGroup(vec_t x, vec_t y, egg_plane plane)
 {
+	Vector3d v, u;
 	egg_group_t *best = NULL;
 	egg_group_t *current = NULL;
-	unit_t dist = 0.0;
-	unit_t closest = 9999.0;
+	vec_t dist = 0.0;
+	vec_t closest = 9999.0;
 	int xx = 0, yy = 1;
 
 
@@ -213,7 +220,9 @@ egg_group_t *Egg::getNearestGroup(unit_t x, unit_t y, egg_plane plane)
 		if (!current)
 			continue;
 
-		dist = mtkDist2d(x, y, current->center[xx], current->center[yy]);
+		v = Vector3d(x, y, 0);
+		u = Vector3d(current->center[xx], current->center[yy], 0);
+		dist = helDist3v(v.mVec, u.mVec);
 
 		// printf("*** dist %f\n", dist);
 
@@ -228,12 +237,12 @@ egg_group_t *Egg::getNearestGroup(unit_t x, unit_t y, egg_plane plane)
 }
 
 
-egg_tag_t *Egg::getNearestTag(unit_t x, unit_t y, egg_plane plane)
+egg_tag_t *Egg::getNearestTag(vec_t x, vec_t y, egg_plane plane)
 {
 	egg_tag_t *best = NULL;
 	egg_tag_t *current = NULL;
-	unit_t dist = 0.0;
-	unit_t close = 0.0;
+	vec_t dist = 0.0;
+	vec_t closest = 99999.0;
 	int xx = 0, yy = 1;
 
 
@@ -264,22 +273,13 @@ egg_tag_t *Egg::getNearestTag(unit_t x, unit_t y, egg_plane plane)
 		if (!current)
 			continue;
 
-		// Init dist
-		if (!best) 
+		dist = helDist3v((Vector3d(x, y, 0)).mVec,
+							  (Vector3d(current->center[xx],	current->center[yy],	0)).mVec);
+
+		if (!best || dist < closest)
 		{
 			best = current;
-
-			close = mtkDist2d(x, y, current->center[xx], current->center[yy]);
-		}
-		else
-		{
-			dist = mtkDist2d(x, y, current->center[xx], current->center[yy]);
-			
-			if (dist < close)
-			{
-				best = current;
-				close = dist;
-			}
+			closest = dist;
 		}
 	}
 
@@ -288,10 +288,10 @@ egg_tag_t *Egg::getNearestTag(unit_t x, unit_t y, egg_plane plane)
 
 
 egg_vertex_t *Egg::getNearestVertex(egg_group_t *group, 
-												unit_t x, unit_t y, egg_plane plane)
+												vec_t x, vec_t y, egg_plane plane)
 {
-	unit_t dist = 0.0;
-	unit_t close = 0.0;
+	vec_t dist = 0.0;
+	vec_t closest = 0.0;
 	int xx = 0, yy = 1;
 	egg_vertex_t *best = NULL;
 	egg_vertex_t *current = NULL;
@@ -328,22 +328,13 @@ egg_vertex_t *Egg::getNearestVertex(egg_group_t *group,
 			continue;
 		}
 
-		// Init dist
-		if (!best) 
+		dist = helDist3v((Vector3d(x, y, 0)).mVec,
+							  (Vector3d(current->pos[xx],	current->pos[yy],	0)).mVec);
+
+		if (!best || dist < closest)
 		{
 			best = current;
-
-			close = mtkDist2d(x, y, current->pos[xx], current->pos[yy]);
-		}
-		else
-		{
-			dist = mtkDist2d(x, y, current->pos[xx], current->pos[yy]);
-
-			if (dist < close)
-			{
-				best = current;
-				close = dist;
-			}
+			closest = dist;
 		}
 	}
 
@@ -541,14 +532,14 @@ int Egg::saveFile(char *filename)
     
 		u = vertex->id;
 		fwrite(&u, 4, 1, f);
-		fwrite(&vertex->pos[0], sizeof(unit_t), 1, f);
-		fwrite(&vertex->pos[1], sizeof(unit_t), 1, f);
-		fwrite(&vertex->pos[2], sizeof(unit_t), 1, f);
-		fwrite(&vertex->uv[0], sizeof(unit_t), 1, f);
-		fwrite(&vertex->uv[1], sizeof(unit_t), 1, f);
-		fwrite(&vertex->norm[0], sizeof(unit_t), 1, f);
-		fwrite(&vertex->norm[1], sizeof(unit_t), 1, f);
-		fwrite(&vertex->norm[2], sizeof(unit_t), 1, f);
+		fwrite(&vertex->pos[0], sizeof(vec_t), 1, f);
+		fwrite(&vertex->pos[1], sizeof(vec_t), 1, f);
+		fwrite(&vertex->pos[2], sizeof(vec_t), 1, f);
+		fwrite(&vertex->uv[0], sizeof(vec_t), 1, f);
+		fwrite(&vertex->uv[1], sizeof(vec_t), 1, f);
+		fwrite(&vertex->norm[0], sizeof(vec_t), 1, f);
+		fwrite(&vertex->norm[1], sizeof(vec_t), 1, f);
+		fwrite(&vertex->norm[2], sizeof(vec_t), 1, f);
 
 #ifdef OBSOLETE
 		// Mongoose 2002.03.02, Texel
@@ -582,8 +573,8 @@ int Egg::saveFile(char *filename)
     
 		u = texel->id;
 		fwrite(&u, 4, 1, f);
-		fwrite(&texel->st[0], sizeof(unit_t), 1, f);
-		fwrite(&texel->st[1], sizeof(unit_t), 1, f);
+		fwrite(&texel->st[0], sizeof(vec_t), 1, f);
+		fwrite(&texel->st[1], sizeof(vec_t), 1, f);
 	} 
 
 	// PolyMesh //////////////////////
@@ -735,21 +726,21 @@ int Egg::loadFile(char *filename)
 	for (i = 0; i < num_vertex; ++i)
 	{
 		fread(&id, 4, 1, f);
-		fread(&x, sizeof(unit_t), 1, f);
-		fread(&y, sizeof(unit_t), 1, f);
-		fread(&z, sizeof(unit_t), 1, f);
+		fread(&x, sizeof(vec_t), 1, f);
+		fread(&y, sizeof(vec_t), 1, f);
+		fread(&z, sizeof(vec_t), 1, f);
 
 		s = t = nx = ny = nz = 0.0;
 
 		switch (version)
 		{
 		case EGG_VERSION:
-			fread(&s, sizeof(unit_t), 1, f);
-			fread(&t, sizeof(unit_t), 1, f);
+			fread(&s, sizeof(vec_t), 1, f);
+			fread(&t, sizeof(vec_t), 1, f);
 
-			fread(&nx, sizeof(unit_t), 1, f);
-			fread(&ny, sizeof(unit_t), 1, f);
-			fread(&nz, sizeof(unit_t), 1, f);
+			fread(&nx, sizeof(vec_t), 1, f);
+			fread(&ny, sizeof(vec_t), 1, f);
+			fread(&nz, sizeof(vec_t), 1, f);
 			break;
 		case EGG_8_10:
 			fread(&si, 4, 1, f);
@@ -835,9 +826,9 @@ int Egg::loadFile(char *filename)
 		fread(&u, 4, 1, f); // type
 
 		// pos
-		fread(&dummy, sizeof(unit_t), 1, f);
-		fread(&dummy, sizeof(unit_t), 1, f);
-		fread(&dummy, sizeof(unit_t), 1, f);
+		fread(&dummy, sizeof(vec_t), 1, f);
+		fread(&dummy, sizeof(vec_t), 1, f);
+		fread(&dummy, sizeof(vec_t), 1, f);
 
 		// sizeof data
 		fread(&u, 4, 1, f);
@@ -1128,15 +1119,15 @@ void Egg::combineVertices(unsigned int A, unsigned int B)
 }
 
 
-egg_vertex_t *Egg::addVertex(unit_t x, unit_t y, unit_t z)
+egg_vertex_t *Egg::addVertex(vec_t x, vec_t y, vec_t z)
 {
 	return addVertex(x, y, z, 0.0, 1.0, 0.0, 0.5, 0.5);
 }
 
 
-egg_vertex_t *Egg::addVertex(unit_t x, unit_t y, unit_t z, 
-									  unit_t nx, unit_t ny, unit_t nz,
-									  unit_t u, unit_t v)
+egg_vertex_t *Egg::addVertex(vec_t x, vec_t y, vec_t z, 
+									  vec_t nx, vec_t ny, vec_t nz,
+									  vec_t u, vec_t v)
 
 {
 	egg_vertex_t *vertex;
@@ -1239,13 +1230,10 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 		return UINT_MAX;
 	}
 
-	if (texel.empty())
-	{
-		printError("PolygonAdd> WARNING: No external texels\n");
-
-		//printError("PolygonAdd> Assertion failed, No texels\n");
-		//return UINT_MAX;
-	}
+	//if (texel.empty())
+	//{
+	//	printError("PolygonAdd> WARNING: No polymapped texcoords\n");
+	//}
 
 	polygon = new egg_polygon_t;
 	mPolygons.pushBack(polygon);
@@ -1439,7 +1427,7 @@ void Egg::delGroup(egg_group_t *group)
 
 
 void Egg::GroupTransform(unsigned int group, enum egg_transform type, 
-								 unit_t x, unit_t y, unit_t z)
+								 vec_t x, vec_t y, vec_t z)
 {
 	egg_group_t *grp = getGroup(group);
 
@@ -1995,15 +1983,15 @@ int Egg::saveTag(egg_tag_t *tag, FILE *f)
 
 	fwrite(&tag->flag, 1, 1, f);
 
-	fwrite(&tag->center[0], sizeof(unit_t), 1, f);
-	fwrite(&tag->center[1], sizeof(unit_t), 1, f);
-	fwrite(&tag->center[2], sizeof(unit_t), 1, f);
+	fwrite(&tag->center[0], sizeof(vec_t), 1, f);
+	fwrite(&tag->center[1], sizeof(vec_t), 1, f);
+	fwrite(&tag->center[2], sizeof(vec_t), 1, f);
 
 	// tag's 'transform matrix' isn't used yet, so ignore it for now  =)
 
-	fwrite(&tag->rot[0], sizeof(unit_t), 1, f);
-	fwrite(&tag->rot[1], sizeof(unit_t), 1, f);
-	fwrite(&tag->rot[2], sizeof(unit_t), 1, f);
+	fwrite(&tag->rot[0], sizeof(vec_t), 1, f);
+	fwrite(&tag->rot[1], sizeof(vec_t), 1, f);
+	fwrite(&tag->rot[2], sizeof(vec_t), 1, f);
 
 	// Check point
 	lu = EGG_BTAG_CHUNK_END;
@@ -2054,15 +2042,15 @@ egg_tag_t *Egg::loadTag(FILE *f)
 
 	fread(&tag->flag, 1, 1, f);
 
-	fread(&tag->center[0], sizeof(unit_t), 1, f);
-	fread(&tag->center[1], sizeof(unit_t), 1, f);
-	fread(&tag->center[2], sizeof(unit_t), 1, f);
+	fread(&tag->center[0], sizeof(vec_t), 1, f);
+	fread(&tag->center[1], sizeof(vec_t), 1, f);
+	fread(&tag->center[2], sizeof(vec_t), 1, f);
 
 	// tag's 'transform matrix' isn't used yet, so ignore it for now  =)
 
-	fread(&tag->rot[0], sizeof(unit_t), 1, f);
-	fread(&tag->rot[1], sizeof(unit_t), 1, f);
-	fread(&tag->rot[2], sizeof(unit_t), 1, f);
+	fread(&tag->rot[0], sizeof(vec_t), 1, f);
+	fread(&tag->rot[1], sizeof(vec_t), 1, f);
+	fread(&tag->rot[2], sizeof(vec_t), 1, f);
 
 	// Check point
 	fread(&lu, 4, 1, f);  
@@ -2086,10 +2074,10 @@ void Egg::addTag(egg_tag_t *tag)
 }
 
 
-egg_tag_t *Egg::addTag(unit_t x, unit_t y, unit_t z, char flag)
+egg_tag_t *Egg::addTag(vec_t x, vec_t y, vec_t z, char flag)
 {
 	egg_tag_t *tag;
-	matrix_t m;
+	Matrix m;
 
 
 	tag = new egg_tag_t;  
@@ -2097,9 +2085,8 @@ egg_tag_t *Egg::addTag(unit_t x, unit_t y, unit_t z, char flag)
 	tag->center[1] = y;
 	tag->center[2] = z;
 	tag->flag = flag;
-
-	mtkIdentity(m);
-	mtkCopy(m, tag->transform);
+	m.setIdentity();
+	m.getMatrix(tag->transform);
 
 	addTag(tag);
 
@@ -2124,18 +2111,18 @@ void Egg::delTag(egg_tag_t *tag)
 }
 
 
-void Egg::TagRotateAbout(unsigned int tag, unit_t rx, unit_t ry, unit_t rz)
+void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
 {
    egg_tag_t *etag;
    float x, y, z;
-   matrix_t transform;
+   Matrix transform;
    egg_mesh_t *mesh;
    egg_group_t *grp;
    egg_vertex_t *vert;
    unsigned int count;
-   unit_t xr = mtkDegToRad(rx);
-   unit_t yr = mtkDegToRad(ry);
-   unit_t zr = mtkDegToRad(rz);
+   vec_t xr = helDegToRad(rx);
+   vec_t yr = helDegToRad(ry);
+   vec_t zr = helDegToRad(rz);
 
 
    etag = getTag(tag);
@@ -2147,8 +2134,8 @@ void Egg::TagRotateAbout(unsigned int tag, unit_t rx, unit_t ry, unit_t rz)
    y = etag->center[1];
    z = etag->center[2];
 
-   mtkIdentity(transform);
-   mtkRotate(transform, xr, yr, zr);
+   transform.setIdentity();
+   transform.rotate(xr, yr, zr);
 
    for (etag->mesh.start(); etag->mesh.forward(); etag->mesh.next())
    {
@@ -2174,9 +2161,9 @@ void Egg::TagRotateAbout(unsigned int tag, unit_t rx, unit_t ry, unit_t rz)
 				vert->pos[0] -= etag->center[0];
 				vert->pos[1] -= etag->center[1];
 				vert->pos[2] -= etag->center[2];
-			 
-				mtkTransform(transform, vert->pos);
-			 
+
+				transform.multiply3v(vert->pos, vert->pos);
+
 				vert->pos[0] += etag->center[0];
 				vert->pos[1] += etag->center[1];
 				vert->pos[2] += etag->center[2];
@@ -2206,18 +2193,18 @@ void Egg::TagRotateAbout(unsigned int tag, unit_t rx, unit_t ry, unit_t rz)
 }
 
 
-void Egg::TagRotateAboutPoint(unsigned int tag, point_t p,
-										unit_t rx, unit_t ry, unit_t rz)
+void Egg::TagRotateAboutPoint(unsigned int tag, vec3_t p,
+										vec_t rx, vec_t ry, vec_t rz)
 {
    egg_tag_t *etag;
-   matrix_t transform;
+   Matrix m;
    egg_mesh_t *mesh;
    egg_group_t *grp;
    egg_vertex_t *vert;
    unsigned int count;
-   unit_t xr = mtkDegToRad(rx);
-   unit_t yr = mtkDegToRad(ry);
-   unit_t zr = mtkDegToRad(rz);
+   vec_t xr = helDegToRad(rx);
+   vec_t yr = helDegToRad(ry);
+   vec_t zr = helDegToRad(rz);
 
 
    etag = getTag(tag);
@@ -2225,8 +2212,8 @@ void Egg::TagRotateAboutPoint(unsigned int tag, point_t p,
    if (!etag)
 		return;
 
-   mtkIdentity(transform);
-   mtkRotate(transform, xr, yr, zr);   
+   m.setIdentity();
+   m.rotate(xr, yr, zr);   
 
    for (etag->mesh.start(); etag->mesh.forward(); etag->mesh.next())
    {
@@ -2253,7 +2240,7 @@ void Egg::TagRotateAboutPoint(unsigned int tag, point_t p,
 				vert->pos[1] -= p[1];
 				vert->pos[2] -= p[2];
 			  
-				mtkTransform(transform, vert->pos);
+				m.multiply3v(vert->pos, vert->pos);
 			  
 				vert->pos[0] += p[0];
 				vert->pos[1] += p[1];
@@ -2272,7 +2259,9 @@ void Egg::TagRotateAboutPoint(unsigned int tag, point_t p,
 					count++;
 				}
 				else
+				{
 					resizeBoundingBox(grp, vert->pos);
+				}
 			}
 		}
    }
@@ -2281,7 +2270,7 @@ void Egg::TagRotateAboutPoint(unsigned int tag, point_t p,
    etag->center[1] -= p[1];
    etag->center[2] -= p[2];
      
-   mtkTransform(transform, etag->center);
+   m.multiply3v(etag->center, etag->center);
      
    etag->center[0] += p[0];
    etag->center[1] += p[1];
@@ -2394,9 +2383,9 @@ int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 		fwrite(&lu, 4, 1, f);
 	}
 
-	fwrite(&boneframe->center[0], sizeof(unit_t), 1, f);
-	fwrite(&boneframe->center[1], sizeof(unit_t), 1, f);
-	fwrite(&boneframe->center[2], sizeof(unit_t), 1, f);
+	fwrite(&boneframe->center[0], sizeof(vec_t), 1, f);
+	fwrite(&boneframe->center[1], sizeof(vec_t), 1, f);
+	fwrite(&boneframe->center[2], sizeof(vec_t), 1, f);
 
 	// Check point
 	lu = EGG_TFRM_CHUNK_END;
@@ -2436,9 +2425,9 @@ egg_boneframe_t *Egg::BoneFrameLoad(FILE *f)
 		boneframe->tag.pushBack(lu);
 	}
 
-	fread(&boneframe->center[0], sizeof(unit_t), 1, f);
-	fread(&boneframe->center[1], sizeof(unit_t), 1, f);
-	fread(&boneframe->center[2], sizeof(unit_t), 1, f);
+	fread(&boneframe->center[0], sizeof(vec_t), 1, f);
+	fread(&boneframe->center[1], sizeof(vec_t), 1, f);
+	fread(&boneframe->center[2], sizeof(vec_t), 1, f);
 
 	// Check point
 	fread(&lu, 4, 1, f);
@@ -2452,7 +2441,7 @@ egg_boneframe_t *Egg::BoneFrameLoad(FILE *f)
 }
 
 
-unsigned int Egg::BoneFrameAdd(unit_t x, unit_t y, unit_t z)
+unsigned int Egg::BoneFrameAdd(vec_t x, vec_t y, vec_t z)
 {
 	egg_boneframe_t *boneframe = new egg_boneframe_t;
 
@@ -2569,30 +2558,30 @@ egg_animation_t *Egg::AnimationLoad(FILE *f)
 
 
 void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
-						  unit_t x, unit_t y, unit_t z)
+						  vec_t x, vec_t y, vec_t z)
 {
 	egg_vertex_t *vert;
-	matrix_t transform;
+	Matrix m;
 
 
 	if (!list)
 		return;
 
-	mtkIdentity(transform);
+	m.setIdentity();
 
 	switch (type)
 	{
 	case SCALE:
-		mtkScale(transform, x, y, z);
+		m.scale(x, y, z);
 		break;
 	case ROTATE:
-		x = mtkDegToRad(x);
-		y = mtkDegToRad(y);
-		z = mtkDegToRad(z);
-		mtkRotate(transform, x, y, z);
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+		m.rotate(x, y, z);
 		break;
 	case TRANSLATE:
-		mtkTranslate(transform, x, y, z);
+		m.translate(x, y, z);
 		break;
 	default:
 		return;
@@ -2605,42 +2594,41 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 		if (!vert)
 			continue;
 
-		mtkTransform(transform, vert->pos);
+		m.multiply3v(vert->pos, vert->pos);
 	}
 }
 
 
 void Egg::Transform(egg_tag_t *etag, enum egg_transform type, 
-						  unit_t x, unit_t y, unit_t z)
+						  vec_t x, vec_t y, vec_t z)
 {
-	matrix_t transform;
+	Matrix m;
 
 
 	if (!etag)
 		return;
 
-	mtkIdentity(transform);
+	m.setIdentity();
 
 	switch (type)
 	{
 	case SCALE:
-		mtkScale(transform, x, y, z);
+		m.scale(x, y, z);
 		break;
 	case ROTATE:
-		x = mtkDegToRad(x);
-		y = mtkDegToRad(y);
-		z = mtkDegToRad(z);
-		mtkRotate(transform, x, y, z);
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+		m.rotate(x, y, z);
 		break;
 	case TRANSLATE:
-		mtkTranslate(transform, x, y, z);
+		m.translate(x, y, z);
 		break;
 	default:
 		return;
 	}
 
-
-	mtkTransform(transform, etag->center);
+	m.multiply3v(etag->center, etag->center);
 
 	//FIXME: transform groups
 	printError("Egg::Transform> ( Tag ) Not fully implemented %s:%i\n", 
@@ -2649,37 +2637,37 @@ void Egg::Transform(egg_tag_t *etag, enum egg_transform type,
 
 
 void Egg::Transform(egg_group_t *grp, enum egg_transform type, 
-						  unit_t x, unit_t y, unit_t z)
+						  vec_t x, vec_t y, vec_t z)
 {
 	egg_vertex_t *vert;
-	matrix_t transform;
+	Matrix m;
 	unsigned int count;
 
 
 	if (!grp)
 		return;
 
-	mtkIdentity(transform);
+	m.setIdentity();
 
 	switch (type)
 	{
 	case SCALE:
-		mtkScale(transform, x, y, z);
+		m.scale(x, y, z);
 		break;
 	case ROTATE:
-		x = mtkDegToRad(x);
-		y = mtkDegToRad(y);
-		z = mtkDegToRad(z);
-		mtkRotate(transform, x, y, z);
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+		m.rotate(x, y, z);
 		break;
 	case TRANSLATE:
-		mtkTranslate(transform, x, y, z);
+		m.translate(x, y, z);
 		break;
 	default:
 		return;
 	}
 
-	mtkTransform(transform, grp->center);
+	m.multiply3v(grp->center, grp->center);
   
 	for (count = 0,grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
 	{
@@ -2688,7 +2676,7 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 		if (!grp)
 			continue;
 
-		mtkTransform(transform, vert->pos);
+		m.multiply3v(vert->pos, vert->pos);
 
 		if (count == 0)
 		{
@@ -2709,9 +2697,9 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 
 
 void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type, 
-						  unit_t x, unit_t y, unit_t z)
+						  vec_t x, vec_t y, vec_t z)
 {
-	matrix_t transform;
+	Matrix m;
 	egg_group_t *grp;
 	egg_vertex_t *vert;
 	int count;
@@ -2720,22 +2708,26 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 	if (!mesh)
 		return;
 
-	mtkIdentity(transform);
+	m.setIdentity();
 
 	switch (type)
 	{
 	case SCALE:
-		mtkScale(transform, x, y, z);
+		m.scale(x, y, z);
 		break;
 	case ROTATE:
-		x = mtkDegToRad(x);
-		y = mtkDegToRad(y);
-		z = mtkDegToRad(z);
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
 
-		mtkRotate(transform, x, y, z);
+		m.rotate(x, y, z);
 		break;
 	case ROTATE_ABOUT_CENTER:
-		mtkRotate(transform, x, y, z);
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+
+		m.rotate(x, y, z);
 
 		//grp = Group(mesh->group.Current());
 		//x = grp->center[0];
@@ -2743,7 +2735,7 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 		//z = grp->center[2];
 		break;
 	case TRANSLATE:
-		mtkTranslate(transform, x, y, z);
+		m.translate(x, y, z);
 		break;
 	default:
 		return;
@@ -2760,8 +2752,14 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 		{
 		case ROTATE_ABOUT_CENTER:
 			break;
+// 		case TRANSLATE:
+// 			// FIXME: matrix translate broken?
+// 			grp->center[0] += x;
+// 			grp->center[1] += y;
+// 			grp->center[2] += z;
+// 			break;
 		default:
-			mtkTransform(transform, grp->center);
+			m.multiply3v(grp->center, grp->center);
 		}
     
 		count = 0;
@@ -2780,14 +2778,20 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 				vert->pos[1] -= grp->center[1];
 				vert->pos[2] -= grp->center[2];
 	
-				mtkTransform(transform, vert->pos);
+				m.multiply3v(vert->pos, vert->pos);
 	
 				vert->pos[0] += grp->center[0];
 				vert->pos[1] += grp->center[1];
 				vert->pos[2] += grp->center[2];
 				break;
+// 			case TRANSLATE:
+// 				// FIXME: matrix translate broken?
+// 				vert->pos[0] += x;
+// 				vert->pos[1] += y;
+// 				vert->pos[2] += z;
+// 				break;
 			default:
-				mtkTransform(transform, vert->pos);
+				m.multiply3v(vert->pos, vert->pos);
 			}
 
 			if (count == 0)
@@ -2811,9 +2815,9 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 }
 
 
-void Egg::Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z)
+void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 {
-	matrix_t transform;
+	Matrix m;
 	egg_tag_t *tag;
 	egg_mesh_t *mesh;
 	egg_group_t *grp;
@@ -2821,22 +2825,22 @@ void Egg::Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z)
 	int count;
 
 
-	mtkIdentity(transform);
+	m.setIdentity();
 
 	switch (type)
 	{
 	case SCALE:
-		mtkScale(transform, x, y, z);
+		m.scale(x, y, z);
 		break;
 	case ROTATE:
-		x = mtkDegToRad(x);
-		y = mtkDegToRad(y);
-		z = mtkDegToRad(z);
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
 
-		mtkRotate(transform, x, y, z);
+		m.rotate(x, y, z);
 		break;
 	case TRANSLATE:
-		mtkTranslate(transform, x, y, z);
+		m.translate(x, y, z);
 		break;
 	default:
 		return;
@@ -2849,7 +2853,7 @@ void Egg::Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z)
 		if (!tag)
 			continue;  
 
-		mtkTransform(transform, tag->center);
+		m.multiply3v(tag->center, tag->center);
 	}
 
 	for (mMeshes.start(); mMeshes.forward(); mMeshes.next())
@@ -2866,7 +2870,7 @@ void Egg::Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z)
 			if (!grp)
 				continue;
 
-			mtkTransform(transform, grp->center);
+			m.multiply3v(grp->center, grp->center);
 
 			count = 0;
 
@@ -2877,7 +2881,7 @@ void Egg::Transform(enum egg_transform type, unit_t x, unit_t y, unit_t z)
 				if (!grp)
 					continue;
 
-				mtkTransform(transform, vert->pos);
+				m.multiply3v(vert->pos, vert->pos);
 
 				if (count == 0)
 				{
@@ -2975,7 +2979,7 @@ bool Egg::VertexInPolygon(unsigned int vertex, egg_polygon_t *polygon)
 }
 
 
-void Egg::resizeBoundingBox(egg_group_t *grp, point_t p)
+void Egg::resizeBoundingBox(egg_group_t *grp, vec3_t p)
 {
 	if (!grp || grp->vertex.empty())
 		return;

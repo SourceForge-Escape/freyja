@@ -19,6 +19,12 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+	* Egg mesh transform not using matrix math for translate ( bug ) 
+	* mtk3d dropped, goodbye old friend ( 199? - 2004 )
+	* Egg v8 now uses libhel
+	* New texture filename loader feature - remaps like names
+	* Fix for texture filename loader, was ref +1 over max
+	
  freyja_model (0.8.14-20040422) Mongoose <mongoose@users.sourceforge.net>
 
 	* New normal generation system

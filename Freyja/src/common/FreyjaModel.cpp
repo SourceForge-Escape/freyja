@@ -24,6 +24,9 @@
 #include <string.h>
 #include <math.h>
 
+#include <hel/math.h>
+#include <hel/Vector3d.h>
+
 #include "MaterialManager.h"
 
 #include "FreyjaModel.h"
@@ -49,6 +52,7 @@ FreyjaModel::FreyjaModel()
 
 	_plugin->addModule("psk");
 	_plugin->addModule("nod");
+	_plugin->addModule("grn");
 
 	delete [] pluginDir;
 
@@ -245,10 +249,10 @@ int FreyjaModel::handleEvent(int mode, int cmd)
 		case CMD_MESH_MIRROR:
 			MeshMirror(getCurrentMesh());
 			break;
-		case CMD_MESH_DUP_FRAME:// FIXME: make CMD_MESH_FRAME_CLONE
+		case CMD_MESH_DUP_FRAME:
 			MeshFrameClone(getCurrentMesh(), getCurrentGroup());
 			break;
-		case CMD_MESH_DUP_SCENE: // FIXME: make CMD_GROUP_CLONE
+		case CMD_MESH_DUP_SCENE:
 			GroupClone(getCurrentGroup());
 			break;
 		case CMD_MESH_ADD:
@@ -265,8 +269,10 @@ int FreyjaModel::handleEvent(int mode, int cmd)
 		switch (cmd)
 		{
 		case CMD_MISC_DISPLAY_INFO:
-			event_print("%d bones, %d polygons, %d vertices",
-						_egg->getTagCount(), _egg->getPolygonCount(), 
+			event_print("%d bones, %d meshes, %d polygons, %d vertices",
+						_egg->getTagCount(), 
+						_egg->getMeshCount(), 
+						_egg->getPolygonCount(), 
 						_egg->getVertexCount());
 			break;
 		case CMD_MISC_LOAD_MAP:
@@ -459,24 +465,6 @@ int FreyjaModel::handleEvent(int mode, int cmd)
 			break;
 		case CMD_BONE_DELETE:
 			TagDel();
-			break;
-		case CMD_BONE_ROTATE_UP_X:
-			Transform(FreyjaModel::TransformBone, Egg::ROTATE, 1.0, 0.0, 0.0);
-			break;
-		case CMD_BONE_ROTATE_UP_Y:
-			Transform(FreyjaModel::TransformBone, Egg::ROTATE, 0.0, 1.0, 0.0);
-			break;
-		case CMD_BONE_ROTATE_UP_Z:
-			Transform(FreyjaModel::TransformBone, Egg::ROTATE, 0.0, 0.0, 1.0);
-			break;
-		case CMD_BONE_ROTATE_DOWN_X:
-			Transform(FreyjaModel::TransformBone, Egg::ROTATE, -1.0, 0.0, 0.0);
-			break;
-		case CMD_BONE_ROTATE_DOWN_Y:
-			Transform(FreyjaModel::TransformBone, Egg::ROTATE, 0.0, -1.0, 0.0);
-			break;
-		case CMD_BONE_ROTATE_DOWN_Z:
-			Transform(FreyjaModel::TransformBone, Egg::ROTATE, 0.0, 0.0, -1.0);
 			break;
 		}
 		break;
@@ -958,10 +946,10 @@ void FreyjaModel::Transform(int mode, enum Egg::egg_transform type,
 		{
 			type = Egg::ROTATE_ABOUT_CENTER;
 
-			// Mongoose 2002.01.18, Scaled rotation for finer control
-			x *= 0.1;
-			y *= 0.1;
-			z *= 0.1;
+			// Mongoose 2002.01.18, Scaled rotation for better control
+			x *= 5;
+			y *= 5;
+			z *= 5;
 		}
 
 		_egg->Transform(CachedMesh(), type, x, y, z);
@@ -1244,7 +1232,7 @@ void FreyjaModel::TagMoveCenter(float xx, float yy)
 
 void FreyjaModel::TagMove(float xx, float yy)
 {
-	unit_t x = 0, y = 0, z = 0;
+	vec_t x = 0, y = 0, z = 0;
 	egg_tag_t *bone;
 
 
@@ -1276,31 +1264,32 @@ void FreyjaModel::TagMove(float xx, float yy)
 
 void FreyjaModel::MeshMove(float xx, float yy)
 {
-	unit_t x = 0, y = 0, z = 0;
+	vec_t x = 0, y = 0, z = 0;
+	egg_group_t *mesh = CachedGroup();
 
 
-	if (!_cached_vertex)
+	if (!mesh)
 		return;
-
+	
 	switch (CurrentPlane())
 	{
 	case Egg::PLANE_XY:
-		x = xx - _cached_vertex->pos[0];
-		y = yy - _cached_vertex->pos[1];
+		x = xx - mesh->center[0];
+		y = yy - mesh->center[1];
 		z = 0;
 		break;
 	case Egg::PLANE_XZ:
-		x = xx - _cached_vertex->pos[0];
+		x = xx - mesh->center[0];
 		y = 0;
-		z = yy - _cached_vertex->pos[2];
+		z = yy - mesh->center[2];
 		break;
 	case Egg::PLANE_YZ:
 		x = 0;
-		y = xx - _cached_vertex->pos[1];
-		z = yy - _cached_vertex->pos[2];
+		y = xx - mesh->center[1];
+		z = yy - mesh->center[2];
 		break;
 	}
-  
+
 	Transform(FreyjaModel::TransformMesh, Egg::TRANSLATE, x, y, z);  
 }
 
@@ -1450,7 +1439,7 @@ void FreyjaModel::VertexSelect(float xx, float yy)
 	_cached_vertex = _egg->getNearestVertex(frame, xx, yy, CurrentPlane());
 }
 
-void FreyjaModel::Bbox(point_t min, point_t max, Vector<unsigned int> **list)
+void FreyjaModel::Bbox(vec3_t min, vec3_t max, Vector<unsigned int> **list)
 {
 	min[0] = mSelectBBox[0][0];
 	min[1] = mSelectBBox[0][1];
@@ -1487,8 +1476,10 @@ void FreyjaModel::BBoxSelect(float xx, float yy)
 		break;
 	}
 
-	dist0 = mtkDist2d(xx, yy, mSelectBBox[0][x], mSelectBBox[0][y]);
-	dist1 = mtkDist2d(xx, yy, mSelectBBox[1][x], mSelectBBox[1][y]);
+	dist0 = helDist3v((Vector3d(xx, yy, 0)).mVec,
+					  (Vector3d(mSelectBBox[0][x], mSelectBBox[0][y], 0)).mVec);
+	dist1 = helDist3v((Vector3d(xx, yy, 0)).mVec,
+					  (Vector3d(mSelectBBox[1][x], mSelectBBox[1][y], 0)).mVec);
 
 	if (dist0 < dist1)
 		_bbox = 0;
@@ -1671,8 +1662,8 @@ void FreyjaModel::TexelSelect(float s, float t)
 	egg_texel_t *best_texel = NULL;
 	egg_vertex_t *best_vertex = NULL;
 	egg_vertex_t *vertex = NULL;
-	unit_t dist = 0.0;
-	unit_t best_dist = 0.0;
+	vec_t dist = 0.0;
+	vec_t best_dist = 0.0;
 
 
 #ifdef DEBUG_TEXEL
@@ -1709,7 +1700,8 @@ void FreyjaModel::TexelSelect(float s, float t)
 				continue;
 
 			// Mongoose: slight optimization, to avoid init branch  =)
-			dist = mtkDist2d(s, t, texel->st[0], texel->st[1]);
+			dist = helDist3v((Vector3d(s, t, 0)).mVec,
+							 (Vector3d(texel->st[0], texel->st[1], 0)).mVec);
 
 			if (dist < best_dist)
 				best_texel = NULL;
@@ -1737,7 +1729,8 @@ void FreyjaModel::TexelSelect(float s, float t)
 					continue;
 				
 				// Mongoose: slight optimization, to avoid init branch  =)
-				dist = mtkDist2d(s, t, vertex->uv[0], vertex->uv[1]);
+				dist = helDist3v((Vector3d(s, t, 0)).mVec, 
+								 (Vector3d(vertex->uv[0], vertex->uv[1], 0)).mVec);
 				
 				if (dist < best_dist)
 					best_vertex = NULL;

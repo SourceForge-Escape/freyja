@@ -25,11 +25,11 @@
 
 void close_log_file();
 
-GtkWidget* about_create(void);
+GtkWidget *dialog_about_create(void);
 
-GtkWidget* window_create(void);
+GtkWidget *window_create(void);
 
-GtkWidget* fileselection_create(char *title);
+GtkWidget *fileselection_create(char *title);
 
 GtkWidget *text_entry_create(GtkWidget *box);
 
