@@ -28,8 +28,8 @@
 #define GUARD__HEL_MONGOOSE_COLLISIONOBJECT_H_
 
 #include <mstl/Vector.h>
-#include <hel/Mass.h>
-#include <hel/math.h>
+#include "hel/Mass.h"
+#include "hel/math.h"
 
 
 class CollisionObject
