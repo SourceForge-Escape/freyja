@@ -117,7 +117,9 @@ typedef enum {
 
 	eGenerateNormals,
 	eGenerateCube,
-	eGenerateTriStrip,
+	eGenerateTube,
+	eGenerateCircle,
+	eGeneratePlane,
 	eGenerateCylinder,
 	eGenerateSphere,
 

@@ -131,10 +131,14 @@
 
 		(submenu "_Tools"
 			(submenu "_Generate"
-				(menu_item "_UV XY Plane"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+				(menu_item "_UV by XY Plane"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+				(menu_seperator)
 				(menu_item "_Normals"	eGenerateNormals	"gtk-polygon")
+				(menu_seperator)
 				(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
-				(menu_item "_TriSrip"	eGenerateTriStrip	"gtk-polygon")
+				(menu_item "_Plane"		eGeneratePlane		"gtk-polygon")
+				(menu_item "_Tube"		eGenerateTube		"gtk-polygon")
+				(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
 				(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
 				(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
 
@@ -274,7 +278,7 @@
 						(label "Generate a mesh"  0.0 0.5))
 					(hbox 1 0 0 1 0
 						(button "Cube"		eMode		eGenerateCube)
-						(button "Strip" 	eMode		eGenerateTriStrip)
+						(button "Plane" 	eMode		eGeneratePlane)
 						(button "Sphere"	eMode		eGenerateSphere)
 						(button "Cylinder"	eMode		eGenerateCylinder)
 						(button	"Cone"		eMode		eGenerateCone))
