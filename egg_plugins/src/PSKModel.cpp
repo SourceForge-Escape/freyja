@@ -2697,42 +2697,15 @@ int freyja_model__psk_import(char *filename)
 		eggBegin(FREYJA_BONE_TAG);
 		eggTagFlags1u(0x0);
 		eggTagName(psk.mBones[i].name);
-		
-#define FUCK_WITH_TRANSLATION
-#ifdef FUCK_WITH_TRANSLATION
+
 		eggTagPos3f(psk.mBones[i].restLoc[0],
 					psk.mBones[i].restLoc[2],
 					-psk.mBones[i].restLoc[1]);
-#else
-		eggTagPos3f(psk.mBones[i].restLoc[0],
-					psk.mBones[i].restLoc[1],
-					psk.mBones[i].restLoc[2]);
-#endif
 
-#define FUCK_WITH_ROTATION
-#ifdef FUCK_WITH_ROTATION
-		eggTagRotateQuaternion4f(-psk.mBones[i].restDir[3],
-								 psk.mBones[i].restDir[2],
+		eggTagRotateQuaternion4f(psk.mBones[i].restDir[3],
 								 psk.mBones[i].restDir[0],
+								 psk.mBones[i].restDir[2],
 								 psk.mBones[i].restDir[1]);
-#else
-		vec_t x, y, z;
-
-
-		/* Convert quaternion to Euler angles */
-		quaternion_to_euler_angles(psk.mBones[i].restDir[3],
-								   psk.mBones[i].restDir[0],
-								   psk.mBones[i].restDir[1],
-								   psk.mBones[i].restDir[2],
-								   &x, &y, &z);
-		
-		/* Convert radians to degrees */
-		x *= 57.295779513082323;
-		y *= 57.295779513082323;
-		z *= 57.295779513082323;
-
-		eggTagRotate3f(x, y, z);
-#endif
 
 		printf("++ Bone[%d] :: ", i);
 
