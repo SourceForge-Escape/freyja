@@ -128,6 +128,12 @@ typedef enum {
 	eGenerateSphere,
 
 	eSetMeshTexture,
+	eSetPolygonTexture,
+	eMirrorUV_X,
+	eMirrorUV_Y,
+	eTranslateUV,
+	eRotateUV,
+	eScaleUV,
 	eTextureSlotLoad,
 
 	/* Widget interaction events */

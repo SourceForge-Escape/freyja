@@ -388,10 +388,20 @@
 							 (button "Set Tex" eMode eSetMeshTexture))
 					 
 					 (hbox 1 0 0 1 0 
-							 (label "Texture" 0.0 0.5) 
-							 (spinbutton 0 0 100 503)
-							 (label "Mesh" 0.0 0.5) 
-							 (spinbutton 0 0 100 eMeshIterator)))
+							 (label "Texture index: " 0.0 0.5) 
+							 (spinbutton 0 0 100 503))
+
+					 (hbox 1 0 0 1 0
+							 (label "Mesh index: " 0.0 0.5) 
+							 (spinbutton 0 0 100 eMeshIterator))
+
+					(hbox 1 0 0 1 0
+						(label "Polyon op:" 0.0 0.5)
+						(vbox 1 0 0 1 0
+							(button "Set texture" eMode eSetPolygonTexture)
+							;(button "Rotate" eMode eRotateUV)
+							(button "Mirror X" eMode eMirrorUV_X)
+							(button "Mirror Y" eMode eMirrorUV_Y))))
 
 
 			  (tab "Animation" eModeAnimation
