@@ -349,7 +349,7 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
-	void renderUVWindow(unsigned int width, unsigned int height);
+	void renderUVWindow();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Renders texel editing quad
@@ -463,7 +463,6 @@ private:
 	float mFar;
 	float mNear;
 	float mFovY;
-
 };
 
 #endif

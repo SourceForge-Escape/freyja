@@ -594,7 +594,7 @@ void freyja_get_rc_filename(char *s, const char *filename, long sz)
 
 int freyja_append_item_to_menu(int event, const char *label, int item_event)
 {
-	mgtk_append_item_to_menu(event, label, item_event);
+	return mgtk_append_item_to_menu(event, label, item_event);
 }
 
 
