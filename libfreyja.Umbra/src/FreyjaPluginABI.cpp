@@ -391,7 +391,7 @@ void freyjaGenerateVertexNormals()
 
 		normal.zero();
 
-		ref = freyjaGetVertexPolygonRef();
+		freyjaGetVertexPolygonRef(ref);
 
 		for (j = ref.begin(); j < ref.end(); ++j)
 		{
@@ -457,7 +457,7 @@ Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(BoundingVolume &vol)
 
 
 Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
-										   Vector<unsigned int> &vertices)
+											  Vector<unsigned int> &vertices)
 {
 	Vector<unsigned int> *list;
 	unsigned int i, count, index;
@@ -497,6 +497,26 @@ Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
 }
 
 
+void freyjaGetVertexPolygonRef(Vector<long> &polygons)
+{
+	polygons.clear();
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg_vertex_t *v = EggPlugin::mEggPlugin->getVertex(freyjaGetCurrent(FREYJA_VERTEX));
+		unsigned int i;
+
+		if (v && !v->ref.empty())
+		{
+			// if longs ploygons.copy(v->ref);
+
+			for (i = v->ref.begin(); i < v->ref.end(); ++i)
+				polygons.pushBack((long)v->ref[i]);
+		}
+	}
+}
+
+
 ////////////////////////////////////////////////////////////////////
 
 
@@ -523,7 +543,16 @@ long freyjaTexCoord2f(vec_t u, vec_t v)
 }
 
 
-long freyjaVertexStore3f(vec_t x, vec_t y, vec_t z)
+long freyjaVertex3fv(vec3_t xyz)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaVertex3f(xyz[0], xyz[1], xyz[2]);
+
+	return FREYJA_PLUGIN_ERROR;
+}
+
+
+long freyjaVertex3f(vec_t x, vec_t y, vec_t z)
 {
 	if (EggPlugin::mEggPlugin)
 		return EggPlugin::mEggPlugin->freyjaVertex3f(x, y, z);
@@ -532,43 +561,50 @@ long freyjaVertexStore3f(vec_t x, vec_t y, vec_t z)
 }
 
 
-void freyjaVertexWeightStore(unsigned int index, 
-						  vec_t weight, unsigned int bone)
+void freyjaVertexWeight(long index, vec_t weight, long bone)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaVertexWeight(index, weight, bone);
 }
 
 
-void freyjaVertexTexCoord2f(unsigned int vIndex, vec_t u, vec_t v)
+void freyjaVertexTexCoord2f(long vIndex, vec_t u, vec_t v)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaVertexTexCoord2f(vIndex, u, v);
 }
 
 
-void freyjaVertexNormal3f(unsigned int vIndex, vec_t x, vec_t y, vec_t z)
+void freyjaVertexNormal3fv(long vIndex, vec3_t nxyz)
+{
+	if (EggPlugin::mEggPlugin)
+		EggPlugin::mEggPlugin->freyjaVertexNormal3f(vIndex, 
+													nxyz[0], nxyz[1], nxyz[2]);
+}
+
+
+void freyjaVertexNormal3f(long vIndex, vec_t x, vec_t y, vec_t z)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaVertexNormal3f(vIndex, x, y, z);
 }
 
 
-void freyjaPolygonVertex1i(unsigned int egg_id)
+void freyjaPolygonVertex1i(long egg_id)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaPolygonVertex1i(egg_id);
 }
 
 
-void freyjaPolygonTexCoord1i(unsigned int egg_id)
+void freyjaPolygonTexCoord1i(long egg_id)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaPolygonTexCoord1i(egg_id);
 }
 
 
-void freyjaPolygonMaterial1i(int id)
+void freyjaPolygonMaterial1i(long id)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaPolygonMaterial1i(id);  
@@ -685,7 +721,7 @@ int freyjaGetTextureImage(unsigned int index, unsigned int *w, unsigned int *h,
 }
 
 
-long freyjaTextureStoreFilename(char *filename)
+long freyjaTextureFilename1s(char *filename)
 {
 	if (EggPlugin::mEggPlugin)
 		return EggPlugin::mEggPlugin->freyjaTextureStoreFilename(filename);
@@ -719,7 +755,7 @@ long freyjaGetCount(freyja_object_t type)
 }
 
 
-long freyjaIterator(freyja_object_t type, int item)
+long freyjaIterator(freyja_object_t type, long item)
 {
 	if (EggPlugin::mEggPlugin)
 		return EggPlugin::mEggPlugin->freyjaIterator(type, item);
@@ -742,7 +778,7 @@ void freyjaGetVertex3fv(vec3_t xyz)
 }
 
 
-void freyjaGetVertexNormal3f(vec3_t nxyz)
+void freyjaGetVertexNormal3fv(vec3_t nxyz)
 {
 	if (EggPlugin::mEggPlugin)
 		EggPlugin::mEggPlugin->freyjaGetVertexNormal(nxyz);
@@ -776,7 +812,7 @@ long freyjaCriticalSection(freyja_lock_t request)
 }
 
 
-long freyjaGetBoneName(unsigned int index, unsigned int size, char *name)
+long freyjaGetBoneName(long index, unsigned int size, char *name)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
 		
@@ -791,7 +827,7 @@ long freyjaGetBoneName(unsigned int index, unsigned int size, char *name)
 }
 
 
-void freyjaSetBoneParent(int index)
+void freyjaSetBoneParent(long index)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
 
@@ -817,7 +853,7 @@ long freyjaGetBoneParent(long index)
 }
 
 
-long freyjaGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz)
+long freyjaGetBoneRotationWXYZ4fv(long index, vec4_t wxyz)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
 	
@@ -833,7 +869,7 @@ long freyjaGetBoneRotationWXYZ4fv(unsigned int index, vec4_t wxyz)
 }
 
 
-long freyjaGetBoneRotationXYZ3fv(unsigned int index, vec3_t xyz)
+long freyjaGetBoneRotationXYZ3fv(long index, vec3_t xyz)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
 	
@@ -850,7 +886,7 @@ long freyjaGetBoneRotationXYZ3fv(unsigned int index, vec3_t xyz)
 }
 
 
-long freyjaGetBoneTranslation3fv(unsigned int index, vec3_t xyz)
+long freyjaGetBoneTranslation3fv(long index, vec3_t xyz)
 {
 	if (EggPlugin::mEggPlugin)
 	{

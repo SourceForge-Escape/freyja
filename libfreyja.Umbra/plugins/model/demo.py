@@ -26,8 +26,9 @@ def generatecube(sz):
 	vertices = []   # Trans maps for indices ( Egg builds still need this )
 	texcoords = []
 
-	freyjaBegin(FREYJA_MODEL)
+	#freyjaBegin(FREYJA_MODEL)
 	freyjaBegin(FREYJA_MESH)
+	freyjaBegin(FREYJA_VERTEX_GROUP)
 	vertices.append(freyjaVertex3f(0.0, sz, 0.0))
 	vertices.append(freyjaVertex3f(sz, sz, 0.0))
 	vertices.append(freyjaVertex3f(sz, 0.0, 0.0))
@@ -36,6 +37,7 @@ def generatecube(sz):
 	vertices.append(freyjaVertex3f(sz, sz, sz))
 	vertices.append(freyjaVertex3f(sz, 0.0, sz))
 	vertices.append(freyjaVertex3f(0.0, 0.0, sz))
+	freyjaEnd()
 
 	#freyjaTexCoord2f(0.0, 0.0)
 
@@ -91,7 +93,7 @@ def generatecube(sz):
 	freyjaEnd() # FREYJA_POLYGON
 
 	freyjaEnd() # FREYJA_MESH
-	freyjaEnd() # FREYJA_MODEL
+	#freyjaEnd() # FREYJA_MODEL
 
 
 generatecube(9.0)

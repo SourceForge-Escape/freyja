@@ -383,10 +383,34 @@ void EggPlugin::freyjaGetVertex(vec3_t xyz)
 
 	vertex = mEgg->VertexList();
 
-	if (!vertex || mIndexVertex >= vertex->end())
+	if (!vertex || mIndexVertex >= vertex->end() || index < 0)
 		return;// FREYJA_PLUGIN_ERROR;
  
 	vert = (*vertex)[mIndexVertex];
+
+	if (!vert)
+		return;// FREYJA_PLUGIN_ERROR;
+
+	xyz[0] = vert->pos[0];
+	xyz[1] = vert->pos[1];
+	xyz[2] = vert->pos[2];
+
+	//return vert->id;
+}
+
+
+void EggPlugin::freyjaGetVertexByIndex(long index, vec3_t xyz)
+{
+	Vector<egg_vertex_t *> *vertex;
+	egg_vertex_t *vert;
+
+
+	vertex = mEgg->VertexList();
+
+	if (!vertex || index >= (int)vertex->end() || index < 0)
+		return;// FREYJA_PLUGIN_ERROR;
+ 
+	vert = (*vertex)[index];
 
 	if (!vert)
 		return;// FREYJA_PLUGIN_ERROR;
@@ -659,7 +683,15 @@ void EggPlugin::freyjaPrintError(char *format, ...)
 
 void EggPlugin::freyjaPrintError(char *format, va_list *args)
 {
-	vfprintf(stderr, format, *args);
+	if (mPrinter)
+	{
+		mPrinter->errorArgs(format, args);
+	}
+	else
+	{
+		vfprintf(stderr, format, *args);
+		fprintf(stderr, "\n");
+	}
 }
 
 
@@ -675,7 +707,15 @@ void EggPlugin::freyjaPrintMessage(char *format, ...)
 
 void EggPlugin::freyjaPrintMessage(char *format, va_list *args)
 {
-	vfprintf(stdout, format, *args);
+	if (mPrinter)
+	{
+		mPrinter->messageArgs(format, args);
+	}
+	else
+	{
+		vfprintf(stdout, format, *args);
+		printf("\n");
+	}
 }
 
 
@@ -683,8 +723,10 @@ void EggPlugin::freyjaPrintMessage(char *format, va_list *args)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool saveModel(const char *filename)
+bool EggPlugin::saveModel(const char *filename)
 {
+	freyjaPrintError("EggPlugin::saveModel> Not implemented %s:%i",
+					 __FILE__, __LINE__);
 	return false;
 }
 
@@ -727,7 +769,7 @@ long EggPlugin::importModel(const char *filename)
 	unsigned int i;
 
 
-	freyjaPrintMessage("[FreyjaPlugin module loader invoked]");
+	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader invoked]");
 
 	if (!reader.doesFileExist(filename))
 	{
@@ -804,7 +846,7 @@ long EggPlugin::importModel(const char *filename)
 			break;
 	}
 
-	freyjaPrintMessage("[FreyjaPlugin module loader sleeps now]\n");
+	freyjaPrintMessage("[FreyjaPlugin (Egg) module loader sleeps now]\n");
 
 	if (loaded)
 		return 0; // sucess
@@ -1125,8 +1167,13 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 		mEgg->addAnimation(mAnimation);
 		break;
 
+	case FREYJA_MODEL:
+		mStack.push(FREYJA_MODEL);
+		break;
+
 	default:
-		;
+		freyjaPrintError("freyjaBegin(%i): Unknown type", type);
+		mStack.push(type);
 	}
 }
 
