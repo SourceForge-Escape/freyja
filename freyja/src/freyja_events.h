@@ -57,11 +57,13 @@ typedef enum {
 	eSaveFile,
 	eSaveAsFile,
 	eCloseFile,
+	eOpenFileModel,
 	eOpenFileTexture,
 	eAppendFile,
 	eRevertFile,
 	eExportFile,
 	eImportFile,
+	ePluginMenu,
 
 	eHelp,
 	eInfo,
@@ -283,7 +285,7 @@ typedef enum {
 
 	EVENT_MISC,
 	eRecentFiles,
-
+	ePluginEventBase = 10000,
 
 	/* Misbehaved text events */
 	eSetMaterialName = 799
@@ -308,6 +310,7 @@ void freyja_event_unfullscreen();
 
 void freyja_event_file_dialog_notify(char *filename);
 
+void freyja_append_eventid(char *symbol, int eventid);
 int freyja_append_item_to_menu(int event, const char *label, int item_event);
 
 float freyja_event_get_float(int event);
