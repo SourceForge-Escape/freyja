@@ -20,38 +20,20 @@
  Show Stoppers
  ------------------
 
- o 2004.12.02-5 ( Related 2004.12.02-1 )  FIXED?
-	Vertex delete on polygon can cause same crash as 2004.12.02-1
-	Polygon delete can cause same crash as 2004.12.02-1
-	See log error in BUG 2004.12.02-1
-
  o 2004.12.02-4
 	Crash on bone selection via iterator/spinbutton with null skeleton
+
 
  o 2004.12.02-3
 	Crash on skeletal mesh model save in ASE PLUGIN export of SKEL
 
- o 2004.12.02-2 ( Related: 2004.12.02-1 )
+
+ o 2004.12.02-2
 	Saved egg files can cause lockup if they contain lots of
 	cut and paste bugged meshes
 
- o 2004.12.02-1  ( Related: 2004.11.29-2?, 2004.11.29-1? )  FIXED?
-	Cut/Delete can cause crash in renderer?  
-
-	FIX?: Unlink meshes from render list before it's elements are
-	      Add group merging to paste code, so all vertices contained
-
-	Looks like multi group meshes like spheres/cylinders to blame?
-
-	Log entry below:
-		FreyjaRender::DrawPolygon> Assertion failure, bad polygon 
-
- o 2004.11.29-2  FIXED?
-	Crash on delete single object ( Rare, Hard to reproduce )
-
- o 2004.11.29-1  FIXED?
-	Crash on mesh delete for some character models, which
-	looks like something to do with aging Egg data structures
+    Seems to be caused by dead polygons being saved... Egg.cpp:802
+	Egg tries to load 10M+ vertex indices per polygon ( rollover -1 )
 
  --------------------------------------------------------------------------
 

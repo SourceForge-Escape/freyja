@@ -690,6 +690,37 @@ bool FreyjaControl::event(int command)
 		}
 		break;
 
+	case eAppendFile:
+		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+		freyja_event_file_dialog("Append to model...");
+		freyja_print("Append mode is default Open mode in this build...");
+		break;
+
+	case eRevertFile:
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You will lose all changes you made by reverting.",
+										 "Would you like to revert the model and lose unsaved changes?",
+										 "gtk-cancel", "_Cancel", "gtk-revert", "_Revert"))
+		{
+			mModel->Clear();
+			freyja_print("Reverting Model...");
+			freyja_set_main_window_title(BUILD_NAME);
+			mModel->loadModel(mRecentFiles[mRecentFiles.end()-1]);
+		}
+		break;
+
+	case eExportFile:
+		mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+		freyja_event_file_dialog("Export model...");
+		freyja_print("Exporting is handled from Save As using file extentions...");
+		break;
+
+	case eImportFile:
+		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+		freyja_event_file_dialog("Import model...");
+		freyja_print("Importing is handled automatically from Open...");
+		break;
+
 
 	case eShutdown:
 		if (freyja_create_confirm_dialog("gtk-dialog-question",
@@ -840,6 +871,9 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+
+
+
 	case eDelete:
 		deleteSelectedObject();
 		freyja_event_gl_refresh();
@@ -855,6 +889,16 @@ bool FreyjaControl::event(int command)
 
 	case eSplitObject:
 		freyja_print("Object splitting removed from this build");
+		break;
+
+	case eSelectAll:
+		freyja_print("Select All is not avalible in this build");
+		break;
+	case eUndo:
+		freyja_print("Undo is not avalible in this build");
+		break;
+	case eRedo:
+		freyja_print("Redo is not avalible in this build");
 		break;
 
 	case eCut:
