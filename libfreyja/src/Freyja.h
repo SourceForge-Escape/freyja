@@ -92,6 +92,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJA_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJA_H_
 
+#include <stdio.h>
+
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
@@ -104,115 +106,7 @@
 #include "FreyjaLight.h"
 #include "FreyjaMesh.h"
 #include "FreyjaSkeleton.h"
-
-
-class FreyjaTexture
-{
-public:
-
-	FreyjaTexture()
-	{
-		name = 0x0;
-		filename = 0x0;
-		image = 0x0;
-	}
-
-	~FreyjaTexture()
-	{
-		if (name)
-			delete [] name;
-
-		if (filename)
-			delete [] filename;
-
-		if (image)
-			delete [] image;
-	}
-
-	char *name;                /* Texture name */
-	
-	char *filename;            /* Filename of image */
-	
-	unsigned char *image;      /* RGB(A) Texture data */
-	
-	unsigned int imageWidth;
-	
-	unsigned int imageHeight;
-	
-	unsigned char mipmaps;
-
-	unsigned char pixelDepth; /* 3 - RGB24bit, 4 - RGBA32bit */
-	
-	unsigned int id;          /* OpenGL texture id use */
-};
-
-
-class FreyjaMaterial
-{
-public:
-
-	FreyjaMaterial()
-	{
-		mId = -1;
-
-		mName[0] = 0;
-
-		mFlags = 0;
-
-		mParent = -1;
-
-		mTexture = -1;
-
-		mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2;
-		mAmbient[3]  = 1.0;
-
-		mDiffuse[0]  = mDiffuse[1]  = mDiffuse[2]  = 0.9;
-		mDiffuse[3]  = 1.0;
-
-		mSpecular[0] = mSpecular[1] = mSpecular[2] = 0.0;
-		mSpecular[3] = 1.0;
-
-		mEmissive[0] = mEmissive[1] = mEmissive[2] = 0.0;
-		mEmissive[3] = 1.0;
-
-		mShininess = 0.0;
-
-		mBlendSrc = 0;
-		mBlendDest = 0; 
-	}
-
-	~FreyjaMaterial()
-	{
-	}
-
-	long mId;                   /* Unique identifier */
-
-	char mName[64];             /* Material name */
-
-	long mFlags;                /* Bit flags */
-
-	long mParent;               /* Linked material id, for shader use */
-
-	vec4_t mAmbient;            /* Ambient color */
-
-	vec4_t mDiffuse;            /* Diffuse color */
-
-	vec4_t mSpecular;           /* Specular color */
-
-	vec4_t mEmissive;           /* Emissive color */
-
-	vec_t mShininess;           /* Specular exponent */
-
-	vec_t mTransparency;        /* Alpha 0.0 - 1.0 */
-
-	unsigned long mBlendSrc;    /* Blend source factor */
-
-	unsigned long mBlendDest;   /* Blend destination factor */
-
-	long mTexture;              /* TextureData index */
-
-	bool mHasAlphaChannel;      /* For depth sorting use */
-};
+#include "FreyjaMaterial.h"
 
 
 class FreyjaMetaData /* For storing ASCII files as strings, textures, etc */
@@ -255,66 +149,15 @@ public:
 };
 
 
-class FreyjaKeyFrame
-{
-public:
-
-	FreyjaKeyFrame()
-	{
-		vec3_t xyz;
-
-		xyz[0] = HEL_DEG_TO_RAD(30.0f);
-		xyz[1] = HEL_DEG_TO_RAD(15.0f);
-		xyz[2] = HEL_DEG_TO_RAD(7.5f);
-
-		mOrientation.setByEulerAngles(xyz);
-		printf("C 0. %f %f %f\n", xyz[0], xyz[1], xyz[2]);
-		mOrientation.getEulerAngles(xyz);
-		printf("C 1. %f %f %f\n", xyz[0], xyz[1], xyz[2]);
-		printf("\n");
-	}
-
-	void setOrientationByEuler(const vec3_t xyz) // must be radians
-	{
-		mOrientation.setByEulerAngles(xyz);
-	}
-
-	void setOrientationByAxisAngles(const vec4_t axyz)
-	{
-		mOrientation.setByAxisAngles(axyz[0], axyz[1], axyz[2], axyz[3]);
-	}
-
-	void setOrientationByQuaternion(const vec4_t wxyz)
-	{
-		mOrientation = Quaternion(wxyz);
-	}
-
-	void getOrientationEuler(vec3_t xyz)
-	{
-		mOrientation.getEulerAngles(xyz+0, xyz+1, xyz+2);
-	}
-
-	void setPosition(vec3_t xyz)
-	{
-		mPosition = Vector3d(xyz);
-	}
-
-	void setTime(vec_t time)
-	{
-		mTime = time;
-	}
-
-	vec_t mTime;                /* Time to next keyframe */
-
-	Vector3d mPosition;
-
-	Quaternion mOrientation;
-};
-
-
 class FreyjaAnimation
 {
 public:
+
+	void setName(const char *name)
+	{
+		strncpy(mName, name, 64);
+		mName[63] = 0;
+	}
 	
 	long mId;
 
@@ -323,8 +166,6 @@ public:
 	vec_t mFrameRate;
 
 	vec_t mTime;
-
-	bool mSkipRoot;
 
 	long mStartBone;          /* For animation blending (subsets) use */
 
@@ -336,7 +177,7 @@ public:
 
 	vec_t mLastTime;    // render use mostly
 
-	Vector<FreyjaKeyFrame *> mKeyFrames;
+	Vector<FreyjaKeyFrame *> mKeyFrames;  // keyCount / mBoneCount = frames
 };
 
 

@@ -732,13 +732,35 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 
 	/* Animation Mutators */
 
-#ifdef NOT_IMPLEMENTED
 	void freyjaAnimationName(long animationIndex, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : Sets human readable animation name
+	 ------------------------------------------------------*/
+
 	void freyjaAnimationFrameRate(long animationIndex, vec_t frameRate);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void freyjaAnimationTime(long animationIndex, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void freyjaAnimationSubsetRoot(long animationIndex, long startBone);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void freyjaAnimationSubsetCount(long animationIndex, long boneCount);
-#endif
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	long freyjaAnimationKeyFrameCreate(long animationIndex);
 	/*------------------------------------------------------

@@ -1304,8 +1304,8 @@ void FreyjaPlugin::freyjaBegin(freyja_object_t type)
 		mStack.push(FREYJA_BONE);
 		mBone = new FreyjaBone();
 		mSkeleton->mBones.pushBack(mBone);
-		mBone->id = mSkeleton->mBones.end() - 1;
-		mIndexBone = mBone->id;
+		mBone->mId = mSkeleton->mBones.end() - 1;
+		mIndexBone = mBone->mId;
 		break;
 
 
@@ -1493,8 +1493,8 @@ void FreyjaPlugin::freyjaBoneName(char *name)
 		}
 		else 
 		{
-			strncpy(mBone->name, name, 64);
-			mBone->name[63] = 0;
+			//strncpy(mBone->mName, name, 64);
+			//mBone->mName[63] = 0;
 		}
 	}
 	else
@@ -1516,16 +1516,16 @@ void FreyjaPlugin::freyjaBonePos(float x, float y, float z)
 		}
 		else 
 		{
-			mBone->position[0] = x;
-			mBone->position[1] = y;
-			mBone->position[2] = z;
+			//mBone->mTranslate[0] = x;
+			//mBone->mTranslate[1] = y;
+			//mBone->mTranslate[2] = z;
 		}
 	}
 	else if (mBone) // HACK
 	{
-		mBone->position[0] = x;
-		mBone->position[1] = y;
-		mBone->position[2] = z;
+		//mBone->mTranslate[0] = x;
+		//mBone->mTranslate[1] = y;
+		//mBone->mTranslate[2] = z;
 	}
 	else
 	{
@@ -1546,12 +1546,12 @@ void FreyjaPlugin::freyjaBoneFlags(unsigned int flags)
 		}
 		else 
 		{
-			mBone->flags = flags;
+			//mBone->flags = flags;
 		}
 	}
 	else if (mBone) // HACK
 	{
-		mBone->flags = flags;
+		//mBone->flags = flags;
 	}
 	else
 	{
@@ -1573,12 +1573,12 @@ void FreyjaPlugin::freyjaBoneAddMesh(unsigned int mesh)
 		}
 		else 
 		{
-			mBone->meshes.pushBack(mesh);
+			//mBone->meshes.pushBack(mesh);
 		}
 	}
 	else if (mBone) // HACK
 	{
-		mBone->meshes.pushBack(mesh);
+		//mBone->meshes.pushBack(mesh);
 	}
 	else
 	{
@@ -1600,6 +1600,7 @@ void FreyjaPlugin::freyjaBoneAddChild(unsigned int bone)
 		}
 		else 
 		{
+/*
 			FreyjaBone *child = mSkeleton->mBones[bone];
 
 			if (child)
@@ -1611,13 +1612,15 @@ void FreyjaPlugin::freyjaBoneAddChild(unsigned int bone)
 				for (i = mBone->children.begin(); 
 					 i < mBone->children.end(); ++i)
 				{
-					/* Avoid dupes */
+					// Avoid dupes 
 					if (mBone->children[i] == bone)
 						return;
 				}
 
 				mBone->children.pushBack(bone);
+
 			}
+*/
 		}
 	}
 	else
@@ -1633,7 +1636,7 @@ void FreyjaPlugin::freyjaBoneRotate(vec3_t xyz)
 {
 	if (mBone)
 	{
-		mBone->rotation = Quaternion(xyz);
+		//mBone->rotation = Quaternion(xyz);
 	}
 }
 
@@ -1642,7 +1645,7 @@ void FreyjaPlugin::freyjaBoneRotate(Quaternion q)
 {
 	if (mBone)
 	{
-		mBone->rotation = q;
+		//mBone->rotation = q;
 	}
 }
 
