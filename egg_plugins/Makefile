@@ -442,7 +442,7 @@ GRNModel.test:
 	@-echo "Building GRNModel unit test"
 	mkdir -p $(BUILD_TEST_DIR)
 	$(CC) -Wall -g -DUNIT_TEST_GRNMODEL $(BASE_INC) -lm -lstdc++ \
-	src/model/GRNModel.cpp \
+	src/GRNModel.cpp \
 	-o $(BUILD_TEST_DIR)/GRNModel.test
 
 #################################################################
