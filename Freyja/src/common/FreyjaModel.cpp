@@ -1,5 +1,5 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -17,7 +17,7 @@
  *
  * 2000-09-09:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -565,7 +565,8 @@ void FreyjaModel::TextureShift()
 {
 	egg_mesh_t *mesh;
 	egg_polygon_t *poly;
-  
+	unsigned int i;
+
 
 	mesh = CachedMesh();
 
@@ -575,9 +576,9 @@ void FreyjaModel::TextureShift()
 		return;
 	}
 
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{  
-		poly = _egg->getPolygon(mesh->polygon.current());
+		poly = _egg->getPolygon(mesh->polygon[i]);
 
 		if (!poly)
 			continue;
@@ -593,6 +594,7 @@ void FreyjaModel::generateUVMap()
 	egg_polygon_t *poly;
 	egg_vertex_t *vertex;
 	egg_texel_t *texel;
+	unsigned int i, j;
 	float u, v;
 
 
@@ -601,48 +603,48 @@ void FreyjaModel::generateUVMap()
 	if (!mesh)
 		return;
 
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{  
-		poly = _egg->getPolygon(mesh->polygon.current());
+		poly = _egg->getPolygon(mesh->polygon[i]);
 
 		if (!poly)
 			continue;
 
 		// Generate texels and record their ids
-		for (poly->vertex.start(); poly->vertex.forward(); poly->vertex.next())
+		for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
 		{
-			vertex = _egg->getVertex(poly->vertex.current());
+			vertex = _egg->getVertex(poly->vertex[j]);
 
-			if (vertex)
-			{
-				// Mongoose 2002.01.18, Generate UV from vertex XYZ
-				eggGenerateUVFromXYZ(vertex->pos, &u, &v);
+			if (!vertex)
+				continue;
+
+			// Mongoose 2002.01.18, Generate UV from vertex XYZ
+			eggGenerateUVFromXYZ(vertex->pos, &u, &v);
 
 #ifdef DEBUG_GEN_TEXEL
-				event_print("FreyjaModel::generateUVMap> %f %f\n", u, v);
+			event_print("FreyjaModel::generateUVMap> %f %f\n", u, v);
 #endif
 
-				if (poly->texel.empty())
-				{
-					texel = 0x0;
-				}
-				else
-				{
-					texel = _egg->getTexel(poly->texel[poly->vertex.currentIndex()]);
-				}
-
-				if (!texel)
-				{
-					vertex->uv[0] = u;
-					vertex->uv[1] = v;
-				}
-				else
-				{
-					texel->st[0] = u;
-					texel->st[1] = v;
-				}
+			if (poly->texel.empty())
+			{
+				texel = 0x0;
 			}
-		} 
+			else
+			{
+				texel = _egg->getTexel(j);
+			}
+			
+			if (!texel)
+			{
+				vertex->uv[0] = u;
+				vertex->uv[1] = v;
+			}
+			else
+			{
+				texel->st[0] = u;
+				texel->st[1] = v;
+			}
+		}
 	}
 }
 
@@ -1094,7 +1096,7 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 	egg_mesh_t *mesh = CachedMesh();
 	egg_vertex_t *vertex;
 	egg_polygon_t *polygon;
-	unsigned int polygonId;
+	unsigned int i, polygonId;
 
 
 	VertexSelect(xx, yy);
@@ -1114,9 +1116,9 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 		event_print("Control> New Polygon made");
 
 		// Generate texels and record their ids
-		for (vertices.start(); vertices.forward(); vertices.next())
+		for (i = vertices.begin(); i < vertices.end(); ++i)
 		{
-			vertex = _egg->getVertex(vertices.current());
+			vertex = _egg->getVertex(vertices[i]);
 
 			if (vertex)
 			{
@@ -1582,6 +1584,7 @@ void FreyjaModel::MeshSelect(float xx, float yy)
 	egg_mesh_t *mesh;
 	Vector<egg_mesh_t *> *meshlst;
 	egg_group_t *frame;
+	unsigned int i;
 
 	
 	frame = _egg->getNearestGroup(xx, yy, CurrentPlane());
@@ -1594,9 +1597,9 @@ void FreyjaModel::MeshSelect(float xx, float yy)
 		return;
 	}
 
-	for (meshlst->start(); meshlst->forward(); meshlst->next())
+	for (i = meshlst->begin(); i < meshlst->end(); ++i)
 	{
-		mesh = meshlst->current();
+		mesh = (*meshlst)[i];
     
 		if (mesh && mesh->group.SearchIndex(frame->id) != UINT_MAX)
 		{
@@ -1665,6 +1668,7 @@ void FreyjaModel::TexelSelect(float s, float t)
 	egg_vertex_t *vertex = NULL;
 	vec_t dist = 0.0;
 	vec_t best_dist = 0.0;
+	unsigned int i, j;
 
 
 #ifdef DEBUG_TEXEL
@@ -1678,9 +1682,9 @@ void FreyjaModel::TexelSelect(float s, float t)
 		return;
 	}
 
-	for (mesh->polygon.start(); mesh->polygon.forward(); mesh->polygon.next())
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{
-		polygon = _egg->getPolygon(mesh->polygon.current());
+		polygon = _egg->getPolygon(mesh->polygon[i]);
 
 		if (!polygon)
 			continue;
@@ -1691,11 +1695,9 @@ void FreyjaModel::TexelSelect(float s, float t)
 			polygon->shader != (int)getCurrentTextureIndex())
 			continue;
 
-		for (polygon->texel.start();
-			 polygon->texel.forward();
-			 polygon->texel.next())
+		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
 		{
-			texel = _egg->getTexel(polygon->texel.current());
+			texel = _egg->getTexel(polygon->texel[j]);
    
 			if (!texel)
 				continue;
@@ -1720,11 +1722,9 @@ void FreyjaModel::TexelSelect(float s, float t)
 
 		if (polygon->texel.empty())
 		{
-			for (polygon->vertex.start();
-				 polygon->vertex.forward();
-				 polygon->vertex.next())
+			for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
 			{
-				vertex = _egg->getVertex(polygon->vertex.current());
+				vertex = _egg->getVertex(polygon->vertex[j]);
 				
 				if (!vertex)
 					continue;
@@ -1807,7 +1807,7 @@ callback_bone_t *generateSkeletalUI(Egg *egg, egg_tag_t *tag,
 									callback_bone_t *bone)
 {
 	egg_tag_t *tagChild;
-	unsigned int t;
+	unsigned int i, tagIndex, count;
 
 
 	if (!tag)
@@ -1845,20 +1845,20 @@ callback_bone_t *generateSkeletalUI(Egg *egg, egg_tag_t *tag,
 		return bone->parent;
 
 	bone->children = new callback_bone_t[bone->numChildren+1];
-	int i = 0;
-	for (tag->slave.start(); tag->slave.forward(); tag->slave.next())
+
+	for (count = 0, i = tag->slave.begin(); i < tag->slave.end(); ++i)
 	{
-		t = tag->slave.current();
-		tagChild = egg->getTag(t);
+		tagIndex = tag->slave[i];
+		tagChild = egg->getTag(tagIndex);
 
 		if (tagChild)
 		{
-			bone->children[i].parent = bone;
+			bone->children[count].parent = bone;
 
 #ifdef DEBUG_BONE_LOAD
-			printf("   -- parent %i <-- child %i\n", bone->id, t);
+			printf("   -- parent %i <-- child %i\n", bone->id, tagIndex);
 #endif
-			generateSkeletalUI(egg, tagChild, &bone->children[i++]);
+			generateSkeletalUI(egg, tagChild, &bone->children[count++]);
 		}
 	}
 
@@ -1886,7 +1886,7 @@ void testBone(callback_bone_t *bone, unsigned int space)
 void updateSkeletonUI(Egg *egg)
 {
 	callback_bone_t *bone;
-	unsigned int i;
+	unsigned int i, j;
 
 	bone = generateSkeletalUI(egg, egg->getTag(0), 0x0);
 
@@ -1897,10 +1897,10 @@ void updateSkeletonUI(Egg *egg)
 #endif
 		egg_tag_t *tag = egg->getTag(i);
 
-		for (tag->slave.start(); tag->slave.forward(); tag->slave.next())
+		for (j = tag->slave.begin(); j < tag->slave.end(); ++j)
 		{
 #ifdef DEBUG_BONE_LOAD
-			printf("%d ", tag->slave.current());
+			printf("%d ", tag->slave[j]);
 #endif
 		}
 #ifdef DEBUG_BONE_LOAD

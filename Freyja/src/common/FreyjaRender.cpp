@@ -350,23 +350,24 @@ void FreyjaRender::drawLights()
 }
 
 
-void drawSkeleton(Vector<egg_tag_t *> *taglist, unsigned int currentBone,
-				  vec_t scale)
+void drawSkeleton(Vector<egg_tag_t *> *taglist, 
+				  unsigned int currentBone, vec_t scale)
 {
 	egg_tag_t *tag, *tag2;
+	unsigned int i, j, index;
 
 
 	if (taglist->empty())
 		return;
 
-	for (taglist->start(); taglist->forward(); taglist->next())
+	for (i = taglist->begin(); i < taglist->end(); ++i)
 	{
-		tag = taglist->current();
+		tag = (*taglist)[i];
 		
 		if (!tag)
 			continue;
 
-		if (taglist->currentIndex() == currentBone)
+		if (i == currentBone)
 		{
 			glColor3fv(GREEN);
 		}
@@ -380,10 +381,10 @@ void drawSkeleton(Vector<egg_tag_t *> *taglist, unsigned int currentBone,
 		if (tag->slave.empty())
 			continue;
 
-		for (tag->slave.start(); tag->slave.forward(); tag->slave.next())
+		for (j = tag->slave.begin(); j < tag->slave.end(); ++j)
 		{
-			unsigned int i = tag->slave.current();
-			tag2 = (*taglist)[i];
+			index = tag->slave[j];
+			tag2 = (*taglist)[index];
 			
 			if (!tag2)
 				continue;
@@ -409,6 +410,7 @@ void drawSkeleton2(Vector<egg_tag_t *> *taglist,
 	const unsigned char xr = 0, yr = 1, zr = 2;
 	egg_tag_t *tag, *tag2;
 	vec3_t pos;
+	unsigned int i, index;
 
 
 	if (taglist->empty())
@@ -444,15 +446,15 @@ void drawSkeleton2(Vector<egg_tag_t *> *taglist,
 		return;
 	}
 
-	for (tag->slave.start(); tag->slave.forward(); tag->slave.next())
+	for (i = tag->slave.begin(); i < tag->slave.end(); ++i)
 	{
-		unsigned int i = tag->slave.current();
-		tag2 = (*taglist)[i];
+		index = tag->slave[i];
+		tag2 = (*taglist)[index];
 		
 		if (!tag2)
 			continue;
 
-		drawSkeleton2(taglist, i, scale);
+		drawSkeleton2(taglist, index, scale);
 	}
 
 	glPopMatrix();
@@ -1007,6 +1009,7 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 	egg_texel_t *texel2;
 	float color[4];
 	bool external_texel = false;
+	unsigned int i, j;
 
 
 	if (polygon.r_vertex.empty())
@@ -1032,10 +1035,9 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 
 		glBegin(GL_LINE_LOOP);
 
-		for(polygon.r_vertex.start(); polygon.r_vertex.forward();
-			 polygon.r_vertex.next())
+		for(i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
 		{
-			vertex = polygon.r_vertex.current();
+			vertex = polygon.r_vertex[i];
 		  
 			if (vertex)
 			{
@@ -1055,10 +1057,10 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 		glBegin(GL_LINES);
 		glColor3f(0.2, 0.2, 0.8);
 		
-		for(polygon.r_vertex.start(); polygon.r_vertex.forward();
-			polygon.r_vertex.next())
+		for(i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
 		{
-			vertex = polygon.r_vertex.current();
+			vertex = polygon.r_vertex[i];
+
 			glVertex3f(vertex->pos[0],
 					   vertex->pos[1],
 					   vertex->pos[2]);
@@ -1078,10 +1080,9 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 
 		glBegin(GL_POINTS);
 	  
-		for(polygon.r_vertex.start(); polygon.r_vertex.forward();
-			 polygon.r_vertex.next())
+		for (i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
 		{
-			vertex = polygon.r_vertex.current();
+			vertex = polygon.r_vertex[i];
 		  
 			if (vertex)
 			{
@@ -1136,13 +1137,13 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 
 		if (external_texel)
 		{
-			for (polygon.r_texel.start(), polygon.r_vertex.start(); 
-				  polygon.r_texel.forward() && 
-				  polygon.r_vertex.forward();
-				  polygon.r_texel.next(), polygon.r_vertex.next())
+			for (i = polygon.r_texel.begin(), j = polygon.r_vertex.begin(); 
+				  i < polygon.r_texel.end() && 
+				  j < polygon.r_vertex.end();
+				  ++i, ++j)
 			{
-				texel = polygon.r_texel.current();
-				vertex = polygon.r_vertex.current();
+				texel = polygon.r_texel[i];
+				vertex = polygon.r_vertex[j];
 
 				if (texel && vertex)
 				{
@@ -1188,10 +1189,9 @@ void FreyjaRender::DrawPolygon(egg_polygon_t &polygon)
 		}
 		else
 		{
-			for (polygon.r_vertex.start(); polygon.r_vertex.forward();
-				  polygon.r_vertex.next())
+			for (i = polygon.r_vertex.begin(); i < polygon.r_vertex.end(); ++i)
 			{
-				vertex = polygon.r_vertex.current();
+				vertex = polygon.r_vertex[i];
 			 
 				if (vertex)
 				{
@@ -1232,6 +1232,7 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 	Egg *egg = _model->CurrentEgg();
 	egg_polygon_t *polygon;
 	egg_group_t *grp;
+	unsigned int i;
 
 
 	/* Mongoose 2004.03.26, 
@@ -1241,10 +1242,9 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 		event_print("FreyjaRender::DrawMesh> caching %i polygons, %i cached...",
 						mesh.polygon.size(), mesh.r_polygon.size());
 
-		for (mesh.polygon.start(); mesh.polygon.forward(); 
-			  mesh.polygon.next())
+		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
 		{
-			polygon = egg->getPolygon(mesh.polygon.current());
+			polygon = egg->getPolygon(mesh.polygon[i]);
 			
 			if (polygon)
 			{
@@ -1258,9 +1258,9 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 		glPointSize(5.0);
 		glBegin(GL_POINTS);
 
-		for (mesh.group.start(); mesh.group.forward(); mesh.group.next())
+		for (i = mesh.group.begin(); i < mesh.group.end(); ++i)
 		{
-			if ((grp = egg->getGroup(mesh.group.current())))
+			if ((grp = egg->getGroup(mesh.group[i])))
 			{
 				glColor3fv(RED);
 				glVertex3fv(grp->center);
@@ -1286,10 +1286,9 @@ void FreyjaRender::DrawMesh(egg_mesh_t &mesh)
 		if ((int)mesh.id == (int)_model->getCurrentMesh())
 			_default_line_width *= 2;
 		
-		for (mesh.r_polygon.start(); mesh.r_polygon.forward(); 
-			 mesh.r_polygon.next())
-		{ 
-			polygon = mesh.r_polygon.current();
+		for (i = mesh.r_polygon.begin(); i < mesh.r_polygon.end(); ++i)
+		{
+			polygon = mesh.r_polygon[i];
 			
 			if (!polygon)
 			{
@@ -1319,7 +1318,7 @@ void FreyjaRender::DrawModel(Egg *egg)
 	egg_boneframe_t *boneframe = NULL;
 	egg_vertex_t *vertex = NULL;
 	vec3_t min, max;
-	unsigned int current_tag;
+	unsigned int i, j, current_tag;
 
 
 	if (!egg)
@@ -1343,9 +1342,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 			glBegin(GL_POINTS);
 			glColor3fv(GREEN);
 		 
-			for (list->start(); list->forward(); list->next())
+			for (i = list->begin(); i < list->end(); ++i)
 			{
-				vertex = egg->getVertex(list->current());
+				vertex = egg->getVertex((*list)[i]);
 			 
 				if (vertex)
 					glVertex3fv(vertex->pos);
@@ -1360,11 +1359,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 	if (boneframe)
 	{
 		// Make a copy of bone tag list
-		for (boneframe->tag.start(); 
-			  boneframe->tag.forward(); 
-			  boneframe->tag.next())
+		for (i = boneframe->tag.begin(); i < boneframe->tag.end(); ++i)
 		{
-			tag = egg->getTag(boneframe->tag.current());
+			tag = egg->getTag(boneframe->tag[i]);
 		 
 			if (!tag)
 			{
@@ -1376,11 +1373,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 		}
 	 
 		// Draw skeletal model using tags as meshtree 
-		for (boneframe->tag.start(); 
-			  boneframe->tag.forward(); 
-			  boneframe->tag.next())
+		for (i = boneframe->tag.begin(); i < boneframe->tag.end(); ++i)
 		{
-			tag = egg->getTag(boneframe->tag.current());
+			tag = egg->getTag(boneframe->tag[i]);
 
 			if (!tag)
 			{
@@ -1388,13 +1383,11 @@ void FreyjaRender::DrawModel(Egg *egg)
 				continue;
 			}
 
-
-			if (boneframe->tag.currentIndex() == 0)
+			if (i == 0)
 			{
 				glTranslatef(boneframe->center[0], 
 								 boneframe->center[1], 
 								 boneframe->center[2]);
-
 
 				if (tag->rot[0])
 					glRotatef(tag->rot[0], 1, 0, 0);
@@ -1436,9 +1429,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 					glRotatef(tag->rot[2], 0, 0, 1);
 			}
 		
-			for (tag->mesh.start(); tag->mesh.forward(); tag->mesh.next())
+			for (j = tag->mesh.begin(); j < tag->mesh.end(); ++j)
 			{
-				egg_mesh_t *m = egg->getMesh(tag->mesh.current());
+				egg_mesh_t *m = egg->getMesh(tag->mesh[j]);
 
 				if (!m)
 				{
@@ -1476,9 +1469,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 
 		glColor3fv(_edit_vertex_highlight_color);
 
-		for (grp->vertex.start(); grp->vertex.forward(); grp->vertex.next())
+		for (i = grp->vertex.begin(); i < grp->vertex.end(); ++i)
 		{
-			vertex = egg->getVertex(grp->vertex.current());
+			vertex = egg->getVertex(grp->vertex[i]);
 
 			if (vertex)
 				glVertex3fv(vertex->pos);
@@ -1496,9 +1489,9 @@ void FreyjaRender::DrawModel(Egg *egg)
 
 	if (meshlist && !meshlist->empty())
 	{
-		for (meshlist->start(); meshlist->forward(); meshlist->next())
+		for (i = meshlist->begin(); i < meshlist->end(); ++i)
 		{
-			mesh = meshlist->current(); 
+			mesh = (*meshlist)[i]; 
 
 			if (mesh)
 				DrawMesh(*mesh);
@@ -1701,7 +1694,7 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 	egg_texel_t *texel = NULL;
 	egg_polygon_t *poly = NULL;
 	float x, y;
-
+	unsigned int i, j;
 
 	glPushMatrix();
 
@@ -1726,9 +1719,9 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 
 	egg_mesh_t mesh = *meshPtr;
 	
-	for (mesh.polygon.start(); mesh.polygon.forward(); mesh.polygon.next())
+	for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
 	{
-		poly = egg->getPolygon(mesh.polygon.current());
+		poly = egg->getPolygon(mesh.polygon[i]);
 		
 		if (!poly)
 			continue;
@@ -1755,10 +1748,9 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		{
 			egg_vertex_t *vertex;
 			
-			for (poly->vertex.start(); poly->vertex.forward(); 
-				 poly->vertex.next())
+			for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
 			{
-				vertex = egg->getVertex(poly->vertex.current());
+				vertex = egg->getVertex(poly->vertex[j]);
 				
 					if (!vertex)
 					{
@@ -1775,10 +1767,9 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		}
 		else
 		{
-			for (poly->texel.start(); poly->texel.forward(); 
-				 poly->texel.next())
+			for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
 			{
-				texel = egg->getTexel(poly->texel.current());
+				texel = egg->getTexel(poly->texel[j]);
 				
 				if (!texel)
 				{
@@ -1802,10 +1793,9 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		{
 			egg_vertex_t *vertex;
 			
-			for (poly->vertex.start(); poly->vertex.forward(); 
-				 poly->vertex.next())
+			for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
 			{
-				vertex = egg->getVertex(poly->vertex.current());
+				vertex = egg->getVertex(poly->vertex[j]);
 				
 				if (!vertex)
 				{
@@ -1814,7 +1804,7 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 
 				if ((int)_model->getCurrentTextureIndex() == poly->shader)
 				{
-					switch (poly->vertex.currentIndex())
+					switch (j)
 					{
 					case 0:
 						glColor3fv(RED);
@@ -1850,9 +1840,9 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 		}
 		else
 		{
-			for (poly->texel.start(); poly->texel.forward(); poly->texel.next())
+			for (j = poly->texel.begin(); j < poly->texel.end(); ++j)
 			{
-				texel = egg->getTexel(poly->texel.current());
+				texel = egg->getTexel(poly->texel[j]);
 					
 				if (!texel)
 					continue;
@@ -1862,7 +1852,7 @@ void FreyjaRender::DrawTextureEditWindow(unsigned int width,
 				
 				if ((int)_model->getCurrentTextureIndex() == poly->shader)
 				{
-					switch (poly->vertex.currentIndex())
+					switch (j)
 					{
 					case 0:
 						glColor3fv(RED);

@@ -28,6 +28,13 @@
 	
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+
+ Freyja (0.3.5-20040506) Mongoose <mongoose@icculus.org>	
+
+	* FreyjaModel removed Vector<T> internal iterator use
+	  Bugs and halairity ensue shortly
+	
+ Freyja (0.3.5-200404XX) Mongoose <mongoose@icculus.org>
 	* About dialog back
 	* Normal vector rendering mode
 	
