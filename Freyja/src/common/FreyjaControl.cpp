@@ -1102,8 +1102,45 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 	float xx = x, yy = y;
   
 
+	if (mMouseButton == MOUSE_BTN_MIDDLE)
+	{
+		float xyz[3];
+
+		if (x > old_x)
+			xyz[0] = 1.0f;
+		else if (x < old_x)
+			xyz[0] = -1.0f;
+
+		if (y < old_y)
+			xyz[1] = 1.0f;
+		else if (y > old_y)
+			xyz[1] = -1.0f;
+
+		xyz[2] = 0.0f;	
+
+		switch (mModel->CurrentPlane())
+		{
+		case Egg::PLANE_XY:
+			mModel->adjustSceneTranslation(xyz[0], xyz[1], xyz[2]);
+			break;
+
+		case Egg::PLANE_XZ:
+			mModel->adjustSceneTranslation(xyz[0], xyz[2], xyz[1]);
+			break;
+
+		case Egg::PLANE_YZ:
+			mModel->adjustSceneTranslation(xyz[2], xyz[0], xyz[1]);
+			break;
+		}
+
+		old_x = x;
+		old_y = y;
+		return;
+	}
+
 	// Mongoose: Convert screen to world system
 	ScreenToWorld(&xx, &yy);
+
 
 	// Mongoose: No click and release
 	if (mMouseButton != MOUSE_BTN_LEFT)
@@ -1111,7 +1148,7 @@ void FreyjaControl::MotionEdit(int x, int y, Egg::egg_plane plane)
 		return;
 	}
 
-	event_print("* motion -> %i, %i : %i", x, y, mMouseButton);
+	//event_print("* motion -> %i, %i : %i", x, y, mMouseButton);
 
 	switch (_minor_mode)
 	{
