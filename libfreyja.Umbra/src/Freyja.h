@@ -115,6 +115,7 @@ public:
 	{
 		name = 0x0;
 		filename = 0x0;
+		image = 0x0;
 	}
 
 	~FreyjaTexture()
@@ -124,6 +125,9 @@ public:
 
 		if (filename)
 			delete [] filename;
+
+		if (image)
+			delete [] image;
 	}
 
 	char *name;                /* Texture name */

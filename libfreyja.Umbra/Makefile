@@ -129,6 +129,7 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS = \
+	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/Egg.o \
 	$(BUILDDIR)/EggPlugin.o \
 	$(BUILDDIR)/Freyja.o \
