@@ -1430,9 +1430,25 @@ bool FreyjaControl::event(int command)
 		break;
 	case eMeshTexcoordSpherical:
 		freyjaMeshUVMapSpherical(mModel->getCurrentMesh());
+
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You generated vertex UV mapping, but it is not polymapped.",
+										 "Would you like to promote it to ploymapped texcoords?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
+		{
+			freyjaMeshPromoteTexcoordsToPloymapping(mModel->getCurrentMesh());
+		}
 		break;
 	case eMeshTexcoordCylindrical:
 		freyjaMeshUVMapCylindrical(mModel->getCurrentMesh());
+
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You generated vertex UV mapping, but it is not polymapped.",
+										 "Would you like to promote it to ploymapped texcoords?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
+		{
+			freyjaMeshPromoteTexcoordsToPloymapping(mModel->getCurrentMesh());
+		}
 		break;
 	case eMeshGenerateNormals:
 		freyjaMeshGenerateVertexNormals(mModel->getCurrentMesh());
