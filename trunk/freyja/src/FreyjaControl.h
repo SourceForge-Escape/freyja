@@ -152,6 +152,9 @@ class FreyjaControl
 	 *
 	 *-- History ------------------------------------------
 	 *
+	 * 2005.03.22:
+	 * Mongoose - Replaces 2000 handleEvent method
+	 *
 	 * 2004.10.23: 
 	 * Mongoose - Created, pulled out of other event methods
 	 ------------------------------------------------------*/
@@ -398,8 +401,6 @@ private:
 	 * Pre      : 
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
-
-
 
 	void setupResource(Resource &r);
 	/*------------------------------------------------------

@@ -334,7 +334,7 @@ void FreyjaModel::printInfo()
 }
 
 
-#warning FIXME Move to libfreyja in fact a lot of these methods should be
+// FIXME Move to libfreyja in fact a lot of these methods should be
 // FIXME: Move to libfreyja?
 void FreyjaModel::transformTexCoord(long texCoordIndex,
 									freyja_transform_action_t action,
@@ -2906,8 +2906,7 @@ void FreyjaModel::TexelMove(float s, float t)
 }
 
 
-// FIXME
-#warning FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
+// FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
 #include <mgtk/mgtk_events.h>
 mgtk_tree_t *generateSkeletalUI(Egg *egg, egg_tag_t *tag, 
 								mgtk_tree_t *bone)
@@ -2990,7 +2989,7 @@ void testBone(mgtk_tree_t *bone, unsigned int space)
 }
 
 
-#warning FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
+// FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
 void updateSkeletonUI(Egg *egg)
 {
 	mgtk_tree_t *bone;

@@ -23,7 +23,7 @@
  program halts, so watch your ass and use the DBC which are clearly listed
  in class headers.  If you get assertion errors testing, then email them.
 
- There is now a ~/.freyja/Freyja-chimera.log you send in with bug reports.
+ There is a ~/.freyja/Freyja-chimera.log you can send in with bug reports.
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 

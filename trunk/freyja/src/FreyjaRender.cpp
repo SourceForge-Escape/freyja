@@ -699,6 +699,8 @@ void FreyjaRender::drawFreeWindow()
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+
 		glLineWidth(1.25f);
 		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
 
@@ -974,6 +976,16 @@ void FreyjaRender::display()
 			// Viewport ( front )
 			glViewport(0, 0, width, height/2);
 			glPushMatrix();
+
+			/* Viewport seperator */
+			glColor3fv(BLACK);  // FIXME: hardcoded
+			glBegin(GL_LINES);
+			glVertex2f(-width*0.25, 19.85);
+			glVertex2f(width*0.25, 19.85);
+			glVertex2f(21.75, -height*0.25);
+			glVertex2f(21.75, height*0.25);
+			glEnd();
+
 			drawWindow(PLANE_XY);
 			glPopMatrix();
 
@@ -984,7 +996,14 @@ void FreyjaRender::display()
 
 			// Viewport ( side )
 			glViewport(width, 0, width, height/2);
-			glPushMatrix();
+			glPushMatrix();			/* Viewport seperator */
+
+			glColor3fv(BLACK);  // FIXME: hardcoded
+			glBegin(GL_LINES);
+			glVertex2f(-width*0.25, 19.85);
+			glVertex2f(width*0.25, 19.85);
+			glEnd();
+
 			drawWindow(PLANE_ZY);
 			glPopMatrix();
 
@@ -1007,7 +1026,16 @@ void FreyjaRender::display()
 			// Viewport ( free )
 			glViewport(0, height/2, width, height/2);
 			glPushMatrix();
+
+			/* Viewport seperator */
+			glColor3fv(BLACK);  // FIXME: hardcoded
+			glBegin(GL_LINES);
+			glVertex2f(21.75, -height*0.25);
+			glVertex2f(21.75, height*0.25);
+			glEnd();
+
 			drawFreeWindow();
+			//renderUVWindow();
 			glPopMatrix();
 
 			glViewport(vp[0], vp[1], vp[2], vp[3]);
@@ -1034,7 +1062,7 @@ void FreyjaRender::display()
 		break;
 	case VIEWMODE_TEXTURE_EDIT:
 		//DrawTextureEditWindow(getWindowWidth(), getWindowHeight());
-		renderUVWindow(getWindowWidth(), getWindowHeight());
+		renderUVWindow();
 		break;
 	case VIEWMODE_MATERIAL_EDIT:
 		DrawMaterialEditWindow();
@@ -1234,9 +1262,9 @@ void FreyjaRender::renderModel(RenderModel &model)
 		drawPatch(FreyjaModel::gTestPatch);
 	}
 
-
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
 
 	/* Highlight current vertex group
 	 * -- this should be model specific later:
@@ -1328,8 +1356,15 @@ void FreyjaRender::renderModel(RenderModel &model)
 			glClear(GL_DEPTH_BUFFER_BIT);
 		}
 
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+
 		FreyjaRender::mSelectedBone = mModel->getCurrentBone();
 		renderSkeleton(model.getSkeleton(), 0, mZoom);
+
+		glPopAttrib();
 	}
 
 	glPopMatrix();
@@ -1362,6 +1397,7 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
 
 		glBegin(GL_LINE_LOOP);
 
@@ -1534,18 +1570,23 @@ void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton,
  * - OpenGL 2d view helper function
  * - Quad to render skin helper function
  */
-void FreyjaRender::renderUVWindow(unsigned int width, unsigned int height)
+void FreyjaRender::renderUVWindow()
 {
 	RenderMesh mesh;
 	RenderPolygon face;
 	float x = 0.0f, y = 0.0f;
-	unsigned int i, j, n;
+	unsigned int i, j, n, width, height;
 
+
+	width = getWindowWidth();
+	height = getWindowHeight();
 
 	glPushMatrix();
 
 	gl_resize_2d(width, height);
+	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mDefaultPointSize);
 
@@ -1553,6 +1594,7 @@ void FreyjaRender::renderUVWindow(unsigned int width, unsigned int height)
 	{
 		DrawQuad(0.0, 0.0, width, height);
 		resizeContext(width, height);
+		glPopAttrib();
 		glPopMatrix();
 		return;
 	}
@@ -1655,6 +1697,7 @@ void FreyjaRender::renderUVWindow(unsigned int width, unsigned int height)
 	}
 
 	DrawQuad(0.0, 0.0, width, height);
+	glPopAttrib();
 	resizeContext(width, height);
 	glPopMatrix();
 }
@@ -1666,6 +1709,9 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 
 	glPushMatrix();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
 	glLineWidth(2.0);
 
 	switch (plane)
@@ -1760,6 +1806,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		glEnd();
    }
 
+   glPopAttrib();
    glPopMatrix();
 }
 
@@ -1841,7 +1888,19 @@ void FreyjaRender::DrawMaterialEditWindow()
 	gMaterialManager->applyEffectGL();
 
 	/* Cast light on sphere colored/detailed by material */
+	glPushMatrix();
+	glRotatef(180.0f, 1, 0, 0);
+	//glRotatef(90.0f, 0, 0, 1);
 	mglDrawSphere(128, 128, 10.0);
+	glPopMatrix();
+
+#ifdef USE_TORUS_TEST
+	glPushMatrix();
+	glRotatef(45.0f, 1, 0, 0);
+	glRotatef(45.0f, 0, 0, 1);
+	drawTorus(3.0, 10.0);
+	glPopMatrix();
+#endif
 }
 
 
