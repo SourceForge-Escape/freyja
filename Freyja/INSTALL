@@ -2,11 +2,11 @@
 To compile and install this program you need the required
 libaries and headers, read doc/FAQ for details.
 
-You should then run:
+To compile and install:
 
-   sh autogen.sh
+	sh autogen.sh
+	make install
 
-To avoid using autotools you can alternatively:
-
-   cp Makefile.am Makefile
-   make debug
+There is alao a total build Makefile in the root of this project.
+The total build will attempt to build all project deps in order and
+install them, but only use this if you're really lazy.

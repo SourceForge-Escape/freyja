@@ -11,32 +11,6 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- Disabled
 
-	o Scene / Mesh / Frame editing modes
-	o Mesh copy / cut / paste
-	o LOAD_MAP / FL_VERTEX_UV / DUMP_TEXTURE
-
- Mlisp
-
-	o None filed
-
- Backend
-
-	o Crash on null file loads?
-	o Tree STL broken
-	o Normal generation not interpolating correctly
-	o Generated Spheres use duplicate vertices
-
- Interface
-
-	o Only supports OpenGL 1.3+
-	o mgtk+ glarea button events mapped twice it seems
-	o Check RTS order in renderer
-	o Some mesh events don't update with event_refresh()
-	o Material texture/texture index race condition
-	o Material system use needs rewrite - rebind on material id
-	o Mesh selection box is really for groups which is unclear
-	o Make new mesh for new polygon when none exist
 
  
