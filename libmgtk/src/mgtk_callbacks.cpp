@@ -1159,8 +1159,10 @@ void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 
 void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
 {
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
 	GtkWidget *menu = mgtk_get_fileselection_pattern_widget();
 	GtkWidget *item;
+
 
 	if (!menu)
 	{
@@ -1176,7 +1178,6 @@ void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
 					   GTK_SIGNAL_FUNC(mgtk_gtk_event_fileselection_pattern), 
 					   (gpointer)pattern);
 
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
 #else
 	GtkWidget *file = mgtk_get_fileselection_widget();
 	GtkFileFilter *filter = gtk_file_filter_new();
