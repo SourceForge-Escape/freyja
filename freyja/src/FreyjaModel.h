@@ -52,8 +52,10 @@ typedef enum {
 
 
 /* Oh noes! You know something is up when you see predecs of classes */
+class RenderPolygon;
 class RenderMesh;
 class RenderModel;
+
 
 class FreyjaModelPrinter : public FreyjaPrinter
 {
@@ -195,6 +197,14 @@ public:
 
 	/* Move into RenderModel class */
 	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
+
+	bool getRenderMesh(unsigned int index, RenderMesh &rmesh);
+	bool getRenderPolygon(unsigned int index, RenderPolygon &face);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if valid rendermesh is returned.
+	 *        
+	 ------------------------------------------------------*/
 
 	unsigned int getAnimationFramesIn(unsigned int animationIndex);
 
@@ -914,6 +924,7 @@ private:
 
 /* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
  * They only use all natural, wholesome Hel math types. */
+
 class RenderPolygon  
 {
 public:
@@ -923,8 +934,12 @@ public:
 	Vector3d normals[6];
 	vec4_t colors[6];
 	long material;
+	long id;
 	unsigned int count; // vertex count
 };
+
+bool createRenderPolygon(RenderPolygon &face,
+						 egg_polygon_t &polygon, long frame);
 
 class RenderMesh
 {
@@ -944,20 +959,42 @@ public:
 		return v;
 	}
 
-	void setEgg(Egg *egg, egg_mesh_t *mesh)
+	void setEgg(Egg *egg, egg_mesh_t *mesh, Vector<egg_polygon_t *> *polygons)
 	{
 		mEgg = egg;
 		mMesh = mesh;
+		mPolygons = polygons;
+	}
+
+	bool getPolygon(unsigned int index, long frame, RenderPolygon &face)
+	{
+		egg_polygon_t *poly;
+
+		if (mPolygons)
+		{
+			poly = (*mPolygons)[index];
+			
+			if (poly)
+			{
+				return createRenderPolygon(face, *poly, frame);
+			}
+		}
+
+		return false;
+	}
+
+	unsigned int getPolygonCount()
+	{
+		return mPolygons->end();
 	}
 
 	long id;
-	Vector<egg_polygon_t *> *polygon;
 	long frame;
-
 	unsigned int gbegin, gend;
 
 private:
 	Egg *mEgg; // For sheilding renderer from egg calls for groups in mesh
+	Vector<egg_polygon_t *> *mPolygons;
 	egg_mesh_t *mMesh;
 };
 
@@ -1005,10 +1042,5 @@ private:
 	Egg *mEgg;
 	FreyjaModel *mModel;
 };
-
-
-void createRenderPolygon(RenderPolygon &face,
-						 egg_polygon_t &polygon, long frame);
-
 
 #endif

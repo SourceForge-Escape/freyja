@@ -90,7 +90,7 @@ void FreyjaModel::getModel(RenderModel &model, unsigned int index)
 
 
 // Gets polygon for given egg polygon for given vertex animation frame
-void createRenderPolygon(RenderPolygon &face,
+bool createRenderPolygon(RenderPolygon &face,
 						 egg_polygon_t &polygon, long frame)
 {
 	static vec_t *mpos;
@@ -108,7 +108,7 @@ void createRenderPolygon(RenderPolygon &face,
 		(!external_texel && polygon.shader == COLORED_POLYGON))
 	{
 		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
-		return;
+		return false;
 	}
 
 	/* Mongoose 2004.12.23, 
@@ -175,6 +175,36 @@ void createRenderPolygon(RenderPolygon &face,
 
 	face.material = polygon.shader;
 	face.count = n;
+	face.id = polygon.id;
+	return true;
+}
+
+
+bool FreyjaModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
+{
+	egg_polygon_t *poly = _egg->getPolygon(index);
+
+	if (poly)
+	{
+		createRenderPolygon(face, *poly, 0);
+		return true;
+	}
+
+	return false;
+}
+
+
+bool FreyjaModel::getRenderMesh(unsigned int index, RenderMesh &rmesh)
+{
+	egg_mesh_t *mesh = _egg->getMesh(index);
+
+	if (mesh)
+	{
+		createRenderMesh(rmesh, *mesh);
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -210,12 +240,10 @@ void FreyjaModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh)
 		}
 	}
 
-	rmesh.setEgg(_egg, &mesh);
+	rmesh.setEgg(_egg, &mesh, &mesh.r_polygon);
 	rmesh.gbegin = mesh.group.begin(); 
 	rmesh.gend = mesh.group.end();
-
 	rmesh.id = mesh.id;
-	rmesh.polygon = &mesh.r_polygon;
 	rmesh.frame = frame;
 }
 
