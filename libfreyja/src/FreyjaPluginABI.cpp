@@ -3233,3 +3233,28 @@ int freyjaGetPluginArg1s(long pluginId, char *name, long len, char *arg)
 	// ATM this does nothing, just here for reserved use
 	return -1;
 }
+
+
+///////////////////////////////////////////////////////////////////////
+//  Pak VFS 
+///////////////////////////////////////////////////////////////////////
+
+long freyjaPakBegin(char *filename)
+{
+	// ATM this does nothing, just here for reserved use
+	return -1;
+}
+
+
+long freyjaPakAddFullPathFile(long pakIndex,
+							  char *vfsFilename, long offset, long size)
+{
+	// ATM this does nothing, just here for reserved use
+	return -1;
+}
+
+
+void freyjaPakEnd(long pakIndex)
+{
+	// ATM this does nothing, just here for reserved use
+}
