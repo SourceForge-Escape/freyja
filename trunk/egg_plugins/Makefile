@@ -68,7 +68,7 @@ SHLIBEXT=$(EXT).$(VERSION)
 SHLIBLDFLAGS=$(LDFLAGS) -fPIC -shared
 
 MODULE_CFLAGS=$(BASE_CFLAGS) -g -DFREYJA_MODEL_PLUGINS
-MODULE_LD_FLAGS=-lfreyja_model -lhel0 -shared -fPIC -ldl -rdynamic
+MODULE_LD_FLAGS=-lfreyja_model -shared -fPIC -ldl -rdynamic
 
 ################################################################
 
