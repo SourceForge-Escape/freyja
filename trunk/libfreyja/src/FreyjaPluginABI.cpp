@@ -437,8 +437,9 @@ void freyjaGenerateConeMesh(vec3_t origin, vec_t height, long count)
 }
 
 
-void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
-							  long count, long segments)
+void freyjaGenerateFunctionalSphereMesh(vec3_t origin, vec_t radius, 
+										long count, long segments, 
+										float(*gen)(long i, long j, long seg))
 {
 	Vector<long> vertices, vertices2, texcoords, texcoords2, segVert, segTex;
 	long i, j, index, index2;
@@ -458,12 +459,6 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 	/* Generate geometery */
 	for (i = 0; i < segments; ++i)
 	{
-		if (!i)
-		{
-			// make a point
-			continue;
-		}
-
 		for (j = 0; j < count; ++j)
 		{
 			x = cos(helDegToRad(360.0 * ((float)j / (float)count)));
@@ -477,11 +472,124 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 			ny = 0.0;
 			nz = z * 0.5;
 
-			r = cos(helDegToRad(360 * ((float)i/(float)segments)));
-			r = radius - radius * r;
-			r *= 0.5;
+			r = (*gen)(i, j, segments);
+			r *= radius;
 
-			index = freyjaVertex3f(origin[0]+x*r, origin[1]+y , origin[2]+z*r);
+			index = freyjaVertex3f(origin[0]+x*r, origin[1]+y*r, origin[2]+z*r);
+			freyjaVertexNormal3f(index, nx, ny, nz);
+			segVert.pushBack(index);
+
+			index = freyjaTexCoord2f(u, v);
+			segTex.pushBack(index);
+		}
+	}
+
+	freyjaEnd(); // FREYJA_VERTEX_GROUP
+
+
+	/* Tube */
+	for (i = 1; i < segments-1; ++i)
+	{
+		for (j = 0; j < count; ++j)
+		{
+			/* Make the 0th/count edge of rings quad, then the rest in order */
+			if (!j)
+			{
+				index = count * i;
+				index2 = count * (i + 1);
+				freyjaBegin(FREYJA_POLYGON);
+				// A
+				freyjaPolygonTexCoord1i(segTex[index]);
+				freyjaPolygonVertex1i(segVert[index]);
+
+				// B
+				freyjaPolygonTexCoord1i(segTex[index + count-1]);
+				freyjaPolygonVertex1i(segVert[index + count-1]);
+
+				// C
+				freyjaPolygonTexCoord1i(segTex[index2 + count-1]);
+				freyjaPolygonVertex1i(segVert[index2 + count-1]);
+
+				// D
+				freyjaPolygonTexCoord1i(segTex[index2]);
+				freyjaPolygonVertex1i(segVert[index2]);
+				freyjaPolygonMaterial1i(0);
+				freyjaEnd(); // FREYJA_POLYGON
+			}
+			else
+			{
+				index = count * i;
+				index2 = count * (i + 1);
+				freyjaBegin(FREYJA_POLYGON);
+				// A
+				freyjaPolygonTexCoord1i(segTex[index+j]);
+				freyjaPolygonVertex1i(segVert[index+j]);
+
+				// B
+				freyjaPolygonTexCoord1i(segTex[index-1+j]);
+				freyjaPolygonVertex1i(segVert[index-1+j]);
+
+				// C
+				freyjaPolygonTexCoord1i(segTex[index2-1+j]);
+				freyjaPolygonVertex1i(segVert[index2-1+j]);
+
+				// D
+				freyjaPolygonTexCoord1i(segTex[index2+j]);
+				freyjaPolygonVertex1i(segVert[index2+j]);
+				freyjaPolygonMaterial1i(0);
+				freyjaEnd(); // FREYJA_POLYGON
+			}
+		}
+	}
+
+	freyjaEnd(); // FREYJA_MESH
+
+	freyjaCriticalSection(FREYJA_WRITE_UNLOCK);
+}
+
+
+void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
+							  long count, long segments)
+{
+	Vector<long> vertices, vertices2, texcoords, texcoords2, segVert, segTex;
+	long i, j, index, index2;
+	vec_t x, z, y, u, v, nx, ny, nz, height, r, tmp;
+
+	(radius < 0) ? radius = -radius : 0;
+	(segments < 1) ? segments = 1 : 0;
+	(count < 3) ? count = 3 : 0;
+
+	height = radius * 2.0;
+
+	freyjaCriticalSection(FREYJA_WRITE_LOCK);
+
+	freyjaBegin(FREYJA_MESH);
+	freyjaBegin(FREYJA_VERTEX_GROUP);
+
+	/* Generate geometery */
+	for (i = 0; i < segments; ++i)
+	{
+		y = height * ((float)i/(float)segments);
+		v = 0.5 * ((float)i/(float)segments) + 0.5;
+
+		r = sin(helDegToRad(180 * ((float)i/(float)segments)));
+		(i > segments/2) ? y = height*(1.0-r)+y*r : y *= r;;
+
+		for (j = 0; j < count; ++j)
+		{
+			x = cos(helDegToRad(360.0 * ((float)j / (float)count)));
+			z = sin(helDegToRad(360.0 * ((float)j / (float)count)));
+
+			u = 1.0 * ((float)j/(float)count);
+
+			nx = x * 0.5;
+			ny = 0.0;
+			nz = z * 0.5;
+
+			x *= r * radius;
+			z *= r * radius;
+
+			index = freyjaVertex3f(origin[0]+x, origin[1]+y, origin[2]+z);
 			freyjaVertexNormal3f(index, nx, ny, nz);
 			segVert.pushBack(index);
 

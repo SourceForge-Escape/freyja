@@ -1727,15 +1727,15 @@ void FreyjaControl::getFreeWorldFromScreen(int xx, int yy, vec3_t xyz)
 
 	xy[0] = x - scroll[0] * invz;
 	xy[1] = y - scroll[1] * invz;
-	xy[2] = 0.0f;
+	xy[2] = xyz[2]; //0.0f;
 
 	xz[0] = x - scroll[0] * invz;
 	xz[2] = y - scroll[2] * invz;
-	xz[1] = 0.0f;
+	xz[1] = xyz[1]; //0.0f;
 
 	yz[2] = y - scroll[2] * invz;
 	yz[1] = x - scroll[1] * invz;
-	yz[0] = 0.0f;
+	yz[0] = xyz[0]; //0.0f;
 
 
 	// FIXME only considers up Y atm
@@ -1807,7 +1807,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 		case MOUSE_BTN_MIDDLE:
 			{
-				Vector3d xyz;
+				Vector3d xyz = Vector3d(mModel->mLight0Pos);
 				vec_t *ptr = mModel->mLight0Pos;
 
 				getFreeWorldFromScreen(x, y, xyz.mVec);
