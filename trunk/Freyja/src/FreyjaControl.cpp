@@ -30,10 +30,13 @@
 
 #include "FreyjaControl.h"
 
+
 extern unsigned int gBoneRenderType;
 extern unsigned char gJointRenderType;
+extern int gPatchDisplayList;
 
-
+void test_patch();
+unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
 void event_register_render(FreyjaRender *r);
 void event_register_model(FreyjaModel *m);
 void event_register_control(FreyjaControl *c);
@@ -1332,6 +1335,30 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+	case eGeneratePatchMesh:
+		mModel->pasteSelectedPatch();
+		break;
+
+
+	case eRenderPatch:
+		if (gPatchDisplayList == -1)
+		{
+			test_patch();
+			gPatchDisplayList = 0;
+		}
+
+		gPatchDisplayList = !gPatchDisplayList;
+		
+		if (gPatchDisplayList)
+		{
+			test_patch(); // hack for update
+		}
+
+		freyja_print("Patch Rendering [%s], Use Vertex:Move to edit...", 
+					 (gPatchDisplayList) ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
 	case FREYJA_MODE_RENDER_BONETAG:
 		mRender->Flags(FreyjaRender::RENDER_BONES, 
 					   !(mRender->Flags() & FreyjaRender::RENDER_BONES));
@@ -1929,7 +1956,11 @@ void FreyjaControl::selectObject(int x, int y, Egg::egg_plane plane)
 		xx = x; 
 		yy = y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
-		mModel->VertexSelect(xx, yy);
+
+		if (gPatchDisplayList > 0)
+			mModel->selectPatchControlPoint(xx, yy);
+		else
+			mModel->VertexSelect(xx, yy);
 		// mModel->selectVertex(plane, xx, yy, zz);
 		break;
 
@@ -1998,7 +2029,10 @@ void FreyjaControl::moveObject(int x, int y, Egg::egg_plane plane)
 		xx = x; 
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
-		mModel->VertexMove(xx, yy);
+		if (gPatchDisplayList > 0)
+			mModel->movePatchControlPoint(xx, yy);
+		else
+			mModel->VertexMove(xx, yy);
 		break;
 
 	case FreyjaModel::TransformBone:
@@ -2334,6 +2368,10 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		xxx = xx;  yyy = yy;
 		freyja_print("store state: %f, %f", xxx, yyy);
 		mModel->VertexSelect(xx, yy);
+		
+		if (gPatchDisplayList)
+			mModel->selectPatchControlPoint(xx, yy);
+
 		_mouse_state = 1;
 		//}
 		//else
