@@ -2315,6 +2315,12 @@ void FreyjaModel::getMeshVertices(long index, Vector<unsigned int> **list)
 }
 
 
+Vector<unsigned int> &FreyjaModel::getVertexSelectionList()
+{
+	return mList;
+}
+
+
 void FreyjaModel::getVertexSelection(vec3_t min, vec3_t max,
 									 Vector<unsigned int> **list)
 {

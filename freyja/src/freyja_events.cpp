@@ -358,6 +358,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
 	r.RegisterInt("eModelIterator", eModelIterator);
+	r.RegisterInt("ePolygonIterator", ePolygonIterator);
 	r.RegisterInt("eMeshIterator", eMeshIterator);
 	r.RegisterInt("eGroupIterator", eGroupIterator);
 	r.RegisterInt("eBoneIterator", eBoneIterator);
