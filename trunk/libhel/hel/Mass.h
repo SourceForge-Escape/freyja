@@ -27,8 +27,8 @@
 #ifndef GUARD__HEL_MONGOOSE_MASS_H_
 #define GUARD__HEL_MONGOOSE_MASS_H_
 
-#include <hel/math.h>
-#include <hel/Vector3d.h>
+#include "hel/math.h"
+#include "hel/Vector3d.h"
 
 class Mass
 {

@@ -27,8 +27,8 @@
 #ifndef GUARD__HEL_MONGOOSE_VIEWVOLUME_H_
 #define GUARD__HEL_MONGOOSE_VIEWVOLUME_H_
 
-#include <hel/Matrix.h>
-#include <hel/BoundingVolume.h>
+#include "hel/Matrix.h"
+#include "hel/BoundingVolume.h"
 
 class ViewVolume
 {

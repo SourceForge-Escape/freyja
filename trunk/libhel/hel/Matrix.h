@@ -28,9 +28,9 @@
 #define GUARD__FREYJA_MONGOOSE_MATRIX_H_
 
 
-#include <hel/math.h>
-#include <hel/Quaternion.h>
-#include <hel/Vector3d.h>
+#include "hel/math.h"
+#include "hel/Quaternion.h"
+#include "hel/Vector3d.h"
 
 	///////////////////////////////////////////////
 	// Multidim map for row order encoding       //

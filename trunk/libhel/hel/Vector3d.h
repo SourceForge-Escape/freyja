@@ -28,7 +28,7 @@
 #define GUARD__HEL_MONGOOSE_VECTOR3D_H_
 
 
-#include <hel/math.h>
+#include "hel/math.h"
 
 class Vector3d
 {

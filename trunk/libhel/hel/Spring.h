@@ -41,7 +41,8 @@
 #ifndef GUARD__HEL_MONGOOSE_SPRING_H_
 #define GUARD__HEL_MONGOOSE_SPRING_H_
 
-#include <hel/Simulation.h>
+#include "hel/Simulation.h"
+
 
 class Spring
 {

@@ -27,7 +27,7 @@
 #ifndef GUARD__HEL_MONGOOSE_QUATERNION_H_
 #define GUARD__HEL_MONGOOSE_QUATERNION_H_
 
-#include <hel/math.h>
+#include "hel/math.h"
 //#include "Matrix.h"
 #include "Vector3d.h"
 
