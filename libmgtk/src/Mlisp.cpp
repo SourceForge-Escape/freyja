@@ -2047,6 +2047,23 @@ mObject *menu_item(mObjectList *parms)
 	return ret;
 }
 
+mObject *mlisp_stub(mObjectList *parms)
+{
+	return NULL;
+}
+
+mObject *vbox(mObjectList *parms)
+{
+	mObject *arg;
+
+
+	arg = objPop(&parms);
+	arg = objPop(&parms);
+	arg = objPop(&parms);
+	arg = objPop(&parms);
+	return NULL;
+}
+
 
 int runUnitTest(int argc, char *argv[])
 {
@@ -2062,6 +2079,11 @@ int runUnitTest(int argc, char *argv[])
 	}
 	else if (argc > 1)
 	{
+		rc.registerLispFunction("mlispdebug", mlisp_stub);
+		rc.registerLispFunction("window", menu);
+		rc.registerLispFunction("menubar", menu);
+		rc.registerLispFunction("vbox", vbox);
+
 		rc.registerLispFunction("menu", menu);
 		rc.registerLispFunction("submenu", submenu);
 		rc.registerLispFunction("menu_item", menu_item);

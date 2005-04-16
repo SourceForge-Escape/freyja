@@ -69,7 +69,7 @@ debian-package:
 	@-cd ..
 	@-cd libfreyja; make debian-package
 	@-cd ..
-	@-cd Freyja; make debian-package
+	@-cd freyja; make debian-package
 	@-cd ..
 
 apt:

@@ -29,8 +29,7 @@
 	o Hard ABI with stricter event control
 
  libmgtk
-	o Move Mlisp into it's own library
-	o External (un)toggle toggle button event for application use 
+	o Port to C# with gtk# and cocoa# bindings
 	o Tree widgets (tree eAction )
 	o Mlisp doesn't lookup symbols for like "true" if just setq
 	o Milsp wish list: garbage collection, fully featured lisp

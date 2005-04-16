@@ -73,7 +73,7 @@ void new_adt(arg_list_t **a, int type, void *data)
 
 	(*a)->symbol = NULL;
 	(*a)->next = NULL;
-	(*a)->type = (enum arg_type_t)type;
+	(*a)->type = (arg_type_t)type;
 	(*a)->data = data;	
 }
 

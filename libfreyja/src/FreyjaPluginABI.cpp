@@ -27,6 +27,7 @@
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <hel/BoundingVolume.h>
+#include <math.h>
 
 #include "FreyjaFileWriter.h"
 #include "EggPlugin.h" // temp for testing
