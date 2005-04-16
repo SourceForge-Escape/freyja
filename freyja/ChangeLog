@@ -29,6 +29,11 @@
 
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
+	o C# port of mlisp continues
+
+
+ freyja (20050408) "NeoUmbra" Mongoose <mongoose@icculus.org>
+
 	o Please report any issues including performance affected by this release
 	o FileChooser support, with texture preview using image plugins
 	o Extrude face tool added, now new extrude face is set as vertex list
