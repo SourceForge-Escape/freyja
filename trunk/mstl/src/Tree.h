@@ -115,7 +115,7 @@ public:
 
 	TreeNode<Key, Data> *GetChild() 
 	{
-		return Left();
+		return GetLeft();
 	}
 
 	
@@ -150,7 +150,7 @@ public:
 
 	TreeNode<Key, Data> *GetSibling() 
 	{
-		return Right();
+		return GetRight();
 	}
 
 
@@ -224,7 +224,7 @@ public:
 
 	void PrintNode()
 	{
-		cout << "(" << _key << ", " << _data << ", "
+		std::cout << "(" << _key << ", " << _data << ", "
 			  << ((GetColor() == _tree_h_red) ? "Red" : "Black")
 			  << ")";
 	}
@@ -235,14 +235,14 @@ public:
 		if (_left)
 		{
 			_left->PrintInorder();
-			cout << ", ";
+			std::cout << ", ";
 		}
 
 		PrintNode();
     
 		if (_right)
 		{
-			cout << ", ";
+			std::cout << ", ";
 			_right->PrintInorder();
 		}
 	}
@@ -534,11 +534,11 @@ public:
 		{
 			if (!parent)
 			{
-				cout << endl << "[height " << height << "]   " << endl;
+				std::cout << std::endl << "[height " << height << "]   " << std::endl;
 
 				if (tree->GetColor() == _tree_h_red)
 				{
-					cout << "*";
+					std::cout << "*";
 				}
 			}
 			else
@@ -546,23 +546,23 @@ public:
 				if (parent->GetColor() == _tree_h_red &&
 					 tree->GetColor() == _tree_h_red)
 				{
-					cout << "*";
+					std::cout << "*";
 				}
 			}
 
-			cout << "(" << tree->GetKey() << ", " 
+			std::cout << "(" << tree->GetKey() << ", " 
 				  << ((tree->GetColor() == _tree_h_red) ? "red" : "blk")
 				  << ")";
 
 			if (rightmost)
 			{
-				cout << endl << "[height " << (height+1) << "]   " << endl;
+				std::cout << std::endl << "[height " << (height+1) << "]   " << std::endl;
 
 				PrintTree(_root, 0, ++seek, true);
 			}
 			else
 			{
-				cout << " ";
+				std::cout << " ";
 			}
 
 			return;
@@ -582,7 +582,7 @@ public:
 		}
 		else
 		{
-			cout << "(-, blk) ";
+			std::cout << "(-, blk) ";
 		}
 		
 		if (right)
@@ -591,14 +591,14 @@ public:
 		}
 		else
 		{
-			cout << "(-, blk) ";
+			std::cout << "(-, blk) ";
 		}
 
 		if (parent)
 		{
 			if (parent->GetRight() != tree)
 			{
-				cout << " |  ";
+				std::cout << " |  ";
 			}
 		}
 	}
@@ -607,23 +607,23 @@ public:
 	void PrintAsTree()
 	{
 		PrintTree(_root, 0, 0, true);
-		cout << endl << "Nodes marked with * are in error" << endl;
+		std::cout << std::endl << "Nodes marked with * are in error" << std::endl;
 	}
   
 
 	void Print()
 	{
-		cout << "Tree: " << _num_elements <<" elements {" << endl;    
+		std::cout << "Tree: " << _num_elements <<" elements {" << std::endl;    
 
 		if (_root)
 		{
 			_root->PrintNode();
-			cout << endl;
+			std::cout << std::endl;
 
 			_root->PrintInorder();
 		}
 
-		cout << endl << "}" << endl;
+		std::cout << std::endl << "}" << std::endl;
 	}
 
 

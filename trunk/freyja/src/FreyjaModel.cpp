@@ -779,7 +779,7 @@ void FreyjaModel::setCurrentPlane(freyja_plane_t p)
 }
 
 
-enum freyja_plane_t FreyjaModel::getCurrentPlane()
+freyja_plane_t FreyjaModel::getCurrentPlane()
 {
 	return mCurrentPlane;
 }

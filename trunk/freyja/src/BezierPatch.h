@@ -29,6 +29,7 @@
 
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
+#include <math.h>
 
 
 class BezierPatch

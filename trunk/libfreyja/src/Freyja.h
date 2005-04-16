@@ -208,12 +208,6 @@ class FreyjaSceneGraph
 {
 public:
 
-	class FreyjaSceneGraphNode;
-
-	FreyjaSceneGraphNode *mRoot; // Thinking about doing a DAG... hhmmm
-
-protected:
-
 	class FreyjaSceneGraphNode
 	{
 	public:
@@ -222,6 +216,8 @@ protected:
 
 		Vector<long> mModels;
 	};
+
+	FreyjaSceneGraphNode *mRoot; // Thinking about doing a DAG... hhmmm
 };
 
 
