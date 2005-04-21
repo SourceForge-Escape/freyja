@@ -63,6 +63,7 @@ public class MLispObject {
 	public object data;
 	public string mTypeName;
 	public MLispFunction callback;
+
 	
 	////////////////////////////////////////////////////////////
 	/// Lisp Object functions //////////////////////////////////
@@ -81,14 +82,15 @@ public class MLispObject {
 
 	public void setTypeName(string name)
 	{
-		mTypeName = name;
+		// I hate this for memory use, but it's fucking #C
+		mTypeName = String.Copy(name);
 	}
 
 
 	public MLispObject execute(ref MLispObjectList objList)
 	{
 		MLispObject obj = new MLispObject();
-		MLispFunction func;
+		//MLispFunction func;
 		
 		if (type != (uint)MLispObjectType.FUNC || callback == null)
 			return obj; 
@@ -267,7 +269,7 @@ public class MLispObjectList : MLispObject {
 
 	public MLispObjectList(MLispObjectList src)
 	{
-		MLispObjectList dest, cur = src;
+		MLispObjectList cur = src;
 
 		head = null;
 		type = (uint)MLispObjectType.LIST;
@@ -322,7 +324,7 @@ public class MLispObjectList : MLispObject {
 
 	public MLispObject pop()
 	{
-		MLispObjectList oldHead;
+		//MLispObjectList oldHead;
 		MLispObject obj;
 
 		if (head == null)
@@ -331,7 +333,7 @@ public class MLispObjectList : MLispObject {
 		}
 
 		obj = head.ldata;
-		oldHead = head;
+		//oldHead = head;
 		head = head.next;
 
 		return obj;
@@ -579,8 +581,11 @@ public class Mlisp {
 	{
 		MLispObjectList current;
 		MLispObject obj;
-		string sym = new string(symbol);
+		// Hack to trim C# strings
+		string tmp = new string(symbol);
+		string sym = tmp.Substring(0, tmp.IndexOf('\0'));
 
+				
 		if (symbol == null || symbol[0] == '\0')
 			return null;
 
@@ -590,6 +595,9 @@ public class Mlisp {
 		{
 			obj = current.peek();
 			current = current.next;
+
+			//Console.WriteLine("getSymbolData$ '{0}' '{1}'", sym, obj.symbol);
+			//Console.WriteLine("getSymbolData$ '{0}' '{1}'", sym.Length, obj.symbol.Length);
 
 			if (sym.CompareTo(obj.symbol) == 0)
 			{
@@ -845,9 +853,9 @@ public class Mlisp {
 
 		while (mSymbolTable.head != null)
 		{
-			MLispObject obj = mSymbolTable.peek();
+			//MLispObject obj = mSymbolTable.peek();
 			//deleteObj(&obj);
-			obj = null;
+			//obj = null;
 			mSymbolTable.pop();
 		}
 
@@ -871,7 +879,7 @@ public class Mlisp {
 		MLispObjectList fstack = new MLispObjectList();
 		MLispObject obj = new MLispObject();
 		MLispObject result = new MLispObject();
-		MLispObject fcall;
+		//MLispObject fcall;
 		int scope = 0;
 
 
@@ -1426,7 +1434,9 @@ public class Mlisp {
 
 		func = getNextSymbol();
 
-		if ((data = getSymbolData(mSymbol, (uint)MLispObjectType.FUNC)) != null)
+		data = getSymbolData(mSymbol, (uint)MLispObjectType.FUNC); // changed for 1.1.6
+
+		if (data != null)
 		{
 			mExecStack.push(func);
 		}
@@ -1598,7 +1608,8 @@ public class Mlisp {
 				// Hack to trim C# strings
 				string tmp = new string(mSymbol);
 				string tmp2 = tmp.Substring(0, tmp.IndexOf('\0'));
-
+				//string tmp2 = new String(mSymbol, 0, tmp.IndexOf('\0'));
+				
 				if (!isString)
 				{
 					++mErrors;
@@ -1860,7 +1871,7 @@ public class Mlisp {
 		MLispObjectList current = list;
 		MLispObject objA;
 		MLispObject objB;
-		uint lenght;
+		//uint length;
 
 
 		objA = current.pop();
