@@ -18,11 +18,12 @@
 	;; Window container
 	(vbox 0 0 0 1 0
 
-		(hbox 1 1 0 0 0
-			(button "_New" eMode eNewFile)
-			(button "_Open" eMode eOpenFile)
-			(button "_Save" eMode eSaveFile)
-			(button "_Quit" eMode eQuitFile))
+		;(handlebox 1 
+			(hbox 1 1 0 0 0
+				(button "_New" eMode eNewFile)
+				(button "_Open" eMode eOpenFile)
+				(button "_Save" eMode eSaveFile)
+				(button "_Quit" eMode eQuitFile));)
 
 		;; Menubar
 		(menubar
