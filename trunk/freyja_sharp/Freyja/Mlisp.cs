@@ -940,95 +940,109 @@ public class Mlisp {
 			if (obj.type == (uint)MLispObjectType.BEGIN)
 			{
 				++scope;
+				
+				if (parms == null)
+				{
+					parms = new MLispObjectList();
+				}
+
+				parms.push(obj); // 20050520, Added to provide scope seperator
 			}
 			else if (obj.type == (uint)MLispObjectType.END)
 			{
 				--scope;
+				parms.push(obj); // 20050520, Added to provide scope seperator
 				
 				if (scope == 0)
 				{
-				
-				Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-				fstack.print();
-				Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+					Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+					fstack.print();
+					Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
-				/* 2.1. Pop func off fstack -- if nil break */
-				//func = fstack.pop();
-
-				/* 2.2. if non-nil continue to execute and later push result */		
-				if (func.isNil())
-					break;
+					/* 2.1. Pop func off fstack -- if nil break */
+					//func = fstack.pop();
+	
+					/* 2.2. if non-nil continue to execute and later push result */		
+					if (func.isNil())
+						break;
 		
-				/* In case function was passed no args, then make a null list */
-				if (parms == null)
-					parms = new MLispObjectList();
+					/* In case function was passed no args, then make a null list */
+					if (parms == null)
+						parms = new MLispObjectList();
 
-				/* Reverse stack, so that order is maintained in callee from mlisp C */
-				MLispObjectList reverse = new MLispObjectList();
-				while (parms.head != null)
-				{
-					obj = parms.pop();
-					
-					Console.Write("Buffering AR... ");
-					obj.print();
-
-					if (obj.type == (uint)MLispObjectType.FUNC)
+					/* Reverse stack, so that order is maintained in callee from mlisp C */
+					MLispObjectList reverse = new MLispObjectList();
+					while (parms.head != null)
 					{
-						Console.WriteLine("--- FUNC ----------------------");				
-						Console.WriteLine("Calling {0}", obj.symbol);
-						reverse.print("\te ");
-						//obj = evalFunction(ref reverse, obj);
-						obj = obj.execute(ref reverse);
-						reverse.push(obj);
-						
-						Console.Write("\t<-- ");
+						obj = parms.pop();
+					
+						Console.Write("Buffering AR... ");
 						obj.print();
-						fstack.pop(); // cull 'obj', and yes this should work
-						continue;
+
+						if (obj.type == (uint)MLispObjectType.FUNC)
+						{
+							Console.WriteLine("--- FUNC ----------------------");				
+							Console.WriteLine("Calling {0}", obj.symbol);
+							reverse.print("\te ");
+							//obj = evalFunction(ref reverse, obj);
+							obj = obj.execute(ref reverse);
+							reverse.push(obj);
+						
+							Console.Write("\t<-- ");
+							obj.print();
+							fstack.pop(); // cull 'obj', and yes this should work
+							continue;
+						}
+						else if (obj.type == (uint)MLispObjectType.BEGIN ||
+								 obj.type == (uint)MLispObjectType.END)
+						{
+							//Console.Write("Stripping AR... ");
+							//obj.print();
+							continue;
+						}
+					
+						//obj = parms.pop();
+						reverse.push(obj);
 					}
 
-					//obj = parms.pop();
-					reverse.push(obj);
-				}
+					parms = reverse;		
 
-				parms = reverse;		
+					func = fstack.pop();
 
-				func = fstack.pop();
+					/* 2.3. Call function implementation */
+					switch (func.type)
+					{
+					case (uint)MLispObjectType.FUNC:
+						Console.WriteLine("FUNC: Calling {0}", func.symbol);
+						reverse.print("\t+ ");
+						result = func.execute(ref reverse);
+						break;
 
-				/* 2.3. Call function implementation */
-				switch (func.type)
-				{
-				case (uint)MLispObjectType.FUNC:
-					Console.WriteLine("FUNC: Calling {0}", func.symbol);
-					reverse.print("\t+ ");
-					result = func.execute(ref reverse);
-					break;
-
-				default:
-					Console.WriteLine("{0}", func.symbol);
-					break;
-				}
-
-				parms.push(result);
-
-				// Show return value
-				Console.Write("\t <-- : ");
-				result.print();
-
-				//Console.Write("\tNEXT FUNC : ");
-				//func = fstack.peek();
-				//func.print();
-
-				if (func == null || func.isNil() || fstack.head == null)
-					break;
+					default:
+						Console.WriteLine("{0}", func.symbol);
+						break;
 					}
+
+					parms.push(result);
+
+					// Show return value
+					Console.Write("\t <-- : ");
+					result.print();
+
+					//Console.Write("\tNEXT FUNC : ");
+					//func = fstack.peek();
+					//func.print();
+
+					if (func == null || func.isNil() || fstack.head == null)
+						break;
+				}
 			}
 
 			/* This was a switch in C, but C# can't do fall through,
 			 * Cull scope markers, setup call stack */
 			if (obj.type == (uint)MLispObjectType.BEGIN ||
 				obj.type == (uint)MLispObjectType.END)
-			{		
+			{
 			}
 			else
 			{
