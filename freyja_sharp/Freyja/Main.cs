@@ -6,6 +6,7 @@ enum MLispObjectGtkWidgetType
 {
 	MGTK_WIDGET = 64,
 	MGTK_WINDOW,
+	MGTK_HANDLEBOX,
 	MGTK_BOX,
 	MGTK_MENU,
 	MGTK_MENUITEM,
@@ -35,7 +36,7 @@ class MainClass {
 
 	public static MLispObject mgtk_handlebox(ref MLispObjectList args)
 	{
-		MLispObject pos = args.peek();
+		MLispObject pos = args.pop();
 		MLispObject result = new MLispObject();
 
 		HandleBox hbox = new HandleBox();
@@ -57,14 +58,24 @@ class MainClass {
 				hbox.HandlePosition = PositionType.Bottom;
 				break;
 			}
-			
-			args.pop();
 		}
 	
 		result = new MLispObjectGtkWidget(hbox);
-		result.type = (uint)MLispObjectGtkWidgetType.MGTK_BOX;
-		result.setTypeName("Gtk.HBox");
-				
+		result.type = (uint)MLispObjectGtkWidgetType.MGTK_HANDLEBOX;
+		result.setTypeName("Gtk.HandleBox");
+
+		MLispObject obj;
+		while ((obj = args.pop()) != null && !obj.isNil())
+		{
+			if (obj.type == (uint)MLispObjectGtkWidgetType.MGTK_BOX)
+			{
+				Console.WriteLine("\t\t handlebox.Append({0})", obj.type);	
+				hbox.Add((Widget)obj.data);
+			}
+		}
+		
+		hbox.ShowAll();
+
 		return result;
 	}
 
@@ -181,20 +192,23 @@ class MainClass {
 		Menu menu = new Menu();
 		menu.Title = (string)name.data;
 		
+		
 		MLispObject obj;
 		while ((obj = args.pop()) != null && !obj.isNil())
 		{
 			if (obj.type == (uint)MLispObjectGtkWidgetType.MGTK_MENUITEM ||
 				obj.type == (uint)MLispObjectGtkWidgetType.MGTK_MENU)
 			{
-				Console.WriteLine("\t\t menu.Append({0})", obj.type);	
+				Console.WriteLine("\t\t menu.Append({0})", obj.mTypeName);	
 				menu.Append((Widget)obj.data);
 			}
 		}
-		
-		menu.ShowAll();
+
+		// FIX for werid Gtk# menuing data structure use
+		MenuItem test = new MenuItem((string)name.data);
+		test.Submenu = menu;
 			
-		result = new MLispObjectGtkWidget(menu);
+		result = new MLispObjectGtkWidget(test);
 		result.type = (uint)MLispObjectGtkWidgetType.MGTK_MENU;
 		result.setTypeName("Gtk.Menu");
 		
@@ -348,7 +362,7 @@ class MainClass {
 		/* Register prototype MLispGtk# methods */
 		resource.registerLispFunction("window", new MLispFunction(mgtk_window));
 		resource.registerLispFunction("vbox", new MLispFunction(mgtk_vbox));
-		resource.registerLispFunction("handlebox", new MLispFunction(mgtk_vbox/*handlebox*/)); // FIXME
+		resource.registerLispFunction("handlebox", new MLispFunction(mgtk_handlebox));
 		resource.registerLispFunction("menubar", new MLispFunction(mgtk_menubar));
 		resource.registerLispFunction("menu_item", new MLispFunction(mgtk_menuitem));
 		resource.registerLispFunction("submenu", new MLispFunction(mgtk_submenu));
