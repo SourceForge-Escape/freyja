@@ -69,7 +69,7 @@ class MainClass {
 		{
 			if (obj.type == (uint)MLispObjectGtkWidgetType.MGTK_BOX)
 			{
-				Console.WriteLine("\t\t handlebox.Append({0})", obj.type);	
+				Console.WriteLine("\t\t handlebox.Append({0})", obj.mTypeName);	
 				hbox.Add((Widget)obj.data);
 			}
 		}
@@ -150,7 +150,12 @@ class MainClass {
 		MLispObject icon = args.pop();
 
 		MenuItem item = new MenuItem((string)name.data);
-			
+
+		// FIXME events not hooked up
+				
+		// FIXME: Temp hardcoded event hack
+		item.Activated += new EventHandler(clickedButtonCallback);
+
 		result = new MLispObjectGtkWidget(item);
 		result.type = (uint)MLispObjectGtkWidgetType.MGTK_MENUITEM;
 		result.setTypeName("Gtk.MenuItem");
@@ -174,7 +179,7 @@ class MainClass {
 		{
 			if (obj.type == (uint)MLispObjectGtkWidgetType.MGTK_MENU)
 			{
-				Console.WriteLine("\t\t menubar.Append({0})", obj.type);	
+				Console.WriteLine("\t\t menubar.Append({0})", obj.mTypeName);	
 				menubar.Append((Widget)obj.data);
 			}
 		}
@@ -240,7 +245,7 @@ class MainClass {
 		{
 			if (obj.type == (uint)MLispObjectGtkWidgetType.MGTK_BOX)
 			{
-				Console.WriteLine("\t\t window.Add({0})", obj.type);	
+				Console.WriteLine("\t\t window.Add({0})", obj.mTypeName);	
 				window.Add((Widget)obj.data);
 			}
 		}
@@ -282,7 +287,7 @@ class MainClass {
 		{
 			if (obj.type >= 64)// (uint)MLispObjectGtkWidgetType.MGTK_BOX)
 			{
-				Console.WriteLine("\t\t hbox.PackStart({0})", obj.type);
+				Console.WriteLine("\t\t hbox.PackStart({0})", obj.mTypeName);
 					
 				if (!expand.isNil() && !fill.isNil() && !padding.isNil())
 				{
@@ -334,7 +339,7 @@ class MainClass {
 		{
 			if (obj.type >= 64)// (uint)MLispObjectGtkWidgetType.MGTK_BOX)
 			{
-				Console.WriteLine("\t\t vbox.PackStart({0})", obj.type);
+				Console.WriteLine("\t\t vbox.PackStart({0})", obj.mTypeName);
 				
 				if (!expand.isNil() && !fill.isNil() && !padding.isNil())
 				{
