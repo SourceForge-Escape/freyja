@@ -873,6 +873,38 @@ public class Mlisp {
 	}
 
 
+	MLispObjectList getNextScopeStack(ref MLispObjectList stack)
+	{
+		MLispObjectList tmpStack = new MLispObjectList();
+		MLispObject obj = new MLispObject();
+		
+		
+		while (stack.head != null)
+		{
+			obj = stack.pop();
+						
+			if (obj == null ||
+				obj.isNil() ||
+				obj.type == (uint)MLispObjectType.END)
+			{
+				/* End with NIL Object for var parm func (func ...) */
+				tmpStack.push(new MLispObject());
+				 
+				break; 
+			}
+
+			Console.Write(">> ");
+			obj.print();
+
+			tmpStack.push(obj);
+		}
+		
+		tmpStack.reverse();
+		
+		return tmpStack;
+	}
+
+
 	MLispObject evalFunction(ref MLispObjectList stack, MLispObject func)
 	{
 		MLispObjectList parms = null;
@@ -984,8 +1016,12 @@ public class Mlisp {
 							Console.WriteLine("--- FUNC ----------------------");				
 							Console.WriteLine("Calling {0}", obj.symbol);
 							reverse.print("\te ");
-							//obj = evalFunction(ref reverse, obj);
-							obj = obj.execute(ref reverse);
+							
+							//reverse.reverse();
+							MLispObjectList tmp = getNextScopeStack(ref reverse);
+							//reverse.reverse();
+							tmp.print("  e> ");
+							obj = obj.execute(ref tmp);//reverse);
 							reverse.push(obj);
 						
 							Console.Write("\t<-- ");
@@ -993,15 +1029,20 @@ public class Mlisp {
 							fstack.pop(); // cull 'obj', and yes this should work
 							continue;
 						}
-						else if (obj.type == (uint)MLispObjectType.BEGIN ||
-								 obj.type == (uint)MLispObjectType.END)
+						else if (obj.type == (uint)MLispObjectType.BEGIN)
 						{
 							//Console.Write("Stripping AR... ");
 							//obj.print();
 							continue;
 						}
-					
-						//obj = parms.pop();
+						else if (obj.type == (uint)MLispObjectType.END)
+						{
+							//Console.Write("Stripping AR... ");
+							//obj.print();
+							//continue;
+							
+						}
+
 						reverse.push(obj);
 					}
 
@@ -1967,7 +2008,7 @@ public class Mlisp {
 		float n = 0.0f, s;
 		char first = (char)1;
 
-	
+
 		while ((obj = args.pop()) != null && !obj.isNil())
 		{
 			switch (obj.type)
