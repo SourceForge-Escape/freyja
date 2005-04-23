@@ -412,20 +412,22 @@ class MainClass {
 		resource.registerLispFunction("dialog", new MLispFunction(undef));
 		resource.registerLispFunction("fileselection_hack", new MLispFunction(undef));
 
+		/* Internal MLisp Gtk values */
 		resource.registerSymbolValue("IconSize_Menu", 1);
 		resource.registerSymbolValue("IconSize_ToolbarSmall", 2);
 		resource.registerSymbolValue("IconSize_Toolbar", 3);
 		resource.registerSymbolValue("IconSize_Button", 4);
 		resource.registerSymbolValue("IconSize_Dialog", 5);
 
-		resource.setDebugLevel(3); // 0, 3, 5
+		resource.setDebugLevel(0); // 0, 3, 5
 		
 		/* Init Gtk# */
 		Application.Init();
 		
 		resource.evalFile("../../test.mlisp");
 		//resource.evalFile("../../freyja.mlisp");
-		resource.dumpSymbols();
+		
+		//resource.dumpSymbols();
 
 		/* Run Gtk# */
 		Application.Run();

@@ -893,8 +893,8 @@ public class Mlisp {
 				break; 
 			}
 
-			Console.Write(">> ");
-			obj.print();
+			//Console.Write(">> ");
+			//obj.print();
 
 			tmpStack.push(obj);
 		}
@@ -911,7 +911,6 @@ public class Mlisp {
 		MLispObjectList fstack = new MLispObjectList();
 		MLispObject obj = new MLispObject();
 		MLispObject result = new MLispObject();
-		//MLispObject fcall;
 		int scope = 0;
 
 
@@ -925,7 +924,8 @@ public class Mlisp {
 		}
 		else
 		{
-			func.print();
+			if (mDebug > 1)
+				func.print();
 		}
 
 		/* 0. Push func obj to grouped function stack */
@@ -987,10 +987,13 @@ public class Mlisp {
 				
 				if (scope == 0)
 				{
-					Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-					fstack.print();
-					Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-
+					if (mDebug > 1)
+					{
+						Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+						fstack.print();
+						Console.WriteLine("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+					}
+					
 					/* 2.1. Pop func off fstack -- if nil break */
 					//func = fstack.pop();
 	
@@ -1008,24 +1011,32 @@ public class Mlisp {
 					{
 						obj = parms.pop();
 					
-						Console.Write("Buffering AR... ");
-						obj.print();
+						if (mDebug > 1)
+						{
+							Console.Write("Buffering AR... ");
+							obj.print();
+						}
 
 						if (obj.type == (uint)MLispObjectType.FUNC)
 						{
-							Console.WriteLine("--- FUNC ----------------------");				
-							Console.WriteLine("Calling {0}", obj.symbol);
-							reverse.print("\te ");
+							if (mDebug > 1)
+							{
+								Console.WriteLine("--- FUNC ----------------------");				
+								Console.WriteLine("Calling {0}", obj.symbol);
+								reverse.print("\te ");
+							}
 							
-							//reverse.reverse();
 							MLispObjectList tmp = getNextScopeStack(ref reverse);
-							//reverse.reverse();
-							tmp.print("  e> ");
-							obj = obj.execute(ref tmp);//reverse);
+							//tmp.print("  e> ");
+							obj = obj.execute(ref tmp);
 							reverse.push(obj);
 						
-							Console.Write("\t<-- ");
-							obj.print();
+							if (mDebug > 1)
+							{
+								Console.Write("\t<-- ");
+								obj.print();
+							}
+													
 							fstack.pop(); // cull 'obj', and yes this should work
 							continue;
 						}
@@ -1054,25 +1065,24 @@ public class Mlisp {
 					switch (func.type)
 					{
 					case (uint)MLispObjectType.FUNC:
-						Console.WriteLine("FUNC: Calling {0}", func.symbol);
-						reverse.print("\t+ ");
+						//Console.WriteLine("FUNC: Calling {0}", func.symbol);
+						//reverse.print("\t+ ");
 						result = func.execute(ref reverse);
 						break;
 
 					default:
-						Console.WriteLine("{0}", func.symbol);
+						//Console.WriteLine("{0}", func.symbol);
 						break;
 					}
 
 					parms.push(result);
 
 					// Show return value
-					Console.Write("\t <-- : ");
-					result.print();
-
-					//Console.Write("\tNEXT FUNC : ");
-					//func = fstack.peek();
-					//func.print();
+					if (mDebug > 1)
+					{
+						Console.Write("\t <-- : ");
+						result.print();
+					}
 
 					if (func == null || func.isNil() || fstack.head == null)
 						break;
@@ -1089,7 +1099,7 @@ public class Mlisp {
 			{
 				if (obj.type == (uint)MLispObjectType.FUNC)
 				{
-					Console.WriteLine("fstack.push({0})", obj.symbol);
+					//Console.WriteLine("fstack.push({0})", obj.symbol);
 					fstack.push(obj);
 				}
 				
@@ -1148,8 +1158,11 @@ public class Mlisp {
 
 			if (obj != null && obj.type == (uint)MLispObjectType.FUNC)
 			{
-				Console.Write("evalFunction <-- ");
-				obj.print();
+				if (mDebug > 1)
+				{
+					Console.Write("evalFunction <-- ");
+					obj.print();
+				}
 				evalFunction(ref mExecStack, obj);
 			}
 		}
