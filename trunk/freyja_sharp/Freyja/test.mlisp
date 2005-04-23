@@ -35,7 +35,7 @@
 		)
 		
 		;(handlebox 1 
-			(vbox 1 1 0 0 0
+			(hbox 1 1 0 0 0
 				(button "_New" eMode eNewFile)
 				(button "_Open" eMode eOpenFile)
 				(button "_Save" eMode eSaveFile)
