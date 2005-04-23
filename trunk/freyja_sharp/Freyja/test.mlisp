@@ -26,6 +26,12 @@
 				(menu_item "Ap_pend..."  			3	"gtk-paste")
 				(menu_item "_Quit"						"gtk-quit")
 			)
+
+			(submenu "_Edit" 
+				(menu_item "C_ut"			"C-x"	11	"gtk-cut")
+				(menu_item "_Copy"			"C-c"	12	"gtk-copy")
+				(menu_item "_Paste"  				13	"gtk-paste")
+			)
 		)
 		
 		;(handlebox 1 

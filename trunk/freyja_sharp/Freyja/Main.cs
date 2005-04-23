@@ -119,7 +119,9 @@ class MainClass {
 		result = new MLispObjectGtkWidget(button);
 		result.type = (uint)MLispObjectGtkWidgetType.MGTK_BUTTON;
 		result.setTypeName("Gtk.Button");
-				
+		
+		args.pop();
+		
 		return result;
 	}
 	
@@ -160,6 +162,8 @@ class MainClass {
 		result.type = (uint)MLispObjectGtkWidgetType.MGTK_MENUITEM;
 		result.setTypeName("Gtk.MenuItem");
 				
+		args.pop();
+		
 		return result;
 	}
 
@@ -217,6 +221,8 @@ class MainClass {
 		result.type = (uint)MLispObjectGtkWidgetType.MGTK_MENU;
 		result.setTypeName("Gtk.Menu");
 		
+		args.pop();
+		
 		return result;
 	}
 
@@ -251,6 +257,8 @@ class MainClass {
 		}
 		
 		window.ShowAll();
+		
+		args.pop();
 		
 		return result;
 	}
@@ -304,6 +312,8 @@ class MainClass {
 
 		hbox.ShowAll();
 
+		args.pop();
+
 		return result;
 	}
 	
@@ -355,6 +365,8 @@ class MainClass {
 		}
 
 		vbox.ShowAll();
+
+		args.pop();
 
 		return result;
 	}
