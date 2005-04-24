@@ -5,7 +5,8 @@ SOURCES = \
 ./Main.cs \
 ./AssemblyInfo.cs \
 ./Mlisp.cs \
-./libfreyja.cs
+./libfreyja.cs \
+./MlispGtk.cs
 
 PKG_REFERENCES = \
 gtk-sharp \

@@ -465,6 +465,7 @@ public class Mlisp {
 	int mLine;
 	int mString;
 	int mErrors;                  /* Parse error counter */
+	int mWarnings;
 	int mDebug;                   /* Level of debugging for parser */
 	bool mGarbageCollection;
 
@@ -487,6 +488,7 @@ public class Mlisp {
 		mLook = '\0';
 		mString = 0;
 		mErrors = 0;
+		mWarnings = 0;
 		mLine = 1;
 	
 		mDebug = 0;
@@ -761,6 +763,13 @@ public class Mlisp {
 	}
 
 
+	void printWarning(string s)
+	{
+		//Console.OpenStandardError();
+		Console.WriteLine("lisp> WARNING #{0}: Line {1}, {2}", mWarnings, mLine, s);
+	}
+	
+
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
@@ -826,14 +835,13 @@ public class Mlisp {
 			buffer[i] = EOF; // C# fix/hack/etc
 		}
 
-		catch (EndOfStreamException e) {
+		catch (Exception e) {
+			Console.WriteLine("ERROR: Couldn't open file {0}.", filename);
 			Console.WriteLine("{0} exceptions caught and ignored.", e.GetType().Name);
 			return -2;
 		}
-		finally
-		{
-			r.BaseStream.Close();
-		}
+
+		r.BaseStream.Close();
 
 		return 0;
 	}
@@ -1484,7 +1492,12 @@ public class Mlisp {
 
 		if (mErrors != 0)
 		{
-			Console.WriteLine("\nlisp> Encountered {0} parse errors\n", mErrors);
+			Console.WriteLine("\nlisp> Encountered {0} parse errors.\n", mErrors);
+		}
+
+		if (mWarnings != 0)
+		{
+			Console.WriteLine("\nlisp> Encountered {0} parse warnings.\n", mWarnings);
 		}
 
 		return 0;
@@ -1680,8 +1693,8 @@ public class Mlisp {
 				
 				if (!isString)
 				{
-					++mErrors;
-					printError("Making string out of non-string <" + tmp2 + ">?");
+					++mWarnings;
+					printWarning("Making string out of non-string <" + tmp2 + ">?");
 				}
 
 				obj = new MLispObjectString(tmp2);

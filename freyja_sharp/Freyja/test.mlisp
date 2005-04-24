@@ -17,6 +17,7 @@
 				(menu_item "_New"			"C-n"	1	"gtk-new")
 				(menu_item "_Open..."		"C-o"	2	"gtk-open")
 				(menu_item "Ap_pend..."  			3	"gtk-paste")
+				(menu_separator)
 				(menu_item "_Quit"						"gtk-quit")
 			)
 
