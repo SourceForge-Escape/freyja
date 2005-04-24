@@ -112,6 +112,8 @@ class MainClass {
 		}
 		
 		// FIXME events not hooked up
+		e.print();
+		mode.print();
 		
 		// FIXME: Temp hardcoded event hack
 		button.Clicked += new EventHandler(clickedButtonCallback);
@@ -151,10 +153,19 @@ class MainClass {
 
 		MLispObject icon = args.pop();
 
+		//Image image = new Image((string)icon.data);
 		MenuItem item = new MenuItem((string)name.data);
 
-		// FIXME events not hooked up
+		//if (image != null)
+		//{
+		//	ImageMenuItem itemImage = new ImageMenuItem((string)name.data);
+		//	itemImage.Image = image;
+		//	item = itemImage;
+		//}
 				
+		// FIXME events not hooked up
+		e.print();
+
 		// FIXME: Temp hardcoded event hack
 		item.Activated += new EventHandler(clickedButtonCallback);
 
@@ -167,6 +178,19 @@ class MainClass {
 		return result;
 	}
 
+
+	public static MLispObject mgtk_menu_seperator(ref MLispObjectList args)
+	{
+		MLispObject result = new MLispObject();
+		SeparatorMenuItem sep = new SeparatorMenuItem();
+
+		result = new MLispObjectGtkWidget(sep);
+		result.type = (uint)MLispObjectGtkWidgetType.MGTK_MENUITEM;
+		result.setTypeName("Gtk.SeparatorMenuItem");
+
+		return result;
+	}
+	
 
 	public static MLispObject mgtk_menubar(ref MLispObjectList args)
 	{
@@ -239,7 +263,15 @@ class MainClass {
 		}
 		
 		Window window = new Window((string)title.data);
-		window.SetDefaultSize(256, 256);				
+		window.SetDefaultSize(256, 256);
+		
+		try {
+			window.Icon = new Gdk.Pixbuf((string)icon.data);
+		}
+		catch (Exception e) {
+			Console.WriteLine("{0} Exceptions caught and ignored.", e.GetType().Name);
+		}
+		
 		result = new MLispObjectGtkWidget(window);
 		result.type = (uint)MLispObjectGtkWidgetType.MGTK_WINDOW;
 		result.setTypeName("Gtk.Window");	
@@ -385,6 +417,10 @@ class MainClass {
 		resource.registerLispFunction("submenu", new MLispFunction(mgtk_submenu));
 		resource.registerLispFunction("button", new MLispFunction(mgtk_button));
 		resource.registerLispFunction("hbox", new MLispFunction(mgtk_hbox));
+		resource.registerLispFunction("menu_separator", new MLispFunction(mgtk_menu_seperator));
+
+		// Old mlisp used misspellings, etc -- alias them  =)
+		resource.registerLispFunction("menu_seperator", new MLispFunction(mgtk_menu_seperator));
 
 		resource.registerLispFunction("icon", new MLispFunction(undef));
 		resource.registerLispFunction("gl_widget",new MLispFunction(undef));
@@ -400,7 +436,6 @@ class MainClass {
 		resource.registerLispFunction("togglebutton", new MLispFunction(undef));
 		resource.registerLispFunction("spinbutton", new MLispFunction(undef));
 		resource.registerLispFunction("spinbutton2", new MLispFunction(undef));
-		resource.registerLispFunction("menu_seperator", new MLispFunction(undef));
 		resource.registerLispFunction("optionmenu", new MLispFunction(undef));
 		resource.registerLispFunction("popup_menu", new MLispFunction(undef));
 		resource.registerLispFunction("animation_tab_hack", new MLispFunction(undef));
@@ -425,7 +460,7 @@ class MainClass {
 		Application.Init();
 		
 		resource.evalFile("../../test.mlisp");
-		//resource.evalFile("../../freyja.mlisp");
+		//resource.evalFile("../../freyja_sharp.mlisp");
 		
 		//resource.dumpSymbols();
 
