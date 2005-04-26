@@ -33,10 +33,7 @@
 
 #include <mstl/List.h>
 
-#include <freyja8/EggPlugin.h>
-#ifdef ENDIAN
-#   include <freyja8/mendian.h>
-#endif
+#include <freyja/FreyjaPluginABI.h>
 
 #include <hel/Matrix.h>
 

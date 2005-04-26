@@ -23,8 +23,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja_egg/EggPlugin.h>
-//#include "User1.h"
+#include <freyja/FreyjaPluginABI.h>
 
 
 extern "C" {
