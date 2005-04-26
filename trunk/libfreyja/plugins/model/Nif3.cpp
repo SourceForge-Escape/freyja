@@ -100,7 +100,7 @@ bool Nif3::loadModel(const char *filename)
 ////////////////////////////////////////////////////////////
 
 #ifdef FREYJA_MODEL_PLUGINS
-#include <freyja8/EggPlugin.h>
+#include <freyja/FreyjaPluginABI.h>
 
 extern "C" {
 
