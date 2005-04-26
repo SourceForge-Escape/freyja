@@ -380,6 +380,29 @@ void printObjList(mObjectList *list)
 }
 
 
+void printObjList2(mObjectList *list, char *s)
+{
+	mObjectList *current = list;
+	mObject *obj;
+
+
+	if (!list)
+	{
+		printf("ObjectList is NULL.\n");
+		return;
+	}
+
+	while (current)
+	{
+		obj = objPeek(current);
+		current = current->next;
+
+		printf("%s", s);
+		printObj(obj);
+	}
+}
+
+
 ////////////////////////////////////////////////////////////
 /// Internal built-in functions ////////////////////////////
 ////////////////////////////////////////////////////////////
@@ -695,6 +718,8 @@ Mlisp::Mlisp()
 	registerLispFunction("rest", rest);
 
 	registerLispFunction("+", add);
+	registerLispFunction("add", add);
+	registerLispFunction("sub", subtract);
 	registerLispFunction("-", subtract);
 	registerLispFunction("*", multiply);
 	registerLispFunction("/", divide);
@@ -804,6 +829,16 @@ void Mlisp::setDebugLevel(int level)
 
 int Mlisp::evalBuffer(const char *buffer)
 {
+	if (mSymbolSize < 65)
+	{
+		mSymbolSize = 65;
+	}
+
+	if (!mSymbol)
+		mSymbol = new char[mSymbolSize];
+
+	//printf("%s\n", buffer);
+
 	if (!parseEvalBuffer(buffer))
 		eval();
 
@@ -1063,15 +1098,55 @@ void Mlisp::clear()
 }
 
 
+mObjectList *getNextScopeStack(mObjectList **stack)
+{
+	mObjectList *tmpStack = NULL;
+	mObject *obj = NULL;
+		
+		
+	while (*stack)
+	{
+		obj = objPop(stack);
+		
+		if (!obj || obj->type == END)
+		{
+			/* End with NIL Object for var parm func (func ...) */
+			//objPush(&tmpStack, NULL); // No longer valid?
+			break; 
+		}
+		
+		//Console.Write(">> ");
+		//obj.print();
+		
+		objPush(&tmpStack, obj);
+	}
+	
+	/* Reverse stack, so that order is maintained in execution from parsing */
+	mObjectList *reverse = NULL;
+	while (tmpStack)
+	{
+		obj = objPop(&tmpStack);
+		objPush(&reverse, obj);
+	}
+	
+	return reverse;
+	
+	// tmpStack = reverse;
+	//return tmpStack;
+}
+
+
+// FIXME: Not trimming given stack, so (setq (add ...)) calls (add ...) agian
 mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 {
 	mObject *(*callFunction)(mObjectList *);
-	mObjectList *parms = NULL, *current = NULL;
+	mObjectList *parms = NULL, *reverse = NULL, *fstack = NULL;
 	mObject *obj, *result = NULL;
-	//unsigned int scopeMatch = 0;
+	int scopeMatch = 0;
 
 
-	printf("-begin----------------------\n");
+	if (mDebug > 2)
+		printf("-begin----------------------\n");
 
 	if (!(func->type == BUILTINFUNC || func->type == FUNC))
 	{
@@ -1084,6 +1159,10 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 	}
 
 
+	/* 0. Push func obj to grouped function stack */
+	objPush(&fstack, func);
+
+
 	/* 1. Pop a Scope BEGIN obj */
 	obj = objPeek(stack);
 	
@@ -1091,6 +1170,9 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 	{
 		printf("FATAL ERROR: Lisp stack corrupt... BEGIN !=");
 		printObj(obj);
+
+		// FIXME: Add stack dump here for debugging
+
 		return result;
 	}
 
@@ -1101,84 +1183,148 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 	{
 		obj = objPeek(stack);
 
-		printObj(obj);
-		
+		if (mDebug > 2)
+		{
+			printf(" ");
+			printObj(obj);
+		}
+
 		if (obj->type == BEGIN)
 		{
-			//++scopeMatch;
+			++scopeMatch;
+			objPush(&parms, obj); // Push BEGIN
 		}
 		else if (obj->type == END)
 		{
-			//--scopeMatch;
+			--scopeMatch;
+			objPush(&parms, obj); // Push END
 			
-			//if (scopeMatch == 0)
-				break;
+			if (scopeMatch == 0)
+			{
+				if (mDebug > 1)
+				{
+					printf("xxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+					printObjList(fstack);
+					printf("xxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+				}
+
+				/* 1. If func is non-nil continue to execute and push result */
+				if (!func)
+					break;
+				
+				/* 2. If the function is passed no args, make a null list */
+				//if (!parms)
+				//	objPush(&parms, NULL); // Is this no longer valid?
+
+				/* 3. Reverse order of stack for use as args list */
+				while (parms)
+				{
+					obj = objPop(&parms);
+
+					if (mDebug > 1)
+					{
+						printf("Buffering AR... ");
+						printObj(obj);
+					}
+
+
+					/* 4. Call function implementation if FUNC, buffer others */
+					switch (obj->type)
+					{
+					case BEGIN:
+						continue;
+
+					case FUNC:
+					case BUILTINFUNC:
+						{
+							if (mDebug > 1)
+							{
+								printf("--- FUNC ---------------------\n");
+								printf(" Calling ");
+								printObj(obj);
+								printObjList2(reverse, "\te> ");
+							}
+
+							mObjectList *tmp = getNextScopeStack(&reverse);
+							
+							if (obj->type == FUNC)
+							{
+								callFunction = (mObject * (*)(mObjectList *))obj->data;
+								obj = (*callFunction)(tmp);
+							}
+							// Use external BUILTINFUNC method w/ indices later
+							else if (!strncmp("setq", obj->symbol, 4))
+							{
+								obj = builtin_setq(tmp); 
+							}
+							else
+							{
+								printf("ERROR '%s' not implemented\n", obj->symbol);
+							}
+
+							objPush(&reverse, obj); // could fall through
+							objPop(&fstack);
+						}
+						break;
+
+					}
+
+					objPush(&reverse, obj);
+				}
+
+				parms = reverse; // FIXME: Memory leak
+
+				func = objPop(&fstack);
+				
+				if (func->type == FUNC)
+				{
+					callFunction = (mObject * (*)(mObjectList *))func->data;
+					result = (*callFunction)(reverse);
+				}
+				else if (!strncmp("setq", func->symbol, 4)) // use external method and indices later
+				{
+					result = builtin_setq(reverse); 
+				}
+				
+				objPush(&parms, result);
+
+				if (mDebug > 1)
+				{
+					printf("\t <-- : ");
+					printObj(result);
+				}
+				
+
+				/* 5. No more functions to inline or callback */
+				if (!func || !fstack)
+					break;
+			}
 		}
 
+		/* Cull scope markers, setup call stack */
 		switch (obj->type)
 		{
 		case BEGIN:
 		case END:
 			break;
+
 		case BUILTINFUNC:
 		case FUNC:
-			obj = evalFunction(stack, obj);
+			objPush(&fstack, obj);
+
 		default:
 
-			if (!parms)
-			{
-				parms = new mObjectList;
-				current = parms;
-			}
-			else
-			{
-				current->next = new mObjectList;
-				current = current->next;
-			}
-
-			//printObj(obj);						
-			current->data = obj;
-			current->next = NULL;
+			objPush(&parms, obj);
 		}
 
 		stack = stack->next;
 	}
 
 
+	if (mDebug > 2)
+		printf("-end------------------------\n");
 
-	/* 3. Call C/C++ function implementation, or method */
-	switch (func->type)
-	{
-	case FUNC:
-		printf("FUNC: calling %s\n", func->symbol);
-		callFunction = (mObject * (*)(mObjectList *))func->data;
-		result = (*callFunction)(parms);
-		break;
-	case BUILTINFUNC:
-		//mObject *(Mlisp::*func)(mObjectList *);
-		//func =(mObject *(Mlisp::*)(mObjectList *))(*(obj->data));
-		//result = (this->*func)(parms);
-		printf("BUILTINFUNC: calling %s\n", func->symbol);
-
-		if (!strncmp("setq", func->symbol, 4))
-		{
-			result = builtin_setq(parms); printf("[./] Check\n");
-		}
-		else
-		{
-			printf("ERROR '%s' not implemented\n", func->symbol);
-		}
-		break;
-	default:
-		printf("%s\n", func->symbol);
-		assert(func->type == FUNC || func->type == BUILTINFUNC);
-	}
-
-	printf("-end------------------------\n");
-
-
-
-	/* 4. Return the result to eval system */
+	/* 6. Return the result to eval system */
 	return result;
 }
 
@@ -1209,8 +1355,7 @@ void Mlisp::eval()
 
 	mExecStack = reverse;
 
-#define TEST_FRAMES
-#ifdef TEST_FRAMES
+
 	while (mExecStack)
 	{
 		obj = objPop(&mExecStack);
@@ -1221,7 +1366,6 @@ void Mlisp::eval()
 			evalFunction(mExecStack, obj);
 		}
 	}
-#endif
 
 	while (mExecStack)
 	{
@@ -2076,6 +2220,9 @@ int runUnitTest(int argc, char *argv[])
 	if (argc <= 1)
 	{
 		printf("%s FILENAME.LISP\n", argv[0]);
+
+		rc.setDebugLevel(20);
+		rc.evalBuffer(";; Test\n\n(setq SHOULD_BE_14 (+ 4 5 (- 9 10) (+ 3 (+ 2 1))))");
 	}
 	else if (argc > 1)
 	{
