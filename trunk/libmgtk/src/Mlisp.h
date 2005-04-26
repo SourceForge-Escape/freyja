@@ -417,7 +417,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 	
-	mObject *evalFunction(mObjectList *stack, mObject *func);
+	mObject *evalFunction(mObjectList **stack, mObject *func);
 	void eval();
 	/*------------------------------------------------------
 	 * Pre  : 

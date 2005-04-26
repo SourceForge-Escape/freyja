@@ -1137,7 +1137,7 @@ mObjectList *getNextScopeStack(mObjectList **stack)
 
 
 // FIXME: Not trimming given stack, so (setq (add ...)) calls (add ...) agian
-mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
+mObject *Mlisp::evalFunction(mObjectList **stack, mObject *func)
 {
 	mObject *(*callFunction)(mObjectList *);
 	mObjectList *parms = NULL, *reverse = NULL, *fstack = NULL;
@@ -1164,7 +1164,7 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 
 
 	/* 1. Pop a Scope BEGIN obj */
-	obj = objPeek(stack);
+	obj = objPeek(*stack);
 	
 	if (!objTypeP(obj, BEGIN))
 	{
@@ -1181,7 +1181,7 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 	 *    function's scope is reached, eval passed functions as well */
 	while (stack)
 	{
-		obj = objPeek(stack);
+		obj = objPeek(*stack);
 
 		if (mDebug > 2)
 		{
@@ -1262,7 +1262,7 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 								printf("ERROR '%s' not implemented\n", obj->symbol);
 							}
 
-							objPush(&reverse, obj); // could fall through
+							//objPush(&reverse, obj); // could fall through
 							objPop(&fstack);
 						}
 						break;
@@ -1317,7 +1317,7 @@ mObject *Mlisp::evalFunction(mObjectList *stack, mObject *func)
 			objPush(&parms, obj);
 		}
 
-		stack = stack->next;
+		*stack = (*stack)->next;
 	}
 
 
@@ -1363,7 +1363,7 @@ void Mlisp::eval()
 		if (obj && obj->type == FUNC || obj->type ==BUILTINFUNC)
 		{
 			printf("evalFunction <-- "); printObj(obj);
-			evalFunction(mExecStack, obj);
+			evalFunction(&mExecStack, obj);
 		}
 	}
 
@@ -2055,9 +2055,10 @@ mObject *Mlisp::builtin_setq(mObjectList *parms)
 	{
 		//registerSymbolObject((char *)symbol->data, data);
 		registerSymbol((char *)symbol->data, data->type, data->data);
+		obj = data;
 	}
 
-	return NULL;
+	return obj;
 }
 
 
