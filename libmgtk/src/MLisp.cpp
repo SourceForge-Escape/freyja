@@ -28,7 +28,7 @@
 
 #include <assert.h>
 
-#include "Mlisp.h"
+#include "MLisp.h"
 
 
 #define MLISP_DEBUG_ENABLED
