@@ -152,7 +152,7 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS = \
-	$(BUILDDIR)/Mlisp.o \
+	$(BUILDDIR)/MLisp.o \
 	$(BUILDDIR)/Resource.o \
 	$(BUILDDIR)/mgtk_callbacks.o \
 	$(BUILDDIR)/mgtk_interface.o \
@@ -318,10 +318,10 @@ backup:
 ################################################################
 
 
-Mlisp.test:
+MLisp.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	gcc -Wall -ggdb -DUNIT_TEST_MLISP -lstdc++ \
-	src/Mlisp.cpp -o $(BUILD_TEST_DIR)/Mlisp.test
+	src/MLisp.cpp -o $(BUILD_TEST_DIR)/MLisp.test
 
 Resource.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
