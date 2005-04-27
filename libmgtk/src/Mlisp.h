@@ -1,16 +1,16 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Midgard
+ * Project : MLisp
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
- * Object  : Mlisp
- * License : No use w/o permission (C) 2001 Mongoose
- * Comments: Mlisp (metadata) handler class
+ * Website : http://icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
+ * Object  : MLisp
+ * License : No use w/o permission (C) 2001-2005 Mongoose
+ * Comments: MLisp domain language class
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------ 
  *
@@ -24,10 +24,11 @@
  * Mongoose - Created
  ===========================================================================*/
 
-#ifndef GUARD__MIDGARD_MONGOOSE_MLISP_H_
-#define GUARD__MIDGARD_MONGOOSE_MLISP_H_
+#ifndef GUARD__MLISP_MONGOOSE_MLISP_H_
+#define GUARD__MLISP_MONGOOSE_MLISP_H_
 
 #include <stdio.h>
+
 
 typedef enum
 {
@@ -88,7 +89,7 @@ mObject *objPeek(mObjectList *list);
 mObject *newListObj(mObjectList *list);
 
 
-class Mlisp
+class MLisp
 {
  public:
 
@@ -100,7 +101,7 @@ class Mlisp
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Mlisp();
+	MLisp();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Mlisp
@@ -111,7 +112,7 @@ class Mlisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~Mlisp();
+	~MLisp();
 	/*------------------------------------------------------
 	 * Pre  : Mlisp object is allocated
 	 * Post : Deconstructs an object of Mlisp

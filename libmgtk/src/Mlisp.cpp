@@ -675,7 +675,7 @@ mObject *divide(mObjectList *list)
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Mlisp::Mlisp()
+MLisp::MLisp()
 {
 	mSymbolTable = NULL;
 	mExecStack = NULL;
@@ -713,7 +713,7 @@ Mlisp::Mlisp()
 	
 	/* Append lisp built-in functions to symbol table */
 	registerLispFunction("nil", nil);
-	registerLispFunctionBuiltIn("setq", SetQ); //, &Mlisp::builtin_setq);
+	registerLispFunctionBuiltIn("setq", SetQ); //, &MLisp::builtin_setq);
 	registerLispFunction("first", first);
 	registerLispFunction("rest", rest);
 
@@ -730,7 +730,7 @@ Mlisp::Mlisp()
 }
 
 
-Mlisp::~Mlisp()
+MLisp::~MLisp()
 {
 	clear();
 }
@@ -740,7 +740,7 @@ Mlisp::~Mlisp()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-void Mlisp::dumpSymbols()
+void MLisp::dumpSymbols()
 {
 	printf("\n\nDumping symbols:\n");
 	printf("------------------------------------------------------------\n");
@@ -749,7 +749,7 @@ void Mlisp::dumpSymbols()
 }
 
 
-mObject *Mlisp::getSymbol(const char *symbol)
+mObject *MLisp::getSymbol(const char *symbol)
 {
 	mObjectList *current;
 	mObject *obj;
@@ -776,7 +776,7 @@ mObject *Mlisp::getSymbol(const char *symbol)
 }
 
 
-int Mlisp::getSymbolData(char *symbol, unsigned int type, void **data)
+int MLisp::getSymbolData(char *symbol, unsigned int type, void **data)
 {
 	mObjectList *current;
 	mObject *obj;
@@ -821,13 +821,13 @@ int Mlisp::getSymbolData(char *symbol, unsigned int type, void **data)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void Mlisp::setDebugLevel(int level)
+void MLisp::setDebugLevel(int level)
 {
 	mDebug = level;
 }
 
 
-int Mlisp::evalBuffer(const char *buffer)
+int MLisp::evalBuffer(const char *buffer)
 {
 	if (mSymbolSize < 65)
 	{
@@ -846,7 +846,7 @@ int Mlisp::evalBuffer(const char *buffer)
 }
 
 
-int Mlisp::evalFile(const char *filename)
+int MLisp::evalFile(const char *filename)
 {
 	if (mBuffer)
 	{
@@ -881,25 +881,25 @@ int Mlisp::evalFile(const char *filename)
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-bool Mlisp::isAtoZ(char c)
+bool MLisp::isAtoZ(char c)
 {
 	return ((unsigned char)c > 64 && (unsigned char)c < 91);
 }
 
 
-bool Mlisp::isatoz(char c)
+bool MLisp::isatoz(char c)
 {
 	return ((unsigned char)c > 96 && (unsigned char)c < 123);
 }
 
 
-bool Mlisp::isDigit(char c)
+bool MLisp::isDigit(char c)
 {
 	return ((unsigned char)c > 47 && (unsigned char)c < 58);
 }
 
 
-bool Mlisp::isMisc(char c)
+bool MLisp::isMisc(char c)
 {
 	if ((unsigned char)c == 95)
 		return true;
@@ -908,7 +908,7 @@ bool Mlisp::isMisc(char c)
 }
 
 
-bool Mlisp::isNumeric(char *symbol, float *n)
+bool MLisp::isNumeric(char *symbol, float *n)
 {
 	int len, i;
 	bool real = false;
@@ -953,7 +953,7 @@ bool Mlisp::isNumeric(char *symbol, float *n)
 }
 
 
-void Mlisp::printError(char *format, ...)
+void MLisp::printError(char *format, ...)
 {
 	char buffer[256];
 	va_list args;
@@ -987,7 +987,7 @@ void Mlisp::printError(char *format, ...)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-int Mlisp::appendSymbolTable(mObject *object)
+int MLisp::appendSymbolTable(mObject *object)
 {
 	mSymbolTable = objAppend(object, mSymbolTable);
 
@@ -995,7 +995,7 @@ int Mlisp::appendSymbolTable(mObject *object)
 }
 
 
-void Mlisp::bind(const char *symbol, mObject *data)
+void MLisp::bind(const char *symbol, mObject *data)
 {
 	int len;
 
@@ -1019,7 +1019,7 @@ void Mlisp::bind(const char *symbol, mObject *data)
 }
 
 
-int Mlisp::bufferFile(const char *filename, 
+int MLisp::bufferFile(const char *filename, 
 					  char **buffer, unsigned int *bytes)
 {
 	FILE *f;
@@ -1057,7 +1057,7 @@ int Mlisp::bufferFile(const char *filename,
 }
 
 
-void Mlisp::clear()
+void MLisp::clear()
 {
 	while (mDataStack)
 	{
@@ -1137,7 +1137,7 @@ mObjectList *getNextScopeStack(mObjectList **stack)
 
 
 // FIXME: Not trimming given stack, so (setq (add ...)) calls (add ...) agian
-mObject *Mlisp::evalFunction(mObjectList **stack, mObject *func)
+mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 {
 	mObject *(*callFunction)(mObjectList *);
 	mObjectList *parms = NULL, *reverse = NULL, *fstack = NULL;
@@ -1329,7 +1329,7 @@ mObject *Mlisp::evalFunction(mObjectList **stack, mObject *func)
 }
 
 
-void Mlisp::eval()
+void MLisp::eval()
 {
 	mObject *(*callFunction)(mObjectList *);
 	mObjectList *parms = NULL, *currentStack = NULL, *curStack, *cur;
@@ -1440,8 +1440,8 @@ void Mlisp::eval()
 					break;
 				default:
 				case BUILTINFUNC:
-					//mObject *(Mlisp::*func)(mObjectList *);
-					//func =(mObject *(Mlisp::*)(mObjectList *))(*(obj->data));
+					//mObject *(MLisp::*func)(mObjectList *);
+					//func =(mObject *(MLisp::*)(mObjectList *))(*(obj->data));
 					//result = (this->*func)(parms);
 					printf("BUILTINFUNC: calling %s\n", obj->symbol);
 					result = builtin_setq(parms);
@@ -1533,7 +1533,7 @@ void Mlisp::eval()
 }
 
 
-void Mlisp::expected(char c)
+void MLisp::expected(char c)
 {
 	char s[4];
 
@@ -1560,7 +1560,7 @@ void Mlisp::expected(char c)
 }
 
 
-mObject *Mlisp::getNextSymbol()
+mObject *MLisp::getNextSymbol()
 {
 	mObject *obj;
 
@@ -1578,13 +1578,13 @@ mObject *Mlisp::getNextSymbol()
 }
 
 
-bool Mlisp::is(char c)
+bool MLisp::is(char c)
 {
   return (c == mLook);
 }
 
 
-void Mlisp::lex()
+void MLisp::lex()
 {
   if (mTop < mBufferSize)
   {
@@ -1611,7 +1611,7 @@ void Mlisp::lex()
 }
 
 
-bool Mlisp::match(char c)
+bool MLisp::match(char c)
 {
   bool r = is(c);
 
@@ -1627,7 +1627,7 @@ bool Mlisp::match(char c)
 }
 
 
-void Mlisp::parseComment()
+void MLisp::parseComment()
 {
 	match(';');
 
@@ -1643,7 +1643,7 @@ void Mlisp::parseComment()
 }
 
 
-int Mlisp::parseEvalBuffer(const char *buffer)
+int MLisp::parseEvalBuffer(const char *buffer)
 {
 	mObject *object;
 
@@ -1702,7 +1702,7 @@ int Mlisp::parseEvalBuffer(const char *buffer)
 }
 
 
-mObject *Mlisp::parseFunction()
+mObject *MLisp::parseFunction()
 {
 	mObject *func = NULL, *object = NULL;
 	void *data;
@@ -1774,7 +1774,7 @@ mObject *Mlisp::parseFunction()
 }
 
 
-mObject *Mlisp::parseNextSymbol()
+mObject *MLisp::parseNextSymbol()
 {
 	int i = 0, j;
 	mObject *object = NULL;
@@ -1894,7 +1894,7 @@ mObject *Mlisp::parseNextSymbol()
 }
 
 
-void Mlisp::parseSeperator()
+void MLisp::parseSeperator()
 {
 	// Real whitespace stripping
 	while (is(' ') || is('\t') || is('\n'))
@@ -1909,7 +1909,7 @@ void Mlisp::parseSeperator()
 }
 
 
-void Mlisp::parseString(char *string, int len)
+void MLisp::parseString(char *string, int len)
 {
 	int i = 0;
 	
@@ -1937,8 +1937,8 @@ void Mlisp::parseString(char *string, int len)
 }
 
 
-int Mlisp::registerLispFunctionBuiltIn(const char *symbol, builtin_t func)
-//mObject *(Mlisp::*func)(mObjectList *))
+int MLisp::registerLispFunctionBuiltIn(const char *symbol, builtin_t func)
+//mObject *(MLisp::*func)(mObjectList *))
 {
     mObject *obj = NULL;
     unsigned int lenght;
@@ -1966,7 +1966,7 @@ int Mlisp::registerLispFunctionBuiltIn(const char *symbol, builtin_t func)
 }
 
 
-int Mlisp::registerLispFunction(const char *symbol, 
+int MLisp::registerLispFunction(const char *symbol, 
 								mObject *(*func)(mObjectList *))
 {
 	if (!func)
@@ -1978,7 +1978,7 @@ int Mlisp::registerLispFunction(const char *symbol,
 }
 
 
-int Mlisp::registerSymbol(const char *symbol, unsigned int type, void *data)
+int MLisp::registerSymbol(const char *symbol, unsigned int type, void *data)
 {
 	mObject *object;
 
@@ -1999,7 +1999,7 @@ int Mlisp::registerSymbol(const char *symbol, unsigned int type, void *data)
 }
 
 
-int Mlisp::registerSymbolValue(const char *symbol, float d)
+int MLisp::registerSymbolValue(const char *symbol, float d)
 {
 	mObject* object = newFloatObj(d);
 
@@ -2016,7 +2016,7 @@ int Mlisp::registerSymbolValue(const char *symbol, float d)
 }
 
 
-int Mlisp::registerSymbolValue(const char *symbol, int i)
+int MLisp::registerSymbolValue(const char *symbol, int i)
 {
 	mObject* object = newIntObj(i);
 
@@ -2032,7 +2032,7 @@ int Mlisp::registerSymbolValue(const char *symbol, int i)
 
 
 // Should dupe data pointer for fear of GC
-mObject *Mlisp::builtin_setq(mObjectList *parms)
+mObject *MLisp::builtin_setq(mObjectList *parms)
 {
 	mObject *symbol, *data, *obj;
 
@@ -2062,7 +2062,7 @@ mObject *Mlisp::builtin_setq(mObjectList *parms)
 }
 
 
-int Mlisp::registerSymbolValue(const char *symbol, char *string)
+int MLisp::registerSymbolValue(const char *symbol, char *string)
 {
 	mObject* object = newStringObj(string);
 
@@ -2077,7 +2077,7 @@ int Mlisp::registerSymbolValue(const char *symbol, char *string)
 }
 
 
-int Mlisp::registerSymbolObject(const char *symbol, mObject *object)
+int MLisp::registerSymbolObject(const char *symbol, mObject *object)
 {
 	if (!symbol || !symbol[0] || !object)
 	{
@@ -2212,7 +2212,7 @@ mObject *vbox(mObjectList *parms)
 
 int runUnitTest(int argc, char *argv[])
 {
-	Mlisp rc;
+	MLisp rc;
 	int i = 0;
 
 
@@ -2265,7 +2265,7 @@ int runUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[Mlisp class test]\n");
+	printf("[MLisp class test]\n");
 
 	return runUnitTest(argc, argv);
 }
