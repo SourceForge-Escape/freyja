@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <math.h>
 #include <freyja/FreyjaFileReader.h>
 
 #include "ETModel.h"

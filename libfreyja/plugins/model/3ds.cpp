@@ -179,7 +179,7 @@ void File3ds::Parse3dsMain()
 	word		id_chunk;
 	long		len;
 	long		header;
-	streampos	end, curr;
+	streampos	end, curr, tmp;
 
 
 	//  Reads a word -- Presumably the first Chunk ID 
@@ -190,7 +190,9 @@ void File3ds::Parse3dsMain()
 		fin.read((char *) &fsize, sizeof fsize); 
 		header = sizeof ( word ) + sizeof ( long );
 
-		end	 = fin.tellg() + fsize - header;		//	Sets the end of this Block
+		end	 = fin.tellg(); 
+		end += (fsize - header); // gcc 3.4 work around
+													//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
@@ -213,7 +215,8 @@ void File3ds::Parse3dsMain()
 				break;
 			default:
 				fin.read((char *) &len,	sizeof len);
-				fin.seekg(curr + len);
+				tmp = curr; tmp += len; // gcc 3.4 work around
+				fin.seekg(tmp);
 				break;
 			}
 			curr = fin.tellg();
@@ -234,10 +237,11 @@ void File3ds::Parse3dsEditor  (long len)
 	long		sub_len;
 	float		fdata;
 	long		header;
-	streampos	end, curr;
+	streampos	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg() + len - header;		//	Sets the end of this Block
+	end	 = fin.tellg(); end += len - header;  // gcc 3.4 work around
+											//	Sets the end of this Block
 											//	at the current position plus
 											//	the length of the block minus										//	the size of the chunk id and
 											//	size of chunk variables that
@@ -272,7 +276,8 @@ void File3ds::Parse3dsEditor  (long len)
 			break;
 		default:
 			fin.read((char *) &sub_len,	sizeof sub_len);
-			fin.seekg(curr + sub_len);
+			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
+			fin.seekg(tmp);
 			break;
 		}
 		curr = fin.tellg();
@@ -287,11 +292,12 @@ void File3ds::ParseObjectBlock(long len)
 	long	sub_len;
 	long	header; 
 	char	*strpos, c;
-	streampos end, curr;
+	streampos end, curr, tmp;
 
 	
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg() + len - header;				//	Sets the end of this Block
+	end	 = fin.tellg(); end += len - header;  // gcc 3.4 work around
+													//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
@@ -323,7 +329,8 @@ void File3ds::ParseObjectBlock(long len)
 			break;
 		default:
 			fin.read((char *) &sub_len,	sizeof sub_len);
-			fin.seekg(curr + sub_len);
+			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
+			fin.seekg(tmp);
 			curr = fin.tellg();
 			break;
 		}
@@ -342,10 +349,11 @@ void File3ds::ParseMaterialBlock  (long len)
 	long		header;
 	char		*strpos, c;
 
-	streampos	end, curr;
+	streampos	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg() + len - header;				//	Sets the end of this Block
+	end	 = fin.tellg(); end += len - header; // gcc 3.4 work around
+				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
@@ -414,7 +422,8 @@ void File3ds::ParseMaterialBlock  (long len)
 			break;
 		default:
 			fin.read((char *) &sub_len,	sizeof sub_len);
-			fin.seekg(curr + sub_len);
+			 tmp = curr; tmp += sub_len;// gcc 3.4 work around
+			fin.seekg(tmp);
 			break;
 		}
 		curr = fin.tellg();
@@ -430,10 +439,11 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 	long		sub_len;
 	long		header;
 	char		*strpos, c;
-	streampos	end, curr;
+	streampos	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg() + len - header;				//	Sets the end of this Block
+	end	 = fin.tellg(); end += len - header; // gcc 3.4 work around
+				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
@@ -472,7 +482,8 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 			break;
 		default:
 			fin.read((char *) &sub_len,	sizeof sub_len);
-			fin.seekg(curr + sub_len);
+			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
+			fin.seekg(tmp);
 			break;
 		}
 		curr = fin.tellg();
@@ -565,10 +576,11 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 	int		x;
 	
 
-	streampos end, curr;
+	streampos end, curr, tmp;
 	
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin->tellg() + len - header;				//	Sets the end of this Block
+	end	 = fin->tellg(); end += len - header;  // gcc 3.4 work around
+				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
@@ -655,7 +667,8 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 			break;
 		default:
 			fin->read((char *) &sub_len,	sizeof sub_len);
-			fin->seekg(curr + sub_len);
+			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
+			fin->seekg(tmp);
 			break;
 		}
 		curr = fin->tellg();
