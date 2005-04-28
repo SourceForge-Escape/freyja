@@ -34,7 +34,7 @@ CONFIGURE_LNK=
 
 ################################################################
 
-CC=gcc
+CC=gcc-3.4
 #CC=i586-mingw32msvc-g++
 #CPP=i586-mingw32msvc-cpp
 #LD=i586-mingw32msvc-ld
