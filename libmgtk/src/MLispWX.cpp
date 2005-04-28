@@ -35,9 +35,11 @@ enum mwx_types
 {
 	MWX_WIDGET = 1024,
 	MWX_FRAME,
-	MWX_GL_CANVAS
+	MWX_GL_CANVAS,
+	MWX_BUTTON
 };
 
+wxFrame *MWX_DUMMY = NULL;
 
 /* Interfaces must be implmented for each interface ( gtk+, win32, wx, etc ) */
 mObject *mwx_rc_window(mObjectList *args)
@@ -55,9 +57,12 @@ mObject *mwx_rc_window(mObjectList *args)
 
 	while (args && (obj = objPop(&args)))
 	{
-		if (obj->type == MWX_WIDGET)
+		if (obj->type >= MWX_WIDGET)
 		{
+			printf("*** Reparenting...\n");
+			//((wxWindow*)obj->data)->SetParent(NULL);
 			((wxWindow*)obj->data)->SetParent(window);
+			//((wxWindow*)obj->data)->Reparent(window);
 		}
 	}
 
@@ -69,7 +74,7 @@ mObject *mwx_rc_window(mObjectList *args)
 
 mObject *mwx_rc_gl_widget(mObjectList *args)
 {
-	wxGLCanvas *gl_widget = new wxGLCanvas(NULL, -1, wxPoint(0,0), wxSize(200,200), wxSUNKEN_BORDER, _("OpenGL"));
+	wxGLCanvas *gl_widget = new wxGLCanvas(MWX_DUMMY, -1, wxPoint(0,0), wxSize(200,200), wxSUNKEN_BORDER, _("OpenGL"));
 
 	return newADTObj(MWX_GL_CANVAS, &gl_widget);
 }
@@ -84,7 +89,20 @@ mObject *mwx_rc_hbox(mObjectList *args) { return NULL; }
 mObject *mwx_rc_vbox(mObjectList *args) { return NULL; }
 mObject *mwx_rc_handlebox(mObjectList *args) { return NULL; }
 mObject *mwx_rc_label(mObjectList *args) { return NULL; }
-mObject *mwx_rc_button(mObjectList *args) { return NULL; }
+
+
+mObject *mwx_rc_button(mObjectList *args)
+{
+	mObject *label = objPop(&args);
+
+	wxButton *button = new wxButton(MWX_DUMMY, 0, "test"/*getString(label)*/,
+									wxDefaultPosition, wxDefaultSize,
+									wxSUNKEN_BORDER, wxDefaultValidator, "button");
+
+	return newADTObj(MWX_BUTTON, &button);
+}
+
+
 mObject *mwx_rc_colorbutton(mObjectList *args) { return NULL; }
 mObject *mwx_rc_togglebutton(mObjectList *args) { return NULL; }
 mObject *mwx_rc_spinbutton(mObjectList *args) { return NULL; }
@@ -228,6 +246,11 @@ IMPLEMENT_APP(StubApp)
 bool StubApp::OnInit()
 {
 	printf("[MLispWX class test]\n");
+
+	// wx needs a dummy 'toplevel' window to make out of order allocations
+	MWX_DUMMY = new wxFrame((wxFrame *)NULL, -1, "VISIBLE FOR DEBUGGING USE ONLY",
+									wxPoint(50, 50), wxSize(512, 512));
+	MWX_DUMMY->Show(TRUE); // REMOVE ME AFTER LOAD
 	runMLispWXUnitTest(argc, argv);
 	return true;
 }
