@@ -317,6 +317,10 @@ backup:
 # Unit tests
 ################################################################
 
+MLispWX.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	gcc -Wall -ggdb -DUNIT_TEST_MLISPWX -lstdc++ `wx-config --libs --cxxflags --gl-libs` \
+	src/MLisp.cpp src/MLispWX.cpp -o $(BUILD_TEST_DIR)/MLispWX.test
 
 MLisp.test:
 	@-mkdir -p $(BUILD_TEST_DIR)

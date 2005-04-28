@@ -1,18 +1,21 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Midgard
+ * Project : MLisp
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
- * Object  : Mlisp
- * License : No use w/o permission (C) 2001 Mongoose
- * Comments: Mlisp (metadata) handler class
+ * Website : http://icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
+ * Object  : MLisp
+ * License : No use w/o permission (C) 2001-2005 Mongoose
+ * Comments: MLisp domain language class
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------ 
+ *
+ * 2004.01.26:
+ * Mongoose - API change for function signature
  *
  * 2004.01.04:
  * Mongoose - Major API changes, fun updates  =)
@@ -712,8 +715,8 @@ MLisp::MLisp()
 	 */
 	
 	/* Append lisp built-in functions to symbol table */
+	registerLispFunctionBuiltIn("setq", SetQ); 
 	registerLispFunction("nil", nil);
-	registerLispFunctionBuiltIn("setq", SetQ); //, &MLisp::builtin_setq);
 	registerLispFunction("first", first);
 	registerLispFunction("rest", rest);
 
@@ -838,6 +841,28 @@ int MLisp::evalBuffer(const char *buffer)
 		mSymbol = new char[mSymbolSize];
 
 	//printf("%s\n", buffer);
+
+#ifdef NO_FILE_REQUIRED
+	if (!mBuffer)  // Good idea?
+	{
+		mBufferSize = strlen(buffer);
+
+		char *tmp = new char[mBufferSize+1];
+		strncpy(tmp, buffer, mBufferSize);
+		tmp[mBufferSize] = '\0';
+
+		--mBufferSize;
+		--mBufferSize;
+
+		if (mBuffer)
+		{
+			delete [] mBuffer;
+
+		}
+
+		mBuffer = tmp;
+	}
+#endif
 
 	if (!parseEvalBuffer(buffer))
 		eval();
@@ -2223,7 +2248,8 @@ int runUnitTest(int argc, char *argv[])
 		printf("%s FILENAME.LISP\n", argv[0]);
 
 		rc.setDebugLevel(20);
-		rc.evalBuffer(";; Test\n\n(setq SHOULD_BE_14 (+ 4 5 (- 9 10) (+ 3 (+ 2 1))))");
+		rc.evalBuffer("(setq SHOULD_BE_14 (+ 4 5 (- 9 10) (+ 3 (+ 2 1))))");
+		rc.dumpSymbols();
 	}
 	else if (argc > 1)
 	{
