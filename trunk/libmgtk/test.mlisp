@@ -8,5 +8,9 @@
 
 (window "MLispWX.test" "freyja.png" 
 	;(gl_widget)
+	(button "label")
+	(button "label2")
+	(button "label3")
+	(button "label4")
 )
 
