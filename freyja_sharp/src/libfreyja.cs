@@ -1,30 +1,14 @@
 // created on 4/13/2005 at 12:47 AM
 
-//#define USING_LIBFREYJA
+#define USING_LIBFREYJA
 
 using System;
 using System.Runtime.InteropServices;
 
 
 #if USING_LIBFREYJA
-using vec3 = System.Double;
-
-public class libfreyja {
-
-
-	public enum freyja_colormode_t
-	{
-		INDEXED_8 = 1, 
-		RGB_24, 
-		RGBA_32
-	}
-
-	public enum freyja_lock_t
-	{
-		FREYJA_WRITE_LOCK = 1,
-		FREYJA_WRITE_UNLOCK
-	} 
-
+namespace Freyja
+{
 	public enum freyja_object_t
 	{
         FREYJA_MODEL = 1,
@@ -43,6 +27,22 @@ public class libfreyja {
         FREYJA_MESHTREE_TAG
 	}
 
+
+	public enum freyja_colormode_t
+	{
+		INDEXED_8 = 1, 
+		RGB_24, 
+		RGBA_32
+	}
+
+
+	public enum freyja_lock_t
+	{
+		FREYJA_WRITE_LOCK = 1,
+		FREYJA_WRITE_UNLOCK
+	}
+
+
 	public enum freyja_transform_t
 	{
 		fTransformScene = 1,
@@ -57,46 +57,52 @@ public class libfreyja {
 		fTransformTexCoord
 	} 
 
-	public struct freyja_file_header_t
-	{
-		[MarshalAs (UnmanagedType.ByValArray, SizeConst=16)]
-		public char []magic; // [16]
-		public long version;
-		public long flags;
-		public long reserved;
-		[MarshalAs (UnmanagedType.ByValArray, SizeConst=64)]
-		public char []comment; //[64]
-	}
 
-	public struct freyja_file_chunk_t
-	{
-		public long type;
-		public long size;
-		public long flags;
-		public long version;
-	}
+	//using vec_t = System.Double;
 
-	public enum freyja_file_chunk_type_t
-	{
-		FREYJA_CHUNK_MODEL    = 0x204C444D,
-		FREYJA_CHUNK_MESH     = 0x4853454D,
-		FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
-		FREYJA_CHUNK_VERTICES = 0x54524556,
-		FREYJA_CHUNK_POLYGONS = 0x594C4F50,
-		FREYJA_CHUNK_SKELETON = 0x4C454B53,
-		FREYJA_CHUNK_BONE     = 0x454E4F42,
-		FREYJA_CHUNK_MATERIAL = 0x5454414D,
-		FREYJA_CHUNK_TEXTURE  = 0x54584554,
-		FREYJA_CHUNK_METADATA = 0x4154454D
-	} 
+
+public class LibFreyja 
+{
+	const string libname = "freyja";
 
 	const uint fPolygon_VertexUV     = 2;
 	const uint fPolygon_PolyMappedUV = 8;
-	const uint fPolygon_PolyMapped   = 8; // alias
+	const uint fPolygon_PolyMapped   = 8;  /* Alias for PolyMappedUV */
 	const uint fPolygon_ColorMapped  = 16;
 
-	const string libname = "/usr/local/lib/libfreyja.so";
 
+	public LibFreyja()
+	{
+	}
+	
+	public static void spawn()
+	{
+		/* Mono seems to require these to preload? */
+		Console.WriteLine("* libc test: username is " + getenv("USER"));
+		Console.WriteLine("* libhel0 test: 90 -> {0}", deg2rad(90));
+		
+		freyjaSpawn();
+	} 
+	
+	public static void kill()
+	{
+		freyjaKill();
+	}
+
+
+	[DllImport("hel0", EntryPoint="_Z11helDegToRadf")]
+	public extern static float deg2rad(float d);
+
+	[DllImport("libc", EntryPoint="getenv")]
+	public extern static string getenv(string var);
+		
+	[DllImport(libname)]
+	public extern static void freyjaSpawn();
+	
+	[DllImport(libname)]
+	public extern static void freyjaKill();
+	
+	
     ///////////////////////////////////////////////////////////////////////        // Freyja Iterator functions
     // Freyja Iterator functions
     ///////////////////////////////////////////////////////////////////////
@@ -169,7 +175,7 @@ public class libfreyja {
 	// FREYJA_TEXTURE Accessors ///////////////////////////////////////////
 
 	[DllImport(libname, EntryPoint="freyjaGetTextureFilename")]
-	public extern static int freyjaGetTextureFilename(uint index, char **filename);
+	public extern static int freyjaGetTextureFilename(uint index, out string filename);
 	/*------------------------------------------------------
 	 * Pre  : Do not attempt to alter <filename> on return
 	 *
@@ -179,9 +185,9 @@ public class libfreyja {
 
 	[DllImport(libname, EntryPoint="freyjaGetTextureImage")]
 	public extern static int freyjaGetTextureImage(uint index,
-							  uint *w, uint *h, 
-							  uint *depth,  uint *type,
-							  byte **image);
+								ref uint w, ref uint h, 
+							 	ref uint depth,  ref uint type,
+							 	ref byte []image);
 	/*------------------------------------------------------
 	 * Pre  : Do not attempt to alter <image> on return
 	 *
@@ -198,7 +204,7 @@ public class libfreyja {
 	public extern static long freyjaGetSkeletonBoneIndex(long skeletonIndex, long element);
 
 	[DllImport(libname, EntryPoint="freyjaGetBoneName")]
-	public extern static long freyjaGetBoneName(long boneIndex, uint size, char *name);
+	public extern static long freyjaGetBoneName(long boneIndex, uint size, string name);
 	/*------------------------------------------------------
 	 * Pre  : <name> must be allocated to <size> width
 	 *        A <size> of 64 is recommended
@@ -216,12 +222,16 @@ public class libfreyja {
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetBoneRotationWXYZ4fv")]
-	public extern static long freyjaGetBoneRotationWXYZ4fv(long boneIndex, vec4_t wxyz);
+	public extern static long freyjaGetBoneRotationWXYZ4fv(long boneIndex, 
+				//[MarshalAs (UnmanagedType.ByValArray, SizeConst=4)]
+				float [] wxyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s orientation as a Quaternion
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
+
+#if FIXME
 
 	[DllImport(libname, EntryPoint="freyjaGetBoneRotationXYZ3fv")]
 	public extern static long freyjaGetBoneRotationXYZ3fv(long boneIndex, vec3_t xyz);
@@ -301,9 +311,9 @@ public class libfreyja {
 	[DllImport(libname, EntryPoint="freyjaGetMeshPosition")]
 	public extern static long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
 	[DllImport(libname, EntryPoint="freyjaGetMeshNameString")]
-	public extern static char *freyjaGetMeshNameString(long meshIndex); // don't alter string
+	public extern static stringfreyjaGetMeshNameString(long meshIndex); // don't alter string
 	[DllImport(libname, EntryPoint="freyjaGetMeshName1s")]
-	public extern static long freyjaGetMeshName1s(long meshIndex, long lenght, char *name);
+	public extern static long freyjaGetMeshName1s(long meshIndex, long lenght, stringname);
 
 	[DllImport(libname, EntryPoint="freyjaGetMeshVertexIndex")]
 	public extern static long freyjaGetMeshVertexIndex(long meshIndex, long element);
@@ -399,7 +409,7 @@ public class libfreyja {
  ------------------------------------------------------*/
 
 //FIXME [DllImport(libname, EntryPoint="freyjaPrintError")]
-//FIXME	public extern static void freyjaPrintError(const char *format, ...);
+//FIXME	public extern static void freyjaPrintError(const stringformat, ...);
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout
@@ -411,7 +421,7 @@ public class libfreyja {
  ------------------------------------------------------*/
 
 //FIXME	[DllImport(libname, EntryPoint="freyjaPrintMessage")]
-//FIXME		public extern static void freyjaPrintMessage(const char *format, ...);
+//FIXME		public extern static void freyjaPrintMessage(const stringformat, ...);
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout
@@ -542,7 +552,7 @@ public class libfreyja {
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaTextureFilename1s")]
-	public extern static long freyjaTextureFilename1s(char *filename);
+	public extern static long freyjaTextureFilename1s(stringfilename);
 
 [DllImport(libname, EntryPoint="freyjaTextureStoreBuffer")]
 	public extern static long freyjaTextureStoreBuffer(byte *image, uint depth,
@@ -578,7 +588,7 @@ public class libfreyja {
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaBoneName1s")]
-	public extern static void freyjaBoneName1s(long boneIndex, char *name);
+	public extern static void freyjaBoneName1s(long boneIndex, stringname);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
  * Post : Set human readable bone name
@@ -736,7 +746,7 @@ public class libfreyja {
 	public extern static long freyjaMeshPosition(long meshIndex, vec3_t xyz);
 
 [DllImport(libname, EntryPoint="freyjaMeshName1s")]
-	public extern static void freyjaMeshName1s(long meshIndex, char *name);
+	public extern static void freyjaMeshName1s(long meshIndex, stringname);
 
 [DllImport(libname, EntryPoint="freyjaMeshFlags1u")]
 	public extern static void freyjaMeshFlags1u(uint flags);
@@ -872,7 +882,7 @@ public class libfreyja {
 
 	[DllImport(libname, EntryPoint="freyjaAnimationBoneCreate")]
 	public extern static long freyjaAnimationBoneCreate(long animationIndex,
-								    char *name, long boneIndex);
+								    stringname, long boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : Creates a new Freyja Animation Bone object
@@ -924,7 +934,7 @@ public class libfreyja {
 	/* Animation Mutators */
 
 	[DllImport(libname, EntryPoint="freyjaAnimationName")]
-	public extern static void freyjaAnimationName(long animationIndex,  char *name);
+	public extern static void freyjaAnimationName(long animationIndex,  stringname);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : Sets human readable animation name
@@ -932,7 +942,7 @@ public class libfreyja {
 
 	[DllImport(libname, EntryPoint="freyjaAnimationBoneName")]
 	public extern static void freyjaAnimationBoneName(long animationIndex, long boneIndex,
-								  char *name);
+								  stringname);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 *        Animation Bone <boneIndex> exists
@@ -1028,7 +1038,7 @@ public class libfreyja {
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialName")]
-	public extern static char *freyjaGetMaterialName(long materialIndex);
+	public extern static stringfreyjaGetMaterialName(long materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 *        Don't alter the returned string
@@ -1111,7 +1121,7 @@ public class libfreyja {
 	/* Material Mutators */
 
 	[DllImport(libname, EntryPoint="freyjaMaterialName")]
-	public extern static void freyjaMaterialName(long materialIndex, char *name);
+	public extern static void freyjaMaterialName(long materialIndex, stringname);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <name> id is set
@@ -1125,7 +1135,7 @@ public class libfreyja {
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialTextureFilename")]
-	public extern static void freyjaMaterialTextureFilename(long materialIndex, char *filename);
+	public extern static void freyjaMaterialTextureFilename(long materialIndex, stringfilename);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material textures's <filename> id is set
@@ -1229,10 +1239,10 @@ public class libfreyja {
 	public extern static void freyjaPluginBegin();
 
 	[DllImport(libname, EntryPoint="freyjaPluginDescription1s")]
-	public extern static void freyjaPluginDescription1s(char *info_line);
+	public extern static void freyjaPluginDescription1s(stringinfo_line);
 
 	[DllImport(libname, EntryPoint="freyjaPluginAddExtention1s")]
-	public extern static void freyjaPluginAddExtention1s(char *ext);
+	public extern static void freyjaPluginAddExtention1s(stringext);
 
 	[DllImport(libname, EntryPoint="freyjaPluginImport1i")]
 	public extern static void freyjaPluginImport1i(long flags);
@@ -1241,13 +1251,13 @@ public class libfreyja {
 	public extern static void freyjaPluginExport1i(long flags);
 
 	[DllImport(libname, EntryPoint="freyjaPluginArg1i")]
-	public extern static void freyjaPluginArg1i(char *name, long defaults);
+	public extern static void freyjaPluginArg1i(stringname, long defaults);
 
 	[DllImport(libname, EntryPoint="freyjaPluginArg1f")]
-	public extern static void freyjaPluginArg1f(char *name, float defaults);
+	public extern static void freyjaPluginArg1f(stringname, float defaults);
 
 	[DllImport(libname, EntryPoint="freyjaPluginArg1s")]
-	public extern static void freyjaPluginArg1s(char *name, char *defaults);
+	public extern static void freyjaPluginArg1s(stringname, stringdefaults);
 
 	[DllImport(libname, EntryPoint="freyjaPluginEnd")]
 	public extern static void freyjaPluginEnd();
@@ -1261,17 +1271,17 @@ public class libfreyja {
 	public extern static long freyjaGetPluginId();
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArg1f")]
-	public extern static int freyjaGetPluginArg1f(long pluginId, char *name, float *arg);
+	public extern static int freyjaGetPluginArg1f(long pluginId, stringname, float *arg);
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArg1i")]
-	public extern static int freyjaGetPluginArg1i(long pluginId, char *name, long *arg);
+	public extern static int freyjaGetPluginArg1i(long pluginId, stringname, long *arg);
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArg1s")]
-	public extern static int freyjaGetPluginArg1s(long pluginId, char *name, char **arg);
+	public extern static int freyjaGetPluginArg1s(long pluginId, stringname, string*arg);
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArgString")]
-	public extern static int freyjaGetPluginArgString(long pluginId, char *name, 
-								 long len, char *arg);
+	public extern static int freyjaGetPluginArgString(long pluginId, stringname, 
+								 long len, stringarg);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -1279,7 +1289,7 @@ public class libfreyja {
 	///////////////////////////////////////////////////////////////////////
 
 	[DllImport(libname, EntryPoint="freyjaPakBegin")]
-	public extern static long freyjaPakBegin(char *filename);
+	public extern static long freyjaPakBegin(stringfilename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Starts a new VFS from a 'pak file'
@@ -1293,7 +1303,7 @@ public class libfreyja {
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaPakAddDecoderFunction2s")]
-	public extern static void freyjaPakAddDecoderFunction2s(char *module, char *symbol);
+	public extern static void freyjaPakAddDecoderFunction2s(stringmodule, stringsymbol);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Used to decrypt or uncompress files in a pak
@@ -1305,7 +1315,7 @@ public class libfreyja {
 
 	[DllImport(libname, EntryPoint="freyjaPakAddFullPathFile")]
 	public extern static long freyjaPakAddFullPathFile(long pakIndex,
-								  char *vfsFilename,
+								  stringvfsFilename,
 								  long offset, long size);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -1331,62 +1341,23 @@ public class libfreyja {
 	 * 2005.01.02:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
+#endif
 
 	///////////////////////////////////////////////////////////////////////
 	//  Pak VFS 
 	///////////////////////////////////////////////////////////////////////
 
 	[DllImport(libname, EntryPoint="freyjaCheckModel")]
-	public extern static long freyjaCheckModel(char *filename);
+	public extern static int freyjaCheckModel(string filename);
 
 	[DllImport(libname, EntryPoint="freyjaLoadModel")]
-	public extern static long freyjaLoadModel(char *filename);
+	public extern static int freyjaLoadModel(string filename);
 
 	[DllImport(libname, EntryPoint="freyjaSaveModel")]
-	public extern static long freyjaSaveModel(char *filename);
-
-
-	///////////////////////////////////////////////////////////////////////
-	// Internal ABI calls
-	//
-	//   If used externally you'll likely get a lot of breakage or
-	//   slower and possibly incorrect object states.
-	///////////////////////////////////////////////////////////////////////
-
-	[DllImport(libname, EntryPoint="freyja__MeshUpdateMappings")]
-	public extern static void freyja__MeshUpdateMappings(long meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : Only use this if you're a core developer writing
-	 *        special test plugins, or internal code.
-	 *
-	 * Post : Updates Egg backend egg_mesh_t to simulate
-	 *        FreyjaMesh local vertex mappings
-	 ------------------------------------------------------*/
+	public extern static int freyjaSaveModel(string filename);
 
 
 
-/* Mongoose 2004.12.19, 
- * C++ fun */
-
-
-//Vector<uint> *freyjaFindVerticesByBox(vec3_t bbox[2]);
-
-//void freyjaGetVertexPolygonRef1i(long vertexIndex, Vector<long> &polygons);
-//void freyjaGetVertexPolygonRef(Vector<long> &polygons);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Returns a list of indices of polygons that
- *        use current vertex in iterator
- *
- *        List can be empty
- *
- *-- History ------------------------------------------
- *
- * 2004.12.17:
- * Mongoose - Created, wrapper for old Egg style
- *            reverse reference system ( very handy )
- ------------------------------------------------------*/
 #if UNIT_TEST_LIBFREYJA
 	static void Main()
 	{
@@ -1397,6 +1368,7 @@ public class libfreyja {
 	}
 #endif
 
+}
 }
 #endif
 

@@ -1,6 +1,7 @@
 // project created on 3/31/2005 at 1:20 PM
 using System;
 using Gtk;
+using Freyja;
 
 enum MLispObjectGtkWidgetType
 {
@@ -130,6 +131,7 @@ class MainClass {
 	
 	static void clickedButtonCallback(object obj, EventArgs args)
 	{
+		LibFreyja.kill();
 		Application.Quit();
 	}
 				
@@ -153,7 +155,11 @@ class MainClass {
 
 		MLispObject icon = args.pop();
 
-		//Image image = new Image((string)icon.data);
+		if (icon != null && !icon.isNil())
+		{
+			//Image image = new Image((string)icon.data);
+		}
+
 		MenuItem item = new MenuItem((string)name.data);
 
 		//if (image != null)
@@ -454,19 +460,22 @@ class MainClass {
 		resource.registerSymbolValue("IconSize_Button", 4);
 		resource.registerSymbolValue("IconSize_Dialog", 5);
 
-		resource.setDebugLevel(0); // 0, 3, 5
 		
 		/* Init Gtk# */
 		Application.Init();
 		
-		resource.evalFile("../../test.mlisp");
-		//resource.evalFile("../../freyja_sharp.mlisp");
+		/* Run P/Invoke of libfreyja */
+		LibFreyja.spawn();
 		
+		/* Call mlisp */
+		resource.setDebugLevel(0); // 0, 3, 5
+		resource.evalFile("../../data/test.mlisp");
 		//resource.dumpSymbols();
 
 		/* Run Gtk# */
 		Application.Run();
 		
-		//Application.Quit();
+		/* Free C/C++ allocated objects */
+		LibFreyja.kill();
 	}
 }

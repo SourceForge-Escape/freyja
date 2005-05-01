@@ -632,7 +632,7 @@ public class Mlisp {
 	public int evalBuffer(char []buffer)
 	{
 		if (parseEvalBuffer(buffer) == 0)
-		eval();
+			eval();
 
 		return 0;
 	}
