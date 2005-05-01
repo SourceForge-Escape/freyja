@@ -427,7 +427,11 @@ class MainClass {
 
 		// Old mlisp used misspellings, etc -- alias them  =)
 		resource.registerLispFunction("menu_seperator", new MLispFunction(mgtk_menu_seperator));
-
+		resource.registerLispFunction("fileselection_hack", new MLispFunction(undef));
+		resource.registerLispFunction("animation_tab_hack", new MLispFunction(undef));
+		
+		resource.registerLispFunction("filechooser", new MLispFunction(undef));
+		resource.registerLispFunction("tree", new MLispFunction(undef));
 		resource.registerLispFunction("icon", new MLispFunction(undef));
 		resource.registerLispFunction("gl_widget",new MLispFunction(undef));
 		resource.registerLispFunction("notebook", new MLispFunction(undef));
@@ -444,14 +448,12 @@ class MainClass {
 		resource.registerLispFunction("spinbutton2", new MLispFunction(undef));
 		resource.registerLispFunction("optionmenu", new MLispFunction(undef));
 		resource.registerLispFunction("popup_menu", new MLispFunction(undef));
-		resource.registerLispFunction("animation_tab_hack", new MLispFunction(undef));
 		resource.registerLispFunction("toolbar", new MLispFunction(undef));
 		resource.registerLispFunction("toolbar_box", new MLispFunction(undef));
 		resource.registerLispFunction("toolbar_togglebutton", new MLispFunction(undef));
 		resource.registerLispFunction("toolbar_button", new MLispFunction(undef));
 		resource.registerLispFunction("hslider", new MLispFunction(undef));
 		resource.registerLispFunction("dialog", new MLispFunction(undef));
-		resource.registerLispFunction("fileselection_hack", new MLispFunction(undef));
 
 		/* Internal MLisp Gtk values */
 		resource.registerSymbolValue("IconSize_Menu", 1);

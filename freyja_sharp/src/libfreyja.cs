@@ -58,7 +58,7 @@ namespace Freyja
 	} 
 
 
-	//using vec_t = System.Double;
+	//using float = System.Double;
 
 
 public class LibFreyja 
@@ -223,7 +223,7 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaGetBoneRotationWXYZ4fv")]
 	public extern static long freyjaGetBoneRotationWXYZ4fv(long boneIndex, 
-				//[MarshalAs (UnmanagedType.ByValArray, SizeConst=4)]
+				[MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
 				float [] wxyz);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -231,10 +231,9 @@ public class LibFreyja
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-#if FIXME
-
 	[DllImport(libname, EntryPoint="freyjaGetBoneRotationXYZ3fv")]
-	public extern static long freyjaGetBoneRotationXYZ3fv(long boneIndex, vec3_t xyz);
+	public extern static long freyjaGetBoneRotationXYZ3fv(long boneIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s orientation in Euler angles
@@ -242,7 +241,8 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetBoneTranslation3fv")]
-	public extern static long freyjaGetBoneTranslation3fv(long index, vec3_t xyz);
+	public extern static long freyjaGetBoneTranslation3fv(long index, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s position
@@ -253,7 +253,8 @@ public class LibFreyja
 	// FREYJA_TEXCOORD Accessors //////////////////////////////////////////
 
 	[DllImport(libname, EntryPoint="freyjaGetTexCoord2fv")]
-	public extern static void freyjaGetTexCoord2fv(long texcoordIndex, vec2_t uv);
+	public extern static void freyjaGetTexCoord2fv(long texcoordIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+				float []  uv);
 	/*------------------------------------------------------
 	 * Pre  : texcoord[index] exists
 	 * Post : Sets passed float array to texcoord u, v
@@ -263,11 +264,14 @@ public class LibFreyja
 	// FREYJA_VERTEX Accessors ////////////////////////////////////////////
 
 	[DllImport(libname, EntryPoint="freyjaGetVertexTexCoord2fv")]
-	public extern static void freyjaGetVertexTexCoord2fv(vec2_t uv);
+	public extern static void freyjaGetVertexTexCoord2fv([MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+				float []  uv);
 	[DllImport(libname, EntryPoint="freyjaGetVertexNormal3fv")]
-	public extern static void freyjaGetVertexNormal3fv(vec3_t xyz);
+	public extern static void freyjaGetVertexNormal3fv([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	[DllImport(libname, EntryPoint="freyjaGetVertex3fv")]
-	public extern static void freyjaGetVertex3fv(vec3_t xyz);
+	public extern static void freyjaGetVertex3fv([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	/*------------------------------------------------------
 	 * Pre  : freyjaIterator has initialized a vertex
 	 *
@@ -278,19 +282,23 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetVertexTexCoordUV2fv")]
-	public extern static long freyjaGetVertexTexCoordUV2fv(long vertexIndex, vec2_t uv);
+	public extern static long freyjaGetVertexTexCoordUV2fv(long vertexIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+				float []  uv);
 	[DllImport(libname, EntryPoint="freyjaGetVertexNormalXYZ3fv")]
-	public extern static long freyjaGetVertexNormalXYZ3fv(long vertexIndex, vec3_t nxyz);
+	public extern static long freyjaGetVertexNormalXYZ3fv(long vertexIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  nxyz);
 	[DllImport(libname, EntryPoint="freyjaGetVertexXYZ3fv")]
-	public extern static long freyjaGetVertexXYZ3fv(long vertexIndex, vec3_t xyz);
+	public extern static long freyjaGetVertexXYZ3fv(long vertexIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	[DllImport(libname, EntryPoint="freyjaGetVertexFrame")]
 	public extern static long freyjaGetVertexFrame(long vertexIndex, long element,
-							  long *frameIndex, vec3_t xyz);
+							  ref int frameIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	[DllImport(libname, EntryPoint="freyjaGetVertexFrameCount")]
 	public extern static long freyjaGetVertexFrameCount(long vertexIndex);
 	[DllImport(libname, EntryPoint="freyjaGetVertexWeight")]
 	public extern static long freyjaGetVertexWeight(long vertexIndex, long element,
-							   long *bone, vec_t *weight);
+							   ref long bone, ref float weight);
 	[DllImport(libname, EntryPoint="freyjaGetVertexWeightCount")]
 	public extern static long freyjaGetVertexWeightCount(long vertexIndex);
 	[DllImport(libname, EntryPoint="freyjaGetVertexFlags")]
@@ -305,15 +313,16 @@ public class LibFreyja
 	public extern static long freyjaGetModelMeshCount(long modelIndex);
 
 	// FREYJA_MESH Accessors
-	//int freyjaGetMeshBoundingBox(long meshIndex, vec3_t min, vec3_t max);
+	//int freyjaGetMeshBoundingBox(long meshIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)] float []  min, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)] float []  max);
 	[DllImport(libname, EntryPoint="freyjaGetMeshFlags")]
 	public extern static long freyjaGetMeshFlags(long meshIndex);
 	[DllImport(libname, EntryPoint="freyjaGetMeshPosition")]
-	public extern static long freyjaGetMeshPosition(long meshIndex, vec3_t xyz);
+	public extern static long freyjaGetMeshPosition(long meshIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	[DllImport(libname, EntryPoint="freyjaGetMeshNameString")]
-	public extern static stringfreyjaGetMeshNameString(long meshIndex); // don't alter string
+	public extern static string freyjaGetMeshNameString(long meshIndex); // don't alter string
 	[DllImport(libname, EntryPoint="freyjaGetMeshName1s")]
-	public extern static long freyjaGetMeshName1s(long meshIndex, long lenght, stringname);
+	public extern static long freyjaGetMeshName1s(long meshIndex, long lenght, string name);
 
 	[DllImport(libname, EntryPoint="freyjaGetMeshVertexIndex")]
 	public extern static long freyjaGetMeshVertexIndex(long meshIndex, long element);
@@ -376,7 +385,7 @@ public class LibFreyja
 
 
 	[DllImport(libname, EntryPoint="freyjaGetPolygon1")]
-	public extern static long freyjaGetPolygon1u(freyja_object_t type, long item, long *value);
+	public extern static long freyjaGetPolygon1u(freyja_object_t type, long item, ref long value);
 /*------------------------------------------------------
  * Pre  : Type is either vertex or texel
  *        Item is index into polygon's type list 
@@ -391,7 +400,7 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaGetPolygon3f")]
-	public extern static long freyjaGetPolygon3f(freyja_object_t type, long item, vec_t *value);
+	public extern static long freyjaGetPolygon3f(freyja_object_t type, long item, ref float value);
 /*------------------------------------------------------
  * Pre  : Type is either vertex or texel
  *        Item is index into polygon's type list 
@@ -409,7 +418,7 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 //FIXME [DllImport(libname, EntryPoint="freyjaPrintError")]
-//FIXME	public extern static void freyjaPrintError(const stringformat, ...);
+//FIXME	public extern static void freyjaPrintError(const string format, ...);
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout
@@ -421,7 +430,7 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 //FIXME	[DllImport(libname, EntryPoint="freyjaPrintMessage")]
-//FIXME		public extern static void freyjaPrintMessage(const stringformat, ...);
+//FIXME		public extern static void freyjaPrintMessage(const string format, ...);
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout
@@ -438,65 +447,78 @@ public class LibFreyja
 ///////////////////////////////////////////////////////////////////////
 
 [DllImport(libname, EntryPoint="freyjaSetNormal3f")]
-	public extern static void freyjaSetNormal3f(uint index, vec_t x, vec_t y, vec_t z);
+	public extern static void freyjaSetNormal3f(uint index, float x, float y, float z);
 [DllImport(libname, EntryPoint="freyjaSetNormal3fv")]
-	public extern static void freyjaSetNormal3fv(uint index, vec3_t xyz);
+	public extern static void freyjaSetNormal3fv(uint index, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 
-[DllImport(libname, EntryPoint="freyjaSetTexCoord2f")]
-	public extern static void freyjaSetTexCoord2f(uint index, vec_t u, vec_t v);
-[DllImport(libname, EntryPoint="freyjaSetTexCoord2fv")]
-	public extern static void freyjaSetTexCoord2fv(uint index, vec2_t uv);
+	[DllImport(libname, EntryPoint="freyjaSetTexCoord2f")]
+	public extern static void freyjaSetTexCoord2f(uint index, float u, float v);
 
-[DllImport(libname, EntryPoint="freyjaSetVertex3f")]
-	public extern static void freyjaSetVertex3f(uint index, vec_t x, vec_t y, vec_t z);
-	//void freyjaSetVertex3fv(uint index, vec3_t xyz);
+	[DllImport(libname, EntryPoint="freyjaSetTexCoord2fv")]
+	public extern static void freyjaSetTexCoord2fv(uint index, [MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+				float []  uv);
 
-[DllImport(libname, EntryPoint="freyjaNormal3f")]
-	public extern static long freyjaNormal3f(vec_t x, vec_t y, vec_t z);
-[DllImport(libname, EntryPoint="freyjaNormal3fv")]
-	public extern static long freyjaNormal3fv(vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : (x,y,z) is a valid normal vector
- * Post : A new normal is created in the mesh
- *        Returns the native index of that normal
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
+	[DllImport(libname, EntryPoint="freyjaSetVertex3f")]
+	public extern static void freyjaSetVertex3f(uint index, float x, float y, float z);
 
-[DllImport(libname, EntryPoint="freyjaTexCoord2f")]
-	public extern static long freyjaTexCoord2f(vec_t u, vec_t v);
-[DllImport(libname, EntryPoint="freyjaTexCoord2fv")]
-	public extern static long freyjaTexCoord2fv(vec2_t uv);
-/*------------------------------------------------------
- * Pre  : s, t are 0.0 to 1.0 texels
- * Post : A new texel is created in the model
- *        Returns the native index of that texel
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
+//	[DllImport(libname, EntryPoint="freyjaSetVertex3fv")]
+//	public extern static void freyjaSetVertex3fv(uint index, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)] float []  xyz);
+				
+	[DllImport(libname, EntryPoint="freyjaNormal3f")]
+	public extern static long freyjaNormal3f(float x, float y, float z);
+	
+	[DllImport(libname, EntryPoint="freyjaNormal3fv")]
+	public extern static long freyjaNormal3fv([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
+	/*------------------------------------------------------
+ 	 * Pre  : (x,y,z) is a valid normal vector
+	 * Post : A new normal is created in the mesh
+	 *        Returns the native index of that normal
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	[DllImport(libname, EntryPoint="freyjaTexCoord2f")]
+	public extern static long freyjaTexCoord2f(float u, float v);
+	
+	[DllImport(libname, EntryPoint="freyjaTexCoord2fv")]
+	public extern static long freyjaTexCoord2fv([MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+				float []  uv);
+	/*------------------------------------------------------
+	 * Pre  : s, t are 0.0 to 1.0 texels
+	 * Post : A new texel is created in the model
+	 *        Returns the native index of that texel	
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 1999.07.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaVertexNormalFlip")]
 	public extern static void freyjaVertexNormalFlip(long index);
 [DllImport(libname, EntryPoint="freyjaVertexTexCoord2f")]
-	public extern static void freyjaVertexTexCoord2f(long index, vec_t u, vec_t v);
+	public extern static void freyjaVertexTexCoord2f(long index, float u, float v);
 [DllImport(libname, EntryPoint="freyjaVertexTexCoord2fv")]
-	public extern static void freyjaVertexTexCoord2fv(long index, vec2_t uv);
+	public extern static void freyjaVertexTexCoord2fv(long index, [MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+				float []  uv);
 [DllImport(libname, EntryPoint="freyjaVertexNormal3f")]
-	public extern static void freyjaVertexNormal3f(long index, vec_t nx, vec_t ny, vec_t nz);
+	public extern static void freyjaVertexNormal3f(long index, float nx, float ny, float nz);
 [DllImport(libname, EntryPoint="freyjaVertexNormal3fv")]
-	public extern static void freyjaVertexNormal3fv(long index, vec3_t nxyz);
+	public extern static void freyjaVertexNormal3fv(long index, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  nxyz);
 [DllImport(libname, EntryPoint="freyjaVertex3f")]
-	public extern static long freyjaVertex3f(vec_t x, vec_t y, vec_t z);
+	public extern static long freyjaVertex3f(float x, float y, float z);
 [DllImport(libname, EntryPoint="freyjaVertexXYZ3fv")]
-	public extern static long freyjaVertexXYZ3fv(long vertexIndex, vec3_t xyz);
+	public extern static long freyjaVertexXYZ3fv(long vertexIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 [DllImport(libname, EntryPoint="freyjaVertex3fv")]
-	public extern static long freyjaVertex3fv(vec3_t xyz);
+	public extern static long freyjaVertex3fv([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_GROUP);
  *        x,y,z are valid 3space coors
@@ -510,7 +532,7 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaVertexWeight")]
-	public extern static void freyjaVertexWeight(long index, vec_t weight, long bone);
+	public extern static void freyjaVertexWeight(long index, float weight, long bone);
 /*------------------------------------------------------
  * Pre  : <weight> of influence of <bone> on vertex[<index>]
  *
@@ -528,7 +550,7 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaMeshTreeAddFrame")]
-	public extern static void freyjaMeshTreeAddFrame(vec_t x, vec_t y, vec_t z);
+	public extern static void freyjaMeshTreeAddFrame(float x, float y, float z);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_MESHTREE_ANIM);
  * Post : Adds a new meshtree frame to meshtree
@@ -552,10 +574,10 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaTextureFilename1s")]
-	public extern static long freyjaTextureFilename1s(stringfilename);
+	public extern static long freyjaTextureFilename1s(string filename);
 
 [DllImport(libname, EntryPoint="freyjaTextureStoreBuffer")]
-	public extern static long freyjaTextureStoreBuffer(byte *image, uint depth,
+	public extern static long freyjaTextureStoreBuffer(byte [] image, uint depth,
 							  uint width, uint height,
 							  freyja_colormode_t type);
 
@@ -588,7 +610,7 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaBoneName1s")]
-	public extern static void freyjaBoneName1s(long boneIndex, stringname);
+	public extern static void freyjaBoneName1s(long boneIndex, string name);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
  * Post : Set human readable bone name
@@ -627,9 +649,10 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaBoneTranslate3f")]
-	public extern static void freyjaBoneTranslate3f(long boneIndex, vec_t x, vec_t y, vec_t z);
+	public extern static void freyjaBoneTranslate3f(long boneIndex, float x, float y, float z);
 [DllImport(libname, EntryPoint="freyjaBoneTranslate3fv")]
-	public extern static void freyjaBoneTranslate3fv(long boneIndex, vec3_t xyz);
+	public extern static void freyjaBoneTranslate3fv(long boneIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
  * Post : Set bone relative position
@@ -641,13 +664,15 @@ public class LibFreyja
  ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaBoneRotateEulerXYZ3f")]
-	public extern static void freyjaBoneRotateEulerXYZ3f(long boneIndex, vec_t x, vec_t y, vec_t z);
+	public extern static void freyjaBoneRotateEulerXYZ3f(long boneIndex, float x, float y, float z);
 [DllImport(libname, EntryPoint="freyjaBoneRotateEulerXYZ3fv")]
-	public extern static void freyjaBoneRotateEulerXYZ3fv(long boneIndex, vec3_t xyz);
+	public extern static void freyjaBoneRotateEulerXYZ3fv(long boneIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 [DllImport(libname, EntryPoint="freyjaBoneRotateQuatWXYZ4f")]
-	public extern static void freyjaBoneRotateQuatWXYZ4f(long boneIndex,vec_t w,vec_t x,vec_t y,vec_t z);
+	public extern static void freyjaBoneRotateQuatWXYZ4f(long boneIndex,float w,float x,float y,float z);
 [DllImport(libname, EntryPoint="freyjaBoneRotateQuatWXYZ4fv")]
-	public extern static void freyjaBoneRotateQuatWXYZ4fv(long boneIndex, vec4_t wxyz);
+	public extern static void freyjaBoneRotateQuatWXYZ4fv(long boneIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  wxyz);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
  * Post : Set bone orientation
@@ -660,30 +685,37 @@ public class LibFreyja
 
 
 [DllImport(libname, EntryPoint="freyjaGroupCenter3f")]
-	public extern static void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
+	public extern static void freyjaGroupCenter3f(float x, float y, float z);
 
 [DllImport(libname, EntryPoint="freyjaGenerateQuadPlaneMesh")]
-	public extern static void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side);
+	public extern static void freyjaGenerateQuadPlaneMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, float side);
 
 [DllImport(libname, EntryPoint="freyjaGenerateQuadCubeMesh")]
-	public extern static void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
+	public extern static void freyjaGenerateQuadCubeMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, float side);
 
 [DllImport(libname, EntryPoint="freyjaGenerateCircleMesh")]
-	public extern static void freyjaGenerateCircleMesh(vec3_t origin, long count); // radius
+	public extern static void freyjaGenerateCircleMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, long count); // radius
 
 [DllImport(libname, EntryPoint="freyjaGenerateConeMesh")]
-	public extern static void freyjaGenerateConeMesh(vec3_t origin, vec_t height, long count); // radius
+	public extern static void freyjaGenerateConeMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, float height, long count); // radius
 
 [DllImport(libname, EntryPoint="freyjaGenerateCylinderMesh")]
-	public extern static void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
+	public extern static void freyjaGenerateCylinderMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, float height, 
 								long count, long segments); // radius
 
 [DllImport(libname, EntryPoint="freyjaGenerateSphereMesh")]
-	public extern static void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
+	public extern static void freyjaGenerateSphereMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, float radius, 
 							  long count, long segments);
 
 [DllImport(libname, EntryPoint="freyjaGenerateTubeMesh")]
-	public extern static void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
+	public extern static void freyjaGenerateTubeMesh([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  origin, float height, 
 							long count, long segments); // radius
 
 	[DllImport(libname, EntryPoint="freyjaMeshPromoteTexcoordsToPloymapping")]
@@ -743,10 +775,11 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 [DllImport(libname, EntryPoint="freyjaMeshPosition")]
-	public extern static long freyjaMeshPosition(long meshIndex, vec3_t xyz);
+	public extern static long freyjaMeshPosition(long meshIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 
 [DllImport(libname, EntryPoint="freyjaMeshName1s")]
-	public extern static void freyjaMeshName1s(long meshIndex, stringname);
+	public extern static void freyjaMeshName1s(long meshIndex, string name);
 
 [DllImport(libname, EntryPoint="freyjaMeshFlags1u")]
 	public extern static void freyjaMeshFlags1u(uint flags);
@@ -764,10 +797,11 @@ public class LibFreyja
 	public extern static void freyjaGenerateVertexNormals();
 
 	[DllImport(libname, EntryPoint="freyjaGenerateUVFromXYZ")]
-	public extern static void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
+	public extern static void freyjaGenerateUVFromXYZ([MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz, ref float u, ref float v);
 
 	[DllImport(libname, EntryPoint="freyjaVertexFrame3f")]
-	public extern static void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
+	public extern static void freyjaVertexFrame3f(long index, float x, float y, float z);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -791,7 +825,7 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaPolygonExtrudeQuad1f")]
-	public extern static int freyjaPolygonExtrudeQuad1f(long polygonIndex, vec_t dist);
+	public extern static int freyjaPolygonExtrudeQuad1f(long polygonIndex, float dist);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *        the 'normal' is the vector you wish to follow with extrude
@@ -806,7 +840,8 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaPolygonExtrudeQuad")]
-	public extern static int freyjaPolygonExtrudeQuad(long polygonIndex, vec3_t normal);
+	public extern static int freyjaPolygonExtrudeQuad(long polygonIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  normal);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *        the 'normal' is the vector you wish to follow with extrude
@@ -882,7 +917,7 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaAnimationBoneCreate")]
 	public extern static long freyjaAnimationBoneCreate(long animationIndex,
-								    stringname, long boneIndex);
+								    string name, long boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : Creates a new Freyja Animation Bone object
@@ -892,7 +927,9 @@ public class LibFreyja
 	[DllImport(libname, EntryPoint="freyjaAnimationBoneKeyFrameCreate")]
 	public extern static long freyjaAnimationBoneKeyFrameCreate(long animationIndex,
 										   long boneIndex,
-										   vec_t time, vec3_t xyz, vec4_t wxyz);
+										   float time, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  wxyz);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 *        Animation Bone <boneIndex> exists
@@ -934,7 +971,7 @@ public class LibFreyja
 	/* Animation Mutators */
 
 	[DllImport(libname, EntryPoint="freyjaAnimationName")]
-	public extern static void freyjaAnimationName(long animationIndex,  stringname);
+	public extern static void freyjaAnimationName(long animationIndex,  string name);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : Sets human readable animation name
@@ -942,7 +979,7 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaAnimationBoneName")]
 	public extern static void freyjaAnimationBoneName(long animationIndex, long boneIndex,
-								  stringname);
+								  string name);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 *        Animation Bone <boneIndex> exists
@@ -950,14 +987,14 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaAnimationFrameRate")]
-	public extern static void freyjaAnimationFrameRate(long animationIndex, vec_t frameRate);
+	public extern static void freyjaAnimationFrameRate(long animationIndex, float frameRate);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : 
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaAnimationTime")]
-	public extern static void freyjaAnimationTime(long animationIndex, vec_t time);
+	public extern static void freyjaAnimationTime(long animationIndex, float time);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : 
@@ -972,7 +1009,7 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaAnimationKeyFrameTime")]
 	public extern static void freyjaAnimationKeyFrameTime(long animationIndex, long boneIndex,
-									 long keyFrameIndex, vec_t time);
+									 long keyFrameIndex, float time);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
 	 * Post : Sets time for <keyFrameIndex> keyframe in animation
@@ -980,7 +1017,8 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaAnimationKeyFramePosition")]
 	public extern static void freyjaAnimationKeyFramePosition(long animationIndex, long boneIndex, 
-										 long keyFrameIndex, vec3_t position);
+										 long keyFrameIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  position);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
 	 * Post : Sets <keyFrameIndex> keyframe's position in animation
@@ -989,7 +1027,8 @@ public class LibFreyja
 	[DllImport(libname, EntryPoint="freyjaAnimationKeyFrameOrientationXYZ")]
 	public extern static void freyjaAnimationKeyFrameOrientationXYZ(long animationIndex,
 											   long boneIndex, 
-											   long keyFrameIndex, vec3_t xyz);
+											   long keyFrameIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+				float []  xyz);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
 	 * Post : Sets <keyFrameIndex> keyframe's orienation in animation
@@ -999,7 +1038,8 @@ public class LibFreyja
 	[DllImport(libname, EntryPoint="freyjaAnimationKeyFrameOrientationWXYZ")]
 	public extern static void freyjaAnimationKeyFrameOrientationWXYZ(long animationIndex,
 												long boneIndex,
-												long keyFrameIndex,vec4_t wxyz);
+												long keyFrameIndex,[MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  wxyz);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> and <keyFrameindex> exist
 	 * Post : Sets <keyFrameIndex> keyframe's orienation in animation
@@ -1038,7 +1078,7 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialName")]
-	public extern static stringfreyjaGetMaterialName(long materialIndex);
+	public extern static string freyjaGetMaterialName(long materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 *        Don't alter the returned string
@@ -1062,42 +1102,46 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialAmbient")]
-	public extern static void freyjaGetMaterialAmbient(long materialIndex, vec4_t ambient);
+	public extern static void freyjaGetMaterialAmbient(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  ambient);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <ambient> color
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialDiffuse")]
-	public extern static void freyjaGetMaterialDiffuse(long materialIndex, vec4_t diffuse);
+	public extern static void freyjaGetMaterialDiffuse(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  diffuse);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <diffuse> color
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialSpecular")]
-	public extern static void freyjaGetMaterialSpecular(long materialIndex, vec4_t specular);
+	public extern static void freyjaGetMaterialSpecular(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  specular);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <specular> color
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialEmissive")]
-	public extern static void freyjaGetMaterialEmissive(long materialIndex, vec4_t emissive);
+	public extern static void freyjaGetMaterialEmissive(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  emissive);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <emissive> color
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialShininess")]
-	public extern static vec_t freyjaGetMaterialShininess(long materialIndex);
+	public extern static float freyjaGetMaterialShininess(long materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns specular exponent or -1.0 on error
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialTransparency")]
-	public extern static vec_t freyjaGetMaterialTransparency(long materialIndex);
+	public extern static float freyjaGetMaterialTransparency(long materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns transparency or -1.0 on error
@@ -1111,7 +1155,7 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaGetMaterialBlendDestination")]
-	public extern static vec_t freyjaGetMaterialBlendDestination(long materialIndex);
+	public extern static float freyjaGetMaterialBlendDestination(long materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns blend destination factor or -1 on error
@@ -1121,7 +1165,7 @@ public class LibFreyja
 	/* Material Mutators */
 
 	[DllImport(libname, EntryPoint="freyjaMaterialName")]
-	public extern static void freyjaMaterialName(long materialIndex, stringname);
+	public extern static void freyjaMaterialName(long materialIndex, string name);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <name> id is set
@@ -1135,7 +1179,7 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialTextureFilename")]
-	public extern static void freyjaMaterialTextureFilename(long materialIndex, stringfilename);
+	public extern static void freyjaMaterialTextureFilename(long materialIndex, string filename);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material textures's <filename> id is set
@@ -1149,42 +1193,46 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialAmbient")]
-	public extern static void freyjaMaterialAmbient(long materialIndex, vec4_t ambient);
+	public extern static void freyjaMaterialAmbient(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  ambient);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <ambient> color is set
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialDiffuse")]
-	public extern static void freyjaMaterialDiffuse(long materialIndex, vec4_t diffuse);
+	public extern static void freyjaMaterialDiffuse(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  diffuse);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <diffuse> color is set
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialSpecular")]
-	public extern static void freyjaMaterialSpecular(long materialIndex, vec4_t specular);
+	public extern static void freyjaMaterialSpecular(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  specular);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <specular> color is set
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialEmissive")]
-	public extern static void freyjaMaterialEmissive(long materialIndex, vec4_t emissive);
+	public extern static void freyjaMaterialEmissive(long materialIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=4)]
+				float []  emissive);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <emissive> color is set
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialShininess")]
-	public extern static void freyjaMaterialShininess(long materialIndex, vec_t exponent);
+	public extern static void freyjaMaterialShininess(long materialIndex, float exponent);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's Specular <exponent> is set
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaMaterialTransparency")]
-	public extern static void freyjaMaterialTransparency(long materialIndex, vec_t transparency);
+	public extern static void freyjaMaterialTransparency(long materialIndex, float transparency);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 *        <transparency> is a value from 0.0 to 1.0
@@ -1212,13 +1260,15 @@ public class LibFreyja
 	// Faster access API for modeler use
 	///////////////////////////////////////////////////////////////////////
 
-	[DllImport(libname, EntryPoint="freyjaGetVertexXYZ")]
-	public extern static vec3_t *freyjaGetVertexXYZ(long vertexIndex);
-	[DllImport(libname, EntryPoint="freyjaGetVertexUV")]
-	public extern static vec2_t *freyjaGetVertexUV(long vertexIndex);
-	[DllImport(libname, EntryPoint="freyjaGetTexCoordUV")]
-	public extern static vec2_t *freyjaGetTexCoordUV(long texcoordIndex);
-
+	//[DllImport(libname, EntryPoint="freyjaGetVertexXYZ")]
+	//public extern static [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
+	//			ref float [] freyjaGetVertexXYZ(long vertexIndex);
+	//[DllImport(libname, EntryPoint="freyjaGetVertexUV")]
+	//public extern static [MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+	//			ref float []  freyjaGetVertexUV(long vertexIndex);
+	//[DllImport(libname, EntryPoint="freyjaGetTexCoordUV")]
+	//public extern static [MarshalAs (UnmanagedType.LPArray, SizeConst=2)]
+	//			ref float []  freyjaGetTexCoordUV(long texcoordIndex);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -1239,10 +1289,10 @@ public class LibFreyja
 	public extern static void freyjaPluginBegin();
 
 	[DllImport(libname, EntryPoint="freyjaPluginDescription1s")]
-	public extern static void freyjaPluginDescription1s(stringinfo_line);
+	public extern static void freyjaPluginDescription1s(string info_line);
 
 	[DllImport(libname, EntryPoint="freyjaPluginAddExtention1s")]
-	public extern static void freyjaPluginAddExtention1s(stringext);
+	public extern static void freyjaPluginAddExtention1s(string ext);
 
 	[DllImport(libname, EntryPoint="freyjaPluginImport1i")]
 	public extern static void freyjaPluginImport1i(long flags);
@@ -1251,13 +1301,13 @@ public class LibFreyja
 	public extern static void freyjaPluginExport1i(long flags);
 
 	[DllImport(libname, EntryPoint="freyjaPluginArg1i")]
-	public extern static void freyjaPluginArg1i(stringname, long defaults);
+	public extern static void freyjaPluginArg1i(string name, long defaults);
 
 	[DllImport(libname, EntryPoint="freyjaPluginArg1f")]
-	public extern static void freyjaPluginArg1f(stringname, float defaults);
+	public extern static void freyjaPluginArg1f(string name, float defaults);
 
 	[DllImport(libname, EntryPoint="freyjaPluginArg1s")]
-	public extern static void freyjaPluginArg1s(stringname, stringdefaults);
+	public extern static void freyjaPluginArg1s(string name, string defaults);
 
 	[DllImport(libname, EntryPoint="freyjaPluginEnd")]
 	public extern static void freyjaPluginEnd();
@@ -1271,17 +1321,17 @@ public class LibFreyja
 	public extern static long freyjaGetPluginId();
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArg1f")]
-	public extern static int freyjaGetPluginArg1f(long pluginId, stringname, float *arg);
+	public extern static int freyjaGetPluginArg1f(long pluginId, string name, ref float arg);
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArg1i")]
-	public extern static int freyjaGetPluginArg1i(long pluginId, stringname, long *arg);
+	public extern static int freyjaGetPluginArg1i(long pluginId, string name, ref long arg);
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArg1s")]
-	public extern static int freyjaGetPluginArg1s(long pluginId, stringname, string*arg);
+	public extern static int freyjaGetPluginArg1s(long pluginId, string name, ref string arg);
 
 	[DllImport(libname, EntryPoint="freyjaGetPluginArgString")]
-	public extern static int freyjaGetPluginArgString(long pluginId, stringname, 
-								 long len, stringarg);
+	public extern static int freyjaGetPluginArgString(long pluginId, string name, 
+								 long len, string arg);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -1289,7 +1339,7 @@ public class LibFreyja
 	///////////////////////////////////////////////////////////////////////
 
 	[DllImport(libname, EntryPoint="freyjaPakBegin")]
-	public extern static long freyjaPakBegin(stringfilename);
+	public extern static long freyjaPakBegin(string filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Starts a new VFS from a 'pak file'
@@ -1303,7 +1353,7 @@ public class LibFreyja
 	 ------------------------------------------------------*/
 
 	[DllImport(libname, EntryPoint="freyjaPakAddDecoderFunction2s")]
-	public extern static void freyjaPakAddDecoderFunction2s(stringmodule, stringsymbol);
+	public extern static void freyjaPakAddDecoderFunction2s(string module, string symbol);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Used to decrypt or uncompress files in a pak
@@ -1315,7 +1365,7 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaPakAddFullPathFile")]
 	public extern static long freyjaPakAddFullPathFile(long pakIndex,
-								  stringvfsFilename,
+								  string vfsFilename,
 								  long offset, long size);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -1341,7 +1391,7 @@ public class LibFreyja
 	 * 2005.01.02:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-#endif
+
 
 	///////////////////////////////////////////////////////////////////////
 	//  Pak VFS 
