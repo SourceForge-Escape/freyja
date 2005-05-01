@@ -4942,6 +4942,32 @@ void freyja__MeshUpdateMappings(long meshIndex)
 //  Deprecated ABI 
 ///////////////////////////////////////////////////////////////////////
 
+void freyjaSpawn()
+{
+	if (!EggPlugin::mEggPlugin)
+	{
+		Egg *egg = new Egg();
+		EggPlugin *eggplugin = new EggPlugin(egg);
+		FreyjaPrinter *printer = new FreyjaPrinter();
+
+		egg->setPrinter(printer);
+		eggplugin->setPrinter(printer);
+		eggplugin->setupPlugins();
+
+		freyjaPrintMessage("libfreyja invoked using freyjaSpawn()");
+	}
+}
+
+
+void freyjaKill()
+{
+	if (EggPlugin::mEggPlugin)
+	{
+		delete EggPlugin::mEggPlugin;
+	}
+}
+
+
 #ifdef DEPRECATED_FREYJA_PLUGIN_ABI
 long freyjaGetBoneMeshCount()
 {
