@@ -1233,6 +1233,11 @@ void freyjaVertexFrame3f(long index, vec_t x, vec_t y, vec_t z);
 	 * Post : Updates Egg backend egg_mesh_t to simulate
 	 *        FreyjaMesh local vertex mappings
 	 ------------------------------------------------------*/
+
+	// For use by external systems to bring up/down Backend
+	void freyjaSpawn();
+
+	void freyjaKill();
 }
 
 
