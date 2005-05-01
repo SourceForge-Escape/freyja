@@ -469,6 +469,13 @@ class MainClass {
 		/* Run P/Invoke of libfreyja */
 		LibFreyja.spawn();
 		
+		if (LibFreyja.loadModel("../../data/extrude-test2.ja") == 0)
+		{
+			Console.WriteLine("Test model loaded");
+		}
+		
+		Console.WriteLine("{0} vertices", LibFreyja.getCount(freyja_object_t.FREYJA_VERTEX));
+		
 		/* Call mlisp */
 		resource.setDebugLevel(0); // 0, 3, 5
 		resource.evalFile("../../data/test.mlisp");

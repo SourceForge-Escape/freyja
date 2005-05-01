@@ -147,8 +147,13 @@ public class LibFreyja
 	 *        the singleton is up and running.
 	 ------------------------------------------------------*/
 
+	public static int getCount(freyja_object_t type)
+	{
+		return freyjaGetCount(type);
+	}
+
 	[DllImport(libname, EntryPoint="freyjaGetCount")]
-	public extern static long freyjaGetCount(freyja_object_t type);
+	public extern static int freyjaGetCount(freyja_object_t type);
 	/*------------------------------------------------------
 	 * Pre  : <type> is valid
 	 * Post : Returns total number of objects of type in 
@@ -774,7 +779,7 @@ public class LibFreyja
 	 *
 	 ------------------------------------------------------*/
 
-[DllImport(libname, EntryPoint="freyjaMeshPosition")]
+	[DllImport(libname, EntryPoint="freyjaMeshPosition")]
 	public extern static long freyjaMeshPosition(long meshIndex, [MarshalAs (UnmanagedType.LPArray, SizeConst=3)]
 				float []  xyz);
 
@@ -1399,6 +1404,11 @@ public class LibFreyja
 
 	[DllImport(libname, EntryPoint="freyjaCheckModel")]
 	public extern static int freyjaCheckModel(string filename);
+
+	public static int loadModel(string filename)
+	{
+		return freyjaLoadModel(filename);
+	}
 
 	[DllImport(libname, EntryPoint="freyjaLoadModel")]
 	public extern static int freyjaLoadModel(string filename);
