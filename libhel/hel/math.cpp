@@ -27,6 +27,12 @@
 
 #define COMPUTE
 
+char *helVersionInfo()
+{
+	return VERSION;
+}
+
+
 void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4])
 {
 	/* Column major */
