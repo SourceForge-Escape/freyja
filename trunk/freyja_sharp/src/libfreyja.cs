@@ -79,7 +79,7 @@ public class LibFreyja
 	{
 		/* Mono seems to require these to preload? */
 		Console.WriteLine("* libc test: username is " + getenv("USER"));
-		Console.WriteLine("* libhel0 test: 90 -> {0}", deg2rad(90));
+		Console.WriteLine("* libhel0: ", helVersionInfo());
 		
 		freyjaSpawn();
 	} 
@@ -90,8 +90,8 @@ public class LibFreyja
 	}
 
 
-	[DllImport("hel0", EntryPoint="_Z11helDegToRadf")]
-	public extern static float deg2rad(float d);
+	[DllImport("hel0", EntryPoint="helVersionInfo")]
+	public extern static string helVersionInfo();
 
 	[DllImport("libc", EntryPoint="getenv")]
 	public extern static string getenv(string var);
