@@ -39,6 +39,13 @@ typedef float vec3_t[3];
 typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 
+extern "C" {
+
+	char *helVersionInfo();
+
+}
+
+
 
 vec_t helIntersectionOfAbstractSpheres(vec3_t centerA, vec_t radiusA,
 													vec3_t centerB, vec_t radiusB);
