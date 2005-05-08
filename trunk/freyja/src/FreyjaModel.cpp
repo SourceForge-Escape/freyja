@@ -36,12 +36,12 @@
 
 BezierPatch FreyjaModel::gTestPatch;
 
+extern int freyja__spawnCopyModel(Egg *egg);
+
 
 FreyjaModel::FreyjaModel()
 {
 	char *pluginDir = freyja_rc_map("plugins/");
-
-	mAppendMode = false;
 
 	mEgg = new Egg();
 	mEgg->setPrinter(&mPrinter);
@@ -49,6 +49,8 @@ FreyjaModel::FreyjaModel()
 	mPlugin->addPluginDirectory(pluginDir);
 	mPlugin->setPrinter(&mPrinter);
 	mPlugin->setupPlugins();
+
+	freyja__spawnCopyModel(mEgg);
 
 	delete [] pluginDir;
 
@@ -79,184 +81,6 @@ vec3_t *FreyjaModel::getVertexXYZ(long index)
 
 	return 0x0;
 #endif
-}
-
-
-unsigned int FreyjaModel::getModelCount()
-{
-	return 1;  // Egg backend use only allows 1 model, but soon we can replace Egg   =)
-}
-
-
-void FreyjaModel::getModel(RenderModel &model, unsigned int index)
-{
-	model.index = -1;
-
-	if (index > getModelCount())
-		return;
-
-	model.index = index;
-	model.setEgg(mEgg, this);
-}
-
-
-// Gets polygon for given egg polygon for given vertex animation frame
-bool createRenderPolygon(RenderPolygon &face,
-						 egg_polygon_t &polygon, long frame)
-{
-	static vec_t *mpos;
-	static Vector3d u, v, w;
-	static unsigned int i, j, iend, jend;
-	static egg_vertex_t *vertex;
-	static egg_texel_t *texel;
-	static egg_texel_t *texel2;
-	static bool external_texel;
-
-
-	face.count = 0;
-	face.material = polygon.shader;
-	face.id = polygon.id;
-
-	external_texel = !polygon.r_texel.empty();
-
-	if (polygon.r_vertex.empty() ||
-		(!external_texel && (polygon.shader == COLORED_POLYGON)))
-	{
-		freyja_print("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
-		return false;
-	}
-
-
-	/* Mongoose 2004.12.23, 
-	 * Setup vertex morphing for egg backend polygon */
-	for (i = polygon.r_vertex.begin(), iend = polygon.r_vertex.end(); i < iend; ++i)
-	{
-		vertex = polygon.r_vertex[i];
-
-		if (!vertex)
-			continue;
-
-		mpos = vertex->pos;
-
-		if (frame > -1)
-		{
-			for (j = vertex->frameId.begin(), jend = vertex->frameId.end(); j < jend; ++j)
-			{
-				if (vertex->frameId[j] == frame)
-				{
-					mpos = *(vertex->frames[j]);
-					break;
-				}
-			}
-
-		}
-
-		face.vertices[i] = Vector3d(mpos);
-		face.normals[i] = Vector3d(vertex->norm);
-
-		if (!external_texel)
-		{
-			face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
-		}
-		else
-		{
-			if (polygon.shader == COLORED_POLYGON)
-			{
-				texel = polygon.r_texel[i*2];
-				texel2 = polygon.r_texel[i*2+1];
-	
-				if (texel && texel2)
-				{
-					face.colors[i][0] = texel->st[0];
-					face.colors[i][1] = texel->st[1];
-					face.colors[i][2] = texel2->st[0];
-					face.colors[i][3] = texel2->st[1];
-				}
-				else
-				{
-					face.colors[i][0] = face.colors[i][1] = face.colors[i][2] = 1.0;
-					face.colors[i][3] = 0.75;
-				}
-			}
-			else
-			{
-				texel = polygon.r_texel[i];
-				face.texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
-			}
-		}
-
-		++face.count;
-	}
-
-	return true;
-}
-
-
-bool FreyjaModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
-{
-	egg_polygon_t *poly = mEgg->getPolygon(index);
-
-	if (poly)
-	{
-		createRenderPolygon(face, *poly, 0);
-		return true;
-	}
-
-	return false;
-}
-
-
-bool FreyjaModel::getRenderMesh(unsigned int index, RenderMesh &rmesh)
-{
-	egg_mesh_t *mesh = mEgg->getMesh(index);
-
-	if (mesh)
-	{
-		createRenderMesh(rmesh, *mesh);
-		return true;
-	}
-
-	return false;
-}
-
-
-void FreyjaModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh)
-{
-	egg_polygon_t *polygon;
-	egg_group_t *grp;
-	unsigned int i;
-	long frame = -1;
-
-
-	/* Vertex morph frame fu */
-	grp = mEgg->getGroup(getCurrentGroup());
-	if (grp && grp->flags == 0xBADA55)
-		frame = grp->id;
-
-
-	/* Mongoose 2004.03.26, 
-	 * This was here for vertex morph frames, still used for edit updates */
-	if (mesh.r_polygon.size() != mesh.polygon.size())
-	{
-		freyja_print("createRenderMesh> mesh[%i]: %i polygons, %i cached...",
-					 mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
-
-		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
-		{
-			polygon = mEgg->getPolygon(mesh.polygon[i]);
-			
-			if (polygon)
-			{
-				mesh.r_polygon.pushBack(polygon);
-			}
-		}
-	}
-
-	rmesh.setEgg(mEgg, &mesh, &mesh.r_polygon);
-	rmesh.gbegin = mesh.group.begin(); 
-	rmesh.gend = mesh.group.end();
-	rmesh.id = mesh.id;
-	rmesh.frame = frame;
 }
 
 
@@ -1435,192 +1259,45 @@ bool FreyjaModel::pasteSelectedPatch()
 
 bool FreyjaModel::pasteSelectedMesh()
 {
-	Vector<unsigned int> transV;
-	Vector<unsigned int> transT;
-	CopyVertex *v;
-	CopyTexCoord *t;
-	CopyPolygon *p;
-	unsigned int i, j, index;
+	char c = freyjaModelPasteMesh(0);
 
-
-	if (mCopyMesh.vertices.empty() || mCopyMesh.polygons.empty())
+	if (c == -1)
 		return false;
 
-	freyjaBegin(FREYJA_MESH);
-	freyjaMeshFlags1u(mCopyMesh.flags);
-	freyjaMeshPosition(freyjaGetCurrent(FREYJA_MESH), mCopyMesh.center);
-
-	freyjaBegin(FREYJA_VERTEX_GROUP);
-	freyjaGroupCenter3f(mCopyMesh.center[0], 
-						mCopyMesh.center[1],
-						mCopyMesh.center[2]);
-
-	for (i = mCopyMesh.vertices.begin(); i < mCopyMesh.vertices.end(); ++i)
-	{
-		v = mCopyMesh.vertices[i];
-		//index = 0;
-
-		if (v)
-		{
-			index = freyjaVertex3fv(v->pos);
-			freyjaVertexNormal3fv(index, v->norm);
-			freyjaVertexTexCoord2fv(index, v->uv);
-		}
-
-		transV.pushBack(index);
-	}
-
-	freyjaEnd(); // FREYJA_GROUP
-
-	for (i = mCopyMesh.texcoords.begin(); i < mCopyMesh.texcoords.end(); ++i)
-	{
-		t = mCopyMesh.texcoords[i];
-		//index = 0;
-
-		if (t)
-		{
-			index = freyjaTexCoord2f(t->uv[0], t->uv[1]);
-		}
-
-		transT.pushBack(index);
-	}
-
-	for (i = mCopyMesh.polygons.begin(); i < mCopyMesh.polygons.end(); ++i)
-	{
-		p = mCopyMesh.polygons[i];
-
-		if (!p)
-			continue;
-
-		freyjaBegin(FREYJA_POLYGON);
-
-		freyjaPolygonMaterial1i(p->material);
-
-		for (j = p->vertices.begin(); j < p->vertices.end(); ++j)
-			freyjaPolygonVertex1i(transV[p->vertices[j]]);
-
-		for (j = p->texcoords.begin(); j < p->texcoords.end(); ++j)
-			freyjaPolygonTexCoord1i(transT[p->texcoords[j]]);
-
-		freyjaEnd(); // FREYJA_POLYGON
-	}
-	
-
-	freyjaEnd(); // FREYJA_MESH
-
-	freyja_print("Mesh pasted...");
-
-	return true;
+	return c;
 }
 
 
-bool FreyjaModel::copySelectedMesh()
+bool FreyjaModel::pasteVertexBuffer()
 {
-	CopyVertex *v;
-	CopyTexCoord *t;
-	CopyPolygon *p;
-	egg_mesh_t *mesh; 
-	egg_group_t *group;
-	egg_polygon_t *polygon;
-	egg_vertex_t *vertex;
-	egg_texel_t *texel;
-	unsigned int i, j, index;
+	char c = freyjaModelPasteMesh(0);
 
-
-	mesh = mEgg->getMesh(getCurrentMesh());
-	group = mEgg->getGroup(getCurrentGroup());
-
-	if (!mesh || !group)
+	if (c == -1)
 		return false;
 
-	// FIXME: You can add a back buffer stack/list here
-	if (!mAppendMode)
-		mCopyMesh.erase();
+	return c;
+}
 
-	mCopyMesh.flags = mesh->flags;
-	mCopyMesh.center[0] = group->center[0];
-	mCopyMesh.center[1] = group->center[1];
-	mCopyMesh.center[2] = group->center[2];
+	
+bool FreyjaModel::copySelectedMesh()
+{
+	char c = freyjaModelCopyMesh(0, getCurrentMesh(), getCurrentGroup());
 
-	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
-	{
-		index = mesh->polygon[i];
-		polygon = mEgg->getPolygon(index);
+	if (c == -1)
+		return false;
 
-		if (!polygon)
-			continue;
+	return c;
+}
 
-		p = new CopyPolygon();
-		p->material = polygon->shader;
+	
+bool FreyjaModel::copyVertexBuffer()
+{
+	char c = freyjaModelCopyVertexList(0, mList, getCurrentMesh(), getCurrentGroup());
 
-		for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
-		{
-			index = polygon->vertex[j];
-			vertex = mEgg->getVertex(index);
+	if (c == -1)
+		return false;
 
-			v = new CopyVertex();
-
-			if (vertex)  // This is to handle a whacky uv alignment issue
-			{
-				v->pos[0] = vertex->pos[0];
-				v->pos[1] = vertex->pos[1];
-				v->pos[2] = vertex->pos[2];
-				v->uv[0] = vertex->uv[0];
-				v->uv[1] = vertex->uv[1];
-				v->norm[0] = vertex->norm[0];
-				v->norm[1] = vertex->norm[1];
-				v->norm[2] = vertex->norm[2];
-			}
-			else
-			{
-				freyja_print("Selected mesh to copy has invalid vertex %i", 
-							 index);
-			}
-
-			//FIXME: Add weight copy here, but this build handles
-			//       weights so poorly no need until they're fixed
-
-			mCopyMesh.vertices.pushBack(v);
-			p->vertices.pushBack(mCopyMesh.vertices.end()-1);
-		}
-
-		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
-		{
-			index = polygon->texel[j];
-			texel = mEgg->getTexel(index);
-
-			t = new CopyTexCoord();
-			
-			if (texel)
-			{
-				t->uv[0] = texel->st[0];
-				t->uv[1] = texel->st[1];
-			}
-			else
-			{
-				freyja_print("Selected mesh to copy has invalid texcoord %i", 
-							 index);
-			}
-
-			mCopyMesh.texcoords.pushBack(t);
-			p->texcoords.pushBack(mCopyMesh.texcoords.end()-1);	
-		}
-
-		mCopyMesh.polygons.pushBack(p);
-	}	
-
-
-	/* FIXME: Drop Animation frames for now ( duping them could waste memory,
-	   and isn't likely to be expected by user ) */
-	for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
-	{
-		// FIXME: Remember if this is implemented, you have to skip the
-		//        current group and reorder since its vertices are duped
-	}	
-
-	freyja_print("Mesh[%i] copied...", mesh->id);
-
-	return true;
+	return c;
 }
 
 
@@ -1661,155 +1338,6 @@ void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 		if (z)
 			(*xyz)[2] = -(*xyz)[2];      
 	}
-}
-
-
-bool FreyjaModel::copyVertexBuffer()
-{
-	Vector<unsigned int> polygonList;
-	CopyVertex *v;
-	CopyTexCoord *t;
-	CopyPolygon *p;
-	egg_mesh_t *mesh;
-	egg_group_t *group;
-	egg_polygon_t *polygon;
-	egg_vertex_t *vertex;
-	egg_texel_t *texel;
-	unsigned long i, j, k, r;
-	long index, index2;
-	Vector3d min, max, center;
-
-
-	mesh = mEgg->getMesh(getCurrentMesh());
-	group = mEgg->getGroup(getCurrentGroup());
-
-	if (!mesh || !group || mList.empty())
-		return false;
-
-	// FIXME: You can add a back buffer stack/list here
-	if (!mAppendMode)
-		mCopyMesh.erase();
-
-	min = Vector3d(999999.0f, 999999.0f, 999999.0f);
-	max = Vector3d(-999999.0f, -999999.0f, -999999.0f);
-
-	mCopyMesh.flags = mesh->flags;
-	mCopyMesh.center[0] = group->center[0];
-	mCopyMesh.center[1] = group->center[1];
-	mCopyMesh.center[2] = group->center[2];
-
-	for (i = mList.begin(); i < mList.end(); ++i)
-	{
-		index = mList[i];
-		vertex = mEgg->getVertex(index);
-
-		if (!vertex)
-			continue;
-
-		for (k = 0; k < 3; ++k)
-		{
-			if (vertex->pos[k] < min.mVec[k])
-				min.mVec[k] = vertex->pos[k];
-
-			if (vertex->pos[k] > max.mVec[k])
-				max.mVec[k] = vertex->pos[k];
-		}
-
-		for (r = vertex->ref.begin(); r < vertex->ref.end(); ++r)
-		{
-			index2 = vertex->ref[r];
-
-			for (j = polygonList.begin(); j < polygonList.end(); ++j)
-			{
-				if (index2 == (int)polygonList[j])
-				{
-					index2 = -1;
-					break;
-				}
-			}	
-			
-			if (index2 > -1)
-			{
-				polygonList.pushBack(index2);
-			}
-		}
-	}
-
-	center = (min + max) / 2;
-
-	mCopyMesh.center[0] = center.mVec[0];
-	mCopyMesh.center[1] = center.mVec[1];
-	mCopyMesh.center[2] = center.mVec[2];
-
-	for (i = polygonList.begin(); i < polygonList.end(); ++i)
-	{
-		index = polygonList[i];
-		polygon = mEgg->getPolygon(index);
-
-		if (!polygon)
-			continue;
-
-		p = new CopyPolygon();
-		p->material = polygon->shader;
-
-		for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
-		{
-			index = polygon->vertex[j];
-			vertex = mEgg->getVertex(index);
-
-			v = new CopyVertex();
-
-			if (vertex)  // This is to handle a whacky uv alignment issue
-			{
-				v->pos[0] = vertex->pos[0];
-				v->pos[1] = vertex->pos[1];
-				v->pos[2] = vertex->pos[2];
-				v->uv[0] = vertex->uv[0];
-				v->uv[1] = vertex->uv[1];
-				v->norm[0] = vertex->norm[0];
-				v->norm[1] = vertex->norm[1];
-				v->norm[2] = vertex->norm[2];
-			}
-			else
-			{
-				freyja_print("Selected mesh to copy has invalid vertex %i", 
-							 index);
-			}
-
-			//FIXME: Add weight copy here, but this build handles
-			//       weights so poorly no need until they're fixed
-
-			mCopyMesh.vertices.pushBack(v);
-			p->vertices.pushBack(mCopyMesh.vertices.end()-1);
-		}
-
-		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
-		{
-			index = polygon->texel[j];
-			texel = mEgg->getTexel(index);
-
-			t = new CopyTexCoord();
-			
-			if (texel)
-			{
-				t->uv[0] = texel->st[0];
-				t->uv[1] = texel->st[1];
-			}
-			else
-			{
-				freyja_print("Selected mesh to copy has invalid texcoord %i", 
-							 index);
-			}
-
-			mCopyMesh.texcoords.pushBack(t);
-			p->texcoords.pushBack(mCopyMesh.texcoords.end()-1);	
-		}
-
-		mCopyMesh.polygons.pushBack(p);
-	}	
-
-	freyja_print("Vertex buffer copied...", mesh->id);
-	return true;
 }
 
 

@@ -14,11 +14,15 @@
     </Configuration>
   </Configurations>
   <References>
-    <ProjectReference type="Gac" localcopy="True" refto="gtk-sharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <ProjectReference type="Gac" localcopy="True" refto="gdk-sharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <ProjectReference type="Gac" localcopy="True" refto="glib-sharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <ProjectReference type="Gac" localcopy="True" refto="glade-sharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <ProjectReference type="Gac" localcopy="True" refto="pango-sharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <ProjectReference type="Assembly" localcopy="True" refto="./csdGL.dll" />
+    <ProjectReference type="Assembly" localcopy="True" refto="./csdCg.dll" />
+    <ProjectReference type="Assembly" localcopy="True" refto="./csdMath.dll" />
+    <ProjectReference type="Gac" localcopy="True" refto="gtk-sharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <ProjectReference type="Assembly" localcopy="True" refto="./csdGLtools.dll" />
   </References>
   <DeploymentInformation strategy="File">
     <excludeFiles />
