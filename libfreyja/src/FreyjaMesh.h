@@ -31,7 +31,6 @@
 
 #include <mstl/Vector.h>
 
-typedef long index_t;
 
 #ifdef POST_CHIMERA_PLUS_UMBRA
 class FreyjaVertex

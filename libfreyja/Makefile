@@ -157,9 +157,11 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS = \
-	$(BUILDDIR)/FreyjaPluginABI.o \
+	$(BUILDDIR)/Action.o \
+	$(BUILDDIR)/CopyModel.o \
 	$(BUILDDIR)/Egg.o \
 	$(BUILDDIR)/EggPlugin.o \
+	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/Freyja.o \
 	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaCamera.o \
@@ -171,7 +173,8 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaMesh.o \
 	$(BUILDDIR)/FreyjaMaterial.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
-	$(BUILDDIR)/FreyjaSkeleton.o 
+	$(BUILDDIR)/FreyjaSkeleton.o \
+	$(BUILDDIR)/RenderModel.o 
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)

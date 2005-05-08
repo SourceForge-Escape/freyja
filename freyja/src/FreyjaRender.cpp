@@ -43,6 +43,7 @@
 #   endif
 #endif
 
+
 #include "freyja_events.h"
 #include "MaterialManager.h"
 
@@ -738,9 +739,9 @@ void FreyjaRender::drawFreeWindow()
 	renderLights();
 	glScalef(mZoom, mZoom, mZoom);
 
-	for (i = 0; i < mModel->getModelCount(); ++i)
+	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
-		mModel->getModel(model, i);
+		freyjaGetRenderModel(i, model);
 		renderModel(model);
 	}
 }
@@ -1341,7 +1342,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	/* Render meshes */
 	for (i = 0, n = model.getMeshCount(); i < n; ++i)
 	{
-		if (model.getMesh(i, rmesh))
+		if (model.getMesh(i, rmesh, mModel->getCurrentGroup()))
 			renderMesh(rmesh);
 	}
 
@@ -1593,7 +1594,10 @@ void FreyjaRender::renderUVWindow()
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mDefaultPointSize);
 
-	if (!mModel->getRenderMesh(mModel->getCurrentMesh(), mesh))
+
+	// Until multi model editing comes just use model[0]
+	if (!freyjaGetRenderModelMesh(0, mModel->getCurrentMesh(),
+								  mModel->getCurrentGroup(), mesh))
 	{
 		DrawQuad(0.0, 0.0, width, height);
 		resizeContext(width, height);
@@ -1605,7 +1609,8 @@ void FreyjaRender::renderUVWindow()
 
 	for (i = mModel->mUVMap.begin(), n = mModel->mUVMap.end();  i < n; ++i)
 	{
-		if (!mModel->getRenderPolygon(mModel->mUVMap[i], face))
+		// Until multi model editing comes just use model[0]
+		if (!freyjaGetRenderModelPolygon(0, mModel->mUVMap[i], face))
 			continue;
 
 		if (face.material != (int)mModel->getCurrentTextureIndex())
@@ -1869,9 +1874,9 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	for (i = 0; i < mModel->getModelCount(); ++i)
+	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
-		mModel->getModel(model, i);
+		freyjaGetRenderModel(i, model);
 		renderModel(model);
 	}
 }
