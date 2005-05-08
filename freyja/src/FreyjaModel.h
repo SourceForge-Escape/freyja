@@ -36,6 +36,7 @@
 
 #include <freyja/EggPlugin.h>
 #include <freyja/Egg.h>
+
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
 #include "BezierPatch.h"
@@ -97,73 +98,6 @@ public:
 	};
 
 
-	class CopyGroup
-	{
-	public:
-		Vector <unsigned int> vertices;     /* Vertices composing group */	
-		vec3_t center;
-	};
-
-
-	// FIXME: dumps vertex weights and for now
-	// Polygon, etc references are never copied -- since objects will be duped
-	class CopyVertex
-	{
-	public:
-		vec3_t pos;
-		vec3_t uv;       /* Remember only uv is used in this build */
-		vec3_t norm;
-		// vec4_t color;  // In this build color is func of polymapped face
-	};
-
-
-	class CopyTexCoord
-	{
-	public:
-		vec2_t uv;
-	};
-
-
-	class CopyPolygon
-	{
-	public:
-		Vector <unsigned int> vertices;
-		Vector <unsigned int> texcoords; // this build also uses this for color
-		int material;
-	};
-
-
-	// FIXME: Drops any vertex animation frames
-	class CopyMesh
-	{
-	public:
-		CopyMesh()
-		{
-			flags = 0;
-		}
-
-		~CopyMesh()
-		{
-			erase();
-		}
-
-		void erase()
-		{
-			flags = 0;
-			vertices.erase();
-			texcoords.erase();
-			polygons.erase();
-			groups.erase();
-		}
-
-		Vector <CopyVertex *> vertices;
-		Vector <CopyTexCoord *> texcoords;
-		Vector <CopyPolygon *> polygons;
-		Vector <CopyGroup *> groups;
-		vec3_t center;
-		unsigned int flags;
-	};
-
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -195,21 +129,6 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
-
-	/* Move into RenderModel class */
-	bool getRenderMesh(unsigned int index, RenderMesh &rmesh);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if valid RenderMesh is set.
-	 *        
-	 ------------------------------------------------------*/
-
-	bool getRenderPolygon(unsigned int index, RenderPolygon &face);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if valid RenderPolygon is set.
-	 *        
-	 ------------------------------------------------------*/
 
 	unsigned int getAnimationFramesIn(unsigned int animationIndex);
 	/*------------------------------------------------------
@@ -406,8 +325,6 @@ public:
 
 	unsigned int getModelCount();
 
-	void getModel(RenderModel &model, unsigned int index);
-
 	void getMeshBoundingBox(long index, vec3_t min, vec3_t max);
 	/*------------------------------------------------------
 	 * Pre  : index is query for 'mesh' by index
@@ -525,10 +442,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool copySelectedMesh();
-
-	bool copyVertexBuffer();
-
 	void createPolyMappedUVMap(long seedPolygon);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -539,6 +452,10 @@ public:
 	 *        Here 'UVMap' is a collection of texture polygons
 	 *
 	 ------------------------------------------------------*/
+
+	bool copySelectedMesh();
+
+	bool copyVertexBuffer();
 
 	void cullUsingVertexBuffer();
 
@@ -577,11 +494,11 @@ public:
 
 	void movePatchControlPoint(Vector3d xyz);
 
+	bool pasteSelectedPatch();
+
 	bool pasteSelectedMesh();
 
 	bool pasteVertexBuffer();
-
-	bool pasteSelectedPatch();
 
 	void selectObject(transform_t type, Vector3d xyz);
 
@@ -806,21 +723,12 @@ public:
 
 	vec4_t mLight0Pos;                  /* Testing for light system */
 
-	bool mAppendMode;                   /* Copy system multiobject copy state */
-
 
 private:
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors
 	////////////////////////////////////////////////////////////
-
-	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Egg realtime data translator method
-	 *
-	 ------------------------------------------------------*/
 
 	egg_group_t *getNearestGroup(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
@@ -874,11 +782,6 @@ private:
 
 	unsigned int mFlags;            /* Stores option flags as bitmap */
 
-	CopyMesh mCopyMesh;             /* This is the fucking buffer for meshes
-									 * it handles things the backend should
-									 * but the backend can't in this build for
-									 * copy/cut/paste */
-
 	bool mEggDebug;                 /* Egg debugging? on/off */
 
 	bbox_t mSelectBBox;             /* 3d selection box using 2 vertices */
@@ -920,213 +823,5 @@ private:
 										* is important */
 };
 
-
-
-/* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
- * They only use all natural, wholesome Hel math types. */
-
-class RenderBone
-{
-public:
-
-	unsigned int getChildrenCount()
-	{
-		return mTag->slave.end();
-	}
-
-	long getBoneIndex(unsigned int index)
-	{
-		return mTag->slave[index];
-	}
-
-	void set(egg_tag_t *tag)
-	{
-		mTag = tag;
-		translate = Vector3d(tag->center);
-		rotate = Vector3d(tag->rot);
-	}
-
-	Vector3d translate;
-	Vector3d rotate;
-
-private:
-	egg_tag_t *mTag;
-};
-
-
-class RenderSkeleton
-{
-public:
-
-	unsigned int getBoneCount()
-	{
-		return mTags->end();
-	}
-
-	bool getBone(unsigned int index, RenderBone &bone)
-	{
-		if ((*mTags)[index])
-		{
-			bone.set((*mTags)[index]);
-			return true;
-		}
-
-		return false;
-	}
-
-	void setTags(Vector<egg_tag_t *> *tags)
-	{
-		mTags = tags;
-	}
-
-private:
-	Vector<egg_tag_t *> *mTags;
-};
-
-
-class RenderPolygon  
-{
-public:
-	/* I've limited the renderer to 6-side polygons recently, so deal */
-	Vector3d vertices[6];
-	Vector3d texcoords[6];
-	Vector3d normals[6];
-	vec4_t colors[6];
-	long material;
-	long id;
-	unsigned int count; // vertex count
-};
-
-bool createRenderPolygon(RenderPolygon &face,
-						 egg_polygon_t &polygon, long frame);
-
-class RenderMesh
-{
-public:
-
-	Vector3d getGroupCenter(unsigned int i)
-	{
-		Vector3d v;
-		egg_group_t *grp;
-
-		if ((grp = mEgg->getGroup(mMesh->group[i])))
-		{
-			return Vector3d(grp->center);
-		}
-
-		v.zero();
-		return v;
-	}
-
-	void setEgg(Egg *egg, egg_mesh_t *mesh, Vector<egg_polygon_t *> *polygons)
-	{
-		mEgg = egg;
-		mMesh = mesh;
-		mPolygons = polygons;
-	}
-
-
-	bool getPolygon(unsigned int index, RenderPolygon &face)
-	{
-		static egg_polygon_t *poly;
-
-		if (mPolygons)
-		{
-			poly = (*mPolygons)[index];
-			
-			if (poly)
-			{
-				return createRenderPolygon(face, *poly, -1);
-			}
-		}
-
-		return false;
-	}
-
-
-	bool getPolygon(unsigned int index, long frame, RenderPolygon &face)
-	{
-		static egg_polygon_t *poly;
-
-		if (mPolygons)
-		{
-			poly = (*mPolygons)[index];
-			
-			if (poly)
-			{
-				return createRenderPolygon(face, *poly, frame);
-			}
-		}
-
-		return false;
-	}
-
-	unsigned int getPolygonCount()
-	{
-		if (mPolygons->empty()) 
-			return 0;
-
-		return mPolygons->end();
-	}
-
-	long id;
-	long frame;
-	unsigned int gbegin, gend;
-
-private:
-	Egg *mEgg; // For sheilding renderer from egg calls for groups in mesh
-	Vector<egg_polygon_t *> *mPolygons;
-	egg_mesh_t *mMesh;
-};
-
-
-class RenderModel
-{
-public:
-
-	RenderSkeleton &getSkeleton()
-	{
-		mSkeleton.setTags(mEgg->TagList());
-		return mSkeleton;
-	}
-
-	unsigned int getMeshCount()
-	{
-		if (mMeshlist->empty())
-			return 0;
-
-		return mMeshlist->end();
-	}
-
-	bool getMesh(unsigned int index, RenderMesh &mesh)
-	{
-#ifdef OLD_RENDERMESH_TRANSLATOR
-		egg_mesh_t *m = (*mMeshlist)[index]; 
-
-		if (m)
-		{
-			mModel->createRenderMesh(mesh, *m);
-		}
-#else
-		return mModel->getRenderMesh(index, mesh);
-#endif
-	}
-
-	void setEgg(Egg *egg, FreyjaModel *model)
-	{
-		mEgg = egg;
-		mMeshlist = egg->MeshList();
-		mModel = model;
-	}
-
-	long index;
-
-private:
-
-	RenderSkeleton mSkeleton;
-	Vector<egg_mesh_t *> *mMeshlist;
-	Egg *mEgg;
-	FreyjaModel *mModel;
-};
 
 #endif

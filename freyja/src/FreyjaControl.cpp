@@ -1227,7 +1227,8 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eCopyAppendMode:
-		mModel->mAppendMode = !mModel->mAppendMode;
+		// ATM modeler only handles 1 model, so only call for 0th index
+		freyjaModelAppendMeshMode(0, !freyjaGetModelAppendMeshMode(0)); 
 		break;
 
 	case eSplitObject:

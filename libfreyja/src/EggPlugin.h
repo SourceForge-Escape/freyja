@@ -199,7 +199,7 @@ public:
 
 	void freyjaGetTexCoord(long index, vec2_t uv);
 
-	long freyjaGetPolygon(freyja_object_t type, long item, long *value);
+	long freyjaGetPolygon(freyja_object_t type, int32 item, int32 *value);
 	/*------------------------------------------------------
 	 * Pre  : Type is either vertex or texel
 	 *        Item is index into polygon's type list 
@@ -703,6 +703,10 @@ public:
 
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 
+	Egg *getEgg()
+	{
+		return mEgg;
+	}
 
 private:
 

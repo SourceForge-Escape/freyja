@@ -617,8 +617,8 @@ long EggPlugin::getPolygonFlags(long polygonIndex)
 }
 
 
-long EggPlugin::freyjaGetPolygon(freyja_object_t type, long item, 
-								 long *value)
+long EggPlugin::freyjaGetPolygon(freyja_object_t type, int32 item, 
+								 int32 *value)
 {
 	Vector<egg_polygon_t *> *polygon_lst;
 	egg_polygon_t *polygon;

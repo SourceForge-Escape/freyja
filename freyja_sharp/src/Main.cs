@@ -1,7 +1,20 @@
 // project created on 3/31/2005 at 1:20 PM
+
+
+#define USING_OPENGL_SHARP
+
 using System;
 using Gtk;
 using Freyja;
+
+#if USING_OPENGL_SHARP
+using csDragons.OpenGL;
+using GLib;
+using GdkSharp;
+using GtkSharp;
+using System.Diagnostics;
+#endif
+
 
 enum MLispObjectGtkWidgetType
 {
@@ -34,6 +47,109 @@ class MainClass {
 		return new MLispObject();
 	}
 
+
+
+#if USING_OPENGL_SHARP
+	// (gl_widget)
+	public static MLispObject mgtk_gl_widget(ref MLispObjectList args)
+	{
+		//MLispObject label = args.pop();
+		//MLispObject mode = args.pop();  // really unused
+		//MLispObject e = args.pop();
+		MLispObject result = new MLispObject();
+		GtkGLArea glarea;
+
+		csDragons.OpenGL.
+
+		//window.ReallocateRedraws = true;
+		
+		glarea.Realized += new EventHandler(OnRealized);
+		glarea.ConfigureEvent += new ConfigureEventHandler(OnConfigure);
+		glarea.ExposeEvent += new ExposeEventHandler(OnExpose);
+		glarea.MapEvent += new MapEventHandler(OnMap);
+		glarea.UnmapEvent += new UnmapEventHandler(OnUnmap);	
+
+		VBox vbox = new VBox(false, 2);
+		vbox.PackStart(glarea, true, true, 5);
+		
+		result = new MLispObjectGtkWidget(vbox);
+		result.type = (uint)MLispObjectGtkWidgetType.MGTK_BOX;
+		result.setTypeName("Gtk.VBox");
+		
+		args.pop();
+		
+		return result;
+	}
+	
+	  protected virtual void OnConfigure (object obj, ConfigureEventArgs args) {
+    if (glarea.MakeCurrent()) {
+      glViewport(0, 0, glarea.Allocation.Width, glarea.Allocation.Height);
+      
+      glMatrixMode( GL_PROJECTION );
+      glLoadIdentity();
+      float h = (float) glarea.Allocation.Height / (float) (glarea.Allocation.Width);
+      glFrustum( -1.0f, 1.0f, -h, h, 5.0f, 5.0f );
+      glMatrixMode( GL_MODELVIEW );
+      glLoadIdentity();
+      //glTranslatef( 0.0f, 0.0f, -40.0f);
+      glEnd();
+    }
+  }
+  
+   protected void OnMap (object obj, MapEventArgs args) {
+    glMapped = false;
+  }
+  
+  protected void OnUnmap (object obj, UnmapEventArgs args) {
+    glMapped = true;
+  }
+  
+  
+  protected void OnRealized (object obj, EventArgs args) {
+    glShadeModel( GL_SMOOTH );
+    glClearColor( 0.0f, 0.0f, 0.0f, 0.5f );
+    glClearDepth( 1.0f );
+    glEnable( GL_DEPTH_TEST );
+    glDepthFunc( GL_LEQUAL );
+    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+  }
+	
+	protected virtual void OnExpose (object obj, ExposeEventArgs args)
+	{
+    if (glarea.MakeCurrent()) {
+      glClearColor( 0, 0, 0, 0 );
+      glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+      glPushMatrix();
+      glRotatef( rotX, 1.0f, 0.0f, 0.0f );
+      glRotatef( rotY, 0.0f, 1.0f, 0.0f );
+      glRotatef( rotZ, 0.0f, 0.0f, 1.0f );
+      glTranslatef( -0.5f, -0.5f, 0.0f );
+      draw();
+      glPopMatrix();
+      glarea.SwapBuffers();
+    }
+  }
+  
+  protected virtual void draw() {
+    if (glarea.MakeCurrent()) {
+      glBegin( GL_TRIANGLES );
+        glColor3f( 1.0f, 0.0f, 0.0f );
+        glVertex2f( 0.0f, 0.0f);
+        glColor3f( 0.0f, 1.0f, 0.0f );
+        glVertex2f( 0.5f, 1.0f);
+        glColor3f( 0.0f, 0.0f, 1.0f );
+        glVertex2f( 1.0f, 0.0f);
+      glEnd();
+    }
+  }
+	
+#else
+	// (gl_widget)
+	public static MLispObject mgtk_gl_widget(ref MLispObjectList args)
+	{
+		return mgtk_vbox(args);
+	}
+#endif
 
 	public static MLispObject mgtk_handlebox(ref MLispObjectList args)
 	{

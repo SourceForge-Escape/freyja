@@ -28,6 +28,7 @@
 
 
 #include <hel/ViewVolume.h>
+#include <freyja/RenderModel.h>
 
 #include "FreyjaModel.h"
 
