@@ -28,6 +28,8 @@
 
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
+#include <freyja/FreyjaPluginABI.h>
+#include <hel/math.h>
 
 #include "FreyjaControl.h"
 
@@ -384,9 +386,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 bool FreyjaControl::event(int event, vec_t value)
 {
-	vec4_t color;
+	vec4_t color, pos;
 	vec_t x, y, z;
-	vec_t *ptr;
 
 
 	switch (event)
@@ -488,8 +489,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	case 800:
 	case 801:
 	case 802:
-		ptr = mModel->mLight0Pos;
-		ptr[event - 800] = value;
+		freyjaGetLightPosition4v(0, pos);
+		pos[event - 800] = value;
+		freyjaLightPosition4v(0, pos);
 		freyja_event_gl_refresh();
 		break;
 
@@ -2018,14 +2020,17 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 		case MOUSE_BTN_MIDDLE:
 			{
-				Vector3d xyz = Vector3d(mModel->mLight0Pos);
-				vec_t *ptr = mModel->mLight0Pos;
+				vec4_t pos;
+				freyjaGetLightPosition4v(0, pos);
+				Vector3d xyz = Vector3d(pos);
 
 				getFreeWorldFromScreen(x, y, xyz.mVec);
 
-				ptr[0] = xyz.mVec[0];
-				ptr[1] = xyz.mVec[1];
-				ptr[2] = xyz.mVec[2];
+				pos[0] = xyz.mVec[0];
+				pos[1] = xyz.mVec[1];
+				pos[2] = xyz.mVec[2];
+
+				freyjaLightPosition4v(0, pos);
 
 				freyja_event_set_float(800, xyz.mVec[0]);
 				freyja_event_set_float(801, xyz.mVec[1]);
