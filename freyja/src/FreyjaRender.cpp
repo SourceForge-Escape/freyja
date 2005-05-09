@@ -3,8 +3,8 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaRender
  * License : No use w/o permission (C)2001 Mongoose
  * Comments: GL context rendering backend for Freyja
@@ -1167,19 +1167,21 @@ void FreyjaRender::renderBox(vec3_t min, vec3_t max)
 
 void FreyjaRender::renderLights()
 {
+	vec4_t pos;
+
 	if (mRenderMode & RENDER_LIGHTING)
 	{
-		float *test = mModel->mLight0Pos;
+		freyjaGetLightPosition4v(0, pos);
 		
 		glPushMatrix();
-		glTranslatef(test[0], test[1], test[2]);
+		glTranslatef(pos[0], pos[1], pos[2]);
 		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 		mglDrawSphere(16, 16, 0.75f);
 		glPopMatrix();
 		
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
-		glLightfv(GL_LIGHT0, GL_POSITION, mModel->mLight0Pos);
+		glLightfv(GL_LIGHT0, GL_POSITION, pos);
 	}
 }
 

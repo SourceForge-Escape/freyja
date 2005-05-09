@@ -2201,6 +2201,121 @@ void freyjaGetVertexPolygonRef(Vector<long> &polygons)
 ////////////////////////////////////////////////////////////////////
 
 
+int32 freyjaLightCreate()
+{
+	int32 lightIndex = gFreyjaLights.size();
+
+	gFreyjaLights.pushBack(new FreyjaLight());
+	// gFreyjaLights[lightIndex]->mId = lightIndex;
+
+	return lightIndex;	
+}
+
+
+void freyjaLightDelete(int32 lightIndex)
+{
+}
+
+
+// Light mutators /////////////////
+
+void freyjaLightPosition4v(uint32 lightIndex, vec4_t position)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		gFreyjaLights[lightIndex]->setPosition(position);
+	}
+}
+
+
+void freyjaLightAmbient(uint32 lightIndex, vec4_t ambient)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		gFreyjaLights[lightIndex]->mAmbient[0] = ambient[0];
+		gFreyjaLights[lightIndex]->mAmbient[1] = ambient[1];
+		gFreyjaLights[lightIndex]->mAmbient[2] = ambient[2];
+		gFreyjaLights[lightIndex]->mAmbient[3] = ambient[3];
+	}
+}
+
+
+void freyjaLightDiffuse(uint32 lightIndex, vec4_t diffuse)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		gFreyjaLights[lightIndex]->mDiffuse[0] = diffuse[0];
+		gFreyjaLights[lightIndex]->mDiffuse[1] = diffuse[1];
+		gFreyjaLights[lightIndex]->mDiffuse[2] = diffuse[2];
+		gFreyjaLights[lightIndex]->mDiffuse[3] = diffuse[3];
+	}
+}
+
+
+void freyjaLightSpecular(uint32 lightIndex, vec4_t specular)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		gFreyjaLights[lightIndex]->mSpecular[0] = specular[0];
+		gFreyjaLights[lightIndex]->mSpecular[1] = specular[1];
+		gFreyjaLights[lightIndex]->mSpecular[2] = specular[2];
+		gFreyjaLights[lightIndex]->mSpecular[3] = specular[3];
+	}
+}
+
+
+// Light accessors /////////////////
+
+void freyjaGetLightPosition4v(uint32 lightIndex, vec4_t position)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		position[0] = gFreyjaLights[lightIndex]->mPos[0];
+		position[1] = gFreyjaLights[lightIndex]->mPos[1];
+		position[2] = gFreyjaLights[lightIndex]->mPos[2];
+		position[3] = gFreyjaLights[lightIndex]->mPos[3];
+	}
+}
+
+
+void freyjaGetLightAmbient(uint32 lightIndex, vec4_t ambient)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		ambient[0] = gFreyjaLights[lightIndex]->mAmbient[0];
+		ambient[1] = gFreyjaLights[lightIndex]->mAmbient[1];
+		ambient[2] = gFreyjaLights[lightIndex]->mAmbient[2];
+		ambient[3] = gFreyjaLights[lightIndex]->mAmbient[3];
+	}
+}
+
+
+void freyjaGetLightDiffuse(uint32 lightIndex, vec4_t diffuse)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		diffuse[0] = gFreyjaLights[lightIndex]->mDiffuse[0];
+		diffuse[1] = gFreyjaLights[lightIndex]->mDiffuse[1];
+		diffuse[2] = gFreyjaLights[lightIndex]->mDiffuse[2];
+		diffuse[3] = gFreyjaLights[lightIndex]->mDiffuse[3];
+	}
+}
+
+
+void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		specular[0] = gFreyjaLights[lightIndex]->mSpecular[0];
+		specular[1] = gFreyjaLights[lightIndex]->mSpecular[1];
+		specular[2] = gFreyjaLights[lightIndex]->mSpecular[2];
+		specular[3] = gFreyjaLights[lightIndex]->mSpecular[3];
+	}
+}
+	
+
+// General /////////
+
 void freyjaBegin(freyja_object_t type)
 {
 	if (EggPlugin::mEggPlugin)

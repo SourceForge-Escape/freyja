@@ -29,7 +29,12 @@
 
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
-	o C# port of mlisp continues
+	o libfreyja aquires lighting, render structure, and action template
+	  from freyja
+	o libfreyja wrapped in C#
+	o Opengl-sharp support for mlisp# prototype outside svn
+	o Gtk# support for mlisp# 
+	o mlisp# completed
 
 
  freyja (20050408) "NeoUmbra" Mongoose <mongoose@icculus.org>

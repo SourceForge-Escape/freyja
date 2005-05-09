@@ -87,7 +87,6 @@ class FreyjaLight
 		mPos[2] = xyz[2];
 	}
 
-	//FIXME temp
 	vec4_t mAmbient;          /* Ambient color */
 
 	vec4_t mDiffuse;          /* Diffuse color */
