@@ -212,6 +212,72 @@ typedef enum {
 	// libfreyja plugin ABI 0.9.1 object accessors
 	///////////////////////////////////////////////////////////////////////
 
+	int32 freyjaLightCreate();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns index of light spawned
+	 ------------------------------------------------------*/
+
+	void freyjaLightDelete(uint32 lightIndex);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Light is removed from light pool
+	 ------------------------------------------------------*/
+
+	// Light mutators /////////////////
+
+	void freyjaLightPosition4v(uint32 lightIndex, vec4_t position);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Sets <position> 
+	 ------------------------------------------------------*/
+
+	void freyjaLightAmbient(uint32 lightIndex, vec4_t ambient);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Sets <ambient> color
+	 ------------------------------------------------------*/
+
+	void freyjaLightDiffuse(uint32 lightIndex, vec4_t diffuse);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Sets <diffuse> color
+	 ------------------------------------------------------*/
+
+	void freyjaLightSpecular(uint32 lightIndex, vec4_t specular);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Sets <specular> color
+	 ------------------------------------------------------*/
+
+	// Light accessors /////////////////
+
+	void freyjaGetLightPosition4v(uint32 lightIndex, vec4_t position);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Returns <position> 
+	 ------------------------------------------------------*/
+
+	void freyjaGetLightAmbient(uint32 lightIndex, vec4_t ambient);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Returns <ambient> color
+	 ------------------------------------------------------*/
+
+	void freyjaGetLightDiffuse(uint32 lightIndex, vec4_t diffuse);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Returns <diffuse> color
+	 ------------------------------------------------------*/
+
+	void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular);
+	/*------------------------------------------------------
+	 * Pre  : Light <lightIndex> exists
+	 * Post : Returns <specular> color
+	 ------------------------------------------------------*/
+	
+
+
 	// FREYJA_TEXTURE Accessors ///////////////////////////////////////////
 
 	int freyjaGetTextureFilename(unsigned int index, char **filename);

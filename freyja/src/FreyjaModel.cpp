@@ -30,7 +30,6 @@
 #include <freyja/FreyjaFileReader.h> 
 
 #include "MaterialManager.h"
-
 #include "FreyjaModel.h"
 #include "freyja_events.h"
 
@@ -51,6 +50,8 @@ FreyjaModel::FreyjaModel()
 	mPlugin->setupPlugins();
 
 	freyja__spawnCopyModel(mEgg);
+
+	freyjaLightCreate(); // spawn 0th light
 
 	delete [] pluginDir;
 
@@ -135,11 +136,6 @@ void FreyjaModel::clear()
 	
 	mSelectBBox[0][0] = mSelectBBox[0][1] = mSelectBBox[0][2] = -16.0;
 	mSelectBBox[1][0] = mSelectBBox[1][1] = mSelectBBox[1][2] = 16.0;
-	
-	mLight0Pos[0] = 0.0f;
-	mLight0Pos[1] = 1.0f;
-	mLight0Pos[2] = 0.0;
-	mLight0Pos[3] = 0.0;
 
 	if (mEgg)
 	{

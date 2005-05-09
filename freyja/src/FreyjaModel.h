@@ -36,11 +36,10 @@
 
 #include <freyja/EggPlugin.h>
 #include <freyja/Egg.h>
-
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
+
 #include "BezierPatch.h"
-#include "Light.h"
 #include "freyja_events.h"
 
 
@@ -720,8 +719,6 @@ public:
 	Vector<long> mUVMap;                /* 'Texture polygon' grouping */
 
 	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
-
-	vec4_t mLight0Pos;                  /* Testing for light system */
 
 
 private:

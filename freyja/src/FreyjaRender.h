@@ -1,10 +1,10 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaRender
  * License : No use w/o permission (C)2001 Mongoose
  * Comments: GL context rendering backend for Freyja
@@ -21,7 +21,7 @@
  * 2000.08.25:
  * Mongoose - Created, based on GooseEgg view prototype
  *
- =================================================================*/
+ ==========================================================================*/
 
 #ifndef GUARD__MONGOOSE_FREYJA_FREYJARENDER_H_
 #define GUARD__MONGOOSE_FREYJA_FREYJARENDER_H_
