@@ -798,7 +798,7 @@ int freyja_model__ase_import(char *filename)
 int freyja_model__ase_export(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
-	long vert;
+	int32 vert;
 	float st[2];
 	int v, t, texel;
 	Ase ase;
