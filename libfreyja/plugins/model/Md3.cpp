@@ -1169,8 +1169,8 @@ int freyja_model__md3_export(char *filename)
 	//md3_bone_t *bone;
 	//md3_tag_t *tag;
 	Md3 md3;
-	long num_meshes, num_frames;
-	long i, j, k, v, f, vertex, idx, texcoord, frameIndex;
+	int32 num_meshes, num_frames;
+	int32 i, j, k, v, f, vertex, idx, texcoord, frameIndex;
 	vec3_t xyz;
 	vec2_t uv;
 	vec_t lat, lng;

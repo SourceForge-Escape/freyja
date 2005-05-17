@@ -375,7 +375,7 @@ int freyja_model__skn_import(char *filename)
 	char *symbol;
 	char name[64];
 	char material[64];
-	long i, j, k, index, pluginId;
+	int32 i, j, k, index, pluginId;
 
 
 	if (freyja_model__skn_check(filename) < 0 || !r.openFile(filename))
@@ -390,13 +390,13 @@ int freyja_model__skn_import(char *filename)
 	{
 		char *pMaterial;
 		float pScale;
-		long pUseAdult, e;
+		int32 pUseAdult, e;
 
 		e = freyjaGetPluginArg1s(pluginId, "Material name", &pMaterial);
 		e = freyjaGetPluginArg1f(pluginId, "Scaling", &pScale);
 		e = freyjaGetPluginArg1i(pluginId, "Use adult skeleton?", &pUseAdult);
 	
-		printf("freyja_model__skn_import> %li :: '%s' %f %li\n", 
+		printf("freyja_model__skn_import> %i :: '%s' %f %i\n", 
 			   pluginId, pMaterial, pScale, pUseAdult);
 	}
 
