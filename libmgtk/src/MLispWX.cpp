@@ -19,8 +19,10 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include <wx/wx.h>
-#include <wx/glcanvas.h>
+#ifdef HAVE_WX
+#   include <wx/wx.h>
+#   include <wx/glcanvas.h>
+#endif
 
 #ifndef WIN32
 #   include <unistd.h>
@@ -39,11 +41,15 @@ enum mwx_types
 	MWX_BUTTON
 };
 
+
+#ifdef HAVE_WX
 wxFrame *MWX_DUMMY = NULL;
+#endif
 
 /* Interfaces must be implmented for each interface ( gtk+, win32, wx, etc ) */
 mObject *mwx_rc_window(mObjectList *args)
 {
+#ifdef HAVE_WX
 	mObject *title = objPop(&args);
 	mObject *icon = objPop(&args);
 	mObject *obj;
@@ -69,14 +75,21 @@ mObject *mwx_rc_window(mObjectList *args)
 	window->Show(TRUE);
 
 	return newADTObj(MWX_FRAME, &window);
+#else
+	return 0x0;
+#endif
 }
 
 
 mObject *mwx_rc_gl_widget(mObjectList *args)
 {
+#ifdef HAVE_WX
 	wxGLCanvas *gl_widget = new wxGLCanvas(MWX_DUMMY, -1, wxPoint(0,0), wxSize(200,200), wxSUNKEN_BORDER, _("OpenGL"));
 
 	return newADTObj(MWX_GL_CANVAS, &gl_widget);
+#else
+	return 0x0;
+#endif
 }
 
 
@@ -93,6 +106,7 @@ mObject *mwx_rc_label(mObjectList *args) { return NULL; }
 
 mObject *mwx_rc_button(mObjectList *args)
 {
+#ifdef HAVE_WX
 	mObject *label = objPop(&args);
 
 	wxButton *button = new wxButton(MWX_DUMMY, 0, "test"/*getString(label)*/,
@@ -100,6 +114,9 @@ mObject *mwx_rc_button(mObjectList *args)
 									wxSUNKEN_BORDER, wxDefaultValidator, "button");
 
 	return newADTObj(MWX_BUTTON, &button);
+#else
+	return 0x0;
+#endif
 }
 
 
@@ -214,6 +231,7 @@ MLispWX::~MLispWX()
 #ifdef UNIT_TEST_MLISPWX
 int runMLispWXUnitTest(int argc, char *argv[])
 {
+#   ifdef HAVE_WX
 	MLisp base;
 	MLispWX rc(&base);
 
@@ -229,11 +247,12 @@ int runMLispWXUnitTest(int argc, char *argv[])
 
 		base.dumpSymbols();
 	}
-
+#   endif
 	return 0;
 }
 
 
+#   ifdef HAVE_WX
 class StubApp: public wxApp
 {
   virtual bool OnInit();
@@ -254,6 +273,7 @@ bool StubApp::OnInit()
 	runMLispWXUnitTest(argc, argv);
 	return true;
 }
+#   endif
 
 //int main(int argc, char *argv[])
 //{
