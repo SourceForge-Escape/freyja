@@ -589,6 +589,8 @@ void Texture::clearFlag(TextureFlag flag)
 
 void Texture::reset()
 {
+	glEnable(GL_TEXTURE_2D);
+
 	if (mTextureIds)
 	{
 		glDeleteTextures(mTextureLimit, mTextureIds);
