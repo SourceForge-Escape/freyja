@@ -54,6 +54,21 @@ FreyjaModel::FreyjaModel()
 
 	freyjaLightCreate(); // spawn 0th light
 
+	freyjaMaterialCreate(); // spawn 0th material
+
+	int32 mIndex = 0;
+	vec4_t rgba = {0,0,0,1};
+
+	freyjaCurrentMaterial(mIndex);
+	freyjaMaterialName(mIndex, "Boring default");
+	freyjaMaterialSpecular(mIndex, rgba);
+	freyjaMaterialEmissive(mIndex, rgba);
+	rgba[0] = rgba[1] = rgba[2] = 0.9;
+	freyjaMaterialDiffuse(mIndex, rgba);
+	rgba[0] = rgba[1] = rgba[2] = 0.2;
+	freyjaMaterialAmbient(mIndex, rgba);
+	freyjaMaterialShininess(mIndex, 0.0f);
+
 	delete [] pluginDir;
 
 	// Mongoose: initalize|reset private data members
@@ -2558,7 +2573,7 @@ void FreyjaModel::updateSkeletalUI()
 	updateSkeletonUI(mEgg);
 }
 
-
+//FIXME temp
 #include <GL/gl.h>
 #include <freyja/FreyjaImage.h>
 int FreyjaModel::loadMaterial(const char *filename)
@@ -2568,7 +2583,8 @@ int FreyjaModel::loadMaterial(const char *filename)
 	//FIXME Quick hack to fix corruption on svn server by refreshing from my master -- which was in middle of rewrite for this
 
 
-	int32 mIndex = freyjaGetCurrentMaterial();
+	int32 mIndex = freyjaMaterialCreate();//freyjaGetCurrentMaterial();
+	freyjaCurrentMaterial(mIndex);
 
 
 	//unsigned int m_flags; // FIXME pass to renderer
@@ -2966,7 +2982,108 @@ int FreyjaModel::saveMaterial(const char *filename)
 {
 	freyja_print("FIXME temp disabled due to rewrite -- svn corruption forced me to check this in before it's ready  =p");
 
-	return -100;
+
+	int32 mIndex = freyjaGetCurrentMaterial();
+
+	float ambient[4];          /* Ambient color */
+	float diffuse[4];          /* Diffuse color */
+	float specular[4];         /* Specular color */
+	float emissive[4];         /* Emissive color */
+	float shininess;           /* Specular exponent */
+	unsigned int texture;      /* Texture id */
+	//unsigned int texture2;     /* Detail Texture id */
+	unsigned int blend_src;    /* Blend source factor */
+	unsigned int blend_dest;   /* Blend destination factor */
+	char *name;
+
+	freyjaGetMaterialAmbient(mIndex, ambient);
+	freyjaGetMaterialDiffuse(mIndex, diffuse);
+	freyjaGetMaterialSpecular(mIndex, specular);
+	freyjaGetMaterialEmissive(mIndex, emissive);
+	shininess = freyjaGetMaterialShininess(mIndex);
+	name = freyjaGetMaterialName(mIndex);
+	texture = freyjaGetMaterialTexture(mIndex);
+	blend_dest = freyjaGetMaterialBlendDestination(mIndex);
+	blend_src = freyjaGetMaterialBlendSource(mIndex);
+
+
+
+	FILE *f;
+
+	
+	if (!filename || !filename[0])
+	{
+		return -1;
+	}
+
+
+	f = fopen(filename, "w");
+
+	if (!f)
+	{
+		perror("Material::saveFile> ");
+		return -2;
+	}
+
+	fprintf(f, "[Material]\n");
+	fprintf(f, "Name=%s\n", name);
+
+	// FIXME
+	//
+	//if (getTextureName())
+	//{
+	//	fprintf(f, "TextureName=%s\n", getTextureName());
+	//}
+	//
+	//fprintf(f, "EnableBlending=%s\n", 
+	//		  (m_flags & fEnable_Blending) ? "true" : "false");
+
+	fprintf(f, "BlendSource=%s\n", 
+			  (blend_src == GL_ZERO) ? "GL_ZERO" :
+			  (blend_src == GL_ONE) ? "GL_ONE" :
+			  (blend_src == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
+			  (blend_src == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
+			  (blend_src == GL_DST_COLOR) ? "GL_DST_COLOR" :
+			  (blend_src == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
+			  (blend_src == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
+			  (blend_src == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
+			  (blend_src == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
+			  (blend_src == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
+			  (blend_src == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
+			  (blend_src == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
+			  (blend_src == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
+			  (blend_src == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
+
+
+	fprintf(f, "BlendDest=%s\n", 
+			  (blend_dest == GL_ZERO) ? "GL_ZERO" :
+			  (blend_dest == GL_ONE) ? "GL_ONE" :
+			  (blend_dest == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
+			  (blend_dest == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
+			  (blend_dest == GL_DST_COLOR) ? "GL_DST_COLOR" :
+			  (blend_dest == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
+			  (blend_dest == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
+			  (blend_dest == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
+			  (blend_dest == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
+			  (blend_dest == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
+			  (blend_dest == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
+			  (blend_dest == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
+			  (blend_dest == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
+			  (blend_dest == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
+
+	fprintf(f, "Ambient=%f,%f,%f,%f\n", 
+			  ambient[0], ambient[1], ambient[2], ambient[3]);
+	fprintf(f, "Diffuse=%f,%f,%f,%f\n", 
+			  diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
+	fprintf(f, "Specular=%f,%f,%f,%f\n", 
+			  specular[0], specular[1], specular[2], specular[3]);
+	fprintf(f, "Emissive=%f,%f,%f,%f\n", 
+			  emissive[0], emissive[1], emissive[2], emissive[3]);
+	fprintf(f, "Shininess=%f\n", shininess);
+
+	fclose(f);
+
+	return 0;
 }
 
 int FreyjaModel::loadTextureBuffer(unsigned char *image, 
