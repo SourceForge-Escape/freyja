@@ -23,10 +23,10 @@
 
 #include <mgtk/mgtk_events.h>
 #include <freyja/FreyjaImage.h>
+
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
-#include "MaterialManager.h"
 #include "freyja_events.h"
 
 
@@ -101,47 +101,39 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 	switch (id)
 	{
 	case eColorMaterialAmbient: 
-		gMaterialManager->setColor(MaterialManager::eAmbient, color);
+		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
 		freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialDiffuse:
-		gMaterialManager->setColor(MaterialManager::eDiffuse, color);
+		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
 		freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialSpecular:
-		gMaterialManager->setColor(MaterialManager::eSpecular, color);
+		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
 		freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialEmissive:
-		gMaterialManager->setColor(MaterialManager::eEmissive, color);
+		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
 		freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
-#ifdef BACKPORTED_LIGHTS
 	case eColorLightAmbient: 
-		setColor(OpenGLFreyjaScene::mMaterialLight.mAmbient, color);
+		freyjaLightAmbient(freyjaGetCurrentLight(), color);
 		freyja_event_set_color(eColorLightAmbient, r, g, b, a);
 		break;
 
 	case eColorLightDiffuse:
-		setColor(OpenGLFreyjaScene::mMaterialLight.mDiffuse, color);
+		freyjaLightDiffuse(freyjaGetCurrentLight(), color);
 		freyja_event_set_color(eColorLightDiffuse, r, g, b, a);
 		break;
 
 	case eColorLightSpecular:
-		setColor(OpenGLFreyjaScene::mMaterialLight.mSpecular, color);
+		freyjaLightSpecular(freyjaGetCurrentLight(), color);
 		freyja_event_set_color(eColorLightSpecular, r, g, b, a);
 		break;
-#else
-	case eColorLightAmbient: 
-	case eColorLightDiffuse:
-	case eColorLightSpecular:
-		freyja_print("Colored lights not backported");
-		break;
-#endif
 
 	case eColorBackground:
 		setColor(FreyjaRender::mColorBackground, color);
@@ -1101,18 +1093,19 @@ int freyja_create_confirm_dialog(char *dialog_icon,
 void freyja_refresh_material_interface()
 {
 	vec4_t ambient, diffuse, specular, emissive;
-	unsigned int src, dest, flags;
+	uint32 src, dest, flags;
 	vec_t shininess;
+	uint32 mIndex = freyjaGetCurrentMaterial();
 
 
-	gMaterialManager->getColor(MaterialManager::eAmbient, ambient);
-	gMaterialManager->getColor(MaterialManager::eDiffuse, diffuse);
-	gMaterialManager->getColor(MaterialManager::eSpecular, specular);
-	gMaterialManager->getColor(MaterialManager::eEmissive, emissive);
-	shininess = gMaterialManager->getShininess();
-	src = gMaterialManager->getBlendSourceIndex();
-	dest = gMaterialManager->getBlendDestIndex();
-	flags = gMaterialManager->getFlags();
+	freyjaGetMaterialAmbient(mIndex, ambient);
+	freyjaGetMaterialDiffuse(mIndex, diffuse);
+	freyjaGetMaterialSpecular(mIndex, specular);
+	freyjaGetMaterialEmissive(mIndex, emissive);
+	shininess = freyjaGetMaterialShininess(mIndex);
+	src = freyjaGetMaterialBlendSource(mIndex);
+	dest = freyjaGetMaterialBlendDestination(mIndex);
+	flags = freyjaGetMaterialFlags(mIndex);
 
 	freyja_event_set_color(eColorMaterialAmbient, 
 						   ambient[0], ambient[1], ambient[2], ambient[3]);
@@ -1161,7 +1154,7 @@ void freyja_refresh_material_interface()
 	mgtk_option_menu_value_set(780, src);
 	mgtk_option_menu_value_set(781, dest);
 
-	if (flags & Material::fEnable_Blending)
+	if (flags & fFreyjaMaterial_Blending)
 	{
 		mgtk_togglebutton_value_set(790, true);
 	}
@@ -1170,7 +1163,7 @@ void freyja_refresh_material_interface()
 		mgtk_togglebutton_value_set(790, false);
 	}
 
-	mgtk_textentry_value_set(799, gMaterialManager->getName());
+	mgtk_textentry_value_set(799, freyjaGetMaterialName(mIndex));
 
 	freyja_print("refresh_material_interface> FIXME %s:%i", __FILE__, __LINE__);
 }

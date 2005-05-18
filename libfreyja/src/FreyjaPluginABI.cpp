@@ -2211,6 +2211,22 @@ int32 freyjaLightCreate()
 	return lightIndex;	
 }
 
+int32 gFreyjaLightIndex = -1;
+
+int32 freyjaGetCurrentLight()
+{
+	return gFreyjaLightIndex;
+}
+
+
+void freyjaCurrentLight(uint32 lightIndex)
+{
+	if (lightIndex < gFreyjaLights.size())
+	{
+		gFreyjaLightIndex = lightIndex;
+	}
+}
+
 
 void freyjaLightDelete(int32 lightIndex)
 {
@@ -4491,6 +4507,21 @@ int32 freyjaMaterialCreate()
 }
 
 
+int32 gCurrentMaterial = -1;
+
+
+uint32 freyjaGetCurrentMaterial()
+{
+	return gCurrentMaterial;
+}
+
+
+void freyjaCurrentMaterial(uint32 materialIndex)
+{
+	gCurrentMaterial = materialIndex;
+}
+
+
 /* Material Accessors */
 
 int32 freyjaGetMaterialCount()
@@ -4658,7 +4689,7 @@ int32 freyjaGetMaterialBlendSource(int32 materialIndex)
 }
 
 
-vec_t freyjaGetMaterialBlendDestination(int32 materialIndex)
+int32 freyjaGetMaterialBlendDestination(int32 materialIndex)
 {
 	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
 	{
@@ -4683,6 +4714,31 @@ void freyjaMaterialName(int32 materialIndex, const char *name)
 		strncpy(gFreyjaMaterials[materialIndex]->mName, name, 64);
 		gFreyjaMaterials[materialIndex]->mName[63] = 0;
 	}	
+}
+
+
+void freyjaMaterialClearFlag(int32 materialIndex, int32 flag)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mFlags |= flag;
+		gFreyjaMaterials[materialIndex]->mFlags ^= flag;
+	}
+}
+
+
+void freyjaMaterialSetFlag(int32 materialIndex, int32 flag)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[materialIndex])
+			return;
+
+		gFreyjaMaterials[materialIndex]->mFlags |= flag;
+	}
 }
 
 

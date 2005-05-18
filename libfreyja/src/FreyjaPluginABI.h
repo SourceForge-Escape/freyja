@@ -126,6 +126,14 @@ typedef struct {
 } freyja_file_chunk_t;
 
 
+enum freyja_material_flags {
+	fFreyjaMaterial_Blending = 1,
+	fFreyjaMaterial_Texture = 2,
+	fFreyjaMaterial_DetailTexture = 4,
+	fFreyjaMaterial_Normalize = 8
+};
+
+
 #define fPolygon_VertexUV      2
 #define fPolygon_PolyMapped    8
 #define fPolygon_PolyMappedUV  8
@@ -213,6 +221,12 @@ typedef enum {
 	///////////////////////////////////////////////////////////////////////
 
 	int32 freyjaLightCreate();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns index of light spawned
+	 ------------------------------------------------------*/
+
+	int32 freyjaGetCurrentLight();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns index of light spawned
@@ -994,6 +1008,18 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	 *        Returns the new Material's index or -1 on error
 	 ------------------------------------------------------*/
 
+	uint32 freyjaGetCurrentMaterial();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaCurrentMaterial(uint32 materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 
 	/* Material Accessors */
 
@@ -1073,7 +1099,7 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	 * Post : Returns blend source factor or -1 on error
 	 ------------------------------------------------------*/
 
-	vec_t freyjaGetMaterialBlendDestination(int32 materialIndex);
+	int32 freyjaGetMaterialBlendDestination(int32 materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns blend destination factor or -1 on error
@@ -1088,6 +1114,8 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	 * Post : Material's <name> id is set
 	 ------------------------------------------------------*/
 
+	void freyjaMaterialClearFlag(int32 materialIndex, int32 flag);
+	void freyjaMaterialSetFlag(int32 materialIndex, int32 flag);
 	void freyjaMaterialFlags(int32 materialIndex, int32 flags);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists

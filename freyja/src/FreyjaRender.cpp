@@ -45,7 +45,6 @@
 
 
 #include "freyja_events.h"
-#include "MaterialManager.h"
 
 #include "FreyjaRender.h"
 
@@ -85,6 +84,79 @@ vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
 vec_t FreyjaRender::mVertexPointSize = 3.5;
 
+
+// TEMP ////////////////////////////////////////////////////////
+
+
+void freyjaApplyMaterial(uint32 materialIndex)
+{
+	vec4_t ambient, diffuse, specular, emissive;
+	vec_t shininess;
+	uint32 flags, texture, texture2, blendSrc, blendDest;
+
+
+	flags = freyjaGetMaterialFlags(materialIndex);
+	texture = freyjaGetMaterialTexture(materialIndex);
+	blendSrc = freyjaGetMaterialBlendSource(materialIndex);
+	blendDest = freyjaGetMaterialBlendDestination(materialIndex);
+	freyjaGetMaterialAmbient(materialIndex, ambient);
+	freyjaGetMaterialDiffuse(materialIndex, diffuse);
+	freyjaGetMaterialSpecular(materialIndex, specular);
+	freyjaGetMaterialEmissive(materialIndex, emissive);
+	shininess = freyjaGetMaterialShininess(materialIndex);
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emissive);
+	glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
+
+#ifndef DISABLE_MULTITEXTURE
+	if (flags & fFreyjaMaterial_DetailTexture)
+	{
+		glActiveTexture(GL_TEXTURE0_ARB);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		// bump
+		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+	
+		glActiveTexture(GL_TEXTURE1_ARB);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+		// bump
+		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_ADD);
+
+		// Combine, gamma correct
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
+	}
+#else
+	if (flags == 0)
+	{
+	}
+#endif
+
+	else if (flags & fFreyjaMaterial_Texture)
+	{
+		glBindTexture(GL_TEXTURE_2D, texture);
+	}
+
+	if (flags & fFreyjaMaterial_Blending)
+	{
+		glBlendFunc(blendSrc, blendDest);
+		glEnable(GL_BLEND);
+	}
+	else
+	{
+		glDisable(GL_BLEND);
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////////
 
 
 void drawPatch(BezierPatch &patch)
@@ -1218,7 +1290,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		
 		if (mRenderMode & RENDER_MATERIAL)
 		{
-			gMaterialManager->applyEffectGL();
+			freyjaApplyMaterial(freyjaGetCurrentMaterial());
 		}
 		
 		if ((int)mesh.id == (int)mModel->getCurrentMesh())
@@ -1453,7 +1525,7 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 			if (mRenderMode & RENDER_MATERIAL)
 			{
 				//glPushAttrib(GL_ENABLE_BIT);
-				gMaterialManager->applyEffectGL(face.material);
+				freyjaApplyMaterial(face.material);
 			}
 
 			BindTexture(face.material + 1);
@@ -1895,7 +1967,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
 	/* Setup material */
-	gMaterialManager->applyEffectGL();
+	freyjaApplyMaterial(freyjaGetCurrentMaterial());
 
 	/* Cast light on sphere colored/detailed by material */
 	glPushMatrix();

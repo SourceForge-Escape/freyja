@@ -25,18 +25,20 @@
 #include <math.h> 
 #include <stdarg.h> 
 #include <string.h>
-
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <hel/math.h>
 
+#include "freyja_events.h"
 #include "FreyjaControl.h"
 
+/* using namespace freyja; */
 
 void test_patch();
 unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
 void event_register_control(FreyjaControl *c);
+void mgtk_event_dialog_visible_set(int dialog, int visible);
 
 
 ////////////////////////////////////////////////////////////
@@ -87,7 +89,8 @@ FreyjaControl::FreyjaControl(Resource *r)
 	/* Mongoose 2002.02.23, Tell renderer to start up */
 	mRender->initContext(width, height, true);
 	mRender->resizeContext(width, height);
-	mMaterial = MaterialManager::Instance();
+
+	mModel->initTexture();
 
 	// handle loaded from system call
 	if (!freyjaGetCount(FREYJA_BONE) && !freyjaGetCount(FREYJA_VERTEX))
@@ -131,7 +134,7 @@ FreyjaControl::~FreyjaControl()
 
 	/* Mongoose 2004.03.26, 
 	 * Entry for MaterialManager test pattern */
-	MaterialManager::DestroyInstance();
+	//MaterialManager::DestroyInstance();
 }
 
 
@@ -143,6 +146,14 @@ float FreyjaControl::getZoom()
 {
 	return mRender->getZoom();
 }
+
+
+void FreyjaControl::takeScreenshot(const char *filename, 
+								   uint32 width, uint32 height)
+{
+	mModel->mTexture.glScreenShot(filename, width, height);
+}
+
 
 
 ////////////////////////////////////////////////////////////
@@ -359,10 +370,10 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eSetMaterialTexture:
-		mMaterial->setTexture(0, value);
-		freyja_print("Material[%i].texture[%d] = %i",
-					mMaterial->getCurrent(), 0,
-					mMaterial->getTexture(0));
+		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
+		freyja_print("Material[%i].texture = %i",
+					 freyjaGetCurrentMaterial(), 
+					 freyjaGetMaterialTexture(freyjaGetCurrentMaterial()));
 		freyja_event_gl_refresh();
 		break;
 
@@ -440,9 +451,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	case 701:
 	case 702:
 	case 703:
-		gMaterialManager->getColor(MaterialManager::eAmbient, color);
+		freyjaGetMaterialAmbient(freyjaGetCurrentMaterial(), color);
 		color[event - 700] = value;
-		gMaterialManager->setColor(MaterialManager::eAmbient, color);
+		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
 		freyja_event_gl_refresh();
 		break;
 
@@ -451,9 +462,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	case 705:
 	case 706:
 	case 707:
-		gMaterialManager->getColor(MaterialManager::eDiffuse, color);
+		freyjaGetMaterialDiffuse(freyjaGetCurrentMaterial(), color);
 		color[event - 704] = value;
-		gMaterialManager->setColor(MaterialManager::eDiffuse, color);
+		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
 		freyja_event_gl_refresh();
 		break;
 
@@ -462,9 +473,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	case 709:
 	case 710:
 	case 711:
-		gMaterialManager->getColor(MaterialManager::eSpecular, color);
+		freyjaGetMaterialSpecular(freyjaGetCurrentMaterial(), color);
 		color[event - 708] = value;
-		gMaterialManager->setColor(MaterialManager::eSpecular, color);
+		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
 		freyja_event_gl_refresh();
 		break;
 
@@ -473,15 +484,15 @@ bool FreyjaControl::event(int event, vec_t value)
 	case 713:
 	case 714:
 	case 715:
-		gMaterialManager->getColor(MaterialManager::eEmissive, color);
+		freyjaGetMaterialEmissive(freyjaGetCurrentMaterial(), color);
 		color[event - 712] = value;
-		gMaterialManager->setColor(MaterialManager::eEmissive, color);
+		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
 		freyja_event_gl_refresh();
 		break;
 
 
 	case 716:
-		gMaterialManager->setShininess(value);
+		freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
 		freyja_event_gl_refresh();
 		break;
 
@@ -537,6 +548,8 @@ bool FreyjaControl::event(int event, vec_t value)
 }
 
 
+// HACK FIXME
+#include <GL/gl.h>
 
 bool FreyjaControl::event(int command)
 {
@@ -550,96 +563,96 @@ bool FreyjaControl::event(int command)
 	switch (command)
 	{
 	case 1000:
-		gMaterialManager->setBlendSource(GL_ZERO);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ZERO);
 		break;
 	case 1001:
-		gMaterialManager->setBlendSource(GL_ONE);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE);
 		break;
 	case 1002:
-		gMaterialManager->setBlendSource(GL_SRC_COLOR);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
 		break;
 	case 1003:
-		gMaterialManager->setBlendSource(GL_ONE_MINUS_SRC_COLOR);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
 		break;
 	case 1004:
-		gMaterialManager->setBlendSource(GL_DST_COLOR);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_COLOR);
 		break;
 	case 1005:
-		gMaterialManager->setBlendSource(GL_ONE_MINUS_DST_COLOR);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
 		break;
 	case 1006:
-		gMaterialManager->setBlendSource(GL_SRC_ALPHA);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
 		break;
 	case 1007:
-		gMaterialManager->setBlendSource(GL_ONE_MINUS_SRC_ALPHA);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	case 1008:
-		gMaterialManager->setBlendSource(GL_DST_ALPHA);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
 		break;
 	case 1009:
-		gMaterialManager->setBlendSource(GL_ONE_MINUS_DST_ALPHA);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
 		break;
 	case 1010:
-		gMaterialManager->setBlendSource(GL_SRC_ALPHA_SATURATE);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
 		break;
 	case 1011:
-		gMaterialManager->setBlendSource(GL_CONSTANT_COLOR);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
 		break;
 	case 1012:
-		gMaterialManager->setBlendSource(GL_ONE_MINUS_CONSTANT_COLOR);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
 		break;
 	case 1013:
-		gMaterialManager->setBlendSource(GL_CONSTANT_ALPHA);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
 		break;
 	case 1014:
-		gMaterialManager->setBlendSource(GL_ONE_MINUS_CONSTANT_ALPHA);
+		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 		break;
 
 
 	case 2000:
-		gMaterialManager->setBlendDest(GL_ZERO);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ZERO);
 		break;
 	case 2001:
-		gMaterialManager->setBlendDest(GL_ONE);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE);
 		break;
 	case 2002:
-		gMaterialManager->setBlendDest(GL_SRC_COLOR);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
 		break;
 	case 2003:
-		gMaterialManager->setBlendDest(GL_ONE_MINUS_SRC_COLOR);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
 		break;
 	case 2004:
-		gMaterialManager->setBlendDest(GL_DST_COLOR);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_COLOR);
 		break;
 	case 2005:
-		gMaterialManager->setBlendDest(GL_ONE_MINUS_DST_COLOR);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
 		break;
 	case 2006:
-		gMaterialManager->setBlendDest(GL_SRC_ALPHA);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
 		break;
 	case 2007:
-		gMaterialManager->setBlendDest(GL_ONE_MINUS_SRC_ALPHA);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	case 2008:
-		gMaterialManager->setBlendDest(GL_DST_ALPHA);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
 		break;
 	case 2009:
-		gMaterialManager->setBlendDest(GL_ONE_MINUS_DST_ALPHA);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
 		break;
 	case 2010:
-		gMaterialManager->setBlendDest(GL_SRC_ALPHA_SATURATE);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
 		break;
 	case 2011:
-		gMaterialManager->setBlendDest(GL_CONSTANT_COLOR);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
 		break;
 	case 2012:
-		gMaterialManager->setBlendDest(GL_ONE_MINUS_CONSTANT_COLOR);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
 		break;
 	case 2013:
-		gMaterialManager->setBlendDest(GL_CONSTANT_ALPHA);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
 		break;
 	case 2014:
-		gMaterialManager->setBlendDest(GL_ONE_MINUS_CONSTANT_ALPHA);
+		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 		break;
 
 #ifndef TEST_FREYJA_EVENTS
@@ -663,55 +676,55 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eMaterialTex:
-		flags = gMaterialManager->getFlags();
+		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
 		
-		if (flags & Material::fEnable_Texture)
-			gMaterialManager->clearFlag(Material::fEnable_Texture);
+		if (flags & fFreyjaMaterial_Texture)
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 		else
-			gMaterialManager->setFlag(Material::fEnable_Texture);
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 		
 		freyja_print("OpenGL texturing is [%s]", 
-					 !(flags & Material::fEnable_Texture) ? "ON" : "OFF");
+					 !(flags & fFreyjaMaterial_Texture) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 	case eMaterialMultiTex:
-		flags = gMaterialManager->getFlags();
+		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
 
-		if (flags & Material::fEnable_DetailTexture)
-			gMaterialManager->clearFlag(Material::fEnable_DetailTexture);
+		if (flags & fFreyjaMaterial_DetailTexture)
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 		else
-			gMaterialManager->setFlag(Material::fEnable_DetailTexture);
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 
 		freyja_print("OpenGL detail texturing is [%s]", 
-					 !(flags & Material::fEnable_DetailTexture) ? "ON" : "OFF");
+					 !(flags & fFreyjaMaterial_DetailTexture) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 	case eOpenGLNormalize:
-		flags = gMaterialManager->getFlags();
+		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
 
-		if (flags & Material::fEnable_Normalize)
-			gMaterialManager->clearFlag(Material::fEnable_Normalize);
+		if (flags & fFreyjaMaterial_Normalize)
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 		else
-			gMaterialManager->setFlag(Material::fEnable_Normalize);
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 
 		freyja_print("OpenGL normalization of normals is [%s]", 
-					 !(flags & Material::fEnable_Normalize) ? "ON" : "OFF");
+					 !(flags & fFreyjaMaterial_Normalize) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 
 	case eOpenGLBlend:
-		flags = gMaterialManager->getFlags();
+		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
 		
-		if (flags & Material::fEnable_Blending)
-			gMaterialManager->clearFlag(Material::fEnable_Blending);
+		if (flags & fFreyjaMaterial_Blending)
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 		else
-			gMaterialManager->setFlag(Material::fEnable_Blending);
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 		
 		freyja_print("OpenGL blending [%s]", 
-					 !(flags & Material::fEnable_Blending) ? "ON" : "OFF");
+					 !(flags & fFreyjaMaterial_Blending) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
@@ -721,7 +734,6 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eHelpDialog:
-		extern void mgtk_event_dialog_visible_set(int dialog, int visible);
 		mgtk_event_dialog_visible_set(eHelpDialog, 1);
 		break; 
 
@@ -757,7 +769,7 @@ bool FreyjaControl::event(int command)
 			}
 			break;
 		case MATERIAL_EDIT_MODE:
-			i = mMaterial->createNewMaterial();
+			i = freyjaMaterialCreate();
 			freyja_print("New material [%i] created.", i);
 			break;
 		}
@@ -796,7 +808,7 @@ bool FreyjaControl::event(int command)
 			}
 			break;
 		case MATERIAL_EDIT_MODE:
-			i = mMaterial->createNewMaterial();
+			i = freyjaMaterialCreate();
 			freyja_print("New material [%i] created.", i);
 			break;
 		}
@@ -1011,9 +1023,9 @@ bool FreyjaControl::event(int command)
 
 
 	case eScreenShot:
-		gMaterialManager->takeScreenshot("Freyja", 
-										 mRender->getWindowWidth(),
-										 mRender->getWindowHeight());
+		mModel->mTexture.glScreenShot("Freyja", 
+									  mRender->getWindowWidth(),
+									  mRender->getWindowHeight());
 		break;
 
 
@@ -1180,41 +1192,42 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eTextureSlotLoad:
-		if (!mMaterial->getGeneralFlags() & 
-			MaterialManager::fLoadTextureInSlot)
+		if (!mModel->getFlags() & FreyjaModel::fLoadTextureInSlot)
 		{
-			mMaterial->setGeneralFlag(MaterialManager::fLoadTextureInSlot);
+			mModel->setFlags(FreyjaModel::fLoadTextureInSlot, 1);
 		}
 		else
 		{
-			mMaterial->clearGeneralFlag(MaterialManager::fLoadTextureInSlot);
+			mModel->setFlags(FreyjaModel::fLoadTextureInSlot, 0);
 		}	
 
 		freyja_print("Texture loading to current slot [%s]",
-					mMaterial->getGeneralFlags() & 
-					MaterialManager::fLoadTextureInSlot ? "on" : "off");
+					(mModel->getFlags() & FreyjaModel::fLoadTextureInSlot) ? "on" : "off");
 		break;
 
 	case eTransformSelectedVertices:
 		mTransformMode = FreyjaModel::TransformSelectedVertices;
 		break;
+
 	case eTransformGroup:
 		mTransformMode = FreyjaModel::TransformVertexFrame;
 		break;
+
 	case eTransformScene:
 		mTransformMode = FreyjaModel::TransformScene;
 		break;
+
 	case eTransformPoint:
 		mTransformMode = FreyjaModel::TransformPoint;
 		break;
+
 	case eTransformMesh:
 		mTransformMode = FreyjaModel::TransformMesh;
 		break;
+
 	case eTransformBone:
 		mTransformMode = FreyjaModel::TransformBone;
 		break;
-
-
 
 
 
@@ -1504,6 +1517,7 @@ bool FreyjaControl::event(int command)
 		mModel->setCurrentAnimation(mModel->getCurrentAnimation() + 1);
 		freyja_print("Animation[%i].", mModel->getCurrentAnimation());
 		break;
+
 	case eAnimationPrev:
 		if (mModel->getCurrentAnimation())
 			mModel->setCurrentAnimation(mModel->getCurrentAnimation() - 1);
@@ -1518,13 +1532,11 @@ bool FreyjaControl::event(int command)
 	case eSelectMaterial:
 		i = (int)freyja_event_get_float(eSelectMaterial);
 
-		if (i != mMaterial->getCurrent())
+		if (i != freyjaGetCurrentMaterial())
 		{
-			mMaterial->setCurrent(i);
-			freyja_event_set_float(eSelectMaterial, 
-								   mMaterial->getCurrent());
+			freyjaCurrentMaterial(i);
+			freyja_event_set_float(eSelectMaterial,freyjaGetCurrentMaterial());
 			freyja_print("Selected material[%i].", i);
-
 			freyja_refresh_material_interface();
 			freyja_event_gl_refresh();
 		}
@@ -1535,9 +1547,6 @@ bool FreyjaControl::event(int command)
 		setZoom(freyja_event_get_float(eZoom));
 		freyja_event_gl_refresh();
 		break;
-
-
-
 
 
 	case CMD_MISC_BBOX_SELECT:
@@ -1797,15 +1806,17 @@ void FreyjaControl::handleFilename(const char *filename)
 	switch (mFileDialogMode)
 	{
 	case FREYJA_MODE_LOAD_MATERIAL:
-		failed = mMaterial->load(filename);
+		failed = mModel->loadMaterial(filename);
 		type = 0;
 		type2 = 1;
 		break;
+
 	case FREYJA_MODE_SAVE_MATERIAL:
-		failed = mMaterial->save(filename);
+		failed = mModel->saveMaterial(filename);
 		type = 0;
 		type2 = 0;
 		break;
+
 	case FREYJA_MODE_LOAD_MODEL:
 		failed = mModel->loadModel(filename);
 
@@ -1824,12 +1835,14 @@ void FreyjaControl::handleFilename(const char *filename)
 		type = 2;
 		type2 = 1;
 		break;
+
 	case FREYJA_MODE_LOAD_TEXTURE:
-		failed = mMaterial->loadTexture(filename);
+		failed = mModel->loadTexture(filename);
 		type = 1;
 		type2 = 1;
 		freyja_event_gl_refresh();
 		break;
+
 	case FREYJA_MODE_SAVE_MODEL:
 		if (FreyjaFileReader::doesFileExist(filename))
 		{
@@ -1898,7 +1911,7 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 	switch (event)
 	{
 	case eSetMaterialName:
-		mMaterial->setName(text);
+		freyjaMaterialName(freyjaGetCurrentMaterial(), text);
 		break;
 
 	case eSetTextureNameA:

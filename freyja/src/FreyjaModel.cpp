@@ -23,15 +23,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <freyja/FreyjaFileReader.h> 
 
-#include "MaterialManager.h"
-#include "FreyjaModel.h"
 #include "freyja_events.h"
+#include "Texture.h"
+#include "FreyjaModel.h"
+
+
 
 BezierPatch FreyjaModel::gTestPatch;
 
@@ -2558,6 +2559,446 @@ void FreyjaModel::updateSkeletalUI()
 }
 
 
+#include <GL/gl.h>
+#include <freyja/FreyjaImage.h>
+int FreyjaModel::loadMaterial(const char *filename)
+{
+	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
+
+	//FIXME Quick hack to fix corruption on svn server by refreshing from my master -- which was in middle of rewrite for this
+
+
+	int32 mIndex = freyjaGetCurrentMaterial();
+
+
+	//unsigned int m_flags; // FIXME pass to renderer
+
+	float ambient[4];          /* Ambient color */
+
+	float diffuse[4];          /* Diffuse color */
+
+	float specular[4];         /* Specular color */
+
+	float emissive[4];         /* Emissive color */
+
+	float shininess;           /* Specular exponent */
+
+	unsigned int texture;      /* Texture id */
+
+	//unsigned int texture2;     /* Detail Texture id */
+
+	unsigned int blend_src;    /* Blend source factor */
+
+	unsigned int blend_dest;   /* Blend destination factor */
+
+
+	FILE *f;
+	unsigned int i, j, k, l, mode;
+	char buffer[128];
+	char buf[64];
+	bool line_comment;
+	char c;
+
+	
+	if (!filename || !filename[0])
+	{
+		return -1;
+	}
+
+
+	f = fopen(filename, "r");
+
+	if (!f)
+	{
+		perror("Material::loadFile> ");
+		return -2;
+	}
+
+	i = 0;
+	buffer[0] = 0;
+	line_comment = false;
+	mode = 0;
+
+	// Strip out whitespace and comments
+	while (fscanf(f, "%c", &c) != EOF)
+	{
+		if (line_comment && c != '\n')
+			continue;
+
+		if (i > 126)
+		{
+			printf("Material::loadFile> Overflow handled\n");
+			i = 126;
+		}
+		
+		switch (c)
+		{
+		case ' ':
+		case '\v':
+		case '\t':
+			break;
+		case '#':
+			buffer[i++] = 0;
+			line_comment = true;
+			break;
+		case '\n':
+			if (line_comment)
+			{
+				line_comment = false;
+				i = 0;
+				buffer[0] = 0;		 
+				continue;
+			}
+			else if (buffer[0] == 0)
+			{
+				i = 0;
+				continue;
+			}
+
+			buffer[i] = 0;
+
+			if (buffer[0] == '[')
+			{
+				if (strncmp(buffer, "[Material]", 10) == 0)
+				{
+					mode = 1;
+				}
+				else
+				{
+					mode = 0;
+				}
+			}
+			else if (mode == 1)
+			{
+				if (strncmp(buffer, "Shininess", 9) == 0)
+				{
+					for (j = 0, k = 10; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					shininess = atof(buf);
+				}
+				else if  (strncmp(buffer, "TextureName", 11) == 0)
+				{
+					for (j = 0, k = 12; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					//setTextureName(buf);
+				}
+				else if  (strncmp(buffer, "Name", 4) == 0)
+				{
+					for (j = 0, k = 5; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					freyjaMaterialName(mIndex, buf);
+
+					//setName(buf);
+				}
+				else if  (strncmp(buffer, "EnableBlending", 14) == 0)
+				{
+					for (j = 0, k = 15; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+
+					if (strncmp(buf, "true", 4) == 0)
+					{
+						//FIXME m_flags |= Material::fEnable_Blending;
+					}
+					else if (strncmp(buf, "false", 5) == 0)
+					{
+						//FIXME m_flags |= Material::fEnable_Blending;
+						//FIXME m_flags ^= Material::fEnable_Blending;
+					}
+				}
+				else if (strncmp(buffer, "Blend", 5) == 0)
+				{
+					bool is_src = false;
+					int val;
+
+
+					if (strncmp(buffer, "BlendSource", 11) == 0)
+					{
+						is_src = true;
+						k = 12;
+					}
+					else
+					{
+						k = 10;
+					}
+
+					for (j = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+
+					//printf("*** %s\n", buf);
+
+					val = (strncmp(buf, "GL_ZERO", 11) == 0) ? GL_ZERO :
+					(strncmp(buf, "GL_SRC_COLOR", 9) == 0) ? GL_SRC_COLOR :
+					(strncmp(buf, "GL_ONE_MINUS_SRC_COLOR", 22) == 0) ? GL_ONE_MINUS_SRC_COLOR :
+					(strncmp(buf, "GL_DST_COLOR", 9) == 0) ? GL_DST_COLOR :
+					(strncmp(buf, "GL_ONE_MINUS_DST_COLOR", 22) == 0) ? GL_ONE_MINUS_DST_COLOR :
+					(strncmp(buf, "GL_SRC_ALPHA", 9) == 0) ? GL_SRC_ALPHA :
+					(strncmp(buf, "GL_ONE_MINUS_SRC_ALPHA", 22) == 0) ? GL_ONE_MINUS_SRC_ALPHA :
+					(strncmp(buf, "GL_DST_ALPHA", 9) == 0) ? GL_DST_ALPHA :
+					(strncmp(buf, "GL_ONE_MINUS_DST_ALPHA", 22) == 0) ? GL_ONE_MINUS_DST_ALPHA :
+					(strncmp(buf, "GL_SRC_ALPHA_SATURATE", 21) == 0) ? GL_SRC_ALPHA_SATURATE :
+					(strncmp(buf, "GL_CONSTANT_COLOR", 17) == 0) ? GL_CONSTANT_COLOR :
+					(strncmp(buf, "GL_ONE_MINUS_CONSTANT_COLOR", 27) == 0) ? GL_ONE_MINUS_CONSTANT_COLOR :
+					(strncmp(buf, "GL_ONE", 6) == 0) ? GL_ONE :
+					(strncmp(buf, "GL_CONSTANT_ALPHA", 17) == 0) ? GL_CONSTANT_ALPHA :					GL_ONE_MINUS_CONSTANT_ALPHA;
+
+					if (is_src)
+					{
+						blend_src = val;
+					}
+					else
+					{
+						blend_dest = val;
+					}
+				}
+				else if (strncmp(buffer, "Ambient", 7) == 0)
+				{
+					for (j = 0, k = 8, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							ambient[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					ambient[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Diffuse", 7) == 0)
+				{
+					for (j = 0, k = 8, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							diffuse[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					diffuse[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Specular", 8) == 0)
+				{
+					for (j = 0, k = 9, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							specular[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					specular[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Emissive", 8) == 0)
+				{
+					for (j = 0, k = 9, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							emissive[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					emissive[l++] = atof(buf);
+				}
+			}
+
+			i = 0;
+			buffer[0] = 0;
+			break;
+		default:
+			buffer[i++] = c;
+		}
+	}
+
+	fclose(f);
+
+	
+
+	freyjaMaterialAmbient(mIndex, ambient);
+	freyjaMaterialDiffuse(mIndex, diffuse);
+	freyjaMaterialSpecular(mIndex, specular);
+	freyjaMaterialEmissive(mIndex, emissive);
+	freyjaMaterialShininess(mIndex, shininess);
+
+	freyjaMaterialTexture(mIndex, texture);
+	freyjaMaterialBlendDestination(mIndex, blend_dest);
+	freyjaMaterialBlendSource(mIndex, blend_src);
+
+	//unsigned int texture2;     /* Detail Texture id */
+
+	return 0;
+}
+
+
+int FreyjaModel::loadTexture(const char *filename)
+{
+	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
+	FreyjaImage img;
+	unsigned char *image;
+	unsigned int w, h;
+
+
+	// Mongoose 2002.01.10, Evil...
+	if (FreyjaFileReader::compareFilenameExtention(filename, ".lst") == 0)
+	{
+		FILE *f;
+		const unsigned int bufferSize = 256;
+		unsigned int i = 0;
+		char buffer[bufferSize];
+		char c;
+
+
+		f = fopen(filename, "r");
+		
+		if (!f)
+		{
+			perror(filename);
+			return -1;
+		}
+
+		while (fscanf(f, "%c", &c) != EOF)
+		{
+			switch (c)
+			{
+			case ' ':
+			case '\t':
+			case '\n':
+				break;
+			case ';':
+				printf("Loading texture from list '%s'\n", buffer);
+				loadTexture(buffer);
+				
+				i = 0;
+				buffer[0] = 0;
+				break;
+			default:
+				if (i > bufferSize-1)
+					i = bufferSize-1;
+				
+				buffer[i++] = c;
+				buffer[i] = 0;
+			}
+		} 
+		
+		fclose(f);
+
+		return 0;
+	}
+	
+	printf("[MaterialManager::loadTexture]\n");
+	printf(" Loading texture '%s'\n", filename);
+
+	if (!img.loadImage(filename))
+	{
+		img.getImage(&image);
+		w = img.getWidth();
+		h = img.getHeight();
+
+
+		switch (img.getColorMode())
+		{
+		case FreyjaImage::RGBA_32:
+			loadTextureBuffer(image, w, h, 32, Texture::RGBA);
+			break;
+		case FreyjaImage::RGB_24:
+			loadTextureBuffer(image, w, h, 24, Texture::RGB);
+			break;
+		default:
+			printf("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
+			
+			if (image)
+				delete [] image;
+
+			return -2;
+		}
+		
+		delete [] image;
+		
+		printf("[Success]\n");
+
+		return 0;
+	}
+	
+	return -100;
+}
+
+int FreyjaModel::saveMaterial(const char *filename)
+{
+	freyja_print("FIXME temp disabled due to rewrite -- svn corruption forced me to check this in before it's ready  =p");
+
+	return -100;
+}
+
+int FreyjaModel::loadTextureBuffer(unsigned char *image, 
+										unsigned int width, 
+										unsigned int height, 
+										unsigned int bpp, 
+										Texture::ColorMode type)
+{
+	int err = 0;
+
+
+	if (mFlags & fLoadTextureInSlot)
+	{
+		err = mTexture.loadBufferSlot(image, width, height, type, bpp,
+									  mTextureId);
+	}
+	else
+	{
+		mTextureId = mTexture.loadBuffer(image, width, height, type, bpp);
+
+		printf("-- %i\n", mTextureId);
+	}
+
+	if (err < 0)
+	{
+		printf("MaterialManager::loadTextureBuffer> ERROR Loading buffer\n");
+	}
+
+	return err;
+}
+
+
 int FreyjaModel::loadModel(const char *filename)
 {
 	int err;
@@ -2574,7 +3015,7 @@ int FreyjaModel::loadModel(const char *filename)
 	}
 	else
 	{
-		mPlugin->fixTexCoords();
+		mPlugin->fixTexCoords(); // FIXME: Per mesh / face instead
 
 		unsigned int i, w, h, bpp, type;
 		unsigned char *image = 0x0;
@@ -2586,9 +3027,9 @@ int FreyjaModel::loadModel(const char *filename)
 			if (textureFilename && textureFilename[0])
 			{
 				freyja_print("FrejaModel::loadModel> Loading texture %i from file\n", i);
-				gMaterialManager->mTextureId = i;
+				mTextureId = i;
 				//gMaterialManager->setGeneralFlag(MaterialManager::fLoadTextureInSlot);
-				gMaterialManager->loadTexture(textureFilename);
+				loadTexture(textureFilename);
 				//gMaterialManager->clearGeneralFlag(MaterialManager::fLoadTextureInSlot);
 			}
 		}
@@ -2602,17 +3043,17 @@ int FreyjaModel::loadModel(const char *filename)
 			switch (type)
 			{
 			case RGBA_32:
-				gMaterialManager->loadTextureBuffer(image, w, h, 32, 
-													Texture::RGBA);
+				loadTextureBuffer(image, w, h, 32, Texture::RGBA);
 				break;
+
 			case RGB_24:
-				gMaterialManager->loadTextureBuffer(image, w, h, 24,
-													Texture::RGB);
+				loadTextureBuffer(image, w, h, 24, Texture::RGB);
 				break;
+
 			case INDEXED_8:
-				gMaterialManager->loadTextureBuffer(image, w, h, 8, 
-													Texture::INDEXED);
+				loadTextureBuffer(image, w, h, 8, Texture::INDEXED);
 				break;
+
 			default:
 				freyja_print("%s> ERROR: Unsupported texture colormap %d",
 							"FreyjaModel::loadModel", type);
