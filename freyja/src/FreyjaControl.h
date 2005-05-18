@@ -36,20 +36,23 @@
 
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
-
 #include <mgtk/Resource.h>
-
-#include "MaterialManager.h"
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaEvent.h"
 #include "freyja_events.h"
+#include "Texture.h"
 
 
 class FreyjaControl
 {
  public:
+
+	typedef enum {
+		RESERVED = 1
+	} OptionFlags;
+
 
 	typedef enum {                              /* Editor modes */
 		TEXTURE_EDIT_MODE = 0, 
@@ -127,10 +130,26 @@ class FreyjaControl
 	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
+	void takeScreenshot(const char *filename, 
+						uint32 width, uint32 height);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	int32 loadTextureBuffer(unsigned char *image, 
+							uint32 width, uint32 height, uint32 bpp,
+							Texture::ColorMode type);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void addRecentFilename(const char *filename);
 	/*------------------------------------------------------
@@ -415,14 +434,11 @@ private:
 
 	void getFreeWorldFromScreen(int x, int y, vec3_t p);
 
-
 	Vector<FreyjaEvent *> mEvents;          /* Command pattern event system */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 
 	Resource *mResource;                    /* Resource system */
-
-	MaterialManager *mMaterial;             /* Material manager */
 
 	FreyjaModel *mModel;                    /* Data model */
 	

@@ -33,7 +33,6 @@
 #include <hel/math.h>
 #include "Material.h"
 #include "Texture.h"
-#include "Light.h"
 
 
 #define gMaterialManager MaterialManager::mInstance

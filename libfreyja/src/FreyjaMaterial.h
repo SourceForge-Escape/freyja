@@ -29,51 +29,20 @@
 
 #include <hel/math.h>
 
-
-class FreyjaTexture
-{
-public:
-
-	FreyjaTexture()
-	{
-		name = 0x0;
-		filename = 0x0;
-		image = 0x0;
-	}
-
-	~FreyjaTexture()
-	{
-		if (name)
-			delete [] name;
-
-		if (filename)
-			delete [] filename;
-
-		if (image)
-			delete [] image;
-	}
-
-	char *name;                /* Texture name */
-	
-	char *filename;            /* Filename of image */
-	
-	unsigned char *image;      /* RGB(A) Texture data */
-	
-	unsigned int imageWidth;
-	
-	unsigned int imageHeight;
-	
-	unsigned char mipmaps;
-
-	unsigned char pixelDepth; /* 3 - RGB24bit, 4 - RGBA32bit */
-	
-	unsigned int id;          /* OpenGL texture id use */
-};
+#include "FreyjaTexture.h"
+#include "FreyjaFileReader.h"
+#include "FreyjaFileWriter.h"
 
 
 class FreyjaMaterial
 {
  public:
+
+	enum Flags
+	{
+		fMaterial_DetailTexure = 1,		
+	};
+
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -90,7 +59,7 @@ class FreyjaMaterial
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~FreyjaMaterial();
+	virtual ~FreyjaMaterial();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaMaterial object is allocated
 	 * Post : Deconstructs an object of FreyjaMaterial
@@ -106,19 +75,117 @@ class FreyjaMaterial
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+   static int32 getBlendIndex(int blend);
+	/*------------------------------------------------------
+	 * Pre  : Pass blend value, Built with HAVE_GL
+	 * Post : Returns -1 if not used, or index if used
+	 ------------------------------------------------------*/
+
+	static uint32 getCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns number of unique materials
+	 ------------------------------------------------------*/
+
+	uint32 getFlags();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get currently set flags
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.07.03:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	uint32 getId();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.01.22:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
+
+	const char *getName();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns Material's name or NULL
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.01.21:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
+
+	const char *getTextureName();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets Material's texture filename or NULL
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.01.21:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
+
+	const char *getDetailTextureName();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets Material's detail texture filename or NULL
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.07.03:
+	 *  Mongoose - Created
+	 ------------------------------------------------------*/
+
+	virtual bool serialize(FreyjaFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	long mId;                   /* Unique identifier */
+	void clearFlag(Flags flag);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unsets passed flag
+	 ------------------------------------------------------*/
+
+	virtual bool serialize(FreyjaFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void setFlag(Flags flag);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets passed flag
+	 ------------------------------------------------------*/
+
+	void setName(const char *name);
+	/*------------------------------------------------------
+	 * Pre  : Name is valid string
+	 * Post : Sets Material's name
+	 ------------------------------------------------------*/
+
+	int32 mId;                  /* Unique identifier */
 
 	char mName[64];             /* Material name */
 
-	long mFlags;                /* Bit flags */
+	uint32 mFlags;              /* Bit flags */
 
-	long mParent;               /* Linked material id, for shader use */
+	int32 mParent;              /* Linked material id, for shader use */
 
 	vec4_t mAmbient;            /* Ambient color */
 
@@ -134,11 +201,11 @@ class FreyjaMaterial
 
 	vec4_t mColor;              /* Solid color */
 
-	unsigned long mBlendSrc;    /* Blend source factor */
+	uint32 mBlendSrc;    		/* Blend source factor */
 
-	unsigned long mBlendDest;   /* Blend destination factor */
+	uint32 mBlendDest;		   	/* Blend destination factor */
 
-	long mTexture;              /* TextureData index */
+	int32 mTexture;             /* TextureData index */
 
 	bool mHasAlphaChannel;      /* For depth sorting use */
 
@@ -154,8 +221,7 @@ class FreyjaMaterial
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-
-	/* */
+	const static uint32 mVersion = 0x0001;
 };
 
 #endif

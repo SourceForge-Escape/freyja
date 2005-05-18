@@ -39,6 +39,7 @@
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
 
+#include "Texture.h"
 #include "BezierPatch.h"
 #include "freyja_events.h"
 
@@ -76,7 +77,8 @@ public:
 		FL_QUAKE_PAL     = 4,    /* Toggle quake/hexen2 palette in mdl loads */
 		FL_VERTEX_UV     = 8,    /* Toggle polymapping of texcoords */
 		fDontUpdateBoneName = 16,
-		fDeformBoneVertices = 32
+		fDeformBoneVertices = 32,
+		fLoadTextureInSlot = 64
 	} option_flag_t;
 
 
@@ -474,6 +476,16 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	int loadMaterial(const char *filename);
+
+	int loadTexture(const char *filename);
+
+	int loadTextureBuffer(unsigned char *image, 
+						  unsigned int width, 
+						  unsigned int height, 
+						  unsigned int bpp, 
+						  Texture::ColorMode type);
+
 	int loadModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : filename is valid, model format supported
@@ -498,6 +510,8 @@ public:
 	bool pasteSelectedMesh();
 
 	bool pasteVertexBuffer();
+
+	int saveMaterial(const char *filename);
 
 	void selectObject(transform_t type, Vector3d xyz);
 
@@ -721,6 +735,21 @@ public:
 	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
 
 
+	// FIXME: Temp here to let this work during rewrite so it could be uploaded to public svn to fix revision corruption in public svn
+	void initTexture()
+	{
+		unsigned char rgba[4] = {255, 255, 255, 255};
+		mTexture.reset();
+		mTexture.setMaxTextureCount(64);
+		mTexture.setFlag(Texture::fUseMipmaps);
+		mTexture.loadColorTexture(rgba, 32, 32);
+		mTextureId = 1;
+	}
+
+	int32 mTextureId;
+
+	Texture mTexture;
+
 private:
 
 	////////////////////////////////////////////////////////////
@@ -818,6 +847,8 @@ private:
 										* replacing this with a new
 										* freyja centric selection system
 										* is important */
+
+
 };
 
 
