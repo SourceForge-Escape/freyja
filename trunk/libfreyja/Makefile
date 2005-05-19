@@ -636,7 +636,7 @@ jpeg.test:
 	NAME=jpeg \
 	OBJS="$(BUILD_TEST_DIR)/image_test.o $(BUILD_TEST_DIR)/image_jpeg.o" \
 	CFLAGS="-Wall -g -O0 -DLIB_JPEG" \
-	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja8 -ljpeg"
+	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja -ljpeg"
 
 freyjaimageutil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
@@ -657,7 +657,7 @@ raw2riff.test:
 	$(MAKE) test NAME=raw2riff BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/raw2riff.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja8"
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 FreyjaUtil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
