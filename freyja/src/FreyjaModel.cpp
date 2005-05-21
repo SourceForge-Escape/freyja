@@ -669,6 +669,7 @@ unsigned int FreyjaModel::getCurrentPolygonEdgeCount()
 
 unsigned int FreyjaModel::getCurrentTextureIndex()
 {
+	freyja_print("! mTextureIndex = %i", mTextureIndex);
 	return mTextureIndex;
 }
 
@@ -695,8 +696,6 @@ void FreyjaModel::setCurrentMesh(unsigned int index)
 		{
 			mGroupIndex = mesh->group[0];
 		}
-		
-		freyja_print("Mesh[%i]", getCurrentMesh());
 	}
 }
 
