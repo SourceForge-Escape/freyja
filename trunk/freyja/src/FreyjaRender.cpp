@@ -1670,8 +1670,19 @@ void FreyjaRender::renderUVWindow()
 
 
 	// Until multi model editing comes just use model[0]
-	if (!freyjaGetRenderModelMesh(0, mModel->getCurrentMesh(),
-								  mModel->getCurrentGroup(), mesh))
+	RenderModel model;
+	bool valid = false;
+	if (freyjaGetRenderModel(0, model))
+	{
+		if (model.getMesh(mModel->getCurrentMesh(), mesh, 
+						  mModel->getCurrentGroup()))
+		{
+			valid = true;
+		}
+	}
+	
+
+	if (!valid)
 	{
 		DrawQuad(0.0, 0.0, width, height);
 		resizeContext(width, height);
@@ -1680,11 +1691,13 @@ void FreyjaRender::renderUVWindow()
 		return;
 	}
 
-
 	for (i = mModel->mUVMap.begin(), n = mModel->mUVMap.end();  i < n; ++i)
 	{
 		// Until multi model editing comes just use model[0]
-		if (!freyjaGetRenderModelPolygon(0, mModel->mUVMap[i], face))
+		//if (!freyjaGetRenderModelPolygon(0, mModel->mUVMap[i], face))
+		//	continue;
+		
+		if (!mesh.getPolygon(mModel->mUVMap[i], face))
 			continue;
 
 		if (face.material != (int)mModel->getCurrentTextureIndex())
