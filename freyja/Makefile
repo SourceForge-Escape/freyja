@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
 BRANCH=
-BUILD_ID=20050328
+BUILD_ID=20050521
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -325,20 +325,10 @@ package.tgz:
 
 tarball:
 	@-cd .. && tar zcvf $(NAME)-$(VERSION).$(BUILD_ID).tar.gz \
-		$(TREE_DIR) \
-		--exclude bin --exclude *~ --exclude .svn  \
-		--exclude CVS --exclude *.notar --exclude spec \
-		--exclude *.log --exclude *.tga --exclude contrib \
-		--exclude $(NAME)/data/models \
-		--exclude $(NAME)/data/textures \
-		--exclude $(NAME)/data/animations \
-		--exclude $(NAME)/data/maps \
-		--exclude $(NAME)/data/tags \
-		--exclude $(NAME)/data/prefab \
-		--exclude $(NAME)/utils \
-		--exclude $(NAME)/doc/rtf \
-		--exclude $(NAME)/system.info \
-		--totals
+		--exclude=bin --exclude=*~ --exclude=.svn  \
+		--exclude=*.log --exclude=*.tga --exclude=contrib \
+		--totals \
+		$(TREE_DIR) 
 
 backup:
 	@-$(MAKE) clean
