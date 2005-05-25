@@ -20,7 +20,7 @@
  *-- History ------------------------------------------------ 
  *
  * 2005.01.08:
- * Mongoose - Created
+ * Mongoose - Created, based on old Material class
  ==========================================================================*/
 
 
@@ -52,22 +52,12 @@ class FreyjaMaterial
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaMaterial
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.01.08: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	virtual ~FreyjaMaterial();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaMaterial object is allocated
 	 * Post : Deconstructs an object of FreyjaMaterial
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.01.08: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 
@@ -91,62 +81,36 @@ class FreyjaMaterial
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get currently set flags
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.07.03:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	uint32 getId();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.22:
-	 *  Mongoose - Created
 	 ------------------------------------------------------*/
 
 	const char *getName();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Material's name or NULL
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.21:
-	 *  Mongoose - Created
 	 ------------------------------------------------------*/
 
 	const char *getTextureName();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's texture filename or NULL
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.01.21:
-	 *  Mongoose - Created
 	 ------------------------------------------------------*/
 
-	const char *getDetailTextureName();
+	uint32 getSerializeSize();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets Material's detail texture filename or NULL
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.07.03:
-	 *  Mongoose - Created
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	virtual bool serialize(FreyjaFileWriter &w);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
+	 * Pre  : Writes this material out to disk
+	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 
 
@@ -162,9 +126,8 @@ class FreyjaMaterial
 
 	virtual bool serialize(FreyjaFileReader &r);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
+	 * Pre  : Reads the material data from disk
+	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 
 	void setFlag(Flags flag);
@@ -178,6 +141,14 @@ class FreyjaMaterial
 	 * Pre  : Name is valid string
 	 * Post : Sets Material's name
 	 ------------------------------------------------------*/
+
+	void setTextureName(const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets Material's texture filename or NULL
+	 ------------------------------------------------------*/
+
+	const static uint32 mVersion = 2;
 
 	int32 mId;                  /* Unique identifier */
 
@@ -221,7 +192,7 @@ class FreyjaMaterial
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	const static uint32 mVersion = 0x0001;
+	char *mTextureName;         /* This is used for file I/O to map classes */
 };
 
 #endif

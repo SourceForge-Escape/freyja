@@ -680,26 +680,9 @@ public:
 
 	void setPrinter(FreyjaPrinter *printer);
 
-	void setupPlugins();
-
 	bool checkModel(const char *filename);
 	bool saveModel(const char *filename);
 	bool loadModel(const char *filename);
-
-	void setPluginDescription(const char *info_line);
-	void setPluginImportFlags(long flags);
-	void setPluginExportFlags(long flags);
-	void setPluginExtention(const char *ext);
-	void addPluginArgInt(const char *name, long defaults);
-	void addPluginArgFloat(const char *name, float defaults);
-	void addPluginArgString(const char *name, const char *defaults);
-	long getPluginArgInt(long pluginIndex, const char *name);
-	float getPluginArgFloat(long pluginIndex, const char *name);
-	char *getPluginArgString(long pluginIndex, const char *name);
-	FreyjaPluginDesc *getPluginDesc(long pluginIndex);
-	FreyjaPluginDesc *getPluginDesc(const char *name);
-	long getPluginDescCount();
-	long getPluginId();
 
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 
@@ -718,12 +701,6 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	FreyjaPluginDesc *mCurrentPlugin;
-
-	Vector<FreyjaPluginDesc *> mPlugins;/* Plugin infos */
-
-	Vector<char *> mPluginDirectories;  /* Search dirs for plugins */
 
 	Vector<EggTextureData *> mTextures; /* Texture data list */
 

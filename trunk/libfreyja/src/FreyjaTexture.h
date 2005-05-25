@@ -27,6 +27,10 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJATEXTURE_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJATEXTURE_H_
 
+#include <hel/math.h>
+
+#include "FreyjaFileReader.h"
+#include "FreyjaFileWriter.h"
 
 class FreyjaTexture
 {
@@ -55,7 +59,7 @@ class FreyjaTexture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~FreyjaTexture();
+	virtual ~FreyjaTexture();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaTexture object is allocated
 	 * Post : Deconstructs an object of FreyjaTexture
@@ -71,16 +75,39 @@ class FreyjaTexture
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	uint32 getSerializeSize();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool serialize(FreyjaFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : Writes this material out to disk
+	 * Post : Returns true on success
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	virtual bool serialize(FreyjaFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : Reads the material data from disk
+	 * Post : Returns true on success
+	 ------------------------------------------------------*/
+
+	void setFilename(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Name is valid string
+	 * Post : Sets Texture's name
+	 ------------------------------------------------------*/
+
 	void setName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
-	 * Post : Sets Material's name
+	 * Post : Sets Texture's name
 	 ------------------------------------------------------*/
 
 	char *name;                 /* Texture name */
@@ -88,7 +115,7 @@ class FreyjaTexture
 	char *filename;             /* Filename of image */
 	
 	unsigned char *image;       /* RGB(A) Texture data */
-	
+
 	unsigned int imageWidth;
 	
 	unsigned int imageHeight;
@@ -98,6 +125,8 @@ class FreyjaTexture
 	unsigned char pixelDepth;   /* 24 - RGB24bit, 32 - RGBA32bit */
 	
 	unsigned int id;            /* OpenGL texture id use */
+
+	int32 mId;
 
 
  private:

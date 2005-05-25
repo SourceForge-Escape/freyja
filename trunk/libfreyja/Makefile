@@ -797,9 +797,10 @@ uninstall:
 
 tarball:
 	@-echo "Making tarball                                  " 
-	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz $(TREE_DIR) \
-		--exclude bin --exclude .svn --exclude *~ --exclude contrib \
-		--totals
+	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz  \
+		--exclude=bin --exclude=.svn --exclude=*~ --exclude=contrib \
+		--totals \
+		$(TREE_DIR)
 	@-echo "[done]"
 
 backup:
