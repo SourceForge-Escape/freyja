@@ -34,7 +34,6 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 #define GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 
-#include <freyja/EggPlugin.h>
 #include <freyja/Egg.h>
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
@@ -50,12 +49,6 @@ typedef enum {
 	PLANE_ZY = 1, 
 	PLANE_XZ = 2
 } freyja_plane_t;
-
-
-/* Oh noes! You know something is up when you see predecs of classes */
-class RenderPolygon;
-class RenderMesh;
-class RenderModel;
 
 
 class FreyjaModel
@@ -366,14 +359,6 @@ public:
 
 	Vector<unsigned int> &getVertexSelectionList();
 
-	vec3_t *getVertexXYZ(long vertexIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Exports vertex via base libhel math type, or
-	 *        returns NULL if invalid vertexIndex
-	 *
-	 ------------------------------------------------------*/
-
 	bool isCurrentBoneAllocated();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -496,8 +481,6 @@ public:
 	 * 2000.09.09: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	void mirrorTexCoord(long texCoordIndex, bool x, bool y);
 
 	void mirrorUsingVertexBuffer(bool x, bool y, bool z);
 
@@ -668,10 +651,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void transformTexCoord(long texCoordIndex,
-						   freyja_transform_action_t action,
-						   vec_t x, vec_t y);
-
 	void updateSkeletalUI();
 
 
@@ -730,7 +709,7 @@ public:
 
 	// FIXME: It's clear why this is bad for the API
 
-	Vector<long> mUVMap;                /* 'Texture polygon' grouping */
+	Vector<int32> mUVMap;               /* 'Texture polygon' grouping */
 
 	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
 
@@ -803,8 +782,6 @@ private:
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 
 	Egg *mEgg;                      /* The 3d data model */
-
-	EggPlugin *mPlugin;             /* Model plugin system */
 
 	unsigned int mFlags;            /* Stores option flags as bitmap */
 

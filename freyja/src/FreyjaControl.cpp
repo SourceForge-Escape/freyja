@@ -1146,32 +1146,38 @@ bool FreyjaControl::event(int command)
 
 
 	case eMirrorUV_X:
-		mModel->mirrorTexCoord(mModel->getCurrentTexCoord(), true, false);
+		freyjaModelMirrorTexCoord(0, mModel->getCurrentTexCoord(), mModel->mUVMap, true, false);
 		freyja_event_gl_refresh();
 		break;
+
 	case eMirrorUV_Y:
-		mModel->mirrorTexCoord(mModel->getCurrentTexCoord(), false, true);
+		freyjaModelMirrorTexCoord(0, mModel->getCurrentTexCoord(), mModel->mUVMap, false, true);
 		freyja_event_gl_refresh();
 		break;
+
 	case eTmpUVMapOn:
 		mModel->createPolyMappedUVMap(mModel->getCurrentPolygon());
 		freyja_event_gl_refresh();
 		break;
+
 	case eTmpUVMapOff:
 		mModel->createPolyMappedUVMap(-1);
 		freyja_event_gl_refresh();
 		break;
+
 	case eTranslateUV:
 		break;
+
 	case eRotateUV:
 		mModel->createPolyMappedUVMap(mModel->getCurrentPolygon());
 		//mModel->transformTexCoord(mModel->getCurrentTexCoord(),
 		//						  fRotateAboutPoint, 45, 0); 
 		freyja_event_gl_refresh();
 		break;
+
 	case eScaleUV:
-		mModel->transformTexCoord(mModel->getCurrentTexCoord(),
-								  fScale, 0.5, 0.5);
+		freyjaModelTransformTexCoord(0, mModel->getCurrentTexCoord(),
+									fScale, 0.5, 0.5);
 		break;
 
 	case eSetMeshTexture:

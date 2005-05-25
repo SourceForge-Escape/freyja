@@ -35,6 +35,8 @@ FreyjaMaterial::FreyjaMaterial()
 
 	mName[0] = 0;
 
+	mTextureName = 0x0;
+
 	mFlags = 0;
 
 	mParent = -1;
@@ -62,6 +64,8 @@ FreyjaMaterial::FreyjaMaterial()
 
 FreyjaMaterial::~FreyjaMaterial()
 {
+	if (mTextureName)
+		delete [] mTextureName;
 }
 
 
@@ -69,13 +73,51 @@ FreyjaMaterial::~FreyjaMaterial()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+
+const char *FreyjaMaterial::getTextureName()
+{
+	return mTextureName;
+}
+
+
+uint32 FreyjaMaterial::getSerializeSize()
+{
+	uint32 length = 0;
+
+
+	if (mTextureName != 0x0)
+	{
+		length = strlen(mTextureName);	
+	}
+
+	return (4 + 64 + 4 + 4 + 4 +
+			4 +	length +
+			4 + 
+			16 + 16 + 16 + 16);
+}
+
+
 bool FreyjaMaterial::serialize(FreyjaFileWriter &w)
 {
-	w.writeLongU(mVersion);
+	uint32 length = 0;
+
+
+	w.writeInt32U(mVersion);
 	w.writeCharString(64, mName);
-	w.writeLongU(mFlags);
-	w.writeLongU(mBlendSrc);
-	w.writeLongU(mBlendDest);
+	w.writeInt32U(mFlags);
+	w.writeInt32U(mBlendSrc);
+	w.writeInt32U(mBlendDest);
+
+	if (mTextureName != 0x0)
+	{
+		length = strlen(mTextureName);
+		w.writeInt32U(length);
+		w.writeCharString(length, mTextureName);
+	}
+	else
+	{
+		w.writeInt32U(0); // length
+	}
 
 	w.writeFloat32(mShininess);
 
@@ -110,15 +152,27 @@ bool FreyjaMaterial::serialize(FreyjaFileWriter &w)
 
 bool FreyjaMaterial::serialize(FreyjaFileReader &r)
 {
-	uint32 version = r.readLongU();
+	uint32 version = r.readInt32U();
+	uint32 length = 0;
+
 
 	if (version != mVersion)
 		return false;
 
 	r.readCharString(64, mName);
-	mFlags = r.readLongU();
-	mBlendSrc = r.readLongU();
-	mBlendDest = r.readLongU();
+	mFlags = r.readInt32U();
+	mBlendSrc = r.readInt32U();
+	mBlendDest = r.readInt32U();
+
+	length = r.readInt32U();
+
+	if (length > 0)
+	{
+		char name[length];
+
+		r.readCharString(length, name);
+		setTextureName(name);
+	}
 
 	mShininess = r.readFloat32();
 
@@ -182,6 +236,29 @@ void FreyjaMaterial::setName(const char *name)
 	//mName = new char[len+1];
 	strncpy(mName, name, len);
 	mName[len] = 0;
+}
+
+
+void FreyjaMaterial::setTextureName(const char *name)
+{
+	int len;
+
+
+	if (!name || !name[0])
+	{
+		return;
+	}
+
+	len = strlen(name);
+
+	if (mTextureName)
+	{
+		delete [] mTextureName;
+	}
+
+	mTextureName = new char[len+1];
+	strncpy(mTextureName, name, len);
+	mTextureName[len] = 0;
 }
 
 

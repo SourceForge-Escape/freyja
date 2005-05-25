@@ -22,6 +22,7 @@
  ==========================================================================*/
 
 #include <mgtk/mgtk_events.h>
+#include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
 
 #include "FreyjaModel.h"
@@ -794,14 +795,14 @@ void freyja_event_file_dialog(char *s)
 	if (!on)
 	{
 		extern void mgtk_add_menu_item(char *text, long event);
-		long i, count = EggPlugin::mEggPlugin->getPluginDescCount();
+		long i, count = freyjaGetPluginCount();
 
 		//mgtk_add_menu_item("All Files (*.*)", 9000);
 		mgtk_event_fileselection_append_pattern("All Files (*.*)", "*.*");
 
 		for (i = 0; i < count; ++i)
 		{
-			FreyjaPluginDesc *plugin = EggPlugin::mEggPlugin->getPluginDesc(i);
+			FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(i);
 			
 			if (plugin && plugin->mImportFlags)
 				//mgtk_add_menu_item(plugin->mDescription, 9001+i);

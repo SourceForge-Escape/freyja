@@ -22,12 +22,21 @@
  *
  ==========================================================================*/
 
+#include <math.h>
+
+#ifdef WIN32
+#   undef MODEL_PLUGINS
+#endif
+
+#ifdef MODEL_PLUGINS
+#   include <dlfcn.h> 
+#endif
+
 #include <mstl/Vector.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <hel/BoundingVolume.h>
-#include <math.h>
 
 #include "ActionManager.h"
 #include "CopyModel.h"
@@ -50,9 +59,42 @@ Vector<FreyjaSkeleton *>  gFreyjaSkeletons;
 Vector<FreyjaCamera *>  gFreyjaCameras;
 Vector<FreyjaLight *>  gFreyjaLights;
 Vector<CopyModel *>  gCopyModels;
+Vector<FreyjaPluginDesc *> gFreyjaPlugins;
+Vector<char *> gPluginDirectories;
 
 FreyjaPrinter *gPrinter = 0x0;
+int32 gCurrentFreyjaPlugin = -1;
+long FreyjaPluginDesc::mNextId = 1;
 
+
+int32 gFreyjaCurrentVertex = -1;
+
+int32 freyjaGetCurrentVertex()
+{
+	return gFreyjaCurrentVertex;
+}
+
+void freyjaCurrentVertex(int32 vertexIndex)
+{
+	gFreyjaCurrentVertex = vertexIndex;
+}
+
+
+FreyjaMaterial *freyjaGetMaterialClass(int32 materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex];
+	}	
+
+	return 0x0;
+}
+
+
+
+
+//////////////////////////////////////////////////////////
 
 
 int32 freyjaCheckModel(const char *filename)
@@ -465,6 +507,20 @@ int32 freyjaLoadModel(const char *filename)
 	vec3_t xyz;
 	char buffer[64];
 
+	
+	/* HACK - This is to load Egg inline like in current freyja,
+	 *        until it's removed and made into purely a plugin */
+	if (EggPlugin::mEggPlugin)
+	{
+		Egg *egg = EggPlugin::mEggPlugin->getEgg();
+
+		if (egg && egg->loadFile((char*)filename) == 0)
+		{
+			// FIXME: Should be per mesh / face instead
+			EggPlugin::mEggPlugin->fixTexCoords();
+			return 0;
+		}
+	}
 
 	if (freyjaCheckModel((char *)filename) != 0)
 		return -1;
@@ -544,6 +600,20 @@ int32 freyjaLoadModel(const char *filename)
 
 			if ((long)r.getFileOffset() != offset)
 				printf("BONE @ %i not %i!\n", r.getFileOffset(), offset);
+			break;
+
+
+		/* Materials */
+		case FREYJA_CHUNK_MATERIAL:
+			{
+				FreyjaMaterial *mat;
+
+				index = freyjaMaterialCreate();
+				mat = freyjaGetMaterialClass(index);
+
+				if (mat)
+					mat->serialize(r);		
+			}
 			break;
 
 
@@ -680,6 +750,30 @@ int32 freyjaSaveModel(const char *filename)
 
 
 	/* Materials */
+	if (freyjaGetMaterialCount())
+	{
+		count = freyjaGetMaterialCount();
+
+		for (i = 0; i < count; ++i)
+		{
+			FreyjaMaterial *mat = freyjaGetMaterialClass(i);
+
+			if (mat)
+			{
+				chunk.type = FREYJA_CHUNK_MATERIAL;
+				chunk.size = mat->getSerializeSize();
+				chunk.flags = 0x0;
+				chunk.version = FreyjaMaterial::mVersion;
+
+				w.writeLong(chunk.type);
+				w.writeLong(chunk.size);
+				w.writeLong(chunk.flags);
+				w.writeLong(chunk.version);
+
+				mat->serialize(w);
+			}
+		}		
+	}
 
 
 	/* Vertex groups */
@@ -3080,6 +3174,58 @@ void freyjaMeshUVMapSpherical(int32 meshIndex)
 }
 
 
+// FIXME: Uses old egg gobal framing, etc
+void freyjaMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz)
+{
+	//egg_mesh_t *mesh;
+	egg_group_t *grp;
+	Egg *egg;
+
+	if (!EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (egg)
+	{
+		grp = egg->getGroup(frame);
+
+		if (grp)
+		{
+			grp->center[0] = xyz[0];
+			grp->center[1] = xyz[1];
+			grp->center[2] = xyz[2];
+		}
+	}
+}
+
+
+// FIXME: Uses old egg gobal framing, etc
+void freyjaGetMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz)
+{
+	//egg_mesh_t *mesh;
+	egg_group_t *grp;
+	Egg *egg;
+
+	if (!EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (egg)
+	{
+		grp = egg->getGroup(frame);
+
+		if (grp)
+		{
+			xyz[0] = grp->center[0];
+			xyz[1] = grp->center[1];
+			xyz[2] = grp->center[2];
+		}
+	}
+}
+
+
 void freyjaMeshUVMapCylindrical(int32 meshIndex)
 {
 	int32 i, j, vertexCount, vertexIndex;
@@ -3337,7 +3483,7 @@ void freyjaMeshTesselateTriangles(int32 meshIndex)
 				for (j = 0; j < vertexCount; ++j)
 				{
 					// 0 1 2, 0 2 3, ..
-#warning FIXME No Implementation due to lack of constraints on 5+ edges
+					freyjaPrintError("freyjaMeshTesselateTriangles> No Implementation due to lack of constraints on 5+ edges");
 					vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
 				}
 			}
@@ -3572,49 +3718,6 @@ void freyjaMeshTreeFrameAddBone(int32 tag)
 }
 
 
-int freyjaGetTextureFilename(unsigned int index, char **filename)
-{
-	*filename = 0x0;
-
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetTextureFilename(index, 
-															   filename);
-	return FREYJA_PLUGIN_ERROR;	
-}
-
-
-int freyjaGetTextureImage(unsigned int index, unsigned int *w, unsigned int *h, 
-					   unsigned int *depth,  unsigned int *type,
-					   unsigned char **image)
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetTextureImage(index, w, h, 
-														 depth, type, image);
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
-int32 freyjaTextureFilename1s(const char *filename)
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaTextureStoreFilename(filename);
-
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
-int32 freyjaTextureStoreBuffer(unsigned char *image, unsigned int depth,
-							  unsigned int width, unsigned int height,
-							  freyja_colormode_t type)
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaTextureStoreBuffer(image, depth,
-															width, height,
-															type);
-
-	return FREYJA_PLUGIN_ERROR;
-  
-}
 
 
 // Accesors /////////////////////////////////////
@@ -4492,9 +4595,75 @@ void freyjaAnimationKeyFrameOrientationWXYZ(int32 animationIndex,
 }
 
 
+
+///////////////////////////////////////////////////////////////////////
+// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
+///////////////////////////////////////////////////////////////////////
+
+int32 freyjaTextureCreate()
+{
+	int32 textureIndex = gFreyjaTextures.size();
+
+	gFreyjaTextures.pushBack(new FreyjaTexture());
+	gFreyjaTextures[textureIndex]->mId = textureIndex;
+
+	return textureIndex;
+}
+
+int32 freyjaGetTextureFilename(unsigned int index, char **filename)
+{
+	*filename = 0x0;
+
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetTextureFilename(index, 
+															   filename);
+	return FREYJA_PLUGIN_ERROR;	
+}
+
+
+int32 freyjaGetTextureImage(uint32 index, uint32 *w, uint32 *h, 
+					   		uint32 *depth,  uint32 *type,
+					   		unsigned char **image)
+{
+	*image = 0x0;
+
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaGetTextureImage(index, w, h, 
+														 depth, type, image);
+	return FREYJA_PLUGIN_ERROR;
+}
+
+
+int32 freyjaTextureFilename1s(const char *filename)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaTextureStoreFilename(filename);
+
+	return FREYJA_PLUGIN_ERROR;
+}
+
+
+int32 freyjaTextureStoreBuffer(unsigned char *image, uint32 depth,
+							  uint32 width, uint32 height,
+							  freyja_colormode_t type)
+{
+	if (EggPlugin::mEggPlugin)
+		return EggPlugin::mEggPlugin->freyjaTextureStoreBuffer(image, depth,
+															width, height,
+															type);
+
+	return FREYJA_PLUGIN_ERROR;
+  
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////
 // Material ( 0.9.3 ABI, Can't be used with freyjaIterators )
 ///////////////////////////////////////////////////////////////////////
+
+int32 gCurrentMaterial = -1;
+
 
 int32 freyjaMaterialCreate()
 {
@@ -4507,7 +4676,288 @@ int32 freyjaMaterialCreate()
 }
 
 
-int32 gCurrentMaterial = -1;
+int32 freyjaLoadMaterialASCII(const char *filename)
+{
+	FILE *f;
+	unsigned int i, j, k, l, mode;
+	char buffer[128];
+	char buf[64];
+	bool line_comment;
+	char c;
+	vec4_t ambient;
+	vec4_t diffuse;
+	vec4_t specular;
+	vec4_t emissive;
+	vec_t shininess;
+	unsigned int texture;
+	unsigned int blend_src;
+	unsigned int blend_dest;
+	int32 mIndex = freyjaMaterialCreate();
+
+	freyjaCurrentMaterial(mIndex);
+
+	
+	if (!filename || !filename[0])
+	{
+		return -1;
+	}
+
+	f = fopen(filename, "r");
+
+	if (!f)
+	{
+		perror("freyjaLoadMaterialASCII> ");
+		return -2;
+	}
+
+	i = 0;
+	buffer[0] = 0;
+	line_comment = false;
+	mode = 0;
+
+	// Strip out whitespace and comments
+	while (fscanf(f, "%c", &c) != EOF)
+	{
+		if (line_comment && c != '\n')
+			continue;
+
+		if (i > 126)
+		{
+			printf("Material::loadFile> Overflow handled\n");
+			i = 126;
+		}
+		
+		switch (c)
+		{
+		case ' ':
+		case '\v':
+		case '\t':
+			break;
+		case '#':
+			buffer[i++] = 0;
+			line_comment = true;
+			break;
+		case '\n':
+			if (line_comment)
+			{
+				line_comment = false;
+				i = 0;
+				buffer[0] = 0;		 
+				continue;
+			}
+			else if (buffer[0] == 0)
+			{
+				i = 0;
+				continue;
+			}
+
+			buffer[i] = 0;
+
+			if (buffer[0] == '[')
+			{
+				if (strncmp(buffer, "[Material]", 10) == 0)
+				{
+					mode = 1;
+				}
+				else
+				{
+					mode = 0;
+				}
+			}
+			else if (mode == 1)
+			{
+				if (strncmp(buffer, "Shininess", 9) == 0)
+				{
+					for (j = 0, k = 10; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					shininess = atof(buf);
+				}
+				else if  (strncmp(buffer, "TextureName", 11) == 0)
+				{
+					for (j = 0, k = 12; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					//setTextureName(buf);
+				}
+				else if  (strncmp(buffer, "Name", 4) == 0)
+				{
+					for (j = 0, k = 5; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					freyjaMaterialName(mIndex, buf);
+
+					//setName(buf);
+				}
+				else if  (strncmp(buffer, "EnableBlending", 14) == 0)
+				{
+					for (j = 0, k = 15; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+
+					if (strncmp(buf, "true", 4) == 0)
+					{
+						//FIXME m_flags |= Material::fEnable_Blending;
+					}
+					else if (strncmp(buf, "false", 5) == 0)
+					{
+						//FIXME m_flags |= Material::fEnable_Blending;
+						//FIXME m_flags ^= Material::fEnable_Blending;
+					}
+				}
+				else if (strncmp(buffer, "Blend", 5) == 0)
+				{
+					bool is_src = false;
+					int val;
+
+
+					if (strncmp(buffer, "BlendSource", 11) == 0)
+					{
+						is_src = true;
+						k = 12;
+					}
+					else
+					{
+						k = 10;
+					}
+
+					for (j = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+
+					val = (strncmp(buf, "GL_ZERO", 11) == 0) ? 0x0 :
+					(strncmp(buf, "GL_SRC_COLOR", 9) == 0) ? 0x0300 :
+					(strncmp(buf, "GL_ONE_MINUS_SRC_COLOR", 22) == 0) ? 0x0301 :
+					(strncmp(buf, "GL_DST_COLOR", 9) == 0) ? 0x0306 :
+					(strncmp(buf, "GL_ONE_MINUS_DST_COLOR", 22) == 0) ? 0x0307 :
+					(strncmp(buf, "GL_SRC_ALPHA", 9) == 0) ? 0x0302 :
+					(strncmp(buf, "GL_ONE_MINUS_SRC_ALPHA", 22) == 0) ? 0x0303 :
+					(strncmp(buf, "GL_DST_ALPHA", 9) == 0) ? 0x0304 :
+					(strncmp(buf, "GL_ONE_MINUS_DST_ALPHA", 22) == 0) ? 0x0305 :
+					(strncmp(buf, "GL_SRC_ALPHA_SATURATE", 21) == 0) ? 0x0308 :
+					(strncmp(buf, "GL_CONSTANT_COLOR", 17) == 0) ? 0x8001 :
+					(strncmp(buf, "GL_ONE_MINUS_CONSTANT_COLOR", 27) == 0) ? 0x8002 :
+					(strncmp(buf, "GL_ONE", 6) == 0) ? 0x1 :
+					(strncmp(buf, "GL_CONSTANT_ALPHA", 17) == 0) ? 0x8003 :					0x8004;
+
+					if (is_src)
+					{
+						blend_src = val;
+					}
+					else
+					{
+						blend_dest = val;
+					}
+				}
+				else if (strncmp(buffer, "Ambient", 7) == 0)
+				{
+					for (j = 0, k = 8, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							ambient[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					ambient[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Diffuse", 7) == 0)
+				{
+					for (j = 0, k = 8, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							diffuse[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					diffuse[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Specular", 8) == 0)
+				{
+					for (j = 0, k = 9, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							specular[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					specular[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Emissive", 8) == 0)
+				{
+					for (j = 0, k = 9, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							emissive[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					emissive[l++] = atof(buf);
+				}
+			}
+
+			i = 0;
+			buffer[0] = 0;
+			break;
+		default:
+			buffer[i++] = c;
+		}
+	}
+
+	fclose(f);
+
+	freyjaMaterialAmbient(mIndex, ambient);
+	freyjaMaterialDiffuse(mIndex, diffuse);
+	freyjaMaterialSpecular(mIndex, specular);
+	freyjaMaterialEmissive(mIndex, emissive);
+	freyjaMaterialShininess(mIndex, shininess);
+	freyjaMaterialTexture(mIndex, texture);
+	freyjaMaterialBlendDestination(mIndex, blend_dest);
+	freyjaMaterialBlendSource(mIndex, blend_src);
+
+	return 0;
+}
+
 
 
 uint32 freyjaGetCurrentMaterial()
@@ -4567,20 +5017,6 @@ int32 freyjaGetMaterialFlags(int32 materialIndex)
 }
 
 
-void freyjaMaterialTextureFilename(int32 materialIndex, const char *filename)
-{
-#ifdef FIXME
-	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
-	{
-		if (gFreyjaMaterials[materialIndex])
-			gFreyjaMaterials[materialIndex]->setTextureFilename(filename);
-	}
-#else
-#   warning FIXME Per material texture filename binding disabled
-#endif
-}
-
-
 int32 freyjaGetMaterialTexture(int32 materialIndex)
 {
 	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
@@ -4590,6 +5026,18 @@ int32 freyjaGetMaterialTexture(int32 materialIndex)
 	}	
 
 	return -1;
+}
+
+
+const char *freyjaGetMaterialTextureName(int32 materialIndex)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->getTextureName();
+	}
+
+	return 0x0;
 }
 
 
@@ -4766,6 +5214,16 @@ void freyjaMaterialTexture(int32 materialIndex, int32 textureIndex)
 }
 
 
+void freyjaMaterialTextureName(int32 materialIndex, const char *name)
+{
+	if (materialIndex > -1 && materialIndex < (long)gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			gFreyjaMaterials[materialIndex]->setTextureName(name);
+	}
+}
+
+
 void freyjaMaterialAmbient(int32 materialIndex, const vec4_t ambient)
 {
 	int32 i;
@@ -4875,7 +5333,434 @@ void freyjaMaterialBlendDestination(int32 materialIndex,	uint32 factor)
 
 
 
-// Model /////////////////////////////
+//////////////////////////////////////////////////////
+// Model
+//
+//////////////////////////////////////////////////////
+
+// FIXME: Uses Egg
+void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
+								Vector<int32> uvMap, bool x, bool y)
+{
+	Egg *egg;
+
+
+	// egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (!egg)
+		return;
+
+	Vector<long> seen;
+	egg_polygon_t *poly;
+	egg_texel_t *texel = egg->getTexel(texCoordIndex);
+	egg_texel_t *tex;
+	Vector3d u, trans, min;
+	long i, j, k;
+
+	if (texel && !uvMap.empty())
+	{
+		for (i = uvMap.begin(); i < (int)uvMap.end(); ++i)
+		{
+			poly = egg->getPolygon(uvMap[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < trans.mVec[0])
+						trans.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < trans.mVec[1])
+						trans.mVec[1] = u.mVec[1];
+
+					if (x) tex->st[0] = -tex->st[0];
+					if (y) tex->st[1] = -tex->st[1];
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < min.mVec[0])
+						min.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < min.mVec[1])
+						min.mVec[1] = u.mVec[1];
+
+					seen.pushBack(poly->texel[j]);
+				}
+			}
+		}
+
+		u = trans;
+		trans = trans - min;
+		//trans += Vector3d(u.mVec[0]/2, u.mVec[1]/2, 0);
+
+		for (k = seen.begin(); k < (int)seen.end(); ++k)
+		{
+			tex = egg->getTexel(seen[k]);
+
+			if (tex)
+			{
+				u = Vector3d(tex->st[0], tex->st[1], 0) + trans;
+
+				tex->st[0] = u.mVec[0];
+				tex->st[1] = u.mVec[1];
+			}
+		}
+
+		return;
+	}
+
+
+	if (texel)
+	{
+		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
+		{
+			poly = egg->getPolygon(texel->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < trans.mVec[0])
+						trans.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < trans.mVec[1])
+						trans.mVec[1] = u.mVec[1];
+
+					if (x) tex->st[0] = -tex->st[0];
+					if (y) tex->st[1] = -tex->st[1];
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+
+					if (u.mVec[0] < min.mVec[0])
+						min.mVec[0] = u.mVec[0];
+
+					if (u.mVec[1] < min.mVec[1])
+						min.mVec[1] = u.mVec[1];
+
+					seen.pushBack(poly->texel[j]);
+				}
+			}
+		}
+
+		u = trans;
+		trans = trans - min;
+		//trans += Vector3d(u.mVec[0]/2, u.mVec[1]/2, 0);
+
+		for (k = seen.begin(); k < (int)seen.end(); ++k)
+		{
+			tex = egg->getTexel(seen[k]);
+
+			if (tex)
+			{
+				u = Vector3d(tex->st[0], tex->st[1], 0) + trans;
+
+				tex->st[0] = u.mVec[0];
+				tex->st[1] = u.mVec[1];
+			}
+		}
+	}
+	else
+	{
+		egg_vertex_t *vertex = egg->getVertex(freyjaGetCurrentVertex());
+		egg_vertex_t *vert;
+
+		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
+		{
+			poly = egg->getPolygon(vertex->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
+				{
+					vert = egg->getVertex(poly->vertex[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->vertex[j])
+						{
+							vert = 0x0;
+							break;
+						}
+					}
+
+					if (!vert) 
+						continue;
+
+					if (x) vert->uv[0] = -vert->uv[0];
+					if (y) vert->uv[1] = -vert->uv[1];
+					seen.pushBack(poly->vertex[j]);
+				}
+			}
+		}
+	}
+}
+
+
+// FIXME: Uses Egg
+void freyjaModelTransformTexCoord(uint32 modelIndex, uint32 texCoordIndex,
+									freyja_transform_action_t action,
+									vec_t x, vec_t y)
+{
+	Egg *egg;
+
+
+	// egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (!egg)
+		return;
+
+	Vector<int32> seen;
+	egg_polygon_t *poly;
+	egg_texel_t *texel = egg->getTexel(texCoordIndex);
+	egg_texel_t *tex;
+	Vector3d u, v, p;
+	int32 i, j, k;
+	Matrix m;
+	vec_t z;
+
+
+	if (texel)
+	{
+		p = Vector3d(texel->st[0], texel->st[1], 0);
+	}
+	else
+	{
+		egg_vertex_t *vertex = egg->getVertex(freyjaGetCurrentVertex());
+		p = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+	}
+
+	switch (action)
+	{
+	case fTranslate:
+		m.translate(x, y, 0);
+		break;
+
+	case fRotateAboutPoint:
+		m.translate(-p.mVec[0], -p.mVec[1], 0);
+		x = helDegToRad(x);
+		y = helDegToRad(0);
+		z = helDegToRad(0);
+		m.rotate(0, 0, helDegToRad(90));
+		m.rotate(x, y, z);
+		m.translate(p.mVec[0], p.mVec[1], 0);
+		break;
+
+	case fScaleAboutPoint:
+		m.translate(-p.mVec[0], -p.mVec[1], 0);
+		m.scale(x, y, 1);
+		m.translate(p.mVec[0], p.mVec[1], 0);
+		break;
+
+	case fRotate:
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(0);
+		m.rotate(x, y, z);
+		break;
+
+	case fScale:
+		m.scale(x, y, 1);
+		break;
+
+	default:
+		freyjaPrintMessage("transformTexCoord: Unknown action");
+		return;
+	}
+
+
+	if (texel)
+	{
+		v = Vector3d(texel->st[0], texel->st[1], 0);
+		v = m * v;
+
+		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
+		{
+			poly = egg->getPolygon(texel->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				{
+					tex = egg->getTexel(poly->texel[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->texel[j])
+						{
+							tex = 0x0;
+							break;
+						}
+					}
+
+					if (!tex) 
+						continue;
+
+					u = Vector3d(tex->st[0], tex->st[1], 0);
+					u = m * u;
+
+					tex->st[0] = u.mVec[0];
+					tex->st[1] = u.mVec[1];
+					seen.pushBack(poly->texel[i]);
+				}
+			}
+		}
+	}
+	else
+	{
+		egg_vertex_t *vertex = egg->getVertex(freyjaGetCurrentVertex());
+		egg_vertex_t *vert;
+
+		v = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		v = m * v;
+
+		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
+		{
+			poly = egg->getPolygon(vertex->ref[i]);
+
+			if (poly)
+			{
+				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
+				{
+					vert = egg->getVertex(poly->vertex[j]);
+
+					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					{
+						if (seen[k] == (int)poly->vertex[j])
+						{
+							vert = 0x0;
+							break;
+						}
+					}
+
+					if (!vert) 
+						continue;
+
+					u = Vector3d(vert->uv[0], vert->uv[1], 0);
+					u = m * u;
+					vert->uv[0] = u.mVec[0];
+					vert->uv[1] = u.mVec[1];
+					seen.pushBack(poly->vertex[j]);
+				}
+			}
+		}
+	}
+}
+
+
+// FIXME: Uses Egg
+void freyjaModelClear(uint32 modelIndex)
+{
+	Egg *egg;
+
+
+	// egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (!egg)
+		return;
+
+	egg->clear();	
+}
+
+
+// FIXME: Uses Egg
+void freyjaModelClampTexCoords(uint32 modelIndex)
+{
+	unsigned int i;
+	egg_texel_t *t;
+	egg_vertex_t *v;
+	Egg *egg;
+
+
+	// egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (!egg)
+		return;
+
+	for (i = 0; i < egg->getTexelCount(); ++i)
+	{
+		t = egg->getTexel(i);
+
+		if (t)
+		{
+			if (t->st[0] < 0.0f)
+				t->st[0] = 0.0f;
+			else if (t->st[0] > 1.0f)
+				t->st[0] = 1.0f;
+
+			if (t->st[1] < 0.0f)
+				t->st[1] = 0.0f;
+			else if (t->st[1] > 1.0f)
+				t->st[1] = 1.0f;
+		}
+	}
+
+	for (i = 0; i < egg->getVertexCount(); ++i)
+	{
+		v = egg->getVertex(i);
+
+		if (v)
+		{
+			if (v->uv[0] < 0.0f)
+				v->uv[0] = 0.0f;
+			else if (v->uv[0] > 1.0f)
+				v->uv[0] = 1.0f;
+
+			if (v->uv[1] < 0.0f)
+				v->uv[1] = 0.0f;
+			else if (v->uv[1] > 1.0f)
+				v->uv[1] = 1.0f;
+		}
+	}
+}
+
 
 char freyjaGetModelAppendMeshMode(int32 modelIndex)
 {
@@ -4934,33 +5819,523 @@ char freyjaModelCopyVertexList(int32 modelIndex,
 
 
 //////////////////////////////////////////////////////////////////////
-// Plugin import / export nicities
+// Plugin subsystem
 //////////////////////////////////////////////////////////////////////
 
-/* TODO hook up to EggPlugin */
+// TODO Replace EggPlugin plugin control
+
+
+void freyjaPluginDirectoriesInit()
+{
+#ifdef unix
+   	freyjaPluginAddDirectory("/usr/lib/freyja/modules/model");
+   	freyjaPluginAddDirectory("/usr/local/lib/freyja/modules/model");
+	freyjaPluginAddDirectory("/usr/share/freyja/modules/model");
+#else
+	freyjaPluginAddDirectory("./modules/model");
+#endif
+}
+
+
+void freyjaPluginAddDirectory(const char *dir)
+{
+	unsigned int l;
+	char *dir2;
+
+
+	if (!dir || !dir[0] || !FreyjaFileReader::isDirectory(dir))
+		return;
+
+	l = strlen(dir);
+
+	dir2 = new char[l+1];
+	strncpy(dir2, dir, l);
+	dir2[l] = 0;
+
+	gPluginDirectories.pushBack(dir2);
+}
+
+
+void freyjaPluginFilename1s(const char *filename)
+{
+
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+
+	if (plugin)
+		plugin->setFilename(filename);
+}
+
+
+void freyjaPluginsInit()
+{
+#ifdef FREYJA_PLUGINS
+	FreyjaFileReader reader;
+	FreyjaPluginDesc plugin;
+	char *module_filename;
+	void (*import)();
+	void *handle;
+	char *error;
+	unsigned int i;
+
+
+	gFreyjaPlugins.erase();
+
+
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("All files (*.*)");
+	freyjaPluginAddExtention1s("*.*");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("Freyja Model (*.ja)");
+	freyjaPluginAddExtention1s("*.ja");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("GooseEgg 8 Model (*.egg)");
+	freyjaPluginAddExtention1s("*.egg");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
+
+
+	/* Check for other format */
+	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
+	{
+		if (!reader.openDirectory(gPluginDirectories[i]))
+		{
+			freyjaPrintError("Couldn't access plugin directory[%d].", i);
+			continue;
+		}
+
+		while ((module_filename = reader.getNextDirectoryListing()))
+		{
+			if (reader.isDirectory(module_filename))
+				continue;
+
+#ifdef MACOSX
+#endif
+
+			freyjaPrintMessage("Module '%s' invoked.", module_filename);
+
+			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+			{
+				freyjaPrintError("In module '%s'.", module_filename);
+				
+				if ((error = dlerror()) != NULL)  
+				{
+					freyjaPrintError("%s", error);
+				}
+
+				continue; /* Try the next plugin, after a bad module load */
+			}
+			else
+			{
+				//freyjaPrintMessage("Module '%s' opened.", module_filename);
+
+				import = (void (*)())dlsym(handle, "freyja_init");
+
+				if ((error = dlerror()) != NULL)  
+				{
+					freyjaPrintError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+
+				freyjaPluginBegin();
+				freyjaPluginFilename1s(module_filename);
+				(*import)();
+				freyjaPluginEnd();
+
+				if ((error = dlerror()) != NULL) 
+				{
+					freyjaPrintError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+				
+				dlclose(handle);
+			}
+		}
+
+		reader.closeDirectory();
+	}
+
+	gCurrentFreyjaPlugin = -1;
+#endif
+}
+
+
+int32 freyjaImportModel(const char *filename)
+{
+#ifdef FREYJA_PLUGINS
+	FreyjaFileReader reader;
+	bool loaded = false, done = false;
+	char *module_filename;
+	int (*import)(char *filename);
+	void *handle;
+	char *error;
+	unsigned int i;
+
+
+	freyjaPrintMessage("[FreyjaPlugin module loader invoked]");
+
+	if (!reader.doesFileExist(filename))
+	{
+		freyjaPrintError("File '%s' couldn't be accessed.", filename);
+		return -1;
+	}
+
+	/* Check for native egg format */
+	if (EggPlugin::mEggPlugin)
+	{
+		if (EggPlugin::mEggPlugin->checkModel(filename))
+		{
+			if (EggPlugin::mEggPlugin->loadModel(filename))
+			{
+				return 0;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+	}
+
+	/* Check for other format */
+	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
+	{
+		if (!reader.openDirectory(gPluginDirectories[i]))
+		{
+			freyjaPrintError("Couldn't access plugin directory[%d].", i);
+			continue;
+		}
+
+		while (!done && (module_filename = reader.getNextDirectoryListing()))
+		{
+			if (reader.isDirectory(module_filename))
+				continue;
+
+			freyjaPrintMessage("Module '%s' invoked.", module_filename);
+
+			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+			{
+				freyjaPrintError("In module '%s'.", module_filename);
+				
+				if ((error = dlerror()) != NULL)  
+				{
+					freyjaPrintError("%s", error);
+				}
+
+				continue; /* Try the next plugin, after a bad module load */
+			}
+			else
+			{
+				freyjaPrintMessage("Module '%s' opened.", module_filename);
+
+#ifdef NO_DUPE_DL_SYM_HACK
+				/* Mongoose 2004.11.01, 
+				 * temp fix? */
+				unsigned int l = strlen(module_filename);
+				char tmp[128];
+				module_filename[l-3] = 0;
+				snprintf(tmp, 64, "%s_import_model", basename(module_filename));
+				freyjaPrintMessage("Symbol '%s' import...", tmp);
+				import = (int (*)(char *filename))dlsym(handle, tmp);
+#else
+				import = (int (*)(char *filename))dlsym(handle, "import_model");
+#endif
+
+				if ((error = dlerror()) != NULL)  
+				{
+					freyjaPrintError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+
+
+				FreyjaPluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
+
+				if (plug)
+					gCurrentFreyjaPlugin = plug->getId(); 
+
+				done = !(*import)((char*)filename);
+
+				gCurrentFreyjaPlugin = -1;
+
+				if (done)
+				{
+					loaded = true;
+					freyjaPrintMessage("Module '%s' success.", module_filename);
+				}
+
+				if ((error = dlerror()) != NULL) 
+				{
+					freyjaPrintError("%s", error);
+					dlclose(handle);
+					continue;
+				}
+				
+				dlclose(handle);
+			}
+		}
+
+		reader.closeDirectory();
+
+		if (done)
+		{
+			break;
+		}
+	}
+
+	freyjaPrintMessage("[FreyjaPlugin module loader sleeps now]\n");
+
+	if (loaded)
+		return 0; // sucess
+#endif
+	return -1;
+}
+
+
+int32 freyjaExportModel(const char *filename, const char *type)
+{
+#ifdef FREYJA_PLUGINS
+	FreyjaFileReader reader;
+	bool saved = false;
+	char module_filename[128];
+	char module_export[128];
+	char *name;
+	int (*export_mdl)(char *filename);
+	void *handle;
+	char *error;
+	unsigned long i;
+
+
+	if (!type || !filename)
+		return -100;
+
+	/* Check for native format or temp use of EGG here */
+	if (strcmp(type, "ja") == 0)
+	{
+		return freyjaSaveModel(filename); // FIXME: true or false needed?
+	}
+	else if (strcmp(type, "egg") == 0)
+	{
+		if (EggPlugin::mEggPlugin)
+		{
+			Egg *egg = EggPlugin::mEggPlugin->getEgg();
+			return egg->saveFile((char *)filename);
+		}
+	}
+
+	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
+
+	name = (char*)type;
+
+	/* Check for other format */
+	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
+	{
+		if (!reader.openDirectory(gPluginDirectories[i]))
+		{
+			freyjaPrintError("Couldn't access plugin directory");
+			continue;
+		}
+
+		sprintf(module_filename, "%s/%s.so", gPluginDirectories[i], name);
+		sprintf(module_export, "freyja_model__%s_export", name);  // use 'model_export'?
+
+		if (!(handle = dlopen(module_filename, RTLD_NOW)))
+		{
+			freyjaPrintError("\tERROR: In module '%s'.\n", module_filename);
+
+			if ((error = dlerror()) != NULL)  
+			{
+				freyjaPrintError("\tERROR: %s\n", error);
+			}
+		}
+		else
+		{
+			freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
+    
+			export_mdl = (int (*)(char * filename))dlsym(handle, module_export);
+
+			if ((error = dlerror()) != NULL)  
+			{
+				freyjaPrintError("\tERROR: %s\n", error);
+				dlclose(handle);
+			}
+
+			FreyjaPluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
+
+			if (plug)
+				gCurrentFreyjaPlugin = plug->getId(); 
+
+			saved = (!(*export_mdl)((char*)filename));
+
+			gCurrentFreyjaPlugin = -1;
+
+			if ((error = dlerror()) != NULL) 
+			{
+				dlclose(handle);
+			}
+
+			dlclose(handle);
+		}
+
+		if (saved)
+			break;
+	}
+
+	freyjaPrintMessage("[FreyjaPlugin module loader sleeps now]\n");
+
+	if (saved)
+		return 0; // success
+#else
+	if (!type || !filename)
+		return -100;
+
+	/* Check for native format or temp use of EGG here */
+	if (strcmp(type, "ja") == 0)
+	{
+		return !saveModel(filename);
+	}
+	else if (strcmp(type, "egg") == 0)
+	{
+		return mEgg->saveFile((char *)filename);
+	}
+#endif
+	return -1;
+}
+
+
+void freyjaPluginDescription(uint32 pluginIndex, const char *info_line)
+{
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+
+	if (plugin)
+	{
+		plugin->setDescription(info_line);
+	}
+}
+
+
+void freyjaPluginImportFlags(uint32 pluginIndex, int32 flags)
+{
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+
+	if (plugin)
+	{
+		plugin->mImportFlags = flags;
+	}
+}
+
+
+void freyjaPluginExportFlags(uint32 pluginIndex, int32 flags)
+{
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+
+	if (plugin)
+	{
+		plugin->mExportFlags = flags;
+	}
+}
+
+void freyjaPluginExtention(uint32 pluginIndex, const char *ext)
+{
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+
+	if (plugin)
+	{
+		plugin->setExtention(ext);
+	}
+}
+
+
+int32 freyjaGetPluginCount()
+{
+	return gFreyjaPlugins.end();
+}
+
+
+FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
+{
+	long i, l;
+
+	if (!name || !name[0])
+		return 0x0;
+
+	l = strnlen(name, 8192);
+
+	for (i = gFreyjaPlugins.begin(); i < (long)gFreyjaPlugins.end(); ++i)
+	{
+		if (gFreyjaPlugins[i] && 
+			gFreyjaPlugins[i]->mFilename && gFreyjaPlugins[i]->mFilename[0])
+		{
+			if (!strncmp(gFreyjaPlugins[i]->mFilename, name, l))
+			{
+				return gFreyjaPlugins[i];
+			}
+		}
+	}
+
+	return 0x0;
+}
+
+
+FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex)
+{
+	if (pluginIndex > 0 && pluginIndex < (long)gFreyjaPlugins.end())
+	{
+		return gFreyjaPlugins[pluginIndex];
+	}
+
+	return 0x0;
+}
+
 
 void freyjaPluginBegin()
 {
-	// ATM this does nothing, just here for reserved use
+	FreyjaPluginDesc *plugin = new FreyjaPluginDesc();
+	plugin->setId(gFreyjaPlugins.size());
+	gFreyjaPlugins.pushBack(plugin);
+	
+	gCurrentFreyjaPlugin = plugin->getId();
 }
 
 
 void freyjaPluginDescription1s(const char *info_line)
 {
-	EggPlugin::mEggPlugin->setPluginDescription(info_line);
-	//freyjaPrintMessage("\t%s", info_line);
+	freyjaPluginDescription(gCurrentFreyjaPlugin, info_line);
 }
 
 
 void freyjaPluginAddExtention1s(const char *ext)
 {
-	EggPlugin::mEggPlugin->setPluginExtention(ext);
+	freyjaPluginExtention(gCurrentFreyjaPlugin, ext);
 }
 
 
 void freyjaPluginImport1i(int32 flags)
 {
-	EggPlugin::mEggPlugin->setPluginImportFlags(flags);
+	freyjaPluginImportFlags(gCurrentFreyjaPlugin, flags);
 	//freyjaPrintMessage("\tImport: %s%s%s",
 	//				   (flags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
 	//				   (flags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
@@ -4970,29 +6345,38 @@ void freyjaPluginImport1i(int32 flags)
 
 void freyjaPluginExport1i(int32 flags)
 {
-	EggPlugin::mEggPlugin->setPluginExportFlags(flags);
+	freyjaPluginExportFlags(gCurrentFreyjaPlugin,flags);
 	//freyjaPrintMessage("\tExport: %s%s%s",
 	//				   (flags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
 	//				   (flags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
 	//				   (flags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 }
 
-
+//FIXME these need direct index functions too
 void freyjaPluginArg1i(const char *name, int32 defaults)
 {
-	EggPlugin::mEggPlugin->addPluginArgInt(name, defaults);
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+
+	if (plugin)
+		plugin->addIntArg(name, defaults);
 }
 
 
 void freyjaPluginArg1f(const char *name, float defaults)
 {
-	EggPlugin::mEggPlugin->addPluginArgFloat(name, defaults);
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+
+	if (plugin)
+		plugin->addFloatArg(name, defaults);
 }
 
 
 void freyjaPluginArg1s(const char *name, const char *defaults)
 {
-	EggPlugin::mEggPlugin->addPluginArgString(name, defaults);
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+
+	if (plugin)
+		plugin->addStringArg(name, defaults);
 }
 
 
@@ -5004,38 +6388,68 @@ void freyjaPluginEnd()
 
 int32 freyjaGetPluginId()
 {
-	return EggPlugin::mEggPlugin->getPluginId();
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+
+	if (plugin)
+		return plugin->getId();
+
+	return -1;
 }
 
 
 int freyjaGetPluginArg1f(int32 pluginId, const char *name, float *arg)
 {
-	*arg = EggPlugin::mEggPlugin->getPluginArgFloat(pluginId, name);
-	 return -1;
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+
+	if (plugin)
+	{
+		*arg =  plugin->getFloatArg(name);
+		return 0;
+	}
+
+	return -1;
 }
 
 
 int freyjaGetPluginArg1i(int32 pluginId, const char *name, int32 *arg)
 {
-	*arg = EggPlugin::mEggPlugin->getPluginArgInt(pluginId, name);
-	 return -1;
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+
+	if (plugin)
+	{
+		*arg =  plugin->getIntArg(name);
+		return 0;
+	}
+
+	return -1;
 }
 
 
 int freyjaGetPluginArg1s(int32 pluginId, const char *name, char **arg)
 {
-	*arg = EggPlugin::mEggPlugin->getPluginArgString(pluginId, name);
-	return 0;
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+
+	if (plugin)
+	{
+		*arg =  plugin->getStringArg(name);
+		return 0;
+	}
+
+	return -1;
 }
 
 
 int freyjaGetPluginArgString(int32 pluginId, const char *name, 
 							 int32 len, char *arg)
 {
-	char *s = EggPlugin::mEggPlugin->getPluginArgString(pluginId, name);
+	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+	char *s = 0x0;
+
+	if (plugin)
+		s = plugin->getStringArg(name);
 
 	if (!s || !s[0])
-		return 0x0;
+		return -1;
 
 	strncpy(arg, s, len);
 
@@ -5220,23 +6634,30 @@ void freyjaSpawn()
 		Egg *egg = new Egg();
 		EggPlugin *eggplugin = new EggPlugin(egg);
 
+		eggplugin->getEgg();
+
+		/* Setup basic default stdout printer */
 		freyja__setPrinter(new FreyjaPrinter(), true);
+
+		/* Spawn cut/copy/paste system */
 		freyja__spawnCopyModel(egg);
 
-		eggplugin->setupPlugins();
+		/* Setup plugins */
+		freyjaPluginDirectoriesInit();
+		freyjaPluginsInit();
 
 		freyjaPrintMessage("libfreyja invoked using freyjaSpawn()");
 	}
 }
 
 
-void freyjaKill()
+void freyjaFree()
 {
 	Egg *egg = 0x0;
 	EggPlugin *eggplugin = EggPlugin::mEggPlugin;
 	
 
-	freyjaPrintMessage("libfreyja invoked using freyjaSpawn()");
+	freyjaPrintMessage("libfreyja stopped using freyjaFree()");
 
 	if (eggplugin)
 	{
@@ -5253,6 +6674,11 @@ void freyjaKill()
 	{
 		delete gPrinter;
 	}
+
+
+	gPluginDirectories.erase();
+
+	gFreyjaPlugins.erase();
 }
 
 

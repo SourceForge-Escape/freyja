@@ -279,6 +279,12 @@ private:
 };
 
 
+// ABI functions
+FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name);
+FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex);
+
+
+
 class FreyjaPlugin
 {
 public:

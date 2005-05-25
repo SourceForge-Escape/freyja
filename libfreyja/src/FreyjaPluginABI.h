@@ -216,6 +216,10 @@ typedef enum {
 	 ------------------------------------------------------*/
 
 
+	int32 freyjaGetCurrentVertex();
+	void freyjaCurrentVertex(int32 vertexIndex);
+
+
 	///////////////////////////////////////////////////////////////////////
 	// libfreyja plugin ABI 0.9.1 object accessors
 	///////////////////////////////////////////////////////////////////////
@@ -599,12 +603,6 @@ void freyjaMeshTreeFrameAddBone(int32 tag);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-int32 freyjaTextureFilename1s(const char *filename);
-
-int32 freyjaTextureStoreBuffer(unsigned char *image, unsigned int depth,
-							  unsigned int width, unsigned int height,
-							  freyja_colormode_t type);
-
 void freyjaBoneFlags1i(int32 boneIndex, int32 flags);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
@@ -712,6 +710,10 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 
 void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
 							int32 count, int32 segments); // radius
+
+	void freyjaMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz);
+
+	void freyjaGetMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz);
 
 	void freyjaMeshPromoteTexcoordsToPloymapping(int32 meshIndex);
 	/*------------------------------------------------------
@@ -998,6 +1000,54 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 
 
 	///////////////////////////////////////////////////////////////////////
+	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
+	///////////////////////////////////////////////////////////////////////
+
+	int32 freyjaShaderCreate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaShaderProgram(uint32 shaderIndex, const char *program);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const char *freyjaGetShaderProgram(uint32 shaderIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
+	///////////////////////////////////////////////////////////////////////
+
+	int32 freyjaTextureCreate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	int32 freyjaTextureFilename1s(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	int32 freyjaTextureStoreBuffer(unsigned char *image, uint32 depth,
+								 	uint32 width, uint32 height,
+									freyja_colormode_t type);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
 	// Material ( 0.9.3 ABI, Can't be used with freyjaIterators )
 	///////////////////////////////////////////////////////////////////////
 
@@ -1055,6 +1105,12 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns texture index or -1 for error or no texture
+	 ------------------------------------------------------*/
+
+	const char *freyjaGetMaterialTextureName(int32 materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	void freyjaGetMaterialAmbient(int32 materialIndex, vec4_t ambient);
@@ -1122,10 +1178,10 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	 * Post : Material's bit <flags> are set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTextureFilename(int32 materialIndex, const char *filename);
+	void freyjaMaterialTextureName(int32 materialIndex, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
-	 * Post : Material textures's <filename> id is set
+	 * Post : Material textures's <name> id is set
 	 ------------------------------------------------------*/
 
 	void freyjaMaterialTexture(int32 materialIndex, int32 textureIndex);
@@ -1203,6 +1259,27 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	 *         disabled when returning  0 
 	 ------------------------------------------------------*/
 
+	void freyjaModelClear(uint32 modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : All data in model is reset/cleared
+	 ------------------------------------------------------*/
+
+	void freyjaModelTransformTexCoord(uint32 modelIndex,
+									uint32 texCoordIndex,
+									freyja_transform_action_t action,
+									vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaModelClampTexCoords(uint32 modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clamps UVs and TexCoords to 0.0 to 1.0
+	 ------------------------------------------------------*/
+
 	void freyjaModelAppendMeshMode(int32 modelIndex, char on);
 	/*------------------------------------------------------
 	 * Pre  : Model <modelIndex> exists and has an active copy buffer
@@ -1225,9 +1302,77 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	 ------------------------------------------------------*/
 
 
+
 	///////////////////////////////////////////////////////////////////////
-	// Plugin import/export iteraction setup
+	// Freyja plugin subsystem
+	//
 	///////////////////////////////////////////////////////////////////////
+
+	void freyjaPluginDirectoriesInit();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets default plugin directories.
+	 ------------------------------------------------------*/
+
+	void freyjaPluginsInit();
+	/*------------------------------------------------------
+	 * Pre  : freyjaPluginDirectoriesInit() is called, or you've
+	 *        set some custom paths with freyjaPluginAddDirectory(...)
+	 * Post : Scans plugin directories and sets up newly found plugins.
+	 ------------------------------------------------------*/
+
+	int32 freyjaExportModel(const char *filename, const char *type);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Exports model and returns 0, or
+	 *        fails to import returns error -N
+	 ------------------------------------------------------*/
+
+	int32 freyjaImportModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Imports model and returns 0, or
+	 *        fails to import returns error -N
+	 ------------------------------------------------------*/
+
+	void freyjaPluginAddDirectory(const char *dir);
+	/*------------------------------------------------------
+	 * Pre  : <dir> is valid string representing valid directory
+	 * Post : Directory is added to runtime linked library
+	 *        search path list.
+	 ------------------------------------------------------*/
+
+	void freyjaPluginDescription(uint32 pluginIndex, const char *info_line);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaPluginImportFlags(uint32 pluginIndex, int32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaPluginExportFlags(uint32 pluginIndex, int32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaPluginExtention(uint32 pluginIndex, const char *ext);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	int32 freyjaGetPluginCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	// Old iterator style plugin interface
 
 	typedef enum {
 		
@@ -1241,22 +1386,58 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 
 
 	void freyjaPluginBegin();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginDescription1s(const char *info_line);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginAddExtention1s(const char *ext);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginImport1i(int32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginExport1i(int32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginArg1i(const char *name, int32 defaults);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginArg1f(const char *name, float defaults);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginArg1s(const char *name, const char *defaults);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaPluginEnd();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -1366,13 +1547,25 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 	///////////////////////////////////////////////////////////////////////
 
 	void freyjaSpawn();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Starts freyja backend, also does needed allocations
+	 ------------------------------------------------------*/
 
-	void freyjaKill();
+	void freyjaFree();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Stops freyja backend, also frees memory used
+	 ------------------------------------------------------*/
 }
 
 
 /* Mongoose 2004.12.19, 
  * C++ fun */
+
+
+void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
+								Vector<int32> uvMap, bool x, bool y);
 
 char freyjaModelCopyVertexList(int32 modelIndex, 
 							   Vector<unsigned int> &list,
