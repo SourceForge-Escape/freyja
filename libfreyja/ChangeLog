@@ -26,6 +26,16 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja (20050524) "Umbra" Mongoose <mongoose@icculus.org>
+
+	o Updated ChangeLog  ;)
+	o Lots of reworking the API/ABI to support iterator and direct
+	  state machine control
+	o Added Material, Texture, Cg Shader data model support
+	o Removed plugin system from EggPlugin, placed in ABI limbo
+	o New library ABI exports for spawn/kill all singletons ( duh )
+
+
  libfreyja (0.9.0-20050107) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o FreyjaSkeletalAnimation added to svn

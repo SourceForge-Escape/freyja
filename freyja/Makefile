@@ -143,8 +143,6 @@ targets: $(TARGETS)
 
 OBJS = \
 	$(BUILD_DIR)/freyja_events.o \
-	$(BUILD_DIR)/MaterialManager.o \
-	$(BUILD_DIR)/Material.o \
 	$(BUILD_DIR)/Texture.o \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \
@@ -263,12 +261,13 @@ install:
 	@-cp data/icons/*.png /usr/share/freyja/icons/
 	@-mkdir -p /usr/share/freyja/palettes/
 	@-cp data/palettes/*.pal /usr/share/freyja/palettes/
-	@-echo [done]
+	@-echo "[done]"
+
 
 install-debug:
 	@-echo -n "Installing debug                            "
 	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(INSTALL_BIN)
-	@-echo [done]
+	@-echo "[done]"
 
 
 ################################################################
@@ -280,49 +279,6 @@ uninstall:
 
 ################################################################
 
-package.tgz:
-	@-rm -rf $(PACKAGE_DIR)
-	@-mkdir -p $(PACKAGE_DIR)/common
-	@-mkdir -p $(PACKAGE_DIR)/common/doc
-	@-mkdir -p $(PACKAGE_DIR)/common/data
-	@-mkdir -p $(PACKAGE_DIR)/common/data/icons
-	@-mkdir -p $(PACKAGE_DIR)/common/data/palettes
-	@-mkdir -p $(PACKAGE_DIR)/common/plugins
-	@-mkdir -p $(PACKAGE_DIR)/common/libs
-	@-cp install-package.sh $(PACKAGE_DIR)/
-	@-cp doc/FAQ ChangeLog TODO README AUTHORS $(PACKAGE_DIR)/common/doc
-	@-cp setup-freyja.sh $(PACKAGE_DIR)/common
-	@-cp ~/.freyja/palettes/*.pal $(PACKAGE_DIR)/common/data/palettes
-	@-cp data/freyja.menu $(PACKAGE_DIR)/common/data
-	@-cp data/icons/*.xpm $(PACKAGE_DIR)/common/data/icons
-	@-cp data/icons/*.png $(PACKAGE_DIR)/common/data/icons
-	@-cp ~/.freyja/plugins/* $(PACKAGE_DIR)/common/plugins
-	@-cp /usr/local/lib/libfreyja_egg.so.0.8.12 $(PACKAGE_DIR)/common/libs
-	@-cp /usr/local/lib/libmtk_image.so.0.1.1 $(PACKAGE_DIR)/common/libs
-	@-cd $(PACKAGE_DIR) && cd .. && \
-		tar zcvf $(NAME)-$(VERSION)-common.tgz $(NAME)/
-	@-echo "====================================================="
-	@-echo "Common package complete"
-	@-echo "====================================================="
-	@-rm -rf $(PACKAGE_DIR)
-	@-mkdir -p $(PACKAGE_DIR)/bin
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(PACKAGE_DIR)/bin/$(NAME).gtk2
-	@-cd $(PACKAGE_DIR) && cd .. && \
-		tar zcvf $(NAME)-$(VERSION)-gtk2_0.tgz $(NAME)/
-	@-echo "====================================================="
-	@-echo "Gtk+ 2.0 binary package complete"
-	@-echo "====================================================="
-	@-rm -rf $(PACKAGE_DIR)
-	@-mkdir -p $(PACKAGE_DIR)/bin
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(PACKAGE_DIR)/bin/$(NAME).gnome
-	@-cd $(PACKAGE_DIR) && cd .. && \
-		tar zcvf $(NAME)-$(VERSION)-gnome.tgz $(NAME)/
-	@-echo "====================================================="
-	@-echo "Gnome binary package complete"
-	@-echo "====================================================="
-	@-rm -rf $(PACKAGE_DIR)
-	@-ls -l $(PACKAGE_DIR)
-
 tarball:
 	@-cd .. && tar zcvf $(NAME)-$(VERSION).$(BUILD_ID).tar.gz \
 		--exclude=bin --exclude=*~ --exclude=.svn  \
@@ -330,33 +286,16 @@ tarball:
 		--totals \
 		$(TREE_DIR) 
 
-backup:
-	@-$(MAKE) clean
-	@-cd .. && tar jcvf $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 \
-	$(TREE_DIR) \
-	--exclude bin --exclude *~ --totals 
-	@-cd .. && cp $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 ~/Backup
-	@-cd .. && cp $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 /mnt/smb/share/www/files/tmp/
-
 
 
 ################################################################
 # Unit tests
 ################################################################
 
-Mlisp.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	gcc -Wall -ggdb -DUNIT_TEST_MLISP -lstdc++ \
-	src/common/Mlisp.cpp -o $(BUILD_TEST_DIR)/Mlisp.test
-
 Material.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	gcc -Wall -g -DUNIT_TEST_MATERIAL -DHAVE_OPENGL \
 	src/common/Material.cpp -o $(BUILD_TEST_DIR)/Material.test
 
-Resource.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	gcc -Wall -g -DUNIT_TEST_RESOURCE -DDEBUG -Isrc/common \
-	-lstdc++ \
-	src/common/Resource.cpp -o $(BUILD_TEST_DIR)/Resource.test   
+
 

@@ -51,10 +51,57 @@ FreyjaTexture::~FreyjaTexture()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+uint32 FreyjaTexture::getSerializeSize()
+{
+	// FIXME
+	return 0;
+}
+
+
+bool FreyjaTexture::serialize(FreyjaFileWriter &w)
+{
+	uint32 length;
+
+	if (name)
+	{
+		length = strlen(name);
+		w.writeInt32U(length);
+		w.writeCharString(length, name);
+	}
+	else
+	{
+		w.writeInt32U(0);
+	}
+
+	
+	char *filename;             /* Filename of image */
+	
+	unsigned char *image;       /* RGB(A) Texture data */
+
+	unsigned int imageWidth;
+	
+	unsigned int imageHeight;
+	
+	unsigned char mipmaps;
+
+	unsigned char pixelDepth;   /* 24 - RGB24bit, 32 - RGBA32bit */
+	
+	unsigned int id; 
+
+	return false;
+}
+
+
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+bool FreyjaTexture::serialize(FreyjaFileReader &r)
+{
+	// FIXME
+	return false;
+}
 
 
 ////////////////////////////////////////////////////////////

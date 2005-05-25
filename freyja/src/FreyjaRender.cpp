@@ -1368,7 +1368,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 
 			for (i = list->begin(), n = list->end(); i < n; ++i)
 			{
-				xyz = mModel->getVertexXYZ((*list)[i]);
+				xyz = freyjaGetVertexXYZ((*list)[i]);
 
 				if (xyz)
 				{
@@ -1398,7 +1398,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 		 
 		for (i = list->begin(), n = list->end(); i < n; ++i)
 		{
-			xyz = mModel->getVertexXYZ((*list)[i]);
+			xyz = freyjaGetVertexXYZ((*list)[i]);
 
 			if (xyz)
 			{
