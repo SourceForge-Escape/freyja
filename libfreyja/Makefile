@@ -77,6 +77,8 @@ BASE_CFLAGS=-Wall -I$(SRC_DIR) \
 	$(CONFIGURE_DEF) \
 	-DPLUGIN_IMAGE_DIR=\"\\\"$(INSTALL_PLUGIN_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
+	-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
+	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 	$(BASE_DEFS)
 
 LDFLAGS=$(CONFIGURE_LNK) -lm -ldl

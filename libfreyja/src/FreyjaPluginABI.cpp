@@ -74,10 +74,47 @@ int32 freyjaGetCurrentVertex()
 	return gFreyjaCurrentVertex;
 }
 
-void freyjaCurrentVertex(int32 vertexIndex)
+void freyjaCurrentVertex(uint32 vertexIndex)
 {
 	gFreyjaCurrentVertex = vertexIndex;
 }
+
+
+char freyjaIsVertexAllocated(uint32 vertexIndex)
+{
+	Egg *egg;
+	egg_vertex_t *vertex;
+	
+
+	if (!EggPlugin::mEggPlugin)
+		return 0;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (!egg)
+		return 0;
+
+	vertex = egg->getVertex(vertexIndex);
+
+	return (vertex != 0x0);
+}
+
+
+char freyjaIsBoneAllocated(uint32 boneIndex)
+{
+	Egg *egg;
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg = EggPlugin::mEggPlugin->getEgg();
+
+		if (egg)
+			return (egg->getTag(boneIndex) != 0x0);
+	}
+
+	return 0;
+}
+
 
 
 FreyjaMaterial *freyjaGetMaterialClass(int32 materialIndex)
@@ -92,7 +129,287 @@ FreyjaMaterial *freyjaGetMaterialClass(int32 materialIndex)
 }
 
 
+void freyjaMeshTransform(uint32 meshIndex, uint32 frame,
+							freyja_transform_action_t action, 
+							vec_t x, vec_t y, vec_t z)
+{
+	enum Egg::egg_transform type;
+	Egg *egg = 0x0;
 
+	// FIXME: Only one model -- ignore model index for now
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg = EggPlugin::mEggPlugin->getEgg();
+	}
+
+	if (!egg)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+	egg->Transform(egg->getMesh(meshIndex), type, x, y, z);
+
+	egg_group_t *group = egg->getGroup(frame);
+	egg_mesh_t *mesh = egg->getMesh(meshIndex);
+
+	if (group && mesh)
+		mesh->position = Vector3d(group->center);	
+}
+
+
+void freyjaMeshFrameTransform(uint32 meshIndex, uint32 frame,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z)
+{
+	enum Egg::egg_transform type;
+	Egg *egg = 0x0;
+
+	// FIXME: Only one model -- ignore model index for now
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg = EggPlugin::mEggPlugin->getEgg();
+	}
+
+	if (!egg)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+	egg->Transform(egg->getGroup(frame), type, x, y, z);
+}
+
+
+void freyjaBoneTransform(uint32 boneIndex, 
+							freyja_transform_action_t action, 
+							vec_t x, vec_t y, vec_t z)
+{
+	enum Egg::egg_transform type;
+	Egg *egg = 0x0;
+
+	// FIXME: Only one model -- ignore model index for now
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg = EggPlugin::mEggPlugin->getEgg();
+	}
+
+	if (!egg)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+	if (type != Egg::ROTATE)
+	{
+		egg->Transform(egg->getTag(boneIndex), type, x, y, z);
+	}
+	else
+	{
+		egg->TagRotateAbout(boneIndex, x, y, z);
+	}
+}
+
+
+void freyjaModelTransform(uint32 modelIndex,
+							freyja_transform_action_t action, 
+							vec_t x, vec_t y, vec_t z)
+{
+	enum Egg::egg_transform type;
+	Egg *egg = 0x0;
+
+	// FIXME: Only one model -- ignore model index for now
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg = EggPlugin::mEggPlugin->getEgg();
+	}
+
+	if (!egg)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+	egg->Transform(type, x, y, z);
+}
+
+
+void freyjaVertexListTransform(Vector<uint32> &list,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z)
+{
+	enum Egg::egg_transform type;
+	Egg *egg = 0x0;
+
+	// FIXME: Only one model -- ignore model index for now
+
+	if (EggPlugin::mEggPlugin)
+	{
+		egg = EggPlugin::mEggPlugin->getEgg();
+	}
+
+	if (!egg)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+
+	if (list.empty())
+		return;
+
+	egg_vertex_t *vertex;
+	Matrix m, inverse, normalTransform;
+	unsigned int i;
+
+
+	m.setIdentity();
+
+	switch (type)
+	{
+	case Egg::SCALE:
+		m.scale(x, y, z);
+		break;
+
+	case Egg::ROTATE:
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+		m.rotate(x, y, z);
+		break;
+
+	case Egg::TRANSLATE:
+		m.translate(x, y, z);
+		break;
+
+	default:
+		return;
+	}
+
+	m.getInvert(inverse.mMatrix);
+	inverse.getTransposeMatrix(normalTransform.mMatrix);
+	normalTransform.setMatrix(inverse.mMatrix);
+
+	for (i = list.begin(); i < list.end(); ++i)
+	{
+		vertex = egg->getVertex(list[i]);
+				
+		if (!vertex)
+			continue;
+				
+		m.multiply3v(vertex->pos, vertex->pos);
+		normalTransform.multiply3v(vertex->norm, vertex->norm);
+	}
+}
 
 //////////////////////////////////////////////////////////
 
@@ -3144,6 +3461,72 @@ void freyjaPolygonTexCoordPurge(int32 polygonIndex)
 }
 
 
+void freyjaMeshUVMapPlanar(int32 meshIndex)
+{
+	Egg *egg;
+	egg_mesh_t *mesh = 0x0;
+	egg_polygon_t *poly;
+	egg_vertex_t *vertex;
+	egg_texel_t *texel;
+	unsigned int i, j;
+	float u, v;
+
+
+	if (EggPlugin::mEggPlugin)
+		egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (egg)
+		mesh = egg->getMesh(meshIndex);
+
+	if (!mesh)
+		return;
+
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
+	{  
+		poly = egg->getPolygon(mesh->polygon[i]);
+
+		if (!poly)
+			continue;
+
+		// Generate texels and record their ids
+		for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
+		{
+			vertex = egg->getVertex(poly->vertex[j]);
+
+			if (!vertex)
+				continue;
+
+			// Mongoose 2002.01.18, Generate UV from vertex XYZ
+			freyjaGenerateUVFromXYZ(vertex->pos, &u, &v);
+
+#ifdef DEBUG_GEN_TEXEL
+			freyja_print("FreyjaModel::generateUVMap> %f %f\n", u, v);
+#endif
+
+			if (poly->texel.empty())
+			{
+				texel = 0x0;
+			}
+			else
+			{
+				texel = egg->getTexel(poly->texel[j]);
+			}
+			
+			if (!texel)
+			{
+				vertex->uv[0] = u;
+				vertex->uv[1] = v;
+			}
+			else
+			{
+				texel->st[0] = u;
+				texel->st[1] = v;
+			}
+		}
+	}
+}
+
+
 void freyjaMeshUVMapSpherical(int32 meshIndex)
 {
 	int32 i, vertexCount, vertexIndex;
@@ -3172,6 +3555,47 @@ void freyjaMeshUVMapSpherical(int32 meshIndex)
 		freyjaVertexTexCoord2fv(vertexIndex, uv);
 	}
 }
+
+
+// FIXME: Uses Egg
+void freyjaMeshMaterial(uint32 meshIndex, uint32 materialIndex)
+{
+	Egg *egg;
+	egg_mesh_t *mesh;
+	egg_polygon_t *poly;
+	uint32 i;
+	
+
+	if (!EggPlugin::mEggPlugin)
+		return;
+
+	egg = EggPlugin::mEggPlugin->getEgg();
+
+	if (!egg)
+		return;
+
+	mesh = egg->getMesh(meshIndex);
+
+	if (!mesh)
+	{
+		freyjaPrintMessage("freyjaMeshMaterial> ERROR: Invalid mesh[%i]\n",
+					 		meshIndex);
+		return;
+	}
+
+	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
+	{  
+		poly = egg->getPolygon(mesh->polygon[i]);
+
+		if (!poly)
+			continue;
+
+		poly->shader = materialIndex;
+	}	
+}
+
+
+
 
 
 // FIXME: Uses old egg gobal framing, etc

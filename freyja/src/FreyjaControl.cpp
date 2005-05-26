@@ -1184,8 +1184,8 @@ bool FreyjaControl::event(int command)
 		freyja_print("Switching all of mesh[%i]'s ploygons to material %i",
 					 mModel->getCurrentMesh(),
 					 mModel->getCurrentTextureIndex());
-		mModel->setMeshMaterial(mModel->getCurrentMesh(),
-								mModel->getCurrentTextureIndex());
+		freyjaMeshMaterial(mModel->getCurrentMesh(),
+							mModel->getCurrentTextureIndex());
 		freyja_event_gl_refresh();
 		break;
 
@@ -1589,7 +1589,7 @@ bool FreyjaControl::event(int command)
 
 
 	case CMD_MISC_GEN_TEXMAP_XY:
-		mModel->generateUVMap();
+		freyjaMeshUVMapPlanar(mModel->getCurrentMesh());
 		break;
 
 

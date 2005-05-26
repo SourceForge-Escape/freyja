@@ -447,20 +447,6 @@ public:
 
 	void deleteAnimationFrame(unsigned int frame);
 
-	void generateUVMap(); // texture projection
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : This currently doesn't actually use a true
-	 *        UV algorithm, when it does this will allow
-	 *        toggling the algorithm:
-	 *           cylindrical / plane / etc
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2???.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	int loadMaterial(const char *filename);
 
 	int loadTexture(const char *filename);
@@ -613,8 +599,6 @@ public:
 	 * 2000.09.09: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	void setMeshMaterial(long meshIndex, long material);
 
 	void setPolygonMaterial(long polygonIndex, long material);
 	/*------------------------------------------------------
@@ -777,15 +761,25 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	/* mEgg, mEggDebug, and mCachedVertex need to go */
+
+	Egg *mEgg;                      /* The 3d data model */
+
+	bool mEggDebug;                 /* Egg debugging? on/off */
+
+	egg_vertex_t *mCachedVertex;    /* Current vertex ( cached ) -
+									 * This is the lynchpin and bane
+									 * of this modeler at once
+									 * replacing this with a new
+									 * freyja centric selection system
+									 * is important */
+
+
 	FreyjaModelPrinter mPrinter;    /* Used to reroute logging for backend */
 
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 
-	Egg *mEgg;                      /* The 3d data model */
-
 	unsigned int mFlags;            /* Stores option flags as bitmap */
-
-	bool mEggDebug;                 /* Egg debugging? on/off */
 
 	bbox_t mSelectBBox;             /* 3d selection box using 2 vertices */
 
@@ -816,16 +810,6 @@ private:
 	unsigned int mMeshIndex;         /* Currently selected mesh id */
 
 	unsigned int mSkeletalFrameIndex;   /* Currently selected skeletal frame */
-
-
-	egg_vertex_t *mCachedVertex;       /* Current vertex ( cached ) -
-										* This is the lynchpin and bane
-										* of this modeler at once
-										* replacing this with a new
-										* freyja centric selection system
-										* is important */
-
-
 };
 
 
