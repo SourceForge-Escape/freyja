@@ -217,7 +217,26 @@ typedef enum {
 
 
 	int32 freyjaGetCurrentVertex();
-	void freyjaCurrentVertex(int32 vertexIndex);
+	void freyjaCurrentVertex(uint32 vertexIndex);
+
+	char freyjaIsVertexAllocated(uint32 vertexIndex);
+	char freyjaIsBoneAllocated(uint32 boneIndex);
+
+	void freyjaModelTransform(uint32 modelIndex,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z);
+
+	void freyjaMeshTransform(uint32 meshIndex, uint32 frame,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z);
+
+	void freyjaBoneTransform(uint32 boneIndex, 
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z);
+
+	void freyjaMeshFrameTransform(uint32 meshIndex, uint32 frame,
+									freyja_transform_action_t action, 
+									vec_t x, vec_t y, vec_t z);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -711,6 +730,10 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
 							int32 count, int32 segments); // radius
 
+
+
+	void freyjaMeshMaterial(uint32 meshIndex, uint32 materialIndex);
+
 	void freyjaMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz);
 
 	void freyjaGetMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz);
@@ -727,6 +750,13 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Removes references to polygonIndex in mesh, but
 	 *        it doesn't free the allocated polygon
+	 ------------------------------------------------------*/
+
+	void freyjaMeshUVMapPlanar(int32 meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : meshIndex references a valid mesh
+	 * Post : Texcoords computed with Planar mapping algorithm
+	 *
 	 ------------------------------------------------------*/
 
 	void freyjaMeshUVMapSpherical(int32 meshIndex);
@@ -764,27 +794,26 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *
 	 ------------------------------------------------------*/
 
-int32 freyjaMeshPosition(int32 meshIndex, vec3_t xyz);
+	int32 freyjaMeshPosition(int32 meshIndex, vec3_t xyz);
 
-void freyjaMeshName1s(int32 meshIndex, const char *name);
+	void freyjaMeshName1s(int32 meshIndex, const char *name);
 
-void freyjaMeshFlags1u(unsigned int flags);
-/*------------------------------------------------------
- * Pre  : Pass valid freyja_mesh_flags_t's bitmap
- * Post : Sets flags for current mesh
- *
- *-- History ------------------------------------------
- *
- * 2004.05.16:
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaMeshFlags1u(unsigned int flags);
+	/*------------------------------------------------------
+	 * Pre  : Pass valid freyja_mesh_flags_t's bitmap
+	 * Post : Sets flags for current mesh
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.05.16:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
-void freyjaGenerateVertexNormals();
+	void freyjaGenerateVertexNormals();
 
-void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
+	void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
-
-void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
+	void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -1562,7 +1591,9 @@ void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
 
 /* Mongoose 2004.12.19, 
  * C++ fun */
-
+void freyjaVertexListTransform(Vector<uint32> &list,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z);
 
 void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
 								Vector<int32> uvMap, bool x, bool y);
