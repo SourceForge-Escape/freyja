@@ -152,11 +152,11 @@ void FreyjaModel::printInfo()
 void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
 {
 	// HACKY entry
-	long i;
+	uint32 i;
 
 	if (!mUVMap.empty())
 	{
-		for (i = mUVMap.begin(); i < (int)mUVMap.end(); ++i)
+		for (i = mUVMap.begin(); i < mUVMap.end(); ++i)
 		{
 			freyjaPolygonSetMaterial1i(mUVMap[i], material);
 		}
@@ -165,102 +165,6 @@ void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
 	}
 
 	freyjaPolygonSetMaterial1i(polygonIndex, material);
-}
-
-
-void FreyjaModel::setMeshMaterial(long meshIndex, long material)
-{
-	egg_mesh_t *mesh;
-	egg_polygon_t *poly;
-	unsigned int i;
-
-
-	if (meshIndex < 0)
-	{ 
-		mesh = 0x0;
-	}
-	else
-	{
-		mesh = mEgg->getMesh(meshIndex);
-	}
-
-	if (!mesh)
-	{
-		freyja_print("FreyjaModel::setMeshMaterial> ERROR: Invalid mesh[%li]\n",
-					 meshIndex);
-		return;
-	}
-
-	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
-	{  
-		poly = mEgg->getPolygon(mesh->polygon[i]);
-
-		if (!poly)
-			continue;
-
-		poly->shader = material;
-	}
-}
-
-
-void FreyjaModel::generateUVMap()
-{
-	egg_mesh_t *mesh;
-	egg_polygon_t *poly;
-	egg_vertex_t *vertex;
-	egg_texel_t *texel;
-	unsigned int i, j;
-	float u, v;
-
-
-	mesh = mEgg->getMesh(getCurrentMesh());
-
-	if (!mesh)
-		return;
-
-	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
-	{  
-		poly = mEgg->getPolygon(mesh->polygon[i]);
-
-		if (!poly)
-			continue;
-
-		// Generate texels and record their ids
-		for (j = poly->vertex.begin(); j < poly->vertex.end(); ++j)
-		{
-			vertex = mEgg->getVertex(poly->vertex[j]);
-
-			if (!vertex)
-				continue;
-
-			// Mongoose 2002.01.18, Generate UV from vertex XYZ
-			freyjaGenerateUVFromXYZ(vertex->pos, &u, &v);
-
-#ifdef DEBUG_GEN_TEXEL
-			freyja_print("FreyjaModel::generateUVMap> %f %f\n", u, v);
-#endif
-
-			if (poly->texel.empty())
-			{
-				texel = 0x0;
-			}
-			else
-			{
-				texel = mEgg->getTexel(poly->texel[j]);
-			}
-			
-			if (!texel)
-			{
-				vertex->uv[0] = u;
-				vertex->uv[1] = v;
-			}
-			else
-			{
-				texel->st[0] = u;
-				texel->st[1] = v;
-			}
-		}
-	}
 }
 
 
@@ -566,113 +470,32 @@ void FreyjaModel::setBoneRotation(float x, float y, float z)
 void FreyjaModel::transform(int mode, freyja_transform_action_t action, 
 							float x, float y, float z)
 {
-	enum Egg::egg_transform type;
-
-	switch (action)
-	{
-	case fTranslate:
-		type = Egg::TRANSLATE;
-		break;
-
-	case fRotate:
-		type = Egg::ROTATE;
-
-		break;
-
-	case fScale:
-		type = Egg::SCALE;
-		break;
-
-	case fScaleAboutPoint:
-		freyja_print("FreyjaModel::transform> No appropreiate wrapper file bug with %", EMAIL_ADDRESS);
-		return;
-		break;
-
-	case fRotateAboutPoint:
-		type = Egg::ROTATE_ABOUT_CENTER;
-		break;
-	}
-
-
 	switch (mode)
 	{
 	case FreyjaModel::TransformVertexFrame:	
-		mEgg->Transform(mEgg->getGroup(getCurrentGroup()), type, x, y, z);
+		freyjaMeshFrameTransform(getCurrentMesh(), getCurrentGroup(),
+									action, x, y, z);
 		break;
+
 
 	case FreyjaModel::TransformMesh:
-		{
-			mEgg->Transform(mEgg->getMesh(getCurrentMesh()), type, x, y, z);
-
-			egg_group_t *group = mEgg->getGroup(getCurrentGroup());
-			egg_mesh_t *mesh = mEgg->getMesh(getCurrentMesh());
-
-			if (group && mesh)
-				mesh->position = Vector3d(group->center);
-		}
+		freyjaMeshTransform(getCurrentMesh(), getCurrentGroup(),
+							action, x, y, z);
 		break;
+
 
 	case FreyjaModel::TransformBone:
-		{
-			if (type != Egg::ROTATE)
-				mEgg->Transform(mEgg->getTag(getCurrentBone()), type, x, y, z);
-			else
-				mEgg->TagRotateAbout(getCurrentBone(), x, y, z);
-			
-			if (mFlags & fDeformBoneVertices)
-			{
-				
-			}
-		}
+		freyjaBoneTransform(getCurrentBone(), action, x, y, z);
 		break;
+
 
 	case TransformSelectedVertices:
-		if (!mList.empty())
-		{
-			egg_vertex_t *vertex;
-			Matrix m, inverse, normalTransform;
-			unsigned int i;
-
-
-			m.setIdentity();
-
-			switch (type)
-			{
-			case Egg::SCALE:
-				m.scale(x, y, z);
-				break;
-			case Egg::ROTATE:
-				x = helDegToRad(x);
-				y = helDegToRad(y);
-				z = helDegToRad(z);
-				m.rotate(x, y, z);
-				break;
-			case Egg::TRANSLATE:
-				m.translate(x, y, z);
-				break;
-			default:
-				return;
-			}
-
-			m.getInvert(inverse.mMatrix);
-			inverse.getTransposeMatrix(normalTransform.mMatrix);
-			normalTransform.setMatrix(inverse.mMatrix);
-
-			for (i = mList.begin(); i < mList.end(); ++i)
-			{
-				vertex = mEgg->getVertex(mList[i]);
-				
-				if (!vertex)
-					continue;
-				
-				m.multiply3v(vertex->pos, vertex->pos);
-				normalTransform.multiply3v(vertex->norm, vertex->norm);
-			}
-		}
+		freyjaVertexListTransform(mList, action, x, y, z);
 		break;
 
+
 	case FreyjaModel::TransformScene:
-		mEgg->Transform(type, x, y, z);
+		freyjaModelTransform(0, action, x, y, z);
 		break;
 	}
 }
@@ -2826,9 +2649,6 @@ int FreyjaModel::loadModel(const char *filename)
 							"FreyjaModel::loadModel", type);
 			}
 		}
-
-		//freyja_print("FreyjaModel::loadModel> Loaded %s, %i polys, %i verts\n", 
-		//	   filename, mEgg->getPolygonCount(), mEgg->getVertexCount());
 	}
 
 	return err;
@@ -2935,7 +2755,7 @@ int FreyjaModel::saveAnimation(const char *filename)
 
 bool FreyjaModel::isCurrentBoneAllocated()
 {
-	return (mEgg->getTag(getCurrentBone()) != 0x0);
+	return freyjaIsBoneAllocated(getCurrentBone());
 }
  
 

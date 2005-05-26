@@ -81,7 +81,7 @@ BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-Wall -Isrc \
-		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
+		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \

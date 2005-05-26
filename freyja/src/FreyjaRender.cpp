@@ -1450,11 +1450,13 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 {
 	static Vector3d u, v;
 	static unsigned int i;
-
+	const vec_t scale = 1.0001f;
 
 	/* Render wireframe */
 	if (mRenderMode & RENDER_WIREFRAME)
 	{
+		glLineWidth(mDefaultLineWidth);
+
 		// Update wireframe color
 		if (face.id == (int)mModel->getCurrentPolygon())
 		{
@@ -1462,14 +1464,12 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 		}
 		else if (mRenderMode & fHightlightPolygonWireframe)
 		{
-			glColor3fv(mColorWireframeHighlight);    
+			glColor3fv(mColorWireframeHighlight);
 		}
 		else
 		{
 			glColor3fv(mColorWireframe);
 		}
-
-		glLineWidth(mDefaultLineWidth);
 
 
 		glPushAttrib(GL_ENABLE_BIT);
@@ -1482,7 +1482,8 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 		for (i = 0; i < face.count; ++i)
 		{
 			u = face.vertices[i];
-			u *= 1.0001;
+			u *= scale;
+
 			glVertex3fv(u.mVec);
 		}
 	  
