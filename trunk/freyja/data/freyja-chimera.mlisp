@@ -143,6 +143,7 @@
 					(menu_item "_Plane"		eGeneratePlane		"gtk-polygon")
 					(menu_item "_Tube"		eGenerateTube		"gtk-polygon")
 					(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
+					(menu_item "C_one"		eGenerateCone		"gtk-polygon")
 					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
 					(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
 
