@@ -244,23 +244,17 @@ unsigned int FreyjaModel::getCurrentAnimation()
 
 void FreyjaModel::setCurrentMesh(unsigned int index)
 {
-	if (index < mEgg->getMeshCount())
+	if (index < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(index))
 	{
-		egg_mesh_t *mesh = mEgg->getMesh(index);
-		mMeshIndex = index;
-		mGroupIndex = 0;
-		
-		if (mesh)
-		{
-			mGroupIndex = mesh->group[0];
-		}
+		mMeshIndex = index;		
+		mGroupIndex = freyjaGetMeshVertexGroupIndex(mMeshIndex, 0);
 	}
 }
 
 
 void FreyjaModel::setCurrentPolygon(unsigned int index)
 {
-	if (index < mEgg->getPolygonCount())
+	if (index < freyjaGetCount(FREYJA_POLYGON))
 	{
 		mPolygonIndex = index;
 	}
@@ -269,7 +263,7 @@ void FreyjaModel::setCurrentPolygon(unsigned int index)
 
 void FreyjaModel::setCurrentGroup(unsigned int index)
 {
-	if (index < mEgg->getGroupCount())
+	if (index < freyjaGetCount(FREYJA_VERTEX_GROUP))
 	{
 		mGroupIndex = index;
 		freyja_print("Group[%i]", getCurrentGroup());
@@ -278,7 +272,7 @@ void FreyjaModel::setCurrentGroup(unsigned int index)
 
 void FreyjaModel::setCurrentSkeleton(unsigned int index)
 {
-	if (index < mEgg->getBoneFrameCount())
+	if (index < freyjaGetCount(FREYJA_SKELETON))
 	{
 		mSkeletalFrameIndex = index;
 	}
@@ -287,7 +281,7 @@ void FreyjaModel::setCurrentSkeleton(unsigned int index)
 
 void FreyjaModel::setCurrentBone(unsigned int index)
 {
-	if (index < mEgg->getTagCount())
+	if (index < freyjaGetCount(FREYJA_BONE))
 	{
 		mBoneIndex = index;
 		freyja_print("Bone Tag[%i]", getCurrentBone());
@@ -297,7 +291,7 @@ void FreyjaModel::setCurrentBone(unsigned int index)
 
 void FreyjaModel::setCurrentTexCoord(unsigned int index)
 {
-	if (index < mEgg->getTexelCount())
+	if (index < freyjaGetCount(FREYJA_TEXCOORD))
 	{
 		mTexCoordIndex = index;
 	}
@@ -306,7 +300,7 @@ void FreyjaModel::setCurrentTexCoord(unsigned int index)
 
 void FreyjaModel::setCurrentVertex(unsigned int index)
 {
-	if (index < mEgg->getVertexCount())
+	if (index < freyjaGetCount(FREYJA_VERTEX))
 	{
 		freyjaCurrentVertex(index);
 		mVertexIndex = index;
@@ -344,9 +338,11 @@ void FreyjaModel::setCurrentTextureIndex(unsigned int index)
 	freyja_print("Texture[%i]", getCurrentTextureIndex());
 }
 
+
+// FIXME: All this 'animation' section is obsolete meshtree type
 void FreyjaModel::setCurrentAnimation(unsigned int index)
 {
-	if (index < mEgg->getAnimationCount())
+	if (index < freyjaGetCount(FREYJA_MESHTREE_FRAME))
 	{
 		mAnimationFrameIndex = index;
 		setCurrentSkeleton(0);
@@ -355,6 +351,7 @@ void FreyjaModel::setCurrentAnimation(unsigned int index)
 					mAnimationFrameIndex, mVertexFrameIndex);
 	}
 }
+
 
 unsigned int FreyjaModel::getAnimationFramesIn(unsigned int animationIndex)
 {
@@ -524,35 +521,40 @@ void FreyjaModel::getSceneTranslation(vec3_t scroll)
 
 
 //// BONES /////////////////////////////////////////
+
 unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 {
-	egg_tag_t *tag;
-	char name[64];
+	int32 boneIndex = freyjaBoneCreate(0);
 
-	tag = mEgg->addTag(x, y, z, flag);
 
-	if (tag->id == 0)
-		snprintf(name, 64, "root");
+	if (boneIndex == 0)
+	{
+		freyjaBoneName1s(boneIndex, "root");
+	}
 	else
-		snprintf(name, 64, "bone %i", tag->id);
+	{
+		char name[64];
 
-	setNameBone(tag->id, name);
+		snprintf(name, 64, "bone %i", boneIndex);
+		freyjaBoneName1s(boneIndex, name);
+	}
+
 	updateSkeletalUI();
 
-	return tag->id;
+	return boneIndex;
 }
 
 
 void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
 {
-	mEgg->TagAddMesh(mEgg->getTag(getCurrentBone()), getCurrentMesh());
+	freyjaBoneAddMesh1i(getCurrentBone(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
 
 void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
 {
-	mEgg->TagDelMesh(mEgg->getTag(getCurrentBone()), getCurrentMesh());
+	freyjaBoneRemoveMesh1i(getCurrentBone(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
@@ -569,7 +571,7 @@ void FreyjaModel::selectBone(float xx, float yy)
 
 void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
 {
-	mEgg->connectTag(master, slave);
+	freyjaBoneAddChild1i(master, slave);
 	updateSkeletalUI();
 }
 
@@ -1766,6 +1768,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 }
 
 
+// Move to libfreyja
 void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 {
 	Vector<int32> uvMap, pending, tmp;
