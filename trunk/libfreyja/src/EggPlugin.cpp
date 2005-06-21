@@ -65,7 +65,7 @@ EggPlugin::~EggPlugin()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-long EggPlugin::freyjaGetCount(freyja_object_t type)
+uint32 EggPlugin::freyjaGetCount(freyja_object_t type)
 {
 	switch (type)
 	{
@@ -109,15 +109,15 @@ long EggPlugin::freyjaGetCount(freyja_object_t type)
 		return mTextures.size();
 		break;
 
-	case FREYJA_VERTEX_FRAME:
 	case FREYJA_ANIMATION:
+	case FREYJA_VERTEX_FRAME:		
 	case FREYJA_MATERIAL:
 	case FREYJA_MESHTREE_TAG:
 		return 0;
 		break;
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return 0; // 20050526, Was FREYJA_PLUGIN_ERROR;
 }
 
 

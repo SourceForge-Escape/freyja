@@ -197,7 +197,7 @@ typedef enum {
 	 *        the singleton is up and running.
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetCount(freyja_object_t type);
+	uint32 freyjaGetCount(freyja_object_t type);
 	/*------------------------------------------------------
 	 * Pre  : <type> is valid
 	 * Post : Returns total number of objects of type in 
@@ -420,10 +420,16 @@ typedef enum {
 	int32 freyjaGetModelMeshCount(int32 modelIndex);
 
 	// FREYJA_MESH Accessors
+	char freyjaIsMeshAllocated(int32 meshIndex);
+
 	//int freyjaGetMeshBoundingBox(int32 meshIndex, vec3_t min, vec3_t max);
+
 	int32 freyjaGetMeshFlags(int32 meshIndex);
+
 	int32 freyjaGetMeshPosition(int32 meshIndex, vec3_t xyz);
+
 	char *freyjaGetMeshNameString(int32 meshIndex); // don't alter string
+
 	int32 freyjaGetMeshName1s(int32 meshIndex, int32 lenght, char *name);
 
 	int32 freyjaGetMeshVertexIndex(int32 meshIndex, int32 element);
@@ -458,16 +464,16 @@ typedef enum {
 	int32 freyjaGetMeshVertexGroupIndex(int32 meshIndex, int32 element);
 	int32 freyjaGetMeshVertexGroupCount(int32 meshIndex);
 	int32 freyjaGetMeshVertexFrameIndex(int32 meshIndex, int32 element); // Not Implemented
-int32 freyjaGetMeshVertexFrameCount(int32 meshIndex); // Not Implemented
+	int32 freyjaGetMeshVertexFrameCount(int32 meshIndex); // Not Implemented
 
-// FREYJA_POLYGON Accessors
-int32 freyjaGetPolygonMaterial(int32 polygonIndex);
-int32 freyjaGetPolygonFlags(int32 polygonIndex);
-int32 freyjaGetPolygonEdgeCount(int32 polygonIndex);
-int32 freyjaGetPolygonVertexCount(int32 polygonIndex);
-int32 freyjaGetPolygonTexCoordCount(int32 polygonIndex);
-int32 freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element);
-int32 freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element);
+	// FREYJA_POLYGON Accessors
+	int32 freyjaGetPolygonMaterial(int32 polygonIndex);
+	int32 freyjaGetPolygonFlags(int32 polygonIndex);
+	int32 freyjaGetPolygonEdgeCount(int32 polygonIndex);
+	int32 freyjaGetPolygonVertexCount(int32 polygonIndex);
+	int32 freyjaGetPolygonTexCoordCount(int32 polygonIndex);
+	int32 freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element);
+	int32 freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element);
 
 
 int32 freyjaGetPolygon1u(freyja_object_t type, int32 item, int32 *value);
@@ -648,6 +654,19 @@ void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+
+	////////////////////////////////////////////////////////////////
+	// Bone
+	//
+	////////////////////////////////////////////////////////////////
+
+	int32 freyjaBoneCreate(uint32 skeletonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Creates a new rest bone for skeleton
+	 *        Returns valid Index or -1 on Error
+	 ------------------------------------------------------*/
+
 void freyjaBoneName1s(int32 boneIndex, char *name);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
@@ -659,6 +678,7 @@ void freyjaBoneName1s(int32 boneIndex, char *name);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaBoneRemoveMesh1i(int32 boneIndex, int32 meshIndex);
 void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
@@ -943,9 +963,16 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : Returns the number of Animations being managed
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetAnimationBoneCount(int32 animationIndex);
+	int32 freyjaGetAnimationFrameCount(int32 animationIndex);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
+	 * Post : Returns the number of frames or -1 on error
+	 ------------------------------------------------------*/
+
+	// FIXME: This is still using fused Animation/Skeleton
+	int32 freyjaGetAnimationBoneCount(int32 skeletonIndex);
+	/*------------------------------------------------------
+	 * Pre  : Skeleton <skeletonIndex> exists
 	 * Post : Returns the number of bones or -1 on error
 	 ------------------------------------------------------*/
 
@@ -1294,6 +1321,15 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : All data in model is reset/cleared
 	 ------------------------------------------------------*/
 
+	void freyjaPolygonSplitTexCoords(uint32 meshIndex, uint32 polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : All TexCoords are duplicated, then references to old
+	 *        TexCoords are removed -- this is useful for making a single
+	 *        polymapped texture polygon when all others will remain
+	 *        in a UV Mesh
+	 ------------------------------------------------------*/
+
 	void freyjaModelTransformTexCoord(uint32 modelIndex,
 									uint32 texCoordIndex,
 									freyja_transform_action_t action,
@@ -1606,6 +1642,8 @@ char freyjaModelCopyVertexList(int32 modelIndex,
  * Post : Model's copy buffer is modified to include new mesh duplicate
  *        using the *local <mesh> index and vertex morph <frame>
  ------------------------------------------------------*/
+
+int32 freyjaFindPolygonByVertices(Vector<uint32> vertices);
 
 // FreyjaSkeletalAnimation *freyjaGetAnimation(int32 animationIndex);
 
