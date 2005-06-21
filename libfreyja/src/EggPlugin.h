@@ -138,11 +138,11 @@ public:
 
 	long getPolygonFlags(long polygonIndex);
 
-	long freyjaGetCount(freyja_object_t type);
+	uint32 freyjaGetCount(freyja_object_t type);
 	/*------------------------------------------------------
 	 * Pre  : Type is valid egg plugin enum
 	 * Post : Returns total number of objects of type in model
-	 *        Returns PLUGIN_ERROR on error
+	 *        Returns 0 on invalid type or 'empty state'
 	 *
 	 *-- History ------------------------------------------
 	 *

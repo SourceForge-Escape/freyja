@@ -27,7 +27,6 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <freyja/FreyjaFileReader.h> 
-#include <freyja/EggPlugin.h>
 
 #include "freyja_events.h"
 #include "Texture.h"
@@ -35,24 +34,30 @@
 
 BezierPatch FreyjaModel::gTestPatch;
 
-extern int freyja__spawnCopyModel(Egg *egg);
+extern Egg *freyja__getEggBackend();
 
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 
 
 FreyjaModel::FreyjaModel()
 {
+	/* Search ~/.freyja/plugins/ first */
 	char *pluginDir = freyja_rc_map("plugins/");
-
-
 	freyjaPluginAddDirectory(pluginDir);
+	delete [] pluginDir;
+
 
 	/* Start up freyja backend */
 	freyjaSpawn();
 	freyja__setPrinter(&mPrinter, false);
 
+	/* Hook into old Egg data model, which is deprecated */
+	mEgg = freyja__getEggBackend();
+
+
 	/* Spawn 0th light */
 	freyjaLightCreate();
+
 
 	/* Spawn 0th material */
 	int32 mIndex = freyjaMaterialCreate();
@@ -69,13 +74,8 @@ FreyjaModel::FreyjaModel()
 	freyjaMaterialAmbient(mIndex, rgba);
 	freyjaMaterialShininess(mIndex, 0.0f);
 
-	delete [] pluginDir;
 
-	/* Hook into old Egg data model */
-	mEgg = EggPlugin::mEggPlugin->getEgg();  // This is subject to change
-
-
-	// Mongoose: initalize|reset private data members
+	/* Initalize/reset private data members */
 	clear();
 }
 
@@ -310,8 +310,44 @@ void FreyjaModel::setCurrentVertex(unsigned int index)
 
 void FreyjaModel::setCurrentVertexFrame(unsigned int index)
 {
-	freyja_print("FreyjaModel::getCurrentVertexFrame> Not Implemented %s:%d\n",
+	freyja_print("FreyjaModel::setCurrentVertexFrame> Not Implemented %s:%d\n",
 				 __FILE__, __LINE__);
+}
+
+
+unsigned int FreyjaModel::getAnimationFrameCount(unsigned int index)
+{
+	freyja_print("FreyjaModel::getAnimationFrameCount> Not Implemented %s:%d\n",
+				 __FILE__, __LINE__);
+
+	return 0;
+}
+
+
+void FreyjaModel::setCurrentAnimation(unsigned int index)
+{
+	freyja_print("FreyjaModel::setCurrentAnimation> Not Implemented %s:%d\n",
+				 __FILE__, __LINE__);
+
+	//index;
+}
+
+
+void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
+{
+	freyja_print("FreyjaModel::setCurrentAnimationFrame> Not Implemented %s:%d\n",
+				 __FILE__, __LINE__);
+
+	//index;
+}
+
+
+int FreyjaModel::saveAnimation(char const *filename)
+{
+	freyja_print("FreyjaModel::saveAnimation> Not Implemented %s:%d\n",
+				 __FILE__, __LINE__);
+
+	return -1;
 }
 
 
@@ -336,93 +372,6 @@ void FreyjaModel::setCurrentTextureIndex(unsigned int index)
 {
 	mTextureIndex = index;
 	freyja_print("Texture[%i]", getCurrentTextureIndex());
-}
-
-
-// FIXME: All this 'animation' section is obsolete meshtree type
-void FreyjaModel::setCurrentAnimation(unsigned int index)
-{
-	if (index < freyjaGetCount(FREYJA_MESHTREE_FRAME))
-	{
-		mAnimationFrameIndex = index;
-		setCurrentSkeleton(0);
-
-		freyja_print("Animation[%i] Frame[%i]", 
-					mAnimationFrameIndex, mVertexFrameIndex);
-	}
-}
-
-
-unsigned int FreyjaModel::getAnimationFramesIn(unsigned int animationIndex)
-{
-	egg_animation_t *animation_frame;
-
-
-	animation_frame = mEgg->getAnimation(getCurrentAnimation());
-
-	if (animation_frame && animation_frame->frame.size())
-	{
-		return animation_frame->frame.size();
-	}
-	
-	return 0;
-}
-
-
-void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
-{
-	egg_animation_t *animation_frame;
-
-
-	animation_frame = mEgg->getAnimation(getCurrentAnimation());
-
-	if (animation_frame && animation_frame->frame.size())
-	{
-		if (index >= animation_frame->frame.size())
-		{
-			mVertexFrameIndex = 0;  
-		}
-		else
-		{
-			mVertexFrameIndex = index;
-		}
-		
-		mSkeletalFrameIndex = animation_frame->frame[mVertexFrameIndex];
-	}
-	else
-	{
-		mVertexFrameIndex = 0;
-		mSkeletalFrameIndex = 0;
-	}
-	
-	freyja_print("Animation[%i].frame[%i] = %i", 
-				getCurrentAnimation(), getCurrentAnimationFrame(), 
-				getCurrentSkeleton());
-}
-
-
-void FreyjaModel::deleteAnimationFrame(unsigned int index)
-{
-	egg_animation_t *animation;
-	unsigned int i;
-	int frame_index = -1;
-
-	animation = mEgg->getAnimation(getCurrentAnimation());
-
-	if (animation && animation->frame.size() && index < animation->frame.size())
-	{
-		frame_index = animation->frame[index];
-
-		for (i = animation->frame.begin(); i+1 < animation->frame.end(); ++i)
-		{
-			if (i >= index)
-			{
-				animation->frame.assign(i, i+1);
-			}
-		}
-
-		//FIXME mEgg->deleteBoneFrame(frame_index);
-	}
 }
 
 
@@ -561,12 +510,10 @@ void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
 
 void FreyjaModel::selectBone(float xx, float yy)
 {
-	egg_tag_t *bone;
+	int32 boneIndex = getNearestBoneIndexInPlane(xx, yy, getCurrentPlane());
 
-	bone = getNearestTag(xx, yy, getCurrentPlane());
-
-	if (bone)
-		setCurrentBone(bone->id);
+	if (boneIndex > -1)
+		setCurrentBone(boneIndex);
 }
 
 void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
@@ -594,7 +541,7 @@ void FreyjaModel::VertexBuffer(float xx, float yy)
 
 void FreyjaModel::PolygonSelectVertex(float xx, float yy)
 {
-	static Vector<unsigned int> vertices;
+	static Vector<uint32> vertices;
 
 
 	VertexSelect(xx, yy);
@@ -613,7 +560,7 @@ void FreyjaModel::PolygonSelectVertex(float xx, float yy)
 	{
 		freyja_print("Control> Polygon selected");
 
-		mPolygonIndex = mEgg->selectPolygon(&vertices);
+		mPolygonIndex = freyjaFindPolygonByVertices(vertices);
 		vertices.clear();
 	}
 }
@@ -2712,48 +2659,6 @@ int FreyjaModel::saveModel(const char *filename)
 }
 
 
-int FreyjaModel::saveAnimation(const char *filename)
-{
-	unsigned int l, s, i;
-	int ret;
-	char ext[32];
-
-
-  
-	if (!filename)
-		return -1000;
-
-	l = strlen(filename);
-  
-	for (s = l; s > 0; s--)
-	{
-		if (filename[s] == '.')
-			break;
-	}
-
-	if (s == 0 || (l - s) > 30)
-		return -100;
-
-	s++;
-
-	memset(ext, 0, 32);
-
-	for (i = 0; s < l; s++, i++)
-	{
-		ext[i] = filename[s];
-	}
-
-	ret = freyjaExportModel(filename, "smd");
-
-	if (ret)
-	{
-		freyja_print("Unknown file export extention: '%s', try using '.smd'", 
-					ext);
-		return ret;
-	}
-  
-	return 0;
-}
 
 
 bool FreyjaModel::isCurrentBoneAllocated()
@@ -2765,6 +2670,88 @@ bool FreyjaModel::isCurrentBoneAllocated()
 ////////////////////////////////////////////////////////////
 // Private Accessors
 ////////////////////////////////////////////////////////////
+
+	
+int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
+{
+	egg_tag_t *tag = getNearestTag(x, y, plane);
+
+	if (tag)
+		return tag->id;
+
+	return -1;
+}
+
+
+egg_tag_t *FreyjaModel::getNearestTag(vec_t x, vec_t y, freyja_plane_t plane)
+{
+	egg_tag_t *best = NULL;
+	egg_tag_t *current = NULL;
+	vec_t dist = 0.0;
+	vec_t closest = 99999.0;
+	int xx = 0, yy = 1;
+	unsigned int i;
+
+
+	if (!mEgg->TagList())
+	{
+		return 0x0;
+	}
+
+	Vector <egg_tag_t *> &tags = *(mEgg->TagList());
+	
+
+	if (tags.empty())
+		return NULL;
+
+	// Oh how cheap it is to avoid a looping branch
+	switch (plane)
+	{
+	case PLANE_XY: 
+		xx = 0;
+		yy = 1;
+		break;
+	case PLANE_XZ: 
+		xx = 0;
+		yy = 2;
+		break;
+	case PLANE_ZY: 
+		xx = 2;
+		yy = 1;    
+		break;
+	}
+     
+	for (i = tags.begin(); i < tags.end(); ++i)
+	{
+		current = tags[i];
+
+		if (!current)
+			continue;
+
+		dist = helDist3v((Vector3d(x, y, 0)).mVec,
+							  (Vector3d(current->center[xx],	current->center[yy],	0)).mVec);
+
+		if (!best || dist < closest)
+		{
+			best = current;
+			closest = dist;
+		}
+	}
+
+	return best;
+}
+
+/*	
+int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
+{
+	egg_vertex_t *vertex = getNearestVertex(x, y, plane);
+
+	if (vertex)
+		return vertex->id;
+
+	return -1;
+}
+*/
 
 egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
 										  freyja_plane_t plane)
@@ -2820,65 +2807,6 @@ egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
 		dist = helDist3v(v.mVec, u.mVec);
 
 		// printf("*** dist %f\n", dist);
-
-		if (!best || dist < closest)
-		{
-			best = current;
-			closest = dist;
-		}
-	}
-
-	return best;
-}
-
-
-egg_tag_t *FreyjaModel::getNearestTag(vec_t x, vec_t y, freyja_plane_t plane)
-{
-	egg_tag_t *best = NULL;
-	egg_tag_t *current = NULL;
-	vec_t dist = 0.0;
-	vec_t closest = 99999.0;
-	int xx = 0, yy = 1;
-	unsigned int i;
-
-
-	if (!mEgg->TagList())
-	{
-		return 0x0;
-	}
-
-	Vector <egg_tag_t *> &tags = *(mEgg->TagList());
-	
-
-	if (tags.empty())
-		return NULL;
-
-	// Oh how cheap it is to avoid a looping branch
-	switch (plane)
-	{
-	case PLANE_XY: 
-		xx = 0;
-		yy = 1;
-		break;
-	case PLANE_XZ: 
-		xx = 0;
-		yy = 2;
-		break;
-	case PLANE_ZY: 
-		xx = 2;
-		yy = 1;    
-		break;
-	}
-     
-	for (i = tags.begin(); i < tags.end(); ++i)
-	{
-		current = tags[i];
-
-		if (!current)
-			continue;
-
-		dist = helDist3v((Vector3d(x, y, 0)).mVec,
-							  (Vector3d(current->center[xx],	current->center[yy],	0)).mVec);
 
 		if (!best || dist < closest)
 		{

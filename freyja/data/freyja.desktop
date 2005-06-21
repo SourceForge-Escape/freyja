@@ -1,9 +1,13 @@
 [Desktop Entry]
+Version=1.0
+Encoding=UTF-8
 Name=Freyja 3d Modeler
-Comment=3d modeler for game models
-Exec=Freyja %F
-TryExec=Freyja
+Exec=freyja %F
 Terminal=false
 Type=Application
 Icon=freyja.png
-Categories=Application;Graphics;RasterGraphics;
+Categories=Application;Graphics
+X-GNOME-DocPath=
+Name[en_US]=Freyja 3d Modeler
+GenericName[en_US]=
+Comment[en_US]=3d modeler for game models
