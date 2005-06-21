@@ -79,7 +79,7 @@ public:
 	Vector <index_t> polygonRef;   /* Ids of polygons referencing vertex */
 
 private:
-	long mIndex;
+	int32 mIndex;
 	static Vector<FreyjaVertex *> mGobalMap;
 };
 

@@ -29,6 +29,7 @@
  libfreyja (20050524) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o Updated ChangeLog  ;)
+	o Changes to skeleton creation could affect plugins
 	o Lots of reworking the API/ABI to support iterator and direct
 	  state machine control
 	o Added Material, Texture, Cg Shader data model support

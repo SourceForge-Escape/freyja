@@ -29,6 +29,8 @@
 
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
+	o .desktop update for GNOME 2.10
+	o Refactoring removed EggPlugin exposure
 	o libfreyja aquires lighting, render structure, and action template
 	  from freyja
 	o libfreyja wrapped in C#

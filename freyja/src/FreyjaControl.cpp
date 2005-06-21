@@ -290,7 +290,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eAnimationSlider: // FIXME: Wrapping and bounds 
 		if (value != mModel->getCurrentAnimationFrame())
 		{
-			freyja_event_set_range(event, value, 0, mModel->getAnimationFramesIn(mModel->getCurrentAnimation()));
+			freyja_event_set_range(event, value, 0, mModel->getAnimationFrameCount(mModel->getCurrentAnimation()));
 			mModel->setCurrentAnimationFrame(value);	
 			freyja_event_gl_refresh();
 		}

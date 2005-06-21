@@ -124,7 +124,7 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	unsigned int getAnimationFramesIn(unsigned int animationIndex);
+	unsigned int getAnimationFrameCount(unsigned int animationIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns number of frames in animation
@@ -719,6 +719,12 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
+	int32 getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
+
+	int32 getNearestMeshIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
+
+	int32 getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
+
 	egg_group_t *getNearestGroup(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  :
@@ -742,6 +748,7 @@ private:
 	 * 2001.11.29:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
 
 	egg_vertex_t *getNearestVertex(egg_group_t *group, 
 								   vec_t x, vec_t y, freyja_plane_t plane);
