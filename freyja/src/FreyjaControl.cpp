@@ -1175,6 +1175,11 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
+	case ePolyMapTexturePolygon:
+		freyjaPolygonSplitTexCoords(mModel->getCurrentMesh(),
+									mModel->getCurrentPolygon());
+		break;
+
 	case eScaleUV:
 		freyjaModelTransformTexCoord(0, mModel->getCurrentTexCoord(),
 									fScale, 0.5, 0.5);

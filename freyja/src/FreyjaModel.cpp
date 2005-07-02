@@ -786,31 +786,25 @@ void FreyjaModel::MeshDel()
 }
 
 
-void FreyjaModel::setNameBone(unsigned int bone, const char *name)
+void FreyjaModel::setNameBone(unsigned int boneIndex, const char *name)
 {
-	egg_tag_t *boneA = mEgg->getTag(bone);
-
 	if (getFlags() & fDontUpdateBoneName)
 		return;
 
-	if (boneA && boneA->id == (int)bone && name && name[1])
+	if (freyjaIsBoneAllocated(boneIndex) && name && name[1])
 	{
-		if (strncmp(boneA->name, name, 64) != 0)
-		{
-			strncpy(boneA->name, name, 64);
-			freyja_print("bone[%i].name = '%s'", bone, name);
-			updateSkeletalUI();
-		}
+		freyjaBoneName1s(boneIndex, name);
+		freyja_print("bone[%i].name = '%s'", boneIndex, name);
+		updateSkeletalUI();
 	}
 }
 
-const char *FreyjaModel::getNameBone(unsigned int bone)
-{
-	egg_tag_t *boneA = mEgg->getTag(bone);
 
-	if (boneA)
+const char *FreyjaModel::getNameBone(unsigned int boneIndex)
+{
+	if (freyjaIsBoneAllocated(boneIndex))
 	{
-		return boneA->name;
+		return freyjaGetBoneName1s(boneIndex);
 	}
 
 	return 0x0;
@@ -854,56 +848,66 @@ void FreyjaModel::removeVertexFromBone(unsigned int bone, unsigned int vertex)
 
 void FreyjaModel::moveBoneCenter(float xx, float yy)
 {
-	egg_tag_t *bone;
+	uint32 boneIndex = getCurrentBone();
+	vec3_t xyz;
 
 
-	if (!(bone = mEgg->getTag(getCurrentBone())))
+	if (!freyjaIsBoneAllocated(boneIndex))
 		return;
-  
+
+	freyjaGetBoneTranslation3fv(boneIndex, xyz);
+
 	switch (getCurrentPlane())
 	{
 	case PLANE_XY:
-		bone->center[0] = xx;
-		bone->center[1] = yy;
+		xyz[0] = xx;
+		xyz[1] = yy;
 		break;
+
 	case PLANE_XZ:
-		bone->center[0] = xx;
-		bone->center[2] = yy;
+		xyz[0] = xx;
+		xyz[2] = yy;
 		break;
+
 	case PLANE_ZY: // side
-		bone->center[2] = xx;
-		bone->center[1] = yy;
+		xyz[2] = xx;
+		xyz[1] = yy;
 		break;
 	}
+
+	freyjaBoneTranslate3fv(boneIndex, xyz);
 }
 
 
 
 void FreyjaModel::moveBone(float xx, float yy)
 {
+	uint32 boneIndex = getCurrentBone();
 	vec_t x = 0, y = 0, z = 0;
-	egg_tag_t *bone;
+	vec3_t xyz;
 
 
-	if (!(bone = mEgg->getTag(getCurrentBone())))
+	if (!freyjaIsBoneAllocated(boneIndex))
 		return;
+
+	freyjaGetBoneTranslation3fv(boneIndex, xyz);
 
 	switch (getCurrentPlane())
 	{
 	case PLANE_XY:
-		x = xx - bone->center[0];
-		y = yy - bone->center[1];
+		x = xx - xyz[0];
+		y = yy - xyz[1];
 		z = 0;
 		break;
 	case PLANE_XZ:
-		x = xx - bone->center[0];
+		x = xx - xyz[0];
 		y = 0;
-		z = yy - bone->center[2];
+		z = yy - xyz[2];
 		break;
 	case PLANE_ZY: //side
 		x = 0;
-		y = yy - bone->center[1];
-		z = xx - bone->center[2];
+		y = yy - xyz[1];
+		z = xx - xyz[2];
 		break;
 	}
   
@@ -1096,22 +1100,24 @@ void FreyjaModel::selectPatchControlPoint(Vector3d xyz)
 
 void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
 {
-	Vector3d v;
-	egg_tag_t *bone;
+	uint32 boneIndex = getCurrentBone();
+	vec3_t pivot;
+
 
 	switch (type)
 	{
 	case FreyjaModel::TransformBone:
-		if (!(bone = mEgg->getTag(getCurrentBone())))
+		if (!freyjaIsBoneAllocated(boneIndex))
 			return;
 
-		v = Vector3d(bone->center);
-		
-		xyz = xyz - v;
+		freyjaGetBoneTranslation3fv(boneIndex, pivot);
+
+		xyz = xyz - Vector3d(pivot);
 		
 		transform(FreyjaModel::TransformBone, fTranslate, 
 				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
 		break;
+
 
 	default:
 		;
@@ -1880,124 +1886,93 @@ void FreyjaModel::TexelMove(float s, float t)
 
 // FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
 #include <mgtk/mgtk_events.h>
-mgtk_tree_t *generateSkeletalUI(Egg *egg, egg_tag_t *tag, 
-								mgtk_tree_t *bone)
+extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
+extern int gSkelTreeWidgetIndex;
+
+
+mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
+								mgtk_tree_t *tree)
 {
-	egg_tag_t *tagChild;
-	unsigned int i, tagIndex, count;
+	uint32 i, boneChild, count;
 
 
-	if (!tag)
+	if (!freyjaIsBoneAllocated(rootIndex))
 	{
-		freyja_print("!ERROR: NULL skeletal bone_tag!\n");
+		freyja_print("!generateSkeletalUI> ERROR: NULL skeletal bone!\n");
 		return 0x0;
 	}
 
-	if (bone == 0x0)
+	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
+	const char *rootName = freyjaGetBoneName1s(rootIndex);
+	uint32 rootSkelBID = freyjaGetBoneSkeletalBoneIndex(rootIndex);
+
+	if (tree == 0x0)
 	{
-		bone = new mgtk_tree_t;
-		snprintf(bone->label, 64, "root");	
-		bone->parent = 0x0;
+		tree = new mgtk_tree_t;
+		snprintf(tree->label, 64, "root");	
+		tree->parent = 0x0;
 	}
 	else
 	{
-		snprintf(bone->label, 64, "bone%03i", tag->id);
+		snprintf(tree->label, 64, "bone%03i", rootSkelBID);
 	}
 
-	if (tag->name[0])
+	if (rootName[0])
 	{
-		snprintf(bone->label, 64, "%s", tag->name);
+		snprintf(tree->label, 64, "%s", rootName);
 	}
 
-	bone->id = tag->id;
-	bone->numChildren = tag->slave.size();
-	bone->children = 0x0;
+	tree->id = rootIndex;
+	tree->numChildren = rootChildCount;
+	tree->children = 0x0;
 
 #ifdef DEBUG_BONE_LOAD
-	printf("-- %s : %i/%i children\n", 
-		   bone->label, bone->numChildren, tag->slave.size());
+	printf("-- %s : %i/%i children\n",  
+		   tree->label, tree->numChildren, rootChildCount);
 #endif
 
-	if (bone->numChildren == 0)
-		return bone->parent;
+	if (tree->numChildren == 0)
+		return tree->parent;
 
-	bone->children = new mgtk_tree_t[bone->numChildren+1];
+	tree->children = new mgtk_tree_t[tree->numChildren+1];
 
-	for (count = 0, i = tag->slave.begin(); i < tag->slave.end(); ++i)
+	for (count = 0, i = 0; i < rootChildCount; ++i)
 	{
-		tagIndex = tag->slave[i];
-		tagChild = egg->getTag(tagIndex);
+		boneChild = freyjaGetBoneChild(rootIndex, i);
 
-		if (tagChild)
+		if (freyjaIsBoneAllocated(boneChild))
 		{
-			bone->children[count].parent = bone;
-
-#ifdef DEBUG_BONE_LOAD
-			printf("   -- parent %i <-- child %i\n", bone->id, tagIndex);
-#endif
-			generateSkeletalUI(egg, tagChild, &bone->children[count++]);
+			tree->children[count].parent = tree;
+			generateSkeletalUI(skelIndex, boneChild, &tree->children[count++]);
 		}
 	}
 
-	return (bone->parent) ? bone->parent : bone;
+	return (tree->parent) ? tree->parent : tree;
 }
 
 
-void testBone(mgtk_tree_t *bone, unsigned int space)
+void updateSkeletonUI(uint32 skelIndex)
 {
-	unsigned int i;
+	mgtk_tree_t *tree;
 
-	for (i = 0; i < space; ++i)
-	{
-		freyja_print(" ");
-	}
+	tree = generateSkeletalUI(skelIndex, 
+							  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
 
-	freyja_print("+ T_BONE %d\n", bone->id);
-
-	for (i = 0; i < bone->numChildren; ++i)
-	{
-		testBone(&bone->children[i], space+1);
-	}
+	mgtk_event_update_tree(gSkelTreeWidgetIndex, tree);
 }
 
 
-// FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
-void updateSkeletonUI(Egg *egg)
-{
-	mgtk_tree_t *bone;
-	unsigned int i, j;
-
-	bone = generateSkeletalUI(egg, egg->getTag(0), 0x0);
-
-	for (i = 0; i < egg->getTagCount(); ++i)
-	{
-#ifdef DEBUG_BONE_LOAD
-		freyja_print("TAG %d :: ", i);
-#endif
-		egg_tag_t *tag = egg->getTag(i);
-
-		for (j = tag->slave.begin(); j < tag->slave.end(); ++j)
-		{
-#ifdef DEBUG_BONE_LOAD
-			freyja_print("%d ", tag->slave[j]);
-#endif
-		}
-#ifdef DEBUG_BONE_LOAD
-		freyja_print("\n");
-#endif
-	}
-
-	// testBone(bone, 0);
-	extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
-	extern int gSkelTreeWidgetIndex;
-	mgtk_event_update_tree(gSkelTreeWidgetIndex, bone);
+uint32 getCurrentSkeleton()
+{ 
+	return 0; // only 1 allowed in editor atm
 }
 
 
 void FreyjaModel::updateSkeletalUI()
 {
-	updateSkeletonUI(mEgg);
+	updateSkeletonUI(getCurrentSkeleton());
 }
+
 
 //FIXME temp
 #include <GL/gl.h>
@@ -2671,75 +2646,70 @@ bool FreyjaModel::isCurrentBoneAllocated()
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-	
+
+/* Note this doesn't handle transformed bones! */
 int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
 {
-	egg_tag_t *tag = getNearestTag(x, y, plane);
-
-	if (tag)
-		return tag->id;
-
-	return -1;
-}
-
-
-egg_tag_t *FreyjaModel::getNearestTag(vec_t x, vec_t y, freyja_plane_t plane)
-{
-	egg_tag_t *best = NULL;
-	egg_tag_t *current = NULL;
+	uint32 i, count, best, current, skeleton;
+	uint32 xx = 0, yy = 1;
 	vec_t dist = 0.0;
 	vec_t closest = 99999.0;
-	int xx = 0, yy = 1;
-	unsigned int i;
+	vec3_t xyz;
 
 
-	if (!mEgg->TagList())
+	skeleton = getCurrentSkeleton();
+	count = freyjaGetSkeletonBoneCount(skeleton);
+
+	if (count == 0)
 	{
 		return 0x0;
 	}
 
-	Vector <egg_tag_t *> &tags = *(mEgg->TagList());
-	
 
-	if (tags.empty())
-		return NULL;
-
-	// Oh how cheap it is to avoid a looping branch
+	/* Avoid an extra looping branch operation by wasting stack space! */
 	switch (plane)
 	{
 	case PLANE_XY: 
 		xx = 0;
 		yy = 1;
 		break;
-	case PLANE_XZ: 
+
+	case PLANE_XZ:
 		xx = 0;
 		yy = 2;
 		break;
+
 	case PLANE_ZY: 
 		xx = 2;
 		yy = 1;    
 		break;
 	}
-     
-	for (i = tags.begin(); i < tags.end(); ++i)
-	{
-		current = tags[i];
 
-		if (!current)
+	for (i = 0; i < count; ++i)
+	{
+		current = freyjaGetSkeletonBoneIndex(skeleton, i);
+
+		if (!freyjaIsBoneAllocated(current))
 			continue;
 
-		dist = helDist3v((Vector3d(x, y, 0)).mVec,
-							  (Vector3d(current->center[xx],	current->center[yy],	0)).mVec);
+		freyjaGetBoneTranslation3fv(current, xyz);
 
-		if (!best || dist < closest)
+		dist = helDist3v((Vector3d(x, y, 0)).mVec,
+						 (Vector3d(xyz[xx], xyz[yy], 0)).mVec);
+
+		if (i == 0 || dist < closest)
 		{
 			best = current;
 			closest = dist;
 		}
 	}
 
+	if (!freyjaIsBoneAllocated(best))
+		return -1;
+
 	return best;
 }
+
 
 /*	
 int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
@@ -2752,6 +2722,7 @@ int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t
 	return -1;
 }
 */
+
 
 egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
 										  freyja_plane_t plane)

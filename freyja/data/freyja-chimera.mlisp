@@ -435,6 +435,7 @@
 							(button "Set texture" eMode eSetPolygonTexture)
 							(button "Generate UVMap" eMode eTmpUVMapOn)
 							(button "Clear UVMap" eMode eTmpUVMapOff)
+							(button "PolyMap"	eMode	ePolyMapTexturePolygon)
 							(button "Mirror X" eMode eMirrorUV_X)
 							(button "Mirror Y" eMode eMirrorUV_Y))))
 
