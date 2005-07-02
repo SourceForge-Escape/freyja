@@ -30,6 +30,9 @@
 #include "hel/math.h"
 #include "hel/Vector3d.h"
 
+
+// class ParticleMass : public Particle
+
 class Mass
 {
  public:

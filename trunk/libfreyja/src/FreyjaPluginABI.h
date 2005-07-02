@@ -340,8 +340,12 @@ typedef enum {
 	// FREYJA_BONE Accessors //////////////////////////////////////////////
 
 	int32 freyjaGetSkeletonBoneCount(int32 skeletonIndex);
+
 	int32 freyjaGetSkeletonBoneIndex(int32 skeletonIndex, int32 element);
 
+	uint32 freyjaGetSkeletonRootIndex(uint32 skeletonIndex);
+
+	const char *freyjaGetBoneName1s(int32 boneIndex);
 	int32 freyjaGetBoneName(int32 boneIndex, unsigned int size, char *name);
 	/*------------------------------------------------------
 	 * Pre  : <name> must be allocated to <size> width
@@ -372,11 +376,29 @@ typedef enum {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetBoneTranslation3fv(int32 index, vec3_t xyz);
+	int32 freyjaGetBoneTranslation3fv(int32 boneIndex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s position
 	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetBoneSkeletalBoneIndex(int32 boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns local skeletal index of this bone
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetBoneChild(int32 boneIndex, uint32 element);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Iterator for bone children
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetBoneChildCount(int32 boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Count of bone children
 	 ------------------------------------------------------*/
 
 
@@ -667,7 +689,7 @@ void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex);
 	 *        Returns valid Index or -1 on Error
 	 ------------------------------------------------------*/
 
-void freyjaBoneName1s(int32 boneIndex, char *name);
+void freyjaBoneName1s(int32 boneIndex, const char *name);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
  * Post : Set human readable bone name

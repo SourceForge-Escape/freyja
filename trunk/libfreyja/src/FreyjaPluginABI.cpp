@@ -2965,7 +2965,8 @@ void freyja__GetDifferenceOfPolygonReferences(int32 vertexA, int32 vertexB,
 
 void freyjaPolygonSplitTexCoords(uint32 meshIndex, uint32 polygonIndex)
 {	
-	int32 polygonCount, vertexCount, vertexIndex, texcoordIndex, i;
+	int32 polygonCount, vertexCount, vertexIndex, texcoordCount, texcoordIndex;
+	int32 i;
 	vec2_t uv;
 
 
@@ -2976,15 +2977,47 @@ void freyjaPolygonSplitTexCoords(uint32 meshIndex, uint32 polygonIndex)
 		return;
 
 	vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-	freyjaPolygonTexCoordPurge(polygonIndex);
+	texcoordCount = freyjaGetPolygonTexCoordCount(polygonIndex);
 
-	for (i = 0; i < vertexCount; ++i) 
+	if (texcoordCount < vertexCount)
 	{
-		vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, i);
-		freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+		freyjaPolygonTexCoordPurge(polygonIndex);
+
+		for (i = 0; i < vertexCount; ++i) 
+		{
+			vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, i);
+			freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+			texcoordIndex = freyjaTexCoord2fv(uv);
+			freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
+		}
+	}
+	else
+	{
+		Vector<int32> texcoords;
+
 		
-		texcoordIndex = freyjaTexCoord2fv(uv);
-		freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
+		for (i = 0; i < texcoordCount; ++i) 
+		{
+			texcoordIndex = freyjaGetPolygonTexCoordIndex(polygonIndex, i);
+			freyjaGetTexCoord2fv(texcoordIndex, uv);
+
+			//printf("%i. %f %f\n", texcoordIndex, uv[0], uv[1]);
+			texcoords.pushBack(texcoordIndex);
+		}
+
+		freyjaPolygonTexCoordPurge(polygonIndex);
+
+		for (i = 0; i < texcoordCount; ++i) 
+		{
+			texcoordIndex = texcoords[i];
+			freyjaGetTexCoord2fv(texcoordIndex, uv);
+
+			//printf("%i. %f %f\n", texcoordIndex, uv[0], uv[1]);
+
+			texcoordIndex = freyjaTexCoord2fv(uv);
+			freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
+		}
+		
 	}
 }
 
@@ -4038,7 +4071,20 @@ void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex)
 }
 
 
-void freyjaBoneName1s(int32 boneIndex, char *name)
+const char *freyjaGetBoneName1s(int32 boneIndex)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+
+	if (bone)
+	{
+		return bone->name;
+	}
+
+	return 0x0;
+}
+
+
+void freyjaBoneName1s(int32 boneIndex, const char *name)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
 
@@ -4704,6 +4750,12 @@ int32 freyjaGetSkeletonBoneIndex(int32 skeletonIndex, int32 element)
 }
 
 
+uint32 freyjaGetSkeletonRootIndex(uint32 skeletonIndex)
+{
+	return 0; // egg can only hold one skeleton, and root is always moved to 0
+}
+
+
 int32 freyjaGetBoneName(int32 index, unsigned int size, char *name)
 {
 	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
@@ -4774,9 +4826,48 @@ int32 freyjaGetBoneRotationWXYZ4fv(int32 index, vec4_t wxyz)
 }
 
 
-int32 freyjaGetBoneRotationXYZ3fv(int32 index, vec3_t xyz)
+uint32 freyjaGetBoneSkeletalBoneIndex(int32 boneIndex)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	
+	if (bone)
+	{
+		return bone->id;
+	}
+
+	return 0;
+}
+
+
+uint32 freyjaGetBoneChild(int32 boneIndex, uint32 childIndex)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	
+	if (bone)
+	{
+		return bone->slave[childIndex];
+	}
+
+	return 0;
+}
+
+
+uint32 freyjaGetBoneChildCount(int32 boneIndex)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	
+	if (bone)
+	{
+		return bone->slave.size();
+	}
+
+	return 0;
+}
+
+
+int32 freyjaGetBoneRotationXYZ3fv(int32 boneIndex, vec3_t xyz)
+{
+	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
 	
 	if (bone)
 	{
@@ -4791,11 +4882,11 @@ int32 freyjaGetBoneRotationXYZ3fv(int32 index, vec3_t xyz)
 }
 
 
-int32 freyjaGetBoneTranslation3fv(int32 index, vec3_t xyz)
+int32 freyjaGetBoneTranslation3fv(int32 boneIndex, vec3_t xyz)
 {
 	if (EggPlugin::mEggPlugin)
 	{
-		egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
+		egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
 
 		xyz[0] = bone->center[0];
 		xyz[1] = bone->center[1];

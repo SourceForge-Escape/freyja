@@ -192,6 +192,8 @@ typedef enum {
 	eMoveBone_Y,
 	eMoveBone_Z,
 
+	ePolyMapTexturePolygon,
+
 	eColorMaterialAmbient,
 	eColorMaterialDiffuse,
 	eColorMaterialSpecular,
