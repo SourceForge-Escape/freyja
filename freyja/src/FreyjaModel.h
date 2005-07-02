@@ -720,6 +720,11 @@ private:
 	////////////////////////////////////////////////////////////
 
 	int32 getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : Returns nearest bone to x, y in given plane
+	 *        ( XY, ZY, XZ )
+	 ------------------------------------------------------*/
 
 	int32 getNearestMeshIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
 
@@ -736,19 +741,6 @@ private:
 	 * 2001.11.29:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	egg_tag_t *getNearestTag(vec_t x, vec_t y, freyja_plane_t plane);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Returns nearest tag to x, y in given plane
-	 *        ( XY, ZY, XZ )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.11.29:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 
 	egg_vertex_t *getNearestVertex(egg_group_t *group, 
 								   vec_t x, vec_t y, freyja_plane_t plane);

@@ -399,6 +399,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eZoomOut", eZoomOut);
 	r.RegisterInt("eSelectLight", eSelectLight);
 
+	r.RegisterInt("ePolyMapTexturePolygon", ePolyMapTexturePolygon);
+
 	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
 	r.RegisterInt("eColorMaterialDiffuse", eColorMaterialDiffuse);
 	r.RegisterInt("eColorMaterialSpecular", eColorMaterialSpecular);
