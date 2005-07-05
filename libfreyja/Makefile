@@ -177,7 +177,9 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaSkeleton.o \
 	$(BUILDDIR)/FreyjaTexture.o \
-	$(BUILDDIR)/RenderModel.o 
+	$(BUILDDIR)/RenderModel.o \
+	$(BUILDDIR)/RigidBody.o \
+	$(BUILDDIR)/Skeleton.o
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
