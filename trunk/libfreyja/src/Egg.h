@@ -247,7 +247,14 @@ typedef struct egg_tag_s {
 	vec3_t rot;
 	int parent;  // Ext for 8.12, 20040917 ( not stored to disk )
 
-	// This needs a reference system to tell when no longer in use
+	//int rotationFrames;  // Ext for 9.0 -- never used
+	//vec3_t *rotations;
+
+	//int positionFrames;  // Ext for 9.0 -- never used
+	//vec3_t *positions;
+
+	//int skeleton;  // Ext for 9.0 -- 'boneframe' that owns this -- never used
+	
 } egg_tag_t;
 
 
@@ -1209,6 +1216,7 @@ public:
 	 * Post : Return vertex list
 	 -----------------------------------------*/
 
+	Vector<egg_polygon_t *> &getPolygonVector();
 	Vector<egg_polygon_t *> *PolygonList();
 	/*-----------------------------------------
 	 * Created  : 2000-11-30, Mongoose

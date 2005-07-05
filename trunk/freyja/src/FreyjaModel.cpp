@@ -107,7 +107,7 @@ unsigned int FreyjaModel::getFlags()
 
 void FreyjaModel::clear()
 {
-	mCachedVertex = 0x0;
+	mCachedVertexIndex = -1;
 	mFlags = 0;
 	mEdgeCount = 3;
 	mTextureIndex = 0;
@@ -527,14 +527,14 @@ void FreyjaModel::VertexBuffer(float xx, float yy)
 {
 	VertexSelect(xx, yy);
 
-	if (!mCachedVertex)
+	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
 		freyja_print("Control> refused to use bad vertex in list");
 		mList.clear();
 	}
 	else
 	{
-		mList.pushBack(mCachedVertex->id);
+		mList.pushBack(mCachedVertexIndex);
 	}
 }
 
@@ -546,14 +546,14 @@ void FreyjaModel::PolygonSelectVertex(float xx, float yy)
 
 	VertexSelect(xx, yy);
 
-	if (!mCachedVertex)
+	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
 		vertices.clear();
 		freyja_print("Control> Bad vertex, not selecting polygon");
 	}
 	else
 	{
-		vertices.pushBack(mCachedVertex->id);
+		vertices.pushBack(mCachedVertexIndex);
 	}
 
 	if (vertices.size() == getCurrentPolygonEdgeCount())
@@ -569,24 +569,27 @@ void FreyjaModel::PolygonSelectVertex(float xx, float yy)
 void FreyjaModel::PolygonDelVertex(float xx, float yy)
 {
 	static Vector<unsigned int> vertices;
+	int32 polygonIndex;
 
 	VertexSelect(xx, yy);
 
-	if (!mCachedVertex)
+	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
 		vertices.clear();
 		freyja_print("Control> Bad vertex, not removing polygon");
 	}
 	else
 	{
-		vertices.pushBack(mCachedVertex->id);
+		vertices.pushBack(mCachedVertexIndex);
 	}
 
 	if (vertices.size() == getCurrentPolygonEdgeCount())
 	{
 		freyja_print("Control> Polygon removed");
 
-		mEgg->delPolygon(&vertices);
+		polygonIndex = freyjaFindPolygonByVertices(vertices);
+		freyjaPolygonDelete(polygonIndex);
+
 		vertices.clear();
 	}
 }
@@ -594,59 +597,71 @@ void FreyjaModel::PolygonDelVertex(float xx, float yy)
 
 void FreyjaModel::PolygonAddVertex(float xx, float yy)
 {
-	static Vector<unsigned int> vertices;
-	static Vector<unsigned int> texels;
-	egg_mesh_t *mesh = mEgg->getMesh(getCurrentMesh());
-	egg_vertex_t *vertex;
-	egg_polygon_t *polygon;
-	unsigned int i, polygonId;
+	static Vector<uint32> vertices;
+	static Vector<uint32> texcoords;
+	int32 meshIndex, vertexIndex, polygonIndex;
+	vec3_t pos;
+	vec2_t uv;
+	uint32 i;
 
 
 	VertexSelect(xx, yy);
     
-	if (!mCachedVertex)
+	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
 		vertices.clear();
 		freyja_print("Control> Bad vertex, not building polygon");
 	}
 	else
 	{
-		vertices.pushBack(mCachedVertex->id);
+		vertices.pushBack(mCachedVertexIndex);
 	}
+
+	meshIndex = getCurrentMesh();
 
 	if (vertices.size() == getCurrentPolygonEdgeCount())
 	{
 		freyja_print("Control> New Polygon made");
 
-		// Generate texels and record their ids
+		/* Generate texcoords and record their ids, or set vertex UV */
 		for (i = vertices.begin(); i < vertices.end(); ++i)
 		{
-			vertex = mEgg->getVertex(vertices[i]);
+			vertexIndex = vertices[i];
 
-			if (vertex)
+			if (freyjaIsVertexAllocated(vertexIndex))
 			{
-				// Mongoose 2002.01.18, Generate UV from vertex XYZ
-				freyjaGenerateUVFromXYZ(vertex->pos, &vertex->uv[0], &vertex->uv[1]);
+				/* A cheap planar like projection on XY plane */
+				freyjaGetVertexXYZ3fv(vertexIndex, pos);
+				freyjaGenerateUVFromXYZ(pos, uv+0, uv+1);
+				freyjaVertexTexCoord2fv(vertexIndex, uv);
 			}
 			else
 			{
-				texels.pushBack(mEgg->addTexel(0.5, 0.5));
+				texcoords.pushBack(freyjaTexCoord2f(0.5, 0.5));
 			}
 		}
 
-		polygonId = mEgg->addPolygon(vertices, texels, 0);
+		/* Allocate polygon */
+		polygonIndex = freyjaPolygonCreate();
+		freyjaPolygonSetMaterial1i(polygonIndex, 0);
+		
+		for (i = vertices.begin(); i < vertices.end(); ++i)
+			freyjaPolygonAddVertex1i(polygonIndex, vertices[i]);
 
-		if (polygonId == UINT_MAX)
+		for (i = texcoords.begin(); i < texcoords.end(); ++i)
+			freyjaPolygonAddTexCoord1i(polygonIndex, texcoords[i]);
+
+		/* Is it renderable/valid? */
+		if (freyjaGetPolygonVertexCount(polygonIndex) != vertices.end())
 		{
-			printf("FIXME: %s:%i\n", __FILE__, __LINE__);
+			printf("!FIXME: %s:%i\n", __FILE__, __LINE__);
+			freyjaPolygonDelete(polygonIndex);
 			return;
 		}
 
-		polygon = mEgg->getPolygon(polygonId);
-		mesh->polygon.pushBack(polygon->id);
-		mesh->r_polygon.pushBack(polygon);
+		freyjaMeshAddPolygon(meshIndex, polygonIndex);
 
-		texels.clear();
+		texcoords.clear();
 		vertices.clear();
 	}
 }
@@ -826,23 +841,7 @@ void addVertexToBone(unsigned int bone, unsigned int vertex)
 
 void FreyjaModel::removeVertexFromBone(unsigned int bone, unsigned int vertex)
 {
-	egg_vertex_t *vert = mEgg->getVertex(vertex);
-	egg_weight_t *weight;
-	unsigned int i;
-
-
-	if (vert)
-	{
-		for (i = vert->weights.begin(); i < vert->weights.end(); ++i)
-		{
-			weight = vert->weights[i];
-
-			if (weight && weight->bone == bone)
-			{
-				delete vert->weights[i];  /* Safe to null this out?  */
-			}
-		}
-	}
+	freyjaBoneRemoveVertex(bone, vertex);
 }
 
 
@@ -986,6 +985,8 @@ void FreyjaModel::MeshMoveCenter(float xx, float yy)
 void FreyjaModel::VertexNew(float xx, float yy)
 {
 	egg_group_t *frame;
+	vec3_t pos = {0, 0, 0};
+	vec2_t uv;
 
 
 	if (!(frame = mEgg->getGroup(getCurrentGroup())))
@@ -996,74 +997,68 @@ void FreyjaModel::VertexNew(float xx, float yy)
 
 	switch (getCurrentPlane())
 	{
-	case PLANE_XY:
-		mCachedVertex = mEgg->addVertex(xx, yy, 0.0);
-    
-		if (mCachedVertex)
-			frame->vertex.add(mCachedVertex->id);
+	case PLANE_XY: // Front
+		pos[0] = xx;
+		pos[1] = yy;
 		break;
 
-	case PLANE_XZ:
-		mCachedVertex = mEgg->addVertex(xx, 0.0, yy);
-    
-		if (mCachedVertex)
-			frame->vertex.add(mCachedVertex->id);
+	case PLANE_XZ: // Top
+		pos[0] = xx;
+		pos[2] = yy;
 		break;
 
-	case PLANE_ZY: // side
-		mCachedVertex = mEgg->addVertex(0.0, yy, xx);
-    
-		if (mCachedVertex)
-			frame->vertex.add(mCachedVertex->id);
+	case PLANE_ZY: // Side
+		pos[1] = yy;
+		pos[2] = xx;
 		break;
+
+	default:
+		return;
 	}
 
-	if (mCachedVertex)
+	mCachedVertexIndex = freyjaVertexCreate3fv(pos);
+
+	if (freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
+		frame->vertex.add(mCachedVertexIndex);
+
 		if (mFlags & FL_VERTEX_UV)
 		{
-			freyjaGenerateUVFromXYZ(mCachedVertex->pos, 
-									&mCachedVertex->uv[0],
-									&mCachedVertex->uv[1]);
-			//vertex_uv_gen(mCachedVertex, &u, &v);
-			//mCachedVertex->texel = mEgg->TexelAdd(u, v);
+			freyjaGenerateUVFromXYZ(pos, uv+0, uv+1);
+			freyjaVertexTexCoord2fv(mCachedVertexIndex, uv);
 		}
     
 		freyja_print("Vertex[%i] (%.3f %.3f %.3f), %i, %i", 
-					mCachedVertex->id,
-					mCachedVertex->pos[0],
-					mCachedVertex->pos[1], 
-					mCachedVertex->pos[2],
-					-1,
-					-1);
+					mCachedVertexIndex, pos[0], pos[1], pos[2], -1, -1);
 	}
 }
 
 
 void FreyjaModel::VertexCombine(float xx, float yy)
 {
-	static egg_vertex_t *v0 = NULL;
+	static int32 v0 = -1;
 
   
 	VertexSelect(xx, yy);
 
-	if (!mCachedVertex)
+	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
 		return;
 	}
 
-	if (!v0)
+	if (v0 < 0)
 	{
-		v0 = mCachedVertex;
-		freyja_print("VertexCombine(%i, ?)", mCachedVertex->id);
-	}
-	else if (mCachedVertex != v0)
-	{
-		freyja_print("VertexCombine(%i, %i)", v0->id, mCachedVertex->id);
-		mEgg->combineVertices(v0->id, mCachedVertex->id);
+		freyja_print("VertexCombine(%i, ?)", mCachedVertexIndex);
 
-		mCachedVertex = v0;
-		v0 = NULL;
+		v0 = mCachedVertexIndex;
+	}
+	else if (mCachedVertexIndex != v0)
+	{
+		freyja_print("VertexCombine(%i, %i)", v0, mCachedVertexIndex);
+
+		freyjaVertexCombine(v0, mCachedVertexIndex);
+		mCachedVertexIndex = v0;
+		v0 = -1;
 	}
 }
 
@@ -1204,27 +1199,36 @@ void FreyjaModel::movePatchControlPoint(float xx, float yy)
 
 void FreyjaModel::VertexMove(float xx, float yy)
 {
-	if (!mCachedVertex)
+	vec3_t xyz;
+
+
+	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
 		freyja_print("FreyjaModel::VertexMove> No vertex to move!\n");
 		return;
 	}
 
+	freyjaGetVertexXYZ3fv(mCachedVertexIndex, xyz);
+
 	switch (getCurrentPlane())
 	{
-	case PLANE_XY:
-		mCachedVertex->pos[0] = xx;
-		mCachedVertex->pos[1] = yy;      
+	case PLANE_XY: // front
+		xyz[0] = xx;
+		xyz[1] = yy;      
 		break;
-	case PLANE_XZ:
-		mCachedVertex->pos[0] = xx;
-		mCachedVertex->pos[2] = yy;
+
+	case PLANE_XZ: // top
+		xyz[0] = xx;
+		xyz[2] = yy;
 		break;
+
 	case PLANE_ZY: // side
-		mCachedVertex->pos[2] = xx;               
-		mCachedVertex->pos[1] = yy;
+		xyz[2] = xx;               
+		xyz[1] = yy;
 		break;
 	}
+
+	freyjaVertexXYZ3fv(mCachedVertexIndex, xyz);
 }
 
 
@@ -1243,13 +1247,9 @@ bool FreyjaModel::getDebug()
 
 void FreyjaModel::VertexSelect(float xx, float yy)
 {
-	egg_group_t *frame;
-
-
-	if (!(frame = mEgg->getGroup(getCurrentGroup())))
-		return;
-
-	mCachedVertex = getNearestVertex(frame, xx, yy, getCurrentPlane());
+	/* Mongoose 2005.07.05, 
+	 * Removed frame / group use */
+	mCachedVertexIndex = getNearestVertexIndexInPlane(xx, yy, getCurrentPlane());
 }
 
 
@@ -1406,19 +1406,106 @@ void FreyjaModel::boxSelectionListBuild()
 
 void FreyjaModel::MeshNew()
 {
-	egg_mesh_t *mesh;
-	egg_group_t *grp;
-
-	mesh = mEgg->newMesh();
-	mEgg->addMesh(mesh);
-  
-	grp = mEgg->newGroup();
-	mEgg->addGroup(grp);
-  
-	mesh->group.pushBack(grp->id);
+	int32 meshIndex = freyjaMeshCreate();
+	freyja_print("Mesh[%i] created.", meshIndex);
+}
 
 
-	freyja_print("Mesh[%i] made with group %i", mesh->id, grp->id);
+void FreyjaModel::TexelSelect(float s, float t)
+{
+	Vector3d st = Vector3d(s, t, 0);
+	uint32 i, j, polygonCount, texcoordCount, vertexCount;
+	int32 meshIndex, polygonIndex, materialIndex, texcoordIndex, vertexIndex;
+	int32 bestPolygon = -1;
+	int32 bestTexcoord = -1;
+	int32 bestVertex = -1;
+	vec_t dist = 0.0;
+	vec_t bestDist = 0.0;
+	vec2_t uv;
+
+
+	meshIndex = getCurrentMesh();
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+	for (i = 0; i < polygonCount; ++i)
+	{
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+		texcoordCount = freyjaGetPolygonTexCoordCount(polygonIndex);
+
+		if (vertexCount == 0)
+			continue;
+	
+		materialIndex = freyjaGetPolygonMaterial(polygonIndex);
+
+		// FIXME: Not the best way to pick
+		if (materialIndex < 0 || 
+			materialIndex != (int)getCurrentTextureIndex())
+			continue;
+
+		for (j = 0; j < texcoordCount; ++j)
+		{
+			texcoordIndex = freyjaGetPolygonTexCoordIndex(polygonIndex, j);
+
+			if (!freyjaIsTexCoordAllocated(texcoordIndex))
+				continue;
+
+			freyjaGetTexCoord2fv(texcoordIndex, uv);
+
+			// Mongoose: slight optimization, to avoid init branch  =)
+			dist = helDist3v(st.mVec,
+							 (Vector3d(uv[0], uv[1], 0)).mVec);
+
+			if (dist < bestDist || bestTexcoord == -1)
+			{ 
+				bestPolygon = polygonIndex;
+				bestTexcoord = texcoordIndex;
+				bestDist = dist;
+			}
+		}
+
+		/* Handle UV */
+		if (texcoordCount == 0)
+		{
+			for (j = 0; j < vertexCount; ++j)
+			{
+				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
+				
+				if (!freyjaIsVertexAllocated(vertexIndex))
+					continue;
+				
+				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+
+				// Mongoose: slight optimization, to avoid init branch  =)
+				dist = helDist3v(st.mVec, 
+								 (Vector3d(uv[0], uv[1], 0)).mVec);
+				
+				if (dist < bestDist || bestVertex == -1)
+				{ 
+					bestPolygon = polygonIndex;
+					bestVertex = vertexIndex;
+					bestDist = dist;
+				}
+			}
+		}
+	}
+      
+
+	/* Mongoose: Now we set the new mTexCoordIndex, etc for cursor */
+	if (bestVertex > -1)
+	{
+		mPolygonIndex = bestPolygon;
+		mVertexIndex = bestVertex;
+		return;
+	}
+
+	if (bestTexcoord > -1)
+	{
+		mPolygonIndex = bestPolygon;
+		mTexCoordIndex = bestTexcoord;
+	}
 }
 
 
@@ -1457,11 +1544,10 @@ void FreyjaModel::MeshSelect(float xx, float yy)
 
 void FreyjaModel::VertexDelete()
 {
-	if (mCachedVertex)
+	if (freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
-		// Don't really need to pass id
-		mEgg->delVertex(mCachedVertex->id);  
-		mCachedVertex = NULL;
+		freyjaVertexDelete(mCachedVertexIndex);  
+		mCachedVertexIndex = -1;
 	}
 }
 
@@ -1481,121 +1567,11 @@ void FreyjaModel::TexelCombine(float s, float t)
 	else if ((int)mTexCoordIndex != a)
 	{
 		freyja_print("TexelCombine(%i, %i)", a, mTexCoordIndex);
-		mEgg->combineTexels(a, mTexCoordIndex);
+		freyjaTexCoordCombine(a, mTexCoordIndex);
 		a = -1;
 	}
 }
 
-
-void FreyjaModel::TexelSelect(float s, float t)
-{
-	egg_mesh_t *mesh = mEgg->getMesh(getCurrentMesh());
-	egg_polygon_t *polygon = NULL;
-	egg_polygon_t *best_polygon = NULL;
-	egg_texel_t *texel = NULL;
-	egg_texel_t *best_texel = NULL;
-	egg_vertex_t *best_vertex = NULL;
-	egg_vertex_t *vertex = NULL;
-	vec_t dist = 0.0;
-	vec_t best_dist = 0.0;
-	unsigned int i, j;
-
-
-#ifdef DEBUG_TEXEL
-	printf("s = %f, t = %f\n", s, t);
-#endif
-
-	// Mongoose: Removed 5 layers of scoping from old code ( loops, ew )
-	if (!mesh || mesh->polygon.empty())
-	{
-		freyja_print("No polygons found! Mesh %i [%p]", getCurrentMesh(), mesh);
-		return;
-	}
-
-	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
-	{
-		polygon = mEgg->getPolygon(mesh->polygon[i]);
-
-		if (!polygon)
-			continue;
-
-		// FIXME: Replace with call to shader for texture id
-		//        once shaders are put in engine
-		if (polygon->shader < 0 || 
-			polygon->shader != (int)getCurrentTextureIndex())
-			continue;
-
-		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
-		{
-			texel = mEgg->getTexel(polygon->texel[j]);
-   
-			if (!texel)
-				continue;
-
-			// Mongoose: slight optimization, to avoid init branch  =)
-			dist = helDist3v((Vector3d(s, t, 0)).mVec,
-							 (Vector3d(texel->st[0], texel->st[1], 0)).mVec);
-
-			if (dist < best_dist)
-				best_texel = NULL;
-		
-			if (best_texel == NULL)
-			{ 
-				best_polygon = polygon;
-				best_texel = texel;
-				best_dist = dist;
-
-#ifdef DEBUG_TEXEL
-				printf("New best_texel = %u @ %f\n", mTexCoordIndex, dist);
-#endif
-			}
-		}
-
-		if (polygon->texel.empty())
-		{
-			for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
-			{
-				vertex = mEgg->getVertex(polygon->vertex[j]);
-				
-				if (!vertex)
-					continue;
-				
-				// Mongoose: slight optimization, to avoid init branch  =)
-				dist = helDist3v((Vector3d(s, t, 0)).mVec, 
-								 (Vector3d(vertex->uv[0], vertex->uv[1], 0)).mVec);
-				
-				if (dist < best_dist)
-					best_vertex = NULL;
-				
-				if (best_vertex == NULL)
-				{ 
-					best_polygon = polygon;
-					best_vertex = vertex;
-					best_dist = dist;
-					
-#ifdef DEBUG_TEXEL
-					printf("New best_texel = %u @ %f\n", mVertexIndex, dist);
-#endif
-				}
-			}
-		}
-	}
-      
-	// Mongoose: now we set the new mTexCoordIndex
-
-	if (best_vertex)
-	{
-		mPolygonIndex = best_polygon->id;
-		mVertexIndex = best_vertex->id;
-		return;
-	}
-
-	if (best_texel)
-	{
-		mPolygonIndex = best_polygon->id;
-		mTexCoordIndex = best_texel->id;
-	}
-}
 
 
 // FIXME: replace 'seen' hack with a capture list -> transform
@@ -1884,11 +1860,10 @@ void FreyjaModel::TexelMove(float s, float t)
 }
 
 
-// FIXME updateSkeletonUI rewrite to not use egg then move to freyja_event
+// FIXME Move to freyja_event?
 #include <mgtk/mgtk_events.h>
 extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
 extern int gSkelTreeWidgetIndex;
-
 
 mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
 								mgtk_tree_t *tree)
@@ -1974,17 +1949,23 @@ void FreyjaModel::updateSkeletalUI()
 }
 
 
-//FIXME temp
+/* FIXME Quick hack to fix corruption on svn server by
+ * using bits from my master copy, which was in middle of rewrite */
 #include <GL/gl.h>
 #include <freyja/FreyjaImage.h>
+
 int FreyjaModel::loadMaterial(const char *filename)
 {
+	int32 mIndex;
+
 	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
 
-	//FIXME Quick hack to fix corruption on svn server by refreshing from my master -- which was in middle of rewrite for this
+	// FIXME: There is no fLoadMaterialInSlot
+	if (mFlags & fLoadTextureInSlot)  
+		mIndex = freyjaGetCurrentMaterial();
+	else
+		mIndex = freyjaMaterialCreate();
 
-
-	int32 mIndex = freyjaMaterialCreate();//freyjaGetCurrentMaterial();
 	freyjaCurrentMaterial(mIndex);
 
 
@@ -2711,17 +2692,19 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 }
 
 
-/*	
-int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
+
+int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, 
+												freyja_plane_t plane)
 {
-	egg_vertex_t *vertex = getNearestVertex(x, y, plane);
+	egg_vertex_t *vertex = getNearestVertex(mEgg->getGroup(getCurrentGroup()), 
+											x, y, plane);
 
 	if (vertex)
 		return vertex->id;
 
 	return -1;
 }
-*/
+
 
 
 egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,

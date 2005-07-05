@@ -1242,6 +1242,12 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 }
 
 
+Vector<egg_polygon_t *> &Egg::getPolygonVector()
+{
+	return mPolygons;
+}
+
+
 void Egg::delPolygon(unsigned int polygon)
 {
 	egg_polygon_t *poly = getPolygon(polygon);

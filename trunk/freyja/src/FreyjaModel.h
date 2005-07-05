@@ -755,10 +755,21 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	int32 getCachedVertexIndex()
+	{
+		return mCachedVertexIndex;
+	}
+
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	void setCachedVertexIndex(int32 vertexIndex)
+	{
+		mCachedVertexIndex = vertexIndex;
+	}
+
 
 	/* mEgg, mEggDebug, and mCachedVertex need to go */
 
@@ -766,12 +777,10 @@ private:
 
 	bool mEggDebug;                 /* Egg debugging? on/off */
 
-	egg_vertex_t *mCachedVertex;    /* Current vertex ( cached ) -
-									 * This is the lynchpin and bane
-									 * of this modeler at once
-									 * replacing this with a new
-									 * freyja centric selection system
-									 * is important */
+	int32 mCachedVertexIndex;       /* Current vertexIndex ( cached ) -
+									 * This is the lynchpin of the
+									 * current modeler interface
+									 */
 
 
 	FreyjaModelPrinter mPrinter;    /* Used to reroute logging for backend */
