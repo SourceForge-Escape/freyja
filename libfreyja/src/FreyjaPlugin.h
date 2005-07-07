@@ -64,6 +64,19 @@
 #   endif
 #endif
 
+
+class FreyjaPluginDescEvent
+{
+public:
+
+	char name[64];
+
+	int eventId;
+
+	void *callback();
+};
+
+
 class FreyjaPluginDesc
 {
 public:

@@ -984,14 +984,13 @@ void FreyjaModel::MeshMoveCenter(float xx, float yy)
 
 void FreyjaModel::VertexNew(float xx, float yy)
 {
-	egg_group_t *frame;
 	vec3_t pos = {0, 0, 0};
 	vec2_t uv;
 
 
-	if (!(frame = mEgg->getGroup(getCurrentGroup())))
+	if (freyjaGetMeshVertexGroupCount(getCurrentMesh()) == 0)
 	{
-		freyja_print("FreyjaModel::VertexNew> Point requires Mesh; Try Mesh->New");
+		freyja_print("Point requires Mesh; Try Mesh->New");
 		return;
 	}
 
@@ -1020,7 +1019,8 @@ void FreyjaModel::VertexNew(float xx, float yy)
 
 	if (freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
-		frame->vertex.add(mCachedVertexIndex);
+		freyjaMeshVertexGroupAppendGobalVertex(getCurrentMesh(), 0, 
+											   mCachedVertexIndex);
 
 		if (mFlags & FL_VERTEX_UV)
 		{
@@ -1250,38 +1250,8 @@ void FreyjaModel::VertexSelect(float xx, float yy)
 	/* Mongoose 2005.07.05, 
 	 * Removed frame / group use */
 	mCachedVertexIndex = getNearestVertexIndexInPlane(xx, yy, getCurrentPlane());
-}
 
-
-void FreyjaModel::getMeshBoundingBox(long index, vec3_t min, vec3_t max)
-{
-	egg_group_t *grp = mEgg->getGroup(index);
-
-	if (grp)
-	{
-		min[0] = grp->bbox_min[0];
-		min[1] = grp->bbox_min[1];	
-		min[2] = grp->bbox_min[2];
-
-		max[0] = grp->bbox_max[0];
-		max[1] = grp->bbox_max[1];	
-		max[2] = grp->bbox_max[2];
-	}
-}
-
-
-void FreyjaModel::getMeshVertices(long index, Vector<unsigned int> **list)
-{
-	egg_group_t *grp = mEgg->getGroup(index);
-
-	if (grp)
-	{
-		*list = &(grp->vertex);
-	}
-	else
-	{
-		*list = 0x0;
-	}
+	freyja_print("!Selected %i\n", mCachedVertexIndex);
 }
 
 
@@ -1509,6 +1479,7 @@ void FreyjaModel::TexelSelect(float s, float t)
 }
 
 
+// FIXME: Shouldn't need direct structure for this
 void FreyjaModel::MeshSelect(float xx, float yy)
 {
 	egg_mesh_t *mesh;
@@ -2692,21 +2663,6 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 }
 
 
-
-int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, 
-												freyja_plane_t plane)
-{
-	egg_vertex_t *vertex = getNearestVertex(mEgg->getGroup(getCurrentGroup()), 
-											x, y, plane);
-
-	if (vertex)
-		return vertex->id;
-
-	return -1;
-}
-
-
-
 egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
 										  freyja_plane_t plane)
 {
@@ -2773,61 +2729,73 @@ egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
 }
 
 
-egg_vertex_t *FreyjaModel::getNearestVertex(egg_group_t *group, 
-											vec_t x, vec_t y, freyja_plane_t plane)
+int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y, 
+												freyja_plane_t plane)
 {
+	Vector3d pos;
+	vec3_t xyz;
 	vec_t dist = 0.0;
 	vec_t closest = 0.0;
-	int xx = 0, yy = 1;
-	egg_vertex_t *best = NULL;
-	egg_vertex_t *current = NULL;
-	unsigned int i;
+	int32 best = -1;
+	int32 meshIndex, vertexIndex, xx, yy;
+	uint32 i, count;
 
 
-	if (!mEgg->VertexList())
+	meshIndex = getCurrentMesh();
+	count = freyjaGetMeshVertexGroupVertexCount(meshIndex, 0);
+	//freyjaGetMeshVertexCount(meshIndex);
+
+	if (count == 0)
 	{
-		return 0x0;
+		freyja_print("!Current mesh[%i] empty, so no vertices to search...\n",
+					 meshIndex);
+		return -1;
 	}
 
-	Vector <egg_vertex_t *> &vertices = *(mEgg->VertexList());
-
-	if (vertices.empty() || !group || group->vertex.empty())
-	{
-		return NULL;
-	}
-	
-	// Oh how cheap it is to avoid a branch in loop
+	/* Avoid extra branch in loop by wasting stack space */
 	switch (plane)
 	{
 	case PLANE_XY: 
 		xx = 0;
 		yy = 1;
 		break;
+
 	case PLANE_XZ: 
 		xx = 0;
 		yy = 2;
 		break;
+
 	case PLANE_ZY: 
 		xx = 2;
 		yy = 1;    
 		break;
 	}
-	
-	for (i = group->vertex.begin(); i < group->vertex.end(); ++i)
+
+	// extra
+	pos.mVec[0] = 0;
+	pos.mVec[1] = 0;
+	pos.mVec[2] = 0;
+
+	pos.mVec[xx] = x;
+	pos.mVec[yy] = y;
+
+	for (i = 0; i < count; ++i)
 	{
-		current = vertices[group->vertex[i]];
+		vertexIndex = freyjaGetMeshVertexGroupVertexIndex(meshIndex, 0, i);
+		//vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
 
-		if (!current)
-		{
+		if (!freyjaIsVertexAllocated(vertexIndex))
 			continue;
-		}
 
-		dist = helDist3v((Vector3d(x, y, 0)).mVec,
-							  (Vector3d(current->pos[xx],	current->pos[yy],	0)).mVec);
+		/* FIXME: This doesn't take transformed vertices into account */
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
-		if (!best || dist < closest)
+		dist = helDist3v(pos.mVec,
+						(Vector3d(xyz[xx], xyz[yy], 0)).mVec);
+
+		if (best == -1 || dist < closest)
 		{
-			best = current;
+			best = vertexIndex;
 			closest = dist;
 		}
 	}

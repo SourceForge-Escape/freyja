@@ -1323,11 +1323,12 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 void FreyjaRender::renderModel(RenderModel &model)
 {
-	Vector<unsigned int> *list = 0x0;
+	Vector<unsigned int> *list;
 	RenderMesh rmesh;
 	vec3_t min, max;
 	vec3_t *xyz;
-	unsigned int i, n;
+	int32 meshIndex = mModel->getCurrentMesh();
+	uint32 count, i;
 
 
 	/* Render patch test -- this should be model specific later */ 
@@ -1347,7 +1348,8 @@ void FreyjaRender::renderModel(RenderModel &model)
 	if (mRenderMode & RENDER_BBOX && model.getMeshCount() > 0)
 	{
 		/* Render bounding box */
-		mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
+		freyjaGetMeshFrameBoundingBox(mModel->getCurrentMesh(),
+									  mModel->getCurrentGroup(), min, max);
 		renderBox(min, max);
 	}
 
@@ -1358,17 +1360,17 @@ void FreyjaRender::renderModel(RenderModel &model)
 		//renderBox(min, max);
 
 		/* Render actual vertices */
-		mModel->getMeshVertices(mModel->getCurrentGroup(), &list);
+		count = freyjaGetMeshVertexGroupVertexCount(meshIndex, 0);
 
-		if (list && !list->empty())
+		if (count > 0)
 		{
 			glPointSize(mDefaultPointSize);
 			glColor3fv(mColorVertexHighlight);
 			glBegin(GL_POINTS);
 
-			for (i = list->begin(), n = list->end(); i < n; ++i)
+			for (i = 0; i < count; ++i)
 			{
-				xyz = freyjaGetVertexXYZ((*list)[i]);
+				xyz = freyjaGetVertexXYZ(freyjaGetMeshVertexGroupVertexIndex(meshIndex, 0, i));
 
 				if (xyz)
 				{
@@ -1396,7 +1398,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 		glColor3fv(RED);
 		glBegin(GL_POINTS);
 		 
-		for (i = list->begin(), n = list->end(); i < n; ++i)
+		for (i = list->begin(), count = list->end(); i < count; ++i)
 		{
 			xyz = freyjaGetVertexXYZ((*list)[i]);
 
@@ -1414,7 +1416,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 
 
 	/* Render meshes */
-	for (i = 0, n = model.getMeshCount(); i < n; ++i)
+	for (i = 0, count = model.getMeshCount(); i < count; ++i)
 	{
 		if (model.getMesh(i, rmesh, mModel->getCurrentGroup()))
 			renderMesh(rmesh);
