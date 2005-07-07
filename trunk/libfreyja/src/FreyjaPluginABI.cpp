@@ -50,6 +50,10 @@
 #include "FreyjaMaterial.h"
 
 
+/* Internal / hidden API methods not exported by header */
+Egg *freyja__getEggBackend();
+
+
 /* Until Freyja replaces Egg backend, let these vector pools float here */
 Vector<FreyjaSkeletalAnimation *> gFreyjaAnimations; 
 Vector<FreyjaMetaData *> gFreyjaMetaData; 
@@ -67,8 +71,6 @@ int32 gCurrentFreyjaPlugin = -1;
 long FreyjaPluginDesc::mNextId = 1;
 int32 gFreyjaCurrentVertex = -1;
 int32 gFreyjaCurrentMesh = -1;
-
-Egg *freyja__getEggBackend();
 
 
 int32 freyjaGetCurrentVertex()
@@ -99,13 +101,22 @@ char freyjaIsTexCoordAllocated(uint32 texcoordIndex)
 }
 
 
+char freyjaIsPolygonAllocated(uint32 polygonIndex)
+{
+	Egg *egg = freyja__getEggBackend();
+
+	if (egg && egg->getPolygon(polygonIndex))
+		return 1;
+
+	return 0;
+}
+
+
 char freyjaIsVertexAllocated(uint32 vertexIndex)
 {
-	Egg *egg;
+	Egg *egg = freyja__getEggBackend();
 	egg_vertex_t *vertex;
 	
-
-	egg = freyja__getEggBackend();
 
 	if (!egg || vertexIndex == (uint32)-1) // cheap, but effective
 		return 0;
@@ -120,17 +131,13 @@ char freyjaIsVertexAllocated(uint32 vertexIndex)
 
 char freyjaIsBoneAllocated(uint32 boneIndex)
 {
-	Egg *egg;
-
-
-	egg = freyja__getEggBackend();
+	Egg *egg = freyja__getEggBackend();
 
 	if (egg)
 		return (egg->getTag(boneIndex) != 0x0);
 
 	return 0;
 }
-
 
 
 FreyjaMaterial *freyjaGetMaterialClass(int32 materialIndex)
@@ -3660,7 +3667,7 @@ void freyjaPolygonTexCoordPurge(int32 polygonIndex)
 
 void freyjaMeshUVMapPlanar(int32 meshIndex)
 {
-	Egg *egg;
+	Egg *egg = freyja__getEggBackend();
 	egg_mesh_t *mesh = 0x0;
 	egg_polygon_t *poly;
 	egg_vertex_t *vertex;
@@ -3668,9 +3675,6 @@ void freyjaMeshUVMapPlanar(int32 meshIndex)
 	unsigned int i, j;
 	float u, v;
 
-
-	if (EggPlugin::mEggPlugin)
-		egg = EggPlugin::mEggPlugin->getEgg();
 
 	if (egg)
 		mesh = egg->getMesh(meshIndex);
@@ -3757,17 +3761,11 @@ void freyjaMeshUVMapSpherical(int32 meshIndex)
 // FIXME: Uses Egg
 void freyjaMeshMaterial(uint32 meshIndex, uint32 materialIndex)
 {
-	Egg *egg;
+	Egg *egg = freyja__getEggBackend();
 	egg_mesh_t *mesh;
 	egg_polygon_t *poly;
 	uint32 i;
 	
-
-	if (!EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
-
 	if (!egg)
 		return;
 
@@ -3792,20 +3790,32 @@ void freyjaMeshMaterial(uint32 meshIndex, uint32 materialIndex)
 }
 
 
+uint32 freyjaGetModelDebugLevel(uint32 model)
+{
+	Egg *egg = freyja__getEggBackend();
 
+	if (egg)
+		return egg->getDebugLevel();
+
+	return 0;
+}
+
+
+void freyjaModelDebugLevel(uint32 model, uint32 debugLevel)
+{
+	Egg *egg = freyja__getEggBackend();
+
+	if (egg)
+		egg->setDebugLevel(debugLevel);
+}
 
 
 // FIXME: Uses old egg gobal framing, etc
 void freyjaMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz)
 {
-	//egg_mesh_t *mesh;
+	Egg *egg = freyja__getEggBackend();
 	egg_group_t *grp;
-	Egg *egg;
 
-	if (!EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
 
 	if (egg)
 	{
@@ -3824,14 +3834,9 @@ void freyjaMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz)
 // FIXME: Uses old egg gobal framing, etc
 void freyjaGetMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz)
 {
-	//egg_mesh_t *mesh;
+	Egg *egg = freyja__getEggBackend();
 	egg_group_t *grp;
-	Egg *egg;
 
-	if (!EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
 
 	if (egg)
 	{
@@ -4305,6 +4310,17 @@ void freyjaBoneName1s(int32 boneIndex, const char *name)
 }
 
 
+void freyjaBoneRemoveChild1i(int32 boneIndex, int32 childIndex)
+{
+	Egg *egg = freyja__getEggBackend();
+
+	if (egg)
+	{
+		egg->TagDisconnect(boneIndex, childIndex);
+	}
+}
+
+
 void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex)
 {
 	//egg->connectTag(master, slave);
@@ -4442,6 +4458,50 @@ int32 freyjaIterator(freyja_object_t type, int32 item)
 }
 
 
+int32 freyjaGetTexCoordPolygonRefIndex(int32 texcoordIndex, uint32 element)
+{
+	Egg *egg = freyja__getEggBackend();
+	egg_texel_t *t;
+
+	if (egg)
+	{
+		t = egg->getTexel(texcoordIndex);
+		return t->ref[element];
+	}
+
+	return -1;
+}
+
+
+uint32 freyjaGetTexCoordPolygonRefCount(int32 texcoordIndex)
+{
+	Egg *egg = freyja__getEggBackend();
+	egg_texel_t *t;
+
+	if (egg)
+	{
+		t = egg->getTexel(texcoordIndex);
+		return t->ref.size();
+	}
+
+	return 0;
+}
+
+
+void freyjaTexCoordUV2fv(int32 texcoordIndex, vec2_t uv)
+{
+	Egg *egg = freyja__getEggBackend();
+	egg_texel_t *t;
+
+	if (egg)
+	{
+		t = egg->getTexel(texcoordIndex);
+		t->st[0] = uv[0];
+		t->st[1] = uv[1];
+	}
+}
+
+
 void freyjaGetTexCoord2fv(int32 index, vec2_t uv)
 {
 	if (EggPlugin::mEggPlugin)
@@ -4473,6 +4533,35 @@ vec2_t *freyjaGetTexCoordUV(int32 texcoordIndex)
 		return EggPlugin::mEggPlugin->freyjaGetTexCoordUV(texcoordIndex);
 
 	return 0x0;
+}
+
+int32 freyjaGetVertexPolygonRefIndex(int32 vertexIndex, uint32 element)
+{
+	Egg *egg = freyja__getEggBackend();
+	egg_vertex_t *v;
+
+	if (egg)
+	{
+		v = egg->getVertex(vertexIndex);
+		return v->ref[element];
+	}
+
+	return -1;
+}
+
+
+uint32 freyjaGetVertexPolygonRefCount(int32 vertexIndex)
+{
+	Egg *egg = freyja__getEggBackend();
+	egg_vertex_t *v;
+
+	if (egg)
+	{
+		v = egg->getVertex(vertexIndex);
+		return v->ref.size();
+	}
+
+	return 0;
 }
 
 

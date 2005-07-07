@@ -34,7 +34,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 #define GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 
-#include <freyja/Egg.h>
+#include <freyja/FreyjaPluginABI.h>
+#include <freyja/FreyjaPrinter.h>
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
 
@@ -42,6 +43,8 @@
 #include "BezierPatch.h"
 #include "freyja_events.h"
 
+
+typedef vec_t bbox2_t[3][3];
 
 typedef enum { 
 	
@@ -627,6 +630,8 @@ public:
 	// FIXME: Might be better to nuke these in favor of direct libfreyja ABI
 	/////////////////////////////////////////////////////////////////////////
 
+	int32 getCurrentModel();
+
 	unsigned int newBone(vec_t x, vec_t y, vec_t z, unsigned char flag);
 	void setNameBone(unsigned int bone, const char *name);
 	const char *getNameBone(unsigned int bone);
@@ -751,12 +756,6 @@ private:
 	}
 
 
-	/* mEgg, mEggDebug, and mCachedVertex need to go */
-
-	Egg *mEgg;                      /* The 3d data model */
-
-	bool mEggDebug;                 /* Egg debugging? on/off */
-
 	int32 mCachedVertexIndex;       /* Current vertexIndex ( cached ) -
 									 * This is the lynchpin of the
 									 * current modeler interface
@@ -769,7 +768,7 @@ private:
 
 	unsigned int mFlags;            /* Stores option flags as bitmap */
 
-	bbox_t mSelectBBox;             /* 3d selection box using 2 vertices */
+	bbox2_t mSelectBBox;            /* 3d selection box using 2 vertices */
 
 	freyja_plane_t mCurrentPlane;   /* Which plane view has editing control */
 

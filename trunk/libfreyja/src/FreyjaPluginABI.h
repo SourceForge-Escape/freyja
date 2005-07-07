@@ -45,6 +45,9 @@ extern "C" {
 #define FREYJA_LIST_SIZE        -4
 #define FREYJA_PLUGIN_ERROR     -1
 
+	/* Start doing aliases for API clean up and backwards compatibility*/
+	//#define freyjaGetVertexTexCoord2fv freyjaGetVertexTexCoordUV2fv 
+
 
 typedef enum {
 	INDEXED_8 = 1, 
@@ -224,6 +227,8 @@ typedef enum {
 	char freyjaIsTexCoordAllocated(uint32 texcoordIndex);
 
 	char freyjaIsBoneAllocated(uint32 boneIndex);
+
+	char freyjaIsPolygonAllocated(uint32 polygonIndex);
 
 	void freyjaModelTransform(uint32 modelIndex,
 								freyja_transform_action_t action, 
@@ -407,6 +412,9 @@ typedef enum {
 
 	// FREYJA_TEXCOORD Accessors //////////////////////////////////////////
 
+	int32 freyjaGetTexCoordPolygonRefIndex(int32 texcoordIndex, uint32 element);
+	uint32 freyjaGetTexCoordPolygonRefCount(int32 texcoordIndex);
+
 	void freyjaGetTexCoord2fv(int32 texcoordIndex, vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : texcoord[index] exists
@@ -415,6 +423,9 @@ typedef enum {
 
 
 	// FREYJA_VERTEX Accessors ////////////////////////////////////////////
+
+	int32 freyjaGetVertexPolygonRefIndex(int32 vertexIndex, uint32 element);
+	uint32 freyjaGetVertexPolygonRefCount(int32 vertexIndex);
 
 	void freyjaGetVertexTexCoord2fv(vec2_t uv);
 	void freyjaGetVertexNormal3fv(vec3_t xyz);
@@ -568,6 +579,9 @@ void freyjaPrintMessage(const char *format, ...);
 // Mutator functions to operate on Scene
 ///////////////////////////////////////////////////////////////////////
 
+	uint32 freyjaGetModelDebugLevel(uint32 model);
+	void freyjaModelDebugLevel(uint32 model, uint32 debugLevel);
+
 void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
 
@@ -575,6 +589,8 @@ void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
 
 void freyjaSetTexCoord2f(unsigned int index, vec_t u, vec_t v);
 void freyjaSetTexCoord2fv(unsigned int index, vec2_t uv);
+
+	void freyjaTexCoordUV2fv(int32 texcoordIndex, vec2_t uv);
 
 void freyjaSetVertex3f(unsigned int index, vec_t x, vec_t y, vec_t z);
 	//void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
@@ -738,6 +754,7 @@ void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyjaBoneRemoveChild1i(int32 boneIndex, int32 childIndex);
 void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_BONE);
