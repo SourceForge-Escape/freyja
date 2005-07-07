@@ -712,13 +712,9 @@ private:
 	 ------------------------------------------------------*/
 
 	int32 getNearestMeshIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
-
-
-
-	egg_group_t *getNearestGroup(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  :
-	 * Post : Returns nearest group to x, y in given plane
+	 * Post : Returns nearest mesh to x, y in given plane
 	 *        ( XY, ZY, XZ )
 	 *
 	 *-- History ------------------------------------------
