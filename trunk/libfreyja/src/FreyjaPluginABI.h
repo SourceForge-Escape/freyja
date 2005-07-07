@@ -447,7 +447,8 @@ typedef enum {
 	// FREYJA_MESH Accessors
 	char freyjaIsMeshAllocated(int32 meshIndex);
 
-	//int freyjaGetMeshBoundingBox(int32 meshIndex, vec3_t min, vec3_t max);
+	int32 freyjaGetMeshFrameBoundingBox(int32 meshIndex, 
+										int32 frame, vec3_t min, vec3_t max);
 
 	int32 freyjaGetMeshFlags(int32 meshIndex);
 
@@ -483,6 +484,14 @@ typedef enum {
 	 *
 	 ------------------------------------------------------*/
 	
+
+	// 'free vertices' outside of polygons as well as other 'grouped' vertices
+	void freyjaMeshVertexGroupAppendGobalVertex(int32 meshIndex, int32 element, 
+												int32 vertexIndex);
+	int32 freyjaGetMeshVertexGroupVertexCount(int32 meshIndex, int32 element);
+	int32 freyjaGetMeshVertexGroupVertexIndex(int32 meshIndex, int32 element,
+											  int32 vertexElement);
+
 
 	int32 freyjaGetMeshPolygonIndex(int32 meshIndex, int32 element);
 	int32 freyjaGetMeshPolygonCount(int32 meshIndex);
@@ -1577,6 +1586,12 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaPluginRegisterMenuCallback(int (*)(int menuId, const char *label, int (*)(int event)));
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	
 
 	///////////////////////////////////////////////////////////////////////
 	//  Plugin import/export iteraction

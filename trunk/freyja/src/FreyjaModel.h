@@ -328,21 +328,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void getMeshVertices(long index, Vector<unsigned int> **list);
-	/*------------------------------------------------------
-	 * Pre  : index is query for 'mesh' by index
-	 *
-	 * Post : Returns list of currently 'editable' vertices
-	 *        of that mesh OR Null. 
-	 *
-	 *        This replaces the old Egg mesh -> group export
-	 *        it pulls 'editable' vertices out of given mesh.
-	 *
-	 *        It does this without exposing groups, and makes
-	 *        Egg removable again.
-	 *
-	 ------------------------------------------------------*/
-
 	void getSceneTranslation(vec3_t offset);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -728,7 +713,7 @@ private:
 
 	int32 getNearestMeshIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
 
-	int32 getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
+
 
 	egg_group_t *getNearestGroup(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
@@ -742,8 +727,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	egg_vertex_t *getNearestVertex(egg_group_t *group, 
-								   vec_t x, vec_t y, freyja_plane_t plane);
+	int32 getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : Returns nearest vertex (in group) to x, y in given plane
