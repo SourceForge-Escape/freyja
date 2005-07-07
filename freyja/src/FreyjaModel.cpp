@@ -1479,36 +1479,19 @@ void FreyjaModel::TexelSelect(float s, float t)
 }
 
 
-// FIXME: Shouldn't need direct structure for this
+// FIXME: Shouldn't need direct structure access for this
 void FreyjaModel::MeshSelect(float xx, float yy)
 {
-	egg_mesh_t *mesh;
-	Vector<egg_mesh_t *> *meshlst;
-	egg_group_t *frame;
-	unsigned int i;
+	int32 meshIndex = getNearestMeshIndexInPlane(xx, yy, getCurrentPlane());
 
-	
-	frame = getNearestGroup(xx, yy, getCurrentPlane());
-
-	meshlst = mEgg->MeshList();
-
-	if (!meshlst || !frame)
+	if (meshIndex < 0)
 	{
-		freyja_print("MeshSelect assertion failed #1 %p %p\n", frame, meshlst);
-		return;
+		freyja_print("This model has no meshes\n");
 	}
-
-	for (i = meshlst->begin(); i < meshlst->end(); ++i)
+	else
 	{
-		mesh = (*meshlst)[i];
-    
-		if (mesh && mesh->group.SearchIndex(frame->id) != UINT_MAX)
-		{
-			freyja_print("Selected mesh %u, group %u\n", mesh->id, frame->id);
-			setCurrentGroup(frame->id);
-			setCurrentMesh(mesh->id);
-			return;
-		}
+		setCurrentGroup(freyjaGetMeshVertexGroupIndex(meshIndex, 0));
+		setCurrentMesh(meshIndex);
 	}
 }
 
@@ -2663,64 +2646,66 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 }
 
 
-egg_group_t *FreyjaModel::getNearestGroup(vec_t x, vec_t y,
-										  freyja_plane_t plane)
+int32 getCurrentModel()
 {
-	Vector3d v, u;
-	egg_group_t *best = NULL;
-	egg_group_t *current = NULL;
-	vec_t dist = 0.0;
-	vec_t closest = 9999.0;
+	return 0;  // Egg limit
+}
+
+
+int32 FreyjaModel::getNearestMeshIndexInPlane(vec_t x, vec_t y,
+											  freyja_plane_t plane)
+{
+	Vector3d v = Vector3d(x, y, 0), u;
+	vec_t dist, closest;
 	int xx = 0, yy = 1;
-	unsigned int i;
+	uint32 i, count;
+	int32 best = -1, meshIndex;
+	vec3_t center;
 
 
-	if (!mEgg->GroupList())
+	count = freyjaGetModelMeshCount(getCurrentModel());
+
+	if (count < 1)
 	{
-		return 0x0;
+		return -1;
 	}
 
-	Vector <egg_group_t *> &groups = *(mEgg->GroupList());
-
-	if (groups.empty())
-	{
-		printf("eggNearestGroup> Assertion failed, No groups\n");
-		return NULL;
-	}
-
-	/* Avoid looping branch / switch */
+	/* Avoid additional looping branch using more stack space */
 	switch (plane)
 	{
 	case PLANE_XY: 
 		xx = 0;
 		yy = 1;
 		break;
+
 	case PLANE_XZ: 
 		xx = 0;
 		yy = 2;
 		break;
+
 	case PLANE_ZY: 
 		xx = 2;
 		yy = 1;    
 		break;
 	}
 	
-	for (i = groups.begin(); i < groups.end(); ++i)
+	for (i = 0; i < count; ++i)
 	{
-		current = groups[i];
+		meshIndex = freyjaGetModelMeshIndex(getCurrentModel(), i);
 
-		if (!current)
+		if (!freyjaIsMeshAllocated(meshIndex))
 			continue;
 
-		v = Vector3d(x, y, 0);
-		u = Vector3d(current->center[xx], current->center[yy], 0);
+		//	printf("%i <-- %i\n", meshIndex, i);
+
+		freyjaGetMeshPosition(meshIndex, center);
+
+		u = Vector3d(center[xx], center[yy], 0);
 		dist = helDist3v(v.mVec, u.mVec);
 
-		// printf("*** dist %f\n", dist);
-
-		if (!best || dist < closest)
+		if (best == -1 || dist < closest)
 		{
-			best = current;
+			best = meshIndex;
 			closest = dist;
 		}
 	}
