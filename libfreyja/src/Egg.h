@@ -1193,6 +1193,11 @@ public:
 	 * Post : Transform 'type' is done to entire scene
 	 --------------------------------------------*/
 
+	unsigned int getDebugLevel()
+	{
+		return mDebugLevel;
+	}
+
 
 	////////////////////////////////////////////////////////////
 	// Public, but should be protected Mutators  ;)

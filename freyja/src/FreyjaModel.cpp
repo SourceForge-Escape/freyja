@@ -34,8 +34,6 @@
 
 BezierPatch FreyjaModel::gTestPatch;
 
-extern Egg *freyja__getEggBackend();
-
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 
 
@@ -46,14 +44,9 @@ FreyjaModel::FreyjaModel()
 	freyjaPluginAddDirectory(pluginDir);
 	delete [] pluginDir;
 
-
 	/* Start up freyja backend */
 	freyjaSpawn();
 	freyja__setPrinter(&mPrinter, false);
-
-	/* Hook into old Egg data model, which is deprecated */
-	mEgg = freyja__getEggBackend();
-
 
 	/* Spawn 0th light */
 	freyjaLightCreate();
@@ -764,7 +757,7 @@ void FreyjaModel::cullUsingVertexBuffer()
 
 	for (i = mList.begin(); i < mList.end(); ++i)
 	{
-		mEgg->delVertex(mList[i]);
+		freyjaVertexDelete(mList[i]);
 	}	
 }
 
@@ -797,7 +790,7 @@ void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 void FreyjaModel::MeshDel()
 {
 	freyja_print("Mesh[%u] deleted\n", mMeshIndex);
-	mEgg->delMesh(mMeshIndex);
+	freyjaMeshDelete(mMeshIndex);
 }
 
 
@@ -826,9 +819,9 @@ const char *FreyjaModel::getNameBone(unsigned int boneIndex)
 }
 
 
-void FreyjaModel::disconnectBone(unsigned int master, unsigned int slave)
+void FreyjaModel::disconnectBone(unsigned int parent, unsigned int child)
 {
-	mEgg->TagDisconnect(master, slave);
+	freyjaBoneRemoveChild1i(parent, child); 
 	updateSkeletalUI();
 }
 
@@ -1234,14 +1227,13 @@ void FreyjaModel::VertexMove(float xx, float yy)
 
 void FreyjaModel::setDebug(unsigned int n)
 {
-	mEggDebug = n;
-	mEgg->setDebugLevel(n);
+	freyjaModelDebugLevel(getCurrentModel(), n);
 }
 
  
 bool FreyjaModel::getDebug()
 {
-	return mEggDebug;
+	return freyjaGetModelDebugLevel(getCurrentModel());
 }
 
 
@@ -1527,137 +1519,150 @@ void FreyjaModel::TexelCombine(float s, float t)
 }
 
 
-
 // FIXME: replace 'seen' hack with a capture list -> transform
 void FreyjaModel::UVMapMotion(float s, float t)
 {
-	Vector<long> seen;
-	egg_polygon_t *poly;
-	egg_texel_t *texel = mEgg->getTexel(getCurrentTexCoord());
-	egg_texel_t *tex;
+	Vector<int32> seen;
 	Vector3d u, v;
-	long i, j, k;
+	vec2_t uv;
+	int32 i, j, k, poly, texel, tex, iCount, jCount;
+
 
 	u = Vector3d(s, t, 0);
 
-	if (texel && !mUVMap.empty())
+	texel = getCurrentTexCoord();
+
+	
+	if (freyjaIsTexCoordAllocated(texel) && !mUVMap.empty())
 	{
-		v = Vector3d(texel->st[0], texel->st[1], 0);
+		freyjaGetTexCoord2fv(texel, uv);
+		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
 
-		for (i = mUVMap.begin(); i < (int)mUVMap.end(); ++i)
+		for (i = mUVMap.begin(), iCount = mUVMap.end(); i < iCount; ++i)
 		{
-			poly = mEgg->getPolygon(mUVMap[i]);
+			poly = mUVMap[i];
+			jCount = freyjaGetPolygonTexCoordCount(poly);
 
-			if (poly)
+			for (j = 0; j < jCount; ++j)
 			{
-				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				tex = freyjaGetPolygonTexCoordIndex(poly, j);
+
+				for (k = seen.begin(); k < (int)seen.end(); ++k)
 				{
-					tex = mEgg->getTexel(poly->texel[j]);
-
-					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					if (seen[k] == tex)
 					{
-						if (seen[k] == (int)poly->texel[j])
-						{
-							tex = 0x0;
-							break;
-						}
+						tex = -1;
+						break;
 					}
-
-					if (!tex) 
-						continue;
-
-					tex->st[0] += u.mVec[0];
-					tex->st[1] += u.mVec[1];
-					seen.pushBack(poly->texel[j]);
 				}
+
+				if (tex == -1) 
+					continue;
+
+				freyjaGetTexCoord2fv(tex, uv);
+				uv[0] += u.mVec[0];
+				uv[1] += u.mVec[1];
+				freyjaTexCoordUV2fv(tex, uv);
+
+				seen.pushBack(tex);
 			}
 		}
 
 		return;
 	}
 
+
+	/* Look for polygons sharing this texcoord, start a new uvmap */
 	if (texel)
-	{
-		v = Vector3d(texel->st[0], texel->st[1], 0);
+	{		
+		freyjaGetTexCoord2fv(texel, uv);
+		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
 
-		for (i = texel->ref.begin(); i < (int)texel->ref.end(); ++i)
+		iCount = freyjaGetTexCoordPolygonRefCount(texel);
+
+		for (i = 0; i < iCount; ++i)
 		{
-			poly = mEgg->getPolygon(texel->ref[i]);
+			poly = freyjaGetTexCoordPolygonRefIndex(texel, i);
 
-			if (poly)
+			jCount = freyjaGetPolygonTexCoordCount(poly);
+
+			for (j = 0; j < jCount; ++j)
 			{
-				for (j = poly->texel.begin(); j < (int)poly->texel.end(); ++j)
+				tex = freyjaGetPolygonTexCoordIndex(poly, j);
+
+				for (k = seen.begin(); k < (int)seen.end(); ++k)
 				{
-					tex = mEgg->getTexel(poly->texel[j]);
-
-					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					if (seen[k] == tex)
 					{
-						if (seen[k] == (int)poly->texel[j])
-						{
-							tex = 0x0;
-							break;
-						}
+						tex = -1;
+						break;
 					}
-
-					if (!tex) 
-						continue;
-
-					tex->st[0] += u.mVec[0];
-					tex->st[1] += u.mVec[1];
-					seen.pushBack(poly->texel[j]);
 				}
+
+				if (tex == -1) 
+					continue;
+
+				freyjaGetTexCoord2fv(tex, uv);
+				uv[0] += u.mVec[0];
+				uv[1] += u.mVec[1];
+				freyjaTexCoordUV2fv(tex, uv);
+
+				seen.pushBack(tex);
 			}
 		}
 	}
 	else
 	{
-		egg_vertex_t *vertex = mEgg->getVertex(getCurrentVertex());
-		egg_vertex_t *vert;
+		int32 vertex = getCurrentVertex();
+		int32 vert;
 
-		v = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+		freyjaGetVertexTexCoordUV2fv(vertex, uv);
+
+		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
 
-		for (i = vertex->ref.begin(); i < (int)vertex->ref.end(); ++i)
+		iCount = freyjaGetVertexPolygonRefCount(vertex);
+
+		for (i = 0; i < iCount; ++i)
 		{
-			poly = mEgg->getPolygon(vertex->ref[i]);
+			poly = freyjaGetVertexPolygonRefIndex(vertex, i);
+			jCount = freyjaGetPolygonVertexCount(poly);
 
-			if (poly)
+			for (j = 0; j < jCount; ++j)
 			{
-				for (j = poly->vertex.begin(); j < (int)poly->vertex.end(); ++j)
+				vert = freyjaGetPolygonVertexIndex(poly, j);
+
+				for (k = seen.begin(); k < (int)seen.end(); ++k)
 				{
-					vert = mEgg->getVertex(poly->vertex[j]);
-
-					for (k = seen.begin(); k < (int)seen.end(); ++k)
+					if (seen[k] == vert)
 					{
-						if (seen[k] == (int)poly->vertex[j])
-						{
-							vert = 0x0;
-							break;
-						}
+						vert = -1;
+						break;
 					}
-
-					if (!vert) 
-						continue;
-
-					vert->uv[0] += u.mVec[0];
-					vert->uv[1] += u.mVec[1];
-					seen.pushBack(poly->vertex[j]);
 				}
+
+				if (vert == -1) 
+					continue;
+
+				freyjaGetVertexTexCoordUV2fv(vert, uv);
+				uv[0] += u.mVec[0];
+				uv[1] += u.mVec[1];
+				freyjaVertexTexCoord2fv(vert, uv);
+
+				seen.pushBack(vert);
 			}
 		}
 	}	
 }
 
 
-// Move to libfreyja
+// Move to libfreyja?
 void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 {
 	Vector<int32> uvMap, pending, tmp;
-	egg_polygon_t *poly;
-	egg_texel_t *texel;
-	long i, j, k;
+	int32 poly, poly2, texel, i, j, k, iCount, jCount;
 
 
 	if (seedPolygon == -1)
@@ -1672,7 +1677,7 @@ void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 
 	while (!pending.empty())
 	{
-		poly = mEgg->getPolygon(pending[0]);
+		poly = pending[0];
 
 		//printf("createPolyMappedUVMap> Pending -> %i\n", pending[0]);
 
@@ -1699,23 +1704,26 @@ void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 		//	printf("%i ", pending[k]);
 		//printf("\n");
 
-		if (!poly)
+		if (!freyjaIsPolygonAllocated(poly))
 		{
 			continue;
 		}
 
-		for (i = poly->texel.begin(); i < (int)poly->texel.end(); ++i)
+		iCount = freyjaGetPolygonTexCoordCount(poly);
+
+		for (i = 0; i < iCount; ++i)
 		{
-			texel = mEgg->getTexel(poly->texel[i]);
+			texel = freyjaGetPolygonTexCoordIndex(poly, i);
 
-			if (!texel)
-				continue;
+			jCount = freyjaGetTexCoordPolygonRefCount(texel);
 
-			for (j = texel->ref.begin(); j < (int)texel->ref.end(); ++j)
+			for (j = 0; j < jCount; ++j)
 			{
+				poly2 = freyjaGetTexCoordPolygonRefIndex(texel, j);
+
 				for (k = pending.begin(); k < (int)pending.end(); ++k)
 				{
-					if (pending[k] == (int)texel->ref[j])
+					if (pending[k] == poly2)
 					{
 						k = -1;
 						break;
@@ -1725,7 +1733,7 @@ void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 				if (k == -1)
 					continue;
 
-				pending.pushBack(texel->ref[j]);
+				pending.pushBack(poly2);
 			}
 		}
 
@@ -2646,9 +2654,9 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 }
 
 
-int32 getCurrentModel()
+int32 FreyjaModel::getCurrentModel()
 {
-	return 0;  // Egg limit
+	return 0;  // limit of old backend
 }
 
 
