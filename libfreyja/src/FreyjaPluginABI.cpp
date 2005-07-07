@@ -107,10 +107,12 @@ char freyjaIsVertexAllocated(uint32 vertexIndex)
 
 	egg = freyja__getEggBackend();
 
-	if (!egg)
+	if (!egg || vertexIndex == (uint32)-1) // cheap, but effective
 		return 0;
 
 	vertex = egg->getVertex(vertexIndex);
+
+	//printf("%p <-- %u\n", vertex, vertexIndex);
 
 	return (vertex != 0x0);
 }
@@ -2842,7 +2844,12 @@ int32 freyjaVertexCombine(int32 vertexIndexA, int32 vertexIndexB)
 	Egg *egg = freyja__getEggBackend();
 	
 	if (egg)
+	{
 		egg->combineVertices(vertexIndexA, vertexIndexB);
+		return vertexIndexA;
+	}
+
+	return -1;
 }
 
 
@@ -3939,9 +3946,31 @@ void freyjaMeshPromoteTexcoordsToPloymapping(int32 meshIndex)
 }
 
 
-int freyjaGetMeshBoundingBox(int32 meshIndex, vec3_t min, vec3_t max)
+int32 freyjaGetMeshFrameBoundingBox(int32 meshIndex, int32 frame, 
+									vec3_t min, vec3_t max)
 {
-	//FIXME Not Implemented due to framing usage in current API
+	egg_group_t *grp;
+	Egg *egg = freyja__getEggBackend();
+
+	if (egg)
+	{
+		// Just use old unbound system for Egg 
+		grp = egg->getGroup(frame);//freyjaGetMeshVertexGroupIndex(meshIndex, frame));
+
+		if (grp)
+		{
+			min[0] = grp->bbox_min[0];
+			min[1] = grp->bbox_min[1];
+			min[2] = grp->bbox_min[2];
+
+			max[0] = grp->bbox_max[0];
+			max[1] = grp->bbox_max[1];
+			max[2] = grp->bbox_max[2];
+		}
+
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -4777,10 +4806,10 @@ int32 freyjaGetMeshVertexIndex(int32 meshIndex, int32 element)
 	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
 
 
-	if (mesh && 
+	if (mesh &&
 		element > -1 && element < (long)mesh->vertices.size())
 	{
-		return mesh->vertices[element];
+			return mesh->vertices[element];
 	}
 
 	return -1;
@@ -4793,11 +4822,62 @@ int32 freyjaGetMeshVertexCount(int32 meshIndex)
 
 	if (mesh)
 	{
+		/* FIXME
+		 * This should only be updated when mesh is MUTATED, and not everytime
+		 * it's accessed in this way! */
 		freyja__MeshUpdateMappings(meshIndex); // Setup Egg mesh for export
 		return mesh->vertices.size();
 	}
 
 	return 0;
+}
+
+
+void freyjaMeshVertexGroupAppendGobalVertex(int32 meshIndex, int32 element, 
+											int32 vertexIndex)
+{
+	int32 groupIndex = freyjaGetMeshVertexGroupIndex(meshIndex, element);
+	Egg *egg = freyja__getEggBackend();
+
+	if (egg && groupIndex > -1 && vertexIndex > -1)
+	{
+		egg_group_t *grp = egg->getGroup(groupIndex);
+		grp->vertex.add(vertexIndex); //pushBack(vertexIndex);
+	}
+}
+
+
+int32 freyjaGetMeshVertexGroupVertexCount(int32 meshIndex, int32 element)
+{
+	int32 groupIndex = freyjaGetMeshVertexGroupIndex(meshIndex, element);
+	Egg *egg = freyja__getEggBackend();
+
+	if (egg && groupIndex > -1)
+	{
+		egg_group_t *grp = egg->getGroup(groupIndex);
+		return grp->vertex.size();
+	}
+
+	return 0;
+}
+
+
+int32 freyjaGetMeshVertexGroupVertexIndex(int32 meshIndex, int32 element,
+										  int32 vertexElement)
+{
+	int32 groupIndex = freyjaGetMeshVertexGroupIndex(meshIndex, element);
+	Egg *egg = freyja__getEggBackend();
+
+
+	if (egg && groupIndex > -1)
+	{
+		egg_group_t *grp = egg->getGroup(groupIndex);
+
+		if (vertexElement < (int32)grp->vertex.size() && vertexElement > -1)
+			return grp->vertex[vertexElement];
+	}
+
+	return -1;
 }
 
 
@@ -4825,6 +4905,7 @@ int32 freyjaGetMeshPolygonIndex(int32 meshIndex, int32 element)
 
 	return -1;
 }
+
 
 int32 freyjaGetMeshVertexGroupIndex(int32 meshIndex, int32 element)
 {

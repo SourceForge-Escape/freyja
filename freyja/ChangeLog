@@ -29,6 +29,8 @@
 
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
+	o Lots and lots of refactoring -- some rendering and editing may no
+	  longer be exactly the same
 	o Slot loading materials using fLoadTextureInSlot flag
 	o Dancer update; Bones in freyja refactored from Egg to pure Freyja API
 	o .desktop update for GNOME 2.10
