@@ -879,13 +879,67 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, int32 meshIndex)
 }
 
 
+void freyjaMeshClampTexCoords(int32 meshIndex)
+{
+	uint32 i, item, count;
+	vec2_t uv;
+
+
+	// FIXME: Might have to use gobal texcoords here?
+
+	/* Clamp texcoords */
+	count = freyjaGetMeshTexCoordCount(meshIndex);
+
+	for (i = 0; i < count; ++i)
+	{
+		item = freyjaGetMeshTexCoordIndex(meshIndex, i);
+		freyjaGetTexCoord2fv(item, uv);
+
+		if (uv[0] < 0.0f)
+			uv[0] = 0.0f;
+		else if (uv[0] > 1.0f)
+			uv[0] = 1.0f;
+
+		if (uv[1] < 0.0f)
+			uv[1] = 0.0f;
+		else if (uv[1] > 1.0f)
+			uv[1] = 1.0f;
+		
+		freyjaTexCoordUV2fv(item, uv);
+	}
+
+
+	/* Clamp vertex UVs*/
+	count = freyjaGetMeshVertexCount(meshIndex);
+
+	for (i = 0; i < count; ++i)
+	{
+		item = freyjaGetMeshVertexIndex(meshIndex, i);
+		freyjaGetVertexTexCoordUV2fv(item, uv);
+
+		if (uv[0] < 0.0f)
+			uv[0] = 0.0f;
+		else if (uv[0] > 1.0f)
+			uv[0] = 1.0f;
+
+		if (uv[1] < 0.0f)
+			uv[1] = 0.0f;
+		else if (uv[1] > 1.0f)
+			uv[1] = 1.0f;
+		
+		freyjaVertexTexCoord2fv(item, uv);
+	}
+}
+
+
 int32 freyjaLoadModel(const char *filename)
 {
+	Egg *egg = freyja__getEggBackend();
 	FreyjaFileReader r;
 	freyja_file_header_t header;
 	Vector<long> vertices, texcoords, bones;
 	freyja_file_chunk_t chunk;
-	int32 offset, i, j, index, flags;
+	int32 offset, i, j, index, flags, count;
 	vec4_t wxyz;
 	vec3_t xyz;
 	char buffer[64];
@@ -893,16 +947,14 @@ int32 freyjaLoadModel(const char *filename)
 	
 	/* HACK - This is to load Egg inline like in current freyja,
 	 *        until it's removed and made into purely a plugin */
-	if (EggPlugin::mEggPlugin)
+	if (egg && egg->loadFile((char*)filename) == 0)
 	{
-		Egg *egg = EggPlugin::mEggPlugin->getEgg();
+		count = freyjaGetModelMeshCount(0); // egg is single model
 
-		if (egg && egg->loadFile((char*)filename) == 0)
-		{
-			// FIXME: Should be per mesh / face instead
-			EggPlugin::mEggPlugin->fixTexCoords();
-			return 0;
-		}
+		for (i = 0; i < count; ++i)
+			freyjaMeshClampTexCoords(i);
+
+		return 0;
 	}
 
 	if (freyjaCheckModel((char *)filename) != 0)
@@ -2425,8 +2477,18 @@ void freyjaPrintMessage(const char *format, ...)
 {
 	va_list args;
 	
-	va_start(args, format);
-	EggPlugin::mEggPlugin->freyjaPrintMessage(format, &args);
+	va_start(args, format);	
+
+	if (gPrinter)
+	{
+		gPrinter->messageArgs(format, &args);
+	}
+	else
+	{
+		vfprintf(stdout, format, args);
+		printf("\n");
+	}
+
 	va_end(args);
 }
 
@@ -2435,8 +2497,18 @@ void freyjaPrintError(const char *format, ...)
 {
 	va_list args;
 	
-	va_start(args, format);
-	EggPlugin::mEggPlugin->freyjaPrintError(format, &args);
+	va_start(args, format);	
+
+	if (gPrinter)
+	{
+		gPrinter->errorArgs(format, &args);
+	}
+	else
+	{
+		vfprintf(stderr, format, args);
+		fprintf(stderr, "\n");
+	}
+
 	va_end(args);
 }
 
@@ -2639,11 +2711,12 @@ Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
 
 void freyjaGetVertexPolygonRef1i(int32 vertexIndex, Vector<long> &polygons)
 {
+	Egg *egg = freyja__getEggBackend();
 	polygons.clear();
 
-	if (EggPlugin::mEggPlugin)
+	if (egg)
 	{
-		egg_vertex_t *v = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+		egg_vertex_t *v = egg->getVertex(vertexIndex);
 		unsigned int i;
 
 		if (v && !v->ref.empty())
@@ -2657,11 +2730,12 @@ void freyjaGetVertexPolygonRef1i(int32 vertexIndex, Vector<long> &polygons)
 
 void freyjaGetVertexPolygonRef(Vector<long> &polygons)
 {
+	Egg *egg = freyja__getEggBackend();
 	polygons.clear();
 
-	if (EggPlugin::mEggPlugin)
+	if (egg)
 	{
-		egg_vertex_t *v = EggPlugin::mEggPlugin->getVertex(freyjaGetCurrent(FREYJA_VERTEX));
+		egg_vertex_t *v = egg->getVertex(freyjaGetCurrent(FREYJA_VERTEX));
 		unsigned int i;
 
 		if (v && !v->ref.empty())
@@ -4916,6 +4990,38 @@ int32 freyjaGetMeshVertexCount(int32 meshIndex)
 		 * it's accessed in this way! */
 		freyja__MeshUpdateMappings(meshIndex); // Setup Egg mesh for export
 		return mesh->vertices.size();
+	}
+
+	return 0;
+}
+
+
+int32 freyjaGetMeshTexCoordIndex(int32 meshIndex, int32 element)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+
+	if (mesh &&
+		element > -1 && element < (long)mesh->texcoordsMap.size())
+	{
+			return mesh->texcoordsMap[element];
+	}
+
+	return -1;
+}
+
+
+uint32 freyjaGetMeshTexCoordCount(int32 meshIndex)
+{
+	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+
+	if (mesh)
+	{
+		/* FIXME
+		 * This should only be updated when mesh is MUTATED, and not everytime
+		 * it's accessed in this way! */
+		//freyja__MeshUpdateMappings(meshIndex); // Setup Egg mesh for export
+		return mesh->texcoordsMap.size();
 	}
 
 	return 0;
@@ -7552,8 +7658,7 @@ void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
 		return;
 
 	egg = eggplugin->getEgg();
-	egg->setPrinter(printer);  // hell I want it to segfault if some idiot removed it from it's wrapper -- it's better than a bad state afterward
-	eggplugin->setPrinter(printer);
+	egg->setPrinter(printer);
 
 	if (freyjaManaged)
 	{
