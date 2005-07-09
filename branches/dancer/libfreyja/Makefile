@@ -160,23 +160,22 @@ targets: $(TARGETS)
 
 PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
+	$(BUILDDIR)/ActionManager.o \
 	$(BUILDDIR)/CopyModel.o \
-	$(BUILDDIR)/Egg.o \
-	$(BUILDDIR)/EggPlugin.o \
-	$(BUILDDIR)/FreyjaPluginABI.o \
+	$(BUILDDIR)/PluginABI.o \
 	$(BUILDDIR)/Freyja.o \
-	$(BUILDDIR)/FreyjaPlugin.o \
-	$(BUILDDIR)/FreyjaCamera.o \
-	$(BUILDDIR)/FreyjaPrinter.o \
-	$(BUILDDIR)/FreyjaFileReader.o \
-	$(BUILDDIR)/FreyjaFileWriter.o \
-	$(BUILDDIR)/FreyjaImage.o \
-	$(BUILDDIR)/FreyjaLight.o \
-	$(BUILDDIR)/FreyjaMesh.o \
-	$(BUILDDIR)/FreyjaMaterial.o \
-	$(BUILDDIR)/FreyjaPakReader.o \
-	$(BUILDDIR)/FreyjaSkeleton.o \
-	$(BUILDDIR)/FreyjaTexture.o \
+	$(BUILDDIR)/Plugin.o \
+	$(BUILDDIR)/Camera.o \
+	$(BUILDDIR)/Printer.o \
+	$(BUILDDIR)/FileReader.o \
+	$(BUILDDIR)/FileWriter.o \
+	$(BUILDDIR)/Image.o \
+	$(BUILDDIR)/Light.o \
+	$(BUILDDIR)/Mesh.o \
+	$(BUILDDIR)/Material.o \
+	$(BUILDDIR)/PakReader.o \
+	$(BUILDDIR)/Skeleton.o \
+	$(BUILDDIR)/Texture.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o
