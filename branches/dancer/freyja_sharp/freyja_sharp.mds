@@ -1,0 +1,16 @@
+<Combine name="freyja_sharp" fileversion="2.0">
+  <Configurations>
+    <Configuration name="Debug" ctype="CombineConfiguration">
+      <Entry build="False" name="freyja_sharp" />
+    </Configuration>
+    <Configuration name="Release" ctype="CombineConfiguration">
+      <Entry build="False" name="freyja_sharp" />
+    </Configuration>
+  </Configurations>
+  <StartMode startupentry="freyja_sharp" single="True">
+    <Execute type="None" entry="freyja_sharp" />
+  </StartMode>
+  <Entries>
+    <Entry filename="./freyja_sharp.mdp" />
+  </Entries>
+</Combine>

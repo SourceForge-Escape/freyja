@@ -1,0 +1,7 @@
+
+(setq WOLF 666)
+(setq WAKKA 777)
+
+(setq TEST (+ WOLF WAKKA))
+
+

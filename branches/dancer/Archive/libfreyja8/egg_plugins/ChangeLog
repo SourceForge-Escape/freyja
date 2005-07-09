@@ -1,0 +1,46 @@
+
+ChangeLog
+
+20041210, Mongoose:
+	o MDL ( halflife ) updated with improved skeletal and UV support
+	o OBJ updated with normal parsing support ( no polymapped normals in Egg )
+	o SMD load -> save can't be 100% due to FP math, but doesn't make a damn 
+	o SMD update, compile time mesh(es) export option
+
+
+20041208, Mongoose:
+	o Halflife.test animator demo build done -- based on donated code
+	o SDLUnitTest got old source deps dumped into it and is free standing
+	o New CLI util for model translation and plugin testing in Chimera
+	o OBJ plugin import finally implemented
+	o SMD plugin with import/export
+	o Changelog in Freyja has updates missing here about SMD
+
+
+20040518, Mongoose:
+	o Md3 loader frames taken out, normals back, correct XYZ coord
+
+
+20040422, Mongoose:
+
+	UnReal
+	o Imported Midgard UT texture, mesh, and package support
+
+	GRNModel
+	o Imported Midgard version
+
+	Mdl
+	o Plugin loads both a hexen2 and quake paletted texture
+	o New texture in model loading system loads a
+	o Convert to freyja coordinate space
+	
+	Md2
+	o Convert to freyja coordinate space
+	o Imported Midgard version
+
+	Md3, Md3AnimModel
+	o Still no Md3AnimModel yet plugin sorry
+	o Imported Midgard versions
+	
+	PSKModel
+	o Fixed material id load bug

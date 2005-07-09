@@ -1,0 +1,78 @@
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+  File     : TODO  ( Last Update: 2004.11.01 )
+  Author   : Terry 'Mongoose' Hendrix II
+  Project  : freyja
+
+ =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+
+
+ TODO
+
+ General
+	o Editor plugins in freyja using freyja_append_eventid, event system, and freyja_append_item_to_menu
+	o Keyframe editor
+	o Merge texture / material systems -- let mesh just bind to material id
+	  materials use solid color, texture, multitexture, and/or material data
+	o Polygon winding control ccw/cw/etc
+	o Let users save preferences
+	o Set recent files limit with prefs
+	o Remove tab controlled file menu stuff
+	o Model/Mesh editing with decentralized data structures
+	o Make a command pattern test with colors system
+	o Material plugins, Cg shader test
+	o Finish Freyja editor interactive plugins 
+	o Add free camera editing back
+	o Make sure order doesn't matter where Vector<> is used
+	o Observer and Command patterns
+	o Event logger system Undo / Redo / Macro / Playback
+	o Hard ABI with stricter event control
+
+ libmgtk
+	o Port to C# with gtk# and cocoa# bindings
+	o Tree widgets (tree eAction )
+	o Mlisp doesn't lookup symbols for like "true" if just setq
+	o Milsp wish list: garbage collection, fully featured lisp
+
+ libfreyja
+	o Documentation
+	o Add vertex/polygon list based texcoord mapping methods to ABI
+	o Add subdiv algorithms like catmull-clark, n-patches, etc
+	o Add polymesh CSG back 
+	o Subdivision Loop and Sabin/Doo surfaces
+	o Mesh smoothing
+	o Normal smoothing
+	o Polygon groups
+
+ plugins
+	o Finish Morrowind import plugin (nif4)
+	o Add support for 'nvidia' ASE skel animation (ase)
+	o Finish PSK export (PSKModel)
+	o UTX export (UTPackage)
+
+ Freyja
+	o Make clear texture export option
+	o Remove context sensitive new/open/save go back to old per tab toolbar
+	  it confused the hell out of users
+	o Documentation
+	o Normal map, DOT3, and matrix palette skinning support
+	o glColorMaterial use
+	o Polygon creation from vertex selection should be seperate from creation
+	  by generating vertices to make a polygon
+	o Interactive Tristrip creation tool
+	o Animated textures
+	o Bone name editor / Id picker from tree
+	o Deform skeletal mesh animation with animation blending
+	o Bbox vertex picker for bone grouping
+	o IK solver use for skeletal animation
+	o Ray based pick face
+	o Pak browser for tombraider / UT paks ( Gtk+ list? )
+	o Timer for animation playback and keyframe timing
+	o Skinning system
+	o Point vertex color/paint
+	o Color picker dialog use
+	o DMAP geometery brush interface
+	o GNOME MIME setup script
+	o Perferences, init.mlisp
+	o Recent files / Home dir
+	o Different skyboxes/floors for animation view

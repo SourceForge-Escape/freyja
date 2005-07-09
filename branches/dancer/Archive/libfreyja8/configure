@@ -1,0 +1,80 @@
+#################################################################
+echo > config.lnk
+echo > config.def
+
+#################################################################
+
+echo -n "Checking to see if you have lib3ds installed           "
+
+if [ $ARG1 = "--no-3ds" ]
+then
+    L3DS="DISABLED"
+else
+    if make -f config.mak lib3ds > /dev/null 2> /dev/null
+    then
+	L3DS="YES"
+    else
+	L3DS="NO"
+    fi
+fi
+
+echo [$L3DS]
+
+if [ $L3DS = "YES" ]
+then
+    echo -n "-DLIB_3DS " >> config.def
+    echo -n "-l3ds " >> config.lnk
+else
+    echo "     You need lib3ds for 3d studio model support"
+fi
+
+
+#################################################################
+echo -n "Checking to see if you have libstdc++ installed        "
+
+if make -f config.mak list > /dev/null 2> /dev/null
+then
+    CPP="YES"
+else
+    CPP="NO"
+fi
+    
+echo [$CPP]
+
+if [ $CPP = "YES" ]
+then
+    echo -n "-lstdc++ " >> config.lnk
+else
+    echo "     Please install the C++ lib development kit"
+    echo "     STL is not needed"
+    exit 0
+fi
+
+
+#################################################################
+echo -n "Checking to see if you have libz installed             "
+
+if make -f config.mak zlib > /dev/null 2> /dev/null
+then
+    ZLIB="YES"
+else
+    ZLIB="NO"
+fi
+
+echo [$ZLIB]
+
+if [ $ZLIB = "YES" ]
+then
+    echo -n "-DLIB_Z " >> config.def
+    echo -n "-lz " >> config.lnk
+else
+    echo "     You need zlib-devel for compressed file support"
+fi
+
+#################################################################
+
+echo "-DBUILD_HOST=\"\\\"`uname -s -n -r -m`\\\"\"" >> config.def
+cat config.def > config.cache
+cat config.lnk >> config.cache
+
+rm -f config.def config.lnk
