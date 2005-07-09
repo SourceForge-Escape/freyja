@@ -40,14 +40,15 @@
 
 #include "ActionManager.h"
 #include "CopyModel.h"
-#include "EggPlugin.h" // temp for testing
-#include "FreyjaFileWriter.h"
-#include "FreyjaPluginABI.h"
-#include "Freyja.h"
-#include "FreyjaCamera.h"
-#include "FreyjaLight.h"
-#include "FreyjaSkeleton.h"
-#include "FreyjaMaterial.h"
+#include "FileWriter.h"
+#include "FileReader.h"
+#include "Scene.h"
+#include "Camera.h"
+#include "Light.h"
+#include "Skeleton.h"
+#include "Material.h"
+
+#include "PluginABI.h"
 
 
 /* Internal / hidden API methods not exported by header */
