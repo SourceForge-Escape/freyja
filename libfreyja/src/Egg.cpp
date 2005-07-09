@@ -1012,7 +1012,7 @@ unsigned int Egg::getVertexCount()
 
 egg_vertex_t *Egg::getVertex(unsigned int id)
 {
-	if (mVertices.empty())
+	if (mVertices.empty() || id >= mVertices.size())
 	{
 		return 0x0;
 	}

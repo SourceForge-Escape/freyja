@@ -856,54 +856,6 @@ long EggPlugin::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
 	return FREYJA_PLUGIN_ERROR;
 }
 
-	
-void EggPlugin::freyjaPrintError(const char *format, ...)
-{
-	va_list args;
-	
-	va_start(args, format);
-	freyjaPrintError(format, &args);
-	va_end(args);
-}
-
-
-void EggPlugin::freyjaPrintError(const char *format, va_list *args)
-{
-	if (mPrinter)
-	{
-		mPrinter->errorArgs(format, args);
-	}
-	else
-	{
-		vfprintf(stderr, format, *args);
-		fprintf(stderr, "\n");
-	}
-}
-
-
-void EggPlugin::freyjaPrintMessage(const char *format, ...)
-{
-	va_list args;
-	
-	va_start(args, format);
-	freyjaPrintMessage(format, &args);
-	va_end(args);
-}
-
-
-void EggPlugin::freyjaPrintMessage(const char *format, va_list *args)
-{
-	if (mPrinter)
-	{
-		mPrinter->messageArgs(format, args);
-	}
-	else
-	{
-		vfprintf(stdout, format, *args);
-		printf("\n");
-	}
-}
-
 
 bool EggPlugin::checkModel(const char *filename)
 {
@@ -930,51 +882,6 @@ bool EggPlugin::saveModel(const char *filename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void EggPlugin::fixTexCoords()
-{
-	unsigned int i;
-	egg_texel_t *t;
-	egg_vertex_t *v;
-
-
-	for (i = 0; i < mEgg->getTexelCount(); ++i)
-	{
-		t = mEgg->getTexel(i);
-
-		if (t)
-		{
-			if (t->st[0] < 0.0f)
-				t->st[0] = 0.0f;
-			else if (t->st[0] > 1.0f)
-				t->st[0] = 1.0f;
-
-			if (t->st[1] < 0.0f)
-				t->st[1] = 0.0f;
-			else if (t->st[1] > 1.0f)
-				t->st[1] = 1.0f;
-		}
-	}
-
-	for (i = 0; i < mEgg->getVertexCount(); ++i)
-	{
-		v = mEgg->getVertex(i);
-
-		if (v)
-		{
-			if (v->uv[0] < 0.0f)
-				v->uv[0] = 0.0f;
-			else if (v->uv[0] > 1.0f)
-				v->uv[0] = 1.0f;
-
-			if (v->uv[1] < 0.0f)
-				v->uv[1] = 0.0f;
-			else if (v->uv[1] > 1.0f)
-				v->uv[1] = 1.0f;
-		}
-	}
-}
-
-
 bool EggPlugin::loadModel(const char *filename)
 {
 	if (freyjaCheckModel(filename) == 0)
@@ -990,13 +897,6 @@ bool EggPlugin::loadModel(const char *filename)
 
 	return false;
 }
-
-
-void EggPlugin::setPrinter(FreyjaPrinter *printer)
-{
-	mPrinter = printer;
-}
-
 
 
 void EggPlugin::freyjaBegin(freyja_object_t type)

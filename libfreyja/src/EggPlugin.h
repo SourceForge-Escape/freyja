@@ -48,7 +48,6 @@
 #include <mstl/Vector.h>
 
 #include "FreyjaPluginABI.h"
-#include "FreyjaPrinter.h"
 #include "FreyjaFileReader.h"
 #include "FreyjaPlugin.h"
 #include "Egg.h"
@@ -175,7 +174,6 @@ public:
 	 ------------------------------------------------------*/
 
 	// 'Fast' export for modeler use
-	void fixTexCoords();
 	vec3_t *freyjaGetVertexXYZ(long vertexIndex);
 	vec2_t *freyjaGetVertexUV(long vertexIndex);
 	vec2_t *freyjaGetTexCoordUV(long texcoordIndex);
@@ -278,36 +276,6 @@ public:
 	 *
 	 * 2001.11.18: 
 	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaPrintError(const char *format, ...);
-	virtual void freyjaPrintError(const char *format, va_list *args);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report messages
-	 *
-	 *        First methot makes va_list and passes it
-	 *        to (format, arg) method to print to stdout
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.18:
-	 * Mongoose - Created, split from Egg9 experimental 
-	 ------------------------------------------------------*/
-
-	void freyjaPrintMessage(const char *format, ...);
-	virtual void freyjaPrintMessage(const char *format, va_list *args);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report error messages
-	 *
-	 *        First methot makes va_list and passes it
-	 *        to (format, arg) method to print to stderr
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.18:
-	 * Mongoose - Created, split from Egg9 experimental 
 	 ------------------------------------------------------*/
 
 
@@ -678,8 +646,6 @@ public:
 	 * Mongoose - Created, to replace current texture handler
 	 ------------------------------------------------------*/
 
-	void setPrinter(FreyjaPrinter *printer);
-
 	bool checkModel(const char *filename);
 	bool saveModel(const char *filename);
 	bool loadModel(const char *filename);
@@ -714,8 +680,6 @@ private:
 										 * accumulation modes and etc */
 
 	Egg *mEgg;                          /* Pointer to the modeler backend  */
-
-	FreyjaPrinter *mPrinter;            /* Logging and output system */
 
 	egg_tag_t *mTag;                    /* Current tag/bolt-on and|or bone */
 

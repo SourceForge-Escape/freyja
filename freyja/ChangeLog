@@ -27,8 +27,12 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ FREYJA: ALL THE ROPE YOU WANT OR AT LEAST THOUGHT YOU DID
+
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
+	o Removed some of the EggPlugin use for direct Egg use in backend
+	o Code size and API reduction continues in backend
 	o Lots and lots of refactoring -- some rendering and editing may no
 	  longer be exactly the same
 	o Slot loading materials using fLoadTextureInSlot flag
