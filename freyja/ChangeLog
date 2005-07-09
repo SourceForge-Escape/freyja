@@ -29,6 +29,11 @@
 
  FREYJA: ALL THE ROPE YOU WANT OR AT LEAST THOUGHT YOU DID
 
+ freyja (branches/dancer) "Dancer" Mongoose <mongoose@icculus.org>
+
+	o All new libfreyja API
+
+
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
 	o Removed some of the EggPlugin use for direct Egg use in backend
