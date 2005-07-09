@@ -38,7 +38,7 @@
 
 extern "C" {
 
-#define FREYJA_PLUGIN_VERSION   "Freyja 0.9.1"
+#define FREYJA_PLUGIN_VERSION   "Freyja 0.9.1" // "Freyja 0.10.0"
 #define FREYJA_LIST_RESET       -2
 #define FREYJA_LIST_NEXT        -1
 #define FREYJA_LIST_CURRENT     -3
