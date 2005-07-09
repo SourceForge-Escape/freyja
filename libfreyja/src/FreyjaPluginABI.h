@@ -220,6 +220,7 @@ typedef enum {
 
 
 	int32 freyjaGetCurrentVertex();
+
 	void freyjaCurrentVertex(uint32 vertexIndex);
 
 	char freyjaIsVertexAllocated(uint32 vertexIndex);
@@ -469,6 +470,10 @@ typedef enum {
 
 	int32 freyjaGetMeshName1s(int32 meshIndex, int32 lenght, char *name);
 
+	uint32 freyjaGetMeshTexCoordCount(int32 meshIndex);
+
+	int32 freyjaGetMeshTexCoordIndex(int32 meshIndex, int32 element);
+
 	int32 freyjaGetMeshVertexIndex(int32 meshIndex, int32 element);
 	/*------------------------------------------------------
 	 * Pre  : freyjaGetMeshVertexCount must be called before
@@ -621,7 +626,10 @@ int32 freyjaTexCoord2fv(vec2_t uv);
  * Mongoose - Created
  ------------------------------------------------------*/
 
+	int32 freyjaVertexCreate3fv(vec3_t xyz);
+
 	int32 freyjaVertexCombine(int32 vertexIndexA, int32 vertexIndexB);
+
 	void freyjaVertexDelete(int32 vertexIndex);
 
 void freyjaVertexNormalFlip(int32 index);
@@ -631,7 +639,6 @@ void freyjaVertexNormal3f(int32 index, vec_t nx, vec_t ny, vec_t nz);
 void freyjaVertexNormal3fv(int32 index, vec3_t nxyz);
 int32 freyjaVertex3f(vec_t x, vec_t y, vec_t z);
 int32 freyjaVertexXYZ3fv(int32 vertexIndex, vec3_t xyz);
-int32 freyjaVertexCreate3fv(vec3_t xyz);
 int32 freyjaVertex3fv(vec3_t xyz);
 /*------------------------------------------------------
  * Pre  : freyjaBegin(FREYJA_GROUP);
@@ -832,6 +839,11 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : Mesh is removed from mesh pool
 	 ------------------------------------------------------*/
 
+	void freyjaMeshClampTexCoords(int32 meshIndex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Makes sure all UVs are inside 0,0 - 1,1
+	 ------------------------------------------------------*/
 
 	void freyjaMeshMaterial(uint32 meshIndex, uint32 materialIndex);
 
