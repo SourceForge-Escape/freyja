@@ -145,6 +145,23 @@ public:
 		return mGobalPool.size();
 	}
 
+	uint32 getSerializedSize()
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Size of this class in bytes if serialized 
+	 ------------------------------------------------------*/
+	{
+		return (4 +
+				4 + 1 + 4 + 12 + 12 + 12 +
+				4 + 8 * weights.size() + 
+				4 + 4 * polygonRef.size());
+	}
+
+	uint32 getChunkType()
+	{
+		return mType;
+	}
+
 	static Vertex *getVertex(index_t uid)
 	{
 		if (uid >= getCount() || uid == INDEX_INVALID)
@@ -159,40 +176,29 @@ public:
 	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 	{
-		uint32 i, count, size;
+		uint32 i, count;
 
 
 		/* Header */
-		w.writeInt32U(mType);
+		//w.writeInt32U(mType);  // Handled layer above here
+		//w.writeInt32U(getSerializedSize());
 		w.writeInt32U(mVersion);
 
-		/* Size of the following data */
-		size = (4 + 1 + 4 + 12 + 12 + 12 +
-				4 + 8 * weights.size() + 
-				4 + 4 * polygonRef.size());
-
-		w.writeInt32U(size);
-		
 		/* Data */
 		w.writeInt32U(mUID);
-
 		w.writeInt8U(flags);
-
 		w.writeInt32U(mesh);
-
 		w.writeFloat32(xyz[0]);
 		w.writeFloat32(xyz[1]);
 		w.writeFloat32(xyz[2]);
-
 		w.writeFloat32(normal[0]);
 		w.writeFloat32(normal[1]);
 		w.writeFloat32(normal[2]);
-
 		w.writeFloat32(uvw[0]);
 		w.writeFloat32(uvw[1]);
 		w.writeFloat32(uvw[2]);
 
-		/* Weights */
+		/* Weights data */
 		count = weights.size();
 		w.writeInt32U(count);
 
@@ -210,7 +216,7 @@ public:
 			}
 		}
 
-		/* Polygon references */
+		/* Polygon references data */
 		count = polygonRef.size();
 		w.writeInt32U(count);
 
@@ -238,14 +244,14 @@ public:
 	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 	{
-		uint32 i, count, type, version, size, uid, idx;
+		uint32 i, count, version, idx;
 		vec_t weight;
 
 
 		/* Header */
-		//type = r.readInt32U();  // Checked and read at higher level
-		//version = r.readInt32U();
+		//type = r.readInt32U();  // Handled layer above here
 		//size = r.readInt32U();
+		version = r.readInt32U();
 
 		if (version != mVersion)
 			return false;
@@ -542,8 +548,6 @@ private:
 	Vector<VertexFrame *> frames;       /* Vertex morph frames */
 
 	Vector<UVMap *> uvmaps;             /* UVMaps of this mesh */
-
-	Vector<VertexWeight *> weights;     /* Vertex weights */
 
 	Vector<SmoothingGroup *> groups;    /* Smoothing Groups of this mesh */
 
