@@ -5,7 +5,7 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
- * Object  : FreyjaTexture
+ * Object  : Texture
  * License : No use w/o permission (C) 2005 Mongoose
  * Comments: This is the texture class
  *
@@ -19,14 +19,15 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include "FreyjaTexture.h"
+#include "Texture.h"
 
+using namespace freyja;
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaTexture::FreyjaTexture()
+Texture::Texture()
 {
 	name = 0x0;
 	filename = 0x0;
@@ -34,7 +35,7 @@ FreyjaTexture::FreyjaTexture()
 }
 
 
-FreyjaTexture::~FreyjaTexture()
+Texture::~Texture()
 {
 	if (name)
 		delete [] name;
@@ -51,14 +52,14 @@ FreyjaTexture::~FreyjaTexture()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-uint32 FreyjaTexture::getSerializeSize()
+uint32 Texture::getSerializeSize()
 {
 	// FIXME
 	return 0;
 }
 
 
-bool FreyjaTexture::serialize(FreyjaFileWriter &w)
+bool Texture::serialize(FreyjaFileWriter &w)
 {
 	uint32 length;
 
@@ -97,7 +98,7 @@ bool FreyjaTexture::serialize(FreyjaFileWriter &w)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool FreyjaTexture::serialize(FreyjaFileReader &r)
+bool Texture::serialize(FreyjaFileReader &r)
 {
 	// FIXME
 	return false;
@@ -118,10 +119,10 @@ bool FreyjaTexture::serialize(FreyjaFileReader &r)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_FREYJATEXTURE
-int runFreyjaTextureUnitTest(int argc, char *argv[])
+#ifdef UNIT_TEST_Texture
+int runTextureUnitTest(int argc, char *argv[])
 {
-	FreyjaTexture test;
+	Texture test;
 
 	return 0;
 }
@@ -129,8 +130,8 @@ int runFreyjaTextureUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[FreyjaTexture class test]\n");
+	printf("[Texture class test]\n");
 
-	return runFreyjaTextureUnitTest(argc, argv);
+	return runTextureUnitTest(argc, argv);
 }
 #endif

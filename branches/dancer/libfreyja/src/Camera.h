@@ -50,8 +50,11 @@
 
 #include <mstl/Vector.h>
 
+#define FreyjaCamera Camera
 
-class FreyjaCamera
+namespace freyja {
+
+class Camera
 {
  public:
 
@@ -345,4 +348,5 @@ class FreyjaCamera
 	static unsigned int mCounter;   /* Id system use */
 };
 
+}
 #endif

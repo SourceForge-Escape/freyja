@@ -102,18 +102,21 @@
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
 
-#include "FreyjaCamera.h"
-#include "FreyjaLight.h"
-#include "FreyjaMesh.h"
-#include "FreyjaSkeleton.h"
-#include "FreyjaMaterial.h"
+#include "freyja.h"
+#include "Camera.h"
+#include "Light.h"
+#include "Mesh.h"
+#include "Skeleton.h"
+#include "Material.h"
+#include "Animation.h"
 
+using namespace freyja;
 
-class FreyjaMetaData /* For storing ASCII files as strings, textures, etc */
+class MetaData /* For storing ASCII files as strings, textures, etc */
 {
 public:
 
-	FreyjaMetaData()
+	MetaData()
 	{
 		id = -1;
 		mBoneIndex = -1;
@@ -124,7 +127,7 @@ public:
 		mData = 0x0;
 	}
 
-	~FreyjaMetaData()
+	~MetaData()
 	{
 		if (mData)
 			delete mData;
@@ -149,39 +152,9 @@ public:
 };
 
 
-class FreyjaAnimation
-{
-public:
-
-	void setName(const char *name)
-	{
-		strncpy(mName, name, 64);
-		mName[63] = 0;
-	}
-	
-	long mId;
-
-	char mName[64];
-
-	vec_t mFrameRate;
-
-	vec_t mTime;
-
-	long mStartBone;          /* For animation blending (subsets) use */
-
-	long mBoneCount;
-
-	long mCurrentFrame; // render use mostly
-
-	long mLastFrame;    // render use mostly
-
-	vec_t mLastTime;    // render use mostly
-
-	Vector<FreyjaKeyFrame *> mKeyFrames;  // keyCount / mBoneCount = frames
-};
 
 
-class Freyja3dModel
+class Model
 {
 public:
 
@@ -204,24 +177,24 @@ public:
 };
 
 
-class FreyjaSceneGraph
+class SceneGraph
 {
 public:
 
-	class FreyjaSceneGraphNode
+	class SceneGraphNode
 	{
 	public:
 
-		Vector<FreyjaSceneGraphNode *> mChildren;
+		Vector<SceneGraphNode *> mChildren;
 
 		Vector<long> mModels;
 	};
 
-	FreyjaSceneGraphNode *mRoot; // Thinking about doing a DAG... hhmmm
+	SceneGraphNode *mRoot; // Thinking about doing a DAG... hhmmm
 };
 
 
-class FreyjaScene
+class Scene
 {
 public:
 
@@ -273,7 +246,7 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaScene();
+	Scene();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an Egg object
@@ -284,7 +257,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~FreyjaScene();
+	~Scene();
 	/*------------------------------------------------------
 	 * Pre  : This object is allocated
 	 * Post : Deconstructs the Egg object
@@ -405,25 +378,25 @@ public:
 
 	SceneGraph mModelGraph;
 
-	Vector<Freyja3dModel *> models;         /* Model container */
+	Vector<Model *> models;         /* Model container */
 
-	Vector<FreyjaMaterial *> materials;   /* Material container */
+	Vector<Material *> materials;   /* Material container */
 
-	Vector<FreyjaTexture *> textures;     /* Texture container */
+	Vector<Texture *> textures;     /* Texture container */
 
-	Vector<FreyjaAnimation *> animations; /* Animation container */
+	Vector<Animation *> animations; /* Animation container */
 
-	Vector<FreyjaSkeleton*> skeletons;    /* Skeletal data for this model */
+	Vector<Skeleton*> skeletons;    /* Skeletal data for this model */
 
-	Vector<FreyjaMesh *> meshes;          /* Geometery structure */
+	Vector<Mesh *> meshes;          /* Geometery structure */
 
-	Vector<FreyjaMetaData *> metadata;    /* Metadata for external use */
+	Vector<MetaData *> metadata;    /* Metadata for external use */
 
-	Vector<FreyjaLight *> lights;
+	Vector<Light *> lights;
 
-	Vector<FreyjaCamera *> cameras;
+	Vector<Camera *> cameras;
 
-	Vector<FreyjaVertexGroup *> vertexgroups;
+	Vector<SmoothingGroup *> groups;
 
 
 private:

@@ -29,10 +29,10 @@
 #   include <dlfcn.h>
 #endif
 
-#include "FreyjaFileReader.h"
-#include "FreyjaFileWriter.h"
+#include "FileReader.h"
+#include "FileWriter.h"
 
-#include "FreyjaImage.h"
+#include "Image.h"
 
 
 

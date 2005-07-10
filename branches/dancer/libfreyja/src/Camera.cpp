@@ -37,16 +37,18 @@
  ==========================================================================*/
 
 #include <math.h>
-#include "FreyjaCamera.h"
+#include "Camera.h"
+
+using namespace freyja;
 
 
-unsigned int FreyjaCamera::mCounter = 0;
+unsigned int Camera::mCounter = 0;
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaCamera::FreyjaCamera()
+Camera::Camera()
 {
 	mId = ++mCounter;
 	mMode = eStationary;
@@ -57,7 +59,7 @@ FreyjaCamera::FreyjaCamera()
 }
 
 
-FreyjaCamera::~FreyjaCamera()
+Camera::~Camera()
 {
 }
 
@@ -66,13 +68,13 @@ FreyjaCamera::~FreyjaCamera()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-unsigned int FreyjaCamera::getId()
+unsigned int Camera::getId()
 {
 	return mId;
 }
 
 
-void FreyjaCamera::getPosition(vec3_t pos)
+void Camera::getPosition(vec3_t pos)
 {
 	pos[0] = mPos[0];
 	pos[1] = mPos[1];
@@ -80,7 +82,7 @@ void FreyjaCamera::getPosition(vec3_t pos)
 }
 
 
-void FreyjaCamera::getUp(vec3_t up)
+void Camera::getUp(vec3_t up)
 {
 	up[0] = mUp[0];
 	up[1] = mUp[1];
@@ -88,7 +90,7 @@ void FreyjaCamera::getUp(vec3_t up)
 }
 
 
-void FreyjaCamera::getTarget(vec3_t target)
+void Camera::getTarget(vec3_t target)
 {
 	target[0] = mTarget[0];
 	target[1] = mTarget[1];
@@ -96,19 +98,19 @@ void FreyjaCamera::getTarget(vec3_t target)
 }
 
 
-float FreyjaCamera::getYaw()
+float Camera::getYaw()
 {
 	return helRadToDeg(mTheta);
 }
 
 
-double FreyjaCamera::getRadianYaw()
+double Camera::getRadianYaw()
 {
 	return mTheta;
 }
 
 
-double FreyjaCamera::getRadianPitch()
+double Camera::getRadianPitch()
 {
 	return mTheta2;
 }
@@ -118,7 +120,7 @@ double FreyjaCamera::getRadianPitch()
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaCamera::rotate(float angle, float x, float y, float z)
+void Camera::rotate(float angle, float x, float y, float z)
 {
 	Quaternion t, n;
 	Matrix matrix;
@@ -150,7 +152,7 @@ void FreyjaCamera::rotate(float angle, float x, float y, float z)
 }
 
 
-void FreyjaCamera::translate(float x, float y, float z)
+void Camera::translate(float x, float y, float z)
 {
 	int i;
 	double result[4];
@@ -198,7 +200,7 @@ void FreyjaCamera::translate(float x, float y, float z)
 }
 
 
-void FreyjaCamera::reset()
+void Camera::reset()
 {
 	mTheta = 0.0;
 	mTheta2 = 0.0;
@@ -225,7 +227,7 @@ void FreyjaCamera::reset()
 
 
 // FIXME: Mostly invalid for new QUAT_CAM (can rotate on XYZ)
-bool FreyjaCamera::isBehind(int x, int z)
+bool Camera::isBehind(int x, int z)
 {
   double bTheta, bCameraX, bCameraZ, Distance;
 
@@ -248,13 +250,13 @@ bool FreyjaCamera::isBehind(int x, int z)
 }
 
 
-void FreyjaCamera::setSpeed(vec_t speed)
+void Camera::setSpeed(vec_t speed)
 {
 	mSpeed = speed;
 }
 
 
-void FreyjaCamera::update()
+void Camera::update()
 {
    mTarget[2] = (mViewDistance * cos(mTheta)) + mPos[2];
    mTarget[0] = (mViewDistance * sin(mTheta)) + mPos[0];
@@ -262,7 +264,7 @@ void FreyjaCamera::update()
 }
 
 
-void FreyjaCamera::setPosition(vec3_t pos)
+void Camera::setPosition(vec3_t pos)
 {
 	mPos[0] = pos[0];
 	mPos[1] = pos[1];
@@ -270,7 +272,7 @@ void FreyjaCamera::setPosition(vec3_t pos)
 }
 
 
-void FreyjaCamera::setUp(vec3_t up)
+void Camera::setUp(vec3_t up)
 {
 	mUp[0] = up[0];
 	mUp[1] = up[1];
@@ -278,7 +280,7 @@ void FreyjaCamera::setUp(vec3_t up)
 }
 
 
-void FreyjaCamera::setTarget(vec3_t target)
+void Camera::setTarget(vec3_t target)
 {
 	mTarget[0] = target[0];
 	mTarget[1] = target[1];

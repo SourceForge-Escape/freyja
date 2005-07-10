@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "FreyjaFileWriter.h"
+#include "FileWriter.h"
 
 
 ////////////////////////////////////////////////////////////

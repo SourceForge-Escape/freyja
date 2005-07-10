@@ -28,12 +28,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 #include <hel/math.h>
 #include <hel/Quaternion.h>
 #include <hel/Vector3d.h>
+#include <freyja/FileReader.h>
 
-#include "FreyjaFileReader.h"
 #include "EggPlugin.h"
 
 EggPlugin *EggPlugin::mEggPlugin = 0x0;

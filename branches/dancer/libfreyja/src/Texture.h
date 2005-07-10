@@ -29,10 +29,14 @@
 
 #include <hel/math.h>
 
-#include "FreyjaFileReader.h"
-#include "FreyjaFileWriter.h"
+#include "FileReader.h"
+#include "FileWriter.h"
 
-class FreyjaTexture
+#define FreyjaTexture Texture
+
+namespace freyja {
+
+class Texture
 {
  public:
 
@@ -48,7 +52,7 @@ class FreyjaTexture
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaTexture();
+	Texture();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaTexture
@@ -59,7 +63,7 @@ class FreyjaTexture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual ~FreyjaTexture();
+	virtual ~Texture();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaTexture object is allocated
 	 * Post : Deconstructs an object of FreyjaTexture
@@ -142,4 +146,5 @@ class FreyjaTexture
 
 };
 
+}
 #endif

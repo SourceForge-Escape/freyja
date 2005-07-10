@@ -33,8 +33,8 @@
 
 #include <assert.h>
 
-#include "FreyjaFileWriter.h"
-#include "Freyja.h"
+#include "FileWriter.h"
+#include "Scene.h"
 
 
 

@@ -32,6 +32,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+// FIXME: Quick hack until new namespaces are set
+#define FileReader FreyjaFileReader
+
 
 class FreyjaFileReader
 {

@@ -53,9 +53,9 @@
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
 
-#include "Freyja.h"
-#include "FreyjaPrinter.h"
-#include "FreyjaPluginABI.h"
+#include "Scene.h"
+#include "Printer.h"
+#include "PluginABI.h"
 
 #ifdef MACOSX
 #   ifndef strnlen

@@ -27,7 +27,7 @@
 
 #include <sys/stat.h>
 
-#include "FreyjaFileReader.h"
+#include "FileReader.h"
 
 #define SWAP_2(x) ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
 #define SWAP_4(x) ( ((x) << 24) | \

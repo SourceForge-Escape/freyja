@@ -28,163 +28,367 @@
 
 #include <hel/math.h>
 #include <hel/Vector3d.h>
-
 #include <mstl/Vector.h>
+#include "freyja.h"
 
 
-#ifdef POST_CHIMERA_PLUS_UMBRA
-class FreyjaVertex
+#define FreyjaMesh Mesh
+
+
+namespace freyja {
+
+
+void freyjaPolygonVertexDeleteHandler(Vector<index_t> polygons, index_t vertex);
+
+
+class Weight
 {
 public:
 
-	class Weight
+	Weight(index_t bone, vec_t weight)
 	{
-	public:
-		Weight(index_t bone, vec_t weight)
-		{
-			mBoneIndex = bone;
-			mWeight = weight;
-		}
-
-		vec_t mWeight;             /* Weight for vertex use */
-		index_t mBoneIndex;             /* Bone id */
-	};
-
-
-	FreyjaVertex()
-	{
-		mIndex = mGobalMap.size();
-		mGobalMap.pushBack(this);
+		mBoneIndex = bone;
+		mWeight = weight;
 	}
 
-	~FreyjaVertex()
+	~Weight();
+
+	vec_t mWeight;             /* Weight for vertex use */
+
+	index_t mBoneIndex;        /* Bone id */
+};
+
+
+class Vertex
+{
+public:
+
+	enum Flags {
+		fOld_UIDs = 1,
+		fRender_Selected = 2,
+		fReservedA = 4,
+		fReservedB = 8,
+		fReservedC = 16,
+		fReservedD = 32,
+		fReservedE = 64,
+		fReservedF = 128
+	};
+
+	Vertex()
 	{
+		// Add check for mFreePool.empty();
+		mUID = mGobalPool.size();
+		mGobalPool.pushBack(this);
+	}
+
+	~Vertex()
+	{
+		/* Mark NULL in pool, then mark free slot */
+		mGobalPool.assign(mUID, 0x0);
+		mFreePool.add(mUID);
+
+		/* Notify Polygons about deleted vertex */
+		freyjaPolygonVertexDeleteHandler(polygonRef, mUID);
+
+		/* Bones don't depend on vertices, so no notification needed */
+
 		weights.erase();
-		frames.erase();
 		polygonRef.erase();
 	}
 
-	unsigned char flags;
-	index_t mesh, id;              /* Unique identifier, mesh[i].vertices[j] */
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	static uint32 getCount()
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns number of unique materials
+	 ------------------------------------------------------*/
+	{
+		mGobalPool.size();
+	}
+
+	bool serialize(FileWriter &w)
+	/*------------------------------------------------------
+	 * Pre  : Writes this object out to disk
+	 * Post : Returns true on success
+	 ------------------------------------------------------*/
+	{
+		uint32 i, count, size;
+
+
+		/* Header */
+		w.writeInt32U(mType);
+		w.writeInt32U(mVersion);
+
+		/* Size of the following data */
+		size = (4 + 1 + 4 + 12 + 12 + 12 +
+				4 + 8 * weights.size() + 
+				4 + 4 * polygonRef.size());
+
+		w.writeInt32U(size);
+		
+		/* Data */
+		w.writeInt32U(mUID);
+
+		w.writeInt8U(flags);
+
+		w.writeInt32U(mesh);
+
+		w.writeFloat32(xyz[0]);
+		w.writeFloat32(xyz[1]);
+		w.writeFloat32(xyz[2]);
+
+		w.writeFloat32(normal[0]);
+		w.writeFloat32(normal[1]);
+		w.writeFloat32(normal[2]);
+
+		w.writeFloat32(uvw[0]);
+		w.writeFloat32(uvw[1]);
+		w.writeFloat32(uvw[2]);
+
+		/* Weights */
+		count = weights.size();
+		w.writeInt32U(count);
+
+		for (i = 0; i < count; ++i)
+		{
+			if (weights[i])
+			{
+				w.writeInt32U(weights[i]->mBoneIndex);
+				w.writeFloat32(weights[i]->mWeight);
+			}
+			else
+			{
+				w.writeInt32U(INDEX_INVALID);
+				w.writeFloat32(0.0f);
+			}
+		}
+
+		/* Polygon references */
+		count = polygonRef.size();
+		w.writeInt32U(count);
+
+		for (i = 0; i < count; ++i)
+		{
+			w.writeInt32U(polygonRef[i]);
+		}
+
+		return true;
+	}
+
+
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
+
+	bool serialize(FileReader &r)
+	/*------------------------------------------------------
+	 * Pre  : Reads this object from disk
+	 * Post : Returns true on success
+	 ------------------------------------------------------*/
+	{
+		uint32 i, count, type, version, size, uid, idx;
+		vec_t weight;
+
+
+		/* Header */
+		type = r.readInt32U();
+		version = r.readInt32U();
+		size = r.readInt32U();
+
+		if (type != mType || version != mVersion)
+			return false;
+
+		/* Data */
+		uid = r.readInt32U(); // 'Old' uid
+		flags = r.readInt8U();
+		flags |= fOld_UIDs; // Flag that the UIDs used are old
+		mesh = r.readInt32U(); // 'Old' mesh uid
+
+		xyz[0] = r.readFloat32();
+		xyz[1] = r.readFloat32();
+		xyz[2] = r.readFloat32();
+
+		normal[0] = r.readFloat32();
+		normal[1] = r.readFloat32();
+		normal[2] = r.readFloat32();
+
+		uvw[0] = r.readFloat32();
+		uvw[1] = r.readFloat32();
+		uvw[2] = r.readFloat32();
+
+		/* Weights */
+		count = r.readInt32U();
+
+		for (i = 0; i < count; ++i)
+		{
+			idx = r.readInt32U(); // 'Old' bone UID
+			weight = r.readFloat32();
+
+			if (idx != INDEX_INVALID)
+			{
+				weights.pushBack(new Weight(idx, weight));
+			}
+		}
+
+		/* Polygon references */
+		count = r.readInt32U();
+
+		for (i = 0; i < count; ++i)
+		{
+			idx = r.readInt32U();
+
+			if (idx != INDEX_INVALID)
+			{		
+				polygonRef.pushBack(idx); // 'Old' polygon UID
+			}
+		}
+
+		return true;
+	}
+
+	byte flags;                    /* Various options stored in bitflag */
+
+	index_t mesh;                  /* Unique identifier for parent mesh */
+
 	vec3_t xyz;                    /* Position in 3 space */
+
 	vec3_t normal;                 /* Normal vector */
+
 	vec3_t uvw;                    /* Texture coordinates */
 
-	//vec4_t color, specular;
+	//vec4_t color;                /* Material property now */
+
+	//vec4_t specular;             /* Material property now */
 
 	Vector<Weight *> weights;      /* Vector of weights */
 
-	Vector <vec3_t *> frames; 
+	Vector<index_t> polygonRef;    /* UIDs of polygons referencing vertex */
 
-	Vector <index_t> polygonRef;   /* Ids of polygons referencing vertex */
 
 private:
-	int32 mIndex;
-	static Vector<FreyjaVertex *> mGobalMap;
+
+	index_t mUID;                       /* Unique identifier, key for pool */
+
+	static uint32 mType = 0x54524556;
+
+	static uint32 mVersion = 1;
+
+	static Map<index_t, index_t> mSerializeMap;
+
+	static Vector<Vertex *> mGobalPool; /* Storage for gobal access */
+
+	static Vector<index_t> mFreePool;   /* Tracks unused gobal pool slots */ 
 };
 
-class FreyjaPolygon
+
+class Polygon
 {
 public:
 
-	unsigned long flags;
+	byte flags;                       /* Options for polygon */
 
-	index_t mesh, id;                 /* Unique identifier */
+	index_t mesh;                     /* Mesh owner UID */
 
 	index_t material;                 /* Material id, if (mat != mesh.mat)
 									   * to support multimaterial meshes */
 
-	Vector <index_t> vertices;        /* Vertices composing polygon */
+	uint32 smoothingGroups;           /* BitFlag for smoothing groups use */
 
-	Vector <vec3_t *> texcoords;      /* Polymapped Texcoords (optional) */
+	Vector<index_t> vertices;         /* Vertices composing polygon */
 
-	Vector <vec4_t *> colors;         /* Colors for polygon (optional) */
-};
-#endif
+	Vector<vec3_t *> normals;         /* Polymapped Normals (optional) */
+
+	Vector<vec3_t *> texcoords;       /* Polymapped Texcoords (optional) */
+
+	Vector<vec4_t *> colors;          /* Colors for polygon (optional) */
 
 
-class FreyjaWeight
-{
-public:
-	FreyjaWeight(unsigned int bone, vec_t weight)
-	{
-		mBone = bone;
-		mWeight = weight;
-	}
+private:
 
-	vec_t mWeight;                     /* Weight for vertex use */
-	unsigned int mBone;                /* Bone id */
+	index_t UID;                      /* Unique identifier, key for pool */
+
+	Vector<Polygon *> mGobalPool;     /* Storage for gobal access */
 };
 
 
-class FreyjaVertexWeight
-{
-public:
-
-	Vector <FreyjaWeight *> mWeights;
-};
-
-
-class FreyjaPolygon
-{
-public:
-
-	unsigned int flags;
-
-	unsigned int id;                  /* Unique identifier */
-
-	int material;                     /* Material id, if (mat != mesh.mat)
-									   * to support multimaterial meshes */
-
-	Vector <unsigned int> vertices;   /* Vertices composing polygon */
-
-	Vector <unsigned int> texcoords;  /* Texcoords for polygon (polymapped) */
-};
-
-
-class FreyjaUVMap
+class SmoothingGroup
 {
 public:
 	void transform();
 
-	Vector <unsigned int> polygons;   /* Contains TexCoords composing group
-									   * either polymapped or by vertex */
+	byte flags;
+
+	char name[64];
+
+	index_t material;
+
+	Vector<index_t> polygons;      /* Contains TexCoords composing group
+									 * either polymapped or by vertex */
+private:
+
+	index_t UID;                      /* Unique identifier, key for pool */
+
+	static Vector<SmoothingGroup *> mGobalPool;    /* Storage for gobal access */
 };
 
 
-class FreyjaVertexGroup
-{
-public:
-	unsigned int id;
-
-	unsigned int mesh;                /* Mesh that owns vertices in group */
-
-	Vector<unsigned int> vertices;    /* Vertices in group */
-	
-	unsigned int childGroup;          /* For linking multimesh groups */
-};
-
-
-class FreyjaVertexFrame
+class UVMap
 {
 public:
 	void transform();
 
-	unsigned int id;
+	Vector<index_t> polygons;   /* Contains TexCoords composing group
+								 * either polymapped or by vertex */
+private:
 
-	Vector<vec_t> vertices;           /* Vertex animation frame */
+	index_t UID;                   /* Unique identifier, key for pool */
+
+	Vector<UVMap *> mGobalPool;    /* Storage for gobal access */
+};
+
+
+class VertexGroup
+{
+	Vector<index_t> vertices;       /* Vertices in group */
+
+private:
+
+	index_t UID;                         /* Unique identifier, key for pool */
+
+	Vector<VertexGroup *> mGobalPool;    /* Storage for gobal access */
+};
+
+
+class VertexFrame
+{
+public:
+	void transform();
+
+	Vector<vec3_t*> transforms;       /* Vertex transforms (animation) */
 
 	Vector3d bboxMin;                 /* Min corner of bounding box */
+
 	Vector3d bboxMax;                 /* Max corner of bounding box */
 
 	Vector3d center;                  /* Center of bounding volume */
+
 	vec_t radius;                     /* Radius of bounding sphere if used */
+
+private:
+
+	index_t UID;                         /* Unique identifier, key for pool */
+
+	Vector<VertexFrame *> mGobalPool;    /* Storage for gobal access */
 };
 
 
 /* Vertex no longer a primative object class/type
  * Move csg to plugin maybe child class of Mesh, CSGMesh */
-class FreyjaMesh
+class Mesh
 {
  public:
 
@@ -198,7 +402,7 @@ class FreyjaMesh
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaMesh();
+	Mesh();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaMesh
@@ -209,7 +413,7 @@ class FreyjaMesh
 	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
-	~FreyjaMesh();
+	~Mesh();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaMesh object is allocated
 	 * Post : Deconstructs an object of FreyjaMesh
@@ -225,138 +429,14 @@ class FreyjaMesh
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	unsigned int getVertexCount() { return vertices.end()/3; }
-	unsigned int getTexCoordCount() { return texcoords.end()/2; }
-	unsigned int getNormalCount() { return normals.end()/3; }
-	unsigned int getVertexWeightCount() { return weights.end(); }
+	unsigned int getVertexCount() { return vertices.end(); }
+
 	unsigned int getPolygonCount() { return polygons.end(); }
-	unsigned int getVertexFrameCount() { return frames.end(); }
-
-	void getNormal(unsigned int index, vec3_t xyz)
-	{
-		if (index*3 > normals.end() || !getNormalCount())
-			return;
-
-		vec_t *array = normals.getVectorArray();
-
-		xyz[0] = array[index/3];
-		xyz[1] = array[index/3+1];
-		xyz[2] = array[index/3+2];
-	}
-
-	void getTexCoord(unsigned int index, vec2_t uv)
-	{
-		if (index*2 > texcoords.end() || !getTexCoordCount())
-			return;
-
-		vec_t *array = texcoords.getVectorArray();
-
-		uv[0] = array[index/2];
-		uv[1] = array[index/2+1];
-	}
-
-	void getVertex(unsigned int index, vec3_t xyz)
-	{
-		if (index*3 > vertices.end() || !getVertexCount())
-			return;
-
-		vec_t *array = vertices.getVectorArray();
-
-		xyz[0] = array[index/3];
-		xyz[1] = array[index/3+1];
-		xyz[2] = array[index/3+2];
-	}
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
-
-	unsigned int addNormal(vec3_t xyz)
-	{
-		normals.pushBack(xyz[0]);
-		normals.pushBack(xyz[1]);
-		normals.pushBack(xyz[2]);
-		return (normals.end() / 3) - 1;
-	}
-
-	unsigned int addTexCoord(vec2_t uv)
-	{
-		texcoords.pushBack(uv[0]);
-		texcoords.pushBack(uv[1]);
-		return (texcoords.end() / 2) - 1;
-	}
-
-	unsigned int addVertex(vec3_t xyz)
-	{
-		vertices.pushBack(xyz[0]);
-		vertices.pushBack(xyz[1]);
-		vertices.pushBack(xyz[2]);
-
-		weights.pushBack(new FreyjaVertexWeight());
-		refPolygons.pushBack(new PolygonRef());
-
-		return (vertices.end() / 3) - 1;
-	}
-
-	int addVertexWeight(unsigned int index, 
-						vec_t weight, unsigned int bone)
-	{
-		if (index*3 > vertices.end() || !weights[index])
-			return -1;
-
-		unsigned int i;
-
-		/* Here index corresponds to vertex index and it's assc weight vector */
-		for (i = weights[index]->mWeights.begin(); 
-			 i < weights[index]->mWeights.end(); ++i)
-		{
-			if (weights[index]->mWeights[i]->mBone == bone)
-			{
-				weights[index]->mWeights[i]->mWeight = weight;
-				return i;
-			}
-		}
-
-		weights[index]->mWeights.pushBack(new FreyjaWeight(bone, weight));
-
-		return (weights.end() - 1);
-	}
-
-	void setNormal(unsigned int index, vec3_t xyz)
-	{
-		if (index*3 > normals.end())
-			return;
-
-		vec_t *array = normals.getVectorArray();
-
-		array[index/3] = xyz[0];
-		array[index/3+1] = xyz[1];
-		array[index/3+2] = xyz[2];
-	}
-
-	void setTexCoord(unsigned int index, vec2_t uv)
-	{
-		if (index*2 > texcoords.end())
-			return;
-
-		vec_t *array = texcoords.getVectorArray();
-
-		array[index/2] = uv[0];
-		array[index/2+1] = uv[1];
-	}
-
-	void setVertex(unsigned int index, vec3_t xyz)
-	{
-		if (index*3 > vertices.end())
-			return;
-
-		vec_t *array = vertices.getVectorArray();
-
-		array[index/3] = xyz[0];
-		array[index/3+1] = xyz[1];
-		array[index/3+2] = xyz[2];
-	}
 
 	void rotate(vec_t x, vec_t y, vec_t z);
 
@@ -368,105 +448,8 @@ class FreyjaMesh
 
 	void translate(vec_t x, vec_t y, vec_t z);
 
-	bool combineTexcoords(unsigned int a, unsigned int b)
-	{
-		FreyjaPolygon *polygon;
-		unsigned int i;
 
-
-		// Make all polygons referencing A point to B
-		for (i = polygons.begin(); i < polygons.end(); ++i)
-		{
-			polygon = polygons[i];
-
-			if (polygon && polygon->texcoords[i] == a)
-				polygon->texcoords.assign(i, b);
-		}
-
-		// Mark A as unused in the texcoord array reference
-		//usedTexCoord.pushBack(a);
-
-		return true;
-	}
-
-	bool combineVertices(unsigned int a, unsigned int b)
-	{
-		FreyjaPolygon *polygon;
-		unsigned int i;
-
-
-		// Make all polygons referencing A point to B
-		for (i = polygons.begin(); i < polygons.end(); ++i)
-		{
-			polygon = polygons[i];
-
-			if (polygon && polygon->vertices[i] == a)
-				polygon->vertices.assign(i, b);
-		}
-
-		// Mark A as unused in the texcoord array reference
-		//usedVertex.pushBack(a);
-
-		// Don't bother touching weights, they aren't managed
-
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Combines object A and B in model
-	 *
-	 *        Destroys A and B then replaces them with new 
-	 *        object with index A where: A = A + B
-	 *
-	 *        Returns true on sucess
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.04:
-	 * Mongoose - Hard ABI back
-	 *
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	FreyjaMesh *csgUnion(FreyjaMesh *a, FreyjaMesh *b);
-	FreyjaMesh *csgIntersection(FreyjaMesh *a, FreyjaMesh *b);
-	FreyjaMesh *csgDifference(FreyjaMesh *a, FreyjaMesh *b);
-	//unsigned int csg(egg_type_t type, egg_csg_t operation,
-	//				 unsigned int a, unsigned int b);
-	/*------------------------------------------------------
-	 * Pre  : Don't count on more than simple vertex culling now
-	 *
-	 * Post : OPERATION on TYPE object A and B in model
-	 *
-	 *        A and B are perserved, creates new object C 
-	 *        where: C = A OPERATION B
-	 *
-	 *        UNION        : C = A u B
-	 *                       if A eq B then copy of A is made
-	 *
-	 *        INTERSECTION : C = A n B
-	 *                       if A eq B then copy of A is made
-	 *
-	 *        DIFFERENCE   : C = A - B
-	 *                       B culls A, order matters
-	 *                       if A eq B then undefined behavior
-	 *
-	 *        Returns C's index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - Created with new generic API based on mtk
-	 ------------------------------------------------------*/
-
-	// FIXME: temp fix for testing
-	// private:
+private:
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors
@@ -477,37 +460,30 @@ class FreyjaMesh
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Vector<FreyjaPolygon *> polygons;         /* Polygons of this mesh */
+	Vector<Vertex *> vertices;          /* Vertices (complex class version) */
 
-	Vector<FreyjaVertexFrame *> frames;       /* Vertex morph frames */
+	Vector<Polygon *> polygons;         /* Polygons of this mesh */
 
-	Vector<FreyjaUVMap *> uvmaps;             /* UVMaps of this mesh */
+	Vector<VertexFrame *> frames;       /* Vertex morph frames */
 
-	Vector<FreyjaVertexWeight *> weights;     /* Vertex weights */
+	Vector<UVMap *> uvmaps;             /* UVMaps of this mesh */
 
-	Vector <unsigned int> groups;       /* Vertex groups of this mesh */
+	Vector<VertexWeight *> weights;     /* Vertex weights */
 
-	Vector <unsigned int> refVertices;  /* Tracks unused vertex pool slots */ 
+	Vector<SmoothingGroup *> groups;    /* Smoothing Groups of this mesh */
 
-	Vector<PolygonRef *> refPolygons;   /* Matches vertex list, shows
-										 * which polygons ref which vertices */
+	Vector3d mPosition;                 /* Position of the mesh */
 
-	Vector<vec_t> vertices;             /* Vertex array, could be replaced 
-										 * with VertexFrame's vertices */
+	index_t mMaterial;                  /* Base material id */
 
-	Vector<vec_t> texcoords;            /* Texcoord array */
 
-	Vector<vec_t> normals;              /* Normal array */
+	/* UID system */
 
-	vec3_t position;                    /* Position of the mesh */
+	index_t UID;                        /* Unique identifier, key for pool */
 
-	unsigned int id;                    /* Unique identifier */
-
-	unsigned int texcoordDepth;         /* 1d, 2d, 3d */
-
-	int material;                       /* Base material id */
-
-	unsigned int currentFrame;          /* Current vertex morph frame */
+	Vector<Mesh *> mGobalPool;          /* Storage for gobal access */
 };
+
+}
 
 #endif

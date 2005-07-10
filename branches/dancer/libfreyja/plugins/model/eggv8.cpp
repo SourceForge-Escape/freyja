@@ -24,9 +24,9 @@
 #include <stdio.h>
 
 #include <mstl/Vector.h>
-#include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <freyja/PluginABI.h>
+#include <freyja/FileReader.h>
+#include <freyja/FileWriter.h>
 
 
 extern "C" {

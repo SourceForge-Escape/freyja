@@ -5,7 +5,7 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
- * Object  : FreyjaMaterial
+ * Object  : Material
  * License : No use w/o permission (C) 2005 Mongoose
  * Comments: Material class for libfreyja, yadda yadda
  *
@@ -22,14 +22,15 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "FreyjaMaterial.h"
+#include "Material.h"
 
+using namespace freyja;
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaMaterial::FreyjaMaterial()
+Material::Material()
 {
 	mId = -1;
 
@@ -62,7 +63,7 @@ FreyjaMaterial::FreyjaMaterial()
 }
 
 
-FreyjaMaterial::~FreyjaMaterial()
+Material::~Material()
 {
 	if (mTextureName)
 		delete [] mTextureName;
@@ -74,13 +75,13 @@ FreyjaMaterial::~FreyjaMaterial()
 ////////////////////////////////////////////////////////////
 
 
-const char *FreyjaMaterial::getTextureName()
+const char *Material::getTextureName()
 {
 	return mTextureName;
 }
 
 
-uint32 FreyjaMaterial::getSerializeSize()
+uint32 Material::getSerializeSize()
 {
 	uint32 length = 0;
 
@@ -97,7 +98,7 @@ uint32 FreyjaMaterial::getSerializeSize()
 }
 
 
-bool FreyjaMaterial::serialize(FreyjaFileWriter &w)
+bool Material::serialize(FreyjaFileWriter &w)
 {
 	uint32 length = 0;
 
@@ -150,7 +151,7 @@ bool FreyjaMaterial::serialize(FreyjaFileWriter &w)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool FreyjaMaterial::serialize(FreyjaFileReader &r)
+bool Material::serialize(FreyjaFileReader &r)
 {
 	uint32 version = r.readInt32U();
 	uint32 length = 0;
@@ -200,20 +201,20 @@ bool FreyjaMaterial::serialize(FreyjaFileReader &r)
 }
 
 
-void FreyjaMaterial::setFlag(Flags flag)
+void Material::setFlag(Flags flag)
 {
 	mFlags |= flag;
 }
 
 
-void FreyjaMaterial::clearFlag(Flags flag)
+void Material::clearFlag(Flags flag)
 {
 	mFlags |= flag;
 	mFlags ^= flag;
 }
 
 
-void FreyjaMaterial::setName(const char *name)
+void Material::setName(const char *name)
 {
 	int len;
 
@@ -239,7 +240,7 @@ void FreyjaMaterial::setName(const char *name)
 }
 
 
-void FreyjaMaterial::setTextureName(const char *name)
+void Material::setTextureName(const char *name)
 {
 	int len;
 
@@ -277,10 +278,10 @@ void FreyjaMaterial::setTextureName(const char *name)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_FREYJAMATERIAL
-int runFreyjaMaterialUnitTest(int argc, char *argv[])
+#ifdef UNIT_TEST_Material
+int runMaterialUnitTest(int argc, char *argv[])
 {
-	FreyjaMaterial test1, test2, test3;
+	Material test1, test2, test3;
 
 
 	test1.setName("Glass");
@@ -414,8 +415,8 @@ int runFreyjaMaterialUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[FreyjaMaterial class test]\n");
+	printf("[Material class test]\n");
 
-	return runFreyjaMaterialUnitTest(argc, argv);
+	return runMaterialUnitTest(argc, argv);
 }
 #endif

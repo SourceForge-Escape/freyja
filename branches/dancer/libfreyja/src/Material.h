@@ -29,12 +29,15 @@
 
 #include <hel/math.h>
 
-#include "FreyjaTexture.h"
-#include "FreyjaFileReader.h"
-#include "FreyjaFileWriter.h"
+#include "Texture.h"
+#include "FileReader.h"
+#include "FileWriter.h"
 
+#define FreyjaMaterial Material
 
-class FreyjaMaterial
+namespace freyja {
+
+class Material
 {
  public:
 
@@ -48,13 +51,13 @@ class FreyjaMaterial
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaMaterial();
+	Material();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaMaterial
 	 ------------------------------------------------------*/
 
-	virtual ~FreyjaMaterial();
+	virtual ~Material();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaMaterial object is allocated
 	 * Post : Deconstructs an object of FreyjaMaterial
@@ -194,5 +197,7 @@ class FreyjaMaterial
 
 	char *mTextureName;         /* This is used for file I/O to map classes */
 };
+
+}
 
 #endif

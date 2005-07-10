@@ -34,8 +34,8 @@
 #include <hel/Vector3d.h>
 #include <hel/BoundingVolume.h>
 
-#include "FreyjaFileReader.h"
-#include "FreyjaPlugin.h"
+#include "FileReader.h"
+#include "Plugin.h"
 
 
 FreyjaPlugin *FreyjaPlugin::mPlugin = 0x0;

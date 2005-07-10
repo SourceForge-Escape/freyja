@@ -19,19 +19,20 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include "FreyjaMesh.h"
+#include "Mesh.h"
 
+using namespace freyja;
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaMesh::FreyjaMesh()
+Mesh::Mesh()
 {
 }
 
 
-FreyjaMesh::~FreyjaMesh()
+Mesh::~Mesh()
 {
 }
 

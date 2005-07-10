@@ -46,10 +46,10 @@
 #include <mstl/Stack.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
+#include <freyja/PluginABI.h>
+#include <freyja/FileReader.h>
 
-#include "FreyjaPluginABI.h"
-#include "FreyjaFileReader.h"
-#include "FreyjaPlugin.h"
+#include "EggPlugin.h"
 #include "Egg.h"
 
 
