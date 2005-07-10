@@ -306,7 +306,7 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaPlugin(FreyjaScene *scene, char *plugin_dir);
+	FreyjaPlugin(Scene *scene, char *plugin_dir);
 	/*------------------------------------------------------
 	 * Pre  : freyja and plugin_dir are valid
 	 * Post : Constructs an object of FreyjaPlugin
@@ -347,11 +347,11 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	FreyjaBone *getBone(unsigned int index);
-	void getVertex(unsigned int index, vec3_t xyz);
-	void getNormal(unsigned int index, vec3_t xyz);
-	void getTexCoord(unsigned int index, vec3_t uv);
-	void getVertexWeights(Vector<unsigned int> &bones,
+	Bone *getBone(index_t index);
+	void getVertex(index_t index, vec3_t xyz);
+	void getNormal(index_t index, vec3_t xyz);
+	void getTexCoord(index_t index, vec3_t uv);
+	void getVertexWeights(Vector<index_t> &bones,
 						  Vector<float> &weights);
 	/*------------------------------------------------------
 	 * Pre  : Current vertex exists
@@ -363,7 +363,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int getPolygon(freyja_object_t obj, int item, unsigned int *value);
+	int getPolygon(freyja_object_t obj, int item, index_t *value);
 	/*------------------------------------------------------
 	 * Pre  : Type is either vertex or texel
 	 *        Item is index into polygon's type list 
@@ -420,10 +420,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getCurrentBone() { return mIndexBone; }
-	unsigned int getCurrentSkeleton() { return mIndexSkeleton; }
-	unsigned int getCurrentModel() { return mIndexModel; }
-	unsigned int getCurrentMesh() { return mIndexMesh; }
+	index_t getCurrentBone() { return mIndexBone; }
+	index_t getCurrentSkeleton() { return mIndexSkeleton; }
+	index_t getCurrentModel() { return mIndexModel; }
+	index_t getCurrentMesh() { return mIndexMesh; }
 
 
 	virtual void printError(char *format, ...);
@@ -484,7 +484,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setMeshPolygonsMaterial(unsigned int index, int material);
+	void setMeshPolygonsMaterial(index_t index, int material);
 	/*------------------------------------------------------
 	 * Pre  : index - index of mesh
 	 *        material - material index
@@ -608,7 +608,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int getTextureFilename(unsigned int index, char **filename);
+	int getTextureFilename(index_t index, char **filename);
 	/*------------------------------------------------------
 	 * Pre  : Don't alter filename once you get pointer to it
 	 * Post : Returns 0 on sucess
@@ -650,7 +650,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int freyjaNormal3fv(vec3_t xyz);
+	index_t freyjaNormal3fv(vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_MESH);
 	 *        <x,y,z> is valid normal vector
@@ -663,7 +663,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int freyjaTexCoord2fv(vec2_t uv);
+	index_t freyjaTexCoord2fv(vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_MESH);
 	 *        u, v are valid: 0.0 to 1.0 range, etc
@@ -676,7 +676,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int freyjaVertex3fv(vec3_t xyz);
+	index_t freyjaVertex3fv(vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_MESH);
 	 *        x,y,z are valid 3space coors
@@ -689,8 +689,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaVertexWeightStore(unsigned int index, 
-							  vec_t weight, unsigned int bone);
+	void freyjaVertexWeightStore(index_t index, 
+							  vec_t weight, index_t bone);
 	/*------------------------------------------------------
 	 * Pre  : <weight> of influence of <bone> on vertex v
 	 *
@@ -708,11 +708,11 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
-	void freyjaSetTexCoord2fv(unsigned int index, vec2_t uv);
-	void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
+	void freyjaSetNormal3fv(index_t index, vec3_t xyz);
+	void freyjaSetTexCoord2fv(index_t index, vec2_t uv);
+	void freyjaSetVertex3fv(index_t index, vec3_t xyz);
 
-	void freyjaVertex1i(unsigned int freyja_id);
+	void freyjaVertex1i(index_t freyja_id);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_POLYGON);
 	 *        Freyja_id is the native index
@@ -724,7 +724,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaTexCoord1i(unsigned int freyja_id);
+	void freyjaTexCoord1i(index_t freyja_id);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_POLYGON);
 	 *        Freyja_id is the native index
@@ -748,9 +748,9 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int freyjaGetTextureImage(unsigned int index, 
-						   unsigned int *w, unsigned int *h, 
-						   unsigned int *depth,  unsigned int *type,
+	int freyjaGetTextureImage(index_t index, 
+						   index_t *w, index_t *h, 
+						   index_t *depth,  index_t *type,
 						   unsigned char **image);
 	/*------------------------------------------------------
 	 * Pre  : Textures were loaded in texture storage
@@ -766,7 +766,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int freyjaFlags();
+	index_t freyjaFlags();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets plugin flags
@@ -777,7 +777,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaFlags(unsigned int set);
+	void freyjaFlags(index_t set);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets plugin flags
@@ -788,7 +788,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int freyjaGroupCenter(float x, float y, float z);
+	index_t freyjaGroupCenter(float x, float y, float z);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_GROUP);
 	 * Post : Current group's center is set
@@ -812,7 +812,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaBoneFlags(unsigned int flags);
+	void freyjaBoneFlags(index_t flags);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_TAG);
 	 * Post : Current tag's mesh/tag tree flag is set
@@ -826,7 +826,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	//void getMeshFlags1u(unsigned int flags);
+	//void getMeshFlags1u(index_t flags);
 	/*------------------------------------------------------
 	 * Pre  : Pass valid freyja_mesh_flags_t's bitmap
 	 * Post : Sets flags for current mesh
@@ -837,7 +837,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaBoneAddMesh(unsigned int mesh);
+	void freyjaBoneAddMesh(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_TAG);
 	 * Post : mesh added to current tag's mesh list
@@ -848,7 +848,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaBoneAddChild(unsigned int tag);
+	void freyjaBoneAddChild(index_t tag);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_TAG);
 	 * Post : mesh added to current tag's slave tag list
@@ -859,7 +859,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int freyjaMeshTreeAddFrame(float x, float y, float z);
+	index_t freyjaMeshTreeAddFrame(float x, float y, float z);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_MESHTREE_ANIM);
 	 * Post : Adds meshtree frame to meshtree
@@ -882,7 +882,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	//unsigned int freyjaMeshTreeBone(unsigned int tag);
+	//index_t freyjaMeshTreeBone(index_t tag);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_MESHTREE_ANIM_FRAME);
 	 * Post : Appends tag to mesh tree frame
@@ -895,11 +895,11 @@ public:
 
 	int getTextureFilename(const char *filename);
 
-	int getTexture(unsigned int index, unsigned int *w, unsigned int *h, 
-				   unsigned int *numBytes,  unsigned char **image);
+	int getTexture(index_t index, index_t *w, index_t *h, 
+				   index_t *numBytes,  unsigned char **image);
 
-	int setTexture(unsigned char *image, unsigned int numBytes,
-				   unsigned int width, unsigned int height);
+	int setTexture(unsigned char *image, index_t numBytes,
+				   index_t width, index_t height);
 	/*------------------------------------------------------
 	 * Pre  : <image> is a valid image buffer 
 	 *        <width> <height> <bpp> are correct for image
@@ -957,9 +957,9 @@ private:
 	Vector<char *> mModules;            /* Names of plugin modules managed by 
 										 * FreyjaPlugin class */
 
-	//Vector<unsigned int> mVertexList;   /* Current polygon's vertex list */
+	//Vector<index_t> mVertexList;   /* Current polygon's vertex list */
 
-	//Vector<unsigned int> mTexCoordList; /* Current polygon's texel list */
+	//Vector<index_t> mTexCoordList; /* Current polygon's texel list */
 
 	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
 										 * accumulation modes and etc */
@@ -973,49 +973,49 @@ private:
 
 	////////////////////////////////////////////////////////////////////////
 
-	FreyjaScene *mScene;                /* Pointer to the modeler backend  */
+	Scene *mScene;                /* Pointer to the modeler backend  */
 
-	Freyja3dModel *mModel;              /* Current Model of Scene */
+	Model *mModel;              /* Current Model of Scene */
 
-	FreyjaMaterial *mMaterial;          /* Current Material of Scene */
+	Material *mMaterial;          /* Current Material of Scene */
 
-	FreyjaTexture *mTexture;            /* Current Texture of Scene */
+	Texture *mTexture;            /* Current Texture of Scene */
 
-	unsigned int mIndexModel;           /* Current sub-Model references */
-	unsigned int mIndexMesh;
-	unsigned int mIndexAnimation;
-	unsigned int mIndexSkeleton;
-	unsigned int mIndexMaterial;
-	unsigned int mIndexTexture;
-	unsigned int mIndexVertexGroup;
+	index_t mIndexModel;           /* Current sub-Model references */
+	index_t mIndexMesh;
+	index_t mIndexAnimation;
+	index_t mIndexSkeleton;
+	index_t mIndexMaterial;
+	index_t mIndexTexture;
+	index_t mIndexVertexGroup;
 
-	FreyjaVertexGroup *mVertexGroup;    /* Vertex list for various 
+	VertexGroup *mVertexGroup;    /* Vertex list for various 
 										 * content creation uses */
 
-	FreyjaMesh *mMesh;                  /* Current Mesh of Scene */
+	Mesh *mMesh;                  /* Current Mesh of Scene */
 
-	FreyjaVertexFrame *mVertexFrame;    /* Current VertexFrame of Mesh */
+	VertexFrame *mVertexFrame;    /* Current VertexFrame of Mesh */
 
-	FreyjaUVMap *mUVMap;                /* Current TexCoord skin of Mesh */
+	UVMap *mUVMap;                /* Current TexCoord skin of Mesh */
 
-	FreyjaPolygon *mPolygon;            /* Current Polygon of Mesh */
+	Polygon *mPolygon;            /* Current Polygon of Mesh */
 
-	unsigned int mIndexVertex;          /* Current sub-Mesh references */
-	unsigned int mIndexTexCoord;
-	unsigned int mIndexVertexFrame;
-	unsigned int mIndexPolygon;
+	index_t mIndexVertex;          /* Current sub-Mesh references */
+	index_t mIndexTexCoord;
+	index_t mIndexVertexFrame;
+	index_t mIndexPolygon;
 
-	FreyjaSkeleton *mSkeleton;          /* Current Skeleton of Scene */
+	Skeleton *mSkeleton;          /* Current Skeleton of Scene */
 
-	FreyjaBone *mBone;                  /* Current Bone of Skeleton */
+	Bone *mBone;                  /* Current Bone of Skeleton */
 
-	unsigned int mIndexBone;            /* Current sub-Skeleton references */
+	index_t mIndexBone;            /* Current sub-Skeleton references */
 
-	FreyjaAnimation *mAnimation;        /* Current Animation of Scene */
+	Animation *mAnimation;        /* Current Animation of Scene */
 
 	////////////////////////////////////////////////////////////////////////
 
-	unsigned int mOptions;              /* Option flags */
+	index_t mOptions;              /* Option flags */
 
 	Vector<char *> mPluginDirectories;
 
