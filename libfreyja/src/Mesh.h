@@ -64,8 +64,9 @@ class Vertex
 public:
 
 	enum Flags {
+		fNone = 0,
 		fOld_UIDs = 1,
-		fRender_Selected = 2,
+		fSelected = 2,
 		fReservedA = 4,
 		fReservedB = 8,
 		fReservedC = 16,
@@ -76,24 +77,39 @@ public:
 
 	Vertex()
 	{
-		// Add check for mFreePool.empty();
-		mUID = mGobalPool.size();
-		mGobalPool.pushBack(this);
+		uint32 i, count;
+
+
+		flags = fNone;
+		mesh = INDEX_INVALID;
+		mOldUID = INDEX_INVALID;
+
+		/* Setup gobal pool UID reference */
+		mUID = count = mFreePool.size();
+
+		for (i = 0; i < count; ++i)
+		{
+			if (mGobalPool[i] == 0x0)
+			{
+				mUID = i;
+				break;
+			}	
+		}
+
+		mGobalPool.assign(mUID, this);
 	}
 
 	~Vertex()
 	{
-		/* Mark NULL in pool, then mark free slot */
+		/* Mark NULL in pool, marking free slot */
 		mGobalPool.assign(mUID, 0x0);
-		mFreePool.add(mUID);
 
 		/* Notify Polygons about deleted vertex */
 		freyjaPolygonVertexDeleteHandler(polygonRef, mUID);
+		polygonRef.erase();
 
 		/* Bones don't depend on vertices, so no notification needed */
-
 		weights.erase();
-		polygonRef.erase();
 	}
 
 
@@ -101,13 +117,40 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	static index_t findVertexIndexByOldUID(index_t oldUID)
+	{
+		uint32 i, count = getCount();
+		Vertex *v;
+
+		if (oldUID == INDEX_INVALID)
+			return INDEX_INVALID;
+
+		for (i = 0; i < count; ++i)
+		{
+			v = getVertex(i);
+
+			if (v && v->mOldUID == oldUID)
+			{
+				return i;
+			}
+		}
+	}
+
 	static uint32 getCount()
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns number of unique materials
 	 ------------------------------------------------------*/
 	{
-		mGobalPool.size();
+		return mGobalPool.size();
+	}
+
+	static Vertex *getVertex(index_t uid)
+	{
+		if (uid >= getCount() || uid == INDEX_INVALID)
+			return 0x0;
+
+		return mGobalPool[uid];
 	}
 
 	bool serialize(FileWriter &w)
@@ -184,6 +227,11 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void assignToMesh(index_t meshIndex)
+	{
+		mesh = meshIndex;
+	}
+
 	bool serialize(FileReader &r)
 	/*------------------------------------------------------
 	 * Pre  : Reads this object from disk
@@ -195,15 +243,15 @@ public:
 
 
 		/* Header */
-		type = r.readInt32U();
-		version = r.readInt32U();
-		size = r.readInt32U();
+		//type = r.readInt32U();  // Checked and read at higher level
+		//version = r.readInt32U();
+		//size = r.readInt32U();
 
-		if (type != mType || version != mVersion)
+		if (version != mVersion)
 			return false;
 
 		/* Data */
-		uid = r.readInt32U(); // 'Old' uid
+		mOldUID = r.readInt32U(); // 'Old' uid
 		flags = r.readInt8U();
 		flags |= fOld_UIDs; // Flag that the UIDs used are old
 		mesh = r.readInt32U(); // 'Old' mesh uid
@@ -273,11 +321,11 @@ private:
 
 	index_t mUID;                       /* Unique identifier, key for pool */
 
-	static uint32 mType = 0x54524556;
+	index_t mOldUID;                    /* UID when this was saved to disk */
 
-	static uint32 mVersion = 1;
+	static uint32 mType;                /* Type of file chunk */
 
-	static Map<index_t, index_t> mSerializeMap;
+	static uint32 mVersion;             /* File chunk version */
 
 	static Vector<Vertex *> mGobalPool; /* Storage for gobal access */
 
@@ -288,6 +336,33 @@ private:
 class Polygon
 {
 public:
+
+	enum Flags {
+		fOld_UIDs = 1,
+		fSelected = 2,
+		fReservedA = 4,
+		fReservedB = 8,
+		fReservedC = 16,
+		fReservedD = 32,
+		fReservedE = 64,
+		fReservedF = 128
+	};
+
+	enum SmoothingGroupFlags {
+		fGroup_1 = 1,
+		fGroup_2 = 2,
+		fGroup_3 = 4,
+		fGroup_4 = 8,
+		fGroup_5 = 16,
+		fGroup_6 = 32,
+		fGroup_7 = 64,
+		fGroup_8 = 128,
+		fGroup_9 = 256,
+		fGroup_10 = 1024,
+		fGroup_11 = 2048
+		// ...
+	};
+
 
 	byte flags;                       /* Options for polygon */
 
