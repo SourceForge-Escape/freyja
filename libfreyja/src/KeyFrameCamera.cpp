@@ -1,13 +1,13 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : libfreyja
+ * Project : freyja
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
- * Object  : FreyjaUtil
- * License : No use w/o permission (C) 2004 Mongoose
- * Comments: This class provides a command line interface translation/test tool.
+ * Object  : KeyFrameCamera
+ * License : No use w/o permission (C) 2005 Mongoose
+ * Comments: This is used for camera animation using paths, etc
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -15,49 +15,23 @@
  * 
  *-- History ------------------------------------------------- 
  *
- * 2004.12.08:
+ * 2005.07.09:
  * Mongoose - Created
  ==========================================================================*/
 
-#include "FreyjaUtil.h"
+#include "KeyFrameCamera.h"
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaUtil::FreyjaUtil()
+KeyFrameCamera::KeyFrameCamera()
 {
-#ifdef unix
-	char pluginDir[4096];
-	char *env;
-
-
-	env = getenv("HOME");
-
-	if (!env || !env[0])
-	{
-		printf("ERROR: Bad HOME envronment\n");
-	}
-
-	snprintf(pluginDir, 4094, "%s/.freyja/plugins/", env);
-	pluginDir[4095] = 0;
-#else
-	char *pluginDir = "C:\freyja\plugins";
-#endif
-
-	mScene = 0x0; //new FreyjaScene();
-	mPlugin = 0x0; //new FreyjaPlugin(mScene, pluginDir);
-	//mPlugin->setPrinter(&mPrinter);
-
-	mEgg = new Egg();
-	mEggPlugin = new EggPlugin(mEgg);
-	mEggPlugin->setPrinter(&mPrinter);
-	mEggPlugin->setupPlugins();
 }
 
 
-FreyjaUtil::~FreyjaUtil()
+KeyFrameCamera::~KeyFrameCamera()
 {
 }
 
@@ -66,20 +40,10 @@ FreyjaUtil::~FreyjaUtil()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-int FreyjaUtil::exportModel(const char *filename, const char *type)
-{
-	return mEggPlugin->exportModel(filename, type);
-}
-
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
-
-int FreyjaUtil::importModel(const char *filename)
-{
-	return mEggPlugin->importModel(filename);
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -96,27 +60,10 @@ int FreyjaUtil::importModel(const char *filename)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_FREYJAUTIL
-int runFreyjaUtilUnitTest(int argc, char *argv[])
+#ifdef UNIT_TEST_KEYFRAMECAMERA
+int runKeyFrameCameraUnitTest(int argc, char *argv[])
 {
-	FreyjaUtil test;
-
-	switch (argc)
-	{
-	case 4: // util file.grn 3ds file.3ds
-		test.importModel(argv[1]);
-		test.exportModel(argv[3], argv[2]);
-		break;
-
-
-	case 2:
-		test.importModel(argv[1]);
-		break;
-
-
-	default:
-		printf("Usage: %s import_model [type export_model]\n", argv[0]);
-	}
+	KeyFrameCamera test;
 
 	return 0;
 }
@@ -124,8 +71,8 @@ int runFreyjaUtilUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[FreyjaUtil class test]\n");
+	printf("[KeyFrameCamera class test]\n");
 
-	return runFreyjaUtilUnitTest(argc, argv);
+	return runKeyFrameCameraUnitTest(argc, argv);
 }
 #endif

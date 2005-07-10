@@ -297,27 +297,14 @@ bool freyjaGetRenderModelMesh(uint32 modelIndex, uint32 meshIndex, uint32 frame,
 }
 
 
-
-#define USING_EGG
-#include "EggPlugin.h"
-
 uint32 freyjaGetRenderModelCount()
 {
-#ifdef USING_EGG 
-	return 1;
-#else
 	return gRenderModels.size();
-#endif
 }
 
 
 bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 {
-#ifdef USING_EGG 
-	model.setEgg(EggPlugin::mEggPlugin->getEgg());
-	model.mIndex = 0;
-	return true;
-#else
 	if (modelIndex < gRenderModels.size())
 	{
 		//model = &(gRenderModels[modelIndex]);
@@ -327,7 +314,6 @@ bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 
 		return true;
 	}
-#endif
 
 	return false;
 }

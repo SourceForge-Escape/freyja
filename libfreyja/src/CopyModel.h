@@ -30,8 +30,6 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
-#include "Egg.h"
-
 
 class CopyGroup
 {
@@ -109,7 +107,7 @@ class CopyModel
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	CopyModel(Egg *egg);
+	CopyModel();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of CopyModel
@@ -189,8 +187,6 @@ class CopyModel
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	Egg *mEgg;                      /* Temp backend still used in transition */
 
 	bool mAppendMode;               /* Copy system multiobject copy state */
 

@@ -33,9 +33,6 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
-#include "Egg.h"
-
-
 
 /* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
  * They only use all natural, wholesome Hel math types. */

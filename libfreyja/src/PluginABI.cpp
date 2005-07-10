@@ -47,22 +47,21 @@
 #include "Light.h"
 #include "Skeleton.h"
 #include "Material.h"
-
+#include "Plugin.h"
 #include "PluginABI.h"
 
-
-/* Internal / hidden API methods not exported by header */
-Egg *freyja__getEggBackend();
+using namespace freyja;
 
 
 /* Until Freyja replaces Egg backend, let these vector pools float here */
-Vector<FreyjaSkeletalAnimation *> gFreyjaAnimations; 
-Vector<FreyjaMetaData *> gFreyjaMetaData; 
+
+// FIXME: Replace with gobal pools
+Vector<MetaData *> gFreyjaMetaData; 
 Vector<FreyjaMaterial *> gFreyjaMaterials;
 Vector<FreyjaTexture *> gFreyjaTextures;
-Vector<FreyjaSkeleton *>  gFreyjaSkeletons;
+Vector<Skeleton *>  gSkeletons;
 Vector<FreyjaCamera *>  gFreyjaCameras;
-Vector<FreyjaLight *>  gFreyjaLights;
+Vector<Light *>  gFreyjaLights;
 Vector<CopyModel *>  gCopyModels;
 Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 Vector<char *> gPluginDirectories;
@@ -7736,17 +7735,8 @@ void freyjaFree()
 
 int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
 {
-#ifdef UMBRA
 	freyjaPrintMessage("findPolygonByVertices> Not Implemented for UMBRA");
 	return -1;
-#else // EGG
-	Egg *model = freyja__getEggBackend();
-
-	if (!model)
-		return -1;
-
-	return model->selectPolygon(&vertices);
-#endif
 }
 
 

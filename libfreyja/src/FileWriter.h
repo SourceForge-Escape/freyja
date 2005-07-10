@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <string.h>
 
+// FIXME: Quick hack until new namespaces are set
+#define FileWriter FreyjaFileWriter
 
 class FreyjaFileWriter
 {

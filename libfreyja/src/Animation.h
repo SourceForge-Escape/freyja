@@ -28,6 +28,8 @@
 #define GUARD__FREYJA_MONGOOSE_ANIMATION_H_
 
 
+#include "KeyFrame.h"
+
 class Animation
 {
  public:
@@ -63,7 +65,31 @@ class Animation
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	void setName(const char *name)
+	{
+		strncpy(mName, name, 64);
+		mName[63] = 0;
+	}
+	
+	long mId;
 
+	char mName[64];
+
+	vec_t mFrameRate;
+
+	vec_t mTime;
+
+	long mStartBone;          /* For animation blending (subsets) use */
+
+	long mBoneCount;
+
+	long mCurrentFrame; // render use mostly
+
+	long mLastFrame;    // render use mostly
+
+	vec_t mLastTime;    // render use mostly
+
+	Vector<KeyFrame *> mKeyFrames;  // keyCount / mBoneCount = frames
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators

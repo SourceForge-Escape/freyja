@@ -19,16 +19,18 @@
  * Mongoose - Created, based on Freyja's Light class from 2002.01.27
  ==========================================================================*/
 
-#include "FreyjaLight.h"
+#include "Light.h"
 
-unsigned int FreyjaLight::mCounter = 0;
+using namespace freyja;
+
+unsigned int Light::mCounter = 0;
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaLight::FreyjaLight()
+Light::Light()
 {
 	mName[0] = 0;
 	mOptions = 0;
@@ -53,7 +55,7 @@ FreyjaLight::FreyjaLight()
 }
 
 
-FreyjaLight::~FreyjaLight()
+Light::~Light()
 {
 }
 
@@ -83,9 +85,9 @@ FreyjaLight::~FreyjaLight()
 ////////////////////////////////////////////////////////////
 
 #ifdef UNIT_TEST_FREYJALIGHT
-int runFreyjaLightUnitTest(int argc, char *argv[])
+int runLightUnitTest(int argc, char *argv[])
 {
-	FreyjaLight test;
+	Light test;
 
 	return 0;
 }
@@ -93,8 +95,8 @@ int runFreyjaLightUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[FreyjaLight class test]\n");
+	printf("[Light class test]\n");
 
-	return runFreyjaLightUnitTest(argc, argv);
+	return runLightUnitTest(argc, argv);
 }
 #endif

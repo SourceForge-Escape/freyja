@@ -1,13 +1,13 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Freyja
+ * Project : libfreyja
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
- * Object  : Action
- * License : No use w/o permission (C) 2005 Mongoose
- * Comments: This is the 'event reel atom' for freyja undo/redo/macro usage
+ * Object  : FreyjaUtil
+ * License : No use w/o permission (C) 2004 Mongoose
+ * Comments: This class provides a command line interface translation/test tool.
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -15,23 +15,49 @@
  * 
  *-- History ------------------------------------------------- 
  *
- * 2005.05.06:
+ * 2004.12.08:
  * Mongoose - Created
  ==========================================================================*/
 
-#include "Action.h"
+#include "Freyja.h"
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Action::Action()
+FreyjaUtil::FreyjaUtil()
 {
+#ifdef unix
+	char pluginDir[4096];
+	char *env;
+
+
+	env = getenv("HOME");
+
+	if (!env || !env[0])
+	{
+		printf("ERROR: Bad HOME envronment\n");
+	}
+
+	snprintf(pluginDir, 4094, "%s/.freyja/plugins/", env);
+	pluginDir[4095] = 0;
+#else
+	char *pluginDir = "C:\freyja\plugins";
+#endif
+
+	mScene = 0x0; //new FreyjaScene();
+	mPlugin = 0x0; //new FreyjaPlugin(mScene, pluginDir);
+	//mPlugin->setPrinter(&mPrinter);
+
+	mEgg = new Egg();
+	mEggPlugin = new EggPlugin(mEgg);
+	mEggPlugin->setPrinter(&mPrinter);
+	mEggPlugin->setupPlugins();
 }
 
 
-Action::~Action()
+FreyjaUtil::~FreyjaUtil()
 {
 }
 
@@ -40,32 +66,20 @@ Action::~Action()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-bool Action::serialize(FileWriter &r)
+int FreyjaUtil::exportModel(const char *filename, const char *type)
 {
-	return false;
+	return mEggPlugin->exportModel(filename, type);
 }
-
 
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void Action::redo()
+int FreyjaUtil::importModel(const char *filename)
 {
+	return mEggPlugin->importModel(filename);
 }
-
-
-bool Action::serialize(FileReader &r)
-{
-	return false;
-}
-
-
-void Action::undo()
-{
-}
-
 
 
 ////////////////////////////////////////////////////////////
@@ -82,10 +96,27 @@ void Action::undo()
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_ACTION
-int runActionUnitTest(int argc, char *argv[])
+#ifdef UNIT_TEST_FREYJAUTIL
+int runFreyjaUtilUnitTest(int argc, char *argv[])
 {
-	Action test;
+	FreyjaUtil test;
+
+	switch (argc)
+	{
+	case 4: // util file.grn 3ds file.3ds
+		test.importModel(argv[1]);
+		test.exportModel(argv[3], argv[2]);
+		break;
+
+
+	case 2:
+		test.importModel(argv[1]);
+		break;
+
+
+	default:
+		printf("Usage: %s import_model [type export_model]\n", argv[0]);
+	}
 
 	return 0;
 }
@@ -93,8 +124,8 @@ int runActionUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[Action class test]\n");
+	printf("[FreyjaUtil class test]\n");
 
-	return runActionUnitTest(argc, argv);
+	return runFreyjaUtilUnitTest(argc, argv);
 }
 #endif

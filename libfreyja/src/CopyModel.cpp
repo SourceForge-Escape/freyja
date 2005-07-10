@@ -19,7 +19,7 @@
  * Mongoose - Created, Moved from FreyjaModel for better abstraction
  ==========================================================================*/
 
-#include "FreyjaPluginABI.h"
+#include "PluginABI.h"
 
 #include "CopyModel.h"
 
@@ -28,9 +28,9 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-CopyModel::CopyModel(Egg *egg)
+CopyModel::CopyModel()
 {
-	mEgg = egg;
+
 	mAppendMode = false;
 }
 
@@ -57,6 +57,7 @@ bool CopyModel::getAppendMeshMode()
 
 bool CopyModel::copyMesh(int currentMesh, int currentGroup)
 {
+#ifdef FIXME
 	CopyVertex *v;
 	CopyTexCoord *t;
 	CopyPolygon *p;
@@ -165,12 +166,17 @@ bool CopyModel::copyMesh(int currentMesh, int currentGroup)
 	freyjaPrintMessage("Mesh[%i] copied...", mesh->id);
 
 	return true;
+#endif
+
+	freyjaPrintMessage("FIXME %s:%i", __FILE__, __LINE__);
+	return false;
 }
 
 
 bool CopyModel::copyVertexBuffer(Vector<unsigned int> &list, 
 								 int currentMesh, int currentGroup)
 {
+#ifdef FIXME
 	Vector<unsigned int> polygonList;
 	CopyVertex *v;
 	CopyTexCoord *t;
@@ -318,6 +324,10 @@ bool CopyModel::copyVertexBuffer(Vector<unsigned int> &list,
 
 	freyjaPrintMessage("Vertex buffer copied...", mesh->id);
 	return true;
+#endif
+
+	freyjaPrintMessage("FIXME %s:%i", __FILE__, __LINE__);
+	return false;
 }
 
 

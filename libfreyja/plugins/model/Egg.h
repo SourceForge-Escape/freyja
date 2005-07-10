@@ -85,8 +85,7 @@
 #include <mstl/Map.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
-
-#include "FreyjaPrinter.h"
+#include <freyja/Printer.h>
 
 
 typedef vec_t bbox_t[3][3];
