@@ -25,95 +25,95 @@
 
 
 
-bool RenderMesh::createRenderPolygon(RenderPolygon &face,
-									 egg_polygon_t &polygon, int32 frame)
-{
-	static vec_t *mpos;
-	static Vector3d u, v, w;
-	static unsigned int i, j, iend, jend;
-	static egg_vertex_t *vertex;
-	static egg_texel_t *texel;
-	static egg_texel_t *texel2;
-	static bool external_texel;
+// bool RenderMesh::createRenderPolygon(RenderPolygon &face,
+// 									 egg_polygon_t &polygon, int32 frame)
+// {
+// 	static vec_t *mpos;
+// 	static Vector3d u, v, w;
+// 	static unsigned int i, j, iend, jend;
+// 	static egg_vertex_t *vertex;
+// 	static egg_texel_t *texel;
+// 	static egg_texel_t *texel2;
+// 	static bool external_texel;
 
 
-	face.count = 0;
-	face.material = polygon.shader;
-	face.id = polygon.id;
+// 	face.count = 0;
+// 	face.material = polygon.shader;
+// 	face.id = polygon.id;
 
-	external_texel = !polygon.r_texel.empty();
+// 	external_texel = !polygon.r_texel.empty();
 
-	if (polygon.r_vertex.empty() ||
-		(!external_texel && (polygon.shader == COLORED_POLYGON)))
-	{
-		//freyjaPrintMessage("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
-		return false;
-	}
+// 	if (polygon.r_vertex.empty() ||
+// 		(!external_texel && (polygon.shader == COLORED_POLYGON)))
+// 	{
+// 		//freyjaPrintMessage("!FreyjaRender::DrawPolygon> Assertion failure, polygon %i malformed %s\n", polygon.id, (polygon.r_vertex.empty()) ? ": empty" : "");
+// 		return false;
+// 	}
 
 
-	/* Mongoose 2004.12.23, 
-	 * Setup vertex morphing for egg backend polygon */
-	for (i = polygon.r_vertex.begin(), iend = polygon.r_vertex.end(); i < iend; ++i)
-	{
-		vertex = polygon.r_vertex[i];
+// 	/* Mongoose 2004.12.23, 
+// 	 * Setup vertex morphing for egg backend polygon */
+// 	for (i = polygon.r_vertex.begin(), iend = polygon.r_vertex.end(); i < iend; ++i)
+// 	{
+// 		vertex = polygon.r_vertex[i];
 
-		if (!vertex)
-			continue;
+// 		if (!vertex)
+// 			continue;
 
-		mpos = vertex->pos;
+// 		mpos = vertex->pos;
 
-		if (frame > -1)
-		{
-			for (j = vertex->frameId.begin(), jend = vertex->frameId.end(); j < jend; ++j)
-			{
-				if (vertex->frameId[j] == frame)
-				{
-					mpos = *(vertex->frames[j]);
-					break;
-				}
-			}
+// 		if (frame > -1)
+// 		{
+// 			for (j = vertex->frameId.begin(), jend = vertex->frameId.end(); j < jend; ++j)
+// 			{
+// 				if (vertex->frameId[j] == frame)
+// 				{
+// 					mpos = *(vertex->frames[j]);
+// 					break;
+// 				}
+// 			}
 
-		}
+// 		}
 
-		face.vertices[i] = Vector3d(mpos);
-		face.normals[i] = Vector3d(vertex->norm);
+// 		face.vertices[i] = Vector3d(mpos);
+// 		face.normals[i] = Vector3d(vertex->norm);
 
-		if (!external_texel)
-		{
-			face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
-		}
-		else
-		{
-			if (polygon.shader == COLORED_POLYGON)
-			{
-				texel = polygon.r_texel[i*2];
-				texel2 = polygon.r_texel[i*2+1];
+// 		if (!external_texel)
+// 		{
+// 			face.texcoords[i] = Vector3d(vertex->uv[0], vertex->uv[1], 0);
+// 		}
+// 		else
+// 		{
+// 			if (polygon.shader == COLORED_POLYGON)
+// 			{
+// 				texel = polygon.r_texel[i*2];
+// 				texel2 = polygon.r_texel[i*2+1];
 	
-				if (texel && texel2)
-				{
-					face.colors[i][0] = texel->st[0];
-					face.colors[i][1] = texel->st[1];
-					face.colors[i][2] = texel2->st[0];
-					face.colors[i][3] = texel2->st[1];
-				}
-				else
-				{
-					face.colors[i][0] = face.colors[i][1] = face.colors[i][2] = 1.0;
-					face.colors[i][3] = 0.75;
-				}
-			}
-			else
-			{
-				texel = polygon.r_texel[i];
-				face.texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
-			}
-		}
+// 				if (texel && texel2)
+// 				{
+// 					face.colors[i][0] = texel->st[0];
+// 					face.colors[i][1] = texel->st[1];
+// 					face.colors[i][2] = texel2->st[0];
+// 					face.colors[i][3] = texel2->st[1];
+// 				}
+// 				else
+// 				{
+// 					face.colors[i][0] = face.colors[i][1] = face.colors[i][2] = 1.0;
+// 					face.colors[i][3] = 0.75;
+// 				}
+// 			}
+// 			else
+// 			{
+// 				texel = polygon.r_texel[i];
+// 				face.texcoords[i] = Vector3d(texel->st[0], texel->st[1], 0);
+// 			}
+// 		}
 
-		++face.count;
-	}
+// 		++face.count;
+// 	}
 
-	return true;
-}
+// 	return true;
+// }
 
 
 ////////////////////////////////////////////////////////////
@@ -136,17 +136,17 @@ RenderModel::~RenderModel()
 
 RenderSkeleton &RenderModel::getSkeleton()
 {
-	mSkeleton.setTags(mEgg->TagList());
+	//mSkeleton.setTags(mEgg->TagList());
 	return mSkeleton;
 }
 
 
 unsigned int RenderModel::getMeshCount()
 {
-	if (mMeshlist->empty())
+	//if (mMeshlist->empty())
 		return 0;
 	
-	return mMeshlist->end();
+		//return mMeshlist->end();
 }
 
 
@@ -163,12 +163,12 @@ bool RenderModel::getMesh(int32 index, RenderMesh &mesh, int32 frame)
 
 bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
 {
-	egg_polygon_t *poly = mEgg->getPolygon(index);
+// 	egg_polygon_t *poly = mEgg->getPolygon(index);
 
-	if (poly)
-	{
-		return RenderMesh::createRenderPolygon(face, *poly, 0);
-	}
+// 	if (poly)
+// 	{
+// 		return RenderMesh::createRenderPolygon(face, *poly, 0);
+// 	}
 
 	return false;
 }
@@ -177,63 +177,63 @@ bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
 bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 								int32 frame)
 {
-	egg_mesh_t *mesh = mEgg->getMesh(meshIndex);
+	//egg_mesh_t *mesh = mEgg->getMesh(meshIndex);
 
-	if (mesh)
-	{
-		createRenderMesh(rmesh, *mesh, frame);
-		return true;
-	}
+	//if (mesh)
+	//{
+	//	createRenderMesh(rmesh, *mesh, frame);
+	//	return true;
+	//}
 
 	return false;
 }
 
 
-void RenderModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh, 
-								   int32 frameIndex)
-{
-	egg_polygon_t *polygon;
-	egg_group_t *grp;
-	unsigned int i;
-	long frame = -1;
+// void RenderModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh, 
+// 								   int32 frameIndex)
+// {
+// 	egg_polygon_t *polygon;
+// 	egg_group_t *grp;
+// 	unsigned int i;
+// 	long frame = -1;
 
 
-	/* Vertex morph frame fu */
-	grp = mEgg->getGroup(frameIndex);
-	if (grp && grp->flags == 0xBADA55)
-		frame = grp->id;
+// 	/* Vertex morph frame fu */
+// 	grp = mEgg->getGroup(frameIndex);
+// 	if (grp && grp->flags == 0xBADA55)
+// 		frame = grp->id;
 
 
-	/* Mongoose 2004.03.26, 
-	 * This was here for vertex morph frames, still used for edit updates */
-	if (mesh.r_polygon.size() != mesh.polygon.size())
-	{
-		//freyjaPrintMessage("createRenderMesh> mesh[%i]: %i polygons, %i cached...", mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
+// 	/* Mongoose 2004.03.26, 
+// 	 * This was here for vertex morph frames, still used for edit updates */
+// 	if (mesh.r_polygon.size() != mesh.polygon.size())
+// 	{
+// 		//freyjaPrintMessage("createRenderMesh> mesh[%i]: %i polygons, %i cached...", mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
 
-		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
-		{
-			polygon = mEgg->getPolygon(mesh.polygon[i]);
+// 		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
+// 		{
+// 			polygon = mEgg->getPolygon(mesh.polygon[i]);
 			
-			if (polygon)
-			{
-				mesh.r_polygon.pushBack(polygon);
-			}
-		}
-	}
+// 			if (polygon)
+// 			{
+// 				mesh.r_polygon.pushBack(polygon);
+// 			}
+// 		}
+// 	}
 
-	rmesh.setEgg(mEgg, &mesh, &mesh.r_polygon);
-	rmesh.gbegin = mesh.group.begin(); 
-	rmesh.gend = mesh.group.end();
-	rmesh.id = mesh.id;
-	rmesh.frame = frame;
-}
+// 	rmesh.setEgg(mEgg, &mesh, &mesh.r_polygon);
+// 	rmesh.gbegin = mesh.group.begin(); 
+// 	rmesh.gend = mesh.group.end();
+// 	rmesh.id = mesh.id;
+// 	rmesh.frame = frame;
+// }
 
 
-void RenderModel::setEgg(Egg *egg)
-{
-	mEgg = egg;
-	mMeshlist = egg->MeshList();
-}
+// void RenderModel::setEgg(Egg *egg)
+// {
+// 	mEgg = egg;
+// 	mMeshlist = egg->MeshList();
+// }
 
 
 
@@ -309,8 +309,8 @@ bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 	{
 		//model = &(gRenderModels[modelIndex]);
 		model.mIndex = gRenderModels[modelIndex]->mIndex;
-		model.mEgg = gRenderModels[modelIndex]->mEgg;
-		model.mMeshlist = gRenderModels[modelIndex]->mMeshlist;
+// 		model.mEgg = gRenderModels[modelIndex]->mEgg;
+// 		model.mMeshlist = gRenderModels[modelIndex]->mMeshlist;
 
 		return true;
 	}

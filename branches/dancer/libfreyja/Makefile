@@ -161,24 +161,21 @@ targets: $(TARGETS)
 PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/ActionManager.o \
-	$(BUILDDIR)/CopyModel.o \
-	$(BUILDDIR)/PluginABI.o \
-	$(BUILDDIR)/Freyja.o \
-	$(BUILDDIR)/Plugin.o \
+	$(BUILDDIR)/Light.o \
+	$(BUILDDIR)/Vertex.o \
 	$(BUILDDIR)/Camera.o \
 	$(BUILDDIR)/Printer.o \
 	$(BUILDDIR)/FileReader.o \
 	$(BUILDDIR)/FileWriter.o \
 	$(BUILDDIR)/Image.o \
-	$(BUILDDIR)/Light.o \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/Material.o \
 	$(BUILDDIR)/PakReader.o \
-	$(BUILDDIR)/Skeleton.o \
 	$(BUILDDIR)/Texture.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
-	$(BUILDDIR)/Skeleton.o
+	$(BUILDDIR)/Skeleton.o \
+	$(BUILDDIR)/PluginABI.o 
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
