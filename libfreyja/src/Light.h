@@ -27,7 +27,10 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJALIGHT_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJALIGHT_H_
 
+#include <mstl/Vector.h>
 #include <hel/math.h>
+#include "freyja.h"
+
 
 #define Freyjalight Light
 
@@ -77,11 +80,40 @@ class Light
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	static uint32 getCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns number of unique materials
+	 ------------------------------------------------------*/
+
+	static Light *getLight(index_t uid);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get light by UID
+	 ------------------------------------------------------*/
+
+	index_t getUID();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Return UID of this Light
+	 ------------------------------------------------------*/
+
+	uint32 getSerializedSize();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Size of this class in bytes if serialized 
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	static index_t createLight();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : A new Light is made, and added to the pool
+	 ------------------------------------------------------*/
 
 	void setPosition(vec4_t xyz)
 	{
@@ -110,13 +142,11 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	unsigned int mId;         /* Unique identifier of this light */
-
 	char mName[64];           /* Light name */
 
-	unsigned int mOptions;    /* Option bitflags */
+	uint32 mOptions;          /* Option bitflags */
 
-	light_type_t mType;       /* Type of light */
+	light_type_t mLightType;  /* Type of light */
 
 
 	vec4_t mDir;	          /* Direction for directional or spot light use */
@@ -127,7 +157,19 @@ private:
 
 	vec_t mAttenuation;       /* Attenuation factor */
 
-	static unsigned int mCounter;   /* Id generator counter */
+
+
+	index_t mUID;                       /* Unique identifier, key for pool */
+
+	index_t mOldUID;                    /* UID when this was saved to disk */
+
+	static uint32 mType;                /* Type of file chunk */
+
+	static uint32 mVersion;             /* File chunk version */
+
+	static Vector<Light *> mGobalPool;  /* Storage for gobal access */
+
+	static Vector<index_t> mFreePool;   /* Tracks unused gobal pool slots */ 
 };
 
 }

@@ -36,17 +36,19 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
+#include "freyja.h"
+#include "LightABI.h"
+
 extern "C" {
 
-#define FREYJA_PLUGIN_VERSION   "Freyja 0.9.1" // "Freyja 0.10.0"
-#define FREYJA_LIST_RESET       -2
-#define FREYJA_LIST_NEXT        -1
-#define FREYJA_LIST_CURRENT     -3
-#define FREYJA_LIST_SIZE        -4
-#define FREYJA_PLUGIN_ERROR     -1
+#define FREYJA_PLUGIN_VERSION   "Freyja 0.10.0"
 
-	/* Start doing aliases for API clean up and backwards compatibility*/
-	//#define freyjaGetVertexTexCoord2fv freyjaGetVertexTexCoordUV2fv 
+/* FSM uses index_t with extentions by these error/states */
+#define FREYJA_NEXT        UINT_MAX-1
+#define FREYJA_RESET       UINT_MAX-2
+#define FREYJA_CURRENT     UINT_MAX-3
+#define FREYJA_SIZE        UINT_MAX-4
+#define FREYJA_ERROR       UINT_MAX-5
 
 
 typedef enum {
@@ -160,7 +162,7 @@ typedef enum {
 
 
 	///////////////////////////////////////////////////////////////////////
-	// Freyja Iterator functions
+	// Freyja Iterator/FSM functions
 	//
 	///////////////////////////////////////////////////////////////////////
 
@@ -176,7 +178,7 @@ typedef enum {
 	 * Post : The object is finialized and construction ends
 	 ------------------------------------------------------*/
 
-	int32 freyjaIterator(freyja_object_t type, int32 item);
+	index_t freyjaIterator(freyja_object_t type, index_t item);
 	/*------------------------------------------------------
 	 * Pre  : <type> is valid
 	 *        <item> is a FREYJA_LIST_... command or item index
@@ -188,7 +190,7 @@ typedef enum {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaCriticalSection(freyja_lock_t request);
+	index_t freyjaCriticalSection(freyja_lock_t request);
 	/*------------------------------------------------------
 	 * Pre  : FreyjaPlugin singleton exists
 	 *
@@ -209,7 +211,7 @@ typedef enum {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetCurrent(freyja_object_t type);
+	index_t freyjaGetCurrent(freyja_object_t type);
 	/*------------------------------------------------------
 	 * Pre  : <type> is valid
 	 * Post : Returns index of current internal complex type
@@ -218,32 +220,39 @@ typedef enum {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
+	index_t freyjaFSMVertex3fv(vec3_t xyz); // FIXME?
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_GROUP);
+	 *        x,y,z are valid 3space coors
+	 * Post : A new vertex created in the model
+	 *        Returns the native index of that vertex
+	 ------------------------------------------------------*/
 
-	int32 freyjaGetCurrentVertex();
+	index_t freyjaGetCurrentVertex();
 
-	void freyjaCurrentVertex(uint32 vertexIndex);
+	void freyjaCurrentVertex(index_t vertexIndex);
 
-	char freyjaIsVertexAllocated(uint32 vertexIndex);
+	char freyjaIsVertexAllocated(index_t vertexIndex);
 
-	char freyjaIsTexCoordAllocated(uint32 texcoordIndex);
+	char freyjaIsTexCoordAllocated(index_t texcoordIndex);
 
-	char freyjaIsBoneAllocated(uint32 boneIndex);
+	char freyjaIsBoneAllocated(index_t boneIndex);
 
-	char freyjaIsPolygonAllocated(uint32 polygonIndex);
+	char freyjaIsPolygonAllocated(index_t polygonIndex);
 
-	void freyjaModelTransform(uint32 modelIndex,
+	void freyjaModelTransform(index_t modelIndex,
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
-	void freyjaMeshTransform(uint32 meshIndex, uint32 frame,
+	void freyjaMeshTransform(index_t meshIndex, index_t frame,
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
-	void freyjaBoneTransform(uint32 boneIndex, 
+	void freyjaBoneTransform(index_t boneIndex, 
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
-	void freyjaMeshFrameTransform(uint32 meshIndex, uint32 frame,
+	void freyjaMeshFrameTransform(index_t meshIndex, index_t frame,
 									freyja_transform_action_t action, 
 									vec_t x, vec_t y, vec_t z);
 
@@ -252,81 +261,12 @@ typedef enum {
 	// libfreyja plugin ABI 0.9.1 object accessors
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaLightCreate();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns index of light spawned
-	 ------------------------------------------------------*/
 
-	int32 freyjaGetCurrentLight();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns index of light spawned
-	 ------------------------------------------------------*/
-
-	void freyjaLightDelete(uint32 lightIndex);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Light is removed from light pool
-	 ------------------------------------------------------*/
-
-	// Light mutators /////////////////
-
-	void freyjaLightPosition4v(uint32 lightIndex, vec4_t position);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Sets <position> 
-	 ------------------------------------------------------*/
-
-	void freyjaLightAmbient(uint32 lightIndex, vec4_t ambient);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Sets <ambient> color
-	 ------------------------------------------------------*/
-
-	void freyjaLightDiffuse(uint32 lightIndex, vec4_t diffuse);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Sets <diffuse> color
-	 ------------------------------------------------------*/
-
-	void freyjaLightSpecular(uint32 lightIndex, vec4_t specular);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Sets <specular> color
-	 ------------------------------------------------------*/
-
-	// Light accessors /////////////////
-
-	void freyjaGetLightPosition4v(uint32 lightIndex, vec4_t position);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Returns <position> 
-	 ------------------------------------------------------*/
-
-	void freyjaGetLightAmbient(uint32 lightIndex, vec4_t ambient);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Returns <ambient> color
-	 ------------------------------------------------------*/
-
-	void freyjaGetLightDiffuse(uint32 lightIndex, vec4_t diffuse);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Returns <diffuse> color
-	 ------------------------------------------------------*/
-
-	void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular);
-	/*------------------------------------------------------
-	 * Pre  : Light <lightIndex> exists
-	 * Post : Returns <specular> color
-	 ------------------------------------------------------*/
-	
 
 
 	// FREYJA_TEXTURE Accessors ///////////////////////////////////////////
 
-	int freyjaGetTextureFilename(unsigned int index, char **filename);
+	int32 freyjaGetTextureFilename(index_t textureIndex, char **filename);
 	/*------------------------------------------------------
 	 * Pre  : Do not attempt to alter <filename> on return
 	 *
@@ -334,10 +274,9 @@ typedef enum {
 	 *        Returns 0 on success.
 	 ------------------------------------------------------*/
 
-	int freyjaGetTextureImage(unsigned int index,
-							  unsigned int *w, unsigned int *h, 
-							  unsigned int *depth,  unsigned int *type,
-							  unsigned char **image);
+	int32 freyjaGetTextureImage(index_t textureIndex,
+								  uint32 *w, uint32 *h, 
+								  uint32 *depth, uint32 *type, byte **image);
 	/*------------------------------------------------------
 	 * Pre  : Do not attempt to alter <image> on return
 	 *
@@ -348,14 +287,15 @@ typedef enum {
 
 	// FREYJA_BONE Accessors //////////////////////////////////////////////
 
-	int32 freyjaGetSkeletonBoneCount(int32 skeletonIndex);
+	uint32 freyjaGetSkeletonBoneCount(index_t skeletonIndex);
 
-	int32 freyjaGetSkeletonBoneIndex(int32 skeletonIndex, int32 element);
+	index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element);
 
-	uint32 freyjaGetSkeletonRootIndex(uint32 skeletonIndex);
+	index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex);
 
-	const char *freyjaGetBoneName1s(int32 boneIndex);
-	int32 freyjaGetBoneName(int32 boneIndex, unsigned int size, char *name);
+	const char *freyjaGetBoneName1s(index_t boneIndex);
+
+	int32 freyjaGetBoneName(index_t boneIndex, uint32 size, char *name);
 	/*------------------------------------------------------
 	 * Pre  : <name> must be allocated to <size> width
 	 *        A <size> of 64 is recommended
@@ -364,47 +304,47 @@ typedef enum {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetBoneParent(int32 boneIndex);
+	int32 freyjaGetBoneParent(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns bone[index]'s parent id
 	 *        Returns -2 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetBoneRotationWXYZ4fv(int32 boneIndex, vec4_t wxyz);
+	index_t freyjaGetBoneRotationWXYZ4fv(index_t boneIndex, vec4_t wxyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s orientation as a Quaternion
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetBoneRotationXYZ3fv(int32 boneIndex, vec3_t xyz);
+	index_t freyjaGetBoneRotationXYZ3fv(index_t boneIndex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s orientation in Euler angles
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetBoneTranslation3fv(int32 boneIndex, vec3_t xyz);
+	index_t freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s position
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetBoneSkeletalBoneIndex(int32 boneIndex);
+	index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns local skeletal index of this bone
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetBoneChild(int32 boneIndex, uint32 element);
+	index_t freyjaGetBoneChild(index_t boneIndex, uint32 element);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Iterator for bone children
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetBoneChildCount(int32 boneIndex);
+	uint32 freyjaGetBoneChildCount(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Count of bone children
@@ -413,10 +353,11 @@ typedef enum {
 
 	// FREYJA_TEXCOORD Accessors //////////////////////////////////////////
 
-	int32 freyjaGetTexCoordPolygonRefIndex(int32 texcoordIndex, uint32 element);
-	uint32 freyjaGetTexCoordPolygonRefCount(int32 texcoordIndex);
+	index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex, uint32 element);
 
-	void freyjaGetTexCoord2fv(int32 texcoordIndex, vec2_t uv);
+	uint32 freyjaGetTexCoordPolygonRefCount(index_t texcoordIndex);
+
+	void freyjaGetTexCoord2fv(index_t texcoordIndex, vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : texcoord[index] exists
 	 * Post : Sets passed float array to texcoord u, v
@@ -425,8 +366,8 @@ typedef enum {
 
 	// FREYJA_VERTEX Accessors ////////////////////////////////////////////
 
-	int32 freyjaGetVertexPolygonRefIndex(int32 vertexIndex, uint32 element);
-	uint32 freyjaGetVertexPolygonRefCount(int32 vertexIndex);
+	index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element);
+	uint32 freyjaGetVertexPolygonRefCount(index_t vertexIndex);
 
 	void freyjaGetVertexTexCoord2fv(vec2_t uv);
 	void freyjaGetVertexNormal3fv(vec3_t xyz);
@@ -440,41 +381,41 @@ typedef enum {
 	 *        This is deprecated
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetVertexTexCoordUV2fv(int32 vertexIndex, vec2_t uv);
-	int32 freyjaGetVertexNormalXYZ3fv(int32 vertexIndex, vec3_t nxyz);
-	int32 freyjaGetVertexXYZ3fv(int32 vertexIndex, vec3_t xyz);
-	int32 freyjaGetVertexFrame(int32 vertexIndex, int32 element,
-							  int32 *frameIndex, vec3_t xyz);
-	int32 freyjaGetVertexFrameCount(int32 vertexIndex);
-	int32 freyjaGetVertexWeight(int32 vertexIndex, int32 element,
-							   int32 *bone, vec_t *weight);
-	int32 freyjaGetVertexWeightCount(int32 vertexIndex);
-	int32 freyjaGetVertexFlags(int32 vertexIndex);
+	int32 freyjaGetVertexTexCoordUV2fv(index_t vertexIndex, vec2_t uv);
+	int32 freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz);
+	int32 freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz);
+	int32 freyjaGetVertexFrame(index_t vertexIndex, uint32 element,
+							  index_t *frameIndex, vec3_t xyz);
+	int32 freyjaGetVertexFrameCount(index_t vertexIndex);
+	int32 freyjaGetVertexWeight(index_t vertexIndex, uint32 element,
+							   index_t *bone, vec_t *weight);
+	int32 freyjaGetVertexWeightCount(index_t vertexIndex);
+	int32 freyjaGetVertexFlags(index_t vertexIndex);
 
 	// FREYJA_MODEL Accessors
-	int32 freyjaGetModelFlags(int32 modelIndex);
-	int32 freyjaGetModelMeshIndex(int32 modelIndex, int32 element);
-	int32 freyjaGetModelMeshCount(int32 modelIndex);
+	uint32 freyjaGetModelFlags(index_t modelIndex);
+	index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element);
+	uint32 freyjaGetModelMeshCount(index_t modelIndex);
 
 	// FREYJA_MESH Accessors
-	char freyjaIsMeshAllocated(int32 meshIndex);
+	char freyjaIsMeshAllocated(index_t meshIndex);
 
-	int32 freyjaGetMeshFrameBoundingBox(int32 meshIndex, 
-										int32 frame, vec3_t min, vec3_t max);
+	int32 freyjaGetMeshFrameBoundingBox(index_t meshIndex, 
+										index_t frame, vec3_t min, vec3_t max);
 
-	int32 freyjaGetMeshFlags(int32 meshIndex);
+	uint32 freyjaGetMeshFlags(index_t meshIndex);
 
-	int32 freyjaGetMeshPosition(int32 meshIndex, vec3_t xyz);
+	int32 freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz);
 
-	char *freyjaGetMeshNameString(int32 meshIndex); // don't alter string
+	char *freyjaGetMeshNameString(index_t meshIndex); // don't alter string
 
-	int32 freyjaGetMeshName1s(int32 meshIndex, int32 lenght, char *name);
+	int32 freyjaGetMeshName1s(index_t meshIndex, uint32 lenght, char *name);
 
-	uint32 freyjaGetMeshTexCoordCount(int32 meshIndex);
+	uint32 freyjaGetMeshTexCoordCount(index_t meshIndex);
 
-	int32 freyjaGetMeshTexCoordIndex(int32 meshIndex, int32 element);
+	index_t freyjaGetMeshTexCoordIndex(index_t meshIndex, uint32 element);
 
-	int32 freyjaGetMeshVertexIndex(int32 meshIndex, int32 element);
+	index_t freyjaGetMeshVertexIndex(index_t meshIndex, uint32 element);
 	/*------------------------------------------------------
 	 * Pre  : freyjaGetMeshVertexCount must be called before
 	 *        this is valid while using the Egg backend
@@ -483,7 +424,7 @@ typedef enum {
 	 *        for mesh <meshIndex> or -1 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMeshVertexCount(int32 meshIndex);
+	uint32 freyjaGetMeshVertexCount(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the number of local vertices
@@ -491,7 +432,7 @@ typedef enum {
 	 *
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMeshPolygonVertexIndex(int32 meshIndex, int32 faceVertexIndex);
+	index_t freyjaGetMeshPolygonVertexIndex(index_t meshIndex, index_t faceVertexIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the index of local vertices
@@ -502,60 +443,28 @@ typedef enum {
 	
 
 	// 'free vertices' outside of polygons as well as other 'grouped' vertices
-	void freyjaMeshVertexGroupAppendGobalVertex(int32 meshIndex, int32 element, 
-												int32 vertexIndex);
-	int32 freyjaGetMeshVertexGroupVertexCount(int32 meshIndex, int32 element);
-	int32 freyjaGetMeshVertexGroupVertexIndex(int32 meshIndex, int32 element,
-											  int32 vertexElement);
+	void freyjaMeshVertexGroupAppendGobalVertex(index_t meshIndex, uint32 element, 
+												index_t vertexIndex);
+	uint32 freyjaGetMeshVertexGroupVertexCount(index_t meshIndex, uint32 element);
+	index_t freyjaGetMeshVertexGroupVertexIndex(index_t meshIndex, uint32 element,
+											  index_t vertexElement);
 
 
-	int32 freyjaGetMeshPolygonIndex(int32 meshIndex, int32 element);
-	int32 freyjaGetMeshPolygonCount(int32 meshIndex);
-	int32 freyjaGetMeshVertexGroupIndex(int32 meshIndex, int32 element);
-	int32 freyjaGetMeshVertexGroupCount(int32 meshIndex);
-	int32 freyjaGetMeshVertexFrameIndex(int32 meshIndex, int32 element); // Not Implemented
-	int32 freyjaGetMeshVertexFrameCount(int32 meshIndex); // Not Implemented
+	index_t freyjaGetMeshPolygonIndex(index_t meshIndex, uint32 element);
+	uint32 freyjaGetMeshPolygonCount(index_t meshIndex);
+	index_t freyjaGetMeshVertexGroupIndex(index_t meshIndex, uint32 element);
+	uint32 freyjaGetMeshVertexGroupCount(index_t meshIndex);
+	index_t freyjaGetMeshVertexFrameIndex(index_t meshIndex, uint32 element); // Not Implemented
+	uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex); // Not Implemented
 
 	// FREYJA_POLYGON Accessors
-	int32 freyjaGetPolygonMaterial(int32 polygonIndex);
-	int32 freyjaGetPolygonFlags(int32 polygonIndex);
-	int32 freyjaGetPolygonEdgeCount(int32 polygonIndex);
+	index_t freyjaGetPolygonMaterial(int32 polygonIndex);
+	uint32 freyjaGetPolygonFlags(int32 polygonIndex);
+	uint32 freyjaGetPolygonEdgeCount(int32 polygonIndex);
 	uint32 freyjaGetPolygonVertexCount(int32 polygonIndex);
 	uint32 freyjaGetPolygonTexCoordCount(int32 polygonIndex);
-	int32 freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element);
-	int32 freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element);
-
-
-int32 freyjaGetPolygon1u(freyja_object_t type, int32 item, int32 *value);
-/*------------------------------------------------------
- * Pre  : Type is either vertex or texel
- *        Item is index into polygon's type list 
- *        Value is valid pointer
- *
- * Post : Sets Value to the internal id value used by item
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-int32 freyjaGetPolygon3f(freyja_object_t type, int32 item, vec_t *value);
-/*------------------------------------------------------
- * Pre  : Type is either vertex or texel
- *        Item is index into polygon's type list 
- *        Value is valid pointer
- *
- * Post : Sets Value to the value used by item:
- *
- *           Texel  - float st[2]
- *           Vertex - float xyz[3]
- *
- *-- History ------------------------------------------
- *
- * 2001.11.03: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	index_t freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element);
+	index_t freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element);
 
 void freyjaPrintError(const char *format, ...);
 /*------------------------------------------------------
@@ -584,338 +493,250 @@ void freyjaPrintMessage(const char *format, ...);
 // Mutator functions to operate on Scene
 ///////////////////////////////////////////////////////////////////////
 
-	uint32 freyjaGetModelDebugLevel(uint32 model);
-	void freyjaModelDebugLevel(uint32 model, uint32 debugLevel);
+	uint32 freyjaGetModelDebugLevel(index_t modelIndex);
 
-void freyjaSetNormal3f(unsigned int index, vec_t x, vec_t y, vec_t z);
-void freyjaSetNormal3fv(unsigned int index, vec3_t xyz);
+	void freyjaModelDebugLevel(index_t modelIndex, uint32 debugLevel);
 
-	void freyjaTexCoordCombine(uint32 A, uint32 B);
+	/* Polymapped texcoords */
+	void freyjaPolyMapTexCoordCombine(index_t a, index_t b);
+	void freyjaPolyMapTexCoord2f(index_t index, vec_t u, vec_t v);
+	void freyjaPolyMapTexCoord2fv(index_t index, vec2_t uv);
+	void freyjaPolyMapTexCoord3f(index_t index, vec_t u, vec_t v, vec_t w);
+	void freyjaPolyMapTexCoord3fv(index_t index, vec3_t uv);
 
-void freyjaSetTexCoord2f(unsigned int index, vec_t u, vec_t v);
-void freyjaSetTexCoord2fv(unsigned int index, vec2_t uv);
+	/* Polymapped normals */
+	void freyjaPolyMapNormal3f(vec_t x, vec_t y, vec_t z);
+	void freyjaPolyMapNormal3fv(vec3_t xyz);
 
-	void freyjaTexCoordUV2fv(int32 texcoordIndex, vec2_t uv);
+	index_t freyjaTexCoord2f(vec_t u, vec_t v);
+	index_t freyjaTexCoord2fv(vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : s, t are 0.0 to 1.0 texels
+	 * Post : A new texel is created in the model
+	 *        Returns the native index of that texel
+	 ------------------------------------------------------*/
 
-void freyjaSetVertex3f(unsigned int index, vec_t x, vec_t y, vec_t z);
-	//void freyjaSetVertex3fv(unsigned int index, vec3_t xyz);
+	index_t freyjaVertexCreate3fv(vec3_t xyz);
 
-int32 freyjaNormal3f(vec_t x, vec_t y, vec_t z);
-int32 freyjaNormal3fv(vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : (x,y,z) is a valid normal vector
- * Post : A new normal is created in the mesh
- *        Returns the native index of that normal
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
+	index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z);
 
-int32 freyjaTexCoord2f(vec_t u, vec_t v);
-int32 freyjaTexCoord2fv(vec2_t uv);
-/*------------------------------------------------------
- * Pre  : s, t are 0.0 to 1.0 texels
- * Post : A new texel is created in the model
- *        Returns the native index of that texel
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
+	index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB);
 
-	int32 freyjaVertexCreate3fv(vec3_t xyz);
+	void freyjaVertexDelete(index_t vertexIndex);
 
-	int32 freyjaVertexCombine(int32 vertexIndexA, int32 vertexIndexB);
+	void freyjaVertexNormalFlip(index_t index);
 
-	void freyjaVertexDelete(int32 vertexIndex);
+	void freyjaVertexTexCoord2f(index_t index, vec_t u, vec_t v);
 
-void freyjaVertexNormalFlip(int32 index);
-void freyjaVertexTexCoord2f(int32 index, vec_t u, vec_t v);
-void freyjaVertexTexCoord2fv(int32 index, vec2_t uv);
-void freyjaVertexNormal3f(int32 index, vec_t nx, vec_t ny, vec_t nz);
-void freyjaVertexNormal3fv(int32 index, vec3_t nxyz);
-int32 freyjaVertex3f(vec_t x, vec_t y, vec_t z);
-int32 freyjaVertexXYZ3fv(int32 vertexIndex, vec3_t xyz);
-int32 freyjaVertex3fv(vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_GROUP);
- *        x,y,z are valid 3space coors
- * Post : A new vertex created in the model
- *        Returns the native index of that vertex
- *
- *-- History ------------------------------------------
- *
- * 1999.07.31:
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaVertexTexCoord2fv(index_t index, vec2_t uv);
 
-void freyjaVertexWeight(int32 index, vec_t weight, int32 bone);
-/*------------------------------------------------------
- * Pre  : <weight> of influence of <bone> on vertex[<index>]
- *
- * Post : Vertex <index> in the model gets weight added
- *        to influence list, if there is a weight for the
- *        corresponding bone it is replaced
- *
- *        <weight> <= 0.0 removes weight
- *
- *        All weights for the vertex combined must be 1.0
- *-- History ------------------------------------------
- *
- * 2004.03.25:
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaVertexNormal3f(index_t index, vec_t nx, vec_t ny, vec_t nz);
 
-void freyjaMeshTreeAddFrame(vec_t x, vec_t y, vec_t z);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_MESHTREE_ANIM);
- * Post : Adds a new meshtree frame to meshtree
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaVertexNormal3fv(index_t index, vec3_t nxyz);
 
-void freyjaMeshTreeFrameAddBone(int32 tag);
-/*------------------------------------------------------
- * Pre  : eggBegin(FREYJA_MESHTREE_ANIM_FRAME);
- * Post : Appends tag to mesh tree frame
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaVertexXYZ3fv(index_t vertexIndex, vec3_t xyz);
+
+	void freyjaVertexWeight(index_t index, vec_t weight, index_t bone);
+	/*------------------------------------------------------
+	 * Pre  : <weight> of influence of <bone> on vertex[<index>]
+	 *
+	 * Post : Vertex <index> in the model gets weight added
+	 *        to influence list, if there is a weight for the
+	 *        corresponding bone it is replaced
+	 *
+	 *        <weight> <= 0.0 removes weight
+	 *
+	 *        All weights for the vertex combined must be 1.0
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////////
 	// Bone
 	//
 	////////////////////////////////////////////////////////////////
 
-	int32 freyjaBoneCreate(uint32 skeletonIndex);
+	index_t freyjaBoneCreate(index_t skeletonIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Creates a new rest bone for skeleton
 	 *        Returns valid Index or -1 on Error
 	 ------------------------------------------------------*/
 
-	void freyjaBoneAddVertex(int32 boneIndex, int32 vertexIndex);
+	void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex);
 
-	void freyjaBoneRemoveVertex(int32 boneIndex, int32 vertexIndex);
-	
+	void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex);
 
-void freyjaBoneFlags1i(int32 boneIndex, int32 flags);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone flags
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneFlags1i(index_t boneIndex, index_t flags);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Set bone flags
+	 ------------------------------------------------------*/
 
-void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone parent
- *
- *        This doesn't affect skeleton, a follow up
- *        call to freyjaBoneAddChild1i is needed after
- *        all bones in skeleton are allocated
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneParent1i(index_t boneIndex, index_t parentIndex);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Set bone parent
+	 *
+	 *        This doesn't affect skeleton, a follow up
+	 *        call to freyjaBoneAddChild1i is needed after
+	 *        all bones in skeleton are allocated
+	 ------------------------------------------------------*/
 
+	void freyjaBoneName1s(index_t boneIndex, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Set human readable bone name
+	 ------------------------------------------------------*/
 
-void freyjaBoneName1s(int32 boneIndex, const char *name);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set human readable bone name
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneRemoveMesh1i(index_t boneIndex, index_t meshIndex);
+	void freyjaBoneAddMesh1i(index_t boneIndex, index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Mesh is added to Bone's child list
+	 *
+	 *        Either makes mesh tree connection or
+	 *        simulates by vertex weights and pivots
+	 ------------------------------------------------------*/
 
-void freyjaBoneRemoveMesh1i(int32 boneIndex, int32 meshIndex);
-void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Mesh is added to Bone's child list
- *
- *        Either makes mesh tree connection or
- *        simulates by vertex weights and pivots
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneRemoveChild1i(index_t boneIndex, index_t childIndex);
+	void freyjaBoneAddChild1i(index_t boneIndex, index_t childIndex);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Child is added to Bone's child list
+	 ------------------------------------------------------*/
 
-void freyjaBoneRemoveChild1i(int32 boneIndex, int32 childIndex);
-void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Child is added to Bone's child list
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneTranslate3f(index_t boneIndex, vec_t x, vec_t y, vec_t z);
+	void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Set bone relative position
+	 ------------------------------------------------------*/
 
-void freyjaBoneTranslate3f(int32 boneIndex, vec_t x, vec_t y, vec_t z);
-void freyjaBoneTranslate3fv(int32 boneIndex, vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone relative position
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneRotateEulerXYZ3f(index_t boneIndex, vec_t x, vec_t y, vec_t z);
+	void freyjaBoneRotateEulerXYZ3fv(index_t boneIndex, vec3_t xyz);
+	void freyjaBoneRotateQuatWXYZ4f(index_t boneIndex,vec_t w,vec_t x,vec_t y,vec_t z);
+	void freyjaBoneRotateQuatWXYZ4fv(index_t boneIndex, vec4_t wxyz);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Set bone orientation
+	 ------------------------------------------------------*/
 
-void freyjaBoneRotateEulerXYZ3f(int32 boneIndex, vec_t x, vec_t y, vec_t z);
-void freyjaBoneRotateEulerXYZ3fv(int32 boneIndex, vec3_t xyz);
-void freyjaBoneRotateQuatWXYZ4f(int32 boneIndex,vec_t w,vec_t x,vec_t y,vec_t z);
-void freyjaBoneRotateQuatWXYZ4fv(int32 boneIndex, vec4_t wxyz);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone orientation
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
 
+	void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side);
 
-void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
+	void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
 
-void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side);
+	void freyjaGenerateCircleMesh(vec3_t origin, uint32 count);
 
-void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
+	void freyjaGenerateConeMesh(vec3_t origin, vec_t height, uint32 count);
 
-void freyjaGenerateCircleMesh(vec3_t origin, int32 count); // radius
+	void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
+									uint32 count, uint32 segments); // radius
 
-void freyjaGenerateConeMesh(vec3_t origin, vec_t height, int32 count); // radius
+	void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
+								  uint32 count, uint32 segments);
 
-void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
-								int32 count, int32 segments); // radius
-
-void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
-							  int32 count, int32 segments);
-
-void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
-							int32 count, int32 segments); // radius
+	void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
+								uint32 count, uint32 segments); // radius
 
 
 
-	int32 freyjaMeshCreate();
+	index_t freyjaMeshCreate();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns index of mesh spawned
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetCurrentMesh();
+	index_t freyjaGetCurrentMesh();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns index using meshIndex state 
 	 ------------------------------------------------------*/
 
-	void freyjaMeshDelete(uint32 meshIndex);
+	void freyjaMeshDelete(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : Mesh <meshIndex> exists
 	 * Post : Mesh is removed from mesh pool
 	 ------------------------------------------------------*/
 
-	void freyjaMeshClampTexCoords(int32 meshIndex);
+	void freyjaMeshClampTexCoords(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Makes sure all UVs are inside 0,0 - 1,1
 	 ------------------------------------------------------*/
 
-	void freyjaMeshMaterial(uint32 meshIndex, uint32 materialIndex);
+	void freyjaMeshMaterial(index_t meshIndex, index_t materialIndex);
 
-	void freyjaMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz);
+	void freyjaMeshFrameCenter(index_t meshIndex, index_t frame, vec3_t xyz);
 
-	void freyjaGetMeshFrameCenter(uint32 meshIndex, uint32 frame, vec3_t xyz);
+	void freyjaGetMeshFrameCenter(index_t meshIndex, index_t frame, vec3_t xyz);
 
-	void freyjaMeshPromoteTexcoordsToPloymapping(int32 meshIndex);
+	void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Takes vertex UVs and promotes them to polymapped
 	 *        texcoords ( stored in polygon ala texture polygons )
 	 ------------------------------------------------------*/
 
-	void freyjaMeshAddPolygon(int32 meshIndex, int32 polygonIndex);
+	void freyjaMeshAddPolygon(index_t meshIndex, index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	int freyjaMeshRemovePolygon(int32 meshIndex, int32 polygonIndex);
+	void freyjaMeshRemovePolygon(index_t meshIndex, index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Removes references to polygonIndex in mesh, but
 	 *        it doesn't free the allocated polygon
 	 ------------------------------------------------------*/
 
-	void freyjaMeshUVMapPlanar(int32 meshIndex);
+	void freyjaMeshUVMapPlanar(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Texcoords computed with Planar mapping algorithm
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMeshUVMapSpherical(int32 meshIndex);
+	void freyjaMeshUVMapSpherical(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Texcoords computed with Spherical mapping algorithm
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMeshUVMapCylindrical(int32 meshIndex);
+	void freyjaMeshUVMapCylindrical(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Texcoords computed with Cylindrical mapping algorithm
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMeshTesselateTriangles(int32 meshIndex);
+	void freyjaMeshTesselateTriangles(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Divides all polygons in mesh into triangles
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMeshNormalFlip(int32 meshIndex);
+	void freyjaMeshNormalFlip(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Flips all vertex normals in mesh
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMeshGenerateVertexNormals(int32 meshIndex);
+	void freyjaMeshGenerateVertexNormals(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : meshIndex references a valid mesh
 	 * Post : Recalculates all vertex normals in mesh
 	 *
 	 ------------------------------------------------------*/
 
-	int32 freyjaMeshPosition(int32 meshIndex, vec3_t xyz);
+	void freyjaMeshPosition(index_t meshIndex, vec3_t xyz);
 
-	void freyjaMeshName1s(int32 meshIndex, const char *name);
+	void freyjaMeshName1s(index_t meshIndex, const char *name);
 
 	void freyjaMeshFlags1u(unsigned int flags);
 	/*------------------------------------------------------
@@ -932,40 +753,40 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
-	void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z);
+	void freyjaVertexFrame3f(index_t index, vec_t x, vec_t y, vec_t z);
 
 
 	///////////////////////////////////////////////////////////////////////
 	// Polygon
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaPolygonCreate();
+	index_t freyjaPolygonCreate();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Makes invalid/empty polygon to be filled, returns index
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonDelete(int32 polygonIndex);
+	void freyjaPolygonDelete(index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Removes polygon 
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonSplit(int32 meshIndex, int32 polygonIndex);
+	void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *
 	 * Post : Polygon is split into 2 smaller polygons 
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonTexCoordPurge(int32 polygonIndex);
+	void freyjaPolygonTexCoordPurge(index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *
 	 * Post : All polymapped texcoords are dereferenced
 	 ------------------------------------------------------*/
 
-	int freyjaPolygonExtrudeQuad1f(int32 polygonIndex, vec_t dist);
+	void freyjaPolygonExtrudeQuad1f(index_t polygonIndex, vec_t dist);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *        the 'normal' is the vector you wish to follow with extrude
@@ -979,7 +800,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int freyjaPolygonExtrudeQuad(int32 polygonIndex, vec3_t normal);
+	void freyjaPolygonExtrudeQuad(index_t polygonIndex, vec3_t normal);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *        the 'normal' is the vector you wish to follow with extrude
@@ -993,8 +814,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonAddVertex1i(int32 polygonIndex, int32 vertexIndex);
-	void freyjaPolygonVertex1i(int32 index);  // DEPRECATED
+	void freyjaPolygonAddVertex1i(index_t polygonIndex, index_t vertexIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 * Post : Adds a vertex to a polygon
@@ -1005,8 +825,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonAddTexCoord1i(int32 polygonIndex, int32 texcoordIndex);
-	void freyjaPolygonTexCoord1i(int32 index);  // DEPRECATED
+	void freyjaPolygonAddTexCoord1i(index_t polygonIndex, index_t texcoordIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 * Post : Adds a texcoord to a polygon
@@ -1017,8 +836,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonSetMaterial1i(int32 polygonIndex, int32 materialIndex);
-	void freyjaPolygonMaterial1i(int32 id);  // DEPRECATED
+	void freyjaPolygonSetMaterial1i(index_t polygonIndex, index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 * Post : Sets material for a polygon
@@ -1034,7 +852,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	// Animation ( 0.9.3 ABI, Can't be used with freyjaIterators )
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaAnimationCreate();
+	index_t freyjaAnimationCreate();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Creates a new Freyja Animation object
@@ -1046,16 +864,16 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *        skeletons match. 
 	 ------------------------------------------------------*/
 
-	int32 freyjaAnimationBoneCreate(int32 animationIndex,
-								   const char *name, int32 boneIndex);
+	index_t freyjaAnimationBoneCreate(index_t animationIndex,
+								   const char *name, index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
 	 * Post : Creates a new Freyja Animation Bone object
 	 *        Returns the new Bone's index or -1 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaAnimationBoneKeyFrameCreate(int32 animationIndex,
-										   int32 boneIndex,
+	index_t freyjaAnimationBoneKeyFrameCreate(index_t animationIndex,
+										   index_t boneIndex,
 										   vec_t time, vec3_t xyz, vec4_t wxyz);
 	/*------------------------------------------------------
 	 * Pre  : Animation <animationIndex> exists
@@ -1068,7 +886,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	/* Animation Accessors */
 
-	int32 freyjaGetAnimationCount();
+	uint32 freyjaGetAnimationCount();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the number of Animations being managed
@@ -1170,19 +988,19 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaShaderCreate();
+	index_t freyjaShaderCreate();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaShaderProgram(uint32 shaderIndex, const char *program);
+	void freyjaShaderProgram(index_t shaderIndex, const char *program);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetShaderProgram(uint32 shaderIndex);
+	const char *freyjaGetShaderProgram(index_t shaderIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -1193,19 +1011,19 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaTextureCreate();
+	index_t freyjaTextureCreate();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	int32 freyjaTextureFilename1s(const char *filename);
+	index_t freyjaTextureCreateFilename(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	int32 freyjaTextureStoreBuffer(unsigned char *image, uint32 depth,
+	index_t freyjaTextureCreateBuffer(byte *image, uint32 depth,
 								 	uint32 width, uint32 height,
 									freyja_colormode_t type);
 	/*------------------------------------------------------
@@ -1218,20 +1036,20 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	// Material ( 0.9.3 ABI, Can't be used with freyjaIterators )
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaMaterialCreate();
+	index_t freyjaMaterialCreate();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Creates a new Freyja Material object
 	 *        Returns the new Material's index or -1 on error
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetCurrentMaterial();
+	index_t freyjaGetCurrentMaterial();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaCurrentMaterial(uint32 materialIndex);
+	void freyjaCurrentMaterial(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -1240,20 +1058,20 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	/* Material Accessors */
 
-	int32 freyjaGetMaterialCount();
+	uint32 freyjaGetMaterialCount();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the number of Materials being managed
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialIndex(int32 materialIndex, int32 element);
+	index_t freyjaGetMaterialIndex(index_t materialIndex, uint32 element);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns the gobal object index ( from the local
 	 *        Material element index ) or -1 on error
 	 ------------------------------------------------------*/
 
-	char *freyjaGetMaterialName(int32 materialIndex);
+	char *freyjaGetMaterialName(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 *        Don't alter the returned string
@@ -1262,67 +1080,67 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *        Returns 0x0 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialFlags(int32 materialIndex);
+	uint32 freyjaGetMaterialFlags(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns flags or -1 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialTexture(int32 materialIndex);
+	uint32 freyjaGetMaterialTexture(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns texture index or -1 for error or no texture
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetMaterialTextureName(int32 materialIndex);
+	const char *freyjaGetMaterialTextureName(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialAmbient(int32 materialIndex, vec4_t ambient);
+	void freyjaGetMaterialAmbient(index_t materialIndex, vec4_t ambient);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <ambient> color
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialDiffuse(int32 materialIndex, vec4_t diffuse);
+	void freyjaGetMaterialDiffuse(index_t materialIndex, vec4_t diffuse);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <diffuse> color
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialSpecular(int32 materialIndex, vec4_t specular);
+	void freyjaGetMaterialSpecular(index_t materialIndex, vec4_t specular);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <specular> color
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialEmissive(int32 materialIndex, vec4_t emissive);
+	void freyjaGetMaterialEmissive(index_t materialIndex, vec4_t emissive);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns <emissive> color
 	 ------------------------------------------------------*/
 
-	vec_t freyjaGetMaterialShininess(int32 materialIndex);
+	vec_t freyjaGetMaterialShininess(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns specular exponent or -1.0 on error
 	 ------------------------------------------------------*/
 
-	vec_t freyjaGetMaterialTransparency(int32 materialIndex);
+	vec_t freyjaGetMaterialTransparency(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns transparency or -1.0 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialBlendSource(int32 materialIndex);
+	int32 freyjaGetMaterialBlendSource(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns blend source factor or -1 on error
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialBlendDestination(int32 materialIndex);
+	int32 freyjaGetMaterialBlendDestination(index_t materialIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Returns blend destination factor or -1 on error
@@ -1331,63 +1149,63 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	/* Material Mutators */
 
-	void freyjaMaterialName(int32 materialIndex, const char *name);
+	void freyjaMaterialName(index_t materialIndex, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <name> id is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialClearFlag(int32 materialIndex, int32 flag);
-	void freyjaMaterialSetFlag(int32 materialIndex, int32 flag);
-	void freyjaMaterialFlags(int32 materialIndex, int32 flags);
+	void freyjaMaterialClearFlag(index_t materialIndex, int32 flag);
+	void freyjaMaterialSetFlag(index_t materialIndex, int32 flag);
+	void freyjaMaterialFlags(index_t materialIndex, int32 flags);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's bit <flags> are set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTextureName(int32 materialIndex, const char *name);
+	void freyjaMaterialTextureName(index_t materialIndex, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material textures's <name> id is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTexture(int32 materialIndex, int32 textureIndex);
+	void freyjaMaterialTexture(index_t materialIndex, index_t textureIndex);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <texture> index is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialAmbient(int32 materialIndex, const vec4_t ambient);
+	void freyjaMaterialAmbient(index_t materialIndex, const vec4_t ambient);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <ambient> color is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialDiffuse(int32 materialIndex, const vec4_t diffuse);
+	void freyjaMaterialDiffuse(index_t materialIndex, const vec4_t diffuse);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <diffuse> color is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialSpecular(int32 materialIndex, const vec4_t specular);
+	void freyjaMaterialSpecular(index_t materialIndex, const vec4_t specular);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <specular> color is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialEmissive(int32 materialIndex, const vec4_t emissive);
+	void freyjaMaterialEmissive(index_t materialIndex, const vec4_t emissive);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's <emissive> color is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialShininess(int32 materialIndex, vec_t exponent);
+	void freyjaMaterialShininess(index_t materialIndex, vec_t exponent);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's Specular <exponent> is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTransparency(int32 materialIndex, vec_t transparency);
+	void freyjaMaterialTransparency(index_t materialIndex, vec_t transparency);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 *        <transparency> is a value from 0.0 to 1.0
@@ -1395,14 +1213,13 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : Material's <transparency> is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialBlendSource(int32 materialIndex, uint32 factor);
+	void freyjaMaterialBlendSource(index_t materialIndex, uint32 factor);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's blend source <factor> is set
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialBlendDestination(int32 materialIndex,
-										uint32 factor);
+	void freyjaMaterialBlendDestination(index_t materialIndex, uint32 factor);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists
 	 * Post : Material's blend destination <factor> is set
@@ -1414,11 +1231,11 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	// Faster access API for modeler use
 	///////////////////////////////////////////////////////////////////////
 
-	vec3_t *freyjaGetVertexXYZ(int32 vertexIndex);
-	vec2_t *freyjaGetVertexUV(int32 vertexIndex);
-	vec2_t *freyjaGetTexCoordUV(int32 texcoordIndex);
+	vec3_t *freyjaGetVertexXYZ(index_t vertexIndex);
+	vec2_t *freyjaGetVertexUV(index_t vertexIndex);
+	vec2_t *freyjaGetTexCoordUV(index_t texcoordIndex);
 
-	char freyjaGetModelAppendMeshMode(int32 modelIndex);
+	char freyjaGetModelAppendMeshMode(index_t modelIndex);
 	/*------------------------------------------------------
 	 * Pre  : Model <modelIndex> exists and has an active copy buffer
 	 * Post : Model's mesh buffer mode is returned or -1 on error
@@ -1426,13 +1243,13 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *         disabled when returning  0 
 	 ------------------------------------------------------*/
 
-	void freyjaModelClear(uint32 modelIndex);
+	void freyjaModelClear(index_t modelIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : All data in model is reset/cleared
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonSplitTexCoords(uint32 meshIndex, uint32 polygonIndex);
+	void freyjaPolygonSplitTexCoords(index_t meshIndex, index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : All TexCoords are duplicated, then references to old
@@ -1441,22 +1258,22 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *        in a UV Mesh
 	 ------------------------------------------------------*/
 
-	void freyjaModelTransformTexCoord(uint32 modelIndex,
-									uint32 texCoordIndex,
-									freyja_transform_action_t action,
-									vec_t x, vec_t y);
+	void freyjaModelTransformTexCoord(index_t modelIndex,
+										index_t texCoordIndex,
+										freyja_transform_action_t action,
+										vec_t x, vec_t y);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaModelClampTexCoords(uint32 modelIndex);
+	void freyjaModelClampTexCoords(index_t modelIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Clamps UVs and TexCoords to 0.0 to 1.0
 	 ------------------------------------------------------*/
 
-	void freyjaModelAppendMeshMode(int32 modelIndex, char on);
+	void freyjaModelAppendMeshMode(index_t modelIndex, char on);
 	/*------------------------------------------------------
 	 * Pre  : Model <modelIndex> exists and has an active copy buffer
 	 * Post : Model's mesh buffer mode is 
@@ -1464,14 +1281,14 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *         disabled when <on> = 0 
 	 ------------------------------------------------------*/
 
-	char freyjaModelCopyMesh(int32 modelIndex, int mesh, int frame);
+	char freyjaModelCopyMesh(index_t modelIndex, index_t mesh, index_t frame);
 	/*------------------------------------------------------
 	 * Pre  : Model <modelIndex> exists and has an active copy buffer
 	 * Post : Model's copy buffer is modified to include new mesh duplicate
 	 *        using the *local <mesh> index and vertex morph <frame>
 	 ------------------------------------------------------*/
 
-	char freyjaModelPasteMesh(int32 modelIndex);
+	char freyjaModelPasteMesh(index_t modelIndex);
 	/*------------------------------------------------------
 	 * Pre  : Model <modelIndex> exists and has an active copy buffer
 	 * Post : Model's copy buffer is added to freyja as world object
@@ -1518,25 +1335,25 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *        search path list.
 	 ------------------------------------------------------*/
 
-	void freyjaPluginDescription(uint32 pluginIndex, const char *info_line);
+	void freyjaPluginDescription(index_t pluginIndex, const char *info_line);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaPluginImportFlags(uint32 pluginIndex, int32 flags);
+	void freyjaPluginImportFlags(index_t pluginIndex, uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaPluginExportFlags(uint32 pluginIndex, int32 flags);
+	void freyjaPluginExportFlags(index_t pluginIndex, uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaPluginExtention(uint32 pluginIndex, const char *ext);
+	void freyjaPluginExtention(index_t pluginIndex, const char *ext);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -1579,13 +1396,13 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaPluginImport1i(int32 flags);
+	void freyjaPluginImport1i(uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaPluginExport1i(int32 flags);
+	void freyjaPluginExport1i(uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -1628,21 +1445,21 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	int32 freyjaGetPluginId();
 
-	int freyjaGetPluginArg1f(int32 pluginId, const char *name, float *arg);
+	int freyjaGetPluginArg1f(index_t pluginId, const char *name, float *arg);
 
-	int freyjaGetPluginArg1i(int32 pluginId, const char *name, int32 *arg);
+	int freyjaGetPluginArg1i(index_t pluginId, const char *name, int32 *arg);
 
-	int freyjaGetPluginArg1s(int32 pluginId, const char *name, char **arg);
+	int freyjaGetPluginArg1s(index_t pluginId, const char *name, char **arg);
 
-	int freyjaGetPluginArgString(int32 pluginId, const char *name, 
-								 int32 len, char *arg);
+	int freyjaGetPluginArgString(index_t pluginId, const char *name, 
+								 uint32 len, char *arg);
 
 
 	///////////////////////////////////////////////////////////////////////
 	//  Pak VFS 
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaPakBegin(const char *filename);
+	index_t freyjaPakBegin(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Starts a new VFS from a 'pak file'
@@ -1665,9 +1482,9 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 *        NOT IMPLEMENTED!
 	 ------------------------------------------------------*/
 
-	int32 freyjaPakAddFullPathFile(int32 pakIndex,
+	int32 freyjaPakAddFullPathFile(index_t pakIndex,
 								  const char *vfsFilename,
-								  int32 offset, int32 size);
+								  uint32 offset, uint32 size);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Adds a new entry to VFS mapping a chunk from
@@ -1681,7 +1498,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaPakEnd(int32 pakIndex);
+	void freyjaPakEnd(index_t pakIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Finalizes VFS for pakIndex
@@ -1742,45 +1559,42 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 }
 
 
+// Use freyjaVertexGroupCreate/Delete to make tmp lists that are C exportable?
+#ifdef REPLACE_ME_FIXME_NOW
 /* Mongoose 2004.12.19, 
  * C++ fun */
-void freyjaVertexListTransform(Vector<uint32> &list,
+void freyjaVertexListTransform(Vector<index_t> &list,
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
-void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
-								Vector<int32> uvMap, bool x, bool y);
+void freyjaModelMirrorTexCoord(index_t modelIndex, index_t texCoordIndex,
+								Vector<index_t> uvMap, bool x, bool y);
 
-char freyjaModelCopyVertexList(int32 modelIndex, 
-							   Vector<unsigned int> &list,
-							   int mesh, int frame);
+char freyjaModelCopyVertexList(index_t modelIndex, 
+							   Vector<index_t> &list,
+							   index_t mesh, index_t frame);
 /*------------------------------------------------------
  * Pre  : Model <modelIndex> exists and has an active copy buffer
  * Post : Model's copy buffer is modified to include new mesh duplicate
  *        using the *local <mesh> index and vertex morph <frame>
  ------------------------------------------------------*/
 
-int32 freyjaFindPolygonByVertices(Vector<uint32> vertices);
+index_t freyjaFindPolygonByVertices(Vector<index_t> vertices);
 
-// FreyjaSkeletalAnimation *freyjaGetAnimation(int32 animationIndex);
 
-Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
+Vector<index_t> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 
-void freyjaGetVertexPolygonRef1i(int32 vertexIndex, Vector<long> &polygons);
-void freyjaGetVertexPolygonRef(Vector<long> &polygons);
+void freyjaGetVertexPolygonRef1i(index_t vertexIndex, Vector<index_t> &polygons);
+
+void freyjaGetVertexPolygonRef(Vector<index_t> &polygons);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Returns a list of indices of polygons that
  *        use current vertex in iterator
  *
  *        List can be empty
- *
- *-- History ------------------------------------------
- *
- * 2004.12.17:
- * Mongoose - Created, wrapper for old Egg style
- *            reverse reference system ( very handy )
  ------------------------------------------------------*/
 
+#endif /* REPLACE_ME_FIXME_NOW */
 
 #endif

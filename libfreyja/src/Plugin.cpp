@@ -21,6 +21,9 @@
  *
  ==========================================================================*/
 
+// TODO: Transform this into purely an _INSTANCED_ FSM, and move plugin
+//       related classes, etc into Plugin ( replace PluginABI )
+
 #include <dlfcn.h> 
 #include <sys/types.h>
 #include <dirent.h>
@@ -41,7 +44,7 @@
 FreyjaPlugin *FreyjaPlugin::mPlugin = 0x0;
 
 
-FreyjaPlugin::FreyjaPlugin(FreyjaScene *scene, char *plugin_dir)
+FreyjaPlugin::FreyjaPlugin(Scene *scene, char *plugin_dir)
 {
 	mPrinter = 0x0;
 
@@ -131,7 +134,7 @@ unsigned int FreyjaPlugin::getCount(freyja_object_t type)
 	case FREYJA_TEXCOORD:
 		if (mMesh)
 		{
-			return mMesh->getTexCoordCount();
+			return 0;//mMesh->getTexCoordCount();
 		}
 		return 0;
 		break;
@@ -147,7 +150,7 @@ unsigned int FreyjaPlugin::getCount(freyja_object_t type)
 	case FREYJA_VERTEX_FRAME:
 		if (mMesh)
 		{
-			return mMesh->getVertexFrameCount();
+			return 0;//mMesh->getVertexFrameCount();
 		}
 		return 0;
 		break;
@@ -169,7 +172,7 @@ unsigned int FreyjaPlugin::getCount(freyja_object_t type)
 	case FREYJA_BONE:
 		if (mSkeleton)
 		{
-			return mSkeleton->getBoneCount();
+			return 0;//mSkeleton->getBoneCount();
 		}
 		return 0;
 		break;
@@ -206,16 +209,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 	{
 	case FREYJA_VERTEX:
 		if (!mMesh)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
 
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexVertex = mMesh->vertices.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexVertex;
 			break;
 		default:
@@ -231,16 +234,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_TEXCOORD:
 		if (!mMesh)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
 
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexTexCoord = mMesh->texcoords.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexTexCoord;
 			break;
 		default:
@@ -255,16 +258,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_MODEL:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
 
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexModel = mScene->models.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexModel;
 			break;
 		default:
@@ -281,16 +284,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_MESH:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
 
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexMesh = mScene->meshes.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexMesh;
 			break;
 		default:
@@ -307,16 +310,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_VERTEX_FRAME:
 		if (!mMesh)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexVertexFrame = mMesh->frames.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexVertexFrame;
 			break;
 		default:
@@ -333,16 +336,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_POLYGON:    
 		if (!mMesh)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexPolygon = mMesh->polygons.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexPolygon;
 			break;
 		default:
@@ -359,16 +362,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_BONE:
 		if (!mSkeleton)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexBone = mSkeleton->mBones.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexBone;
 			break;
 		default:
@@ -385,16 +388,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_SKELETON:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexSkeleton = mScene->skeletons.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexSkeleton;
 			break;
 		default:
@@ -411,16 +414,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_ANIMATION:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexAnimation = mScene->animations.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexAnimation;
 			break;
 		default:
@@ -437,16 +440,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_VERTEX_GROUP:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
 
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexVertexGroup = mScene->vertexgroups.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexVertexGroup;
 			break;
 		default:
@@ -463,16 +466,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_MATERIAL:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexMaterial = mScene->materials.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexMaterial;
 			break;
 		default:
@@ -489,16 +492,16 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_TEXTURE:
 		if (!mScene)
-			return FREYJA_PLUGIN_ERROR;
+			return FREYJA_ERROR;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexTexture = mScene->textures.begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexTexture;
 			break;
 		default:
@@ -518,7 +521,7 @@ long FreyjaPlugin::freyjaIterator(freyja_object_t type, int item)
 		break;
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return FREYJA_ERROR;
 }
 
 
@@ -710,7 +713,7 @@ long FreyjaPlugin::getCurrentIndex(freyja_object_t type)
 		break;
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return FREYJA_ERROR;
 }
 
 	
@@ -1666,7 +1669,7 @@ int FreyjaPlugin::setTexture(unsigned char *image, unsigned int numBytes,
 
 
 	if (!image || numBytes < 3 || !width || !height)
-		return FREYJA_PLUGIN_ERROR;
+		return FREYJA_ERROR;
 
 	size = width*height*numBytes;
 
