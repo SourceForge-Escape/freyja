@@ -20,6 +20,7 @@
  ==========================================================================*/
 
 #include "Vertex.h"
+#include "VertexABI.h"
 
 using namespace freyja;
 
@@ -127,6 +128,12 @@ Vertex *Vertex::getVertex(index_t uid)
 }
 
 
+index_t Vertex::getUID()
+{
+	return mUID;
+}
+
+
 bool Vertex::serialize(FileWriter &w)
 {
 	uint32 i, count;
@@ -189,6 +196,15 @@ bool Vertex::serialize(FileWriter &w)
 void Vertex::assignToMesh(index_t meshIndex)
 {
 	mesh = meshIndex;
+}
+
+
+index_t Vertex::combine(index_t vertexIndexA, index_t vertexIndexB)
+{
+	freyjaPrintMessage("Vertex::combine(...) Not Implemented %s:%i",
+					   __FILE__, __LINE__);
+
+	return vertexIndexA;
 }
 
 
@@ -263,6 +279,312 @@ bool Vertex::serialize(FileReader &r)
 ////////////////////////////////////////////////////////////
 // Private Mutators
 ////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// C ABI
+////////////////////////////////////////////////////////////
+
+index_t gFreyjaCurrentVertex = INDEX_INVALID;
+
+index_t freyjaGetCurrentVertex()
+{
+	return gFreyjaCurrentVertex;
+}
+
+
+void freyjaCurrentVertex(index_t vertexIndex)
+{
+	if (freyjaIsVertexAllocated(vertexIndex))
+		gFreyjaCurrentVertex = vertexIndex;
+}
+
+
+/* C Accessors */
+
+byte freyjaIsVertexAllocated(index_t vertexIndex)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+
+void freyjaGetVertexNormal3fv(index_t vertexIndex, vec3_t xyz)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		xyz[0] = v->normal[0];
+		xyz[1] = v->normal[1];
+		xyz[2] = v->normal[2];
+	}
+}
+
+
+index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v && element < v->polygonRef.size())
+	{
+		return v->polygonRef[element];
+	}
+
+	return INDEX_INVALID;
+}
+
+
+uint32 freyjaGetVertexPolygonRefCount(index_t vertexIndex)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		return v->polygonRef.size();
+	}
+
+	return 0;
+}
+
+
+void freyjaGetVertexPosition3fv(index_t vertexIndex, vec3_t xyz)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		xyz[0] = v->xyz[0];
+		xyz[1] = v->xyz[1];
+		xyz[2] = v->xyz[2];
+	}
+}
+
+
+void freyjaGetVertexTexCoord2fv(index_t vertexIndex, vec2_t uv)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		uv[0] = v->uvw[0];
+		uv[1] = v->uvw[1];
+		//uvw[2] = v->uvw[2];
+	}
+}
+
+
+void freyjaGetVertexFrame(index_t vertexIndex, uint32 element,
+						  index_t *frameIndex, vec3_t xyz)
+{
+// 	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+
+
+// 	if (vertex)
+// 	{
+// 		if (element > -1 && element < (int)vertex->frames.end())
+// 		{
+// 			vec_t *v = *(vertex->frames[element]);
+
+// 			if (element < (int)vertex->frameId.end())
+// 				*frameIndex = vertex->frameId[element];
+
+// 			xyz[0] = v[0];
+// 			xyz[1] = v[1];
+// 			xyz[2] = v[2];
+
+// 			return 0;
+// 		}
+
+// 		/* Invalid indices return orignal position, so you don't get holes */
+// 		xyz[0] = vertex->pos[0];
+// 		xyz[1] = vertex->pos[1];
+// 		xyz[2] = vertex->pos[2];
+
+// 		return 0;
+// 	}
+
+// 	return -1;
+}
+
+
+uint32 freyjaGetVertexFrameCount(int32 vertexIndex)
+{
+// 	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+//	
+// 	if (vertex)
+// 	{
+// 		return vertex->frames.end();
+// 	}
+
+ 	return 0;
+}
+
+
+void freyjaGetVertexWeight(index_t vertexIndex, uint32 element,
+						   index_t *bone, vec_t *weight)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v && element < v->weights.size() && v->weights[element])
+	{
+		*bone = v->weights[element]->mBoneIndex;
+		*weight = v->weights[element]->mWeight;
+	}
+}
+
+
+uint32 freyjaGetVertexWeightCount(index_t vertexIndex)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		return v->weights.size();
+	}
+
+	return 0;
+}
+
+
+byte freyjaGetVertexFlags(index_t vertexIndex)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		return v->flags;
+	}
+
+	return 0;
+}
+
+
+/* C Mutators */
+
+index_t freyjaVertexCreate3fv(const vec3_t xyz)
+{
+	Vertex *v = new Vertex();
+
+	v->xyz[0] = xyz[0];
+	v->xyz[1] = xyz[1];
+	v->xyz[2] = xyz[2];
+
+	return v->getUID();
+}
+
+
+index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
+{
+	Vertex *v = new Vertex();
+
+	v->xyz[0] = x;
+	v->xyz[1] = y;
+	v->xyz[2] = z;
+
+	return v->getUID();
+}
+
+
+void freyjaVertexDelete(index_t vertexIndex)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		delete v;
+	}
+}
+
+
+index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB)
+{
+	return Vertex::combine(vertexIndexA, vertexIndexB);
+}
+
+
+void freyjaVertexAddWeight(index_t vertexIndex, vec_t weight, index_t bone)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		freyjaPrintMessage("freyjaVertexAddWeight Not Implemented %s:%i",
+						   __FILE__, __LINE__);
+	}
+}
+
+
+void freyjaVertexTexCoord2fv(index_t vertexIndex, const vec2_t uv)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		v->uvw[0] = uv[0];
+		v->uvw[1] = uv[1];
+		v->uvw[2] = 0.0f;
+	}
+}
+
+
+void freyjaVertexTexCoord2f(index_t vertexIndex, vec_t u, vec_t v)
+{
+	Vertex *vertex = Vertex::getVertex(vertexIndex);
+
+	if (vertex)
+	{
+		vertex->uvw[0] = u;
+		vertex->uvw[1] = v;
+		vertex->uvw[2] = 0.0f;
+	}
+}
+
+
+void freyjaVertexNormalFlip(index_t vertexIndex)
+{
+	Vector3d n;
+
+	if (freyjaIsVertexAllocated(vertexIndex))
+	{
+		freyjaGetVertexNormal3fv(vertexIndex, n.mVec);
+		n = -n;
+		n.normalize();
+		freyjaVertexNormal3fv(vertexIndex, n.mVec);
+	}
+}
+
+
+void freyjaVertexNormal3fv(index_t vertexIndex, const vec3_t xyz)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		v->normal[0] = xyz[0];
+		v->normal[1] = xyz[1];
+		v->normal[2] = xyz[2];
+	}
+}
+
+
+void freyjaVertexNormal3f(index_t vertexIndex, vec_t x, vec_t y, vec_t z)
+{
+	Vertex *v = Vertex::getVertex(vertexIndex);
+
+	if (v)
+	{
+		v->normal[0] = x;
+		v->normal[1] = y;
+		v->normal[2] = z;
+	}
+}
 
 
 ////////////////////////////////////////////////////////////

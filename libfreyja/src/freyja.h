@@ -26,16 +26,39 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJA__H_
 #define GUARD__FREYJA_MONGOOSE_FREYJA__H_
 
-//#include <hel/math.h>
+#include <hel/math.h>
 //#include <hel/Vector3d.h>
-
 //#include <mstl/Vector.h>
 
+#define FREYJA_API_VERSION   "Freyja 0.10.0"
+
+/* FSM uses index_t with extentions by these error/states */
+#define FREYJA_NEXT        (UINT_MAX - 1)
+#define FREYJA_RESET       (UINT_MAX - 2)
+#define FREYJA_CURRENT     (UINT_MAX - 3)
+#define FREYJA_SIZE        (UINT_MAX - 4)
+#define FREYJA_ERROR       (UINT_MAX - 5)
+
 /* UINT_MAX 32bit */
-#define INDEX_INVALID 4294967295U
+#define INDEX_INVALID      4294967295U
 
 typedef uint32 index_t;
 
 typedef unsigned char byte;
+
+extern "C" {
+
+	void freyjaPrintError(const char *format, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stderr or gPrinter
+	 ------------------------------------------------------*/
+
+	void freyjaPrintMessage(const char *format, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout or gPrinter
+	 ------------------------------------------------------*/
+}
 
 #endif

@@ -28,7 +28,10 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJAMATERIAL_H_
 
 #include <hel/math.h>
+#include <mstl/Vector.h>
 
+
+#include "freyja.h"
 #include "Texture.h"
 #include "FileReader.h"
 #include "FileWriter.h"
@@ -86,10 +89,10 @@ class Material
 	 * Post : Get currently set flags
 	 ------------------------------------------------------*/
 
-	uint32 getId();
+	static Material *getMaterial(index_t uid);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
+	 * Post : Returns material or 0x0 ( NULL )
 	 ------------------------------------------------------*/
 
 	const char *getName();
@@ -108,6 +111,12 @@ class Material
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t getUID();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns unique material index
 	 ------------------------------------------------------*/
 
 	virtual bool serialize(FreyjaFileWriter &w);
@@ -153,7 +162,7 @@ class Material
 
 	const static uint32 mVersion = 2;
 
-	int32 mId;                  /* Unique identifier */
+	const static uint32 mType = 0x5454414D;
 
 	char mName[64];             /* Material name */
 
@@ -196,6 +205,12 @@ class Material
 	////////////////////////////////////////////////////////////
 
 	char *mTextureName;         /* This is used for file I/O to map classes */
+
+	index_t mUID;                         /* Unique identifier, key for pool */
+
+	index_t mOldUID;                      /* UID when this was saved to disk */
+
+	static Vector<Material *> mGobalPool; /* Storage for gobal access */
 };
 
 }
