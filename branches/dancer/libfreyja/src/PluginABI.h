@@ -37,18 +37,12 @@
 #include <mstl/Vector.h>
 
 #include "freyja.h"
+#include "VertexABI.h"
 #include "LightABI.h"
 
 extern "C" {
 
-#define FREYJA_PLUGIN_VERSION   "Freyja 0.10.0"
 
-/* FSM uses index_t with extentions by these error/states */
-#define FREYJA_NEXT        UINT_MAX-1
-#define FREYJA_RESET       UINT_MAX-2
-#define FREYJA_CURRENT     UINT_MAX-3
-#define FREYJA_SIZE        UINT_MAX-4
-#define FREYJA_ERROR       UINT_MAX-5
 
 
 typedef enum {
@@ -228,12 +222,6 @@ typedef enum {
 	 *        Returns the native index of that vertex
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetCurrentVertex();
-
-	void freyjaCurrentVertex(index_t vertexIndex);
-
-	char freyjaIsVertexAllocated(index_t vertexIndex);
-
 	char freyjaIsTexCoordAllocated(index_t texcoordIndex);
 
 	char freyjaIsBoneAllocated(index_t boneIndex);
@@ -364,34 +352,6 @@ typedef enum {
 	 ------------------------------------------------------*/
 
 
-	// FREYJA_VERTEX Accessors ////////////////////////////////////////////
-
-	index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element);
-	uint32 freyjaGetVertexPolygonRefCount(index_t vertexIndex);
-
-	void freyjaGetVertexTexCoord2fv(vec2_t uv);
-	void freyjaGetVertexNormal3fv(vec3_t xyz);
-	void freyjaGetVertex3fv(vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : freyjaIterator has initialized a vertex
-	 *
-	 * Post : Sets vertex[FREYJA_LIST_CURRENT]'s
-	 *        position, normal, or texcoord
-	 *
-	 *        This is deprecated
-	 ------------------------------------------------------*/
-
-	int32 freyjaGetVertexTexCoordUV2fv(index_t vertexIndex, vec2_t uv);
-	int32 freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz);
-	int32 freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz);
-	int32 freyjaGetVertexFrame(index_t vertexIndex, uint32 element,
-							  index_t *frameIndex, vec3_t xyz);
-	int32 freyjaGetVertexFrameCount(index_t vertexIndex);
-	int32 freyjaGetVertexWeight(index_t vertexIndex, uint32 element,
-							   index_t *bone, vec_t *weight);
-	int32 freyjaGetVertexWeightCount(index_t vertexIndex);
-	int32 freyjaGetVertexFlags(index_t vertexIndex);
-
 	// FREYJA_MODEL Accessors
 	uint32 freyjaGetModelFlags(index_t modelIndex);
 	index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element);
@@ -466,28 +426,6 @@ typedef enum {
 	index_t freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element);
 	index_t freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element);
 
-void freyjaPrintError(const char *format, ...);
-/*------------------------------------------------------
- * Pre  : Format string and args are valid
- * Post : Report messages to stdout
- *
- *-- History ------------------------------------------
- *
- * 2004.05.18:
- * Mongoose - Created, split from experimental branch
- ------------------------------------------------------*/
-
-void freyjaPrintMessage(const char *format, ...);
-/*------------------------------------------------------
- * Pre  : Format string and args are valid
- * Post : Report messages to stdout
- *
- *-- History ------------------------------------------
- *
- * 2004.05.18:
- * Mongoose - Created, split from experimental branch
- ------------------------------------------------------*/
-
 
 ///////////////////////////////////////////////////////////////////////
 // Mutator functions to operate on Scene
@@ -516,38 +454,6 @@ void freyjaPrintMessage(const char *format, ...);
 	 *        Returns the native index of that texel
 	 ------------------------------------------------------*/
 
-	index_t freyjaVertexCreate3fv(vec3_t xyz);
-
-	index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z);
-
-	index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB);
-
-	void freyjaVertexDelete(index_t vertexIndex);
-
-	void freyjaVertexNormalFlip(index_t index);
-
-	void freyjaVertexTexCoord2f(index_t index, vec_t u, vec_t v);
-
-	void freyjaVertexTexCoord2fv(index_t index, vec2_t uv);
-
-	void freyjaVertexNormal3f(index_t index, vec_t nx, vec_t ny, vec_t nz);
-
-	void freyjaVertexNormal3fv(index_t index, vec3_t nxyz);
-
-	void freyjaVertexXYZ3fv(index_t vertexIndex, vec3_t xyz);
-
-	void freyjaVertexWeight(index_t index, vec_t weight, index_t bone);
-	/*------------------------------------------------------
-	 * Pre  : <weight> of influence of <bone> on vertex[<index>]
-	 *
-	 * Post : Vertex <index> in the model gets weight added
-	 *        to influence list, if there is a weight for the
-	 *        corresponding bone it is replaced
-	 *
-	 *        <weight> <= 0.0 removes weight
-	 *
-	 *        All weights for the vertex combined must be 1.0
-	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////////
@@ -1032,198 +938,6 @@ void freyjaPrintMessage(const char *format, ...);
 	 ------------------------------------------------------*/
 
 
-	///////////////////////////////////////////////////////////////////////
-	// Material ( 0.9.3 ABI, Can't be used with freyjaIterators )
-	///////////////////////////////////////////////////////////////////////
-
-	index_t freyjaMaterialCreate();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Creates a new Freyja Material object
-	 *        Returns the new Material's index or -1 on error
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetCurrentMaterial();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaCurrentMaterial(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-
-	/* Material Accessors */
-
-	uint32 freyjaGetMaterialCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the number of Materials being managed
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetMaterialIndex(index_t materialIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns the gobal object index ( from the local
-	 *        Material element index ) or -1 on error
-	 ------------------------------------------------------*/
-
-	char *freyjaGetMaterialName(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 *        Don't alter the returned string
-	 *
-	 * Post : Returns a pointer to NULL terminated name string
-	 *        Returns 0x0 on error
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMaterialFlags(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns flags or -1 on error
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMaterialTexture(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns texture index or -1 for error or no texture
-	 ------------------------------------------------------*/
-
-	const char *freyjaGetMaterialTextureName(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaGetMaterialAmbient(index_t materialIndex, vec4_t ambient);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns <ambient> color
-	 ------------------------------------------------------*/
-
-	void freyjaGetMaterialDiffuse(index_t materialIndex, vec4_t diffuse);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns <diffuse> color
-	 ------------------------------------------------------*/
-
-	void freyjaGetMaterialSpecular(index_t materialIndex, vec4_t specular);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns <specular> color
-	 ------------------------------------------------------*/
-
-	void freyjaGetMaterialEmissive(index_t materialIndex, vec4_t emissive);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns <emissive> color
-	 ------------------------------------------------------*/
-
-	vec_t freyjaGetMaterialShininess(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns specular exponent or -1.0 on error
-	 ------------------------------------------------------*/
-
-	vec_t freyjaGetMaterialTransparency(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns transparency or -1.0 on error
-	 ------------------------------------------------------*/
-
-	int32 freyjaGetMaterialBlendSource(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns blend source factor or -1 on error
-	 ------------------------------------------------------*/
-
-	int32 freyjaGetMaterialBlendDestination(index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Returns blend destination factor or -1 on error
-	 ------------------------------------------------------*/
-
-
-	/* Material Mutators */
-
-	void freyjaMaterialName(index_t materialIndex, const char *name);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's <name> id is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialClearFlag(index_t materialIndex, int32 flag);
-	void freyjaMaterialSetFlag(index_t materialIndex, int32 flag);
-	void freyjaMaterialFlags(index_t materialIndex, int32 flags);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's bit <flags> are set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialTextureName(index_t materialIndex, const char *name);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material textures's <name> id is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialTexture(index_t materialIndex, index_t textureIndex);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's <texture> index is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialAmbient(index_t materialIndex, const vec4_t ambient);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's <ambient> color is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialDiffuse(index_t materialIndex, const vec4_t diffuse);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's <diffuse> color is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialSpecular(index_t materialIndex, const vec4_t specular);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's <specular> color is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialEmissive(index_t materialIndex, const vec4_t emissive);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's <emissive> color is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialShininess(index_t materialIndex, vec_t exponent);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's Specular <exponent> is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialTransparency(index_t materialIndex, vec_t transparency);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 *        <transparency> is a value from 0.0 to 1.0
-	 *
-	 * Post : Material's <transparency> is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialBlendSource(index_t materialIndex, uint32 factor);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's blend source <factor> is set
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialBlendDestination(index_t materialIndex, uint32 factor);
-	/*------------------------------------------------------
-	 * Pre  : Material <materialIndex> exists
-	 * Post : Material's blend destination <factor> is set
-	 ------------------------------------------------------*/
 
 
 

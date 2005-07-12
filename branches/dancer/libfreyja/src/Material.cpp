@@ -23,6 +23,8 @@
 #include <stdio.h>
 
 #include "Material.h"
+#include "MaterialABI.h"
+
 
 using namespace freyja;
 
@@ -32,7 +34,22 @@ using namespace freyja;
 
 Material::Material()
 {
-	mId = -1;
+	uint32 i, count;
+
+	/* Setup gobal pool UID reference */
+	mOldUID = INDEX_INVALID;
+	mUID = count = mGobalPool.size();
+
+	for (i = 0; i < count; ++i)
+	{
+		if (mGobalPool[i] == 0x0)
+		{
+			mUID = i;
+			break;
+		}	
+	}
+
+	mGobalPool.assign(mUID, this);
 
 	mName[0] = 0;
 
@@ -65,6 +82,9 @@ Material::Material()
 
 Material::~Material()
 {
+	/* Mark NULL in pool, marking free slot */
+	mGobalPool.assign(mUID, 0x0);
+
 	if (mTextureName)
 		delete [] mTextureName;
 }
@@ -73,6 +93,26 @@ Material::~Material()
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
+
+index_t Material::getUID()
+{
+	return mUID;
+}
+
+
+uint32 Material::getCount()
+{
+	return mGobalPool.size();
+}
+
+
+Material *Material::getMaterial(index_t uid)
+{
+	if (uid < mGobalPool.size())
+		return mGobalPool[uid];
+
+	return 0x0;
+}
 
 
 const char *Material::getTextureName()
@@ -274,6 +314,662 @@ void Material::setTextureName(const char *name)
 ////////////////////////////////////////////////////////////
 
 
+///////////////////////////////////////////////////////////////////////
+// Material C ABI
+///////////////////////////////////////////////////////////////////////
+
+index_t gCurrentMaterial = INDEX_INVALID;
+
+
+index_t freyjaMaterialCreate()
+{
+	Material *material = new Material();
+	vec4_t rgba = {0,0,0,1};
+	index_t materialIndex = material->getUID();
+
+	freyjaMaterialName(materialIndex, "Boring default");
+	freyjaMaterialSpecular(materialIndex, rgba);
+	freyjaMaterialEmissive(materialIndex, rgba);
+	rgba[0] = rgba[1] = rgba[2] = 0.9;
+	freyjaMaterialDiffuse(materialIndex, rgba);
+	rgba[0] = rgba[1] = rgba[2] = 0.2;
+	freyjaMaterialAmbient(materialIndex, rgba);
+	freyjaMaterialShininess(materialIndex, 0.0f);
+
+	return materialIndex;
+}
+
+
+index_t freyjaLoadMaterialASCII(const char *filename)
+{
+	FILE *f;
+	unsigned int i, j, k, l, mode;
+	char buffer[128];
+	char buf[64];
+	bool line_comment;
+	char c;
+	vec4_t ambient;
+	vec4_t diffuse;
+	vec4_t specular;
+	vec4_t emissive;
+	vec_t shininess;
+	unsigned int texture;
+	unsigned int blend_src;
+	unsigned int blend_dest;
+	index_t mIndex;
+
+	
+	if (!filename || !filename[0])
+	{
+		return INDEX_INVALID;
+	}
+
+	f = fopen(filename, "r");
+
+	if (!f)
+	{
+		perror("freyjaLoadMaterialASCII> ");
+		return INDEX_INVALID;
+	}
+
+	i = 0;
+	buffer[0] = 0;
+	line_comment = false;
+	mode = 0;
+
+	mIndex = freyjaMaterialCreate();
+	freyjaCurrentMaterial(mIndex);
+
+	// Strip out whitespace and comments
+	while (fscanf(f, "%c", &c) != EOF)
+	{
+		if (line_comment && c != '\n')
+			continue;
+
+		if (i > 126)
+		{
+			printf("Material::loadFile> Overflow handled\n");
+			i = 126;
+		}
+		
+		switch (c)
+		{
+		case ' ':
+		case '\v':
+		case '\t':
+			break;
+		case '#':
+			buffer[i++] = 0;
+			line_comment = true;
+			break;
+		case '\n':
+			if (line_comment)
+			{
+				line_comment = false;
+				i = 0;
+				buffer[0] = 0;		 
+				continue;
+			}
+			else if (buffer[0] == 0)
+			{
+				i = 0;
+				continue;
+			}
+
+			buffer[i] = 0;
+
+			if (buffer[0] == '[')
+			{
+				if (strncmp(buffer, "[Material]", 10) == 0)
+				{
+					mode = 1;
+				}
+				else
+				{
+					mode = 0;
+				}
+			}
+			else if (mode == 1)
+			{
+				if (strncmp(buffer, "Shininess", 9) == 0)
+				{
+					for (j = 0, k = 10; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					shininess = atof(buf);
+				}
+				else if  (strncmp(buffer, "TextureName", 11) == 0)
+				{
+					for (j = 0, k = 12; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					//setTextureName(buf);
+				}
+				else if  (strncmp(buffer, "Name", 4) == 0)
+				{
+					for (j = 0, k = 5; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+					
+					freyjaMaterialName(mIndex, buf);
+
+					//setName(buf);
+				}
+				else if  (strncmp(buffer, "EnableBlending", 14) == 0)
+				{
+					for (j = 0, k = 15; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+
+					if (strncmp(buf, "true", 4) == 0)
+					{
+						//FIXME m_flags |= Material::fEnable_Blending;
+					}
+					else if (strncmp(buf, "false", 5) == 0)
+					{
+						//FIXME m_flags |= Material::fEnable_Blending;
+						//FIXME m_flags ^= Material::fEnable_Blending;
+					}
+				}
+				else if (strncmp(buffer, "Blend", 5) == 0)
+				{
+					bool is_src = false;
+					int val;
+
+
+					if (strncmp(buffer, "BlendSource", 11) == 0)
+					{
+						is_src = true;
+						k = 12;
+					}
+					else
+					{
+						k = 10;
+					}
+
+					for (j = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						buf[j] = buffer[k];
+						buf[j+1] = 0;
+					}
+
+					val = (strncmp(buf, "GL_ZERO", 11) == 0) ? 0x0 :
+					(strncmp(buf, "GL_SRC_COLOR", 9) == 0) ? 0x0300 :
+					(strncmp(buf, "GL_ONE_MINUS_SRC_COLOR", 22) == 0) ? 0x0301 :
+					(strncmp(buf, "GL_DST_COLOR", 9) == 0) ? 0x0306 :
+					(strncmp(buf, "GL_ONE_MINUS_DST_COLOR", 22) == 0) ? 0x0307 :
+					(strncmp(buf, "GL_SRC_ALPHA", 9) == 0) ? 0x0302 :
+					(strncmp(buf, "GL_ONE_MINUS_SRC_ALPHA", 22) == 0) ? 0x0303 :
+					(strncmp(buf, "GL_DST_ALPHA", 9) == 0) ? 0x0304 :
+					(strncmp(buf, "GL_ONE_MINUS_DST_ALPHA", 22) == 0) ? 0x0305 :
+					(strncmp(buf, "GL_SRC_ALPHA_SATURATE", 21) == 0) ? 0x0308 :
+					(strncmp(buf, "GL_CONSTANT_COLOR", 17) == 0) ? 0x8001 :
+					(strncmp(buf, "GL_ONE_MINUS_CONSTANT_COLOR", 27) == 0) ? 0x8002 :
+					(strncmp(buf, "GL_ONE", 6) == 0) ? 0x1 :
+					(strncmp(buf, "GL_CONSTANT_ALPHA", 17) == 0) ? 0x8003 :					0x8004;
+
+					if (is_src)
+					{
+						blend_src = val;
+					}
+					else
+					{
+						blend_dest = val;
+					}
+				}
+				else if (strncmp(buffer, "Ambient", 7) == 0)
+				{
+					for (j = 0, k = 8, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							ambient[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					ambient[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Diffuse", 7) == 0)
+				{
+					for (j = 0, k = 8, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							diffuse[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					diffuse[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Specular", 8) == 0)
+				{
+					for (j = 0, k = 9, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							specular[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					specular[l++] = atof(buf);
+				}
+				else if (strncmp(buffer, "Emissive", 8) == 0)
+				{
+					for (j = 0, k = 9, l = 0; j < 63 && k < 126; ++j, ++k)
+					{
+						if (buffer[k] == ',')
+						{
+							emissive[l++] = atof(buf);
+							j = 0;
+						}
+						else
+						{
+							buf[j] = buffer[k];
+							buf[j+1] = 0;
+						}
+					}
+					
+					emissive[l++] = atof(buf);
+				}
+			}
+
+			i = 0;
+			buffer[0] = 0;
+			break;
+		default:
+			buffer[i++] = c;
+		}
+	}
+
+	fclose(f);
+
+	freyjaMaterialAmbient(mIndex, ambient);
+	freyjaMaterialDiffuse(mIndex, diffuse);
+	freyjaMaterialSpecular(mIndex, specular);
+	freyjaMaterialEmissive(mIndex, emissive);
+	freyjaMaterialShininess(mIndex, shininess);
+	freyjaMaterialTexture(mIndex, texture);
+	freyjaMaterialBlendDestination(mIndex, blend_dest);
+	freyjaMaterialBlendSource(mIndex, blend_src);
+
+	return 0;
+}
+
+
+
+uint32 freyjaGetCurrentMaterial()
+{
+	return gCurrentMaterial;
+}
+
+
+void freyjaCurrentMaterial(index_t materialIndex)
+{
+	gCurrentMaterial = materialIndex;
+}
+
+
+/* Material Accessors */
+
+uint32 freyjaGetMaterialCount()
+{
+	return Material::getCount();
+}
+
+
+char *freyjaGetMaterialName(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		if (m->mName[0])
+			return m->mName;
+	}	
+
+	return 0x0;
+}
+
+
+byte freyjaGetMaterialFlags(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->mFlags;
+	}
+
+	return 0;
+}
+
+
+index_t freyjaGetMaterialTexture(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->mTexture;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+const char *freyjaGetMaterialTextureName(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->getTextureName();
+	}
+
+	return 0x0;
+}
+
+
+void freyjaGetMaterialAmbient(index_t materialIndex, vec4_t ambient)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			ambient[i] = m->mAmbient[i];
+	}
+}
+
+
+void freyjaGetMaterialDiffuse(index_t materialIndex, vec4_t diffuse)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			diffuse[i] = m->mDiffuse[i];
+	}
+}
+
+
+void freyjaGetMaterialSpecular(index_t materialIndex, vec4_t specular)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			specular[i] = m->mSpecular[i];
+	}
+}
+
+
+void freyjaGetMaterialEmissive(index_t materialIndex, vec4_t emissive)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			emissive[i] = m->mEmissive[i];
+	}
+}
+
+
+vec_t freyjaGetMaterialShininess(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->mShininess;
+	}	
+
+	return 0.0f;
+}
+
+
+vec_t freyjaGetMaterialTransparency(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->mTransparency;
+	}	
+
+	return 1.0f;
+}
+
+
+int32 freyjaGetMaterialBlendSource(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->mBlendSrc;
+	}	
+
+	return -1;
+}
+
+
+int32 freyjaGetMaterialBlendDestination(index_t materialIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		return m->mBlendDest;
+	}	
+
+	return -1;
+}
+
+
+
+
+/* Material Mutators */
+
+void freyjaMaterialName(index_t materialIndex, const char *name)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		strncpy(m->mName, name, 64);
+		m->mName[63] = 0;
+	}	
+}
+
+
+void freyjaMaterialClearFlag(index_t materialIndex, int32 flag)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mFlags |= flag;
+		m->mFlags ^= flag;
+	}
+}
+
+
+void freyjaMaterialSetFlag(index_t materialIndex, int32 flag)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mFlags |= flag;
+	}
+}
+
+
+void freyjaMaterialFlags(index_t materialIndex, int32 flags)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mFlags = flags;
+	}
+}
+
+
+void freyjaMaterialTexture(index_t materialIndex, int32 textureIndex)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mTexture = textureIndex;
+	}
+}
+
+
+void freyjaMaterialTextureName(index_t materialIndex, const char *name)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->setTextureName(name);
+	}
+}
+
+
+void freyjaMaterialAmbient(index_t materialIndex, const vec4_t ambient)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint32 i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			m->mAmbient[i] = ambient[i];
+	}
+}
+
+
+void freyjaMaterialDiffuse(index_t materialIndex, const vec4_t diffuse)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint32 i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			m->mDiffuse[i] = diffuse[i];
+	}
+}
+
+
+void freyjaMaterialSpecular(index_t materialIndex, const vec4_t specular)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint32 i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			m->mSpecular[i] = specular[i];
+	}
+}
+
+
+void freyjaMaterialEmissive(index_t materialIndex, const vec4_t emissive)
+{
+	Material *m = Material::getMaterial(materialIndex);
+	uint32 i;
+
+	if (m)
+	{
+		for (i = 0; i < 4; ++i)
+			m->mEmissive[i] = emissive[i];
+	}
+}
+
+
+void freyjaMaterialShininess(index_t materialIndex, vec_t exponent)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mShininess = exponent;
+	}
+}
+
+
+void freyjaMaterialTransparency(index_t materialIndex, vec_t transparency)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mTransparency = transparency;
+	}
+}
+
+
+void freyjaMaterialBlendSource(index_t materialIndex, uint32 factor)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mBlendSrc = factor;
+	}
+}
+
+
+void freyjaMaterialBlendDestination(index_t materialIndex, uint32 factor)
+{
+	Material *m = Material::getMaterial(materialIndex);
+
+	if (m)
+	{
+		m->mBlendDest = factor;
+	}
+}
+
+
 ////////////////////////////////////////////////////////////
 // Unit Test code
 ////////////////////////////////////////////////////////////
@@ -409,7 +1105,7 @@ int runMaterialUnitTest(int argc, char *argv[])
 		printf("ERROR> blending file I/O corrupt!\n");
 	}
 
-	return 0;
+	return mIndex;
 }
 
 

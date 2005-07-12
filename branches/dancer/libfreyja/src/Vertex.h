@@ -29,6 +29,7 @@
 
 #include <mstl/Vector.h>
 #include <hel/math.h>
+#include <hel/Vector3d.h>
 #include "freyja.h"
 #include "FileReader.h"
 #include "FileWriter.h"
@@ -125,6 +126,11 @@ class Vertex
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	index_t getUID();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	bool serialize(FileWriter &w);
 	/*------------------------------------------------------
@@ -138,6 +144,12 @@ class Vertex
 	////////////////////////////////////////////////////////////
 
 	void assignToMesh(index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	static index_t combine(index_t vertexIndexA, index_t vertexIndexB);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
