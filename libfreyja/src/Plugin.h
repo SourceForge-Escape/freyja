@@ -54,7 +54,6 @@
 #include <mstl/Vector.h>
 
 #include "Scene.h"
-#include "Printer.h"
 #include "PluginABI.h"
 
 #ifdef MACOSX
@@ -426,35 +425,7 @@ public:
 	index_t getCurrentMesh() { return mIndexMesh; }
 
 
-	virtual void printError(char *format, ...);
-	virtual void printErrorArgs(char *format, va_list *args);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report messages
-	 *
-	 *        First methot makes va_list and passes it
-	 *        to (format, arg) method to print to stdout
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.18:
-	 * Mongoose - Created, split from Freyja9 experimental 
-	 ------------------------------------------------------*/
 
-	virtual void printMessage(char *format, ...);
-	virtual void printMessageArgs(char *format, va_list *args);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report error messages
-	 *
-	 *        First methot makes va_list and passes it
-	 *        to (format, arg) method to print to stderr
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.18:
-	 * Mongoose - Created, split from Freyja9 experimental 
-	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -495,18 +466,6 @@ public:
 	 *-- History ------------------------------------------
 	 *
 	 * 2004.10.24:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setPrinter(FreyjaPrinter *printer);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sends text output/errors to printer for logging
-	 *        or special output 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.10.30:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -963,10 +922,6 @@ private:
 
 	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
 										 * accumulation modes and etc */
-
-	FreyjaPrinter *mPrinter;            /* Printer handles logging and
-										 * message/error output */
-
 
 	vec3_t mPoint;                      /* Used to mutate transform origin */
 

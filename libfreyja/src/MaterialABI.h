@@ -27,6 +27,14 @@
 
 extern "C" {
 
+	enum freyja_material_flags {
+		fFreyjaMaterial_Blending = 1,
+		fFreyjaMaterial_Texture = 2,
+		fFreyjaMaterial_DetailTexture = 4,
+		fFreyjaMaterial_Normalize = 8
+	};
+
+
 	index_t freyjaMaterialCreate();
 	/*------------------------------------------------------
 	 * Pre  : 

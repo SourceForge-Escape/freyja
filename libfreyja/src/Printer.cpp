@@ -21,17 +21,19 @@
 
 #include "Printer.h"
 
+using namespace freyja;
+
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaPrinter::FreyjaPrinter()
+Printer::Printer()
 {
 }
 
 
-FreyjaPrinter::~FreyjaPrinter()
+Printer::~Printer()
 {
 }
 
@@ -61,9 +63,9 @@ FreyjaPrinter::~FreyjaPrinter()
 ////////////////////////////////////////////////////////////
 
 #ifdef UNIT_TEST_FREYJAPRINTER
-int runFreyjaPrinterUnitTest(int argc, char *argv[])
+int runPrinterUnitTest(int argc, char *argv[])
 {
-	FreyjaPrinter test;
+	Printer test;
 
 	return 0;
 }
@@ -71,8 +73,8 @@ int runFreyjaPrinterUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[FreyjaPrinter class test]\n");
+	printf("[Printer class test]\n");
 
-	return runFreyjaPrinterUnitTest(argc, argv);
+	return runPrinterUnitTest(argc, argv);
 }
 #endif
