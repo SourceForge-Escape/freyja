@@ -210,9 +210,35 @@ class Mesh
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	unsigned int getVertexCount() { return vertices.end(); }
+	static uint32 getCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	unsigned int getPolygonCount() { return polygons.end(); }
+	static Mesh *getMesh(index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	uint32 getPolygonCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t getUID();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	uint32 getVertexCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -220,14 +246,52 @@ class Mesh
 	////////////////////////////////////////////////////////////
 
 	void rotate(vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void rotateAboutPoint(vec3_t point, vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void scale(vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void transform();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void translate(vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	byte mFlags;
+
+	char mName[64];
+
+	index_t mMaterial;                  /* Base material id */
+
+	Vector3d mPosition;                 /* Position of the mesh */
+
+	Vector<index_t> vertices;           /* Vertices (complex class version) */
+
+	Vector<index_t> polygons;           /* Polygons of this mesh */
+
+	Vector<index_t> frames;             /* Vertex morph frames */
+
+	Vector<index_t> uvmaps;             /* UVMaps of this mesh */
+
+	Vector<index_t> groups;             /* Smoothing Groups of this mesh */
 
 
 private:
@@ -241,26 +305,14 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Vector<index_t> vertices;           /* Vertices (complex class version) */
-
-	Vector<index_t> polygons;           /* Polygons of this mesh */
-
-	Vector<index_t> frames;             /* Vertex morph frames */
-
-	Vector<index_t> uvmaps;             /* UVMaps of this mesh */
-
-	Vector<index_t> groups;             /* Smoothing Groups of this mesh */
-
-	Vector3d mPosition;                 /* Position of the mesh */
-
-	index_t mMaterial;                  /* Base material id */
-
 
 	/* UID system */
 
-	index_t UID;                        /* Unique identifier, key for pool */
+	index_t mUID;                       /* Unique identifier, key for pool */
 
-	Vector<Mesh *> mGobalPool;          /* Storage for gobal access */
+	index_t mOldUID;
+
+	static Vector<Mesh *> mGobalPool;   /* Storage for gobal access */
 };
 
 }

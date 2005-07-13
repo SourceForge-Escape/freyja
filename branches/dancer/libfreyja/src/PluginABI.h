@@ -40,119 +40,85 @@
 #include "VertexABI.h"
 #include "LightABI.h"
 
-extern "C" {
-
-
-
-
-typedef enum {
-	INDEXED_8 = 1, 
-	RGB_24, 
-	RGBA_32
-
-} freyja_colormode_t;
-
-
-typedef enum {
-	FREYJA_WRITE_LOCK = 1,
-	FREYJA_WRITE_UNLOCK
-	
-} freyja_lock_t;
-
-
-typedef enum {
-	FREYJA_MODEL = 1,
-	FREYJA_MESH,
-	FREYJA_POLYGON,
-	FREYJA_BONE,
-	FREYJA_SKELETON,
-	FREYJA_VERTEX_FRAME,
-	FREYJA_VERTEX_GROUP,           /* Was FREYJA_GROUP in EggPlugin */
-	FREYJA_VERTEX,
-	FREYJA_TEXCOORD,
-	FREYJA_MATERIAL,
-	FREYJA_TEXTURE,
-	FREYJA_ANIMATION,
-	FREYJA_MESHTREE_FRAME,         /* Was FREYJA_SKEL_ANIM in EggPlugin */
-	FREYJA_MESHTREE_TAG
-	
-} freyja_object_t;
-
-
-typedef enum {
-	fTransformScene = 1,
-	fTransformModel,
-	fTransformMesh,
-	fTransformVertexFrame,
-	fTransformSkeleton,
-	fTransformBone,
-	fTransformUVMap,
-	fTransformVertexGroup,
-	fTransformVertex,
-	fTransformTexCoord
-	
-} freyja_transform_t;
-
-
-typedef enum {
-	fTranslate = 1,
-	fRotate,
-	fScale,
-	fRotateAboutPoint,
-	fScaleAboutPoint
-	
-} freyja_transform_action_t;
-
-
-typedef struct {
-
-	char magic[16];
-	int32 version;
-	int32 flags;
-	int32 reserved;
-	char comment[64];
-
-} freyja_file_header_t;
-
-
-typedef struct {
-
-	int32 type;
-	int32 size;
-	int32 flags;
-	int32 version;
-
-} freyja_file_chunk_t;
-
-
-enum freyja_material_flags {
-	fFreyjaMaterial_Blending = 1,
-	fFreyjaMaterial_Texture = 2,
-	fFreyjaMaterial_DetailTexture = 4,
-	fFreyjaMaterial_Normalize = 8
-};
-
 
 #define fPolygon_VertexUV      2
 #define fPolygon_PolyMapped    8
 #define fPolygon_PolyMappedUV  8
 #define fPolygon_ColorMapped   16
 
+extern "C" {
 
-typedef enum {
+	typedef enum {
+		INDEXED_8 = 1, 
+		RGB_24, 
+		RGBA_32
 
-	FREYJA_CHUNK_MODEL    = 0x204C444D,
-	FREYJA_CHUNK_MESH     = 0x4853454D,
-	FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
-	FREYJA_CHUNK_VERTICES = 0x54524556,
-	FREYJA_CHUNK_POLYGONS = 0x594C4F50,
-	FREYJA_CHUNK_SKELETON = 0x4C454B53,
-	FREYJA_CHUNK_BONE     = 0x454E4F42,
-	FREYJA_CHUNK_MATERIAL = 0x5454414D,
-	FREYJA_CHUNK_TEXTURE  = 0x54584554,
-	FREYJA_CHUNK_METADATA = 0x4154454D
+	} freyja_colormode_t;
 
-} freyja_file_chunk_type_t;
+
+	typedef enum {
+		FREYJA_WRITE_LOCK = 1,
+		FREYJA_WRITE_UNLOCK
+	
+	} freyja_lock_t;
+
+
+	// The object_t is used with the FSM, which might be pulled in this branch
+	typedef enum {
+		FREYJA_MODEL = 1,
+		FREYJA_MESH,
+		FREYJA_POLYGON,
+		FREYJA_BONE,
+		FREYJA_SKELETON,
+		FREYJA_VERTEX_FRAME,
+		FREYJA_VERTEX_GROUP,           /* Was FREYJA_GROUP in EggPlugin */
+		FREYJA_VERTEX,
+		FREYJA_TEXCOORD,
+		FREYJA_MATERIAL,
+		FREYJA_TEXTURE,
+		FREYJA_ANIMATION,
+		FREYJA_SMOOTHING_GROUP
+	
+	} freyja_object_t;
+
+
+
+	typedef struct {
+
+		char magic[16];
+		int32 version;
+		int32 flags;
+		int32 reserved;
+		char comment[64];
+
+	} freyja_file_header_t;
+
+
+	typedef struct {
+
+		int32 type;
+		int32 size;
+		int32 flags;
+		int32 version;
+
+	} freyja_file_chunk_t;
+
+
+	typedef enum {
+
+		FREYJA_CHUNK_MODEL    = 0x204C444D,
+		FREYJA_CHUNK_MESH     = 0x4853454D,
+		FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
+		FREYJA_CHUNK_VERTICES = 0x54524556,
+		FREYJA_CHUNK_POLYGONS = 0x594C4F50,
+		FREYJA_CHUNK_SKELETON = 0x4C454B53,
+		FREYJA_CHUNK_BONE     = 0x454E4F42,
+		FREYJA_CHUNK_MATERIAL = 0x5454414D,
+		FREYJA_CHUNK_TEXTURE  = 0x54584554,
+		FREYJA_CHUNK_METADATA = 0x4154454D
+
+	} freyja_file_chunk_type_t;
+
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -214,25 +180,15 @@ typedef enum {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	index_t freyjaFSMVertex3fv(vec3_t xyz); // FIXME?
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_GROUP);
-	 *        x,y,z are valid 3space coors
-	 * Post : A new vertex created in the model
-	 *        Returns the native index of that vertex
-	 ------------------------------------------------------*/
+	void freyjaPolygonTexCoord1i(index_t texcoordIndex);
 
-	char freyjaIsTexCoordAllocated(index_t texcoordIndex);
+	void freyjaPolygonVertex1i(index_t vertexIndex);
 
-	char freyjaIsBoneAllocated(index_t boneIndex);
+	void freyjaPolygonMaterial1i(index_t materialIndex);
 
-	char freyjaIsPolygonAllocated(index_t polygonIndex);
+	void freyjaGetVertex3fv(vec3_t xyz);
 
 	void freyjaModelTransform(index_t modelIndex,
-								freyja_transform_action_t action, 
-								vec_t x, vec_t y, vec_t z);
-
-	void freyjaMeshTransform(index_t meshIndex, index_t frame,
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
@@ -240,16 +196,16 @@ typedef enum {
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
-	void freyjaMeshFrameTransform(index_t meshIndex, index_t frame,
-									freyja_transform_action_t action, 
-									vec_t x, vec_t y, vec_t z);
+	void freyjaKeyFrameMeshTransform(index_t meshIndex, index_t frame,
+									 freyja_transform_action_t action, 
+									 vec_t x, vec_t y, vec_t z);
+
+
 
 
 	///////////////////////////////////////////////////////////////////////
 	// libfreyja plugin ABI 0.9.1 object accessors
 	///////////////////////////////////////////////////////////////////////
-
-
 
 
 	// FREYJA_TEXTURE Accessors ///////////////////////////////////////////
@@ -339,92 +295,7 @@ typedef enum {
 	 ------------------------------------------------------*/
 
 
-	// FREYJA_TEXCOORD Accessors //////////////////////////////////////////
 
-	index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex, uint32 element);
-
-	uint32 freyjaGetTexCoordPolygonRefCount(index_t texcoordIndex);
-
-	void freyjaGetTexCoord2fv(index_t texcoordIndex, vec2_t uv);
-	/*------------------------------------------------------
-	 * Pre  : texcoord[index] exists
-	 * Post : Sets passed float array to texcoord u, v
-	 ------------------------------------------------------*/
-
-
-	// FREYJA_MODEL Accessors
-	uint32 freyjaGetModelFlags(index_t modelIndex);
-	index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element);
-	uint32 freyjaGetModelMeshCount(index_t modelIndex);
-
-	// FREYJA_MESH Accessors
-	char freyjaIsMeshAllocated(index_t meshIndex);
-
-	int32 freyjaGetMeshFrameBoundingBox(index_t meshIndex, 
-										index_t frame, vec3_t min, vec3_t max);
-
-	uint32 freyjaGetMeshFlags(index_t meshIndex);
-
-	int32 freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz);
-
-	char *freyjaGetMeshNameString(index_t meshIndex); // don't alter string
-
-	int32 freyjaGetMeshName1s(index_t meshIndex, uint32 lenght, char *name);
-
-	uint32 freyjaGetMeshTexCoordCount(index_t meshIndex);
-
-	index_t freyjaGetMeshTexCoordIndex(index_t meshIndex, uint32 element);
-
-	index_t freyjaGetMeshVertexIndex(index_t meshIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : freyjaGetMeshVertexCount must be called before
-	 *        this is valid while using the Egg backend
-	 *
-	 * Post : Returns the index of the local vertex <element>
-	 *        for mesh <meshIndex> or -1 on error
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMeshVertexCount(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the number of local vertices
-	 *        for mesh <meshIndex> or 0 on error
-	 *
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetMeshPolygonVertexIndex(index_t meshIndex, index_t faceVertexIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the index of local vertices
-	 *        for mesh <meshIndex> with local
-	 *        mapping from polygon to mesh ids or -1 on error
-	 *
-	 ------------------------------------------------------*/
-	
-
-	// 'free vertices' outside of polygons as well as other 'grouped' vertices
-	void freyjaMeshVertexGroupAppendGobalVertex(index_t meshIndex, uint32 element, 
-												index_t vertexIndex);
-	uint32 freyjaGetMeshVertexGroupVertexCount(index_t meshIndex, uint32 element);
-	index_t freyjaGetMeshVertexGroupVertexIndex(index_t meshIndex, uint32 element,
-											  index_t vertexElement);
-
-
-	index_t freyjaGetMeshPolygonIndex(index_t meshIndex, uint32 element);
-	uint32 freyjaGetMeshPolygonCount(index_t meshIndex);
-	index_t freyjaGetMeshVertexGroupIndex(index_t meshIndex, uint32 element);
-	uint32 freyjaGetMeshVertexGroupCount(index_t meshIndex);
-	index_t freyjaGetMeshVertexFrameIndex(index_t meshIndex, uint32 element); // Not Implemented
-	uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex); // Not Implemented
-
-	// FREYJA_POLYGON Accessors
-	index_t freyjaGetPolygonMaterial(int32 polygonIndex);
-	uint32 freyjaGetPolygonFlags(int32 polygonIndex);
-	uint32 freyjaGetPolygonEdgeCount(int32 polygonIndex);
-	uint32 freyjaGetPolygonVertexCount(int32 polygonIndex);
-	uint32 freyjaGetPolygonTexCoordCount(int32 polygonIndex);
-	index_t freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element);
-	index_t freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element);
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -446,13 +317,6 @@ typedef enum {
 	void freyjaPolyMapNormal3f(vec_t x, vec_t y, vec_t z);
 	void freyjaPolyMapNormal3fv(vec3_t xyz);
 
-	index_t freyjaTexCoord2f(vec_t u, vec_t v);
-	index_t freyjaTexCoord2fv(vec2_t uv);
-	/*------------------------------------------------------
-	 * Pre  : s, t are 0.0 to 1.0 texels
-	 * Post : A new texel is created in the model
-	 *        Returns the native index of that texel
-	 ------------------------------------------------------*/
 
 
 
@@ -548,113 +412,6 @@ typedef enum {
 
 
 
-	index_t freyjaMeshCreate();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns index of mesh spawned
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetCurrentMesh();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns index using meshIndex state 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshDelete(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : Mesh <meshIndex> exists
-	 * Post : Mesh is removed from mesh pool
-	 ------------------------------------------------------*/
-
-	void freyjaMeshClampTexCoords(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Makes sure all UVs are inside 0,0 - 1,1
-	 ------------------------------------------------------*/
-
-	void freyjaMeshMaterial(index_t meshIndex, index_t materialIndex);
-
-	void freyjaMeshFrameCenter(index_t meshIndex, index_t frame, vec3_t xyz);
-
-	void freyjaGetMeshFrameCenter(index_t meshIndex, index_t frame, vec3_t xyz);
-
-	void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Takes vertex UVs and promotes them to polymapped
-	 *        texcoords ( stored in polygon ala texture polygons )
-	 ------------------------------------------------------*/
-
-	void freyjaMeshAddPolygon(index_t meshIndex, index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshRemovePolygon(index_t meshIndex, index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Removes references to polygonIndex in mesh, but
-	 *        it doesn't free the allocated polygon
-	 ------------------------------------------------------*/
-
-	void freyjaMeshUVMapPlanar(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Texcoords computed with Planar mapping algorithm
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMeshUVMapSpherical(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Texcoords computed with Spherical mapping algorithm
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMeshUVMapCylindrical(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Texcoords computed with Cylindrical mapping algorithm
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMeshTesselateTriangles(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Divides all polygons in mesh into triangles
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMeshNormalFlip(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Flips all vertex normals in mesh
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMeshGenerateVertexNormals(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Recalculates all vertex normals in mesh
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMeshPosition(index_t meshIndex, vec3_t xyz);
-
-	void freyjaMeshName1s(index_t meshIndex, const char *name);
-
-	void freyjaMeshFlags1u(unsigned int flags);
-	/*------------------------------------------------------
-	 * Pre  : Pass valid freyja_mesh_flags_t's bitmap
-	 * Post : Sets flags for current mesh
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.16:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	void freyjaGenerateVertexNormals();
 
 	void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
@@ -662,96 +419,11 @@ typedef enum {
 	void freyjaVertexFrame3f(index_t index, vec_t x, vec_t y, vec_t z);
 
 
-	///////////////////////////////////////////////////////////////////////
-	// Polygon
-	///////////////////////////////////////////////////////////////////////
 
-	index_t freyjaPolygonCreate();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Makes invalid/empty polygon to be filled, returns index
-	 ------------------------------------------------------*/
 
-	void freyjaPolygonDelete(index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Removes polygon 
-	 ------------------------------------------------------*/
 
-	void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 *
-	 * Post : Polygon is split into 2 smaller polygons 
-	 ------------------------------------------------------*/
 
-	void freyjaPolygonTexCoordPurge(index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 *
-	 * Post : All polymapped texcoords are dereferenced
-	 ------------------------------------------------------*/
 
-	void freyjaPolygonExtrudeQuad1f(index_t polygonIndex, vec_t dist);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 *        the 'normal' is the vector you wish to follow with extrude
-	 *
-	 * Post : Adds a quad where every edge is on this face by
-	 *        extruding by face normal scaled by dist
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.03.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaPolygonExtrudeQuad(index_t polygonIndex, vec3_t normal);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 *        the 'normal' is the vector you wish to follow with extrude
-	 *
-	 * Post : Adds a quad where every edge is on this face by
-	 *        extruding by 'normal'
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.03.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaPolygonAddVertex1i(index_t polygonIndex, index_t vertexIndex);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 * Post : Adds a vertex to a polygon
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaPolygonAddTexCoord1i(index_t polygonIndex, index_t texcoordIndex);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 * Post : Adds a texcoord to a polygon
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaPolygonSetMaterial1i(index_t polygonIndex, index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : Polygon polygonIndex exists
-	 * Post : Sets material for a polygon
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -944,10 +616,6 @@ typedef enum {
 	///////////////////////////////////////////////////////////////////////
 	// Faster access API for modeler use
 	///////////////////////////////////////////////////////////////////////
-
-	vec3_t *freyjaGetVertexXYZ(index_t vertexIndex);
-	vec2_t *freyjaGetVertexUV(index_t vertexIndex);
-	vec2_t *freyjaGetTexCoordUV(index_t texcoordIndex);
 
 	char freyjaGetModelAppendMeshMode(index_t modelIndex);
 	/*------------------------------------------------------

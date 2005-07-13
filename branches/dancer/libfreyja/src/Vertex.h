@@ -37,6 +37,10 @@
 
 namespace freyja {
 
+void freyjaVertexListTransform(Vector<index_t> &list,
+							   freyja_transform_action_t action, 
+							   vec_t x, vec_t y, vec_t z);
+
 void freyjaPolygonVertexDeleteHandler(Vector<index_t> polygons, index_t vertex);
 
 

@@ -31,8 +31,9 @@
 #include <stdarg.h>
 #include <string.h>
 
+namespace freyja {
 
-class FreyjaPrinter
+class Printer
 {
  public:
 
@@ -40,7 +41,7 @@ class FreyjaPrinter
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaPrinter();
+	Printer();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaPrinter
@@ -51,7 +52,7 @@ class FreyjaPrinter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual ~FreyjaPrinter();
+	virtual ~Printer();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaPrinter object is allocated
 	 * Post : Deconstructs an object of FreyjaPrinter
@@ -153,4 +154,5 @@ class FreyjaPrinter
 	/* */
 };
 
+}
 #endif

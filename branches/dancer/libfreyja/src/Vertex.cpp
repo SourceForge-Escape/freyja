@@ -19,6 +19,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <hel/Matrix.h>
+
 #include "Vertex.h"
 #include "VertexABI.h"
 
@@ -583,6 +585,68 @@ void freyjaVertexNormal3f(index_t vertexIndex, vec_t x, vec_t y, vec_t z)
 		v->normal[0] = x;
 		v->normal[1] = y;
 		v->normal[2] = z;
+	}
+}
+
+
+void freyjaVertexListTransform(Vector<index_t> &list,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z)
+{
+	Matrix m, inverse, normalTransform;
+	vec3_t xyz;
+	index_t vertexIndex;
+	uint32 i, count;
+
+
+	if (list.empty())
+		return;
+
+	m.setIdentity();
+
+	switch (action)
+	{
+	case fTranslate:
+		m.translate(x, y, z);
+		break;
+
+	case fRotate:
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+		m.rotate(x, y, z);
+		break;
+
+	case fScale:
+		m.scale(x, y, z);
+		break;
+
+	case fScaleAboutPoint:   // FIXME
+		m.scale(x, y, z);
+		break;
+
+	case fRotateAboutPoint:  // FIXME
+		x = helDegToRad(x);
+		y = helDegToRad(y);
+		z = helDegToRad(z);
+		m.rotate(x, y, z);
+		break;
+	}
+
+	m.getInvert(inverse.mMatrix);
+	inverse.getTransposeMatrix(normalTransform.mMatrix);
+
+	for (i = list.begin(), count = list.end(); i < count; ++i)
+	{
+		vertexIndex = list[i];
+
+		freyjaGetVertexPosition3fv(vertexIndex, xyz);
+		m.multiply3v(xyz, xyz);
+		freyjaVertexPosition3fv(vertexIndex, xyz);
+
+		freyjaGetVertexNormal3fv(vertexIndex, xyz);
+		normalTransform.multiply3v(xyz, xyz);
+		freyjaVertexNormal3fv(vertexIndex, xyz);
 	}
 }
 
