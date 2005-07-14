@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=10
 MICRO_VERSION=0
 BRANCH=
-BUILD_ID=20050711
+BUILD_ID=20050713
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -88,7 +88,7 @@ RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
 	-fomit-frame-pointer -fexpensive-optimizations -O2
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g $(DEBUG_DEFS)
 
-SHLIBEXT=$(EXT).$(VERSION)
+SHLIBEXT=-$(MAJOR_VERSION).$(MINOR_VERSION)$(EXT).$(VERSION)
 SHLIBLDFLAGS=$(LDFLAGS) -fPIC -shared
 
 MODULE_CFLAGS=$(BASE_CFLAGS) -g -DFREYJA_PLUGINS
@@ -779,7 +779,7 @@ install:
 
 install-link:
 	@-echo -n "New soft links                               "
-	@-cd $(INSTALL_LIB) && ln -sf $(NAME)$(SHLIBEXT) $(NAME)$(EXT)
+	@-cd $(INSTALL_LIB) && ln -sf $(NAME)$(SHLIBEXT) $(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION)$(EXT)
 	@-echo "[done]"
 
 install-headers:
