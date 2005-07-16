@@ -85,8 +85,46 @@ vec_t FreyjaRender::mDefaultLineWidth = 1.0;
 vec_t FreyjaRender::mVertexPointSize = 3.5;
 
 
-// TEMP ////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+// Events
+////////////////////////////////////////////////////////////////
 
+void ePointJoint()
+{
+	FreyjaRender::mJointRenderType = 1;
+}
+
+void eSphereJoint()
+{
+	FreyjaRender::mJointRenderType = 2;
+}
+
+void eAxisJoint()
+{
+	FreyjaRender::mJointRenderType = 3;
+}
+
+void eLineBone()
+{
+	FreyjaRender::mBoneRenderType = 1;
+}
+
+void ePolyMeshBone()
+{
+		FreyjaRender::mBoneRenderType = 2;
+}
+
+void FreyjaRenderEventsAttach()
+{
+	FreyjaEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
+	FreyjaEventCallback::add("eLineBone", &eLineBone);
+	FreyjaEventCallback::add("eAxisJoint", &eAxisJoint);
+	FreyjaEventCallback::add("eSphereJoint", &eSphereJoint);
+	FreyjaEventCallback::add("ePointJoint", &ePointJoint);
+}
+
+
+// TEMP ////////////////////////////////////////////////////////
 
 void freyjaApplyMaterial(uint32 materialIndex)
 {
