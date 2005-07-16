@@ -555,8 +555,8 @@ bool FreyjaControl::event(int command)
 {
 	unsigned int i, flags;
 
-#ifdef TEST_FREYJA_EVENTS
-	if (FreyjaEvent::listen(command))
+#ifdef ENABLE_FREYJA_EVENTS
+	if (FreyjaEvent::listen(command - 10000 /*ePluginEventBase*/))
 		return true;
 #endif
 
@@ -1455,6 +1455,7 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
+
 		
 	/* MESHES */
 	case eMeshTesselate:
@@ -1518,12 +1519,6 @@ bool FreyjaControl::event(int command)
 
 
 	/* ANIMATIONS */
-	case eAnimationPlay:
-		freyja_print("eAnimationPlay disabled / no longer implemented");
-		break;
-	case eAnimationStop:
-		freyja_print("eAnimationStop disabled / no longer implemented");
-		break;
 	case eAnimationNext:
 		mModel->setCurrentAnimation(mModel->getCurrentAnimation() + 1);
 		freyja_print("Animation[%i].", mModel->getCurrentAnimation());
