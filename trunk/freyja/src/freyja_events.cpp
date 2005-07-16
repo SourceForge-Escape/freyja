@@ -28,6 +28,7 @@
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
+#include "FreyjaEvent.h"
 #include "freyja_events.h"
 
 
@@ -232,15 +233,30 @@ void mgtk_handle_key_press(int key, int mod)
 	freyja_print("mgtk_handle_key_press(%d, %d) not handled", key, mod);
 }
 
+void eVertexExtrude()
+{
+	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
+	//vec3_t n;
+
+	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
+	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
+}
+
+void eNoImplementation(FreyjaEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
+
 
 void mgtk_handle_resource_init(Resource &r)
 {
-#ifdef TEST_FREYJA_EVENTS
-	FreyjaEvent *event;
-	event = new FreyjaEventNormalGeneration(&r, "eGenerateNormals");
-#else
-	r.RegisterInt("eGenerateNormals", eGenerateNormals);
-#endif
+	FreyjaEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
+	FreyjaEventCallback2::add("eAnimationStop", &eNoImplementation);
+	FreyjaEventCallback2::add("eAnimationPlay", &eNoImplementation);
+	FreyjaEventCallback2::add("eUndo", &eNoImplementation);
+	//r.RegisterInt("eUndo", eUndo);
+
 
 	/* Mongoose 2002.01.12, 
 	 * Bind script functions to C/C++ functions */
@@ -253,7 +269,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
 	r.RegisterInt("eRedo", eRedo);
-	r.RegisterInt("eUndo", eUndo);
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
@@ -361,8 +376,6 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eAnimationNext", eAnimationNext);
 	r.RegisterInt("eAnimationPrev", eAnimationPrev);
-	r.RegisterInt("eAnimationStop", eAnimationStop);
-	r.RegisterInt("eAnimationPlay", eAnimationPlay);
 	r.RegisterInt("eAnimationSlider", eAnimationSlider);
 
 	/* Widget events ( widgets hold data like spinbuttons, etc ) */
@@ -1213,6 +1226,9 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 
 int main(int argc, char *argv[])
 {
+	/* Hookup resource to event system */
+	FreyjaEvent::setResource(&gResource);
+
 	mgtk_init(argc, argv);
 
 	/* Mongoose 2002.02.23, 

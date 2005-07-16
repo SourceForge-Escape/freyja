@@ -27,26 +27,11 @@
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
 #include <freyja/FreyjaPluginABI.h>
-
-//#define TEST_FREYJA_EVENTS
-#ifdef TEST_FREYJA_EVENTS
 #include "FreyjaEvent.h"
 
-class FreyjaEventNormalGeneration : public FreyjaEvent
-{
-public:
-	FreyjaEventNormalGeneration(Resource *rcSys, const char *name) :
-		FreyjaEvent(rcSys, name)
-	{
-	}
 
-	bool action()
-	{
-		freyjaGenerateVertexNormals();
-		return true;
-	}
-};
-#endif
+#define ENABLE_FREYJA_EVENTS
+
 
 typedef enum {
 
@@ -99,8 +84,6 @@ typedef enum {
 	eTransformMeshPivot,
 	eAnimationNext,
 	eAnimationPrev,
-	eAnimationStop,
-	eAnimationPlay,
 	eAnimationSlider,
 	eZoomIn,
 	eZoomOut,
