@@ -50,7 +50,7 @@ enum rotate_flags {
 void getOpenGLViewport(int *viewportXYWH); // int[4]
 void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
-
+void FreyjaRenderEventsAttach();
 
 class FreyjaRender
 {

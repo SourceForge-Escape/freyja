@@ -251,12 +251,23 @@ void eNoImplementation(FreyjaEvent *e)
 
 void mgtk_handle_resource_init(Resource &r)
 {
+	////////////////////////////////////////////////////////////////////
+	// New freyja events
+	////////////////////////////////////////////////////////////////////
+
 	FreyjaEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
 	FreyjaEventCallback2::add("eAnimationStop", &eNoImplementation);
 	FreyjaEventCallback2::add("eAnimationPlay", &eNoImplementation);
 	FreyjaEventCallback2::add("eUndo", &eNoImplementation);
-	//r.RegisterInt("eUndo", eUndo);
+	FreyjaEventCallback2::add("eRedo", &eNoImplementation);
+	FreyjaEventCallback2::add("eSkeletalDeform", &eNoImplementation);
 
+	FreyjaRenderEventsAttach();
+
+
+	////////////////////////////////////////////////////////////////////
+	// Old style events
+	////////////////////////////////////////////////////////////////////
 
 	/* Mongoose 2002.01.12, 
 	 * Bind script functions to C/C++ functions */
@@ -268,7 +279,6 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
-	r.RegisterInt("eRedo", eRedo);
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
@@ -282,7 +292,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenFileTexture", eOpenFileTexture);
 	r.RegisterInt("eOpenFileModel", eOpenFileModel);
-	r.RegisterInt("ePluginMenu", ePluginMenu);
+
+	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
 
 
 	// dialogs
@@ -332,12 +343,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
-
-	r.RegisterInt("ePointJoint", ePointJoint);
-	r.RegisterInt("eSphereJoint", eSphereJoint);
-	r.RegisterInt("eAxisJoint", eAxisJoint);
-	r.RegisterInt("eLineBone", eLineBone);
-	r.RegisterInt("ePolyMeshBone", ePolyMeshBone);
 	r.RegisterInt("eRenderBbox", eRenderBbox);
 
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
@@ -469,8 +474,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eRenderMaterial", FREYJA_MODE_RENDER_MATERIAL);
 	r.RegisterInt("eRenderSkeleton",FREYJA_MODE_RENDER_BONETAG);
 	r.RegisterInt("eRenderGrid", FREYJA_MODE_RENDER_GRID);
-
-	r.RegisterInt("eSkeletalDeform", eSkeletalDeform);
 
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
