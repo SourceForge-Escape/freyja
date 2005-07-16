@@ -2541,7 +2541,7 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 						  vec_t x, vec_t y, vec_t z)
 {
 	egg_vertex_t *vert;
-	Matrix m;
+	Matrix m, inverse, normalTransform;
 	unsigned int i, count;
 
 
@@ -2568,6 +2568,10 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 		return;
 	}
 
+	m.getInvert(inverse.mMatrix);
+	inverse.getTransposeMatrix(normalTransform.mMatrix);
+	normalTransform.setMatrix(inverse.mMatrix);
+
 	m.multiply3v(grp->center, grp->center);
   
 	for (count = 0, i = grp->vertex.begin(); i < grp->vertex.end(); ++i)
@@ -2578,6 +2582,7 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 			continue;
 
 		m.multiply3v(vert->pos, vert->pos);
+		normalTransform.multiply3v(vert->norm, vert->norm);
 
 		if (count == 0)
 		{
@@ -2600,7 +2605,7 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type, 
 						  vec_t x, vec_t y, vec_t z)
 {
-	Matrix m;
+	Matrix m, inverse, normalTransform;
 	egg_group_t *grp;
 	egg_vertex_t *vert;
 	unsigned int i, j, count;
@@ -2642,6 +2647,10 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 		return;
 	}
 
+	m.getInvert(inverse.mMatrix);
+	inverse.getTransposeMatrix(normalTransform.mMatrix);
+	normalTransform.setMatrix(inverse.mMatrix);
+
 	for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
 	{
 		grp = getGroup(mesh->group[i]);
@@ -2671,6 +2680,8 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 
 			if (!grp)
 				continue;
+
+			normalTransform.multiply3v(vert->norm, vert->norm);
 
 			switch (type)
 			{
@@ -2718,7 +2729,7 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 
 void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 {
-	Matrix m;
+	Matrix m, inverse, normalTransform;
 	egg_tag_t *tag;
 	egg_mesh_t *mesh;
 	egg_group_t *grp;
@@ -2757,6 +2768,10 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 		m.multiply3v(tag->center, tag->center);
 	}
 
+	m.getInvert(inverse.mMatrix);
+	inverse.getTransposeMatrix(normalTransform.mMatrix);
+	normalTransform.setMatrix(inverse.mMatrix);
+
 	for (i = mMeshes.begin(); i < mMeshes.end(); ++i)
 	{
 		mesh = mMeshes[i];
@@ -2783,6 +2798,7 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 					continue;
 
 				m.multiply3v(vert->pos, vert->pos);
+				normalTransform.multiply3v(vert->norm, vert->norm);
 
 				if (count == 0)
 				{

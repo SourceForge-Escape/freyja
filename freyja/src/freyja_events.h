@@ -123,11 +123,6 @@ typedef enum {
 	eTransformBone,
 	eTransformPoint,
 
-	ePointJoint,
-	eSphereJoint,
-	eAxisJoint,
-	eLineBone,
-	ePolyMeshBone,
 	eRenderBbox,
 	eCamera,
 	

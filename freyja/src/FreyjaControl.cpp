@@ -555,10 +555,9 @@ bool FreyjaControl::event(int command)
 {
 	unsigned int i, flags;
 
-#ifdef ENABLE_FREYJA_EVENTS
+
 	if (FreyjaEvent::listen(command - 10000 /*ePluginEventBase*/))
 		return true;
-#endif
 
 	switch (command)
 	{
@@ -655,15 +654,6 @@ bool FreyjaControl::event(int command)
 		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 		break;
 
-#ifndef TEST_FREYJA_EVENTS
-	case eGenerateNormals:
-		freyjaGenerateVertexNormals();
-		break;
-#endif
-
-	case eSkeletalDeform:
-		freyja_print("eSkeletalDeform is currently not implemented in modeler");
-		break;
 
 	case ePolygonSplit:
 		freyjaPolygonSplit(mModel->getCurrentMesh(), mModel->getCurrentPolygon());
@@ -1116,25 +1106,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case ePointJoint:
-		FreyjaRender::mJointRenderType = 1;
-		break;
 
-	case eSphereJoint:
-		FreyjaRender::mJointRenderType = 2;
-		break;
-
-	case eAxisJoint:
-		FreyjaRender::mJointRenderType = 3;
-		break;
-
-	case eLineBone:
-		FreyjaRender::mBoneRenderType = 1;
-		break;
-
-	case ePolyMeshBone:
-		FreyjaRender::mBoneRenderType = 2;
-		break;
 
 
 	case eRenderBbox:
