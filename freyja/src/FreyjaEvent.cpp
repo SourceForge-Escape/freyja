@@ -25,28 +25,51 @@
 #include "FreyjaEvent.h"
 
 
-unsigned long FreyjaEvent::mNextId = 0;
-Vector<FreyjaEvent*> FreyjaEvent::mEventStore;
+unsigned int FreyjaEvent::mCounter = 0; 
+Resource *FreyjaEvent::mResource; 
+Vector<FreyjaEvent*>  FreyjaEvent::mEvents;
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaEvent::FreyjaEvent(Resource *rcSys, const char *name)
+FreyjaEvent::FreyjaEvent(const char *name)
 {
-	mResource = rcSys;
+	unsigned int i, count;
+	bool found = false;
 
-	mId = mNextId++;
 	mName = 0x0;
 	setName(name);
 
-	mEventStore.pushBack(this);
+	/* Setup UID and class container reference */
+	mUID = count = mEvents.size();
+
+	for (i = 0; i < count; ++i)
+	{
+		if (mEvents[i] == 0x0)
+		{
+			mUID = i;
+			mEvents.assign(mUID, this);
+			printf("= %u : '%s'\n", mUID, mName);
+			found = true;
+		}	
+	}
+
+	if (!found)
+	{
+		mEvents.pushBack(this);
+		printf("+ %u : '%s'\n", mUID, mName);
+	}
+
+	mResource->RegisterInt(mName, /*ePluginEventBase*/ 10000 + mUID);
 }
 
 
 FreyjaEvent::~FreyjaEvent()
 {
+	/* Mark NULL in container, marking free slot */
+	mEvents.assign(mUID, 0x0);
 }
 
 
@@ -87,8 +110,6 @@ bool FreyjaEvent::action(char *value)
 {
 	return false;
 }
-
-
 
 
 bool FreyjaEvent::listen(unsigned long event)
@@ -169,6 +190,12 @@ bool FreyjaEvent::listen(unsigned long event, char *value)
 }
 
 
+void FreyjaEvent::setResource(Resource *rcSys)
+{
+	mResource = rcSys;
+}
+
+
 bool FreyjaEvent::redo()
 {
 	return false;
@@ -187,9 +214,9 @@ bool FreyjaEvent::undo()
 
 FreyjaEvent *FreyjaEvent::getEventById(unsigned long id)
 {
-	if (id < mEventStore.size())
+	if (id < mEvents.size())
 	{
-		return mEventStore[id];
+		return mEvents[id];
 	}
 
 	return 0x0;
@@ -222,9 +249,6 @@ void FreyjaEvent::setName(const char *name)
 	mName = new char[l+1];
 	strncpy(mName, name, l);
 	mName[l] = 0;
-	mResource->RegisterInt(mName, mId);
-
-	printf("'%s' <- %lu\n", mName, mId);
 }
 
 

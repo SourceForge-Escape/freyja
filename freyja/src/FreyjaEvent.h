@@ -40,7 +40,7 @@ class FreyjaEvent
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaEvent(Resource *rcSys, const char *name);
+	FreyjaEvent(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaEvent
@@ -67,6 +67,10 @@ class FreyjaEvent
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	char *getName()
+	{
+		return mName;
+	}
 
 
 	////////////////////////////////////////////////////////////
@@ -108,6 +112,18 @@ class FreyjaEvent
 	 *
 	 * 2005.02.08:
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void setHandler(void (*handler)());
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	static void setResource(Resource *rcSys);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	virtual bool redo();
@@ -172,45 +188,98 @@ class FreyjaEvent
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Resource *mResource;            /* Resource system pointer */
+	unsigned int mUID;                   /* Numeric id of event */
 
-	unsigned long mId;              /* Numeric id of event */
+	char *mName;                         /* Symbolic name of event */
 
-	char *mName;                    /* Symbolic name of event */
+	static unsigned int mCounter;        /* Avoid reserve algorithm ids */
 
-	static unsigned long mNextId;   /* Simple UID generator scheme */
+	static Resource *mResource;          /* Resource system pointer */
 
-	static Vector<FreyjaEvent*> mEventStore; /* Event store for control use */
+	static Vector<FreyjaEvent*> mEvents; /* Event store for control use */
 };
 
 
-#ifdef FIXME
 class FreyjaEventCallback : public FreyjaEvent
 {
 public:
 
-	FreyjaEventCallback(Resource *rcSys, const char *name, int *func()) :
-		FreyjaEvent(rcSys, name)
+	FreyjaEventCallback(const char *name, void (*func)()) : FreyjaEvent(name)
 	{
-		mFunc = func;
+		setHandler(func);
 	}
 
+	static void add(const char *name, void (*func)())
+	{
+		FreyjaEventCallback *e = new FreyjaEventCallback(name, func);
+
+		if (e)
+		{
+		}
+	}
 
 	virtual bool action()
 	{
-		if (mFunc)
+		if (mHandler)
 		{
-			return (*mFunc)();
+			(*mHandler)();
+			return true;
 		}
 
 		return false;
 	}
 
+	void setHandler(void (*func)())
+	{
+		mHandler = func;
+	}
+
 
 private:
 
-	int *mFunc();
+	void (*mHandler)();                  /* Function pointer callback */
 };
-#endif
+
+
+class FreyjaEventCallback2 : public FreyjaEvent
+{
+public:
+
+	FreyjaEventCallback2(const char *name, void (*func)(FreyjaEvent *e)) : FreyjaEvent(name)
+	{
+		setHandler(func);
+	}
+
+	static void add(const char *name, void (*func)(FreyjaEvent *e))
+	{
+		FreyjaEventCallback2 *e = new FreyjaEventCallback2(name, func);
+
+		if (e)
+		{
+		}
+	}
+
+	virtual bool action()
+	{
+		if (mHandler)
+		{
+			(*mHandler)(this);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setHandler(void (*func)(FreyjaEvent *e))
+	{
+		mHandler = func;
+	}
+
+
+private:
+
+	void (*mHandler)(FreyjaEvent *e);       /* Function pointer callback */
+};
+
 
 #endif

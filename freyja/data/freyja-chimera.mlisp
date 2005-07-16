@@ -166,7 +166,9 @@
 			(submenu "_Vertex"
 				(menu_item "_New"		eMode  eVertexNew)
 				(menu_item "_Delete"	eMode  eVertexDelete)
-				(menu_item "_Combine"	eMode  eVertexCombine))
+				(menu_item "_Combine"	eMode  eVertexCombine)
+				;;(menu_item "_Extrude"	eMode  eVertexExtrude)
+			)
 
 			(submenu "_Polygon"
 				(menu_item "_New"		eMode	ePolygonNew)
