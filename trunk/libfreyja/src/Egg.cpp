@@ -2516,24 +2516,44 @@ void Egg::Transform(egg_tag_t *etag, enum egg_transform type,
 	case SCALE:
 		m.scale(x, y, z);
 		break;
+
+
 	case ROTATE:
 		x = helDegToRad(x);
 		y = helDegToRad(y);
 		z = helDegToRad(z);
 		m.rotate(x, y, z);
+
+		// FIXME
+		printError("Egg::Transform> ( Tag ) Not fully implemented %s:%i\n", 
+					  __FILE__, __LINE__);
+		/* to avoid extra rotation in scene
+		etag->rot[0] += x;
+		etag->rot[1] += y;
+		etag->rot[2] += z;
+
+		if (etag->rot[0] > 360.0f)
+			etag->rot[0] -= 360.0f;
+
+		if (etag->rot[1] > 360.0f)
+			etag->rot[1] -= 360.0f;
+
+		if (etag->rot[2] > 360.0f)
+			etag->rot[2] -= 360.0f;
+		*/
 		break;
+
+
 	case TRANSLATE:
 		m.translate(x, y, z);
 		break;
+
+
 	default:
 		return;
 	}
 
 	m.multiply3v(etag->center, etag->center);
-
-	//FIXME: transform groups
-	printError("Egg::Transform> ( Tag ) Not fully implemented %s:%i\n", 
-				  __FILE__, __LINE__);
 }
 
 

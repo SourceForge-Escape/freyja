@@ -586,34 +586,35 @@ void mglDrawSphere(int numMajor, int numMinor, float radius)
 
 void mglDrawBone(unsigned char type, const vec3_t pos)
 {
-	const vec_t min = 0.625f;
-	const vec_t max = 2.5f;
+	const vec_t min = 0.05f;
+	const vec_t max = 0.50f;
 
 
 	switch (type)
 	{
 	case 1:
 		glBegin(GL_LINES);
-		glVertex3f(0, 0, 0);
+		glVertex3f(0.0f, 0.0f, 0.0f);
 		glVertex3f(pos[0], pos[1], pos[2]);
 		glEnd();
 		break;
+
 	case 2:
 		glBegin(GL_LINE_STRIP);
-		glVertex3f(0.0,   min,  0.0);     // 0
-		glVertex3f(-max,  0.0, -max);     // 1
-		glVertex3f( max,  0.0, -max);     // 2
-		glVertex3fv(pos);                 // Base
-		glVertex3f(-max,  0.0,-max);      // 1
-		glVertex3f(-max,  0.0, max);      // 4
-		glVertex3f( 0.0,  min, 0.0);      // 0
-		glVertex3f( max,  0.0,-max);      // 2
-		glVertex3f( max,  0.0, max);      // 3
-		glVertex3f( 0.0,  min, 0.0);      // 0
-		glVertex3f(-max,  0.0, max);      // 4
-		glVertex3fv(pos);                 // Base
-		glVertex3f( max,  0.0, max);      // 3
-		glVertex3f(-max,  0.0, max);      // 4
+		glVertex3f(0.0f,   min,  0.0f);    // 0
+		glVertex3f(-max,  0.0f, -max);     // 1
+		glVertex3f( max,  0.0f, -max);     // 2
+		glVertex3fv(pos);                        // Base
+		glVertex3f(-max,  0.0f,-max);      // 1
+		glVertex3f(-max,  0.0f, max);      // 4
+		glVertex3f( 0.0f,  min, 0.0f);     // 0
+		glVertex3f( max,  0.0f,-max);      // 2
+		glVertex3f( max,  0.0f, max);      // 3
+		glVertex3f( 0.0f,  min, 0.0f);     // 0
+		glVertex3f(-max,  0.0f, max);      // 4
+		glVertex3fv(pos);                        // Base
+		glVertex3f( max,  0.0f, max);      // 3
+		glVertex3f(-max,  0.0f, max);      // 4
 		glEnd();
 		break;
 	}
