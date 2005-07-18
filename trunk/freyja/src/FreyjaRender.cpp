@@ -1958,6 +1958,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
    glPopMatrix();
 }
 
+double gMatrix[16];
 
 void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
@@ -1973,7 +1974,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
-	glTranslatef(-20.0, -17.0, 10.0);
+	glTranslatef(/*-20.0*/-mScaleEnv, /*-17.0*/-mScaleEnv + 2.5f, 10.0);
 
 	switch (plane)
 	{
@@ -2013,6 +2014,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	renderLights();
 
 	glScalef(mZoom, mZoom, mZoom);
+
+	getOpenGLModelviewMatrix(gMatrix);
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{

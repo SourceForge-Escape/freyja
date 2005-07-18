@@ -2272,11 +2272,21 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 }
 
 
-void FreyjaControl::getWorldFromScreen(vec_t mouseX, vec_t mouseY, vec3_t xyz)
+void FreyjaControl::testPickRay(vec_t x, vec_t y)
 {
-#ifdef FIXME
-	// Not using viewport checks, widths, and heights
-	double matrix[16], inverse[16];
+	double rayOrigin[4];
+	double rayVector[4];
+
+	getPickRay(x, y, rayOrigin, rayVector);
+}
+
+
+void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, 
+								double *rayOrigin, double *rayVector)
+{
+	/* This does not use viewport: quadrant checks, widths, and heights */
+	extern double gMatrix[16]; // This is actual cached render transform
+	double inverse[16];
 	double rayPnt[4] = {0.0f, 0.0f, 0.0f, 1.0f };
 	double rayVec[4];
 	vec_t winH = mRender->getWindowHeight();
@@ -2285,7 +2295,7 @@ void FreyjaControl::getWorldFromScreen(vec_t mouseX, vec_t mouseY, vec3_t xyz)
 	vec_t winX = mouseX - winH * 0.5f;
 	vec_t normX = winX / ( winH * 0.5f );
 	vec_t zNear = -400.0f; // mRender->getZNear();
-	vec_t nearH = 20.0f; // mRender->getNearH();
+	vec_t nearH = mRender->getNearHeight();
 	vec_t aspect = mRender->getWindowAspectRatio();
 
 	// This is now ray in eye coordinates
@@ -2295,56 +2305,15 @@ void FreyjaControl::getWorldFromScreen(vec_t mouseX, vec_t mouseY, vec3_t xyz)
 	rayVec[3] = 0.0f;
 
 	// Now transform by inverse of modelview matrix to object coordinates
-	getOpenGLModelviewMatrix(matrix);
-	matrixInvert16dv(matrix, inverse);
-	matrix4dvx16dv(inverse, rayVec, rayVec); // just put result back in
-	matrix4dvx16dv(inverse, rayPnt, rayPnt);
-	
-	xyz[0] = rayVec[0];
-	xyz[1] = rayVec[1];
-	xyz[2] = rayVec[2];
+	matrixInvert16dv(gMatrix, inverse);
+	matrix4dvx16dv(inverse, rayVec, rayVector); // src, dest can be same
+	matrix4dvx16dv(inverse, rayPnt, rayOrigin); // src, dest can be same
 
-#endif
-
-	freyja_print("!%f, %f -> %f %f %f\n", mouseX, mouseY, xyz[0], xyz[1], xyz[2]);
-}
-
-
-Vector3d FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, vec3_t xyz)
-{
-	// FIXME: This does nothing atm
-#ifdef FIXME
-	vec_t nearHeight = 400; // fluff filler for now
-	vec_t zNear = 0.1;
-
-
-	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
-	long windowHeight = mRender->getWindowHeight();
-	long windowWidth = mRender->getWindowWidth();
-	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
-	vec_t windowX = mouseX - windowWidth / 2;
-	double normX = double(windowX) / double(windowWidth / 2);
-	vec_t windowY = (windowHeight - mouseY) - windowHeight / 2;
-	double normY = double(windowY) / double(windowHeight / 2);
-	float x = nearHeight * (windowWidth/windowHeight) * normX;
-	float y = nearHeight * normY;
-
-	// Pick vector is now <x, y, -zNear> in eye coords
-	
-	Vector3d v = Vector3d(x, y, -zNear);
-	return v;
-
-	//Point rayPointObjCoord = Point(0, 0, 0);
-	//Vector3d rayVectorObjCoord = Vector3d(x, y, -nearDistance);
-
-	//Vector3d vObjCoord = modelviewInverse * rayVectorObjCoord;
-	//Point pObjCoord = modelviewInverse * rayPointObjCoord;
-
-	//...
-#else
-	Vector3d v;
-	v.zero();
-	return v;
+#ifdef DEBUG_PICK_RAY
+	freyja_print("!%f, %f -> <%f %f %f> @ %f, %f, %f\n",
+				mouseX, mouseY,
+				rayVector[0], rayVector[1], rayVector[2],
+				rayOrigin[0], rayOrigin[1], rayOrigin[2]);
 #endif
 }
 
@@ -2514,11 +2483,9 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 	/* Mongoose: Convert screen to world coordinate system */
 	getWorldFromScreen(&xx, &yy, &zz);
 
-	// test
-	vec3_t xyz;
-	getWorldFromScreen(x, y, xyz);
-	printf("%f %f %f | old\n", xx, yy, zz);
-
+	// testPickRay
+	testPickRay(x, y);
+	//freyja_print("!%f %f %f | old\n", xx, yy, zz);
 
 	switch (mTransformMode)
 	{
