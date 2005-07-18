@@ -244,11 +244,11 @@ uninstall-lib:
 
 tarball:
 	@-$(MAKE) clean
-	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz $(TREE_DIR) \
-		--exclude bin --exclude *~ --exclude .svn \
-		--exclude CVS --exclude *.notar --exclude spec \
-		--exclude *.log --exclude contrib \
-		--totals
+	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz \
+		--exclude=bin --exclude=*~ --exclude=.svn \
+		--exclude=CVS --exclude=*.notar --exclude=spec \
+		--exclude=*.log --exclude contrib \
+		--totals $(TREE_DIR)
 	@-echo "[done]"
 
 backup:
