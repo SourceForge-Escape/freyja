@@ -293,9 +293,18 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	Vector3d getPickRay(vec_t mouseX, vec_t mouseY, vec3_t xyz);
+	void getPickRay(vec_t mouseX, vec_t mouseY, 
+					double *rayOrigin, double *rayVector);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pick ray in object cooridnates
+	 ------------------------------------------------------*/
 
-	void getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz);
+	void testPickRay(vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : FIXME: Replace with ray picking object picker
+	 ------------------------------------------------------*/
 
 	void getScreenToWorldOBSOLETE(float *x, float *y);
 	/*------------------------------------------------------
