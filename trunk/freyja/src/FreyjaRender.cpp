@@ -31,7 +31,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-
 #include <assert.h>
 
 #ifdef HAVE_OPENGL
@@ -43,10 +42,10 @@
 #   endif
 #endif
 
-
 #include "freyja_events.h"
-
 #include "FreyjaRender.h"
+
+FreyjaRender *FreyjaRender::mSingleton = 0x0;
 
 
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
@@ -114,6 +113,12 @@ void ePolyMeshBone()
 		FreyjaRender::mBoneRenderType = 2;
 }
 
+void eSetNearHeight(vec_t f)
+{
+	FreyjaRender::mSingleton->setNearHeight(f);
+}
+
+
 void FreyjaRenderEventsAttach()
 {
 	FreyjaEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
@@ -121,6 +126,7 @@ void FreyjaRenderEventsAttach()
 	FreyjaEventCallback::add("eAxisJoint", &eAxisJoint);
 	FreyjaEventCallback::add("eSphereJoint", &eSphereJoint);
 	FreyjaEventCallback::add("ePointJoint", &ePointJoint);
+	FreyjaEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
 }
 
 
@@ -678,10 +684,13 @@ void getOpenGLModelviewMatrix(double *modelview) // double[16]
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 }
 
+
 void getOpenGLProjectionMatrix(double *projection) // double[16]
 {
 	glGetDoublev(GL_PROJECTION_MATRIX, projection);
 }
+
+
 
 
 ////////////////////////////////////////////////////////////////
@@ -707,10 +716,12 @@ FreyjaRender::FreyjaRender()
 		mColorAxisZ[i] = BLUE[i] * 0.75f;
 	}
 
-	mScaleEnv = 20.0;
+	mScaleEnv = 40.0f; //20.0; // 40.0f for higher res
 	mFar = 6000.0;
 	mNear = 0.1;
 	mFovY = 40.0;
+
+	mSingleton = this;
 }
 
 
@@ -1212,7 +1223,7 @@ void FreyjaRender::resizeContext(unsigned int width, unsigned int height)
 		glOrtho(-mScaleEnv * mAspectRatio,
 				mScaleEnv * mAspectRatio, 
 				-mScaleEnv, mScaleEnv, 
-				-400.0, 
+				-400.0, // zNear
 				400.0);
 	}
 

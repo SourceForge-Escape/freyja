@@ -2004,6 +2004,7 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
    vec_t yr = helDegToRad(ry);
    vec_t zr = helDegToRad(rz);
 	unsigned int i, j, k;
+	vec_t norm;
 
 
    etag = getTag(tag);
@@ -2055,8 +2056,11 @@ void Egg::TagRotateAbout(unsigned int tag, vec_t rx, vec_t ry, vec_t rz)
 				vert->pos[2] += etag->center[2];
 
 				normalTransform.multiply3v(vert->norm, vert->norm);
+				norm = sqrt(vert->norm[0]*vert->norm[0] + vert->norm[1]*vert->norm[1] + vert->norm[2]*vert->norm[2]);
+			 	vert->norm[0] /= norm;
+			 	vert->norm[1] /= norm;
+			 	vert->norm[2] /= norm;
 
-			 
 				if (count == 0)
 				{
 					grp->bbox_min[0] = vert->pos[0];
@@ -2458,7 +2462,7 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 	egg_vertex_t *vert;
 	Matrix m, inverse, normalTransform;
 	unsigned int i;
-
+	vec_t norm;
 
 	if (!list)
 		return;
@@ -2496,6 +2500,10 @@ void Egg::Transform(Vector<egg_vertex_t *> *list, enum egg_transform type,
 
 		m.multiply3v(vert->pos, vert->pos);
 		normalTransform.multiply3v(vert->norm, vert->norm);
+		norm = sqrt(vert->norm[0]*vert->norm[0] + vert->norm[1]*vert->norm[1] + vert->norm[2]*vert->norm[2]);
+	 	vert->norm[0] /= norm;
+	 	vert->norm[1] /= norm;
+	 	vert->norm[2] /= norm;
 	}
 }
 
@@ -2563,6 +2571,7 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 	egg_vertex_t *vert;
 	Matrix m, inverse, normalTransform;
 	unsigned int i, count;
+	vec_t norm;
 
 
 	if (!grp)
@@ -2603,6 +2612,10 @@ void Egg::Transform(egg_group_t *grp, enum egg_transform type,
 
 		m.multiply3v(vert->pos, vert->pos);
 		normalTransform.multiply3v(vert->norm, vert->norm);
+		norm = sqrt(vert->norm[0]*vert->norm[0] + vert->norm[1]*vert->norm[1] + vert->norm[2]*vert->norm[2]);
+	 	vert->norm[0] /= norm;
+	 	vert->norm[1] /= norm;
+	 	vert->norm[2] /= norm;
 
 		if (count == 0)
 		{
@@ -2629,7 +2642,7 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 	egg_group_t *grp;
 	egg_vertex_t *vert;
 	unsigned int i, j, count;
-
+	vec_t norm;
 
 	if (!mesh)
 		return;
@@ -2702,6 +2715,10 @@ void Egg::Transform(egg_mesh_t *mesh, enum egg_transform type,
 				continue;
 
 			normalTransform.multiply3v(vert->norm, vert->norm);
+			norm = sqrt(vert->norm[0]*vert->norm[0] + vert->norm[1]*vert->norm[1] + vert->norm[2]*vert->norm[2]);
+		 	vert->norm[0] /= norm;
+		 	vert->norm[1] /= norm;
+		 	vert->norm[2] /= norm;
 
 			switch (type)
 			{
@@ -2755,7 +2772,7 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 	egg_group_t *grp;
 	egg_vertex_t *vert;
 	unsigned int i, j, k, count;
-
+	vec_t norm;
 
 	m.setIdentity();
 
@@ -2819,6 +2836,10 @@ void Egg::Transform(enum egg_transform type, vec_t x, vec_t y, vec_t z)
 
 				m.multiply3v(vert->pos, vert->pos);
 				normalTransform.multiply3v(vert->norm, vert->norm);
+				norm = sqrt(vert->norm[0]*vert->norm[0] + vert->norm[1]*vert->norm[1] + vert->norm[2]*vert->norm[2]);
+			 	vert->norm[0] /= norm;
+			 	vert->norm[1] /= norm;
+			 	vert->norm[2] /= norm;
 
 				if (count == 0)
 				{

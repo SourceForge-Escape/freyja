@@ -29,6 +29,7 @@
 
 
 #include <mstl/Vector.h>
+#include <hel/math.h>
 #include <mgtk/Resource.h>
 
 
@@ -78,6 +79,7 @@ class FreyjaEvent
 	////////////////////////////////////////////////////////////
 
 	virtual bool action() = 0;
+	virtual bool action(unsigned int value) { return false; };
 	virtual bool action(long value);
 	virtual bool action(long *value, unsigned long size);
 	virtual bool action(float value);
@@ -281,5 +283,96 @@ private:
 	void (*mHandler)(FreyjaEvent *e);       /* Function pointer callback */
 };
 
+
+class FreyjaEventCallbackUInt : public FreyjaEvent
+{
+public:
+
+	FreyjaEventCallbackUInt(const char *name, void (*func)(unsigned int)) : FreyjaEvent(name)
+	{
+		setHandler(func);
+	}
+
+	static void add(const char *name, void (*func)(unsigned int))
+	{
+		FreyjaEventCallbackUInt *e = new FreyjaEventCallbackUInt(name, func);
+
+		if (e)
+		{
+		}
+	}
+
+	virtual bool action()
+	{
+		return false;
+	}
+
+	virtual bool action(unsigned int value)
+	{
+		if (mHandler)
+		{
+			(*mHandler)(value);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setHandler(void (*func)(unsigned int))
+	{
+		mHandler = func;
+	}
+
+
+private:
+
+	void (*mHandler)(unsigned int);       /* Function pointer callback */
+};
+
+
+class FreyjaEventCallbackVec : public FreyjaEvent
+{
+public:
+
+	FreyjaEventCallbackVec(const char *name, void (*func)(vec_t)) : FreyjaEvent(name)
+	{
+		setHandler(func);
+	}
+
+	static void add(const char *name, void (*func)(vec_t))
+	{
+		FreyjaEventCallbackVec *e = new FreyjaEventCallbackVec(name, func);
+
+		if (e)
+		{
+		}
+	}
+
+	virtual bool action()
+	{
+		return false;
+	}
+
+	virtual bool action(float value)
+	{
+		if (mHandler)
+		{
+			(*mHandler)(value);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setHandler(void (*func)(vec_t))
+	{
+		mHandler = func;
+	}
+
+
+private:
+
+	void (*mHandler)(vec_t);       /* Function pointer callback */
+};
 
 #endif

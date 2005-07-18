@@ -732,6 +732,10 @@ Send bug reports and feature requests:
 			(icon "freyja.png" IconSize_Dialog))
 
 		(hbox 1 0 0 1 0
+			(label "Near Height "  0.0 0.5) 
+			(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
+
+		(hbox 1 0 0 1 0
 			(label "Polygon # of sides "  0.0 0.5) 
 			(spinbutton 0 3 6 ePolygonSize))
 

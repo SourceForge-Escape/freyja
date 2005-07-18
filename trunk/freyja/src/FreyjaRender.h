@@ -52,6 +52,8 @@ void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
 void FreyjaRenderEventsAttach();
 
+
+
 class FreyjaRender
 {
 public:
@@ -142,6 +144,8 @@ public:
 	 * Mongoose - Created, was public data member
 	 ------------------------------------------------------*/
 
+	vec_t getNearHeight() { return mScaleEnv; } 
+
 	unsigned int getWindowWidth();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -229,6 +233,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void setNearHeight(vec_t scale) { mScaleEnv = scale; resizeContext(mWidth, mHeight); } 
+
 	void setSceneData(FreyjaModel *model);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -295,6 +301,8 @@ public:
 	static vec_t mDefaultPointSize;
 	static vec_t mDefaultLineWidth;
 	static vec_t mVertexPointSize;
+
+	static FreyjaRender *mSingleton;  // Not really, but will be later
 
 private:    
 
