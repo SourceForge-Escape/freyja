@@ -422,4 +422,8 @@ class Matrix
 	 ------------------------------------------------------*/
 };
 
+void matrix4dvx16dv(double *matrix, double *v, double *result);
+
+bool matrixInvert16dv(double *m, double *out);
+
 #endif
