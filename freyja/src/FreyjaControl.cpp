@@ -3,15 +3,15 @@
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.wetga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaControl
  * License : No use w/o permission (C) 2000 Mongoose
  * Comments: This is the controler class for the client
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -400,6 +400,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	vec4_t color, pos;
 	vec_t x, y, z;
 
+
+	if (FreyjaEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+		return true;
 
 	switch (event)
 	{
@@ -2269,36 +2272,45 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 }
 
 
-void FreyjaControl::getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz)
+void FreyjaControl::getWorldFromScreen(vec_t mouseX, vec_t mouseY, vec3_t xyz)
 {
 #ifdef FIXME
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
+	// Not using viewport checks, widths, and heights
+	double matrix[16], inverse[16];
+	double rayPnt[4] = {0.0f, 0.0f, 0.0f, 1.0f };
+	double rayVec[4];
+	vec_t winH = mRender->getWindowHeight();
+	vec_t winY = (winH - mouseY) - winH * 0.5f;
+	vec_t normY = winY / ( winH * 0.5f );
+	vec_t winX = mouseX - winH * 0.5f;
+	vec_t normX = winX / ( winH * 0.5f );
+	vec_t zNear = -400.0f; // mRender->getZNear();
+	vec_t nearH = 20.0f; // mRender->getNearH();
+	vec_t aspect = mRender->getWindowAspectRatio();
 
+	// This is now ray in eye coordinates
+	rayVec[0] = nearH * normY;
+	rayVec[1] = nearH * aspect * normX;
+	rayVec[2] = -zNear;
+	rayVec[3] = 0.0f;
 
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	// Now transform by inverse of modelview matrix to object coordinates
+	getOpenGLModelviewMatrix(matrix);
+	matrixInvert16dv(matrix, inverse);
+	matrix4dvx16dv(inverse, rayVec, rayVec); // just put result back in
+	matrix4dvx16dv(inverse, rayPnt, rayPnt);
+	
+	xyz[0] = rayVec[0];
+	xyz[1] = rayVec[1];
+	xyz[2] = rayVec[2];
 
-
-	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
-	long windowHeight = mRender->getWindowHeight();
-	long windowWidth = mRender->getWindowWidth();
-	//	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
-	vec_t windowX = x - windowWidth / 2;
-	double normX = double(windowX) / double(windowWidth / 2);
-	vec_t windowY = (windowHeight - y) - windowHeight / 2;
-	double normY = double(windowY) / double(windowHeight / 2);
-	//float x = nearHeight * mRender->getAspectRatio() * normX;
-	//float y = nearHeight * normY;
-
-	printf("%f %f %f\n", xyz[0], xyz[1], xyz[2]);
 #endif
+
+	freyja_print("!%f, %f -> %f %f %f\n", mouseX, mouseY, xyz[0], xyz[1], xyz[2]);
 }
 
 
-Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
+Vector3d FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, vec3_t xyz)
 {
 	// FIXME: This does nothing atm
 #ifdef FIXME
@@ -2339,6 +2351,7 @@ Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
 
 void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 {
+	float nearHeight = mRender->getNearHeight() * 2.0f;
 	float width, height, invz, fs;
 	float scroll[3];
  
@@ -2355,7 +2368,7 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 #endif
 
 	invz = (1.0 / mRender->getZoom());
-	fs = (40.0 * invz) / height;  // fov 40?
+	fs = (nearHeight * invz) / height;  // fov 40?
 
 	*x = (*x - width / 2.0) * fs;
 	*y = -(*y - height / 2.0) * fs;

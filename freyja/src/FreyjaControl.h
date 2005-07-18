@@ -293,7 +293,8 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	Vector3d getPickRay(float mouseX, float mouseY, vec3_t xyz);
+	Vector3d getPickRay(vec_t mouseX, vec_t mouseY, vec3_t xyz);
+
 	void getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz);
 
 	void getScreenToWorldOBSOLETE(float *x, float *y);
