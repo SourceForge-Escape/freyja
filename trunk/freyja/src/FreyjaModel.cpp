@@ -1962,9 +1962,7 @@ int FreyjaModel::loadMaterial(const char *filename)
 {
 	int32 mIndex;
 
-	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
 
-	// FIXME: There is no fLoadMaterialInSlot
 	if (mFlags & fLoadMaterialInSlot)  
 		mIndex = freyjaGetCurrentMaterial();
 	else
@@ -2471,6 +2469,7 @@ int FreyjaModel::saveMaterial(const char *filename)
 
 	return 0;
 }
+
 
 int FreyjaModel::loadTextureBuffer(unsigned char *image, 
 										unsigned int width, 

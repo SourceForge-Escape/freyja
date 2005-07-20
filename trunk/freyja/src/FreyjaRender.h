@@ -76,7 +76,8 @@ public:
 		fSkeletalVertexBlending     = 16384,
 		RENDER_POINTS           = 32768,
 		fRenderBonesClearedZBuffer = 65536,
-		fViewports              = 131072
+		fViewports              = 131072,
+		fRenderGridClearedZBuffer = 262144
 	} flags_t;
 
 
@@ -454,7 +455,7 @@ private:
 	vec4_t mViewports[4];                      /* Size and offset of viewports
 															  * if enabled */
 	
-	unsigned int mRenderMode;                  /* Rendering mode */
+	static unsigned int mRenderMode;                  /* Rendering mode */
 
 	float mZoom;                               /* Used to cache zoom */
 
