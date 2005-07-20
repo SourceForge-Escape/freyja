@@ -263,6 +263,7 @@ void mgtk_handle_resource_init(Resource &r)
 	FreyjaEventCallback2::add("eSkeletalDeform", &eNoImplementation);
 
 	FreyjaRenderEventsAttach();
+	FreyjaModelEventsAttach();
 
 
 	////////////////////////////////////////////////////////////////////
