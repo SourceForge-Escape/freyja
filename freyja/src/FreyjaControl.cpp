@@ -1191,20 +1191,6 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-	case eTextureSlotLoad:
-		if (!mModel->getFlags() & FreyjaModel::fLoadTextureInSlot)
-		{
-			mModel->setFlags(FreyjaModel::fLoadTextureInSlot, 1);
-		}
-		else
-		{
-			mModel->setFlags(FreyjaModel::fLoadTextureInSlot, 0);
-		}	
-
-		freyja_print("Texture loading to current slot [%s]",
-					(mModel->getFlags() & FreyjaModel::fLoadTextureInSlot) ? "on" : "off");
-		break;
-
 	case eTransformSelectedVertices:
 		mTransformMode = FreyjaModel::TransformSelectedVertices;
 		break;

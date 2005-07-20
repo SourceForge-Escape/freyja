@@ -54,6 +54,9 @@ typedef enum {
 } freyja_plane_t;
 
 
+void FreyjaModelEventsAttach();
+
+
 class FreyjaModel
 {
 public:
@@ -72,9 +75,11 @@ public:
 		FL_LOAD_MAP      = 2,    /* Toggle map loading in TR paks */
 		FL_QUAKE_PAL     = 4,    /* Toggle quake/hexen2 palette in mdl loads */
 		FL_VERTEX_UV     = 8,    /* Toggle polymapping of texcoords */
-		fDontUpdateBoneName = 16,
-		fDeformBoneVertices = 32,
-		fLoadTextureInSlot = 64
+		fDontUpdateBoneName  = 16,
+		fDeformBoneVertices  = 32,
+		fLoadTextureInSlot   = 64,
+		fLoadMaterialInSlot  = 128
+
 	} option_flag_t;
 
 
@@ -191,7 +196,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getFlags();
+	static unsigned int getFlags();
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : Returns control flags for model
@@ -576,7 +581,7 @@ public:
 
 	void setDebug(unsigned int n);
 
-	void setFlags(option_flag_t flag, int op);
+	static void setFlags(option_flag_t flag, int op);
 	/*------------------------------------------------------
 	 * Pre  : The flag and operator are valid
 	 * Post : Sets control flags for model
@@ -766,7 +771,7 @@ private:
 
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 
-	unsigned int mFlags;            /* Stores option flags as bitmap */
+	static unsigned int mFlags;            /* Stores option flags as bitmap */
 
 	bbox2_t mSelectBBox;            /* 3d selection box using 2 vertices */
 

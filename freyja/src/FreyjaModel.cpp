@@ -33,8 +33,50 @@
 #include "FreyjaModel.h"
 
 BezierPatch FreyjaModel::gTestPatch;
+unsigned int FreyjaModel::mFlags = 0;
 
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
+
+// FIXME: Add set/clear methods to replace old get/set flags crap
+void eTextureSlotLoadToggle()
+{
+	if (FreyjaModel::getFlags() & FreyjaModel::fLoadTextureInSlot)
+	{
+		FreyjaModel::setFlags(FreyjaModel::fLoadTextureInSlot, 0);
+	}
+	else
+	{
+		FreyjaModel::setFlags(FreyjaModel::fLoadTextureInSlot, 1);
+	}	
+
+	freyja_print("Texture loading into current slot [%s]",
+				(FreyjaModel::getFlags() & FreyjaModel::fLoadTextureInSlot) ? "on" : "off");
+}
+
+void eMaterialSlotLoadToggle()
+{
+	if (FreyjaModel::getFlags() & FreyjaModel::fLoadMaterialInSlot)
+	{
+		FreyjaModel::setFlags(FreyjaModel::fLoadMaterialInSlot, 0);
+	}
+	else
+	{
+		FreyjaModel::setFlags(FreyjaModel::fLoadMaterialInSlot, 1);
+	}	
+
+	freyja_print("Material loading into current slot [%s]",
+				(FreyjaModel::getFlags() & FreyjaModel::fLoadMaterialInSlot) ? "on" : "off");
+}
+
+
+void FreyjaModelEventsAttach()
+{
+	FreyjaEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
+	FreyjaEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+}
+
+
+/////////////////////////////////////////////////
 
 
 FreyjaModel::FreyjaModel()
@@ -1923,7 +1965,7 @@ int FreyjaModel::loadMaterial(const char *filename)
 	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
 
 	// FIXME: There is no fLoadMaterialInSlot
-	if (mFlags & fLoadTextureInSlot)  
+	if (mFlags & fLoadMaterialInSlot)  
 		mIndex = freyjaGetCurrentMaterial();
 	else
 		mIndex = freyjaMaterialCreate();
