@@ -297,6 +297,20 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
+	case eSelectMaterial:
+		if (!freyja_event_set_range(event, value, 0, freyjaGetMaterialCount()-1))
+		{
+			if (value != freyjaGetCurrentMaterial())
+			{
+				freyjaCurrentMaterial(value);
+				freyja_print("Selected material[%i].", value);
+				freyja_refresh_material_interface();
+				freyja_event_gl_refresh();
+			}
+		}
+		break;
+
+
 	case eBoneIterator:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_BONE)))
 		{
@@ -1510,18 +1524,7 @@ bool FreyjaControl::event(int command)
 
 
 
-	case eSelectMaterial:
-		i = (int)freyja_event_get_float(eSelectMaterial);
 
-		if (i != freyjaGetCurrentMaterial())
-		{
-			freyjaCurrentMaterial(i);
-			freyja_event_set_float(eSelectMaterial,freyjaGetCurrentMaterial());
-			freyja_print("Selected material[%i].", i);
-			freyja_refresh_material_interface();
-			freyja_event_gl_refresh();
-		}
-		break;
 
 
 	case eZoom:
