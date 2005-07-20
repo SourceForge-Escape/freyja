@@ -72,6 +72,7 @@ vec4_t FreyjaRender::mColorVertexHighlight;
 vec4_t FreyjaRender::mColorAxisX;
 vec4_t FreyjaRender::mColorAxisY;
 vec4_t FreyjaRender::mColorAxisZ;
+unsigned int  FreyjaRender::mRenderMode = 0;
 unsigned int FreyjaRender::mSelectedBone = 0;
 unsigned int FreyjaRender::mBoneRenderType = 1;
 unsigned char FreyjaRender::mJointRenderType = 1;
@@ -118,9 +119,33 @@ void eSetNearHeight(vec_t f)
 	FreyjaRender::mSingleton->setNearHeight(f);
 }
 
+void eRenderToggleBoneZClear()
+{
+	if (FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderBonesClearedZBuffer)
+		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderBonesClearedZBuffer);
+	else
+		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderBonesClearedZBuffer);
+
+	freyja_print("Bone rendering with cleared Z buffer [%s]",
+				(FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderBonesClearedZBuffer) ? "on" : "off");
+}
+
+void eRenderToggleGridZClear()
+{
+	if (FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderGridClearedZBuffer)
+		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderGridClearedZBuffer);
+	else
+		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderGridClearedZBuffer);
+
+	freyja_print("Grid rendering with cleared Z buffer [%s]",
+				(FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderGridClearedZBuffer) ? "on" : "off");
+}
+
 
 void FreyjaRenderEventsAttach()
 {
+	FreyjaEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
+	FreyjaEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	FreyjaEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
 	FreyjaEventCallback::add("eLineBone", &eLineBone);
 	FreyjaEventCallback::add("eAxisJoint", &eAxisJoint);
@@ -1857,6 +1882,10 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 
 	glPushMatrix();
+
+	if (mRenderMode & fRenderGridClearedZBuffer)
+		glClear(GL_DEPTH_BUFFER_BIT);
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
