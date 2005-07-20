@@ -113,6 +113,7 @@
 			(menu_item "_Viewports"		eMode	eViewports)
 			(menu_seperator)
 			(menu_item "_Grid"			eMode	eRenderGrid)
+			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
 			(menu_item "_Camera"		eMode	eCamera)
 			(menu_item "P_atch"			eMode	eRenderPatch)
 			(submenu "_Mesh"
@@ -129,6 +130,7 @@
 				(menu_item "_Sphere"	eSphereJoint	"gtk-blanked")
 				(menu_item "_Axes"		eAxisJoint		"gtk-blanked"))
 			(submenu "_Bone"
+				(menu_item "_ZBuffer"	eRenderToggleBoneZClear	"gtk-blanked")
 				(menu_item "_Line"		eLineBone		"gtk-blanked")
 				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
