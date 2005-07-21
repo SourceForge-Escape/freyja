@@ -63,6 +63,7 @@ FreyjaEvent::FreyjaEvent(const char *name)
 	}
 
 	mResource->RegisterInt(mName, /*ePluginEventBase*/ 10000 + mUID);
+	++mCounter;
 }
 
 
@@ -70,6 +71,7 @@ FreyjaEvent::~FreyjaEvent()
 {
 	/* Mark NULL in container, marking free slot */
 	mEvents.assign(mUID, 0x0);
+	--mCounter;
 }
 
 

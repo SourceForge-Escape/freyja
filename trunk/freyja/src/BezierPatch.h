@@ -83,8 +83,8 @@ class BezierPatch
 		Vector3d a, b, c, d, r;
 
 		a = p[0] * pow(u, 3);
-		b = p[1] * 3*pow(u, 2)*(1-u);
-		c = p[2] * 3*u*pow((1-u), 2);
+		b = p[1] * 3 * pow(u, 2) * (1-u);
+		c = p[2] * 3 * u * pow((1-u), 2);
 		d = p[3] * pow((1-u), 3);
 
 		r = (a + b) + (c + d);
