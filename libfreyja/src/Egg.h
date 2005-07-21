@@ -245,15 +245,18 @@ typedef struct egg_tag_s {
 	vec3_t center;                    /* Pivot point, center of rotation */
 	matrix_t transform;               /* Transform mesh/slaves by this matrix */
 	vec3_t rot;
+
 	int parent;  // Ext for 8.12, 20040917 ( not stored to disk )
 
-	//int rotationFrames;  // Ext for 9.0 -- never used
-	//vec3_t *rotations;
+	int rotationFrames;  // Ext for 9.0 -- never used
+	unsigned int rotationFramesReserved;
+	vec3_t *rotations;
 
-	//int positionFrames;  // Ext for 9.0 -- never used
-	//vec3_t *positions;
+	int positionFrames;  // Ext for 9.0 -- never used
+	unsigned int positionFramesReserved;
+	vec3_t *positions;
 
-	//int skeleton;  // Ext for 9.0 -- 'boneframe' that owns this -- never used
+	int skeleton;  // Ext for 9.0 -- 'boneframe' that owns this -- never used
 	
 } egg_tag_t;
 

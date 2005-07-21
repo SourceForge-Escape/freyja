@@ -100,7 +100,7 @@ class BezierPatch
 	void generatePolygonMesh(int divs)
 	{
 		int u = 0, v;
-		vec_t py, px, pyold; 
+		vec_t py, px, pyold, divsInverse = 1.0f / (vec_t)divs;
 		Vector3d temp[4];
 		Vector3d *last = new Vector3d[divs+1];  /* Array Of Points To Mark
 												   The First Line Of Polygons */
@@ -113,7 +113,9 @@ class BezierPatch
 		for (v = 0; v <= divs; ++v)
 		{
 			// Create The First Line Of Points
-			px = ((vec_t)v)/((vec_t)divs);		// Percent Along Y-Axis
+			//px = ((vec_t)v)/((vec_t)divs);		// Percent Along Y-Axis
+			px = (vec_t)v * divsInverse;		// Percent Along Y-Axis
+
 			/* Use The 4 Points From The Derived Curve To 
 			 * Calculate The Points Along That Curve */
 			last[v] = solveBernstein(px, temp);
@@ -124,8 +126,10 @@ class BezierPatch
 
 		for (u = 1; u <= divs; ++u) 
 		{
-			py    = ((float)u)/((float)divs);		// Percent Along Y-Axis
-			pyold = ((float)u-1.0f)/((float)divs);	// Percent Along Old Y Axis
+			//py    = ((float)u)/((float)divs);		// Percent Along Y-Axis
+			//pyold = ((float)u-1.0f)/((float)divs);	// Percent Along Old Y Axis
+			py = (vec_t)u * divsInverse;
+			pyold = ((vec_t)u - 1.0f) * divsInverse;
 
 			// Calculate New Bezier Points
 			temp[0] = solveBernstein(py, control[0]);
@@ -135,7 +139,8 @@ class BezierPatch
 
 			for (v = 0; v <= divs; ++v)
 			{
-				px = ((float)v)/((float)divs);		// Percent Along The X-Axis
+				//px = ((float)v)/((float)divs);		// Percent Along The X-Axis
+				px = (vec_t)v * divsInverse;
 				
 				vertices.pushBack(new Vector3d(last[v]));
 				texcoords.pushBack(new Vector3d(pyold, px, 0));
