@@ -113,7 +113,6 @@ class BezierPatch
 		for (v = 0; v <= divs; ++v)
 		{
 			// Create The First Line Of Points
-			//px = ((vec_t)v)/((vec_t)divs);		// Percent Along Y-Axis
 			px = (vec_t)v * divsInverse;		// Percent Along Y-Axis
 
 			/* Use The 4 Points From The Derived Curve To 
@@ -126,10 +125,8 @@ class BezierPatch
 
 		for (u = 1; u <= divs; ++u) 
 		{
-			//py    = ((float)u)/((float)divs);		// Percent Along Y-Axis
-			//pyold = ((float)u-1.0f)/((float)divs);	// Percent Along Old Y Axis
-			py = (vec_t)u * divsInverse;
-			pyold = ((vec_t)u - 1.0f) * divsInverse;
+			py = (vec_t)u * divsInverse;				// Percent Along Y-Axis
+			pyold = ((vec_t)u - 1.0f) * divsInverse;	// Percent Along Old
 
 			// Calculate New Bezier Points
 			temp[0] = solveBernstein(py, control[0]);
@@ -139,8 +136,7 @@ class BezierPatch
 
 			for (v = 0; v <= divs; ++v)
 			{
-				//px = ((float)v)/((float)divs);		// Percent Along The X-Axis
-				px = (vec_t)v * divsInverse;
+				px = (vec_t)v * divsInverse;	// Percent Along The X-Axis
 				
 				vertices.pushBack(new Vector3d(last[v]));
 				texcoords.pushBack(new Vector3d(pyold, px, 0));
