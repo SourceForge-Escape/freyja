@@ -379,10 +379,10 @@ void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
 
 int FreyjaModel::saveAnimation(char const *filename)
 {
-	freyja_print("FreyjaModel::saveAnimation> Not Implemented %s:%d\n",
-				 __FILE__, __LINE__);
+	char filename2[512];
 
-	return -1;
+	snprintf(filename2, 512, "%s-keyframe.smd", filename);
+	return saveModel(filename2);
 }
 
 
