@@ -702,9 +702,11 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 }
 
 
+// FIXME: Generate a contiguous mesh sharing vertices and 
+//        compose a single tristrip that reverses on edges
 bool FreyjaModel::pasteSelectedPatch()
 {
-	Vector<unsigned int> transV;
+	Vector<unsigned int> transV, tmp;
 	unsigned int index, i, n, cursor, divs = 7;
 
 
@@ -726,31 +728,19 @@ bool FreyjaModel::pasteSelectedPatch()
 
 	freyjaEnd(); // FREYJA_GROUP
 
-//#define USE_OLD_INCORRECT_WAY
-#ifdef USE_OLD_INCORRECT_WAY
-	n = gTestPatch.vertices.end() - 2;
-	for (i = gTestPatch.vertices.begin(); i < n; ++i)
+	// FIXME: This is just a test case to get the facets right,
+	//        notice some vertices will not be used that were created above
+	for (i = 1, n = (divs + divs + 2) * (divs - 1); i < n; i += 2)
 	{
-		if (i == 7)
-			continue;
-
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(gTestPatch.texture);
-		freyjaPolygonVertex1i(transV[i]);
-		freyjaPolygonVertex1i(transV[i+1]);
-		freyjaPolygonVertex1i(transV[i+2]);
-		freyjaEnd(); // FREYJA_POLYGON
+		//freyja_print("! %i -> %i", i+divs+divs+1, i);
+		tmp.pushBack(i+divs+divs+1);
+		transV.assign(i+divs+divs+1, transV[i]);
 	}
-#else
-	i = 0;
-	freyjaBegin(FREYJA_POLYGON);
-	freyjaPolygonMaterial1i(gTestPatch.texture);
-	freyjaPolygonVertex1i(transV[i]);
-	freyjaPolygonVertex1i(transV[i+1]);
-	freyjaPolygonVertex1i(transV[i+2]);
-	freyjaEnd(); // FREYJA_POLYGON
 
-	for (i = 1, cursor = divs + divs, n = divs * (divs+1) * 2; i < n; ++i)
+	//for (i = 0, n = tmp.end(); i < n; ++i)
+	//	freyjaVertexDelete(tmp[i]);
+
+	for (i = 0, cursor = divs + divs, n = (divs * (divs+1) * 2); i < n; ++i)
 	{
 		//if (i == 14 || i == 28 + 2 || i == 42 + 4) // Found for 7x7
 		if (i == cursor)
@@ -766,7 +756,6 @@ bool FreyjaModel::pasteSelectedPatch()
 		freyjaPolygonVertex1i(transV[i+2]);
 		freyjaEnd(); // FREYJA_POLYGON
 	}
-#endif
 
 	freyjaEnd(); // FREYJA_MESH
 
