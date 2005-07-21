@@ -1779,6 +1779,9 @@ void FreyjaControl::handleFilename(const char *filename)
 		failed = mModel->loadMaterial(filename);
 		type = 0;
 		type2 = 1;
+
+		if (!failed)
+			freyja_refresh_material_interface();
 		break;
 
 	case FREYJA_MODE_SAVE_MATERIAL:
