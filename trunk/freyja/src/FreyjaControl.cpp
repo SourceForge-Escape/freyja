@@ -1847,7 +1847,10 @@ void FreyjaControl::handleFilename(const char *filename)
 
 	case FREYJA_MODE_SAVE_ANIMATION:
 		failed = 0;
-		mModel->saveAnimation(filename);
+
+		if (mModel->saveAnimation(filename) < 0)
+			failed = 1;
+
 		type = 3;
 		type2 = 0;
 		break;
