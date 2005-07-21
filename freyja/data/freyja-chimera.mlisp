@@ -344,7 +344,7 @@
 						(spinbutton 0 0 100 eBoneIterator))
 					(hbox 1 0 0 1 0
 						(label "Current Face #" 0.0 0.5) 
-						(spinbutton 0 0 100 ePolygonIterator))
+						(spinbutton 0 0 500 ePolygonIterator))
 
 					(hbox 1 0 0 1 0
 						(button "New"     eMode  eAddObject)
