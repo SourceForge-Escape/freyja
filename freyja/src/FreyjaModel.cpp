@@ -705,10 +705,10 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 bool FreyjaModel::pasteSelectedPatch()
 {
 	Vector<unsigned int> transV;
-	unsigned int index, i, n;
+	unsigned int index, i, n, cursor, divs = 7;
 
 
-	gTestPatch.generatePolygonMesh(7);
+	gTestPatch.generatePolygonMesh(divs);
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaMeshFlags1u(0x0);
@@ -726,9 +726,14 @@ bool FreyjaModel::pasteSelectedPatch()
 
 	freyjaEnd(); // FREYJA_GROUP
 
+//#define USE_OLD_INCORRECT_WAY
+#ifdef USE_OLD_INCORRECT_WAY
 	n = gTestPatch.vertices.end() - 2;
 	for (i = gTestPatch.vertices.begin(); i < n; ++i)
 	{
+		if (i == 7)
+			continue;
+
 		freyjaBegin(FREYJA_POLYGON);
 		freyjaPolygonMaterial1i(gTestPatch.texture);
 		freyjaPolygonVertex1i(transV[i]);
@@ -736,6 +741,32 @@ bool FreyjaModel::pasteSelectedPatch()
 		freyjaPolygonVertex1i(transV[i+2]);
 		freyjaEnd(); // FREYJA_POLYGON
 	}
+#else
+	i = 0;
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonMaterial1i(gTestPatch.texture);
+	freyjaPolygonVertex1i(transV[i]);
+	freyjaPolygonVertex1i(transV[i+1]);
+	freyjaPolygonVertex1i(transV[i+2]);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	for (i = 1, cursor = divs + divs, n = divs * (divs+1) * 2; i < n; ++i)
+	{
+		//if (i == 14 || i == 28 + 2 || i == 42 + 4) // Found for 7x7
+		if (i == cursor)
+		{
+			i += 2;
+			cursor += divs + divs + 2;
+		}
+
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonMaterial1i(gTestPatch.texture);
+		freyjaPolygonVertex1i(transV[i]);
+		freyjaPolygonVertex1i(transV[i+1]);
+		freyjaPolygonVertex1i(transV[i+2]);
+		freyjaEnd(); // FREYJA_POLYGON
+	}
+#endif
 
 	freyjaEnd(); // FREYJA_MESH
 
