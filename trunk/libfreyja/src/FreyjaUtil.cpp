@@ -50,15 +50,13 @@ FreyjaUtil::FreyjaUtil()
 	mPlugin = 0x0; //new FreyjaPlugin(mScene, pluginDir);
 	//mPlugin->setPrinter(&mPrinter);
 
-	mEgg = new Egg();
-	mEggPlugin = new EggPlugin(mEgg);
-	mEggPlugin->setPrinter(&mPrinter);
-	mEggPlugin->setupPlugins();
+	freyjaSpawn();
 }
 
 
 FreyjaUtil::~FreyjaUtil()
 {
+	freyjaFree();
 }
 
 
@@ -68,7 +66,7 @@ FreyjaUtil::~FreyjaUtil()
 
 int FreyjaUtil::exportModel(const char *filename, const char *type)
 {
-	return mEggPlugin->exportModel(filename, type);
+	return freyjaExportModel(filename, type);
 }
 
 
@@ -78,7 +76,7 @@ int FreyjaUtil::exportModel(const char *filename, const char *type)
 
 int FreyjaUtil::importModel(const char *filename)
 {
-	return mEggPlugin->importModel(filename);
+	return freyjaImportModel(filename);
 }
 
 

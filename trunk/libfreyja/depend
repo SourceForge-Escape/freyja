@@ -17,10 +17,10 @@ $(BUILDDIR)/FreyjaUtil.o: src/FreyjaUtil.cpp src/FreyjaUtil.h
 	 $(DO_CC)
 
 $(BUILDDIR)/EggPlugin.o: src/EggPlugin.cpp src/FreyjaFileReader.h src/EggPlugin.h \
-  src/FreyjaPluginABI.h src/FreyjaPrinter.h src/FreyjaPlugin.h \
-  src/Freyja.h src/FreyjaCamera.h src/FreyjaLight.h src/FreyjaMesh.h \
+  src/FreyjaPluginABI.h src/FreyjaPlugin.h src/Freyja.h \
+  src/FreyjaCamera.h src/FreyjaLight.h src/FreyjaMesh.h \
   src/FreyjaSkeleton.h src/FreyjaMaterial.h src/FreyjaTexture.h \
-  src/FreyjaFileWriter.h src/Egg.h
+  src/FreyjaFileWriter.h src/FreyjaPrinter.h src/Egg.h
 	 $(DO_CC)
 
 $(BUILDDIR)/FreyjaPrinter.o: src/FreyjaPrinter.cpp src/FreyjaPrinter.h
@@ -93,6 +93,9 @@ $(BUILDDIR)/RigidBody.o: src/RigidBody.cpp src/RigidBody.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Skeleton.o: src/Skeleton.cpp src/Skeleton.h
+	 $(DO_CC)
+
+$(BUILDDIR)/PerlinNoise.o: src/PerlinNoise.cpp src/PerlinNoise.h
 	 $(DO_CC)
 
 $(BUILDDIR)/mtk_tga.o: plugins/image/mtk_tga.cpp plugins/image/mtk_tga.h
