@@ -2538,13 +2538,13 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 	switch (plane)
 	{
-	case PLANE_XY:
+	case PLANE_XY: // front
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0;
 		break;
 
-	case PLANE_XZ:
+	case PLANE_XZ: // top
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));

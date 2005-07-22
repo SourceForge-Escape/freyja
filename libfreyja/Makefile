@@ -177,6 +177,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaSkeleton.o \
 	$(BUILDDIR)/FreyjaTexture.o \
+	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o
@@ -685,6 +686,15 @@ UTPackage.test:
 	OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+
+PerlinNoise.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(CC) -Wall -g -pipe -O0 -lstdc++ -Isrc \
+		-DUNIT_TEST_PERLINNOISE \
+		plugins/image/tga.cpp \
+		src/PerlinNoise.cpp -o $(BUILD_TEST_DIR)/PerlinNoise.test
+
+#################################################################
 
 $(BUILDDIR)/$(NAME).test : $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)

@@ -32,8 +32,8 @@ typedef enum
   TGA_TYPE__COLOR      = 2,
   TGA_TYPE__GREYSCALE  = 3,
   TGA_TYPE__MAPPED_RLE = 9,
-  TGA_TYPE__COLOR_RLE  = 10
-  //  TGA_TYPE__GREYSCALE_COMPRESSED  = 11,
+  TGA_TYPE__COLOR_RLE  = 10,
+  TGA_TYPE__GREYSCALE_COMPRESSED  = 11
   //  TGA_TYPE__COLOR_HUFFMAN_DELTA_RLE  = 32,
   //  TGA_TYPE__COLOR_HUFFMAN_DELTA_RLE_4PASS  = 33
 
@@ -45,7 +45,7 @@ typedef struct mtk_image_tga_s
   unsigned char comment_lenght;       /* Number of bytes in comment */
   unsigned char colormap_type;        /* 0 No colormap; 1 Has colormap  */
   unsigned char image_type;           /* 1 Colormapped, 2 Unmapped;
-					 9 Colormapped RLE; 10 Unmapped RLE */
+									   * 9 Colormapped RLE; 10 Unmapped RLE */
   
   unsigned short colormap_index;      /* Index of first color map entry */
   unsigned short colormap_lenght;     /* Number of color map entries */
@@ -61,38 +61,39 @@ typedef struct mtk_image_tga_s
 } mtk_image_tga_t;
 
 
-  int mtk_image__tga_check(FILE *f);
-  /*------------------------------------------------------
-   * Pre  : Filename is to be checked
-   * Post : Returns 0 if valid, else error condition
-   *
-   *-- History ------------------------------------------
-   *
-   * 2001.04.01:
-   * Mongoose - Created
-   ------------------------------------------------------*/
+int mtk_image__tga_check(FILE *f);
+/*------------------------------------------------------
+ * Pre  : Filename is to be checked
+ * Post : Returns 0 if valid, else error condition
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.04.01:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
-  int mtk_image__tga_load(FILE *f, unsigned char **image, 
-			 unsigned int *width, unsigned int *height, char *type);
-  /*------------------------------------------------------
-   * Pre  : Filename is a valid image file
-   * Post : Image is either a valid pixmap or NULL
-   *
-   *-- History ------------------------------------------
-   *
-   * 2001.04.01:
-   * Mongoose - Created
-   ------------------------------------------------------*/
+int mtk_image__tga_load(FILE *f, unsigned char **image, 
+						unsigned int *width, unsigned int *height, char *type);
+/*------------------------------------------------------
+ * Pre  : Filename is a valid image file
+ * Post : Image is either a valid pixmap or NULL
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.04.01:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
-  int mtk_image__tga_save(FILE *f, unsigned char *image, 
-			  unsigned int width, unsigned int height, char type);
-  /*------------------------------------------------------
-   * Pre  : Filename is a valid image file
-   * Post : Image is either a valid pixmap or NULL
-   *
-   *-- History ------------------------------------------
-   *
-   * 2001.04.01:
-   * Mongoose - Created
-   ------------------------------------------------------*/
+int mtk_image__tga_save(FILE *f, unsigned char *image, 
+						unsigned int width, unsigned int height, char type);
+/*------------------------------------------------------
+ * Pre  : Filename is a valid image file
+ * Post : Image is either a valid pixmap or NULL
+ *
+ *-- History ------------------------------------------
+ *
+ * 2001.04.01:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
 #endif
