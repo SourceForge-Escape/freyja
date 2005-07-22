@@ -31,6 +31,9 @@
 
 #include "tga.h"
 
+// greyscale = 0.30 * red + 0.59 * green + 0.11 * blue;
+
+
 extern "C" {
 
 	int check(FILE *f);
