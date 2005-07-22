@@ -206,7 +206,7 @@
 				(menu_item "_Select"		eMode	eBoneSelect)
 				(menu_item "_Move"			eMode	eBoneMoveJoint)))
 
-		(submenu ePluginMenu "_Plugins")	
+		(submenu ePluginMenu "_Plugins...")
 
 		(menu_seperator)
 
@@ -415,6 +415,10 @@
 
 						(toolbar_button "gtk-save-as" "Save"
 								"Save document"		eMode  eSaveFile)))
+
+		(hbox 1 0 0 1 0
+			(label "Perlin seed TEST "  0.0 0.5) 
+			(spinbutton 257 0 1000 ePerlinNoiseSeed))
 
 					 (hbox 1 0 0 1 0 
 							 (togglebutton "Merge" 0 eMode CMD_MISC_TEXEL_COMBINE)

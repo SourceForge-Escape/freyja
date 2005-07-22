@@ -40,6 +40,18 @@ FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
 
 
+int freyja_get_event_id_by_name(char *symbol)
+{
+	int id = -1;
+
+	gResource.Lookup(symbol, &id);
+
+	//freyja_print("! id = %i", id);
+
+	return id;
+}
+
+
 void setColor(vec4_t dest, vec4_t color)
 {
 	dest[0] = color[0];	
@@ -520,6 +532,8 @@ void mgtk_handle_resource_start()
 	freyja_event2i(EVENT_MISC, FREYJA_MODE_MODEL_EDIT);
 	gFreyjaControl->event(eTransformMesh);
 	gFreyjaControl->event(eMoveObject);
+	extern void FreyjaModelGUIAttach();
+	FreyjaModelGUIAttach();
 
 	freyja_set_main_window_title(BUILD_NAME);
 	mgtk_event_gl_refresh();
