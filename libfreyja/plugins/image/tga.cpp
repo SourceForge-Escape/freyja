@@ -1,4 +1,5 @@
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*==========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -22,7 +23,7 @@
  *
  * 2000-10-15:
  * Mongoose - Created
- ================================================================*/
+ ==========================================================================*/
 
 #include <string.h>
 #include <stdlib.h>
@@ -32,456 +33,540 @@
 
 extern "C" {
 
-  int check(FILE *f);
+	int check(FILE *f);
   
-  int import_image(char *filename, unsigned char **image, 
-		   unsigned int *w, unsigned int *h, 
-		   char *type);
+	int import_image(char *filename, unsigned char **image, 
+					 unsigned int *w, unsigned int *h, 
+					 char *type);
 
-  int freyja_image_export__tga(char *filename, unsigned char *image, 
-			       unsigned int w, unsigned int h, 
-			       char type);
+	int freyja_image_export__tga(char *filename, unsigned char *image, 
+								 unsigned int w, unsigned int h, 
+								 char type);
 }
+
 
 int check(FILE *f)
 {
-  char buffer[10];
+	char buffer[10];
 
 
-  if (!f)
-  {
-    perror("tga.so: ERROR Passed invalid file.\n");
-    return -1;
-  }
+	if (!f)
+	{
+		perror("tga.so: ERROR Passed invalid file.\n");
+		return -1;
+	}
 
-  /* Read the header */
-  fseek(f, 0, SEEK_SET);
-  fread(buffer, 8, 1, f);
+	/* Read the header */
+	fseek(f, 0, SEEK_SET);
+	fread(buffer, 8, 1, f);
 
-  // buffer[1] = 0 - Means not color mapped ( 1 would mean mapped )
-  if (!(buffer[1] == 0 && (buffer[2] == TGA_TYPE__COLOR ||
-			   //buffer[2] == TGA_TYPE__GREYSCALE ||
-			   buffer[2] == TGA_TYPE__COLOR_RLE)))
-  {
-    printf("tga.so: Inavlid or unknown TGA format.\n");
-    return -2;
-  }
+	// buffer[1] = 0 - Means not color mapped ( 1 would mean mapped )
+	if (!(buffer[1] == 0 && (buffer[2] == TGA_TYPE__COLOR ||
+							 buffer[2] == TGA_TYPE__GREYSCALE ||
+							 buffer[2] == TGA_TYPE__COLOR_RLE)))
+	{
+		printf("tga.so: Inavlid or unknown TGA format.\n");
+		return -2;
+	}
 
-  return 0;
+	return 0;
 }
 
 
 int import_image(char *filename, unsigned char **image, 
-		 unsigned int *width, unsigned int *height, char *type)
+				 unsigned int *width, unsigned int *height, char *type)
 {
-  FILE *f = fopen(filename, "rb");
-  mtk_image_tga_t header;
-  char comment[256];
-  unsigned char pixel[4];
-  unsigned char *swap_row = NULL;
-  unsigned char tmp, packet;
-  bool must_flip = 0;
-  unsigned int size;
-  unsigned int i, j;
+	FILE *f = fopen(filename, "rb");
+	mtk_image_tga_t header;
+	char comment[256];
+	unsigned char pixel[4];
+	unsigned char *swap_row = NULL;
+	unsigned char tmp, packet;
+	bool must_flip = 0;
+	unsigned int size;
+	unsigned int i, j;
 
 
-  if (!f)
-  {
-    fprintf(stderr, "mtk.so: Invalid file.\n");
-    return -1;
-  }
+	if (!f)
+	{
+		fprintf(stderr, "mtk.so: Invalid file.\n");
+		return -1;
+	}
 
-  if (check(f))
-  {
-    fclose(f);
-    return -1;
-  }
+	if (check(f))
+	{
+		fclose(f);
+		return -1;
+	}
 
-  fseek(f, 0, SEEK_SET);
+	fseek(f, 0, SEEK_SET);
 
-  // Read TGA header
-  fread(&header.comment_lenght, 1, 1, f);
-  fread(&header.colormap_type, 1, 1, f); 
-  fread(&header.image_type, 1, 1, f);
-  fread(&header.colormap_index, 2, 1, f);
-  fread(&header.colormap_lenght, 2, 1, f);
-  fread(&header.colormap_bbp, 1, 1, f);
-
-  fread(&tmp, 1, 1, f);
-  header.origin_x = tmp;
-  fread(&tmp, 1, 1, f);
-  header.origin_x += tmp * 256;
-
-  fread(&tmp, 1, 1, f);
-  header.origin_y = tmp;
-  fread(&tmp, 1, 1, f);
-  header.origin_y += tmp * 256;
-
-  fread(&tmp, 1, 1, f);
-  header.width = tmp;
-  fread(&tmp, 1, 1, f);
-  header.width += tmp * 256;
-
-  fread(&tmp, 1, 1, f);
-  header.height = tmp;
-  fread(&tmp, 1, 1, f);
-  header.height += tmp * 256;
-
-  fread(&header.bpp, 1, 1, f);
-  fread(&header.desc_flags, 1, 1, f);
-
-  *width = header.width;
-  *height = header.height;
-
-  switch (header.bpp)
-  {
-  case 32:
-    *type = 4;//32;
-    break;
-  case 24:
-    *type = 3;//24;
-    break;
-  case 8:
-    *type = 1;//8;
-    break;
-  default:
-    *type = 0;
-  }
-
-  printf("TGA [%ix%i@%ibpp, %it, %ix, %iy, %uf]\n", 
-	 header.width, header.height, header.bpp, header.image_type,  
-	 header.origin_x, header.origin_y,
-	 header.desc_flags);
-
-  // Comments can be 0 - 255
-  if (header.comment_lenght) 
-  {
-    fread(&comment, 1, header.comment_lenght, f);
-    comment[255] = 0;
-    printf("Comment: %s\n", comment);
-  }
-
-  size = header.width * header.height;
-
-  if (!size || (!(header.colormap_type == 0 && 
-		  (header.image_type == 2 || header.image_type == 10))))
-  {
-    fprintf(stderr, "mtk_image__tga_load> Unknown image format.\n");
-    return -2;
-  }
-
-  *image = NULL;
-
-  // Mongoose: Added 'screen origin bit' support back here
-  if (!(header.desc_flags & 32))
-  {
-    must_flip = true;
-  }
-
-  switch (header.bpp)
-  {
-  case 32:
-    size *= 4;
-    *image = new unsigned char [size];
-
-    switch (header.image_type)
-    {
-    case TGA_TYPE__COLOR_RLE:
-      for (i = 0; i < size;)
-      {
-	fread(&packet, 1, 1, f);
+	// Read TGA header
+	fread(&header.comment_lenght, 1, 1, f);
+	fread(&header.colormap_type, 1, 1, f); 
+	fread(&header.image_type, 1, 1, f);
+	fread(&header.colormap_index, 2, 1, f);
+	fread(&header.colormap_lenght, 2, 1, f);
+	fread(&header.colormap_bbp, 1, 1, f);
 	
-	if (packet & 0x80)  // Run Lenght
+	fread(&tmp, 1, 1, f);
+	header.origin_x = tmp;
+	fread(&tmp, 1, 1, f);
+	header.origin_x += tmp * 256;
+
+	fread(&tmp, 1, 1, f);
+	header.origin_y = tmp;
+	fread(&tmp, 1, 1, f);
+	header.origin_y += tmp * 256;
+
+	fread(&tmp, 1, 1, f);
+	header.width = tmp;
+	fread(&tmp, 1, 1, f);
+	header.width += tmp * 256;
+
+	fread(&tmp, 1, 1, f);
+	header.height = tmp;
+	fread(&tmp, 1, 1, f);
+	header.height += tmp * 256;
+
+	fread(&header.bpp, 1, 1, f);
+	fread(&header.desc_flags, 1, 1, f);
+
+	*width = header.width;
+	*height = header.height;
+
+	switch (header.bpp)
 	{
-	  packet = (packet &0x7F) + 1;
+	case 32:
+		*type = 4;//32;
+		break;
 
-	  fread(&pixel, 4, 1, f);
+	case 24:
+		*type = 3;//24;
+		break;
 
-	  for (j = 0; j < packet; j++)
-	  {
-	    (*image)[i++] = pixel[2];
-	    (*image)[i++] = pixel[1];
-	    (*image)[i++] = pixel[0];
-	    (*image)[i++] = pixel[3];
-	  }
+	case 8:
+		*type = 1;//8;
+		break;
+
+	default:
+		*type = 0;
 	}
-	else // RAW
+
+	printf("TGA [%ix%i@%ibpp, %it, %ix, %iy, %uf]\n", 
+		   header.width, header.height, header.bpp, header.image_type,  
+		   header.origin_x, header.origin_y,
+		   header.desc_flags);
+
+	// Comments can be 0 - 255
+	if (header.comment_lenght) 
 	{
-	  packet = (packet &0x7F) + 1;
-	  
-	  for (j = 0; j < packet; j++)
-	  {
-	    fread(&pixel, 4, 1, f);
-
-	    (*image)[i++] = pixel[2];
-	    (*image)[i++] = pixel[1];
-	    (*image)[i++] = pixel[0];
-	    (*image)[i++] = pixel[3];
-	  }
+		fread(&comment, 1, header.comment_lenght, f);
+		comment[255] = 0;
+		printf("Comment: %s\n", comment);
 	}
-      }
-      break;
-    case TGA_TYPE__COLOR:
-      if (fread((*image), size, 1, f) < 1)
-      {
-	fprintf(stderr, "mtk_image__tga_load> Image fread failed.\n");
-	delete [] *image;
-	return -4;
-      }
 
-      for (i = 0; i < size; i += 4)
-      { 
-	tmp = (*image)[i];
-	(*image)[i] = (*image)[i + 2];
-	(*image)[i + 2] = tmp;
-      }
-      break;
-    default:
-      ;
-    }
+	size = header.width * header.height;
 
-    if (must_flip)
-    {
-      swap_row = new unsigned char [header.width * 4];
-      
-      for (i = 0, j = ((header.height < 2) ? 0 : header.height - 1); 
-			(int)i < header.height/2; i++, j--)
-      {
-	memcpy(swap_row, &(*image)[i*header.width*4], header.width*4);
-	memcpy(&(*image)[i*header.width*4], &(*image)[j*header.width*4], 
-	       header.width*4);
-	memcpy(&(*image)[j*header.width*4], swap_row, header.width*4);
-      }
+	if (!size || (!(header.colormap_type == 0 && 
+						 (header.image_type == TGA_TYPE__COLOR || 
+						  header.image_type == TGA_TYPE__COLOR_RLE ||
+						  header.image_type == TGA_TYPE__GREYSCALE ||
+						  header.image_type == TGA_TYPE__GREYSCALE_COMPRESSED))))
+	{
+		fprintf(stderr, "mtk_image__tga_load> Unknown image format.\n");
+		return -2;
+	}
+
+	*image = NULL;
+
+	// Mongoose: Added 'screen origin bit' support back here
+	if (!(header.desc_flags & 32))
+	{
+		must_flip = true;
+	}
+
+	switch (header.bpp)
+	{
+	case 32:
+		size *= 4;
+		*image = new unsigned char [size];
+		
+		switch (header.image_type)
+		{
+		case TGA_TYPE__COLOR_RLE:
+			for (i = 0; i < size;)
+			{
+				fread(&packet, 1, 1, f);
+				
+				if (packet & 0x80)  // Run Lenght
+				{
+					packet = (packet &0x7F) + 1;
+					
+					fread(&pixel, 4, 1, f);
+
+					for (j = 0; j < packet; j++)
+					{
+						(*image)[i++] = pixel[2];
+						(*image)[i++] = pixel[1];
+						(*image)[i++] = pixel[0];
+						(*image)[i++] = pixel[3];
+					}
+				}
+				else // RAW
+				{
+					packet = (packet &0x7F) + 1;
+					
+					for (j = 0; j < packet; j++)
+					{
+						fread(&pixel, 4, 1, f);
+						
+						(*image)[i++] = pixel[2];
+						(*image)[i++] = pixel[1];
+						(*image)[i++] = pixel[0];
+						(*image)[i++] = pixel[3];
+					}
+				}
+			}
+			break;
+
+		case TGA_TYPE__COLOR:
+			if (fread((*image), size, 1, f) < 1)
+			{
+				fprintf(stderr, "mtk_image__tga_load> Image fread failed.\n");
+				delete [] *image;
+				return -4;
+			}
 			
-      delete [] swap_row;
-    }
-    break;
-  case 24:
-    size *= 3;
-    *image = new unsigned char [size];
+			for (i = 0; i < size; i += 4)
+			{ 
+				tmp = (*image)[i];
+				(*image)[i] = (*image)[i + 2];
+				(*image)[i + 2] = tmp;
+			}
+			break;
 
-    switch (header.image_type)
-    {
-    case TGA_TYPE__COLOR_RLE:
-      for (i = 0; i < size;)
-      {
-	fread(&packet, 1, 1, f);
+		default:
+			;
+		}
 
-	if (packet & 0x80)  // Run Lenght
-	{
-	  packet = (packet &0x7F) + 1;
+		
+		if (must_flip)
+		{
+			swap_row = new unsigned char [header.width * 4];
+			
+			for (i = 0, j = ((header.height < 2) ? 0 : header.height - 1); 
+				 (int)i < header.height/2; i++, j--)
+			{
+				memcpy(swap_row, &(*image)[i*header.width*4], header.width*4);
+				memcpy(&(*image)[i*header.width*4], &(*image)[j*header.width*4], 
+					   header.width*4);
+				memcpy(&(*image)[j*header.width*4], swap_row, header.width*4);
+			}
+			
+			delete [] swap_row;
+		}
+		break;
 
-	  fread(&pixel, 3, 1, f);
+	case 24:
+		size *= 3;
+		*image = new unsigned char [size];
+		
+		switch (header.image_type)
+		{
+		case TGA_TYPE__COLOR_RLE:
+			for (i = 0; i < size;)
+			{
+				fread(&packet, 1, 1, f);
+				
+				if (packet & 0x80)  // Run Lenght
+				{
+					packet = (packet &0x7F) + 1;
+					
+					fread(&pixel, 3, 1, f);
+					
+					for (j = 0; j < packet; j++)
+					{
+						(*image)[i++] = pixel[2];
+						(*image)[i++] = pixel[1];
+						(*image)[i++] = pixel[0];
+					}
+				}
+				else // RAW
+				{
+					packet = (packet &0x7F) + 1;
+					
+					for (j = 0; j < packet; j++)
+					{
+						fread(&pixel, 3, 1, f);
+						
+						(*image)[i++] = pixel[2];
+						(*image)[i++] = pixel[1];
+						(*image)[i++] = pixel[0];
+					}
+				}
+			}
+			break;
 
-	  for (j = 0; j < packet; j++)
-	  {
-	    (*image)[i++] = pixel[2];
-	    (*image)[i++] = pixel[1];
-	    (*image)[i++] = pixel[0];
-	  }
-	}
-	else // RAW
-	{
-	  packet = (packet &0x7F) + 1;
+		case TGA_TYPE__COLOR:
+			if (fread((*image), size, 1, f) < 1)
+			{
+				fprintf(stderr, "mtk_image__tga_load> Image fread failed.\n");
+				delete [] *image;
+				return -4;
+			}
+			
+			for (i = 0; i < size; i += 3)
+			{
+				tmp = (*image)[i];
+				(*image)[i] = (*image)[i + 2];
+				(*image)[i + 2] = tmp;
+			}
+			break;
 
-	  for (j = 0; j < packet; j++)
-	  {
-	    fread(&pixel, 3, 1, f);
+		default:
+			fprintf(stderr, "mtk_image_tga_load> Unsupported TGA format %i.\n",
+					header.image_type);
+			return -5;
+		}
 
-	    (*image)[i++] = pixel[2];
-	    (*image)[i++] = pixel[1];
-	    (*image)[i++] = pixel[0];
-	  }
-	}
-      }
-      break;
-    case TGA_TYPE__COLOR:
-      if (fread((*image), size, 1, f) < 1)
-      {
-	fprintf(stderr, "mtk_image__tga_load> Image fread failed.\n");
-	delete [] *image;
-	return -4;
-      }
-
-      for (i = 0; i < size; i += 3)
-      {
-	tmp = (*image)[i];
-	(*image)[i] = (*image)[i + 2];
-	(*image)[i + 2] = tmp;
-      }
-      break;
-    default:
-      ;
-    }
-
-    if (must_flip)
-    {
-      swap_row = new unsigned char [header.width * 3];
+		if (must_flip)
+		{
+			unsigned int byteSize = (header.bpp / 8);
+			swap_row = new unsigned char [header.width * byteSize];
       
-      for (i = 0, j = header.height - 1; (int)i < header.height / 2; i++, j--)
-      {
-	memcpy(swap_row, &(*image)[i*header.width*3], header.width*3);
-	memcpy(&(*image)[i*header.width*3], &(*image)[j*header.width*3], 
-	       header.width*3);
-	memcpy(&(*image)[j*header.width*3], swap_row, header.width*3);
-      }
+			for (i = 0, j = header.height - 1; (int)i < header.height / 2; ++i, --j)
+			{
+				memcpy(swap_row, &(*image)[i*header.width*byteSize], header.width*byteSize);
+				memcpy(&(*image)[i*header.width*byteSize], &(*image)[j*header.width*byteSize], 
+					   header.width*byteSize);
+				memcpy(&(*image)[j*header.width*byteSize], swap_row, header.width*byteSize);
+			}
+			
+			delete [] swap_row;
+		}
 
-      delete [] swap_row;
-    }
+		break;
 
-    break;
-  case 8: 
-    printf("tga_load> 8bpp Not implemented\n");
-    break;
-  default:
-    ;
-  }
+
+	case 8: 
+		*image = new unsigned char [size];
+
+		switch (header.image_type)
+		{
+		case TGA_TYPE__GREYSCALE_COMPRESSED:
+
+			for (i = 0; i < size;)
+			{
+				fread(&packet, 1, 1, f);
+
+				if (packet & 0x80)  // Run Lenght
+				{
+					packet = (packet &0x7F) + 1;
+
+					fread(&pixel, 1, 1, f);
+
+					for (j = 0; j < packet; j++)
+					{
+						(*image)[i++] = pixel[0];
+					}
+				}
+				else // RAW
+				{
+					packet = (packet &0x7F) + 1;
+
+					for (j = 0; j < packet; j++)
+					{
+						fread(&pixel, 1, 1, f);
+
+						(*image)[i++] = pixel[0];
+					}
+				}
+			}
+			break;
+		case TGA_TYPE__GREYSCALE:
+			if (fread((*image), size, 1, f) < 1)
+			{
+				fprintf(stderr, "mtk_image__tga_load> Image fread failed.\n");
+				delete [] *image;
+				return -4;
+			}
+			break;
+		default:
+			printf("mtk_image_tga_load> Unsupported TGA format %i.\n",
+					 header.image_type);
+			return -5;
+		}
+		break;
+
+
+	default:
+		;
+	}
     
+
 #ifdef DEBUG_TGA
-  char c;
+	char c;
 
-  printf("Comment:\n");
-
-  while (fread(&c, 1, 1, f) == 1)
-  {
-    printf("%c", c);
-  }
-
-  printf("\n");
+	printf("Comment:\n");
+	
+	while (fread(&c, 1, 1, f) == 1)
+	{
+		printf("%c", c);
+	}
+	
+	printf("\n");
 #endif
 
-  fclose(f);
+	fclose(f);
 
-  return 0; 
+	return 0; 
 }
 
 
 int mtk_image__tga_save(FILE *f, unsigned char *image,
-			unsigned int width, unsigned int height, char type);
+						unsigned int width, unsigned int height, char type);
 
 int freyja_image_export__tga(char *filename, unsigned char *image, 
-			     unsigned int w, unsigned int h, char bbp)
+							 unsigned int w, unsigned int h, char bbp)
 {
-  long ret;
-  FILE *f;
+	long ret;
+	FILE *f;
 
-  f = fopen(filename, "wb");
+	f = fopen(filename, "wb");
 
-  if (!f)
-  {
-    perror(filename);
-    return -1;
-  }
+	if (!f)
+	{
+	  perror(filename);
+	  return -1;
+	}
 
-  ret = mtk_image__tga_save(f, image, w, h, bbp);
+	ret = mtk_image__tga_save(f, image, w, h, bbp);
 
-  fclose(f);
+	fclose(f);
 
-  return ret;
+	return ret;
 }
 
 
 int mtk_image__tga_save(FILE *f, unsigned char *image,
 			unsigned int width, unsigned int height, char type)
 {
-  mtk_image_tga_t header;
-  unsigned int i, size;
-  unsigned char tmp;
-  char comment[64];
+	mtk_image_tga_t header;
+	unsigned int i, size;
+	unsigned char tmp;
+	char comment[64];
 
 
-  if (!f || !image || !width || !height)
-  {
-    fprintf(stderr, "mtk_image__tga_save> Invalid parameters.\n");
-    return -1;
-  }
+	if (!f || !image || !width || !height)
+	{
+		fprintf(stderr, "mtk_image__tga_save> Invalid parameters.\n");
+		return -1;
+	}
 
-  strcpy(comment, "Mongoose TGA module 0.0.1");
-  header.comment_lenght = strlen(comment);
-  header.colormap_type = 0;
-  header.image_type = 2;
+	strncpy(comment, "Mongoose TGA module 0.0.1", 63);
+	comment[63] = 0;
+
+	header.comment_lenght = strlen(comment);
+	header.colormap_type = 0;
+	header.image_type = 2;
   
-  // No colormaps
-  header.colormap_index = 0;
-  header.colormap_lenght = 0;
-  header.colormap_bbp = 0;
+	// No colormaps
+	header.colormap_index = 0;
+	header.colormap_lenght = 0;
+	header.colormap_bbp = 0;
 
-  header.origin_x = header.origin_y = 0;
-  header.width = width;
-  header.height = height;
+	header.origin_x = header.origin_y = 0;
+	header.width = width;
+	header.height = height;
 
-  switch (type)
-  {
-  case 4:
-    header.bpp = 32;
-    break;
+	switch (type)
+	{
+	case 32: // RGBA
+	case 4: // bytes count!
+		header.bpp = 32;
+		break;
 
-  case 3:
-    header.bpp = 24;
-    break;
+	case 24: // RBG
+	case 3: // bytes count!
+		header.bpp = 24;
+		break;
 
-  default:
-    header.bpp = 24; // so wrong
-  }
+	case 8:
+	case 1: // bytes count!
+		header.image_type = TGA_TYPE__GREYSCALE;
+		header.bpp = 8;
+		break;
 
-  header.desc_flags = 32; // flip me vertically on load he says
+	default:
+		header.bpp = 24; // so wrong
+	}
 
-  // Write TGA header
-  fwrite(&header.comment_lenght, 1, 1, f);
-  fwrite(&header.colormap_type, 1, 1, f); 
-  fwrite(&header.image_type, 1, 1, f);
-  fwrite(&header.colormap_index, 2, 1, f);
-  fwrite(&header.colormap_lenght, 2, 1, f);
-  fwrite(&header.colormap_bbp, 1, 1, f);
-  fwrite(&header.origin_x, 2, 1, f);
-  fwrite(&header.origin_y, 2, 1, f);
-  fwrite(&header.width, 2, 1, f);
-  fwrite(&header.height, 2, 1, f);
-  fwrite(&header.bpp, 1, 1, f);
-  fwrite(&header.desc_flags, 1, 1, f);
+	header.desc_flags = 32; // flip me vertically on load he says
 
-  // Write comment
-  fwrite(&comment, 1, header.comment_lenght, f);
+	// Write TGA header
+	fwrite(&header.comment_lenght, 1, 1, f);
+	fwrite(&header.colormap_type, 1, 1, f); 
+	fwrite(&header.image_type, 1, 1, f);
+	fwrite(&header.colormap_index, 2, 1, f);
+	fwrite(&header.colormap_lenght, 2, 1, f);
+	fwrite(&header.colormap_bbp, 1, 1, f);
+	fwrite(&header.origin_x, 2, 1, f);
+	fwrite(&header.origin_y, 2, 1, f);
+	fwrite(&header.width, 2, 1, f);
+	fwrite(&header.height, 2, 1, f);
+	fwrite(&header.bpp, 1, 1, f);
+	fwrite(&header.desc_flags, 1, 1, f);
 
-  size = header.width * header.height;
+	// Write comment
+	fwrite(&comment, 1, header.comment_lenght, f);
 
-  switch (header.bpp)
-  {
-  case 32:
-    size = header.width * header.height * 4;
+	size = header.width * header.height;
+
+	switch (header.bpp)
+	{
+	case 32:
+		size = header.width * header.height * 4;
  
-    for (i = 0; i < size; i += 4)
-    {
-      tmp = image[i];
-      image[i] = image[i + 2];
-      image[i + 2] = tmp;
-    }
-    break;
+		// FIXME: Replace with generic color ordering? ( eg AGBR -> RGBA )
+		for (i = 0; i < size; i += 4)
+		{
+			tmp = image[i];
+			image[i] = image[i + 2];
+			image[i + 2] = tmp;
+		}
+		break;
 
 
-  case 24:
-    size = header.width * header.height * 3;
- 
-    for (i = 0; i < size; i += 3)
-    {
-      tmp = image[i];
-      image[i] = image[i + 2];
-      image[i + 2] = tmp;
-    }
-    break;
-  }
+	case 24:
+		size = header.width * header.height * 3;
 
-  // Write image data
-  if (fwrite(image, size, 1, f) < 1)
-  {
-    perror("mtk_image__tga_save> Disk write failed.\n");
-    return -2;
-  }
+		// FIXME: Replace with generic color ordering? ( eg GBR -> RGB )
+		for (i = 0; i < size; i += 3)
+		{
+			tmp = image[i];
+			image[i] = image[i + 2];
+			image[i + 2] = tmp;
+		}
+		break;
 
-  return 0;
+	case 8:
+		size = header.width * header.height;
+		break;
+	}
+
+	// Write image data
+	if (fwrite(image, size, 1, f) < 1)
+	{
+		perror("mtk_image__tga_save> Disk write failed.\n");
+		return -2;
+	}
+
+	return 0;
 }
 
-#ifdef __TEST_
+
+#ifdef TGA_UNIT_TEST__
 int main(int argc, char *argv[])
 {
   FILE *f;

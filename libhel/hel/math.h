@@ -33,6 +33,7 @@
 #define HEL_RAD_TO_DEG(x) ((x) * HEL_180_OVER_PI)
 #define HEL_DEG_TO_RAD(x) ((x) * HEL_PI_OVER_180)
 
+typedef unsigned char byte;
 typedef int int32;
 typedef unsigned int uint32;
 typedef float vec_t;
