@@ -158,7 +158,7 @@ int FreyjaImage::loadIndexedPixmap(unsigned char *image, int width, int height)
   int i, size, index;
 
 
-  if (!image || !_palette || !width || !height || image == _image)
+  if (!image || /* !_palette || */ !width || !height || image == _image)
   {
     printf("FreyjaImage::LoadIndexedBuffer> Assertion failed\n");
     return -1;
@@ -174,6 +174,26 @@ int FreyjaImage::loadIndexedPixmap(unsigned char *image, int width, int height)
   _image = new unsigned char[size * 3];
 
   _color_mode = RGB_24;
+
+
+  // Greyscale -- man, first update since 1998  =)
+  if (!_palette)
+  {
+	  for (i = 0; i < size; ++i)
+	  {
+		  index = image[i];
+
+		  // Let's not bother with correction for now
+		  // greyscale = 0.30 * red + 0.59 * green + 0.11 * blue
+
+		  _image[i*3] = index;
+		  _image[i*3+1] = index;
+		  _image[i*3+2] = index;
+	  }
+
+	  return 0;
+  }
+
 
   for (i = 0; i < size; ++i)
   {
@@ -521,16 +541,24 @@ int FreyjaImage::loadImage(const char *filename)
 
 		switch (type)
 		{
+		case 1:
+			loadPixmap(image, width, height, INDEXED_8);
+			delete [] image;
+			return 0; /* Success! */			
+			break;
+
 		case 3:
 			loadPixmap(image, width, height, RGB_24);
 			delete [] image;
 			return 0; /* Success! */
 			break;
+
 		case 4:
 			loadPixmap(image, width, height, RGBA_32);
 			delete [] image;
 			return 0; /* Success! */
 			break;
+
 		default:
 			;
 		}
