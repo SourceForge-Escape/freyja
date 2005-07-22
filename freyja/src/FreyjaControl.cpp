@@ -269,6 +269,9 @@ bool FreyjaControl::event(int event, unsigned int value)
 	vec_t x, y, z;
 
 
+	if (FreyjaEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+		return true;
+
 	switch (event)
 	{
 	case 503:

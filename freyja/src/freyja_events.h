@@ -299,6 +299,8 @@ void freyja_event_file_dialog(char *s);
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
 
+int freyja_get_event_id_by_name(char *symbol);
+
 void freyja_event_info_dialog(char *icon, char *message);
 void freyja_event_file_dialog(char *title);
 void freyja_event_fullscreen();
