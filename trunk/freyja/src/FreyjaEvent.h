@@ -101,6 +101,7 @@ class FreyjaEvent
 
 	static bool listen(unsigned long event);
 	static bool listen(unsigned long event, long value);
+	static bool listen(unsigned long event, unsigned int value);
 	static bool listen(unsigned long event, long *value, unsigned long size);
 	static bool listen(unsigned long event, float value);
 	static bool listen(unsigned long event, float *value, unsigned long size);

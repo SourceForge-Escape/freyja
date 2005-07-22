@@ -34,6 +34,7 @@
 
 BezierPatch FreyjaModel::gTestPatch;
 unsigned int FreyjaModel::mFlags = 0;
+FreyjaModel *gFreyjaModel = 0x0;
 
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 
@@ -68,11 +69,62 @@ void eMaterialSlotLoadToggle()
 				(FreyjaModel::getFlags() & FreyjaModel::fLoadMaterialInSlot) ? "on" : "off");
 }
 
+#include <freyja/PerlinNoise.h>
+unsigned int gPerlinNoiseSeed = 257;
+void ePerlinNoiseGen()
+{
+	PerlinNoise perlin;
+	uint32 seed = 257, w = 256, h = 256, clamp = 0;
+	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
+	byte *image;
+
+	seed = gPerlinNoiseSeed;
+	//seed = freyja_event_get_int(ePerlinNoiseSeed);
+	//w = freyja_event_get_int(ePerlinNoiseW);
+	//h = freyja_event_get_int(ePerlinNoiseH);
+	//clamp = freyja_event_get_int(ePerlinNoiseClamp);
+	//iA = freyja_event_get_float(ePerlinNoiseIA);
+	//iB = freyja_event_get_float(ePerlinNoiseIB);
+	//d = freyja_event_get_float(ePerlinNoiseD);
+
+	image = perlin.generateBuffer(w, h, seed);
+
+	if (clamp)
+		perlin.clampBufferIntensity(image, w, h, iA, iB, d);
+
+	gFreyjaModel->loadTextureBuffer(image, w, h, 8, Texture::GREYSCALE);
+}
+
+void ePerlinNoiseSeed(unsigned int i)
+{
+	gPerlinNoiseSeed = i;
+}
 
 void FreyjaModelEventsAttach()
 {
+	FreyjaEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
+
+	// FIXME: Add limits and a GUI generator wrapper for this
+	//        the GUI generator wrapper will have to wait until 
+	//        interface is done to call itself back to generate
+	// FIXME: Also find a way to make these data members of the other event
+	//        if possible ( remember callbacks might need functions )
+	FreyjaEventCallbackUInt::add("ePerlinNoiseSeed", &ePerlinNoiseSeed);
+	//FreyjaEventCallbackUInt::add("ePerlinNoiseW", &ePerlinNoiseW);
+	//FreyjaEventCallbackUInt::add("ePerlinNoiseH", &ePerlinNoiseH);
+	//FreyjaEventCallbackUInt::add("ePerlinNoiseClamp", &ePerlinNoiseClamp);
+	//FreyjaEventCallbackVec::add("ePerlinNoiseIA", &ePerlinNoiseIA);
+	//FreyjaEventCallbackVec::add("ePerlinNoiseIB", &ePerlinNoiseIB);
+	//FreyjaEventCallbackVec::add("ePerlinNoiseD", &ePerlinNoiseD);
+
+
 	FreyjaEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	FreyjaEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+}
+
+void FreyjaModelGUIAttach()
+{
+	freyja_append_item_to_menu(ePluginMenu, "PerlinNoise", freyja_get_event_id_by_name("ePerlinNoiseGen"));
 }
 
 
@@ -93,7 +145,6 @@ FreyjaModel::FreyjaModel()
 	/* Spawn 0th light */
 	freyjaLightCreate();
 
-
 	/* Spawn 0th material */
 	int32 mIndex = freyjaMaterialCreate();
 	freyjaCurrentMaterial(mIndex);
@@ -109,6 +160,7 @@ FreyjaModel::FreyjaModel()
 	freyjaMaterialAmbient(mIndex, rgba);
 	freyjaMaterialShininess(mIndex, 0.0f);
 
+	gFreyjaModel = this;
 
 	/* Initalize/reset private data members */
 	clear();

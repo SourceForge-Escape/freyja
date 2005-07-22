@@ -127,6 +127,19 @@ bool FreyjaEvent::listen(unsigned long event)
 }
 
 
+bool FreyjaEvent::listen(unsigned long event, unsigned int value)
+{
+	FreyjaEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value);
+	}
+
+	return false;
+}
+
+
 bool FreyjaEvent::listen(unsigned long event, long value)
 {
 	FreyjaEvent *e = getEventById(event);
