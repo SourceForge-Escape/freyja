@@ -38,6 +38,7 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 Resource gResource;
 FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
+Vector<FreyjaAppPluginTest*> FreyjaAppPluginTest::mPlugins;
 
 
 int freyja_get_event_id_by_name(char *symbol)
@@ -103,10 +104,6 @@ void mgtk_handle_application_window_close()
 }
 
 
-// FIXME: test, need generic color event
-extern vec4_t gColorPerlinAdd;
-extern vec4_t gColorPerlinMult;
-
 void mgtk_handle_color(int id, float r, float g, float b, float a)
 {
 	vec4_t color;
@@ -115,6 +112,33 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 	color[1] = g;
 	color[2] = b;
 	color[3] = a;
+
+
+	/* Color event listener */
+	if (FreyjaEvent::listen(id - 10000 /*ePluginEventBase*/, color, 4))
+		return; // true;
+
+	/* Plugin testing -- waiting on color events */
+	extern vec4_t gColorPerlinAdd;
+	extern vec4_t gColorPerlinMult;
+
+	switch (id)
+	{
+	case eColorPerlinMult:
+		setColor(gColorPerlinMult, color);
+		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
+		mgtk_event_gl_refresh();
+		return;
+		break;
+
+	case eColorPerlinAdd:
+		setColor(gColorPerlinAdd, color);
+		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
+		mgtk_event_gl_refresh();
+		return;
+		break;
+	}
+
 
 	switch (id)
 	{
@@ -181,16 +205,6 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 
 	case eColorMeshHighlight:
 		setColor(FreyjaRender::mColorWireframeHighlight, color);
-		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
-		break;
-
-	case eColorPerlinMult:
-		setColor(gColorPerlinMult, color);
-		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
-		break;
-
-	case eColorPerlinAdd:
-		setColor(gColorPerlinAdd, color);
 		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
 		break;
 
@@ -291,6 +305,15 @@ void mgtk_handle_resource_init(Resource &r)
 	FreyjaRenderEventsAttach();
 	FreyjaModelEventsAttach();
 
+	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
+
+	for (i = 0; i < n; ++i)
+	{
+		if (FreyjaAppPluginTest::mPlugins[i] != 0x0)
+		{
+			FreyjaAppPluginTest::mPlugins[i]->mEventsAttach();
+		}
+	}
 
 	////////////////////////////////////////////////////////////////////
 	// Old style events
@@ -548,8 +571,17 @@ void mgtk_handle_resource_start()
 	freyja_event2i(EVENT_MISC, FREYJA_MODE_MODEL_EDIT);
 	gFreyjaControl->event(eTransformMesh);
 	gFreyjaControl->event(eMoveObject);
-	extern void FreyjaModelGUIAttach();
-	FreyjaModelGUIAttach();
+
+	/* App pluging prototype testing... */
+	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
+
+	for (i = 0; i < n; ++i)
+	{
+		if (FreyjaAppPluginTest::mPlugins[i] != 0x0)
+		{
+			FreyjaAppPluginTest::mPlugins[i]->mGUIAttach();
+		}
+	}
 
 	freyja_set_main_window_title(BUILD_NAME);
 	mgtk_event_gl_refresh();
