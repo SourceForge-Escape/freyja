@@ -36,12 +36,13 @@ FreyjaMaterial::FreyjaMaterial()
 	mName[0] = 0;
 
 	mTextureName = 0x0;
+	setTextureName("No shader");
 
 	mFlags = 0;
 
 	mParent = -1;
 
-	mTexture = -1;
+	mTexture = 0;
 
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2;
 	mAmbient[3]  = 1.0;

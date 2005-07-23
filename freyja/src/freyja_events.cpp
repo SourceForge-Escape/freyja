@@ -1199,7 +1199,7 @@ void freyja_refresh_material_interface()
 
 	mgtk_textentry_value_set(799, freyjaGetMaterialName(mIndex));
 
-	freyja_print("refresh_material_interface> FIXME %s:%i", __FILE__, __LINE__);
+	//freyja_print("!refresh_material_interface> FIXME %s:%i", __FILE__, __LINE__);
 }
 
 
