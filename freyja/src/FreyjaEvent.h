@@ -376,4 +376,50 @@ private:
 	void (*mHandler)(vec_t);       /* Function pointer callback */
 };
 
+
+class FreyjaEventCallbackVecArray : public FreyjaEvent
+{
+public:
+
+	FreyjaEventCallbackVecArray(const char *name, void (*func)(vec_t*, unsigned long)) : FreyjaEvent(name)
+	{
+		setHandler(func);
+	}
+
+	static void add(const char *name, void (*func)(vec_t*, unsigned long))
+	{
+		FreyjaEventCallbackVecArray *e = new FreyjaEventCallbackVecArray(name, func);
+
+		if (e)
+		{
+		}
+	}
+
+	virtual bool action()
+	{
+		return false;
+	}
+
+	virtual bool action(float *value, unsigned long count)
+	{
+		if (mHandler)
+		{
+			(*mHandler)(value, count);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setHandler(void (*func)(vec_t*, unsigned long))
+	{
+		mHandler = func;
+	}
+
+
+private:
+
+	void (*mHandler)(vec_t*, unsigned long);       /* Function pointer callback */
+};
+
 #endif

@@ -442,4 +442,21 @@ void freyja_refresh_material_interface();
  * 2002.02.12:
  * Mongoose - Created
  ------------------------------------------------------*/
+
+class FreyjaAppPluginTest
+{
+public:
+	FreyjaAppPluginTest(void (*rc_func)(), void (*gui_func)()) 
+	{
+		mEventsAttach = rc_func;
+		mGUIAttach = gui_func;
+
+		mPlugins.pushBack(this);
+	}
+
+	static Vector<FreyjaAppPluginTest*> mPlugins;
+	void (*mEventsAttach)();
+	void (*mGUIAttach)();
+};
+
 #endif
