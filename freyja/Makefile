@@ -142,6 +142,7 @@ all: debug release prof
 targets: $(TARGETS)
 
 OBJS = \
+	$(BUILD_DIR)/perlinnoise.o \
 	$(BUILD_DIR)/freyja_events.o \
 	$(BUILD_DIR)/Texture.o \
 	$(BUILD_DIR)/FreyjaRender.o \
