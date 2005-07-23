@@ -103,6 +103,10 @@ void mgtk_handle_application_window_close()
 }
 
 
+// FIXME: test, need generic color event
+extern vec4_t gColorPerlinAdd;
+extern vec4_t gColorPerlinMult;
+
 void mgtk_handle_color(int id, float r, float g, float b, float a)
 {
 	vec4_t color;
@@ -177,6 +181,16 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 
 	case eColorMeshHighlight:
 		setColor(FreyjaRender::mColorWireframeHighlight, color);
+		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
+		break;
+
+	case eColorPerlinMult:
+		setColor(gColorPerlinMult, color);
+		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
+		break;
+
+	case eColorPerlinAdd:
+		setColor(gColorPerlinAdd, color);
 		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
 		break;
 
@@ -442,6 +456,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorBackground", eColorBackground);
 	r.RegisterInt("eColorGrid", eColorGrid);
 	r.RegisterInt("eColorMesh", eColorMesh);
+	r.RegisterInt("eColorPerlinAdd", eColorPerlinAdd);
+	r.RegisterInt("eColorPerlinMult", eColorPerlinMult);
 	r.RegisterInt("eColorVertex", eColorVertex);
 	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
 	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
