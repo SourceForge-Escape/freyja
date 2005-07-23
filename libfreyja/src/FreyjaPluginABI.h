@@ -1331,6 +1331,12 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	/* Material Mutators */
 
+	int32 freyjaLoadMaterialASCII(int32 materialIndex, const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Material <materialIndex> exists
+	 * Post : Material is reset by loaded disk file
+	 ------------------------------------------------------*/
+
 	void freyjaMaterialName(int32 materialIndex, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Material <materialIndex> exists

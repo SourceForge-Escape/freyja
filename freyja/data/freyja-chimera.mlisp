@@ -414,7 +414,9 @@
 								"Open texture file"	eMode	eOpenFileTexture)
 
 						(toolbar_button "gtk-save-as" "Save"
-								"Save document"		eMode  eSaveFile)))
+								"Save document"		eMode  eSaveFile))
+
+						(togglebutton "Slot Load" 0 eMode eTextureSlotLoadToggle))
 
 		(hbox 1 0 0 1 0
 			(label "Perlin seed TEST "  0.0 0.5) 
@@ -422,7 +424,6 @@
 
 					 (hbox 1 0 0 1 0 
 							 (togglebutton "Merge" 0 eMode CMD_MISC_TEXEL_COMBINE)
-							 (togglebutton "Slot Load" 0 eMode eTextureSlotLoadToggle)
 							 (button "Set Tex" eMode eSetMeshTexture))
 					 
 					 (hbox 1 0 0 1 0 

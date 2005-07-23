@@ -131,10 +131,6 @@ FreyjaControl::~FreyjaControl()
 
 	if (mModel)
 		delete mModel;
-
-	/* Mongoose 2004.03.26, 
-	 * Entry for MaterialManager test pattern */
-	//MaterialManager::DestroyInstance();
 }
 
 
@@ -691,7 +687,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_Texture)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 		
 		freyja_print("OpenGL texturing is [%s]", 
 					 !(flags & fFreyjaMaterial_Texture) ? "ON" : "OFF");
@@ -704,7 +700,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_DetailTexture)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 
 		freyja_print("OpenGL detail texturing is [%s]", 
 					 !(flags & fFreyjaMaterial_DetailTexture) ? "ON" : "OFF");
@@ -717,7 +713,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_Normalize)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 
 		freyja_print("OpenGL normalization of normals is [%s]", 
 					 !(flags & fFreyjaMaterial_Normalize) ? "ON" : "OFF");
@@ -731,7 +727,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_Blending)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 		
 		freyja_print("OpenGL blending [%s]", 
 					 !(flags & fFreyjaMaterial_Blending) ? "ON" : "OFF");

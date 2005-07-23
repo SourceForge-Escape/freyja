@@ -5714,7 +5714,7 @@ int32 freyjaMaterialCreate()
 }
 
 
-int32 freyjaLoadMaterialASCII(const char *filename)
+int32 freyjaLoadMaterialASCII(int32 materialIndex, const char *filename)
 {
 	FILE *f;
 	unsigned int i, j, k, l, mode;
@@ -5730,9 +5730,8 @@ int32 freyjaLoadMaterialASCII(const char *filename)
 	unsigned int texture;
 	unsigned int blend_src;
 	unsigned int blend_dest;
-	int32 mIndex = freyjaMaterialCreate();
-
-	freyjaCurrentMaterial(mIndex);
+	int32 mIndex = materialIndex;
+	//int32 mIndex = freyjaMaterialCreate();
 
 	
 	if (!filename || !filename[0])

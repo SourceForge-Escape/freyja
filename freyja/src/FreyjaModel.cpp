@@ -74,7 +74,7 @@ unsigned int gPerlinNoiseSeed = 257;
 void ePerlinNoiseGen()
 {
 	PerlinNoise perlin;
-	uint32 seed = 257, w = 256, h = 256, clamp = 0;
+	uint32 seed = 257, w = 256, h = 256, clamp = 1;
 	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
 	byte *image;
 
@@ -2036,12 +2036,13 @@ int FreyjaModel::loadMaterial(const char *filename)
 
 
 	if (mFlags & fLoadMaterialInSlot)  
+	{
 		mIndex = freyjaGetCurrentMaterial();
+	}
 	else
+	{
 		mIndex = freyjaMaterialCreate();
-
-	freyjaCurrentMaterial(mIndex);
-
+	}
 
 	//unsigned int m_flags; // FIXME pass to renderer
 
