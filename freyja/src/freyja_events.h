@@ -185,6 +185,8 @@ typedef enum {
 	eColorVertexHighlight,
 	eColorMesh,
 	eColorMeshHighlight,
+	eColorPerlinMult,  // FIXME
+	eColorPerlinAdd,   // FIXME
 
 	eModelIterator,
 	ePolygonIterator,

@@ -39,38 +39,36 @@ FreyjaModel *gFreyjaModel = 0x0;
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 
 // FIXME: Add set/clear methods to replace old get/set flags crap
+
+
 void eTextureSlotLoadToggle()
 {
-	if (FreyjaModel::getFlags() & FreyjaModel::fLoadTextureInSlot)
-	{
-		FreyjaModel::setFlags(FreyjaModel::fLoadTextureInSlot, 0);
-	}
-	else
-	{
-		FreyjaModel::setFlags(FreyjaModel::fLoadTextureInSlot, 1);
-	}	
+	bool on = FreyjaModel::toggleFlag(FreyjaModel::fLoadTextureInSlot);
 
 	freyja_print("Texture loading into current slot [%s]",
-				(FreyjaModel::getFlags() & FreyjaModel::fLoadTextureInSlot) ? "on" : "off");
+				on ? "on" : "off");
 }
 
 void eMaterialSlotLoadToggle()
 {
-	if (FreyjaModel::getFlags() & FreyjaModel::fLoadMaterialInSlot)
-	{
-		FreyjaModel::setFlags(FreyjaModel::fLoadMaterialInSlot, 0);
-	}
-	else
-	{
-		FreyjaModel::setFlags(FreyjaModel::fLoadMaterialInSlot, 1);
-	}	
+	bool on = FreyjaModel::toggleFlag(FreyjaModel::fLoadMaterialInSlot);
 
-	freyja_print("Material loading into current slot [%s]",
-				(FreyjaModel::getFlags() & FreyjaModel::fLoadMaterialInSlot) ? "on" : "off");
+	freyja_print("Texture loading into current slot [%s]",
+				on ? "on" : "off");
 }
 
 #include <freyja/PerlinNoise.h>
+#include <freyja/FreyjaImage.h>
 unsigned int gPerlinNoiseSeed = 257;
+unsigned int gPerlinNoiseW = 256;
+unsigned int gPerlinNoiseH = 256;
+unsigned int gPerlinNoiseClamp = 1;
+vec_t gPerlinNoiseIA = 1.0f;
+vec_t gPerlinNoiseIB = 2.0f;
+vec_t gPerlinNoiseD = 20.0f;
+vec4_t gColorPerlinAdd;
+vec4_t gColorPerlinMult;
+
 void ePerlinNoiseGen()
 {
 	PerlinNoise perlin;
@@ -78,21 +76,51 @@ void ePerlinNoiseGen()
 	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
 	byte *image;
 
-	seed = gPerlinNoiseSeed;
-	//seed = freyja_event_get_int(ePerlinNoiseSeed);
-	//w = freyja_event_get_int(ePerlinNoiseW);
-	//h = freyja_event_get_int(ePerlinNoiseH);
-	//clamp = freyja_event_get_int(ePerlinNoiseClamp);
-	//iA = freyja_event_get_float(ePerlinNoiseIA);
-	//iB = freyja_event_get_float(ePerlinNoiseIB);
-	//d = freyja_event_get_float(ePerlinNoiseD);
+	seed = gPerlinNoiseSeed; //freyja_event_get_int(ePerlinNoiseSeed);
+	w = gPerlinNoiseW; //freyja_event_get_int(ePerlinNoiseW);
+	h = gPerlinNoiseH; //freyja_event_get_int(ePerlinNoiseH);
+	clamp = gPerlinNoiseClamp; //freyja_event_get_int(ePerlinNoiseClamp);
+	iA = gPerlinNoiseIA; //freyja_event_get_float(ePerlinNoiseIA);
+	iB = gPerlinNoiseIB; //freyja_event_get_float(ePerlinNoiseIB);
+	d = gPerlinNoiseD; //freyja_event_get_float(ePerlinNoiseD);
 
 	image = perlin.generateBuffer(w, h, seed);
 
 	if (clamp)
 		perlin.clampBufferIntensity(image, w, h, iA, iB, d);
 
+#define MOD_ADD_PERLIN
+#ifdef MOD_ADD_PERLIN
+	// FIXME: Modulate and add here
+	FreyjaImage img;
+	byte *rgb;
+	uint32 i, n;
+	img.loadPixmap(image, w, h, FreyjaImage::INDEXED_8);
+	img.getImage(&rgb);
+
+	// hahaha it's 0600 no sleep -- can't wait to clean this prototype!
+	for (i = 0, n = w * h * 3; i < n; ++i)
+	{
+		rgb[i] = (byte)(rgb[i] * gColorPerlinMult[0]) + 128 * gColorPerlinAdd[0];
+		++i; // avoid mult indexing
+		rgb[i] = (byte)(rgb[i] * gColorPerlinMult[1]) + 128 * gColorPerlinAdd[1];
+		++i; // avoid mult indexing
+		rgb[i] = (byte)(rgb[i] * gColorPerlinMult[2]) + 128 * gColorPerlinAdd[2];
+
+		/* NOTE: No clamping or scaling of colors, however there is a 
+		         weakened 50 / 50 add in the sense that ADD can only contrib
+				 _up_to_ 50% of full intensity.
+
+				The reason for this is to allow bleeding for plasma.
+		*/
+	}
+
+	gFreyjaModel->loadTextureBuffer(rgb, w, h, 24, Texture::RGB);
+#else
 	gFreyjaModel->loadTextureBuffer(image, w, h, 8, Texture::GREYSCALE);
+#endif
+
+	freyja_event_gl_refresh();
 }
 
 void ePerlinNoiseSeed(unsigned int i)
@@ -100,22 +128,67 @@ void ePerlinNoiseSeed(unsigned int i)
 	gPerlinNoiseSeed = i;
 }
 
+void ePerlinNoiseW(unsigned int i)
+{
+	gPerlinNoiseW = i;
+}
+
+void ePerlinNoiseH(unsigned int i)
+{
+	gPerlinNoiseH = i;
+}
+
+void ePerlinNoiseClamp(unsigned int i)
+{
+	gPerlinNoiseClamp = i;
+}
+
+void ePerlinNoiseIA(vec_t v)
+{
+	gPerlinNoiseIA = v;
+}
+
+void ePerlinNoiseIB(vec_t v)
+{
+	gPerlinNoiseIB = v;
+}
+
+void ePerlinNoiseD(vec_t v)
+{
+	gPerlinNoiseD = v;
+}
+
+void eDialogPerlinNoise()
+{
+	static bool on = true;
+
+	extern void mgtk_event_dialog_visible_set(int, int);
+	mgtk_event_dialog_visible_set(freyja_get_event_id_by_name("eDialogPerlinNoise"), on);
+
+	on = !on;
+} 
+
+
+
 void FreyjaModelEventsAttach()
 {
 	FreyjaEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
+
 
 	// FIXME: Add limits and a GUI generator wrapper for this
 	//        the GUI generator wrapper will have to wait until 
 	//        interface is done to call itself back to generate
 	// FIXME: Also find a way to make these data members of the other event
 	//        if possible ( remember callbacks might need functions )
+	FreyjaEventCallback::add("eDialogPerlinNoise", &eDialogPerlinNoise);
+	FreyjaEventCallback::add("eDialogPerlinNoise", &eDialogPerlinNoise);
 	FreyjaEventCallbackUInt::add("ePerlinNoiseSeed", &ePerlinNoiseSeed);
-	//FreyjaEventCallbackUInt::add("ePerlinNoiseW", &ePerlinNoiseW);
-	//FreyjaEventCallbackUInt::add("ePerlinNoiseH", &ePerlinNoiseH);
-	//FreyjaEventCallbackUInt::add("ePerlinNoiseClamp", &ePerlinNoiseClamp);
-	//FreyjaEventCallbackVec::add("ePerlinNoiseIA", &ePerlinNoiseIA);
-	//FreyjaEventCallbackVec::add("ePerlinNoiseIB", &ePerlinNoiseIB);
-	//FreyjaEventCallbackVec::add("ePerlinNoiseD", &ePerlinNoiseD);
+	FreyjaEventCallbackUInt::add("ePerlinNoiseW", &ePerlinNoiseW);
+	FreyjaEventCallbackUInt::add("ePerlinNoiseH", &ePerlinNoiseH);
+	FreyjaEventCallbackUInt::add("ePerlinNoiseClamp", &ePerlinNoiseClamp);
+	FreyjaEventCallbackVec::add("ePerlinNoiseIA", &ePerlinNoiseIA);
+	FreyjaEventCallbackVec::add("ePerlinNoiseIB", &ePerlinNoiseIB);
+	FreyjaEventCallbackVec::add("ePerlinNoiseD", &ePerlinNoiseD);
 
 
 	FreyjaEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
@@ -124,7 +197,8 @@ void FreyjaModelEventsAttach()
 
 void FreyjaModelGUIAttach()
 {
-	freyja_append_item_to_menu(ePluginMenu, "PerlinNoise", freyja_get_event_id_by_name("ePerlinNoiseGen"));
+	//freyja_append_item_to_menu(ePluginMenu, "PerlinNoise gen", freyja_get_event_id_by_name("ePerlinNoiseGen"));
+	freyja_append_item_to_menu(ePluginMenu, "PerlinNoise", freyja_get_event_id_by_name("eDialogPerlinNoise"));
 }
 
 
@@ -170,6 +244,21 @@ FreyjaModel::FreyjaModel()
 FreyjaModel::~FreyjaModel()
 {
 	freyjaFree();
+}
+
+
+bool FreyjaModel::toggleFlag(option_flag_t flag)
+{
+	if (FreyjaModel::getFlags() & flag)
+	{
+		FreyjaModel::setFlags(flag, 0);
+	}
+	else
+	{
+		FreyjaModel::setFlags(flag, 1);
+	}
+
+	return (getFlags() & flag);
 }
 
 

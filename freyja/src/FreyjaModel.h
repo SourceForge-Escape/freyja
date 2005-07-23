@@ -609,6 +609,8 @@ public:
 
 	void setSceneTranslation(vec_t x, vec_t y, vec_t z);
 
+	static bool toggleFlag(option_flag_t flag);
+
 	void transform(int mode, freyja_transform_action_t action, 
 				   float x, float y, float z);
 	/*------------------------------------------------------
