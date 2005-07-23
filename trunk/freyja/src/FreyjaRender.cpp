@@ -47,7 +47,6 @@
 
 FreyjaRender *FreyjaRender::mSingleton = 0x0;
 
-
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
 const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
@@ -180,9 +179,9 @@ void freyjaApplyMaterial(uint32 materialIndex)
 	glMaterialfv(GL_FRONT, GL_EMISSION, emissive);
 	glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
 
-#ifndef DISABLE_MULTITEXTURE
 	if (flags & fFreyjaMaterial_DetailTexture)
 	{
+#ifndef DISABLE_MULTITEXTURE
 		glActiveTexture(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -200,16 +199,15 @@ void freyjaApplyMaterial(uint32 materialIndex)
 		// Combine, gamma correct
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
-	}
-#else
-	if (flags == 0)
-	{
-	}
 #endif
-
-	else if (flags & fFreyjaMaterial_Texture)
+	}
+	else if (flags & fFreyjaMaterial_Texture) // Non-colored is ( id + 1)
 	{
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, texture+1);
+	}
+	else // Colored, first texture is a generated WHITE 32x32
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	if (flags & fFreyjaMaterial_Blending)
@@ -1212,9 +1210,11 @@ void FreyjaRender::display()
 		//DrawTextureEditWindow(getWindowWidth(), getWindowHeight());
 		renderUVWindow();
 		break;
+
 	case VIEWMODE_MATERIAL_EDIT:
 		DrawMaterialEditWindow();
 		break;
+
 	default:
 		;
 	}
@@ -1365,6 +1365,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		
 		if (mRenderMode & RENDER_MATERIAL)
 		{
+			// FIXME: mesh.material
 			freyjaApplyMaterial(freyjaGetCurrentMaterial());
 		}
 		
@@ -1598,15 +1599,18 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 		}
 
 		// Call shader/texture ( no shader support yet )
-		if (mRenderMode & RENDER_TEXTURE && face.material != COLORED_POLYGON)
+		if (mRenderMode & RENDER_TEXTURE && 
+			face.material != COLORED_POLYGON)
 		{
 			if (mRenderMode & RENDER_MATERIAL)
 			{
 				//glPushAttrib(GL_ENABLE_BIT);
 				freyjaApplyMaterial(face.material);
 			}
-
-			BindTexture(face.material + 1);
+			else
+			{
+				BindTexture(face.material + 1);
+			}
 		}
 		else
 		{
@@ -2059,26 +2063,24 @@ void FreyjaRender::DrawMaterialEditWindow()
 	float pos[4] = {128.0, 128.0, 128.0, 1.0};
 
 
-	/* Setup lighting */
+	/* Setup lighting */	
+	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
-
-	/* Setup material */
-	freyjaApplyMaterial(freyjaGetCurrentMaterial());
-
-	/* Cast light on sphere colored/detailed by material */
-	glPushMatrix();
-	glRotatef(180.0f, 1, 0, 0);
-	//glRotatef(90.0f, 0, 0, 1);
-	mglDrawSphere(128, 128, 10.0);
-	glPopMatrix();
 
 #ifdef USE_TORUS_TEST
 	glPushMatrix();
 	glRotatef(45.0f, 1, 0, 0);
 	glRotatef(45.0f, 0, 0, 1);
 	drawTorus(3.0, 10.0);
+	glPopMatrix();
+#else
+	/* Cast light on sphere colored/detailed by material */
+	glPushMatrix();
+	glRotatef(180.0f, 1, 0, 0);
+	freyjaApplyMaterial(freyjaGetCurrentMaterial());
+	mglDrawSphere(128, 128, 10.0);
 	glPopMatrix();
 #endif
 }
