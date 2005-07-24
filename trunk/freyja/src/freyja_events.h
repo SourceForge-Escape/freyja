@@ -445,29 +445,6 @@ void freyja_refresh_material_interface();
 
 void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp);
 
-
 void freyja_plugin_generic(const char *symbol, void *something);
-
-
-class FreyjaAppPluginTest
-{
-public:
-	FreyjaAppPluginTest(void (*rc_func)(), void (*gui_func)()) 
-	{
-		mEventsAttach = rc_func;
-		mGUIAttach = gui_func;
-
-		mPlugins.pushBack(this);
-	}
-
-	static void loadTextureBuffer(byte *image, uint32 w, uint32 h, uint32 bpp)
-	{
-		freyja_load_texture_buffer(image, w, h, bpp);
-	}
-
-	static Vector<FreyjaAppPluginTest*> mPlugins;
-	void (*mEventsAttach)();
-	void (*mGUIAttach)();
-};
 
 #endif

@@ -1010,13 +1010,43 @@ void EggPlugin::freyjaEnd()
 
 long EggPlugin::freyjaTextureStore(EggTextureData *textureData)
 {
+	unsigned int i, count;
+	bool found = false;
+
 	if (textureData)
 	{
-		mTextures.pushBack(textureData);
-		return mTextures.size() - 1;
+		count = mTextures.size();
+
+		for (i = 0; i < count; ++i)
+		{
+			if (mTextures[i] == 0x0)
+			{
+				mTextures.assign(i, textureData);
+				found = true;
+				return i;
+			}	
+		}
+
+		if (!found)
+		{
+			mTextures.pushBack(textureData);
+			return mTextures.size() - 1;
+		}
 	}
 
 	return -1;
+}
+
+
+void EggPlugin::freyjaTextureDelete(int tIndex)
+{
+	EggTextureData *t = mTextures[tIndex];
+
+	if (t)
+	{
+		delete t;
+		mTextures.assign(tIndex, 0x0);
+	}
 }
 
 

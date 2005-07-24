@@ -27,6 +27,7 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <freyja/FreyjaFileReader.h> 
+#include <mgtk/ResourceEvent.h>
 
 #include "freyja_events.h"
 #include "Texture.h"
@@ -58,11 +59,44 @@ void eMaterialSlotLoadToggle()
 				on ? "on" : "off");
 }
 
+void eTextureUpload(unsigned int id)
+{
+	byte *image;
+	uint32 w, h, bpp, type;
+
+	/* Texture image was stored as raw buffer */
+	freyjaGetTextureImage(id, &w, &h, &bpp, &type, &image);
+	freyja_print("!test");
+
+	if (image)
+	{
+		switch (type)
+		{
+		case RGBA_32:
+			gFreyjaModel->loadTextureBuffer(image, w, h, 32, Texture::RGBA);
+			break;
+
+		case RGB_24:
+			gFreyjaModel->loadTextureBuffer(image, w, h, 24, Texture::RGB);
+			break;
+
+		case INDEXED_8:
+			gFreyjaModel->loadTextureBuffer(image, w, h, 8, Texture::INDEXED);
+			break;
+
+		default:
+			freyja_print("%s> ERROR: Unsupported texture colormap %d",
+						"FreyjaModel::loadModel", type);
+		}
+	}
+}
+
 
 void FreyjaModelEventsAttach()
 {
-	FreyjaEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
-	FreyjaEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
+	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
 }
 
 

@@ -154,6 +154,7 @@ targets: $(TARGETS)
 PROG_OBJS = \
 	$(BUILDDIR)/MLisp.o \
 	$(BUILDDIR)/Resource.o \
+	$(BUILDDIR)/ResourceEvent.o \
 	$(BUILDDIR)/mgtk_callbacks.o \
 	$(BUILDDIR)/mgtk_interface.o \
 	$(BUILDDIR)/mgtk_resource.o
