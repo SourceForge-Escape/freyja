@@ -362,6 +362,7 @@ class Resource
    * Mongoose - Created
    ------------------------------------------------------*/
 
+	int getIntByName(const char *symbol);
 
 	bool Lookup(char *symbol, arg_list_t **adt);
 	bool Lookup(char *symbol, float *f);
@@ -419,6 +420,8 @@ class Resource
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 #endif
+
+	static Resource *mInstance;
 
  private:
 

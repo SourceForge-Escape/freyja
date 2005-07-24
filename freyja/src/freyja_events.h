@@ -185,8 +185,6 @@ typedef enum {
 	eColorVertexHighlight,
 	eColorMesh,
 	eColorMeshHighlight,
-	eColorPerlinMult,  // FIXME
-	eColorPerlinAdd,   // FIXME
 
 	eModelIterator,
 	ePolygonIterator,
@@ -292,6 +290,8 @@ typedef enum {
 
 #define freyja_event_get_float mgtk_event_get_float
 #define freyja_event_set_range mgtk_event_set_range
+
+
 
 void freyja_event_start();       /* Starts up Freyja subsystems */
 void freyja_event_exit();        /* Calls shutdown and exits GUI */
@@ -443,6 +443,12 @@ void freyja_refresh_material_interface();
  * Mongoose - Created
  ------------------------------------------------------*/
 
+void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp);
+
+
+void freyja_plugin_generic(const char *symbol, void *something);
+
+
 class FreyjaAppPluginTest
 {
 public:
@@ -452,6 +458,11 @@ public:
 		mGUIAttach = gui_func;
 
 		mPlugins.pushBack(this);
+	}
+
+	static void loadTextureBuffer(byte *image, uint32 w, uint32 h, uint32 bpp)
+	{
+		freyja_load_texture_buffer(image, w, h, bpp);
 	}
 
 	static Vector<FreyjaAppPluginTest*> mPlugins;
