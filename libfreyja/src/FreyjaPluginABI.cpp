@@ -5648,6 +5648,14 @@ int32 freyjaTextureCreate()
 	return textureIndex;
 }
 
+
+void freyjaTextureDelete(int32 textureIndex)
+{
+	if (EggPlugin::mEggPlugin)
+		EggPlugin::mEggPlugin->freyjaTextureDelete(textureIndex);	
+}
+
+
 int32 freyjaGetTextureFilename(unsigned int index, char **filename)
 {
 	*filename = 0x0;

@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#include <mgtk/ResourceEvent.h>
 
 #ifdef HAVE_OPENGL
 #   ifdef MACOSX
@@ -143,14 +144,14 @@ void eRenderToggleGridZClear()
 
 void FreyjaRenderEventsAttach()
 {
-	FreyjaEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
-	FreyjaEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
-	FreyjaEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
-	FreyjaEventCallback::add("eLineBone", &eLineBone);
-	FreyjaEventCallback::add("eAxisJoint", &eAxisJoint);
-	FreyjaEventCallback::add("eSphereJoint", &eSphereJoint);
-	FreyjaEventCallback::add("ePointJoint", &ePointJoint);
-	FreyjaEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
+	ResourceEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
+	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
+	ResourceEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
+	ResourceEventCallback::add("eLineBone", &eLineBone);
+	ResourceEventCallback::add("eAxisJoint", &eAxisJoint);
+	ResourceEventCallback::add("eSphereJoint", &eSphereJoint);
+	ResourceEventCallback::add("ePointJoint", &ePointJoint);
+	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
 }
 
 

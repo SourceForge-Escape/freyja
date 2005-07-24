@@ -549,6 +549,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void freyjaTextureDelete(int tIndex);
+
 	void freyjaBoneFlags(unsigned int flags);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_TAG);
