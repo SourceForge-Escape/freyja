@@ -22,18 +22,19 @@
 #include <string.h>
 #include <math.h>
 #include <hel/math.h>
-#include <hel/Vector3d.h>
-#include <hel/Matrix.h>
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/PerlinNoise.h>
 #include <freyja/FreyjaImage.h>
+#include <mgtk/mgtk_events.h>
 
 #include "freyja_events.h"
-#include "Texture.h"
-#include "FreyjaModel.h"
 
 
-extern FreyjaModel *gFreyjaModel; // hhmm...
+extern "C" {
+
+	void freyja_perlinnoise_init(void (*func)(const char*, void*));
+}
+
 unsigned int gPerlinNoiseSeed = 257;
 unsigned int gPerlinNoiseW = 256;
 unsigned int gPerlinNoiseH = 256;
@@ -43,6 +44,24 @@ vec_t gPerlinNoiseIB = 2.0f;
 vec_t gPerlinNoiseD = 20.0f;
 vec4_t gColorPerlinAdd = {0.51, 0.51, 0.29, 1.0};
 vec4_t gColorPerlinMult = {0.61, 0.51, 0.35, 1.0};
+
+void PerlinNoiseEventsAttach();
+void PerlinNoiseGUIAttach();
+
+/* This hooks up the plugin to the appliciation */
+FreyjaAppPluginTest PerlinNoiseAppPlugin(PerlinNoiseEventsAttach,
+										 PerlinNoiseGUIAttach);
+
+void *perlinnoise_captured1 = 0x0;
+
+void freyja_perlinnoise_init(void (*func)(const char*, void*))
+{
+	//void freyja_plugin_generic(const char *symbol, void *something);
+
+	func("freyja_load_texture_buffer", perlinnoise_captured1);
+
+	// FIXME: Once this code is runtime loaded, move hook up here as allocation, and clean up the new ad-hoc API	
+}
 
 
 void ePerlinNoiseGen()
@@ -93,9 +112,10 @@ void ePerlinNoiseGen()
 				(byte)(128 * gColorPerlinAdd[2]);
 	}
 
-	gFreyjaModel->loadTextureBuffer(rgb, w, h, 24, Texture::RGB);
+	PerlinNoiseAppPlugin.loadTextureBuffer(rgb, w, h, 24);
+	//freyjaTextureStoreBuffer(rgb, 3, w, h, RGB_24);
 
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -143,19 +163,37 @@ void ePerlinNoiseD(vec_t v)
 
 void eDialogPerlinNoise()
 {
-	static bool on = true;
-
-	extern void mgtk_event_dialog_visible_set(int, int);
-	mgtk_event_dialog_visible_set(freyja_get_event_id_by_name("eDialogPerlinNoise"), on);
-
-	on = !on;
+	mgtk_event_dialog_visible_set(Resource::mInstance->getIntByName("eDialogPerlinNoise"), 1);
 } 
+
+
+void eColorPerlinMult(float *c, unsigned long count)
+{
+	uint32 i;
+
+	for (i = 0; i < 4; ++i)
+		gColorPerlinMult[i] = c[i];
+
+	mgtk_event_set_color(Resource::mInstance->getIntByName("eColorPerlinMult"), c[0], c[1], c[2], c[3]);
+	mgtk_event_gl_refresh();
+}
+
+
+void eColorPerlinAdd(float *c, unsigned long count)
+{
+	uint32 i;
+
+	for (i = 0; i < 4; ++i)
+		gColorPerlinAdd[i] = c[i];
+
+	mgtk_event_set_color(Resource::mInstance->getIntByName("eColorPerlinAdd"), c[0], c[1], c[2], c[3]);
+	mgtk_event_gl_refresh();
+}
 
 
 void PerlinNoiseEventsAttach()
 {
 	FreyjaEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
-
 
 	// FIXME: Add limits and a GUI generator wrapper for this
 	//        the GUI generator wrapper will have to wait until 
@@ -163,75 +201,43 @@ void PerlinNoiseEventsAttach()
 	// FIXME: Also find a way to make these data members of the other event
 	//        if possible ( remember callbacks might need functions )
 	FreyjaEventCallback::add("eDialogPerlinNoise", &eDialogPerlinNoise);
-	FreyjaEventCallback::add("eDialogPerlinNoise", &eDialogPerlinNoise);
+
 	FreyjaEventCallbackUInt::add("ePerlinNoiseSeed", &ePerlinNoiseSeed);
 	FreyjaEventCallbackUInt::add("ePerlinNoiseW", &ePerlinNoiseW);
 	FreyjaEventCallbackUInt::add("ePerlinNoiseH", &ePerlinNoiseH);
 	FreyjaEventCallbackUInt::add("ePerlinNoiseClamp", &ePerlinNoiseClamp);
+
 	FreyjaEventCallbackVec::add("ePerlinNoiseIA", &ePerlinNoiseIA);
 	FreyjaEventCallbackVec::add("ePerlinNoiseIB", &ePerlinNoiseIB);
 	FreyjaEventCallbackVec::add("ePerlinNoiseD", &ePerlinNoiseD);
+
+	FreyjaEventCallbackVecArray::add("eColorPerlinMult", &eColorPerlinMult);
+	FreyjaEventCallbackVecArray::add("eColorPerlinAdd", &eColorPerlinAdd);
 }
 
 
 void PerlinNoiseGUIAttach()
 {
-	freyja_append_item_to_menu(ePluginMenu, "PerlinNoise", freyja_get_event_id_by_name("eDialogPerlinNoise"));
+	char *filename;
+	char *basename = "plugins/perlinnoise.mlisp";
+	int id;
 
-	freyja_event_set_color(eColorPerlinAdd, 0.51f, 0.51f, 0.29f, 1.0f);
-	freyja_event_set_color(eColorPerlinMult, 0.61f, 0.51f, 0.35f, 1.0f);
+	id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
+	mgtk_append_item_to_menu(ePluginMenu, "PerlinNoise", id);
+
+	filename = mgtk_rc_map(basename);
+	Resource::mInstance->Load(filename);
+	delete [] filename;
+
+	id = Resource::mInstance->getIntByName("eColorPerlinAdd");
+	mgtk_event_set_color(id, 0.51f, 0.51f, 0.29f, 1.0f);
+	
+	id = Resource::mInstance->getIntByName("eColorPerlinMult");
+	mgtk_event_set_color(id, 0.61f, 0.51f, 0.35f, 1.0f);
 }
 
-/*
-(dialog "Freyja :: PerlinNoise test" eDialogPerlinNoise 0
-	(vbox 0 0 0 0 0
-		(hbox 1 0 0 1 0
-			(icon "freyja.png" IconSize_Dialog))
-
-		(label "Perlin Noise "  0.0 0.5)
-
-		(button "Generate texture" eMode ePerlinNoiseGen)
-
-		(hbox 1 0 0 1 0
-			(label "Seed "  0.0 0.5)
-			(spinbutton 257 0 1000 ePerlinNoiseSeed))
-
-		(hbox 1 0 0 1 0
-			(label "Width "  0.0 0.5)
-			(spinbutton 256 8 1024 ePerlinNoiseW))
-
-		(hbox 1 0 0 1 0
-			(label "Height "  0.0 0.5)
-			(spinbutton 256 8 1024 ePerlinNoiseH))
-
-		(hbox 1 0 0 1 0
-			(label "Clamping on? "  0.0 0.5)
-			(spinbutton 1 0 1 ePerlinNoiseClamp))
-
-		(hbox 1 0 0 1 0
-			(label "iA "  0.0 0.5) 
-			(spinbutton2 1.0 0.0 99999.0 1.0 1.0 1.0 1 ePerlinNoiseIA))
-
-		(hbox 1 0 0 1 0
-			(label "iB "  0.0 0.5) 
-			(spinbutton2 2.0 0.0 99999.0 1.0 1.0 1.0 1 ePerlinNoiseIB))
-
-		(hbox 1 0 0 1 0
-			(label "d "  0.0 0.5) 
-			(spinbutton2 20.0 0.0 100.0 1.0 1.0 1.0 3 ePerlinNoiseD))
-
-		(hbox 1 0 0 1 2 
-			(label "Modulate color " 0.0 0.5)
-			(colorbutton 1 eColorPerlinMult))
-
-		(hbox 1 0 0 1 2 
-			(label "Add color " 0.0 0.5)
-			(colorbutton 1 eColorPerlinAdd))))
-*/
 
 
-
-FreyjaAppPluginTest PerlinNoiseAppPlugin(PerlinNoiseEventsAttach, PerlinNoiseGUIAttach);
 
 
 

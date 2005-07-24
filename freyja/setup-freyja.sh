@@ -12,7 +12,13 @@ mkdir -p ~/.freyja/textures/
 mkdir -p ~/.freyja/particles/
 mkdir -p ~/.freyja/materials/
 mkdir -p ~/.freyja/icons/
+mkdir -p ~/.freyja/plugins/
 
+# Plugins
+cp bin/plugins/*.so  ~/.freyja/plugins/
+cp plugins/*.mlisp ~/.freyja/plugins/
+
+# Main data
 cp ./data/freyja8.mlisp ~/.freyja/
 cp ./data/freyja-chimera.mlisp ~/.freyja/
 cp ./data/palettes/*.pal ~/.freyja/palettes/

@@ -3027,9 +3027,16 @@ void FreyjaControl::loadResource()
 		mResource->Print();
 	}
 
-	if (mResource->Lookup("GRID_ON", &i) && i)
+	if (mResource->Lookup("GRID_ON", &i))
 	{
-		mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
+		if (i)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_EDIT_GRID);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_EDIT_GRID);
+		}
 	}
 
 	if (mResource->Lookup("FLUSH_RESOURCE", &i) && i)
