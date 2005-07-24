@@ -26,7 +26,11 @@
 #include <stdlib.h>
 #include "Resource.h"
 
+#define MULTI_EVAL
+//#define DEBUG_RESOURCE_EXE
+//#define DEBUG_RESOURCE_SYMBOL
 
+Resource *Resource::mInstance = 0x0;
 Resource *__RESOURCE_AGENT_ = NULL;
 
 
@@ -432,12 +436,10 @@ Resource::Resource()
 	_error = 0;
 	_line = 1;
 
-
-
 	RegisterFunction("setq", setq);
 	RegisterFunction("nil", nil);
 
-	__RESOURCE_AGENT_ = this;
+	Resource::mInstance = __RESOURCE_AGENT_ = this;
 
 	/* Mongoose 2002.01.12, 
 	 * Bind script functions to C/C++ functions */
@@ -595,7 +597,7 @@ arg_list_t *Resource::Function(arg_list_t *arg)
 	arg_list_t *sym_tab;
 	arg_list_t *ret;
 	arg_list_t *func;
-   arg_list_t *(*call)(arg_list_t *);
+	arg_list_t *(*call)(arg_list_t *);
 
 
 	Match('(');
@@ -604,6 +606,7 @@ arg_list_t *Resource::Function(arg_list_t *arg)
 	sym_tab = _sym_tab;
 	ret = NULL;
 
+	// FIXME: This causes bad things with MULT_EVAL
 	while (sym_tab)
 	{
 		if (sym_tab->type == FUNC && strcmp(_symbol, sym_tab->symbol) == 0)
@@ -634,7 +637,6 @@ arg_list_t *Resource::Function(arg_list_t *arg)
 		{
 			printf("Probable unbound function '%s'\n", (char *)func->data);
 		}
-			
 	}
 
 	//Mongoose 2001.11.09: For 'empty space' or '(func (func' use
@@ -648,7 +650,6 @@ arg_list_t *Resource::Function(arg_list_t *arg)
 		Function(ret);
 		//ret = arg_pop(&_stack);
 
-//#define DEBUG_RESOURCE_EXE
 #ifdef DEBUG_RESOURCE_EXE
 		printf("Function executed on Line %i\n", _line);
 #endif
@@ -982,6 +983,10 @@ void Resource::Comment()
 
 int Resource::Load(char *filename)
 {
+#ifdef MULTI_EVAL
+	printf("Resource::Load> '%s'\n", filename);
+#endif
+
 	if (_buffer)
 	{
 		delete [] _buffer;
@@ -1062,6 +1067,19 @@ int Resource::Eval(char *buffer)
 	_line = 1; 
 	_error = 0;
 
+
+#ifdef MULTI_EVAL
+	_top = 0;
+	_string = 0;
+
+	while (_stack)
+	{
+		arg_pop(&_stack);
+	}
+
+	_stack = NULL;
+#endif
+
 	Lex();
 	Seperator();
 
@@ -1104,6 +1122,15 @@ int Resource::Eval(char *buffer)
 	return 0;
 }
 
+
+int Resource::getIntByName(const char *symbol)
+{
+	int id = -1;
+
+	Lookup((char*)symbol, &id);
+
+	return id;	
+}
 
 
 bool Resource::Lookup(char *symbol, float *f)
@@ -1358,7 +1385,6 @@ int Resource::_RegressionTest(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
   Resource test;
-
 
   printf("[Resource class test]\n");
 

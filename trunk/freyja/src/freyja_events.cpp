@@ -21,6 +21,12 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#define FREYJA_APP_PLUGINS
+
+#ifdef FREYJA_APP_PLUGINS
+#   include <dlfcn.h>
+#endif
+
 #include <mgtk/mgtk_events.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
@@ -59,6 +65,104 @@ void setColor(vec4_t dest, vec4_t color)
 	dest[1] = color[1];	
 	dest[2] = color[2];	
 	dest[3] = color[3];
+}
+
+
+extern FreyjaModel *gFreyjaModel;
+void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
+{
+	if (bpp == 24)
+		gFreyjaModel->loadTextureBuffer(image, w, h, 24, Texture::RGB);
+	else if (bpp == 32)
+		gFreyjaModel->loadTextureBuffer(image, w, h, 32, Texture::RGBA);
+}
+
+
+void freyja_plugin_generic(const char *symbol, void *something)
+{
+	// 1. look for symbol in the 'hack bind list'
+	// 2. return what you found via the void pointer
+
+	if (strncmp(symbol, "freyja_load_texture_buffer", 25) == 0)
+	{
+		something = (void *)freyja_load_texture_buffer;
+	}
+
+	something = 0x0;
+}
+
+
+void freyja_init_application_plugins(const char *dir)
+{
+#ifdef FREYJA_APP_PLUGINS
+	FreyjaFileReader reader;
+	void (*init)(void (*func)(const char*, void*));
+	bool done = false;
+	char *module_filename;
+	void *handle;
+	char *error;
+
+
+	freyja_print("![Freyja application plugin system invoked]");
+
+	if (!reader.openDirectory(dir))
+	{
+		freyja_print("!Couldn't access application plugin directory.");
+		return;
+	}
+
+	while (!done && (module_filename = reader.getNextDirectoryListing()))
+	{
+		if (reader.isDirectory(module_filename))
+			continue;
+
+		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+		{
+			freyja_print("!In module '%s'.", module_filename);
+
+			if ((error = dlerror()) != NULL)
+			{
+				freyja_print("!%s", error);
+			}
+
+			continue; /* Try the next plugin, even after a bad module load */
+		}
+		else
+		{
+			freyja_print("!Module '%s' opened.", module_filename);
+
+			// FIXME: use so name instead of 'perlinnoise' later
+			init = (void (*)(void (*)(const char*, void*)))dlsym(handle, "freyja_perlinnoise_init");
+
+			if ((error = dlerror()) != NULL)  
+			{
+				freyja_print("!%s", error);
+				dlclose(handle);
+				continue;
+			}
+
+			/* Call plugin's init function */
+	      	(*init)(freyja_plugin_generic);
+
+			if ((error = dlerror()) != NULL) 
+			{
+				freyja_print("!%s", error);
+				dlclose(handle);
+				continue;
+			}
+
+			// Keep plugins in memory... now open next
+			//dlclose(handle);
+		}
+	}
+
+	reader.closeDirectory();
+
+	freyja_print("![Freyja application plugin loader sleeps now]\n");
+
+#else
+	freyja_print("FreyjaAppPlugin: This build was compiled w/o plugin support");
+#endif
 }
 
 
@@ -117,28 +221,6 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 	/* Color event listener */
 	if (FreyjaEvent::listen(id - 10000 /*ePluginEventBase*/, color, 4))
 		return; // true;
-
-	/* Plugin testing -- waiting on color events */
-	extern vec4_t gColorPerlinAdd;
-	extern vec4_t gColorPerlinMult;
-
-	switch (id)
-	{
-	case eColorPerlinMult:
-		setColor(gColorPerlinMult, color);
-		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
-		mgtk_event_gl_refresh();
-		return;
-		break;
-
-	case eColorPerlinAdd:
-		setColor(gColorPerlinAdd, color);
-		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
-		mgtk_event_gl_refresh();
-		return;
-		break;
-	}
-
 
 	switch (id)
 	{
@@ -305,6 +387,12 @@ void mgtk_handle_resource_init(Resource &r)
 	FreyjaRenderEventsAttach();
 	FreyjaModelEventsAttach();
 
+	/* Load and init plugins */
+	char *dir = freyja_rc_map("plugins");	
+	freyja_init_application_plugins(dir);
+	delete [] dir;
+
+	/* Hook plugins to resource */
 	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
 
 	for (i = 0; i < n; ++i)
@@ -479,8 +567,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorBackground", eColorBackground);
 	r.RegisterInt("eColorGrid", eColorGrid);
 	r.RegisterInt("eColorMesh", eColorMesh);
-	r.RegisterInt("eColorPerlinAdd", eColorPerlinAdd);
-	r.RegisterInt("eColorPerlinMult", eColorPerlinMult);
 	r.RegisterInt("eColorVertex", eColorVertex);
 	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
 	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
@@ -559,8 +645,20 @@ void mgtk_handle_resource_start()
 
 	gFreyjaControl = new FreyjaControl(&gResource);
 
+	// This is done when FreyjaControl is allocated now
 	/* Build the user interface from lisp, and load user preferences */
-	gFreyjaControl->loadResource();
+	//gFreyjaControl->loadResource();
+
+	/* FreyjaAppPlugin prototype testing... */
+	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
+
+	for (i = 0; i < n; ++i)
+	{
+		if (FreyjaAppPluginTest::mPlugins[i] != 0x0)
+		{
+			FreyjaAppPluginTest::mPlugins[i]->mGUIAttach();
+		}
+	}
 
 	/* Setup material interface */
 	freyja_refresh_material_interface();
@@ -571,17 +669,6 @@ void mgtk_handle_resource_start()
 	freyja_event2i(EVENT_MISC, FREYJA_MODE_MODEL_EDIT);
 	gFreyjaControl->event(eTransformMesh);
 	gFreyjaControl->event(eMoveObject);
-
-	/* App pluging prototype testing... */
-	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
-
-	for (i = 0; i < n; ++i)
-	{
-		if (FreyjaAppPluginTest::mPlugins[i] != 0x0)
-		{
-			FreyjaAppPluginTest::mPlugins[i]->mGUIAttach();
-		}
-	}
 
 	freyja_set_main_window_title(BUILD_NAME);
 	mgtk_event_gl_refresh();
