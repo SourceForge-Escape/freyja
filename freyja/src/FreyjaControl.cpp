@@ -25,6 +25,7 @@
 #include <math.h> 
 #include <stdarg.h> 
 #include <string.h>
+#include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaPluginABI.h>
@@ -265,7 +266,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 	vec_t x, y, z;
 
 
-	if (FreyjaEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
 
 	switch (event)
@@ -414,7 +415,7 @@ bool FreyjaControl::event(int event, vec_t value)
 	vec_t x, y, z;
 
 
-	if (FreyjaEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
 
 	switch (event)
@@ -572,7 +573,7 @@ bool FreyjaControl::event(int command)
 	unsigned int i, flags;
 
 
-	if (FreyjaEvent::listen(command - 10000 /*ePluginEventBase*/))
+	if (ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
 		return true;
 
 	switch (command)

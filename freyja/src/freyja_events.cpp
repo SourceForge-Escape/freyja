@@ -28,13 +28,13 @@
 #endif
 
 #include <mgtk/mgtk_events.h>
+#include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
-#include "FreyjaEvent.h"
 #include "freyja_events.h"
 
 
@@ -44,7 +44,6 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 Resource gResource;
 FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
-Vector<FreyjaAppPluginTest*> FreyjaAppPluginTest::mPlugins;
 
 
 int freyja_get_event_id_by_name(char *symbol)
@@ -116,6 +115,8 @@ void freyja_init_application_plugins(const char *dir)
 		if (reader.isDirectory(module_filename))
 			continue;
 
+		// FIXME: Add check here for SO check
+
 		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
 		{
 			freyja_print("!In module '%s'.", module_filename);
@@ -150,6 +151,8 @@ void freyja_init_application_plugins(const char *dir)
 				dlclose(handle);
 				continue;
 			}
+
+			freyja_print("!Module '%s' linked.", module_filename);
 
 			// Keep plugins in memory... now open next
 			//dlclose(handle);
@@ -219,7 +222,7 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 
 
 	/* Color event listener */
-	if (FreyjaEvent::listen(id - 10000 /*ePluginEventBase*/, color, 4))
+	if (ResourceEvent::listen(id - 10000 /*ePluginEventBase*/, color, 4))
 		return; // true;
 
 	switch (id)
@@ -364,7 +367,7 @@ void eVertexExtrude()
 	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
 }
 
-void eNoImplementation(FreyjaEvent *e)
+void eNoImplementation(ResourceEvent *e)
 {
 	freyja_print("!'%s' : No longer implemented or disabled.",
 				(e && e->getName()) ? e->getName() : "Unknown event");
@@ -377,31 +380,16 @@ void mgtk_handle_resource_init(Resource &r)
 	// New freyja events
 	////////////////////////////////////////////////////////////////////
 
-	FreyjaEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
-	FreyjaEventCallback2::add("eAnimationStop", &eNoImplementation);
-	FreyjaEventCallback2::add("eAnimationPlay", &eNoImplementation);
-	FreyjaEventCallback2::add("eUndo", &eNoImplementation);
-	FreyjaEventCallback2::add("eRedo", &eNoImplementation);
-	FreyjaEventCallback2::add("eSkeletalDeform", &eNoImplementation);
+	ResourceEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
+	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
+	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
+	ResourceEventCallback2::add("eUndo", &eNoImplementation);
+	ResourceEventCallback2::add("eRedo", &eNoImplementation);
+	ResourceEventCallback2::add("eSkeletalDeform", &eNoImplementation);
 
 	FreyjaRenderEventsAttach();
 	FreyjaModelEventsAttach();
 
-	/* Load and init plugins */
-	char *dir = freyja_rc_map("plugins");	
-	freyja_init_application_plugins(dir);
-	delete [] dir;
-
-	/* Hook plugins to resource */
-	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
-
-	for (i = 0; i < n; ++i)
-	{
-		if (FreyjaAppPluginTest::mPlugins[i] != 0x0)
-		{
-			FreyjaAppPluginTest::mPlugins[i]->mEventsAttach();
-		}
-	}
 
 	////////////////////////////////////////////////////////////////////
 	// Old style events
@@ -619,6 +607,25 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
 	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
+
+
+	//r.RegisterSymbol();
+
+	/* Load and init plugins */
+	char *dir = freyja_rc_map("plugins");	
+	freyja_init_application_plugins(dir);
+	delete [] dir;
+
+	/* Hook plugins to resource */
+	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
+
+	for (i = 0; i < n; ++i)
+	{
+		if (ResourceAppPluginTest::mPlugins[i] != 0x0)
+		{
+			ResourceAppPluginTest::mPlugins[i]->mEventsAttach();
+		}
+	}
 }
 
 
@@ -650,13 +657,13 @@ void mgtk_handle_resource_start()
 	//gFreyjaControl->loadResource();
 
 	/* FreyjaAppPlugin prototype testing... */
-	uint32 i, n = FreyjaAppPluginTest::mPlugins.size();
+	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
 
 	for (i = 0; i < n; ++i)
 	{
-		if (FreyjaAppPluginTest::mPlugins[i] != 0x0)
+		if (ResourceAppPluginTest::mPlugins[i] != 0x0)
 		{
-			FreyjaAppPluginTest::mPlugins[i]->mGUIAttach();
+			ResourceAppPluginTest::mPlugins[i]->mGUIAttach();
 		}
 	}
 
@@ -1380,7 +1387,7 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 int main(int argc, char *argv[])
 {
 	/* Hookup resource to event system */
-	FreyjaEvent::setResource(&gResource);
+	ResourceEvent::setResource(&gResource);
 
 	mgtk_init(argc, argv);
 

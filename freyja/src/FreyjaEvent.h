@@ -3,15 +3,15 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaEvent
  * License : No use w/o permission (C) 2004 Mongoose
  * Comments: This is the plugin event class
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- Test Defines -----------------------------------------------
  *           
@@ -420,6 +420,23 @@ public:
 private:
 
 	void (*mHandler)(vec_t*, unsigned long);       /* Function pointer callback */
+};
+
+
+class FreyjaAppPluginTest
+{
+public:
+	FreyjaAppPluginTest(void (*rc_func)(), void (*gui_func)()) 
+	{
+		mEventsAttach = rc_func;
+		mGUIAttach = gui_func;
+
+		mPlugins.pushBack(this);
+	}
+
+	static Vector<FreyjaAppPluginTest*> mPlugins;
+	void (*mEventsAttach)();
+	void (*mGUIAttach)();
 };
 
 #endif

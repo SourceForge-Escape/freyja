@@ -25,9 +25,11 @@
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/PerlinNoise.h>
 #include <freyja/FreyjaImage.h>
+#include <freyja/FreyjaPluginABI.h>
+#include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
 
-#include "freyja_events.h"
+//#include "freyja_events.h"
 
 
 extern "C" {
@@ -49,18 +51,16 @@ void PerlinNoiseEventsAttach();
 void PerlinNoiseGUIAttach();
 
 /* This hooks up the plugin to the appliciation */
-FreyjaAppPluginTest PerlinNoiseAppPlugin(PerlinNoiseEventsAttach,
-										 PerlinNoiseGUIAttach);
+//ResourceAppPluginTest PerlinNoisePlugin(PerlinNoiseEventsAttach,
+//										PerlinNoiseGUIAttach);
 
 void *perlinnoise_captured1 = 0x0;
 
 void freyja_perlinnoise_init(void (*func)(const char*, void*))
 {
-	//void freyja_plugin_generic(const char *symbol, void *something);
-
-	func("freyja_load_texture_buffer", perlinnoise_captured1);
-
-	// FIXME: Once this code is runtime loaded, move hook up here as allocation, and clean up the new ad-hoc API	
+	ResourceAppPluginTest *plugin;
+	plugin = new ResourceAppPluginTest(PerlinNoiseEventsAttach,
+										PerlinNoiseGUIAttach);	
 }
 
 
@@ -112,8 +112,19 @@ void ePerlinNoiseGen()
 				(byte)(128 * gColorPerlinAdd[2]);
 	}
 
-	PerlinNoiseAppPlugin.loadTextureBuffer(rgb, w, h, 24);
-	//freyjaTextureStoreBuffer(rgb, 3, w, h, RGB_24);
+#ifdef BUILT_INTO_APPLICATION
+	freyja_load_texture_buffer(rgb, w, h, 24);
+#else
+	unsigned int tid = freyjaTextureStoreBuffer(rgb, 3, w, h, RGB_24);
+	unsigned long id = Resource::mInstance->getIntByName("eTextureUpload");
+
+	mgtk_print("!Uploading texture %i, using function %i...", tid, id);
+
+	if (ResourceEvent::listen(id - 10000, tid))
+		mgtk_print("!success");
+
+	freyjaTextureDelete(tid);
+#endif
 
 	mgtk_event_gl_refresh();
 }
@@ -193,26 +204,26 @@ void eColorPerlinAdd(float *c, unsigned long count)
 
 void PerlinNoiseEventsAttach()
 {
-	FreyjaEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
+	ResourceEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
 
 	// FIXME: Add limits and a GUI generator wrapper for this
 	//        the GUI generator wrapper will have to wait until 
 	//        interface is done to call itself back to generate
 	// FIXME: Also find a way to make these data members of the other event
 	//        if possible ( remember callbacks might need functions )
-	FreyjaEventCallback::add("eDialogPerlinNoise", &eDialogPerlinNoise);
+	ResourceEventCallback::add("eDialogPerlinNoise", &eDialogPerlinNoise);
 
-	FreyjaEventCallbackUInt::add("ePerlinNoiseSeed", &ePerlinNoiseSeed);
-	FreyjaEventCallbackUInt::add("ePerlinNoiseW", &ePerlinNoiseW);
-	FreyjaEventCallbackUInt::add("ePerlinNoiseH", &ePerlinNoiseH);
-	FreyjaEventCallbackUInt::add("ePerlinNoiseClamp", &ePerlinNoiseClamp);
+	ResourceEventCallbackUInt::add("ePerlinNoiseSeed", &ePerlinNoiseSeed);
+	ResourceEventCallbackUInt::add("ePerlinNoiseW", &ePerlinNoiseW);
+	ResourceEventCallbackUInt::add("ePerlinNoiseH", &ePerlinNoiseH);
+	ResourceEventCallbackUInt::add("ePerlinNoiseClamp", &ePerlinNoiseClamp);
 
-	FreyjaEventCallbackVec::add("ePerlinNoiseIA", &ePerlinNoiseIA);
-	FreyjaEventCallbackVec::add("ePerlinNoiseIB", &ePerlinNoiseIB);
-	FreyjaEventCallbackVec::add("ePerlinNoiseD", &ePerlinNoiseD);
+	ResourceEventCallbackVec::add("ePerlinNoiseIA", &ePerlinNoiseIA);
+	ResourceEventCallbackVec::add("ePerlinNoiseIB", &ePerlinNoiseIB);
+	ResourceEventCallbackVec::add("ePerlinNoiseD", &ePerlinNoiseD);
 
-	FreyjaEventCallbackVecArray::add("eColorPerlinMult", &eColorPerlinMult);
-	FreyjaEventCallbackVecArray::add("eColorPerlinAdd", &eColorPerlinAdd);
+	ResourceEventCallbackVecArray::add("eColorPerlinMult", &eColorPerlinMult);
+	ResourceEventCallbackVecArray::add("eColorPerlinAdd", &eColorPerlinAdd);
 }
 
 
@@ -220,10 +231,11 @@ void PerlinNoiseGUIAttach()
 {
 	char *filename;
 	char *basename = "plugins/perlinnoise.mlisp";
-	int id;
+	int id, menuId;
 
 	id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
-	mgtk_append_item_to_menu(ePluginMenu, "PerlinNoise", id);
+	menuId = Resource::mInstance->getIntByName("ePluginMenu"); // ePluginMenu;
+	mgtk_append_item_to_menu(menuId, "PerlinNoise", id);
 
 	filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);

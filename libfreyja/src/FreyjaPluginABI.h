@@ -1199,6 +1199,12 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaTextureDelete(int32 textureIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	int32 freyjaTextureFilename1s(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
