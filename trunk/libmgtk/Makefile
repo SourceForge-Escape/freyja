@@ -13,7 +13,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=1
 MICRO_VERSION=0
 PRE=
-BUILD_ID=20041031
+BUILD_ID=20050724
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(PRE)
 EXT=.so
 TREE_DIR=libmgtk
@@ -301,9 +301,9 @@ uninstall:
 
 tarball:
 	@-echo "Making tarball                                  " 
-	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz $(TREE_DIR) \
-		--exclude bin --exclude CVS --exclude *~ --exclude contrib \
-		--exclude .svn --totals
+	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz \
+		--exclude=bin --exclude=CVS --exclude=*~ --exclude=contrib \
+		--exclude=.svn --totals $(TREE_DIR)
 	@-echo "[done]"
 
 backup:
