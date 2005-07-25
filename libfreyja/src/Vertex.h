@@ -35,13 +35,13 @@
 #include "FileWriter.h"
 
 
-namespace freyja {
-
 void freyjaVertexListTransform(Vector<index_t> &list,
 							   freyja_transform_action_t action, 
 							   vec_t x, vec_t y, vec_t z);
 
 void freyjaPolygonVertexDeleteHandler(Vector<index_t> polygons, index_t vertex);
+
+namespace freyja {
 
 
 class Weight
@@ -54,7 +54,7 @@ public:
 		mWeight = weight;
 	}
 
-	~Weight();
+	~Weight() {}
 
 	vec_t mWeight;             /* Weight for vertex use */
 
@@ -195,6 +195,8 @@ class Vertex
 	Vector<index_t> polygonRef;    /* UIDs of polygons referencing vertex */
 
 
+	static Vector<Vertex *> mGobalPool; /* Storage for gobal access */
+
  private:
 
 	////////////////////////////////////////////////////////////
@@ -206,7 +208,6 @@ class Vertex
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-
 	index_t mUID;                       /* Unique identifier, key for pool */
 
 	index_t mOldUID;                    /* UID when this was saved to disk */
@@ -214,10 +215,6 @@ class Vertex
 	static uint32 mType;                /* Type of file chunk */
 
 	static uint32 mVersion;             /* File chunk version */
-
-	static Vector<Vertex *> mGobalPool; /* Storage for gobal access */
-
-	static Vector<index_t> mFreePool;   /* Tracks unused gobal pool slots */
 };
 
 }

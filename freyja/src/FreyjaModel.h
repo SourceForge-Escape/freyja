@@ -34,13 +34,12 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 #define GUARD__FREYJA_MONGOOSE_FREYJAMODEL_H
 
-#include <freyja/FreyjaPluginABI.h>
-#include <freyja/FreyjaPrinter.h>
+#include <freyja-0.10/freyja.h>
+#include <freyja-0.10/Printer.h>
 #include <hel/Vector3d.h>
 #include <mstl/Vector.h>
 
 #include "Texture.h"
-#include "BezierPatch.h"
 #include "freyja_events.h"
 
 
@@ -52,6 +51,24 @@ typedef enum {
 	PLANE_ZY = 1, 
 	PLANE_XZ = 2
 } freyja_plane_t;
+
+
+void FreyjaModelEventsAttach();
+
+class FreyjaModelPrinter : public freyja::Printer
+{
+public:
+
+	virtual void errorArgs(char *format, va_list *args)
+	{
+		freyja_print_args(format, args);
+	}
+
+	virtual void messageArgs(char *format, va_list *args)
+	{
+		freyja_print_args(format, args);
+	}
+};
 
 
 class FreyjaModel
@@ -72,28 +89,12 @@ public:
 		FL_LOAD_MAP      = 2,    /* Toggle map loading in TR paks */
 		FL_QUAKE_PAL     = 4,    /* Toggle quake/hexen2 palette in mdl loads */
 		FL_VERTEX_UV     = 8,    /* Toggle polymapping of texcoords */
-		fDontUpdateBoneName = 16,
-		fDeformBoneVertices = 32,
-		fLoadTextureInSlot = 64
+		fDontUpdateBoneName  = 16,
+		fDeformBoneVertices  = 32,
+		fLoadTextureInSlot   = 64,
+		fLoadMaterialInSlot  = 128
+
 	} option_flag_t;
-
-
-	class FreyjaModelPrinter : public FreyjaPrinter
-	{
-	public:
-
-		virtual void errorArgs(char *format, va_list *args)
-		{
-			freyja_print_args(format, args);
-		}
-
-
-		virtual void messageArgs(char *format, va_list *args)
-		{
-			freyja_print_args(format, args);
-		}
-	};
-
 
 
 	////////////////////////////////////////////////////////////
@@ -191,7 +192,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getFlags();
+	static unsigned int getFlags();
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : Returns control flags for model
@@ -443,7 +444,7 @@ public:
 						  unsigned int width, 
 						  unsigned int height, 
 						  unsigned int bpp, 
-						  Texture::ColorMode type);
+						  freyjarender::Texture::ColorMode type);
 
 	int loadModel(const char *filename);
 	/*------------------------------------------------------
@@ -460,10 +461,6 @@ public:
 
 	void moveObject(transform_t type, Vector3d xyz);
 
-	void movePatchControlPoint(Vector3d xyz);
-
-	bool pasteSelectedPatch();
-
 	bool pasteSelectedMesh();
 
 	bool pasteVertexBuffer();
@@ -471,8 +468,6 @@ public:
 	int saveMaterial(const char *filename);
 
 	void selectObject(transform_t type, Vector3d xyz);
-
-	void selectPatchControlPoint(Vector3d xyz);
 
 	void setBoneRotation(float pitch, float yaw, float roll);
 	/*------------------------------------------------------
@@ -576,7 +571,7 @@ public:
 
 	void setDebug(unsigned int n);
 
-	void setFlags(option_flag_t flag, int op);
+	static void setFlags(option_flag_t flag, int op);
 	/*------------------------------------------------------
 	 * Pre  : The flag and operator are valid
 	 * Post : Sets control flags for model
@@ -603,6 +598,8 @@ public:
 	 ------------------------------------------------------*/
 
 	void setSceneTranslation(vec_t x, vec_t y, vec_t z);
+
+	static bool toggleFlag(option_flag_t flag);
 
 	void transform(int mode, freyja_transform_action_t action, 
 				   float x, float y, float z);
@@ -647,9 +644,6 @@ public:
 	/// FIXME: These should use an event mapping and/or selection system
 	/////////////////////////////////////////////////////////////////////////
 
-	void movePatchControlPoint(float xx, float yy);
-	void selectPatchControlPoint(float xx, float yy);
-
 	void VertexNew(float xx, float yy);
 	void VertexMove(float xx, float yy);
 	void VertexSelect(float xx, float yy);
@@ -685,8 +679,6 @@ public:
 
 	Vector<int32> mUVMap;               /* 'Texture polygon' grouping */
 
-	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
-
 
 	// FIXME: Temp here to let this work during rewrite so it could be uploaded to public svn to fix revision corruption in public svn
 	void initTexture()
@@ -694,14 +686,14 @@ public:
 		unsigned char rgba[4] = {255, 255, 255, 255};
 		mTexture.reset();
 		mTexture.setMaxTextureCount(64);
-		mTexture.setFlag(Texture::fUseMipmaps);
+		mTexture.setFlag(freyjarender::Texture::fUseMipmaps);
 		mTexture.loadColorTexture(rgba, 32, 32);
 		mTextureId = 1;
 	}
 
 	int32 mTextureId;
 
-	Texture mTexture;
+	freyjarender::Texture mTexture;
 
 private:
 
@@ -766,7 +758,7 @@ private:
 
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 
-	unsigned int mFlags;            /* Stores option flags as bitmap */
+	static unsigned int mFlags;            /* Stores option flags as bitmap */
 
 	bbox2_t mSelectBBox;            /* 3d selection box using 2 vertices */
 

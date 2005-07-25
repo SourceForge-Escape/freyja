@@ -168,8 +168,6 @@ private:
 	static uint32 mVersion;             /* File chunk version */
 
 	static Vector<Light *> mGobalPool;  /* Storage for gobal access */
-
-	static Vector<index_t> mFreePool;   /* Tracks unused gobal pool slots */ 
 };
 
 }

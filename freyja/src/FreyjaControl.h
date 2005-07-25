@@ -40,7 +40,6 @@
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
-#include "FreyjaEvent.h"
 #include "freyja_events.h"
 #include "Texture.h"
 
@@ -145,7 +144,7 @@ class FreyjaControl
 
 	int32 loadTextureBuffer(unsigned char *image, 
 							uint32 width, uint32 height, uint32 bpp,
-							Texture::ColorMode type);
+							freyjarender::Texture::ColorMode type);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -293,7 +292,11 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	Vector3d getPickRay(float mouseX, float mouseY, vec3_t xyz);
+	void testPickRay(vec_t x, vec_t y);
+
+	void getPickRay(vec_t mouseX, vec_t mouseY, 
+								double *rayOrigin, double *rayVector);
+
 	void getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz);
 
 	void getScreenToWorldOBSOLETE(float *x, float *y);
@@ -433,8 +436,6 @@ private:
 	 ------------------------------------------------------*/
 
 	void getFreeWorldFromScreen(int x, int y, vec3_t p);
-
-	Vector<FreyjaEvent *> mEvents;          /* Command pattern event system */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 

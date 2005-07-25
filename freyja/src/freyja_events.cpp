@@ -22,8 +22,10 @@
  ==========================================================================*/
 
 #include <mgtk/mgtk_events.h>
-#include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaImage.h>
+#include <freyja-0.10/freyja.h>
+#include <freyja-0.10/MaterialABI.h>
+#include <freyja-0.10/Plugin.h>
+#include <freyja-0.10/Image.h>
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
@@ -310,19 +312,14 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshTexcoordSpherical",eMeshTexcoordSpherical);
 	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
 	r.RegisterInt("eMeshTesselate", eMeshTesselate);
-	//r.RegisterInt("eMeshRotate", eMeshRotate);
-	//r.RegisterInt("eMeshScale", eMeshScale);
+
 
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
 
-	r.RegisterInt("ePointJoint", ePointJoint);
-	r.RegisterInt("eSphereJoint", eSphereJoint);
-	r.RegisterInt("eAxisJoint", eAxisJoint);
-	r.RegisterInt("eLineBone", eLineBone);
-	r.RegisterInt("ePolyMeshBone", ePolyMeshBone);
+
 	r.RegisterInt("eRenderBbox", eRenderBbox);
 
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
@@ -804,7 +801,7 @@ void freyja_event_file_dialog(char *s)
 
 		for (i = 0; i < count; ++i)
 		{
-			FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(i);
+			FreyjaPluginDesc *plugin = 0x0; //freyjaGetPluginClassByIndex(i);
 			
 			if (plugin && plugin->mImportFlags)
 				//mgtk_add_menu_item(plugin->mDescription, 9001+i);

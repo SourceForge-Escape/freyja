@@ -47,6 +47,35 @@ Quaternion::Quaternion(vec_t w, vec_t x, vec_t y, vec_t z)
 }
 
 
+Quaternion::Quaternion(vec_t pitch, vec_t heading, vec_t roll)
+{
+	vec_t cr, cp, cy, sr, sp, sy, cpcy, spsy;
+
+	/* Want to use half of the values in equations from here on */
+	roll *= 0.5;
+	pitch *= 0.5;
+	yaw *= 0.5;
+
+	cr = cos(roll);
+	cp = cos(pitch);
+	cy = cos(heading);
+
+	sr = sin(roll);
+	sp = sin(pitch);
+	sy = sin(heading);
+
+	cpcy = cp * cy;
+	spsy = sp * sy;
+
+	mW = cr * cpcy + sr * spsy;
+	mX = sr * cpcy - cr *spsy;
+	mY = cr * sp * cy + sr * cp * sy;
+	mZ = cr * cp * sy - sr * sp * cy;
+
+	normalize();
+}
+
+
 Quaternion::Quaternion(vec_t roll, vec_t pitch, vec_t yaw)
 {
 	vec_t cr, cp, cy, sr, sp, sy, cpcy, spsy;

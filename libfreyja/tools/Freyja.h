@@ -30,14 +30,12 @@
 #ifndef GUARD__LIBFREYJA_MONGOOSE_FREYJAUTIL_H_
 #define GUARD__LIBFREYJA_MONGOOSE_FREYJAUTIL_H_
 
-#include <freyja/FreyjaPrinter.h>
-#include <freyja/FreyjaPlugin.h>
-#include <freyja/Freyja.h>
-#include <freyja/EggPlugin.h>
-#include <freyja/Egg.h>
+#include <freyja/Printer.h>
+#include <freyja/Plugin.h>
+#include <freyja/freyja.h>
 
 
-class FreyjaUtilPrinter : public FreyjaPrinter
+class FreyjaUtilPrinter : public Printer
 {
  public:
 
@@ -131,15 +129,6 @@ class FreyjaUtil
 	////////////////////////////////////////////////////////////
 
 	FreyjaUtilPrinter mPrinter;
-
-
-	FreyjaScene *mScene;         /* The data model */
-	
-	FreyjaPlugin *mPlugin;       /* Standard interface to data model */
-
-	/* Old school backend testing */
-	Egg *mEgg;
-	EggPlugin *mEggPlugin;
 };
 
 #endif

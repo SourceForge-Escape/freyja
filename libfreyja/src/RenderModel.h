@@ -104,20 +104,51 @@ private:
 };
 
 
-
-class RenderPolygon  
+typedef struct 
 {
-public:
-	/* I've limited the renderer to 6-side polygons recently, so deal */
-	Vector3d vertices[6];
-	Vector3d texcoords[6];
-	Vector3d normals[6];
-	vec4_t colors[6];
-	long material;
-	long id;
-	unsigned int count; // vertex count
+	vec3_t vertices[4];
+	vec3_t texcoords[4];
+	vec3_t normals[4];
+	vec4_t colors[4];
+	index_t material;
+
+} freyja_quad_t;
+
+
+typedef struct 
+{
+	vec3_t vertices[3];
+	vec3_t texcoords[3];
+	vec3_t normals[3];
+	vec4_t colors[3];
+	index_t material;
+
+} freyja_triangle_t;
+
+
+class RenderStrip
+{
+	vec3_t *vertices;
+	uint32 count;
+
+	vec3_t *texcoords;
+	vec3_t *normals;
+	vec4_t *colors;
+	index_t material;
 };
 
+class RenderPolygon
+{ 
+public:
+       Vector3d vertices[6];
+        Vector3d texcoords[6];
+        Vector3d normals[6];
+        vec4_t colors[6];
+        long material;
+        long id;
+        unsigned int count; // vertex count
+
+};
 
 
 class RenderMesh

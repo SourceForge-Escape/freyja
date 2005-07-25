@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=10
 MICRO_VERSION=0
 BRANCH=
-BUILD_ID=20050713
+BUILD_ID=20050714
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -671,9 +671,9 @@ FreyjaUtil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
 	NAME=FreyjaUtil \
-	OBJS="$(BUILD_TEST_DIR)/FreyjaUtil.o" \
+	OBJS="$(BUILD_TEST_DIR)/Freyja.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
-	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja-0.10"
 
 python.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
@@ -784,8 +784,8 @@ install-link:
 
 install-headers:
 	@-echo -n "Installing headers                           "
-	@-mkdir -p $(INSTALL_INCLUDE)/$(BASE_NAME)
-	@-cp -f src/*.h $(INSTALL_INCLUDE)/$(BASE_NAME)
+	@-mkdir -p $(INSTALL_INCLUDE)/$(BASE_NAME)-$(MAJOR_VERSION).$(MINOR_VERSION)
+	@-cp -f src/*.h $(INSTALL_INCLUDE)/$(BASE_NAME)-$(MAJOR_VERSION).$(MINOR_VERSION)
 	@-echo "[done]"
 
 

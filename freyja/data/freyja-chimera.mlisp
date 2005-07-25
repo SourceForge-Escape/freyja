@@ -113,6 +113,7 @@
 			(menu_item "_Viewports"		eMode	eViewports)
 			(menu_seperator)
 			(menu_item "_Grid"			eMode	eRenderGrid)
+			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
 			(menu_item "_Camera"		eMode	eCamera)
 			(menu_item "P_atch"			eMode	eRenderPatch)
 			(submenu "_Mesh"
@@ -129,6 +130,7 @@
 				(menu_item "_Sphere"	eSphereJoint	"gtk-blanked")
 				(menu_item "_Axes"		eAxisJoint		"gtk-blanked"))
 			(submenu "_Bone"
+				(menu_item "_ZBuffer"	eRenderToggleBoneZClear	"gtk-blanked")
 				(menu_item "_Line"		eLineBone		"gtk-blanked")
 				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
@@ -166,7 +168,9 @@
 			(submenu "_Vertex"
 				(menu_item "_New"		eMode  eVertexNew)
 				(menu_item "_Delete"	eMode  eVertexDelete)
-				(menu_item "_Combine"	eMode  eVertexCombine))
+				(menu_item "_Combine"	eMode  eVertexCombine)
+				;;(menu_item "_Extrude"	eMode  eVertexExtrude)
+			)
 
 			(submenu "_Polygon"
 				(menu_item "_New"		eMode	ePolygonNew)
@@ -202,7 +206,7 @@
 				(menu_item "_Select"		eMode	eBoneSelect)
 				(menu_item "_Move"			eMode	eBoneMoveJoint)))
 
-		(submenu ePluginMenu "_Plugins")	
+		(submenu ePluginMenu "_Plugins...")
 
 		(menu_seperator)
 
@@ -340,7 +344,7 @@
 						(spinbutton 0 0 100 eBoneIterator))
 					(hbox 1 0 0 1 0
 						(label "Current Face #" 0.0 0.5) 
-						(spinbutton 0 0 100 ePolygonIterator))
+						(spinbutton 0 0 500 ePolygonIterator))
 
 					(hbox 1 0 0 1 0
 						(button "New"     eMode  eAddObject)
@@ -410,11 +414,13 @@
 								"Open texture file"	eMode	eOpenFileTexture)
 
 						(toolbar_button "gtk-save-as" "Save"
-								"Save document"		eMode  eSaveFile)))
+								"Save document"		eMode  eSaveFile))
+
+						(togglebutton "Slot Load" 0 eMode eTextureSlotLoadToggle))
+
 
 					 (hbox 1 0 0 1 0 
 							 (togglebutton "Merge" 0 eMode CMD_MISC_TEXEL_COMBINE)
-							 (togglebutton "Slot Load" 0 eMode eTextureSlotLoad)
 							 (button "Set Tex" eMode eSetMeshTexture))
 					 
 					 (hbox 1 0 0 1 0 
@@ -528,7 +534,9 @@
 							(toolbar_button "gtk-open" "Open"
 								"Open material"			eMode	eOpenFile)
 							(toolbar_button "gtk-save-as" "Save as..."
-								"Save material as..."	eMode	eSaveFile)))
+								"Save material as..."	eMode	eSaveFile))
+
+						(togglebutton "Slot Load" 0 eMode eMaterialSlotLoadToggle))
 
 					(hbox 1 1 0 1 1
 						(label "Current Material" 0.0 0.5)
@@ -730,6 +738,10 @@ Send bug reports and feature requests:
 			(icon "freyja.png" IconSize_Dialog))
 
 		(hbox 1 0 0 1 0
+			(label "Near Height "  0.0 0.5) 
+			(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
+
+		(hbox 1 0 0 1 0
 			(label "Polygon # of sides "  0.0 0.5) 
 			(spinbutton 0 3 6 ePolygonSize))
 
@@ -797,6 +809,7 @@ Send bug reports and feature requests:
 ;				(colorbutton 1 eColorMeshHighlight))))
 ;
 
+
 ;; Custom colors -- After widgets so widgets can be updated to match 
 (color	eColorBackground		0.5	0.5	0.5	1.0) 
 (color	eColorGrid				0.4	0.4	0.4	0.9)
@@ -804,4 +817,5 @@ Send bug reports and feature requests:
 (color	eColorMeshHighlight		0.2	0.2	1.0	1.0)
 (color	eColorVertex			0.2	1.0	1.0	1.0)
 (color	eColorVertexHighlight	1.0	1.0	0.0	1.0)
+
 

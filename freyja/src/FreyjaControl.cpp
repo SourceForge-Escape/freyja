@@ -3,15 +3,15 @@
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.wetga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaControl
  * License : No use w/o permission (C) 2000 Mongoose
  * Comments: This is the controler class for the client
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -25,18 +25,20 @@
 #include <math.h> 
 #include <stdarg.h> 
 #include <string.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <mgtk/ResourceEvent.h>
+#include <freyja-0.10/FileReader.h>
+#include <freyja-0.10/FileWriter.h>
+#include <freyja-0.10/PluginABI.h>
+#include <freyja-0.10/MaterialABI.h>
+#include <freyja-0.10/PluginABI.h>
+#include <freyja-0.10/MeshABI.h>
 #include <hel/math.h>
 
 #include "freyja_events.h"
 #include "FreyjaControl.h"
 
-/* using namespace freyja; */
+//using namespace freyja;
 
-void test_patch();
-unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
 void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 
@@ -131,10 +133,6 @@ FreyjaControl::~FreyjaControl()
 
 	if (mModel)
 		delete mModel;
-
-	/* Mongoose 2004.03.26, 
-	 * Entry for MaterialManager test pattern */
-	//MaterialManager::DestroyInstance();
 }
 
 
@@ -269,6 +267,9 @@ bool FreyjaControl::event(int event, unsigned int value)
 	vec_t x, y, z;
 
 
+	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+		return true;
+
 	switch (event)
 	{
 	case 503:
@@ -293,6 +294,20 @@ bool FreyjaControl::event(int event, unsigned int value)
 			freyja_event_set_range(event, value, 0, mModel->getAnimationFrameCount(mModel->getCurrentAnimation()));
 			mModel->setCurrentAnimationFrame(value);	
 			freyja_event_gl_refresh();
+		}
+		break;
+
+
+	case eSelectMaterial:
+		if (!freyja_event_set_range(event, value, 0, freyjaGetMaterialCount()-1))
+		{
+			if (value != freyjaGetCurrentMaterial())
+			{
+				freyjaCurrentMaterial(value);
+				freyja_print("Selected material[%i].", value);
+				freyja_refresh_material_interface();
+				freyja_event_gl_refresh();
+			}
 		}
 		break;
 
@@ -370,11 +385,11 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eSetMaterialTexture:
-		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
-		freyja_print("Material[%i].texture = %i",
-					 freyjaGetCurrentMaterial(), 
-					 freyjaGetMaterialTexture(freyjaGetCurrentMaterial()));
-		freyja_event_gl_refresh();
+		//freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
+		//freyja_print("Material[%i].texture = %i",
+		//			 freyjaGetCurrentMaterial(), 
+		//			 freyjaGetMaterialTexture(freyjaGetCurrentMaterial()));
+		//freyja_event_gl_refresh();
 		break;
 
 
@@ -400,6 +415,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	vec4_t color, pos;
 	vec_t x, y, z;
 
+
+	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+		return true;
 
 	switch (event)
 	{
@@ -555,10 +573,9 @@ bool FreyjaControl::event(int command)
 {
 	unsigned int i, flags;
 
-#ifdef TEST_FREYJA_EVENTS
-	if (FreyjaEvent::listen(command))
+
+	if (ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
 		return true;
-#endif
 
 	switch (command)
 	{
@@ -655,18 +672,9 @@ bool FreyjaControl::event(int command)
 		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 		break;
 
-#ifndef TEST_FREYJA_EVENTS
-	case eGenerateNormals:
-		freyjaGenerateVertexNormals();
-		break;
-#endif
-
-	case eSkeletalDeform:
-		freyja_print("eSkeletalDeform is currently not implemented in modeler");
-		break;
 
 	case ePolygonSplit:
-		freyjaPolygonSplit(mModel->getCurrentMesh(), mModel->getCurrentPolygon());
+		//freyjaPolygonSplit(mModel->getCurrentMesh(), mModel->getCurrentPolygon());
 		freyja_print("Splitting polygon[%i]", mModel->getCurrentPolygon());
 		break;
 
@@ -681,7 +689,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_Texture)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 		
 		freyja_print("OpenGL texturing is [%s]", 
 					 !(flags & fFreyjaMaterial_Texture) ? "ON" : "OFF");
@@ -694,7 +702,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_DetailTexture)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 
 		freyja_print("OpenGL detail texturing is [%s]", 
 					 !(flags & fFreyjaMaterial_DetailTexture) ? "ON" : "OFF");
@@ -707,7 +715,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_Normalize)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 
 		freyja_print("OpenGL normalization of normals is [%s]", 
 					 !(flags & fFreyjaMaterial_Normalize) ? "ON" : "OFF");
@@ -721,7 +729,7 @@ bool FreyjaControl::event(int command)
 		if (flags & fFreyjaMaterial_Blending)
 			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 		else
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 		
 		freyja_print("OpenGL blending [%s]", 
 					 !(flags & fFreyjaMaterial_Blending) ? "ON" : "OFF");
@@ -1003,8 +1011,8 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eDebugBackend:
-		mModel->setDebug(!mModel->getDebug());
-		freyja_print("Backend debug [%s]", mModel->getDebug() ? "ON" : "OFF");
+		//mModel->setDebug(!mModel->getDebug());
+		//freyja_print("Backend debug [%s]", mModel->getDebug() ? "ON" : "OFF");
 		break;
 
 
@@ -1035,7 +1043,7 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateConeMesh(v.mVec, mGenMeshHeight, mGenMeshCount);
+			//freyjaGenerateConeMesh(v.mVec, mGenMeshHeight, mGenMeshCount);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1047,8 +1055,8 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateCylinderMesh(v.mVec, mGenMeshHeight, 
-									   mGenMeshCount, mGenMeshSegements);
+			//freyjaGenerateCylinderMesh(v.mVec, mGenMeshHeight, 
+			//						   mGenMeshCount, mGenMeshSegements);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1060,8 +1068,8 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateTubeMesh(v.mVec, mGenMeshHeight, 
-								   mGenMeshCount, mGenMeshSegements);
+			//freyjaGenerateTubeMesh(v.mVec, mGenMeshHeight, 
+			//					   mGenMeshCount, mGenMeshSegements);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1073,8 +1081,8 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateSphereMesh(v.mVec, mGenMeshHeight, 
-									 mGenMeshCount, mGenMeshCount);
+			//freyjaGenerateSphereMesh(v.mVec, mGenMeshHeight, 
+			//						 mGenMeshCount, mGenMeshCount);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1086,7 +1094,7 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateQuadCubeMesh(v.mVec, mGenMeshHeight);
+			//freyjaGenerateQuadCubeMesh(v.mVec, mGenMeshHeight);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1098,7 +1106,7 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateQuadPlaneMesh(v.mVec, mGenMeshHeight);
+			//freyjaGenerateQuadPlaneMesh(v.mVec, mGenMeshHeight);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1110,31 +1118,13 @@ bool FreyjaControl::event(int command)
 
 			v.zero();
 			mCleared = false;
-			freyjaGenerateCircleMesh(v.mVec, mGenMeshCount);
+			//freyjaGenerateCircleMesh(v.mVec, mGenMeshCount);
 			freyja_event_gl_refresh();
 		}
 		break;
 
 
-	case ePointJoint:
-		FreyjaRender::mJointRenderType = 1;
-		break;
 
-	case eSphereJoint:
-		FreyjaRender::mJointRenderType = 2;
-		break;
-
-	case eAxisJoint:
-		FreyjaRender::mJointRenderType = 3;
-		break;
-
-	case eLineBone:
-		FreyjaRender::mBoneRenderType = 1;
-		break;
-
-	case ePolyMeshBone:
-		FreyjaRender::mBoneRenderType = 2;
-		break;
 
 
 	case eRenderBbox:
@@ -1145,6 +1135,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+#ifdef FIXME
 	case eMirrorUV_X:
 		freyjaModelMirrorTexCoord(0, mModel->getCurrentTexCoord(), mModel->mUVMap, true, false);
 		freyja_event_gl_refresh();
@@ -1154,6 +1145,7 @@ bool FreyjaControl::event(int command)
 		freyjaModelMirrorTexCoord(0, mModel->getCurrentTexCoord(), mModel->mUVMap, false, true);
 		freyja_event_gl_refresh();
 		break;
+#endif
 
 	case eTmpUVMapOn:
 		mModel->createPolyMappedUVMap(mModel->getCurrentPolygon());
@@ -1202,20 +1194,6 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-	case eTextureSlotLoad:
-		if (!mModel->getFlags() & FreyjaModel::fLoadTextureInSlot)
-		{
-			mModel->setFlags(FreyjaModel::fLoadTextureInSlot, 1);
-		}
-		else
-		{
-			mModel->setFlags(FreyjaModel::fLoadTextureInSlot, 0);
-		}	
-
-		freyja_print("Texture loading to current slot [%s]",
-					(mModel->getFlags() & FreyjaModel::fLoadTextureInSlot) ? "on" : "off");
-		break;
-
 	case eTransformSelectedVertices:
 		mTransformMode = FreyjaModel::TransformSelectedVertices;
 		break;
@@ -1254,7 +1232,7 @@ bool FreyjaControl::event(int command)
 
 	case eCopyAppendMode:
 		// ATM modeler only handles 1 model, so only call for 0th index
-		freyjaModelAppendMeshMode(0, !freyjaGetModelAppendMeshMode(0)); 
+		//freyjaModelAppendMeshMode(0, !freyjaGetModelAppendMeshMode(0)); 
 		break;
 
 	case eSplitObject:
@@ -1436,6 +1414,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eExtrude:
+/*
 		freyjaPolygonExtrudeQuad1f(mModel->getCurrentPolygon(), 8.0f);
 
 		if (freyjaGetPolygonVertexCount(mModel->getCurrentPolygon()))
@@ -1453,7 +1432,9 @@ bool FreyjaControl::event(int command)
 			}
 		}
 		freyja_event_gl_refresh();
+*/
 		break;
+
 
 		
 	/* MESHES */
@@ -1518,12 +1499,6 @@ bool FreyjaControl::event(int command)
 
 
 	/* ANIMATIONS */
-	case eAnimationPlay:
-		freyja_print("eAnimationPlay disabled / no longer implemented");
-		break;
-	case eAnimationStop:
-		freyja_print("eAnimationStop disabled / no longer implemented");
-		break;
 	case eAnimationNext:
 		mModel->setCurrentAnimation(mModel->getCurrentAnimation() + 1);
 		freyja_print("Animation[%i].", mModel->getCurrentAnimation());
@@ -1540,18 +1515,7 @@ bool FreyjaControl::event(int command)
 
 
 
-	case eSelectMaterial:
-		i = (int)freyja_event_get_float(eSelectMaterial);
 
-		if (i != freyjaGetCurrentMaterial())
-		{
-			freyjaCurrentMaterial(i);
-			freyja_event_set_float(eSelectMaterial,freyjaGetCurrentMaterial());
-			freyja_print("Selected material[%i].", i);
-			freyja_refresh_material_interface();
-			freyja_event_gl_refresh();
-		}
-		break;
 
 
 	case eZoom:
@@ -1635,31 +1599,6 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-
-	case eGeneratePatchMesh:
-		if (mModel->pasteSelectedPatch())
-			mCleared = false;
-		break;
-
-
-	case eRenderPatch:
-		if (FreyjaRender::mPatchDisplayList == -1)
-		{
-			test_patch();
-			FreyjaRender::mPatchDisplayList = 0;
-		}
-
-		FreyjaRender::mPatchDisplayList = !FreyjaRender::mPatchDisplayList;
-		
-		if (FreyjaRender::mPatchDisplayList)
-		{
-			test_patch(); // hack for update
-		}
-
-		freyja_print("Patch Rendering [%s], Use Vertex:Move to edit...", 
-					 (FreyjaRender::mPatchDisplayList) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
 
 	case FREYJA_MODE_RENDER_BONETAG:
 		mRender->toggleFlag(FreyjaRender::RENDER_BONES);
@@ -1820,6 +1759,9 @@ void FreyjaControl::handleFilename(const char *filename)
 		failed = mModel->loadMaterial(filename);
 		type = 0;
 		type2 = 1;
+
+		if (!failed)
+			freyja_refresh_material_interface();
 		break;
 
 	case FREYJA_MODE_SAVE_MATERIAL:
@@ -1888,7 +1830,10 @@ void FreyjaControl::handleFilename(const char *filename)
 
 	case FREYJA_MODE_SAVE_ANIMATION:
 		failed = 0;
-		mModel->saveAnimation(filename);
+
+		if (mModel->saveAnimation(filename) < 0)
+			failed = 1;
+
 		type = 3;
 		type2 = 0;
 		break;
@@ -2070,8 +2015,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 				getFreeWorldFromScreen(x, y, xyz.mVec);
 
-				if (FreyjaRender::mPatchDisplayList)
-					mModel->movePatchControlPoint(xyz);
+				//if (FreyjaRender::mPatchDisplayList)
+				//	mModel->movePatchControlPoint(xyz);
 
 				if (mTransformMode == FreyjaModel::TransformBone)
 					mModel->moveObject(FreyjaModel::TransformBone, xyz);
@@ -2199,8 +2144,8 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 				getFreeWorldFromScreen(x, y, pos);
 		
-				if (FreyjaRender::mPatchDisplayList)
-					mModel->selectPatchControlPoint(pos);
+				//if (FreyjaRender::mPatchDisplayList)
+				//	mModel->selectPatchControlPoint(pos);
 
 				mXYZMouseState = 1;
 			}
@@ -2302,76 +2247,55 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 }
 
 
-void FreyjaControl::getWorldFromScreen(vec_t x, vec_t y, vec3_t xyz)
+void FreyjaControl::testPickRay(vec_t x, vec_t y)
 {
-#ifdef FIXME
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
+	double rayOrigin[4];
+	double rayVector[4];
 
-
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
-
-	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
-	long windowHeight = mRender->getWindowHeight();
-	long windowWidth = mRender->getWindowWidth();
-	//	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
-	vec_t windowX = x - windowWidth / 2;
-	double normX = double(windowX) / double(windowWidth / 2);
-	vec_t windowY = (windowHeight - y) - windowHeight / 2;
-	double normY = double(windowY) / double(windowHeight / 2);
-	//float x = nearHeight * mRender->getAspectRatio() * normX;
-	//float y = nearHeight * normY;
-
-	printf("%f %f %f\n", xyz[0], xyz[1], xyz[2]);
-#endif
+	getPickRay(x, y, rayOrigin, rayVector);
 }
 
 
-Vector3d FreyjaControl::getPickRay(float mouseX, float mouseY, vec3_t xyz)
+void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, 
+								double *rayOrigin, double *rayVector)
 {
-	// FIXME: This does nothing atm
-#ifdef FIXME
-	vec_t nearHeight = 400; // fluff filler for now
-	vec_t zNear = 0.1;
+	/* This does not use viewport: quadrant checks, widths, and heights */
+	extern double gMatrix[16]; // This is actual cached render transform
+	double inverse[16];
+	double rayPnt[4] = {0.0f, 0.0f, 0.0f, 1.0f };
+	double rayVec[4];
+	vec_t winH = mRender->getWindowHeight();
+	vec_t winY = (winH - mouseY) - winH * 0.5f;
+	vec_t normY = winY / ( winH * 0.5f );
+	vec_t winX = mouseX - winH * 0.5f;
+	vec_t normX = winX / ( winH * 0.5f );
+	vec_t zNear = -400.0f; // mRender->getZNear();
+	vec_t nearH = mRender->getNearHeight();
+	vec_t aspect = mRender->getWindowAspectRatio();
 
+	// This is now ray in eye coordinates
+	rayVec[0] = nearH * normY;
+	rayVec[1] = nearH * aspect * normX;
+	rayVec[2] = -zNear;
+	rayVec[3] = 0.0f;
 
-	/* Pick ray vector using normalized ( -1 to 1 ) pos idea from OpenGL FAQ */
-	long windowHeight = mRender->getWindowHeight();
-	long windowWidth = mRender->getWindowWidth();
-	Matrix modelviewInverse = mRender->getModelViewMatrixInverse();
-	vec_t windowX = mouseX - windowWidth / 2;
-	double normX = double(windowX) / double(windowWidth / 2);
-	vec_t windowY = (windowHeight - mouseY) - windowHeight / 2;
-	double normY = double(windowY) / double(windowHeight / 2);
-	float x = nearHeight * (windowWidth/windowHeight) * normX;
-	float y = nearHeight * normY;
+	// Now transform by inverse of modelview matrix to object coordinates
+	matrixInvert16dv(gMatrix, inverse);
+	matrix4dvx16dv(inverse, rayVec, rayVector); // src, dest can be same
+	matrix4dvx16dv(inverse, rayPnt, rayOrigin); // src, dest can be same
 
-	// Pick vector is now <x, y, -zNear> in eye coords
-	
-	Vector3d v = Vector3d(x, y, -zNear);
-	return v;
-
-	//Point rayPointObjCoord = Point(0, 0, 0);
-	//Vector3d rayVectorObjCoord = Vector3d(x, y, -nearDistance);
-
-	//Vector3d vObjCoord = modelviewInverse * rayVectorObjCoord;
-	//Point pObjCoord = modelviewInverse * rayPointObjCoord;
-
-	//...
-#else
-	Vector3d v;
-	v.zero();
-	return v;
+#ifdef DEBUG_PICK_RAY
+	freyja_print("!%f, %f -> <%f %f %f> @ %f, %f, %f\n",
+				mouseX, mouseY,
+				rayVector[0], rayVector[1], rayVector[2],
+				rayOrigin[0], rayOrigin[1], rayOrigin[2]);
 #endif
 }
 
 
 void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 {
+	float nearHeight = mRender->getNearHeight() * 2.0f;
 	float width, height, invz, fs;
 	float scroll[3];
  
@@ -2388,7 +2312,7 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 #endif
 
 	invz = (1.0 / mRender->getZoom());
-	fs = (40.0 * invz) / height;  // fov 40?
+	fs = (nearHeight * invz) / height;  // fov 40?
 
 	*x = (*x - width / 2.0) * fs;
 	*y = -(*y - height / 2.0) * fs;
@@ -2450,11 +2374,11 @@ bool FreyjaControl::pasteSelectedObject()
 	switch (mTransformMode)
 	{
 	case FreyjaModel::TransformSelectedVertices:
-		return mModel->pasteSelectedMesh(); // vertexbuffercopy shares buf
+		//return mModel->pasteSelectedMesh(); // vertexbuffercopy shares buf
 		break;
 
 	case FreyjaModel::TransformMesh:
-		return mModel->pasteSelectedMesh();
+		//return mModel->pasteSelectedMesh();
 		break;
 
 	default:
@@ -2534,11 +2458,9 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 	/* Mongoose: Convert screen to world coordinate system */
 	getWorldFromScreen(&xx, &yy, &zz);
 
-	// test
-	vec3_t xyz;
-	getWorldFromScreen(x, y, xyz);
-	printf("%f %f %f | old\n", xx, yy, zz);
-
+	// testPickRay
+	testPickRay(x, y);
+	//freyja_print("!%f %f %f | old\n", xx, yy, zz);
 
 	switch (mTransformMode)
 	{
@@ -2547,11 +2469,10 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 		yy = y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
 
-		if (FreyjaRender::mPatchDisplayList > 0)
-			mModel->selectPatchControlPoint(xx, yy);
-		else
+		//if (FreyjaRender::mPatchDisplayList > 0)
+		//	mModel->selectPatchControlPoint(xx, yy);
+		//else
 			mModel->VertexSelect(xx, yy);
-		// mModel->selectVertex(plane, xx, yy, zz);
 		break;
 
 	case FreyjaModel::TransformMesh:
@@ -2559,7 +2480,7 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 		yy = y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		mModel->MeshSelect(xx, yy);
-		// mModel->selectMesh(plane, xx, yy, zz);
+
 		freyja_print("Selected Mesh[%i]", 
 					mModel->getCurrentMesh());
 		break;
@@ -2596,13 +2517,13 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 	switch (plane)
 	{
-	case PLANE_XY:
+	case PLANE_XY: // front
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0;
 		break;
 
-	case PLANE_XZ:
+	case PLANE_XZ: // top
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0;
 		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
@@ -2622,9 +2543,9 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		xx = x; 
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
-		if (FreyjaRender::mPatchDisplayList > 0)
-			mModel->movePatchControlPoint(xx, yy);
-		else
+		//if (FreyjaRender::mPatchDisplayList > 0)
+		//	mModel->movePatchControlPoint(xx, yy);
+		//else
 			mModel->VertexMove(xx, yy);
 		break;
 
@@ -2967,8 +2888,8 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		freyja_print("store state: %f, %f", xxx, yyy);
 		mModel->VertexSelect(xx, yy);
 		
-		if (FreyjaRender::mPatchDisplayList)
-			mModel->selectPatchControlPoint(xx, yy);
+		//if (FreyjaRender::mPatchDisplayList)
+		//	mModel->selectPatchControlPoint(xx, yy);
 
 		mXYZMouseState = 1;
 		//}
@@ -3086,9 +3007,16 @@ void FreyjaControl::loadResource()
 		mResource->Print();
 	}
 
-	if (mResource->Lookup("GRID_ON", &i) && i)
+	if (mResource->Lookup("GRID_ON", &i))
 	{
-		mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
+		if (i)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_EDIT_GRID);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_EDIT_GRID);
+		}
 	}
 
 	if (mResource->Lookup("FLUSH_RESOURCE", &i) && i)

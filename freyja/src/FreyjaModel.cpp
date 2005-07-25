@@ -26,22 +26,95 @@
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
-#include <freyja/FreyjaFileReader.h> 
+#include <freyja-0.10/freyja.h> 
+#include <freyja-0.10/FileReader.h> 
+#include <freyja-0.10/PluginABI.h> 
+#include <freyja-0.10/MeshABI.h> 
+#include <freyja-0.10/VertexABI.h>
+#include <freyja-0.10/MaterialABI.h> 
+#include <freyja-0.10/SkeletonABI.h> 
+#include <mgtk/ResourceEvent.h>
 
 #include "freyja_events.h"
 #include "Texture.h"
 #include "FreyjaModel.h"
 
-BezierPatch FreyjaModel::gTestPatch;
 
-extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
+using namespace freyja;
+
+unsigned int FreyjaModel::mFlags = 0;
+FreyjaModel *gFreyjaModel = 0x0;
+
+extern void freyja__setPrinter(freyja::Printer *printer, bool freyjaManaged);
+
+// FIXME: Add set/clear methods to replace old get/set flags crap
+
+
+void eTextureSlotLoadToggle()
+{
+	bool on = FreyjaModel::toggleFlag(FreyjaModel::fLoadTextureInSlot);
+
+	freyja_print("Texture loading into current slot [%s]",
+				on ? "on" : "off");
+}
+
+void eMaterialSlotLoadToggle()
+{
+	bool on = FreyjaModel::toggleFlag(FreyjaModel::fLoadMaterialInSlot);
+
+	freyja_print("Texture loading into current slot [%s]",
+				on ? "on" : "off");
+}
+
+void eTextureUpload(unsigned int id)
+{
+	byte *image;
+	uint32 w, h, bpp, type;
+
+	/* Texture image was stored as raw buffer */
+	freyjaGetTextureImage(id, &w, &h, &bpp, &type, &image);
+	freyja_print("!test");
+
+	if (image)
+	{
+		switch (type)
+		{
+		case RGBA_32:
+			gFreyjaModel->loadTextureBuffer(image, w, h, 32, freyjarender::Texture::RGBA);
+			break;
+
+		case RGB_24:
+			gFreyjaModel->loadTextureBuffer(image, w, h, 24, freyjarender::Texture::RGB);
+			break;
+
+		case INDEXED_8:
+			gFreyjaModel->loadTextureBuffer(image, w, h, 8, freyjarender::Texture::INDEXED);
+			break;
+
+		default:
+			freyja_print("%s> ERROR: Unsupported texture colormap %d",
+						"FreyjaModel::loadModel", type);
+		}
+	}
+}
+
+
+void FreyjaModelEventsAttach()
+{
+	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
+	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
+}
+
+
+/////////////////////////////////////////////////
 
 
 FreyjaModel::FreyjaModel()
 {
 	/* Search ~/.freyja/plugins/ first */
 	char *pluginDir = freyja_rc_map("plugins/");
-	freyjaPluginAddDirectory(pluginDir);
+	//FIXME freyjaPluginAddDirectory(pluginDir);
 	delete [] pluginDir;
 
 	/* Start up freyja backend */
@@ -50,7 +123,6 @@ FreyjaModel::FreyjaModel()
 
 	/* Spawn 0th light */
 	freyjaLightCreate();
-
 
 	/* Spawn 0th material */
 	int32 mIndex = freyjaMaterialCreate();
@@ -67,6 +139,7 @@ FreyjaModel::FreyjaModel()
 	freyjaMaterialAmbient(mIndex, rgba);
 	freyjaMaterialShininess(mIndex, 0.0f);
 
+	gFreyjaModel = this;
 
 	/* Initalize/reset private data members */
 	clear();
@@ -76,6 +149,21 @@ FreyjaModel::FreyjaModel()
 FreyjaModel::~FreyjaModel()
 {
 	freyjaFree();
+}
+
+
+bool FreyjaModel::toggleFlag(option_flag_t flag)
+{
+	if (FreyjaModel::getFlags() & flag)
+	{
+		FreyjaModel::setFlags(flag, 0);
+	}
+	else
+	{
+		FreyjaModel::setFlags(flag, 1);
+	}
+
+	return (getFlags() & flag);
 }
 
 
@@ -123,7 +211,7 @@ void FreyjaModel::clear()
 	mSelectBBox[0][0] = mSelectBBox[0][1] = mSelectBBox[0][2] = -16.0;
 	mSelectBBox[1][0] = mSelectBBox[1][1] = mSelectBBox[1][2] = 16.0;
 
-	freyjaModelClear(0); // Only 1 edit model supported in this bulid
+	//freyjaModelClear(0); // Only 1 edit model supported in this bulid
 }
 
 
@@ -151,13 +239,13 @@ void FreyjaModel::setPolygonMaterial(long polygonIndex, long material)
 	{
 		for (i = mUVMap.begin(); i < mUVMap.end(); ++i)
 		{
-			freyjaPolygonSetMaterial1i(mUVMap[i], material);
+			//freyjaPolygonMaterial(mUVMap[i], material);
 		}
 
 		return;
 	}
 
-	freyjaPolygonSetMaterial1i(polygonIndex, material);
+	//freyjaPolygonMaterial(polygonIndex, material);
 }
 
 
@@ -240,7 +328,7 @@ void FreyjaModel::setCurrentMesh(unsigned int index)
 	if (index < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(index))
 	{
 		mMeshIndex = index;		
-		mGroupIndex = freyjaGetMeshVertexGroupIndex(mMeshIndex, 0);
+		//mGroupIndex = freyjaGetMeshVertexGroupIndex(mMeshIndex, 0);
 	}
 }
 
@@ -295,7 +383,7 @@ void FreyjaModel::setCurrentVertex(unsigned int index)
 {
 	if (index < freyjaGetCount(FREYJA_VERTEX))
 	{
-		freyjaCurrentVertex(index);
+		//FIXME freyjaCurrentVertex(index);
 		mVertexIndex = index;
 	}
 }
@@ -337,10 +425,10 @@ void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
 
 int FreyjaModel::saveAnimation(char const *filename)
 {
-	freyja_print("FreyjaModel::saveAnimation> Not Implemented %s:%d\n",
-				 __FILE__, __LINE__);
+	char filename2[512];
 
-	return -1;
+	snprintf(filename2, 512, "%s-keyframe.smd", filename);
+	return saveModel(filename2);
 }
 
 
@@ -376,7 +464,7 @@ void FreyjaModel::getBoneTranslation(float *x, float *y, float *z)
 {
 	vec3_t xyz;
 
-	freyjaGetBoneTranslation3fv(getCurrentBone(), xyz);
+	//freyjaGetBoneTranslation3fv(getCurrentBone(), xyz);
 	*x = xyz[0];
 	*y = xyz[1];
 	*z = xyz[2];
@@ -393,7 +481,7 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 {
 	vec3_t xyz;
 
-	freyjaGetBoneRotationXYZ3fv(getCurrentBone(), xyz);
+	freyjaGetBoneRotation3fv(getCurrentBone(), xyz);
 	*x = xyz[0];
 	*y = xyz[1];
 	*z = xyz[2];
@@ -402,13 +490,14 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 
 void FreyjaModel::setBoneRotation(float x, float y, float z)
 {
-	freyjaBoneRotateEulerXYZ3f(getCurrentBone(), x, y, z);
+	freyjaBoneRotateEuler3f(getCurrentBone(), x, y, z);
 }
 
 
 void FreyjaModel::transform(int mode, freyja_transform_action_t action, 
 							float x, float y, float z)
 {
+#ifdef FIXME
 	switch (mode)
 	{
 	case FreyjaModel::TransformVertexFrame:	
@@ -437,6 +526,7 @@ void FreyjaModel::transform(int mode, freyja_transform_action_t action,
 		freyjaModelTransform(0, action, x, y, z);
 		break;
 	}
+#endif
 }
 
 
@@ -471,14 +561,14 @@ unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 
 	if (boneIndex == 0)
 	{
-		freyjaBoneName1s(boneIndex, "root");
+		freyjaBoneName(boneIndex, "root");
 	}
 	else
 	{
 		char name[64];
 
 		snprintf(name, 64, "bone %i", boneIndex);
-		freyjaBoneName1s(boneIndex, name);
+		freyjaBoneName(boneIndex, name);
 	}
 
 	updateSkeletalUI();
@@ -489,14 +579,14 @@ unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 
 void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
 {
-	freyjaBoneAddMesh1i(getCurrentBone(), getCurrentMesh());
+	//freyjaBoneAddMesh1i(getCurrentBone(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
 
 void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
 {
-	freyjaBoneRemoveMesh1i(getCurrentBone(), getCurrentMesh());
+	//freyjaBoneRemoveMesh1i(getCurrentBone(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
@@ -511,7 +601,7 @@ void FreyjaModel::selectBone(float xx, float yy)
 
 void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
 {
-	freyjaBoneAddChild1i(master, slave);
+	freyjaBoneAddChild(master, slave);
 	updateSkeletalUI();
 }
 
@@ -553,7 +643,7 @@ void FreyjaModel::PolygonSelectVertex(float xx, float yy)
 	{
 		freyja_print("Control> Polygon selected");
 
-		mPolygonIndex = freyjaFindPolygonByVertices(vertices);
+		//FIXME mPolygonIndex = freyjaFindPolygonByVertices(vertices);
 		vertices.clear();
 	}
 }
@@ -562,7 +652,7 @@ void FreyjaModel::PolygonSelectVertex(float xx, float yy)
 void FreyjaModel::PolygonDelVertex(float xx, float yy)
 {
 	static Vector<unsigned int> vertices;
-	int32 polygonIndex;
+	//int32 polygonIndex;
 
 	VertexSelect(xx, yy);
 
@@ -580,8 +670,8 @@ void FreyjaModel::PolygonDelVertex(float xx, float yy)
 	{
 		freyja_print("Control> Polygon removed");
 
-		polygonIndex = freyjaFindPolygonByVertices(vertices);
-		freyjaPolygonDelete(polygonIndex);
+		//polygonIndex = freyjaFindPolygonByVertices(vertices);
+		//freyjaPolygonDelete(polygonIndex);
 
 		vertices.clear();
 	}
@@ -624,28 +714,28 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 			if (freyjaIsVertexAllocated(vertexIndex))
 			{
 				/* A cheap planar like projection on XY plane */
-				freyjaGetVertexXYZ3fv(vertexIndex, pos);
+				freyjaGetVertexPosition3fv(vertexIndex, pos);
 				freyjaGenerateUVFromXYZ(pos, uv+0, uv+1);
 				freyjaVertexTexCoord2fv(vertexIndex, uv);
 			}
 			else
 			{
-				texcoords.pushBack(freyjaTexCoord2f(0.5, 0.5));
+				//texcoords.pushBack(freyjaTexCoordCreate2f(0.5, 0.5));
 			}
 		}
 
 		/* Allocate polygon */
-		polygonIndex = freyjaPolygonCreate();
-		freyjaPolygonSetMaterial1i(polygonIndex, 0);
+		polygonIndex = 0;//freyjaPolygonCreate();
+		//freyjaPolygonMaterial(polygonIndex, 0);
 		
 		for (i = vertices.begin(); i < vertices.end(); ++i)
-			freyjaPolygonAddVertex1i(polygonIndex, vertices[i]);
+			;//freyjaPolygonAddVertex(polygonIndex, vertices[i]);
 
 		for (i = texcoords.begin(); i < texcoords.end(); ++i)
-			freyjaPolygonAddTexCoord1i(polygonIndex, texcoords[i]);
+			;//freyjaPolygonAddTexCoord(polygonIndex, texcoords[i]);
 
 		/* Is it renderable/valid? */
-		if (freyjaGetPolygonVertexCount(polygonIndex) != vertices.end())
+		if (0)//freyjaGetPolygonVertexCount(polygonIndex) != vertices.end())
 		{
 			printf("!FIXME: %s:%i\n", __FILE__, __LINE__);
 			freyjaPolygonDelete(polygonIndex);
@@ -660,63 +750,9 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 }
 
 
-bool FreyjaModel::pasteSelectedPatch()
-{
-	Vector<unsigned int> transV;
-	unsigned int index, i, n;
-
-
-	gTestPatch.generatePolygonMesh(7);
-
-	freyjaBegin(FREYJA_MESH);
-	freyjaMeshFlags1u(0x0);
-
-	freyjaBegin(FREYJA_VERTEX_GROUP);
-	freyjaGroupCenter3f(0, 0, 0);
-
-	for (i = gTestPatch.vertices.begin(); i < gTestPatch.vertices.end(); ++i)
-	{
-		index = freyjaVertex3fv(gTestPatch.vertices[i]->mVec);
-		freyjaVertexNormal3f(index, 0, 1, 0);
-		freyjaVertexTexCoord2fv(index, gTestPatch.texcoords[i]->mVec);
-		transV.pushBack(index);
-	}
-
-	freyjaEnd(); // FREYJA_GROUP
-
-	n = gTestPatch.vertices.end() - 2;
-	for (i = gTestPatch.vertices.begin(); i < n; ++i)
-	{
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(gTestPatch.texture);
-		freyjaPolygonVertex1i(transV[i]);
-		freyjaPolygonVertex1i(transV[i+1]);
-		freyjaPolygonVertex1i(transV[i+2]);
-		freyjaEnd(); // FREYJA_POLYGON
-	}
-
-	freyjaEnd(); // FREYJA_MESH
-
-	freyja_print("Mesh generated from patch...");
-
-	return true;
-}
-
-
-bool FreyjaModel::pasteSelectedMesh()
-{
-	char c = freyjaModelPasteMesh(0);
-
-	if (c == -1)
-		return false;
-
-	return c;
-}
-
-
 bool FreyjaModel::pasteVertexBuffer()
 {
-	char c = freyjaModelPasteMesh(0);
+	char c = -1;//freyjaModelPasteMesh(0);
 
 	if (c == -1)
 		return false;
@@ -727,7 +763,7 @@ bool FreyjaModel::pasteVertexBuffer()
 	
 bool FreyjaModel::copySelectedMesh()
 {
-	char c = freyjaModelCopyMesh(0, getCurrentMesh(), getCurrentGroup());
+	char c = -1;//freyjaModelCopyMesh(0, getCurrentMesh(), getCurrentGroup());
 
 	if (c == -1)
 		return false;
@@ -738,7 +774,7 @@ bool FreyjaModel::copySelectedMesh()
 	
 bool FreyjaModel::copyVertexBuffer()
 {
-	char c = freyjaModelCopyVertexList(0, mList, getCurrentMesh(), getCurrentGroup());
+	char c = -1;//freyjaModelCopyVertexList(0, mList, getCurrentMesh(), getCurrentGroup());
 
 	if (c == -1)
 		return false;
@@ -765,7 +801,7 @@ void FreyjaModel::cullUsingVertexBuffer()
 void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 {
 	unsigned int i;
-	vec3_t *xyz;
+	vec3_t xyz;
 
 
 	if (mList.empty())
@@ -773,16 +809,20 @@ void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 
 	for (i = mList.begin(); i < mList.end(); ++i)
 	{
-		xyz = freyjaGetVertexXYZ(mList[i]);
+		freyjaGetVertexPosition3fv(mList[i], xyz);
+
+		// FIXME: Use matrix mirror transform -- cpus can handle mul ops  =p
 
 		if (y)
-			(*xyz)[0] = -(*xyz)[0];
+			xyz[0] = -xyz[0];
 
 		if (x)
-			(*xyz)[1] = -(*xyz)[1];      
+			xyz[1] = -xyz[1];      
 
 		if (z)
-			(*xyz)[2] = -(*xyz)[2];      
+			xyz[2] = -xyz[2];
+
+		//freyjaVertexPosition3fv(mList[i], xyz);
 	}
 }
 
@@ -801,7 +841,7 @@ void FreyjaModel::setNameBone(unsigned int boneIndex, const char *name)
 
 	if (freyjaIsBoneAllocated(boneIndex) && name && name[1])
 	{
-		freyjaBoneName1s(boneIndex, name);
+		//freyjaBoneName1s(boneIndex, name);
 		freyja_print("bone[%i].name = '%s'", boneIndex, name);
 		updateSkeletalUI();
 	}
@@ -821,20 +861,20 @@ const char *FreyjaModel::getNameBone(unsigned int boneIndex)
 
 void FreyjaModel::disconnectBone(unsigned int parent, unsigned int child)
 {
-	freyjaBoneRemoveChild1i(parent, child); 
+	//freyjaBoneRemoveChild1i(parent, child); 
 	updateSkeletalUI();
 }
 
 
 void addVertexToBone(unsigned int bone, unsigned int vertex)
 {
-	freyjaVertexWeight(vertex, 1.0f, bone);
+	//freyjaVertexWeight(vertex, 1.0f, bone);
 }
 
 
 void FreyjaModel::removeVertexFromBone(unsigned int bone, unsigned int vertex)
 {
-	freyjaBoneRemoveVertex(bone, vertex);
+	//freyjaBoneRemoveVertex(bone, vertex);
 }
 
 
@@ -847,7 +887,7 @@ void FreyjaModel::moveBoneCenter(float xx, float yy)
 	if (!freyjaIsBoneAllocated(boneIndex))
 		return;
 
-	freyjaGetBoneTranslation3fv(boneIndex, xyz);
+	//freyjaGetBoneTranslation3fv(boneIndex, xyz);
 
 	switch (getCurrentPlane())
 	{
@@ -882,7 +922,7 @@ void FreyjaModel::moveBone(float xx, float yy)
 	if (!freyjaIsBoneAllocated(boneIndex))
 		return;
 
-	freyjaGetBoneTranslation3fv(boneIndex, xyz);
+	//freyjaGetBoneTranslation3fv(boneIndex, xyz);
 
 	switch (getCurrentPlane())
 	{
@@ -913,7 +953,7 @@ void FreyjaModel::MeshMove(float xx, float yy)
 	vec_t x = 0, y = 0, z = 0;
 
 
-	freyjaGetMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), xyz);
+	//freyjaGetMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), xyz);
 
 	switch (getCurrentPlane())
 	{
@@ -942,7 +982,7 @@ void FreyjaModel::MeshMove(float xx, float yy)
 
 void FreyjaModel::getCurrentMeshCenter(vec3_t center)
 {
-	freyjaGetMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), center);
+	//freyjaGetMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), center);
 }
 
 
@@ -951,7 +991,7 @@ void FreyjaModel::MeshMoveCenter(float xx, float yy)
 	vec3_t center;
 
 
-	freyjaGetMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), center);
+	//freyjaGetMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), center);
 
 	switch (getCurrentPlane())
 	{
@@ -971,7 +1011,7 @@ void FreyjaModel::MeshMoveCenter(float xx, float yy)
 		break;
 	}
 
-	freyjaMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), center);
+	//freyjaMeshFrameCenter(getCurrentMesh(), getCurrentGroup(), center);
 }
 
 
@@ -980,12 +1020,6 @@ void FreyjaModel::VertexNew(float xx, float yy)
 	vec3_t pos = {0, 0, 0};
 	vec2_t uv;
 
-
-	if (freyjaGetMeshVertexGroupCount(getCurrentMesh()) == 0)
-	{
-		freyja_print("Point requires Mesh; Try Mesh->New");
-		return;
-	}
 
 	switch (getCurrentPlane())
 	{
@@ -1012,8 +1046,8 @@ void FreyjaModel::VertexNew(float xx, float yy)
 
 	if (freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
-		freyjaMeshVertexGroupAppendGobalVertex(getCurrentMesh(), 0, 
-											   mCachedVertexIndex);
+	//	freyjaMeshVertexGroupAppendGobalVertex(getCurrentMesh(), 0, 
+	//										   mCachedVertexIndex);
 
 		if (mFlags & FL_VERTEX_UV)
 		{
@@ -1055,7 +1089,7 @@ void FreyjaModel::VertexCombine(float xx, float yy)
 	}
 }
 
-
+#ifdef FIXME_OLD_PATCH_EDIT
 void FreyjaModel::selectPatchControlPoint(Vector3d xyz)
 {
 	unsigned int besti = 0, bestj = 0, i, j;
@@ -1084,34 +1118,6 @@ void FreyjaModel::selectPatchControlPoint(Vector3d xyz)
 	gTestPatch.x = besti;
 	gTestPatch.y = bestj;
 }
-
-
-void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
-{
-	uint32 boneIndex = getCurrentBone();
-	vec3_t pivot;
-
-
-	switch (type)
-	{
-	case FreyjaModel::TransformBone:
-		if (!freyjaIsBoneAllocated(boneIndex))
-			return;
-
-		freyjaGetBoneTranslation3fv(boneIndex, pivot);
-
-		xyz = xyz - Vector3d(pivot);
-		
-		transform(FreyjaModel::TransformBone, fTranslate, 
-				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
-		break;
-
-
-	default:
-		;
-	}
-}
-
 
 void FreyjaModel::movePatchControlPoint(Vector3d xyz)
 {
@@ -1188,6 +1194,34 @@ void FreyjaModel::movePatchControlPoint(float xx, float yy)
 		break;
 	}
 }
+#endif
+
+
+void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
+{
+	uint32 boneIndex = getCurrentBone();
+	vec3_t pivot;
+
+
+	switch (type)
+	{
+	case FreyjaModel::TransformBone:
+		if (!freyjaIsBoneAllocated(boneIndex))
+			return;
+
+		//freyjaGetBoneTranslation3fv(boneIndex, pivot);
+
+		xyz = xyz - Vector3d(pivot);
+		
+		transform(FreyjaModel::TransformBone, fTranslate, 
+				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
+		break;
+
+
+	default:
+		;
+	}
+}
 
 
 void FreyjaModel::VertexMove(float xx, float yy)
@@ -1201,7 +1235,7 @@ void FreyjaModel::VertexMove(float xx, float yy)
 		return;
 	}
 
-	freyjaGetVertexXYZ3fv(mCachedVertexIndex, xyz);
+	freyjaGetVertexPosition3fv(mCachedVertexIndex, xyz);
 
 	switch (getCurrentPlane())
 	{
@@ -1221,19 +1255,7 @@ void FreyjaModel::VertexMove(float xx, float yy)
 		break;
 	}
 
-	freyjaVertexXYZ3fv(mCachedVertexIndex, xyz);
-}
-
-
-void FreyjaModel::setDebug(unsigned int n)
-{
-	freyjaModelDebugLevel(getCurrentModel(), n);
-}
-
- 
-bool FreyjaModel::getDebug()
-{
-	return freyjaGetModelDebugLevel(getCurrentModel());
+	//freyjaVertexPosition3fv(mCachedVertexIndex, xyz);
 }
 
 
@@ -1357,12 +1379,12 @@ void FreyjaModel::BBoxMove(float xx, float yy)
 
 void FreyjaModel::boxSelectionListBuild()
 {
-	Vector<unsigned int> *list;
+	Vector<unsigned int> list;
 
 
 	mList.clear();
-	list = freyjaFindVerticesByBox(mSelectBBox);
-	mList.copy(*list);
+	//FIXME list = freyjaFindVerticesByBox(mSelectBBox);
+	mList.copy(list);
 }
 
 
@@ -1394,13 +1416,13 @@ void FreyjaModel::TexelSelect(float s, float t)
 	{
 		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
 
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-		texcoordCount = freyjaGetPolygonTexCoordCount(polygonIndex);
+		vertexCount = 0;//freyjaGetPolygonVertexCount(polygonIndex);
+		texcoordCount = 0;//freyjaGetPolygonTexCoordCount(polygonIndex);
 
 		if (vertexCount == 0)
 			continue;
 	
-		materialIndex = freyjaGetPolygonMaterial(polygonIndex);
+		materialIndex = 0;//freyjaGetPolygonMaterial(polygonIndex);
 
 		// FIXME: Not the best way to pick
 		if (materialIndex < 0 || 
@@ -1409,12 +1431,12 @@ void FreyjaModel::TexelSelect(float s, float t)
 
 		for (j = 0; j < texcoordCount; ++j)
 		{
-			texcoordIndex = freyjaGetPolygonTexCoordIndex(polygonIndex, j);
+			texcoordIndex = 0;//freyjaGetPolygonTexCoordIndex(polygonIndex, j);
 
 			if (!freyjaIsTexCoordAllocated(texcoordIndex))
 				continue;
 
-			freyjaGetTexCoord2fv(texcoordIndex, uv);
+			//freyjaGetTexCoord2fv(texcoordIndex, uv);
 
 			// Mongoose: slight optimization, to avoid init branch  =)
 			dist = helDist3v(st.mVec,
@@ -1433,12 +1455,12 @@ void FreyjaModel::TexelSelect(float s, float t)
 		{
 			for (j = 0; j < vertexCount; ++j)
 			{
-				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
+				vertexIndex = 0;//freyjaGetPolygonVertexIndex(polygonIndex, j);
 				
 				if (!freyjaIsVertexAllocated(vertexIndex))
 					continue;
 				
-				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+				freyjaGetVertexTexCoord2fv(vertexIndex, uv);
 
 				// Mongoose: slight optimization, to avoid init branch  =)
 				dist = helDist3v(st.mVec, 
@@ -1482,7 +1504,7 @@ void FreyjaModel::MeshSelect(float xx, float yy)
 	}
 	else
 	{
-		setCurrentGroup(freyjaGetMeshVertexGroupIndex(meshIndex, 0));
+		//setCurrentGroup(freyjaGetMeshVertexGroupIndex(meshIndex, 0));
 		setCurrentMesh(meshIndex);
 	}
 }
@@ -1513,7 +1535,7 @@ void FreyjaModel::TexelCombine(float s, float t)
 	else if ((int)mTexCoordIndex != a)
 	{
 		freyja_print("TexelCombine(%i, %i)", a, mTexCoordIndex);
-		freyjaTexCoordCombine(a, mTexCoordIndex);
+		//FIXME freyjaTexCoordCombine(a, mTexCoordIndex);
 		a = -1;
 	}
 }
@@ -1535,18 +1557,18 @@ void FreyjaModel::UVMapMotion(float s, float t)
 	
 	if (freyjaIsTexCoordAllocated(texel) && !mUVMap.empty())
 	{
-		freyjaGetTexCoord2fv(texel, uv);
+		//freyjaGetTexCoord2fv(texel, uv);
 		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
 
 		for (i = mUVMap.begin(), iCount = mUVMap.end(); i < iCount; ++i)
 		{
 			poly = mUVMap[i];
-			jCount = freyjaGetPolygonTexCoordCount(poly);
+			jCount = 0;//freyjaGetPolygonTexCoordCount(poly);
 
 			for (j = 0; j < jCount; ++j)
 			{
-				tex = freyjaGetPolygonTexCoordIndex(poly, j);
+				tex = 0;//freyjaGetPolygonTexCoordIndex(poly, j);
 
 				for (k = seen.begin(); k < (int)seen.end(); ++k)
 				{
@@ -1560,10 +1582,10 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				if (tex == -1) 
 					continue;
 
-				freyjaGetTexCoord2fv(tex, uv);
+				//freyjaGetTexCoord2fv(tex, uv);
 				uv[0] += u.mVec[0];
 				uv[1] += u.mVec[1];
-				freyjaTexCoordUV2fv(tex, uv);
+				//freyjaTexCoord2fv(tex, uv);
 
 				seen.pushBack(tex);
 			}
@@ -1576,21 +1598,21 @@ void FreyjaModel::UVMapMotion(float s, float t)
 	/* Look for polygons sharing this texcoord, start a new uvmap */
 	if (texel)
 	{		
-		freyjaGetTexCoord2fv(texel, uv);
+		//freyjaGetTexCoord2fv(texel, uv);
 		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
 
-		iCount = freyjaGetTexCoordPolygonRefCount(texel);
+		iCount = 0;//freyjaGetTexCoordPolygonRefCount(texel);
 
 		for (i = 0; i < iCount; ++i)
 		{
-			poly = freyjaGetTexCoordPolygonRefIndex(texel, i);
+			poly = 0;//freyjaGetTexCoordPolygonRefIndex(texel, i);
 
-			jCount = freyjaGetPolygonTexCoordCount(poly);
+			jCount = 0;//freyjaGetPolygonTexCoordCount(poly);
 
 			for (j = 0; j < jCount; ++j)
 			{
-				tex = freyjaGetPolygonTexCoordIndex(poly, j);
+				tex = 0;//freyjaGetPolygonTexCoordIndex(poly, j);
 
 				for (k = seen.begin(); k < (int)seen.end(); ++k)
 				{
@@ -1604,10 +1626,10 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				if (tex == -1) 
 					continue;
 
-				freyjaGetTexCoord2fv(tex, uv);
+				//freyjaGetTexCoord2fv(tex, uv);
 				uv[0] += u.mVec[0];
 				uv[1] += u.mVec[1];
-				freyjaTexCoordUV2fv(tex, uv);
+				//freyjaTexCoord2fv(tex, uv);
 
 				seen.pushBack(tex);
 			}
@@ -1618,7 +1640,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 		int32 vertex = getCurrentVertex();
 		int32 vert;
 
-		freyjaGetVertexTexCoordUV2fv(vertex, uv);
+		freyjaGetVertexTexCoord2fv(vertex, uv);
 
 		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
@@ -1628,11 +1650,11 @@ void FreyjaModel::UVMapMotion(float s, float t)
 		for (i = 0; i < iCount; ++i)
 		{
 			poly = freyjaGetVertexPolygonRefIndex(vertex, i);
-			jCount = freyjaGetPolygonVertexCount(poly);
+			jCount = 0;//freyjaGetPolygonVertexCount(poly);
 
 			for (j = 0; j < jCount; ++j)
 			{
-				vert = freyjaGetPolygonVertexIndex(poly, j);
+				vert = 0;//freyjaGetPolygonVertexIndex(poly, j);
 
 				for (k = seen.begin(); k < (int)seen.end(); ++k)
 				{
@@ -1646,7 +1668,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				if (vert == -1) 
 					continue;
 
-				freyjaGetVertexTexCoordUV2fv(vert, uv);
+				freyjaGetVertexTexCoord2fv(vert, uv);
 				uv[0] += u.mVec[0];
 				uv[1] += u.mVec[1];
 				freyjaVertexTexCoord2fv(vert, uv);
@@ -1709,17 +1731,17 @@ void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 			continue;
 		}
 
-		iCount = freyjaGetPolygonTexCoordCount(poly);
+		//iCount = freyjaGetPolygonTexCoordCount(poly);
 
 		for (i = 0; i < iCount; ++i)
 		{
-			texel = freyjaGetPolygonTexCoordIndex(poly, i);
+			texel = 0;//freyjaGetPolygonTexCoordIndex(poly, i);
 
-			jCount = freyjaGetTexCoordPolygonRefCount(texel);
+			jCount = 0;//freyjaGetTexCoordPolygonRefCount(texel);
 
 			for (j = 0; j < jCount; ++j)
 			{
-				poly2 = freyjaGetTexCoordPolygonRefIndex(texel, j);
+				poly2 = 0;//freyjaGetTexCoordPolygonRefIndex(texel, j);
 
 				for (k = pending.begin(); k < (int)pending.end(); ++k)
 				{
@@ -1800,25 +1822,14 @@ void FreyjaModel::createPolyMappedUVMap(long seedPolygon)
 }
 
 
-void FreyjaModel::TexelMove(float s, float t)
+void FreyjaModel::TexelMove(float u, float v)
 {
-	vec2_t *uv = freyjaGetTexCoordUV(getCurrentTexCoord());
+	vec2_t uv;
+	// FIXME
 
-	if (uv)
-	{
-		(*uv)[0] = s;
-		(*uv)[1] = t;
-	}
-	else
-	{
-		uv = freyjaGetVertexUV(getCurrentVertex());
-		
-		if (uv)
-		{
-			(*uv)[0] = s;
-			(*uv)[1] = t;
-		}
-	}
+	uv[0] = u;
+	uv[1] = v;
+	freyjaVertexTexCoord2fv(getCurrentVertex(), uv);
 }
 
 
@@ -1841,7 +1852,7 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 
 	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
 	const char *rootName = freyjaGetBoneName1s(rootIndex);
-	uint32 rootSkelBID = freyjaGetBoneSkeletalBoneIndex(rootIndex);
+	uint32 rootSkelBID = freyjaGetSkeletonBoneIndex(skelIndex, rootIndex);
 
 	if (tree == 0x0)
 	{
@@ -1920,16 +1931,15 @@ int FreyjaModel::loadMaterial(const char *filename)
 {
 	int32 mIndex;
 
-	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
 
-	// FIXME: There is no fLoadMaterialInSlot
-	if (mFlags & fLoadTextureInSlot)  
+	if (mFlags & fLoadMaterialInSlot)  
+	{
 		mIndex = freyjaGetCurrentMaterial();
+	}
 	else
+	{
 		mIndex = freyjaMaterialCreate();
-
-	freyjaCurrentMaterial(mIndex);
-
+	}
 
 	//unsigned int m_flags; // FIXME pass to renderer
 
@@ -1943,7 +1953,7 @@ int FreyjaModel::loadMaterial(const char *filename)
 
 	float shininess;           /* Specular exponent */
 
-	unsigned int texture;      /* Texture id */
+	//unsigned int texture;      /* Texture id */
 
 	//unsigned int texture2;     /* Detail Texture id */
 
@@ -2220,7 +2230,7 @@ int FreyjaModel::loadMaterial(const char *filename)
 	freyjaMaterialEmissive(mIndex, emissive);
 	freyjaMaterialShininess(mIndex, shininess);
 
-	freyjaMaterialTexture(mIndex, texture);
+	//freyjaMaterialTexture(mIndex, texture);
 	freyjaMaterialBlendDestination(mIndex, blend_dest);
 	freyjaMaterialBlendSource(mIndex, blend_src);
 
@@ -2298,10 +2308,10 @@ int FreyjaModel::loadTexture(const char *filename)
 		switch (img.getColorMode())
 		{
 		case FreyjaImage::RGBA_32:
-			loadTextureBuffer(image, w, h, 32, Texture::RGBA);
+			loadTextureBuffer(image, w, h, 32, freyjarender::Texture::RGBA);
 			break;
 		case FreyjaImage::RGB_24:
-			loadTextureBuffer(image, w, h, 24, Texture::RGB);
+			loadTextureBuffer(image, w, h, 24, freyjarender::Texture::RGB);
 			break;
 		default:
 			printf("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
@@ -2434,7 +2444,7 @@ int FreyjaModel::loadTextureBuffer(unsigned char *image,
 										unsigned int width, 
 										unsigned int height, 
 										unsigned int bpp, 
-										Texture::ColorMode type)
+										freyjarender::Texture::ColorMode type)
 {
 	int err = 0;
 
@@ -2462,7 +2472,7 @@ int FreyjaModel::loadTextureBuffer(unsigned char *image,
 
 int FreyjaModel::loadModel(const char *filename)
 {
-	int err = freyjaImportModel(filename); 
+	int err = 1;//freyjaImportModel(filename); 
 
 	updateSkeletalUI();		
  
@@ -2475,12 +2485,12 @@ int FreyjaModel::loadModel(const char *filename)
 	{
 		freyjaModelClampTexCoords(0); // Only support 1 model per edit atm
 
-		unsigned int i, w, h, bpp, type;
+		unsigned int i, w, h, type; // bpp;
 		unsigned char *image = 0x0;
 		char *textureFilename = 0x0; /* Texture filename */
 
 		/* Texture image was stored as external file from model */
-		for (i = 0; !freyjaGetTextureFilename(i, &textureFilename); ++i)
+		for (i = 0; i > 0/*!freyjaGetTextureFilename(i, &textureFilename)*/; ++i)
 		{
 			if (textureFilename && textureFilename[0])
 			{
@@ -2493,7 +2503,7 @@ int FreyjaModel::loadModel(const char *filename)
 		}
 	 
 		/* Texture image was stored as raw buffer */
-		for (i = 0; !freyjaGetTextureImage(i, &w, &h, &bpp, &type, &image); ++i)
+		for (i = 0; i > 0/*!freyjaGetTextureImage(i, &w, &h, &bpp, &type, &image)*/; ++i)
 		{
 			if (!image)
 				continue;
@@ -2501,15 +2511,15 @@ int FreyjaModel::loadModel(const char *filename)
 			switch (type)
 			{
 			case RGBA_32:
-				loadTextureBuffer(image, w, h, 32, Texture::RGBA);
+				loadTextureBuffer(image, w, h, 32, freyjarender::Texture::RGBA);
 				break;
 
 			case RGB_24:
-				loadTextureBuffer(image, w, h, 24, Texture::RGB);
+				loadTextureBuffer(image, w, h, 24, freyjarender::Texture::RGB);
 				break;
 
 			case INDEXED_8:
-				loadTextureBuffer(image, w, h, 8, Texture::INDEXED);
+				loadTextureBuffer(image, w, h, 8, freyjarender::Texture::INDEXED);
 				break;
 
 			default:
@@ -2547,7 +2557,7 @@ int FreyjaModel::saveModel(const char *filename)
 		char buffer[4096];
 		snprintf(buffer, 4095, "%s.ja", filename);
 		buffer[4095] = 0;
-		ret = freyjaExportModel(buffer, "ja");
+		ret = -1;//freyjaExportModel(buffer, "ja");
 	}
 	else
 	{
@@ -2563,7 +2573,7 @@ int FreyjaModel::saveModel(const char *filename)
 			ext[i] = filename[s];
 		}
 
-		ret = freyjaExportModel(filename, ext);
+		ret = -1;//freyjaExportModel(filename, ext);
 	}
 
 	if (ret)
@@ -2635,7 +2645,7 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 		if (!freyjaIsBoneAllocated(current))
 			continue;
 
-		freyjaGetBoneTranslation3fv(current, xyz);
+		//freyjaGetBoneTranslation3fv(current, xyz);
 
 		dist = helDist3v((Vector3d(x, y, 0)).mVec,
 						 (Vector3d(xyz[xx], xyz[yy], 0)).mVec);
@@ -2671,7 +2681,7 @@ int32 FreyjaModel::getNearestMeshIndexInPlane(vec_t x, vec_t y,
 	vec3_t center;
 
 
-	count = freyjaGetModelMeshCount(getCurrentModel());
+	count = 0;//freyjaGetModelMeshCount(getCurrentModel());
 
 	if (count < 1)
 	{
@@ -2699,7 +2709,7 @@ int32 FreyjaModel::getNearestMeshIndexInPlane(vec_t x, vec_t y,
 	
 	for (i = 0; i < count; ++i)
 	{
-		meshIndex = freyjaGetModelMeshIndex(getCurrentModel(), i);
+		meshIndex = 0;//freyjaGetModelMeshIndex(getCurrentModel(), i);
 
 		if (!freyjaIsMeshAllocated(meshIndex))
 			continue;
@@ -2735,7 +2745,7 @@ int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y,
 
 
 	meshIndex = getCurrentMesh();
-	count = freyjaGetMeshVertexGroupVertexCount(meshIndex, 0);
+	count = freyjaGetMeshVertexCount(meshIndex);
 	//freyjaGetMeshVertexCount(meshIndex);
 
 	if (count == 0)
@@ -2774,14 +2784,14 @@ int32 FreyjaModel::getNearestVertexIndexInPlane(vec_t x, vec_t y,
 
 	for (i = 0; i < count; ++i)
 	{
-		vertexIndex = freyjaGetMeshVertexGroupVertexIndex(meshIndex, 0, i);
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
 		//vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
 
 		if (!freyjaIsVertexAllocated(vertexIndex))
 			continue;
 
 		/* FIXME: This doesn't take transformed vertices into account */
-		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		freyjaGetVertexPosition3fv(vertexIndex, xyz);
 
 		dist = helDist3v(pos.mVec,
 						(Vector3d(xyz[xx], xyz[yy], 0)).mVec);

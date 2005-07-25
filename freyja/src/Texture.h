@@ -75,6 +75,7 @@ typedef struct
 } gl_font_t;
 
 
+namespace freyjarender {
 
 class Texture
 {
@@ -476,6 +477,8 @@ class Texture
 	
 	int mTextureId2;				/* Multitexture Texture Id */
 };
+
+}
 
 	////////////////////////////////////////////////////////////
 	// Gobal functions

@@ -48,13 +48,6 @@
 
 extern "C" {
 
-	typedef enum {
-		INDEXED_8 = 1, 
-		RGB_24, 
-		RGBA_32
-
-	} freyja_colormode_t;
-
 
 	typedef enum {
 		FREYJA_WRITE_LOCK = 1,
@@ -201,8 +194,6 @@ extern "C" {
 									 vec_t x, vec_t y, vec_t z);
 
 
-
-
 	///////////////////////////////////////////////////////////////////////
 	// libfreyja plugin ABI 0.9.1 object accessors
 	///////////////////////////////////////////////////////////////////////
@@ -229,82 +220,11 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 
-	// FREYJA_BONE Accessors //////////////////////////////////////////////
-
-	uint32 freyjaGetSkeletonBoneCount(index_t skeletonIndex);
-
-	index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element);
-
-	index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex);
-
-	const char *freyjaGetBoneName1s(index_t boneIndex);
-
-	int32 freyjaGetBoneName(index_t boneIndex, uint32 size, char *name);
-	/*------------------------------------------------------
-	 * Pre  : <name> must be allocated to <size> width
-	 *        A <size> of 64 is recommended
-	 *
-	 * Post : Gets bone[index]'s name as '\0' terminated string
-	 *        Returns FREYJA_PLUGIN_ERROR on error
-	 ------------------------------------------------------*/
-
-	int32 freyjaGetBoneParent(index_t boneIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns bone[index]'s parent id
-	 *        Returns -2 on error
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetBoneRotationWXYZ4fv(index_t boneIndex, vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets bone[index]'s orientation as a Quaternion
-	 *        Returns FREYJA_PLUGIN_ERROR on error
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetBoneRotationXYZ3fv(index_t boneIndex, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets bone[index]'s orientation in Euler angles
-	 *        Returns FREYJA_PLUGIN_ERROR on error
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets bone[index]'s position
-	 *        Returns FREYJA_PLUGIN_ERROR on error
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns local skeletal index of this bone
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetBoneChild(index_t boneIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Iterator for bone children
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetBoneChildCount(index_t boneIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Count of bone children
-	 ------------------------------------------------------*/
+	///////////////////////////////////////////////////////////////////////
+	// Mutator functions to operate on Scene
+	///////////////////////////////////////////////////////////////////////
 
 
-
-
-
-///////////////////////////////////////////////////////////////////////
-// Mutator functions to operate on Scene
-///////////////////////////////////////////////////////////////////////
-
-	uint32 freyjaGetModelDebugLevel(index_t modelIndex);
-
-	void freyjaModelDebugLevel(index_t modelIndex, uint32 debugLevel);
 
 	/* Polymapped texcoords */
 	void freyjaPolyMapTexCoordCombine(index_t a, index_t b);
@@ -320,76 +240,6 @@ extern "C" {
 
 
 
-	////////////////////////////////////////////////////////////////
-	// Bone
-	//
-	////////////////////////////////////////////////////////////////
-
-	index_t freyjaBoneCreate(index_t skeletonIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Creates a new rest bone for skeleton
-	 *        Returns valid Index or -1 on Error
-	 ------------------------------------------------------*/
-
-	void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex);
-
-	void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex);
-
-	void freyjaBoneFlags1i(index_t boneIndex, index_t flags);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Set bone flags
-	 ------------------------------------------------------*/
-
-	void freyjaBoneParent1i(index_t boneIndex, index_t parentIndex);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Set bone parent
-	 *
-	 *        This doesn't affect skeleton, a follow up
-	 *        call to freyjaBoneAddChild1i is needed after
-	 *        all bones in skeleton are allocated
-	 ------------------------------------------------------*/
-
-	void freyjaBoneName1s(index_t boneIndex, const char *name);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Set human readable bone name
-	 ------------------------------------------------------*/
-
-	void freyjaBoneRemoveMesh1i(index_t boneIndex, index_t meshIndex);
-	void freyjaBoneAddMesh1i(index_t boneIndex, index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Mesh is added to Bone's child list
-	 *
-	 *        Either makes mesh tree connection or
-	 *        simulates by vertex weights and pivots
-	 ------------------------------------------------------*/
-
-	void freyjaBoneRemoveChild1i(index_t boneIndex, index_t childIndex);
-	void freyjaBoneAddChild1i(index_t boneIndex, index_t childIndex);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Child is added to Bone's child list
-	 ------------------------------------------------------*/
-
-	void freyjaBoneTranslate3f(index_t boneIndex, vec_t x, vec_t y, vec_t z);
-	void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Set bone relative position
-	 ------------------------------------------------------*/
-
-	void freyjaBoneRotateEulerXYZ3f(index_t boneIndex, vec_t x, vec_t y, vec_t z);
-	void freyjaBoneRotateEulerXYZ3fv(index_t boneIndex, vec3_t xyz);
-	void freyjaBoneRotateQuatWXYZ4f(index_t boneIndex,vec_t w,vec_t x,vec_t y,vec_t z);
-	void freyjaBoneRotateQuatWXYZ4fv(index_t boneIndex, vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Set bone orientation
-	 ------------------------------------------------------*/
 
 	void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
 
@@ -450,16 +300,6 @@ extern "C" {
 	 *        Returns the new Bone's index or -1 on error
 	 ------------------------------------------------------*/
 
-	index_t freyjaAnimationBoneKeyFrameCreate(index_t animationIndex,
-										   index_t boneIndex,
-										   vec_t time, vec3_t xyz, vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : Animation <animationIndex> exists
-	 *        Animation Bone <boneIndex> exists
-	 *
-	 * Post : Returns the keyframe's local Animation's Bone's
-	 *        Keyframe element index or -1 on error
-	 ------------------------------------------------------*/
 
 
 	/* Animation Accessors */
@@ -585,29 +425,7 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 
-	///////////////////////////////////////////////////////////////////////
-	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
-	///////////////////////////////////////////////////////////////////////
 
-	index_t freyjaTextureCreate();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaTextureCreateFilename(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaTextureCreateBuffer(byte *image, uint32 depth,
-								 	uint32 width, uint32 height,
-									freyja_colormode_t type);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
 
 
 
@@ -629,15 +447,6 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : All data in model is reset/cleared
-	 ------------------------------------------------------*/
-
-	void freyjaPolygonSplitTexCoords(index_t meshIndex, index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : All TexCoords are duplicated, then references to old
-	 *        TexCoords are removed -- this is useful for making a single
-	 *        polymapped texture polygon when all others will remain
-	 *        in a UV Mesh
 	 ------------------------------------------------------*/
 
 	void freyjaModelTransformTexCoord(index_t modelIndex,
@@ -741,7 +550,7 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetPluginCount();
+	uint32 freyjaGetPluginCount();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -896,48 +705,11 @@ extern "C" {
 	//  Pak VFS 
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaCheckModel(const char *filename);
-
-	int32 freyjaLoadModel(const char *filename);
-
-	int32 freyjaSaveModel(const char *filename);
-
-
-	///////////////////////////////////////////////////////////////////////
-	// Internal ABI calls
-	//
-	//   If used externally you'll likely get a lot of breakage or
-	//   slower and possibly incorrect object states.
-	///////////////////////////////////////////////////////////////////////
-
-	void freyja__MeshUpdateMappings(int32 meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : Only use this if you're a core developer writing
-	 *        special test plugins, or internal code.
-	 *
-	 * Post : Updates Egg backend egg_mesh_t to simulate
-	 *        FreyjaMesh local vertex mappings
-	 ------------------------------------------------------*/
 
 
 
-	///////////////////////////////////////////////////////////////////////
-	// Managed ABI 
-	//
-	//   For use by external systems to bring up/down Backend outside C++
-	///////////////////////////////////////////////////////////////////////
 
-	void freyjaSpawn();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Starts freyja backend, also does needed allocations
-	 ------------------------------------------------------*/
 
-	void freyjaFree();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Stops freyja backend, also frees memory used
-	 ------------------------------------------------------*/
 }
 
 

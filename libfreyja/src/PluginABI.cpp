@@ -6,7 +6,7 @@
  * Website : http://icculus.org/freyja
  * Email   : mongoose@icculus.org
  * Object  : 
- * License : GPL, also (C) 2000 Mongoose
+ * License : GPL, also (C) 2000 Mongooe
  * Comments: This is the Freyja plugin ABI/API.
  * 
  *           
@@ -38,6 +38,7 @@
 #include "PluginABI.h"
 #include "VertexABI.h"
 #include "MaterialABI.h"
+#include "SkeletonABI.h"
 #include "MeshABI.h"
 #include "freyja.h"
 
@@ -78,13 +79,6 @@ byte freyjaIsPolygonAllocated(index_t polygonIndex)
 }
 
 
-byte freyjaIsBoneAllocated(index_t boneIndex)
-{
-	freyjaPrintMessage("FIXME: %s:%i, file bug with %s",
-					   __FILE__, __LINE__, EMAIL_ADDRESS);
-
-	return 0;
-}
 
 
 //////////////////////////////////////////////////////////
@@ -554,9 +548,9 @@ int32 freyjaLoadModel(const char *filename)
 
 			memset(buffer, 0, 64);
 			r.readCharString(64, buffer);
-			freyjaBoneName1s(index, buffer);
-			freyjaBoneFlags1i(index, 0x0);
-			freyjaBoneParent1i(index, r.readLong());
+			freyjaBoneName(index, buffer);
+			freyjaBoneFlags(index, 0x0);
+			freyjaBoneParent(index, r.readLong());
 			flags = r.readLong();
  
 			for (j = 0; j < 3; ++j)
@@ -571,14 +565,14 @@ int32 freyjaLoadModel(const char *filename)
 				for (j = 0; j < 3; ++j)
 					xyz[j] = r.readFloat32();
 
-				freyjaBoneRotateEulerXYZ3fv(index, xyz);
+				freyjaBoneRotateEuler3fv(index, xyz);
 			}
 			else
 			{
 				for (j = 0; j < 4; ++j)
 					wxyz[j] = r.readFloat32();
 
-				freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+				freyjaBoneRotateQuat4fv(index, wxyz);
 			}
 
 			freyjaEnd(); // FREYJA_BONE
@@ -626,11 +620,11 @@ int32 freyjaLoadModel(const char *filename)
 		{
 			for (j = bones.begin(); j < (long)bones.end(); ++j)
 			{
-				if (bones[i] == freyjaGetBoneParent(bones[j]))
+				if (bones[i] == (int)freyjaGetBoneParent(bones[j]))
 				{
-					freyjaBoneAddChild1i(bones[i], bones[j]);
+					freyjaBoneAddChild(bones[i], bones[j]);
 				}
-			} 		
+			}
 		} 
 
 		freyjaEnd(); // FREYJA_SKELETON
@@ -715,12 +709,12 @@ int32 freyjaSaveModel(const char *filename)
 				w.writeFloat32(xyz[j]);
 
 #ifdef QUAT_BACKEND
-			freyjaGetBoneRotationWXYZ4fv(index, wxyz);
+			freyjaGetBoneRotation4fv(index, wxyz);
 			
 			for (j = 0; j < 4; ++j)
 				w.writeFloat32(wxyz[j]);
 #else
-			freyjaGetBoneRotationXYZ3fv(index, xyz);
+			freyjaGetBoneRotation3fv(index, xyz);
 			w.writeLong(0x0); // pad out
 			for (j = 0; j < 3; ++j)
 				w.writeFloat32(xyz[j]);
@@ -2815,17 +2809,6 @@ void freyjaVertexExtrude(index_t vertexIndex, vec_t midpointScale, vec3_t normal
 }
 
 
-void freyjaBoneAddVertex(int32 boneIndex, int32 vertexIndex)
-{
-	freyjaVertexAddWeight(vertexIndex, 1.0f, boneIndex);
-}
-
-
-void freyjaBoneRemoveVertex(int32 boneIndex, int32 vertexIndex)
-{
-	freyjaVertexAddWeight(vertexIndex, 0.0f, boneIndex);
-}
-
 
 // Accesors /////////////////////////////////////
 
@@ -3276,6 +3259,75 @@ void freyjaModelClampTexCoords(uint32 modelIndex)
 	}
 #endif
 }
+
+
+///////////////////////////////////////////////////////////////////////
+//  Stubs to allow linking to tracer build of this library
+///////////////////////////////////////////////////////////////////////
+
+int32 freyjaGetTextureImage(index_t textureIndex,
+								  uint32 *w, uint32 *h, 
+								  uint32 *depth, uint32 *type, byte **image)
+	{ return -1; }
+
+index_t freyjaIterator(freyja_object_t type, index_t item) {return INDEX_INVALID;}
+
+//index_t freyjaTexCoord2fv(vec2_t uv) {return INDEX_INVALID;}
+void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv) {}
+
+void freyjaPolygonVertexDeleteHandler(Vector<unsigned>, unsigned) {}
+
+index_t freyjaGetModelMeshIndex(index_t, uint32) { return INDEX_INVALID;}
+
+uint32 freyjaGetModelMeshCount(index_t) { return 0;}
+
+void freyjaVertexPosition3fv(index_t, const vec3_t) {}
+
+void freyjaVertexFrame3f(index_t index, vec_t x, vec_t y, vec_t z) {}
+
+uint32 freyjaGetPluginCount() {	return 0; }
+
+byte freyjaGetPolygonFlags(index_t) { return 0; }
+
+void freyjaPluginsInit() {}
+
+void freyjaPluginDirectoriesInit() {}
+
+index_t freyjaCriticalSection(freyja_lock_t) { return INDEX_INVALID; }
+
+uint32 freyjaGetVertexFrameCount(index_t) { return 0; }
+
+index_t freyjaTexCoordCreate2fv(vec2_t) { return INDEX_INVALID; }
+
+void freyjaGetVertex3fv(vec3_t) { }
+
+void freyjaGetTexCoord2fv(index_t, vec2_t) {}
+
+index_t freyjaTexCoordCreate2f(vec_t u, vec_t v) { return INDEX_INVALID; }
+index_t freyjaPolygonCreate() { return INDEX_INVALID; }
+
+uint32 freyjaGetPolygonEdgeCount(index_t polygonIndex) { return 0; }
+
+uint32 freyjaGetPolygonVertexCount(index_t polygonIndex) { return 0; }
+
+void freyjaPolygonTexCoordPurge(index_t) {}
+
+uint32 freyjaGetPolygonTexCoordCount(index_t polygonIndex) { return 0; }
+
+index_t freyjaGetPolygonVertexIndex(index_t polygonIndex, uint32 element){ return INDEX_INVALID; }
+
+index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element){ return INDEX_INVALID; }
+index_t freyjaGetPolygonMaterial(index_t polygonIndex) { return INDEX_INVALID; }
+void freyjaPolygonMaterial(index_t polygonIndex, index_t materialIndex) {}
+void freyjaPolygonAddTexCoord(index_t polygonIndex, index_t texcoordIndex) {}
+void freyjaPolygonAddVertex(index_t polygonIndex, index_t vertexIndex) {}
+
+void freyjaPolygonTexCoord1i(index_t texcoordIndex) {}
+void freyjaPolygonVertex1i(index_t vertexIndex) {}
+void freyjaPolygonMaterial1i(index_t materialIndex) {}
+
+
+
 
 
 ///////////////////////////////////////////////////////////////////////

@@ -28,6 +28,8 @@
 
 using namespace freyja;
 
+Vector<Material *> Material::mGobalPool;
+
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
@@ -852,7 +854,7 @@ void freyjaMaterialFlags(index_t materialIndex, int32 flags)
 }
 
 
-void freyjaMaterialTexture(index_t materialIndex, int32 textureIndex)
+void freyjaMaterialTexture(index_t materialIndex, index_t textureIndex)
 {
 	Material *m = Material::getMaterial(materialIndex);
 
