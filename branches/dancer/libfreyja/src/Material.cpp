@@ -37,9 +37,10 @@ Vector<Material *> Material::mGobalPool;
 Material::Material()
 {
 	uint32 i, count;
+	bool found = false;
 
-	/* Setup gobal pool UID reference */
-	mOldUID = INDEX_INVALID;
+
+	/* Setup UID and class container reference */
 	mUID = count = mGobalPool.size();
 
 	for (i = 0; i < count; ++i)
@@ -47,11 +48,17 @@ Material::Material()
 		if (mGobalPool[i] == 0x0)
 		{
 			mUID = i;
+			mGobalPool.assign(mUID, this);
+
+			found = true;
 			break;
 		}	
 	}
 
-	mGobalPool.assign(mUID, this);
+	if (!found)
+	{
+		mGobalPool.pushBack(this);
+	}
 
 	mName[0] = 0;
 

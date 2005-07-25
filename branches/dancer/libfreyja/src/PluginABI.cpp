@@ -126,6 +126,7 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	int32 vertexWeightCount;
 	int32 vertexFrameCount;
 	int32 texCoordCount;
+	index_t face;
 
 
 	/* Read from diskfile */
@@ -200,28 +201,39 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	/* Polygons */
 	for (i = 0; i < polygonCount; ++i)
 	{
-		freyjaBegin(FREYJA_POLYGON);
+		face = freyjaPolygonCreate();
+		//freyjaBegin(FREYJA_POLYGON);
+
 		flags = r.readLong();
 		material = r.readLong();
-		//FIXME freyjaPolygonMaterial(polygon, material);
+		freyjaPolygonMaterial(face, material);
+
+		count = r.readLong();
+
+		// DEBUG
+		printf("%i {\n", face);
+		for (j = 0; j < count; ++j)
+		{
+			idx = r.readLong();
+			freyjaPolygonAddVertex(face, verticesMap[idx]);
+
+			// DEBUG
+			freyjaGetVertexPosition3fv(verticesMap[idx], xyz);
+			printf("%f %f %f\n", xyz[0],xyz[1],xyz[2]);
+		}
+		// DEBUG
+		printf("{\n");
 
 		count = r.readLong();
 
 		for (j = 0; j < count; ++j)
 		{
 			idx = r.readLong();
-			//FIXME freyjaPolygonAddVertex(polygon, verticesMap[idx]);
+			freyjaPolygonAddTexCoord(face, texcoordsMap[idx]);
 		}
 
-		count = r.readLong();
-
-		for (j = 0; j < count; ++j)
-		{
-			idx = r.readLong();
-			//FIXME freyjaPolygonAddTexCoord(polygon, texcoordsMap[idx]);
-		}
-
-		freyjaEnd(); // FREYJA_POLYGON
+		//FIXME freyjaMeshAddPolygon(mesh, face); 
+		//freyjaEnd(); // FREYJA_POLYGON
 	}
 
 	freyjaEnd(); // FREYJA_MESH
@@ -247,7 +259,6 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, int32 meshIndex)
 	int32 flags, material; // bone, frame;
 	int32 i, j, k, count, idx, vertex, texcoord;
 	int32 polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-	int32 vertexGroupCount = 0;//freyjaGetMeshVertexGroupCount(meshIndex);
 	int32 byteSize = 0;
 	int32 meshFlags = freyjaGetMeshFlags(meshIndex);
 	int32 vertexCount = 0;
@@ -265,7 +276,7 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, int32 meshIndex)
 	byteSize += 4; // vertexFrameCount
 	byteSize += 4; // texCoordCount
 	byteSize += 4; // polygonCount
-	byteSize += 4; // vertexGroupCount
+	byteSize += 4; // vertexGroupCount wasn't used in v9 anyway, treat as reserved
 
 	/* Polygons, filtered by mesh */
 	for (i = 0, count = 0; i < polygonCount; ++i)
@@ -359,14 +370,6 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, int32 meshIndex)
 	}
 
 
-	/* Groups WARNING currently not written to disk */
-	for (i = 0; i < vertexGroupCount; ++i)
-	{
-		idx = 0;//FIXME;freyjaGetMeshVertexGroupIndex(meshIndex, i);
-	}
-
-	vertexGroupCount = 0;
-
 	/* Write to diskfile */
 	chunk.type = FREYJA_CHUNK_MESH;
 	chunk.size = byteSize;
@@ -384,7 +387,7 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, int32 meshIndex)
 	w.writeLong(vertexFrameCount);
 	w.writeLong(texCoordCount);
 	w.writeLong(polygonCount);
-	w.writeLong(vertexGroupCount);
+	w.writeLong(0); // vertexGroupCount wasn't used in v9 anyway
 
 	/* Vertices */
 	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
@@ -3304,7 +3307,7 @@ void freyjaGetVertex3fv(vec3_t) { }
 void freyjaGetTexCoord2fv(index_t, vec2_t) {}
 
 index_t freyjaTexCoordCreate2f(vec_t u, vec_t v) { return INDEX_INVALID; }
-index_t freyjaPolygonCreate() { return INDEX_INVALID; }
+
 
 uint32 freyjaGetPolygonEdgeCount(index_t polygonIndex) { return 0; }
 
@@ -3318,9 +3321,6 @@ index_t freyjaGetPolygonVertexIndex(index_t polygonIndex, uint32 element){ retur
 
 index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element){ return INDEX_INVALID; }
 index_t freyjaGetPolygonMaterial(index_t polygonIndex) { return INDEX_INVALID; }
-void freyjaPolygonMaterial(index_t polygonIndex, index_t materialIndex) {}
-void freyjaPolygonAddTexCoord(index_t polygonIndex, index_t texcoordIndex) {}
-void freyjaPolygonAddVertex(index_t polygonIndex, index_t vertexIndex) {}
 
 void freyjaPolygonTexCoord1i(index_t texcoordIndex) {}
 void freyjaPolygonVertex1i(index_t vertexIndex) {}

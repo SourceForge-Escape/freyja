@@ -29,6 +29,7 @@ using namespace freyja;
 
 
 Vector<Mesh *> Mesh::mGobalPool;
+Vector<Polygon *> Polygon::mGobalPool;
 
 
 ////////////////////////////////////////////////////////////
@@ -38,9 +39,9 @@ Vector<Mesh *> Mesh::mGobalPool;
 Mesh::Mesh()
 {
 	uint32 i, count;
+	bool found = false;
 
-	/* Setup gobal pool UID reference */
-	mOldUID = INDEX_INVALID;
+	/* Setup UID and class container reference */
 	mUID = count = mGobalPool.size();
 
 	for (i = 0; i < count; ++i)
@@ -48,11 +49,17 @@ Mesh::Mesh()
 		if (mGobalPool[i] == 0x0)
 		{
 			mUID = i;
+			mGobalPool.assign(mUID, this);
+
+			found = true;
 			break;
 		}	
 	}
 
-	mGobalPool.assign(mUID, this);
+	if (!found)
+	{
+		mGobalPool.pushBack(this);
+	}
 }
 
 
@@ -892,6 +899,45 @@ void freyjaGetMeshName1s(index_t meshIndex, uint32 lenght, char *name)
 
 		strncpy(name, mesh->mName, lenght);
 		name[lenght-1] = 0;
+	}
+}
+
+
+index_t freyjaPolygonCreate()
+{
+	Polygon *face = new Polygon();
+	return face->getUID();
+}
+
+void freyjaPolygonMaterial(index_t polygonIndex, index_t materialIndex)
+{
+	Polygon *face = Polygon::getPolygon(polygonIndex);
+
+	if (face)
+	{
+		face->material = materialIndex;
+	}
+}
+
+
+void freyjaPolygonAddTexCoord(index_t polygonIndex, index_t texcoordIndex) 
+{
+	Polygon *face = Polygon::getPolygon(polygonIndex);
+
+	if (face)
+	{
+		// FIXME
+	}
+}
+
+
+void freyjaPolygonAddVertex(index_t polygonIndex, index_t vertexIndex) 
+{
+	Polygon *face = Polygon::getPolygon(polygonIndex);
+
+	if (face)
+	{
+		face->vertices.pushBack(vertexIndex);
 	}
 }
 

@@ -278,7 +278,7 @@ class RenderModel
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	bool getRenderMesh(uint32 polygonIndex, RenderMesh &rmesh, int32 frame);
+	bool getRenderMesh(index_t polygonIndex, RenderMesh &rmesh, uint32 frame);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if valid RenderMesh is set.
@@ -306,7 +306,7 @@ class RenderModel
 	 *        
 	 ------------------------------------------------------*/
 
-	bool getMesh(int32 index, RenderMesh &mesh, int32 frame);
+	bool getMesh(index_t index, RenderMesh &mesh, uint32 frame);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -314,31 +314,11 @@ class RenderModel
 	 ------------------------------------------------------*/
 
 
-
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
-	
-	//void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh, int32 frame);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Egg realtime data translator method
-	 *
-	 ------------------------------------------------------*/
-	
-// 	void setEgg(Egg *egg);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Egg backend is set
-	 *
-	 ------------------------------------------------------*/
 
 	int32 mIndex;
-
-// 	Vector<egg_mesh_t *> *mMeshlist;
-
-// 	Egg *mEgg;
-
 
 
  private:
@@ -353,7 +333,6 @@ class RenderModel
 	////////////////////////////////////////////////////////////
 
 	RenderSkeleton mSkeleton;
-
 };
 
 

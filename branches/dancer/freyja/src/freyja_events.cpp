@@ -488,8 +488,9 @@ void mgtk_handle_resource_start()
 
 	gFreyjaControl = new FreyjaControl(&gResource);
 
+	// Called on allocation of FreyjaControl
 	/* Build the user interface from lisp, and load user preferences */
-	gFreyjaControl->loadResource();
+	//gFreyjaControl->loadResource();
 
 	/* Setup material interface */
 	freyja_refresh_material_interface();

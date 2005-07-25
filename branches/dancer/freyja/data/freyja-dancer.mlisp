@@ -113,7 +113,6 @@
 			(menu_item "_Viewports"		eMode	eViewports)
 			(menu_seperator)
 			(menu_item "_Grid"			eMode	eRenderGrid)
-			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
 			(menu_item "_Camera"		eMode	eCamera)
 			(menu_item "P_atch"			eMode	eRenderPatch)
 			(submenu "_Mesh"
@@ -130,7 +129,7 @@
 				(menu_item "_Sphere"	eSphereJoint	"gtk-blanked")
 				(menu_item "_Axes"		eAxisJoint		"gtk-blanked"))
 			(submenu "_Bone"
-				(menu_item "_ZBuffer"	eRenderToggleBoneZClear	"gtk-blanked")
+				(menu_item "_ZBuffer"	eMode	eRenderToggleBoneZClear)
 				(menu_item "_Line"		eLineBone		"gtk-blanked")
 				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
@@ -725,11 +724,11 @@ Send bug reports and feature requests:
 		(hbox 1 0 0 1 0
 			(icon "freyja.png" IconSize_Dialog))
 		(hbox 1 0 0 1 0 
-			(label2 "                <big>Freyja 0.3 Chimera</big>
+			(label2 "                <big>Freyja 0.4 Dancer</big>
  Freyja is an Open Source 3d modeling system.
    This build is a mix of stable and unstable builds.
    It will replace stable soon.
- <small>Freyja Copyright © 2002-2004 by Terry 'Mongoose' Hendrix II</small>"))))
+ <small>Freyja Copyright © 2002-2005 by Terry 'Mongoose' Hendrix II</small>"))))
 
 
 (dialog "Freyja :: Preferences" ePreferencesDialog 0
