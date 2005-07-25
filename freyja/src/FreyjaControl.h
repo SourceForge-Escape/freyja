@@ -40,7 +40,6 @@
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
-#include "FreyjaEvent.h"
 #include "freyja_events.h"
 #include "Texture.h"
 
@@ -443,8 +442,6 @@ private:
 	 ------------------------------------------------------*/
 
 	void getFreeWorldFromScreen(int x, int y, vec3_t p);
-
-	Vector<FreyjaEvent *> mEvents;          /* Command pattern event system */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 

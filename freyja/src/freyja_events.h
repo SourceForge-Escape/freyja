@@ -27,10 +27,6 @@
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
 #include <freyja/FreyjaPluginABI.h>
-#include "FreyjaEvent.h"
-
-
-#define ENABLE_FREYJA_EVENTS
 
 
 typedef enum {
