@@ -21,9 +21,12 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include "Mesh.h"
+
 #include "RenderModel.h"
 
 
+using namespace freyja;
 
 // bool RenderMesh::createRenderPolygon(RenderPolygon &face,
 // 									 egg_polygon_t &polygon, int32 frame)
@@ -143,14 +146,11 @@ RenderSkeleton &RenderModel::getSkeleton()
 
 unsigned int RenderModel::getMeshCount()
 {
-	//if (mMeshlist->empty())
-		return 0;
-	
-		//return mMeshlist->end();
+	return Mesh::getCount();
 }
 
 
-bool RenderModel::getMesh(int32 index, RenderMesh &mesh, int32 frame)
+bool RenderModel::getMesh(index_t index, RenderMesh &mesh, uint32 frame)
 {
 	return getRenderMesh(index, mesh, frame);
 }
@@ -174,29 +174,19 @@ bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
 }
 
 
-bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
-								int32 frame)
+// FIXME: Add caching here and just check if renderable needs update
+//        instead of rebuild of cache object each frame!
+bool RenderModel::getRenderMesh(index_t meshIndex, RenderMesh &rmesh,
+								uint32 frame)
 {
-	//egg_mesh_t *mesh = mEgg->getMesh(meshIndex);
-
-	//if (mesh)
-	//{
-	//	createRenderMesh(rmesh, *mesh, frame);
-	//	return true;
-	//}
-
-	return false;
-}
-
-
-// void RenderModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh, 
-// 								   int32 frameIndex)
-// {
 // 	egg_polygon_t *polygon;
 // 	egg_group_t *grp;
 // 	unsigned int i;
 // 	long frame = -1;
+	Mesh *mesh = Mesh::getMesh(meshIndex);
 
+	if (!mesh)
+		return false;
 
 // 	/* Vertex morph frame fu */
 // 	grp = mEgg->getGroup(frameIndex);
@@ -204,37 +194,34 @@ bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 // 		frame = grp->id;
 
 
-// 	/* Mongoose 2004.03.26, 
-// 	 * This was here for vertex morph frames, still used for edit updates */
-// 	if (mesh.r_polygon.size() != mesh.polygon.size())
-// 	{
-// 		//freyjaPrintMessage("createRenderMesh> mesh[%i]: %i polygons, %i cached...", mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
+#ifdef FIXME
+ 	/* Mongoose 2004.03.26, 
+ 	 * This was here for vertex morph frames, still used for edit updates */
+ 	if (mesh.r_polygon.size() != mesh.polygon.size())
+ 	{
+ 		//freyjaPrintMessage("createRenderMesh> mesh[%i]: %i polygons, %i cached...", mesh.id, mesh.polygon.size(), mesh.r_polygon.size());
 
-// 		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
-// 		{
-// 			polygon = mEgg->getPolygon(mesh.polygon[i]);
+ 		for (i = mesh.polygon.begin(); i < mesh.polygon.end(); ++i)
+ 		{
+ 			polygon = mEgg->getPolygon(mesh.polygon[i]);
 			
-// 			if (polygon)
-// 			{
-// 				mesh.r_polygon.pushBack(polygon);
-// 			}
-// 		}
-// 	}
+ 			if (polygon)
+ 			{
+ 				mesh.r_polygon.pushBack(polygon);
+ 			}
+ 		}
+ 	}
 
 // 	rmesh.setEgg(mEgg, &mesh, &mesh.r_polygon);
 // 	rmesh.gbegin = mesh.group.begin(); 
 // 	rmesh.gend = mesh.group.end();
 // 	rmesh.id = mesh.id;
 // 	rmesh.frame = frame;
-// }
+	//	return true;
+#endif
 
-
-// void RenderModel::setEgg(Egg *egg)
-// {
-// 	mEgg = egg;
-// 	mMeshlist = egg->MeshList();
-// }
-
+	return false;
+}
 
 
 ////////////////////////////////////////////////////////////

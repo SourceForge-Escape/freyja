@@ -109,11 +109,11 @@ FreyjaControl::FreyjaControl(Resource *r)
 FreyjaControl::~FreyjaControl()
 {
 	FreyjaFileWriter w;
-	char *filename = freyja_rc_map("recent_files");
+	char *filename = freyja_rc_map("recent_files-dancer");
 	unsigned int i;
 
 
-	/* Save recent_files to disk */
+	/* Save recent_files-dancer to disk */
 	if (w.openFile(filename))
 	{
 		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
@@ -2972,7 +2972,7 @@ void FreyjaControl::loadResource()
 {
 	int i, x, y;
 	char *s;
-	char *filename = "freyja-chimera.mlisp";
+	char *filename = "freyja-dancer.mlisp";
 	bool failed = true;
 
 	
@@ -3027,7 +3027,7 @@ void FreyjaControl::loadResource()
 
 	/* Recent files persistance test */
 	FreyjaFileReader r;
-	s = freyja_rc_map("recent_files");
+	s = freyja_rc_map("recent_files-dancer");
 
 	if (r.openFile(s))
 	{

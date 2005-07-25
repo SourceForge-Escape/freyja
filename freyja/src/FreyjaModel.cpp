@@ -2472,7 +2472,7 @@ int FreyjaModel::loadTextureBuffer(unsigned char *image,
 
 int FreyjaModel::loadModel(const char *filename)
 {
-	int err = 1;//freyjaImportModel(filename); 
+	int err = freyjaLoadModel(filename);//freyjaImportModel(filename); 
 
 	updateSkeletalUI();		
  

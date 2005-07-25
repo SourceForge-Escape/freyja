@@ -39,13 +39,12 @@ Vector<Vertex *> Vertex::mGobalPool;
 Vertex::Vertex()
 {
 	uint32 i, count;
-
+	bool found = false;
 
 	flags = fNone;
 	mesh = INDEX_INVALID;
 
-	/* Setup gobal pool UID reference */
-	mOldUID = INDEX_INVALID;
+	/* Setup UID and class container reference */
 	mUID = count = mGobalPool.size();
 
 	for (i = 0; i < count; ++i)
@@ -53,11 +52,17 @@ Vertex::Vertex()
 		if (mGobalPool[i] == 0x0)
 		{
 			mUID = i;
+			mGobalPool.assign(mUID, this);
+
+			found = true;
 			break;
 		}	
 	}
 
-	mGobalPool.assign(mUID, this);
+	if (!found)
+	{
+		mGobalPool.pushBack(this);
+	}
 }
 
 

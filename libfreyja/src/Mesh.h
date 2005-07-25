@@ -69,6 +69,64 @@ public:
 		// ...
 	};
 
+	Polygon()
+	{
+		uint32 i, count;
+		bool found = false;
+
+		/* Setup UID and class container reference */
+		mUID = count = mGobalPool.size();
+
+		for (i = 0; i < count; ++i)
+		{
+			if (mGobalPool[i] == 0x0)
+			{
+				mUID = i;
+				mGobalPool.assign(mUID, this);
+	
+				found = true;
+				break;
+			}	
+		}
+
+		if (!found)
+		{
+			mGobalPool.pushBack(this);
+		}
+	}
+
+	~Polygon()
+	{
+		/* Mark NULL in pool, marking free slot */
+		mGobalPool.assign(mUID, 0x0);
+	}
+
+	static uint32 getCount()
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		return mGobalPool.size();
+	}
+
+	static Polygon *getPolygon(index_t polygonIndex)
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		if (polygonIndex < mGobalPool.size())
+			return mGobalPool[polygonIndex];
+
+		return 0x0;
+	}
+
+	index_t getUID()
+	{
+		return mUID;
+	}
+
 
 	byte flags;                       /* Options for polygon */
 
@@ -90,9 +148,9 @@ public:
 
 private:
 
-	index_t UID;                      /* Unique identifier, key for pool */
+	index_t mUID;                        /* Unique identifier, key for pool */
 
-	Vector<Polygon *> mGobalPool;     /* Storage for gobal access */
+	static Vector<Polygon *> mGobalPool;     /* Storage for gobal access */
 };
 
 
