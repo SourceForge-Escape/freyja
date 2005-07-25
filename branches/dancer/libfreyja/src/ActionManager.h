@@ -30,6 +30,7 @@
 
 #include "Action.h"
 
+namespace freyja {
 
 class ActionManager
 {
@@ -66,7 +67,7 @@ class ActionManager
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool serialize(FreyjaFileWriter &w);
+	virtual bool serialize(FreyjaFileWriter &w) { return false; } // FIXME
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -116,7 +117,7 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(FreyjaFileReader &r);
+	virtual bool serialize(FreyjaFileReader &r) { return false; } // FIXME
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -156,5 +157,7 @@ class ActionManager
 
 	/* */
 };
+
+}
 
 #endif

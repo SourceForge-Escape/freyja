@@ -27,6 +27,21 @@
 
 extern "C" {
 
+	typedef struct
+	{
+		byte flags;                    /* Various options stored in bitflag */
+		
+		vec3_t xyz;                    /* Position in 3 space */
+		
+		vec3_t normal;                 /* Normal vector */
+
+		vec3_t uvw;                    /* Texture coordinates */		
+
+		index_t weightIndex;           /* The weight(s) of this vertex */
+		
+	}  fvertex_t;
+
+
 	//index_t freyjaGetCurrentVertex();
 
 	//void freyjaCurrentVertex(index_t vertexIndex);
@@ -93,7 +108,6 @@ extern "C" {
 	 *
 	 *        All weights for the vertex combined must be 1.0
 	 ------------------------------------------------------*/
-
 }
 
 #endif

@@ -67,6 +67,7 @@
 #   define glMultiTexCoord2f glMultiTexCoord2fARB
 #endif
 
+using namespace freyjarender;
 
 /* Texture *Texture::mSingleton = 0x0; */
 gl_font_t *gFontTest = 0x0;

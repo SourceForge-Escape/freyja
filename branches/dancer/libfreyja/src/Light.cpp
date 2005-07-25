@@ -26,6 +26,7 @@ using namespace freyja;
 
 unsigned int Light::mType = 0x4c495445;
 uint32 Light::mVersion = 1;
+Vector<Light *> Light::mGobalPool;
 
 
 ////////////////////////////////////////////////////////////

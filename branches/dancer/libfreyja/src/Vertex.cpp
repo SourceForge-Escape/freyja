@@ -29,6 +29,7 @@ using namespace freyja;
 
 uint32 Vertex::mType = 0x54524556;
 uint32 Vertex::mVersion = 1;
+Vector<Vertex *> Vertex::mGobalPool;
 
 
 ////////////////////////////////////////////////////////////

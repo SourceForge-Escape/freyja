@@ -26,9 +26,8 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJA__H_
 #define GUARD__FREYJA_MONGOOSE_FREYJA__H_
 
+
 #include <hel/math.h>
-//#include <hel/Vector3d.h>
-//#include <mstl/Vector.h>
 
 #define FREYJA_API_VERSION   "Freyja 0.10.0"
 
@@ -73,6 +72,31 @@ extern "C" {
 	} freyja_transform_action_t;
 
 
+	typedef enum {
+		INDEXED_8 = 1, 
+		RGB_24, 
+		RGBA_32
+
+	} freyja_colormode_t;
+
+
+
+	///////////////////////////////////////////////////////////////////////
+	//  Freyja library util functions
+	///////////////////////////////////////////////////////////////////////
+
+	void freyjaSpawn();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Starts freyja backend, also does needed allocations
+	 ------------------------------------------------------*/
+
+	void freyjaFree();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Stops freyja backend, also frees memory used
+	 ------------------------------------------------------*/
+
 	void freyjaPrintError(const char *format, ...);
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
@@ -85,16 +109,27 @@ extern "C" {
 	 * Post : Report messages to stdout or gPrinter
 	 ------------------------------------------------------*/
 
+	int32 freyjaCheckModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	int32 freyjaLoadModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	int32 freyjaSaveModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 
-	/*** TEMP ABI location for stuff in transition ****/
 
-	///////////////////////////////////////////////////////////////////////
-	// Bone
-	///////////////////////////////////////////////////////////////////////
-
-	byte freyjaIsBoneAllocated(index_t boneIndex);
-
+	/* TEMP ABI location for stuff in transition below */
 
 	///////////////////////////////////////////////////////////////////////
 	// Model
@@ -137,6 +172,24 @@ extern "C" {
 	 * Post : A new texture coordinate is created
 	 *        Returns the UID of that texcoord
 	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
+	// KeyFrame
+	///////////////////////////////////////////////////////////////////////
+
+	index_t freyjaKeyFrameCreate(index_t animationIndex, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : Animation <animationIndex> exists
+	 *        Animation Bone <boneIndex> exists
+	 *
+	 * Post : Returns the keyframe's local Animation's Bone's
+	 *        Keyframe element index or -1 on error
+	 ------------------------------------------------------*/
+
+	void freyjaKeyFrameTime(index_t keyframeIndex, vec_t time);
+
+	vec_t freyjaGetKeyFrameTime(index_t keyframeIndex);
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -211,6 +264,57 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 * Post : Adds a texcoord to a polygon
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonSplitTexCoords(index_t meshIndex, index_t polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : All TexCoords are duplicated, then references to old
+	 *        TexCoords are removed -- this is useful for making a single
+	 *        polymapped texture polygon when all others will remain
+	 *        in a UV Mesh
+	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Texture
+	///////////////////////////////////////////////////////////////////////
+
+	index_t freyjaTextureCreate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t freyjaTextureCreateFilename(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t freyjaTextureCreateBuffer(byte *image, uint32 depth,
+									  uint32 width, uint32 height,
+									  freyja_colormode_t type);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Internal ABI calls
+	//
+	//   If used externally you'll likely get a lot of breakage or
+	//   slower and possibly incorrect object states.
+	///////////////////////////////////////////////////////////////////////
+
+	void freyja__MeshUpdateMappings(index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : Only use this if you're a core developer writing
+	 *        special test plugins, or internal code.
+	 *
+	 * Post : Updates Egg backend egg_mesh_t to simulate
+	 *        FreyjaMesh local vertex mappings
 	 ------------------------------------------------------*/
 }
 

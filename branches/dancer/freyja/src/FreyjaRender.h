@@ -28,7 +28,7 @@
 
 
 #include <hel/ViewVolume.h>
-#include <freyja/RenderModel.h>
+#include <freyja-0.10/RenderModel.h>
 
 #include "FreyjaModel.h"
 
@@ -50,6 +50,8 @@ enum rotate_flags {
 void getOpenGLViewport(int *viewportXYWH); // int[4]
 void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
+void FreyjaRenderEventsAttach();
+
 
 
 class FreyjaRender
@@ -74,7 +76,8 @@ public:
 		fSkeletalVertexBlending     = 16384,
 		RENDER_POINTS           = 32768,
 		fRenderBonesClearedZBuffer = 65536,
-		fViewports              = 131072
+		fViewports              = 131072,
+		fRenderGridClearedZBuffer = 262144
 	} flags_t;
 
 
@@ -141,6 +144,8 @@ public:
 	 * 2000.08.25:
 	 * Mongoose - Created, was public data member
 	 ------------------------------------------------------*/
+
+	vec_t getNearHeight() { return mScaleEnv; } 
 
 	unsigned int getWindowWidth();
 	/*------------------------------------------------------
@@ -229,6 +234,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void setNearHeight(vec_t scale) { mScaleEnv = scale; resizeContext(mWidth, mHeight); } 
+
 	void setSceneData(FreyjaModel *model);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -295,6 +302,8 @@ public:
 	static vec_t mDefaultPointSize;
 	static vec_t mDefaultLineWidth;
 	static vec_t mVertexPointSize;
+
+	static FreyjaRender *mSingleton;  // Not really, but will be later
 
 private:    
 
@@ -446,7 +455,7 @@ private:
 	vec4_t mViewports[4];                      /* Size and offset of viewports
 															  * if enabled */
 	
-	unsigned int mRenderMode;                  /* Rendering mode */
+	static unsigned int mRenderMode;                  /* Rendering mode */
 
 	float mZoom;                               /* Used to cache zoom */
 

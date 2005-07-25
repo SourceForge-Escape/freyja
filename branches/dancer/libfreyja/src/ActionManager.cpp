@@ -21,6 +21,8 @@
 
 #include "ActionManager.h"
 
+using namespace freyja;
+
 
 ////////////////////////////////////////////////////////////
 // Constructors

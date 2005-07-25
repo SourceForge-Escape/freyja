@@ -35,6 +35,7 @@
 #include <hel/Quaternion.h>
 
 #include <mstl/Vector.h>
+#include "freyja.h"
 
 
 namespace freyja {
@@ -56,9 +57,9 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	uint32 mSkeletalKeyFrameUID;     /* UID of skeletal keyframe */
+	index_t mSkeletalKeyFrameUID;    /* UID of skeletal keyframe */
 
-	uint32 mRestBoneUID;             /* UID of rest bone */
+	index_t mRestBoneUID;            /* UID of rest bone */
 
 	Quaternion mRotation;            /* Oreintation of this bone */
 
@@ -73,6 +74,18 @@ public:
 									  * rest.mBoneToWorld * this.mBboneToWorld,
 									  * which is updated in sync with changes
 									  * to rest bone and this transform */
+
+private:
+
+	index_t mUID;                       /* Unique identifier, key for pool */
+
+	index_t mOldUID;                    /* UID when this was saved to disk */
+
+	static uint32 mType;                /* Type of file chunk */
+
+	static uint32 mVersion;             /* File chunk version */
+
+	static Vector<BoneTransform *> mGobalPool; /* Storage for gobal access */
 };
 
 
@@ -93,30 +106,52 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	uint32 getUID();
+	index_t getUID();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	static Bone *getGobalBoneByUID(uint32 uid);
+	static Bone *getBone(index_t uid);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void addChild(index_t child) {} // FIXME
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void removeChild(index_t child) {} // FIXME
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void setName(const char *name) {} // FIXME
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void updateBoneToWorld() {} // FIXME
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
 
-	uint32 mSkeletonIndex;           /* The skeleton that owns this bone */
-
-	uint32 mIndex;                   /* Unique identifier in this skeleton */
-
-	uint32 mFlags;                   /* Options bitmap */
+	byte mFlags;                     /* Options bitmap */
 
 	char mName[64];                  /* Human readable identifier */
 
-	int32 mParent;                   /* Parent of this bone */
+	index_t mSkeleton;               /* Skeleton to which this bone belongs */
 
-	Vector <uint32> mChildren;       /* Children bones */
+	index_t mParent;                 /* Parent bone of this bone */
+
+	Vector<index_t> mChildren;       /* Children bones of this bone */
 
 	Quaternion mRotation;            /* Oreintation of this bone */
 
@@ -126,13 +161,14 @@ public:
 									  * this cache of the current orientation 
 									  * and translation in matrix form */
 
-
 private:
 	
-	uint32 mUID;                     /* System for allowing gobal references, 
-									  * which are mostly for C API callbacks */
+	index_t mUID;                     /* System for allowing gobal references, 
+									   * which are mostly for C API callbacks */
 
-	static uint32 mUIDCount;
+	index_t mOldUID;                  /* UID when this was saved to disk */
+
+	static Vector<Bone *> mGobalPool; /* Storage for gobal access */
 };
 
 
@@ -195,10 +231,12 @@ class Skeleton
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	uint32 mUID;                     /* System for allowing gobal references, 
-									  * which are mostly for C API callbacks */
+	index_t mUID;                     /* System for allowing gobal references, 
+									   * which are mostly for C API callbacks */
 
-	static uint32 mUIDCount;
+	index_t mOldUID;                  /* UID when this was saved to disk */
+
+	static Vector<Skeleton *> mGobalPool; /* Storage for gobal access */
 };
 
 
@@ -208,8 +246,6 @@ class SkeletalKeyFrame
 public:
 
 	vec_t time;
-
-	vec_t lastTime;
 
 	Vector<BoneTransform *> mTransforms;
 };
@@ -228,12 +264,17 @@ public:
 
 	Vector<SkeletalKeyFrame *> mKeyFrames;
 
+	vec_t time;
+	
+	vec_t lastTime;
+
+
 private:
 	
-	uint32 mUID;                     /* System for allowing gobal references, 
+	index_t mUID;                    /* System for allowing gobal references, 
 									  * which are mostly for C API callbacks */
 
-	static uint32 mUIDCount;
+	static Vector<SkeletalAnimation *> mGobalPool; /* Storage for gobal access */
 	
 };
 
