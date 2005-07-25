@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=3
 MICRO_VERSION=5
 BRANCH=
-BUILD_ID=20050607
+BUILD_ID=20050724
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -146,7 +146,6 @@ OBJS = \
 	$(BUILD_DIR)/Texture.o \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \
-	$(BUILD_DIR)/FreyjaEvent.o \
 	$(BUILD_DIR)/FreyjaModel.o
 
 
@@ -321,6 +320,8 @@ plug-ins: $(PLUGINS)
 
 $(BUILD_DIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
+
+plugins: perlinnoise.so
 
 perlinnoise.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
