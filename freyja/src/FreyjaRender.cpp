@@ -88,6 +88,8 @@ vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
 vec_t FreyjaRender::mVertexPointSize = 3.5;
 
+void mglDrawBone(unsigned char type, const vec3_t pos);
+
 
 ////////////////////////////////////////////////////////////////
 // Events
@@ -164,6 +166,7 @@ void FreyjaRenderEventsAttach()
 // Temp for testing
 #include <freyja-0.10/Vertex.h>
 #include <freyja-0.10/Mesh.h>
+#include <freyja-0.10/Skeleton.h>
 using namespace freyja;
 
 void renderTest()
@@ -172,6 +175,20 @@ void renderTest()
 	index_t v;// meshIndex;
 	uint32 count, i, j, n;
 	vec3_t xyz;
+
+
+	count = Bone::getCount();
+	Bone *bone;
+	glColor3fv(WHITE);
+
+	for (i = 0; i < count; ++i)
+	{
+		bone = Bone::getBone(i);
+
+		// FIXME: Just to show bones are loading at this point
+		if (bone)
+			mglDrawBone(2, bone->mTranslation.mVec);
+	}
 
 	count = Polygon::getCount();
 	Polygon *face;

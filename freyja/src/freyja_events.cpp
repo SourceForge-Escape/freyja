@@ -21,10 +21,18 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#define FREYJA_APP_PLUGINS
+
+#ifdef FREYJA_APP_PLUGINS
+#   include <dlfcn.h>
+#endif
+
 #include <mgtk/mgtk_events.h>
+#include <mgtk/ResourceEvent.h>
 #include <freyja-0.10/freyja.h>
 #include <freyja-0.10/MaterialABI.h>
 #include <freyja-0.10/Plugin.h>
+#include <freyja-0.10/PluginABI.h>
 #include <freyja-0.10/Image.h>
 
 #include "FreyjaModel.h"
@@ -41,12 +49,124 @@ FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
 
 
+int freyja_get_event_id_by_name(char *symbol)
+{
+	int id = -1;
+
+	gResource.Lookup(symbol, &id);
+
+	return id;
+}
+
+
 void setColor(vec4_t dest, vec4_t color)
 {
 	dest[0] = color[0];	
 	dest[1] = color[1];	
 	dest[2] = color[2];	
 	dest[3] = color[3];
+}
+
+// Temp test
+extern FreyjaModel *gFreyjaModel;
+void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
+{
+	if (bpp == 24)
+		gFreyjaModel->loadTextureBuffer(image, w, h, 24, freyjarender::Texture::RGB);
+	else if (bpp == 32)
+		gFreyjaModel->loadTextureBuffer(image, w, h, 32, freyjarender::Texture::RGBA);
+}
+
+
+void freyja_plugin_generic(const char *symbol, void *something)
+{
+	// 1. look for symbol in the 'hack bind list'
+	// 2. return what you found via the void pointer
+
+	if (strncmp(symbol, "freyja_load_texture_buffer", 25) == 0)
+	{
+		something = (void *)freyja_load_texture_buffer;
+	}
+
+	something = 0x0;
+}
+
+
+void freyja_init_application_plugins(const char *dir)
+{
+#ifdef FREYJA_APP_PLUGINS
+	FreyjaFileReader reader;
+	void (*init)(void (*func)(const char*, void*));
+	bool done = false;
+	char *module_filename;
+	void *handle;
+	char *error;
+
+
+	freyja_print("![Freyja application plugin system invoked]");
+
+	if (!reader.openDirectory(dir))
+	{
+		freyja_print("!Couldn't access application plugin directory.");
+		return;
+	}
+
+	while (!done && (module_filename = reader.getNextDirectoryListing()))
+	{
+		if (reader.isDirectory(module_filename))
+			continue;
+
+		// FIXME: Add check here for SO check
+
+		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+		{
+			freyja_print("!In module '%s'.", module_filename);
+
+			if ((error = dlerror()) != NULL)
+			{
+				freyja_print("!%s", error);
+			}
+
+			continue; /* Try the next plugin, even after a bad module load */
+		}
+		else
+		{
+			freyja_print("!Module '%s' opened.", module_filename);
+
+			// FIXME: use so name instead of 'perlinnoise' later
+			init = (void (*)(void (*)(const char*, void*)))dlsym(handle, "freyja_perlinnoise_init");
+
+			if ((error = dlerror()) != NULL)  
+			{
+				freyja_print("!%s", error);
+				dlclose(handle);
+				continue;
+			}
+
+			/* Call plugin's init function */
+	      	(*init)(freyja_plugin_generic);
+
+			if ((error = dlerror()) != NULL) 
+			{
+				freyja_print("!%s", error);
+				dlclose(handle);
+				continue;
+			}
+
+			freyja_print("!Module '%s' linked.", module_filename);
+
+			// Keep plugins in memory... now open next
+			//dlclose(handle);
+		}
+	}
+
+	reader.closeDirectory();
+
+	freyja_print("![Freyja application plugin loader sleeps now]\n");
+
+#else
+	freyja_print("FreyjaAppPlugin: This build was compiled w/o plugin support");
+#endif
 }
 
 
@@ -100,6 +220,11 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 	color[1] = g;
 	color[2] = b;
 	color[3] = a;
+
+
+	/* Color event listener */
+	if (ResourceEvent::listen(id - 10000 /*ePluginEventBase*/, color, 4))
+		return; // true;
 
 	switch (id)
 	{
@@ -234,15 +359,42 @@ void mgtk_handle_key_press(int key, int mod)
 	freyja_print("mgtk_handle_key_press(%d, %d) not handled", key, mod);
 }
 
+void eVertexExtrude()
+{
+	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
+	//vec3_t n;
+
+	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
+	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
+}
+
+void eNoImplementation(ResourceEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
+
 
 void mgtk_handle_resource_init(Resource &r)
 {
-#ifdef TEST_FREYJA_EVENTS
-	FreyjaEvent *event;
-	event = new FreyjaEventNormalGeneration(&r, "eGenerateNormals");
-#else
-	r.RegisterInt("eGenerateNormals", eGenerateNormals);
-#endif
+	////////////////////////////////////////////////////////////////////
+	// New freyja events
+	////////////////////////////////////////////////////////////////////
+
+	ResourceEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
+	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
+	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
+	ResourceEventCallback2::add("eUndo", &eNoImplementation);
+	ResourceEventCallback2::add("eRedo", &eNoImplementation);
+	ResourceEventCallback2::add("eSkeletalDeform", &eNoImplementation);
+
+	FreyjaRenderEventsAttach();
+	FreyjaModelEventsAttach();
+
+
+	////////////////////////////////////////////////////////////////////
+	// Old style events
+	////////////////////////////////////////////////////////////////////
 
 	/* Mongoose 2002.01.12, 
 	 * Bind script functions to C/C++ functions */
@@ -254,8 +406,6 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
-	r.RegisterInt("eRedo", eRedo);
-	r.RegisterInt("eUndo", eUndo);
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
@@ -269,7 +419,8 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenFileTexture", eOpenFileTexture);
 	r.RegisterInt("eOpenFileModel", eOpenFileModel);
-	r.RegisterInt("ePluginMenu", ePluginMenu);
+
+	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
 
 
 	// dialogs
@@ -313,13 +464,10 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
 	r.RegisterInt("eMeshTesselate", eMeshTesselate);
 
-
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
-
-
 	r.RegisterInt("eRenderBbox", eRenderBbox);
 
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
@@ -358,8 +506,6 @@ void mgtk_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eAnimationNext", eAnimationNext);
 	r.RegisterInt("eAnimationPrev", eAnimationPrev);
-	r.RegisterInt("eAnimationStop", eAnimationStop);
-	r.RegisterInt("eAnimationPlay", eAnimationPlay);
 	r.RegisterInt("eAnimationSlider", eAnimationSlider);
 
 	/* Widget events ( widgets hold data like spinbuttons, etc ) */
@@ -454,14 +600,31 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eRenderSkeleton",FREYJA_MODE_RENDER_BONETAG);
 	r.RegisterInt("eRenderGrid", FREYJA_MODE_RENDER_GRID);
 
-	r.RegisterInt("eSkeletalDeform", eSkeletalDeform);
-
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
 	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
 	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
+
+
+	//r.RegisterSymbol();
+
+	/* Load and init plugins */
+	char *dir = freyja_rc_map("plugins-0.10");	
+	freyja_init_application_plugins(dir);
+	delete [] dir;
+
+	/* Hook plugins to resource */
+	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
+
+	for (i = 0; i < n; ++i)
+	{
+		if (ResourceAppPluginTest::mPlugins[i] != 0x0)
+		{
+			ResourceAppPluginTest::mPlugins[i]->mEventsAttach();
+		}
+	}
 }
 
 
@@ -488,9 +651,20 @@ void mgtk_handle_resource_start()
 
 	gFreyjaControl = new FreyjaControl(&gResource);
 
-	// Called on allocation of FreyjaControl
+	// This is done when FreyjaControl is allocated now
 	/* Build the user interface from lisp, and load user preferences */
 	//gFreyjaControl->loadResource();
+
+	/* FreyjaAppPlugin prototype testing... */
+	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
+
+	for (i = 0; i < n; ++i)
+	{
+		if (ResourceAppPluginTest::mPlugins[i] != 0x0)
+		{
+			ResourceAppPluginTest::mPlugins[i]->mGUIAttach();
+		}
+	}
 
 	/* Setup material interface */
 	freyja_refresh_material_interface();
@@ -802,7 +976,7 @@ void freyja_event_file_dialog(char *s)
 
 		for (i = 0; i < count; ++i)
 		{
-			FreyjaPluginDesc *plugin = 0x0; //freyjaGetPluginClassByIndex(i);
+			FreyjaPluginDesc *plugin = 0x0;//FIXMEfreyjaGetPluginClassByIndex(i);
 			
 			if (plugin && plugin->mImportFlags)
 				//mgtk_add_menu_item(plugin->mDescription, 9001+i);
@@ -1166,7 +1340,7 @@ void freyja_refresh_material_interface()
 
 	mgtk_textentry_value_set(799, freyjaGetMaterialName(mIndex));
 
-	freyja_print("refresh_material_interface> FIXME %s:%i", __FILE__, __LINE__);
+	//freyja_print("!refresh_material_interface> FIXME %s:%i", __FILE__, __LINE__);
 }
 
 
@@ -1211,6 +1385,9 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 
 int main(int argc, char *argv[])
 {
+	/* Hookup resource to event system */
+	ResourceEvent::setResource(&gResource);
+
 	mgtk_init(argc, argv);
 
 	/* Mongoose 2002.02.23, 
