@@ -161,6 +161,61 @@ void FreyjaRenderEventsAttach()
 
 // TEMP ////////////////////////////////////////////////////////
 
+// Temp for testing
+#include <freyja-0.10/Vertex.h>
+#include <freyja-0.10/Mesh.h>
+using namespace freyja;
+
+void renderTest()
+{
+	// FIXME: Temp test
+	index_t v;// meshIndex;
+	uint32 count, i, j, n;
+	vec3_t xyz;
+
+	count = Polygon::getCount();
+	Polygon *face;
+	glColor3fv(FreyjaRender::mColorWireframe);
+
+	for (i = 0; i < count; ++i)
+	{
+		face = Polygon::getPolygon(i);
+
+		if (face)
+		{
+			n = face->vertices.size();
+			glBegin(GL_LINE_LOOP);
+			for (j = 0; j < n; ++j)
+			{
+				freyjaGetVertexPosition3fv(face->vertices[j], xyz);
+				glVertex3fv(xyz);
+			}
+			glEnd();
+		}
+	} 
+
+	//if (mRenderMode & RENDER_POINTS)
+	//{
+		/* Render actual vertices */
+		count = Vertex::getCount();//freyjaGetMeshVertexCount(meshIndex);
+
+		glPointSize(FreyjaRender::mDefaultPointSize);
+		glColor3fv(FreyjaRender::mColorVertexHighlight);
+		glBegin(GL_POINTS);
+
+		for (i = 0; i < count; ++i)
+		{
+			v = i;//freyjaGetMeshVertexIndex(meshIndex, i);
+			freyjaGetVertexPosition3fv(v, xyz);
+
+			glVertex3fv(xyz);
+		}
+  
+		glEnd();
+	//} 
+}
+
+
 void freyjaApplyMaterial(uint32 materialIndex)
 {
 	vec4_t ambient, diffuse, specular, emissive;
@@ -771,6 +826,8 @@ void FreyjaRender::drawFreeWindow()
 	renderLights();
 	glScalef(mZoom, mZoom, mZoom);
 
+	renderTest();
+
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
 		freyjaGetRenderModel(i, model);
@@ -1286,10 +1343,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 }
 
 
-// Temp for testing
-#include <freyja-0.10/Vertex.h>
-#include <freyja-0.10/Mesh.h>
-using namespace freyja;
 void FreyjaRender::renderModel(RenderModel &model)
 {
 	Vector<unsigned int> *list;
@@ -1297,7 +1350,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	vec3_t min, max;
 	vec3_t xyz;
 	int32 meshIndex = mModel->getCurrentMesh();
-	uint32 count, i, j, v, n;
+	uint32 count, i, v;
 
 
 	glPushAttrib(GL_ENABLE_BIT);
@@ -1928,52 +1981,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	getOpenGLModelviewMatrix(gMatrix);
 
-	// FIXME: Temp test
-	index_t v, meshIndex;
-	uint32 count, j, n;
-	vec3_t xyz;
-
-	count = Polygon::getCount();
-	Polygon *face;
-	glColor3fv(mColorVertexHighlight);
-
-	for (i = 0; i < count; ++i)
-	{
-		face = Polygon::getPolygon(i);
-
-		if (face)
-		{
-			n = face->vertices.size();
-			glBegin(GL_LINE_LOOP);
-			//glBegin(GL_POLYGON);
-			for (j = 0; j < n; ++j)
-			{
-				freyjaGetVertexPosition3fv(face->vertices[i], xyz);
-				glVertex3fv(xyz);
-			}
-			glEnd();
-		}
-	} 
-
-	if (mRenderMode & RENDER_POINTS)
-	{
-		/* Render actual vertices */
-		count = Vertex::getCount();//freyjaGetMeshVertexCount(meshIndex);
-
-		glPointSize(mDefaultPointSize);
-		glColor3fv(mColorVertexHighlight);
-		glBegin(GL_POINTS);
-
-		for (i = 0; i < count; ++i)
-		{
-			v = i;//freyjaGetMeshVertexIndex(meshIndex, i);
-			freyjaGetVertexPosition3fv(v, xyz);
-
-			glVertex3fv(xyz);
-		}
-  
-		glEnd();
-	} 
+	renderTest();
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{

@@ -210,19 +210,13 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 
 		count = r.readLong();
 
-		// DEBUG
-		printf("%i {\n", face);
 		for (j = 0; j < count; ++j)
 		{
 			idx = r.readLong();
 			freyjaPolygonAddVertex(face, verticesMap[idx]);
 
-			// DEBUG
 			freyjaGetVertexPosition3fv(verticesMap[idx], xyz);
-			printf("%f %f %f\n", xyz[0],xyz[1],xyz[2]);
 		}
-		// DEBUG
-		printf("{\n");
 
 		count = r.readLong();
 
