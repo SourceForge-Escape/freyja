@@ -107,6 +107,24 @@ typedef struct mgtk_tree_s
 } mgtk_tree_t;
 
 void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree);
+void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
+
+typedef struct mgtk_mouse_event_s
+{
+	unsigned char type;       /* Click = 1, Motion = 2, Reserved */
+
+	// Clicked
+	int button;      /* mgtk_mouse_key_t */
+	int state;       /* mgtk_mouse_key_state_t */
+	int modifiers;   /* mgtk_key_modifers_t */
+	int x;
+	int y;
+
+	// Motion
+	int x_delta;
+	int y_delta;
+
+} mgtk_mouse_event_t;
 
 
 #endif

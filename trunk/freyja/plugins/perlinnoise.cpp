@@ -81,6 +81,12 @@ void ePerlinNoiseGen()
 
 	image = perlin.generateBuffer(w, h, seed);
 
+	if (!image)
+	{
+		mgtk_print("ePerlinNoiseGen: Invalid image generation");
+		return;
+	}
+
 	if (clamp)
 		perlin.clampBufferIntensity(image, w, h, iA, iB, d);
 
@@ -90,6 +96,12 @@ void ePerlinNoiseGen()
 	uint32 i, n;
 	img.loadPixmap(image, w, h, FreyjaImage::INDEXED_8);
 	img.getImage(&rgb);
+
+	if (!rgb)
+	{
+		mgtk_print("ePerlinNoiseGen: Invalid image after color conversion");
+		return;
+	}
 
 	// hahaha it's 0600 no sleep -- can't wait to clean this prototype!
 	for (i = 0, n = w * h * 3; i < n; ++i)

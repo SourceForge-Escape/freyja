@@ -52,8 +52,6 @@ int freyja_get_event_id_by_name(char *symbol)
 
 	gResource.Lookup(symbol, &id);
 
-	//freyja_print("! id = %i", id);
-
 	return id;
 }
 
@@ -462,8 +460,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshTexcoordSpherical",eMeshTexcoordSpherical);
 	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
 	r.RegisterInt("eMeshTesselate", eMeshTesselate);
-	//r.RegisterInt("eMeshRotate", eMeshRotate);
-	//r.RegisterInt("eMeshScale", eMeshScale);
 
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
