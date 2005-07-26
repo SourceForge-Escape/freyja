@@ -529,7 +529,6 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("ePolygonIterator", ePolygonIterator);
 	r.RegisterInt("eMeshIterator", eMeshIterator);
 	r.RegisterInt("eGroupIterator", eGroupIterator);
-	r.RegisterInt("eBoneIterator", eBoneIterator);
 
 	r.RegisterInt("CMD_MISC_TEXEL_COMBINE", CMD_MISC_TEXEL_COMBINE);
 	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
@@ -569,17 +568,7 @@ void mgtk_handle_resource_init(Resource &r)
 	r.RegisterInt("ePolygonDelete", CMD_POLYGON_DELETE);	
 	r.RegisterInt("ePolygonSelect", CMD_POLYGON_SELECT);	
 
-	/* Bone edit */
-	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName); // textbox
-	r.RegisterInt("eBoneNew", CMD_BONE_NEW);
-	r.RegisterInt("eBoneSelect", CMD_BONE_SELECT);
-	r.RegisterInt("eBoneLinkChild", CMD_BONE_CONNECT);
-	r.RegisterInt("eBoneUnLinkChild", CMD_BONE_DISCONNECT);
-	r.RegisterInt("eBoneLinkMesh", CMD_BONE_ADD_MESH);
-	r.RegisterInt("eBoneUnLinkMesh", CMD_BONE_DELETE_MESH);
-	r.RegisterInt("eBoneMoveJoint", CMD_BONE_MOVE_PIVOT);
-
-
+	
 	r.RegisterInt("eSelectionByBox", CMD_MISC_BBOX_SELECT);
 	r.RegisterInt("eTextureMapProjection", CMD_MISC_GEN_TEXMAP_XY);
 	r.RegisterInt("eModeModel", FREYJA_MODE_MODEL_EDIT);

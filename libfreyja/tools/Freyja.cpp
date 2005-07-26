@@ -65,7 +65,7 @@ FreyjaUtil::~FreyjaUtil()
 
 int FreyjaUtil::exportModel(const char *filename, const char *type)
 {
-	return freyjaExportModel(filename, type);
+	return -1;//freyjaExportModel(filename, type);
 }
 
 
@@ -75,7 +75,7 @@ int FreyjaUtil::exportModel(const char *filename, const char *type)
 
 int FreyjaUtil::importModel(const char *filename)
 {
-	return freyjaImportModel(filename);
+	return freyjaLoadModel(filename); //freyjaImportModel(filename);
 }
 
 

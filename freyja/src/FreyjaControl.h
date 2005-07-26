@@ -285,6 +285,20 @@ class FreyjaControl
 
 	void updateDisplay();
 
+	void getFreeWorldFromScreen(int x, int y, vec3_t p);
+	void getWorldFromScreen(float *x, float *y, float *z);
+	/*------------------------------------------------------
+	 * Pre  : X and Y are the mouse position
+	 *
+	 * Post : Converts x,y on screen to x,y,z in world
+	 *        for whichever plane was last selected
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25: 
+	 * Mongoose - Created from ScreenToWorld from GooseEgg
+	 ------------------------------------------------------*/
+
 
 private:
 
@@ -308,19 +322,6 @@ private:
 	 *
 	 * 2004.08.15: 
 	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void getWorldFromScreen(float *x, float *y, float *z);
-	/*------------------------------------------------------
-	 * Pre  : X and Y are the mouse position
-	 *
-	 * Post : Converts x,y on screen to x,y,z in world
-	 *        for whichever plane was last selected
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25: 
-	 * Mongoose - Created from ScreenToWorld from GooseEgg
 	 ------------------------------------------------------*/
 
 
@@ -434,8 +435,6 @@ private:
 	 * 2004.08.14: 
 	 * Mongoose - Created from old stand alone function
 	 ------------------------------------------------------*/
-
-	void getFreeWorldFromScreen(int x, int y, vec3_t p);
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 

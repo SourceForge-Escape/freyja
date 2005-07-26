@@ -39,6 +39,7 @@
 #include "VertexABI.h"
 #include "MaterialABI.h"
 #include "SkeletonABI.h"
+#include "BoneABI.h"
 #include "MeshABI.h"
 #include "freyja.h"
 
@@ -2266,15 +2267,15 @@ Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
 
 void freyjaBegin(freyja_object_t type)
 {
-	freyjaPrintMessage("FIXME: %s:%i, file bug with %s",
-					   __FILE__, __LINE__, EMAIL_ADDRESS);
+	freyjaPrintMessage("freyjaBegin> Call is obsolete %s:%i",
+					   __FILE__, __LINE__);
 }
 
 
 void freyjaEnd()
 {
-	freyjaPrintMessage("FIXME: %s:%i, file bug with %s",
-					   __FILE__, __LINE__, EMAIL_ADDRESS);
+	freyjaPrintMessage("freyjaEnd> Call is obsolete %s:%i",
+					   __FILE__, __LINE__);
 }
 
 
@@ -2812,15 +2813,15 @@ void freyjaVertexExtrude(index_t vertexIndex, vec_t midpointScale, vec3_t normal
 
 uint32 freyjaGetCount(freyja_object_t type)
 {
-	freyjaPrintMessage("FIXME: %s:%i, file bug with %s",
-					   __FILE__, __LINE__, EMAIL_ADDRESS);
+	freyjaPrintMessage("freyjaGetCount> Call is obsolete %s:%i",
+					   __FILE__, __LINE__);
 	return 0;
 }
 
 
 index_t freyjaIterator(freyja_object_t type, int32 item)
 {
-	freyjaPrintMessage("FIXME: %s:%i, file bug with %s",
+	freyjaPrintMessage("freyjaIterator> Call is obsolete %s:%i",
 					   __FILE__, __LINE__, EMAIL_ADDRESS);
 
 	return FREYJA_ERROR;
