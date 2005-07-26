@@ -62,7 +62,7 @@ class Quaternion
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion(vec_t pitch, vec_t heading, vec_t roll);
+	//Quaternion(vec_t pitch, vec_t heading, vec_t roll);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Quaternion from Euler

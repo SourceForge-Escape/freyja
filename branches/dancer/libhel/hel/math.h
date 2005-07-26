@@ -33,6 +33,9 @@
 #define HEL_RAD_TO_DEG(x) ((x) * HEL_180_OVER_PI)
 #define HEL_DEG_TO_RAD(x) ((x) * HEL_PI_OVER_180)
 
+#define HEL_VEC3_COPY(in, out) (out[0] = in[0], out[1] = in[1], out[2] = in[2])
+
+typedef unsigned char byte;
 typedef int int32;
 typedef unsigned int uint32;
 typedef float vec_t;

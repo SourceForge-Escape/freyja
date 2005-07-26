@@ -164,9 +164,9 @@ typedef enum {
 	eScale_X,
 	eScale_Y,
 	eScale_Z,
-	eMoveBone_X,
-	eMoveBone_Y,
-	eMoveBone_Z,
+	//eMoveBone_X,
+	//eMoveBone_Y,
+	//eMoveBone_Z,
 
 	ePolyMapTexturePolygon,
 
@@ -188,7 +188,7 @@ typedef enum {
 	ePolygonIterator,
 	eMeshIterator,
 	eGroupIterator,
-	eBoneIterator,
+	//eBoneIterator,
 
 	eTransformMenu,
 	eObjectMenu,
@@ -196,7 +196,7 @@ typedef enum {
 	eSkeletalDeform,
 
 	/* Text events */
-	eSetCurrentBoneName,
+	//eSetCurrentBoneName,
 	eSetTextureNameA,
 	eSetTextureNameB,
 
@@ -248,16 +248,15 @@ typedef enum {
 	CMD_POINT_DELETE,
 	CMD_POINT_COMBINE,
 
-	CMD_BONE_PREV,
-	CMD_BONE_NEXT,
-	CMD_BONE_NEW,
-	CMD_BONE_SELECT,
-	CMD_BONE_ADD_MESH,
-	CMD_BONE_DELETE_MESH,
-	CMD_BONE_CONNECT,
-	CMD_BONE_DISCONNECT,
-	CMD_BONE_MOVE_PIVOT,
-
+	//CMD_BONE_PREV,
+	//CMD_BONE_NEXT,
+	//CMD_BONE_NEW,
+	//CMD_BONE_SELECT,
+	//CMD_BONE_ADD_MESH,
+	//CMD_BONE_DELETE_MESH,
+	//CMD_BONE_CONNECT,
+	//CMD_BONE_DISCONNECT,
+	//CMD_BONE_MOVE_PIVOT,
 
 	CMD_MESH_ADD,
 	CMD_MESH_MOVE_CENTER,
@@ -296,6 +295,8 @@ void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
 void freyja_event_file_dialog(char *s);
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
+
+int freyja_get_event_id_by_name(char *symbol);
 
 void freyja_event_info_dialog(char *icon, char *message);
 void freyja_event_file_dialog(char *title);

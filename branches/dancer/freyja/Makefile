@@ -8,7 +8,7 @@
 # + Lots of misc new features
 ################################################################
 
-NAME=freyja
+NAME=freyja-0.10
 BASE_NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=4
@@ -142,6 +142,7 @@ all: debug release prof
 targets: $(TARGETS)
 
 OBJS = \
+	$(BUILD_DIR)/skeletal.o \
 	$(BUILD_DIR)/freyja_events.o \
 	$(BUILD_DIR)/Texture.o \
 	$(BUILD_DIR)/FreyjaRender.o \
@@ -264,10 +265,10 @@ install:
 	@-cp data/icons/*.png /usr/share/freyja/icons/
 	@-mkdir -p /usr/share/freyja/palettes/
 	@-cp data/palettes/*.pal /usr/share/freyja/palettes/
-	@-mkdir -p /usr/share/freyja/plugins/
-	@-cp plugins/*.mlisp /usr/share/freyja/plugins/
-	@-mkdir -p /usr/share/freyja/plugins/
-	@-cp bin/plugins/*.so /usr/share/freyja/plugins/
+	@-mkdir -p /usr/share/freyja/plugins-0.10/
+	@-cp plugins/*.mlisp /usr/share/freyja/plugins-0.10/
+	@-mkdir -p /usr/share/freyja/plugins-0.10/
+	@-cp bin/plugins/*.so /usr/share/freyja/plugins-0.10/
 	@-echo "[done]"
 
 

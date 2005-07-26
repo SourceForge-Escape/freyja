@@ -504,16 +504,16 @@
 					;; Replace usage with generic transform box later
 					(hbox 1 0 0 1 0 
 						(label "Translate" 0.0 0.5) 
-						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 510)
-						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 511)
-						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 512))
+						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 eBoneTranslateX)
+						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 eBoneTranslateY)
+						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 eBoneTranslateZ))
 
 					;; Replace usage with generic transform box later
 					(hbox 1 0 0 1 0 
 						(label "Rotate" 0.0 0.5) 
-						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 520)
-						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 521)
-						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 522))
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 eBoneRotateX)
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 eBoneRotateY)
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 eBoneRotateZ))
 
 					(hbox 1 1 0 1 1	(hsep))
 

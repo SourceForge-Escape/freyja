@@ -32,12 +32,18 @@
 #include <freyja-0.10/MaterialABI.h>
 #include <freyja-0.10/PluginABI.h>
 #include <freyja-0.10/MeshABI.h>
+#include <freyja-0.10/Mesh.h>
+#include <freyja-0.10/BoneABI.h>
+#include <freyja-0.10/Bone.h>
+#include <freyja-0.10/Vertex.h>
 #include <hel/math.h>
 
 #include "freyja_events.h"
 #include "FreyjaControl.h"
 
-//using namespace freyja;
+using namespace freyja;
+
+extern index_t gCurrentSkeleton; 
 
 void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
@@ -95,7 +101,7 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mModel->initTexture();
 
 	// handle loaded from system call
-	if (!freyjaGetCount(FREYJA_BONE) && !freyjaGetCount(FREYJA_VERTEX))
+	if (!Bone::getCount() && !Vertex::getCount())
 		mCleared = true;
 	else
 		mCleared = false;
@@ -264,9 +270,6 @@ void FreyjaControl::setZoom(float zoom)
 
 bool FreyjaControl::event(int event, unsigned int value)
 {
-	vec_t x, y, z;
-
-
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
 
@@ -312,45 +315,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 
-	case eBoneIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_BONE)))
-		{
-			char dupname[64];
-
-			mModel->setCurrentBone(value);
-
-			if (value == mModel->getCurrentBone() &&
-				mModel->isCurrentBoneAllocated())
-			{
-				/* Mongoose 2002.08.31, Update spin buttons dependent 
-				 * on this one */
-				mModel->getBoneRotation(&x, &y, &z);
-				freyja_event_set_float(520, x);
-				freyja_event_set_float(521, y);
-				freyja_event_set_float(522, z);
-				
-				mModel->getBoneTranslation(&x, &y, &z);
-				freyja_event_set_float(510, x);
-				freyja_event_set_float(511, y);
-				freyja_event_set_float(512, z);
-				freyja_event_gl_refresh();
-				freyja_print("Selecting bone[%i] ...", value);
-
-				/* Update any bone name listeners, 
-				 * 1. Dup string to avoid evil widgets that want to mutate it
-				 * 2. Diable event hook up in case of event loop */
-				extern void mgtk_textentry_value_set(int event, const char *s);
-				strncpy(dupname, mModel->getNameBone(value), 64);
-				mModel->setFlags(FreyjaModel::fDontUpdateBoneName, 1);
-				mgtk_textentry_value_set(eSetCurrentBoneName, dupname);
-				mModel->setFlags(FreyjaModel::fDontUpdateBoneName, 0);
-			}
-		}
-		break;
-
-
 	case ePolygonIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_POLYGON)))
+		if (!freyja_event_set_range(event, value, 0, Polygon::getCount()))
 		{
 			mModel->setCurrentPolygon(value);			
 			freyja_event_gl_refresh();
@@ -360,7 +326,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eMeshIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_MESH)))
+		if (!freyja_event_set_range(event, value, 0, Mesh::getCount()))
 		{
 			mModel->setCurrentMesh(value);			
 			freyja_event_gl_refresh();
@@ -413,7 +379,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 bool FreyjaControl::event(int event, vec_t value)
 {
 	vec4_t color, pos;
-	vec_t x, y, z;
 
 
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
@@ -421,50 +386,6 @@ bool FreyjaControl::event(int event, vec_t value)
 
 	switch (event)
 	{
-	case 510:
-	case 511:
-	case 512:
-		mModel->getBoneTranslation(&x, &y, &z);
-		
-		switch (event - 510)
-		{
-		case 0:
-			mModel->setBoneTranslation(value, y, z);
-			break;
-		case 1:
-			mModel->setBoneTranslation(x, value, z);
-			break;
-		case 2:
-			mModel->setBoneTranslation(x, y, value);
-			break;
-		}
-		
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 520:
-	case 521:
-	case 522:
-		mModel->getBoneRotation(&x, &y, &z);
-
-		switch (event - 520)
-		{
-		case 0:
-			mModel->setBoneRotation(value, y, z);
-			break;
-		case 1:
-			mModel->setBoneRotation(x, value, z);
-			break;
-		case 2:
-			mModel->setBoneRotation(x, y, value);
-			break;
-		}
-		
-		freyja_event_gl_refresh();
-		break;
-
-
 	case 700:
 	case 701:
 	case 702:
@@ -524,12 +445,6 @@ bool FreyjaControl::event(int event, vec_t value)
 		freyja_event_gl_refresh();
 		break;
 
-
-	/* Move/Rotate/Scale generics are used by a larger event as a vector */
-	case eMoveBone_X:
-	case eMoveBone_Y:
-	case eMoveBone_Z:
-		break;
 
 	case eMove_X:
 	case eMove_Y:
@@ -1362,56 +1277,6 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	/* BONES */
-	case CMD_BONE_SELECT:
-		mTransformMode = FreyjaModel::TransformBone;
-		freyja_print("Select bone...");
-		mEventMode = modeSelect;
-		break;
-	case CMD_BONE_NEW:
-		mTransformMode = FreyjaModel::TransformBone;
-		addObject();
-		mCleared = false;
-		//freyja_print("Select new child bone placement directly...");
-		//mEventMode = BONE_ADD_MODE;
-		break;
-	case CMD_BONE_CONNECT:
-		mTransformMode = FreyjaModel::TransformBone;
-		freyja_print("Select a bone to connect to current bone...");
-		mEventMode = BONE_CONNECT_MODE;
-		break;
-
-	case CMD_BONE_DISCONNECT:
-		mTransformMode = FreyjaModel::TransformBone;
-		freyja_print("Select bone to break from current");
-		mEventMode = BONE_DISCONNECT_MODE;
-		break;
-
-	case CMD_BONE_NEXT:
-		mTransformMode = FreyjaModel::TransformBone;
-		mModel->setCurrentBone(mModel->getCurrentBone() + 1);
-		break;
-
-	case CMD_BONE_PREV:
-		mTransformMode = FreyjaModel::TransformBone;
-		if (mModel->getCurrentBone())
-			mModel->setCurrentBone(mModel->getCurrentBone() - 1);
-		break;
-
-	case CMD_BONE_ADD_MESH:
-		mTransformMode = FreyjaModel::TransformBone;
-		mModel->addMeshToBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
-		freyja_print("New Bone[%i] now contains mesh %i",
-					 mModel->getCurrentBone(), mModel->getCurrentMesh());
-		break;
-	
-	case CMD_BONE_DELETE_MESH:
-		mTransformMode = FreyjaModel::TransformBone;
-		mModel->removeMeshFromBone(mModel->getCurrentBone(), mModel->getCurrentMesh());
-		freyja_print("New Bone[%i] no longer contains mesh %i",
-					 mModel->getCurrentBone(), mModel->getCurrentMesh());
-		break;
-
 
 	case eExtrude:
 /*
@@ -1878,10 +1743,6 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 	case eSetTextureNameB:
 		/* Text here is assumed to be a filename */
 		//mMaterial->loadDetailTexture(text);
-		break;
-
-	case eSetCurrentBoneName:
-		mModel->setNameBone(mModel->getCurrentBone(), text);
 		break;
 
 	default:
@@ -2409,8 +2270,7 @@ void FreyjaControl::deleteSelectedObject()
 		break;
 
 	case FreyjaModel::TransformBone:
-		freyja_print("NOT IMPLEMENTED: Deleting Bone Tag %d", 
-					mModel->getCurrentBone());
+		freyjaBoneDelete(mModel->getCurrentBone());
 		break;
 
 	case FreyjaModel::TransformMesh:
@@ -2432,17 +2292,13 @@ void FreyjaControl::addObject()
 		break;
 
 	case FreyjaModel::TransformBone:
-		index = mModel->newBone(0.0, 0.0, 0.0, 0x0);
-
-		if (index > 0)
-		{
-			mModel->connectBone(mModel->getCurrentBone(), index);
-		}
-		
+		index = freyjaBoneCreate(gCurrentSkeleton);
+		freyjaBoneAddChild(mModel->getCurrentBone(), index);		
 		freyja_event_gl_refresh();
 		freyja_print("New Bone[%u], Bone[%u].parent = %i",
 					 index, index, mModel->getCurrentBone());
 		break;
+
 	case FreyjaModel::TransformMesh:
 		mModel->MeshNew();
 		break;
@@ -2601,12 +2457,12 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
-	static int old_y = 0, old_x = 0;
-	const float t = 1.0f, m = 1.0f;
-	float xr, yr, zr;
-	float xf, yf, zf;
-	int swap;
+	static int32 old_y = 0, old_x = 0, swap;
+	const vec_t t = 1.0f, m = 1.0f;
 	freyja_transform_action_t rotate;
+	vec3_t xyz;
+	vec_t xf, yf, zf;
+	uint32 i;
 
 
 	/* Mongoose: Compute a relative movement value too here */
@@ -2639,20 +2495,20 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	switch (mTransformMode)
 	{
 	case FreyjaModel::TransformBone:
-		mModel->getBoneRotation(&xr, &yr, &zr);
-		mModel->setBoneRotation(xr + xf, yr + yf, zr + zf);
-		mModel->getBoneRotation(&xr, &yr, &zr);
+		freyjaGetBoneRotation3fv(mModel->getCurrentBone(), xyz);
 
-		if (xr > 180.0f)
-			mModel->setBoneRotation(-180.0f, yr, zr);
+		xyz[0] += xf;
+		xyz[1] += yf;
+		xyz[2] += zf;
 
-		if (xr > 180.0f)
-			mModel->setBoneRotation(xr, -180.0f, zr);
+		for (i = 0; i < 3; ++i)
+		{
+			if (xyz[i] > 180.0f)   // Ah, fucked up constraints from old system
+				xyz[i] -= 180.0f;
+		}
 
-		if (xr > 180.0f)
-			mModel->setBoneRotation(xr, yr, -180.0f);			
+		freyjaBoneRotateEuler3fv(mModel->getCurrentBone(), xyz);
 		break;
-
 
 	case FreyjaModel::TransformMesh:
 		/* Mongoose: Scaled rotation for better response */
@@ -2815,10 +2671,6 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 		case VERTEX_BBOX_SELECT_MODE:
 			mModel->BBoxMove(xx, yy);
 			break;
-			
-		case TAG_MOVE_CENTER:
-			mModel->moveBoneCenter(xx, yy);
-			break;
 
 		case MESH_MOVE_CENTER: 
 			mModel->MeshMoveCenter(xx, yy);
@@ -2840,7 +2692,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 { 
 	vec3_t xyz;
 	float xx = x, yy = y;
-	unsigned int master_tag, i;
 	static float xxx, yyy;
 
 	
@@ -2928,18 +2779,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		mModel->VertexSelect(xx, yy);
 		mModel->VertexDelete();
 		break;
-	case BONE_CONNECT_MODE:
-		master_tag = mModel->getCurrentBone();
-		mModel->selectBone(xx, yy);
-		mModel->connectBone(master_tag, mModel->getCurrentBone());
-		mModel->setCurrentBone(master_tag);
-		break;
-	case BONE_DISCONNECT_MODE:
-		master_tag = mModel->getCurrentBone();
-		mModel->selectBone(xx, yy);
-		mModel->removeMeshFromBone(master_tag, mModel->getCurrentBone());
-		mModel->setCurrentBone(master_tag);
-		break;
 	case MESH_MOVE_CENTER:
 		if (mXYZMouseState == 0)
 			mXYZMouseState = 1;
@@ -2948,10 +2787,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 	case POINT_ADD_MODE: 
 		mModel->VertexNew(xx, yy);
-		break;
-	case BONE_ADD_MODE:
-		i = mModel->newBone(xyz[0], xyz[1], xyz[2], 0x0);
-		freyja_print("New bone[%i] created", i);
 		break;
 	case POLYGON_ADD_MODE:
 		mModel->PolygonAddVertex(xx, yy);

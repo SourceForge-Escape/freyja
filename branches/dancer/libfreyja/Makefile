@@ -161,6 +161,7 @@ targets: $(TARGETS)
 PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/ActionManager.o \
+	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/Light.o \
 	$(BUILDDIR)/Vertex.o \
 	$(BUILDDIR)/Camera.o \

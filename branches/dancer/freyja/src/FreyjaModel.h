@@ -135,30 +135,6 @@ public:
 	 *        
 	 ------------------------------------------------------*/
 
-	void getBoneRotation(vec_t *pitch, vec_t *yaw, vec_t *roll);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get pointers to the current bone's 
-	 *        orientation in 3 space ( Euler angles )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 200?.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void getBoneTranslation(vec_t *x, vec_t *y, vec_t *z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get pointers to the current bone's X Y Z offset
-	 *        in 3 space
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 200?.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	unsigned int getCurrentAnimation();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -348,13 +324,7 @@ public:
 
 	Vector<unsigned int> &getVertexSelectionList();
 
-	bool isCurrentBoneAllocated();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if current bone index has a 
-	 *        matching allocated object
-	 *
-	 ------------------------------------------------------*/
+
 
 	void printInfo();
 	/*------------------------------------------------------
@@ -468,30 +438,6 @@ public:
 	int saveMaterial(const char *filename);
 
 	void selectObject(transform_t type, Vector3d xyz);
-
-	void setBoneRotation(float pitch, float yaw, float roll);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set the current bone's X Y Z orientation in
-	 *        3 space by Euler angles
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 200?.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setBoneTranslation(float x, float y, float z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set the current bone's X Y Z offset in
-	 *        3 space
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 200?.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	void setCurrentAnimation(unsigned int index);
 	/*------------------------------------------------------
@@ -620,8 +566,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void updateSkeletalUI();
-
 
 	/////////////////////////////////////////////////////////////////////////
 	// FIXME: Might be better to nuke these in favor of direct libfreyja ABI
@@ -629,15 +573,6 @@ public:
 
 	int32 getCurrentModel();
 
-	unsigned int newBone(vec_t x, vec_t y, vec_t z, unsigned char flag);
-	void setNameBone(unsigned int bone, const char *name);
-	const char *getNameBone(unsigned int bone);
-	void addVertexToBone(unsigned int bone, unsigned int vertex);
-	void removeVertexFromBone(unsigned int bone, unsigned int vertex);
-	void addMeshToBone(unsigned int bone, unsigned int mesh);
-	void removeMeshFromBone(unsigned int bone, unsigned int mesh);
-	void connectBone(unsigned int master, unsigned int slave);
-	void disconnectBone(unsigned int master, unsigned int slave);
 
 
 	/////////////////////////////////////////////////////////////////////////
@@ -669,9 +604,9 @@ public:
 	void MeshNew();
 	void MeshDel();
 
-	void moveBoneCenter(float xx, float yy);
-	void moveBone(float xx, float yy);
+
 	void selectBone(float xx, float yy);
+	void moveBone(float xx, float yy);
 
 	///////////////////////////////////////////////////////
 

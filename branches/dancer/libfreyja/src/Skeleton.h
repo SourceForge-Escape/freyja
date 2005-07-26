@@ -33,9 +33,9 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
-
 #include <mstl/Vector.h>
 #include "freyja.h"
+#include "Bone.h"
 
 
 namespace freyja {
@@ -88,94 +88,6 @@ private:
 	static Vector<BoneTransform *> mGobalPool; /* Storage for gobal access */
 };
 
-
-
-class Bone 
-{
-public:
-
-	Bone();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	~Bone();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t getUID();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	static uint32 getCount() { return mGobalPool.size(); } 
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	static Bone *getBone(index_t uid);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void addChild(index_t child) {} // FIXME
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void removeChild(index_t child) {} // FIXME
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void setName(const char *name) {} // FIXME
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void updateBoneToWorld() {} // FIXME
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-
-	byte mFlags;                     /* Options bitmap */
-
-	char mName[64];                  /* Human readable identifier */
-
-	index_t mSkeleton;               /* Skeleton to which this bone belongs */
-
-	index_t mParent;                 /* Parent bone of this bone */
-
-	Vector<index_t> mChildren;       /* Children bones of this bone */
-
-	Quaternion mRotation;            /* Oreintation of this bone */
-
-	Vector3d mTranslation;           /* Offset of this bone from parent */
-
-	Matrix mBoneToWorld;             /* Transform vertices to world coords with
-									  * this cache of the current orientation 
-									  * and translation in matrix form */
-
-private:
-	
-	index_t mUID;                     /* System for allowing gobal references, 
-									   * which are mostly for C API callbacks */
-
-	index_t mOldUID;                  /* UID when this was saved to disk */
-
-	static Vector<Bone *> mGobalPool; /* Storage for gobal access */
-};
 
 
 class Skeleton
@@ -239,8 +151,6 @@ class Skeleton
 
 	index_t mUID;                     /* System for allowing gobal references, 
 									   * which are mostly for C API callbacks */
-
-	index_t mOldUID;                  /* UID when this was saved to disk */
 
 	static Vector<Skeleton *> mGobalPool; /* Storage for gobal access */
 };

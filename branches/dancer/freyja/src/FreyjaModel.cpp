@@ -33,6 +33,10 @@
 #include <freyja-0.10/VertexABI.h>
 #include <freyja-0.10/MaterialABI.h> 
 #include <freyja-0.10/SkeletonABI.h> 
+#include <freyja-0.10/BoneABI.h> 
+#include <freyja-0.10/Mesh.h> 
+#include <freyja-0.10/Vertex.h>
+#include <freyja-0.10/Bone.h> 
 #include <mgtk/ResourceEvent.h>
 
 #include "freyja_events.h"
@@ -218,10 +222,10 @@ void FreyjaModel::clear()
 void FreyjaModel::printInfo()
 {
 	freyja_print("%d bones, %d meshes, %d polygons, %d vertices",
-				freyjaGetCount(FREYJA_BONE), 
-				freyjaGetCount(FREYJA_MESH), 
-				freyjaGetCount(FREYJA_POLYGON), 
-				freyjaGetCount(FREYJA_VERTEX));
+				Bone::getCount(), 
+				Mesh::getCount(), 
+				Polygon::getCount(), 
+				Vertex::getCount());
 }
 
 
@@ -325,7 +329,7 @@ unsigned int FreyjaModel::getCurrentAnimation()
 
 void FreyjaModel::setCurrentMesh(unsigned int index)
 {
-	if (index < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(index))
+	if (index < Mesh::getCount() && freyjaIsMeshAllocated(index))
 	{
 		mMeshIndex = index;		
 		//mGroupIndex = freyjaGetMeshVertexGroupIndex(mMeshIndex, 0);
@@ -335,7 +339,7 @@ void FreyjaModel::setCurrentMesh(unsigned int index)
 
 void FreyjaModel::setCurrentPolygon(unsigned int index)
 {
-	if (index < freyjaGetCount(FREYJA_POLYGON))
+	if (index < Polygon::getCount())
 	{
 		mPolygonIndex = index;
 	}
@@ -362,7 +366,7 @@ void FreyjaModel::setCurrentSkeleton(unsigned int index)
 
 void FreyjaModel::setCurrentBone(unsigned int index)
 {
-	if (index < freyjaGetCount(FREYJA_BONE))
+	if (index < Bone::getCount())
 	{
 		mBoneIndex = index;
 		freyja_print("Bone Tag[%i]", getCurrentBone());
@@ -381,7 +385,7 @@ void FreyjaModel::setCurrentTexCoord(unsigned int index)
 
 void FreyjaModel::setCurrentVertex(unsigned int index)
 {
-	if (index < freyjaGetCount(FREYJA_VERTEX))
+	if (index < Vertex::getCount())
 	{
 		//FIXME freyjaCurrentVertex(index);
 		mVertexIndex = index;
@@ -460,39 +464,6 @@ void FreyjaModel::setCurrentTextureIndex(unsigned int index)
 ///////////////////////////////////////////////////////////////////////////////
 
 
-void FreyjaModel::getBoneTranslation(float *x, float *y, float *z)
-{
-	vec3_t xyz;
-
-	//freyjaGetBoneTranslation3fv(getCurrentBone(), xyz);
-	*x = xyz[0];
-	*y = xyz[1];
-	*z = xyz[2];
-}
-
-
-void FreyjaModel::setBoneTranslation(float x, float y, float z)
-{
-	freyjaBoneTranslate3f(getCurrentBone(), x, y, z);
-}
-
-
-void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
-{
-	vec3_t xyz;
-
-	freyjaGetBoneRotation3fv(getCurrentBone(), xyz);
-	*x = xyz[0];
-	*y = xyz[1];
-	*z = xyz[2];
-}
-
-
-void FreyjaModel::setBoneRotation(float x, float y, float z)
-{
-	freyjaBoneRotateEuler3f(getCurrentBone(), x, y, z);
-}
-
 
 void FreyjaModel::transform(int mode, freyja_transform_action_t action, 
 							float x, float y, float z)
@@ -554,55 +525,12 @@ void FreyjaModel::getSceneTranslation(vec3_t scroll)
 
 //// BONES /////////////////////////////////////////
 
-unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
-{
-	int32 boneIndex = freyjaBoneCreate(0);
-
-
-	if (boneIndex == 0)
-	{
-		freyjaBoneName(boneIndex, "root");
-	}
-	else
-	{
-		char name[64];
-
-		snprintf(name, 64, "bone %i", boneIndex);
-		freyjaBoneName(boneIndex, name);
-	}
-
-	updateSkeletalUI();
-
-	return boneIndex;
-}
-
-
-void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
-{
-	//freyjaBoneAddMesh1i(getCurrentBone(), getCurrentMesh());
-	updateSkeletalUI();
-}
-
-
-void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
-{
-	//freyjaBoneRemoveMesh1i(getCurrentBone(), getCurrentMesh());
-	updateSkeletalUI();
-}
-
-
 void FreyjaModel::selectBone(float xx, float yy)
 {
 	int32 boneIndex = getNearestBoneIndexInPlane(xx, yy, getCurrentPlane());
 
 	if (boneIndex > -1)
 		setCurrentBone(boneIndex);
-}
-
-void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
-{
-	freyjaBoneAddChild(master, slave);
-	updateSkeletalUI();
 }
 
 
@@ -822,7 +750,7 @@ void FreyjaModel::mirrorUsingVertexBuffer(bool x, bool y, bool z)
 		if (z)
 			xyz[2] = -xyz[2];
 
-		//freyjaVertexPosition3fv(mList[i], xyz);
+		freyjaVertexPosition3fv(mList[i], xyz);
 	}
 }
 
@@ -832,84 +760,6 @@ void FreyjaModel::MeshDel()
 	freyja_print("Mesh[%u] deleted\n", mMeshIndex);
 	freyjaMeshDelete(mMeshIndex);
 }
-
-
-void FreyjaModel::setNameBone(unsigned int boneIndex, const char *name)
-{
-	if (getFlags() & fDontUpdateBoneName)
-		return;
-
-	if (freyjaIsBoneAllocated(boneIndex) && name && name[1])
-	{
-		//freyjaBoneName1s(boneIndex, name);
-		freyja_print("bone[%i].name = '%s'", boneIndex, name);
-		updateSkeletalUI();
-	}
-}
-
-
-const char *FreyjaModel::getNameBone(unsigned int boneIndex)
-{
-	if (freyjaIsBoneAllocated(boneIndex))
-	{
-		return freyjaGetBoneName1s(boneIndex);
-	}
-
-	return 0x0;
-}
-
-
-void FreyjaModel::disconnectBone(unsigned int parent, unsigned int child)
-{
-	//freyjaBoneRemoveChild1i(parent, child); 
-	updateSkeletalUI();
-}
-
-
-void addVertexToBone(unsigned int bone, unsigned int vertex)
-{
-	//freyjaVertexWeight(vertex, 1.0f, bone);
-}
-
-
-void FreyjaModel::removeVertexFromBone(unsigned int bone, unsigned int vertex)
-{
-	//freyjaBoneRemoveVertex(bone, vertex);
-}
-
-
-void FreyjaModel::moveBoneCenter(float xx, float yy)
-{
-	uint32 boneIndex = getCurrentBone();
-	vec3_t xyz;
-
-
-	if (!freyjaIsBoneAllocated(boneIndex))
-		return;
-
-	//freyjaGetBoneTranslation3fv(boneIndex, xyz);
-
-	switch (getCurrentPlane())
-	{
-	case PLANE_XY:
-		xyz[0] = xx;
-		xyz[1] = yy;
-		break;
-
-	case PLANE_XZ:
-		xyz[0] = xx;
-		xyz[2] = yy;
-		break;
-
-	case PLANE_ZY: // side
-		xyz[2] = xx;
-		xyz[1] = yy;
-		break;
-	}
-
-	freyjaBoneTranslate3fv(boneIndex, xyz);
-}
-
 
 
 void FreyjaModel::moveBone(float xx, float yy)
@@ -1833,93 +1683,9 @@ void FreyjaModel::TexelMove(float u, float v)
 }
 
 
-// FIXME Move to freyja_event?
-#include <mgtk/mgtk_events.h>
-extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
-extern int gSkelTreeWidgetIndex;
-
-mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
-								mgtk_tree_t *tree)
-{
-	uint32 i, boneChild, count;
 
 
-	if (!freyjaIsBoneAllocated(rootIndex))
-	{
-		freyja_print("!generateSkeletalUI> ERROR: NULL skeletal bone!\n");
-		return 0x0;
-	}
 
-	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
-	const char *rootName = freyjaGetBoneName1s(rootIndex);
-	uint32 rootSkelBID = freyjaGetSkeletonBoneIndex(skelIndex, rootIndex);
-
-	if (tree == 0x0)
-	{
-		tree = new mgtk_tree_t;
-		snprintf(tree->label, 64, "root");	
-		tree->parent = 0x0;
-	}
-	else
-	{
-		snprintf(tree->label, 64, "bone%03i", rootSkelBID);
-	}
-
-	if (rootName[0])
-	{
-		snprintf(tree->label, 64, "%s", rootName);
-	}
-
-	tree->id = rootIndex;
-	tree->numChildren = rootChildCount;
-	tree->children = 0x0;
-
-#ifdef DEBUG_BONE_LOAD
-	printf("-- %s : %i/%i children\n",  
-		   tree->label, tree->numChildren, rootChildCount);
-#endif
-
-	if (tree->numChildren == 0)
-		return tree->parent;
-
-	tree->children = new mgtk_tree_t[tree->numChildren+1];
-
-	for (count = 0, i = 0; i < rootChildCount; ++i)
-	{
-		boneChild = freyjaGetBoneChild(rootIndex, i);
-
-		if (freyjaIsBoneAllocated(boneChild))
-		{
-			tree->children[count].parent = tree;
-			generateSkeletalUI(skelIndex, boneChild, &tree->children[count++]);
-		}
-	}
-
-	return (tree->parent) ? tree->parent : tree;
-}
-
-
-void updateSkeletonUI(uint32 skelIndex)
-{
-	mgtk_tree_t *tree;
-
-	tree = generateSkeletalUI(skelIndex, 
-							  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
-
-	mgtk_event_update_tree(gSkelTreeWidgetIndex, tree);
-}
-
-
-uint32 getCurrentSkeleton()
-{ 
-	return 0; // only 1 allowed in editor atm
-}
-
-
-void FreyjaModel::updateSkeletalUI()
-{
-	updateSkeletonUI(getCurrentSkeleton());
-}
 
 
 /* FIXME Quick hack to fix corruption on svn server by
@@ -2474,8 +2240,8 @@ int FreyjaModel::loadModel(const char *filename)
 {
 	int err = freyjaLoadModel(filename);//freyjaImportModel(filename); 
 
-	updateSkeletalUI();		
- 
+	//updateSkeletalUI();
+
 	if (err)
 	{
 		freyja_print("ERROR: File '%s' not found or unknown format\n", filename);
@@ -2586,14 +2352,6 @@ int FreyjaModel::saveModel(const char *filename)
 	return 0;
 }
 
-
-
-
-bool FreyjaModel::isCurrentBoneAllocated()
-{
-	return freyjaIsBoneAllocated(getCurrentBone());
-}
- 
 
 ////////////////////////////////////////////////////////////
 // Private Accessors

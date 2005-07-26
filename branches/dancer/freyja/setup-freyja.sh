@@ -18,6 +18,10 @@ cp ./data/palettes/*.pal ~/.freyja/palettes/
 cp ./data/materials/*.mat ~/.freyja/materials/
 cp ./data/icons/* ~/.freyja/icons/
 
+mkdir -p ~/.freyja/plugins-0.10/
+cp plugins/*.mlisp ~/.freyja/plugins-0.10/
+cp bin/plugins/*.so ~/.freyja/plugins-0.10/
+
 # GNOME Setup
 #cp ./data/freyja.desktop /usr/share/applications/
 #cp ./data/freyja.desktop /usr/share/applnk/Graphics/

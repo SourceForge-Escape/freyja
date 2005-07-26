@@ -166,7 +166,8 @@ void FreyjaRenderEventsAttach()
 // Temp for testing
 #include <freyja-0.10/Vertex.h>
 #include <freyja-0.10/Mesh.h>
-#include <freyja-0.10/Skeleton.h>
+#include <freyja-0.10/Bone.h>
+#include <freyja-0.10/BoneABI.h>
 using namespace freyja;
 
 void renderTest()
@@ -174,21 +175,48 @@ void renderTest()
 	// FIXME: Temp test
 	index_t v;// meshIndex;
 	uint32 count, i, j, n;
-	vec3_t xyz;
+	vec3_t xyz, txyz;
 
 
 	count = Bone::getCount();
 	Bone *bone;
 	glColor3fv(WHITE);
 
+#ifdef OLD_BONE_RENDER_TEST
+	// Assumes Bone 0 is root until Skeleton is up
+	for (i = 0; i < count; ++i)
+	{
+		glPushMatrix();
+		glTranslatef(txyz[0], txyz[1], txyz[2]); // here t is translate
+		glRotatef(rxyz[2], 0.0f, 0.0f, 1.0f);
+		glRotatef(rxyz[1], 0.0f, 1.0f, 0.0f);
+		glRotatef(rxyz[0], 1.0f, 0.0f, 0.0f);
+		mglDrawBone(2, xyz);//bone->mTranslation.mVec);
+		glPopMatrix();	
+	}
+#else
 	for (i = 0; i < count; ++i)
 	{
 		bone = Bone::getBone(i);
 
+		freyjaGetBoneTranslation3fv(i, xyz);
+
 		// FIXME: Just to show bones are loading at this point
 		if (bone)
-			mglDrawBone(2, bone->mTranslation.mVec);
+		{
+			vec3_t origin = {0,0,0};
+			bone->mBoneToWorld.multiply3v(xyz, txyz); // here t is transform
+			bone->mBoneToWorld.multiply3v(origin, origin);
+
+			glBegin(GL_LINES);
+			glVertex3fv(origin);
+			glVertex3fv(txyz);
+			glEnd();
+
+			//mglDrawBone(2, txyz);
+		}
 	}
+#endif
 
 	count = Polygon::getCount();
 	Polygon *face;
