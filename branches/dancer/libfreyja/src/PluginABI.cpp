@@ -539,8 +539,9 @@ int32 freyjaLoadModel(const char *filename)
 		switch (chunk.type)
 		{
 		case FREYJA_CHUNK_BONE:
-			freyjaBegin(FREYJA_BONE);
-			index = freyjaGetCurrent(FREYJA_BONE);
+			//freyjaBegin(FREYJA_BONE);
+			//index = freyjaGetCurrent(FREYJA_BONE);
+			index = freyjaBoneCreate(0); // only 1 skeleton in v9
 			bones.pushBack(index);
 
 			memset(buffer, 0, 64);
@@ -572,7 +573,7 @@ int32 freyjaLoadModel(const char *filename)
 				freyjaBoneRotateQuat4fv(index, wxyz);
 			}
 
-			freyjaEnd(); // FREYJA_BONE
+			//freyjaEnd(); // FREYJA_BONE
 
 			if ((long)r.getFileOffset() != offset)
 				printf("BONE @ %i not %i!\n", r.getFileOffset(), offset);
