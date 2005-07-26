@@ -170,77 +170,122 @@ void FreyjaRenderEventsAttach()
 #include <freyja-0.10/BoneABI.h>
 using namespace freyja;
 
+void renderSkeletonTest(uint32 boneIndex)
+{
+	Bone *bone, *parent;
+	Quaternion q;
+	vec3_t xyz = {0,0,0}, rxyz = {0,0,0}, txyz;
+	uint32 count, i;
+
+
+	bone = Bone::getBone(boneIndex);
+
+	if (!bone)
+		return;
+
+	parent = Bone::getBone(bone->mParent);
+	count = bone->mChildren.size();
+
+	glColor3fv(WHITE);
+
+	extern index_t gCurrentBone;
+	if (gCurrentBone == boneIndex)
+		glColor3fv(CYAN);
+
+	bone->mBoneToWorld.multiply3v(xyz, txyz);
+	//q = bone->mBoneToWorld.getQuat();  // matrix needs eular extraction
+
+	if (parent)
+		parent->mRotation.getEulerAngles(rxyz);  // abs rotation stored in parent in old format?  hell I forgot
+
+	const uint32 x = 0, y = 2, z = 1;
+	/* FIXME: Convert old format to new native format
+		need to look for: old angle order, if it was stored in rad, etc
+		fix: Quaternion, etc for new euler format ( angles have changed )
+		also redo Matrix so it's native column order
+	 */
+
+	glPushMatrix();
+	glTranslatef(txyz[0], txyz[1], txyz[2]);
+	glRotatef(HEL_RAD_TO_DEG(rxyz[z]), 0.0f, 0.0f, 1.0f);
+	glRotatef(HEL_RAD_TO_DEG(rxyz[y]), 0.0f, 1.0f, 0.0f);
+	glRotatef(HEL_RAD_TO_DEG(rxyz[x]), 1.0f, 0.0f, 0.0f);
+	freyjaGetBoneTranslation3fv(boneIndex, xyz);
+	mglDrawBone(2, xyz);
+
+	for (i = 0; i < count; ++i)
+		renderSkeletonTest(bone->mChildren[i]);
+
+	glPopMatrix();	
+}
+
 void renderTest()
 {
 	// FIXME: Temp test
 	index_t v;// meshIndex;
-	uint32 count, i, j, n;
-	vec3_t xyz, txyz;
+	uint32 count, i, j, n, flags;
+	vec3_t xyz;
 
 
-	count = Bone::getCount();
-	Bone *bone;
-	glColor3fv(WHITE);
+	flags = FreyjaRender::mSingleton->getFlags();
 
-#ifdef OLD_BONE_RENDER_TEST
-	// Assumes Bone 0 is root until Skeleton is up
-	for (i = 0; i < count; ++i)
+	if (flags & FreyjaRender::RENDER_BONES)
 	{
-		glPushMatrix();
-		glTranslatef(txyz[0], txyz[1], txyz[2]); // here t is translate
-		glRotatef(rxyz[2], 0.0f, 0.0f, 1.0f);
-		glRotatef(rxyz[1], 0.0f, 1.0f, 0.0f);
-		glRotatef(rxyz[0], 1.0f, 0.0f, 0.0f);
-		mglDrawBone(2, xyz);//bone->mTranslation.mVec);
-		glPopMatrix();	
+		// Assumes Bone 0 is root until Skeleton is up
+		renderSkeletonTest(0);
 	}
-#else
-	for (i = 0; i < count; ++i)
+
+	if (flags & FreyjaRender::RENDER_WIREFRAME)
 	{
-		bone = Bone::getBone(i);
+		count = Polygon::getCount();
+		Polygon *face;
+		glColor3fv(FreyjaRender::mColorWireframe);
 
-		freyjaGetBoneTranslation3fv(i, xyz);
-
-		// FIXME: Just to show bones are loading at this point
-		if (bone)
+		for (i = 0; i < count; ++i)
 		{
-			vec3_t origin = {0,0,0};
-			bone->mBoneToWorld.multiply3v(xyz, txyz); // here t is transform
-			bone->mBoneToWorld.multiply3v(origin, origin);
+			face = Polygon::getPolygon(i);
 
-			glBegin(GL_LINES);
-			glVertex3fv(origin);
-			glVertex3fv(txyz);
-			glEnd();
-
-			//mglDrawBone(2, txyz);
-		}
-	}
-#endif
-
-	count = Polygon::getCount();
-	Polygon *face;
-	glColor3fv(FreyjaRender::mColorWireframe);
-
-	for (i = 0; i < count; ++i)
-	{
-		face = Polygon::getPolygon(i);
-
-		if (face)
-		{
-			n = face->vertices.size();
-			glBegin(GL_LINE_LOOP);
-			for (j = 0; j < n; ++j)
+			if (face)
 			{
-				freyjaGetVertexPosition3fv(face->vertices[j], xyz);
-				glVertex3fv(xyz);
+				n = face->vertices.size();
+				glBegin(GL_LINE_LOOP);
+				for (j = 0; j < n; ++j)
+				{
+					freyjaGetVertexPosition3fv(face->vertices[j], xyz);
+					glVertex3fv(xyz);
+				}
+				glEnd();
 			}
-			glEnd();
-		}
-	} 
+		} 
+	}
 
-	//if (mRenderMode & RENDER_POINTS)
-	//{
+	if (flags & FreyjaRender::RENDER_FACE)
+	{
+		count = Polygon::getCount();
+		Polygon *face;
+
+		for (i = 0; i < count; ++i)
+		{
+			face = Polygon::getPolygon(i);
+
+			if (face)
+			{
+				n = face->vertices.size();
+				glBegin(GL_POLYGON);
+				for (j = 0; j < n; ++j)
+				{
+					freyjaGetVertexPosition3fv(face->vertices[j], xyz);
+					glColor3f(((int)xyz[0] % 10)*0.1f, ((int)xyz[1] % 10)*0.1f, ((int)xyz[2] % 10)*0.1f);
+					glVertex3fv(xyz);
+				}
+				glEnd();
+			}
+		} 
+	}
+
+
+	if (flags & FreyjaRender::RENDER_POINTS)
+	{
 		/* Render actual vertices */
 		count = Vertex::getCount();//freyjaGetMeshVertexCount(meshIndex);
 
@@ -257,7 +302,7 @@ void renderTest()
 		}
   
 		glEnd();
-	//} 
+	} 
 }
 
 
