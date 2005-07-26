@@ -451,4 +451,6 @@ class Resource
 	arg_list_t *_sym_tab;
 };
 
+int resourceGetEventId1s(const char *name);
+
 #endif

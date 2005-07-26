@@ -34,6 +34,12 @@ Resource *Resource::mInstance = 0x0;
 Resource *__RESOURCE_AGENT_ = NULL;
 
 
+int resourceGetEventId1s(const char *name)
+{
+	return Resource::mInstance->getIntByName(name);
+}
+
+
 /// Arg list /////////////////////////////////////////////////////////
 
 void new_func(arg_list_t **a, arg_list_t *(*f)(arg_list_t *), char *s)
