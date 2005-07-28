@@ -236,6 +236,14 @@ typedef struct egg_mesh_s {
 
 
 // egg_tag mixed with egg_bone
+
+typedef struct egg_keyframe_bone_s {
+	vec3_t translate;	
+	mat3x3_t rotate;
+	vec_t time;
+
+} egg_keyframe_bone_t;
+
 typedef struct egg_tag_s {
 	int id;                           /* Unique identifier */
 	char name[64];                    // Ext to 8.12 for bone name
@@ -248,15 +256,17 @@ typedef struct egg_tag_s {
 
 	int parent;  // Ext for 8.12, 20040917 ( not stored to disk )
 
-	int rotationFrames;  // Ext for 9.0 -- never used
-	unsigned int rotationFramesReserved;
-	vec3_t *rotations;
+	Vector <egg_keyframe_bone_t *> keyframes;
 
-	int positionFrames;  // Ext for 9.0 -- never used
-	unsigned int positionFramesReserved;
-	vec3_t *positions;
+	//int rotationFrames;  // Ext for 9.0 -- never used
+	//unsigned int rotationFramesReserved;
+	//vec3_t *rotations;
 
-	int skeleton;  // Ext for 9.0 -- 'boneframe' that owns this -- never used
+	//int positionFrames;  // Ext for 9.0 -- never used
+	//unsigned int positionFramesReserved;
+	//vec3_t *positions;
+
+	//int skeleton;  // Ext for 9.0 -- 'boneframe' that owns this -- never used
 	
 } egg_tag_t;
 

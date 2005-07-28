@@ -246,20 +246,10 @@ int freyja_model__grn_import(char *filename)
 			freyjaBoneName1s(index, boneName);
 			freyjaBoneParent1i(index, bone->parent);
 
-			if (!i)
-			{
-				freyjaBoneTranslate3f(index,
-									  bone->translate.points[0]*scale, 
-									  bone->translate.points[1]*scale, 
-									  bone->translate.points[2]*scale);
-			}
-			else
-			{
-				freyjaBoneTranslate3f(index,
-									  bone->translate.points[0]*scale, 
-									  bone->translate.points[2]*scale, 
-									  -bone->translate.points[1]*scale);
-			}
+			freyjaBoneTranslate3f(index,
+								  bone->translate.points[0]*scale, 
+								  bone->translate.points[1]*scale, 
+								  bone->translate.points[2]*scale);
 
 			Quaternion r, r2, q;
 			vec4_t wxyz;
@@ -268,6 +258,7 @@ int freyja_model__grn_import(char *filename)
 						   bone->quaternion.points[1],
 						   bone->quaternion.points[2]);
 
+#ifdef OLD
 			long nxt = i;
 			r.setIdentity();
 			while (nxt > -1)
@@ -281,7 +272,7 @@ int freyja_model__grn_import(char *filename)
 								child->quaternion.points[0], 
 								child->quaternion.points[1],
 								child->quaternion.points[2]);
-				//	r2.normalize();
+				//r2.normalize();
 				r = r * r2;
 			}
 			
@@ -291,7 +282,7 @@ int freyja_model__grn_import(char *filename)
 									   bone->quaternion.points[0], 
 									   bone->quaternion.points[1],
 									   bone->quaternion.points[2]);
-
+#endif
 			q.getQuaternion4fv(wxyz);
 			freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
 

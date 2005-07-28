@@ -4486,9 +4486,9 @@ void freyjaBoneRotateQuatWXYZ4f(int32 boneIndex,vec_t w,vec_t x,vec_t y,vec_t z)
 
 		q.getEulerAngles(&heading, &bank, &attitude);
 
-		heading *= 57.295779513082323;
-		bank *= 57.295779513082323;
-		attitude *= 57.295779513082323;
+		heading = HEL_RAD_TO_DEG(heading); 
+		bank = HEL_RAD_TO_DEG(bank); 
+		attitude = HEL_RAD_TO_DEG(attitude); 
 
 		EggPlugin::mEggPlugin->freyjaBoneRotate(heading, bank, attitude);
 	}

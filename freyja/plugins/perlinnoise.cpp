@@ -133,7 +133,7 @@ void ePerlinNoiseGen()
 	mgtk_print("!Uploading texture %i, using function %i...", tid, id);
 
 	if (ResourceEvent::listen(id - 10000, tid))
-		mgtk_print("!success");
+		mgtk_print("!ePerlinNoiseGen generated texture successfully.");
 
 	freyjaTextureDelete(tid);
 #endif
