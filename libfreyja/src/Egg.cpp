@@ -208,7 +208,7 @@ void Egg::print(char *s, ...)
 }
 
 
-int Egg::checkFile(char *filename)
+int Egg::checkFile(const char *filename)
 {
 	unsigned long id, version;
 	FILE *f;
@@ -329,7 +329,7 @@ void Egg::clear()
 }
 
 
-int Egg::saveFile(char *filename)
+int Egg::saveFile(const char *filename)
 {
 	FILE *f;
 	unsigned long u, version, id;
@@ -584,7 +584,7 @@ int Egg::saveFile(char *filename)
 }
 
 
-int Egg::loadFile(char *filename)
+int Egg::loadFile(const char *filename)
 {
 	long si;
 	unsigned long u, version, id, i, j, n;

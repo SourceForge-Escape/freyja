@@ -857,47 +857,9 @@ long EggPlugin::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
 }
 
 
-bool EggPlugin::checkModel(const char *filename)
-{
-	if (freyjaCheckModel(filename) == 0)
-		return true;
-
-	if (Egg::checkFile((char*)filename) == 0)
-		return true;
-
-	return false;
-}
-
-
-bool EggPlugin::saveModel(const char *filename)
-{
-	if (freyjaSaveModel(filename) == 0)
-		return true;
-
-	return false;
-}
-
-
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
-
-bool EggPlugin::loadModel(const char *filename)
-{
-	if (freyjaCheckModel(filename) == 0)
-	{
-		if (freyjaLoadModel(filename) == 0)
-			return true;
-	}
-	else
-	{
-		if (mEgg->loadFile((char*)filename) == 0)
-			return true;
-	}
-
-	return false;
-}
-
 
 void EggPlugin::freyjaBegin(freyja_object_t type)
 {

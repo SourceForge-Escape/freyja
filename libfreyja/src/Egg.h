@@ -356,7 +356,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static int checkFile(char *filename);
+	static int checkFile(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Checks to see if it's valid model file
@@ -400,7 +400,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int saveFile(char *filename);
+	int saveFile(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Saves model to disk file
@@ -411,7 +411,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int loadFile(char *filename);
+	int loadFile(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : File is valid format and exists
 	 * Post : Loads model from disk file
