@@ -3067,6 +3067,7 @@ void FreyjaControl::loadResource()
 
 	/* Recent files persistance test */
 	FreyjaFileReader r;
+	uint32 j;
 	s = freyja_rc_map("recent_files");
 
 	if (r.openFile(s))
@@ -3076,7 +3077,7 @@ void FreyjaControl::loadResource()
 			delete [] s;
 		}
 
-		for (i = 0; i < gRecentFileLimit && !r.endOfFile(); ++i)
+		for (j = 0; j < gRecentFileLimit && !r.endOfFile(); ++j)
 		{
 			s = r.parseSymbol();
 			addRecentFilename(s);
