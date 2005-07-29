@@ -7083,12 +7083,21 @@ int32 freyjaImportModel(const char *filename)
 		return -1;
 	}
 
-	/* Check for native egg format */
-	if (EggPlugin::mEggPlugin)
+	/* Check for native freyja JA format */
+	if (freyjaCheckModel(filename) == 0)
 	{
-		if (EggPlugin::mEggPlugin->checkModel(filename))
+		if (freyjaLoadModel(filename) == 0)
+			return 0;
+		
+		return -1;
+	}
+
+	/* Check for native egg format */
+	if (gEgg)
+	{
+		if (Egg::checkFile(filename) == 0)
 		{
-			if (EggPlugin::mEggPlugin->loadModel(filename))
+			if (gEgg->loadFile(filename) == 0)
 			{
 				return 0;
 			}
@@ -7218,10 +7227,9 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	}
 	else if (strcmp(type, "egg") == 0)
 	{
-		if (EggPlugin::mEggPlugin)
+		if (gEgg)
 		{
-			Egg *egg = freyja__getEggBackend();
-			return egg->saveFile((char *)filename);
+			return gEgg->saveFile(filename);
 		}
 	}
 
