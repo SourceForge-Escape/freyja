@@ -17,8 +17,8 @@
  *             based on FreyjaPlugin and EggPlugin.
  *
  *             This common interface makes it possible to share ABI 
- *             compatible binary C/C++ plugins between FreyjaPlugin and
- *             EggPlugin.  ( Chimera and Umbra branches merged )
+ *             compatiblity for binary C/C++ plugins.
+ *             ( Chimera and Umbra branches merged )
  *
  ==========================================================================*/
 
@@ -67,6 +67,7 @@ Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 Vector<char *> gPluginDirectories;
 
 FreyjaPrinter *gPrinter = 0x0;
+Egg *gEgg = 0x0;
 int32 gCurrentFreyjaPlugin = -1;
 long FreyjaPluginDesc::mNextId = 1;
 int32 gFreyjaCurrentVertex = -1;
@@ -2951,9 +2952,9 @@ int32 freyjaVertex3fv(vec3_t xyz)
 
 void freyjaVertexFrame3f(int32 index, vec_t x, vec_t y, vec_t z)
 {
-	if (EggPlugin::mEggPlugin)
+	if (gEgg)
 	{
-		egg_vertex_t *v = EggPlugin::mEggPlugin->getVertex(index);
+		egg_vertex_t *v = gEgg->getVertex(index);
 
 		if (v)
 		{
@@ -3036,11 +3037,11 @@ void freyja__PolygonReplaceReference(int32 polygonIndex,
 	unsigned int i;
 
 
-	if (EggPlugin::mEggPlugin)
+	if (gEgg)
 	{
-		a = EggPlugin::mEggPlugin->getVertex(vertexA);
-		b = EggPlugin::mEggPlugin->getVertex(vertexB);
-		polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+		a = gEgg->getVertex(vertexA);
+		b = gEgg->getVertex(vertexB);
+		polygon = gEgg->getPolygon(polygonIndex);
 	}
 	
 	if (!a || !b || !polygon)
@@ -3055,7 +3056,7 @@ void freyja__PolygonReplaceReference(int32 polygonIndex,
 
 	for (i = polygon->vertex.begin(); i < polygon->vertex.end(); ++i)
 	{
-		polygon->r_vertex.pushBack(EggPlugin::mEggPlugin->getVertex(polygon->vertex[i]));
+		polygon->r_vertex.pushBack(gEgg->getVertex(polygon->vertex[i]));
 	}
 
 	// Add polygonIndex to B's reference list
@@ -3085,8 +3086,8 @@ void freyja__GetCommonPolygonReferences(int32 vertexA, int32 vertexB,
 
 	if (EggPlugin::mEggPlugin)
 	{
-		a = EggPlugin::mEggPlugin->getVertex(vertexA);
-		b = EggPlugin::mEggPlugin->getVertex(vertexB);
+		a = gEgg->getVertex(vertexA);
+		b = gEgg->getVertex(vertexB);
 
 		if (a && b)
 		{
@@ -3117,8 +3118,8 @@ void freyja__GetDifferenceOfPolygonReferences(int32 vertexA, int32 vertexB,
 	
 	if (EggPlugin::mEggPlugin)
 	{
-		a = EggPlugin::mEggPlugin->getVertex(vertexA);
-		b = EggPlugin::mEggPlugin->getVertex(vertexB);
+		a = gEgg->getVertex(vertexA);
+		b = gEgg->getVertex(vertexB);
 
 		if (a && b)
 		{
@@ -3388,7 +3389,7 @@ int32 freyjaVertexXYZ3fv(int32 vertexIndex, vec3_t xyz)
 
 	if (EggPlugin::mEggPlugin)
 	{
-		v = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+		v = gEgg->getVertex(vertexIndex);
 
 		if (v)
 		{
@@ -3504,12 +3505,12 @@ void freyjaPolygonAddVertex1i(int32 polygonIndex, int32 vertexIndex)
 {
 	if (EggPlugin::mEggPlugin)
 	{
-		egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+		egg_polygon_t *polygon = gEgg->getPolygon(polygonIndex);
 
 		if (polygon)
 		{
 			polygon->vertex.pushBack(vertexIndex);
-			polygon->r_vertex.pushBack(EggPlugin::mEggPlugin->getVertex(vertexIndex));
+			polygon->r_vertex.pushBack(gEgg->getVertex(vertexIndex));
 		}
 	}
 }
@@ -3650,7 +3651,7 @@ void freyjaPolygonAddTexCoord1i(int32 polygonIndex, int32 texcoordIndex)
 {
 	if (EggPlugin::mEggPlugin)
 	{
-		egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+		egg_polygon_t *polygon = gEgg->getPolygon(polygonIndex);
 		Egg *egg = freyja__getEggBackend();
 
 		if (polygon)
@@ -3675,7 +3676,7 @@ void freyjaPolygonSetMaterial1i(int32 polygonIndex, int32 materialIndex)
 {
 	if (EggPlugin::mEggPlugin)
 	{
-		egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+		egg_polygon_t *polygon = gEgg->getPolygon(polygonIndex);
 
 		if (polygon)
 			polygon->shader = materialIndex;
@@ -3701,7 +3702,7 @@ uint32 freyjaGetFlags()
 
 char *freyjaGetMeshNameString(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -3714,7 +3715,7 @@ char *freyjaGetMeshNameString(int32 meshIndex)
 
 int32 freyjaGetMeshName1s(int32 meshIndex, int32 lenght, char *name)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -3729,7 +3730,7 @@ int32 freyjaGetMeshName1s(int32 meshIndex, int32 lenght, char *name)
 
 void freyjaPolygonTexCoordPurge(int32 polygonIndex)
 {
-	egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+	egg_polygon_t *polygon = gEgg->getPolygon(polygonIndex);
 
 	if (polygon)
 	{
@@ -4223,7 +4224,7 @@ void freyjaMeshTesselateTriangles(int32 meshIndex)
 int freyjaMeshRemovePolygon(int32 meshIndex, int32 polygonIndex)
 {
 	Vector<long> keep;
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 	int32 i, count;
 
 
@@ -4274,7 +4275,7 @@ void freyjaMeshNormalFlip(int32 meshIndex)
 
 void freyjaMeshName1s(int32 meshIndex, const char *name)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4287,7 +4288,7 @@ void freyjaMeshName1s(int32 meshIndex, const char *name)
 int32 freyjaMeshPosition(int32 meshIndex, vec3_t xyz)
 {
 	// Not Implemented properly due to Egg backend use ( not scene based )
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4340,7 +4341,7 @@ void freyjaBoneRemoveVertex(int32 boneIndex, int32 vertexIndex)
 
 void freyjaBoneFlags1i(int32 boneIndex, int32 flags)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4351,7 +4352,7 @@ void freyjaBoneFlags1i(int32 boneIndex, int32 flags)
 
 void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4362,7 +4363,7 @@ void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex)
 
 const char *freyjaGetBoneName1s(int32 boneIndex)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4375,7 +4376,7 @@ const char *freyjaGetBoneName1s(int32 boneIndex)
 
 void freyjaBoneName1s(int32 boneIndex, const char *name)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4398,11 +4399,11 @@ void freyjaBoneRemoveChild1i(int32 boneIndex, int32 childIndex)
 void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex)
 {
 	//egg->connectTag(master, slave);
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
-		egg_tag_t *child =  EggPlugin::mEggPlugin->getBone(childIndex);
+		egg_tag_t *child =  gEgg->getTag(childIndex);
 			
 		if (child)
 		{
@@ -4417,7 +4418,7 @@ void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex)
 
 void freyjaBoneRemoveMesh1i(int32 boneIndex, int32 meshIndex)
 {
-	Egg *egg = EggPlugin::mEggPlugin->getEgg();
+	Egg *egg = freyja__getEggBackend();
 
 	if (egg)
 	{
@@ -4428,7 +4429,7 @@ void freyjaBoneRemoveMesh1i(int32 boneIndex, int32 meshIndex)
 
 void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex)
 {
-	Egg *egg = EggPlugin::mEggPlugin->getEgg();
+	Egg *egg = freyja__getEggBackend();
 
 	if (egg)
 	{
@@ -4439,7 +4440,7 @@ void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex)
 
 void freyjaBoneTranslate3f(int32 boneIndex, vec_t x, vec_t y, vec_t z)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4458,7 +4459,7 @@ void freyjaBoneTranslate3fv(int32 boneIndex, vec3_t xyz)
 
 void freyjaBoneRotateEulerXYZ3f(int32 boneIndex, vec_t x, vec_t y, vec_t z)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4477,7 +4478,7 @@ void freyjaBoneRotateEulerXYZ3fv(int32 boneIndex, vec3_t xyz)
 
 void freyjaBoneRotateQuatWXYZ4f(int32 boneIndex,vec_t w,vec_t x,vec_t y,vec_t z)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 	if (bone)
 	{
@@ -4662,7 +4663,7 @@ void freyjaGetVertexNormal3fv(vec3_t nxyz)
 
 uint32 freyjaGetPolygonVertexCount(int32 polygonIndex)
 {
-	egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+	egg_polygon_t *polygon = gEgg->getPolygon(polygonIndex);
 
 	if (polygon)
 	{
@@ -4675,7 +4676,7 @@ uint32 freyjaGetPolygonVertexCount(int32 polygonIndex)
 
 uint32 freyjaGetPolygonTexCoordCount(int32 polygonIndex)
 {
-	egg_polygon_t *polygon = EggPlugin::mEggPlugin->getPolygon(polygonIndex);
+	egg_polygon_t *polygon = gEgg->getPolygon(polygonIndex);
 
 	if (polygon)
 	{
@@ -4688,7 +4689,7 @@ uint32 freyjaGetPolygonTexCoordCount(int32 polygonIndex)
 
 int32 freyjaGetVertexTexCoordUV2fv(int32 vertexIndex, vec2_t uv)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex)
 	{
@@ -4703,7 +4704,7 @@ int32 freyjaGetVertexTexCoordUV2fv(int32 vertexIndex, vec2_t uv)
 
 int32 freyjaGetVertexNormalXYZ3fv(int32 vertexIndex, vec3_t nxyz)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex)
 	{
@@ -4719,7 +4720,7 @@ int32 freyjaGetVertexNormalXYZ3fv(int32 vertexIndex, vec3_t nxyz)
 
 int32 freyjaGetVertexXYZ3fv(int32 vertexIndex, vec3_t xyz)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex)
 	{
@@ -4736,7 +4737,7 @@ int32 freyjaGetVertexXYZ3fv(int32 vertexIndex, vec3_t xyz)
 int32 freyjaGetVertexFrame(int32 vertexIndex, int32 element,
 						  int32 *frameIndex, vec3_t xyz)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 
 	if (vertex)
@@ -4769,7 +4770,7 @@ int32 freyjaGetVertexFrame(int32 vertexIndex, int32 element,
 
 int32 freyjaGetVertexFrameCount(int32 vertexIndex)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex)
 	{
@@ -4783,7 +4784,7 @@ int32 freyjaGetVertexFrameCount(int32 vertexIndex)
 int32 freyjaGetVertexWeight(int32 vertexIndex, int32 element,
 						   int32 *bone, vec_t *weight)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex && element > -1 && element < (int)vertex->weights.end())
 	{
@@ -4798,7 +4799,7 @@ int32 freyjaGetVertexWeight(int32 vertexIndex, int32 element,
 
 int32 freyjaGetVertexWeightCount(int32 vertexIndex)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex)
 	{
@@ -4811,7 +4812,7 @@ int32 freyjaGetVertexWeightCount(int32 vertexIndex)
 
 int32 freyjaGetVertexFlags(int32 vertexIndex)
 {
-	egg_vertex_t *vertex = EggPlugin::mEggPlugin->getVertex(vertexIndex);
+	egg_vertex_t *vertex = gEgg->getVertex(vertexIndex);
 
 	if (vertex)
 	{
@@ -4831,7 +4832,7 @@ int32 freyjaGetModelFlags(int32 modelIndex)
 int32 freyjaGetModelMeshIndex(int32 modelIndex, int32 element)
 {
 	// Not Implemented properly due to Egg backend use ( not scene based )
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(element);
+	egg_mesh_t *mesh = gEgg->getMesh(element);
 
 	if (mesh)
 	{
@@ -4855,7 +4856,7 @@ int32 freyjaGetModelMeshCount(int32 modelIndex)
 
 char freyjaIsMeshAllocated(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 		return 1;
@@ -4866,7 +4867,7 @@ char freyjaIsMeshAllocated(int32 meshIndex)
 
 int32 freyjaGetMeshPosition(int32 meshIndex, vec3_t xyz)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4882,7 +4883,7 @@ int32 freyjaGetMeshPosition(int32 meshIndex, vec3_t xyz)
 
 int32 freyjaGetMeshFlags(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4895,7 +4896,7 @@ int32 freyjaGetMeshFlags(int32 meshIndex)
 
 int32 freyjaGetMeshVertexFrameIndex(int32 meshIndex, int32 element)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4938,7 +4939,7 @@ int32 freyjaGetMeshVertexFrameCount(int32 meshIndex)
 
 int32 freyjaGetMeshPolygonCount(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4951,7 +4952,7 @@ int32 freyjaGetMeshPolygonCount(int32 meshIndex)
 
 int32 freyjaGetMeshPolygonVertexIndex(int32 meshIndex, int32 faceVertexIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 
 	if (mesh && 
@@ -4966,7 +4967,7 @@ int32 freyjaGetMeshPolygonVertexIndex(int32 meshIndex, int32 faceVertexIndex)
 
 int32 freyjaGetMeshVertexIndex(int32 meshIndex, int32 element)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 
 	if (mesh &&
@@ -4981,7 +4982,7 @@ int32 freyjaGetMeshVertexIndex(int32 meshIndex, int32 element)
 
 int32 freyjaGetMeshVertexCount(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -4998,7 +4999,7 @@ int32 freyjaGetMeshVertexCount(int32 meshIndex)
 
 int32 freyjaGetMeshTexCoordIndex(int32 meshIndex, int32 element)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 
 	if (mesh &&
@@ -5013,7 +5014,7 @@ int32 freyjaGetMeshTexCoordIndex(int32 meshIndex, int32 element)
 
 uint32 freyjaGetMeshTexCoordCount(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -5078,7 +5079,7 @@ int32 freyjaGetMeshVertexGroupVertexIndex(int32 meshIndex, int32 element,
 
 int32 freyjaGetMeshVertexGroupCount(int32 meshIndex)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh)
 	{
@@ -5091,7 +5092,7 @@ int32 freyjaGetMeshVertexGroupCount(int32 meshIndex)
 
 int32 freyjaGetMeshPolygonIndex(int32 meshIndex, int32 element)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh && element > -1 && element < (int)mesh->polygon.end())
 	{
@@ -5104,7 +5105,7 @@ int32 freyjaGetMeshPolygonIndex(int32 meshIndex, int32 element)
 
 int32 freyjaGetMeshVertexGroupIndex(int32 meshIndex, int32 element)
 {
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 
 	if (mesh && element > -1 && element < (int)mesh->group.end())
 	{
@@ -5117,46 +5118,98 @@ int32 freyjaGetMeshVertexGroupIndex(int32 meshIndex, int32 element)
 
 int32 freyjaGetPolygonVertexIndex(int32 polygonIndex, int32 element)
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->getPolygonVertexIndex(polygonIndex, element);
+	egg_polygon_t *polygon;
 
-	return -1;
+	if (!gEgg)
+		return -1;
+
+	polygon = gEgg->getPolygon(polygonIndex);
+
+	if (!polygon || element < 0 || element >= (int)polygon->vertex.end())
+		return -1; 
+
+	return polygon->vertex[element];
 }
 
 
 int32 freyjaGetPolygonTexCoordIndex(int32 polygonIndex, int32 element)
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->getPolygonTexCoordIndex(polygonIndex, element);
+	egg_polygon_t *polygon;
 
-	return -1;
+	if (!gEgg)
+		return -1;
+
+	polygon = gEgg->getPolygon(polygonIndex);
+
+	if (!polygon || element < 0 || element >= (int)polygon->texel.end())
+		return -1; 
+
+	return polygon->texel[element];
 }
 
 
 int32 freyjaGetPolygonMaterial(int32 polygonIndex)
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->getPolygonMaterial(polygonIndex);
+	egg_polygon_t *polygon;
 
-	return 0;
+	if (!gEgg)
+		return 0;
+
+	polygon = gEgg->getPolygon(polygonIndex);
+
+	if (!polygon)
+		return 0; 
+
+	return polygon->shader;
 }
 
 
 int32 freyjaGetPolygonFlags(int32 polygonIndex)
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->getPolygonFlags(polygonIndex);
+	egg_polygon_t *polygon;
 
-	return 0;
+	if (!gEgg)
+		return 0;
+
+	polygon = gEgg->getPolygon(polygonIndex);
+
+	if (!polygon)
+		return 0;
+
+	return polygon->vertex.end();
 }
 
 
 int32 freyjaGetPolygonEdgeCount(int32 polygonIndex)
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->getPolygonEdgeCount(polygonIndex);
+	egg_polygon_t *polygon;
+	long flags = 0x0;
 
-	return 0;
+
+	if (!gEgg)
+		return 0;
+
+	polygon = gEgg->getPolygon(polygonIndex);
+
+	if (!polygon)
+		return 0; 
+
+	// Currently using Egg backend -- it can't do more than one UV type
+	// or coloring
+	if (polygon->vertex.end() == polygon->texel.end())
+	{
+		flags |= fPolygon_PolyMapped;
+	}
+	else if (polygon->vertex.end() == polygon->texel.end()*2)
+	{
+		flags |= fPolygon_ColorMapped;
+	}
+	else
+	{
+		flags |= fPolygon_VertexUV;
+	}
+
+	return flags;
 }
 
 
@@ -5195,7 +5248,7 @@ int32 freyjaGetSkeletonBoneCount(int32 skeletonIndex)
 
 int32 freyjaGetSkeletonBoneIndex(int32 skeletonIndex, int32 element)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(element);
+	egg_tag_t *bone = gEgg->getTag(element);
 	// Atm all one big reference skeleton in Egg backend
 
 	if (bone)
@@ -5215,7 +5268,7 @@ uint32 freyjaGetSkeletonRootIndex(uint32 skeletonIndex)
 
 int32 freyjaGetBoneName(int32 index, unsigned int size, char *name)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
+	egg_tag_t *bone = gEgg->getTag(index);
 		
 	if (bone)
 	{
@@ -5230,7 +5283,7 @@ int32 freyjaGetBoneName(int32 index, unsigned int size, char *name)
 
 int32 freyjaBoneCreate(uint32 skeletonIndex)
 {
-	Egg *egg = EggPlugin::mEggPlugin->getEgg();
+	Egg *egg = freyja__getEggBackend();
 
 	if (!egg)
 		return -1;
@@ -5243,7 +5296,7 @@ int32 freyjaBoneCreate(uint32 skeletonIndex)
 
 void freyjaBoneParent(int32 index)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(freyjaGetCurrent(FREYJA_BONE));
+	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
 
 	if (bone)
 	{
@@ -5254,7 +5307,7 @@ void freyjaBoneParent(int32 index)
 
 int32 freyjaGetBoneParent(int32 index)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
+	egg_tag_t *bone = gEgg->getTag(index);
 
 	if (bone)
 	{
@@ -5267,7 +5320,7 @@ int32 freyjaGetBoneParent(int32 index)
 
 int32 freyjaGetBoneRotationWXYZ4fv(int32 index, vec4_t wxyz)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(index);
+	egg_tag_t *bone = gEgg->getTag(index);
 	
 	if (bone)
 	{
@@ -5285,7 +5338,7 @@ int32 freyjaGetBoneRotationWXYZ4fv(int32 index, vec4_t wxyz)
 
 uint32 freyjaGetBoneSkeletalBoneIndex(int32 boneIndex)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 	
 	if (bone)
 	{
@@ -5298,7 +5351,7 @@ uint32 freyjaGetBoneSkeletalBoneIndex(int32 boneIndex)
 
 uint32 freyjaGetBoneChild(int32 boneIndex, uint32 childIndex)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 	
 	if (bone)
 	{
@@ -5311,7 +5364,7 @@ uint32 freyjaGetBoneChild(int32 boneIndex, uint32 childIndex)
 
 uint32 freyjaGetBoneChildCount(int32 boneIndex)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 	
 	if (bone)
 	{
@@ -5324,7 +5377,7 @@ uint32 freyjaGetBoneChildCount(int32 boneIndex)
 
 int32 freyjaGetBoneRotationXYZ3fv(int32 boneIndex, vec3_t xyz)
 {
-	egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
 	
 	if (bone)
 	{
@@ -5343,7 +5396,7 @@ int32 freyjaGetBoneTranslation3fv(int32 boneIndex, vec3_t xyz)
 {
 	if (EggPlugin::mEggPlugin)
 	{
-		egg_tag_t *bone = EggPlugin::mEggPlugin->getBone(boneIndex);
+		egg_tag_t *bone = gEgg->getTag(boneIndex);
 
 		xyz[0] = bone->center[0];
 		xyz[1] = bone->center[1];
@@ -6387,24 +6440,20 @@ void freyjaMaterialBlendDestination(int32 materialIndex,	uint32 factor)
 void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
 								Vector<int32> uvMap, bool x, bool y)
 {
-	Egg *egg;
-
-
-	// egg backend only supports 1 model at a time
-	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
-
-	if (!egg)
-		return;
-
+	Egg *egg = freyja__getEggBackend();
 	Vector<long> seen;
 	egg_polygon_t *poly;
-	egg_texel_t *texel = egg->getTexel(texCoordIndex);
+	egg_texel_t *texel;
 	egg_texel_t *tex;
 	Vector3d u, trans, min;
 	long i, j, k;
+
+
+	// egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !egg)
+		return;
+
+	texel = egg->getTexel(texCoordIndex);
 
 	if (texel && !uvMap.empty())
 	{
@@ -6582,27 +6631,22 @@ void freyjaModelTransformTexCoord(uint32 modelIndex, uint32 texCoordIndex,
 									freyja_transform_action_t action,
 									vec_t x, vec_t y)
 {
-	Egg *egg;
-
-
-	// egg backend only supports 1 model at a time
-	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
-
-	if (!egg)
-		return;
-
+	Egg *egg = freyja__getEggBackend();
 	Vector<int32> seen;
 	egg_polygon_t *poly;
-	egg_texel_t *texel = egg->getTexel(texCoordIndex);
+	egg_texel_t *texel;
 	egg_texel_t *tex;
 	Vector3d u, v, p;
 	int32 i, j, k;
 	Matrix m;
 	vec_t z;
 
+
+	// egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !egg)
+		return;
+
+	texel = egg->getTexel(texCoordIndex);
 
 	if (texel)
 	{
@@ -6735,16 +6779,11 @@ void freyjaModelTransformTexCoord(uint32 modelIndex, uint32 texCoordIndex,
 // FIXME: Uses Egg
 void freyjaModelClear(uint32 modelIndex)
 {
-	Egg *egg;
+	Egg *egg = freyja__getEggBackend();
 
 
 	// egg backend only supports 1 model at a time
-	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
-
-	if (!egg)
+	if (modelIndex != 0 || !egg)
 		return;
 
 	egg->clear();	
@@ -6757,16 +6796,11 @@ void freyjaModelClampTexCoords(uint32 modelIndex)
 	unsigned int i;
 	egg_texel_t *t;
 	egg_vertex_t *v;
-	Egg *egg;
+	Egg *egg = freyja__getEggBackend();
 
 
-	// egg backend only supports 1 model at a time
-	if (modelIndex != 0 || !EggPlugin::mEggPlugin)
-		return;
-
-	egg = EggPlugin::mEggPlugin->getEgg();
-
-	if (!egg)
+	// Egg backend only supports 1 model at a time
+	if (modelIndex != 0 || !egg)
 		return;
 
 	for (i = 0; i < egg->getTexelCount(); ++i)
@@ -7186,7 +7220,7 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	{
 		if (EggPlugin::mEggPlugin)
 		{
-			Egg *egg = EggPlugin::mEggPlugin->getEgg();
+			Egg *egg = freyja__getEggBackend();
 			return egg->saveFile((char *)filename);
 		}
 	}
@@ -7535,7 +7569,7 @@ void freyjaPakEnd(int32 pakIndex)
 void freyja__MeshUpdateMappings(int32 meshIndex)
 {
 	Vector<long> polygons, texcoords;
-	egg_mesh_t *mesh = EggPlugin::mEggPlugin->getMesh(meshIndex);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
 	int32 i, j, k, count, idx, vertex, texcoord;
 	int32 polygonCount = freyjaGetMeshPolygonCount(meshIndex);
 	int32 vertexCount = 0;
@@ -7631,13 +7665,36 @@ void freyja__MeshUpdateMappings(int32 meshIndex)
 }
 
 
+
+
+///////////////////////////////////////////////////////////////////////
+// C++ API 
+///////////////////////////////////////////////////////////////////////
+
+int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
+{
+#ifdef UMBRA
+	freyjaPrintMessage("findPolygonByVertices> Not Implemented for UMBRA");
+	return -1;
+#else // EGG
+	Egg *model = freyja__getEggBackend();
+
+	if (!model)
+		return -1;
+
+	return model->selectPolygon(&vertices);
+#endif
+}
+
+
+///////////////////////////////////////////////////////////////////////
+// Managed ABI 
+///////////////////////////////////////////////////////////////////////
+
 // Hidden API
 Egg *freyja__getEggBackend()
 {
-	if (!EggPlugin::mEggPlugin)
-		return 0x0;
-
-	return EggPlugin::mEggPlugin->getEgg();
+	return gEgg;
 }
 
 
@@ -7657,15 +7714,8 @@ int freyja__spawnCopyModel(Egg *egg)
 // Hidden API
 void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
 {
-	EggPlugin *eggplugin = EggPlugin::mEggPlugin;
-	Egg *egg;
-
-	
-	if (!printer || !eggplugin)
+	if (!printer)
 		return;
-
-	egg = eggplugin->getEgg();
-	egg->setPrinter(printer);
 
 	if (freyjaManaged)
 	{
@@ -7676,28 +7726,28 @@ void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
 
 		gPrinter = printer;
 	}
+
+	/* Hookup gobal classes using a Printer child class */
+	gEgg->setPrinter(printer);
 }
 
-
-
-///////////////////////////////////////////////////////////////////////
-// Managed ABI 
-///////////////////////////////////////////////////////////////////////
 
 void freyjaSpawn()
 {
 	if (!EggPlugin::mEggPlugin)
 	{
-		Egg *egg = new Egg();
-		EggPlugin *eggplugin = new EggPlugin(egg);
+		gEgg = new Egg();
+		EggPlugin *eggplugin = new EggPlugin(gEgg);
 
-		eggplugin->getEgg();
+
+		/* Here just to avoid compiler warnings and removal by opt */
+		eggplugin->freyjaGetCount(FREYJA_VERTEX);
 
 		/* Setup basic default stdout printer */
 		freyja__setPrinter(new FreyjaPrinter(), true);
 
 		/* Spawn cut/copy/paste system */
-		freyja__spawnCopyModel(egg);
+		freyja__spawnCopyModel(gEgg);
 
 		/* Setup plugins */
 		freyjaPluginDirectoriesInit();
@@ -7710,21 +7760,20 @@ void freyjaSpawn()
 
 void freyjaFree()
 {
-	Egg *egg = 0x0;
+	//Egg *egg = 0x0;
 	EggPlugin *eggplugin = EggPlugin::mEggPlugin;
 	
-
 	freyjaPrintMessage("libfreyja stopped using freyjaFree()");
 
 	if (eggplugin)
 	{
-		egg = eggplugin->getEgg();
+		//egg = eggplugin->getEgg();
 		delete eggplugin;
 	}
 
-	if (egg)
+	if (gEgg)
 	{
-		delete egg;
+		delete gEgg;
 	}
 
 	if (gPrinter)
@@ -7732,6 +7781,7 @@ void freyjaFree()
 		delete gPrinter;
 	}
 
+	gEgg = 0x0;
 
 	gPluginDirectories.erase();
 
@@ -7740,41 +7790,4 @@ void freyjaFree()
 
 
 
-int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
-{
-#ifdef UMBRA
-	freyjaPrintMessage("findPolygonByVertices> Not Implemented for UMBRA");
-	return -1;
-#else // EGG
-	Egg *model = freyja__getEggBackend();
 
-	if (!model)
-		return -1;
-
-	return model->selectPolygon(&vertices);
-#endif
-}
-
-
-///////////////////////////////////////////////////////////////////////
-//  Deprecated ABI 
-///////////////////////////////////////////////////////////////////////
-
-#ifdef DEPRECATED_FREYJA_PLUGIN_ABI
-int32 freyjaGetBoneMeshCount()
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetBoneMeshCount();
-
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
-int32 freyjaGetBoneMeshIndex(int32 element)
-{
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetBoneMeshIndex(element);
-
-	return FREYJA_PLUGIN_ERROR;
-}
-#endif
