@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <hel/math.h>
 #include <freyja/FreyjaPlugin.h>
 
 /* Export as C functions */
@@ -102,6 +103,8 @@ int freyja_model__grn_import(char *filename)
 	unsigned int i, j;
 	string out;
 	long index;
+	vec4_t wxyz;
+
 
 
 	grn.load(filename, "");
@@ -198,17 +201,6 @@ int freyja_model__grn_import(char *filename)
 		transXYZ.Clear();
 		transUV.Clear();
 
-		/* Weights */
-		for (i = 0; i < mesh.weights.size(); ++i)
-		{
-			BoneWeight w = mesh.weights[i];
-
-			for (j = 0; j < w.numWeights; ++j)
-			{
-				freyjaVertexWeight(i, w.weights[j], w.bones[j]);
-			}
-		}
-
 
 		/* Skeleton */
 		freyjaBegin(FREYJA_SKELETON);
@@ -248,17 +240,24 @@ int freyja_model__grn_import(char *filename)
 
 			freyjaBoneTranslate3f(index,
 								  bone->translate.points[0]*scale, 
-								  bone->translate.points[1]*scale, 
-								  bone->translate.points[2]*scale);
+								  bone->translate.points[2]*scale, 
+								  -bone->translate.points[1]*scale);
 
+			printf("%li: %f %f %f\n", index,
+								  bone->translate.points[0]*scale, 
+								  bone->translate.points[2]*scale, 
+								  -bone->translate.points[1]*scale);
+
+#define GRN_QUAT_STACK
+#ifdef GRN_QUAT_STACK
 			Quaternion r, r2, q;
-			vec4_t wxyz;
+
+
 			q = Quaternion(bone->quaternion.points[3], // wxyz 
 						   bone->quaternion.points[0], 
 						   bone->quaternion.points[1],
 						   bone->quaternion.points[2]);
 
-#ifdef OLD
 			long nxt = i;
 			r.setIdentity();
 			while (nxt > -1)
@@ -277,14 +276,24 @@ int freyja_model__grn_import(char *filename)
 			}
 			
 			q = r * q;
+			//q.getQuaternion4fv(wxyz);
+			//freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+			q.getEulerAngles(wxyz);
+	
+			printf("   %f %f %f\n", HEL_RAD_TO_DEG(wxyz[0]),
+									HEL_RAD_TO_DEG(wxyz[1]),
+									HEL_RAD_TO_DEG(wxyz[2]));
+			freyjaBoneRotateEulerXYZ3f(index, 
+										HEL_RAD_TO_DEG(wxyz[0]),
+										HEL_RAD_TO_DEG(wxyz[1]),
+										HEL_RAD_TO_DEG(wxyz[2]));
+#else
 			freyjaBoneRotateQuatWXYZ4f(index,
-									   bone->quaternion.points[3], // wxyz 
-									   bone->quaternion.points[0], 
-									   bone->quaternion.points[1],
-									   bone->quaternion.points[2]);
+										bone->quaternion.points[3], // wxyz 
+										bone->quaternion.points[0], 
+										bone->quaternion.points[1],
+										bone->quaternion.points[2]);
 #endif
-			q.getQuaternion4fv(wxyz);
-			freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
 
 			if (bone->parent == bone->id)
 				freyjaBoneParent1i(index, -1);
@@ -304,6 +313,17 @@ int freyja_model__grn_import(char *filename)
 		}
 
 		freyjaEnd(); // FREYJA_SKELETON
+
+		/* Weights */
+		for (i = 0; i < mesh.weights.size(); ++i)
+		{
+			BoneWeight w = mesh.weights[i];
+
+			for (j = 0; j < w.numWeights; ++j)
+			{
+				freyjaVertexWeight(i, w.weights[j], w.bones[j]);
+			}
+		}
 	}
 
 	freyjaEnd(); // FREYJA_MODEL

@@ -230,7 +230,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		dupe[l] = 0;
 
 		// Bubble up hack
-		if (mRecentFiles.end() > gRecentFileLimit)
+		if (mRecentFiles.end() >= gRecentFileLimit)
 		{
 			char *old, *swap = dupe;
 

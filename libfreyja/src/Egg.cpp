@@ -1173,7 +1173,7 @@ unsigned int Egg::getPolygonCount()
 
 egg_polygon_t *Egg::getPolygon(unsigned int id)
 {
-	if (mPolygons.empty() || id > mPolygons.end())
+	if (mPolygons.empty() || id >= mPolygons.end()) // was >
 		return 0x0;
   
 	return mPolygons[id];
@@ -1638,7 +1638,7 @@ void Egg::delMesh(egg_mesh_t *mesh)
 
 egg_mesh_t *Egg::getMesh(unsigned int id)
 {
-	if (mMeshes.empty() || id > mMeshes.end())
+	if (mMeshes.empty() || id >= mMeshes.end()) // was >
 		return 0x0;
 
 	return mMeshes[id];
@@ -3195,3 +3195,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 #endif
+
+
+
+
