@@ -48,6 +48,8 @@
 #include "FreyjaLight.h"
 #include "FreyjaSkeleton.h"
 #include "FreyjaMaterial.h"
+#include "FreyjaTexture.h"
+#include "FreyjaImage.h"
 
 
 /* Internal / hidden API methods not exported by header */
@@ -58,7 +60,10 @@ Egg *freyja__getEggBackend();
 Vector<FreyjaSkeletalAnimation *> gFreyjaAnimations; 
 Vector<FreyjaMetaData *> gFreyjaMetaData; 
 Vector<FreyjaMaterial *> gFreyjaMaterials;
+
 Vector<FreyjaTexture *> gFreyjaTextures;
+uint32 gFreyjaTextureCount = 0;
+
 Vector<FreyjaSkeleton *>  gFreyjaSkeletons;
 Vector<FreyjaCamera *>  gFreyjaCameras;
 Vector<FreyjaLight *>  gFreyjaLights;
@@ -5743,68 +5748,174 @@ void freyjaAnimationKeyFrameOrientationWXYZ(int32 animationIndex,
 // Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
 ///////////////////////////////////////////////////////////////////////
 
-int32 freyjaTextureCreate()
-{
-	int32 textureIndex = gFreyjaTextures.size();
+index_t freyjaTextureCreateFilename(const char *filename)
+{	
+	FreyjaImage image;
+	FreyjaTexture texture;
+	index_t uid;
+	freyja_colormode_t colorMode;
+	uint32 byteDepth;
 
-	gFreyjaTextures.pushBack(new FreyjaTexture());
-	gFreyjaTextures[textureIndex]->mId = textureIndex;
 
-	return textureIndex;
+	if (image.loadImage(filename) != 0)
+		return INDEX_INVALID;
+
+	image.getImage(&texture.mImage);
+	texture.mWidth = image.getWidth();
+	texture.mHeight = image.getHeight();
+
+	switch (image.getColorMode())
+	{
+	case FreyjaImage::RGBA_32:
+		byteDepth = 32;
+		colorMode = RGBA_32;
+		break;
+
+	case FreyjaImage::RGB_24:
+		byteDepth = 24;
+		colorMode = RGB_24;
+		break;
+
+	case FreyjaImage::INDEXED_8:
+		byteDepth = 8;
+		colorMode = INDEXED_8;
+		break;
+
+	default:
+		byteDepth = 0;	
+	}
+
+	uid = freyjaTextureCreateBuffer(texture.mImage, byteDepth, 
+									texture.mWidth, texture.mHeight,
+									colorMode);
+
+	/* Texture will delete the image copy here on scope exit */
+	return uid;
 }
 
 
-void freyjaTextureDelete(int32 textureIndex)
+index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
+                                  uint32 width, uint32 height,
+                                  freyja_colormode_t type)
 {
-	if (EggPlugin::mEggPlugin)
-		EggPlugin::mEggPlugin->freyjaTextureDelete(textureIndex);	
+	FreyjaTexture *texture = new FreyjaTexture();
+	index_t uid;
+	uint32 i, count, size =  width * height * byteDepth;
+	bool found = false;
+
+
+	if (image == 0x0 || size == 0)
+	{
+		return INDEX_INVALID;
+	}
+
+	/* Setup texture */
+	texture->mImage = new byte[size];
+	memcpy(texture->mImage, image, size);
+	texture->mWidth = width;
+	texture->mHeight = height;
+	texture->mBitDepth = byteDepth * 8;
+
+
+	/* Setup UID and class container reference */
+	uid = count = gFreyjaTextures.size();
+
+	for (i = 0; i < count; ++i)
+	{
+		if (gFreyjaTextures[i] == 0x0)
+		{
+			uid = i;
+			gFreyjaTextures.assign(uid, texture);
+
+			found = true;
+			break;
+		}	
+	}
+
+	if (!found)
+	{
+		gFreyjaTextures.pushBack(texture);
+	}
+
+	++gFreyjaTextureCount;
+
+	texture->mUID = uid;
+
+	return uid;
 }
 
 
-int32 freyjaGetTextureFilename(unsigned int index, char **filename)
+void freyjaTextureDelete(index_t textureIndex)
 {
-	*filename = 0x0;
+	FreyjaTexture *texture;
 
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetTextureFilename(index, 
-															   filename);
-	return FREYJA_PLUGIN_ERROR;	
+	if (textureIndex < gFreyjaTextures.size())
+	{
+		texture = gFreyjaTextures[textureIndex];
+
+		if (texture != 0x0)
+		{
+			delete texture;
+
+			gFreyjaTextures.assign(textureIndex, 0x0);
+			--gFreyjaTextureCount;
+		}
+	}
 }
 
 
-int32 freyjaGetTextureImage(uint32 index, uint32 *w, uint32 *h, 
-					   		uint32 *depth,  uint32 *type,
-					   		unsigned char **image)
+void freyjaGetTextureImage(index_t textureIndex,
+                           uint32 *w, uint32 *h, uint32 *bitDepth,  
+                           uint32 *type, byte **image)
 {
+	FreyjaTexture *texture;
+
+	/* Init */
 	*image = 0x0;
+	*bitDepth = 0;
+	*type = 0;
+	*w = 0;
+	*h = 0;
 
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaGetTextureImage(index, w, h, 
-														 depth, type, image);
-	return FREYJA_PLUGIN_ERROR;
+	if (textureIndex < gFreyjaTextures.size())
+	{
+		texture = gFreyjaTextures[textureIndex];
+
+		if (texture != 0x0)
+		{
+			*image = texture->mImage;
+			*bitDepth = texture->mBitDepth;
+			*w = texture->mWidth;
+			*h = texture->mHeight;
+
+			switch (texture->mPixelFormat)
+			{
+			case FreyjaTexture::RGBA32:
+				*type = RGBA_32; 
+				break;
+
+			case FreyjaTexture::RGB24:
+				*type = RGB_24; 
+				break;
+
+			case FreyjaTexture::Indexed8:
+				*type = INDEXED_8; 
+				break;
+			}
+		}
+	}
 }
 
 
-int32 freyjaTextureFilename1s(const char *filename)
+uint32 freyjaGetTexturePoolCount()
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaTextureStoreFilename(filename);
-
-	return FREYJA_PLUGIN_ERROR;
+	return gFreyjaTextures.size();
 }
 
 
-int32 freyjaTextureStoreBuffer(unsigned char *image, uint32 depth,
-							  uint32 width, uint32 height,
-							  freyja_colormode_t type)
+uint32 freyjaGetTextureCount()
 {
-	if (EggPlugin::mEggPlugin)
-		return EggPlugin::mEggPlugin->freyjaTextureStoreBuffer(image, depth,
-															width, height,
-															type);
-
-	return FREYJA_PLUGIN_ERROR;
-  
+	return gFreyjaTextureCount;
 }
 
 

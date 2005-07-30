@@ -718,7 +718,7 @@ int freyja_model__ase_import(char *filename)
 		
 		freyjaEnd();
 
-		int texture = freyjaTextureFilename1s(ase.mTexture.name);
+		int texture = freyjaTextureCreateFilename(ase.mTexture.name);
 
 		if (texture > -1)
 			textureId = texture;

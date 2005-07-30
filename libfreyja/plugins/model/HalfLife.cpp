@@ -521,7 +521,7 @@ int freyja_model__halflife_import(char *filename)
 	{
 		if (hl.mImages[i].image && hl.mImages[i].w > 0 && hl.mImages[i].h > 0)
 		{
-			freyjaTextureStoreBuffer(hl.mImages[i].image, 3, 
+			freyjaTextureCreateBuffer(hl.mImages[i].image, 3, 
 								  hl.mImages[i].w, hl.mImages[i].h, RGB_24);
 			printf("%i/%i\n", i, hl.mTextureCount);
 		}

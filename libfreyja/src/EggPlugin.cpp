@@ -56,8 +56,6 @@ EggPlugin::EggPlugin(Egg *egg)
 
 EggPlugin::~EggPlugin()
 {
-	mTextures.erase();
-	mTextureFiles.erase();
 }
 
 
@@ -106,7 +104,7 @@ uint32 EggPlugin::freyjaGetCount(freyja_object_t type)
 		break;
 
 	case FREYJA_TEXTURE:
-		return mTextures.size();
+		return freyjaGetTextureCount();
 		break;
 
 	case FREYJA_ANIMATION:
@@ -117,7 +115,7 @@ uint32 EggPlugin::freyjaGetCount(freyja_object_t type)
 		break;
 	}
 
-	return 0; // 20050526, Was FREYJA_PLUGIN_ERROR;
+	return 0;
 }
 
 
@@ -369,18 +367,16 @@ void EggPlugin::freyjaGetVertex(vec3_t xyz)
 	vertex = mEgg->VertexList();
 
 	if (!vertex || mIndexVertex >= vertex->end() || index < 0)
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
  
 	vert = (*vertex)[mIndexVertex];
 
 	if (!vert)
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
 
 	xyz[0] = vert->pos[0];
 	xyz[1] = vert->pos[1];
 	xyz[2] = vert->pos[2];
-
-	//return vert->id;
 }
 
 
@@ -393,17 +389,15 @@ void EggPlugin::freyjaGetVertexTexCoord(vec2_t uv)
 	vertex = mEgg->VertexList();
 
 	if (!vertex || mIndexVertex >= vertex->end())
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
  
 	vert = (*vertex)[mIndexVertex];
 
 	if (!vert)
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
 
 	uv[0] = vert->uv[0];
 	uv[1] = vert->uv[1];
-
-	//return vert->id;
 }
 
 
@@ -688,7 +682,6 @@ void EggPlugin::freyjaEnd()
 		if (polygon == UINT_MAX)
 		{
 			freyjaPrintMessage("EggPlugin::freyjaEnd> Polygon is invalid\n");
-			//return FREYJA_PLUGIN_ERROR;
 		}
 
 		if (mMesh)
@@ -709,125 +702,6 @@ void EggPlugin::freyjaEnd()
 	default:
 		;
 	}
-}
-
-
-long EggPlugin::freyjaTextureStore(EggTextureData *textureData)
-{
-	unsigned int i, count;
-	bool found = false;
-
-	if (textureData)
-	{
-		count = mTextures.size();
-
-		for (i = 0; i < count; ++i)
-		{
-			if (mTextures[i] == 0x0)
-			{
-				mTextures.assign(i, textureData);
-				found = true;
-				return i;
-			}	
-		}
-
-		if (!found)
-		{
-			mTextures.pushBack(textureData);
-			return mTextures.size() - 1;
-		}
-	}
-
-	return -1;
-}
-
-
-void EggPlugin::freyjaTextureDelete(int tIndex)
-{
-	EggTextureData *t = mTextures[tIndex];
-
-	if (t)
-	{
-		delete t;
-		mTextures.assign(tIndex, 0x0);
-	}
-}
-
-
-long EggPlugin::freyjaTextureStoreFilename(const char *filename)
-{
-	unsigned int i;
-
-
-	if (!filename || !filename[0])
-	{
-		return 0;
-	}
-
-	if (!mTextureFiles.empty())
-	{
-		for (i = mTextureFiles.begin(); i < mTextureFiles.end(); ++i)
-		{
-			if (!strcmp(mTextureFiles[i], filename))
-				return i;
-		}
-	}
-
-	mTextureFiles.pushBack(strdup(filename));
-	return mTextureFiles.size() - 1;
-}
-
-long EggPlugin::freyjaGetTextureFilename(long index, char **filename)
-{
-	*filename = 0x0;
-
-
-	if (mTextureFiles.empty() || 
-		index < 0 || index > (int)mTextureFiles.size()-1)
-		return FREYJA_PLUGIN_ERROR;
-
-	*filename = mTextureFiles[index];
-
-	return 0;
-}
-
-
-long EggPlugin::freyjaGetTextureImage(long index, 
-									  unsigned int *w, unsigned int *h, 
-									  unsigned int *depth,
-									  unsigned int *type,
-									  unsigned char **image)
-{
-	EggTextureData *t;
-
-
-	if (mTextures.empty() || index > (int)mTextures.size()-1)
-		return FREYJA_PLUGIN_ERROR;
-
-	t = mTextures[index];
-
-	// Init
-	*image = 0x0;
-	*depth = 0x0;
-	*type = 0x0;
-	*w = 0x0;
-	*h = 0x0;
-
-	if (!t)
-		return FREYJA_PLUGIN_ERROR;
-
-	if (t->mImage && t->mWidth && t->mHeight && t->mBitDepth)
-	{
-		*image = t->mImage;
-		*depth = t->mBitDepth;
-		*type = t->mType;
-		*w = t->mWidth;
-		*h = t->mHeight;
-
-		return 0;
-	}
-  
-	return FREYJA_PLUGIN_ERROR;
 }
 
 
@@ -1018,7 +892,7 @@ void EggPlugin::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 		if (!mGroup)
 		{
 			freyjaPrintError("EggPlugin::freyjaGroupCenter> GROUP isn't allocated!\n");
-			return;// FREYJA_PLUGIN_ERROR;
+			return;
 		}
 		else 
 		{
@@ -1030,10 +904,8 @@ void EggPlugin::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 	else
 	{
 		freyjaPrintError("EggPlugin::freyjaGroupCenter> Center defined outside GROUP!\n");
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
 	}
-
-	//return 0;
 }
 
 
@@ -1044,7 +916,7 @@ void EggPlugin::freyjaBoneName(char *name)
 		if (!mTag)
 		{
 			freyjaPrintError("EggPlugin::freyjaBonePos> BONEMTAG isn't allocated!\n");
-			return;// FREYJA_PLUGIN_ERROR;
+			return;
 		}
 		else 
 		{
@@ -1055,10 +927,8 @@ void EggPlugin::freyjaBoneName(char *name)
 	else
 	{
 		freyjaPrintError("EggPlugin::freyjaBonePos> Pos defined outside BONEMTAG!\n");
-		return;// FREYJA_PLUGIN_ERROR;
+		return;;
 	}
-
-	//return 0;
 }
 
 
@@ -1069,7 +939,7 @@ void EggPlugin::freyjaBonePos(float x, float y, float z)
 		if (!mTag)
 		{
 			freyjaPrintError("EggPlugin::freyjaBonePos> BONEMTAG isn't allocated!\n");
-			return;// FREYJA_PLUGIN_ERROR;
+			return;
 		}
 		else 
 		{
@@ -1087,10 +957,8 @@ void EggPlugin::freyjaBonePos(float x, float y, float z)
 	else
 	{
 		freyjaPrintError("EggPlugin::freyjaBonePos> Pos defined outside BONEMTAG!\n");
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
 	}
-
-	//return 0;
 }
 
 
@@ -1101,7 +969,7 @@ void EggPlugin::freyjaBoneFlags(unsigned int flags)
 		if (!mTag)
 		{
 			freyjaPrintError("EggPlugin::freyjaBoneFlags> BONEMTAG isn't allocated!\n");
-			return;// FREYJA_PLUGIN_ERROR;
+			return;
 		}
 		else 
 		{
@@ -1115,10 +983,8 @@ void EggPlugin::freyjaBoneFlags(unsigned int flags)
 	else
 	{
 		freyjaPrintError("EggPlugin::freyjaBoneFlags> Flag defined outside BONEMTAG!\n");
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
 	}
-
-	//return 0;
 }
 
 
@@ -1130,7 +996,7 @@ void EggPlugin::freyjaBoneAddMesh(long mesh)
 		{
 			freyjaPrintError( 
 					"EggPlugin::freyjaBoneAddMesh> BONEMTAG isn't allocated!\n");
-			return;//  FREYJA_PLUGIN_ERROR;
+			return;
 		}
 		else 
 		{
@@ -1144,10 +1010,8 @@ void EggPlugin::freyjaBoneAddMesh(long mesh)
 	else
 	{
 		freyjaPrintError("EggPlugin::freyjaBoneAddMesh> Mesh defined outside BONEMTAG!\n");
-		return;//  FREYJA_PLUGIN_ERROR;
+		return;
 	}
-
-	//return 0;
 }
 
 
@@ -1159,7 +1023,7 @@ void EggPlugin::freyjaBoneAddChild(long tag)
 		{
 			freyjaPrintError("EggPlugin::freyjaBoneAddSlave> BONEMTAG isn't allocated!\n");
       
-			return;// FREYJA_PLUGIN_ERROR;
+			return;
 		}
 		else 
 		{
@@ -1169,7 +1033,6 @@ void EggPlugin::freyjaBoneAddChild(long tag)
 				child->parent = mTag->id;
 
 			// If it fails here it's got to be picked up in SKELETON 
-
 			mTag->slave.pushBack(tag);
 		}
 	}
@@ -1177,10 +1040,8 @@ void EggPlugin::freyjaBoneAddChild(long tag)
 	{
 		freyjaPrintError("EggPlugin::freyjaBoneAddSlave> Slave defined outside BONEMTAG!\n");
 
-		return;// FREYJA_PLUGIN_ERROR;
+		return;
 	}
-
-	//return 0;
 }
 
 
@@ -1190,11 +1051,7 @@ void EggPlugin::freyjaMeshTreeAddFrame(vec_t x, vec_t y, vec_t z)
 	{
 		mBoneFrame = mEgg->BoneFrame(mEgg->BoneFrameAdd(x, y, z));    
 		mAnimation->frame.pushBack(mBoneFrame->id);
-   
-		//return 0;
 	}
-
-	//return FREYJA_PLUGIN_ERROR;
 }
 
 
@@ -1205,11 +1062,7 @@ void EggPlugin::freyjaBoneRotate(vec_t x, vec_t y, vec_t z)
 		mTag->rot[0] = x;
 		mTag->rot[1] = y;
 		mTag->rot[2] = z;
-   
-		//return 0;
 	}
-
-	//return FREYJA_PLUGIN_ERROR;
 }
 
 
@@ -1218,39 +1071,7 @@ void EggPlugin::freyjaMeshTreeFrameAddBone(long tag)
 	if (mBoneFrame)
 	{
 		mBoneFrame->tag.pushBack(tag);
-		//return 0;
 	}
-
-	//return FREYJA_PLUGIN_ERROR;
-}
-
-
-long EggPlugin::freyjaTextureStoreBuffer(unsigned char *image, 
-										 unsigned int depth,
-										 unsigned int width, 
-										 unsigned int height,
-										 freyja_colormode_t type)
-{
-	EggTextureData *t;
-	unsigned int size;
-
-
-	if (!image || !depth || !width || !height)
-		return FREYJA_PLUGIN_ERROR;
-
-	size = width*height*depth;
-
-	t = new EggTextureData();
- 
-	t->mWidth = width;
-	t->mHeight = height;
-	t->mType = type;
-	t->mBitDepth = depth * 8;
-	t->mImage = new unsigned char[size];
-  
-	memcpy(t->mImage, image, size);
-
-	return freyjaTextureStore(t);
 }
 
 

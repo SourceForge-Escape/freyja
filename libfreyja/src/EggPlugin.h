@@ -53,37 +53,6 @@
 #include "Egg.h"
 
 
-class EggTextureData
-{
-public:
-	EggTextureData()
-	{
-		mType = RGBA_32;
-		mImage = 0x0;
-		mPalette = 0x0;
-		mWidth = 0;
-		mHeight = 0;
-		mBitDepth = 0;
-	}
-
-	~EggTextureData()
-	{
-		if (mImage)
-			delete [] mImage;
-
-		if (mPalette)
-			delete [] mPalette;
-	}
-
-	freyja_colormode_t mType;
-	unsigned char *mImage;
-	unsigned char *mPalette;
-	unsigned int mWidth;
-	unsigned int mHeight;
-	unsigned int mBitDepth;
-};
-
-
 class EggPlugin
 {
 public:
@@ -270,47 +239,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	long freyjaGetTextureFilename(long index, char **filename);
-	/*------------------------------------------------------
-	 * Pre  : Don't alter filename once you get pointer to it
-	 * Post : Returns 0 on sucess
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.28:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	long freyjaTextureStoreFilename(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : filename is valid
-	 *
-	 * Post : Stores texture filename to be loaded by modeler
-	 *        and used to generate textures
-	 *
-	 *        Returns either texture id or PLUGIN_ERROR
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	long freyjaTextureStore(EggTextureData *textureData);
-	/*------------------------------------------------------
-	 * Pre  : Texture data is valid
-	 *
-	 * Post : Stores texture data to be called by modeler
-	 *        and used to generate textures
-	 *
-	 *        Returns either texture id or -1 for error
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	long freyjaTexCoord2f(float s, float t);
 	/*------------------------------------------------------
 	 * Pre  : s, t are 0.0 to 1.0 texels
@@ -390,24 +318,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	long freyjaGetTextureImage(long index, 
-							   unsigned int *w, unsigned int *h, 
-							   unsigned int *depth,  unsigned int *type,
-							   unsigned char **image);
-	/*------------------------------------------------------
-	 * Pre  : Textures were loaded in texture storage
-	 * Post : Passes texture data by using index
-	 *        Returns 0 on sucess, else error
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.09:
-	 * Mongoose - Changes to support more buffer types
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	unsigned int freyjaFlags();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -453,8 +363,6 @@ public:
 	 * 2001.10.27: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	void freyjaTextureDelete(int tIndex);
 
 	void freyjaBoneFlags(unsigned int flags);
 	/*------------------------------------------------------
@@ -536,23 +444,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	long freyjaTextureStoreBuffer(unsigned char *image, unsigned int bpp,
-								  unsigned int width, unsigned int height,
-								  freyja_colormode_t type);
-	/*------------------------------------------------------
-	 * Pre  : <image> is a valid image buffer 
-	 *        <width> <height> <bpp> are correct for image
-	 *        <type> for image matches pixel format
-	 *
-	 * Post : Loads texture into manager
-	 *        Returns 0 if sucessful
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.09:
-	 * Mongoose - Created, to replace current texture handler
-	 ------------------------------------------------------*/
-
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 
 
@@ -567,16 +458,12 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Vector<EggTextureData *> mTextures; /* Texture data list */
-
-	Vector<char *> mTextureFiles;       /* Texture filename list */
+	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
+										 * accumulation modes and etc */
 
 	Vector<unsigned int> mVertexList;   /* Current polygon's vertex list */
 
 	Vector<unsigned int> mTexCoordList; /* Current polygon's texel list */
-
-	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
-										 * accumulation modes and etc */
 
 	Egg *mEgg;                          /* Pointer to the modeler backend  */
 

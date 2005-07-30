@@ -49,6 +49,11 @@ extern "C" {
 	//#define freyjaGetVertexTexCoord2fv freyjaGetVertexTexCoordUV2fv 
 
 
+/* UINT_MAX 32bit used with index_t */
+#define INDEX_INVALID      4294967295U
+typedef uint32 index_t;
+
+
 typedef enum {
 	INDEXED_8 = 1, 
 	RGB_24, 
@@ -320,29 +325,6 @@ typedef enum {
 	/*------------------------------------------------------
 	 * Pre  : Light <lightIndex> exists
 	 * Post : Returns <specular> color
-	 ------------------------------------------------------*/
-	
-
-
-	// FREYJA_TEXTURE Accessors ///////////////////////////////////////////
-
-	int freyjaGetTextureFilename(unsigned int index, char **filename);
-	/*------------------------------------------------------
-	 * Pre  : Do not attempt to alter <filename> on return
-	 *
-	 * Post : Gets a pointer to the filename of texture[index]
-	 *        Returns 0 on success.
-	 ------------------------------------------------------*/
-
-	int freyjaGetTextureImage(unsigned int index,
-							  unsigned int *w, unsigned int *h, 
-							  unsigned int *depth,  unsigned int *type,
-							  unsigned char **image);
-	/*------------------------------------------------------
-	 * Pre  : Do not attempt to alter <image> on return
-	 *
-	 * Post : Gets pointers to texture[index]'s data members
-	 *        Returns 0 on success.
 	 ------------------------------------------------------*/
 
 
@@ -1193,30 +1175,46 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
 	///////////////////////////////////////////////////////////////////////
 
-	int32 freyjaTextureCreate();
+	index_t freyjaTextureCreateFilename(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns new index or INDEX_INVALID
 	 ------------------------------------------------------*/
 
-	void freyjaTextureDelete(int32 textureIndex);
+	index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
+                                      uint32 width, uint32 height,
+                                      freyja_colormode_t type);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns new index or INDEX_INVALID
 	 ------------------------------------------------------*/
 
-	int32 freyjaTextureFilename1s(const char *filename);
+	void freyjaTextureDelete(index_t textureIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Deletes texture given any valid index 
 	 ------------------------------------------------------*/
 
-	int32 freyjaTextureStoreBuffer(unsigned char *image, uint32 depth,
-								 	uint32 width, uint32 height,
-									freyja_colormode_t type);
+	void freyjaGetTextureImage(index_t textureIndex,
+                               uint32 *w, uint32 *h, uint32 *bitDepth,  
+                               uint32 *type, byte **image);
+	/*------------------------------------------------------
+	 * Pre  : Do not attempt to alter <image> on return
+	 *
+	 * Post : Gets pointers to texture[index]'s data members
+	 *        Returns 0 on success.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetTexturePoolCount();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns the number of texture slots
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetTextureCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the number of texture slots used
 	 ------------------------------------------------------*/
 
 
