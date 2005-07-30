@@ -117,6 +117,13 @@ void ePolyMeshBone()
 void eSetNearHeight(vec_t f)
 {
 	FreyjaRender::mSingleton->setNearHeight(f);
+	freyja_event_gl_refresh();
+}
+
+void eSetZoomLevel(vec_t f)
+{
+	FreyjaRender::mSingleton->setNearHeight(f*20.0f);
+	freyja_event_gl_refresh();
 }
 
 void eRenderToggleBoneZClear()
@@ -152,6 +159,7 @@ void FreyjaRenderEventsAttach()
 	ResourceEventCallback::add("eSphereJoint", &eSphereJoint);
 	ResourceEventCallback::add("ePointJoint", &ePointJoint);
 	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
+	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
 }
 
 
