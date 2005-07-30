@@ -534,7 +534,7 @@ int freyja_model__md2_import(char *filename)
 
 	if (md2.SkinName(0))
 	{
-		textureId = freyjaTextureFilename1s(md2.SkinName(0));
+		textureId = freyjaTextureCreateFilename(md2.SkinName(0));
 	}
 
 

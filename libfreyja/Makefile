@@ -530,7 +530,7 @@ plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.s
 
 plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
 
-tools: FreyjaUtil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
+tools: freyjautil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
 
 
 ######################################################################
@@ -556,7 +556,7 @@ install-plugins:
 	@-echo "[done]"
 
 install-tools:
-	@-cp bin/test/FreyjaUtil.test $(INSTALL_BIN)/freyjautil
+	@-cp bin/test/freyjautil.test $(INSTALL_BIN)/freyjautil
 	@-cp bin/test/bsa.test $(INSTALL_BIN)/bsa
 	@-cp bin/test/cull.test $(INSTALL_BIN)/cull
 	@-cp bin/test/raw2riff.test $(INSTALL_BIN)/raw2riff
@@ -664,11 +664,11 @@ raw2riff.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-FreyjaUtil.test:
+freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
-	NAME=FreyjaUtil \
-	OBJS="$(BUILD_TEST_DIR)/FreyjaUtil.o" \
+	NAME=Ffreyjautil \
+	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja"
 

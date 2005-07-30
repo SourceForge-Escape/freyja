@@ -1312,7 +1312,7 @@ int freyja_model__mdl_import(char *filename)
 
 	if (image)
 	{
-		freyjaTextureStoreBuffer(image, 3,
+		freyjaTextureCreateBuffer(image, 3,
 								 mdl.getTextureWidth(), mdl.getTextureHeight(),
 								 RGB_24);
 	}
@@ -1321,7 +1321,7 @@ int freyja_model__mdl_import(char *filename)
 	
 	if (image)
 	{
-		freyjaTextureStoreBuffer(image, 3,
+		freyjaTextureCreateBuffer(image, 3,
 								 mdl.getTextureWidth(), mdl.getTextureHeight(), 
 								 RGB_24);
 	}

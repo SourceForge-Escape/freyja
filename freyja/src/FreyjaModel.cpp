@@ -2576,26 +2576,17 @@ int FreyjaModel::loadModel(const char *filename)
 	{
 		freyjaModelClampTexCoords(0); // Only support 1 model per edit atm
 
-		unsigned int i, w, h, bpp, type;
+		unsigned int i, w, h, bpp, type, count;
 		unsigned char *image = 0x0;
-		char *textureFilename = 0x0; /* Texture filename */
 
-		/* Texture image was stored as external file from model */
-		for (i = 0; !freyjaGetTextureFilename(i, &textureFilename); ++i)
-		{
-			if (textureFilename && textureFilename[0])
-			{
-				freyja_print("FrejaModel::loadModel> Loading texture %i from file\n", i);
-				mTextureId = i;
-				//gMaterialManager->setGeneralFlag(MaterialManager::fLoadTextureInSlot);
-				loadTexture(textureFilename);
-				//gMaterialManager->clearGeneralFlag(MaterialManager::fLoadTextureInSlot);
-			}
-		}
+
+		count = freyjaGetTexturePoolCount();
 	 
 		/* Texture image was stored as raw buffer */
-		for (i = 0; !freyjaGetTextureImage(i, &w, &h, &bpp, &type, &image); ++i)
+		for (i = 0; i < count; ++i)
 		{
+			freyjaGetTextureImage(i, &w, &h, &bpp, &type, &image);
+
 			if (!image)
 				continue;
 
@@ -2617,6 +2608,8 @@ int FreyjaModel::loadModel(const char *filename)
 				freyja_print("%s> ERROR: Unsupported texture colormap %d",
 							"FreyjaModel::loadModel", type);
 			}
+
+			freyjaTextureDelete(i); // hhhmmm
 		}
 	}
 

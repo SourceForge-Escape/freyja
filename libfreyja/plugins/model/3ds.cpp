@@ -871,7 +871,7 @@ int freyja_model__3ds_import(char *filename)
 
 			if (faces[i].material)
 			{
-				t = freyjaTextureFilename1s(faces[i].material->texture1.filename);
+				t = freyjaTextureCreateFilename(faces[i].material->texture1.filename);
 				freyjaPolygonMaterial1i(t);
 			}
 			else

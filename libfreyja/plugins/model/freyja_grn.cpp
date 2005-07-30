@@ -145,7 +145,7 @@ int freyja_model__grn_import(char *filename)
 		if (texture.c_str())
 		{
 			string texture2 = texture + ".png";
-			textureIndex = freyjaTextureFilename1s((char*)texture2.c_str());
+			textureIndex = freyjaTextureCreateFilename((char*)texture2.c_str());
 		}
 
 		freyjaBegin(FREYJA_MESH);
