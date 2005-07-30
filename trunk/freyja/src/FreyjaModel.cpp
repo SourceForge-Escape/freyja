@@ -2400,9 +2400,15 @@ int FreyjaModel::loadTexture(const char *filename)
 		case FreyjaImage::RGBA_32:
 			loadTextureBuffer(image, w, h, 32, Texture::RGBA);
 			break;
+
 		case FreyjaImage::RGB_24:
 			loadTextureBuffer(image, w, h, 24, Texture::RGB);
 			break;
+
+		case FreyjaImage::INDEXED_8:
+			loadTextureBuffer(image, w, h, 8, Texture::INDEXED);
+			break;
+
 		default:
 			printf("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
 			
