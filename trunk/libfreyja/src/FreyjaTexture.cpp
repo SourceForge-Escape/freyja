@@ -28,22 +28,30 @@
 
 FreyjaTexture::FreyjaTexture()
 {
-	name = 0x0;
-	filename = 0x0;
-	image = 0x0;
+	mName = 0x0;
+	mFilename = 0x0;
+	mImage = 0x0;
+	mPalette = 0x0;
+	mWidth = 0;
+	mHeight = 0;
+	mBitDepth = 0;
+	mPixelFormat = RGB24;
 }
 
 
 FreyjaTexture::~FreyjaTexture()
 {
-	if (name)
-		delete [] name;
+	if (mName)
+		delete [] mName;
 
-	if (filename)
-		delete [] filename;
+	if (mFilename)
+		delete [] mFilename;
 
-	if (image)
-		delete [] image;
+	if (mImage)
+		delete [] mImage;
+
+	if (mPalette)
+		delete [] mPalette;
 }
 
 
@@ -62,6 +70,7 @@ bool FreyjaTexture::serialize(FreyjaFileWriter &w)
 {
 	uint32 length;
 
+#ifdef FIXME
 	if (name)
 	{
 		length = strlen(name);
@@ -72,21 +81,7 @@ bool FreyjaTexture::serialize(FreyjaFileWriter &w)
 	{
 		w.writeInt32U(0);
 	}
-
-	
-	char *filename;             /* Filename of image */
-	
-	unsigned char *image;       /* RGB(A) Texture data */
-
-	unsigned int imageWidth;
-	
-	unsigned int imageHeight;
-	
-	unsigned char mipmaps;
-
-	unsigned char pixelDepth;   /* 24 - RGB24bit, 32 - RGBA32bit */
-	
-	unsigned int id; 
+#endif
 
 	return false;
 }

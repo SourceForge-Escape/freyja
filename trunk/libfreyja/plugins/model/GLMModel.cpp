@@ -452,7 +452,7 @@ int freyja_model__glm_import(char *filename)
 	for (i = 0; i < glm.mMDXMHeader.numSurfaces; i++)
 	{
 		freyjaBegin(FREYJA_MATERIAL);
-		glm.mMDXMHierarchy[i].shaderIndex = freyjaTextureFilename1s(glm.mMDXMHierarchy[i].shader);
+		glm.mMDXMHierarchy[i].shaderIndex = freyjaTextureCreateFilename(glm.mMDXMHierarchy[i].shader);
 		freyjaEnd();
 	}
 

@@ -127,7 +127,7 @@ void ePerlinNoiseGen()
 #ifdef BUILT_INTO_APPLICATION
 	freyja_load_texture_buffer(rgb, w, h, 24);
 #else
-	unsigned int tid = freyjaTextureStoreBuffer(rgb, 3, w, h, RGB_24);
+	unsigned int tid = freyjaTextureCreateBuffer(rgb, 3, w, h, RGB_24);
 	unsigned long id = Resource::mInstance->getIntByName("eTextureUpload");
 
 	mgtk_print("!Uploading texture %i, using function %i...", tid, id);

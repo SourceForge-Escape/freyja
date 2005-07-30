@@ -544,7 +544,7 @@ int freyja_model__nod_import(char *filename)
 	for (i = 0; i < nod.header1.NumMaterials; i++)
 	{
 		freyjaBegin(FREYJA_MATERIAL);
-		freyjaTextureFilename1s(nod.materials[i].MaterialName);
+		freyjaTextureCreateFilename(nod.materials[i].MaterialName);
 		freyjaEnd();
 	}
   

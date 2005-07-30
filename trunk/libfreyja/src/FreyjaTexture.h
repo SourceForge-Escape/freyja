@@ -29,6 +29,7 @@
 
 #include <hel/math.h>
 
+#include "FreyjaPluginABI.h"
 #include "FreyjaFileReader.h"
 #include "FreyjaFileWriter.h"
 
@@ -36,11 +37,11 @@ class FreyjaTexture
 {
  public:
 
-	enum PixelBitDepth {
+	enum PixelFormat {
 
-		Indexed8bit  = 8,
-		RGB24bit     = 24,
-		RGBA32bit    = 32
+		Indexed8,
+		RGB24,
+		RGBA32
 	};
 
 
@@ -110,24 +111,23 @@ class FreyjaTexture
 	 * Post : Sets Texture's name
 	 ------------------------------------------------------*/
 
-	char *name;                 /* Texture name */
+	char *mName;                /* Texture name */
 	
-	char *filename;             /* Filename of image */
-	
-	unsigned char *image;       /* RGB(A) Texture data */
+	char *mFilename;            /* Filename of image */
 
-	unsigned int imageWidth;
-	
-	unsigned int imageHeight;
-	
-	unsigned char mipmaps;
+	byte *mImage;
 
-	unsigned char pixelDepth;   /* 24 - RGB24bit, 32 - RGBA32bit */
-	
-	unsigned int id;            /* OpenGL texture id use */
+	byte *mPalette;
 
-	int32 mId;
+	uint32 mBitDepth;
 
+	PixelFormat mPixelFormat;
+
+	uint32 mWidth;
+
+	uint32 mHeight;
+
+	index_t mUID;              /* Used by Gobal Pool */
 
  private:
 
