@@ -299,7 +299,7 @@ bool freyjaGetRenderModelMesh(uint32 modelIndex, uint32 meshIndex, uint32 frame,
 
 
 #define USING_EGG
-#include "EggPlugin.h"
+#include "Egg.h"
 
 uint32 freyjaGetRenderModelCount()
 {
@@ -314,7 +314,8 @@ uint32 freyjaGetRenderModelCount()
 bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 {
 #ifdef USING_EGG 
-	model.setEgg(EggPlugin::mEggPlugin->getEgg());
+	extern Egg *gEgg;
+	model.setEgg(gEgg);
 	model.mIndex = 0;
 	return true;
 #else
