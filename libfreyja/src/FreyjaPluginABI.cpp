@@ -4521,14 +4521,11 @@ void freyjaBoneRotateQuatWXYZ4f(int32 boneIndex,vec_t w,vec_t x,vec_t y,vec_t z)
 	{
 		vec_t heading, bank, attitude;
 		Quaternion q = Quaternion(w, x, y, z);
-
 		q.getEulerAngles(&heading, &bank, &attitude);
 
-		heading = HEL_RAD_TO_DEG(heading); 
-		bank = HEL_RAD_TO_DEG(bank); 
-		attitude = HEL_RAD_TO_DEG(attitude); 
-
-		EggPlugin::mEggPlugin->freyjaBoneRotate(heading, bank, attitude);
+		bone->rot[0] = HEL_RAD_TO_DEG(attitude);
+		bone->rot[1] = HEL_RAD_TO_DEG(bank);
+		bone->rot[2] = HEL_RAD_TO_DEG(heading);
 	}
 }
 

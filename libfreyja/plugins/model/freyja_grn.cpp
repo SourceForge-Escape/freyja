@@ -283,15 +283,15 @@ int freyja_model__grn_import(char *filename)
 			q.getEulerAngles(wxyz);
 	
 			printf("   %f %f %f\n", HEL_RAD_TO_DEG(wxyz[0]),
-									HEL_RAD_TO_DEG(wxyz[1]),
-									HEL_RAD_TO_DEG(wxyz[2]));
+									HEL_RAD_TO_DEG(wxyz[2]),
+									-HEL_RAD_TO_DEG(wxyz[1]));
 			freyjaBoneRotateEulerXYZ3f(index, 
 										HEL_RAD_TO_DEG(wxyz[0]),
-										HEL_RAD_TO_DEG(wxyz[1]),
-										HEL_RAD_TO_DEG(wxyz[2]));
+										HEL_RAD_TO_DEG(wxyz[2]),
+										-HEL_RAD_TO_DEG(wxyz[1]));
 #else
 			freyjaBoneRotateQuatWXYZ4f(index,
-										bone->quaternion.points[3], // wxyz 
+										bone->quaternion.points[3],
 										bone->quaternion.points[0], 
 										bone->quaternion.points[1],
 										bone->quaternion.points[2]);
