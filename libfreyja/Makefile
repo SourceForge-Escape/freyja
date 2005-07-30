@@ -667,7 +667,7 @@ raw2riff.test:
 freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
-	NAME=Ffreyjautil \
+	NAME=freyjautil \
 	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja"
