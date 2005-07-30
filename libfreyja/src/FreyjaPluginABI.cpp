@@ -4621,8 +4621,8 @@ void freyjaGetTexCoord2fv(int32 tindex, vec2_t uv)
 
 		if (t)
 		{
-			t->st[0] = uv[0];
-			t->st[1] = uv[1];
+			uv[0] = t->st[0];
+			uv[1] = t->st[1];
 		}
 	}
 }
