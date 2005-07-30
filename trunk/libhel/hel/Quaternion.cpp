@@ -130,27 +130,50 @@ void Quaternion::getAxisAngles(vec4_t axyz)
 
 void Quaternion::getEulerAngles(vec3_t xyz)
 {
-	double qw2 = mW*mW;
-	double qx2 = mX*mX;
-	double qy2 = mY*mY;
-	double qz2 = mZ*mZ;
-
-	xyz[2] = atan(2.0 * (mY*mZ+mX*mW)/(-qx2 - qy2 + qz2 + qw2));
-	xyz[0] = asin(-2.0 * (mX*mZ-mY*mW));
-	xyz[1] = atan(2.0 * (mX*mY+mZ*mW)/(qx2 - qy2 + qz2 + qw2));
+	getEulerAngles(xyz+0, xyz+1, xyz+2);
 }
 
 
 void Quaternion::getEulerAngles(vec_t *heading, vec_t *bank, vec_t *attitude)
 {
-	double qw2 = mW*mW;
-	double qx2 = mX*mX;
-	double qy2 = mY*mY;
-	double qz2 = mZ*mZ;
+	double test = mX*mY + mZ*mW;
 
-	*heading = atan(2.0 * (mX*mY+mZ*mW)/(qx2 - qy2 + qz2 + qw2));
-	*bank = atan(2.0 * (mY*mZ+mX*mW)/(-qx2 - qy2 + qz2 + qw2));
+	// Thanks to euclideanspace.com for the singluarity check algorithm
+	if (test > 0.499) { // singularity at north pole
+		*heading = 2.0 * atan2(mX, mW);
+		*bank = HEL_PI_OVER_2;
+		*attitude = 0.0f;
+		return;
+	}
+	if (test < -0.499) { // singularity at south pole
+		*heading = -2.0 * atan2(mX, mW);
+		*bank = -HEL_PI_OVER_2;
+		*attitude = 0.0f;
+		return;
+	}
+
+	double sqx = mX*mX;
+	double sqy = mY*mY;
+	double sqz = mZ*mZ;
+
+#define QUAT_OLD_EULER_CLAC
+#ifdef QUAT_OLD_EULER_CLAC
+	double sqw = mW*mW;
+
+	// From my old mtk3d math lib
+	//*heading = atan2(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
+	//*bank = atan2(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
+	//*attitude = asin(-2.0 * (mX*mZ - mY*mW));
+
+	// From my newer hel math lib
+	*heading = atan((2.0 * (mX*mY+mZ*mW))/(sqx - sqy + sqz + sqw));
+	*bank = atan((2.0 * (mY*mZ+mX*mW))/(-sqx - sqy + sqz + sqw));
 	*attitude = asin(-2.0 * (mX*mZ-mY*mW));
+#else
+    *heading = atan2(2*mY*mW-2*mX*mZ , 1 - 2*qy2 - 2*qz2);
+	*bank = asin(2*test);
+	*attitude = atan2(2*mX*mW-2*mY*mZ , 1 - 2*qx2 - 2*qz2);
+#endif
 }
 
 
