@@ -930,7 +930,7 @@ unsigned int Egg::getTexelCount()
 
 egg_texel_t *Egg::getTexel(unsigned int id)
 {
-	if (mTexels.empty())
+	if (mTexels.empty() || id >= mTexels.size())
 	{
 		return 0x0;
 	}

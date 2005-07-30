@@ -119,24 +119,6 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	egg_polygon_t *getPolygon(long index);  // this isn't freyja exportable
-
-	egg_vertex_t *getVertex(long index);  // this isn't freyja exportable
-
-	egg_tag_t *getBone(long index);  // this isn't freyja exportable
-
-	egg_mesh_t *getMesh(long index);  // this isn't freyja exportable
-	
-	long getPolygonVertexIndex(long polygonIndex, long element);
-
-	long getPolygonTexCoordIndex(long polygonIndex, long element);
-
-	long getPolygonMaterial(long polygonIndex);
-
-	long getPolygonEdgeCount(long polygonIndex);
-
-	long getPolygonFlags(long polygonIndex);
-
 	uint32 freyjaGetCount(freyja_object_t type);
 	/*------------------------------------------------------
 	 * Pre  : Type is valid egg plugin enum
@@ -162,22 +144,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void freyjaGetVertexByIndex(long index, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Doesn't affect internal iterator state
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.12.19:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	// 'Fast' export for modeler use
-	vec3_t *freyjaGetVertexXYZ(long vertexIndex);
-	vec2_t *freyjaGetVertexUV(long vertexIndex);
-	vec2_t *freyjaGetTexCoordUV(long texcoordIndex);
-
 	void freyjaGetVertex(vec3_t xyz);
 	void freyjaGetVertexNormal(vec3_t nxyz);
 	void freyjaGetVertexTexCoord(vec2_t uv);
@@ -194,8 +160,6 @@ public:
 	 * 2001.11.03: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	void freyjaGetTexCoord(long index, vec2_t uv);
 
 	long freyjaGetPolygon(freyja_object_t type, int32 item, int32 *value);
 	/*------------------------------------------------------
@@ -282,41 +246,6 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
-
-	void addPluginDirectory(const char *dir);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.10.26:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	long importModel(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Imports model and returns 0, or
-	 *        fails to import returns error -N
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	long exportModel(const char *filename, const char *type);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Exports model of type and returns 0, or
-	 *        fails to export returns error -N
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	void freyjaBegin(freyja_object_t type);
 	/*------------------------------------------------------
@@ -422,30 +351,6 @@ public:
 	 *-- History ------------------------------------------
 	 *
 	 * 2004.03.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaVertexTexCoord2f(long index, vec_t u, vec_t v);
-	/*------------------------------------------------------
-	 * Pre  : (u,v) is texel for vertex v
-	 *
-	 * Post : Vertex 'v' in the model gets normal set
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void freyjaVertexNormal3f(long index, vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : x,y,z are the normal vector for vertex v
-	 *
-	 * Post : Vertex 'v' in the model gets normal set
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -648,16 +553,8 @@ public:
 	 * Mongoose - Created, to replace current texture handler
 	 ------------------------------------------------------*/
 
-	bool checkModel(const char *filename);
-	bool saveModel(const char *filename);
-	bool loadModel(const char *filename);
-
 	static EggPlugin *mEggPlugin;       /* Singleton and public use */
 
-	Egg *getEgg()
-	{
-		return mEgg;
-	}
 
 private:
 

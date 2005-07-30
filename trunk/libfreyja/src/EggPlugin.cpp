@@ -360,39 +360,6 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 }
 
 
-vec3_t *EggPlugin::freyjaGetVertexXYZ(long vertexIndex)
-{
-	egg_vertex_t *vertex = mEgg->getVertex(vertexIndex);
-			 
-	if (vertex)
-		return &(vertex->pos);
-
-	return 0x0;
-}
-
-
-vec2_t *EggPlugin::freyjaGetVertexUV(long vertexIndex)
-{
-	egg_vertex_t *vertex = mEgg->getVertex(vertexIndex);
-			 
-	if (vertex)
-		return &(vertex->uv);
-
-	return 0x0;
-}
-
-
-vec2_t *EggPlugin::freyjaGetTexCoordUV(long texcoordIndex)
-{
-	egg_texel_t *texel = mEgg->getTexel(texcoordIndex);
-			 
-	if (texel)
-		return &(texel->st); // really uv
-
-	return 0x0;
-}
-
-
 void EggPlugin::freyjaGetVertex(vec3_t xyz)
 {
 	Vector<egg_vertex_t *> *vertex;
@@ -412,77 +379,6 @@ void EggPlugin::freyjaGetVertex(vec3_t xyz)
 	xyz[0] = vert->pos[0];
 	xyz[1] = vert->pos[1];
 	xyz[2] = vert->pos[2];
-
-	//return vert->id;
-}
-
-
-void EggPlugin::freyjaGetTexCoord(long index, vec2_t uv)
-{
-	Vector<egg_texel_t *> *texel;
-	egg_texel_t *tex;
-
-
-	texel = mEgg->TexelList();
-
-	if (!texel || index >= (int)texel->end() || index < 0)
-		return;// FREYJA_PLUGIN_ERROR;
- 
-	tex = (*texel)[index];
-
-	if (!tex)
-		return;// FREYJA_PLUGIN_ERROR;
-
-	uv[0] = tex->st[0];
-	uv[1] = tex->st[1];
-
-	//return vert->id;
-}
-
-
-void EggPlugin::freyjaGetVertexByIndex(long index, vec3_t xyz)
-{
-	Vector<egg_vertex_t *> *vertex;
-	egg_vertex_t *vert;
-
-
-	vertex = mEgg->VertexList();
-
-	if (!vertex || index >= (int)vertex->end() || index < 0)
-		return;// FREYJA_PLUGIN_ERROR;
- 
-	vert = (*vertex)[index];
-
-	if (!vert)
-		return;// FREYJA_PLUGIN_ERROR;
-
-	xyz[0] = vert->pos[0];
-	xyz[1] = vert->pos[1];
-	xyz[2] = vert->pos[2];
-
-	//return vert->id;
-}
-
-
-void EggPlugin::freyjaGetVertexNormal(vec3_t xyz)
-{
-	Vector<egg_vertex_t *> *vertex;
-	egg_vertex_t *vert;
-
-
-	vertex = mEgg->VertexList();
-
-	if (!vertex || mIndexVertex >= vertex->end())
-		return;// FREYJA_PLUGIN_ERROR;
- 
-	vert = (*vertex)[mIndexVertex];
-
-	if (!vert)
-		return;// FREYJA_PLUGIN_ERROR;
-
-	xyz[0] = vert->norm[0];
-	xyz[1] = vert->norm[1];
-	xyz[2] = vert->norm[2];
 
 	//return vert->id;
 }
@@ -508,92 +404,6 @@ void EggPlugin::freyjaGetVertexTexCoord(vec2_t uv)
 	uv[1] = vert->uv[1];
 
 	//return vert->id;
-}
-
-
-long EggPlugin::getPolygonVertexIndex(long polygonIndex, long element)
-{
-	egg_polygon_t *polygon;
-
-
-	polygon = getPolygon(polygonIndex);
-
-	if (!polygon || element < 0 || element >= (int)polygon->vertex.end())
-		return -1; 
-
-	return polygon->vertex[element];
-}
-
-
-long EggPlugin::getPolygonTexCoordIndex(long polygonIndex, long element)
-{
-	egg_polygon_t *polygon;
-
-
-	polygon = getPolygon(polygonIndex);
-
-	if (!polygon || element < 0 || element >= (int)polygon->texel.end())
-		return -1; 
-
-	return polygon->texel[element];
-}
-
-
-long EggPlugin::getPolygonMaterial(long polygonIndex)
-{
-	egg_polygon_t *polygon;
-
-
-	polygon = getPolygon(polygonIndex);
-
-	if (!polygon)
-		return 0; 
-
-	return polygon->shader;
-}
-
-
-long EggPlugin::getPolygonEdgeCount(long polygonIndex)
-{
-	egg_polygon_t *polygon;
-
-
-	polygon = getPolygon(polygonIndex);
-
-	if (!polygon)
-		return 0;
-
-	return polygon->vertex.end();
-}
-
-
-long EggPlugin::getPolygonFlags(long polygonIndex)
-{
-	egg_polygon_t *polygon;
-	long flags = 0x0;
-
-
-	polygon = getPolygon(polygonIndex);
-
-	if (!polygon)
-		return 0; 
-
-	// Currently using Egg backend -- it can't do more than one UV type
-	// or coloring
-	if (polygon->vertex.end() == polygon->texel.end())
-	{
-		flags |= fPolygon_PolyMapped;
-	}
-	else if (polygon->vertex.end() == polygon->texel.end()*2)
-	{
-		flags |= fPolygon_ColorMapped;
-	}
-	else
-	{
-		flags |= fPolygon_VertexUV;
-	}
-
-	return flags;
 }
 
 
@@ -642,74 +452,6 @@ long EggPlugin::freyjaGetPolygon(freyja_object_t type, int32 item,
 	}
 
 	return FREYJA_PLUGIN_ERROR;
-}
-
-
-egg_polygon_t *EggPlugin::getPolygon(long index)
-{
-	Vector<egg_polygon_t *> *polygons;
-	egg_polygon_t *poly;
-	
-	polygons = mEgg->PolygonList();
-
-	if (!polygons || polygons->empty() || index > (int)polygons->size()-1 ||
-		index < 0)
-		return 0x0;
-
-	poly = (*polygons)[index];
-
-	return poly;
-}
-
-
-egg_mesh_t *EggPlugin::getMesh(long index)
-{
-	Vector<egg_mesh_t *> *meshes;
-	egg_mesh_t *mesh;
-	
-	meshes = mEgg->MeshList();
-
-	if (!meshes || meshes->empty() || index > (int)meshes->size()-1 ||
-		index < 0)
-		return 0x0;
-
-	mesh = (*meshes)[index];
-
-	return mesh;
-}
-
-
-egg_tag_t *EggPlugin::getBone(long index)
-{
-	Vector<egg_tag_t *> *bones;
-	egg_tag_t *bone;
-	
-	bones = mEgg->TagList();
-
-	if (!bones || bones->empty() || index > (int)bones->size()-1 ||
-		index < 0)
-		return 0x0;
-
-	bone = (*bones)[index];
-
-	return bone;
-}
-
-
-egg_vertex_t *EggPlugin::getVertex(long index)
-{
-	Vector<egg_vertex_t *> *vertex;
-	egg_vertex_t *v;
-	
-	vertex = mEgg->VertexList();
-
-	if (!vertex || vertex->empty() || index > (int)vertex->size()-1 ||
-		index < 0)
-		return 0x0;
-
-	v = (*vertex)[index];
-
-	return v;
 }
 
 
@@ -1189,34 +931,19 @@ void EggPlugin::freyjaVertexWeight(long index, vec_t weight, long bone)
 }
 
 
-void EggPlugin::freyjaVertexTexCoord2f(long index, vec_t u, vec_t v)
-{
-	egg_vertex_t *vert;
-
-  
-	vert = mEgg->getVertex(index);
-
-	if (!vert)
-		return;
-
-	vert->uv[0] = u;
-	vert->uv[1] = v;
-}
-
-
-void EggPlugin::freyjaVertexNormal3f(long index, vec_t x, vec_t y, vec_t z)
+void EggPlugin::freyjaGetVertexNormal(vec3_t xyz)
 {
 	egg_vertex_t *vert;
 
 
-	vert = mEgg->getVertex(index);
+	vert = mEgg->getVertex(mIndexVertex);
 
 	if (!vert)
 		return;
 
-	vert->norm[0] = x;
-	vert->norm[1] = y;
-	vert->norm[2] = z;
+	xyz[0] = vert->norm[0];
+	xyz[1] = vert->norm[1];
+	xyz[2] = vert->norm[2];
 }
 
 
