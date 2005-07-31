@@ -1280,27 +1280,37 @@ void PSKModelRenderer::render()
 			if (mFlags & fRenderTexture)
 			{
 				glTexCoord2fv(mVTXWs[mFaces[i].x].uv);
-				glVertex3fv(mVertexTransformCache+index[0]);
-				glTexCoord2fv(mVTXWs[mFaces[i].y].uv);
-				glVertex3fv(mVertexTransformCache+index[1]);
-				glTexCoord2fv(mVTXWs[mFaces[i].z].uv);
-				glVertex3fv(mVertexTransformCache+index[2]); 
-			}
-			else
-			{
-				((i % 2) ? 
-				 glColor3f(0.0f, 0.0f, (((float)i)/(float)mNumFaces)*.5+.25) :
-				 glColor3f(0.0f, (((float)i)/(float)mNumFaces)*.5+.25, 0.0f));
-
-				//glVertex3fv(mVertexTransformCache+index[0]); 
-				//glVertex3fv(mVertexTransformCache+index[1]); 
-				//glVertex3fv(mVertexTransformCache+index[2]); 
+				//glVertex3fv(mVertexTransformCache+index[0]);
 				glVertex3f(-mVertexTransformCache[index[0]+0],
 						   mVertexTransformCache[index[0]+2],
 						   mVertexTransformCache[index[0]+1]); 
+				glTexCoord2fv(mVTXWs[mFaces[i].y].uv);
+				//glVertex3fv(mVertexTransformCache+index[1]);
 				glVertex3f(-mVertexTransformCache[index[1]+0],
 						   mVertexTransformCache[index[1]+2],
 						   mVertexTransformCache[index[1]+1]); 
+				glTexCoord2fv(mVTXWs[mFaces[i].z].uv);
+				//glVertex3fv(mVertexTransformCache+index[2]); 
+				glVertex3f(-mVertexTransformCache[index[2]+0],
+						   mVertexTransformCache[index[2]+2],
+						   mVertexTransformCache[index[2]+1]); 
+			}
+			else
+			{
+				// Old flat color per face
+				//((i % 2) ? 
+				// glColor3f(0.0f, 0.0f, (((float)i)/(float)mNumFaces)*.5+.25) :
+				// glColor3f(0.0f, (((float)i)/(float)mNumFaces)*.5+.25, 0.0f));
+
+				glColor3f(mVTXWs[mFaces[i].x].uv[0], mVTXWs[mFaces[i].x].uv[1], mVertexTransformCache[index[0]+2]*0.001f);
+				glVertex3f(-mVertexTransformCache[index[0]+0],
+						   mVertexTransformCache[index[0]+2],
+						   mVertexTransformCache[index[0]+1]); 
+				glColor3f(mVTXWs[mFaces[i].y].uv[0], mVTXWs[mFaces[i].y].uv[1], mVertexTransformCache[index[1]+2]*0.001f);
+				glVertex3f(-mVertexTransformCache[index[1]+0],
+						   mVertexTransformCache[index[1]+2],
+						   mVertexTransformCache[index[1]+1]); 
+				glColor3f(mVTXWs[mFaces[i].z].uv[0], mVTXWs[mFaces[i].z].uv[1], mVertexTransformCache[index[2]+2]*0.001f);
 				glVertex3f(-mVertexTransformCache[index[2]+0],
 						   mVertexTransformCache[index[2]+2],
 						   mVertexTransformCache[index[2]+1]); 
@@ -2489,7 +2499,7 @@ int runPSKModelUnitTest(int argc, char *argv[])
 	ut.mResource.registerSymbolValue("EVENT_RES800x600",   SDLK_F10);
 	ut.mResource.registerSymbolValue("EVENT_RES1024x768",  SDLK_F11);
 	ut.mResource.registerSymbolValue("EVENT_RES1280x1024", SDLK_F12);
-	ut.mResource.evalFile("src/PSKModelUnitTest.lsp");
+	ut.mResource.evalFile("plugins/model/PSKModelUnitTest.lsp");
 
 	ut.mFlags |= SDLUnitTest::fAutoRotate;
 	ut.mYaw = 0.0f;
