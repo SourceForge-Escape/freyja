@@ -167,7 +167,7 @@ unsigned int gRecentFileLimit = 7; // This is becoming a plugin soon
 void FreyjaControl::addRecentFilename(const char *filename)
 {
 	unsigned int i, l, n;
-	char *dupe, *swap, *old;
+	char *insert, *swap, *old;
 	bool found = false;
 
 
@@ -199,7 +199,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 
 		mRecentFiles.assign(0, mRecentFiles[i]);
 
-		for (i = 0; i < n; ++i)
+		for (i = 1; i < n; ++i)
 		{
 			if (i > l)
 			{
@@ -214,14 +214,14 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	else  /* Add new file to top slot, push others down one */
 	{
 		l = strlen(filename);
-		dupe = new char[l+1];
-		strncpy(dupe, filename, l);
-		dupe[l] = 0;
+		insert = new char[l+1];
+		strncpy(insert, filename, l);
+		insert[l] = 0;
 
 		// Bubble up hack
 		if (mRecentFiles.end() >= gRecentFileLimit)
 		{
-			swap = dupe;
+			swap = insert;
 			n = mRecentFiles.end();
 			for (i = mRecentFiles.begin(); i < n; ++i)
 			{				
@@ -232,7 +232,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		}
 		else
 		{
-			mRecentFiles.pushBack(dupe);
+			mRecentFiles.pushBack(insert);
 		}
 	}
 
