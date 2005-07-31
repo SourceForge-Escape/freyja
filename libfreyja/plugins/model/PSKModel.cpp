@@ -1538,9 +1538,6 @@ void PSKModelRenderer::generateNormals()
 	if (mFaceNormals == 0x0)
 		mFaceNormals = new float[mNumFaces*3];
 
-	/* Assuming a manifold mesh, you can cache polygon refs in the normal,
-	 * then copy those per vertex just before computing the vertex normal. */
-
 	/* Compute face normals */
     for (i = 0; i < mNumFaces; ++i)
     {
@@ -1568,30 +1565,51 @@ void PSKModelRenderer::generateNormals()
 
 
 	/* Compute vertex normals */
-#ifdef FIXME
-	Vector<long> ref;
-	int j;
+#ifdef FIXME_WASTE_OF_STACK_SPACE_AND_SLOW
+	int ref[mNumVertices][6];  // Assuming manifold mesh and small trifans
+	int j, count;
 
-    for (i = 0; i < meshVertexCount; ++i)
+	// Clear ref counters
+	for (i = 0; i < mNumVertices; ++i)
+    {
+		ref[i][0] = 0;
+	}
+
+	// Get face references
+    for (i = 0; i < mNumFaces; ++i)
+    {
+		v0 = mVTXWs[mFaces[i].x].vertex*3;
+		v1 = mVTXWs[mFaces[i].y].vertex*3;
+		v2 = mVTXWs[mFaces[i].z].vertex*3;
+
+		++ref[v0][0];
+		ref[v0][ref[v0][0]] = i;
+
+		++ref[v1][0];
+		ref[v1][ref[v1][0]] = i;
+
+		++ref[v1][0];
+		ref[v1][ref[v1][0]] = i;
+	}
+
+	// Compute vertex normal
+    for (i = 0; i < mNumVertices; ++i)
     {
 		normal.zero();
 
-		freyjaGetVertexPolygonRef1i(vertexIndex, ref);
+		count = ref[i][0];
 
-		for (j = ref.begin(); j < (int)ref.end(); ++j)
+		for (j = 1; j < count; ++j)
 		{
-			if (ref[j] > polygonCount)
-			{
-				continue;
-			}
-
-			normal += *faceNormals[ref[j]];
+			normal.mVec[0] += mFaceNormals[ref[i][j]*3+0];
+			normal.mVec[1] += mFaceNormals[ref[i][j]*3+1];
+			normal.mVec[2] += mFaceNormals[ref[i][j]*3+2];
 		}
 
 		normal.normalize();
 		mVertexNormals[i*3+0] = normal.mVec[0];
-		mVertexNormals[i*3+1] = normal.mVec[2]; // reordered
-		mVertexNormals[i*3+2] = normal.mVec[1]; // reordered
+		mVertexNormals[i*3+1] = normal.mVec[1]; // already reordered
+		mVertexNormals[i*3+2] = normal.mVec[2]; // already reordered
     }
 #endif
 }
