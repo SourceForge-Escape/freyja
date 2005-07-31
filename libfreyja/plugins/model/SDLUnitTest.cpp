@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <freyja/FreyjaImage.h>
 
 #include "SDLUnitTest.h"
 
-#undef USING_MTK_TGA // FIXME
 
 /* FIXME: Use key down flags instead of key repeats!! */
 /* Arg list types for Resource use */
@@ -3732,23 +3732,37 @@ void Texture::glScreenShot(char *base, unsigned int width, unsigned int height)
 
 int Texture::loadPNG(char *filename)
 {
-#ifdef USING_MTK_PNG
-	FILE *f;
+#ifdef HAVE_FREYJA
+	FreyjaImage img;
 	unsigned char *image = NULL;
 	unsigned char *image2 = NULL;
 	unsigned int w, h, bpp;
 	int id = -1;
 
-
-	f = fopen(filename, "rb");
   
-	if (!f)
+	if (img.loadImage(filename) == 0)
 	{
-		perror("Couldn't load file");
-	}
-	else if (!mtk_image__png_check(f))
-	{
-		mtk_image__png_load(f, &image, &w, &h, &bpp);
+		img.getImage(&image);
+		w = img.getWidth();
+		h = img.getHeight();
+
+		if (image == 0x0 || w == 0 || h == 0)
+			return -1;
+
+		switch (img.getColorMode())
+		{
+		case FreyjaImage::RGBA_32:
+			bpp = 32;
+			break;
+
+		case FreyjaImage::RGB_24:
+			bpp = 24;
+			break;
+
+		case FreyjaImage::INDEXED_8:
+			bpp = 8;
+			break;
+		}
 
 		image2 = scaleBuffer(image, w, h, bpp/8);
 
@@ -3767,11 +3781,6 @@ int Texture::loadPNG(char *filename)
 
 			delete [] image;
 		}
-
-		if (f)
-		{
-			fclose(f);
-		}
 	}
 
 	if (id == -1)
@@ -3781,7 +3790,7 @@ int Texture::loadPNG(char *filename)
 
 	return id;
 #else
-	printf("ERROR: MTK PNG support not enabled in this build\n");
+	printf("ERROR: FREYJAIMAGE support not enabled in this build\n");
 	return -1;
 #endif
 }
@@ -3789,23 +3798,38 @@ int Texture::loadPNG(char *filename)
 
 int Texture::loadTGA(char *filename)
 {
-#ifdef USING_MTK_TGA
-	FILE *f;
+#ifdef HAVE_FREYJA
+	FreyjaImage img;
 	unsigned char *image = NULL;
 	unsigned char *image2 = NULL;
 	unsigned int w, h, bpp;
 	int id = -1;
 
 
-	f = fopen(filename, "rb");
-  
-	if (!f)
+	if (img.loadImage(filename) == 0)
 	{
-		perror("Couldn't load file");
-	}
-	else if (!mtk_image__tga_check(f))
-	{
-		mtk_image__tga_load(f, &image, &w, &h, &bpp);
+		img.getImage(&image);
+		w = img.getWidth();
+		h = img.getHeight();
+
+		if (image == 0x0 || w == 0 || h == 0)
+			return -1;
+
+		switch (img.getColorMode())
+		{
+		case FreyjaImage::RGBA_32:
+			bpp = 32;
+			break;
+
+		case FreyjaImage::RGB_24:
+			bpp = 24;
+			break;
+
+		case FreyjaImage::INDEXED_8:
+			bpp = 8;
+			break;
+		}
+
 		image2 = scaleBuffer(image, w, h, bpp/8);
 
 		if (image2)
@@ -3825,8 +3849,6 @@ int Texture::loadTGA(char *filename)
 
 			delete [] image;
 		}
-
-		fclose(f);
 	}
 
 	if (id == -1)
@@ -3836,7 +3858,7 @@ int Texture::loadTGA(char *filename)
 
 	return id;
 #else
-	printf("ERROR: MTK TGA support not enabled in this build\n");
+	printf("ERROR: FREYJAIMAGE support not enabled in this build\n");
 	return -1;
 #endif
 }

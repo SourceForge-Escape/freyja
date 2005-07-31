@@ -577,7 +577,7 @@ test: $(TEST)
 ##########################################################################
 
 SDLUNIT_CFLAGS=$(BASE_CFLAGS) $(shell sdl-config --cflags) \
-		-DHAVE_SDL -DHAVE_OPENGL -DHAVE_SDL_TTF
+		-DHAVE_SDL -DHAVE_OPENGL -DHAVE_SDL_TTF -DHAVE_FREYJA
 SDLUNIT_LDFLAGS=$(shell sdl-config --libs) -lSDL_ttf -lGL -lGLU -lm -lstdc++ \
 		-lhel0 -lfreyja
 SDLUNIT_OBJS=$(BUILD_TEST_DIR)/SDLUnitTest.o
