@@ -452,6 +452,12 @@ class PSKModelRenderer
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void generateNormals();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Generate normals for faces and vertices
+	 ------------------------------------------------------*/
+
 	void convertBoneAngles();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -570,6 +576,10 @@ class PSKModelRenderer
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	float *mFaceNormals;
+
+	float *mVertexNormals;
 
 	float *mBoneRotationCache;				/* Cache of the computed axis angles */
 
