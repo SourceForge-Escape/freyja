@@ -1022,8 +1022,6 @@ void EggPlugin::freyjaBoneAddChild(long tag)
 		if (!mTag)
 		{
 			freyjaPrintError("EggPlugin::freyjaBoneAddSlave> BONEMTAG isn't allocated!\n");
-      
-			return;
 		}
 		else 
 		{
@@ -1039,8 +1037,6 @@ void EggPlugin::freyjaBoneAddChild(long tag)
 	else
 	{
 		freyjaPrintError("EggPlugin::freyjaBoneAddSlave> Slave defined outside BONEMTAG!\n");
-
-		return;
 	}
 }
 

@@ -5348,6 +5348,23 @@ int32 freyjaBoneCreate(uint32 skeletonIndex)
 }
 
 
+void freyjaBoneAddKeyFrame(int32 boneIndex, int32 frameIndex, 
+							vec_t time, vec3_t translate, vec3_t rotate)
+{
+	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
+
+	if (bone)
+	{
+		egg_keyframe_bone_t *key = new egg_keyframe_bone_t;
+
+		HEL_VEC3_COPY(translate, key->translate);
+		HEL_VEC3_COPY(rotate, key->rotate);
+		key->time = time;
+		key->frameIndex = frameIndex;
+	}
+}
+
+
 void freyjaBoneParent(int32 index)
 {
 	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
