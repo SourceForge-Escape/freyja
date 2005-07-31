@@ -166,8 +166,8 @@ void Quaternion::getEulerAngles(vec_t *heading, vec_t *bank, vec_t *attitude)
 	//*attitude = asin(-2.0 * (mX*mZ - mY*mW));
 
 	// From my newer hel math lib
-	*heading = atan((2.0 * (mX*mY+mZ*mW))/(sqx - sqy + sqz + sqw));
-	*bank = atan((2.0 * (mY*mZ+mX*mW))/(-sqx - sqy + sqz + sqw));
+	*heading = atan((2.0 * (mX*mY+mZ*mW)) / (sqx - sqy + sqz + sqw));
+	*bank = atan((2.0 * (mY*mZ+mX*mW)) / (-sqx - sqy + sqz + sqw));
 	*attitude = asin(-2.0 * (mX*mZ-mY*mW));
 #else
     *heading = atan2(2*mY*mW-2*mX*mZ , 1 - 2*qy2 - 2*qz2);

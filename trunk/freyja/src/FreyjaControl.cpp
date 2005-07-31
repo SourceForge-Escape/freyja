@@ -107,26 +107,6 @@ FreyjaControl::FreyjaControl(Resource *r)
 
 FreyjaControl::~FreyjaControl()
 {
-	FreyjaFileWriter w;
-	char *filename = freyja_rc_map("recent_files");
-	unsigned int i;
-
-
-	/* Save recent_files to disk */
-	if (w.openFile(filename))
-	{
-		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
-		{
-			w.print("%s\n", mRecentFiles[i]);
-			delete [] mRecentFiles[i];
-		}
-
-		w.closeFile();
-	}
-
-	if (filename)
-		delete [] filename;
-
 	if (mRender)
 		delete mRender;
 
@@ -187,7 +167,7 @@ unsigned int gRecentFileLimit = 7; // This is becoming a plugin soon
 void FreyjaControl::addRecentFilename(const char *filename)
 {
 	unsigned int i, l, n;
-	char *dupe;
+	char *dupe, *swap, *old;
 	bool found = false;
 
 
@@ -205,24 +185,33 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		}
 	}
 
-	// FIXME: Should 'boost' this file to top slot
+
+	/* 'Boost' this file to top slot, push others down one */
 	if (found)
 	{
-#ifdef FIXME
-		char *swap = mRecentFiles[0];
-		mRecentFiles.assign(0, mRecentFiles[i]);
-		mRecentFiles.assign(i, swap);
+		swap = mRecentFiles[0];
+		n = mRecentFiles.end();
+		l = i;
 
-		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+		// Already at top, no change to menu
+		if (l == 0)
+			return;
+
+		mRecentFiles.assign(0, mRecentFiles[i]);
+
+		for (i = 0; i < n; ++i)
 		{
-			char *swap = mRecentFiles[0];
-			mRecentFiles.assign(0, mRecentFiles[i]);
-			mRecentFiles.assign(i, swap);	
+			if (i > l)
+			{
+				break;
+			}
+
+			old = mRecentFiles[i];
+			mRecentFiles.assign(i, swap);
+			swap = old;
 		}
-#endif
-		return;
 	}
-	else
+	else  /* Add new file to top slot, push others down one */
 	{
 		l = strlen(filename);
 		dupe = new char[l+1];
@@ -232,8 +221,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		// Bubble up hack
 		if (mRecentFiles.end() >= gRecentFileLimit)
 		{
-			char *old, *swap = dupe;
-
+			swap = dupe;
 			n = mRecentFiles.end();
 			for (i = mRecentFiles.begin(); i < n; ++i)
 			{				
@@ -248,14 +236,6 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		}
 	}
 
-	// FIXME: Add a recently used file size limit here
-
-	// FIXME: Should reorder files LRU to bottom, drop last with limit
-
-	// FIXME: If you reorder remember to update all the code else where using
-	//        'last' file by ending index instead of begining
-
-
 	/* Rebuild menu in order of mRecentFiles */
 	freyja_remove_all_items_to_menu(eRecentFiles);
 
@@ -265,6 +245,32 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	{
 		freyja_append_item_to_menu(eRecentFiles, mRecentFiles[i], 
 								   (eRecentFiles + i + 1));
+	}
+
+
+	/* Save recent_files to disk */
+	FreyjaFileWriter w;
+	char *filename2 = freyja_rc_map("recent_files");
+
+
+	if (w.openFile(filename2))
+	{
+		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
+		{
+			swap = mRecentFiles[i];
+
+			if (swap && swap[0])
+			{
+				w.print("%s\n", swap);
+			}
+		}
+
+		w.closeFile();
+	}
+
+	if (filename2)
+	{
+		delete [] filename2;
 	}
 }
 
