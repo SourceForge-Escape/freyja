@@ -245,10 +245,10 @@ int freyja_model__grn_import(char *filename)
 								  bone->translate.points[2]*scale, 
 								  -bone->translate.points[1]*scale);
 
-			printf("%li: %f %f %f\n", index,
-								  bone->translate.points[0]*scale, 
-								  bone->translate.points[2]*scale, 
-								  -bone->translate.points[1]*scale);
+			//freyjaPrintMessage("%li: %f %f %f", index,
+			//					  bone->translate.points[0]*scale, 
+			//					  bone->translate.points[2]*scale, 
+			//					  -bone->translate.points[1]*scale);
 
 #define GRN_QUAT_STACK
 #ifdef GRN_QUAT_STACK
@@ -278,23 +278,23 @@ int freyja_model__grn_import(char *filename)
 			}
 			
 			q = r * q;
-			//q.getQuaternion4fv(wxyz);
-			//freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+			q.getQuaternion4fv(wxyz);
+			freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
 			q.getEulerAngles(wxyz);
 	
-			printf("   %f %f %f\n", HEL_RAD_TO_DEG(wxyz[0]),
-									HEL_RAD_TO_DEG(wxyz[2]),
-									-HEL_RAD_TO_DEG(wxyz[1]));
-			freyjaBoneRotateEulerXYZ3f(index, 
-										HEL_RAD_TO_DEG(wxyz[0]),
-										HEL_RAD_TO_DEG(wxyz[2]),
-										-HEL_RAD_TO_DEG(wxyz[1]));
+			//freyjaPrintMessage("   %f %f %f", HEL_RAD_TO_DEG(wxyz[0]),
+			//						HEL_RAD_TO_DEG(wxyz[2]),
+			//						-HEL_RAD_TO_DEG(wxyz[1]));
+			//freyjaBoneRotateEulerXYZ3f(index, 
+			//							HEL_RAD_TO_DEG(wxyz[2]),
+			//							HEL_RAD_TO_DEG(wxyz[0]),
+			//							-HEL_RAD_TO_DEG(wxyz[1]));
 #else
 			freyjaBoneRotateQuatWXYZ4f(index,
-										bone->quaternion.points[3],
-										bone->quaternion.points[0], 
-										bone->quaternion.points[1],
-										bone->quaternion.points[2]);
+										bone->quaternion.points[0],
+										bone->quaternion.points[1], 
+										bone->quaternion.points[2],
+										bone->quaternion.points[3]);
 #endif
 
 			if (bone->parent == bone->id)
