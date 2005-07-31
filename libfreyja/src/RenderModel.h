@@ -61,6 +61,27 @@ public:
 		rotate = Vector3d(tag->rot);
 	}
 
+	void set(egg_tag_t *tag, unsigned int frame)
+	{
+		unsigned int i, n = tag->keyframes.size();
+		mTag = tag;
+
+		if (n > 0)
+		{
+			for (i = 0; i < n; ++i)
+			{
+				if (tag->keyframes[i]->frameIndex == frame)
+				{
+					translate = Vector3d(tag->keyframes[i]->translate);
+					rotate = Vector3d(tag->keyframes[i]->rotate);
+				}
+			}
+		}
+
+		translate = Vector3d(tag->center);
+		rotate = Vector3d(tag->rot);
+	}
+
 	Vector3d translate;
 	Vector3d rotate;
 
@@ -76,6 +97,17 @@ public:
 	unsigned int getBoneCount()
 	{
 		return mTags->end();
+	}
+
+	bool getBoneKeyframe(unsigned int index, unsigned int frame, RenderBone &bone)
+	{
+		if ((*mTags)[index])
+		{
+			bone.set((*mTags)[index], frame);
+			return true;
+		}
+
+		return false;
 	}
 
 	bool getBone(unsigned int index, RenderBone &bone)

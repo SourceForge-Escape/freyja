@@ -685,102 +685,95 @@ void freyjaMeshTreeFrameAddBone(int32 tag);
 	 *        Returns valid Index or -1 on Error
 	 ------------------------------------------------------*/
 
+	void freyjaBoneAddKeyFrame(int32 boneIndex, int32 frameIndex, 
+								vec_t time, vec3_t translate, vec3_t rotate);
+	/*------------------------------------------------------
+	 * Pre  : frameIndex - used for virtual grouping 
+	 *        time - time to next frame
+	 *        translate, rotate - transform change from rest frame
+	 * Post : Appends a simple keyframe transition to bone
+	 ------------------------------------------------------*/
+
 	void freyjaBoneAddVertex(int32 boneIndex, int32 vertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets a strong weight in vertex for this bone
+	 ------------------------------------------------------*/
 
 	void freyjaBoneRemoveVertex(int32 boneIndex, int32 vertexIndex);
-	
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Removes weights in vertex for this bone
+	 ------------------------------------------------------*/
 
-void freyjaBoneFlags1i(int32 boneIndex, int32 flags);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone flags
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneFlags1i(int32 boneIndex, int32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set bone flags
+	 ------------------------------------------------------*/
 
-void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone parent
- *
- *        This doesn't affect skeleton, a follow up
- *        call to freyjaBoneAddChild1i is needed after
- *        all bones in skeleton are allocated
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
+	void freyjaBoneParent1i(int32 boneIndex, int32 parentIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set bone parent	
+	 *
+	 *        This doesn't affect skeleton, a follow up
+	 *        call to freyjaBoneAddChild1i is needed after
+	 *        all bones in skeleton are allocated
+	 ------------------------------------------------------*/
+
+	void freyjaBoneName1s(int32 boneIndex, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set human readable bone name
+	 ------------------------------------------------------*/
+
+	void freyjaBoneRemoveMesh1i(int32 boneIndex, int32 meshIndex);
+	void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Mesh is added to Bone's child list
+	 *
+	 *        Either makes mesh tree connection or
+	 *        simulates by vertex weights and pivots
+	 ------------------------------------------------------*/
+
+	void freyjaBoneRemoveChild1i(int32 boneIndex, int32 childIndex);
+	void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Child is added to Bone's child list
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneTranslate3f(int32 boneIndex, vec_t x, vec_t y, vec_t z);
+	void freyjaBoneTranslate3fv(int32 boneIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set bone relative position
+	 ------------------------------------------------------*/
+
+	void freyjaBoneRotateEulerXYZ3f(int32 boneIndex,
+									vec_t x, vec_t y, vec_t z);
+	void freyjaBoneRotateEulerXYZ3fv(int32 boneIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set bone orientation
+	 ------------------------------------------------------*/
+
+	void freyjaBoneRotateQuatWXYZ4f(int32 boneIndex,
+									vec_t w, vec_t x, vec_t y, vec_t z);
+	void freyjaBoneRotateQuatWXYZ4fv(int32 boneIndex, vec4_t wxyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set bone orientation
+	 ------------------------------------------------------*/
 
 
-void freyjaBoneName1s(int32 boneIndex, const char *name);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set human readable bone name
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaBoneRemoveMesh1i(int32 boneIndex, int32 meshIndex);
-void freyjaBoneAddMesh1i(int32 boneIndex, int32 meshIndex);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Mesh is added to Bone's child list
- *
- *        Either makes mesh tree connection or
- *        simulates by vertex weights and pivots
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaBoneRemoveChild1i(int32 boneIndex, int32 childIndex);
-void freyjaBoneAddChild1i(int32 boneIndex, int32 childIndex);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Child is added to Bone's child list
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaBoneTranslate3f(int32 boneIndex, vec_t x, vec_t y, vec_t z);
-void freyjaBoneTranslate3fv(int32 boneIndex, vec3_t xyz);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone relative position
- *
- *-- History ------------------------------------------
- *
- * 2001.10.27: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
-void freyjaBoneRotateEulerXYZ3f(int32 boneIndex, vec_t x, vec_t y, vec_t z);
-void freyjaBoneRotateEulerXYZ3fv(int32 boneIndex, vec3_t xyz);
-void freyjaBoneRotateQuatWXYZ4f(int32 boneIndex,vec_t w,vec_t x,vec_t y,vec_t z);
-void freyjaBoneRotateQuatWXYZ4fv(int32 boneIndex, vec4_t wxyz);
-/*------------------------------------------------------
- * Pre  : freyjaBegin(FREYJA_BONE);
- * Post : Set bone orientation
- *
- *-- History ------------------------------------------
- *
- * 2001.11.18: 
- * Mongoose - Created
- ------------------------------------------------------*/
-
+	////////////////////////////////////////////////////////////////
+	// Misc
+	//
+	////////////////////////////////////////////////////////////////
 
 void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
 
