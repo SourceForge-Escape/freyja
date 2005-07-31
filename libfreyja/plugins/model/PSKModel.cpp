@@ -63,6 +63,10 @@
 #   include <GL/glu.h>
 #endif
 
+#ifdef HAVE_FREYJA
+#	include <hel/Vector3d.h>
+#endif
+
 #ifdef HAVE_UTPACKAGE
 #   include "UTPackage.h"
 #endif
@@ -1149,6 +1153,8 @@ int PSAAnimation::load(char *filename)
 
 PSKModelRenderer::PSKModelRenderer()
 {
+	mVertexNormals = 0x0;
+	mFaceNormals = 0x0;
 	mBoneRotationCache = 0x0;
 	mVertexTransformCache = 0x0;
 	mInvertedMatrices = 0x0;
@@ -1164,6 +1170,11 @@ PSKModelRenderer::~PSKModelRenderer()
 {
 	unsigned int i;
 
+	if (mVertexNormals)
+		delete [] mVertexNormals;
+
+	if (mFaceNormals)
+		delete [] mFaceNormals;
 
 	if (mBoneRotationCache)
 		delete [] mBoneRotationCache;
@@ -1196,7 +1207,8 @@ PSKModelRenderer::~PSKModelRenderer()
 void PSKModelRenderer::render()
 {
 #ifdef HAVE_OPENGL
-	unsigned int i;
+	unsigned int i, a, b, c, ia, ib, ic;
+	int lastTexture = 999999;
 
 
 	glDisable(GL_TEXTURE_2D);
@@ -1220,17 +1232,7 @@ void PSKModelRenderer::render()
 
 		for (i = 0; i < mNumVertices*3; i+= 3)
 		{
-			//glVertex3fv(mVertexTransformCache+i);
-
-			glVertex3f(-mVertexTransformCache[i+0],
-					   mVertexTransformCache[i+2],
-					   mVertexTransformCache[i+1]); 
-			glVertex3f(-mVertexTransformCache[i+0],
-					   mVertexTransformCache[i+2],
-					   mVertexTransformCache[i+1]); 
-			glVertex3f(-mVertexTransformCache[i+0],
-					   mVertexTransformCache[i+2],
-					   mVertexTransformCache[i+1]); 
+			glVertex3fv(mVertexTransformCache+i);
 		}
 
 		glEnd();
@@ -1242,78 +1244,65 @@ void PSKModelRenderer::render()
 	}
 
 	if (mFlags & fRenderFaces)
-	{		
-		unsigned int index[3];
-		int lastTexture = 999999;
-
+	{
 		for (i = 0; i < mNumFaces; ++i)
 		{
 			if (mFlags & fRenderTexture)
 			{
 				if (lastTexture != mFaces[i].material)
 				{
-					glBindTexture(GL_TEXTURE_2D, mTextures[mFaces[i].material]);
+					glBindTexture(GL_TEXTURE_2D, mTextures[(short)mFaces[i].material]);
 					lastTexture = mFaces[i].material;
 				}
 			}
 
 			glBegin(GL_TRIANGLES);
 
-			index[0] = mVTXWs[mFaces[i].x].vertex*3;
-			index[1] = mVTXWs[mFaces[i].y].vertex*3;
-			index[2] = mVTXWs[mFaces[i].z].vertex*3;
+			// Cache face vertex indices
+			a = mFaces[i].x;
+			b = mFaces[i].y;
+		 	c = mFaces[i].z;
+
+			// Cache vertex transform indices
+			ia = mVTXWs[a].vertex*3;
+			ib = mVTXWs[b].vertex*3;
+			ic = mVTXWs[c].vertex*3;
 
 			if (mFlags & fDebugFaceRender)
 			{
 				printf("face[%u] = \n", i);
 				printf("\t (%u = (%.3f..), %u = (%.3f...), %u = (%.3f..))\n",
-						 index[0], mVertexTransformCache[index[0]],
-						 index[1], mVertexTransformCache[index[1]],
-						 index[2], mVertexTransformCache[index[2]]);
+						 ia, mVertexTransformCache[ia],
+						 ib, mVertexTransformCache[ib],
+						 ic, mVertexTransformCache[ic]);
 
-				printf("material = %u\n", mFaces[i].material);
-
-				printf("UVs (%.3f, %.3f)\n",
-						 mVTXWs[mFaces[i].z].uv[0], mVTXWs[mFaces[i].z].uv[1]);
+				printf("\t material = %u\n", mFaces[i].material);
 			}
 
 			if (mFlags & fRenderTexture)
 			{
-				glTexCoord2fv(mVTXWs[mFaces[i].x].uv);
-				//glVertex3fv(mVertexTransformCache+index[0]);
-				glVertex3f(-mVertexTransformCache[index[0]+0],
-						   mVertexTransformCache[index[0]+2],
-						   mVertexTransformCache[index[0]+1]); 
-				glTexCoord2fv(mVTXWs[mFaces[i].y].uv);
-				//glVertex3fv(mVertexTransformCache+index[1]);
-				glVertex3f(-mVertexTransformCache[index[1]+0],
-						   mVertexTransformCache[index[1]+2],
-						   mVertexTransformCache[index[1]+1]); 
-				glTexCoord2fv(mVTXWs[mFaces[i].z].uv);
-				//glVertex3fv(mVertexTransformCache+index[2]); 
-				glVertex3f(-mVertexTransformCache[index[2]+0],
-						   mVertexTransformCache[index[2]+2],
-						   mVertexTransformCache[index[2]+1]); 
+				if (mFaceNormals)
+					glNormal3fv(mFaceNormals+i*3);
+
+				glColor3f(1.0f, 1.0f, 1.0f);
+				glTexCoord2fv(mVTXWs[a].uv);
+				glVertex3fv(mVertexTransformCache+ia);
+				glTexCoord2fv(mVTXWs[b].uv);
+				glVertex3fv(mVertexTransformCache+ib);
+				glTexCoord2fv(mVTXWs[c].uv);
+				glVertex3fv(mVertexTransformCache+ic); 
 			}
 			else
 			{
-				// Old flat color per face
-				//((i % 2) ? 
-				// glColor3f(0.0f, 0.0f, (((float)i)/(float)mNumFaces)*.5+.25) :
-				// glColor3f(0.0f, (((float)i)/(float)mNumFaces)*.5+.25, 0.0f));
+				if (mFaceNormals)
+					glNormal3fv(mFaceNormals+i*3);
 
-				glColor3f(mVTXWs[mFaces[i].x].uv[0], mVTXWs[mFaces[i].x].uv[1], mVertexTransformCache[index[0]+2]*0.001f);
-				glVertex3f(-mVertexTransformCache[index[0]+0],
-						   mVertexTransformCache[index[0]+2],
-						   mVertexTransformCache[index[0]+1]); 
-				glColor3f(mVTXWs[mFaces[i].y].uv[0], mVTXWs[mFaces[i].y].uv[1], mVertexTransformCache[index[1]+2]*0.001f);
-				glVertex3f(-mVertexTransformCache[index[1]+0],
-						   mVertexTransformCache[index[1]+2],
-						   mVertexTransformCache[index[1]+1]); 
-				glColor3f(mVTXWs[mFaces[i].z].uv[0], mVTXWs[mFaces[i].z].uv[1], mVertexTransformCache[index[2]+2]*0.001f);
-				glVertex3f(-mVertexTransformCache[index[2]+0],
-						   mVertexTransformCache[index[2]+2],
-						   mVertexTransformCache[index[2]+1]); 
+				glColor3f(mVTXWs[a].uv[0], mVTXWs[a].uv[1], mVertexTransformCache[ia+1]*0.003f);
+				glVertex3fv(mVertexTransformCache+ia); 
+				glColor3f(mVTXWs[b].uv[0], mVTXWs[b].uv[1], mVertexTransformCache[ib+1]*0.003f);
+				glVertex3fv(mVertexTransformCache+ib); 
+				glColor3f(mVTXWs[c].uv[0], mVTXWs[c].uv[1], mVertexTransformCache[ic+1]*0.003f);
+				glVertex3fv(mVertexTransformCache+ic); 
 			}
 
 			glEnd();
@@ -1537,6 +1526,77 @@ void PSKModelRenderer::renderBone(unsigned int id)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void PSKModelRenderer::generateNormals()
+{
+	Vector3d a, b, c, aa, bb, normal;
+	unsigned int v0, v1, v2, i;
+
+
+	if (mVertexNormals == 0x0)
+		mVertexNormals = new float[mNumVertices*3];
+
+	if (mFaceNormals == 0x0)
+		mFaceNormals = new float[mNumFaces*3];
+
+	/* Assuming a manifold mesh, you can cache polygon refs in the normal,
+	 * then copy those per vertex just before computing the vertex normal. */
+
+	/* Compute face normals */
+    for (i = 0; i < mNumFaces; ++i)
+    {
+		v0 = mVTXWs[mFaces[i].x].vertex*3;
+		v1 = mVTXWs[mFaces[i].y].vertex*3;
+		v2 = mVTXWs[mFaces[i].z].vertex*3;
+
+		a = Vector3d(-mVertexTransformCache[v0+0],
+					 mVertexTransformCache[v0+1],
+					 mVertexTransformCache[v0+2]);
+		b = Vector3d(-mVertexTransformCache[v1+0],
+					 mVertexTransformCache[v1+1],
+					 mVertexTransformCache[v1+2]);
+		c = Vector3d(-mVertexTransformCache[v2+0],
+					 mVertexTransformCache[v2+1],
+					 mVertexTransformCache[v2+2]);
+
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
+		mFaceNormals[i*3+0] = normal.mVec[0];
+		mFaceNormals[i*3+1] = normal.mVec[2]; // reordered
+		mFaceNormals[i*3+2] = normal.mVec[1]; // reordered
+	}
+
+
+	/* Compute vertex normals */
+#ifdef FIXME
+	Vector<long> ref;
+	int j;
+
+    for (i = 0; i < meshVertexCount; ++i)
+    {
+		normal.zero();
+
+		freyjaGetVertexPolygonRef1i(vertexIndex, ref);
+
+		for (j = ref.begin(); j < (int)ref.end(); ++j)
+		{
+			if (ref[j] > polygonCount)
+			{
+				continue;
+			}
+
+			normal += *faceNormals[ref[j]];
+		}
+
+		normal.normalize();
+		mVertexNormals[i*3+0] = normal.mVec[0];
+		mVertexNormals[i*3+1] = normal.mVec[2]; // reordered
+		mVertexNormals[i*3+2] = normal.mVec[1]; // reordered
+    }
+#endif
+}
+
+
 void PSKModelRenderer::convertBoneAngles()
 {
 	unsigned int i;
@@ -1702,9 +1762,11 @@ void PSKModelRenderer::copyVertices()
 	for (i = 0; i < mModel->mNumVertices; ++i)
 	{
 		mVertexTransformCache[i*3]   = mModel->mVertices[i*3];   // 0
-		mVertexTransformCache[i*3+1] = mModel->mVertices[i*3+1]; // 2
-		mVertexTransformCache[i*3+2] = mModel->mVertices[i*3+2]; // 1
+		mVertexTransformCache[i*3+1] = mModel->mVertices[i*3+2]; // 2
+		mVertexTransformCache[i*3+2] = mModel->mVertices[i*3+1]; // 1
 	}
+
+	generateNormals();
 }
 
 
