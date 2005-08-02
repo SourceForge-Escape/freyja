@@ -70,7 +70,7 @@ public:
 		{
 			for (i = 0; i < n; ++i)
 			{
-				if (tag->keyframes[i]->frameIndex == frame)
+				if (tag->keyframes[i]->frameIndex == (int)frame)
 				{
 					translate = Vector3d(tag->keyframes[i]->translate);
 					rotate = Vector3d(tag->keyframes[i]->rotate);
