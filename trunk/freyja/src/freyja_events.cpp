@@ -23,6 +23,10 @@
 
 #define FREYJA_APP_PLUGINS
 
+#ifdef WIN32
+#   undef FREYJA_APP_PLUGINS
+#endif
+
 #ifdef FREYJA_APP_PLUGINS
 #   include <dlfcn.h>
 #endif
@@ -734,13 +738,14 @@ void freyja_append_eventid(char *symbol, int eventid)
 
 void freyja_get_rc_path(char *s, long sz)
 {
-	char *env;
 	long len;
 
 
 	s[0] = 0;
 
 #ifdef unix
+	char *env;
+
 	env = getenv("HOME");
 
 	if (!env || !env[0])
@@ -781,13 +786,14 @@ void freyja_get_share_path(char *s, long sz)
 
 void freyja_get_rc_filename(char *s, const char *filename, long sz)
 {
-	char *env;
 	long len;
 
 
 	s[0] = 0;
 
 #ifdef unix
+	char *env;
+
 	env = getenv("HOME");
 
 	if (!env || !env[0])
@@ -1214,7 +1220,6 @@ char *freyja_rc_map(char *s)
 {
 	char *rc = NULL;
 	char *path = "freyja";
-	char *env;
 	unsigned int len;
 	
 	
@@ -1226,6 +1231,8 @@ char *freyja_rc_map(char *s)
 	len = strlen(s) + strlen(path);
   
 #ifdef unix
+	char *env;
+
 	env = getenv("HOME");
 
 	if (!env || !env[0])
@@ -1454,7 +1461,7 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 	snprintf(dest, size, "%s/.freyja/icons/%s",
 			 (char *)getenv("HOME"), icon_name);
 #else
-	strcpy(dest, "data/icons/%s", icon_name);
+	sprintf(dest, "data/icons/%s", icon_name);
 #endif
 
 	dest[size-1] = 0;

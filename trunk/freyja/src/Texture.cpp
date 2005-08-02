@@ -67,6 +67,20 @@
 #   define glMultiTexCoord2f glMultiTexCoord2fARB
 #endif
 
+#ifdef WIN32
+#   include <GL/glext.h>
+#   define glActiveTexture glActiveTextureARB
+#   define glMultiTexCoord2f glMultiTexCoord2fARB
+
+   PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB = NULL;
+   PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
+   PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB = NULL;
+   PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB = NULL;
+   PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
+   PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
+#endif
+
+void *wglGetProcAddress(char *);
 
 /* Texture *Texture::mSingleton = 0x0; */
 gl_font_t *gFontTest = 0x0;
@@ -87,6 +101,18 @@ Texture::Texture()
 	mTextureLimit = 0;
 
 	//mSingleton = this;
+
+#ifdef WIN32
+	int texelUnitCount;
+
+	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &texelUnitCount);
+	glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)wglGetProcAddress("glMultiTexCoord1fARB");
+	glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)wglGetProcAddress("glMultiTexCoord2fARB");
+	glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)wglGetProcAddress("glMultiTexCoord3fARB");
+	glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)wglGetProcAddress("glMultiTexCoord4fARB");
+	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
+	glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)wglGetProcAddress("glClientActiveTextureARB");
+#endif
 
 	initSDL_TTF();
 }
