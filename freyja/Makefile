@@ -90,14 +90,20 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
 		-DBUILD_HOST=\"\\\"$(BUILD_HOST)\\\"\"
 
-#-framework OpenGL
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja -lmgtk \
 		$(shell pkg-config --libs gtk+-2.0) -lgtkgl-2.0
-LD_FLAGS_WIN32=$(LD_FLAGS)
 #LD_FLAGS += -Wl,-z,defs
 #LD_FLAGS += -Wl,-O1
+
+LD_FLAGS_WIN32=-L/usr/local/lib $(CONFIGURE_LDFLAGS) -lm  -lstdc++ \
+		-lopengl32 \
+		-lhel0 -lfreyja -lmgtk \
+		$(shell pkg-config --libs gtk+-2.0) -lgtkgl-2.0 \
+		-lz
+
+LD_FLAGS_OSX=-framework OpenGL
 
 ################################################################
 

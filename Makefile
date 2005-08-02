@@ -14,7 +14,7 @@ lazybuild:
 	@-cd libmgtk && ./autogen.sh && make && make install
 
 	@-printf "Installing Freyja\n"
-	@-cd freyja && ./autogen.sh && make && make install
+	@-cd freyja && ./autogen.sh && make && make plugins && make install
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
