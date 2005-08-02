@@ -24,12 +24,12 @@
 
 #include <math.h>
 
-#ifdef WIN32
-#   undef FREYJA_PLUGINS
-#endif
-
 #ifdef FREYJA_PLUGINS
-#   include <dlfcn.h> 
+#   ifdef WIN32
+#      include <windows.h>
+#   else
+#      include <dlfcn.h>
+#   endif
 #endif
 
 #include <mstl/Vector.h>
@@ -7130,7 +7130,6 @@ void freyjaPluginsInit()
 	char *module_filename;
 	void (*import)();
 	void *handle;
-	char *error;
 	unsigned int i;
 
 
@@ -7187,32 +7186,31 @@ void freyjaPluginsInit()
 			if (reader.isDirectory(module_filename))
 				continue;
 
-#ifdef MACOSX
-#endif
-
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
 
-			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+			if (!(handle = freyjaModuleLoad(module_filename)))
+//dlopen(module_filename, RTLD_NOW)))
 			{
-				freyjaPrintError("In module '%s'.", module_filename);
+				//freyjaPrintError("In module '%s'.", module_filename);
 				
-				if ((error = dlerror()) != NULL)  
-				{
-					freyjaPrintError("%s", error);
-				}
+				//if ((error = dlerror()) != NULL)  
+				//{
+				//	freyjaPrintError("%s", error);
+				//}
 
 				continue; /* Try the next plugin, after a bad module load */
 			}
 			else
 			{
-				//freyjaPrintMessage("Module '%s' opened.", module_filename);
+				import = (void (*)())freyjaModuleImportFunction(handle, "freyja_init");
+				//import = (void (*)())dlsym(handle, "freyja_init");
 
-				import = (void (*)())dlsym(handle, "freyja_init");
-
-				if ((error = dlerror()) != NULL)  
+				if (!import)
+				//if ((error = dlerror()) != NULL)  
 				{
-					freyjaPrintError("%s", error);
-					dlclose(handle);
+					freyjaModuleUnload(handle);
+					//freyjaPrintError("%s", error);
+					//dlclose(handle);
 					continue;
 				}
 
@@ -7221,14 +7219,7 @@ void freyjaPluginsInit()
 				(*import)();
 				freyjaPluginEnd();
 
-				if ((error = dlerror()) != NULL) 
-				{
-					freyjaPrintError("%s", error);
-					dlclose(handle);
-					continue;
-				}
-				
-				dlclose(handle);
+				freyjaModuleUnload(handle);
 			}
 		}
 
@@ -7248,7 +7239,6 @@ int32 freyjaImportModel(const char *filename)
 	char *module_filename;
 	int (*import)(char *filename);
 	void *handle;
-	char *error;
 	unsigned int i;
 
 
@@ -7301,15 +7291,8 @@ int32 freyjaImportModel(const char *filename)
 
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
 
-			if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+			if (!(handle = freyjaModuleLoad(module_filename)))
 			{
-				freyjaPrintError("In module '%s'.", module_filename);
-				
-				if ((error = dlerror()) != NULL)  
-				{
-					freyjaPrintError("%s", error);
-				}
-
 				continue; /* Try the next plugin, after a bad module load */
 			}
 			else
@@ -7324,15 +7307,14 @@ int32 freyjaImportModel(const char *filename)
 				module_filename[l-3] = 0;
 				snprintf(tmp, 64, "%s_import_model", basename(module_filename));
 				freyjaPrintMessage("Symbol '%s' import...", tmp);
-				import = (int (*)(char *filename))dlsym(handle, tmp);
+				import = (int (*)(char *filename))freyjaModuleImportFunction(handle, tmp);
 #else
-				import = (int (*)(char *filename))dlsym(handle, "import_model");
+				import = (int (*)(char *filename))freyjaModuleImportFunction(handle, "import_model");
 #endif
 
-				if ((error = dlerror()) != NULL)  
+				if (!import)  
 				{
-					freyjaPrintError("%s", error);
-					dlclose(handle);
+					freyjaModuleUnload(handle);
 					continue;
 				}
 
@@ -7352,14 +7334,7 @@ int32 freyjaImportModel(const char *filename)
 					freyjaPrintMessage("Module '%s' success.", module_filename);
 				}
 
-				if ((error = dlerror()) != NULL) 
-				{
-					freyjaPrintError("%s", error);
-					dlclose(handle);
-					continue;
-				}
-				
-				dlclose(handle);
+				freyjaModuleUnload(handle);
 			}
 		}
 
@@ -7423,7 +7398,6 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	char *name;
 	int (*export_mdl)(char *filename);
 	void *handle;
-	char *error;
 	unsigned long i;
 
 
@@ -7459,42 +7433,26 @@ int32 freyjaExportModel(const char *filename, const char *type)
 		sprintf(module_filename, "%s/%s.so", gPluginDirectories[i], name);
 		sprintf(module_export, "freyja_model__%s_export", name);  // use 'model_export'?
 
-		if (!(handle = dlopen(module_filename, RTLD_NOW)))
+		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
-			freyjaPrintError("\tERROR: In module '%s'.\n", module_filename);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				freyjaPrintError("\tERROR: %s\n", error);
-			}
 		}
 		else
 		{
 			freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
     
-			export_mdl = (int (*)(char * filename))dlsym(handle, module_export);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				freyjaPrintError("\tERROR: %s\n", error);
-				dlclose(handle);
-			}
+			export_mdl = (int (*)(char * filename))freyjaModuleImportFunction(handle, module_export);
 
 			FreyjaPluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
 
 			if (plug)
 				gCurrentFreyjaPlugin = plug->getId(); 
 
-			saved = (!(*export_mdl)((char*)filename));
+			if (export_mdl)
+				saved = (!(*export_mdl)((char*)filename));
 
 			gCurrentFreyjaPlugin = -1;
 
-			if ((error = dlerror()) != NULL) 
-			{
-				dlclose(handle);
-			}
-
-			dlclose(handle);
+			freyjaModuleUnload(handle);
 		}
 
 		if (saved)
@@ -8005,7 +7963,96 @@ void freyjaFree()
 
 	gFreyjaPlugins.erase();
 }
+ 
+
+/* Thanks to Sam for the WIN32 module loader example */
+void *freyjaModuleImportFunction(void *handle, const char *name)
+{
+	char *loaderror = 0x0;
+	void *symbol = NULL;
+
+#ifdef WIN32
+	char errbuf[512];
+
+	symbol = (void *)GetProcAddress((HMODULE)handle, name);
+
+	if (symbol == NULL)
+	{
+		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
+					FORMAT_MESSAGE_FROM_SYSTEM),
+				NULL, GetLastError(), 
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				errbuf, 512, NULL);
+		loaderror = errbuf;
+	}
+
+#else // UNIX is always assumed here, everything else is special case
+
+	symbol = dlsym(handle, name);
+
+	if (symbol == NULL)
+	{
+		loaderror = (char *)dlerror();
+	}
+
+#endif
+
+	if (symbol == NULL)
+	{
+		freyjaPrintError("Failed to import %s: %s", name, loaderror);
+	}
+
+	return symbol;
+}
 
 
+void *freyjaModuleLoad(const char *module)
+{
+	void *handle = NULL;
+	char *loaderror;
+
+#ifdef WIN32
+	char errbuf[512];
+
+	handle = (void *)LoadLibrary(module);
+
+	/* Generate an error message if all loads failed */
+	if (handle == NULL) 
+	{
+		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
+					FORMAT_MESSAGE_FROM_SYSTEM),
+				NULL, GetLastError(), 
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				errbuf, 512, NULL);
+		loaderror = errbuf;
+	}
+
+#else
+
+	handle = dlopen(module, RTLD_NOW);
+	loaderror = (char *)dlerror();
+
+#endif
+
+	if (handle == NULL)
+	{
+		freyjaPrintError("Failed to load %s: %s", module, loaderror);
+	}
+
+	return handle;
+}
 
 
+void freyjaModuleUnload(void *handle)
+{
+	if (handle == NULL)
+	{
+		return;
+	}
+
+#ifdef WIN32
+	FreeLibrary((HMODULE)handle);
+#else
+	dlclose(handle);
+#endif
+}

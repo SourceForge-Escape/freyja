@@ -1742,6 +1742,24 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	 * Pre  : 
 	 * Post : Stops freyja backend, also frees memory used
 	 ------------------------------------------------------*/
+
+	void *freyjaModuleImportFunction(void *handle, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : System facade for shared object function import
+	 ------------------------------------------------------*/
+
+	void *freyjaModuleLoad(const char *module);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : System facade for shared object loading
+	 ------------------------------------------------------*/
+
+	void freyjaModuleUnload(void *handle);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : System facade for shared object unloading
+	 ------------------------------------------------------*/
 }
 
 
