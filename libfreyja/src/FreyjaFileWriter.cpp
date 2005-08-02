@@ -80,7 +80,7 @@ bool FreyjaFileWriter::doesFileExist(const char *filename)
 bool FreyjaFileWriter::createDirectory(const char *dir)
 {
 #ifdef WIN32
-	return (mkdir(dir, S_IRWXU) == 0);
+	return mkdir(dir);//(mkdir(dir, S_IRWXU) == 0);
 #else
 	return (mkdir(dir, S_IRWXU | S_IRWXG) == 0);
 #endif
