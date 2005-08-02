@@ -43,6 +43,14 @@
 #   endif
 #endif
 
+#ifdef WIN32
+#   include <GL/glext.h>
+#   define glActiveTexture glActiveTextureARB
+#   define glMultiTexCoord2f glMultiTexCoord2fARB
+
+   extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+#endif
+
 #include "freyja_events.h"
 #include "FreyjaRender.h"
 

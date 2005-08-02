@@ -1901,7 +1901,11 @@ void FreyjaControl::handleFilename(const char *filename)
 					(type == 3) ? "Animation" :
 					(type == 4) ?"Palette" :
 					"!ERROR: No event for ",
+#ifdef WIN32
+					filename,
+#else
 					basename(filename),
+#endif
 					(type2 == 0) ? "save " : "load ",
 					(failed == 0) ? "[sucess]" : "[failed]");
 }

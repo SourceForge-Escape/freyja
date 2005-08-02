@@ -48,6 +48,7 @@ CC=gcc
 BUILD_DEBUG_DIR=bin/debug
 BUILD_RELEASE_DIR=bin/release
 BUILD_PROF_DIR=bin/prof
+BUILD_WIN32_DIR=bin/win32
 BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
@@ -94,8 +95,9 @@ LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja -lmgtk \
 		$(shell pkg-config --libs gtk+-2.0) -lgtkgl-2.0
-LD_FLAGS += -Wl,-z,defs
-LD_FLAGS += -Wl,-O1
+LD_FLAGS_WIN32=$(LD_FLAGS)
+#LD_FLAGS += -Wl,-z,defs
+#LD_FLAGS += -Wl,-O1
 
 ################################################################
 
@@ -119,7 +121,7 @@ debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -Wl,-z,defs"
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
@@ -132,6 +134,17 @@ prof:
 	$(MAKE) targets BUILD_DIR=$(BUILD_PROF_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DNDEBUG -pg" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -pg"
+
+win32:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILD_DIR=$(BUILD_WIN32_DIR) \
+	CC="i586-mingw32msvc-g++ " \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	EXT="dll" \
+	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(LD_FLAGS_WIN32) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+
 
 ########################################################################
 
