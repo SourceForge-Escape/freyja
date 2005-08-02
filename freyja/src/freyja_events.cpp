@@ -951,8 +951,21 @@ void freyja_install_user()
 	//freyja_get_rc_filename(rc, "particles/", 512);
 	//FreyjaFileWriter::createDirectory(rc);
 
+	/* Copy plugins */
 	freyja_get_rc_filename(rc, "plugins/", 512);
+	freyja_get_share_filename(share, "plugins/", 512);
 	FreyjaFileWriter::createDirectory(rc);
+
+	if (r.openDirectory(share))
+	{
+		while ((filename = r.getNextDirectoryListing()))
+		{
+			if (r.isDirectory(filename))
+				continue;
+
+			w.copyFileToPath(filename, rc);
+		}
+	}
 }
 
 

@@ -38,12 +38,14 @@ CC=gcc
 #CC=i586-mingw32msvc-g++
 #CPP=i586-mingw32msvc-cpp
 #LD=i586-mingw32msvc-ld
+#EXT=dll
 
 ################################################################
 
 BUILD_DEBUG_DIR=bin/debug
 BUILD_RELEASE_DIR=bin/release
 BUILD_PROF_DIR=bin/prof
+BUILD_WIN32_DIR=bin/win32
 BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
@@ -129,6 +131,16 @@ release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
 	CFLAGS="$(RELEASE_CFLAGS)" \
+	LD_FLAGS="$(LD_FLAGS)"
+
+win32:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	CC="i586-mingw32msvc-g++ " \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	EXT="dll" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(LD_FLAGS)"
 
 

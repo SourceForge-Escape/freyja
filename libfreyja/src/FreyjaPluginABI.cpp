@@ -25,10 +25,10 @@
 #include <math.h>
 
 #ifdef WIN32
-#   undef MODEL_PLUGINS
+#   undef FREYJA_PLUGINS
 #endif
 
-#ifdef MODEL_PLUGINS
+#ifdef FREYJA_PLUGINS
 #   include <dlfcn.h> 
 #endif
 
@@ -7375,6 +7375,39 @@ int32 freyjaImportModel(const char *filename)
 
 	if (loaded)
 		return 0; // sucess
+#else
+	FreyjaFileReader reader;
+
+	if (!reader.doesFileExist(filename))
+	{
+		freyjaPrintError("File '%s' couldn't be accessed.", filename);
+		return -1;
+	}
+
+	/* Check for native freyja JA format */
+	if (freyjaCheckModel(filename) == 0)
+	{
+		if (freyjaLoadModel(filename) == 0)
+			return 0;
+		
+		return -1;
+	}
+
+	/* Check for native egg format */
+	if (gEgg)
+	{
+		if (Egg::checkFile(filename) == 0)
+		{
+			if (gEgg->loadFile(filename) == 0)
+			{
+				return 0;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+	}
 #endif
 	return -1;
 }
@@ -7473,17 +7506,17 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	if (saved)
 		return 0; // success
 #else
-	if (!type || !filename)
-		return -100;
-
 	/* Check for native format or temp use of EGG here */
 	if (strcmp(type, "ja") == 0)
 	{
-		return !saveModel(filename);
+		return freyjaSaveModel(filename); // FIXME: true or false needed?
 	}
 	else if (strcmp(type, "egg") == 0)
 	{
-		return mEgg->saveFile((char *)filename);
+		if (gEgg)
+		{
+			return gEgg->saveFile(filename);
+		}
 	}
 #endif
 	return -1;
