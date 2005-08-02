@@ -366,7 +366,7 @@ void EggPlugin::freyjaGetVertex(vec3_t xyz)
 
 	vertex = mEgg->VertexList();
 
-	if (!vertex || mIndexVertex >= vertex->end() || index < 0)
+	if (!vertex || mIndexVertex >= vertex->end() || mIndexVertex < 0)
 		return;
  
 	vert = (*vertex)[mIndexVertex];

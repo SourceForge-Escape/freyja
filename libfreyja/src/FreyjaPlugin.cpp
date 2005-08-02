@@ -21,7 +21,14 @@
  *
  ==========================================================================*/
 
-#include <dlfcn.h> 
+#ifdef WIN32
+#   undef FREYJA_PLUGINS
+#endif
+
+#ifdef FREYJA_PLUGINS
+#   include <dlfcn.h> 
+#endif
+
 #include <sys/types.h>
 #include <dirent.h>
 

@@ -1,17 +1,17 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : PSKModel
  * License : No use w/o permission (C) 2003 Mongoose
  * Comments: Unreal Tournament skeletal model
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -50,7 +50,7 @@
  *
  * 2003.01.06:
  * Mongoose - Created
- =================================================================*/
+ ==========================================================================*/
 
 #include <stdio.h>
 #include <string.h>
@@ -1528,6 +1528,7 @@ void PSKModelRenderer::renderBone(unsigned int id)
 
 void PSKModelRenderer::generateNormals()
 {
+#ifdef HAVE_FREYJA
 	Vector3d a, b, c, aa, bb, normal;
 	unsigned int v0, v1, v2, i;
 
@@ -1562,7 +1563,7 @@ void PSKModelRenderer::generateNormals()
 		mFaceNormals[i*3+1] = normal.mVec[2]; // reordered
 		mFaceNormals[i*3+2] = normal.mVec[1]; // reordered
 	}
-
+#endif
 
 	/* Compute vertex normals */
 #ifdef FIXME_WASTE_OF_STACK_SPACE_AND_SLOW

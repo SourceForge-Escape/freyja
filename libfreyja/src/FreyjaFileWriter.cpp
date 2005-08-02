@@ -26,6 +26,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifdef WIN32
+#   include "win32/dirent.h"
+#endif
+
 #include "FreyjaFileWriter.h"
 
 
@@ -75,7 +79,11 @@ bool FreyjaFileWriter::doesFileExist(const char *filename)
 
 bool FreyjaFileWriter::createDirectory(const char *dir)
 {
+#ifdef WIN32
+	return (mkdir(dir, S_IRWXU) == 0);
+#else
 	return (mkdir(dir, S_IRWXU | S_IRWXG) == 0);
+#endif
 }
 
 
