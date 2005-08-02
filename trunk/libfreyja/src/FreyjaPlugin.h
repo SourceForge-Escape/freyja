@@ -57,12 +57,13 @@
 #include "FreyjaPrinter.h"
 #include "FreyjaPluginABI.h"
 
-#ifdef MACOSX
+// Oddly my new windows build system is missing it too
+//#ifdef MACOSX
 #   ifndef strnlen
 #      include <mstl/String.h>
 #      define strnlen String::strnlen
 #   endif
-#endif
+//#endif
 
 
 class FreyjaPluginDescEvent

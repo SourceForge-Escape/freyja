@@ -47,6 +47,7 @@ EXT=so
 BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/prof
 BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/debug
 BUILD_RELEASE_DIR=$(BUILD_BASE_DIR)/release
+BUILD_WIN32_DIR=$(BUILD_BASE_DIR)/win32
 BUILD_TEST_DIR=$(BUILD_BASE_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_BASE_DIR)/$(BUILD_SELECT)
 
@@ -98,6 +99,16 @@ prof:
 	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) -pg" \
 	LD_FLAGS="$(LD_FLAGS) -pg"
+
+win32:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	CC="i586-mingw32msvc-g++ " \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	EXT="dll" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(LD_FLAGS)"
 
 depend:
 	@-echo -n Making deps...
