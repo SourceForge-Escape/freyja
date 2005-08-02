@@ -27,6 +27,10 @@
 
 #include <sys/stat.h>
 
+#ifdef WIN32
+//#   include "win32/dirent.h"
+#endif
+
 #include "FreyjaFileReader.h"
 
 #define SWAP_2(x) ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
