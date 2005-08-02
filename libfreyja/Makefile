@@ -141,7 +141,8 @@ win32:
 	LD="i586-mingw32msvc-ld " \
 	EXT="dll" \
 	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
-	LD_FLAGS="$(LD_FLAGS)"
+	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
+	SHLIBLDFLAGS="$(CONFIGURE_LNK) -lm -fPIC -shared"
 
 
 ################################################################
