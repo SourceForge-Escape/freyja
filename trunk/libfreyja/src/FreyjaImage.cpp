@@ -25,6 +25,10 @@
 #include <math.h>
 #include <stdio.h>
 
+#ifdef WIN32
+#   undef FREYJAIMAGE_PLUGINS
+#endif
+
 #ifdef FREYJAIMAGE_PLUGINS
 #   include <dlfcn.h>
 #endif

@@ -33,6 +33,7 @@ BUILD_SELECT=debug
 BUILD_PROF_DIR=bin/prof
 BUILD_DEBUG_DIR=bin/debug
 BUILD_RELEASE_DIR=bin/release
+BUILD_WIN32_DIR=bin/win32
 BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
@@ -142,6 +143,16 @@ prof:
 	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DNDEBUG -pg" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -pg"
+
+win32:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	CC="i586-mingw32msvc-g++ " \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	EXT="dll" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(LD_FLAGS)"
 
 depend:
 	@-echo -n Making deps...
