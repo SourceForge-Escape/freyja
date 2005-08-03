@@ -25,12 +25,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#ifdef WIN32
-#   undef FREYJAIMAGE_PLUGINS
-#endif
-
 #ifdef FREYJAIMAGE_PLUGINS
-#   include <dlfcn.h>
+#   include "FreyjaPluginABI.h"
 #endif
 
 #include "FreyjaFileReader.h"
@@ -465,7 +461,6 @@ int FreyjaImage::loadImage(const char *filename)
 	bool done = false;
 	char *module_filename;
 	void *handle;
-	char *error;
 	unsigned char *image = 0x0;
 	unsigned int width = 0, height = 0;
 	char type = 0;
@@ -490,21 +485,8 @@ int FreyjaImage::loadImage(const char *filename)
 		if (reader.isDirectory(module_filename))
 			continue;
 
-		//#define DISABLE_MODULES
-#ifdef DISABLE_MODULES
-		print("Disabled load of '%s'", module_filename);
-		continue; // Disabled plugin loading for now
-#endif
-
-		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
-			printError("In module '%s'.", module_filename);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				printError("%s", error);
-			}
-
 			continue; /* Try the next plugin, even after a bad module load */
 		}
 		else
@@ -513,25 +495,17 @@ int FreyjaImage::loadImage(const char *filename)
     
 			import_img = (int (*)(char *filename, unsigned char **image,
 										 unsigned int *width, unsigned int *height, 
-										 char *type))dlsym(handle, "import_image");
+										 char *type))freyjaModuleImportFunction(handle, "import_image");
 
-			if ((error = dlerror()) != NULL)  
+			if (import_img == NULL)  
 			{
-				printError("%s", error);
-				dlclose(handle);
+				freyjaModuleUnload(handle);
 				continue;
 			}
 
-	      done = !(*import_img)((char*)filename, &image, &width, &height, &type);
+			done = !(*import_img)((char*)filename, &image, &width, &height, &type);
 
-			if ((error = dlerror()) != NULL) 
-			{
-				printError("%s", error);
-				dlclose(handle);
-				continue;
-			}
-
-			dlclose(handle);
+			freyjaModuleUnload(handle);
 		}
 	}
 
@@ -646,7 +620,6 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 	bool done = false;
 	char *module_filename;
 	void *handle;
-	char *error;
 
 
 	print("[FreyjaImage plugin system invoked]");
@@ -668,15 +641,8 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 		continue; // Disabled plugin loading for now
 #endif
 
-		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
-			printError("In module '%s'.", module_filename);
-
-			if ((error = dlerror()) != NULL)  
-			{
-				printError("%s", error);
-			}
-
 			continue; /* Try the next plugin, even after a bad module load */
 		}
 		else
@@ -687,12 +653,11 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 
 			export_img = (int (*)(char *filename, unsigned char *image,
 								  unsigned int width, unsigned int height, 
-								  char type))dlsym(handle, symbol);
+								  char type))freyjaModuleImportFunction(handle, symbol);
 
-			if ((error = dlerror()) != NULL)  
+			if (export_img == NULL)  
 			{
-				printError("%s", error);
-				dlclose(handle);
+				freyjaModuleUnload(handle);
 				continue;
 			}
 			
@@ -701,14 +666,7 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 								  ((_color_mode == RGBA_32) ? 4 :
 								   (_color_mode == RGB_24) ? 3 : 1));
 
-			if ((error = dlerror()) != NULL) 
-			{
-				printError("%s", error);
-				dlclose(handle);
-				continue;
-			}
-
-			dlclose(handle);
+			freyjaModuleUnload(handle);
 		}
 	}
 
