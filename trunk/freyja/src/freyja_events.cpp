@@ -23,12 +23,8 @@
 
 #define FREYJA_APP_PLUGINS
 
-#ifdef WIN32
-#   undef FREYJA_APP_PLUGINS
-#endif
-
 #ifdef FREYJA_APP_PLUGINS
-#   include <dlfcn.h>
+#   include <freyja/FreyjaPluginABI.h>
 #endif
 
 #include <mgtk/mgtk_events.h>
@@ -101,7 +97,6 @@ void freyja_init_application_plugins(const char *dir)
 	bool done = false;
 	char *module_filename;
 	void *handle;
-	char *error;
 
 
 	freyja_print("![Freyja application plugin system invoked]");
@@ -119,15 +114,8 @@ void freyja_init_application_plugins(const char *dir)
 
 		// FIXME: Add check here for SO check
 
-		if (!(handle = dlopen(module_filename, RTLD_NOW))) //RTLD_LAZY)))
+		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
-			freyja_print("!In module '%s'.", module_filename);
-
-			if ((error = dlerror()) != NULL)
-			{
-				freyja_print("!%s", error);
-			}
-
 			continue; /* Try the next plugin, even after a bad module load */
 		}
 		else
@@ -135,24 +123,16 @@ void freyja_init_application_plugins(const char *dir)
 			freyja_print("!Module '%s' opened.", module_filename);
 
 			// FIXME: use so name instead of 'perlinnoise' later
-			init = (void (*)(void (*)(const char*, void*)))dlsym(handle, "freyja_perlinnoise_init");
+			init = (void (*)(void (*)(const char*, void*)))freyjaModuleImportFunction(handle, "freyja_perlinnoise_init");
 
-			if ((error = dlerror()) != NULL)  
+			if (init == NULL)  
 			{
-				freyja_print("!%s", error);
-				dlclose(handle);
+				freyjaModuleUnload(handle);
 				continue;
 			}
 
 			/* Call plugin's init function */
 	      	(*init)(freyja_plugin_generic);
-
-			if ((error = dlerror()) != NULL) 
-			{
-				freyja_print("!%s", error);
-				dlclose(handle);
-				continue;
-			}
 
 			freyja_print("!Module '%s' linked.", module_filename);
 
