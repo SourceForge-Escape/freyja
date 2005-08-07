@@ -166,6 +166,8 @@ void freyja_init_application_plugins(const char *dir)
 #endif
 }
 
+void freyja_handle_resource_start();
+
 
 ///////////////////////////////////////////////////////////////////////
 // MGtk wrappers
