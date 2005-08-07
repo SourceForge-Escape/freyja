@@ -164,11 +164,15 @@ prof:
 #export OBJDUMP=/usr/bin/i586-mingw32msvc-objdump
 #export HOST_CC=/usr/bin/gcc
 
-# crossdump-inc.sh
+# crossdump.sh
 #sh cross.env
 #echo `./pkg-config.exe --cflags gtk+-2.0 gtkglext-1.0` | sed -e "s/G://g"
+#echo `./pkg-config.exe --libs gtk+-2.0 gtkglext-1.0` | sed -e "s/G://g"
+
 
 CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include
+
+CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv 
 
 WIN32_CROSS=/home/mongoose/Projects/win32
 WIN32_INCLUDE=$(WIN32_CROSS)/include
@@ -189,7 +193,7 @@ win32:
 	SHLIBEXT=".dll" \
 	CFLAGS="$(WIN32_CFLAGS) -I/usr/local/include/ -DMGTKEXPORTSCLASS" \
 	LD_FLAGS="$(LD_FLAGS)" \
-	LIBS="-L/usr/local/lib -lm -lstdc++ -lopengl32 -L$(WIN32_LIB) -lglib-2.0 -lgtk-win32-2.0 -lgtkglext-win32-1.0"
+	LIBS="-L/usr/local/lib -lm -lstdc++ -L$(WIN32_LIB) $(CROSSDUMP_LIBS)"
 
 
 ########################################################################

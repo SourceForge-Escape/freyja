@@ -1163,7 +1163,6 @@ void FreyjaModel::selectPatchControlPoint(Vector3d xyz)
 	Vector3d u, v;
 	vec_t dist, closest = 99999;
 
-
 	for (i = 0; i < 4; ++i)
 	{
 		for (j = 0; j < 4; ++j)
