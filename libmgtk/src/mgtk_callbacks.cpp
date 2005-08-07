@@ -549,7 +549,9 @@ void mgtk_event_swap_gl_buffers()
 {
 	/* Hhhmm...  nothing really needed here, swapping is handled in 
 	 * the gtk glarea interfacing code after draw requests */
+#ifndef WIN32 // freyja always assumes native unix
 	usleep(250); // Hhmm... avoid back to back redraws give time to finish
+#endif
 }
 
 
