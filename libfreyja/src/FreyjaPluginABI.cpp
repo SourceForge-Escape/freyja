@@ -24,12 +24,12 @@
 
 #include <math.h>
 
-#ifdef FREYJA_PLUGINS
-#   ifdef WIN32
-#      include <windows.h>
-#   else
-#      include <dlfcn.h>
-#   endif
+#if defined (FREYJA_PLUGINS) && !(WIN32)
+#   include <dlfcn.h>
+#endif
+
+#ifdef WIN32
+#   include <windows.h>
 #endif
 
 #include <mstl/Vector.h>

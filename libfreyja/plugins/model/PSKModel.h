@@ -287,9 +287,9 @@ public:
 
 	enum PSKModelRendererFlag
 	{
-		fReserved1			= 1,
-		fReserved2			= 2,
-		fDebugBones			= 4,
+		fReserved1		= 1,
+		fReserved2		= 2,
+		fDebugBones		= 4,
 		fDebugAnimInfos	= 8,
 		fDebugKeyFrames	= 16
 	};
@@ -388,7 +388,7 @@ class PSKModelRenderer
 		fRenderTexture		= 2,
 		fRenderPoints		= 4,
 		fRenderBones 		= 8,
-		fConvertEuler 		= 16,
+		fReservedBit16		= 16,
 		fDebugFaceRender 	= 32
 	};
 
