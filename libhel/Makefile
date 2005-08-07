@@ -78,6 +78,8 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 TARGETS=$(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION)
 
+W32TARGETS=$(BUILDDIR)/$(MODULE)$(SHLIBEXT)
+
 auto: $(BUILD_SELECT)
 
 ################################################################
@@ -102,13 +104,16 @@ prof:
 
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	CC="i586-mingw32msvc-g++ " \
+	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
-	EXT="dll" \
-	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
-	LD_FLAGS="$(LD_FLAGS)"
+	MODULE="hel0" \
+	SHLIBEXT=".dll" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/ -DEXPORTSCLASS" \
+	LD_FLAGS="$(LD_FLAGS)" \
+	LIBS="-L/usr/local/lib -lm"
+	SHLIBLDFLAGS="-L/usr/local/lib/ -mdll -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--no-whole-archive -lm"
 
 depend:
 	@-echo -n Making deps...
@@ -121,6 +126,8 @@ depend:
 all: debug release prof
 
 ########################################################################
+
+w32targets: $(W32TARGETS)
 
 targets: $(TARGETS)
 
@@ -138,6 +145,15 @@ OBJS = \
 
 $(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION) : $(OBJS) 
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
+
+$(BUILDDIR)/$(MODULE).dll : $(OBJS)
+	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
+    -Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
+    -Wl,--export-all-symbols \
+    -Wl,--enable-auto-import \
+    -Wl,--whole-archive $(OBJS) \
+    -Wl,--no-whole-archive $(LIBS)
+
 
 ################################################################
 
@@ -163,6 +179,12 @@ clean:
 	@-echo -n "Cleaning DEBUG builds                       "
 	@-rm -f $(BUILD_DEBUG_DIR)/*.o
 	@-rm -f $(BUILD_DEBUG_DIR)/$(NAME)
+	@-echo "[done]"
+
+	@-echo -n "Cleaning WIN32 builds                       "
+	@-rm -f $(BUILD_WIN32_DIR)/*.o
+	@-rm -f $(BUILD_WIN32_DIR)/*.dll
+	@-rm -f $(BUILD_WIN32_DIR)/*.a
 	@-echo "[done]"
 
 	@-echo -n "Cleaning PROF builds                        "
@@ -238,6 +260,11 @@ install-lib:
 	./libsetup.sh
 	@-echo "[done]"
 
+install-win32:
+	@-echo -n "Installing win32 build                   "
+	@-cp $(BUILD_WIN32_DIR)/*.a $(BUILD_WIN32_DIR)/*.dll $(INSTALL_LIB)
+	@-echo "[done]"
+
 install-headers:
 	@-echo -n "Installing headers                          "
 	@-mkdir -p $(INSTALL_INC_DIR)/$(SRC_DIR)
@@ -267,9 +294,44 @@ backup:
 	@-cd .. && tar Icvf $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 $(TREE_DIR)
 	@-echo "[done]"
 
-################################################################
 
-test:
-	@-echo "No test build rule made"
-	@-echo "[done]"
+##########################################################################
+# Unit tests
+##########################################################################
+
+TEST=$(BUILDDIR)/$(NAME).test
+
+test: $(TEST)
+
+libhel.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(CC) -Wall -g -pipe -O0 -lstdc++ -Isrc -lhel0 \
+		-DUNIT_TEST_LIBHEL \
+		hel/libhel.cpp \
+		-o $(BUILD_TEST_DIR)/libhel.test
+
+win32.test-strip:
+	strip --strip-all $(BUILD_TEST_DIR)/libhel-win32.test
+
+cycle-win32: win32 install-win32 test-win32
+
+test-win32:
+	mkdir -p $(BUILD_TEST_DIR)
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	EXT="dll" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
+	i586-mingw32msvc-g++ -mms-bitfields \
+		-Wall -g -pipe -O0 -I/usr/local/include/ -DUNIT_TEST_LIBHEL  \
+		hel/libhel.cpp \
+		-o $(BUILD_TEST_DIR)/libhel-win32.test \
+		-lstdc++ -L/usr/local/lib/ -lhel0
+
+
+##########################################################################
+
+$(BUILDDIR)/$(NAME).test : $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
+
 

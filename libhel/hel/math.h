@@ -35,6 +35,8 @@
 
 #define HEL_VEC3_COPY(in, out) (out[0] = in[0], out[1] = in[1], out[2] = in[2])
 
+extern "C" {
+
 typedef unsigned char byte;
 typedef int int32;
 typedef unsigned int uint32;
@@ -45,11 +47,9 @@ typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
 
-extern "C" {
 
-	char *helVersionInfo();
 
-}
+char *helVersionInfo();
 
 
 
@@ -169,4 +169,7 @@ vec_t helRandomNum(vec_t from, vec_t to);
 
 /* Some cruft for ye olde mtk3d compatibility */
 void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4]);
+
+}
+
 #endif
