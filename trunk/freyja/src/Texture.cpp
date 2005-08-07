@@ -69,6 +69,9 @@
 
 #ifdef WIN32
 #   include <GL/glext.h>
+#   include <gdk/win32/gdkglwglext.h>
+//  void *wglGetProcAddress(char *);
+
 #   define glActiveTexture glActiveTextureARB
 #   define glMultiTexCoord2f glMultiTexCoord2fARB
 
@@ -80,7 +83,6 @@
    PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
 #endif
 
-void *wglGetProcAddress(char *);
 
 /* Texture *Texture::mSingleton = 0x0; */
 gl_font_t *gFontTest = 0x0;
