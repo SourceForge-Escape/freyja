@@ -303,7 +303,7 @@ void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree)
 
 void mgtk_handle_application_window_close()
 {
-	freyja_handle_application_window_close()
+	freyja_handle_application_window_close();
 }
 
 
@@ -403,11 +403,15 @@ char *mgtk_rc_map(char *filename_or_dirname)
 	return freyja_rc_map(filename_or_dirname);
 }
 
+
+void freyja_handle_motion(int x, int y);
 void mgtk_handle_motion(int x, int y)
 {
 	freyja_handle_motion(x, y);
 }
 
+
+void freyja_handle_mouse(int button, int state, int mod, int x, int y);
 void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
 {
 	freyja_handle_mouse(button, state, mod, x, y);
