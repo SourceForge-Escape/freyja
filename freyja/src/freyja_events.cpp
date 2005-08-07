@@ -31,6 +31,8 @@
 #include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
+#include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 
 #include "FreyjaModel.h"
 #include "FreyjaRender.h"
@@ -167,7 +169,9 @@ void freyja_init_application_plugins(const char *dir)
 }
 
 void freyja_handle_resource_start();
-
+void freyja_callback_get_image_data_rgb24(const char *filename, 
+										unsigned char **image, 
+										int *width, int *height);
 
 ///////////////////////////////////////////////////////////////////////
 // MGtk wrappers
@@ -189,24 +193,7 @@ void mgtk_callback_get_image_data_rgb24(const char *filename,
 										unsigned char **image, 
 										int *width, int *height)
 {
-	FreyjaImage img;
-	unsigned char *swap;
-
-	*image = 0x0;
-	*width = 0;
-	*height = 0;
-
-	if (!img.loadImage(filename))
-	{
-		img.setColorMode(FreyjaImage::RGB_24);
-		img.scaleImage();
-		img.getImage(&swap);
-		*image = swap;
-		*width = img.getWidth();
-		*height = img.getHeight();
-
-		printf("SUCCESS freyja\n");
-	}
+	freyja_callback_get_image_data_rgb24(filename, image, width, height);
 }
 
 
@@ -407,6 +394,37 @@ char *mgtk_rc_map(char *filename_or_dirname)
 ///////////////////////////////////////////////////////////////////////
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
+
+void freyja_callback_get_image_data_rgb24(const char *filename, 
+										unsigned char **image, 
+										int *width, int *height)
+{
+	FreyjaImage img;
+	unsigned char *swap;
+
+	*image = 0x0;
+	*width = 0;
+	*height = 0;
+
+	if (!img.loadImage(filename))
+	{
+		img.setColorMode(FreyjaImage::RGB_24);
+		img.scaleImage();
+		img.getImage(&swap);
+		*image = swap;
+		*width = img.getWidth();
+		*height = img.getHeight();
+
+		printf("SUCCESS freyja\n");
+	}
+}
+
+
+void freyja_handle_command(int command)
+{
+	gFreyjaControl->event(command);
+}
+
 
 void freyja_handle_resource_init(Resource &r)
 {
@@ -717,10 +735,6 @@ void freyja_handle_resource_start()
 	/* Mongoose 2002.02.23, Hook for exit() calls */
 	atexit(freyja_event_shutdown);
 }
-
-
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
 
 long PLUGIN_EVENT_COUNTER = ePluginEventBase;
 
@@ -1346,8 +1360,6 @@ void freyja_refresh_material_interface()
 	}
 
 	mgtk_textentry_value_set(799, freyjaGetMaterialName(mIndex));
-
-	//freyja_print("!refresh_material_interface> FIXME %s:%i", __FILE__, __LINE__);
 }
 
 
@@ -1390,6 +1402,22 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 }
 
 
+void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
+{
+	if (size < 1)
+		return;
+
+#ifdef unix
+	snprintf(dest, size, "%s/.freyja/icons/%s",
+			 (char *)getenv("HOME"), icon_name);
+#else
+	snprintf(dest, size, "C:/freyja/icons/%s", icon_name);
+#endif
+
+	dest[size-1] = 0;
+}
+
+
 int main(int argc, char *argv[])
 {
 // Link up mgtk DLL stubs to these implementations
@@ -1397,6 +1425,9 @@ int main(int argc, char *argv[])
 	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
 	mgtk_win32_import("win32_mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
 	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
+	mgtk_win32_import("win32_mgtk_handle_command", (void*)freyja_handle_command);
+	mgtk_win32_import("win32_mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
+	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
 #endif
 
 	/* Hookup resource to event system */
@@ -1449,20 +1480,7 @@ void mgtk_event_glresize(unsigned int width, unsigned int height)
 }
 
 
-void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
-{
-	if (size < 1)
-		return;
 
-#ifdef unix
-	snprintf(dest, size, "%s/.freyja/icons/%s",
-			 (char *)getenv("HOME"), icon_name);
-#else
-	sprintf(dest, "data/icons/%s", icon_name);
-#endif
-
-	dest[size-1] = 0;
-}
 
 
 void freyja_set_main_window_title(char *title)

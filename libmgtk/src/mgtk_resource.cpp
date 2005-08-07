@@ -49,7 +49,9 @@
 #ifdef WIN32
 void (*win32_mgtk_callback_get_image_data_rgb24)(const char *, unsigned char **, int *, int *) = NULL;
 
+void (*win32_mgtk_handle_command)(int) = NULL;
 void (*win32_mgtk_handle_resource_start)() = NULL;
+
 void (*win32_mgtk_print)(const char*, ...) = NULL;
 void (*win32_mgtk_get_pixmap_filename)(char *, unsigned int, char *) = NULL;
 char *(*win32_mgtk_rc_map)(char *) = NULL;
@@ -61,11 +63,14 @@ void mgtk_win32_import(char *symbol, void *func)
 		win32_mgtk_callback_get_image_data_rgb24 = (void (*)(const char *, unsigned char **, int *, int *))func;
 	}
 
+	else if (strncmp("win32_mgtk_handle_command", symbol, 26) == 0)
+	{
+		win32_mgtk_handle_command = (void (*)(int))func;
+	}
 	else if (strncmp("win32_mgtk_handle_resource_start", symbol, 17) == 0)
 	{
 		win32_mgtk_handle_resource_start = (void (*)())func;
 	}
-
 	else if (strncmp("win32_mgtk_print", symbol, 17) == 0)
 	{
 		win32_mgtk_print = (void (*)(const char*, ...))func;
@@ -80,7 +85,7 @@ void mgtk_win32_import(char *symbol, void *func)
 	}
 	else
 	{
-		mgtk_print("mgtk_win32_import> No binding for %s:%p", symbol, func);
+		mgtk_print("mgtk_win32_import> No binding for %s:%p\n", symbol, func);
 	}
 }
 
@@ -98,62 +103,67 @@ void mgtk_callback_get_image_data_rgb24(const char *filename,
 
 void mgtk_handle_application_window_close()
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_color(int id, float r, float g, float b, float a)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
+
 
 void mgtk_handle_command(int command)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	if (win32_mgtk_handle_command != NULL)
+	{
+		(*win32_mgtk_handle_command)(command);
+	}
 }
+
 
 void mgtk_handle_command2i(int event, int command)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_event1u(int event, unsigned int value)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_event1f(int event, float value)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_file_dialog_selection(char *filename)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_gldisplay()
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_glresize(unsigned int width, unsigned int height)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_key_press(int key, int mod)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_motion(int x_delta, int y_delta)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_resource_start()
@@ -166,12 +176,12 @@ void mgtk_handle_resource_start()
 
 void mgtk_handle_slider1u(int event, unsigned int value)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_handle_text(int event, char *text)
 {
-	printf("FIXME: No linkage to actual function %s:%i", __FILE__, __LINE__);
+	printf("FIXME: No linkage to actual function %s:%i\n", __FILE__, __LINE__);
 }
 
 void mgtk_print(char *format, ...)
