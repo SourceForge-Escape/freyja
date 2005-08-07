@@ -27,10 +27,20 @@
 #ifndef GUARD__FREYJA_MONGOOSE_MATRIX_H_
 #define GUARD__FREYJA_MONGOOSE_MATRIX_H_
 
-
 #include "hel/math.h"
 #include "hel/Quaternion.h"
 #include "hel/Vector3d.h"
+
+#ifdef WIN32
+#   ifdef EXPORTSCLASS
+#      define EXPORTCLASS_API class __declspec(dllexport)
+#   else
+#      define EXPORTCLASS_API class __declspec(dllimport)
+#   endif
+#else
+#   define EXPORTCLASS_API class
+#endif
+
 
 	///////////////////////////////////////////////
 	// Multidim map for row order encoding       //
@@ -51,7 +61,7 @@
 	///////////////////////////////////////////////
 
 
-class Matrix
+EXPORTCLASS_API Matrix
 {
  public:
 
