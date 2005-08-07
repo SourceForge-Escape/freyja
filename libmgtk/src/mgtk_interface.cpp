@@ -61,27 +61,51 @@
 #if HAVE_GTKGLEXT
 void mgtk_refresh_glarea(GtkWidget *widget)
 {
-	GdkRectangle area;
+	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
+	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 
-	area.x = 0;
-	area.y = 0;
-	area.width  = widget->allocation.width;
-	area.height = widget->allocation.height;
+	/* OpenGL calls can be done only if make_current returns true */
+	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
+		return;
 
-	gtk_widget_draw(widget, &area);
+	/* Call modeler's renderer */
+	mgtk_handle_gldisplay();
+
+	/* Swap buffers to rasterize */
+	if (gdk_gl_drawable_is_double_buffered(gldrawable))
+		gdk_gl_drawable_swap_buffers(gldrawable);
+	else
+		glFlush ();
+
+	gdk_gl_drawable_gl_end(gldrawable);
 }
 
 
 void mgtk_init_glarea(GtkWidget* widget)
 {
-	// FIXME
+	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
+	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
+
+
+	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
+	{
+		g_print("*** GL context failed to init for gtkglext!\n");
+		return;
+	}
+	else
+	{
+		g_print("*** GL context init for gtkglext\n");
+	}
+
+	gdk_gl_drawable_gl_end(gldrawable);
 }
 
 
 void mgtk_expose_glarea(GtkWidget *widget, GdkEventExpose *event)
 {
-	//GtkGLArea *glarea = GTK_GL_AREA(widget);
+	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
+	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	
 	/* draw only last expose */
@@ -91,14 +115,19 @@ void mgtk_expose_glarea(GtkWidget *widget, GdkEventExpose *event)
 	}
 
 	/* OpenGL calls can be done only if make_current returns true */
-	//if (gtk_gl_area_make_current(glarea)) 
-	//{
-		/* Call modeler's renderer */
-		mgtk_handle_gldisplay();
-		
-		/* Swap buffers to rasterize */
-		//gtk_gl_area_swapbuffers(glarea);
-	//}
+	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
+		return;
+
+	/* Call modeler's renderer */
+	mgtk_handle_gldisplay();
+
+	/* Swap buffers to rasterize */
+	if (gdk_gl_drawable_is_double_buffered(gldrawable))
+		gdk_gl_drawable_swap_buffers(gldrawable);
+	else
+		glFlush ();
+
+	gdk_gl_drawable_gl_end(gldrawable);
 }
 
 
@@ -117,11 +146,72 @@ void mgtk_destroy_glarea(GtkWidget *widget)
 {
 }
 
+#define TIMEOUT_INTERVAL 10
+int gAnimate = 0;
+static guint gTimeoutId = 0;
+
+static gboolean timeout(GtkWidget *widget)
+{
+  /* Invalidate the whole window. */
+  gdk_window_invalidate_rect (widget->window, &widget->allocation, FALSE);
+
+  /* Update synchronously. */
+  gdk_window_process_updates (widget->window, FALSE);
+
+  return TRUE;
+}
+
+static void timeout_add (GtkWidget *widget)
+{
+  if (gTimeoutId == 0)
+	{
+		gTimeoutId = g_timeout_add(TIMEOUT_INTERVAL, (GSourceFunc)timeout, widget);
+	}
+}
+
+static void timeout_remove (GtkWidget *widget)
+{
+	if (gTimeoutId != 0)
+	{
+		g_source_remove(gTimeoutId);
+		gTimeoutId = 0;
+	}
+}
+
+static gboolean map_event(GtkWidget *widget, GdkEventAny *event, gpointer     data)
+{
+	if (gAnimate)
+		timeout_add (widget);
+
+	return TRUE;
+}
+
+static gboolean unmap_event(GtkWidget *widget, GdkEventAny *event, gpointer data)
+{
+	timeout_remove (widget);
+
+	return TRUE;
+}
+
+
+static gboolean visibility_notify_event(GtkWidget *widget, GdkEventVisibility *event, gpointer data)
+{
+	if (gAnimate)
+	{
+		if (event->state == GDK_VISIBILITY_FULLY_OBSCURED)
+			timeout_remove (widget);
+		else
+			timeout_add (widget);
+	}
+
+	return TRUE;
+}
+
 
 GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 {
 	GtkWidget *drawing_area;
-	GdkGLConfig *glconfig;
+	GdkGLConfig *glconfig = NULL;
 	gint major, minor;
 
 
@@ -134,13 +224,14 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	// Must do this since gdk_gl_config_new_by_mode has broken lib / headers ( arg is for an enum not int! )
 	int args[] = {
 		GDK_GL_RGBA, 
-		GDK_GL_RED_SIZE, 16,
-		GDK_GL_GREEN_SIZE, 16,
-  		GDK_GL_BLUE_SIZE, 16,
-		GDK_GL_DEPTH_SIZE, 16,
+		GDK_GL_RED_SIZE, 1,  // Not bpp or color depth? 
+		GDK_GL_GREEN_SIZE, 1,
+  		GDK_GL_BLUE_SIZE, 1,
+		GDK_GL_DEPTH_SIZE, 1,
 		GDK_GL_DOUBLEBUFFER, 
 		GDK_GL_ATTRIB_LIST_NONE};  
 
+	g_print("*** Spawning double-buffered visual...\n");
 	glconfig = gdk_gl_config_new(args);
 #else
 	glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE);
@@ -156,10 +247,10 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 		// Must do this since gdk_gl_config_new_by_mode has broken lib / headers ( arg is for an enum not int! )
 		int args_single[] = {
 			GDK_GL_RGBA, 
-			GDK_GL_RED_SIZE, 16,
-			GDK_GL_GREEN_SIZE, 16,
-	  		GDK_GL_BLUE_SIZE, 16,
-			GDK_GL_DEPTH_SIZE, 16, 
+			GDK_GL_RED_SIZE, 1,  // Not bpp? 
+			GDK_GL_GREEN_SIZE, 1,
+	  		GDK_GL_BLUE_SIZE, 1,
+			GDK_GL_DEPTH_SIZE, 1, 
 			GDK_GL_ATTRIB_LIST_NONE};  
 
 		glconfig = gdk_gl_config_new(args_single);
@@ -178,6 +269,7 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	{
 		g_print("*** Created double-buffered visual for OpenGL context.\n");
 	}
+
 
 
 	/* Drawing area for drawing OpenGL scene. */
@@ -205,22 +297,26 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	g_signal_connect(G_OBJECT(drawing_area), "button_release_event",
 					 G_CALLBACK(mgtk_event_button_release), NULL);
 
-	//g_signal_connect(G_OBJECT(drawing_area), "map_event",
-	//	    G_CALLBACK(map_event), NULL);
-	//g_signal_connect(G_OBJECT(drawing_area), "unmap_event",
-	//	    G_CALLBACK(unmap_event), NULL);
-	//g_signal_connect(G_OBJECT(drawing_area), "visibility_notify_event",
-	//	    G_CALLBACK(visibility_notify_event), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "map_event",
+		    G_CALLBACK(map_event), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "unmap_event",
+		    G_CALLBACK(unmap_event), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "visibility_notify_event",
+		    G_CALLBACK(visibility_notify_event), NULL);
 
-	//g_signal_connect_swapped(G_OBJECT(window), "key_press_event",
-	//		    G_CALLBACK(key_press_event), drawing_area);
+	g_signal_connect_swapped(G_OBJECT(drawing_area), "key_press_event",
+						G_CALLBACK(mgtk_event_key_press), NULL);
+	g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 
-	//gtk_widget_show(drawing_area);
+	gtk_widget_show(drawing_area);
 
 	return drawing_area;
 }
 
+
 #elif HAVE_GTKGLAREA
+
 void mgtk_refresh_glarea(GtkWidget *widget)
 {
 	GdkRectangle area;
