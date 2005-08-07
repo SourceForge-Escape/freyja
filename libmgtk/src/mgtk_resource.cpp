@@ -663,7 +663,7 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 		return NULL;
 	}
 
-#ifdef HAVE_GTKGLAREA
+#if defined (HAVE_GTKGLAREA) || (HAVE_GTKGLEXT)
 	/* Gtk GL Area widget */
 	gl = mgtk_create_glarea(get_int(width), get_int(height));
 
@@ -676,16 +676,21 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 		mgtk_print("@Gtk+ GL context started...");
 	}
 
+	GTK_GL_AREA_WIDGET = gl;
+
+#   ifndef HAVE_GTKGLEXT
 	state = (mgtk_glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(gl),
 															 "gl_window_state");
-	GTK_GL_AREA_WIDGET = gl;
 	state->appbar = NULL;
+
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_press_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_release_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "destroy",
 					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
+#   endif
+
 #else
 #   warning "WARNING No gtkglarea widget support in this build"
 	gl = label_create(GTK_WIDGET(box->data), "lab1", "No gtkglarea widget support in this build\nAdd -DHAVE_GTKGL to CONFIGURE_CFLAGS in Makefile to force build to use gtkglarea widget", 0.5, 0.5);
@@ -720,7 +725,7 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 	
 	delete_arg(&width);
 	delete_arg(&height);
-	
+
 	return ret;
 }
 
