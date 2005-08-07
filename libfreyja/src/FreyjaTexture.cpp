@@ -68,9 +68,9 @@ uint32 FreyjaTexture::getSerializeSize()
 
 bool FreyjaTexture::serialize(FreyjaFileWriter &w)
 {
+#ifdef FIXME
 	uint32 length;
 
-#ifdef FIXME
 	if (name)
 	{
 		length = strlen(name);

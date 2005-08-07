@@ -74,10 +74,6 @@
 #include "PSKModel.h"
 
 
-//#define FUDGE_BONE_RENDER
-//#define INTERACTIVE_BONE_RENDER
-
-
 void multiply_matrix(float *a, float *b, float *result)
 {
 	/* Column order */
@@ -288,26 +284,15 @@ void quaternion_to_axis_angles(float qw, float qx, float qy, float qz,
 
 	double scale = (
 						 //sqrt(qx*qx + qy*qy + qz*qz);
-						 (float)sin(*theta / 2.0));
-
+						 //(float)sin(*theta / 2.0));
+						(float)sin(*theta * 0.5));
 	*x = qx / scale;
 	*y = qy / scale;
 	*z = qz / scale;
 }
 
 
-void quaternion_to_euler_angles(float qw, float qx, float qy, float qz, 
-								float *x, float *y, float *z)
-{
-	double qw2 = qw*qw;
-	double qx2 = qx*qx;
-	double qy2 = qy*qy;
-	double qz2 = qz*qz;
 
-	*x = atan(2.0 * (qx*qy+qz*qw)/(qx2 - qy2 + qz2 + qw2)); // heading
-	*y = atan(2.0 * (qy*qz+qx*qw)/(-qx2 - qy2 + qz2 + qw2));  // bank
-	*z = asin(-2.0 * (qx*qz-qy*qw)); // attitude
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -1215,16 +1200,8 @@ void PSKModelRenderer::render()
 	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glPushMatrix();
-	//glRotatef(-90.0f,  1, 0, 0);  /* Make model stand up in our Y */
+	glRotatef(-90.0f,  1, 0, 0);  /* Make model stand up in our Y */
 	//glTranslatef(0, 0, 2);
-
-	if (mFlags & fRenderBones)
-	{
-		glPushMatrix();
-		//glRotatef(180.0f,  0, 0, 1);
-		renderBone(0);
-		glPopMatrix();
-	}
 
 	if (mFlags & fRenderPoints)
 	{	
@@ -1315,18 +1292,27 @@ void PSKModelRenderer::render()
 		}
 	}
 
+	if (mFlags & fRenderBones)
+	{
+		glPushMatrix();
+
+		glPushAttrib(GL_ENABLE_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+
+		renderBone(0);
+
+		glPopAttrib();
+
+		glPopMatrix();
+	}
+
 	glPopMatrix();
 #endif
 }
 
-
-#ifdef INTERACTIVE_BONE_RENDER
-/* HACK */
-float gBoneRotHackX = 0;
-float gBoneRotHackY = 0;
-float gBoneRotHackZ = 0;
-unsigned int gBoneId = 0;
-#endif
 
 void PSKModelRenderer::renderBone(unsigned int id)
 {
@@ -1337,31 +1323,11 @@ void PSKModelRenderer::renderBone(unsigned int id)
 	unsigned int f;
 
 
-
-#ifdef INTERACTIVE_BONE_RENDER
-	/* Hack */
-	glPushMatrix();
-
-	if (gBoneId == id)
-	{
-		glRotatef(gBoneRotHackZ,  0, 0, 1);
-		glRotatef(gBoneRotHackY,  0, 1, 0);
-		glRotatef(gBoneRotHackX,  1, 0, 0);
-	}
-#endif
-
 	glPushMatrix();
 
 	if (id == 0)
 	{
 		glPointSize(8.0);
-#ifdef FUDGE_BONE_RENDER
-		//glTranslatef(16.0, 16.0, 0.0);
-		//glRotatef(180, 0, 0, 1);
-		//glRotatef(-90, 0, 1, 0);
-		//glRotatef(-90, 1, 0, 0);
-		glPushMatrix();
-#endif
 	}
 
 	/* Handle PSA animation use */
@@ -1387,12 +1353,12 @@ void PSKModelRenderer::renderBone(unsigned int id)
 		if (id == 0)
 		{
 			posB[0] = -mBones[id].restLoc[0];
-			posB[1] = -mBones[id].restLoc[2];
-			posB[2] = -mBones[id].restLoc[1];
+			posB[1] = -mBones[id].restLoc[1];
+			posB[2] = -mBones[id].restLoc[2];
 
 			glTranslatef(mBones[id].restLoc[0],
-						 mBones[id].restLoc[2],
-						 mBones[id].restLoc[1]);
+						 mBones[id].restLoc[1],
+						 mBones[id].restLoc[2]);
 		}
 		else
 		{
@@ -1400,16 +1366,10 @@ void PSKModelRenderer::renderBone(unsigned int id)
 						 mBones[id].restLoc[1],
 						 mBones[id].restLoc[2]);
 		}
-
-		if (id == 1)
-		{
-			glRotatef(90, 0, 1, 0);
-		}
-
 	}
 
 	/* Draw a visible 'bone',
-		Gradient light (parent) to dark (child) */
+	 *	Gradient light (parent) to dark (child) */
 	glLineWidth(3.5);
 	glBegin(GL_LINES);
 	glColor3f(0.33, 0.33, 0.33);
@@ -1418,22 +1378,11 @@ void PSKModelRenderer::renderBone(unsigned int id)
 	glVertex3fv(posB);
 	glEnd();
 
-
-	if (mFlags & fConvertEuler)
-	{
-		// euler angles
-		glRotatef(mBoneRotationCache[id*4],   1, 0, 0);
-		glRotatef(mBoneRotationCache[id*4+1], 0, 1, 0);
-		glRotatef(mBoneRotationCache[id*4+2], 0, 0, 1);
-	}
-	else
-	{
-		// axis angles
-		glRotatef(mBoneRotationCache[id*4],
-				  mBoneRotationCache[id*4+1],
-				  mBoneRotationCache[id*4+2],
-				  mBoneRotationCache[id*4+3]);
-	}
+	/* Rotate using axis angles */
+	glRotatef(mBoneRotationCache[id*4],
+			  mBoneRotationCache[id*4+1],
+			  mBoneRotationCache[id*4+2],
+			  mBoneRotationCache[id*4+3]);
 
 	glLineWidth(1.5);
 
@@ -1505,15 +1454,8 @@ void PSKModelRenderer::renderBone(unsigned int id)
 
 	glPopMatrix();
 
-#ifdef INTERACTIVE_BONE_RENDER
-	glPopMatrix();
-#endif
-
 	if (id == 0)
 	{
-#ifdef FUDGE_BONE_RENDER
-		glPopMatrix();
-#endif
 		glColor3f(1.0, 1.0, 1.0);
 		glLineWidth(1.0);
 		glPointSize(1.0);
@@ -1630,49 +1572,29 @@ void PSKModelRenderer::convertBoneAngles()
 	/* Use PSK bones */
 	mBones = mModel->mBones;
 
-	printf("Converting quaternions to [%s]\n",
-			 (mFlags & fConvertEuler) ? "Eular angles" : "Axis angles");
+	printf("Converting quaternions to [Axis angles]\n");
 
 	for (i = 0; i < mNumBones; ++i)
 	{
-		if (mFlags & fConvertEuler)
-		{
-			// eular angles
-			quaternion_to_euler_angles(mBones[i].restDir[0],
-									   mBones[i].restDir[1],
-									   mBones[i].restDir[2],
-									   mBones[i].restDir[3],
-									   &mBoneRotationCache[i*4],    // x
-									   &mBoneRotationCache[i*4+1],  // y
-									   &mBoneRotationCache[i*4+2]); // z
-			
-			// Convert radians to degrees
-			mBoneRotationCache[i*4] *= 57.295779513082323;
-			mBoneRotationCache[i*4+1] *= 57.295779513082323;
-			mBoneRotationCache[i*4+2] *= 57.295779513082323;
-		}
-		else
-		{
-			// axis angles
-			quaternion_to_axis_angles(mBones[i].restDir[3], // qw is dir[3]?
-									  mBones[i].restDir[0], // qx
-									  mBones[i].restDir[1], // qy
-									  mBones[i].restDir[2], // qz
-									  &mBoneRotationCache[i*4],    // theta
-									  &mBoneRotationCache[i*4+1],  // x
-									  &mBoneRotationCache[i*4+2],  // y  
-									  &mBoneRotationCache[i*4+3]); // z
+		/* Convert to Axis angles */
+		quaternion_to_axis_angles(mBones[i].restDir[3], // qw is dir[3]?
+								  mBones[i].restDir[0], // qx
+								  mBones[i].restDir[1], // qy
+								  mBones[i].restDir[2], // qz
+								  &mBoneRotationCache[i*4],    // theta
+								  &mBoneRotationCache[i*4+1],  // x
+								  &mBoneRotationCache[i*4+2],  // y  
+								  &mBoneRotationCache[i*4+3]); // z
 
-			// Convert radians to degrees, negated to account for UT coords
-			mBoneRotationCache[i*4] *= -57.295779513082323; 
-		}
+		/* Convert radians to degrees, negated to account for UT coords */
+		mBoneRotationCache[i*4] *= -57.295779513082323; 
 	}
 }
 
 
 void PSKModelRenderer::convertBoneAnglesPSA(unsigned int frame)
 {
-	unsigned int i, b, start, end;
+	unsigned int i, b, start, end, count;
 	float w, x, y, z, w2, x2, y2, z2;
 	float qw, qx, qy, qz;
 
@@ -1683,18 +1605,20 @@ void PSKModelRenderer::convertBoneAnglesPSA(unsigned int frame)
 		return;
 	}
 
+	count = (mAnimation->mNumKeyFrames / mAnimation->mNumBones);
+
 	/* Use PSA bones */
 	mBones = mAnimation->mBones;
 
 	/* Check here for frame out of bounds */
-	if (frame > mAnimation->mNumKeyFrames / mAnimation->mNumBones)
+	if (frame > count)
 	{
 		printf("convertBoneAnglesPSA()> Error: Frame out of bounds\n");
 		return;
 	}
 
-	printf("Converting quaternions to [%s] for PSA frame [%u]\n",
-			 (mFlags & fConvertEuler) ? "Eular angles" : "Axis angles", frame);
+	printf("Converting quaternions to [%s] for PSA frame [%u/%u]\n",
+			 "Axis angles", frame, count);
 
 	/* Update frame tracker */
 	mAnimationFrame = frame;
@@ -1729,33 +1653,15 @@ void PSKModelRenderer::convertBoneAnglesPSA(unsigned int frame)
 			qw = w;  qx = x;  qy = y;  qz = z;
 		}
 
-		if (mFlags & fConvertEuler)
-		{
-			/* FIXME: No support for frames */
+		// axis angles
+		quaternion_to_axis_angles(qw, qx, qy, qz,
+								  &mBoneRotationCache[b*4],    // theta
+								  &mBoneRotationCache[b*4+1],  // x
+								  &mBoneRotationCache[b*4+2],  // y  
+								  &mBoneRotationCache[b*4+3]); // z
 
-			// eular angles
-			quaternion_to_euler_angles(qw, qx, qy, qz,
-									   &mBoneRotationCache[b*4],    // x
-									   &mBoneRotationCache[b*4+1],  // y
-									   &mBoneRotationCache[b*4+2]); // z
-			
-			// Convert radians to degrees
-			mBoneRotationCache[b*4] *= 57.295779513082323;
-			mBoneRotationCache[b*4+1] *= 57.295779513082323;
-			mBoneRotationCache[b*4+2] *= 57.295779513082323;
-		}
-		else
-		{
-			// axis angles
-			quaternion_to_axis_angles(qw, qx, qy, qz,
-									  &mBoneRotationCache[b*4],    // theta
-									  &mBoneRotationCache[b*4+1],  // x
-									  &mBoneRotationCache[b*4+2],  // y  
-									  &mBoneRotationCache[b*4+3]); // z
-
-			// Convert radians to degrees, negated to account for UT coords
-			mBoneRotationCache[b*4] *= -57.295779513082323;
-		}
+		// Convert radians to degrees, negated to account for UT coords
+		mBoneRotationCache[b*4] *= -57.295779513082323;
 	}
 
 	/* Setup matrices for mesh deformation use */
@@ -1780,9 +1686,9 @@ void PSKModelRenderer::copyVertices()
 
 	for (i = 0; i < mModel->mNumVertices; ++i)
 	{
-		mVertexTransformCache[i*3]   = mModel->mVertices[i*3];   // 0
-		mVertexTransformCache[i*3+1] = mModel->mVertices[i*3+2]; // 2
-		mVertexTransformCache[i*3+2] = mModel->mVertices[i*3+1]; // 1
+		mVertexTransformCache[i*3]   = mModel->mVertices[i*3];   // was  0
+		mVertexTransformCache[i*3+1] = -mModel->mVertices[i*3+1]; // was  2
+		mVertexTransformCache[i*3+2] = mModel->mVertices[i*3+2]; // was  1
 	}
 
 	generateNormals();
@@ -1957,21 +1863,11 @@ void PSKModelRenderer::setupWorldMatrices(unsigned int id)
 						 mBones[id].restLoc[2]);
 	}
 
-	if (mFlags & fConvertEuler)
-	{
-		// euler angles
-		glRotatef(mBoneRotationCache[id*4],   1, 0, 0);
-		glRotatef(mBoneRotationCache[id*4+1], 0, 1, 0);
-		glRotatef(mBoneRotationCache[id*4+2], 0, 0, 1);
-	}
-	else
-	{
-		// axis angles
-		glRotatef(mBoneRotationCache[id*4],
-					 mBoneRotationCache[id*4+1],
-					 mBoneRotationCache[id*4+2],
-					 mBoneRotationCache[id*4+3]);
-	}
+	// axis angles
+	glRotatef(mBoneRotationCache[id*4],
+				 mBoneRotationCache[id*4+1],
+				 mBoneRotationCache[id*4+2],
+				 mBoneRotationCache[id*4+3]);
 
 	/* Store world transform matrix */
 	glGetFloatv(GL_MODELVIEW_MATRIX, mWorldMatrices[id]);
@@ -2290,7 +2186,7 @@ void initScene(int argc, char *argv[])
 	printf("UP/DOWN    - Adjust scene pitch\n");
 	printf("RIGHT/LEFT - Adjust scene yaw\n");
 	printf("-/=        - Adjust model scaling\n");
-	printf(";/'        - Switch PSA frame (EXPERIMENTAL)\n");
+	printf("[ ]'       - Switch PSA frame\n");
 	printf("/          - Show PSK frame\n");
 	printf("----------------------------------\n");
 	printf("1 - Toggle polygon rendering\n");   
@@ -2302,10 +2198,6 @@ void initScene(int argc, char *argv[])
 	printf("8 - Toggle OpenGL Lighting\n"); 
 	printf("r - Reset mesh to default\n");  
 	printf("w - Toggle wireframe rendering\n");
-#ifdef INTERACTIVE_BONE_RENDER
-	printf("g,h - Select bone Id\n");
-	printf("z,x,c, b,n,m - Adjust bone rotatation\n");
-#endif
 	printf("f - Convert rotation to angles to render correctly\n");
 	printf("i,k,j,l - Move light\n");
 	printf("----------------------------------\n");
@@ -2362,48 +2254,6 @@ void handleKeyPressEvent(unsigned int key, unsigned int mod)
 		printf("Converting bone angles...\n");
 		gModelRenderer.convertBoneAngles();
 		break;
-#ifdef INTERACTIVE_BONE_RENDER
-	case 'g':
-		--gBoneId;
-		printf("gBoneId = %i\n", gBoneId);
-		bufferedPrintf(ut.mMessage, 256, "gBoneId = %i\n", gBoneId);
-		break;
-	case 'h':
-		++gBoneId;
-		printf("gBoneId = %i\n", gBoneId);
-		bufferedPrintf(ut.mMessage, 256, "gBoneId = %i\n", gBoneId);
-		break;
-	case 'z':
-		--gBoneRotHackX;
-		printf("gBoneRotHackX = %f\n", gBoneRotHackX);
-		bufferedPrintf(ut.mMessage, 256, "gBoneRotHackX = %f\n", gBoneRotHackX);
-		break;
-	case 'x':
-		--gBoneRotHackY;
-		printf("gBoneRotHackY = %f\n", gBoneRotHackY);
-		bufferedPrintf(ut.mMessage, 256, "gBoneRotHackY = %f\n", gBoneRotHackY);
-		break;
-	case 'c':
-		--gBoneRotHackZ;
-		printf("gBoneRotHackZ = %f\n", gBoneRotHackZ);
-		bufferedPrintf(ut.mMessage, 256, "gBoneRotHackZ = %f\n", gBoneRotHackZ);
-		break;
-	case 'b':
-		++gBoneRotHackX;
-		printf("gBoneRotHackX = %f\n", gBoneRotHackX);
-		bufferedPrintf(ut.mMessage, 256, "gBoneRotHackX = %f\n", gBoneRotHackX);
-		break;
-	case 'n':
-		++gBoneRotHackY;
-		printf("gBoneRotHackY = %f\n", gBoneRotHackY);
-		bufferedPrintf(ut.mMessage, 256, "gBoneRotHackY = %f\n", gBoneRotHackY);
-		break;
-	case 'm':
-		++gBoneRotHackZ;
-		printf("gBoneRotHackZ = %f\n", gBoneRotHackZ);
-		bufferedPrintf(ut.mMessage, 256, "gBoneRotHackZ = %f\n", gBoneRotHackZ);
-		break;
-#endif
 	case '-':
 		if (ut.mScale * 0.15 > 0.000001)
 			ut.mScale *= 0.15f;
@@ -2489,10 +2339,10 @@ void handleKeyPressEvent(unsigned int key, unsigned int mod)
 	case '/':
 		gModelRenderer.convertBoneAngles();
 		break;
-	case '\'':
+	case ']':
 		gModelRenderer.convertBoneAnglesPSA(gModelRenderer.mAnimationFrame+1);
 		break;
-	case ';':
+	case '[':
 		gModelRenderer.convertBoneAnglesPSA(gModelRenderer.mAnimationFrame-1);
 		break;
 	case 'r':
@@ -2848,24 +2698,53 @@ int freyja_model__psk_import(char *filename)
 	}
 
 
+	vec_t theta, x, y, z;
+	double aascale;
+
 	freyjaBegin(FREYJA_SKELETON);
+
+	Matrix local[psk.mNumBones];
+	Matrix localInverse[psk.mNumBones];
 
 	for (i = 0; i < psk.mNumBones; ++i)
 	{
-		if (!i)
-		{
-			q = Quaternion(psk.mBones[i].restDir[3],   // qw
-						   -psk.mBones[i].restDir[0],  // qx
-						    psk.mBones[i].restDir[1],  // qy
-						   -psk.mBones[i].restDir[2]); // qz
-		}
-		else
-		{
-			q = Quaternion(psk.mBones[i].restDir[3],  // qw
-						   psk.mBones[i].restDir[0],  // qx
-						   psk.mBones[i].restDir[1],  // qy
-						   psk.mBones[i].restDir[2]); // qz
-		}
+		/* Convert quaternion to axis angles, theta in radians */
+		theta = (float)acos(psk.mBones[i].restDir[3]) * 2.0;
+		aascale = ((float)sin(theta * 0.5));
+		x = psk.mBones[i].restDir[0] / aascale;
+		y = psk.mBones[i].restDir[1] / aascale;
+		z = psk.mBones[i].restDir[2] / aascale;
+
+		q.setByAxisAngles(-theta, x, y, z);
+
+		local[i] = Matrix(q);
+		local[i].translate(psk.mBones[i].restLoc[0]*scale,
+							psk.mBones[i].restLoc[1]*scale,
+							psk.mBones[i].restLoc[2]*scale);
+
+		localInverse[i] = local[i];
+		localInverse[i].invert();
+	}
+
+
+	vec_t tx, ty, tz;
+
+
+	for (i = 0; i < psk.mNumBones; ++i)
+	{
+		/* Convert quaternion to axis angles, theta in radians */
+		theta = (float)acos(psk.mBones[i].restDir[3]) * 2.0;
+		aascale = ((float)sin(theta * 0.5));
+		x = psk.mBones[i].restDir[0] / aascale;
+		y = psk.mBones[i].restDir[1] / aascale;
+		z = psk.mBones[i].restDir[2] / aascale;
+
+		q.setByAxisAngles(-theta, x, y, z);
+
+		tx = psk.mBones[i].restLoc[0];
+		ty = psk.mBones[i].restLoc[1];
+		tz = psk.mBones[i].restLoc[2];
+
 
 		/* Start a new bone */
 		freyjaBegin(FREYJA_BONE);
@@ -2895,6 +2774,20 @@ int freyja_model__psk_import(char *filename)
 							psk.mBones[j].restDir[0],  // qx
 							psk.mBones[j].restDir[1],  // qy
 							psk.mBones[j].restDir[2]); // qz
+
+		/* Convert quaternion to axis angles, theta in radians */
+		theta = (float)acos(psk.mBones[i].restDir[3]) * 2.0;
+		aascale = ((float)sin(theta * 0.5));
+		x = psk.mBones[j].restDir[0] / aascale;
+		y = psk.mBones[j].restDir[1] / aascale;
+		z = psk.mBones[j].restDir[2] / aascale;
+
+		r2.setByAxisAngles(-theta, x, y, z);
+
+		tx += psk.mBones[i].restLoc[0];
+		ty += psk.mBones[i].restLoc[1];
+		tz += psk.mBones[i].restLoc[2];
+
 			//	r2.normalize();
 			r = r * r2;
 		}
