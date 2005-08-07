@@ -706,10 +706,11 @@ freyjautil-win32.test:
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
 	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
-	i586-mingw32msvc-g++ -mms-bitfields -Wall -g -pipe -O0 -lstdc++ -I/usr/local/include/ \
-		-L/usr/local/lib/ -lfreyja9 -lhel0 \
+	i586-mingw32msvc-g++ -mms-bitfields \
+		-Wall -g -pipe -O0 -I/usr/local/include/ \
 		tools/freyjautil.cpp \
-		-o $(BUILD_TEST_DIR)/freyjautil-win32.test
+		-o $(BUILD_TEST_DIR)/freyjautil-win32.test \
+		-lstdc++ -L/usr/local/lib/ -lhel0 -lfreyja9 
 
 python.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
