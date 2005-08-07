@@ -1519,6 +1519,8 @@ void FreyjaRender::renderModel(RenderModel &model)
 	/* Render skeleton */
 	if (mRenderMode & RENDER_BONES)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+
 		/* Yay, let thou bones show through thine meshes 
 		 * and it was good for editing */
 		if (mRenderMode & fRenderBonesClearedZBuffer)
@@ -1526,7 +1528,6 @@ void FreyjaRender::renderModel(RenderModel &model)
 			glClear(GL_DEPTH_BUFFER_BIT);
 		}
 
-		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
