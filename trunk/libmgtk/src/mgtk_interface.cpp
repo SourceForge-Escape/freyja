@@ -130,9 +130,21 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	//FIXME: I bet this casting breaks the bitmap -- thanks to whoever that wrote the bad arg types for gdk_gl_config_new_by_mode
 
 	/* Get a double buffered gtk_gl context handle */
-	glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB |
-										 GDK_GL_MODE_DEPTH | 
-										 GDK_GL_MODE_DOUBLE));
+#ifdef WIN32
+	// Must do this since gdk_gl_config_new_by_mode has broken lib / headers ( arg is for an enum not int! )
+	int args[] = {
+		GDK_GL_RGBA, 
+		GDK_GL_RED_SIZE, 16,
+		GDK_GL_GREEN_SIZE, 16,
+  		GDK_GL_BLUE_SIZE, 16,
+		GDK_GL_DEPTH_SIZE, 16,
+		GDK_GL_DOUBLEBUFFER, 
+		GDK_GL_ATTRIB_LIST_NONE};  
+
+	glconfig = gdk_gl_config_new(args);
+#else
+	glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE);
+#endif
 
 	if (glconfig == NULL)
     {
@@ -140,8 +152,21 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 		g_print("*** Trying single-buffered visual.\n");
 
 		/* Try single-buffered visual */
-		glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB |
-					    GDK_GL_MODE_DEPTH));
+#ifdef WIN32
+		// Must do this since gdk_gl_config_new_by_mode has broken lib / headers ( arg is for an enum not int! )
+		int args_single[] = {
+			GDK_GL_RGBA, 
+			GDK_GL_RED_SIZE, 16,
+			GDK_GL_GREEN_SIZE, 16,
+	  		GDK_GL_BLUE_SIZE, 16,
+			GDK_GL_DEPTH_SIZE, 16, 
+			GDK_GL_ATTRIB_LIST_NONE};  
+
+		glconfig = gdk_gl_config_new(args_single);
+#else
+		glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB |
+					    GDK_GL_MODE_DEPTH);
+#endif
 
 		if (glconfig == NULL)
 		{
@@ -149,10 +174,14 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 			return NULL;
 		}
     }
+	else
+	{
+		g_print("*** Created double-buffered visual for OpenGL context.\n");
+	}
 
 
 	/* Drawing area for drawing OpenGL scene. */
-	drawing_area = gtk_drawing_area_new ();
+	drawing_area = gtk_drawing_area_new();
 	gtk_widget_set_size_request(drawing_area, width, height);
 
 	/* Set up events and signals for OpenGL widget */
@@ -186,7 +215,7 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	//g_signal_connect_swapped(G_OBJECT(window), "key_press_event",
 	//		    G_CALLBACK(key_press_event), drawing_area);
 
-	gtk_widget_show(drawing_area);
+	//gtk_widget_show(drawing_area);
 
 	return drawing_area;
 }

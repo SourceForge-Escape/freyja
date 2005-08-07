@@ -170,9 +170,13 @@ prof:
 #echo `./pkg-config.exe --libs gtk+-2.0 gtkglext-1.0` | sed -e "s/G://g"
 
 
-CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include
+CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include 
 
-CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv 
+# -I/home/mongoose/Projects/win32/include/gtkgl-2.0/
+
+CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv
+
+# -lgtkgl-2.0
 
 WIN32_CROSS=/home/mongoose/Projects/win32
 WIN32_INCLUDE=$(WIN32_CROSS)/include
@@ -182,6 +186,7 @@ WIN32_CFLAGS=$(DEBUG_CFLAGS) \
 	-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR \
 	$(CROSSDUMP_INC)
 
+# -DHAVE_GTKGLAREA
 
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
