@@ -136,13 +136,16 @@ release:
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	CC="i586-mingw32msvc-g++ " \
+	NAME="freyja9" \
+	SHLIBEXT=".dll" \
+	MODULE="freyja9" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
-	EXT="dll" \
-	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
+	CFLAGS="$(BASE_CFLAGS) -I/usr/local/include/ -DLIBFREYJA_EXPORTSCLASS" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	SHLIBLDFLAGS="$(CONFIGURE_LNK) -lm -fPIC -shared"
+	LIBS="-L/usr/local/lib -lm -lhel0"
+	SHLIBLDFLAGS="-L/usr/local/lib/ -mdll -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--no-whole-archive -lhel0"
 
 
 ################################################################
@@ -197,6 +200,14 @@ PROG_OBJS = \
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
+
+$(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
+	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
+    -Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
+    -Wl,--export-all-symbols \
+    -Wl,--enable-auto-import \
+    -Wl,--whole-archive $(PROG_OBJS) \
+    -Wl,--no-whole-archive $(LIBS)
 
 
 ##########################################################################
@@ -685,6 +696,21 @@ freyjautil.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
 	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja"
 
+cycle-win32: win32 install-win32 test-win32
+
+test-win32: freyjautil-win32.test
+
+freyjautil-win32.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
+	i586-mingw32msvc-g++ -mms-bitfields -Wall -g -pipe -O0 -lstdc++ -I/usr/local/include/ \
+		-L/usr/local/lib/ -lfreyja9 -lhel0 \
+		tools/freyjautil.cpp \
+		-o $(BUILD_TEST_DIR)/freyjautil-win32.test
+
 python.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
@@ -721,7 +747,7 @@ $(BUILDDIR)/$(NAME).test : $(OBJS)
 
 ##########################################################################
 
-clean: clean-emacs clean-build clean-test clean-obj clean-plugins
+clean: clean-emacs clean-build clean-test clean-obj clean-plugins clean-win32
 
 clean-test:
 	@-echo -n "Cleaning test builds                         "
@@ -734,6 +760,12 @@ clean-obj:
 	@-rm -f $(BUILD_DEBUG_DIR)/*.o
 	@-rm -f $(BUILD_RELEASE_DIR)/*.o
 	@-rm -f $(BUILD_TEST_DIR)/*.o
+	@-echo "[done]"
+
+clean-win32:
+	@-echo -n "Cleaning WIN32 builds                        "
+	@-rm -f $(BUILD_WIN32_DIR)/*.o
+	@-rm -f $(BUILD_WIN32_DIR)/$(NAME)
 	@-echo "[done]"
 
 clean-emacs:
@@ -795,6 +827,11 @@ install:
 	@-echo $(MAKE) install-plugins
 	@-echo $(MAKE) tools
 	@-echo $(MAKE) install-tools
+
+install-win32:
+	@-echo -n "Installing win32 build                   "
+	@-cp $(BUILD_WIN32_DIR)/*.a $(BUILD_WIN32_DIR)/*.dll $(INSTALL_LIB)
+	@-echo "[done]"
 
 install-link:
 	@-echo -n "New soft links                               "
