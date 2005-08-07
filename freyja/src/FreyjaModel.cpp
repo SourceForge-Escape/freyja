@@ -34,6 +34,17 @@
 #include "FreyjaModel.h"
 
 
+#ifdef WIN32
+float helDist3v(float *a, float *b)
+{
+	// FIXME
+	return (sqrt( ((b[0] - a[0]) * (b[0] - a[0])) +
+					  ((b[1] - a[1]) * (b[1] - a[1])) + 
+					  ((b[2] - a[2]) * (b[2] - a[2]))));
+}
+
+#endif
+
 BezierPatch FreyjaModel::gTestPatch;
 unsigned int FreyjaModel::mFlags = 0;
 FreyjaModel *gFreyjaModel = 0x0;
