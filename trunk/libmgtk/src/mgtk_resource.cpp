@@ -381,7 +381,7 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 		return NULL;
 	}
 
-#ifdef HAVE_GTKGL
+#ifdef HAVE_GTKGLAREA
 	/* Gtk GL Area widget */
 	gl = mgtk_create_glarea(get_int(width), get_int(height));
 
