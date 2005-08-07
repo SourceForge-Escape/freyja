@@ -173,43 +173,14 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 										unsigned char **image, 
 										int *width, int *height);
 
-///////////////////////////////////////////////////////////////////////
-// MGtk wrappers
-///////////////////////////////////////////////////////////////////////
 
-#ifdef WIN32
-#else
-void mgtk_print(char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	freyja_print_args(format, &args);
-	va_end(args);
-}
-
-
-void mgtk_callback_get_image_data_rgb24(const char *filename, 
-										unsigned char **image, 
-										int *width, int *height)
-{
-	freyja_callback_get_image_data_rgb24(filename, image, width, height);
-}
-
-
-void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree)
-{
-	freyja_print("FIXME: mgtk_update_tree() not in libmgtk yet");
-}
-
-
-void mgtk_handle_application_window_close()
+void freyja_handle_application_window_close()
 {
 	gFreyjaControl->event(eShutdown);
 }
 
 
-void mgtk_handle_color(int id, float r, float g, float b, float a)
+void freyja_handle_color(int id, float r, float g, float b, float a)
 {
 	vec4_t color;
 
@@ -296,6 +267,49 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 	}
 
 	mgtk_event_gl_refresh();
+}
+
+
+
+///////////////////////////////////////////////////////////////////////
+// MGtk wrappers
+///////////////////////////////////////////////////////////////////////
+
+#ifdef WIN32
+#else
+void mgtk_print(char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	freyja_print_args(format, &args);
+	va_end(args);
+}
+
+
+void mgtk_callback_get_image_data_rgb24(const char *filename, 
+										unsigned char **image, 
+										int *width, int *height)
+{
+	freyja_callback_get_image_data_rgb24(filename, image, width, height);
+}
+
+
+void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree)
+{
+	freyja_print("FIXME: mgtk_update_tree() not in libmgtk yet");
+}
+
+
+void mgtk_handle_application_window_close()
+{
+	freyja_handle_application_window_close()
+}
+
+
+void mgtk_handle_color(int id, float r, float g, float b, float a)
+{
+	freyja_handle_color(id, r, g, b, a);
 }
 
 
@@ -388,12 +402,90 @@ char *mgtk_rc_map(char *filename_or_dirname)
 {
 	return freyja_rc_map(filename_or_dirname);
 }
+
+void mgtk_handle_motion(int x, int y)
+{
+	freyja_handle_motion(x, y);
+}
+
+void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
+{
+	freyja_handle_mouse(button, state, mod, x, y);
+}
+
 #endif
 
 
 ///////////////////////////////////////////////////////////////////////
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
+
+// FIXME remove duplicates
+void freyja_handle_key_press(int key, int mod)
+{
+	freyja_print("mgtk_handle_key_press(%d, %d) not handled", key, mod);
+}
+
+
+void freyja_handle_command2i(int event, int command)
+{
+	freyja_event2i(event, command);
+}
+
+
+void freyja_handle_event1u(int event, unsigned int value)
+{
+	if (!gFreyjaControl->event(event, value))
+	{
+		if (freyja_event2i(EVENT_MISC, event) == -1)
+			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", EVENT_MISC, event);
+	}
+}
+
+
+void freyja_handle_event1f(int event, float value)
+{
+	if (!gFreyjaControl->event(event, value))
+	{
+		if (freyja_event2i(EVENT_MISC, event) == -1)
+			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", EVENT_MISC, event);
+	}
+}
+
+
+void freyja_handle_file_dialog_selection(char *filename)
+{
+	gFreyjaControl->handleFilename(filename);
+}
+
+
+void freyja_handle_gldisplay()
+{
+	if (gFreyjaControl)
+		gFreyjaControl->updateDisplay();
+}
+
+
+void freyja_handle_glresize(unsigned int width, unsigned int height)
+{
+	if (gFreyjaControl)
+		gFreyjaControl->resizeDisplay(width, height);
+}
+
+
+void freyja_handle_slider1u(int event, unsigned int value)
+{
+	gFreyjaControl->event(event, value);
+}
+
+
+void freyja_handle_text(int event, char *text)
+{
+	if (gFreyjaControl)
+	{
+		gFreyjaControl->handleTextEvent(event, text);
+	}
+}
 
 void freyja_callback_get_image_data_rgb24(const char *filename, 
 										unsigned char **image, 
@@ -1066,7 +1158,7 @@ void freyja_event_register_control(FreyjaControl *c)
 }
 
 
-void mgtk_handle_motion(int x, int y)
+void freyja_handle_motion(int x, int y)
 {
 	if (gFreyjaControl)
 	{
@@ -1075,7 +1167,7 @@ void mgtk_handle_motion(int x, int y)
 }
 
 
-void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
+void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 {
 	if (gFreyjaControl)
 	{
@@ -1422,17 +1514,25 @@ int main(int argc, char *argv[])
 {
 // Link up mgtk DLL stubs to these implementations
 #ifdef WIN32
-	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
-	mgtk_win32_import("win32_mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
-	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
-	mgtk_win32_import("win32_mgtk_handle_command", (void*)freyja_handle_command);
 	mgtk_win32_import("win32_mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
-	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
-
+	mgtk_win32_import("win32_mgtk_handle_color", (void*)freyja_handle_color);
+	mgtk_win32_import("win32_mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
+	mgtk_win32_import("win32_mgtk_handle_command", (void*)freyja_handle_command);
+	mgtk_win32_import("win32_mgtk_handle_command2i", (void*)freyja_handle_command2i);
+	mgtk_win32_import("win32_mgtk_handle_event1u", (void*)freyja_handle_event1u);
+	mgtk_win32_import("win32_mgtk_handle_event1f", (void*)freyja_handle_event1f);
+	mgtk_win32_import("win32_mgtk_handle_file_dialog_selection", (void*)freyja_handle_file_dialog_selection);
+	mgtk_win32_import("win32_mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
+	mgtk_win32_import("win32_mgtk_handle_glresize", (void*)freyja_handle_glresize);
+	mgtk_win32_import("win32_mgtk_handle_key_press", (void*)freyja_handle_key_press);
+	mgtk_win32_import("win32_mgtk_handle_motion", (void*)freyja_handle_motion);
 	mgtk_win32_import("win32_mgtk_handle_mouse", (void*)freyja_handle_mouse);
-
+	mgtk_win32_import("win32_mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
 	mgtk_win32_import("win32_mgtk_handle_slider1u", (void*)freyja_handle_slider1u);
 	mgtk_win32_import("win32_mgtk_handle_text", (void*)freyja_handle_text);
+	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
+	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
+	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
 #endif
 
 	/* Hookup resource to event system */
