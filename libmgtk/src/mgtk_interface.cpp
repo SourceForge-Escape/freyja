@@ -42,7 +42,12 @@
 #   include <GL/gl.h>
 #   include <GL/glu.h>
 
-#   ifdef HAVE_GTKGL
+#   ifdef HAVE_GTKGLEXT
+#      include <gtk/gtkgl.h>
+#      ifdef WIN32
+#         include <gdk/win32/gdkglwin32.h>
+#      endif
+#   elif HAVE_GTKGLAREA
 #      include <gtkgl/gtkglarea.h>
 #   endif
 #endif
@@ -53,7 +58,140 @@
 #include "mgtk_events.h"
 
 
-#ifdef HAVE_GTKGL
+#if HAVE_GTKGLEXT
+void mgtk_refresh_glarea(GtkWidget *widget)
+{
+	GdkRectangle area;
+
+
+	area.x = 0;
+	area.y = 0;
+	area.width  = widget->allocation.width;
+	area.height = widget->allocation.height;
+
+	gtk_widget_draw(widget, &area);
+}
+
+
+void mgtk_init_glarea(GtkWidget* widget)
+{
+	// FIXME
+}
+
+
+void mgtk_expose_glarea(GtkWidget *widget, GdkEventExpose *event)
+{
+	//GtkGLArea *glarea = GTK_GL_AREA(widget);
+
+	
+	/* draw only last expose */
+	if (event->count > 0) 
+	{
+		return;
+	}
+
+	/* OpenGL calls can be done only if make_current returns true */
+	//if (gtk_gl_area_make_current(glarea)) 
+	//{
+		/* Call modeler's renderer */
+		mgtk_handle_gldisplay();
+		
+		/* Swap buffers to rasterize */
+		//gtk_gl_area_swapbuffers(glarea);
+	//}
+}
+
+
+void mgtk_resize_glarea(GtkWidget *widget, GdkEventConfigure *event)
+{
+	/* OpenGL calls can be done only if make_current returns true */
+	//if (gtk_gl_area_make_current(GTK_GL_AREA(widget))) 
+	//{
+		//glViewport(0, 0, widget->allocation.width, widget->allocation.height);
+		mgtk_handle_glresize(widget->allocation.width, widget->allocation.height);
+	//}
+}
+
+
+void mgtk_destroy_glarea(GtkWidget *widget)
+{
+}
+
+
+GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
+{
+	GtkWidget *drawing_area;
+	GdkGLConfig *glconfig;
+	gint major, minor;
+
+
+	gdk_gl_query_version(&major, &minor);
+
+	//FIXME: I bet this casting breaks the bitmap -- thanks to whoever that wrote the bad arg types for gdk_gl_config_new_by_mode
+
+	/* Get a double buffered gtk_gl context handle */
+	glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB |
+										 GDK_GL_MODE_DEPTH | 
+										 GDK_GL_MODE_DOUBLE));
+
+	if (glconfig == NULL)
+    {
+		g_print("*** Cannot find the double-buffered visual.\n");
+		g_print("*** Trying single-buffered visual.\n");
+
+		/* Try single-buffered visual */
+		glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB |
+					    GDK_GL_MODE_DEPTH));
+
+		if (glconfig == NULL)
+		{
+			g_print ("*** No appropriate OpenGL-capable visual found.\n");
+			return NULL;
+		}
+    }
+
+
+	/* Drawing area for drawing OpenGL scene. */
+	drawing_area = gtk_drawing_area_new ();
+	gtk_widget_set_size_request(drawing_area, width, height);
+
+	/* Set up events and signals for OpenGL widget */
+	gtk_widget_add_events(drawing_area,
+				 GDK_BUTTON1_MOTION_MASK |
+				 GDK_BUTTON2_MOTION_MASK |
+				 GDK_BUTTON_PRESS_MASK |
+				 GDK_VISIBILITY_NOTIFY_MASK);
+
+	g_signal_connect_after(G_OBJECT(drawing_area), "realize",
+                           G_CALLBACK(mgtk_init_glarea), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "configure_event",
+		    		 G_CALLBACK(mgtk_resize_glarea), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "expose_event",
+		 			 G_CALLBACK(mgtk_expose_glarea), NULL);
+
+	g_signal_connect(G_OBJECT(drawing_area), "button_press_event",
+		    		 G_CALLBACK(mgtk_event_button_press), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "motion_notify_event",
+					 G_CALLBACK(mgtk_event_mouse_motion), NULL);
+	g_signal_connect(G_OBJECT(drawing_area), "button_release_event",
+					 G_CALLBACK(mgtk_event_button_release), NULL);
+
+	//g_signal_connect(G_OBJECT(drawing_area), "map_event",
+	//	    G_CALLBACK(map_event), NULL);
+	//g_signal_connect(G_OBJECT(drawing_area), "unmap_event",
+	//	    G_CALLBACK(unmap_event), NULL);
+	//g_signal_connect(G_OBJECT(drawing_area), "visibility_notify_event",
+	//	    G_CALLBACK(visibility_notify_event), NULL);
+
+	//g_signal_connect_swapped(G_OBJECT(window), "key_press_event",
+	//		    G_CALLBACK(key_press_event), drawing_area);
+
+	gtk_widget_show(drawing_area);
+
+	return drawing_area;
+}
+
+#elif HAVE_GTKGLAREA
 void mgtk_refresh_glarea(GtkWidget *widget)
 {
 	GdkRectangle area;
