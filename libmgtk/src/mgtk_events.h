@@ -29,6 +29,13 @@
 
 /* Handle mgtk widget events by implementing these functions in your code */
 /* Repeat: You have to implement these following call backs */
+
+extern "C" {
+
+#ifdef WIN32
+void mgtk_win32_import(char *symbol, void *func);
+#endif
+
 void mgtk_callback_get_image_data_rgb24(const char *filename, 
 										unsigned char **image, 
 										int *width, int *height);
@@ -53,7 +60,7 @@ void mgtk_print(char *format, ...);
 
 void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 char *mgtk_rc_map(char *filename_or_dirname);
-
+}
 
 
 /* Call into special mgtk using these internal mgtk functions below */

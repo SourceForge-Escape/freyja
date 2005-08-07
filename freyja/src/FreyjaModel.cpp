@@ -42,7 +42,6 @@ float helDist3v(float *a, float *b)
 					  ((b[1] - a[1]) * (b[1] - a[1])) + 
 					  ((b[2] - a[2]) * (b[2] - a[2]))));
 }
-
 #endif
 
 BezierPatch FreyjaModel::gTestPatch;
