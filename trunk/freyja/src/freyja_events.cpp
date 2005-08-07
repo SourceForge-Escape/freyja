@@ -75,6 +75,22 @@ void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
 }
 
 
+void eVertexExtrude()
+{
+	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
+	//vec3_t n;
+
+	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
+	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
+}
+
+void eNoImplementation(ResourceEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
+
+
 void freyja_plugin_generic(const char *symbol, void *something)
 {
 	// 1. look for symbol in the 'hack bind list'
@@ -154,6 +170,17 @@ void freyja_init_application_plugins(const char *dir)
 ///////////////////////////////////////////////////////////////////////
 // MGtk wrappers
 ///////////////////////////////////////////////////////////////////////
+
+#ifdef WIN32
+#else
+void mgtk_print(char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	freyja_print_args(format, &args);
+	va_end(args);
+}
 
 
 void mgtk_callback_get_image_data_rgb24(const char *filename, 
@@ -340,23 +367,46 @@ void mgtk_handle_key_press(int key, int mod)
 	freyja_print("mgtk_handle_key_press(%d, %d) not handled", key, mod);
 }
 
-void eVertexExtrude()
-{
-	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
-	//vec3_t n;
 
-	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
-	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
-}
-
-void eNoImplementation(ResourceEvent *e)
+void mgtk_handle_resource_start()
 {
-	freyja_print("!'%s' : No longer implemented or disabled.",
-				(e && e->getName()) ? e->getName() : "Unknown event");
+	freyja_handle_resource_start();
 }
 
 
-void mgtk_handle_resource_init(Resource &r)
+void mgtk_handle_slider1u(int event, unsigned int value)
+{
+	gFreyjaControl->event(event, value);
+}
+
+
+void mgtk_handle_text(int event, char *text)
+{
+	if (gFreyjaControl)
+	{
+		gFreyjaControl->handleTextEvent(event, text);
+	}
+}
+
+
+void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
+{
+	freyja_get_pixmap_filename(dest, size, icon_name);
+}
+
+
+char *mgtk_rc_map(char *filename_or_dirname)
+{
+	return freyja_rc_map(filename_or_dirname);
+}
+#endif
+
+
+///////////////////////////////////////////////////////////////////////
+// Freyja wrappers
+///////////////////////////////////////////////////////////////////////
+
+void freyja_handle_resource_init(Resource &r)
 {
 	////////////////////////////////////////////////////////////////////
 	// New freyja events
@@ -609,7 +659,7 @@ void mgtk_handle_resource_init(Resource &r)
 }
 
 
-void mgtk_handle_resource_start()
+void freyja_handle_resource_start()
 {
 	/* Mongoose 2002.02.02, This is the backend entry
 	 *   for some damn reason it's started by the fucking
@@ -624,7 +674,7 @@ void mgtk_handle_resource_start()
 
 	freyja_print("@Freyja started...");
 
-	mgtk_handle_resource_init(gResource);
+	freyja_handle_resource_init(gResource);
 
 	/* User install of icons, samples, configs, etc */
 	if (!freyja_is_user_installed())
@@ -666,38 +716,6 @@ void mgtk_handle_resource_start()
 	atexit(freyja_event_shutdown);
 }
 
-
-void mgtk_handle_slider1u(int event, unsigned int value)
-{
-	gFreyjaControl->event(event, value);
-}
-
-
-void mgtk_handle_text(int event, char *text)
-{
-	if (gFreyjaControl)
-	{
-		gFreyjaControl->handleTextEvent(event, text);
-	}
-}
-
-
-void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
-{
-	freyja_get_pixmap_filename(dest, size, icon_name);
-}
-
-
-char *mgtk_rc_map(char *filename_or_dirname)
-{
-	return freyja_rc_map(filename_or_dirname);
-}
-
-
-
-///////////////////////////////////////////////////////////////////////
-// Freyja wrappers
-///////////////////////////////////////////////////////////////////////
 
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
@@ -1159,16 +1177,6 @@ void freyja_print_args(char *format, va_list *args)
 }
 
 
-void mgtk_print(char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	freyja_print_args(format, &args);
-	va_end(args);
-}
-
-
 void freyja_print(char *format, ...)
 {
 	va_list args;
@@ -1382,6 +1390,13 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 
 int main(int argc, char *argv[])
 {
+// Link up mgtk DLL stubs to these implementations
+#ifdef WIN32
+	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
+	mgtk_win32_import("win32_mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
+	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
+#endif
+
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&gResource);
 
