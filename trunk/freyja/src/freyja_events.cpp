@@ -1428,6 +1428,11 @@ int main(int argc, char *argv[])
 	mgtk_win32_import("win32_mgtk_handle_command", (void*)freyja_handle_command);
 	mgtk_win32_import("win32_mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
 	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
+
+	mgtk_win32_import("win32_mgtk_handle_mouse", (void*)freyja_handle_mouse);
+
+	mgtk_win32_import("win32_mgtk_handle_slider1u", (void*)freyja_handle_slider1u);
+	mgtk_win32_import("win32_mgtk_handle_text", (void*)freyja_handle_text);
 #endif
 
 	/* Hookup resource to event system */
