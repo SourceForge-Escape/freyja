@@ -109,14 +109,17 @@ void mgtk_expose_glarea(GtkWidget *widget, GdkEventExpose *event)
 
 	
 	/* draw only last expose */
-	if (event->count > 0) 
-	{
-		return;
-	}
+	//if (event->count > 0) 
+	//{
+	//	return;
+	//}
 
 	/* OpenGL calls can be done only if make_current returns true */
 	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
+	{
+		g_print("*** GL context failed to expose for gtkglext!\n");
 		return;
+	}
 
 	/* Call modeler's renderer */
 	mgtk_handle_gldisplay();
@@ -133,12 +136,18 @@ void mgtk_expose_glarea(GtkWidget *widget, GdkEventExpose *event)
 
 void mgtk_resize_glarea(GtkWidget *widget, GdkEventConfigure *event)
 {
+	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
+	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
+
 	/* OpenGL calls can be done only if make_current returns true */
-	//if (gtk_gl_area_make_current(GTK_GL_AREA(widget))) 
-	//{
-		//glViewport(0, 0, widget->allocation.width, widget->allocation.height);
-		mgtk_handle_glresize(widget->allocation.width, widget->allocation.height);
-	//}
+	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
+	{
+		g_print("*** GL context failed to resize for gtkglext!\n");
+		return;
+	}
+
+	mgtk_handle_glresize(widget->allocation.width, widget->allocation.height);
+	gdk_gl_drawable_gl_end(gldrawable);
 }
 
 
@@ -161,7 +170,7 @@ static gboolean timeout(GtkWidget *widget)
   return TRUE;
 }
 
-static void timeout_add (GtkWidget *widget)
+static void timeout_add(GtkWidget *widget)
 {
   if (gTimeoutId == 0)
 	{
@@ -169,7 +178,7 @@ static void timeout_add (GtkWidget *widget)
 	}
 }
 
-static void timeout_remove (GtkWidget *widget)
+static void timeout_remove(GtkWidget *widget)
 {
 	if (gTimeoutId != 0)
 	{
@@ -216,6 +225,9 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 
 	gdk_gl_query_version(&major, &minor);
+	g_print ("OpenGL %d.%d\n", major, minor);
+
+
 
 	//FIXME: I bet this casting breaks the bitmap -- thanks to whoever that wrote the bad arg types for gdk_gl_config_new_by_mode
 
@@ -234,7 +246,7 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	g_print("*** Spawning double-buffered visual...\n");
 	glconfig = gdk_gl_config_new(args);
 #else
-	glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE);
+	glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE));
 #endif
 
 	if (glconfig == NULL)
@@ -274,7 +286,14 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 	/* Drawing area for drawing OpenGL scene. */
 	drawing_area = gtk_drawing_area_new();
-	gtk_widget_set_size_request(drawing_area, width, height);
+	gtk_widget_set_size_request(drawing_area, width, height); 
+
+	/* Set OpenGL-capability to the widget. */
+	gtk_widget_set_gl_capability(drawing_area,
+                                glconfig,
+                                NULL,
+                                TRUE,
+                                GDK_GL_RGBA_TYPE);
 
 	/* Set up events and signals for OpenGL widget */
 	gtk_widget_add_events(drawing_area,
@@ -306,8 +325,8 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 	g_signal_connect_swapped(G_OBJECT(drawing_area), "key_press_event",
 						G_CALLBACK(mgtk_event_key_press), NULL);
-	g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+	//g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
+	//				   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 
 	gtk_widget_show(drawing_area);
 
