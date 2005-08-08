@@ -16,6 +16,7 @@ mkdir -p ~/.freyja/plugins/
 
 # Plugins
 cp bin/plugins/*.so  ~/.freyja/plugins/
+cp bin/plugins/*.dll ~/.freyja/plugins/
 cp plugins/*.mlisp ~/.freyja/plugins/
 
 # Main data

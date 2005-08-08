@@ -134,6 +134,13 @@ debug:
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
 
+debug-gtkglext:
+	@-mkdir -p $(BUILD_DEBUG_DIR).gtkglext
+	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR).gtkglext \
+	CFLAGS="$(DEBUG_CFLAGS) -DHAVE_GTKGLEXT $(shell pkg-config --cflags gtkglext-1.0)" \
+	SHLIBLDFLAGS="$(SHLIBLDFLAGS) $(shell pkg-config --libs gtkglext-1.0)"
+	LD_FLAGS="$(LD_FLAGS) $(shell pkg-config --libs gtkglext-1.0)"
+
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
