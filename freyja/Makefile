@@ -36,6 +36,10 @@ CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
 		-DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL
 CONFIGURE_LDFLAGS=
 
+# Uncomment PKG_LIB_ADD and comment out LIB_ADD to use gtkglext
+#PKG_LIB_ADD=gtkglext-1.0
+LIB_ADD=-lgtkgl-2.0
+
 ################################################################
 
 CC=gcc
@@ -93,7 +97,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja -lmgtk \
-		$(shell pkg-config --libs gtk+-2.0) -lgtkgl-2.0
+		$(shell pkg-config --libs gtk+-2.0 $(PKG_LIB_ADD)) $(LIB_ADD)
 #LD_FLAGS += -Wl,-z,defs
 #LD_FLAGS += -Wl,-O1
 
@@ -151,11 +155,11 @@ prof:
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_WIN32_DIR) \
+	NAME=$(NAME).exe \
 	CC="i586-mingw32msvc-g++ " \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
-	EXT="dll" \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/ $(CROSS_FLAGS)" \
+	CFLAGS="-mwindows $(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/ $(CROSS_FLAGS)" \
 	LD_FLAGS="$(LD_FLAGS_WIN32) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
 
 
@@ -197,9 +201,9 @@ depend:
 
 ################################################################
 
-clean-all: clean clean-conf
+clean-all: clean clean-conf clean-plugins
 
-clean: clean-builds
+clean: clean-builds	clean-plugins
 
 clean-builds: 
 	@-echo -n "Cleaning emacs files                        "
@@ -222,6 +226,11 @@ clean-builds:
 	@-rm -f $(BUILD_GTK2_DIR)*/*.o
 	@-rm -f $(BUILD_GTK2_DIR)*/$(NAME)
 	@-rm -f $(BUILD_GTK2_DIR)*/*.test
+	@-echo [done]
+
+	@-echo -n "Cleaning Win32 build                        "
+	@-rm -f $(BUILD_WIN32_DIR)*/*.o
+	@-rm -f $(BUILD_WIN32_DIR)*/$(NAME).exe
 	@-echo [done]
 
 	@-echo -n "Cleaning DEBUG builds                       "
@@ -341,13 +350,34 @@ PLUGIN_LD_FLAGS += --warn-unresolved-symbols -Wl
 PLUGIN_BUILD_DIR=bin/plugins
 
 PLUGINS=$(BUILD_DIR)/$(MOD_NAME).so
+PLUGINSWIN32=$(BUILD_DIR)/$(MOD_NAME).dll
 
 plug-ins: $(PLUGINS)
+
+plug-ins-win32: $(PLUGINSWIN32)
 
 $(BUILD_DIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
 
+$(BUILD_DIR)/$(MOD_NAME).dll : $(MOD_OBJS)
+	$(CC) -shared -o $(BUILD_DIR)/$(MOD_NAME).dll \
+    -Wl,--out-implib=$(BUILD_DIR)/lib$(MOD_NAME).a \
+    -Wl,--export-all-symbols \
+    -Wl,--enable-auto-import \
+    -Wl,--whole-archive $(MOD_OBJS) \
+    -Wl,--no-whole-archive $(LIBS)
+
+clean-plugins:
+	@-echo -n "Cleaning plugins                            "
+	@-rm -f $(PLUGIN_BUILD_DIR)*/*.o
+	@-rm -f $(PLUGIN_BUILD_DIR)*/*.so
+	@-rm -f $(PLUGIN_BUILD_DIR)*/*.a
+	@-rm -f $(PLUGIN_BUILD_DIR)*/*.dll
+	@-echo [done]
+
 plugins: perlinnoise.so
+
+plugins-win32: perlinnoise.dll
 
 perlinnoise.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -357,4 +387,15 @@ perlinnoise.so:
 		CFLAGS="$(PLUGIN_CFLAGS)" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
+perlinnoise.dll:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=perlinnoise \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/perlinnoise.o" \
+		CC="i586-mingw32msvc-g++ -mms-bitfields" \
+		CPP="i586-mingw32msvc-cpp " \
+		LD="i586-mingw32msvc-ld " \
+		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
+		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
 
