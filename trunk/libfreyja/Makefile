@@ -219,8 +219,10 @@ IMAGE_PLUGIN_BUILD_DIR=$(PLUGIN_BUILD_DIR)/image
 MODEL_PLUGIN_BUILD_DIR=$(PLUGIN_BUILD_DIR)/model
 IMAGE_PLUGIN_TEST_OBJ=$(IMAGE_PLUGIN_BUILD_DIR)/image_test.o
 PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
+PLUGINSWIN32=$(BUILDDIR)/$(MOD_NAME).dll
 
 plug-ins: $(PLUGINS)
+plug-ins-win32: $(PLUGINSWIN32)
 
 bmp.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
@@ -230,6 +232,18 @@ bmp.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+bmp.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=bmp \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/bmp.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 dds.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
@@ -237,6 +251,18 @@ dds.so:
 	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/dds.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+dds.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=dds \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/dds.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 jpg.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
@@ -246,6 +272,22 @@ jpg.so:
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -ljpeg"
 
+CROSS_INC=/home/mongoose/Projects/win32/include
+CROSS_LIB=/home/mongoose/Projects/win32/lib
+CROSS_BIN=/home/mongoose/Projects/win32/bin
+
+jpg.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=jpg \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/jpeg.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG -I/usr/local/include/ -I$(CROSS_INC)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9 -L$(CROSS_LIB) -ljpeg"
+
 pcx.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
@@ -253,6 +295,18 @@ pcx.so:
 	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/pcx.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+pcx.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=pcx \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/pcx.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 ppm.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
@@ -262,6 +316,18 @@ ppm.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+ppm.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=ppm \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/ppm.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 png.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
@@ -269,6 +335,18 @@ png.so:
 	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/png.o" \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_PNG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lpng -lz"
+
+png.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=png \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/png.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -DLIB_PNG -I/usr/local/include/ -I$(CROSS_INC)" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9 -L$(CROSS_LIB) -lpng"
 
 tga.so:
 	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
@@ -278,8 +356,21 @@ tga.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+tga.dll:
+	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
+	MOD_NAME=tga \
+	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/tga.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 plugins-image: bmp.so dds.so jpg.so pcx.so ppm.so png.so tga.so
 
+plugins-image-win32: dds.dll bmp.dll pcx.dll ppm.dll tga.dll jpg.dll png.dll
 
 ######################################################################
 # Model plugins
@@ -308,6 +399,18 @@ ase.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+ase.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=ase \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 eggv7.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -554,6 +657,8 @@ plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.s
 
 plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
 
+plugins-model-win32: ase.dll
+
 tools: freyjautil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
 
 
@@ -562,6 +667,8 @@ tools: freyjautil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
 ######################################################################
 
 plugins: plugins-image plugins-model tools
+
+plugins-win32: plugins-image-win32 plugins-model-win32
 
 clean-plugins:
 	@-echo -n "Cleaning plugins                             "
@@ -579,6 +686,16 @@ install-plugins:
 	@-cp plugins/model/python/*.py $(INSTALL_PLUGIN_DIR)/model/python/
 	@-echo "[done]"
 
+install-plugins-win32:
+	@-echo -n "Installing plugins                           "
+	@-mkdir -p $(INSTALL_PLUGIN_DIR)/image
+	@-cp $(IMAGE_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/image/
+	@-mkdir -p $(INSTALL_PLUGIN_DIR)/model
+	@-cp $(MODEL_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/model/
+	@-mkdir -p $(INSTALL_PLUGIN_DIR)/model/python
+	@-cp plugins/model/python/*.py $(INSTALL_PLUGIN_DIR)/model/python/
+	@-echo "[done]"
+
 install-tools:
 	@-cp bin/test/freyjautil.test $(INSTALL_BIN)/freyjautil
 	@-cp bin/test/bsa.test $(INSTALL_BIN)/bsa
@@ -589,6 +706,13 @@ install-tools:
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
 
+$(BUILDDIR)/$(MOD_NAME).dll : $(MOD_OBJS)
+	$(CC) -shared -o $(BUILDDIR)/$(MOD_NAME).dll \
+    -Wl,--out-implib=$(BUILDDIR)/lib$(MOD_NAME).a \
+    -Wl,--export-all-symbols \
+    -Wl,--enable-auto-import \
+    -Wl,--whole-archive $(MOD_OBJS) \
+    -Wl,--no-whole-archive $(LIBS)
 
 ##########################################################################
 # Unit tests
