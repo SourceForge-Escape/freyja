@@ -631,7 +631,6 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 {
 	arg_list_t *width, *height, *ret;
 	GtkWidget *gl, *table, *hbox;
-	mgtk_glarea_window_state_t *state;
 
 
 	if (!box)
@@ -679,6 +678,8 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 	GTK_GL_AREA_WIDGET = gl;
 
 #   ifndef HAVE_GTKGLEXT
+	mgtk_glarea_window_state_t *state;
+
 	state = (mgtk_glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(gl),
 															 "gl_window_state");
 	state->appbar = NULL;
