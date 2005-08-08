@@ -51,8 +51,6 @@ typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
 
 char *helVersionInfo();
 
-
-
 vec_t helIntersectionOfAbstractSpheres(vec3_t centerA, vec_t radiusA,
 													vec3_t centerB, vec_t radiusB);
 /*------------------------------------------------------
@@ -141,7 +139,6 @@ void helMidpoint3v(vec3_t a, vec3_t b, vec3_t mid);
  * 1999.06.14:
  * Mongoose - Created, from mtk3d
  ------------------------------------------------------*/
-
 
 vec_t helDegToRad(vec_t degrees);
 /*------------------------------------------------------

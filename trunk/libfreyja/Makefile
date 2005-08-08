@@ -144,8 +144,7 @@ win32:
 	LD="i586-mingw32msvc-ld " \
 	CFLAGS="$(BASE_CFLAGS) -I/usr/local/include/ -DLIBFREYJA_EXPORTSCLASS" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	LIBS="-L/usr/local/lib -lm -lhel0"
-	SHLIBLDFLAGS="-L/usr/local/lib/ -mdll -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--no-whole-archive -lhel0"
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0"
 
 
 ################################################################

@@ -29,18 +29,7 @@
 
 #include "hel/math.h"
 
-#ifdef WIN32
-#   ifdef EXPORTSCLASS
-#      define EXPORTCLASS_API class __declspec(dllexport)
-#   else
-#      define EXPORTCLASS_API class __declspec(dllimport)
-#   endif
-#else
-#   define EXPORTCLASS_API class
-#endif
-
-
-EXPORTCLASS_API Vector3d
+class Vector3d
 {
  public:
 

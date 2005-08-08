@@ -973,6 +973,10 @@ char freyja_is_user_installed()
 
 	freyja_get_rc_path(path, 128);
 
+#ifdef WIN32
+	return 1;
+#endif
+
 	return (r.doesFileExist(path));
 }
 
