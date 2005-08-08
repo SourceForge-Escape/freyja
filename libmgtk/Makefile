@@ -99,7 +99,7 @@ GTK2_CFLAGS=-DUSING_GTK_2_0 -I/usr/X11R6/include \
 GTK2_LDFLAGS=$(shell pkg-config --libs gtk+-2.0 gtkgl-2.0)
 
 # To catch user installed 
-GTK_GLAREA2_CFLAGS=-DGTK_GLAREA_GL -I/usr/local/include/gtkgl-2.0
+GTK_GLAREA2_CFLAGS=-DGTK_GLAREA_GL -I/usr/local/include/gtkgl-2.0 
 GTK_GLAREA2_LD_FLAGS=-lgtkgl-2.0
 
 
@@ -174,7 +174,7 @@ CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/P
 
 # -I/home/mongoose/Projects/win32/include/gtkgl-2.0/
 
-CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv
+CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv 
 
 # -lgtkgl-2.0
 

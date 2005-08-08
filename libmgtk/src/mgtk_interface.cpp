@@ -267,8 +267,8 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 		glconfig = gdk_gl_config_new(args_single);
 #else
-		glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB |
-					    GDK_GL_MODE_DEPTH);
+		glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB |
+					    GDK_GL_MODE_DEPTH));
 #endif
 
 		if (glconfig == NULL)
@@ -297,6 +297,12 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 	/* Set up events and signals for OpenGL widget */
 	gtk_widget_add_events(drawing_area,
+		                        GDK_EXPOSURE_MASK |
+//                           GDK_KEY_PRESS_MASK |
+//                           GDK_KEY_RELEASE_MASK |
+//                          GDK_BUTTON_PRESS_MASK |
+//                           GDK_BUTTON_RELEASE_MASK |
+//                           GDK_POINTER_MOTION_MASK
 				 GDK_BUTTON1_MOTION_MASK |
 				 GDK_BUTTON2_MOTION_MASK |
 				 GDK_BUTTON_PRESS_MASK |
