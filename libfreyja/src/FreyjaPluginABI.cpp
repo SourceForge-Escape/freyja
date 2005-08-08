@@ -7088,7 +7088,7 @@ void freyjaPluginDirectoriesInit()
    	freyjaPluginAddDirectory("/usr/local/lib/freyja/modules/model");
 	freyjaPluginAddDirectory("/usr/share/freyja/modules/model");
 #else
-	freyjaPluginAddDirectory("./modules/model");
+	freyjaPluginAddDirectory("C:/freyja/modules/model");
 #endif
 }
 

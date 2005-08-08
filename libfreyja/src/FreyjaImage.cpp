@@ -474,11 +474,19 @@ int FreyjaImage::loadImage(const char *filename)
 
 	print("[FreyjaImage plugin system invoked]");
 
+#ifdef WIN32
+	if (!reader.openDirectory("C:/freyja/modules/image"))
+	{
+		printError("Couldn't access image plugin directory");
+		return -2;
+	}
+#else
 	if (!reader.openDirectory(PLUGIN_IMAGE_DIR))
 	{
 		printError("Couldn't access image plugin directory");
 		return -2;
 	}
+#endif
 
 	while (!done && (module_filename = reader.getNextDirectoryListing()))
 	{
