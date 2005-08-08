@@ -110,10 +110,10 @@ win32:
 	LD="i586-mingw32msvc-ld " \
 	MODULE="hel0" \
 	SHLIBEXT=".dll" \
-	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/ -DEXPORTSCLASS" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/ -DHELEXPORTSCLASS" \
 	LD_FLAGS="$(LD_FLAGS)" \
-	LIBS="-L/usr/local/lib -lm"
-	SHLIBLDFLAGS="-L/usr/local/lib/ -mdll -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--no-whole-archive -lm"
+	LIBS="-lm -lstdc++ -L/usr/local/lib"
+
 
 depend:
 	@-echo -n Making deps...
