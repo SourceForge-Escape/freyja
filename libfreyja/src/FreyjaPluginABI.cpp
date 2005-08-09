@@ -8014,6 +8014,11 @@ void *freyjaModuleLoad(const char *module)
 #ifdef WIN32
 	char errbuf[512];
 
+	if (FreyjaFileReader::compareFilenameExtention(module, ".dll") != 0)
+	{
+		return NULL;
+	}
+
 	handle = (void *)LoadLibrary(module);
 
 	/* Generate an error message if all loads failed */
