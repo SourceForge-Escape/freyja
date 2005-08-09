@@ -37,8 +37,8 @@ CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
 CONFIGURE_LDFLAGS=
 
 # Uncomment PKG_LIB_ADD and comment out LIB_ADD to use gtkglext
-#PKG_LIB_ADD=gtkglext-1.0
-LIB_ADD=-lgtkgl-2.0
+PKG_LIB_ADD=gtkglext-1.0
+#LIB_ADD=-lgtkgl-2.0
 
 ################################################################
 
