@@ -300,8 +300,7 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 		                        GDK_EXPOSURE_MASK |
 //                           GDK_KEY_PRESS_MASK |
 //                           GDK_KEY_RELEASE_MASK |
-//                          GDK_BUTTON_PRESS_MASK |
-//                           GDK_BUTTON_RELEASE_MASK |
+                           GDK_BUTTON_RELEASE_MASK |
 //                           GDK_POINTER_MOTION_MASK
 
 						  GDK_POINTER_MOTION_MASK |
@@ -335,8 +334,8 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 	g_signal_connect_swapped(G_OBJECT(drawing_area), "key_press_event",
 						G_CALLBACK(mgtk_event_key_press), NULL);
-	//g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
-	//				   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+	g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 
 	/* Setup GL window state */
 	mgtk_glarea_window_state_t *state = new mgtk_glarea_window_state_t;

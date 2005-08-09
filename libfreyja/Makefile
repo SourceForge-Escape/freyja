@@ -379,6 +379,18 @@ plugins-image-win32: dds.dll bmp.dll pcx.dll ppm.dll tga.dll jpg.dll png.dll
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+3ds.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=3ds \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/3ds.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 bsa.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -386,6 +398,18 @@ bsa.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/BSAPakReader.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+bsa.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=ase \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/BSAPakReader.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 ase.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
