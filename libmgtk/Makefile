@@ -365,6 +365,9 @@ install-win32:
 	@-cp $(BUILD_WIN32_DIR)/*.a $(BUILD_WIN32_DIR)/*.dll $(INSTALL_LIB)
 	@-echo "[done]"
 
+install-gtkglext:
+	@-cp $(BUILD_DEBUG_DIR).gtkglext/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
+
 install-link:
 	@-echo -n "New soft links                               "
 	@-cd $(INSTALL_LIB) && ln -sf libmgtk$(SHLIBEXT) libmgtk.so

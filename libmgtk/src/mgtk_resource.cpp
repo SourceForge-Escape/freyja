@@ -677,13 +677,14 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 
 	GTK_GL_AREA_WIDGET = gl;
 
-#   ifndef HAVE_GTKGLEXT
+//#   ifndef HAVE_GTKGLEXT
 	mgtk_glarea_window_state_t *state;
 
 	state = (mgtk_glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(gl),
 															 "gl_window_state");
 	state->appbar = NULL;
 
+#   ifndef HAVE_GTKGLEXT
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_press_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_release_event",

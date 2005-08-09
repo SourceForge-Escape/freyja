@@ -303,8 +303,12 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 //                          GDK_BUTTON_PRESS_MASK |
 //                           GDK_BUTTON_RELEASE_MASK |
 //                           GDK_POINTER_MOTION_MASK
-				 GDK_BUTTON1_MOTION_MASK |
-				 GDK_BUTTON2_MOTION_MASK |
+
+						  GDK_POINTER_MOTION_MASK |
+						  GDK_POINTER_MOTION_HINT_MASK |
+						  GDK_MOTION_NOTIFY |
+//				 GDK_BUTTON1_MOTION_MASK |
+//				 GDK_BUTTON2_MOTION_MASK |
 				 GDK_BUTTON_PRESS_MASK |
 				 GDK_VISIBILITY_NOTIFY_MASK);
 
@@ -333,6 +337,17 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 						G_CALLBACK(mgtk_event_key_press), NULL);
 	//g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
 	//				   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+
+	/* Setup GL window state */
+	mgtk_glarea_window_state_t *state = new mgtk_glarea_window_state_t;
+	state->init = false;
+	state->plane = 0;
+	state->mouse_x = 0;
+	state->mouse_y = 0;
+	state->width = width;
+	state->height = height;
+	gtk_object_set_data(GTK_OBJECT(drawing_area), "gl_window_state", state);
+
 
 	gtk_widget_show(drawing_area);
 
