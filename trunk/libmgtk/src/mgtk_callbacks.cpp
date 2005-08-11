@@ -395,6 +395,48 @@ int mgtk_append_item_to_menu(int event, const char *label, int item_event)
 }
 
 
+void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data);
+int mgtk_append_item_to_menu2i(int menuEvent, const char *label, short event, short command)
+{
+	Vector<GtkWidget*> *widgets;
+	GtkWidget *menu, *item;
+	unsigned int i;
+	long eventc;
+	char *buf = (char*)&eventc;
+
+	memcpy(buf, &event, sizeof(short));
+	memcpy(buf+sizeof(short), &command, sizeof(short));
+
+	widgets = gWidgetMap[menuEvent];
+
+	if (!widgets)
+		return 0;
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		menu = (*widgets)[i];
+		
+		if (menu && GTK_IS_MENU(menu))
+		{
+			item = gtk_menu_item_new_with_label(label);
+			gtk_menu_append(GTK_MENU(menu), item);
+			gtk_widget_show(item);
+		
+			g_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_command_2_for_1), 
+							   GINT_TO_POINTER(eventc));
+			return 1;
+		}
+		else
+		{
+			mgtk_print("mgtk_append_item_to_menu> %i:%d failed", event, i);
+		}
+	}
+
+	return 0;
+}
+
+
 int spinbutton_value_get_int(int event, bool *error)
 {
 	Vector<GtkWidget*> *widgets;
@@ -1192,6 +1234,25 @@ void mgtk_event_notify_statusbar(const char *message)
 void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 {
 	mgtk_handle_command(GPOINTER_TO_INT(user_data));
+}
+
+
+#include "ResourceEvent.h"
+void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
+{
+	long event = GPOINTER_TO_INT(user_data);
+	short e1, e2;
+	char *buf = (char*)&event;
+
+	memcpy(&e1, buf, sizeof(short));
+	memcpy(&e2, buf+sizeof(short), sizeof(short));
+
+	//mgtk_handle_command2i(e1, e2);
+
+	if (ResourceEvent::listen(e1 - 10000 /*ePluginEventBase*/, (unsigned int)e2))
+		return;
+
+	mgtk_handle_command2i(e1, e2);
 }
 
 
