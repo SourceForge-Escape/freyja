@@ -276,7 +276,6 @@ typedef enum {
 	EVENT_MISC,
 	eMeshFlipNormals,
 	ePluginEventBase = 10000,
-	eRecentFiles = 100000,
 
 	/* Misbehaved text events */
 	eSetMaterialName = 799

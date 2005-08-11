@@ -77,6 +77,15 @@ void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
 }
 
 
+void eRecentFiles(unsigned int value)
+{
+	if (gFreyjaControl)
+	{
+		gFreyjaControl->handleRecentFile(value);
+	}
+}
+
+
 void eVertexExtrude()
 {
 	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
@@ -575,6 +584,7 @@ void freyja_handle_resource_init(Resource &r)
 	// New freyja events
 	////////////////////////////////////////////////////////////////////
 
+	ResourceEventCallbackUInt::add("eRecentFiles", &eRecentFiles);
 	ResourceEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
@@ -695,8 +705,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eTransformMeshPivot", eTransformMeshPivot);
 	r.RegisterInt("eTransformBone", eTransformBone);
 	r.RegisterInt("eTransformPoint", eTransformPoint);
-
-	r.RegisterInt("eRecentFiles", eRecentFiles);
 
 	r.RegisterInt("eAnimationNext", eAnimationNext);
 	r.RegisterInt("eAnimationPrev", eAnimationPrev);
