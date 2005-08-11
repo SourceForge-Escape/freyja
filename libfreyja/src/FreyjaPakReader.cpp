@@ -26,13 +26,16 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaPakReader::FreyjaPakReader()
+FreyjaPakReader::FreyjaPakReader(const char *pakfile)
 {
+	mPakFile = String::strdup(pakfile);
 }
 
 
 FreyjaPakReader::~FreyjaPakReader()
 {
+	if (mPakFile)
+		delete [] mPakFile;
 }
 
 
@@ -40,10 +43,167 @@ FreyjaPakReader::~FreyjaPakReader()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+byte *FreyjaPakReader::getFileByFullPathName(const char *vfsFilename)
+{
+	FreyjaFileReader r;
+	FreyjaPakDirectory *pakDir = &mRoot; // cd /
+	FreyjaPakFile *pakFile;
+	const uint32 blimit = 127;
+	char buffer[blimit+1];
+	uint32 i, b, length;
+	char c;
+
+
+	if (vfsFilename == 0x0 || vfsFilename[0] == 0)
+	{
+		return 0x0;
+	}
+
+	length = strlen(vfsFilename);
+
+#ifdef DEBUGPAK
+	freyjaPrintMessage(vfsFilename);
+	freyjaPrintMessage("cd /"); 
+#endif
+
+	for (i = 0, b = 0; i < length; ++i)
+	{
+		c = vfsFilename[i];
+
+		switch (c)
+		{
+		case '\\':
+		case '/':
+			if (i > 0)
+			{
+				pakDir = pakDir->getPakDir(buffer); // cd 'buffer'/
+#ifdef DEBUGPAK
+				freyjaPrintMessage("cd %s/", buffer);
+#endif
+			}
+
+			b = 0;
+			buffer[0] = 0;
+			break;
+
+		default:
+			if (b > blimit)
+			{
+			}
+			else
+			{
+				buffer[b++] = c;
+				buffer[b] = 0;
+			}
+
+			if (vfsFilename[i+1] == 0)
+			{
+				pakFile = pakDir->getPakFile(buffer);
+#ifdef DEBUGPAK
+				freyjaPrintMessage("x %s", buffer);
+#endif
+			}
+		}
+	}
+
+	if (pakFile != 0x0 && r.openFile(mPakFile))
+	{
+		return pakFile->getCopyOfData(r);
+	}
+
+	return 0x0;
+}
+
+
+byte *FreyjaPakReader::getFileInDirectory(const char *vfsDir, const char *vfsFilename)
+{
+	freyjaPrintMessage("Not implemented %s:%i", __FILE__, __LINE__);
+	return 0x0;
+}
+
+
+byte *FreyjaPakReader::getFileInCurrentDirectory(const char *vfsFilename)
+{
+	freyjaPrintMessage("Not implemented %s:%i", __FILE__, __LINE__);
+	return 0x0;
+}
+
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size)
+{
+	FreyjaPakDirectory *pakDir = &mRoot, *tmpDir;
+	FreyjaPakFile *pakFile;
+	const uint32 blimit = 127;
+	char buffer[blimit+1];
+	uint32 i, b, length;
+	char c;
+
+
+	if (vfsFilename == 0x0 || vfsFilename[0] == 0)
+	{
+		return;
+	}
+
+	length = strlen(vfsFilename);
+
+#ifdef DEBUGPAK
+	freyjaPrintMessage("\n%s", vfsFilename);
+#endif
+
+	for (i = 0, b = 0; i < length; ++i)
+	{
+		c = vfsFilename[i];
+
+		switch (c)
+		{
+		case '\\':
+		case '/':
+			if (i > 0)
+			{
+#ifdef DEBUGPAK
+				freyjaPrintMessage("+ %s/%s/", pakDir->getName(), buffer);
+#endif
+
+				tmpDir = new FreyjaPakDirectory(buffer);
+				pakDir->addDir(tmpDir);
+				pakDir = tmpDir;
+			}
+
+			b = 0;
+			buffer[0] = 0;
+			break;
+
+		default:
+			if (b > blimit)
+			{
+			}
+			else
+			{
+				buffer[b++] = c;
+				buffer[b] = 0;
+			}
+
+			if (vfsFilename[i+1] == 0)
+			{
+				pakFile = new FreyjaPakFile(buffer, offset, size);
+				pakDir->addFile(pakFile);
+#ifdef DEBUGPAK
+				freyjaPrintMessage("+ %s/%s", pakDir->getName(), buffer);
+#endif
+			}
+		}
+	}
+}
+
+
+void FreyjaPakReader::changeDir(const char *dirname)
+{
+	freyjaPrintMessage("Not implemented %s:%i", __FILE__, __LINE__);
+}
 
 
 ////////////////////////////////////////////////////////////

@@ -107,10 +107,55 @@ void freyja_plugin_generic(const char *symbol, void *something)
 }
 
 
+// Get the basename of the full path name and strip ext '.so', '.dll', etc
+void freyja_init_get_basename(const char *filename, char *basename, uint32 size)
+{
+	uint32 i, j, l = strlen(filename);
+	char c;
+
+
+	for (i = 0, j = 0; i < l; ++i)
+	{
+		c = filename[i];
+
+		switch (c)
+		{
+		case '\\':
+		case '/':
+			j = 0;
+			basename[0] = 0;
+			break;
+		
+		default:
+			if (j < size-1)
+			{
+				basename[j++] = c;
+				basename[j] = 0;
+			}
+		}
+	}
+
+	for (; i > 0; --i)
+	{
+		c = basename[i];
+
+		if (c == '.')
+			break;
+	}
+
+	if (i > 0)
+		basename[i] = 0;
+
+	//freyjaPrintMessage("! %s", basename);
+}
+
+
 void freyja_init_application_plugins(const char *dir)
 {
 #ifdef FREYJA_APP_PLUGINS
 	FreyjaFileReader reader;
+	char module_name[128];
+	char module_symbol[128];
 	void (*init)(void (*func)(const char*, void*));
 	bool done = false;
 	char *module_filename;
@@ -138,10 +183,12 @@ void freyja_init_application_plugins(const char *dir)
 		}
 		else
 		{
+			freyja_init_get_basename(module_filename, module_name, 128);
+			snprintf(module_symbol, 128, "freyja_%s_init", module_name);
+
 			freyja_print("!Module '%s' opened.", module_filename);
 
-			// FIXME: use so name instead of 'perlinnoise' later
-			init = (void (*)(void (*)(const char*, void*)))freyjaModuleImportFunction(handle, "freyja_perlinnoise_init");
+			init = (void (*)(void (*)(const char*, void*)))freyjaModuleImportFunction(handle, module_symbol);
 
 			if (init == NULL)  
 			{
@@ -154,8 +201,8 @@ void freyja_init_application_plugins(const char *dir)
 
 			freyja_print("!Module '%s' linked.", module_filename);
 
-			// Keep plugins in memory... now open next
-			//dlclose(handle);
+			// Keep these plugins in memory...
+			//freyjaModuleUnload(handle);
 		}
 	}
 

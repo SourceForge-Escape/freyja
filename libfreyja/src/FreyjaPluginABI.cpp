@@ -7430,7 +7430,11 @@ int32 freyjaExportModel(const char *filename, const char *type)
 			continue;
 		}
 
+#ifdef WIN32
+		sprintf(module_filename, "%s/%s.dll", gPluginDirectories[i], name);
+#else
 		sprintf(module_filename, "%s/%s.so", gPluginDirectories[i], name);
+#endif
 		sprintf(module_export, "freyja_model__%s_export", name);  // use 'model_export'?
 
 		if (!(handle = freyjaModuleLoad(module_filename)))
@@ -7716,18 +7720,70 @@ int freyjaGetPluginArgString(int32 pluginId, const char *name,
 //  Pak VFS 
 ///////////////////////////////////////////////////////////////////////
 
+#include "FreyjaPakReader.h"
+
+Vector< FreyjaPakReader*> gFreyjaPaks;
+uint32 gFreyjaPakCount = 0;
+
+void freyjaPakDelete(index_t uid)
+{
+	if (uid < gFreyjaPaks.size() && gFreyjaPaks[uid] != 0x0)
+	{
+		delete gFreyjaPaks[uid];
+		gFreyjaPaks.assign(uid, 0x0);
+		--gFreyjaPakCount;
+	}
+}
+
+
 int32 freyjaPakBegin(const char *filename)
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	FreyjaPakReader *pak = new FreyjaPakReader(filename);
+	uint32 i, count;
+	index_t uid;
+	bool found = false;
+
+
+	/* Setup UID and class container reference */
+	uid = count = gFreyjaPaks.size();
+
+	for (i = 0; i < count; ++i)
+	{
+		if (gFreyjaPaks[i] == 0x0)
+		{
+			uid = i;
+			gFreyjaPaks.assign(uid, pak);
+
+			found = true;
+			break;
+		}	
+	}
+
+	if (!found)
+	{
+		gFreyjaPaks.pushBack(pak);
+	}
+
+	++gFreyjaPakCount;
+
+	pak->mUID = uid;
+
+	return uid;
 }
 
 
 int32 freyjaPakAddFullPathFile(int32 pakIndex,
 							  const char *vfsFilename, int32 offset, int32 size)
 {
-	// ATM this does nothing, just here for reserved use
-	return -1;
+	index_t uid = pakIndex;
+
+	if (uid < gFreyjaPaks.size() && gFreyjaPaks[uid] != 0x0)
+	{
+		gFreyjaPaks[uid]->addFullPathFileDesc(vfsFilename, offset, size);
+		return 1;
+	}
+
+	return 0;
 }
 
 
@@ -8033,6 +8089,11 @@ void *freyjaModuleLoad(const char *module)
 	}
 
 #else
+
+	if (FreyjaFileReader::compareFilenameExtention(module, ".so") != 0)
+	{
+		return NULL;
+	}
 
 	handle = dlopen(module, RTLD_NOW);
 	loaderror = (char *)dlerror();
