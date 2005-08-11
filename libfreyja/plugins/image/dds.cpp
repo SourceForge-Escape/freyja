@@ -264,12 +264,12 @@ void dds_decompress_DXT1(dds_image_t &dds,
 }
 
 
-//FIXME
 void dds_decompress_DXT3(dds_image_t &dds, 
 								 unsigned char *image, unsigned int mipmap)
 {
 	unsigned char *temp = dds.surface_data;
-	unsigned int x, y, z, i, j, k, select, bitmask, offset;
+	unsigned int x, y, z, i, j, k, select;
+	unsigned int bitmask, offset;
 	dds_rgb_pixel_t *color_0, *color_1;  // 565?
 	dds_rgba_pixel_t colors[4]; 
 	dds_rgba_pixel_t *col;
@@ -284,8 +284,10 @@ void dds_decompress_DXT3(dds_image_t &dds,
 		dds.header.pixelformat.bits_per_pixel = 32;
 
 	bpp = 4;
-	bps = (dds.header.width * dds.header.pixelformat.bits_per_pixel/8);
+	bps = (dds.header.width * dds.header.pixelformat.bits_per_pixel/8)/8;
 	sz = dds.header.width * dds.header.height;
+
+	unsigned int size = sz * bpp;
 
 	for (y = 0; y < dds.header.height; y += 4) 
 	{
@@ -333,6 +335,12 @@ void dds_decompress_DXT3(dds_image_t &dds,
 						 ((y + j) < dds.header.height))
 					{
 						offset = z * sz + (y + j) * bps + (x + i) * bpp;
+
+						printf("%i offset = (%i y + %i j) * %i bps\n", offset, y, j, bps);
+						printf("+ (%i x + %i i) * %i bpp\n", x, i, bpp);
+
+						offset = ((offset > size) ? size-4 : offset);
+
 						image[offset + 0] = col->b;
 						image[offset + 1] = col->g;
 						image[offset + 2] = col->r;
@@ -350,6 +358,7 @@ void dds_decompress_DXT3(dds_image_t &dds,
 						 && ((y + j) < dds.header.height))
 					{
 						offset = z * sz + (y + j) * bps + (x + i) * bpp + 3;
+						offset = ((offset > size) ? size-4 : offset);
 						image[offset] = word & 0x0F;
 						image[offset] = image[offset] | (image[offset] << 4);
 					}
@@ -358,7 +367,7 @@ void dds_decompress_DXT3(dds_image_t &dds,
 				}
 			}
 		}
-	}	
+	}
 }
 
 
