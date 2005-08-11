@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=1
 BRANCH=
-BUILD_ID=20050724
+BUILD_ID=20050810
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -439,6 +439,18 @@ eggv7.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+eggv7.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=eggv7 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/eggv7.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 eggv8.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -446,6 +458,18 @@ eggv8.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/eggv8.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+eggv8.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=eggv8 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/eggv8.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 et.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -455,6 +479,18 @@ et.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+et.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=et \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/ETModel.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 glm.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -462,6 +498,18 @@ glm.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/GLMModel.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+glm.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=glm \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/GLMModel.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 grn.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -483,6 +531,31 @@ grn.so:
 			$(MODEL_PLUGIN_BUILD_DIR)/grnunhandled.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+grn.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=grn \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/freyja_grn.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/grannyfile.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/GrannyStream.o \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnanim.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnbones.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnboneties.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnitemlist.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnmatrix.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnmeshes.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnobjects.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grntextchunk.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grntextureinfos.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grntextures.o  \
+			$(MODEL_PLUGIN_BUILD_DIR)/grnunhandled.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 grnX.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -517,6 +590,18 @@ lwo.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+lwo.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=lwo \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Lwo.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 mdl.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -524,6 +609,18 @@ mdl.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Mdl.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
+
+mdl.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=mdl \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Mdl.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 md2.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -533,6 +630,18 @@ md2.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
+md2.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=md2 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md2.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 md3.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -540,6 +649,18 @@ md3.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
 	CFLAGS="$(MODULE_CFLAGS) -DMD3_EXPORT_ENABLED" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+md3.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=md3 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 md3anim.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -556,6 +677,18 @@ md5.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md5.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+md5.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=md5 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md5.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 meshgen.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -581,6 +714,18 @@ nif4.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
 
+nif4.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=nif4 \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nif4.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 nod.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -588,6 +733,18 @@ nod.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nod.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
+
+nod.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=nod \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nod.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 nwnascii.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -605,6 +762,18 @@ obj.so:
 	CFLAGS="$(MODULE_CFLAGS) -DOBJ_EXPORT_ENABLED" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+obj.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=obj \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/obj.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 psk.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -612,6 +781,18 @@ psk.so:
 	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/PSKModel.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
+
+psk.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=psk \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/PSKModel.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 python.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
@@ -654,6 +835,18 @@ smd.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
+smd.dll:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=smd \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/smd.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 tombraider.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
@@ -674,9 +867,9 @@ trmesh.so:
 
 plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
 
-plugins-model-win32: ase.dll
+plugins-model-win32: 3ds.dll bsa.dll ase.dll eggv7.dll et.dll glm.dll grn.dll mdl.dll md2.dll md3.dll md5.dll nif4.dll lwo.dll nod.dll obj.dll psk.dll smd.dll
 
 tools: freyjautil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
 

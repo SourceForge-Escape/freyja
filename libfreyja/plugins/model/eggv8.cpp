@@ -28,6 +28,9 @@
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 
+#ifdef WIN32
+typedef unsigned int u_int32_t;
+#endif
 
 extern "C" {
 

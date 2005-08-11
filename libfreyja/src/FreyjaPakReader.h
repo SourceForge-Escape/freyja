@@ -28,20 +28,53 @@
 #define GUARD__FREYJA_MONGOOSE_PAKBROWSER_H_
 
 
+#include <hel/math.h>
 #include <mstl/Vector.h>
+#include <mstl/String.h>
+#include "FreyjaFileReader.h"
+#include "FreyjaPluginABI.h"
 
 
 class FreyjaPakFile
 {
  public:
 
-	char *getName();
+	FreyjaPakFile(const char *filename, uint32 offset, uint32 size)
+	{
+		mFilename = String::strdup(filename);
+		mOffset = offset;
+		mSize = size;
+	}
 
-	unsigned int getDataSize();
+	~FreyjaPakFile()
+	{
+		if (mFilename != 0x0)
+		{
+			delete [] mFilename;
+		}
+	}
 
-	unsigned char *getDataPointer();
+	const char *getName() { return mFilename; }
 
-	unsigned char *getCopyOfData();
+	uint32 getDataOffset() { return mOffset; }
+
+	uint32 getDataSize() { return mSize; }
+
+	byte *getCopyOfData(FreyjaFileReader &r)
+	{
+		byte *buffer = new byte[mSize];
+		r.setFileOffset(mOffset);
+		r.readBuffer(mSize, buffer);
+		return buffer;
+	}
+
+ private:
+
+	char *mFilename;
+
+	uint32 mOffset;
+
+	uint32 mSize;
 };
 
 
@@ -49,25 +82,122 @@ class FreyjaPakDirectory
 {
  public:
 
-	FreyjaPakDirectory *getDir(unsigned int index);
+	FreyjaPakDirectory()
+	{
+		mDirName = String::strdup("vfs:/");
+	}
 
-	FreyjaPakFile *getFile(unsigned int index);
+	FreyjaPakDirectory(const char *dirname)
+	{
+		mDirName = String::strdup(dirname);
+	}
 
-	char *getDirName(unsigned int index);
+	~FreyjaPakDirectory()
+	{
+		if (mDirName != 0x0)
+		{
+			delete [] mDirName;
+		}
 
-	char *getFileName(unsigned int index);
+		mPakDirs.erase();
+		mPakFiles.erase();
+	}
 
-	unsigned int getDirCount();
+	FreyjaPakDirectory *getPakDir(uint32 index)
+	{
+		if (index < mPakDirs.size() && mPakDirs[index] != 0x0)
+			return mPakDirs[index];
 
-	unsigned int getFileCount();
+		return 0x0;
+	}
 
-	char *getName();
+	FreyjaPakFile *getPakFile(uint32 index) 
+	{
+		if (index < mPakFiles.size() && mPakFiles[index] != 0x0)
+			return mPakFiles[index];
+
+		return 0x0;
+	}
+
+	const char *getDirName(uint32 index)
+	{
+		if (index < mPakDirs.size() && mPakDirs[index] != 0x0)
+		{
+			return mPakDirs[index]->getName();
+		}
+
+		return 0x0;
+	}
+
+	const char *getFileName(uint32 index) 
+	{
+		if (index < mPakFiles.size() && mPakFiles[index] != 0x0)
+		{
+			return mPakFiles[index]->getName();
+		}
+
+		return 0x0;
+	}
+
+	FreyjaPakDirectory *getPakDir(const char *dirname) 
+	{
+		uint32 i, l, count = mPakDirs.size();
+
+		if (dirname == 0x0 || dirname[0] == 0)
+			return 0x0;
+
+		l = strlen(dirname);
+
+		for (i = 0; i < count; ++i)
+		{
+			if (strncmp(dirname, mPakDirs[i]->getName(), l) == 0)
+				return mPakDirs[i];
+		}
+
+		return 0x0;
+	}
+
+	FreyjaPakFile *getPakFile(const char *filename) 
+	{
+		uint32 i, l, count = mPakFiles.size();
+
+		if (filename == 0x0 || filename[0] == 0)
+			return 0x0;
+
+		l = strlen(filename);
+
+		for (i = 0; i < count; ++i)
+		{
+			if (strncmp(filename, mPakFiles[i]->getName(), l) == 0)
+				return mPakFiles[i];
+		}
+
+		return 0x0;
+	}
+
+	uint32 getDirCount() { return mPakDirs.size(); }
+
+	uint32 getFileCount() { return mPakFiles.size(); }
+
+	const char *getName() { return mDirName; }
+
+	void addDir(FreyjaPakDirectory *dir)
+	{
+		mPakDirs.pushBack(dir);
+	}
+
+	void addFile(FreyjaPakFile *file)
+	{
+		mPakFiles.pushBack(file);
+	}
 
  protected:
 
-	Vector <FreyjaPakDirectory *> mDir;
+	char *mDirName;
 
-	Vector <FreyjaPakFile *> mFiles;
+	Vector <FreyjaPakDirectory *> mPakDirs;
+
+	Vector <FreyjaPakFile *> mPakFiles;
 };
 
 
@@ -79,7 +209,7 @@ class FreyjaPakReader
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaPakReader();
+	FreyjaPakReader(const char *pakfile);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaPakReader
@@ -106,26 +236,23 @@ class FreyjaPakReader
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	byte *getFileByFullPathName(const char *vfsFilename);
 
+	byte *getFileInDirectory(const char *vfsDir, const char *vfsFilename);
+
+	byte *getFileInCurrentDirectory(const char *vfsFilename);
+
+	FreyjaPakDirectory *getRoot() { return &mRoot; }
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void viewFile(char *name);
-	void viewFile(unsigned int index);
+	void addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size);
 
-	void dumpFile(char *name);
-	void dumpFile(unsigned int index);
+	uint32 mUID;
 
-	void changeDir(char *name);
-	void changeDir(unsigned int index);
-
-	// Factor these out to FreyjaPakWriter
-	void mkdirDir(char *name);
-	void removeDir(char *name);
-	void removeDir(unsigned int index);
-
+	void changeDir(const char *dirname);
 
  private:
 
@@ -138,6 +265,9 @@ class FreyjaPakReader
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	char *mPakFile;                  /* Filename of pak file on disk */
+
+	char *mCurrentDir;               /* String of current dir */ 
 
 	FreyjaPakDirectory mRoot;        /* Virtual root directory */
 };
