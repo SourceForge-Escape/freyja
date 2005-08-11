@@ -47,6 +47,20 @@
 #   include <GL/gl.h>
 #endif
 
+#ifndef int8_t
+typedef signed char int8_t;
+#endif
+
+#ifndef int16_t
+typedef short int16_t;
+#endif
+
+#ifndef int32_t
+typedef int int32_t;
+#endif
+
+
+
 #include "Md3.h"
 
 

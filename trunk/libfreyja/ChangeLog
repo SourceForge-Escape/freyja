@@ -26,6 +26,14 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ libfreyja 0.9.1 trunk Mongoose <mongoose@icculus.org>
+
+	o New texture system
+	o win32 build system merged with svn trunk
+	o vfs pak system backend
+	o Many fixes and minor features
+
+
  libfreyja (20050524) "Umbra" Mongoose <mongoose@icculus.org>
 
 	o Updated ChangeLog  ;)
