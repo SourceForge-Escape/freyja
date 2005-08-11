@@ -168,8 +168,14 @@ void FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset
 				freyjaPrintMessage("+ %s/%s/", pakDir->getName(), buffer);
 #endif
 
-				tmpDir = new FreyjaPakDirectory(buffer);
-				pakDir->addDir(tmpDir);
+				tmpDir = pakDir->getPakDir(buffer);
+
+				if (tmpDir == 0x0)
+				{
+					tmpDir = new FreyjaPakDirectory(buffer);
+					pakDir->addDir(tmpDir);
+				}
+
 				pakDir = tmpDir;
 			}
 

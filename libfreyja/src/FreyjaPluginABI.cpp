@@ -7725,6 +7725,7 @@ int freyjaGetPluginArgString(int32 pluginId, const char *name,
 Vector<FreyjaPakReader*> gFreyjaPaks;
 uint32 gFreyjaPakCount = 0;
 
+
 FreyjaPakReader *freyjaGetPakReader(index_t uid)
 {
 	if (uid < gFreyjaPaks.size() && gFreyjaPaks[uid] != 0x0)

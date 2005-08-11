@@ -22,10 +22,10 @@
 #include <string.h>
 #include <math.h>
 #include <hel/math.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/PerlinNoise.h>
-#include <freyja/FreyjaImage.h>
 #include <freyja/FreyjaPluginABI.h>
+#include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaPakReader.h>
+#include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
 
@@ -38,11 +38,64 @@ extern "C" {
 void PakReaderEventsAttach();
 void PakReaderGUIAttach();
 
+
 void freyja_pakreader_init(void (*func)(const char*, void*))
 {
 	ResourceAppPluginTest *plugin;
 	plugin = new ResourceAppPluginTest(PakReaderEventsAttach,
 										PakReaderGUIAttach);	
+}
+
+
+void ePakReaderMenuUpdate()
+{
+	FreyjaPakReader *pak = freyjaGetPakReader(0); // test
+	FreyjaPakDirectory *dir, *tmpDir;
+	FreyjaPakFile *file;
+	uint32 menu = Resource::mInstance->getIntByName("ePakReaderMenu");
+	uint32 event = Resource::mInstance->getIntByName("ePakReaderSelect");
+	uint32 i, j, count;
+
+
+	if (pak == 0x0)
+		return;
+
+	dir = pak->getRoot();
+
+	mgtk_remove_all_items_to_menu(menu);
+
+	for (i = 0, count = dir->getDirCount(); i < count; ++i)
+	{
+		tmpDir = dir->getPakDir(i);
+	
+		if (tmpDir)
+		{
+			mgtk_append_item_to_menu2i(menu, tmpDir->getName(), event, i);
+			freyjaPrintMessage("! %s/", tmpDir->getName());
+		}
+	}
+
+	for (j = 0, count = dir->getFileCount(); j < count; ++j)
+	{
+		file = dir->getPakFile(j);
+
+		if (file)
+		{
+			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
+			freyjaPrintMessage("! %s", file->getName());
+		}
+	}
+}
+
+
+void ePakReaderMenu()
+{
+}
+
+
+void ePakReaderSelect(unsigned int value)
+{
+	freyjaPrintMessage("! ePakReaderSelect(%i)", value);
 }
 
 
@@ -54,7 +107,10 @@ void eDialogPakReader()
 
 void PakReaderEventsAttach()
 {
+	ResourceEventCallbackUInt::add("ePakReaderSelect", &ePakReaderSelect);
+	ResourceEventCallback::add("ePakReaderMenu", &ePakReaderMenu);
 	ResourceEventCallback::add("eDialogPakReader", &eDialogPakReader);
+	ResourceEventCallback::add("ePakReaderMenuUpdate", &ePakReaderMenuUpdate);
 }
 
 

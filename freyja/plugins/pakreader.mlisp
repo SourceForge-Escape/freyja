@@ -11,12 +11,17 @@
 
 (dialog "Freyja :: Pak Reader" eDialogPakReader 0
 	(vbox 0 0 0 0 0
+		(menubar
+			(submenu ePakReaderMenu "vfs://"))
+
 		(hbox 1 0 0 1 0
 			(icon "freyja.png" IconSize_Dialog))
 
 		(label "Pak Reader "	0.0 0.5)
 
-		(label "Coming soon!"	0.0 1.0)
+		(button "Update vfs" eMode ePakReaderMenuUpdate)
+
+		(label "Improved UI coming soon?"	0.0 0.5)
 	)
 )
 
