@@ -43,18 +43,12 @@
 #   endif
 #endif
 
-#ifdef WIN32
-#   include <GL/glext.h>
-#   define glActiveTexture glActiveTextureARB
-#   define glMultiTexCoord2f glMultiTexCoord2fARB
-
-   extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-#endif
 
 #include "freyja_events.h"
 #include "FreyjaRender.h"
 
 FreyjaRender *FreyjaRender::mSingleton = 0x0;
+extern FreyjaModel *gFreyjaModel;
 
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
@@ -198,25 +192,7 @@ void freyjaApplyMaterial(uint32 materialIndex)
 
 	if (flags & fFreyjaMaterial_DetailTexture)
 	{
-#ifndef DISABLE_MULTITEXTURE
-		glActiveTexture(GL_TEXTURE0_ARB);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		// bump
-		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
-	
-		glActiveTexture(GL_TEXTURE1_ARB);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-		// bump
-		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_ADD);
-
-		// Combine, gamma correct
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
-#endif
+		gFreyjaModel->mTexture.bindMultiTexture(texture, texture2);
 	}
 	else if (flags & fFreyjaMaterial_Texture) // Non-colored is ( id + 1)
 	{

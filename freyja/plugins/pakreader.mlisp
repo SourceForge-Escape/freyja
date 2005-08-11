@@ -5,7 +5,7 @@
 ; Author : Terry 'Mongoose' Hendrix II
 ; Website: http://icculus.org/freyja
 ; Email  : mongoose@icculus.org
-; Comment: Interface for perlin noise plugin
+; Comment: Interface for pak vfs plugin
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 

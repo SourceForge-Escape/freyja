@@ -65,6 +65,7 @@
 #ifdef USE_ARB_MULTITEXTURE
 #   define glActiveTexture glActiveTextureARB
 #   define glMultiTexCoord2f glMultiTexCoord2fARB
+
 #endif
 
 #ifdef WIN32
@@ -81,6 +82,21 @@
    PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB = NULL;
    PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
    PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
+#elif USE_ARB_MULTITEXTURE // if no preassigned funcs in older GLX libs
+#    define GLX_GLXEXT_PROTOTYPES
+#   include <GL/glx.h>
+#   include <GL/glxext.h>
+   PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB = NULL;
+   PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
+   PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB = NULL;
+   PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB = NULL;
+   PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
+   PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
+
+//#  ifndef glXGetProcAddressARB
+//#    define glXGetProcAddress glXGetProcAddressARB
+//	extern __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *);
+//#   endif
 #endif
 
 
@@ -114,6 +130,16 @@ Texture::Texture()
 	glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)wglGetProcAddress("glMultiTexCoord4fARB");
 	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
 	glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)wglGetProcAddress("glClientActiveTextureARB");
+#elif USE_ARB_MULTITEXTURE
+	int texelUnitCount;
+
+	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &texelUnitCount);
+	glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)glXGetProcAddressARB((GLubyte *)"glMultiTexCoord1fARB");
+	glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)glXGetProcAddressARB((GLubyte *)"glMultiTexCoord2fARB");
+	glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)glXGetProcAddressARB((GLubyte *)"glMultiTexCoord3fARB");
+	glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)glXGetProcAddressARB((GLubyte *)"glMultiTexCoord4fARB");
+	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)glXGetProcAddressARB((GLubyte *)"glActiveTextureARB");
+	glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)glXGetProcAddressARB((GLubyte *)"glClientActiveTextureARB");
 #endif
 
 	initSDL_TTF();
@@ -665,6 +691,30 @@ void Texture::useMultiTexture(float u, float v)
 #ifndef DISABLE_MULTITEXTURE
 	glMultiTexCoord2f(GL_TEXTURE0_ARB, u, v);
 	glMultiTexCoord2f(GL_TEXTURE1_ARB, u, v);
+#endif
+}
+
+
+void freyja_renders_old_multi(int texture, int texture2)
+{
+#ifndef DISABLE_MULTITEXTURE
+		glActiveTexture(GL_TEXTURE0_ARB);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		// bump
+		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+	
+		glActiveTexture(GL_TEXTURE1_ARB);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+		// bump
+		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_ADD);
+
+		// Combine, gamma correct
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
 #endif
 }
 
