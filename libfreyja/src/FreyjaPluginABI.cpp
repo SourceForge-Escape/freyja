@@ -7722,8 +7722,19 @@ int freyjaGetPluginArgString(int32 pluginId, const char *name,
 
 #include "FreyjaPakReader.h"
 
-Vector< FreyjaPakReader*> gFreyjaPaks;
+Vector<FreyjaPakReader*> gFreyjaPaks;
 uint32 gFreyjaPakCount = 0;
+
+FreyjaPakReader *freyjaGetPakReader(index_t uid)
+{
+	if (uid < gFreyjaPaks.size() && gFreyjaPaks[uid] != 0x0)
+	{
+		return gFreyjaPaks[uid];
+	}
+
+	return 0x0;
+}
+
 
 void freyjaPakDelete(index_t uid)
 {
