@@ -265,7 +265,6 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	FreyjaFileWriter w;
 	char *filename2 = freyja_rc_map("recent_files");
 
-
 	if (w.openFile(filename2))
 	{
 		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
