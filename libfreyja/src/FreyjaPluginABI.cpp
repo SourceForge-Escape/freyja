@@ -5830,6 +5830,23 @@ index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
 	texture->mHeight = height;
 	texture->mBitDepth = byteDepth * 8;
 
+	switch (type)
+	{
+	case RGBA_32:
+		texture->mPixelFormat = FreyjaTexture::RGBA32;
+		break;
+
+	case RGB_24:
+		texture->mPixelFormat = FreyjaTexture::RGB24;
+		break;
+
+	case INDEXED_8:
+		texture->mPixelFormat = FreyjaTexture::Indexed8;
+		break;
+
+	default:
+		byteDepth = 0;	
+	}
 
 	/* Setup UID and class container reference */
 	uid = count = gFreyjaTextures.size();
