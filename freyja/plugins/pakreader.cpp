@@ -96,6 +96,67 @@ void ePakReaderMenu()
 }
 
 
+void pak_reader_try_upload(char *filename)
+{
+	FreyjaImage img;
+
+
+	mgtk_print("!PakReader> Trying to upload '%s'", filename);
+
+	if (!img.loadImage(filename))
+	{
+		uint32 tid;
+		uint32 id = Resource::mInstance->getIntByName("eTextureUpload");
+		uint32 w = img.getWidth();
+		uint32 h = img.getHeight();
+		byte *image;
+		bool done = false;
+
+		img.getImage(&image);
+
+		switch (img.getColorMode())
+		{
+		case FreyjaImage::RGBA_32:
+			tid = freyjaTextureCreateBuffer(image, 4, w, h, RGBA_32);
+			done = true;
+			break;
+
+		case FreyjaImage::RGB_24:
+			tid = freyjaTextureCreateBuffer(image, 3, w, h, RGB_24);
+			done = true;
+			break;
+
+		case FreyjaImage::INDEXED_8:
+			tid = freyjaTextureCreateBuffer(image, 1, w, h, INDEXED_8);
+			done = true;
+			break;
+
+		default:
+			;
+		}
+		
+		if (image != 0x0)
+			delete [] image;
+		
+		if (done)
+		{
+			mgtk_print("!Uploading texture %i, using function %i...", tid, id);
+
+			if (ResourceEvent::listen(id - 10000, tid))
+				mgtk_print("!ePakReader generated texture successfully.");
+
+			freyjaTextureDelete(tid);
+			return;
+		}
+	}
+
+	uint32 event = Resource::mInstance->getIntByName("eModelUpload");
+
+	if (ResourceEvent::listen(event - 10000, filename))
+		mgtk_print("!ePakReader loaded model '%s' successfully.", filename);
+}
+
+
 void ePakReaderSelect(unsigned int value)
 {
 	FreyjaPakReader *pak = freyjaGetPakReader(gPakReaderUID);
@@ -123,6 +184,42 @@ void ePakReaderSelect(unsigned int value)
 	{
 		gPakReaderDir = dir = dir->getPakDir(value);
 	}
+	else
+	{
+		FreyjaFileReader r;
+		FreyjaFileWriter w;
+		char tmpfilename[256];
+
+
+		if (r.openFile(pak->getPakFile()))
+		{
+			file = dir->getPakFile(value - dir->getDirCount());
+			buffer = file->getCopyOfData(r);
+
+			// FIXME simple minded test importer
+			if (buffer != 0x0)
+			{
+#ifdef WIN32
+				snprintf(tmpfilename, 255, "C:\temp/%s", file->getName());
+#else
+				snprintf(tmpfilename, 255, "/tmp/%s", file->getName());
+#endif
+				w.openFile(tmpfilename);
+				w.writeBuffer(file->getDataSize(), buffer);
+				w.closeFile();
+
+				mgtk_print("Wrote '%s' from pak", tmpfilename);
+
+				delete [] buffer;
+
+				pak_reader_try_upload(tmpfilename);
+			}
+
+			r.closeFile();
+		}
+
+		return;  // don't update menu
+	}
 
 	for (i = 0, count = dir->getDirCount(); i < count; ++i)
 	{
@@ -143,36 +240,6 @@ void ePakReaderSelect(unsigned int value)
 		{
 			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
 			freyjaPrintMessage("! %s", file->getName());
-		}
-	}
-
-	if (value >= dir->getDirCount())
-	{
-		FreyjaFileReader r;
-		FreyjaFileWriter w;
-		char tmpfilename[256];
-
-
-		if (r.openFile(pak->getPakFile()))
-		{
-			file = dir->getPakFile(value-i);
-			buffer = file->getCopyOfData(r);
-
-			// FIXME simple minded test
-			if (buffer)
-			{
-#ifdef WIN32
-				snprintf(tmpfilename, 255, "C:\temp/%s", file->getName());
-#else
-				snprintf(tmpfilename, 255, "/tmp/%s", file->getName());
-#endif
-				w.openFile(tmpfilename);
-				w.writeBuffer(file->getDataSize(), buffer);
-
-				mgtk_print("Wrote '%s' from pak", tmpfilename);
-
-				delete [] buffer;
-			}
 		}
 	}
 }

@@ -69,6 +69,13 @@ void eMaterialSlotLoadToggle()
 				on ? "on" : "off");
 }
 
+
+void eModelUpload(char *filename)
+{
+	gFreyjaModel->loadModel(filename);
+}
+
+
 void eTextureUpload(unsigned int id)
 {
 	byte *image;
@@ -104,6 +111,7 @@ void eTextureUpload(unsigned int id)
 
 void FreyjaModelEventsAttach()
 {
+	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
 	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
