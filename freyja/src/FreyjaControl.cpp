@@ -137,6 +137,19 @@ void FreyjaControl::takeScreenshot(const char *filename,
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+bool FreyjaControl::handleRecentFile(unsigned int value)
+{
+	if (value < mRecentFiles.size())
+	{
+		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+		handleFilename(mRecentFiles[value]);
+		return true;
+	}
+
+	return false;
+}
+
+
 void FreyjaControl::updateDisplay()
 {
 	if (mRender)
@@ -237,15 +250,14 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	}
 
 	/* Rebuild menu in order of mRecentFiles */
-	freyja_remove_all_items_to_menu(eRecentFiles);
+	uint32 menuId = Resource::mInstance->getIntByName("eRecentFiles");
+	freyja_remove_all_items_to_menu(menuId);
 
 	n = mRecentFiles.end();
 
 	for (i = mRecentFiles.begin(); i < n; ++i)
 	{
-		//freyja_append_item_to_menu(eRecentFiles, mRecentFiles[i], 
-		//						   (eRecentFiles + i + 1));
-		mgtk_append_item_to_menu2i(eRecentFiles, mRecentFiles[i], eRecentFiles, i+1);
+		mgtk_append_item_to_menu2i(menuId, mRecentFiles[i], menuId, i);
 	}
 
 
@@ -302,14 +314,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 		{
 			mModel->setCurrentTextureIndex(value);
 			freyja_event_gl_refresh();
-		}
-		break;
-
-	case eRecentFiles:
-		if ((value - 1) < (int)mRecentFiles.size())
-		{
-			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-			handleFilename(mRecentFiles[(value- 1)]);
 		}
 		break;
 

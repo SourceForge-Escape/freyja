@@ -190,6 +190,12 @@ class FreyjaControl
 	 * Mongoose - Created, pulled out of other event methods
 	 ------------------------------------------------------*/
 
+	bool handleRecentFile(unsigned int idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	bool event(int command);
 	/*------------------------------------------------------
 	 * Pre  : 
