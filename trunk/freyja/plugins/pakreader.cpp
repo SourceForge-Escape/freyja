@@ -153,7 +153,10 @@ void pak_reader_try_upload(char *filename)
 	uint32 event = Resource::mInstance->getIntByName("eModelUpload");
 
 	if (ResourceEvent::listen(event - 10000, filename))
+	{
 		mgtk_print("!ePakReader loaded model '%s' successfully.", filename);
+		mgtk_event_gl_refresh();
+	}
 }
 
 
