@@ -372,9 +372,29 @@ clean-plugins:
 	@-rm -f $(PLUGIN_BUILD_DIR)*/*.dll
 	@-echo [done]
 
-plugins: perlinnoise.so
+plugins: pakreader.so perlinnoise.so
 
-plugins-win32: perlinnoise.dll
+plugins-win32: pakreader.dll perlinnoise.dll
+
+pakreader.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=pakreader \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pakreader.o" \
+		CFLAGS="$(PLUGIN_CFLAGS)" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
+
+pakreader.dll:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=pakreader \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pakreader.o" \
+		CC="i586-mingw32msvc-g++ -mms-bitfields" \
+		CPP="i586-mingw32msvc-cpp " \
+		LD="i586-mingw32msvc-ld " \
+		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
+		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
 
 perlinnoise.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
