@@ -24,6 +24,7 @@
 #include <hel/math.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaPakReader.h>
 #include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
@@ -38,6 +39,8 @@ extern "C" {
 void PakReaderEventsAttach();
 void PakReaderGUIAttach();
 
+uint32 gPakReaderUID = 0;
+FreyjaPakDirectory *gPakReaderDir = 0x0;
 
 void freyja_pakreader_init(void (*func)(const char*, void*))
 {
@@ -49,7 +52,7 @@ void freyja_pakreader_init(void (*func)(const char*, void*))
 
 void ePakReaderMenuUpdate()
 {
-	FreyjaPakReader *pak = freyjaGetPakReader(0); // test
+	FreyjaPakReader *pak = freyjaGetPakReader(gPakReaderUID);
 	FreyjaPakDirectory *dir, *tmpDir;
 	FreyjaPakFile *file;
 	uint32 menu = Resource::mInstance->getIntByName("ePakReaderMenu");
@@ -60,7 +63,7 @@ void ePakReaderMenuUpdate()
 	if (pak == 0x0)
 		return;
 
-	dir = pak->getRoot();
+	gPakReaderDir = dir = pak->getRoot();
 
 	mgtk_remove_all_items_to_menu(menu);
 
@@ -95,7 +98,83 @@ void ePakReaderMenu()
 
 void ePakReaderSelect(unsigned int value)
 {
+	FreyjaPakReader *pak = freyjaGetPakReader(gPakReaderUID);
+	FreyjaPakDirectory *dir, *tmpDir;
+	FreyjaPakFile *file;
+	uint32 menu = Resource::mInstance->getIntByName("ePakReaderMenu");
+	uint32 event = Resource::mInstance->getIntByName("ePakReaderSelect");
+	uint32 i, j, count;
+	byte *buffer;
+
+
+	if (pak == 0x0)
+		return;
+
 	freyjaPrintMessage("! ePakReaderSelect(%i)", value);
+
+	if (!gPakReaderDir)
+		gPakReaderDir = pak->getRoot();
+
+	dir = gPakReaderDir;
+
+	mgtk_remove_all_items_to_menu(menu);
+
+	if (value < dir->getDirCount())
+	{
+		gPakReaderDir = dir = dir->getPakDir(value);
+	}
+
+	for (i = 0, count = dir->getDirCount(); i < count; ++i)
+	{
+		tmpDir = dir->getPakDir(i);
+	
+		if (tmpDir)
+		{
+			mgtk_append_item_to_menu2i(menu, tmpDir->getName(), event, i);
+			freyjaPrintMessage("! %s/", tmpDir->getName());
+		}
+	}
+
+	for (j = 0, count = dir->getFileCount(); j < count; ++j)
+	{
+		file = dir->getPakFile(j);
+
+		if (file)
+		{
+			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
+			freyjaPrintMessage("! %s", file->getName());
+		}
+	}
+
+	if (value >= dir->getDirCount())
+	{
+		FreyjaFileReader r;
+		FreyjaFileWriter w;
+		char tmpfilename[256];
+
+
+		if (r.openFile(pak->getPakFile()))
+		{
+			file = dir->getPakFile(value-i);
+			buffer = file->getCopyOfData(r);
+
+			// FIXME simple minded test
+			if (buffer)
+			{
+#ifdef WIN32
+				snprintf(tmpfilename, 255, "C:\temp/%s", file->getName());
+#else
+				snprintf(tmpfilename, 255, "/tmp/%s", file->getName());
+#endif
+				w.openFile(tmpfilename);
+				w.writeBuffer(file->getDataSize(), buffer);
+
+				mgtk_print("Wrote '%s' from pak", tmpfilename);
+
+				delete [] buffer;
+			}
+		}
+	}
 }
 
 

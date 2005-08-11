@@ -19,7 +19,7 @@
 
 		(label "Pak Reader "	0.0 0.5)
 
-		(button "Update vfs" eMode ePakReaderMenuUpdate)
+		(button "Reset VFS" eMode ePakReaderMenuUpdate)
 
 		(label "Improved UI coming soon?"	0.0 0.5)
 	)
