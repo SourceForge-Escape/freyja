@@ -264,6 +264,7 @@ void dds_decompress_DXT1(dds_image_t &dds,
 }
 
 
+//FIXME
 void dds_decompress_DXT3(dds_image_t &dds, 
 								 unsigned char *image, unsigned int mipmap)
 {
