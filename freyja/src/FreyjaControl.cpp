@@ -243,8 +243,9 @@ void FreyjaControl::addRecentFilename(const char *filename)
 
 	for (i = mRecentFiles.begin(); i < n; ++i)
 	{
-		freyja_append_item_to_menu(eRecentFiles, mRecentFiles[i], 
-								   (eRecentFiles + i + 1));
+		//freyja_append_item_to_menu(eRecentFiles, mRecentFiles[i], 
+		//						   (eRecentFiles + i + 1));
+		mgtk_append_item_to_menu2i(eRecentFiles, mRecentFiles[i], eRecentFiles, i+1);
 	}
 
 
@@ -304,6 +305,13 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
+	case eRecentFiles:
+		if ((value - 1) < (int)mRecentFiles.size())
+		{
+			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+			handleFilename(mRecentFiles[(value- 1)]);
+		}
+		break;
 
 	case ePolygonSize:
 		mModel->setCurrentPolygonEdgeCount(value);
@@ -1766,12 +1774,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 	default:
-		if (command > eRecentFiles &&
-			(command - eRecentFiles - 1) < (int)mRecentFiles.size())
-		{
-			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-			handleFilename(mRecentFiles[(command - eRecentFiles - 1)]);
-		}
+		//if (command > eRecentFiles &&
+		//	(command - eRecentFiles - 1) < (int)mRecentFiles.size())
+		//{
+		//	mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+		//	handleFilename(mRecentFiles[(command - eRecentFiles - 1)]);
+		//}
 
 		freyja_print("!Unhandled event(%d)", command);
 		return false;

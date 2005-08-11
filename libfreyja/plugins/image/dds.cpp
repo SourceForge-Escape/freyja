@@ -336,9 +336,6 @@ void dds_decompress_DXT3(dds_image_t &dds,
 					{
 						offset = z * sz + (y + j) * bps + (x + i) * bpp;
 
-						printf("%i offset = (%i y + %i j) * %i bps\n", offset, y, j, bps);
-						printf("+ (%i x + %i i) * %i bpp\n", x, i, bpp);
-
 						offset = ((offset > size) ? size-4 : offset);
 
 						image[offset + 0] = col->b;
