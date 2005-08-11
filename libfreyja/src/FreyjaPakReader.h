@@ -272,4 +272,10 @@ class FreyjaPakReader
 	FreyjaPakDirectory mRoot;        /* Virtual root directory */
 };
 
+
+extern "C"
+{
+	FreyjaPakReader *freyjaGetPakReader(index_t uid);
+}
+
 #endif
