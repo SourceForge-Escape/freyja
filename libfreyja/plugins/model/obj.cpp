@@ -59,7 +59,8 @@ int import_model(char *filename)
 
 int freyja_model__obj_check(char *filename)
 {
-	if (FreyjaFileReader::compareFilenameExtention(filename, ".obj") == 0)
+	if (FreyjaFileReader::compareFilenameExtention(filename, ".obj") == 0 ||
+		FreyjaFileReader::compareFilenameExtention(filename, ".OBJ") == 0)
 	{
 		freyjaPrintMessage("obj.so: '%s' is an obj model", filename);
 		return 0;
