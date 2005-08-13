@@ -562,7 +562,7 @@ int32 freyjaLoadModel(const char *filename)
 				r.readLong();
 
 				for (j = 0; j < 3; ++j)
-					xyz[j] = r.readFloat32();
+					xyz[j] = HEL_DEG_TO_RAD(r.readFloat32());
 
 				freyjaBoneRotateEuler3fv(index, xyz);
 			}

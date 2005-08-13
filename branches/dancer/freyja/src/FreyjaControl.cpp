@@ -189,10 +189,11 @@ void FreyjaControl::resizeDisplay(unsigned int width, unsigned int height)
 	}
 }
 
+unsigned int gRecentFileLimit = 7; // This is becoming a plugin soon
 
 void FreyjaControl::addRecentFilename(const char *filename)
 {
-	unsigned int i, l;
+	unsigned int i, l, n;
 	char *dupe;
 	bool found = false;
 
@@ -235,7 +236,23 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		strncpy(dupe, filename, l);
 		dupe[l] = 0;
 
-		mRecentFiles.pushBack(dupe);
+		// Bubble up hack
+		if (mRecentFiles.end() > gRecentFileLimit)
+		{
+			char *old, *swap = dupe;
+
+			n = mRecentFiles.end();
+			for (i = mRecentFiles.begin(); i < n; ++i)
+			{				
+				old = mRecentFiles[i];
+				mRecentFiles.assign(i, swap);
+				swap = old;
+			}
+		}
+		else
+		{
+			mRecentFiles.pushBack(dupe);
+		}
 	}
 
 	// FIXME: Add a recently used file size limit here
@@ -249,8 +266,10 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	/* Rebuild menu in order of mRecentFiles */
 	freyja_remove_all_items_to_menu(eRecentFiles);
 
-	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
-	{	
+	n = mRecentFiles.end();
+
+	for (i = mRecentFiles.begin(); i < n; ++i)
+	{
 		freyja_append_item_to_menu(eRecentFiles, mRecentFiles[i], 
 								   (eRecentFiles + i + 1));
 	}
@@ -951,7 +970,7 @@ bool FreyjaControl::event(int command)
 									  mRender->getWindowHeight());
 		break;
 
-
+	// Move these to a mesh gen plugin
 	case eGenerateCone:
 		{
 			Vector3d v;
@@ -2871,7 +2890,7 @@ void FreyjaControl::loadResource()
 			delete [] s;
 		}
 
-		for (i = 0; i < 5 && !r.endOfFile(); ++i)
+		for (i = 0; i < gRecentFileLimit && !r.endOfFile(); ++i)
 		{
 			s = r.parseSymbol();
 			addRecentFilename(s);
