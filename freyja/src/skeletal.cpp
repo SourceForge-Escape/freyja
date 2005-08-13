@@ -29,7 +29,6 @@
 #include <freyja-0.10/Skeleton.h> 
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
-//#include "skeletal.h"
 
 using namespace freyja;
 
@@ -153,7 +152,9 @@ void eBoneRotateX(vec_t x)
 	vec3_t xyz;
 
 	freyjaGetBoneRotation3fv(gCurrentBone, xyz);
-	xyz[0] = x;
+	mgtk_print("! eBoneRotateX> %f %f %f -> %f %f %f",
+				xyz[0],xyz[1],xyz[2], x,xyz[1],xyz[2]);
+	xyz[0] = HEL_DEG_TO_RAD(x);
 	freyjaBoneRotateEuler3fv(gCurrentBone, xyz);
 	mgtk_event_gl_refresh();
 }
@@ -164,7 +165,7 @@ void eBoneRotateY(vec_t y)
 	vec3_t xyz;
 
 	freyjaGetBoneRotation3fv(gCurrentBone, xyz);
-	xyz[1] = y;
+	xyz[1] = HEL_DEG_TO_RAD(y);
 	freyjaBoneRotateEuler3fv(gCurrentBone, xyz);
 	mgtk_event_gl_refresh();
 }
@@ -175,7 +176,7 @@ void eBoneRotateZ(vec_t z)
 	vec3_t xyz;
 
 	freyjaGetBoneRotation3fv(gCurrentBone, xyz);
-	xyz[2] = z;
+	xyz[2] = HEL_DEG_TO_RAD(z);
 	freyjaBoneRotateEuler3fv(gCurrentBone, xyz);
 	mgtk_event_gl_refresh();
 }
@@ -322,11 +323,11 @@ void eBoneIterator(unsigned int id)
 			 * Update spin buttons dependent on this iterator */
 			freyjaGetBoneRotation3fv(id, xyz);
 			e = resourceGetEventId1s("eBoneRotateX"); // cache these to gobals or statics for a speed boost
-			mgtk_spinbutton_value_set(e, xyz[0]);
+			mgtk_spinbutton_value_set(e, HEL_RAD_TO_DEG(xyz[0]));
 			e = resourceGetEventId1s("eBoneRotateY");
-			mgtk_spinbutton_value_set(e, xyz[1]);
+			mgtk_spinbutton_value_set(e, HEL_RAD_TO_DEG(xyz[1]));
 			e = resourceGetEventId1s("eBoneRotateZ");
-			mgtk_spinbutton_value_set(e, xyz[2]);
+			mgtk_spinbutton_value_set(e, HEL_RAD_TO_DEG(xyz[2]));
 				
 			freyjaGetBoneTranslation3fv(id, xyz);
 			e = resourceGetEventId1s("eBoneTranslateX");

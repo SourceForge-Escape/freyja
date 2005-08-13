@@ -170,8 +170,11 @@ void FreyjaRenderEventsAttach()
 #include <freyja-0.10/BoneABI.h>
 using namespace freyja;
 
+vec3_t gDeformedVertexTest[1024];
+
 void renderSkeletonTest(uint32 boneIndex)
 {
+	Matrix m; // for crappy deform test
 	Bone *bone, *parent;
 	Quaternion q;
 	vec3_t xyz = {0,0,0}, rxyz = {0,0,0}, txyz;
@@ -192,17 +195,20 @@ void renderSkeletonTest(uint32 boneIndex)
 	if (gCurrentBone == boneIndex)
 		glColor3fv(CYAN);
 
-	bone->mBoneToWorld.multiply3v(xyz, txyz);
-	//q = bone->mBoneToWorld.getQuat();  // matrix needs eular extraction
+	bone->mBoneToWorld.multiply3v(xyz, txyz); // Bone rotation not in mat atm
 
 	if (parent)
-		parent->mRotation.getEulerAngles(rxyz);  // abs rotation stored in parent in old format?  hell I forgot
+		parent->mRotation.getEulerAngles(rxyz);
+
+	m.rotate(rxyz);    // for crappy deform test
+	m.translate(txyz);
 
 	const uint32 x = 0, y = 2, z = 1;
 	/* FIXME: Convert old format to new native format
-		need to look for: old angle order, if it was stored in rad, etc
-		fix: Quaternion, etc for new euler format ( angles have changed )
-		also redo Matrix so it's native column order
+		1. Rotation angle order is different?
+		2. Fix Quaternion, etc for new euler format ( phr )
+		3. Redo Matrix so it's native column order
+		4. 'Wobble' in euler <--> quat using spin buttons -- mouse only?
 	 */
 
 	glPushMatrix();
@@ -211,13 +217,42 @@ void renderSkeletonTest(uint32 boneIndex)
 	glRotatef(HEL_RAD_TO_DEG(rxyz[y]), 0.0f, 1.0f, 0.0f);
 	glRotatef(HEL_RAD_TO_DEG(rxyz[x]), 1.0f, 0.0f, 0.0f);
 	freyjaGetBoneTranslation3fv(boneIndex, xyz);
+
+	glColor3fv(WHITE);
 	mglDrawBone(2, xyz);
 
 	for (i = 0; i < count; ++i)
 		renderSkeletonTest(bone->mChildren[i]);
 
+	// Find vertices controlled by this bone for 1:1 test and render here
+	// Removed spherical effect for a custom model test to be sure
+
+	/* Render actual vertices */
+	count = Vertex::getCount();
+	freyjaGetBoneTranslation3fv(boneIndex, txyz);
+	glPointSize(FreyjaRender::mDefaultPointSize);
+	glColor3fv(FreyjaRender::mColorVertexHighlight);
+	glColor3fv(RED);
+	glBegin(GL_POINTS);
+
+	for (i = 0; i < count; ++i)
+	{
+		freyjaGetVertexPosition3fv(i, xyz);
+
+		if (xyz[1] < boneIndex * 8.0f && xyz[1] > (txyz[1]-2.0f))
+		{
+			m.multiply3v(xyz, gDeformedVertexTest[i]);
+			glVertex3fv(gDeformedVertexTest[i]);
+		}
+	}
+  
+	glEnd();
+
+
 	glPopMatrix();	
 }
+
+
 
 void renderTest()
 {
@@ -251,8 +286,15 @@ void renderTest()
 				glBegin(GL_LINE_LOOP);
 				for (j = 0; j < n; ++j)
 				{
-					freyjaGetVertexPosition3fv(face->vertices[j], xyz);
-					glVertex3fv(xyz);
+					if (face->vertices[j] < 132)  // crappy deformed vertex test
+					{
+						glVertex3fv(gDeformedVertexTest[face->vertices[j]]);
+					}
+					else
+					{
+						freyjaGetVertexPosition3fv(face->vertices[j], xyz);
+						glVertex3fv(xyz);
+					}
 				}
 				glEnd();
 			}

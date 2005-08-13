@@ -163,12 +163,12 @@ void Bone::updateBoneToWorld()
 		if (b)
 		{
 			b->mBoneToWorld.setIdentity();
-			//b->mBoneToWorld = m;
+			b->mBoneToWorld = m; // m.rotate(rxyz); 
 			b->mBoneToWorld.translate(mTranslation.mVec);
 
 			vec3_t o = {0,0,0}, t;
-			//HEL_VEC3_COPY(b->mTranslation.mVec, o);
-			b->mBoneToWorld.multiply3v(o, t); 
+			b->mBoneToWorld.multiply3v(o, t);
+			
 			freyjaPrintMessage("! %i=>%i. %f, %f, %f -> %f, %f, %f",
 								mUID, mChildren[i], o[0], o[1], o[2], t[0], t[1], t[2]);
 
@@ -324,7 +324,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 
 	if (b)
 	{
-		b->mRotation.getEulerAngles(phr);
+		b->mRotation.setByEulerAngles(phr);
 		b->updateBoneToWorld();
 	}
 }
@@ -414,7 +414,7 @@ void freyjaGetBoneRotation3fv(index_t boneIndex, vec3_t phr)
 
 	if (b)
 	{
-		b->mRotation.getEulerAngles(phr, phr, phr);  // P H R -> H B A
+		b->mRotation.getEulerAngles(phr+0, phr+1, phr+2);  // P H R -> H B A
 	}
 }
 

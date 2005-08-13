@@ -896,8 +896,7 @@ void FreyjaModel::VertexNew(float xx, float yy)
 
 	if (freyjaIsVertexAllocated(mCachedVertexIndex))
 	{
-	//	freyjaMeshVertexGroupAppendGobalVertex(getCurrentMesh(), 0, 
-	//										   mCachedVertexIndex);
+		//freyjaMeshAddVertex(getCurrentMesh(), mCachedVertexIndex);
 
 		if (mFlags & FL_VERTEX_UV)
 		{
