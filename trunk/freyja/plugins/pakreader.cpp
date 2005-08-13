@@ -137,7 +137,7 @@ void pak_reader_try_upload(char *filename)
 		
 		if (image != 0x0)
 			delete [] image;
-		
+
 		if (done)
 		{
 			mgtk_print("!Uploading texture %i, using function %i...", tid, id);

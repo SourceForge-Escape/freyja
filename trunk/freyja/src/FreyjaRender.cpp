@@ -1328,9 +1328,11 @@ void FreyjaRender::renderLights()
 
 void FreyjaRender::renderMesh(RenderMesh &mesh)
 {
-	RenderPolygon face;
-	Vector3d v;
-	unsigned int i, n;
+	const vec_t scale = 1.0001f;
+	static Vector3d u, v;
+	static RenderPolygon face;
+	vec_t *color;
+	unsigned int i, j, n;
 
 
 	if (mRenderMode & RENDER_POINTS)
@@ -1362,25 +1364,162 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			freyjaApplyMaterial(freyjaGetCurrentMaterial());
 		}
 		
+		color = mColorWireframe;
+
 		if ((int)mesh.id == (int)mModel->getCurrentMesh())
 		{
 			mRenderMode |= fHightlightPolygonWireframe;
+			color = mColorWireframeHighlight;
 		}
 
-		mDefaultLineWidth *= 2;
+		// Setup GL state here for faces
+		glLineWidth(mDefaultLineWidth*2.0f);
 
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+
+		// FIXME Cached array access instead of functional facade
 		for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
 		{
 			if (mesh.getPolygon(i, mesh.frame, face))
-				renderPolygon(face);
+			{
+				/* Render wireframe */
+				if (mRenderMode & RENDER_WIREFRAME)
+				{
+					glColor3fv(color);
+					glBegin(GL_LINE_LOOP);
+
+					for (j = 0; j < face.count; ++j)
+					{
+						u = face.vertices[j];
+						u *= scale;
+
+						glVertex3fv(u.mVec);
+					}
+	  
+					glEnd();
+				}
+
+				// Render normals
+				if (mRenderMode & RENDER_NORMALS)
+				{
+					glBegin(GL_LINES);
+					glColor3f(0.2, 0.2, 0.8);
+
+					for (j = 0; j < face.count; ++j)
+					{
+						u = face.vertices[j];
+						v = face.normals[j];
+						v *= (2 * (1 / mZoom));
+						v += u;
+
+						glVertex3fv(u.mVec);
+						glVertex3fv(v.mVec);
+					}
+		
+					glEnd();
+				}
+			}
+		}
+
+		glPopAttrib();
+
+		/* Render face with material, color, or something */
+		if (mRenderMode & RENDER_FACE)
+		{
+			if (mRenderMode & RENDER_TEXTURE) // Now implies material
+			{
+				glEnable(GL_TEXTURE_2D);
+
+			for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
+			{
+				if (mesh.getPolygon(i, mesh.frame, face))
+				{
+					freyjaApplyMaterial(face.material); // material!
+
+					switch (face.count)
+					{
+					case 1:
+						glBegin(GL_POINTS); // error
+						break;
+					case 2:
+						glBegin(GL_LINES); // error
+						break;
+					case 3:
+						glBegin(GL_TRIANGLES);
+						break;
+					case 4:
+						glBegin(GL_QUADS);
+						break;
+					default:
+						glBegin(GL_POLYGON);
+					}
+
+					for (j = 0; j < face.count; ++j)
+					{
+						if (face.material == COLORED_POLYGON)
+						{
+							glColor4fv(face.colors[j]);
+						}
+						else
+						{
+							glColor3fv(WHITE);
+						}
+
+						glTexCoord2fv(face.texcoords[j].mVec);
+						glNormal3fv(face.normals[j].mVec);
+						glVertex3fv(face.vertices[j].mVec);
+					}
+
+					glEnd();
+				}
+			}
+			}
+			else // Fake color
+			{
+			for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
+			{
+				if (mesh.getPolygon(i, mesh.frame, face))
+				{
+					freyjaApplyMaterial(face.material); // material!
+
+					switch (face.count)
+					{
+					case 1:
+						glBegin(GL_POINTS); // error
+						break;
+					case 2:
+						glBegin(GL_LINES); // error
+						break;
+					case 3:
+						glBegin(GL_TRIANGLES);
+						break;
+					case 4:
+						glBegin(GL_QUADS);
+						break;
+					default:
+						glBegin(GL_POLYGON);
+					}
+
+					for (j = 0; j < face.count; ++j)
+					{
+						glColor4f(face.texcoords[j].mVec[0], 
+								  face.texcoords[j].mVec[1], 0.5, 1.0);
+						glVertex3fv(face.vertices[j].mVec);
+					}
+
+					glEnd();
+				}
+			}				
+			}
 		}
 		
 		if ((int)mesh.id == (int)mModel->getCurrentMesh())
 		{
 			mRenderMode ^= fHightlightPolygonWireframe;
 		}
-
-		mDefaultLineWidth /= 2;
 		
 		if (mRenderMode & RENDER_TEXTURE)
 		{
