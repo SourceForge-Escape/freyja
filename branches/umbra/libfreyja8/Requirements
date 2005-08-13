@@ -1,0 +1,317 @@
+
+ ------------------------------------------------------
+ Egg Modeling system v9 spec
+
+ Author       : Terry 'Mongoose' Hendrix II
+ Date Created : 2001.07.31
+ Last Revised : 2001.09.07
+ Notes        : This is a draft of the spec and 
+                focuses on modeling for now.
+
+                * - Data is stored in local type
+                # - Editing mode EDIT_STATE storage
+ ------------------------------------------------------
+
+ 0. Supported features
+ 0.0. Animation
+ 0.1. Metadata
+ 0.2. Tags
+ 0.3. Notes
+
+ 1. Base Types
+ 1.1. Vertex 
+ 1.2. Weight
+ 1.3. Bone
+ 1.4. Tag
+ 1.5. Metadata
+
+ 2. Compound Types
+ 2.1. Polygon
+ 2.2. Vertex grouping
+ 2.3. Mesh
+ 2.4. Tag frame
+ 2.5. Bone Frame
+
+ 3. File format
+ 3.1. Layout
+
+
+ ---------------------------------------------------------------
+ 0. Supported features
+ ---------------------------------------------------------------
+
+ 0.0. Animation
+
+      * Bones for deforming skeletal animation
+      * Tag animation frames using quarterions
+      * Vertex morph framing per mesh
+      * You can combine the various animation types in 
+        one model
+
+ 0.1. Metadata
+
+      * Position a generic object inside tags for extra
+        control like rotation, offset placement, and scaling
+      * Allows you to add on extra functionality without
+        altering the entire system
+      * Allows your add-on data to be stored seperately
+
+ 0.2. Tags
+
+      * Make dynamic models that can swap parts
+      * Rotation, offset placement, and scaling of groups
+        of meshes or metadata
+      * Can be used for simple H-model aniamtion or with
+        metadata markers to detect collision to make 
+        advanced enviromental feedback animation 
+
+ 0.2. Notes
+
+      * List is a special kind of data structure that acts
+        like a vector and a list with a special kind of caching.
+      * Index is a node of List, and contains pointer to data
+        as well as it's numerical id.  This is to make the format
+        editor friendly, since it helps avoid repeated searches.
+      * vec_t is a floating point number
+      * vec2_t is vec_t[2] 
+      * vec3_t is vec_t[3]
+
+ ---------------------------------------------------------------
+ 1. Base Types
+ ---------------------------------------------------------------
+
+ 1.1. Vertex
+
+      Vertex is the fundamental part of the model geometery. 
+      EggV9 uses only one type of vertex now, so that models
+      with less features or special needs are at higher levels.
+
+      Bone weight list index set to -1 when not used.
+
+  1.1.1. Vertex composition
+
+         * World position : vec3_t ( x, y, z : POS )
+         * Normal vector : vect3_t ( x, y, z : NORM )
+         * Texel coordinate : vec2_t ( u, v : UV )
+         * Bone weight list index : index ( IDX_BONE )
+
+ ---------------------------------------------------------------
+
+ 1.2. Weight
+
+
+ ---------------------------------------------------------------
+
+ 1.3. Bone
+
+
+ ---------------------------------------------------------------
+
+ 1.4. Tag
+
+      Tags are used to make modular models with interchangable
+      parts, or animate very simple skeletal models.
+
+      Flag either PUSHes or POPs the matrix stack to simulate
+      mesh tree animation behavior.
+
+      Offset is the 3 space offset of slave to the tag.
+
+      Rotation is the salves orientation.
+
+      Scale is the amount to scale slaves by on all 3 axes.
+
+  1.4.1 Tag composition
+
+        * Mesh list index : index ( IDX_MESH )
+        * Animation tree flag : tag_flag ( FLAG )
+        * Offset : vec3_t ( x, y, z : OFFSET )
+        * Rotation/Orientation : quat_t ( w, x, y, z : ORI )
+        * Scale : vec_t ( SCALE )
+
+ ---------------------------------------------------------------
+
+ 1.5. Metadata
+
+      Metadata markers are used to add lights and other special 
+      objects that aren't normally handled by a polygon modeling 
+      system.
+
+  1.5.1 Metadata marker composition 
+
+        * World position : vec3_t ( x, y, z : POS )
+        * Type of marker : index ( TYPE )
+	* Instance index : index ( ID )
+
+ ---------------------------------------------------------------
+ 2. Compound Types
+ ---------------------------------------------------------------
+
+ 2.1. Polygon
+
+      Polygons are the basic building blocks of the model mesh
+      geometery. The faces may have n vertices, where 3 <= n <=
+      max sides supported by your egg renderer.  The format allows
+      for as many sides as you have memory. 
+
+      Shader index may just be texture id, or -1 for vertex color.  
+
+      The optional texel list is mainly for handling textiles.
+      If optional texel index is -1, then it's not used.  
+
+      The vertex is looked up using mesh_base + index.  This
+      is to support vertex arrays and vertex morph frames. The
+      index is really used as an offset into the array list or
+      frame.  eg: eggRenderVertex1i(frame_base+vertex_index);
+
+  2.1.1. Polygon composition
+
+         * Vertex index list : List<index> ( vertex offset index : VERTEX )
+         * Texel index list : index ( texel list index : TEXEL_IDX)
+         * Shader index : index ( shader/texture index : SHADER_IDX )
+
+ ---------------------------------------------------------------
+
+ 2.2. Vertex grouping
+
+      Vertex groups hold the actual vertex data, and are useful
+      for making arrays and vertex morph frame meshes.
+
+  2.2.1. Vertex grouping composition
+
+         * Vertex list : List<Vertex> ( VERTEX )
+         * Center : vec3_t ( CENTER )
+         * Bounding box : vec3_t[2] ( xyz_min, xyz_max : BBOX )
+
+ ---------------------------------------------------------------
+
+ 2.3. Mesh
+
+      The vertex groupings can be for used for vertex morphing 
+      frames.  The polygon list is the polygons that compose
+      the mesh.  See Polygon for vertex indexing use details.
+
+  2.3.1. Mesh composition
+         
+         * Vertex group list : List<VertexGroup> ( FRAME )
+         * Polygon group list : List<Polygon> ( FACE )
+         # current frame index : index ( CURRENT_FRAME_ID )
+
+ ---------------------------------------------------------------
+
+ 2.4. Tag frame
+
+      Tag frames hold a group of tags in a List as a tree using
+      internal data in tag and position in list.  In the future
+      tag may use Tree data structure internally, and obsolete
+      this.
+
+  2.4.1. Tag frame composition
+
+         * Tag list : List<Tag> ( TAG )
+
+ ---------------------------------------------------------------
+
+ 2.4. Bone frame
+
+ ---------------------------------------------------------------
+
+ 3. File format
+
+    The file format is little endian, and is chunk based.
+
+  3.1. Types
+
+    3.1.1. Strings
+
+           Strings are stored like pascal strings with length
+           before data.  Length is stored as an unsigned byte.
+           To read a string stored like this, read the first byte
+           to get string length.  Then read length bytes as the
+           string data.
+
+    3.1.2. Chunks for composites
+
+           Chunks for composites take the form:
+
+            ____________________________________________________
+           |  MARKER UINT         | TYPE   | MARKER INT         |
+           |----------------------|--------|--------------------|
+           | EGG_TYPE_CHUNK_START | DATA   | EGG_TYPE_CHUNK_END | 
+           | u_int32_t            | ?bytes | u_int32_t          |
+           +----------------------------------------------------+
+
+           The longer composites like mesh also have internal
+           checkpoints, so it can determine if the chunk is valid
+           without reading it all.  These will be handled inside
+           data read functions however.
+
+           Also base types with be contianed in composite data for
+           Egg9 1.00.  This may change in the future.
+
+
+  3.2. Header
+
+       u_int32_t ( Egg file model id )
+       u_int32_t ( Egg file model version )     
+       String    ( Modeler/Comment string )
+
+       eg ["Egg9"] ["1.00"] [20, "Freyja 0.2.2-20010901"] ->       
+ 
+          [45 67 67 39][ 31 2E 30 30][14 ...]
+
+  3.3. Chunks
+
+       After the header is read, the chunk reader will read the
+       rest of the file. Note that ENDs are the ASCII reverse of
+       the START.  This will help with compatibility when new 
+       features are added for various animation types.  I'm trying
+       to leave this open ended as I can.  I'd also like to be
+       able to keep geometery seperate from skeletal animation by
+       using POINTER_CHUNKS; MATERIAL_CHUNKS for filename reference
+       to materials.  The shader engine won't be ready for a long
+       time, but the MATERIAL_CHUNKS interface should also handle 
+       them external to Egg just like it handles other rendering.
+
+       An example top level loader would be something like:
+
+       type = ChunkStart(f);   // Pass file f, get chunk type
+
+       switch (type)
+       {
+       case EGG_POINTER_CHUNK_START:
+          ChunkPointerRead(f); // Pass file f, load external chunk data
+       case EGG_BONE_CHUNK_START:
+          ChunkBoneRead(f);    // Pass file f, load chunk data
+       case EGG_MESH_CHUNK_START:
+          ChunkMeshRead(f);    // Pass file f, load chunk data
+       default:
+          ChunkUnknown(type);  // Read to matching END of type
+       }
+
+
+    3.3.1. Vertex group chunk
+
+    3.3.2. Polygon chunk
+
+    3.3.3. Mesh chunk
+
+    3.3.4. Tag frame chunk
+
+    3.3.5. Bone chunk
+
+    3.3.6. Pointer chunk
+
+           Chunk
+           * "PNTR" / "RTNP"
+
+           Data
+           * String filename
+
+
+    3.3.7. Material chunk
+
+
+-------------------------------------------------------------------------------
+
+AnimationFrame { BoneFrame[] { Mesh[] { int VertexFrame }  } }
