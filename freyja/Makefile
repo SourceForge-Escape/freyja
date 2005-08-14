@@ -372,7 +372,7 @@ clean-plugins:
 	@-rm -f $(PLUGIN_BUILD_DIR)*/*.dll
 	@-echo [done]
 
-plugins: pakreader.so perlinnoise.so
+plugins: pakreader.so perlinnoise.so reverseengineer.so
 
 plugins-win32: pakreader.dll perlinnoise.dll
 
@@ -415,4 +415,12 @@ perlinnoise.dll:
 		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
 		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
+
+reverseengineer.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=reverseengineer \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/reverseengineer.o" \
+		CFLAGS="$(PLUGIN_CFLAGS)" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 

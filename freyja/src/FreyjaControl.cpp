@@ -1924,6 +1924,9 @@ void FreyjaControl::handleFilename(const char *filename)
 
 void FreyjaControl::handleTextEvent(int event, const char *text)
 {
+	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, (char*)text))
+		return;
+
 	switch (event)
 	{
 	case eSetMaterialName:
