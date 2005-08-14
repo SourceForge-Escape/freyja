@@ -1,0 +1,39 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix II
+; Website: http://icculus.org/freyja
+; Email  : mongoose@icculus.org
+; Comment: Interface for perlin noise plugin
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(dialog "Freyja :: Reverse Engineer" eDialogReverseEngineer 0
+	(vbox 0 0 0 0 0
+		(hbox 1 0 0 1 0
+			(icon "freyja.png" IconSize_Dialog))
+
+		(label "Reverse Engineer "  0.0 0.5)
+
+		(button "Generate a mesh?" eMode eReverseEngineer)
+
+		(hbox 0 1 0 1 1
+			(label "Filename" 0.0 0.5)
+			(textbox eReverseEngineerFilename))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex Offset "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerVOffset))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex Count "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerVCount))
+
+		(label "Add normals, etc later "  0.0 0.5)
+	)
+)
+
+
+
+
