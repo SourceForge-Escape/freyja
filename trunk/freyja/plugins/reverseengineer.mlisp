@@ -17,6 +17,7 @@
 		(label "Reverse Engineer "  0.0 0.5)
 
 		(button "Generate a mesh?" eMode eReverseEngineer)
+		(button "Erase model" eMode eReverseEngineerDelete)
 
 		(hbox 0 1 0 1 1
 			(label "Filename" 0.0 0.5)
@@ -29,6 +30,10 @@
 		(hbox 1 0 0 1 0
 			(label "Vertex Count "  0.0 0.5)
 			(spinbutton 0 0 999999 eReverseEngineerVCount))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex Skip "  0.0 0.5)
+			(spinbutton 0 0 1024 eReverseEngineerVSkip))
 
 		(label "Add normals, etc later "  0.0 0.5)
 	)
