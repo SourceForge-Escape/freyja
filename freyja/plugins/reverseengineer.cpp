@@ -40,6 +40,8 @@ void ReverseEngineerGUIAttach();
 
 uint32 gReverseEngineerVOffset = 0;
 uint32 gReverseEngineerVCount = 0;
+uint32 gReverseEngineerVSkip = 0;
+int32 gReverseEngineerMeshId = -1;
 char *gReverseEngineerFilename = 0x0;
 
 void freyja_reverseengineer_init(void (*func)(const char*, void*))
@@ -65,11 +67,16 @@ void eReverseEngineer()
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
 
+	gReverseEngineerMeshId = freyjaGetCurrent(FREYJA_MESH);
+
 	for (i = 0; i < gReverseEngineerVCount && !r.endOfFile(); ++i)
 	{
 		x = r.readFloat32();
 		y = r.readFloat32();
 		z = r.readFloat32();
+
+		if (gReverseEngineerVSkip > 0)
+			r.setFileOffset(r.getFileOffset() + gReverseEngineerVSkip);
 
 		freyjaVertex3f(x, y, z);
 	}
@@ -79,7 +86,17 @@ void eReverseEngineer()
 
 	r.closeFile();
 
-	mgtk_print("! eReverseEngineer> %ibytes read", i*12);
+	mgtk_print("! eReverseEngineer> %ibytes read; %i %i %i", i*12,
+               gReverseEngineerVOffset, gReverseEngineerVCount,
+               gReverseEngineerVSkip);
+	mgtk_event_gl_refresh();
+}
+
+
+void eReverseEngineerDelete()
+{
+	//freyjaMeshDelete(gReverseEngineerMeshId);
+	freyjaModelClear(0);
 	mgtk_event_gl_refresh();
 }
 
@@ -105,6 +122,12 @@ void eReverseEngineerVCount(unsigned int value)
 }
 
 
+void eReverseEngineerVSkip(unsigned int value)
+{
+	gReverseEngineerVSkip = value;
+}
+
+
 void eDialogReverseEngineer()
 {
 	mgtk_event_dialog_visible_set(Resource::mInstance->getIntByName("eDialogReverseEngineer"), 1);
@@ -116,7 +139,9 @@ void ReverseEngineerEventsAttach()
 	ResourceEventCallbackString::add("eReverseEngineerFilename", &eReverseEngineerFilename);
 	ResourceEventCallbackUInt::add("eReverseEngineerVOffset", &eReverseEngineerVOffset);
 	ResourceEventCallbackUInt::add("eReverseEngineerVCount", &eReverseEngineerVCount);
+	ResourceEventCallbackUInt::add("eReverseEngineerVSkip", &eReverseEngineerVSkip);
 	ResourceEventCallback::add("eReverseEngineer", &eReverseEngineer);
+	ResourceEventCallback::add("eReverseEngineerDelete", &eReverseEngineerDelete);
 	ResourceEventCallback::add("eDialogReverseEngineer", &eDialogReverseEngineer);
 }
 
