@@ -12,9 +12,9 @@ NAME=libfreyja
 BASE_NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=9
-MICRO_VERSION=1
+MICRO_VERSION=3
 BRANCH=
-BUILD_ID=20050810
+BUILD_ID=20050813
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -133,12 +133,12 @@ win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
 	NAME="freyja9" \
-	SHLIBEXT=".dll" \
 	MODULE="freyja9" \
+	SHLIBEXT=".dll" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
-	CFLAGS="$(BASE_CFLAGS) -I/usr/local/include/ -DLIBFREYJA_EXPORTSCLASS" \
+	CFLAGS="$(BASE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0"
 
@@ -173,9 +173,9 @@ PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/CopyModel.o \
 	$(BUILDDIR)/Egg.o \
-	$(BUILDDIR)/EggPlugin.o \
-	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/Freyja.o \
+	$(BUILDDIR)/FreyjaFSM.o \
+	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaCamera.o \
 	$(BUILDDIR)/FreyjaPrinter.o \
@@ -188,6 +188,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaSkeleton.o \
 	$(BUILDDIR)/FreyjaTexture.o \
+	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
@@ -198,11 +199,11 @@ $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 
 $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
-    -Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
-    -Wl,--export-all-symbols \
-    -Wl,--enable-auto-import \
-    -Wl,--whole-archive $(PROG_OBJS) \
-    -Wl,--no-whole-archive $(LIBS)
+	-Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
+	-Wl,--export-all-symbols \
+	-Wl,--enable-auto-import \
+	-Wl,--whole-archive $(PROG_OBJS) \
+	-Wl,--no-whole-archive $(LIBS)
 
 
 ##########################################################################
@@ -886,6 +887,8 @@ clean-plugins:
 	@-echo -n "Cleaning plugins                             "
 	@-rm -f $(IMAGE_PLUGIN_BUILD_DIR)/*.o $(IMAGE_PLUGIN_BUILD_DIR)/*.so
 	@-rm -f $(MODEL_PLUGIN_BUILD_DIR)/*.o $(MODEL_PLUGIN_BUILD_DIR)/*.so
+	@-rm -f $(IMAGE_PLUGIN_BUILD_DIR)/*.o $(IMAGE_PLUGIN_BUILD_DIR)/*.dll
+	@-rm -f $(MODEL_PLUGIN_BUILD_DIR)/*.o $(MODEL_PLUGIN_BUILD_DIR)/*.dll
 	@-echo "[done]"
 
 install-plugins:
@@ -904,8 +907,6 @@ install-plugins-win32:
 	@-cp $(IMAGE_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/image/
 	@-mkdir -p $(INSTALL_PLUGIN_DIR)/model
 	@-cp $(MODEL_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/model/
-	@-mkdir -p $(INSTALL_PLUGIN_DIR)/model/python
-	@-cp plugins/model/python/*.py $(INSTALL_PLUGIN_DIR)/model/python/
 	@-echo "[done]"
 
 install-tools:
@@ -920,11 +921,11 @@ $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
 
 $(BUILDDIR)/$(MOD_NAME).dll : $(MOD_OBJS)
 	$(CC) -shared -o $(BUILDDIR)/$(MOD_NAME).dll \
-    -Wl,--out-implib=$(BUILDDIR)/lib$(MOD_NAME).a \
-    -Wl,--export-all-symbols \
-    -Wl,--enable-auto-import \
-    -Wl,--whole-archive $(MOD_OBJS) \
-    -Wl,--no-whole-archive $(LIBS)
+	-Wl,--out-implib=$(BUILDDIR)/lib$(MOD_NAME).a \
+	-Wl,--export-all-symbols \
+	-Wl,--enable-auto-import \
+	-Wl,--whole-archive $(MOD_OBJS) \
+	-Wl,--no-whole-archive $(LIBS)
 
 ##########################################################################
 # Unit tests
@@ -986,6 +987,13 @@ glm.test:
 	$(MAKE) test NAME=glm BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/GLMModel.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_GLMMODEL $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+
+md5.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=md5 BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/Md5.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_MD5 $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 nod.test:

@@ -199,33 +199,33 @@ int freyja_model__smd_import(char *filename)
 				index = r.parseInteger();
 				freyjaPolygonMaterial1i(index);
 
-				freyjaPolygonVertex1i(i = freyjaVertex3f(r.parseFloat()*scale,
+				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.parseFloat()*scale,
 														 r.parseFloat()*scale,
 														 r.parseFloat()*scale));
 				freyjaVertexNormal3f(i, r.parseFloat(),
 									 r.parseFloat(),
 									 r.parseFloat());
-				freyjaVertexTexCoord2f(i, r.parseFloat(), r.parseFloat());
+				freyjaVertexTexcoord2f(i, r.parseFloat(), r.parseFloat());
 
 
 				index = r.parseInteger();
-				freyjaPolygonVertex1i(i = freyjaVertex3f(r.parseFloat()*scale,
+				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.parseFloat()*scale,
 														 r.parseFloat()*scale,
 														 r.parseFloat()*scale));
 				freyjaVertexNormal3f(i, r.parseFloat(),
 									 r.parseFloat(),
 									 r.parseFloat());
-				freyjaVertexTexCoord2f(i, r.parseFloat(), r.parseFloat());
+				freyjaVertexTexcoord2f(i, r.parseFloat(), r.parseFloat());
 
 
 				index = r.parseInteger();
-				freyjaPolygonVertex1i(i = freyjaVertex3f(r.parseFloat()*scale, 
+				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.parseFloat()*scale, 
 														 r.parseFloat()*scale,
 														 r.parseFloat()*scale));
 				freyjaVertexNormal3f(i, r.parseFloat(), 
 									 r.parseFloat(),
 									 r.parseFloat());
-				freyjaVertexTexCoord2f(i, r.parseFloat(), r.parseFloat());
+				freyjaVertexTexcoord2f(i, r.parseFloat(), r.parseFloat());
 							  							  
 				freyjaEnd(); // FREYJA_POLYGON
 			}
@@ -264,19 +264,19 @@ int freyja_model__smd_export(char *filename)
 
 	if (freyjaGetCount(FREYJA_BONE))
 	{
-		freyjaIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+		freyjaIterator(FREYJA_SKELETON, FREYJA_RESET);
+		freyjaIterator(FREYJA_BONE, FREYJA_RESET);
 		n = freyjaGetCount(FREYJA_BONE);
 
 		for (i = 0; i < n; ++i)
 		{
-			index = freyjaIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+			index = freyjaIterator(FREYJA_BONE, FREYJA_CURRENT);
 			index = freyjaGetCurrent(FREYJA_BONE);
 
 			freyjaGetBoneName(index, 64, name);
 			w.print("%3i \"%s\" %i\n", i, name, freyjaGetBoneParent(index));
 
-			freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+			freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
 		}
 	}
 
@@ -288,17 +288,17 @@ int freyja_model__smd_export(char *filename)
 
 	if (freyjaGetCount(FREYJA_BONE))
 	{
-		freyjaIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+		freyjaIterator(FREYJA_SKELETON, FREYJA_RESET);
+		freyjaIterator(FREYJA_BONE, FREYJA_RESET);
 		n = freyjaGetCount(FREYJA_BONE);
 
 		for (i = 0; i < n; ++i)
 		{
-			index = freyjaIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+			index = freyjaIterator(FREYJA_BONE, FREYJA_CURRENT);
 			index = freyjaGetCurrent(FREYJA_BONE);
 
 			freyjaGetBoneTranslation3fv(index, translation);
-			freyjaGetBoneRotationXYZ3fv(index, rotation);
+			freyjaGetBoneRotationEulerXYZ3fv(index, rotation);
 
 			translation[0] *= scale; 
 			translation[2] *= scale; 
@@ -319,7 +319,7 @@ int freyja_model__smd_export(char *filename)
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
 
-			freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+			freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
 		}
 	}
 	w.print("end\n");
@@ -334,8 +334,8 @@ int freyja_model__smd_export(char *filename)
 
 	if (freyjaGetNum(FREYJA_POLYGON))
 	{
-		freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
-		freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
+		freyjaIterator(FREYJA_MESH, FREYJA_RESET);
+		freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
 		n = freyjaGetNum(FREYJA_POLYGON);
 
 		group = 0;
@@ -346,7 +346,7 @@ int freyja_model__smd_export(char *filename)
 #endif
 		for (j = 0; j < n; ++j)
 		{
-			index = freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT);
+			index = freyjaIterator(FREYJA_POLYGON, FREYJA_CURRENT);
 			index = freyjaGetCurrent(FREYJA_POLYGON);
 
 			for (j = 0; j < n; ++j)
@@ -361,7 +361,7 @@ int freyja_model__smd_export(char *filename)
 						uv[0], uv[1]);
 			}
 
-			freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
+			freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
 		}
 	}
 #endif

@@ -5,44 +5,57 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://icculus.org/freyja
  * Email   : mongoose@icculus.org
- * Object  : EggPlugin
+ * Object  : FreyjaFSM
  * License : GPL, also (C) 2000 Mongoose
  * Comments: This is the python plugin handler class
  *
  *
  *-- Test Defines -------------------------------------------
  *           
- * UNIT_TEST_EGGPLUGIN  Builds module test code as a console program
+ * UNIT_TEST_FREYJAFSM  Builds module test code as a console program
  *
  *-- History ------------------------------------------------ 
  *
  * 2001.02.24:
  * Mongoose - Created, based on python test code
- *
  ==========================================================================*/
-
-#include <sys/types.h>
-#include <dirent.h>
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-
 #include <hel/math.h>
 #include <hel/Quaternion.h>
 #include <hel/Vector3d.h>
 
 #include "FreyjaFileReader.h"
-#include "EggPlugin.h"
+#include "FreyjaPluginABI.h"
+#include "FreyjaFSM.h"
 
-EggPlugin *EggPlugin::mEggPlugin = 0x0;
+FreyjaFSM *FreyjaFSM::mFreyjaFSM = 0x0;
+
+// FIXME Very temporary gobals until interface is done no code changes 
+//       since this class is instanced as a gobal these should work fine
+//       for now w/o threads until the new implementation is done
+//       This is to remove exposure of Egg types in header
+#include "Egg.h"
+
+	Egg *mEgg;                          /* Pointer to the modeler backend  */
+
+	egg_tag_t *mTag;                    /* Current tag/bolt-on and|or bone */
+
+	egg_mesh_t *mMesh;                  /* Current mesh */
+
+	egg_group_t *mGroup;                /* Current vertex grouping */
+
+	egg_boneframe_t *mBoneFrame;        /* MeshTree animation frame */
+
+	egg_animation_t *mAnimation;        /* MeshTree animation group */
 
 
-EggPlugin::EggPlugin(Egg *egg)
+FreyjaFSM::FreyjaFSM()
 {
-	mEgg = egg;
-	mFlags = 0;
+	extern Egg *gEgg;
+	mEgg = gEgg;  // freyjaSpawn always allocates in proper order for this to work
 	mTag = 0x0;
 	mMesh = 0x0;
 	mGroup = 0x0;
@@ -50,11 +63,11 @@ EggPlugin::EggPlugin(Egg *egg)
 	mBoneFrame = 0x0;
 	mTextureId = 0;
 
-	EggPlugin::mEggPlugin = this;
+	FreyjaFSM::mFreyjaFSM = this;
 }
 
 
-EggPlugin::~EggPlugin()
+FreyjaFSM::~FreyjaFSM()
 {
 }
 
@@ -63,7 +76,7 @@ EggPlugin::~EggPlugin()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-uint32 EggPlugin::freyjaGetCount(freyja_object_t type)
+uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 {
 	switch (type)
 	{
@@ -99,19 +112,23 @@ uint32 EggPlugin::freyjaGetCount(freyja_object_t type)
 		return mEgg->getBoneFrameCount();
 		break;
 
-	case FREYJA_MESHTREE_FRAME:
-		return mEgg->getAnimationCount();
-		break;
-
 	case FREYJA_TEXTURE:
 		return freyjaGetTextureCount();
 		break;
 
-	case FREYJA_ANIMATION:
-	case FREYJA_VERTEX_FRAME:		
+	case FREYJA_SKEL_ANIMATION:
+		return freyjaGetAnimationCount();
+		break;
+
+	case FREYJA_SKEL_KEYFRAME:
+		return freyjaGetAnimationFrameCount(mIndexSkeletonAnim);
+		break;
+
 	case FREYJA_MATERIAL:
-	case FREYJA_MESHTREE_TAG:
-		return 0;
+		return freyjaGetMaterialCount();
+		break;
+
+	case FREYJA_VERTEX_FRAME:
 		break;
 	}
 
@@ -119,7 +136,7 @@ uint32 EggPlugin::freyjaGetCount(freyja_object_t type)
 }
 
 
-long EggPlugin::freyjaIterator(freyja_object_t type, int item)
+index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 {
 	Vector<egg_vertex_t *> *vertex;
 	Vector<egg_texel_t *> *texel;
@@ -134,26 +151,23 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 	switch (type)
 	{
 	case FREYJA_MODEL:
-		if (item < 1 && item > 0) // I have no idea why...
-		{
-			return 0;
-		}
+		return 0;  // This was disabled
 		break;
 
 	case FREYJA_VERTEX:
 		vertex = mEgg->VertexList();
     
 		if (!vertex)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexVertex = vertex->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexVertex;
 			break;
 		default:
@@ -165,20 +179,21 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 			return mIndexVertex;
 		}
 		break;
+
 	case FREYJA_TEXCOORD:
 		texel = mEgg->TexelList();
     
 		if (!texel)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexTexCoord = texel->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexTexCoord;
 			break;
 		default:
@@ -190,20 +205,21 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 			return mIndexTexCoord;
 		}
 		break;
+
 	case FREYJA_MESH:
 		mesh = mEgg->MeshList();
     
 		if (!mesh)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexMesh = mesh->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexMesh;
 			break;
 		default:
@@ -215,21 +231,22 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 			return mIndexMesh;
 		}
 		break;
+
 	case FREYJA_VERTEX_FRAME:
 	case FREYJA_VERTEX_GROUP:
 		group = mEgg->GroupList();
     
 		if (!group)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexGroup = group->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexGroup;
 			break;
 		default:
@@ -241,20 +258,21 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 			return mIndexGroup;
 		}
 		break;
+
 	case FREYJA_POLYGON:
 		polygon = mEgg->PolygonList();
     
 		if (!polygon)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexPolygon = polygon->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexPolygon;
 			break;
 		default:
@@ -267,22 +285,20 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 		}
 		break;
 
-
-	case FREYJA_MESHTREE_TAG:
 	case FREYJA_BONE:
 		tag = mEgg->TagList();
     
 		if (!tag)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexBone = tag->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexBone;
 			break;
 		default:
@@ -301,16 +317,16 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 		boneframe = mEgg->BoneFrameList();
     
 		if (!boneframe)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexSkeleton = boneframe->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexSkeleton;
 			break;
 		default:
@@ -322,20 +338,21 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 			return mIndexSkeleton;
 		}
 		break;
-	case FREYJA_MESHTREE_FRAME:
+
+	case FREYJA_SKEL_KEYFRAME:
 		skelanim = mEgg->AnimationList();
     
 		if (!skelanim)
-			return FREYJA_PLUGIN_ERROR;
+			return INDEX_INVALID;
  
 		switch (item)
 		{
-		case FREYJA_LIST_CURRENT:
+		case FREYJA_CURRENT:
 			break;
-		case FREYJA_LIST_RESET:
+		case FREYJA_RESET:
 			mIndexSkeletonAnim = skelanim->begin();
 			break;
-		case FREYJA_LIST_NEXT:
+		case FREYJA_NEXT:
 			++mIndexSkeletonAnim;
 			break;
 		default:
@@ -350,15 +367,15 @@ long EggPlugin::freyjaIterator(freyja_object_t type, int item)
 
 	case FREYJA_MATERIAL:
 	case FREYJA_TEXTURE:
-	case FREYJA_ANIMATION:
+	case FREYJA_SKEL_ANIMATION:
 		break;
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return INDEX_INVALID;
 }
 
 
-void EggPlugin::freyjaGetVertex(vec3_t xyz)
+void FreyjaFSM::freyjaGetVertex(vec3_t xyz)
 {
 	Vector<egg_vertex_t *> *vertex;
 	egg_vertex_t *vert;
@@ -380,7 +397,7 @@ void EggPlugin::freyjaGetVertex(vec3_t xyz)
 }
 
 
-void EggPlugin::freyjaGetVertexTexCoord(vec2_t uv)
+void FreyjaFSM::freyjaGetVertexTexCoord(vec2_t uv)
 {
 	Vector<egg_vertex_t *> *vertex;
 	egg_vertex_t *vert;
@@ -401,129 +418,29 @@ void EggPlugin::freyjaGetVertexTexCoord(vec2_t uv)
 }
 
 
-long EggPlugin::freyjaGetPolygon(freyja_object_t type, int32 item, 
-								 int32 *value)
-{
-	Vector<egg_polygon_t *> *polygon_lst;
-	egg_polygon_t *polygon;
-	egg_vertex_t *vert;
-	egg_texel_t *tex;
-
-
-
-	polygon_lst = mEgg->PolygonList();
-  
-	if (!polygon_lst)
-		return FREYJA_PLUGIN_ERROR;
-
-	polygon = (*polygon_lst)[mIndexPolygon];
-
-	if (!polygon)
-		return FREYJA_PLUGIN_ERROR; 
-
-	switch (type)
-	{
-	case FREYJA_VERTEX:
-		vert = mEgg->getVertex(polygon->vertex[item]);
-    
-		if (!vert)
-			return FREYJA_PLUGIN_ERROR;
-
-		*value = vert->id;
-		return vert->id;
-		break;
-	case FREYJA_TEXCOORD:
-		tex = mEgg->getTexel(polygon->vertex[item]);
-    
-		if (!tex)
-			return FREYJA_PLUGIN_ERROR;
-
-		*value = tex->id;
-		return tex->id;
-		break;
-	default:
-		return FREYJA_PLUGIN_ERROR;
-	}
-
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
-long EggPlugin::freyjaGetPolygon(freyja_object_t type, long item, float *value)
-{
-	Vector<egg_polygon_t *> *polygon_lst;
-	egg_polygon_t *polygon;
-	egg_vertex_t *vert;
-	egg_texel_t *tex;
-
-
-
-	polygon_lst = mEgg->PolygonList();
-  
-	if (!polygon_lst)
-		return FREYJA_PLUGIN_ERROR;
-
-	polygon = (*polygon_lst)[mIndexPolygon];
-
-	if (!polygon)
-		return FREYJA_PLUGIN_ERROR; 
-
-	switch (type)
-	{
-	case FREYJA_VERTEX:
-		vert = mEgg->getVertex(polygon->vertex[item]);
-    
-		if (!vert)
-			return FREYJA_PLUGIN_ERROR;
-
-		value[0] = vert->pos[0];
-		value[1] = vert->pos[1];
-		value[2] = vert->pos[2];
-
-		return vert->id;
-		break;
-	case FREYJA_TEXCOORD:
-		tex = mEgg->getTexel(polygon->vertex[item]);
-    
-		if (!tex)
-			return FREYJA_PLUGIN_ERROR;
-
-		value[0] = tex->st[0];
-		value[1] = tex->st[1];
-    
-		return tex->id;
-		break;
-	default:
-		return FREYJA_PLUGIN_ERROR;
-	}
-
-	return FREYJA_PLUGIN_ERROR;
-}
-
-
-long EggPlugin::freyjaGetBoneMeshIndex(long element)
+index_t FreyjaFSM::freyjaGetBoneMeshIndex(uint32 element)
 {
 	if (mTag)
 	{
 		return mTag->mesh[element];
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return INDEX_INVALID;
 }
 
 
-long EggPlugin::freyjaGetBoneMeshCount()
+uint32 FreyjaFSM::freyjaGetBoneMeshCount()
 {
 	if (mTag)
 	{
 		return mTag->mesh.size();
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return INDEX_INVALID;
 }
 
 
-long EggPlugin::freyjaGetCurrent(freyja_object_t type)
+index_t FreyjaFSM::freyjaGetCurrent(freyja_object_t type)
 {
 	switch (type)
 	{
@@ -550,7 +467,6 @@ long EggPlugin::freyjaGetCurrent(freyja_object_t type)
 		return mIndexPolygon;
 		break;
 
-	case FREYJA_MESHTREE_TAG:
 	case FREYJA_BONE:
 		if (mTag)
 			return mTag->id;
@@ -561,35 +477,27 @@ long EggPlugin::freyjaGetCurrent(freyja_object_t type)
 			return mBoneFrame->id;
 		break;
 
-	case FREYJA_MESHTREE_FRAME:
-		if (mAnimation)
-			return mAnimation->id;
-		break;
-
+	case FREYJA_SKEL_ANIMATION:
+	case FREYJA_SKEL_KEYFRAME:
 	case FREYJA_MODEL:
 	case FREYJA_MATERIAL:
 	case FREYJA_TEXTURE:
-	case FREYJA_ANIMATION:
 		return 0;
 		break;
 	}
 
-	return FREYJA_PLUGIN_ERROR;
+	return INDEX_INVALID;
 }
 
 
-long EggPlugin::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
+void FreyjaFSM::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
 {
 	if (mTag)
 	{
 		*x = mTag->rot[0];
 		*y = mTag->rot[1];
 		*z = mTag->rot[2];
-   
-		return 0;
 	}
-
-	return FREYJA_PLUGIN_ERROR;
 }
 
 
@@ -597,7 +505,7 @@ long EggPlugin::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void EggPlugin::freyjaBegin(freyja_object_t type)
+void FreyjaFSM::freyjaBegin(freyja_object_t type)
 {
 	switch (type)
 	{
@@ -613,7 +521,7 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 
 		if (!mMesh)
 		{
-			freyjaPrintError("EggPlugin::freyjaBegin> GROUP defined outside MESH.");
+			freyjaPrintError("FreyjaFSM::freyjaBegin> GROUP defined outside MESH.");
 		}
 		else
 		{
@@ -652,16 +560,12 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 		mStack.push(FREYJA_SKELETON);
 		break;
 
-	case FREYJA_MESHTREE_FRAME:
-		mStack.push(FREYJA_MESHTREE_FRAME);
-		mAnimation = new egg_animation_t;
-		mEgg->addAnimation(mAnimation);
-		break;
-
 	case FREYJA_MODEL:
 		mStack.push(FREYJA_MODEL);
 		break;
 
+	case FREYJA_SKEL_ANIMATION:
+	case FREYJA_SKEL_KEYFRAME:
 	default:
 		freyjaPrintError("freyjaBegin(%i): Unknown type", type);
 		mStack.push(type);
@@ -669,7 +573,7 @@ void EggPlugin::freyjaBegin(freyja_object_t type)
 }
 
 
-void EggPlugin::freyjaEnd()
+void FreyjaFSM::freyjaEnd()
 {
 	unsigned int polygon;
 
@@ -681,7 +585,7 @@ void EggPlugin::freyjaEnd()
 
 		if (polygon == UINT_MAX)
 		{
-			freyjaPrintMessage("EggPlugin::freyjaEnd> Polygon is invalid\n");
+			freyjaPrintMessage("FreyjaFSM::freyjaEnd> Polygon is invalid\n");
 		}
 
 		if (mMesh)
@@ -705,13 +609,13 @@ void EggPlugin::freyjaEnd()
 }
 
 
-long EggPlugin::freyjaTexCoord2f(vec_t s, vec_t t)
+index_t FreyjaFSM::freyjaTexCoordCreate2f(vec_t s, vec_t t)
 {
 	return mEgg->addTexel(s, t);
 }
 
 
-long EggPlugin::freyjaVertex3f(vec_t x, vec_t y, vec_t z)
+index_t FreyjaFSM::freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 {
 	egg_vertex_t *vert;
 
@@ -729,7 +633,7 @@ long EggPlugin::freyjaVertex3f(vec_t x, vec_t y, vec_t z)
 		}
 		else
 		{
-#ifdef EGGPLUGIN_WARN_VERTEX_OUTSIDE_GROUP
+#ifdef FreyjaFSM_WARN_VERTEX_OUTSIDE_GROUP
 			freyjaPrintError("freyjaVertex3f: WARNING Vertex[%i] outside GROUP!",
 							 vert->id);
 #endif
@@ -738,11 +642,11 @@ long EggPlugin::freyjaVertex3f(vec_t x, vec_t y, vec_t z)
 		return vert->id;
 	}
 	else
-		return FREYJA_PLUGIN_ERROR;
+		return INDEX_INVALID;
 }
 
 
-void EggPlugin::freyjaVertexWeight(long index, vec_t weight, long bone)
+void FreyjaFSM::freyjaVertexWeight(index_t index, vec_t weight, index_t bone)
 {
 	egg_vertex_t *vert = mEgg->getVertex(index);
 	egg_weight_t *vWeight;
@@ -767,7 +671,7 @@ void EggPlugin::freyjaVertexWeight(long index, vec_t weight, long bone)
 				return;
 			}
 
-			if ((int)vWeight->bone == bone) // Alter weight
+			if (vWeight->bone == bone) // Alter weight
 			{
 				vWeight->weight = weight;
 				return;
@@ -785,8 +689,8 @@ void EggPlugin::freyjaVertexWeight(long index, vec_t weight, long bone)
 		return;
 
 	if (total + weight > 1.0)  // Just give a warning for now
-		freyjaPrintError("WARNING: Weight overflow not handled here %s:%d\n", 
-					  __FILE__, __LINE__);
+		freyjaPrintError("WARNING: Weight overflow %.3f + %.3f > 1.0 not handled here %s:%d\n", 
+					 total, weight, __FILE__, __LINE__);
 
 	vWeight = new egg_weight_t;
 	vWeight->weight = weight;
@@ -805,7 +709,7 @@ void EggPlugin::freyjaVertexWeight(long index, vec_t weight, long bone)
 }
 
 
-void EggPlugin::freyjaGetVertexNormal(vec3_t xyz)
+void FreyjaFSM::freyjaGetVertexNormal(vec3_t xyz)
 {
 	egg_vertex_t *vert;
 
@@ -821,20 +725,20 @@ void EggPlugin::freyjaGetVertexNormal(vec3_t xyz)
 }
 
 
-void EggPlugin::freyjaPolygonVertex1i(long index)
+void FreyjaFSM::freyjaPolygonAddVertex1i(index_t vertexIndex)
 {
 	if (mStack.peek() == FREYJA_POLYGON)
 	{
-		mVertexList.pushBack(index);
+		mVertexList.pushBack(vertexIndex);
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaVertex1i> Vertex defined outside POLYGON!\n");
+		freyjaPrintError("FreyjaFSM::freyjaVertex1i> Vertex defined outside POLYGON!\n");
 	}
 }
 
 
-void EggPlugin::freyjaMeshFlags1u(unsigned int flags)
+void FreyjaFSM::freyjaMeshFlags1u(uint32 flags)
 {
 	if (mStack.peek() == FREYJA_MESH || !mMesh)
 	{
@@ -842,56 +746,44 @@ void EggPlugin::freyjaMeshFlags1u(unsigned int flags)
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaMeshFlags1u> Flag defined outside MESH!\n");
+		freyjaPrintError("FreyjaFSM::freyjaMeshFlags1u> Flag defined outside MESH!\n");
 	}
 }
 
 
-void EggPlugin::freyjaPolygonTexCoord1i(long index)
+void FreyjaFSM::freyjaPolygonAddTexCoord1i(index_t texcoordIndex)
 {
 	if (mStack.peek() == FREYJA_POLYGON)
 	{
-		mTexCoordList.pushBack(index);
+		mTexCoordList.pushBack(texcoordIndex);
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaTexCoord1i> Texel defined outside POLYGON!\n");
+		freyjaPrintError("FreyjaFSM::freyjaTexCoord1i> Texel defined outside POLYGON!\n");
 	}
 }
 
 
-void EggPlugin::freyjaPolygonMaterial1i(long index)
+void FreyjaFSM::freyjaPolygonMaterial1i(index_t materialIndex)
 {
 	if (mStack.peek() == FREYJA_POLYGON)
 	{
-		mTextureId = index;
+		mTextureId = materialIndex;
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaTexture1i> Texture defined outside POLYGON!\n");
+		freyjaPrintError("FreyjaFSM::freyjaTexture1i> Texture defined outside POLYGON!\n");
 	}
 }
 
 
-unsigned int EggPlugin::freyjaFlags()
-{
-	return mFlags;
-}
-
-
-void EggPlugin::freyjaFlags(unsigned int set)
-{
-	mFlags = set;
-}
-
-
-void EggPlugin::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
+void FreyjaFSM::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 {
 	if (mStack.peek() == FREYJA_VERTEX_GROUP)
 	{
 		if (!mGroup)
 		{
-			freyjaPrintError("EggPlugin::freyjaGroupCenter> GROUP isn't allocated!\n");
+			freyjaPrintError("FreyjaFSM::freyjaGroupCenter> GROUP isn't allocated!\n");
 			return;
 		}
 		else 
@@ -903,19 +795,19 @@ void EggPlugin::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaGroupCenter> Center defined outside GROUP!\n");
+		freyjaPrintError("FreyjaFSM::freyjaGroupCenter> Center defined outside GROUP!\n");
 		return;
 	}
 }
 
 
-void EggPlugin::freyjaBoneName(char *name)
+void FreyjaFSM::freyjaBoneName(const char *name)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
 		if (!mTag)
 		{
-			freyjaPrintError("EggPlugin::freyjaBonePos> BONEMTAG isn't allocated!\n");
+			freyjaPrintError("FreyjaFSM::freyjaBonePos> BONEMTAG isn't allocated!\n");
 			return;
 		}
 		else 
@@ -926,19 +818,19 @@ void EggPlugin::freyjaBoneName(char *name)
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaBonePos> Pos defined outside BONEMTAG!\n");
+		freyjaPrintError("FreyjaFSM::freyjaBonePos> Pos defined outside BONEMTAG!\n");
 		return;;
 	}
 }
 
 
-void EggPlugin::freyjaBonePos(float x, float y, float z)
+void FreyjaFSM::freyjaBonePosition(vec_t x, vec_t y, vec_t z)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
 		if (!mTag)
 		{
-			freyjaPrintError("EggPlugin::freyjaBonePos> BONEMTAG isn't allocated!\n");
+			freyjaPrintError("FreyjaFSM::freyjaBonePos> BONEMTAG isn't allocated!\n");
 			return;
 		}
 		else 
@@ -956,19 +848,19 @@ void EggPlugin::freyjaBonePos(float x, float y, float z)
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaBonePos> Pos defined outside BONEMTAG!\n");
+		freyjaPrintError("FreyjaFSM::freyjaBonePos> Pos defined outside BONEMTAG!\n");
 		return;
 	}
 }
 
 
-void EggPlugin::freyjaBoneFlags(unsigned int flags)
+void FreyjaFSM::freyjaBoneFlags(unsigned int flags)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
 		if (!mTag)
 		{
-			freyjaPrintError("EggPlugin::freyjaBoneFlags> BONEMTAG isn't allocated!\n");
+			freyjaPrintError("FreyjaFSM::freyjaBoneFlags> BONEMTAG isn't allocated!\n");
 			return;
 		}
 		else 
@@ -982,76 +874,39 @@ void EggPlugin::freyjaBoneFlags(unsigned int flags)
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaBoneFlags> Flag defined outside BONEMTAG!\n");
+		freyjaPrintError("FreyjaFSM::freyjaBoneFlags> Flag defined outside BONEMTAG!\n");
 		return;
 	}
 }
 
 
-void EggPlugin::freyjaBoneAddMesh(long mesh)
+void FreyjaFSM::freyjaBoneAddChild(index_t boneIndex)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
 		if (!mTag)
 		{
-			freyjaPrintError( 
-					"EggPlugin::freyjaBoneAddMesh> BONEMTAG isn't allocated!\n");
-			return;
+			freyjaPrintError("FreyjaFSM::freyjaBoneAddSlave> BONEMTAG isn't allocated!\n");
 		}
 		else 
 		{
-			mTag->mesh.pushBack(mesh);
-		}
-	}
-	else if (mTag) // HACK
-	{
-		mTag->mesh.pushBack(mesh);
-	}
-	else
-	{
-		freyjaPrintError("EggPlugin::freyjaBoneAddMesh> Mesh defined outside BONEMTAG!\n");
-		return;
-	}
-}
-
-
-void EggPlugin::freyjaBoneAddChild(long tag)
-{
-	if (mStack.peek() == FREYJA_BONE)
-	{
-		if (!mTag)
-		{
-			freyjaPrintError("EggPlugin::freyjaBoneAddSlave> BONEMTAG isn't allocated!\n");
-		}
-		else 
-		{
-			egg_tag_t *child =  mEgg->getTag(tag);
+			egg_tag_t *child =  mEgg->getTag(boneIndex);
 			
 			if (child)
 				child->parent = mTag->id;
 
 			// If it fails here it's got to be picked up in SKELETON 
-			mTag->slave.pushBack(tag);
+			mTag->slave.pushBack(boneIndex);
 		}
 	}
 	else
 	{
-		freyjaPrintError("EggPlugin::freyjaBoneAddSlave> Slave defined outside BONEMTAG!\n");
+		freyjaPrintError("FreyjaFSM::freyjaBoneAddSlave> Slave defined outside BONEMTAG!\n");
 	}
 }
 
 
-void EggPlugin::freyjaMeshTreeAddFrame(vec_t x, vec_t y, vec_t z)
-{
-	if (mAnimation)
-	{
-		mBoneFrame = mEgg->BoneFrame(mEgg->BoneFrameAdd(x, y, z));    
-		mAnimation->frame.pushBack(mBoneFrame->id);
-	}
-}
-
-
-void EggPlugin::freyjaBoneRotate(vec_t x, vec_t y, vec_t z)
+void FreyjaFSM::freyjaBoneRotate(vec_t x, vec_t y, vec_t z)
 {
 	if (mTag)
 	{
@@ -1062,11 +917,11 @@ void EggPlugin::freyjaBoneRotate(vec_t x, vec_t y, vec_t z)
 }
 
 
-void EggPlugin::freyjaMeshTreeFrameAddBone(long tag)
+void FreyjaFSM::freyjaSkeletonAddBone(index_t boneIndex)
 {
 	if (mBoneFrame)
 	{
-		mBoneFrame->tag.pushBack(tag);
+		mBoneFrame->tag.pushBack(boneIndex);
 	}
 }
 
@@ -1085,11 +940,11 @@ void EggPlugin::freyjaMeshTreeFrameAddBone(long tag)
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_EGGPLUGIN
+#ifdef UNIT_TEST_FreyjaFSM
 
-int runEggPluginUnitTest(int argc, char *argv[])
+int runFreyjaFSMUnitTest(int argc, char *argv[])
 {
-	EggPlugin ep;
+	FreyjaFSM ep;
 
 	return 0;
 }
@@ -1097,11 +952,153 @@ int runEggPluginUnitTest(int argc, char *argv[])
 
 int main(int argv, char *argc[])
 {
- 	printf("[EggPlugin class test]\n");
+ 	printf("[FreyjaFSM class test]\n");
 
-	return runEggPluginUnitTest(argc, argv); 
+	return runFreyjaFSMUnitTest(argc, argv); 
   
 	return 0;
 }
 
 #endif
+
+
+
+////////////////////////////////////////////////////////////
+// ABI
+////////////////////////////////////////////////////////////
+
+void freyjaBegin(freyja_object_t type)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaBegin(type);
+}
+
+
+void freyjaEnd()
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaEnd();
+}
+
+
+uint32 freyjaGetCount(freyja_object_t type)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		return FreyjaFSM::mFreyjaFSM->freyjaGetCount(type);
+
+	return 0;
+}
+
+
+index_t freyjaIterator(freyja_object_t type, index_t item)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		return FreyjaFSM::mFreyjaFSM->freyjaIterator(type, item);
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaGetCurrent(freyja_object_t type)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		return FreyjaFSM::mFreyjaFSM->freyjaGetCurrent(type);
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		return FreyjaFSM::mFreyjaFSM->freyjaTexCoordCreate2f(u, v);
+
+	return INDEX_INVALID;
+}
+
+void freyjaMeshFlags1u(uint32 flags)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaMeshFlags1u(flags);	
+}
+
+
+void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaGroupCenter(x, y, z);
+}
+
+
+void freyjaPolygonVertex1i(index_t egg_id)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddVertex1i(egg_id);
+}
+
+
+void freyjaPolygonTexCoord1i(index_t egg_id)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddTexCoord1i(egg_id);
+}
+
+void freyjaPolygonMaterial1i(index_t id)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaPolygonMaterial1i(id);  
+}
+
+
+void freyjaSkeletonAddBone(index_t boneIndex)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaSkeletonAddBone(boneIndex);
+}
+
+
+index_t freyjaVertexCreate3fv(vec3_t xyz)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		return FreyjaFSM::mFreyjaFSM->freyjaVertexCreate3f(xyz[0], xyz[1], xyz[2]);
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		return FreyjaFSM::mFreyjaFSM->freyjaVertexCreate3f(x, y, z);
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaVertexWeight(index_t index, vec_t weight, index_t bone)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaVertexWeight(index, weight, bone);
+}
+
+
+void freyjaGetVertex3fv(vec3_t xyz)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaGetVertex(xyz);
+}
+
+
+void freyjaGetVertexTexCoord2fv(vec2_t uv)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaGetVertexTexCoord(uv);
+}
+
+
+void freyjaGetVertexNormal3fv(vec3_t nxyz)
+{
+	if (FreyjaFSM::mFreyjaFSM)
+		FreyjaFSM::mFreyjaFSM->freyjaGetVertexNormal(nxyz);
+}
+

@@ -24,6 +24,17 @@
 #include "RenderModel.h"
 
 
+// uint32 gRenderVertexCount = 0;  // Set to zero on update to avoid use in
+                                   // renderer, don't worry about threads here
+
+//Vector<Vector3d *> gRenderVertices;
+//	Vector3d vertices[6];
+//	Vector3d texcoords[6];
+//	Vector3d normals[6];
+//	vec4_t colors[6];
+
+//	index_t *vindices
+
 
 bool RenderMesh::createRenderPolygon(RenderPolygon &face,
 									 egg_polygon_t &polygon, int32 frame)

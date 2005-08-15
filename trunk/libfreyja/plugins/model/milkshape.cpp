@@ -508,7 +508,7 @@ int freyja_model__milkshape_import(char *filename)
 
 	for (i = 0; i < mdl.nNumVertices; ++i)
 	{
-		index = freyjaVertex3f(mdl.vertices[i].vertex[0]*scale,
+		index = freyjaVertexCreate3f(mdl.vertices[i].vertex[0]*scale,
 								mdl.vertices[i].vertex[1]*scale,
 								mdl.vertices[i].vertex[2]*scale);
 		freyjaVertexWeight(index, 1.0f, mdl.vertices[i].boneId);
@@ -530,7 +530,7 @@ int freyja_model__milkshape_import(char *filename)
 									mdl.tris[i].vertexNormals[j][0],
 									mdl.tris[i].vertexNormals[j][1],
 									mdl.tris[i].vertexNormals[j][2]);
-			freyjaPolygonTexCoord1i(freyjaTexCoord2f(mdl.tris[i].s[j],
+			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(mdl.tris[i].s[j],
 														mdl.tris[i].t[j]));
 
 		}
@@ -679,7 +679,7 @@ int freyja_model__milkshape_export(char *filename)
 			{
 				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
-				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 				
 				w.writeFloat32(uv[0]);
 			}
@@ -688,7 +688,7 @@ int freyja_model__milkshape_export(char *filename)
 			{
 				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
-				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 				
 				w.writeFloat32(uv[1]);
 			}
@@ -777,7 +777,7 @@ int freyja_model__milkshape_export(char *filename)
 		freyjaGetBoneName(freyjaGetBoneParent(boneIndex), 32, name);
 		w.writeCharString(32, name); // parent name
 
-		freyjaGetBoneRotationXYZ3fv(boneIndex, xyz);
+		freyjaGetBoneRotationEulerXYZ3fv(boneIndex, xyz);
 		w.writeFloat32(helDegToRad(xyz[0]));
 		w.writeFloat32(helDegToRad(xyz[1]));
 		w.writeFloat32(helDegToRad(xyz[2]));

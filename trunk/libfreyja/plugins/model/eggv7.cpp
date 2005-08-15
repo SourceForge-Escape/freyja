@@ -172,7 +172,7 @@ int freyja_model__eggv7_import(char *filename)
 	fread(&id, sizeof(int), 1, f);
 	
 	// Store vertices in group
-	vertex = freyjaVertex3f(pos[0], pos[1], pos[2]);
+	vertex = freyjaVertexCreate3f(pos[0], pos[1], pos[2]);
 	
 	// Mongoose: Here I track the loaded id and actual id vs the ii id
 	//           You fear it, I'm sure... this let's us map on 1:n 
@@ -210,7 +210,7 @@ int freyja_model__eggv7_import(char *filename)
 	 //printf("%i\n", id);
 
 	 freyjaPolygonVertex1i(id);  
-	 freyjaPolygonTexCoord1i(freyjaTexCoord2f(st[0], st[1]));
+	 freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
        }
        
        if (!bad_poly)

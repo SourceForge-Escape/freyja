@@ -1104,7 +1104,7 @@ int freyja_model__md3_import(char *filename)
 
 				if (!f)
 				{
-					vertex = freyjaVertex3f(pos[1], pos[2], pos[0]); // XZY
+					vertex = freyjaVertexCreate3f(pos[1], pos[2], pos[0]); // XZY
 					freyjaVertexNormal3f(vertex, 
 										 md3_mesh[m].vertex[v].norm[1], 
 										 md3_mesh[m].vertex[v].norm[2], 
@@ -1149,7 +1149,7 @@ int freyja_model__md3_import(char *filename)
 					t = md3_mesh[m].texel[md3_mesh[m].tris[p].triangle[i]].st[1];
 				}
 
-				freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+				freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 			}
 
 #ifdef FIXME
@@ -1184,7 +1184,8 @@ int freyja_model__md3_export(char *filename)
 	//md3_tag_t *tag;
 	Md3 md3;
 	int32 num_meshes, num_frames;
-	int32 i, j, k, v, f, vertex, idx, texcoord, frameIndex;
+	int32 i, j, k, v, f, vertex, idx, texcoord;
+	index_t frameIndex;
 	vec3_t xyz;
 	vec2_t uv;
 	vec_t lat, lng;
@@ -1199,19 +1200,19 @@ int freyja_model__md3_export(char *filename)
 
 	// Don't allow use of internal iterators or
 	// changes of data by other processes
-	freyjaCriticalSection(FREYJA_WRITE_LOCK);
+	freyjaCriticalSectionLock();
 
 	mesh = new md3_mesh_t[num_meshes];
 	memset(mesh, 0, sizeof(md3_mesh_t) * num_meshes);
 	md3.setMeshes(mesh, num_meshes);
 
 	// Using list interface, as opposed to array
-	freyjaIterator(FREYJA_MESH, FREYJA_LIST_RESET);
+	freyjaIterator(FREYJA_MESH, FREYJA_RESET);
 
 	for (k = 0; k < num_meshes; k++)
 	{
-		transM.pushBack(freyjaIterator(FREYJA_MESH, FREYJA_LIST_CURRENT));
-		freyjaIterator(FREYJA_MESH, FREYJA_LIST_NEXT);
+		transM.pushBack(freyjaIterator(FREYJA_MESH, FREYJA_CURRENT));
+		freyjaIterator(FREYJA_MESH, FREYJA_NEXT);
 
 		// Don't write edges > 3, tesselate to triangles
 		//freyjaMeshTesselation(transM[k], FREYJA_TRIANGLES); //let user control
@@ -1263,7 +1264,7 @@ int freyja_model__md3_export(char *filename)
 				// Modeler must use VertexUV, not polymapping for best results
 				if (freyjaGetPolygonFlags(idx) & fPolygon_VertexUV)
 				{
-					freyjaGetVertexTexCoordUV2fv(vertex, uv);
+					freyjaGetVertexTexcoord2fv(vertex, uv);
 					mesh[k].texel[v].st[0] = uv[0];
 					mesh[k].texel[v].st[1] = uv[1];
 				}
@@ -1278,7 +1279,7 @@ int freyja_model__md3_export(char *filename)
 				}
 				else // Color info only?  Grab the vertex uv anyway then
 				{
-					freyjaGetVertexTexCoordUV2fv(vertex, uv);
+					freyjaGetVertexTexcoord2fv(vertex, uv);
 					mesh[k].texel[v].st[0] = uv[0];
 					mesh[k].texel[v].st[1] = uv[1];
 				}
@@ -1326,7 +1327,7 @@ int freyja_model__md3_export(char *filename)
 					// Use VertexUV, not polymapping for best results
 					if (freyjaGetPolygonFlags(idx) & fPolygon_VertexUV)
 					{
-						freyjaGetVertexTexCoordUV2fv(vertex, uv);
+						freyjaGetVertexTexcoord2fv(vertex, uv);
 						mesh[k].texel[v].st[0] = uv[0];
 						mesh[k].texel[v].st[1] = uv[1];
 					}
@@ -1341,7 +1342,7 @@ int freyja_model__md3_export(char *filename)
 					}
 					else // Color info only?  Grab the vertex uv anyway then
 					{
-						freyjaGetVertexTexCoordUV2fv(vertex, uv);
+						freyjaGetVertexTexcoord2fv(vertex, uv);
 						mesh[k].texel[v].st[0] = uv[0];
 						mesh[k].texel[v].st[1] = uv[1];
 					}
@@ -1392,7 +1393,7 @@ int freyja_model__md3_export(char *filename)
    }
 #endif
 
-   freyjaCriticalSection(FREYJA_WRITE_UNLOCK);
+   freyjaCriticalSectionUnlock();
 
    return md3.save(filename);
 #else

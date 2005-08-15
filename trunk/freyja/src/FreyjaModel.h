@@ -323,8 +323,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool getDebug();
-
 	unsigned int getModelCount();
 
 	void getMeshBoundingBox(long index, vec3_t min, vec3_t max);
@@ -578,8 +576,6 @@ public:
 	void setCurrentVertex(unsigned int index);
 
 	void setCurrentVertexFrame(unsigned int index);
-
-	void setDebug(unsigned int n);
 
 	static void setFlags(option_flag_t flag, int op);
 	/*------------------------------------------------------

@@ -156,7 +156,7 @@ int freyja_model__grn_import(char *filename)
 		for (j = 0; j < mesh.points.size(); ++j)
 		{
 			Point p = mesh.points[j];
-			i = freyjaVertex3f(p.points[0]*scale, p.points[2]*scale, -p.points[1]*scale);
+			i = freyjaVertexCreate3f(p.points[0]*scale, p.points[2]*scale, -p.points[1]*scale);
 			// XZ-Y
 
 			// Generates id translator list
@@ -174,7 +174,7 @@ int freyja_model__grn_import(char *filename)
 		for (j = 0; j < mesh.textureMap.size(); ++j)
 		{
 			Point p = mesh.textureMap[j];
-			i = freyjaTexCoord2f(p.points[0], p.points[1]);
+			i = freyjaTexCoordCreate2f(p.points[0], p.points[1]);
 
 			// Generates id translator list
 			transUV.Add(j, i);
@@ -298,7 +298,7 @@ int freyja_model__grn_import(char *filename)
 #endif
 
 			if (bone->parent == bone->id)
-				freyjaBoneParent1i(index, -1);
+				freyjaBoneParent1i(index, INDEX_INVALID);
 
 			for (j = 0; j < bones.bones.size(); ++j)
 			{

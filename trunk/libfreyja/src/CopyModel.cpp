@@ -350,7 +350,7 @@ bool CopyModel::pasteMesh()
 
 		if (v)
 		{
-			index = freyjaVertex3fv(v->pos);
+			index = freyjaVertexCreate3fv(v->pos);
 			freyjaVertexNormal3fv(index, v->norm);
 			freyjaVertexTexCoord2fv(index, v->uv);
 		}
@@ -367,7 +367,7 @@ bool CopyModel::pasteMesh()
 
 		if (t)
 		{
-			index = freyjaTexCoord2f(t->uv[0], t->uv[1]);
+			index = freyjaTexCoordCreate2f(t->uv[0], t->uv[1]);
 		}
 
 		transT.pushBack(index);

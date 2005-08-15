@@ -1357,7 +1357,7 @@ int freyja_model__mdl_import(char *filename)
 			if (!f)
 			{
 				// Store vertices in group
-				vertex = freyjaVertex3f(x, z, y); // freyja coordinates
+				vertex = freyjaVertexCreate3f(x, z, y); // freyja coordinates
 
 				// Generates id translator list
 				transV.pushBack(vertex);
@@ -1391,7 +1391,7 @@ int freyja_model__mdl_import(char *filename)
 			s = (float)(st_vert[tris[i].vertindex[0]].s + mdl.getTextureWidth()/2) / 
 			(float)mdl.getTextureWidth();
 
-		freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
       
 		s = (float)st_vert[tris[i].vertindex[1]].s / (float)mdl.getTextureWidth();
 		t = (float)st_vert[tris[i].vertindex[1]].t / (float)mdl.getTextureHeight();
@@ -1401,7 +1401,7 @@ int freyja_model__mdl_import(char *filename)
 			s = (float)(st_vert[tris[i].vertindex[1]].s + mdl.getTextureWidth()/2) / 
 			(float)mdl.getTextureWidth();
 		
-		freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
 		s = (float)st_vert[tris[i].vertindex[2]].s / (float)mdl.getTextureWidth();
 		t = (float)st_vert[tris[i].vertindex[2]].t / (float)mdl.getTextureHeight();
@@ -1411,7 +1411,7 @@ int freyja_model__mdl_import(char *filename)
 			s = (float)(st_vert[tris[i].vertindex[2]].s + mdl.getTextureWidth()/2) / 
 			(float)mdl.getTextureWidth();
 		
-		freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 		
 		freyjaPolygonMaterial1i(0);
 		

@@ -222,11 +222,11 @@ PyObject *py_freyjaTexCoord2f(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "ff", &u, &v))
 		return NULL;
 
-	return PyInt_FromLong(freyjaTexCoord2f(u, v));
+	return PyInt_FromLong(freyjaTexCoordCreate2f(u, v));
 }
 
 
-PyObject *py_freyjaVertex3f(PyObject *self, PyObject *args)
+PyObject *py_freyjaVertexCreate3f(PyObject *self, PyObject *args)
 {
 	float x, y, z;
 
@@ -234,7 +234,7 @@ PyObject *py_freyjaVertex3f(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "fff", &x, &y, &z))
 		return NULL;
 
-	return PyInt_FromLong(freyjaVertex3f(x, y, z));
+	return PyInt_FromLong(freyjaVertexCreate3f(x, y, z));
 }
 
 
@@ -295,7 +295,7 @@ PyMethodDef Plugin_methods[] =
 	{ "setImportValid", py_setImportValid, METH_VARARGS },
 	{ "freyjaBegin", py_freyjaBegin, METH_VARARGS },
 	{ "freyjaEnd", py_freyjaEnd, METH_VARARGS },
-	{ "freyjaVertex3f", py_freyjaVertex3f, METH_VARARGS },
+	{ "freyjaVertexCreate3f", py_freyjaVertexCreate3f, METH_VARARGS },
 	{ "freyjaTexCoord2f", py_freyjaTexCoord2f, METH_VARARGS },
 	{ "freyjaVertexNormal3f", py_freyjaVertexNormal3f, METH_VARARGS },
 	{ "freyjaPolygonVertex1i", py_freyjaPolygonVertex1i, METH_VARARGS },

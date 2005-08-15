@@ -131,7 +131,7 @@ int freyja_model__obj_import(char *filename)
 			v = r.parseFloat();
 			hasUV = true;
 
-			transT.pushBack(freyjaTexCoord2f(u, v));
+			transT.pushBack(freyjaTexCoordCreate2f(u, v));
 		}
 		else if (!strcmp(symbol, "vn"))  // Assumes normals come after v
 		{
@@ -151,7 +151,7 @@ int freyja_model__obj_import(char *filename)
 			y = r.parseFloat();
 			z = r.parseFloat();
 
-			transV.pushBack(freyjaVertex3f(x, y, z));
+			transV.pushBack(freyjaVertexCreate3f(x, y, z));
 		}
 		else if (!strcmp(symbol, "o"))
 		{
@@ -170,10 +170,12 @@ int freyja_model__obj_import(char *filename)
 			index = r.parseInteger();
 			freyjaPrintMessage("FIXME: Smoothing Group %i is not used\n", i);
 		}
-		else if (!strcmp(symbol, "f"))
+		else if (!strcmp(symbol, "f")) // f 1/1/1 2/2/2 3/3/3
 		{
 			// Start a new polygon
 			freyjaBegin(FREYJA_POLYGON);
+
+			// FIXME: Add state machine parser to handle all the quirks like 1//1
 
 			for (i = 0; i < 3; ++i)
 			{
@@ -191,7 +193,7 @@ int freyja_model__obj_import(char *filename)
 				}
 				else
 				{
-					freyjaVertexTexCoord2f(index, 0.25*i, 0.25*(i%2));
+					freyjaVertexTexcoord2f(index, 0.25*i, 0.25*(i%2));
 				}
 
 				if (hasNormal) // polymapped normals aren't in Freyja atm
@@ -204,10 +206,17 @@ int freyja_model__obj_import(char *filename)
 
 					if (!normals.empty())
 					{
-						freyjaVertexNormal3f(vertexIndex,
-											 normals[(index-1)*3],
-											 normals[(index-1)*3+1],
-											 normals[(index-1)*3+2]);
+						if ((index-1)*3+2 > (int)normals.size())
+						{
+							freyjaPrintError("obj.so> bad normal parse?");
+						}
+						else
+						{
+							freyjaVertexNormal3f(vertexIndex,
+												 normals[(index-1)*3],
+												 normals[(index-1)*3+1],
+												 normals[(index-1)*3+2]);
+						}
 					}
 				}
 			}
@@ -232,7 +241,7 @@ int freyja_model__obj_import(char *filename)
 				}
 				else
 				{
-					freyjaVertexTexCoord2f(index, 0.25*i, 0.25*(i%2));
+					freyjaVertexTexcoord2f(index, 0.25*i, 0.25*(i%2));
 				}
 
 				if (hasNormal) // polymapped normals aren't in Freyja atm
@@ -279,7 +288,7 @@ int freyja_model__obj_export(char *filename)
 	}
 
 	/* Comment */
-	w.print("# Exported from %s\n",	FREYJA_PLUGIN_VERSION);
+	w.print("# Exported from %s\n",	FREYJA_API_VERSION);
 
 
 	/* Meshes */
@@ -323,7 +332,7 @@ int freyja_model__obj_export(char *filename)
 		for (j = 0; j < vertexCount; ++j)
 		{
 			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
-			freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+			freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 
 			w.print("vt %f %f\n", uv[0], uv[1]);
 		}

@@ -547,7 +547,7 @@ int freyja_model__md2_import(char *filename)
 	for (v = 0; v < md2_header->numXYZ; v++)
 	{
 		// Swap Y and Z for freyja
-		vertex = freyjaVertex3f(md2_vertex[v].x*scale, 
+		vertex = freyjaVertexCreate3f(md2_vertex[v].x*scale, 
 										md2_vertex[v].z*scale + transY,
 										md2_vertex[v].y*scale);
 		transV.pushBack(vertex);
@@ -589,17 +589,17 @@ int freyja_model__md2_import(char *filename)
       md2.TexCoords(&ss, &tt, p, 0);
       s = (float)ss / (float)md2_header->skinWidth;
       t = (float)tt / (float)md2_header->skinHeight;
-      freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+      freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
       
       md2.TexCoords(&ss, &tt, p, 1);
       s = (float)ss / (float)md2_header->skinWidth;
       t = (float)tt / (float)md2_header->skinHeight;
-      freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+      freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
       
       md2.TexCoords(&ss, &tt, p, 2);
       s = (float)ss / (float)md2_header->skinWidth;
       t = (float)tt / (float)md2_header->skinHeight;
-      freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+      freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
       
       freyjaPolygonMaterial1i(textureId);
       

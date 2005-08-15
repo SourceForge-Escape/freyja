@@ -19,7 +19,12 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include "FreyjaPluginABI.h"
+#include "FreyjaImage.h"
 #include "FreyjaTexture.h"
+
+Vector<FreyjaTexture *> gFreyjaTextures;
+uint32 gFreyjaTextureCount = 0;
 
 
 ////////////////////////////////////////////////////////////
@@ -129,3 +134,198 @@ int main(int argc, char *argv[])
 	return runFreyjaTextureUnitTest(argc, argv);
 }
 #endif
+
+
+
+///////////////////////////////////////////////////////////////////////
+// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
+///////////////////////////////////////////////////////////////////////
+
+index_t freyjaTextureCreateFilename(const char *filename)
+{	
+	FreyjaImage image;
+	FreyjaTexture texture;
+	index_t uid;
+	freyja_colormode_t colorMode;
+	uint32 byteDepth;
+
+
+	if (image.loadImage(filename) != 0)
+		return INDEX_INVALID;
+
+	image.getImage(&texture.mImage);
+	texture.mWidth = image.getWidth();
+	texture.mHeight = image.getHeight();
+
+	switch (image.getColorMode())
+	{
+	case FreyjaImage::RGBA_32:
+		byteDepth = 32;
+		colorMode = RGBA_32;
+		break;
+
+	case FreyjaImage::RGB_24:
+		byteDepth = 24;
+		colorMode = RGB_24;
+		break;
+
+	case FreyjaImage::INDEXED_8:
+		byteDepth = 8;
+		colorMode = INDEXED_8;
+		break;
+
+	default:
+		byteDepth = 0;	
+	}
+
+	uid = freyjaTextureCreateBuffer(texture.mImage, byteDepth, 
+									texture.mWidth, texture.mHeight,
+									colorMode);
+
+	/* Texture will delete the image copy here on scope exit */
+	return uid;
+}
+
+
+index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
+                                  uint32 width, uint32 height,
+                                  freyja_colormode_t type)
+{
+	FreyjaTexture *texture = new FreyjaTexture();
+	index_t uid;
+	uint32 i, count, size =  width * height * byteDepth;
+	bool found = false;
+
+
+	if (image == 0x0 || size == 0)
+	{
+		return INDEX_INVALID;
+	}
+
+	/* Setup texture */
+	texture->mImage = new byte[size];
+	memcpy(texture->mImage, image, size);
+	texture->mWidth = width;
+	texture->mHeight = height;
+	texture->mBitDepth = byteDepth * 8;
+
+	switch (type)
+	{
+	case RGBA_32:
+		texture->mPixelFormat = FreyjaTexture::RGBA32;
+		break;
+
+	case RGB_24:
+		texture->mPixelFormat = FreyjaTexture::RGB24;
+		break;
+
+	case INDEXED_8:
+		texture->mPixelFormat = FreyjaTexture::Indexed8;
+		break;
+
+	default:
+		byteDepth = 0;	
+	}
+
+	/* Setup UID and class container reference */
+	uid = count = gFreyjaTextures.size();
+
+	for (i = 0; i < count; ++i)
+	{
+		if (gFreyjaTextures[i] == 0x0)
+		{
+			uid = i;
+			gFreyjaTextures.assign(uid, texture);
+
+			found = true;
+			break;
+		}	
+	}
+
+	if (!found)
+	{
+		gFreyjaTextures.pushBack(texture);
+	}
+
+	++gFreyjaTextureCount;
+
+	texture->mUID = uid;
+
+	return uid;
+}
+
+
+void freyjaTextureDelete(index_t textureIndex)
+{
+	FreyjaTexture *texture;
+
+	if (textureIndex < gFreyjaTextures.size())
+	{
+		texture = gFreyjaTextures[textureIndex];
+
+		if (texture != 0x0)
+		{
+			delete texture;
+
+			gFreyjaTextures.assign(textureIndex, 0x0);
+			--gFreyjaTextureCount;
+		}
+	}
+}
+
+
+void freyjaGetTextureImage(index_t textureIndex,
+                           uint32 *w, uint32 *h, uint32 *bitDepth,  
+                           uint32 *type, byte **image)
+{
+	FreyjaTexture *texture;
+
+	/* Init */
+	*image = 0x0;
+	*bitDepth = 0;
+	*type = 0;
+	*w = 0;
+	*h = 0;
+
+	if (textureIndex < gFreyjaTextures.size())
+	{
+		texture = gFreyjaTextures[textureIndex];
+
+		if (texture != 0x0)
+		{
+			*image = texture->mImage;
+			*bitDepth = texture->mBitDepth;
+			*w = texture->mWidth;
+			*h = texture->mHeight;
+
+			switch (texture->mPixelFormat)
+			{
+			case FreyjaTexture::RGBA32:
+				*type = RGBA_32; 
+				break;
+
+			case FreyjaTexture::RGB24:
+				*type = RGB_24; 
+				break;
+
+			case FreyjaTexture::Indexed8:
+				*type = INDEXED_8; 
+				break;
+			}
+		}
+	}
+}
+
+
+uint32 freyjaGetTexturePoolCount()
+{
+	return gFreyjaTextures.size();
+}
+
+
+uint32 freyjaGetTextureCount()
+{
+	return gFreyjaTextureCount;
+}
+
+
