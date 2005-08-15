@@ -174,7 +174,7 @@ void freyjaApplyMaterial(uint32 materialIndex)
 	uint32 flags, texture, texture2, blendSrc, blendDest;
 
 
-	if ((int)materialIndex > freyjaGetMaterialCount())
+	if (materialIndex > freyjaGetMaterialCount())
 	{
 		materialIndex = 0;
 	}

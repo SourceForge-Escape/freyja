@@ -578,6 +578,12 @@ void freyja_handle_command(int command)
 }
 
 
+void eModelGenerateNormals()
+{
+	freyjaModelGenerateVertexNormals(0); // only 1 model atm
+}
+
+
 void freyja_handle_resource_init(Resource &r)
 {
 	////////////////////////////////////////////////////////////////////
@@ -585,7 +591,7 @@ void freyja_handle_resource_init(Resource &r)
 	////////////////////////////////////////////////////////////////////
 
 	ResourceEventCallbackUInt::add("eRecentFiles", &eRecentFiles);
-	ResourceEventCallback::add("eGenerateNormals", &freyjaGenerateVertexNormals);
+	ResourceEventCallback::add("eGenerateNormals", &eModelGenerateNormals);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
 	ResourceEventCallback2::add("eUndo", &eNoImplementation);

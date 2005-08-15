@@ -305,7 +305,7 @@ int freyja_model__mdm_import(char *filename)
 				zz = z + mdm.mTags[b].tag_pos_vector_to_bone[2];
 			}
 
-			index = freyjaVertex3f(xx, yy, zz);
+			index = freyjaVertexCreate3f(xx, yy, zz);
 			freyjaVertexTexCoord2fv(index, mdm.mSurfaces[i].vertices[j].uv);
 			freyjaVertexNormal3fv(index, mdm.mSurfaces[i].vertices[j].normal);
 			transV.pushBack(index);

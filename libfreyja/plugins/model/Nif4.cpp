@@ -232,7 +232,7 @@ int freyja_model__nif4_import(char *filename)
 
 		for (j = 0; j < data->num_vertices; ++j)
 		{
-			idx = freyjaVertex3f(data->coordinates[j].x,
+			idx = freyjaVertexCreate3f(data->coordinates[j].x,
 								 data->coordinates[j].z,
 								 data->coordinates[j].y);
 
@@ -243,9 +243,9 @@ int freyja_model__nif4_import(char *filename)
 
 			if (data->num_uv_sets > 0)
 			{
-				freyjaVertexTexCoord2f(idx,
-									   data->uv_set[0].textureinfo[j].u,
-									   data->uv_set[0].textureinfo[j].v);
+				freyjaTexCoord2f(idx,
+								 data->uv_set[0].textureinfo[j].u,
+								 data->uv_set[0].textureinfo[j].v);
 			}
 
 			vertices.pushBack(idx);

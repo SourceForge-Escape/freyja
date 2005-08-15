@@ -545,7 +545,7 @@ int freyja_model__halflife_import(char *filename)
 
 		for (i = 0; i < hl.mBodyParts[b].models[mdl].vertexCount; ++i)
 		{
-			vert = freyjaVertex3f(hl.mBodyParts[b].models[mdl].vertices[i*3][0],
+			vert = freyjaVertexCreate3f(hl.mBodyParts[b].models[mdl].vertices[i*3][0],
 								  hl.mBodyParts[b].models[mdl].vertices[i*3][1],
 								  hl.mBodyParts[b].models[mdl].vertices[i*3][2]);
 			//freyjaVertexNormal3fv(vert, hl.mBodyParts[b].models[mdl].normals[i*3]);
@@ -579,19 +579,19 @@ int freyja_model__halflife_import(char *filename)
 					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[0].t;
 					u = s / w;
 					v = t / h;
-					freyjaPolygonTexCoord1i(freyjaTexCoord2f(u, v));
+					freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(u, v));
 
 					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].s;
 					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].t;
 					u = s / w;
 					v = t / h;
-					freyjaPolygonTexCoord1i(freyjaTexCoord2f(u, v));
+					freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(u, v));
 
 					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].s;
 					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].t;
 					u = s / w;
 					v = t / h;
-					freyjaPolygonTexCoord1i(freyjaTexCoord2f(u, v));
+					freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(u, v));
 
 					freyjaPolygonMaterial1i(hl.mBodyParts[b].models[mdl].meshes[m].material);
 				}

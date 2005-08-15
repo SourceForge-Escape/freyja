@@ -31,6 +31,19 @@
 
  freyja (svn) "NeoUmbra" Mongoose <mongoose@icculus.org>
 
+	o New renderer algorithm starts
+	o fix for obj.so
+	o material renderer defaults to 0 on out of range
+	o md5 export tests
+	o FreyjaFSM from EggPlugin FSM
+	o Freyja 9.1 becomes 9.3 due to ABI changes
+	o meshtree support completely removed in 9.3 - use skinning instead now
+	o transient dialog windows
+	o reverse engineering plugin
+
+	o pak vfs plugin
+	o perlin noise plugin	
+
 	o Removed some of the EggPlugin use for direct Egg use in backend
 	o Code size and API reduction continues in backend
 	o Lots and lots of refactoring -- some rendering and editing may no

@@ -492,7 +492,7 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 {
 	vec3_t xyz;
 
-	freyjaGetBoneRotationXYZ3fv(getCurrentBone(), xyz);
+	freyjaGetBoneRotationEulerXYZ3fv(getCurrentBone(), xyz);
 	*x = xyz[0];
 	*y = xyz[1];
 	*z = xyz[2];
@@ -729,7 +729,7 @@ void FreyjaModel::PolygonAddVertex(float xx, float yy)
 			}
 			else
 			{
-				texcoords.pushBack(freyjaTexCoord2f(0.5, 0.5));
+				texcoords.pushBack(freyjaTexCoordCreate2f(0.5, 0.5));
 			}
 		}
 
@@ -777,7 +777,7 @@ bool FreyjaModel::pasteSelectedPatch()
 
 	for (i = gTestPatch.vertices.begin(); i < gTestPatch.vertices.end(); ++i)
 	{
-		index = freyjaVertex3fv(gTestPatch.vertices[i]->mVec);
+		index = freyjaVertexCreate3fv(gTestPatch.vertices[i]->mVec);
 		freyjaVertexNormal3f(index, 0, 1, 0);
 		freyjaVertexTexCoord2fv(index, gTestPatch.texcoords[i]->mVec);
 		transV.pushBack(index);
@@ -1339,19 +1339,7 @@ void FreyjaModel::VertexMove(float xx, float yy)
 		break;
 	}
 
-	freyjaVertexXYZ3fv(mCachedVertexIndex, xyz);
-}
-
-
-void FreyjaModel::setDebug(unsigned int n)
-{
-	freyjaModelDebugLevel(getCurrentModel(), n);
-}
-
- 
-bool FreyjaModel::getDebug()
-{
-	return freyjaGetModelDebugLevel(getCurrentModel());
+	freyjaVertexPosition3fv(mCachedVertexIndex, xyz);
 }
 
 
@@ -1556,7 +1544,7 @@ void FreyjaModel::TexelSelect(float s, float t)
 				if (!freyjaIsVertexAllocated(vertexIndex))
 					continue;
 				
-				freyjaGetVertexTexCoordUV2fv(vertexIndex, uv);
+				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 
 				// Mongoose: slight optimization, to avoid init branch  =)
 				dist = helDist3v(st.mVec, 
@@ -1681,7 +1669,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				freyjaGetTexCoord2fv(tex, uv);
 				uv[0] += u.mVec[0];
 				uv[1] += u.mVec[1];
-				freyjaTexCoordUV2fv(tex, uv);
+				freyjaTexCoord2fv(tex, uv);
 
 				seen.pushBack(tex);
 			}
@@ -1725,7 +1713,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				freyjaGetTexCoord2fv(tex, uv);
 				uv[0] += u.mVec[0];
 				uv[1] += u.mVec[1];
-				freyjaTexCoordUV2fv(tex, uv);
+				freyjaTexCoord2fv(tex, uv);
 
 				seen.pushBack(tex);
 			}
@@ -1736,7 +1724,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 		int32 vertex = getCurrentVertex();
 		int32 vert;
 
-		freyjaGetVertexTexCoordUV2fv(vertex, uv);
+		freyjaGetVertexTexcoord2fv(vertex, uv);
 
 		v = Vector3d(uv[0], uv[1], 0);
 		u -= v;
@@ -1764,7 +1752,7 @@ void FreyjaModel::UVMapMotion(float s, float t)
 				if (vert == -1) 
 					continue;
 
-				freyjaGetVertexTexCoordUV2fv(vert, uv);
+				freyjaGetVertexTexcoord2fv(vert, uv);
 				uv[0] += u.mVec[0];
 				uv[1] += u.mVec[1];
 				freyjaVertexTexCoord2fv(vert, uv);
@@ -2468,7 +2456,7 @@ int FreyjaModel::saveMaterial(const char *filename)
 	freyjaGetMaterialSpecular(mIndex, specular);
 	freyjaGetMaterialEmissive(mIndex, emissive);
 	shininess = freyjaGetMaterialShininess(mIndex);
-	name = freyjaGetMaterialName(mIndex);
+	name = (char*)freyjaGetMaterialName(mIndex);
 	texture = freyjaGetMaterialTexture(mIndex);
 	blend_dest = freyjaGetMaterialBlendDestination(mIndex);
 	blend_src = freyjaGetMaterialBlendSource(mIndex);

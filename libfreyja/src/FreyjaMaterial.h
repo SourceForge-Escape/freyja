@@ -195,4 +195,7 @@ class FreyjaMaterial
 	char *mTextureName;         /* This is used for file I/O to map classes */
 };
 
+
+FreyjaMaterial *freyjaGetMaterialClass(index_t materialIndex);
+
 #endif

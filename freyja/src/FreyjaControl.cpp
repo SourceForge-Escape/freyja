@@ -1045,12 +1045,6 @@ bool FreyjaControl::event(int command)
 					"ON" : "OFF");
 		break;
 
-	case eDebugBackend:
-		mModel->setDebug(!mModel->getDebug());
-		freyja_print("Backend debug [%s]", mModel->getDebug() ? "ON" : "OFF");
-		break;
-
-
 	case eFullscreen:
 		mFullScreen = !mFullScreen;
 		
@@ -1201,7 +1195,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case ePolyMapTexturePolygon:
-		freyjaPolygonSplitTexCoords(mModel->getCurrentMesh(),
+		freyjaMeshPolygonSplitTexCoords(mModel->getCurrentMesh(),
 									mModel->getCurrentPolygon());
 		break;
 

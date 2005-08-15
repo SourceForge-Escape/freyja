@@ -589,6 +589,23 @@ bool FreyjaFileReader::setFileOffset(unsigned int offset)
 }
 
 
+void FreyjaFileReader::setFileOffsetToEnd()
+{
+	fseek(mFileHandle, 0, SEEK_END);
+}
+
+// FIXME Cache size on open()
+unsigned int FreyjaFileReader::getFileSize()
+{
+	unsigned int whence = getFileOffset();
+	fseek(mFileHandle, 0, SEEK_END);
+	unsigned int size = getFileOffset();
+	setFileOffset(whence);
+
+	return size;
+}
+
+
 ////////////////////////////////////////////////////////////
 // Private Accessors
 ////////////////////////////////////////////////////////////

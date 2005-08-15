@@ -468,7 +468,7 @@ int freyja_model__glm_import(char *filename)
 		{
 			v = Vector3d(glm.mMDXMeshes[i].vertices[j].vertCoords);
 			v *= scale;
-			index = freyjaVertex3f(v.mVec[0], v.mVec[2], -v.mVec[1]);	
+			index = freyjaVertexCreate3f(v.mVec[0], v.mVec[2], -v.mVec[1]);	
 			
 			v = Vector3d(glm.mMDXMeshes[i].vertices[j].normal);
 			freyjaVertexNormal3f(index, v.mVec[0], v.mVec[2], -v.mVec[1]);

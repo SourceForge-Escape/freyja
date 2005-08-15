@@ -2641,7 +2641,7 @@ int freyja_model__psk_import(char *filename)
 	for (i = 0; i < psk.mNumVertices; ++i)
 	{
 		/* Store vertices in group as freyja XYZ */
-		v = freyjaVertex3f(psk.mVertices[i*3+0]*scale, 
+		v = freyjaVertexCreate3f(psk.mVertices[i*3+0]*scale, 
 						   psk.mVertices[i*3+2]*scale, 
 						   -psk.mVertices[i*3+1]*scale);
 
@@ -2667,17 +2667,17 @@ int freyja_model__psk_import(char *filename)
 
 		/* Store vertices and texels by true id, using translator lists */
 		freyjaPolygonVertex1i(transV[psk.mVTXWs[psk.mFaces[i].x].vertex]);
-		t = freyjaTexCoord2f(psk.mVTXWs[psk.mFaces[i].x].uv[0], 
+		t = freyjaTexCoordCreate2f(psk.mVTXWs[psk.mFaces[i].x].uv[0], 
 							 psk.mVTXWs[psk.mFaces[i].x].uv[1]);
 		freyjaPolygonTexCoord1i(t);
 
 		freyjaPolygonVertex1i(transV[psk.mVTXWs[psk.mFaces[i].y].vertex]);
-		t = freyjaTexCoord2f(psk.mVTXWs[psk.mFaces[i].y].uv[0], 
+		t = freyjaTexCoordCreate2f(psk.mVTXWs[psk.mFaces[i].y].uv[0], 
 							 psk.mVTXWs[psk.mFaces[i].y].uv[1]);
 		freyjaPolygonTexCoord1i(t);
 
 		freyjaPolygonVertex1i(transV[psk.mVTXWs[psk.mFaces[i].z].vertex]);
-		t = freyjaTexCoord2f(psk.mVTXWs[psk.mFaces[i].z].uv[0], 
+		t = freyjaTexCoordCreate2f(psk.mVTXWs[psk.mFaces[i].z].uv[0], 
 							 psk.mVTXWs[psk.mFaces[i].z].uv[1]);
 		freyjaPolygonTexCoord1i(t);
 		

@@ -732,7 +732,7 @@ int freyja_model__ase_import(char *filename)
 	for (i = 0; (int)i < ase.mVertexCount; ++i)
 	{
 		/* Store vertices in group */
-		v = freyjaVertex3fv(ase.mVertices[i]);
+		v = freyjaVertexCreate3fv(ase.mVertices[i]);
 		
 		/* Generates id translator list */
 		trans.Add(i, v);
@@ -743,7 +743,7 @@ int freyja_model__ase_import(char *filename)
 	for (i = 0; (int)i < ase.mUVWCount; ++i)
 	{
 		/* Store texels */
-		t = freyjaTexCoord2f(ase.mUVWs[i][0], ase.mUVWs[i][1]);
+		t = freyjaTexCoordCreate2f(ase.mUVWs[i][0], ase.mUVWs[i][1]);
 		
 		/* Generates id translator list */
 		trans2.Add(i, t);
@@ -772,9 +772,9 @@ int freyja_model__ase_import(char *filename)
 
 		if (!ase.mUVWCount)
 		{
-			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.0, 0.5));
-			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.5, 0.5));
-			freyjaPolygonTexCoord1i(freyjaTexCoord2f(0.0, 0.0));			
+			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.0, 0.5));
+			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.5));
+			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.0, 0.0));			
 		}
 		else
 		{
@@ -798,7 +798,7 @@ int freyja_model__ase_import(char *filename)
 int freyja_model__ase_export(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
-	int32 vert;
+	index_t face, vert, tex;
 	float st[2];
 	int v, t, texel;
 	Ase ase;
@@ -813,7 +813,7 @@ int freyja_model__ase_export(char *filename)
 	
 	// Don't allow use of internal iterators or
 	// changes of data by other processes
-	freyjaCriticalSection(FREYJA_WRITE_LOCK);
+	freyjaCriticalSectionLock();
 	
 	ase.mVertexCount = freyjaGetCount(FREYJA_VERTEX);
 	ase.mUVWCount = freyjaGetCount(FREYJA_POLYGON) * 3;
@@ -826,7 +826,7 @@ int freyja_model__ase_export(char *filename)
 	ase.mUVWs = new vec3_t[ase.mUVWCount];
 
 	/* Using freyja iterator interface */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_RESET);
+	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
 
 	for (v = 0; v < ase.mVertexCount; ++v)
 	{
@@ -834,19 +834,19 @@ int freyja_model__ase_export(char *filename)
 		freyjaGetVertexNormal3fv(ase.mNormals[v]);
 		
 		// Use translator list
-		vert = freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_CURRENT);
+		vert = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
 		trans.Add(vert, v);
 		
 		//printf("trans.Add(%i, %i)\n", vert, v);
-		freyjaIterator(FREYJA_VERTEX, FREYJA_LIST_NEXT);
+		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
 	}
 	
 	// Using list interface, as opposed to array
-	freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_RESET);
+	freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
 
 	for (t = 0, texel = 0; t < ase.mFaceCount; ++t)
 	{
-		if (freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_CURRENT) < 0)
+		if (freyjaIterator(FREYJA_POLYGON, FREYJA_CURRENT) < 0)
 		{
 			freyjaPrintError("Bad polygon!");
 			continue;
@@ -854,35 +854,40 @@ int freyja_model__ase_export(char *filename)
 
 		//freyjaPrintMessage("%i / %i\n", t, ase.mFaceCount);
 
-		// Use translator list
-		freyjaGetPolygon1u(FREYJA_VERTEX, 0, &vert);
+		face = freyjaGetCurrent(FREYJA_POLYGON);
+
+		// FIXME: Could export quads too, but ase tris needs update first
+
+		// Use translator lists
+		vert = freyjaGetPolygonVertexIndex(face, 0);
+		freyjaGetVertexTexcoord2fv(vert, ase.mUVWs[ase.mFaces[t].uvwIndex[0]]);
 		ase.mFaces[t].vertIndex[0] = trans[vert];
-		freyjaGetPolygon1u(FREYJA_VERTEX, 1, &vert);
+		vert = freyjaGetPolygonVertexIndex(face, 1);
+		freyjaGetVertexTexcoord2fv(vert, ase.mUVWs[ase.mFaces[t].uvwIndex[1]]);
 		ase.mFaces[t].vertIndex[1] = trans[vert];
-		freyjaGetPolygon1u(FREYJA_VERTEX, 2, &vert);
+		vert = freyjaGetPolygonVertexIndex(face, 2);
+		freyjaGetVertexTexcoord2fv(vert, ase.mUVWs[ase.mFaces[t].uvwIndex[2]]);
 		ase.mFaces[t].vertIndex[2] = trans[vert];
 		
-		// FIXME: Texels aren't right for multiple texels per vertex
-		freyjaGetPolygon3f(FREYJA_TEXCOORD, 0, st);
+		if (freyjaGetPolygonTexCoordCount(face))
+		{
+			tex = freyjaGetPolygonTexCoordIndex(face, 0);
+			freyjaGetTexCoord2fv(tex, ase.mUVWs[ase.mFaces[t].uvwIndex[0]]);
+			tex = freyjaGetPolygonTexCoordIndex(face, 1);
+			freyjaGetTexCoord2fv(tex, ase.mUVWs[ase.mFaces[t].uvwIndex[1]]);
+			tex = freyjaGetPolygonTexCoordIndex(face, 2);
+			freyjaGetTexCoord2fv(tex, ase.mUVWs[ase.mFaces[t].uvwIndex[2]]);
+		}
+
 		ase.mFaces[t].uvwIndex[0] = texel++;
-		ase.mUVWs[ase.mFaces[t].uvwIndex[0]][0] = st[0];
-		ase.mUVWs[ase.mFaces[t].uvwIndex[0]][1] = st[1];
-		
-		freyjaGetPolygon3f(FREYJA_TEXCOORD, 1, st);
 		ase.mFaces[t].uvwIndex[1] = texel++;
-		ase.mUVWs[ase.mFaces[t].uvwIndex[1]][0] = st[0];
-		ase.mUVWs[ase.mFaces[t].uvwIndex[1]][1] = st[1];
-		
-		freyjaGetPolygon3f(FREYJA_TEXCOORD, 2, st);
 		ase.mFaces[t].uvwIndex[2] = texel++;
-		ase.mUVWs[ase.mFaces[t].uvwIndex[2]][0] = st[0];
-		ase.mUVWs[ase.mFaces[t].uvwIndex[2]][1] = st[1];
 		
 		// Using list interface, as opposed to array
-		freyjaIterator(FREYJA_POLYGON, FREYJA_LIST_NEXT);
+		freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
 	}
 
-	freyjaCriticalSection(FREYJA_WRITE_UNLOCK);
+	freyjaCriticalSectionUnlock();
 	
 	return (ase.save(filename));
 }

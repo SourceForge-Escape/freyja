@@ -486,11 +486,11 @@ int freyja_model__skel_export(char *filename)
 
 
 	/* SKELETON */
-	freyjaIterator(FREYJA_SKELETON, FREYJA_LIST_RESET);
+	freyjaIterator(FREYJA_SKELETON, FREYJA_RESET);
 
 	skel.mBoneCount = freyjaGetCount(FREYJA_BONE);
 	skel.mBones = new Skel::bone_t[skel.mBoneCount];
-	freyjaIterator(FREYJA_BONE, FREYJA_LIST_RESET);
+	freyjaIterator(FREYJA_BONE, FREYJA_RESET);
 
 	for (b = 0; b < skel.mBoneCount; ++b)
 	{
@@ -499,11 +499,11 @@ int freyja_model__skel_export(char *filename)
 
 	for (b = 0; b < skel.mBoneCount; ++b)
 	{
-		bone = freyjaIterator(FREYJA_BONE, FREYJA_LIST_CURRENT);
+		bone = freyjaIterator(FREYJA_BONE, FREYJA_CURRENT);
 		bone = freyjaGetCurrent(FREYJA_BONE);
 
 		skel.mBones[b].parent = freyjaGetBoneParent(bone);
-		freyjaGetBoneRotationWXYZ4fv(bone, skel.mBones[b].rotation);
+		freyjaGetBoneRotationQuatWXYZ4fv(bone, skel.mBones[b].rotation);
 		freyjaGetBoneTranslation3fv(bone, skel.mBones[b].translation);
 		freyjaGetBoneName(bone, 64, skel.mBones[b].name);
 
@@ -516,7 +516,7 @@ int freyja_model__skel_export(char *filename)
 		//trans.Add(bone, b);
 		//printf("trans.Add(%i, %i)\n", bone, b);
 
-		freyjaIterator(FREYJA_BONE, FREYJA_LIST_NEXT);
+		freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
 	}
 
 	// Loop to populate children lists here
