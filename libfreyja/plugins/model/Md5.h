@@ -61,6 +61,7 @@ class Md5Weight
 class Md5Mesh
 {
  public:
+	char name[32];
 	char *shader;
 	int numverts;
 	Md5Vertex *verts;
@@ -137,6 +138,12 @@ class Md5
 	 *
 	 * 2004.08.13:
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	bool saveModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Parses and stores a Md5mesh model to a file
+	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
 

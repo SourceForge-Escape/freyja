@@ -139,31 +139,31 @@ int freyja_model__trmesh_import(char *filename)
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
 
     // Read and store texels directly in TRMESH
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     freyjaPolygonMaterial1i(tile);
     
@@ -198,40 +198,40 @@ int freyja_model__trmesh_import(char *filename)
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
 
     // Read and store texels directly in TRMESH
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     fread(&s, 4, 1, f);
     fread(&t, 4, 1, f);
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(s, t));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s, t));
 
     freyjaPolygonMaterial1i(tile);
     
@@ -262,17 +262,17 @@ int freyja_model__trmesh_import(char *filename)
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     // Read color hack
     fread(&r, 4, 1, f);
@@ -280,12 +280,12 @@ int freyja_model__trmesh_import(char *filename)
     fread(&b, 4, 1, f);
     fread(&a, 4, 1, f);
 
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
     freyjaPolygonMaterial1i(-1);
     
@@ -315,22 +315,22 @@ int freyja_model__trmesh_import(char *filename)
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     fread(&x, 2, 1, f);
     fread(&y, 2, 1, f);
     fread(&z, 2, 1, f);
-    freyjaPolygonVertex1i(freyjaVertex3f(x, y, z));
+    freyjaPolygonVertex1i(freyjaVertexCreate3f(x, y, z));
 
     // Read color
     fread(&r, 4, 1, f);
@@ -338,17 +338,17 @@ int freyja_model__trmesh_import(char *filename)
     fread(&b, 4, 1, f);
     fread(&a, 4, 1, f);
 
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(r, g));
-    freyjaPolygonTexCoord1i(freyjaTexCoord2f(a, b));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
+    freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
     freyjaPolygonMaterial1i(-1);
     

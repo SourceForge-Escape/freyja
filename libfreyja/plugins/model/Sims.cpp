@@ -328,7 +328,7 @@ int freyja_model__sims_import(char *filename)
 
   for (i = 0; i < sims.VertexCount(); i++)
   {
-    v = freyjaVertex3f(vert[0], vert[1], vert[2]);
+    v = freyjaVertexCreate3f(vert[0], vert[1], vert[2]);
     trans.Add(i, v);
   }
 
@@ -341,7 +341,7 @@ int freyja_model__sims_import(char *filename)
     for (j = 0; j < n; ++j)
     {
 		freyjaPolygonVertex1i(transV[]);
-		index = freyjaTexCoord2f(, );
+		index = freyjaTexCoordCreate2f(, );
 		freyjaPolygonTexCoord1i(index);
 	}
     }

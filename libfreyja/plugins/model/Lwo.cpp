@@ -634,7 +634,7 @@ int freyja_model__lwo_import(char *filename)
     lwo.Vertex(i, vert);
 
     // Store vertices in group
-    v = freyjaVertex3f(vert[0], vert[1], vert[2]);
+    v = freyjaVertexCreate3f(vert[0], vert[1], vert[2]);
 
 #ifdef DEBUG_LWO_VERTS
     printf("%i = %f %f %f\n", v, vert[0], vert[1], vert[2]);
@@ -674,18 +674,18 @@ int freyja_model__lwo_import(char *filename)
       if (material)
       {
 	// Generate color by texel hack, store it's index
-			t = freyjaTexCoord2f(material->r, material->g);
+			t = freyjaTexCoordCreate2f(material->r, material->g);
 			freyjaPolygonTexCoord1i(t);
 	
-			t = freyjaTexCoord2f(material->b, material->a);
+			t = freyjaTexCoordCreate2f(material->b, material->a);
 			freyjaPolygonTexCoord1i(t);
       }
       else
       {
-			t = freyjaTexCoord2f(0.0, 0.0);
+			t = freyjaTexCoordCreate2f(0.0, 0.0);
 			freyjaPolygonTexCoord1i(t);
 	
-			t = freyjaTexCoord2f(0.0, 0.0);
+			t = freyjaTexCoordCreate2f(0.0, 0.0);
 			freyjaPolygonTexCoord1i(t);	
       }
     }

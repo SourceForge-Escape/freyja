@@ -830,7 +830,7 @@ int freyja_model__3ds_import(char *filename)
 		for (i = 0; i < vertCount; i++) 
 		{
 			// Store vertices in group
-			v = freyjaVertex3f(verts[i].x, verts[i].z, -verts[i].y); // XZY
+			v = freyjaVertexCreate3f(verts[i].x, verts[i].z, -verts[i].y); // XZY
 			
 			// Generates id translator list
 			trans.Add(i, v);
@@ -851,20 +851,20 @@ int freyja_model__3ds_import(char *filename)
 			// Store texels by true id, using translator list
 			if (uvs)
 			{
-				t = freyjaTexCoord2f(uvs[faces[i].vcA].U, uvs[faces[i].vcA].V);
+				t = freyjaTexCoordCreate2f(uvs[faces[i].vcA].U, uvs[faces[i].vcA].V);
 				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoord2f(uvs[faces[i].vcB].U, uvs[faces[i].vcB].V);
+				t = freyjaTexCoordCreate2f(uvs[faces[i].vcB].U, uvs[faces[i].vcB].V);
 				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoord2f(uvs[faces[i].vcC].U, uvs[faces[i].vcC].V);
+				t = freyjaTexCoordCreate2f(uvs[faces[i].vcC].U, uvs[faces[i].vcC].V);
 				freyjaPolygonTexCoord1i(t);				
 			}
 			else
 			{
-				t = freyjaTexCoord2f(0.0, 0.5);
+				t = freyjaTexCoordCreate2f(0.0, 0.5);
 				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoord2f(0.5, 0.5);
+				t = freyjaTexCoordCreate2f(0.5, 0.5);
 				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoord2f(0.0, 0.0);
+				t = freyjaTexCoordCreate2f(0.0, 0.0);
 				freyjaPolygonTexCoord1i(t);
 			}
 

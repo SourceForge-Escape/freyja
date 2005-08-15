@@ -35,6 +35,18 @@
 			(label "Vertex Skip "  0.0 0.5)
 			(spinbutton 0 0 1024 eReverseEngineerVSkip))
 
+		(hbox 1 0 0 1 0
+			(label "Face Offset "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerFOffset))
+
+		(hbox 1 0 0 1 0
+			(label "Face Count "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerFCount))
+
+		(hbox 1 0 0 1 0
+			(label "Face Skip "  0.0 0.5)
+			(spinbutton 0 0 1024 eReverseEngineerFSkip))
+
 		(label "Add normals, etc later "  0.0 0.5)
 	)
 )

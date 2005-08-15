@@ -420,6 +420,7 @@ GtkWidget *mgtk_get_fileselection_widget()
 #else
 		file = mgtk_create_filechooser("Select file");
 #endif
+
 		path = mgtk_rc_map("/");
 		
 		if (path)

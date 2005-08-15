@@ -408,7 +408,7 @@ int freyja_model__bsa_import(char *filename)
 	BSAPakReader bsa;
 	char file[1024];
 	char *s;
-	long i, pakIndex, vfsFileIndex;
+	long i, pakIndex;
 
 
 	if (bsa.load(filename))
@@ -427,11 +427,9 @@ int freyja_model__bsa_import(char *filename)
 				}
 			}
 
-			vfsFileIndex = freyjaPakAddFullPathFile(pakIndex, 
-													file,
-													(bsa.mDataOffset +
-													 bsa.mTable[i].mOffset),
-													bsa.mTable[i].mSize);
+			freyjaPakAddFullPathFile(pakIndex, file,
+									(bsa.mDataOffset + bsa.mTable[i].mOffset),
+									bsa.mTable[i].mSize);
 		}
 
 		freyjaPakEnd(pakIndex);

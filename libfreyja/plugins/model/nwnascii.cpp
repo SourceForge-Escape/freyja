@@ -177,7 +177,7 @@ int freyja_model__nwnascii_import(char *filename)
 						r.parseFloat(); // w
 
 						//printf("vt %f %f\n", u, v);
-						transT.pushBack(freyjaTexCoord2f(u, 1.0 - v));
+						transT.pushBack(freyjaTexCoordCreate2f(u, 1.0 - v));
 					}
 				}
 				else if (!strncmp(symbol, "verts", 6))
@@ -197,7 +197,7 @@ int freyja_model__nwnascii_import(char *filename)
 						z = r.parseFloat() + position[2];
 
 						//printf("v %f %f %f\n", x, z, y);
-						transV.pushBack(freyjaVertex3f(x*scale,
+						transV.pushBack(freyjaVertexCreate3f(x*scale,
 													   z*scale,
 													   y*scale));
 					}

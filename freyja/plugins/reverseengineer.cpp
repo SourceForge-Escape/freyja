@@ -38,9 +38,13 @@ extern "C" {
 void ReverseEngineerEventsAttach();
 void ReverseEngineerGUIAttach();
 
+uint32 gReverseEngineerISz = 2;
 uint32 gReverseEngineerVOffset = 0;
 uint32 gReverseEngineerVCount = 0;
 uint32 gReverseEngineerVSkip = 0;
+uint32 gReverseEngineerFOffset = 0;
+uint32 gReverseEngineerFCount = 0;
+uint32 gReverseEngineerFSkip = 0;
 int32 gReverseEngineerMeshId = -1;
 char *gReverseEngineerFilename = 0x0;
 
@@ -55,8 +59,9 @@ void freyja_reverseengineer_init(void (*func)(const char*, void*))
 void eReverseEngineer()
 {
 	FreyjaFileReader r;
-	uint32 i;
+	uint32 i, j, b, vcount, size;
 	vec_t x, y, z;
+	uint32 aa, bb, cc;
 
 
 	if (r.openFile(gReverseEngineerFilename) == false)
@@ -69,16 +74,76 @@ void eReverseEngineer()
 
 	gReverseEngineerMeshId = freyjaGetCurrent(FREYJA_MESH);
 
-	for (i = 0; i < gReverseEngineerVCount && !r.endOfFile(); ++i)
+	size = r.getFileSize();
+
+	mgtk_print("! eReverseEngineer> %ibytes in file", size);
+
+	for (i = 0, b = 0, vcount=0; i < gReverseEngineerVCount && b < size; ++i)
 	{
 		x = r.readFloat32();
 		y = r.readFloat32();
 		z = r.readFloat32();
+	
+		b += 12;
 
 		if (gReverseEngineerVSkip > 0)
-			r.setFileOffset(r.getFileOffset() + gReverseEngineerVSkip);
+		{
+			for (j = 0; j < gReverseEngineerVSkip && b < size; ++j, ++b)
+			{
+				r.readInt8U();
+			}
+		}
 
-		freyjaVertex3f(x, y, z);
+		++vcount;
+		freyjaVertexCreate3f(x, y, z);
+	}
+
+	r.setFileOffset(gReverseEngineerFOffset);
+
+	for (i = 0, b = 0; i < gReverseEngineerFCount && b < size; ++i)
+	{
+		switch (gReverseEngineerISz)
+		{
+		case 2:
+			aa = r.readInt16U();
+			bb = r.readInt16U();
+			cc = r.readInt16U();
+			b += 3*2;
+			break;
+
+		case 4:
+			aa = r.readInt32U();
+			bb = r.readInt32U();
+			cc = r.readInt32U();
+			b += 3*4;
+			break;
+
+		default:
+			i = gReverseEngineerFCount;
+			continue;
+		}
+
+		if (aa > gReverseEngineerVCount ||
+			bb > gReverseEngineerVCount ||
+			cc > gReverseEngineerVCount)
+		{
+			mgtk_print("! %i %i %i invalid skipping", aa, bb, cc);
+			continue;
+		}
+
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonVertex1i(aa);
+		freyjaPolygonVertex1i(bb);
+		freyjaPolygonVertex1i(cc);
+		freyjaEnd();
+
+		if (gReverseEngineerFSkip > 0)
+		{
+			for (j = 0; j < gReverseEngineerFSkip && b < size; ++j, ++b)
+			{
+				r.readInt8U();
+			}
+		}
 	}
 
 	freyjaEnd();
@@ -128,6 +193,23 @@ void eReverseEngineerVSkip(unsigned int value)
 }
 
 
+void eReverseEngineerFOffset(unsigned int value)
+{
+	gReverseEngineerFOffset = value;
+}
+
+
+void eReverseEngineerFCount(unsigned int value)
+{
+	gReverseEngineerFCount = value;
+}
+
+
+void eReverseEngineerFSkip(unsigned int value)
+{
+	gReverseEngineerFSkip = value;
+}
+
 void eDialogReverseEngineer()
 {
 	mgtk_event_dialog_visible_set(Resource::mInstance->getIntByName("eDialogReverseEngineer"), 1);
@@ -140,6 +222,9 @@ void ReverseEngineerEventsAttach()
 	ResourceEventCallbackUInt::add("eReverseEngineerVOffset", &eReverseEngineerVOffset);
 	ResourceEventCallbackUInt::add("eReverseEngineerVCount", &eReverseEngineerVCount);
 	ResourceEventCallbackUInt::add("eReverseEngineerVSkip", &eReverseEngineerVSkip);
+	ResourceEventCallbackUInt::add("eReverseEngineerFOffset", &eReverseEngineerFOffset);
+	ResourceEventCallbackUInt::add("eReverseEngineerFCount", &eReverseEngineerFCount);
+	ResourceEventCallbackUInt::add("eReverseEngineerFSkip", &eReverseEngineerFSkip);
 	ResourceEventCallback::add("eReverseEngineer", &eReverseEngineer);
 	ResourceEventCallback::add("eReverseEngineerDelete", &eReverseEngineerDelete);
 	ResourceEventCallback::add("eDialogReverseEngineer", &eDialogReverseEngineer);

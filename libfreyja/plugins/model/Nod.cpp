@@ -624,9 +624,9 @@ int freyja_model__nod_import(char *filename)
 			//matrix.multiply3v(pos, pos);
 		
 			// Store vertices and texels in group
-			index = freyjaVertex3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
+			index = freyjaVertexCreate3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
 			freyjaVertexNormal3fv(index, nod.vertices[num_verts + j].Norm);
-			freyjaVertexTexCoord2f(index,
+			freyjaVertexTexcoord2f(index,
 								   nod.vertices[num_verts + j].UV[0],
 								   1.0 - nod.vertices[num_verts + j].UV[1]);
 			vertices.pushBack(index);

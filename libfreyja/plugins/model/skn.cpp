@@ -271,7 +271,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 				vec3_t xyz;
 
 				freyjaBoneRotateQuatWXYZ4fv(idx, skeleton[i].wxyz);
-				freyjaGetBoneRotationXYZ3fv(idx, xyz);
+				freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
 				xyz[1] -= 90.0f;
 				freyjaBoneRotateEulerXYZ3f(idx, xyz[0], xyz[1], xyz[2]);
 				freyjaBoneTranslate3f(idx, 
@@ -301,7 +301,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 
 				if (i == 2 || i == 8)
 				{
-					freyjaGetBoneRotationXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
 					xyz[0] += 0.0f;
 					xyz[1] -= 180.0f;
 					xyz[2] += 0.0f;
@@ -312,7 +312,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 				}
 				else if (i == 19)
 				{
-					freyjaGetBoneRotationXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
 					xyz[0] += 0.0f;
 					xyz[1] -= 90.0f;
 					xyz[2] += 0.0f;
@@ -323,7 +323,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 				}
 				else if (i == 24)
 				{
-					freyjaGetBoneRotationXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
 					xyz[0] += 0.0f;
 					xyz[1] += 90.0f;
 					xyz[2] += 0.0f;
@@ -335,7 +335,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 				else
 				{
 					freyjaBoneRotateQuatWXYZ4fv(idx, skeleton[i].wxyz);	
-					freyjaGetBoneRotationXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
 					skeleton[i].mat.rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
@@ -565,7 +565,7 @@ int freyja_model__skn_import(char *filename)
 
 	for (i = 0; i < vertexCount; ++i)
 	{
-		index = freyjaVertex3f(vertices[i][0] * scale,
+		index = freyjaVertexCreate3f(vertices[i][0] * scale,
 							   vertices[i][2] * scale,
 							   vertices[i][1] * scale);
 
@@ -581,7 +581,7 @@ int freyja_model__skn_import(char *filename)
 
 	for (i = 0; i < texcoordCount; ++i)
 	{
-		transT.pushBack(freyjaTexCoord2f(texcoords[i][0], texcoords[i][1]));
+		transT.pushBack(freyjaTexCoordCreate2f(texcoords[i][0], texcoords[i][1]));
 	}
 
 	for (i = 0; i < trisCount; ++i)
