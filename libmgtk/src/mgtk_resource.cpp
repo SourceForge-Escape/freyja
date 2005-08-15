@@ -1345,6 +1345,8 @@ arg_list_t *mgtk_rc_dialog(arg_list_t *box)
 	{
 		widget = mgtk_create_window(get_string(title), "", "");
 
+		gtk_window_set_transient_for(GTK_WINDOW(widget), GTK_WINDOW(GTK_MAIN_WINDOW));
+
 		g_signal_connect(GTK_OBJECT(widget), "delete_event",
 						 G_CALLBACK(mgtk_event_hide_dialog),
 						 GINT_TO_POINTER(0));
