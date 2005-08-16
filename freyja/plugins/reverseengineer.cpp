@@ -99,6 +99,14 @@ void eReverseEngineer()
 					tmpf = 0.0f;
 					break;
 
+				case '1':  // for visuallizing UVs and 2d vertices
+					tmpf = 1.0f;
+					break;
+
+				case '2':  // for visuallizing UVs and 2d vertices
+					tmpf = 2.0f;
+					break;
+
 				case 'i':
 					tmpf = r.readInt32U();
 					break;
@@ -134,6 +142,18 @@ void eReverseEngineer()
 				case 'V':
 					v = tmpf;
 					uv = true;
+					break;
+
+				case '/':
+					x /= tmpf;
+					y /= tmpf;
+					z /= tmpf;
+					break;
+
+				case '*':
+					x *= tmpf;
+					y *= tmpf;
+					z *= tmpf;
 					break;
 
 				default:
