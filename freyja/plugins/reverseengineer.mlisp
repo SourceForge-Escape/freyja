@@ -23,43 +23,33 @@
 			(label "Filename" 0.0 0.5)
 			(textbox eReverseEngineerFilename))
 
+		;; Vertex extractor
+		(hbox 1 0 0 1 0 (hsep))
+		(label "Vertex extractor "  0.0 0.5)
+		(textbox eReverseEngineerVString)
 		(hbox 1 0 0 1 0
 			(label "Vertex Offset "  0.0 0.5)
 			(spinbutton 0 0 99999999 eReverseEngineerVOffset))
-
 		(hbox 1 0 0 1 0
 			(label "Vertex Count "  0.0 0.5)
 			(spinbutton 0 0 999999 eReverseEngineerVCount))
-
 		(hbox 1 0 0 1 0
 			(label "Vertex Skip "  0.0 0.5)
 			(spinbutton 0 0 1024 eReverseEngineerVSkip))
 
+
+		;; Face extractor
+		(hbox 1 0 0 1 0 (hsep))
+		(label "Face extractor "  0.0 0.5)
+		(textbox eReverseEngineerFString)
 		(hbox 1 0 0 1 0
 			(label "Face Offset "  0.0 0.5)
 			(spinbutton 0 0 999999 eReverseEngineerFOffset))
-
 		(hbox 1 0 0 1 0
 			(label "Face Count "  0.0 0.5)
 			(spinbutton 0 0 999999 eReverseEngineerFCount))
 
-		(hbox 1 0 0 1 0
-			(label "Face Skip "  0.0 0.5)
-			(spinbutton 0 0 1024 eReverseEngineerFSkip))
-
-		(label "eg FSffSffSff "  0.0 0.5)
-		(hbox 0 1 0 1 1
-			(label "Cmd " 0.0 0.5)
-			(textbox eReverseEngineerString))
-		(hbox 1 0 0 1 0
-			(label "Cmd Offset "  0.0 0.5)
-			(spinbutton 0 0 999999 eReverseEngineerCmdOffset))
-		(hbox 1 0 0 1 0
-			(label "Cmd Count "  0.0 0.5)
-			(spinbutton 0 0 999999 eReverseEngineerCmdCount))
-		(button "Run command" eMode eReverseEngineerCmd)
-
-		(label "Add normals, etc later "  0.0 0.5)
+		(label "More to come! "  0.0 0.5)
 	)
 )
 
