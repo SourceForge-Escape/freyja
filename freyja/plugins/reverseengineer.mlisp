@@ -25,7 +25,7 @@
 
 		(hbox 1 0 0 1 0
 			(label "Vertex Offset "  0.0 0.5)
-			(spinbutton 0 0 999999 eReverseEngineerVOffset))
+			(spinbutton 0 0 99999999 eReverseEngineerVOffset))
 
 		(hbox 1 0 0 1 0
 			(label "Vertex Count "  0.0 0.5)
@@ -46,6 +46,18 @@
 		(hbox 1 0 0 1 0
 			(label "Face Skip "  0.0 0.5)
 			(spinbutton 0 0 1024 eReverseEngineerFSkip))
+
+		(label "eg FSffSffSff "  0.0 0.5)
+		(hbox 0 1 0 1 1
+			(label "Cmd " 0.0 0.5)
+			(textbox eReverseEngineerString))
+		(hbox 1 0 0 1 0
+			(label "Cmd Offset "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerCmdOffset))
+		(hbox 1 0 0 1 0
+			(label "Cmd Count "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerCmdCount))
+		(button "Run command" eMode eReverseEngineerCmd)
 
 		(label "Add normals, etc later "  0.0 0.5)
 	)
