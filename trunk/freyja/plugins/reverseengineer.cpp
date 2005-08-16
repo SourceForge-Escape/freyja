@@ -39,17 +39,15 @@ void ReverseEngineerEventsAttach();
 void ReverseEngineerGUIAttach();
 
 uint32 gReverseEngineerISz = 2;
+char *gReverseEngineerVString = 0x0;
 uint32 gReverseEngineerVOffset = 0;
 uint32 gReverseEngineerVCount = 0;
 uint32 gReverseEngineerVSkip = 0;
+char *gReverseEngineerFString = 0x0;
 uint32 gReverseEngineerFOffset = 0;
 uint32 gReverseEngineerFCount = 0;
-uint32 gReverseEngineerFSkip = 0;
 int32 gReverseEngineerMeshId = -1;
 char *gReverseEngineerFilename = 0x0;
-char *gReverseEngineerString = 0x0;
-uint32 gReverseEngineerCmdOffset = 0;
-uint32 gReverseEngineerCmdCount = 0;
 
 
 void freyja_reverseengineer_init(void (*func)(const char*, void*))
@@ -63,16 +61,16 @@ void freyja_reverseengineer_init(void (*func)(const char*, void*))
 void eReverseEngineer()
 {
 	FreyjaFileReader r;
-	uint32 i, j, b, vcount, size;
-	vec_t x, y, z;
-	uint32 aa, bb, cc;
+	uint32 i, j, b, count, vCount, size;
+	vec_t x, y, z, u, v, tmpf;
+	uint32 aa, bb, cc, dd, material = 0, tmp;
+	char lastCmd = 0;
+	//vec3_t abcd[4];
+	bool quad = false, uv = false;
 
 
 	if (r.openFile(gReverseEngineerFilename) == false)
 		return;
-
-	size = r.getFileSize();
-	r.setFileOffset(gReverseEngineerVOffset);
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -81,7 +79,89 @@ void eReverseEngineer()
 
 	mgtk_print("! eReverseEngineer> %ibytes in file", size);
 
-	for (i = 0, b = 0, vcount=0; i < gReverseEngineerVCount && b < size; ++i)
+	/* Vertex extractor */
+	size = r.getFileSize();
+	r.setFileOffset(gReverseEngineerVOffset);
+	count = strlen(gReverseEngineerVString);
+
+	for (i = 0, b = 0; i < gReverseEngineerVCount && b < size; ++i)
+	{
+		switch (gReverseEngineerVString[0]) // Main command
+		{
+		case 'V':
+			quad = false;
+
+			for (j = 1, lastCmd = 0; j < count; ++j)
+			{
+				switch (gReverseEngineerVString[j])
+				{
+				case '0':  // for visuallizing UVs and 2d vertices
+					tmpf = 0.0f;
+					break;
+
+				case 'i':
+					tmpf = r.readInt32U();
+					break;
+
+				case 's':
+					tmpf = r.readInt16U();
+					break;
+
+				case 'f':
+					tmpf = r.readFloat32();
+					break;
+				}
+
+				switch (lastCmd)
+				{
+				case 'X':
+					x = tmpf;
+					break;
+
+				case 'Y':
+					y = tmpf;
+					break;
+
+				case 'Z':
+					z = tmpf;
+					break;
+
+				case 'U':
+					u = tmpf;
+					uv = true;
+					break;
+
+				case 'V':
+					v = tmpf;
+					uv = true;
+					break;
+
+				default:
+					;
+				}
+
+				lastCmd = gReverseEngineerVString[j];
+			}
+
+			++vCount;
+			freyjaVertexCreate3f(x, y, z);
+			break;
+
+		default:
+			;
+		}
+
+		if (gReverseEngineerVSkip > 0)
+		{
+			for (j = 0; j < gReverseEngineerVSkip && b < size; ++j, ++b)
+			{
+				r.readInt8U();
+			}
+		}
+	}
+
+#ifdef OLD
+	for (i = 0, b = 0, vCount=0; i < gReverseEngineerVCount && b < size; ++i)
 	{
 		x = r.readFloat32();
 		y = r.readFloat32();
@@ -97,58 +177,98 @@ void eReverseEngineer()
 			}
 		}
 
-		++vcount;
+		++vCount;
 
 		freyjaVertexCreate3f(x, z, y);
 	}
+#endif
 
+
+	/* Face extractor */
 	size = r.getFileSize();
 	r.setFileOffset(gReverseEngineerFOffset);
+	count = strlen(gReverseEngineerFString);
 
 	for (i = 0, b = 0; i < gReverseEngineerFCount && b < size; ++i)
 	{
-		switch (gReverseEngineerISz)
+		switch (gReverseEngineerFString[0]) // Main command
 		{
-		case 2:
-			aa = r.readInt16U();
-			bb = r.readInt16U();
-			cc = r.readInt16U();
-			mgtk_print("! (%i %i %i)", aa, bb, cc);
-			b += 3*2;
-			break;
+		case 'F':
+			quad = false;
 
-		case 4:
-			aa = r.readInt32U();
-			bb = r.readInt32U();
-			cc = r.readInt32U();
-			b += 3*4;
+			for (j = 1, lastCmd = 0; j < count; ++j)
+			{
+				switch (gReverseEngineerFString[j])
+				{
+				case '0':  // for visuallizing UVs and 2d vertices
+					tmp = 0;
+					break;
+
+				case 'i':
+					tmp = r.readInt32U();
+					break;
+
+				case 's':
+					tmp = r.readInt16U();
+					break;
+
+				case 'f':
+					r.readFloat32();
+					break;
+				}
+
+				switch (lastCmd)
+				{
+				case 'A':
+					aa = tmp;
+					break;
+
+				case 'B':
+					bb = tmp;
+					break;
+
+				case 'C':
+					cc = tmp;
+					break;
+
+				case 'D':
+					dd = tmp;
+					quad = true;
+					break;
+
+				case 'M':
+					material = tmp;
+					break;
+
+				default:
+					;
+				}
+
+				lastCmd = gReverseEngineerFString[j];
+			}
+
+			if (aa > vCount ||
+				bb > vCount ||
+				cc > vCount)
+			{
+				mgtk_print("! %i %i %i invalid skipping", aa, bb, cc);
+				continue;
+			}
+			else
+			{
+				mgtk_print("! %i (%i %i %i)", material, aa, bb, cc);
+			}
+
+			freyjaBegin(FREYJA_POLYGON);
+			freyjaPolygonVertex1i(aa);
+			freyjaPolygonVertex1i(bb);
+			freyjaPolygonVertex1i(cc);
+			if (quad) freyjaPolygonVertex1i(dd);
+			freyjaEnd();
 			break;
 
 		default:
-			i = gReverseEngineerFCount; // break out of loop
-			continue;
-		}
-
-		if (aa > gReverseEngineerVCount ||
-			bb > gReverseEngineerVCount ||
-			cc > gReverseEngineerVCount)
-		{
-			mgtk_print("! %i %i %i invalid skipping", aa, bb, cc);
-			continue;
-		}
-
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonVertex1i(aa);
-		freyjaPolygonVertex1i(bb);
-		freyjaPolygonVertex1i(cc);
-		freyjaEnd();
-
-		if (gReverseEngineerFSkip > 0)
-		{
-			for (j = 0; j < gReverseEngineerFSkip && b < size; ++j, ++b)
-			{
-				r.readInt8U();
-			}
+			;
 		}
 	}
 
@@ -182,133 +302,12 @@ void eReverseEngineerFilename(char *filename)
 }
 
 
-void eReverseEngineerCmd()
+void eReverseEngineerVString(char *s)
 {
-	FreyjaFileReader r;
-	uint32 i, j, k, b, size;
-	uint32 aa, bb, cc, tmp, count;
+	if (gReverseEngineerVString)
+		delete [] gReverseEngineerVString;
 
-
-	if (gReverseEngineerString == 0x0)
-		return;
-
-	if (r.openFile(gReverseEngineerFilename) == false)
-		return;
-
-	if (gReverseEngineerMeshId == -1)
-	{
-		mgtk_print("! eReverseEngineerCmd currently needs vertices loaded first");
-		return;
-	}
-
-	r.setFileOffset(gReverseEngineerCmdOffset);
-
-	gReverseEngineerMeshId = freyjaGetCurrent(FREYJA_MESH);
-
-	size = r.getFileSize();
-	count = strlen(gReverseEngineerString);
-
-	for (i = 0, b = 0; i < gReverseEngineerCmdCount && b < size; ++i)
-	{
-		switch (gReverseEngineerString[0]) // Main command
-		{
-		case 'F':
-			for (j = 1, k = 0; j < count; ++j)
-			{
-				switch (gReverseEngineerString[j])
-				{
-				case 'I':
-					tmp = r.readInt32U();
-					switch (k)
-					{
-					case 0:
-						aa = tmp;
-					case 1:
-						bb = tmp;
-					case 2:
-						cc = tmp;
-						printf("%i ", tmp);
-					default:
-						;
-					}
-					++k;
-					break;
-
-				case 'S':
-					tmp = r.readInt16U();
-					switch (k)
-					{
-					case 0:
-						aa = tmp;
-					case 1:
-						bb = tmp;
-					case 2:
-						cc = tmp;
-						printf("%i ", tmp);
-					default:
-						;
-					}
-					++k;
-					break;
-
-				case 'i':
-					r.readInt32U();
-					break;
-
-				case 's':
-					r.readInt16U();
-					break;
-
-				case 'f':
-					r.readFloat32();
-					break;
-				}
-			}
-
-			printf("\n");
-
-			if (aa > gReverseEngineerVCount ||
-				bb > gReverseEngineerVCount ||
-				cc > gReverseEngineerVCount)
-			{
-				mgtk_print("! %i %i %i invalid skipping", aa, bb, cc);
-				continue;
-			}
-
-			freyjaBegin(FREYJA_POLYGON);
-			freyjaPolygonVertex1i(aa);
-			freyjaPolygonVertex1i(bb);
-			freyjaPolygonVertex1i(cc);
-			freyjaEnd();
-			break;
-
-		default:
-			;
-		}
-	}
-
-	mgtk_event_gl_refresh();
-}
-
-
-void eReverseEngineerString(char *s)
-{
-	if (gReverseEngineerString)
-		delete [] gReverseEngineerString;
-
-	gReverseEngineerString = String::strdup(s);
-}
-
-
-void eReverseEngineerCmdOffset(unsigned int value)
-{
-	gReverseEngineerCmdOffset = value;
-}
-
-
-void eReverseEngineerCmdCount(unsigned int value)
-{
-	gReverseEngineerCmdCount = value;
+	gReverseEngineerVString = String::strdup(s);
 }
 
 
@@ -330,6 +329,15 @@ void eReverseEngineerVSkip(unsigned int value)
 }
 
 
+void eReverseEngineerFString(char *s)
+{
+	if (gReverseEngineerFString)
+		delete [] gReverseEngineerFString;
+
+	gReverseEngineerFString = String::strdup(s);
+}
+
+
 void eReverseEngineerFOffset(unsigned int value)
 {
 	gReverseEngineerFOffset = value;
@@ -342,11 +350,6 @@ void eReverseEngineerFCount(unsigned int value)
 }
 
 
-void eReverseEngineerFSkip(unsigned int value)
-{
-	gReverseEngineerFSkip = value;
-}
-
 void eDialogReverseEngineer()
 {
 	mgtk_event_dialog_visible_set(Resource::mInstance->getIntByName("eDialogReverseEngineer"), 1);
@@ -356,20 +359,21 @@ void eDialogReverseEngineer()
 void ReverseEngineerEventsAttach()
 {
 	ResourceEventCallbackString::add("eReverseEngineerFilename", &eReverseEngineerFilename);
+
+
+	ResourceEventCallbackString::add("eReverseEngineerVString", &eReverseEngineerVString);
 	ResourceEventCallbackUInt::add("eReverseEngineerVOffset", &eReverseEngineerVOffset);
 	ResourceEventCallbackUInt::add("eReverseEngineerVCount", &eReverseEngineerVCount);
 	ResourceEventCallbackUInt::add("eReverseEngineerVSkip", &eReverseEngineerVSkip);
+
+
+	ResourceEventCallbackString::add("eReverseEngineerFString", &eReverseEngineerFString);
 	ResourceEventCallbackUInt::add("eReverseEngineerFOffset", &eReverseEngineerFOffset);
 	ResourceEventCallbackUInt::add("eReverseEngineerFCount", &eReverseEngineerFCount);
-	ResourceEventCallbackUInt::add("eReverseEngineerFSkip", &eReverseEngineerFSkip);
+
 	ResourceEventCallback::add("eReverseEngineer", &eReverseEngineer);
 	ResourceEventCallback::add("eReverseEngineerDelete", &eReverseEngineerDelete);
 	ResourceEventCallback::add("eDialogReverseEngineer", &eDialogReverseEngineer);
-
-	ResourceEventCallbackUInt::add("eReverseEngineerCmdCount", &eReverseEngineerCmdCount);
-	ResourceEventCallbackUInt::add("eReverseEngineerCmdOffset", &eReverseEngineerCmdOffset);
-	ResourceEventCallback::add("eReverseEngineerCmd", &eReverseEngineerCmd);
-	ResourceEventCallbackString::add("eReverseEngineerString", &eReverseEngineerString);
 }
 
 
@@ -378,6 +382,8 @@ void ReverseEngineerGUIAttach()
 	char *filename;
 	char *basename = "plugins/reverseengineer.mlisp";
 	int id, menuId;
+	uint32 e;
+
 
 	id = Resource::mInstance->getIntByName("eDialogReverseEngineer");
 	menuId = Resource::mInstance->getIntByName("ePluginMenu");
@@ -386,6 +392,12 @@ void ReverseEngineerGUIAttach()
 	filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
+
+	e = resourceGetEventId1s("eReverseEngineerFString");
+	mgtk_textentry_value_set(e, "FAsBsCs");
+
+	e = resourceGetEventId1s("eReverseEngineerVString");
+	mgtk_textentry_value_set(e, "VXfZfYf");
 }
 
 
