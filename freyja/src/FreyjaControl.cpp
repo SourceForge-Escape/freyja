@@ -1846,7 +1846,7 @@ void FreyjaControl::handleFilename(const char *filename)
 		freyja_event_gl_refresh();
 
 		if (!failed)
-			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
+			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), filename);
 		break;
 
 	case FREYJA_MODE_SAVE_MODEL:
