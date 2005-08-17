@@ -424,3 +424,34 @@ reverseengineer.so:
 		CFLAGS="$(PLUGIN_CFLAGS)" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
+reverseengineer.dll:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=reverseengineer \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/reverseengineer.o" \
+		CC="i586-mingw32msvc-g++ -mms-bitfields" \
+		CPP="i586-mingw32msvc-cpp " \
+		LD="i586-mingw32msvc-ld " \
+		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
+		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
+
+lineageIIextract.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=lineageIIextract \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/lineageIIextract.o" \
+		CFLAGS="$(PLUGIN_CFLAGS)" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
+
+lineageIIextract.dll:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=lineageIIextract \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/lineageIIextract.o" \
+		CC="i586-mingw32msvc-g++ -mms-bitfields" \
+		CPP="i586-mingw32msvc-cpp " \
+		LD="i586-mingw32msvc-ld " \
+		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
+		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
