@@ -1844,6 +1844,9 @@ void FreyjaControl::handleFilename(const char *filename)
 		type = 1;
 		type2 = 1;
 		freyja_event_gl_refresh();
+
+		if (!failed)
+			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
 		break;
 
 	case FREYJA_MODE_SAVE_MODEL:
@@ -1928,8 +1931,7 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		break;
 
 	case eSetTextureNameA:
-		/* Text here is assumed to be a filename */
-		//mMaterial->loadTexture(text);
+		freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
 		break;
 
 	case eSetTextureNameB:
