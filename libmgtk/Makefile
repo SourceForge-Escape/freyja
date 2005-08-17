@@ -128,7 +128,10 @@ all: debug release prof
 ################################################################
 # GTK+ 2.0 
 ################################################################
-debug:
+
+debug: debug-gtkglext
+
+debug-gtkglarea:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
@@ -281,6 +284,7 @@ clean-obj:
 	@-echo -n "Cleaning objects                             "
 	@-rm -f $(BUILD_PROF_DIR)/*.o
 	@-rm -f $(BUILD_DEBUG_DIR)/*.o
+	@-rm -f $(BUILD_DEBUG_DIR).gtkglext/*.o
 	@-rm -f $(BUILD_RELEASE_DIR)/*.o
 	@-rm -f $(BUILD_TEST_DIR)/*.o
 	@-echo "[done]"
@@ -301,9 +305,11 @@ clean-build:
 	@-echo -n "Cleaning builds                              "
 	@-rm -f $(BUILD_PROF_DIR)/lib$(NAME)$(SHLIBEXT)
 	@-rm -f $(BUILD_DEBUG_DIR)/lib$(NAME)$(SHLIBEXT)
+	@-rm -f $(BUILD_DEBUG_DIR).gtkglext/lib$(NAME)$(SHLIBEXT)
 	@-rm -f $(BUILD_RELEASE_DIR)/lib$(NAME)$(SHLIBEXT)
 	@-rm -f $(BUILD_PROF_DIR)/*.so
 	@-rm -f $(BUILD_DEBUG_DIR)/*.so
+	@-rm -f $(BUILD_DEBUG_DIR).gtkglext/*.so
 	@-rm -f $(BUILD_RELEASE_DIR)/*.so
 	@-rm -f $(BUILD_DEBUG_DIR)/*.test
 	@-echo "[done]"
@@ -351,7 +357,19 @@ deb:
 
 ################################################################
 
-install:
+install: install-gtkglext
+
+install-gtkglext:
+	@-echo -n "Installing selected build                     "
+	@-mkdir -p  $(INSTALL_LIB)
+	@-cp bin/debug.gtkglext/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
+	@-echo "[done]"
+	@-$(MAKE) install-link
+	@-$(MAKE) install-headers
+	@-./libsetup.sh $(INSTALL_LIB)
+
+
+install-gtkglarea:
 	@-echo -n "Installing selected build                     "
 	@-mkdir -p  $(INSTALL_LIB)
 	@-cp bin/debug/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
@@ -360,13 +378,11 @@ install:
 	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
 
+
 install-win32:
 	@-echo -n "Installing win32 build                   "
 	@-cp $(BUILD_WIN32_DIR)/*.a $(BUILD_WIN32_DIR)/*.dll $(INSTALL_LIB)
 	@-echo "[done]"
-
-install-gtkglext:
-	@-cp $(BUILD_DEBUG_DIR).gtkglext/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
 
 install-link:
 	@-echo -n "New soft links                               "
