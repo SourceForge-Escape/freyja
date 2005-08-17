@@ -1,0 +1,41 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix II
+; Website: http://icculus.org/freyja
+; Email  : mongoose@icculus.org
+; Comment: Interface for perlin noise plugin
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(dialog "Freyja :: LineageII Extractor" eDialogL2Extract 0
+	(vbox 0 0 0 0 0
+		(hbox 1 0 0 1 0
+			(icon "freyja.png" IconSize_Dialog))
+
+		(label "LineageII Extractor "  0.0 0.5)
+
+		(button "Extract" eMode eL2Extract)
+
+		(label "Input Filename" 0.0 0.5)
+		(textbox eL2ExtractFilename)
+
+		(hbox 1 0 0 1 0 (hsep))
+
+		(label "Output Filename" 0.0 0.5)
+		(textbox eL2ExtractOut)
+
+		(hbox 1 0 0 1 0
+			(label "Offset "  0.0 0.5)
+			(spinbutton 0 0 99999999 eL2ExtractOffset))
+
+		(hbox 1 0 0 1 0
+			(label "Size "  0.0 0.5)
+			(spinbutton 0 0 999999 eL2ExtractSize))
+
+	)
+)
+
+
+S
