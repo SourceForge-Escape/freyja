@@ -109,14 +109,17 @@ void eReverseEngineer()
 
 				case 'i':
 					tmpf = r.readInt32U();
+					b += 4;
 					break;
 
 				case 's':
 					tmpf = r.readInt16U();
+					b += 2;
 					break;
 
 				case 'f':
 					tmpf = r.readFloat32();
+					b += 4;
 					break;
 				}
 
@@ -180,28 +183,6 @@ void eReverseEngineer()
 		}
 	}
 
-#ifdef OLD
-	for (i = 0, b = 0, vCount=0; i < gReverseEngineerVCount && b < size; ++i)
-	{
-		x = r.readFloat32();
-		y = r.readFloat32();
-		z = r.readFloat32();
-	
-		b += 12;
-
-		if (gReverseEngineerVSkip > 0)
-		{
-			for (j = 0; j < gReverseEngineerVSkip && b < size; ++j, ++b)
-			{
-				r.readInt8U();
-			}
-		}
-
-		++vCount;
-
-		freyjaVertexCreate3f(x, z, y);
-	}
-#endif
 
 
 	/* Face extractor */
@@ -226,14 +207,17 @@ void eReverseEngineer()
 
 				case 'i':
 					tmp = r.readInt32U();
+					b += 4;
 					break;
 
 				case 's':
 					tmp = r.readInt16U();
+					b += 2;
 					break;
 
 				case 'f':
 					r.readFloat32();
+					b += 4;
 					break;
 				}
 
