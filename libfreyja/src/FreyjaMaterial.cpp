@@ -173,9 +173,11 @@ bool FreyjaMaterial::serialize(FreyjaFileReader &r)
 
 	if (length > 0)
 	{
-		char name[length];
+		char name[length+1];
 
 		r.readCharString(length, name);
+		name[length] = 0;		
+		//printf("'%s'\n", name);
 		setTextureName(name);
 	}
 

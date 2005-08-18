@@ -1086,7 +1086,19 @@ int32 freyjaLoadModel(const char *filename)
 				mat = freyjaGetMaterialClass(index);
 
 				if (mat)
-					mat->serialize(r);		
+				{
+					mat->serialize(r);
+
+					if (FreyjaFileReader::doesFileExist(mat->getTextureName()))
+					{
+						index_t textureIndex = freyjaTextureCreateFilename(mat->getTextureName());
+
+						if (textureIndex != INDEX_INVALID)
+						{
+							mat->mTexture = textureIndex;
+						}
+					}
+				}
 			}
 			break;
 

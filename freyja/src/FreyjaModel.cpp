@@ -2337,7 +2337,6 @@ int FreyjaModel::loadMaterial(const char *filename)
 
 int FreyjaModel::loadTexture(const char *filename)
 {
-	freyja_print("FIXME: Temp broken while moving to new libfreyja implementation");
 	FreyjaImage img;
 	unsigned char *image;
 	unsigned int w, h;
@@ -2435,9 +2434,6 @@ int FreyjaModel::loadTexture(const char *filename)
 
 int FreyjaModel::saveMaterial(const char *filename)
 {
-	freyja_print("FIXME temp disabled due to rewrite -- svn corruption forced me to check this in before it's ready  =p");
-
-
 	int32 mIndex = freyjaGetCurrentMaterial();
 
 	float ambient[4];          /* Ambient color */

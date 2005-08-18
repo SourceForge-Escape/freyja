@@ -53,6 +53,7 @@
 #define fPolygon_PolyMapped    8
 #define fPolygon_PolyMappedUV  8
 #define fPolygon_ColorMapped   16
+#define fPolygon_Alpha         32
 
 
 extern "C" {
