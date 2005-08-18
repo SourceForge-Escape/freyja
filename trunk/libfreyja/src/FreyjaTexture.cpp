@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
 index_t freyjaTextureCreateFilename(const char *filename)
 {	
 	FreyjaImage image;
-	FreyjaTexture texture;
 	index_t uid;
+	byte *pixmap;
 	freyja_colormode_t colorMode;
 	uint32 byteDepth;
 
@@ -153,33 +153,32 @@ index_t freyjaTextureCreateFilename(const char *filename)
 	if (image.loadImage(filename) != 0)
 		return INDEX_INVALID;
 
-	image.getImage(&texture.mImage);
-	texture.mWidth = image.getWidth();
-	texture.mHeight = image.getHeight();
+	image.scaleImage();
+	image.getImage(&pixmap);
 
 	switch (image.getColorMode())
 	{
 	case FreyjaImage::RGBA_32:
-		byteDepth = 32;
+		byteDepth = 4;
 		colorMode = RGBA_32;
 		break;
 
 	case FreyjaImage::RGB_24:
-		byteDepth = 24;
+		byteDepth = 3;
 		colorMode = RGB_24;
 		break;
 
 	case FreyjaImage::INDEXED_8:
-		byteDepth = 8;
+		byteDepth = 1;
 		colorMode = INDEXED_8;
 		break;
 
 	default:
-		byteDepth = 0;	
+		byteDepth = 0;
 	}
 
-	uid = freyjaTextureCreateBuffer(texture.mImage, byteDepth, 
-									texture.mWidth, texture.mHeight,
+	uid = freyjaTextureCreateBuffer(pixmap, byteDepth, 
+									image.getWidth(), image.getHeight(),
 									colorMode);
 
 	/* Texture will delete the image copy here on scope exit */
@@ -197,7 +196,7 @@ index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
 	bool found = false;
 
 
-	if (image == 0x0 || size == 0)
+	if (image == 0x0 || size == 0 || byteDepth == 0)
 	{
 		return INDEX_INVALID;
 	}

@@ -1845,8 +1845,12 @@ void FreyjaControl::handleFilename(const char *filename)
 		type2 = 1;
 		freyja_event_gl_refresh();
 
-		if (!failed)
-			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), filename);
+		if (failed == 0) // success
+		{
+			uint32 e = resourceGetEventId1s("eSetTextureNameA");
+			mgtk_textentry_value_set(e, filename);
+			//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+		}
 		break;
 
 	case FREYJA_MODE_SAVE_MODEL:
