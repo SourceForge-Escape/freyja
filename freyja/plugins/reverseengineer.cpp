@@ -107,7 +107,7 @@ void eReverseEngineer()
 					tmpf = 2.0f;
 					break;
 
-				case 'i':
+				case 'u':
 					tmpf = r.readInt32U();
 					b += 4;
 					break;
@@ -115,6 +115,11 @@ void eReverseEngineer()
 				case 's':
 					tmpf = r.readInt16U();
 					b += 2;
+					break;
+
+				case 'b':
+					tmpf = r.readInt8U();
+					b += 1;
 					break;
 
 				case 'f':

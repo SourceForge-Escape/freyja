@@ -668,7 +668,7 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
  * It filters and realigns indices to only save valid data, not
  * the entire junky backend cruft like undo data which remains
  *
- * Vector maps are very memory wasteful */
+ * Vector maps are very memory wasteful */  // use a materialMap
 int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 {
 	const int32 version = 1;
@@ -1087,15 +1087,20 @@ int32 freyjaLoadModel(const char *filename)
 
 				if (mat)
 				{
+					/* Read in new material */
 					mat->serialize(r);
 
-					if (FreyjaFileReader::doesFileExist(mat->getTextureName()))
+					bool uniqueMaterial = 
+
+					if (uniqueMaterial &&
+                        FreyjaFileReader::doesFileExist(mat->getTextureName()))
 					{
 						index_t textureIndex = freyjaTextureCreateFilename(mat->getTextureName());
 
 						if (textureIndex != INDEX_INVALID)
 						{
 							mat->mTexture = textureIndex;
+							mat->mFlags |= fFreyjaMaterial_Texture;
 						}
 					}
 				}

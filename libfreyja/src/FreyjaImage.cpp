@@ -367,7 +367,6 @@ int FreyjaImage::loadPixmap(unsigned char *image,
 		return loadIndexedPixmap(image, w, h);
 		break;
 		
-		
 	case RGB_24:
 		_color_mode = RGB_24;
 		_width = _original_width = w;
@@ -376,7 +375,6 @@ int FreyjaImage::loadPixmap(unsigned char *image,
 		memcpy(_image, image, w * h * 3);
 		return 0;
 		break;
-		
 		
 	case RGBA_32:
 		_color_mode = RGBA_32;
@@ -726,8 +724,14 @@ FreyjaImage::colormode_t FreyjaImage::getColorMode()
 }
 
 
-/* This code based off on gluScaleImage()  */
 void FreyjaImage::scaleImage()
+{
+	scaleImage(1024, 1024);
+}
+
+
+/* This code based off on gluScaleImage()  */
+void FreyjaImage::scaleImage(unsigned int maxW, unsigned int maxH)
 {
    int i, j, k;
    float* tempin;
@@ -739,22 +743,27 @@ void FreyjaImage::scaleImage()
 	
    if (!_image || !_width || !_height)
 		return;
-	
+
+	if (_color_mode == RGBA_32)
+	{
+		components = 4;
+	}
+
    _height = getNextPower(_height);
    _width = getNextPower(_width);
 	
-   if (_height > 256) 
-		_height = 256;
-	
-   if (_width > 256) 
-		_width = 256;
-	
+   if (_height > (int)maxH) 
+		_height = maxH;
+
+   if (_width > (int)maxW) 
+		_width = maxW;
+
 	
    // Check to see if scaling is needed
    if (_height == _original_height && _width == _original_width) 
 		return;
 	
-   image = new unsigned char[_height * _width * 3];
+   image = new unsigned char[_height * _width * components];
 	
    tempin = new float[_original_width * _original_height * 
 							 components * sizeof(float)];
