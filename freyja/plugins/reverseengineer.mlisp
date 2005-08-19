@@ -19,9 +19,9 @@
 		(button "Generate a mesh?" eMode eReverseEngineer)
 		(button "Erase model" eMode eReverseEngineerDelete)
 
-		(hbox 0 1 0 1 1
-			(label "Filename" 0.0 0.5)
-			(textbox eReverseEngineerFilename))
+		;; Input filename
+		(label "Filename" 0.0 0.5)
+		(textbox eReverseEngineerFilename)
 
 		;; Vertex extractor
 		(hbox 1 0 0 1 0 (hsep))

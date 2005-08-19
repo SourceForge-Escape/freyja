@@ -2432,6 +2432,59 @@ int FreyjaModel::loadTexture(const char *filename)
 	return -100;
 }
 
+
+int FreyjaModel::loadTextureBuffer(unsigned char *image, 
+										unsigned int width, 
+										unsigned int height, 
+										unsigned int bpp, 
+										Texture::ColorMode type)
+{
+	int err = 0;
+
+
+	if (image == 0x0 || width == 0 || height == 0 || bpp == 0)
+		return -1;
+
+#ifdef NO_GLU_IN_UPLOAD_SCALE_HERE 
+	FreyjaImage img;
+
+	switch (type)
+	{
+	case Texture::RGBA:
+		img.loadPixmap(image, width, height, FreyjaImage::RGBA_32);
+		img.scaleImage(1024, 1024);
+		delete [] image;
+		img.getImage(&image);
+		width = img.getWidth();
+		height = img.getHeight();		
+		break;
+
+	default:
+		;
+	}
+#endif
+
+	if (mFlags & fLoadTextureInSlot)
+	{
+		err = mTexture.loadBufferSlot(image, width, height, type, bpp,
+									  mTextureId);
+	}
+	else
+	{
+		mTextureId = mTexture.loadBuffer(image, width, height, type, bpp);
+
+		printf("-- %i\n", mTextureId);
+	}
+
+	if (err < 0)
+	{
+		printf("MaterialManager::loadTextureBuffer> ERROR Loading buffer\n");
+	}
+
+	return err;
+}
+
+
 int FreyjaModel::saveMaterial(const char *filename)
 {
 	int32 mIndex = freyjaGetCurrentMaterial();
@@ -2479,13 +2532,11 @@ int FreyjaModel::saveMaterial(const char *filename)
 	fprintf(f, "[Material]\n");
 	fprintf(f, "Name=%s\n", name);
 
-	// FIXME
-	//
-	//if (getTextureName())
-	//{
-	//	fprintf(f, "TextureName=%s\n", getTextureName());
-	//}
-	//
+	if (freyjaGetMaterialTextureName(mIndex))
+	{
+		fprintf(f, "TextureName=%s\n", freyjaGetMaterialTextureName(mIndex));
+	}
+
 	//fprintf(f, "EnableBlending=%s\n", 
 	//		  (m_flags & fEnable_Blending) ? "true" : "false");
 
@@ -2535,36 +2586,6 @@ int FreyjaModel::saveMaterial(const char *filename)
 	fclose(f);
 
 	return 0;
-}
-
-
-int FreyjaModel::loadTextureBuffer(unsigned char *image, 
-										unsigned int width, 
-										unsigned int height, 
-										unsigned int bpp, 
-										Texture::ColorMode type)
-{
-	int err = 0;
-
-
-	if (mFlags & fLoadTextureInSlot)
-	{
-		err = mTexture.loadBufferSlot(image, width, height, type, bpp,
-									  mTextureId);
-	}
-	else
-	{
-		mTextureId = mTexture.loadBuffer(image, width, height, type, bpp);
-
-		printf("-- %i\n", mTextureId);
-	}
-
-	if (err < 0)
-	{
-		printf("MaterialManager::loadTextureBuffer> ERROR Loading buffer\n");
-	}
-
-	return err;
 }
 
 

@@ -660,9 +660,10 @@ int UTPackage::load(const char *filename)
 			/* Multiple valid keys, so let's look for common 0 byte */
 			// mKeyXOR = 0xCE;
 			// mKeyXOR = 0x73;
+			unsigned int whence = ftell(mStream);
 			fseek(mStream, 0x23, SEEK_SET);
 			fread(&mKeyXOR, 1, 1, mStream);
-			fseek(mStream, 0x1C, SEEK_SET);
+			fseek(mStream, whence, SEEK_SET);
 		}
 		else
 		{
@@ -804,14 +805,15 @@ int UTPackage::load(const char *filename)
 		mHeader.exportTable[i].objName = getIndex(mStream);
 		dRead(&mHeader.exportTable[i].objFlags, 4, 1, mStream);
 		mHeader.exportTable[i].serialSize = getIndex(mStream);
-		mHeader.exportTable[i].serialOffset = getIndex(mStream);
+		mHeader.exportTable[i].serialOffset = getIndex(mStream) + mOffset;
 
 		printf("\texportTable[%u] { class %i, super %i, package %u, name %i\n",i,
 				 mHeader.exportTable[i].objClass, mHeader.exportTable[i].objSuper,
 				 mHeader.exportTable[i].package, mHeader.exportTable[i].objName);
-		printf("\t   flags %u, serialSz %i bytes, serialOff %i }\n",
+		printf("\t   flags %u, serialSz %i bytes, serialOff %i (0x%x) }\n",
 				 mHeader.exportTable[i].objFlags,
 				 mHeader.exportTable[i].serialSize, 
+				 mHeader.exportTable[i].serialOffset, 
 				 mHeader.exportTable[i].serialOffset);
 	}
 
@@ -884,19 +886,18 @@ int UTPackage::load(const char *filename)
 				 ((nameIndex < 0) ? "Null" :
 				  mHeader.nameTable[nameIndex].objName));
 
-		index = useIndex(mHeader.exportTable[i].objName, &type);
+		index = mHeader.exportTable[i].objName;
 
 		printf("         Name '%s'\n", 
 				 ((type == UTPackage::UT_NULL) ? "Null" :
 				  mHeader.nameTable[index].objName));
 
-		sz = useIndex(mHeader.exportTable[i].serialSize, &type);
+		sz = mHeader.exportTable[i].serialSize;
 		printf("         Size %i bytes\n", sz);
 
-		off = useIndex(mHeader.exportTable[i].serialOffset, &type);
+		off = mHeader.exportTable[i].serialOffset;
 		printf("         Offset 0x%x (%u bytes)\n", off, off);
 
-		off += mOffset;
 
 		/* Seek back to the object */
 		fseek(mStream, off, SEEK_SET);
@@ -930,6 +931,7 @@ int UTPackage::load(const char *filename)
 
 			if (f2)
 			{
+#ifdef THIS_IS_A_BAD_JOKE_OF_BUFFER_CODE_I_HATE_TO_SAY
 				for (k = 0, j = 0; k < sz; k += j)
 				{
 					if (sz - k >= 512)
@@ -944,6 +946,13 @@ int UTPackage::load(const char *filename)
 					dRead(buf, j, 1, mStream);
 					fwrite(buf, j, 1, f2);
 				}
+#else // Make sure it's correct, before optimizing...
+				for (j = 0; j < sz; ++j)
+				{
+					dRead(buf, 1, 1, mStream);
+					fwrite(buf, 1, 1, f2);
+				}
+#endif
 
 				fclose(f2);
 			}
@@ -951,6 +960,7 @@ int UTPackage::load(const char *filename)
 			fseek(mStream, off, SEEK_SET);
 		}
 
+#ifdef NON_RAW_EXPORT_ALLOWED
 		/* Exported dump to usable external formats */
 		if (mFlags & fDiskDump && nameIndex > 0 &&
 			 strcmp("Texture", mHeader.nameTable[nameIndex].objName) == 0)
@@ -964,6 +974,7 @@ int UTPackage::load(const char *filename)
 		{
 			loadSkeletalMesh(mStream);
 		}
+#endif
 	}
 
 	fclose(mStream);
@@ -1201,11 +1212,14 @@ int UTPackage::getArrayIndex(FILE *f)
 
 int UTPackage::getIndex(FILE *f)
 {
+#define DONT_USE_OLD_SCHOOL_INDEX_READER_ALGORITHM
+#ifdef DONT_USE_OLD_SCHOOL_INDEX_READER_ALGORITHM
 	unsigned int index, data;
 	int vindex;
 	unsigned short shift = 6;
 	unsigned char b;
 	bool sign;
+
 
 	dRead(&b, 1, 1, f);
 	sign = (b & INDEX_SIGN_BIT) != 0;
@@ -1226,6 +1240,48 @@ int UTPackage::getIndex(FILE *f)
 	vindex = index;
 	
 	return ((sign) ? -vindex : index); // vindex);
+#else
+	int val;
+	char b0, b1, b2, b3, b4;
+                                                                               
+	val = 0;
+   
+	dRead(&b0, 1, 1, f);
+   
+	if (b0 & 0x40)
+	{
+		dRead(&b1, 1, 1, f);
+ 
+		if (b1 & 0x80)
+		{
+			dRead(&b2, 1, 1, f);
+ 
+			if (b2 & 0x80)
+			{
+				dRead(&b3, 1, 1, f);
+ 
+				if (b3 & 0x80)
+				{
+					dRead(&b4, 1, 1, f);
+					val = b4;
+				}
+				
+				val = (val << 7) + (b3 & 0x7f);
+			}
+			
+			val = (val << 7) + (b2 & 0x7f);
+		}
+		
+		val = (val << 7) + (b1 & 0x7f);
+	}
+	
+	val = (val << 6) + (b0 & 0x3f);
+   
+	if (b0 & 0x80)
+		val = -val;
+
+	return val;
+#endif
 }
 
 
