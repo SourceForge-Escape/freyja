@@ -42,6 +42,52 @@
 #define hex_dump_file(f, size) hexDump(f, 0x0, size)
 #define hex_dump_buffer(buffer, size) hexDump(0x0, buffer, size)
 
+
+unsigned char *buffer_from_utpak(FILE *f, unsigned int signature, unsigned int offset, unsigned int size, unsigned char key)
+{
+	unsigned char *buffer = 0x0;
+	unsigned int i;
+
+
+	if (!f)
+	{
+		return 0x0;
+	}
+
+	switch (signature)
+	{
+	case 0x9E2a83c1:
+		i = ftell(f);
+		fseek(f, offset, SEEK_SET);
+		buffer = new unsigned char[size];
+		fread(buffer, 1, size, f);
+		fseek(f, i, SEEK_SET);
+		break;
+
+
+	case 0x0069004c:
+		i = ftell(f);
+		fseek(f, offset, SEEK_SET);
+		buffer = new unsigned char[size];
+		fread(buffer, 1, size, f);
+		fseek(f, i, SEEK_SET);
+
+		for (i = 0; i < size; ++i)
+		{
+			buffer[i] ^= key;
+		}
+		break;
+
+
+	default:
+		printf("Not a known UT package 0x%x\n", signature);
+	}
+
+
+	return buffer;
+}
+
+
 void decryptBufferXOR(unsigned char *buffer, unsigned int size, char key)
 {
 	unsigned int i;
@@ -913,7 +959,6 @@ int UTPackage::load(const char *filename)
 		if (mFlags & fDiskDump)
 		{
 			char buf[512];
-			unsigned int k, j;
 			sprintf(buf, "/tmp/utpak/%s/%s.raw", 
 					  mHeader.nameTable[nameIndex].objName,
 					  mHeader.nameTable[index].objName);
@@ -931,7 +976,11 @@ int UTPackage::load(const char *filename)
 
 			if (f2)
 			{
-#ifdef THIS_IS_A_BAD_JOKE_OF_BUFFER_CODE_I_HATE_TO_SAY
+#define UTP_DUMP_WITH_BUFFERS
+#ifdef UTP_DUMP_WITH_BUFFERS
+#  ifdef UTP_STACK_BUFFERS
+				unsigned int k, j;
+
 				for (k = 0, j = 0; k < sz; k += j)
 				{
 					if (sz - k >= 512)
@@ -946,6 +995,15 @@ int UTPackage::load(const char *filename)
 					dRead(buf, j, 1, mStream);
 					fwrite(buf, j, 1, f2);
 				}
+#   else  // HEAP BUFFERS
+				unsigned char *buffer = buffer_from_utpak(mStream, mHeader.signature, off, sz, mKeyXOR);
+
+				if (buffer)
+				{
+					fwrite(buffer, sz, 1, f2);
+					delete [] buffer;
+				}
+#   endif
 #else // Make sure it's correct, before optimizing...
 				for (j = 0; j < sz; ++j)
 				{
