@@ -33,6 +33,9 @@ int main(int argc, char *argv[])
 		printf("%f\n", f);
 	}
 
+	printf("# %i\n", ftell(in));
+
+
 	fclose(in);
 
 	return 0;
