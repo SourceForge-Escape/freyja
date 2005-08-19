@@ -265,6 +265,8 @@ class FreyjaImage
 	 * Post : Loads MTK palette from file
 	 --------------------------------------------*/
 
+
+   void scaleImage(unsigned int maxW, unsigned int maxH);
    void scaleImage();
 	/*--------------------------------------------
 	 * Created  : ???? by Mongoose, based on gluScaleImage

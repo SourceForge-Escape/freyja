@@ -153,7 +153,6 @@ index_t freyjaTextureCreateFilename(const char *filename)
 	if (image.loadImage(filename) != 0)
 		return INDEX_INVALID;
 
-	image.scaleImage();
 	image.getImage(&pixmap);
 
 	switch (image.getColorMode())

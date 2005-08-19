@@ -1099,6 +1099,21 @@ void freyjaMaterialBlendDestination(index_t materialIndex, uint32 factor)
 }
 
 
+bool freyjaMaterialIsUnique(FreyjaMaterial *mat)
+{
+	uint32 i, count = gFreyjaMaterials.size();
+
+
+	for (i = 0; i < count; ++i)
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex];
+	}
+
+	return false;
+}
+
+
 FreyjaMaterial *freyjaGetMaterialClass(index_t materialIndex)
 {
 	if (materialIndex < gFreyjaMaterials.size())

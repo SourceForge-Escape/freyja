@@ -476,6 +476,20 @@ void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
 #endif
 
 
+void mgtk_event_gldisplay()
+{
+	if (gFreyjaControl)
+		gFreyjaControl->updateDisplay();
+}
+
+
+void mgtk_event_glresize(unsigned int width, unsigned int height)
+{
+	if (gFreyjaControl)
+		gFreyjaControl->resizeDisplay(width, height);
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
@@ -547,6 +561,7 @@ void freyja_handle_text(int event, char *text)
 	}
 }
 
+
 void freyja_callback_get_image_data_rgb24(const char *filename, 
 										unsigned char **image, 
 										int *width, int *height)
@@ -561,13 +576,13 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 	if (!img.loadImage(filename))
 	{
 		img.setColorMode(FreyjaImage::RGB_24);
-		img.scaleImage();
+		img.scaleImage(256, 256);
 		img.getImage(&swap);
 		*image = swap;
 		*width = img.getWidth();
 		*height = img.getHeight();
 
-		printf("SUCCESS freyja\n");
+		//printf("SUCCESS freyja\n");
 	}
 }
 
@@ -1447,6 +1462,19 @@ int freyja_create_confirm_dialog(char *dialog_icon,
 }
 
 
+void freyja_event_file_dialog_notify(char *filename)
+{
+	if (gFreyjaControl)
+		gFreyjaControl->handleFilename(filename);
+}
+
+
+void freyja_set_main_window_title(char *title)
+{
+	mgtk_application_window_title(title);
+}
+
+
 void freyja_refresh_material_interface()
 {
 	vec4_t ambient, diffuse, specular, emissive;
@@ -1520,7 +1548,20 @@ void freyja_refresh_material_interface()
 		mgtk_togglebutton_value_set(790, false);
 	}
 
+	if (flags & fFreyjaMaterial_Texture)
+	{
+		mgtk_togglebutton_value_set(eMaterialTex, true);
+	}
+	else
+	{
+		mgtk_togglebutton_value_set(eMaterialTex, false);
+	}
+
 	mgtk_textentry_value_set(799, freyjaGetMaterialName(mIndex));
+	mgtk_spinbutton_value_set(eSetMaterialTexture,
+                              freyjaGetMaterialTexture(mIndex));	
+	mgtk_textentry_value_set(eSetTextureNameA,
+                             freyjaGetMaterialTextureName(mIndex));
 }
 
 
@@ -1579,6 +1620,12 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 }
 
 
+void event_register_control(FreyjaControl *c)
+{
+	gFreyjaControl = c;
+}
+
+
 int main(int argc, char *argv[])
 {
 // Link up mgtk DLL stubs to these implementations
@@ -1623,41 +1670,6 @@ int main(int argc, char *argv[])
 }
 
 
-////////////////////////////////////////////////
-// OLD CODE
-////////////////////////////////////////////////
-
-void event_register_control(FreyjaControl *c)
-{
-	gFreyjaControl = c;
-}
-
-
-void freyja_event_file_dialog_notify(char *filename)
-{
-	if (gFreyjaControl)
-		gFreyjaControl->handleFilename(filename);
-}
-
-
-void mgtk_event_gldisplay()
-{
-	if (gFreyjaControl)
-		gFreyjaControl->updateDisplay();
-}
-
-
-void mgtk_event_glresize(unsigned int width, unsigned int height)
-{
-	if (gFreyjaControl)
-		gFreyjaControl->resizeDisplay(width, height);
-}
 
 
 
-
-
-void freyja_set_main_window_title(char *title)
-{
-	mgtk_application_window_title(title);
-}
