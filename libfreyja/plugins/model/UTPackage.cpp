@@ -54,41 +54,17 @@ unsigned char *buffer_from_utpak(FILE *f, unsigned int signature, unsigned int o
 		return 0x0;
 	}
 
-	switch (signature)
-	{
-	case 0x9E2a83c1:
-		i = ftell(f);
-		fseek(f, offset, SEEK_SET);
-		buffer = new unsigned char[size];
-		fread(buffer, 1, size, f);
-		fseek(f, i, SEEK_SET);
-		break;
-
-
-	case 0x0069004c:
-		i = ftell(f);
-		fseek(f, offset, SEEK_SET);
-		buffer = new unsigned char[size];
-		fread(buffer, 1, size, f);
-		fseek(f, i, SEEK_SET);
-
-		for (i = 0; i < size; ++i)
-		{
-			buffer[i] ^= key;
-		}
-		break;
-
-
-	default:
-		printf("Not a known UT package 0x%x\n", signature);
-	}
-
+	i = ftell(f);
+	fseek(f, offset, SEEK_SET);
+	buffer = new unsigned char[size];
+	fread(buffer, 1, size, f);
+	fseek(f, i, SEEK_SET);
 
 	return buffer;
 }
 
 
-void decryptBufferXOR(unsigned char *buffer, unsigned int size, char key)
+void decryptBufferXOR(unsigned char *buffer, unsigned int size, unsigned char key)
 {
 	unsigned int i;
 
@@ -1000,6 +976,8 @@ int UTPackage::load(const char *filename)
 
 				if (buffer)
 				{
+					if (mKeyXOR)
+						decryptBufferXOR(buffer, sz, mKeyXOR);
 					fwrite(buffer, sz, 1, f2);
 					delete [] buffer;
 				}
