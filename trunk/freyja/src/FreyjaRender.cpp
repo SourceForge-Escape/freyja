@@ -947,8 +947,9 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		
 		glEnable(GL_TEXTURE_2D);
 		
-		BindTexture(mModel->getCurrentTextureIndex()+1);
-		
+		//BindTexture(mModel->getCurrentTextureIndex()+1);
+		freyjaApplyMaterial(mModel->getCurrentTextureIndex());
+
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
 		glVertex2f(x, y);
@@ -1942,9 +1943,6 @@ void FreyjaRender::renderUVWindow()
 	{
 		if (!mesh.getPolygon(i, face))
 			continue;
-		
-		if (face.material != (int)mModel->getCurrentTextureIndex())
-			continue;
 
 		if (mesh.id == (int)mModel->getCurrentMesh())
 		{
@@ -1956,6 +1954,18 @@ void FreyjaRender::renderUVWindow()
 		else
 		{
 			glColor3fv(mColorWireframe);
+		}
+		
+		if (face.material != (int)mModel->getCurrentTextureIndex())
+		{
+			if (mesh.id == (int)mModel->getCurrentMesh())
+			{
+				glColor3fv(GREEN);
+			}
+			else
+			{
+				continue;
+			}
 		}		
 
 		// Mongoose: Draw texel polygons
