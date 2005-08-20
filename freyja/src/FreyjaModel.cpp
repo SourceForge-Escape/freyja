@@ -2340,7 +2340,8 @@ int FreyjaModel::loadTexture(const char *filename)
 	FreyjaImage img;
 	unsigned char *image;
 	unsigned int w, h;
-
+	index_t matIndex;
+	int err = -1;
 
 	// Mongoose 2002.01.10, Evil...
 	if (FreyjaFileReader::compareFilenameExtention(filename, ".lst") == 0)
@@ -2402,15 +2403,15 @@ int FreyjaModel::loadTexture(const char *filename)
 		switch (img.getColorMode())
 		{
 		case FreyjaImage::RGBA_32:
-			loadTextureBuffer(image, w, h, 32, Texture::RGBA);
+			err = loadTextureBuffer(image, w, h, 32, Texture::RGBA);
 			break;
 
 		case FreyjaImage::RGB_24:
-			loadTextureBuffer(image, w, h, 24, Texture::RGB);
+			err = loadTextureBuffer(image, w, h, 24, Texture::RGB);
 			break;
 
 		case FreyjaImage::INDEXED_8:
-			loadTextureBuffer(image, w, h, 8, Texture::INDEXED);
+			err = loadTextureBuffer(image, w, h, 8, Texture::INDEXED);
 			break;
 
 		default:
@@ -2418,6 +2419,14 @@ int FreyjaModel::loadTexture(const char *filename)
 			
 			if (image)
 				delete [] image;
+
+			if (err > -1)
+			{
+				//matIndex = freyjaMaterialCreate();
+				freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
+				freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+				freyja_refresh_material_interface();
+			}
 
 			return -2;
 		}
@@ -2471,7 +2480,7 @@ int FreyjaModel::loadTextureBuffer(unsigned char *image,
 	}
 	else
 	{
-		mTextureId = mTexture.loadBuffer(image, width, height, type, bpp);
+		err = mTextureId = mTexture.loadBuffer(image, width, height, type, bpp);
 
 		printf("-- %i\n", mTextureId);
 	}
