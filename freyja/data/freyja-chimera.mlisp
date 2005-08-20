@@ -407,47 +407,37 @@
 			)  ;; end tab
 
 
+			;; UV editor tab
 			(tab "Skin" eModeSkin
-
-				 (hbox 1 0 0 1 0
-					   (toolbar
-						(toolbar_button "gtk-new" "New"	
-								"New document"		eMode eNewFile)
-						
-						(toolbar_button "gtk-open" "Open"
-								"Open texture file"	eMode	eOpenFileTexture)
-
-						(toolbar_button "gtk-save-as" "Save"
-								"Save document"		eMode  eSaveFile))
-
-						(togglebutton "Slot Load" 0 eMode eTextureSlotLoadToggle))
-
-
-					 (hbox 1 0 0 1 0 
-							 (togglebutton "Merge" 0 eMode CMD_MISC_TEXEL_COMBINE)
-							 (button "Set Tex" eMode eSetMeshTexture))
+				(hbox 1 0 0 1 0 
+					(togglebutton "Merge Texcoords" 0 eMode eTexcoordCombine))
+				(hbox 1 0 0 1 0
+					(button "Set Mesh Material" eMode eSetMeshTexture))
 					 
-					 (hbox 1 0 0 1 0 
-							 (label "Texture index: " 0.0 0.5) 
-							 (spinbutton 0 0 100 503))
+				(hbox 1 0 0 1 0 
+					(label "Material index: " 0.0 0.5) 
+					(spinbutton 0 0 100 503))
 
-					(hbox 1 0 0 1 0
-						(label "Face index:" 0.0 0.5) 
-						(spinbutton 0 0 100 ePolygonIterator))
+				(hbox 1 0 0 1 0
+					(label "Face index:" 0.0 0.5) 
+					(spinbutton 0 0 100 ePolygonIterator))
 
-					 (hbox 1 0 0 1 0
-							 (label "Mesh index: " 0.0 0.5) 
-							 (spinbutton 0 0 100 eMeshIterator))
+				(hbox 1 0 0 1 0
+					(label "Mesh index: " 0.0 0.5) 
+					(spinbutton 0 0 100 eMeshIterator))
 
-					(hbox 1 0 0 1 0
-						(label "Polyon op:" 0.0 0.5)
-						(vbox 1 0 0 1 0
-							(button "Set texture" eMode eSetPolygonTexture)
-							(button "Generate UVMap" eMode eTmpUVMapOn)
-							(button "Clear UVMap" eMode eTmpUVMapOff)
-							(button "PolyMap"	eMode	ePolyMapTexturePolygon)
-							(button "Mirror X" eMode eMirrorUV_X)
-							(button "Mirror Y" eMode eMirrorUV_Y))))
+				;; Per face editing
+				(hbox 1 1 0 1 1	(label "Face operations" 0.0 0.5))
+				(hbox 1 1 0 1 1	(hsep))
+				(hbox 1 0 0 1 0
+					(vbox 1 0 0 1 0
+						(button "Set material" eMode eSetPolygonTexture)
+						(button "Generate UVMap" eMode eTmpUVMapOn)
+						(button "Clear UVMap" eMode eTmpUVMapOff)
+						(button "PolyMap"	eMode	ePolyMapTexturePolygon)
+						(button "Mirror X" eMode eMirrorUV_X)
+						(button "Mirror Y" eMode eMirrorUV_Y)
+						(button "Flag alpha" eMode eCurrentFaceFlagAlpha))))
 
 
 			  (tab "Animation" eModeAnimation
@@ -542,25 +532,23 @@
 
 						(togglebutton "Slot Load" 0 eMode eMaterialSlotLoadToggle))
 
-					(hbox 1 1 0 1 1
-						(label "Current Material" 0.0 0.5)
-						(spinbutton 0 0 1024 eSelectMaterial))
-						
+
+					;; Material selector / name editor
+					(label "Material Select" 0.0 0.5)
 					(hbox 0 1 0 1 1
-						(label "Name" 0.0 0.5)
+						;;(label "Name" 0.0 0.5)
+						(spinbutton 0 0 1024 eSelectMaterial)
 						(textbox eSetMaterialName))
 
+					;; Texture loader interface
+					(hbox 1 0 0 1 0 (hsep))
+					(label "Material's Texture" 0.0 0.5)
 					(hbox 0 1 0 1 1
-						(label "Texture" 0.0 0.5) 
+						;;(label "Texture" 0.0 0.5)
+						(spinbutton 0 0 100 eSetMaterialTexture)
 						(textbox eSetTextureNameA)
-						;(button "..." eMode eOpenFileTexture);)
-						(toolbar
-							(toolbar_button "gtk-open" "Open"
-								"Open texture file"	eMode	eOpenFileTexture)))
-
-					(hbox 1 0 0 1 0 
-						(label "Texture Index" 0.0 0.5) 
-							(spinbutton 0 0 100 eSetMaterialTexture))
+						(togglebutton "Slot" 0 eMode eTextureSlotLoadToggle)
+						(button "..." eMode eOpenFileTexture))
 
 					(hbox 1 0 0 1 0 (hsep))
 

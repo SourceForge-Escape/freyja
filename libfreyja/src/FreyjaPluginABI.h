@@ -1064,6 +1064,12 @@ extern "C" {
 	 * Post : Returns 1 if exists
 	 ------------------------------------------------------*/
 
+	void freyjaPolygonFlagAlpha(index_t polygonIndex, char on);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists

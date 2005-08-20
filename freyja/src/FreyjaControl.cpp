@@ -1566,7 +1566,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case CMD_MISC_TEXEL_COMBINE:
+	case eTexcoordCombine:
 		if (mEventMode != TEXEL_COMBINE)
 		{
 			mEventMode = TEXEL_COMBINE;
