@@ -2201,6 +2201,9 @@ void FreyjaRender::DrawMaterialEditWindow()
 	float pos[4] = {128.0, 128.0, 128.0, 1.0};
 
 
+	glPushMatrix();
+	glTranslatef(-8.0f, 0.0f, 0.0f);
+
 	/* Setup lighting */	
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_LIGHTING);
@@ -2216,11 +2219,40 @@ void FreyjaRender::DrawMaterialEditWindow()
 #else
 	/* Cast light on sphere colored/detailed by material */
 	glPushMatrix();
-	glRotatef(180.0f, 1, 0, 0);
+	glRotatef(90.0f, 1, 0, 0);
+	glRotatef(180.0f, 0, 1, 0);
 	freyjaApplyMaterial(freyjaGetCurrentMaterial());
 	mglDrawSphere(128, 128, 10.0);
 	glPopMatrix();
 #endif
+
+	const float x = 12.0f, y = -8.0f, z = 0.0f, w = 16.0f, h = 16.0f, s = 1.001f;
+
+	glPushMatrix();
+	glDisable(GL_LIGHTING);
+
+	glColor3fv(BLACK);
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x*s, y*s, z);
+	glVertex3f(x*s, (y+h)*s, z);
+	glVertex3f((x+w)*s, (y+h)*s, z);
+	glVertex3f((x+w)*s, y*s, z);
+	glEnd();
+
+	glColor3fv(WHITE);
+	freyjaApplyMaterial(freyjaGetCurrentMaterial());
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 1.0);
+	glVertex3f(x, y, z);
+	glTexCoord2f(0.0, 0.0);
+	glVertex3f(x, y+h, z);
+	glTexCoord2f(1.0, 0.0);
+	glVertex3f(x+w, y+h, z);
+	glTexCoord2f(1.0, 1.0);
+	glVertex3f(x+w, y, z);
+	glEnd();	
+	glPopMatrix();
+	glPopMatrix();
 }
 
 
