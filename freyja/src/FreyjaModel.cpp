@@ -53,6 +53,7 @@ extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 // FIXME: Add set/clear methods to replace old get/set flags crap
 
 
+
 void eTextureSlotLoadToggle()
 {
 	bool on = FreyjaModel::toggleFlag(FreyjaModel::fLoadTextureInSlot);
@@ -73,6 +74,12 @@ void eMaterialSlotLoadToggle()
 void eModelUpload(char *filename)
 {
 	gFreyjaModel->loadModel(filename);
+}
+
+
+void eCurrentFaceFlagAlpha()
+{
+	freyjaPolygonFlagAlpha(gFreyjaModel->getCurrentPolygon(), 1);
 }
 
 
@@ -114,6 +121,7 @@ void FreyjaModelEventsAttach()
 	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallback::add("eCurrentFaceFlagAlpha", &eCurrentFaceFlagAlpha);
 	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
 }
 
@@ -2340,7 +2348,6 @@ int FreyjaModel::loadTexture(const char *filename)
 	FreyjaImage img;
 	unsigned char *image;
 	unsigned int w, h;
-	index_t matIndex;
 	int err = -1;
 
 	// Mongoose 2002.01.10, Evil...

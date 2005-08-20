@@ -178,6 +178,8 @@ typedef struct egg_polygon_s {
 	Vector <egg_vertex_t *> r_vertex;
 	Vector <egg_texel_t *> r_texel;
 
+	unsigned char flags; // ext not saved to disk
+
 } egg_polygon_t;
 
 

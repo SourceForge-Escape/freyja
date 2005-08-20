@@ -134,6 +134,8 @@ typedef enum {
 	eGenerateCylinder,
 	eGenerateSphere,
 
+	eTexcoordCombine,
+
 	eSetMeshTexture,
 	eSetPolygonTexture,
 	eMirrorUV_X,
@@ -267,7 +269,6 @@ typedef enum {
 	CMD_MISC_INFO,
 	CMD_MISC_FPS,
 	CMD_MISC_WIDGETSHOWN,
-	CMD_MISC_TEXEL_COMBINE,
 	CMD_MISC_BBOX_SELECT,
 	CMD_MISC_GEN_TEXMAP_XY,
 	CMD_MISC_VERTEX_UV,
