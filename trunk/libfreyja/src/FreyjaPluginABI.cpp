@@ -1090,10 +1090,10 @@ int32 freyjaLoadModel(const char *filename)
 					/* Read in new material */
 					mat->serialize(r);
 
-					bool uniqueMaterial = 
+					// FIXME use string name matching like skeletalkeyframes
+                    // to avoid dupe textures in the future
 
-					if (uniqueMaterial &&
-                        FreyjaFileReader::doesFileExist(mat->getTextureName()))
+					if (FreyjaFileReader::doesFileExist(mat->getTextureName()))
 					{
 						index_t textureIndex = freyjaTextureCreateFilename(mat->getTextureName());
 
@@ -2141,6 +2141,25 @@ void freyjaPolygonDelete(index_t polygonIndex)
 	{
 		gEgg->delPolygon(polygonIndex);
 	}
+}
+
+
+void freyjaPolygonFlagAlpha(index_t polygonIndex, char on)
+{
+	egg_polygon_t *polygon;
+
+	if (gEgg)
+	{
+		polygon = gEgg->getPolygon(polygonIndex);
+
+		if (polygon)
+		{
+			polygon->flags |= fPolygon_Alpha;
+
+			if (!on)
+				polygon->flags ^= fPolygon_Alpha;
+		}
+	}	
 }
 
 
@@ -3958,7 +3977,7 @@ index_t freyjaGetPolygonFlags(index_t polygonIndex)
 	if (!polygon)
 		return 0;
 
-	return polygon->vertex.end();
+	return polygon->vertex.end();//FIXME | polygon->flags;
 }
 
 
