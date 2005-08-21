@@ -14,6 +14,12 @@ typedef unsigned char byte;
 byte gCommonBytes1[] = {0x00, 0x09, 0x01, 0x00};
 byte gCommonBytes2[] = {0x00, 0x06, 0x01, 0x00};
 
+// FIXME: Make it adaptive to match mat2 patterns later
+char isKnownMat2(unsigned char mat2)
+{
+	return (mat2 == 0x9 || mat2 == 0x6 || mat2 == 0x8);
+}
+
 
 // Old school UT Index reader, see my UTPackage for a newer algorithm
 int read_index(FILE *f, unsigned int &bytes)
@@ -175,7 +181,7 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 			break;
 
 		case 1:
-			if (b == 0x09 || b == 0x06)
+			if (isKnownMat2(b))
 			{
 				++state;
 				//printf("@ %i, state = %i\n", offset, state);
@@ -300,7 +306,7 @@ int find_mesh(FILE *in, unsigned int offset, unsigned int count)
 			count = i - 1;
 			max = oldmax;
 		}
-		else if (mat != 0x0 || !(mat2 == 0x9 || mat2 == 0x6) || u != 1)
+		else if (mat != 0x0 || !isKnownMat2(mat2) || u != 1)
 		{
 			SKIP printf("# Material ids not expected\n");
 			SKIP printf("#    f%i %i %i %i %i %i %i\n", i, x, y, z, mat, mat2, u);
@@ -482,12 +488,17 @@ int main(int argc, char *argv[])
 	fseek(in, 89, SEEK_SET);
 	count = read_index(in, bytes);
 
+	if (count == 0)
+	{
+		count = read_index(in, bytes);
+	}
+
 	printf("# faceCount is likely to be %i\n", count);
 
 	if (argc > 2)
 		count = atoi(argv[2]);
 
-	unsigned int guessOffset = 89, guessFailsafe = 0;
+	unsigned int guessOffset = ftell(in), guessFailsafe = 0;
 
 	if (argc > 3)
 		guessOffset = atoi(argv[3]);

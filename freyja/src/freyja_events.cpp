@@ -1501,24 +1501,6 @@ void freyja_refresh_material_interface()
 	freyja_event_set_color(eColorMaterialEmissive, 
 						   emissive[0], emissive[1], emissive[2], emissive[3]);
 
-#ifdef NOT_BACKPORTED
-	freyja_event_set_color(eColorLightAmbient, 
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[0],
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[1],
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[2],
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[3]);
-	freyja_event_set_color(eColorLightDiffuse, 
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[0],
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[1],
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[2],
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[3]);
-	freyja_event_set_color(eColorLightSpecular,
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[0],
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[1],
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[2],
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[3]);
-#endif
-
 	mgtk_spinbutton_value_set(700, ambient[0]);	
 	mgtk_spinbutton_value_set(701, ambient[1]);
 	mgtk_spinbutton_value_set(702, ambient[2]);
@@ -1548,6 +1530,7 @@ void freyja_refresh_material_interface()
 		mgtk_togglebutton_value_set(790, false);
 	}
 
+mgtk_togglebutton_value_set(eMaterialTex, false);
 	if (flags & fFreyjaMaterial_Texture)
 	{
 		mgtk_togglebutton_value_set(eMaterialTex, true);
@@ -1562,6 +1545,24 @@ void freyja_refresh_material_interface()
                               freyjaGetMaterialTexture(mIndex));	
 	mgtk_textentry_value_set(eSetTextureNameA,
                              freyjaGetMaterialTextureName(mIndex));
+
+#ifdef UMBRA_LIGHTS_NOT_BACKPORTED
+	freyja_event_set_color(eColorLightAmbient, 
+						   OpenGLFreyjaScene::mMaterialLight.mAmbient[0],
+						   OpenGLFreyjaScene::mMaterialLight.mAmbient[1],
+						   OpenGLFreyjaScene::mMaterialLight.mAmbient[2],
+						   OpenGLFreyjaScene::mMaterialLight.mAmbient[3]);
+	freyja_event_set_color(eColorLightDiffuse, 
+						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[0],
+						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[1],
+						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[2],
+						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[3]);
+	freyja_event_set_color(eColorLightSpecular,
+						   OpenGLFreyjaScene::mMaterialLight.mSpecular[0],
+						   OpenGLFreyjaScene::mMaterialLight.mSpecular[1],
+						   OpenGLFreyjaScene::mMaterialLight.mSpecular[2],
+						   OpenGLFreyjaScene::mMaterialLight.mSpecular[3]);
+#endif
 }
 
 

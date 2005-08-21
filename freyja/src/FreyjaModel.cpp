@@ -11,7 +11,7 @@
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -2427,11 +2427,11 @@ int FreyjaModel::loadTexture(const char *filename)
 			if (image)
 				delete [] image;
 
-			if (err > -1)
+			if (err >= 0)
 			{
-				//matIndex = freyjaMaterialCreate();
 				freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
 				freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+				freyja_print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
 				freyja_refresh_material_interface();
 			}
 

@@ -1071,6 +1071,14 @@ UTPackage.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
+lineageIIextract.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test NAME=lineageIIextract BUILDDIR=$(BUILD_TEST_DIR) \
+	OBJS="$(BUILD_TEST_DIR)/extractFace.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
+	LD_FLAGS="-lstdc++"
+	
+
 PerlinNoise.test:
 	mkdir -p $(BUILD_TEST_DIR)
 	$(CC) -Wall -g -pipe -O0 -lstdc++ -Isrc \

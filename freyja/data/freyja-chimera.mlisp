@@ -243,9 +243,6 @@
 				(toolbar_togglebutton false "light.png" "Light" 
 					"Light used when rendering"		eMode	eRenderLighting)
 
-				(toolbar_togglebutton false "material.png" "Material"
-					"Material used when rendering"	eMode	eRenderMaterial)
-
 				(toolbar_togglebutton false "patch.png" "Patch"
 					"Render/enable patch tool"	eMode	eRenderPatch)
 
@@ -420,11 +417,11 @@
 
 				(hbox 1 0 0 1 0
 					(label "Face index:" 0.0 0.5) 
-					(spinbutton 0 0 100 ePolygonIterator))
+					(spinbutton 0 0 100000 ePolygonIterator))
 
 				(hbox 1 0 0 1 0
 					(label "Mesh index: " 0.0 0.5) 
-					(spinbutton 0 0 100 eMeshIterator))
+					(spinbutton 0 0 1000 eMeshIterator))
 
 				;; Per face editing
 				(hbox 1 1 0 1 1	(label "Face operations" 0.0 0.5))
