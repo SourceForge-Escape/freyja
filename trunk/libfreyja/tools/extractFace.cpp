@@ -17,20 +17,22 @@
 
 typedef unsigned char byte;
 
-byte gCommonBytes[] = 
+// Facet pattern, the 2nd byte is often varied while others very common
+// 0x00, 0x09, 0x01, 0x00, 0x00, 0x00
+
+byte gMat2Bytes[] = 
 {
-	0x00, 0x09, 0x01, 0x00, 0x00, 0x00,
-	0x00, 0x06, 0x01, 0x00, 0x00, 0x00
+	0x09, 0x06, 0x08, 0x14, 0x29, 0x1D
 };
 
 unsigned int gGuessFailSafe = 48; //12;
+unsigned int adpativeMat2 = 0x00; // start guessing new ones ( very slow )
 
 // FIXME: Make it adaptive to match mat2 patterns later
-char isKnownMat2(unsigned char mat2)
+char isKnownMat2(unsigned char mat2)//, unsigned int depth)
 {
-	return (mat2 == 0x9 || mat2 == 0x6 || mat2 == 0x8);
-	//return (mat2 == 0x9 || mat2 == 0x6 || mat2 == 0x8 || 
-	//        mat2 == 0x14 || mat2 == 0x29 || 0x1D); // includes weapons
+	return (mat2 == 0x9 || mat2 == 0x6 || mat2 == 0x8 ||   //  players
+	        mat2 == 0x14 || mat2 == 0x29 || mat2 == 0x1D); //  weapons
 }
 
 
@@ -561,6 +563,13 @@ int main(int argc, char *argv[])
 			       wedgeOffset, wedgeCount,
 			       faceOffset, faceCount);
 		}
+	}
+	else
+	{
+#ifdef UNIX
+		fprintf(stderr, "# Failed to extract '%s'\n", argv[1]);
+#endif
+		printf("# Failed to extract '%s'\n", argv[1]);
 	}
 
 	fclose(in);
