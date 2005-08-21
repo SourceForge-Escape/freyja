@@ -54,7 +54,7 @@ const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
 const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
 const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
-const float ORANGE[]       = {  1.0,  0.0,  7.0, 1.0 };
+const float ORANGE[]       = {  1.0,  7.0,  0.0, 1.0 };
 const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
 const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
 const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
@@ -1369,7 +1369,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			// FIXME: mesh.material
 			freyjaApplyMaterial(freyjaGetCurrentMaterial());
 		}
-		
+
 		color = mColorWireframe;
 
 		if ((int)mesh.id == (int)mModel->getCurrentMesh())
@@ -1443,6 +1443,10 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			{
 				if (mesh.getPolygon(i, mesh.frame, face))
 				{
+					// FIXME - move to pass2
+					if (face.flags & fPolygon_Alpha)  
+						continue;
+
 					freyjaApplyMaterial(face.material); // material!
 
 					switch (face.count)
@@ -1947,7 +1951,9 @@ void FreyjaRender::renderUVWindow()
 		if (mesh.id == (int)mModel->getCurrentMesh())
 		{
 			if (face.id == (int)mModel->getCurrentPolygon())
-				glColor3fv(RED);    
+				glColor3fv(RED);
+			else if (face.flags & fPolygon_Alpha)  
+				glColor3fv(ORANGE);
 			else
 				glColor3fv(CYAN);
 		}

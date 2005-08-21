@@ -140,6 +140,7 @@ public:
 	Vector3d texcoords[6];
 	Vector3d normals[6];
 	vec4_t colors[6];
+	unsigned char flags;
 	long material;
 	long id;
 	unsigned int count; // vertex count

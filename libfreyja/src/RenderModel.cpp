@@ -51,6 +51,7 @@ bool RenderMesh::createRenderPolygon(RenderPolygon &face,
 	face.count = 0;
 	face.material = polygon.shader;
 	face.id = polygon.id;
+	face.flags = polygon.flags;
 
 	external_texel = !polygon.r_texel.empty();
 

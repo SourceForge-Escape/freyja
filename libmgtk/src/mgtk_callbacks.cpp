@@ -228,6 +228,7 @@ void mgtk_togglebutton_value_set(int event, bool val)
 	Vector<GtkWidget*> *widgets;
 	GtkWidget *test;
 	unsigned int i;
+	gboolean is_active = val ? TRUE : FALSE;
 
 
 	widgets = gWidgetMap[event];
@@ -241,10 +242,11 @@ void mgtk_togglebutton_value_set(int event, bool val)
 
 		if (test && GTK_IS_TOGGLE_BUTTON(test))
 		{
-			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(test)) != val ? TRUE : FALSE)
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(test)) != 
+				is_active)
 			{
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(test),  
-											 val ? TRUE : FALSE);
+											 is_active);
 			}
 		}
 		else
