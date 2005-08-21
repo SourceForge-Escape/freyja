@@ -1206,6 +1206,7 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 	mPolygons.pushBack(polygon);
 	polygon->id = mPolygons.size() - 1;
 	polygon->shader = shader;
+	polygon->flags = 0;
 
 	for (i = texel.begin(); i < texel.end(); ++i)
 	{

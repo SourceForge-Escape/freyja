@@ -19,6 +19,7 @@
  Unknown
 
  Index faceCount = 268 @ 89 // Seems to always be at this offset or will be 0
+                            // sometimes it starts at 90
 
  short[268] @ 91 - 627
 
