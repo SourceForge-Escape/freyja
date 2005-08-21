@@ -6,18 +6,31 @@
 #   include <unistd.h>
 #endif
 
+#define RANGE_CHECK
+#define AVG_SCALE 5 //4
+
 #define MAX(max, s) max = (s > max) ? s : max
 #define SKIP if (dump != 1)
+#define UV_OUT_OF_RANGE -4
+#define XYZ_OUT_OF_RANGE -5
+#define FOUND 311
 
 typedef unsigned char byte;
 
-byte gCommonBytes1[] = {0x00, 0x09, 0x01, 0x00};
-byte gCommonBytes2[] = {0x00, 0x06, 0x01, 0x00};
+byte gCommonBytes[] = 
+{
+	0x00, 0x09, 0x01, 0x00, 0x00, 0x00,
+	0x00, 0x06, 0x01, 0x00, 0x00, 0x00
+};
+
+unsigned int gGuessFailSafe = 48; //12;
 
 // FIXME: Make it adaptive to match mat2 patterns later
 char isKnownMat2(unsigned char mat2)
 {
 	return (mat2 == 0x9 || mat2 == 0x6 || mat2 == 0x8);
+	//return (mat2 == 0x9 || mat2 == 0x6 || mat2 == 0x8 || 
+	//        mat2 == 0x14 || mat2 == 0x29 || 0x1D); // includes weapons
 }
 
 
@@ -169,6 +182,7 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 
 		switch (state)
 		{
+		case 10:
 		case 0:
 			if (b == 0x00)
 			{
@@ -180,6 +194,7 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 			}
 			break;
 
+		case 11:
 		case 1:
 			if (isKnownMat2(b))
 			{
@@ -199,6 +214,7 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 			}
 			break;
 
+		case 12:
 		case 2:
 			if (b == 0x01)
 			{
@@ -217,6 +233,9 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 			}
 			break;
 
+		case 13:
+		case 14:
+		case 15:
 		case 3:
 		case 4:
 		case 5:
@@ -229,6 +248,11 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 					fix = 11;
 					state = 6; // partial match will be fine today
 				}
+				else if (state == 15)
+				{
+					fix = 22;
+					state = 16; // partial match will be fine today
+				}
 
 				//printf("@ %i, state = %i\n", offset, state);
 			}
@@ -236,11 +260,15 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 			{
 				//printf("@ %i '0x%x != 0x0' rewind to %i\n", offset, b, offset - state);
 				fseek(f, -3/*state*/, SEEK_CUR);
+				offset -= 3;
 				state = 0;
 			}
 			break;
 
-		case 6:		// Trap state
+		case 6:		// Trap state or double check state
+			//state = 10;
+			
+		case 16:
 			break;
 
 		default:
@@ -248,18 +276,12 @@ unsigned int guess_face_offset(FILE *f, unsigned long size)
 		}
 	}
 
-	if (state == 6)
+	if (state == 6 || state == 16)
 		return offset - fix; // account for 's s s' too
 
 	return offset;
 }
 
-
-#define RANGE_CHECK
-
-#define UV_OUT_OF_RANGE -4
-#define XYZ_OUT_OF_RANGE -5
-#define FOUND 311
 
 unsigned int wedgeOffset, wedgeCount, faceOffset, faceCount, vertexOffset, vertexCount;
 
@@ -295,7 +317,7 @@ int find_mesh(FILE *in, unsigned int offset, unsigned int count)
 
 		avg = total/((i+1)*3);
 
-		if (x > avg*4 || y > avg*4 || z > avg*4)
+		if (x > avg*AVG_SCALE || y > avg*AVG_SCALE || z > avg*AVG_SCALE)
 		{
 			if (i == 0) i = 1;
 
@@ -503,7 +525,7 @@ int main(int argc, char *argv[])
 	if (argc > 3)
 		guessOffset = atoi(argv[3]);
 
-	while (found != FOUND && ++guessFailsafe < 12)
+	while (found != FOUND && ++guessFailsafe < gGuessFailSafe)
 	{
 		fseek(in, guessOffset, SEEK_SET);
 		offset = guess_face_offset(in, size);
@@ -513,6 +535,12 @@ int main(int argc, char *argv[])
 		guessOffset = offset + 12;
 		fseek(in, offset, SEEK_SET);
 		found = find_mesh(in, offset, count);
+
+		if (offset >= size)
+		{
+			printf("# Reached end of file @ %i / %i\n", offset, size);
+			break;
+		}
 	}
 
 	if (found == FOUND)
