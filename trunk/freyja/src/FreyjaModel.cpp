@@ -27,6 +27,8 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <freyja/FreyjaFileReader.h> 
+#define BONE_0_9_3_API
+#include <freyja/BoneABI.h> 
 #include <mgtk/ResourceEvent.h>
 
 #include "freyja_events.h"

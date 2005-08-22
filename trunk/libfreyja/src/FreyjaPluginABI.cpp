@@ -40,14 +40,13 @@
 
 #include "ActionManager.h"
 #include "CopyModel.h"
-#include "Freyja.h"
 #include "FreyjaCamera.h"
 #include "FreyjaFSM.h"
 #include "FreyjaFileWriter.h"
 #include "FreyjaImage.h"
 #include "FreyjaLight.h"
 #include "FreyjaMaterial.h"
-#include "FreyjaSkeleton.h"
+#include "FreyjaScene.h"
 #include "FreyjaTexture.h"
 
 #include "FreyjaPluginABI.h"
@@ -99,9 +98,7 @@ Egg *freyja__getEggBackend();
 
 
 /* Until Freyja replaces Egg backend, let these vector pools float here */
-Vector<FreyjaSkeletalAnimation *> gFreyjaAnimations; 
 Vector<FreyjaMetaData *> gFreyjaMetaData; 
-Vector<FreyjaSkeleton *>  gFreyjaSkeletons;
 Vector<FreyjaCamera *>  gFreyjaCameras;
 Vector<FreyjaLight *>  gFreyjaLights;
 Vector<CopyModel *>  gCopyModels;
@@ -114,6 +111,20 @@ int32 gCurrentFreyjaPlugin = -1;
 long FreyjaPluginDesc::mNextId = 1;
 index_t gFreyjaCurrentVertex = INDEX_INVALID;
 index_t gFreyjaCurrentMesh = INDEX_INVALID;
+
+
+// OBSOLETE
+uint32 freyjaGetAnimationCount()
+{
+	return 0;
+}
+
+
+// OBSOLETE
+uint32 freyjaGetAnimationFrameCount(index_t animationIndex)
+{	
+	return 0;
+}
 
 
 index_t freyjaGetCurrentModelIndex()
@@ -179,15 +190,6 @@ char freyjaIsVertexAllocated(index_t vertexIndex)
 	vertex = gEgg->getVertex(vertexIndex);
 
 	return (vertex != 0x0);
-}
-
-
-char freyjaIsBoneAllocated(index_t boneIndex)
-{
-	if (gEgg)
-		return (gEgg->getTag(boneIndex) != 0x0);
-
-	return 0;
 }
 
 
@@ -321,53 +323,7 @@ void freyjaMeshFrameTransform(index_t meshIndex, uint32 frame,
 }
 
 
-void freyjaBoneTransform(index_t boneIndex, 
-							freyja_transform_action_t action, 
-							vec_t x, vec_t y, vec_t z)
-{
-	enum Egg::egg_transform type;
-	Egg *egg = 0x0;
 
-	// FIXME: Only one model -- ignore model index for now
-
-	egg = freyja__getEggBackend();
-
-	if (!egg)
-		return;
-
-	switch (action)
-	{
-	case fTranslate:
-		type = Egg::TRANSLATE;
-		break;
-
-	case fRotate:
-		type = Egg::ROTATE;
-		break;
-
-	case fScale:
-		type = Egg::SCALE;
-		break;
-
-	case fScaleAboutPoint:
-		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
-		return;
-		break;
-
-	case fRotateAboutPoint:
-		type = Egg::ROTATE_ABOUT_CENTER;
-		break;
-	}
-
-	if (type != Egg::ROTATE)
-	{
-		egg->Transform(egg->getTag(boneIndex), type, x, y, z);
-	}
-	else
-	{
-		egg->TagRotateAbout(boneIndex, x, y, z);
-	}
-}
 
 
 void freyjaMeshAddPolygon(index_t meshIndex, index_t polygonIndex)
@@ -1043,9 +999,9 @@ int32 freyjaLoadModel(const char *filename)
 
 			memset(buffer, 0, 64);
 			r.readCharString(64, buffer);
-			freyjaBoneName1s(index, buffer);
-			freyjaBoneFlags1i(index, 0x0);
-			freyjaBoneParent1i(index, r.readLong());
+			freyjaBoneName(index, buffer);
+			freyjaBoneFlags(index, 0x0);
+			freyjaBoneParent(index, r.readLong());
 			flags = r.readLong();
  
 			for (j = 0; j < 3; ++j)
@@ -1060,14 +1016,14 @@ int32 freyjaLoadModel(const char *filename)
 				for (j = 0; j < 3; ++j)
 					xyz[j] = r.readFloat32();
 
-				freyjaBoneRotateEulerXYZ3fv(index, xyz);
+				freyjaBoneRotateEuler3fv(index, xyz);
 			}
 			else
 			{
 				for (j = 0; j < 4; ++j)
 					wxyz[j] = r.readFloat32();
 
-				freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+				freyjaBoneRotateQuat4fv(index, wxyz);
 			}
 
 			freyjaEnd(); // FREYJA_BONE
@@ -1134,7 +1090,7 @@ int32 freyjaLoadModel(const char *filename)
 			{
 				if (bones[i] == (long)freyjaGetBoneParent(bones[j]))
 				{
-					freyjaBoneAddChild1i(bones[i], bones[j]);
+					freyjaBoneAddChild(bones[i], bones[j]);
 				}
 			} 		
 		} 
@@ -1221,12 +1177,12 @@ int32 freyjaSaveModel(const char *filename)
 				w.writeFloat32(xyz[j]);
 
 #ifdef QUAT_BACKEND
-			freyjaGetBoneRotationQuatWXYZ4fv(index, wxyz);
+			freyjaGetBoneRotationQuat4fv(index, wxyz);
 			
 			for (j = 0; j < 4; ++j)
 				w.writeFloat32(wxyz[j]);
 #else
-			freyjaGetBoneRotationEulerXYZ3fv(index, xyz);
+			freyjaGetBoneRotationEuler3fv(index, xyz);
 			w.writeLong(0x0); // pad out
 			for (j = 0; j < 3; ++j)
 				w.writeFloat32(xyz[j]);
@@ -3154,6 +3110,67 @@ void freyjaMeshPosition(index_t meshIndex, vec3_t xyz)
 }
 
 
+#ifdef BONE_0_9_3_API
+
+
+char freyjaIsBoneAllocated(index_t boneIndex)
+{
+	if (gEgg)
+		return (gEgg->getTag(boneIndex) != 0x0);
+
+	return 0;
+}
+
+
+void freyjaBoneTransform(index_t boneIndex, 
+							freyja_transform_action_t action, 
+							vec_t x, vec_t y, vec_t z)
+{
+	enum Egg::egg_transform type;
+	Egg *egg = 0x0;
+
+	// FIXME: Only one model -- ignore model index for now
+
+	egg = freyja__getEggBackend();
+
+	if (!egg)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		type = Egg::TRANSLATE;
+		break;
+
+	case fRotate:
+		type = Egg::ROTATE;
+		break;
+
+	case fScale:
+		type = Egg::SCALE;
+		break;
+
+	case fScaleAboutPoint:
+		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
+		return;
+		break;
+
+	case fRotateAboutPoint:
+		type = Egg::ROTATE_ABOUT_CENTER;
+		break;
+	}
+
+	if (type != Egg::ROTATE)
+	{
+		egg->Transform(egg->getTag(boneIndex), type, x, y, z);
+	}
+	else
+	{
+		egg->TagRotateAbout(boneIndex, x, y, z);
+	}
+}
+
+
 void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex)
 {
 	freyjaVertexWeight(vertexIndex, 1.0f, boneIndex);
@@ -3345,6 +3362,153 @@ void freyjaBoneRotateQuatWXYZ4fv(index_t boneIndex, vec4_t wxyz)
 {
 	freyjaBoneRotateQuatWXYZ4f(boneIndex, wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
 }
+
+
+void freyjaGetBoneName(index_t index, uint32 size, char *name)
+{
+	egg_tag_t *bone = gEgg->getTag(index);
+		
+	if (bone)
+	{
+		strncpy(name, bone->name, size);
+	}
+}
+
+
+index_t freyjaBoneCreate(index_t skeletonIndex)
+{
+	if (!gEgg)
+		return INDEX_INVALID;
+
+	egg_tag_t *tag = gEgg->addTag(0, 0, 0, 0x0);
+
+	return tag->id;
+}
+
+
+void freyjaBoneAddKeyFrame(index_t boneIndex, index_t frameIndex, 
+							vec_t time, vec3_t translate, vec3_t rotate)
+{
+	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
+
+	if (bone)
+	{
+		egg_keyframe_bone_t *key = new egg_keyframe_bone_t;
+
+		HEL_VEC3_COPY(translate, key->translate);
+		HEL_VEC3_COPY(rotate, key->rotate);
+		key->time = time;
+		key->frameIndex = frameIndex;
+
+		bone->keyframes.pushBack(key);
+	}
+}
+
+
+void freyjaBoneParent(index_t index)
+{
+	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
+
+	if (bone)
+	{
+		bone->parent = index;
+	}	
+}
+
+
+index_t freyjaGetBoneParent(index_t index)
+{
+	egg_tag_t *bone = gEgg->getTag(index);
+
+	if (bone && bone->parent >= 0)
+	{
+		return bone->parent;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaGetBoneRotationQuatWXYZ4fv(index_t index, vec4_t wxyz)
+{
+	egg_tag_t *bone = gEgg->getTag(index);
+	
+	if (bone)
+	{
+		Quaternion q = Quaternion(helDegToRad(bone->rot[2]), // roll
+								  helDegToRad(bone->rot[0]), // pitch
+								  helDegToRad(bone->rot[1]));// yaw
+		q.getQuaternion4fv(wxyz);
+	}
+}
+
+
+index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
+{
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
+	
+	if (bone)
+	{
+		return bone->id;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaGetBoneChild(index_t boneIndex, index_t childIndex)
+{
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
+	
+	if (bone)
+	{
+		return bone->slave[childIndex];
+	}
+
+	return INDEX_INVALID;
+}
+
+
+uint32 freyjaGetBoneChildCount(index_t boneIndex)
+{
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
+	
+	if (bone)
+	{
+		return bone->slave.size();
+	}
+
+	return 0;
+}
+
+
+void freyjaGetBoneRotationEulerXYZ3fv(index_t boneIndex, vec3_t xyz)
+{
+	egg_tag_t *bone = gEgg->getTag(boneIndex);
+	
+	if (bone)
+	{
+		xyz[0] = bone->rot[0];
+		xyz[1] = bone->rot[1];
+		xyz[2] = bone->rot[2];
+	}
+}
+
+
+void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz)
+{
+	if (gEgg)
+	{
+		egg_tag_t *bone = gEgg->getTag(boneIndex);
+
+		xyz[0] = bone->center[0];
+		xyz[1] = bone->center[1];
+		xyz[2] = bone->center[2];
+	}
+}
+
+
+#endif
 
 
 index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex, uint32 element)
@@ -4053,410 +4217,6 @@ index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, int32 element)
 index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex)
 {
 	return 0; // egg can only hold one skeleton, and root is always moved to 0
-}
-
-
-void freyjaGetBoneName(index_t index, uint32 size, char *name)
-{
-	egg_tag_t *bone = gEgg->getTag(index);
-		
-	if (bone)
-	{
-		strncpy(name, bone->name, size);
-	}
-}
-
-
-index_t freyjaBoneCreate(index_t skeletonIndex)
-{
-	if (!gEgg)
-		return INDEX_INVALID;
-
-	egg_tag_t *tag = gEgg->addTag(0, 0, 0, 0x0);
-
-	return tag->id;
-}
-
-
-void freyjaBoneAddKeyFrame(index_t boneIndex, index_t frameIndex, 
-							vec_t time, vec3_t translate, vec3_t rotate)
-{
-	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
-
-	if (bone)
-	{
-		egg_keyframe_bone_t *key = new egg_keyframe_bone_t;
-
-		HEL_VEC3_COPY(translate, key->translate);
-		HEL_VEC3_COPY(rotate, key->rotate);
-		key->time = time;
-		key->frameIndex = frameIndex;
-
-		bone->keyframes.pushBack(key);
-	}
-}
-
-
-void freyjaBoneParent(index_t index)
-{
-	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
-
-	if (bone)
-	{
-		bone->parent = index;
-	}	
-}
-
-
-index_t freyjaGetBoneParent(index_t index)
-{
-	egg_tag_t *bone = gEgg->getTag(index);
-
-	if (bone && bone->parent >= 0)
-	{
-		return bone->parent;
-	}
-
-	return INDEX_INVALID;
-}
-
-
-void freyjaGetBoneRotationQuatWXYZ4fv(index_t index, vec4_t wxyz)
-{
-	egg_tag_t *bone = gEgg->getTag(index);
-	
-	if (bone)
-	{
-		Quaternion q = Quaternion(helDegToRad(bone->rot[2]), // roll
-								  helDegToRad(bone->rot[0]), // pitch
-								  helDegToRad(bone->rot[1]));// yaw
-		q.getQuaternion4fv(wxyz);
-	}
-}
-
-
-index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		return bone->id;
-	}
-
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaGetBoneChild(index_t boneIndex, index_t childIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		return bone->slave[childIndex];
-	}
-
-	return INDEX_INVALID;
-}
-
-
-uint32 freyjaGetBoneChildCount(index_t boneIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		return bone->slave.size();
-	}
-
-	return 0;
-}
-
-
-void freyjaGetBoneRotationEulerXYZ3fv(index_t boneIndex, vec3_t xyz)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		xyz[0] = bone->rot[0];
-		xyz[1] = bone->rot[1];
-		xyz[2] = bone->rot[2];
-	}
-}
-
-
-void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz)
-{
-	if (gEgg)
-	{
-		egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-		xyz[0] = bone->center[0];
-		xyz[1] = bone->center[1];
-		xyz[2] = bone->center[2];
-	}
-}
-
-
-///////////////////////////////////////////////////////////////////////
-// Animation ( 0.9.3 ABI, Can't be used with freyjaIterators )
-///////////////////////////////////////////////////////////////////////
-
-FreyjaSkeletalAnimation *freyjaGetAnimation(int32 animationIndex);
-
-
-index_t freyjaAnimationCreate()
-{
-	index_t animationIndex = gFreyjaAnimations.size();
-
-	gFreyjaAnimations.pushBack(new FreyjaSkeletalAnimation());
-	gFreyjaAnimations[animationIndex]->mId = animationIndex;
-
-	return animationIndex;
-	
-}
-
-
-index_t freyjaAnimationBoneCreate(int32 animationIndex, 
-							   const char *name, index_t boneIndex)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-
-	if (anim)
-	{
-		return anim->newBoneKeyFrame(name, boneIndex);
-	}	
-
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaAnimationBoneKeyFrameCreate(int32 animationIndex, index_t boneIndex,
-									   vec_t time, vec3_t xyz, vec4_t wxyz)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-
-	if (anim)
-	{
-		return anim->newKeyFrame(boneIndex, time, xyz, wxyz);
-	}	
-
-	return INDEX_INVALID;
-}
-
-
-
-/* Animation Accessors */
-
-FreyjaSkeletalAnimation *freyjaGetAnimation(int32 animationIndex)
-{
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-	{
-		return gFreyjaAnimations[animationIndex]; 
-	}	
-
-	return 0x0;
-}
-
-
-uint32 freyjaGetAnimationCount()
-{
-	return gFreyjaAnimations.size();
-}
-
-
-uint32 freyjaGetAnimationFrameCount(index_t animationIndex)
-{
-	egg_animation_t *animation_frame;
-
-	if (!gEgg)
-		return 0;
-
-	animation_frame = gEgg->getAnimation(animationIndex);
-
-	if (animation_frame && animation_frame->frame.size())
-	{
-		return animation_frame->frame.size();
-	}
-	
-	return 0;
-}
-
-
-uint32 freyjaGetAnimationBoneCount(index_t animationIndex)
-{
-	if (animationIndex < gFreyjaAnimations.size())
-	{
-		FreyjaSkeletalAnimation *anim = gFreyjaAnimations[animationIndex];
-
-		if (anim)
-		{
-			return anim->getBoneCount();
-		}
-	}	
-
-	return 0;	
-}
-
-
-uint32 freyjaGetAnimationBoneKeyFrameCount(index_t animationIndex,
-											index_t boneIndex)
-{
-	if (animationIndex < gFreyjaAnimations.size())
-	{
-		FreyjaSkeletalAnimation *anim = gFreyjaAnimations[animationIndex];
-
-		if (anim)
-		{
-			return anim->getKeyFrameCountForBone(boneIndex);
-		}
-	}	
-
-	return 0;	
-}
-
-
-/* Animation Mutators */
-
-void freyjaAnimationName(int32 animationIndex, const char *name)
-{
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-	{
-		if (gFreyjaAnimations[animationIndex])
-		{
-			gFreyjaAnimations[animationIndex]->setName(name);
-		}
-	}
-}
-
-
-void freyjaAnimationFrameRate(int32 animationIndex, vec_t frameRate)
-{
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-	{
-		if (gFreyjaAnimations[animationIndex])
-		{
-			gFreyjaAnimations[animationIndex]->mFrameRate = frameRate;
-		}
-	}
-}
-
-
-void freyjaAnimationTime(int32 animationIndex, vec_t time)
-{
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-	{
-		if (gFreyjaAnimations[animationIndex])
-		{
-			gFreyjaAnimations[animationIndex]->mTime = time;
-		}
-	}
-}
-
-
-void freyjaAnimationSubsetRoot(int32 animationIndex, int32 startBone)
-{
-	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-	{
-		if (gFreyjaAnimations[animationIndex])
-		{
-			gFreyjaAnimations[animationIndex]->mStartBone = startBone;
-		}
-	}
-}
-
-
-//void freyjaAnimationSubsetCount(int32 animationIndex, int32 boneCount)
-//{
-//	if (animationIndex > -1 && animationIndex < (long)gFreyjaAnimations.size())
-//	{
-//		if (gFreyjaAnimations[animationIndex])
-//		{
-//			gFreyjaAnimations[animationIndex]->mBoneCount = boneCount;
-//		}
-//	}
-//}
-
-
-void freyjaAnimationBoneName(int32 animationIndex, index_t boneIndex,
-							 const char *name)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-	if (anim)
-	{
-		anim->setBoneName(boneIndex, name);
-	}
-	
-}
-
-
-void freyjaAnimationKeyFrameTime(int32 animationIndex, index_t boneIndex, 
-								 int32 keyFrameIndex, vec_t time)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-	if (anim)
-	{
-		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
-														 keyFrameIndex);
-
-		if (keyframe)
-			keyframe->setTime(time);
-	}
-}
-
-
-void freyjaAnimationKeyFramePosition(int32 animationIndex, index_t boneIndex, 
-									 int32 keyFrameIndex, vec3_t position)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-	if (anim)
-	{
-		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
-														 keyFrameIndex);
-
-		if (keyframe)
-			keyframe->setPosition(position);
-	}
-}
-
-
-void freyjaAnimationKeyFrameOrientationXYZ(int32 animationIndex, index_t boneIndex, 
-										   int32 keyFrameIndex, vec3_t xyz)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-	if (anim)
-	{
-		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
-														 keyFrameIndex);
-
-		if (keyframe)
-			keyframe->setOrientationByEuler(xyz);
-	}
-}
-
-
-void freyjaAnimationKeyFrameOrientationWXYZ(int32 animationIndex,
-											index_t boneIndex, 
-											int32 keyFrameIndex,vec4_t wxyz)
-{
-	FreyjaSkeletalAnimation *anim = freyjaGetAnimation(animationIndex);
-
-	if (anim)
-	{
-		FreyjaKeyFrame *keyframe = anim->getBoneKeyFrame(boneIndex, 
-														 keyFrameIndex);
-
-		if (keyframe)
-			keyframe->setOrientationByQuaternion(wxyz);
-	}
 }
 
 

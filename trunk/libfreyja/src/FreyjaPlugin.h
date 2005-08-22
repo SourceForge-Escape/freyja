@@ -53,7 +53,7 @@
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
 
-#include "Freyja.h"
+#include "freyja.h"
 #include "FreyjaPrinter.h"
 #include "FreyjaPluginABI.h"
 

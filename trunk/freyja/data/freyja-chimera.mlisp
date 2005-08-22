@@ -66,8 +66,8 @@
 	(menubar
 		(submenu "_File"
 			(menu_item "_New"			"C-n"	eNewFile	"gtk-new")
-			(menu_item "_Open..."		"C-o"	eOpenFile	"gtk-open")
-			(menu_item "Ap_pend..."  			eAppendFile	"gtk-paste")
+			(menu_item "_Open Model..."	"C-o"	eOpenFileModel	"gtk-open")
+			(menu_item "Ap_pend Model..."  		eAppendFile		"gtk-paste")
 
 			(menu_seperator)
 
@@ -75,9 +75,9 @@
 
 			(menu_seperator)
 
-			(menu_item "_Save"			"C-s"	eSaveFile	"gtk-save")
-			(menu_item "Save _As..."	"S-C-s"	eSaveAsFile	"gtk-save-as")
-			(menu_item "_Revert"     			eRevertFile	"gtk-revert-to-saved")
+			(menu_item "_Save Model"			"C-s"	eSaveFileModel	"gtk-save")
+			(menu_item "Save Model _As ..."	"S-C-s"	eSaveAsFileModel	"gtk-save-as")
+			(menu_item "_Revert Model"     			eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
 			(menu_item "Proper_ties"		eInfo		"gtk-properties")
