@@ -812,8 +812,8 @@ bool FreyjaControl::event(int command)
 			}
 			break;
 		case MATERIAL_EDIT_MODE:
-			i = freyjaMaterialCreate();
-			freyja_print("New material [%i] created.", i);
+			//freyjaMaterialDelete(freyjaCurrentMaterial());
+			//freyja_print("New material [%i] deleted.", i);
 			break;
 		}
 		break;
@@ -982,6 +982,60 @@ bool FreyjaControl::event(int command)
 		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 		freyja_event_file_dialog("Append to model...");
 		freyja_print("Append mode is default Open mode in this build...");
+		break;
+
+	case eSaveAsFileModel:
+		mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+		freyja_event_file_dialog("Save model as...");
+		break;
+
+	case eSaveFileModel:
+		if (mCleared) // safety
+		{
+			freyja_print("No changes to be saved.");
+			break;
+		}
+
+		if (mRecentFiles.empty())
+		{
+			mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
+			freyja_event_file_dialog("Save model as...");				
+		}
+		else
+		{
+			if (!mModel->saveModel(mRecentFiles[mRecentFiles.end()-1]))
+				freyja_print("Model '%s' Saved",
+							 mRecentFiles[mRecentFiles.end()-1]);
+			else
+				freyja_print("Model '%s' failed to save",
+							 mRecentFiles[mRecentFiles.end()-1]);
+		}
+		break;
+
+	case eOpenFileModel:
+		if (!mCleared)
+		{
+			if (freyja_create_confirm_dialog("gtk-dialog-question",
+											 "You must close the current model to open a new one.",
+											 "Open the new model and lose unsaved changes?",
+											 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
+			{
+				mModel->clear();
+				freyja_print("Closing Model...");
+				freyja_set_main_window_title(BUILD_NAME);
+
+				
+				mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+				freyja_event_file_dialog("Open model...");
+				//freyja_event_file_dialog2("Open model...", eLoadModelText);
+			}
+		}
+		else
+		{
+			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
+			freyja_event_file_dialog("Open model...");
+			//freyja_event_file_dialog2("Open model...", eLoadModelText);
+		}
 		break;
 
 	case eRevertFile:

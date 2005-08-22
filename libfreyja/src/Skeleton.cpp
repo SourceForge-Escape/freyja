@@ -23,32 +23,9 @@
 
 using namespace freyja;
 
-uint32 Bone::mUIDCount = 0;
+uint32 Skeleton::mUIDCount = 0;
 
-Vector<Bone *> gBones;
-
-
-Bone::Bone()
-{
-	/* Set gobal index via mUID, and store a pointer using a vector */
-	mUID = gBones.size(); 
-	gBones.pushBack(this);
-}
-
-
-Bone *Bone::getGobalBoneByUID(uint32 uid)
-{
-	if (uid < gBones.size())
-		return gBones[uid];
-
-	return 0x0;
-}
-
-
-uint32 Bone::getUID()
-{
-	return mUID;
-}
+Vector<Skeleton *> gSkeletons;
 
 
 ////////////////////////////////////////////////////////////

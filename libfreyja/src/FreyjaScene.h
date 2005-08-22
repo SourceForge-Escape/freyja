@@ -105,7 +105,6 @@
 #include "FreyjaCamera.h"
 #include "FreyjaLight.h"
 #include "FreyjaMesh.h"
-#include "FreyjaSkeleton.h"
 #include "FreyjaMaterial.h"
 
 
@@ -177,7 +176,7 @@ public:
 
 	vec_t mLastTime;    // render use mostly
 
-	Vector<FreyjaKeyFrame *> mKeyFrames;  // keyCount / mBoneCount = frames
+	//Vector<FreyjaKeyFrame *> mKeyFrames;  // keyCount / mBoneCount = frames
 };
 
 
@@ -413,7 +412,7 @@ public:
 
 	Vector<FreyjaAnimation *> animations; /* Animation container */
 
-	Vector<FreyjaSkeleton*> skeletons;    /* Skeletal data for this model */
+	//Vector<FreyjaSkeleton*> skeletons;    /* Skeletal data for this model */
 
 	Vector<FreyjaMesh *> meshes;          /* Geometery structure */
 

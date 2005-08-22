@@ -19,6 +19,7 @@
  * Mongoose - Created, Moved from FreyjaModel for better abstraction
  ==========================================================================*/
 
+#include "freyja.h"
 #include "FreyjaPluginABI.h"
 
 #include "CopyModel.h"

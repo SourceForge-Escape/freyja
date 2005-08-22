@@ -30,12 +30,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <assert.h>
-
 #include "FreyjaFileWriter.h"
-#include "Freyja.h"
 
+#include "FreyjaScene.h"
 
 
 ////////////////////////////////////////////////////////////
@@ -68,7 +66,7 @@ bool FreyjaScene::exportScene(const char *filename)
 }
 
 unsigned int FreyjaScene::getMeshCount() { return meshes.end(); }
-unsigned int FreyjaScene::getSkeletonCount() { return skeletons.end(); }
+//unsigned int FreyjaScene::getSkeletonCount() { return skeletons.end(); }
 unsigned int FreyjaScene::getAnimationCount() { return animations.end(); }
 unsigned int FreyjaScene::getModelCount() { return models.end(); }
 unsigned int FreyjaScene::getMaterialCount() { return materials.end(); }
@@ -92,7 +90,7 @@ void FreyjaScene::erase()
 	materials.erase();
 	textures.erase();
 	animations.erase();
-	skeletons.erase();
+	//skeletons.erase();
 	meshes.erase();
 	metadata.erase();
 	lights.erase();

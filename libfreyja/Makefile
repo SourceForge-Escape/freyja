@@ -29,7 +29,7 @@ LICENSE=LGPL
 BUILD_SELECT=debug
 BASE_DEFS=-DMODEL_PLUGINS
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
-CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
+CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS -DBONE_0_9_3_API
 CONFIGURE_LNK=
 
 ################################################################
@@ -171,9 +171,10 @@ targets: $(TARGETS)
 
 PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
+	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/CopyModel.o \
 	$(BUILDDIR)/Egg.o \
-	$(BUILDDIR)/Freyja.o \
+	$(BUILDDIR)/FreyjaScene.o \
 	$(BUILDDIR)/FreyjaFSM.o \
 	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/FreyjaPlugin.o \
@@ -186,7 +187,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaMesh.o \
 	$(BUILDDIR)/FreyjaMaterial.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
-	$(BUILDDIR)/FreyjaSkeleton.o \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/PerlinNoise.o \

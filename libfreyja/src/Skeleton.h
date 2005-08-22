@@ -33,8 +33,9 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
-
 #include <mstl/Vector.h>
+#include "freyja.h"
+#include "Bone.h"
 
 
 namespace freyja {
@@ -56,9 +57,9 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	uint32 mSkeletalKeyFrameUID;     /* UID of skeletal keyframe */
+	index_t mSkeletalKeyFrameUID;    /* UID of skeletal keyframe */
 
-	uint32 mRestBoneUID;             /* UID of rest bone */
+	index_t mRestBoneUID;            /* UID of rest bone */
 
 	Quaternion mRotation;            /* Oreintation of this bone */
 
@@ -75,65 +76,6 @@ public:
 									  * to rest bone and this transform */
 };
 
-
-
-class Bone 
-{
-public:
-
-	Bone();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	~Bone();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 getUID();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	static Bone *getGobalBoneByUID(uint32 uid);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-
-	uint32 mSkeletonIndex;           /* The skeleton that owns this bone */
-
-	uint32 mIndex;                   /* Unique identifier in this skeleton */
-
-	uint32 mFlags;                   /* Options bitmap */
-
-	char mName[64];                  /* Human readable identifier */
-
-	int32 mParent;                   /* Parent of this bone */
-
-	Vector <uint32> mChildren;       /* Children bones */
-
-	Quaternion mRotation;            /* Oreintation of this bone */
-
-	Vector3d mTranslation;           /* Offset of this bone from parent */
-
-	Matrix mBoneToWorld;             /* Transform vertices to world coords with
-									  * this cache of the current orientation 
-									  * and translation in matrix form */
-
-
-private:
-	
-	uint32 mUID;                     /* System for allowing gobal references, 
-									  * which are mostly for C API callbacks */
-
-	static uint32 mUIDCount;
-};
 
 
 class Skeleton
@@ -195,10 +137,12 @@ class Skeleton
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	uint32 mUID;                     /* System for allowing gobal references, 
-									  * which are mostly for C API callbacks */
+	index_t mUID;                     /* System for allowing gobal references, 
+									   * which are mostly for C API callbacks */
 
 	static uint32 mUIDCount;
+
+	static Vector<Skeleton *> mGobalPool; /* Storage for gobal access */
 };
 
 
@@ -226,14 +170,16 @@ public:
 
 	char mName[64];
 
+	Skeleton *mRestPose;
+
 	Vector<SkeletalKeyFrame *> mKeyFrames;
 
 private:
 	
-	uint32 mUID;                     /* System for allowing gobal references, 
+	index_t mUID;                    /* System for allowing gobal references, 
 									  * which are mostly for C API callbacks */
 
-	static uint32 mUIDCount;
+	static Vector<SkeletalAnimation *> mGobalPool; /* Storage for gobal access */
 	
 };
 
