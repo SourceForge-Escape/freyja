@@ -38,6 +38,8 @@ typedef enum {
 	eSaveFile,
 	eSaveAsFile,
 	eCloseFile,
+	eSaveFileModel,
+	eSaveAsFileModel,
 	eOpenFileModel,
 	eOpenFileTexture,
 	eAppendFile,

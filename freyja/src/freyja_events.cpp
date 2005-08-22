@@ -659,6 +659,11 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);
 
+
+	r.RegisterInt("eOpenFileModel", eOpenFileModel);
+	r.RegisterInt("eSaveFileModel", eSaveFileModel);
+	r.RegisterInt("eSaveAsFileModel", eSaveAsFileModel);
+
 	r.RegisterInt("eScreenShot", eScreenShot);
 	r.RegisterInt("eShutdown", eShutdown);
 	r.RegisterInt("eNewFile", eNewFile);
