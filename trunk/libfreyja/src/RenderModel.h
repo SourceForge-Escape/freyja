@@ -33,10 +33,13 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
+#include "freyja.h"
+#include "BoneABI.h"
+#include "SkeletonABI.h"
 #include "Egg.h"
 
 
-
+#ifdef BONE_0_9_3_API
 /* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
  * They only use all natural, wholesome Hel math types. */
 
@@ -130,6 +133,107 @@ private:
 	Vector<egg_tag_t *> *mTags;
 };
 
+#else
+
+class RenderBone
+{
+public:
+
+	unsigned int getChildrenCount()
+	{
+		return freyjaGetBoneChildCount(mBoneIndex);
+	}
+
+	long getBoneIndex(unsigned int index)
+	{
+		return mBoneIndex;
+	}
+
+	void set(index_t boneIndex)
+	{
+		mBoneIndex = boneIndex;
+		freyjaGetBoneRotationEuler3fv(boneIndex, rotate.mVec);
+		freyjaGetBoneTranslation3fv(boneIndex, translate.mVec);
+	}
+
+	void set(index_t boneIndex, unsigned int frame)
+	{
+		mBoneIndex = boneIndex;
+		freyjaGetBoneRotationEuler3fv(boneIndex, rotate.mVec);
+		freyjaGetBoneTranslation3fv(boneIndex, translate.mVec);
+		/*
+		unsigned int i, n = tag->keyframes.size();
+		mTag = tag;
+
+		if (n > 0)
+		{
+			for (i = 0; i < n; ++i)
+			{
+				if (tag->keyframes[i]->frameIndex == (int)frame)
+				{
+					translate = Vector3d(tag->keyframes[i]->translate);
+					rotate = Vector3d(tag->keyframes[i]->rotate);
+				}
+			}
+		}
+
+		translate = Vector3d(tag->center);
+		rotate = Vector3d(tag->rot);
+		*/
+	}
+
+	index_t mBoneIndex;
+	Vector3d translate;
+	Vector3d rotate;
+};
+
+
+class RenderSkeleton
+{
+public:
+
+	uint32 getBoneCount()
+	{
+		return freyjaGetSkeletonBoneCount(mSkeletonIndex);
+	}
+
+
+	bool getBoneKeyframe(uint32 index, uint32 frame, RenderBone &bone)
+	{
+		index_t boneIndex = freyjaGetSkeletonBoneIndex(mSkeletonIndex, index);
+		index_t keyframe = INDEX_INVALID;
+
+		if (boneIndex != INDEX_INVALID && keyframe != INDEX_INVALID)
+		{
+			bone.set(boneIndex, keyframe);
+			return true;
+		}
+
+		return false;
+	}
+
+
+	bool getBone(uint32 index, RenderBone &bone)
+	{
+		index_t boneIndex = freyjaGetSkeletonBoneIndex(mSkeletonIndex, index);
+
+		if (boneIndex != INDEX_INVALID)
+		{
+			bone.set(boneIndex);
+			return true;
+		}
+
+		return false;
+	}
+
+	void set(uint32 skeletonIndex)
+	{
+		mSkeletonIndex = skeletonIndex;
+	}
+
+	index_t mSkeletonIndex;
+};
+#endif
 
 
 class RenderPolygon  

@@ -31,6 +31,7 @@
 #include <iostream>
 
 #include <hel/math.h>
+#include <hel/Quaternion.h>
 #include <freyja/FreyjaPlugin.h>
 
 /* Export as C functions */

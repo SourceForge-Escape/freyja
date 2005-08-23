@@ -36,8 +36,8 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 #include "freyja.h"
-
 #include "BoneABI.h"
+#include "SkeletonABI.h"
 
 
 extern "C" {
@@ -320,25 +320,6 @@ extern "C" {
 
 	vec2_t *freyjaGetVertexUV(index_t vertexIndex);
 
-
-	////////////////////////////////////////////////////////////////
-	// Skeleton
-	//
-	////////////////////////////////////////////////////////////////
-
-	index_t freyjaSkeletonCreate();
-
-	void freyjaSkeletonDelete(index_t skeletonIndex);
-
-	index_t freyjaGetCurrentSkeletonIndex();
-
-	// Skeleton accessors /////////////////
-
-	uint32 freyjaGetSkeletonBoneCount(index_t skeletonIndex);
-
-	index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, int32 element);
-
-	uint32 freyjaGetSkeletonRootIndex(index_t skeletonIndex);
 
 
 	////////////////////////////////////////////////////////////////
