@@ -121,7 +121,7 @@ public:
 	 *        Returns PLUGIN_ERROR if Tag doesn't exist
 	 ------------------------------------------------------*/
 
-	void freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z);
+	void getBoneRotation(vec_t *x, vec_t *y, vec_t *z);
 	/*------------------------------------------------------
 	 * Pre  : Bone selected
 	 * Post : 
@@ -200,7 +200,7 @@ public:
 	 * Post : Current group's center is set
 	 ------------------------------------------------------*/
 
-	void freyjaBoneName(const char *name);
+	void boneName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_TAG);
 	 * Post : Set current bones's name
@@ -218,7 +218,7 @@ public:
 	 * Post : Sets flags for current mesh
 	 ------------------------------------------------------*/
 
-	void freyjaBoneFlags(uint32 flags);
+	void boneFlags(uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_TAG);
 	 * Post : Current tag's mesh/tag tree flag is set
@@ -227,7 +227,7 @@ public:
 	 *        0x01 - pop
 	 ------------------------------------------------------*/
 
-	void freyjaBoneAddChild(index_t childBoneIndex);
+	void boneAddChild(index_t childBoneIndex);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_BONE);
 	 * Post : chlidBoneIndex added to current bone's child list
@@ -239,7 +239,7 @@ public:
 	 * Post : Sets tag rotation with eular angles
 	 ------------------------------------------------------*/
 
-	void freyjaSkeletonAddBone(index_t boneIndex);
+	void skeletonAddBone(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : freyjaBegin(FREYJA_SKELETON);
 	 * Post : Appends tag to mesh tree frame

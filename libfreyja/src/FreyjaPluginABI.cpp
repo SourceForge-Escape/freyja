@@ -133,12 +133,6 @@ index_t freyjaGetCurrentModelIndex()
 }
 
 
-index_t freyjaGetCurrentSkeletonIndex()
-{
-	return 0; // Egg is single model
-}
-
-
 index_t freyjaGetCurrentVertex()
 {
 	return gFreyjaCurrentVertex;
@@ -3111,6 +3105,42 @@ void freyjaMeshPosition(index_t meshIndex, vec3_t xyz)
 
 
 #ifdef BONE_0_9_3_API
+uint32 freyjaGetBoneCount()
+{
+	return freyjaGetCount(FREYJA_BONE);
+}
+
+
+index_t freyjaGetCurrentSkeletonIndex()
+{
+	return 0; // Egg is single model
+}
+
+
+index_t freyjaGetSkeletonBoneCount(index_t skeletonIndex)
+{
+	return freyjaGetCount(FREYJA_BONE); // Single ref skeleton in Egg backend
+}
+
+
+index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element)
+{
+	egg_tag_t *bone = gEgg->getTag(element);
+	// Atm all one big reference skeleton in Egg backend
+
+	if (bone)
+	{
+		return bone->id;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex)
+{
+	return 0; // egg can only hold one skeleton, and root is always moved to 0
+}
 
 
 char freyjaIsBoneAllocated(index_t boneIndex)
@@ -3507,7 +3537,56 @@ void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz)
 	}
 }
 
+#else
+index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
+{
+	return boneIndex; // Assumes single skeleton model, FIXME when Skeleton added to backend API
+}
 
+
+void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex)
+{
+	freyjaVertexWeight(vertexIndex, 1.0f, boneIndex);
+}
+
+
+void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex)
+{
+	Egg *egg = freyja__getEggBackend();
+	egg_vertex_t *vert = egg->getVertex(vertexIndex);
+	egg_weight_t *weight;
+	unsigned int i;
+
+	if (!egg)
+		return;
+
+	vert = egg->getVertex(vertexIndex);
+
+	if (vert)
+	{
+		for (i = vert->weights.begin(); i < vert->weights.end(); ++i)
+		{
+			weight = vert->weights[i];
+
+			if (weight && weight->bone == boneIndex)
+			{
+				delete vert->weights[i];  /* Safe to null this out?  */
+			}
+		}
+	}
+}
+
+
+void freyjaBoneRemoveMesh1i(index_t boneIndex, index_t meshIndex)
+{
+	freyjaPrintMessage("FIXME %s:%i", __FILE__, __LINE__);
+}
+
+
+void freyjaBoneAddMesh1i(index_t boneIndex, index_t meshIndex)
+{
+	freyjaPrintMessage("FIXME %s:%i", __FILE__, __LINE__);
+}
 #endif
 
 
@@ -4191,32 +4270,6 @@ void freyjaCriticalSectionUnlock()
 
 void freyjaCriticalSectionUnLock(index_t lock)
 {
-}
-
-
-index_t freyjaGetSkeletonBoneCount(index_t skeletonIndex)
-{
-	return freyjaGetCount(FREYJA_BONE); // Single ref skeleton in Egg backend
-}
-
-
-index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, int32 element)
-{
-	egg_tag_t *bone = gEgg->getTag(element);
-	// Atm all one big reference skeleton in Egg backend
-
-	if (bone)
-	{
-		return bone->id;
-	}
-
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex)
-{
-	return 0; // egg can only hold one skeleton, and root is always moved to 0
 }
 
 

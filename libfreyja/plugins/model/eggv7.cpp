@@ -25,6 +25,7 @@
 #include <mstl/List.h>
 
 #include <freyja/FreyjaPlugin.h>
+#include <freyja/BoneABI.h>
 
 
 extern "C" {

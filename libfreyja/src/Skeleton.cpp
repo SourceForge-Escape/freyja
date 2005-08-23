@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include "SkeletonABI.h"
 #include "Skeleton.h"
 
 using namespace freyja;
@@ -80,5 +81,65 @@ int main(int argc, char *argv[])
 	printf("[Skeleton class test]\n");
 
 	return runSkeletonUnitTest(argc, argv);
+}
+#endif
+
+
+////////////////////////////////////////////////////////////
+// ABI
+////////////////////////////////////////////////////////////
+#ifndef BONE_0_9_3_API
+index_t freyjaGetCurrentSkeletonIndex()
+{
+	return 0; // FIXME
+}
+
+
+index_t freyjaSkeletonCreate()
+{
+	return 0; // FIXME
+}
+
+
+void freyjaSkeletonDelete(index_t skeletonIndex)
+{
+}
+
+#include "BoneABI.h"
+
+void freyjaSkeletonUpdateBones(index_t skeletonIndex)
+{
+	// FIXME
+}
+
+
+void freyjaSkeletonAddBone(index_t skeletonIndex, index_t boneIndex)
+{
+	// FIXME
+}
+
+// ABI Accessors ///////////////////////
+
+uint32 freyjaGetSkeletonCount()
+{
+	return 1; // FIXME
+}
+
+
+uint32 freyjaGetSkeletonBoneCount(index_t skeletonIndex)
+{
+	return freyjaGetBoneCount(); // FIXME
+}
+
+
+index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element)
+{
+	return element; // FIXME
+}
+
+
+index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex)
+{
+	return 0; // FIXME
 }
 #endif
