@@ -26,7 +26,9 @@
 #include <hel/math.h>
 #include <hel/Quaternion.h>
 #include <hel/Vector3d.h>
-
+#include "freyja.h"
+#include "BoneABI.h"
+#include "SkeletonABI.h"
 #include "FreyjaFileReader.h"
 #include "FreyjaPluginABI.h"
 #include "FreyjaFSM.h"
@@ -41,13 +43,15 @@ FreyjaFSM *FreyjaFSM::mFreyjaFSM = 0x0;
 
 	Egg *mEgg;                          /* Pointer to the modeler backend  */
 
+
+#ifdef BONE_0_9_3_API
 	egg_tag_t *mTag;                    /* Current tag/bolt-on and|or bone */
+	egg_boneframe_t *mBoneFrame;        /* MeshTree animation frame */
+#endif
 
 	egg_mesh_t *mMesh;                  /* Current mesh */
 
 	egg_group_t *mGroup;                /* Current vertex grouping */
-
-	egg_boneframe_t *mBoneFrame;        /* MeshTree animation frame */
 
 	egg_animation_t *mAnimation;        /* MeshTree animation group */
 
@@ -56,11 +60,15 @@ FreyjaFSM::FreyjaFSM()
 {
 	extern Egg *gEgg;
 	mEgg = gEgg;  // freyjaSpawn always allocates in proper order for this to work
+
+#ifdef BONE_0_9_3_API
 	mTag = 0x0;
+	mBoneFrame = 0x0;
+#endif
+
 	mMesh = 0x0;
 	mGroup = 0x0;
 	mAnimation = 0x0;
-	mBoneFrame = 0x0;
 	mTextureId = 0;
 
 	FreyjaFSM::mFreyjaFSM = this;
@@ -105,11 +113,19 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 		break;
 
 	case FREYJA_BONE:
+#ifdef BONE_0_9_3_API
 		return mEgg->getTagCount();
+#else
+		freyjaGetBoneCount();
+#endif
 		break;
 
 	case FREYJA_SKELETON:
+#ifdef BONE_0_9_3_API
 		return mEgg->getBoneFrameCount();
+#else
+		freyjaGetSkeletonCount();
+#endif
 		break;
 
 	case FREYJA_TEXTURE:
@@ -143,10 +159,11 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 	Vector<egg_mesh_t *> *mesh;
 	Vector<egg_group_t *> *group;
 	Vector<egg_polygon_t *> *polygon;
+	Vector<egg_animation_t *> *skelanim;
+#ifdef BONE_0_9_3_API
 	Vector<egg_tag_t *> *tag;
 	Vector<egg_boneframe_t *> *boneframe;
-	Vector<egg_animation_t *> *skelanim;
-
+#endif
 
 	switch (type)
 	{
@@ -286,17 +303,23 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 		break;
 
 	case FREYJA_BONE:
+#ifdef BONE_0_9_3_API
 		tag = mEgg->TagList();
     
 		if (!tag)
 			return INDEX_INVALID;
- 
+#endif
+
 		switch (item)
 		{
 		case FREYJA_CURRENT:
 			break;
 		case FREYJA_RESET:
+#ifdef BONE_0_9_3_API
 			mIndexBone = tag->begin();
+#else
+			mIndexBone = 0;
+#endif
 			break;
 		case FREYJA_NEXT:
 			++mIndexBone;
@@ -305,26 +328,39 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 			mIndexBone = item;
 		}
 
+#ifdef BONE_0_9_3_API
 		if (mIndexBone < tag->end())
 		{
 			mTag = (*tag)[mIndexBone];
 			return mIndexBone;
 		}
+#else
+		if (freyjaIsBoneAllocated(mIndexBone))
+		{
+			return mIndexBone;
+		}
+#endif
 		break;
 
 
 	case FREYJA_SKELETON:
+#ifdef BONE_0_9_3_API
 		boneframe = mEgg->BoneFrameList();
     
 		if (!boneframe)
 			return INDEX_INVALID;
+#endif
  
 		switch (item)
 		{
 		case FREYJA_CURRENT:
 			break;
 		case FREYJA_RESET:
+#ifdef BONE_0_9_3_API
 			mIndexSkeleton = boneframe->begin();
+#else
+			mIndexSkeleton = 0;
+#endif
 			break;
 		case FREYJA_NEXT:
 			++mIndexSkeleton;
@@ -333,10 +369,17 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 			mIndexSkeleton = item;
 		}
 
+#ifdef BONE_0_9_3_API
 		if (mIndexSkeleton < boneframe->end())
 		{
 			return mIndexSkeleton;
 		}
+#else
+		if (freyjaIsBoneAllocated(mIndexBone))
+		{
+			return mIndexBone;
+		}
+#endif
 		break;
 
 	case FREYJA_SKEL_KEYFRAME:
@@ -420,23 +463,31 @@ void FreyjaFSM::freyjaGetVertexTexCoord(vec2_t uv)
 
 index_t FreyjaFSM::freyjaGetBoneMeshIndex(uint32 element)
 {
+#ifdef BONE_0_9_3_API
 	if (mTag)
 	{
 		return mTag->mesh[element];
 	}
 
 	return INDEX_INVALID;
+#else
+	return INDEX_INVALID;  // This is obsolete DEAD DEAD DEAD
+#endif
 }
 
 
 uint32 FreyjaFSM::freyjaGetBoneMeshCount()
 {
+#ifdef BONE_0_9_3_API
 	if (mTag)
 	{
 		return mTag->mesh.size();
 	}
 
 	return INDEX_INVALID;
+#else
+	return INDEX_INVALID;  // This is obsolete DEAD DEAD DEAD
+#endif
 }
 
 
@@ -468,13 +519,21 @@ index_t FreyjaFSM::freyjaGetCurrent(freyja_object_t type)
 		break;
 
 	case FREYJA_BONE:
+#ifdef BONE_0_9_3_API
 		if (mTag)
 			return mTag->id;
+#else
+		return mIndexBone;
+#endif
 		break;
 
 	case FREYJA_SKELETON:
+#ifdef BONE_0_9_3_API
 		if (mBoneFrame)
 			return mBoneFrame->id;
+#else
+		return mIndexSkeleton;
+#endif
 		break;
 
 	case FREYJA_SKEL_ANIMATION:
@@ -490,14 +549,22 @@ index_t FreyjaFSM::freyjaGetCurrent(freyja_object_t type)
 }
 
 
-void FreyjaFSM::freyjaGetBoneRotate(vec_t *x, vec_t *y, vec_t *z)
+void FreyjaFSM::getBoneRotation(vec_t *x, vec_t *y, vec_t *z)
 {
+#ifdef BONE_0_9_3_API
 	if (mTag)
 	{
 		*x = mTag->rot[0];
 		*y = mTag->rot[1];
 		*z = mTag->rot[2];
 	}
+#else
+	vec3_t xyz;
+	freyjaGetBoneRotationEuler3fv(mIndexBone, xyz);
+	*x = xyz[0];
+	*y = xyz[1];
+	*z = xyz[2];
+#endif
 }
 
 
@@ -551,13 +618,20 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 
 	case FREYJA_BONE:
 		mStack.push(FREYJA_BONE);
+#ifdef BONE_0_9_3_API
 		mTag = mEgg->addTag(0.0, 0.0, 0.0, 0x00);
 		mTag->name[0] = 0;
 		mTag->parent = -1;
+#else
+		mIndexBone = freyjaBoneCreate(mIndexSkeleton);
+#endif
 		break;
 
 	case FREYJA_SKELETON:
 		mStack.push(FREYJA_SKELETON);
+#ifndef BONE_0_9_3_API
+		mIndexSkeleton = freyjaSkeletonCreate();
+#endif
 		break;
 
 	case FREYJA_MODEL:
@@ -600,7 +674,11 @@ void FreyjaFSM::freyjaEnd()
 		break;
 
 	case FREYJA_SKELETON:
+#ifdef BONE_0_9_3_API
 		mEgg->updateBones();
+#else
+		freyjaSkeletonUpdateBones(mIndexSkeleton);
+#endif
 		break;
 
 	default:
@@ -801,10 +879,11 @@ void FreyjaFSM::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 }
 
 
-void FreyjaFSM::freyjaBoneName(const char *name)
+void FreyjaFSM::boneName(const char *name)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
+#ifdef BONE_0_9_3_API
 		if (!mTag)
 		{
 			freyjaPrintError("FreyjaFSM::freyjaBonePos> BONEMTAG isn't allocated!\n");
@@ -815,6 +894,9 @@ void FreyjaFSM::freyjaBoneName(const char *name)
 			strncpy(mTag->name, name, 64);
 			mTag->name[63] = 0;
 		}
+#else
+		freyjaBoneName(mIndexBone, name);
+#endif
 	}
 	else
 	{
@@ -828,6 +910,7 @@ void FreyjaFSM::freyjaBonePosition(vec_t x, vec_t y, vec_t z)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
+#ifdef BONE_0_9_3_API
 		if (!mTag)
 		{
 			freyjaPrintError("FreyjaFSM::freyjaBonePos> BONEMTAG isn't allocated!\n");
@@ -839,13 +922,23 @@ void FreyjaFSM::freyjaBonePosition(vec_t x, vec_t y, vec_t z)
 			mTag->center[1] = y;
 			mTag->center[2] = z;
 		}
+#else
+		freyjaBoneTranslate3f(mIndexBone, x, y, z);
+#endif
 	}
+#ifdef BONE_0_9_3_API
 	else if (mTag) // HACK
 	{
 		mTag->center[0] = x;
 		mTag->center[1] = y;
 		mTag->center[2] = z;
 	}
+#else
+	else if (freyjaIsBoneAllocated(mIndexBone)) // HACK
+	{
+		freyjaBoneTranslate3f(mIndexBone, x, y, z);
+	}
+#endif
 	else
 	{
 		freyjaPrintError("FreyjaFSM::freyjaBonePos> Pos defined outside BONEMTAG!\n");
@@ -854,10 +947,11 @@ void FreyjaFSM::freyjaBonePosition(vec_t x, vec_t y, vec_t z)
 }
 
 
-void FreyjaFSM::freyjaBoneFlags(unsigned int flags)
+void FreyjaFSM::boneFlags(unsigned int flags)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
+#ifdef BONE_0_9_3_API
 		if (!mTag)
 		{
 			freyjaPrintError("FreyjaFSM::freyjaBoneFlags> BONEMTAG isn't allocated!\n");
@@ -867,11 +961,21 @@ void FreyjaFSM::freyjaBoneFlags(unsigned int flags)
 		{
 			mTag->flag = flags;
 		}
+#else
+		freyjaBoneFlags(mIndexBone, flags);
+#endif
 	}
+#ifdef BONE_0_9_3_API
 	else if (mTag) // HACK
 	{
 		mTag->flag = flags;
 	}
+#else
+	else if (freyjaIsBoneAllocated(mIndexBone)) // HACK
+	{
+		freyjaBoneFlags(mIndexBone, flags);
+	}
+#endif
 	else
 	{
 		freyjaPrintError("FreyjaFSM::freyjaBoneFlags> Flag defined outside BONEMTAG!\n");
@@ -880,10 +984,11 @@ void FreyjaFSM::freyjaBoneFlags(unsigned int flags)
 }
 
 
-void FreyjaFSM::freyjaBoneAddChild(index_t boneIndex)
+void FreyjaFSM::boneAddChild(index_t boneIndex)
 {
 	if (mStack.peek() == FREYJA_BONE)
 	{
+#ifdef BONE_0_9_3_API
 		if (!mTag)
 		{
 			freyjaPrintError("FreyjaFSM::freyjaBoneAddSlave> BONEMTAG isn't allocated!\n");
@@ -898,6 +1003,9 @@ void FreyjaFSM::freyjaBoneAddChild(index_t boneIndex)
 			// If it fails here it's got to be picked up in SKELETON 
 			mTag->slave.pushBack(boneIndex);
 		}
+#else
+		freyjaBoneAddChild(mIndexBone, boneIndex);
+#endif
 	}
 	else
 	{
@@ -908,21 +1016,29 @@ void FreyjaFSM::freyjaBoneAddChild(index_t boneIndex)
 
 void FreyjaFSM::freyjaBoneRotate(vec_t x, vec_t y, vec_t z)
 {
+#ifdef BONE_0_9_3_API
 	if (mTag)
 	{
 		mTag->rot[0] = x;
 		mTag->rot[1] = y;
 		mTag->rot[2] = z;
 	}
+#else
+	freyjaBoneRotateEuler3f(mIndexBone, x, y, z);
+#endif
 }
 
 
-void FreyjaFSM::freyjaSkeletonAddBone(index_t boneIndex)
+void FreyjaFSM::skeletonAddBone(index_t boneIndex)
 {
+#ifdef BONE_0_9_3_API
 	if (mBoneFrame)
 	{
 		mBoneFrame->tag.pushBack(boneIndex);
 	}
+#else
+	freyjaSkeletonAddBone(mIndexSkeleton, boneIndex);
+#endif
 }
 
 
@@ -1053,7 +1169,7 @@ void freyjaPolygonMaterial1i(index_t id)
 void freyjaSkeletonAddBone(index_t boneIndex)
 {
 	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaSkeletonAddBone(boneIndex);
+		FreyjaFSM::mFreyjaFSM->skeletonAddBone(boneIndex);
 }
 
 

@@ -28,27 +28,38 @@
 extern "C" {
 
 #ifndef BONE_0_9_3_API
-	/* A nice trick to support deprecated function signatures, just recompile */
+	/* To support deprecated function signatures, just recompile plugins */
 	#define freyjaGetBoneName1s freyjaGetBoneNameString
 	#define freyjaBoneName1s freyjaBoneName
+	#define freyjaBoneFlags1i freyjaBoneFlags
+	#define freyjaBoneParent1i freyjaBoneParent
 	#define freyjaBoneAddChild1i freyjaBoneAddChild
 	#define freyjaBoneRemoveChild1i freyjaBoneRemoveChild
 	#define freyjaGetBoneRotationEulerXYZ3fv freyjaGetBoneRotationEuler3fv
 	#define freyjaBoneRotateEulerXYZ3f freyjaBoneRotateEuler3f
-	#define freyjaGetBoneSkeletalBoneIndex
+	#define freyjaBoneRotateEulerXYZ3fv freyjaBoneRotateEuler3fv
+	#define freyjaBoneRotateQuatWXYZ4fv freyjaBoneRotateQuat4fv
+	#define freyjaBoneRotateQuatWXYZ4f freyjaBoneRotateQuat4f
+	#define freyjaGetBoneRotationQuatWXYZ4fv freyjaGetBoneRotationQuat4fv
 
-	// These aren't bone functions, but utilities
-	#define freyjaBoneRemoveVertex
-	#define freyjaBoneAddMesh1i 
-	#define freyjaBoneRemoveMesh1i
-#else
+	// These aren't bone functions, but other utility functions now
+	index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex);
+	void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex);
+	void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex);
+	void freyjaBoneAddMesh1i(index_t boneIndex, index_t meshIndex);
+	void freyjaBoneRemoveMesh1i(index_t boneIndex, index_t meshIndex);
+
+#else /* Wrap 0.9.5 API down to 0.9.3 functions for compatibility testing */
+
 	#define freyjaGetBoneNameString freyjaGetBoneName1s
 	#define freyjaBoneName freyjaBoneName1s
 	#define freyjaBoneParent freyjaBoneParent1i 
 	#define freyjaBoneFlags freyjaBoneFlags1i 
+	#define freyjaBoneRotateEuler3f freyjaBoneRotateEulerXYZ3f
 	#define freyjaBoneRotateEuler3fv freyjaBoneRotateEulerXYZ3fv
 	#define freyjaBoneRotateQuat4fv freyjaBoneRotateQuatWXYZ4fv 
 	#define freyjaBoneAddChild freyjaBoneAddChild1i
+	#define freyjaBoneRemoveChild freyjaBoneRemoveChild1i
 	#define freyjaGetBoneRotationEuler3fv freyjaGetBoneRotationEulerXYZ3fv
 #endif
 
@@ -57,6 +68,12 @@ extern "C" {
 	///////////////////////////////////////////////////////////////////////
 	// BONE
 	///////////////////////////////////////////////////////////////////////
+
+	uint32 freyjaGetBoneCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	byte freyjaIsBoneAllocated(index_t boneIndex);
 	/*------------------------------------------------------
@@ -133,6 +150,14 @@ extern "C" {
 	 * Post : Set bone orientation
 	 ------------------------------------------------------*/
 
+	void freyjaBoneTransform(index_t boneIndex, 
+	                         freyja_transform_action_t action, 
+	                         vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	const char *freyjaGetBoneNameString(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -191,13 +216,6 @@ extern "C" {
 	 * Post : Count of bone children
 	 ------------------------------------------------------*/
 
-	void freyjaBoneTransform(index_t boneIndex, 
-	                         freyja_transform_action_t action, 
-	                         vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
 
 
 #else
@@ -331,6 +349,12 @@ extern "C" {
 
 
 	// Bone accessors /////////////////
+
+	uint32 freyjaGetBoneCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	const char *freyjaGetBoneName1s(index_t boneIndex);
 	void freyjaGetBoneName(index_t boneIndex, uint32 size, char *name);

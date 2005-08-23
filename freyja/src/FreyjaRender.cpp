@@ -33,6 +33,7 @@
 #include <time.h>
 #include <assert.h>
 #include <mgtk/ResourceEvent.h>
+#include <freyja/SkeletonABI.h>
 
 #ifdef HAVE_OPENGL
 #   ifdef MACOSX

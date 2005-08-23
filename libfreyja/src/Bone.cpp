@@ -199,6 +199,12 @@ void freyjaCurrentBone(index_t boneIndex)
 }
 
 
+uint32 freyjaGetBoneCount()
+{
+	return Bone::getCount();
+}
+
+
 byte freyjaIsBoneAllocated(index_t boneIndex)
 {
 	Bone *b = Bone::getBone(boneIndex);

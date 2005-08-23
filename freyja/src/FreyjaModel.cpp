@@ -27,7 +27,6 @@
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <freyja/FreyjaFileReader.h> 
-#define BONE_0_9_3_API
 #include <freyja/BoneABI.h> 
 #include <mgtk/ResourceEvent.h>
 
@@ -502,7 +501,7 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 {
 	vec3_t xyz;
 
-	freyjaGetBoneRotationEulerXYZ3fv(getCurrentBone(), xyz);
+	freyjaGetBoneRotationEuler3fv(getCurrentBone(), xyz);
 	*x = xyz[0];
 	*y = xyz[1];
 	*z = xyz[2];
@@ -511,7 +510,7 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 
 void FreyjaModel::setBoneRotation(float x, float y, float z)
 {
-	freyjaBoneRotateEulerXYZ3f(getCurrentBone(), x, y, z);
+	freyjaBoneRotateEuler3f(getCurrentBone(), x, y, z);
 }
 
 
@@ -580,14 +579,14 @@ unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 
 	if (boneIndex == 0)
 	{
-		freyjaBoneName1s(boneIndex, "root");
+		freyjaBoneName(boneIndex, "root");
 	}
 	else
 	{
 		char name[64];
 
 		snprintf(name, 64, "bone %i", boneIndex);
-		freyjaBoneName1s(boneIndex, name);
+		freyjaBoneName(boneIndex, name);
 	}
 
 	updateSkeletalUI();
@@ -620,7 +619,7 @@ void FreyjaModel::selectBone(float xx, float yy)
 
 void FreyjaModel::connectBone(unsigned int master, unsigned int slave)
 {
-	freyjaBoneAddChild1i(master, slave);
+	freyjaBoneAddChild(master, slave);
 	updateSkeletalUI();
 }
 
@@ -930,7 +929,7 @@ void FreyjaModel::setNameBone(unsigned int boneIndex, const char *name)
 
 	if (freyjaIsBoneAllocated(boneIndex) && name && name[1])
 	{
-		freyjaBoneName1s(boneIndex, name);
+		freyjaBoneName(boneIndex, name);
 		freyja_print("bone[%i].name = '%s'", boneIndex, name);
 		updateSkeletalUI();
 	}
@@ -950,7 +949,7 @@ const char *FreyjaModel::getNameBone(unsigned int boneIndex)
 
 void FreyjaModel::disconnectBone(unsigned int parent, unsigned int child)
 {
-	freyjaBoneRemoveChild1i(parent, child); 
+	freyjaBoneRemoveChild(parent, child); 
 	updateSkeletalUI();
 }
 

@@ -148,7 +148,11 @@ RenderModel::~RenderModel()
 
 RenderSkeleton &RenderModel::getSkeleton()
 {
+#ifdef BONE_0_9_3_API
 	mSkeleton.setTags(mEgg->TagList());
+#else
+	mSkeleton.set(freyjaGetCurrentSkeletonIndex());
+#endif
 	return mSkeleton;
 }
 
