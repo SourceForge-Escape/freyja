@@ -32,7 +32,7 @@
 
 extern "C" {
 
-#ifdef WIN32
+#if defined (WIN32) || (MACOSX)
 void mgtk_win32_import(char *symbol, void *func);
 #endif
 

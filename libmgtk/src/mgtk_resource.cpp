@@ -45,8 +45,8 @@
 #define ARG_GTK_TOOLBOX_WIDGET   4096
 
 // Could use mlisp to replace this, but let's not go there for this
-// prototype merge of linux/win32
-#ifdef WIN32
+// prototype merge of linux/win32/osx
+#if defined (WIN32) || (MACOSX)
 void (*win32_mgtk_callback_get_image_data_rgb24)(const char *, unsigned char **, int *, int *) = NULL;
 void (*win32_mgtk_handle_color)(int, float, float, float, float) = NULL;
 void (*win32_mgtk_handle_application_window_close)() = NULL;
@@ -367,6 +367,7 @@ void mgtk_callback_free_image_data(guchar *pixels, gpointer data)
 }
 
 
+#ifndef USE_OLD_FILE_SELECTION_WIDGET
 void mgtk_update_filechooser_preview(GtkFileChooser *file_chooser, 
 									 gpointer data)
 {
@@ -406,6 +407,7 @@ void mgtk_update_filechooser_preview(GtkFileChooser *file_chooser,
 
 	gtk_file_chooser_set_preview_widget_active(file_chooser, have_preview);
 }
+#endif
 
 
 GtkWidget *mgtk_get_fileselection_widget()
