@@ -117,6 +117,7 @@ DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 
 TARGETS=$(BUILDDIR)/lib$(NAME)$(SHLIBEXT)
 W32TARGETS=$(BUILDDIR)/$(MODULE)$(SHLIBEXT)
+OSXTARGETS=$(BUILDDIR)/$(FRAMEWORK)$(SHLIBEXT)
 TESTS=$(BUILDDIR)/$(NAME).test
 
 ################################################################
@@ -155,6 +156,22 @@ prof:
 	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DNDEBUG -pg" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -pg"
+
+
+
+########################################################################
+# OSX build
+########################################################################
+
+debug-osx:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) osxtargets BUILDDIR=$(BUILD_DEBUG_DIR) \
+	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)" \
+	SHLIBLDFLAGS="$(LD_FLAGS) -dynamiclib -fPIC" \
+	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DDISABLE_GTK_COLORBUTTON -DUSE_OLD_FILE_SELECTION_WIDGET"
+
+install-osx:
+	$(MAKE) install-gtkglarea
 
 
 ########################################################################
@@ -221,6 +238,9 @@ depend:
 
 
 ########################################################################
+
+
+osxtargets: $(OSXTARGETS)
 
 w32targets: $(W32TARGETS)
 

@@ -854,7 +854,8 @@ GtkWidget *mgtk_create_fileselection(char *title)
 
 GtkWidget *mgtk_create_filechooser(char *title)
 {
-	GtkWidget *filechooser;
+	GtkWidget *filechooser = NULL;
+#ifndef USE_OLD_FILE_SELECTION_WIDGET
 	GtkWidget *vbox;
 	GtkWidget *action_area;
 	GtkWidget *cancel_button;
@@ -892,6 +893,7 @@ GtkWidget *mgtk_create_filechooser(char *title)
 					   NULL);
 
 	gtk_widget_grab_default(ok_button);
+#endif
 
 	return filechooser;
 }
