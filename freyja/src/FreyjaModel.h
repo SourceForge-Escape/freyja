@@ -712,7 +712,7 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	int32 getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
+	index_t getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : Returns nearest bone to x, y in given plane

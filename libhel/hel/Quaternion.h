@@ -62,7 +62,7 @@ class Quaternion
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion(vec_t roll, vec_t pitch, vec_t yaw);
+	Quaternion(vec_t pitch, vec_t heading, vec_t roll);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Quaternion from Euler
@@ -113,11 +113,11 @@ class Quaternion
 	 * Mongoose - Created, yeah this should've been in a while
 	 ------------------------------------------------------*/
 
-	void getEulerAngles(vec3_t xyz); // pitch roll yaw order
-	void getEulerAngles(vec_t *heading, vec_t *bank, vec_t *attitude);
+	void getEulerAngles(vec3_t phr); // pitch heading roll
+	void getEulerAngles(vec_t *pitch, vec_t *heading, vec_t *roll);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Eular angles
+	 * Post : Eular angles in *radians*
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -317,8 +317,18 @@ class Quaternion
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setByEulerAngles(const vec3_t xyz);
-	void setByEulerAngles(vec_t pitch, vec_t roll, vec_t yaw);
+	void setByEulerAngles(const vec3_t phr);
+	void setByEulerAngles(vec_t pitch, vec_t heading, vec_t roll);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets this quaternion by euler angles in *radians*
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.05.08:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
 	void setByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z);
 	void set(vec_t angle, vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------

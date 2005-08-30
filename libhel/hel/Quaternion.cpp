@@ -31,10 +31,6 @@
 Quaternion::Quaternion()
 {
 	setIdentity();
-	//mW = 0;
-	//mX = 0;
-	//mY = 0;
-	//mZ = 0;
 }
 
 
@@ -47,32 +43,10 @@ Quaternion::Quaternion(vec_t w, vec_t x, vec_t y, vec_t z)
 }
 
 
-Quaternion::Quaternion(vec_t roll, vec_t pitch, vec_t yaw)
+Quaternion::Quaternion(vec_t pitch, vec_t heading, vec_t roll)
 {
-	vec_t cr, cp, cy, sr, sp, sy, cpcy, spsy;
-
-	/* Want to use half of the values in equations from here on */
-	roll *= 0.5;
-	pitch *= 0.5;
-	yaw *= 0.5;
-
-	cr = cos(roll);
-	cp = cos(pitch);
-	cy = cos(yaw);
-
-	sr = sin(roll);
-	sp = sin(pitch);
-	sy = sin(yaw);
-
-	cpcy = cp * cy;
-	spsy = sp * sy;
-
-	mW = cr * cpcy + sr * spsy;
-	mX = sr * cpcy - cr *spsy;
-	mY = cr * sp * cy + sr * cp * sy;
-	mZ = cr * cp * sy - sr * sp * cy;
-
-	normalize();
+	vec3_t phr = {pitch, heading, roll};
+	setByEulerAngles(phr);
 }
 
 
@@ -134,46 +108,17 @@ void Quaternion::getEulerAngles(vec3_t xyz)
 }
 
 
-void Quaternion::getEulerAngles(vec_t *heading, vec_t *bank, vec_t *attitude)
+void Quaternion::getEulerAngles(vec_t *pitch, vec_t *heading, vec_t *roll)
 {
-	double test = mX*mY + mZ*mW;
-
-	// Thanks to euclideanspace.com for the singluarity check algorithm
-	if (test > 0.499) { // singularity at north pole
-		*heading = 2.0 * atan2(mX, mW);
-		*bank = HEL_PI_OVER_2;
-		*attitude = 0.0f;
-		return;
-	}
-	if (test < -0.499) { // singularity at south pole
-		*heading = -2.0 * atan2(mX, mW);
-		*bank = -HEL_PI_OVER_2;
-		*attitude = 0.0f;
-		return;
-	}
-
 	double sqx = mX*mX;
 	double sqy = mY*mY;
 	double sqz = mZ*mZ;
-
-#define QUAT_OLD_EULER_CLAC
-#ifdef QUAT_OLD_EULER_CLAC
 	double sqw = mW*mW;
 
-	// From my old mtk3d math lib
-	//*heading = atan2(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
-	//*bank = atan2(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
-	//*attitude = asin(-2.0 * (mX*mZ - mY*mW));
-
-	// From my newer hel math lib
-	*heading = atan((2.0 * (mX*mY+mZ*mW)) / (sqx - sqy + sqz + sqw));
-	*bank = atan((2.0 * (mY*mZ+mX*mW)) / (-sqx - sqy + sqz + sqw));
-	*attitude = asin(-2.0 * (mX*mZ-mY*mW));
-#else
-    *heading = atan2(2*mY*mW-2*mX*mZ , 1 - 2*qy2 - 2*qz2);
-	*bank = asin(2*test);
-	*attitude = atan2(2*mX*mW-2*mY*mZ , 1 - 2*qx2 - 2*qz2);
-#endif
+	// From my old mtk3d math lib ( clamps (+-)PI )
+	*heading = atan2(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
+	*roll = atan2(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
+	*pitch = asin(-2.0 * (mX*mZ - mY*mW));
 }
 
 
@@ -296,17 +241,17 @@ vec_t Quaternion::magnitude()
 
 void Quaternion::setIdentity()
 {
-	mW = 1.0;
-	mX = 0.0;
-	mY = 0.0;
-	mZ = 0.0;
+	mW = 1.0f;
+	mX = 0.0f;
+	mY = 0.0f;
+	mZ = 0.0f;
 }
 
 
 void Quaternion::setByEulerAngles(const vec3_t xyz)
 {
 	vec_t pitch = xyz[0], roll = xyz[2], yaw = xyz[1];
-	double cr, cp, cy, sr, sp, sy, cpcy, spsy;
+	vec_t cr, cp, cy, sr, sp, sy, cpcy, spsy;
 
 	/* Want to use half of the values in equations from here on */
 	roll *= 0.5;
@@ -605,8 +550,47 @@ Quaternion Quaternion::subtract(Quaternion a, Quaternion b)
 ////////////////////////////////////////////////////////////
 
 #ifdef UNIT_TEST_QUATERNION
+#include <stdio.h>
+
 int runQuaternionUnitTest(int argc, char *argv[])
 {
+	Quaternion q;
+	vec3_t xyz;
+	//vec_t x, y, z;
+	uint32 i, count = 6;
+
+	printf("Simple Euler conversion ( 3fv ordering ) test\n");
+
+	for (i = 0; i < count; ++i)
+	{
+		xyz[0] = HEL_DEG_TO_RAD(15.0f*i);
+		xyz[1] = HEL_DEG_TO_RAD(30.0f*i);
+		xyz[2] = HEL_DEG_TO_RAD(45.0f*i);
+
+		printf("set %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);	
+		printf("    %f %f %f\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
+		q.setByEulerAngles(xyz);
+		q.getEulerAngles(xyz);
+		printf("get %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);
+		printf("    %f %f %f\n\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
+	}
+
+	printf("Simple Euler conversion ( 3f ordering ) test\n");
+
+	for (i = 0; i < count; ++i)
+	{
+		xyz[0] = HEL_DEG_TO_RAD(15.0f*i);
+		xyz[1] = HEL_DEG_TO_RAD(30.0f*i);
+		xyz[2] = HEL_DEG_TO_RAD(45.0f*i);
+
+		printf("set %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);	
+		printf("    %f %f %f\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
+		q = Quaternion(xyz[0], xyz[1], xyz[2]);
+		q.getEulerAngles(xyz+0, xyz+1, xyz+2);
+		printf("get %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);
+		printf("    %f %f %f\n\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
+	}
+
 	return 0;
 }
 

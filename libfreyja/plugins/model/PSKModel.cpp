@@ -2749,8 +2749,8 @@ int freyja_model__psk_import(char *filename)
 		/* Start a new bone */
 		freyjaBegin(FREYJA_BONE);
 		index = freyjaGetCurrent(FREYJA_BONE);
-		freyjaBoneFlags1i(index, 0x0);
-		freyjaBoneName1s(index, psk.mBones[i].name);
+		freyjaBoneFlags(index, 0x0);
+		freyjaBoneName(index, psk.mBones[i].name);
 		freyjaBoneTranslate3f(index, 
 							  psk.mBones[i].restLoc[0]*scale,
 							  psk.mBones[i].restLoc[1]*scale,
@@ -2796,7 +2796,7 @@ int freyja_model__psk_import(char *filename)
 		//	q.normalize();
 		q = q * r.conjugate();
 		q.getQuaternion4fv(wxyz);
-		freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+		freyjaBoneRotateQuat4fv(index, wxyz);
 
 		switch (i)
 		{
@@ -2813,7 +2813,7 @@ int freyja_model__psk_import(char *filename)
 				r.set(helDegToRad(90.0f), 0, 1, 0);
 				q = r * q;
 				q.getQuaternion4fv(wxyz);
-				freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+				freyjaBoneRotateQuat4fv(index, wxyz);
 			}
 			break;
 		default:
@@ -2825,7 +2825,7 @@ int freyja_model__psk_import(char *filename)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
-				freyjaBoneAddChild1i(index, j);
+				freyjaBoneAddChild(index, j);
 			}
 		}
 

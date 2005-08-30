@@ -3,20 +3,20 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
- * Object  : Lwo
+ * Website : http://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
+ * Object  : Nod
  * License : GPL
  * Comments: NOD module for freyja
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------ 
  *
  * 2001.07.04:
- * Mongoose - Created, based on viewer code from anonymous
+ * Mongoose - Created, based on viewer code from anonymous ( file structure )
  ==========================================================================*/
 
 
@@ -466,6 +466,7 @@ bool Nod::save(const char *filename)
 
 #include <stdio.h>
 #include <string.h>
+#include <freyja/freyja.h>
 #include <freyja/FreyjaPlugin.h>
 #include <hel/Matrix.h>
 #include "Nod.h"
@@ -528,16 +529,18 @@ int freyja_model__nod_import(char *filename)
 	const vec_t scale = 0.25;
 	Vector<long> vertices;
 	Nod nod;
-	long index, num_verts = 0, num_faces = 0;
+	long num_verts = 0, num_faces = 0;
 	int i, j, b;
 	char name[64];
 	Matrix matrix;
 	vec3_t pos, rot;
+	index_t vertex, skeleton, bone;
 
 
 	if (!nod.load(filename))
 		return -1;
 
+	//unsigned int matMap[nod.header1.NumMaterials];
 				  
 	freyjaBegin(FREYJA_MODEL);
 
@@ -547,34 +550,33 @@ int freyja_model__nod_import(char *filename)
 		freyjaTextureCreateFilename(nod.materials[i].MaterialName);
 		freyjaEnd();
 	}
-  
 
-	freyjaBegin(FREYJA_SKELETON);
+	skeleton = freyjaSkeletonCreate();
 
 	for (b = 0; b < nod.header2.NumBones; ++b)
 	{
 		snprintf(name, 64, "bone[%i]", b);
 		nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
 
-		freyjaBegin(FREYJA_BONE);
-		index = freyjaGetCurrent(FREYJA_BONE); // transb[] 
-		freyjaBoneFlags1i(index, 0x0);
-		freyjaBoneParent1i(index, nod.bones[b].ParentID);
-		freyjaBoneName1s(index, name);
-		freyjaBoneTranslate3f(index, 
+		bone = freyjaBoneCreate(skeleton); // transb[]
+		freyjaSkeletonAddBone(skeleton, bone);
+		freyjaBoneFlags(bone, 0x0);
+		freyjaBoneParent(bone, nod.bones[b].ParentID);
+		freyjaBoneName(bone, name);
+		freyjaBoneTranslate3f(bone, 
 							  nod.bones[b].RestTranslate[0]*scale,
 							  nod.bones[b].RestTranslate[1]*scale,
 							  nod.bones[b].RestTranslate[2]*scale);
-		freyjaBoneRotateEulerXYZ3fv(index, rot);
+		freyjaBoneRotateEuler3fv(bone, rot);
 		
-		if (!b)
+		if (b == 0)
 		{
-			freyjaBoneTranslate3f(index,
+			freyjaBoneTranslate3f(bone,
 								  nod.bones[b].RestTranslate[0]*scale,
 								  nod.bones[b].RestTranslate[2]*scale,
 								  nod.bones[b].RestTranslate[1]*scale);
-			freyjaBoneRotateEulerXYZ3f(index, 
-									   rot[0] - 90, rot[2] + 180, rot[1]);
+			freyjaBoneRotateEuler3f(bone, 
+			                       rot[0] - 90, rot[2] + 180, rot[1]);
 		}
 
 		freyjaPrintMessage("bone[%i].rotate = %f %f %f", b, 
@@ -590,12 +592,9 @@ int freyja_model__nod_import(char *filename)
 		for (i = 0; i < nod.header2.NumBones; ++i)
 		{
 			if (nod.bones[i].ParentID == b)
-				freyjaBoneAddChild1i(index, i);
+				freyjaBoneAddChild(bone, i);
 		}
 	}
-
-	freyjaEnd(); // FREYJA_SKELETON
-
 
 
 	for (i = 0; i < nod.header2.NumGroups; ++i)
@@ -624,12 +623,12 @@ int freyja_model__nod_import(char *filename)
 			//matrix.multiply3v(pos, pos);
 		
 			// Store vertices and texels in group
-			index = freyjaVertexCreate3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
-			freyjaVertexNormal3fv(index, nod.vertices[num_verts + j].Norm);
-			freyjaVertexTexcoord2f(index,
+			vertex = freyjaVertexCreate3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
+			freyjaVertexNormal3fv(vertex, nod.vertices[num_verts + j].Norm);
+			freyjaVertexTexcoord2f(vertex,
 								   nod.vertices[num_verts + j].UV[0],
 								   1.0 - nod.vertices[num_verts + j].UV[1]);
-			vertices.pushBack(index);
+			vertices.pushBack(vertex);
 		}
 		
 		freyjaEnd(); // FREYJA_GROUP
@@ -661,9 +660,9 @@ int freyja_model__nod_import(char *filename)
 
 int freyja_model__nod_export(char *filename)
 {
-  printf("freyja_model__nod_export> Not implemented, %s:%i\n", 
-	 __FILE__, __LINE__);
-  return -1;
+	freyjaPrintMessage("Nod Export: Not implemented, %s:%i\n", 
+	                   __FILE__, __LINE__);
+	return -1;
 }
 
 #endif

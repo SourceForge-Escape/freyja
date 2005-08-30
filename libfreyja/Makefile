@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=3
 BRANCH=
-BUILD_ID=20050822
+BUILD_ID=20050826
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -24,13 +24,26 @@ TREE_DIR=libfreyja
 TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
 LICENSE=LGPL
 
+
+################################################################
+# Build options
 ################################################################
 
 BUILD_SELECT=debug
 BASE_DEFS=-DMODEL_PLUGINS
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
-CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS -DBONE_0_9_3_API
+CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 CONFIGURE_LNK=
+
+
+################################################################
+# WIN32 Cross Enviroment
+################################################################
+
+CROSS_WIN32=/home/mongoose/Projects/win32
+CROSS_INC=$(CROSS_WIN32)/include
+CROSS_LIB=$(CROSS_WIN32)/lib
+CROSS_BIN=$(CROSS_WIN32)/bin
 
 ################################################################
 
@@ -142,6 +155,15 @@ win32:
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0"
 
+osx:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
+	NAME="freyja9" \
+	MODULE="freyja9" \
+	SHLIBEXT=".dynlib" \
+	CFLAGS="$(DEBUG_CFLAGS)" \
+	LD_FLAGS="$(CONFIGURE_LNK) -lm -ldl"
+
 
 ################################################################
 # Include Dependences
@@ -205,6 +227,12 @@ $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	-Wl,--whole-archive $(PROG_OBJS) \
 	-Wl,--no-whole-archive $(LIBS)
 
+$(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
+	$(CC) $(LD_FLAGS) -L/usr/local/lib -lhel0 \
+	-L/usr/lib -lstdc++ -fPIC -dynamiclib \
+	-o $(BUILDDIR)/$(MODULE).dynlib \
+	$(PROG_OBJS)
+
 
 ##########################################################################
 # Image plugins
@@ -213,6 +241,9 @@ $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 PLUGIN_BUILD_DIR=bin/plugins
 IMAGE_PLUGIN_BUILD_DIR=$(PLUGIN_BUILD_DIR)/image
 MODEL_PLUGIN_BUILD_DIR=$(PLUGIN_BUILD_DIR)/model
+WIN32_PLUGIN_BUILD_DIR=bin/win32/plugins
+WIN32_IMAGE_PLUGIN_BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR)/image
+WIN32_MODEL_PLUGIN_BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR)/model
 IMAGE_PLUGIN_TEST_OBJ=$(IMAGE_PLUGIN_BUILD_DIR)/image_test.o
 PLUGINS=$(BUILDDIR)/$(MOD_NAME).so
 PLUGINSWIN32=$(BUILDDIR)/$(MOD_NAME).dll
@@ -229,10 +260,12 @@ bmp.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 bmp.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=bmp \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/bmp.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="bmp" \
+	NAME="bmp" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/bmp.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -249,10 +282,12 @@ dds.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 dds.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=dds \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/dds.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="dds" \
+	NAME="dds" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/dds.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -268,15 +303,13 @@ jpg.so:
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG" \
 	LD_FLAGS="$(MODULE_LD_FLAGS) -ljpeg"
 
-CROSS_INC=/home/mongoose/Projects/win32/include
-CROSS_LIB=/home/mongoose/Projects/win32/lib
-CROSS_BIN=/home/mongoose/Projects/win32/bin
-
 jpg.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=jpg \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/jpeg.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="jpg" \
+	NAME="jpg" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/jpeg.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -293,10 +326,12 @@ pcx.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 pcx.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=pcx \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/pcx.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="pcx" \
+	NAME="pcx" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/pcx.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -313,10 +348,12 @@ ppm.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 ppm.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=ppm \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/ppm.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="ppm" \
+	NAME="ppm" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/ppm.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -333,10 +370,12 @@ png.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lpng -lz"
 
 png.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=png \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/png.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="png" \
+	NAME="png" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/png.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -353,10 +392,12 @@ tga.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 tga.dll:
-	@-mkdir -p $(IMAGE_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(IMAGE_PLUGIN_BUILD_DIR) \
-	MOD_NAME=tga \
-	MOD_OBJS="$(IMAGE_PLUGIN_BUILD_DIR)/tga.o" \
+	@-mkdir -p $(WIN32_IMAGE_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_IMAGE_PLUGIN_BUILD_DIR) \
+	MODULE="tga" \
+	NAME="tga" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/tga.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -381,10 +422,12 @@ plugins-image-win32: dds.dll bmp.dll pcx.dll ppm.dll tga.dll jpg.dll png.dll
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 3ds.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=3ds \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/3ds.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="3ds" \
+	NAME="3ds" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/3ds.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -401,10 +444,12 @@ bsa.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 bsa.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=ase \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/BSAPakReader.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="bsa" \
+	NAME="bsa" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/BSAPakReader.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -421,10 +466,12 @@ ase.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 ase.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=ase \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="ase" \
+	NAME="ase" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -441,10 +488,12 @@ eggv7.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 eggv7.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=eggv7 \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/eggv7.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="eggv7" \
+	NAME="eggv7" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/eggv7.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -461,10 +510,12 @@ eggv8.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 eggv8.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=eggv8 \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/eggv8.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="eggv8" \
+	NAME="eggv8" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/eggv8.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -481,10 +532,12 @@ et.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 et.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=et \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/ETModel.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="et" \
+	NAME="et" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/ETModel.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -501,10 +554,12 @@ glm.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 glm.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=glm \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/GLMModel.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="glm" \
+	NAME="glm" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/GLMModel.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -534,23 +589,25 @@ grn.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 grn.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=grn \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/freyja_grn.o \
-			$(MODEL_PLUGIN_BUILD_DIR)/grannyfile.o \
-			$(MODEL_PLUGIN_BUILD_DIR)/GrannyStream.o \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnanim.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnbones.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnboneties.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnitemlist.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnmatrix.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnmeshes.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnobjects.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grntextchunk.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grntextureinfos.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grntextures.o  \
-			$(MODEL_PLUGIN_BUILD_DIR)/grnunhandled.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="grn" \
+	NAME="grn" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/freyja_grn.o \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grannyfile.o \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/GrannyStream.o \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnanim.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnbones.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnboneties.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnitemlist.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnmatrix.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnmeshes.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnobjects.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grntextchunk.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grntextureinfos.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grntextures.o  \
+			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnunhandled.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -592,10 +649,12 @@ lwo.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 lwo.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=lwo \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Lwo.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="lwo" \
+	NAME="lwo" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Lwo.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -612,10 +671,12 @@ mdl.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 mdl.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=mdl \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Mdl.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="mdl" \
+	NAME="mdl" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Mdl.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -632,10 +693,12 @@ md2.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
 md2.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=md2 \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md2.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="md2" \
+	NAME="md2" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Md2.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -652,10 +715,12 @@ md3.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 md3.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=md3 \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="md3" \
+	NAME="md3" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -680,10 +745,12 @@ md5.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 md5.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=md5 \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Md5.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="md5" \
+	NAME="md5" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Md5.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -716,10 +783,12 @@ nif4.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
 
 nif4.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=nif4 \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nif4.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="nif4" \
+	NAME="nif4" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Nif4.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -736,10 +805,12 @@ nod.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm -lhel0"
 
 nod.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=nod \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Nod.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="nod" \
+	NAME="nod" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Nod.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -784,10 +855,12 @@ psk.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 psk.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=psk \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/PSKModel.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="psk" \
+	NAME="psk" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/PSKModel.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -837,10 +910,12 @@ smd.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 smd.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=smd \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/smd.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="smd" \
+	NAME="smd" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/smd.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -887,8 +962,8 @@ clean-plugins:
 	@-echo -n "Cleaning plugins                             "
 	@-rm -f $(IMAGE_PLUGIN_BUILD_DIR)/*.o $(IMAGE_PLUGIN_BUILD_DIR)/*.so
 	@-rm -f $(MODEL_PLUGIN_BUILD_DIR)/*.o $(MODEL_PLUGIN_BUILD_DIR)/*.so
-	@-rm -f $(IMAGE_PLUGIN_BUILD_DIR)/*.o $(IMAGE_PLUGIN_BUILD_DIR)/*.dll
-	@-rm -f $(MODEL_PLUGIN_BUILD_DIR)/*.o $(MODEL_PLUGIN_BUILD_DIR)/*.dll
+	@-rm -f $(WIN32_IMAGE_PLUGIN_BUILD_DIR)/*.o $(WIN32_IMAGE_PLUGIN_BUILD_DIR)/*.a $(WIN32_IMAGE_PLUGIN_BUILD_DIR)/*.dll
+	@-rm -f $(WIN32_MODEL_PLUGIN_BUILD_DIR)/*.o $(WIN32_MODEL_PLUGIN_BUILD_DIR)/*.a $(WIN32_MODEL_PLUGIN_BUILD_DIR)/*.dll
 	@-echo "[done]"
 
 install-plugins:
@@ -904,9 +979,9 @@ install-plugins:
 install-plugins-win32:
 	@-echo -n "Installing plugins                           "
 	@-mkdir -p $(INSTALL_PLUGIN_DIR)/image
-	@-cp $(IMAGE_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/image/
+	@-cp $(WIN32_IMAGE_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/image/
 	@-mkdir -p $(INSTALL_PLUGIN_DIR)/model
-	@-cp $(MODEL_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/model/
+	@-cp $(WIN32_MODEL_PLUGIN_BUILD_DIR)/*.dll $(INSTALL_PLUGIN_DIR)/model/
 	@-echo "[done]"
 
 install-tools:
@@ -919,13 +994,6 @@ install-tools:
 $(BUILDDIR)/$(MOD_NAME).so : $(MOD_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
 
-$(BUILDDIR)/$(MOD_NAME).dll : $(MOD_OBJS)
-	$(CC) -shared -o $(BUILDDIR)/$(MOD_NAME).dll \
-	-Wl,--out-implib=$(BUILDDIR)/lib$(MOD_NAME).a \
-	-Wl,--export-all-symbols \
-	-Wl,--enable-auto-import \
-	-Wl,--whole-archive $(MOD_OBJS) \
-	-Wl,--no-whole-archive $(LIBS)
 
 ##########################################################################
 # Unit tests
@@ -1077,7 +1145,7 @@ lineageIIextract.test:
 	OBJS="$(BUILD_TEST_DIR)/extractFace.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lstdc++"
-	
+
 
 PerlinNoise.test:
 	mkdir -p $(BUILD_TEST_DIR)

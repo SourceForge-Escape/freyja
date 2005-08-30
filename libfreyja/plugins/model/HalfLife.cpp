@@ -612,8 +612,8 @@ int freyja_model__halflife_import(char *filename)
 	{
 		freyjaBegin(FREYJA_BONE);
 		idx = freyjaGetCurrent(FREYJA_BONE);
-		freyjaBoneParent1i(idx, hl.mBones[b].parent);
-		freyjaBoneName1s(idx, hl.mBones[b].name);
+		freyjaBoneParent(idx, hl.mBones[b].parent);
+		freyjaBoneName(idx, hl.mBones[b].name);
 
 		if (b == 0)
 		{
@@ -621,10 +621,10 @@ int freyja_model__halflife_import(char *filename)
 								  hl.mBones[b].value[0]*scale, 
 								  hl.mBones[b].value[2]*scale, 
 								  hl.mBones[b].value[1]*scale);
-			freyjaBoneRotateEulerXYZ3f(idx,
-									   hl.mBones[b].value[3]*57.295779513082323, 
-									   hl.mBones[b].value[4]*57.295779513082323 -90.0, 
-									   hl.mBones[b].value[5]*57.295779513082323);
+			freyjaBoneRotateEuler3f(idx,
+								   hl.mBones[b].value[3]*57.295779513082323, 
+								   hl.mBones[b].value[4]*57.295779513082323 -90.0, 
+								   hl.mBones[b].value[5]*57.295779513082323);
 		}
 		else
 		{
@@ -632,17 +632,17 @@ int freyja_model__halflife_import(char *filename)
 								  hl.mBones[b].value[0]*scale, 
 								  hl.mBones[b].value[1]*scale, 
 								  hl.mBones[b].value[2]*scale);
-			freyjaBoneRotateEulerXYZ3f(idx,
-									   hl.mBones[b].value[3]*57.295779513082323, 
-									   hl.mBones[b].value[4]*57.295779513082323, 
-									   hl.mBones[b].value[5]*57.295779513082323);
+			freyjaBoneRotateEuler3f(idx,
+									hl.mBones[b].value[3]*57.295779513082323, 
+									hl.mBones[b].value[4]*57.295779513082323, 
+									hl.mBones[b].value[5]*57.295779513082323);
 		}
 
 		for (i = 0; i < hl.mBoneCount; ++i)
 		{
 			if (hl.mBones[i].parent == (int)b)
 			{ 
-				freyjaBoneAddChild1i(idx, i);
+				freyjaBoneAddChild(idx, i);
 			}
 		}
 

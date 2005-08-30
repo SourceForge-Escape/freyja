@@ -36,12 +36,12 @@
 #include <freyja/SkeletonABI.h>
 
 #ifdef HAVE_OPENGL
-#   ifdef MACOSX
-#      include <OpenGL/OpenGL.h>
-#   else
+//#   ifdef MACOSX
+//#      include <OpenGL/OpenGL.h>
+//#   else
 #      include <GL/gl.h>
 #      include <GL/glu.h>
-#   endif
+//#   endif
 #endif
 
 
@@ -1854,13 +1854,16 @@ void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton,
 	glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
 	glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
 	glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
-
 	n = bone.getChildrenCount();
 
 	for (i = 0; i < n; ++i)
 	{
 		index = bone.getBoneIndex(i);
-		renderSkeleton(skeleton, index, scale);
+
+		if (index != currentBone)
+		{
+			renderSkeleton(skeleton, index, scale);
+		}
 	}
 
 	glPopMatrix();

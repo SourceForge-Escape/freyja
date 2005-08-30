@@ -33,28 +33,7 @@ Vector<Bone *> Bone::mGobalPool;
 
 Bone::Bone()
 {
-	uint32 i, count;
-	bool found = false;
-
-	/* Setup UID and class container reference */
-	mUID = count = mGobalPool.size();
-
-	for (i = 0; i < count; ++i)
-	{
-		if (mGobalPool[i] == 0x0)
-		{
-			mUID = i;
-			mGobalPool.assign(mUID, this);
-
-			found = true;
-		}	
-	}
-
-	if (!found)
-	{
-		mGobalPool.pushBack(this);
-	}
-
+	mUID = INDEX_INVALID;
 	mSkeleton = INDEX_INVALID;
 	mParent = INDEX_INVALID;
 	mName[0] = '\0';
@@ -74,20 +53,17 @@ Bone::~Bone()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-
-////////////////////////////////////////////////////////////
-// Public Mutators
-////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////
-// Private Accessors
-////////////////////////////////////////////////////////////
+index_t Bone::getUID()
+{
+	return mUID;
+}
 
 
-////////////////////////////////////////////////////////////
-// Private Mutators
-////////////////////////////////////////////////////////////
+uint32 Bone::getCount() 
+{
+	return mGobalPool.size();
+} 
+
 
 Bone *Bone::getBone(index_t uid)
 {
@@ -98,15 +74,46 @@ Bone *Bone::getBone(index_t uid)
 }
 
 
-index_t Bone::getUID()
-{
-	return mUID;
-}
-
+////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
 
 void Bone::addChild(index_t child)
 {
 	mChildren.pushBack(child);
+}
+
+
+index_t Bone::addToPool()
+{
+	uint32 i, count;
+	bool found = false;
+
+
+	if (mUID == INDEX_INVALID)
+	{
+
+		/* Setup UID and class container reference */
+		mUID = count = mGobalPool.size();
+
+		for (i = 0; i < count; ++i)
+		{
+			if (mGobalPool[i] == 0x0)
+			{
+				mUID = i;
+				mGobalPool.assign(mUID, this);
+
+				found = true;
+			}	
+		}
+
+		if (!found)
+		{
+			mGobalPool.pushBack(this);
+		}
+	}
+
+	return mUID;
 }
 
 
@@ -134,11 +141,26 @@ void Bone::removeChild(index_t child)
 }
 
 
+void Bone::removeFromPool()
+{
+	if (mUID < mGobalPool.size())
+		mGobalPool.assign(mUID, 0x0);
+
+	mUID = INDEX_INVALID;
+}
+
+
+void Bone::resetPool()
+{
+	mGobalPool.clear();
+}
+
+
 void Bone::setName(const char *name)
 {
 	uint32 i;
 
-	if (name)
+	if (name != 0x0 && name[0] != 0)
 	{
 		for (i = 0; i < 62 && name[i] != 0; ++i)
 		{
@@ -146,8 +168,10 @@ void Bone::setName(const char *name)
 		}
 
 		mName[i] = 0;
+		
+		mName[63] = 0;
 	}
-} 
+}
 
 
 void Bone::updateBoneToWorld()
@@ -179,12 +203,49 @@ void Bone::updateBoneToWorld()
 
 
 ////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Unit Test code
+////////////////////////////////////////////////////////////
+
+#ifdef UNIT_TEST_BONE
+int runBoneUnitTest(int argc, char *argv[])
+{
+	Bone bone;
+
+	return 0;
+}
+
+
+int main(int argc, char *argv[])
+{
+	printf("[Bone class test]\n");
+
+	return runBoneUnitTest(argc, argv);
+}
+#endif
+
+
+////////////////////////////////////////////////////////////
 // C ABI
 ////////////////////////////////////////////////////////////
 
-#ifndef BONE_0_9_3_API
-
 index_t gFreyjaCurrentBone = INDEX_INVALID;
+
+void freyjaBonePoolClear()
+{
+	gFreyjaCurrentBone = INDEX_INVALID;
+	Bone::resetPool();
+}
+
 
 index_t freyjaGetCurrentBone()
 {
@@ -223,6 +284,7 @@ index_t freyjaBoneCreate(index_t skeletonIndex)
 	Bone *b = new Bone();
 
 	b->mSkeleton = skeletonIndex;
+	b->addToPool();
 	return b->getUID();
 }
 
@@ -232,7 +294,10 @@ void freyjaBoneDelete(index_t boneIndex)
 	Bone *b = Bone::getBone(boneIndex);
 
 	if (b)
+	{
+		b->removeFromPool();
 		delete b;
+	}
 }
 
 
@@ -250,10 +315,15 @@ void freyjaBoneParent(index_t boneIndex, index_t parentIndex)
 	Bone *b = Bone::getBone(boneIndex);
 	Bone *p = Bone::getBone(parentIndex);
 
-	if (b && p && boneIndex != parentIndex)
+	if (b && boneIndex != parentIndex)
 	{
 		b->mParent = parentIndex;
-		p->updateBoneToWorld();
+
+		if (p)
+		{
+			//p->addChild(boneIndex);
+			//p->updateBoneToWorld();
+		}
 	}
 }
 
@@ -282,8 +352,9 @@ void freyjaBoneAddChild(index_t boneIndex, index_t childIndex)
 
 	if (b && boneIndex != childIndex)
 	{
+		freyjaPrintMessage("! bone %i -> %i parent", childIndex, boneIndex);
 		b->addChild(childIndex);
-		b->updateBoneToWorld();
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -295,7 +366,7 @@ void freyjaBoneTranslate3f(index_t boneIndex, vec_t x, vec_t y, vec_t z)
 	if (b)
 	{
 		b->mTranslation = Vector3d(x, y, z);
-		b->updateBoneToWorld();
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -307,7 +378,7 @@ void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz)
 	if (b)
 	{
 		b->mTranslation = Vector3d(xyz[0], xyz[1], xyz[2]);
-		b->updateBoneToWorld();
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -315,12 +386,11 @@ void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz)
 void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 {
 	Bone *b = Bone::getBone(boneIndex);
-	Quaternion q = Quaternion(p, h, r);
 
 	if (b)
 	{
-		b->mRotation = q;
-		b->updateBoneToWorld();
+		b->mRotation = Quaternion(p, h, r);
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -328,12 +398,11 @@ void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 {
 	Bone *b = Bone::getBone(boneIndex);
-	Quaternion q = Quaternion(phr[1], phr[1], phr[2]);
 
 	if (b)
 	{
 		b->mRotation.setByEulerAngles(phr);
-		b->updateBoneToWorld();
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -346,7 +415,7 @@ void freyjaBoneRotateQuat4f(index_t boneIndex,
 	if (b)
 	{
 		b->mRotation = Quaternion(w, x, y, z);
-		b->updateBoneToWorld();
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -358,7 +427,7 @@ void freyjaBoneRotateQuat4fv(index_t boneIndex, vec4_t wxyz)
 	if (b)
 	{
 		b->mRotation = Quaternion(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
-		b->updateBoneToWorld();
+		//b->updateBoneToWorld();
 	}
 }
 
@@ -418,11 +487,13 @@ void freyjaGetBoneRotationQuat4fv(index_t boneIndex, vec4_t wxyz)
 void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 {
 	Bone *b = Bone::getBone(boneIndex);
-	Quaternion q = Quaternion(phr[0], phr[1], phr[2]); // P H R -> R P Y
+	Quaternion q;// = Quaternion(phr[0], phr[1], phr[2]); // P H R -> R P Y
 
 	if (b)
 	{
-		b->mRotation.getEulerAngles(phr+0, phr+1, phr+2);  // P H R -> H B A
+		q = b->mRotation;
+		//freyjaPrintError("FIXME %p, %s:%i", b, __FILE__, __LINE__);
+		q.getEulerAngles(phr);  // P H R -> H B A
 	}
 }
 
@@ -476,51 +547,50 @@ uint32 freyjaGetBoneChildCount(index_t boneIndex)
 	return 0;
 }
 
+#include <hel/Matrix.h>
 
 void freyjaBoneTransform(index_t boneIndex, 
                          freyja_transform_action_t action, 
                          vec_t x, vec_t y, vec_t z)
 {
+	Matrix m;
+	vec3_t xyz;
+
+
 	switch (action)
 	{
 	case fTranslate:
+		freyjaGetBoneTranslation3fv(boneIndex, xyz);
+		xyz[0] += x;
+		xyz[1] += y;
+		xyz[2] += z;
+		freyjaBoneTranslate3fv(boneIndex, xyz);
 		break;
 
 	case fRotate:
+		freyjaGetBoneRotationEuler3fv(boneIndex, xyz);
+
+		xyz[0] = HEL_DEG_TO_RAD(x + HEL_RAD_TO_DEG(xyz[0]));
+		xyz[1] = HEL_DEG_TO_RAD(y + HEL_RAD_TO_DEG(xyz[1]));
+		xyz[2] = HEL_DEG_TO_RAD(z + HEL_RAD_TO_DEG(xyz[2]));
+
+		freyjaBoneRotateEuler3fv(boneIndex, xyz);
 		break;
 
 	case fScale:
+		freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
 		break;
 
 	case fScaleAboutPoint:
+		freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
 		break;
 
 	case fRotateAboutPoint:
+		freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
 		break;
 	}
 }
 
-#endif
 
 
-////////////////////////////////////////////////////////////
-// Unit Test code
-////////////////////////////////////////////////////////////
-
-#ifdef UNIT_TEST_BONE
-int runBoneUnitTest(int argc, char *argv[])
-{
-	Bone bone;
-
-	return 0;
-}
-
-
-int main(int argc, char *argv[])
-{
-	printf("[Bone class test]\n");
-
-	return runBoneUnitTest(argc, argv);
-}
-#endif
 
