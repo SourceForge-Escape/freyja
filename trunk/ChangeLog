@@ -1,0 +1,12 @@
+
+ ChangeLog ( trunk )
+
+ 20050830 Mongoose
+ - md5.so Fix for new skeletal system
+ - Started new changelog for trunk, since svn logs are lacking
+ - bmp.so Color fix and vertical flip
+ - 3ds.so Fix for crash causing dozens of NULL materials
+ - libhel Fix for Quaternion <--> Euler math, new unit test
+ - libfreyja Fix for dancer bone renderer
+ - various model plugins updated for new Bone ABI
+ - libfreyja New dancer bones backport to trunk finished and commited
