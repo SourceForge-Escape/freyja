@@ -421,6 +421,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eSetMaterialTexture:
+		mModel->setCurrentTextureIndex(value);
 		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
 		freyja_print("Material[%i].texture = %i",
 					 freyjaGetCurrentMaterial(), 
@@ -1903,8 +1904,12 @@ void FreyjaControl::handleFilename(const char *filename)
 		if (failed == 0) // success
 		{
 			uint32 e = resourceGetEventId1s("eSetTextureNameA");
+			uint32 texture = mModel->getTexureId() - 1;
 			mgtk_textentry_value_set(e, filename);
-			//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(),
+			                      fFreyjaMaterial_Texture);
+			mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
+			freyjaMaterialTexture(freyjaGetCurrentMaterial(), texture);
 		}
 		break;
 

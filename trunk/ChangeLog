@@ -2,6 +2,8 @@
  ChangeLog ( trunk )
 
  20050830 Mongoose
+ - 
+ - freyja Fix for material texture loading to automate ids, etc
  - md5.so Fix for new skeletal system
  - Started new changelog for trunk, since svn logs are lacking
  - bmp.so Color fix and vertical flip

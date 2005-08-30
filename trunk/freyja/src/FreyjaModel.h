@@ -278,6 +278,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	unsigned int getTexureId();
+
 	unsigned int getCurrentTexCoord();
 	/*------------------------------------------------------
 	 * Pre  : 
