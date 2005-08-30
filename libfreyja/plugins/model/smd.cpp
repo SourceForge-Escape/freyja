@@ -142,22 +142,22 @@ int freyja_model__smd_import(char *filename)
 
 					freyjaBegin(FREYJA_BONE);
 					idx = freyjaGetCurrent(FREYJA_BONE);
-					freyjaBoneFlags1i(idx, 0x0);
-					freyjaBoneParent1i(idx, bone->parent);
-					freyjaBoneName1s(idx, bone->name);
+					freyjaBoneFlags(idx, 0x0);
+					freyjaBoneParent(idx, bone->parent);
+					freyjaBoneName(idx, bone->name);
 
 					//printf("%3i: %s %i\n", idx, bone->name, bone->parent);
 
 					if (!index)
 					{
 						freyjaBoneTranslate3f(idx, x*scale, z*scale, y*scale);
-						freyjaBoneRotateEulerXYZ3f(idx, 
-												   rx*r2d,(ry*r2d)-90.0,rz*r2d);
+						freyjaBoneRotateEuler3f(idx, 
+												rx*r2d,(ry*r2d)-90.0,rz*r2d);
 					}
 					else
 					{
 						freyjaBoneTranslate3f(idx, x*scale, y*scale, z*scale);
-						freyjaBoneRotateEulerXYZ3f(idx, rx*r2d, ry*r2d, rz*r2d);
+						freyjaBoneRotateEuler3f(idx, rx*r2d, ry*r2d, rz*r2d);
 					}
 
 					for (i = bones.begin(); i < bones.end(); ++i)
@@ -166,7 +166,7 @@ int freyja_model__smd_import(char *filename)
 
 						if (bone && bone->parent == index)
 						{ 
-							freyjaBoneAddChild1i(idx, i);
+							freyjaBoneAddChild(idx, i);
 						}
 					}
 
@@ -298,7 +298,7 @@ int freyja_model__smd_export(char *filename)
 			index = freyjaGetCurrent(FREYJA_BONE);
 
 			freyjaGetBoneTranslation3fv(index, translation);
-			freyjaGetBoneRotationEulerXYZ3fv(index, rotation);
+			freyjaGetBoneRotationEuler3fv(index, rotation);
 
 			translation[0] *= scale; 
 			translation[2] *= scale; 

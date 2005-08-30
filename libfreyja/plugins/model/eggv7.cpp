@@ -269,7 +269,7 @@ int freyja_model__eggv7_import(char *filename)
      index = freyjaGetCurrent(FREYJA_BONE);
      transT.Add(id, index);
      freyjaBoneTranslate3fv(index, pos);
-     freyjaBoneFlags1i(index, 0x00);
+     freyjaBoneFlags(index, 0x00);
 
      printf(" %i meshes:\n   ", mesh_count);
 
@@ -278,7 +278,7 @@ int freyja_model__eggv7_import(char *filename)
        fread(&id, sizeof(int), 1, f);
        printf(" %i", id);
 
-       freyjaBoneAddMesh1i(index, transM[id]);
+       freyjaBoneAddMesh(index, transM[id]);
      }
 
      printf("\n %i slaves:\n   ", slaves);
@@ -288,7 +288,7 @@ int freyja_model__eggv7_import(char *filename)
        fread(&id, sizeof(int), 1, f);
        printf(" %i", id);
 
-       freyjaBoneAddChild1i(index, transT[id]);
+       freyjaBoneAddChild(index, transT[id]);
      }
 
      printf("\n}\n");

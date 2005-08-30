@@ -1,4 +1,5 @@
 
+
 lazybuild:
 	@-printf "Installing mstl\n"
 	@-cd mstl && make install

@@ -331,7 +331,7 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 // MGtk wrappers
 ///////////////////////////////////////////////////////////////////////
 
-#ifdef WIN32
+#if defined (WIN32) || (MACOSX)
 #else
 void mgtk_print(char *format, ...)
 {
@@ -1415,7 +1415,7 @@ char *freyja_rc_map(char *s)
 
 	len = strlen(s) + strlen(path);
   
-#ifdef unix
+#if defined unix || MACOSX
 	char *env;
 
 	env = getenv("HOME");
@@ -1615,7 +1615,7 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 	if (size < 1)
 		return;
 
-#ifdef unix
+#if defined unix || MACOSX
 	snprintf(dest, size, "%s/.freyja/icons/%s",
 			 (char *)getenv("HOME"), icon_name);
 #else
@@ -1635,7 +1635,7 @@ void event_register_control(FreyjaControl *c)
 int main(int argc, char *argv[])
 {
 // Link up mgtk DLL stubs to these implementations
-#ifdef WIN32
+#if defined (WIN32) || (MACOSX)
 	mgtk_win32_import("win32_mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
 	mgtk_win32_import("win32_mgtk_handle_color", (void*)freyja_handle_color);
 	mgtk_win32_import("win32_mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);

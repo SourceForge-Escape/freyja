@@ -448,22 +448,22 @@ int freyja_model__skel_import(char *filename)
 			/* Start a new tag */
 			freyjaBegin(FREYJA_BONE);
 			idx = freyjaGetCurrent(FREYJA_BONE);
-			freyjaBoneFlags1i(idx, 0x0);
-			freyjaBoneName1s(idx, skel.mBones[i].name);
+			freyjaBoneFlags(idx, 0x0);
+			freyjaBoneName(idx, skel.mBones[i].name);
 			freyjaBoneTranslate3f(idx, 
 								  skel.mBones[i].translation[0],
 								  skel.mBones[i].translation[1],
 								  skel.mBones[i].translation[2]);
-			freyjaBoneRotateQuatWXYZ4f(idx, 
-									   skel.mBones[i].rotation[0], // w?
-									   skel.mBones[i].rotation[1],
-									   skel.mBones[i].rotation[2],
-									   skel.mBones[i].rotation[3]);
+			freyjaBoneRotateQuat4f(idx, 
+									skel.mBones[i].rotation[0], // w?
+									skel.mBones[i].rotation[1],
+									skel.mBones[i].rotation[2],
+									skel.mBones[i].rotation[3]);
 			
 			for (j = 0; j <  skel.mBones[i].childrenCount; ++j)
 			{
 				printf("%d ", skel.mBones[i].children[j]);
-				freyjaBoneAddChild1i(idx, skel.mBones[i].children[j]);
+				freyjaBoneAddChild(idx, skel.mBones[i].children[j]);
 			}
 			
 			printf("\n");
@@ -503,7 +503,7 @@ int freyja_model__skel_export(char *filename)
 		bone = freyjaGetCurrent(FREYJA_BONE);
 
 		skel.mBones[b].parent = freyjaGetBoneParent(bone);
-		freyjaGetBoneRotationQuatWXYZ4fv(bone, skel.mBones[b].rotation);
+		freyjaGetBoneRotationQuat4fv(bone, skel.mBones[b].rotation);
 		freyjaGetBoneTranslation3fv(bone, skel.mBones[b].translation);
 		freyjaGetBoneName(bone, 64, skel.mBones[b].name);
 

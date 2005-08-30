@@ -113,17 +113,70 @@ class Skeleton
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	index_t getUID();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	static uint32 getCount();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	static Skeleton *getSkeleton(index_t skeletonIndex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void addBone(index_t bone);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t addToPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void removeBone(index_t bone);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void removeFromPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	static void resetPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void setName(const char *name);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	char mName[64];                  /* Human readable identifier */
 
-	Vector<Bone *> mBones;           /* Bones in this skeleton */
+	Vector<index_t> mBones;          /* Bones in this skeleton */
 
-	uint32 mRoot;                    /* Root bone index */
+	index_t mRoot;                   /* Root bone index */
 
 
  private:
@@ -139,8 +192,6 @@ class Skeleton
 
 	index_t mUID;                     /* System for allowing gobal references, 
 									   * which are mostly for C API callbacks */
-
-	static uint32 mUIDCount;
 
 	static Vector<Skeleton *> mGobalPool; /* Storage for gobal access */
 };

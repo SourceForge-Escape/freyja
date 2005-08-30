@@ -632,9 +632,9 @@ int freyja_model__md5_import(char *filename)
 		/* Start a new tag */
 		freyjaBegin(FREYJA_BONE);
 		bindex = freyjaGetCurrent(FREYJA_BONE);
-		freyjaBoneFlags1i(bindex, 0x0);
-		freyjaBoneParent1i(bindex, md5.mJoints[j].parent);
-		freyjaBoneName1s(bindex, md5.mJoints[j].name);
+		freyjaBoneFlags(bindex, 0x0);
+		freyjaBoneParent(bindex, md5.mJoints[j].parent);
+		freyjaBoneName(bindex, md5.mJoints[j].name);
 
 		/* Translate */
 		vec3 = transforms[j];
@@ -682,7 +682,7 @@ int freyja_model__md5_import(char *filename)
 		{
 			if (md5.mJoints[j2].parent == j)
 			{ 
-				freyjaBoneAddChild1i(bindex, j2);
+				freyjaBoneAddChild(bindex, j2);
 			}
 		}
 
@@ -741,7 +741,7 @@ int freyja_model__md5_export(char *filename)
 		md5.mJoints[j].name = new char[64];
 		freyjaGetBoneName(boneIndex, 64, md5.mJoints[j].name);
 
-		freyjaGetBoneRotationQuatWXYZ4fv(boneIndex, wxyz);
+		freyjaGetBoneRotationQuat4fv(boneIndex, wxyz);
 		//FIXME encode quaternion wxyz to id format here
 		md5.mJoints[j].rotate[0] = wxyz[0];
 		md5.mJoints[j].rotate[1] = wxyz[1];

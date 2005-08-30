@@ -52,6 +52,8 @@ extern "C" {
 	//
 	////////////////////////////////////////////////////////////////
 
+	uint32 freyjaGetModelCount();
+
 	index_t freyjaGetCurrentModelIndex();
 
 	void freyjaModelGenerateVertexNormals(index_t modelIndex);
@@ -244,6 +246,28 @@ extern "C" {
 	 * Pre  : Light <lightIndex> exists
 	 * Post : Returns <specular> color
 	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////////
+	// 0.9.3 Bone utils for 10.0 bones
+	//
+	////////////////////////////////////////////////////////////////
+
+	void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex);
+	void freyjaBoneAddMesh(index_t boneIndex, index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Mesh is added to Bone's child list
+	 *
+	 *        Either makes mesh tree connection or
+	 *        simulates by vertex weights and pivots
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex);
+
+	void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex);
+
+	void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex);
 
 
 	////////////////////////////////////////////////////////////////

@@ -39,102 +39,6 @@
 #include "Egg.h"
 
 
-#ifdef BONE_0_9_3_API
-/* These classes sheild FreyjaRender from Egg use for polygons, meshes, etc. 
- * They only use all natural, wholesome Hel math types. */
-
-class RenderBone
-{
-public:
-
-	unsigned int getChildrenCount()
-	{
-		return mTag->slave.end();
-	}
-
-	long getBoneIndex(unsigned int index)
-	{
-		return mTag->slave[index];
-	}
-
-	void set(egg_tag_t *tag)
-	{
-		mTag = tag;
-		translate = Vector3d(tag->center);
-		rotate = Vector3d(tag->rot);
-	}
-
-	void set(egg_tag_t *tag, unsigned int frame)
-	{
-		unsigned int i, n = tag->keyframes.size();
-		mTag = tag;
-
-		if (n > 0)
-		{
-			for (i = 0; i < n; ++i)
-			{
-				if (tag->keyframes[i]->frameIndex == (int)frame)
-				{
-					translate = Vector3d(tag->keyframes[i]->translate);
-					rotate = Vector3d(tag->keyframes[i]->rotate);
-				}
-			}
-		}
-
-		translate = Vector3d(tag->center);
-		rotate = Vector3d(tag->rot);
-	}
-
-	Vector3d translate;
-	Vector3d rotate;
-
-private:
-	egg_tag_t *mTag;
-};
-
-
-class RenderSkeleton
-{
-public:
-
-	unsigned int getBoneCount()
-	{
-		return mTags->end();
-	}
-
-	bool getBoneKeyframe(unsigned int index, unsigned int frame, RenderBone &bone)
-	{
-		if ((*mTags)[index])
-		{
-			bone.set((*mTags)[index], frame);
-			return true;
-		}
-
-		return false;
-	}
-
-	bool getBone(unsigned int index, RenderBone &bone)
-	{
-		if ((*mTags)[index])
-		{
-			bone.set((*mTags)[index]);
-			return true;
-		}
-
-		return false;
-	}
-
-	void setTags(Vector<egg_tag_t *> *tags)
-	{
-		mTags = tags;
-	}
-
-private:
-	Vector<egg_tag_t *> *mTags;
-};
-
-#else
-
 class RenderBone
 {
 public:
@@ -146,13 +50,14 @@ public:
 
 	long getBoneIndex(unsigned int index)
 	{
-		return mBoneIndex;
+		return freyjaGetBoneChild(mBoneIndex, index);
 	}
 
 	void set(index_t boneIndex)
 	{
 		mBoneIndex = boneIndex;
 		freyjaGetBoneRotationEuler3fv(boneIndex, rotate.mVec);
+		rotate = rotate * HEL_180_OVER_PI;
 		freyjaGetBoneTranslation3fv(boneIndex, translate.mVec);
 	}
 
@@ -160,6 +65,7 @@ public:
 	{
 		mBoneIndex = boneIndex;
 		freyjaGetBoneRotationEuler3fv(boneIndex, rotate.mVec);
+		rotate = rotate * HEL_180_OVER_PI;
 		freyjaGetBoneTranslation3fv(boneIndex, translate.mVec);
 		/*
 		unsigned int i, n = tag->keyframes.size();
@@ -233,7 +139,6 @@ public:
 
 	index_t mSkeletonIndex;
 };
-#endif
 
 
 class RenderPolygon  
