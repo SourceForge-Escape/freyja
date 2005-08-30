@@ -647,7 +647,7 @@ void FreyjaFSM::freyjaVertexWeight(index_t index, vec_t weight, index_t bone)
 	if (weight <= 0.0) // Don't add dead weight ( remove requested )
 		return;
 
-	if (total + weight > 1.0)  // Just give a warning for now
+	if (total + weight > 1.0001)  // Just give a warning for now
 		freyjaPrintError("WARNING: Weight overflow %.3f + %.3f > 1.0 not handled here %s:%d\n", 
 					 total, weight, __FILE__, __LINE__);
 

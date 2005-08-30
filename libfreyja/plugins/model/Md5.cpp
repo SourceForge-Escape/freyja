@@ -596,7 +596,7 @@ int freyja_model__md5_import(char *filename)
 	freyjaEnd(); // FREYJA_MODEL
 
 	freyjaBegin(FREYJA_SKELETON);
-
+	index_t skeletonIndex = freyjaGetCurrent(FREYJA_SKELETON);
 	Vector3d transforms[md5.mNumJoints];
 	Vector3d origin;
 
@@ -632,6 +632,7 @@ int freyja_model__md5_import(char *filename)
 		/* Start a new tag */
 		freyjaBegin(FREYJA_BONE);
 		bindex = freyjaGetCurrent(FREYJA_BONE);
+		freyjaSkeletonAddBone(skeletonIndex, bindex);
 		freyjaBoneFlags(bindex, 0x0);
 		freyjaBoneParent(bindex, md5.mJoints[j].parent);
 		freyjaBoneName(bindex, md5.mJoints[j].name);
@@ -721,7 +722,7 @@ int freyja_model__md5_export(char *filename)
 
 	/* Encode the model into md5 to save */
 	modelIndex = freyjaGetCurrentModelIndex();
-	skeletonIndex = freyjaGetCurrentSkeletonIndex();
+	skeletonIndex = freyjaGetCurrentSkeleton();
 
 	md5.mVersion = 10;
 	md5.mNumMeshes = freyjaGetModelMeshCount(modelIndex);
