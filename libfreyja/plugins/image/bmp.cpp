@@ -61,7 +61,9 @@ int import_image(char *filename, unsigned char **image,
 	FreyjaFileReader r;
 	bmp_header_t header;
 	bmp_desc_header_t desc;
-	unsigned int byte_size;
+	unsigned int i, j, byte_size;
+	unsigned char tmp;
+	bool flip = true;
 
 
 	if (!r.openFile(filename))
@@ -84,15 +86,15 @@ int import_image(char *filename, unsigned char **image,
 	/* Read bitmap desc */
 	desc.header_size = r.readInt32U();
 	desc.width = r.readInt32();
-   desc.height = r.readInt32();
-   desc.planes = r.readInt16U();
-   desc.bpp = r.readInt16U();
-   desc.compression = r.readInt32U();
-   desc.data_size = r.readInt32U();
-   desc.x_ppm = r.readInt32();
-   desc.y_ppm = r.readInt32();
-   desc.n_colors = r.readInt32U();
-   desc.n_important_colors = r.readInt32U();
+	desc.height = r.readInt32();
+	desc.planes = r.readInt16U();
+	desc.bpp = r.readInt16U();
+	desc.compression = r.readInt32U();
+	desc.data_size = r.readInt32U();
+	desc.x_ppm = r.readInt32();
+	desc.y_ppm = r.readInt32();
+	desc.n_colors = r.readInt32U();
+	desc.n_important_colors = r.readInt32U();
 	
 	if (desc.data_size == 0)
 		return -3;
@@ -102,11 +104,36 @@ int import_image(char *filename, unsigned char **image,
 
 	byte_size = desc.data_size; //*type * desc.width * desc.height;
 
-	*w =	desc.width;
+	*w = desc.width;
 	*h = desc.height;
 	*type = desc.bpp/8;
 	*image = new unsigned char[byte_size];
 	r.readBufferUnsignedChar(byte_size, *image);
+
+	/* Swap color */
+	for (i = 0; i < byte_size; i += 3)
+	{
+		tmp = (*image)[i];
+		(*image)[i] = (*image)[i + 2];
+		(*image)[i + 2] = tmp;
+	}
+
+	/* Flip vertical */
+	if (flip)
+	{
+		unsigned int byteSize = (desc.bpp / 8);
+		unsigned int s = (desc.width * byteSize);
+		unsigned char *swap_row = new unsigned char[s];
+      
+		for (i = 0, j = desc.height - 1; (int)i < desc.height / 2; ++i, --j)
+		{
+			memcpy(swap_row, &(*image)[i*s], s);
+			memcpy(&(*image)[i*s], &(*image)[j*s], s);
+			memcpy(&(*image)[j*s], swap_row, s);
+		}
+			
+		delete [] swap_row;
+	}
 
 	return 0;
 }
