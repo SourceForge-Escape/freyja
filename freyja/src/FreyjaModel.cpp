@@ -2509,6 +2509,12 @@ int FreyjaModel::loadTextureBuffer(unsigned char *image,
 }
 
 
+unsigned int FreyjaModel::getTexureId()
+{
+	return mTextureId;
+}
+
+
 int FreyjaModel::saveMaterial(const char *filename)
 {
 	int32 mIndex = freyjaGetCurrentMaterial();
