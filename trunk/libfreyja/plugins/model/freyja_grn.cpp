@@ -218,8 +218,8 @@ int freyja_model__grn_import(char *filename)
 				freyjaPrintMessage("ERROR: NULL GRN bone!\n");
 				freyjaBegin(FREYJA_BONE);
 				index = freyjaGetCurrent(FREYJA_BONE);
-				freyjaBoneFlags1i(index, 0x0);
-				freyjaBoneName1s(index, "ERROR: NULL!");
+				freyjaBoneFlags(index, 0x0);
+				freyjaBoneName(index, "ERROR: NULL!");
 				freyjaEnd();
 
 				continue;
@@ -237,9 +237,9 @@ int freyja_model__grn_import(char *filename)
 
 			freyjaBegin(FREYJA_BONE);
 			index = freyjaGetCurrent(FREYJA_BONE);
-			freyjaBoneFlags1i(index, 0x0);
-			freyjaBoneName1s(index, boneName);
-			freyjaBoneParent1i(index, bone->parent);
+			freyjaBoneFlags(index, 0x0);
+			freyjaBoneName(index, boneName);
+			freyjaBoneParent(index, bone->parent);
 
 			freyjaBoneTranslate3f(index,
 								  bone->translate.points[0]*scale, 
@@ -280,7 +280,7 @@ int freyja_model__grn_import(char *filename)
 			
 			q = r * q;
 			q.getQuaternion4fv(wxyz);
-			freyjaBoneRotateQuatWXYZ4fv(index, wxyz);
+			freyjaBoneRotateQuat4fv(index, wxyz);
 			q.getEulerAngles(wxyz);
 	
 			//freyjaPrintMessage("   %f %f %f", HEL_RAD_TO_DEG(wxyz[0]),
@@ -291,7 +291,7 @@ int freyja_model__grn_import(char *filename)
 			//							HEL_RAD_TO_DEG(wxyz[0]),
 			//							-HEL_RAD_TO_DEG(wxyz[1]));
 #else
-			freyjaBoneRotateQuatWXYZ4f(index,
+			freyjaBoneRotateQuat4f(index,
 										bone->quaternion.points[0],
 										bone->quaternion.points[1], 
 										bone->quaternion.points[2],
@@ -299,7 +299,7 @@ int freyja_model__grn_import(char *filename)
 #endif
 
 			if (bone->parent == bone->id)
-				freyjaBoneParent1i(index, INDEX_INVALID);
+				freyjaBoneParent(index, INDEX_INVALID);
 
 			for (j = 0; j < bones.bones.size(); ++j)
 			{
@@ -308,7 +308,7 @@ int freyja_model__grn_import(char *filename)
 				if (child->parent == bone->id && child->id != bone->id)
 				{
 					printf("+child %li\n", child->id);
-					freyjaBoneAddChild1i(index, child->id);
+					freyjaBoneAddChild(index, child->id);
 				}
 			}
 

@@ -166,8 +166,8 @@ bool tmpHelSphereIntersectLine(Vector3d pos, Vector3d lastPos,
 
 
 int helIntersectionLineAndPolygon(vec3_t intersect,
-											 vec3_t p1, vec3_t p2,
-											 unsigned int vertexCount, vec3_t *ploygon)
+                                  vec3_t p1, vec3_t p2,
+                                  unsigned int vertexCount, vec3_t *ploygon)
 {
 	//	vec3_t normal, a, b;
 	Vector3d a, b, normal, pA, pB;

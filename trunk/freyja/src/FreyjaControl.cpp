@@ -24,6 +24,7 @@
 #include <stdio.h> 
 #include <math.h> 
 #include <stdarg.h> 
+#include <libgen.h> 
 #include <string.h>
 #include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaFileReader.h>
@@ -1970,7 +1971,7 @@ void FreyjaControl::handleFilename(const char *filename)
 #ifdef WIN32
 					filename,
 #else
-					basename(filename),
+					basename((char*)filename),
 #endif
 					(type2 == 0) ? "save " : "load ",
 					(failed == 0) ? "[sucess]" : "[failed]");
@@ -2608,7 +2609,7 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 		yy = y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		mModel->selectBone(xx, yy);
-		// mModel->selectTag(plane, xx, yy, zz);
+		// mModel->selectBone(plane, xx, yy, zz);
 		freyja_print("Selected Bone[%i] ( Still buggy? )", 
 					mModel->getCurrentBone());
 		break;
@@ -2737,17 +2738,17 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	case PLANE_XY:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
-		zf = 0;
+		zf = 0.0f;
 		break;
 
 	case PLANE_XZ:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = 0;
+		yf = 0.0f;
 		zf = ((y < old_y-t) ? m : ((y > old_y+t) ? -m : 0));
 		break;
 
 	case PLANE_ZY: //side
-		xf = 0;
+		xf = 0.0f;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		break;
@@ -2757,6 +2758,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	switch (mTransformMode)
 	{
 	case FreyjaModel::TransformBone:
+//#define EDIT_LIKE_BONE_0_9_3
+#ifdef EDIT_LIKE_BONE_0_9_3
 		mModel->getBoneRotation(&xr, &yr, &zr);
 		mModel->setBoneRotation(xr + xf, yr + yf, zr + zf);
 		mModel->getBoneRotation(&xr, &yr, &zr);
@@ -2768,7 +2771,30 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			mModel->setBoneRotation(xr, -180.0f, zr);
 
 		if (xr > 180.0f)
-			mModel->setBoneRotation(xr, yr, -180.0f);			
+			mModel->setBoneRotation(xr, yr, -180.0f);
+#else
+		{
+			const vec_t scale = 2.0f;
+			vec3_t xyz;
+
+			freyjaGetBoneRotationEuler3fv(mModel->getCurrentBone(), xyz);
+			xyz[0] += HEL_DEG_TO_RAD(xf*scale);
+			xyz[1] += HEL_DEG_TO_RAD(yf*scale);
+			xyz[2] += HEL_DEG_TO_RAD(zf*scale);
+		
+			// FIXME: Limit range -pi/2 to pi/2
+
+			freyjaBoneRotateEuler3fv(mModel->getCurrentBone(), xyz);
+			//freyjaPrintMessage("bone[%i].setEuler(%f, %f, %f)", 
+			//                  mModel->getCurrentBone(), xyz[0], xyz[1], xyz[2]);
+		}
+
+		rotate = fRotate;
+
+		old_x = x;
+		old_y = y;
+		return;
+#endif
 		break;
 
 

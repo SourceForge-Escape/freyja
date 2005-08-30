@@ -261,8 +261,8 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 	{
 		freyjaBegin(FREYJA_BONE);
 		idx = freyjaGetCurrent(FREYJA_BONE);
-		freyjaBoneParent1i(idx, skeleton[i].parent);
-		freyjaBoneName1s(idx, skeleton[i].name);
+		freyjaBoneParent(idx, skeleton[i].parent);
+		freyjaBoneName(idx, skeleton[i].name);
 		
 		switch (i)
 		{
@@ -270,10 +270,10 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 			{
 				vec3_t xyz;
 
-				freyjaBoneRotateQuatWXYZ4fv(idx, skeleton[i].wxyz);
-				freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
+				freyjaBoneRotateQuat4fv(idx, skeleton[i].wxyz);
+				freyjaGetBoneRotationEuler3fv(idx, xyz);
 				xyz[1] -= 90.0f;
-				freyjaBoneRotateEulerXYZ3f(idx, xyz[0], xyz[1], xyz[2]);
+				freyjaBoneRotateEuler3f(idx, xyz[0], xyz[1], xyz[2]);
 				freyjaBoneTranslate3f(idx, 
 									  skeleton[i].xyz[0] * scale, 
 									  skeleton[i].xyz[1] * scale,
@@ -301,41 +301,41 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 
 				if (i == 2 || i == 8)
 				{
-					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEuler3fv(idx, xyz);
 					xyz[0] += 0.0f;
 					xyz[1] -= 180.0f;
 					xyz[2] += 0.0f;
-					freyjaBoneRotateEulerXYZ3f(idx, xyz[2], xyz[0], xyz[1]);
+					freyjaBoneRotateEuler3f(idx, xyz[2], xyz[0], xyz[1]);
 					skeleton[i].mat.rotate(skeleton[i].xyz[2],
 										   skeleton[i].xyz[0],
 										   skeleton[i].xyz[1]);
 				}
 				else if (i == 19)
 				{
-					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEuler3fv(idx, xyz);
 					xyz[0] += 0.0f;
 					xyz[1] -= 90.0f;
 					xyz[2] += 0.0f;
-					freyjaBoneRotateEulerXYZ3f(idx, xyz[0], xyz[1], xyz[2]);
+					freyjaBoneRotateEuler3f(idx, xyz[0], xyz[1], xyz[2]);
 					skeleton[i].mat.rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
 				}
 				else if (i == 24)
 				{
-					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
+					freyjaGetBoneRotationEuler3fv(idx, xyz);
 					xyz[0] += 0.0f;
 					xyz[1] += 90.0f;
 					xyz[2] += 0.0f;
-					freyjaBoneRotateEulerXYZ3f(idx, xyz[0], xyz[1], xyz[2]);
+					freyjaBoneRotateEuler3f(idx, xyz[0], xyz[1], xyz[2]);
 					skeleton[i].mat.rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
 				}
 				else
 				{
-					freyjaBoneRotateQuatWXYZ4fv(idx, skeleton[i].wxyz);	
-					freyjaGetBoneRotationEulerXYZ3fv(idx, xyz);
+					freyjaBoneRotateQuat4fv(idx, skeleton[i].wxyz);	
+					freyjaGetBoneRotationEuler3fv(idx, xyz);
 					skeleton[i].mat.rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
@@ -347,7 +347,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 		{
 			if (skeleton[j].parent == i)
 			{ 
-				freyjaBoneAddChild1i(idx, j);
+				freyjaBoneAddChild(idx, j);
 			}
 		}
 		

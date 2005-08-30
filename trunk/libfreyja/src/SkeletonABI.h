@@ -38,6 +38,12 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaSkeletonPoolClear();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void freyjaSkeletonDelete(index_t skeletonIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -56,6 +62,26 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaSkeletonRootIndex(index_t skeletonIndex, index_t boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaCurrentSkeleton(index_t skeletonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaSkeletonTransform(index_t boneIndex, 
+	                             freyja_transform_action_t action, 
+	                             vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 
 	// Skeleton accessors /////////////////
 
@@ -65,7 +91,7 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetCurrentSkeletonIndex();
+	index_t freyjaGetCurrentSkeleton();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

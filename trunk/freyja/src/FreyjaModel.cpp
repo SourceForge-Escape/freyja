@@ -35,16 +35,6 @@
 #include "FreyjaModel.h"
 
 
-#ifdef WIN32
-float helDist3v(float *a, float *b)
-{
-	// FIXME
-	return (sqrt( ((b[0] - a[0]) * (b[0] - a[0])) +
-					  ((b[1] - a[1]) * (b[1] - a[1])) + 
-					  ((b[2] - a[2]) * (b[2] - a[2]))));
-}
-#endif
-
 BezierPatch FreyjaModel::gTestPatch;
 unsigned int FreyjaModel::mFlags = 0;
 FreyjaModel *gFreyjaModel = 0x0;
@@ -502,15 +492,18 @@ void FreyjaModel::getBoneRotation(float *x, float *y, float *z)
 	vec3_t xyz;
 
 	freyjaGetBoneRotationEuler3fv(getCurrentBone(), xyz);
-	*x = xyz[0];
-	*y = xyz[1];
-	*z = xyz[2];
+	*x = HEL_RAD_TO_DEG(xyz[0]);
+	*y = HEL_RAD_TO_DEG(xyz[1]);
+	*z = HEL_RAD_TO_DEG(xyz[2]);
+	freyja_print("%f %f %f", xyz[0], xyz[1], xyz[2]);
 }
 
 
 void FreyjaModel::setBoneRotation(float x, float y, float z)
 {
-	freyjaBoneRotateEuler3f(getCurrentBone(), x, y, z);
+	vec3_t xyz = {HEL_DEG_TO_RAD(x), HEL_DEG_TO_RAD(y), HEL_DEG_TO_RAD(z)};
+
+	freyjaBoneRotateEuler3fv(getCurrentBone(), xyz);
 }
 
 
@@ -574,10 +567,24 @@ void FreyjaModel::getSceneTranslation(vec3_t scroll)
 
 unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 {
-	int32 boneIndex = freyjaBoneCreate(0);
+	index_t skeletonIndex, boneIndex;
 
 
-	if (boneIndex == 0)
+	if (freyjaGetSkeletonCount() == 0)
+	{
+		skeletonIndex = freyjaSkeletonCreate();
+		freyjaCurrentSkeleton(skeletonIndex);
+		freyjaPrintMessage("No skeleton found, creating one...");
+	}
+
+	if (freyjaGetCurrentSkeleton() == INDEX_INVALID)
+		freyjaCurrentSkeleton(0);
+
+	skeletonIndex = freyjaGetCurrentSkeleton();
+	boneIndex = freyjaBoneCreate(skeletonIndex);
+	freyjaSkeletonAddBone(skeletonIndex, boneIndex);
+
+	if (boneIndex == 0) // FIXME no root handling for 'dancer' skel yet
 	{
 		freyjaBoneName(boneIndex, "root");
 	}
@@ -597,23 +604,23 @@ unsigned int FreyjaModel::newBone(float x, float y, float z, unsigned char flag)
 
 void FreyjaModel::addMeshToBone(unsigned int tag, unsigned int mesh)
 {
-	freyjaBoneAddMesh1i(getCurrentBone(), getCurrentMesh());
+	freyjaBoneAddMesh(getCurrentBone(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
 
 void FreyjaModel::removeMeshFromBone(unsigned int tag, unsigned int mesh)
 {
-	freyjaBoneRemoveMesh1i(getCurrentBone(), getCurrentMesh());
+	freyjaBoneRemoveMesh(getCurrentBone(), getCurrentMesh());
 	updateSkeletalUI();
 }
 
 
 void FreyjaModel::selectBone(float xx, float yy)
 {
-	int32 boneIndex = getNearestBoneIndexInPlane(xx, yy, getCurrentPlane());
+	index_t boneIndex = getNearestBoneIndexInPlane(xx, yy, getCurrentPlane());
 
-	if (boneIndex > -1)
+	if (boneIndex != INDEX_INVALID)
 		setCurrentBone(boneIndex);
 }
 
@@ -940,7 +947,7 @@ const char *FreyjaModel::getNameBone(unsigned int boneIndex)
 {
 	if (freyjaIsBoneAllocated(boneIndex))
 	{
-		return freyjaGetBoneName1s(boneIndex);
+		return freyjaGetBoneNameString(boneIndex);
 	}
 
 	return 0x0;
@@ -1955,7 +1962,7 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 	}
 
 	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
-	const char *rootName = freyjaGetBoneName1s(rootIndex);
+	const char *rootName = freyjaGetBoneNameString(rootIndex);
 	uint32 rootSkelBID = freyjaGetBoneSkeletalBoneIndex(rootIndex);
 
 	if (tree == 0x0)
@@ -2610,6 +2617,12 @@ int FreyjaModel::loadModel(const char *filename)
 {
 	int err = freyjaImportModel(filename); 
 
+	if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
+	    freyjaGetSkeletonCount() > 0)
+	{
+		freyjaCurrentSkeleton(0);
+	}
+
 	updateSkeletalUI();		
  
 	if (err)
@@ -2730,7 +2743,7 @@ bool FreyjaModel::isCurrentBoneAllocated()
 
 
 /* Note this doesn't handle transformed bones! */
-int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
+index_t FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane)
 {
 	uint32 i, count, best, current, skeleton;
 	uint32 xx = 0, yy = 1;
@@ -2739,7 +2752,7 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 	vec3_t xyz;
 
 
-	skeleton = getCurrentSkeleton();
+	skeleton = freyjaGetCurrentSkeleton();
 	count = freyjaGetSkeletonBoneCount(skeleton);
 
 	if (count == 0)
@@ -2787,7 +2800,7 @@ int32 FreyjaModel::getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t p
 	}
 
 	if (!freyjaIsBoneAllocated(best))
-		return -1;
+		return INDEX_INVALID;
 
 	return best;
 }

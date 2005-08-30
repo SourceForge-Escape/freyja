@@ -310,6 +310,13 @@ libhel.test:
 		hel/libhel.cpp \
 		-o $(BUILD_TEST_DIR)/libhel.test
 
+Quaternion.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(CC) -Wall -g -pipe -O0 -L/usr/local/lib -lstdc++ -lm -lhel0 \
+		-DUNIT_TEST_QUATERNION hel/Quaternion.cpp \
+		-o $(BUILD_TEST_DIR)/Quaternion.test
+	
+
 win32.test-strip:
 	strip --strip-all $(BUILD_TEST_DIR)/libhel-win32.test
 

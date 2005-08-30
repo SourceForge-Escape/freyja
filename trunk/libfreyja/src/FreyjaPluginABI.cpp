@@ -932,7 +932,7 @@ int32 freyjaLoadModel(const char *filename)
 	vec4_t wxyz;
 	vec3_t xyz;
 	char buffer[64];
-
+	
 	
 	/* HACK - This is to load Egg inline like in current freyja,
 	 *        until it's removed and made into purely a plugin */
@@ -1077,9 +1077,12 @@ int32 freyjaLoadModel(const char *filename)
 	if (!bones.empty())
 	{
 		freyjaBegin(FREYJA_SKELETON);
+		index_t skeleton = freyjaGetCurrent(FREYJA_SKELETON);
 
 		for (i = bones.begin(); i < (long)bones.end(); ++i)
 		{
+			freyjaSkeletonAddBone(skeleton, bones[i]);
+
 			for (j = bones.begin(); j < (long)bones.end(); ++j)
 			{
 				if (bones[i] == (long)freyjaGetBoneParent(bones[j]))
@@ -1932,6 +1935,7 @@ void freyja__PolygonReplaceReference(index_t polygonIndex,
 	a->ref.clear();
 	a->ref.copy(ref);
 }
+
 
 
 void freyja__GetCommonPolygonReferences(index_t vertexA, index_t vertexB,
@@ -3104,440 +3108,32 @@ void freyjaMeshPosition(index_t meshIndex, vec3_t xyz)
 }
 
 
-#ifdef BONE_0_9_3_API
-uint32 freyjaGetBoneCount()
+void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex)
 {
-	return freyjaGetCount(FREYJA_BONE);
-}
+	uint32 i, count;
 
+	count = freyjaGetMeshVertexCount(meshIndex);
 
-index_t freyjaGetCurrentSkeletonIndex()
-{
-	return 0; // Egg is single model
-}
-
-
-index_t freyjaGetSkeletonBoneCount(index_t skeletonIndex)
-{
-	return freyjaGetCount(FREYJA_BONE); // Single ref skeleton in Egg backend
-}
-
-
-index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element)
-{
-	egg_tag_t *bone = gEgg->getTag(element);
-	// Atm all one big reference skeleton in Egg backend
-
-	if (bone)
+	for (i = 0; i < count; ++i)
 	{
-		return bone->id;
-	}
-
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex)
-{
-	return 0; // egg can only hold one skeleton, and root is always moved to 0
-}
-
-
-char freyjaIsBoneAllocated(index_t boneIndex)
-{
-	if (gEgg)
-		return (gEgg->getTag(boneIndex) != 0x0);
-
-	return 0;
-}
-
-
-void freyjaBoneTransform(index_t boneIndex, 
-							freyja_transform_action_t action, 
-							vec_t x, vec_t y, vec_t z)
-{
-	enum Egg::egg_transform type;
-	Egg *egg = 0x0;
-
-	// FIXME: Only one model -- ignore model index for now
-
-	egg = freyja__getEggBackend();
-
-	if (!egg)
-		return;
-
-	switch (action)
-	{
-	case fTranslate:
-		type = Egg::TRANSLATE;
-		break;
-
-	case fRotate:
-		type = Egg::ROTATE;
-		break;
-
-	case fScale:
-		type = Egg::SCALE;
-		break;
-
-	case fScaleAboutPoint:
-		freyjaPrintMessage("freyjaModelTransform> No appropreiate transform, file bug with %", EMAIL_ADDRESS);
-		return;
-		break;
-
-	case fRotateAboutPoint:
-		type = Egg::ROTATE_ABOUT_CENTER;
-		break;
-	}
-
-	if (type != Egg::ROTATE)
-	{
-		egg->Transform(egg->getTag(boneIndex), type, x, y, z);
-	}
-	else
-	{
-		egg->TagRotateAbout(boneIndex, x, y, z);
+		freyjaBoneRemoveVertex(boneIndex, freyjaGetMeshVertexIndex(meshIndex, i));
 	}
 }
 
 
-void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex)
+void freyjaBoneAddMesh(index_t boneIndex, index_t meshIndex)
 {
-	freyjaVertexWeight(vertexIndex, 1.0f, boneIndex);
-}
+	uint32 i, count;
 
+	count = freyjaGetMeshVertexCount(meshIndex);
 
-void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex)
-{
-	Egg *egg = freyja__getEggBackend();
-	egg_vertex_t *vert = egg->getVertex(vertexIndex);
-	egg_weight_t *weight;
-	unsigned int i;
-
-	if (!egg)
-		return;
-
-	vert = egg->getVertex(vertexIndex);
-
-	if (vert)
+	for (i = 0; i < count; ++i)
 	{
-		for (i = vert->weights.begin(); i < vert->weights.end(); ++i)
-		{
-			weight = vert->weights[i];
-
-			if (weight && weight->bone == boneIndex)
-			{
-				delete vert->weights[i];  /* Safe to null this out?  */
-			}
-		}
+		freyjaBoneAddVertex(boneIndex, freyjaGetMeshVertexIndex(meshIndex, i));
 	}
 }
 
 
-void freyjaBoneFlags1i(index_t boneIndex, uint32 flags)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		bone->flag = flags;
-	}
-}
-
-
-void freyjaBoneParent1i(index_t boneIndex, index_t parentIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		bone->parent = parentIndex;
-	}
-}
-
-
-const char *freyjaGetBoneName1s(index_t boneIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		return bone->name;
-	}
-
-	return 0x0;
-}
-
-
-void freyjaBoneName1s(index_t boneIndex, const char *name)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		strncpy(bone->name, name, 64);
-	}
-}
-
-
-void freyjaBoneRemoveChild1i(index_t boneIndex, index_t childIndex)
-{
-	Egg *egg = freyja__getEggBackend();
-
-	if (egg)
-	{
-		egg->TagDisconnect(boneIndex, childIndex);
-	}
-}
-
-
-void freyjaBoneAddChild1i(index_t boneIndex, index_t childIndex)
-{
-	//egg->connectTag(master, slave);
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		egg_tag_t *child =  gEgg->getTag(childIndex);
-			
-		if (child)
-		{
-			child->parent = bone->id;
-		}
-		
-		// This is for plugin use -- will require child allocation in future
-		bone->slave.pushBack(childIndex);
-	}
-}
-
-
-void freyjaBoneRemoveMesh1i(index_t boneIndex, index_t meshIndex)
-{
-	Egg *egg = freyja__getEggBackend();
-
-	if (egg)
-	{
-		egg->TagDelMesh(egg->getTag(boneIndex), meshIndex);
-	}
-}
-
-
-void freyjaBoneAddMesh1i(index_t boneIndex, index_t meshIndex)
-{
-	Egg *egg = freyja__getEggBackend();
-
-	if (egg)
-	{
-		egg->TagAddMesh(egg->getTag(boneIndex), meshIndex);
-	}
-}
-
-
-void freyjaBoneTranslate3f(index_t boneIndex, vec_t x, vec_t y, vec_t z)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		bone->center[0] = x;
-		bone->center[1] = y;
-		bone->center[2] = z;
-	}
-}
-
-
-void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz)
-{
-	freyjaBoneTranslate3f(boneIndex, xyz[0], xyz[1], xyz[2]);
-}
-
-
-void freyjaBoneRotateEulerXYZ3f(index_t boneIndex, vec_t x, vec_t y, vec_t z)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		bone->rot[0] = x;
-		bone->rot[1] = y;
-		bone->rot[2] = z;
-	}
-}
-
-
-void freyjaBoneRotateEulerXYZ3fv(index_t boneIndex, vec3_t xyz)
-{
-	freyjaBoneRotateEulerXYZ3f(boneIndex, xyz[0], xyz[1], xyz[2]);
-}
-
-
-void freyjaBoneRotateQuatWXYZ4f(index_t boneIndex,vec_t w,vec_t x,vec_t y,vec_t z)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-	if (bone)
-	{
-		vec_t heading, bank, attitude;
-		Quaternion q = Quaternion(w, x, y, z);
-		q.getEulerAngles(&heading, &bank, &attitude);
-
-		bone->rot[0] = HEL_RAD_TO_DEG(attitude);
-		bone->rot[1] = HEL_RAD_TO_DEG(bank);
-		bone->rot[2] = HEL_RAD_TO_DEG(heading);
-	}
-}
-
-
-void freyjaBoneRotateQuatWXYZ4fv(index_t boneIndex, vec4_t wxyz)
-{
-	freyjaBoneRotateQuatWXYZ4f(boneIndex, wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
-}
-
-
-void freyjaGetBoneName(index_t index, uint32 size, char *name)
-{
-	egg_tag_t *bone = gEgg->getTag(index);
-		
-	if (bone)
-	{
-		strncpy(name, bone->name, size);
-	}
-}
-
-
-index_t freyjaBoneCreate(index_t skeletonIndex)
-{
-	if (!gEgg)
-		return INDEX_INVALID;
-
-	egg_tag_t *tag = gEgg->addTag(0, 0, 0, 0x0);
-
-	return tag->id;
-}
-
-
-void freyjaBoneAddKeyFrame(index_t boneIndex, index_t frameIndex, 
-							vec_t time, vec3_t translate, vec3_t rotate)
-{
-	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
-
-	if (bone)
-	{
-		egg_keyframe_bone_t *key = new egg_keyframe_bone_t;
-
-		HEL_VEC3_COPY(translate, key->translate);
-		HEL_VEC3_COPY(rotate, key->rotate);
-		key->time = time;
-		key->frameIndex = frameIndex;
-
-		bone->keyframes.pushBack(key);
-	}
-}
-
-
-void freyjaBoneParent(index_t index)
-{
-	egg_tag_t *bone = gEgg->getTag(freyjaGetCurrent(FREYJA_BONE));
-
-	if (bone)
-	{
-		bone->parent = index;
-	}	
-}
-
-
-index_t freyjaGetBoneParent(index_t index)
-{
-	egg_tag_t *bone = gEgg->getTag(index);
-
-	if (bone && bone->parent >= 0)
-	{
-		return bone->parent;
-	}
-
-	return INDEX_INVALID;
-}
-
-
-void freyjaGetBoneRotationQuatWXYZ4fv(index_t index, vec4_t wxyz)
-{
-	egg_tag_t *bone = gEgg->getTag(index);
-	
-	if (bone)
-	{
-		Quaternion q = Quaternion(helDegToRad(bone->rot[2]), // roll
-								  helDegToRad(bone->rot[0]), // pitch
-								  helDegToRad(bone->rot[1]));// yaw
-		q.getQuaternion4fv(wxyz);
-	}
-}
-
-
-index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		return bone->id;
-	}
-
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaGetBoneChild(index_t boneIndex, index_t childIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		return bone->slave[childIndex];
-	}
-
-	return INDEX_INVALID;
-}
-
-
-uint32 freyjaGetBoneChildCount(index_t boneIndex)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		return bone->slave.size();
-	}
-
-	return 0;
-}
-
-
-void freyjaGetBoneRotationEulerXYZ3fv(index_t boneIndex, vec3_t xyz)
-{
-	egg_tag_t *bone = gEgg->getTag(boneIndex);
-	
-	if (bone)
-	{
-		xyz[0] = bone->rot[0];
-		xyz[1] = bone->rot[1];
-		xyz[2] = bone->rot[2];
-	}
-}
-
-
-void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz)
-{
-	if (gEgg)
-	{
-		egg_tag_t *bone = gEgg->getTag(boneIndex);
-
-		xyz[0] = bone->center[0];
-		xyz[1] = bone->center[1];
-		xyz[2] = bone->center[2];
-	}
-}
-
-#else
 index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
 {
 	return boneIndex; // Assumes single skeleton model, FIXME when Skeleton added to backend API
@@ -3575,19 +3171,6 @@ void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex)
 		}
 	}
 }
-
-
-void freyjaBoneRemoveMesh1i(index_t boneIndex, index_t meshIndex)
-{
-	freyjaPrintMessage("FIXME %s:%i", __FILE__, __LINE__);
-}
-
-
-void freyjaBoneAddMesh1i(index_t boneIndex, index_t meshIndex)
-{
-	freyjaPrintMessage("FIXME %s:%i", __FILE__, __LINE__);
-}
-#endif
 
 
 index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex, uint32 element)
@@ -4278,6 +3861,12 @@ void freyjaCriticalSectionUnLock(index_t lock)
 //
 //////////////////////////////////////////////////////
 
+uint32 freyjaGetModelCount()
+{
+	return 1;  // Egg backend is single model
+}
+
+
 // FIXME: Uses Egg
 void freyjaModelMirrorTexCoord(index_t modelIndex, index_t texcoordIndex,
 								Vector<int32> uvMap, bool x, bool y)
@@ -4625,7 +4214,11 @@ void freyjaModelClear(index_t modelIndex)
 	if (modelIndex != 0 || !gEgg)
 		return;
 
-	gEgg->clear();	
+	gEgg->clear();
+
+	// Currently there is no multimodel while egg is being used
+	freyjaSkeletonPoolClear();
+	freyjaBonePoolClear();
 }
 
 
@@ -4745,12 +4338,12 @@ char freyjaModelCopyVertexList(index_t modelIndex,
 
 void freyjaPluginDirectoriesInit()
 {
-#ifdef unix
+#ifdef WIN32
+	freyjaPluginAddDirectory("C:/freyja/modules/model");
+#else
    	freyjaPluginAddDirectory("/usr/lib/freyja/modules/model");
    	freyjaPluginAddDirectory("/usr/local/lib/freyja/modules/model");
 	freyjaPluginAddDirectory("/usr/share/freyja/modules/model");
-#else
-	freyjaPluginAddDirectory("C:/freyja/modules/model");
 #endif
 }
 
