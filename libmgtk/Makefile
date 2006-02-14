@@ -73,12 +73,12 @@ CC=gcc
 
 # -Weffc++
 BASE_DEFS= \
-	-Isrc/common -Isrc/gnome $(CONFIGURE_CFLAGS) -Wno-deprecated \
+	-fPIC -Isrc/common -Isrc/gnome $(CONFIGURE_CFLAGS) -Wno-deprecated \
 	-DUSING_GTK_2_0 \
 	$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
-		-Wall -Isrc \
+		-fPIC -Wall -Isrc \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
