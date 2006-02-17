@@ -54,7 +54,7 @@ BUILD_INSTALL_DIR=$(BUILD_BASE_DIR)/$(BUILD_SELECT)
 ################################################################
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
-BASE_CFLAGS=$(FLAGS) -Wall -I. -I../libhel/ \
+BASE_CFLAGS=$(FLAGS) -fPIC -Wall -I. -I../libhel/ \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\"
@@ -231,7 +231,7 @@ debian-package:
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
-	dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	yes | dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
 	@-cp debian/control debian/control.old
 	@-sed -e "s/<insert up to 60 chars description>/Freyja math utils/g" debian/control.old > debian/control
 	@-rm -f debian/control.old

@@ -48,6 +48,15 @@ Skeleton::~Skeleton()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+SkeletalAnimation *Skeleton::getAnimation(index_t animationIndex)
+{
+	if (animationIndex < mAnimations.size())
+		return mAnimations[animationIndex];
+
+	return 0x0;
+}
+
+
 index_t Skeleton::getUID()
 {
 	return mUID;
@@ -109,6 +118,48 @@ index_t Skeleton::addToPool()
 	}
 
 	return mUID;
+}
+
+
+index_t Skeleton::createAnimation()
+{
+	SkeletalAnimation *anim = new SkeletalAnimation();
+	uint32 i, count;
+	bool found = false;
+
+	anim->mSkeleton = mUID;
+
+	/* Setup Animation ID and class container reference */
+	anim->mId = count = mAnimations.size();
+
+	for (i = 0; i < count; ++i)
+	{
+		if (mAnimations[i] == 0x0)
+		{
+			anim->mId = i;
+			mAnimations.assign(mUID, anim);
+			found = true;
+		}	
+	}
+
+	if (!found)
+	{
+		mAnimations.pushBack(anim);
+	}
+
+	return anim->mId;
+}
+
+
+void Skeleton::deleteAnimation(index_t animationIndex)
+{
+	if (animationIndex < mAnimations.size())
+	{
+		if (mAnimations[animationIndex])
+			delete mAnimations[animationIndex];
+
+		mAnimations.assign(animationIndex, 0x0);
+	}
 }
 
 

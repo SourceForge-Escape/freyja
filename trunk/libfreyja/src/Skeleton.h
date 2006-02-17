@@ -45,13 +45,19 @@ class BoneTransform
 {
 public:
 
-	BoneTransform();
+	BoneTransform()
+	{
+		mSkeletalKeyFrameUID = INDEX_INVALID;
+		mRestBoneUID = INDEX_INVALID;
+	}
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	~BoneTransform();
+	~BoneTransform()
+	{
+	}
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -61,9 +67,9 @@ public:
 
 	index_t mRestBoneUID;            /* UID of rest bone */
 
-	Quaternion mRotation;            /* Oreintation of this bone */
+	Quaternion mRotate;              /* Oreintation of this bone */
 
-	Vector3d mTranslation;           /* Offset of this bone from parent */
+	Vector3d mTranslate;             /* Offset of this bone from parent */
 
 	Matrix mBoneToWorld;             /* Transform vertices to world coords with
 									  * this cache of the current orientation 
@@ -76,6 +82,59 @@ public:
 									  * to rest bone and this transform */
 };
 
+
+class SkeletalKeyFrame
+{
+public:
+
+	SkeletalKeyFrame()
+	{
+		mAnimation = INDEX_INVALID;
+		time = 0.0f;
+		lastTime = 0.0f;
+	}
+
+	~SkeletalKeyFrame()
+	{
+		mBones.erase();
+	}
+
+	index_t mAnimation;         /* The animation which owns this keyframe */
+
+	vec_t time;
+
+	vec_t lastTime;
+
+	Vector<BoneTransform *> mBones;
+};
+
+
+class SkeletalAnimation
+{
+public:
+
+	SkeletalAnimation()
+ 	{
+		mId = INDEX_INVALID;
+		mSkeleton = INDEX_INVALID;
+		mName[0] = 0;
+	}
+
+	~SkeletalAnimation()
+	{
+		mKeyFrames.erase();
+	}
+
+	index_t mId;            /* Local UID ( local to this skeleton ) */
+
+	index_t mSkeleton;      /* Skeleton which owns this animation */
+
+	char mName[64];
+
+	//char mSkeletonName[64]; /* 'Symbolic pointer' to link to skeleton by name */
+
+	Vector<SkeletalKeyFrame *> mKeyFrames;
+};
 
 
 class Skeleton
@@ -113,6 +172,12 @@ class Skeleton
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	SkeletalAnimation *getAnimation(index_t animationIndex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	index_t getUID();
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -143,6 +208,18 @@ class Skeleton
 	 ------------------------------------------------------*/
 
 	index_t addToPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t createAnimation();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void deleteAnimation(index_t animationIndex);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -190,50 +267,13 @@ class Skeleton
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	index_t mUID;                     /* System for allowing gobal references, 
-									   * which are mostly for C API callbacks */
+	Vector<SkeletalAnimation *> mAnimations; /* Animations for the skeleton */
+
+	index_t mUID;                 /* System for allowing gobal references, 
+	                               * which are mostly for C API callbacks */
 
 	static Vector<Skeleton *> mGobalPool; /* Storage for gobal access */
 };
-
-
-
-class SkeletalKeyFrame
-{
-public:
-
-	vec_t time;
-
-	vec_t lastTime;
-
-	Vector<BoneTransform *> mTransforms;
-};
-
-
-
-class SkeletalAnimation
-{
-public:
-
-	SkeletalAnimation();
-
-	~SkeletalAnimation();
-
-	char mName[64];
-
-	Skeleton *mRestPose;
-
-	Vector<SkeletalKeyFrame *> mKeyFrames;
-
-private:
-	
-	index_t mUID;                    /* System for allowing gobal references, 
-									  * which are mostly for C API callbacks */
-
-	static Vector<SkeletalAnimation *> mGobalPool; /* Storage for gobal access */
-	
-};
-
 
 }
 

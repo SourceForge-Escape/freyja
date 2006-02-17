@@ -79,7 +79,7 @@ BASE_DEFS= \
 	-DUSING_GTK_2_0 \
 	$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
-BASE_CFLAGS=-Wall -Isrc \
+BASE_CFLAGS=-fPIC -Wall -Isrc \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -364,7 +364,7 @@ debian-package:
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
-	dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	yes | dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
 	@-cp debian/control debian/control.old
 	@-sed -e "s/<insert up to 60 chars description>/MLISP gtk+ binding/g" debian/control.old > debian/control
 	@-rm -f debian/control.old
