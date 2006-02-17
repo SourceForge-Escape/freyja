@@ -2,6 +2,7 @@
  ChangeLog ( trunk )
 
  20060216 Mongoose
+ - Python plugin requires USING_PYTHON define now
  - Fix for Makefiles to build on AMD64 and newer gcc 4s
  - Fix for vargs bug in freyja_print_args for newer implementations
 
