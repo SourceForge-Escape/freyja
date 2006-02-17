@@ -24,7 +24,9 @@
 #include <stdio.h> 
 #include <math.h> 
 #include <stdarg.h> 
-#include <libgen.h> 
+#ifndef WIN32
+#   include <libgen.h> 
+#endif
 #include <string.h>
 #include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaFileReader.h>
@@ -2727,7 +2729,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float t = 1.0f, m = 1.0f;
-	float xr, yr, zr;
+	//float xr, yr, zr;
 	float xf, yf, zf;
 	int swap;
 	freyja_transform_action_t rotate;
