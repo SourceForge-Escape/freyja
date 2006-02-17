@@ -1,7 +1,7 @@
 // project created on 3/31/2005 at 1:20 PM
 
 
-#define USING_OPENGL_SHARP
+// #define USING_OPENGL_SHARP
 
 using System;
 using Gtk;

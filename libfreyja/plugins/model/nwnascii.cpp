@@ -67,7 +67,7 @@ int freyja_model__nwnascii_check(char *filename)
 
 		symbol = r.parseSymbol();
 
-		if (!strncmp("#MAXMODEL", symbol, 9))
+		if (strncmp("#MAXMODEL", symbol, 9) == 0)
 		{
 			freyjaPrintMessage("nwnascii.so: '%s' is an nwnascii model",
 							   filename);
@@ -213,7 +213,7 @@ int freyja_model__nwnascii_import(char *filename)
 						a = r.parseInteger();
 						b = r.parseInteger();
 						c = r.parseInteger();
-						r.parseInteger(); // Smoothing group?
+						r.parseInteger(); // Smoothing group bitflag?
 						ta = r.parseInteger();
 						tb = r.parseInteger();
 						tc = r.parseInteger();

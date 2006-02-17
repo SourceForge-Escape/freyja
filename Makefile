@@ -14,12 +14,35 @@ lazybuild:
 	@-printf "Installing libmgtk\n"
 	@-cd libmgtk && ./autogen.sh && make && make install
 
-	@-printf "Installing Freyja\n"
+	@-printf "Installing freyja\n"
 	@-cd freyja && ./autogen.sh && make && make plugins && make install
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
-	@-printf "       * Look in Freyja/Makefile for options to disable\n"
+	@-printf "       * Look in freyja/Makefile for options to disable\n"
+	@-printf "\n\n o Now 'make user-install' as a user\n\n"
+
+
+win32:
+	@-printf "Installing mstl\n"
+	@-cd mstl && make install
+
+	@-printf "Installing libhel\n"
+	@-cd libhel && ./autogen.sh && make win32 && make install-win32
+
+	@-printf "Installing libfreyja\n"
+	@-cd libfreyja && ./autogen.sh && make win32 && make install-win32
+	@-cd libfreyja && make plugins-win32 && make install-plugins-win32
+
+	@-printf "Installing libmgtk\n"
+	@-cd libmgtk && ./autogen.sh && make win32 && make install-win32
+
+	@-printf "Installing freyja\n"
+	@-cd freyja && ./autogen.sh && make win32 && make plugins-win32 && make install-win32
+
+	@-printf "\n\n o If your build failed:\n"
+	@-printf "       * Make sure you have a complete glext.h header\n"
+	@-printf "       * Look in freyja/Makefile for options to disable\n"
 	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
 
@@ -59,7 +82,7 @@ INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
 INSTALL_INCLUDE=$(DESTDIR)/usr/include
 
 snapshot:
-	tar zcvf freyja-trunk-snapshot-`date +%Y%m%d%H%M%S`.tar.gz --exclude=.svn /usr/local/bin/freyja /usr/local/lib/libfreyja.so.0.9.1 /usr/local/lib/libfreyja.so /usr/local/lib/libhel0.so.0.0.1 /usr/local/lib/libhel0.so /usr/local/lib/libmgtk.so.0.1.0 /usr/local/lib/libmgtk.so /usr/local/lib/freyja/ /usr/share/freyja/
+	tar zcvf freyja-trunk-snapshot-`date +%Y%m%d%H%M%S`.tar.gz --exclude=.svn /usr/local/bin/freyja /usr/local/lib/libfreyja.so.0.9.3 /usr/local/lib/libfreyja.so /usr/local/lib/libhel0.so.0.0.1 /usr/local/lib/libhel0.so /usr/local/lib/libmgtk.so.0.1.0 /usr/local/lib/libmgtk.so /usr/local/lib/freyja/ /usr/share/freyja/
 
 
 redhat:

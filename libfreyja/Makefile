@@ -84,7 +84,7 @@ FLAGS_DEB=-s
 
 ################################################################
 
-BASE_CFLAGS=-Wall -I$(SRC_DIR) \
+BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 	$(CONFIGURE_DEF) \
 	-DPLUGIN_IMAGE_DIR=\"\\\"$(INSTALL_PLUGIN_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -835,10 +835,12 @@ obj.so:
 	LD_FLAGS="$(MODULE_LD_FLAGS) -lm"
 
 obj.dll:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=obj \
-	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/obj.o" \
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="obj" \
+	NAME="obj" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/obj.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
@@ -943,7 +945,8 @@ trmesh.so:
 
 plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so python.so
+plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so 
+#python.so
 
 plugins-model-win32: 3ds.dll bsa.dll ase.dll eggv7.dll et.dll glm.dll grn.dll mdl.dll md2.dll md3.dll md5.dll nif4.dll lwo.dll nod.dll obj.dll psk.dll smd.dll
 
@@ -1186,7 +1189,8 @@ clean-obj:
 clean-win32:
 	@-echo -n "Cleaning WIN32 builds                        "
 	@-rm -f $(BUILD_WIN32_DIR)/*.o
-	@-rm -f $(BUILD_WIN32_DIR)/$(NAME)
+	@-rm -f $(BUILD_WIN32_DIR)/*.a
+	@-rm -f $(BUILD_WIN32_DIR)/*.dll
 	@-echo "[done]"
 
 clean-emacs:
@@ -1222,13 +1226,16 @@ debian-package:
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
-	dh_make -c $(LICENSE) $(FLAGS_DEB) -e $(EMAIL) -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	yes | dh_make -c $(LICENSE) $(FLAGS_DEB) -e $(EMAIL) -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
 	@-cp debian/control debian/control.old
 	@-sed -e "s/<insert up to 60 chars description>/Freyja backbone/g" debian/control.old > debian/control
 	@-rm -f debian/control.old
 	@-cp debian/control debian/control.old
 	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
 	@-rm -f debian/control.old
+	@-cp debian/rules debian/rules.old
+	@-sed -e "s/MAKE) install/MAKE) install plugins install-plugins tools install-tools/g" debian/rules.old > debian/rules
+	@-rm -f debian/rules.old
 
 deb:
 	dpkg-buildpackage -rfakeroot
