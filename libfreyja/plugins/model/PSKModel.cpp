@@ -2749,6 +2749,7 @@ int freyja_model__psk_import(char *filename)
 		/* Start a new bone */
 		freyjaBegin(FREYJA_BONE);
 		index = freyjaGetCurrent(FREYJA_BONE);
+		freyjaSkeletonAddBone(freyjaGetCurrent(FREYJA_SKELETON), index);
 		freyjaBoneFlags(index, 0x0);
 		freyjaBoneName(index, psk.mBones[i].name);
 		freyjaBoneTranslate3f(index, 

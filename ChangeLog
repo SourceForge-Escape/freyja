@@ -1,8 +1,18 @@
 
  ChangeLog ( trunk )
 
+ 20060216 Mongoose
+ - Fix for Makefiles to build on AMD64 and newer gcc 4s
+ - Fix for vargs bug in freyja_print_args for newer implementations
+
+
+ 20050831 Mongoose
+ - libfreyja backend for anim/keyframing
+
+
  20050830 Mongoose
- - 
+ - psk.so Fix for dancer skeleton loader
+ - freyja (win32) freyja.lnk and freyja.ico added to svn
  - freyja Fix for material texture loading to automate ids, etc
  - md5.so Fix for new skeletal system
  - Started new changelog for trunk, since svn logs are lacking

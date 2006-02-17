@@ -22,6 +22,9 @@ $(BUILDDIR)/FreyjaFSM.o: src/FreyjaFSM.cpp src/freyja.h src/BoneABI.h \
 $(BUILDDIR)/FreyjaPrinter.o: src/FreyjaPrinter.cpp src/FreyjaPrinter.h
 	 $(DO_CC)
 
+$(BUILDDIR)/Bone.o: src/Bone.cpp src/Bone.h src/freyja.h src/BoneABI.h
+	 $(DO_CC)
+
 $(BUILDDIR)/FreyjaPlugin.o: src/FreyjaPlugin.cpp src/FreyjaPlugin.h src/freyja.h \
   src/FreyjaPrinter.h src/FreyjaPluginABI.h src/BoneABI.h \
   src/SkeletonABI.h
@@ -104,9 +107,6 @@ $(BUILDDIR)/FreyjaScene.o: src/FreyjaScene.cpp src/FreyjaFileWriter.h \
   src/FreyjaScene.h src/FreyjaCamera.h src/FreyjaLight.h src/FreyjaMesh.h \
   src/FreyjaMaterial.h src/FreyjaTexture.h src/FreyjaPluginABI.h \
   src/freyja.h src/BoneABI.h src/SkeletonABI.h src/FreyjaFileReader.h
-	 $(DO_CC)
-
-$(BUILDDIR)/Bone.o: src/Bone.cpp src/Bone.h src/freyja.h src/BoneABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/PerlinNoise.o: src/PerlinNoise.cpp src/PerlinNoise.h
