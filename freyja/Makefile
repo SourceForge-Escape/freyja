@@ -82,7 +82,7 @@ DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
-		-Wall -Isrc \
+		-fPIC -Wall -Isrc \
 		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -271,13 +271,22 @@ debian-package:
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
-	dh_make -c lgpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	yes | dh_make -c lgpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
 	@-cp debian/control debian/control.old
 	@-sed -e "s/<insert up to 60 chars description>/Freyja 3d modeler/g" debian/control.old > debian/control
 	@-rm -f debian/control.old
 	@-cp debian/control debian/control.old
 	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
 	@-rm -f debian/control.old
+	@-cp debian/control debian/control.old
+	@-sed -e "s/[$][{]misc:Depends[}]/libmgtk, libhel, libfreyja/g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+	@-cp debian/control debian/control.old
+	@-sed -e "s/[$][{]shlibs:Depends[}]//g" debian/control.old > debian/control
+	@-rm -f debian/control.old
+	@-cp debian/rules debian/rules.old
+	@-sed -e "s/MAKE) install/MAKE) plugins install/g" debian/rules.old > debian/rules
+	@-rm -f debian/rules.old
 
 deb:
 	dpkg-buildpackage -rfakeroot
@@ -288,20 +297,37 @@ install:
 	@-echo -n "Installing                                  "
 	@-mkdir -p  $(INSTALL_BIN)
 	@-cp bin/debug/freyja $(INSTALL_BIN)
-	@-mkdir -p /usr/share/freyja/
-	@-cp data/*.mlisp /usr/share/freyja/
-	@-mkdir -p /usr/share/freyja/materials/
-	@-cp data/materials/*.mat /usr/share/freyja/materials/
-	@-mkdir -p /usr/share/freyja/icons/
-	@-cp data/icons/*.png /usr/share/freyja/icons/
-	@-mkdir -p /usr/share/freyja/palettes/
-	@-cp data/palettes/*.pal /usr/share/freyja/palettes/
-	@-mkdir -p /usr/share/freyja/plugins/
-	@-cp plugins/*.mlisp /usr/share/freyja/plugins/
-	@-mkdir -p /usr/share/freyja/plugins/
-	@-cp bin/plugins/*.so /usr/share/freyja/plugins/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/
+	@-cp data/*.mlisp $(DESTDIR)/usr/share/freyja/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/materials/
+	@-cp data/materials/*.mat $(DESTDIR)/usr/share/freyja/materials/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/icons/
+	@-cp data/icons/*.png $(DESTDIR)/usr/share/freyja/icons/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/palettes/
+	@-cp data/palettes/*.pal $(DESTDIR)/usr/share/freyja/palettes/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
+	@-cp plugins/*.mlisp $(DESTDIR)/usr/share/freyja/plugins/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
+	@-cp bin/plugins/*.so $(DESTDIR)/usr/share/freyja/plugins/
 	@-echo "[done]"
 
+install-win32:
+	@-echo -n "Installing                                  "
+	@-mkdir -p  $(INSTALL_BIN)
+	@-cp $(BUILD_WIN32_DIR)/freyja*.exe $(INSTALL_BIN)/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/
+	@-cp data/*.mlisp $(DESTDIR)/usr/share/freyja/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/materials/
+	@-cp data/materials/*.mat $(DESTDIR)/usr/share/freyja/materials/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/icons/
+	@-cp data/icons/*.png $(DESTDIR)/usr/share/freyja/icons/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/palettes/
+	@-cp data/palettes/*.pal $(DESTDIR)/usr/share/freyja/palettes/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
+	@-cp plugins/*.mlisp $(DESTDIR)/usr/share/freyja/plugins/
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
+	@-cp bin/plugins/*.dll $(DESTDIR)/usr/share/freyja/plugins/
+	@-echo "[done]"
 
 install-debug:
 	@-echo -n "Installing debug                            "
@@ -340,7 +366,7 @@ Material.test:
 ################################################################
 # Plugins
 ################################################################
-PLUGIN_CFLAGS=-Wall -g -Isrc -Iplugins
+PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins
 PLUGIN_LD_FLAGS=-lm -ldl -lfreyja -lhel0 -lmgtk -lstdc++ -shared -fPIC -ldl -rdynamic 
 PLUGIN_LD_FLAGS += --warn-unresolved-symbols -Wl
 #PLUGIN_LD_FLAGS += -z defs
@@ -372,9 +398,9 @@ clean-plugins:
 	@-rm -f $(PLUGIN_BUILD_DIR)*/*.dll
 	@-echo [done]
 
-plugins: pakreader.so perlinnoise.so reverseengineer.so
+plugins: pakreader.so perlinnoise.so reverseengineer.so lineageIIextract.so
 
-plugins-win32: pakreader.dll perlinnoise.dll
+plugins-win32: pakreader.dll perlinnoise.dll reverseengineer.dll lineageIIextract.dll
 
 pakreader.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
