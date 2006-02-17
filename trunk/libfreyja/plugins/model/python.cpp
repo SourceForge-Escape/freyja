@@ -23,11 +23,13 @@
  * Mongoose - Created, based on python test code
  ==========================================================================*/
 
-#include <python2.3/Python.h>
+#ifdef USING_PYTHON
+#   include <python2.4/Python.h>
+PyObject *initPlugins();
+#endif
+
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaFileReader.h>
-
-PyObject *initPlugins();
 
 
 extern "C" {
@@ -62,6 +64,7 @@ int export_model(char *filename)
 
 int import_model(char *filename)
 {
+#ifdef USING_PYTHON
 	Vector <char *> pyPluginDirectories;
 	FreyjaFileReader reader;
 	int ret = -1;
@@ -135,11 +138,13 @@ int import_model(char *filename)
 			}
 		}
 	}
+#endif
 
 	return -1;
 }
 
 
+#ifdef USING_PYTHON
 PyObject *py_setImportValid(PyObject *self, PyObject *args)
 {
 	int index;
@@ -339,6 +344,7 @@ PyObject *initPlugins()
 
 	return module;
 }
+#endif
 
 
 #ifdef UNIT_TEST_PYTHON
