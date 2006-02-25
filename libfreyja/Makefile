@@ -945,7 +945,7 @@ trmesh.so:
 
 plugins-model-exp: eggv8.so grnX.so halflifeX.so md3anim.so nif3.so tombraider.so 
 
-plugins-model: 3ds.so ase.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so 
+plugins-model: 3ds.so ase.so bsa.so eggv7.so halflife.so et.so glm.so grn.so lwo.so mdl.so md2.so md3.so md5.so milkshape.so nif4.so nwnascii.so nod.so psk.so obj.so skel.so skn.so sims.so smd.so trmesh.so grn.so 
 #python.so
 
 plugins-model-win32: 3ds.dll bsa.dll ase.dll eggv7.dll et.dll glm.dll grn.dll mdl.dll md2.dll md3.dll md5.dll nif4.dll lwo.dll nod.dll obj.dll psk.dll smd.dll
