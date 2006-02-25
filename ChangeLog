@@ -1,6 +1,12 @@
 
  ChangeLog ( trunk )
 
+ 20060225 Mongoose
+ - bsa.so plugin enabled in build again
+ - Fix for FreyjaFileReader integer reads on 64bit arch
+ - 
+
+
  20060216 Mongoose
  - Python plugin requires USING_PYTHON define now
  - Fix for Makefiles to build on AMD64 and newer gcc 4s

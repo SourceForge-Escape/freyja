@@ -481,7 +481,7 @@ unsigned char FreyjaFileReader::readInt8U()
 
 short FreyjaFileReader::readInt16()
 {
-	short int i;
+	short int i = 0;
 	void *ptr = &i;
 	size_t sz = fread(ptr, 2, 1, mFileHandle);
 
@@ -497,7 +497,7 @@ short FreyjaFileReader::readInt16()
 	
 unsigned short FreyjaFileReader::readInt16U()
 {
-	unsigned short int u;
+	unsigned short int u = 0;
 	void *ptr = &u;
 	size_t sz = fread(ptr, 2, 1, mFileHandle);
 
@@ -513,7 +513,7 @@ unsigned short FreyjaFileReader::readInt16U()
 
 int FreyjaFileReader::readInt32()
 {
-	int i;
+	int i = 0;
 	void *ptr = &i;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
@@ -529,7 +529,7 @@ int FreyjaFileReader::readInt32()
 
 unsigned int FreyjaFileReader::readInt32U()
 {
-	unsigned int u;
+	unsigned int u = 0;
 	void *ptr = &u;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
@@ -545,7 +545,7 @@ unsigned int FreyjaFileReader::readInt32U()
 
 long FreyjaFileReader::readLong()
 {
-	long i;
+	long i = 0;
 	void *ptr = &i;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
@@ -565,7 +565,7 @@ long FreyjaFileReader::readLong()
 
 unsigned long FreyjaFileReader::readLongU()
 {
-	long u;
+	unsigned long u = 0;
 	void *ptr = &u;
 	size_t sz = fread(ptr, 4, 1, mFileHandle);
 
