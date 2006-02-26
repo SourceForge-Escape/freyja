@@ -34,7 +34,7 @@
 #include "Texture.h"
 #include "FreyjaModel.h"
 
-
+Freyja3dCursor gFreyjaCursor;
 BezierPatch FreyjaModel::gTestPatch;
 unsigned int FreyjaModel::mFlags = 0;
 FreyjaModel *gFreyjaModel = 0x0;
@@ -1327,6 +1327,26 @@ void FreyjaModel::movePatchControlPoint(float xx, float yy)
 void FreyjaModel::VertexMove(float xx, float yy)
 {
 	vec3_t xyz;
+
+	gFreyjaCursor.type = Freyja3dCursor::Translation;
+
+	switch (getCurrentPlane())
+	{
+	case PLANE_XY: // front
+		//gFreyjaCursor.pos.mVec[0] = xx;
+		gFreyjaCursor.pos.mVec[1] = yy;      
+		break;
+
+	case PLANE_XZ: // top
+		//gFreyjaCursor.pos.mVec[0] = xx;
+		gFreyjaCursor.pos.mVec[2] = yy;
+		break;
+
+	case PLANE_ZY: // side
+		//gFreyjaCursor.pos.mVec[2] = xx;               
+		gFreyjaCursor.pos.mVec[1] = yy;
+		break;
+	}	
 
 
 	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
