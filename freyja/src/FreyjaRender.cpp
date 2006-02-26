@@ -571,6 +571,88 @@ void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
 }
 
 
+void mglDraw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max)
+{
+	glBegin(GL_LINES);
+      
+	// X Axis, red
+	glColor3fv(RED);
+	glVertex3f(0.0,  0.0, 0.0);
+	glVertex3f(mid,  0.0, 0.0);
+	//  Y arrowhead
+	glVertex3f(mid,  0.0, 0.0);
+	glVertex3f(max,  min, 0.0);
+	glVertex3f(mid,  0.0, 0.0);
+	glVertex3f(max, -min, 0.0);
+	//  Z arrowhead
+	glVertex3f(mid,  0.0, 0.0);
+	glVertex3f(max,  0.0, min);
+	glVertex3f(mid,  0.0, 0.0);
+	glVertex3f(max,  0.0, -min);
+
+
+	// Y Axis, green
+	glColor3fv(GREEN);	
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(0.0,  0.0, 0.0);	
+	//  X arrowhead		
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(min,  max, 0.0);
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(-min, max, 0.0);
+	//  Z arrowhead
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(0.0,  max, min);
+	glVertex3f(0.0,  mid, 0.0);
+	glVertex3f(0.0,  max, -min);
+
+      
+	// Z Axis, blue
+	glColor3fv(BLUE);
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(0.0,  0.0,  0.0);
+	//  Y arrowhead
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(0.0,  min,  max);
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(0.0, -min,  max);
+	//  X arrowhead
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(min,  0.0,  max);
+	glVertex3f(0.0,  0.0,  mid);
+	glVertex3f(-min, 0.0,  max);
+	glEnd();
+}
+
+void mglDraw3dCursor(const vec_t min, const vec_t mid, const vec_t max)
+{
+	extern Freyja3dCursor gFreyjaCursor;
+
+	glPushMatrix();
+	glTranslatef(gFreyjaCursor.pos.mVec[0], 
+				 gFreyjaCursor.pos.mVec[1], 
+				 gFreyjaCursor.pos.mVec[2]);
+
+	switch (gFreyjaCursor.type)
+	{
+	case Freyja3dCursor::Translation:
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		mglDraw3dCursorLoc(min, mid, max);
+		glPopAttrib();
+		break;
+
+	default:
+	case Freyja3dCursor::Invisible:
+		break;
+	}
+
+	glPopMatrix();
+}
+
+
 /* Based on draw_sphere (public domain), 1995, David G Yu */
 void mglDrawSphere(int numMajor, int numMinor, float radius)
 {
@@ -836,9 +918,8 @@ void FreyjaRender::drawFreeWindow()
 
 	glTranslatef(mScroll[0], mScroll[1], mScroll[2]);
 
-	glPushMatrix();
-
-	glLineWidth(2.0f); 
+	//glPushMatrix();
+	glLineWidth(2.0f);
 
 	if (mRenderMode & RENDER_EDIT_GRID)
 	{
@@ -874,13 +955,15 @@ void FreyjaRender::drawFreeWindow()
 			glVertex3f(50.0f, 0.0f, x);
 		}
 		glEnd();
-		
+
 		glPopAttrib();
 	}
+	//glPopMatrix();
 
-	glPopMatrix();
+	//glPushMatrix();
 
 	renderLights();
+
 	glScalef(mZoom, mZoom, mZoom);
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
@@ -888,6 +971,10 @@ void FreyjaRender::drawFreeWindow()
 		freyjaGetRenderModel(i, model);
 		renderModel(model);
 	}
+
+	//glPopMatrix();
+
+	mglDraw3dCursor(0.25f, 2.0f, 0.872f);
 }
 
 
@@ -1550,6 +1637,8 @@ void FreyjaRender::renderModel(RenderModel &model)
 	uint32 count, i;
 
 
+	glPushMatrix();
+
 	/* Render patch test -- this should be model specific later */ 
 	if (FreyjaRender::mPatchDisplayList > 0)
 	{
@@ -2185,7 +2274,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	glPopMatrix();
 #endif
 
-   glPopAttrib();
+	glPopAttrib();
 
 	switch (plane)
 	{
@@ -2202,6 +2291,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		break;
 	}
 
+	glPushMatrix();
+
 	renderLights();
 
 	glScalef(mZoom, mZoom, mZoom);
@@ -2213,6 +2304,10 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		freyjaGetRenderModel(i, model);
 		renderModel(model);
 	}
+
+	mglDraw3dCursor(0.5f, 2.4f, 1.744f);
+
+	glPopMatrix();
 }
 
 

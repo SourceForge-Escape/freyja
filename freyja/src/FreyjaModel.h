@@ -37,6 +37,7 @@
 #include <freyja/FreyjaPluginABI.h>
 #include <freyja/FreyjaPrinter.h>
 #include <hel/Vector3d.h>
+#include <hel/Quaternion.h>
 #include <mstl/Vector.h>
 
 #include "Texture.h"
@@ -56,6 +57,39 @@ typedef enum {
 
 void FreyjaModelEventsAttach();
 
+
+class Freyja3dCursor
+{
+ public:
+
+	typedef enum Freyja3dCursorFlags {
+		Rotatation,
+		Translation,
+		Scale,
+		Invisible
+	} Freyja3dCursorFlags_t;
+
+	Freyja3dCursor()
+	{
+		Reset();
+	}
+
+	void Reset()
+	{
+		type = Invisible;
+		pos = Vector3d(0.0f, 0.0f, 0.0f);
+		scale = Vector3d(1.0f, 1.0f, 1.0f);
+		rot = Quaternion();
+	}
+
+	Freyja3dCursorFlags_t type;
+
+	Vector3d pos;
+
+	Vector3d scale;
+
+	Quaternion rot;
+};
 
 class FreyjaModel
 {
