@@ -211,6 +211,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/FreyjaUtil.o \
+	$(BUILDDIR)/KeyFrame.o \
 	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \

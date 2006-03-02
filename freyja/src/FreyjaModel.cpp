@@ -214,6 +214,8 @@ void FreyjaModel::clear()
 	mPolygonIndex = 0;
 	mSelectionBoxOrdering = 0;
 
+	gFreyjaCursor.Reset();
+
 	mScroll[0] = 0.0f;
 	mScroll[1] = -18.0f;
 	mScroll[2] = 0.0f;
@@ -468,7 +470,6 @@ void FreyjaModel::setCurrentTextureIndex(unsigned int index)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-
 
 void FreyjaModel::getBoneTranslation(float *x, float *y, float *z)
 {
@@ -1324,30 +1325,78 @@ void FreyjaModel::movePatchControlPoint(float xx, float yy)
 }
 
 
-void FreyjaModel::VertexMove(float xx, float yy)
+void FreyjaModel::CursorPush()
 {
-	vec3_t xyz;
+	gFreyjaCursor.Push();
+}
 
-	gFreyjaCursor.type = Freyja3dCursor::Translation;
+
+void FreyjaModel::CursorPop()
+{
+	gFreyjaCursor.Pop();
+}
+
+
+void FreyjaModel::CursorMove(float xx, float yy)
+{
+	gFreyjaCursor.SetMode( Freyja3dCursor::Translation );
 
 	switch (getCurrentPlane())
 	{
 	case PLANE_XY: // front
-		//gFreyjaCursor.pos.mVec[0] = xx;
-		gFreyjaCursor.pos.mVec[1] = yy;      
+		switch ( gFreyjaCursor.mAxis )
+		{
+		case 0:
+			gFreyjaCursor.mPos.mVec[0] = xx;  // side to side on screen
+			break;
+		case 1:
+			gFreyjaCursor.mPos.mVec[1] = yy; // up and down on screen
+			break;
+		case 2:
+			// In and out of screen by up and down mouse
+			gFreyjaCursor.mPos.mVec[2] = yy;
+			break;
+		}
 		break;
 
 	case PLANE_XZ: // top
-		//gFreyjaCursor.pos.mVec[0] = xx;
-		gFreyjaCursor.pos.mVec[2] = yy;
+		switch ( gFreyjaCursor.mAxis )
+		{
+		case 0:
+			gFreyjaCursor.mPos.mVec[0] = xx;  // side to side on screen
+			break;
+		case 1:
+			// In and out of screen by up and down mouse
+			gFreyjaCursor.mPos.mVec[1] = yy;
+			break;
+		case 2:
+			gFreyjaCursor.mPos.mVec[2] = yy; // up and down on screen
+			break;
+		}
 		break;
 
 	case PLANE_ZY: // side
-		//gFreyjaCursor.pos.mVec[2] = xx;               
-		gFreyjaCursor.pos.mVec[1] = yy;
+		switch ( gFreyjaCursor.mAxis )
+		{
+		case 0:
+			// In and out of screen by up and down mouse
+			gFreyjaCursor.mPos.mVec[0] = yy;
+			break;
+		case 1:
+			gFreyjaCursor.mPos.mVec[1] = yy; // up and down on screen
+			break;
+		case 2:
+			gFreyjaCursor.mPos.mVec[2] = xx; // side to side on screen
+			break;
+		}
 		break;
 	}	
+}
 
+
+void FreyjaModel::VertexMove(float xx, float yy)
+{
+	vec3_t xyz;
 
 	if (!freyjaIsVertexAllocated(mCachedVertexIndex))
 	{

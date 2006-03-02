@@ -11,7 +11,7 @@
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <mongoose@icculus.org>
+ *           template generator scripopt.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -629,11 +629,11 @@ void mglDraw3dCursor(const vec_t min, const vec_t mid, const vec_t max)
 	extern Freyja3dCursor gFreyjaCursor;
 
 	glPushMatrix();
-	glTranslatef(gFreyjaCursor.pos.mVec[0], 
-				 gFreyjaCursor.pos.mVec[1], 
-				 gFreyjaCursor.pos.mVec[2]);
+	glTranslatef(gFreyjaCursor.mPos.mVec[0], 
+				 gFreyjaCursor.mPos.mVec[1], 
+				 gFreyjaCursor.mPos.mVec[2]);
 
-	switch (gFreyjaCursor.type)
+	switch (gFreyjaCursor.GetMode())
 	{
 	case Freyja3dCursor::Translation:
 		glPushAttrib(GL_ENABLE_BIT);

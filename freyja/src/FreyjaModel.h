@@ -39,6 +39,7 @@
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
+#include <mstl/Stack.h>
 
 #include "Texture.h"
 #include "BezierPatch.h"
@@ -57,6 +58,31 @@ typedef enum {
 
 void FreyjaModelEventsAttach();
 
+// Cheap Undo / Redo test
+class FreyjaState
+{
+ public: 
+
+	FreyjaState() { mEvent = mIndex = -1; }
+	virtual ~FreyjaState() {}
+	FreyjaState(int event, int index) { mEvent = event; mIndex = index; }
+	virtual bool Undo() { return false;/*mModel->moveObject(mEvent, pos);*/ }
+	virtual void Redo() {}
+	void operator =(FreyjaState s) 
+    { mEvent = s.mEvent; mIndex = s.mIndex; }
+	bool operator ==(FreyjaState b) 
+    { return ( b.mEvent == mEvent && b.mIndex == mIndex ); }
+	bool operator !=(FreyjaState b) 
+    { return ( b.mEvent != mEvent || b.mIndex != mIndex ); }
+
+	int tmp;
+	Vector3d pos;
+
+	int mEvent, mIndex;
+
+ private:
+};
+
 
 class Freyja3dCursor
 {
@@ -74,21 +100,75 @@ class Freyja3dCursor
 		Reset();
 	}
 
-	void Reset()
+	~Freyja3dCursor() { }
+
+	void SetMode(Freyja3dCursorFlags_t n)
 	{
-		type = Invisible;
-		pos = Vector3d(0.0f, 0.0f, 0.0f);
-		scale = Vector3d(1.0f, 1.0f, 1.0f);
-		rot = Quaternion();
+		mMode = n;
 	}
 
-	Freyja3dCursorFlags_t type;
+	void ChangeState(FreyjaState state, Freyja3dCursorFlags_t mode)
+	{
+		//mgtk_print("! Freyja3dCursor::ChangeState() entered.");
 
-	Vector3d pos;
+		if ( state != mLastState )
+		{
+			//mgtk_print("! Freyja3dCursor::ChangeState() push.");
+			state.tmp = mode;
+			state.pos = mPos;
+			mStack.push(new FreyjaState(state));
+			mLastState = state;
+		}
 
-	Vector3d scale;
+		mMode = mode;
+	}
 
-	Quaternion rot;
+	Freyja3dCursorFlags_t GetMode() { return mMode; }
+
+	void Push()
+	{
+		// FIXME: Not implemented yet
+	}
+
+	FreyjaState *Pop()
+	{
+		FreyjaState *state = NULL;
+		mLastState.mEvent = -1;
+
+		if (!mStack.empty())
+		{
+			state = mStack.pop();
+			state->Undo();
+			return state;
+		}
+
+		return state;
+	}
+
+	void Reset()
+	{
+		mAxis = 0; // implies 1, 2 plane
+		mMode = Invisible;
+		mPos = Vector3d(0.0f, 0.0f, 0.0f);
+		mScale = Vector3d(1.0f, 1.0f, 1.0f);
+		mRot = Quaternion();
+	}
+
+	unsigned short int mAxis;
+
+	Vector3d mPos;
+
+	Vector3d mScale;
+
+	Quaternion mRot;
+
+ private:
+
+	FreyjaState mLastState;
+
+	Stack<FreyjaState *> mStack;
+
+	Freyja3dCursorFlags_t mMode;
 };
 
 class FreyjaModel
@@ -688,6 +768,10 @@ public:
 
 	void movePatchControlPoint(float xx, float yy);
 	void selectPatchControlPoint(float xx, float yy);
+
+	void CursorPush();
+	void CursorPop();
+	void CursorMove(float xx, float yy);
 
 	void VertexNew(float xx, float yy);
 	void VertexMove(float xx, float yy);

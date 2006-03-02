@@ -259,6 +259,14 @@
 				(label "  ZoomLevel "  0.0 0.4) 
 				(spinbutton2 2.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
 
+				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				(hbox 1 0 0 1 0
+					(label "CursorAxis"  0.0 0.5)
+					(optionmenu		eMode	eNone
+						(menu_item	"  X"	eMode	FREYJA_MODE_AXIS_X)
+			  			(menu_item	"  Y"	eMode	FREYJA_MODE_AXIS_Y)
+			  			(menu_item	"  Z"	eMode	FREYJA_MODE_AXIS_Z)))
+
 				 )))
 
 		;; Toolbar Edit
