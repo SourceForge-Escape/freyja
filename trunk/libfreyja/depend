@@ -93,7 +93,8 @@ $(BUILDDIR)/KeyFrameLight.o: src/KeyFrameLight.cpp src/KeyFrameLight.h
 $(BUILDDIR)/KeyFrameMesh.o: src/KeyFrameMesh.cpp src/KeyFrameMesh.h
 	 $(DO_CC)
 
-$(BUILDDIR)/KeyFrameSkeleton.o: src/KeyFrameSkeleton.cpp src/KeyFrameSkeleton.h
+$(BUILDDIR)/KeyFrameSkeleton.o: src/KeyFrameSkeleton.cpp src/KeyFrameSkeleton.h \
+  src/KeyFrame.h
 	 $(DO_CC)
 
 $(BUILDDIR)/RigidBody.o: src/RigidBody.cpp src/RigidBody.h
@@ -114,6 +115,15 @@ $(BUILDDIR)/PerlinNoise.o: src/PerlinNoise.cpp src/PerlinNoise.h
 
 $(BUILDDIR)/FreyjaUtil.o: src/FreyjaUtil.cpp src/FreyjaPluginABI.h src/freyja.h \
   src/BoneABI.h src/SkeletonABI.h
+	 $(DO_CC)
+
+$(BUILDDIR)/BezierPatch.o: src/BezierPatch.cpp src/BezierPatch.h
+	 $(DO_CC)
+
+$(BUILDDIR)/Animation.o: src/Animation.cpp src/Animation.h src/KeyFrame.h
+	 $(DO_CC)
+
+$(BUILDDIR)/Camera.o: src/Camera.cpp src/Camera.h
 	 $(DO_CC)
 
 $(BUILDDIR)/bmp.o: plugins/image/bmp.cpp

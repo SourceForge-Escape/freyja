@@ -43,7 +43,7 @@ void test_patch();
 unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
 void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
-
+extern Freyja3dCursor gFreyjaCursor;
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -1327,9 +1327,26 @@ bool FreyjaControl::event(int command)
 	case eSelectAll:
 		freyja_print("Select All is not avalible in this build");
 		break;
+
 	case eUndo:
-		freyja_print("Undo is not avalible in this build");
+		FreyjaState *state = gFreyjaCursor.Pop();
+
+		if (state)
+		{
+			freyja_print("Undo %i %f %f %f", 
+				state->mEvent, 
+				state->pos.mVec[0], state->pos.mVec[1], state->pos.mVec[2] );
+			mModel->moveObject((FreyjaModel::transform_t)state->mEvent, state->pos);
+			gFreyjaCursor.mPos = state->pos;
+			delete state;
+			freyja_event_gl_refresh();
+		}
+		else
+		{
+			freyja_print("Undo is not avalible in this build");
+		}
 		break;
+
 	case eRedo:
 		freyja_print("Redo is not avalible in this build");
 		break;
@@ -1828,6 +1845,22 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
+	case FREYJA_MODE_AXIS_X:
+		freyja_print("X locked"); 
+		gFreyjaCursor.mAxis = 0;
+		freyja_event_gl_refresh();
+		break;
+	case FREYJA_MODE_AXIS_Y:
+		freyja_print("Y locked"); 
+		gFreyjaCursor.mAxis = 1;
+		freyja_event_gl_refresh();
+		break;	
+	case FREYJA_MODE_AXIS_Z:
+		freyja_print("Z locked"); 
+		gFreyjaCursor.mAxis = 2;
+		freyja_event_gl_refresh();
+		break;
+
 	default:
 		//if (command > eRecentFiles &&
 		//	(command - eRecentFiles - 1) < (int)mRecentFiles.size())
@@ -2118,12 +2151,40 @@ bool FreyjaControl::motionEvent(int x, int y)
 				freyjaGetLightPosition4v(0, pos);
 				Vector3d xyz = Vector3d(pos);
 
+#if 0
 				getFreeWorldFromScreen(x, y, xyz.mVec);
+#else
+				// We can't use actual values due to event system spam
+				// method used now, so we do constant deltas for now
+				float xf, yf;
+				const float d = 1.0f;
+				xf = ((x < old_x-2.0f) ? -d : ((x > old_x+2.0f) ? d : 0));
+				yf = ((y < old_y-2.0f) ? -d : ((y > old_y+2.0f) ? d : 0));
 
+				switch ( mEventMode )
+				{
+				case modeMove:
+					gFreyjaCursor.SetMode(Freyja3dCursor::Translation);
+					gFreyjaCursor.mPos.zero();
+					mModel->CursorMove(xf, yf);
+					xyz += gFreyjaCursor.mPos;
+					gFreyjaCursor.mPos = xyz;
+					break;
+
+				case modeRotate:
+					freyja_print("3d cursor rotate not implemented");
+					break;
+
+				default:
+					;
+				}
+
+				old_x = x;
+				old_y = y;
+#endif
 				pos[0] = xyz.mVec[0];
 				pos[1] = xyz.mVec[1];
 				pos[2] = xyz.mVec[2];
-
 				freyjaLightPosition4v(0, pos);
 
 				freyja_event_set_float(800, xyz.mVec[0]);
@@ -2138,13 +2199,40 @@ bool FreyjaControl::motionEvent(int x, int y)
 			{
 				Vector3d xyz;
 
+#if 0
 				getFreeWorldFromScreen(x, y, xyz.mVec);
+#else
+				// We can't use actual values due to event system spam
+				// method used now, so we do constant deltas for now
+				float xf, yf;
+				const float d = 0.5f, t = 1.0f;
+				xf = ((x < old_x-t) ? -d : ((x > old_x+t) ? d : 0));
+				yf = ((y < old_y-t) ? -d : ((y > old_y+t) ? d : 0));
 
+				if (mTransformMode == FreyjaModel::TransformBone)
+				{
+					freyjaGetBoneTranslation3fv(mModel->getCurrentBone(),
+												xyz.mVec);
+				}
+
+				gFreyjaCursor.mPos.zero();
+				mModel->CursorMove(xf, -yf);
+				xyz += gFreyjaCursor.mPos;
+				gFreyjaCursor.mPos = xyz;
+
+				old_x = x;
+				old_y = y;
+#endif
 				if (FreyjaRender::mPatchDisplayList)
 					mModel->movePatchControlPoint(xyz);
 
 				if (mTransformMode == FreyjaModel::TransformBone)
+				{
+					FreyjaState state(FreyjaModel::TransformBone, 
+				                      mModel->getCurrentBone());
 					mModel->moveObject(FreyjaModel::TransformBone, xyz);
+					gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
+				}
 				
 			}
 			break;
@@ -2670,9 +2758,13 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		if (FreyjaRender::mPatchDisplayList > 0)
+		{
 			mModel->movePatchControlPoint(xx, yy);
+		}
 		else
+		{
 			mModel->VertexMove(xx, yy);
+		}
 		break;
 
 	case FreyjaModel::TransformBone:

@@ -135,14 +135,11 @@ public:
    T pop()
    {
      StackNode<T> *rm;
-     T data;
-
 
      if (mTop)
      {
        rm = mTop;
-
-       data = mTop->Data();
+       T data = mTop->Data();
        mTop = mTop->Prev();
 
        delete rm;
@@ -190,9 +187,13 @@ public:
     -----------------------------------------*/
 	bool empty()
 	{
-		return (mCount && mTop);
+		return (mCount == 0 || mTop == NULL); 
 	}
- 
+
+	unsigned int count()
+	{
+		return mCount;
+ 	}
 
  private:
 

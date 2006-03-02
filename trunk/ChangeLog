@@ -1,10 +1,27 @@
 
+ TODO Shortlist ( trunk )
+ =====================================================================
+ - Rewrite the UI to use 3d cursor w/ undo/redo/init events
+ - Rewrite renderer to use viewports for views correctly
+ - Backport freyja dancer keyframes and make a new UI for them 
+ - Hook up virtual planes in viewer using pickray ( cubes )
+ - Hook up 3d cursor modes to offset bboxes for the cursor's axies
+ - Run maps over types to allow undo/redo to work with the current backend ds
+
  ChangeLog ( trunk )
+ =====================================================================
+
 
  20060225 Mongoose
  - bsa.so plugin enabled in build again
  - Fix for FreyjaFileReader integer reads on 64bit arch
- - 
+ - 3d cursor UI with test control off vertex move
+ - Fix for renderModel fucking up matrix stack
+ - Light controlled by 3d cursor test in free view
+ - Bone translate controlled by 3d cursor test in free view
+ - KeyFrame from dancer in libfreyja trunk
+ - Fix for stack
+ - Undo test for bone transforms in free view using 3d cursor
 
 
  20060216 Mongoose
