@@ -283,6 +283,17 @@
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
 
+					;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					(hbox 1 0 0 1 0
+						(label "Select editing axis"  0.0 0.5))
+					(hbox 1 0 0 1 0
+						(button "  X"
+							EVENT_FREYJA_MODE FREYJA_MODE_AXIS_X)
+						(button "  Y"
+							EVENT_FREYJA_MODE FREYJA_MODE_AXIS_Y)
+						(button "  Z"
+							EVENT_FREYJA_MODE FREYJA_MODE_AXIS_Z))
+
 					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					(hbox 1 0 0 1 0
 						(label "Select editing plane"  0.0 0.5))

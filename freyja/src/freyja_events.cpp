@@ -609,7 +609,7 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback::add("eGenerateNormals", &eModelGenerateNormals);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
-	ResourceEventCallback2::add("eUndo", &eNoImplementation);
+	//ResourceEventCallback2::add("eUndo", &eNoImplementation);
 	ResourceEventCallback2::add("eRedo", &eNoImplementation);
 	ResourceEventCallback2::add("eSkeletalDeform", &eNoImplementation);
 
@@ -630,6 +630,8 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eNone", eNone);
 
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
+
+	r.RegisterInt("eUndo", eUndo);
 
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
@@ -835,6 +837,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
 
+	r.RegisterInt("FREYJA_MODE_AXIS_X", FREYJA_MODE_AXIS_X);
+	r.RegisterInt("FREYJA_MODE_AXIS_Y", FREYJA_MODE_AXIS_Y);
+	r.RegisterInt("FREYJA_MODE_AXIS_Z", FREYJA_MODE_AXIS_Z);
 
 	//r.RegisterSymbol();
 
