@@ -1333,10 +1333,22 @@ bool FreyjaControl::event(int command)
 
 		if (state)
 		{
-			freyja_print("Undo %i %f %f %f", 
-				state->mEvent, 
-				state->pos.mVec[0], state->pos.mVec[1], state->pos.mVec[2] );
-			mModel->moveObject((FreyjaModel::transform_t)state->mEvent, state->pos);
+			switch (state->mEvent)
+			{
+		 	case FreyjaModel::TransformPoint:
+				freyja_print("Undo vertex %i %f %f %f", 
+					state->mIndex, 
+					state->pos.mVec[0], state->pos.mVec[1], state->pos.mVec[2] );
+				
+				freyjaVertexPosition3fv(state->mIndex, state->pos.mVec);
+				break;
+
+			default:
+				freyja_print("Undo %i %f %f %f", 
+					state->mEvent, 
+					state->pos.mVec[0], state->pos.mVec[1], state->pos.mVec[2] );
+				mModel->moveObject((FreyjaModel::transform_t)state->mEvent, state->pos);		
+			}
 			gFreyjaCursor.mPos = state->pos;
 			delete state;
 			freyja_event_gl_refresh();
@@ -2783,6 +2795,13 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		}
 		else
 		{
+			{
+				FreyjaState state(mTransformMode, mModel->getCurrentVertexIndex());
+				freyjaGetVertexXYZ3fv(mModel->getCurrentVertexIndex(),
+											gFreyjaCursor.mPos.mVec);
+				gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
+			}
+			
 			mModel->VertexMove(xx, yy);
 		}
 		break;
@@ -2792,6 +2811,12 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		mModel->moveBone(xx, yy);
+		{
+			FreyjaState state(mTransformMode, mModel->getCurrentBone());
+			freyjaGetBoneTranslation3fv(mModel->getCurrentBone(),
+										gFreyjaCursor.mPos.mVec);
+			gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
+		}
 		break;			
 		
 	case FreyjaModel::TransformMesh:
@@ -2827,9 +2852,6 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		}
 
 		mModel->transform(mTransformMode, fTranslate, xf, yf, zf);
-
-		freyjaGetBoneTranslation3fv(mModel->getCurrentMesh(),
-									gFreyjaCursor.mPos.mVec);
 		break;
 
 	default:  
@@ -3146,6 +3168,13 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 				FreyjaState state(FreyjaModel::TransformMesh, 
 			                      mModel->getCurrentMesh());		
 				mModel->getCurrentMeshCenter(gFreyjaCursor.mPos.mVec);
+				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
+			}
+			else if ( mTransformMode == FreyjaModel::TransformPoint )
+			{
+				unsigned int idx = mModel->getCurrentVertexIndex();
+				FreyjaState state(mTransformMode, idx);		
+				freyjaGetVertexXYZ3fv(idx, gFreyjaCursor.mPos.mVec);
 				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
 			}
 			freyja_print("! moved: %f, %f", xx-xxx, yy-yyy);

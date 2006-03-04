@@ -433,6 +433,8 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	unsigned int getCurrentVertexIndex() { return mCachedVertexIndex; }
+
 	unsigned int getCurrentVertex();
 	/*------------------------------------------------------
 	 * Pre  : 
