@@ -2726,6 +2726,27 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 	/* Mongoose: Convert screen to world coordinate system */
 	//getWorldFromScreen(&xx, &yy, &zz);
 
+#if 0
+				float xf, yf;
+				const float d = 0.5f, t = 1.0f;
+				xf = ((x < old_x-t) ? -d : ((x > old_x+t) ? d : 0));
+				yf = ((y < old_y-t) ? -d : ((y > old_y+t) ? d : 0));
+
+				if (mTransformMode == FreyjaModel::TransformBone)
+				{
+					freyjaGetBoneTranslation3fv(mModel->getCurrentBone(),
+												xyz.mVec);
+				}
+
+				gFreyjaCursor.mPos.zero();
+				mModel->CursorMove(xf, -yf);
+				xyz += gFreyjaCursor.mPos;
+				gFreyjaCursor.mPos = xyz;
+
+				old_x = x;
+				old_y = y;
+#endif
+
 	/* Mongoose: Compute a relative movement value too here */
 	y = -y;
 
@@ -2749,7 +2770,6 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		break;
 	}
-
 
 	switch (mTransformMode)
 	{
@@ -2799,10 +2819,18 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 			yf = yy - center[1];
 			break;
 		}
-		
-		mModel->transform(mTransformMode, fTranslate, xf, yf, zf); 
-		break;
 
+		{
+			FreyjaState state(mTransformMode, mModel->getCurrentMesh());
+			mModel->getCurrentMeshCenter(gFreyjaCursor.mPos.mVec);
+			gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
+		}
+
+		mModel->transform(mTransformMode, fTranslate, xf, yf, zf);
+
+		freyjaGetBoneTranslation3fv(mModel->getCurrentMesh(),
+									gFreyjaCursor.mPos.mVec);
+		break;
 
 	default:  
 		/* Relative movement based on mouse tracking */
@@ -3113,7 +3141,14 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		switch(mEventMode)
 		{
 		case modeMove:
-			freyja_print("moved: %f, %f", xx-xxx, yy-yyy);
+			if ( mTransformMode == FreyjaModel::TransformMesh )
+			{
+				FreyjaState state(FreyjaModel::TransformMesh, 
+			                      mModel->getCurrentMesh());		
+				mModel->getCurrentMeshCenter(gFreyjaCursor.mPos.mVec);
+				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
+			}
+			freyja_print("! moved: %f, %f", xx-xxx, yy-yyy);
 			break;
 		default:
 			;
@@ -3130,7 +3165,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		xxx = xx;  yyy = yy;
 		freyja_print("store state: %f, %f", xxx, yyy);
 		mModel->VertexSelect(xx, yy);
-		
+
 		if (FreyjaRender::mPatchDisplayList)
 			mModel->selectPatchControlPoint(xx, yy);
 
