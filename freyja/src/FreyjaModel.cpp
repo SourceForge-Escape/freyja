@@ -1224,6 +1224,7 @@ void FreyjaModel::selectPatchControlPoint(Vector3d xyz)
 void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
 {
 	uint32 boneIndex = getCurrentBone();
+	uint32 meshIndex = getCurrentMesh();
 	vec3_t pivot;
 
 
@@ -1241,6 +1242,21 @@ void FreyjaModel::moveObject(transform_t type, Vector3d xyz)
 				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
 		break;
 
+
+	case FreyjaModel::TransformMesh:
+		mgtk_print("! test %f %f %f", xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
+		if (!freyjaIsMeshAllocated(meshIndex))
+			return;
+
+		getCurrentMeshCenter(pivot);
+		xyz = xyz - Vector3d(pivot);
+
+		//freyjaMeshTransform(getCurrentMesh(), getCurrentGroup(),
+		//		fTranslate, 
+		//		xyz.mVec[0], xyz.mVec[1], xyz.mVec[2] );
+		transform(FreyjaModel::TransformMesh, fTranslate, 
+				  xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
+		break;
 
 	default:
 		;

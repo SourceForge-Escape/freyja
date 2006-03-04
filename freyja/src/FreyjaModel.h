@@ -107,6 +107,22 @@ class Freyja3dCursor
 		mMode = n;
 	}
 
+	void ForceChangeState(FreyjaState state, Freyja3dCursorFlags_t mode)
+	{
+		//mgtk_print("! Freyja3dCursor::ForceChangeState() entered.");
+
+		//if ( state != mLastState )
+		//{
+			//mgtk_print("! Freyja3dCursor::ChangeState() push.");
+			state.tmp = mode;
+			state.pos = mPos;
+			mStack.push(new FreyjaState(state));
+			mLastState = state;
+		//}
+
+		mMode = mode;
+	}
+
 	void ChangeState(FreyjaState state, Freyja3dCursorFlags_t mode)
 	{
 		//mgtk_print("! Freyja3dCursor::ChangeState() entered.");
