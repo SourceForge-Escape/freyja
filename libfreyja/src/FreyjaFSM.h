@@ -160,19 +160,6 @@ public:
 	 *        Returns the native index of that vertex
 	 ------------------------------------------------------*/
 
-	void freyjaVertexWeight(index_t index, vec_t weight, index_t bone);
-	/*------------------------------------------------------
-	 * Pre  : <weight> of influence of <bone> on vertex v
-	 *
-	 * Post : Vertex <index> in the model gets weight added
-	 *        to influence list, if their is a weight for the
-	 *        corresponding bone it is replaced
-	 *
-	 *        <weight> <= 0.0 removes weight
-	 *
-	 *        All weights for the vertex combined must be 1.0
-	 ------------------------------------------------------*/
-
 	void freyjaPolygonAddVertex1i(index_t index);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_POLYGON);

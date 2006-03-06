@@ -224,7 +224,7 @@ class FreyjaScene
 {
 public:
 
-#ifdef COMMENT
+	/*
 	typedef enum {
 		VERTEX     = 0x54524556,
 		TEXCOORD   = 0x54455843,
@@ -255,7 +255,7 @@ public:
         INTERSECTION,
 		DIFFERENCE
 	} freyja_csg_t;
-#endif
+	*/
 
 
 	/* Mongoose 2004.11.27, 
@@ -341,9 +341,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-#ifdef FIXME
-
-	unsigned int csg(egg_type_t type, egg_csg_t operation,
+	unsigned int csg(freyja_object_t type, freyja_csg_t operation,
 					 unsigned int a, unsigned int b);
 	/*------------------------------------------------------
 	 * Pre  : Don't count on more than simple vertex culling now
@@ -371,7 +369,7 @@ public:
 	 * Mongoose - Created with new generic API based on mtk
 	 ------------------------------------------------------*/
 
-	void remove(egg_type_t type, unsigned int index);
+	void remove(freyja_object_t type, unsigned int index);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Remove TYPE object[index] from model
@@ -386,7 +384,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void transform(egg_type_t type, egg_transform_t transform, vec3_t xyz);
+	void transform(freyja_object_t type, freyja_transform_t transform, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -400,7 +398,6 @@ public:
 	 * 2000.07.31:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-#endif
 
 	SceneGraph mModelGraph;
 

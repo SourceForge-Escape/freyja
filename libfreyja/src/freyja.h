@@ -5,8 +5,8 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
- * Object  : FreyjaMesh
- * License : No use w/o permission (C) 2004 Mongoose
+ * Object  : 
+ * License : No use w/o permission (C) 2004-2006 Mongoose
  * Comments: This is the FreyjaMesh and classes that compose it.
  *
  *
@@ -96,6 +96,14 @@ extern "C" {
 
 
 	typedef enum {
+		fUnion = 1,
+		fDifference,
+		fIntersection
+	
+	} freyja_csg_t;
+
+
+	typedef enum {
 		fTranslate = 1,
 		fRotate,
 		fScale,
@@ -168,6 +176,22 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : System facade for shared object unloading
+	 ------------------------------------------------------*/
+
+	void freyjaGetGenericTransform3fv(freyja_transform_t transform,
+									  freyja_transform_action_t action,
+									  index_t id, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets a transform
+	 ------------------------------------------------------*/
+		
+	void freyjaGenericTransform3fv(freyja_transform_t transform,
+								   freyja_transform_action_t action,
+								   index_t id, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets a transform generically 
 	 ------------------------------------------------------*/
 
 

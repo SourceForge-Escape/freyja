@@ -53,45 +53,6 @@
 
 #include "Egg.h" // Left over from 9.1 API, but 9.5 it's gone
 
-extern "C" {
-
-typedef struct {
-
-	char magic[16];
-	int32 version;
-	int32 flags;
-	int32 reserved;
-	char comment[64];
-
-} freyja_file_header_t;
-
-
-typedef struct {
-
-	int32 type;
-	int32 size;
-	int32 flags;
-	int32 version;
-
-} freyja_file_chunk_t;
-
-
-typedef enum {
-
-	FREYJA_CHUNK_MODEL    = 0x204C444D,
-	FREYJA_CHUNK_MESH     = 0x4853454D,
-	FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
-	FREYJA_CHUNK_VERTICES = 0x54524556,
-	FREYJA_CHUNK_POLYGONS = 0x594C4F50,
-	FREYJA_CHUNK_SKELETON = 0x4C454B53,
-	FREYJA_CHUNK_BONE     = 0x454E4F42,
-	FREYJA_CHUNK_MATERIAL = 0x5454414D,
-	FREYJA_CHUNK_TEXTURE  = 0x54584554,
-	FREYJA_CHUNK_METADATA = 0x4154454D
-
-} freyja_file_chunk_type_t;
-
-}
 
 /* Internal / hidden API methods not exported by header */
 Egg *freyja__getEggBackend();
@@ -147,12 +108,9 @@ void freyjaCurrentVertex(index_t vertexIndex)
 
 char freyjaIsTexCoordAllocated(index_t texcoordIndex)
 {
-	Egg *egg;
+	Egg *egg = freyja__getEggBackend();
 	egg_texel_t *texcoord;
 	
-
-	egg = freyja__getEggBackend();
-
 	if (!egg)
 		return 0;
 
@@ -184,6 +142,352 @@ char freyjaIsVertexAllocated(index_t vertexIndex)
 	vertex = gEgg->getVertex(vertexIndex);
 
 	return (vertex != 0x0);
+}
+
+
+void freyjaGetGenericTransform3fv(freyja_transform_t transform,
+								  freyja_transform_action_t action,
+								  index_t id, vec3_t xyz)
+{
+	switch (transform)
+	{
+	case fTransformScene:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformModel:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformMesh:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetMeshPosition(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexFrame:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformSkeleton:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformBone:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetBoneTranslation3fv(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformUVMap:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexGroup:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertex:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetVertexXYZ3fv(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformTexCoord:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+	}
+}
+
+		
+void freyjaGenericTransform3fv(freyja_transform_t transform,
+							   freyja_transform_action_t action,
+							   index_t id, vec3_t xyz)
+{
+	switch (transform)
+	{
+	case fTransformScene:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformModel:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformMesh:
+		switch (action)
+		{
+		case fTranslate:
+			//freyjaMeshPosition(id, xyz);
+			freyjaMeshTransform(id, freyjaGetMeshVertexGroupIndex(id, 0),
+								action, xyz[0], xyz[1], xyz[2]);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexFrame:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformSkeleton:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformBone:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaBoneTransform(id, action, xyz[0], xyz[1], xyz[2]);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformUVMap:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexGroup:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertex:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaVertexPosition3fv(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformTexCoord:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+	}
 }
 
 
@@ -220,10 +524,7 @@ index_t freyjaGetCurrentMesh()
 
 void freyjaMeshDelete(index_t meshIndex)
 {
-	Egg *egg = freyja__getEggBackend();
-
-	if (egg)
-		egg->delMesh(meshIndex);
+	gEgg->delMesh(meshIndex);
 }
 
 
@@ -232,11 +533,9 @@ void freyjaMeshTransform(index_t meshIndex, uint32 frame,
 							vec_t x, vec_t y, vec_t z)
 {
 	enum Egg::egg_transform type;
-	Egg *egg = 0x0;
+	Egg *egg = freyja__getEggBackend();
 
 	// FIXME: Only one model -- ignore model index for now
-
-	egg = freyja__getEggBackend();
 
 	if (!egg)
 		return;
@@ -280,11 +579,9 @@ void freyjaMeshFrameTransform(index_t meshIndex, uint32 frame,
 								vec_t x, vec_t y, vec_t z)
 {
 	enum Egg::egg_transform type;
-	Egg *egg = 0x0;
+	Egg *egg = freyja__getEggBackend();
 
 	// FIXME: Only one model -- ignore model index for now
-
-	egg = freyja__getEggBackend();
 
 	if (!egg)
 		return;
@@ -1743,9 +2040,76 @@ void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular)
 }
 	
 
+index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
+{
+	return gEgg->addTexel(u, v);
+}
+
+
 index_t freyjaTexCoordCreate2fv(const vec2_t uv)
 {
 	return freyjaTexCoordCreate2f(uv[0], uv[1]);
+}
+
+
+void freyjaVertexWeight(index_t vertexIndex, vec_t weight, index_t bone)
+{
+	egg_vertex_t *vert = gEgg->getVertex(vertexIndex);
+	egg_weight_t *vWeight;
+	int emptySlot = -1;
+	vec_t total = 0.0f;
+	unsigned int i;
+
+
+	if (!vert)
+		return;
+
+	for (i = vert->weights.begin(); i < vert->weights.end(); ++i)
+	{
+		vWeight = vert->weights[i];
+
+		if (vWeight)
+		{
+			if (weight <= 0.0) // Remove weight
+			{
+				delete vWeight;
+				vert->weights.assign(i, 0x0);
+				return;
+			}
+
+			if (vWeight->bone == bone) // Alter weight
+			{
+				vWeight->weight = weight;
+				return;
+			}
+
+			total = vWeight->weight;
+		}
+		else
+		{
+			emptySlot = i;
+		}
+	}
+
+	if (weight <= 0.0) // Don't add dead weight ( remove requested )
+		return;
+
+	if (total + weight > 1.0001)  // Just give a warning for now
+		freyjaPrintError("WARNING: Weight overflow %.3f + %.3f > 1.0 not handled here %s:%d\n", 
+					 total, weight, __FILE__, __LINE__);
+
+	vWeight = new egg_weight_t;
+	vWeight->weight = weight;
+	vWeight->bone = bone;
+
+	if (emptySlot > -1)
+	{
+		vert->weights.assign(emptySlot, vWeight);
+	}
+	else
+	{
+		vert->weights.pushBack(vWeight);
+	}
 }
 
 
@@ -3310,6 +3674,40 @@ uint32 freyjaGetVertexPolygonRefCount(index_t vertexIndex)
 	}
 
 	return 0;
+}
+
+
+index_t freyjaMeshVertexCreate3f(index_t meshIndex, index_t groupIndex,
+								 vec_t x, vec_t y, vec_t z)
+{
+	index_t id = INDEX_INVALID;
+	egg_vertex_t *vert = gEgg->addVertex(x, y, z);
+	egg_mesh_t *mesh = gEgg->getMesh(meshIndex);
+	egg_group_t *group = gEgg->getGroup(groupIndex);
+
+	if (vert)
+	{
+		if (mesh)
+		{
+			mesh->vertices.pushBack(vert->id);
+		}
+
+		if (group)
+		{
+			group->vertex.pushBack(vert->id);
+		}
+		else
+		{
+#ifdef WARN_VERTEX_OUTSIDE_GROUP
+			freyjaPrintError("freyjaVertex3f: WARNING Vertex[%i] outside GROUP!",
+							 vert->id);
+#endif
+		}
+		
+		id = vert->id;
+	}
+
+	return id;
 }
 
 

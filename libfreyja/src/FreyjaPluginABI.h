@@ -47,6 +47,44 @@ extern "C" {
 	///////////////////////////////////////////////////////////////////////
 
 
+	typedef struct {
+
+		char magic[16];
+		int32 version;
+		int32 flags;
+		int32 reserved;
+		char comment[64];
+
+	} freyja_file_header_t;
+
+
+	typedef struct {
+
+		int32 type;
+		int32 size;
+		int32 flags;
+		int32 version;
+
+	} freyja_file_chunk_t;
+
+
+	typedef enum {
+
+		FREYJA_CHUNK_MODEL    = 0x204C444D,
+		FREYJA_CHUNK_MESH     = 0x4853454D,
+		FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
+		FREYJA_CHUNK_VERTICES = 0x54524556,
+		FREYJA_CHUNK_POLYGONS = 0x594C4F50,
+		FREYJA_CHUNK_SKELETON = 0x4C454B53,
+		FREYJA_CHUNK_BONE     = 0x454E4F42,
+		FREYJA_CHUNK_MATERIAL = 0x5454414D,
+		FREYJA_CHUNK_TEXTURE  = 0x54584554,
+		FREYJA_CHUNK_METADATA = 0x4154454D,
+		FREYJA_CHUNK_UNDO     = 0x4F444E55
+
+	} freyja_file_chunk_type_t;
+
+
 	////////////////////////////////////////////////////////////////
 	// Models
 	//
@@ -306,7 +344,7 @@ extern "C" {
 	void freyjaVertexPosition3fv(index_t vertexIndex, vec3_t xyz);
 
 	void freyjaVertexWeight(index_t index, vec_t weight, index_t bone);
-	/*------------------------------------------------------
+	/*------------------------------------------------------------
 	 * Pre  : <weight> of influence of <bone> on vertex[<index>]
 	 *
 	 * Post : Vertex <index> in the model gets weight added	
@@ -316,7 +354,7 @@ extern "C" {
 	 *        <weight> <= 0.0 removes weight	
 	 *
 	 *        All weights for the vertex combined must be 1.0
-	 ------------------------------------------------------*/
+	 -----------------------------------------------------------*/
 
 	index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element);
 
@@ -367,6 +405,16 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Mesh <meshIndex> exists
 	 * Post : Mesh is removed from mesh pool
+	 ------------------------------------------------------*/
+
+	index_t freyjaMeshVertexCreate3f(index_t meshIndex, 
+									 index_t groupIndex,
+									 vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : Note in 0.9.3 API group isn't smoothing group
+	 *        After 0.10 merge it will be
+	 *
+	 * Post : Returns index of vertex created
 	 ------------------------------------------------------*/
 
 	void freyjaMeshTransform(index_t meshIndex, uint32 frame,

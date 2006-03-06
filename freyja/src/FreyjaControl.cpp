@@ -1333,29 +1333,16 @@ bool FreyjaControl::event(int command)
 
 		if (state)
 		{
-			switch (state->mEvent)
-			{
-		 	case FreyjaModel::TransformPoint:
-				freyja_print("Undo vertex %i %f %f %f", 
-					state->mIndex, 
-					state->pos.mVec[0], state->pos.mVec[1], state->pos.mVec[2] );
-				
-				freyjaVertexPosition3fv(state->mIndex, state->pos.mVec);
-				break;
-
-			default:
-				freyja_print("Undo %i %f %f %f", 
-					state->mEvent, 
-					state->pos.mVec[0], state->pos.mVec[1], state->pos.mVec[2] );
-				mModel->moveObject((FreyjaModel::transform_t)state->mEvent, state->pos);		
-			}
-			gFreyjaCursor.mPos = state->pos;
+			//state->Undo();
+			//freyja_print( "! Undo e=%i, m=%i, i=%i",
+			//			  state->GetEvent(), state->GetMode(), state->GetIndex());
+			//gFreyjaCursor.mPos = state->GetPos();
 			delete state;
 			freyja_event_gl_refresh();
 		}
 		else
 		{
-			freyja_print("Undo is not avalible in this build");
+			freyja_print("Undo is out of stack frames.");
 		}
 		break;
 
@@ -2240,10 +2227,11 @@ bool FreyjaControl::motionEvent(int x, int y)
 
 				if (mTransformMode == FreyjaModel::TransformBone)
 				{
-					FreyjaState state(FreyjaModel::TransformBone, 
-				                      mModel->getCurrentBone());
-					mModel->moveObject(FreyjaModel::TransformBone, xyz);
+					FreyjaStateTransform *state = new
+					FreyjaStateTransform(fTransformBone, fTranslate,
+										 mModel->getCurrentBone(), xyz.mVec);
 					gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
+					mModel->moveObject(FreyjaModel::TransformBone, xyz);
 				}
 				
 			}
@@ -2796,9 +2784,12 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		else
 		{
 			{
-				FreyjaState state(mTransformMode, mModel->getCurrentVertexIndex());
 				freyjaGetVertexXYZ3fv(mModel->getCurrentVertexIndex(),
-											gFreyjaCursor.mPos.mVec);
+									  gFreyjaCursor.mPos.mVec);
+				FreyjaStateTransform *state = new
+				FreyjaStateTransform(fTransformVertex, fTranslate,
+									 mModel->getCurrentVertexIndex(),
+									 gFreyjaCursor.mPos.mVec);
 				gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
 			}
 			
@@ -2812,9 +2803,12 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		getScreenToWorldOBSOLETE(&xx, &yy);
 		mModel->moveBone(xx, yy);
 		{
-			FreyjaState state(mTransformMode, mModel->getCurrentBone());
 			freyjaGetBoneTranslation3fv(mModel->getCurrentBone(),
 										gFreyjaCursor.mPos.mVec);
+			FreyjaStateTransform *state = new
+			FreyjaStateTransform(fTransformBone, fTranslate,
+								 mModel->getCurrentBone(),
+								 gFreyjaCursor.mPos.mVec);
 			gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
 		}
 		break;			
@@ -2846,8 +2840,11 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		}
 
 		{
-			FreyjaState state(mTransformMode, mModel->getCurrentMesh());
 			mModel->getCurrentMeshCenter(gFreyjaCursor.mPos.mVec);
+			FreyjaStateTransform *state = new
+			FreyjaStateTransform(fTransformMesh, fTranslate,
+								 mModel->getCurrentMesh(),
+								 gFreyjaCursor.mPos.mVec);
 			gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
 		}
 
@@ -3165,16 +3162,20 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		case modeMove:
 			if ( mTransformMode == FreyjaModel::TransformMesh )
 			{
-				FreyjaState state(FreyjaModel::TransformMesh, 
-			                      mModel->getCurrentMesh());		
 				mModel->getCurrentMeshCenter(gFreyjaCursor.mPos.mVec);
+				FreyjaStateTransform *state = new
+				FreyjaStateTransform(fTransformMesh, fTranslate,
+									 mModel->getCurrentMesh(),
+									 gFreyjaCursor.mPos.mVec);
 				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
 			}
 			else if ( mTransformMode == FreyjaModel::TransformPoint )
 			{
 				unsigned int idx = mModel->getCurrentVertexIndex();
-				FreyjaState state(mTransformMode, idx);		
 				freyjaGetVertexXYZ3fv(idx, gFreyjaCursor.mPos.mVec);
+				FreyjaStateTransform *state = new
+				FreyjaStateTransform(fTransformVertex, fTranslate,
+									 idx, gFreyjaCursor.mPos.mVec);
 				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
 			}
 			freyja_print("! moved: %f, %f", xx-xxx, yy-yyy);

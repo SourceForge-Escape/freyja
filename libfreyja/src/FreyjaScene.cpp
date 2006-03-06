@@ -3,9 +3,9 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://gooseegg.sourceforge.net
- * Email   : mongoose@users.sourceforge.net
- * Object  : Egg
+ * Website : http://icculus.org/freyja
+ * Email   : mongoose@icculus.org
+ * Object  : FreyjaScene
  * License : GPL, also (C) 2000 Mongoose
  * Comments: This is the data model agent
  *
@@ -118,47 +118,47 @@ bool FreyjaScene::isDebugLevel(unsigned int level)
 // Unit Test Code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_EGG
+#ifdef UNIT_TEST_SCENE
 int main(int argc, char *argv[])
 {
-	FreyjaScene egg;
+	FreyjaScene scene;
 
 
 	printf("[FreyjaScene class test]\n");
-	egg.setDebugLevel(4); // 5 for a lot of crap
+	scene.setDebugLevel(4); // 5 for a lot of crap
 
 	if (argc > 2)
 	{
 		if (strcmp(argv[1], "load") == 0)
 		{
-			if (!egg.loadFile(argv[2]))
+			if (!scene.loadFile(argv[2]))
 				printf("main: Load reports success.\n");
 		}
 		else if (strcmp(argv[1], "save") == 0)
 		{
-			// FIXME: Add code here to generate a small egg
+			// FIXME: Add code here to generate a small scene
 
-			if (!egg.saveFile(argv[2]))
+			if (!scene.saveFile(argv[2]))
 				printf("main: Save reports success.\n");
 		}
 		else if (strcmp(argv[1], "test") == 0 && argc > 3)
 		{
-			if (!egg.loadFile(argv[2]))
+			if (!scene.loadFile(argv[2]))
 				printf("main: Load reports success.\n");
-			if (!egg.saveFile(argv[3]))
+			if (!scene.saveFile(argv[3]))
 				printf("main: Save reports success.\n");
-			if (!egg.loadFile(argv[3]))
+			if (!scene.loadFile(argv[3]))
 				printf("main: Load reports success.\n");
 		}
 		else
 		{
-			printf("\n\n%s [save | load | test] filename.egg [testout.egg]\n", 
+			printf("\n\n%s [save | load | test] filename.ja [testout.ja]\n", 
 					 argv[0]);
 		}
 	}
 	else
 	{
-		printf("\n\n%s [save | load | test] filename.egg [testout.egg]\n", 
+		printf("\n\n%s [save | load | test] filename.ja [testout.ja]\n", 
 				 argv[0]);
 	}
 
