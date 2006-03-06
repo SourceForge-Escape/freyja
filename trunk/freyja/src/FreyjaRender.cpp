@@ -1275,9 +1275,9 @@ void FreyjaRender::display()
 		
 			glBegin(GL_LINES);
 			glColor3fv(BLACK);
-			glVertex2f(width, 0);
-			glVertex2f(width, height);
-			glVertex2f(0, height/2);
+			glVertex2f(width*mZoom, 0);
+			glVertex2f(width*mZoom, height*mZoom);
+			glVertex2f(0, height*mZoom/2);
 			glVertex2f(width, height/2);
 			glEnd();
 		}
