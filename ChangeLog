@@ -1,15 +1,27 @@
 
  TODO Shortlist ( trunk )
  =====================================================================
- - Rewrite the UI to use 3d cursor w/ undo/redo/init events
- - Rewrite renderer to use viewports for views correctly
- - Backport freyja dancer keyframes and make a new UI for them 
- - Hook up virtual planes in viewer using pickray ( cubes )
+ - Merge with 0.10 libfreyja
+   - Remove Egg from libfreyja
+   - Backport freyja dancer keyframes
+   - Seperate smoothing groups and clusters
+   - Seperate keyframes and primary data structures
+ - Merge free and view edit window interfaces
+   - Finish up viewport editing test
+   - Rewrite renderer to use viewports for views correctly
+ - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
+ - Hook up virtual planes in free mode using pickray ( cubes )
  - Hook up 3d cursor modes to offset bboxes for the cursor's axies
- - Run maps over types to allow undo/redo to work with the current backend ds
+ - Run maps over types to allow undo/redo to allow for cut/copy/paste
+
 
  ChangeLog ( trunk )
  =====================================================================
+
+ 20060304 Mongoose
+ - Minor refactoring pass in libfreyja
+ - Generic transforms like 0.10 for trunk ( new implementation )
+ - Undo test converted into full subsystem with serialization support
 
 
  20060225 Mongoose

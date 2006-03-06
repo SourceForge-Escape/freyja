@@ -362,44 +362,13 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 
 void FreyjaFSM::freyjaGetVertex(vec3_t xyz)
 {
-	Vector<egg_vertex_t *> *vertex;
-	egg_vertex_t *vert;
-
-
-	vertex = mEgg->VertexList();
-
-	if (!vertex || mIndexVertex >= vertex->end() || mIndexVertex < 0)
-		return;
- 
-	vert = (*vertex)[mIndexVertex];
-
-	if (!vert)
-		return;
-
-	xyz[0] = vert->pos[0];
-	xyz[1] = vert->pos[1];
-	xyz[2] = vert->pos[2];
+	freyjaGetVertexXYZ3fv(mIndexVertex, xyz);
 }
 
 
 void FreyjaFSM::freyjaGetVertexTexCoord(vec2_t uv)
 {
-	Vector<egg_vertex_t *> *vertex;
-	egg_vertex_t *vert;
-
-
-	vertex = mEgg->VertexList();
-
-	if (!vertex || mIndexVertex >= vertex->end())
-		return;
- 
-	vert = (*vertex)[mIndexVertex];
-
-	if (!vert)
-		return;
-
-	uv[0] = vert->uv[0];
-	uv[1] = vert->uv[1];
+	freyjaGetVertexTexcoord2fv(mIndexVertex, uv);
 }
 
 
@@ -568,119 +537,15 @@ void FreyjaFSM::freyjaEnd()
 }
 
 
-index_t FreyjaFSM::freyjaTexCoordCreate2f(vec_t s, vec_t t)
-{
-	return mEgg->addTexel(s, t);
-}
-
-
 index_t FreyjaFSM::freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 {
-	egg_vertex_t *vert;
-
-
-	vert = mEgg->addVertex(x, y, z);
-
-	if (vert)
-	{
-		if (mMesh)
-			mMesh->vertices.pushBack(vert->id);
-
-		if (mGroup)
-		{
-			mGroup->vertex.pushBack(vert->id);
-		}
-		else
-		{
-#ifdef FreyjaFSM_WARN_VERTEX_OUTSIDE_GROUP
-			freyjaPrintError("freyjaVertex3f: WARNING Vertex[%i] outside GROUP!",
-							 vert->id);
-#endif
-		}
-
-		return vert->id;
-	}
-	else
-		return INDEX_INVALID;
+	return freyjaMeshVertexCreate3f(mIndexMesh, mIndexGroup, x, y, z);
 }
 
 
-void FreyjaFSM::freyjaVertexWeight(index_t index, vec_t weight, index_t bone)
+void FreyjaFSM::freyjaGetVertexNormal(vec3_t nxyz)
 {
-	egg_vertex_t *vert = mEgg->getVertex(index);
-	egg_weight_t *vWeight;
-	int emptySlot = -1;
-	vec_t total = 0.0f;
-	unsigned int i;
-
-
-	if (!vert)
-		return;
-
-	for (i = vert->weights.begin(); i < vert->weights.end(); ++i)
-	{
-		vWeight = vert->weights[i];
-
-		if (vWeight)
-		{
-			if (weight <= 0.0) // Remove weight
-			{
-				delete vWeight;
-				vert->weights.assign(i, 0x0);
-				return;
-			}
-
-			if (vWeight->bone == bone) // Alter weight
-			{
-				vWeight->weight = weight;
-				return;
-			}
-
-			total = vWeight->weight;
-		}
-		else
-		{
-			emptySlot = i;
-		}
-	}
-
-	if (weight <= 0.0) // Don't add dead weight ( remove requested )
-		return;
-
-	if (total + weight > 1.0001)  // Just give a warning for now
-		freyjaPrintError("WARNING: Weight overflow %.3f + %.3f > 1.0 not handled here %s:%d\n", 
-					 total, weight, __FILE__, __LINE__);
-
-	vWeight = new egg_weight_t;
-	vWeight->weight = weight;
-	vWeight->bone = bone;
-
-	if (emptySlot > -1)
-	{
-		vert->weights.assign(emptySlot, vWeight);
-	}
-	else
-	{
-		vert->weights.pushBack(vWeight);
-	}
-
-	return;
-}
-
-
-void FreyjaFSM::freyjaGetVertexNormal(vec3_t xyz)
-{
-	egg_vertex_t *vert;
-
-
-	vert = mEgg->getVertex(mIndexVertex);
-
-	if (!vert)
-		return;
-
-	xyz[0] = vert->norm[0];
-	xyz[1] = vert->norm[1];
-	xyz[2] = vert->norm[2];
+	freyjaGetVertexNormalXYZ3fv(mIndexVertex, nxyz);
 }
 
 
@@ -933,14 +798,6 @@ index_t freyjaGetCurrent(freyja_object_t type)
 }
 
 
-index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
-{
-	if (FreyjaFSM::mFreyjaFSM)
-		return FreyjaFSM::mFreyjaFSM->freyjaTexCoordCreate2f(u, v);
-
-	return INDEX_INVALID;
-}
-
 void freyjaMeshFlags1u(uint32 flags)
 {
 	if (FreyjaFSM::mFreyjaFSM)
@@ -955,17 +812,17 @@ void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z)
 }
 
 
-void freyjaPolygonVertex1i(index_t egg_id)
+void freyjaPolygonVertex1i(index_t id)
 {
 	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddVertex1i(egg_id);
+		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddVertex1i(id);
 }
 
 
-void freyjaPolygonTexCoord1i(index_t egg_id)
+void freyjaPolygonTexCoord1i(index_t id)
 {
 	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddTexCoord1i(egg_id);
+		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddTexCoord1i(id);
 }
 
 void freyjaPolygonMaterial1i(index_t id)
@@ -999,13 +856,6 @@ index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 		return FreyjaFSM::mFreyjaFSM->freyjaVertexCreate3f(x, y, z);
 
 	return INDEX_INVALID;
-}
-
-
-void freyjaVertexWeight(index_t index, vec_t weight, index_t bone)
-{
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaVertexWeight(index, weight, bone);
 }
 
 

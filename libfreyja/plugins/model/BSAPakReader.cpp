@@ -418,6 +418,7 @@ int freyja_model__bsa_import(char *filename)
 		for (i = 0; i < bsa.mHeader.mFileCount; ++i)
 		{
 			strncpy(file, bsa.mTable[i].mFilename, 1023);
+			file[1023] = 0;
 
 			for (s = file; s[0]; ++s)
 			{

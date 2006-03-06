@@ -41,6 +41,7 @@
 #include <mstl/Vector.h>
 #include <mstl/Stack.h>
 
+#include "FreyjaState.h"
 #include "Texture.h"
 #include "BezierPatch.h"
 #include "freyja_events.h"
@@ -57,31 +58,6 @@ typedef enum {
 
 
 void FreyjaModelEventsAttach();
-
-// Cheap Undo / Redo test
-class FreyjaState
-{
- public: 
-
-	FreyjaState() { mEvent = mIndex = -1; }
-	virtual ~FreyjaState() {}
-	FreyjaState(int event, int index) { mEvent = event; mIndex = index; }
-	virtual bool Undo() { return false;/*mModel->moveObject(mEvent, pos);*/ }
-	virtual void Redo() {}
-	void operator =(FreyjaState s) 
-    { mEvent = s.mEvent; mIndex = s.mIndex; }
-	bool operator ==(FreyjaState b) 
-    { return ( b.mEvent == mEvent && b.mIndex == mIndex ); }
-	bool operator !=(FreyjaState b) 
-    { return ( b.mEvent != mEvent || b.mIndex != mIndex ); }
-
-	int tmp;
-	Vector3d pos;
-
-	int mEvent, mIndex;
-
- private:
-};
 
 
 class Freyja3dCursor
@@ -107,35 +83,29 @@ class Freyja3dCursor
 		mMode = n;
 	}
 
-	void ForceChangeState(FreyjaState state, Freyja3dCursorFlags_t mode)
+	void ForceChangeState(FreyjaState *state, Freyja3dCursorFlags_t mode)
 	{
-		//mgtk_print("! Freyja3dCursor::ForceChangeState() entered.");
+		if (!state)
+			return;
 
-		//if ( state != mLastState )
-		//{
-			//mgtk_print("! Freyja3dCursor::ChangeState() push.");
-			state.tmp = mode;
-			state.pos = mPos;
-			mStack.push(new FreyjaState(state));
-			mLastState = state;
-		//}
-
+		freyja_print("! force pushed undo frame");
+		mStack.push(state);
+		mLastState = *state;
 		mMode = mode;
 	}
 
-	void ChangeState(FreyjaState state, Freyja3dCursorFlags_t mode)
+	void ChangeState(FreyjaState *state, Freyja3dCursorFlags_t mode)
 	{
-		//mgtk_print("! Freyja3dCursor::ChangeState() entered.");
+		if (!state)
+			return;
 
-		if ( state != mLastState )
+		if ( *state != mLastState )
 		{
-			//mgtk_print("! Freyja3dCursor::ChangeState() push.");
-			state.tmp = mode;
-			state.pos = mPos;
-			mStack.push(new FreyjaState(state));
-			mLastState = state;
+			freyja_print("! pushed undo frame");
+			mStack.push(state);
+			mLastState = *state;
 		}
-
+		
 		mMode = mode;
 	}
 
@@ -149,7 +119,7 @@ class Freyja3dCursor
 	FreyjaState *Pop()
 	{
 		FreyjaState *state = NULL;
-		mLastState.mEvent = -1;
+		mLastState.SetEvent(-1);
 
 		if (!mStack.empty())
 		{
@@ -163,7 +133,7 @@ class Freyja3dCursor
 
 	void Reset()
 	{
-		mAxis = 0; // implies 1, 2 plane
+		mAxis = 0; // implies X, Y screen/free virtual plane
 		mMode = Invisible;
 		mPos = Vector3d(0.0f, 0.0f, 0.0f);
 		mScale = Vector3d(1.0f, 1.0f, 1.0f);
@@ -183,6 +153,8 @@ class Freyja3dCursor
 	FreyjaState mLastState;
 
 	Stack<FreyjaState *> mStack;
+
+	Stack<FreyjaState *> mRedoStack;
 
 	Freyja3dCursorFlags_t mMode;
 };
