@@ -3193,7 +3193,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		//if (mXYZMouseState == 0)
 		//{
 		xxx = xx;  yyy = yy;
-		freyja_print("store state: %f, %f", xxx, yyy);
+		freyja_print("! store state: %f, %f", xxx, yyy);
 		mModel->VertexSelect(xx, yy);
 
 		if (FreyjaRender::mPatchDisplayList)
