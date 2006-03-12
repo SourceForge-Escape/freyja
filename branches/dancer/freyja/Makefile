@@ -32,8 +32,8 @@ BUILD_SELECT=debug
 # DISABLE_MULTITEXTURE
 # DISABLE_GTK_COLORBUTTON
 CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
-		-DHAVE_FREYJA_IMAGE -DFORCE_GLAREA_GTK_2_0 \
-		-DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL
+		-DHAVE_FREYJA_IMAGE \
+		-DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL -DDISABLE_MULTITEXTURE
 CONFIGURE_LDFLAGS=
 
 ################################################################
@@ -93,7 +93,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja-0.10 -lmgtk \
-		$(shell pkg-config --libs gtk+-2.0) -lgtkgl-2.0
+		$(shell pkg-config --libs gtk+-2.0 gtkglext-1.0)
 LD_FLAGS += -Wl,-z,defs
 LD_FLAGS += -Wl,-O1
 

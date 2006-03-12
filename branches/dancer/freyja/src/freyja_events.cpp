@@ -1121,6 +1121,7 @@ void freyja_print_args(char *format, va_list *args)
 	// Strip message of an trailing carrage return 
 	//  and print to stdout and the status bar
 	vsnprintf(buffer, 1024, format, *args);
+	buffer[1023] = 0;
 	
 	l = strlen(buffer);
   
@@ -1144,9 +1145,7 @@ void freyja_print_args(char *format, va_list *args)
 
 	if (f)
 	{
-		fprintf(f, "> ");
-		vfprintf(f, format, *args);
-		fprintf(f, "\n");
+		fprintf(f, "> %s\n", buffer );
 		fflush(f);
 	}
 }
