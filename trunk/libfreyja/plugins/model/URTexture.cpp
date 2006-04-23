@@ -239,6 +239,7 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 			printf("\tdataOffset = %u ( 0x%x )\n", 
 					 dataOffset, dataOffset);
 
+#if THIS_NOT_USED_IT_SEEMS  // here's your fix
 			/* You have to grab palette via export table, duh */
 			if (0)
 			{
@@ -314,6 +315,7 @@ int URTexture::load(UTPackage &pak, unsigned int index)
 				pak.dRead(palette, paletteSize*4, 1);
 			}
 			else
+#endif
 			{
 				printf("\t*Palette load disabled, using a greyscale palette\n");
 				paletteSize = 256;

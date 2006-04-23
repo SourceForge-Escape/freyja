@@ -1143,6 +1143,18 @@ UTPackage.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
+
+UTPackage-win32.test:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) test NAME=UTPackage.exe BUILDDIR=$(BUILD_WIN32_DIR) \
+	OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
+
+
 lineageIIextract.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=lineageIIextract BUILDDIR=$(BUILD_TEST_DIR) \
