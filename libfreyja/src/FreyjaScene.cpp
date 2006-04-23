@@ -71,7 +71,7 @@ unsigned int FreyjaScene::getAnimationCount() { return animations.end(); }
 unsigned int FreyjaScene::getModelCount() { return models.end(); }
 unsigned int FreyjaScene::getMaterialCount() { return materials.end(); }
 unsigned int FreyjaScene::getTextureCount() { return textures.end(); }
-unsigned int FreyjaScene::getVertexGroupCount() { return vertexgroups.end(); }
+//unsigned int FreyjaScene::getVertexGroupCount() { return vertexgroups.end(); }
 
 
 ////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ void FreyjaScene::erase()
 	metadata.erase();
 	lights.erase();
 	cameras.erase();
-	vertexgroups.erase();
+	//vertexgroups.erase();
 }
 
 

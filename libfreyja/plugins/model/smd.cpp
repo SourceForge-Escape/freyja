@@ -152,7 +152,7 @@ int freyja_model__smd_import(char *filename)
 					{
 						freyjaBoneTranslate3f(idx, x*scale, z*scale, y*scale);
 						freyjaBoneRotateEuler3f(idx, 
-												rx*r2d,(ry*r2d)-90.0,rz*r2d);
+												rx*r2d,(ry*r2d)-90.0f,rz*r2d);
 					}
 					else
 					{

@@ -327,8 +327,8 @@ uint32 freyjaGetRenderModelCount()
 bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 {
 #ifdef USING_EGG 
-	extern Egg *gEgg;
-	model.setEgg(gEgg);
+	extern Egg *freyja__getEggBackend();
+	model.setEgg(freyja__getEggBackend());
 	model.mIndex = 0;
 	return true;
 #else

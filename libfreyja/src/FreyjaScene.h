@@ -411,7 +411,7 @@ public:
 
 	//Vector<FreyjaSkeleton*> skeletons;    /* Skeletal data for this model */
 
-	Vector<FreyjaMesh *> meshes;          /* Geometery structure */
+	Vector<freyja::Mesh *> meshes;          /* Geometery structure */
 
 	Vector<FreyjaMetaData *> metadata;    /* Metadata for external use */
 
@@ -419,7 +419,7 @@ public:
 
 	Vector<FreyjaCamera *> cameras;
 
-	Vector<FreyjaVertexGroup *> vertexgroups;
+	//Vector<FreyjaVertexGroup *> vertexgroups;
 
 
 private:

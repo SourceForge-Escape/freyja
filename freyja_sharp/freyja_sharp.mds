@@ -1,10 +1,10 @@
 <Combine name="freyja_sharp" fileversion="2.0">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="CombineConfiguration">
-      <Entry build="False" name="freyja_sharp" />
+      <Entry build="False" name="freyja_sharp" configuration="Debug" />
     </Configuration>
     <Configuration name="Release" ctype="CombineConfiguration">
-      <Entry build="False" name="freyja_sharp" />
+      <Entry build="False" name="freyja_sharp" configuration="Release" />
     </Configuration>
   </Configurations>
   <StartMode startupentry="freyja_sharp" single="True">
