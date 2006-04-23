@@ -1153,6 +1153,7 @@ UTPackage-win32.test:
 	LD="i586-mingw32msvc-ld " \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
+	@-mv $(BUILD_WIN32_DIR)/UTPackage.exe.test $(BUILD_WIN32_DIR)/UTPackage.exe
 
 
 lineageIIextract.test:
@@ -1161,6 +1162,18 @@ lineageIIextract.test:
 	OBJS="$(BUILD_TEST_DIR)/extractFace.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lstdc++"
+
+
+lineageIIextract-win32.test:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) test NAME=lineageIIextract.exe BUILDDIR=$(BUILD_WIN32_DIR) \
+	OBJS="$(BUILD_WIN32_DIR)/extractFace.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
+	@-mv $(BUILD_WIN32_DIR)/lineageIIextract.exe.test $(BUILD_WIN32_DIR)/lineageIIextract.exe
 
 
 PerlinNoise.test:
