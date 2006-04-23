@@ -98,13 +98,15 @@ class KeyFrameObject
 	virtual void SetDeltaScaleY(float y) {}
 	virtual void SetDeltaScaleZ(float z) {}
 
-	// 'Light' interface
+	// 'Color' interface
 	virtual void SetColorRGB(vec3_t rgb) {}
 	virtual void SetColorRGBA(vec4_t rgba) {}
 	virtual void SetColorR(float r) {}
 	virtual void SetColorB(float b) {}
 	virtual void SetColorG(float g) {}
 	virtual void SetColorA(float a) {}
+
+	// 'Light' interface
 	virtual void SetFalloff(float d) {}
 
 	// 'Generic' interface for message passing
@@ -169,9 +171,11 @@ class KeyFrame
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	vec_t mTime;    /* Time offset to this frame */
+	index_t mIndex;                     /* Keyframe number */
 
-	KeyFrameObject *obj;;
+	vec_t mTime;                        /* Time offset to this frame */
+
+	Vector<KeyFrameObject *> mObjects;  /* All objects bound to this frame */
 
  private:
 
@@ -187,6 +191,15 @@ class KeyFrame
 };
 
 
+class KeyFrameList
+{
+ public:
+	KeyFrameList *mPrev;
+	KeyFrameList *mNext;
+	KeyFrame *mKeyframe;	
+};
+
+
 class KeyFrameGroup
 {
 	////////////////////////////////////////////////////////////
@@ -196,6 +209,8 @@ class KeyFrameGroup
  public:
 
  private:
+
+	KeyFrameList *mKeyFrames;
 
 	float mDuration;		/* How long is this track */
 

@@ -41,23 +41,21 @@ FreyjaFSM *FreyjaFSM::mFreyjaFSM = 0x0;
 //       This is to remove exposure of Egg types in header
 #include "Egg.h"
 
-	Egg *mEgg;                          /* Pointer to the modeler backend  */
+Egg *freyja__getEggBackend();
 
-	egg_mesh_t *mMesh;                  /* Current mesh */
-
-	egg_group_t *mGroup;                /* Current vertex grouping */
-
-	egg_animation_t *mAnimation;        /* MeshTree animation group */
+Egg *mEgg;                          /* Pointer to the modeler backend  */
+egg_mesh_t *mMesh;                  /* Current mesh */
+egg_group_t *mGroup;                /* Current vertex grouping */
 
 
 FreyjaFSM::FreyjaFSM()
 {
-	extern Egg *gEgg;
-	mEgg = gEgg;  // freyjaSpawn always allocates in proper order for this to work ( HASA child, then parent )
+	// freyjaSpawn always allocates in proper order for this to work
+	// ( HASA child, then parent )
+	mEgg = freyja__getEggBackend(); 
 
 	mMesh = 0x0;
 	mGroup = 0x0;
-	mAnimation = 0x0;
 	mTextureId = 0;
 
 	FreyjaFSM::mFreyjaFSM = this;

@@ -132,6 +132,45 @@ extern "C" {
 	} freyja_plugin_options_t;
 
 
+	typedef struct {
+
+		char magic[16];
+		int32 version;
+		int32 flags;
+		int32 reserved;
+		char comment[64];
+
+	} freyja_file_header_t;
+
+
+	typedef struct {
+
+		int32 type;
+		int32 size;
+		int32 flags;
+		int32 version;
+
+	} freyja_file_chunk_t;
+
+
+	typedef enum {
+
+		FREYJA_CHUNK_MODEL    = 0x204C444D,
+		FREYJA_CHUNK_MESH     = 0x4853454D,
+		FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
+		FREYJA_CHUNK_VERTICES = 0x54524556,
+		FREYJA_CHUNK_POLYGONS = 0x594C4F50,
+		FREYJA_CHUNK_SKELETON = 0x4C454B53,
+		FREYJA_CHUNK_BONE     = 0x454E4F42,
+		FREYJA_CHUNK_MATERIAL = 0x5454414D,
+		FREYJA_CHUNK_TEXTURE  = 0x54584554,
+		FREYJA_CHUNK_METADATA = 0x4154454D,
+		FREYJA_CHUNK_UNDO     = 0x4F444E55
+
+	} freyja_file_chunk_type_t;
+
+
+
 	///////////////////////////////////////////////////////////////////////
 	//  Freyja library util functions
 	///////////////////////////////////////////////////////////////////////
