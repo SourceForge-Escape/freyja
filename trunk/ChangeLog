@@ -1,22 +1,43 @@
 
- TODO Shortlist ( trunk )
+ TODO 0.10 ( trunk merge )
  =====================================================================
  - Merge with 0.10 libfreyja
-   - Remove Egg from libfreyja
+   - Remove Egg from libfreyja 
+   - Break 0.9.x ABI / API and replace with 0.10 ABI/API
    - Backport freyja dancer keyframes
-   - Seperate smoothing groups and clusters
-   - Seperate keyframes and primary data structures
+   - Seperate smoothing groups and clusters ( vertex groups )
+     - Smoothing groups as vertex flags
+   - Seperate keyframes and data structures ( vertices shouldn't have frames )
+     - Remove concept of mesh 'groups/frames'
+     - Move vertex 'frames' to keyframes of vertex transforms
+   - Remove model dependency on concept of edit planes { XY, YZ, XZ }
+   - Merge new freyja 0.10 editor features and plugins
+   - Purge unused classes
+   - Storage of bone rotation as euler, rotation with quats ( all quats now )
+   - Curves support for keyframes
+
  - Merge free and view edit window interfaces
+   - Refactor to use true singletons/other patterns where systems require
+     - Break up Model/Render/Control into windows/views
+   - Move BezierPatch, etc into libfreyja
    - Finish up viewport editing test
    - Rewrite renderer to use viewports for views correctly
- - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
- - Hook up virtual planes in free mode using pickray ( cubes )
- - Hook up 3d cursor modes to offset bboxes for the cursor's axies
- - Run maps over types to allow undo/redo to allow for cut/copy/paste
+   - Billboard/sprite support outside edit data for user diagrams and icons
+   - Default 'zoom' to x1
+   - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
+     - Hook up virtual planes in free mode using pickray ( cubes )
+     - Hook up 3d cursor modes to offset bboxes for the cursor's axies
+     - Run maps over types to allow undo/redo to allow for cut/copy/paste
 
 
- ChangeLog ( trunk )
+ ChangeLog 0.9 ( trunk )
  =====================================================================
+
+ 20060423 Mongoose
+ - New boundingvolume update in libhel
+ - All new libfreyja Mesh class ( not hooked up yet )
+ - Minor refactoring pass in libfreyja cont
+
 
  20060304 Mongoose
  - Minor refactoring pass in libfreyja

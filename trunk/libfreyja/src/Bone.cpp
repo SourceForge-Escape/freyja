@@ -389,6 +389,7 @@ void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 
 	if (b)
 	{
+		freyjaPrintMessage(" ! set %f %f %f", p, h, r);
 		b->mRotation = Quaternion(p, h, r);
 		//b->updateBoneToWorld();
 	}
@@ -401,6 +402,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 
 	if (b)
 	{
+		freyjaPrintMessage(" ! set %f %f %f", phr[0], phr[1], phr[2]);
 		b->mRotation.setByEulerAngles(phr);
 		//b->updateBoneToWorld();
 	}
@@ -494,6 +496,11 @@ void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 		q = b->mRotation;
 		//freyjaPrintError("FIXME %p, %s:%i", b, __FILE__, __LINE__);
 		q.getEulerAngles(phr);  // P H R -> H B A
+		//vec_t tmp;
+		//tmp = phr[0];
+		//phr[0] = phr[2];
+		//phr[2] = tmp;
+		freyjaPrintMessage(" ! get %f %f %f", phr[0], phr[1], phr[2]);
 	}
 }
 

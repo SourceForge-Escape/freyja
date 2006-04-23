@@ -29,26 +29,7 @@
 #define GUARD__LIBHEL_MONGOOSE_BOUNDINGVOLUME_H_
 
 #include "hel/math.h"
-
-
-#ifndef FREYJA9
-class BoundingSphere
-{
-public:
-	vec3_t mCenter;            /* Center of bounding sphere */
-
-	vec_t mRadius;             /* Raduis of bounding sphere */	
-};
-
-
-class BoundingBox
-{
-public:
-	vec3_t mMin;           /* Bounding box MIN point */
-
-	vec3_t mMax;           /* Bounding box MAX point */
-};
-#endif
+#include "hel/Matrix.h"
 
 
 class BoundingVolume
@@ -86,19 +67,25 @@ class BoundingVolume
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool isVertexInside(vec3_t vertex);
+	virtual bool IsPointInside(vec3_t point) { return false; }
 
+	virtual bool IsInsideFrustum(vec_t frustum[6][4]) { return false; }
+	
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	virtual void Reset() {}
 
-#ifndef FREYJA9
-	BoundingSphere mSphere;    /* Bounding sphere of this volume */
+	virtual void Translate(vec3_t xyz) {}
 
-	BoundingBox mBox;;         /* Bounding box of this volume */
-#endif
+	virtual void Rotate(vec3_t xyz) {}
+
+	virtual void Scale(vec3_t xyz) {}
+
+	virtual void UpdateBounds(vec3_t point) {}
+
 
  private:
 
@@ -116,28 +103,70 @@ class BoundingVolume
 };
 
 
-#ifdef FREYJA9
 class BoundingSphere : public BoundingVolume
 {
 public:
 
 	BoundingSphere(vec3_t center, vec_t radius)
 	{
-		mCenter[0] = center[0];
-		mCenter[1] = center[1];
-		mCenter[2] = center[2];
+		HEL_VEC3_COPY(center, mCenter);
 
 		mRadius = radius;
 	}
 
 
-	bool isVertexInside(vec3_t vertex)
+	bool IsPointInside(vec3_t point)
 	{
-		if (helDist3v(mCenter, vertex) <= mRadius)
+		if (helDist3v(mCenter, point) <= mRadius)
 			return true;
 
 		return false;
 	}
+
+	bool IsInsideFrustum(vec_t frustum[6][4])
+	{
+		unsigned int p;
+		vec_t d;
+
+
+		for (p = 0; p < 6; ++p)
+		{
+			d = (frustum[p][0] * mCenter[0] + 
+				  frustum[p][1] * mCenter[1] + 
+				  frustum[p][2] * mCenter[2] +
+				  frustum[p][3]);
+
+			if (d <= -mRadius)
+				return false;
+		}
+
+		return true;
+	}
+
+	void Reset()
+	{
+		mRadius = 0.0f;
+	}
+
+	void Translate(vec3_t xyz)
+	{
+		HEL_VEC3_COPY(xyz, mCenter);
+	}
+
+
+	void Scale(vec3_t xyz)
+	{
+		mRadius *= xyz[0];  // assume uniform scaling no way to recover hull data
+	}
+
+	void UpdateBounds(vec3_t point)
+	{
+		vec_t radius = helDist3v(mCenter, point);
+
+		if (radius > mRadius)
+			mRadius = radius;
+	}
+
 
 	vec3_t mCenter;            /* Center of bounding sphere */
 
@@ -161,13 +190,13 @@ public:
 	}
 
 
-	bool isVertexInside(vec3_t vertex)
+	bool IsPointInside(vec3_t point)
 	{
-		if (vertex[0] >= mMin[0] && vertex[0] <= mMax[0])
+		if (point[0] >= mMin[0] && point[0] <= mMax[0])
 		{
-			if (vertex[1] >= mMin[1] && vertex[1] <= mMax[1])
+			if (point[1] >= mMin[1] && point[1] <= mMax[1])
 			{
-				if (vertex[0] >= mMin[2] && vertex[0] <= mMax[2])
+				if (point[0] >= mMin[2] && point[0] <= mMax[2])
 				{
 					return true;
 				}
@@ -175,6 +204,119 @@ public:
 		}
 
 		return false;
+	}
+
+	bool IsInsideFrustum(vec_t frustum[6][4])
+	{
+		unsigned int p;
+		vec_t *min = mMin;
+		vec_t *max = mMax;
+
+		for (p = 0; p < 6; ++p)
+		{
+			if (frustum[p][0] * min[0] + 
+				 frustum[p][1] * min[1] + 
+				 frustum[p][2] * min[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * max[0] + 
+				 frustum[p][1] * max[1] + 
+				 frustum[p][2] * max[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * min[0] + 
+				 frustum[p][1] * max[1] + 
+				 frustum[p][2] * max[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * min[0] + 
+				 frustum[p][1] * min[1] + 
+				 frustum[p][2] * max[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * min[0] + 
+				 frustum[p][1] * max[1] + 
+				 frustum[p][2] * min[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * max[0] + 
+				 frustum[p][1] * min[1] + 
+				 frustum[p][2] * min[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * max[0] + 
+				 frustum[p][1] * max[1] + 
+				 frustum[p][2] * min[2] + frustum[p][3] > 0)
+				continue;
+
+			if (frustum[p][0] * max[0] + 
+				 frustum[p][1] * min[1] + 
+				 frustum[p][2] * max[2] + frustum[p][3] > 0)
+				continue;
+
+			return false;
+		}
+
+		return true;
+	}
+
+	
+	void Reset()
+	{
+
+		mMin[0] = 0.0f;	
+		mMin[1] = 0.0f;	
+		mMin[2] = 0.0f;
+
+		mMax[0] = 0.0f;	
+		mMax[1] = 0.0f;	
+		mMax[2] = 0.0f;
+	}
+
+	void Translate(vec3_t xyz)
+	{
+		mMin[0] += xyz[0];	
+		mMin[1] += xyz[1];	
+		mMin[2] += xyz[2];
+
+		mMax[0] += xyz[0];	
+		mMax[1] += xyz[1];	
+		mMax[2] += xyz[2];	
+	}
+
+	void Rotate(vec3_t xyz)
+	{
+		Matrix m;
+		m.rotate(xyz);
+		m.multiply3v(mMin, mMin);
+		m.multiply3v(mMax, mMax);
+	}
+
+	void Scale(vec3_t xyz)
+	{
+		mMin[0] *= xyz[0];	
+		mMin[1] *= xyz[1];	
+		mMin[2] *= xyz[2];
+
+		mMax[0] *= xyz[0];	
+		mMax[1] *= xyz[1];	
+		mMax[2] *= xyz[2];	
+	}
+
+
+	void UpdateBounds(vec3_t point)
+	{
+		for (unsigned int i = 0; i < 3; ++i )
+		{
+			if (point[i] > mMax[i])
+			{
+				mMax[i] = point[i];
+			}
+			else if (point[i] < mMin[i])
+			{
+				mMin[i] = point[i];
+			}
+		}
 	}
 
 	vec3_t mMin;           /* Bounding box MIN point */
@@ -187,27 +329,53 @@ class BoundingBoxCombo : public BoundingVolume
 {
 public:
 
-	BoundingBoxCombo(BoundingSphere &s, BoundingBox &b)
+	BoundingBoxCombo(BoundingSphere &s, BoundingBox &b) : BoundingVolume(), 
+		mSphere(s), mBox(b)
 	{
-		mSphere = s;
-		mBox = b;
 	}
 
 
-	bool isVertexInside(vec3_t vertex)
+	bool IsPointInside(vec3_t point)
 	{
-		if (mSphere.isVertexInside(vertex) &&
-			 mBox.isVertexInside(vertex))
+		if (mSphere.IsPointInside(point) && mBox.IsPointInside(point))
 			return true;
 
 		return false;
 	}
 
+	void Reset()
+	{
+		mSphere.Reset();
+		mBox.Reset();
+	}
+
+	void Translate(vec3_t xyz) 
+	{
+		mSphere.Translate(xyz);
+		mBox.Translate(xyz);
+	}
+
+	void Rotate(vec3_t xyz)
+	{
+		mSphere.Rotate(xyz);
+		mBox.Rotate(xyz);
+	}
+
+	void Scale(vec3_t xyz)
+	{
+		mSphere.Scale(xyz);
+		mBox.Scale(xyz);
+	}
+
+	void UpdateBounds(vec3_t point)
+	{
+		mSphere.UpdateBounds(point);
+		mBox.UpdateBounds(point);
+	}
 
 	BoundingSphere mSphere;    /* Bounding sphere of this volume */
 	
 	BoundingBox mBox;          /* Bounding box of this volume */
 };
-#endif
 
 #endif

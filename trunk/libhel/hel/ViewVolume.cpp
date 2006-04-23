@@ -45,23 +45,7 @@ ViewVolume::~ViewVolume()
 
 bool ViewVolume::isBoundingVolumeInFrustum(BoundingVolume bvol)
 {
-	return (isBoundingSphereInFrustum(bvol.mSphere) &&
-			  isBoundingBoxInFrustum(bvol.mBox));
-}
-
-
-bool ViewVolume::isBoundingSphereInFrustum(BoundingSphere bvol)
-{
-	return (isSphereInFrustum(bvol.mCenter[0],
-									  bvol.mCenter[1],
-									  bvol.mCenter[2],
-									  bvol.mRadius));
-}
-
-
-bool ViewVolume::isBoundingBoxInFrustum(BoundingBox bvol)
-{
-	return (isBboxInFrustum(bvol.mMin, bvol.mMax));
+	return (bvol.IsInsideFrustum(mFrustum));
 }
 
 

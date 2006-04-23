@@ -27,181 +27,121 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJAMESH_H_
 
 #include <hel/math.h>
-#include <hel/Vector3d.h>
-
+#include <hel/BoundingVolume.h>
 #include <mstl/Vector.h>
+#include <mstl/stack.h>
+#include "freyja.h"
+#include "FreyjaFileWriter.h"
+#include "FreyjaFileReader.h"
 
 
-#ifdef POST_CHIMERA_PLUS_UMBRA
-class FreyjaVertex
+namespace freyja {
+
+class Weight
 {
 public:
 
-	class Weight
-	{
-	public:
-		Weight(index_t bone, vec_t weight)
-		{
-			mBoneIndex = bone;
-			mWeight = weight;
-		}
-
-		vec_t mWeight;             /* Weight for vertex use */
-		index_t mBoneIndex;             /* Bone id */
-	};
-
-
-	FreyjaVertex()
-	{
-		mIndex = mGobalMap.size();
-		mGobalMap.pushBack(this);
-	}
-
-	~FreyjaVertex()
-	{
-		weights.erase();
-		frames.erase();
-		polygonRef.erase();
-	}
-
-	unsigned char flags;
-	index_t mesh, id;              /* Unique identifier, mesh[i].vertices[j] */
-	vec3_t xyz;                    /* Position in 3 space */
-	vec3_t normal;                 /* Normal vector */
-	vec3_t uvw;                    /* Texture coordinates */
-
-	//vec4_t color, specular;
-
-	Vector<Weight *> weights;      /* Vector of weights */
-
-	Vector <vec3_t *> frames; 
-
-	Vector <index_t> polygonRef;   /* Ids of polygons referencing vertex */
-
-private:
-	int32 mIndex;
-	static Vector<FreyjaVertex *> mGobalMap;
-};
-
-class FreyjaPolygon
-{
-public:
-
-	unsigned long flags;
-
-	index_t mesh, id;                 /* Unique identifier */
-
-	index_t material;                 /* Material id, if (mat != mesh.mat)
-									   * to support multimaterial meshes */
-
-	Vector <index_t> vertices;        /* Vertices composing polygon */
-
-	Vector <vec3_t *> texcoords;      /* Polymapped Texcoords (optional) */
-
-	Vector <vec4_t *> colors;         /* Colors for polygon (optional) */
-};
-#endif
-
-
-class FreyjaWeight
-{
-public:
-	FreyjaWeight(unsigned int bone, vec_t weight)
-	{
-		mBone = bone;
-		mWeight = weight;
-	}
-
-	vec_t mWeight;                     /* Weight for vertex use */
-	unsigned int mBone;                /* Bone id */
-};
-
-
-class FreyjaVertexWeight
-{
-public:
-
-	Vector <FreyjaWeight *> mWeights;
-};
-
-
-class FreyjaPolygon
-{
-public:
-
-	unsigned int flags;
-
-	unsigned int id;                  /* Unique identifier */
-
-	int material;                     /* Material id, if (mat != mesh.mat)
-									   * to support multimaterial meshes */
-
-	Vector <unsigned int> vertices;   /* Vertices composing polygon */
-
-	Vector <unsigned int> texcoords;  /* Texcoords for polygon (polymapped) */
-};
-
-
-class FreyjaUVMap
-{
-public:
-	void transform();
-
-	Vector <unsigned int> polygons;   /* Contains TexCoords composing group
-									   * either polymapped or by vertex */
-};
-
-
-class FreyjaVertexGroup
-{
-public:
-	unsigned int id;
-
-	unsigned int mesh;                /* Mesh that owns vertices in group */
-
-	Vector<unsigned int> vertices;    /* Vertices in group */
+	static size_t SerializedSize() { return 0; }
+	bool Serialize(FreyjaFileWriter &w) { return true; }
 	
-	unsigned int childGroup;          /* For linking multimesh groups */
+	index_t mVertexIndex;
+	index_t mBoneIndex;
+	vec_t mWeight;
 };
 
 
-class FreyjaVertexFrame
+// This class allows polymapping Normals, UVs, etc
+class Vertex
 {
 public:
-	void transform();
+	typedef enum {
+		fNone       = 0,
+		fRBGAColor  = 1,
+		fMaterial   = 2
+	} VertexFlags;
 
-	unsigned int id;
+	static size_t SerializedSize() { return 0; }
+	bool Serialize(FreyjaFileWriter &w) { return true; }
 
-	Vector<vec_t> vertices;           /* Vertex animation frame */
+	unsigned char mFlags;
 
-	Vector3d bboxMin;                 /* Min corner of bounding box */
-	Vector3d bboxMax;                 /* Max corner of bounding box */
+	index_t mVertexIndex; // Pool storage of XYZ position
 
-	Vector3d center;                  /* Center of bounding volume */
-	vec_t radius;                     /* Radius of bounding sphere if used */
+	index_t mUVIndex;     // Pool storage of UVW coordinate
+
+	index_t mNormalIndex; // Pool storage of XYZ normal
+
+	index_t mColor;       // Pool storage of color
+
+	index_t mMaterial;
+	
+	index_t mReserved1;
 };
 
 
-/* Vertex no longer a primative object class/type
- * Move csg to plugin maybe child class of Mesh, CSGMesh */
-class FreyjaMesh
+class UVMap
 {
- public:
+public:
+	void rotate(vec_t x, vec_t y);
 
-	class PolygonRef
-	{
-	public:
-		Vector<unsigned int> polygons;
-	};
+	void scale(vec_t x, vec_t y);
 
+	void translate(vec_t x, vec_t y);
+
+	static size_t SerializedSize() { return 0; }
+
+	Vector<index_t> mFaceIndices;   /* Contains UVs composing group
+									 * either polymapped or by vertex */
+};
+
+
+class Face
+{
+public:
+	void rotate(vec_t x, vec_t y, vec_t z);
+
+	void scale(vec_t x, vec_t y, vec_t z);
+
+	void translate(vec_t x, vec_t y, vec_t z);
+
+	static size_t SerializedSize() { return 0; }
+	bool Serialize(FreyjaFileWriter &w) { return true; }
+
+	index_t mMaterial;
+	uint32 mFlags;
+	uint32 mSmoothingGroups;
+};
+
+class Triangle : public Face
+{
+public:
+	index_t mIndices[3];
+};
+
+class Quad : public Face
+{
+public:
+	index_t mIndices[4];
+};
+
+class Polygon : public Face
+{
+public:
+	Vector<index_t> mIndices;
+};
+
+
+class Mesh
+{
+public:	
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaMesh();
+	Mesh();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of FreyjaMesh
+	 * Post : Constructs an object of Mesh
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -209,10 +149,10 @@ class FreyjaMesh
 	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
-	~FreyjaMesh();
+	~Mesh();
 	/*------------------------------------------------------
-	 * Pre  : FreyjaMesh object is allocated
-	 * Post : Deconstructs an object of FreyjaMesh
+	 * Pre  : Mesh object is allocated
+	 * Post : Deconstructs an object of Mesh
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -225,46 +165,146 @@ class FreyjaMesh
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	unsigned int getVertexCount() { return vertices.end()/3; }
-	unsigned int getTexCoordCount() { return texcoords.end()/2; }
-	unsigned int getNormalCount() { return normals.end()/3; }
-	unsigned int getVertexWeightCount() { return weights.end(); }
-	unsigned int getPolygonCount() { return polygons.end(); }
-	unsigned int getVertexFrameCount() { return frames.end(); }
-
-	void getNormal(unsigned int index, vec3_t xyz)
+	bool Serialize(FreyjaFileWriter &w)
 	{
-		if (index*3 > normals.end() || !getNormalCount())
-			return;
+		freyja_file_chunk_t chunk;
 
-		vec_t *array = normals.getVectorArray();
+		chunk.type = FREYJA_CHUNK_MESH;
+		chunk.size = 0;
+		chunk.flags = 0x0;
+		chunk.version = 10;
 
-		xyz[0] = array[index/3];
-		xyz[1] = array[index/3+1];
-		xyz[2] = array[index/3+2];
+		/* Compute byte size here */
+		chunk.size += 4;  // index_t mUID;
+		chunk.size += 4;  // uint32 mFlags;
+		chunk.size += 4;  // index_t mMaterialIndex;
+		chunk.size += 12; // vec3_t mPosition;
+		chunk.size += 12; // vec3_t mRotation;
+		chunk.size += 12; // vec3_t mScale;
+		chunk.size += mVertexPool.size() * 4;
+		chunk.size += mFreedVertices.size() * 4;
+		chunk.size += mNormalPool.size() * 4;
+		chunk.size += mFreedNormals.size() * 4;
+		chunk.size += mColorPool.size() * 4;
+		chunk.size += mFreedColors.size() * 4;
+		chunk.size += mTexCoordPool.size() * 4;
+		chunk.size += mFreedTexCoords.size() * 4;
+		chunk.size += mFaces.size() * Face::SerializedSize();
+		chunk.size += mVertices.size() * Vertex::SerializedSize();
+		chunk.size += mWeights.size() * Weight::SerializedSize();
+
+		/* Write chunk header to diskfile */
+		w.writeLong(FREYJA_CHUNK_MESH);
+		w.writeLong(chunk.size);
+		w.writeLong(chunk.flags);
+		w.writeLong(chunk.version);
+
+		/* Write chunk data to diskfile */
+		w.writeLong(mUID);
+		w.writeLong(mFlags);
+		w.writeLong(mMaterialIndex);
+		w.writeFloat32(mPosition[0]);
+		w.writeFloat32(mPosition[1]);
+		w.writeFloat32(mPosition[2]);
+		w.writeFloat32(mRotation[0]);
+		w.writeFloat32(mRotation[1]);
+		w.writeFloat32(mRotation[2]);
+		w.writeFloat32(mScale[0]);
+		w.writeFloat32(mScale[1]);
+		w.writeFloat32(mScale[2]);
+
+		SerializePool(w, mVertexPool, mFreedVertices);
+		SerializePool(w, mNormalPool, mFreedNormals);
+		SerializePool(w, mColorPool, mFreedColors);
+		SerializePool(w, mTexCoordPool, mFreedTexCoords);
+
+		for ( uint32 i = 0; i < mFaces.size(); ++i )
+		{
+			if ( mFaces[i] ) 
+				mFaces[i]->Serialize(w);
+		}
+
+		for ( uint32 i = 0; i < mVertices.size(); ++i )
+		{
+			if ( mVertices[i] ) 
+				mVertices[i]->Serialize(w);
+		}
+
+		for ( uint32 i = 0; i < mWeights.size(); ++i )
+		{
+			if ( mWeights[i] ) 
+				mWeights[i]->Serialize(w);
+		}
+
+		return true;
 	}
 
-	void getTexCoord(unsigned int index, vec2_t uv)
+	bool SerializePool(FreyjaFileWriter &w, 
+					   Vector<vec_t> &v, mstl::stack<index_t> &s)
 	{
-		if (index*2 > texcoords.end() || !getTexCoordCount())
-			return;
+		mstl::stack<index_t> copy; // We don't really care about order
 
-		vec_t *array = texcoords.getVectorArray();
+		for ( uint32 i = 0; i < v.size(); ++i )
+		{
+			w.writeFloat32(v[i]);
+		}
+		
+		for ( uint32 i = 0; i < s.size(); ++i )
+		{
+			index_t item = s.pop();
+			copy.push(item);
+			w.writeLong(item);
+		}
 
-		uv[0] = array[index/2];
-		uv[1] = array[index/2+1];
+		while ( !copy.empty() )
+		{
+			s.push(copy.pop());
+		}
+
+		return true;
 	}
 
-	void getVertex(unsigned int index, vec3_t xyz)
+	Mesh *Copy();
+
+
+	uint32 GetVertexCount() { return 0; }
+
+
+	uint32 GetTexCoordCount() { return 0; }
+
+
+	uint32 GetNormalCount() { return 0; }
+
+
+	uint32 GetVertexWeightCount() { return 0; }
+
+
+	uint32 GetFaceCount() { return 0; }
+
+
+	void GetColor(index_t colorIndex, vec4_t rgba)
 	{
-		if (index*3 > vertices.end() || !getVertexCount())
-			return;
+		// FIXME: Check flags for rgba or rgb
+		GetVec(mColorPool, 4, colorIndex, rgba);
+	}
 
-		vec_t *array = vertices.getVectorArray();
 
-		xyz[0] = array[index/3];
-		xyz[1] = array[index/3+1];
-		xyz[2] = array[index/3+2];
+	void GetNormal(index_t normalIndex, vec3_t xyz)
+	{
+		GetTripleVec(mNormalPool, normalIndex, xyz);
+	}
+
+
+	void GetTexCoord(index_t texCoordIndex, vec3_t uvw)
+	{
+		// FIXME: Check flags for uv or uvw
+		GetTripleVec(mTexCoordPool, texCoordIndex, uvw);
+	}
+
+
+	void GetVertex(index_t vertexIndex, vec3_t xyz)
+	{
+		GetTripleVec(mVertexPool, vertexIndex, xyz);
 	}
 
 
@@ -272,173 +312,55 @@ class FreyjaMesh
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	unsigned int addNormal(vec3_t xyz)
+	// 'Location' interface
+	void SetPosition(vec3_t xyz) { Translate(xyz[0], xyz[1], xyz[2]); }
+	void SetPositionX(vec_t x) { Translate(x, mPosition[1], mPosition[2]); }
+	void SetPositionY(vec_t y) { Translate(mPosition[0], y, mPosition[2]); }
+	void SetPositionZ(vec_t z) { Translate(mPosition[0], mPosition[1], z); }
+	void SetDeltaPosition(vec3_t xyz) 
+	{Translate(mPosition[0]+xyz[0], mPosition[1]+xyz[1], mPosition[2]+xyz[2]);}
+	void SetDeltaPositionX(vec_t x) 
+	{ Translate(mPosition[0]+x, mPosition[1], mPosition[2]); }
+	void SetDeltaPositionY(vec_t y)
+	{ Translate(mPosition[0], mPosition[1]+y, mPosition[2]); }
+	void SetDeltaPositionZ(vec_t z)
+	{ Translate(mPosition[0], mPosition[1], mPosition[2]+z); }
+
+	// 'Rotation' Euler angle interface 
+	void SetRotationQuat(vec4_t wxyz) {}
+	void SetDeltaRotationQuat(vec4_t wxyz) {}
+
+	// 'Rotation' Quaternion interface 
+	void SetRotation(vec3_t xyz) {}
+	void SetRotationX(vec_t x) {}
+	void SetRotationY(vec_t y) {}
+	void SetRotationZ(vec_t z) {}
+	void SetDeltaRotation(vec3_t xyz) {}	
+	void SetDeltaRotationX(vec_t x) {}
+	void SetDeltaRotationY(vec_t y) {}
+	void SetDeltaRotationZ(vec_t z) {}
+
+	// 'Size' interface
+	void SetScale(vec3_t xyz) {}	
+	void SetScaleX(vec_t x) {}
+	void SetScaleY(vec_t y) {}
+	void SetScaleZ(vec_t z) {}
+	void SetDeltaScale(vec3_t xyz) {}	
+	void SetDeltaScaleX(vec_t x) {}
+	void SetDeltaScaleY(vec_t y) {}
+	void SetDeltaScaleZ(vec_t z) {}
+
+
+	bool Serialize(FreyjaFileReader &r)
 	{
-		normals.pushBack(xyz[0]);
-		normals.pushBack(xyz[1]);
-		normals.pushBack(xyz[2]);
-		return (normals.end() / 3) - 1;
+		// FIXME
+		return false;
 	}
 
-	unsigned int addTexCoord(vec2_t uv)
-	{
-		texcoords.pushBack(uv[0]);
-		texcoords.pushBack(uv[1]);
-		return (texcoords.end() / 2) - 1;
-	}
 
-	unsigned int addVertex(vec3_t xyz)
-	{
-		vertices.pushBack(xyz[0]);
-		vertices.pushBack(xyz[1]);
-		vertices.pushBack(xyz[2]);
-
-		weights.pushBack(new FreyjaVertexWeight());
-		refPolygons.pushBack(new PolygonRef());
-
-		return (vertices.end() / 3) - 1;
-	}
-
-	int addVertexWeight(unsigned int index, 
-						vec_t weight, unsigned int bone)
-	{
-		if (index*3 > vertices.end() || !weights[index])
-			return -1;
-
-		unsigned int i;
-
-		/* Here index corresponds to vertex index and it's assc weight vector */
-		for (i = weights[index]->mWeights.begin(); 
-			 i < weights[index]->mWeights.end(); ++i)
-		{
-			if (weights[index]->mWeights[i]->mBone == bone)
-			{
-				weights[index]->mWeights[i]->mWeight = weight;
-				return i;
-			}
-		}
-
-		weights[index]->mWeights.pushBack(new FreyjaWeight(bone, weight));
-
-		return (weights.end() - 1);
-	}
-
-	void setNormal(unsigned int index, vec3_t xyz)
-	{
-		if (index*3 > normals.end())
-			return;
-
-		vec_t *array = normals.getVectorArray();
-
-		array[index/3] = xyz[0];
-		array[index/3+1] = xyz[1];
-		array[index/3+2] = xyz[2];
-	}
-
-	void setTexCoord(unsigned int index, vec2_t uv)
-	{
-		if (index*2 > texcoords.end())
-			return;
-
-		vec_t *array = texcoords.getVectorArray();
-
-		array[index/2] = uv[0];
-		array[index/2+1] = uv[1];
-	}
-
-	void setVertex(unsigned int index, vec3_t xyz)
-	{
-		if (index*3 > vertices.end())
-			return;
-
-		vec_t *array = vertices.getVectorArray();
-
-		array[index/3] = xyz[0];
-		array[index/3+1] = xyz[1];
-		array[index/3+2] = xyz[2];
-	}
-
-	void rotate(vec_t x, vec_t y, vec_t z);
-
-	void rotateAboutPoint(vec3_t point, vec_t x, vec_t y, vec_t z);
-
-	void scale(vec_t x, vec_t y, vec_t z);
-
-	void transform();
-
-	void translate(vec_t x, vec_t y, vec_t z);
-
-	bool combineTexcoords(unsigned int a, unsigned int b)
-	{
-		FreyjaPolygon *polygon;
-		unsigned int i;
-
-
-		// Make all polygons referencing A point to B
-		for (i = polygons.begin(); i < polygons.end(); ++i)
-		{
-			polygon = polygons[i];
-
-			if (polygon && polygon->texcoords[i] == a)
-				polygon->texcoords.assign(i, b);
-		}
-
-		// Mark A as unused in the texcoord array reference
-		//usedTexCoord.pushBack(a);
-
-		return true;
-	}
-
-	bool combineVertices(unsigned int a, unsigned int b)
-	{
-		FreyjaPolygon *polygon;
-		unsigned int i;
-
-
-		// Make all polygons referencing A point to B
-		for (i = polygons.begin(); i < polygons.end(); ++i)
-		{
-			polygon = polygons[i];
-
-			if (polygon && polygon->vertices[i] == a)
-				polygon->vertices.assign(i, b);
-		}
-
-		// Mark A as unused in the texcoord array reference
-		//usedVertex.pushBack(a);
-
-		// Don't bother touching weights, they aren't managed
-
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Combines object A and B in model
-	 *
-	 *        Destroys A and B then replaces them with new 
-	 *        object with index A where: A = A + B
-	 *
-	 *        Returns true on sucess
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.04:
-	 * Mongoose - Hard ABI back
-	 *
-	 * 2004.04.08:
-	 * Mongoose - New generic API that supports all types 
-	 *            in one method
-	 *
-	 * 2000.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	FreyjaMesh *csgUnion(FreyjaMesh *a, FreyjaMesh *b);
-	FreyjaMesh *csgIntersection(FreyjaMesh *a, FreyjaMesh *b);
-	FreyjaMesh *csgDifference(FreyjaMesh *a, FreyjaMesh *b);
-	//unsigned int csg(egg_type_t type, egg_csg_t operation,
-	//				 unsigned int a, unsigned int b);
+	Mesh *CsgUnion(Mesh *a, Mesh *b);
+	Mesh *CsgIntersection(Mesh *a, Mesh *b);
+	Mesh *CsgDifference(Mesh *a, Mesh *b);
 	/*------------------------------------------------------
 	 * Pre  : Don't count on more than simple vertex culling now
 	 *
@@ -465,49 +387,252 @@ class FreyjaMesh
 	 * Mongoose - Created with new generic API based on mtk
 	 ------------------------------------------------------*/
 
-	// FIXME: temp fix for testing
-	// private:
 
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
+	Mesh *Cut();
+
+	void Paste(Mesh *model);
+
+	void Rotate(vec_t x, vec_t y, vec_t z);
+
+	void RotateAboutPoint(vec3_t point, vec_t x, vec_t y, vec_t z);
+
+	void Scale(vec_t x, vec_t y, vec_t z);
+
+	void Translate(vec_t x, vec_t y, vec_t z);
 
 
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
 
-	Vector<FreyjaPolygon *> polygons;         /* Polygons of this mesh */
+	void SetColor(index_t colorIndex, const vec4_t rgba)
+	{
+		// FIXME: Check flags for rgba or rgb
+		SetVec(mColorPool, 4, colorIndex, rgba);
+	}
 
-	Vector<FreyjaVertexFrame *> frames;       /* Vertex morph frames */
 
-	Vector<FreyjaUVMap *> uvmaps;             /* UVMaps of this mesh */
+	void SetNormal(index_t normalIndex, const vec3_t xyz)
+	{
+		SetTripleVec(mNormalPool, normalIndex, xyz);
+	}
 
-	Vector<FreyjaVertexWeight *> weights;     /* Vertex weights */
 
-	Vector <unsigned int> groups;       /* Vertex groups of this mesh */
+	void SetTexCoord(index_t texCoordIndex, const vec3_t uvw)
+	{
+		// FIXME: Check flags for uv or uvw
+		SetTripleVec(mTexCoordPool, texCoordIndex, uvw);
+	}
 
-	Vector <unsigned int> refVertices;  /* Tracks unused vertex pool slots */ 
 
-	Vector<PolygonRef *> refPolygons;   /* Matches vertex list, shows
-										 * which polygons ref which vertices */
+	void SetVertex(index_t vertexIndex, const vec3_t xyz)
+	{
+		SetTripleVec(mVertexPool, vertexIndex, xyz);
+	}
 
-	Vector<vec_t> vertices;             /* Vertex array, could be replaced 
-										 * with VertexFrame's vertices */
 
-	Vector<vec_t> texcoords;            /* Texcoord array */
+	bool WeldTexCoords(index_t a, index_t b)
+	{
+		Face *face;
 
-	Vector<vec_t> normals;              /* Normal array */
 
-	vec3_t position;                    /* Position of the mesh */
+		// Make all polygons referencing A point to B
+		for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
+		{
+			face = mFaces[i];
 
-	unsigned int id;                    /* Unique identifier */
+			if (face)
+			{
+				//FIXME face->WeldTexCoords(a, b);
+			}
+		}
 
-	unsigned int texcoordDepth;         /* 1d, 2d, 3d */
+		// Mark A as unused in the texcoord pool
+		mFreedTexCoords.push(a);
 
-	int material;                       /* Base material id */
+		return true;
+	}
 
-	unsigned int currentFrame;          /* Current vertex morph frame */
+
+	bool WeldVertices(index_t a, index_t b)
+	{
+		Face *face;
+		unsigned int i;
+
+
+		// Make all polygons referencing A point to B
+		for (i = mFaces.begin(); i < mFaces.end(); ++i)
+		{
+			face = mFaces[i];
+
+			if (face)
+			{
+				//FIXME face->WeldVertices(a, b);
+			}
+		}
+
+		// Mark A as unused in the vertex pool
+		mFreedVertices.push(a);
+
+		return true;
+	}
+
+
+private:
+
+	index_t AddVec(Vector<vec_t> &v, mstl::stack<index_t>&f, uint32 n, vec_t *u)
+	{
+		if (f.empty())
+		{
+			return AppendVec(v, n, u);
+		}
+
+		index_t tIndex = f.pop();
+
+		SetVec(v, n, tIndex, u);
+
+		return tIndex;
+	}
+
+
+	index_t AppendVec(Vector<vec_t> &v, uint32 n, vec_t *u)
+	{
+		for ( uint32 i = 0; i < n; ++i)
+		{
+			v.pushBack(u[i]);
+		}
+
+		return (( v.end() / n ) - 1);
+	}
+
+
+	void GetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
+	{
+		tIndex *= n;
+
+		if (tIndex > v.end())
+			return;
+
+		vec_t *array = v.getVectorArray();
+
+		for ( uint32 i = 0; i < n; ++i)
+		{
+			u[i] = array[tIndex + i];
+		}
+	}
+
+
+	void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, const vec_t *u)
+	{
+		tIndex *= n;
+
+		if (tIndex > v.end())
+			return;
+
+		vec_t *array = v.getVectorArray();
+
+		for ( uint32 i = 0; i < n; ++i)
+		{
+			array[tIndex + i] = u[i];
+		}
+	}
+
+
+	index_t AddTripleVec(Vector<vec_t> &v, mstl::stack<index_t> &f, vec3_t xyz)
+	{
+		if (f.empty())
+		{
+			return AppendTripleVec(v, xyz);
+		}
+
+		index_t tIndex = f.pop();
+
+		SetTripleVec(v, tIndex, xyz);
+
+		return tIndex;
+	}
+
+
+	index_t AppendTripleVec(Vector<vec_t> &v, vec3_t xyz)
+	{
+		v.pushBack(xyz[0]);
+		v.pushBack(xyz[1]);
+		v.pushBack(xyz[2]);
+
+		return (( v.end() / 3 ) - 1);
+	}
+
+
+	void GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz)
+	{
+		tIndex *= 3;
+
+		if (tIndex > v.end())
+			return;
+
+		vec_t *array = v.getVectorArray();
+
+		xyz[0] = array[tIndex    ];
+		xyz[1] = array[tIndex + 1];
+		xyz[2] = array[tIndex + 2];
+	}
+
+
+	void SetTripleVec(Vector<vec_t> &v, index_t tIndex, const vec3_t xyz)
+	{
+		tIndex *= 3;
+
+		if (tIndex > v.end())
+			return;
+
+		vec_t *array = v.getVectorArray();
+
+		array[tIndex    ] = xyz[0];
+		array[tIndex + 1] = xyz[1];
+		array[tIndex + 2] = xyz[2];
+	}
+
+	static index_t mNextUID;
+
+	index_t mUID;
+
+	uint32 mFlags;
+
+	index_t mMaterialIndex;
+
+	vec3_t mPosition;
+
+	vec3_t mRotation;  // Set by quaternion, store as euler for Size interface
+
+	vec3_t mScale;
+
+	BoundingBoxCombo mBoundingVolume;
+
+	Vector<vec_t> mVertexPool;
+	mstl::stack<index_t> mFreedVertices;
+
+	Vector<vec_t> mNormalPool;
+	mstl::stack<index_t> mFreedNormals;
+
+	Vector<vec_t> mColorPool;
+	mstl::stack<index_t> mFreedColors;
+
+	Vector<vec_t> mTexCoordPool;
+	mstl::stack<index_t> mFreedTexCoords;
+
+	Vector<Face *> mFaces;
+
+	Vector<Vertex *> mVertices;
+
+	Vector<Weight *> mWeights;
 };
+
+
+class ObjectManager
+{
+public:
+
+	//mDeletedObjectCount;
+};
+
+}
+
 
 #endif

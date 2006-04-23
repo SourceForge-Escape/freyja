@@ -119,6 +119,13 @@ void Quaternion::getEulerAngles(vec_t *pitch, vec_t *heading, vec_t *roll)
 	*heading = atan2(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
 	*roll = atan2(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
 	*pitch = asin(-2.0 * (mX*mZ - mY*mW));
+	//heading = atan2(-m20,m00)
+	//attitude = asin(m10)
+	//bank = atan2(-m12,m11)
+
+	//heading = atan2(-m20,m[0])
+	//attitude = asin(m[4])
+	//bank = atan2(-m12,m[5])
 }
 
 

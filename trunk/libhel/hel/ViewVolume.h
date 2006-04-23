@@ -96,30 +96,6 @@ class ViewVolume
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool isBoundingSphereInFrustum(BoundingSphere bvol);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if frustum contains the given 
-	 *        bounding volume
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.12.15: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	bool isBoundingBoxInFrustum(BoundingBox bvol);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if frustum contains the given 
-	 *        bounding volume
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.12.15: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	bool isPointInFrustum(vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : 
