@@ -1329,20 +1329,22 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eUndo:
-		FreyjaState *state = gFreyjaCursor.Pop();
+		{
+			FreyjaState *state = gFreyjaCursor.Pop();
 
-		if (state)
-		{
-			//state->Undo();
-			//freyja_print( "! Undo e=%i, m=%i, i=%i",
-			//			  state->GetEvent(), state->GetMode(), state->GetIndex());
-			//gFreyjaCursor.mPos = state->GetPos();
-			delete state;
-			freyja_event_gl_refresh();
-		}
-		else
-		{
-			freyja_print("Undo is out of stack frames.");
+			if (state)
+			{
+				//state->Undo();
+				//freyja_print( "! Undo e=%i, m=%i, i=%i",
+				//			  state->GetEvent(), state->GetMode(), state->GetIndex());
+				//gFreyjaCursor.mPos = state->GetPos();
+				delete state;
+				freyja_event_gl_refresh();
+			}
+			else
+			{
+				freyja_print("Undo is out of stack frames.");
+			}
 		}
 		break;
 

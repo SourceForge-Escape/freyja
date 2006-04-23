@@ -149,7 +149,7 @@ public:
 	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
-	~Mesh();
+	~Mesh() { /* FIXME */ }
 	/*------------------------------------------------------
 	 * Pre  : Mesh object is allocated
 	 * Post : Deconstructs an object of Mesh
@@ -358,13 +358,55 @@ public:
 	}
 
 
-	Mesh *CsgUnion(Mesh *a, Mesh *b);
-	Mesh *CsgIntersection(Mesh *a, Mesh *b);
-	Mesh *CsgDifference(Mesh *a, Mesh *b);
+	Mesh *CopyPartial(Vector<index_t> &list);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh is a valid mesh
+	 *        list is a valid vertex list of mesh
+	 * Post : Returns newly allocated mesh
+	 *        that is a copy of mesh 
+	 *        determined by the list
+	 -----------------------------------------*/
+
+	void Merge(Mesh *meshA, Vector<index_t> &list);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : meshA is a valid mesh
+	 *        list is a valid vertex list of meshA
+	 *  
+	 * Post : Makes one mesh of of two, by
+	 *        merging vertices in list with this
+	 *        and removing from A 
+	 *
+	 *        Passing all vertices makes a 
+	 *        full merge
+	 -----------------------------------------*/
+
+	Mesh *Split(Vector<index_t> &list);
+	/*-----------------------------------------
+	 * Created  : 2000-11-30, Mongoose
+	 * Modified : 
+	 *
+	 * Pre  : mesh is a valid mesh
+	 *        list is a valid vertex list of mesh
+	 * Post : Removes the vertices in list
+	 *        from mesh, then generates a new
+	 *        mesh ( splits one mesh into two )
+	 *        The newly made mesh is returned
+	 -----------------------------------------*/    
+
+
+	Mesh *CsgUnion(Mesh *a);
+	Mesh *CsgIntersection(Mesh *a);
+	Mesh *CsgDifference(Mesh *a);
 	/*------------------------------------------------------
 	 * Pre  : Don't count on more than simple vertex culling now
 	 *
-	 * Post : OPERATION on TYPE object A and B in model
+	 * Post : OPERATION on TYPE object A and B (this) in model
 	 *
 	 *        A and B are perserved, creates new object C 
 	 *        where: C = A OPERATION B

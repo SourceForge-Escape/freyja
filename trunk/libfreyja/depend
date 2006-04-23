@@ -67,7 +67,8 @@ $(BUILDDIR)/FreyjaImage.o: src/FreyjaImage.cpp src/FreyjaFileReader.h \
   src/FreyjaFileWriter.h src/FreyjaImage.h
 	 $(DO_CC)
 
-$(BUILDDIR)/KeyFrame.o: src/KeyFrame.cpp src/KeyFrame.h
+$(BUILDDIR)/KeyFrame.o: src/KeyFrame.cpp src/KeyFrame.h src/freyja.h \
+  src/FreyjaFileWriter.h src/FreyjaFileReader.h
 	 $(DO_CC)
 
 $(BUILDDIR)/FreyjaSkeleton.o: src/FreyjaSkeleton.cpp src/FreyjaSkeleton.h
@@ -81,7 +82,8 @@ $(BUILDDIR)/CopyModel.o: src/CopyModel.cpp src/freyja.h src/FreyjaPluginABI.h \
   src/FreyjaPrinter.h
 	 $(DO_CC)
 
-$(BUILDDIR)/FreyjaMesh.o: src/FreyjaMesh.cpp src/FreyjaMesh.h
+$(BUILDDIR)/FreyjaMesh.o: src/FreyjaMesh.cpp src/FreyjaMesh.h src/freyja.h \
+  src/FreyjaFileWriter.h src/FreyjaFileReader.h
 	 $(DO_CC)
 
 $(BUILDDIR)/KeyFrameCamera.o: src/KeyFrameCamera.cpp src/KeyFrameCamera.h
@@ -94,7 +96,8 @@ $(BUILDDIR)/KeyFrameMesh.o: src/KeyFrameMesh.cpp src/KeyFrameMesh.h
 	 $(DO_CC)
 
 $(BUILDDIR)/KeyFrameSkeleton.o: src/KeyFrameSkeleton.cpp src/KeyFrameSkeleton.h \
-  src/KeyFrame.h
+  src/KeyFrame.h src/freyja.h src/FreyjaFileWriter.h \
+  src/FreyjaFileReader.h
 	 $(DO_CC)
 
 $(BUILDDIR)/RigidBody.o: src/RigidBody.cpp src/RigidBody.h
@@ -106,8 +109,9 @@ $(BUILDDIR)/Skeleton.o: src/Skeleton.cpp src/SkeletonABI.h src/freyja.h \
 
 $(BUILDDIR)/FreyjaScene.o: src/FreyjaScene.cpp src/FreyjaFileWriter.h \
   src/FreyjaScene.h src/FreyjaCamera.h src/FreyjaLight.h src/FreyjaMesh.h \
-  src/FreyjaMaterial.h src/FreyjaTexture.h src/FreyjaPluginABI.h \
-  src/freyja.h src/BoneABI.h src/SkeletonABI.h src/FreyjaFileReader.h
+  src/freyja.h src/FreyjaFileReader.h src/FreyjaMaterial.h \
+  src/FreyjaTexture.h src/FreyjaPluginABI.h src/BoneABI.h \
+  src/SkeletonABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/PerlinNoise.o: src/PerlinNoise.cpp src/PerlinNoise.h
@@ -120,7 +124,8 @@ $(BUILDDIR)/FreyjaUtil.o: src/FreyjaUtil.cpp src/FreyjaPluginABI.h src/freyja.h 
 $(BUILDDIR)/BezierPatch.o: src/BezierPatch.cpp src/BezierPatch.h
 	 $(DO_CC)
 
-$(BUILDDIR)/Animation.o: src/Animation.cpp src/Animation.h src/KeyFrame.h
+$(BUILDDIR)/Animation.o: src/Animation.cpp src/Animation.h src/KeyFrame.h \
+  src/freyja.h src/FreyjaFileWriter.h src/FreyjaFileReader.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Camera.o: src/Camera.cpp src/Camera.h
