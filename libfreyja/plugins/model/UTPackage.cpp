@@ -26,6 +26,10 @@
 #include <stdarg.h>
 #include <math.h>
 
+#ifdef WIN32
+#   include <direct.h>
+#endif
+
 #include "URTexture.h"
 
 #include "UTPackage.h"
@@ -935,16 +939,26 @@ int UTPackage::load(const char *filename)
 		if (mFlags & fDiskDump)
 		{
 			char buf[512];
-			sprintf(buf, "/tmp/utpak/%s/%s.raw", 
+			snprintf(buf, 511, "/tmp/utpak/%s/%s.raw", 
 					  mHeader.nameTable[nameIndex].objName,
 					  mHeader.nameTable[index].objName);
+			buf[511] = 0;
 			FILE *f2 = fopen(buf, "wb");
 
 
+#ifdef WIN32
+			mkdir("/tmp/utpak");
+#else
 			mkdir("/tmp/utpak", S_IRWXU | S_IRWXG);
-			sprintf(buf, "/tmp/utpak/%s", 
+#endif
+			snprintf(buf, 511, "/tmp/utpak/%s", 
 					  mHeader.nameTable[nameIndex].objName);
+			buf[511] = 0;
+#ifdef WIN32
+			mkdir(buf);
+#else
 			mkdir(buf, S_IRWXU | S_IRWXG);
+#endif
 
 			printf("Writing /tmp/utpak/%s/%s.raw\n", 
 					 mHeader.nameTable[nameIndex].objName,
