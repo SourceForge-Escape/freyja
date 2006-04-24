@@ -34,6 +34,8 @@
  =====================================================================
 
  20060423 Mongoose
+ - win32 builds of lineageII tools
+ - Several bug fixes
  - New boundingvolume update in libhel
  - All new libfreyja Mesh class ( not hooked up yet )
  - Minor refactoring pass in libfreyja cont
