@@ -27,6 +27,7 @@
 #ifndef GUARD__FREYJA_MONGOOSE_UTPAKBROWSER_H_
 #define GUARD__FREYJA_MONGOOSE_UTPAKBROWSER_H_
 
+#include "UTPackage.h"
 
 class UTPakBrowser
 {
@@ -82,7 +83,7 @@ class UTPakBrowser
 	////////////////////////////////////////////////////////////
 
 
-	/* */
+	UTPackage pak; /* */
 };
 
 #endif
