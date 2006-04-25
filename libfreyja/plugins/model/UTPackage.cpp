@@ -938,31 +938,33 @@ int UTPackage::load(const char *filename)
 		/* RAW dump to disk, seek back */
 		if (mFlags & fDiskDump)
 		{
-			char buf[512];
-			snprintf(buf, 511, "/tmp/utpak/%s/%s.raw", 
-					  mHeader.nameTable[nameIndex].objName,
-					  mHeader.nameTable[index].objName);
-			buf[511] = 0;
-			FILE *f2 = fopen(buf, "wb");
-
-
 #ifdef WIN32
-			mkdir("/tmp/utpak");
+			char *dir = "utpak";
 #else
-			mkdir("/tmp/utpak", S_IRWXU | S_IRWXG);
+			char *dir = "/tmp/utpak";
 #endif
-			snprintf(buf, 511, "/tmp/utpak/%s", 
-					  mHeader.nameTable[nameIndex].objName);
+			char buf[512];
+
+			snprintf(buf, 511, "%s/%s",
+						dir,
+						mHeader.nameTable[nameIndex].objName);
 			buf[511] = 0;
 #ifdef WIN32
+			mkdir(dir);
 			mkdir(buf);
 #else
+			mkdir(dir, S_IRWXU | S_IRWXG);
 			mkdir(buf, S_IRWXU | S_IRWXG);
 #endif
 
-			printf("Writing /tmp/utpak/%s/%s.raw\n", 
-					 mHeader.nameTable[nameIndex].objName,
-					 mHeader.nameTable[index].objName);
+			snprintf(buf, 511, "%s/%s/%s.raw", 
+						dir,
+						mHeader.nameTable[nameIndex].objName,
+						mHeader.nameTable[index].objName);
+			buf[511] = 0;
+
+			printf("Writing %s\n", buf );
+			FILE *f2 = fopen(buf, "wb");
 
 			if (f2)
 			{
