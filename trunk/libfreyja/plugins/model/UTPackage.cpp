@@ -2304,7 +2304,9 @@ int freyja_model__utpackage_import(char *filename)
 		UTPackage::UTVFSDir *dir = ut.GetVFSRoot( );
 		UTPackage::UTVFSDir *cur = dir;
 		UTPackage::UTVFSObj *obj;
-		
+		long pakIndex = freyjaPakBegin(filename);
+		char buf[256];
+
 
 		while ( cur )
 		{
@@ -2313,11 +2315,16 @@ int freyja_model__utpackage_import(char *filename)
 			while ( obj )
 			{
 				freyjaPrintMessage("%s/%s", cur->name, cur->obj->filename);
+				snprintf(buf, 255, "%s/%s", cur->name, cur->obj->filename);
+				buf[255] = 0;
+				freyjaPakAddFullPathFile(pakIndex, buf, obj->offset, obj->size);
 				obj = obj->next;
 			}
 
 			cur = cur->next;
 		}
+
+		freyjaPakEnd(pakIndex);
 
 		return 0;
 	}
