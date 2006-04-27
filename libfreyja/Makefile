@@ -926,6 +926,28 @@ smd.dll:
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
+utpackage.so:
+	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
+	MOD_NAME=utpackage \
+	MOD_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/UTPackage.o $(MODEL_PLUGIN_BUILD_DIR)/URTexture.o" \
+	CFLAGS="$(MODULE_CFLAGS) -DHAVE_FREYJA" \
+	LD_FLAGS="$(MODULE_LD_FLAGS) -L/usr/local/lib -lm -lfreyja"
+
+utpackage.dll:
+	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
+	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
+	MODULE="utpackage" \
+	NAME="utpackage" \
+	SHLIBEXT=".dll" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/UTPackage.o $(WIN32_MODEL_PLUGIN_BUILD_DIR)/URTexture.o" \
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/ -DHAVE_FREYJA" \
+	LD_FLAGS="$(MODULE_LD_FLAGS)" \
+	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
+
 tombraider.so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
