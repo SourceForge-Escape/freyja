@@ -502,6 +502,140 @@ class UTPackage
 	} UTPackageFlags;
 
 
+	class UTVFSObj
+	{
+	public:
+		char filename[64];
+		unsigned int signature;
+		unsigned int offset;
+		unsigned int size;
+		unsigned char key;
+		UTVFSObj() { next = NULL; }
+		UTVFSObj *next;
+		void add(UTVFSObj*d) { next ? d->next = next, next = d : next = d; }
+	};
+
+	class UTVFSDir
+	{
+	public:
+		UTVFSDir() { next = NULL; name[0] = 0; }
+		char name[64];
+		UTVFSDir *next;
+		UTVFSObj *obj;
+		void add(UTVFSDir*d) { next ? d->next = next, next = d : next = d; }
+	};
+
+
+	class UTVFS
+	{
+	public:
+		UTVFS() { root = NULL; }
+
+		UTVFSObj *Find( const char *dir, const char *file )
+		{
+			UTVFSDir *d = FindDir(dir);
+			UTVFSObj *obj = FindFile(d, file);
+			
+			return obj;
+		}
+
+
+		UTVFSObj *FindFile( UTVFSDir *d, const char *file )
+		{
+			if ( d == NULL )
+				return NULL;
+			
+			UTVFSObj *cur = d->obj;
+
+			while (cur)
+			{
+				if ( strcmp(cur->filename, file) == 0 )
+				{
+					return cur;
+				}
+
+				cur = cur->next;
+			}
+
+			return NULL;
+		}
+
+
+		UTVFSDir *FindDir( const char *dir )
+		{
+			UTVFSDir *cur = root;
+
+			while (cur)
+			{
+				if ( strcmp(cur->name, dir) == 0 )
+				{
+					return cur;
+				}
+
+				cur = cur->next;
+			}
+
+			return NULL;
+		}
+
+
+		void AddFile( const char *dir, const char *file, 
+						  unsigned int signature, unsigned int offset, 
+						  unsigned int size, unsigned char key)
+		{
+			UTVFSDir *cur = root;
+
+			while (cur)
+			{
+				if ( strcmp(cur->name, dir) == 0 )
+				{
+					UTVFSObj *obj = new UTVFSObj();
+
+					strcpy( obj->filename, file );
+					obj->signature=signature;
+					obj->offset=offset;
+					obj->size=size;
+					obj->key=key;
+					
+					if ( cur->obj == NULL )
+					{
+						cur->obj = obj;
+					}
+					else
+					{
+						cur->obj->add( obj );
+					}
+
+					break;
+				}
+
+				cur = cur->next;
+			}
+		}
+
+		void AddDir( const char *dir )
+		{
+			if (FindDir(dir))
+				return;
+
+			UTVFSDir *d = new UTVFSDir();
+			strcpy( d->name, dir );
+
+			if ( root == NULL )
+			{
+				root = d;
+			}
+			else
+			{
+				root->add(d);
+			}
+		}
+
+		char pakfile[512];
+		UTVFSDir *root;	
+	};
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -537,6 +671,24 @@ class UTPackage
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	unsigned char *UTPackage::GetVFSObject( const char *type, const char *file );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	UTVFSDir *UTPackage::GetVFSRoot( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	bool LoadPakVFS(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads UT Package as a VFS
+	 ------------------------------------------------------*/
 
 	int load(const char *filename);
 	/*------------------------------------------------------
@@ -737,6 +889,8 @@ class UTPackage
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	UTVFS mVFS;                   /* Pak VFS */
 
 	unsigned int mFlags;          /* Option flags */
 
