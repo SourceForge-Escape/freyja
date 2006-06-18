@@ -10,8 +10,9 @@
 ################################################################
 
 NAME=ase
-BASE_NAME=ase
-MODULE=ase
+BASE_NAME=$(NAME)
+MODULE=$(NAME)
+TREE_DIR=$(NAME)
 MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=6
@@ -22,7 +23,6 @@ BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
 EMAIL="mongoose@icculus.org"
 EXT=.so
-TREE_DIR=ase
 TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
 LICENSE=LGPL
 
@@ -36,7 +36,7 @@ BASE_DEFS=-DMODEL_PLUGINS
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 CONFIGURE_LNK=
-BUILD_ROOT_DIR=../../bin/model/
+BUILD_ROOT_DIR=../../../../bin/plugins/model
 BUILD_DEBUG_DIR=$(BUILD_ROOT_DIR)/debug
 BUILD_RELEASE_DIR=$(BUILD_ROOT_DIR)/release
 BUILD_PROF_DIR=$(BUILD_ROOT_DIR)/prof
@@ -166,11 +166,16 @@ depend:
 
 targets: $(TARGETS)
 
-$(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
-	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
+PROG_OBJS=$(BUILDDIR)/Ase.o
+
+$(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
+	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)
 
 $(BUILDDIR)/$(MODULE).test : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)
+
+$(BUILDDIR)/$(MODULE).so : $(PROG_OBJS)
+	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
 
 $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
@@ -200,7 +205,7 @@ test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-ase.so:
+$(NAME).so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) targets BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
 	MOD_NAME=ase \
@@ -208,7 +213,7 @@ ase.so:
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
-ase.dll:
+$(NAME).dll:
 	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
 	SHLIBEXT=".dll" \
