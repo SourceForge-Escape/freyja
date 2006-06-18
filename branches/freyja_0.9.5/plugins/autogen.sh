@@ -7,6 +7,9 @@
 # 
 # /bin/sh INSTALL
 
+for i in modules/image/*; do cd $i; make; cd ..; done
+for i in modules/model/*; do cd $i; make; cd ..; done
+
 rm -f depend
 make debug
 #make install
