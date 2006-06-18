@@ -12,9 +12,9 @@ NAME=libfreyja
 BASE_NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=9
-MICRO_VERSION=3
+MICRO_VERSION=5
 BRANCH=
-BUILD_ID=20060423
+BUILD_ID=20060505
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -34,31 +34,35 @@ BASE_DEFS=-DMODEL_PLUGINS
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 CONFIGURE_LNK=
+BUILD_ROOT_DIR=../bin
+BUILD_DEBUG_DIR=$(BUILD_ROOT_DIR)/debug
+BUILD_RELEASE_DIR=$(BUILD_ROOT_DIR)/release
+BUILD_PROF_DIR=$(BUILD_ROOT_DIR)/prof
+BUILD_WIN32_DIR=$(BUILD_ROOT_DIR)/win32
+BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
+BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
+BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
+SRC_DIR=src
+LOCAL_INCLUDES=-I../libhel/
 
 
 ################################################################
-# WIN32 Cross Enviroment
+# Compiler and Cross Enviroments
 ################################################################
 
+CC=gcc
+DEPS=./deps.sh
 CROSS_WIN32=/home/mongoose/Projects/win32
 CROSS_INC=$(CROSS_WIN32)/include
 CROSS_LIB=$(CROSS_WIN32)/lib
 CROSS_BIN=$(CROSS_WIN32)/bin
 
-################################################################
-
-CC=gcc
 
 ################################################################
+# Build options
+################################################################
 
-BUILD_DEBUG_DIR=bin/debug
-BUILD_RELEASE_DIR=bin/release
-BUILD_PROF_DIR=bin/prof
-BUILD_WIN32_DIR=bin/win32
-BUILD_TEST_DIR=bin/test
-BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
-SRC_DIR=src
 
 DESTDIR =
 NO_DEB=
@@ -83,8 +87,10 @@ FLAGS_DEB=-s
 
 
 ################################################################
+# Compiler flags
+################################################################
 
-BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
+BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) $(LOCAL_INCLUDES) \
 	$(CONFIGURE_DEF) \
 	-DPLUGIN_IMAGE_DIR=\"\\\"$(INSTALL_PLUGIN_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -195,9 +201,8 @@ PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/CopyModel.o \
-	$(BUILDDIR)/Egg.o \
-	$(BUILDDIR)/FreyjaScene.o \
 	$(BUILDDIR)/FreyjaFSM.o \
+	$(BUILDDIR)/FreyjaScene.o \
 	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaCamera.o \
@@ -1305,9 +1310,18 @@ install:
 	@-echo $(MAKE) install-tools
 
 install-win32:
+	@-mkdir -p $(INSTALL_LIB)
+	@-mkdir -p $(INSTALL_LIB)/$(BASE_NAME)
 	@-echo -n "Installing win32 build                   "
 	@-cp $(BUILD_WIN32_DIR)/*.a $(BUILD_WIN32_DIR)/*.dll $(INSTALL_LIB)
 	@-echo "[done]"
+	@-$(MAKE) install-link
+	@-$(MAKE) install-headers
+	@-./libsetup.sh $(INSTALL_LIB)
+	@-echo $(MAKE) win32-plugins
+	@-echo $(MAKE) win32-install-plugins
+	@-echo $(MAKE) win32-tools
+	@-echo $(MAKE) win32-install-tools
 
 install-link:
 	@-echo -n "New soft links                               "

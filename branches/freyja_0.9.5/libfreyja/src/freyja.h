@@ -29,7 +29,7 @@
 #include <hel/math.h>
 
 
-#define FREYJA_API_VERSION   "Freyja 0.9.3"
+#define FREYJA_API_VERSION   "Freyja 0.9.5"
 
 /* index_t invalid state is equal to UINT_MAX 32bit */
 #define INDEX_INVALID      4294967295U
@@ -47,6 +47,20 @@
 #define fPolygon_PolyMappedUV  8
 #define fPolygon_ColorMapped   16
 #define fPolygon_Alpha         32
+
+#define BUG_ME(bug, file, line) freyjaPrintMessage("%s, '%s' %s:%i file bug with %s", bug, FREYJA_API_VERSION, file, line, EMAIL_ADDRESS)
+
+
+#ifdef DEBUG
+#   define DEBUG_MSG(msg) freyjaPrintMessage(msg)
+#   define DEBUG_MSGF freyjaPrintMessage
+#   define ASSERT_MSG freyjaAssertMessage
+#else
+#   define DEBUG_MSG(msg) 
+#   define DEBUG_MSGF(...)
+#   define ASSERT_MSG(...)
+#endif
+
 
 extern "C" {
 
@@ -159,6 +173,7 @@ extern "C" {
 		FREYJA_CHUNK_MESH     = 0x4853454D,
 		FREYJA_CHUNK_TEXCOORDS= 0x524F4F43,
 		FREYJA_CHUNK_VERTICES = 0x54524556,
+		FREYJA_CHUNK_VERTEX   = 0x52524556,
 		FREYJA_CHUNK_POLYGONS = 0x594C4F50,
 		FREYJA_CHUNK_SKELETON = 0x4C454B53,
 		FREYJA_CHUNK_BONE     = 0x454E4F42,
@@ -191,6 +206,12 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stderr or gPrinter
+	 ------------------------------------------------------*/
+
+	void freyjaAssertMessage(bool expr, const char *format, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout or gPrinter
 	 ------------------------------------------------------*/
 
 	void freyjaPrintMessage(const char *format, ...);
