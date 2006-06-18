@@ -9,7 +9,7 @@
 # + Stripped down for module/plugin build
 ################################################################
 
-NAME=bmp
+NAME=tga
 BASE_NAME=$(NAME)
 MODULE=$(NAME)
 TREE_DIR=$(NAME)
