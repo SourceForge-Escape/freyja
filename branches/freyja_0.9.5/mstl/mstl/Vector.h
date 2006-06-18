@@ -30,7 +30,6 @@
 
 #define VECTOR_BASE_EXPAND 16
 
-
 template <class Object> class Vector
 {
 public:

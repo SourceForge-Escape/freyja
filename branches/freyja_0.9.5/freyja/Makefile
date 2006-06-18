@@ -54,6 +54,8 @@ BUILD_TEST_DIR=bin/test
 BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
 
 SRC_DIR=src
+LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/
+LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
 
 DESTDIR =
 NO_DEB=
@@ -82,7 +84,7 @@ DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
-		-fPIC -Wall -Isrc \
+		-fPIC -Wall $(LOCAL_INCLUDES) \
 		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -91,7 +93,7 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
 		-DBUILD_HOST=\"\\\"$(BUILD_HOST)\\\"\"
 
-LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
+LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja -lmgtk \
 		$(shell pkg-config --libs gtk+-2.0 $(PKG_LIB_ADD)) $(LIB_ADD)
