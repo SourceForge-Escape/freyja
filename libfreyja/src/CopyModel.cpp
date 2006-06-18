@@ -29,18 +29,10 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-#ifdef USING_EGG
-CopyModel::CopyModel(Egg *egg)
-{
-	mEgg = egg;
-	mAppendMode = false;
-}
-#else
 CopyModel::CopyModel()
 {
 	mAppendMode = false;
 }
-#endif
 
 
 CopyModel::~CopyModel()

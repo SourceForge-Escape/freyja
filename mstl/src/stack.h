@@ -9,6 +9,9 @@
  *
  *-- History -----------------------------------------------
  *
+ * 2006.06.18:
+ * Mongoose - Merged back in comments from a long time ago hah
+ *
  * 2004.04.15:
  * Mongoose - No more leading underscores, style changes
  *
@@ -72,13 +75,28 @@ template <class Type> class stack
 {
 public:
 
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : Nothing
+    * Pre      : None
+    * Post     : Constructs an Stack
+    -----------------------------------------*/
 	stack()
 	{
 		mCount = 0;
 		mTop = NULL;
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : Nothing
+    * Pre      : None
+    * Post     : Deconstructs an Stack
+    -----------------------------------------*/
 	~stack()
 	{
 		while (mTop)
@@ -87,7 +105,14 @@ public:
 		}
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : value of top stack element
+    * Pre      : stack isn't empty
+    * Post     : Returns top of stack's value
+    -----------------------------------------*/
 	Type peek()
 	{
 		if (mTop)
@@ -101,7 +126,15 @@ public:
 		}
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : value of top stack element
+    * Pre      : stack isn't empty
+    * Post     : Removes top of stack and 
+    *            returns it's value
+    -----------------------------------------*/
 	Type pop()
 	{
 		StackNode<Type> *rm;
@@ -125,7 +158,14 @@ public:
 		}
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : Value to push on top of stack
+    * Returns  : Nothing
+    * Pre      : Stack isn't full
+    * Post     : Stack has new top, with value i
+    -----------------------------------------*/
 	void push(Type data)
 	{
 		StackNode<Type> *node;
@@ -137,7 +177,15 @@ public:
 		++mCount;
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : true if stack is empty, else
+    *            returns false
+    * Pre      : None
+    * Post     : No side effect
+    -----------------------------------------*/
 	bool empty()
 	{
 		return (mCount == 0);
