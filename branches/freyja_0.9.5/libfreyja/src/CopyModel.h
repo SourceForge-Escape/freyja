@@ -30,9 +30,6 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
-#ifdef USING_EGG
-#   include "Egg.h"
-#endif
 
 class CopyGroup
 {

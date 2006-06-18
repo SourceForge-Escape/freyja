@@ -49,13 +49,15 @@
 
 #include <stdarg.h>
 #include <string.h>
-#include <mstl/Stack.h>
+#include <mstl/stack.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
 
 #include "freyja.h"
 #include "FreyjaPrinter.h"
 #include "FreyjaPluginABI.h"
+
+using namespace mstl;
 
 // Oddly my new windows build system is missing it too
 //#ifdef MACOSX

@@ -37,7 +37,7 @@
 #define GUARD__MONGOOSE_FREYJA_FREYJAFSM_H
 
 #include <stdarg.h>
-#include <mstl/Stack.h>
+#include <mstl/stack.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
 #include <hel/math.h>
@@ -47,6 +47,7 @@
 #include "FreyjaPlugin.h"
 #include "FreyjaMesh.h"
 
+using namespace mstl;
 
 class FreyjaFSM
 {
@@ -266,7 +267,7 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
+	stack<freyja_object_t> mStack;      /* Object stack to keep up with 
 										 * accumulation modes and etc */
 
 	Vector<index_t> mVertexList;        /* Current polygon's vertex list */
