@@ -1,0 +1,47 @@
+#!/bin/sh
+# Setup basic freyja rc/data directory - Mongoose
+
+echo "Installing Freyja user directories and custom data"
+
+mkdir -p ~/.freyja
+mkdir -p ~/.freyja/models/
+mkdir -p ~/.freyja/models/python/
+mkdir -p ~/.freyja/palettes/
+mkdir -p ~/.freyja/prefabs/
+mkdir -p ~/.freyja/textures/
+mkdir -p ~/.freyja/particles/
+mkdir -p ~/.freyja/materials/
+mkdir -p ~/.freyja/icons/
+mkdir -p ~/.freyja/plugins/
+
+# Plugins
+cp bin/plugins/*.so  ~/.freyja/plugins/
+cp bin/plugins/*.dll ~/.freyja/plugins/
+cp plugins/*.mlisp ~/.freyja/plugins/
+
+# Main data
+cp ./data/freyja8.mlisp ~/.freyja/
+cp ./data/freyja-chimera.mlisp ~/.freyja/
+cp ./data/palettes/*.pal ~/.freyja/palettes/
+cp ./data/materials/*.mat ~/.freyja/materials/
+cp ./data/icons/* ~/.freyja/icons/
+
+# GNOME Setup
+#cp ./data/freyja.desktop /usr/share/applications/
+#cp ./data/freyja.desktop /usr/share/applnk/Graphics/
+#cp ./data/freyja.desktop ~/.gnome2/vfolders/applications/
+cp ./data/freyja.desktop ~/.local/share/applications/
+cp ./data/icons/freyja.png ~/.icons/
+
+#cp ./data/freyja.desktop ~/Desktop
+
+#printf "Would you like to put Freyja icon on the desktop? [y/N]"
+#read DESKTOP_ICON
+#
+#case "DESKTOP_ICON" in
+#	y)
+#		cp ./data/freyja.desktop ~/Desktop
+#		;;
+#	*)
+#		;;
+#esac
