@@ -285,6 +285,10 @@ bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 		return true;
 	}
 #else
+
+	if (gFreyjaMeshes.size() == 0)
+		return false;
+
 	// FIXME: Fix this when we have true models in later
 	freyja::Mesh *mesh = gFreyjaMeshes[meshIndex];
 

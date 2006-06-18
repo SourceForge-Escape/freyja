@@ -119,10 +119,10 @@ public:
 	}
 
 	
-	void SetChild(TreeNode<Key, Data> *tree) 
-	{
-		Left(tree);
-	}
+	//void SetChild(TreeNode<Key, Data> *tree) 
+	//{
+	//	Left(tree);
+	//}
 
 
 	TreeNode<Key, Data> *GetLeft() 
@@ -1002,7 +1002,9 @@ private:
 			delete prev;     
 		}
 
-		if (prev->GetColor() == _tree_h_black)
+		//assert(tree != NULL);
+		// was prev?  wtf
+		if (tree->GetColor() == _tree_h_black)
 		{
 			RestoreRedBlackAfterRemove(cur);
 		}
@@ -1139,9 +1141,10 @@ private:
 		{
 			grandparent = parent->GetParent();
 			
-			if (parent == _root)
+			if (grandparent == NULL) //parent == _root)
 			{
-				printf("FIXME: parent == root, restore broken\n");
+				printf("FIXME: grandparent == NULL, RestoreRedBlackAfterInsert Broken\n");
+				//printf("FIXME: parent == root, restore broken\n");
 				break;
 			}
 
