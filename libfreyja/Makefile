@@ -43,7 +43,8 @@ BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
 BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=freyja
-LOCAL_INCLUDES=-I../libhel/
+LOCAL_INCLUDES=-I../mstl -I../libhel/
+LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ 
 
 
 ################################################################
@@ -58,8 +59,6 @@ DEPS=./deps.sh
 ################################################################
 # Build options
 ################################################################
-
-
 
 DESTDIR =
 NO_DEB=
@@ -95,7 +94,7 @@ BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) $(LOCAL_INCLUDES) \
 	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 	$(BASE_DEFS)
 
-LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
+LDFLAGS=$(CONFIGURE_LNK) -lm -ldl $(LOCAL_LIBS)
 #LDFLAGS += -Wl,-z,defs
 #LDFLAGS += -Wl,-O1
 RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
@@ -221,6 +220,7 @@ PROG_OBJS = \
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
+	@-cp $(BUILDDIR)/$(NAME)$(SHLIBEXT) $(BUILDDIR)/$(NAME).so
 
 $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
