@@ -140,7 +140,7 @@ public:
 
 	bool empty()
 	{
-		return (mCount > 0);
+		return (mCount == 0);
 	}
  
 
@@ -159,7 +159,7 @@ public:
 	Type mError;
 };
 
-};
+}; /* namespace mstl */
 
 #endif
 

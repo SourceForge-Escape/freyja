@@ -178,7 +178,7 @@ void freyjaApplyMaterial(uint32 materialIndex)
 	if (materialIndex > freyjaGetMaterialCount())
 	{
 		materialIndex = 0;
-	}
+}
 
 	flags = freyjaGetMaterialFlags(materialIndex);
 	texture = freyjaGetMaterialTexture(materialIndex);
@@ -982,6 +982,10 @@ void FreyjaRender::drawFreeWindow()
 
 ///////// PRIVATE METHODS ////////////////////////////////
 
+#ifndef COLORED_POLYGON
+#   define COLORED_POLYGON -1
+#   warning COLORED_POLYGON is obsolete
+#endif
 
 void FreyjaRender::BindTexture(unsigned int texture)
 {
@@ -1419,7 +1423,12 @@ void FreyjaRender::renderLights()
 	}
 }
 
-
+#define TEST_NEW_BACKEND_FORMAT
+#ifdef TEST_NEW_BACKEND_FORMAT
+#include <freyja/FreyjaMesh.h>
+using namespace freyja;
+extern Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
+#endif
 void FreyjaRender::renderMesh(RenderMesh &mesh)
 {
 	const vec_t scale = 1.0001f;
@@ -1443,7 +1452,53 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 		glEnd();
 		glPointSize(mDefaultPointSize);
+
+#ifdef TEST_NEW_BACKEND_FORMAT
+		Mesh *m = freyjaModelGetMeshClass(0,0);
+
+		if (m)
+		{
+			glPointSize(2.0);
+			glBegin(GL_POINTS);
+			
+			for (i = 0; i < m->GetVertexCount(); ++i)
+			{
+				m->GetVertexPos(i, v.mVec);
+				glColor3fv(GREEN);
+				glVertex3fv(v.mVec);
+			}
+
+			glEnd();
+			glPointSize(mDefaultPointSize);
+		}
+#endif
 	}
+
+#ifdef TEST_NEW_BACKEND_FORMAT
+		Mesh *m = freyjaModelGetMeshClass(0,0);
+
+		if (m && mRenderMode & RENDER_WIREFRAME)
+		{
+			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
+			{
+				Face *f = m->GetFace(i);
+
+				if (!f) continue;
+
+				glBegin(GL_LINE_LOOP);
+				glColor3fv(mColorWireframeHighlight);
+
+				for (j = 0; j < f->mIndices.size(); ++j)
+				{
+					m->GetVertexPos(f->mIndices[j], v.mVec);
+					glVertex3fv(v.mVec);
+				}
+				
+				glEnd();
+				glPointSize(mDefaultPointSize);
+			}
+		}
+#endif
 
 	if (mesh.getPolygonCount())
 	{
@@ -1473,6 +1528,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
+
 
 		// FIXME Cached array access instead of functional facade
 		for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)

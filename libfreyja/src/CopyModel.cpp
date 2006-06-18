@@ -29,11 +29,18 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
+#ifdef USING_EGG
 CopyModel::CopyModel(Egg *egg)
 {
 	mEgg = egg;
 	mAppendMode = false;
 }
+#else
+CopyModel::CopyModel()
+{
+	mAppendMode = false;
+}
+#endif
 
 
 CopyModel::~CopyModel()
@@ -58,6 +65,7 @@ bool CopyModel::getAppendMeshMode()
 
 bool CopyModel::copyMesh(int currentMesh, int currentGroup)
 {
+#ifdef USING_EGG
 	CopyVertex *v;
 	CopyTexCoord *t;
 	CopyPolygon *p;
@@ -166,12 +174,17 @@ bool CopyModel::copyMesh(int currentMesh, int currentGroup)
 	freyjaPrintMessage("Mesh[%i] copied...", mesh->id);
 
 	return true;
+#else
+	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	return false;
+#endif
 }
 
 
 bool CopyModel::copyVertexBuffer(Vector<unsigned int> &list, 
 								 int currentMesh, int currentGroup)
 {
+#ifdef USING_EGG
 	Vector<unsigned int> polygonList;
 	CopyVertex *v;
 	CopyTexCoord *t;
@@ -319,11 +332,16 @@ bool CopyModel::copyVertexBuffer(Vector<unsigned int> &list,
 
 	freyjaPrintMessage("Vertex buffer copied...", mesh->id);
 	return true;
+#else
+	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	return false;
+#endif
 }
 
 
 bool CopyModel::pasteMesh()
 {
+#ifdef USING_EGG
 	Vector<unsigned int> transV;
 	Vector<unsigned int> transT;
 	CopyVertex *v;
@@ -400,6 +418,10 @@ bool CopyModel::pasteMesh()
 	freyjaPrintMessage("Mesh pasted...");
 
 	return true;
+#else
+	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	return false;
+#endif
 }
 
 

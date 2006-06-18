@@ -33,32 +33,35 @@
 #include "FreyjaPluginABI.h"
 #include "FreyjaFSM.h"
 
-FreyjaFSM *FreyjaFSM::mFreyjaFSM = 0x0;
+FreyjaFSM *FreyjaFSM::mInstance = 0x0;
 
+#ifdef USING_EGG
 // FIXME Very temporary gobals until interface is done no code changes 
 //       since this class is instanced as a gobal these should work fine
 //       for now w/o threads until the new implementation is done
 //       This is to remove exposure of Egg types in header
-#include "Egg.h"
+#   include "Egg.h"
 
 Egg *freyja__getEggBackend();
 
 Egg *mEgg;                          /* Pointer to the modeler backend  */
 egg_mesh_t *mMesh;                  /* Current mesh */
 egg_group_t *mGroup;                /* Current vertex grouping */
+#endif
 
 
 FreyjaFSM::FreyjaFSM()
 {
+#ifdef USING_EGG
 	// freyjaSpawn always allocates in proper order for this to work
 	// ( HASA child, then parent )
 	mEgg = freyja__getEggBackend(); 
+	mGroup = 0x0;
+#endif
 
 	mMesh = 0x0;
-	mGroup = 0x0;
+	mIndexModel = 0; // was 1
 	mTextureId = 0;
-
-	FreyjaFSM::mFreyjaFSM = this;
 }
 
 
@@ -71,6 +74,29 @@ FreyjaFSM::~FreyjaFSM()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+index_t gFreyjaCurrentVertex = INDEX_INVALID;
+extern index_t gFreyjaCurrentMesh;
+extern index_t gFreyjaCurrentModel;
+
+// FIXME: Move all these gobal iterators to FSMs or the FSM singleton
+index_t freyjaGetCurrentModelIndex()
+{
+	return 0; // Egg has a single model data structure
+}
+
+
+index_t freyjaGetCurrentVertexIndex()
+{
+	return gFreyjaCurrentVertex;
+}
+
+
+void freyjaCurrentVertex(index_t vertexIndex)
+{
+	gFreyjaCurrentVertex = vertexIndex;
+}
+
+
 uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 {
 	switch (type)
@@ -80,23 +106,43 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 		break;
 
 	case FREYJA_VERTEX:
+#ifdef USING_EGG
 		return mEgg->getVertexCount();
+#else
+		return freyjaGetMeshVertexCount(gFreyjaCurrentMesh);
+#endif
 		break;
 
 	case FREYJA_TEXCOORD:
+#ifdef USING_EGG
 		return mEgg->getTexelCount();
+#else
+		return freyjaGetMeshTexCoordCount(gFreyjaCurrentMesh);
+#endif
 		break;
 
 	case FREYJA_MESH:
+#ifdef USING_EGG
 		return mEgg->getMeshCount();
+#else
+		return freyjaGetModelMeshCount(gFreyjaCurrentModel);
+#endif
 		break;
 
 	case FREYJA_VERTEX_GROUP:
+#ifdef USING_EGG
 		return mEgg->getGroupCount();
+#else
+		return 0;
+#endif
 		break;
 
 	case FREYJA_POLYGON:
+#ifdef USING_EGG
 		return mEgg->getPolygonCount();
+#else
+		return freyjaGetMeshPolygonCount(gFreyjaCurrentMesh);
+#endif
 		break;
 
 	case FREYJA_BONE:
@@ -133,13 +179,13 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 
 index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 {
+#ifdef USING_EGG
 	Vector<egg_vertex_t *> *vertex;
 	Vector<egg_texel_t *> *texel;
 	Vector<egg_mesh_t *> *mesh;
 	Vector<egg_group_t *> *group;
 	Vector<egg_polygon_t *> *polygon;
 	Vector<egg_animation_t *> *skelanim;
-
 
 	switch (type)
 	{
@@ -353,6 +399,9 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 	case FREYJA_SKEL_ANIMATION:
 		break;
 	}
+#else
+	BUG_ME("freyjaIterator Not Implementation", __FILE__, __LINE__);
+#endif
 
 	return INDEX_INVALID;
 }
@@ -383,14 +432,22 @@ index_t FreyjaFSM::freyjaGetCurrent(freyja_object_t type)
 		break;
 
 	case FREYJA_MESH:
+#ifdef USING_EGG
 		if (mMesh)
 			return mMesh->id;
+#else
+		return mIndexMesh;
+#endif
 		break;
 
 	case FREYJA_VERTEX_FRAME:
 	case FREYJA_VERTEX_GROUP:
+#ifdef USING_EGG
 		if (mGroup)
 			return mGroup->id;
+#else
+		return mIndexGroup;
+#endif
 		break;
 
 	case FREYJA_POLYGON:
@@ -438,14 +495,19 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 	{
 	case FREYJA_MESH:
 		mStack.push(FREYJA_MESH);
+#ifdef USING_EGG
 		mMesh = mEgg->newMesh();
 		mEgg->addMesh(mMesh);
+#else
+		mIndexMesh = gFreyjaCurrentMesh = freyjaModelCreateMesh(mIndexModel);
+#endif
 		break;
 
 	case FREYJA_VERTEX_FRAME:
 	case FREYJA_VERTEX_GROUP:
 		mStack.push(FREYJA_VERTEX_GROUP);
 
+#ifdef USING_EGG
 		if (!mMesh)
 		{
 			freyjaPrintError("FreyjaFSM::freyjaBegin> GROUP defined outside MESH.");
@@ -463,6 +525,7 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 				mGroup->flags = 0xBADA55;
 			}
 		}
+#endif
 		break;
 
 	case FREYJA_POLYGON:
@@ -470,10 +533,12 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 		mVertexList.clear();
 		mTexCoordList.clear();
 
+#ifdef USING_EGG
 		if (!mMesh)
 		{
 			//freyjaPrintError("freyjaBegin: WARNING, POLYGON outside MESH");
 		}
+#endif
 		break;
 
 	case FREYJA_BONE:
@@ -501,12 +566,14 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 
 void FreyjaFSM::freyjaEnd()
 {
-	unsigned int polygon;
+	index_t polygon = INDEX_INVALID, vertex;
+	uint32 i, count;
 
 
 	switch (mStack.pop())
 	{
 	case FREYJA_POLYGON:
+#ifdef USING_EGG
 		polygon = mEgg->addPolygon(mVertexList, mTexCoordList, mTextureId);
 
 		if (polygon == UINT_MAX)
@@ -523,6 +590,24 @@ void FreyjaFSM::freyjaEnd()
 		{
 			freyjaPrintError("freyjaEnd: WARNING, FREYJA_POLYGON outside FREYJA_MESH");
 		}
+#else
+		polygon = freyjaModelMeshPolygonCreate(mIndexModel, mIndexMesh);
+		
+		for (i = 0, count = mVertexList.size(); i < count; ++i)
+		{
+			vertex = mVertexList[i];
+			freyjaModelMeshPolygonAddVertex1i(mIndexModel, 
+											  mIndexMesh, polygon, vertex);
+			//vertex = mTexCoordList[i];
+			//freyjaModelMeshPolygonAddTexCoord1i(mIndexModel, 
+			//									mIndexMesh, polygon, vertex);
+		}
+
+		mVertexList.clear();
+		mTexCoordList.clear();
+
+		BUG_ME("freyjaEnd(FREYJA_POLYGON) TexCoords Not Implementatied", __FILE__, __LINE__);
+#endif
 		break;
 
 	case FREYJA_SKELETON:
@@ -562,9 +647,13 @@ void FreyjaFSM::freyjaPolygonAddVertex1i(index_t vertexIndex)
 
 void FreyjaFSM::freyjaMeshFlags1u(uint32 flags)
 {
-	if (mStack.peek() == FREYJA_MESH || !mMesh)
+	if (mStack.peek() == FREYJA_MESH)
 	{
+#ifdef USING_EGG
 		mMesh->flags = flags;
+#else
+		BUG_ME("freyjaMeshFlags1u Not Implemented", __FILE__, __LINE__);
+#endif
 	}
 	else
 	{
@@ -603,6 +692,7 @@ void FreyjaFSM::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 {
 	if (mStack.peek() == FREYJA_VERTEX_GROUP)
 	{
+#ifdef USING_EGG
 		if (!mGroup)
 		{
 			freyjaPrintError("FreyjaFSM::freyjaGroupCenter> GROUP isn't allocated!\n");
@@ -614,6 +704,7 @@ void FreyjaFSM::freyjaGroupCenter(vec_t x, vec_t y, vec_t z)
 			mGroup->center[1] = y;
 			mGroup->center[2] = z;
 		}
+#endif
 	}
 	else
 	{
@@ -757,123 +848,159 @@ int main(int argv, char *argc[])
 
 void freyjaBegin(freyja_object_t type)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaBegin(type);
+	FreyjaFSM::GetInstance()->freyjaBegin(type);
 }
 
 
 void freyjaEnd()
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaEnd();
+	FreyjaFSM::GetInstance()->freyjaEnd();
 }
 
 
 uint32 freyjaGetCount(freyja_object_t type)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		return FreyjaFSM::mFreyjaFSM->freyjaGetCount(type);
-
-	return 0;
+	return FreyjaFSM::GetInstance()->freyjaGetCount(type);
 }
 
 
 index_t freyjaIterator(freyja_object_t type, index_t item)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		return FreyjaFSM::mFreyjaFSM->freyjaIterator(type, item);
-
-	return INDEX_INVALID;
+	return FreyjaFSM::GetInstance()->freyjaIterator(type, item);
 }
 
 
 index_t freyjaGetCurrent(freyja_object_t type)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		return FreyjaFSM::mFreyjaFSM->freyjaGetCurrent(type);
-
-	return INDEX_INVALID;
+	return FreyjaFSM::GetInstance()->freyjaGetCurrent(type);
 }
 
 
 void freyjaMeshFlags1u(uint32 flags)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaMeshFlags1u(flags);	
+	FreyjaFSM::GetInstance()->freyjaMeshFlags1u(flags);	
 }
 
 
 void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaGroupCenter(x, y, z);
+	FreyjaFSM::GetInstance()->freyjaGroupCenter(x, y, z);
 }
 
 
 void freyjaPolygonVertex1i(index_t id)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddVertex1i(id);
+	FreyjaFSM::GetInstance()->freyjaPolygonAddVertex1i(id);
 }
 
 
 void freyjaPolygonTexCoord1i(index_t id)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaPolygonAddTexCoord1i(id);
+	FreyjaFSM::GetInstance()->freyjaPolygonAddTexCoord1i(id);
 }
 
 void freyjaPolygonMaterial1i(index_t id)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaPolygonMaterial1i(id);  
+	FreyjaFSM::GetInstance()->freyjaPolygonMaterial1i(id);  
 }
 
 
 #ifdef OBSOLETE_FSM_EXPORTABLE
 void freyjaSkeletonAddBone(index_t boneIndex)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->skeletonAddBone(boneIndex);
+	FreyjaFSM::GetInstance()->skeletonAddBone(boneIndex);
 }
 #endif
 
 
 index_t freyjaVertexCreate3fv(vec3_t xyz)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		return FreyjaFSM::mFreyjaFSM->freyjaVertexCreate3f(xyz[0], xyz[1], xyz[2]);
-
-	return INDEX_INVALID;
+	return FreyjaFSM::GetInstance()->freyjaVertexCreate3f(xyz[0], xyz[1], xyz[2]);
 }
 
 
 index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		return FreyjaFSM::mFreyjaFSM->freyjaVertexCreate3f(x, y, z);
-
-	return INDEX_INVALID;
+	return FreyjaFSM::GetInstance()->freyjaVertexCreate3f(x, y, z);
 }
 
 
 void freyjaGetVertex3fv(vec3_t xyz)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaGetVertex(xyz);
+	FreyjaFSM::GetInstance()->freyjaGetVertex(xyz);
 }
 
 
 void freyjaGetVertexTexCoord2fv(vec2_t uv)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaGetVertexTexCoord(uv);
+	FreyjaFSM::GetInstance()->freyjaGetVertexTexCoord(uv);
 }
 
 
 void freyjaGetVertexNormal3fv(vec3_t nxyz)
 {
-	if (FreyjaFSM::mFreyjaFSM)
-		FreyjaFSM::mFreyjaFSM->freyjaGetVertexNormal(nxyz);
+	FreyjaFSM::GetInstance()->freyjaGetVertexNormal(nxyz);
 }
 
+
+//////////////////////////////////////////////////////////////////
+// 0.9.3 Compatibility API Wrappers
+//////////////////////////////////////////////////////////////////
+
+#ifdef USING_EGG
+#   include "Egg.h" // Left over from 9.1 API, but 9.5 it's gone
+Egg *freyja__getEggBackend();
+#endif
+
+
+// OBSOLETE
+uint32 freyjaGetAnimationCount()
+{
+       return 0;
+}
+
+
+// OBSOLETE
+uint32 freyjaGetAnimationFrameCount(index_t animationIndex)
+{
+       return 0;
+}
+
+char freyjaIsTexCoordAllocated(index_t texcoordIndex)
+{
+#ifdef USING_EGG
+	return (freyja__getEggBackend()->getTexel(texcoordIndex) != 0x0);
+#else
+	BUG_ME("freyjaIsTexCoordAllocated Not Implemented", __FILE__, __LINE__);
+	return 1;
+#endif
+}
+
+
+char freyjaIsPolygonAllocated(index_t polygonIndex)
+{
+#ifdef USING_EGG
+       if (freyja__getEggBackend() &&
+               freyja__getEggBackend()->getPolygon(polygonIndex))
+               return 1;
+
+       return 0;
+#else
+	BUG_ME("freyjaIsTexCoordAllocated Not Implemented", __FILE__, __LINE__);
+	return 1;
+#endif
+}
+
+
+char freyjaIsVertexAllocated(index_t vertexIndex)
+{
+#ifdef USING_EGG
+       if (!freyja__getEggBackend() || vertexIndex == INDEX_INVALID)
+               return 0;
+
+       return (freyja__getEggBackend()->getVertex(vertexIndex) != 0x0);
+#else
+	BUG_ME("freyjaIsTexCoordAllocated Not Implemented", __FILE__, __LINE__);
+	return 1;
+#endif
+}
