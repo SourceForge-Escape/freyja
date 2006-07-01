@@ -22,6 +22,9 @@
  ==========================================================================*/
 
 #include "RenderModel.h"
+#include "freyja.h"
+#include <hel/math.h>
+
 
 #ifdef USING_EGG
 #   include "Egg.h"
@@ -207,7 +210,7 @@ bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &rface)
 	rface.id = index;
 	rface.flags = face->mFlags;
 
-	for ( uint i = 0, idx; i < rface.count; ++i )
+	for ( uint32 i = 0, idx; i < rface.count; ++i )
 	{
 		idx = face->mIndices[i];
 		// FIXME: we should be using arrays later once the modeler is updated
@@ -256,7 +259,7 @@ bool RenderMesh::getPolygon(unsigned int index, RenderPolygon &rface)
 	rface.id = index;
 	rface.flags = face->mFlags;
 
-	for ( uint i = 0, idx; i < rface.count; ++i )
+	for ( uint32 i = 0, idx; i < rface.count; ++i )
 	{
 		idx = face->mIndices[i];
 		// FIXME: we should be using arrays later once the modeler is updated
