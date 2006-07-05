@@ -76,6 +76,9 @@ FreyjaPrinter *gPrinter = 0x0;
 int32 gCurrentFreyjaPlugin = -1;
 long FreyjaPluginDesc::mNextId = 1;
 
+#ifdef USING_EGG
+Egg *freyja__getEggBackend();
+#endif
 
 
 void freyjaGetGenericTransform3fv(freyja_transform_t transform,
@@ -3073,6 +3076,9 @@ Egg *gEgg = 0x0;
 // Hidden API
 Egg *freyja__getEggBackend()
 {
+	if (!gEgg)
+		gEgg = new Egg();
+
 	return gEgg;
 }
 
@@ -3108,8 +3114,10 @@ void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
 	}
 
 #ifdef USING_EGG
+	Egg *egg = freyja__getEggBackend();
+
 	/* Hookup gobal classes using a Printer child class */
-	gEgg->setPrinter(printer);
+	egg->setPrinter(printer);
 #endif
 }
 
@@ -3119,7 +3127,8 @@ void freyjaSpawn()
 	if (!FreyjaFSM::GetInstance())
 	{
 #ifdef USING_EGG
-		gEgg = new Egg();
+		//gEgg = new Egg();
+		Egg *egg = freyja__getEggBackend();
 #endif
 		FreyjaFSM *fsm = FreyjaFSM::GetInstance();
 

@@ -30,7 +30,7 @@ LICENSE=LGPL
 ################################################################
 
 BUILD_SELECT=debug
-BASE_DEFS=-DMODEL_PLUGINS
+BASE_DEFS=-DMODEL_PLUGINS -DUSING_EGG
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 CONFIGURE_LNK=
@@ -200,6 +200,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/CopyModel.o \
+	$(BUILDDIR)/Egg.o \
 	$(BUILDDIR)/FreyjaFSM.o \
 	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/FreyjaPlugin.o \

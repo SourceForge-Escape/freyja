@@ -273,7 +273,10 @@ private:
 
 	Vector<index_t> mTexCoordList;      /* Current polygon's texel list */
 
+#ifdef USING_EGG
+#else
 	freyja::Mesh *mMesh;                /* Mesh outside Scene for FSM use */
+#endif
 
 	index_t mTextureId;                 /* Texture id for current polygon */
 
