@@ -33,6 +33,7 @@
 #include "Resource.h"
 #include "mgtk_events.h"
 
+using namespace mstl;
 
 class ResourceEvent
 {
