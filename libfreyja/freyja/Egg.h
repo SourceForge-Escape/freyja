@@ -88,6 +88,8 @@
 
 #include "FreyjaPrinter.h"
 
+using namespace mstl;
+
 
 typedef vec_t bbox_t[3][3];
 

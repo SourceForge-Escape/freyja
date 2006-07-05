@@ -207,7 +207,7 @@ public:
 
 		if (mPolygons)
 		{
-			poly = (*mPolygons)[index];
+			poly = (*mPolygons)[findex];
 			
 			if (poly)
 			{
