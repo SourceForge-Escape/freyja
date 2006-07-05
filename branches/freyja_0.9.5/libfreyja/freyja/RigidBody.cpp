@@ -23,8 +23,50 @@
 
 using namespace freyja;
 
-ParticleSystem::ParticleSystem()
+uint32 ParticleSystem::mUIDCount = 0;
+
+
+ParticleSystem::ParticleSystem() :
+	mParticleCount(0),
+	mX(0x0),
+	mOldX(0x0),
+	mA(0x0),
+	mIsMassUsed(false),
+	mMass(0x0),
+	mGravity(0.0f, /*-9.8f*/0.0f, 0.0f),  // Y-up can't be expected
+	mTimeStep(1.0f),
+	mUID(mUIDCount++)
 {
+}
+
+
+ParticleSystem::ParticleSystem(const ParticleSystem &sys) :
+	mParticleCount(sys.mParticleCount),
+	mX(sys.mX),
+	mOldX(sys.mOldX),
+	mA(sys.mA),
+	mIsMassUsed(sys.mIsMassUsed),
+	mMass(sys.mMass),
+	mGravity(sys.mGravity), 
+	mTimeStep(sys.mTimeStep),
+	mUID(mUIDCount++)
+{
+}
+
+
+ParticleSystem &ParticleSystem::operator=(const ParticleSystem &sys) 
+{
+	mParticleCount = sys.mParticleCount;
+	mX = sys.mX;
+	mOldX = sys.mOldX;
+	mA = sys.mA;
+	mIsMassUsed = sys.mIsMassUsed;
+	mMass = sys.mMass;
+	mGravity = sys.mGravity;
+	mTimeStep = sys.mTimeStep;
+	
+
+	return *this;
 }
 
 
@@ -42,7 +84,8 @@ void ParticleSystem::Init(uint32 numberOfParticles)
 // Constructors
 ////////////////////////////////////////////////////////////
 
-RigidBody::RigidBody(uint32 particleCount)
+RigidBody::RigidBody(uint32 particleCount) :
+	mSystem()
 {
 	mSystem.Init(particleCount);
 }

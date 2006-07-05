@@ -46,13 +46,12 @@ unsigned int FreyjaCamera::mCounter = 0;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaCamera::FreyjaCamera()
+FreyjaCamera::FreyjaCamera() :
+	mId(++mCounter),
+	mMode(eStationary),
+	mViewDistance(14.0f),
+	mSpeed(0)
 {
-	mId = ++mCounter;
-	mMode = eStationary;
-	mViewDistance = 14.0;
-	mSpeed = 0;
-
 	reset();
 }
 

@@ -32,10 +32,28 @@ index_t Mesh::mNextUID = 0;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Mesh::Mesh()
+Mesh::Mesh() :
+	mUID(mNextUID++),
+	mFlags(0),
+	mMaterialIndex(0),
+	mPosition(),
+	mRotation(),  // Store as Euler Angles for 'Size' interface
+	mScale(),
+	mBoundingVolume(),
+	mVertexPool(),
+	mFreedVertices(),
+	mNormalPool(),
+	mFreedNormals(),
+	mColorPool(),
+	mFreedColors(),
+	mTexCoordPool(),
+	mFreedTexCoords(),
+	mFaces(),
+	mVertices(),
+	mWeights()
 {
-	mUID = mNextUID++;
-	
+	//mUID = mNextUID++;
+
 	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
 	mName[mNameSize-1] = 0;
 	

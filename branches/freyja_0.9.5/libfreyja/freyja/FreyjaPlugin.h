@@ -50,7 +50,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <mstl/stack.h>
-#include <mstl/Map.h>
 #include <mstl/Vector.h>
 
 #include "freyja.h"
@@ -72,6 +71,12 @@ class FreyjaPluginDescEvent
 {
 public:
 
+	FreyjaPluginDescEvent() : 
+		eventId(-1)
+	{
+		name[0] = 0;
+	}
+
 	char name[64];
 
 	int eventId;
@@ -84,14 +89,46 @@ class FreyjaPluginDesc
 {
 public:
 	
-	FreyjaPluginDesc()
+	FreyjaPluginDesc() :
+		mFilename(NULL),
+		mImportFlags(FREYJA_PLUGIN_NONE),
+		mExportFlags(FREYJA_PLUGIN_NONE),
+		mFloatArgsDesc(),
+		mFloatArgs(),
+		mIntArgsDesc(),
+		mIntArgs(),
+		mStringArgsDesc(),
+		mStringArgs(),
+		mId(mNextId)
 	{
-		mImportFlags = FREYJA_PLUGIN_NONE;
-		mExportFlags = FREYJA_PLUGIN_NONE;
-		mFilename = 0x0;
-		mId = mNextId;
+		mDescription[0] = 0;
+		mExtention[0] = 0;
 		++mNextId;
 	}
+
+
+	FreyjaPluginDesc(const FreyjaPluginDesc& p) :
+		mFilename(NULL),
+		mImportFlags(FREYJA_PLUGIN_NONE),
+		mExportFlags(FREYJA_PLUGIN_NONE),
+		mFloatArgsDesc(),
+		mFloatArgs(),
+		mIntArgsDesc(),
+		mIntArgs(),
+		mStringArgsDesc(),
+		mStringArgs(),
+		mId(p.mId)
+	{
+		BUG_ME("This shouldn't ever happen by design", __FILE__, __LINE__);
+	}
+
+
+	FreyjaPluginDesc &operator=(const FreyjaPluginDesc &fpd)
+	{
+		BUG_ME("This shouldn't ever happen by design", __FILE__, __LINE__);
+		return *this;
+	}
+
 
 	~FreyjaPluginDesc()
 	{
@@ -298,7 +335,6 @@ private:
 // ABI functions
 FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name);
 FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex);
-
 
 #endif
 

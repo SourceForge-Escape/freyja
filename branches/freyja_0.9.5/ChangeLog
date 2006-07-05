@@ -33,6 +33,12 @@
  ChangeLog 0.9 ( trunk )
  =====================================================================
 
+ 20060704 Mongoose
+ - New test system to avoid installing to test the whole system
+ - Minor clean ups all around 
+ - Masssive build update
+
+
  20060617 Mongoose
  - Fixes for mesh creation and rendering
  - Updates to build system

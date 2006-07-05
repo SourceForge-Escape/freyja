@@ -42,12 +42,12 @@ class MetaData
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	MetaData()
+	MetaData() :
+		mId(INDEX_INVALID),
+		mTypeId(0),
+		mData(NULL),
+		mDataSize(0)
 	{
-		mId = INDEX_INVALID;
-		mTypeId = 0;
-		mDataSize = 0;
-		mData = 0x0;
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -163,6 +163,11 @@ class MetaData
 
 
  private:
+
+	MetaData(const MetaData &md);
+
+	MetaData &operator =(const MetaData &md);
+
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors

@@ -74,7 +74,7 @@ Vector<char *> gPluginDirectories;
 Vector<CopyModel *>  gCopyModels;
 FreyjaPrinter *gPrinter = 0x0;
 int32 gCurrentFreyjaPlugin = -1;
-long FreyjaPluginDesc::mNextId = 1;
+
 
 
 

@@ -26,7 +26,11 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaPakReader::FreyjaPakReader(const char *pakfile)
+FreyjaPakReader::FreyjaPakReader(const char *pakfile) :
+	mUID(0),
+	mPakFile(NULL),
+	mCurrentDir(NULL),
+	mRoot()
 {
 	mPakFile = String::strdup(pakfile);
 }

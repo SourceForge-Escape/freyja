@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+
 #include "KeyFrame.h"
 
 
@@ -26,7 +27,10 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-KeyFrame::KeyFrame()
+KeyFrame::KeyFrame() :
+	mIndex(INDEX_INVALID),
+	mTime(0.0f),
+	mObjects()
 {
 }
 

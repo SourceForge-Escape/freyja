@@ -61,6 +61,19 @@ class FreyjaFileWriter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	FreyjaFileWriter(const FreyjaFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of FreyjaFileWriter
+	 ------------------------------------------------------*/
+
+
+	FreyjaFileWriter &operator=(const FreyjaFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of FreyjaFileWriter
+	 ------------------------------------------------------*/
+
 	~FreyjaFileWriter();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaFileWriter object is allocated

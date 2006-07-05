@@ -35,6 +35,8 @@
 #include "FreyjaFileReader.h"
 
 
+using namespace mstl;
+
 namespace freyja {
 
 class Weight
@@ -62,26 +64,26 @@ public:
 		fHidden      =  8
 	} VertexFlags;
 
-	Vertex(index_t vertex, index_t texcoord, index_t normal)
+	Vertex(index_t vertex, index_t texcoord, index_t normal) :
+		mFlags(fNone),
+		mVertexIndex(vertex),
+		mTexCoordIndex(texcoord),    
+		mNormalIndex(normal),
+		mColor(INDEX_INVALID),      
+		mMaterial(INDEX_INVALID),
+		mReserved1(0)
 	{
-		mFlags = fNone;
-		mVertexIndex = vertex;
-		mTexCoordIndex = texcoord;    
-		mNormalIndex = normal;
-		mColor = INDEX_INVALID;      
-		mMaterial = INDEX_INVALID;
-		mReserved1 = 0;
 	}
 
-	Vertex()
+	Vertex() :
+		mFlags(fNone),
+		mVertexIndex(0),
+		mTexCoordIndex(0),    
+		mNormalIndex(0),
+		mColor(INDEX_INVALID),      
+		mMaterial(INDEX_INVALID),
+		mReserved1(0)
 	{
-		mFlags = fNone;
-		mVertexIndex = INDEX_INVALID;
-		mTexCoordIndex = INDEX_INVALID;    
-		mNormalIndex = INDEX_INVALID;
-		mColor = INDEX_INVALID;      
-		mMaterial = INDEX_INVALID;
-		mReserved1 = 0;
 	}
 
 	static size_t SerializedSize() 
@@ -144,6 +146,18 @@ public:
 class Face
 {
 public:
+	Face() :
+		mMaterial(0), // Always have a valid material
+		mFlags(0x0),
+		mSmoothingGroups(0), // Bitmap of groups 
+		mIndices()
+	{
+	}
+
+	~Face()
+	{
+	}
+
 	void rotate(vec_t x, vec_t y, vec_t z);
 
 	void scale(vec_t x, vec_t y, vec_t z);

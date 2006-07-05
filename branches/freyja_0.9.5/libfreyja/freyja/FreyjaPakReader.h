@@ -34,17 +34,19 @@
 #include "FreyjaFileReader.h"
 #include "FreyjaPluginABI.h"
 
+using namespace mstl;
 
 class FreyjaPakFile
 {
  public:
 
-	FreyjaPakFile(const char *filename, uint32 offset, uint32 size)
+	FreyjaPakFile(const char *filename, uint32 offset, uint32 size) :
+		mFilename(NULL),
+		mXORKey(0x0),
+		mOffset(offset),
+		mSize(size)
 	{
 		mFilename = String::strdup(filename);
-		mOffset = offset;
-		mSize = size;
-		mXORKey = 0x0;
 	}
 
 	~FreyjaPakFile()
@@ -90,6 +92,11 @@ class FreyjaPakFile
 
  private:
 
+	FreyjaPakFile(const FreyjaPakFile &pak);
+
+	FreyjaPakFile &operator=(const FreyjaPakFile &pak);
+
+
 	char *mFilename;
 
 	unsigned char mXORKey;
@@ -104,12 +111,18 @@ class FreyjaPakDirectory
 {
  public:
 
-	FreyjaPakDirectory()
+	FreyjaPakDirectory() :
+		mDirName(NULL),
+		mPakDirs(),
+		mPakFiles()
 	{
 		mDirName = String::strdup("vfs:/");
 	}
 
-	FreyjaPakDirectory(const char *dirname)
+	FreyjaPakDirectory(const char *dirname) :
+		mDirName(NULL),
+		mPakDirs(),
+		mPakFiles()
 	{
 		mDirName = String::strdup(dirname);
 	}
@@ -216,6 +229,11 @@ class FreyjaPakDirectory
 
  protected:
 
+	FreyjaPakDirectory(const FreyjaPakDirectory &pak);
+
+	FreyjaPakDirectory &operator=(const FreyjaPakDirectory &pak);
+
+
 	char *mDirName;
 
 	Vector <FreyjaPakDirectory *> mPakDirs;
@@ -283,6 +301,11 @@ class FreyjaPakReader
 	void changeDir(const char *dirname);
 
  private:
+
+	FreyjaPakReader(const FreyjaPakReader&);
+
+	FreyjaPakReader &operator =(const FreyjaPakReader&);
+
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors

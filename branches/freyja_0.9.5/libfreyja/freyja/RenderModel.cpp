@@ -43,7 +43,9 @@ Vector<RenderModel *> gRenderModels;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-RenderModel::RenderModel()
+RenderModel::RenderModel() :
+	mIndex(0),
+	mSkeleton()
 {
 }
 

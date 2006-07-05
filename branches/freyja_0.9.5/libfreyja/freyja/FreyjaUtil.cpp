@@ -4,6 +4,8 @@
 #include "FreyjaPluginABI.h"
 
 
+using namespace mstl;
+
 /* Mesh generation utils */
 void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side)
 {

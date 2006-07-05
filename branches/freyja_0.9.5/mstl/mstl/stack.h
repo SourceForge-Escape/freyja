@@ -31,42 +31,47 @@ template <class T> class StackNode
 {
  public:
 
-  StackNode(T data)
-  {
-    mData  = data;
-    mPrev = NULL;
-  }
+	StackNode(T data) :
+		mPrev(NULL),
+		mData(data)
+	{
+	}
 
 
-  ~StackNode()
-  {
-  }
+	~StackNode()
+	{
+	}
 
-  void Data(T data)
-  {
-    mData = data;
-  }
+	void Data(T data)
+	{
+		mData = data;
+	}
 
-  T Data()
-  {
-    return mData;
-  }
+	T Data()
+	{
+		return mData;
+	}
 
-  StackNode<T> *Prev()
-  {
-    return mPrev;
-  }
+	StackNode<T> *Prev()
+	{
+		return mPrev;
+	}
 
-  void Prev(StackNode<T> *prev)
-  {
-    mPrev = prev;
-  }
+	void Prev(StackNode<T> *prev)
+	{
+		mPrev = prev;
+	}
 
- private:
+private:
 
-  StackNode<T> *mPrev;
+	StackNode<T>(const StackNode<T> &node);
 
-  T mData;
+	StackNode<T> &operator =(const StackNode<T> &node);
+
+	
+	StackNode<T> *mPrev;
+	
+	T mData;
 };
 
 
@@ -83,11 +88,59 @@ public:
     * Pre      : None
     * Post     : Constructs an Stack
     -----------------------------------------*/
-	stack()
+	stack() :
+		mCount(0),
+		mTop(NULL),
+		mError(false)
+	{
+	}
+
+	stack(const stack<Type> &s) :
+		mCount(0),
+		mTop(NULL),
+		mError(false)
+	{
+		StackNode<Type> *cur = s.mTop;
+		stack<Type> tmp; // haha
+
+		while (cur)
+		{
+			Type data = cur->Data();
+			cur = cur->Prev();
+			tmp.push(data);
+		}
+
+		while ( !tmp.empty() )
+		{
+			push(tmp.pop());
+		}
+	}
+
+
+	stack<Type> operator=(const stack<Type> &s) 
 	{
 		mCount = 0;
 		mTop = NULL;
+		mError = false;
+
+		StackNode<Type> *cur = mTop;
+		stack<Type> tmp; // haha
+
+		while (cur)
+		{
+			Type data = cur->Data();
+			cur = cur->Prev();
+			tmp.push(data);
+		}
+
+		while ( !tmp.empty() )
+		{
+			push(tmp.pop());
+		}
+
+		return *this;
 	}
+
 
    /*-----------------------------------------
     * Created  : 990831 by Terry Hendrix II
@@ -168,9 +221,7 @@ public:
     -----------------------------------------*/
 	void push(Type data)
 	{
-		StackNode<Type> *node;
-
-		node = new StackNode<Type>(data);
+		StackNode<Type> *node = new StackNode<Type>(data);
 		node->Prev(mTop);
 
 		mTop = node;
@@ -204,10 +255,10 @@ public:
 
 	StackNode<Type> *mTop;
 
-	Type mError;
+	bool mError;
 };
 
-}; /* namespace mstl */
+} /* namespace mstl */
 
 #endif
 

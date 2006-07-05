@@ -55,6 +55,15 @@ class FreyjaImage
 	 * Post : MtkImage object is constructed
 	 --------------------------------------------*/
 
+	FreyjaImage(const FreyjaImage &img);
+	/*--------------------------------------------
+	 * Pre  : None
+	 * Post : MtkImage object is constructed
+	 --------------------------------------------*/
+
+
+
+
 	virtual ~FreyjaImage();
 	/*--------------------------------------------
 	 * Created  : 2000-10-05 by Mongoose
@@ -301,6 +310,8 @@ class FreyjaImage
 
 
  private:
+
+	FreyjaImage &operator=(const FreyjaImage &img);
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors
