@@ -33,6 +33,9 @@
  ChangeLog 0.9 ( trunk )
  =====================================================================
 
+20060704 Mongoose
+ - Masssive build backport from dev branch
+
  20060423 Mongoose
  - win32 builds of lineageII tools
  - Several bug fixes
