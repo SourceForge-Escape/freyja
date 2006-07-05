@@ -107,11 +107,10 @@ class BoundingSphere : public BoundingVolume
 {
 public:
 
-	BoundingSphere(vec3_t center, vec_t radius)
+	BoundingSphere(vec3_t center, vec_t radius) :
+		mRadius(radius)
 	{
 		HEL_VEC3_COPY(center, mCenter);
-
-		mRadius = radius;
 	}
 
 
@@ -329,6 +328,12 @@ class BoundingBoxCombo : public BoundingVolume
 {
 public:
 
+	BoundingBoxCombo() : BoundingVolume(),
+								mSphere(Vector3d::zeroVector().mVec, 0.0f), 
+								mBox(Vector3d::zeroVector().mVec, Vector3d::zeroVector().mVec)					
+	{
+	}
+
 	BoundingBoxCombo(BoundingSphere &s, BoundingBox &b) : BoundingVolume(), 
 		mSphere(s), mBox(b)
 	{
@@ -371,6 +376,12 @@ public:
 	{
 		mSphere.UpdateBounds(point);
 		mBox.UpdateBounds(point);
+	}
+
+	void GetBoundingBox(vec3_t min, vec3_t max)
+	{
+		HEL_VEC3_COPY(mBox.mMin, min);
+		HEL_VEC3_COPY(mBox.mMax, max);
 	}
 
 	BoundingSphere mSphere;    /* Bounding sphere of this volume */

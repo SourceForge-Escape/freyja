@@ -36,6 +36,7 @@
 #include <mstl/Vector.h>
 #include "freyja.h"
 
+using namespace mstl;
 
 namespace freyja {
 

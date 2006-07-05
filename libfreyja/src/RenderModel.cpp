@@ -23,19 +23,46 @@
 
 #include "RenderModel.h"
 
+#ifdef USING_EGG
+#   include "Egg.h"
+#else
+#   include "FreyjaMesh.h"
+using namespace freyja;
+extern Vector<Mesh*> gFreyjaMeshes;
+#endif
 
-// uint32 gRenderVertexCount = 0;  // Set to zero on update to avoid use in
-                                   // renderer, don't worry about threads here
-
-//Vector<Vector3d *> gRenderVertices;
-//	Vector3d vertices[6];
-//	Vector3d texcoords[6];
-//	Vector3d normals[6];
-//	vec4_t colors[6];
-
-//	index_t *vindices
+/* Set to zero on update to avoid use in renderer, don't worry about threads */
+//uint32 gRenderVertexCount = 0;
+Vector<RenderModel *> gRenderModels;
 
 
+////////////////////////////////////////////////////////////
+// Constructors
+////////////////////////////////////////////////////////////
+
+RenderModel::RenderModel()
+{
+}
+
+
+RenderModel::~RenderModel()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+// Public Accessors
+////////////////////////////////////////////////////////////
+
+RenderSkeleton &RenderModel::getSkeleton()
+{
+	mSkeleton.set(freyjaGetCurrentSkeleton());
+
+	return mSkeleton;
+}
+
+
+#ifdef USING_EGG
 bool RenderMesh::createRenderPolygon(RenderPolygon &face,
 									 egg_polygon_t &polygon, int32 frame)
 {
@@ -126,45 +153,25 @@ bool RenderMesh::createRenderPolygon(RenderPolygon &face,
 
 	return true;
 }
-
-
-////////////////////////////////////////////////////////////
-// Constructors
-////////////////////////////////////////////////////////////
-
-RenderModel::RenderModel()
-{
-}
-
-
-RenderModel::~RenderModel()
-{
-}
-
-
-////////////////////////////////////////////////////////////
-// Public Accessors
-////////////////////////////////////////////////////////////
-
-RenderSkeleton &RenderModel::getSkeleton()
-{
-	mSkeleton.set(freyjaGetCurrentSkeleton());
-
-	return mSkeleton;
-}
+#endif
 
 
 unsigned int RenderModel::getMeshCount()
 {
+#ifdef USING_EGG
 	if (mMeshlist->empty())
 		return 0;
 	
 	return mMeshlist->end();
+#else
+	return gFreyjaMeshes.size();
+#endif
 }
 
 
 bool RenderModel::getMesh(int32 index, RenderMesh &mesh, int32 frame)
 {
+	mIndex = index;
 	return getRenderMesh(index, mesh, frame);
 }
 
@@ -174,15 +181,94 @@ bool RenderModel::getMesh(int32 index, RenderMesh &mesh, int32 frame)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
+bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &rface)
 {
+#ifdef USING_EGG
 	egg_polygon_t *poly = mEgg->getPolygon(index);
 
 	if (poly)
 	{
-		return RenderMesh::createRenderPolygon(face, *poly, 0);
+		return RenderMesh::createRenderPolygon(rface, *poly, 0);
+	}
+#else
+	BUG_ME("getRenderPolygon Not Implemented", __FILE__, __LINE__);
+	freyja::Mesh *mesh = gFreyjaMeshes[mIndex];
+
+	if (mesh == NULL)
+		return false;
+
+	Face *face = mesh->GetFace(index);
+	
+	if (face == NULL)
+		return false;
+
+	rface.count = face->mIndices.size();
+	rface.material = face->mMaterial;
+	rface.id = index;
+	rface.flags = face->mFlags;
+
+	for ( uint i = 0, idx; i < rface.count; ++i )
+	{
+		idx = face->mIndices[i];
+		// FIXME: we should be using arrays later once the modeler is updated
+		rface.vertices[i]  = mesh->GetVertexPosition(idx);
+		rface.normals[i]   = mesh->GetVertexNormal(idx);
+		rface.texcoords[i] = mesh->GetVertexTexCoord(idx);
+		rface.colors[i][0] = rface.colors[i][1] = rface.colors[i][2] = 1.0;
+		rface.colors[i][3] = 0.75;
 	}
 
+	return (rface.count > 0);
+
+#endif
+
+	return false;
+}
+
+
+bool RenderMesh::getPolygon(unsigned int index, RenderPolygon &rface)
+{
+#ifdef USING_EGG
+	static egg_polygon_t *poly;
+	
+	if (mPolygons)
+	{
+		poly = (*mPolygons)[index];
+		
+		if (poly)
+		{
+			return RenderMesh::createRenderPolygon(rface, *poly, (int32)-1);
+		}
+	}
+#else
+	freyja::Mesh *mesh = gFreyjaMeshes[id];
+
+	if (mesh == NULL)
+		return false;
+
+	Face *face = mesh->GetFace(index);
+
+	if (face == NULL)
+		return false;
+
+	rface.count = face->mIndices.size();
+	rface.material = face->mMaterial;
+	rface.id = index;
+	rface.flags = face->mFlags;
+
+	for ( uint i = 0, idx; i < rface.count; ++i )
+	{
+		idx = face->mIndices[i];
+		// FIXME: we should be using arrays later once the modeler is updated
+		rface.vertices[i]  = mesh->GetVertexPosition(idx);
+		rface.normals[i]   = mesh->GetVertexNormal(idx);
+		rface.texcoords[i] = mesh->GetVertexTexCoord(idx);
+		rface.colors[i][0] = rface.colors[i][1] = rface.colors[i][2] = 1.0;
+		rface.colors[i][3] = 0.75;
+	}
+
+	return true;//(rface.count > 0);
+#endif
 	return false;
 }
 
@@ -190,6 +276,7 @@ bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &face)
 bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 								int32 frame)
 {
+#ifdef USING_EGG
 	egg_mesh_t *mesh = mEgg->getMesh(meshIndex);
 
 	if (mesh)
@@ -197,13 +284,60 @@ bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 		createRenderMesh(rmesh, *mesh, frame);
 		return true;
 	}
+#else
+	// FIXME: Fix this when we have true models in later
+	freyja::Mesh *mesh = gFreyjaMeshes[meshIndex];
+
+	rmesh.count = 0;
+
+	if (mesh == NULL)
+		return false;
+
+	/* Mongoose 2004.03.26, 
+	 * This was here for vertex morph frames, still used for edit updates */
+	if (mesh->GetFaceCount())
+	{
+		rmesh.count = mesh->GetFaceCount();
+		rmesh.gbegin = 0; 
+		rmesh.gend = 1;
+		rmesh.id = meshIndex;
+		rmesh.frame = frame;
+
+		//BUG_ME("getRenderMesh Not Implemented", __FILE__, __LINE__);
+
+#ifdef STORE_ON_RENDER_IS_DUMB		
+		for (uint32 i = 0; i < rmesh.count; ++i)
+		{ 
+			freyja::Face *face = mesh->GetFace();
+
+			if (face == NULL)
+				continue;
+
+			( face->mIndices.size() < 6 ) ? face->mIndices.size() : 6;
+
+			for (uint32 j = 0, countJ = face->mIndices.size(); j < countJ; ++j)
+			{
+				polygon = mEgg->getPolygon(mesh.polygon[i]);
+				
+				if (polygon)
+				{
+					mesh.r_polygon.pushBack(polygon);
+				}
+			}
+		}
+#endif
+	}
+
+	return true;
+#endif
 
 	return false;
 }
 
 
-void RenderModel::createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh, 
-								   int32 frameIndex)
+#ifdef USING_EGG
+void RenderModel::createRenderMesh(RenderMesh &rmesh, 
+								   egg_mesh_t &mesh, int32 frameIndex)
 {
 	egg_polygon_t *polygon;
 	egg_group_t *grp;
@@ -247,7 +381,7 @@ void RenderModel::setEgg(Egg *egg)
 	mEgg = egg;
 	mMeshlist = egg->MeshList();
 }
-
+#endif
 
 
 ////////////////////////////////////////////////////////////
@@ -261,30 +395,8 @@ void RenderModel::setEgg(Egg *egg)
 
 
 ////////////////////////////////////////////////////////////
-// Unit Test code
+// Exported gobals
 ////////////////////////////////////////////////////////////
-
-#ifdef UNIT_TEST_RENDERMODEL
-int runRenderModelUnitTest(int argc, char *argv[])
-{
-	RenderModel test;
-
-	return 0;
-}
-
-
-int main(int argc, char *argv[])
-{
-	printf("[RenderModel class test]\n");
-
-	return runRenderModelUnitTest(argc, argv);
-}
-#endif
-
-
-
-Vector<RenderModel *> gRenderModels;
-
 
 bool freyjaGetRenderModelPolygon(uint32 modelIndex, uint32 polygonIndex, 
 								 RenderPolygon &face)
@@ -310,16 +422,12 @@ bool freyjaGetRenderModelMesh(uint32 modelIndex, uint32 meshIndex, uint32 frame,
 }
 
 
-
-#define USING_EGG
-#include "Egg.h"
-
 uint32 freyjaGetRenderModelCount()
 {
 #ifdef USING_EGG 
 	return 1;
 #else
-	return gRenderModels.size();
+	return gRenderModels.size() + 1;  // FIXME 
 #endif
 }
 
@@ -332,13 +440,20 @@ bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 	model.mIndex = 0;
 	return true;
 #else
-	if (modelIndex < gRenderModels.size())
+	if ( modelIndex == 0 )  // FIXME
 	{
-		//model = &(gRenderModels[modelIndex]);
-		model.mIndex = gRenderModels[modelIndex]->mIndex;
-		model.mEgg = gRenderModels[modelIndex]->mEgg;
-		model.mMeshlist = gRenderModels[modelIndex]->mMeshlist;
+		model.mIndex = 0;
+		//BUG_ME("freyjaGetRenderModel Not Implemented", __FILE__, __LINE__);
+		return true;
+	}
+	else if (modelIndex < gRenderModels.size())
+	{
+		model = *(gRenderModels[modelIndex]);
+		//model.mIndex = gRenderModels[modelIndex]->mIndex;
+		//model.mEgg = gRenderModels[modelIndex]->mEgg;
+		//model.mMeshlist = gRenderModels[modelIndex]->mMeshlist;
 
+		BUG_ME("freyjaGetRenderModel Not Implemented", __FILE__, __LINE__);
 		return true;
 	}
 #endif
@@ -347,3 +462,23 @@ bool freyjaGetRenderModel(uint32 modelIndex, RenderModel &model)
 }
 
 
+////////////////////////////////////////////////////////////
+// Unit Test code
+////////////////////////////////////////////////////////////
+
+#ifdef UNIT_TEST_RENDERMODEL
+int runRenderModelUnitTest(int argc, char *argv[])
+{
+	RenderModel test;
+
+	return 0;
+}
+
+
+int main(int argc, char *argv[])
+{
+	printf("[RenderModel class test]\n");
+
+	return runRenderModelUnitTest(argc, argv);
+}
+#endif

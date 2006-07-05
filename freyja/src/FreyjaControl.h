@@ -34,7 +34,6 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
-#include <mstl/Map.h>
 #include <mstl/Vector.h>
 #include <mgtk/Resource.h>
 

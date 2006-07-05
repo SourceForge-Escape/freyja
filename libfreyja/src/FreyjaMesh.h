@@ -55,19 +55,65 @@ class Vertex
 {
 public:
 	typedef enum {
-		fNone       = 0,
-		fRBGAColor  = 1,
-		fMaterial   = 2
+		fNone        =  0,
+		fHighlighted =  1,
+		fMaterial    =  2,
+		fSelected    =  4,
+		fHidden      =  8
 	} VertexFlags;
 
-	static size_t SerializedSize() { return 0; }
-	bool Serialize(FreyjaFileWriter &w) { return true; }
+	Vertex(index_t vertex, index_t texcoord, index_t normal)
+	{
+		mFlags = fNone;
+		mVertexIndex = vertex;
+		mTexCoordIndex = texcoord;    
+		mNormalIndex = normal;
+		mColor = INDEX_INVALID;      
+		mMaterial = INDEX_INVALID;
+		mReserved1 = 0;
+	}
 
-	unsigned char mFlags;
+	Vertex()
+	{
+		mFlags = fNone;
+		mVertexIndex = INDEX_INVALID;
+		mTexCoordIndex = INDEX_INVALID;    
+		mNormalIndex = INDEX_INVALID;
+		mColor = INDEX_INVALID;      
+		mMaterial = INDEX_INVALID;
+		mReserved1 = 0;
+	}
+
+	static size_t SerializedSize() 
+	{
+		return ( 1 + 4 * 6); 
+	}
+
+	bool Serialize(FreyjaFileWriter &w) 
+	{ 
+		freyja_file_chunk_t chunk;
+
+		chunk.type = FREYJA_CHUNK_VERTEX;
+		chunk.size = 0;
+		chunk.flags = 0x0;
+		chunk.version = 10;
+
+		w.writeInt8U(mFlags);
+		w.writeLong(mVertexIndex);
+		w.writeLong(mTexCoordIndex);
+		w.writeLong(mNormalIndex);
+		w.writeLong(mColor);
+		w.writeLong(mMaterial);
+		w.writeLong(mReserved1);
+
+		return true; 
+	}
+
+	byte mFlags;
 
 	index_t mVertexIndex; // Pool storage of XYZ position
 
-	index_t mUVIndex;     // Pool storage of UVW coordinate
+	index_t mTexCoordIndex;     // Pool storage of UV[W] coordinate
 
 	index_t mNormalIndex; // Pool storage of XYZ normal
 
@@ -109,26 +155,10 @@ public:
 
 	index_t mMaterial;
 	uint32 mFlags;
-	uint32 mSmoothingGroups;
-};
-
-class Triangle : public Face
-{
-public:
-	index_t mIndices[3];
-};
-
-class Quad : public Face
-{
-public:
-	index_t mIndices[4];
-};
-
-class Polygon : public Face
-{
-public:
+	uint32 mSmoothingGroups; // bitmap
 	Vector<index_t> mIndices;
 };
+
 
 
 class Mesh
@@ -149,7 +179,7 @@ public:
 	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
-	~Mesh() { /* FIXME */ }
+	~Mesh();
 	/*------------------------------------------------------
 	 * Pre  : Mesh object is allocated
 	 * Post : Deconstructs an object of Mesh
@@ -165,187 +195,202 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	bool Serialize(FreyjaFileWriter &w)
-	{
-		freyja_file_chunk_t chunk;
-
-		chunk.type = FREYJA_CHUNK_MESH;
-		chunk.size = 0;
-		chunk.flags = 0x0;
-		chunk.version = 10;
-
-		/* Compute byte size here */
-		chunk.size += 4;  // index_t mUID;
-		chunk.size += 4;  // uint32 mFlags;
-		chunk.size += 4;  // index_t mMaterialIndex;
-		chunk.size += 12; // vec3_t mPosition;
-		chunk.size += 12; // vec3_t mRotation;
-		chunk.size += 12; // vec3_t mScale;
-		chunk.size += mVertexPool.size() * 4;
-		chunk.size += mFreedVertices.size() * 4;
-		chunk.size += mNormalPool.size() * 4;
-		chunk.size += mFreedNormals.size() * 4;
-		chunk.size += mColorPool.size() * 4;
-		chunk.size += mFreedColors.size() * 4;
-		chunk.size += mTexCoordPool.size() * 4;
-		chunk.size += mFreedTexCoords.size() * 4;
-		chunk.size += mFaces.size() * Face::SerializedSize();
-		chunk.size += mVertices.size() * Vertex::SerializedSize();
-		chunk.size += mWeights.size() * Weight::SerializedSize();
-
-		/* Write chunk header to diskfile */
-		w.writeLong(FREYJA_CHUNK_MESH);
-		w.writeLong(chunk.size);
-		w.writeLong(chunk.flags);
-		w.writeLong(chunk.version);
-
-		/* Write chunk data to diskfile */
-		w.writeLong(mUID);
-		w.writeLong(mFlags);
-		w.writeLong(mMaterialIndex);
-		w.writeFloat32(mPosition[0]);
-		w.writeFloat32(mPosition[1]);
-		w.writeFloat32(mPosition[2]);
-		w.writeFloat32(mRotation[0]);
-		w.writeFloat32(mRotation[1]);
-		w.writeFloat32(mRotation[2]);
-		w.writeFloat32(mScale[0]);
-		w.writeFloat32(mScale[1]);
-		w.writeFloat32(mScale[2]);
-
-		SerializePool(w, mVertexPool, mFreedVertices);
-		SerializePool(w, mNormalPool, mFreedNormals);
-		SerializePool(w, mColorPool, mFreedColors);
-		SerializePool(w, mTexCoordPool, mFreedTexCoords);
-
-		for ( uint32 i = 0; i < mFaces.size(); ++i )
-		{
-			if ( mFaces[i] ) 
-				mFaces[i]->Serialize(w);
-		}
-
-		for ( uint32 i = 0; i < mVertices.size(); ++i )
-		{
-			if ( mVertices[i] ) 
-				mVertices[i]->Serialize(w);
-		}
-
-		for ( uint32 i = 0; i < mWeights.size(); ++i )
-		{
-			if ( mWeights[i] ) 
-				mWeights[i]->Serialize(w);
-		}
-
-		return true;
-	}
-
-	bool SerializePool(FreyjaFileWriter &w, 
-					   Vector<vec_t> &v, mstl::stack<index_t> &s)
-	{
-		mstl::stack<index_t> copy; // We don't really care about order
-
-		for ( uint32 i = 0; i < v.size(); ++i )
-		{
-			w.writeFloat32(v[i]);
-		}
-		
-		for ( uint32 i = 0; i < s.size(); ++i )
-		{
-			index_t item = s.pop();
-			copy.push(item);
-			w.writeLong(item);
-		}
-
-		while ( !copy.empty() )
-		{
-			s.push(copy.pop());
-		}
-
-		return true;
-	}
-
 	Mesh *Copy();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clone this mesh
+	 ------------------------------------------------------*/
 
 
-	uint32 GetVertexCount() { return 0; }
+	void GetBBox(vec3_t min, vec3_t max)
+	{
+		HEL_VEC3_COPY(mBoundingVolume.mBox.mMin, min);
+		HEL_VEC3_COPY(mBoundingVolume.mBox.mMax, max);
+	}
 
 
-	uint32 GetTexCoordCount() { return 0; }
-
-
-	uint32 GetNormalCount() { return 0; }
-
-
-	uint32 GetVertexWeightCount() { return 0; }
-
-
-	uint32 GetFaceCount() { return 0; }
+	Vector3d GetBBoxCenter()
+	{
+		Vector3d u, v;
+		u.Set(mBoundingVolume.mBox.mMax);
+		v.Set(mBoundingVolume.mBox.mMin);
+		return (u - v);
+	}
 
 
 	void GetColor(index_t colorIndex, vec4_t rgba)
-	{
-		// FIXME: Check flags for rgba or rgb
-		GetVec(mColorPool, 4, colorIndex, rgba);
-	}
+	{	GetVec(mColorPool, 4, colorIndex, rgba);	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	uint32 GetFaceCount() { return mFaces.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	const char *GetName() { return mName; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get human readable name of mesh
+	 ------------------------------------------------------*/
 
 
 	void GetNormal(index_t normalIndex, vec3_t xyz)
-	{
-		GetTripleVec(mNormalPool, normalIndex, xyz);
-	}
+	{ GetTripleVec(mNormalPool, normalIndex, xyz); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	uint32 GetNormalCount() { return mNormalPool.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	void GetSelectedVertices(Vector<index_t> &list);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Return a list of vertices flagged fSelected 
+	 *        ( by index )
+	 ------------------------------------------------------*/
 
 
 	void GetTexCoord(index_t texCoordIndex, vec3_t uvw)
-	{
-		// FIXME: Check flags for uv or uvw
-		GetTripleVec(mTexCoordPool, texCoordIndex, uvw);
-	}
+	{	GetTripleVec(mTexCoordPool, texCoordIndex, uvw);	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 
-	void GetVertex(index_t vertexIndex, vec3_t xyz)
-	{
-		GetTripleVec(mVertexPool, vertexIndex, xyz);
-	}
+	uint32 GetTexCoordCount() { return mTexCoordPool.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	Vertex *GetVertex(index_t vertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : vertexIndex is valid for this mesh
+	 * Post : Return vertex if it exists or NULL
+	 ------------------------------------------------------*/
+
+
+	Vector3d GetVertexNormal(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	Vector3d GetVertexPosition(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	Vector3d GetVertexTexCoord(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	uint32 GetVertexCount() { return mVertices.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	void GetVertexPos(index_t vertexIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void GetVertexArrayPos(index_t vertexIndex, vec3_t xyz)
+	{	GetTripleVec(mVertexPool, vertexIndex, xyz);	}
+	/*------------------------------------------------------
+	 * Pre  : NOTE This is not the same as GetVertexClassPos
+	 *        This is the ith point stored in the point array
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	uint32 GetWeightCount() { return mWeights.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	bool Serialize(FreyjaFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the mesh to diskfile as a chunk
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void SetName(const char *name)
+	{
+		strncpy(mName, name, 31);
+		mName[31] = 0;
+	}
+
 	// 'Location' interface
-	void SetPosition(vec3_t xyz) { Translate(xyz[0], xyz[1], xyz[2]); }
-	void SetPositionX(vec_t x) { Translate(x, mPosition[1], mPosition[2]); }
-	void SetPositionY(vec_t y) { Translate(mPosition[0], y, mPosition[2]); }
-	void SetPositionZ(vec_t z) { Translate(mPosition[0], mPosition[1], z); }
-	void SetDeltaPosition(vec3_t xyz) 
-	{Translate(mPosition[0]+xyz[0], mPosition[1]+xyz[1], mPosition[2]+xyz[2]);}
-	void SetDeltaPositionX(vec_t x) 
-	{ Translate(mPosition[0]+x, mPosition[1], mPosition[2]); }
-	void SetDeltaPositionY(vec_t y)
-	{ Translate(mPosition[0], mPosition[1]+y, mPosition[2]); }
-	void SetDeltaPositionZ(vec_t z)
-	{ Translate(mPosition[0], mPosition[1], mPosition[2]+z); }
+	void GetPosition(vec3_t xyz) { mPosition.Set(xyz); }
+	void SetPosition(const vec3_t xyz) { HEL_VEC3_COPY(xyz, mPosition.mVec); }
+	void SetPositionX(vec_t x) { mPosition.mVec[0] = x; }
+	void SetPositionY(vec_t y) { mPosition.mVec[1] = y; }
+	void SetPositionZ(vec_t z) { mPosition.mVec[2] = z; }
+
+	void SetDeltaPosition(const vec3_t xyz) 
+	{
+		mPosition.mVec[0] += xyz[0]; 
+		mPosition.mVec[1] += xyz[1];
+		mPosition.mVec[2] += xyz[2];
+	}
+
+	void SetDeltaPositionX(vec_t x) { mPosition.mVec[0]+=x; }
+	void SetDeltaPositionY(vec_t y)	{ mPosition.mVec[1]+=y; }
+	void SetDeltaPositionZ(vec_t z) { mPosition.mVec[2]+=z; }
 
 	// 'Rotation' Euler angle interface 
-	void SetRotationQuat(vec4_t wxyz) {}
-	void SetDeltaRotationQuat(vec4_t wxyz) {}
+	void GetRotation(vec3_t xyz) { mRotation.Set(xyz); }
+	void SetRotationQuat(const vec4_t wxyz) {}
+	void SetDeltaRotationQuat(const vec4_t wxyz) {}
 
 	// 'Rotation' Quaternion interface 
-	void SetRotation(vec3_t xyz) {}
+	void SetRotation(const vec3_t xyz) {}
 	void SetRotationX(vec_t x) {}
 	void SetRotationY(vec_t y) {}
 	void SetRotationZ(vec_t z) {}
-	void SetDeltaRotation(vec3_t xyz) {}	
+	void SetDeltaRotation(const vec3_t xyz) {}	
 	void SetDeltaRotationX(vec_t x) {}
 	void SetDeltaRotationY(vec_t y) {}
 	void SetDeltaRotationZ(vec_t z) {}
 
 	// 'Size' interface
-	void SetScale(vec3_t xyz) {}	
+	void SetScale(const vec3_t xyz) {}	
 	void SetScaleX(vec_t x) {}
 	void SetScaleY(vec_t y) {}
 	void SetScaleZ(vec_t z) {}
-	void SetDeltaScale(vec3_t xyz) {}	
+	void SetDeltaScale(const vec3_t xyz) {}	
 	void SetDeltaScaleX(vec_t x) {}
 	void SetDeltaScaleY(vec_t y) {}
 	void SetDeltaScaleZ(vec_t z) {}
@@ -353,7 +398,7 @@ public:
 
 	bool Serialize(FreyjaFileReader &r)
 	{
-		// FIXME
+		BUG_ME("AddWeight Not Implemented", __FILE__, __LINE__);
 		return false;
 	}
 
@@ -430,6 +475,10 @@ public:
 	 ------------------------------------------------------*/
 
 
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
+
 	Mesh *Cut();
 
 	void Paste(Mesh *model);
@@ -442,12 +491,16 @@ public:
 
 	void Translate(vec_t x, vec_t y, vec_t z);
 
+	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
+	{
+		BUG_ME("AddWeight Not Implemented", __FILE__, __LINE__);
+	}
 
 
 	void SetColor(index_t colorIndex, const vec4_t rgba)
 	{
 		// FIXME: Check flags for rgba or rgb
-		SetVec(mColorPool, 4, colorIndex, rgba);
+		SetVec(mColorPool, 4, colorIndex, (vec_t*)rgba);
 	}
 
 
@@ -493,6 +546,83 @@ public:
 	}
 
 
+	Face *GetFace(index_t idx)
+	{
+		Face **array = mFaces.getVectorArray();
+		
+		if ( idx < mFaces.size() )
+		{
+			return array[idx];
+		}
+
+		return NULL;
+	}
+
+
+	index_t CreateFace()
+	{
+		Face **array = mFaces.getVectorArray();
+		Face *face = new Face();
+
+		for ( uint32 i = 0, count = mFaces.size(); i < count; ++i )
+		{
+			if (array[i] == NULL)
+			{
+				array[i] = face;
+				return i;
+			}
+		}
+
+		mFaces.pushBack(face);
+		return mFaces.size() - 1;
+	}
+
+
+	vec_t *GetVertexArray()
+	{
+		return mVertexPool.getVectorArray();
+	}
+
+	index_t CreateVertex(const vec3_t xyz)
+	{
+		vec3_t nxyz = {0.0f, 1.0f, 0.0f};
+		vec3_t uvw = {0.5f, 0.5f, 0.0f};
+		return CreateVertex(xyz, uvw, nxyz);
+	}
+
+	void SetMaterial(index_t idx)
+	{
+		mMaterialIndex = idx;
+	}
+
+	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
+	{
+		Vertex **array = mVertices.getVectorArray();
+		index_t vertex = AddTripleVec(mVertexPool, mFreedVertices, (vec_t*)xyz);
+		index_t texcoord = AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw);
+		index_t normal = AddTripleVec(mNormalPool, mFreedNormals, (vec_t*)nxyz);
+		Vertex *vert = new Vertex(vertex, texcoord, normal);
+
+		for ( uint32 i = 0, count = mVertices.size(); i < count; ++i )
+		{
+			if (array[i] == NULL)
+			{
+				array[i] = vert;
+				return i;
+			}
+		}
+
+		mVertices.pushBack(vert);
+		return mVertices.size() - 1;
+	}
+
+
+	void DeleteVertex(index_t vertexIndex)
+	{
+		BUG_ME("DeleteVertex Not Implemented", __FILE__, __LINE__);
+	}
+
+
 	bool WeldVertices(index_t a, index_t b)
 	{
 		Face *face;
@@ -516,8 +646,52 @@ public:
 		return true;
 	}
 
+	void ClampAllTexCoords()
+	{
+		ClampAllTexCoords(0.0f, 1.0f);
+	}
+
+	void ClampAllTexCoords(vec_t min, vec_t max)
+	{
+		ClampVecValues(mTexCoordPool, min, max);
+	}
+
+	void SetBBox(const vec3_t min, const vec3_t max)
+	{
+		HEL_VEC3_COPY(min, mBoundingVolume.mBox.mMin);
+		HEL_VEC3_COPY(max, mBoundingVolume.mBox.mMax);
+	}
+
 
 private:
+
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
+
+	bool SerializePool(FreyjaFileWriter &w, 
+					   Vector<vec_t> &v, mstl::stack<index_t> &s);
+
+
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
+
+	void ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max)
+	{
+		vec_t *array = v.getVectorArray();
+		vec_t r;
+
+		for ( uint32 i = 0, n = v.size(); i < n; ++i )
+		{
+			r = array[i];
+
+			if (r < min)
+				array[i] = min;
+			else if (r > max)
+				array[i] = max;
+		}
+	}
 
 	index_t AddVec(Vector<vec_t> &v, mstl::stack<index_t>&f, uint32 n, vec_t *u)
 	{
@@ -561,7 +735,7 @@ private:
 	}
 
 
-	void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, const vec_t *u)
+	void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
 	{
 		tIndex *= n;
 
@@ -631,7 +805,12 @@ private:
 		array[tIndex + 2] = xyz[2];
 	}
 
-	static index_t mNextUID;
+
+	const static uint32 mNameSize = 32;
+
+	static index_t mNextUID;  // UIDs outside of owner's array index
+
+	char mName[mNameSize];  // Human readable name of mesh
 
 	index_t mUID;
 
@@ -639,11 +818,11 @@ private:
 
 	index_t mMaterialIndex;
 
-	vec3_t mPosition;
+	Vector3d mPosition;
 
-	vec3_t mRotation;  // Set by quaternion, store as euler for Size interface
+	Vector3d mRotation;  // Store as Euler Angles for 'Size' interface
 
-	vec3_t mScale;
+	Vector3d mScale;
 
 	BoundingBoxCombo mBoundingVolume;
 

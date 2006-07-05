@@ -44,6 +44,7 @@ class FreyjaPakFile
 		mFilename = String::strdup(filename);
 		mOffset = offset;
 		mSize = size;
+		mXORKey = 0x0;
 	}
 
 	~FreyjaPakFile()
@@ -54,23 +55,44 @@ class FreyjaPakFile
 		}
 	}
 
+	void decryptBufferXOR(unsigned char *buffer, unsigned int size)
+	{
+		unsigned int i;
+
+
+		for (i = 0; i < size; ++i)
+		{
+			buffer[i] ^= mXORKey;
+		}
+	}
+
 	const char *getName() { return mFilename; }
 
 	uint32 getDataOffset() { return mOffset; }
 
 	uint32 getDataSize() { return mSize; }
 
+	void setXORKey(unsigned char key) { mXORKey = key; }
+
 	byte *getCopyOfData(FreyjaFileReader &r)
 	{
 		byte *buffer = new byte[mSize];
 		r.setFileOffset(mOffset);
 		r.readBuffer(mSize, buffer);
+
+		if (mXORKey)
+		{
+			decryptBufferXOR(buffer, mSize);
+		}
+
 		return buffer;
 	}
 
  private:
 
 	char *mFilename;
+
+	unsigned char mXORKey;
 
 	uint32 mOffset;
 
@@ -186,9 +208,10 @@ class FreyjaPakDirectory
 		mPakDirs.pushBack(dir);
 	}
 
-	void addFile(FreyjaPakFile *file)
+	index_t addFile(FreyjaPakFile *file)
 	{
 		mPakFiles.pushBack(file);
+		return (mPakFiles.size() - 1);
 	}
 
  protected:
@@ -251,7 +274,9 @@ class FreyjaPakReader
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size);
+	index_t addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size);
+
+	index_t addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size, unsigned char key);
 
 	uint32 mUID;
 

@@ -42,6 +42,18 @@
 
 extern "C" {
 
+
+	///////////////////////////////////////////////////////////////////////
+	// Freyja ABI 0.9.5
+	///////////////////////////////////////////////////////////////////////
+	
+	void freyjaModelMeshPolygonAddTexCoord1i(index_t modelIndex, index_t meshIndex, 
+											 index_t polygonIndex, index_t texcoordIndex);
+
+	void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex, 
+										   index_t polygonIndex, index_t vertexIndex);
+
+
 	///////////////////////////////////////////////////////////////////////
 	// Freyja ABI 0.9.3 
 	///////////////////////////////////////////////////////////////////////
@@ -57,6 +69,8 @@ extern "C" {
 	uint32 freyjaGetModelCount();
 
 	index_t freyjaGetCurrentModelIndex();
+
+	index_t freyjaModelCreateMesh(index_t modelIndex);
 
 	void freyjaModelGenerateVertexNormals(index_t modelIndex);
 
@@ -485,6 +499,8 @@ extern "C" {
 
 	void freyjaGetMeshFrameBoundingBox(index_t meshIndex, 
 										uint32 frame, vec3_t min, vec3_t max);
+
+	index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex);
 
 	uint32 freyjaGetMeshFlags(index_t meshIndex);
 

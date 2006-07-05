@@ -39,13 +39,15 @@
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
-#include <mstl/Stack.h>
+#include <mstl/stack.h>
 
 #include "FreyjaState.h"
 #include "Texture.h"
 #include "BezierPatch.h"
 #include "freyja_events.h"
 
+
+using namespace mstl;
 
 typedef vec_t bbox2_t[3][3];
 
@@ -152,9 +154,9 @@ class Freyja3dCursor
 
 	FreyjaState mLastState;
 
-	Stack<FreyjaState *> mStack;
+	mstl::stack<FreyjaState *> mStack;
 
-	Stack<FreyjaState *> mRedoStack;
+	mstl::stack<FreyjaState *> mRedoStack;
 
 	Freyja3dCursorFlags_t mMode;
 };
