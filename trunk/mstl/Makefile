@@ -11,6 +11,7 @@ BUILD_RELEASE_DIR=bin/release
 BUILD_DEBUG_DIR=bin/debug
 BUILD_PROF_DIR=bin/prof
 BUILD_TEST_DIR=bin/test
+SRC_DIR=mstl
 
 INSTALL_INCLUDE=/usr/local/include
 
@@ -54,7 +55,7 @@ LDFLAGS=-lstdc++
 Vector.test:
 	mkdir -p $(BUILD_TEST_DIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) \
-		-o $(BUILD_TEST_DIR)/Vector.test src/test_vector.cpp
+		-o $(BUILD_TEST_DIR)/Vector.test $(SRC_DIR)/test_vector.cpp
 
 
 ########################################################
@@ -67,5 +68,5 @@ install: install-headers
 install-headers:
 	@-printf "Installing headers                           "
 	@-mkdir -p $(INSTALL_INCLUDE)/$(NAME)
-	@-cp -f src/*.h $(INSTALL_INCLUDE)/$(NAME)
+	@-cp -f $(SRC_DIR)/*.h $(INSTALL_INCLUDE)/$(NAME)
 	@-printf "[DONE]\n"

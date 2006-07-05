@@ -3,8 +3,8 @@
  * 
  * Project : Freyja
  * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/~mongoose/
+ * Email   : mongoose@icculus.org
  * Object  : Vector
  * License : No use w/o permission (C) 2002 Mongoose
  * Comments: mtk template vector
@@ -12,9 +12,12 @@
  *           UINT_MAX is an error condition, used in place of -1
  * 
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------ 
+ *
+ * 2006.07.01:
+ * Mongoose - ISO C++98 update
  *
  * 2002.08.31:
  * Mongoose - Created
@@ -30,45 +33,56 @@
 
 #define VECTOR_BASE_EXPAND 16
 
+namespace mstl {
 
 template <class Object> class Vector
 {
 public:
 
-	Vector()
+	Vector() :
+		mData(0x0),
+		mReserve(0),
+		mStart(0),
+		mEnd(0),
+		mExpand(VECTOR_BASE_EXPAND)
 	{
-		mData = 0x0;
-
-		mReserve = 0;
-		mStart = 0;
-		mEnd = 0;
-		mExpand = VECTOR_BASE_EXPAND;
 	}
 
 
-	Vector(Vector &vector)
+	Vector(Vector &vector) :
+		mData(0x0),
+		mReserve(0),
+		mStart(0),
+		mEnd(0),
+		mExpand(VECTOR_BASE_EXPAND)
 	{
-		mData = 0x0;
-
-		mReserve = 0;
-		mStart = 0;
-		mEnd = 0;
-		mExpand = VECTOR_BASE_EXPAND;
-
 		copy(vector);
 	}
 
 
-	Vector(unsigned int size)
+	Vector(unsigned int size) :
+		mData(0x0),
+		mReserve(0),
+		mStart(0),
+		mEnd(0),
+		mExpand(VECTOR_BASE_EXPAND)
 	{
-		mData = 0x0;
-
-		mReserve = 0;
-		mStart = 0;
-		mEnd = 0;
-		mExpand = VECTOR_BASE_EXPAND;
-
 		resize(size);
+	}
+
+
+	Vector &operator=(const Vector<Object> &v)
+	{
+		mData = NULL;
+		mReserve = v.mReserve;
+		mStart = v.mStart;
+		mEnd = v.mEnd;
+
+		if ( v.mData != NULL && mReserve )
+		{
+			mData = new Object[mReserve];
+			memcpy(mData, v.mData, sizeof(Object) * mReserve);			
+		}
 	}
 
 
@@ -476,5 +490,6 @@ public:
 	unsigned int mIndex;
 };
 
+}
 
 #endif
