@@ -164,9 +164,16 @@ bool Mesh::Serialize(FreyjaFileWriter &w)
 }
 
 
+void Mesh::GetVertexArrayPos(index_t vertexIndex, vec3_t xyz)
+{	
+	if (vertexIndex < mVertexPool.size())
+		GetTripleVec(mVertexPool, vertexIndex, xyz);	
+}
+
+
 void Mesh::GetVertexPos(index_t vertexIndex, vec3_t xyz)
 {
-	Vertex *vert = mVertices[vertexIndex];
+	Vertex *vert = GetVertex(vertexIndex);
 
 	if ( vert ) 
 	{
@@ -295,7 +302,7 @@ bool Mesh::SerializePool(FreyjaFileWriter &w,
 // until 0.10 release 
 Vector<Mesh *> gFreyjaMeshes;
 index_t gFreyjaCurrentModel = 0;
-index_t gFreyjaCurrentMesh = INDEX_INVALID;
+index_t gFreyjaCurrentMesh = 0; //INDEX_INVALID;
 
 
 ////////////////////////////////////
@@ -341,17 +348,17 @@ void freyjaModelDeleteMesh(index_t modelIndex, index_t meshIndex)
 }
 
 
-// FIXME: No model usage
+// FIXME: No model usage`
 Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex)
 {
 	Mesh **array = gFreyjaMeshes.getVectorArray();
 
-	if ( gFreyjaCurrentMesh < gFreyjaMeshes.size() && array[meshIndex] != NULL )
+	//ASSERT_MSG( meshIndex < gFreyjaMeshes.size(), "meshIndex [%i] < gFreyjaMeshes.size() [%i]", meshIndex, gFreyjaMeshes.size() );
+
+	if ( meshIndex < gFreyjaMeshes.size() && array[meshIndex] != NULL )
 	{
 		return array[meshIndex];
 	}
-
-	//DEBUG_MSGF("Mesh[%i] == NULL", meshIndex);
 
 	return NULL;
 }
@@ -1300,8 +1307,6 @@ void freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz)
 		Vector3d v = mesh->GetVertexPosition(vertexIndex);
 		HEL_VEC3_COPY(v.mVec, xyz);
 	}
-		
-	BUG_ME("freyjaGetVertexXYZ3fv Not Implemented", __FILE__, __LINE__);
 }
 
 
