@@ -122,7 +122,10 @@ void FreyjaModelEventsAttach()
 
 FreyjaModel::FreyjaModel()
 {
-	/* Search ~/.freyja/plugins/ first */
+	/* Search local paths first ( mostly debugging ) */
+	freyjaPluginAddDirectory("plugins/model/debug");
+
+	/* Search ~/.freyja/plugins/ second ( first for real path for end users ) */
 	char *pluginDir = freyja_rc_map("plugins/");
 	freyjaPluginAddDirectory(pluginDir);
 	delete [] pluginDir;

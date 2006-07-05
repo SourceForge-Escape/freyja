@@ -53,6 +53,8 @@
 
 #include "FreyjaPluginABI.h"
 
+#define QUAT_BACKEND 0
+
 
 using namespace freyja;
 
@@ -891,20 +893,6 @@ int32 freyjaLoadModel(const char *filename)
 	char buffer[64];
 	
 	
-#ifdef USING_EGG
-	/* HACK - This is to load Egg inline like in current freyja,
-	 *        until it's removed and made into purely a plugin */
-	if (freyja__getEggBackend()->loadFile((char*)filename) == 0)
-	{
-		int32 count = freyjaGetModelMeshCount(0); // egg is single model
-
-		for (i = 0; i < count; ++i)
-			freyjaMeshClampTexCoords(i);
-
-		return 0;
-	}
-#endif
-
 	if (freyjaCheckModel((char *)filename) != 0)
 		return -1;
 
@@ -1121,7 +1109,7 @@ int32 freyjaSaveModel(const char *filename)
 			w.writeLong(chunk.version);
 			w.writeCharString(64, buffer);
 			w.writeLong(idx);
-#ifdef QUAT_BACKEND
+#if QUAT_BACKEND
 			w.writeLong(0x0);
 #else
 			w.writeLong(32); // Flag 32 - Using euler angles
@@ -1132,7 +1120,7 @@ int32 freyjaSaveModel(const char *filename)
 			for (j = 0; j < 3; ++j)
 				w.writeFloat32(xyz[j]);
 
-#ifdef QUAT_BACKEND
+#if QUAT_BACKEND
 			freyjaGetBoneRotationQuat4fv(index, wxyz);
 			
 			for (j = 0; j < 4; ++j)
@@ -2254,18 +2242,6 @@ void freyjaPluginsInit()
 	freyjaPluginBegin();
 	freyjaPluginDescription1s("Freyja Model (*.ja)");
 	freyjaPluginAddExtention1s("*.ja");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
-						 FREYJA_PLUGIN_SKELETON |
-						 FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
-						 FREYJA_PLUGIN_SKELETON |
-						 FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginEnd();
-
-
-	freyjaPluginBegin();
-	freyjaPluginDescription1s("GooseEgg 8 Model (*.egg)");
-	freyjaPluginAddExtention1s("*.egg");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 						 FREYJA_PLUGIN_SKELETON |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);

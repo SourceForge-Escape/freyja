@@ -789,6 +789,33 @@ private:
 		return (( v.end() / 3 ) - 1);
 	}
 
+	// NOTE: If this is a sparse array ( most of these are ) you operate
+	// on more than actually used data, however it doesn't use the class
+	// index system ( so it likely still faster in general case )
+	void TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz)
+	{
+		uint32 i, idx, size = v.size();
+		vec_t *array = v.getVectorArray();
+
+		for ( i = 0; i < size; ++i )
+		{
+			idx = i * 3;
+			array[idx  ] += xyz[0];  
+			array[idx+1] += xyz[1];  
+			array[idx+2] += xyz[2];  
+		}
+	}
+
+	void TripleVec_Transform(Vector<vec_t> &v, Matrix &mat)
+	{
+		uint32 i, size = v.size();
+		vec_t *array = v.getVectorArray();
+
+		for ( i = 0; i < size; i += 3 )
+		{
+			mat.Multiply3v(array + i);
+		}
+	}
 
 	void GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz)
 	{

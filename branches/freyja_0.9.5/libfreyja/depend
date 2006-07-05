@@ -120,36 +120,3 @@ $(BUILDDIR)/FreyjaMesh.o: freyja/FreyjaMesh.cpp freyja/FreyjaPluginABI.h \
   freyja/FreyjaMesh.h freyja/FreyjaFileWriter.h freyja/FreyjaFileReader.h
 	 $(DO_CC)
 
-$(BUILDDIR)/freyjaimageutil.o: tools/freyjaimageutil.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/freyjautil.o: tools/freyjautil.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/cull.o: tools/cull.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/extractWedge.o: tools/extractWedge.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/raw2riff.o: tools/raw2riff.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/lineageIIraw2obj.o: tools/lineageIIraw2obj.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/extractFace.o: tools/extractFace.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/extractFace2.o: tools/extractFace2.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/extractUTIndex.o: tools/extractUTIndex.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/extractVec2.o: tools/extractVec2.cpp
-	 $(DO_CC)
-
-$(BUILDDIR)/extractVec3.o: tools/extractVec3.cpp
-	 $(DO_CC)
-

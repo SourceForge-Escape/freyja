@@ -10,5 +10,5 @@ cp -f lib*/${SELECT}/*.so ${TEST}
 
 ldd ./freyja/${SELECT}/freyja | grep ${TEST}
 
-./freyja/${SELECT}/freyja
+$@ ./freyja/${SELECT}/freyja
 
