@@ -32,6 +32,10 @@
 
  ChangeLog 0.9 ( trunk )
  =====================================================================
+ 
+20060704 Mongoose
+ - Masssive build backport from dev branch
+
 
  20060617 Mongoose
  - Fixes for mesh creation and rendering
