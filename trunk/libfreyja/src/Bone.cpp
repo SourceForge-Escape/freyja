@@ -31,16 +31,17 @@ Vector<Bone *> Bone::mGobalPool;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Bone::Bone()
+Bone::Bone() :
+	mFlags(0),
+	mSkeleton(INDEX_INVALID),
+	mParent(INDEX_INVALID),
+	mChildren(),
+	mRotation(),
+	mTranslation(0.0f, 0.0f, 0.0f),
+	mBoneToWorld(),
+	mUID(INDEX_INVALID)
 {
-	mUID = INDEX_INVALID;
-	mSkeleton = INDEX_INVALID;
-	mParent = INDEX_INVALID;
 	mName[0] = '\0';
-	mFlags = 0;
-	mTranslation.zero();
-	mRotation = Quaternion();
-	mBoneToWorld.setIdentity();
 }
 
 

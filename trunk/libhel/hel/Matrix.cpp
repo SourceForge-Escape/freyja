@@ -279,6 +279,19 @@ void Matrix::multiply3v(vec3_t v, vec3_t result)
 	result[2] = mMatrix[8]*x + mMatrix[9]*y + mMatrix[10]*z + mMatrix[14];
 }
 
+
+// row order
+void Matrix::Multiply3v(vec3_t v)
+{
+	vec_t x = v[0], y = v[1], z = v[2];
+
+
+	v[0] = mMatrix[0]*x + mMatrix[1]*y + mMatrix[ 2]*z + mMatrix[12];
+	v[1] = mMatrix[4]*x + mMatrix[5]*y + mMatrix[ 6]*z + mMatrix[13];
+	v[2] = mMatrix[8]*x + mMatrix[9]*y + mMatrix[10]*z + mMatrix[14];
+}
+
+
 // row order
 void Matrix::multiply4d(double *v, double *result)
 {

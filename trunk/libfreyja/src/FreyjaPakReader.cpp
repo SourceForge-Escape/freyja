@@ -133,10 +133,17 @@ byte *FreyjaPakReader::getFileInCurrentDirectory(const char *vfsFilename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size)
+index_t FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size)
+{
+	return addFullPathFileDesc(vfsFilename, offset, size, 0x0);
+}
+
+
+index_t FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset, uint32 size, unsigned char key)
 {
 	FreyjaPakDirectory *pakDir = &mRoot, *tmpDir;
 	FreyjaPakFile *pakFile;
+	index_t fi = INDEX_INVALID;
 	const uint32 blimit = 127;
 	char buffer[blimit+1];
 	uint32 i, b, length;
@@ -145,7 +152,7 @@ void FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset
 
 	if (vfsFilename == 0x0 || vfsFilename[0] == 0)
 	{
-		return;
+		return INDEX_INVALID;
 	}
 
 	length = strlen(vfsFilename);
@@ -173,7 +180,7 @@ void FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset
 				if (tmpDir == 0x0)
 				{
 					tmpDir = new FreyjaPakDirectory(buffer);
-					pakDir->addDir(tmpDir);
+					/*fi =*/ pakDir->addDir(tmpDir);
 				}
 
 				pakDir = tmpDir;
@@ -196,13 +203,17 @@ void FreyjaPakReader::addFullPathFileDesc(const char *vfsFilename, uint32 offset
 			if (vfsFilename[i+1] == 0)
 			{
 				pakFile = new FreyjaPakFile(buffer, offset, size);
-				pakDir->addFile(pakFile);
+				pakFile->setXORKey(key);
+
+				fi = pakDir->addFile(pakFile);
 #ifdef DEBUGPAK
 				freyjaPrintMessage("+ %s/%s", pakDir->getName(), buffer);
 #endif
 			}
 		}
 	}
+
+	return fi;
 }
 
 

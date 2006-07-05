@@ -33,6 +33,20 @@
  ChangeLog 0.9 ( trunk )
  =====================================================================
 
+ 20060617 Mongoose
+ - Fixes for mesh creation and rendering
+ - Updates to build system
+ - Finalized new plugin build structure
+ - Egg removed
+
+
+ 20060430 Mongoose
+ - 0.9.5 build with stubs ( Has 0.9.3 API wrappers to 0.9.5 API )
+ - Code clean up
+ - FreyjaFSM a real singleton now --
+   Kids don't use this in plugins use the C ABI for state machine access
+
+
  20060423 Mongoose
  - win32 builds of lineageII tools
  - Several bug fixes

@@ -45,6 +45,7 @@
 #include "FreyjaPluginABI.h"
 #include "FreyjaFileReader.h"
 #include "FreyjaPlugin.h"
+#include "FreyjaMesh.h"
 
 
 class FreyjaFSM
@@ -54,12 +55,6 @@ public:
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
-
-	FreyjaFSM();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of FreyjaFSM
-	 ------------------------------------------------------*/
 
 	virtual ~FreyjaFSM();
 	/*------------------------------------------------------
@@ -238,8 +233,27 @@ public:
 	 * Post : Appends keyframe to skeletal animation
 	 ------------------------------------------------------*/
 
-	static FreyjaFSM *mFreyjaFSM;       /* Singleton and public use */
+	static FreyjaFSM *GetInstance()
+	{
+		if ( mInstance == NULL )
+		{
+			mInstance = new FreyjaFSM();
+		}
 
+		return mInstance;
+	}
+
+protected:
+
+	FreyjaFSM();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of FreyjaFSM
+	 ------------------------------------------------------*/
+
+	static FreyjaFSM *mInstance; /* Singleton for reals -- put this off
+								  * until some user plugins where trying 
+								  * to use it! */
 
 private:
 
@@ -259,6 +273,8 @@ private:
 
 	Vector<index_t> mTexCoordList;      /* Current polygon's texel list */
 
+	freyja::Mesh *mMesh;                /* Mesh outside Scene for FSM use */
+
 	index_t mTextureId;                 /* Texture id for current polygon */
 
 	index_t mIndexVertex;               /* Indices controlled by fsm */
@@ -268,6 +284,8 @@ private:
 	index_t mIndexPolygon;
 
 	index_t mIndexGroup;
+
+	index_t mIndexModel;
 
 	index_t mIndexMesh;
 

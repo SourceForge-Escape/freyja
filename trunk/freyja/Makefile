@@ -98,6 +98,8 @@ LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
 #LD_FLAGS += -Wl,-z,defs
 #LD_FLAGS += -Wl,-O1
 
+CG_LD_FLAGS=-lCgGL -lCg
+
 
 CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include
 
