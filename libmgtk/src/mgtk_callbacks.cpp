@@ -47,6 +47,8 @@
 #include "mgtk_events.h"
 #include "mgtk_keys.h"
 
+using namespace mstl;
+
 
 float spinbutton_value_get_float(int event, bool *error);
 int spinbutton_uint_set_range(GtkSpinButton *spin, 

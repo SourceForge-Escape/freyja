@@ -131,6 +131,11 @@ class FreyjaTexture
 
  private:
 
+	FreyjaTexture(const FreyjaTexture &ft);
+
+	FreyjaTexture &operator=(const FreyjaTexture &ft);
+
+
 	////////////////////////////////////////////////////////////
 	// Private Accessors
 	////////////////////////////////////////////////////////////

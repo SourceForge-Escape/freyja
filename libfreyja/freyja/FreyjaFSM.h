@@ -38,7 +38,6 @@
 
 #include <stdarg.h>
 #include <mstl/stack.h>
-#include <mstl/Map.h>
 #include <mstl/Vector.h>
 #include <hel/math.h>
 
@@ -258,6 +257,11 @@ protected:
 
 private:
 
+	FreyjaFSM(const FreyjaFSM &fsm);
+
+	FreyjaFSM &operator=(const FreyjaFSM &fsm);
+
+
 	////////////////////////////////////////////////////////////
 	// Private Accessors
 	////////////////////////////////////////////////////////////
@@ -278,6 +282,8 @@ private:
 
 	index_t mTextureId;                 /* Texture id for current polygon */
 
+	index_t mIndexModel;
+
 	index_t mIndexVertex;               /* Indices controlled by fsm */
 
 	index_t mIndexTexCoord;
@@ -285,8 +291,6 @@ private:
 	index_t mIndexPolygon;
 
 	index_t mIndexGroup;
-
-	index_t mIndexModel;
 
 	index_t mIndexMesh;
 

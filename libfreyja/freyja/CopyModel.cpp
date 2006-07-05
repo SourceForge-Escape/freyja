@@ -29,9 +29,10 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-CopyModel::CopyModel()
+CopyModel::CopyModel() :
+	mAppendMode(false),
+	mCopyMesh()
 {
-	mAppendMode = false;
 }
 
 

@@ -76,7 +76,7 @@ class FreyjaCamera
 	class FlyByPath
 	{ 
 	public:
-		Vector <FlyByNode *> path;  /* Flyby path */
+		mstl::Vector <FlyByNode *> path;  /* Flyby path */
 	};
 
 
@@ -324,8 +324,6 @@ class FreyjaCamera
 
 	Quaternion mQ;              /* Quaternion for rotation */
 
-	vec_t mSpeed;               /* Movement speed for this camera */
-
 	double mPos[4];             /* Location in 3 space (aka eye) */
 	
 	double mTarget[4];          /* Postition we're looking at  */
@@ -339,6 +337,8 @@ class FreyjaCamera
 	double mTheta;              /* View angle  Y */
 	
 	double mTheta2;             /* View angle  Z */
+
+	vec_t mSpeed;               /* Movement speed for this camera */
 	
 	bool mUpdate;               /* Check to see if view needs updating */
 

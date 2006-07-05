@@ -36,6 +36,7 @@
 #include "hel/Mass.h"
 #include "hel/math.h"
 
+using namespace mstl;
 
 class Simulation
 {

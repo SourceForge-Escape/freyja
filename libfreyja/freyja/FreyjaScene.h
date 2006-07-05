@@ -112,16 +112,22 @@ class FreyjaMetaData /* For storing ASCII files as strings, textures, etc */
 {
 public:
 
-	FreyjaMetaData()
+	FreyjaMetaData() :
+		mId(-1),
+		mBoneIndex(-1),
+		mTypeId(0),
+		mDataSize(0),
+		mData(NULL)
 	{
-		id = -1;
-		mBoneIndex = -1;
-		mSymbol[0] = 0;
-		mDescription[0] = 0;
-		mTypeId = 0;
-		mDataSize = 0;
-		mData = 0x0;
+		mSymbol[0] = '\0';
+		mDescription[0] = '\0';
 	}
+
+
+	FreyjaMetaData(const FreyjaMetaData &fmd);
+
+	FreyjaMetaData &operator=(const FreyjaMetaData &fmd);
+
 
 	~FreyjaMetaData()
 	{
@@ -131,7 +137,7 @@ public:
 
 	
 
-	long id;                  /* Unique identifier */
+	long mId;                /* Unique identifier */
 
 	char mSymbol[64];
 

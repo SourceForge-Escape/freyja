@@ -33,35 +33,31 @@
 #include "FreyjaPluginABI.h"
 #include "FreyjaFSM.h"
 
+index_t gFreyjaCurrentVertex = INDEX_INVALID;
+extern index_t gFreyjaCurrentMesh;
+extern index_t gFreyjaCurrentModel;
+
+
 FreyjaFSM *FreyjaFSM::mInstance = 0x0;
 
-#ifdef USING_EGG
-// FIXME Very temporary gobals until interface is done no code changes 
-//       since this class is instanced as a gobal these should work fine
-//       for now w/o threads until the new implementation is done
-//       This is to remove exposure of Egg types in header
-#   include "Egg.h"
 
-Egg *freyja__getEggBackend();
-
-Egg *mEgg;                          /* Pointer to the modeler backend  */
-egg_mesh_t *mMesh;                  /* Current mesh */
-egg_group_t *mGroup;                /* Current vertex grouping */
-#endif
-
-
-FreyjaFSM::FreyjaFSM()
+FreyjaFSM::FreyjaFSM() :
+	mStack(),
+	mVertexList(),
+	mTexCoordList(),
+	mMesh(NULL),
+	mTextureId(0),
+	mIndexModel(0),
+	mIndexVertex(INDEX_INVALID), 
+	mIndexTexCoord(INDEX_INVALID),
+	mIndexPolygon(INDEX_INVALID),
+	mIndexGroup(INDEX_INVALID),
+	mIndexMesh(INDEX_INVALID),
+	mIndexBone(INDEX_INVALID),
+	mIndexSkeleton(INDEX_INVALID),
+	mIndexSkeletonAnim(INDEX_INVALID),
+	mIndexSkelKeyframe(INDEX_INVALID)
 {
-#ifdef USING_EGG
-	// freyjaSpawn always allocates in proper order for this to work
-	// ( HASA child, then parent )
-	mEgg = freyja__getEggBackend(); 
-	mGroup = 0x0;
-#endif
-
-	mMesh = 0x0;
-	mIndexModel = 0; // was 1
-	mTextureId = 0;
 }
 
 
@@ -73,10 +69,6 @@ FreyjaFSM::~FreyjaFSM()
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
-
-index_t gFreyjaCurrentVertex = INDEX_INVALID;
-extern index_t gFreyjaCurrentMesh;
-extern index_t gFreyjaCurrentModel;
 
 // FIXME: Move all these gobal iterators to FSMs or the FSM singleton
 index_t freyjaGetCurrentModelIndex()

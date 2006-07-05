@@ -36,17 +36,46 @@
 
 
 
-FreyjaImage::FreyjaImage()
+FreyjaImage::FreyjaImage() :
+	_image(NULL),
+	_palette(NULL),
+    _width(0),
+    _height(0),
+    _original_width(0),
+    _original_height(0),
+    _color_mode(RGB_24),
+	_image_bpp(0),
+	_palette_bpp(0)
 {
-	_image = 0x0;
-	_palette = 0x0;
-	_width = 0;             
-	_height = 0;            
-	_original_width = 0;    
-	_original_height = 0;   
-	_color_mode = RGB_24;
-	_image_bpp = 0;
-	_palette_bpp = 0;
+}
+
+
+FreyjaImage::FreyjaImage(const FreyjaImage &img) :
+	_image(NULL),
+	_palette(NULL),
+    _width(img._width),
+    _height(img._height),
+    _original_width(img._original_width),
+    _original_height(img._original_height),
+    _color_mode(img._color_mode),
+	_image_bpp(img._image_bpp),
+	_palette_bpp(img._palette_bpp)
+{
+	if (img._image)
+	{
+		unsigned int size = img._width * img._height * _image_bpp;
+		_image = new unsigned char[size];
+		memcpy(_image, img._image, size);
+	}
+
+	if (img._palette)
+	{
+		// FIXME: Wow, the palette system looks broken in here
+		// no time to fix it in dev branch needing more important feature first
+		unsigned int size = 768;// img._width * img._height * _palette_bpp;
+		_palette = new unsigned char[size];
+		memcpy(_palette, img._palette, size);
+	}
 }
 
 

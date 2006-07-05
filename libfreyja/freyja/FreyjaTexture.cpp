@@ -23,6 +23,8 @@
 #include "FreyjaImage.h"
 #include "FreyjaTexture.h"
 
+using namespace mstl;
+
 Vector<FreyjaTexture *> gFreyjaTextures;
 uint32 gFreyjaTextureCount = 0;
 
@@ -31,16 +33,17 @@ uint32 gFreyjaTextureCount = 0;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaTexture::FreyjaTexture()
+FreyjaTexture::FreyjaTexture() :
+	mName(NULL),                /* Texture name */
+	mFilename(NULL),            /* Filename of image */
+	mImage(NULL),
+	mPalette(NULL),
+	mBitDepth(0),
+	mPixelFormat(RGB24),
+	mWidth(0),
+	mHeight(0),
+	mUID(INDEX_INVALID)         /* Used by Gobal Pool */
 {
-	mName = 0x0;
-	mFilename = 0x0;
-	mImage = 0x0;
-	mPalette = 0x0;
-	mWidth = 0;
-	mHeight = 0;
-	mBitDepth = 0;
-	mPixelFormat = RGB24;
 }
 
 

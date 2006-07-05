@@ -30,6 +30,7 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
+using namespace mstl;
 
 class CopyGroup
 {
@@ -71,10 +72,17 @@ public:
 class CopyMesh
 {
 public:
-	CopyMesh()
+
+	CopyMesh() :
+		vertices(),
+		texcoords(),
+		polygons(),
+		groups(),
+		flags(0)
 	{
-		flags = 0;
+		center[0] = center[1] = center[2] = 0.0f;
 	}
+
 
 	~CopyMesh()
 	{

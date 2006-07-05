@@ -39,7 +39,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
-
 void mgtk_event_button_release(GtkWidget *widget, GdkEventButton *event);
 
 void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event);

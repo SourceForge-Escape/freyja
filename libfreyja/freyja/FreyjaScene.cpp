@@ -40,9 +40,18 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaScene::FreyjaScene()
+FreyjaScene::FreyjaScene() :
+	mModelGraph(),
+	models(),         /* Model container */
+	materials(),      /* Material container */
+	textures(),       /* Texture container */
+	animations(),     /* Animation container */
+	meshes(),         /* Geometery structure */
+	metadata(),       /* Metadata for external use */
+	lights(),
+	cameras(),
+	mDebugLevel(0)
 {
-	mDebugLevel = 0;
 }
 
 

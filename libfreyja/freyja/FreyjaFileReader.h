@@ -59,6 +59,21 @@ class FreyjaFileReader
 	 * 2004.08.16: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+ 
+
+	FreyjaFileReader(const FreyjaFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of FreyjaFileReader
+	 ------------------------------------------------------*/
+
+
+	FreyjaFileReader &operator=(const FreyjaFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of FreyjaFileReader
+	 ------------------------------------------------------*/
+
 
 	~FreyjaFileReader();
 	/*------------------------------------------------------

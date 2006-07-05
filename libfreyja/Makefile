@@ -94,6 +94,9 @@ BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) $(LOCAL_INCLUDES) \
 	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 	$(BASE_DEFS)
 
+BASE_CFLAGS += -Weffc++ -std=c++98
+#BASE_CFLAGS += -pedantic
+
 LDFLAGS=$(CONFIGURE_LNK) -lm -ldl $(LOCAL_LIBS)
 #LDFLAGS += -Wl,-z,defs
 #LDFLAGS += -Wl,-O1
@@ -190,7 +193,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/CopyModel.o \
 	$(BUILDDIR)/FreyjaFSM.o \
-	$(BUILDDIR)/FreyjaScene.o \
 	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaCamera.o \
@@ -209,6 +211,9 @@ PROG_OBJS = \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o
+
+#	$(BUILDDIR)/FreyjaScene.o 
+
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)

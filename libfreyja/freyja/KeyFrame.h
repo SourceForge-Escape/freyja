@@ -39,6 +39,8 @@
 #include "FreyjaFileReader.h"
 
 
+using namespace mstl;
+
 class KeyFrameObject
 {
 	////////////////////////////////////////////////////////////

@@ -22,7 +22,6 @@ BUILD_SELECT=debug
 INSTALL_INC_DIR=/usr/local/include
 INSTALL_LIB_DIR=/usr/local/lib
 INSTALL_BIN_DIR=/usr/local/bin
-SRC_DIR=hel
 API=0
 
 ################################################################
@@ -44,12 +43,18 @@ EXT=so
 
 ################################################################
 
-BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/prof
-BUILD_DEBUG_DIR=$(BUILD_BASE_DIR)/debug
-BUILD_RELEASE_DIR=$(BUILD_BASE_DIR)/release
-BUILD_WIN32_DIR=$(BUILD_BASE_DIR)/win32
-BUILD_TEST_DIR=$(BUILD_BASE_DIR)/test
-BUILD_INSTALL_DIR=$(BUILD_BASE_DIR)/$(BUILD_SELECT)
+BUILD_ROOT_DIR=../bin/libhel
+BUILD_DEBUG_DIR=$(BUILD_ROOT_DIR)/debug
+BUILD_RELEASE_DIR=$(BUILD_ROOT_DIR)/release
+BUILD_PROF_DIR=$(BUILD_ROOT_DIR)/prof
+BUILD_WIN32_DIR=$(BUILD_ROOT_DIR)/win32
+BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
+BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
+BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
+SRC_DIR=hel
+LOCAL_INCLUDES=-I../mstl/
+LOCAL_LIBS=
+
 
 ################################################################
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
@@ -57,7 +62,8 @@ DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 BASE_CFLAGS=$(FLAGS) -fPIC -Wall -I. -I../libhel/ \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
-		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\"
+		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
+		$(LOCAL_INCLUDES)
 
 LD_FLAGS=-lm -shared -lstdc++ -fPIC
 #LD_FLAGS += -dynamiclib
@@ -145,6 +151,7 @@ OBJS = \
 
 $(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION) : $(OBJS) 
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)
+	@-cp $(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION) $(BUILDDIR)/lib$(NAME)$(API).$(EXT)
 
 $(BUILDDIR)/$(MODULE).dll : $(OBJS)
 	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \

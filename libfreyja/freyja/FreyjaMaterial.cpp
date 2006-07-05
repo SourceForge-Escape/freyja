@@ -26,6 +26,9 @@
 
 #include "FreyjaMaterial.h"
 
+
+using namespace mstl;
+
 Vector<FreyjaMaterial *> gFreyjaMaterials;
 
 
@@ -33,20 +36,20 @@ Vector<FreyjaMaterial *> gFreyjaMaterials;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaMaterial::FreyjaMaterial()
+FreyjaMaterial::FreyjaMaterial() :
+	mId(-1),
+	mFlags(0),
+	mParent(-1),
+	mShininess(0.0f),
+	mTransparency(1.0f),
+	mBlendSrc(0),
+	mBlendDest(0),
+	mTexture(0),
+	mHasAlphaChannel(false),
+	mTextureName(NULL)
 {
-	mId = -1;
-
-	mName[0] = 0;
-
-	mTextureName = 0x0;
+	mName[0] = '\0';
 	setTextureName("No shader");
-
-	mFlags = 0;
-
-	mParent = -1;
-
-	mTexture = 0;
 
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2;
 	mAmbient[3]  = 1.0;
@@ -60,10 +63,7 @@ FreyjaMaterial::FreyjaMaterial()
 	mEmissive[0] = mEmissive[1] = mEmissive[2] = 0.0;
 	mEmissive[3] = 1.0;
 
-	mShininess = 0.0;
-
-	mBlendSrc = 0;
-	mBlendDest = 0; 
+	mColor[0] = mColor[1] = mColor[2] = mColor[3] = 1.0f;
 }
 
 

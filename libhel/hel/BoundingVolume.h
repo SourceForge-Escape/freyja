@@ -107,11 +107,10 @@ class BoundingSphere : public BoundingVolume
 {
 public:
 
-	BoundingSphere(vec3_t center, vec_t radius)
+	BoundingSphere(vec3_t center, vec_t radius) :
+		mRadius(radius)
 	{
 		HEL_VEC3_COPY(center, mCenter);
-
-		mRadius = radius;
 	}
 
 

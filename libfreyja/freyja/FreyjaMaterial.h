@@ -54,6 +54,15 @@ class FreyjaMaterial
 	 * Post : Constructs an object of FreyjaMaterial
 	 ------------------------------------------------------*/
 
+	FreyjaMaterial(const FreyjaMaterial &fm);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of FreyjaMaterial
+	 ------------------------------------------------------*/
+
+	FreyjaMaterial &operator=(const FreyjaMaterial &fm);
+
+
 	virtual ~FreyjaMaterial();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaMaterial object is allocated
@@ -182,6 +191,7 @@ class FreyjaMaterial
 
 
  private:
+
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors

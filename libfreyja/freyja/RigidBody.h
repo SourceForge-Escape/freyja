@@ -75,6 +75,10 @@ public:
 
 	ParticleSystem(uint32 numberOfParticles);
 
+	ParticleSystem(const ParticleSystem &sys);
+
+	ParticleSystem &operator=(const ParticleSystem &sys);
+
 	~ParticleSystem();
 
 	void Init(uint32 numberOfParticles);

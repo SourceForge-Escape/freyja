@@ -50,11 +50,11 @@ template <class K, class D> class MapNode
 {
 public:
 
-	MapNode(K key, D data)
+	MapNode(K key, D data) :
+		_next(NULL),
+		_key(key),
+		_data(data)
 	{
-		_data  = data;
-		_key = key;
-		_next = NULL;
 	}
 
 	
@@ -112,13 +112,13 @@ template <class K, class D> class Map
 {
 public:
 	
-	Map()
+	Map() :
+		_num_items(0),
+		_head(NULL),
+		_current(NULL),
+		_cache(NULL)
 	{
 		UnSetError();
-		_num_items = 0;
-		_head = NULL;
-		_current = NULL;
-		_cache = NULL;
 	}
 	
 	
@@ -497,7 +497,7 @@ public:
 	}
 
 
-	bool operator ++ (int dummy)
+	bool operator ++ (int)
 	{
 		return Next();
 	}
