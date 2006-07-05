@@ -76,7 +76,7 @@ class FreyjaCamera
 	class FlyByPath
 	{ 
 	public:
-		Vector <FlyByNode *> path;  /* Flyby path */
+		mstl::Vector <FlyByNode *> path;  /* Flyby path */
 	};
 
 
