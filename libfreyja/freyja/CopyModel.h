@@ -30,6 +30,8 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 
+using namespace mstl;
+
 #ifdef USING_EGG
 #   include "Egg.h"
 #endif

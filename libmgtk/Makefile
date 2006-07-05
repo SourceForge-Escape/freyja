@@ -26,7 +26,7 @@ EMAIL=mongoose@icculus.org
 
 INSTALL_DIR=/usr/local/bin
 #$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
-SRC_DIR=src
+SRC_DIR=mgtk
 PACKAGE_DIR=/tmp/package/$(NAME)
 
 BUILD_SELECT=debug

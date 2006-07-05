@@ -1216,17 +1216,23 @@ extern "C" {
 }
 
 
-/* Mongoose 2004.12.19, 
- * C++ fun */
-void freyjaVertexListTransform(Vector<uint32> &list,
+/* Mongoose 2004.12.19, C++ API for interface with the modeler */
+
+#ifdef __cplusplus
+#   include <mstl/Vector.h>
+
+using namespace mstl;
+
+
+void freyjaVertexListTransform(mstl::Vector<uint32> &list,
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
 
 void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
-								Vector<int32> uvMap, bool x, bool y);
+							   mstl::Vector<int32> uvMap, bool x, bool y);
 
 char freyjaModelCopyVertexList(index_t modelIndex, 
-							   Vector<unsigned int> &list,
+							   mstl::Vector<unsigned int> &list,
 							   int mesh, int frame);
 /*------------------------------------------------------
  * Pre  : Model <modelIndex> exists and has an active copy buffer
@@ -1234,12 +1240,12 @@ char freyjaModelCopyVertexList(index_t modelIndex,
  *        using the *local <mesh> index and vertex morph <frame>
  ------------------------------------------------------*/
 
-int32 freyjaFindPolygonByVertices(Vector<uint32> vertices);
+int32 freyjaFindPolygonByVertices(mstl::Vector<uint32> vertices);
 
-Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
+mstl::Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 
-void freyjaGetVertexPolygonRef1i(index_t vertexIndex, Vector<long> &polygons);
-void freyjaGetVertexPolygonRef(Vector<long> &polygons);
+void freyjaGetVertexPolygonRef1i(index_t vertexIndex, mstl::Vector<long> &polygons);
+void freyjaGetVertexPolygonRef(mstl::Vector<long> &polygons);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Returns a list of indices of polygons that
@@ -1254,5 +1260,6 @@ void freyjaGetVertexPolygonRef(Vector<long> &polygons);
  *            reverse reference system ( very handy )
  ------------------------------------------------------*/
 
+#   endif
 
 #endif

@@ -38,6 +38,7 @@
 #include "FreyjaFileWriter.h"
 #include "FreyjaFileReader.h"
 
+using namespace mstl;
 
 class KeyFrameObject
 {
