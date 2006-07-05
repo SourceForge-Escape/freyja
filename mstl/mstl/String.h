@@ -42,10 +42,10 @@ class String
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	String()
+	String() :
+		mString(NULL),
+		mLength(0)
 	{
-		mString = 0x0;
-		mLength = 0;
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -57,11 +57,34 @@ class String
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	String(const String& s) :
+		mString(NULL),
+		mLength(0)
+	{
+		mLength = s.mLength;
+		mString = new char[mLength+1];
+		memcpy(mString, s.mString, mLength-1);
+		mString[mLength] = 0;
+	}
+
+
+	String &operator=(const String& s) 
+	{
+		mLength = s.mLength;
+		mString = new char[mLength+1];
+		memcpy(mString, s.mString, mLength-1);
+		mString[mLength] = 0;
+
+		return *this;
+	}
+
+
 	~String()
 	{
 		if (mString)
 		{
 			delete [] mString;
+			mString = NULL;
 		}
 	}
 	/*------------------------------------------------------
@@ -79,8 +102,13 @@ class String
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	const char *GetCString()
+	{
+		return mString;
+	}
+
 	// This is better than the GNU extention   ;)
-	static size_t String::strnlen(const char *s, size_t maxlen)
+	static size_t strnlen(const char *s, size_t maxlen)
 	{
 		size_t i;
 
@@ -91,7 +119,7 @@ class String
 	}
 
 
-	static char *String::strdup(const char *src)
+	static char *strdup(const char *src)
 	{
 		char *dest = NULL;
 		int len;

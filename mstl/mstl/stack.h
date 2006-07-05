@@ -9,6 +9,9 @@
  *
  *-- History -----------------------------------------------
  *
+ * 2006.06.18:
+ * Mongoose - Merged back in comments from a long time ago hah
+ *
  * 2004.04.15:
  * Mongoose - No more leading underscores, style changes
  *
@@ -28,42 +31,47 @@ template <class T> class StackNode
 {
  public:
 
-  StackNode(T data)
-  {
-    mData  = data;
-    mPrev = NULL;
-  }
+	StackNode(T data) :
+		mPrev(NULL),
+		mData(data)
+	{
+	}
 
 
-  ~StackNode()
-  {
-  }
+	~StackNode()
+	{
+	}
 
-  void Data(T data)
-  {
-    mData = data;
-  }
+	void Data(T data)
+	{
+		mData = data;
+	}
 
-  T Data()
-  {
-    return mData;
-  }
+	T Data()
+	{
+		return mData;
+	}
 
-  StackNode<T> *Prev()
-  {
-    return mPrev;
-  }
+	StackNode<T> *Prev()
+	{
+		return mPrev;
+	}
 
-  void Prev(StackNode<T> *prev)
-  {
-    mPrev = prev;
-  }
+	void Prev(StackNode<T> *prev)
+	{
+		mPrev = prev;
+	}
 
- private:
+private:
 
-  StackNode<T> *mPrev;
+	StackNode<T>(const StackNode<T> &node);
 
-  T mData;
+	StackNode<T> &operator =(const StackNode<T> &node);
+
+	
+	StackNode<T> *mPrev;
+	
+	T mData;
 };
 
 
@@ -72,13 +80,76 @@ template <class Type> class stack
 {
 public:
 
-	stack()
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : Nothing
+    * Pre      : None
+    * Post     : Constructs an Stack
+    -----------------------------------------*/
+	stack() :
+		mCount(0),
+		mTop(NULL),
+		mError(false)
 	{
-		mCount = 0;
-		mTop = NULL;
+	}
+
+	stack(const stack<Type> &s) :
+		mCount(0),
+		mTop(NULL),
+		mError(false)
+	{
+		StackNode<Type> *cur = s.mTop;
+		stack<Type> tmp; // haha
+
+		while (cur)
+		{
+			Type data = cur->Data();
+			cur = cur->Prev();
+			tmp.push(data);
+		}
+
+		while ( !tmp.empty() )
+		{
+			push(tmp.pop());
+		}
 	}
 
 
+	stack<Type> operator=(const stack<Type> &s) 
+	{
+		mCount = 0;
+		mTop = NULL;
+		mError = false;
+
+		StackNode<Type> *cur = mTop;
+		stack<Type> tmp; // haha
+
+		while (cur)
+		{
+			Type data = cur->Data();
+			cur = cur->Prev();
+			tmp.push(data);
+		}
+
+		while ( !tmp.empty() )
+		{
+			push(tmp.pop());
+		}
+
+		return *this;
+	}
+
+
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : Nothing
+    * Pre      : None
+    * Post     : Deconstructs an Stack
+    -----------------------------------------*/
 	~stack()
 	{
 		while (mTop)
@@ -87,7 +158,14 @@ public:
 		}
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : value of top stack element
+    * Pre      : stack isn't empty
+    * Post     : Returns top of stack's value
+    -----------------------------------------*/
 	Type peek()
 	{
 		if (mTop)
@@ -101,7 +179,15 @@ public:
 		}
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : value of top stack element
+    * Pre      : stack isn't empty
+    * Post     : Removes top of stack and 
+    *            returns it's value
+    -----------------------------------------*/
 	Type pop()
 	{
 		StackNode<Type> *rm;
@@ -125,22 +211,35 @@ public:
 		}
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : Value to push on top of stack
+    * Returns  : Nothing
+    * Pre      : Stack isn't full
+    * Post     : Stack has new top, with value i
+    -----------------------------------------*/
 	void push(Type data)
 	{
-		StackNode<Type> *node;
-
-		node = new StackNode<Type>(data);
+		StackNode<Type> *node = new StackNode<Type>(data);
 		node->Prev(mTop);
 
 		mTop = node;
 		++mCount;
 	}
 
-
+   /*-----------------------------------------
+    * Created  : 990831 by Terry Hendrix II
+    * Modified : NA
+    * Inputs   : None
+    * Returns  : true if stack is empty, else
+    *            returns false
+    * Pre      : None
+    * Post     : No side effect
+    -----------------------------------------*/
 	bool empty()
 	{
-		return (mCount > 0);
+		return (mCount == 0);
 	}
  
 
@@ -156,10 +255,10 @@ public:
 
 	StackNode<Type> *mTop;
 
-	Type mError;
+	bool mError;
 };
 
-};
+} /* namespace mstl */
 
 #endif
 
