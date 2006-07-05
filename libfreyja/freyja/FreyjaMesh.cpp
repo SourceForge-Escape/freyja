@@ -226,6 +226,24 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void Mesh::Rotate(vec_t x, vec_t y, vec_t z)
+{
+	BUG_ME("Not Implemented", __FILE__, __LINE__);
+}
+
+
+void Mesh::Scale(vec_t x, vec_t y, vec_t z)
+{
+	BUG_ME("Not Implemented", __FILE__, __LINE__);
+}
+
+
+void Mesh::Translate(vec_t x, vec_t y, vec_t z)
+{
+	vec3_t v = {x, y, z};
+	TripleVec_Addition(mVertexPool, v);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Private Accessors
@@ -448,11 +466,21 @@ void freyjaMeshTransform(index_t meshIndex, uint32 frame,
 						 freyja_transform_action_t action, 
 						 vec_t x, vec_t y, vec_t z)
 {
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (mesh == NULL)
+	{
+		DEBUG_MSGF("Tried to transform invalid mesh[%i]", meshIndex);
+		return;
+	}
+
 	switch (action)
 	{
 	case fTranslate:
+		mesh->Translate(x, y, z);
 		break;
 
+#if 0
 	case fRotate:
 		break;
 
@@ -464,9 +492,11 @@ void freyjaMeshTransform(index_t meshIndex, uint32 frame,
 
 	case fRotateAboutPoint:
 		break;
-	}
+#endif
 
-	BUG_ME("freyjaMeshTransform Not Implemented", __FILE__, __LINE__);
+	default:
+		BUG_ME("freyjaMeshTransform Not Implemented", __FILE__, __LINE__);
+	}
 }
 
 
@@ -1263,6 +1293,14 @@ void freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz)
 
 void freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz)
 {
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+
+	if (mesh)
+	{
+		Vector3d v = mesh->GetVertexPosition(vertexIndex);
+		HEL_VEC3_COPY(v.mVec, xyz);
+	}
+		
 	BUG_ME("freyjaGetVertexXYZ3fv Not Implemented", __FILE__, __LINE__);
 }
 

@@ -34,7 +34,6 @@
 
 #include <stdarg.h>
 #include <hel/math.h>
-#include <mstl/Vector.h>
 #include "freyja.h"
 #include "BoneABI.h"
 #include "SkeletonABI.h"
@@ -1217,7 +1216,12 @@ extern "C" {
 
 
 /* Mongoose 2004.12.19, C++ API for interface with the modeler */
-#include <mstl/Vector.h>
+
+#ifdef __cplusplus
+#   include <mstl/Vector.h>
+
+using namespace mstl;
+
 
 void freyjaVertexListTransform(mstl::Vector<uint32> &list,
 								freyja_transform_action_t action, 
@@ -1254,6 +1258,6 @@ void freyjaGetVertexPolygonRef(mstl::Vector<long> &polygons);
  * Mongoose - Created, wrapper for old Egg style
  *            reverse reference system ( very handy )
  ------------------------------------------------------*/
-
+#   endif
 
 #endif

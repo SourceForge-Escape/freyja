@@ -178,6 +178,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Multiply3v(vec3_t v);
 	void multiply3v(vec3_t v, vec3_t result);
 	/*------------------------------------------------------
 	 * Pre  : Multiplies <V> vector and <This> matrix
