@@ -40,20 +40,29 @@ CONFIGURE_LDFLAGS=
 PKG_LIB_ADD=gtkglext-1.0
 #LIB_ADD=-lgtkgl-2.0
 
+
+################################################################
+# Compiler and Cross Enviroments
 ################################################################
 
 CC=gcc
+DEPS=./deps.sh
+-include ../win32.env
+
 
 ################################################################
 
-BUILD_DEBUG_DIR=bin/debug
-BUILD_RELEASE_DIR=bin/release
-BUILD_PROF_DIR=bin/prof
-BUILD_WIN32_DIR=bin/win32
-BUILD_TEST_DIR=bin/test
-BUILD_INSTALL_DIR=bin/$(BUILD_SELECT)
-
+BUILD_ROOT_DIR=../bin/freyja
+BUILD_DEBUG_DIR=$(BUILD_ROOT_DIR)/debug
+BUILD_RELEASE_DIR=$(BUILD_ROOT_DIR)/release
+BUILD_PROF_DIR=$(BUILD_ROOT_DIR)/prof
+BUILD_WIN32_DIR=$(BUILD_ROOT_DIR)/win32
+BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
+BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
+BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=src
+LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/  -I../libmgtk/
+LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
 
 DESTDIR =
 NO_DEB=
@@ -78,11 +87,12 @@ VERSION_DEB=$(VERSION).$(BUILD_ID)
 
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 
-# -Weffc++ -Wall -pedantic -std=c99
+
 BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic
+#BASE_DEFS += -Weffc++ -Wall -pedantic -std=c99
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
-		-fPIC -Wall -Isrc \
+		-fPIC -Wall $(LOCAL_INCLUDES) \
 		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -91,12 +101,14 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
 		-DBUILD_HOST=\"\\\"$(BUILD_HOST)\\\"\"
 
-LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) \
+LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
 		-lhel0 -lfreyja -lmgtk \
 		$(shell pkg-config --libs gtk+-2.0 $(PKG_LIB_ADD)) $(LIB_ADD)
 #LD_FLAGS += -Wl,-z,defs
 #LD_FLAGS += -Wl,-O1
+
+CG_LD_FLAGS=-lCgGL -lCg
 
 
 CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include

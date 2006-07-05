@@ -48,6 +48,8 @@
 #include "freyja_events.h"
 #include "FreyjaRender.h"
 
+#define COLORED_POLYGON -1
+
 FreyjaRender *FreyjaRender::mSingleton = 0x0;
 extern FreyjaModel *gFreyjaModel;
 
