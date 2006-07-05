@@ -30,10 +30,12 @@
      - Run maps over types to allow undo/redo to allow for cut/copy/paste
 
 
- ChangeLog 0.9 ( trunk )
+ ChangeLog 0.9.5 ( development - This will not always compile from svn )
  =====================================================================
 
  20060704 Mongoose
+ - Crash fixes
+ - Local plugins 
  - New test system to avoid installing to test the whole system
  - Minor clean ups all around 
  - Masssive build update

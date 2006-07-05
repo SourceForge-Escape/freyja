@@ -1283,6 +1283,9 @@ void freyjaAssertMessage(bool expr, const char *format, ...)
 {
 	va_list args;
 
+
+	//assert(expr);
+
 	if (expr)
 		return;
 	
