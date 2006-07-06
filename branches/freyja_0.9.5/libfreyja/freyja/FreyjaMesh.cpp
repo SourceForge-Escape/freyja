@@ -302,7 +302,7 @@ bool Mesh::SerializePool(FreyjaFileWriter &w,
 // until 0.10 release 
 Vector<Mesh *> gFreyjaMeshes;
 index_t gFreyjaCurrentModel = 0;
-index_t gFreyjaCurrentMesh = 0; //INDEX_INVALID;
+index_t gFreyjaCurrentMesh = INDEX_INVALID;
 
 
 ////////////////////////////////////
@@ -450,6 +450,17 @@ void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex,
 ////////////////////////////////////
 // 0.9.3 <- 0.9.5 ABI
 ////////////////////////////////////
+
+char freyjaIsVertexAllocated(index_t vertexIndex)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+
+	if (mesh)
+		return (mesh->GetVertex(vertexIndex) != NULL);
+
+	return 0;
+}
+
 
 index_t freyjaGetCurrentMesh()
 {

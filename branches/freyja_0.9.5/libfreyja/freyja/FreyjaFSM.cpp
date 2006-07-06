@@ -33,6 +33,7 @@
 #include "FreyjaPluginABI.h"
 #include "FreyjaFSM.h"
 
+
 index_t gFreyjaCurrentVertex = INDEX_INVALID;
 extern index_t gFreyjaCurrentMesh;
 extern index_t gFreyjaCurrentModel;
@@ -978,21 +979,8 @@ char freyjaIsPolygonAllocated(index_t polygonIndex)
 
        return 0;
 #else
-	BUG_ME("freyjaIsTexCoordAllocated Not Implemented", __FILE__, __LINE__);
+	BUG_ME("freyjaIsPolygonAllocated Not Implemented", __FILE__, __LINE__);
 	return 1;
 #endif
 }
 
-
-char freyjaIsVertexAllocated(index_t vertexIndex)
-{
-#ifdef USING_EGG
-       if (!freyja__getEggBackend() || vertexIndex == INDEX_INVALID)
-               return 0;
-
-       return (freyja__getEggBackend()->getVertex(vertexIndex) != 0x0);
-#else
-	BUG_ME("freyjaIsTexCoordAllocated Not Implemented", __FILE__, __LINE__);
-	return 1;
-#endif
-}

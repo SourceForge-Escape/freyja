@@ -61,7 +61,7 @@ BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
 BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=src
-LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/
+LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/  -I../libmgtk/
 LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
 
 DESTDIR =
