@@ -29,6 +29,7 @@
 
 #include "hel/math.h"
 
+
 class Vector3d
 {
  public:
@@ -312,5 +313,8 @@ class Vector3d
 	////////////////////////////////////////////////////////////
 
 };
+
+
+typedef Vector3d Vec3;
 
 #endif

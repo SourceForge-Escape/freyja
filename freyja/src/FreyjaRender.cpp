@@ -1332,7 +1332,11 @@ void FreyjaRender::resizeContext(unsigned int width, unsigned int height)
 
 	if (mRenderMode & RENDER_CAMERA)
 	{
-		gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
+		// Old method
+		//gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
+		glFrustum( -mNearHeight * mAspectRatio, 
+					mNearHeight * mAspectRatio,
+					-mNearHeight, mNearHeight, mNear, mFar );
 	}
 	else 
 	{

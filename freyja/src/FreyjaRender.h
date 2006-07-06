@@ -470,8 +470,9 @@ private:
 	float mAngles[3];                          /* Used to rotate the scene */
 
 	float mScaleEnv;                           /* OpenGL context use */
-	float mFar;
-	float mNear;
+	float mFar;	// zFar
+	float mNear;	// zNear
+	float mNearHeight;
 	float mFovY;
 };
 
