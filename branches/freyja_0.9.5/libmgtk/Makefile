@@ -79,11 +79,11 @@ DEPS=../deps.sh
 
 # -Weffc++
 BASE_DEFS= \
-	-Isrc/common -Isrc/gnome $(CONFIGURE_CFLAGS) -Wno-deprecated \
+	$(CONFIGURE_CFLAGS) -Wno-deprecated \
 	-DUSING_GTK_2_0 \
 	$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
-BASE_CFLAGS=-fPIC -Wall -Isrc \
+BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
