@@ -804,8 +804,8 @@ FreyjaRender::FreyjaRender() :
 	mModel(NULL),
 	mWidth(640),
 	mHeight(480),
-	mViewMode(VIEWMODE_MODEL_VIEW),
 	mTextureId(0),
+	mViewMode(VIEWMODE_MODEL_VIEW),
 	mInitContext(false),
 	mScaleEnv(40.0f), //20.0; // 40.0f for higher res
 	mFar(6000.0f),
@@ -1487,7 +1487,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	}
 
 #ifdef TEST_NEW_BACKEND_FORMAT
-		Mesh *m = freyjaModelGetMeshClass(0,0);
+		Mesh *m = freyjaModelGetMeshClass(0,mesh.id);
 
 		if (m && mRenderMode & RENDER_WIREFRAME)
 		{
@@ -1508,6 +1508,35 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				
 				glEnd();
 				glPointSize(mDefaultPointSize);
+			}
+		}
+
+		/* Render face with material, color, or something */
+		if (mRenderMode & RENDER_FACE)
+		{
+			if (mRenderMode & RENDER_TEXTURE) // Now implies material
+			{
+				glEnable(GL_TEXTURE_2D);
+				freyjaApplyMaterial(0); // material!
+			}
+
+			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
+			{
+				Face *f = m->GetFace(i);
+
+				if (!f) continue;
+
+				glBegin(GL_POLYGON);
+
+				for (j = 0; j < f->mIndices.size(); ++j)
+				{
+					//glTexCoord2fv(t.mVec);
+					//glNormal3fv(n.mVec);
+					m->GetVertexPos(f->mIndices[j], v.mVec);
+					glVertex3fv(v.mVec);
+				}
+				
+				glEnd();
 			}
 		}
 #endif
