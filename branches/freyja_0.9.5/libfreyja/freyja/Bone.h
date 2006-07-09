@@ -65,19 +65,19 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	index_t getUID();
+	index_t GetUID();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	static uint32 getCount();
+	static uint32 GetCount();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	static Bone *getBone(index_t uid);
+	static Bone *GetBone(index_t uid);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -88,46 +88,52 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void addChild(index_t child);
+	void AddChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	index_t addToPool();
+	index_t AddToPool();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void removeChild(index_t child);
+	void RemoveChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void removeFromPool();
+	void RemoveFromPool();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	static void resetPool();
+	static void ResetPool();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void setName(const char *name);
+	void SetName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void updateBoneToWorld();
+	void UpdateBindPose();
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Pass transform changes up the heirarchy
+	 ------------------------------------------------------*/
+
+	void UpdateWorldPose();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Pass transform changes up the heirarchy
 	 ------------------------------------------------------*/
 
 
@@ -141,13 +147,33 @@ public:
 
 	Vector<index_t> mChildren;       /* Children bones of this bone */
 
-	Quaternion mRotation;            /* Oreintation of this bone */
+	Quaternion mRotation;            /* Orientation of this bone */
 
-	Vector3d mTranslation;           /* Offset of this bone from parent */
+	Vec3 mTranslation;               /* Offset of this bone from parent */
 
-	Matrix mBoneToWorld;             /* Transform vertices to world coords with
+	Matrix mBindPose;                /* Store the bind transform from the 
+									  * origin ( this bulids off parents ).
+									  * This transforms vertices to rest pose */
+
+	Matrix mBindToWorld;             /* Cached inverse of mBindTransform:
+									  * Transform vertices to world coords with
 									  * this cache of the current orientation 
 									  * and translation in matrix form */
+
+	// Starting in 0.9.5 moved world transforms here from keyframing,
+	// Makes it easier to control the beast, and stops bone sharing schemes.
+	// The actual transforms 'we care about' in the keyframes.
+	// This is for use as a callback a bone to do rendering/pose transforms.
+
+	Quaternion mFrameRotation;       /* AnimFrame Orientation of this bone */
+
+	Vec3 mFrameTranslation;          /* AnimFrame Offset of this bone from parent */
+
+	Matrix mWorldPose;               /* This is the animated frame transform 
+									  * from origin */
+
+	Matrix mCombined;                /* <= mWorldPose * mBindToWorld, 
+									  * Convenice storage of deformation  */
 
 private:
 
