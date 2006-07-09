@@ -31,11 +31,12 @@ Vector<Skeleton *> Skeleton::mGobalPool;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Skeleton::Skeleton()
+Skeleton::Skeleton() :
+	mBones(),
+	mRoot(0),
+	mUID(INDEX_INVALID)
 {
-	mUID = INDEX_INVALID;
-	mName[0] = 0;
-	mRoot = 0;
+	mName[0] = '\0';
 }
 
 
@@ -311,7 +312,7 @@ void freyjaSkeletonUpdateBones(index_t skeletonIndex)
 void freyjaSkeletonRootIndex(index_t skeletonIndex, index_t boneIndex)
 {
 	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
-	Bone *bone = Bone::getBone(boneIndex);
+	Bone *bone = Bone::GetBone(boneIndex);
 
 	if (skel && bone)
 		skel->mRoot = boneIndex;
@@ -321,7 +322,7 @@ void freyjaSkeletonRootIndex(index_t skeletonIndex, index_t boneIndex)
 void freyjaSkeletonAddBone(index_t skeletonIndex, index_t boneIndex)
 {
 	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
-	Bone *bone = Bone::getBone(boneIndex);
+	Bone *bone = Bone::GetBone(boneIndex);
 
 	if (skel && bone)
 	{

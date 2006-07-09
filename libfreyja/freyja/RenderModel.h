@@ -39,9 +39,6 @@
 #include "FreyjaPluginABI.h"
 #include "SkeletonABI.h"
 
-#ifdef USING_EGG
-#   include "Egg.h"
-#endif
 
 class RenderBone
 {
@@ -177,33 +174,13 @@ public:
 	Vector3d getGroupCenter(unsigned int i)
 	{
 		Vector3d v;
-#ifdef USING_EGG
-		egg_group_t *grp;
 
-		if ((grp = mEgg->getGroup(mMesh->group[i])))
-		{
-			return Vector3d(grp->center);
-		}
-#else
 		vec3_t center;
 		//FIXME: This is just a 0.9.3 placeholder that's fine for now
 		freyjaGetMeshFrameCenter(id, 0, center);
 		v.Set(center);
 		return v;
-#endif
-		v.zero();
-		return v;
 	}
-
-
-#ifdef USING_EGG
-	void setEgg(Egg *egg, egg_mesh_t *mesh, Vector<egg_polygon_t *> *polygons)
-	{
-		mEgg = egg;
-		mMesh = mesh;
-		mPolygons = polygons;
-	}
-#endif
 
 
 	bool getPolygon(unsigned int index, RenderPolygon &face);
@@ -211,49 +188,15 @@ public:
 
 	bool getPolygon(unsigned int findex, long frame, RenderPolygon &face)
 	{
-#ifdef USING_EGG
-		static egg_polygon_t *poly;
-
-		if (mPolygons)
-		{
-			poly = (*mPolygons)[index];
-			
-			if (poly)
-			{
-				return RenderMesh::createRenderPolygon(face, *poly, (int32)frame);
-			}
-		}
-#else
 		getPolygon(findex, face);
-		//BUG_ME("getPolygon Not Implemented", __FILE__, __LINE__);
-#endif
 
 		return false;
 	}
 
 	unsigned int getPolygonCount()
 	{
-#ifdef USING_EGG
-		if (mPolygons->empty()) 
-			return 0;
-
-		return mPolygons->end();
-#else
 		return freyjaGetMeshPolygonCount(id);
-#endif
 	}
-
-#ifdef USING_EGG
-	static bool createRenderPolygon(RenderPolygon &face,
-									egg_polygon_t &polygon, int32 frame);
-#endif
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Egg realtime data translator method
-	 *        Gets polygon for given egg polygon, vertex animation frame
-	 ------------------------------------------------------*/
-
-
 
 	index_t id;
 	long frame;
@@ -261,11 +204,6 @@ public:
 	unsigned int gbegin, gend;
 
 private:
-#ifdef USING_EGG
-	Egg *mEgg; // For sheilding renderer from egg calls for groups in mesh
-	Vector<egg_polygon_t *> *mPolygons;
-	egg_mesh_t *mMesh;
-#endif
 };
 
 
@@ -346,25 +284,6 @@ class RenderModel
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 	
-#ifdef USING_EGG
-	void createRenderMesh(RenderMesh &rmesh, egg_mesh_t &mesh, int32 frame);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Egg realtime data translator method
-	 *
-	 ------------------------------------------------------*/
-	
-	void setEgg(Egg *egg);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Egg backend is set
-	 *
-	 ------------------------------------------------------*/
-
-	Vector<egg_mesh_t *> *mMeshlist;
-
-	Egg *mEgg;
-#else
 	void createRenderMesh(RenderMesh &rmesh, index_t meshIndex, int32 frame);
 	/*------------------------------------------------------
 	 * Pre  :
@@ -372,7 +291,6 @@ class RenderModel
 	 *
 	 ------------------------------------------------------*/
 
-#endif
 
 	int32 mIndex;
 

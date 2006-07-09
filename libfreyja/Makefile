@@ -191,6 +191,7 @@ targets: $(TARGETS)
 PROG_OBJS = \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/Bone.o \
+	$(BUILDDIR)/BoneABI.o \
 	$(BUILDDIR)/CopyModel.o \
 	$(BUILDDIR)/FreyjaFSM.o \
 	$(BUILDDIR)/FreyjaPluginABI.o \
@@ -201,12 +202,13 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaFileWriter.o \
 	$(BUILDDIR)/FreyjaImage.o \
 	$(BUILDDIR)/FreyjaLight.o \
-	$(BUILDDIR)/FreyjaMesh.o \
 	$(BUILDDIR)/FreyjaMaterial.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/KeyFrame.o \
+	$(BUILDDIR)/Mesh.o \
+	$(BUILDDIR)/MeshABI.o \
 	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \

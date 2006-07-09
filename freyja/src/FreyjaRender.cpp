@@ -1435,8 +1435,8 @@ void FreyjaRender::renderLights()
 	}
 }
 
-#define TEST_NEW_BACKEND_FORMAT
-#ifdef TEST_NEW_BACKEND_FORMAT
+#define TEST_NEW_BACKEND_FORMAT 1
+#if TEST_NEW_BACKEND_FORMAT
 #include <freyja/FreyjaMesh.h>
 using namespace freyja;
 extern Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
@@ -1465,7 +1465,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		glEnd();
 		glPointSize(mDefaultPointSize);
 
-#ifdef TEST_NEW_BACKEND_FORMAT
+#if TEST_NEW_BACKEND_FORMAT
 		Mesh *m = freyjaModelGetMeshClass(0,0);
 
 		if (m)
@@ -1486,28 +1486,57 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 #endif
 	}
 
-#ifdef TEST_NEW_BACKEND_FORMAT
+#if TEST_NEW_BACKEND_FORMAT
 		Mesh *m = freyjaModelGetMeshClass(0,mesh.id);
 
-		if (m && mRenderMode & RENDER_WIREFRAME)
+		if ( m )
 		{
 			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
 			{
 				Face *f = m->GetFace(i);
 
-				if (!f) continue;
+				if (!f) 
+					continue;
 
-				glBegin(GL_LINE_LOOP);
-				glColor3fv(mColorWireframeHighlight);
-
-				for (j = 0; j < f->mIndices.size(); ++j)
+				/* Render face as wireframe */
+				if ( mRenderMode & RENDER_WIREFRAME )
 				{
-					m->GetVertexPos(f->mIndices[j], v.mVec);
-					glVertex3fv(v.mVec);
-				}
+					glBegin(GL_LINE_LOOP);
+					glColor3fv(mColorWireframeHighlight);
+
+					for (j = 0; j < f->mIndices.size(); ++j)
+					{
+						m->GetVertexPos(f->mIndices[j], v.mVec);
+						v *= scale; // Scale out a little to avoid z-fighting
+						glVertex3fv(v.mVec);
+					}
 				
-				glEnd();
-				glPointSize(mDefaultPointSize);
+					glEnd();
+					glPointSize(mDefaultPointSize);
+				}
+
+				/* Render face with material, color, or something */
+				if (mRenderMode & RENDER_FACE)
+				{
+					if (mRenderMode & RENDER_TEXTURE)
+					{
+						glEnable(GL_TEXTURE_2D);
+					}
+
+					freyjaApplyMaterial(f->mMaterial);
+					glBegin(GL_POLYGON);
+
+					for (j = 0; j < f->mIndices.size(); ++j)
+					{
+						//glTexCoord2fv(t.mVec);
+						//glNormal3fv(n.mVec);
+						m->GetVertexPos(f->mIndices[j], v.mVec);
+						glVertex3fv(v.mVec);
+					}
+
+					glEnd();
+				}
+
 			}
 		}
 
@@ -1526,6 +1555,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 				if (!f) continue;
 
+				freyjaApplyMaterial(freyjaGetCurrentMaterial());
+
 				glBegin(GL_POLYGON);
 
 				for (j = 0; j < f->mIndices.size(); ++j)
@@ -1539,7 +1570,14 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				glEnd();
 			}
 		}
-#endif
+
+
+	if (mRenderMode & RENDER_TEXTURE)
+	{
+		glDisable(GL_TEXTURE_2D);
+	}
+
+#else
 
 	if (mesh.getPolygonCount())
 	{
@@ -1721,6 +1759,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			glDisable(GL_TEXTURE_2D);
 		}
 	}
+#endif
 }
 
 

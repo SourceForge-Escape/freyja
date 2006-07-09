@@ -3,6 +3,10 @@ $(BUILDDIR)/MetaData.o: freyja/MetaData.cpp freyja/MetaData.h freyja/freyja.h \
   freyja/FreyjaFileWriter.h freyja/FreyjaFileReader.h
 	 $(DO_CC)
 
+$(BUILDDIR)/BoneABI.o: freyja/BoneABI.cpp freyja/Bone.h freyja/freyja.h \
+  freyja/BoneABI.h
+	 $(DO_CC)
+
 $(BUILDDIR)/FreyjaFileReader.o: freyja/FreyjaFileReader.cpp freyja/FreyjaFileReader.h
 	 $(DO_CC)
 
@@ -94,7 +98,7 @@ $(BUILDDIR)/FreyjaImage.o: freyja/FreyjaImage.cpp freyja/FreyjaFileReader.h \
   freyja/FreyjaFileWriter.h freyja/FreyjaImage.h
 	 $(DO_CC)
 
-$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/freyja.h freyja/BoneABI.h
+$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/freyja.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Skeleton.o: freyja/Skeleton.cpp freyja/SkeletonABI.h freyja/freyja.h \
