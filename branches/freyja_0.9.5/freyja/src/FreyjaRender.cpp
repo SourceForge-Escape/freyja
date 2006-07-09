@@ -800,18 +800,22 @@ void getOpenGLProjectionMatrix(double *projection) // double[16]
 ////////////////////////////////////////////////////////////////
 
 
-FreyjaRender::FreyjaRender()
+FreyjaRender::FreyjaRender() :
+	mModel(NULL),
+	mRenderMode(RENDER_BBOX | fRenderBonesClearedZBuffer),
+	mWidth(640),
+	mHeight(480),
+	mViewMode(VIEWMODE_MODEL_VIEW),
+	mInitContext(false),
+	mTextureId(0);
+	mScaleEnv(40.0f); //20.0; // 40.0f for higher res
+	mFar(6000.0f);
+	mNear(0.1f);
+	mFovY(40.0f);	
 {
-	mModel = NULL;
-	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer;
-	mWidth = 640;
-	mHeight = 480;
-	mViewMode = VIEWMODE_MODEL_VIEW;
-	mInitContext = false;
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
 	mAngles[2] = 0.0f;
-	mTextureId = 0;
 
 	for (long i = 0; i < 3; ++i)
 	{
@@ -819,11 +823,6 @@ FreyjaRender::FreyjaRender()
 		mColorAxisY[i] = GREEN[i] * 0.75f;
 		mColorAxisZ[i] = BLUE[i] * 0.75f;
 	}
-
-	mScaleEnv = 40.0f; //20.0; // 40.0f for higher res
-	mFar = 6000.0;
-	mNear = 0.1;
-	mFovY = 40.0;
 
 	mSingleton = this;
 }
@@ -1332,11 +1331,20 @@ void FreyjaRender::resizeContext(unsigned int width, unsigned int height)
 
 	if (mRenderMode & RENDER_CAMERA)
 	{
+#if 0
 		// Old method
-		//gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
+		gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
+#else
+		mNearHeight = 10.0f;
+		mNear = 10.0f;
+		mFar = 1000.0f;
+
 		glFrustum( -mNearHeight * mAspectRatio, 
 					mNearHeight * mAspectRatio,
-					-mNearHeight, mNearHeight, mNear, mFar );
+					-mNearHeight, mNearHeight, 
+					mNear,
+					mFar );
+#endif
 	}
 	else 
 	{
