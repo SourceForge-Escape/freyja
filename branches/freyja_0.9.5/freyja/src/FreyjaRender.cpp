@@ -802,17 +802,17 @@ void getOpenGLProjectionMatrix(double *projection) // double[16]
 
 FreyjaRender::FreyjaRender() :
 	mModel(NULL),
-	mRenderMode(RENDER_BBOX | fRenderBonesClearedZBuffer),
 	mWidth(640),
 	mHeight(480),
 	mViewMode(VIEWMODE_MODEL_VIEW),
+	mTextureId(0),
 	mInitContext(false),
-	mTextureId(0);
-	mScaleEnv(40.0f); //20.0; // 40.0f for higher res
-	mFar(6000.0f);
-	mNear(0.1f);
-	mFovY(40.0f);	
+	mScaleEnv(40.0f), //20.0; // 40.0f for higher res
+	mFar(6000.0f),
+	mNear(0.1f),
+	mFovY(40.0f)
 {
+	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer;
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
 	mAngles[2] = 0.0f;

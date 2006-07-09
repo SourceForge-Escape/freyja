@@ -27,6 +27,10 @@ int main(int argc, char *argv[])
 	{
 	case 4: // freyjautil file.grn 3ds file.3ds
 		freyjaSpawn();
+
+		/* Search local paths first ( mostly debugging ) */
+		freyjaPluginAddDirectory("plugins/model/debug");
+
 		freyjaImportModel(argv[1]);
 		freyjaExportModel(argv[3], argv[2]);
 		freyjaFree();
@@ -35,6 +39,10 @@ int main(int argc, char *argv[])
 
 	case 2: // freyjautil file.glm
 		freyjaSpawn();
+
+		/* Search local paths first ( mostly debugging ) */
+		freyjaPluginAddDirectory("plugins/model/debug");
+
 		freyjaImportModel(argv[1]);
 		freyjaFree();
 		break;

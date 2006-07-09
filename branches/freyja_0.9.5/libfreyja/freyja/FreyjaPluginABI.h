@@ -1212,6 +1212,12 @@ extern "C" {
 	 * Post : Updates Egg backend egg_mesh_t to simulate
 	 *        FreyjaMesh local vertex mappings
 	 ------------------------------------------------------*/
+
+	const char *freyjaGetObjectName(freyja_object_t obj);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gives you a string name for the obj ( nice for debugging )
+	 ------------------------------------------------------*/
 }
 
 

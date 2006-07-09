@@ -1575,13 +1575,13 @@ void freyjaModelTransformTexCoord(index_t modelIndex, index_t texcoordIndex,
 									freyja_transform_action_t action,
 									vec_t x, vec_t y)
 {
-	BUG_ME("freyjaModelTransformTexCoord Not Implemented", __FILE__, __LINE__);
+	MARK_MSG("Not fully Implemented");
 }
 
 
 void freyjaModelClear(index_t modelIndex)
 {
-	BUG_ME("freyjaModelClear Not fully Implemented", __FILE__, __LINE__);
+	MARK_MSG("Not fully Implemented");
 
 	// Currently there is no multimodel while egg is being used
 	freyjaSkeletonPoolClear();
@@ -1591,7 +1591,7 @@ void freyjaModelClear(index_t modelIndex)
 
 void freyjaModelClampTexCoords(index_t modelIndex)
 {
-	BUG_ME("freyjaModelClampTexCoords Not fully Implemented", __FILE__, __LINE__);
+	MARK_MSG("Not fully Implemented");
 	uint32 i, count = 0;//freyjaModelGetMeshCount(modelIndex);
 
 	for ( i = 0; i < count; ++i )

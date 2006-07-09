@@ -165,6 +165,15 @@ class RenderMesh
 {
 public:
 
+	RenderMesh() :
+		id(INDEX_INVALID),
+		frame(0),
+		count(0),
+		gbegin(0),
+		gend(0)
+	{
+	}
+
 	Vector3d getGroupCenter(unsigned int i)
 	{
 		Vector3d v;

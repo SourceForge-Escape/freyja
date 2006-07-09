@@ -3041,6 +3041,67 @@ int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
 }
 
 
+const char *freyjaGetObjectName(freyja_object_t obj)
+{
+	switch (obj)
+	{
+	case FREYJA_MODEL:
+		return "FREYJA_MODEL";
+		break;
+
+	case FREYJA_MESH:
+		return "FREYJA_MESH";
+		break;
+
+	case FREYJA_POLYGON:
+		return "FREYJA_POLYGON";
+		break;
+
+	case FREYJA_BONE:
+		return "FREYJA_BONE";
+		break;
+
+	case FREYJA_SKELETON:
+		return "FREYJA_SKELETON";
+		break;
+
+	case FREYJA_VERTEX_FRAME:
+		return "FREYJA_VERTEX_FRAME";
+		break;
+
+	case FREYJA_VERTEX_GROUP:
+		return "FREYJA_VERTEX_GROUP";
+		break;
+
+	case FREYJA_VERTEX:
+		return "FREYJA_VERTEX";
+		break;
+
+	case FREYJA_TEXCOORD:
+		return "FREYJA_TEXCOORD";
+		break;
+
+	case FREYJA_MATERIAL:
+		return "FREYJA_MATERIAL";
+		break;
+
+	case FREYJA_TEXTURE:
+		return "FREYJA_TEXTURE";
+		break;
+
+	case FREYJA_SKEL_ANIMATION:
+		return "FREYJA_SKEL_ANIMATION";
+		break;
+
+	case FREYJA_SKEL_KEYFRAME:
+		return "FREYJA_SKEL_KEYFRAME";
+		break;
+	}
+
+	return "UNKNOWN";
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 // Managed ABI 
 ///////////////////////////////////////////////////////////////////////

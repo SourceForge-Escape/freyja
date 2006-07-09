@@ -393,7 +393,33 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 		break;
 	}
 #else
-	BUG_ME("freyjaIterator Not Implementation", __FILE__, __LINE__);
+	switch (type)
+	{
+	case FREYJA_BONE:
+		switch (item)
+		{
+		case FREYJA_CURRENT:
+			break;
+		case FREYJA_RESET:
+			mIndexBone = 0;
+			break;
+		case FREYJA_NEXT:
+			++mIndexBone;
+			break;
+		default:
+			mIndexBone = item;
+		}
+
+		if (freyjaIsBoneAllocated(mIndexBone))
+		{
+			return mIndexBone;
+		}
+		break;
+
+	default:	
+		MARK_MSG("");
+		DEBUG_MSGF("'type = %s' Not Implemented", freyjaGetObjectName(type) );
+	}
 #endif
 
 	return INDEX_INVALID;
