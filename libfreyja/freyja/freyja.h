@@ -50,11 +50,23 @@
 
 #define BUG_ME(bug, file, line) freyjaPrintMessage("%s, '%s' %s:%i file bug with %s", bug, FREYJA_API_VERSION, file, line, EMAIL_ADDRESS)
 
+/* Special debug messages visible in all builds */
+//#if !__GNUC__
+#define MARK_MSG(msg) freyjaPrintMessage("[%s] %s:%i, %s() %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, msg)
+
+#define MARK_MSGF freyjaPrintMessage("\n[%s] %s:%i, %s() ", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyjaPrintMessage
+//#else
+//#define MARK_MSG(msg) freyjaPrintMessage("[%s] %s:%i, %s() %s", FREYJA_API_VERSION, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
+//
+//#define MARK_MSGF freyjaPrintMessage("[%s] %s:%i, %s()", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyjaPrintMessage
+//#endif
+
 
 #ifdef DEBUG
 #   define DEBUG_MSG(msg) freyjaPrintMessage(msg)
 #   define DEBUG_MSGF freyjaPrintMessage
 #   define ASSERT_MSG freyjaAssertMessage
+#   define DEBUG_MSGF freyjaPrintMessage
 #else
 #   define DEBUG_MSG(msg) 
 #   define DEBUG_MSGF(...)
