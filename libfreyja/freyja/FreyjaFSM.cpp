@@ -417,8 +417,7 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 		break;
 
 	default:	
-		MARK_MSG("");
-		DEBUG_MSGF("'type = %s' Not Implemented", freyjaGetObjectName(type) );
+		MARK_MSGF("'type = %s' Not Implemented", freyjaGetObjectName(type) );
 	}
 #endif
 
@@ -625,7 +624,7 @@ void FreyjaFSM::freyjaEnd()
 		mVertexList.clear();
 		mTexCoordList.clear();
 
-		BUG_ME("freyjaEnd(FREYJA_POLYGON) TexCoords Not Implementatied", __FILE__, __LINE__);
+		BUG_ME("TexCoords Not Implemented");
 #endif
 		break;
 
@@ -671,7 +670,7 @@ void FreyjaFSM::freyjaMeshFlags1u(uint32 flags)
 #ifdef USING_EGG
 		mMesh->flags = flags;
 #else
-		BUG_ME("freyjaMeshFlags1u Not Implemented", __FILE__, __LINE__);
+		BUG_ME("Not Implemented");
 #endif
 	}
 	else
@@ -990,7 +989,7 @@ char freyjaIsTexCoordAllocated(index_t texcoordIndex)
 #ifdef USING_EGG
 	return (freyja__getEggBackend()->getTexel(texcoordIndex) != 0x0);
 #else
-	BUG_ME("freyjaIsTexCoordAllocated Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 	return 1;
 #endif
 }
@@ -1005,7 +1004,7 @@ char freyjaIsPolygonAllocated(index_t polygonIndex)
 
        return 0;
 #else
-	BUG_ME("freyjaIsPolygonAllocated Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 	return 1;
 #endif
 }

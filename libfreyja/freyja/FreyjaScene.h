@@ -104,7 +104,7 @@
 
 #include "FreyjaCamera.h"
 #include "FreyjaLight.h"
-#include "FreyjaMesh.h"
+#include "Mesh.h"
 #include "FreyjaMaterial.h"
 
 

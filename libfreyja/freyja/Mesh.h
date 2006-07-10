@@ -77,9 +77,9 @@ public:
 
 	Vertex() :
 		mFlags(fNone),
-		mVertexIndex(0),
-		mTexCoordIndex(0),    
-		mNormalIndex(0),
+		mVertexIndex(INDEX_INVALID),
+		mTexCoordIndex(INDEX_INVALID),    
+		mNormalIndex(INDEX_INVALID),
 		mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
 		mReserved1(0)
@@ -96,7 +96,7 @@ public:
 		freyja_file_chunk_t chunk;
 
 		chunk.type = FREYJA_CHUNK_VERTEX;
-		chunk.size = 0;
+		chunk.size = SerializedSize();
 		chunk.flags = 0x0;
 		chunk.version = 10;
 
@@ -113,13 +113,13 @@ public:
 
 	byte mFlags;
 
-	index_t mVertexIndex; // Pool storage of XYZ position
+	index_t mVertexIndex; 		// Pool storage of XYZ position
 
 	index_t mTexCoordIndex;     // Pool storage of UV[W] coordinate
 
-	index_t mNormalIndex; // Pool storage of XYZ normal
+	index_t mNormalIndex; 		// Pool storage of XYZ normal
 
-	index_t mColor;       // Pool storage of color
+	index_t mColor;       		// Pool storage of color
 
 	index_t mMaterial;
 	
@@ -411,7 +411,7 @@ public:
 
 	bool Serialize(FreyjaFileReader &r)
 	{
-		BUG_ME("AddWeight Not Implemented", __FILE__, __LINE__);
+		BUG_ME("Serialize disabled for incomplete class");
 		return false;
 	}
 
@@ -506,7 +506,7 @@ public:
 
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
 	{
-		BUG_ME("AddWeight Not Implemented", __FILE__, __LINE__);
+		BUG_ME("Not Implemented");
 	}
 
 
@@ -632,7 +632,7 @@ public:
 
 	void DeleteVertex(index_t vertexIndex)
 	{
-		BUG_ME("DeleteVertex Not Implemented", __FILE__, __LINE__);
+		BUG_ME("Not Implemented");
 	}
 
 

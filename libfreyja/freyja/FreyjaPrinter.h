@@ -67,6 +67,36 @@ class FreyjaPrinter
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	static void Log(const char *filename, const char *format, ...)
+	{
+		FILE *f = fopen(filename, "a");
+		va_list args;
+		char buffer[1024];
+		unsigned int l;
+		
+		if (!f)
+		{
+			perror( filename );
+			return;
+		}
+
+		va_start(args, format);
+
+		vsnprintf(buffer, 1024, format, args);
+	
+		l = strlen(buffer);
+  
+		if (!l || !buffer[0])
+			return;
+
+		if (buffer[l-1] == '\n')
+			buffer[l-1] = 0;
+
+		fprintf(f, "%s\n", buffer);
+
+		va_end(args);
+	}
+
 	static void print(const char *format, ...)
 	{
 		va_list args;
