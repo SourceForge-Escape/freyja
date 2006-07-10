@@ -189,6 +189,7 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS = \
+	$(BUILDDIR)/freyja.o \
 	$(BUILDDIR)/Action.o \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/BoneABI.o \

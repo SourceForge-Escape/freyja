@@ -119,13 +119,13 @@ public:
 		mStringArgs(),
 		mId(p.mId)
 	{
-		BUG_ME("This shouldn't ever happen by design", __FILE__, __LINE__);
+		BUG_ME("This shouldn't ever happen by design");
 	}
 
 
 	FreyjaPluginDesc &operator=(const FreyjaPluginDesc &fpd)
 	{
-		BUG_ME("This shouldn't ever happen by design", __FILE__, __LINE__);
+		BUG_ME("This shouldn't ever happen by design");
 		return *this;
 	}
 

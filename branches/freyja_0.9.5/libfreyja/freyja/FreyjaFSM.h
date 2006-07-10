@@ -44,7 +44,7 @@
 #include "FreyjaPluginABI.h"
 #include "FreyjaFileReader.h"
 #include "FreyjaPlugin.h"
-#include "FreyjaMesh.h"
+#include "Mesh.h"
 
 using namespace mstl;
 

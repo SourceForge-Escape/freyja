@@ -168,7 +168,7 @@ bool CopyModel::copyMesh(int currentMesh, int currentGroup)
 
 	return true;
 #else
-	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 	return false;
 #endif
 }
@@ -326,7 +326,7 @@ bool CopyModel::copyVertexBuffer(Vector<unsigned int> &list,
 	freyjaPrintMessage("Vertex buffer copied...", mesh->id);
 	return true;
 #else
-	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 	return false;
 #endif
 }
@@ -412,7 +412,7 @@ bool CopyModel::pasteMesh()
 
 	return true;
 #else
-	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 	return false;
 #endif
 }

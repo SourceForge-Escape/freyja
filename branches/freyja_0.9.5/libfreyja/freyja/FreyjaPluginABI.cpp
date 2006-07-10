@@ -74,7 +74,6 @@ Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 
 Vector<char *> gPluginDirectories;
 Vector<CopyModel *>  gCopyModels;
-FreyjaPrinter *gPrinter = 0x0;
 int32 gCurrentFreyjaPlugin = -1;
 
 
@@ -1276,72 +1275,6 @@ Vector<unsigned int> *eggFindVerticesInBox(vec3_t bbox[2],
 	freyjaCriticalSectionUnlock();
 	
 	return list;
-}
-
-
-void freyjaAssertMessage(bool expr, const char *format, ...)
-{
-	va_list args;
-
-
-	//assert(expr);
-
-	if (expr)
-		return;
-	
-	va_start(args, format);	
-
-	if (gPrinter)
-	{
-		gPrinter->messageArgs(format, &args);
-	}
-	else
-	{
-		vfprintf(stdout, format, args);
-		printf("\n");
-	}
-
-	va_end(args);
-}
-
-
-void freyjaPrintMessage(const char *format, ...)
-{
-	va_list args;
-	
-	va_start(args, format);	
-
-	if (gPrinter)
-	{
-		gPrinter->messageArgs(format, &args);
-	}
-	else
-	{
-		vfprintf(stdout, format, args);
-		printf("\n");
-	}
-
-	va_end(args);
-}
-
-
-void freyjaPrintError(const char *format, ...)
-{
-	va_list args;
-	
-	va_start(args, format);	
-
-	if (gPrinter)
-	{
-		gPrinter->errorArgs(format, &args);
-	}
-	else
-	{
-		vfprintf(stderr, format, args);
-		fprintf(stderr, "\n");
-	}
-
-	va_end(args);
 }
 
 
@@ -3017,7 +2950,7 @@ void freyja__MeshUpdateMappings(index_t meshIndex)
 		}
 	}
 #else
-	BUG_ME("freyja__MeshUpdateMappings Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 #endif
 }
 
@@ -3034,7 +2967,7 @@ int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
 	if (freyja__getEggBackend())
 		return freyja__getEggBackend()->selectPolygon(&vertices);
 #else
-	BUG_ME("freyja__MeshUpdateMappings Not Implemented", __FILE__, __LINE__);
+	BUG_ME("Not Implemented");
 #endif
 
 	return -1;
@@ -3102,217 +3035,4 @@ const char *freyjaGetObjectName(freyja_object_t obj)
 }
 
 
-///////////////////////////////////////////////////////////////////////
-// Managed ABI 
-///////////////////////////////////////////////////////////////////////
 
-#ifdef USING_EGG
-Egg *gEgg = 0x0;
-
-
-// Hidden API
-Egg *freyja__getEggBackend()
-{
-	return gEgg;
-}
-
-
-// Hidden API
-int freyja__spawnCopyModel(Egg *egg)
-{
-	if (!egg)
-		return -1;
-
-	freyjaPrintMessage("Spawned CopyModel");
-	gCopyModels.pushBack(new CopyModel(egg));
-
-	return gCopyModels.size();
-}
-#endif
-
-
-// Hidden API
-void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
-{
-	if (!printer)
-		return;
-
-	if (freyjaManaged)
-	{
-		if (gPrinter && gPrinter != printer)
-		{
-			delete gPrinter;
-		}
-
-		gPrinter = printer;
-	}
-
-#ifdef USING_EGG
-	/* Hookup gobal classes using a Printer child class */
-	gEgg->setPrinter(printer);
-#endif
-}
-
-
-void freyjaSpawn()
-{
-	if (!FreyjaFSM::GetInstance())
-	{
-#ifdef USING_EGG
-		gEgg = new Egg();
-#endif
-		FreyjaFSM *fsm = FreyjaFSM::GetInstance();
-
-		/* Here just to avoid compiler warnings and removal by opt */
-		fsm->freyjaGetCount(FREYJA_VERTEX);
-
-		/* Setup basic default stdout printer */
-		freyja__setPrinter(new FreyjaPrinter(), true);
-
-#ifdef USING_EGG
-		/* Spawn cut/copy/paste system */
-		freyja__spawnCopyModel(gEgg);
-#endif
-
-		/* Setup plugins */
-		freyjaPluginDirectoriesInit();
-		freyjaPluginsInit();
-
-		freyjaPrintMessage("libfreyja invoked using freyjaSpawn()");
-	}
-}
-
-
-void freyjaFree()
-{
-	FreyjaFSM *FreyjaFSM = FreyjaFSM::GetInstance();
-	
-	freyjaPrintMessage("libfreyja stopped using freyjaFree()");
-
-	if (FreyjaFSM)
-	{
-		//egg = FreyjaFSM->getEgg();
-		delete FreyjaFSM;
-	}
-
-#ifdef USING_EGG
-	if (gEgg)
-	{
-		delete gEgg;
-	}
-
-	gEgg = 0x0;
-#endif
-
-	if (gPrinter)
-	{
-		delete gPrinter;
-	}
-
-	gPluginDirectories.erase();
-
-	gFreyjaPlugins.erase();
-}
- 
-
-/* Thanks to Sam for the WIN32 module loader example */
-void *freyjaModuleImportFunction(void *handle, const char *name)
-{
-	char *loaderror = 0x0;
-	void *symbol = NULL;
-
-#ifdef WIN32
-	char errbuf[512];
-
-	symbol = (void *)GetProcAddress((HMODULE)handle, name);
-
-	if (symbol == NULL)
-	{
-		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
-					FORMAT_MESSAGE_FROM_SYSTEM),
-				NULL, GetLastError(), 
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf, 512, NULL);
-		loaderror = errbuf;
-	}
-
-#else // UNIX is always assumed here, everything else is special case
-
-	symbol = dlsym(handle, name);
-
-	if (symbol == NULL)
-	{
-		loaderror = (char *)dlerror();
-	}
-
-#endif
-
-	if (symbol == NULL)
-	{
-		freyjaPrintError("Failed to import %s: %s", name, loaderror);
-	}
-
-	return symbol;
-}
-
-
-void *freyjaModuleLoad(const char *module)
-{
-	void *handle = NULL;
-	char *loaderror;
-
-#ifdef WIN32
-	char errbuf[512];
-
-	if (FreyjaFileReader::compareFilenameExtention(module, ".dll") != 0)
-	{
-		return NULL;
-	}
-
-	handle = (void *)LoadLibrary(module);
-
-	/* Generate an error message if all loads failed */
-	if (handle == NULL) 
-	{
-		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
-					FORMAT_MESSAGE_FROM_SYSTEM),
-				NULL, GetLastError(), 
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf, 512, NULL);
-		loaderror = errbuf;
-	}
-
-#else
-
-	if (FreyjaFileReader::compareFilenameExtention(module, ".so") != 0)
-	{
-		return NULL;
-	}
-
-	handle = dlopen(module, RTLD_NOW);
-	loaderror = (char *)dlerror();
-
-#endif
-
-	if (handle == NULL)
-	{
-		freyjaPrintError("Failed to load %s: %s", module, loaderror);
-	}
-
-	return handle;
-}
-
-
-void freyjaModuleUnload(void *handle)
-{
-	if (handle == NULL)
-	{
-		return;
-	}
-
-#ifdef WIN32
-	FreeLibrary((HMODULE)handle);
-#else
-	dlclose(handle);
-#endif
-}

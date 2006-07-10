@@ -48,23 +48,18 @@
 #define fPolygon_ColorMapped   16
 #define fPolygon_Alpha         32
 
-#define BUG_ME(bug, file, line) freyjaPrintMessage("%s, '%s' %s:%i file bug with %s", bug, FREYJA_API_VERSION, file, line, EMAIL_ADDRESS)
 
 /* Special debug messages visible in all builds */
-//#if !__GNUC__
+#define BUG_ME freyjaPrintMessage("\n[%s] %s:%i, %s() file bug with %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, EMAIL_ADDRESS); freyjaPrintMessage   
+
 #define MARK_MSG(msg) freyjaPrintMessage("[%s] %s:%i, %s() %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, msg)
 
 #define MARK_MSGF freyjaPrintMessage("\n[%s] %s:%i, %s() ", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyjaPrintMessage
-//#else
-//#define MARK_MSG(msg) freyjaPrintMessage("[%s] %s:%i, %s() %s", FREYJA_API_VERSION, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
-//
-//#define MARK_MSGF freyjaPrintMessage("[%s] %s:%i, %s()", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyjaPrintMessage
-//#endif
 
 
 #ifdef DEBUG
 #   define DEBUG_MSG(msg) freyjaPrintMessage(msg)
-#   define DEBUG_MSGF freyjaPrintMessage
+#   define DEBUG_MSGF freyjaPrintMessage 
 #   define ASSERT_MSG freyjaAssertMessage
 #   define DEBUG_MSGF freyjaPrintMessage
 #else
@@ -220,7 +215,7 @@ extern "C" {
 	 * Post : Report messages to stderr or gPrinter
 	 ------------------------------------------------------*/
 
-	void freyjaAssertMessage(bool expr, const char *format, ...);
+	byte freyjaAssertMessage(bool expr, const char *format, ...);
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stdout or gPrinter
@@ -462,5 +457,31 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 }
+
+
+/* Internal memory management and logging system ala mtk_memeory */
+#   ifdef __cplusplus
+#      include <stddef.h>
+#      define USING_FREYJA_MEMORY 1
+
+#      if USING_FREYJA_MEMORY
+void freyjaRemoveTrack(void *ptr, const char *file, int line, const char *func, uint32 flags);
+#         define FREYJA_NEW new( __FILE__, __LINE__, __func__)
+#         define FREYJA_DELETE freyjaRemoveTrack(NULL, __FILE__, __LINE__, __func__, 0x2); delete
+
+void *operator new(size_t size, const char *file, int line, const char *func);
+void *operator new [](size_t size, const char *file, int line, const char *func);
+
+// Default parms to match new makes doing this unreasonable unless
+// I use the mtk_memeory tricks, which overrides *ALL deletes 
+//void operator delete(void *p);
+//void operator delete [](void *p); 
+
+
+#      else
+#         define FREYJA_NEW new
+#         define FREYJA_DELETE delete
+#      endif
+#   endif
 
 #endif

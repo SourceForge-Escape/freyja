@@ -24,7 +24,7 @@
 #include "RenderModel.h"
 #include "freyja.h"
 #include <hel/math.h>
-#include "FreyjaMesh.h"
+#include "Mesh.h"
 
 using namespace freyja;
 
@@ -167,7 +167,7 @@ bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 		rmesh.id = meshIndex;
 		rmesh.frame = frame;
 
-		//BUG_ME("getRenderMesh Not Implemented", __FILE__, __LINE__);
+		//BUG_ME("Not Implemented");
 
 #ifdef STORE_ON_RENDER_IS_DUMB		
 		for (uint32 i = 0; i < rmesh.count; ++i)

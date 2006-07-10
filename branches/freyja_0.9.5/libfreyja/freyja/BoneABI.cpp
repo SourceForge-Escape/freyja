@@ -19,6 +19,7 @@
  * Mongoose - Created, Split from Bone.cpp
  ==========================================================================*/
 
+#include "freyja.h"
 #include "Bone.h"
 #include "BoneABI.h"
 
@@ -72,7 +73,7 @@ byte freyjaIsBoneAllocated(index_t boneIndex)
 
 index_t freyjaBoneCreate(index_t skeletonIndex)
 {
-	Bone *b = new Bone();
+	Bone *b = FREYJA_NEW Bone();
 
 	b->mSkeleton = skeletonIndex;
 	b->AddToPool();
@@ -87,7 +88,7 @@ void freyjaBoneDelete(index_t boneIndex)
 	if (b)
 	{
 		b->RemoveFromPool();
-		delete b;
+		FREYJA_DELETE b;
 	}
 }
 
@@ -104,8 +105,9 @@ void freyjaBoneFlags(index_t boneIndex, byte flags)
 void freyjaBoneParent(index_t boneIndex, index_t parentIndex)
 {
 	Bone *b = Bone::GetBone(boneIndex);
-	Bone *p = Bone::GetBone(parentIndex);
 
+	// NOTE: This is setup to allow setting parents that don't exist yet
+	//       currently to retain 0.9.3 and older plugin compatibility
 	if (b && boneIndex != parentIndex)
 	{
 		b->mParent = parentIndex;
@@ -113,6 +115,8 @@ void freyjaBoneParent(index_t boneIndex, index_t parentIndex)
 		// Doing AddChild elsewhere for compatibility reasons, but
 		// I think it should be done here by 0.9.5 release
 #if 0
+		Bone *p = Bone::GetBone(parentIndex);
+
 		if (p)
 		{
 			p->addChild(boneIndex);
@@ -147,7 +151,7 @@ void freyjaBoneAddChild(index_t boneIndex, index_t childIndex)
 
 	if (b && boneIndex != childIndex)
 	{
-		freyjaPrintMessage("! bone %i -> %i parent", childIndex, boneIndex);
+		//MARK_MSGF("! bone %i -> %i parent", childIndex, boneIndex);
 		b->AddChild(childIndex);
 		//b->updateBoneToWorld();
 	}
@@ -184,7 +188,7 @@ void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 
 	if (b)
 	{
-		MARK_MSGF(" ! set %f %f %f", p, h, r);
+		//MARK_MSGF(" ! set %f %f %f", p, h, r);
 		b->mRotation = Quaternion(p, h, r);
 		//b->updateBoneToWorld();
 	}
@@ -197,7 +201,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 
 	if (b)
 	{
-		MARK_MSGF(" ! set %f %f %f", phr[0], phr[1], phr[2]);
+		//MARK_MSGF(" ! set %f %f %f", phr[0], phr[1], phr[2]);
 		b->mRotation.setByEulerAngles(phr);
 		//b->updateBoneToWorld();
 	}
@@ -295,7 +299,8 @@ void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 		//tmp = phr[0];
 		//phr[0] = phr[2];
 		//phr[2] = tmp;
-		MARK_MSGF(" ! get %f %f %f", phr[0], phr[1], phr[2]);
+
+		//MARK_MSGF(" ! get %u %f %f %f", boneIndex, phr[0], phr[1], phr[2]);
 	}
 }
 
