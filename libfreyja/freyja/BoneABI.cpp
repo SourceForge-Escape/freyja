@@ -153,7 +153,7 @@ void freyjaBoneAddChild(index_t boneIndex, index_t childIndex)
 	{
 		//MARK_MSGF("! bone %i -> %i parent", childIndex, boneIndex);
 		b->AddChild(childIndex);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 
@@ -165,7 +165,7 @@ void freyjaBoneTranslate3f(index_t boneIndex, vec_t x, vec_t y, vec_t z)
 	if (b)
 	{
 		b->mTranslation = Vector3d(x, y, z);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 
@@ -177,7 +177,7 @@ void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz)
 	if (b)
 	{
 		b->mTranslation = Vector3d(xyz[0], xyz[1], xyz[2]);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 
@@ -190,7 +190,7 @@ void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 	{
 		//MARK_MSGF(" ! set %f %f %f", p, h, r);
 		b->mRotation = Quaternion(p, h, r);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 
@@ -203,7 +203,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 	{
 		//MARK_MSGF(" ! set %f %f %f", phr[0], phr[1], phr[2]);
 		b->mRotation.setByEulerAngles(phr);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 
@@ -216,7 +216,7 @@ void freyjaBoneRotateQuat4f(index_t boneIndex,
 	if (b)
 	{
 		b->mRotation = Quaternion(w, x, y, z);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 
@@ -228,7 +228,7 @@ void freyjaBoneRotateQuat4fv(index_t boneIndex, vec4_t wxyz)
 	if (b)
 	{
 		b->mRotation = Quaternion(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
-		//b->updateBoneToWorld();
+		b->UpdateBindPose();
 	}
 }
 

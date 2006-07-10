@@ -303,8 +303,7 @@ void freyjaPrintError(const char *format, ...)
 #if USING_FREYJA_MEMORY
 void freyjaAddTrack(void *ptr, size_t size, const char *file, int line, const char *func, uint32 flags)
 {
-	if (gPrinter) 
-		gPrinter->Log("memory.csv", "%u, %p, %u, %s, %i, %s", gFreyjaMemoryTick, ptr, size, file, line, func);
+	//if (gPrinter) gPrinter->Log("memory.csv", "%u, %p, %u, %s, %i, %s", gFreyjaMemoryTick, ptr, size, file, line, func);
 
 	++gFreyjaMemoryNews;
 	++gFreyjaMemoryTick;
@@ -313,8 +312,7 @@ void freyjaAddTrack(void *ptr, size_t size, const char *file, int line, const ch
 
 void freyjaRemoveTrack(void *ptr, const char *file, int line, const char *func, uint32 flags)
 {
-	if (gPrinter) 
-		gPrinter->Log("memory.csv", "%u, %p, ?, %s, %i, %s", gFreyjaMemoryTick, ptr, file, line, func);
+	//if (gPrinter) gPrinter->Log("memory.csv", "%u, %p, ?, %s, %i, %s", gFreyjaMemoryTick, ptr, file, line, func);
 
 	++gFreyjaMemoryDeletes;
 	++gFreyjaMemoryTick;
