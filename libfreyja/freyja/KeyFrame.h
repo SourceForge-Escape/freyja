@@ -41,6 +41,9 @@
 
 using namespace mstl;
 
+
+namespace freyja {
+
 class KeyFrameObject
 {
 	////////////////////////////////////////////////////////////
@@ -221,7 +224,7 @@ class KeyFrameGroup
 
 	long mUID;				/* Unique numeric identifer for this group */
 
-	char mName[64];			/* Human readable name for this group eg 'Run0' */
+	char mName[64];		/* Human readable name for this group eg 'Run0' */
 };
 
 
@@ -235,5 +238,7 @@ class KeyFrameGroupControl
 
 	float mTimeEnd;
 };
+
+} // namespace freyja
 
 #endif

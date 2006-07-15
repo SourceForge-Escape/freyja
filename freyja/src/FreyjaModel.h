@@ -609,26 +609,16 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setCurrentAnimation(unsigned int index);
+	void SetCurrentAnimation(index_t animId);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets the current animation index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setCurrentAnimationFrame(unsigned int index);
+	void SetCurrentKeyFrame(index_t keyframe);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets the current animation frame index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
+	 * Post : Sets the current UI keyframe index
 	 ------------------------------------------------------*/
 
 	void setCurrentBone(unsigned int index);

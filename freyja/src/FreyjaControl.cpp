@@ -330,7 +330,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 		if (value != mModel->getCurrentAnimationFrame())
 		{
 			freyja_event_set_range(event, value, 0, mModel->getAnimationFrameCount(mModel->getCurrentAnimation()));
-			mModel->setCurrentAnimationFrame(value);	
+			mModel->SetCurrentKeyFrame(value);	
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1601,15 +1601,15 @@ bool FreyjaControl::event(int command)
 
 	/* ANIMATIONS */
 	case eAnimationNext:
-		mModel->setCurrentAnimation(mModel->getCurrentAnimation() + 1);
+		mModel->SetCurrentAnimation(mModel->getCurrentAnimation() + 1);
 		freyja_print("Animation[%i].", mModel->getCurrentAnimation());
 		break;
 
 	case eAnimationPrev:
 		if (mModel->getCurrentAnimation())
-			mModel->setCurrentAnimation(mModel->getCurrentAnimation() - 1);
+			mModel->SetCurrentAnimation(mModel->getCurrentAnimation() - 1);
 		else
-			mModel->setCurrentAnimation(0);
+			mModel->SetCurrentAnimation(0);
 
 		freyja_print("Animation[%i].", mModel->getCurrentAnimation());
 		break;
