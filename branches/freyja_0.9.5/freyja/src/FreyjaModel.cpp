@@ -411,30 +411,22 @@ void FreyjaModel::setCurrentVertexFrame(unsigned int index)
 }
 
 
-unsigned int FreyjaModel::getAnimationFrameCount(unsigned int index)
+unsigned int FreyjaModel::getAnimationFrameCount(unsigned int animId)
 {
-	freyja_print("FreyjaModel::getAnimationFrameCount> Not Implemented %s:%d\n",
-				 __FILE__, __LINE__);
-
+	MARK_MSGF("Not Implemented; %u", animId);
 	return 0;
 }
 
 
-void FreyjaModel::setCurrentAnimation(unsigned int index)
+void FreyjaModel::SetCurrentAnimation(index_t animId)
 {
-	freyja_print("FreyjaModel::setCurrentAnimation> Not Implemented %s:%d\n",
-				 __FILE__, __LINE__);
-
-	//index;
+	MARK_MSGF("Not Implemented; %u", animId);
 }
 
 
-void FreyjaModel::setCurrentAnimationFrame(unsigned int index)
+void FreyjaModel::SetCurrentKeyFrame(index_t keyframe)
 {
-	freyja_print("FreyjaModel::setCurrentAnimationFrame> Not Implemented %s:%d\n",
-				 __FILE__, __LINE__);
-
-	//index;
+	MARK_MSGF("Not Implemented; %u", keyframe);
 }
 
 

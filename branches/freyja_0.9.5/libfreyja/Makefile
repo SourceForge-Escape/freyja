@@ -215,7 +215,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o
 
-#	$(BUILDDIR)/FreyjaScene.o 
 
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
