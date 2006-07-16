@@ -213,4 +213,136 @@ class BezierPatch
 
 };
 
-#endif
+#ifdef HAVE_OPENGL
+//#   ifdef MACOSX
+//#      include <OpenGL/OpenGL.h>
+//#   else
+#      include <GL/gl.h>
+#      include <GL/glu.h>
+//#   endif
+
+class BezierPatchOpenGL
+{
+public:
+
+	BezierPatchOpenGL();
+
+	~BezierPatchOpenGL();
+
+
+	static void DrawPatch(BezierPatch &patch)
+	{
+		unsigned int i, j;
+
+
+		glColor3f(1.0f,0.0f,0.0f);
+	
+		for (i = 0; i < 4; ++i)
+		{
+			glBegin(GL_LINE_STRIP);
+
+			for (j = 0; j < 4; ++j)
+				glVertex3fv(patch.control[i][j].mVec);
+			glEnd();
+		}
+
+		for (i = 0; i < 4; ++i)
+		{
+			glBegin(GL_LINE_STRIP);
+
+			for(j = 0; j < 4; ++j)
+				glVertex3fv(patch.control[j][i].mVec);
+			glEnd();
+		}
+
+		glPointSize(4.0);
+		glColor3f(0.0f, 1.0f, 0.0f);
+
+		for (i = 0; i < 4; ++i)
+		{
+			glBegin(GL_POINTS);
+
+			for(j = 0; j < 4; ++j)
+				glVertex3fv(patch.control[i][j].mVec);
+
+			glEnd();
+		}
+
+		glPointSize(1.0);
+
+		glColor3f(1.0f,1.0f,1.0f);
+	}
+
+
+	/* Used nehe tut for basis, so this could be much better */
+	static unsigned int BuildOpenGLDisplayList(BezierPatch &patch, int divs)
+	{
+		int u = 0, v;
+		vec_t py, px, pyold; 
+		GLuint drawlist = glGenLists(1);
+		Vector3d temp[4];
+		Vector3d *last = new Vector3d[divs+1];  /* Array Of Points To Mark
+												   The First Line Of Polygons */
+
+		if (patch.displayList != 0)	   // Get Rid Of Any Old Display Lists
+			glDeleteLists(patch.displayList, 1);
+
+		temp[0] = patch.control[0][3];	   // The First Derived Curve (Along X-Axis)
+		temp[1] = patch.control[1][3];
+		temp[2] = patch.control[2][3];
+		temp[3] = patch.control[3][3];
+
+		for (v = 0; v <= divs; ++v)
+		{			// Create The First Line Of Points
+			px = ((vec_t)v)/((vec_t)divs);		// Percent Along Y-Axis
+			/* Use The 4 Points From The Derived Curve To 
+			 * Calculate The Points Along That Curve */
+			last[v] = patch.solveBernstein(px, temp);
+		}
+
+		glNewList(drawlist, GL_COMPILE);				// Start A New Display List
+		glBindTexture(GL_TEXTURE_2D, patch.texture);	// Bind The Texture
+
+		for (u = 1; u <= divs; ++u) 
+		{
+			py    = ((float)u)/((float)divs);			// Percent Along Y-Axis
+			pyold = ((float)u-1.0f)/((float)divs);		// Percent Along Old Y Axis
+
+			// Calculate New Bezier Points
+			temp[0] = patch.solveBernstein(py, patch.control[0]);
+			temp[1] = patch.solveBernstein(py, patch.control[1]);
+			temp[2] = patch.solveBernstein(py, patch.control[2]);
+			temp[3] = patch.solveBernstein(py, patch.control[3]);
+
+			glBegin(GL_TRIANGLE_STRIP);
+
+			for (v = 0; v <= divs; ++v)
+			{
+				px = ((float)v)/((float)divs);		// Percent Along The X-Axis
+
+				glTexCoord2f(pyold, px);			// Apply The Old Texture Coords
+				glVertex3d(last[v].mVec[0], last[v].mVec[1], last[v].mVec[2]);	// Old Point
+
+				last[v] = patch.solveBernstein(px, temp);	// Generate New Point
+				glTexCoord2f(py, px);				// Apply The New Texture Coords
+				glVertex3d(last[v].mVec[0], last[v].mVec[1], last[v].mVec[2]);	// New Point
+			}
+
+			glEnd();						// END The Triangle Strip
+		}
+	
+		glEndList();						// END The List
+
+		delete [] last;						// Free The Old Vertices Array
+
+		patch.displayList = drawlist;
+
+		return drawlist;					// Return The Display List
+	}
+
+};
+
+
+#   endif // HAVE_OPENGL
+
+#endif // GUARD__FREYJA_MONGOOSE_BEZIERPATCH_H_

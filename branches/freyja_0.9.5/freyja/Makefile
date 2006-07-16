@@ -187,6 +187,7 @@ OBJS = \
 	$(BUILD_DIR)/FreyjaControl.o \
 	$(BUILD_DIR)/FreyjaModel.o \
 	$(BUILD_DIR)/FreyjaState.o \
+	$(BUILD_DIR)/FreyjaOpenGL.o
 
 
 $(BUILD_DIR)/$(NAME) : $(OBJS) 

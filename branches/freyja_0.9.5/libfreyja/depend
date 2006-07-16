@@ -3,7 +3,7 @@ $(BUILDDIR)/MetaData.o: freyja/MetaData.cpp freyja/MetaData.h freyja/freyja.h \
   freyja/FreyjaFileWriter.h freyja/FreyjaFileReader.h
 	 $(DO_CC)
 
-$(BUILDDIR)/BoneABI.o: freyja/BoneABI.cpp freyja/Bone.h freyja/freyja.h \
+$(BUILDDIR)/BoneABI.o: freyja/BoneABI.cpp freyja/freyja.h freyja/Bone.h \
   freyja/BoneABI.h
 	 $(DO_CC)
 
@@ -28,13 +28,6 @@ $(BUILDDIR)/FreyjaFSM.o: freyja/FreyjaFSM.cpp freyja/freyja.h freyja/BoneABI.h \
   freyja/SkeletonABI.h freyja/FreyjaFileReader.h freyja/FreyjaPluginABI.h \
   freyja/MeshABI.h freyja/FreyjaFSM.h freyja/FreyjaPlugin.h \
   freyja/FreyjaPrinter.h freyja/Mesh.h freyja/FreyjaFileWriter.h
-	 $(DO_CC)
-
-$(BUILDDIR)/FreyjaScene.o: freyja/FreyjaScene.cpp freyja/FreyjaFileWriter.h \
-  freyja/FreyjaScene.h freyja/FreyjaCamera.h freyja/FreyjaLight.h \
-  freyja/Mesh.h freyja/freyja.h freyja/FreyjaFileReader.h \
-  freyja/FreyjaMaterial.h freyja/FreyjaTexture.h freyja/FreyjaPluginABI.h \
-  freyja/BoneABI.h freyja/MeshABI.h freyja/SkeletonABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/FreyjaPlugin.o: freyja/FreyjaPlugin.cpp freyja/FreyjaPlugin.h \
@@ -88,8 +81,7 @@ $(BUILDDIR)/FreyjaPluginABI.o: freyja/FreyjaPluginABI.cpp freyja/ActionManager.h
   freyja/MeshABI.h freyja/SkeletonABI.h freyja/FreyjaPlugin.h \
   freyja/FreyjaPrinter.h freyja/Mesh.h freyja/FreyjaImage.h \
   freyja/FreyjaLight.h freyja/FreyjaMaterial.h freyja/FreyjaTexture.h \
-  freyja/FreyjaScene.h freyja/MetaData.h freyja/KeyFrame.h \
-  freyja/FreyjaPakReader.h
+  freyja/MetaData.h freyja/KeyFrame.h freyja/FreyjaPakReader.h
 	 $(DO_CC)
 
 $(BUILDDIR)/RigidBody.o: freyja/RigidBody.cpp freyja/RigidBody.h

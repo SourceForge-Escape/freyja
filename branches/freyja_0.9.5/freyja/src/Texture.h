@@ -429,6 +429,8 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	static Texture *mSingleton;
+
 
  private:
 

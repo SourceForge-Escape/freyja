@@ -35,6 +35,7 @@
 #include <hel/math.h>
 
 #include "freyja_events.h"
+#include "Freyja3dCursor.h"
 #include "FreyjaControl.h"
 
 /* using namespace freyja; */

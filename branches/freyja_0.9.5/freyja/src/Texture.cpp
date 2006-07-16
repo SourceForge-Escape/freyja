@@ -100,8 +100,8 @@
 #endif
 
 
-/* Texture *Texture::mSingleton = 0x0; */
-gl_font_t *gFontTest = 0x0;
+Texture *Texture::mSingleton = NULL;
+gl_font_t *gFontTest = NULL;
 
 
 ////////////////////////////////////////////////////////////
@@ -143,6 +143,9 @@ Texture::Texture()
 #endif
 
 	initSDL_TTF();
+
+	
+	mSingleton = this;
 }
 
 

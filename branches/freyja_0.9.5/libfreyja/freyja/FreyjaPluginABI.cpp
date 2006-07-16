@@ -46,7 +46,6 @@
 #include "FreyjaImage.h"
 #include "FreyjaLight.h"
 #include "FreyjaMaterial.h"
-#include "FreyjaScene.h"
 #include "FreyjaTexture.h"
 #include "MetaData.h"
 #include "KeyFrame.h"

@@ -32,7 +32,9 @@
 
 #include "freyja_events.h"
 #include "Texture.h"
+#include "Freyja3dCursor.h"
 #include "FreyjaModel.h"
+
 
 Freyja3dCursor gFreyjaCursor;
 BezierPatch FreyjaModel::gTestPatch;
