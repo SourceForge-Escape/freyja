@@ -46,21 +46,14 @@
 
 
 #include "freyja_events.h"
+#include "FreyjaOpenGL.h"
 #include "FreyjaRender.h"
+
+
+#define COLORED_POLYGON -1
 
 FreyjaRender *FreyjaRender::mSingleton = 0x0;
 extern FreyjaModel *gFreyjaModel;
-
-const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
-const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
-const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
-const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
-const float ORANGE[]       = {  1.0,  7.0,  0.0, 1.0 };
-const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
-const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
-const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
-const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
-const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
 
 
 vec4_t FreyjaRender::mColorBackground;
@@ -91,6 +84,12 @@ vec_t FreyjaRender::mVertexPointSize = 3.5;
 ////////////////////////////////////////////////////////////////
 // Events
 ////////////////////////////////////////////////////////////////
+
+void test_patch()
+{
+	FreyjaRender::mPatchDisplayList = 1;
+	BezierPatchOpenGL::BuildOpenGLDisplayList(FreyjaModel::gTestPatch, 7);
+}
 
 void ePointJoint()
 {
@@ -166,637 +165,6 @@ void FreyjaRenderEventsAttach()
 }
 
 
-// TEMP ////////////////////////////////////////////////////////
-
-void freyjaApplyMaterial(uint32 materialIndex)
-{
-	vec4_t ambient, diffuse, specular, emissive;
-	vec_t shininess;
-	uint32 flags, texture, texture2, blendSrc, blendDest;
-
-
-	if (materialIndex > freyjaGetMaterialCount())
-	{
-		materialIndex = 0;
-}
-
-	flags = freyjaGetMaterialFlags(materialIndex);
-	texture = freyjaGetMaterialTexture(materialIndex);
-	blendSrc = freyjaGetMaterialBlendSource(materialIndex);
-	blendDest = freyjaGetMaterialBlendDestination(materialIndex);
-	freyjaGetMaterialAmbient(materialIndex, ambient);
-	freyjaGetMaterialDiffuse(materialIndex, diffuse);
-	freyjaGetMaterialSpecular(materialIndex, specular);
-	freyjaGetMaterialEmissive(materialIndex, emissive);
-	shininess = freyjaGetMaterialShininess(materialIndex);
-
-	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT, GL_EMISSION, emissive);
-	glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
-
-	if (flags & fFreyjaMaterial_DetailTexture)
-	{
-		gFreyjaModel->mTexture.bindMultiTexture(texture, texture2);
-	}
-	else if (flags & fFreyjaMaterial_Texture) // Non-colored is ( id + 1)
-	{
-		glBindTexture(GL_TEXTURE_2D, texture+1);
-	}
-	else // Colored, first texture is a generated WHITE 32x32
-	{
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	if (flags & fFreyjaMaterial_Blending)
-	{
-		glBlendFunc(blendSrc, blendDest);
-		glEnable(GL_BLEND);
-	}
-	else
-	{
-		glDisable(GL_BLEND);
-	}
-}
-
-
-
-////////////////////////////////////////////////////////////////
-
-
-void drawPatch(BezierPatch &patch)
-{
-	unsigned int i, j;
-
-
-	glColor3f(1.0f,0.0f,0.0f);
-	
-	for (i = 0; i < 4; ++i)
-	{
-		glBegin(GL_LINE_STRIP);
-
-		for (j = 0; j < 4; ++j)
-			glVertex3fv(patch.control[i][j].mVec);
-		glEnd();
-	}
-
-	for (i = 0; i < 4; ++i)
-	{
-		glBegin(GL_LINE_STRIP);
-
-		for(j = 0; j < 4; ++j)
-			glVertex3fv(patch.control[j][i].mVec);
-		glEnd();
-	}
-
-	glPointSize(4.0);
-	glColor3f(0.0f, 1.0f, 0.0f);
-
-	for (i = 0; i < 4; ++i)
-	{
-		glBegin(GL_POINTS);
-
-		for(j = 0; j < 4; ++j)
-			glVertex3fv(patch.control[i][j].mVec);
-
-		glEnd();
-	}
-
-	glPointSize(1.0);
-
-	glColor3f(1.0f,1.0f,1.0f);
-}
-
-/* Crappy patch list using nehe tut for basis */
-unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs)
-{
-	int u = 0, v;
-	vec_t py, px, pyold; 
-	GLuint drawlist = glGenLists(1);
-	Vector3d temp[4];
-	Vector3d *last = new Vector3d[divs+1];  /* Array Of Points To Mark
-											   The First Line Of Polygons */
-
-	if (patch.displayList != 0)	   // Get Rid Of Any Old Display Lists
-		glDeleteLists(patch.displayList, 1);
-
-	temp[0] = patch.control[0][3];	   // The First Derived Curve (Along X-Axis)
-	temp[1] = patch.control[1][3];
-	temp[2] = patch.control[2][3];
-	temp[3] = patch.control[3][3];
-
-	for (v = 0; v <= divs; ++v)
-	{			// Create The First Line Of Points
-		px = ((vec_t)v)/((vec_t)divs);		// Percent Along Y-Axis
-		/* Use The 4 Points From The Derived Curve To 
-		 * Calculate The Points Along That Curve */
-		last[v] = patch.solveBernstein(px, temp);
-	}
-
-	glNewList(drawlist, GL_COMPILE);				// Start A New Display List
-	glBindTexture(GL_TEXTURE_2D, patch.texture);	// Bind The Texture
-
-	for (u = 1; u <= divs; ++u) 
-	{
-		py    = ((float)u)/((float)divs);			// Percent Along Y-Axis
-		pyold = ((float)u-1.0f)/((float)divs);		// Percent Along Old Y Axis
-
-		// Calculate New Bezier Points
-		temp[0] = patch.solveBernstein(py, patch.control[0]);
-		temp[1] = patch.solveBernstein(py, patch.control[1]);
-		temp[2] = patch.solveBernstein(py, patch.control[2]);
-		temp[3] = patch.solveBernstein(py, patch.control[3]);
-
-		glBegin(GL_TRIANGLE_STRIP);
-
-		for (v = 0; v <= divs; ++v)
-		{
-			px = ((float)v)/((float)divs);		// Percent Along The X-Axis
-
-			glTexCoord2f(pyold, px);			// Apply The Old Texture Coords
-			glVertex3d(last[v].mVec[0], last[v].mVec[1], last[v].mVec[2]);	// Old Point
-
-			last[v] = patch.solveBernstein(px, temp);	// Generate New Point
-			glTexCoord2f(py, px);				// Apply The New Texture Coords
-			glVertex3d(last[v].mVec[0], last[v].mVec[1], last[v].mVec[2]);	// New Point
-		}
-
-		glEnd();						// END The Triangle Strip
-	}
-	
-	glEndList();						// END The List
-
-	delete [] last;						// Free The Old Vertices Array
-
-	patch.displayList = drawlist;
-
-	return drawlist;					// Return The Display List
-}
-
-
-void test_patch()
-{
-	FreyjaRender::mPatchDisplayList = 1;
-	generate_bezier_patch_list(FreyjaModel::gTestPatch, 7);
-}
-
-
-bool gl_ext_check(char *ext)
-{
-	bool ret = false;
-	
-	
-	if (strstr((char*)glGetString(GL_EXTENSIONS), ext))
-	{
-		ret = true;
-	}
-	
-	return ret;
-}
-
-
-void gl_resize_2d(int width, int height)
-{
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();  
-	glOrtho(0, width, 0, height, -99999, 99999);
-	glTranslatef(0.0, 0.0, 99998.0);
-	glMatrixMode(GL_MODELVIEW);
-}
-
-
-void mglDrawBbox(const vec3_t min, const vec3_t max, 
-				 const vec4_t pointColor, const vec4_t lineColor)
-{
-	glPointSize(4.0);
-
-	glColor4fv(pointColor);
-
-	glBegin(GL_POINTS);
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(max[0], max[1], min[2]);
-	glVertex3f(min[0], min[1], max[2]);
-	glVertex3f(min[0], max[1], min[2]);
-	glVertex3f(max[0], min[1], min[2]);
-	glEnd();
-
-
-	glColor4fv(lineColor);
-
-	glBegin(GL_LINES);
-	// max, top quad
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(max[0], max[1], min[2]);
-
-	// max-min, vertical quads
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(min[0], max[1], min[2]);
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(max[0], min[1], min[2]);
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(min[0], min[1], max[2]);
-
-	// min-max, vertical quads
-	glVertex3f(max[0], max[1], min[2]);
-	glVertex3f(max[0], min[1], min[2]);
-	glVertex3f(max[0], max[1], min[2]);
-	glVertex3f(min[0], max[1], min[2]);
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(min[0], min[1], max[2]);
-
-	// min, bottom quad
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(min[0], max[1], min[2]);  
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(max[0], min[1], min[2]);
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(min[0], min[1], max[2]);
-	glEnd();
-}
-
-
-void mglDrawSelectBox(const vec3_t min, const vec3_t max, const vec4_t lineColor)
-{
-	vec_t w = (max[0] - min[0]);
-	vec_t h = (max[1] - min[1]);
-	vec_t d = (max[2] - min[2]);
-	vec_t sw = w * 0.33;
-	vec_t sh = h * 0.33;
-	vec_t sd = d * 0.33;
-
-
-	glColor4fv(lineColor);
-
-	//glBegin(GL_POINTS);
-	//glVertex3f(max[0], max[1], max[2]);
-	//glVertex3f(min[0], min[1], min[2]);
-	//glVertex3f(max[0], min[1], max[2]);
-	//glVertex3f(min[0], max[1], max[2]);
-	//glVertex3f(max[0], max[1], min[2]);
-	//glVertex3f(min[0], min[1], max[2]);
-	//glVertex3f(min[0], max[1], min[2]);
-	//glVertex3f(max[0], min[1], min[2]);
-	//glEnd();
-
-
-	glBegin(GL_LINES);
-
-	// A
-	glVertex3f(min[0], max[1], min[2]);
-	glVertex3f(min[0] + sw, max[1], min[2]);
-	glVertex3f(min[0], max[1], min[2]);
-	glVertex3f(min[0], max[1] - sh, min[2]);
-	glVertex3f(min[0], max[1], min[2]);
-	glVertex3f(min[0], max[1], min[2] + sd);
-
-	// B
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(min[0] + sw, max[1], max[2]);
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(min[0], max[1] - sh, max[2]);
-	glVertex3f(min[0], max[1], max[2]);
-	glVertex3f(min[0], max[1], max[2] -sd);
-
-	// C ( max )
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(max[0] - sw, max[1], max[2]);
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(max[0], max[1] - sh, max[2]);
-	glVertex3f(max[0], max[1], max[2]);
-	glVertex3f(max[0], max[1], max[2] - sd);
-
-	// D
-	glVertex3f(max[0], max[1], min[2]);
-	glVertex3f(max[0] - sw, max[1], min[2]);
-	glVertex3f(max[0], max[1], min[2]);
-	glVertex3f(max[0], max[1] - sh, min[2]);
-	glVertex3f(max[0], max[1], min[2]);
-	glVertex3f(max[0], max[1], min[2] + sd);
-
-	// E ( min )
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(min[0] + sw, min[1], min[2]);
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(min[0], min[1] + sh, min[2]);
-	glVertex3f(min[0], min[1], min[2]);
-	glVertex3f(min[0], min[1], min[2] + sd);
-
-	// F
-	glVertex3f(min[0], min[1], max[2]);
-	glVertex3f(min[0] + sw, min[1], max[2]);
-	glVertex3f(min[0], min[1], max[2]);
-	glVertex3f(min[0], min[1] + sh, max[2]);
-	glVertex3f(min[0], min[1], max[2]);
-	glVertex3f(min[0], min[1], max[2] - sd);
-
-	// G
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(max[0] - sw, min[1], max[2]);
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(max[0], min[1] + sh, max[2]);
-	glVertex3f(max[0], min[1], max[2]);
-	glVertex3f(max[0], min[1], max[2] - sd);
-	
-	//H
-	glVertex3f(max[0], min[1], min[2]);
-	glVertex3f(max[0] - sw, min[1], min[2]);
-	glVertex3f(max[0], min[1], min[2]);
-	glVertex3f(max[0], min[1] + sh, min[2]);
-	glVertex3f(max[0], min[1], min[2]);
-	glVertex3f(max[0], min[1], min[2] + sd);
-
-	glEnd();
-}
-
-
-void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
-{
-	glBegin(GL_LINES);
-      
-	// X Axis, red
-	glColor3fv(RED);
-	glVertex3f(-mid, 0.0, 0.0);
-	glVertex3f(mid,  0.0, 0.0);
-	//  Y arrowhead
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  min, 0.0);
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max, -min, 0.0);
-	//  Z arrowhead
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  0.0, min);
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  0.0, -min);
-
-
-	// Y Axis, green
-	glColor3fv(GREEN);	
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0, -mid, 0.0);	
-	//  X arrowhead		
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(min,  max, 0.0);
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(-min, max, 0.0);
-	//  Z arrowhead
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  max, min);
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  max, -min);
-
-      
-	// Z Axis, blue
-	glColor3fv(BLUE);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0,  0.0, -mid);
-	//  Y arrowhead
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0,  min,  max);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0, -min,  max);
-	//  X arrowhead
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(min,  0.0,  max);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(-min, 0.0,  max);
-	glEnd();
-}
-
-
-void mglDraw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max)
-{
-	glBegin(GL_LINES);
-      
-	// X Axis, red
-	glColor3fv(RED);
-	glVertex3f(0.0,  0.0, 0.0);
-	glVertex3f(mid,  0.0, 0.0);
-	//  Y arrowhead
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  min, 0.0);
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max, -min, 0.0);
-	//  Z arrowhead
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  0.0, min);
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  0.0, -min);
-
-
-	// Y Axis, green
-	glColor3fv(GREEN);	
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  0.0, 0.0);	
-	//  X arrowhead		
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(min,  max, 0.0);
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(-min, max, 0.0);
-	//  Z arrowhead
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  max, min);
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  max, -min);
-
-      
-	// Z Axis, blue
-	glColor3fv(BLUE);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0,  0.0,  0.0);
-	//  Y arrowhead
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0,  min,  max);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0, -min,  max);
-	//  X arrowhead
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(min,  0.0,  max);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(-min, 0.0,  max);
-	glEnd();
-}
-
-void mglDraw3dCursor(const vec_t min, const vec_t mid, const vec_t max)
-{
-	extern Freyja3dCursor gFreyjaCursor;
-
-	glPushMatrix();
-	glTranslatef(gFreyjaCursor.mPos.mVec[0], 
-				 gFreyjaCursor.mPos.mVec[1], 
-				 gFreyjaCursor.mPos.mVec[2]);
-
-	switch (gFreyjaCursor.GetMode())
-	{
-	case Freyja3dCursor::Translation:
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		mglDraw3dCursorLoc(min, mid, max);
-		glPopAttrib();
-		break;
-
-	default:
-	case Freyja3dCursor::Invisible:
-		break;
-	}
-
-	glPopMatrix();
-}
-
-
-/* Based on draw_sphere (public domain), 1995, David G Yu */
-void mglDrawSphere(int numMajor, int numMinor, float radius)
-{
-	double majorStep = (M_PI / numMajor);
-	double minorStep = (2.0 * M_PI / numMinor);
-	double a, b, c, r0, r1;
-	float z0, z1, x, y;
-	int i, j;
-	
-	
-	for (i = 0; i < numMajor; ++i)
-	{
-		a = i * majorStep;
-		b = a + majorStep;
-		r0 = radius * sin(a);
-		r1 = radius * sin(b);
-		z0 = radius * cos(a);
-		z1 = radius * cos(b);
-		
-		glBegin(GL_TRIANGLE_STRIP);
-		
-		for (j = 0; j <= numMinor; ++j) 
-		{
-			c = j * minorStep;
-			x = cos(c);
-			y = sin(c);
-			
-			glNormal3f((x * r0) / radius, (y * r0) / radius, z0 / radius);
-			glTexCoord2f(j / (GLfloat) numMinor, i / (GLfloat) numMajor);
-			glVertex3f(x * r0, y * r0, z0);
-			
-			glNormal3f((x * r1) / radius, (y * r1) / radius, z1 / radius);
-			glTexCoord2f(j / (GLfloat) numMinor, (i + 1) / (GLfloat) numMajor);
-			glVertex3f(x * r1, y * r1, z1);
-		}
-		
-		glEnd();
-	}
-}
-
-
-void mglDrawBone(unsigned char type, const vec3_t pos)
-{
-	const vec_t min = 0.05f;
-	const vec_t max = 0.50f;
-
-
-	switch (type)
-	{
-	case 1:
-		glBegin(GL_LINES);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(pos[0], pos[1], pos[2]);
-		glEnd();
-		break;
-
-	case 2:
-		glBegin(GL_LINE_STRIP);
-		glVertex3f(0.0f,   min,  0.0f);    // 0
-		glVertex3f(-max,  0.0f, -max);     // 1
-		glVertex3f( max,  0.0f, -max);     // 2
-		glVertex3fv(pos);                        // Base
-		glVertex3f(-max,  0.0f,-max);      // 1
-		glVertex3f(-max,  0.0f, max);      // 4
-		glVertex3f( 0.0f,  min, 0.0f);     // 0
-		glVertex3f( max,  0.0f,-max);      // 2
-		glVertex3f( max,  0.0f, max);      // 3
-		glVertex3f( 0.0f,  min, 0.0f);     // 0
-		glVertex3f(-max,  0.0f, max);      // 4
-		glVertex3fv(pos);                        // Base
-		glVertex3f( max,  0.0f, max);      // 3
-		glVertex3f(-max,  0.0f, max);      // 4
-		glEnd();
-		break;
-	}
-}
-
-
-void mglDrawJoint(unsigned char type, const vec3_t pos)
-{
-	switch (type)
-	{
-	case 1:
-		glBegin(GL_POINTS);
-		glVertex3fv(pos);
-		glEnd();
-		break;
-	case 2:
-		mglDrawSphere(12, 12, 0.5f);
-		break;
-	case 3:
-		mglDrawAxis(0.25f, 1.2f, 0.872f);
-		break;
-	}
-}
-
-
-void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
-{
-	vec_t x, z;
-
-
-	/* Draw grid without using GL Scaling, which is 'teh bad' */
-	glPushMatrix();
-	glColor3fv(color);
-
-	for (x = -size; x < size; x += step)
-	{
-		glBegin(GL_LINE_LOOP);
-
-		for (z = -size; z < size; z += step)
-		{
-			glVertex3f((x + step) * scale, 0.0f, z * scale);	
-			glVertex3f(x * scale, 0.0f, z * scale);	
-			glVertex3f(x * scale, 0.0f, (z + step) * scale);
-			glVertex3f((x + step) * scale, 0.0f, (z + step) * scale);
-		}
-
-		glEnd();
-	}
-
-	glPopMatrix();
-}
-
-
-void getOpenGLViewport(int *viewportXYWH) // int[4]
-{
-	glGetIntegerv(GL_VIEWPORT, viewportXYWH);
-}
-
-void getOpenGLModelviewMatrix(double *modelview) // double[16]
-{
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-}
-
-
-void getOpenGLProjectionMatrix(double *projection) // double[16]
-{
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-}
-
-
-
-
 ////////////////////////////////////////////////////////////////
 
 
@@ -805,8 +173,8 @@ FreyjaRender::FreyjaRender() :
 	mWidth(640),
 	mHeight(480),
 	mTextureId(0),
-	mViewMode(VIEWMODE_MODEL_VIEW),
 	mInitContext(false),
+	mViewMode(VIEWMODE_MODEL_VIEW),
 	mScaleEnv(40.0f), //20.0; // 40.0f for higher res
 	mFar(6000.0f),
 	mNear(0.1f),
@@ -981,11 +349,6 @@ void FreyjaRender::drawFreeWindow()
 
 ///////// PRIVATE METHODS ////////////////////////////////
 
-#ifndef COLORED_POLYGON
-#   define COLORED_POLYGON -1
-#   warning COLORED_POLYGON is obsolete
-#endif
-
 void FreyjaRender::BindTexture(unsigned int texture)
 {
 	static int hack = 0;
@@ -1039,7 +402,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glEnable(GL_TEXTURE_2D);
 		
 		//BindTexture(mModel->getCurrentTextureIndex()+1);
-		freyjaApplyMaterial(mModel->getCurrentTextureIndex());
+		mglApplyMaterial(mModel->getCurrentTextureIndex());
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
@@ -1087,8 +450,8 @@ void FreyjaRender::initContext(unsigned int width, unsigned int height, bool fas
 	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
 
 	/* Test for extentions */
-	arb_multitexture = gl_ext_check("GL_ARB_multitexture");
-	ext_texture_env_combine = gl_ext_check("GL_EXT_texture_env_combine");
+	arb_multitexture = mglHardwareExtTest("GL_ARB_multitexture");
+	ext_texture_env_combine = mglHardwareExtTest("GL_EXT_texture_env_combine");
 
 	freyja_print("\tGL_ARB_multitexture       \t\t[%s]",
 			 arb_multitexture ? "YES" : "NO");
@@ -1446,7 +809,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	const vec_t scale = 1.0001f;
 	static Vector3d u, v;
 	static RenderPolygon face;
-	vec_t *color;
+	//vec_t *color;
 	unsigned int i, j, n;
 
 
@@ -1523,7 +886,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 						glEnable(GL_TEXTURE_2D);
 					}
 
-					freyjaApplyMaterial(f->mMaterial);
+					mglApplyMaterial(f->mMaterial);
 					glBegin(GL_POLYGON);
 
 					for (j = 0; j < f->mIndices.size(); ++j)
@@ -1546,7 +909,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			if (mRenderMode & RENDER_TEXTURE) // Now implies material
 			{
 				glEnable(GL_TEXTURE_2D);
-				freyjaApplyMaterial(0); // material!
+				mglApplyMaterial(0); // material!
 			}
 
 			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
@@ -1555,7 +918,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 				if (!f) continue;
 
-				freyjaApplyMaterial(freyjaGetCurrentMaterial());
+				mglApplyMaterial(freyjaGetCurrentMaterial());
 
 				glBegin(GL_POLYGON);
 
@@ -1589,7 +952,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		if (mRenderMode & RENDER_MATERIAL)
 		{
 			// FIXME: mesh.material
-			freyjaApplyMaterial(freyjaGetCurrentMaterial());
+			mglApplyMaterial(freyjaGetCurrentMaterial());
 		}
 
 		color = mColorWireframe;
@@ -1670,7 +1033,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 					if (face.flags & fPolygon_Alpha)  
 						continue;
 
-					freyjaApplyMaterial(face.material); // material!
+					mglApplyMaterial(face.material); // material!
 
 					switch (face.count)
 					{
@@ -1716,7 +1079,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			{
 				if (mesh.getPolygon(i, mesh.frame, face))
 				{
-					freyjaApplyMaterial(face.material); // material!
+					mglApplyMaterial(face.material); // material!
 
 					switch (face.count)
 					{
@@ -1779,7 +1142,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	if (FreyjaRender::mPatchDisplayList > 0)
 	{
 		glCallList(FreyjaModel::gTestPatch.displayList);
-		drawPatch(FreyjaModel::gTestPatch);
+		BezierPatchOpenGL::DrawPatch(FreyjaModel::gTestPatch);
 	}
 
 	glPushAttrib(GL_ENABLE_BIT);
@@ -1974,7 +1337,7 @@ void FreyjaRender::renderPolygon(RenderPolygon &face)
 			if (mRenderMode & RENDER_MATERIAL)
 			{
 				//glPushAttrib(GL_ENABLE_BIT);
-				freyjaApplyMaterial(face.material);
+				mglApplyMaterial(face.material);
 			}
 			else
 			{
@@ -2115,7 +1478,7 @@ void FreyjaRender::renderUVWindow()
 
 	glPushMatrix();
 
-	gl_resize_2d(width, height);
+	mgl2dProjection(width, height);
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
@@ -2177,9 +1540,9 @@ void FreyjaRender::renderUVWindow()
 		if (!mesh.getPolygon(i, face))
 			continue;
 
-		if (mesh.id == (int)mModel->getCurrentMesh())
+		if (mesh.id == mModel->getCurrentMesh())
 		{
-			if (face.id == (int)mModel->getCurrentPolygon())
+			if (face.id == mModel->getCurrentPolygon())
 				glColor3fv(RED);
 			else if (face.flags & fPolygon_Alpha)  
 				glColor3fv(ORANGE);
@@ -2193,7 +1556,7 @@ void FreyjaRender::renderUVWindow()
 		
 		if (face.material != (int)mModel->getCurrentTextureIndex())
 		{
-			if (mesh.id == (int)mModel->getCurrentMesh())
+			if (mesh.id == mModel->getCurrentMesh())
 			{
 				glColor3fv(GREEN);
 			}
@@ -2433,7 +1796,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	getOpenGLModelviewMatrix(gMatrix);
+	mglGetOpenGLModelviewMatrix(gMatrix);
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
@@ -2472,7 +1835,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glPushMatrix();
 	glRotatef(90.0f, 1, 0, 0);
 	glRotatef(180.0f, 0, 1, 0);
-	freyjaApplyMaterial(freyjaGetCurrentMaterial());
+	mglApplyMaterial(freyjaGetCurrentMaterial());
 	mglDrawSphere(128, 128, 10.0);
 	glPopMatrix();
 #endif
@@ -2491,7 +1854,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glEnd();
 
 	glColor3fv(WHITE);
-	freyjaApplyMaterial(freyjaGetCurrentMaterial());
+	mglApplyMaterial(freyjaGetCurrentMaterial());
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0, 1.0);
 	glVertex3f(x, y, z);
