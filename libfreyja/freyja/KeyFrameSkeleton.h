@@ -72,6 +72,14 @@ class KeyFrameBone : public KeyFrameObject
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	vec_t mTime;
+
+	Vec3 mTranslation;
+
+	Vec3 mScale;
+
+	Quaternion mRotation;
+
 
  private:
 
@@ -83,12 +91,6 @@ class KeyFrameBone : public KeyFrameObject
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	Vector3d mTranslation;
-
-	Vector3d mScale;
-
-	Quaternion mRotation;
 };
 
 #endif

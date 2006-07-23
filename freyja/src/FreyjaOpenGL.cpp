@@ -25,16 +25,6 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_OPENGL
-//#   ifdef MACOSX
-//#      include <OpenGL/OpenGL.h>
-//#   else
-#      include <GL/gl.h>
-#      include <GL/glu.h>
-//#   endif
-#endif
-
-
 #include <freyja/freyja.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <hel/math.h>
@@ -42,18 +32,103 @@
 #include "Freyja3dCursor.h"
 #include "Texture.h"
 
+#include "FreyjaOpenGL.h"
 
-const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
-const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
-const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
-const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
-const float ORANGE[]       = {  1.0,  7.0,  0.0, 1.0 };
-const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
-const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
-const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
-const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
-const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
 
+PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB = NULL;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
+PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB = NULL;
+PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB = NULL;
+PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
+PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
+
+
+using namespace freyja3d;
+
+
+////////////////////////////////////////////////////////////
+// Constructors
+////////////////////////////////////////////////////////////
+
+OpenGL *OpenGL::mSingleton = NULL;
+
+OpenGL *OpenGL::Instance()
+{
+	return mSingleton ? mSingleton : new OpenGL();
+}
+
+OpenGL::OpenGL() :
+	mFlags(fNone),
+	mTextureCount(0),
+	mTextureLimit(0)
+{
+	int texelUnitCount = 2;
+
+	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &texelUnitCount);
+	glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
+	glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
+	glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
+	glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)mglGetProcAddress("glMultiTexCoord4fARB");
+	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)mglGetProcAddress("glActiveTextureARB");
+	glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)mglGetProcAddress("glClientActiveTextureARB");
+
+	mTextureCount = texelUnitCount;
+
+	mSingleton = this;
+}
+
+
+OpenGL::~OpenGL()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+// Public Accessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Unit Test code
+////////////////////////////////////////////////////////////
+
+#ifdef UNIT_TEST_OPENGL
+int runOpenGLUnitTest(int argc, char *argv[])
+{
+	OpenGL test;
+
+	return 0;
+}
+
+
+int main(int argc, char *argv[])
+{
+	printf("[OpenGL class test]\n");
+
+	return runOpenGLUnitTest(argc, argv);
+}
+#endif
+
+
+
+////////////////////////////////////////////////////////////
+// mgl utils
+////////////////////////////////////////////////////////////
 
 bool mglHardwareExtTest(const char *ext)
 {

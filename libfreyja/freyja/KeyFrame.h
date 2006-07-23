@@ -44,6 +44,16 @@ using namespace mstl;
 
 namespace freyja {
 
+	// Need to get scale and translation tests up by end of the week
+	// TtoL  	time_t -> distance_t
+	// TtoA 	time_t -> angle_t
+	// TtoT 	time_t -> time_t
+	// TtoU 	time_t -> double_t
+	// UtoL 	unit_t -> distance_t
+	// UtoA 	unit_t -> angle_t
+	// UtoT 	unit_t -> time_t
+	// UtoU 	unit_t -> unit_t
+
 class KeyFrameObject
 {
 	////////////////////////////////////////////////////////////
@@ -67,6 +77,8 @@ class KeyFrameObject
 	virtual ~KeyFrameObject();
 
 	// 'Signal' interface ( TODO: Merge with Action objects )
+	virtual void PushUndoState() {}
+	virtual void PushRedoState() {}
 	virtual void Undo() {}
 	virtual void Redo() {}
 	virtual bool SerializeUndoHistory(FreyjaFileWriter &w) { return false; }
@@ -95,6 +107,7 @@ class KeyFrameObject
 	virtual void SetDeltaRotationZ(float z) {}
 
 	// 'Size' interface
+	virtual void SetScale(vec_t s) {}
 	virtual void SetScale(vec3_t xyz) {}	
 	virtual void SetScaleX(float x) {}
 	virtual void SetScaleY(float y) {}
@@ -111,6 +124,8 @@ class KeyFrameObject
 	virtual void SetColorB(float b) {}
 	virtual void SetColorG(float g) {}
 	virtual void SetColorA(float a) {}
+	virtual void SetTransparentcy(float t) {}
+	virtual void SetVisibility(float v) {}
 
 	// 'Light' interface
 	virtual void SetFalloff(float d) {}
@@ -172,7 +187,6 @@ class KeyFrame
 	////////////////////////////////////////////////////////////
 
 
-
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
@@ -182,6 +196,8 @@ class KeyFrame
 	vec_t mTime;                        /* Time offset to this frame */
 
 	Vector<KeyFrameObject *> mObjects;  /* All objects bound to this frame */
+
+
 
  private:
 
@@ -197,47 +213,113 @@ class KeyFrame
 };
 
 
-class KeyFrameList
-{
- public:
-	KeyFrameList *mPrev;
-	KeyFrameList *mNext;
-	KeyFrame *mKeyframe;	
-};
-
-
 class KeyFrameGroup
 {
+	// A Hybrid of keygroup and animation now
+
 	////////////////////////////////////////////////////////////
 	// Groups keyframes for indepentdent playback and blending
 	////////////////////////////////////////////////////////////
 
  public:
 
+	KeyFrameGroup() :
+		mPool(),
+		mTimeStart(0.0f),
+		mTimeEnd(0.0f),
+		mRate(30.0f),
+		mDuration(0.0f),
+		mUID(INDEX_INVALID),
+		mHasRootAnimation(false)
+	{
+	}
+
+
+	~KeyFrameGroup()
+	{
+	}
+
+	void FreeKeyFrame(index_t idx)
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		KeyFrame **array = mPool.getVectorArray();
+		
+		if ( idx < mPool.size() && array[idx] )
+		{
+			delete array[idx];
+			array[idx] = NULL;
+		}
+	}
+
+	index_t NewKeyframe()
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		KeyFrame **array = mPool.getVectorArray();
+		KeyFrame *obj = new KeyFrame();
+
+		for ( uint32 i = 0, count = mPool.size(); i < count; ++i )
+		{
+			if (array[i] == NULL)
+			{
+				obj->mIndex = i;
+				array[i] = obj;
+				return i;
+			}
+		}
+
+		mPool.pushBack(obj);
+		return mPool.size() - 1;
+	}
+
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	KeyFrame *GetKeyframe(index_t idx)
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		KeyFrame **array = mPool.getVectorArray();
+		
+		if ( idx < mPool.size() )
+		{
+			return array[idx];
+		}
+
+		return NULL;
+	}
+
+
+	Vector<KeyFrame *> mPool;    /* Storage for all Keyframes */
+
+	char mName[64];		    /* Human readable name for this group eg 'Run0' */
+
+	vec_t mTimeStart;
+
+	vec_t mTimeEnd;
+
+	vec_t mRate;
+
+	vec_t mDuration;		/* How long is this track */
+
+	index_t mUID;			/* Unique numeric identifer for this group */
+
+	bool mHasRootAnimation;
+
+
  private:
 
-	KeyFrameList *mKeyFrames;
-
-	float mDuration;		/* How long is this track */
-
-	unsigned int mCount;	/* Number of keyframes in this group */
-
-	long mUID;				/* Unique numeric identifer for this group */
-
-	char mName[64];		/* Human readable name for this group eg 'Run0' */
 };
 
-
-class KeyFrameGroupControl
-{
- public:
-
- private:
-
-	float mTimeStart;
-
-	float mTimeEnd;
-};
 
 } // namespace freyja
 

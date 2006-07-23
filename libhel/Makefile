@@ -262,7 +262,7 @@ install-bin:
 install-lib:
 	@-echo -n "Installing lib                              "
 	@-mkdir -p $(INSTALL_LIB)
-	@-cp bin/debug/libhel$(API).$(EXT).$(VERSION) $(INSTALL_LIB)
+	@-cp $(BUILD_INSTALL_DIR)/libhel$(API).$(EXT).$(VERSION) $(INSTALL_LIB)
 	@-cd $(INSTALL_LIB) && ln -sf lib$(NAME)$(API).$(EXT).$(VERSION) lib$(NAME)$(API).$(EXT)
 	./libsetup.sh
 	@-echo "[done]"
@@ -317,12 +317,13 @@ libhel.test:
 		hel/libhel.cpp \
 		-o $(BUILD_TEST_DIR)/libhel.test
 
+
 Quaternion.test:
 	mkdir -p $(BUILD_TEST_DIR)
 	$(CC) -Wall -g -pipe -O0 -L/usr/local/lib -lstdc++ -lm -lhel0 \
 		-DUNIT_TEST_QUATERNION hel/Quaternion.cpp \
 		-o $(BUILD_TEST_DIR)/Quaternion.test
-	
+
 
 win32.test-strip:
 	strip --strip-all $(BUILD_TEST_DIR)/libhel-win32.test

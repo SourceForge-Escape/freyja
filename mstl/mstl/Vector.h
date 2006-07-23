@@ -295,6 +295,25 @@ public:
 		}
 	}
 
+	void qSort(int (*compareFunc)(const void *, const void *))
+	{
+		qsort(mData, end(), sizeof(Object), compareFunc);
+	}
+	
+
+	void swap(unsigned int a, unsigned int b)
+	{
+		if (a < begin() || a > end())
+			return;
+		
+		if (b < begin() || b > end())
+			return;
+
+		Object swap = mData[a];
+		mData[a] = mData[b];
+		mData[b] = swap;
+	}
+
 	
 	void assign(unsigned int index, Object object)
 	{
@@ -381,6 +400,7 @@ public:
  	}
 
 #endif
+
 
 
 	// Instead of appending objects this apptempts replacing 'removed' objects
@@ -485,6 +505,23 @@ public:
 		return (*mVector)[mIndex];
 	}
 
+
+	/* Requires objects to support '=='  */
+	bool find(Object object)
+	{
+		Object *array = mVector->getVectorArray();
+		unsigned int i = mVector->begin(), n = mVector->end();
+
+		for (; i < n; ++i)
+		{
+			if (object == array[i])
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	Vector<Object> *mVector;
 	unsigned int mIndex;

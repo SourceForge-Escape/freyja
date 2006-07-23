@@ -24,6 +24,39 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_
 
+#ifdef HAVE_OPENGL
+#   ifdef MACOSX
+#      include <OpenGL/OpenGL.h>
+#      include <OpenGL/gl.h>
+#      include <OpenGL/glu.h>
+#   elif WIN32
+#      include <GL/glext.h>
+#      include <gdk/win32/gdkglwglext.h>
+#      define mglGetProcAddress(string) wglGetProcAddress(string)
+#   else
+#      include <GL/gl.h>
+#      include <GL/glu.h>
+#      include <GL/glext.h>
+#      define GLX_GLXEXT_PROTOTYPES
+#      include <GL/glx.h>
+#      include <GL/glxext.h>
+#      define mglGetProcAddress(string) glXGetProcAddressARB((GLubyte *)string)
+#   endif
+
+extern PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB;
+extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
+extern PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB;
+extern PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB;
+extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
+
+#else
+#   error "This module requires OpenGL SDK"
+#endif
+
+#include <hel/math.h>
+
+
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
 const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
@@ -66,6 +99,94 @@ void mglGetOpenGLModelviewMatrix(double *modelview); // double[16]
 void mglGetOpenGLProjectionMatrix(double *projection); // double[16]
 
 void mglApplyMaterial(uint32 materialIndex);
+
+
+namespace freyja3d {
+
+class OpenGL
+{
+ public:
+
+	enum Flags {
+		fNone = 0
+	};
+
+
+	////////////////////////////////////////////////////////////
+	// Constructors
+	////////////////////////////////////////////////////////////
+
+	~OpenGL();
+	/*------------------------------------------------------
+	 * Pre  : OpenGL object is allocated
+	 * Post : Deconstructs an object of OpenGL
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2006.07.22: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+
+
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
+
+	static OpenGL *Instance();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGL if not already 
+	 *        allocated
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2006.07.22: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	static OpenGL *mSingleton;
+
+
+ protected:
+
+	OpenGL();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGL
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2006.07.22: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
+ private:
+
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
+
+	uint32 mFlags;             /* */
+
+	uint32 mTextureCount;      /* */
+
+	uint32 mTextureLimit;      /* */
+};
+
+} // namespace freyja3d
+
 
 
 #endif /* GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_ */

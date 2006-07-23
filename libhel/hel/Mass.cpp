@@ -26,23 +26,33 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Mass::Mass()
+Mass::Mass() :
+	mState(fRest),
+	mMass(0.0f),
+	mPos(),
+	mVelocity(),
+	mForce()
 {
-	mMass = 0.0;
 }
 
 
-Mass::Mass(vec_t mass)
+Mass::Mass(vec_t mass) :
+	mState(fRest),
+	mMass(mass),
+	mPos(),
+	mVelocity(),
+	mForce()
 {
-	mMass = mass;
 }
 
 
-Mass::Mass(vec_t mass, const Vector3d &position, const Vector3d &velocity)
+Mass::Mass(vec_t mass, const Vector3d &position, const Vector3d &velocity) :
+	mState(fRest),
+	mMass(mass),
+	mPos(position),
+	mVelocity(velocity),
+	mForce()
 {
-	mMass = mass;
-	mPos = position;
-	mVelocity = velocity;
 }
 
 
@@ -63,12 +73,14 @@ Mass::~Mass()
 void Mass::applyForce(Vector3d force)
 {
 	mForce += force;
+	mState = fActive;
 }
 
 
 void Mass::rest()
 {
 	mForce = Vector3d(0, 0, 0);
+	mState = fRest;
 }
 
 
