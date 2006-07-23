@@ -34,12 +34,14 @@
  ==========================================================================*/
 
 #include <stdio.h>
+#include <string.h>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
 
 #include "mgtk_callbacks.h"
 #include "mgtk_interface.h"
@@ -595,9 +597,8 @@ void mgtk_event_swap_gl_buffers()
 {
 	/* Hhhmm...  nothing really needed here, swapping is handled in 
 	 * the gtk glarea interfacing code after draw requests */
-#ifndef WIN32 // freyja always assumes native unix
-	usleep(250); // Hhmm... avoid back to back redraws give time to finish
-#endif
+	// Hhmm... avoid back to back redraws give time to finish
+	SystemIO::MicroSleep(250);
 }
 
 

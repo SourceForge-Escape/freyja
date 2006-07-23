@@ -110,9 +110,11 @@ class String
 	// This is better than the GNU extention   ;)
 	static size_t strnlen(const char *s, size_t maxlen)
 	{
+		if (!s || !s[0]) return 0;
+
 		size_t i;
 
-		for (i = 0; s[i] && maxlen; ++i, --maxlen)
+		for (i = 0; s[i] && i < maxlen; ++i, --maxlen)
 			;
 
 		return i;
