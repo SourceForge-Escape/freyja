@@ -47,21 +47,11 @@
 #   include <GL/gl.h>
 #endif
 
-#ifndef int8_t
-typedef signed char int8_t;
-#endif
-
-#ifndef int16_t
-typedef short int16_t;
-#endif
-
-#ifndef int32_t
-typedef int int32_t;
-#endif
-
-
+#include <mstl/SystemIO.h>
 
 #include "Md3.h"
+
+using namespace mstl;
 
 
 Md3::Md3()
@@ -290,16 +280,14 @@ void Md3::setMeshes(md3_mesh_t *meshes, unsigned long count)
 
 
 // FIXME: Only partial endian support
-int Md3::load(char *filename)
+int Md3::load(const char *filename)
 {
 	FILE *f;
-	int i, j, k, npherno_warn;
+	int i, j, k, npherno_warn = 0;
 	bool dump_skin;
 	int16_t ss;
 	int8_t sb;
 
-  
-	npherno_warn = 0;
 
 	f = fopen(filename, "rb");
 

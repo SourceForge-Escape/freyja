@@ -346,7 +346,7 @@ public:
 
 	void setMeshes(md3_mesh_t *meshes, unsigned long count);
 
-	int load(char *filename);
+	int load(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Error code is returned, 0 no error
