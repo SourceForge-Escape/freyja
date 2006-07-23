@@ -44,7 +44,10 @@ Simulation::~Simulation()
 
 Mass *Simulation::getMass(unsigned int i)
 {
-	return mMasses[i];
+	if (i < mMasses.size())
+		return mMasses[i];
+
+	return NULL;
 }
 
 
@@ -86,6 +89,20 @@ bool Simulation::collisionDetected(Mass *mass)
 void Simulation::generateMasses(unsigned int count, vec_t mass)
 {
 	generateMasses(count, mass, Vector3d(0, 0, 0), Vector3d(0, 0, 0));
+}
+
+
+void Simulation::setMass(unsigned int idx, vec_t mass,
+						 const Vec3 &position, const Vec3 &velocity)
+{
+	Mass *m = getMass(idx);
+
+	if (m)
+	{
+		m->mMass = mass;
+		m->mPos = position;
+		m->mVelocity = velocity;
+	}
 }
 
 

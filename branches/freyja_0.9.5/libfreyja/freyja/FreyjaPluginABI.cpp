@@ -65,7 +65,6 @@ using namespace freyja;
  * These should be storged in the Scene and accessed from the
  * SceneManager singleton  */
 //Vector<Model *> gFreyjaMeshes; 
-Vector<KeyFrame *> gFreyjaKeyFrames; 
 Vector<MetaData *> gFreyjaMetaData; 
 Vector<FreyjaCamera *>  gFreyjaCameras;
 Vector<FreyjaLight *>  gFreyjaLights;

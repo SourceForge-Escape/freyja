@@ -67,7 +67,7 @@ class Action
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool serialize(FreyjaFileWriter &w);
+	virtual bool Serialize(FreyjaFileWriter &w) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -84,7 +84,7 @@ class Action
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	virtual void redo();
+	virtual void Redo() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -95,7 +95,7 @@ class Action
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(FreyjaFileReader &r);
+	virtual bool Serialize(FreyjaFileReader &r) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -106,7 +106,7 @@ class Action
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
- 	virtual void undo();
+ 	virtual void Undo() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

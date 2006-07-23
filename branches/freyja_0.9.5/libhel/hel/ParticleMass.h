@@ -37,7 +37,15 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	ParticleMass();
+	ParticleMass() :
+		mMass(NULL),
+		mActive(false),
+		mTextureId(0),
+		mLife(0.0f),
+		mBlend(0.0f)
+	{
+		mColor[0] = mColor[1] = mColor[2] = mColor[3] = 1.0f;
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Particle

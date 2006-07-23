@@ -135,6 +135,14 @@ class Simulation
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	virtual void setMass(unsigned int idx, vec_t mass,
+								const Vec3 &pos, const Vec3 &velocity);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : <idx>th mass is set with 
+	 *        <mass>, <position>, and <velocity>
+	 ------------------------------------------------------*/
+
 	virtual void generateMasses(unsigned int count, vec_t mass,
 										 const Vector3d &position, 
 										 const Vector3d &velocity);
@@ -208,6 +216,13 @@ class Simulation
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	virtual unsigned int getMassCount() { return mMassCount; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : Have forces act on masses  
+	 ------------------------------------------------------*/
+
+
 	Vector<Mass *> mMasses;			/* It's a collection of masses, silly */
 
 	Vector<CollisionObject *> mObjects;	/* Object(s) to test collision with */
@@ -232,9 +247,11 @@ class GravitySimulation : public Simulation
 {
 public:
 
-	GravitySimulation() : Simulation()      
+	GravitySimulation() : 
+		Simulation(),
+		gravitation(0.0f, -9.81f, 0.0f)		 
 	{
-		gravitation = Vector3d(0.0f, -9.81f, 0.0f);
+		//gravitation = Vector3d(0.0f, -9.81f, 0.0f);
 	}
 
 
