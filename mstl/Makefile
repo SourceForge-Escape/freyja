@@ -17,6 +17,8 @@ INSTALL_INCLUDE=/usr/local/include
 
 ########################################################
 
+all: Vector.test
+
 clean: clean-emacs clean-build clean-test clean-obj
 
 clean-test:
@@ -49,13 +51,14 @@ clean-build:
 
 ########################################################
 
-CFLAGS=-Wall -g 
+CFLAGS=-Wall -g -I. 
 LDFLAGS=-lstdc++
 
 Vector.test:
 	mkdir -p $(BUILD_TEST_DIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) \
 		-o $(BUILD_TEST_DIR)/Vector.test $(SRC_DIR)/test_vector.cpp
+	$(BUILD_TEST_DIR)/Vector.test
 
 
 ########################################################
