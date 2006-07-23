@@ -43,9 +43,16 @@
 #ifndef __FREYJA_MONGOOSE_TREE_H_
 #define __FREYJA_MONGOOSE_TREE_H_
 
-
 #include <stdlib.h>
-#include <iostream>
+#include <stdio.h>
+
+#ifdef USE_IOSTREAM
+#   include <iostream.h>
+#endif
+
+#ifdef DEBUG_MEMEORY
+#   include "memeory_test.h"
+#endif
 
 
 typedef enum
@@ -121,7 +128,7 @@ public:
 	
 	//void SetChild(TreeNode<Key, Data> *tree) 
 	//{
-	//	Left(tree);
+	//	SetLeft(tree);
 	//}
 
 
@@ -222,6 +229,7 @@ public:
 
 	/// Misc ///////////////////////////////////////
 
+#ifdef USE_IOSTREAM
 	void PrintNode()
 	{
 		std::cout << "(" << _key << ", " << _data << ", "
@@ -244,6 +252,43 @@ public:
 		{
 			std::cout << ", ";
 			_right->PrintInorder();
+		}
+	}
+#endif
+
+
+	void PrintNodeSpecial(void (*print_func_k)(Key), void (*print_func_d)(Data))
+	{
+		printf("(");
+
+		if (print_func_k)
+			(*print_func_k)(_key);
+
+		printf(", ");
+
+		if (print_func_d)
+			(*print_func_d)(_data);
+
+		printf(", %s)", ((GetColor() == _tree_h_red) ? "Red" : "Black"));
+	}
+
+
+	void PrintInorderSpecial(void (*print_func_k)(Key), void (*print_func_d)(Data))
+	{
+		if (_left)
+		{
+			_left->PrintInorderSpecial(print_func_k, print_func_d);
+			printf(",\n");
+			//			printf(", ");
+		}
+
+		PrintNodeSpecial(print_func_k, print_func_d);
+
+		if (_right)
+		{
+			printf(",\n");
+			//			printf(", ");
+			_right->PrintInorderSpecial(print_func_k, print_func_d);
 		}
 	}
 
@@ -517,6 +562,7 @@ public:
 	}
 
 
+#ifdef USE_IOSTREAM
 	void PrintTree(TreeNode<Key, Data> *tree, unsigned int height,
 						unsigned int seek, bool rightmost)
 	{
@@ -617,6 +663,7 @@ public:
 
 		if (_root)
 		{
+			std::cout << "Root: ";
 			_root->PrintNode();
 			std::cout << std::endl;
 
@@ -624,6 +671,23 @@ public:
 		}
 
 		std::cout << std::endl << "}" << std::endl;
+	}
+#endif
+
+
+	void PrintSpecial(void (*print_func_k)(Key), void (*print_func_d)(Data))
+	{
+		printf("Tree: %i elements {\n", _num_elements);
+
+		if (_root && print_func_k && print_func_d)
+		{
+			printf("Root: ");
+			_root->PrintNodeSpecial(print_func_k, print_func_d);
+			printf("\n");
+			_root->PrintInorderSpecial(print_func_k, print_func_d);
+		}
+
+		printf("\n}\n");
 	}
 
 

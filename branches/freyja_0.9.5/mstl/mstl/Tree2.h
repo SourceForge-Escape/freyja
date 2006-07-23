@@ -1,5 +1,5 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Freyja
  * Author  : Mongoose
@@ -37,7 +37,7 @@
  *
  * 2000.10.26:
  * Mongoose - Created
- ================================================================*/
+ ===========================================================================*/
 
 
 #ifndef __FREYJA_MONGOOSE_TREE_H_
@@ -57,9 +57,8 @@
 
 typedef enum
 {
-	_tree_h_black,
-	_tree_h_red
-	
+	_tree_h_black = false,
+	_tree_h_red = true
 }  _tree_h_color_t;
 
 
