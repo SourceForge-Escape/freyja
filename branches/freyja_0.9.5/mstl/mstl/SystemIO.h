@@ -29,9 +29,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifdef WIN32
 #   include "windows.h"
+#   include "winbase.h" // Required for Sleep()
 #endif
 
 // Some very old byte swapping routines
@@ -988,6 +990,16 @@ class SystemIO
 		fprintf(f, "%s\n", buffer);
 
 		va_end(args);
+	}
+
+
+	static void MicroSleep(long usec)
+	{
+#ifdef WIN32
+		Sleep(usec);
+#else
+		usleep(usec); 
+#endif
 	}
 
 
