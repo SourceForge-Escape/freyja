@@ -49,14 +49,14 @@ public:
 	}
 
 
-	Vector(Vector &vector) :
+	Vector(const Vector &v) :
 		mData(0x0),
 		mReserve(0),
 		mStart(0),
 		mEnd(0),
 		mExpand(VECTOR_BASE_EXPAND)
 	{
-		copy(vector);
+		copy(v);
 	}
 
 
@@ -83,6 +83,8 @@ public:
 			mData = new Object[mReserve];
 			memcpy(mData, v.mData, sizeof(Object) * mReserve);			
 		}
+
+		return *this;
 	}
 
 
@@ -208,11 +210,29 @@ public:
 
 	void resize(unsigned int count)
 	{
+#if OLD_VECTOR_PTR_HELPER
 		resize(count, 0x0);
+#else
+		unsigned int i;
+
+
+		if (!reserve(count))
+		{
+			for (i = 0; i < count; ++i)
+			{
+				if (i < begin() || i >= end())
+				{
+					mData[i] = Object();
+				}
+			}
+		}
+
+		mEnd = count;
+#endif
 	}
 
 
-	void resize(unsigned int count, Object object)
+	void resize(unsigned int count, Object obj)//Object &obj = Object())
 	{
 		unsigned int i;
 
@@ -223,7 +243,7 @@ public:
 			{
 				if (i < begin() || i >= end())
 				{
-					mData[i] = object;
+					mData[i] = obj;
 				}
 			}
 		}
@@ -275,29 +295,29 @@ public:
 	}
 	
 
-	void copy(Vector<Object> &vector)
+	void copy(const Vector<Object> &v)
 	{
-		unsigned int i;
+		unsigned int i, count;
 
 
-		if (vector.capacity() > capacity())
+		if (v.mReserve/*v.capacity()*/ > capacity())
 		{
-			resize(vector.capacity());
+			resize(v.mReserve/*v.capacity()*/);
 		}
 
-		mStart = vector.begin();
-		mEnd = vector.end();
+		mStart = v.mStart;//v.begin();
+		mEnd = v.mEnd;//v.end();
 
-		for (i = vector.begin(); i < vector.end(); ++i)
+		for (i = mStart, count = mEnd; i < count; ++i)
 		{
-			mData[i] = vector[i];
-			// Add(list->Current());
+			mData[i] = v.mData[i];//v[i];
 		}
 	}
 
-	void qSort(int (*compareFunc)(const void *, const void *))
+
+	void qSort(int (*compare_func)(const void *, const void *))
 	{
-		qsort(mData, end(), sizeof(Object), compareFunc);
+		qsort(mData, end(), sizeof(Object), compare_func);
 	}
 	
 
@@ -455,10 +475,10 @@ template <class Object> class VectorIterator
 {
 public:
 
-	VectorIterator(Vector<Object> *vector)
+	VectorIterator(Vector<Object> *vector) :
+		mVector(vector),
+		mIndex(0)
 	{
-		mVector = vector;
-		mIndex = 0;
 	}
 
 	void start()

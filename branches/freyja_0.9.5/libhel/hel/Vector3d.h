@@ -49,6 +49,7 @@ class Vector3d
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	Vector3d(const Vector3d &v);
 	Vector3d(const vec3_t v);
 	Vector3d(vec3_t v);
 	/*------------------------------------------------------

@@ -33,6 +33,14 @@ Vector3d::Vector3d()
 }
 
 
+Vector3d::Vector3d(const Vector3d &v)
+{
+	mVec[0] = v.mVec[0];
+	mVec[1] = v.mVec[1];
+	mVec[2] = v.mVec[2];
+}
+
+
 Vector3d::Vector3d(const vec3_t v)
 {
 	mVec[0] = v[0];
