@@ -57,23 +57,30 @@ class String
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	String(const String& s) :
+	String(const char *s) :
+		mString(NULL),
+		mLength(0)
+	{
+		if (s && s[0])
+		{
+			mLength = strlen(s);
+			mString = String::strdup(s);
+		}
+	}
+
+	String(const String &s) :
 		mString(NULL),
 		mLength(0)
 	{
 		mLength = s.mLength;
-		mString = new char[mLength+1];
-		memcpy(mString, s.mString, mLength-1);
-		mString[mLength] = 0;
+		mString = String::strdup(s.mString);
 	}
 
 
-	String &operator=(const String& s) 
+	String &operator=(const String &s) 
 	{
 		mLength = s.mLength;
-		mString = new char[mLength+1];
-		memcpy(mString, s.mString, mLength-1);
-		mString[mLength] = 0;
+		mString = String::strdup(s.mString);
 
 		return *this;
 	}
@@ -81,11 +88,7 @@ class String
 
 	~String()
 	{
-		if (mString)
-		{
-			delete [] mString;
-			mString = NULL;
-		}
+		Clear();
 	}
 	/*------------------------------------------------------
 	 * Pre  : String object is allocated
@@ -143,6 +146,17 @@ class String
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void Clear()
+	{
+		mLength = 0;
+
+		if (mString)
+		{
+			delete [] mString;
+			mString = NULL;
+		}
+	}
+	
 
  private:
 

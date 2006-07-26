@@ -521,6 +521,33 @@ class SystemIO
 		}
 
 
+		// Stops on '\0' and EOF
+		bool FindNextChar(char c)
+		{
+			bool found = false;
+			char lex;
+
+			while ((lex = NextChar()) && !IsEndOfFile())
+			{
+				if (c == lex)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			return found;
+		}
+
+
+		char NextChar()
+		{
+			char c;
+			fread(&c, 1, 1, mFileHandle);  // heh, yeah
+			return c;
+		}
+
+
 		double ParseDouble()
 		{
 			double r;
@@ -862,8 +889,9 @@ class SystemIO
 			 "int $3 \n" 
 		);
 #elif defined(__powerpc__)
+		/* Trap on any condition */
 		asm(
-			"tw 12,r2,r2 \n"
+			 "tw 31, r1, r1 \n"
 		);
 #else
 #   warning "No soft breakpoint can be inserted for this machine language"
