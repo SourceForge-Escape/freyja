@@ -70,7 +70,7 @@ class SystemIO
 			mHostOrder(LITTLE),
 			mFileHandle(NULL),
 			mBuffer(NULL),
-			mBufferSize(NULL),
+			mBufferSize(0),
 			mDirectory(NULL),
 			mDirectoryName(NULL),
 			mDirectoryListing(NULL)

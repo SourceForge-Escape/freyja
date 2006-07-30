@@ -105,6 +105,12 @@ class String
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	bool Empty()
+	{
+		return !(mLength && mString && mString[0]);
+	}
+
+
 	const char *GetCString()
 	{
 		return mString;

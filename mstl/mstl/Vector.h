@@ -215,7 +215,6 @@ public:
 #else
 		unsigned int i;
 
-
 		if (!reserve(count))
 		{
 			for (i = 0; i < count; ++i)
@@ -299,6 +298,8 @@ public:
 	{
 		unsigned int i, count;
 
+		//if (&v == 0x0)
+		//	return;
 
 		if (v.mReserve/*v.capacity()*/ > capacity())
 		{
@@ -343,7 +344,7 @@ public:
 
 	/* Mongoose 2002.08.31, The burden of bounds checking is on you
 	 *   this way you can handle your own problems w/o exceptions */
-	Object operator [] (unsigned int index)
+	Object &operator [] (unsigned int index)
 	{
 		return mData[index];
 	}
@@ -402,6 +403,7 @@ public:
  		++mIndex;
  	}
 
+
  	void prev()
  	{
  		--mIndex;
@@ -448,6 +450,7 @@ public:
 		//mData[index] = mData[begin()];
 		//++mStart;
 	}
+
 
 	Object *getVectorArray() /* Danger, Danger ;) */
 	{
