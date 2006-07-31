@@ -56,6 +56,9 @@ extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 
 #include <hel/math.h>
 
+#include <mstl/Vector.h>
+
+using namespace mstl;
 
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
@@ -68,6 +71,11 @@ const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
 const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
 const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
 
+
+
+////////////////////////////////////////////////////////////
+// Gobal functions
+////////////////////////////////////////////////////////////
 
 bool mglHardwareExtTest(const char *ext);
 
@@ -102,6 +110,27 @@ void mglApplyMaterial(uint32 materialIndex);
 
 
 namespace freyja3d {
+
+
+class OpenGLContext
+{
+public:
+	
+	
+	void Init(uint32 width, uint32 height);
+
+	void Resize(uint32 width, uint32 height);
+
+	vec_t mAspectRatio;
+	vec_t mNearHeight;
+	vec_t mNear;
+	vec_t mFar;
+	vec_t mScaleEnv;
+	uint32 mWidth;
+	uint32 mHeight;
+	bool mInitContext;
+};
+
 
 class OpenGL
 {
@@ -178,11 +207,13 @@ class OpenGL
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	Vector<OpenGLContext> mContexts;
+
 	uint32 mFlags;             /* */
 
-	uint32 mTextureCount;      /* */
+	int32 mTextureUnitCount;   /* */
 
-	uint32 mTextureLimit;      /* */
+	int32 mMaxLightsCount;     /* */
 };
 
 } // namespace freyja3d

@@ -47,7 +47,11 @@ typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
 
-
+#ifdef sincosf
+#   define helSinCosf sincosf
+#else
+#   define helSinCosf(a, s, c) *s = sin(a); *c = cos(a) 
+#endif
 
 char *helVersionInfo();
 

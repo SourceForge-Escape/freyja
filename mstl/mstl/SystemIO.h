@@ -78,6 +78,20 @@ class SystemIO
 		}
 
 
+#if 0 // This doesn't make sense to copy -- if YOU want to start here
+		File(const File &f) :
+			mHostOrder(f.mHostOrder),
+			mFileHandle(NULL),
+			mBuffer(NULL),
+			mBufferSize(0),
+			mDirectory(NULL),
+			mDirectoryName(NULL),
+			mDirectoryListing(NULL)
+		{
+		}
+#endif
+
+
 		virtual ~File()
 		{
 			Close();
@@ -472,7 +486,7 @@ class SystemIO
 		~TextFileWriter() { }
 
 		bool Open(const char *filename) { return File::Open(filename, "wb"); }
-		
+	 
 
 		void Print(const char *s, ...)
 		{
@@ -884,6 +898,18 @@ class SystemIO
 		
 	
 		// Soft breakpoint insertion
+		Assert(expr);
+
+		return true;
+	}
+
+
+	static void Assert(bool expr)
+	{
+		if (expr)
+			return;
+
+		// Soft breakpoint insertion
 #if defined(__x86_64__) || defined(__x86_32__)
 		asm(
 			 "int $3 \n" 
@@ -896,8 +922,6 @@ class SystemIO
 #else
 #   warning "No soft breakpoint can be inserted for this machine language"
 #endif
-
-		return true;
 	}
 
 
@@ -1030,6 +1054,30 @@ class SystemIO
 #endif
 	}
 
+
+	static void BufferedPrint(char *string, unsigned int len, char *s, ...)
+	/*------------------------------------------------------
+	 * Pre  : <String> is allocated to <Len> characters
+	 *        the rest is just like a printf() call
+	 *
+	 * Post : Generates the string and buffers it in <String>
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.12.31:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+	{
+		va_list args;
+
+		if (s && s[0])
+		{
+			va_start(args, s);
+			vsnprintf(string, len-1, s, args);	
+			string[len-1] = 0;
+			va_end(args);
+		}	
+	}
 
 	static void Print(const char *format, ...)
 	{

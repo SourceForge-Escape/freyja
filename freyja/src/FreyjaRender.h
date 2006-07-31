@@ -28,6 +28,7 @@
 
 
 #include <hel/ViewVolume.h>
+#include <hel/Ray.h>
 #include <freyja/RenderModel.h>
 
 #include "FreyjaModel.h"
@@ -305,6 +306,8 @@ public:
 
 	static FreyjaRender *mSingleton;  // Not really, but will be later
 
+	static Ray mTestRay;
+
 private:    
 
 	////////////////////////////////////////////////////////////
@@ -442,7 +445,6 @@ private:
 	 * 2002.02.28:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
 
 	FreyjaModel *mModel;                       /* Scene data model */
 

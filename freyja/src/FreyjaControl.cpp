@@ -2174,6 +2174,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 					break;
 
 				case modeRotate:
+					gFreyjaCursor.SetMode(Freyja3dCursor::Rotation);
 					freyja_print("3d cursor rotate not implemented");
 					break;
 
@@ -2462,13 +2463,73 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 	}
 }
 
-
+#include <hel/Ray.h>
+#define DEBUG_PICK_RAY 1
+#define DEBUG_SCREEN_TO_WORLD 0
 void FreyjaControl::testPickRay(vec_t x, vec_t y)
 {
+	Ray &r = mRender->mTestRay;
+	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
+	//const vec_t k = 100.0f;
+	//Vec3 a(0,0,0), b(k,0,0), c(0,k,0), i; // test facex
+	vec_t z;
+
+#if 0
 	double rayOrigin[4];
 	double rayVector[4];
-
 	getPickRay(x, y, rayOrigin, rayVector);
+
+	HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
+	HEL_VEC3_COPY(rayVector, r.mDir.mVec);
+
+	switch (mModel->getCurrentPlane())
+	{
+	case PLANE_XY:
+		r.mOrigin += Vec3(0,0,100);
+		break;
+
+	case PLANE_XZ:
+		r.mOrigin += Vec3(0,100,0);
+		break;
+
+	case PLANE_ZY: // side ZY! change
+		r.mOrigin += Vec3(100,0,0);
+		break;
+	}
+
+	r.mDir *= -1.0f;
+	//r.mOrigin = Vec3(x, y, );
+#else
+	getWorldFromScreen(&x, &y, &z);
+	r.mOrigin = Vec3(x, y, z);
+
+	switch (mModel->getCurrentPlane())
+	{
+	case PLANE_XY:
+		r.mOrigin += Vec3(0,0,100);
+		r.mDir += Vec3(0,0,-10000);
+		break;
+
+	case PLANE_XZ:
+		r.mOrigin += Vec3(0,100,0);
+		r.mDir += Vec3(0,-10000,0);
+		break;
+
+	case PLANE_ZY: // side ZY! change
+		r.mOrigin += Vec3(100,0,0);
+		r.mDir += Vec3(-10000,0,0);
+		break;
+	}	
+#endif
+
+	bool s = r.IntersectTriangle(a.mVec,b.mVec,c.mVec,i);
+
+
+	freyja_print("! %s, o %f %f %f, d %f %f %f => %f %f %f",
+				 s ? "true" : "false",
+				 r.mOrigin.mVec[0],r.mOrigin.mVec[1],r.mOrigin.mVec[2],
+				 r.mDir.mVec[0],r.mDir.mVec[1],r.mDir.mVec[2],
+				 i.mVec[0],i.mVec[1],i.mVec[2]);
 }
 
 
@@ -2500,11 +2561,11 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 	matrix4dvx16dv(inverse, rayVec, rayVector); // src, dest can be same
 	matrix4dvx16dv(inverse, rayPnt, rayOrigin); // src, dest can be same
 
-#ifdef DEBUG_PICK_RAY
-	freyja_print("!%f, %f -> <%f %f %f> @ %f, %f, %f\n",
+#if DEBUG_PICK_RAY
+	freyja_print("!%f, %f => <%f %f %f> @ %f, %f, %f\n",
 				mouseX, mouseY,
 				rayVector[0], rayVector[1], rayVector[2],
-				rayOrigin[0], rayOrigin[1], rayOrigin[2]);
+				 rayOrigin[0], rayOrigin[1], rayOrigin[2]);
 #endif
 }
 
@@ -2520,9 +2581,9 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 	height = mRender->getWindowHeight();
 	mModel->getSceneTranslation(scroll);
 
-#ifdef DEBUG_SCREEN_TO_WORLD
+#if DEBUG_SCREEN_TO_WORLD
 	printf("Screen (%.3f, %.3f); aspect_ratio = %.3f; zoom = %.3f\n", 
-			 *x, *y, width/height, mModel->getZoom());
+			 *x, *y, width/height, mRender->getZoom());
 	printf("Scroll (%.3f, %.3f, %.3f)\n", 
 			 scroll[0], scroll[1], scroll[2]);
 #endif
@@ -2554,7 +2615,7 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 		break;
 	}
 
-#ifdef DEBUG_SCREEN_TO_WORLD
+#if DEBUG_SCREEN_TO_WORLD
 	printf("World (%.3f, %.3f, %.3f)\n", *x, *y, *z);
 #endif
 }

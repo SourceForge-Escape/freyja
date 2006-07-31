@@ -99,43 +99,23 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 		break;
 
 	case FREYJA_VERTEX:
-#ifdef USING_EGG
-		return mEgg->getVertexCount();
-#else
 		return freyjaGetMeshVertexCount(gFreyjaCurrentMesh);
-#endif
 		break;
 
 	case FREYJA_TEXCOORD:
-#ifdef USING_EGG
-		return mEgg->getTexelCount();
-#else
 		return freyjaGetMeshTexCoordCount(gFreyjaCurrentMesh);
-#endif
 		break;
 
 	case FREYJA_MESH:
-#ifdef USING_EGG
-		return mEgg->getMeshCount();
-#else
 		return freyjaGetModelMeshCount(gFreyjaCurrentModel);
-#endif
 		break;
 
 	case FREYJA_VERTEX_GROUP:
-#ifdef USING_EGG
-		return mEgg->getGroupCount();
-#else
-		return 0;
-#endif
+		MARK_MSGF("FREYJA_VERTEX_GROUP Obsolete");
 		break;
 
 	case FREYJA_POLYGON:
-#ifdef USING_EGG
-		return mEgg->getPolygonCount();
-#else
 		return freyjaGetMeshPolygonCount(gFreyjaCurrentMesh);
-#endif
 		break;
 
 	case FREYJA_BONE:
@@ -163,7 +143,11 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 		break;
 
 	case FREYJA_VERTEX_FRAME:
+		MARK_MSGF("FREYJA_VERTEX_FRAME Obsolete");
 		break;
+		
+	default:
+		MARK_MSGF("Invalid state %i", type);
 	}
 
 	return 0;
@@ -417,7 +401,7 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 		break;
 
 	default:	
-		MARK_MSGF("'type = %s' Not Implemented", freyjaGetObjectName(type) );
+		MARK_MSGF("'type = %s' Not implemented in this branch", freyjaGetObjectName(type) );
 	}
 #endif
 
@@ -584,31 +568,14 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 
 void FreyjaFSM::freyjaEnd()
 {
-	index_t polygon = INDEX_INVALID, vertex;
+	index_t polygon = INDEX_INVALID, vertex = INDEX_INVALID;
 	uint32 i, count;
 
 
 	switch (mStack.pop())
 	{
 	case FREYJA_POLYGON:
-#ifdef USING_EGG
-		polygon = mEgg->addPolygon(mVertexList, mTexCoordList, mTextureId);
 
-		if (polygon == UINT_MAX)
-		{
-			freyjaPrintMessage("FreyjaFSM::freyjaEnd> Polygon is invalid\n");
-		}
-
-		if (mMesh)
-		{
-			mMesh->polygon.pushBack(polygon);
-			mMesh->r_polygon.pushBack(mEgg->getPolygon(polygon));
-		}
-		else
-		{
-			freyjaPrintError("freyjaEnd: WARNING, FREYJA_POLYGON outside FREYJA_MESH");
-		}
-#else
 		polygon = freyjaModelMeshPolygonCreate(mIndexModel, mIndexMesh);
 		
 		for (i = 0, count = mVertexList.size(); i < count; ++i)
@@ -616,16 +583,13 @@ void FreyjaFSM::freyjaEnd()
 			vertex = mVertexList[i];
 			freyjaModelMeshPolygonAddVertex1i(mIndexModel, 
 											  mIndexMesh, polygon, vertex);
-			//vertex = mTexCoordList[i];
-			//freyjaModelMeshPolygonAddTexCoord1i(mIndexModel, 
-			//									mIndexMesh, polygon, vertex);
+			vertex = mTexCoordList[i];
+			freyjaModelMeshPolygonAddTexCoord1i(mIndexModel, 
+												mIndexMesh, polygon, vertex);
 		}
 
 		mVertexList.clear();
 		mTexCoordList.clear();
-
-		BUG_ME("TexCoords Not Implemented");
-#endif
 		break;
 
 	case FREYJA_SKELETON:

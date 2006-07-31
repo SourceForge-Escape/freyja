@@ -26,11 +26,11 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaState::FreyjaState(int event, int objIndex, int mode)
+FreyjaState::FreyjaState(int event, int objIndex, int mode) :
+	mEvent(event),
+	mIndex(objIndex),
+	mMode(mode)	
 {
-	mEvent = event;
-	mIndex = objIndex;
-	mMode = mode;
 }
 
 

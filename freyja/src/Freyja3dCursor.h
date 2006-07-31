@@ -36,7 +36,7 @@ class Freyja3dCursor
  public:
 
 	typedef enum Freyja3dCursorFlags {
-		Rotatation,
+		Rotation,
 		Translation,
 		Scale,
 		Invisible

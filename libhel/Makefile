@@ -138,16 +138,18 @@ w32targets: $(W32TARGETS)
 targets: $(TARGETS)
 
 OBJS = \
-	$(BUILDDIR)/ViewVolume.o \
-	$(BUILDDIR)/Simulation.o \
-	$(BUILDDIR)/Spring.o \
-	$(BUILDDIR)/Mass.o \
-	$(BUILDDIR)/CollisionObject.o \
 	$(BUILDDIR)/BoundingVolume.o \
-	$(BUILDDIR)/Vector3d.o \
+	$(BUILDDIR)/CollisionObject.o \
+	$(BUILDDIR)/Mass.o \
+	$(BUILDDIR)/math.o \
 	$(BUILDDIR)/Matrix.o \
 	$(BUILDDIR)/Quaternion.o \
-	$(BUILDDIR)/math.o
+	$(BUILDDIR)/Ray.o \
+	$(BUILDDIR)/Simulation.o \
+	$(BUILDDIR)/Spring.o \
+	$(BUILDDIR)/Vector3d.o \
+	$(BUILDDIR)/ViewVolume.o 
+
 
 $(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION) : $(OBJS) 
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LD_FLAGS)

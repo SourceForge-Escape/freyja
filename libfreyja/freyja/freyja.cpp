@@ -27,6 +27,7 @@
 #   include <windows.h>
 #endif
 
+#include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 #include "FreyjaPrinter.h"
 #include "FreyjaFSM.h"
@@ -225,30 +226,23 @@ byte freyjaAssertMessage(bool expr, const char *format, ...)
 	if (expr)
 		return 0;
 
-	va_list args;
-	
-
-#if __x86_64__ || __x86_32__
-	asm(
-		 "int $3 \n" 
-	);
-#else
-	MARK_MSGF("No soft breakpoint inserted for this arch");
-#endif
-
-	va_start(args, format);	
-
 	if (gPrinter)
 	{
+		va_list args;
+		va_start(args, format);	
 		gPrinter->messageArgs(format, &args);
+		va_end(args);
 	}
 	else
 	{
+		va_list args;
+		va_start(args, format);	
 		vfprintf(stdout, format, args);
-		printf("\n");
+		fprintf(stdout, "\n");
+		va_end(args);
 	}
 
-	va_end(args);
+	SystemIO::Assert(expr);
 
 	return 1;
 }
