@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <mgtk/ResourceEvent.h>
 #include <freyja/SkeletonABI.h>
+#include <freyja/Mesh.h>
 
 #ifdef HAVE_OPENGL
 //#   ifdef MACOSX
@@ -874,10 +875,15 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 
 #if TEST_NEW_BACKEND_FORMAT
-		Mesh *m = freyjaModelGetMeshClass(0,mesh.id);
+		Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
 
 		if ( m )
 		{
+			int selected = -1;
+			m->IntersectFaces(mTestRay, selected, false);
+			//Vec3 bestV(-9999,-9999,-9999);
+			//int bestF = -1;
+
 			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
 			{
 				Face *f = m->GetFace(i);
@@ -910,8 +916,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 						glEnable(GL_TEXTURE_2D);
 					}
 
-					bool intersect = false;
-
 					for (j = 0; j < f->mIndices.size(); ++j)
 					{
 						//glTexCoord2fv(t.mVec);
@@ -921,6 +925,9 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 						glVertex3fv(v.mVec);
 					}
 
+#if 0
+					// Quick and dirty hit test for planar ray picker test
+					bool intersect = false;
 					glColor3fv(WHITE);
 					
 					if (f->mIndices.size() > 2)
@@ -928,12 +935,37 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 						Vec3 a,b,c,r;
 						m->GetVertexPos(f->mIndices[0], a.mVec);
 						m->GetVertexPos(f->mIndices[1], b.mVec);
-						m->GetVertexPos(f->mIndices[2], c.mVec);
-						intersect = mTestRay.IntersectTriangle(a.mVec,b.mVec,c.mVec, r);
+						
+						for (j = 2; j < f->mIndices.size(); ++j)
+						{
+							m->GetVertexPos(f->mIndices[j], c.mVec);
+							intersect = mTestRay.IntersectTriangle(a.mVec,b.mVec,c.mVec, r);
+							
+							if (intersect) 
+							{
+								freyja_print("! %i. %f %f %f",
+											 i, r.mVec[0],r.mVec[1],r.mVec[2]);
+								break;
+							}
+							
+							a = b;
+							b = c;
+						}
+
 
 						if (intersect)
 							glColor3fv(RED);
 					}
+#else
+					if (selected == (int)i)
+					{
+						glColor3fv(RED);
+					}
+					else
+					{
+						glColor3fv(WHITE);
+					}
+#endif
 
 					mglApplyMaterial(f->mMaterial);
 					glBegin(GL_POLYGON);

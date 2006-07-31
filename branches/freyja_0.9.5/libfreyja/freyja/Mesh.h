@@ -28,6 +28,7 @@
 
 #include <hel/math.h>
 #include <hel/BoundingVolume.h>
+#include <hel/Ray.h>
 #include <mstl/Vector.h>
 #include <mstl/stack.h>
 #include "freyja.h"
@@ -146,6 +147,16 @@ public:
 class Face
 {
 public:
+
+	typedef enum {
+		fNone        =  0,
+		fHighlighted =  1,
+		fMaterial    =  2,
+		fSelected    =  4,
+		fHidden      =  8,
+		fRayHit      = 16
+	} Flags;
+
 	Face() :
 		mMaterial(0), // Always have a valid material
 		mFlags(0x0),
@@ -345,6 +356,14 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	bool IntersectFaces(Ray &r, int &face0, bool markAll);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : <face0> First face encountered along ray
+	 *        <markAll> Sets selected flag on all faces hit
 	 ------------------------------------------------------*/
 
 
