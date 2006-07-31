@@ -2337,6 +2337,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 	mMouseButton = btn;
 	mModKey = mod;
 
+
 	switch (mEditorMode)
 	{
 	case ANIMATION_EDIT_MODE:
@@ -2476,6 +2477,31 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 #define DEBUG_SCREEN_TO_WORLD 0
 void FreyjaControl::testPickRay(vec_t x, vec_t y)
 {
+	freyja_print("! mouse x = %f y = %f", x, y);
+
+	// Mongoose - 2006.07.31 - more crap for old system to be backported then rewritten properly  =/
+	if (mRender->GetMode() & FreyjaRender::fViewports)
+	{
+		// Translate this to it's correct 'plane editing mode'
+		// for the viewport and adjust the x, y values here 
+		// to reuse the old mouse style handling
+		// In other words - just make this work for now
+		vec_t h = mRender->getWindowHeight();
+		vec_t w = mRender->getWindowWidth();
+		
+
+		if ( x < w/2.0f && y > h/2.0f )
+		{
+			// FIXME Set plane = xy
+
+			// Reset x, y to fit to viewport
+			y = y*2.0f - h;
+			x = x*2.0f;
+		}
+
+		freyja_print("! adjusted mouse x = %f y = %f", x, y);
+	}
+
 	Ray &r = mRender->mTestRay;
 	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
 	//const vec_t k = 100.0f;
@@ -2509,22 +2535,21 @@ void FreyjaControl::testPickRay(vec_t x, vec_t y)
 	//r.mOrigin = Vec3(x, y, );
 #else
 	getWorldFromScreen(&x, &y, &z);
-	r.mOrigin = Vec3(x, y, z);
 
 	switch (mModel->getCurrentPlane())
 	{
-	case PLANE_XY:
-		r.mOrigin += Vec3(0,0,100);
+	case PLANE_XY: // front
+		r.mOrigin = Vec3(x, y, z + 100);
 		r.mDir += Vec3(0,0,-10000);
 		break;
 
-	case PLANE_XZ:
-		r.mOrigin += Vec3(0,100,0);
+	case PLANE_XZ: // top FIXME
+		r.mOrigin = Vec3(x, z, y + 100);
 		r.mDir += Vec3(0,-10000,0);
 		break;
 
-	case PLANE_ZY: // side ZY! change
-		r.mOrigin += Vec3(100,0,0);
+	case PLANE_ZY: // side FIXME
+		r.mOrigin = Vec3(y, z, x + 100);
 		r.mDir += Vec3(-10000,0,0);
 		break;
 	}	

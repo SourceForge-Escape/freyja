@@ -146,6 +146,8 @@ public:
 	 * Mongoose - Created, was public data member
 	 ------------------------------------------------------*/
 
+	unsigned int GetMode() { return mRenderMode; }
+
 	vec_t getNearHeight() { return mScaleEnv; } 
 
 	unsigned int getWindowWidth();
@@ -474,8 +476,8 @@ private:
 	float mScaleEnv;                           /* OpenGL context use */
 	float mFar;	// zFar
 	float mNear;	// zNear
-	float mNearHeight;
 	float mFovY;
+	float mNearHeight;
 };
 
 #endif
