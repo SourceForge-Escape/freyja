@@ -148,8 +148,7 @@ class FreyjaStateTransform : public FreyjaState
 
 	virtual bool Undo()
 	{	
-		Vector3d xyz;
-
+		Vec3 xyz;
 
 		freyjaGetGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
 		

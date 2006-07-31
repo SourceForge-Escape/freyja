@@ -55,6 +55,7 @@
 FreyjaRender *FreyjaRender::mSingleton = 0x0;
 extern FreyjaModel *gFreyjaModel;
 
+Ray FreyjaRender::mTestRay;
 
 vec4_t FreyjaRender::mColorBackground;
 vec4_t FreyjaRender::mColorText;
@@ -79,6 +80,8 @@ vec_t FreyjaRender::mBonePointSize = 5.0;
 vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
 vec_t FreyjaRender::mVertexPointSize = 3.5;
+
+double gMatrix[16];
 
 
 ////////////////////////////////////////////////////////////////
@@ -333,6 +336,24 @@ void FreyjaRender::drawFreeWindow()
 
 	glScalef(mZoom, mZoom, mZoom);
 
+	mglGetOpenGLModelviewMatrix(gMatrix);
+
+	Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
+	glPointSize(2.0);
+	glBegin(GL_POINTS);	
+	glColor3fv(GREEN);	
+	glVertex3fv(mTestRay.mOrigin.mVec);
+	glVertex3fv(rayEnd.mVec);
+	glEnd();
+	glBegin(GL_LINES);	
+	glColor3fv(GREEN);	
+	glVertex3fv(mTestRay.mOrigin.mVec);
+	glColor3fv(YELLOW);	
+	glVertex3fv(rayEnd.mVec);
+	glEnd();
+	glPointSize(mDefaultPointSize);
+
+
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
 		freyjaGetRenderModel(i, model);
@@ -462,6 +483,8 @@ void FreyjaRender::initContext(unsigned int width, unsigned int height, bool fas
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	glEnable(GL_TEXTURE_2D);
 
 	// Set up culling
 	//glEnable(GL_CULL_FACE);
@@ -847,7 +870,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			glPointSize(mDefaultPointSize);
 		}
 #endif
-	}
+	}	
+
 
 #if TEST_NEW_BACKEND_FORMAT
 		Mesh *m = freyjaModelGetMeshClass(0,mesh.id);
@@ -886,13 +910,40 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 						glEnable(GL_TEXTURE_2D);
 					}
 
-					mglApplyMaterial(f->mMaterial);
-					glBegin(GL_POLYGON);
+					bool intersect = false;
 
 					for (j = 0; j < f->mIndices.size(); ++j)
 					{
 						//glTexCoord2fv(t.mVec);
 						//glNormal3fv(n.mVec);
+						
+						m->GetVertexPos(f->mIndices[j], v.mVec);
+						glVertex3fv(v.mVec);
+					}
+
+					glColor3fv(WHITE);
+					
+					if (f->mIndices.size() > 2)
+					{
+						Vec3 a,b,c,r;
+						m->GetVertexPos(f->mIndices[0], a.mVec);
+						m->GetVertexPos(f->mIndices[1], b.mVec);
+						m->GetVertexPos(f->mIndices[2], c.mVec);
+						intersect = mTestRay.IntersectTriangle(a.mVec,b.mVec,c.mVec, r);
+
+						if (intersect)
+							glColor3fv(RED);
+					}
+
+					mglApplyMaterial(f->mMaterial);
+					glBegin(GL_POLYGON);
+
+					for (j = 0; j < f->mIndices.size(); ++j)
+					{
+						m->GetTexCoord(f->mIndices[j], v.mVec);
+						glTexCoord2fv(v.mVec);
+						m->GetNormal(f->mIndices[j], v.mVec);
+						glNormal3fv(v.mVec);
 						m->GetVertexPos(f->mIndices[j], v.mVec);
 						glVertex3fv(v.mVec);
 					}
@@ -1737,13 +1788,11 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
    glPopMatrix();
 }
 
-double gMatrix[16];
 
 void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
 	RenderModel model;
 	unsigned int i;
-
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
@@ -1760,7 +1809,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	case PLANE_XY:
 		break;
 	case PLANE_XZ:
-		glRotatef(-90.0, 1.0, 0.0, 0.0);
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
 	case PLANE_ZY:
 		glRotatef(90.0, 0.0, 1.0, 0.0);
@@ -1797,6 +1846,23 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	glScalef(mZoom, mZoom, mZoom);
 
 	mglGetOpenGLModelviewMatrix(gMatrix);
+
+	{
+		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
+		glPointSize(2.0);
+		glBegin(GL_POINTS);	
+		glColor3fv(GREEN);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(rayEnd.mVec);
+		glEnd();
+		glBegin(GL_LINES);	
+		glColor3fv(GREEN);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glColor3fv(YELLOW);	
+		glVertex3fv(rayEnd.mVec);
+		glEnd();
+		glPointSize(mDefaultPointSize);
+	}
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{

@@ -34,47 +34,6 @@
 
 #include <stdio.h>
 
-typedef struct
-{
-	int x, y, w, h;
-	int minx; int maxx; int miny; int maxy; int advance;
-
-} ttf_glyph_t; 
-
-typedef struct
-{
-	unsigned int utf8Offset;
-	unsigned int count;   
-
-/* [utf8Offset -> utf8Offset+count], 
-	 matches indexing into glyphs[0 -> count] for texcoords, etc
-	----------------------------------------
-	41     -> 126     ASCII English w/ special chars,
-	0x303f -> 0x3093  Japanese hiragana kana,
-	0x301a -> 0x30f6  Japanese katakana kana */
-
-	unsigned int width;     /* Width and height of RGBA texture */
-	unsigned char *texture; /* RGBA texture data */
-
-	ttf_glyph_t *glyphs;    /* For typesetting and rendering use */
-	int fontHeight;
-	int fontAscent;
-	int fontDescent;
-	int fontSpacing;
-
-} ttf_texture_t; 
-
-
-typedef struct
-{
-	unsigned int utf8Offset;
-	unsigned int count;
-	int textureId;
-	int drawListBase;
-
-} gl_font_t;
-
-
 
 class Texture
 {
@@ -149,43 +108,6 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	gl_font_t *generateFont(ttf_texture_t *texture);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.30:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	ttf_texture_t *generateFontTexture(char *filename, int pointSize, 
-												  unsigned int textureWidth,
-												  unsigned char color[3],
-												  unsigned int utf8Offset,
-												  unsigned int count,
-												  char verbose);
-	/*------------------------------------------------------
-	 * Pre  : <Filename> of TTF font
-	 *        <PointSize> to generate
-	 *        <TextureWidth> is width of texture, height will match it
-	 *        <Color> is RGB 24bit color
-	 *        <Utf8Offset> is offset into font's encoding chart
-	 *        <Count> is number of glyphs to read from offset start
-	 *        <Verbose> dumps debug info to stdout 
-	 *
-	 * Post : Generates a font texture with typeset info from TTF
-	 *
-	 *        DOES NOT load the texture itself, call loadFont()
-	 *        on returned ttf_texture_t
-	 *
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
    int getTextureCount();
 	/*------------------------------------------------------
@@ -269,17 +191,6 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void initSDL_TTF();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Loads SDL_TTF if avalible
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
    int loadBuffer(unsigned char *image, 
 				  unsigned int width, unsigned int height, 
 				  ColorMode mode, unsigned int bpp);
@@ -324,24 +235,6 @@ class Texture
 	 *-- History ------------------------------------------
 	 *
 	 * 2003.06.30:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int loadFontTTF(char *filename, 
-						 unsigned int utf8Offset, unsigned int count);
-	/*------------------------------------------------------
-	 * Pre  : <Filename> of TTF font
-	 *        <Utf8Offset> is offset into UNICODE table
-	 *        <Count> is number of glyphs to load
-	 *
-	 * Post : Loads a TTF, 
-	 *        Generates: texture image, glyph list, and drawlist
-	 *
-	 *        Returns font id if sucessful, or < 0 if error
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.07.05:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
@@ -479,88 +372,5 @@ class Texture
 	int mTextureId2;				/* Multitexture Texture Id */
 };
 
-	////////////////////////////////////////////////////////////
-	// Gobal functions
-	////////////////////////////////////////////////////////////
 
-	void bufferedPrintf(char *string, unsigned int len, char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : <String> is allocated to <Len> characters
-	 *        the rest is just like a printf() call
-	 *
-	 * Post : Generates the string and buffers it in <String>
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.12.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void glPrint3d(float x, float y, float z, 
-				   float pitch, float yaw, float roll, 
-				   float scale,
-				   char *string);
-	/*------------------------------------------------------
-	 * Pre  : <X>, <Y>, and <Z> are valid world coordinates
-	 *        <String> is a valid string
-	 *
-	 *        System::bufferString(..) can cache printf()
-	 *        style calls for use with this method
-	 *
-	 * Post : Renders string in OpenGL ( 3d projection )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Ported to SDL_TTF
-	 *
-	 * 2001.12.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void glPrint2d(float x, float y, float scale, char *string);
-	/*------------------------------------------------------
-	 * Pre  : <X>, and <Y> are valid world coordinates
-	 *        <String> is a valid string
-	 *     
-	 *        Requires glEnterMode2d() call before entry
-	 *
-	 *        System::bufferString(..) can cache printf()
-	 *        style calls for use with this method
-	 *
-	 * Post : Renders string in OpenGL ( 2d projection )
-	 *
-	 *        Call glExitMode2d() after finishing calls
-	 *        to this method and other 2d rendering
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Ported to SDL_TTF
-	 *
-	 * 2001.12.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void glEnterMode2d(unsigned int width, unsigned int height);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : OpenGL ortho projection
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void glExitMode2d();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : OpenGL model matrix projection
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 #endif
