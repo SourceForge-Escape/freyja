@@ -545,6 +545,8 @@ void FreyjaRender::initContext(unsigned int width, unsigned int height, bool fas
 	//glEndList();
 
 
+	setNearHeight(20.0f);
+
 	mWidth = width;
 	mHeight = height;
 	mInitContext = true;
