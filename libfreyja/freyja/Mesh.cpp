@@ -227,6 +227,77 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 }
 
 
+bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
+{
+	vec_t bestDist = 99999.0f;
+	face0 = -1;
+	
+
+	for (uint32 i = 0, n = GetFaceCount(); i < n; ++i)
+	{
+		Face *f = GetFace(i);
+		
+		if (!f) 
+			continue;
+	
+		// Quick and dirty hit test that pretends you can 
+		// pusedo tesselate a face and get as good results
+		bool intersect = false;
+					
+		if (f->mIndices.size() > 2)
+		{
+			Vec3 a, b, c, p;
+
+			GetVertexPos(f->mIndices[0], a.mVec);
+			GetVertexPos(f->mIndices[1], b.mVec);
+		
+			for (uint32 j = 2; j < f->mIndices.size(); ++j)
+			{
+				GetVertexPos(f->mIndices[j], c.mVec);
+				intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, p);
+			
+				if (intersect)
+				{
+					break;
+				}
+			
+				a = b;
+				b = c;
+			}
+		
+
+			if (intersect)
+			{
+				vec_t dist = helDist3v(r.mOrigin.mVec, p.mVec);
+
+				if (dist < bestDist)
+				{
+					bestDist = dist;
+					face0 = i;
+				}
+
+				if (markAll) f->mFlags |= Face::fRayHit;
+			}
+			else 
+			{
+				f->mFlags |= Face::fRayHit;
+				f->mFlags ^= Face::fRayHit;
+			}
+		}
+	}
+
+	if (face0 > -1)
+	{
+		Face *f = GetFace(face0);
+		
+		if (f) 
+			f->mFlags |= Face::fRayHit;
+	}
+
+	return (face0 > -1);
+}
+
+
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////

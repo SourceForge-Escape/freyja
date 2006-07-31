@@ -352,7 +352,7 @@ install-link:
 install-headers:
 	@-echo -n "Installing headers                           "
 	@-mkdir -p $(INSTALL_INCLUDE)/$(BASE_NAME)
-	@-cp -f src/*.h $(INSTALL_INCLUDE)/$(BASE_NAME)
+	@-cp -f ${SRC_DIR}/*.h $(INSTALL_INCLUDE)/$(BASE_NAME)
 	@-echo "[done]"
 
 
