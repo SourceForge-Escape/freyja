@@ -60,6 +60,7 @@
 
 	;; Window container
 	(vbox 0 0 0 1 0
+				
 
 	;; Menubar
 	(handlebox 1
@@ -257,7 +258,7 @@
 
 				
 				(label "  ZoomLevel "  0.0 0.4) 
-				(spinbutton2 2.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
+				(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
 
 				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				(hbox 1 0 0 1 0
@@ -470,19 +471,7 @@
 						(label "Mesh Frame/Group #" 0.0 0.5) 
 						(spinbutton 0 0 500 eGroupIterator))
 
-			    	(handlebox 1 
-        				(vbox 0 0 0 1 0
-							(hslider eAnimationSlider 0 100)
-							(hbox 0 1 0 1 0
-								(toolbar
-									(toolbar_button "gtk-goto-first" "Prev"	
-										"Previous" eMode eAnimationPrev)
-									(toolbar_button "gtk-go-forward" "Play"	
-										"Play" eMode eAnimationPlay)
-									(toolbar_button "gtk-stop" "Stop"	
-										"Stop" eMode eAnimationStop)
-									(toolbar_button "gtk-goto-last" "Next"	
-										"Next" eMode eAnimationNext)))))
+
 
 					(animation_tab_hack)
 
@@ -515,13 +504,7 @@
 						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 521)
 						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 522))
 
-					(hbox 1 1 0 1 1	(hsep))
-
-					(hbox 1 1 0 1 1
-						(label "Light0" 0.0 0.5)
-						(spinbutton 0.0 -10000.0 10000.0 800)
-						(spinbutton 0.0 -10000.0 10000.0 801)
-						(spinbutton 0.0 -10000.0 10000.0 802)))
+				) ;; Tab animation
 
 
 				(tab "Material" eModeMaterial
@@ -555,20 +538,6 @@
 						(togglebutton "Slot" 0 eMode eTextureSlotLoadToggle)
 						(button "..." eMode eOpenFileTexture))
 
-					(hbox 1 0 0 1 0 (hsep))
-
-					(hbox 1 1 0 1 1
-						(label "Light" 0.0 0.5)
-						(label "Ambient" 0.0 0.5)
-						(label "Diffuse" 0.0 0.5)
-						(label "Specular" 0.0 0.5))
-					(hbox 1 1 0 1 1
-						;(label " " 0.0 0.5)
-						(spinbutton 0 0 100 eSelectLight)
-						(colorbutton 1 eColorLightAmbient)
-						(colorbutton 1 eColorLightDiffuse)
-						(colorbutton 1 eColorLightSpecular))
-					 
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 1 0 1 1
@@ -697,9 +666,30 @@
 						(togglebutton "GL_BLEND" 0 eMode eOpenGLBlend))))
 
 )
-))
 )
 )
+
+	;; Animation bar
+   	(handlebox 1 
+		(vbox 0 0 0 1 0	
+			(hbox 0 1 0 1 0
+				(hslider eAnimationSlider 0 100)
+					(toolbar
+						(toolbar_button "gtk-goto-first" "Prev"	
+									"Previous" eMode eAnimationPrev)
+						(toolbar_button "gtk-go-forward" "Play"	
+									"Play" eMode eAnimationPlay)
+						(toolbar_button "gtk-stop" "Stop"	
+									"Stop" eMode eAnimationStop)
+						(toolbar_button "gtk-goto-last" "Next"	
+									"Next" eMode eAnimationNext) )
+			) ;; hbox
+		) ;; vbox
+	) ;; handlebox
+
+
+	) ;; vbox
+)  ;; Window
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dialogs
@@ -780,7 +770,29 @@ Send bug reports and feature requests:
 
 		(hbox 1 0 0 1 2 
 			(label "Wireframe highlight " 0.0 0.5)
-			(colorbutton 1 eColorMeshHighlight))))
+			(colorbutton 1 eColorMeshHighlight))
+		
+		(hbox 1 1 0 1 1	(hsep))
+
+		(hbox 1 1 0 1 1
+			(label "Light" 0.0 0.5)
+			(label "Ambient" 0.0 0.5)
+			(label "Diffuse" 0.0 0.5)
+			(label "Specular" 0.0 0.5))
+		(hbox 1 1 0 1 1
+			;(label " " 0.0 0.5)
+			(spinbutton 0 0 100 eSelectLight)
+			(colorbutton 1 eColorLightAmbient)
+			(colorbutton 1 eColorLightDiffuse)
+			(colorbutton 1 eColorLightSpecular))
+		(hbox 1 1 0 1 1
+			;(label "Light0" 0.0 0.5)
+			(spinbutton 0.0 -10000.0 10000.0 800)
+			(spinbutton 0.0 -10000.0 10000.0 801)
+			(spinbutton 0.0 -10000.0 10000.0 802))
+
+)) ;; Preferences dialog
+
 
 ;(dialog "Freyja :: 趣味" ePreferencesDialog 0
 ;	(vbox 0 0 0 0 0
