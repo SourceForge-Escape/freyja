@@ -28,8 +28,8 @@
 
 FreyjaState::FreyjaState(int event, int objIndex, int mode) :
 	mEvent(event),
-	mIndex(objIndex),
-	mMode(mode)	
+	mMode(mode),
+	mIndex(objIndex)
 {
 }
 

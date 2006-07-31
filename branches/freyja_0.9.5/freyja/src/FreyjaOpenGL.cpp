@@ -528,7 +528,7 @@ void mglDraw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max)
 
 	// red
 	glColor3fv(RED);
-	mglDraw3dCircle(center, radius, count, 1, false);
+	mglDraw3dCircle(center, radius, count, 1, true);
 
 	// green
 	glColor3fv(GREEN);
@@ -536,7 +536,7 @@ void mglDraw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max)
 
 	// blue
 	glColor3fv(BLUE);
-	mglDraw3dCircle(center, radius, count, 0, false);
+	mglDraw3dCircle(center, radius, count, 0, true);
 }
 
 
