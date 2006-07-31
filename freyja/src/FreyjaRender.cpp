@@ -182,7 +182,8 @@ FreyjaRender::FreyjaRender() :
 	mScaleEnv(40.0f), //20.0; // 40.0f for higher res
 	mFar(6000.0f),
 	mNear(0.1f),
-	mFovY(40.0f)
+	mFovY(40.0f),
+	mNearHeight(20.0f)
 {
 	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer;
 	mAngles[0] = 18.0f;

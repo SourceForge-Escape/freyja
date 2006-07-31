@@ -500,6 +500,9 @@ void mglDraw3dCircle(const vec3_t center, const vec_t radius, uint32 count,
 	{
 		helSinCosf(helDegToRad(360.0f * (i / fCount)), &x, &z);
 
+		x *= radius;
+		z *= radius;
+
 		switch (plane)
 		{
 		case 0:
@@ -523,7 +526,7 @@ void mglDraw3dCircle(const vec3_t center, const vec_t radius, uint32 count,
 void mglDraw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max)
 {
 	vec3_t center = {0.0f, 0.0f, 0.0f};
-	vec_t radius = max / 2.0f;
+	vec_t radius = max * 4.0f;// / 2.0f;
 	const uint32 count = 64;
 
 	// red
