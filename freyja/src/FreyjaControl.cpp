@@ -1370,22 +1370,30 @@ bool FreyjaControl::event(int command)
 
 	case eMoveObject:
 		mEventMode = modeMove;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Translation);
 		freyja_print("Move object...");
+		freyja_event_gl_refresh();
 		break;
 
 	case eScaleObject:
 		mEventMode = modeScale;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Scale);
 		freyja_print("Scale object...");
+		freyja_event_gl_refresh();
 		break;
 
 	case eRotateObject:
 		mEventMode = modeRotate;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Rotation);
 		freyja_print("Rotate object...");
+		freyja_event_gl_refresh();
 		break;
 
 	case eSelect:
 		mEventMode = modeSelect;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Invisible);
 		freyja_print("Select object...");
+		freyja_event_gl_refresh();
 		break;
 
 
