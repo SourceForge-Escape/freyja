@@ -38,6 +38,12 @@ index_t gFreyjaCurrentModel = 0;
 index_t gFreyjaCurrentMesh = INDEX_INVALID;
 
 
+uint32 freyjaModelGetMeshCount(index_t modelIndex)
+{
+	return gFreyjaMeshes.size();	
+}
+
+
 ////////////////////////////////////
 // 0.9.5 ABI
 ////////////////////////////////////
@@ -1319,13 +1325,21 @@ void freyjaModelClear(index_t modelIndex)
 	// Currently there is no multimodel while egg is being used
 	freyjaSkeletonPoolClear();
 	freyjaBonePoolClear();
+	
+
+	// Purge meshes
+	uint32 i, count = freyjaModelGetMeshCount(modelIndex);
+
+	for ( i = 0; i < count; ++i )
+	{
+		freyjaModelDeleteMesh(modelIndex, i);
+	}
 }
 
 
 void freyjaModelClampTexCoords(index_t modelIndex)
 {
-	MARK_MSG("Not fully Implemented");
-	uint32 i, count = 0;//freyjaModelGetMeshCount(modelIndex);
+	uint32 i, count = freyjaModelGetMeshCount(modelIndex);
 
 	for ( i = 0; i < count; ++i )
 	{

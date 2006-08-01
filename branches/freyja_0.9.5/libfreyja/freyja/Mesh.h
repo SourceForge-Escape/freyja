@@ -179,7 +179,7 @@ public:
 	bool Serialize(FreyjaFileWriter &w) { return true; }
 
 	index_t mMaterial;
-	uint32 mFlags;
+	byte mFlags;
 	uint32 mSmoothingGroups; // bitmap
 	Vector<index_t> mIndices;
 };
@@ -377,6 +377,11 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	void SetFaceFlags(index_t face, uint32 flags);
+
+	void ClearFaceFlags(index_t face, uint32 flags);
+
 
 	void SetName(const char *name)
 	{

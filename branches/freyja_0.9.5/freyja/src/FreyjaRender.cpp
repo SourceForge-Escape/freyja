@@ -340,21 +340,23 @@ void FreyjaRender::drawFreeWindow()
 
 	mglGetOpenGLModelviewMatrix(gMatrix);
 
-	Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
-	glPointSize(2.0);
-	glBegin(GL_POINTS);	
-	glColor3fv(GREEN);	
-	glVertex3fv(mTestRay.mOrigin.mVec);
-	glVertex3fv(rayEnd.mVec);
-	glEnd();
-	glBegin(GL_LINES);	
-	glColor3fv(YELLOW);	
-	glVertex3fv(mTestRay.mOrigin.mVec);
-	glColor3fv(DARK_YELLOW);	
-	glVertex3fv(rayEnd.mVec);
-	glEnd();
-	glPointSize(mDefaultPointSize);
-
+	if (mRenderMode & fDrawPickRay)
+	{
+		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
+		glPointSize(2.0);
+		glBegin(GL_POINTS);	
+		glColor3fv(GREEN);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(rayEnd.mVec);
+		glEnd();
+		glBegin(GL_LINES);	
+		glColor3fv(YELLOW);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glColor3fv(DARK_YELLOW);	
+		glVertex3fv(rayEnd.mVec);
+		glEnd();
+		glPointSize(mDefaultPointSize);
+	}
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
@@ -882,11 +884,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 		if ( m )
 		{
-			int selected = -1;
-			m->IntersectFaces(mTestRay, selected, false);
-			//Vec3 bestV(-9999,-9999,-9999);
-			//int bestF = -1;
-
 			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
 			{
 				Face *f = m->GetFace(i);
@@ -928,39 +925,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 						glVertex3fv(v.mVec);
 					}
 
-#if 0
-					// Quick and dirty hit test for planar ray picker test
-					bool intersect = false;
-					glColor3fv(WHITE);
-					
-					if (f->mIndices.size() > 2)
-					{
-						Vec3 a,b,c,r;
-						m->GetVertexPos(f->mIndices[0], a.mVec);
-						m->GetVertexPos(f->mIndices[1], b.mVec);
-						
-						for (j = 2; j < f->mIndices.size(); ++j)
-						{
-							m->GetVertexPos(f->mIndices[j], c.mVec);
-							intersect = mTestRay.IntersectTriangle(a.mVec,b.mVec,c.mVec, r);
-							
-							if (intersect) 
-							{
-								freyja_print("! %i. %f %f %f",
-											 i, r.mVec[0],r.mVec[1],r.mVec[2]);
-								break;
-							}
-							
-							a = b;
-							b = c;
-						}
-
-
-						if (intersect)
-							glColor3fv(RED);
-					}
-#else
-					if (selected == (int)i)
+					if (f->mFlags & Face::fSelected)
 					{
 						glColor3fv(RED);
 					}
@@ -968,7 +933,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 					{
 						glColor3fv(WHITE);
 					}
-#endif
 
 					mglApplyMaterial(f->mMaterial);
 					glBegin(GL_POLYGON);
@@ -1882,6 +1846,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	mglGetOpenGLModelviewMatrix(gMatrix);
 
+	if (mRenderMode & fDrawPickRay)
 	{
 		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
 		glPointSize(2.0);

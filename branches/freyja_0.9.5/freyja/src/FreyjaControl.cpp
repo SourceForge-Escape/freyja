@@ -32,13 +32,18 @@
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaPluginABI.h>
+#include <freyja/Mesh.h>
+#include <freyja/MeshABI.h>
 #include <hel/math.h>
 
 #include "freyja_events.h"
 #include "Freyja3dCursor.h"
 #include "FreyjaControl.h"
 
-/* using namespace freyja; */
+using namespace mstl;
+
+using namespace freyja;
+
 
 void test_patch();
 unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
@@ -2343,6 +2348,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 	switch (mEditorMode)
 	{
+#if 0
 	case ANIMATION_EDIT_MODE:
 		if (btn == MOUSE_BTN_UP && state == MOUSE_BTN_STATE_PRESSED)
 		{
@@ -2382,7 +2388,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 		}
 
 		break;
-
+#endif
 
 	case TEXTURE_EDIT_MODE:
 		if (mUVMouseState)
@@ -2417,6 +2423,8 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 			return true;
 		}
 		break;
+
+	case ANIMATION_EDIT_MODE:
 	case MODEL_EDIT_MODE:
 		// Mongoose 2002.01.12, Allow temp mode override
 		if (mod & KEY_LCTRL)
@@ -2555,59 +2563,49 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
 	Ray &r = mRender->mTestRay;
+
+	mRender->setFlag(FreyjaRender::fDrawPickRay);
+
+	if (mEditorMode == ANIMATION_EDIT_MODE)
+	{
+		double rayOrigin[4];
+		double rayVector[4];
+		getPickRay(x, y, rayOrigin, rayVector);
+
+		HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
+		HEL_VEC3_COPY(rayVector, r.mDir.mVec);
+	}
+	else
+	{
+		vec_t z;
+
+		getWorldFromScreen(&x, &y, &z);
+
+		switch (mModel->getCurrentPlane())
+		{
+		case PLANE_XY: // Front
+			r.mOrigin = Vec3(x, y, z + 100);
+			r.mDir = Vec3(0,0,-10000);
+			break;
+
+		case PLANE_XZ: // Top
+			r.mOrigin = Vec3(x, y-100, -z);
+			r.mDir = Vec3(0,10000,0);
+			break;
+
+		case PLANE_ZY: // Side FIXME
+			r.mOrigin = Vec3(x - 100, y, z);
+			r.mDir = Vec3(10000,0,0);
+			break;
+		}	
+	}
+
+
+#if 0
+	// DEBUG case is a triangle ABC...
 	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
 	//const vec_t k = 100.0f;
 	//Vec3 a(0,0,0), b(k,0,0), c(0,k,0), i; // test facex
-
-#if 0
-	double rayOrigin[4];
-	double rayVector[4];
-	getPickRay(x, y, rayOrigin, rayVector);
-
-	HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
-	HEL_VEC3_COPY(rayVector, r.mDir.mVec);
-
-	switch (mModel->getCurrentPlane())
-	{
-	case PLANE_XY:
-		r.mOrigin = Vec3(0,0,100);
-		break;
-
-	case PLANE_XZ:
-		r.mOrigin = Vec3(0,100,0);
-		break;
-
-	case PLANE_ZY: // side ZY! change
-		r.mOrigin = Vec3(100,0,0);
-		break;
-	}
-
-	r.mDir *= -1.0f;
-	//r.mOrigin = Vec3(x, y, );
-#else
-	vec_t z;
-
-	getWorldFromScreen(&x, &y, &z);
-
-	switch (mModel->getCurrentPlane())
-	{
-	case PLANE_XY: // Front
-		r.mOrigin = Vec3(x, y, z + 100);
-		r.mDir = Vec3(0,0,-10000);
-		break;
-
-	case PLANE_XZ: // Top
-		r.mOrigin = Vec3(x, y-100, -z);
-		r.mDir = Vec3(0,10000,0);
-		break;
-
-	case PLANE_ZY: // Side FIXME
-		r.mOrigin = Vec3(x - 100, y, z);
-		r.mDir = Vec3(10000,0,0);
-		break;
-	}	
-#endif
-
 	bool s = r.IntersectTriangle(a.mVec,b.mVec,c.mVec,i);
 
 
@@ -2616,6 +2614,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 				 r.mOrigin.mVec[0],r.mOrigin.mVec[1],r.mOrigin.mVec[2],
 				 r.mDir.mVec[0],r.mDir.mVec[1],r.mDir.mVec[2],
 				 i.mVec[0],i.mVec[1],i.mVec[2]);
+#endif
 }
 
 
@@ -2633,7 +2632,7 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 	vec_t winX = mouseX - winH * 0.5f;
 	vec_t normX = winX / ( winH * 0.5f );
 	vec_t zNear = -400.0f; // mRender->getZNear();
-	vec_t nearH = mRender->getNearHeight();
+	vec_t nearH = 20.0f;//mRender->getNearHeight();
 	vec_t aspect = mRender->getWindowAspectRatio();
 
 	// This is now ray in eye coordinates
@@ -2821,7 +2820,24 @@ void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
 	/* Mongoose: Convert screen to world coordinate system */
 	getWorldFromScreen(&xx, &yy, &zz);
 
+	// Look for objects with depth ( was using planar projection )
+	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(x, y);
+
+	// New backend ray test
+	Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
+
+	if ( m )
+	{
+		int selected = -1;
+		m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
+
+		if (selected > -1)
+		{
+			freyja_print("Face[%i] selected by pick ray.", selected);
+			m->SetFaceFlags(selected, Face::fSelected);
+		}
+	}
 
 	switch (mTransformMode)
 	{
