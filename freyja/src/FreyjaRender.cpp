@@ -844,18 +844,25 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 	if (mRenderMode & RENDER_POINTS)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+
 		glPointSize(5.0);
 		glBegin(GL_POINTS);
 
 		for (i = mesh.gbegin; i < mesh.gend; ++i)
 		{
 			v = mesh.getGroupCenter(i);
-			glColor3fv(RED);
+			glColor3fv(PINK);
 			glVertex3fv(v.mVec);
 		}
 
 		glEnd();
 		glPointSize(mDefaultPointSize);
+
+		glPopAttrib();
 
 #if TEST_NEW_BACKEND_FORMAT
 		Mesh *m = freyjaModelGetMeshClass(0,0);
@@ -894,6 +901,11 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				/* Render face as wireframe */
 				if ( mRenderMode & RENDER_WIREFRAME )
 				{
+					glPushAttrib(GL_ENABLE_BIT);
+					glDisable(GL_TEXTURE_2D);
+					glDisable(GL_LIGHTING);
+					glDisable(GL_BLEND);
+
 					glBegin(GL_LINE_LOOP);
 					glColor3fv(mColorWireframeHighlight);
 
@@ -906,6 +918,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				
 					glEnd();
 					glPointSize(mDefaultPointSize);
+
+					glPopAttrib();
 				}
 
 				/* Render face with material, color, or something */

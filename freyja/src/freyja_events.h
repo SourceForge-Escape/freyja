@@ -31,8 +31,15 @@
 
 typedef enum {
 
+	// Special events
 	eNone = 0,
 	eShutdown = 1,
+
+	// Event flow control modes ( majors )
+	eMode,     /* These events change modes ( modify states ) */
+	eEvent,    /* These events request handling ( perform actions ) */
+
+	// Event ids ( minors )
 	eNewFile,
 	eOpenFile,
 	eSaveFile,
@@ -281,7 +288,6 @@ typedef enum {
 	CMD_MISC_VERTEX_UV,
 	CMD_MISC_SCENE_ROTATE,
 
-	EVENT_MISC,
 	eMeshFlipNormals,
 	ePluginEventBase = 10000,
 
