@@ -438,6 +438,7 @@ private:
 	 *            in edit mode
 	 --------------------------------------------*/
 	
+	bool MouseEdit(int btn, int state, int mod, int x, int y);
 	void MouseEdit(int btn, int state, int mod, int x, int y, 
 				   freyja_plane_t plane);
 	/*--------------------------------------------

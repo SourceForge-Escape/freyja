@@ -120,6 +120,7 @@ typedef enum {
 	eTransformScene,
 	eTransformMesh,
 	eTransformBone,
+	eTransformFace,
 	eTransformPoint,
 
 	eRenderBbox,
