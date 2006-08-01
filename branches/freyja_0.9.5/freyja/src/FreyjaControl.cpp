@@ -2484,7 +2484,9 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 
 	// Trap the junk 0,0 states that are often tossed around on
 	// just mouse button updates
-	if ( x == 0 && y == 0)
+	if ( x == 0 && y == 0 || 
+		 mEditorMode == MATERIAL_EDIT_MODE ||
+		 mEditorMode == TEXTURE_EDIT_MODE)
 	{
 	}
 	else if (mRender->GetMode() & FreyjaRender::fViewports)
