@@ -229,7 +229,7 @@
 				(toolbar_togglebutton true "point.png" "Points" 
 					"Point render mode"		eMode	eRenderVertex)
 
-				(toolbar_togglebutton false "wireframe.png" "Wireframe" 
+				(toolbar_togglebutton true "wireframe.png" "Wireframe" 
 					"Wireframe render mode"		eMode	eRenderWireframe)
 
 				(toolbar_togglebutton false "normals.png" "Normals" 
@@ -256,9 +256,10 @@
 				(toolbar_togglebutton true "grid.png" "Grid"
 					"Toggle plane grid rendering"	eMode eRenderGrid) ) 
 
-				
-				(label "  ZoomLevel "  0.0 0.4) 
-				(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
+
+				;; This really adjusts view height ( removing feature soon )
+				;(label "  ZoomLevel "  0.0 0.4) 
+				;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
 
 				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				(hbox 1 0 0 1 0
@@ -358,10 +359,9 @@
 						(label "Current Face #" 0.0 0.5) 
 						(spinbutton 0 0 500 ePolygonIterator))
 
-					(hbox 1 0 0 1 0
-						(button "New"     eMode  eAddObject)
-						(button "Delete"  eMode  eDelete)
-			  			(button "Select"  eMode  eSelect))
+					;(hbox 1 0 0 1 0
+					;	(button "New"     eMode  eAddObject)
+					;	(button "Delete"  eMode  eDelete))
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -381,7 +381,8 @@
 							(menu_item "Move"    eMode	eMoveObject)
 				  			(menu_item "Rotate"  eMode	eRotateObject)
 				  			(menu_item "Scale"   eMode	eScaleObject)
-				  			(menu_item "Select"  eMode	eSelect)))
+				  			(menu_item "Select"  eMode	eSelect)
+				  			(menu_item "Unselect"  eMode	eUnselect)))
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -409,6 +410,20 @@
 
 					(hbox 1 0 0 1 0 
 						(button "Mesh from Patch"  eMode eGeneratePatchMesh))
+
+					;; Animation ;;;;;;;;;;;;;;;
+
+					;; Seperator
+					(hbox 1 0 0 1 0 (hsep))
+
+					(hbox 0 0 0 1 0
+						(label "Merge Animations with Mesh" 0.0 0.5))
+
+					(hbox 1 0 0 1 0
+						(label "KeyFrame #" 0.0 0.5) 
+						(spinbutton 0 0 500 eGroupIterator))
+
+					(animation_tab_hack)
 
 			)  ;; end tab
 
