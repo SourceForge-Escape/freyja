@@ -56,6 +56,7 @@ typedef enum {
 	PLANE_XY = 0, 
 	PLANE_ZY = 1, 
 	PLANE_XZ = 2
+
 } freyja_plane_t;
 
 

@@ -348,9 +348,9 @@ void FreyjaRender::drawFreeWindow()
 	glVertex3fv(rayEnd.mVec);
 	glEnd();
 	glBegin(GL_LINES);	
-	glColor3fv(GREEN);	
-	glVertex3fv(mTestRay.mOrigin.mVec);
 	glColor3fv(YELLOW);	
+	glVertex3fv(mTestRay.mOrigin.mVec);
+	glColor3fv(DARK_YELLOW);	
 	glVertex3fv(rayEnd.mVec);
 	glEnd();
 	glPointSize(mDefaultPointSize);
@@ -1891,9 +1891,9 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glBegin(GL_LINES);	
-		glColor3fv(GREEN);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
 		glColor3fv(YELLOW);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glColor3fv(DARK_YELLOW);	
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glPointSize(mDefaultPointSize);

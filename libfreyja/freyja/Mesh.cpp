@@ -230,10 +230,10 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 {
 	vec_t bestDist = 99999.0f;
+
 	face0 = -1;
 	
-
-	for (uint32 i = 0, n = GetFaceCount(); i < n; ++i)
+	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
 	{
 		Face *f = GetFace(i);
 		
@@ -246,16 +246,18 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 					
 		if (f->mIndices.size() > 2)
 		{
+			uint32 jCount = f->mIndices.size();
 			Vec3 a, b, c, p;
 
 			GetVertexPos(f->mIndices[0], a.mVec);
 			GetVertexPos(f->mIndices[1], b.mVec);
-		
-			for (uint32 j = 2; j < f->mIndices.size(); ++j)
+
+
+			for (uint32 j = 2; j < jCount; ++j)
 			{
 				GetVertexPos(f->mIndices[j], c.mVec);
 				intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, p);
-			
+				
 				if (intersect)
 				{
 					break;
@@ -276,16 +278,19 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 					face0 = i;
 				}
 
+				// Only mark hit flags for every face hit with markAll==true
 				if (markAll) f->mFlags |= Face::fRayHit;
 			}
 			else 
 			{
+				// Clear hit flags
 				f->mFlags |= Face::fRayHit;
 				f->mFlags ^= Face::fRayHit;
 			}
 		}
 	}
 
+	// Did we have a 'best hit'?
 	if (face0 > -1)
 	{
 		Face *f = GetFace(face0);

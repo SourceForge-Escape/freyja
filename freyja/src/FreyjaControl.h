@@ -140,6 +140,14 @@ class FreyjaControl
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+	
+	void AdjustMouseXYForViewports(vec_t &x, vec_t &y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Maps actual mouse x, y to veiwport's local x, y
+	 *        as if it was the entire window/context
+	 ------------------------------------------------------*/
+
 
 	int32 loadTextureBuffer(unsigned char *image, 
 							uint32 width, uint32 height, uint32 bpp,
@@ -304,10 +312,10 @@ private:
 	 * Post : Returns pick ray in object cooridnates
 	 ------------------------------------------------------*/
 
-	void testPickRay(vec_t x, vec_t y);
+	void CastPickRay(vec_t x, vec_t y);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : FIXME: Replace with ray picking object picker
+	 * Post : Accounts for view mode ( front, top, side, free )
 	 ------------------------------------------------------*/
 
 	void getScreenToWorldOBSOLETE(float *x, float *y);
@@ -395,7 +403,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void selectObject(int x, int y, freyja_plane_t plane);
+	void SelectObject(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
