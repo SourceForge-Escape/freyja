@@ -2472,14 +2472,13 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 	}
 }
 
-#include <hel/Ray.h>
-#define DEBUG_PICK_RAY 1
-#define DEBUG_SCREEN_TO_WORLD 0
-void FreyjaControl::testPickRay(vec_t x, vec_t y)
-{
-	freyja_print("! mouse x = %f y = %f", x, y);
 
-	// Mongoose - 2006.07.31 - more crap for old system to be backported then rewritten properly  =/
+// Mongoose - 2006.07.31 
+// More crap for old system to be backported then rewritten properly  =/
+void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
+{
+	freyja_print("! Mouse x = %f y = %f", x, y);
+
 	if (mRender->GetMode() & FreyjaRender::fViewports)
 	{
 		// Translate this to it's correct 'plane editing mode'
@@ -2488,25 +2487,55 @@ void FreyjaControl::testPickRay(vec_t x, vec_t y)
 		// In other words - just make this work for now
 		vec_t h = mRender->getWindowHeight();
 		vec_t w = mRender->getWindowWidth();
+		vec_t halfW = w * 0.5f;
+		vec_t halfH = h * 0.5f;
 		
 
-		if ( x < w/2.0f && y > h/2.0f )
+		// Handle Front XY viewport ( not using viewport class yet )
+		if ( x < halfW && y > halfH )
 		{
-			// FIXME Set plane = xy
+			mModel->setCurrentPlane(PLANE_XY);
 
-			// Reset x, y to fit to viewport
-			y = y*2.0f - h;
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
 			x = x*2.0f;
+			y = y*2.0f - h;
+		}
+		// Handle Top XZ viewport ( not using viewport class yet )
+		else if ( x > halfW && y < halfH )
+		{
+			mModel->setCurrentPlane(PLANE_XZ);
+
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f - w;
+			y = y*2.0f;
+		}
+		// Handle Side ZY viewport ( not using viewport class yet )
+		else if ( x > halfW && y > halfH )
+		{
+			mModel->setCurrentPlane(PLANE_ZY);
+
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f - w;
+			y = y*2.0f - h;
 		}
 
-		freyja_print("! adjusted mouse x = %f y = %f", x, y);
+		freyja_print("! Adjusted mouse x = %f y = %f", x, y);
 	}
+}
 
+
+#include <hel/Ray.h>
+#define DEBUG_PICK_RAY 1
+#define DEBUG_SCREEN_TO_WORLD 0
+void FreyjaControl::CastPickRay(vec_t x, vec_t y)
+{
 	Ray &r = mRender->mTestRay;
 	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
 	//const vec_t k = 100.0f;
 	//Vec3 a(0,0,0), b(k,0,0), c(0,k,0), i; // test facex
-	vec_t z;
 
 #if 0
 	double rayOrigin[4];
@@ -2519,38 +2548,40 @@ void FreyjaControl::testPickRay(vec_t x, vec_t y)
 	switch (mModel->getCurrentPlane())
 	{
 	case PLANE_XY:
-		r.mOrigin += Vec3(0,0,100);
+		r.mOrigin = Vec3(0,0,100);
 		break;
 
 	case PLANE_XZ:
-		r.mOrigin += Vec3(0,100,0);
+		r.mOrigin = Vec3(0,100,0);
 		break;
 
 	case PLANE_ZY: // side ZY! change
-		r.mOrigin += Vec3(100,0,0);
+		r.mOrigin = Vec3(100,0,0);
 		break;
 	}
 
 	r.mDir *= -1.0f;
 	//r.mOrigin = Vec3(x, y, );
 #else
+	vec_t z;
+
 	getWorldFromScreen(&x, &y, &z);
 
 	switch (mModel->getCurrentPlane())
 	{
-	case PLANE_XY: // front
+	case PLANE_XY: // Front
 		r.mOrigin = Vec3(x, y, z + 100);
-		r.mDir += Vec3(0,0,-10000);
+		r.mDir = Vec3(0,0,-10000);
 		break;
 
-	case PLANE_XZ: // top FIXME
-		r.mOrigin = Vec3(x, z, y + 100);
-		r.mDir += Vec3(0,-10000,0);
+	case PLANE_XZ: // Top
+		r.mOrigin = Vec3(x, y-100, -z);
+		r.mDir = Vec3(0,10000,0);
 		break;
 
-	case PLANE_ZY: // side FIXME
-		r.mOrigin = Vec3(y, z, x + 100);
-		r.mDir += Vec3(-10000,0,0);
+	case PLANE_ZY: // Side FIXME
+		r.mOrigin = Vec3(x - 100, y, z);
+		r.mDir = Vec3(10000,0,0);
 		break;
 	}	
 #endif
@@ -2760,7 +2791,7 @@ void FreyjaControl::addObject()
 }
 
 
-void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
+void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
 {
 	float xx = x, yy = y, zz;
 
@@ -2768,9 +2799,7 @@ void FreyjaControl::selectObject(int x, int y, freyja_plane_t plane)
 	/* Mongoose: Convert screen to world coordinate system */
 	getWorldFromScreen(&xx, &yy, &zz);
 
-	// testPickRay
-	testPickRay(x, y);
-	//freyja_print("!%f %f %f | old\n", xx, yy, zz);
+	CastPickRay(x, y);
 
 	switch (mTransformMode)
 	{
@@ -3226,21 +3255,25 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 							  freyja_plane_t plane) 
 { 
 	vec3_t xyz;
-	float xx = x, yy = y;
 	unsigned int master_tag, i;
 	static float xxx, yyy;
 
+
+	// Get the viewport adjusted mouse coordinates, and swap modes if needed
+	vec_t vx = x, vy = y;
+	AdjustMouseXYForViewports(vx, vy);
 	
+	vec_t xx = vx, yy = vy;
 	getScreenToWorldOBSOLETE(&xx, &yy);
 	
 	switch (plane)
 	{
-	case PLANE_XY:
+	case PLANE_XY: // front
 		xyz[0] = xx;
 		xyz[1] = yy;
 		xyz[2] = 0;
 		break;
-	case PLANE_XZ:
+	case PLANE_XZ: // top
 		xyz[0] = xx;
 		xyz[1] = 0;
 		xyz[2] = yy;
@@ -3305,7 +3338,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 
 	case modeSelect:
-		selectObject(x, y, plane);
+		SelectObject(vx, vy, plane);
 		break;
 
 
