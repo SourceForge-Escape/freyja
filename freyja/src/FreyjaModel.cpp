@@ -41,6 +41,7 @@ BezierPatch FreyjaModel::gTestPatch;
 unsigned int FreyjaModel::mFlags = 0;
 FreyjaModel *gFreyjaModel = 0x0;
 
+
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 
 // FIXME: Add set/clear methods to replace old get/set flags crap

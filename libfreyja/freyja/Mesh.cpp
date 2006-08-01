@@ -230,7 +230,6 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 {
 	vec_t bestDist = 99999.0f;
-
 	face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -296,7 +295,9 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 		Face *f = GetFace(face0);
 		
 		if (f) 
+		{
 			f->mFlags |= Face::fRayHit;
+		}
 	}
 
 	return (face0 > -1);
@@ -306,6 +307,31 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void Mesh::SetFaceFlags(index_t face, uint32 flags)
+{
+	Face *f = GetFace(face);
+		
+	if (f)
+	{
+		// Set flags
+		f->mFlags |= flags;
+	}
+}
+
+
+void Mesh::ClearFaceFlags(index_t face, uint32 flags)
+{
+	Face *f = GetFace(face);
+		
+	if (f)
+	{
+		// Clear flags
+		f->mFlags |= flags;
+		f->mFlags ^= flags;
+	}
+}
+
 
 void Mesh::Rotate(vec_t x, vec_t y, vec_t z)
 {

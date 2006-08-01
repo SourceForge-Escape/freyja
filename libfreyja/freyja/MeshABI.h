@@ -27,6 +27,9 @@
 
 extern "C" {
 
+	// TMP model stuff
+	uint32 freyjaModelGetMeshCount(index_t modelIndex);
+
 
 	///////////////////////////////////////////////////////////////////////
 	// MESH
@@ -321,6 +324,12 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 }
+
+
+#   ifdef __cplusplus
+#      include <freyja/Mesh.h>
+freyja::Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
+#   endif
 
 #endif
 

@@ -78,7 +78,8 @@ public:
 		RENDER_POINTS           = 32768,
 		fRenderBonesClearedZBuffer = 65536,
 		fViewports              = 131072,
-		fRenderGridClearedZBuffer = 262144
+		fRenderGridClearedZBuffer = 262144,
+		fDrawPickRay              = 524288   /* Draw the pick ray for debug */
 	} flags_t;
 
 
@@ -459,7 +460,7 @@ private:
 	vec4_t mViewports[4];                      /* Size and offset of viewports
 															  * if enabled */
 	
-	static unsigned int mRenderMode;                  /* Rendering mode */
+	static unsigned int mRenderMode;           /* Rendering mode */
 
 	float mZoom;                               /* Used to cache zoom */
 

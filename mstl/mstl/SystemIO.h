@@ -78,7 +78,6 @@ class SystemIO
 		}
 
 
-#if 0 // This doesn't make sense to copy -- if YOU want to start here
 		File(const File &f) :
 			mHostOrder(f.mHostOrder),
 			mFileHandle(NULL),
@@ -88,8 +87,23 @@ class SystemIO
 			mDirectoryName(NULL),
 			mDirectoryListing(NULL)
 		{
+			// This is bad and will never do what you want
 		}
-#endif
+
+		File &operator =(const File &f)
+		{
+			mHostOrder = f.mHostOrder;
+			mFileHandle = NULL;
+			mBuffer = NULL;
+			mBufferSize = 0;
+			mDirectory = NULL;
+			mDirectoryName = NULL;
+			mDirectoryListing = NULL;
+
+			// This is bad and will never do what you want
+
+			return *this;
+		}
 
 
 		virtual ~File()
