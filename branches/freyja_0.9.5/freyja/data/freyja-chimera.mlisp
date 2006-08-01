@@ -111,21 +111,21 @@
 			;; These should use check menus here -- they are toggles!
 			(menu_seperator)
 			(menu_item "_Fullscreen"	"M-E"	eFullscreen	"gtk-fullscreen")
-			(menu_item "_Viewports"		eMode	eViewports)
+			(menu_item "_Viewports"		eEvent	eViewports)
 			(menu_seperator)
-			(menu_item "_Grid"			eMode	eRenderGrid)
+			(menu_item "_Grid"			eEvent	eRenderGrid)
 			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
-			(menu_item "_Camera"		eMode	eCamera)
-			(menu_item "P_atch"			eMode	eRenderPatch)
+			(menu_item "_Camera"		eEvent	eCamera)
+			(menu_item "P_atch"			eEvent	eRenderPatch)
 			(submenu "_Mesh"
-				(menu_item "_Points"	eMode	eRenderVertex)
-				(menu_item "_Wireframe"	eMode	eRenderWireframe)
-				(menu_item "_Normals"	eMode	eRenderNormals)
-				(menu_item "_Faces"		eMode	eRenderFace)
-				(menu_item "_Texture"	eMode	eRenderTexture)
-				(menu_item "_Lighting"	eMode	eRenderLighting)
-				(menu_item "_Material"	eMode	eRenderMaterial))
-			(menu_item "_Skeleton"		eMode	eRenderSkeleton)
+				(menu_item "_Points"	eEvent	eRenderVertex)
+				(menu_item "_Wireframe"	eEvent	eRenderWireframe)
+				(menu_item "_Normals"	eEvent	eRenderNormals)
+				(menu_item "_Faces"		eEvent	eRenderFace)
+				(menu_item "_Texture"	eEvent	eRenderTexture)
+				(menu_item "_Lighting"	eEvent	eRenderLighting)
+				(menu_item "_Material"	eEvent	eRenderMaterial))
+			(menu_item "_Skeleton"		eEvent	eRenderSkeleton)
 			(submenu "_Joint"
 				(menu_item "_Point"		ePointJoint		"gtk-blanked")
 				(menu_item "_Sphere"	eSphereJoint	"gtk-blanked")
@@ -137,9 +137,9 @@
 
 		(submenu "_Create" 
 				(submenu "_Primatives"
-						(menu_item "_Vertex"		eMode  eVertexNew)
-						(menu_item "_Polygon"		eMode  ePolygonNew)
-						(menu_item "_Bone"			eMode  eBoneNew))
+						(menu_item "_Vertex"		eEvent  eVertexNew)
+						(menu_item "_Polygon"		eEvent  ePolygonNew)
+						(menu_item "_Bone"			eEvent  eBoneNew))
 
 				(submenu "P_olygon Primatives"
 					(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
@@ -167,45 +167,45 @@
 				(menu_item "Generate _Normals"	eGenerateNormals	"gtk-polygon"))
 
 			(submenu "_Vertex"
-				(menu_item "_New"		eMode  eVertexNew)
-				(menu_item "_Delete"	eMode  eVertexDelete)
-				(menu_item "_Combine"	eMode  eVertexCombine)
-				;;(menu_item "_Extrude"	eMode  eVertexExtrude)
+				(menu_item "_New"		eEvent  eVertexNew)
+				(menu_item "_Delete"	eEvent  eVertexDelete)
+				(menu_item "_Combine"	eEvent  eVertexCombine)
+				;;(menu_item "_Extrude"	eEvent  eVertexExtrude)
 			)
 
 			(submenu "_Polygon"
-				(menu_item "_New"		eMode	ePolygonNew)
-				(menu_item "_Select"	eMode	ePolygonSelect)
-				(menu_item "_Delete"	eMode	ePolygonDelete)
-				(menu_item "_Split"		eMode	ePolygonSplit)
+				(menu_item "_New"		eEvent	ePolygonNew)
+				(menu_item "_Select"	eEvent	ePolygonSelect)
+				(menu_item "_Delete"	eEvent	ePolygonDelete)
+				(menu_item "_Split"		eEvent	ePolygonSplit)
 				(menu_item "_Extrude"	"F4" eExtrude		"gtk-polygon"))
 
 			(submenu "_Vertices..."
-				(menu_item "Mirror_X"	eMode	eMeshMirrorX)
-				(menu_item "Mirror_Y"	eMode	eMeshMirrorY)
-				(menu_item "Mirror_Z"	eMode	eMeshMirrorZ))
+				(menu_item "Mirror_X"	eEvent	eMeshMirrorX)
+				(menu_item "Mirror_Y"	eEvent	eMeshMirrorY)
+				(menu_item "Mirror_Z"	eEvent	eMeshMirrorZ))
 
 			(submenu "_Mesh"
 				(submenu "_UV Texcoord Mapping"
 					(menu_item "_Planar"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
 					(menu_item "_Cylindrical" eMeshTexcoordCylindrical	"gtk-polygon")
 					(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-polygon"))
-				(menu_item "_New"		eMode	eMeshNew)
-				(menu_item "_Delete"	eMode	eMeshDelete)
-				(menu_item "_Select"	eMode	eMeshSelect)
-				(menu_item "Re_center"	eMode	eTransformMeshPivot)
-				(menu_item "_Tesselate"	eMode	eMeshTesselate)
-				(menu_item "_Generate Normals"	eMode	eMeshGenerateNormals)
-				(menu_item "_Flip Normals"	eMode	eMeshFlipNormals))
+				(menu_item "_New"		eEvent	eMeshNew)
+				(menu_item "_Delete"	eEvent	eMeshDelete)
+				(menu_item "_Select"	eEvent	eMeshSelect)
+				(menu_item "Re_center"	eEvent	eTransformMeshPivot)
+				(menu_item "_Tesselate"	eEvent	eMeshTesselate)
+				(menu_item "_Generate Normals"	eEvent	eMeshGenerateNormals)
+				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals))
 
 			(submenu "_Bone"
-				(menu_item "_New"			eMode	eBoneNew)
-				(menu_item "_Link child"	eMode	eBoneLinkChild)
-				(menu_item "_Unlink child"	eMode	eBoneUnLinkChild)
-				(menu_item "L_ink mesh"		eMode	eBoneLinkMesh)
-				(menu_item "U_nlink mesh"	eMode	eBoneUnLinkMesh)
-				(menu_item "_Select"		eMode	eBoneSelect)
-				(menu_item "_Move"			eMode	eBoneMoveJoint)))
+				(menu_item "_New"			eEvent	eBoneNew)
+				(menu_item "_Link child"	eEvent	eBoneLinkChild)
+				(menu_item "_Unlink child"	eEvent	eBoneUnLinkChild)
+				(menu_item "L_ink mesh"		eEvent	eBoneLinkMesh)
+				(menu_item "U_nlink mesh"	eEvent	eBoneUnLinkMesh)
+				(menu_item "_Select"		eEvent	eBoneSelect)
+				(menu_item "_Move"			eEvent	eBoneMoveJoint)))
 
 		(submenu ePluginMenu "_Plugins...")
 
@@ -227,34 +227,34 @@
 			(toolbar
 
 				(toolbar_togglebutton true "point.png" "Points" 
-					"Point render mode"		eMode	eRenderVertex)
+					"Point render mode"		eEvent	eRenderVertex)
 
 				(toolbar_togglebutton true "wireframe.png" "Wireframe" 
-					"Wireframe render mode"		eMode	eRenderWireframe)
+					"Wireframe render mode"		eEvent	eRenderWireframe)
 
 				(toolbar_togglebutton false "normals.png" "Normals" 
-					"Normals render mode"		eMode	eRenderNormals)
+					"Normals render mode"		eEvent	eRenderNormals)
 
 				(toolbar_togglebutton true "solid.png" "Faces"
-					"Solid face render mode"		eMode	eRenderFace)
+					"Solid face render mode"		eEvent	eRenderFace)
 
 				(toolbar_togglebutton false "texture.png" "Texture" 
-					"Texture used when rendering"	eMode	eRenderTexture)
+					"Texture used when rendering"	eEvent	eRenderTexture)
 
 				(toolbar_togglebutton false "light.png" "Light" 
-					"Light used when rendering"		eMode	eRenderLighting)
+					"Light used when rendering"		eEvent	eRenderLighting)
 
 				(toolbar_togglebutton false "patch.png" "Patch"
-					"Render/enable patch tool"	eMode	eRenderPatch)
+					"Render/enable patch tool"	eEvent	eRenderPatch)
 
 				;(toolbar_togglebutton false "mesh.png" "BoundingBox"
-				;	"Render Bounding boxes"	eMode	eRenderBbox)
+				;	"Render Bounding boxes"	eEvent	eRenderBbox)
 
 				(toolbar_togglebutton true "bone-tag.png" "Bones"
-					"Show bones when rendering"		eMode	eRenderSkeleton)
+					"Show bones when rendering"		eEvent	eRenderSkeleton)
 
 				(toolbar_togglebutton true "grid.png" "Grid"
-					"Toggle plane grid rendering"	eMode eRenderGrid) ) 
+					"Toggle plane grid rendering"	eEvent eRenderGrid) ) 
 
 
 				;; This really adjusts view height ( removing feature soon )
@@ -264,10 +264,10 @@
 				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				(hbox 1 0 0 1 0
 					(label "CursorAxis"  0.0 0.5)
-					(optionmenu		eMode	eNone
-						(menu_item	"  X"	eMode	FREYJA_MODE_AXIS_X)
-			  			(menu_item	"  Y"	eMode	FREYJA_MODE_AXIS_Y)
-			  			(menu_item	"  Z"	eMode	FREYJA_MODE_AXIS_Z)))
+					(optionmenu		eEvent	eNone
+						(menu_item	"  X"	eEvent	FREYJA_MODE_AXIS_X)
+			  			(menu_item	"  Y"	eEvent	FREYJA_MODE_AXIS_Y)
+			  			(menu_item	"  Z"	eEvent	FREYJA_MODE_AXIS_Z)))
 
 				 )))
 
@@ -278,7 +278,7 @@
 
 			(toolbar
 				(toolbar_togglebutton false "deform.png" "Skeletal deform"
-					"Deform using skeleton"		eMode	eSkeletalDeform) ) )))
+					"Deform using skeleton"		eEvent	eSkeletalDeform) ) )))
 
 		) ;; End toolbars
 
@@ -291,7 +291,7 @@
 
 			;; Sidebar notebook in non-expanding container
 			(handlebox 1   ;; (hbox 0 1 0 1 1
-			(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eMode
+			(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eEvent
 
 				;; Mesh tab
 				(tab "Mesh" eModeModel
@@ -299,33 +299,33 @@
 					(hbox 0 0 0 1 0 
 						(toolbar 
 							(toolbar_button "gtk-new" "New"	
-								"New model"		eMode eNewFile)
+								"New model"		eEvent eNewFile)
 
 							(toolbar_button "gtk-open" "Open..."
-								"Open model..."	eMode  eOpenFile)
+								"Open model..."	eEvent  eOpenFile)
 
 							(toolbar_button "gtk-save-as" "Save As..."
-								"Save model as..."		eMode  eSaveAsFile)
+								"Save model as..."		eEvent  eSaveAsFile)
 
 							(toolbar_togglebutton true
 								"cursor-select.png" "Select" "Select by pointer"
-								eMode eSelect)
+								eEvent eSelect)
 
 							(toolbar_togglebutton false
 								"bbox-select.png" "Select" "Select by bounding box" 
-								eMode eSelectionByBox)
+								eEvent eSelectionByBox)
 
 							(toolbar_togglebutton false 
 								"clone.png" "CopyM"	"Copy multiple objects" 
-								eMode eCopyAppendMode)
+								eEvent eCopyAppendMode)
 
 							(toolbar_button
 								"split.png" "Split" "Split object" 
-								eMode eSplitObject)
+								eEvent eSplitObject)
 
 							(toolbar_button
 								"texmap.png" "TexelGen" "Texture Map, XY Plane"
-								eMode eTextureMapProjection)))
+								eEvent eTextureMapProjection)))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
@@ -333,10 +333,10 @@
 					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					(hbox 1 0 0 1 0
 						(label "Select edit plane: "  0.0 0.5)
-						(optionmenu		eMode	eNone
-							(menu_item	"Front               "	eMode	FREYJA_MODE_PLANE_XY)
-				  			(menu_item	"Side"	eMode	FREYJA_MODE_PLANE_YZ)
-				  			(menu_item	"Top"	eMode	FREYJA_MODE_PLANE_XZ)))
+						(optionmenu		eEvent	eNone
+							(menu_item	"Front               "	eEvent	FREYJA_MODE_PLANE_XY)
+				  			(menu_item	"Side"	eEvent	FREYJA_MODE_PLANE_YZ)
+				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)))
 
 
 					;; Seperator
@@ -360,47 +360,48 @@
 						(spinbutton 0 0 500 ePolygonIterator))
 
 					;(hbox 1 0 0 1 0
-					;	(button "New"     eMode  eAddObject)
-					;	(button "Delete"  eMode  eDelete))
+					;	(button "New"     eEvent  eAddObject)
+					;	(button "Delete"  eEvent  eDelete))
 
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0
 						(label "Transform: " 0.0 0.5)
 
-						(optionmenu		eMode	eTransformMenu
-							(menu_item	"Scene"		eMode eTransformScene)
-							(menu_item	"Mesh"		eMode eTransformMesh)
-							(menu_item	"Bone"		eMode eTransformBone)
-							(menu_item	"Group"		eMode eTransformGroup)
-							(menu_item	"Vertex"	eMode eTransformPoint)
-							(menu_item	"Vertex List"	eMode eTransformSelectedVertices)
-							(menu_item	"MeshPivot"	eMode eTransformMeshPivot))
+						(optionmenu		eEvent	eTransformMenu
+							(menu_item	"Scene"		eEvent eTransformScene)
+							(menu_item	"Face"		eEvent eTransformFace)
+							(menu_item	"Mesh"		eEvent eTransformMesh)
+							(menu_item	"Bone"		eEvent eTransformBone)
+							(menu_item	"Group"		eEvent eTransformGroup)
+							(menu_item	"Vertex"	eEvent eTransformPoint)
+							(menu_item	"Vertex List"	eEvent eTransformSelectedVertices)
+							(menu_item	"MeshPivot"	eEvent eTransformMeshPivot))
 
-						(optionmenu		eMode	eObjectMenu
-							(menu_item "Move"    eMode	eMoveObject)
-				  			(menu_item "Rotate"  eMode	eRotateObject)
-				  			(menu_item "Scale"   eMode	eScaleObject)
-				  			(menu_item "Select"  eMode	eSelect)
-				  			(menu_item "Unselect"  eMode	eUnselect)))
+						(optionmenu		eEvent	eObjectMenu
+							(menu_item "Move"    eEvent	eMoveObject)
+				  			(menu_item "Rotate"  eEvent	eRotateObject)
+				  			(menu_item "Scale"   eEvent	eScaleObject)
+				  			(menu_item "Select"  eEvent	eSelect)
+				  			(menu_item "Unselect"  eEvent	eUnselect)))
 
 					(hbox 1 0 0 1 0 (hsep))
 
 					;; Generic Transform box
 					(hbox 1 1 0 1 1
-						(button "Move" eMode eMove)
+						(button "Move" eEvent eMove)
 						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_X)
 						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Y)
 						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Z))
 
 					(hbox 1 1 0 1 1
-						(button "Rotate" eMode eRotate)
+						(button "Rotate" eEvent eRotate)
 						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_X)
 						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Y)
 						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Z))
 
 					(hbox 1 1 0 1 1
-						(button "Scale" eMode eScale)
+						(button "Scale" eEvent eScale)
 						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_X)
 						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Y)
 						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Z))
@@ -409,7 +410,7 @@
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0 
-						(button "Mesh from Patch"  eMode eGeneratePatchMesh))
+						(button "Mesh from Patch"  eEvent eGeneratePatchMesh))
 
 					;; Animation ;;;;;;;;;;;;;;;
 
@@ -431,9 +432,9 @@
 			;; UV editor tab
 			(tab "UV" eModeSkin
 				(hbox 1 0 0 1 0 
-					(togglebutton "Merge Texcoords" 0 eMode eTexcoordCombine))
+					(togglebutton "Merge Texcoords" 0 eEvent eTexcoordCombine))
 				(hbox 1 0 0 1 0
-					(button "Set Mesh Material" eMode eSetMeshTexture))
+					(button "Set Mesh Material" eEvent eSetMeshTexture))
 					 
 				(hbox 1 0 0 1 0 
 					(label "Material index: " 0.0 0.5) 
@@ -452,13 +453,13 @@
 				(hbox 1 1 0 1 1	(hsep))
 				(hbox 1 0 0 1 0
 					(vbox 1 0 0 1 0
-						(button "Set material" eMode eSetPolygonTexture)
-						(button "Generate UVMap" eMode eTmpUVMapOn)
-						(button "Clear UVMap" eMode eTmpUVMapOff)
-						(button "PolyMap"	eMode	ePolyMapTexturePolygon)
-						(button "Mirror X" eMode eMirrorUV_X)
-						(button "Mirror Y" eMode eMirrorUV_Y)
-						(button "Flag alpha" eMode eCurrentFaceFlagAlpha))))
+						(button "Set material" eEvent eSetPolygonTexture)
+						(button "Generate UVMap" eEvent eTmpUVMapOn)
+						(button "Clear UVMap" eEvent eTmpUVMapOff)
+						(button "PolyMap"	eEvent	ePolyMapTexturePolygon)
+						(button "Mirror X" eEvent eMirrorUV_X)
+						(button "Mirror Y" eEvent eMirrorUV_Y)
+						(button "Flag alpha" eEvent eCurrentFaceFlagAlpha))))
 
 
 			  (tab "Animation" eModeAnimation
@@ -466,13 +467,13 @@
 				(hbox 1 0 0 1 0 
 					(toolbar
 						(toolbar_button "gtk-new" "New"	
-							"New document"		eMode eNewFile)
+							"New document"		eEvent eNewFile)
 
 						(toolbar_button "gtk-open" "Open..."
-							"Open document..."	eMode  eOpenFile)
+							"Open document..."	eEvent  eOpenFile)
 
 						(toolbar_button "gtk-save-as" "Save"
-							"Save document"		eMode  eSaveFile)))
+							"Save document"		eEvent  eSaveFile)))
 
 					;(hbox 1 0 0 1 0 
 					;	(label "Background color" 0.0 0.5)
@@ -527,13 +528,13 @@
 					(hbox 1 1 0 1 1
 						(toolbar
 							(toolbar_button "gtk-new" "New"
-								"New material"			eMode	eNewFile)
+								"New material"			eEvent	eNewFile)
 							(toolbar_button "gtk-open" "Open"
-								"Open material"			eMode	eOpenFile)
+								"Open material"			eEvent	eOpenFile)
 							(toolbar_button "gtk-save-as" "Save as..."
-								"Save material as..."	eMode	eSaveFile))
+								"Save material as..."	eEvent	eSaveFile))
 
-						(togglebutton "Slot Load" 0 eMode eMaterialSlotLoadToggle))
+						(togglebutton "Slot Load" 0 eEvent eMaterialSlotLoadToggle))
 
 
 					;; Material selector / name editor
@@ -545,13 +546,13 @@
 
 					;; Texture loader interface
 					(hbox 1 0 0 1 0 (hsep))
-					(label "Material's Texture" 0.0 0.5)
+					;(label "Material's Texture" 0.0 0.5)
 					(hbox 0 1 0 1 1
 						;;(label "Texture" 0.0 0.5)
 						(spinbutton 0 0 100 eSetMaterialTexture)
 						(textbox eSetTextureNameA)
-						(togglebutton "Slot" 0 eMode eTextureSlotLoadToggle)
-						(button "..." eMode eOpenFileTexture))
+						(togglebutton "Slot" 0 eEvent eTextureSlotLoadToggle)
+						(button "..." eEvent eOpenFileTexture))
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -603,82 +604,82 @@
 						(label "Source" 0.0 0.5))
 
 					(hbox 1 0 0 1 0
-						(optionmenu eMode 780
+						(optionmenu eEvent 780
 							(menu_item "GL__ZERO"
-								eMode 1000)
+								eEvent 1000)
 							(menu_item "GL__ONE"
-								eMode 1001)
+								eEvent 1001)
 							(menu_item "GL__SRC__COLOR"
-								eMode 1002)
+								eEvent 1002)
 							(menu_item "GL__ONE__MINUS__SRC__COLOR"
-								eMode 1003)
+								eEvent 1003)
 							(menu_item "GL__DST__COLOR"
-								eMode 1004)
+								eEvent 1004)
 							(menu_item "GL__ONE__MINUS__DST__COLOR"
-								eMode 1005)
+								eEvent 1005)
 							(menu_item "GL__SRC__ALPHA"
-								eMode 1006)
+								eEvent 1006)
 							(menu_item "GL__ONE__MINUS__SRC__ALPHA"
-								eMode 1007)
+								eEvent 1007)
 							(menu_item "GL__DST__ALPHA"
-								eMode 1008)
+								eEvent 1008)
 							(menu_item "GL__ONE__MINUS__DST__ALPHA"
-								eMode 1009)
+								eEvent 1009)
 							(menu_item "GL__SRC__ALPHA__SATURATE"
-								eMode 1010)
+								eEvent 1010)
 							(menu_item "GL__CONSTANT__COLOR"
-								eMode 1011)
+								eEvent 1011)
 							(menu_item "GL__ONE__MINUS__CONSTANT__COLOR"
-								eMode 1012)
+								eEvent 1012)
 							(menu_item "GL__CONSTANT__ALPHA"
-								eMode 1013)
+								eEvent 1013)
 							(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" 
-								eMode 1014)))
+								eEvent 1014)))
 
 					(hbox 1 0 0 1 0
 						(label "Dest" 0.0 0.5))
 
 					(hbox 1 0 0 1 0
-						(optionmenu eMode 781
+						(optionmenu eEvent 781
 							(menu_item "GL__ZERO" 
-								eMode 2000)
+								eEvent 2000)
 							(menu_item "GL__ONE"
-								eMode 2001)
+								eEvent 2001)
 							(menu_item "GL__SRC__COLOR" 
-								eMode 2002)
+								eEvent 2002)
 							(menu_item "GL__ONE__MINUS__SRC__COLOR"
-								eMode 2003)
+								eEvent 2003)
 							(menu_item "GL__DST__COLOR"
-								eMode 2004)
+								eEvent 2004)
 							(menu_item "GL__ONE__MINUS__DST__COLOR"
-								eMode 2005)
+								eEvent 2005)
 							(menu_item "GL__SRC__ALPHA"
-								eMode 2006)
+								eEvent 2006)
 							(menu_item "GL__ONE__MINUS__SRC__ALPHA"
-								eMode 2007)
+								eEvent 2007)
 							(menu_item "GL__DST__ALPHA"
-								eMode 2008)
+								eEvent 2008)
 							(menu_item "GL__ONE__MINUS__DST__ALPHA"
-								eMode 2009)
+								eEvent 2009)
 							(menu_item "GL__SRC__ALPHA__SATURATE"
-								eMode 2010)
+								eEvent 2010)
 							(menu_item "GL__CONSTANT__COLOR"
-								eMode 2011)
+								eEvent 2011)
 							(menu_item "GL__ONE__MINUS__CONSTANT__COLOR"
-								eMode 2012)
+								eEvent 2012)
 							(menu_item "GL__CONSTANT__ALPHA"
-								eMode 2013)
+								eEvent 2013)
 							(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" 
-								eMode 2014)))
+								eEvent 2014)))
 
 					(hbox 1 0 0 1 0
 						(vbox 1 0 0 1 0
-							(togglebutton "Texture" 0 eMode eMaterialTex)
-							(togglebutton "Detail texture" 0 eMode eMaterialMultiTex))
+							(togglebutton "Texture" 0 eEvent eMaterialTex)
+							(togglebutton "Detail texture" 0 eEvent eMaterialMultiTex))
 
 					(vbox 1 0 0 1 0
-						(togglebutton "GL_NORMALIZE" 0 eMode eOpenGLNormalize)
-						(togglebutton "GL_BLEND" 0 eMode eOpenGLBlend))))
+						(togglebutton "GL_NORMALIZE" 0 eEvent eOpenGLNormalize)
+						(togglebutton "GL_BLEND" 0 eEvent eOpenGLBlend))))
 
 )
 )
@@ -691,13 +692,13 @@
 				(hslider eAnimationSlider 0 100)
 					(toolbar
 						(toolbar_button "gtk-goto-first" "Prev"	
-									"Previous" eMode eAnimationPrev)
+									"Previous" eEvent eAnimationPrev)
 						(toolbar_button "gtk-go-forward" "Play"	
-									"Play" eMode eAnimationPlay)
+									"Play" eEvent eAnimationPlay)
 						(toolbar_button "gtk-stop" "Stop"	
-									"Stop" eMode eAnimationStop)
+									"Stop" eEvent eAnimationStop)
 						(toolbar_button "gtk-goto-last" "Next"	
-									"Next" eMode eAnimationNext) )
+									"Next" eEvent eAnimationNext) )
 			) ;; hbox
 		) ;; vbox
 	) ;; handlebox

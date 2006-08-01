@@ -28,13 +28,15 @@
 #   include <libgen.h> 
 #endif
 #include <string.h>
+
+#include <mstl/String.h>
+#include <mstl/SystemIO.h>
 #include <mgtk/ResourceEvent.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
 #include <hel/math.h>
+#include <hel/Ray.h>
 
 #include "freyja_events.h"
 #include "Freyja3dCursor.h"
@@ -44,11 +46,57 @@ using namespace mstl;
 
 using namespace freyja;
 
+#define DEBUG_PICK_RAY 1
+#define DEBUG_PICK_RAY_PLANAR 0
+#define DEBUG_SCREEN_TO_WORLD 0
 #define DEBUG_VIEWPORT_MOUSE 0
 
+unsigned int gRecentFileLimit = 7; // This is becoming a plugin soon
 void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern Freyja3dCursor gFreyjaCursor;
+
+String TransformModeToString(FreyjaModel::transform_t t)
+{
+	String s;
+
+	switch (t)
+	{
+	case FreyjaModel::TransformMesh:
+		s = String("TransformMesh");
+		break;
+
+	case FreyjaModel::TransformVertexFrame:
+		s = String("TransformVertexFrame");
+		break;
+
+	case FreyjaModel::TransformScene:
+		s = String("TransformScene");
+		break;
+
+	case FreyjaModel::TransformBone:
+		s = String("TransformBone");
+		break;
+
+	case FreyjaModel::TransformPoint:
+		s = String("TransformPoint");
+		break;
+
+	case FreyjaModel::TransformSelectedVertices:
+		s = String("TransformSelectedVertices");
+		break;
+
+	case FreyjaModel::TransformFace:
+		s = String("TransformFace");
+		break;
+
+	default:
+		s = String("Unknown");		
+	}
+
+	return s;
+}
+
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -89,7 +137,7 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mEditorMode = MODEL_EDIT_MODE;
 	mEventMode = modeNone;
 	mTransformMode = FreyjaModel::TransformScene;
-	mLastEvent = EVENT_MISC;
+	mLastEvent = eEvent;
 	mLastCommand = eSelect;
 	setZoom(1.0f);
 	mFullScreen = false;
@@ -183,7 +231,6 @@ void FreyjaControl::resizeDisplay(unsigned int width, unsigned int height)
 	}
 }
 
-unsigned int gRecentFileLimit = 7; // This is becoming a plugin soon
 
 void FreyjaControl::addRecentFilename(const char *filename)
 {
@@ -192,7 +239,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	bool found = false;
 
 
-	if (!filename || !filename[0] || !FreyjaFileReader::doesFileExist(filename))
+	if (!filename || !filename[0] || !SystemIO::File::DoesFileExist(filename))
 	{
 		return;
 	}
@@ -270,10 +317,10 @@ void FreyjaControl::addRecentFilename(const char *filename)
 
 
 	/* Save recent_files to disk */
-	FreyjaFileWriter w;
+	SystemIO::TextFileWriter w;
 	char *filename2 = freyja_rc_map("recent_files");
 
-	if (w.openFile(filename2))
+	if (w.Open(filename2))
 	{
 		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
 		{
@@ -281,11 +328,11 @@ void FreyjaControl::addRecentFilename(const char *filename)
 
 			if (swap && swap[0])
 			{
-				w.print("%s\n", swap);
+				w.Print("%s\n", swap);
 			}
 		}
 
-		w.closeFile();
+		w.Close();
 	}
 
 	if (filename2)
@@ -1904,12 +1951,30 @@ bool FreyjaControl::event(int command)
 
 bool FreyjaControl::handleEvent(int mode, int cmd)
 {
-	freyja_print("Call to handleEvent is deprecated...\n");
+	bool handled = true;
+	//freyja_print("! Call to handleEvent is deprecated...\n");
 
-	if (event(cmd))
-		return true;
+	switch (mode)
+	{
+	case eSelect:
+		mEventMode = modeSelect;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Invisible);
+		freyja_print("! (mode) Select object...");
+		freyja_event_gl_refresh();
+		break;
 
-	return false;
+	case eUnselect:
+		mEventMode = modeUnselect;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Invisible);
+		freyja_print("! (mode) Unselect object...");
+		freyja_event_gl_refresh();
+		break;
+
+	default:
+		handled = event(cmd);
+	}
+
+	return handled;
 }
 
 
@@ -2350,33 +2415,39 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	vec_t vx = x, vy = y;
 	EventMode mode = mEventMode;
 	mMouseButton = btn;
+	mMouseState = state;
 	mModKey = mod;
 
-	// Get the viewport adjusted mouse coordinates, and swap modes if needed
+	/* Get the viewport adjusted mouse coordinates, and swap modes if needed */
 	AdjustMouseXYForViewports(vx, vy);
 
+	/* Handle key modifers */
 	if (mod & KEY_LCTRL)
 	{
-		handleEvent(EVENT_MISC, eSelect);
+		handleEvent(eEvent, eSelect);
 	}
 	else if (mod & KEY_LSHIFT)
 	{
-		handleEvent(EVENT_MISC, eRotate);
+		handleEvent(eEvent, eRotate);
 	}
 
-	ret = true;
-	switch (mEventMode)
+	/* Handle left clicks */
+	if (btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED)
 	{
-	case modeSelect:
-		SelectObject(vx, vy);
-		break;
+		ret = true;
+		switch (mEventMode)
+		{
+		case modeSelect:
+			SelectObject(vx, vy);
+			break;
 
-	case modeUnselect:
-		UnselectObject(vx, vy);
-		break;
+		case modeUnselect:
+			UnselectObject(vx, vy);
+			break;
 
-	default:
-		ret = false;
+		default:
+			ret = false;
+		}
 	}
 
 	mEventMode = mode;
@@ -2391,6 +2462,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 	EventMode mode = mEventMode;
 	mMouseButton = btn;
+	mMouseState = state;
 	mModKey = mod;
 	vec_t vx = x, vy = y;
 	AdjustMouseXYForViewports(vx, vy);
@@ -2437,11 +2509,11 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 		// Mongoose 2002.01.12, Allow temp mode override
 		if (mod & KEY_LCTRL)
 		{
-			handleEvent(EVENT_MISC, eSelect);
+			handleEvent(eEvent, eSelect);
 		}
 		else if (mod & KEY_LSHIFT)
 		{
-			handleEvent(EVENT_MISC, eRotate);
+			handleEvent(eEvent, eRotate);
 		}
 
 		MouseEdit(btn, state, mod, x, y, mModel->getCurrentPlane());
@@ -2569,9 +2641,6 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 }
 
 
-#include <hel/Ray.h>
-#define DEBUG_PICK_RAY 1
-#define DEBUG_SCREEN_TO_WORLD 0
 void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
 	Ray &r = mRender->mTestRay;
@@ -2613,7 +2682,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 	}
 
 
-#if 0
+#if DEBUG_PICK_RAY_PLANAR
 	// DEBUG case is a triangle ABC...
 	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
 	//const vec_t k = 100.0f;
@@ -2852,7 +2921,12 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 		break;
 
 	default:
-		MARK_MSGF("Case '%i' not supported", mTransformMode);
+		{
+			String s;
+			s = TransformModeToString((FreyjaModel::transform_t)mTransformMode);
+			freyja_print("UnselectObject '%s' not supported.", s.GetCString());
+			MARK_MSGF("Case '%s' not supported", s.GetCString());
+		}
 	}
 }
 
@@ -2877,67 +2951,65 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 				
 				if (selected > -1)
 				{
-					freyja_print("Face[%i] selected by pick ray.", selected);
+					freyja_print("Face[%i] unselected by pick ray.", selected);
 					m->SetFaceFlags(selected, Face::fSelected);
 				}
 			}
 		}
 		break;
 
-	default:
-		MARK_MSGF("Case '%i' not supported", mTransformMode);
-	}
-}
-
-
 #if 0
-void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
-{
-	float xx = x, yy = y, zz;
-
-
-	/* Mongoose: Convert screen to world coordinate system */
-	getWorldFromScreen(&xx, &yy, &zz);
-
-	switch (mTransformMode)
-	{
 	case FreyjaModel::TransformPoint:
-		xx = x; 
-		yy = y;
-		getScreenToWorldOBSOLETE(&xx, &yy);
+		{
+			/* Mongoose: Convert screen to world coordinate system */
+			getWorldFromScreen(&xx, &yy, &zz);
+			xx = x; 
+			yy = y;
+			getScreenToWorldOBSOLETE(&xx, &yy);
 
-		if (FreyjaRender::mPatchDisplayList > 0)
-			mModel->selectPatchControlPoint(xx, yy);
-		else
-			mModel->VertexSelect(xx, yy);
-		// mModel->selectVertex(plane, xx, yy, zz);
+			if (FreyjaRender::mPatchDisplayList > 0)
+				mModel->selectPatchControlPoint(xx, yy);
+			else
+				mModel->VertexSelect(xx, yy);
+			// mModel->selectVertex(plane, xx, yy, zz);
+		}
 		break;
 
 	case FreyjaModel::TransformMesh:
-		xx = x; 
-		yy = y;
-		getScreenToWorldOBSOLETE(&xx, &yy);
-		mModel->MeshSelect(xx, yy);
-		// mModel->selectMesh(plane, xx, yy, zz);
-		freyja_print("Selected Mesh[%i]", 
-					mModel->getCurrentMesh());
+		{
+			/* Mongoose: Convert screen to world coordinate system */
+			getWorldFromScreen(&xx, &yy, &zz);
+			xx = x; 
+			yy = y;
+			getScreenToWorldOBSOLETE(&xx, &yy);
+			mModel->MeshSelect(xx, yy);
+			// mModel->selectMesh(plane, xx, yy, zz);
+			freyja_print("Selected Mesh[%i]", mModel->getCurrentMesh());
+		}
 		break;
 
 	case FreyjaModel::TransformBone:
-		xx = x; 
-		yy = y;
-		getScreenToWorldOBSOLETE(&xx, &yy);
-		mModel->selectBone(xx, yy);
-		// mModel->selectBone(plane, xx, yy, zz);
-		freyja_print("Selected Bone[%i] ( Still buggy? )", 
-					mModel->getCurrentBone());
+		{
+			/* Mongoose: Convert screen to world coordinate system */
+			getWorldFromScreen(&xx, &yy, &zz);
+			xx = x; 
+			yy = y;
+			getScreenToWorldOBSOLETE(&xx, &yy);
+			mModel->selectBone(xx, yy);
+			// mModel->selectBone(plane, xx, yy, zz);
+			freyja_print("Selected Bone[%i])", mModel->getCurrentBone());
 		break;
+#endif
 
 	default:
-		freyja_print("WARNING: Selection undefined for this mode");
+		{
+			String s;
+			s = TransformModeToString((FreyjaModel::transform_t)mTransformMode);
+			freyja_print("SelectObject '%s' not supported.", s.GetCString());
+			MARK_MSGF("Case '%s' not supported", s.GetCString());
+		}
 	}
 }
-#endif
 
 
 void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
@@ -3265,7 +3337,7 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 	const float treshold = 2.0f;
 	float xyz[3];
 	float xx = x, yy = y;
-  
+
 
 	switch (mMouseButton)
 	{
@@ -3361,24 +3433,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	// Get the viewport adjusted mouse coordinates, and swap modes if needed
 	vec_t vx = x, vy = y;
 	AdjustMouseXYForViewports(vx, vy);
-
-	bool nEvent = true;
-	switch (mEventMode)
-	{
-	case modeSelect:
-		SelectObject(vx, vy);
-		break;
-
-	case modeUnselect:
-		UnselectObject(vx, vy);
-		break;
-
-	default:
-		nEvent = false;
-	}
-
-	if (nEvent)
-		return;
 	
 	vec_t xx = vx, yy = vy;
 	getScreenToWorldOBSOLETE(&xx, &yy);
@@ -3402,37 +3456,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 	}
 
-	if (!(btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED))
-	{	
-		switch(mEventMode)
-		{
-		case modeMove:
-			if ( mTransformMode == FreyjaModel::TransformMesh )
-			{
-				mModel->getCurrentMeshCenter(gFreyjaCursor.mPos.mVec);
-				FreyjaStateTransform *state = new
-				FreyjaStateTransform(fTransformMesh, fTranslate,
-									 mModel->getCurrentMesh(),
-									 gFreyjaCursor.mPos.mVec);
-				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
-			}
-			else if ( mTransformMode == FreyjaModel::TransformPoint )
-			{
-				unsigned int idx = mModel->getCurrentVertexIndex();
-				freyjaGetVertexXYZ3fv(idx, gFreyjaCursor.mPos.mVec);
-				FreyjaStateTransform *state = new
-				FreyjaStateTransform(fTransformVertex, fTranslate,
-									 idx, gFreyjaCursor.mPos.mVec);
-				gFreyjaCursor.ForceChangeState(state, Freyja3dCursor::Translation);
-			}
-			freyja_print("! moved: %f, %f", xx-xxx, yy-yyy);
-			break;
-		default:
-			;
-		}
-
-		return;
-	}
 
 	switch(mEventMode)
 	{
@@ -3453,11 +3476,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		//	mXYZMouseState = 0;
 		//}
 		break;
-
-	case modeSelect:
-		SelectObject(vx, vy); //, plane);
-		break;
-
 
 	case VERTEX_COMBINE:
 		if (mXYZMouseState == 0)
@@ -3581,24 +3599,24 @@ void FreyjaControl::loadResource()
 
 
 	/* Recent files persistance test */
-	FreyjaFileReader r;
+	SystemIO::TextFileReader r;
 	uint32 j;
 	s = freyja_rc_map("recent_files");
 
-	if (r.openFile(s))
+	if (r.Open(s))
 	{
 		if (s) 
 		{
 			delete [] s;
 		}
 
-		for (j = 0; j < gRecentFileLimit && !r.endOfFile(); ++j)
+		for (j = 0; j < gRecentFileLimit && !r.IsEndOfFile(); ++j)
 		{
-			s = r.parseSymbol();
-			addRecentFilename(s);
+			const char *sym = r.ParseSymbol();
+			addRecentFilename(sym);
 		}
 
-		r.closeFile();
+		r.Close();
 	}
 }
 

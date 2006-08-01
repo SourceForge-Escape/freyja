@@ -385,8 +385,8 @@ void mgtk_handle_event1u(int event, unsigned int value)
 {
 	if (!gFreyjaControl->event(event, value))
 	{
-		if (freyja_event2i(EVENT_MISC, event) == -1)
-			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", EVENT_MISC, event);
+		if (freyja_event2i(eEvent, event) == -1)
+			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", eEvent, event);
 	}
 }
 
@@ -395,8 +395,8 @@ void mgtk_handle_event1f(int event, float value)
 {
 	if (!gFreyjaControl->event(event, value))
 	{
-		if (freyja_event2i(EVENT_MISC, event) == -1)
-			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", EVENT_MISC, event);
+		if (freyja_event2i(eEvent, event) == -1)
+			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
 	}
 }
 
@@ -511,8 +511,8 @@ void freyja_handle_event1u(int event, unsigned int value)
 {
 	if (!gFreyjaControl->event(event, value))
 	{
-		if (freyja_event2i(EVENT_MISC, event) == -1)
-			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", EVENT_MISC, event);
+		if (freyja_event2i(eEvent, event) == -1)
+			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", eEvent, event);
 	}
 }
 
@@ -521,8 +521,8 @@ void freyja_handle_event1f(int event, float value)
 {
 	if (!gFreyjaControl->event(event, value))
 	{
-		if (freyja_event2i(EVENT_MISC, event) == -1)
-			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", EVENT_MISC, event);
+		if (freyja_event2i(eEvent, event) == -1)
+			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
 	}
 }
 
@@ -621,6 +621,13 @@ void freyja_handle_resource_init(Resource &r)
 	// Old style events
 	////////////////////////////////////////////////////////////////////
 
+	// Event types used for flow control of event ids
+	r.RegisterInt("eMode", eMode);
+	r.RegisterInt("eEvent", eEvent);
+
+
+	// Event ids
+
 	/* Mongoose 2002.01.12, 
 	 * Bind script functions to C/C++ functions */
 	r.RegisterFunction("color", freyja_rc_color);
@@ -631,14 +638,18 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
+	// Edit actions and modes
 	r.RegisterInt("eUndo", eUndo);
-
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
+	r.RegisterInt("eDelete", eDelete);
+	r.RegisterInt("eSelect", eSelect);
+	r.RegisterInt("eUnselect", eUnselect);
+	r.RegisterInt("eSelectAll", eSelectAll);
+
 
 	r.RegisterInt("eSplitObject", eSplitObject);
-	r.RegisterInt("eSelectAll", eSelectAll);
 	r.RegisterInt("eAppendFile", eAppendFile);
 	r.RegisterInt("eRevertFile", eRevertFile);
 	r.RegisterInt("eExportFile", eExportFile);
@@ -655,9 +666,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eAboutDialog", eAboutDialog);
 	r.RegisterInt("eHelpDialog", eHelpDialog);
 
-	r.RegisterInt("eDelete", eDelete);
-	r.RegisterInt("eSelect", eSelect);
-	r.RegisterInt("eUnselect", eUnselect);
 
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);
@@ -792,7 +800,6 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eViewports", eViewports);
 
-	r.RegisterInt("eMode", EVENT_MISC); // Hack to fake 2i event to eventMisc
 	r.RegisterInt("eVertexNew", CMD_POINT_ADD);
 	//r.RegisterInt("eVertexMove", CMD_POINT_MOVE);
 	r.RegisterInt("eVertexCombine", CMD_POINT_COMBINE);
@@ -907,9 +914,9 @@ void freyja_handle_resource_start()
 	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eTransformMenu, 1);
 	mgtk_option_menu_value_set(eObjectMenu, 0);
-	freyja_event2i(EVENT_MISC, FREYJA_MODE_MODEL_EDIT);
-	gFreyjaControl->event(eTransformMesh);
-	gFreyjaControl->event(eMoveObject);
+	freyja_event2i(eEvent, FREYJA_MODE_MODEL_EDIT);
+	gFreyjaControl->event(eTransformFace);
+	gFreyjaControl->event(eSelect);
 
 	freyja_set_main_window_title(BUILD_NAME);
 	mgtk_event_gl_refresh();

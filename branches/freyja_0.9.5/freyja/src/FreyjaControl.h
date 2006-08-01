@@ -473,7 +473,7 @@ private:
 
 	unsigned int mMouseButton, mModKey;     /* Cached mouse button event */
 
-	unsigned int mMouseState;
+	int mMouseState;                        /* Cached mouse state event */
 
 	EditorMode mEditorMode;                 /* Mode of the editor */
 

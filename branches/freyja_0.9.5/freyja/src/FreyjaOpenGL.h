@@ -64,6 +64,7 @@ const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
 const float BLUE[]         = {  0.0,  0.0,  1.0, 1.0 };
 const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
+const float PINK[]         = {  1.0,  0.75,  0.75, 1.0 };
 const float ORANGE[]       = {  1.0,  7.0,  0.0, 1.0 };
 const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
 const float DARK_YELLOW[]  = {  0.75, 0.75,  0.0, 1.0 };
