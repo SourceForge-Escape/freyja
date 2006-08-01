@@ -73,7 +73,8 @@ public:
 		TransformScene       = 2,
 		TransformBone        = 3,
 		TransformPoint,
-		TransformSelectedVertices
+		TransformSelectedVertices,
+		TransformFace
 	} transform_t;
 
 	typedef enum {

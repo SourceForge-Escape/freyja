@@ -1300,6 +1300,10 @@ bool FreyjaControl::event(int command)
 		mTransformMode = FreyjaModel::TransformPoint;
 		break;
 
+	case eTransformFace:
+		mTransformMode = FreyjaModel::TransformFace;
+		break;
+
 	case eTransformMesh:
 		mTransformMode = FreyjaModel::TransformMesh;
 		break;
@@ -2340,62 +2344,60 @@ bool FreyjaControl::motionEvent(int x, int y)
 }
 
 
-bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
+bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 {
+	bool ret = false;
+	vec_t vx = x, vy = y;
 	EventMode mode = mEventMode;
-
-
 	mMouseButton = btn;
 	mModKey = mod;
 
+	// Get the viewport adjusted mouse coordinates, and swap modes if needed
+	AdjustMouseXYForViewports(vx, vy);
+
+	if (mod & KEY_LCTRL)
+	{
+		handleEvent(EVENT_MISC, eSelect);
+	}
+	else if (mod & KEY_LSHIFT)
+	{
+		handleEvent(EVENT_MISC, eRotate);
+	}
+
+	ret = true;
+	switch (mEventMode)
+	{
+	case modeSelect:
+		SelectObject(vx, vy);
+		break;
+
+	case modeUnselect:
+		UnselectObject(vx, vy);
+		break;
+
+	default:
+		ret = false;
+	}
+
+	mEventMode = mode;
+
+	return ret;
+}
+
+
+bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
+{
+	if (MouseEdit(btn, state, mod, x, y)) return true;
+
+	EventMode mode = mEventMode;
+	mMouseButton = btn;
+	mModKey = mod;
 	vec_t vx = x, vy = y;
 	AdjustMouseXYForViewports(vx, vy);
 
 
 	switch (mEditorMode)
 	{
-#if 0
-	case ANIMATION_EDIT_MODE:
-		if (btn == MOUSE_BTN_UP && state == MOUSE_BTN_STATE_PRESSED)
-		{
-			freyja_event2i(EVENT_MISC, CMD_MISC_ZOOM_IN);
-			freyja_print("Zoom in");
-		}
-		
-		if (btn == MOUSE_BTN_DOWN && state == MOUSE_BTN_STATE_PRESSED)
-		{
-			freyja_event2i(EVENT_MISC, CMD_MISC_ZOOM_OUT);
-			freyja_print("Zoom out");
-		}
-
-		switch (btn)
-		{
-		case MOUSE_BTN_MIDDLE:
-			{
-				vec3_t pos;
-
-				getFreeWorldFromScreen(x, y, pos);
-
-				mXYZMouseState = 1;
-			}
-			break;
-		case MOUSE_BTN_LEFT:
-			{
-				vec3_t pos;
-
-				getFreeWorldFromScreen(x, y, pos);
-		
-				if (FreyjaRender::mPatchDisplayList)
-					mModel->selectPatchControlPoint(pos);
-
-				mXYZMouseState = 1;
-			}
-			break;
-		}
-
-		break;
-#endif
-
 	case TEXTURE_EDIT_MODE:
 		if (mUVMouseState)
 		{
@@ -2828,19 +2830,29 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
-	// New backend ray test ( picks faces and marks them unselected )
-	Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
-
-	if ( m )
+	switch (mTransformMode)
 	{
-		int selected = -1;
-		m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
-
-		if (selected > -1)
+	case FreyjaModel::TransformFace:
 		{
-			freyja_print("Face[%i] selected by pick ray.", selected);
-			m->ClearFaceFlags(selected, Face::fSelected);
+			// New backend ( picks faces and marks them selected )
+			Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
+
+			if ( m )
+			{
+				int selected = -1;
+				m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
+				
+				if (selected > -1)
+				{
+					freyja_print("Face[%i] selected by pick ray.", selected);
+					m->ClearFaceFlags(selected, Face::fSelected);
+				}
+			}
 		}
+		break;
+
+	default:
+		MARK_MSGF("Case '%i' not supported", mTransformMode);
 	}
 }
 
@@ -2851,19 +2863,29 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
-	// New backend ray test ( picks faces and marks them selected )
-	Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
-
-	if ( m )
+	switch (mTransformMode)
 	{
-		int selected = -1;
-		m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
-
-		if (selected > -1)
+	case FreyjaModel::TransformFace:
 		{
-			freyja_print("Face[%i] selected by pick ray.", selected);
-			m->SetFaceFlags(selected, Face::fSelected);
+			// New backend ( picks faces and marks them selected )
+			Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
+
+			if ( m )
+			{
+				int selected = -1;
+				m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
+				
+				if (selected > -1)
+				{
+					freyja_print("Face[%i] selected by pick ray.", selected);
+					m->SetFaceFlags(selected, Face::fSelected);
+				}
+			}
 		}
+		break;
+
+	default:
+		MARK_MSGF("Case '%i' not supported", mTransformMode);
 	}
 }
 
