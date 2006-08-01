@@ -2337,6 +2337,9 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 	mMouseButton = btn;
 	mModKey = mod;
 
+	vec_t vx = x, vy = y;
+	AdjustMouseXYForViewports(vx, vy);
+
 
 	switch (mEditorMode)
 	{
@@ -2479,7 +2482,12 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 {
 	freyja_print("! Mouse x = %f y = %f", x, y);
 
-	if (mRender->GetMode() & FreyjaRender::fViewports)
+	// Trap the junk 0,0 states that are often tossed around on
+	// just mouse button updates
+	if ( x == 0 && y == 0)
+	{
+	}
+	else if (mRender->GetMode() & FreyjaRender::fViewports)
 	{
 		// Translate this to it's correct 'plane editing mode'
 		// for the viewport and adjust the x, y values here 
@@ -2490,10 +2498,10 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		vec_t halfW = w * 0.5f;
 		vec_t halfH = h * 0.5f;
 		
-
 		// Handle Front XY viewport ( not using viewport class yet )
 		if ( x < halfW && y > halfH )
 		{
+			mEditorMode = MODEL_EDIT_MODE;
 			mModel->setCurrentPlane(PLANE_XY);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -2504,6 +2512,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Top XZ viewport ( not using viewport class yet )
 		else if ( x > halfW && y < halfH )
 		{
+			mEditorMode = MODEL_EDIT_MODE;
 			mModel->setCurrentPlane(PLANE_XZ);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -2514,6 +2523,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Side ZY viewport ( not using viewport class yet )
 		else if ( x > halfW && y > halfH )
 		{
+			mEditorMode = MODEL_EDIT_MODE;
 			mModel->setCurrentPlane(PLANE_ZY);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -2521,8 +2531,18 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 			x = x*2.0f - w;
 			y = y*2.0f - h;
 		}
+		// Handle 'Free' viewport ( not using viewport class yet )
+		else if ( x < halfW && y < halfH )
+		{
+			mEditorMode = ANIMATION_EDIT_MODE;
 
-		freyja_print("! Adjusted mouse x = %f y = %f", x, y);
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f;
+			y = y*2.0f;
+		}
+
+		freyja_print("!       x = %f y = %f", x, y);
 	}
 }
 
