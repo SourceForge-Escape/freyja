@@ -657,6 +657,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eDelete", eDelete);
 	r.RegisterInt("eSelect", eSelect);
+	r.RegisterInt("eUnselect", eUnselect);
 
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);

@@ -44,9 +44,8 @@ using namespace mstl;
 
 using namespace freyja;
 
+#define DEBUG_VIEWPORT_MOUSE 0
 
-void test_patch();
-unsigned int generate_bezier_patch_list(BezierPatch &patch, int divs);
 void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern Freyja3dCursor gFreyjaCursor;
@@ -1401,6 +1400,13 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
+	case eUnselect:
+		mEventMode = modeUnselect;
+		gFreyjaCursor.SetMode(Freyja3dCursor::Invisible);
+		freyja_print("Unselect object...");
+		freyja_event_gl_refresh();
+		break;
+
 
 	case eMove:
 		mModel->transform(mTransformMode, fTranslate,
@@ -1724,7 +1730,7 @@ bool FreyjaControl::event(int command)
 	case eRenderPatch:
 		if (FreyjaRender::mPatchDisplayList == -1)
 		{
-			test_patch();
+			//test_patch();
 			FreyjaRender::mPatchDisplayList = 0;
 		}
 
@@ -1732,7 +1738,7 @@ bool FreyjaControl::event(int command)
 		
 		if (FreyjaRender::mPatchDisplayList)
 		{
-			test_patch(); // hack for update
+			//test_patch(); // hack for update
 		}
 
 		freyja_print("Patch Rendering [%s], Use Vertex:Move to edit...", 
@@ -2488,7 +2494,9 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 // More crap for old system to be backported then rewritten properly  =/
 void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 {
-	freyja_print("! Mouse x = %f y = %f", x, y);
+#if DEBUG_VIEWPORT_MOUSE
+	freyja_print("> Mouse x = %f y = %f", x, y);
+#endif
 
 	// Trap the junk 0,0 states that are often tossed around on
 	// just mouse button updates
@@ -2552,7 +2560,9 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 			y = y*2.0f;
 		}
 
-		freyja_print("!       x = %f y = %f", x, y);
+#if DEBUG_VIEWPORT_MOUSE
+		freyja_print("       x = %f y = %f", x, y);
+#endif
 	}
 }
 
@@ -2812,19 +2822,36 @@ void FreyjaControl::addObject()
 }
 
 
-void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
+void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 {
-	float xx = x, yy = y, zz;
-
-
-	/* Mongoose: Convert screen to world coordinate system */
-	getWorldFromScreen(&xx, &yy, &zz);
-
 	// Look for objects with depth ( was using planar projection )
 	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
-	CastPickRay(x, y);
+	CastPickRay(mouseX, mouseY);
 
-	// New backend ray test
+	// New backend ray test ( picks faces and marks them unselected )
+	Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
+
+	if ( m )
+	{
+		int selected = -1;
+		m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
+
+		if (selected > -1)
+		{
+			freyja_print("Face[%i] selected by pick ray.", selected);
+			m->ClearFaceFlags(selected, Face::fSelected);
+		}
+	}
+}
+
+
+void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
+{
+	// Look for objects with depth ( was using planar projection )
+	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
+	CastPickRay(mouseX, mouseY);
+
+	// New backend ray test ( picks faces and marks them selected )
 	Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
 
 	if ( m )
@@ -2838,6 +2865,17 @@ void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
 			m->SetFaceFlags(selected, Face::fSelected);
 		}
 	}
+}
+
+
+#if 0
+void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
+{
+	float xx = x, yy = y, zz;
+
+
+	/* Mongoose: Convert screen to world coordinate system */
+	getWorldFromScreen(&xx, &yy, &zz);
 
 	switch (mTransformMode)
 	{
@@ -2877,6 +2915,7 @@ void FreyjaControl::SelectObject(vec_t x, vec_t y, freyja_plane_t plane)
 		freyja_print("WARNING: Selection undefined for this mode");
 	}
 }
+#endif
 
 
 void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
@@ -3300,6 +3339,24 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	// Get the viewport adjusted mouse coordinates, and swap modes if needed
 	vec_t vx = x, vy = y;
 	AdjustMouseXYForViewports(vx, vy);
+
+	bool nEvent = true;
+	switch (mEventMode)
+	{
+	case modeSelect:
+		SelectObject(vx, vy);
+		break;
+
+	case modeUnselect:
+		UnselectObject(vx, vy);
+		break;
+
+	default:
+		nEvent = false;
+	}
+
+	if (nEvent)
+		return;
 	
 	vec_t xx = vx, yy = vy;
 	getScreenToWorldOBSOLETE(&xx, &yy);
@@ -3376,7 +3433,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 
 	case modeSelect:
-		SelectObject(vx, vy, plane);
+		SelectObject(vx, vy); //, plane);
 		break;
 
 

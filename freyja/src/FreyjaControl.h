@@ -81,7 +81,8 @@ class FreyjaControl
 		modeMove,
 		modeRotate,
 		modeScale,
-		modeSelect
+		modeSelect,
+		modeUnselect
 		
 	} EventMode;
 
@@ -403,7 +404,10 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void SelectObject(vec_t x, vec_t y, freyja_plane_t plane);
+
+	void SelectObject(vec_t mouseX, vec_t mouseY);
+	void UnselectObject(vec_t mouseX, vec_t mouseY);
+	//void SelectObject(vec_t x, vec_t y, freyja_plane_t plane);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

@@ -102,6 +102,7 @@ typedef enum {
 
 	eDelete,
 	eSelect,
+	eUnselect,
 	eCopy,
 	eCut,
 	ePaste,
