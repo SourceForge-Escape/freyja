@@ -2741,7 +2741,7 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 	float nearHeight = mRender->getNearHeight() * 2.0f;
 	float width, height, invz, fs;
 	float scroll[3];
- 
+
 
 	width = mRender->getWindowWidth();
 	height = mRender->getWindowHeight();
@@ -2946,7 +2946,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 8.0f);
+				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 2.0f);
 				
 				if (selected > -1)
 				{

@@ -60,20 +60,18 @@ Ray::~Ray()
 
 bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 {
-	Vec3 center(center3);
+	Vec3 center;
+	HEL_VEC3_COPY(center3, center.mVec);
 	Vec3 l = center - mOrigin;
-	Vec3 d(mDir);
-	d.normalize();
-	vec_t s = l * d;
+	vec_t s = l * mDir;
 	vec_t l2 = l * l;
 	vec_t r2 = radius * radius;
 
-	if ( s > 0.0f && l2 > r2)
+	if ( s < 0.0f && l2 > r2)
 		return false;
 
 	vec_t m2 = l2 - (s*s);
-	
-	
+
 	if (m2 > r2)
 		return false;
 
@@ -113,7 +111,6 @@ bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 
 bool Ray::IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv)
 {
-	mDir.normalize();
 	vec3_t edge1, edge2, tvec, pvec, qvec;
 	vec3_t &orig = mOrigin.mVec, &dir = mDir.mVec;
 	vec_t det, inv_det;
