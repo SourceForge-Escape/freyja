@@ -80,7 +80,7 @@ vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
 vec_t FreyjaRender::mBonePointSize = 5.0;
 vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
-vec_t FreyjaRender::mVertexPointSize = 3.5;
+vec_t FreyjaRender::mVertexPointSize = 5.0; // 3.5;
 
 double gMatrix[16];
 
@@ -844,26 +844,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 	if (mRenderMode & RENDER_POINTS)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-
-		glPointSize(5.0);
-		glBegin(GL_POINTS);
-
-		for (i = mesh.gbegin; i < mesh.gend; ++i)
-		{
-			v = mesh.getGroupCenter(i);
-			glColor3fv(YELLOW);
-			glVertex3fv(v.mVec);
-		}
-
-		glEnd();
-		glPointSize(mDefaultPointSize);
-
-		glPopAttrib();
-
 #if TEST_NEW_BACKEND_FORMAT
 		Mesh *m = freyjaModelGetMeshClass(0,0);
 
@@ -875,7 +855,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_BLEND);
-			glPointSize(2.0);
+			glPointSize(mVertexPointSize);
+
 			glBegin(GL_POINTS);
 			
 			for (i = 0; i < m->GetVertexCount(); ++i)
@@ -896,7 +877,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 			}
 
 			glEnd();
-			glPointSize(mDefaultPointSize);
+			//glPointSize(mDefaultPointSize);
 			glPopAttrib();
 		}
 #endif
@@ -934,8 +915,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 					}
 				
 					glEnd();
-					glPointSize(mDefaultPointSize);
-
 					glPopAttrib();
 				}
 
@@ -1243,6 +1222,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 
 	if (mRenderMode & RENDER_POINTS)
 	{
+#if 0
 		/* Render bounding box */
 		//mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
 		//renderBox(min, max);
@@ -1268,6 +1248,7 @@ void FreyjaRender::renderModel(RenderModel &model)
   
 			glEnd();
 		}
+#endif
 	}    
 
 
