@@ -246,7 +246,7 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 		if (f->mIndices.size() > 2)
 		{
 			uint32 jCount = f->mIndices.size();
-			Vec3 a, b, c, p;
+			Vec3 a, b, c, tuv;
 
 			GetVertexPos(f->mIndices[0], a.mVec);
 			GetVertexPos(f->mIndices[1], b.mVec);
@@ -255,8 +255,8 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 			for (uint32 j = 2; j < jCount; ++j)
 			{
 				GetVertexPos(f->mIndices[j], c.mVec);
-				intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, p);
-				
+				intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tuv.mVec);
+
 				if (intersect)
 				{
 					break;
@@ -269,10 +269,11 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 
 			if (intersect)
 			{
-				vec_t dist = helDist3v(r.mOrigin.mVec, p.mVec);
+				vec_t dist = tuv.mVec[0];
 
-				if (dist < bestDist)
+				if (face0 == -1 || dist < bestDist)
 				{
+					freyjaPrintMessage("--- t = %f, uv = %f, %f", tuv.mVec[0],tuv.mVec[1],tuv.mVec[2]);
 					bestDist = dist;
 					face0 = i;
 				}
@@ -280,7 +281,7 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 				// Only mark hit flags for every face hit with markAll==true
 				if (markAll) f->mFlags |= Face::fRayHit;
 			}
-			else 
+			else
 			{
 				// Clear hit flags
 				f->mFlags |= Face::fRayHit;
@@ -329,7 +330,7 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 		{
 			vec_t dist = helDist3v(r.mOrigin.mVec, center.mVec);
 
-			if (dist < bestDist)
+			if (vertex0 == -1 || dist < bestDist)
 			{
 				bestDist = dist;
 				vertex0 = i;

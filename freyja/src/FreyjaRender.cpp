@@ -855,7 +855,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		for (i = mesh.gbegin; i < mesh.gend; ++i)
 		{
 			v = mesh.getGroupCenter(i);
-			glColor3fv(PINK);
+			glColor3fv(YELLOW);
 			glVertex3fv(v.mVec);
 		}
 
@@ -869,18 +869,35 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 		if (m)
 		{
+			Vertex *vertex;
+
+			glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
 			glPointSize(2.0);
 			glBegin(GL_POINTS);
 			
 			for (i = 0; i < m->GetVertexCount(); ++i)
 			{
-				m->GetVertexPos(i, v.mVec);
-				glColor3fv(GREEN);
-				glVertex3fv(v.mVec);
+				vertex = m->GetVertex(i);
+
+				if (vertex)
+				{
+					(vertex->mFlags & Vertex::fSelected) ?
+					glColor3fv(mColorVertexHighlight) :
+					glColor3fv(mColorVertex);
+					//glVertex3fv(v.mVec);
+
+					m->GetVertexPos(i, v.mVec);
+					//glColor3fv(mColorVertex);
+					glVertex3fv(v.mVec);
+				}
 			}
 
 			glEnd();
 			glPointSize(mDefaultPointSize);
+			glPopAttrib();
 		}
 #endif
 	}	
