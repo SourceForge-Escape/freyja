@@ -915,7 +915,7 @@ void freyja_handle_resource_start()
 	mgtk_option_menu_value_set(eTransformMenu, 1);
 	mgtk_option_menu_value_set(eObjectMenu, 0);
 	freyja_event2i(eEvent, FREYJA_MODE_MODEL_EDIT);
-	gFreyjaControl->event(eTransformFace);
+	gFreyjaControl->event(eTransformMesh);
 	gFreyjaControl->event(eSelect);
 
 	freyja_set_main_window_title(BUILD_NAME);

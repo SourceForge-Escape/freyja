@@ -583,9 +583,13 @@ void FreyjaFSM::freyjaEnd()
 			vertex = mVertexList[i];
 			freyjaModelMeshPolygonAddVertex1i(mIndexModel, 
 											  mIndexMesh, polygon, vertex);
-			vertex = mTexCoordList[i];
-			freyjaModelMeshPolygonAddTexCoord1i(mIndexModel, 
-												mIndexMesh, polygon, vertex);
+
+			if ( i < mTexCoordList.size() )
+			{
+				vertex = mTexCoordList[i];
+				freyjaModelMeshPolygonAddTexCoord1i(mIndexModel, 
+													mIndexMesh, polygon, vertex);
+			}
 		}
 
 		mVertexList.clear();
