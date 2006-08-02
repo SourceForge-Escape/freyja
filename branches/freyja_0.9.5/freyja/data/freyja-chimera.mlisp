@@ -261,6 +261,9 @@
 				;(label "  ZoomLevel "  0.0 0.4) 
 				;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
 
+				(label "  Zoom "  0.0 0.4) 
+				(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
+
 				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				(hbox 1 0 0 1 0
 					(label "CursorAxis"  0.0 0.5)
@@ -370,11 +373,11 @@
 
 						(optionmenu		eEvent	eTransformMenu
 							(menu_item	"Scene"		eEvent eTransformScene)
-							(menu_item	"Face"		eEvent eTransformFace)
 							(menu_item	"Mesh"		eEvent eTransformMesh)
+							(menu_item	"Vertex"	eEvent eTransformPoint)
+							(menu_item	"Face"		eEvent eTransformFace)
 							(menu_item	"Bone"		eEvent eTransformBone)
 							(menu_item	"Group"		eEvent eTransformGroup)
-							(menu_item	"Vertex"	eEvent eTransformPoint)
 							(menu_item	"Vertex List"	eEvent eTransformSelectedVertices)
 							(menu_item	"MeshPivot"	eEvent eTransformMeshPivot))
 
