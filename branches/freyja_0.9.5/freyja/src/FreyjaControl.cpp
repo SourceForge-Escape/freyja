@@ -2946,11 +2946,11 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 3.0f);
+				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 8.0f);
 				
 				if (selected > -1)
 				{
-					freyja_print("Vertex[%i] unselected by pick ray.", selected);
+					freyja_print("! Vertex[%i] selected by pick ray.", selected);
 					m->SetVertexFlags(selected, Vertex::fSelected);
 				}
 			}
@@ -2969,29 +2969,15 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 				
 				if (selected > -1)
 				{
-					freyja_print("Face[%i] unselected by pick ray.", selected);
+					freyja_print("Face[%i] selected by pick ray.", selected);
 					m->SetFaceFlags(selected, Face::fSelected);
+					mModel->setCurrentPolygon(selected);
 				}
 			}
 		}
 		break;
 
 #if 0
-	case FreyjaModel::TransformPoint:
-		{
-			/* Mongoose: Convert screen to world coordinate system */
-			getWorldFromScreen(&xx, &yy, &zz);
-			xx = x; 
-			yy = y;
-			getScreenToWorldOBSOLETE(&xx, &yy);
-
-			if (FreyjaRender::mPatchDisplayList > 0)
-				mModel->selectPatchControlPoint(xx, yy);
-			else
-				mModel->VertexSelect(xx, yy);
-			// mModel->selectVertex(plane, xx, yy, zz);
-		}
-		break;
 
 	case FreyjaModel::TransformMesh:
 		{
