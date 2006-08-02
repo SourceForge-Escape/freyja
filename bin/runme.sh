@@ -3,6 +3,7 @@
 TEST=test
 SELECT=debug
 
+cd ~/Projects/freyja/freyja_0.9.3/bin
 mkdir -p ${TEST}
 export LD_LIBRARY_PATH=${TEST}
 

@@ -413,7 +413,7 @@
 
 
 			;; UV editor tab
-			(tab "Skin" eModeSkin
+			(tab "UV" eModeSkin
 				(hbox 1 0 0 1 0 
 					(togglebutton "Merge Texcoords" 0 eMode eTexcoordCombine))
 				(hbox 1 0 0 1 0
