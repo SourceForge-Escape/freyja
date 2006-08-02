@@ -2939,6 +2939,24 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformPoint:
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
+
+			if ( m )
+			{
+				int selected = -1;
+				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 3.0f);
+				
+				if (selected > -1)
+				{
+					freyja_print("Vertex[%i] unselected by pick ray.", selected);
+					m->SetVertexFlags(selected, Vertex::fSelected);
+				}
+			}
+		}
+		break;
+
 	case FreyjaModel::TransformFace:
 		{
 			// New backend ( picks faces and marks them selected )
@@ -2947,7 +2965,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
+				m->IntersectClosestFace(FreyjaRender::mTestRay, selected);
 				
 				if (selected > -1)
 				{

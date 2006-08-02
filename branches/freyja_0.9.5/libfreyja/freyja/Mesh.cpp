@@ -304,81 +304,51 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 }
 
 
-bool Mesh::IntersectVertex(Ray &r, int &vertex0, bool markAll)
+bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 {
-	Vec3 normal;
+	Vec3 center, normal, p;
 	vec_t bestDist = 99999.0f;
-	face0 = -1;
+	vertex0 = -1;
 	
 	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
 	{
-		Face *f = GetFace(i);
-		
-		if (!f) 
+		Vertex *v = GetVertex(i);
+
+		if (!v) 
 			continue;
-	
-		// Quick and dirty hit test that pretends you can 
-		// pusedo tesselate a face and get as good results
-		bool intersect = false;
-	
-		if (f->mIndices.size() > 2)
-		{
-			uint32 jCount = f->mIndices.size();
-			Vec3 a, b, c, p;
 
-			GetVertexPos(f->mIndices[0], a.mVec);
-			GetVertexPos(f->mIndices[1], b.mVec);
+		// Clear old ray hit results
+		v->mFlags |= Vertex::fRayHit;
+		v->mFlags ^= Vertex::fRayHit;
 
-
-			for (uint32 j = 2; j < jCount; ++j)
-			{
-				GetVertexPos(f->mIndices[j], c.mVec);
-				intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, p);
-				
-				if (intersect)
-				{
-					break;
-				}
-			
-				a = b;
-				b = c;
-			}
+		center = GetVertexPosition(i);
 		
+		bool intersect = r.IntersectSphere(center, radius, p);
+				
+		if (intersect)
+		{
+			vec_t dist = helDist3v(r.mOrigin.mVec, center.mVec);
 
-			if (intersect)
+			if (dist < bestDist)
 			{
-				vec_t dist = helDist3v(r.mOrigin.mVec, p.mVec);
-
-				if (dist < bestDist)
-				{
-					bestDist = dist;
-					face0 = i;
-				}
-
-				// Only mark hit flags for every face hit with markAll==true
-				if (markAll) f->mFlags |= Face::fRayHit;
-			}
-			else 
-			{
-				// Clear hit flags
-				f->mFlags |= Face::fRayHit;
-				f->mFlags ^= Face::fRayHit;
+				bestDist = dist;
+				vertex0 = i;
 			}
 		}
 	}
 
 	// Did we have a 'best hit'?
-	if (face0 > -1)
+	if (vertex0 > -1)
 	{
-		Face *f = GetFace(face0);
+		Vertex *v = GetVertex(vertex0);
 		
-		if (f) 
+		if (v) 
 		{
-			f->mFlags |= Face::fRayHit;
+			v->mFlags |= Vertex::fRayHit;
 		}
 	}
 
-	return (face0 > -1);
+	return (vertex0 > -1);
 }
 
 
@@ -401,6 +371,31 @@ void Mesh::SetFaceFlags(index_t face, uint32 flags)
 void Mesh::ClearFaceFlags(index_t face, uint32 flags)
 {
 	Face *f = GetFace(face);
+		
+	if (f)
+	{
+		// Clear flags
+		f->mFlags |= flags;
+		f->mFlags ^= flags;
+	}
+}
+
+
+void Mesh::SetVertexFlags(index_t face, uint32 flags)
+{
+	Vertex *f = GetVertex(face);
+		
+	if (f)
+	{
+		// Set flags
+		f->mFlags |= flags;
+	}
+}
+
+
+void Mesh::ClearVertexFlags(index_t face, uint32 flags)
+{
+	Vertex *f = GetVertex(face);
 		
 	if (f)
 	{

@@ -62,7 +62,8 @@ public:
 		fHighlighted =  1,
 		fMaterial    =  2,
 		fSelected    =  4,
-		fHidden      =  8
+		fHidden      =  8,
+		fRayHit      = 16
 	} VertexFlags;
 
 	Vertex(index_t vertex, index_t texcoord, index_t normal) :
@@ -358,14 +359,34 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	
+	bool IntersectClosestFace(Ray &r, int &face0) 
+	{ return IntersectFaces(r, face0, false); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : <face0> First face encountered along ray, or -1 if DNE.
+	 *        Always sets fRayHit flag on face0.
+	 *        Clears old fRayHit results on all other faces.
+	 ------------------------------------------------------*/
+
+
+	bool IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius);
+	/*------------------------------------------------------
+	 * Pre  : <radius> Sets selected flag on all faces hit
+	 *
+	 * Post : <vertex0> First face encountered along ray, or -1 if DNE.
+	 *        Always sets fRayHit flag on vertex0.
+	 *        Clears old fRayHit results on all other vertices.
+	 ------------------------------------------------------*/
+
 
 	bool IntersectFaces(Ray &r, int &face0, bool markAll);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : <face0> First face encountered along ray
-	 *        <markAll> Sets selected flag on all faces hit
+	 * Post : <face0> First face encountered along ray, or -1 if DNE.
+	 *        <markAll> If true sets fRayHit flag on all faces hit.
+	 *        Always sets fRayHit flag on face0, clears old results. 
 	 ------------------------------------------------------*/
-
 
 	bool Serialize(FreyjaFileWriter &w);
 	/*------------------------------------------------------
@@ -378,9 +399,14 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void ClearFaceFlags(index_t face, uint32 flags);
+
 	void SetFaceFlags(index_t face, uint32 flags);
 
-	void ClearFaceFlags(index_t face, uint32 flags);
+
+	void ClearVertexFlags(index_t vertex, uint32 flags);
+
+	void SetVertexFlags(index_t vertex, uint32 flags);
 
 
 	void SetName(const char *name)
