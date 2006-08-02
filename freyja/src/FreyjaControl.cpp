@@ -2671,7 +2671,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 
 		case PLANE_XZ: // Top
 			r.mOrigin = Vec3(x, y-100, -z);
-			r.mDir = Vec3(0,10000,0);
+			r.mDir = Vec3(0,-10000,0);
 			break;
 
 		case PLANE_ZY: // Side FIXME

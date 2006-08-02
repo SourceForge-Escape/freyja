@@ -72,7 +72,7 @@ class Ray
 	const Vec3 &GetOrigin() { return mOrigin; }
 
 
-	bool IntersectSphere(Vec3 center, vec_t radius, Vec3 &hit);
+	bool IntersectSphere(vec3_t center, vec_t radius, vec_t &t);
 	
 
 	bool IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv);
