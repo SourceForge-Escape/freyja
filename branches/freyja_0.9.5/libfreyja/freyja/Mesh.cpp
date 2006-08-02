@@ -230,6 +230,7 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 {
 	vec_t bestDist = 99999.0f;
+	r.mDir.normalize();
 	face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -266,6 +267,9 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 				b = c;
 			}
 		
+			// Clear old hit flags
+			f->mFlags |= Face::fRayHit;
+			f->mFlags ^= Face::fRayHit;
 
 			if (intersect)
 			{
@@ -280,12 +284,6 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 
 				// Only mark hit flags for every face hit with markAll==true
 				if (markAll) f->mFlags |= Face::fRayHit;
-			}
-			else
-			{
-				// Clear hit flags
-				f->mFlags |= Face::fRayHit;
-				f->mFlags ^= Face::fRayHit;
 			}
 		}
 	}
@@ -309,6 +307,7 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 {
 	Vec3 center, normal;
 	vec_t t, bestDist = 99999.0f;
+	r.mDir.normalize();
 	vertex0 = -1;
 	
 	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
@@ -322,10 +321,12 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 		v->mFlags |= Vertex::fRayHit;
 		v->mFlags ^= Vertex::fRayHit;
 
-		center = GetVertexPosition(i);
+		GetVertexArrayPos(v->mVertexIndex, center.mVec);
 		
 		bool intersect = r.IntersectSphere(center.mVec, radius, t);
-				
+			
+		freyjaPrintMessage("--- t = %f", t);
+	
 		if (intersect)
 		{
 			if (vertex0 == -1 || t < bestDist)
