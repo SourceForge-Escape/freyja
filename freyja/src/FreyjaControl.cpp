@@ -2666,17 +2666,17 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		{
 		case PLANE_XY: // Front
 			r.mOrigin = Vec3(x, y, z + 100);
-			r.mDir = Vec3(0,0,-10000);
+			r.mDir = Vec3(0, 0, -1);
 			break;
 
 		case PLANE_XZ: // Top
-			r.mOrigin = Vec3(x, y-100, -z);
-			r.mDir = Vec3(0,-10000,0);
+			r.mOrigin = Vec3(x, y - 100, -z);
+			r.mDir = Vec3(0, -1, 0);
 			break;
 
 		case PLANE_ZY: // Side FIXME
 			r.mOrigin = Vec3(x - 100, y, z);
-			r.mDir = Vec3(10000,0,0);
+			r.mDir = Vec3(1, 0, 0);
 			break;
 		}	
 	}

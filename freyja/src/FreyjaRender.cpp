@@ -342,7 +342,7 @@ void FreyjaRender::drawFreeWindow()
 
 	if (mRenderMode & fDrawPickRay)
 	{
-		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
+		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	
@@ -1879,7 +1879,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	if (mRenderMode & fDrawPickRay)
 	{
-		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir;
+		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	
