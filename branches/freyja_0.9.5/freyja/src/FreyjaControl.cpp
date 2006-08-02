@@ -2901,6 +2901,24 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 
 	switch (mTransformMode)
 	{
+	case FreyjaModel::TransformPoint:
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, mModel->getCurrentMesh());
+
+			if ( m )
+			{
+				int selected = -1;
+				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 2.0f);
+				
+				if (selected > -1)
+				{
+					freyja_print("! Vertex[%i] unselected by pick ray.", selected);
+					m->ClearVertexFlags(selected, Vertex::fSelected);
+				}
+			}
+		}
+		break;
+
 	case FreyjaModel::TransformFace:
 		{
 			// New backend ( picks faces and marks them selected )
@@ -3549,7 +3567,7 @@ void FreyjaControl::loadResource()
 {
 	int i, x, y;
 	char *s;
-	char *filename = "freyja-chimera.mlisp";
+	char *filename = "freyja-dev.mlisp";
 	bool failed = true;
 
 	

@@ -20,8 +20,7 @@ cp bin/plugins/*.dll ~/.freyja/plugins/
 cp plugins/*.mlisp ~/.freyja/plugins/
 
 # Main data
-cp ./data/freyja8.mlisp ~/.freyja/
-cp ./data/freyja-chimera.mlisp ~/.freyja/
+cp ./data/freyja-dev.mlisp ~/.freyja/
 cp ./data/palettes/*.pal ~/.freyja/palettes/
 cp ./data/materials/*.mat ~/.freyja/materials/
 cp ./data/icons/* ~/.freyja/icons/

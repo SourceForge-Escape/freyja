@@ -1,0 +1,853 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix
+; Website: http://gooseegg.sourceforge.net
+; Email  : mongoose@users.sourceforge.net
+; Comment: This is a sample resource Freyja file
+;
+;;;History;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; 2001.10.31
+; Mongoose - New implementation uses this as the
+;            main resource file
+;
+; ????.??.??
+; Mongoose - Created as metadata for gtk-menu
+;            script prototype
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Misc defines and varabiles
+(setq true 1)
+(setq false 0)
+
+;; Program defaults
+(setq WINDOW_X 32)             ; Offset of the window on load
+(setq WINDOW_Y 32)
+
+(setq WIDTH  700)              ; Set GL window width and height
+(setq HEIGHT 640)
+
+(setq NOTEBOOK_WIDTH 340)      ; Set sidebar notebook width and height
+(setq NOTEBOOK_HEIGHT HEIGHT)
+
+(setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
+(setq FAST_CARD true)          ; Toggle OpenGL accel features
+(setq GRID_ON true)            ; Toggle edit grid rendering
+(setq PATH "~/.freyja")        ; Set initial data path
+
+;; Gtk+ Interface
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; (textbox "text" EVENT COMMAND)
+; (option_menu (menu_item "label"  EVENT COMMAND))
+; (togglebutton "label" pressed EVENT COMMAND)
+; (button "label" EVENT COMMAND)
+; (vbox homogenous spacing expand fill pading ...)
+; (hbox homogenous spacing expand fill pading ...)
+; (hslider EVENT min max)
+; (icon filename/iconname IconSize_*)
+	; IconSize_Menu
+	; IconSize_ToolbarSmall
+	; IconSize_Toolbar
+	; IconSize_Button
+	; IconSize_Dialog
+
+
+;; Application Window
+(window "Freyja" "freyja.png"
+
+	;; Window container
+	(vbox 0 0 0 1 0
+				
+
+	;; Menubar
+	(handlebox 1
+	(menubar
+		(submenu "_File"
+			(menu_item "_New"			"C-n"	eNewFile	"gtk-new")
+			(menu_item "_Open Model..."	"C-o"	eOpenFileModel	"gtk-open")
+			(menu_item "Ap_pend Model..."  		eAppendFile		"gtk-paste")
+
+			(menu_seperator)
+
+			(submenu eRecentFiles "R_ecent Models...")			
+
+			(menu_seperator)
+
+			(menu_item "_Save Model"			"C-s"	eSaveFileModel	"gtk-save")
+			(menu_item "Save Model _As ..."	"S-C-s"	eSaveAsFileModel	"gtk-save-as")
+			(menu_item "_Revert Model"     			eRevertFile	"gtk-revert-to-saved")
+			(menu_seperator)
+
+			(menu_item "Proper_ties"		eInfo		"gtk-properties")
+			(menu_item "_Import"		"C-i"	eImportFile	"gtk-go-forward")
+			(menu_item "_Export"		"C-e"	eExportFile	"gtk-go-back")
+
+			(menu_seperator)
+
+			(menu_item "_Close"			"C-w"	eCloseFile	"gtk-close")
+			(menu_item "_Quit"			"C-q"	eShutdown	"gtk-quit"))
+
+
+		(submenu "_Edit"
+			(menu_item "Take _Screenshot"		eScreenShot	"gtk-screenshot")
+			(menu_seperator)
+			(menu_item "_Undo"			"C-z"	eUndo		"gtk-undo")
+			(menu_item "_Redo"			"S-C-z"	eRedo		"gtk-redo")
+			(menu_seperator)
+			(menu_item "Cu_t"     		"C-x"	eCut		"gtk-cut")
+			(menu_item "_Copy" 	    	"C-c"	eCopy		"gtk-copy")
+			(menu_item "_Paste"     	"C-v"	ePaste		"gtk-paste")
+			(menu_item "_Delete"    	"C-d"	eDelete		"gtk-delete")
+			(menu_seperator)
+			(menu_item "Select _All"	"C-a"	eSelectAll	"gtk-select-table")
+			(menu_seperator)
+			(menu_item "Pr_eferences"    ePreferencesDialog	"gtk-preferences"))
+
+
+		(submenu "_View"
+			;; These should use check menus here -- they are toggles!
+			(menu_seperator)
+			(menu_item "_Fullscreen"	"M-E"	eFullscreen	"gtk-fullscreen")
+			(menu_item "_Viewports"		eEvent	eViewports)
+			(menu_seperator)
+			(menu_item "_Grid"			eEvent	eRenderGrid)
+			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
+			(menu_item "_Camera"		eEvent	eCamera)
+			(menu_item "P_atch"			eEvent	eRenderPatch)
+			(submenu "_Mesh"
+				(menu_item "_Points"	eEvent	eRenderVertex)
+				(menu_item "_Wireframe"	eEvent	eRenderWireframe)
+				(menu_item "_Normals"	eEvent	eRenderNormals)
+				(menu_item "_Faces"		eEvent	eRenderFace)
+				(menu_item "_Texture"	eEvent	eRenderTexture)
+				(menu_item "_Lighting"	eEvent	eRenderLighting)
+				(menu_item "_Material"	eEvent	eRenderMaterial))
+			(menu_item "_Skeleton"		eEvent	eRenderSkeleton)
+			(submenu "_Joint"
+				(menu_item "_Point"		ePointJoint		"gtk-blanked")
+				(menu_item "_Sphere"	eSphereJoint	"gtk-blanked")
+				(menu_item "_Axes"		eAxisJoint		"gtk-blanked"))
+			(submenu "_Bone"
+				(menu_item "_ZBuffer"	eRenderToggleBoneZClear	"gtk-blanked")
+				(menu_item "_Line"		eLineBone		"gtk-blanked")
+				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
+
+		(submenu "_Create" 
+				(submenu "_Primatives"
+						(menu_item "_Vertex"		eEvent  eVertexNew)
+						(menu_item "_Polygon"		eEvent  ePolygonNew)
+						(menu_item "_Bone"			eEvent  eBoneNew))
+
+				(submenu "P_olygon Primatives"
+					(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
+					(menu_item "_Plane"		eGeneratePlane		"gtk-polygon")
+					(menu_item "_Tube"		eGenerateTube		"gtk-polygon")
+					(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
+					(menu_item "C_one"		eGenerateCone		"gtk-polygon")
+					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
+					(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
+
+				) ;; submenu Create
+
+		(submenu "_Tools"
+
+			;; Transforms
+			(submenu "_Transforms"
+				(menu_item "Move"    "F5"	eMoveObject "gtk-polygon")
+				(menu_item "Rotate"  "F6"	eRotateObject "gtk-polygon")
+				(menu_item "Scale"   "F7"	eScaleObject "gtk-polygon")
+				(menu_item "Select"  "F8"	eSelect "gtk-polygon"))
+
+			(menu_seperator)
+
+			(submenu "_Scene"
+				(menu_item "Generate _Normals"	eGenerateNormals	"gtk-polygon"))
+
+			(submenu "_Vertex"
+				(menu_item "_New"		eEvent  eVertexNew)
+				(menu_item "_Delete"	eEvent  eVertexDelete)
+				(menu_item "_Combine"	eEvent  eVertexCombine)
+				;;(menu_item "_Extrude"	eEvent  eVertexExtrude)
+			)
+
+			(submenu "_Polygon"
+				(menu_item "_New"		eEvent	ePolygonNew)
+				(menu_item "_Select"	eEvent	ePolygonSelect)
+				(menu_item "_Delete"	eEvent	ePolygonDelete)
+				(menu_item "_Split"		eEvent	ePolygonSplit)
+				(menu_item "_Extrude"	"F4" eExtrude		"gtk-polygon"))
+
+			(submenu "_Vertices..."
+				(menu_item "Mirror_X"	eEvent	eMeshMirrorX)
+				(menu_item "Mirror_Y"	eEvent	eMeshMirrorY)
+				(menu_item "Mirror_Z"	eEvent	eMeshMirrorZ))
+
+			(submenu "_Mesh"
+				(submenu "_UV Texcoord Mapping"
+					(menu_item "_Planar"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+					(menu_item "_Cylindrical" eMeshTexcoordCylindrical	"gtk-polygon")
+					(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-polygon"))
+				(menu_item "_New"		eEvent	eMeshNew)
+				(menu_item "_Delete"	eEvent	eMeshDelete)
+				(menu_item "_Select"	eEvent	eMeshSelect)
+				(menu_item "Re_center"	eEvent	eTransformMeshPivot)
+				(menu_item "_Tesselate"	eEvent	eMeshTesselate)
+				(menu_item "_Generate Normals"	eEvent	eMeshGenerateNormals)
+				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals))
+
+			(submenu "_Bone"
+				(menu_item "_New"			eEvent	eBoneNew)
+				(menu_item "_Link child"	eEvent	eBoneLinkChild)
+				(menu_item "_Unlink child"	eEvent	eBoneUnLinkChild)
+				(menu_item "L_ink mesh"		eEvent	eBoneLinkMesh)
+				(menu_item "U_nlink mesh"	eEvent	eBoneUnLinkMesh)
+				(menu_item "_Select"		eEvent	eBoneSelect)
+				(menu_item "_Move"			eEvent	eBoneMoveJoint)))
+
+		(submenu ePluginMenu "_Plugins...")
+
+		(menu_seperator)
+
+		(submenu "_Help"
+			(menu_item "_Contents"	"F1"	eHelpDialog	"gtk-help")
+			(menu_item "_About"  			eAboutDialog "gtk-about"))))
+
+
+		;; Toolbars
+		(hbox 0 1 0 1 0
+
+		;; Toolbar View
+	    (handlebox 1 
+        (vbox 0 0 0 1 0
+		(hbox 0 1 0 1 0
+
+			(toolbar
+
+				(toolbar_togglebutton true "point.png" "Points" 
+					"Point render mode"		eEvent	eRenderVertex)
+
+				(toolbar_togglebutton true "wireframe.png" "Wireframe" 
+					"Wireframe render mode"		eEvent	eRenderWireframe)
+
+				(toolbar_togglebutton false "normals.png" "Normals" 
+					"Normals render mode"		eEvent	eRenderNormals)
+
+				(toolbar_togglebutton true "solid.png" "Faces"
+					"Solid face render mode"		eEvent	eRenderFace)
+
+				(toolbar_togglebutton false "texture.png" "Texture" 
+					"Texture used when rendering"	eEvent	eRenderTexture)
+
+				(toolbar_togglebutton false "light.png" "Light" 
+					"Light used when rendering"		eEvent	eRenderLighting)
+
+				(toolbar_togglebutton false "patch.png" "Patch"
+					"Render/enable patch tool"	eEvent	eRenderPatch)
+
+				;(toolbar_togglebutton false "mesh.png" "BoundingBox"
+				;	"Render Bounding boxes"	eEvent	eRenderBbox)
+
+				(toolbar_togglebutton true "bone-tag.png" "Bones"
+					"Show bones when rendering"		eEvent	eRenderSkeleton)
+
+				(toolbar_togglebutton true "grid.png" "Grid"
+					"Toggle plane grid rendering"	eEvent eRenderGrid) ) 
+
+
+				;; This really adjusts view height ( removing feature soon )
+				;(label "  ZoomLevel "  0.0 0.4) 
+				;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
+
+				(label "  Zoom "  0.0 0.4) 
+				(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
+
+				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				(hbox 1 0 0 1 0
+					(label "CursorAxis"  0.0 0.5)
+					(optionmenu		eEvent	eNone
+						(menu_item	"  X"	eEvent	FREYJA_MODE_AXIS_X)
+			  			(menu_item	"  Y"	eEvent	FREYJA_MODE_AXIS_Y)
+			  			(menu_item	"  Z"	eEvent	FREYJA_MODE_AXIS_Z)))
+
+				 )))
+
+		;; Toolbar Edit
+	    (handlebox 1 
+        (vbox 0 0 0 1 0
+		(hbox 0 1 0 1 0
+
+			(toolbar
+				(toolbar_togglebutton false "deform.png" "Skeletal deform"
+					"Deform using skeleton"		eEvent	eSkeletalDeform) ) )))
+
+		) ;; End toolbars
+
+
+		;; Main window body
+		(hbox 0 1 1 1 1
+
+			;; GL window
+			(gl_widget WIDTH HEIGHT)
+
+			;; Sidebar notebook in non-expanding container
+			(handlebox 1   ;; (hbox 0 1 0 1 1
+			(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eEvent
+
+				;; Mesh tab
+				(tab "Mesh" eModeModel
+
+					(hbox 0 0 0 1 0 
+						(toolbar 
+							(toolbar_button "gtk-new" "New"	
+								"New model"		eEvent eNewFile)
+
+							(toolbar_button "gtk-open" "Open..."
+								"Open model..."	eEvent  eOpenFile)
+
+							(toolbar_button "gtk-save-as" "Save As..."
+								"Save model as..."		eEvent  eSaveAsFile)
+
+							(toolbar_togglebutton true
+								"cursor-select.png" "Select" "Select by pointer"
+								eEvent eSelect)
+
+							(toolbar_togglebutton false
+								"bbox-select.png" "Select" "Select by bounding box" 
+								eEvent eSelectionByBox)
+
+							(toolbar_togglebutton false 
+								"clone.png" "CopyM"	"Copy multiple objects" 
+								eEvent eCopyAppendMode)
+
+							(toolbar_button
+								"split.png" "Split" "Split object" 
+								eEvent eSplitObject)
+
+							(toolbar_button
+								"texmap.png" "TexelGen" "Texture Map, XY Plane"
+								eEvent eTextureMapProjection)))
+
+					;; Seperator
+					(hbox 1 0 0 1 0 (hsep))
+
+					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					(hbox 1 0 0 1 0
+						(label "Select edit plane: "  0.0 0.5)
+						(optionmenu		eEvent	eNone
+							(menu_item	"Front               "	eEvent	FREYJA_MODE_PLANE_XY)
+				  			(menu_item	"Side"	eEvent	FREYJA_MODE_PLANE_YZ)
+				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)))
+
+
+					;; Seperator
+					(hbox 1 0 0 1 0 (hsep))
+
+					;; Object operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					(hbox 0 0 0 1 0
+						(label "Object operations" 0.0 0.5))
+					(hbox 1 0 0 1 0 (hsep))
+					(hbox 1 0 0 1 0
+						(label "Current Mesh  #"  0.0 0.5) 
+						(spinbutton 0 0 100 eMeshIterator))
+					(hbox 1 0 0 1 0
+						(label "Current Group #" 0.0 0.5) 
+						(spinbutton 0 0 500 eGroupIterator))
+					(hbox 1 0 0 1 0
+						(label "Current Bone #" 0.0 0.5) 
+						(spinbutton 0 0 100 eBoneIterator))
+					(hbox 1 0 0 1 0
+						(label "Current Face #" 0.0 0.5) 
+						(spinbutton 0 0 500 ePolygonIterator))
+
+					;(hbox 1 0 0 1 0
+					;	(button "New"     eEvent  eAddObject)
+					;	(button "Delete"  eEvent  eDelete))
+
+					(hbox 1 0 0 1 0 (hsep))
+
+					(hbox 1 0 0 1 0
+						(label "Transform: " 0.0 0.5)
+
+						(optionmenu		eEvent	eTransformMenu
+							(menu_item	"Scene"		eEvent eTransformScene)
+							(menu_item	"Mesh"		eEvent eTransformMesh)
+							(menu_item	"Vertex"	eEvent eTransformPoint)
+							(menu_item	"Face"		eEvent eTransformFace)
+							(menu_item	"Bone"		eEvent eTransformBone)
+							(menu_item	"Group"		eEvent eTransformGroup)
+							(menu_item	"Vertex List"	eEvent eTransformSelectedVertices)
+							(menu_item	"MeshPivot"	eEvent eTransformMeshPivot))
+
+						(optionmenu		eEvent	eObjectMenu
+							(menu_item "Move"    eEvent	eMoveObject)
+				  			(menu_item "Rotate"  eEvent	eRotateObject)
+				  			(menu_item "Scale"   eEvent	eScaleObject)
+				  			(menu_item "Select"  eEvent	eSelect)
+				  			(menu_item "Unselect"  eEvent	eUnselect)))
+
+					(hbox 1 0 0 1 0 (hsep))
+
+					;; Generic Transform box
+					(hbox 1 1 0 1 1
+						(button "Move" eEvent eMove)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_X)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Y)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Z))
+
+					(hbox 1 1 0 1 1
+						(button "Rotate" eEvent eRotate)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_X)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Y)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Z))
+
+					(hbox 1 1 0 1 1
+						(button "Scale" eEvent eScale)
+						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_X)
+						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Y)
+						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Z))
+
+					;; Seperator
+					(hbox 1 0 0 1 0 (hsep))
+
+					(hbox 1 0 0 1 0 
+						(button "Mesh from Patch"  eEvent eGeneratePatchMesh))
+
+					;; Animation ;;;;;;;;;;;;;;;
+
+					;; Seperator
+					(hbox 1 0 0 1 0 (hsep))
+
+					(hbox 0 0 0 1 0
+						(label "Merge Animations with Mesh" 0.0 0.5))
+
+					(hbox 1 0 0 1 0
+						(label "KeyFrame #" 0.0 0.5) 
+						(spinbutton 0 0 500 eGroupIterator))
+
+					(animation_tab_hack)
+
+			)  ;; end tab
+
+
+			;; UV editor tab
+			(tab "UV" eModeSkin
+				(hbox 1 0 0 1 0 
+					(togglebutton "Merge Texcoords" 0 eEvent eTexcoordCombine))
+				(hbox 1 0 0 1 0
+					(button "Set Mesh Material" eEvent eSetMeshTexture))
+					 
+				(hbox 1 0 0 1 0 
+					(label "Material index: " 0.0 0.5) 
+					(spinbutton 0 0 100 503))
+
+				(hbox 1 0 0 1 0
+					(label "Face index:" 0.0 0.5) 
+					(spinbutton 0 0 100000 ePolygonIterator))
+
+				(hbox 1 0 0 1 0
+					(label "Mesh index: " 0.0 0.5) 
+					(spinbutton 0 0 1000 eMeshIterator))
+
+				;; Per face editing
+				(hbox 1 1 0 1 1	(label "Face operations" 0.0 0.5))
+				(hbox 1 1 0 1 1	(hsep))
+				(hbox 1 0 0 1 0
+					(vbox 1 0 0 1 0
+						(button "Set material" eEvent eSetPolygonTexture)
+						(button "Generate UVMap" eEvent eTmpUVMapOn)
+						(button "Clear UVMap" eEvent eTmpUVMapOff)
+						(button "PolyMap"	eEvent	ePolyMapTexturePolygon)
+						(button "Mirror X" eEvent eMirrorUV_X)
+						(button "Mirror Y" eEvent eMirrorUV_Y)
+						(button "Flag alpha" eEvent eCurrentFaceFlagAlpha))))
+
+
+			  (tab "Animation" eModeAnimation
+
+				(hbox 1 0 0 1 0 
+					(toolbar
+						(toolbar_button "gtk-new" "New"	
+							"New document"		eEvent eNewFile)
+
+						(toolbar_button "gtk-open" "Open..."
+							"Open document..."	eEvent  eOpenFile)
+
+						(toolbar_button "gtk-save-as" "Save"
+							"Save document"		eEvent  eSaveFile)))
+
+					;(hbox 1 0 0 1 0 
+					;	(label "Background color" 0.0 0.5)
+					;	(colorbutton 1 eColorBackground))
+					;
+					;(hbox 1 0 0 1 0 
+					;	(label "Grid color" 0.0 0.5)
+					;	(colorbutton 1 eColorGrid))
+
+					(hbox 1 0 0 1 0
+						(label "Mesh Frame/Group #" 0.0 0.5) 
+						(spinbutton 0 0 500 eGroupIterator))
+
+
+
+					(animation_tab_hack)
+
+					(hbox 1 0 0 1 0 
+						(label "Select Bone" 0.0 0.5)
+						(spinbutton 0 0 200 eBoneIterator))
+
+					(hbox 1 0 0 1 0
+						(label "Bone Name: " 0.0 0.5) 
+						(textbox eSetCurrentBoneName))
+
+					;(hbox 1 0 0 1 0
+					;	(label "Bone Parent: " 0.0 0.5) 
+					;	(spinbutton 0 0 200 eSetCurrentBoneParent))
+
+					(hbox 1 0 0 1 0 
+						(label "To be replaced with transformbox:" 0.0 0.5))
+
+					;; Replace usage with generic transform box later
+					(hbox 1 0 0 1 0 
+						(label "Translate" 0.0 0.5) 
+						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 510)
+						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 511)
+						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 512))
+
+					;; Replace usage with generic transform box later
+					(hbox 1 0 0 1 0 
+						(label "Rotate" 0.0 0.5) 
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 520)
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 521)
+						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 522))
+
+				) ;; Tab animation
+
+
+				(tab "Material" eModeMaterial
+
+					(hbox 1 1 0 1 1
+						(toolbar
+							(toolbar_button "gtk-new" "New"
+								"New material"			eEvent	eNewFile)
+							(toolbar_button "gtk-open" "Open"
+								"Open material"			eEvent	eOpenFile)
+							(toolbar_button "gtk-save-as" "Save as..."
+								"Save material as..."	eEvent	eSaveFile))
+
+						(togglebutton "Slot Load" 0 eEvent eMaterialSlotLoadToggle))
+
+
+					;; Material selector / name editor
+					(label "Material Select" 0.0 0.5)
+					(hbox 0 1 0 1 1
+						;;(label "Name" 0.0 0.5)
+						(spinbutton 0 0 1024 eSelectMaterial)
+						(textbox eSetMaterialName))
+
+					;; Texture loader interface
+					(hbox 1 0 0 1 0 (hsep))
+					;(label "Material's Texture" 0.0 0.5)
+					(hbox 0 1 0 1 1
+						;;(label "Texture" 0.0 0.5)
+						(spinbutton 0 0 100 eSetMaterialTexture)
+						(textbox eSetTextureNameA)
+						(togglebutton "Slot" 0 eEvent eTextureSlotLoadToggle)
+						(button "..." eEvent eOpenFileTexture))
+
+					(hbox 1 0 0 1 0 (hsep))
+
+					(hbox 1 1 0 1 1
+						(label "Ambient" 0.0 0.5))
+
+					(hbox 1 1 0 1 1
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 700)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 701)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 702)
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 703)
+						(colorbutton 1 eColorMaterialAmbient))
+
+					(hbox 1 1 0 1 1
+						(label "Diffuse" 0.0 0.5))
+ 
+					(hbox 1 1 0 1 1
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 704)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 705)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 706)
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 707)
+						(colorbutton 1 eColorMaterialDiffuse))
+
+					(hbox 1 1 0 1 1
+						(label "Specular" 0.0 0.5))
+
+					(hbox 1 1 0 1 1
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 708)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 709)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 710)
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 711)
+						(colorbutton 1 eColorMaterialSpecular))
+
+					(hbox 1 1 0 1 1
+						(label "Emissive" 0.0 0.5))
+
+					(hbox 1 1 0 1 1
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 712)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 713)
+						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 714)
+						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 715)
+						(colorbutton 1 eColorMaterialEmissive))
+
+					(hbox 1 1 0 1 1
+						(label "Shininess" 0.0 0.5)
+						(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 716))
+
+					(hbox 1 0 0 1 0
+						(label "Source" 0.0 0.5))
+
+					(hbox 1 0 0 1 0
+						(optionmenu eEvent 780
+							(menu_item "GL__ZERO"
+								eEvent 1000)
+							(menu_item "GL__ONE"
+								eEvent 1001)
+							(menu_item "GL__SRC__COLOR"
+								eEvent 1002)
+							(menu_item "GL__ONE__MINUS__SRC__COLOR"
+								eEvent 1003)
+							(menu_item "GL__DST__COLOR"
+								eEvent 1004)
+							(menu_item "GL__ONE__MINUS__DST__COLOR"
+								eEvent 1005)
+							(menu_item "GL__SRC__ALPHA"
+								eEvent 1006)
+							(menu_item "GL__ONE__MINUS__SRC__ALPHA"
+								eEvent 1007)
+							(menu_item "GL__DST__ALPHA"
+								eEvent 1008)
+							(menu_item "GL__ONE__MINUS__DST__ALPHA"
+								eEvent 1009)
+							(menu_item "GL__SRC__ALPHA__SATURATE"
+								eEvent 1010)
+							(menu_item "GL__CONSTANT__COLOR"
+								eEvent 1011)
+							(menu_item "GL__ONE__MINUS__CONSTANT__COLOR"
+								eEvent 1012)
+							(menu_item "GL__CONSTANT__ALPHA"
+								eEvent 1013)
+							(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" 
+								eEvent 1014)))
+
+					(hbox 1 0 0 1 0
+						(label "Dest" 0.0 0.5))
+
+					(hbox 1 0 0 1 0
+						(optionmenu eEvent 781
+							(menu_item "GL__ZERO" 
+								eEvent 2000)
+							(menu_item "GL__ONE"
+								eEvent 2001)
+							(menu_item "GL__SRC__COLOR" 
+								eEvent 2002)
+							(menu_item "GL__ONE__MINUS__SRC__COLOR"
+								eEvent 2003)
+							(menu_item "GL__DST__COLOR"
+								eEvent 2004)
+							(menu_item "GL__ONE__MINUS__DST__COLOR"
+								eEvent 2005)
+							(menu_item "GL__SRC__ALPHA"
+								eEvent 2006)
+							(menu_item "GL__ONE__MINUS__SRC__ALPHA"
+								eEvent 2007)
+							(menu_item "GL__DST__ALPHA"
+								eEvent 2008)
+							(menu_item "GL__ONE__MINUS__DST__ALPHA"
+								eEvent 2009)
+							(menu_item "GL__SRC__ALPHA__SATURATE"
+								eEvent 2010)
+							(menu_item "GL__CONSTANT__COLOR"
+								eEvent 2011)
+							(menu_item "GL__ONE__MINUS__CONSTANT__COLOR"
+								eEvent 2012)
+							(menu_item "GL__CONSTANT__ALPHA"
+								eEvent 2013)
+							(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" 
+								eEvent 2014)))
+
+					(hbox 1 0 0 1 0
+						(vbox 1 0 0 1 0
+							(togglebutton "Texture" 0 eEvent eMaterialTex)
+							(togglebutton "Detail texture" 0 eEvent eMaterialMultiTex))
+
+					(vbox 1 0 0 1 0
+						(togglebutton "GL_NORMALIZE" 0 eEvent eOpenGLNormalize)
+						(togglebutton "GL_BLEND" 0 eEvent eOpenGLBlend))))
+
+)
+)
+)
+
+	;; Animation bar
+   	(handlebox 1 
+		(vbox 0 0 0 1 0	
+			(hbox 0 1 0 1 0
+				(hslider eAnimationSlider 0 100)
+					(toolbar
+						(toolbar_button "gtk-goto-first" "Prev"	
+									"Previous" eEvent eAnimationPrev)
+						(toolbar_button "gtk-go-forward" "Play"	
+									"Play" eEvent eAnimationPlay)
+						(toolbar_button "gtk-stop" "Stop"	
+									"Stop" eEvent eAnimationStop)
+						(toolbar_button "gtk-goto-last" "Next"	
+									"Next" eEvent eAnimationNext) )
+			) ;; hbox
+		) ;; vbox
+	) ;; handlebox
+
+
+	) ;; vbox
+)  ;; Window
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Dialogs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(dialog "Freyja :: Help" eHelpDialog 0
+	(vbox 0 0 0 0 0
+		(label2 "Use the object drop down to select edit mode.
+
+If you'd like to work on documentation email me. 
+
+Send bug reports and feature requests:
+<small>  · http://icculus.org/freyja
+  · irc://irc.freenode.net/#freyja
+  · mongoose@icculus.org</small>")))
+
+
+(dialog "Freyja :: About" eAboutDialog 0
+	(vbox 0 0 0 0 0
+		(hbox 1 0 0 1 0
+			(icon "freyja.png" IconSize_Dialog))
+		(hbox 1 0 0 1 0 
+			(label2 "                <big>Freyja 0.3 Chimera</big>
+ Freyja is an Open Source 3d modeling system.
+   This build is a mix of stable and unstable builds.
+   It will replace stable soon.
+ <small>Freyja Copyright © 2002-2004 by Terry 'Mongoose' Hendrix II</small>"))))
+
+
+(dialog "Freyja :: Preferences" ePreferencesDialog 0
+	(vbox 0 0 0 0 0
+		(hbox 1 0 0 1 0
+			(icon "freyja.png" IconSize_Dialog))
+
+		;;(hbox 1 0 0 1 0
+		;;	(label "Near Height "  0.0 0.5) 
+		;;	(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
+
+		(hbox 1 0 0 1 0
+			(label "Render scaling"  0.0 0.5) 
+			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom))
+
+		(hbox 1 0 0 1 0
+			(label "Polygon # of sides "  0.0 0.5) 
+			(spinbutton 0 3 6 ePolygonSize))
+
+		(hbox 1 0 0 1 0
+			(label "GenMesh height "  0.0 0.5) 
+			(spinbutton2 8.0 1.0 100.0 0.01 0.1 0.1 3 eGenMeshHeight))
+
+		(hbox 1 0 0 1 0
+			(label "GenMesh # of partitions "  0.0 0.5) 
+			(spinbutton 16 3 32 eGenMeshCount))
+
+		(hbox 1 0 0 1 0
+			(label "GenMesh # of segments "  0.0 0.5) 
+			(spinbutton 4 3 32 eGenMeshSegements))
+
+		(hbox 1 0 0 1 2 
+			(label "Background color " 0.0 0.5)
+			(colorbutton 1 eColorBackground))
+
+		(hbox 1 0 0 1 2 
+			(label "Grid color " 0.0 0.5)
+			(colorbutton 1 eColorGrid))
+
+		(hbox 1 0 0 1 2 
+			(label "Vertex color " 0.0 0.5)
+			(colorbutton 1 eColorVertex))
+
+		(hbox 1 0 0 1 2 
+			(label "Vertex highlight " 0.0 0.5)
+			(colorbutton 1 eColorVertexHighlight))
+
+		(hbox 1 0 0 1 2 
+			(label "Wireframe color " 0.0 0.5)
+			(colorbutton 1 eColorMesh))
+
+		(hbox 1 0 0 1 2 
+			(label "Wireframe highlight " 0.0 0.5)
+			(colorbutton 1 eColorMeshHighlight))
+		
+		(hbox 1 1 0 1 1	(hsep))
+
+		(hbox 1 1 0 1 1
+			(label "Light" 0.0 0.5)
+			(label "Ambient" 0.0 0.5)
+			(label "Diffuse" 0.0 0.5)
+			(label "Specular" 0.0 0.5))
+		(hbox 1 1 0 1 1
+			;(label " " 0.0 0.5)
+			(spinbutton 0 0 100 eSelectLight)
+			(colorbutton 1 eColorLightAmbient)
+			(colorbutton 1 eColorLightDiffuse)
+			(colorbutton 1 eColorLightSpecular))
+		(hbox 1 1 0 1 1
+			;(label "Light0" 0.0 0.5)
+			(spinbutton 0.0 -10000.0 10000.0 800)
+			(spinbutton 0.0 -10000.0 10000.0 801)
+			(spinbutton 0.0 -10000.0 10000.0 802))
+
+)) ;; Preferences dialog
+
+
+;(dialog "Freyja :: 趣味" ePreferencesDialog 0
+;	(vbox 0 0 0 0 0
+;
+;		(hbox 1 0 0 1 0 
+;			(label "遠景の呈色" 0.0 0.5)
+;			(colorbutton 1 eColorBackground))
+;
+;		(hbox 1 0 0 1 0 
+;			(label "基底の呈色" 0.0 0.5)
+;			(colorbutton 1 eColorGrid))
+;
+;			(hbox 1 0 0 1 0 
+;				(label "天頂の呈色" 0.0 0.5)
+;				(colorbutton 1 eColorVertex))
+;
+;			(hbox 1 0 0 1 0 
+;				(label "現行天頂の呈色" 0.0 0.5)
+;				(colorbutton 1 eColorVertexHighlight))
+;
+;			(hbox 1 0 0 1 0 
+;				(label "Meshの呈色" 0.0 0.5)
+;				(colorbutton 1 eColorMesh))
+;
+;			(hbox 1 0 0 1 0 
+;				(label "現行Meshの呈色" 0.0 0.5)
+;				(colorbutton 1 eColorMeshHighlight))))
+;
+
+
+;; Custom colors -- After widgets so widgets can be updated to match 
+(color	eColorBackground		0.5	0.5	0.5	1.0) 
+(color	eColorGrid				0.4	0.4	0.4	0.9)
+(color	eColorMesh				0.0	0.0	0.0	1.0)
+(color	eColorMeshHighlight		0.2	0.2	1.0	1.0)
+(color	eColorVertex			0.2	1.0	1.0	1.0)
+(color	eColorVertexHighlight	1.0	0.0	0.86 1.0)
+
+

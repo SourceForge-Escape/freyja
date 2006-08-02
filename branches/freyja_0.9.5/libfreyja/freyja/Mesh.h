@@ -160,7 +160,7 @@ public:
 
 	Face() :
 		mMaterial(0), // Always have a valid material
-		mFlags(0x0),
+		mFlags(fNone),
 		mSmoothingGroups(0), // Bitmap of groups 
 		mIndices()
 	{
