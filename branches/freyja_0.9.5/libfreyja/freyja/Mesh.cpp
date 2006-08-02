@@ -307,8 +307,8 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 
 bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 {
-	Vec3 center, normal, p;
-	vec_t bestDist = 99999.0f;
+	Vec3 center, normal;
+	vec_t t, bestDist = 99999.0f;
 	vertex0 = -1;
 	
 	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
@@ -324,15 +324,13 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 
 		center = GetVertexPosition(i);
 		
-		bool intersect = r.IntersectSphere(center, radius, p);
+		bool intersect = r.IntersectSphere(center.mVec, radius, t);
 				
 		if (intersect)
 		{
-			vec_t dist = helDist3v(r.mOrigin.mVec, center.mVec);
-
-			if (vertex0 == -1 || dist < bestDist)
+			if (vertex0 == -1 || t < bestDist)
 			{
-				bestDist = dist;
+				bestDist = t;
 				vertex0 = i;
 			}
 		}

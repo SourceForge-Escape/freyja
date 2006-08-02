@@ -58,8 +58,9 @@ Ray::~Ray()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-bool Ray::IntersectSphere(Vec3 center, vec_t radius, Vec3 &hit)
+bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 {
+	Vec3 center(center3);
 	Vec3 l = center - mOrigin;
 	Vec3 d(mDir);
 	d.normalize();
@@ -77,7 +78,6 @@ bool Ray::IntersectSphere(Vec3 center, vec_t radius, Vec3 &hit)
 		return false;
 
 	vec_t q = sqrt(r2 - m2);
-	vec_t t; // FIXME: Use this to find hit 
 
 	if (l2 > r2) 
 		t = s - q;
