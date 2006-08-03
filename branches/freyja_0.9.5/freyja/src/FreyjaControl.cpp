@@ -307,32 +307,6 @@ bool FreyjaControl::handleRecentFile(unsigned int value)
 }
 
 
-void FreyjaControl::updateDisplay()
-{
-	if (mRender)
-	{
-		mRender->display();
-	}
-	else
-	{
-		freyja_print("!updateDisplay> Call to NULL Renderer\n");
-	}
-}
-
-
-void FreyjaControl::resizeDisplay(unsigned int width, unsigned int height)
-{
-	if (mRender)
-	{
-		mRender->resizeContext(width, height);
-	}
-	else
-	{
-		freyja_print("!resizeDisplay> Call to NULL Renderer\n");
-	}
-}
-
-
 void FreyjaControl::addRecentFilename(const char *filename)
 {
 	unsigned int i, l, n;
@@ -1990,19 +1964,19 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case FREYJA_MODE_PLANE_XY:
-		freyja_print("Plane XY");      
+		freyja_print("Plane XY");
 		mModel->setCurrentPlane(PLANE_XY);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_XZ:
-		freyja_print("Plane XZ");      
+		freyja_print("Plane XZ");  
 		mModel->setCurrentPlane(PLANE_XZ);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_YZ:
-		freyja_print("Plane ZY");      
+		freyja_print("Plane ZY");
 		mModel->setCurrentPlane(PLANE_ZY);
 		freyja_event_gl_refresh();
 		break;
