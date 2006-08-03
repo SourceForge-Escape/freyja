@@ -88,7 +88,14 @@ void mglDrawBbox(const vec3_t min, const vec3_t max,
 
 void mglDrawSelectBox(const vec3_t min, const vec3_t max, const vec4_t color);
 
-void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max);
+void mglDrawCone(vec3_t origin, vec_t height, uint32 count);
+
+void mglDrawEditorAxis();
+
+void mglDrawAxisWithCones(const vec_t min, const vec_t mid, const vec_t max,
+						  uint32 count);
+
+void mglDrawAxisWithLines(const vec_t min, const vec_t mid, const vec_t max);
 
 void mglDraw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max);
 

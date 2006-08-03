@@ -115,10 +115,10 @@ class FreyjaControl
 
 
 	////////////////////////////////////////////////////////////
-	// Public Accessors
+	// Public Properties
 	////////////////////////////////////////////////////////////
 
-	float getZoom();
+	float GetZoom();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns current viewing zoom of scene
@@ -128,6 +128,24 @@ class FreyjaControl
 	 * 2000.08.25: 
 	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
+
+
+	void SetZoom(float zoom);
+	/*------------------------------------------------------
+	 * Pre  : <zoom> is a number greater than 0.0
+	 * Post : Sets current viewing zoom of scene
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25: 
+	 * Mongoose - Created from GooseEgg
+	 ------------------------------------------------------*/
+
+
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
 
 	void takeScreenshot(const char *filename, 
 						uint32 width, uint32 height);
@@ -149,14 +167,6 @@ class FreyjaControl
 	 *        as if it was the entire window/context
 	 ------------------------------------------------------*/
 
-
-	int32 loadTextureBuffer(unsigned char *image, 
-							uint32 width, uint32 height, uint32 bpp,
-							Texture::ColorMode type);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
 
 	void addRecentFilename(const char *filename);
 	/*------------------------------------------------------
@@ -248,16 +258,6 @@ class FreyjaControl
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setZoom(float zoom);
-	/*------------------------------------------------------
-	 * Pre  : ZOOM is a number greater than 0.0
-	 * Post : Sets current viewing zoom of scene
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25: 
-	 * Mongoose - Created from GooseEgg
-	 ------------------------------------------------------*/
 
 	bool mouseEvent(int btn, int state, int mod, int x, int y);
 	/*--------------------------------------------
@@ -466,7 +466,6 @@ private:
 	 * Mongoose - Created from old stand alone function
 	 ------------------------------------------------------*/
 
-	void getFreeWorldFromScreen(int x, int y, vec3_t p);
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 

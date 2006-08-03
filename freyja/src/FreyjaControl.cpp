@@ -19,7 +19,6 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include <assert.h>
 #include <stdlib.h> 
 #include <stdio.h> 
 #include <math.h> 
@@ -56,47 +55,6 @@ void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern Freyja3dCursor gFreyjaCursor;
 
-String TransformModeToString(FreyjaModel::transform_t t)
-{
-	String s;
-
-	switch (t)
-	{
-	case FreyjaModel::TransformMesh:
-		s = String("TransformMesh");
-		break;
-
-	case FreyjaModel::TransformVertexFrame:
-		s = String("TransformVertexFrame");
-		break;
-
-	case FreyjaModel::TransformScene:
-		s = String("TransformScene");
-		break;
-
-	case FreyjaModel::TransformBone:
-		s = String("TransformBone");
-		break;
-
-	case FreyjaModel::TransformPoint:
-		s = String("TransformPoint");
-		break;
-
-	case FreyjaModel::TransformSelectedVertices:
-		s = String("TransformSelectedVertices");
-		break;
-
-	case FreyjaModel::TransformFace:
-		s = String("TransformFace");
-		break;
-
-	default:
-		s = String("Unknown");		
-	}
-
-	return s;
-}
-
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -104,27 +62,19 @@ String TransformModeToString(FreyjaModel::transform_t t)
 
 FreyjaControl::FreyjaControl(Resource *r)
 {
-	unsigned int width = 740;
-	unsigned int height = 560;
-
-	mResource = r;
-
 	/* Hook up the backend and user interface */
+	mResource = r;
 	mModel = new FreyjaModel();
 	mRender = new FreyjaRender();
 	mRender->setSceneData(mModel);
 
+	ASSERT_MSG(mModel, "FreyjaModel Singleton control failure");
+	ASSERT_MSG(mRender, "FreyjaRender Singleton control failure");
+
 	if (!mModel || !mRender)
 	{
-		freyja_print("FreyjaControl::FreyjaControl> Assertion failure");
-	
-		if (!mRender)
-			freyja_print("FreyjaControl::FreyjaControl> FreyjaRender = 0x0");
-
-		if (!mModel)
-			freyja_print("FreyjaControl::FreyjaControl> FreyjaModel = 0x0");
-
-		printf("Please read ~/.freyja/Freyja.log for errors.\n");
+		
+		SystemIO::Print("Please read ~/.freyja/Freyja.log for errors.\n");
 		exit(-1);
 	}
 		
@@ -139,11 +89,13 @@ FreyjaControl::FreyjaControl(Resource *r)
 	mTransformMode = FreyjaModel::TransformScene;
 	mLastEvent = eEvent;
 	mLastCommand = eSelect;
-	setZoom(1.0f);
+	SetZoom(1.0f);
 	mFullScreen = false;
 	mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 
-	/* Mongoose 2002.02.23, Tell renderer to start up */
+	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
+	uint32 width = 740;
+	uint32 height = 560;
 	mRender->initContext(width, height, true);
 	mRender->resizeContext(width, height);
 
@@ -171,15 +123,31 @@ FreyjaControl::~FreyjaControl()
 }
 
 
+
 ////////////////////////////////////////////////////////////
-// Public Accessors
+// Public Properties
 ////////////////////////////////////////////////////////////
 
-float FreyjaControl::getZoom()
+float FreyjaControl::GetZoom()
 {
 	return mRender->getZoom();
 }
 
+
+void FreyjaControl::SetZoom(float zoom)
+{
+	ASSERT_MSG(zoom > 0.0f, "You can't have a zoom less than 0.0f");
+
+	freyja_event_notify_observer1f(eZoom, zoom);
+	mRender->setZoom(zoom);
+	freyja_print("Zoom set to %f", mRender->getZoom());
+}
+
+
+
+////////////////////////////////////////////////////////////
+// Public Accessors
+////////////////////////////////////////////////////////////
 
 void FreyjaControl::takeScreenshot(const char *filename, 
 								   uint32 width, uint32 height)
@@ -339,17 +307,6 @@ void FreyjaControl::addRecentFilename(const char *filename)
 	{
 		delete [] filename2;
 	}
-}
-
-
-void FreyjaControl::setZoom(float zoom)
-{
-	assert(zoom > 0.0f);
-
-	freyja_event_notify_observer1f(eZoom, zoom);
-
-	mRender->setZoom(zoom);
-	freyja_print("Zoom set to %f", mRender->getZoom());
 }
 
 
@@ -639,7 +596,7 @@ bool FreyjaControl::event(int event, vec_t value)
 
 
 	case eZoom:
-		setZoom(value);//freyja_event_get_float(eZoom));
+		SetZoom(value);//freyja_event_get_float(eZoom));
 		freyja_print("Zoom %f", mRender->getZoom());
 		freyja_event_gl_refresh();
 		break;
@@ -1691,7 +1648,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eZoom:
-		setZoom(freyja_event_get_float(eZoom));
+		SetZoom(freyja_event_get_float(eZoom));
 		freyja_event_gl_refresh();
 		break;
 
@@ -2138,78 +2095,6 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 }
 
 
-void FreyjaControl::getFreeWorldFromScreen(int xx, int yy, vec3_t xyz)
-{
-	vec_t x = xx, y = yy, width, height, invz, fs;
-	vec3_t scroll, rotate, xy, yz, xz;
-
-
-	width = mRender->getWindowWidth();
-	height = mRender->getWindowHeight();
-	mModel->getSceneTranslation(scroll);
-	mRender->getRotation(rotate);
-
-	invz = (1.0 / mRender->getZoom());
-	fs = (40.0 * invz) / height;  // fov 40?
-
-	x = (x - width / 2.0) * fs;
-	y = -(y - height / 2.0) * fs;
-
-	xy[0] = x - scroll[0] * invz;
-	xy[1] = y - scroll[1] * invz;
-	xy[2] = xyz[2]; //0.0f;
-
-	xz[0] = x - scroll[0] * invz;
-	xz[2] = y - scroll[2] * invz;
-	xz[1] = xyz[1]; //0.0f;
-
-	yz[2] = y - scroll[2] * invz;
-	yz[1] = x - scroll[1] * invz;
-	yz[0] = xyz[0]; //0.0f;
-
-
-	// FIXME only considers up Y atm
-	if (rotate[1] < 90) // ~0
-	{
-		xyz[0] = xy[0];
-		xyz[1] = xy[1];
-		xyz[2] = xy[2];
-	}
-	else if (rotate[1] >= 260) // ~270
-	{
-		xyz[0] = yz[0];
-		xyz[1] = yz[2] + 18;
-		xyz[2] = -(yz[1] - 18);
-	}
-	else if (rotate[1] >= 170) // ~180
-	{
-		xyz[0] = -xy[0];
-		xyz[1] = xy[1];
-		xyz[2] = xy[2];
-	}
-	else if (rotate[1] >= 60) // ~90
-	{
-		xyz[0] = yz[0];
-		xyz[1] = yz[2] + 18;
-		xyz[2] = yz[1] - 18;
-	}
-	else if (rotate[1] >= 40) // ~45
-	{
-		xyz[0] = xy[0]/2 + yz[0]/2;
-		xyz[1] = xy[1]/2 + (yz[2] + 18)/2;
-		xyz[2] = xy[2]/2 + (yz[1] - 18)/2;
-	}
-	else // FIXME
-	{
-		xyz[0] = xy[0];
-		xyz[1] = xy[1];
-		xyz[2] = xy[2];
-	}
-
-	//printf("r %f\n", rotate[1]);
-}
-
-
 bool FreyjaControl::motionEvent(int x, int y)
 {
 	static int old_y = 0, old_x = 0;
@@ -2426,7 +2311,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			Vec3 a, b, c, d, tuv, p = gFreyjaCursor.mPos;
 			vec_t min = gCursorDrawSz[0];
 			vec_t mid = gCursorDrawSz[1] - 1.0f;
-			vec_t max = gCursorDrawSz[2] + 1.0f;
+			//vec_t max = gCursorDrawSz[2] + 1.0f;
 			bool picked = false;
 
 			switch (mModel->getCurrentPlane())
@@ -3093,7 +2978,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 	default:
 		{
 			String s;
-			s = TransformModeToString((FreyjaModel::transform_t)mTransformMode);
+			s = FreyjaModel::TransformModeToString((FreyjaModel::transform_t)mTransformMode);
 			freyja_print("UnselectObject '%s' not supported.", s.GetCString());
 			MARK_MSGF("Case '%s' not supported", s.GetCString());
 		}
@@ -3211,7 +3096,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 	default:
 		{
 			String s;
-			s = TransformModeToString((FreyjaModel::transform_t)mTransformMode);
+			s = FreyjaModel::TransformModeToString((FreyjaModel::transform_t)mTransformMode);
 			freyja_print("SelectObject '%s' not supported.", s.GetCString());
 			MARK_MSGF("Case '%s' not supported", s.GetCString());
 		}
@@ -3288,11 +3173,11 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		else
 		{
 			{
-				freyjaGetVertexXYZ3fv(mModel->getCurrentVertexIndex(),
+				freyjaGetVertexXYZ3fv(mModel->getCurrentVertex(),
 									  gFreyjaCursor.mPos.mVec);
 				FreyjaStateTransform *state = new
 				FreyjaStateTransform(fTransformVertex, fTranslate,
-									 mModel->getCurrentVertexIndex(),
+									 mModel->getCurrentVertex(),
 									 gFreyjaCursor.mPos.mVec);
 				gFreyjaCursor.ChangeState(state, Freyja3dCursor::Translation);
 			}
@@ -3633,7 +3518,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 							  freyja_plane_t plane) 
 { 
 	vec3_t xyz;
-	unsigned int master_tag, i;
+	unsigned int i;//, master_tag;
 	static float xxx, yyy;
 
 
@@ -3667,21 +3552,10 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	switch(mEventMode)
 	{
 	case modeMove:
-		//if (mXYZMouseState == 0)
-		//{
 		xxx = xx;  yyy = yy;
 		freyja_print("! store state: %f, %f", xxx, yyy);
-		mModel->VertexSelect(xx, yy);
-
-		if (FreyjaRender::mPatchDisplayList)
-			mModel->selectPatchControlPoint(xx, yy);
-
 		mXYZMouseState = 1;
-		//}
-		//else
-		//{
-		//	mXYZMouseState = 0;
-		//}
+		//mModel->VertexSelect(xx, yy);
 		break;
 
 	case VERTEX_COMBINE:
@@ -3704,27 +3578,19 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		else
 			mXYZMouseState = 0;
       break;
-	case POINT_DEL_MODE:
-		mModel->VertexSelect(xx, yy);
-		mModel->VertexDelete();
-		break;
 	case BONE_CONNECT_MODE:
-		master_tag = mModel->getCurrentBone();
-		mModel->selectBone(xx, yy);
-		mModel->connectBone(master_tag, mModel->getCurrentBone());
-		mModel->setCurrentBone(master_tag);
+		MARK_MSGF("FIXME");
+		//master_tag = mModel->getCurrentBone();
+		//mModel->selectBone(xx, yy);
+		//mModel->connectBone(master_tag, mModel->getCurrentBone());
+		//mModel->setCurrentBone(master_tag);
 		break;
 	case BONE_DISCONNECT_MODE:
-		master_tag = mModel->getCurrentBone();
-		mModel->selectBone(xx, yy);
-		mModel->removeMeshFromBone(master_tag, mModel->getCurrentBone());
-		mModel->setCurrentBone(master_tag);
-		break;
-	case MESH_MOVE_CENTER:
-		if (mXYZMouseState == 0)
-			mXYZMouseState = 1;
-		else
-			mXYZMouseState = 0;
+		MARK_MSGF("FIXME");
+		//master_tag = mModel->getCurrentBone();
+		//mModel->selectBone(xx, yy);
+		//mModel->removeMeshFromBone(master_tag, mModel->getCurrentBone());
+		//mModel->setCurrentBone(master_tag);
 		break;
 	case POINT_ADD_MODE: 
 		mModel->VertexNew(xx, yy);
@@ -3735,12 +3601,6 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		break;
 	case POLYGON_ADD_MODE:
 		mModel->PolygonAddVertex(xx, yy);
-		break;
-	case POLYGON_DEL_MODE:
-		mModel->PolygonDelVertex(xx, yy);
-		break;
-	case POLYGON_SELECT_MODE:
-		mModel->PolygonSelectVertex(xx, yy);
 		break;
 	default:
 		;

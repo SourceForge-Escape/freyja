@@ -432,9 +432,147 @@ void mglDrawSelectBox(const vec3_t min, const vec3_t max, const vec4_t lineColor
 }
 
 
+// When you just don't want to do things the easy way... manually inlined
+void mglDrawAxisWithCones(const vec_t min, const vec_t mid, const vec_t max,
+						  uint32 count)
+{  
+	if (count < 3)
+		count = 3;
+
+	const float delta = HEL_DEG_TO_RAD(360.0f) * ( 1.0f / (float)count );
+	Vec3 o, point, ith, last;
+	vec_t s, t;
 
 
-void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
+	// X Axis, Red
+	glColor3fv(RED);
+	glBegin(GL_LINES);
+	glVertex3f(-mid, 0.0, 0.0);
+	glVertex3f(mid,  0.0, 0.0);
+	glEnd();
+
+	o = Vec3(mid, 0.0f, 0.0f);
+	point = o;
+	point.mVec[0] += mid+min;
+	glBegin(GL_TRIANGLES);
+	helSinCosf((count-1) * delta, &s, &t);
+	last = Vec3(o.mVec[0], o.mVec[1] + s, o.mVec[2] + t);
+
+	for (uint32 i = 0; i < count; ++i)
+	{ 
+		helSinCosf((float)i * delta, &s, &t);
+
+		ith = Vec3(o.mVec[0], o.mVec[1] + s, o.mVec[2] + t);
+
+		/* Base */
+		glVertex3fv(o.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		/* Cone */
+		glVertex3fv(point.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		last = ith;
+	}
+
+	glEnd();
+
+
+	// Y Axis, Green
+	glColor3fv(GREEN);
+	glBegin(GL_LINES);
+	glVertex3f(0.0, -mid, 0.0);
+	glVertex3f(0.0, mid, 0.0);
+	glEnd();
+
+	o = Vec3(0.0f, mid, 0.0f);
+	point = o;
+	point.mVec[1] += mid+min;
+	glBegin(GL_TRIANGLES);
+	helSinCosf((count-1) * delta, &s, &t);
+	last = Vec3(o.mVec[0] + s, o.mVec[1], o.mVec[2] + t);
+
+	for (uint32 i = 0; i < count; ++i)
+	{ 
+		helSinCosf((float)i * delta, &s, &t);
+
+		ith = Vec3(o.mVec[0] + s, o.mVec[1], o.mVec[2] + t);
+
+		/* Base */
+		glVertex3fv(o.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		/* Cone */
+		glVertex3fv(point.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		last = ith;
+	}
+
+	glEnd();
+
+
+	// Z Axis, Blue
+	glColor3fv(BLUE);
+	glBegin(GL_LINES);
+	glVertex3f(0.0, 0.0, -mid);
+	glVertex3f(0.0, 0.0, mid);
+	glEnd();
+
+	o = Vec3(0.0f, 0.0f, mid);
+	point = o;
+	point.mVec[2] += mid+min;
+	glBegin(GL_TRIANGLES);
+	helSinCosf((count-1) * delta, &s, &t);
+	last = Vec3(o.mVec[0] + s, o.mVec[1] + t, o.mVec[2]);
+
+	for (uint32 i = 0; i < count; ++i)
+	{ 
+		helSinCosf((float)i * delta, &s, &t);
+
+		ith = Vec3(o.mVec[0] + s, o.mVec[1] + t, o.mVec[2]);
+
+		/* Base */
+		glVertex3fv(o.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		/* Cone */
+		glVertex3fv(point.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		last = ith;
+	}
+
+	glEnd();
+}
+
+
+void mglDrawEditorAxis()
+{
+	static int drawList = -1;
+
+	if (drawList == -1)
+	{
+		const vec_t min = 0.3f, mid = 1.2f, max = 0.872f;
+		drawList = glGenLists(1);
+		glNewList(drawList, GL_COMPILE);
+		mglDrawAxisWithCones(min, mid, max, 8);
+		glEndList();
+	}
+	else
+	{
+		glCallList(drawList);
+	}
+}
+
+
+void mglDrawAxisWithLines(const vec_t min, const vec_t mid, const vec_t max)
 {
 	glBegin(GL_LINES);
       
@@ -493,7 +631,7 @@ void mglDrawCone(vec3_t origin, vec_t height, uint32 count)
 	Vec3 point(origin[0], origin[1] + height, origin[2]);
 	Vec3 center(origin[0], origin[1], origin[2]);
 	vec_t x, z;
-	float countf = count;
+	const float delta = HEL_DEG_TO_RAD(360.0f) * ( 1.0f / (float)count );
 
 	
 	if (count < 3)
@@ -501,13 +639,13 @@ void mglDrawCone(vec3_t origin, vec_t height, uint32 count)
 
 	glBegin(GL_TRIANGLES);
 	
-	helSinCosf(360.0f * ((countf-1) / countf), &x, &z);
+	helSinCosf((count-1) * delta, &x, &z);
 	Vec3 ith;
 	Vec3 last(origin[0] + x, origin[1], origin[2] + z);
 
 	for (uint32 i = 0; i < count; ++i)
 	{ 
-		helSinCosf(360.0f * ((float)i / countf), &x, &z);
+		helSinCosf((float)i * delta, &x, &z);
 
 		ith = Vec3(origin[0] + x, origin[1], origin[2] + z);
 
@@ -584,7 +722,8 @@ void mglDraw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max)
 
 
 void mglDraw3dCursorScale(const vec_t min, const vec_t mid, const vec_t max)
-{	glBegin(GL_LINES);
+{
+	glBegin(GL_LINES);
       
 	// X Axis, red
 	glColor3fv(RED);
@@ -695,63 +834,22 @@ void mglDraw3dCursorScale(const vec_t min, const vec_t mid, const vec_t max)
 
 void mglDraw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max)
 {
-	Vec3 o;
-	vec_t h = min;
+	//mglDrawAxisWithCones(min, mid, max, 8);
+	//return;
 
-	o = Vec3(mid, 0.0, 0.0);
-	glColor3fv(RED);
-	mglDrawCone(o.mVec, h, 4);
+	static int drawList = -1;
 
-
-	glBegin(GL_LINES);
-      
-	// X Axis, red
-	glColor3fv(RED);
-	glVertex3f(0.0,  0.0, 0.0);
-	glVertex3f(mid,  0.0, 0.0);
-	//  Y arrowhead
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  min, 0.0);
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max, -min, 0.0);
-	//  Z arrowhead
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  0.0, min);
-	glVertex3f(mid,  0.0, 0.0);
-	glVertex3f(max,  0.0, -min);
-
-
-	// Y Axis, green
-	glColor3fv(GREEN);	
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  0.0, 0.0);	
-	//  X arrowhead		
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(min,  max, 0.0);
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(-min, max, 0.0);
-	//  Z arrowhead
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  max, min);
-	glVertex3f(0.0,  mid, 0.0);
-	glVertex3f(0.0,  max, -min);
-
-      
-	// Z Axis, blue
-	glColor3fv(BLUE);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0,  0.0,  0.0);
-	//  Y arrowhead
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0,  min,  max);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(0.0, -min,  max);
-	//  X arrowhead
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(min,  0.0,  max);
-	glVertex3f(0.0,  0.0,  mid);
-	glVertex3f(-min, 0.0,  max);
-	glEnd();
+	if (drawList == -1)
+	{
+		drawList = glGenLists(1);
+		glNewList(drawList, GL_COMPILE);
+		mglDrawAxisWithCones(min, mid, max, 8);
+		glEndList();
+	}
+	else
+	{
+		glCallList(drawList);
+	}
 }
 
 
@@ -894,7 +992,7 @@ void mglDrawJoint(unsigned char type, const vec3_t pos)
 		mglDrawSphere(12, 12, 0.5f);
 		break;
 	case 3:
-		mglDrawAxis(0.25f, 1.2f, 0.872f);
+		mglDrawEditorAxis();
 		break;
 	}
 }
