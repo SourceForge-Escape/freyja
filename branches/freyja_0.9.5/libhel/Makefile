@@ -32,14 +32,14 @@ FLAGS=
 BUILD_BASE_DIR=bin
 EXT=so
 
-########################################
-# WIN32
-#CC=i586-mingw32msvc-g++
-#CPP=i586-mingw32msvc-cpp
-#LD=i586-mingw32msvc-ld
-#FLAGS=-I/usr/local/include/
-#BUILD_BASE_DIR=bin.win32
-#EXT=dll
+################################################################
+# Compiler and Cross Enviroments
+################################################################
+
+CC=gcc
+DEPS=./deps.sh
+-include ../win32.env
+
 
 ################################################################
 
