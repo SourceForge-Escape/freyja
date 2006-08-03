@@ -284,6 +284,20 @@ void FreyjaRender::drawFreeWindow()
 	unsigned int i;
 
 
+#ifdef PLANE_NOTIFY_WITH_AXIS
+	glPushMatrix();
+	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
+
+	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+
+	glLineWidth(2.0);
+	mglDrawEditorAxis();
+
+	glPopMatrix();
+#endif
+
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
@@ -302,8 +316,8 @@ void FreyjaRender::drawFreeWindow()
 		glLineWidth(1.25f);
 		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
 
-		glLineWidth(2.0f);
-		mglDrawAxis(0.25f, 1.2f, 0.872f);
+		//glLineWidth(2.0f);
+		//mglDrawEditorAxis();
 
 		glLineWidth(1.75f);
 		glBegin(GL_LINES);
@@ -1207,7 +1221,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	RenderMesh rmesh;
 	vec3_t min, max;
 	vec3_t *xyz;
-	int32 meshIndex = mModel->getCurrentMesh();
+	//int32 meshIndex = mModel->getCurrentMesh();
 	uint32 count, i;
 
 
@@ -1828,14 +1842,14 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
-	glTranslatef(/*-20.0*/-mScaleEnv, /*-17.0*/-mScaleEnv + 2.5f, 10.0);
+	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
 
 	switch (plane)
 	{
 	case PLANE_XY:
 		break;
 	case PLANE_XZ:
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
+		glRotatef(-90.0, 1.0, 0.0, 0.0);
 		break;
 	case PLANE_ZY:
 		glRotatef(90.0, 0.0, 1.0, 0.0);
@@ -1843,8 +1857,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	}
 
 	glLineWidth(2.0);
+	mglDrawEditorAxis();
 
-	mglDrawAxis(0.5f, 2.4f, 1.744f);
 	glPopMatrix();
 #endif
 

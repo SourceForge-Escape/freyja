@@ -39,6 +39,7 @@
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
+#include <mstl/String.h>
 #include <mstl/stack.h>
 
 #include "FreyjaState.h"
@@ -138,6 +139,14 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
+
+	static String TransformModeToString(FreyjaModel::transform_t t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns String for transform type
+	 *        
+	 ------------------------------------------------------*/
+
 
 	unsigned int getAnimationFrameCount(unsigned int animationIndex);
 	/*------------------------------------------------------
@@ -309,8 +318,6 @@ public:
 	 * 2000.09.10: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	unsigned int getCurrentVertexIndex() { return mCachedVertexIndex; }
 
 	unsigned int getCurrentVertex();
 	/*------------------------------------------------------
@@ -660,10 +667,10 @@ public:
 
 	void VertexNew(float xx, float yy);
 	void VertexMove(float xx, float yy);
-	void VertexSelect(float xx, float yy);
+	//void VertexSelect(float xx, float yy);
 	void VertexBuffer(float xx, float yy);
 	void VertexCombine(float xx, float yy);
-	void VertexDelete();
+	//void VertexDelete();
 
 	void TexelCombine(float s, float t);
 	void TexelSelect(float s, float t);
@@ -671,8 +678,8 @@ public:
 	void UVMapMotion(float s, float t);
 
 	void PolygonAddVertex(float xx, float yy);
-	void PolygonDelVertex(float xx, float yy);
-	void PolygonSelectVertex(float xx, float yy);
+	//void PolygonDelVertex(float xx, float yy);
+	//void PolygonSelectVertex(float xx, float yy);
 
 	void BBoxSelect(float xx, float yy);
 	void BBoxMove(float xx, float yy);
@@ -685,7 +692,10 @@ public:
 
 	void moveBoneCenter(float xx, float yy);
 	void moveBone(float xx, float yy);
-	void selectBone(float xx, float yy);
+	//void selectBone(float xx, float yy);
+
+
+
 
 	///////////////////////////////////////////////////////
 
@@ -718,64 +728,17 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	index_t getNearestBoneIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Returns nearest bone to x, y in given plane
-	 *        ( XY, ZY, XZ )
-	 ------------------------------------------------------*/
-
-	int32 getNearestMeshIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Returns nearest mesh to x, y in given plane
-	 *        ( XY, ZY, XZ )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.11.29:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int32 getNearestVertexIndexInPlane(vec_t x, vec_t y, freyja_plane_t plane);
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : Returns nearest vertex (in group) to x, y in given plane
-	 *        ( XY, ZY, XZ )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.11.29:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int32 getCachedVertexIndex()
-	{
-		return mCachedVertexIndex;
-	}
 
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	void setCachedVertexIndex(int32 vertexIndex)
-	{
-		mCachedVertexIndex = vertexIndex;
-	}
-
-
-	int32 mCachedVertexIndex;       /* Current vertexIndex ( cached ) -
-									 * This is the lynchpin of the
-									 * current modeler interface
-									 */
-
+	static unsigned int mFlags;     /* Stores option flags as bitmap */
 
 	FreyjaModelPrinter mPrinter;    /* Used to reroute logging for backend */
 
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
-
-	static unsigned int mFlags;            /* Stores option flags as bitmap */
 
 	bbox2_t mSelectBBox;            /* 3d selection box using 2 vertices */
 
