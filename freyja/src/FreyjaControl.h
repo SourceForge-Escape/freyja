@@ -34,6 +34,7 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
+#include <mstl/String.h>
 #include <mstl/Vector.h>
 #include <mgtk/Resource.h>
 
@@ -122,11 +123,6 @@ class FreyjaControl
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns current viewing zoom of scene
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25: 
-	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
 
@@ -134,11 +130,6 @@ class FreyjaControl
 	/*------------------------------------------------------
 	 * Pre  : <zoom> is a number greater than 0.0
 	 * Post : Sets current viewing zoom of scene
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25: 
-	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
 
@@ -147,27 +138,20 @@ class FreyjaControl
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	void takeScreenshot(const char *filename, 
-						uint32 width, uint32 height);
+	void AdjustMouseXYForViewports(vec_t &x, vec_t &y);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
-	 *
+	 * Post : Maps actual mouse x, y to veiwport's local x, y.
+	 *        As if the viewport was the same size as 
+	 *        entire context.
 	 ------------------------------------------------------*/
+
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 	
-	void AdjustMouseXYForViewports(vec_t &x, vec_t &y);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Maps actual mouse x, y to veiwport's local x, y
-	 *        as if it was the entire window/context
-	 ------------------------------------------------------*/
-
-
 	void addRecentFilename(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -177,6 +161,13 @@ class FreyjaControl
 	 *
 	 * 2004.08.14: 
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void CastPickRay(vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Casts the pick array given a screen x, y.
+	 *        Accounts for view mode ( front, top, side, free )
 	 ------------------------------------------------------*/
 
 	bool event(int event, unsigned int value);
@@ -284,7 +275,7 @@ class FreyjaControl
 	 *            input
 	 --------------------------------------------*/
 
-	void loadResource();
+	void LoadResource();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Loads the Resource file from disk and sets cvars
@@ -311,12 +302,6 @@ private:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns pick ray in object cooridnates
-	 ------------------------------------------------------*/
-
-	void CastPickRay(vec_t x, vec_t y);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Accounts for view mode ( front, top, side, free )
 	 ------------------------------------------------------*/
 
 	void getScreenToWorldOBSOLETE(float *x, float *y);
@@ -455,17 +440,8 @@ private:
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
 
-	void setupResource(Resource &r);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns current viewing zoom of scene
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.14: 
-	 * Mongoose - Created from old stand alone function
-	 ------------------------------------------------------*/
 
+	String mResourceFilename;	            /* Resource file for control */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 

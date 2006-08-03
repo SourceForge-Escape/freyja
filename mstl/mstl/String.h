@@ -86,6 +86,9 @@ class String
 	}
 
 
+	String &operator+(const String &s);
+
+
 	~String()
 	{
 		Clear();

@@ -33,6 +33,13 @@
  ChangeLog 0.9.5 ( development - This will not always compile from svn )
  =====================================================================
 
+ 20060803 Mongoose
+ - Crash fixes
+ - Lots of refactoring 
+ - New 3d cursor geometery to look more 'pro'
+ - All new Ray casting and controls using it
+
+
  20060704 Mongoose
  - Crash fixes
  - Local plugins 

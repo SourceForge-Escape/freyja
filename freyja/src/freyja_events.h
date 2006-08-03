@@ -26,6 +26,7 @@
 
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
+#include <mstl/String.h>
 #include <freyja/FreyjaPluginABI.h>
 
 
@@ -333,8 +334,8 @@ void freyja_event_notify_view_log(const char *message);
 
 void freyja_event_key_press(int key, int mod);
 void freyja_event_new_key_cmd(int key, int event, int cmd);
-char *freyja_rc_map(char *s);
 
+String freyja_rc_map_string(const char *s);
 char *freyja_rc_map(char *s);
 /*------------------------------------------------------
  * Pre  : s is a valid filename or path/filename 
