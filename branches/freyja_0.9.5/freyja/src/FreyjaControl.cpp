@@ -62,6 +62,8 @@ extern Freyja3dCursor gFreyjaCursor;
 
 FreyjaControl::FreyjaControl(Resource *r)
 {
+	mResourceFilename = String("freyja-dev.mlisp");
+
 	/* Hook up the backend and user interface */
 	mResource = r;
 	mModel = new FreyjaModel();
@@ -81,7 +83,7 @@ FreyjaControl::FreyjaControl(Resource *r)
 	event_register_control(this);
 
 	/* Build the user interface from lisp, and load user preferences */
-	loadResource();
+	LoadResource();
 
 	/* Set some basic defaults */
 	mEditorMode = MODEL_EDIT_MODE;
@@ -149,17 +151,148 @@ void FreyjaControl::SetZoom(float zoom)
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-void FreyjaControl::takeScreenshot(const char *filename, 
-								   uint32 width, uint32 height)
+// Mongoose - 2006.07.31 
+// More crap for old system to be backported then rewritten properly  =/
+void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 {
-	mModel->mTexture.glScreenShot(filename, width, height);
-}
+#if DEBUG_VIEWPORT_MOUSE
+	freyja_print("> Mouse x = %f y = %f", x, y);
+#endif
 
+	// Trap the junk 0,0 states that are often tossed around on
+	// just mouse button updates
+	if ( x == 0 && y == 0 || 
+		 mEditorMode == MATERIAL_EDIT_MODE ||
+		 mEditorMode == TEXTURE_EDIT_MODE)
+	{
+	}
+	else if (mRender->GetMode() & FreyjaRender::fViewports)
+	{
+		// Translate this to it's correct 'plane editing mode'
+		// for the viewport and adjust the x, y values here 
+		// to reuse the old mouse style handling
+		// In other words - just make this work for now
+		vec_t h = mRender->getWindowHeight();
+		vec_t w = mRender->getWindowWidth();
+		vec_t halfW = w * 0.5f;
+		vec_t halfH = h * 0.5f;
+		
+		// Handle Front XY viewport ( not using viewport class yet )
+		if ( x < halfW && y > halfH )
+		{
+			mEditorMode = MODEL_EDIT_MODE;
+			mModel->setCurrentPlane(PLANE_XY);
+
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f;
+			y = y*2.0f - h;
+		}
+		// Handle Top XZ viewport ( not using viewport class yet )
+		else if ( x > halfW && y < halfH )
+		{
+			mEditorMode = MODEL_EDIT_MODE;
+			mModel->setCurrentPlane(PLANE_XZ);
+
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f - w;
+			y = y*2.0f;
+		}
+		// Handle Side ZY viewport ( not using viewport class yet )
+		else if ( x > halfW && y > halfH )
+		{
+			mEditorMode = MODEL_EDIT_MODE;
+			mModel->setCurrentPlane(PLANE_ZY);
+
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f - w;
+			y = y*2.0f - h;
+		}
+		// Handle 'Free' viewport ( not using viewport class yet )
+		else if ( x < halfW && y < halfH )
+		{
+			mEditorMode = ANIMATION_EDIT_MODE;
+
+			// Adjust actual window space mouse x, y to fit to viewport
+			// This makes the x, y fill the 'window' for the viewport
+			x = x*2.0f;
+			y = y*2.0f;
+		}
+
+#if DEBUG_VIEWPORT_MOUSE
+		freyja_print("       x = %f y = %f", x, y);
+#endif
+	}
+}
 
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void FreyjaControl::CastPickRay(vec_t x, vec_t y)
+{
+	Ray &r = mRender->mTestRay;
+
+
+	if (mEditorMode == ANIMATION_EDIT_MODE)
+	{
+		double rayOrigin[4];
+		double rayVector[4];
+		getPickRay(x, y, rayOrigin, rayVector);
+
+		HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
+		HEL_VEC3_COPY(rayVector, r.mDir.mVec);
+	}
+	else if (mEditorMode == MODEL_EDIT_MODE)
+	{
+		vec_t z;
+
+		getWorldFromScreen(&x, &y, &z);
+
+		switch (mModel->getCurrentPlane())
+		{
+		case PLANE_XY: // Front
+			r.mOrigin = Vec3(x, y, z + 100);
+			r.mDir = Vec3(0, 0, -1);
+			break;
+
+		case PLANE_XZ: // Top
+			r.mOrigin = Vec3(x, y - 100, -z);
+			r.mDir = Vec3(0, -1, 0);
+			break;
+
+		case PLANE_ZY: // Side FIXME
+			r.mOrigin = Vec3(x - 100, y, z);
+			r.mDir = Vec3(1, 0, 0);
+			break;
+		}	
+	}
+	else
+	{
+		return;
+	}
+
+	mRender->setFlag(FreyjaRender::fDrawPickRay);
+
+#if DEBUG_PICK_RAY_PLANAR
+	// DEBUG case is a triangle ABC...
+	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
+	//const vec_t k = 100.0f;
+	//Vec3 a(0,0,0), b(k,0,0), c(0,k,0), i; // test facex
+	bool s = r.IntersectTriangle(a.mVec,b.mVec,c.mVec,i);
+
+
+	freyja_print("! %s, o %f %f %f, d %f %f %f => %f %f %f",
+				 s ? "true" : "false",
+				 r.mOrigin.mVec[0],r.mOrigin.mVec[1],r.mOrigin.mVec[2],
+				 r.mDir.mVec[0],r.mDir.mVec[1],r.mDir.mVec[2],
+				 i.mVec[0],i.mVec[1],i.mVec[2]);
+#endif
+}
+
 
 bool FreyjaControl::handleRecentFile(unsigned int value)
 {
@@ -2597,145 +2730,6 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 }
 
 
-// Mongoose - 2006.07.31 
-// More crap for old system to be backported then rewritten properly  =/
-void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
-{
-#if DEBUG_VIEWPORT_MOUSE
-	freyja_print("> Mouse x = %f y = %f", x, y);
-#endif
-
-	// Trap the junk 0,0 states that are often tossed around on
-	// just mouse button updates
-	if ( x == 0 && y == 0 || 
-		 mEditorMode == MATERIAL_EDIT_MODE ||
-		 mEditorMode == TEXTURE_EDIT_MODE)
-	{
-	}
-	else if (mRender->GetMode() & FreyjaRender::fViewports)
-	{
-		// Translate this to it's correct 'plane editing mode'
-		// for the viewport and adjust the x, y values here 
-		// to reuse the old mouse style handling
-		// In other words - just make this work for now
-		vec_t h = mRender->getWindowHeight();
-		vec_t w = mRender->getWindowWidth();
-		vec_t halfW = w * 0.5f;
-		vec_t halfH = h * 0.5f;
-		
-		// Handle Front XY viewport ( not using viewport class yet )
-		if ( x < halfW && y > halfH )
-		{
-			mEditorMode = MODEL_EDIT_MODE;
-			mModel->setCurrentPlane(PLANE_XY);
-
-			// Adjust actual window space mouse x, y to fit to viewport
-			// This makes the x, y fill the 'window' for the viewport
-			x = x*2.0f;
-			y = y*2.0f - h;
-		}
-		// Handle Top XZ viewport ( not using viewport class yet )
-		else if ( x > halfW && y < halfH )
-		{
-			mEditorMode = MODEL_EDIT_MODE;
-			mModel->setCurrentPlane(PLANE_XZ);
-
-			// Adjust actual window space mouse x, y to fit to viewport
-			// This makes the x, y fill the 'window' for the viewport
-			x = x*2.0f - w;
-			y = y*2.0f;
-		}
-		// Handle Side ZY viewport ( not using viewport class yet )
-		else if ( x > halfW && y > halfH )
-		{
-			mEditorMode = MODEL_EDIT_MODE;
-			mModel->setCurrentPlane(PLANE_ZY);
-
-			// Adjust actual window space mouse x, y to fit to viewport
-			// This makes the x, y fill the 'window' for the viewport
-			x = x*2.0f - w;
-			y = y*2.0f - h;
-		}
-		// Handle 'Free' viewport ( not using viewport class yet )
-		else if ( x < halfW && y < halfH )
-		{
-			mEditorMode = ANIMATION_EDIT_MODE;
-
-			// Adjust actual window space mouse x, y to fit to viewport
-			// This makes the x, y fill the 'window' for the viewport
-			x = x*2.0f;
-			y = y*2.0f;
-		}
-
-#if DEBUG_VIEWPORT_MOUSE
-		freyja_print("       x = %f y = %f", x, y);
-#endif
-	}
-}
-
-
-void FreyjaControl::CastPickRay(vec_t x, vec_t y)
-{
-	Ray &r = mRender->mTestRay;
-
-
-	if (mEditorMode == ANIMATION_EDIT_MODE)
-	{
-		double rayOrigin[4];
-		double rayVector[4];
-		getPickRay(x, y, rayOrigin, rayVector);
-
-		HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
-		HEL_VEC3_COPY(rayVector, r.mDir.mVec);
-	}
-	else if (mEditorMode == MODEL_EDIT_MODE)
-	{
-		vec_t z;
-
-		getWorldFromScreen(&x, &y, &z);
-
-		switch (mModel->getCurrentPlane())
-		{
-		case PLANE_XY: // Front
-			r.mOrigin = Vec3(x, y, z + 100);
-			r.mDir = Vec3(0, 0, -1);
-			break;
-
-		case PLANE_XZ: // Top
-			r.mOrigin = Vec3(x, y - 100, -z);
-			r.mDir = Vec3(0, -1, 0);
-			break;
-
-		case PLANE_ZY: // Side FIXME
-			r.mOrigin = Vec3(x - 100, y, z);
-			r.mDir = Vec3(1, 0, 0);
-			break;
-		}	
-	}
-	else
-	{
-		return;
-	}
-
-	mRender->setFlag(FreyjaRender::fDrawPickRay);
-
-#if DEBUG_PICK_RAY_PLANAR
-	// DEBUG case is a triangle ABC...
-	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
-	//const vec_t k = 100.0f;
-	//Vec3 a(0,0,0), b(k,0,0), c(0,k,0), i; // test facex
-	bool s = r.IntersectTriangle(a.mVec,b.mVec,c.mVec,i);
-
-
-	freyja_print("! %s, o %f %f %f, d %f %f %f => %f %f %f",
-				 s ? "true" : "false",
-				 r.mOrigin.mVec[0],r.mOrigin.mVec[1],r.mOrigin.mVec[2],
-				 r.mDir.mVec[0],r.mDir.mVec[1],r.mDir.mVec[2],
-				 i.mVec[0],i.mVec[1],i.mVec[2]);
-#endif
-}
-
-
 void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, 
 								double *rayOrigin, double *rayVector)
 {
@@ -3608,26 +3602,21 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 }
 
 
-void FreyjaControl::loadResource()
+void FreyjaControl::LoadResource()
 {
+	String s = freyja_rc_map_string(mResourceFilename.GetCString());
 	int i, x, y;
-	char *s;
-	char *filename = "freyja-dev.mlisp";
 	bool failed = true;
 
-	
-	s = freyja_rc_map(filename);
 
-	if (!mResource->Load(s))
+	if (!mResource->Load((char *)s.GetCString()))
 	{
 		failed = false;
 	}
 
-	delete [] s;
-
 	if (failed)
 	{
-		printf("FreyjaControl::ReadRC> ERROR: Couldn't find '%s'\n", s);
+		MARK_MSGF("ERROR: Couldn't find resource file '%s'\n", s.GetCString());
 		freyja_event_shutdown();
 	}
 
@@ -3665,24 +3654,19 @@ void FreyjaControl::loadResource()
 	}
 
 
-	/* Recent files persistance test */
+
+	/* Recent files persistance */
 	SystemIO::TextFileReader r;
-	uint32 j;
-	s = freyja_rc_map("recent_files");
+	String filename = freyja_rc_map_string("recent_files");
 
-	if (r.Open(s))
+	if (r.Open(filename.GetCString()))
 	{
-		if (s) 
-		{
-			delete [] s;
-		}
-
-		for (j = 0; j < gRecentFileLimit && !r.IsEndOfFile(); ++j)
+		for (uint32 j = 0; j < gRecentFileLimit && !r.IsEndOfFile(); ++j)
 		{
 			const char *sym = r.ParseSymbol();
 			addRecentFilename(sym);
 		}
-
+		
 		r.Close();
 	}
 }

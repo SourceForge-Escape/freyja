@@ -1416,6 +1416,18 @@ void freyja_event_shutdown()
 }
 
 
+String freyja_rc_map_string(const char *s)
+{
+	char *cs = freyja_rc_map((char *)s);
+	String str(cs);
+
+	if (cs) 
+		delete [] cs;
+
+	return str;
+}
+
+
 char *freyja_rc_map(char *s)
 {
 	char *rc = NULL;

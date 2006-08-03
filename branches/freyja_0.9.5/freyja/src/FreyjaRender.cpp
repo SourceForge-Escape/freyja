@@ -292,20 +292,18 @@ void FreyjaRender::drawFreeWindow()
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glLineWidth(2.0);
 	mglDrawEditorAxis();
 
 	glPopMatrix();
 #endif
+
+	//glPushMatrix();
 
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
 	glTranslatef(mScroll[0], mScroll[1], mScroll[2]);
-
-	//glPushMatrix();
-	glLineWidth(2.0f);
 
 	if (mRenderMode & RENDER_EDIT_GRID)
 	{
@@ -315,9 +313,6 @@ void FreyjaRender::drawFreeWindow()
 
 		glLineWidth(1.25f);
 		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
-
-		//glLineWidth(2.0f);
-		//mglDrawEditorAxis();
 
 		glLineWidth(1.75f);
 		glBegin(GL_LINES);

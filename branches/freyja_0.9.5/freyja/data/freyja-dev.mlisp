@@ -492,7 +492,7 @@
 
 
 
-					(animation_tab_hack)
+					;(animation_tab_hack)
 
 					(hbox 1 0 0 1 0 
 						(label "Select Bone" 0.0 0.5)

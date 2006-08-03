@@ -559,7 +559,7 @@ void mglDrawEditorAxis()
 
 	if (drawList == -1)
 	{
-		const vec_t min = 0.1f, mid = 1.2f, max = 0.872f;
+		const vec_t min = 0.5f, mid = 1.2f, max = 0.872f;
 		drawList = glGenLists(1);
 		glNewList(drawList, GL_COMPILE);
 		mglDrawAxisWithCones(min, mid, max, 8);
