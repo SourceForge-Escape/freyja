@@ -2409,6 +2409,94 @@ bool FreyjaControl::motionEvent(int x, int y)
 }
 
 
+void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
+{
+	switch (gFreyjaCursor.GetMode())
+	{
+	case Freyja3dCursor::Invisible:
+		break;
+		
+	default:
+		if (mEditorMode == MODEL_EDIT_MODE)
+		{
+			freyja_print("! SelectCursorAxis...");
+			CastPickRay(vx, vy);
+
+			Ray &r = FreyjaRender::mTestRay;
+			Vec3 a, b, c, d, tuv, p = gFreyjaCursor.mPos;
+			vec_t min = gCursorDrawSz[0];
+			vec_t mid = gCursorDrawSz[1] - 1.0f;
+			vec_t max = gCursorDrawSz[2] + 1.0f;
+			bool picked = false;
+
+			switch (mModel->getCurrentPlane())
+			{
+			case PLANE_XY: // Front
+				a = Vec3(mid+min,  -min, 0.0) + p;
+				b = Vec3(mid+min,  min, 0.0) + p;
+				c = Vec3(mid-min,  min, 0.0) + p;
+
+
+				if (r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tuv.mVec))
+				{
+					picked = true;
+				}
+				else
+				{
+					d = Vec3(mid-min,  -min, 0.0) + p;
+
+					if (r.IntersectTriangle(b.mVec, c.mVec, d.mVec, tuv.mVec))
+					{
+						picked = true;
+					}
+				}
+
+
+				if (!picked)
+				{
+					a = Vec3(mid+min, 0.0,  -min) + p;
+					b = Vec3(mid+min, 0.0,  min) + p;
+					c = Vec3(mid-min, 0.0,  min) + p;
+
+					if (r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tuv.mVec))
+					{
+						picked = true;
+					}
+					else
+					{
+						d = Vec3(mid-min, 0.0,  -min) + p;
+						
+						if (r.IntersectTriangle(b.mVec, c.mVec, d.mVec, tuv.mVec))
+						{
+							picked = true;
+						}
+					}
+				}
+				
+				if (picked)
+				{
+					gFreyjaCursor.mAxis = 0;
+					freyja_print("! Cursor ray picked X");
+				}
+				
+				
+				break;
+
+			case PLANE_XZ: // Top
+				
+				
+				break;
+
+			case PLANE_ZY: // Side FIXME
+				
+				
+				break;
+			}
+		}
+	}
+}
+
+
 bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 {
 	bool ret = false;
@@ -2418,17 +2506,76 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	mMouseState = state;
 	mModKey = mod;
 
+
+	/* Handle mode */
+	/* FIXME: These should be seperate 'windows' with their own 
+	 * MouseEdit() methods or the like later */
+	switch (mEditorMode)
+	{
+	case TEXTURE_EDIT_MODE:
+		if (mUVMouseState)
+		{
+			mUVMouseState = false;
+			return true;
+		}
+		else if (btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED)
+		{
+			float s, t;
+			
+			
+			s = (float)x / (float)mRender->getWindowWidth();
+			t = (float)y / (float)mRender->getWindowHeight();
+			
+			// Mongoose: Clamp texels to be bound by min and max
+			if (s > 1.0) s = 1.0;
+			if (s < 0.0) s = 0.0;
+			if (t > 1.0) t = 1.0;
+			if (t < 0.0) t = 0.0;
+			
+			if (mEventMode == TEXEL_COMBINE)
+			{
+				mModel->TexelCombine(s, t);
+			}
+			else
+			{
+				mModel->TexelSelect(s, t);
+			}
+			
+			mUVMouseState = true;
+			return true;
+		}
+		break;
+
+	case ANIMATION_EDIT_MODE:
+	case MODEL_EDIT_MODE:
+		// Mongoose 2002.01.12, Allow temp mode override
+		if (mod & KEY_LCTRL)
+		{
+			handleEvent(eEvent, eSelect);
+		}
+		else if (mod & KEY_LSHIFT)
+		{
+			handleEvent(eEvent, eRotate);
+		}
+
+		MouseEdit(btn, state, mod, x, y, mModel->getCurrentPlane());
+		break;
+	default:
+		;
+	}
+
+
 	/* Get the viewport adjusted mouse coordinates, and swap modes if needed */
 	AdjustMouseXYForViewports(vx, vy);
 
-	/* Handle key modifers */
+	/* Handle key modifers -- notice this are temp state changes */
 	if (mod & KEY_LCTRL)
 	{
 		handleEvent(eEvent, eSelect);
 	}
 	else if (mod & KEY_LSHIFT)
 	{
-		handleEvent(eEvent, eRotate);
+		handleEvent(eEvent, eUnselect);
 	}
 
 	/* Handle left clicks */
@@ -2446,6 +2593,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			break;
 
 		default:
+			SelectCursorAxis(vx, vy);
 			ret = false;
 		}
 	}
@@ -2645,7 +2793,6 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
 	Ray &r = mRender->mTestRay;
 
-	mRender->setFlag(FreyjaRender::fDrawPickRay);
 
 	if (mEditorMode == ANIMATION_EDIT_MODE)
 	{
@@ -2656,7 +2803,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
 		HEL_VEC3_COPY(rayVector, r.mDir.mVec);
 	}
-	else
+	else if (mEditorMode == MODEL_EDIT_MODE)
 	{
 		vec_t z;
 
@@ -2680,7 +2827,12 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 			break;
 		}	
 	}
+	else
+	{
+		return;
+	}
 
+	mRender->setFlag(FreyjaRender::fDrawPickRay);
 
 #if DEBUG_PICK_RAY_PLANAR
 	// DEBUG case is a triangle ABC...
@@ -2974,6 +3126,39 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			}
 		}
 		break;
+
+#if LIGHT_TRANSFORMS
+	case FreyjaModel::TransformLight:
+		{
+			Vec3 xyz;
+			vec4_t pos;
+			vec_t t, closest;
+			int selected = -1;
+
+			for (uint32 i = 0, count = freyjaGetLightCount(); i < count; ++i)
+			{
+				freyjaGetLightPosition4v(0, pos);
+				xyz = Vector3d(pos);
+
+				if (r.IntersectSphere(xyz.mVec, 5.0f, t))
+				{
+					if (selected == -1 || t < closest)
+					{
+						selected = i;
+						closest = t;
+					}
+				}
+			}
+
+			if (selected > -1)
+			{
+				mModel->SetCurrentLight(selected);
+				gFreyjaCursor.mPos = xyz;
+			}
+
+		}
+		break;
+#endif
 
 	case FreyjaModel::TransformFace:
 		{

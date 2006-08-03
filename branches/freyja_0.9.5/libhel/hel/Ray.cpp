@@ -58,6 +58,13 @@ Ray::~Ray()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+
+bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
+{
+	return false; // need to pick an algorithm and implement I guess  =)
+}
+
+
 bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 {
 	Vec3 center;

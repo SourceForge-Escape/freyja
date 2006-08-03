@@ -73,7 +73,7 @@ public:
 		mNormalIndex(normal),
 		mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
-		mReserved1(0)
+		mPolygonReference(INDEX_INVALID)
 	{
 	}
 
@@ -84,7 +84,7 @@ public:
 		mNormalIndex(INDEX_INVALID),
 		mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
-		mReserved1(0)
+		mPolygonReference(INDEX_INVALID)
 	{
 	}
 
@@ -108,7 +108,7 @@ public:
 		w.writeLong(mNormalIndex);
 		w.writeLong(mColor);
 		w.writeLong(mMaterial);
-		w.writeLong(mReserved1);
+		w.writeLong(mPolygonReference);
 
 		return true; 
 	}
@@ -123,9 +123,9 @@ public:
 
 	index_t mColor;       		// Pool storage of color
 
-	index_t mMaterial;
+	index_t mMaterial;          // Material index
 	
-	index_t mReserved1;
+	index_t mPolygonReference;  // PolygonReference index
 };
 
 
@@ -155,14 +155,18 @@ public:
 		fMaterial    =  2,
 		fSelected    =  4,
 		fHidden      =  8,
-		fRayHit      = 16
+		fRayHit      = 16,
+		fPolyMappedTexCoords = 32,
+		fPolyMappedNormals = 64
 	} Flags;
 
 	Face() :
 		mMaterial(0), // Always have a valid material
 		mFlags(fNone),
 		mSmoothingGroups(0), // Bitmap of groups 
-		mIndices()
+		mIndices(),
+		mTexCoordIndices(),
+		mNormalsIndices()
 	{
 	}
 
@@ -183,6 +187,8 @@ public:
 	byte mFlags;
 	uint32 mSmoothingGroups; // bitmap
 	Vector<index_t> mIndices;
+	Vector<index_t> mTexCoordIndices; // Only used with fPolyMappedTexCoords
+	Vector<index_t> mNormalsIndices; // Only used with fPolyMappedNormals
 };
 
 
@@ -657,6 +663,13 @@ public:
 	{
 		mMaterialIndex = idx;
 	}
+
+
+	index_t CreateTexCoord(const vec3_t uvw)
+	{
+		return AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw);
+	}
+
 
 	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
 	{

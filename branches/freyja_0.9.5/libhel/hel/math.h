@@ -38,6 +38,8 @@
 extern "C" {
 
 typedef unsigned char byte;
+typedef short int int16;
+typedef unsigned short int uint16;
 typedef int int32;
 typedef unsigned int uint32;
 typedef float vec_t;
@@ -47,6 +49,7 @@ typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
 
+//FIXME... just implement it here already
 #ifdef sincosf
 #   define helSinCosf sincosf
 #else

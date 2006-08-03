@@ -217,7 +217,7 @@ void freyjaFree()
 	freyjaPrintMessage("\nlibfreyja stopped using freyjaFree()");
 
 	// Memory stats
-	freyjaPrintMessage("\nMemory stats:\n %u allocations\n %u deallocations\n %u operations\n\n", gFreyjaMemoryNews, gFreyjaMemoryDeletes, gFreyjaMemoryTick);
+	freyjaPrintMessage("\nMemoryPool stats:\n %u allocations\n %u deallocations\n %u operations\n\n", gFreyjaMemoryNews, gFreyjaMemoryDeletes, gFreyjaMemoryTick);
 }
 
 
