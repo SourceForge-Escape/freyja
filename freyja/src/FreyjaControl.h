@@ -286,9 +286,18 @@ class FreyjaControl
 	 * Mongoose - Created from GooseEgg
 	 ------------------------------------------------------*/
 
-	void resizeDisplay(unsigned int width, unsigned int height);
+	void Display()
+	{
+		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
+		mRender->display();
+	}
 
-	void updateDisplay();
+
+	void HandleResize(uint32 width, uint32 height)
+	{
+		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
+		mRender->resizeContext(width, height);
+	}
 
 
 private:

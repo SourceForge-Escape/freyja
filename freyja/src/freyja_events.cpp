@@ -410,14 +410,14 @@ void mgtk_handle_file_dialog_selection(char *filename)
 void mgtk_handle_gldisplay()
 {
 	if (gFreyjaControl)
-		gFreyjaControl->updateDisplay();
+		gFreyjaControl->Display();
 }
 
 
 void mgtk_handle_glresize(unsigned int width, unsigned int height)
 {
 	if (gFreyjaControl)
-		gFreyjaControl->resizeDisplay(width, height);
+		gFreyjaControl->HandleResize(width, height);
 }
 
 
@@ -479,14 +479,14 @@ void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
 void mgtk_event_gldisplay()
 {
 	if (gFreyjaControl)
-		gFreyjaControl->updateDisplay();
+		gFreyjaControl->Display();
 }
 
 
 void mgtk_event_glresize(unsigned int width, unsigned int height)
 {
 	if (gFreyjaControl)
-		gFreyjaControl->resizeDisplay(width, height);
+		gFreyjaControl->HandleResize(width, height);
 }
 
 
@@ -535,15 +535,15 @@ void freyja_handle_file_dialog_selection(char *filename)
 
 void freyja_handle_gldisplay()
 {
-	if (gFreyjaControl)
-		gFreyjaControl->updateDisplay();
+	ASSERT_MSG(gFreyjaControl, "FreyjaControl Singleton not allocated");
+	gFreyjaControl->Display();
 }
 
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	if (gFreyjaControl)
-		gFreyjaControl->resizeDisplay(width, height);
+	ASSERT_MSG(gFreyjaControl, "FreyjaControl Singleton not allocated");
+	gFreyjaControl->HandleResize(width, height);
 }
 
 
@@ -581,8 +581,6 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 		*image = swap;
 		*width = img.getWidth();
 		*height = img.getHeight();
-
-		//printf("SUCCESS freyja\n");
 	}
 }
 
