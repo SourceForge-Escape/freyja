@@ -27,12 +27,14 @@
 #include <hel/Quaternion.h>
 #include <hel/Vector3d.h>
 #include "freyja.h"
+#include "Mesh.h"
 #include "BoneABI.h"
 #include "SkeletonABI.h"
 #include "FreyjaFileReader.h"
 #include "FreyjaPluginABI.h"
 #include "FreyjaFSM.h"
 
+using namespace freyja;
 
 index_t gFreyjaCurrentVertex = INDEX_INVALID;
 extern index_t gFreyjaCurrentMesh;
@@ -379,6 +381,33 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 #else
 	switch (type)
 	{
+	case FREYJA_POLYGON:
+		{
+			Mesh *m = freyjaModelGetMeshClass( mIndexModel, mIndexMesh );
+			uint32 count = m ? m->GetFaceCount() : 0;
+
+			switch (item)
+			{
+			case FREYJA_CURRENT:
+				break;
+			case FREYJA_RESET:
+				mIndexPolygon = 0;
+				break;
+			case FREYJA_NEXT:
+				++mIndexPolygon;
+				break;
+			default:
+				mIndexPolygon = item;
+			}
+
+			if (mIndexPolygon < count)
+			{
+				return mIndexPolygon;
+			}
+		}
+		break;
+
+
 	case FREYJA_BONE:
 		switch (item)
 		{

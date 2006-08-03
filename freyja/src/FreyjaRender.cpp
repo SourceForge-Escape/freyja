@@ -947,14 +947,29 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 					mglApplyMaterial(f->mMaterial);
 					glBegin(GL_POLYGON);
 
-					for (j = 0; j < f->mIndices.size(); ++j)
+					if (f->mFlags & Face::fPolyMappedTexCoords)
 					{
-						m->GetTexCoord(f->mIndices[j], v.mVec);
-						glTexCoord2fv(v.mVec);
-						m->GetNormal(f->mIndices[j], v.mVec);
-						glNormal3fv(v.mVec);
-						m->GetVertexPos(f->mIndices[j], v.mVec);
-						glVertex3fv(v.mVec);
+						for (j = 0; j < f->mIndices.size(); ++j)
+						{
+							m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+							glTexCoord2fv(v.mVec);
+							m->GetNormal(f->mIndices[j], v.mVec);
+							glNormal3fv(v.mVec);
+							m->GetVertexPos(f->mIndices[j], v.mVec);
+							glVertex3fv(v.mVec);
+						}
+					}
+					else
+					{
+						for (j = 0; j < f->mIndices.size(); ++j)
+						{
+							m->GetTexCoord(f->mIndices[j], v.mVec);
+							glTexCoord2fv(v.mVec);
+							m->GetNormal(f->mIndices[j], v.mVec);
+							glNormal3fv(v.mVec);
+							m->GetVertexPos(f->mIndices[j], v.mVec);
+							glVertex3fv(v.mVec);
+						}
 					}
 
 					glEnd();

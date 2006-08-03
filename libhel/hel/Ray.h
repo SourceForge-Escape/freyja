@@ -72,6 +72,9 @@ class Ray
 	const Vec3 &GetOrigin() { return mOrigin; }
 
 
+	bool IntersectAABB(vec3_t min, vec3_t max, vec_t &t);
+
+
 	bool IntersectSphere(vec3_t center, vec_t radius, vec_t &t);
 	
 

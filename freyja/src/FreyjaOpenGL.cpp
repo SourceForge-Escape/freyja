@@ -488,6 +488,46 @@ void mglDrawAxis(const vec_t min, const vec_t mid, const vec_t max)
 }
 
 
+void mglDrawCone(vec3_t origin, vec_t height, uint32 count)
+{
+	Vec3 point(origin[0], origin[1] + height, origin[2]);
+	Vec3 center(origin[0], origin[1], origin[2]);
+	vec_t x, z;
+	float countf = count;
+
+	
+	if (count < 3)
+		count = 3;
+
+	glBegin(GL_TRIANGLES);
+	
+	helSinCosf(360.0f * ((countf-1) / countf), &x, &z);
+	Vec3 ith;
+	Vec3 last(origin[0] + x, origin[1], origin[2] + z);
+
+	for (uint32 i = 0; i < count; ++i)
+	{ 
+		helSinCosf(360.0f * ((float)i / countf), &x, &z);
+
+		ith = Vec3(origin[0] + x, origin[1], origin[2] + z);
+
+		/* Base */
+		glVertex3fv(center.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		/* Cone */
+		glVertex3fv(point.mVec);
+		glVertex3fv(ith.mVec);
+		glVertex3fv(last.mVec);
+
+		last = ith;
+	}
+
+	glEnd();
+}
+
+
 void mglDraw3dCircle(const vec3_t center, const vec_t radius, uint32 count, 
 					 uint32 plane, bool solid)
 {
@@ -565,54 +605,104 @@ void mglDraw3dCursorScale(const vec_t min, const vec_t mid, const vec_t max)
 
 	glBegin(GL_QUADS);
       
-	// X Axis, red
+	// X Axis, Red box
 	glColor3fv(RED);
-	//  Y arrowhead
-	glVertex3f(mid+min,  -min, 0.0);
-	glVertex3f(mid+min,  min, 0.0);
-	glVertex3f(mid-min,  min, 0.0);
-	glVertex3f(mid-min,  -min, 0.0);
+	glVertex3f(mid+min,  -min, min);
+	glVertex3f(mid+min,  min, min);
+	glVertex3f(mid-min,  min, min);
+	glVertex3f(mid-min,  -min, min);
 
-	//  Z arrowhead
-	glVertex3f(mid+min,  0.0, -min);
-	glVertex3f(mid+min,  0.0, min);
-	glVertex3f(mid-min,  0.0, min);
-	glVertex3f(mid-min,  0.0, -min);
+	glVertex3f(mid+min,  -min, -min);
+	glVertex3f(mid+min,  min, -min);
+	glVertex3f(mid-min,  min, -min);
+	glVertex3f(mid-min,  -min, -min);
+
+	glVertex3f(mid+min,  min, -min);
+	glVertex3f(mid+min,  min, min);
+	glVertex3f(mid-min,  min, min);
+	glVertex3f(mid-min,  min, -min);
+
+	glVertex3f(mid+min,  -min, -min);
+	glVertex3f(mid+min,  -min, min);
+	glVertex3f(mid-min,  -min, min);
+	glVertex3f(mid-min,  -min, -min);
+
+	glVertex3f(mid+min,  min, -min);
+	glVertex3f(mid+min,  min, min);
+	glVertex3f(mid+min,  -min, min);
+	glVertex3f(mid+min,  -min, -min);
 
 
 	// Y Axis, green
 	glColor3fv(GREEN);	
-	//  X arrowhead	
-	glVertex3f(-min,mid+min,   0.0);
-	glVertex3f(min,mid+min,   0.0);
-	glVertex3f( min,mid-min,  0.0);
-	glVertex3f(-min, mid-min, 0.0);	
+	glVertex3f(-min, mid+min,  min);
+	glVertex3f(min,mid+min,   min);
+	glVertex3f(min,mid-min,   min);
+	glVertex3f(-min,mid-min,   min);
 
-	//  Z arrowhead
-	glVertex3f(0.0, mid+min,   -min);
-	glVertex3f(0.0,mid+min,   min);
-	glVertex3f( 0.0,mid-min,  min);
-	glVertex3f(0.0, mid-min, -min);	
+	glVertex3f(-min,mid+min,   -min);
+	glVertex3f(min,mid+min,   -min);
+	glVertex3f( min,mid-min,  -min);
+	glVertex3f(-min,mid-min,   -min);
+
+	glVertex3f( min,mid+min,  -min);
+	glVertex3f( min,mid+min,  min);
+	glVertex3f(min,mid-min,   min);
+	glVertex3f( min,mid-min,  -min);
+
+	glVertex3f( -min,mid+min,  -min);
+	glVertex3f( -min,mid+min,  min);
+	glVertex3f(-min,mid-min,   min);
+	glVertex3f(-min,mid-min,   -min);
+
+	glVertex3f(min,mid+min,   -min);
+	glVertex3f(min,mid+min,   min);
+	glVertex3f( -min,mid+min,  min);
+	glVertex3f(-min,mid+min,   -min);
 
       
 	// Z Axis, blue
 	glColor3fv(BLUE);
-	//  Y arrowhead
-	glVertex3f(0.0,    -min, mid+min);
-	glVertex3f(0.0,min,mid+min);
-	glVertex3f( 0.0,min, mid-min);
-	glVertex3f(0.0,  -min,mid-min);
-	//  X arrowhead
-	glVertex3f(    -min,0.0, mid+min);
-	glVertex3f(min,0.0,mid+min);
-	glVertex3f( min, 0.0,mid-min);
-	glVertex3f(  -min,0.0,mid-min);
+	glVertex3f(-min, min, mid+min);
+	glVertex3f(min,   min, mid+min);
+	glVertex3f(min,   min, mid-min);
+	glVertex3f(-min,   min, mid-min);
+
+	glVertex3f(-min,    -min, mid+min);
+	glVertex3f(min,   -min, mid+min);
+	glVertex3f( min,  -min, mid-min);
+	glVertex3f(-min,   -min, mid-min);
+
+	glVertex3f( min,  -min, mid+min);
+	glVertex3f( min,  min, mid+min);
+	glVertex3f(min,   min, mid-min);
+	glVertex3f( min,  -min, mid-min);
+
+	glVertex3f( -min,  -min, mid+min);
+	glVertex3f( -min,  min, mid+min);
+	glVertex3f(-min,   min, mid-min);
+	glVertex3f(-min,   -min, mid-min);
+
+	glVertex3f(min,   -min, mid+min);
+	glVertex3f(min,   min, mid+min);
+	glVertex3f( -min,  min, mid+min);
+	glVertex3f(-min,   -min, mid+min);
+
+
 	glEnd();
 }
 
 
 void mglDraw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max)
 {
+	Vec3 o;
+	vec_t h = min;
+
+	o = Vec3(mid, 0.0, 0.0);
+	glColor3fv(RED);
+	mglDrawCone(o.mVec, h, 4);
+
+
 	glBegin(GL_LINES);
       
 	// X Axis, red

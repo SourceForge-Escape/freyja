@@ -111,14 +111,14 @@ prof:
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC="$(WIN32_CC)" \
+	CPP="$(WIN32_CPP) " \
+	LD="$(WIN32_LD) " \
 	MODULE="hel0" \
 	SHLIBEXT=".dll" \
-	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/ -DHELEXPORTSCLASS" \
-	LD_FLAGS="$(LD_FLAGS)" \
-	LIBS="-lm -lstdc++ -L/usr/local/lib"
+	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR) -DHELEXPORTSCLASS" \
+	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
+	LIBS="-lm -lstdc++"
 
 
 depend:

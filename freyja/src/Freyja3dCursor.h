@@ -25,10 +25,13 @@
 
 
 #include <hel/math.h>
+#include <hel/Ray.h>
 #include <mstl/stack.h>
 
 #include "freyja_events.h"
 #include "FreyjaState.h"
+
+const vec3_t gCursorDrawSz = { 0.5f, 2.4f, 1.744f };
 
 
 class Freyja3dCursor
@@ -111,7 +114,7 @@ class Freyja3dCursor
 		mRot = Quaternion();
 	}
 
-	unsigned short int mAxis;
+	uint16 mAxis;
 
 	Vector3d mPos;
 

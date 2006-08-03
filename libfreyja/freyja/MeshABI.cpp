@@ -109,6 +109,22 @@ Mesh *freyjaGetCurrentMeshClass()
 }
 
 
+// Useful for 0.9.3 ABI functions
+Vertex *freyjaGetCurrentMeshVertexClass(index_t vertexIndex)
+{
+	Mesh *mesh = freyjaGetCurrentMeshClass();
+	return (mesh) ? mesh->GetVertex(vertexIndex) : NULL;
+}
+
+
+// Useful for 0.9.3 ABI functions
+Face *freyjaGetCurrentMeshFaceClass(index_t faceIndex)
+{
+	Mesh *mesh = freyjaGetCurrentMeshClass();
+	return (mesh) ? mesh->GetFace(faceIndex) : NULL;
+}
+
+
 index_t freyjaModelMeshVertexCreate(index_t modelIndex, index_t meshIndex,
 									vec3_t xyz, vec3_t uvw, vec3_t nxyz)
 {
@@ -149,7 +165,18 @@ index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex)
 void freyjaModelMeshPolygonAddTexCoord1i(index_t modelIndex, index_t meshIndex, 
 										 index_t polygonIndex, index_t texcoordIndex)
 {
-	DEBUG_MSG("freyjaModelMeshPolygonAddTexCoord1i, Not Implmented.");	
+	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
+
+	if (mesh)
+	{
+		Face *f = mesh->GetFace(polygonIndex);
+
+		if (f)
+		{
+			f->mFlags |= Face::fPolyMappedTexCoords;
+			f->mTexCoordIndices.pushBack(texcoordIndex);
+		}
+	}
 }
 
 
@@ -175,7 +202,7 @@ void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex,
 			{
 				if (face->mIndices[i] == vertexIndex)
 				{
-					DEBUG_MSGF("freyjaModelMeshPolygonAddVertex1i, Tried to insert duplicate vertex into face[%i].  %i  %i", polygonIndex, face->mIndices[i], vertexIndex);
+					MARK_MSGF("freyjaModelMeshPolygonAddVertex1i, Tried to insert duplicate vertex into face[%i].  %i  %i", polygonIndex, face->mIndices[i], vertexIndex);
 					return;
 				}
 			}
@@ -227,7 +254,7 @@ void freyjaMeshTransform(index_t meshIndex, uint32 frame,
 
 	if (mesh == NULL)
 	{
-		DEBUG_MSGF("Tried to transform invalid mesh[%i]", meshIndex);
+		MARK_MSGF("Tried to transform invalid mesh[%i]", meshIndex);
 		return;
 	}
 
@@ -354,10 +381,18 @@ void freyjaGetVertexPolygonRef(Vector<long> &polygons)
 }
 
 
-
 index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
 {
-	BUG_ME("Not Implemented");
+	MARK_MSG("Obsolete function call.");
+
+	Mesh *mesh = freyjaGetCurrentMeshClass();
+
+	if (mesh)
+	{
+		vec3_t uvw = {u, v, 0.0f };
+		return mesh->CreateTexCoord(uvw);
+	}
+
 	return INDEX_INVALID;
 }
 
@@ -687,7 +722,13 @@ void freyjaPolygonExtrudeQuad(index_t polygonIndex, vec3_t normal)
 
 void freyjaPolygonAddVertex1i(index_t polygonIndex, index_t vertexIndex)
 {
-	BUG_ME("Not Implemented");
+	MARK_MSG("Obsolete function call");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+
+	if (f)
+	{
+		f->mIndices.pushBack(polygonIndex);
+	}
 }
 
 
@@ -820,13 +861,23 @@ int freyjaVertexExtrude(index_t vertexIndex, vec_t midpointScale, vec3_t normal)
 
 void freyjaPolygonAddTexCoord1i(index_t polygonIndex, index_t texcoordIndex)
 {
-	BUG_ME("Not Implemented");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		f->mTexCoordIndices.pushBack(texcoordIndex);
+	}
 }
 
 
 void freyjaPolygonSetMaterial1i(index_t polygonIndex, index_t materialIndex)
 {
-	BUG_ME("Not Implemented");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		f->mMaterial = materialIndex;
+	}
 }
 
 
@@ -1024,27 +1075,68 @@ index_t freyjaMeshVertexCreate3f(index_t meshIndex, index_t groupIndex,
 
 uint32 freyjaGetPolygonVertexCount(index_t polygonIndex)
 {
-	BUG_ME("Not Implemented");
-	return 0;
+	MARK_MSG("Obsolete function call.");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	return f ? f->mIndices.size() : 0;
 }
 
 
 uint32 freyjaGetPolygonTexCoordCount(index_t polygonIndex)
 {
-	BUG_ME("Not Implemented");
+	MARK_MSG("Obsolete function call.");
+
+	Mesh *mesh = freyjaGetCurrentMeshClass();
+
+	if (mesh)
+	{
+		Face *f = mesh->GetFace(polygonIndex);
+
+		if (f && f->mFlags & Face::fPolyMappedTexCoords)
+		{
+			return f->mTexCoordIndices.size();
+		}
+	}
+
 	return 0;
 }
 
 
 void freyjaGetVertexTexcoord2fv(index_t vertexIndex, vec2_t uv)
 {
-	BUG_ME("Not Implemented");
+	MARK_MSG("Obsolete function call.");
+
+	Mesh *mesh = freyjaGetCurrentMeshClass();
+
+	if (mesh)
+	{
+		Vertex *v = mesh->GetVertex(vertexIndex);
+
+		if (v)
+		{
+			vec3_t uvw;
+			mesh->GetTexCoord(v->mTexCoordIndex, uvw);
+			uv[0] = uvw[0];
+			uv[1] = uvw[1];
+		}
+	}
 }
 
 
 void freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz)
 {
-	BUG_ME("Not Implemented");
+	MARK_MSG("Obsolete function call.");
+
+	Mesh *mesh = freyjaGetCurrentMeshClass();
+
+	if (mesh)
+	{
+		Vertex *v = mesh->GetVertex(vertexIndex);
+
+		if (v)
+		{
+			mesh->GetTexCoord(v->mNormalIndex, nxyz);
+		}
+	}
 }
 
 
@@ -1090,8 +1182,8 @@ index_t freyjaGetVertexWeightCount(index_t vertexIndex)
 
 index_t freyjaGetVertexFlags(index_t vertexIndex)
 {
-	BUG_ME("Not Implemented");
-	return 0;
+	Vertex *v = freyjaGetCurrentMeshVertexClass(vertexIndex);
+	return v ? v->mFlags : 0;
 }
 
 
@@ -1270,35 +1362,66 @@ index_t freyjaGetMeshVertexGroupIndex(index_t meshIndex, uint32 element)
 
 index_t freyjaGetPolygonVertexIndex(index_t polygonIndex, uint32 element)
 {
-	BUG_ME("Not Implemented");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		return f->mIndices[element];
+	}
+
 	return 0;
 }
 
 
 index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element)
 {
-	BUG_ME("Not Implemented");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		return f->mTexCoordIndices[element];
+	}
+
 	return 0;
 }
 
 
 index_t freyjaGetPolygonMaterial(index_t polygonIndex)
 {
-	BUG_ME("Not Implemented");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		return f->mMaterial;
+	}
+
 	return 0;
 }
 
 
 index_t freyjaGetPolygonFlags(index_t polygonIndex)
 {
-	BUG_ME("Not Implemented");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		return f->mFlags;
+	}
+
 	return 0;
 }
 
 
 uint32 freyjaGetPolygonEdgeCount(index_t polygonIndex)
 {
-	BUG_ME("Not Implemented");
+	MARK_MSG("Obsolete function call.");
+	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
+	
+	if (f)
+	{
+		return f->mIndices.size();
+	}
+
 	return 0;
 }
 
@@ -1320,7 +1443,7 @@ void freyjaModelTransformTexCoord(index_t modelIndex, index_t texcoordIndex,
 
 void freyjaModelClear(index_t modelIndex)
 {
-	BUG_ME("Not fully Implemented");
+	MARK_MSG("Not using model class\n");
 
 	// Currently there is no multimodel while egg is being used
 	freyjaSkeletonPoolClear();

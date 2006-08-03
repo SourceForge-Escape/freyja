@@ -405,6 +405,13 @@ private:
 	 ------------------------------------------------------*/
 
 
+	void SelectCursorAxis(vec_t vx, vec_t vy);
+	/*------------------------------------------------------
+	 * Pre  : vx, vy are mouse coords adjusted for viewports
+	 * Post : Sets selected cursor 'axis' X Y Z
+	 *
+	 ------------------------------------------------------*/
+
 	void SelectObject(vec_t mouseX, vec_t mouseY);
 	void UnselectObject(vec_t mouseX, vec_t mouseY);
 	//void SelectObject(vec_t x, vec_t y, freyja_plane_t plane);
