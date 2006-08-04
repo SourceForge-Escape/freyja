@@ -337,6 +337,7 @@
 					(hbox 1 0 0 1 0
 						(label "Select edit plane: "  0.0 0.5)
 						(optionmenu		eEvent	eNone
+							(menu_item	"Free                "	eEvent	FREYJA_MODE_PLANE_FREE)
 							(menu_item	"Front               "	eEvent	FREYJA_MODE_PLANE_XY)
 				  			(menu_item	"Side"	eEvent	FREYJA_MODE_PLANE_YZ)
 				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)))
@@ -427,6 +428,10 @@
 						(label "KeyFrame #" 0.0 0.5) 
 						(spinbutton 0 0 500 eGroupIterator))
 
+					(hbox 1 0 0 1 0
+						(label "Bone Name: " 0.0 0.5) 
+						(textbox eSetCurrentBoneName))
+
 					(animation_tab_hack)
 
 			)  ;; end tab
@@ -465,66 +470,9 @@
 						(button "Flag alpha" eEvent eCurrentFaceFlagAlpha))))
 
 
-			  (tab "Animation" eModeAnimation
-
-				(hbox 1 0 0 1 0 
-					(toolbar
-						(toolbar_button "gtk-new" "New"	
-							"New document"		eEvent eNewFile)
-
-						(toolbar_button "gtk-open" "Open..."
-							"Open document..."	eEvent  eOpenFile)
-
-						(toolbar_button "gtk-save-as" "Save"
-							"Save document"		eEvent  eSaveFile)))
-
-					;(hbox 1 0 0 1 0 
-					;	(label "Background color" 0.0 0.5)
-					;	(colorbutton 1 eColorBackground))
-					;
-					;(hbox 1 0 0 1 0 
-					;	(label "Grid color" 0.0 0.5)
-					;	(colorbutton 1 eColorGrid))
-
-					(hbox 1 0 0 1 0
-						(label "Mesh Frame/Group #" 0.0 0.5) 
-						(spinbutton 0 0 500 eGroupIterator))
-
-
-
-					;(animation_tab_hack)
-
-					(hbox 1 0 0 1 0 
-						(label "Select Bone" 0.0 0.5)
-						(spinbutton 0 0 200 eBoneIterator))
-
-					(hbox 1 0 0 1 0
-						(label "Bone Name: " 0.0 0.5) 
-						(textbox eSetCurrentBoneName))
-
-					;(hbox 1 0 0 1 0
-					;	(label "Bone Parent: " 0.0 0.5) 
-					;	(spinbutton 0 0 200 eSetCurrentBoneParent))
-
-					(hbox 1 0 0 1 0 
-						(label "To be replaced with transformbox:" 0.0 0.5))
-
-					;; Replace usage with generic transform box later
-					(hbox 1 0 0 1 0 
-						(label "Translate" 0.0 0.5) 
-						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 510)
-						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 511)
-						(spinbutton2 0.0 -10000.0 10000.0 1.0 1.0 0.1 1 512))
-
-					;; Replace usage with generic transform box later
-					(hbox 1 0 0 1 0 
-						(label "Rotate" 0.0 0.5) 
-						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 520)
-						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 521)
-						(spinbutton2 0.0 -180.0 180.0 0.25 1.0 0.1 3 522))
-
-				) ;; Tab animation
-
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+				;; Material tab 
+				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 				(tab "Material" eModeMaterial
 

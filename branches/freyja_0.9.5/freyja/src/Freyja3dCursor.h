@@ -30,8 +30,7 @@
 
 #include "freyja_events.h"
 #include "FreyjaState.h"
-
-const vec3_t gCursorDrawSz = { 0.5f, 2.4f, 1.744f };
+#include "FreyjaOpenGL.h"
 
 
 class Freyja3dCursor
@@ -45,12 +44,82 @@ class Freyja3dCursor
 		Invisible
 	} Freyja3dCursorFlags_t;
 
+	const static vec_t min = 0.5f, mid = 2.4f, max = 1.744f;
+
+
 	Freyja3dCursor()
 	{
 		Reset();
 	}
 
 	~Freyja3dCursor() { }
+
+	bool CheckForRayCollision(Ray &r)
+	{
+		bool ret = false;
+
+		switch (GetMode())
+		{
+		case Freyja3dCursor::Scale:
+			break;
+
+
+		case Freyja3dCursor::Rotation:
+			break;
+
+		case Freyja3dCursor::Translation:
+			break;
+
+		default:
+			ret = false;
+		}
+
+		return ret;
+	}
+
+	void Display()
+	{
+		glPushMatrix();
+		glTranslatef(mPos.mVec[0], mPos.mVec[1], mPos.mVec[2]);
+
+		switch (GetMode())
+		{
+		case Freyja3dCursor::Scale:
+			glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			Draw3dCursorScale(min, mid, max);
+			glPopAttrib();
+			break;
+
+
+		case Freyja3dCursor::Rotation:
+			glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			Draw3dCursorRot(min, mid, max);
+			glPopAttrib();
+			break;
+
+		case Freyja3dCursor::Translation:
+			glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			Draw3dCursorLoc(min, mid, max);
+			glPopAttrib();
+			break;
+
+		default:
+		case Freyja3dCursor::Invisible:
+			break;
+		}
+
+		glPopMatrix();
+	}
+
 
 	void SetMode(Freyja3dCursorFlags_t n)
 	{
@@ -122,7 +191,156 @@ class Freyja3dCursor
 
 	Quaternion mRot;
 
+
  private:
+
+	void Draw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max)
+	{
+		static int drawList = -1;
+
+		if (drawList == -1)
+		{
+			drawList = glGenLists(1);
+			glNewList(drawList, GL_COMPILE);
+			mglDrawAxisWithCones(min, mid, max, 8);
+			glEndList();
+		}
+		else
+		{
+			glCallList(drawList);
+		}
+	}
+
+	void Draw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max)
+	{
+		vec3_t center = {0.0f, 0.0f, 0.0f};
+		vec_t radius = max * 4.0f;// / 2.0f;
+		const uint32 count = 64;
+
+		// red
+		glColor3fv(RED);
+		mglDraw3dCircle(center, radius, count, 1, true);
+
+		// green
+		glColor3fv(GREEN);
+		mglDraw3dCircle(center, radius, count, 2, true);
+
+		// blue
+		glColor3fv(BLUE);
+		mglDraw3dCircle(center, radius, count, 0, true);
+	}
+
+
+	void Draw3dCursorScale(const vec_t min, const vec_t mid, const vec_t max)
+	{
+		glBegin(GL_LINES);
+      
+		// X Axis, red
+		glColor3fv(RED);
+		glVertex3f(0.0,  0.0, 0.0);
+		glVertex3f(mid,  0.0, 0.0);
+
+		// Y Axis, green
+		glColor3fv(GREEN);	
+		glVertex3f(0.0,  mid, 0.0);
+		glVertex3f(0.0,  0.0, 0.0);	
+      
+		// Z Axis, blue
+		glColor3fv(BLUE);
+		glVertex3f(0.0,  0.0,  mid);
+		glVertex3f(0.0,  0.0,  0.0);
+		glEnd();
+
+
+		glBegin(GL_QUADS);
+      
+		// X Axis, Red box
+		glColor3fv(RED);
+		glVertex3f(mid+min,  -min, min);
+		glVertex3f(mid+min,  min, min);
+		glVertex3f(mid-min,  min, min);
+		glVertex3f(mid-min,  -min, min);
+
+		glVertex3f(mid+min,  -min, -min);
+		glVertex3f(mid+min,  min, -min);
+		glVertex3f(mid-min,  min, -min);
+		glVertex3f(mid-min,  -min, -min);
+
+		glVertex3f(mid+min,  min, -min);
+		glVertex3f(mid+min,  min, min);
+		glVertex3f(mid-min,  min, min);
+		glVertex3f(mid-min,  min, -min);
+
+		glVertex3f(mid+min,  -min, -min);
+		glVertex3f(mid+min,  -min, min);
+		glVertex3f(mid-min,  -min, min);
+		glVertex3f(mid-min,  -min, -min);
+
+		glVertex3f(mid+min,  min, -min);
+		glVertex3f(mid+min,  min, min);
+		glVertex3f(mid+min,  -min, min);
+		glVertex3f(mid+min,  -min, -min);
+
+
+		// Y Axis, green
+		glColor3fv(GREEN);	
+		glVertex3f(-min, mid+min,  min);
+		glVertex3f(min,mid+min,   min);
+		glVertex3f(min,mid-min,   min);
+		glVertex3f(-min,mid-min,   min);
+
+		glVertex3f(-min,mid+min,   -min);
+		glVertex3f(min,mid+min,   -min);
+		glVertex3f( min,mid-min,  -min);
+		glVertex3f(-min,mid-min,   -min);
+
+		glVertex3f( min,mid+min,  -min);
+		glVertex3f( min,mid+min,  min);
+		glVertex3f(min,mid-min,   min);
+		glVertex3f( min,mid-min,  -min);
+
+		glVertex3f( -min,mid+min,  -min);
+		glVertex3f( -min,mid+min,  min);
+		glVertex3f(-min,mid-min,   min);
+		glVertex3f(-min,mid-min,   -min);
+
+		glVertex3f(min,mid+min,   -min);
+		glVertex3f(min,mid+min,   min);
+		glVertex3f( -min,mid+min,  min);
+		glVertex3f(-min,mid+min,   -min);
+
+      
+		// Z Axis, blue
+		glColor3fv(BLUE);
+		glVertex3f(-min, min, mid+min);
+		glVertex3f(min,   min, mid+min);
+		glVertex3f(min,   min, mid-min);
+		glVertex3f(-min,   min, mid-min);
+
+		glVertex3f(-min,    -min, mid+min);
+		glVertex3f(min,   -min, mid+min);
+		glVertex3f( min,  -min, mid-min);
+		glVertex3f(-min,   -min, mid-min);
+
+		glVertex3f( min,  -min, mid+min);
+		glVertex3f( min,  min, mid+min);
+		glVertex3f(min,   min, mid-min);
+		glVertex3f( min,  -min, mid-min);
+
+		glVertex3f( -min,  -min, mid+min);
+		glVertex3f( -min,  min, mid+min);
+		glVertex3f(-min,   min, mid-min);
+		glVertex3f(-min,   -min, mid-min);
+
+		glVertex3f(min,   -min, mid+min);
+		glVertex3f(min,   min, mid+min);
+		glVertex3f( -min,  min, mid+min);
+		glVertex3f(-min,   -min, mid+min);
+
+
+		glEnd();
+	}
+
 
 	FreyjaState mLastState;
 

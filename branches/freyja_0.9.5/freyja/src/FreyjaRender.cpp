@@ -35,26 +35,23 @@
 #include <mgtk/ResourceEvent.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/Mesh.h>
-
-#ifdef HAVE_OPENGL
-//#   ifdef MACOSX
-//#      include <OpenGL/OpenGL.h>
-//#   else
-#      include <GL/gl.h>
-#      include <GL/glu.h>
-//#   endif
-#endif
-
+#include <freyja/MeshABI.h>
 
 #include "freyja_events.h"
 #include "FreyjaOpenGL.h"
+#include "FreyjaControl.h"
+
 #include "FreyjaRender.h"
 
 
+#define TEST_NEW_BACKEND_FORMAT 1
 #define COLORED_POLYGON -1
+#define VIEWPORT_TEST 1
+
+using namespace freyja;
+
 
 FreyjaRender *FreyjaRender::mSingleton = 0x0;
-extern FreyjaModel *gFreyjaModel;
 
 Ray FreyjaRender::mTestRay;
 
@@ -85,95 +82,7 @@ vec_t FreyjaRender::mVertexPointSize = 5.0; // 3.5;
 double gMatrix[16];
 
 
-////////////////////////////////////////////////////////////////
-// Events
-////////////////////////////////////////////////////////////////
-
-void test_patch()
-{
-	FreyjaRender::mPatchDisplayList = 1;
-	BezierPatchOpenGL::BuildOpenGLDisplayList(FreyjaModel::gTestPatch, 7);
-}
-
-void ePointJoint()
-{
-	FreyjaRender::mJointRenderType = 1;
-}
-
-void eSphereJoint()
-{
-	FreyjaRender::mJointRenderType = 2;
-}
-
-void eAxisJoint()
-{
-	FreyjaRender::mJointRenderType = 3;
-}
-
-void eLineBone()
-{
-	FreyjaRender::mBoneRenderType = 1;
-}
-
-void ePolyMeshBone()
-{
-		FreyjaRender::mBoneRenderType = 2;
-}
-
-void eSetNearHeight(vec_t f)
-{
-	FreyjaRender::mSingleton->setNearHeight(f);
-	freyja_event_gl_refresh();
-}
-
-void eSetZoomLevel(vec_t f)
-{
-	FreyjaRender::mSingleton->setNearHeight(f*20.0f);
-	freyja_event_gl_refresh();
-}
-
-void eRenderToggleBoneZClear()
-{
-	if (FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderBonesClearedZBuffer)
-		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderBonesClearedZBuffer);
-	else
-		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderBonesClearedZBuffer);
-
-	freyja_print("Bone rendering with cleared Z buffer [%s]",
-				(FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderBonesClearedZBuffer) ? "on" : "off");
-}
-
-void eRenderToggleGridZClear()
-{
-	if (FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderGridClearedZBuffer)
-		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderGridClearedZBuffer);
-	else
-		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderGridClearedZBuffer);
-
-	freyja_print("Grid rendering with cleared Z buffer [%s]",
-				(FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderGridClearedZBuffer) ? "on" : "off");
-}
-
-
-void FreyjaRenderEventsAttach()
-{
-	ResourceEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
-	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
-	ResourceEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
-	ResourceEventCallback::add("eLineBone", &eLineBone);
-	ResourceEventCallback::add("eAxisJoint", &eAxisJoint);
-	ResourceEventCallback::add("eSphereJoint", &eSphereJoint);
-	ResourceEventCallback::add("ePointJoint", &ePointJoint);
-	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
-	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
-}
-
-
-////////////////////////////////////////////////////////////////
-
-
 FreyjaRender::FreyjaRender() :
-	mModel(NULL),
 	mWidth(640),
 	mHeight(480),
 	mTextureId(0),
@@ -375,7 +284,7 @@ void FreyjaRender::drawFreeWindow()
 
 	//glPopMatrix();
 
-	mglDraw3dCursor(0.25f, 2.0f, 0.872f);
+	FreyjaControl::mInstance->GetCursor().Display();
 }
 
 
@@ -436,7 +345,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glEnable(GL_TEXTURE_2D);
 		
 		//BindTexture(mModel->getCurrentTextureIndex()+1);
-		mglApplyMaterial(mModel->getCurrentTextureIndex());
+		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedTexture());
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
@@ -572,7 +481,8 @@ void FreyjaRender::display()
 	}
 	
 	// Mongoose 2002.02.02, Cache for use in calls from here
-	mModel->getSceneTranslation(mScroll);
+	Vec3 v = FreyjaControl::mInstance->GetSceneTranslation();
+	HEL_VEC3_COPY(v.mVec, mScroll);
 	
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
 				 1.0);
@@ -581,8 +491,7 @@ void FreyjaRender::display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-#define VIEWPORT_TEST
-#ifdef VIEWPORT_TEST
+#if VIEWPORT_TEST
     GLint vp[4];
     glGetIntegerv(GL_VIEWPORT, vp);    
     long width = vp[2] / 2;
@@ -688,12 +597,12 @@ void FreyjaRender::display()
 		else
 		{
 			glPushMatrix();
-			drawWindow(mModel->getCurrentPlane());
+			drawWindow(FreyjaControl::mInstance->GetSelectedView());
 			glPopMatrix();
 		}
 #else
 		glPushMatrix();
-		drawWindow(mModel->getCurrentPlane());
+		drawWindow(FreyjaControl::mInstance->GetSelectedView());
 		glPopMatrix();
 #endif
 		break;
@@ -771,12 +680,6 @@ void FreyjaRender::setFlag(flags_t flag)
 }
 
 
-void FreyjaRender::setSceneData(FreyjaModel *model)
-{
-	mModel = model;
-}
-
-
 void FreyjaRender::setViewMode(int mode)
 {
 	mViewMode = mode;
@@ -836,398 +739,190 @@ void FreyjaRender::renderLights()
 	}
 }
 
-#define TEST_NEW_BACKEND_FORMAT 1
-#if TEST_NEW_BACKEND_FORMAT
-#include <freyja/FreyjaMesh.h>
-using namespace freyja;
-extern Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
-#endif
+
 void FreyjaRender::renderMesh(RenderMesh &mesh)
 {
 	const vec_t scale = 1.0001f;
 	static Vector3d u, v;
 	static RenderPolygon face;
-	//vec_t *color;
-	unsigned int i, j, n;
+	Mesh *m = freyjaModelGetMeshClass(0,0);
 
+
+	if (!m)
+		return;
+
+	glPushMatrix();
+	m->GetPosition(u.mVec);
+	glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glPointSize(mVertexPointSize);
 
 	if (mRenderMode & RENDER_POINTS)
 	{
-#if TEST_NEW_BACKEND_FORMAT
-		Mesh *m = freyjaModelGetMeshClass(0,0);
+		Vertex *vertex;
+		vec_t *array = m->GetVertexArray();
 
-		if (m)
+		glBegin(GL_POINTS);
+			
+		for (uint32 i = 0; i < m->GetVertexCount(); ++i)
 		{
-			Vertex *vertex;
+			vertex = m->GetVertex(i);
 
+			if (vertex)
+			{
+				(vertex->mFlags & Vertex::fSelected) ?
+				glColor3fv(mColorVertexHighlight) :
+				glColor3fv(mColorVertex);
+#if 0
+				m->GetVertexPos(i, v.mVec);
+				glVertex3fv(v.mVec);
+#else
+				glVertex3fv(array+vertex->mVertexIndex*3);
+#endif
+			}
+		}
+
+		glEnd();
+	}
+
+
+	// Render faces	
+
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		Face *f = m->GetFace(i);
+
+		if (!f) 
+			continue;
+
+		/* Render face as wireframe */
+		if ( mRenderMode & RENDER_WIREFRAME )
+		{
+			glBegin(GL_LINE_LOOP);
+			glColor3fv(mColorWireframeHighlight);
+
+			for (uint32 j = 0; j < f->mIndices.size(); ++j)
+			{
+				m->GetVertexPos(f->mIndices[j], v.mVec);
+				v *= scale; // Scale out a little to avoid z-fighting
+				glVertex3fv(v.mVec);
+			}
+				
+			glEnd();
+		}
+	}
+
+	glPopAttrib();
+
+
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		Face *f = m->GetFace(i);
+
+		if (!f) 
+			continue;
+#if 0
+		/* Render face as wireframe */
+		if ( mRenderMode & RENDER_WIREFRAME )
+		{
 			glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_BLEND);
-			glPointSize(mVertexPointSize);
 
-			glBegin(GL_POINTS);
-			
-			for (i = 0; i < m->GetVertexCount(); ++i)
+			glBegin(GL_LINE_LOOP);
+			glColor3fv(mColorWireframeHighlight);
+
+			for (uint32 j = 0; j < f->mIndices.size(); ++j)
 			{
-				vertex = m->GetVertex(i);
-
-				if (vertex)
-				{
-					(vertex->mFlags & Vertex::fSelected) ?
-					glColor3fv(mColorVertexHighlight) :
-					glColor3fv(mColorVertex);
-					//glVertex3fv(v.mVec);
-
-					m->GetVertexPos(i, v.mVec);
-					//glColor3fv(mColorVertex);
-					glVertex3fv(v.mVec);
-				}
+				m->GetVertexPos(f->mIndices[j], v.mVec);
+				v *= scale; // Scale out a little to avoid z-fighting
+				glVertex3fv(v.mVec);
 			}
-
+				
 			glEnd();
-			//glPointSize(mDefaultPointSize);
 			glPopAttrib();
 		}
 #endif
-	}	
-
-
-#if TEST_NEW_BACKEND_FORMAT
-		Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
-
-		if ( m )
-		{
-			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
-			{
-				Face *f = m->GetFace(i);
-
-				if (!f) 
-					continue;
-
-				/* Render face as wireframe */
-				if ( mRenderMode & RENDER_WIREFRAME )
-				{
-					glPushAttrib(GL_ENABLE_BIT);
-					glDisable(GL_TEXTURE_2D);
-					glDisable(GL_LIGHTING);
-					glDisable(GL_BLEND);
-
-					glBegin(GL_LINE_LOOP);
-					glColor3fv(mColorWireframeHighlight);
-
-					for (j = 0; j < f->mIndices.size(); ++j)
-					{
-						m->GetVertexPos(f->mIndices[j], v.mVec);
-						v *= scale; // Scale out a little to avoid z-fighting
-						glVertex3fv(v.mVec);
-					}
-				
-					glEnd();
-					glPopAttrib();
-				}
-
-				/* Render face with material, color, or something */
-				if (mRenderMode & RENDER_FACE)
-				{
-					if (mRenderMode & RENDER_TEXTURE)
-					{
-						glEnable(GL_TEXTURE_2D);
-					}
-
-					for (j = 0; j < f->mIndices.size(); ++j)
-					{
-						//glTexCoord2fv(t.mVec);
-						//glNormal3fv(n.mVec);
-						
-						m->GetVertexPos(f->mIndices[j], v.mVec);
-						glVertex3fv(v.mVec);
-					}
-
-					if (f->mFlags & Face::fSelected)
-					{
-						glColor3fv(RED);
-					}
-					else
-					{
-						glColor3fv(WHITE);
-					}
-
-					mglApplyMaterial(f->mMaterial);
-					glBegin(GL_POLYGON);
-
-					if (f->mFlags & Face::fPolyMappedTexCoords)
-					{
-						for (j = 0; j < f->mIndices.size(); ++j)
-						{
-							m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-							glTexCoord2fv(v.mVec);
-							m->GetNormal(f->mIndices[j], v.mVec);
-							glNormal3fv(v.mVec);
-							m->GetVertexPos(f->mIndices[j], v.mVec);
-							glVertex3fv(v.mVec);
-						}
-					}
-					else
-					{
-						for (j = 0; j < f->mIndices.size(); ++j)
-						{
-							m->GetTexCoord(f->mIndices[j], v.mVec);
-							glTexCoord2fv(v.mVec);
-							m->GetNormal(f->mIndices[j], v.mVec);
-							glNormal3fv(v.mVec);
-							m->GetVertexPos(f->mIndices[j], v.mVec);
-							glVertex3fv(v.mVec);
-						}
-					}
-
-					glEnd();
-				}
-
-			}
-		}
 
 		/* Render face with material, color, or something */
 		if (mRenderMode & RENDER_FACE)
 		{
-			if (mRenderMode & RENDER_TEXTURE) // Now implies material
+			if (mRenderMode & RENDER_TEXTURE)
 			{
 				glEnable(GL_TEXTURE_2D);
-				mglApplyMaterial(0); // material!
 			}
 
-			for (i = 0, n = m->GetFaceCount(); i < n; ++i)
+			for (uint32 j = 0; j < f->mIndices.size(); ++j)
 			{
-				Face *f = m->GetFace(i);
+				//glTexCoord2fv(t.mVec);
+				//glNormal3fv(n.mVec);
+						
+				m->GetVertexPos(f->mIndices[j], v.mVec);
+				glVertex3fv(v.mVec);
+			}
 
-				if (!f) continue;
+			if (f->mFlags & Face::fSelected)
+			{
+				glColor3fv(RED);
+			}
+			else
+			{
+				glColor3fv(WHITE);
+			}
 
-				mglApplyMaterial(freyjaGetCurrentMaterial());
+			mglApplyMaterial(f->mMaterial);
+			glBegin(GL_POLYGON);
 
-				glBegin(GL_POLYGON);
-
-				for (j = 0; j < f->mIndices.size(); ++j)
+			if (f->mFlags & Face::fPolyMappedTexCoords)
+			{
+				for (uint32 j = 0; j < f->mIndices.size(); ++j)
 				{
-					//glTexCoord2fv(t.mVec);
-					//glNormal3fv(n.mVec);
+					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+					glTexCoord2fv(v.mVec);
+					m->GetNormal(f->mIndices[j], v.mVec);
+					glNormal3fv(v.mVec);
 					m->GetVertexPos(f->mIndices[j], v.mVec);
 					glVertex3fv(v.mVec);
 				}
-				
-				glEnd();
 			}
+			else
+			{
+				for (uint32 j = 0; j < f->mIndices.size(); ++j)
+				{
+					m->GetTexCoord(f->mIndices[j], v.mVec);
+					glTexCoord2fv(v.mVec);
+					m->GetNormal(f->mIndices[j], v.mVec);
+					glNormal3fv(v.mVec);
+					m->GetVertexPos(f->mIndices[j], v.mVec);
+					glVertex3fv(v.mVec);
+				}
+			}
+			
+			glEnd();
 		}
-
-
-	if (mRenderMode & RENDER_TEXTURE)
-	{
-		glDisable(GL_TEXTURE_2D);
+		
 	}
 
-#else
-
-	if (mesh.getPolygonCount())
-	{
-		if (mRenderMode & RENDER_TEXTURE)
-		{
-			glEnable(GL_TEXTURE_2D);
-		}
-		
-		if (mRenderMode & RENDER_MATERIAL)
-		{
-			// FIXME: mesh.material
-			mglApplyMaterial(freyjaGetCurrentMaterial());
-		}
-
-		color = mColorWireframe;
-
-		if ((int)mesh.id == (int)mModel->getCurrentMesh())
-		{
-			mRenderMode |= fHightlightPolygonWireframe;
-			color = mColorWireframeHighlight;
-		}
-
-		// Setup GL state here for faces
-		glLineWidth(mDefaultLineWidth*2.0f);
-
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-
-
-		// FIXME Cached array access instead of functional facade
-		for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
-		{
-			if (mesh.getPolygon(i, mesh.frame, face))
-			{
-				/* Render wireframe */
-				if (mRenderMode & RENDER_WIREFRAME)
-				{
-					glColor3fv(color);
-					glBegin(GL_LINE_LOOP);
-
-					for (j = 0; j < face.count; ++j)
-					{
-						u = face.vertices[j];
-						u *= scale;
-
-						glVertex3fv(u.mVec);
-					}
-	  
-					glEnd();
-				}
-
-				// Render normals
-				if (mRenderMode & RENDER_NORMALS)
-				{
-					glBegin(GL_LINES);
-					glColor3f(0.2, 0.2, 0.8);
-
-					for (j = 0; j < face.count; ++j)
-					{
-						u = face.vertices[j];
-						v = face.normals[j];
-						v *= (2 * (1 / mZoom));
-						v += u;
-
-						glVertex3fv(u.mVec);
-						glVertex3fv(v.mVec);
-					}
-		
-					glEnd();
-				}
-			}
-		}
-
-		glPopAttrib();
-
-		/* Render face with material, color, or something */
-		if (mRenderMode & RENDER_FACE)
-		{
-			if (mRenderMode & RENDER_TEXTURE) // Now implies material
-			{
-				glEnable(GL_TEXTURE_2D);
-
-			for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
-			{
-				if (mesh.getPolygon(i, mesh.frame, face))
-				{
-					// FIXME - move to pass2
-					if (face.flags & fPolygon_Alpha)  
-						continue;
-
-					mglApplyMaterial(face.material); // material!
-
-					switch (face.count)
-					{
-					case 1:
-						glBegin(GL_POINTS); // error
-						break;
-					case 2:
-						glBegin(GL_LINES); // error
-						break;
-					case 3:
-						glBegin(GL_TRIANGLES);
-						break;
-					case 4:
-						glBegin(GL_QUADS);
-						break;
-					default:
-						glBegin(GL_POLYGON);
-					}
-
-					for (j = 0; j < face.count; ++j)
-					{
-						if (face.material == COLORED_POLYGON)
-						{
-							glColor4fv(face.colors[j]);
-						}
-						else
-						{
-							glColor3fv(WHITE);
-						}
-
-						glTexCoord2fv(face.texcoords[j].mVec);
-						glNormal3fv(face.normals[j].mVec);
-						glVertex3fv(face.vertices[j].mVec);
-					}
-
-					glEnd();
-				}
-			}
-			}
-			else // Fake color
-			{
-			for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
-			{
-				if (mesh.getPolygon(i, mesh.frame, face))
-				{
-					mglApplyMaterial(face.material); // material!
-
-					switch (face.count)
-					{
-					case 1:
-						glBegin(GL_POINTS); // error
-						break;
-					case 2:
-						glBegin(GL_LINES); // error
-						break;
-					case 3:
-						glBegin(GL_TRIANGLES);
-						break;
-					case 4:
-						glBegin(GL_QUADS);
-						break;
-					default:
-						glBegin(GL_POLYGON);
-					}
-
-					for (j = 0; j < face.count; ++j)
-					{
-						glColor4f(face.texcoords[j].mVec[0], 
-								  face.texcoords[j].mVec[1], 0.5, 1.0);
-						glVertex3fv(face.vertices[j].mVec);
-					}
-
-					glEnd();
-				}
-			}				
-			}
-		}
-		
-		if ((int)mesh.id == (int)mModel->getCurrentMesh())
-		{
-			mRenderMode ^= fHightlightPolygonWireframe;
-		}
-		
-		if (mRenderMode & RENDER_TEXTURE)
-		{
-			glDisable(GL_TEXTURE_2D);
-		}
-	}
-#endif
+	glPopMatrix();
 }
 
 
 void FreyjaRender::renderModel(RenderModel &model)
 {
-	Vector<unsigned int> *list;
+	//Vector<unsigned int> *list;
 	RenderMesh rmesh;
-	vec3_t min, max;
-	vec3_t *xyz;
+	//vec3_t min, max;
+	//vec3_t *xyz;
 	//int32 meshIndex = mModel->getCurrentMesh();
 	uint32 count, i;
 
 
 	glPushMatrix();
-
-	/* Render patch test -- this should be model specific later */ 
-	if (FreyjaRender::mPatchDisplayList > 0)
-	{
-		glCallList(FreyjaModel::gTestPatch.displayList);
-		BezierPatchOpenGL::DrawPatch(FreyjaModel::gTestPatch);
-	}
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
@@ -1238,10 +933,12 @@ void FreyjaRender::renderModel(RenderModel &model)
 	 * eg mModel->getCurrentGroup() -> model.index */
 	if (mRenderMode & RENDER_BBOX && model.getMeshCount() > 0)
 	{
+#if 0
 		/* Render bounding box */
 		freyjaGetMeshFrameBoundingBox(mModel->getCurrentMesh(),
 									  mModel->getCurrentGroup(), min, max);
 		renderBox(min, max);
+#endif
 	}
 
 	if (mRenderMode & RENDER_POINTS)
@@ -1276,6 +973,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	}    
 
 
+#if 0
 	/* Render bounding box selection */
 	mModel->getVertexSelection(min, max, &list);
 
@@ -1304,6 +1002,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 		glEnd();
 		glPointSize(mDefaultPointSize);
 	}
+#endif
 
 	glPopAttrib();
 
@@ -1311,7 +1010,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	/* Render meshes */
 	for (i = 0, count = model.getMeshCount(); i < count; ++i)
 	{
-		if (model.getMesh(i, rmesh, mModel->getCurrentGroup()))
+		if (model.getMesh(i, rmesh, 0))
 			renderMesh(rmesh);
 	}
 
@@ -1332,163 +1031,13 @@ void FreyjaRender::renderModel(RenderModel &model)
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 
-		FreyjaRender::mSelectedBone = mModel->getCurrentBone();
+		FreyjaRender::mSelectedBone = FreyjaControl::mInstance->GetSelectedBone();
 		renderSkeleton(model.getSkeleton(), 0, mZoom);
 
 		glPopAttrib();
 	}
 
 	glPopMatrix();
-}
-
-
-void FreyjaRender::renderPolygon(RenderPolygon &face)
-{
-	static Vector3d u, v;
-	static unsigned int i;
-	const vec_t scale = 1.0001f;
-
-	/* Render wireframe */
-	if (mRenderMode & RENDER_WIREFRAME)
-	{
-		glLineWidth(mDefaultLineWidth);
-
-		// Update wireframe color
-		if (face.id == (int)mModel->getCurrentPolygon())
-		{
-			glColor3fv(RED);
-		}
-		else if (mRenderMode & fHightlightPolygonWireframe)
-		{
-			glColor3fv(mColorWireframeHighlight);
-		}
-		else
-		{
-			glColor3fv(mColorWireframe);
-		}
-
-
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-
-		glBegin(GL_LINE_LOOP);
-
-		for (i = 0; i < face.count; ++i)
-		{
-			u = face.vertices[i];
-			u *= scale;
-
-			glVertex3fv(u.mVec);
-		}
-	  
-		glEnd();
-
-		glPopAttrib();
-	}
-
-	// Render normals, remove this for speed -- move up to model or mesh
-	if (mRenderMode & RENDER_NORMALS)
-	{
-		glBegin(GL_LINES);
-		glColor3f(0.2, 0.2, 0.8);
-	
-		for (i = 0; i < face.count; ++i)
-		{
-			u = face.vertices[i];
-			v = face.normals[i];
-			v *= (2 * (1 / mZoom));
-			v += u;
-
-			glVertex3fv(u.mVec);
-			glVertex3fv(v.mVec);
-		}
-		
-		glEnd();
-	}
-
-	/* Render face with material, color, or something */
-	if (mRenderMode & RENDER_FACE)
-	{
-		if (mRenderMode & RENDER_TEXTURE)
-		{
-			glEnable(GL_TEXTURE_2D);
-		}
-
-		// Call shader/texture ( no shader support yet )
-		if (mRenderMode & RENDER_TEXTURE && 
-			face.material != COLORED_POLYGON)
-		{
-			if (mRenderMode & RENDER_MATERIAL)
-			{
-				//glPushAttrib(GL_ENABLE_BIT);
-				mglApplyMaterial(face.material);
-			}
-			else
-			{
-				BindTexture(face.material + 1);
-			}
-		}
-		else
-		{
-			BindTexture(0);//COLORED_POLYGON);
-			glDisable(GL_TEXTURE_2D);
-		}
-
-		glColor3fv(WHITE);
-
-		switch (face.count)
-		{
-		case 1:
-			glBegin(GL_POINTS); // error
-			break;
-		case 2:
-			glBegin(GL_LINES); // error
-			break;
-		case 3:
-			glBegin(GL_TRIANGLES);
-			break;
-		case 4:
-			glBegin(GL_QUADS);
-			break;
-		default:
-			glBegin(GL_POLYGON);
-		}
-
-		for (i = 0; i < face.count; ++i)
-		{
-			if (mRenderMode & RENDER_NORMAL)
-			{
-				glNormal3fv(face.normals[i].mVec);
-			}
-
-			if (face.material == COLORED_POLYGON)
-			{
-				glColor4fv(face.colors[i]);
-			}
-			else if (mRenderMode & RENDER_TEXTURE)
-			{
-				glColor3f(1.0, 1.0, 1.0);
-				glTexCoord2fv(face.texcoords[i].mVec);
-			}
-			else
-			{
-				glColor3fv(WHITE);
-				glColor4f(face.texcoords[i].mVec[0], 
-						  face.texcoords[i].mVec[1], 0.5, 1.0);
-			}
-
-			glVertex3fv(face.vertices[i].mVec);
-		}
-
-		glEnd();
-
-		if (mRenderMode & RENDER_MATERIAL)
-		{
-			//glPopAttrib();
-		}
-	}
 }
 
 
@@ -1577,8 +1126,7 @@ void FreyjaRender::renderUVWindow()
 	bool valid = false;
 	if (freyjaGetRenderModel(0, model))
 	{
-		if (model.getMesh(mModel->getCurrentMesh(), mesh, 
-						  mModel->getCurrentGroup()))
+		if (model.getMesh(FreyjaControl::mInstance->GetSelectedMesh(), mesh, 0))
 		{
 			valid = true;
 		}
@@ -1594,6 +1142,7 @@ void FreyjaRender::renderUVWindow()
 		return;
 	}
 
+#if 0
 	for (i = mModel->mUVMap.begin(), n = mModel->mUVMap.end();  i < n; ++i)
 	{
 		// Until multi model editing comes just use model[0]
@@ -1619,16 +1168,16 @@ void FreyjaRender::renderUVWindow()
 		
 		glEnd();
 	}
-
+#endif
 
 	for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
 	{
 		if (!mesh.getPolygon(i, face))
 			continue;
 
-		if (mesh.id == mModel->getCurrentMesh())
+		if (mesh.id == FreyjaControl::mInstance->GetSelectedMesh())
 		{
-			if (face.id == mModel->getCurrentPolygon())
+			if (face.id == FreyjaControl::mInstance->GetSelectedFace())
 				glColor3fv(RED);
 			else if (face.flags & fPolygon_Alpha)  
 				glColor3fv(ORANGE);
@@ -1640,9 +1189,9 @@ void FreyjaRender::renderUVWindow()
 			glColor3fv(mColorWireframe);
 		}
 		
-		if (face.material != (int)mModel->getCurrentTextureIndex())
+		if (face.material != (int)FreyjaControl::mInstance->GetSelectedTexture())
 		{
-			if (mesh.id == mModel->getCurrentMesh())
+			if (mesh.id == FreyjaControl::mInstance->GetSelectedMesh())
 			{
 				glColor3fv(GREEN);
 			}
@@ -1671,7 +1220,7 @@ void FreyjaRender::renderUVWindow()
 		
 		for (j = 0; j < face.count; ++j)
 		{
-			if ((int)mModel->getCurrentTextureIndex() == face.material)
+			if ((int)FreyjaControl::mInstance->GetSelectedTexture() == face.material)
 			{
 				switch (j)
 				{
@@ -1849,6 +1398,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	case PLANE_ZY:
 		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
+	default:
+		;
 	}
 
 	glLineWidth(2.0);
@@ -1872,6 +1423,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		glTranslatef(mScroll[2], mScroll[1], 0.0);
 		glRotatef(90.0, 0.0, 1.0, 0.0);
 		break;
+	default:
+		;
 	}
 
 	glPushMatrix();
@@ -1906,7 +1459,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		renderModel(model);
 	}
 
-	mglDraw3dCursor(0.5f, 2.4f, 1.744f);
+	FreyjaControl::mInstance->GetCursor().Display();
 
 	glPopMatrix();
 }

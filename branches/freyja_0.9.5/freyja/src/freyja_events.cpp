@@ -34,7 +34,6 @@
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 
-#include "FreyjaModel.h"
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
 #include "freyja_events.h"
@@ -47,6 +46,82 @@ Resource gResource;
 FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
 
+
+// FIXME Move to freyja_event?
+#include <mgtk/mgtk_events.h>
+extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
+extern int gSkelTreeWidgetIndex;
+
+mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
+								mgtk_tree_t *tree)
+{
+	uint32 i, boneChild, count;
+
+
+	if (!freyjaIsBoneAllocated(rootIndex))
+	{
+		freyja_print("!generateSkeletalUI> ERROR: NULL skeletal bone!\n");
+		return 0x0;
+	}
+
+	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
+	const char *rootName = freyjaGetBoneNameString(rootIndex);
+	uint32 rootSkelBID = freyjaGetBoneSkeletalBoneIndex(rootIndex);
+
+	if (tree == 0x0)
+	{
+		tree = new mgtk_tree_t;
+		snprintf(tree->label, 64, "root");	
+		tree->parent = 0x0;
+	}
+	else
+	{
+		snprintf(tree->label, 64, "bone%03i", rootSkelBID);
+	}
+
+	if (rootName[0])
+	{
+		snprintf(tree->label, 64, "%s", rootName);
+	}
+
+	tree->id = rootIndex;
+	tree->numChildren = rootChildCount;
+	tree->children = 0x0;
+
+#ifdef DEBUG_BONE_LOAD
+	printf("-- %s : %i/%i children\n",  
+		   tree->label, tree->numChildren, rootChildCount);
+#endif
+
+	if (tree->numChildren == 0)
+		return tree->parent;
+
+	tree->children = new mgtk_tree_t[tree->numChildren+1];
+
+	for (count = 0, i = 0; i < rootChildCount; ++i)
+	{
+		boneChild = freyjaGetBoneChild(rootIndex, i);
+
+		if (freyjaIsBoneAllocated(boneChild))
+		{
+			tree->children[count].parent = tree;
+			generateSkeletalUI(skelIndex, boneChild, &tree->children[count++]);
+		}
+	}
+
+	return (tree->parent) ? tree->parent : tree;
+}
+
+
+void UpdateSkeletonUI_Callback(uint32 skelIndex)
+{
+	mgtk_tree_t *tree;
+
+	tree = generateSkeletalUI(skelIndex, 
+							  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
+
+	mgtk_event_update_tree(gSkelTreeWidgetIndex, tree);
+}
 
 int freyja_get_event_id_by_name(char *symbol)
 {
@@ -64,16 +139,6 @@ void setColor(vec4_t dest, vec4_t color)
 	dest[1] = color[1];	
 	dest[2] = color[2];	
 	dest[3] = color[3];
-}
-
-
-extern FreyjaModel *gFreyjaModel;
-void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
-{
-	if (bpp == 24)
-		gFreyjaModel->loadTextureBuffer(image, w, h, 24, Texture::RGB);
-	else if (bpp == 32)
-		gFreyjaModel->loadTextureBuffer(image, w, h, 32, Texture::RGBA);
 }
 
 
@@ -611,8 +676,8 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eRedo", &eNoImplementation);
 	ResourceEventCallback2::add("eSkeletalDeform", &eNoImplementation);
 
-	FreyjaRenderEventsAttach();
-	FreyjaModelEventsAttach();
+	FreyjaViewEventsAttach();
+	FreyjaControlEventsAttach();
 
 
 	////////////////////////////////////////////////////////////////////
@@ -843,6 +908,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
 	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
+	r.RegisterInt("FREYJA_MODE_PLANE_FREE", FREYJA_MODE_PLANE_FREE);
 
 	r.RegisterInt("FREYJA_MODE_AXIS_X", FREYJA_MODE_AXIS_X);
 	r.RegisterInt("FREYJA_MODE_AXIS_Y", FREYJA_MODE_AXIS_Y);

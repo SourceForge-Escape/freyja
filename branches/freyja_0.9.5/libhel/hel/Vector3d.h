@@ -111,6 +111,7 @@ class Vector3d
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Get(vec3_t xyz) { HEL_VEC3_COPY(mVec, xyz); }
 	void getXYZ(vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 

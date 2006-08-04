@@ -34,6 +34,10 @@
  =====================================================================
 
  20060803 Mongoose
+ - Major rewrite/refactor of MVC into a View and Controller to be used
+   as a template for the new Plugin Arch style control scheme
+ - Merging FreyjaControl and FreyjaModel into a single class, and will
+   then break it up into new InterfacePlugins as needed
  - Crash fixes
  - Lots of refactoring 
  - New 3d cursor geometery to look more 'pro'
