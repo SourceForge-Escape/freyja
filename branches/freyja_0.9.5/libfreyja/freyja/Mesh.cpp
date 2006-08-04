@@ -169,6 +169,7 @@ void Mesh::GetVertexArrayPos(index_t vertexIndex, vec3_t xyz)
 }
 
 
+#if 0
 void Mesh::GetVertexPos(index_t vertexIndex, vec3_t xyz)
 {
 	Vertex *vert = GetVertex(vertexIndex);
@@ -178,6 +179,8 @@ void Mesh::GetVertexPos(index_t vertexIndex, vec3_t xyz)
 		GetVertexArrayPos(vert->mVertexIndex, xyz);
 	}
 }
+#endif
+
 
 Vertex *Mesh::GetVertex(index_t vertexIndex)
 {

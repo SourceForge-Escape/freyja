@@ -751,6 +751,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	if (!m)
 		return;
 
+	vec_t *array = m->GetVertexArray();
+
 	glPushMatrix();
 	m->GetPosition(u.mVec);
 	glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
@@ -764,7 +766,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	if (mRenderMode & RENDER_POINTS)
 	{
 		Vertex *vertex;
-		vec_t *array = m->GetVertexArray();
 
 		glBegin(GL_POINTS);
 			
@@ -790,8 +791,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	}
 
 
-	// Render faces	
-
+	// Render wireframe faces	
 	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 	{
 		Face *f = m->GetFace(i);
@@ -819,52 +819,22 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	glPopAttrib();
 
 
-	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	/* Render solid face with material, color, or whatever you got */
+	if (mRenderMode & RENDER_FACE)
 	{
-		Face *f = m->GetFace(i);
+		uint32 material = 99999;
 
-		if (!f) 
-			continue;
-#if 0
-		/* Render face as wireframe */
-		if ( mRenderMode & RENDER_WIREFRAME )
+		if (mRenderMode & RENDER_TEXTURE)
 		{
-			glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_BLEND);
-
-			glBegin(GL_LINE_LOOP);
-			glColor3fv(mColorWireframeHighlight);
-
-			for (uint32 j = 0; j < f->mIndices.size(); ++j)
-			{
-				m->GetVertexPos(f->mIndices[j], v.mVec);
-				v *= scale; // Scale out a little to avoid z-fighting
-				glVertex3fv(v.mVec);
-			}
-				
-			glEnd();
-			glPopAttrib();
+			glEnable(GL_TEXTURE_2D);
 		}
-#endif
 
-		/* Render face with material, color, or something */
-		if (mRenderMode & RENDER_FACE)
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
-			if (mRenderMode & RENDER_TEXTURE)
-			{
-				glEnable(GL_TEXTURE_2D);
-			}
+			Face *f = m->GetFace(i);
 
-			for (uint32 j = 0; j < f->mIndices.size(); ++j)
-			{
-				//glTexCoord2fv(t.mVec);
-				//glNormal3fv(n.mVec);
-						
-				m->GetVertexPos(f->mIndices[j], v.mVec);
-				glVertex3fv(v.mVec);
-			}
+			if (!f) 
+				continue;
 
 			if (f->mFlags & Face::fSelected)
 			{
@@ -875,7 +845,12 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				glColor3fv(WHITE);
 			}
 
-			mglApplyMaterial(f->mMaterial);
+			if ( f->mMaterial != material )
+			{
+				mglApplyMaterial(f->mMaterial);
+				material = f->mMaterial;
+			}
+
 			glBegin(GL_POLYGON);
 
 			if (f->mFlags & Face::fPolyMappedTexCoords)
@@ -924,6 +899,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 
 	glPushMatrix();
 
+#if 0
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_BLEND);
@@ -933,47 +909,12 @@ void FreyjaRender::renderModel(RenderModel &model)
 	 * eg mModel->getCurrentGroup() -> model.index */
 	if (mRenderMode & RENDER_BBOX && model.getMeshCount() > 0)
 	{
-#if 0
 		/* Render bounding box */
 		freyjaGetMeshFrameBoundingBox(mModel->getCurrentMesh(),
 									  mModel->getCurrentGroup(), min, max);
 		renderBox(min, max);
-#endif
 	}
 
-	if (mRenderMode & RENDER_POINTS)
-	{
-#if 0
-		/* Render bounding box */
-		//mModel->getMeshBoundingBox(mModel->getCurrentGroup(), min, max);
-		//renderBox(min, max);
-
-		/* Render actual vertices */
-		count = freyjaGetMeshVertexGroupVertexCount(meshIndex, 0);
-
-		if (count > 0)
-		{
-			glPointSize(mDefaultPointSize);
-			glColor3fv(mColorVertexHighlight);
-			glBegin(GL_POINTS);
-
-			for (i = 0; i < count; ++i)
-			{
-				xyz = freyjaGetVertexXYZ(freyjaGetMeshVertexGroupVertexIndex(meshIndex, 0, i));
-
-				if (xyz)
-				{
-					glVertex3fv(*xyz);
-				}
-			}
-  
-			glEnd();
-		}
-#endif
-	}    
-
-
-#if 0
 	/* Render bounding box selection */
 	mModel->getVertexSelection(min, max, &list);
 
@@ -1002,9 +943,9 @@ void FreyjaRender::renderModel(RenderModel &model)
 		glEnd();
 		glPointSize(mDefaultPointSize);
 	}
-#endif
 
 	glPopAttrib();
+#endif
 
 
 	/* Render meshes */
