@@ -345,11 +345,11 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 			break;
 
 		case PLANE_XZ: // Top
-			r.mOrigin = Vec3(x, y - 100, -z);
+			r.mOrigin = Vec3(x, y + 100, -z);
 			r.mDir = Vec3(0, -1, 0);
 			break;
 
-		case PLANE_ZY: // Side FIXME
+		case PLANE_ZY: // Side
 			r.mOrigin = Vec3(x - 100, y, z);
 			r.mDir = Vec3(1, 0, 0);
 			break;
@@ -3078,7 +3078,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					return;
 				}
 
-				o = Vec3(0, 0, Freyja3dCursor::mid*-1) + mCursor.mPos;
+				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
 
 				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
 				{
