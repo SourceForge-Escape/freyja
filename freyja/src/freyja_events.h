@@ -221,6 +221,7 @@ typedef enum {
 	FREYJA_MODE_PLANE_XY,
 	FREYJA_MODE_PLANE_XZ,
 	FREYJA_MODE_PLANE_YZ,
+	FREYJA_MODE_PLANE_FREE,
 	FREYJA_MODE_AXIS_X,
 	FREYJA_MODE_AXIS_Y,
 	FREYJA_MODE_AXIS_Z,
@@ -456,5 +457,7 @@ void freyja_refresh_material_interface();
 void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp);
 
 void freyja_plugin_generic(const char *symbol, void *something);
+
+void UpdateSkeletonUI_Callback(uint32 skelIndex);
 
 #endif

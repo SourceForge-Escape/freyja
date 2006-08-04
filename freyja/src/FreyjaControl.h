@@ -34,34 +34,51 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
+#include <freyja/FreyjaPrinter.h>
 #include <mstl/String.h>
 #include <mstl/Vector.h>
 #include <mgtk/Resource.h>
 
-#include "FreyjaModel.h"
-#include "FreyjaRender.h"
 #include "freyja_events.h"
+#include "FreyjaRender.h"
 #include "Texture.h"
+#include "Freyja3dCursor.h"
 
 
 class FreyjaControl
 {
  public:
 
-	typedef enum {
-		RESERVED = 1
-	} OptionFlags;
-
-
-	typedef enum {                              /* Editor modes */
-		TEXTURE_EDIT_MODE = 0, 
-		ANIMATION_EDIT_MODE,
-		MAP_EDIT_MODE,
-		MODEL_EDIT_MODE,
-		MATERIAL_EDIT_MODE
+	/* Each of these control schemes will have it's own control class later */
+	typedef enum {        
+		eScheme_UV = 0,
+		eScheme_Model,
+		eScheme_Material
 		
-	} EditorMode;
+	} ControlScheme;
 
+
+	typedef enum {
+		TransformMesh        = 0,
+		TransformVertexFrame = 1,
+		TransformScene       = 2,
+		TransformBone        = 3,
+		TransformPoint,
+		TransformSelectedVertices,
+		TransformFace
+	} transform_t;
+
+
+	typedef enum {
+		fPolyMappedTexCoords = 1,
+		fDeformBoneVertices  = 2,
+		fLoadTextureInSlot   = 4,
+		fLoadMaterialInSlot  = 8
+
+	} options_t;
+
+
+	/* Old event format enums */
 	typedef enum {                              /* Editor event modes */
 		modeNone = 1,
 		MESH_MOVE_CENTER,
@@ -86,6 +103,23 @@ class FreyjaControl
 		modeUnselect
 		
 	} EventMode;
+
+
+	class FreyjaControlPrinter : public FreyjaPrinter
+	{
+	public:
+
+		virtual void errorArgs(char *format, va_list *args)
+		{
+			freyja_print_args(format, args);
+		}
+
+
+		virtual void messageArgs(char *format, va_list *args)
+		{
+			freyja_print_args(format, args);
+		}
+	};
 
 
 	////////////////////////////////////////////////////////////
@@ -119,19 +153,125 @@ class FreyjaControl
 	// Public Properties
 	////////////////////////////////////////////////////////////
 
-	float GetZoom();
+	ControlScheme GetControlScheme() { return mControlScheme; }
+	void SetControlScheme(ControlScheme scheme) { mControlScheme = scheme; }
 	/*------------------------------------------------------
 	 * Pre  : 
+	 * Post : Alters the way input is handled for this control
+	 ------------------------------------------------------*/
+
+	uint32 GetFaceEdgeCount() { return mFaceEdgeCount; }
+	void SetFaceEdgeCount(uint32 i) { if (i>2) mFaceEdgeCount = i; }
+	uint32 mFaceEdgeCount;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns face 'edge count' for draw poly from 
+	 *        points interface.  ( An odd, yet popular feature. ) 
+	 ------------------------------------------------------*/
+
+	const Vec3 &GetSceneTranslation() { return mSceneTrans; }
+	void SetSceneTranslation(const Vec3 &v) { mSceneTrans = v; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns xyz offset of the scene
+	 ------------------------------------------------------*/
+	
+	uint32 GetSelectedAnimation() { return mSelectedAnimation; }
+	void SetSelectedAnimation(uint32 i) { mSelectedAnimation = i; }
+	uint32 mSelectedAnimation;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected animation index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedBone() { return mSelectedBone; }
+	void SetSelectedBone(uint32 i) 
+	{ if (i < freyjaGetCount(FREYJA_BONE)) mSelectedBone = i; }
+	uint32 mSelectedBone;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected bone index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedFace() { return mSelectedFace; }
+	void SetSelectedFace(uint32 i) 
+	{ if (i < freyjaGetCount(FREYJA_POLYGON)) mSelectedFace = i; }
+	uint32 mSelectedFace;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected face index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedKeyFrame() { return mSelectedKeyFrame; }
+	void SetSelectedKeyFrame(uint32 i) { mSelectedKeyFrame = i; }
+	uint32 mSelectedKeyFrame;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected keyframe index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedMesh() { return mSelectedMesh; }
+	void SetSelectedMesh(uint32 i) 
+	{
+		if (i < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(i))
+			mSelectedMesh = i;
+	}
+	uint32 mSelectedMesh;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected mesh index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedSkeleton() { return mSelectedSkeleton; }
+	void SetSelectedSkeleton(uint32 i) 
+	{ if (i < freyjaGetCount(FREYJA_SKELETON)) mSelectedSkeleton = i; }
+	uint32 mSelectedSkeleton;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected skeleton index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedTexCoord() { return mSelectedTexCoord; }
+	void SetSelectedTexCoord(uint32 i) 
+	{ if (i < freyjaGetCount(FREYJA_TEXCOORD)) mSelectedTexCoord = i; }
+	uint32 mSelectedTexCoord;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected texcoord index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedTexture() { return mSelectedTexture; }
+	void SetSelectedTexture(uint32 i) { mSelectedTexture = i; }
+	uint32 mSelectedTexture;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected texture index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedVertex() { return mSelectedVertex; }
+	void SetSelectedVertex(uint32 i) 
+	{ if (i < freyjaGetCount(FREYJA_VERTEX)) mSelectedVertex = i; }
+	uint32  mSelectedVertex;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected vertex
+	 ------------------------------------------------------*/
+
+	freyja_plane_t GetSelectedView() { return mSelectedView; }
+	void SetSelectedView(freyja_plane_t p) { mSelectedView = p; }
+	freyja_plane_t  mSelectedView;
+	/*------------------------------------------------------
+	 * Pre  : - TEMP USE ONLY -
+	 * Post : Returns currently selected view
+	 ------------------------------------------------------*/
+
+	vec_t GetZoom();
+	void SetZoom(vec_t zoom);
+	/*------------------------------------------------------
+	 * Pre  : Set() <zoom> is a number greater than 0.0
 	 * Post : Returns current viewing zoom of scene
 	 ------------------------------------------------------*/
-
-
-	void SetZoom(float zoom);
-	/*------------------------------------------------------
-	 * Pre  : <zoom> is a number greater than 0.0
-	 * Post : Sets current viewing zoom of scene
-	 ------------------------------------------------------*/
-
+	
 
 
 	////////////////////////////////////////////////////////////
@@ -146,6 +286,29 @@ class FreyjaControl
 	 *        entire context.
 	 ------------------------------------------------------*/
 
+	Freyja3dCursor &GetCursor() { return mCursor; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	bool SaveModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Writes model to disk
+	 * Post : Returns true if sucessful
+	 ------------------------------------------------------*/
+
+	bool SaveMaterial(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Writes material to disk
+	 * Post : Returns true if sucessful
+	 ------------------------------------------------------*/
+
+	String TransformModeToString(transform_t t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns String for transform type
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -174,7 +337,7 @@ class FreyjaControl
 	/*------------------------------------------------------
 	 * Pre  : Generic event signal is valid and value is
 	 *        valid for the generic event
-	 *
+	 *mControlScheme
 	 * Post : Event is handled internally 
 	 *
 	 *-- History ------------------------------------------
@@ -249,6 +412,12 @@ class FreyjaControl
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	bool LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
+						  uint32 bpp, Texture::ColorMode type);
+	/*------------------------------------------------------
+	 * Pre  : Don't pass in invalid/mismatched data
+	 * Post : Loads a texture given a pixel buffer
+	 ------------------------------------------------------*/
 
 	bool mouseEvent(int btn, int state, int mod, int x, int y);
 	/*--------------------------------------------
@@ -275,6 +444,18 @@ class FreyjaControl
 	 *            input
 	 --------------------------------------------*/
 
+	bool LoadModel(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Reads model from disk
+	 * Post : Returns true if sucessful
+	 ------------------------------------------------------*/
+
+	bool LoadMaterial(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Reads material from disk
+	 * Post : Returns true if sucessful
+	 ------------------------------------------------------*/
+
 	void LoadResource();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -284,6 +465,12 @@ class FreyjaControl
 	 *
 	 * 2000.09.10: 
 	 * Mongoose - Created from GooseEgg
+	 ------------------------------------------------------*/
+
+	bool LoadTexture(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Reads material from disk
+	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
 	void Display()
@@ -298,6 +485,17 @@ class FreyjaControl
 		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
 		mRender->resizeContext(width, height);
 	}
+
+
+	void CursorStatePush() { mCursor.Push(); }
+	
+	
+	void CursorStatePop() { mCursor.Pop(); }
+
+	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
+
+
+	static FreyjaControl *mInstance;
 
 
 private:
@@ -352,6 +550,105 @@ private:
 	 * 2004.08.01: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	// Collection of some hasty merging 
+	bool SaveKeyFrame(char const *filename)
+	{
+		char filename2[512];
+		snprintf(filename2, 512, "%s-keyframe.smd", filename);
+		return SaveModel(filename2);
+	}
+
+	// FIXME: Temp here to let this work during rewrite so it could be uploaded to public svn to fix revision corruption in public svn
+	void InitTexture()
+	{
+		unsigned char rgba[4] = {255, 255, 255, 255};
+		mTexture.reset();
+		mTexture.setMaxTextureCount(64);
+		mTexture.setFlag(Texture::fUseMipmaps);
+		mTexture.loadColorTexture(rgba, 32, 32);
+		mTextureId = 1;
+	}
+
+	int32 mTextureId;
+
+	void MeshMove(vec_t xx, vec_t yy);
+
+	void SetFaceMaterial(index_t faceIndex, index_t material);
+
+	void CreatePolyMappedUVMap(int i) {BUG_ME("Not implemented in this build");}
+
+	void CursorMove(float xx, float yy);
+
+	void GetBoneRotation(float *x, float *y, float *z)
+	{
+		vec3_t xyz;
+
+		freyjaGetBoneRotationEuler3fv(GetSelectedBone(), xyz);
+		*x = HEL_RAD_TO_DEG(xyz[0]);
+		*y = HEL_RAD_TO_DEG(xyz[1]);
+		*z = HEL_RAD_TO_DEG(xyz[2]);
+		freyja_print("%f %f %f", xyz[0], xyz[1], xyz[2]);
+	}
+
+	void Transform(int mode, freyja_transform_action_t action, 
+				   float x, float y, float z) { BUG_ME("Not implemented"); }
+	/*------------------------------------------------------
+	 * Pre  : mode is {FRAME, MESH, SCENE, BONE, etc}
+	 *        action is { fTranslate, fRotate, fScale, etc }
+	 *        x, y, z are in degrees or units
+	 *
+	 * Post : Transform is performed
+	 *
+	 * Notes: FRAME  : Transform current frame of current mesh
+	 *        MESH   : Transform current mesh
+	 *        SCENE  : Transform entire scene
+	 *        BONETAG: Transform current bone tag
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void UpdateSkeletalUI() { UpdateSkeletonUI_Callback(GetSelectedSkeleton()); }
+
+	const char *GetBoneName(unsigned int boneIndex)
+	{
+		return (freyjaIsBoneAllocated(boneIndex)) ? freyjaGetBoneNameString(boneIndex) : 0x0;
+	}
+
+	void SetBoneName(unsigned int boneIndex, const char *name)
+	{
+		if (freyjaIsBoneAllocated(boneIndex) && name && name[1])
+		{
+			freyjaBoneName(boneIndex, name);
+			freyja_print("bone[%i].name = '%s'", boneIndex, name);
+			UpdateSkeletalUI();
+		}
+	}
+
+	void PrintInfo()
+	{
+		freyja_print("%d bones, %d meshes, %d polygons, %d vertices",
+					 freyjaGetCount(FREYJA_BONE), 
+					 freyjaGetCount(FREYJA_MESH), 
+					 freyjaGetCount(FREYJA_POLYGON), 
+					 freyjaGetCount(FREYJA_VERTEX));
+	}
+
+	void SetBoneRotation(float x, float y, float z)
+	{
+		vec3_t xyz = {HEL_DEG_TO_RAD(x), HEL_DEG_TO_RAD(y), HEL_DEG_TO_RAD(z)};
+		freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
+	}
+
+
+	void Clear()
+	{
+
+		mCursor.Reset();
+		mCleared = true;
+	}
 
 	void deleteSelectedObject();
 	/*------------------------------------------------------
@@ -449,16 +746,26 @@ private:
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
 
-
-	String mResourceFilename;	            /* Resource file for control */
+	Texture mTexture;                       /* Collection of OpenGL/Texture
+											   utils */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
 
-	Resource *mResource;                    /* Resource system */
+	Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
 
-	FreyjaModel *mModel;                    /* Data model */
+	FreyjaControlPrinter mPrinter;          /* Reroute text msg from backend */
+
+	String mResourceFilename;	            /* Resource file for control */
+
+	Vec3 mSceneTrans;                       /* Offset of scene in 3 space */
+
+	Freyja3dCursor mCursor;                 /* Special mouse input handler */
+
+	Resource *mResource;                    /* Resource system */
 	
 	FreyjaRender *mRender;                  /* OpenGL renderer */
+
+	uint32 mFlags;
 
 	unsigned int mLastEvent, mLastCommand;  /* The last command pair recieved*/
 
@@ -466,7 +773,7 @@ private:
 
 	int mMouseState;                        /* Cached mouse state event */
 
-	EditorMode mEditorMode;                 /* Mode of the editor */
+	ControlScheme mControlScheme;           /* Current control scheme in use */
 
 	EventMode mEventMode;                   /* Mode of generic event handler */
 	
@@ -484,9 +791,13 @@ private:
 
 	bool mCleared;
 
+	bool mAllowBoneNameUpdate;
+
 	float mGenMeshHeight;
 	unsigned long mGenMeshCount;
 	unsigned long mGenMeshSegements;
 };
+
+void FreyjaControlEventsAttach();
 
 #endif

@@ -52,11 +52,13 @@ using namespace mstl;
 
 typedef vec_t bbox2_t[3][3];
 
+
 typedef enum { 
 	
 	PLANE_XY = 0, 
 	PLANE_ZY = 1, 
-	PLANE_XZ = 2
+	PLANE_XZ = 2,
+	PLANE_FREE
 
 } freyja_plane_t;
 
@@ -68,15 +70,7 @@ class FreyjaModel
 {
 public:
 
-	typedef enum {
-		TransformMesh        = 0,
-		TransformVertexFrame = 1,
-		TransformScene       = 2,
-		TransformBone        = 3,
-		TransformPoint,
-		TransformSelectedVertices,
-		TransformFace
-	} transform_t;
+
 
 	typedef enum {
 		FL_DUMP_TEXTURE  = 1,    /* Toggle image file dumps of TR textures */
@@ -89,23 +83,6 @@ public:
 		fLoadMaterialInSlot  = 128
 
 	} option_flag_t;
-
-
-	class FreyjaModelPrinter : public FreyjaPrinter
-	{
-	public:
-
-		virtual void errorArgs(char *format, va_list *args)
-		{
-			freyja_print_args(format, args);
-		}
-
-
-		virtual void messageArgs(char *format, va_list *args)
-		{
-			freyja_print_args(format, args);
-		}
-	};
 
 
 
@@ -140,14 +117,6 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	static String TransformModeToString(FreyjaModel::transform_t t);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns String for transform type
-	 *        
-	 ------------------------------------------------------*/
-
-
 	unsigned int getAnimationFrameCount(unsigned int animationIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -179,39 +148,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getCurrentAnimation();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current animation index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentAnimationFrame();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current animation frame index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentBone();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current bone index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	static unsigned int getFlags();
 	/*------------------------------------------------------
 	 * Pre  :
@@ -223,126 +159,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int getCurrentGroup();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current texcoord index for
-	 *        polymapped texcoords
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentMesh();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current mesh index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void getCurrentMeshCenter(vec3_t center);
-
-	freyja_plane_t getCurrentPlane();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current edit plane
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentPolygon();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current texcoord index for
-	 *        polymapped texcoords
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentPolygonEdgeCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current edge count for polygon
-	 *        creation interally in FreyjaModel
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentSkeleton();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current skeleton index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getTexureId();
-
-	unsigned int getCurrentTexCoord();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current texcoord index for
-	 *        polymapped texcoords
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentTextureIndex();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current texture index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentVertex();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the current vertex index for editing
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getCurrentVertexFrame();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns current vertex animation frame index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getModelCount();
-
 	void getMeshBoundingBox(long index, vec3_t min, vec3_t max);
 	/*------------------------------------------------------
 	 * Pre  : index is query for 'mesh' by index
@@ -352,16 +168,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void getSceneTranslation(vec3_t offset);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get the offset of the scene in X Y Z in 3 space
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.01:
-	 * Mongoose - Created, replaces old API 'Scroll' methods
-	 ------------------------------------------------------*/
 
 	void getVertexSelection(vec3_t min, vec3_t max,
 							Vector<unsigned int> **list);
@@ -409,20 +215,6 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
-
-	void adjustSceneTranslation(vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set the scene's position in 3 space
-	 *        by translating X Y Z from it's local origin
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 200?.??.??: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	//void boxSelection(vec3_t min, vec3_t max, Vector<unsigned int> &list);
 
 	void boxSelectionListBuild();
 
@@ -493,7 +285,6 @@ public:
 
 	void selectObject(transform_t type, Vector3d xyz);
 
-	void selectPatchControlPoint(Vector3d xyz);
 
 	void setBoneRotation(float pitch, float yaw, float roll);
 	/*------------------------------------------------------
@@ -519,72 +310,6 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void SetCurrentAnimation(index_t animId);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets the current animation index
-	 ------------------------------------------------------*/
-
-	void SetCurrentKeyFrame(index_t keyframe);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets the current UI keyframe index
-	 ------------------------------------------------------*/
-
-	void setCurrentBone(unsigned int index);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets the current bone index
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setCurrentGroup(unsigned int index);
-
-	void setCurrentMesh(unsigned int index);
-
-	void setCurrentPlane(freyja_plane_t p);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets the current edit plane
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setCurrentPolygon(unsigned int index);
-
-	void setCurrentPolygonEdgeCount(unsigned int count);
-	/*------------------------------------------------------
-	 * Pre  : COUNT must be between 3 and 7
-	 * Post : Sets the number of polygon vertices ( sides )
-	 *
-	 * Notes: There is no true hard limit in the polygon
-	 *        implementation, however this enforces a 
-	 *        reasonable edge count for testing complex
-	 *        polygon rendering if you so wish.
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setCurrentSkeleton(unsigned int index);
-
-	void setCurrentTexCoord(unsigned int index);
-
-	void setCurrentTextureIndex(unsigned int index);
-
-	void setCurrentVertex(unsigned int index);
-
-	void setCurrentVertexFrame(unsigned int index);
-
 	static void setFlags(option_flag_t flag, int op);
 	/*------------------------------------------------------
 	 * Pre  : The flag and operator are valid
@@ -596,22 +321,6 @@ public:
 	 * 2000.09.09: 
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	void setPolygonMaterial(long polygonIndex, long material);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets mesh[<meshIndex>] and all it's polygon's
-	 *        material ids to <material>
-	 *
-	 * Notes: 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.12.17: 
-	 * Mongoose - Created, an improved API for TextureShift()
-	 ------------------------------------------------------*/
-
-	void setSceneTranslation(vec_t x, vec_t y, vec_t z);
 
 	static bool toggleFlag(option_flag_t flag);
 
@@ -658,12 +367,6 @@ public:
 	/// FIXME: These should use an event mapping and/or selection system
 	/////////////////////////////////////////////////////////////////////////
 
-	void movePatchControlPoint(float xx, float yy);
-	void selectPatchControlPoint(float xx, float yy);
-
-	void CursorPush();
-	void CursorPop();
-	void CursorMove(float xx, float yy);
 
 	void VertexNew(float xx, float yy);
 	void VertexMove(float xx, float yy);
@@ -701,10 +404,6 @@ public:
 
 	// FIXME: It's clear why this is bad for the API
 
-	Vector<int32> mUVMap;               /* 'Texture polygon' grouping */
-
-	static BezierPatch gTestPatch;      /* Testing for curved surfaces */
-
 
 	// FIXME: Temp here to let this work during rewrite so it could be uploaded to public svn to fix revision corruption in public svn
 	void initTexture()
@@ -721,6 +420,8 @@ public:
 
 	Texture mTexture;
 
+	static FreyjaModel *mInstance;
+
 
 private:
 
@@ -736,15 +437,11 @@ private:
 
 	static unsigned int mFlags;     /* Stores option flags as bitmap */
 
-	FreyjaModelPrinter mPrinter;    /* Used to reroute logging for backend */
-
 	Vector<unsigned int> mList;     /* Temp generic vertex list buffer */
 
 	bbox2_t mSelectBBox;            /* 3d selection box using 2 vertices */
 
 	freyja_plane_t mCurrentPlane;   /* Which plane view has editing control */
-
-	vec3_t mScroll;                 /* Offset of scene from origin */
 
 	unsigned int mTextureIndex;     /* Index to texture array */
 

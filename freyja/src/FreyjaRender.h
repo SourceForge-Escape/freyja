@@ -31,8 +31,6 @@
 #include <hel/Ray.h>
 #include <freyja/RenderModel.h>
 
-#include "FreyjaModel.h"
-
 
 enum view_mode {                   /* View|Edit mode */     
 	VIEWMODE_MODEL_EDIT       = 1,
@@ -51,8 +49,17 @@ enum rotate_flags {
 void getOpenGLViewport(int *viewportXYWH); // int[4]
 void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
-void FreyjaRenderEventsAttach();
+void FreyjaViewEventsAttach();
 
+
+typedef enum { 
+	
+	PLANE_XY = 0, 
+	PLANE_ZY = 1, 
+	PLANE_XZ = 2,
+	PLANE_FREE
+
+} freyja_plane_t;
 
 
 class FreyjaRender
@@ -240,12 +247,6 @@ public:
 
 	void setNearHeight(vec_t scale) { mScaleEnv = scale; resizeContext(mWidth, mHeight); } 
 
-	void setSceneData(FreyjaModel *model);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Hook into data model for the scene
-	 *
-	 ------------------------------------------------------*/
 
 	void setViewMode(int mode);
 	/*------------------------------------------------------
@@ -448,8 +449,6 @@ private:
 	 * 2002.02.28:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
-
-	FreyjaModel *mModel;                       /* Scene data model */
 
 	unsigned int mWidth;                       /* Width of context */
 
