@@ -819,6 +819,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	glPopAttrib();
 
 
+	glPushAttrib(GL_ENABLE_BIT);
+
 	/* Render solid face with material, color, or whatever you got */
 	if (mRenderMode & RENDER_FACE)
 	{
@@ -882,6 +884,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		}
 		
 	}
+
+	glPopAttrib();
 
 	glPopMatrix();
 }
@@ -973,7 +977,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 		glDisable(GL_BLEND);
 
 		FreyjaRender::mSelectedBone = FreyjaControl::mInstance->GetSelectedBone();
-		renderSkeleton(model.getSkeleton(), 0, mZoom);
+		renderSkeleton(model.getSkeleton(), 0, 1.0f);
 
 		glPopAttrib();
 	}
