@@ -70,6 +70,7 @@ class FreyjaControl
 
 
 	typedef enum {
+		fNone                = 0,
 		fPolyMappedTexCoords = 1,
 		fDeformBoneVertices  = 2,
 		fLoadTextureInSlot   = 4,
@@ -651,7 +652,7 @@ private:
 		mCleared = true;
 	}
 
-	void deleteSelectedObject();
+	void DeleteSelectedObject();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -747,10 +748,15 @@ private:
 	 * Post     : Process mouse input in edit mode
 	 --------------------------------------------*/
 
-	Texture mTexture;                       /* Collection of OpenGL/Texture
-											   utils */
+
+	uint32 mFlags;                          /* Option bitflags */
+
+	transform_t mTransformMode;             /* Current object type to edit */
+
+	Texture mTexture;                       /* Collection of Texture utils */
 
 	Vector<char *> mRecentFiles;            /* Recently loaded model files */
+	const static uint32 mRecentFileLimit = 7;      
 
 	Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
 
@@ -765,8 +771,6 @@ private:
 	Resource *mResource;                    /* Resource system */
 	
 	FreyjaRender *mRender;                  /* OpenGL renderer */
-
-	uint32 mFlags;
 
 	unsigned int mLastEvent, mLastCommand;  /* The last command pair recieved*/
 
@@ -785,10 +789,6 @@ private:
 	unsigned int mFileDialogMode;
 
 	bool mFullScreen;
-
-	char mScratchTextBuffer[1024];
-
-	unsigned int mTransformMode;
 
 	bool mCleared;
 

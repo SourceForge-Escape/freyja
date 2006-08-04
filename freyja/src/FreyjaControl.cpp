@@ -51,7 +51,6 @@ using namespace freyja;
 #define DEBUG_SCREEN_TO_WORLD 0
 #define DEBUG_VIEWPORT_MOUSE 0
 
-unsigned int gRecentFileLimit = 7; // This is becoming a plugin soon
 void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
@@ -65,10 +64,12 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 
 FreyjaControl::FreyjaControl(Resource *r) :
 	mSelectedTexture(0),
+	mFlags(fNone),
+	mTransformMode(TransformScene),
 	mResourceFilename("freyja-dev.mlisp"),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
 	mResource(r),
-	mFlags(0x0),
+	mCleared(true),
 	mAllowBoneNameUpdate(true)
 {
 	/* Search local paths first ( mostly debugging ) */
@@ -119,7 +120,6 @@ FreyjaControl::FreyjaControl(Resource *r) :
 	SetControlScheme(eScheme_Model);
 	SetZoom(1.0f);
 	mEventMode = modeNone;
-	mTransformMode = TransformScene;
 	mLastEvent = eEvent;
 	mLastCommand = eSelect;
 	mFullScreen = false;
@@ -456,19 +456,17 @@ void FreyjaControl::CursorMove(float xx, float yy)
 
 bool FreyjaControl::LoadMaterial(const char *filename)
 {
-	int32 mIndex;
+	int32 matIndex;
 
 
 	if (mFlags & fLoadMaterialInSlot)  
 	{
-		mIndex = freyjaGetCurrentMaterial();
+		matIndex = freyjaGetCurrentMaterial();
 	}
 	else
 	{
-		mIndex = freyjaMaterialCreate();
+		matIndex = freyjaMaterialCreate();
 	}
-
-	//unsigned int m_flags; // FIXME pass to renderer
 
 	float ambient[4];          /* Ambient color */
 
@@ -481,8 +479,6 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 	float shininess;           /* Specular exponent */
 
 	unsigned int texture;      /* Texture id */
-
-	//unsigned int texture2;     /* Detail Texture id */
 
 	unsigned int blend_src;    /* Blend source factor */
 
@@ -595,7 +591,7 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 						buf[j+1] = 0;
 					}
 					
-					freyjaMaterialName(mIndex, buf);
+					freyjaMaterialName(matIndex, buf);
 
 					//setName(buf);
 				}
@@ -751,17 +747,15 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 
 	
 
-	freyjaMaterialAmbient(mIndex, ambient);
-	freyjaMaterialDiffuse(mIndex, diffuse);
-	freyjaMaterialSpecular(mIndex, specular);
-	freyjaMaterialEmissive(mIndex, emissive);
-	freyjaMaterialShininess(mIndex, shininess);
+	freyjaMaterialAmbient(matIndex, ambient);
+	freyjaMaterialDiffuse(matIndex, diffuse);
+	freyjaMaterialSpecular(matIndex, specular);
+	freyjaMaterialEmissive(matIndex, emissive);
+	freyjaMaterialShininess(matIndex, shininess);
 
-	freyjaMaterialTexture(mIndex, texture);
-	freyjaMaterialBlendDestination(mIndex, blend_dest);
-	freyjaMaterialBlendSource(mIndex, blend_src);
-
-	//unsigned int texture2;     /* Detail Texture id */
+	freyjaMaterialTexture(matIndex, texture);
+	freyjaMaterialBlendDestination(matIndex, blend_dest);
+	freyjaMaterialBlendSource(matIndex, blend_src);
 
 	return true;
 }
@@ -769,7 +763,7 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 
 bool FreyjaControl::SaveMaterial(const char *filename)
 {
-	int32 mIndex = freyjaGetCurrentMaterial();
+	int32 matIndex = freyjaGetCurrentMaterial();
 
 	float ambient[4];          /* Ambient color */
 	float diffuse[4];          /* Diffuse color */
@@ -782,15 +776,15 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 	unsigned int blend_dest;   /* Blend destination factor */
 	char *name;
 
-	freyjaGetMaterialAmbient(mIndex, ambient);
-	freyjaGetMaterialDiffuse(mIndex, diffuse);
-	freyjaGetMaterialSpecular(mIndex, specular);
-	freyjaGetMaterialEmissive(mIndex, emissive);
-	shininess = freyjaGetMaterialShininess(mIndex);
-	name = (char*)freyjaGetMaterialName(mIndex);
-	texture = freyjaGetMaterialTexture(mIndex);
-	blend_dest = freyjaGetMaterialBlendDestination(mIndex);
-	blend_src = freyjaGetMaterialBlendSource(mIndex);
+	freyjaGetMaterialAmbient(matIndex, ambient);
+	freyjaGetMaterialDiffuse(matIndex, diffuse);
+	freyjaGetMaterialSpecular(matIndex, specular);
+	freyjaGetMaterialEmissive(matIndex, emissive);
+	shininess = freyjaGetMaterialShininess(matIndex);
+	name = (char*)freyjaGetMaterialName(matIndex);
+	texture = freyjaGetMaterialTexture(matIndex);
+	blend_dest = freyjaGetMaterialBlendDestination(matIndex);
+	blend_src = freyjaGetMaterialBlendSource(matIndex);
 
 
 
@@ -814,9 +808,9 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 	fprintf(f, "[Material]\n");
 	fprintf(f, "Name=%s\n", name);
 
-	if (freyjaGetMaterialTextureName(mIndex))
+	if (freyjaGetMaterialTextureName(matIndex))
 	{
-		fprintf(f, "TextureName=%s\n", freyjaGetMaterialTextureName(mIndex));
+		fprintf(f, "TextureName=%s\n", freyjaGetMaterialTextureName(matIndex));
 	}
 
 	//fprintf(f, "EnableBlending=%s\n", 
@@ -1210,7 +1204,7 @@ void FreyjaControl::addRecentFilename(const char *filename)
 		insert[l] = 0;
 
 		// Bubble up hack
-		if (mRecentFiles.end() >= gRecentFileLimit)
+		if (mRecentFiles.end() >= mRecentFileLimit)
 		{
 			swap = insert;
 			n = mRecentFiles.end();
@@ -1877,6 +1871,10 @@ bool FreyjaControl::event(int command)
 			}
 			else
 			{
+				freyja_print("Crtl+S save disabled in dev build for your own good!");
+
+				return true;
+
 				if (SaveModel(mRecentFiles[mRecentFiles.end()-1]))
 					freyja_print("Model '%s' Saved",
 								 mRecentFiles[mRecentFiles.end()-1]);
@@ -2224,7 +2222,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eDelete:
-		deleteSelectedObject();
+		DeleteSelectedObject();
 		freyja_event_gl_refresh();
 		break;
 
@@ -2273,7 +2271,7 @@ bool FreyjaControl::event(int command)
 
 	case eCut:
 		if (copySelectedObject())
-			deleteSelectedObject();
+			DeleteSelectedObject();
 		freyja_event_gl_refresh();
 		break;
 	case eCopy:
@@ -2495,7 +2493,7 @@ bool FreyjaControl::event(int command)
 		break;
 	case eMeshDelete:
 		mTransformMode = TransformMesh;
-		deleteSelectedObject();
+		DeleteSelectedObject();
 		mCleared = false;
 		break;
 	case eMeshSelect:
@@ -3521,12 +3519,16 @@ bool FreyjaControl::pasteSelectedObject()
 }
 
 
-void FreyjaControl::deleteSelectedObject()
+void FreyjaControl::DeleteSelectedObject()
 {
 	switch (mTransformMode)
 	{
 	case TransformPoint:
 		mEventMode = POINT_DEL_MODE;
+		break;
+
+	case TransformFace:
+		freyjaMeshPolygonDelete(GetSelectedMesh(), GetSelectedFace());
 		break;
 
 	case TransformSelectedVertices:
@@ -3540,12 +3542,11 @@ void FreyjaControl::deleteSelectedObject()
 		break;
 
 	case TransformBone:
-		freyja_print("NOT IMPLEMENTED: Deleting Bone Tag %d", 
-					GetSelectedBone());
+		freyjaBoneDelete(GetSelectedMesh());
 		break;
 
 	case TransformMesh:
-		//MeshDel();
+		freyjaMeshDelete(GetSelectedMesh());
 		break;
 	}
 }
@@ -4448,7 +4449,7 @@ void FreyjaControl::LoadResource()
 
 	if (r.Open(filename.GetCString()))
 	{
-		for (uint32 j = 0; j < gRecentFileLimit && !r.IsEndOfFile(); ++j)
+		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
 		{
 			const char *sym = r.ParseSymbol();
 			addRecentFilename(sym);
