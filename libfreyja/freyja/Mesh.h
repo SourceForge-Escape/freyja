@@ -345,7 +345,12 @@ public:
 	 ------------------------------------------------------*/
 
 
-	void GetVertexPos(index_t vertexIndex, vec3_t xyz);
+	void GetVertexPos(index_t vertexIndex, vec3_t xyz)
+	{
+		Vertex *vert;
+		if (vertexIndex < mVertices.size() && (vert = mVertices[vertexIndex]))
+			GetVertexArrayPos(vert->mVertexIndex, xyz);
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
