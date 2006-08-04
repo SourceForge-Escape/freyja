@@ -1049,8 +1049,7 @@ void FreyjaRender::renderUVWindow()
 {
 	RenderMesh mesh;
 	RenderPolygon face;
-	float x = 0.0f, y = 0.0f;
-	unsigned int i, j, n, width, height;
+	unsigned int width, height;
 
 
 	width = getWindowWidth();
@@ -1088,6 +1087,8 @@ void FreyjaRender::renderUVWindow()
 	}
 
 #if 0
+	float x = 0.0f, y = 0.0f;
+
 	for (i = mModel->mUVMap.begin(), n = mModel->mUVMap.end();  i < n; ++i)
 	{
 		// Until multi model editing comes just use model[0]
@@ -1115,6 +1116,9 @@ void FreyjaRender::renderUVWindow()
 	}
 #endif
 
+
+
+#if 0
 	for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
 	{
 		if (!mesh.getPolygon(i, face))
@@ -1198,6 +1202,107 @@ void FreyjaRender::renderUVWindow()
 			
 		glEnd();
 	}
+#else
+	Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
+
+
+	if (!m)
+		return;
+
+	glPushMatrix();
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glPointSize(mVertexPointSize);
+
+	// Render wireframe faces	
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		Face *f = m->GetFace(i);
+		Vec3 v;
+
+		if (!f) 
+			continue;
+
+		/* Render UVs as points */
+		if ( 1 )
+		{
+			// This will do many points for each point, opt later
+			glBegin(GL_POINTS);
+			glColor3fv(mColorVertexHighlight);
+
+			if (f->mFlags & Face::fPolyMappedTexCoords)
+			{
+				for (uint32 j = 0; j < f->mIndices.size(); ++j)
+				{
+					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+					v.mVec[0] *= width;
+					v.mVec[1] *= height;
+					glVertex2fv(v.mVec);
+				}
+			}
+			else
+			{
+				for (uint32 j = 0; j < f->mIndices.size(); ++j)
+				{
+					m->GetTexCoord(f->mIndices[j], v.mVec);
+					v.mVec[0] *= width;
+					v.mVec[1] *= height;
+					glVertex2fv(v.mVec);
+				}
+			}
+				
+			glEnd();
+		}
+	}
+
+
+	// Render wireframe faces	
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		Face *f = m->GetFace(i);
+		Vec3 v;
+
+		if (!f) 
+			continue;
+
+		/* Render face as wireframe */
+		if ( mRenderMode & RENDER_WIREFRAME )
+		{
+			glBegin(GL_LINE_LOOP);
+			glColor3fv(mColorWireframeHighlight);
+
+			if (f->mFlags & Face::fPolyMappedTexCoords)
+			{
+				for (uint32 j = 0; j < f->mIndices.size(); ++j)
+				{
+					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+					v.mVec[0] *= width;
+					v.mVec[1] *= height;
+					glVertex2fv(v.mVec);
+				}
+			}
+			else
+			{
+				for (uint32 j = 0; j < f->mIndices.size(); ++j)
+				{
+					m->GetTexCoord(f->mIndices[j], v.mVec);
+					v.mVec[0] *= width;
+					v.mVec[1] *= height;
+					glVertex2fv(v.mVec);
+				}
+			}
+				
+			glEnd();
+		}
+	}
+
+	//glPopAttrib();
+
+
+#endif
 
 	DrawQuad(0.0, 0.0, width, height);
 	glPopAttrib();
