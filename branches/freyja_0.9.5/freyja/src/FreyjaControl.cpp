@@ -3399,6 +3399,11 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 	matrix4dvx16dv(inverse, rayVec, rayVector); // src, dest can be same
 	matrix4dvx16dv(inverse, rayPnt, rayOrigin); // src, dest can be same
 
+	//vec_t x = rayVector[2];
+	//rayVector[2] = rayVector[1];
+	//rayVector[1] = x;
+
+
 #if DEBUG_PICK_RAY
 	freyja_print("!%f, %f => <%f %f %f> @ %f, %f, %f\n",
 				mouseX, mouseY,

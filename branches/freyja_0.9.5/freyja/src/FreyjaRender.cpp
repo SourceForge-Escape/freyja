@@ -745,7 +745,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	const vec_t scale = 1.0001f;
 	static Vector3d u, v;
 	static RenderPolygon face;
-	Mesh *m = freyjaModelGetMeshClass(0,0);
+	Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
 
 
 	if (!m)
@@ -754,8 +754,8 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	vec_t *array = m->GetVertexArray();
 
 	glPushMatrix();
-	m->GetPosition(u.mVec);
-	glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
+	//m->GetPosition(u.mVec);
+	//glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_TEXTURE_2D);
