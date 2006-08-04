@@ -146,6 +146,19 @@ index_t freyjaModelMeshVertexCreate(index_t modelIndex, index_t meshIndex,
 	return INDEX_INVALID;
 }
 
+
+void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (mesh)
+	{
+		mesh->DeleteFace(polygonIndex);
+		freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] deleted.",
+						   gFreyjaCurrentModel, meshIndex, polygonIndex);
+	}
+}
+
 index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex)
 {
 	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);

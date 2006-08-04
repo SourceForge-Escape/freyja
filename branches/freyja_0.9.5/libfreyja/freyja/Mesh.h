@@ -651,6 +651,19 @@ public:
 		return mFaces.size() - 1;
 	}
 
+	void DeleteFace(index_t idx)
+	{
+		Face **array = mFaces.getVectorArray();
+		Face *face = GetFace(idx);
+
+		if ( face )
+		{
+			// FIXME
+			BUG_ME("This implementation doesn't clean up deps, which it prob shouldn't until vertex reference design is finalized");
+			delete face;
+			array[idx] = NULL;
+		}
+	}
 
 	vec_t *GetVertexArray()
 	{

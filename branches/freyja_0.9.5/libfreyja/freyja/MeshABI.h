@@ -323,6 +323,10 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	// 0.9.5 EXT
+
+	void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex);
+
 }
 
 
