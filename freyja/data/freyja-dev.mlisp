@@ -435,6 +435,9 @@
 					(togglebutton "Merge Texcoords" 0 eEvent eTexcoordCombine))
 				(hbox 1 0 0 1 0
 					(button "Set Mesh Material" eEvent eSetMeshTexture))
+
+				(hbox 1 0 0 1 0
+					(button "Set Selected Faces Material" eEvent eSetFacesMaterial))
 					 
 				(hbox 1 0 0 1 0 
 					(label "Material index: " 0.0 0.5) 

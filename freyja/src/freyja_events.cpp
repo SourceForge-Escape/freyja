@@ -807,6 +807,8 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eTransformBone", eTransformBone);
 	r.RegisterInt("eTransformPoint", eTransformPoint);
 
+	r.RegisterInt("eSetFacesMaterial", eSetFacesMaterial);
+
 	r.RegisterInt("eAnimationNext", eAnimationNext);
 	r.RegisterInt("eAnimationPrev", eAnimationPrev);
 	r.RegisterInt("eAnimationSlider", eAnimationSlider);
