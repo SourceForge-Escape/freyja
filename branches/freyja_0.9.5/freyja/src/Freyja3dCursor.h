@@ -176,12 +176,15 @@ class Freyja3dCursor
 
 	void Reset()
 	{
+		mSelected = false;
 		mAxis = 0; // implies X, Y screen/free virtual plane
 		mMode = Invisible;
 		mPos = Vector3d(0.0f, 0.0f, 0.0f);
 		mScale = Vector3d(1.0f, 1.0f, 1.0f);
 		mRot = Quaternion();
 	}
+
+	bool mSelected;
 
 	uint16 mAxis;
 

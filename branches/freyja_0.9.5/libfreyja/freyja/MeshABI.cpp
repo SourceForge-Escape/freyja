@@ -1216,7 +1216,12 @@ char freyjaIsMeshAllocated(index_t meshIndex)
 
 void freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz)
 {
-	BUG_ME("Not Implemented");
+	Mesh *mesh = freyjaModelGetMeshClass( gFreyjaCurrentModel, meshIndex );
+
+	if (mesh)
+	{
+		mesh->GetPosition(xyz);
+	}
 }
 
 

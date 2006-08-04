@@ -3054,6 +3054,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				if (picked)
 				{
 					mCursor.mAxis = 0;
+					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked X");
 				}
 				
@@ -3183,6 +3184,15 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 
 bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 {
+	//freyja_print("!.. %i %i", btn, state);
+
+	// We've just let go of the button that was being held down
+	if (mCursor.mSelected && !btn && !state) 
+	{
+		mCursor.mSelected = false;
+		freyja_print("! Cursor was released.");
+	}
+
 	if (MouseEdit(btn, state, mod, x, y)) return true;
 
 	EventMode mode = mEventMode;
@@ -3792,6 +3802,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		{
 			xx = x; 
 			yy = -y;
+			AdjustMouseXYForViewports(xx, yy);
 			getScreenToWorldOBSOLETE(&xx, &yy);
 			mCursor.mPos.Get(center);
 
@@ -3817,11 +3828,20 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				;
 			}
 
-			freyjaGetMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
+			// FIXME: Should only move on selected axis ( or all if [center] )
+			// for now we just assume center or 'free' move is on for testing
+			mCursor.mPos += Vec3(xf, yf, zf);
+
+			freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
 			FreyjaStateTransform *state = new
 			FreyjaStateTransform(fTransformMesh, fTranslate,
 								 GetSelectedMesh(), mCursor.mPos.mVec);
 			mCursor.ChangeState(state, Freyja3dCursor::Translation);
+
+			//MeshMove(xx, yy);
+			old_x = x;
+			old_y = y;
+			return;
 		}
 
 		
