@@ -2,7 +2,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Project: Freyja
-; Author : Terry 'Mongoose' Hendrix
+; Author : Terry 'Mongoose' Hendrix II
 ; Website: http://gooseegg.sourceforge.net
 ; Email  : mongoose@users.sourceforge.net
 ; Comment: This is a sample resource Freyja file
@@ -263,14 +263,6 @@
 
 				(label "  Zoom "  0.0 0.4) 
 				(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
-
-				;; Axis selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-				(hbox 1 0 0 1 0
-					(label "CursorAxis"  0.0 0.5)
-					(optionmenu		eEvent	eNone
-						(menu_item	"  X"	eEvent	FREYJA_MODE_AXIS_X)
-			  			(menu_item	"  Y"	eEvent	FREYJA_MODE_AXIS_Y)
-			  			(menu_item	"  Z"	eEvent	FREYJA_MODE_AXIS_Z)))
 
 				 )))
 
