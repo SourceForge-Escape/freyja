@@ -44,6 +44,18 @@ class Freyja3dCursor
 		Invisible
 	} Freyja3dCursorFlags_t;
 
+
+	typedef enum {
+
+		eNone = 0,
+		eX,
+		eY,
+		eZ,
+		eAll
+
+	} axis_t;
+
+
 	const static vec_t min = 0.5f, mid = 2.4f, max = 1.744f;
 
 
@@ -177,7 +189,7 @@ class Freyja3dCursor
 	void Reset()
 	{
 		mSelected = false;
-		mAxis = 0; // implies X, Y screen/free virtual plane
+		mAxis = eNone;
 		mMode = Invisible;
 		mPos = Vector3d(0.0f, 0.0f, 0.0f);
 		mScale = Vector3d(1.0f, 1.0f, 1.0f);
@@ -186,7 +198,7 @@ class Freyja3dCursor
 
 	bool mSelected;
 
-	uint16 mAxis;
+	axis_t mAxis;
 
 	Vector3d mPos;
 
