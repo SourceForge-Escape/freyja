@@ -2180,6 +2180,13 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
+	case eSetFacesMaterial:
+		freyja_print("Switching all of selected faces to material %i",
+					 GetSelectedMesh(), GetSelectedTexture());
+		SetMaterialForSelectedFaces(GetSelectedTexture());
+		freyja_event_gl_refresh();
+		break;
+
 	case eSetPolygonTexture:
 		freyja_print("Face to material set to %i", GetSelectedTexture());
 		SetFaceMaterial(GetSelectedFace(), GetSelectedTexture());
@@ -3541,6 +3548,27 @@ void FreyjaControl::deleteSelectedObject()
 		//MeshDel();
 		break;
 	}
+}
+
+
+void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
+{
+	Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+
+	if (!m)
+		return;
+
+	// Render wireframe faces	
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		Face *f = m->GetFace(i);
+
+		if (f && f->mFlags & Face::fSelected)
+		{
+			freyjaPolygonSetMaterial1i(i, material);
+		}
+	}   
 }
 
 

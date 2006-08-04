@@ -181,6 +181,7 @@ typedef enum {
 	eMoveBone_Z,
 
 	ePolyMapTexturePolygon,
+	eSetFacesMaterial,
 
 	eColorMaterialAmbient,
 	eColorMaterialDiffuse,

@@ -642,6 +642,7 @@ private:
 		freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
 	}
 
+	void SetMaterialForSelectedFaces(uint32 material);
 
 	void Clear()
 	{

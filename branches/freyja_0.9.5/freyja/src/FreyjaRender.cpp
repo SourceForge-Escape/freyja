@@ -1272,7 +1272,11 @@ void FreyjaRender::renderUVWindow()
 		if ( mRenderMode & RENDER_WIREFRAME )
 		{
 			glBegin(GL_LINE_LOOP);
-			glColor3fv(mColorWireframeHighlight);
+
+			if (f->mFlags & Face::fSelected)
+				glColor3fv(mColorWireframeHighlight);
+			else
+				glColor3fv(mColorWireframe);
 
 			if (f->mFlags & Face::fPolyMappedTexCoords)
 			{
