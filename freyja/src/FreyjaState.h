@@ -38,15 +38,24 @@ class FreyjaState
 {
  public:
 
+	typedef enum {
+
+		eEvent = 0,
+		eTransform = 1
+
+	} state_t;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaState()
+	FreyjaState() :
+		mState(eEvent),
+		mEvent(-1),
+		mMode(-1),
+		mIndex(INDEX_INVALID)
 	{
-		mEvent = -1;
-		mMode = -1;
-		mIndex = INDEX_INVALID;
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -85,6 +94,8 @@ class FreyjaState
 
 	void SetMode(int i) { mMode = i; }
 
+	state_t GetType() { return mState; }
+
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
@@ -110,6 +121,8 @@ class FreyjaState
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	state_t mState;
+
 	int mEvent;           /* Event to generate */
 
 	int mMode;            /* Mode of the event */
@@ -124,8 +137,9 @@ class FreyjaStateTransform : public FreyjaState
 
 	FreyjaStateTransform(freyja_transform_t transform,
 						 freyja_transform_action_t action,
-						 index_t id, vec3_t xyz) : FreyjaState()
+						 index_t id, vec3_t xyz) : FreyjaState() 
 	{
+		mState = eTransform;
 		mEvent = transform;
 		mMode = action;
 		mIndex = id;
@@ -211,7 +225,7 @@ class FreyjaStateTransform : public FreyjaState
 		return true;
 	}
 
-	virtual void operator =(FreyjaStateTransform s)
+	virtual void operator =(const FreyjaStateTransform &s)
     { 
 		mEvent = s.mEvent; 
 		mIndex = s.mIndex; 

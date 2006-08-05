@@ -2,22 +2,18 @@
 /*===========================================================================
  * 
  * Project : Freyja
- * Author  : Mongoose
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Author  : Terry 'Mongoose' Hendrix II
+ * Website : ttp://icculus.org/freyja/
+ * Email   : mongoose@icculus.org
  * Object  : FreyjaControl
  * License : No use w/o permission (C) 2000 Mongoose
  * Comments: This is the controler class for the client
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongoose@icculus.org>
  *
  *-- TODO --------------------------------------------------- 
- *
- * + Remove Egg dependence ( planes ) 
- *
- * + 3d events to Model facade
  *
  * + Command pattern event refactoring
  *
@@ -44,168 +40,6 @@
 #include "FreyjaRender.h"
 #include "Texture.h"
 #include "Freyja3dCursor.h"
-
-
-class RecentFilesControl
-{
-public:
-
-	RecentFilesControl() //:
-	//	mResourceFilename("recent_files")
-	{
-	}
-
-
-	void AddRecentFilename(const char *filename)
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Appends filename to recently opened file list
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.14: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-	{
-		bool found = false;
-		uint32 idx;
-
-		if (!filename || !filename[0] || 
-			!SystemIO::File::DoesFileExist(filename))
-		{
-			return;
-		}
-
-		for (uint32 i = mRecentFiles.begin(), n = mRecentFiles.end(); i < n; ++i)
-		{
-			if (strcmp(filename, mRecentFiles[i].GetCString()) == 0)
-			{
-				idx = i;
-				found = true;
-				break;
-			}
-		}
-
-
-		/* 'Boost' this file to top slot, push others down one */
-		if (found)
-		{
-			// Already at top, no change to menu
-			if (idx == 0)
-				return;
-
-			String swap, old;
-			uint32 n = mRecentFiles.end();
-			swap = mRecentFiles[0];
-			mRecentFiles[0] = mRecentFiles[idx];
-
-			for (uint32 i = 1; i < n; ++i)
-			{
-				if (i > idx)
-				{
-					break;
-				}
-
-				old = mRecentFiles[i];
-				mRecentFiles[i] = swap;
-				swap = old;
-			}
-		}
-		else  /* Add new file to top slot, push others down one */
-		{
-			String swap, old;
-			String insert(filename);
-
-			// Bubble up hack
-			if (mRecentFiles.end() >= mRecentFileLimit)
-			{
-				swap = insert;
-				uint32 n = mRecentFiles.end();
-				for (uint32 i = mRecentFiles.begin(); i < n; ++i)
-				{				
-					old = mRecentFiles[i];
-					mRecentFiles[i] = swap;
-					swap = old;
-				}
-			}
-			else
-			{
-				mRecentFiles.pushBack(insert);
-			}
-		}
-
-		/* Rebuild menu in order of mRecentFiles */
-		uint32 menuId = Resource::mInstance->getIntByName("eRecentFiles");
-		freyja_remove_all_items_to_menu(menuId);
-		
-		uint32 n = mRecentFiles.end();
-		for (uint32 i = mRecentFiles.begin(); i < n; ++i)
-		{
-			mgtk_append_item_to_menu2i(menuId, mRecentFiles[i].GetCString(), menuId, i);
-		}
-
-
-		/* Save recent_files to disk */
-		SystemIO::TextFileWriter w;
-
-		if (w.Open(freyja_rc_map_string("recent_files").GetCString()))
-		{
-			String swap;
-			uint32 n = mRecentFiles.end();
-			for (uint32 i = mRecentFiles.begin(); i < n; ++i)
-			{
-				swap = mRecentFiles[i];
-			
-				if (!swap.Empty())
-				{
-					w.Print("%s\n", swap.GetCString());
-				}
-			}
-
-			w.Close();
-		}
-	}
-
-
-	bool HandleEvent(uint32 value)
-	{
-		if (value < mRecentFiles.size())
-		{
-			BUG_ME("FIXME");
-			//mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-			//handleFilename(mRecentFiles[value]);
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool LoadResource()
-	{
-		/* Recent files persistance */
-		SystemIO::TextFileReader r;
-		String filename = freyja_rc_map_string("recent_files");
-
-		if (r.Open(filename.GetCString()))
-		{
-			for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
-			{
-				const char *sym = r.ParseSymbol();
-				AddRecentFilename(sym);
-			}
-		
-			r.Close();
-			return true;
-		}
-
-		return false;
-	}
-
-	const static uint32 mRecentFileLimit = 7;
-
-	Vector<String> mRecentFiles;            /* Recently loaded model files */	
-};
 
 
 class FreyjaControl
@@ -495,7 +329,7 @@ class FreyjaControl
 	 *        Currently not fully implemented.
 	 ------------------------------------------------------*/
 
-	void AddRecentFilename(const char *filename) { BUG_ME("FIXME"); }
+	void AddRecentFilename(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Appends filename to recently opened file list
@@ -562,6 +396,13 @@ class FreyjaControl
 	 *
 	 * 2000.09.10: 
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	const char *GetRecentFilename(uint32 i)
+	{ return mRecentFiles[i].GetCString(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	void handleFilename(const char *filename);
@@ -902,6 +743,13 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	bool LoadRecentFilesResource(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
 	void MotionEdit(int x, int y, freyja_plane_t plane);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
@@ -928,6 +776,9 @@ private:
 	object_type_t mObjectMode;              /* Current object type to edit */
 
 	Texture mTexture;                       /* Collection of Texture utils */
+
+	const static uint32 mRecentFileLimit = 7;
+	Vector<String> mRecentFiles;            /* Recently loaded model files */
 
 	Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
 

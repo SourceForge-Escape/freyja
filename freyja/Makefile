@@ -110,19 +110,6 @@ LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
 
 CG_LD_FLAGS=-lCgGL -lCg
 
-
-CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include
-
-CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv
-
-WIN32_CROSS_DIR=/home/mongoose/Projects/win32
-CROSS_FLAGS=-I$(WIN32_CROSS_DIR)/include $(CROSSDUMP_INC)
-CROSS_LIBS=-L$(WIN32_CROSS_DIR)/lib/ $(CROSSDUMP_LIBS)
-
-LD_FLAGS_WIN32=$(CONFIGURE_LDFLAGS) -lstdc++ -lm \
-		$(CROSS_LIBS) \
-		-L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1 
-
 LD_FLAGS_OSX=-framework OpenGL
 
 ################################################################
@@ -165,11 +152,11 @@ win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_WIN32_DIR) \
 	NAME=$(NAME).exe \
-	CC="i586-mingw32msvc-g++ " \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="-mwindows $(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/ $(CROSS_FLAGS)" \
-	LD_FLAGS="$(LD_FLAGS_WIN32) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
+	CFLAGS="-mwindows $(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) $(WIN32_CROSS_CFLAGS)" \
+	LD_FLAGS="$(WIN32_CROSS_LIBS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -lstdc++ -lm $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK)"
 
 
 ########################################################################
