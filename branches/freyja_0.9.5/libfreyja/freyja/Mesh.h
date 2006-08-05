@@ -427,8 +427,10 @@ public:
 	}
 
 	// 'Location' interface
+	const Vec3 &GetPosition() { return mPosition; }
 	void GetPosition(vec3_t xyz) { mPosition.Set(xyz); }
 	void SetPosition(const vec3_t xyz) { HEL_VEC3_COPY(xyz, mPosition.mVec); }
+	void SetPosition(const Vec3 &v) { mPosition = v; }
 	void SetPositionX(vec_t x) { mPosition.mVec[0] = x; }
 	void SetPositionY(vec_t y) { mPosition.mVec[1] = y; }
 	void SetPositionZ(vec_t z) { mPosition.mVec[2] = z; }
@@ -564,6 +566,8 @@ public:
 	void Scale(vec_t x, vec_t y, vec_t z);
 
 	void Translate(vec_t x, vec_t y, vec_t z);
+
+	void Translate(Vec3 v) { Translate(v.mVec[0], v.mVec[1], v.mVec[2]); }
 
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
 	{

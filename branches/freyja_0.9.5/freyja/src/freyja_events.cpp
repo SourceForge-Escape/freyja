@@ -146,7 +146,8 @@ void eRecentFiles(unsigned int value)
 {
 	if (gFreyjaControl)
 	{
-		gFreyjaControl->handleRecentFile(value);
+		BUG_ME("FIXME");
+		//gFreyjaControl->handleRecentFile(value);
 	}
 }
 

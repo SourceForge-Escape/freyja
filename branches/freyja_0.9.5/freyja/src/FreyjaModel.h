@@ -60,7 +60,7 @@ typedef enum {
 	PLANE_XZ = 2,
 	PLANE_FREE
 
-} freyja_plane_t;
+} freyja_plane_t;  // view modes for model editing
 
 
 void FreyjaModelEventsAttach();
