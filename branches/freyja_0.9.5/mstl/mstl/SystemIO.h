@@ -32,8 +32,9 @@
 #include <unistd.h>
 
 #ifdef WIN32
-#   include "windows.h"
-#   include "winbase.h" // Required for Sleep()
+#   include <windows.h>
+#   include <winbase.h> // Required for Sleep()
+#   include <libgen.h>  // Required for Basename()
 #endif
 
 // Some very old byte swapping routines

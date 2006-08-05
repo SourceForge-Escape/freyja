@@ -27,8 +27,12 @@
 #ifndef GUARD__MSTL_MONGOOSE_STRING_H_
 #define GUARD__MSTL_MONGOOSE_STRING_H_
 
+#include <stdarg.h>
 #include <string.h>
 
+#ifdef WIN32
+#   define strdup String::Strdup
+#endif
 
 //#ifndef strnlen
 //#   define strnlen(s, maxlen) char *s__s; long s__maxlen; for (s__s = s, s__maxlen = maxlen; s__s && s__maxlen;  ++s__s, --s__maxlen) ; (!s__s) ? 0 : (s__maxlen > 0) ? 1 : -1
@@ -64,23 +68,24 @@ class String
 		if (s && s[0])
 		{
 			mLength = strlen(s);
-			mString = String::strdup(s);
+			mString = String::Strdup(s);
 		}
 	}
+
 
 	String(const String &s) :
 		mString(NULL),
 		mLength(0)
 	{
 		mLength = s.mLength;
-		mString = String::strdup(s.mString);
+		mString = String::Strdup(s.mString);
 	}
 
 
 	String &operator=(const String &s) 
 	{
 		mLength = s.mLength;
-		mString = String::strdup(s.mString);
+		mString = String::Strdup(s.mString);
 
 		return *this;
 	}
@@ -119,8 +124,31 @@ class String
 		return mString;
 	}
 
+
+	// How overboard is this I ask you?
+	void Set(const char *format, ...)
+	{
+		mString = NULL;
+		mLength = 0;
+
+		if (format && format[0])
+		{
+			char buf[1024];
+
+			va_list args;
+
+			va_start(args, format);
+			vsnprintf(buf, 1024, format, args);
+			va_end(args);
+
+			mLength = strlen(buf);
+			mString = String::Strdup(buf);
+		}
+	}
+
+
 	// This is better than the GNU extention   ;)
-	static size_t strnlen(const char *s, size_t maxlen)
+	static size_t Strnlen(const char *s, size_t maxlen)
 	{
 		if (!s || !s[0]) return 0;
 
@@ -133,7 +161,7 @@ class String
 	}
 
 
-	static char *strdup(const char *src)
+	static char *Strdup(const char *src)
 	{
 		char *dest = NULL;
 		int len;

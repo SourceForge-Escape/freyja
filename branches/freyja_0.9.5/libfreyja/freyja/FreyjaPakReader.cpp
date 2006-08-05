@@ -32,7 +32,7 @@ FreyjaPakReader::FreyjaPakReader(const char *pakfile) :
 	mCurrentDir(NULL),
 	mRoot()
 {
-	mPakFile = String::strdup(pakfile);
+	mPakFile = String::Strdup(pakfile);
 }
 
 

@@ -47,10 +47,14 @@ FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
 
 
-// FIXME Move to freyja_event?
-#include <mgtk/mgtk_events.h>
-extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
-extern int gSkelTreeWidgetIndex;
+void eRecentFiles(unsigned int value)
+{
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->LoadModel(FreyjaControl::mInstance->GetRecentFilename(value));
+}
+
+
+//extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
 
 mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
 								mgtk_tree_t *tree)
@@ -139,16 +143,6 @@ void setColor(vec4_t dest, vec4_t color)
 	dest[1] = color[1];	
 	dest[2] = color[2];	
 	dest[3] = color[3];
-}
-
-
-void eRecentFiles(unsigned int value)
-{
-	if (gFreyjaControl)
-	{
-		BUG_ME("FIXME");
-		//gFreyjaControl->handleRecentFile(value);
-	}
 }
 
 

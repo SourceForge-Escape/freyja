@@ -23,9 +23,6 @@
 #include <stdio.h> 
 #include <math.h> 
 #include <stdarg.h> 
-#ifndef WIN32
-#   include <libgen.h> 
-#endif
 #include <string.h>
 
 #include <mstl/String.h>
@@ -335,9 +332,117 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaControl::ActionModelModified(FreyjaState *s)
+void FreyjaControl::ActionModelModified(FreyjaState *state)
 {
 	mCleared = false;
+
+	if (state)
+	{
+		mCursor.ChangeState(state, Freyja3dCursor::Translation);
+	}
+}
+
+
+void FreyjaControl::AddRecentFilename(const char *filename)
+{
+	bool found = false;
+	uint32 idx;
+
+
+	if (!filename || !filename[0] || 
+		!SystemIO::File::DoesFileExist(filename))
+	{
+		return;
+	}
+
+	for (uint32 i = mRecentFiles.begin(), n = mRecentFiles.end(); i < n; ++i)
+	{
+		if (strcmp(filename, mRecentFiles[i].GetCString()) == 0)
+		{
+			idx = i;
+			found = true;
+			break;
+		}
+	}
+
+
+	/* 'Boost' this file to top slot, push others down one */
+	if (found)
+	{
+		// Already at top, no change to menu
+		if (idx == 0)
+			return;
+
+		String swap, old;
+		uint32 n = mRecentFiles.end();
+		swap = mRecentFiles[0];
+		mRecentFiles[0] = mRecentFiles[idx];
+
+		for (uint32 i = 1; i < n; ++i)
+		{
+			if (i > idx)
+			{
+				break;
+			}
+
+			old = mRecentFiles[i];
+			mRecentFiles[i] = swap;
+			swap = old;
+		}
+	}
+	else  /* Add new file to top slot, push others down one */
+	{
+		String swap, old;
+		String insert(filename);
+
+		// Bubble up hack
+		if (mRecentFiles.end() >= mRecentFileLimit)
+		{
+			swap = insert;
+			uint32 n = mRecentFiles.end();
+			for (uint32 i = mRecentFiles.begin(); i < n; ++i)
+			{				
+				old = mRecentFiles[i];
+				mRecentFiles[i] = swap;
+				swap = old;
+			}
+		}
+		else
+		{
+			mRecentFiles.pushBack(insert);
+		}
+	}
+
+	/* Rebuild menu in order of mRecentFiles */
+	uint32 menuId = Resource::mInstance->getIntByName("eRecentFiles");
+	freyja_remove_all_items_to_menu(menuId);
+		
+	uint32 n = mRecentFiles.end();
+	for (uint32 i = mRecentFiles.begin(); i < n; ++i)
+	{
+		mgtk_append_item_to_menu2i(menuId, mRecentFiles[i].GetCString(), menuId, i);
+	}
+
+
+	/* Save recent_files to disk */
+	SystemIO::TextFileWriter w;
+
+	if (w.Open(freyja_rc_map_string("recent_files-dev").GetCString()))
+	{
+		String swap;
+		uint32 n = mRecentFiles.end();
+		for (uint32 i = mRecentFiles.begin(); i < n; ++i)
+		{
+			swap = mRecentFiles[i];
+			
+			if (!swap.Empty())
+			{
+				w.Print("%s\n", swap.GetCString());
+			}
+		}
+
+		w.Close();
+	}
 }
 
 
@@ -907,6 +1012,7 @@ bool FreyjaControl::LoadModel(const char *filename)
 	{
 		freyja_print("ERROR: File '%s' not found or unknown format\n", filename);
 		freyja_print("ERROR CODE %i\n", err);
+		return false;
 	}
 	else
 	{
@@ -948,6 +1054,13 @@ bool FreyjaControl::LoadModel(const char *filename)
 			freyjaTextureDelete(i); // hhhmmm
 		}
 	}
+
+	String title;
+	title.Set("%s - Freyja", filename);
+	freyja_set_main_window_title((char *)title.GetCString());
+	AddRecentFilename(filename);
+	mCurrentlyOpenFilename = String(filename);
+	mCleared = false;
 
 	return true;
 }
@@ -1665,6 +1778,7 @@ bool FreyjaControl::event(int command)
 			Clear();
 			freyja_print("Closing Model...");
 			freyja_set_main_window_title(BUILD_NAME);
+			mCurrentlyOpenFilename = String();
 			mCleared = true;
 		}
 		break;
@@ -1682,6 +1796,7 @@ bool FreyjaControl::event(int command)
 				Clear();
 				freyja_print("Closing Model...");
 				freyja_set_main_window_title(BUILD_NAME);
+				mCurrentlyOpenFilename = String();
 				mCleared = true;
 			}
 			break;
@@ -1776,12 +1891,18 @@ bool FreyjaControl::event(int command)
 			}
 			else
 			{
-				const char *s = mCurrentlyOpenFilename.GetCString();
-
-				if (SaveModel(s))
-					freyja_print("Model '%s' Saved", s);
-				else
-					freyja_print("Model '%s' failed to save", s);
+				if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You are about to overwrite a file.",
+										 "Are you sure you want to overwrite the file?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite"))
+				{
+					const char *s = mCurrentlyOpenFilename.GetCString();
+					
+					if (SaveModel(s))
+						freyja_print("Model '%s' Saved", s);
+					else
+						freyja_print("Model '%s' failed to save", s);
+				}
 			}
 			break;
 
@@ -2145,6 +2266,17 @@ bool FreyjaControl::event(int command)
 
 			if (state)
 			{
+				switch (state->GetType())
+				{
+				case FreyjaState::eEvent:
+					BUG_ME("FreyjaState::eEvent Undo not implemented");
+					break;
+
+				case FreyjaState::eTransform:
+					mCursor.mPos = ((FreyjaStateTransform *)state)->GetXYZ();
+					break;
+				}
+
 				//state->Undo();
 				//freyja_print( "! Undo e=%i, m=%i, i=%i",
 				//			  state->GetEvent(), state->GetMode(), state->GetIndex());
@@ -2710,19 +2842,6 @@ void FreyjaControl::handleFilename(const char *filename)
 
 	case FREYJA_MODE_LOAD_MODEL:
 		failed = !LoadModel(filename);
-
-		if (!failed)
-		{
-			char title[1024];
-
-			snprintf(title, 1024, "%s - Freyja", filename);
-			freyja_set_main_window_title(title);
-
-			AddRecentFilename(filename);
-
-			mCleared = false;
-		}
-
 		type = 2;
 		type2 = 1;
 		break;
@@ -3518,7 +3637,7 @@ void FreyjaControl::DeleteSelectedObject()
 										 "Are you sure you want to delete these vertices?",
 										 "gtk-cancel", "_Cancel", "gtk-ok", "_Delete"))
 		{
-			//CullUsingVertexBuffer();
+			BUG_ME("FIXME");//CullUsingVertexBuffer();
 		}
 		break;
 
@@ -3951,6 +4070,11 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				break;
 			}
 
+			ActionModelModified(new
+								FreyjaStateTransform(fTransformMesh, fTranslate,
+													 GetSelectedMesh(), mCursor.mPos.mVec));
+
+
 			mCursor.mPos += Vec3(xf, yf, zf);
 
 			{
@@ -3965,19 +4089,11 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 			}
 
 			freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
-			FreyjaStateTransform *state = new
-			FreyjaStateTransform(fTransformMesh, fTranslate,
-								 GetSelectedMesh(), mCursor.mPos.mVec);
-			mCursor.ChangeState(state, Freyja3dCursor::Translation);
 
-			//MeshMove(xx, yy);
 			old_x = x;
 			old_y = y;
 			return;
 		}
-
-		
-		//transform(mObjectMode, fTranslate, xf, yf, zf);
 		break;
 
 	default:  
@@ -4293,102 +4409,26 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 }
 
 
-#if OLD_ASS_CODE
-void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y, 
-							  freyja_plane_t plane) 
-{ 
-	// Get the viewport adjusted mouse coordinates, and swap modes if needed
-	vec_t vx = x, vy = y;
-	AdjustMouseXYForViewports(vx, vy);
-
-#if 0	
-	vec3_t xyz;
-	//unsigned int i;//, master_tag;
-
-
-
-	vec_t xx = vx, yy = vy;
-	getScreenToWorldOBSOLETE(&xx, &yy);
+bool FreyjaControl::LoadRecentFilesResource(const char *filename)
+{
+	/* Recent files persistance */
+	SystemIO::TextFileReader r;
+	//String file = freyja_rc_map_string(filename);
 	
-	switch (plane)
+	if (r.Open(filename/*file.GetCString()*/))
 	{
-	case PLANE_XY: // front
-		xyz[0] = xx;
-		xyz[1] = yy;
-		xyz[2] = 0;
-		break;
-	case PLANE_XZ: // top
-		xyz[0] = xx;
-		xyz[1] = 0;
-		xyz[2] = yy;
-		break;
-	case PLANE_ZY: // side
-		xyz[0] = 0;
-		xyz[1] = yy;
-		xyz[2] = xx;
-		break;
-
-	default:
-		;
+		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
+		{
+			const char *sym = r.ParseSymbol();
+			AddRecentFilename(sym);
+		}
+		
+		r.Close();
+		return true;
 	}
-#endif
 
-	switch (mEventMode)
-	{
-	case modeMove:
-		mXYZMouseState = 1;
-		//VertexSelect(xx, yy);
-		break;
-
-	case VERTEX_COMBINE:
-		if (mXYZMouseState == 0)
-		{
-			//VertexCombine(xx, yy);
-			 mXYZMouseState = 1;
-		}
-		else
-		{
-			mXYZMouseState = 0;
-		}
-		break;
-	case VERTEX_BBOX_SELECT_MODE:
-		if (mXYZMouseState == 0)
-		{
-			//BBoxSelect(xx, yy);
-			mXYZMouseState = 1;
-		}
-		else
-			mXYZMouseState = 0;
-      break;
-	case BONE_CONNECT_MODE:
-		MARK_MSGF("FIXME");
-		//master_tag = GetSelectedBone();
-		//selectBone(xx, yy);
-		//connectBone(master_tag, GetSelectedBone());
-		//SetSelectedBone(master_tag);
-		break;
-	case BONE_DISCONNECT_MODE:
-		MARK_MSGF("FIXME");
-		//master_tag = GetSelectedBone();
-		//selectBone(xx, yy);
-		//removeMeshFromBone(master_tag, GetSelectedBone());
-		//SetSelectedBone(master_tag);
-		break;
-	case POINT_ADD_MODE: 
-		//VertexNew(xx, yy);
-		break;
-	case BONE_ADD_MODE:
-		//i = newBone(xyz[0], xyz[1], xyz[2], 0x0);
-		//freyja_print("New bone[%i] created", i);
-		break;
-	case POLYGON_ADD_MODE:
-		//PolygonAddVertex(xx, yy);
-		break;
-	default:
-		;
-	}
+	return false;
 }
-#endif
 
 
 void FreyjaControl::LoadResource()
@@ -4398,6 +4438,7 @@ void FreyjaControl::LoadResource()
 	bool failed = true;
 
 
+	// Setup the UI
 	if (!mResource->Load((char *)s.GetCString()))
 	{
 		failed = false;
@@ -4441,6 +4482,12 @@ void FreyjaControl::LoadResource()
 	{
 		mResource->Flush();
 	}
+
+
+	// Load up recent files list
+	freyja_print("Loading recent_files-dev...");
+	bool b = LoadRecentFilesResource(freyja_rc_map_string("recent_files-dev").GetCString());
+	freyja_print("Loading recent_files-dev %s", b ? "successful" : "failed");
 }
 
 

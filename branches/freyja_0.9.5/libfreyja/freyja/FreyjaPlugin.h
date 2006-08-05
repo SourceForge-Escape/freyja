@@ -62,7 +62,7 @@ using namespace mstl;
 //#ifdef MACOSX
 #   ifndef strnlen
 #      include <mstl/String.h>
-#      define strnlen String::strnlen
+#      define strnlen String::Strnlen
 #   endif
 //#endif
 

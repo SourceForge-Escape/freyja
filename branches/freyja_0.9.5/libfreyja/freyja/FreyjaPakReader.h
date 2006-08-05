@@ -46,7 +46,7 @@ class FreyjaPakFile
 		mOffset(offset),
 		mSize(size)
 	{
-		mFilename = String::strdup(filename);
+		mFilename = String::Strdup(filename);
 	}
 
 	~FreyjaPakFile()
@@ -116,7 +116,7 @@ class FreyjaPakDirectory
 		mPakDirs(),
 		mPakFiles()
 	{
-		mDirName = String::strdup("vfs:/");
+		mDirName = String::Strdup("vfs:/");
 	}
 
 	FreyjaPakDirectory(const char *dirname) :
@@ -124,7 +124,7 @@ class FreyjaPakDirectory
 		mPakDirs(),
 		mPakFiles()
 	{
-		mDirName = String::strdup(dirname);
+		mDirName = String::Strdup(dirname);
 	}
 
 	~FreyjaPakDirectory()

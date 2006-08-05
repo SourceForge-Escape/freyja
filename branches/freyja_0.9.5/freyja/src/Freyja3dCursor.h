@@ -138,6 +138,7 @@ class Freyja3dCursor
 		mMode = n;
 	}
 
+	// When seperating events from cursor remember to restore mode here
 	void ForceChangeState(FreyjaState *state, Freyja3dCursorFlags_t mode)
 	{
 		if (!state)
