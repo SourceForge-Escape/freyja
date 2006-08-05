@@ -65,8 +65,9 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 FreyjaControl::FreyjaControl(Resource *r) :
 	mSelectedTexture(0),
 	mFlags(fNone),
-	mTransformMode(TransformScene),
+	mObjectMode(tScene),
 	mResourceFilename("freyja-dev.mlisp"),
+	mCurrentlyOpenFilename(),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
 	mResource(r),
 	mCleared(true),
@@ -267,39 +268,58 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 }
 
 
-
-String FreyjaControl::TransformModeToString(transform_t t)
+String FreyjaControl::ObjectTypeToString(object_type_t t)
 {
 	String s;
 
 	switch (t)
 	{
-	case TransformMesh:
-		s = String("TransformMesh");
+	case tNone:
+		s = String("tNone");
 		break;
 
-	case TransformVertexFrame:
-		s = String("TransformVertexFrame");
+	case tPoint:
+		s = String("tPoint");
 		break;
 
-	case TransformScene:
-		s = String("TransformScene");
+	case tFace:
+		s = String("tFace");
 		break;
 
-	case TransformBone:
-		s = String("TransformBone");
+	case tMesh:
+		s = String("tMesh");
 		break;
 
-	case TransformPoint:
-		s = String("TransformPoint");
+	case tBone:
+		s = String("tBone");
 		break;
 
-	case TransformSelectedVertices:
-		s = String("TransformSelectedVertices");
+	case tKeyFrame:
+		s = String("tKeyFrame");
 		break;
 
-	case TransformFace:
-		s = String("TransformFace");
+	case tSkeleton:
+		s = String("tSkeleton");
+		break;
+
+	case tScene:
+		s = String("tScene");
+		break;
+
+	case tSelectedVertices:
+		s = String("tSelectedVertices");
+		break;
+
+	case tSelectedFaces:
+		s = String("tSelectedFaces");
+		break;
+
+	case tSelectedBones:
+		s = String("tSelectedBones");
+		break;
+
+	case tSelectedMeshes:
+		s = String("tSelectedMeshes");
 		break;
 
 	default:
@@ -314,6 +334,12 @@ String FreyjaControl::TransformModeToString(transform_t t)
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void FreyjaControl::ActionModelModified(FreyjaState *s)
+{
+	mCleared = false;
+}
+
 
 void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
@@ -1136,129 +1162,6 @@ bool FreyjaControl::LoadTextureBuffer(byte *image, uint32 width, uint32 height,
 }
 
 
-bool FreyjaControl::handleRecentFile(unsigned int value)
-{
-	if (value < mRecentFiles.size())
-	{
-		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-		handleFilename(mRecentFiles[value]);
-		return true;
-	}
-
-	return false;
-}
-
-
-void FreyjaControl::addRecentFilename(const char *filename)
-{
-	unsigned int i, l, n;
-	char *insert, *swap, *old;
-	bool found = false;
-
-
-	if (!filename || !filename[0] || !SystemIO::File::DoesFileExist(filename))
-	{
-		return;
-	}
-
-	for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
-	{
-		if (strcmp(filename, mRecentFiles[i]) == 0)
-		{
-			found = true;
-			break;
-		}
-	}
-
-
-	/* 'Boost' this file to top slot, push others down one */
-	if (found)
-	{
-		swap = mRecentFiles[0];
-		n = mRecentFiles.end();
-		l = i;
-
-		// Already at top, no change to menu
-		if (l == 0)
-			return;
-
-		mRecentFiles.assign(0, mRecentFiles[i]);
-
-		for (i = 1; i < n; ++i)
-		{
-			if (i > l)
-			{
-				break;
-			}
-
-			old = mRecentFiles[i];
-			mRecentFiles.assign(i, swap);
-			swap = old;
-		}
-	}
-	else  /* Add new file to top slot, push others down one */
-	{
-		l = strlen(filename);
-		insert = new char[l+1];
-		strncpy(insert, filename, l);
-		insert[l] = 0;
-
-		// Bubble up hack
-		if (mRecentFiles.end() >= mRecentFileLimit)
-		{
-			swap = insert;
-			n = mRecentFiles.end();
-			for (i = mRecentFiles.begin(); i < n; ++i)
-			{				
-				old = mRecentFiles[i];
-				mRecentFiles.assign(i, swap);
-				swap = old;
-			}
-		}
-		else
-		{
-			mRecentFiles.pushBack(insert);
-		}
-	}
-
-	/* Rebuild menu in order of mRecentFiles */
-	uint32 menuId = Resource::mInstance->getIntByName("eRecentFiles");
-	freyja_remove_all_items_to_menu(menuId);
-
-	n = mRecentFiles.end();
-
-	for (i = mRecentFiles.begin(); i < n; ++i)
-	{
-		mgtk_append_item_to_menu2i(menuId, mRecentFiles[i], menuId, i);
-	}
-
-
-	/* Save recent_files to disk */
-	SystemIO::TextFileWriter w;
-	char *filename2 = freyja_rc_map("recent_files");
-
-	if (w.Open(filename2))
-	{
-		for (i = mRecentFiles.begin(); i < mRecentFiles.end(); ++i)
-		{
-			swap = mRecentFiles[i];
-
-			if (swap && swap[0])
-			{
-				w.Print("%s\n", swap);
-			}
-		}
-
-		w.Close();
-	}
-
-	if (filename2)
-	{
-		delete [] filename2;
-	}
-}
-
-
 bool FreyjaControl::event(int event, unsigned int value)
 {
 	vec_t x, y, z;
@@ -1434,7 +1337,8 @@ bool FreyjaControl::event(int event, vec_t value)
 			freyjaBoneTranslate3fv(GetSelectedBone(), v.mVec);
 			break;
 		}
-		
+
+		ActionModelModified(NULL);
 		freyja_event_gl_refresh();
 		break;
 
@@ -1457,6 +1361,7 @@ bool FreyjaControl::event(int event, vec_t value)
 			break;
 		}
 		
+		ActionModelModified(NULL);
 		freyja_event_gl_refresh();
 		break;
 
@@ -1864,23 +1769,19 @@ bool FreyjaControl::event(int command)
 				break;
 			}
 
-			if (mRecentFiles.empty())
+			if (mCurrentlyOpenFilename.Empty())
 			{
 				mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
 				freyja_event_file_dialog("Save model as...");				
 			}
 			else
 			{
-				freyja_print("Crtl+S save disabled in dev build for your own good!");
+				const char *s = mCurrentlyOpenFilename.GetCString();
 
-				return true;
-
-				if (SaveModel(mRecentFiles[mRecentFiles.end()-1]))
-					freyja_print("Model '%s' Saved",
-								 mRecentFiles[mRecentFiles.end()-1]);
+				if (SaveModel(s))
+					freyja_print("Model '%s' Saved", s);
 				else
-					freyja_print("Model '%s' failed to save",
-								 mRecentFiles[mRecentFiles.end()-1]);
+					freyja_print("Model '%s' failed to save", s);
 			}
 			break;
 
@@ -1912,19 +1813,18 @@ bool FreyjaControl::event(int command)
 			break;
 		}
 
-		if (mRecentFiles.empty())
+		if (mCurrentlyOpenFilename.Empty())
 		{
 			mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
 			freyja_event_file_dialog("Save model as...");				
 		}
 		else
 		{
-			if (SaveModel(mRecentFiles[mRecentFiles.end()-1]))
-				freyja_print("Model '%s' Saved",
-							 mRecentFiles[mRecentFiles.end()-1]);
+			const char *s = mCurrentlyOpenFilename.GetCString();
+			if (SaveModel(s))
+				freyja_print("Model '%s' Saved", s);
 			else
-				freyja_print("Model '%s' failed to save",
-							 mRecentFiles[mRecentFiles.end()-1]);
+				freyja_print("Model '%s' failed to save", s);
 		}
 		break;
 
@@ -1955,7 +1855,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eRevertFile:
-		if (mRecentFiles.empty())
+		if (mCurrentlyOpenFilename.Empty())
 		{
 			freyja_print("Revert requires a model being previously loaded");
 			break;
@@ -1970,7 +1870,7 @@ bool FreyjaControl::event(int command)
 			freyja_print("Reverting Model...");
 			freyja_set_main_window_title(BUILD_NAME);
 
-			if (LoadModel(mRecentFiles[mRecentFiles.end()-1]))
+			if (LoadModel(mCurrentlyOpenFilename.GetCString()))
 				mCleared = false;
 		}
 		break;
@@ -2167,8 +2067,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eScaleUV:
-		freyjaModelTransformTexCoord(0, GetSelectedTexCoord(),
-									fScale, 0.5, 0.5);
+		freyjaModelTransformTexCoord(0, GetSelectedTexCoord(), fScale, 0.5, 0.5);
 		break;
 
 	case eSetMeshTexture:
@@ -2192,31 +2091,27 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eTransformSelectedVertices:
-		mTransformMode = TransformSelectedVertices;
-		break;
-
-	case eTransformGroup:
-		mTransformMode = TransformVertexFrame;
+		mObjectMode = tSelectedVertices;
 		break;
 
 	case eTransformScene:
-		mTransformMode = TransformScene;
+		mObjectMode = tScene;
 		break;
 
 	case eTransformPoint:
-		mTransformMode = TransformPoint;
+		mObjectMode = tPoint;
 		break;
 
 	case eTransformFace:
-		mTransformMode = TransformFace;
+		mObjectMode = tFace;
 		break;
 
 	case eTransformMesh:
-		mTransformMode = TransformMesh;
+		mObjectMode = tMesh;
 		break;
 
 	case eTransformBone:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		break;
 
 
@@ -2321,7 +2216,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eMove:
-		Transform(mTransformMode, fTranslate,
+		Transform(mObjectMode, fTranslate,
 						  freyja_event_get_float(eMove_X),
 						  freyja_event_get_float(eMove_Y),
 						  freyja_event_get_float(eMove_Z));
@@ -2333,7 +2228,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eRotate:
-		Transform(mTransformMode, fRotate,
+		Transform(mObjectMode, fRotate,
 						  freyja_event_get_float(eRotate_X),
 						  freyja_event_get_float(eRotate_Y),
 						  freyja_event_get_float(eRotate_Z));
@@ -2345,7 +2240,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eScale:
-		Transform(mTransformMode, fScale,
+		Transform(mObjectMode, fScale,
 						  freyja_event_get_float(eScale_X),
 						  freyja_event_get_float(eScale_Y),
 						  freyja_event_get_float(eScale_Z));
@@ -2399,36 +2294,36 @@ bool FreyjaControl::event(int command)
 
 	/* BONES */
 	case CMD_BONE_SELECT:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		freyja_print("Select bone...");
 		mEventMode = modeSelect;
 		break;
 	case CMD_BONE_NEW:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		addObject();
 		mCleared = false;
 		//freyja_print("Select new child bone placement directly...");
 		//mEventMode = BONE_ADD_MODE;
 		break;
 	case CMD_BONE_CONNECT:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		freyja_print("Select a bone to connect to current bone...");
 		mEventMode = BONE_CONNECT_MODE;
 		break;
 
 	case CMD_BONE_DISCONNECT:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		freyja_print("Select bone to break from current");
 		mEventMode = BONE_DISCONNECT_MODE;
 		break;
 
 	case CMD_BONE_NEXT:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		SetSelectedBone(GetSelectedBone() + 1);
 		break;
 
 	case CMD_BONE_PREV:
-		mTransformMode = TransformBone;
+		mObjectMode = tBone;
 		if (GetSelectedBone())
 			SetSelectedBone(GetSelectedBone() - 1);
 		break;
@@ -2487,17 +2382,17 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 	case eMeshNew:
-		mTransformMode = TransformMesh;
+		mObjectMode = tMesh;
 		addObject();
 		mCleared = false;
 		break;
 	case eMeshDelete:
-		mTransformMode = TransformMesh;
+		mObjectMode = tMesh;
 		DeleteSelectedObject();
 		mCleared = false;
 		break;
 	case eMeshSelect:
-		mTransformMode = TransformMesh;
+		mObjectMode = tMesh;
 		mEventMode = modeSelect;
 		freyja_print("Select object mesh...");
 		break;
@@ -2511,7 +2406,7 @@ bool FreyjaControl::event(int command)
 		//mirrorUsingVertexBuffer(false, false, true);
 		break;
 	case eTransformMeshPivot:
-		mTransformMode = TransformMesh;
+		mObjectMode = tMesh;
 		mEventMode = MESH_MOVE_CENTER;
 		freyja_print("Reposition mesh center point");
 		break;
@@ -2823,7 +2718,7 @@ void FreyjaControl::handleFilename(const char *filename)
 			snprintf(title, 1024, "%s - Freyja", filename);
 			freyja_set_main_window_title(title);
 
-			addRecentFilename(filename);
+			AddRecentFilename(filename);
 
 			mCleared = false;
 		}
@@ -2875,7 +2770,7 @@ void FreyjaControl::handleFilename(const char *filename)
 
 			snprintf(title, 1024, "%s - Freyja", filename);
 			freyja_set_main_window_title(title);
-			addRecentFilename(filename);
+			AddRecentFilename(filename);
 			mCleared = true;
 		}
 		break;
@@ -3210,7 +3105,92 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			handleEvent(eEvent, eRotate);
 		}
 
-		MouseEdit(btn, state, mod, x, y, GetSelectedView());
+#if 0	
+		vec3_t xyz;
+		//unsigned int i;//, master_tag;
+
+
+
+		vec_t xx = vx, yy = vy;
+		getScreenToWorldOBSOLETE(&xx, &yy);
+	
+		switch (plane)
+		{
+		case PLANE_XY: // front
+			xyz[0] = xx;
+			xyz[1] = yy;
+			xyz[2] = 0;
+			break;
+		case PLANE_XZ: // top
+			xyz[0] = xx;
+			xyz[1] = 0;
+			xyz[2] = yy;
+			break;
+		case PLANE_ZY: // side
+			xyz[0] = 0;
+			xyz[1] = yy;
+			xyz[2] = xx;
+			break;
+
+		default:
+			;
+		}
+#endif
+
+		switch (mEventMode)
+		{
+		case modeMove:
+			mXYZMouseState = 1;
+			//VertexSelect(xx, yy);
+			break;
+
+		case VERTEX_COMBINE:
+			if (mXYZMouseState == 0)
+			{
+				//VertexCombine(xx, yy);
+				mXYZMouseState = 1;
+			}
+			else
+			{
+				mXYZMouseState = 0;
+			}
+			break;
+		case VERTEX_BBOX_SELECT_MODE:
+			if (mXYZMouseState == 0)
+			{
+				//BBoxSelect(xx, yy);
+				mXYZMouseState = 1;
+			}
+			else
+				mXYZMouseState = 0;
+			break;
+		case BONE_CONNECT_MODE:
+			MARK_MSGF("FIXME");
+			//master_tag = GetSelectedBone();
+			//selectBone(xx, yy);
+			//connectBone(master_tag, GetSelectedBone());
+			//SetSelectedBone(master_tag);
+			break;
+		case BONE_DISCONNECT_MODE:
+			MARK_MSGF("FIXME");
+			//master_tag = GetSelectedBone();
+			//selectBone(xx, yy);
+			//removeMeshFromBone(master_tag, GetSelectedBone());
+			//SetSelectedBone(master_tag);
+			break;
+		case POINT_ADD_MODE: 
+			//VertexNew(xx, yy);
+			break;
+		case BONE_ADD_MODE:
+			//i = newBone(xyz[0], xyz[1], xyz[2], 0x0);
+			//freyja_print("New bone[%i] created", i);
+			break;
+		case POLYGON_ADD_MODE:
+			//PolygonAddVertex(xx, yy);
+			break;
+		default:
+			;
+		}
 		break;
 
 	default:
@@ -3325,7 +3305,7 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 			handleEvent(eEvent, eRotate);
 		}
 
-		MouseEdit(btn, state, mod, x, y, GetSelectedView());
+		MouseEdit(btn, state, mod, x, y);
 		break;
 	default:
 		;
@@ -3347,6 +3327,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 	static bool warn = false;
 	float z;
 
+	//ASSERT_MSG(false, "Obsolete function call.");
 
 	if (!warn)
 	{
@@ -3479,13 +3460,13 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 
 bool FreyjaControl::copySelectedObject()
 {
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformSelectedVertices:
+	case tSelectedVertices:
 		//return CopyVertexBuffer();
 		break;
 
-	case TransformMesh:
+	case tMesh:
 		//return CopySelectedMesh();
 		break;
 
@@ -3500,18 +3481,18 @@ bool FreyjaControl::copySelectedObject()
 
 bool FreyjaControl::pasteSelectedObject()
 {
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformSelectedVertices:
+	case tSelectedVertices:
 		//return PasteSelectedMesh(); // vertexbuffercopy shares buf
 		break;
 
-	case TransformMesh:
+	case tMesh:
 		//return pasteSelectedMesh();
 		break;
 
 	default:
-		freyja_print("This object type is not supported by Generic Paste.");
+		freyja_print("This object type '%s' is not supported by Generic Paste.", ObjectTypeToString(mObjectMode).GetCString());
 		return false;
 	}
 
@@ -3521,17 +3502,17 @@ bool FreyjaControl::pasteSelectedObject()
 
 void FreyjaControl::DeleteSelectedObject()
 {
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformPoint:
+	case tPoint:
 		mEventMode = POINT_DEL_MODE;
 		break;
 
-	case TransformFace:
+	case tFace:
 		freyjaMeshPolygonDelete(GetSelectedMesh(), GetSelectedFace());
 		break;
 
-	case TransformSelectedVertices:
+	case tSelectedVertices:
 		if (freyja_create_confirm_dialog("gtk-dialog-question",
 										 "You are about to delete the selected vertices.",
 										 "Are you sure you want to delete these vertices?",
@@ -3541,13 +3522,16 @@ void FreyjaControl::DeleteSelectedObject()
 		}
 		break;
 
-	case TransformBone:
+	case tBone:
 		freyjaBoneDelete(GetSelectedMesh());
 		break;
 
-	case TransformMesh:
+	case tMesh:
 		freyjaMeshDelete(GetSelectedMesh());
 		break;
+
+	default:
+		freyja_print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
 	}
 }
 
@@ -3578,13 +3562,13 @@ void FreyjaControl::addObject()
 	int index = -1;
 
 
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformPoint:
+	case tPoint:
 		mEventMode = POINT_ADD_MODE;
 		break;
 
-	case TransformBone:
+	case tBone:
 		//index = NewBone(0.0, 0.0, 0.0, 0x0);
 
 		if (index > 0)
@@ -3598,11 +3582,16 @@ void FreyjaControl::addObject()
 			freyja_print("New Bone[%u], Bone[%u].parent = %i",
 						 index, index, GetSelectedBone());
 		}
+
+		ActionModelModified(NULL);
 		break;
 
-	case TransformMesh:
+	case tMesh:
 		//MeshNew();
+		ActionModelModified(NULL);
 		break;
+	default:
+		freyja_print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
 	}
 }
 
@@ -3613,9 +3602,9 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformPoint:
+	case tPoint:
 		{
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
@@ -3633,7 +3622,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
-	case TransformFace:
+	case tFace:
 		{
 			// New backend ( picks faces and marks them selected )
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
@@ -3655,7 +3644,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 	default:
 		{
 			String s;
-			s = TransformModeToString((transform_t)mTransformMode);
+			s = ObjectTypeToString(mObjectMode);
 			freyja_print("UnselectObject '%s' not supported.", s.GetCString());
 			MARK_MSGF("Case '%s' not supported", s.GetCString());
 		}
@@ -3669,9 +3658,9 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformPoint:
+	case tPoint:
 		{
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
@@ -3690,7 +3679,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		break;
 
 #if LIGHT_TRANSFORMS
-	case TransformLight:
+	case tLight:
 		{
 			Vec3 xyz;
 			vec4_t pos;
@@ -3722,7 +3711,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		break;
 #endif
 
-	case TransformFace:
+	case tFace:
 		{
 			// New backend ( picks faces and marks them selected )
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
@@ -3744,7 +3733,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 #if 0
 
-	case TransformMesh:
+	case tMesh:
 		{
 			/* Mongoose: Convert screen to world coordinate system */
 			getWorldFromScreen(&xx, &yy, &zz);
@@ -3757,7 +3746,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
-	case TransformBone:
+	case tBone:
 		{
 			/* Mongoose: Convert screen to world coordinate system */
 			getWorldFromScreen(&xx, &yy, &zz);
@@ -3773,7 +3762,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 	default:
 		{
 			String s;
-			s = TransformModeToString((transform_t)mTransformMode);
+			s = ObjectTypeToString(mObjectMode);
 			freyja_print("SelectObject '%s' not supported.", s.GetCString());
 			MARK_MSGF("Case '%s' not supported", s.GetCString());
 		}
@@ -3828,7 +3817,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				xf = ((x < old_x-t) ? -d : ((x > old_x+t) ? d : 0));
 				yf = ((y < old_y-t) ? -d : ((y > old_y+t) ? d : 0));
 
-				if (mTransformMode == TransformBone)
+				if (mObjectMode == tBone)
 				{
 					freyjaGetBoneTranslation3fv(GetSelectedBone(),
 												xyz.mVec);
@@ -3870,9 +3859,9 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		;
 	}
 
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformPoint:
+	case tPoint:
 		xx = x; 
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
@@ -3887,7 +3876,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		//VertexMove(xx, yy);
 		break;
 
-	case TransformBone:
+	case tBone:
 		xx = x; 
 		yy = -y;
 		getScreenToWorldOBSOLETE(&xx, &yy);
@@ -3902,7 +3891,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		}
 		break;			
 		
-	case TransformMesh:
+	case tMesh:
 		{
 			xx = x; 
 			yy = -y;
@@ -3964,6 +3953,17 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 			mCursor.mPos += Vec3(xf, yf, zf);
 
+			{
+				Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+				if (m)
+				{
+					Vec3 o = m->GetPosition();
+					m->Translate(mCursor.mPos - o);
+					m->SetPosition(mCursor.mPos);
+				}
+			}
+
 			freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
 			FreyjaStateTransform *state = new
 			FreyjaStateTransform(fTransformMesh, fTranslate,
@@ -3977,14 +3977,14 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 		}
 
 		
-		//transform(mTransformMode, fTranslate, xf, yf, zf);
+		//transform(mObjectMode, fTranslate, xf, yf, zf);
 		break;
 
 	default:  
 		/* Relative movement based on mouse tracking */
 		if (plane == PLANE_XZ) zf = -zf;
 
-		Transform(mTransformMode, fTranslate, xf, yf, zf);
+		Transform(mObjectMode, fTranslate, xf, yf, zf);
 		break;
 	}
 
@@ -4033,9 +4033,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	}
 
 
-	switch (mTransformMode)
+	switch (mObjectMode)
 	{
-	case TransformBone:
+	case tBone:
 //#define EDIT_LIKE_BONE_0_9_3
 #ifdef EDIT_LIKE_BONE_0_9_3
 		getBoneRotation(&xr, &yr, &zr);
@@ -4076,7 +4076,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		break;
 
 
-	case TransformMesh:
+	case tMesh:
 		/* Mongoose: Scaled rotation for better response */
 		xf *= 5.0f;
 		yf *= 5.0f;
@@ -4090,7 +4090,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		rotate = fRotate;
 	}
 
-	Transform(mTransformMode, rotate, xf, yf, zf);
+	Transform(mObjectMode, rotate, xf, yf, zf);
 	
 	old_x = x;
 	old_y = y;
@@ -4106,13 +4106,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			Transform(mTransformMode, fScale, 1.0, 0.99, 1.0);
+			Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
 			break;
 		case PLANE_XZ:
-			Transform(mTransformMode, fScale, 1.0, 1.0, 1.01);
+			Transform(mObjectMode, fScale, 1.0, 1.0, 1.01);
 			break;
 		case PLANE_ZY: // side
-			Transform(mTransformMode, fScale, 1.0, 0.99, 1.0);
+			Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
 			break;
 		default:
 			;
@@ -4123,13 +4123,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			Transform(mTransformMode, fScale, 1.0, 1.01, 1.0);
+			Transform(mObjectMode, fScale, 1.0, 1.01, 1.0);
 			break;
 		case PLANE_XZ:
-			Transform(mTransformMode, fScale, 1.0, 1.0, 0.99);
+			Transform(mObjectMode, fScale, 1.0, 1.0, 0.99);
 			break;
 		case PLANE_ZY: // side
-			Transform(mTransformMode, fScale, 1.0, 1.01, 1.0);
+			Transform(mObjectMode, fScale, 1.0, 1.01, 1.0);
 		default:
 			;
 		}
@@ -4140,13 +4140,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			Transform(mTransformMode, fScale, 0.99, 1.0, 1.0);
+			Transform(mObjectMode, fScale, 0.99, 1.0, 1.0);
 			break;
 		case PLANE_XZ:
-			Transform(mTransformMode, fScale, 0.99, 1.0, 1.0);
+			Transform(mObjectMode, fScale, 0.99, 1.0, 1.0);
 			break;
 		case PLANE_ZY: // side
-			Transform(mTransformMode, fScale, 1.0, 1.0, 0.99);
+			Transform(mObjectMode, fScale, 1.0, 1.0, 0.99);
 			break;
 		default:
 			;
@@ -4157,13 +4157,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		switch (plane)
 		{
 		case PLANE_XY:
-			Transform(mTransformMode, fScale, 1.01, 1.0, 1.0);
+			Transform(mObjectMode, fScale, 1.01, 1.0, 1.0);
 			break;
 		case PLANE_XZ:
-			Transform(mTransformMode, fScale, 1.01, 1.0, 1.0);
+			Transform(mObjectMode, fScale, 1.01, 1.0, 1.0);
 			break;
 		case PLANE_ZY: // side
-			Transform(mTransformMode, fScale, 1.0, 1.0, 1.01);
+			Transform(mObjectMode, fScale, 1.0, 1.0, 1.01);
 		default:
 			;
 		}
@@ -4293,18 +4293,20 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 }
 
 
+#if OLD_ASS_CODE
 void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y, 
 							  freyja_plane_t plane) 
 { 
-	vec3_t xyz;
-	//unsigned int i;//, master_tag;
-	static float xxx, yyy;
-
-
 	// Get the viewport adjusted mouse coordinates, and swap modes if needed
 	vec_t vx = x, vy = y;
 	AdjustMouseXYForViewports(vx, vy);
-	
+
+#if 0	
+	vec3_t xyz;
+	//unsigned int i;//, master_tag;
+
+
+
 	vec_t xx = vx, yy = vy;
 	getScreenToWorldOBSOLETE(&xx, &yy);
 	
@@ -4329,13 +4331,11 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 	default:
 		;
 	}
+#endif
 
-
-	switch(mEventMode)
+	switch (mEventMode)
 	{
 	case modeMove:
-		xxx = xx;  yyy = yy;
-		//freyja_print("! Mouse mode move state: %f, %f", xxx, yyy);
 		mXYZMouseState = 1;
 		//VertexSelect(xx, yy);
 		break;
@@ -4388,6 +4388,7 @@ void FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y,
 		;
 	}
 }
+#endif
 
 
 void FreyjaControl::LoadResource()
@@ -4439,23 +4440,6 @@ void FreyjaControl::LoadResource()
 	if (mResource->Lookup("FLUSH_RESOURCE", &i) && i)
 	{
 		mResource->Flush();
-	}
-
-
-
-	/* Recent files persistance */
-	SystemIO::TextFileReader r;
-	String filename = freyja_rc_map_string("recent_files");
-
-	if (r.Open(filename.GetCString()))
-	{
-		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
-		{
-			const char *sym = r.ParseSymbol();
-			addRecentFilename(sym);
-		}
-		
-		r.Close();
 	}
 }
 
