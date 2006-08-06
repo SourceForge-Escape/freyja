@@ -587,8 +587,6 @@ private:
 
 	int32 mTextureId;
 
-	void MeshMove(vec_t xx, vec_t yy);
-
 	void SetFaceMaterial(index_t faceIndex, index_t material);
 
 	void CreatePolyMappedUVMap(int i) {BUG_ME("Not implemented in this build");}
@@ -821,6 +819,9 @@ private:
 	float mGenMeshHeight;
 	unsigned long mGenMeshCount;
 	unsigned long mGenMeshSegements;
+
+	bool mToken;                            /* This puts the breaks on over
+											 * doing pushing actions */
 };
 
 void FreyjaControlEventsAttach();

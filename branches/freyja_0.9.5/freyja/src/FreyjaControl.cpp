@@ -68,7 +68,8 @@ FreyjaControl::FreyjaControl(Resource *r) :
 	mSceneTrans(0.0f, -18.0f, 0.0f),
 	mResource(r),
 	mCleared(true),
-	mAllowBoneNameUpdate(true)
+	mAllowBoneNameUpdate(true),
+	mToken(false)
 {
 	/* Search local paths first ( mostly debugging ) */
 	freyjaPluginAddDirectory("plugins/model/debug");
@@ -338,8 +339,16 @@ void FreyjaControl::ActionModelModified(FreyjaState *state)
 
 	if (state)
 	{
-		mCursor.ChangeState(state, Freyja3dCursor::Translation);
+		static Freyja3dCursor::Flags lastMode;
+		lastMode = mCursor.GetMode();
+
+		if (mToken)
+		{
+			mCursor.ForceChangeState(state, Freyja3dCursor::Translation);
+		}
 	}
+
+	mToken = false;
 }
 
 
@@ -3059,6 +3068,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					mCursor.mAxis = Freyja3dCursor::eX;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked X");
+					mToken = true;
 					return;
 				}
 
@@ -3070,6 +3080,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					mCursor.mAxis = Freyja3dCursor::eY;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Y");
+					mToken = true;
 					return;
 				}
 
@@ -3081,6 +3092,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					mCursor.mAxis = Freyja3dCursor::eAll;
 						mCursor.mSelected = true;
 						freyja_print("! Cursor ray picked All");
+						mToken = true;
 						return;
 				}
 				break;
@@ -3093,6 +3105,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					DEBUG_MSGF("Sphere hit!");
 					mCursor.mAxis = Freyja3dCursor::eX;
 					mCursor.mSelected = true;
+					mToken = true;
 					freyja_print("! Cursor ray picked X");
 					return;
 				}
@@ -3114,9 +3127,10 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				{
 					DEBUG_MSGF("Sphere hit!");
 					mCursor.mAxis = Freyja3dCursor::eAll;
-						mCursor.mSelected = true;
-						freyja_print("! Cursor ray picked All");
-						return;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked All");
+					mToken = true;
+					return;
 				}
 				break;
 
@@ -3129,6 +3143,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					mCursor.mAxis = Freyja3dCursor::eZ;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Z");
+					mToken = true;
 					return;
 				}
 
@@ -3140,6 +3155,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					mCursor.mAxis = Freyja3dCursor::eY;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Y");
+					mToken = true;
 					return;
 				}
 
@@ -3149,9 +3165,10 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				{
 					DEBUG_MSGF("Sphere hit!");
 					mCursor.mAxis = Freyja3dCursor::eAll;
-						mCursor.mSelected = true;
-						freyja_print("! Cursor ray picked All");
-						return;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked All");
+					mToken = true;
+					return;
 				}
 				break;
 
@@ -3889,36 +3906,6 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 }
 
 
-void FreyjaControl::MeshMove(vec_t xx, vec_t yy)
-{
-	Vec3 pos, t;
-
-	freyjaGetMeshPosition(GetSelectedMesh(), pos.mVec);
-
-	switch (GetSelectedView())
-	{
-	case PLANE_XY: // Front
-		t = Vec3(xx - pos.mVec[0], yy - pos.mVec[1], 0.0f);
-		break;
-
-	case PLANE_XZ: // Top
-		t = Vec3(xx - pos.mVec[0], 0.0f, yy - pos.mVec[2]);
-		break;
-
-	case PLANE_ZY: // Side
-		t = Vec3(0.0f, yy - pos.mVec[1], xx - pos.mVec[2]);
-		break;
-
-	default: 
-		;
-	}
-
-	pos += t;
-
-	freyjaMeshPosition(GetSelectedMesh(), pos.mVec);
-}
-
-
 void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
@@ -3926,30 +3913,6 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 	vec3_t center;
 	float xx = x, yy = y, xf, yf, zf;
 
-
-	/* Mongoose: Convert screen to world coordinate system */
-	//getWorldFromScreen(&xx, &yy, &zz);
-
-#if 0
-				float xf, yf;
-				const float d = 0.5f, t = 1.0f;
-				xf = ((x < old_x-t) ? -d : ((x > old_x+t) ? d : 0));
-				yf = ((y < old_y-t) ? -d : ((y > old_y+t) ? d : 0));
-
-				if (mObjectMode == tBone)
-				{
-					freyjaGetBoneTranslation3fv(GetSelectedBone(),
-												xyz.mVec);
-				}
-
-				mCursor.mPos.zero();
-				CursorMove(xf, -yf);
-				xyz += mCursor.mPos;
-				mCursor.mPos = xyz;
-
-				old_x = x;
-				old_y = y;
-#endif
 
 	/* Mongoose: Compute a relative movement value too here */
 	y = -y;
@@ -4070,9 +4033,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				break;
 			}
 
-			ActionModelModified(new
-								FreyjaStateTransform(fTransformMesh, fTranslate,
-													 GetSelectedMesh(), mCursor.mPos.mVec));
+			ActionModelModified(new FreyjaStateTransform(fTransformMesh, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
 
 
 			mCursor.mPos += Vec3(xf, yf, zf);
