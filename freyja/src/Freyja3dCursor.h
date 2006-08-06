@@ -37,12 +37,12 @@ class Freyja3dCursor
 {
  public:
 
-	typedef enum Freyja3dCursorFlags {
+	typedef enum {
 		Rotation,
 		Translation,
 		Scale,
 		Invisible
-	} Freyja3dCursorFlags_t;
+	} Flags;
 
 
 	typedef enum {
@@ -133,13 +133,13 @@ class Freyja3dCursor
 	}
 
 
-	void SetMode(Freyja3dCursorFlags_t n)
+	void SetMode(Flags n)
 	{
 		mMode = n;
 	}
 
 	// When seperating events from cursor remember to restore mode here
-	void ForceChangeState(FreyjaState *state, Freyja3dCursorFlags_t mode)
+	void ForceChangeState(FreyjaState *state, Flags mode)
 	{
 		if (!state)
 			return;
@@ -150,7 +150,7 @@ class Freyja3dCursor
 		mMode = mode;
 	}
 
-	void ChangeState(FreyjaState *state, Freyja3dCursorFlags_t mode)
+	void ChangeState(FreyjaState *state, Flags mode)
 	{
 		if (!state)
 			return;
@@ -165,7 +165,7 @@ class Freyja3dCursor
 		mMode = mode;
 	}
 
-	Freyja3dCursorFlags_t GetMode() { return mMode; }
+	Flags GetMode() { return mMode; }
 
 	void Push()
 	{
@@ -362,9 +362,7 @@ class Freyja3dCursor
 
 	mstl::stack<FreyjaState *> mStack;
 
-	mstl::stack<FreyjaState *> mRedoStack;
-
-	Freyja3dCursorFlags_t mMode;
+	Flags mMode;
 };
 
 
