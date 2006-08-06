@@ -225,6 +225,30 @@ void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex,
 	}
 }
 
+void freyjaModelMeshTransform3v(index_t modelIndex, index_t meshIndex, 
+								freyja_transform_action_t action, vec3_t xyz)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
+
+	if (mesh == NULL)
+		return;
+
+	switch (action)
+	{
+	case fTranslate:
+		{
+			Vec3 origin = mesh->GetPosition();
+			Vec3 translate(xyz);
+			mesh->Translate(translate - origin);
+			mesh->SetPosition(translate);
+		}
+		break;
+		
+	default:
+		BUG_ME("Case '%i' Not Implemented", action);
+	}
+}
+
 
 ////////////////////////////////////
 // 0.9.3 <- 0.9.5 ABI
