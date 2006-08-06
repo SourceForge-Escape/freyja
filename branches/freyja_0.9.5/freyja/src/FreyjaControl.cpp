@@ -48,7 +48,6 @@ using namespace freyja;
 #define DEBUG_SCREEN_TO_WORLD 0
 #define DEBUG_VIEWPORT_MOUSE 0
 
-void event_register_control(FreyjaControl *c);
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 
@@ -67,6 +66,7 @@ FreyjaControl::FreyjaControl(Resource *r) :
 	mCurrentlyOpenFilename(),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
 	mResource(r),
+	mRender(NULL),
 	mCleared(true),
 	mAllowBoneNameUpdate(true),
 	mToken(false)
@@ -109,11 +109,16 @@ FreyjaControl::FreyjaControl(Resource *r) :
 		SystemIO::Print("See ~/.freyja/Freyja.log for possible errors.\n");
 		exit(-1);
 	}
-		
-	event_register_control(this);
+
+	mInstance = this;
 
 	/* Build the user interface from lisp, and load user preferences */
 	LoadResource();
+
+	/* Load up recent files list into file menu */
+	freyja_print("Loading recent_files-dev...");
+	bool b = LoadRecentFilesResource(freyja_rc_map_string("recent_files-dev").GetCString());
+	freyja_print("Loading recent_files-dev %s", b ? "successful" : "failed");
 
 	/* Set some basic defaults */
 	SetControlScheme(eScheme_Model);
@@ -140,8 +145,6 @@ FreyjaControl::FreyjaControl(Resource *r) :
 	mGenMeshHeight = 8.0f;
 	mGenMeshCount = 16;
 	mGenMeshSegements = 4;
-
-	mInstance = this;
 }
 
 
@@ -345,6 +348,11 @@ void FreyjaControl::ActionModelModified(FreyjaState *state)
 		if (mToken)
 		{
 			mCursor.ForceChangeState(state, Freyja3dCursor::Translation);
+		}
+		else // This is an extranous event if it doesn't have a token
+		{
+			DEBUG_MSG("Extranous event dropped.");
+			delete state;
 		}
 	}
 
@@ -2286,12 +2294,10 @@ bool FreyjaControl::event(int command)
 					break;
 				}
 
-				//state->Undo();
-				//freyja_print( "! Undo e=%i, m=%i, i=%i",
-				//			  state->GetEvent(), state->GetMode(), state->GetIndex());
-				//mCursor.mPos = ((FreyjaStateTransform *)state)->GetXYZ();
 				freyja_print("Undo state Popped.");
+
 				delete state;
+
 				freyja_event_gl_refresh();
 			}
 			else
@@ -4033,8 +4039,10 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				break;
 			}
 
-			ActionModelModified(new FreyjaStateTransform(fTransformMesh, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
-
+			if (mToken)
+			{
+				//ActionModelModified(new FreyjaStateTransform(fTransformMesh, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
+			}
 
 			mCursor.mPos += Vec3(xf, yf, zf);
 
@@ -4049,7 +4057,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				}
 			}
 
-			freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
+			//freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
 
 			old_x = x;
 			old_y = y;
@@ -4443,12 +4451,6 @@ void FreyjaControl::LoadResource()
 	{
 		mResource->Flush();
 	}
-
-
-	// Load up recent files list
-	freyja_print("Loading recent_files-dev...");
-	bool b = LoadRecentFilesResource(freyja_rc_map_string("recent_files-dev").GetCString());
-	freyja_print("Loading recent_files-dev %s", b ? "successful" : "failed");
 }
 
 

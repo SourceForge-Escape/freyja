@@ -421,13 +421,6 @@ void Mesh::Scale(vec_t x, vec_t y, vec_t z)
 }
 
 
-void Mesh::Translate(vec_t x, vec_t y, vec_t z)
-{
-	vec3_t v = {x, y, z};
-	TripleVec_Addition(mVertexPool, v);
-}
-
-
 ////////////////////////////////////////////////////////////
 // Private Accessors
 ////////////////////////////////////////////////////////////

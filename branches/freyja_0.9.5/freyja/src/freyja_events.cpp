@@ -43,7 +43,6 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 
 
 Resource gResource;
-FreyjaControl *gFreyjaControl = 0x0;
 int gSkelTreeWidgetIndex;
 
 
@@ -292,7 +291,8 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 
 void freyja_handle_application_window_close()
 {
-	gFreyjaControl->event(eShutdown);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->event(eShutdown);
 }
 
 
@@ -431,7 +431,8 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 
 void mgtk_handle_command(int command)
 {
-	gFreyjaControl->event(command);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated, Event %i not handled", command);
+	FreyjaControl::mInstance->event(command);
 }
 
 
@@ -443,7 +444,8 @@ void mgtk_handle_command2i(int event, int command)
 
 void mgtk_handle_event1u(int event, unsigned int value)
 {
-	if (!gFreyjaControl->event(event, value))
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	if (!FreyjaControl::mInstance->event(event, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", eEvent, event);
@@ -453,7 +455,9 @@ void mgtk_handle_event1u(int event, unsigned int value)
 
 void mgtk_handle_event1f(int event, float value)
 {
-	if (!gFreyjaControl->event(event, value))
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+
+	if (!FreyjaControl::mInstance->event(event, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
@@ -463,21 +467,25 @@ void mgtk_handle_event1f(int event, float value)
 
 void mgtk_handle_file_dialog_selection(char *filename)
 {
-	gFreyjaControl->handleFilename(filename);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+
+	FreyjaControl::mInstance->handleFilename(filename);
 }
 
 
 void mgtk_handle_gldisplay()
 {
-	if (gFreyjaControl)
-		gFreyjaControl->Display();
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->Display();
 }
 
 
 void mgtk_handle_glresize(unsigned int width, unsigned int height)
 {
-	if (gFreyjaControl)
-		gFreyjaControl->HandleResize(width, height);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->HandleResize(width, height);
 }
 
 
@@ -495,16 +503,16 @@ void mgtk_handle_resource_start()
 
 void mgtk_handle_slider1u(int event, unsigned int value)
 {
-	gFreyjaControl->event(event, value);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->event(event, value);
 }
 
 
 void mgtk_handle_text(int event, char *text)
 {
-	if (gFreyjaControl)
-	{
-		gFreyjaControl->handleTextEvent(event, text);
-	}
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->handleTextEvent(event, text);
 }
 
 
@@ -538,15 +546,17 @@ void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
 
 void mgtk_event_gldisplay()
 {
-	if (gFreyjaControl)
-		gFreyjaControl->Display();
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->Display();
 }
 
 
 void mgtk_event_glresize(unsigned int width, unsigned int height)
 {
-	if (gFreyjaControl)
-		gFreyjaControl->HandleResize(width, height);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->HandleResize(width, height);
 }
 
 
@@ -569,7 +579,9 @@ void freyja_handle_command2i(int event, int command)
 
 void freyja_handle_event1u(int event, unsigned int value)
 {
-	if (!gFreyjaControl->event(event, value))
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+
+	if (!FreyjaControl::mInstance->event(event, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", eEvent, event);
@@ -579,7 +591,9 @@ void freyja_handle_event1u(int event, unsigned int value)
 
 void freyja_handle_event1f(int event, float value)
 {
-	if (!gFreyjaControl->event(event, value))
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+
+	if (!FreyjaControl::mInstance->event(event, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
@@ -589,36 +603,37 @@ void freyja_handle_event1f(int event, float value)
 
 void freyja_handle_file_dialog_selection(char *filename)
 {
-	gFreyjaControl->handleFilename(filename);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->handleFilename(filename);
 }
 
 
 void freyja_handle_gldisplay()
 {
-	ASSERT_MSG(gFreyjaControl, "FreyjaControl Singleton not allocated");
-	gFreyjaControl->Display();
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
+	FreyjaControl::mInstance->Display();
 }
 
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	ASSERT_MSG(gFreyjaControl, "FreyjaControl Singleton not allocated");
-	gFreyjaControl->HandleResize(width, height);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
+	FreyjaControl::mInstance->HandleResize(width, height);
 }
 
 
 void freyja_handle_slider1u(int event, unsigned int value)
 {
-	gFreyjaControl->event(event, value);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->event(event, value);
 }
 
 
 void freyja_handle_text(int event, char *text)
 {
-	if (gFreyjaControl)
-	{
-		gFreyjaControl->handleTextEvent(event, text);
-	}
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->handleTextEvent(event, text);
 }
 
 
@@ -647,7 +662,8 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 
 void freyja_handle_command(int command)
 {
-	gFreyjaControl->event(command);
+	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->event(command);
 }
 
 
@@ -952,11 +968,11 @@ void freyja_handle_resource_start()
 	if (!freyja_is_user_installed())
 		freyja_install_user();
 
-	gFreyjaControl = new FreyjaControl(&gResource);
+	FreyjaControl *startInstance = new FreyjaControl(&gResource);
 
 	// This is done when FreyjaControl is allocated now
 	/* Build the user interface from lisp, and load user preferences */
-	//gFreyjaControl->loadResource();
+	//FreyjaControl::mInstance->loadResource();
 
 	/* FreyjaAppPlugin prototype testing... */
 	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
@@ -976,8 +992,8 @@ void freyja_handle_resource_start()
 	mgtk_option_menu_value_set(eTransformMenu, 1);
 	mgtk_option_menu_value_set(eObjectMenu, 0);
 	freyja_event2i(eEvent, FREYJA_MODE_MODEL_EDIT);
-	gFreyjaControl->event(eTransformMesh);
-	gFreyjaControl->event(eSelect);
+	FreyjaControl::mInstance->event(eTransformMesh);
+	FreyjaControl::mInstance->event(eSelect);
 
 	freyja_set_main_window_title(BUILD_NAME);
 	mgtk_event_gl_refresh();
@@ -1316,26 +1332,20 @@ void freyja_event_info_dialog(char *icon, char *message)
 }
 
 
-void freyja_event_register_control(FreyjaControl *c)
-{
-	gFreyjaControl = c;
-}
-
-
 void freyja_handle_motion(int x, int y)
 {
-	if (gFreyjaControl)
+	if (FreyjaControl::mInstance)
 	{
-		gFreyjaControl->motionEvent(x, y);
+		FreyjaControl::mInstance->motionEvent(x, y);
 	}
 }
 
 
 void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 {
-	if (gFreyjaControl)
+	if (FreyjaControl::mInstance)
 	{
-		gFreyjaControl->mouseEvent(button, state, mod, x, y);
+		FreyjaControl::mInstance->mouseEvent(button, state, mod, x, y);
 	}
 }
 
@@ -1348,9 +1358,9 @@ void freyja_event_set_color(int colorId, float r, float g, float b, float a)
 
 int freyja_event2i(int event, int cmd)
 {
-	if (gFreyjaControl)
+	if (FreyjaControl::mInstance)
 	{
-		if (!gFreyjaControl->handleEvent(event, cmd))
+		if (!FreyjaControl::mInstance->handleEvent(event, cmd))
 		{
 			freyja_print("  freyja_event2i passed previous unhandled event %i:%i",
 						event, cmd);
@@ -1462,9 +1472,9 @@ void freyja_print(char *format, ...)
 
 void freyja_event_shutdown()
 {
-	if (gFreyjaControl)
+	if (FreyjaControl::mInstance)
 	{
-		delete gFreyjaControl;
+		delete FreyjaControl::mInstance;
 	}
 
 	freyja_print("!Thanks for using %s", PROGRAM_NAME);
@@ -1557,8 +1567,8 @@ int freyja_create_confirm_dialog(char *dialog_icon,
 
 void freyja_event_file_dialog_notify(char *filename)
 {
-	if (gFreyjaControl)
-		gFreyjaControl->handleFilename(filename);
+	if (FreyjaControl::mInstance)
+		FreyjaControl::mInstance->handleFilename(filename);
 }
 
 
@@ -1711,12 +1721,6 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 #endif
 
 	dest[size-1] = 0;
-}
-
-
-void event_register_control(FreyjaControl *c)
-{
-	gFreyjaControl = c;
 }
 
 

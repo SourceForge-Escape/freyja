@@ -32,6 +32,12 @@
 #include "FreyjaPrinter.h"
 #include "FreyjaFSM.h"
 
+
+const char *gStoreFile = 0x0;
+unsigned int gStoreLine = 0;
+const char *gStoreFunc = 0x0;
+
+
 #include "freyja.h"
 
 
@@ -220,11 +226,20 @@ void freyjaFree()
 	freyjaPrintMessage("\nMemoryPool stats:\n %u allocations\n %u deallocations\n %u operations\n\n", gFreyjaMemoryNews, gFreyjaMemoryDeletes, gFreyjaMemoryTick);
 }
 
+void freyjaStoreMark(const char *file, unsigned int line, const char *func)
+{
+	gStoreFile = file;
+	gStoreLine = line;
+	gStoreFunc = func;
+}
+
 
 byte freyjaAssertMessage(bool expr, const char *format, ...)
 {
 	if (expr)
 		return 0;
+
+	freyjaPrintMessage("Assert encountered: %s:%i %s", gStoreFile, gStoreLine, gStoreFunc);
 
 	if (gPrinter)
 	{
