@@ -179,6 +179,7 @@ class FreyjaStateTransform : public FreyjaState
 		freyjaPrintMessage("! FreyjaStateTransform::Undo() %i %i %i %f %f %f",
 						   mTransform, mAction, mIndex,
 						   xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
+
 		freyjaGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
 		
 		return true;

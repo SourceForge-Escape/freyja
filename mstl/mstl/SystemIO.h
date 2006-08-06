@@ -897,6 +897,32 @@ class SystemIO
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	static bool AssertMsgMarker(const char *file, unsigned int line, 
+										 const char *function,
+										 bool expr, const char *format, ...)
+	{
+		if (expr)
+			return false;
+
+		printf("%s:%u %s\n", file, line, function);
+
+		va_list args;
+		va_start(args, format);	
+		vfprintf(stdout, format, args);
+		printf("\n");
+		va_end(args);
+
+		// TODO: Add attachable helper objects here to handle assert events
+		// useful for making GUI MsgBox asserts, etc
+		
+	
+		// Soft breakpoint insertion
+		Assert(expr);
+
+		return true;
+	}
+
+
 	static bool AssertMsg(bool expr, const char *format, ...)
 	{
 		if (expr)

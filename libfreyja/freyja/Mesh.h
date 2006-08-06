@@ -565,9 +565,9 @@ public:
 
 	void Scale(vec_t x, vec_t y, vec_t z);
 
-	void Translate(vec_t x, vec_t y, vec_t z);
+	void Translate(vec_t x, vec_t y, vec_t z) { Translate(Vec3(x,y,z)); }
 
-	void Translate(Vec3 v) { Translate(v.mVec[0], v.mVec[1], v.mVec[2]); }
+	void Translate(Vec3 v) { TripleVec_Addition(mVertexPool, v.mVec); }
 
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
 	{

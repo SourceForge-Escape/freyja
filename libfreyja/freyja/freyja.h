@@ -58,12 +58,13 @@
 
 
 #ifdef DEBUG
+#   define STORE_MARK freyjaStoreMark
 #   define DEBUG_MSG(msg) freyjaPrintMessage(msg)
 #   define DEBUG_MSGF freyjaPrintMessage 
-#   define ASSERT_MSG freyjaAssertMessage
+#   define ASSERT_MSG STORE_MARK(__FILE__, __LINE__, __func__); freyjaAssertMessage
 #   define DEBUG_MSGF freyjaPrintMessage
 #else
-#   define DEBUG_MSG(msg) 
+#   define DEBUG_MSG(msg)
 #   define DEBUG_MSGF(...)
 #   define ASSERT_MSG(...)
 #endif
@@ -213,6 +214,12 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stderr or gPrinter
+	 ------------------------------------------------------*/
+
+	void freyjaStoreMark(const char *file, unsigned int line, const char *func);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : This is just useful for tmp info storage for debugging
 	 ------------------------------------------------------*/
 
 	byte freyjaAssertMessage(bool expr, const char *format, ...);
