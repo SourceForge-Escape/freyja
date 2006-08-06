@@ -267,6 +267,11 @@ void FreyjaRender::drawFreeWindow()
 
 	if (mRenderMode & fDrawPickRay)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
 		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
@@ -281,6 +286,8 @@ void FreyjaRender::drawFreeWindow()
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glPointSize(mDefaultPointSize);
+
+		glPopAttrib();
 	}
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
@@ -1505,6 +1512,11 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	if (mRenderMode & fDrawPickRay)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
 		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
@@ -1519,6 +1531,8 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glPointSize(mDefaultPointSize);
+
+		glPopAttrib();
 	}
 
 	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
