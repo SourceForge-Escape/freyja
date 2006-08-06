@@ -4041,7 +4041,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 
 			if (mToken)
 			{
-				//ActionModelModified(new FreyjaStateTransform(fTransformMesh, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
+				ActionModelModified(new FreyjaStateTransform(fTransformMesh, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
 			}
 
 			mCursor.mPos += Vec3(xf, yf, zf);

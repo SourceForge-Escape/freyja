@@ -195,6 +195,11 @@ void FreyjaRender::drawFreeWindow()
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+
 	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
 
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
@@ -203,6 +208,7 @@ void FreyjaRender::drawFreeWindow()
 
 	mglDrawEditorAxis();
 
+	glPopAttrib();
 	glPopMatrix();
 #endif
 
@@ -219,6 +225,7 @@ void FreyjaRender::drawFreeWindow()
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
 
 		glLineWidth(1.25f);
 		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);

@@ -775,7 +775,7 @@ private:
 
 	Texture mTexture;                       /* Collection of Texture utils */
 
-	const static uint32 mRecentFileLimit = 7;
+	const static uint32 mRecentFileLimit = 10;
 	Vector<String> mRecentFiles;            /* Recently loaded model files */
 
 	Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
