@@ -1439,6 +1439,13 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	RenderModel model;
 	unsigned int i;
 
+
+	if (plane == PLANE_FREE)
+	{
+		drawFreeWindow();
+		return;
+	}
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 
