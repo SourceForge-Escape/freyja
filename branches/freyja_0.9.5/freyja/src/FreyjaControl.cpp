@@ -3914,7 +3914,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 {
-	vec_t xf, yf, zf;
+	Vec3 t;
 	vec3_t center;
 
 	getScreenToWorldOBSOLETE(&vx, &vy);
@@ -3924,49 +3924,54 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	switch (GetSelectedView())
 	{
 	case PLANE_XY:
-		xf = vx - center[0];
-		yf = vy - center[1];
-		zf = 0;
+		t.mVec[0] = vx - center[0];
+		t.mVec[1] = vy - center[1];
+		t.mVec[2] = 0;
 		break;
+
 	case PLANE_XZ:
-		xf = vx - center[0];
-		yf = 0;
-		zf = vy - center[2];
+		t.mVec[0] = vx - center[0];
+		t.mVec[1] = 0;
+		t.mVec[2] = vy - center[2];
 		break;
+
 	case PLANE_ZY: // side
-		xf = 0;
-		zf = vx - center[2];
-		yf = vy - center[1];
+		t.mVec[0] = 0;
+		t.mVec[1] = vx - center[2];
+		t.mVec[2] = vy - center[1];
 		break;
+
 	default:
 		;
 	}
 
-	// Cursor axis determined limited movement
+	/* Cursor axis determined limited movement */
 	switch (mCursor.mAxis)
 	{
 	case Freyja3dCursor::eAll:
 		break;
+
 	case Freyja3dCursor::eX:
-		yf = 0;
-		zf = 0;
+		t.mVec[1] = 0;
+		t.mVec[2] = 0;
 		break;
+
 	case Freyja3dCursor::eY:
-		xf = 0;
-		zf = 0;
+		t.mVec[0] = 0;
+		t.mVec[2] = 0;
 		break;
+
 	case Freyja3dCursor::eZ:
-		xf = 0;
-		yf = 0;
+		t.mVec[0] = 0;
+		t.mVec[1] = 0;
 		break;
+
 	case Freyja3dCursor::eNone:
-		xf = 0;
-		yf = 0;
-		zf = 0;
 		return;
 		break;
 	}
 
+	/* Store undo information if token is set */
 	if (mToken)
 	{
 		freyja_transform_t type = fTransformMesh;
@@ -3975,7 +3980,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		ActionModelModified(new FreyjaStateTransform(type, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
 	}
 
-	mCursor.mPos += Vec3(xf, yf, zf);
+	mCursor.mPos += t;
 
 
 	switch (mObjectMode)
