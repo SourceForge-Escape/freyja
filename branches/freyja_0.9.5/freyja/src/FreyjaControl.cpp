@@ -4057,7 +4057,7 @@ void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
 				}
 			}
 
-			//freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
+			freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
 
 			old_x = x;
 			old_y = y;
