@@ -687,10 +687,11 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void moveObject(int x, int y, freyja_plane_t plane);
+	void MoveObject(vec_t vx, vec_t vy);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : Pass viewport adjusted x, y 
+	 * Post : Determines type and which object to move based
+	 *        on editing mode and selection, and moves it.
 	 *
 	 *-- History ------------------------------------------
 	 *

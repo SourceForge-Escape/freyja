@@ -3912,169 +3912,90 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 }
 
 
-void FreyjaControl::moveObject(int x, int y, freyja_plane_t plane)
+void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 {
-	static int old_y = 0, old_x = 0;
-	const float t = 2.0f, m = 0.5f;
+	vec_t xf, yf, zf;
 	vec3_t center;
-	float xx = x, yy = y, xf, yf, zf;
 
+	getScreenToWorldOBSOLETE(&vx, &vy);
+	mCursor.mPos.Get(center);
 
-	/* Mongoose: Compute a relative movement value too here */
-	y = -y;
-
-	switch (plane)
+	/* Exact movement based on center of object */
+	switch (GetSelectedView())
 	{
-	case PLANE_XY: // front
-		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+	case PLANE_XY:
+		xf = vx - center[0];
+		yf = vy - center[1];
 		zf = 0;
 		break;
-
-	case PLANE_XZ: // top
-		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
+	case PLANE_XZ:
+		xf = vx - center[0];
 		yf = 0;
-		zf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		zf = vy - center[2];
 		break;
-
 	case PLANE_ZY: // side
 		xf = 0;
-		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		zf = vx - center[2];
+		yf = vy - center[1];
 		break;
-
 	default:
 		;
 	}
 
+	// Cursor axis determined limited movement
+	switch (mCursor.mAxis)
+	{
+	case Freyja3dCursor::eAll:
+		break;
+	case Freyja3dCursor::eX:
+		yf = 0;
+		zf = 0;
+		break;
+	case Freyja3dCursor::eY:
+		xf = 0;
+		zf = 0;
+		break;
+	case Freyja3dCursor::eZ:
+		xf = 0;
+		yf = 0;
+		break;
+	case Freyja3dCursor::eNone:
+		xf = 0;
+		yf = 0;
+		zf = 0;
+		return;
+		break;
+	}
+
+	if (mToken)
+	{
+		freyja_transform_t type = fTransformMesh;
+		//fTransformVertex
+		//fTransformBone
+		ActionModelModified(new FreyjaStateTransform(type, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
+	}
+
+	mCursor.mPos += Vec3(xf, yf, zf);
+
+
 	switch (mObjectMode)
 	{
+	case tMesh:
+		freyjaModelMeshTransform3v(0, GetSelectedMesh(), fTranslate, mCursor.mPos.mVec);
+		break;
+
 	case tPoint:
-		xx = x; 
-		yy = -y;
-		getScreenToWorldOBSOLETE(&xx, &yy);
-		{
-			freyjaGetVertexXYZ3fv(GetSelectedVertex(), mCursor.mPos.mVec);
-			FreyjaStateTransform *state = new
-			FreyjaStateTransform(fTransformVertex, fTranslate,
-								 GetSelectedVertex(), mCursor.mPos.mVec);
-			mCursor.ChangeState(state, Freyja3dCursor::Translation);
-		}
-			
 		//VertexMove(xx, yy);
 		break;
 
 	case tBone:
-		xx = x; 
-		yy = -y;
-		getScreenToWorldOBSOLETE(&xx, &yy);
 		//moveBone(xx, yy);
-		{
-			freyjaGetBoneTranslation3fv(GetSelectedBone(),
-										mCursor.mPos.mVec);
-			FreyjaStateTransform *state = new
-			FreyjaStateTransform(fTransformBone, fTranslate,
-								 GetSelectedBone(), mCursor.mPos.mVec);
-			mCursor.ChangeState(state, Freyja3dCursor::Translation);
-		}
-		break;			
-		
-	case tMesh:
-		{
-			xx = x; 
-			yy = -y;
-			AdjustMouseXYForViewports(xx, yy);
-			getScreenToWorldOBSOLETE(&xx, &yy);
-			mCursor.mPos.Get(center);
-
-			/* Exact movement based on center of object */
-			switch (plane)
-			{
-			case PLANE_XY:
-				xf = xx - center[0];
-				yf = yy - center[1];
-				zf = 0;
-				break;
-			case PLANE_XZ:
-				xf = xx - center[0];
-				yf = 0;
-				zf = yy - center[2];
-				break;
-			case PLANE_ZY: // side
-				xf = 0;
-				zf = xx - center[2];
-				yf = yy - center[1];
-				break;
-			default:
-				;
-			}
-
-			// FIXME: Should only move on selected axis ( or all if [center] )
-			// for now we just assume center or 'free' move is on for testing
-
-			switch (mCursor.mAxis)
-			{
-			case Freyja3dCursor::eAll:
-				break;
-			case Freyja3dCursor::eX:
-				yf = 0;
-				zf = 0;
-				break;
-			case Freyja3dCursor::eY:
-				xf = 0;
-				zf = 0;
-				break;
-			case Freyja3dCursor::eZ:
-				xf = 0;
-				yf = 0;
-				break;
-			case Freyja3dCursor::eNone:
-				xf = 0;
-				yf = 0;
-				zf = 0;
-				
-				old_x = x;
-				old_y = y;
-				return;
-				break;
-			}
-
-			if (mToken)
-			{
-				ActionModelModified(new FreyjaStateTransform(fTransformMesh, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
-			}
-
-			mCursor.mPos += Vec3(xf, yf, zf);
-
-			{
-				Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-
-				if (m)
-				{
-					Vec3 o = m->GetPosition();
-					m->Translate(mCursor.mPos - o);
-					m->SetPosition(mCursor.mPos);
-				}
-			}
-
-			freyjaMeshPosition(GetSelectedMesh(), mCursor.mPos.mVec);
-
-			old_x = x;
-			old_y = y;
-			return;
-		}
 		break;
 
-	default:  
-		/* Relative movement based on mouse tracking */
-		if (plane == PLANE_XZ) zf = -zf;
-
-		Transform(mObjectMode, fTranslate, xf, yf, zf);
+	default:
+		//Transform(mObjectMode, fTranslate, xf, yf, zf);
 		break;
 	}
-
-	old_x = x;
-	old_y = y;
 }
 
 
@@ -4344,7 +4265,11 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 		switch (mEventMode)
 		{
 		case modeMove:
-			moveObject(x, y, plane);
+			{
+				vec_t vx = x, vy = y;
+				AdjustMouseXYForViewports(vx, vy);
+				MoveObject(vx, vy);
+			}
 			break;
 
 		case modeRotate: 

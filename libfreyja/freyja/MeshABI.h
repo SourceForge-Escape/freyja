@@ -30,6 +30,9 @@ extern "C" {
 	// TMP model stuff
 	uint32 freyjaModelGetMeshCount(index_t modelIndex);
 
+	void freyjaModelMeshTransform3v(index_t modelIndex, index_t meshIndex, 
+									freyja_transform_action_t action, vec3_t xyz);
+
 
 	///////////////////////////////////////////////////////////////////////
 	// MESH

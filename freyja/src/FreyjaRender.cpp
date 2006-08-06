@@ -1565,7 +1565,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glPushMatrix();
 	glRotatef(45.0f, 1, 0, 0);
 	glRotatef(45.0f, 0, 0, 1);
-	drawTorus(3.0, 10.0);
+	mglDrawTorus(3.0, 10.0);
 	glPopMatrix();
 #else
 	/* Cast light on sphere colored/detailed by material */
