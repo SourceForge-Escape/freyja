@@ -878,15 +878,14 @@ private:
 	// index system ( so it likely still faster in general case )
 	void TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz)
 	{
-		uint32 i, idx, size = v.size();
+		uint32 i, size = v.size();
 		vec_t *array = v.getVectorArray();
 
-		for ( i = 0; i < size; ++i )
+		for ( i = 0; i < size; i += 3 )
 		{
-			idx = i * 3;
-			array[idx  ] += xyz[0];  
-			array[idx+1] += xyz[1];  
-			array[idx+2] += xyz[2];  
+			array[i  ] += xyz[0];  
+			array[i+1] += xyz[1];  
+			array[i+2] += xyz[2];  
 		}
 	}
 
