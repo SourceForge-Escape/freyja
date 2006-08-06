@@ -32,6 +32,7 @@
 #include <freyja/freyja.h>
 #include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaFileReader.h>
+#include <freyja/MeshABI.h>
 
 
 class FreyjaState
@@ -162,6 +163,13 @@ class FreyjaStateTransform : public FreyjaState
 
 	virtual bool Undo()
 	{	
+		if (mTransform == fTransformMesh)
+		{
+			freyjaModelMeshTransform3v(0, mIndex, fTranslate, mXYZ.mVec);
+			return true;
+		}
+
+
 		Vec3 xyz;
 
 		freyjaGetGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
