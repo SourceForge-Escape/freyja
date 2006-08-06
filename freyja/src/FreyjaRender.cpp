@@ -218,7 +218,7 @@ void FreyjaRender::drawFreeWindow()
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glTranslatef(mScroll[0], mScroll[1], mScroll[2]);
+	glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
 
 	if (mRenderMode & RENDER_EDIT_GRID)
 	{
