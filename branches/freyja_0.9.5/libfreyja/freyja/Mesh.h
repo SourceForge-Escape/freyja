@@ -357,6 +357,7 @@ public:
 	 ------------------------------------------------------*/
 
 	void GetVertexArrayPos(index_t vertexIndex, vec3_t xyz);
+	void SetVertexArrayPos(index_t vertexIndex, const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : NOTE This is not the same as GetVertexClassPos
 	 *        This is the ith point stored in the point array

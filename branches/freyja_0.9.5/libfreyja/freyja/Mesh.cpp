@@ -371,6 +371,13 @@ void Mesh::SetFaceFlags(index_t face, uint32 flags)
 }
 
 
+void Mesh::SetVertexArrayPos(index_t vertexIndex, const vec3_t xyz)
+{	
+	if (vertexIndex < mVertexPool.size())
+		SetTripleVec(mVertexPool, vertexIndex, xyz);	
+}
+
+
 void Mesh::ClearFaceFlags(index_t face, uint32 flags)
 {
 	Face *f = GetFace(face);

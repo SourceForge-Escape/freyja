@@ -183,7 +183,7 @@ class FreyjaStateTransform : public FreyjaState
 	{	
 		if (mTransform == fTransformMesh)
 		{
-			freyjaModelMeshTransform3v(0, mIndex, fTranslate, mXYZ.mVec);
+			freyjaModelMeshTransform3fv(0, mIndex, fTranslate, mXYZ.mVec);
 			return true;
 		}
 

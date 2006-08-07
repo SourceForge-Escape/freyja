@@ -225,7 +225,28 @@ void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex,
 	}
 }
 
-void freyjaModelMeshTransform3v(index_t modelIndex, index_t meshIndex, 
+
+void freyjaMeshVertexTranslate3fv(index_t meshIndex, 
+								  index_t vertexIndex, vec3_t xyz)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (mesh)
+	{
+		Vertex *vert = mesh->GetVertex(vertexIndex);
+
+		if (vert)
+		{
+			Vec3 v;
+			Vec3 u(xyz);
+			mesh->GetVertexArrayPos(vert->mVertexIndex, v.mVec);
+			mesh->SetVertexArrayPos(vert->mVertexIndex, (v+(u-v)).mVec);
+		}
+	}
+}
+
+
+void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex, 
 								freyja_transform_action_t action, vec3_t xyz)
 {
 	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
@@ -287,37 +308,9 @@ void freyjaMeshTransform(index_t meshIndex, uint32 frame,
 						 freyja_transform_action_t action, 
 						 vec_t x, vec_t y, vec_t z)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
-
-	if (mesh == NULL)
-	{
-		MARK_MSGF("Tried to transform invalid mesh[%i]", meshIndex);
-		return;
-	}
-
-	switch (action)
-	{
-	case fTranslate:
-		mesh->Translate(x, y, z);
-		break;
-
-#if 0
-	case fRotate:
-		break;
-
-	case fScale:
-		break;
-
-	case fScaleAboutPoint:
-		break;
-
-	case fRotateAboutPoint:
-		break;
-#endif
-
-	default:
-		BUG_ME("Not Implemented");
-	}
+	MARK_MSG("WARNING 0.9.5 API has no concept of 0.9.3 'mesh frames'");
+	vec3_t v = {x,y,z};
+	freyjaModelMeshTransform3fv(gFreyjaCurrentModel, meshIndex, action, v);
 }
 
 
@@ -325,25 +318,7 @@ void freyjaMeshFrameTransform(index_t meshIndex, uint32 frame,
 							  freyja_transform_action_t action, 
 							  vec_t x, vec_t y, vec_t z)
 {
-	switch (action)
-	{
-	case fTranslate:
-		break;
-
-	case fRotate:
-		break;
-
-	case fScale:
-		break;
-
-	case fScaleAboutPoint:
-		break;
-
-	case fRotateAboutPoint:
-		break;
-	}
-
-	BUG_ME("Not Implemented");
+	MARK_MSG("ERROR 0.9.5 API has no concept of 0.9.3 'mesh frames', No object on which to operate.");
 }
 
 
