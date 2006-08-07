@@ -537,7 +537,8 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void getWorldFromScreen(float *x, float *y, float *z);
+
+	void GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z);
 	/*------------------------------------------------------
 	 * Pre  : X and Y are the mouse position
 	 *

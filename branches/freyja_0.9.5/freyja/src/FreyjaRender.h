@@ -143,7 +143,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	vec_t getWindowAspectRatio();
+	const vec_t &GetWindowAspectRatio() { return mAspectRatio; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get GL context window aspect ratio
@@ -156,20 +156,7 @@ public:
 
 	unsigned int GetMode() { return mRenderMode; }
 
-	vec_t getNearHeight() { return mScaleEnv; } 
-
-	unsigned int getWindowWidth();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get GL context window width 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	unsigned int getWindowHeight();
+	const vec_t &getNearHeight() { return mScaleEnv; } 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get GL context window height
@@ -180,7 +167,29 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	float getZoom();
+	const unsigned int &GetWindowWidth() { return mWidth; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get GL context window width 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	const unsigned int &GetWindowHeight() { return mHeight; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get GL context window height
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	const vec_t &GetZoom() { return mZoom; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get current zoom factor for the scene
@@ -259,7 +268,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setZoom(float zoom);
+	void SetZoom(vec_t zoom) { mZoom = zoom; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set current zoom factor for the scene

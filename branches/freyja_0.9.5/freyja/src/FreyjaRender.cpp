@@ -133,30 +133,6 @@ void FreyjaRender::getRotation(vec3_t v)
 }
 
 
-vec_t FreyjaRender::getWindowAspectRatio()
-{
-	return mAspectRatio;
-}
-
-
-unsigned int FreyjaRender::getWindowWidth()
-{
-	return mWidth;
-}
-
-
-unsigned int FreyjaRender::getWindowHeight()
-{
-	return mHeight;
-}
-
-
-float FreyjaRender::getZoom()
-{
-	return mZoom;
-}
-
-
 /* Mongoose 2004.03.26, 
  * You have to be kidding me 
  * Replace with quarternion/matrix and change API  */
@@ -700,12 +676,6 @@ void FreyjaRender::setViewMode(int mode)
 }
 
 
-void FreyjaRender::setZoom(float zoom)
-{
-	mZoom = zoom;
-}
-
-
 void FreyjaRender::toggleFlag(flags_t flag)
 {
 	mRenderMode ^= flag;
@@ -1066,8 +1036,8 @@ void FreyjaRender::renderUVWindow()
 	unsigned int width, height;
 
 
-	width = getWindowWidth();
-	height = getWindowHeight();
+	width = GetWindowWidth();
+	height = GetWindowHeight();
 
 	glPushMatrix();
 
@@ -1457,7 +1427,7 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 	glDisable(GL_LIGHTING);
 
 	if (mRenderMode & RENDER_EDIT_GRID)
-		DrawGrid(plane, getWindowWidth(), getWindowHeight(), 10);
+		DrawGrid(plane, GetWindowWidth(), GetWindowHeight(), 10);
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
