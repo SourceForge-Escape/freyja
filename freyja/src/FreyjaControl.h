@@ -64,6 +64,8 @@ class FreyjaControl
 		tKeyFrame,
 		tSkeleton,
 		tScene,
+		tLight,
+		tCamera,
 		tSelectedVertices,
 		tSelectedFaces,
 		tSelectedBones,

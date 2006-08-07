@@ -199,10 +199,22 @@ extern "C" {
 	 * Post : Returns index of light spawned
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetCurrentLight();
+	uint32 freyjaGetLightCount();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns index of light spawned
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetCurrentLight();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns index of selected (backend) light 
+	 ------------------------------------------------------*/
+
+	void freyjaCurrentLight(uint32 lightIndex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Sets selected (backend) light 
 	 ------------------------------------------------------*/
 
 	void freyjaLightDelete(index_t lightIndex);
