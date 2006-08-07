@@ -3773,6 +3773,8 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 				{
 					freyja_print("! Vertex[%i] selected by pick ray.", selected);
 					m->SetVertexFlags(selected, Vertex::fSelected);
+					SetSelectedVertex(selected);
+					mCursor.mPos = m->GetVertexPosition(selected);
 				}
 			}
 		}
@@ -3824,6 +3826,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 					freyja_print("Face[%i] selected by pick ray.", selected);
 					m->SetFaceFlags(selected, Face::fSelected);
 					SetSelectedFace(selected);
+					//mCursor.mPos = m->GetFacePosition();
 				}
 			}
 		}
@@ -3916,11 +3919,12 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	switch (mObjectMode)
 	{
 	case tMesh:
-		freyjaModelMeshTransform3v(0, GetSelectedMesh(), fTranslate, mCursor.mPos.mVec);
+		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fTranslate, mCursor.mPos.mVec);
 		break;
 
 	case tPoint:
-		//VertexMove(xx, yy);
+		freyjaMeshVertexTranslate3fv(GetSelectedMesh(), GetSelectedVertex(), mCursor.mPos.mVec);
+		
 		break;
 
 	case tBone:

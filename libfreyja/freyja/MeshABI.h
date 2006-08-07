@@ -30,7 +30,7 @@ extern "C" {
 	// TMP model stuff
 	uint32 freyjaModelGetMeshCount(index_t modelIndex);
 
-	void freyjaModelMeshTransform3v(index_t modelIndex, index_t meshIndex, 
+	void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex, 
 									freyja_transform_action_t action, vec3_t xyz);
 
 
@@ -66,6 +66,14 @@ extern "C" {
 	 *
 	 * Post : Returns index of vertex created
 	 ------------------------------------------------------*/
+
+	void freyjaMeshVertexTranslate3fv(index_t meshIndex, 
+									  index_t vertexIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Alter a single vertex position
+	 ------------------------------------------------------*/
+
 
 	void freyjaMeshTransform(index_t meshIndex, uint32 frame,
 								freyja_transform_action_t action, 

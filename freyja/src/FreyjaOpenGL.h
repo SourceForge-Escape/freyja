@@ -52,7 +52,7 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 
 #else
-#   error "This module requires OpenGL SDK"
+#   error "This module requires an OpenGL SDK"
 #endif
 
 #include <hel/math.h>
