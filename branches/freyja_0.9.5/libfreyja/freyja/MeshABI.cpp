@@ -598,46 +598,11 @@ void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex)
 }
 
 
-void freyjaPolygonExtrudeQuad1f(index_t polygonIndex, vec_t dist)
+void freyjaMeshPolygonExtrudeQuad1f(index_t meshIndex, index_t polygonIndex, vec3_t v)
 {
-	Vector3d faceNormal, a, b, c;
-	int32 i, v, count;
-
-	if (freyjaIterator(FREYJA_POLYGON, polygonIndex) == INDEX_INVALID)
-		return;
-
-	// 1. Get face normal
-	faceNormal.zero();
-
-#if 0
-	/* Generated face normal, which won't match preclac vertex normalsx */
-	freyjaGetPolygon1u(FREYJA_VERTEX, 0, &v1);
-	freyjaGetPolygon1u(FREYJA_VERTEX, 1, &v1);
-	freyjaGetPolygon1u(FREYJA_VERTEX, 2, &v2);
-	freyjaGetVertexXYZ3fv(v0, a.mVec);
-	freyjaGetVertexXYZ3fv(v1, b.mVec);
-	freyjaGetVertexXYZ3fv(v2, c.mVec);
-	faceNormal = Vector3d::cross(a - b, c - b);
-#endif 
-
-	/* Use existing vertex normals ( perfered, also like n-patch ) */
-	count = freyjaGetPolygonVertexCount(polygonIndex);
-	for (i = 0; i < count; ++i)
-	{
-		v = freyjaGetPolygonVertexIndex(polygonIndex, i);
-		freyjaGetVertexNormalXYZ3fv(v, a.mVec);
-		faceNormal += a;
-	}
-
-
-	// 2. Scale face normal by dist
-	faceNormal.normalize();
-	faceNormal *= dist;
-
-	
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-	if (mesh) mesh->ExtrudeFace(polygonIndex, faceNormal.mVec);
-	//freyjaPolygonExtrudeQuad(polygonIndex, faceNormal.mVec);
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	if (mesh) 
+		mesh->ExtrudeFace(polygonIndex, v);
 }
 
 

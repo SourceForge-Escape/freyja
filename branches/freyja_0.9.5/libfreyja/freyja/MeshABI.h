@@ -197,6 +197,8 @@ extern "C" {
 	 * Post : Sets flags for current mesh
 	 ------------------------------------------------------*/
 
+	void freyjaMeshPolygonExtrudeQuad1f(index_t meshIndex, index_t polygonIndex,
+ vec3_t v);
 
 
 	// Mesh accessors //////////////

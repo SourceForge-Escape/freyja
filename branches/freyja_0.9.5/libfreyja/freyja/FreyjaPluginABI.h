@@ -432,13 +432,13 @@ extern "C" {
 	 *        extruding by face normal scaled by dist
 	 ------------------------------------------------------*/
 
-	void freyjaPolygonExtrudeQuad(index_t polygonIndex, vec3_t normal);
+	void freyjaPolygonExtrudeQuad(index_t polygonIndex, vec3_t v);
 	/*------------------------------------------------------
 	 * Pre  : Polygon polygonIndex exists
 	 *        the 'normal' is the vector you wish to follow with extrude
 	 *
 	 * Post : Adds a quad where every edge is on this face by
-	 *        extruding by 'normal'
+	 *        extruding by 'normal' v ( or partial spline or ray )
 	 ------------------------------------------------------*/
 
 	void freyjaPolygonAddVertex1i(index_t polygonIndex, index_t vertexIndex);
