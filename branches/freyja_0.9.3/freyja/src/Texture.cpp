@@ -70,7 +70,9 @@
 
 #ifdef WIN32
 #   include <GL/glext.h>
-#   include <gdk/win32/gdkglwglext.h>
+#   include <windows.h>
+#   include <wingdi.h>
+//#   include <gdk/win32/gdkglwglext.h>
 //  void *wglGetProcAddress(char *);
 
 #   define glActiveTexture glActiveTextureARB
