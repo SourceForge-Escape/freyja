@@ -43,9 +43,9 @@
 using namespace mstl;
 using namespace freyja;
 
-#define DEBUG_PICK_RAY 1
+#define DEBUG_PICK_RAY 0
 #define DEBUG_PICK_RAY_PLANAR 0
-#define DEBUG_SCREEN_TO_WORLD 0
+#define DEBUG_SCREEN_TO_WORLD 1
 #define DEBUG_VIEWPORT_MOUSE 0
 
 void mgtk_event_dialog_visible_set(int dialog, int visible);
@@ -178,7 +178,7 @@ void FreyjaControl::SetFaceMaterial(index_t faceIndex, index_t material)
 
 float FreyjaControl::GetZoom()
 {
-	return mRender->getZoom();
+	return mRender->GetZoom();
 }
 
 
@@ -187,8 +187,8 @@ void FreyjaControl::SetZoom(float zoom)
 	ASSERT_MSG(zoom > 0.0f, "You can't have a zoom less than 0.0f");
 
 	freyja_event_notify_observer1f(eZoom, zoom);
-	mRender->setZoom(zoom);
-	freyja_print("Zoom set to %f", mRender->getZoom());
+	mRender->SetZoom(zoom);
+	freyja_print("Zoom set to %f", mRender->GetZoom());
 }
 
 
@@ -216,8 +216,8 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// for the viewport and adjust the x, y values here 
 		// to reuse the old mouse style handling
 		// In other words - just make this work for now
-		vec_t h = mRender->getWindowHeight();
-		vec_t w = mRender->getWindowWidth();
+		vec_t h = mRender->GetWindowHeight();
+		vec_t w = mRender->GetWindowWidth();
 		vec_t halfW = w * 0.5f;
 		vec_t halfH = h * 0.5f;
 		
@@ -483,7 +483,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 	{
 		vec_t z;
 
-		getWorldFromScreen(&x, &y, &z);
+		GetWorldFromScreen(x, y, z);
 
 		switch (GetSelectedView())
 		{
@@ -1580,7 +1580,7 @@ bool FreyjaControl::event(int event, vec_t value)
 
 	case eZoom:
 		SetZoom(value);//freyja_event_get_float(eZoom));
-		freyja_print("Zoom %f", mRender->getZoom());
+		freyja_print("Zoom %f", mRender->GetZoom());
 		freyja_event_gl_refresh();
 		break;
 
@@ -2067,7 +2067,7 @@ bool FreyjaControl::event(int command)
 
 
 	case eScreenShot:
-		mTexture.glScreenShot("Freyja", mRender->getWindowWidth(), mRender->getWindowHeight());
+		mTexture.glScreenShot("Freyja", mRender->GetWindowWidth(), mRender->GetWindowHeight());
 		break;
 
 
@@ -2633,26 +2633,26 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case CMD_MISC_ZOOM_IN:
-		if (mRender->getZoom() <= 0.02)
+		if (mRender->GetZoom() <= 0.02)
 		{
-			mRender->setZoom(mRender->getZoom() + 0.0001);
+			mRender->SetZoom(mRender->GetZoom() + 0.0001);
 		}
 		else
 		{
-			mRender->setZoom(mRender->getZoom() + 0.01);
+			mRender->SetZoom(mRender->GetZoom() + 0.01);
 		}
 
 		freyja_event_gl_refresh();
 		break;
 
 	case CMD_MISC_ZOOM_OUT:
-		if (mRender->getZoom() <= 0.02)
+		if (mRender->GetZoom() <= 0.02)
 		{
-			mRender->setZoom(mRender->getZoom() - 0.0001);
+			mRender->SetZoom(mRender->GetZoom() - 0.0001);
 		}
 		else
 		{
-			mRender->setZoom(mRender->getZoom() - 0.01);
+			mRender->SetZoom(mRender->GetZoom() - 0.01);
 		}
 
 		freyja_event_gl_refresh();
@@ -2972,8 +2972,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 				float s;
 				float t;
 				
-				s = (float)x / (float)mRender->getWindowWidth();
-				t = (float)y / (float)mRender->getWindowHeight();
+				s = (float)x / (float)mRender->GetWindowWidth();
+				t = (float)y / (float)mRender->GetWindowHeight();
 
 				if (s > 1.0) s = 1.0;
 				if (s < 0.0) s = 0.0;
@@ -2991,8 +2991,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 				float s;
 				float t;
 				
-				s = (float)x / (float)mRender->getWindowWidth();
-				t = (float)y / (float)mRender->getWindowHeight();
+				s = (float)x / (float)mRender->GetWindowWidth();
+				t = (float)y / (float)mRender->GetWindowHeight();
 
 				if (s > 1.0) s = 1.0;
 				if (s < 0.0) s = 0.0;
@@ -3011,8 +3011,8 @@ bool FreyjaControl::motionEvent(int x, int y)
 				float s;
 				float t;
 				
-				s = (float)x / (float)mRender->getWindowWidth();
-				t = (float)y / (float)mRender->getWindowHeight();
+				s = (float)x / (float)mRender->GetWindowWidth();
+				t = (float)y / (float)mRender->GetWindowHeight();
 				
 				if (s > 1.0) s = 1.0;
 				if (s < 0.0) s = 0.0;
@@ -3213,8 +3213,8 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			float s, t;
 			
 			
-			s = (float)x / (float)mRender->getWindowWidth();
-			t = (float)y / (float)mRender->getWindowHeight();
+			s = (float)x / (float)mRender->GetWindowWidth();
+			t = (float)y / (float)mRender->GetWindowHeight();
 			
 			// Mongoose: Clamp texels to be bound by min and max
 			if (s > 1.0) s = 1.0;
@@ -3413,8 +3413,8 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 			float s, t;
 			
 			
-			s = (float)x / (float)mRender->getWindowWidth();
-			t = (float)y / (float)mRender->getWindowHeight();
+			s = (float)x / (float)mRender->GetWindowWidth();
+			t = (float)y / (float)mRender->GetWindowHeight();
 			
 			// Mongoose: Clamp texels to be bound by min and max
 			if (s > 1.0) s = 1.0;
@@ -3477,7 +3477,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 		freyja_print("Call to getScreenToWorldOBSOLETE is deprecated...");
 	}
 
-	getWorldFromScreen(x, y, &z);
+	GetWorldFromScreen(*x, *y, z);
 
 	switch (GetSelectedView())
 	{
@@ -3494,6 +3494,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 		break;
 
 	case PLANE_FREE:
+		/* Not Implemented, since there is no such 'ideal plane' concept */
 		break;
 	}
 }
@@ -3507,14 +3508,14 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 	double inverse[16];
 	double rayPnt[4] = {0.0f, 0.0f, 0.0f, 1.0f };
 	double rayVec[4];
-	vec_t winH = mRender->getWindowHeight();
+	vec_t winH = mRender->GetWindowHeight();
 	vec_t winY = (winH - mouseY) - winH * 0.5f;
 	vec_t normY = winY / ( winH * 0.5f );
 	vec_t winX = mouseX - winH * 0.5f;
 	vec_t normX = winX / ( winH * 0.5f );
 	vec_t zNear = -400.0f; // mRender->getZNear();
 	vec_t nearH = 20.0f;//mRender->getNearHeight();
-	vec_t aspect = mRender->getWindowAspectRatio();
+	vec_t aspect = mRender->GetWindowAspectRatio();
 
 	// This is now ray in eye coordinates
 	rayVec[0] = nearH * normY;
@@ -3541,49 +3542,47 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 }
 
 
-void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
+void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 {
-	float nearHeight = mRender->getNearHeight() * 2.0f;
-	float width, height, invz, fs;
-	float scroll[3];
-
-
-	width = mRender->getWindowWidth();
-	height = mRender->getWindowHeight();
-	Vec3 v = GetSceneTranslation();
-	HEL_VEC3_COPY(v.mVec, scroll);
+	Vec3 scroll(GetSceneTranslation());
+	vec_t nearHeight = mRender->getNearHeight() * 2.0f;
+	vec_t width = mRender->GetWindowWidth();
+	vec_t height = mRender->GetWindowHeight();
+	
 
 #if DEBUG_SCREEN_TO_WORLD
 	printf("Screen (%.3f, %.3f); aspect_ratio = %.3f; zoom = %.3f\n", 
-			 *x, *y, width/height, mRender->getZoom());
+			 x, y, width/height, mRender->GetZoom());
 	printf("Scroll (%.3f, %.3f, %.3f)\n", 
-			 scroll[0], scroll[1], scroll[2]);
+			 scroll.mVec[0], scroll.mVec[1], scroll.mVec[2]);
 #endif
 
-	invz = (1.0 / mRender->getZoom());
-	fs = (nearHeight * invz) / height;  // fov 40?
+	vec_t invz = (1.0 / mRender->GetZoom());
+	vec_t fs = (nearHeight * invz) / height;  // fov 40?
 
-	*x = (*x - width / 2.0) * fs;
-	*y = -(*y - height / 2.0) * fs;
+	x = (x - width * 0.5f) * fs;
+	y = -(y - height * 0.5f) * fs;
+
+	scroll *= invz;
 	
 	switch (GetSelectedView())
 	{
 	case PLANE_XY:
-		*x -= scroll[0] * invz;
-		*y -= scroll[1] * invz;
-		*z = 0.0f;
+		x -= scroll.mVec[0];
+		y -= scroll.mVec[1];
+		z = 0.0f;
 		break;
 
 	case PLANE_XZ:
-		*x -= scroll[0] * invz;
-		*z = *y - scroll[2] * invz;
-		*y = 0.0f;
+		x -= scroll.mVec[0];
+		z = y - scroll.mVec[2];
+		y = 0.0f;
 		break;
 
 	case PLANE_ZY: // side ZY! change
-		*z = *x - scroll[2] * invz;
-		*y -= scroll[1] * invz;
-		*x = 0.0f;
+		z = x - scroll.mVec[2];
+		y -= scroll.mVec[1];
+		x = 0.0f;
 		break;
 
 	default:
@@ -3591,7 +3590,7 @@ void FreyjaControl::getWorldFromScreen(float *x, float *y, float *z)
 	}
 
 #if DEBUG_SCREEN_TO_WORLD
-	printf("World (%.3f, %.3f, %.3f)\n", *x, *y, *z);
+	printf("World (%.3f, %.3f, %.3f)\n", x, y, z);
 #endif
 }
 
@@ -3915,35 +3914,43 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 {
 	Vec3 t;
-	vec3_t center;
 
+	mCursor.mPos.Get(t.mVec);
+
+#if 1
 	getScreenToWorldOBSOLETE(&vx, &vy);
-	mCursor.mPos.Get(center);
 
-	/* Exact movement based on center of object */
+	/* Exact movement based on cursor position, 
+	 * but limited to a plane of movement */
 	switch (GetSelectedView())
 	{
 	case PLANE_XY:
-		t.mVec[0] = vx - center[0];
-		t.mVec[1] = vy - center[1];
+		t.mVec[0] = vx - t.mVec[0];
+		t.mVec[1] = vy - t.mVec[1];
 		t.mVec[2] = 0;
 		break;
 
 	case PLANE_XZ:
-		t.mVec[0] = vx - center[0];
+		t.mVec[0] = vx - t.mVec[0];
 		t.mVec[1] = 0;
-		t.mVec[2] = vy - center[2];
+		t.mVec[2] = vy - t.mVec[2];
 		break;
 
 	case PLANE_ZY: // side
 		t.mVec[0] = 0;
-		t.mVec[1] = vx - center[2];
-		t.mVec[2] = vy - center[1];
+		t.mVec[1] = vy - t.mVec[1];
+		t.mVec[2] = vx - t.mVec[2];
 		break;
 
 	default:
 		;
 	}
+#else
+	vec_t vz = 0.0f;
+	GetWorldFromScreen(vx, vy, vz);
+	t -= Vec3(vx, vy, vz);
+#endif
+
 
 	/* Cursor axis determined limited movement */
 	switch (mCursor.mAxis)
@@ -3970,6 +3977,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		return;
 		break;
 	}
+
 
 	/* Store undo information if token is set */
 	if (mToken)
