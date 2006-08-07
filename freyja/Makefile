@@ -64,6 +64,7 @@ PLUGIN_BUILD_DIR=$(BUILD_INSTALL_DIR)/plugins
 SRC_DIR=src
 LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/  -I../libmgtk/
 LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
+LOCAL_WIN32_LIBS=-L../bin/libfreyja/win32/ -L../bin/libhel/win32/ -L../bin/libmgtk/win32/
 
 DESTDIR =
 NO_DEB=
@@ -156,8 +157,8 @@ win32:
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
-	CFLAGS="-mwindows $(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/ $(WIN32_CROSS_CFLAGS)" \
-	LD_FLAGS="$(WIN32_CROSS_LIBS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+	CFLAGS="$(LOCAL_INCLUDES) -mwindows $(DEBUG_CFLAGS) $(WIN32_CROSS_CFLAGS)" \
+	LD_FLAGS="$(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK)"
 
 
 ########################################################################
