@@ -1705,7 +1705,6 @@ bool FreyjaControl::event(int command)
 		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 		break;
 
-
 	case ePolygonSplit:
 		freyjaPolygonSplit(GetSelectedMesh(), GetSelectedFace());
 		freyja_print("Splitting polygon[%i]", GetSelectedFace());
@@ -2478,8 +2477,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eExtrude:
-		freyjaCurrentMesh(GetSelectedMesh());
-		freyjaPolygonExtrudeQuad1f(GetSelectedFace(), 8.0f);
+		{
+			Vec3 v = FreyjaRender::mTestRay.mDir;
+			v *= -8.0f;
+			freyjaMeshPolygonExtrudeQuad1f(GetSelectedMesh(), GetSelectedFace(),
+										   v.mVec);
+		}
 #if 0  // Currently we don't support this ( it marks all the new face vertices as selected )
 		if (freyjaGetPolygonVertexCount(GetSelectedFace()))
 		{
@@ -4455,8 +4458,15 @@ void eRenderToggleGridZClear()
 }
 
 
+void eCollapseFace()
+{
+	BUG_ME("Test implementation removed");
+}
+
+
 void FreyjaViewEventsAttach()
 {
+	ResourceEventCallback::add("eCollapseFace", &eCollapseFace);
 	ResourceEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
 	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	ResourceEventCallback::add("ePolyMeshBone", &ePolyMeshBone);

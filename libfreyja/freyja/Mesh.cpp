@@ -367,7 +367,14 @@ void Mesh::CollapseEdge(index_t faceIndex,
 	if (!face || face->mIndices.size() == 0)
 		return;
 
-	BUG_ME("Not implemented until vertex refs are checked in.");
+	for (uint32 i = 0, count = face->mIndices.size(); i < count; ++i)
+	{
+		if (face->mIndices[i] == a) face->mIndices[i] = c;
+		if (face->mIndices[i] == d) face->mIndices[i] = d;
+	}
+
+
+	BUG_ME("Can't be implemented properly until vertex refs are checked in.");
 
 	// Edge #1 AB
 	// Edge #2 CD
