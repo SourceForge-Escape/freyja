@@ -60,6 +60,7 @@ BUILD_WIN32_DIR=$(BUILD_ROOT_DIR)/win32
 BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
 BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
+PLUGIN_BUILD_DIR=$(BUILD_INSTALL_DIR)/plugins
 SRC_DIR=src
 LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/  -I../libmgtk/
 LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
@@ -110,19 +111,6 @@ LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
 
 CG_LD_FLAGS=-lCgGL -lCg
 
-
-CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include
-
-CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv
-
-WIN32_CROSS_DIR=/home/mongoose/Projects/win32
-CROSS_FLAGS=-I$(WIN32_CROSS_DIR)/include $(CROSSDUMP_INC)
-CROSS_LIBS=-L$(WIN32_CROSS_DIR)/lib/ $(CROSSDUMP_LIBS)
-
-LD_FLAGS_WIN32=$(CONFIGURE_LDFLAGS) -lstdc++ -lm \
-		$(CROSS_LIBS) \
-		-L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1 
-
 LD_FLAGS_OSX=-framework OpenGL
 
 ################################################################
@@ -165,11 +153,11 @@ win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_WIN32_DIR) \
 	NAME=$(NAME).exe \
-	CC="i586-mingw32msvc-g++ " \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="-mwindows $(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/ $(CROSS_FLAGS)" \
-	LD_FLAGS="$(LD_FLAGS_WIN32) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
+	CFLAGS="-mwindows $(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -I/usr/local/include/ $(WIN32_CROSS_CFLAGS)" \
+	LD_FLAGS="$(WIN32_CROSS_LIBS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
 
 
 ########################################################################
@@ -186,7 +174,7 @@ OBJS = \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \
 	$(BUILD_DIR)/FreyjaModel.o \
-	$(BUILD_DIR)/FreyjaState.o \
+	$(BUILD_DIR)/FreyjaState.o 
 
 
 $(BUILD_DIR)/$(NAME) : $(OBJS) 
@@ -309,7 +297,7 @@ deb:
 install:
 	@-echo -n "Installing                                  "
 	@-mkdir -p  $(INSTALL_BIN)
-	@-cp bin/debug/freyja $(INSTALL_BIN)
+	@-cp $(BUILD_INSTALL_DIR)/freyja $(INSTALL_BIN)
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/
 	@-cp data/*.mlisp $(DESTDIR)/usr/share/freyja/
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/materials/
@@ -321,7 +309,7 @@ install:
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
 	@-cp plugins/*.mlisp $(DESTDIR)/usr/share/freyja/plugins/
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
-	@-cp bin/plugins/*.so $(DESTDIR)/usr/share/freyja/plugins/
+	@-cp $(PLUGIN_BUILD_DIR)/*.so $(DESTDIR)/usr/share/freyja/plugins/
 	@-echo "[done]"
 
 install-win32:
@@ -339,12 +327,7 @@ install-win32:
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
 	@-cp plugins/*.mlisp $(DESTDIR)/usr/share/freyja/plugins/
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
-	@-cp bin/plugins/*.dll $(DESTDIR)/usr/share/freyja/plugins/
-	@-echo "[done]"
-
-install-debug:
-	@-echo -n "Installing debug                            "
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME) $(INSTALL_BIN)
+	@-cp $(PLUGIN_BUILD_DIR)/*.dll $(DESTDIR)/usr/share/freyja/plugins/
 	@-echo "[done]"
 
 
@@ -383,7 +366,7 @@ PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins
 PLUGIN_LD_FLAGS=-lm -ldl -lfreyja -lhel0 -lmgtk -lstdc++ -shared -fPIC -ldl -rdynamic 
 PLUGIN_LD_FLAGS += --warn-unresolved-symbols -Wl
 #PLUGIN_LD_FLAGS += -z defs
-PLUGIN_BUILD_DIR=bin/plugins
+
 
 PLUGINS=$(BUILD_DIR)/$(MOD_NAME).so
 PLUGINSWIN32=$(BUILD_DIR)/$(MOD_NAME).dll
@@ -428,12 +411,12 @@ pakreader.dll:
 	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
 		MOD_NAME=pakreader \
 		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pakreader.o" \
-		CC="i586-mingw32msvc-g++ -mms-bitfields" \
-		CPP="i586-mingw32msvc-cpp " \
-		LD="i586-mingw32msvc-ld " \
+		CC=$(WIN32_CC) \
+		CPP=$(WIN32_CPP) \
+		LD=$(WIN32_LD) \
 		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
+		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
 perlinnoise.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -448,12 +431,12 @@ perlinnoise.dll:
 	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
 		MOD_NAME=perlinnoise \
 		MOD_OBJS="$(PLUGIN_BUILD_DIR)/perlinnoise.o" \
-		CC="i586-mingw32msvc-g++ -mms-bitfields" \
-		CPP="i586-mingw32msvc-cpp " \
-		LD="i586-mingw32msvc-ld " \
+		CC=$(WIN32_CC) \
+		CPP=$(WIN32_CPP) \
+		LD=$(WIN32_LD) \
 		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
+		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
 reverseengineer.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -468,12 +451,12 @@ reverseengineer.dll:
 	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
 		MOD_NAME=reverseengineer \
 		MOD_OBJS="$(PLUGIN_BUILD_DIR)/reverseengineer.o" \
-		CC="i586-mingw32msvc-g++ -mms-bitfields" \
-		CPP="i586-mingw32msvc-cpp " \
-		LD="i586-mingw32msvc-ld " \
+		CC=$(WIN32_CC) \
+		CPP=$(WIN32_CPP) \
+		LD=$(WIN32_LD) \
 		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
+		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
 lineageIIextract.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -488,9 +471,9 @@ lineageIIextract.dll:
 	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
 		MOD_NAME=lineageIIextract \
 		MOD_OBJS="$(PLUGIN_BUILD_DIR)/lineageIIextract.o" \
-		CC="i586-mingw32msvc-g++ -mms-bitfields" \
-		CPP="i586-mingw32msvc-cpp " \
-		LD="i586-mingw32msvc-ld " \
+		CC=$(WIN32_CC) \
+		CPP=$(WIN32_CPP) \
+		LD=$(WIN32_LD) \
 		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9 -lmgtk1"
+		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
