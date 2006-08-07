@@ -359,6 +359,21 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void Mesh::CollapseEdge(index_t faceIndex, 
+						uint32 a, uint32 b, uint32 c, uint32 d)
+{
+	Face *face = GetFace(faceIndex);
+
+	if (!face || face->mIndices.size() == 0)
+		return;
+
+	BUG_ME("Not implemented until vertex refs are checked in.");
+
+	// Edge #1 AB
+	// Edge #2 CD
+}
+
+
 void Mesh::ExtrudeFace(index_t faceIndex, vec3_t displacement)
 {
 	Face *face = GetFace(faceIndex);
@@ -429,6 +444,113 @@ void Mesh::ExtrudeFace(index_t faceIndex, vec3_t displacement)
 			genFace->mTexCoordIndices.pushBack(C);
 			genFace->mTexCoordIndices.pushBack(D);
 		}
+	}
+}
+
+
+void Mesh::SplitFace(index_t faceIndex)
+{
+	Face *face = GetFace(faceIndex);
+
+	if (!face || face->mIndices.size() == 0)
+		return;
+
+	Face *genFace;
+	int32 A, B, C, D, M1, M2;
+	Vec3 m1, m2, a, b, c, d, uv, norm;
+	bool gap1 = false, gap2 = false;
+
+ 
+	switch (face->mIndices.size())
+	{
+	case 4:
+
+		// 1. Generate midpoint vertices
+		A = face->mIndices[0];
+		GetVertexPos(A, a.mVec);
+		B = face->mIndices[1];
+		GetVertexPos(B, b.mVec);
+		C = face->mIndices[2];
+		GetVertexPos(C, c.mVec);
+		D = face->mIndices[3];
+		GetVertexPos(D, d.mVec);
+
+		// M1
+		helMidpoint3v(a.mVec, b.mVec, m1.mVec);
+		uv = GetVertexTexCoord(A) + GetVertexTexCoord(A);
+		uv *= 0.5f;
+		norm = GetVertexNormal(A) + GetVertexNormal(B);
+		norm.normalize();
+		M1 = CreateVertex(m1.mVec, uv.mVec, norm.mVec);
+
+		// M2
+		helMidpoint3v(c.mVec, d.mVec, m2.mVec);
+		uv = GetVertexTexCoord(C) + GetVertexTexCoord(D);
+		uv *= 0.5f;
+		norm = GetVertexNormal(C) + GetVertexNormal(D);
+		norm.normalize();
+		M2 = CreateVertex(m2.mVec, uv.mVec, norm.mVec);
+
+		// 2. Generate a new quad face, and reuse the old one with new vertices
+		genFace = GetFace(CreateFace());
+		genFace->mMaterial = face->mMaterial;
+		genFace->mIndices.pushBack(A);
+		genFace->mIndices.pushBack(M1);
+		genFace->mIndices.pushBack(M2);
+		genFace->mIndices.pushBack(D);
+		
+		// This won't be correct
+		if (face->mFlags & Face::fPolyMappedTexCoords)
+		{
+			// This will have to change when polymapping changes
+			genFace->mTexCoordIndices.pushBack(A);
+			genFace->mTexCoordIndices.pushBack(M1);
+			genFace->mTexCoordIndices.pushBack(M2);
+			genFace->mTexCoordIndices.pushBack(D);
+		}
+
+		// Reuse old face here
+		face->mIndices[0] = B;
+		face->mIndices[1] = M1;
+		face->mIndices[2] = M2;
+		face->mIndices[3] = C;
+
+		// This won't be correct
+		if (face->mFlags & Face::fPolyMappedTexCoords)
+		{
+			// This will have to change when polymapping changes
+			genFace->mTexCoordIndices.pushBack(B);
+			genFace->mTexCoordIndices.pushBack(M1);
+			genFace->mTexCoordIndices.pushBack(M2);
+			genFace->mTexCoordIndices.pushBack(C);
+		}
+
+		// 3. Use vertex references to check for gaps
+		BUG_ME("No vertex refs to check for gaps, assuming closed topology...");
+		gap1 = gap2 = true;
+
+		// 4. Fill in the two gaps with triangles
+		if (gap1)
+		{
+			genFace = GetFace(CreateFace());
+			genFace->mMaterial = face->mMaterial;
+			genFace->mIndices.pushBack(A);
+			genFace->mIndices.pushBack(M1);
+			genFace->mIndices.pushBack(B);
+		}
+
+		if (gap2)
+		{
+			genFace = GetFace(CreateFace());
+			genFace->mMaterial = face->mMaterial;
+			genFace->mIndices.pushBack(D);
+			genFace->mIndices.pushBack(M2);
+			genFace->mIndices.pushBack(C);
+		}
+		break;
+
+	default:
+		;
 	}
 }
 

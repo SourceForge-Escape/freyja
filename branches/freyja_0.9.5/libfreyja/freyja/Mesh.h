@@ -227,6 +227,10 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	void CollapseEdge(index_t faceIndex,uint32 a, uint32 b, uint32 c, uint32 d);
+
+	void SplitFace(index_t faceIndex);
+
 	Mesh *Copy();
 	/*------------------------------------------------------
 	 * Pre  : 

@@ -589,103 +589,12 @@ void freyjaPolygonFlagAlpha(index_t polygonIndex, char on)
 
 void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex)
 {
-	Vector<unsigned int> common, face;
-	Vector<long> ref;
-	Vector3d a, b, c, d, m1, m2, n1, n2, n;
-	vec2_t uv1, uv2, uv;
-	int32 A, B, C, D, M1, M2, material, count;
-
-
-	material = freyjaGetPolygonMaterial(polygonIndex);
-	count = freyjaGetPolygonVertexCount(polygonIndex);
-
-	if (!count)
-		return;
-
-	switch (count)
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	
+	if (mesh)
 	{
-	case 4:
-
-		// 1. Generate midpoint vertices
-		A = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-		freyjaGetVertexXYZ3fv(A, a.mVec);
-		B = freyjaGetPolygonVertexIndex(polygonIndex, 1);
-		freyjaGetVertexXYZ3fv(B, b.mVec);
-		C = freyjaGetPolygonVertexIndex(polygonIndex, 2);
-		freyjaGetVertexXYZ3fv(C, c.mVec);
-		D = freyjaGetPolygonVertexIndex(polygonIndex, 3);
-		freyjaGetVertexXYZ3fv(D, d.mVec);
-
-		helMidpoint3v(a.mVec, b.mVec, m1.mVec);
-		M1 = freyjaVertexCreate3fv(m1.mVec);
-		freyjaGetVertexTexcoord2fv(A, uv1);
-		freyjaGetVertexTexcoord2fv(B, uv2);
-		uv[0] = (uv1[0] + uv2[0]) / 2;
-		uv[1] = (uv1[1] + uv2[1]) / 2;
-		freyjaVertexTexCoord2fv(M1, uv);
-		freyjaGetVertexNormalXYZ3fv(A, n1.mVec);
-		freyjaGetVertexNormalXYZ3fv(B, n2.mVec);
-		n = n1 + n2;
-		n.normalize();
-		freyjaVertexNormal3fv(M1, n.mVec);
-
-		helMidpoint3v(c.mVec, d.mVec, m2.mVec);
-		M2 = freyjaVertexCreate3fv(m2.mVec);
-		freyjaGetVertexTexcoord2fv(C, uv1);
-		freyjaGetVertexTexcoord2fv(D, uv2);
-		uv[0] = (uv1[0] + uv2[0]) / 2;
-		uv[1] = (uv1[1] + uv2[1]) / 2;
-		freyjaVertexTexCoord2fv(M2, uv);
-		freyjaGetVertexNormalXYZ3fv(C, n1.mVec);
-		freyjaGetVertexNormalXYZ3fv(D, n2.mVec);
-		n = n1 + n2;
-		n.normalize();
-		freyjaVertexNormal3fv(M2, n.mVec);
-
-		// 2. Generate the 2 new quad faces
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(material);
-		freyjaPolygonVertex1i(A);
-		freyjaPolygonVertex1i(M1);
-		freyjaPolygonVertex1i(M2);
-		freyjaPolygonVertex1i(D);
-
-		// FIXME: Should be able to generate mixing both uvs
-		if (freyjaGetPolygonTexCoordCount(polygonIndex))
-		{
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.25, 0.25));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.25));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.5));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.25, 0.5));
-		}
-
-		freyjaEnd();
-
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(material);
-		freyjaPolygonVertex1i(B);
-		freyjaPolygonVertex1i(M1);
-		freyjaPolygonVertex1i(M2);
-		freyjaPolygonVertex1i(C);
-
-		// FIXME: Should be able to generate mixing both uvs
-		if (freyjaGetPolygonTexCoordCount(polygonIndex))
-		{
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.25, 0.25));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.25));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.5));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.25, 0.5));
-		}
-
-		freyjaEnd();
-
-		// 3. Remove old face we split
-		freyjaMeshRemovePolygon(meshIndex, polygonIndex);
-		break;
-
-	default:
-		;
-	}	
+		mesh->SplitFace(polygonIndex);
+	}
 }
 
 
