@@ -153,9 +153,9 @@ win32:
 	NAME="freyja9" \
 	MODULE="freyja9" \
 	SHLIBEXT=".dll" \
-	CC="$(WIN32_CC)" \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL)"
@@ -275,9 +275,9 @@ bmp.dll:
 	NAME="bmp" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/bmp.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -297,9 +297,9 @@ dds.dll:
 	NAME="dds" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/dds.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -319,9 +319,9 @@ jpg.dll:
 	NAME="jpg" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/jpeg.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_JPEG -I/usr/local/include/ -I$(CROSS_INC)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9 -L$(CROSS_LIB) -ljpeg"
@@ -341,9 +341,9 @@ pcx.dll:
 	NAME="pcx" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/pcx.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -363,9 +363,9 @@ ppm.dll:
 	NAME="ppm" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/ppm.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -385,9 +385,9 @@ png.dll:
 	NAME="png" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/png.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -DLIB_PNG -I/usr/local/include/ -I$(CROSS_INC)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9 -L$(CROSS_LIB) -lpng"
@@ -407,9 +407,9 @@ tga.dll:
 	NAME="tga" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_IMAGE_PLUGIN_BUILD_DIR)/tga.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -437,9 +437,9 @@ plugins-image-win32: dds.dll bmp.dll pcx.dll ppm.dll tga.dll jpg.dll png.dll
 	NAME="3ds" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/3ds.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -459,9 +459,9 @@ bsa.dll:
 	NAME="bsa" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/BSAPakReader.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -481,9 +481,9 @@ ase.dll:
 	NAME="ase" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -503,9 +503,9 @@ eggv7.dll:
 	NAME="eggv7" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/eggv7.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -525,9 +525,9 @@ eggv8.dll:
 	NAME="eggv8" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/eggv8.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -547,9 +547,9 @@ et.dll:
 	NAME="et" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/ETModel.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -569,9 +569,9 @@ glm.dll:
 	NAME="glm" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/GLMModel.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -617,9 +617,9 @@ grn.dll:
 			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grntextureinfos.o  \
 			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grntextures.o  \
 			$(WIN32_MODEL_PLUGIN_BUILD_DIR)/grnunhandled.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -664,9 +664,9 @@ lwo.dll:
 	NAME="lwo" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Lwo.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -686,9 +686,9 @@ mdl.dll:
 	NAME="mdl" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Mdl.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -708,9 +708,9 @@ md2.dll:
 	NAME="md2" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Md2.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -730,9 +730,9 @@ md3.dll:
 	NAME="md3" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Md3.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -760,9 +760,9 @@ md5.dll:
 	NAME="md5" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Md5.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -798,9 +798,9 @@ nif4.dll:
 	NAME="nif4" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Nif4.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -820,9 +820,9 @@ nod.dll:
 	NAME="nod" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Nod.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -850,9 +850,9 @@ obj.dll:
 	NAME="obj" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/obj.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -872,9 +872,9 @@ psk.dll:
 	NAME="psk" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/PSKModel.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -927,9 +927,9 @@ smd.dll:
 	NAME="smd" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/smd.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -949,9 +949,9 @@ utpackage.dll:
 	NAME="utpackage" \
 	SHLIBEXT=".dll" \
 	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/UTPackage.o $(WIN32_MODEL_PLUGIN_BUILD_DIR)/URTexture.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/ -DHAVE_FREYJA" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)" \
 	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
@@ -1148,9 +1148,9 @@ test-win32: freyjautil-win32.test
 
 freyjautil-win32.test:
 	mkdir -p $(BUILD_TEST_DIR)
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
 	i586-mingw32msvc-g++ -mms-bitfields \
 		-Wall -g -pipe -O0 -I/usr/local/include/ \
@@ -1178,9 +1178,9 @@ UTPackage-win32.test:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) test NAME=UTPackage.exe BUILDDIR=$(BUILD_WIN32_DIR) \
 	OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
 	@-mv $(BUILD_WIN32_DIR)/UTPackage.exe.test $(BUILD_WIN32_DIR)/UTPackage.exe
@@ -1198,9 +1198,9 @@ lineageIIextract-win32.test:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) test NAME=lineageIIextract.exe BUILDDIR=$(BUILD_WIN32_DIR) \
 	OBJS="$(BUILD_WIN32_DIR)/extractFace.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
 	@-mv $(BUILD_WIN32_DIR)/lineageIIextract.exe.test $(BUILD_WIN32_DIR)/lineageIIextract.exe
