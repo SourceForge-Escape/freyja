@@ -363,11 +363,10 @@ Material.test:
 ################################################################
 # Plugins
 ################################################################
-PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins
-PLUGIN_LD_FLAGS=-lm -ldl -lfreyja -lhel0 -lmgtk -lstdc++ -shared -fPIC -ldl -rdynamic 
+PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins $(LOCAL_INCLUDES)
+PLUGIN_LD_FLAGS=-lm -ldl $(LOCAL_LIBS) -lfreyja -lhel0 -lmgtk -lstdc++ -shared -fPIC -ldl -rdynamic 
 PLUGIN_LD_FLAGS += --warn-unresolved-symbols -Wl
 #PLUGIN_LD_FLAGS += -z defs
-
 
 PLUGINS=$(BUILD_DIR)/$(MOD_NAME).so
 PLUGINSWIN32=$(BUILD_DIR)/$(MOD_NAME).dll
@@ -415,9 +414,9 @@ pakreader.dll:
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
 perlinnoise.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -435,9 +434,9 @@ perlinnoise.dll:
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
 reverseengineer.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -455,9 +454,9 @@ reverseengineer.dll:
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
 lineageIIextract.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
@@ -475,6 +474,6 @@ lineageIIextract.dll:
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) -I/usr/local/include/" \
+		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ -L/usr/local/lib $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
