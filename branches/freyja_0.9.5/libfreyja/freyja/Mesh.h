@@ -351,6 +351,12 @@ public:
 		if (vertexIndex < mVertices.size() && (vert = mVertices[vertexIndex]))
 			GetVertexArrayPos(vert->mVertexIndex, xyz);
 	}
+	void SetVertexPos(index_t vertexIndex, vec3_t xyz)
+	{
+		Vertex *vert;
+		if (vertexIndex < mVertices.size() && (vert = mVertices[vertexIndex]))
+			SetVertexArrayPos(vert->mVertexIndex, xyz);
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -555,6 +561,8 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	void ExtrudeFace(index_t faceIndex, vec3_t displacement);
 
 	Mesh *Cut();
 

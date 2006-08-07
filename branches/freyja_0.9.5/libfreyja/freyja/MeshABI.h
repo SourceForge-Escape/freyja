@@ -51,6 +51,12 @@ extern "C" {
 	 * Post : Returns index using meshIndex state 
 	 ------------------------------------------------------*/
 
+	void freyjaCurrentMesh(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Sets index, which is useful for 0.9.3 usage 
+	 ------------------------------------------------------*/
+
 	void freyjaMeshDelete(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : Mesh <meshIndex> exists

@@ -2478,6 +2478,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eExtrude:
+		freyjaCurrentMesh(GetSelectedMesh());
 		freyjaPolygonExtrudeQuad1f(GetSelectedFace(), 8.0f);
 #if 0  // Currently we don't support this ( it marks all the new face vertices as selected )
 		if (freyjaGetPolygonVertexCount(GetSelectedFace()))
@@ -3914,7 +3915,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	}
 
 	mCursor.mPos += t;
-
+	mCursor.SetMode(Freyja3dCursor::Translation);
 
 	switch (mObjectMode)
 	{
