@@ -91,7 +91,13 @@ class String
 	}
 
 
-	String &operator+(const String &s);
+	String operator+(const String &s)
+	{
+		String t(s); // argh
+		char tmp[mLength + s.mLength + 1];
+		snprintf("%s%s", mLength + s.mLength, GetCString(), t.GetCString());
+		return String(tmp);
+	}
 
 
 	~String()

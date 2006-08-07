@@ -359,6 +359,80 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void Mesh::ExtrudeFace(index_t faceIndex, vec3_t displacement)
+{
+	Face *face = GetFace(faceIndex);
+
+	if (!face || face->mIndices.size() == 0)
+		return;
+
+	Vector<unsigned int> common, faceWind;
+	Vector<long> ref;
+	vec3_t xyz;
+	Vec3 uv, nxyz;
+	int32 A, B, C, D;
+
+
+	for (uint32 i = 0, count = face->mIndices.size(); i < count; ++i)
+	{
+		/* 1. Make duplicate vertices with same wind for 'face' */
+		A = face->mIndices[i];
+		GetVertexPos(A, xyz);
+		uv = GetVertexTexCoord(A);
+		nxyz = GetVertexNormal(A);
+
+		// Push vertices along 'displacement'
+		xyz[0] += displacement[0];
+		xyz[1] += displacement[1];
+		xyz[2] += displacement[2];
+
+		B = CreateVertex(xyz, uv.mVec, nxyz.mVec);
+		faceWind.pushBack(A);
+
+		/* 2. Replace all references to A with B in old face */
+		face->mIndices[i] = B;
+	}
+
+	for (uint32 i = 0, count = face->mIndices.size(); i < count; ++i)
+	{
+		// 3. Generate new quad ABCD connecting 'face' and ploygonIndex vertices
+
+		// Make edge #1
+		A = faceWind[i];
+		B = face->mIndices[i];
+
+		// Make edge #2
+		if (i+1 < count)
+		{
+			C = face->mIndices[i+1];
+			D = faceWind[i+1];
+		}
+		else
+		{
+			C = face->mIndices[0];
+			D = faceWind[0];
+		}
+
+		// Make the quad face from #1 and #2
+		Face *genFace = GetFace(CreateFace());
+		genFace->mMaterial = face->mMaterial;
+		genFace->mIndices.pushBack(A);
+		genFace->mIndices.pushBack(B);
+		genFace->mIndices.pushBack(C);
+		genFace->mIndices.pushBack(D);
+		
+		if (face->mFlags & Face::fPolyMappedTexCoords)
+		{
+			// This will have to change when ploymapping changes
+			genFace->mTexCoordIndices.pushBack(A);
+			genFace->mTexCoordIndices.pushBack(B);
+			genFace->mTexCoordIndices.pushBack(C);
+			genFace->mTexCoordIndices.pushBack(D);
+		}
+	}
+}
+
+
 void Mesh::SetFaceFlags(index_t face, uint32 flags)
 {
 	Face *f = GetFace(face);
