@@ -1489,6 +1489,12 @@ index_t freyjaLightCreate()
 }
 
 
+uint32 freyjaGetLightCount()
+{
+	return gFreyjaLights.size();
+}
+
+
 index_t freyjaGetCurrentLight()
 {
 	return gFreyjaLightIndex;

@@ -3247,37 +3247,6 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			handleEvent(eEvent, eRotate);
 		}
 
-#if 0	
-		vec3_t xyz;
-		//unsigned int i;//, master_tag;
-
-
-
-		vec_t xx = vx, yy = vy;
-		getScreenToWorldOBSOLETE(&xx, &yy);
-	
-		switch (plane)
-		{
-		case PLANE_XY: // front
-			xyz[0] = xx;
-			xyz[1] = yy;
-			xyz[2] = 0;
-			break;
-		case PLANE_XZ: // top
-			xyz[0] = xx;
-			xyz[1] = 0;
-			xyz[2] = yy;
-			break;
-		case PLANE_ZY: // side
-			xyz[0] = 0;
-			xyz[1] = yy;
-			xyz[2] = xx;
-			break;
-
-		default:
-			;
-		}
-#endif
 
 		switch (mEventMode)
 		{
@@ -3819,7 +3788,6 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
-#if LIGHT_TRANSFORMS
 	case tLight:
 		{
 			Vec3 xyz;
@@ -3829,10 +3797,10 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 			for (uint32 i = 0, count = freyjaGetLightCount(); i < count; ++i)
 			{
-				freyjaGetLightPosition4v(0, pos);
+				freyjaGetLightPosition4v(i, pos);
 				xyz = Vector3d(pos);
 
-				if (r.IntersectSphere(xyz.mVec, 5.0f, t))
+				if (FreyjaRender::mTestRay.IntersectSphere(xyz.mVec, 5.0f, t))
 				{
 					if (selected == -1 || t < closest)
 					{
@@ -3844,13 +3812,12 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 			if (selected > -1)
 			{
-				SetCurrentLight(selected);
+				freyjaCurrentLight(selected);
 				mCursor.mPos = xyz;
 			}
 
 		}
 		break;
-#endif
 
 	case tFace:
 		{
@@ -3872,34 +3839,6 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
-#if 0
-
-	case tMesh:
-		{
-			/* Mongoose: Convert screen to world coordinate system */
-			getWorldFromScreen(&xx, &yy, &zz);
-			xx = x; 
-			yy = y;
-			getScreenToWorldOBSOLETE(&xx, &yy);
-			MeshSelect(xx, yy);
-			// selectMesh(plane, xx, yy, zz);
-			freyja_print("Selected Mesh[%i]", GetSelectedMesh());
-		}
-		break;
-
-	case tBone:
-		{
-			/* Mongoose: Convert screen to world coordinate system */
-			getWorldFromScreen(&xx, &yy, &zz);
-			xx = x; 
-			yy = y;
-			getScreenToWorldOBSOLETE(&xx, &yy);
-			selectBone(xx, yy);
-			// selectBone(plane, xx, yy, zz);
-			freyja_print("Selected Bone[%i])", GetSelectedBone());
-		break;
-#endif
-
 	default:
 		{
 			String s;
@@ -3916,8 +3855,6 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	Vec3 t;
 
 	mCursor.mPos.Get(t.mVec);
-
-#if 1
 	getScreenToWorldOBSOLETE(&vx, &vy);
 
 	/* Exact movement based on cursor position, 
@@ -3945,11 +3882,6 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	default:
 		;
 	}
-#else
-	vec_t vz = 0.0f;
-	GetWorldFromScreen(vx, vy, vz);
-	t -= Vec3(vx, vy, vz);
-#endif
 
 
 	/* Cursor axis determined limited movement */
