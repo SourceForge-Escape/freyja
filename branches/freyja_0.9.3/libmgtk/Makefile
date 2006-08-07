@@ -43,6 +43,7 @@ INSTALL_BIN=/usr/local/bin
 PLUGIN_INSTALL_DIR=$(INSTALL_LIB)/$(NAME)/modules
 LOCAL_INCLUDES=-I../mstl -I../libhel/
 LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ 
+LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ 
 
 ################################################################
 # DEBUG_GTK_MOUSE    
@@ -79,11 +80,11 @@ DEPS=../deps.sh
 
 # -Weffc++
 BASE_DEFS= \
-	-Isrc/common -Isrc/gnome $(CONFIGURE_CFLAGS) -Wno-deprecated \
+	-Imgtk $(CONFIGURE_CFLAGS) -Wno-deprecated \
 	-DUSING_GTK_2_0 \
 	$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
-BASE_CFLAGS=-fPIC -Wall -Isrc \
+BASE_CFLAGS=-fPIC -Wall -Imgtk \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -182,54 +183,17 @@ install-osx:
 # WIN32 build
 ########################################################################
 
-# cross.env
-#PREFIX=/home/mongoose/Projects/win32
-#export CC="mingw32-gcc -mms-bitfields"
-#export CXX="mingw32-g++ -mms-bitfields"
-#export CFLAGS="-O2 -march=i586 -mms-bitfields"
-#export CXXFLAGS="-O2 -march=i586 -mms-bitfields"
-#export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-#export PATH=$PREFIX/bin:$PREFIX/bin:/bin:/usr/bin
-#export LD_LIBRARY_PATH=$PREFIX/lib
-#export LDFLAGS=-L$PREFIX/lib
-#export OBJDUMP=/usr/bin/i586-mingw32msvc-objdump
-#export HOST_CC=/usr/bin/gcc
-
-# crossdump.sh
-#sh cross.env
-#echo `./pkg-config.exe --cflags gtk+-2.0 gtkglext-1.0` | sed -e "s/G://g"
-#echo `./pkg-config.exe --libs gtk+-2.0 gtkglext-1.0` | sed -e "s/G://g"
-
-
-CROSSDUMP_INC=-I/home/mongoose/Projects/win32/include/gtk-2.0 -I/home/mongoose/Projects/win32/lib/gtk-2.0/include -I/home/mongoose/Projects/win32/include/atk-1.0 -I/home/mongoose/Projects/win32/include/pango-1.0 -I/home/mongoose/Projects/win32/include/glib-2.0 -I/home/mongoose/Projects/win32/lib/glib-2.0/include -I/home/mongoose/Projects/win32/include/gtkglext-1.0 -I/home/mongoose/Projects/win32/lib/gtkglext-1.0/include 
-
-# -I/home/mongoose/Projects/win32/include/gtkgl-2.0/
-
-CROSSDUMP_LIBS=-lgtkglext-win32-1.0 -lgdkglext-win32-1.0 -lglu32 -lopengl32 -luser32 -lkernel32 -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lintl -liconv 
-
-# -lgtkgl-2.0
-
-WIN32_CROSS=/home/mongoose/Projects/win32
-WIN32_INCLUDE=$(WIN32_CROSS)/include
-WIN32_LIB=$(WIN32_CROSS)/lib/
-WIN32_BIN=$(WIN32_CROSS)/bin/
-WIN32_CFLAGS=$(DEBUG_CFLAGS) \
-	-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR \
-	$(CROSSDUMP_INC)
-
-# -DHAVE_GTKGLAREA
-
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	CC="$(WIN32_CC) " \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	MODULE="mgtk1" \
 	SHLIBEXT=".dll" \
-	CFLAGS="$(WIN32_CFLAGS) $(WIN32_INC_DIR) -DMGTKEXPORTSCLASS" \
-	LD_FLAGS="$(LD_FLAGS)" \
-	LIBS="$(WIN32_LIB_DIR) -lm -lstdc++ -L$(WIN32_LIB) $(CROSSDUMP_LIBS)"
+	CFLAGS="$(BASE_CFLAGS) $(WIN32_CROSS_CFLAGS) $(LOCAL_INCLUDES) -DMGTKEXPORTSCLASS -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR" \
+	LD_FLAGS="$(WIN32_CROSS_LIBS) $(LD_FLAGS)" \
+	LIBS="$(WIN32_LIB_DIR) -lm -lstdc++ $(WIN32_CROSS_LIBS)"
 
 
 ########################################################################

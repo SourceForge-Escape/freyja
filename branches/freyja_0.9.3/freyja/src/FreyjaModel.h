@@ -152,9 +152,7 @@ class Freyja3dCursor
 
 	FreyjaState mLastState;
 
-	Stack<FreyjaState *> mStack;
-
-	Stack<FreyjaState *> mRedoStack;
+	mstl::Stack<FreyjaState *> mStack;
 
 	Freyja3dCursorFlags_t mMode;
 };

@@ -68,18 +68,18 @@ template <class T> class StackNode
 
 
 
-template <class Type> class stack
+template <class Type> class Stack
 {
 public:
 
-	stack()
+	Stack()
 	{
 		mCount = 0;
 		mTop = NULL;
 	}
 
 
-	~stack()
+	~Stack()
 	{
 		while (mTop)
 		{

@@ -45,6 +45,7 @@ BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=freyja
 LOCAL_INCLUDES=-I../mstl -I../libhel/
 LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ 
+LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ 
 
 
 ################################################################
@@ -157,8 +158,8 @@ win32:
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
-	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL)"
+	LD_FLAGS="$(LOCAL_LIBS) $(CONFIGURE_LNK) -lm" \
+	LIBS="-lstdc++ -lm $(LOCAL_WIN32_LIBS) $(WIN32_LIB_DIR) $(WIN32_LIBHEL)"
 
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)

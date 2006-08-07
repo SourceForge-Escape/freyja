@@ -29,7 +29,7 @@
 #include <hel/math.h>
 #include <hel/BoundingVolume.h>
 #include <mstl/Vector.h>
-#include <mstl/stack.h>
+#include <mstl/Stack.h>
 #include "freyja.h"
 #include "FreyjaFileWriter.h"
 #include "FreyjaFileReader.h"
@@ -240,9 +240,9 @@ public:
 	}
 
 	bool SerializePool(FreyjaFileWriter &w, 
-					   Vector<vec_t> &v, mstl::stack<index_t> &s)
+					   Vector<vec_t> &v, mstl::Stack<index_t> &s)
 	{
-		mstl::stack<index_t> copy; // We don't really care about order
+		mstl::Stack<index_t> copy; // We don't really care about order
 
 		for ( uint32 i = 0; i < v.size(); ++i )
 		{
@@ -519,7 +519,7 @@ public:
 
 private:
 
-	index_t AddVec(Vector<vec_t> &v, mstl::stack<index_t>&f, uint32 n, vec_t *u)
+	index_t AddVec(Vector<vec_t> &v, mstl::Stack<index_t>&f, uint32 n, vec_t *u)
 	{
 		if (f.empty())
 		{
@@ -577,7 +577,7 @@ private:
 	}
 
 
-	index_t AddTripleVec(Vector<vec_t> &v, mstl::stack<index_t> &f, vec3_t xyz)
+	index_t AddTripleVec(Vector<vec_t> &v, mstl::Stack<index_t> &f, vec3_t xyz)
 	{
 		if (f.empty())
 		{
@@ -648,16 +648,16 @@ private:
 	BoundingBoxCombo mBoundingVolume;
 
 	Vector<vec_t> mVertexPool;
-	mstl::stack<index_t> mFreedVertices;
+	mstl::Stack<index_t> mFreedVertices;
 
 	Vector<vec_t> mNormalPool;
-	mstl::stack<index_t> mFreedNormals;
+	mstl::Stack<index_t> mFreedNormals;
 
 	Vector<vec_t> mColorPool;
-	mstl::stack<index_t> mFreedColors;
+	mstl::Stack<index_t> mFreedColors;
 
 	Vector<vec_t> mTexCoordPool;
-	mstl::stack<index_t> mFreedTexCoords;
+	mstl::Stack<index_t> mFreedTexCoords;
 
 	Vector<Face *> mFaces;
 

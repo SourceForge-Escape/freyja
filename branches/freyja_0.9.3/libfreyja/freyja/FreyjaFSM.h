@@ -252,8 +252,8 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Stack<freyja_object_t> mStack;      /* Object stack to keep up with 
-										 * accumulation modes and etc */
+	mstl::Stack<freyja_object_t> mStack; /* Object stack to keep up with 
+			  							  * accumulation modes and etc */
 
 	Vector<index_t> mVertexList;        /* Current polygon's vertex list */
 
