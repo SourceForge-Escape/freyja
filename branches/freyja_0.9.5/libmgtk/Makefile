@@ -43,6 +43,7 @@ INSTALL_BIN=/usr/local/bin
 PLUGIN_INSTALL_DIR=$(INSTALL_LIB)/$(NAME)/modules
 LOCAL_INCLUDES=-I../mstl -I../libhel/
 LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ 
+LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ 
 
 ################################################################
 # DEBUG_GTK_MOUSE    
@@ -76,7 +77,7 @@ DEPS=../deps.sh
 
 # -Weffc++
 BASE_DEFS= \
-	$(CONFIGURE_CFLAGS) -Wno-deprecated \
+	-I$(SRC_DIR) $(CONFIGURE_CFLAGS) -Wno-deprecated \
 	-DUSING_GTK_2_0 \
 	$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
 
@@ -182,14 +183,14 @@ install-osx:
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	CC="$(WIN32_CC) " \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
 	MODULE="mgtk1" \
 	SHLIBEXT=".dll" \
-	CFLAGS="$(DEBUG_CFLAGS) -DMGTKEXPORTSCLASS -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR $(WIN32_INC_DIR)" \
-	LD_FLAGS="$(LD_FLAGS) $(WIN32_LIB_DIR) $(WIN32_CROSS_LIBS)" \
-	LIBS="$(WIN32_LIB_DIR) -lm -lstdc++ -L$(WIN32_LIB) $(WIN32_CROSS_CFLAGS)"
+	CFLAGS="$(BASE_CFLAGS) $(WIN32_CROSS_CFLAGS) $(LOCAL_INCLUDES) -DMGTKEXPORTSCLASS -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR" \
+	LD_FLAGS="$(WIN32_CROSS_LIBS) $(LD_FLAGS)" \
+	LIBS="$(WIN32_LIB_DIR) -lm -lstdc++ $(WIN32_CROSS_LIBS)"
 
 
 ########################################################################
