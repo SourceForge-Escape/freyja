@@ -31,7 +31,8 @@
 #      include <OpenGL/glu.h>
 #   elif WIN32
 #      include <GL/glext.h>
-#      include <gdk/win32/gdkglwglext.h>
+#      include <windows.h>
+#      include <wingdi.h>
 #      define mglGetProcAddress(string) wglGetProcAddress(string)
 #   else
 #      include <GL/gl.h>

@@ -194,7 +194,7 @@ class Freyja3dCursor
 		mMode = Invisible;
 		mPos = Vector3d(0.0f, 0.0f, 0.0f);
 		mScale = Vector3d(1.0f, 1.0f, 1.0f);
-		mRot = Quaternion();
+		mRotate = Quaternion();
 	}
 
 	bool mSelected;
@@ -205,7 +205,7 @@ class Freyja3dCursor
 
 	Vector3d mScale;
 
-	Quaternion mRot;
+	Quaternion mRotate;
 
 
  private:

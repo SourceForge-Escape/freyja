@@ -86,7 +86,6 @@ class FreyjaControl
 	/* Old event format enums */
 	typedef enum {                              /* Editor event modes */
 		modeNone = 1,
-		MESH_MOVE_CENTER,
 		POINT_ADD_MODE,
 		POINT_DEL_MODE,
 		POLYGON_ADD_MODE,
@@ -94,7 +93,6 @@ class FreyjaControl
 		BONE_CONNECT_MODE,
 		BONE_DISCONNECT_MODE,
 		BONE_ADD_MODE,
-		TAG_MOVE_CENTER,
 		TEXEL_COMBINE,
 		VERTEX_COMBINE,
 		VERTEX_BBOX_SELECT_MODE,
@@ -131,7 +129,8 @@ class FreyjaControl
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaControl(Resource *r);
+	static FreyjaControl *GetInstance() 
+	{ return (mInstance ? mInstance : mInstance = new FreyjaControl()); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : FreyjaControl object is constructed
@@ -297,6 +296,12 @@ class FreyjaControl
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	Resource &GetResource() { return mResource; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	bool SaveModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Writes model to disk
@@ -429,6 +434,13 @@ class FreyjaControl
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Init();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads resource, which sets up the interface
+	 *        Also initilizes all the subsystems of this control
+	 ------------------------------------------------------*/
+
 	bool LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
 						  uint32 bpp, Texture::ColorMode type);
 	/*------------------------------------------------------
@@ -515,6 +527,20 @@ class FreyjaControl
 	static FreyjaControl *mInstance;
 
 
+protected:
+
+	FreyjaControl();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : FreyjaControl object is constructed
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2000.09.10: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+
 private:
 
 	////////////////////////////////////////////////////////////
@@ -528,7 +554,7 @@ private:
 	 * Post : Returns pick ray in object cooridnates
 	 ------------------------------------------------------*/
 
-	void getScreenToWorldOBSOLETE(float *x, float *y);
+	void getScreenToWorldOBSOLETE(vec_t &x, vec_t &y);
 	/*------------------------------------------------------
 	 * Pre  : Emulates the old ScreenToWorld() method behavior
 	 * Post : This function will be removed after the Model rewrite
@@ -794,7 +820,7 @@ private:
 
 	Freyja3dCursor mCursor;                 /* Special mouse input handler */
 
-	Resource *mResource;                    /* Resource system */
+	Resource mResource;                     /* Resource system */
 	
 	FreyjaRender *mRender;                  /* OpenGL renderer */
 

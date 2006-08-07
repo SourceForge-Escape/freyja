@@ -111,9 +111,9 @@ prof:
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	CC="$(WIN32_CC)" \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP)  \
+	LD=$(WIN32_LD)  \
 	MODULE="hel0" \
 	SHLIBEXT=".dll" \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR) -DHELEXPORTSCLASS" \
@@ -319,13 +319,11 @@ libhel.test:
 		hel/libhel.cpp \
 		-o $(BUILD_TEST_DIR)/libhel.test
 
-
 Quaternion.test:
 	mkdir -p $(BUILD_TEST_DIR)
 	$(CC) -Wall -g -pipe -O0 -L/usr/local/lib -lstdc++ -lm -lhel0 \
 		-DUNIT_TEST_QUATERNION hel/Quaternion.cpp \
 		-o $(BUILD_TEST_DIR)/Quaternion.test
-
 
 win32.test-strip:
 	strip --strip-all $(BUILD_TEST_DIR)/libhel-win32.test

@@ -58,14 +58,14 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaControl::FreyjaControl(Resource *r) :
+FreyjaControl::FreyjaControl() :
 	mSelectedTexture(0),
 	mFlags(fNone),
 	mObjectMode(tScene),
 	mResourceFilename("freyja-dev.mlisp"),
 	mCurrentlyOpenFilename(),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
-	mResource(r),
+	mResource(),
 	mRender(NULL),
 	mCleared(true),
 	mAllowBoneNameUpdate(true),
@@ -78,19 +78,17 @@ FreyjaControl::FreyjaControl(Resource *r) :
 	String sPluginDir = freyja_rc_map_string("plugins/");
 	freyjaPluginAddDirectory(sPluginDir.GetCString());
 
-	/* Start up freyja backend */
+	/* Start up libfreyja backend, and redirect it's stdio */
 	freyjaSpawn();
 	freyja__setPrinter(&mPrinter, false);
 
-	/* Spawn 0th light */
-	freyjaLightCreate();
+	/* Spawn 0th light, and set the light iterator */
+	freyjaCurrentLight(freyjaLightCreate());
 
-	/* Spawn 0th material */
+	/* Spawn 0th material, set the iterator, and make a default material */
 	int32 mIndex = freyjaMaterialCreate();
-	freyjaCurrentMaterial(mIndex);
-
 	vec4_t rgba = {0,0,0,1};
-
+	freyjaCurrentMaterial(mIndex);
 	freyjaMaterialName(mIndex, "Boring default");
 	freyjaMaterialSpecular(mIndex, rgba);
 	freyjaMaterialEmissive(mIndex, rgba);
@@ -111,7 +109,11 @@ FreyjaControl::FreyjaControl(Resource *r) :
 	}
 
 	mInstance = this;
+}
 
+
+void FreyjaControl::Init()
+{
 	/* Build the user interface from lisp, and load user preferences */
 	LoadResource();
 
@@ -2552,11 +2554,6 @@ bool FreyjaControl::event(int command)
 	case eMeshMirrorZ:
 		//mirrorUsingVertexBuffer(false, false, true);
 		break;
-	case eTransformMeshPivot:
-		mObjectMode = tMesh;
-		mEventMode = MESH_MOVE_CENTER;
-		freyja_print("Reposition mesh center point");
-		break;
 
 
 	/* ANIMATIONS */
@@ -3433,20 +3430,13 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
+void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 {
-	static bool warn = false;
-	float z;
+	vec_t z;
 
 	//ASSERT_MSG(false, "Obsolete function call.");
 
-	if (!warn)
-	{
-		warn = true;
-		freyja_print("Call to getScreenToWorldOBSOLETE is deprecated...");
-	}
-
-	GetWorldFromScreen(*x, *y, z);
+	GetWorldFromScreen(x, y, z);
 
 	switch (GetSelectedView())
 	{
@@ -3455,11 +3445,11 @@ void FreyjaControl::getScreenToWorldOBSOLETE(float *x, float *y)
 		break;
 		
 	case PLANE_XZ:
-		*y = -z;
+		y = -z;
 		break;
 		
 	case PLANE_ZY: // side
-		*x = z;
+		x = z;
 		break;
 
 	case PLANE_FREE:
@@ -3855,7 +3845,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	Vec3 t;
 
 	mCursor.mPos.Get(t.mVec);
-	getScreenToWorldOBSOLETE(&vx, &vy);
+	getScreenToWorldOBSOLETE(vx, vy);
 
 	/* Exact movement based on cursor position, 
 	 * but limited to a plane of movement */
@@ -4127,59 +4117,55 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 
 void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 {
-	static int old_y = 0, old_x = 0;
-	const float treshold = 2.0f;
-	float xyz[3];
-	float xx = x, yy = y;
-
-
 	switch (mMouseButton)
 	{
 	case MOUSE_BTN_MIDDLE:
-		xyz[0] = 0.0f;
-		xyz[1] = 0.0f;
-		xyz[2] = 0.0f;
-		
-		if (x > old_x + treshold)
-			xyz[0] = 1.0f;
-		else if (x < old_x - treshold)
-			xyz[0] = -1.0f;
-		
-		if (y > old_y + treshold)
-			xyz[1] = -1.0f;
-		else if (y < old_y - treshold)
-			xyz[1] = 1.0f;
-		
-
-		switch (GetSelectedView())
 		{
-		case PLANE_XY: // front
-			{
-				Vec3 t(xyz[0], xyz[1], xyz[2]);
-				mSceneTrans += t;
-			}
-			break;
+			static int old_y = 0, old_x = 0;
+			const float treshold = 1.0f;
+			float xyz[3];
 
-		case PLANE_XZ: // top
-			{
-				Vec3 t(xyz[0], xyz[2], xyz[1]);
-				mSceneTrans += t;
-			}
-			break;
+			xyz[0] = 0.0f;
+			xyz[1] = 0.0f;
+			xyz[2] = 0.0f;
+		
+			if (x > old_x + treshold)
+				xyz[0] = 1.0f;
+			else if (x < old_x - treshold)
+				xyz[0] = -1.0f;
+		
+			if (y > old_y + treshold)
+				xyz[1] = -1.0f;
+			else if (y < old_y - treshold)
+				xyz[1] = 1.0f;
+		
+			old_x = x;
+			old_y = y;
 
-		case PLANE_ZY: // side
+			if (xyz[0] == 0.0f && xyz[1] == 0.0f)
 			{
-				Vec3 t(xyz[2], xyz[1], xyz[0]);
-				mSceneTrans += t;
+				//DEBUG_MSG("Early out");
+				return;
 			}
-			break;
 
-		default:
-			;
+			switch (GetSelectedView())
+			{
+			case PLANE_XY: // front
+				mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
+				break;
+				
+			case PLANE_XZ: // top
+				mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
+				break;
+				
+			case PLANE_ZY: // side
+				mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
+				break;
+				
+			default:
+				;
+			}
 		}
-
-		old_x = x;
-		old_y = y;
 		break;
 
 
@@ -4204,9 +4190,6 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 		break;
 
 	case MOUSE_BTN_LEFT:
-		// Mongoose: Convert screen to world system
-		getScreenToWorldOBSOLETE(&xx, &yy);
-
 		switch (mEventMode)
 		{
 		case modeMove:
@@ -4229,20 +4212,11 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 			//BBoxMove(xx, yy);
 			break;
 			
-		case TAG_MOVE_CENTER:
-			//moveBoneCenter(xx, yy);
-			break;
-
-		case MESH_MOVE_CENTER: 
-			//MeshMoveCenter(xx, yy);
-			break;
 
 		default:
 			break;
 		}
 
-		old_x = x;
-		old_y = y;
 		break;
 	}
 }
@@ -4278,7 +4252,7 @@ void FreyjaControl::LoadResource()
 
 
 	// Setup the UI
-	if (!mResource->Load((char *)s.GetCString()))
+	if (!mResource.Load((char *)s.GetCString()))
 	{
 		failed = false;
 	}
@@ -4291,21 +4265,21 @@ void FreyjaControl::LoadResource()
 
 
 	/* GUI stuff */
-	if (mResource->Lookup("WINDOW_X", &x))
+	if (mResource.Lookup("WINDOW_X", &x))
 	{
-		if (mResource->Lookup("WINDOW_Y", &y))
+		if (mResource.Lookup("WINDOW_Y", &y))
 		{
 			extern void application_window_move(int x, int y);
 			freyja_application_window_move(x, y);
 		}
 	}
 
-	if (mResource->Lookup("DUMP_SYMTAB", &i) && i)
+	if (mResource.Lookup("DUMP_SYMTAB", &i) && i)
 	{
-		mResource->Print();
+		mResource.Print();
 	}
 
-	if (mResource->Lookup("GRID_ON", &i))
+	if (mResource.Lookup("GRID_ON", &i))
 	{
 		if (i)
 		{
@@ -4317,9 +4291,9 @@ void FreyjaControl::LoadResource()
 		}
 	}
 
-	if (mResource->Lookup("FLUSH_RESOURCE", &i) && i)
+	if (mResource.Lookup("FLUSH_RESOURCE", &i) && i)
 	{
-		mResource->Flush();
+		mResource.Flush();
 	}
 }
 

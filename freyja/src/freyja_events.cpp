@@ -42,7 +42,6 @@
 arg_list_t *freyja_rc_color(arg_list_t *args);
 
 
-Resource gResource;
 int gSkelTreeWidgetIndex;
 
 
@@ -130,7 +129,7 @@ int freyja_get_event_id_by_name(char *symbol)
 {
 	int id = -1;
 
-	gResource.Lookup(symbol, &id);
+	FreyjaControl::mInstance->GetResource().Lookup(symbol, &id);
 
 	return id;
 }
@@ -960,19 +959,16 @@ void freyja_handle_resource_start()
 	 *                here, most likey using resource for
 	 *                total gui control */
 
-	freyja_print("@Freyja started...");
+	freyja_print("!@Freyja started...");
 
-	freyja_handle_resource_init(gResource);
+	freyja_handle_resource_init(FreyjaControl::GetInstance()->GetResource());
 
 	/* User install of icons, samples, configs, etc */
 	if (!freyja_is_user_installed())
 		freyja_install_user();
 
-	FreyjaControl *startInstance = new FreyjaControl(&gResource);
-
-	// This is done when FreyjaControl is allocated now
 	/* Build the user interface from lisp, and load user preferences */
-	//FreyjaControl::mInstance->loadResource();
+	FreyjaControl::mInstance->Init();
 
 	/* FreyjaAppPlugin prototype testing... */
 	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
@@ -1014,7 +1010,7 @@ long freyja_get_new_plugin_eventid()
 
 void freyja_append_eventid(char *symbol, int eventid)
 {
-	gResource.RegisterInt(symbol, eventid);
+	FreyjaControl::mInstance->GetResource().RegisterInt(symbol, eventid);
 }
 
 
@@ -1750,7 +1746,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Hookup resource to event system */
-	ResourceEvent::setResource(&gResource);
+	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());
 
 	mgtk_init(argc, argv);
 

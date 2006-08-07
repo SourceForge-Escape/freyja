@@ -63,13 +63,18 @@ class FreyjaState
 	 * Post : Constructs an object of FreyjaState
 	 ------------------------------------------------------*/
 
-	FreyjaState(int event, int objIndex, int mode);
+	FreyjaState::FreyjaState(int event, int objIndex, int mode) :
+		mEvent(event),
+		mMode(mode),
+		mIndex(objIndex)
+	{
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaState
 	 ------------------------------------------------------*/
 
-	virtual ~FreyjaState();
+	virtual ~FreyjaState() {}
 	/*------------------------------------------------------
 	 * Pre  : FreyjaState object is allocated
 	 * Post : Deconstructs an object of FreyjaState
@@ -79,11 +84,24 @@ class FreyjaState
 
 	virtual bool Redo() { return false; }
 
-	virtual void operator =(FreyjaState s);
+	void FreyjaState::operator =(FreyjaState s) 
+	{
+		mEvent = s.mEvent; 
+		mIndex = s.mIndex; 
+		mMode = s.mMode; 
+	}
 
-	virtual bool operator ==(FreyjaState b);
 
-	virtual bool operator !=(FreyjaState b);
+	bool FreyjaState::operator ==(FreyjaState b) 
+	{
+		return (b.mEvent == mEvent && b.mIndex == mIndex && b.mMode == mMode); 
+	}
+
+
+	bool FreyjaState::operator !=(FreyjaState b) 
+	{
+		return (b.mEvent != mEvent || b.mIndex != mIndex || b.mMode != mMode); 
+	}
 
 	int GetEvent() { return mEvent; }
 
