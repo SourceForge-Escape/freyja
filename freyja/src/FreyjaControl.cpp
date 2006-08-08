@@ -83,7 +83,9 @@ FreyjaControl::FreyjaControl() :
 	freyja__setPrinter(&mPrinter, false);
 
 	/* Spawn 0th light, and set the light iterator */
+	vec4_t lightPos = {64,64,64,0};
 	freyjaCurrentLight(freyjaLightCreate());
+	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
 	/* Spawn 0th material, set the iterator, and make a default material */
 	int32 mIndex = freyjaMaterialCreate();
@@ -490,7 +492,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		vec3_t v;
 		z += 100;
 
-		y += 10.0f;
+		y += 10.0f * 1/GetZoom();
 		vec3_t u = {x, y, z};
 		mRender->getRotation(v);
 		//v[0] = 0;
