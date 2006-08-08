@@ -474,12 +474,37 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 
 	if (GetSelectedView() == PLANE_FREE)
 	{
+#if 0
 		double rayOrigin[4];
 		double rayVector[4];
 		getPickRay(x, y, rayOrigin, rayVector);
 
 		HEL_VEC3_COPY(rayOrigin, r.mOrigin.mVec);
 		HEL_VEC3_COPY(rayVector, r.mDir.mVec);
+#else
+		// stop gap fix until new camera system is checked in
+		vec_t z;
+		//y += GetSceneTranslation().mVec[1] + 18.0f;
+		GetWorldFromScreen(x, y, z);
+		Matrix m;
+		vec3_t v;
+		z += 100;
+
+		y += 10.0f;
+		vec3_t u = {x, y, z};
+		mRender->getRotation(v);
+		//v[0] = 0;
+		v[0] = HEL_DEG_TO_RAD(v[0]);
+		v[1] = HEL_DEG_TO_RAD(v[1]);
+		v[2] = HEL_DEG_TO_RAD(v[2]);
+		DEBUG_MSGF("$$ yaw = %f\n", v[1]);
+
+		m.rotate(v);
+		m.Multiply3v(u);
+		r.mOrigin = Vec3(u);
+		r.mDir = Vec3(0, 0, -1);
+		m.Multiply3v(r.mDir.mVec);
+#endif
 	}
 	else
 	{
