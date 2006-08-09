@@ -1187,7 +1187,7 @@ void FreyjaRender::renderUVWindow()
 		glEnd();
 	}
 #else
-	Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
 
 
 	if (!m)
@@ -1207,7 +1207,7 @@ void FreyjaRender::renderUVWindow()
 		Face *f = m->GetFace(i);
 		Vec3 v;
 
-		if (!f) 
+		if (!f ||f->mMaterial != FreyjaControl::mInstance->GetSelectedTexture())
 			continue;
 
 		/* Render UVs as points */
