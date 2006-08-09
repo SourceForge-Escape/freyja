@@ -212,7 +212,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 
 	// Trap the junk 0,0 states that are often tossed around on
 	// just mouse button updates
-	if ( x == 0 && y == 0 || GetControlScheme() != eScheme_Model )
+	if ( GetControlScheme() != eScheme_Model || x == 0 && y == 0 )
 	{
 	}
 	else if (mRender->GetMode() & FreyjaRender::fViewports)
@@ -4450,15 +4450,27 @@ void eRenderToggleGridZClear()
 }
 
 
-void eCollapseFace()
+void eImplementationRemoved()
 {
-	BUG_ME("Test implementation removed");
+	freyja_print("Implementation removed");
+	BUG_ME("Implementation removed");
+}
+
+void eImplementationRemovedUInt(unsigned int u)
+{
+	freyja_print("Implementation removed");
+	BUG_ME("Implementation removed");
 }
 
 
 void FreyjaViewEventsAttach()
 {
-	ResourceEventCallback::add("eCollapseFace", &eCollapseFace);
+	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
+	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
+	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);
+	ResourceEventCallback::add("eCollapseFace", &eImplementationRemoved);
+
+
 	ResourceEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
 	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	ResourceEventCallback::add("ePolyMeshBone", &ePolyMeshBone);

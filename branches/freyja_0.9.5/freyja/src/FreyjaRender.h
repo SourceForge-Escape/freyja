@@ -487,6 +487,8 @@ private:
 	float mNear;	// zNear
 	float mFovY;
 	float mNearHeight;
+
+	bool mScrollingUV_X;
 };
 
 #endif
