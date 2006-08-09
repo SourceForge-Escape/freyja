@@ -601,6 +601,17 @@ class SystemIO
 		}
 
 
+		bool ParseBool()
+		{
+			const char *sym = ParseSymbol();
+
+			 if (strncmp(sym, "true", 4) == 0 || strncmp(sym, "TRUE", 4) == 0 )
+				 return true;
+
+			return false;
+		}
+
+
 		bool ParseMatchingSymbol(const char *symbol)
 		{
 			/* Assumes !(!symbol) && !(!symbol[0]) */
