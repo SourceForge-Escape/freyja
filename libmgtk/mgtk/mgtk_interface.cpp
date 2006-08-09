@@ -863,6 +863,7 @@ GtkWidget *mgtk_create_filechooser(char *title)
 
 
 	filechooser = gtk_file_chooser_dialog_new(title, NULL, GTK_FILE_CHOOSER_ACTION_OPEN, NULL);
+	//gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(filechooser), TRUE);
 	gtk_window_set_type_hint(GTK_WINDOW(filechooser), GDK_WINDOW_TYPE_HINT_DIALOG);
 
 	vbox = GTK_DIALOG(filechooser)->vbox;

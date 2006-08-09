@@ -1560,16 +1560,33 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glVertex3f((x+w)*s, y*s, z);
 	glEnd();
 
+
+	static vec_t xd = 0.0f;
+
+	xd += 0.001f;
+
+	if (xd > 1.0f) xd = 0.0f;
+
+	Vec3 uvA(1.0-1.0*xd,1,0);
+	Vec3 uvB(1.0-1.0*xd,0,0);
+	Vec3 uvC(1.0*xd,0,0);
+	Vec3 uvD(1.0*xd,1,0);
+
+
 	glColor3fv(WHITE);
 	mglApplyMaterial(freyjaGetCurrentMaterial());
 	glBegin(GL_QUADS);
-	glTexCoord2f(0.0, 1.0);
+	//glTexCoord2f(0.0, 1.0);
+	glTexCoord2fv(uvA.mVec);
 	glVertex3f(x, y, z);
-	glTexCoord2f(0.0, 0.0);
+	//glTexCoord2f(0.0, 0.0);
+	glTexCoord2fv(uvB.mVec);
 	glVertex3f(x, y+h, z);
-	glTexCoord2f(1.0, 0.0);
+	//glTexCoord2f(1.0, 0.0);
+	glTexCoord2fv(uvC.mVec);
 	glVertex3f(x+w, y+h, z);
-	glTexCoord2f(1.0, 1.0);
+	//glTexCoord2f(1.0, 1.0);
+	glTexCoord2fv(uvD.mVec);
 	glVertex3f(x+w, y, z);
 	glEnd();	
 	glPopMatrix();
