@@ -1253,7 +1253,7 @@ void FreyjaRender::renderUVWindow()
 			continue;
 
 		/* Render face as wireframe */
-		if ( mRenderMode & RENDER_WIREFRAME )
+		if ( 1 ) //mRenderMode & RENDER_WIREFRAME )
 		{
 			glBegin(GL_LINE_LOOP);
 
