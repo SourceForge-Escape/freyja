@@ -36,7 +36,7 @@ BASE_DEFS=-DMODEL_PLUGINS
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
 CONFIGURE_DEF=-DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 CONFIGURE_LNK=
-BUILD_ROOT_DIR=../../../../bin/plugins/model
+BUILD_ROOT_DIR=../../../../bin/plugins/model/$(NAME)
 BUILD_DEBUG_DIR=$(BUILD_ROOT_DIR)/debug
 BUILD_RELEASE_DIR=$(BUILD_ROOT_DIR)/release
 BUILD_PROF_DIR=$(BUILD_ROOT_DIR)/prof
@@ -47,7 +47,7 @@ SRC_DIR=.
 
 
 ################################################################
-# Compiler and Cross Enviroment
+# Compiler and Cross Environment
 ################################################################
 
 CC=gcc
@@ -73,6 +73,13 @@ LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
 RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
 	-fomit-frame-pointer -fexpensive-optimizations -O2
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g $(DEBUG_DEFS)
+
+################################################################
+# Local Build Environment
+################################################################
+
+-include ../../../freyja.env
+
 
 # Library ######################################################
 SHLIBEXT=$(EXT).$(VERSION)
@@ -109,29 +116,29 @@ debug:
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	SHLIBEXT=".so" \
 	CFLAGS="$(DEBUG_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS)"
+	LD_FLAGS="$(LDFLAGS)"
 
 prof:
 	@-mkdir -p $(BUILD_PROF_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
 	SHLIBEXT=".so" \
 	CFLAGS="$(DEBUG_CFLAGS) -pg" \
-	LD_FLAGS="$(LD_FLAGS) -pg"
+	LD_FLAGS="$(LDFLAGS) -pg"
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
 	SHLIBEXT=".so" \
 	CFLAGS="$(RELEASE_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS)"
+	LD_FLAGS="$(LDFLAGS)"
 
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
 	SHLIBEXT=".dll" \
-	CC="$(WIN32_CC)" \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP)  \
+	LD=$(WIN32_LD)  \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
@@ -199,26 +206,6 @@ test:
 	PROG_OBJS="$(BUILD_TEST_DIR)/Ase.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
-
-$(NAME).so:
-	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) targets BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=ase \
-	PROG_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-$(NAME).dll:
-	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
-	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
-	SHLIBEXT=".dll" \
-	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)" \
-	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
 
 
 ##########################################################################
