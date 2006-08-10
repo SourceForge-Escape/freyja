@@ -1761,76 +1761,6 @@ void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex)
 }
 
 
-void freyjaMeshGenerateVertexNormals(index_t meshIndex)
-{
-	Vector <Vector3d *> faceNormals;
-	Vector <long> ref;
-	Vector3d a, b, c, aa, bb, normal;
-	int32 v0, v1, v2, i, j, vertexIndex, polygonIndex, meshVertexCount, polygonCount, vertexCount;
-
-
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-	meshVertexCount = freyjaGetMeshVertexCount(meshIndex);
-
-	if (!meshVertexCount || !polygonCount)
-		return;
-
-    for (i = 0; i < polygonCount; ++i)
-    {
-		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-		
-		/* Just need 3 sides -- assume all coplanar these are simple polygons,
-		 * so just take first 3 vertices to make 2 edge vectors */
-		v0 = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-		v1 = freyjaGetPolygonVertexIndex(polygonIndex, 1);
-		v2 = freyjaGetPolygonVertexIndex(polygonIndex, 2);
-
-		freyjaPrintMessage("%i <%d %d %d>", polygonIndex, v0, v1, v2);
-		freyjaGetVertexXYZ3fv(v0, a.mVec);
-		freyjaGetVertexXYZ3fv(v1, b.mVec);
-		freyjaGetVertexXYZ3fv(v2, c.mVec);
-
-		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
-		faceNormals.pushBack(new Vector3d(normal));
-	}
-
-
-	/* Compute vertex normals */
-    for (i = 0; i < meshVertexCount; ++i)
-    {
-		vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, i);
-
-		if (vertexIndex < 0)
-		{
-			freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad vertex\n");
-			continue;
-		}
-
-		normal.zero();
-
-		freyjaGetVertexPolygonRef1i(vertexIndex, ref);
-
-		for (j = ref.begin(); j < (int)ref.end(); ++j)
-		{
-			if (ref[j] > polygonCount)
-			{
-				freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR bad face\n");
-				continue;
-			}
-
-			normal += *faceNormals[ref[j]];
-		}
-
-		normal.normalize();
-
-		freyjaVertexNormal3fv(vertexIndex, normal.mVec);
-    }
-
-	faceNormals.erase();
-}
 
 
 void freyjaMeshTesselateTriangles(index_t meshIndex)
@@ -1924,23 +1854,6 @@ void freyjaMeshTesselateTriangles(index_t meshIndex)
 		freyjaMeshRemovePolygon(meshIndex, purge[ii]);
 	}
 }
-
-
-void freyjaMeshNormalFlip(index_t meshIndex)
-{
-	int32 i, n, v;
-
-	for (i = 0, n = freyjaGetMeshVertexCount(meshIndex); i < n; ++i)
-	{
-		v = freyjaGetMeshVertexIndex(meshIndex, i);
-
-		if (v > -1)
-		{
-			freyjaVertexNormalFlip(v);
-		}
-	}
-}
-
 
 
 void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex)

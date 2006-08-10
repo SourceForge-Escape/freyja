@@ -1385,3 +1385,115 @@ void freyjaModelClampTexCoords(index_t modelIndex)
 			mesh->ClampAllTexCoords();
 	}
 }
+
+
+void freyjaMeshGenerateVertexNormals(index_t meshIndex)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (!mesh)
+		return;
+
+	BUG_ME("Function local vertex refs implementation used.");
+	Vector<Vec3> faceNormals;
+	Vec3 a, b, c, normal;
+
+    for (uint32 v = 0, vn = mesh->GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = mesh->GetVertex(v);
+
+		if (vertex)
+			vertex->mPolyRefIndices.clear();
+	}
+
+	/* Compute face normals */
+	for (uint32 f = 0, fn = mesh->GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = mesh->GetFace(f);
+
+		if (!face)
+		{
+			faceNormals.pushBack(normal);  // For alignment purposes
+			continue;
+		}
+
+		for (uint32 v = 0, vn = face->mIndices.size(); v < vn; ++v)
+		{
+			Vertex *vertex = mesh->GetVertex(face->mIndices[v]);
+			
+			if (vertex)
+				vertex->mPolyRefIndices.pushBack(f);
+		}
+
+		mesh->GetVertexPos(face->mIndices[0], a.mVec);
+		mesh->GetVertexPos(face->mIndices[1], b.mVec);
+		mesh->GetVertexPos(face->mIndices[2], c.mVec);
+
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
+		faceNormals.pushBack(normal);
+		//DEBUG_MSGF("face %i. %f %f %f\n", f, normal.mVec[0], normal.mVec[1], normal.mVec[2]);
+	}
+
+
+	/* Compute vertex normals */
+    for (uint32 v = 0, vn = mesh->GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = mesh->GetVertex(v);
+
+		if (!vertex)
+			continue;
+
+		normal.zero();
+
+		//ASSERT_MSG(vertex->mPolyRefIndices.size(), "WTF vertex[%i] with no faces...", v);
+
+		if (vertex->mPolyRefIndices.size() == 0)
+		{
+			//DEBUG_MSGF("WTF vertex[%i] with no faces...", v);
+			continue;
+		}
+
+		for (uint32 j = 0, jn = vertex->mPolyRefIndices.size(); j < jn; ++j)
+		{
+			if (vertex->mPolyRefIndices[j] == INDEX_INVALID)
+			{
+				freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR Bad face reference\n");
+				continue;
+			}
+
+			normal += faceNormals[vertex->mPolyRefIndices[j]];
+		}
+
+
+		normal.normalize();
+
+		//DEBUG_MSGF("vert %i. %f %f %f\n", v, normal.mVec[0], normal.mVec[1], normal.mVec[2]);
+
+		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
+		mesh->SetNormal(v, normal.mVec);
+    }
+}
+
+
+void freyjaMeshNormalFlip(index_t meshIndex)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (!mesh)
+		return;
+
+	Vec3 normal;
+
+    for (uint32 n = 0, nn = mesh->GetNormalCount(); n < nn; ++n)
+    {
+		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
+		mesh->GetNormal(n, normal.mVec);
+		normal = -normal;
+		mesh->SetNormal(n, normal.mVec);
+	}
+}
+
+
+
