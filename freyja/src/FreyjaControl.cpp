@@ -4017,11 +4017,16 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	case tMesh:
 		/* Mongoose: Scaled rotation for better response */
-		xf *= 5.0f;
-		yf *= 5.0f;
-		zf *= 5.0f;
+		xf *= 0.4f;
+		yf *= 0.4f;
+		zf *= 0.4f;
 
 		rotate = fRotateAboutPoint;
+		{
+			BUG_ME("This interface is broken");
+			Vec3 r(xf, yf, zf);
+			freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, r.mVec);
+		}
 		break;
 
 
