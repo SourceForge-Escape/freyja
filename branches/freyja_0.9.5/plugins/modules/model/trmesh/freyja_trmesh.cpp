@@ -287,7 +287,7 @@ int freyja_model__trmesh_import(char *filename)
     freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
     freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
-    freyjaPolygonMaterial1i(-1);
+    freyjaPolygonMaterial1i(0);
     
     // End FREYJA_POLYGON
     freyjaEnd();
@@ -350,7 +350,7 @@ int freyja_model__trmesh_import(char *filename)
     freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(r, g));
     freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(a, b));
 
-    freyjaPolygonMaterial1i(-1);
+    freyjaPolygonMaterial1i(0);
     
     // End FREYJA_POLYGON
     freyjaEnd();

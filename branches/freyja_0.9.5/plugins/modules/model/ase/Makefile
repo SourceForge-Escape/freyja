@@ -207,26 +207,6 @@ test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-#$(NAME).so:
-#	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
-#	$(MAKE) targets BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
-	MOD_NAME=ase \
-	PROG_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
-	CFLAGS="$(MODULE_CFLAGS)" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)"
-
-#$(NAME).dll:
-#	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
-#	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
-	SHLIBEXT=".dll" \
-	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/Ase.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="$(MODULE_CFLAGS) -I/usr/local/include/" \
-	LD_FLAGS="$(MODULE_LD_FLAGS)" \
-	LIBS="-lstdc++ -lm -L/usr/local/lib -lhel0 -lfreyja9"
-
 
 ##########################################################################
 # Object dependency include
