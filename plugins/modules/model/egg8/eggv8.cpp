@@ -28,6 +28,10 @@
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 
+#include <mstl/Map.h>
+
+using namespace mstl;
+
 #ifdef WIN32
 typedef unsigned int u_int32_t;
 #endif

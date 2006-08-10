@@ -440,7 +440,9 @@ int HalfLife::load(const char *filename)
 #ifdef FREYJA_PLUGINS
 
 #include <freyja/FreyjaPlugin.h>
+#include <mstl/Map.h>
 
+using namespace mstl;
 
 extern "C" {
 

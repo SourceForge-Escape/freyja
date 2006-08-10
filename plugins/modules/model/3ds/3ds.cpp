@@ -717,8 +717,10 @@ Material::Material ()
 
 #ifdef FREYJA_PLUGINS
 #include <freyja/FreyjaPlugin.h>
+#include <mstl/Map.h>
 #include <stdio.h>
 
+using namespace mstl;
 
 /* Export as C functions */
 extern "C" {
