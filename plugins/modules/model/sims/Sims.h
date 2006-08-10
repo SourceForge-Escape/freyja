@@ -29,6 +29,7 @@
 
 #include <mstl/Vector.h>
 
+using namespace mstl;
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/FreyjaFileWriter.h>
 

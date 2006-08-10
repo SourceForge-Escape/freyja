@@ -102,8 +102,8 @@ int Skel::save(char *filename)
 
 	fprintf(f, "*SKELETON {\n");
 	fprintf(f, "\t*NAME \"%s\"\n", "RestSkeleton");
-	fprintf(f, "\t*BONE_COUNT %d\n", mBoneCount);
-	fprintf(f, "\t*WEIGHT_COUNT %d\n", mWeightCount);
+	fprintf(f, "\t*BONE_COUNT %lu\n", mBoneCount);
+	fprintf(f, "\t*WEIGHT_COUNT %lu\n", mWeightCount);
 
 	fprintf(f, "\t*BONE_WEIGHTS {\n");
 

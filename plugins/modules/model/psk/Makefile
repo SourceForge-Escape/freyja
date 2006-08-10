@@ -117,7 +117,7 @@ debug:
 	SHLIBEXT=".so" \
 	CFLAGS="$(DEBUG_CFLAGS)" \
 	LD_FLAGS="$(LDFLAGS)"
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME).so $(BUILD_INSTALL_DIR)
+	@-cp $(BUILD_DEBUG_DIR)/$(NAME).so $(BUILD_INSTALL_DIR)/debug
 
 prof:
 	@-mkdir -p $(BUILD_PROF_DIR)
