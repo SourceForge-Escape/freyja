@@ -27,6 +27,9 @@
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/BoneABI.h>
 
+#include <mstl/Map.h>
+
+using namespace mstl;
 
 extern "C" {
 

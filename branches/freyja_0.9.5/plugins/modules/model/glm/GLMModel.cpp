@@ -382,7 +382,6 @@ int main(int argc, char *argv[])
 #include <string.h>
 #include <freyja/FreyjaPlugin.h>
 #include <hel/Matrix.h>
-#include "Nod.h"
 
 
 extern "C" {

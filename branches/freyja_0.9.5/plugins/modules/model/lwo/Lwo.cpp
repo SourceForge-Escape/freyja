@@ -571,7 +571,9 @@ void Lwo::ReadPnts(FILE *f, int nbytes)
 #ifdef FREYJA_PLUGINS
 #include <stdio.h>
 #include <freyja/FreyjaPlugin.h>
+#include <mstl/Map.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -690,7 +692,7 @@ int freyja_model__lwo_import(char *filename)
       }
     }
 
-    freyjaPolygonMaterial1i(-1);
+    freyjaPolygonMaterial1i(0);
 
     freyjaEnd(); // FREYJA_POLYGON
   }

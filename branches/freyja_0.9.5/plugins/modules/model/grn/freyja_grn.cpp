@@ -33,6 +33,10 @@
 #include <hel/math.h>
 #include <hel/Quaternion.h>
 #include <freyja/FreyjaPlugin.h>
+#include <mstl/Map.h>
+
+
+using namespace mstl;
 
 /* Export as C functions */
 extern "C" {
