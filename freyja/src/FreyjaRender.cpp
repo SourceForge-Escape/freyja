@@ -564,11 +564,18 @@ void FreyjaRender::display()
 			glPushMatrix();
 
 			/* Viewport seperator */
+			glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
+
 			glColor3fv(BLACK);  // FIXME: hardcoded
 			glBegin(GL_LINES);
 			glVertex2f(21.75, -height*0.25);
 			glVertex2f(21.75, height*0.25);
 			glEnd();
+
+			glPopAttrib();
 
 			drawFreeWindow();
 			//renderUVWindow();
@@ -576,6 +583,11 @@ void FreyjaRender::display()
 
 			glViewport(vp[0], vp[1], vp[2], vp[3]);
 		
+			glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_BLEND);
+
 			glBegin(GL_LINES);
 			glColor3fv(BLACK);
 			glVertex2f(width*mZoom, 0);
@@ -583,6 +595,8 @@ void FreyjaRender::display()
 			glVertex2f(0, height*mZoom/2);
 			glVertex2f(width, height/2);
 			glEnd();
+
+			glPopAttrib();
 		}
 		else
 		{
@@ -786,7 +800,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				// FIXME: later this will use vertex/face remapped index
 				m->GetVertexPos(i, v.mVec);
 				m->GetNormal(i, n.mVec);
-				n = v + (n*3.0f);
+				n = v + (n*1.75f);
 				glVertex3fv(v.mVec);
 				glVertex3fv(n.mVec);
 			}
