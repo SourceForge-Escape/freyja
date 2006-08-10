@@ -289,8 +289,8 @@
 			(handlebox 1   ;; (hbox 0 1 0 1 1
 			(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eEvent
 
-				;; Mesh tab
-				(tab "Mesh" eModeModel
+				;; Model tab
+				(tab "Model" eModeModel
 
 					(hbox 0 0 0 1 0 
 						(toolbar 
@@ -346,12 +346,12 @@
 					(hbox 1 0 0 1 0
 						(label "Current Mesh  #"  0.0 0.5) 
 						(spinbutton 0 0 100 eMeshIterator))
-					(hbox 1 0 0 1 0
-						(label "Current Group #" 0.0 0.5) 
-						(spinbutton 0 0 500 eGroupIterator))
-					(hbox 1 0 0 1 0
-						(label "Current Face #" 0.0 0.5) 
-						(spinbutton 0 0 500 ePolygonIterator))
+					;(hbox 1 0 0 1 0
+					;	(label "Current Group #" 0.0 0.5) 
+					;	(spinbutton 0 0 500 eGroupIterator))
+					;(hbox 1 0 0 1 0
+					;	(label "Current Face #" 0.0 0.5) 
+					;	(spinbutton 0 0 500 ePolygonIterator))
 
 					;(hbox 1 0 0 1 0
 					;	(button "New"     eEvent  eAddObject)
@@ -411,24 +411,27 @@
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
 
-					(hbox 0 0 0 1 0
-						(label "Merge Animations with Mesh" 0.0 0.5))
+					(hbox 1 0 0 1 0
+						(label "Animation" 0.0 0.5))
 
 					(hbox 1 0 0 1 0
 						(label "KeyFrame #" 0.0 0.5) 
 						(spinbutton 0 0 500 eGroupIterator))
 
 
+					;; Skeleton attribute editor  
+					(hbox 1 0 0 1 0 (hsep))
+					(hbox 1 0 0 1 0
+						(label "Skeleton" 0.0 0.5))
 
-; (hbox homogenous spacing expand fill pading ...)
-					;; Bone attribute editor
+					; Make a UID string for trees later so to be fully generic
+					(animation_tab_hack eBoneIterator eSetCurrentBoneName)
+					;; Replace these with improved tree support
 					(hbox 0 0 0 1 0
 						(hbox 1 0 0 1 0
 							(label "Bone: " 0.0 0.5))
 						(spinbutton 0 0 100 eBoneIterator)
 						(textbox eSetCurrentBoneName))
-
-					(animation_tab_hack eBoneIterator eSetCurrentBoneName)
 
 			)  ;; end tab
 
