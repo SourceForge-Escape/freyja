@@ -1201,7 +1201,12 @@ void FreyjaRender::renderUVWindow()
 	glDisable(GL_BLEND);
 	glPointSize(mVertexPointSize);
 
-	// Render wireframe faces	
+	/* Render UVs as points */
+	// FIXME: This will do many points for each point, opt later
+	//        when we can't have mixed polymaps
+	glBegin(GL_POINTS);
+	glColor3fv(mColorVertexHighlight);	
+
 	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 	{
 		Face *f = m->GetFace(i);
@@ -1210,37 +1215,29 @@ void FreyjaRender::renderUVWindow()
 		if (!f ||f->mMaterial != FreyjaControl::mInstance->GetSelectedTexture())
 			continue;
 
-		/* Render UVs as points */
-		if ( 1 )
+		if (f->mFlags & Face::fPolyMappedTexCoords)
 		{
-			// This will do many points for each point, opt later
-			glBegin(GL_POINTS);
-			glColor3fv(mColorVertexHighlight);
-
-			if (f->mFlags & Face::fPolyMappedTexCoords)
+			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
 			{
-				for (uint32 j = 0; j < f->mIndices.size(); ++j)
-				{
-					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-					v.mVec[0] *= width;
-					v.mVec[1] *= height;
-					glVertex2fv(v.mVec);
-				}
+				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+				v.mVec[0] *= width;
+				v.mVec[1] *= height;
+				glVertex2fv(v.mVec);
 			}
-			else
+		}
+		else
+		{
+			for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
 			{
-				for (uint32 j = 0; j < f->mIndices.size(); ++j)
-				{
-					m->GetTexCoord(f->mIndices[j], v.mVec);
-					v.mVec[0] *= width;
-					v.mVec[1] *= height;
-					glVertex2fv(v.mVec);
-				}
+				m->GetTexCoord(f->mIndices[j], v.mVec);
+				v.mVec[0] *= width;
+				v.mVec[1] *= height;
+				glVertex2fv(v.mVec);
 			}
-				
-			glEnd();
 		}
 	}
+
+	glEnd();
 
 
 	// Render wireframe faces	
@@ -1253,38 +1250,35 @@ void FreyjaRender::renderUVWindow()
 			continue;
 
 		/* Render face as wireframe */
-		if ( 1 ) //mRenderMode & RENDER_WIREFRAME )
+		glBegin(GL_LINE_LOOP);
+
+		if (f->mFlags & Face::fSelected)
+			glColor3fv(mColorWireframeHighlight);
+		else
+			glColor3fv(mColorWireframe);
+
+		if (f->mFlags & Face::fPolyMappedTexCoords)
 		{
-			glBegin(GL_LINE_LOOP);
-
-			if (f->mFlags & Face::fSelected)
-				glColor3fv(mColorWireframeHighlight);
-			else
-				glColor3fv(mColorWireframe);
-
-			if (f->mFlags & Face::fPolyMappedTexCoords)
+			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
 			{
-				for (uint32 j = 0; j < f->mIndices.size(); ++j)
-				{
-					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-					v.mVec[0] *= width;
-					v.mVec[1] *= height;
-					glVertex2fv(v.mVec);
-				}
+				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+				v.mVec[0] *= width;
+				v.mVec[1] *= height;
+				glVertex2fv(v.mVec);
 			}
-			else
-			{
-				for (uint32 j = 0; j < f->mIndices.size(); ++j)
-				{
-					m->GetTexCoord(f->mIndices[j], v.mVec);
-					v.mVec[0] *= width;
-					v.mVec[1] *= height;
-					glVertex2fv(v.mVec);
-				}
-			}
-				
-			glEnd();
 		}
+		else
+		{
+			for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
+			{
+				m->GetTexCoord(f->mIndices[j], v.mVec);
+				v.mVec[0] *= width;
+				v.mVec[1] *= height;
+				glVertex2fv(v.mVec);
+			}
+		}
+				
+		glEnd();
 	}
 
 	//glPopAttrib();
