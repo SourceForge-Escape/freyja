@@ -3203,17 +3203,15 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		}
 		else if (btn == MOUSE_BTN_LEFT && state == MOUSE_BTN_STATE_PRESSED)
 		{
-			float s, t;
-			
-			
-			s = (float)x / (float)mRender->GetWindowWidth();
-			t = (float)y / (float)mRender->GetWindowHeight();
-			
-			// Mongoose: Clamp texels to be bound by min and max
+			// Mongoose: Convert window coords to UV coords, and clamp UVs
+			float s = (float)x / (float)mRender->GetWindowWidth();
 			if (s > 1.0) s = 1.0;
-			if (s < 0.0) s = 0.0;
+			else if (s < 0.0) s = 0.0;
+
+			float t = (float)y / (float)mRender->GetWindowHeight();
 			if (t > 1.0) t = 1.0;
-			if (t < 0.0) t = 0.0;
+			else if (t < 0.0) t = 0.0;
+			
 			
 			if (mEventMode == TEXEL_COMBINE)
 			{
@@ -3221,7 +3219,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			}
 			else
 			{
-				//TexelSelect(s, t);
+				TexCoordSelect(s, t);
 			}
 			
 			mUVMouseState = true;
@@ -4297,6 +4295,69 @@ void FreyjaControl::LoadResource()
 	}
 }
 
+
+void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
+{
+	mTexCoordArrayIndex = INDEX_INVALID;
+
+	Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+	if (!m)
+		return;
+
+	const vec_t cutoff = 0.005f; // must be within this many 'uv units' to pick
+	Vec3 uv(u, v, 0.0f);
+	Vec3 uvB;
+	Face *f;
+	vec_t dist, bestDist = 2.0f; // Outside 0.0f - 1.0f
+	
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		f = m->GetFace(i);
+
+		/* Only consider UVs using selected material */
+		if (!f || f->mMaterial != GetSelectedTexture())
+			continue;
+
+		// NOTE: Right now we can have mixed texcoord polymapped faces
+		/* Compare UVs as 2 space coords ( for the most part ) */
+		if (f->mFlags & Face::fPolyMappedTexCoords)
+		{
+			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
+			{
+				m->GetTexCoord(f->mTexCoordIndices[j], uvB.mVec);
+				uvB.mVec[2] = 0.0f;
+				dist = helDist3v(uv.mVec, uvB.mVec);
+				
+				if (dist < cutoff && dist < bestDist)
+				{
+					bestDist = dist;
+					mTexCoordArrayIndex = f->mTexCoordIndices[j];
+				}
+			}
+		}
+		else
+		{
+			for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
+			{
+				// FIXME: This must change when vertices use texcoordIndex
+				m->GetTexCoord(f->mIndices[j], uvB.mVec);
+				uvB.mVec[2] = 0.0f;				
+				dist = helDist3v(uv.mVec, uvB.mVec);
+				
+				if (dist < cutoff && dist < bestDist)
+				{
+					bestDist = dist;
+					mTexCoordArrayIndex = f->mIndices[j];
+				}				
+			}
+		}
+	}
+
+	((mTexCoordArrayIndex == INDEX_INVALID) ? 
+	 freyja_print("No UVs selected!") : 
+	 freyja_print("Selected UV[%i]", mTexCoordArrayIndex));
+}
 
 
 ////////////////////////////////////////////////////////////

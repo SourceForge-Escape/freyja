@@ -886,9 +886,9 @@ void mgtk_event_update_gtk_tree_generic(GtkTreeView *gtktree, mgtk_tree_t *tree,
 	unsigned int i;
 	
 	
-	if (!tree)
+	if (!tree || !gtktree)
 		return;
-	
+
 #ifdef DEBUG_UPDATE_GTK_TREE
 	mgtk_print("mgtk_event_update_gtk_tree_generic %d::\n", tree->id);
 #endif

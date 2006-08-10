@@ -350,9 +350,6 @@
 						(label "Current Group #" 0.0 0.5) 
 						(spinbutton 0 0 500 eGroupIterator))
 					(hbox 1 0 0 1 0
-						(label "Current Bone #" 0.0 0.5) 
-						(spinbutton 0 0 100 eBoneIterator))
-					(hbox 1 0 0 1 0
 						(label "Current Face #" 0.0 0.5) 
 						(spinbutton 0 0 500 ePolygonIterator))
 
@@ -421,11 +418,17 @@
 						(label "KeyFrame #" 0.0 0.5) 
 						(spinbutton 0 0 500 eGroupIterator))
 
-					(hbox 1 0 0 1 0
-						(label "Bone Name: " 0.0 0.5) 
+
+
+; (hbox homogenous spacing expand fill pading ...)
+					;; Bone attribute editor
+					(hbox 0 0 0 1 0
+						(hbox 1 0 0 1 0
+							(label "Bone: " 0.0 0.5))
+						(spinbutton 0 0 100 eBoneIterator)
 						(textbox eSetCurrentBoneName))
 
-					(animation_tab_hack)
+					(animation_tab_hack eBoneIterator eSetCurrentBoneName)
 
 			)  ;; end tab
 

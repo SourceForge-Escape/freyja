@@ -678,6 +678,9 @@ private:
 					 freyjaGetCount(FREYJA_VERTEX));
 	}
 
+	void TexCoordSelect(vec_t u, vec_t v);
+	index_t mTexCoordArrayIndex;
+
 	void SetBoneRotation(float x, float y, float z)
 	{
 		vec3_t xyz = {HEL_DEG_TO_RAD(x), HEL_DEG_TO_RAD(y), HEL_DEG_TO_RAD(z)};

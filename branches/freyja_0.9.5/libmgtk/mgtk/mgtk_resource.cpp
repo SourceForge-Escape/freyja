@@ -2244,6 +2244,60 @@ void mgtk_resource_rebuild_treeview(GtkTreeModel *model)
 	}
 }
 
+void mgtk_tree_cell_edited_callback (GtkCellRendererText *cell,
+									 gchar               *path_string,
+									 gchar               *new_text,
+									 gpointer             userdata)
+{
+	mgtk_print("!Event %i: %s\n", GPOINTER_TO_INT(userdata), new_text);
+	mgtk_handle_text(GPOINTER_TO_INT(userdata), new_text);
+}
+
+
+
+gboolean mgtk_GtkTreeSelectionFunc(GtkTreeSelection *selection,
+								   GtkTreeModel *model,
+								   GtkTreePath *path,
+								   gboolean path_currently_selected,
+								   gpointer data)
+{
+	mgtk_print("!$$$$$$$$$$$$$\n tree selected\n$$$$$$$$$$$$$$$$\n");
+
+	return TRUE;
+}
+
+
+void  mgtk_treeview_onRowActivated (GtkTreeView        *treeview,
+						   GtkTreePath        *path,
+						   GtkTreeViewColumn  *col,
+						   gpointer            userdata)
+{
+	GtkTreeModel *model;
+	GtkTreeIter   iter;
+	
+    g_print ("A row has been double-clicked!\n");
+	
+    model = gtk_tree_view_get_model(treeview);
+	
+    if (gtk_tree_model_get_iter(model, &iter, path))
+    {
+		gchar *name;
+		gint id;
+
+		gtk_tree_model_get(model, &iter, 
+						   NAME_COLUMN, &name, 
+						   ID_COLUMN, &id,
+						   -1);
+
+		mgtk_print("!Event %i: Selected row { %s, %i }\n", GPOINTER_TO_INT(userdata), name, id);
+
+		mgtk_handle_event1u(GPOINTER_TO_INT(userdata), id);
+
+		g_free(name);
+	}
+}
+
+
 
 /* Mongoose 2002.01.24,
  * Tree widget should be factored out for general widget use */
@@ -2267,6 +2321,25 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 		return NULL;
 	}
 
+
+	// Read in an event id
+	arg_list_t *event = symbol();
+	arg_enforce_type(&event, INT);
+	if (!event)
+	{
+		rc_assertion_error("animation_tab_hack", "event == INT");
+		return NULL;
+	}
+
+	arg_list_t *event2 = symbol();
+	arg_enforce_type(&event2, INT);
+	if (!event2)
+	{
+		rc_assertion_error("animation_tab_hack", "event2 == INT");
+		return NULL;
+	}	
+
+
 	ret = NULL;
 
 	box = (GtkWidget *)container->data;
@@ -2284,6 +2357,15 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 	view = gtk_tree_view_new();	
 	SKELETON_TREEVIEW = GTK_TREE_VIEW(view);
 
+	g_signal_connect(view, "row-activated", (GCallback)mgtk_treeview_onRowActivated, GINT_TO_POINTER(get_int(event)));
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+	if (selection)
+	{
+		gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
+		gtk_tree_selection_set_select_function(selection, mgtk_GtkTreeSelectionFunc, GINT_TO_POINTER(get_int(event)), NULL);
+	}
+
 	/* Column "Name" */
 	col = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title(col, "Name");
@@ -2291,6 +2373,8 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(col, renderer, TRUE);
 	gtk_tree_view_column_add_attribute(col, renderer, "text", NAME_COLUMN);
+	g_object_set(renderer, "editable", TRUE, NULL);
+	g_signal_connect(renderer, "edited", (GCallback)mgtk_tree_cell_edited_callback, GINT_TO_POINTER(get_int(event2)));
 
 	/* Column "Id" */
 	col = gtk_tree_view_column_new();
@@ -2339,6 +2423,9 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 	gtk_box_pack_start(GTK_BOX(box), scroll, FALSE, FALSE, FALSE);
 	gtk_container_add(GTK_CONTAINER(scroll), view);
 #endif
+
+	delete_arg(&event);
+	delete_arg(&event2);
 
 	return ret;
 }
