@@ -728,13 +728,13 @@ void mglDrawSphere(int numMajor, int numMinor, float radius)
 			x = cos(c);
 			y = sin(c);
 			
-			glNormal3f((x * r0) / radius, (y * r0) / radius, z0 / radius);
+			glNormal3f((x * r0) / radius, z0 / radius, (y * r0) / radius);
 			glTexCoord2f(j / (GLfloat) numMinor, i / (GLfloat) numMajor);
-			glVertex3f(x * r0, y * r0, z0);
+			glVertex3f(x * r0, z0, y * r0);
 			
-			glNormal3f((x * r1) / radius, (y * r1) / radius, z1 / radius);
+			glNormal3f((x * r1) / radius, z1 / radius, (y * r1) / radius);
 			glTexCoord2f(j / (GLfloat) numMinor, (i + 1) / (GLfloat) numMajor);
-			glVertex3f(x * r1, y * r1, z1);
+			glVertex3f(x * r1, z1, y * r1);
 		}
 		
 		glEnd();

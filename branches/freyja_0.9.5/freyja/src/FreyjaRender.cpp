@@ -1567,9 +1567,11 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glPopMatrix();
 #else
 	/* Cast light on sphere colored/detailed by material */
+	static vec_t dy = 0.0f;
+	dy += 0.5f;
+	if (dy > 360.0f) dy = 0.0f;
 	glPushMatrix();
-	glRotatef(90.0f, 1, 0, 0);
-	glRotatef(180.0f, 0, 1, 0);
+	glRotatef(dy, 0, 1, 0);
 	mglApplyMaterial(freyjaGetCurrentMaterial());
 	mglDrawSphere(128, 128, 10.0);
 	glPopMatrix();
