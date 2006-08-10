@@ -36,6 +36,9 @@
 
 #include <mstl/Vector.h>
 
+
+using namespace mstl;
+
 //#define NIF4_DUMP_OBJ
 #define NIF4_HEADER_START "NetImmerse File Format, Version 4.0.0.2"
 
