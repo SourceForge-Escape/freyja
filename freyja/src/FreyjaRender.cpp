@@ -762,18 +762,38 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				(vertex->mFlags & Vertex::fSelected) ?
 				glColor3fv(mColorVertexHighlight) :
 				glColor3fv(mColorVertex);
-#if 0
-				m->GetVertexPos(i, v.mVec);
-				glVertex3fv(v.mVec);
-#else
 				glVertex3fv(array+vertex->mVertexIndex*3);
-#endif
 			}
 		}
 
 		glEnd();
 	}
 
+	if (mRenderMode & RENDER_NORMALS)
+	{
+		Vertex *vertex;
+		Vec3 v, n;
+
+		glBegin(GL_LINES);
+		glColor3fv(mColorVertexHighlight);
+			
+		for (uint32 i = 0; i < m->GetVertexCount(); ++i)
+		{
+			vertex = m->GetVertex(i);
+
+			if (vertex)
+			{
+				// FIXME: later this will use vertex/face remapped index
+				m->GetVertexPos(i, v.mVec);
+				m->GetNormal(i, n.mVec);
+				n = v + (n*3.0f);
+				glVertex3fv(v.mVec);
+				glVertex3fv(n.mVec);
+			}
+		}
+
+		glEnd();
+	}
 
 	// Render wireframe faces	
 	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)

@@ -71,9 +71,10 @@ public:
 		mVertexIndex(vertex),
 		mTexCoordIndex(texcoord),    
 		mNormalIndex(normal),
-		mColor(INDEX_INVALID),      
+		//mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
-		mPolygonReference(INDEX_INVALID)
+		//mPolygonReference(INDEX_INVALID)
+		mPolyRefIndices()
 	{
 	}
 
@@ -82,9 +83,10 @@ public:
 		mVertexIndex(INDEX_INVALID),
 		mTexCoordIndex(INDEX_INVALID),    
 		mNormalIndex(INDEX_INVALID),
-		mColor(INDEX_INVALID),      
+		//mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
-		mPolygonReference(INDEX_INVALID)
+		//mPolygonReference(INDEX_INVALID)
+		mPolyRefIndices()
 	{
 	}
 
@@ -106,9 +108,9 @@ public:
 		w.writeLong(mVertexIndex);
 		w.writeLong(mTexCoordIndex);
 		w.writeLong(mNormalIndex);
-		w.writeLong(mColor);
+		//w.writeLong(mColor);
 		w.writeLong(mMaterial);
-		w.writeLong(mPolygonReference);
+		//w.writeLong(mPolygonReference);
 
 		return true; 
 	}
@@ -121,11 +123,13 @@ public:
 
 	index_t mNormalIndex; 		// Pool storage of XYZ normal
 
-	index_t mColor;       		// Pool storage of color
+	//index_t mColor;       		// Pool storage of color
 
 	index_t mMaterial;          // Material index
 	
-	index_t mPolygonReference;  // PolygonReference index
+	//index_t mPolygonReference;  // PolygonReference index
+
+	Vector<index_t> mPolyRefIndices;
 };
 
 
