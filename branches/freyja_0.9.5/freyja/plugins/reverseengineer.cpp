@@ -307,7 +307,7 @@ void eReverseEngineerFilename(char *filename)
 	if (gReverseEngineerFilename)
 		delete [] gReverseEngineerFilename;
 
-	gReverseEngineerFilename = String::strdup(filename);
+	gReverseEngineerFilename = String::Strdup(filename);
 }
 
 
@@ -316,7 +316,7 @@ void eReverseEngineerVString(char *s)
 	if (gReverseEngineerVString)
 		delete [] gReverseEngineerVString;
 
-	gReverseEngineerVString = String::strdup(s);
+	gReverseEngineerVString = String::Strdup(s);
 }
 
 
@@ -343,7 +343,7 @@ void eReverseEngineerFString(char *s)
 	if (gReverseEngineerFString)
 		delete [] gReverseEngineerFString;
 
-	gReverseEngineerFString = String::strdup(s);
+	gReverseEngineerFString = String::Strdup(s);
 }
 
 

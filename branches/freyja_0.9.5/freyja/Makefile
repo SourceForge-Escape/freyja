@@ -362,7 +362,7 @@ Material.test:
 ################################################################
 # Plugins
 ################################################################
-PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins $(LOCAL_INCLUDES)
+PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins $(BASE_CFLAGS) $(LOCAL_INCLUDES)
 PLUGIN_LD_FLAGS=-lm -ldl $(LOCAL_LIBS) -lfreyja -lhel0 -lmgtk -lstdc++ -shared -fPIC -ldl -rdynamic 
 PLUGIN_LD_FLAGS += --warn-unresolved-symbols -Wl
 #PLUGIN_LD_FLAGS += -z defs

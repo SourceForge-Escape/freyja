@@ -178,7 +178,7 @@ void eL2ExtractFilename(char *s)
 	if (gL2ExtractFilename)
 		delete [] gL2ExtractFilename;
 
-	gL2ExtractFilename = String::strdup(s);
+	gL2ExtractFilename = String::Strdup(s);
 }
 
 
@@ -187,7 +187,7 @@ void eL2ExtractOut(char *s)
 	if (gL2ExtractOut)
 		delete [] gL2ExtractOut;
 
-	gL2ExtractOut= String::strdup(s);
+	gL2ExtractOut= String::Strdup(s);
 }
 
 

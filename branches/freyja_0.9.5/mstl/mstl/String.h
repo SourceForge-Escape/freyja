@@ -28,6 +28,7 @@
 #define GUARD__MSTL_MONGOOSE_STRING_H_
 
 #include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 
 #ifdef WIN32
