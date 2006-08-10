@@ -710,6 +710,21 @@ public:
 	}
 
 
+	void TransformTexCoords(Matrix &mat)
+	{
+		TripleVec_Transform(mTexCoordPool, mat);
+	}
+
+	void TransformNormals(Matrix &mat)
+	{
+		TripleVec_Transform(mNormalPool, mat);
+	}
+
+	void TransformVertices(Matrix &mat)
+	{
+		TripleVec_Transform(mVertexPool, mat);
+	}
+
 	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
 	{
 		Vertex **array = mVertices.getVectorArray();

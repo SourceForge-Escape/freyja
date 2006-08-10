@@ -260,6 +260,24 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 
 	switch (action)
 	{
+	case fRotate:
+		{
+			Matrix r;
+			r.rotate(xyz);
+			mesh->TransformVertices(r);
+			r.invert();
+			mesh->TransformNormals(r);
+		}
+		break;
+
+	case fScale:
+		{
+			Matrix s;
+			s.scale(xyz);
+			mesh->TransformVertices(s);
+		}
+		break;
+
 	case fTranslate:
 		{
 			Vec3 origin = mesh->GetPosition();
