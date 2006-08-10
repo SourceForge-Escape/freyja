@@ -655,6 +655,10 @@ void Ase::readModelData(FILE *f)
 
 #ifdef FREYJA_PLUGINS
 #include <freyja/FreyjaPlugin.h>
+#include <mstl/Map.h>
+
+using namespace mstl;
+
 
 extern "C" {
 
@@ -799,7 +803,7 @@ int freyja_model__ase_export(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
 	index_t face, vert, tex;
-	float st[2];
+	//float st[2];
 	int v, t, texel;
 	Ase ase;
 	
