@@ -51,11 +51,8 @@ SRC_DIR=.
 ################################################################
 
 CC=gcc
-DEPS=../../deps.sh
-CROSS_WIN32=/home/mongoose/Projects/win32
-CROSS_INC=$(CROSS_WIN32)/include
-CROSS_LIB=$(CROSS_WIN32)/lib
-CROSS_BIN=$(CROSS_WIN32)/bin
+DEPS=../../../deps.sh
+-include ../../../../win32.env
 
 
 ################################################################
@@ -95,6 +92,8 @@ SDLUNIT_LDFLAGS=$(shell sdl-config --libs) -lSDL_ttf -lGL -lGLU \
 SDLUNIT_OBJS=$(BUILD_TEST_DIR)/SDLUnitTest.o
 
 
+-include ../../../freyja.env
+
 ################################################################
 # Build rules
 ################################################################
@@ -132,9 +131,9 @@ win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
 	SHLIBEXT=".dll" \
-	CC="$(WIN32_CC)" \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP)  \
+	LD=$(WIN32_LD)  \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
@@ -199,7 +198,7 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) targets NAME=ase SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
-	PROG_OBJS="$(BUILD_TEST_DIR)/jpg.o" \
+	PROG_OBJS="$(BUILD_TEST_DIR)/jpeg.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_JPEG $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
@@ -207,7 +206,7 @@ $(NAME).so:
 	@-mkdir -p $(MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) targets BUILDDIR=$(MODEL_PLUGIN_BUILD_DIR) \
 	MOD_NAME=ase \
-	PROG_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/jpg.o" \
+	PROG_OBJS="$(MODEL_PLUGIN_BUILD_DIR)/jpeg.o" \
 	CFLAGS="$(MODULE_CFLAGS)" \
 	LD_FLAGS="$(MODULE_LD_FLAGS)"
 
@@ -215,7 +214,7 @@ $(NAME).dll:
 	@-mkdir -p $(WIN32_MODEL_PLUGIN_BUILD_DIR)
 	$(MAKE) targets BUILDDIR=$(WIN32_MODEL_PLUGIN_BUILD_DIR) \
 	SHLIBEXT=".dll" \
-	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/jpg.o" \
+	PROG_OBJS="$(WIN32_MODEL_PLUGIN_BUILD_DIR)/jpeg.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \

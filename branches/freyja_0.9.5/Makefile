@@ -42,6 +42,31 @@ win32:
 	@-printf "       * Make sure you have a complete glext.h header\n"
 
 
+WIN32_BUNDLE_DIR=bin/freyja-win32
+WIN32_MODEL_MOD_DIR=bin/freyja-win32/modules/model
+WIN32_IMAGE_MOD_DIR=bin/freyja-win32/modules/image
+win32-bundle:
+	@-printf "Building win32 bundle...\n"
+	mkdir -p $(WIN32_BUNDLE_DIR)
+	cp freyja/data/freyja-dev.mlisp $(WIN32_BUNDLE_DIR)
+	cp freyja/data/freyja.ico $(WIN32_BUNDLE_DIR)
+	cp freyja/data/freyja.lnk $(WIN32_BUNDLE_DIR)
+	mkdir -p $(WIN32_BUNDLE_DIR)/icons
+	cp freyja/data/icons/*.png $(WIN32_BUNDLE_DIR)/icons
+	mkdir -p $(WIN32_BUNDLE_DIR)/materials
+	cp freyja/data/materials/*.mat $(WIN32_BUNDLE_DIR)/materials
+	mkdir -p $(WIN32_BUNDLE_DIR)/palettes
+	cp freyja/data/palettes/*.pal $(WIN32_BUNDLE_DIR)/palettes
+	cp bin/freyja/win32/freyja.exe $(WIN32_BUNDLE_DIR)
+	mkdir -p $(WIN32_MODEL_MOD_DIR)
+	cp bin/plugins/model/*/win32/*.dll $(WIN32_MODEL_MOD_DIR)
+	mkdir -p $(WIN32_IMAGE_MOD_DIR)
+	cp bin/plugins/image/win32/*.dll $(WIN32_IMAGE_MOD_DIR)
+	cp bin/libfreyja/win32/freyja9.dll $(WIN32_BUNDLE_DIR)
+	cp bin/libmgtk/win32/mgtk1.dll $(WIN32_BUNDLE_DIR)
+	cp bin/libhel/win32/hel0.dll $(WIN32_BUNDLE_DIR)
+
+
 clean:
 	@-echo -n "Cleaning emacs files                         "
 	@-rm -f `find . -name "*~" -print`
