@@ -92,6 +92,8 @@ SDLUNIT_LDFLAGS=$(shell sdl-config --libs) -lSDL_ttf -lGL -lGLU \
 SDLUNIT_OBJS=$(BUILD_TEST_DIR)/SDLUnitTest.o
 
 
+-include ../../../freyja.env
+
 ################################################################
 # Build rules
 ################################################################
@@ -129,9 +131,9 @@ win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
 	SHLIBEXT=".dll" \
-	CC="$(WIN32_CC)" \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP)  \
+	LD=$(WIN32_LD)  \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"

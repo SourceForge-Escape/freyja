@@ -18,8 +18,9 @@
  * Mongoose - Created, header spec from docs
  ==========================================================================*/
 
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -58,7 +59,7 @@ int import_image(char *filename, unsigned char **image,
 					  unsigned int *w, unsigned int *h, 
 					  char *type)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	bmp_header_t header;
 	bmp_desc_header_t desc;
 	unsigned int i, j, byte_size;
@@ -66,17 +67,17 @@ int import_image(char *filename, unsigned char **image,
 	bool flip = true;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 	{
-		printf("File '%s' couldn't be accessed.", filename);
+		SystemIO::Print("File '%s' couldn't be accessed.", filename);
 		return -1;
 	}
 
 	/* Read file header */
-	header.magic = r.readInt16U();
-	header.file_size = r.readInt32U();
-	header.reserved = r.readInt32U();
-	header.data_offset = r.readInt32U();
+	header.magic = r.ReadInt16U();
+	header.file_size = r.ReadInt32U();
+	header.reserved = r.ReadInt32U();
+	header.data_offset = r.ReadInt32U();
 
 	if (header.magic != 0x4D42)
 	{
@@ -84,17 +85,17 @@ int import_image(char *filename, unsigned char **image,
 	}
 
 	/* Read bitmap desc */
-	desc.header_size = r.readInt32U();
-	desc.width = r.readInt32();
-	desc.height = r.readInt32();
-	desc.planes = r.readInt16U();
-	desc.bpp = r.readInt16U();
-	desc.compression = r.readInt32U();
-	desc.data_size = r.readInt32U();
-	desc.x_ppm = r.readInt32();
-	desc.y_ppm = r.readInt32();
-	desc.n_colors = r.readInt32U();
-	desc.n_important_colors = r.readInt32U();
+	desc.header_size = r.ReadInt32U();
+	desc.width = r.ReadInt32();
+	desc.height = r.ReadInt32();
+	desc.planes = r.ReadInt16U();
+	desc.bpp = r.ReadInt16U();
+	desc.compression = r.ReadInt32U();
+	desc.data_size = r.ReadInt32U();
+	desc.x_ppm = r.ReadInt32();
+	desc.y_ppm = r.ReadInt32();
+	desc.n_colors = r.ReadInt32U();
+	desc.n_important_colors = r.ReadInt32U();
 	
 	if (desc.data_size == 0)
 		return -3;
@@ -108,7 +109,7 @@ int import_image(char *filename, unsigned char **image,
 	*h = desc.height;
 	*type = desc.bpp/8;
 	*image = new unsigned char[byte_size];
-	r.readBufferUnsignedChar(byte_size, *image);
+	r.ReadBuffer(byte_size, *image);
 
 	/* Swap color */
 	for (i = 0; i < byte_size; i += 3)
