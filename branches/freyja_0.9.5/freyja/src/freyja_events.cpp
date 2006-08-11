@@ -27,8 +27,6 @@
 #   include <freyja/FreyjaPluginABI.h>
 #endif
 
-#include <mgtk/mgtk_events.h>
-#include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/FreyjaFileReader.h>
@@ -36,6 +34,10 @@
 
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
+
+#include <mgtk/mgtk_events.h>
+#include <mgtk/ResourceEvent.h>
+
 #include "freyja_events.h"
 
 

@@ -23,6 +23,8 @@
  *
  ==========================================================================*/
 
+#include "FreyjaOpenGL.h" // includes <windows.h>
+
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,13 +34,14 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+
 #include <mgtk/ResourceEvent.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
 
+
 #include "freyja_events.h"
-#include "FreyjaOpenGL.h"
 #include "FreyjaControl.h"
 
 #include "FreyjaRender.h"

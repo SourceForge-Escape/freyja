@@ -87,13 +87,14 @@ FLAGS_DEB=-s
 # Compiler flags
 ################################################################
 
-BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) $(LOCAL_INCLUDES) \
+BASE_CFLAGS=-Wall -I. -I$(SRC_DIR) $(LOCAL_INCLUDES) \
 	$(CONFIGURE_DEF) \
 	-DPLUGIN_IMAGE_DIR=\"\\\"$(INSTALL_PLUGIN_DIR)/image\\\"\" \
 	-DVERSION=\"\\\"$(VERSION)-$(BUILD_ID)\\\"\" \
 	-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
-	$(BASE_DEFS)
+	$(BASE_DEFS) \
+	-fPIC
 
 BASE_CFLAGS += -Weffc++ -std=c++98
 #BASE_CFLAGS += -pedantic
@@ -151,15 +152,15 @@ release:
 win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	NAME="freyja9" \
 	MODULE="freyja9" \
+	NAME="freyja9" \
 	SHLIBEXT=".dll" \
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
-	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
-	LD_FLAGS="$(LOCAL_LIBS) $(CONFIGURE_LNK) -lm" \
-	LIBS="-lstdc++ -lm $(LOCAL_WIN32_LIBS) $(WIN32_LIB_DIR) $(WIN32_LIBHEL)"
+	CFLAGS="-DWIN32 $(DEBUG_CFLAGS) $(WIN32_INC_DIR) " \
+	LD_FLAGS="$(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) " \
+	LIBS="$(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) -lstdc++ -lm $(WIN32_LIBHEL)"
 
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)

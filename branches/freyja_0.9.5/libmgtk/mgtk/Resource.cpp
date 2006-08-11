@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "Resource.h"
 
+
 #define MULTI_EVAL
 //#define DEBUG_RESOURCE_EXE
 //#define DEBUG_RESOURCE_SYMBOL
@@ -41,6 +42,7 @@ int resourceGetEventId1s(const char *name)
 
 
 /// Arg list /////////////////////////////////////////////////////////
+
 
 void new_func(arg_list_t **a, arg_list_t *(*f)(arg_list_t *), char *s)
 {

@@ -19,6 +19,7 @@
  * Mongoose - Created, Split from Bone.cpp
  ==========================================================================*/
 
+#include <math.h>
 #include "Mesh.h"
 #include "MeshABI.h"
 #include "FreyjaPluginABI.h"
@@ -831,12 +832,6 @@ void freyjaGetMeshName1s(index_t meshIndex, int32 lenght, char *name)
 }
 
 
-void freyjaPolygonTexCoordPurge(index_t polygonIndex)
-{
-	BUG_ME("Not Implemented");
-}
-
-
 void freyjaGetMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz)
 {
 	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
@@ -1512,6 +1507,172 @@ void freyjaMeshNormalFlip(index_t meshIndex)
 		mesh->SetNormal(n, normal.mVec);
 	}
 }
+
+
+
+void freyjaMeshUVMapPlanar(index_t meshIndex)
+{
+	uint32 i, vertexCount;
+	index_t vertexIndex;
+	vec3_t xyz;
+	vec2_t uv;
+
+
+	vertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		freyjaGenerateUVFromXYZ(xyz, uv+0, uv+1);
+		freyjaVertexTexCoord2fv(vertexIndex, uv);
+	}
+}
+
+
+void freyjaMeshUVMapSpherical(index_t meshIndex)
+{
+	int32 i, vertexCount, vertexIndex;
+	vec_t longitude, latitude;
+	vec3_t xyz;
+	vec3_t uv;
+
+
+	vertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+		longitude = atan2((float)-xyz[0], xyz[2]);
+		latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+
+		longitude = 1.0 - longitude / (HEL_2_PI);
+		latitude = fabs(0.5 - latitude / HEL_PI);
+
+		uv[0] = longitude - floor(longitude);
+		uv[1] = latitude;
+
+		freyjaVertexTexCoord2fv(vertexIndex, uv);
+	}
+}
+
+
+void freyjaMeshUVMapCylindrical(index_t meshIndex)
+{
+	int32 i, j, vertexCount, vertexIndex;
+	vec_t longitude, latitude, ysize;
+	vec3_t xyz;
+	vec3_t min = {999999.0f, 999999.0f, 999999.0f};
+	vec3_t max = {-999999.0f, -999999.0f, -999999.0f};
+	vec2_t uv;
+	
+
+	vertexCount = freyjaGetMeshVertexCount(meshIndex);
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+		for (j = 0; j < 3; ++j)
+		{
+			if (xyz[j] < min[j])
+				min[j] = xyz[j];
+
+			if (xyz[j] > max[j])
+				max[j] = xyz[j];
+		}
+	}
+
+	if (max[1] >= 0)
+	{
+		if (min[1] >= 0)
+		{
+			ysize = max[1] - min[1];
+		}
+		else
+		{
+			ysize = max[1] + -min[1];
+		}
+	}
+	else
+	{
+		ysize = -max[1] + min[1];
+	}
+
+	if (ysize < 0.0001 && ysize > -0.0001)
+		ysize = 1.0f;
+
+    for (i = 0; i < vertexCount; ++i)
+    {
+		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+
+		longitude = atan2((float)-xyz[0], xyz[2]);
+		latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+
+		longitude = 1.0 - longitude / (HEL_2_PI);
+		latitude = fabs(0.5 - latitude / HEL_PI);
+
+		uv[0] = longitude - floor(longitude);
+		uv[1] = xyz[1] / ysize;
+
+		freyjaVertexTexCoord2fv(vertexIndex, uv);
+	}
+}
+
+
+void freyjaPolygonTexCoordPurge(index_t polygonIndex)
+{
+	//Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	//	if (!mesh)
+	//	return;
+
+	BUG_ME("Not Implemented");
+}
+
+
+void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex)
+{
+	vec2_t uv;
+	int32 i, j, k, vertexCount, vertexIndex, texcoordIndex, polygonIndex, polygonCount;
+
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+    for (i = 0; i < polygonCount; ++i)
+    {
+		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
+		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+		for (j = 0; j < vertexCount; ++j)
+		{
+			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+
+			// NOTE: I just update all UV -> polymapp to avoid corrupt 
+			//       'texture faces' eg not completely polymapped
+			freyjaPolygonTexCoordPurge(polygonIndex);
+
+			for (k = 0; k < vertexCount; ++k) 
+			{
+				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
+
+				texcoordIndex = freyjaTexCoordCreate2fv(uv);
+				freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
+			}
+		}
+	}
+}
+
+
+
+
 
 
 
