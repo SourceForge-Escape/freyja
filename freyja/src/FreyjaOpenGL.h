@@ -30,6 +30,8 @@
 #      include <OpenGL/gl.h>
 #      include <OpenGL/glu.h>
 #   elif WIN32
+#      include <GL/gl.h>
+#      include <GL/glu.h>
 #      include <GL/glext.h>
 #      include <windows.h>
 #      include <wingdi.h>

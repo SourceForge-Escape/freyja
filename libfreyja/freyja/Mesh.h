@@ -178,14 +178,49 @@ public:
 	{
 	}
 
-	void rotate(vec_t x, vec_t y, vec_t z);
 
-	void scale(vec_t x, vec_t y, vec_t z);
+	void PurgePolyMappedTexCoords()
+	{
+		mFlags |= fPolyMappedTexCoords;
+		mFlags ^= fPolyMappedTexCoords;
+		mTexCoordIndices.clear();
+	}
 
-	void translate(vec_t x, vec_t y, vec_t z);
 
-	static size_t SerializedSize() { return 0; }
-	bool Serialize(FreyjaFileWriter &w) { return true; }
+	void AppendNormal(index_t idx)
+	{
+		mFlags |= fPolyMappedNormals;
+		mNormalsIndices.pushBack(idx);
+	}
+
+
+	void AppendTexCoord(index_t idx)
+	{
+		mFlags |= fPolyMappedTexCoords;
+		mTexCoordIndices.pushBack(idx);
+	}
+
+
+	void AppendVertex(index_t idx)
+	{
+		// FIXME: Now you should append this Face's id to the vertex's polyref
+		// FIXME: Might want to cache edge map too
+		mIndices.pushBack(idx);
+	}
+
+
+	void Rotate(vec_t x, vec_t y, vec_t z);
+
+	void Scale(vec_t x, vec_t y, vec_t z);
+
+	void Translate(vec_t x, vec_t y, vec_t z);
+
+	static size_t SerializedSize() 
+	{
+		return 0; 
+	}
+
+	bool Serialize(FreyjaFileWriter &w) { return false; }
 
 	index_t mMaterial;
 	byte mFlags;

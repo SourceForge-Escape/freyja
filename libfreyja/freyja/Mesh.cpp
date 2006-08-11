@@ -194,10 +194,15 @@ Vertex *Mesh::GetVertex(index_t vertexIndex)
 Vector3d Mesh::GetVertexPosition(index_t idx)
 {
 	Vector3d v;
-	Vertex *vert = mVertices[idx];
-	if ( vert ) 
+
+	if (idx < mVertices.size())
 	{
-		GetVertexArrayPos(vert->mVertexIndex, v.mVec);
+		Vertex *vert = mVertices[idx];
+
+		if ( vert ) 
+		{
+			GetVertexArrayPos(vert->mVertexIndex, v.mVec);
+		}
 	}
 
 	return v;

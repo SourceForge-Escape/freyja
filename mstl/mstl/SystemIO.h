@@ -34,7 +34,9 @@
 #ifdef WIN32
 #   include <windows.h>
 #   include <winbase.h> // Required for Sleep()
-#   include <libgen.h>  // Required for Basename()
+//#   include <libgen.h>  // Required for Basename()
+#else // UNIX is default system
+#   include <dlfcn.h>
 #endif
 
 // Some very old byte swapping routines
@@ -143,6 +145,50 @@ class SystemIO
 				closedir(mDirectory);
 				mDirectory = NULL;
 			}
+		}
+
+
+		// This could greatly improve, but for now perserve the old freyja func
+		static int CompareFilenameExtention(const char *filename, const char *ext)
+		{
+			unsigned int len_f, len_e;
+ 
+	
+			/* Check for null or blank input strings */
+			if (!filename || !filename[0] || !ext || !ext[0])
+			{
+				return -1;
+			}
+
+			len_f = strlen(filename) - 1;
+			len_e = strlen(ext) - 1;
+	
+			while (len_f+1 && len_e+1)
+			{
+				//printf("extcheck: %c %c\n", filename[len_f], ext[len_e]);
+		
+				if (filename[len_f] == ext[len_e])
+				{
+					if (ext[len_e] == '.')
+					{
+						//printf("extcheck: match found\n");
+						return 0;
+					}
+				}
+				else if (filename[len_f] < ext[len_e])
+				{
+					return -1;
+				}
+				else if (filename[len_f] > ext[len_e])
+				{
+					return 1;
+				}
+		
+				--len_f;
+				--len_e;
+			}
+			
+			return 1;
 		}
 
 
@@ -734,52 +780,60 @@ class SystemIO
 	class FileWriter : public File
 	{
 	public:
+
 		FileWriter() : File() { }
+
 		~FileWriter() { }
 		
 		bool Open(const char *filename) { return File::Open(filename, "wb"); }
 
 
-		void WriteBuffer(unsigned int length, unsigned char *buffer)
+		bool WriteBuffer(unsigned int length, unsigned char *buffer)
 		{
-			fwrite(buffer, length, 1, mFileHandle);  // heh, yeah
+			return (fwrite(buffer, length, 1, mFileHandle) == 1);  // heh, yeah
 		}
 
 
-		void WriteString(unsigned int length, char *buffer)
+		bool WriteString(unsigned int length, char *buffer)
 		{
-			fwrite(buffer, length, 1, mFileHandle);  // heh, yeah
+			return (fwrite(buffer, length, 1, mFileHandle) == 1);  // heh, yeah
 		}
 
 
-		void WriteInt16Array(long size, short int array[])
+		bool WriteInt16Array(long size, short int array[])
 		{	
+			bool t = false;
 			for (int i = 0; i < size; ++i)
 			{
-				WriteInt16(array[i]);
+				t =WriteInt16(array[i]);
 			}
+			return t;
 		}
 
 
-		void WriteInt32Array(long size, int array[])
+		bool WriteInt32Array(long size, int array[])
 		{	
+			bool t = false;
 			for (int i = 0; i < size; ++i)
 			{
-				WriteInt32(array[i]);
+				t = WriteInt32(array[i]);
 			}
+			return t;
 		}
 
 
-		void WriteFloat32Array(long size, float array[])
-		{	
+		bool WriteFloat32Array(long size, float array[])
+		{
+			bool t = false;
 			for (int i = 0; i < size; ++i)
 			{
-				WriteFloat32(array[i]);
+				t = WriteFloat32(array[i]);
 			}
+			return t;
 		}
 
 
-		void WriteFloat32(float r)
+		bool WriteFloat32(float r)
 		{	
 			void *ptr = &r;
 		#if HAVE_BIG_ENDIAN
@@ -787,24 +841,23 @@ class SystemIO
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to write 32bit float\n");
+			return !(sz < 1);
 		}
 
 
-		void WriteInt8(char c)
+		bool WriteInt8(char c)
 		{
-			fwrite(&c, 1, 1, mFileHandle);
+			return (fwrite(&c, 1, 1, mFileHandle) == 1);
 		}
 
 
-		void WriteInt8U(unsigned char u)
+		bool WriteInt8U(unsigned char u)
 		{
-			fwrite(&u, 1, 1, mFileHandle);  // heh, yeah
+			return (fwrite(&u, 1, 1, mFileHandle) == 1);  // heh, yeah
 		}
 
 
-		void WriteInt16(short i)
+		bool WriteInt16(short i)
 		{
 			void *ptr = &i;
 		#ifdef HAVE_BIG_ENDIAN
@@ -812,12 +865,11 @@ class SystemIO
 		#endif
 			size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to write 16bit int\n");
+			return !(sz < 1);
 		}
 
 			
-		void WriteInt16U(unsigned short u)
+		bool WriteInt16U(unsigned short u)
 		{
 			void *ptr = &u;
 		#ifdef HAVE_BIG_ENDIAN
@@ -825,12 +877,11 @@ class SystemIO
 		#endif
 			size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to read 16bit uint\n");
+			return !(sz < 1);
 		}
 
 
-		void WriteInt32(int i)
+		bool WriteInt32(int i)
 		{
 			void *ptr = &i;
 		#ifdef HAVE_BIG_ENDIAN
@@ -838,12 +889,11 @@ class SystemIO
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to read 32bit int\n");
+			return !(sz < 1);
 		}
 
 
-		void WriteInt32U(unsigned int u)
+		bool WriteInt32U(unsigned int u)
 		{
 			void *ptr = &u;
 		#ifdef HAVE_BIG_ENDIAN
@@ -851,12 +901,11 @@ class SystemIO
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to read 32bit uint\n");
+			return !(sz < 1);
 		}
 
 
-		void WriteLong(long l)
+		bool WriteLong(long l)
 		{
 			void *ptr = &l;
 			size_t sz;
@@ -867,12 +916,11 @@ class SystemIO
 
 			sz = fwrite(ptr, 4, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to read 32bit int\n");
+			return !(sz < 1);
 		}
 
 
-		void WriteLongU(unsigned long ul)
+		bool WriteLongU(unsigned long ul)
 		{
 			void *ptr = &ul;
 		#ifdef HAVE_BIG_ENDIAN
@@ -880,8 +928,7 @@ class SystemIO
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
-			if (sz < 1)
-				printf("FreyjaFileWriter: ERROR failed to read 32bit uint\n");
+			return !(sz < 1);
 		}
 
 	};
@@ -1219,6 +1266,107 @@ class SystemIO
 
 		fprintf(stderr, "%s\n", buffer);
 	}
+
+
+	static void *ImportFunction(void *handle, const char *name)
+	{
+		char *loaderror = 0x0;
+		void *symbol = NULL;
+
+#ifdef WIN32
+		char errbuf[512];
+
+		symbol = (void *)GetProcAddress((HMODULE)handle, name);
+
+		if (symbol == NULL)
+		{
+			FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
+								FORMAT_MESSAGE_FROM_SYSTEM),
+							  NULL, GetLastError(), 
+							  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+							  errbuf, 512, NULL);
+			loaderror = errbuf;
+		}
+
+#else // UNIX is always assumed here, everything else is special case
+
+		symbol = dlsym(handle, name);
+
+		if (symbol == NULL)
+		{
+			loaderror = (char *)dlerror();
+		}
+
+#endif
+
+		if (symbol == NULL)
+		{
+			PrintError("SystemIO failed to import %s: %s\n", name, loaderror);
+		}
+
+		return symbol;
+	}
+
+
+	static void *ModuleLoad(const char *module)
+	{
+		void *handle = NULL;
+		char *loaderror;
+
+#ifdef WIN32
+		char errbuf[512];
+
+		if (File::CompareFilenameExtention(module, ".dll") != 0)
+		{
+			return NULL;
+		}
+
+		handle = (void *)LoadLibrary(module);
+
+		/* Generate an error message if all loads failed */
+		if (handle == NULL) 
+		{
+			FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
+								FORMAT_MESSAGE_FROM_SYSTEM),
+							  NULL, GetLastError(), 
+							  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+							  errbuf, 512, NULL);
+			loaderror = errbuf;
+		}
+#else
+
+		if (File::CompareFilenameExtention(module, ".so") != 0)
+		{
+			return NULL;
+		}
+
+		handle = dlopen(module, RTLD_NOW);
+		loaderror = (char *)dlerror();
+#endif
+
+		if (handle == NULL)
+		{
+			PrintError("SystemIO Failed to load %s: %s\n", module, loaderror);
+		}
+
+		return handle;
+	}
+
+
+	static void ModuleUnload(void *handle)
+	{
+		if (handle == NULL)
+		{
+			return;
+		}
+
+#ifdef WIN32
+		FreeLibrary((HMODULE)handle);
+#else
+		dlclose(handle);
+#endif
+	}
+
 
 
 	////////////////////////////////////////////////////////////

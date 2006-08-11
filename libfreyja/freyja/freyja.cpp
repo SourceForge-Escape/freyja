@@ -19,14 +19,6 @@
  * Mongoose - Created, This is a general library lib util module
  ==========================================================================*/
 
-#if defined (FREYJA_PLUGINS) && !(WIN32)
-#   include <dlfcn.h>
-#endif
-
-#ifdef WIN32
-#   include <windows.h>
-#endif
-
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 #include "FreyjaPrinter.h"

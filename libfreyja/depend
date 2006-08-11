@@ -20,10 +20,10 @@ $(BUILDDIR)/FreyjaUtil.o: freyja/FreyjaUtil.cpp freyja/FreyjaPluginABI.h \
 $(BUILDDIR)/FreyjaPrinter.o: freyja/FreyjaPrinter.cpp freyja/FreyjaPrinter.h
 	 $(DO_CC)
 
-$(BUILDDIR)/FreyjaFSM.o: freyja/FreyjaFSM.cpp freyja/freyja.h freyja/BoneABI.h \
-  freyja/SkeletonABI.h freyja/FreyjaFileReader.h freyja/FreyjaPluginABI.h \
-  freyja/MeshABI.h freyja/FreyjaFSM.h freyja/FreyjaPlugin.h \
-  freyja/FreyjaPrinter.h freyja/Mesh.h freyja/FreyjaFileWriter.h
+$(BUILDDIR)/FreyjaFSM.o: freyja/FreyjaFSM.cpp freyja/freyja.h freyja/Mesh.h \
+  freyja/FreyjaFileWriter.h freyja/FreyjaFileReader.h freyja/BoneABI.h \
+  freyja/SkeletonABI.h freyja/FreyjaPluginABI.h freyja/MeshABI.h \
+  freyja/FreyjaFSM.h freyja/FreyjaPlugin.h freyja/FreyjaPrinter.h
 	 $(DO_CC)
 
 $(BUILDDIR)/KeyFrame.o: freyja/KeyFrame.cpp freyja/KeyFrame.h freyja/freyja.h \
@@ -48,14 +48,16 @@ $(BUILDDIR)/FreyjaMaterial.o: freyja/FreyjaMaterial.cpp freyja/FreyjaPluginABI.h
 
 $(BUILDDIR)/RenderModel.o: freyja/RenderModel.cpp freyja/RenderModel.h \
   freyja/freyja.h freyja/BoneABI.h freyja/FreyjaPluginABI.h \
-  freyja/MeshABI.h freyja/SkeletonABI.h freyja/Mesh.h \
-  freyja/FreyjaFileWriter.h freyja/FreyjaFileReader.h
+  freyja/MeshABI.h freyja/SkeletonABI.h freyja/Mesh.h
 	 $(DO_CC)
 
 $(BUILDDIR)/FreyjaTexture.o: freyja/FreyjaTexture.cpp freyja/FreyjaPluginABI.h \
   freyja/freyja.h freyja/BoneABI.h freyja/MeshABI.h freyja/SkeletonABI.h \
   freyja/FreyjaImage.h freyja/FreyjaTexture.h freyja/FreyjaFileReader.h \
   freyja/FreyjaFileWriter.h
+	 $(DO_CC)
+
+$(BUILDDIR)/Model.o: freyja/Model.cpp freyja/Model.h
 	 $(DO_CC)
 
 $(BUILDDIR)/FreyjaLight.o: freyja/FreyjaLight.cpp freyja/FreyjaLight.h
@@ -110,7 +112,7 @@ $(BUILDDIR)/Mesh.o: freyja/Mesh.cpp freyja/Mesh.h freyja/freyja.h \
 $(BUILDDIR)/freyja.o: freyja/freyja.cpp freyja/FreyjaPrinter.h freyja/FreyjaFSM.h \
   freyja/FreyjaPluginABI.h freyja/freyja.h freyja/BoneABI.h \
   freyja/MeshABI.h freyja/SkeletonABI.h freyja/FreyjaFileReader.h \
-  freyja/FreyjaPlugin.h freyja/Mesh.h freyja/FreyjaFileWriter.h
+  freyja/FreyjaPlugin.h freyja/Mesh.h
 	 $(DO_CC)
 
 $(BUILDDIR)/MeshABI.o: freyja/MeshABI.cpp freyja/Mesh.h freyja/freyja.h \
