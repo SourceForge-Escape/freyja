@@ -1,21 +1,20 @@
 
 
 lazybuild:
-	@-printf "Installing mstl\n"
-	@-cd mstl && make install
+	@-printf "Building libhel\n"
+	@-cd libhel && ./autogen.sh && make
 
-	@-printf "Installing libhel\n"
-	@-cd libhel && ./autogen.sh && make && make install
+	@-printf "Building libfreyja\n"
+	@-cd libfreyja && ./autogen.sh && make
 
-	@-printf "Installing libfreyja\n"
-	@-cd libfreyja && ./autogen.sh && make && make install
-	@-cd libfreyja && make plugins && make install-plugins
+	@-printf "Building libfreyja plugins\n"
+	@-cd plugins && make
 
-	@-printf "Installing libmgtk\n"
-	@-cd libmgtk && ./autogen.sh && make && make install
+	@-printf "Building libmgtk\n"
+	@-cd libmgtk && ./autogen.sh && make
 
-	@-printf "Installing freyja\n"
-	@-cd freyja && ./autogen.sh && make && make plugins && make install
+	@-printf "Building freyja\n"
+	@-cd freyja && ./autogen.sh && make && make plugins
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -24,26 +23,23 @@ lazybuild:
 
 
 win32:
-	@-printf "Installing mstl\n"
-	@-cd mstl && make install
+	@-printf "Building libhel\n"
+	@-cd libhel && ./autogen.sh && make win32
 
-	@-printf "Installing libhel\n"
-	@-cd libhel && ./autogen.sh && make win32 && make install-win32
+	@-printf "Building libfreyja\n"
+	@-cd libfreyja && ./autogen.sh && make win32
 
-	@-printf "Installing libfreyja\n"
-	@-cd libfreyja && ./autogen.sh && make win32 && make install-win32
-	@-cd libfreyja && make plugins-win32 && make install-plugins-win32
+	@-printf "Building libfreyja plugins\n"
+	@-cd plugins && make win32
 
-	@-printf "Installing libmgtk\n"
-	@-cd libmgtk && ./autogen.sh && make win32 && make install-win32
+	@-printf "Building libmgtk\n"
+	@-cd libmgtk && ./autogen.sh && make win32
 
-	@-printf "Installing freyja\n"
-	@-cd freyja && ./autogen.sh && make win32 && make plugins-win32 && make install-win32
+	@-printf "Building freyja\n"
+	@-cd freyja && ./autogen.sh && make win32 && make plugins-win32
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
-	@-printf "       * Look in freyja/Makefile for options to disable\n"
-	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
 
 clean:
