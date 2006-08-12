@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <setjmp.h>
 
-#ifdef LIB_JPEG
+#ifdef HAVE_LIBJPEG
 #   include <jpeglib.h>
 #endif
 
@@ -36,7 +36,7 @@ extern "C" {
 }
 
 
-#ifdef LIB_JPEG
+#ifdef HAVE_LIBJPEG
 int mtk_image__jpeg_check(FILE *f)
 {
 	unsigned char buffer[16];
@@ -84,7 +84,7 @@ void stupid_jpeg_error_exit(j_common_ptr image)
 int import_image(char *filename, unsigned char **imageRET, 
 					  unsigned int *w, unsigned int *h, char *bpp)
 {
-#ifdef LIB_JPEG
+#ifdef HAVE_LIBJPEG
 	struct jpeg_decompress_struct image;
 	struct stupid_jpeg_error_mgr jerr;
 	//JSAMPROW rows[1], bptr;

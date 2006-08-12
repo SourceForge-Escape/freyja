@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#ifdef LIB_PNG
+#ifdef HAVE_LIBPNG
 extern "C" {
 #include <png.h>
 }
@@ -40,7 +40,7 @@ extern "C" {
 
 int check_png(FILE *f)
 {
-#ifdef LIB_PNG
+#ifdef HAVE_LIBPNG
 	char buffer[PNG_BYTES_TO_CHECK];
 
 
@@ -81,7 +81,7 @@ int import_image(char *filename, unsigned char **image,
 					  unsigned int *w, unsigned int *h, 
 					  char *type)
 {
-#ifdef LIB_PNG
+#ifdef HAVE_LIBPNG
 	FILE *f = fopen(filename, "rb");
    int interlace_type, color_type, depth;
    png_uint_32 width, height;

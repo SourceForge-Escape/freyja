@@ -49,7 +49,7 @@ FreyjaMaterial::FreyjaMaterial() :
 	mTextureName(NULL)
 {
 	mName[0] = '\0';
-	setTextureName("No shader");
+	//setTextureName("No shader");
 
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2;
 	mAmbient[3]  = 1.0;
