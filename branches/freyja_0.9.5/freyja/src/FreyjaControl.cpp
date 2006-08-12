@@ -948,7 +948,7 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 	fprintf(f, "[Material]\n");
 	fprintf(f, "Name = \"%s\"\n", name);
 
-	if (freyjaGetMaterialTextureName(matIndex))
+	if (texture && freyjaGetMaterialTextureName(matIndex))
 	{
 		fprintf(f, "TextureName = \"%s\"\n", freyjaGetMaterialTextureName(matIndex));
 	}
@@ -999,8 +999,9 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 			  emissive[0], emissive[1], emissive[2], emissive[3]);
 	fprintf(f, "Shininess = %f\n", shininess);
 
+	// No 'named' texture dump perlin noise
+	if (texture && !freyjaGetMaterialTextureName(matIndex))
 	{
-		char ext[256];
 		int seed = GetResourceInt("ePerlinNoiseSeed");
 		int w = GetResourceInt("ePerlinNoiseW");
 		int h = GetResourceInt("ePerlinNoiseH");
@@ -1013,10 +1014,8 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 		float ar, ab, ag, aa;
 		GetResourceColor("eColorPerlinAdd", ar, ab, ag, aa);
 
-		snprintf(ext, 255, "\n\n[PerlinNoise]\nSeed = %i\nWidth = %i\nHeight = %i\nClamp = %s\niA = %f\niB = %f\nd = %f\nModulateColor = %f, %f, %f\nAddColor = %f, %f, %f", seed, w, h, clamp ? "true" : "false", ia, ib, d, mr, mb, mg, ar, ab, ag);
-		ext[255] = 0;
 
-		fprintf(f, "%s", ext);
+		fprintf(f, "\n\n[PerlinNoise]\nSeed = %i\nWidth = %i\nHeight = %i\nClamp = %s\niA = %f\niB = %f\nd = %f\nModulateColor = %f, %f, %f\nAddColor = %f, %f, %f", seed, w, h, clamp ? "true" : "false", ia, ib, d, mr, mb, mg, ar, ab, ag);
 	}
 
 
