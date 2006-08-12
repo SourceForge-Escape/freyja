@@ -529,11 +529,23 @@ class FreyjaControl
 		return (int)GetResourceFloat(symbol);
 	}
 
+	void SetResourceInt(const char *symbol, int i)
+	{
+		return SetResourceFloat(symbol, i);
+	}
+
 	float GetResourceFloat(const char *symbol)
 	{
 		int event;
 		mResource.Lookup((char*)symbol, &event);
 		return freyja_event_get_float(event);
+	}
+
+	void SetResourceFloat(const char *symbol, float r)
+	{
+		int event;
+		mResource.Lookup((char*)symbol, &event);
+		return freyja_event_set_float(event, r);
 	}
 
 	void GetResourceColor(const char *symbol, 
@@ -542,6 +554,14 @@ class FreyjaControl
 		int event;
 		mResource.Lookup((char*)symbol, &event);
 		freyja_event_get_color(event, r, g, b, a);
+	}
+
+	void SetResourceColor(const char *symbol, 
+						  float r, float g, float b, float a)
+	{
+		int event;
+		mResource.Lookup((char*)symbol, &event);
+		freyja_event_set_color(event, r, g, b, a);
 	}
 
 	static FreyjaControl *mInstance;
