@@ -302,7 +302,7 @@ typedef enum {
 
 #define freyja_event_get_float mgtk_event_get_float
 #define freyja_event_set_range mgtk_event_set_range
-
+#define freyja_event_get_color mgtk_event_get_color
 
 
 void freyja_event_start();       /* Starts up Freyja subsystems */
@@ -416,6 +416,7 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 
 void freyja_event_fileselection_append_pattern(char *label, char *pattern);
 
+void freyja_event_get_color(int colorId, float &r, float &g, float &b, float &a);
 void freyja_event_set_color(int colorId, float r, float g, float b, float a);
 
 void freyja_event_gl_refresh();

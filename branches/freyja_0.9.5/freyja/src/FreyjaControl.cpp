@@ -962,7 +962,7 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 			  (blend_src == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
 
 
-	fprintf(f, "BlendDest=%s\n", 
+	fprintf(f, "BlendDest = %s\n", 
 			  (blend_dest == GL_ZERO) ? "GL_ZERO" :
 			  (blend_dest == GL_ONE) ? "GL_ONE" :
 			  (blend_dest == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
@@ -987,6 +987,27 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 	fprintf(f, "Emissive = %f, %f, %f, %f\n", 
 			  emissive[0], emissive[1], emissive[2], emissive[3]);
 	fprintf(f, "Shininess = %f\n", shininess);
+
+	{
+		char ext[256];
+		int seed = GetResourceInt("ePerlinNoiseSeed");
+		int w = GetResourceInt("ePerlinNoiseW");
+		int h = GetResourceInt("ePerlinNoiseH");
+		int clamp = GetResourceInt("ePerlinNoiseClamp");
+		float ia = GetResourceFloat("ePerlinNoiseIA");
+		float ib = GetResourceFloat("ePerlinNoiseIB");
+		float d = GetResourceFloat("ePerlinNoiseD");
+		float mr, mb, mg, ma;
+		GetResourceColor("eColorPerlinMult", mr, mb, mg, ma);
+		float ar, ab, ag, aa;
+		GetResourceColor("eColorPerlinAdd", ar, ab, ag, aa);
+
+		snprintf(ext, 255, "\n\n[PerlinNoise]\nSeed = %i\nWidth = %i\nHeight = %i\nClamp = %s\niA = %f\niB = %f\nd = %f\nModulateColor = %f, %f, %f\nAddColor = %f, %f, %f", seed, w, h, clamp ? "true" : "false", ia, ib, d, mr, mb, mg, ar, ab, ag);
+		ext[255] = 0;
+
+		fprintf(f, "%s", ext);
+	}
+
 
 	fclose(f);
 
@@ -2927,17 +2948,20 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 void FreyjaControl::PrintInfo()
 {
-	char buf[256];
+	const long bufSz = 511;
+	char buf[bufSz+1];
 
-	snprintf(buf, 255, "Current Model Properties\n Bones    \t%d\n Meshes  \t%d\n Polygons \t%d\n Vertices  \t%d",
+	snprintf(buf, bufSz, 
+			 "Current Model Properties\n Bones    \t%d\n Meshes  \t%d\n Polygons \t%d\n Vertices  \t%d\n",
 			 freyjaGetCount(FREYJA_BONE), 
 			 freyjaGetCount(FREYJA_MESH), 
 			 freyjaGetCount(FREYJA_POLYGON), 
 			 freyjaGetCount(FREYJA_VERTEX));	
-	buf[255] = 0;
+	buf[bufSz] = 0;
 
 	freyja_event_info_dialog("gtk-dialog-info", buf);
 }
+
 
 bool FreyjaControl::motionEvent(int x, int y)
 {

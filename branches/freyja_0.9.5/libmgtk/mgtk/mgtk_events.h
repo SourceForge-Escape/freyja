@@ -74,6 +74,7 @@ int mgtk_create_confirm_dialog(char *dialog_icon,
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 void mgtk_event_fileselection_set_dir(char *dir);
 void mgtk_event_fileselection_append_pattern(char *label, char *pattern);
+void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a);
 void mgtk_event_set_color(int id, float r, float g, float b, float a);
 void mgtk_event_notify_observer1f(unsigned int event, float value);
 void mgtk_event_file_dialog(char *title);

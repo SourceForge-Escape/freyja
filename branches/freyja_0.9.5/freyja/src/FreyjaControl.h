@@ -524,6 +524,26 @@ class FreyjaControl
 	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
 
 
+	int GetResourceInt(const char *symbol)
+	{
+		return (int)GetResourceFloat(symbol);
+	}
+
+	float GetResourceFloat(const char *symbol)
+	{
+		int event;
+		mResource.Lookup((char*)symbol, &event);
+		return freyja_event_get_float(event);
+	}
+
+	void GetResourceColor(const char *symbol, 
+						  float &r, float &g, float &b, float &a)
+	{
+		int event;
+		mResource.Lookup((char*)symbol, &event);
+		freyja_event_get_color(event, r, g, b, a);
+	}
+
 	static FreyjaControl *mInstance;
 
 
