@@ -412,7 +412,7 @@ class FreyjaControl
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void handleFilename(const char *filename);
+	void handleFilename(const char *filename, int eventId);
 	/*------------------------------------------------------
 	 * Pre  : filename is valid and mode was set
 	 * Post : Executes a file operation depending on mode
@@ -669,14 +669,7 @@ private:
 		}
 	}
 
-	void PrintInfo()
-	{
-		freyja_print("%d bones, %d meshes, %d polygons, %d vertices",
-					 freyjaGetCount(FREYJA_BONE), 
-					 freyjaGetCount(FREYJA_MESH), 
-					 freyjaGetCount(FREYJA_POLYGON), 
-					 freyjaGetCount(FREYJA_VERTEX));
-	}
+	void PrintInfo();
 
 	void TexCoordSelect(vec_t u, vec_t v);
 	index_t mTexCoordArrayIndex;
@@ -840,8 +833,6 @@ private:
 	int mUVMouseState;                      /* Mouse state on texture canvas */
 	
 	int mXYZMouseState;                     /* Mouse state on modeler canvas */
-
-	unsigned int mFileDialogMode;
 
 	bool mFullScreen;
 

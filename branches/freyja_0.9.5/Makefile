@@ -65,6 +65,7 @@ win32-bundle:
 	cp bin/libfreyja/win32/freyja9.dll $(WIN32_BUNDLE_DIR)
 	cp bin/libmgtk/win32/mgtk1.dll $(WIN32_BUNDLE_DIR)
 	cp bin/libhel/win32/hel0.dll $(WIN32_BUNDLE_DIR)
+	zip -r freyja-win32.zip  $(WIN32_BUNDLE_DIR) 
 
 
 clean:

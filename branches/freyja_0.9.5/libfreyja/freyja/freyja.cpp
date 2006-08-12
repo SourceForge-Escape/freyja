@@ -69,103 +69,18 @@ void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
 /* Thanks to Sam for the WIN32 module loader example */
 void *freyjaModuleImportFunction(void *handle, const char *name)
 {
-	char *loaderror = 0x0;
-	void *symbol = NULL;
-
-#ifdef WIN32
-	char errbuf[512];
-
-	symbol = (void *)GetProcAddress((HMODULE)handle, name);
-
-	if (symbol == NULL)
-	{
-		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
-					FORMAT_MESSAGE_FROM_SYSTEM),
-				NULL, GetLastError(), 
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf, 512, NULL);
-		loaderror = errbuf;
-	}
-
-#else // UNIX is always assumed here, everything else is special case
-
-	symbol = dlsym(handle, name);
-
-	if (symbol == NULL)
-	{
-		loaderror = (char *)dlerror();
-	}
-
-#endif
-
-	if (symbol == NULL)
-	{
-		freyjaPrintError("Failed to import %s: %s", name, loaderror);
-	}
-
-	return symbol;
+	return SystemIO::ImportFunction(handle, name);
 }
-
 
 void *freyjaModuleLoad(const char *module)
 {
-	void *handle = NULL;
-	char *loaderror;
-
-#ifdef WIN32
-	char errbuf[512];
-
-	if (FreyjaFileReader::compareFilenameExtention(module, ".dll") != 0)
-	{
-		return NULL;
-	}
-
-	handle = (void *)LoadLibrary(module);
-
-	/* Generate an error message if all loads failed */
-	if (handle == NULL) 
-	{
-		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
-					FORMAT_MESSAGE_FROM_SYSTEM),
-				NULL, GetLastError(), 
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf, 512, NULL);
-		loaderror = errbuf;
-	}
-
-#else
-
-	if (FreyjaFileReader::compareFilenameExtention(module, ".so") != 0)
-	{
-		return NULL;
-	}
-
-	handle = dlopen(module, RTLD_NOW);
-	loaderror = (char *)dlerror();
-
-#endif
-
-	if (handle == NULL)
-	{
-		freyjaPrintError("Failed to load %s: %s", module, loaderror);
-	}
-
-	return handle;
+	return SystemIO::ModuleLoad(module);
 }
 
 
 void freyjaModuleUnload(void *handle)
 {
-	if (handle == NULL)
-	{
-		return;
-	}
-
-#ifdef WIN32
-	FreeLibrary((HMODULE)handle);
-#else
-	dlclose(handle);
-#endif
+	SystemIO::ModuleUnload(handle);
 }
 
 

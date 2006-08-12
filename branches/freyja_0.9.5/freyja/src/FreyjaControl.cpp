@@ -75,6 +75,9 @@ FreyjaControl::FreyjaControl() :
 	/* Search local paths first ( mostly debugging ) */
 	freyjaPluginAddDirectory("plugins/model/debug");
 
+	/* Search local paths for things like windows builds */
+	freyjaPluginAddDirectory("modules/model");
+
 	/* Search ~/.freyja/plugins/ second ( first for real path for end users ) */
 	String sPluginDir = freyja_rc_map_string("plugins/");
 	freyjaPluginAddDirectory(sPluginDir.GetCString());
@@ -132,7 +135,6 @@ void FreyjaControl::Init()
 	mLastEvent = eEvent;
 	mLastCommand = eSelect;
 	mFullScreen = false;
-	mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
 
 	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
 	uint32 width = 740;
@@ -1823,16 +1825,14 @@ bool FreyjaControl::event(int command)
 
 
 	case eOpenFileTexture:
-		mFileDialogMode = FREYJA_MODE_LOAD_TEXTURE;
-		freyja_event_file_dialog("Open texture...");
+		freyja_event_file_dialog("Open texture...", FREYJA_MODE_LOAD_TEXTURE);
 		break;
 
 	case eOpenFile:
 		switch (GetControlScheme())
 		{
 		case eScheme_UV:
-			mFileDialogMode = FREYJA_MODE_LOAD_TEXTURE;
-			freyja_event_file_dialog("Open texture...");
+			freyja_event_file_dialog("Open texture...", FREYJA_MODE_LOAD_TEXTURE);
 			break;
 
 		case eScheme_Model:
@@ -1847,20 +1847,18 @@ bool FreyjaControl::event(int command)
 					freyja_print("Closing Model...");
 					freyja_set_main_window_title(BUILD_NAME);
 
-					mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-					freyja_event_file_dialog("Open model...");
+				
+					freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
 				}
 			}
 			else
 			{
-				mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-				freyja_event_file_dialog("Open model...");
+				freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
 			}
 			break;
 
 		case eScheme_Material:
-			mFileDialogMode = FREYJA_MODE_LOAD_MATERIAL;
-			freyja_event_file_dialog("Open material...");
+			freyja_event_file_dialog("Open material...", FREYJA_MODE_LOAD_MATERIAL);
 			break;
 		}
 		break;
@@ -1870,13 +1868,11 @@ bool FreyjaControl::event(int command)
 		switch (GetControlScheme())
 		{
 		case eScheme_Model:
-			mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-			freyja_event_file_dialog("Save model as...");
+			freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);
 			break;
 
 		case eScheme_Material:
-			mFileDialogMode = FREYJA_MODE_SAVE_MATERIAL;
-			freyja_event_file_dialog("Save material as...");
+			freyja_event_file_dialog("Save material as...", FREYJA_MODE_SAVE_MATERIAL);
 			break;
 
 		default:
@@ -1896,8 +1892,7 @@ bool FreyjaControl::event(int command)
 
 			if (mCurrentlyOpenFilename.Empty())
 			{
-				mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-				freyja_event_file_dialog("Save model as...");				
+				freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);				
 			}
 			else
 			{
@@ -1917,8 +1912,7 @@ bool FreyjaControl::event(int command)
 			break;
 
 		case eScheme_Material:
-			mFileDialogMode = FREYJA_MODE_SAVE_MATERIAL;
-			freyja_event_file_dialog("Save material as...");
+			freyja_event_file_dialog("Save material as...", FREYJA_MODE_SAVE_MATERIAL);
 			break;
 
 		default:
@@ -1927,14 +1921,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eAppendFile:
-		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-		freyja_event_file_dialog("Append to model...");
+		freyja_event_file_dialog("Append to model...", FREYJA_MODE_LOAD_MODEL);
 		freyja_print("Append mode is default Open mode in this build...");
 		break;
 
 	case eSaveAsFileModel:
-		mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-		freyja_event_file_dialog("Save model as...");
+		freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);
 		break;
 
 	case eSaveFileModel:
@@ -1946,8 +1938,7 @@ bool FreyjaControl::event(int command)
 
 		if (mCurrentlyOpenFilename.Empty())
 		{
-			mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-			freyja_event_file_dialog("Save model as...");				
+			freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);				
 		}
 		else
 		{
@@ -1972,15 +1963,13 @@ bool FreyjaControl::event(int command)
 				freyja_set_main_window_title(BUILD_NAME);
 
 				
-				mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-				freyja_event_file_dialog("Open model...");
+				freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
 				//freyja_event_file_dialog2("Open model...", eLoadModelText);
 			}
 		}
 		else
 		{
-			mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-			freyja_event_file_dialog("Open model...");
+			freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
 			//freyja_event_file_dialog2("Open model...", eLoadModelText);
 		}
 		break;
@@ -2007,14 +1996,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eExportFile:
-		mFileDialogMode = FREYJA_MODE_SAVE_MODEL;
-		freyja_event_file_dialog("Export model...");
+		freyja_event_file_dialog("Export model...", FREYJA_MODE_SAVE_MODEL);
 		freyja_print("Exporting is handled from Save As using file extentions...");
 		break;
 
 	case eImportFile:
-		mFileDialogMode = FREYJA_MODE_LOAD_MODEL;
-		freyja_event_file_dialog("Import model...");
+		freyja_event_file_dialog("Import model...", FREYJA_MODE_LOAD_MODEL);
 		freyja_print("Importing is handled automatically from Open...");
 		break;
 
@@ -2825,13 +2812,13 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 }
 
 
-void FreyjaControl::handleFilename(const char *filename)
+void FreyjaControl::handleFilename(const char *filename, int eventId)
 {
 	int failed = 1;
 	int type = -1, type2 = -1;
 
 
-	switch (mFileDialogMode)
+	switch (eventId)
 	{
 	case FREYJA_MODE_LOAD_MATERIAL:
 		failed = !LoadMaterial(filename);
@@ -2952,6 +2939,20 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 	}
 }
 
+
+void FreyjaControl::PrintInfo()
+{
+	char buf[256];
+
+	snprintf(buf, 255, "Current Model Properties\n Bones    \t%d\n Meshes  \t%d\n Polygons \t%d\n Vertices  \t%d",
+			 freyjaGetCount(FREYJA_BONE), 
+			 freyjaGetCount(FREYJA_MESH), 
+			 freyjaGetCount(FREYJA_POLYGON), 
+			 freyjaGetCount(FREYJA_VERTEX));	
+	buf[255] = 0;
+
+	freyja_event_info_dialog("gtk-dialog-info", buf);
+}
 
 bool FreyjaControl::motionEvent(int x, int y)
 {
