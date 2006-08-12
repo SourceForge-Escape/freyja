@@ -1053,6 +1053,43 @@ void mgtk_event_slider(GtkWidget *widget, gpointer id)
 }
 
 
+void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a)
+{
+#ifndef DISABLE_GTK_COLORBUTTON	
+	Vector<GtkWidget*> *widgets;
+	GtkWidget *colorbutton;
+	GdkColor color;
+	guint16 alpha;
+	unsigned int i;
+
+	widgets = gWidgetMap[id];
+
+	if (!widgets)
+		return;
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		colorbutton = (*widgets)[i];
+
+		if (colorbutton && GTK_IS_COLOR_BUTTON(colorbutton))
+		{
+			gtk_color_button_get_color(GTK_COLOR_BUTTON(colorbutton), &color);
+			alpha = gtk_color_button_get_alpha(GTK_COLOR_BUTTON(colorbutton));
+
+			r = color.red / 65535.0;
+			g = color.green / 65535.0;
+			b = color.blue / 65535.0;
+			a = alpha / 65535.0;
+		}
+		else
+		{
+			mgtk_print("mgtk_event_get_color> %d:%d failed", id, i);
+		}
+	}
+#endif
+}
+
+
 void mgtk_event_set_color(int id, float r, float g, float b, float a)
 {
 #ifdef DISABLE_GTK_COLORBUTTON
