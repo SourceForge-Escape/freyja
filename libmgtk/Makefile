@@ -23,6 +23,8 @@ URL=http://icculus.org/freyja
 EMAIL=mongoose@icculus.org
 
 ################################################################
+# Directory Setup
+################################################################
 
 INSTALL_DIR=/usr/local/bin
 #$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
@@ -41,10 +43,13 @@ INSTALL_BIN=/usr/local/bin
 #INSTALL_LIB=/usr/local/lib
 #INSTALL_INCLUDE=/usr/local/include
 PLUGIN_INSTALL_DIR=$(INSTALL_LIB)/$(NAME)/modules
-LOCAL_INCLUDES=-I../mstl -I../libhel/
+LOCAL_INCLUDES=-I../mstl/ -I../libhel/
 LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ 
 LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ 
 
+
+################################################################
+# Configure support was removed, but options are set here
 ################################################################
 # DEBUG_GTK_MOUSE    
 # DEBUG_GTK_KEYS
@@ -52,17 +57,22 @@ LOCAL_WIN32_LIBS=-L../bin/libhel/win32/
 # USE_OLD_FILE_SELECTION_WIDGET
 # HAVE_GTKGLEXT
 # HAVE_GTKGLAREA
-CONFIGURE_CFLAGS=-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL \
-		 -DHAVE_GTKGLAREA -DFORCE_ICON_TOOLBAR $(LOCAL_INCLUDES)
-
+CONFIGURE_CFLAGS=-DUSING_GTK_2_0 -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL \
+		-DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR -DMGTKEXPORTSCLASS \
+		$(LOCAL_INCLUDES)
 
 CONFIGURE_LDFLAGS=$(LOCAL_LIBS)
 
-################################################################
-
-BUILD_SELECT=debug
-# -DDEBUG -DEXPERIMENTAL -DFIXME -DOBSOLETE
 DEBUG_DEFS=-DDEBUG -DEXPERIMENTAL
+
+
+################################################################
+# PKG_CONFIG Setup
+################################################################
+# gtkglext-win32-1.0
+# gtkgl-2.0
+PKG_CONFIG_CFLAGS="gtk+-2.0 gtkglext-1.0"
+PKG_CONFIG_LIBS="gtk+-2.0 gtkglext-1.0"
 
 
 ################################################################
@@ -78,8 +88,7 @@ DEPS=../deps.sh
 # -Weffc++
 BASE_DEFS= \
 	-I$(SRC_DIR) $(CONFIGURE_CFLAGS) -Wno-deprecated \
-	-DUSING_GTK_2_0 \
-	$(shell pkg-config --cflags gtkgl-2.0 gtk+-2.0)
+	$(shell pkg-config --cflags $(PKG_CONFIG_CFLAGS))
 
 BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
@@ -90,28 +99,28 @@ BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
 		-DBUILD_HOST=\"\\\"$(BUILD_HOST)\\\"\" 
 
-LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) -lm -ldl -lGL -lGLU -lstdc++
+LD_FLAGS=$(CONFIGURE_LDFLAGS) -lm -ldl -lGL -lGLU -lstdc++
 LD_FLAGS += -Wl,-z,defs
 LD_FLAGS += -Wl,-O1
 
 ################################################################
 
-GTK2_CFLAGS=-DUSING_GTK_2_0 -I/usr/X11R6/include \
-		$(shell pkg-config --cflags gtk+-2.0 gtkgl-2.0)
-GTK2_LDFLAGS=$(shell pkg-config --libs gtk+-2.0 gtkgl-2.0)
+GTK2_CFLAGS=$(shell pkg-config --cflags $(PKG_CONFIG_CFLAGS))
 
-# To catch user installed 
-GTK_GLAREA2_CFLAGS=-DGTK_GLAREA_GL -I/usr/local/include/gtkgl-2.0 
-GTK_GLAREA2_LD_FLAGS=-lgtkgl-2.0
-
+GTK2_LDFLAGS=$(shell pkg-config --libs $(PKG_CONFIG_LIBS))
 
 RELEASE_CFLAGS=$(BASE_CFLAGS) $(CONFIGURE_CFLAGS) -ffast-math -funroll-loops \
 	-fomit-frame-pointer -fexpensive-optimizations -O2
+
 DEBUG_CFLAGS=$(BASE_CFLAGS) $(CONFIGURE_CFLAGS) -g $(DEBUG_DEFS)
 
 SHLIBEXT=$(EXT).$(VERSION)
+
 SHLIBLDFLAGS=$(LDFLAGS) -fPIC -shared
 
+
+################################################################
+# Main build targets
 ################################################################
 
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
@@ -122,65 +131,40 @@ W32TARGETS=$(BUILDDIR)/$(MODULE)$(SHLIBEXT)
 OSXTARGETS=$(BUILDDIR)/$(FRAMEWORK)$(SHLIBEXT)
 TESTS=$(BUILDDIR)/$(NAME).test
 
-################################################################
+
+########################################################################
+# Main build rules
+########################################################################
 
 auto: $(BUILD_SELECT)
 
 all: debug release prof
 
-################################################################
-# GTK+ 2.0 
-################################################################
-
-debug: debug-gtkglext
-
-debug-gtkglarea:
-	@-mkdir -p $(BUILD_DEBUG_DIR).gtkglarea
-	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR).gtkglarea \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
-
-debug-gtkglext:
+debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) -DHAVE_GTKGLEXT $(shell pkg-config --cflags gtkglext-1.0)" \
-	SHLIBLDFLAGS="$(SHLIBLDFLAGS) $(shell pkg-config --libs gtkglext-1.0)"
-	LD_FLAGS="$(LD_FLAGS) $(shell pkg-config --libs gtkglext-1.0)"
+	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS)" \
+	SHLIBLDFLAGS="$(SHLIBLDFLAGS)"
+	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS)"
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
-	CFLAGS="$(RELEASE_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+	CFLAGS="$(RELEASE_CFLAGS) $(GTK2_CFLAGS)" \
+	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS)"
 
 prof: 
 	@-mkdir -p $(BUILD_PROF_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DNDEBUG -pg" \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -pg"
+	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) -DNDEBUG -pg" \
+	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) -pg"
 
 
+################################################################
 
-########################################################################
-# OSX build
-########################################################################
+win32: debug-win32
 
-debug-osx:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) osxtargets BUILDDIR=$(BUILD_DEBUG_DIR) \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)" \
-	SHLIBLDFLAGS="$(LD_FLAGS) -dynamiclib -fPIC" \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS) -DDISABLE_GTK_COLORBUTTON -DUSE_OLD_FILE_SELECTION_WIDGET"
-
-install-osx:
-	$(MAKE) install-gtkglarea
-
-
-########################################################################
-# WIN32 build
-########################################################################
-
-win32:
+debug-win32:
 	@-mkdir -p $(BUILD_WIN32_DIR)
 	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
 	CC=$(WIN32_CC) \
@@ -188,22 +172,24 @@ win32:
 	LD=$(WIN32_LD) \
 	MODULE="mgtk1" \
 	SHLIBEXT=".dll" \
-	CFLAGS="$(BASE_CFLAGS) $(WIN32_CROSS_CFLAGS) $(LOCAL_INCLUDES) -DMGTKEXPORTSCLASS -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR" \
+	CFLAGS="$(BASE_CFLAGS) $(WIN32_CROSS_CFLAGS) $(CONFIGURE_CFLAGS)" \
 	LD_FLAGS="$(WIN32_CROSS_LIBS) $(LD_FLAGS)" \
 	LIBS="$(WIN32_LIB_DIR) -lm -lstdc++ $(WIN32_CROSS_LIBS)"
 
 
+################################################################
+
+osx: debug-osx
+
+debug-osx:
+	@-mkdir -p $(BUILD_DEBUG_DIR)
+	$(MAKE) osxtargets BUILDDIR=$(BUILD_DEBUG_DIR) \
+	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS)" \
+	SHLIBLDFLAGS="$(LD_FLAGS) -dynamiclib -fPIC" \
+	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS)"
+
+
 ########################################################################
-
-depend:
-	@-echo -n Making deps...
-	@-echo "# Autogenerated dependency file" > depend
-	@-find $(SRC_DIR) -name "*.cpp" -exec $(DEPS) $(BASE_DEFS) {} \; >> depend
-	@-echo "       [done]"
-
-
-########################################################################
-
 
 osxtargets: $(OSXTARGETS)
 
@@ -252,12 +238,20 @@ $(BUILDDIR)/$(NAME).test : $(OBJS)
 
 
 ##########################################################################
-# Object dependency include
-##########################################################################
+# Dependency rule and depend include 
+########################################################################
+
+depend:
+	@-echo -n Making deps...
+	@-echo "# Autogenerated dependency file" > depend
+	@-find $(SRC_DIR) -name "*.cpp" -exec $(DEPS) $(BASE_DEFS) {} \; >> depend
+	@-echo "       [done]"
+
 
 -include depend
 
 ##########################################################################
+
 
 clean: clean-emacs clean-build clean-test clean-obj clean-win32
 

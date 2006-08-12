@@ -713,6 +713,88 @@ class SystemIO
 		}
 
 
+		// Delimited by until string eg "," stops parsing at the first ','
+		const char *ParseSymbol(const char *until)
+		{
+			long i = 0, state = 0, untilI = 0;
+			bool untilFound = false;
+			char c;
+
+			AllocateBuffer();
+
+			while (i < mBufferSize && fscanf(mFileHandle, "%c", &c) != EOF)
+			{
+				if (c == until[untilI])
+				{
+					++untilI;
+
+					// Found the delimter, so quit parsing
+					if ( untilI == '\0' )
+						untilFound = true;;
+				}
+				else
+				{
+					untilI = 0;
+				}
+			  
+
+				switch (state)
+				{
+				case 0:
+					if (c == '/')
+					{
+						state = 1;
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;	
+					}
+					else if (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+					{
+						if (i > 0)
+							i = mBufferSize;
+					}
+					else
+					{
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+
+				case 1:
+					if (c == '/')
+					{
+						state = 2;
+						--i;
+						mBuffer[i] = 0;
+					}
+					else
+					{
+						state = 0;
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+
+				case 2:
+					if (c == '\n')
+					{
+						/* Only wrap lines when given a only comment line(s) */
+						if (i > 0)
+							i = mBufferSize;
+						else
+							state = 0;
+					}
+					break;
+				}
+
+				if (untilFound)
+					break;
+			}
+
+			return mBuffer;
+		}
+
+
+		// Supports C++ style comments, and strips whitespace
 		const char *ParseSymbol()
 		{
 			long i = 0, state = 0;
