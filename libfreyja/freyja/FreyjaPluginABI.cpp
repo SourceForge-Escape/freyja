@@ -1878,6 +1878,7 @@ void freyjaPluginDirectoriesInit()
 {
 #ifdef WIN32
 	freyjaPluginAddDirectory("C:/freyja/modules/model");
+	freyjaPluginAddDirectory("C:/freyja/modules/image");
 #else
    	freyjaPluginAddDirectory("/usr/lib/freyja/modules/model");
    	freyjaPluginAddDirectory("/usr/local/lib/freyja/modules/model");

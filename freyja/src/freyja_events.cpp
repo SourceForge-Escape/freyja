@@ -45,7 +45,7 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 
 
 int gSkelTreeWidgetIndex;
-
+int gFileDialogEvent;
 
 void eRecentFiles(unsigned int value)
 {
@@ -469,8 +469,7 @@ void mgtk_handle_event1f(int event, float value)
 void mgtk_handle_file_dialog_selection(char *filename)
 {
 	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-
-	FreyjaControl::mInstance->handleFilename(filename);
+	FreyjaControl::mInstance->handleFilename(filename, gFileDialogEvent);
 }
 
 
@@ -605,7 +604,7 @@ void freyja_handle_event1f(int event, float value)
 void freyja_handle_file_dialog_selection(char *filename)
 {
 	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->handleFilename(filename);
+	FreyjaControl::mInstance->handleFilename(filename, gFileDialogEvent);
 }
 
 
@@ -1259,12 +1258,12 @@ void freyja_install_user()
 }
 
 
-void freyja_event_file_dialog(char *s)
+void freyja_event_file_dialog(char *s, int eventId)
 {
 	static bool on = 0;
 
-
-	mgtk_event_file_dialog(s);
+	gFileDialogEvent = eventId;
+	mgtk_event_file_dialog(s); //, eventId);
 
 	if (!on)
 	{
@@ -1563,10 +1562,10 @@ int freyja_create_confirm_dialog(char *dialog_icon,
 }
 
 
-void freyja_event_file_dialog_notify(char *filename)
+void freyja_event_file_dialog_notify(char *filename)//, int eventId)
 {
 	if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->handleFilename(filename);
+		FreyjaControl::mInstance->handleFilename(filename, gFileDialogEvent);
 }
 
 

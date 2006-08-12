@@ -309,7 +309,7 @@ void freyja_event_start();       /* Starts up Freyja subsystems */
 void freyja_event_exit();        /* Calls shutdown and exits GUI */
 void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
 
-void freyja_event_file_dialog(char *s);
+void freyja_event_file_dialog(char *s, int eventId);
 
 void freyja_event_notify_observer1f(event_subject_id id, float r);
 
