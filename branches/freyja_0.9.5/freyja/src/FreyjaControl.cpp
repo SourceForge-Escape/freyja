@@ -800,18 +800,22 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 			if (strncmp(buffer, "Seed", 4) == 0)
 			{
 				seed = r.ParseInteger();
+				SetResourceInt("ePerlinNoiseSeed", seed);
 			}
 			else if (strncmp(buffer, "Width", 5) == 0)
 			{
 				width = r.ParseInteger();
+				SetResourceInt("ePerlinNoiseW", width);
 			}
 			else if (strncmp(buffer, "Height", 6) == 0)
 			{
 				height = r.ParseInteger();
+				SetResourceInt("ePerlinNoiseH", height);
 			}
 			else if (strncmp(buffer, "Clamp", 5) == 0)
 			{
 				clamp = r.ParseBool();
+				SetResourceInt("ePerlinNoiseClamp", clamp);
 			}
 			else if (strncmp(buffer, "AddColor", 8) == 0)
 			{
@@ -820,6 +824,8 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 				addcolor[1] = r.ParseFloat();
 				r.FindNextChar(',');
 				addcolor[2] = r.ParseFloat();
+				SetResourceColor("eColorPerlinAdd", 
+								 addcolor[0], addcolor[1], addcolor[2], 1.0);
 			}
 			else if (strncmp(buffer, "ModulateColor", 14) == 0)
 			{
@@ -828,18 +834,23 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 				modcolor[1] = r.ParseFloat();
 				r.FindNextChar(',');
 				modcolor[2] = r.ParseFloat();
+				SetResourceColor("eColorPerlinMult", 
+								 modcolor[0], modcolor[1], modcolor[2], 1.0);
 			}
 			else if (strncmp(buffer, "iA", 2) == 0)
 			{
 				iA = r.ParseFloat();
+				SetResourceFloat("ePerlinNoiseIA", iA);
 			}
 			else if (strncmp(buffer, "iB", 2) == 0)
 			{
 				iB = r.ParseFloat();
+				SetResourceFloat("ePerlinNoiseIB", iB);
 			}
 			else if (strncmp(buffer, "d", 1) == 0)
 			{
 				d = r.ParseFloat();
+				SetResourceFloat("ePerlinNoiseD", d);
 			}
 		}
 	}
