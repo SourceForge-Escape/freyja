@@ -4413,16 +4413,17 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 				}
 			}
 #else
-			foreach (f->mTexCoordIndices)
+			long j;
+			foreach (f->mTexCoordIndices, j)
 			{
-				m->GetTexCoord(f->mTexCoordIndices.current(), uvB.mVec);
+				m->GetTexCoord(f->mTexCoordIndices.current(j), uvB.mVec);
 				uvB.mVec[2] = 0.0f;
 				dist = helDist3v(uv.mVec, uvB.mVec);
 				
 				if (dist < cutoff && dist < bestDist)
 				{
 					bestDist = dist;
-					mTexCoordArrayIndex = f->mTexCoordIndices.current();
+					mTexCoordArrayIndex = f->mTexCoordIndices.current(j);
 				}
 			}
 #endif
