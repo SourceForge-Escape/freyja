@@ -481,6 +481,8 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
 			break;
 		}
 	}
+
+	return dialog;
 }
 
 

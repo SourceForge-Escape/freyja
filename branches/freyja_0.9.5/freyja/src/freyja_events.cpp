@@ -728,6 +728,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eRevertFile", eRevertFile);
 	r.RegisterInt("eExportFile", eExportFile);
 	r.RegisterInt("eImportFile", eImportFile);
+	r.RegisterInt("eNewFile", eNewFile);
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenTexture", eOpenTexture);
 	r.RegisterInt("eOpenTextureB", eOpenTextureB);

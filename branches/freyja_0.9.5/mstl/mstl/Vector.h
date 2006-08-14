@@ -457,10 +457,9 @@ public:
 		return mData;
 	}
 
-	bool start() { mIndex = mStart; return (mIndex != mEnd); }
-	bool next() { ++mIndex; return (mIndex != mEnd); }
-	long currentIndex() { return mIndex; }
-	Object &current() { return mData[mIndex]; }
+	bool start(long &idx) { idx = mStart; return (idx != mEnd); }
+	bool next(long &idx) { ++idx; return (idx != mEnd); }
+	Object &current(long idx) { return mData[idx]; }
 
 private:
 
@@ -470,13 +469,12 @@ private:
 	unsigned int mStart;
 	unsigned int mEnd;
 	unsigned int mExpand;
-	long mIndex;
 };
 
-// Thanks to Rajiv Bhagwat for foreach macro idea
+// Thanks to Rajiv Bhagwat for foreach macro idea, didn't want to use internal iterators however
 #define F_E_JOIN2(a,b) a##b
 #define F_E_JOIN(a,b) F_E_JOIN2(a,b)
-#define foreach(v) for(bool F_E_JOIN(flag,__LINE__)=v.start(); F_E_JOIN(flag,__LINE__);F_E_JOIN(flag,__LINE__)=v.next()) 
+#define foreach(v, idx) for(bool F_E_JOIN(flag,__LINE__)=v.start(idx); F_E_JOIN(flag,__LINE__);F_E_JOIN(flag,__LINE__)=v.next(idx)) 
 
 
 
