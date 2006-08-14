@@ -564,6 +564,7 @@ class FreyjaControl
 		freyja_event_set_color(event, r, g, b, a);
 	}
 
+
 	static FreyjaControl *mInstance;
 
 

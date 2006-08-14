@@ -426,6 +426,10 @@ arg_list_t *mgtk_rc_icon(arg_list_t *args);
 arg_list_t *mgtk_rc_dialog(arg_list_t *args);
 arg_list_t *mgtk_rc_label2(arg_list_t *args);
 arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box);
+arg_list_t *mgtk_rc_filechooserbutton(arg_list_t *box);
+arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *box);
+arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box);
+
 
 ////////////////////////////////////////////////////////////////
 
@@ -484,7 +488,9 @@ Resource::Resource()
 	RegisterFunction("hslider", mgtk_rc_hslider);
 	RegisterFunction("dialog", mgtk_rc_dialog);
 	RegisterFunction("fileselection_hack", mgtk_rc_fileselection_drop_down_menu);
-
+	RegisterFunction("filechooserbutton", mgtk_rc_filechooserbutton);
+	RegisterFunction("filechoosermenu_item", mgtk_rc_filechoosermenu_item);
+	RegisterFunction("filechoosertoolbar_button", mgtk_rc_filechoosertoolbar_button);
 
 	RegisterInt("IconSize_Menu", 1);
 	RegisterInt("IconSize_ToolbarSmall", 2);

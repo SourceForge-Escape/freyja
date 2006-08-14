@@ -534,23 +534,23 @@ void mgtk_gtk_event_fileselection_pattern(GtkWidget *widget, gpointer data)
 }
 
 
-void mgtk_event_fileselection_pattern(char *pattern)
+void mgtk_event_fileselection_pattern(int event, char *pattern)
 {
 #ifdef USE_OLD_FILE_SELECTION_WIDGET
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
 
 	gtk_file_selection_complete(GTK_FILE_SELECTION(file), pattern);
 #else
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(file), 
 								gtk_file_chooser_get_filter(GTK_FILE_CHOOSER(file)));
 #endif
 }
 
 
-void mgtk_event_file_dialog(char *title)
+void mgtk_event_file_dialog(int event, char *title)
 {
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	
 	gtk_window_set_title(GTK_WINDOW(file), title);
 	gtk_widget_show(file);
@@ -1303,10 +1303,10 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 // File dialog support func
 ////////////////////////////////////////////////////////////////
 
-void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
+void mgtk_event_fileselection_append_pattern(int event, char *label, char *pattern)
 {
 #ifdef USE_OLD_FILE_SELECTION_WIDGET
-	GtkWidget *menu = mgtk_get_fileselection_pattern_widget();
+	GtkWidget *menu = mgtk_get_fileselection_pattern_widget(event);
 	GtkWidget *item;
 
 
@@ -1325,7 +1325,7 @@ void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
 					   (gpointer)pattern);
 
 #else
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	GtkFileFilter *filter = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filter, (char*)pattern);
 	gtk_file_filter_set_name(filter, (char*)label);
@@ -1334,17 +1334,22 @@ void mgtk_event_fileselection_append_pattern(char *label, char *pattern)
 }
 
 
-void mgtk_add_menu_item(char *text, long event)
+void mgtk_add_menu_item(int eventId, char *text, long event)
 {
+	GtkWidget *dropdown = mgtk_get_fileselection_pattern_widget(eventId);
+
+	if (!dropdown)
+	{
+		DEBUG_MSG("%s %p\n", text, dropdown);
+		return;
+	}
+
 	GtkWidget *item;
-	extern GtkWidget *GTK_FILESELECTION_DROP_DOWN_MENU;
 	extern void *rc_gtk_event_func(int event);
 	void *agtk_event;
 
-	//printf("%s %p\n", text, GTK_FILESELECTION_DROP_DOWN_MENU);
-
 	item = gtk_image_menu_item_new_with_mnemonic(text);		
-	gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), item);
+	gtk_menu_append(GTK_MENU(dropdown), item);
 	gtk_widget_show(item);
 		
 	agtk_event = rc_gtk_event_func(event);
@@ -1357,10 +1362,9 @@ void mgtk_add_menu_item(char *text, long event)
 	}
 }
 
-
-void mgtk_event_fileselection_action()
+void mgtk_event_fileselection_action(int event)
 {
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	char *filename;
 
 #ifdef USE_OLD_FILE_SELECTION_WIDGET
@@ -1369,21 +1373,47 @@ void mgtk_event_fileselection_action()
 	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
 #endif
 
-	mgtk_handle_file_dialog_selection(filename);
+	mgtk_handle_file_dialog_selection(event, filename);
 	gtk_widget_hide(file);
 }
 
 
-void mgtk_event_fileselection_cancel()
+void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
 {
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(GPOINTER_TO_INT(user_data));
+	char *filename;
+
+#ifdef USE_OLD_FILE_SELECTION_WIDGET
+	filename = (char *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(file));
+#else
+	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
+#endif
+
+	mgtk_handle_file_dialog_selection(GPOINTER_TO_INT(user_data), filename);
+
 	gtk_widget_hide(file);
 }
 
 
-void mgtk_event_fileselection_set_dir(char *dir)
+void mgtk_event_filechooser_cancel(GtkWidget *widget, gpointer user_data)
 {
-	GtkWidget *file = mgtk_get_fileselection_widget();
+	GtkWidget *file = mgtk_get_fileselection_widget(GPOINTER_TO_INT(user_data));
+
+	if (file)
+		gtk_widget_hide(file);
+}
+
+
+void mgtk_event_fileselection_cancel(int event)
+{
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
+	gtk_widget_hide(file);
+}
+
+
+void mgtk_event_fileselection_set_dir(int event, char *dir)
+{
+	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	
 	if (!dir || !dir[0])
 	{

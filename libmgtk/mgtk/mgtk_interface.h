@@ -54,9 +54,9 @@ GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func);
 
 GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_filename);
 
-GtkWidget *mgtk_create_fileselection(char *title);
+GtkWidget *mgtk_create_fileselection(int event, char *title);
 
-GtkWidget *mgtk_create_filechooser(char *title);
+GtkWidget *mgtk_create_filechooser(int event, char *title);
 
 GtkWidget *mgtk_create_text_entry(GtkWidget *box);
 

@@ -45,7 +45,6 @@ void mgtk_handle_command(int command);
 void mgtk_handle_command2i(int event, int command);
 void mgtk_handle_event1u(int event, unsigned int value);
 void mgtk_handle_event1f(int event, float value);
-void mgtk_handle_file_dialog_selection(char *filename);
 void mgtk_handle_gldisplay();
 void mgtk_handle_glresize(unsigned int width, unsigned int height);
 void mgtk_handle_key_press(int key, int mod);
@@ -71,13 +70,16 @@ int mgtk_create_confirm_dialog(char *dialog_icon,
 							   char *cancel_icon, char *cancel_text,
 							   char *accept_icon, char *accept_text);
 
+/* File dialog events */
+void mgtk_event_file_dialog(int eventId, char *title);
+void mgtk_handle_file_dialog_selection(int eventId, char *filename);
+void mgtk_event_fileselection_set_dir(int eventId, char *dir);
+void mgtk_event_fileselection_append_pattern(int eventId, char *label, char *pattern);
+
 void mgtk_event_dialog_visible_set(int dialog, int visible);
-void mgtk_event_fileselection_set_dir(char *dir);
-void mgtk_event_fileselection_append_pattern(char *label, char *pattern);
 void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a);
 void mgtk_event_set_color(int id, float r, float g, float b, float a);
 void mgtk_event_notify_observer1f(unsigned int event, float value);
-void mgtk_event_file_dialog(char *title);
 void mgtk_event_notify_statusbar(const char *message);
 void mgtk_event_swap_gl_buffers();
 void mgtk_event_gl_refresh();

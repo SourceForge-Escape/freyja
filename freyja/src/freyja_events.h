@@ -161,6 +161,9 @@ typedef enum {
 
 	eViewports,
 
+	eOpenTexture,
+	eOpenTextureB,
+
 	/* Widget interaction events */
 	eZoom,
 	eSelectMaterial,	

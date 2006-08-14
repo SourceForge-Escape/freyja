@@ -26,6 +26,9 @@
 
 #include <gtk/gtk.h>
 
+#include <mstl/Map.h>
+#include <mstl/SystemIO.h>
+
 #include "Resource.h"
 
 #include "mgtk_interface.h"
@@ -43,6 +46,13 @@
 #define ARG_GTK_MENU_WIDGET      1024
 #define ARG_GTK_NOTEBOOK         2048
 #define ARG_GTK_TOOLBOX_WIDGET   4096
+
+
+using namespace mstl;
+
+Map<long, GtkWidget *> gFileDialogWidgetMap;
+Map<long, GtkWidget *> gFileDialogPatternWidgetMap;
+
 
 // Could use mlisp to replace this, but let's not go there for this
 // prototype merge of linux/win32/osx
@@ -215,11 +225,11 @@ void mgtk_handle_event1f(int event, float value)
 	}
 }
 
-void mgtk_handle_file_dialog_selection(char *filename)
+void mgtk_handle_file_dialog_selection(int event, char *filename)
 {
 	if (win32_mgtk_handle_file_dialog_selection != NULL)
 	{
-		(*win32_mgtk_handle_file_dialog_selection)(filename);
+		(*win32_mgtk_handle_file_dialog_selection)(event, filename);
 	}
 }
 
@@ -333,7 +343,7 @@ GtkTreeView *SKELETON_TREEVIEW = 0x0;
 
 /* Mongoose 2004.10.28, 
  * These are the only gobals that should be used here */
-GtkWidget *GTK_FILESELECTION_DROP_DOWN_MENU = 0x0;
+//GtkWidget *GTK_FILESELECTION_DROP_DOWN_MENU = 0x0;
 GtkWidget *GTK_MAIN_WINDOW = 0x0;
 GtkWidget *GTK_GL_AREA_WIDGET = 0x0;
 GtkWidget *GTK_STATUS_BAR_WIDGET = 0x0;
@@ -354,9 +364,123 @@ GtkWidget *mgtk_get_statusbar_widget()
 	return GTK_STATUS_BAR_WIDGET;
 }
 
-GtkWidget *mgtk_get_fileselection_pattern_widget()
+
+GtkWidget *mgtk_get_fileselection_pattern_widget(int event)
 {
-	return GTK_FILESELECTION_DROP_DOWN_MENU;
+	return gFileDialogPatternWidgetMap[event];
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// File chooser init
+///////////////////////////////////////////////////////////////////////////
+
+void mgtk_filechooser_spawn_event(GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *dialog = gFileDialogWidgetMap[GPOINTER_TO_INT(user_data)];
+
+	DEBUG_MSG("%p %i\n", widget, user_data, dialog);
+
+	if (dialog)
+		gtk_widget_show_all(dialog);
+}
+
+void mgtk_filechooser_close_event(GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *dialog = gFileDialogWidgetMap[GPOINTER_TO_INT(user_data)];
+
+	DEBUG_MSG("%p %i %p\n", widget, user_data, dialog);
+
+	if (dialog)
+		gtk_widget_hide_all(dialog);
+}
+
+
+GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
+{
+	GtkWidget *dialog = gFileDialogWidgetMap[event];
+
+	if (dialog)
+		return dialog;
+
+	/* Didn't find it created, so create and then link it */
+	dialog = mgtk_create_filechooser(event, title);
+	gFileDialogWidgetMap.Add(event, dialog);
+
+	gtk_signal_connect(GTK_OBJECT(dialog), "close",
+					   GTK_SIGNAL_FUNC(mgtk_filechooser_close_event), 
+					   GINT_TO_POINTER(event));
+
+
+	/* Uber string options */
+	const char *buffer = option;
+	long len = strlen(buffer), state = 0;
+	char symbol[64];
+	char value[64];
+
+	for (long i = 0, j = 0; i < len; ++i)
+	{
+		if (j == 63) j = 0;
+		
+		switch ( state )
+		{
+		case 0:
+			if (buffer[i] == '=')
+			{
+				state = 1;
+				j = 0;
+			}
+			else
+			{
+				symbol[j++] = buffer[i];
+				symbol[j] = 0;
+			}
+			break;
+			
+		case 1:
+			if (buffer[i] == ',' || !buffer[i])
+			{
+				state = j = 0;
+				
+				if (strcmp(symbol, "mode") == 0)
+				{
+					if (strcmp(value, "save") == 0)
+					{
+						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
+													GTK_FILE_CHOOSER_ACTION_SAVE);
+					}
+					else if (strcmp(value, "open") == 0)
+					{
+						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
+													GTK_FILE_CHOOSER_ACTION_OPEN);
+					}
+					else if (strcmp(value, "select-folder") == 0)
+					{
+						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
+													GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+					}
+					else if (strcmp(value, "create-folder") == 0)
+					{
+						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
+													GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER);
+					}
+				}
+				else if (strcmp(symbol, "confirm-overwrite") == 0)
+				{
+					if (strcmp(value, "true") == 0)
+					{
+						gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+					}
+				}
+			}
+			else
+			{
+				value[j++] = buffer[i];
+				value[j] = 0;
+			}
+			break;
+		}
+	}
 }
 
 
@@ -410,18 +534,20 @@ void mgtk_update_filechooser_preview(GtkFileChooser *file_chooser,
 #endif
 
 
-GtkWidget *mgtk_get_fileselection_widget()
+GtkWidget *mgtk_get_fileselection_widget(int event)
 {
-	static GtkWidget *file = NULL;
+	GtkWidget *file = gFileDialogWidgetMap[event];
 	char *path;
 
 	if (!file)
 	{
 #ifdef USE_OLD_FILE_SELECTION_WIDGET
-		file = mgtk_create_fileselection("Select file");
+		file = mgtk_create_fileselection(event, "Select file");
 #else
-		file = mgtk_create_filechooser("Select file");
+		file = mgtk_create_filechooser(event, "Select file");
 #endif
+
+		gFileDialogWidgetMap.Add(event, file);
 
 		path = mgtk_rc_map("/");
 		
@@ -976,6 +1102,98 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 	delete_arg(&help);
 	delete_arg(&event);
 	delete_arg(&cmd);
+
+	return ret;
+}
+
+
+
+// (filechoosertoolbar_button "icon" "name" "tooltip" "Title..." eEvent "your_mgtk_rc_pattern_callback") 
+arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
+{
+	arg_list_t *ret, *icon, *label, *help, *title, *event, *options;
+	GtkWidget *button;
+
+	if (!box)
+	{
+		rc_assertion_error("toolbar_button", "container != NULL");
+		return NULL;
+	}
+
+	arg_enforce_type(&box,  ARG_GTK_TOOLBOX_WIDGET);
+
+	if (!box)
+	{
+		rc_assertion_error("toolbar_button", 
+						   "container == ARG_GTK_TOOLBOX_WIDGET");
+		return NULL;
+	}
+
+	symbol_enforce_type(&icon, CSTRING);
+	symbol_enforce_type(&label, CSTRING);
+	symbol_enforce_type(&help, CSTRING);
+	symbol_enforce_type(&title, CSTRING);
+	symbol_enforce_type(&event, INT);
+	symbol_enforce_type(&options, CSTRING);
+	ret = NULL;
+
+	if (!icon || !label || !help || !title || !event || !options)
+	{
+		if (!icon)
+			rc_assertion_error("togglebutton", "icon == CSTRING");
+
+		if (!label)
+			rc_assertion_error("togglebutton", "label == CSTRING");
+
+		if (!help)
+			rc_assertion_error("togglebutton", "help == CSTRING");
+
+		if (!title)
+			rc_assertion_error("togglebutton", "title == CSTRING");
+
+		if (!event)
+			rc_assertion_error("togglebutton", "event == INT");
+
+		if (!options)
+			rc_assertion_error("togglebutton", "options == CSTRING");
+	}
+	else
+	{
+		// FIXME: Should be removed and replaced with lisp function
+		char icon_filename[1024];
+
+		if (!strncmp(get_string(icon), "gtk", 3))
+		{
+			strncpy(icon_filename, get_string(icon), 1024);
+			icon_filename[1023] = 0;
+		}
+		else
+		{
+			mgtk_get_pixmap_filename(icon_filename, 1024, get_string(icon));
+			icon_filename[1023] = 0;
+		}
+
+		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(options));
+
+		button =
+		mgtk_create_toolbar_button((GtkWidget *)box->data, icon_filename, 
+								   get_string(label), get_string(help),
+								   NULL, GPOINTER_TO_INT(get_int(event)));
+		
+
+		gtk_signal_connect(GTK_OBJECT(button), "pressed",
+						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
+						   GINT_TO_POINTER(get_int(event)));
+
+		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
+	}
+
+	delete_arg(&icon);
+	delete_arg(&label);
+	delete_arg(&help);
+	delete_arg(&title);
+	delete_arg(&event);
+	delete_arg(&options);
 
 	return ret;
 }
@@ -2503,18 +2721,113 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 // Hacky extention
 arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box)
 {
-	arg_list_t *ret = NULL;
+	arg_list_t *event, *ret = NULL;
 	
 	mgtk_print("fileselection_drop_down_menu entry");
 
-	if (!GTK_FILESELECTION_DROP_DOWN_MENU)
+	event = symbol();
+	arg_enforce_type(&event, INT);
+
+	if (!event)
+		rc_assertion_error("optionmenu", "event == INT");
+
+	GtkWidget *dd = event ? gFileDialogPatternWidgetMap[get_int(event)] : NULL;
+
+	if (!dd)
 	{
 		rc_assertion_error("fileselection_drop_down_menu", "container != NULL");
 		return NULL;
 	}
 
-	new_adt(&ret, ARG_GTK_MENU_WIDGET,
-			(void *)GTK_FILESELECTION_DROP_DOWN_MENU);
+	new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)dd);
+
+	delete_arg(&event);
+
+	return ret;
+}
+
+
+// (filechooser* ... "Title..." eEvent "your_mgtk_rc_pattern_callback") 
+// (filechooserbutton "Button label" "Title..." eFileDialogEvent "your_mgtk_rc_pattern_callback") 
+arg_list_t *mgtk_rc_filechooserbutton(arg_list_t *box)
+{
+	arg_list_t *label, *event, *title, *pattern_func, *ret = NULL;
+
+	if (!box)
+	{
+		rc_assertion_error("mgtk_rc_filechooserbutton", "container != NULL");
+		return NULL;
+	}
+
+	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET); // ARG_GTK_BOX_WIDGET
+
+	if (!box)
+	{
+		rc_assertion_error("mgtk_rc_filechooserbutton", "container == ARG_GTK_BOX_WIDGET");
+		return NULL;
+	}
+
+	label = symbol();
+	arg_enforce_type(&label, CSTRING);
+	if (!label)	rc_assertion_error("mgtk_rc_filechooserbutton", "label == CSTRING");
+
+	title = symbol();
+	arg_enforce_type(&title, CSTRING);
+	if (!title)	rc_assertion_error("mgtk_rc_filechooserbutton", "title == STRING");
+
+	event = symbol();
+	arg_enforce_type(&event, INT);
+	if (!event)	rc_assertion_error("mgtk_rc_filechooserbutton", "event == INT");
+
+	pattern_func = symbol();
+	arg_enforce_type(&pattern_func, CSTRING);
+	if (!pattern_func)	rc_assertion_error("mgtk_rc_filechooserbutton", "pattern_func == CSTRING");
+
+
+	GtkWidget *item = NULL;
+
+	if (!label || !title || !event || !pattern_func)
+	{
+		return NULL;
+	}
+	else
+	{
+		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(pattern_func));
+
+		item = gtk_button_new_with_label(get_string(label));
+		gtk_widget_ref(item);
+		gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)box->data), 
+								 "filechooserbutton1", item,
+								 (GtkDestroyNotify)gtk_widget_unref);
+		gtk_widget_show(item);
+
+		gtk_box_pack_start(GTK_BOX((GtkWidget *)box->data), 
+								 item, TRUE, TRUE, 0);
+
+		gtk_signal_connect(GTK_OBJECT(item), "pressed",
+						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
+						   GINT_TO_POINTER(get_int(event)));
+		
+		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+	}
+
+	///////////////////////
+
+
+
+
+	if (!title || !event || !pattern_func)
+	{
+		rc_assertion_error("mgtk_rc_filechooserbutton", "container != NULL");
+		return NULL;
+	}
+
+	new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item);
+
+	delete_arg(&label);
+	delete_arg(&title);
+	delete_arg(&event);
+	delete_arg(&pattern_func);
 
 	return ret;
 }
@@ -2523,6 +2836,198 @@ arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box)
 ////////////////////////////////////////////////////////////////
 // Gtk+ menu widgets
 ////////////////////////////////////////////////////////////////
+
+// (filechoosermenu_item "Label" "Title..." [F1] eFileDialogEvent "your_mgtk_rc_pattern_callback" "icon") 
+arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
+{
+	GtkWidget *item;
+	arg_list_t *ret = NULL;
+
+	if (!menu)
+	{
+		rc_assertion_error("menu_item", "menu != NULL");
+		return NULL;
+	}
+
+	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET); // ARG_GTK_MENU_WIDGET
+
+	if (!menu)
+	{
+		rc_assertion_error("menu_item", "menu == ARG_GTK_MENU_WIDGET");
+		return NULL;
+	}
+
+	arg_list_t *text = symbol();
+	arg_enforce_type(&text,  CSTRING);
+	if (!text)	rc_assertion_error("mgtk_rc_filechooserbutton", "text == STRING");
+
+	arg_list_t *title = symbol();
+	arg_enforce_type(&title, CSTRING);
+	if (!title)	rc_assertion_error("mgtk_rc_filechooserbutton", "title == STRING");
+
+
+	// Accel is optional
+	arg_list_t *accel = symbol();
+	arg_list_t *event;
+
+	if (accel->type == CSTRING)
+	{
+		event = symbol();
+	}
+	else
+	{
+		event = accel;
+		accel = 0x0;
+	}
+
+	arg_enforce_type(&event, INT);
+	if (!event)	rc_assertion_error("mgtk_rc_filechooserbutton", "event == INT");
+
+	arg_list_t *pattern_func = symbol();
+	arg_enforce_type(&pattern_func, CSTRING);
+	if (!pattern_func)	rc_assertion_error("mgtk_rc_filechooserbutton", "pattern_func == CSTRING");
+
+	arg_list_t *icon = symbol();
+	arg_enforce_type(&icon, CSTRING);
+	if (!icon)	rc_assertion_error("mgtk_rc_filechooserbutton", "icon == STRING");
+
+	if (!text || !event || !pattern_func || !icon)
+	{
+		return NULL;
+	}
+	else
+	{
+		item = gtk_image_menu_item_new_with_mnemonic((char *)text->data);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item),
+									  mgtk_create_icon((char *)icon->data, 
+													   GTK_ICON_SIZE_MENU));
+
+#ifdef ACCEL_SUPPORT_ON
+		if (accel != 0 &&
+			accel->data != 0 &&
+			((char *)accel->data)[0] != 0)
+		{  
+			GtkAccelGroup *accel_group;
+			unsigned int i, len, key, mod;
+			char *s = (char *)(accel->data);
+			
+			mgtk_print("Key accel %s", (char *)(accel->data));
+			
+			len = strlen(s);
+			
+			for (mod = 0, i = 0; i < len; ++i)
+			{
+				switch (s[i])
+				{
+				case 'C':
+					mod |= GDK_CONTROL_MASK;
+					break;
+				case 'S':
+					mod |= GDK_SHIFT_MASK;
+					break;
+				case 'M':
+					mod |= GDK_MOD1_MASK;
+					break;
+				case 'E':
+					key = GDK_Return;
+					
+					i = len + 8;
+					break;
+				case 'F':
+					switch (s[i+1])
+					{
+					case '1':
+						switch (s[i+2])
+						{
+						case '0':
+							key = GDK_F10;
+							break;
+						case '1':
+							key = GDK_F11;
+							break;
+						case '2':
+							key = GDK_F12;
+							break;
+						default:
+							key = GDK_F1;
+							break;
+						}
+						break;
+					case '2':
+						key = GDK_F2;
+						break;
+					case '3':
+						key = GDK_F3;
+						break;
+					case '4':
+						key = GDK_F4;
+						break;
+					case '5':
+						key = GDK_F5;
+						break;
+					case '6':
+						key = GDK_F6;
+						break;
+					case '7':
+						key = GDK_F7;
+						break;
+					case '8':
+						key = GDK_F8;
+						break;
+					case '9':
+						key = GDK_F9;
+						break;
+					}
+					
+					i = len + 8;
+					break;
+				case '-':
+					break;
+				default:
+					key = gdk_unicode_to_keyval(s[i]);
+					break;
+				}
+			}
+				
+			/* Add code here to translate accel string to GDK key / mods */
+
+			accel_group = gtk_accel_group_new();
+			
+			// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
+
+			gtk_widget_add_accelerator(item, "activate", 
+									   accel_group,
+									   key, (GdkModifierType)mod,
+									   GTK_ACCEL_VISIBLE);
+			
+			gtk_window_add_accel_group(GTK_WINDOW(mgtk_get_application_window()),
+									   accel_group);
+		}
+#endif
+
+		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
+		
+		gtk_menu_append(GTK_MENU(menu->data), item);
+		gtk_widget_show(item);
+		
+
+		gtk_signal_connect(GTK_OBJECT(item), "activate",
+						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
+						   GINT_TO_POINTER(get_int(event)));
+
+		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(pattern_func));
+	}
+
+	delete_arg(&text);
+	delete_arg(&title);
+	delete_arg(&event);
+	delete_arg(&accel);
+	delete_arg(&pattern_func);
+	delete_arg(&icon);
+
+	return ret;
+}
+
 
 arg_list_t *mgtk_rc_menu_seperator(arg_list_t *container)
 {
