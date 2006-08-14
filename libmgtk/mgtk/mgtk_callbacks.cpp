@@ -43,6 +43,7 @@
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 
+#include "ResourceEvent.h"
 #include "mgtk_callbacks.h"
 #include "mgtk_interface.h"
 #include "mgtk_resource.h"
@@ -991,21 +992,16 @@ void mgtk_event_fileselection_homedir(GtkWidget *file, void *data)
 
 void mgtk_event_text(GtkWidget *widget, gpointer user_data)
 {
-	char *text;
-
-
 	if (!widget)
 	{
 		return;
 	}
 
-	text = (char *)gtk_entry_get_text(GTK_ENTRY(widget));
+	char *text = (char *)gtk_entry_get_text(GTK_ENTRY(widget));
+	int event = GPOINTER_TO_INT(user_data);
 
-	switch (GPOINTER_TO_INT(user_data))
-	{
-	default:
-		mgtk_handle_text(GPOINTER_TO_INT(user_data), text);
-	}
+	if (!ResourceEvent::listen(event - ResourceEvent::eBase, text))
+		mgtk_handle_text(event, text);
 }
 
 
@@ -1132,7 +1128,6 @@ void mgtk_event_set_color(int id, float r, float g, float b, float a)
 void mgtk_event_color(GtkWidget *colorbutton, gpointer id)
 {
 #ifdef DISABLE_GTK_COLORBUTTON
-	return;
 #else
 	GdkColor color;
 	guint16 alpha;
@@ -1279,7 +1274,7 @@ void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 }
 
 
-#include "ResourceEvent.h"
+
 void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 {
 	long event = GPOINTER_TO_INT(user_data);
@@ -1373,7 +1368,9 @@ void mgtk_event_fileselection_action(int event)
 	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
 #endif
 
-	mgtk_handle_file_dialog_selection(event, filename);
+	if (!ResourceEvent::listen(event - ResourceEvent::eBase, filename))
+		mgtk_handle_text(event, filename);
+
 	gtk_widget_hide(file);
 }
 
@@ -1389,7 +1386,10 @@ void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
 	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
 #endif
 
-	mgtk_handle_file_dialog_selection(GPOINTER_TO_INT(user_data), filename);
+	int event = GPOINTER_TO_INT(user_data);
+
+	if (!ResourceEvent::listen(event - ResourceEvent::eBase, filename))
+		mgtk_handle_text(event, filename);
 
 	gtk_widget_hide(file);
 }
