@@ -412,6 +412,17 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
 					   GINT_TO_POINTER(event));
 
 
+	/* 'Home' directory links */
+	char *path = mgtk_rc_map("/");
+		
+	if (path)
+	{
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+		gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), path, NULL);
+		delete [] path;
+	}
+
+
 	/* Uber string options */
 	const char *buffer = option;
 	long len = strlen(buffer), state = 0;
