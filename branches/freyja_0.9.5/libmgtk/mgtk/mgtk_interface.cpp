@@ -809,7 +809,7 @@ GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name,
 }
 
 
-GtkWidget *mgtk_create_fileselection(char *title)
+GtkWidget *mgtk_create_fileselection(int event, char *title)
 {
 	GtkWidget *fileselection;
 	GtkWidget *ok_button;
@@ -832,9 +832,10 @@ GtkWidget *mgtk_create_fileselection(char *title)
 	gtk_widget_show(ok_button);
 	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
 
+	// Mongoose 2006.08.13, Pass event id back ( allows many dialogs to be made  instead of reusing one over and over )
 	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
 					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_action),
-					   NULL);
+					   GINT_TO_POINTER(event));
 
 
 	// Cancel button
@@ -846,13 +847,13 @@ GtkWidget *mgtk_create_fileselection(char *title)
 	
 	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
 					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_cancel),
-					   NULL);
+					   GINT_TO_POINTER(event));
 
 	return fileselection;
 }
 
-
-GtkWidget *mgtk_create_filechooser(char *title)
+void mgtk_update_filechooser_preview(GtkFileChooser *filechooser,gpointer data);
+GtkWidget *mgtk_create_filechooser(int event, char *title)
 {
 	GtkWidget *filechooser = NULL;
 #ifndef USE_OLD_FILE_SELECTION_WIDGET
@@ -862,7 +863,7 @@ GtkWidget *mgtk_create_filechooser(char *title)
 	GtkWidget *ok_button;
 
 
-	filechooser = gtk_file_chooser_dialog_new(title, NULL, GTK_FILE_CHOOSER_ACTION_OPEN, NULL);
+	filechooser = gtk_file_chooser_dialog_new(title, NULL, GTK_FILE_CHOOSER_ACTION_OPEN, NULL, NULL);
 	//gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(filechooser), TRUE);
 	gtk_window_set_type_hint(GTK_WINDOW(filechooser), GDK_WINDOW_TYPE_HINT_DIALOG);
 
@@ -880,8 +881,8 @@ GtkWidget *mgtk_create_filechooser(char *title)
 	GTK_WIDGET_SET_FLAGS(cancel_button, GTK_CAN_DEFAULT);
 
 	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
-					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_cancel),
-					   NULL);
+					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_cancel),
+					   GINT_TO_POINTER(event));
 
 	/* Add ok button -- this is used due to multiuse of single filedialog in mtk */
 	ok_button = gtk_button_new_from_stock("gtk-ok");
@@ -890,10 +891,17 @@ GtkWidget *mgtk_create_filechooser(char *title)
 	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
 
 	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
-					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_action),
-					   NULL);
+					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_action),
+					   GINT_TO_POINTER(event));
 
 	gtk_widget_grab_default(ok_button);
+
+
+	/* Add preview widget for images */
+	GtkWidget *preview = gtk_image_new();
+	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(filechooser), preview);
+	g_signal_connect(filechooser, "update-preview",
+					 G_CALLBACK(mgtk_update_filechooser_preview), preview);
 #endif
 
 	return filechooser;

@@ -456,7 +456,11 @@ public:
 	{
 		return mData;
 	}
-	
+
+	bool start() { mIndex = mStart; return (mIndex != mEnd); }
+	bool next() { ++mIndex; return (mIndex != mEnd); }
+	long currentIndex() { return mIndex; }
+	Object &current() { return mData[mIndex]; }
 
 private:
 
@@ -466,8 +470,13 @@ private:
 	unsigned int mStart;
 	unsigned int mEnd;
 	unsigned int mExpand;
+	long mIndex;
 };
 
+// Thanks to Rajiv Bhagwat for foreach macro idea
+#define F_E_JOIN2(a,b) a##b
+#define F_E_JOIN(a,b) F_E_JOIN2(a,b)
+#define foreach(v) for(bool F_E_JOIN(flag,__LINE__)=v.start(); F_E_JOIN(flag,__LINE__);F_E_JOIN(flag,__LINE__)=v.next()) 
 
 
 

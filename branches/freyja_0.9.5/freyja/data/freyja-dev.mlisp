@@ -67,7 +67,7 @@
 	(menubar
 		(submenu "_File"
 			(menu_item "_New"			"C-n"	eNewFile	"gtk-new")
-			(menu_item "_Open Model..."	"C-o"	eOpenFileModel	"gtk-open")
+			(filechoosermenu_item "_Open Model..."	"Open Model..."	"C-o"	eOpenModel	"selection=freyja_model_pattern_callback"	"gtk-open")
 			(menu_item "Ap_pend Model..."  		eAppendFile		"gtk-paste")
 
 			(menu_seperator)
@@ -76,8 +76,12 @@
 
 			(menu_seperator)
 
+	;; Special file chooser options
+	; mode=create-folder|select-folder|(open)|save  
+    ; confirm-overwrite=true|(false)
+
 			(menu_item "_Save Model"			"C-s"	eSaveFileModel	"gtk-save")
-			(menu_item "Save Model _As ..."	"S-C-s"	eSaveAsFileModel	"gtk-save-as")
+			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save,confirm-overwrite=true,"	"gtk-save-as")
 			(menu_item "_Revert Model"     			eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
@@ -163,8 +167,8 @@
 
 			(menu_seperator)
 
-			(submenu "_Scene"
-				(menu_item "Generate _Normals"	eGenerateNormals	"gtk-polygon"))
+			;(submenu "_Scene"
+			;	(menu_item "Generate _Normals"	eGenerateNormals	"gtk-polygon"))
 
 			(submenu "_Vertex"
 				(menu_item "_New"		eEvent  eVertexNew)
@@ -179,7 +183,7 @@
 				(menu_item "_Delete"	eEvent	ePolygonDelete)
 				(menu_item "_Split"	eEvent	ePolygonSplit)
 				(menu_item "_Collapse"	eEvent	eCollapseFace)
-				(menu_item "_Extrude"	"F4" eExtrude		"gtk-polygon"))
+				(menu_item "_Extrude"	"F4"	eExtrude	"gtk-polygon"))
 
 			(submenu "_Vertices..."
 				(menu_item "Mirror_X"	eEvent	eMeshMirrorX)
@@ -297,11 +301,13 @@
 							(toolbar_button "gtk-new" "New"	
 								"New model"		eEvent eNewFile)
 
-							(toolbar_button "gtk-open" "Open..."
-								"Open model..."	eEvent  eOpenFile)
+							(filechoosertoolbar_button 
+								"gtk-open" "Open" "Loads model file" 
+								"Open Model..." eOpenModel "mode=open")
 
-							(toolbar_button "gtk-save-as" "Save As..."
-								"Save model as..."		eEvent  eSaveAsFile)
+							(filechoosertoolbar_button 
+								"gtk-save-as" "Save as..." "Saves model file" 
+								"Save Model..." eSaveModel "mode=save,confirm-overwrite=true,")
 
 							(toolbar_togglebutton true
 								"cursor-select.png" "Select" "Select by pointer"
@@ -482,10 +488,12 @@
 						(toolbar
 							(toolbar_button "gtk-new" "New"
 								"New material"			eEvent	eNewFile)
-							(toolbar_button "gtk-open" "Open"
-								"Open material"			eEvent	eOpenFile)
-							(toolbar_button "gtk-save-as" "Save as..."
-								"Save material as..."	eEvent	eSaveFile))
+							(filechoosertoolbar_button 
+								"gtk-open" "Open" "Loads material file" 
+								"Open Material..." eOpenMaterial "mode=open")
+							(filechoosertoolbar_button 
+								"gtk-save-as" "Save as..." "Saves material file" 
+								"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,"))
 
 						(togglebutton "Slot Load" 0 eEvent eMaterialSlotLoadToggle))
 
@@ -504,12 +512,15 @@
 						(spinbutton 0 0 128 eSetMaterialTexture)
 						(textbox eSetTextureNameA)
 						(togglebutton "Slot" 0 eEvent eTextureSlotLoadToggle)
-						(button "..." eEvent eOpenFileTexture))
+						(filechooserbutton "..." "Open Texture..." eOpenTexture "texture_pattern")
+					)
+
 					(hbox 0 1 0 1 1
 						(spinbutton 0 0 128 eSetMaterialTextureB)
 						(textbox eSetTextureNameB)
 						(togglebutton "Slot" 0 eEvent eTextureSlotLoadToggleB)
-						(button "..." eEvent eOpenFileTextureB))
+						(filechooserbutton "..." "Open TextureB..." eOpenTextureB "texture_pattern")
+					)
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -685,11 +696,10 @@ Send bug reports and feature requests:
 		(hbox 1 0 0 1 0
 			(icon "freyja.png" IconSize_Dialog))
 		(hbox 1 0 0 1 0 
-			(label2 "                <big>Freyja 0.3 Chimera</big>
+			(label2 " <big>Freyja 0.9.5 Development Branch</big>
  Freyja is an Open Source 3d modeling system.
-   This build is a mix of stable and unstable builds.
-   It will replace stable soon.
- <small>Freyja Copyright © 2002-2004 by Terry 'Mongoose' Hendrix II</small>"))))
+ This build is a mix of stable and unstable builds.
+ <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II</small>"))))
 
 
 (dialog "Freyja :: Preferences" ePreferencesDialog 0

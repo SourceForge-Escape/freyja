@@ -59,12 +59,10 @@
 
 #ifdef DEBUG
 #   define STORE_MARK freyjaStoreMark
-#   define DEBUG_MSG(msg) freyjaPrintMessage(msg)
 #   define DEBUG_MSGF freyjaPrintMessage 
 #   define ASSERT_MSG STORE_MARK(__FILE__, __LINE__, __func__); freyjaAssertMessage
 #   define DEBUG_MSGF freyjaPrintMessage
 #else
-#   define DEBUG_MSG(msg)
 #   define DEBUG_MSGF(...)
 #   define ASSERT_MSG(...)
 #endif

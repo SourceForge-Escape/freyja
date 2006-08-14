@@ -466,10 +466,10 @@ void mgtk_handle_event1f(int event, float value)
 }
 
 
-void mgtk_handle_file_dialog_selection(char *filename)
+void mgtk_handle_file_dialog_selection(int event, char *filename)
 {
 	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->handleFilename(filename, gFileDialogEvent);
+	FreyjaControl::mInstance->handleFilename(filename, event);
 }
 
 
@@ -729,8 +729,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eExportFile", eExportFile);
 	r.RegisterInt("eImportFile", eImportFile);
 	r.RegisterInt("eCloseFile", eCloseFile);
-	r.RegisterInt("eOpenFileTexture", eOpenFileTexture);
-	r.RegisterInt("eOpenFileModel", eOpenFileModel);
+	r.RegisterInt("eOpenTexture", eOpenTexture);
+	r.RegisterInt("eOpenTextureB", eOpenTextureB);
+
 
 	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
 
@@ -1260,10 +1261,10 @@ void freyja_install_user()
 
 void freyja_event_file_dialog(char *s, int eventId)
 {
-	static bool on = 0;
+	static bool on = false;
 
 	gFileDialogEvent = eventId;
-	mgtk_event_file_dialog(s); //, eventId);
+	mgtk_event_file_dialog(eventId, s);
 
 	if (!on)
 	{
@@ -1271,16 +1272,18 @@ void freyja_event_file_dialog(char *s, int eventId)
 		long i, count = freyjaGetPluginCount();
 
 		//mgtk_add_menu_item("All Files (*.*)", 9000);
-		mgtk_event_fileselection_append_pattern("All Files (*.*)", "*.*");
+		mgtk_event_fileselection_append_pattern(eventId, "All Files (*.*)", "*.*");
 
 		for (i = 0; i < count; ++i)
 		{
 			FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(i);
 			
 			if (plugin && plugin->mImportFlags)
-				//mgtk_add_menu_item(plugin->mDescription, 9001+i);
-				mgtk_event_fileselection_append_pattern(plugin->mDescription,
+			{
+				mgtk_event_fileselection_append_pattern(eventId, 
+														plugin->mDescription,
 														plugin->mExtention);
+			}
 		}
 
 		on = 1;
@@ -1317,9 +1320,9 @@ void freyja_event_gl_refresh()
 }
 
 
-void freyja_event_fileselection_append_pattern(char *label, char *pattern)
+void freyja_event_fileselection_append_pattern(int event, char *label, char *pattern)
 {
-	mgtk_event_fileselection_append_pattern(label, pattern);
+	mgtk_event_fileselection_append_pattern(event, label, pattern);
 }
 
 
@@ -1755,8 +1758,8 @@ int main(int argc, char *argv[])
 	 * Load file passed by command line args */
 	if (argc > 1)
 	{
-		mgtk_event_fileselection_set_dir(argv[1]);
-		mgtk_handle_file_dialog_selection(argv[1]);
+		mgtk_event_fileselection_set_dir(eOpenFile, argv[1]);
+		mgtk_handle_file_dialog_selection(eOpenFile, argv[1]);
 	}
 
 	mgtk_start();

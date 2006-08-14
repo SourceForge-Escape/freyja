@@ -24,6 +24,11 @@
 #ifndef GUARD__FREYJA_MONGOOSE_GNOME_RESOURCE_H_
 #define GUARD__FREYJA_MONGOOSE_GNOME_RESOURCE_H_
 
+#include <mstl/Vector.h>
+
+using namespace mstl;
+
+
 typedef enum {
    NAME_COLUMN = 0,
    ID_COLUMN,
@@ -41,8 +46,8 @@ typedef struct {
 GtkWidget *mgtk_get_application_window();
 GtkWidget *mgtk_get_gl_widget();
 GtkWidget *mgtk_get_statusbar_widget();
-GtkWidget *mgtk_get_fileselection_widget();
-GtkWidget *mgtk_get_fileselection_pattern_widget();
+GtkWidget *mgtk_get_fileselection_widget(int event);
+GtkWidget *mgtk_get_fileselection_pattern_widget(int event);
 
 void mgtk_resource_rebuild_treeview(GtkTreeModel *model);
 

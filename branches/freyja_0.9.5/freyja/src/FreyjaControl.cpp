@@ -2830,9 +2830,60 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 
 void FreyjaControl::handleFilename(const char *filename, int eventId)
 {
+	if (ResourceEvent::listen(eventId - 10000 /*ePluginEventBase*/, (char*)filename))
+		return;
+
 	int failed = 1;
 	int type = -1, type2 = -1;
 
+
+	if (!filename || !filename[0])
+	{
+		freyja_print("Passed NULL filename for event = %i", eventId);
+		return;
+	}
+
+	if (eventId == eOpenTexture)
+	{
+		bool loaded = LoadTexture(filename);
+		if (loaded)
+		{
+			uint32 e = resourceGetEventId1s("eSetTextureNameA");
+			uint32 texture = mTextureId - 1;
+			uint32 mat = freyjaGetCurrentMaterial();
+
+			mgtk_textentry_value_set(e, filename);
+			freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+			mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
+			freyjaMaterialTexture(mat, texture);
+
+			freyja_event_gl_refresh();
+		}
+
+		freyja_print("%s %s", filename, loaded ? "loaded" : "failed to load");
+
+		return;
+	}
+
+	if (eventId == eOpenTextureB)
+	{
+		if (LoadTexture(filename))
+		{
+			uint32 e = resourceGetEventId1s("eSetTextureNameB");
+			//uint32 texture = mTextureId - 1;
+			uint32 mat = freyjaGetCurrentMaterial();
+
+			mgtk_textentry_value_set(e, filename);
+			freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+			DEBUG_MSG("Not implemented in backend yet");
+			//mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
+			//freyjaMaterialTexture(mat, texture);
+			//
+			freyja_event_gl_refresh();
+		}
+
+		return;
+	}
 
 	switch (eventId)
 	{
@@ -4348,6 +4399,7 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 		/* Compare UVs as 2 space coords ( for the most part ) */
 		if (f->mFlags & Face::fPolyMappedTexCoords)
 		{
+#if 0
 			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
 			{
 				m->GetTexCoord(f->mTexCoordIndices[j], uvB.mVec);
@@ -4360,6 +4412,20 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 					mTexCoordArrayIndex = f->mTexCoordIndices[j];
 				}
 			}
+#else
+			foreach (f->mTexCoordIndices)
+			{
+				m->GetTexCoord(f->mTexCoordIndices.current(), uvB.mVec);
+				uvB.mVec[2] = 0.0f;
+				dist = helDist3v(uv.mVec, uvB.mVec);
+				
+				if (dist < cutoff && dist < bestDist)
+				{
+					bestDist = dist;
+					mTexCoordArrayIndex = f->mTexCoordIndices.current();
+				}
+			}
+#endif
 		}
 		else
 		{
@@ -4462,8 +4528,36 @@ void eTextureUpload(unsigned int id)
 }
 
 
+void eOpenModel(char *filename)
+{
+	FreyjaControl::mInstance->LoadModel(filename);
+}
+
+
+void eSaveModel(char *filename)
+{
+	FreyjaControl::mInstance->SaveModel(filename);
+}
+
+
+void eOpenMaterial(char *filename)
+{
+	FreyjaControl::mInstance->LoadMaterial(filename);
+}
+
+
+void eSaveMaterial(char *filename)
+{
+	FreyjaControl::mInstance->SaveMaterial(filename);
+}
+
+
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
+	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
+	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
+	ResourceEventCallbackString::add("eSaveModel", &eSaveModel);
 	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);

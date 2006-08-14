@@ -39,6 +39,13 @@
 #   include <dlfcn.h>
 #endif
 
+// Define DISABLE_SYSTEMIO_DEBUG_MSG to disable this debug macro
+#if defined(DEBUG) && !defined(DISABLE_SYSTEMIO_DEBUG_MSG)
+#   define DEBUG_MSG SystemIO::Print("(%s:%i): %s() %s ", __FILE__, __LINE__, __func__); SystemIO::Print
+#else
+#   define DEBUG_MSG(...)
+#endif
+
 // Some very old byte swapping routines
 #define SWAP_2(x) ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
 #define SWAP_4(x) ( ((x) << 24) | \
@@ -48,7 +55,6 @@
 #define FIX_SHORT(x) (*(unsigned short *)&(x) = SWAP_2(*(unsigned short *)&(x)))
 #define FIX_INT(x)   (*(unsigned int *)&(x)   = SWAP_4(*(unsigned int *)&(x)))
 #define FIX_FLOAT(x) FIX_INT(x)
-
 
 namespace mstl {
 
