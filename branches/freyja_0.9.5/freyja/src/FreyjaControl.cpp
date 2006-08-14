@@ -2828,161 +2828,57 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 }
 
 
-void FreyjaControl::handleFilename(const char *filename, int eventId)
-{
-	if (ResourceEvent::listen(eventId - 10000 /*ePluginEventBase*/, (char*)filename))
-		return;
-
-	int failed = 1;
-	int type = -1, type2 = -1;
-
-
-	if (!filename || !filename[0])
-	{
-		freyja_print("Passed NULL filename for event = %i", eventId);
-		return;
-	}
-
-	if (eventId == eOpenTexture)
-	{
-		bool loaded = LoadTexture(filename);
-		if (loaded)
-		{
-			uint32 e = resourceGetEventId1s("eSetTextureNameA");
-			uint32 texture = mTextureId - 1;
-			uint32 mat = freyjaGetCurrentMaterial();
-
-			mgtk_textentry_value_set(e, filename);
-			freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-			mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
-			freyjaMaterialTexture(mat, texture);
-
-			freyja_event_gl_refresh();
-		}
-
-		freyja_print("%s %s", filename, loaded ? "loaded" : "failed to load");
-
-		return;
-	}
-
-	if (eventId == eOpenTextureB)
-	{
-		if (LoadTexture(filename))
-		{
-			uint32 e = resourceGetEventId1s("eSetTextureNameB");
-			//uint32 texture = mTextureId - 1;
-			uint32 mat = freyjaGetCurrentMaterial();
-
-			mgtk_textentry_value_set(e, filename);
-			freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-			DEBUG_MSG("Not implemented in backend yet");
-			//mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
-			//freyjaMaterialTexture(mat, texture);
-			//
-			freyja_event_gl_refresh();
-		}
-
-		return;
-	}
-
-	switch (eventId)
-	{
-	case FREYJA_MODE_LOAD_MATERIAL:
-		failed = !LoadMaterial(filename);
-		type = 0;
-		type2 = 1;
-
-		if (!failed)
-			freyja_refresh_material_interface();
-		break;
-
-	case FREYJA_MODE_SAVE_MATERIAL:
-		failed = !SaveMaterial(filename);
-		type = 0;
-		type2 = 0;
-		break;
-
-	case FREYJA_MODE_LOAD_MODEL:
-		failed = !LoadModel(filename);
-		type = 2;
-		type2 = 1;
-		break;
-
-	case FREYJA_MODE_LOAD_TEXTURE:
-		failed = !LoadTexture(filename);
-		type = 1;
-		type2 = 1;
-		freyja_event_gl_refresh();
-
-		if (failed == 0) // success
-		{
-			uint32 e = resourceGetEventId1s("eSetTextureNameA");
-			uint32 texture = mTextureId - 1;
-			mgtk_textentry_value_set(e, filename);
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
-			mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
-			freyjaMaterialTexture(freyjaGetCurrentMaterial(), texture);
-		}
-		break;
-
-	case FREYJA_MODE_SAVE_MODEL:
-		if (FreyjaFileReader::doesFileExist(filename))
-		{
-			if (freyja_create_confirm_dialog("gtk-dialog-question",
-											 "You are about to overwrite an existing file.",
-											 "Would you like to replace the existing model with your current model?",
-											 "gtk-cancel", "_Cancel", "gtk-replace", "_Replace"))
-			{
-				failed = !SaveModel(filename);
-				type = 2;
-				type2 = 0;
-			}
-		}
-		else
-		{
-			failed = !SaveModel(filename);
-			type = 2;
-			type2 = 0;
-		}
-
-		if (!failed)
-		{
-			char title[1024];
-
-			snprintf(title, 1024, "%s - Freyja", filename);
-			freyja_set_main_window_title(title);
-			AddRecentFilename(filename);
-			mCleared = true;
-		}
-		break;
-
-	}
-
-	// Mongoose 2002.02.02, Reduce text segment size some  =)
-	freyja_print("%s '%s' %s%s", 
-					(type == 0) ? "Material" : 
-					(type == 1) ? "Texture" : 
-					(type == 2) ? "Model" : 
-					(type == 3) ? "Animation" :
-					(type == 4) ?"Palette" :
-					"!ERROR: No event for ",
-#ifdef WIN32
-					filename,
-#else
-					basename((char*)filename),
-#endif
-					(type2 == 0) ? "save " : "load ",
-					(failed == 0) ? "[sucess]" : "[failed]");
-}
-
-
 void FreyjaControl::handleTextEvent(int event, const char *text)
 {
-	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, (char*)text))
-		return;
+	bool empty = !(text == NULL || text[0] == 0);
+
 
 	switch (event)
 	{
+	case eOpenTexture:
+		{
+			if (empty) return;
+
+			bool loaded = LoadTexture(text);
+			if (loaded)
+			{
+				uint32 e = resourceGetEventId1s("eSetTextureNameA");
+				uint32 texture = mTextureId - 1;
+				uint32 mat = freyjaGetCurrentMaterial();
+
+				mgtk_textentry_value_set(e, text);
+				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+				mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
+				freyjaMaterialTexture(mat, texture);
+				
+				freyja_event_gl_refresh();
+			}
+
+			freyja_print("%s %s", text, loaded ? "loaded" : "failed to load");
+		}
+		break;
+
+	case eOpenTextureB:
+		{
+			if (empty) return;
+
+			if (LoadTexture(text))
+			{
+				uint32 e = resourceGetEventId1s("eSetTextureNameB");
+				//uint32 texture = mTextureId - 1;
+				uint32 mat = freyjaGetCurrentMaterial();
+
+				mgtk_textentry_value_set(e, text);
+				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+				DEBUG_MSG("Not implemented in backend yet");
+				//mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
+				//freyjaMaterialTexture(mat, texture);
+				//
+				freyja_event_gl_refresh();
+			}
+		}
+		break;
+
 	case eSetMaterialName:
 		freyjaMaterialName(freyjaGetCurrentMaterial(), text);
 		break;
@@ -2992,6 +2888,7 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		break;
 
 	case eSetTextureNameB:
+		// FIXME: Need to make N level texture support in backend first
 		/* Text here is assumed to be a filename */
 		//mMaterial->loadDetailTexture(text);
 		break;
@@ -4531,7 +4428,13 @@ void eTextureUpload(unsigned int id)
 
 void eOpenModel(char *filename)
 {
-	FreyjaControl::mInstance->LoadModel(filename);
+	if (FreyjaControl::mInstance->LoadModel(filename))
+	{
+		char title[1024];
+		snprintf(title, 1024, "%s - Freyja", filename);
+		freyja_set_main_window_title(title);
+		FreyjaControl::mInstance->AddRecentFilename(filename);
+	}
 }
 
 
@@ -4543,7 +4446,10 @@ void eSaveModel(char *filename)
 
 void eOpenMaterial(char *filename)
 {
-	FreyjaControl::mInstance->LoadMaterial(filename);
+	if (FreyjaControl::mInstance->LoadMaterial(filename))
+	{
+		freyja_refresh_material_interface();
+	}
 }
 
 

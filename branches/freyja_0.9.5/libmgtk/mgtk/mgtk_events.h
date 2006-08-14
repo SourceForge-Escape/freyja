@@ -70,9 +70,8 @@ int mgtk_create_confirm_dialog(char *dialog_icon,
 							   char *cancel_icon, char *cancel_text,
 							   char *accept_icon, char *accept_text);
 
-/* File dialog events */
+/* File dialog events, now sends handle_text events */
 void mgtk_event_file_dialog(int eventId, char *title);
-void mgtk_handle_file_dialog_selection(int eventId, char *filename);
 void mgtk_event_fileselection_set_dir(int eventId, char *dir);
 void mgtk_event_fileselection_append_pattern(int eventId, char *label, char *pattern);
 

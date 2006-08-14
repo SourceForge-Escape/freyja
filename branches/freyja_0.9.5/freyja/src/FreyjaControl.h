@@ -412,17 +412,6 @@ class FreyjaControl
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void handleFilename(const char *filename, int eventId);
-	/*------------------------------------------------------
-	 * Pre  : filename is valid and mode was set
-	 * Post : Executes a file operation depending on mode
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.05.22:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	void handleTextEvent(int event, const char *text);
 	/*------------------------------------------------------
 	 * Pre  : text is valid

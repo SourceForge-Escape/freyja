@@ -466,13 +466,6 @@ void mgtk_handle_event1f(int event, float value)
 }
 
 
-void mgtk_handle_file_dialog_selection(int event, char *filename)
-{
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->handleFilename(filename, event);
-}
-
-
 void mgtk_handle_gldisplay()
 {
 	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
@@ -598,13 +591,6 @@ void freyja_handle_event1f(int event, float value)
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
 	}
-}
-
-
-void freyja_handle_file_dialog_selection(char *filename)
-{
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->handleFilename(filename, gFileDialogEvent);
 }
 
 
@@ -1566,13 +1552,6 @@ int freyja_create_confirm_dialog(char *dialog_icon,
 }
 
 
-void freyja_event_file_dialog_notify(char *filename)//, int eventId)
-{
-	if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->handleFilename(filename, gFileDialogEvent);
-}
-
-
 void freyja_set_main_window_title(char *title)
 {
 	mgtk_application_window_title(title);
@@ -1760,7 +1739,8 @@ int main(int argc, char *argv[])
 	if (argc > 1)
 	{
 		mgtk_event_fileselection_set_dir(eOpenFile, argv[1]);
-		mgtk_handle_file_dialog_selection(eOpenFile, argv[1]);
+		extern void eOpenModel(char *);
+		eOpenModel(argv[1]);
 	}
 
 	mgtk_start();
