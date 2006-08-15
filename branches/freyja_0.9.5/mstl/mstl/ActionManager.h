@@ -85,17 +85,6 @@ class ActionManager
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void PopScope() {}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : For multiple actions mostly
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.05.06:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
 	virtual Action *Pop() { return mActions.pop(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -140,7 +129,14 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool Undo() { Action *a = Pop(); if (!a) return false; bool b = a->Undo(); delete a; return b; }
+	bool Undo() 
+	{ 
+		Action *a = Pop(); 
+		if (!a) return false; 
+		bool b = a->Undo(); 
+		delete a; 
+		return b; 
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handles push/append as needed ( deletetion )

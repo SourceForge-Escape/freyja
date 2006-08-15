@@ -28,6 +28,8 @@
 #define GUARD__FREYJA_MONGOOSE_ACTION_H_
 
 #include <mstl/SystemIO.h>
+#include <mstl/Vector.h>
+
 
 namespace mstl {
 
@@ -132,6 +134,53 @@ class Action
 
 
 	/* */
+};
+
+
+class ActionList : public Action
+{
+public:
+	ActionList(Vector<Action *> &actions) :
+		Action(),
+		mActions(actions)
+	{}
+
+	~ActionList()
+	{
+		long idx;
+		foreach (mActions, idx)
+		{
+			if (mActions.current(idx))
+				delete mActions.current(idx);
+		}
+	}
+
+	virtual bool Redo()
+	{
+		long idx;
+		foreach (mActions, idx)
+		{
+			if (mActions.current(idx))
+				mActions.current(idx)->Redo();
+		}
+
+		return true;
+	}
+
+	virtual bool Undo() 
+	{
+		long idx;
+		foreach (mActions, idx)
+		{
+			if (mActions.current(idx))
+				mActions.current(idx)->Undo();
+		}
+
+		return true;
+	}
+
+
+	Vector<Action *> mActions;
 };
 
 } // namespace mstl

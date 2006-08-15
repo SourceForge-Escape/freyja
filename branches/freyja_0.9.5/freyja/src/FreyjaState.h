@@ -33,6 +33,8 @@
 #include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaFileReader.h>
 #include <freyja/MeshABI.h>
+#include <freyja/Mesh.h>
+#include <mstl/Action.h>
 
 
 class FreyjaState
@@ -150,44 +152,106 @@ class FreyjaState
 };
 
 
-class FreyjaStateTransform : public FreyjaState
+class ActionMeshTransformExt : public Action
 {
  public:
+	ActionMeshTransformExt(index_t mesh, freyja_transform_action_t a, vec3_t xyz, Vec3 &v) :
+		Action(),
+		mCursorXYZ(v),
+		mMesh(mesh),
+		mAction(a),
+		mXYZ(xyz)
+	{ }
 
-	FreyjaStateTransform(freyja_transform_t transform,
-						 freyja_transform_action_t action,
-						 index_t id, vec3_t xyz) : FreyjaState() 
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
 	{
-		mState = eTransform;
-		mEvent = transform;
-		mMode = action;
-		mIndex = id;
-		mTransform = transform;
-		mAction = action;
-		mXYZ.mVec[0] = xyz[0];
-		mXYZ.mVec[1] = xyz[1];
-		mXYZ.mVec[2] = xyz[2];		
+		freyjaModelMeshTransform3fv(0, mMesh, mAction, mXYZ.mVec);
+		mCursorXYZ = mXYZ;
+		return true;
 	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of FreyjaStateTransform
-	 ------------------------------------------------------*/
 
-	virtual ~FreyjaStateTransform() {}
-	/*------------------------------------------------------
-	 * Pre  : FreyjaStateTransform object is allocated
-	 * Post : Deconstructs an object of FreyjaStateTransform
-	 ------------------------------------------------------*/
+	Vec3 &mCursorXYZ;
+	index_t mMesh;                      /* Which mesh? */
+	freyja_transform_action_t mAction;  /* Type of transform */
+	Vector3d mXYZ;                      /* Storage for 3d transform event */
+};
 
-	virtual bool Undo()
-	{	
-		if (mTransform == fTransformMesh)
+
+class ActionMeshTransform : public Action
+{
+ public:
+	ActionMeshTransform(index_t mesh, freyja_transform_action_t a, vec3_t xyz) :
+		Action(),
+		mMesh(mesh),
+		mAction(a),
+		mXYZ(xyz)
+	{}
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		freyjaModelMeshTransform3fv(0, mMesh, mAction, mXYZ.mVec);
+		return true;
+	}
+
+	index_t mMesh;                      /* Which mesh? */
+	freyja_transform_action_t mAction;  /* Type of transform */
+	Vector3d mXYZ;                      /* Storage for 3d transform event */
+};
+
+
+class ActionTexCoordTransform : public Action
+{
+ public:
+	ActionTexCoordTransform(index_t mesh, index_t texcoord, vec_t u, vec_t v) :
+		Action(),
+		mMesh(mesh),
+		mTexCoordArrayIndex(texcoord),
+		mU(u),
+		mV(v)
+	{}
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		//DEBUG_MSG("$$$$$$$$$$$$ UNDO - %u %u %f %f\n", mMesh, mTexCoordArrayIndex, mU, mV);
+		freyja::Mesh *m = freyjaModelGetMeshClass(0, mMesh);
+
+		if (m)
 		{
-			freyjaModelMeshTransform3fv(0, mIndex, fTranslate, mXYZ.mVec);
+			vec3_t uvw = { mU, mV, 0.0f };
+			m->SetTexCoord(mTexCoordArrayIndex, uvw);
 			return true;
 		}
 
+		return false;
+	}
 
+	index_t mMesh, mTexCoordArrayIndex;
+	vec_t mU, mV;
+};
+
+
+class ActionGenericTransformExt : public Action
+{
+ public:
+	ActionGenericTransformExt(index_t idx, freyja_transform_t t, freyja_transform_action_t a, vec3_t xyz, Vec3 &v) :
+		Action(),
+		mCursorXYZ(v),
+		mIndex(idx),
+		mTransform(t),
+		mAction(a),
+		mXYZ(xyz)
+	{ }
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
 		Vec3 xyz;
 
 		freyjaGetGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
@@ -207,76 +271,45 @@ class FreyjaStateTransform : public FreyjaState
 						   xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
 
 		freyjaGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
-		
-		return true;
-	}	
 
-	virtual bool Redo()
-	{
-		return false;
-	}
-
-	virtual bool SerializeUndoHistory(FreyjaFileWriter &w) 
-	{
-		w.writeInt32U(32); // Byte size 		
-		w.writeInt32(mEvent);
-		w.writeInt32(mMode);
-		w.writeInt32U(mIndex);
-		//w.writeInt32U(mObject);
-		w.writeInt32U(mTransform);
-		w.writeInt32U(mAction);
-		w.writeFloat32(mXYZ.mVec[0]);
-		w.writeFloat32(mXYZ.mVec[1]);
-		w.writeFloat32(mXYZ.mVec[2]);
-		return true; 
-	}
-
-	virtual bool SerializeUndoHistory(FreyjaFileReader &r) 
-	{
-		unsigned int byteSize = r.readInt32U(); // Byte size 
-
-		if ( byteSize != 32 )
-		{
-			freyjaPrintError("! FreyjaStateTransform::SerializeUndoHistory error");
-		}
-
-		mEvent = r.readInt32();
-		mMode = r.readInt32();
-		mIndex = r.readInt32U();
-		//mObject = (freyja_object_t)r.readInt32U();
-		mTransform = (freyja_transform_t)r.readInt32U();
-		mAction = (freyja_transform_action_t)r.readInt32U();
-		mXYZ.mVec[0] = r.readFloat32();
-		mXYZ.mVec[1] = r.readFloat32();
-		mXYZ.mVec[2] = r.readFloat32();
+		mCursorXYZ = mXYZ;
 		return true;
 	}
 
-	virtual void operator =(const FreyjaStateTransform &s)
-    { 
-		mEvent = s.mEvent; 
-		mIndex = s.mIndex; 
-		mMode = s.mMode; 
-
-		//mObject = s.mObject;
-		mTransform = s.mTransform;
-		mAction = s.mAction;
-		mXYZ.mVec[0] = s.mXYZ.mVec[0];
-		mXYZ.mVec[1] = s.mXYZ.mVec[1];
-		mXYZ.mVec[2] = s.mXYZ.mVec[2];	
-	}
-
-	Vector3d GetXYZ() { return mXYZ; }
-
-	void SetXYZ(Vector3d &u) { mXYZ = u; }
-
-
- private:
-
+	Vec3 &mCursorXYZ;
+	index_t mIndex;
 	freyja_transform_t mTransform;      /* Object type */
-
 	freyja_transform_action_t mAction;  /* Type of transform */
+	Vector3d mXYZ;                      /* Storage for 3d transform event */
+};
 
+
+class ActionVertexTransformExt : public Action
+{
+ public:
+	ActionVertexTransformExt(index_t mesh, index_t vertex, freyja_transform_action_t a, vec3_t xyz, Vec3 &v) :
+		Action(),
+		mCursorXYZ(v),
+		mMesh(mesh),
+		mVertex(vertex),
+		mAction(a),
+		mXYZ(xyz)
+	{ }
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		if (mAction == fTranslate)
+			freyjaMeshVertexTranslate3fv(mMesh, mVertex, mXYZ.mVec);
+		mCursorXYZ = mXYZ;
+		return true;
+	}
+
+	Vec3 &mCursorXYZ;
+	index_t mMesh;
+	index_t mVertex;
+	freyja_transform_action_t mAction;  /* Type of transform */
 	Vector3d mXYZ;                      /* Storage for 3d transform event */
 };
 
