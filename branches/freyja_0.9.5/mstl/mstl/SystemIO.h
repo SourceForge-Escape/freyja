@@ -41,7 +41,7 @@
 
 // Define DISABLE_SYSTEMIO_DEBUG_MSG to disable this debug macro
 #if defined(DEBUG) && !defined(DISABLE_SYSTEMIO_DEBUG_MSG)
-#   define DEBUG_MSG SystemIO::Print("(%s:%i): %s() %s ", __FILE__, __LINE__, __func__); SystemIO::Print
+#   define DEBUG_MSG SystemIO::Print("(%s:%i): %s() ", __FILE__, __LINE__, __func__); SystemIO::Print
 #else
 #   define DEBUG_MSG(...)
 #endif

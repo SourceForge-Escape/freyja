@@ -853,6 +853,7 @@ GtkWidget *mgtk_create_fileselection(int event, char *title)
 }
 
 void mgtk_update_filechooser_preview(GtkFileChooser *filechooser,gpointer data);
+
 GtkWidget *mgtk_create_filechooser(int event, char *title)
 {
 	GtkWidget *filechooser = NULL;
