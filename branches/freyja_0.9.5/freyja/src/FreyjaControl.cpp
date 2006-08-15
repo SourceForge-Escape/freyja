@@ -3862,6 +3862,13 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	case tMesh:	
 		if (mToken) 
 		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				mCursor.mPos = m->GetPosition();
+			}
+
 			mActionManager.Push(new ActionMeshTransformExt(GetSelectedMesh(), fTranslate, mCursor.mPos.mVec, mCursor.mPos));
 			mToken = false;
 		}
