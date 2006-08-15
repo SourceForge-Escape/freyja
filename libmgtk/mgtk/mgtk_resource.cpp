@@ -407,8 +407,14 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
 	dialog = mgtk_create_filechooser(event, title);
 	gFileDialogWidgetMap.Add(event, dialog);
 
+	/*Hide on calls to close */
 	gtk_signal_connect(GTK_OBJECT(dialog), "close",
 					   GTK_SIGNAL_FUNC(mgtk_filechooser_close_event), 
+					   GINT_TO_POINTER(event));
+
+	/* Hide on window manager calls to close */
+	gtk_signal_connect(GTK_OBJECT(dialog), "delete_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_cancel), 
 					   GINT_TO_POINTER(event));
 
 
