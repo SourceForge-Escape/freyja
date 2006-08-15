@@ -1258,7 +1258,8 @@ void FreyjaRender::renderUVWindow()
 			{
 				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
 				v.mVec[0] *= width;
-				v.mVec[1] *= height;
+				//v.mVec[1] *= height;
+				v.mVec[1] = height - v.mVec[1]*height;
 				glVertex2fv(v.mVec);
 			}
 		}
@@ -1268,7 +1269,8 @@ void FreyjaRender::renderUVWindow()
 			{
 				m->GetTexCoord(f->mIndices[j], v.mVec);
 				v.mVec[0] *= width;
-				v.mVec[1] *= height;
+				//v.mVec[1] *= height;
+				v.mVec[1] = height - v.mVec[1]*height;
 				glVertex2fv(v.mVec);
 			}
 		}
@@ -1300,7 +1302,8 @@ void FreyjaRender::renderUVWindow()
 			{
 				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
 				v.mVec[0] *= width;
-				v.mVec[1] *= height;
+				//v.mVec[1] *= height;
+				v.mVec[1] = height - v.mVec[1]*height;
 				glVertex2fv(v.mVec);
 			}
 		}
@@ -1310,7 +1313,8 @@ void FreyjaRender::renderUVWindow()
 			{
 				m->GetTexCoord(f->mIndices[j], v.mVec);
 				v.mVec[0] *= width;
-				v.mVec[1] *= height;
+				//v.mVec[1] *= height;
+				v.mVec[1] = height - v.mVec[1]*height;
 				glVertex2fv(v.mVec);
 			}
 		}

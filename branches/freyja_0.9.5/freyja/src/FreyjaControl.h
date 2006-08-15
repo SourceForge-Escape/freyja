@@ -701,6 +701,7 @@ private:
 
 	void PrintInfo();
 
+	void TexCoordMove(vec_t u, vec_t v);
 	void TexCoordSelect(vec_t u, vec_t v);
 	index_t mTexCoordArrayIndex;
 
