@@ -31,6 +31,7 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
 #include <freyja/FreyjaPrinter.h>
+#include <mstl/ActionManager.h>
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
@@ -40,6 +41,42 @@
 #include "FreyjaRender.h"
 #include "Texture.h"
 #include "Freyja3dCursor.h"
+
+
+// test for new, cleaner undo/redo system
+#include <freyja/Mesh.h>
+#include <freyja/MeshABI.h>
+class ActionTexCoordTransform : public Action
+{
+ public:
+	ActionTexCoordTransform(index_t mesh, index_t texcoord, vec_t u, vec_t v) :
+		Action(),
+		mMesh(mesh),
+		mTexCoordArrayIndex(texcoord),
+		mU(u),
+		mV(v)
+	{}
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		DEBUG_MSG("$$$$$$$$$$$$ UNDO - %u %u %f %f\n", mMesh, mTexCoordArrayIndex, mU, mV);
+		freyja::Mesh *m = freyjaModelGetMeshClass(0, mMesh);
+
+		if (m)
+		{
+			vec3_t uvw = { mU, mV, 0.0f };
+			m->SetTexCoord(mTexCoordArrayIndex, uvw);
+			return true;
+		}
+
+		return false;
+	}
+
+	index_t mMesh, mTexCoordArrayIndex;
+	vec_t mU, mV;
+};
 
 
 class FreyjaControl
@@ -825,6 +862,8 @@ private:
 	 * Mongoose - Created  ( Updated comment style )
 	 ------------------------------------------------------*/
 
+
+	ActionManager mActionManager;           /* New Undo/Redo system */
 
 	uint32 mFlags;                          /* Option bitflags */
 

@@ -39,7 +39,7 @@ class Action
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Action();
+	Action() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Action
@@ -50,7 +50,7 @@ class Action
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual ~Action();
+	virtual ~Action() {}
 	/*------------------------------------------------------
 	 * Pre  : Action object is allocated
 	 * Post : Deconstructs an object of Action
@@ -67,7 +67,7 @@ class Action
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool Serialize(SystemIO::Writer &w) { return false; }
+	virtual bool Serialize(SystemIO::FileWriter &w) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
