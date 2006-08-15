@@ -2276,39 +2276,14 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eUndo:
-
 		if (mActionManager.Undo())
 		{
 			freyja_event_gl_refresh();
 		}
-		
+		else
 		{
-			FreyjaState *state = mCursor.Pop();
-
-			if (state)
-			{
-				switch (state->GetType())
-				{
-				case FreyjaState::eEvent:
-					BUG_ME("FreyjaState::eEvent Undo not implemented");
-					break;
-
-				case FreyjaState::eTransform:
-					mCursor.mPos = ((FreyjaStateTransform *)state)->GetXYZ();
-					break;
-				}
-
-				freyja_print("Undo state Popped.");
-
-				delete state;
-
-				freyja_event_gl_refresh();
-			}
-			else
-			{
-				freyja_print("Undo is out of stack frames.");
-			}
-		}
+			freyja_print("Undo system has no more actions to revert.");
+		}		
 		break;
 
 	case eRedo:
@@ -3097,6 +3072,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					mCursor.mAxis = Freyja3dCursor::eZ;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Z");
+					mToken = true;
 					return;
 				}
 
@@ -3691,6 +3667,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 				{
 					freyja_print("! Vertex[%i] unselected by pick ray.", selected);
 					m->ClearVertexFlags(selected, Vertex::fSelected);
+					
 				}
 			}
 		}
@@ -3877,28 +3854,35 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		break;
 	}
 
-
-	/* Store undo information if token is set */
-	if (mToken)
-	{
-		freyja_transform_t type = fTransformMesh;
-		//fTransformVertex
-		//fTransformBone
-		ActionModelModified(new FreyjaStateTransform(type, fTranslate, GetSelectedMesh(), mCursor.mPos.mVec));
-	}
-
 	mCursor.mPos += t;
 	mCursor.SetMode(Freyja3dCursor::Translation);
 
 	switch (mObjectMode)
 	{
-	case tMesh:
+	case tMesh:	
+		if (mToken) 
+		{
+			mActionManager.Push(new ActionMeshTransformExt(GetSelectedMesh(), fTranslate, mCursor.mPos.mVec, mCursor.mPos));
+			mToken = false;
+		}
+
 		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fTranslate, mCursor.mPos.mVec);
 		break;
 
 	case tPoint:
+		if (mToken) 
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				m->GetVertexPos(GetSelectedVertex(), mCursor.mPos.mVec);
+			}
+
+			mActionManager.Push(new ActionVertexTransformExt(GetSelectedMesh(), GetSelectedVertex(), fTranslate, mCursor.mPos.mVec, mCursor.mPos));
+			mToken = false;
+		}
 		freyjaMeshVertexTranslate3fv(GetSelectedMesh(), GetSelectedVertex(), mCursor.mPos.mVec);
-		
 		break;
 
 	case tBone:
@@ -3906,6 +3890,11 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		break;
 
 	default:
+		if (mToken) 
+		{
+			//mActionManager.Push(new ActionGenericTransformExt(GetSelectedMesh(), fTranslate, mCursor.mPos.mVec, mCursor.mPos));
+		}
+
 		//Transform(mObjectMode, fTranslate, xf, yf, zf);
 		break;
 	}
