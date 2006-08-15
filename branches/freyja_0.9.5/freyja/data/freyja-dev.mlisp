@@ -336,8 +336,9 @@
 					(hbox 1 0 0 1 0
 						(label "Select edit plane: "  0.0 0.5)
 						(optionmenu		eEvent	eNone
-							(menu_item	"Free                "	eEvent	FREYJA_MODE_PLANE_FREE)
-							(menu_item	"Front               "	eEvent	FREYJA_MODE_PLANE_XY)
+							(menu_item "Viewports"		eEvent	eViewports)
+							(menu_item	"Free"	eEvent	FREYJA_MODE_PLANE_FREE)
+							(menu_item	"Front"	eEvent	FREYJA_MODE_PLANE_XY)
 				  			(menu_item	"Side"	eEvent	FREYJA_MODE_PLANE_YZ)
 				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)))
 

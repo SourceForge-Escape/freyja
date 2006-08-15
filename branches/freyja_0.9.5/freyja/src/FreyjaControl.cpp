@@ -2046,6 +2046,7 @@ bool FreyjaControl::event(int command)
 		freyja_print("Viewport rendering [%s]", 
 					(mRender->getFlags() & FreyjaRender::fViewports) ? 
 					"ON" : "OFF");
+		freyja_event_gl_refresh();
 		break;
 
 	case eFullscreen:
@@ -2751,24 +2752,28 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case FREYJA_MODE_PLANE_XY:
+		mRender->clearFlag(FreyjaRender::fViewports);
 		freyja_print("Plane XY");
 		SetSelectedView(PLANE_XY);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_XZ:
+		mRender->clearFlag(FreyjaRender::fViewports);
 		freyja_print("Plane XZ");  
 		SetSelectedView(PLANE_XZ);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_YZ:
+		mRender->clearFlag(FreyjaRender::fViewports);
 		freyja_print("Plane ZY");
 		SetSelectedView(PLANE_ZY);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_FREE:
+		mRender->clearFlag(FreyjaRender::fViewports);
 		freyja_print("Plane Free");
 		SetSelectedView(PLANE_FREE);
 		freyja_event_gl_refresh();
