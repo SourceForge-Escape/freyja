@@ -355,7 +355,7 @@ void FreyjaControl::ActionModelModified(FreyjaState *state)
 
 		if (mToken)
 		{
-			mCursor.ForceChangeState(state, Freyja3dCursor::Translation);
+			//mCursor.ForceChangeState(state, Freyja3dCursor::Translation);
 		}
 		else // This is an extranous event if it doesn't have a token
 		{
@@ -3908,6 +3908,8 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 }
 
 
+//FIXME: Using object Pos as a pivot and selected point on cursor arc...
+//       mark off displacement of motion and rotate by that angle
 void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
