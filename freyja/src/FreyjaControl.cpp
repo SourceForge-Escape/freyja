@@ -2946,7 +2946,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 				if (t > 1.0) t = 1.0;
 				if (t < 0.0) t = 0.0;
 				
-				//TexelMove(s, t);
+				TexCoordMove(s, t);
 				return true;
 			}
 			break;
@@ -4274,6 +4274,19 @@ void FreyjaControl::LoadResource()
 }
 
 
+void FreyjaControl::TexCoordMove(vec_t u, vec_t v)
+{
+	Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+	if (!m || mTexCoordArrayIndex == INDEX_INVALID)
+		return;
+
+	vec3_t uvw = { u, v, 0.0f };
+	
+	m->SetTexCoord(mTexCoordArrayIndex, uvw);
+}
+
+
 void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 {
 	mTexCoordArrayIndex = INDEX_INVALID;
@@ -4350,7 +4363,7 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 
 	((mTexCoordArrayIndex == INDEX_INVALID) ? 
 	 freyja_print("No UVs selected!") : 
-	 freyja_print("Selected UV[%i]", mTexCoordArrayIndex));
+	 freyja_print("Selected UV[%i].  Move with right mouse button.", mTexCoordArrayIndex));
 }
 
 
