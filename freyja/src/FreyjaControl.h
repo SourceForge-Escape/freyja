@@ -506,11 +506,6 @@ class FreyjaControl
 	}
 
 
-	void CursorStatePush() { mCursor.Push(); }
-	
-	
-	void CursorStatePop() { mCursor.Pop(); }
-
 	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
 
 

@@ -132,60 +132,9 @@ class Freyja3dCursor
 		glPopMatrix();
 	}
 
-
-	void SetMode(Flags n)
-	{
-		mMode = n;
-	}
-
-	// When seperating events from cursor remember to restore mode here
-	void ForceChangeState(FreyjaState *state, Flags mode)
-	{
-		if (!state)
-			return;
-
-		freyja_print("! force pushed undo frame");
-		mStack.push(state);
-		mLastState = *state;
-		mMode = mode;
-	}
-
-	void ChangeState(FreyjaState *state, Flags mode)
-	{
-		if (!state)
-			return;
-
-		if ( *state != mLastState )
-		{
-			freyja_print("! pushed undo frame");
-			mStack.push(state);
-			mLastState = *state;
-		}
-		
-		mMode = mode;
-	}
-
 	Flags GetMode() { return mMode; }
 
-	void Push()
-	{
-		// FIXME: Not implemented yet
-	}
-
-	FreyjaState *Pop()
-	{
-		FreyjaState *state = NULL;
-		mLastState.SetEvent(-1);
-
-		if (!mStack.empty())
-		{
-			state = mStack.pop();
-			state->Undo();
-			return state;
-		}
-
-		return state;
-	}
+	void SetMode(Flags n) { mMode = n; }
 
 	void Reset()
 	{
@@ -357,10 +306,6 @@ class Freyja3dCursor
 		glEnd();
 	}
 
-
-	FreyjaState mLastState;
-
-	mstl::stack<FreyjaState *> mStack;
 
 	Flags mMode;
 };
