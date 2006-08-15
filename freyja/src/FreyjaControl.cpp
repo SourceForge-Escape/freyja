@@ -61,6 +61,7 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 
 FreyjaControl::FreyjaControl() :
 	mSelectedTexture(0),
+	mActionManager(),
 	mFlags(fNone),
 	mObjectMode(tScene),
 	mResourceFilename("freyja-dev.mlisp"),
@@ -2275,6 +2276,12 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eUndo:
+
+		if (mActionManager.Undo())
+		{
+			freyja_event_gl_refresh();
+		}
+		
 		{
 			FreyjaState *state = mCursor.Pop();
 
@@ -4280,6 +4287,17 @@ void FreyjaControl::TexCoordMove(vec_t u, vec_t v)
 
 	if (!m || mTexCoordArrayIndex == INDEX_INVALID)
 		return;
+
+	static uint32 texcoord = INDEX_INVALID;
+
+	if (texcoord != mTexCoordArrayIndex)
+	{
+		texcoord = mTexCoordArrayIndex;
+		vec3_t uv;
+		m->GetTexCoord(mTexCoordArrayIndex, uv);
+		
+		mActionManager.Push(new ActionTexCoordTransform(GetSelectedMesh(), mTexCoordArrayIndex, uv[0], uv[1]));
+	}
 
 	vec3_t uvw = { u, v, 0.0f };
 	

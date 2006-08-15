@@ -29,7 +29,8 @@
 
 
 #include <mstl/Action.h>
-#include <mstl/Stack.h>
+#include <mstl/stack.h>
+#include <mstl/SystemIO.h>
 
 
 class ActionManager
@@ -40,7 +41,7 @@ class ActionManager
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	ActionManager();
+	ActionManager() : mActions() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of ActionManager
@@ -51,7 +52,7 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual ~ActionManager();
+	virtual ~ActionManager() { while ( mActions.pop()) ; }
 	/*------------------------------------------------------
 	 * Pre  : ActionManager object is allocated
 	 * Post : Deconstructs an object of ActionManager
@@ -67,7 +68,7 @@ class ActionManager
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool Serialize(SystemIO::FileWriter &w);
+	virtual bool Serialize(SystemIO::FileWriter &w) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -84,7 +85,7 @@ class ActionManager
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void PopScope();
+	void PopScope() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : For multiple actions mostly
@@ -95,7 +96,7 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void Push(Action *action);
+	virtual Action *Pop() { return mActions.pop(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -106,7 +107,18 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void Redo();
+	virtual void Push(Action *action) { if (action) mActions.push(action); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2005.05.06:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void Redo() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handles pop/delete as needed
@@ -117,7 +129,7 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::Reader &r);
+	virtual bool Serialize(SystemIO::FileReader &r) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -128,16 +140,21 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool Undo(Action *action);
+	bool Undo() { Action *a = Pop(); if (!a) return false; bool b = a->Undo(); delete a; return b; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Handles push/append as needed
+	 * Post : Handles push/append as needed ( deletetion )
 	 *
 	 *-- History ------------------------------------------
 	 *
 	 * 2005.05.06:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+
+ protected:
+
+	mstl::stack<Action *> mActions;    	/* 'Undo' stack */
 
 
  private:
@@ -151,7 +168,6 @@ class ActionManager
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Stack<Action *> mActions;    	/* */
 };
 
 #endif // GUARD__MSTL_MONGOOSE_ACTIONMANAGER_H_
