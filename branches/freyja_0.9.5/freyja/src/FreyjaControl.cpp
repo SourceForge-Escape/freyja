@@ -2830,7 +2830,7 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 
 void FreyjaControl::handleTextEvent(int event, const char *text)
 {
-	bool empty = !(text == NULL || text[0] == 0);
+	bool empty = (text == NULL || text[0] == 0);
 
 
 	switch (event)
