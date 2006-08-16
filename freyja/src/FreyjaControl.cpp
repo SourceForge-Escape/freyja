@@ -4515,7 +4515,7 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 				}
 			}
 #else
-			long j;
+			uint32 j;
 			foreach (f->mTexCoordIndices, j)
 			{
 				m->GetTexCoord(f->mTexCoordIndices.current(j), uvB.mVec);

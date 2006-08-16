@@ -147,7 +147,7 @@ public:
 
 	~ActionList()
 	{
-		long idx;
+		unsigned int idx;
 		foreach (mActions, idx)
 		{
 			if (mActions.current(idx))
@@ -157,7 +157,7 @@ public:
 
 	virtual bool Redo()
 	{
-		long idx;
+		unsigned int idx;
 		foreach (mActions, idx)
 		{
 			if (mActions.current(idx))
@@ -169,7 +169,7 @@ public:
 
 	virtual bool Serialize(SystemIO::FileReader &r)
 	{
-		long idx;
+		unsigned int idx;
 		foreach (mActions, idx)
 		{
 			if (mActions.current(idx))
@@ -182,7 +182,7 @@ public:
 
 	virtual bool Serialize(SystemIO::FileWriter &w)
 	{
-		long idx;
+		unsigned int idx;
 		foreach (mActions, idx)
 		{
 			if (mActions.current(idx))
@@ -195,7 +195,7 @@ public:
 
 	virtual bool Undo() 
 	{
-		long idx;
+		unsigned int idx;
 		foreach (mActions, idx)
 		{
 			if (mActions.current(idx))

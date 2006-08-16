@@ -457,9 +457,9 @@ public:
 		return mData;
 	}
 
-	bool start(long &idx) { idx = mStart; return (idx != mEnd); }
-	bool next(long &idx) { ++idx; return (idx != mEnd); }
-	Object &current(long idx) { return mData[idx]; }
+	bool start(unsigned int &idx) { idx = mStart; return (idx != mEnd); }
+	bool next(unsigned int &idx) { ++idx; return (idx != mEnd); }
+	Object &current(unsigned int idx) { return mData[idx]; }
 
 private:
 
