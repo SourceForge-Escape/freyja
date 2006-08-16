@@ -548,6 +548,12 @@ class FreyjaControl
 	}
 
 
+	int GetEventIdByName(const char *symbol)
+	{
+		return GetResource().GetEventIdByName(symbol);
+	}
+
+
 	static FreyjaControl *mInstance;
 
 

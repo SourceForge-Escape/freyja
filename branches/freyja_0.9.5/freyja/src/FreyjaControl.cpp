@@ -49,6 +49,7 @@ using namespace freyja;
 #define DEBUG_PICK_RAY_PLANAR 0
 #define DEBUG_SCREEN_TO_WORLD 1
 #define DEBUG_VIEWPORT_MOUSE 0
+#define FREYJA_RECENT_FILES "recent_files-dev"
 
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
@@ -126,9 +127,9 @@ void FreyjaControl::Init()
 	LoadResource();
 
 	/* Load up recent files list into file menu */
-	freyja_print("Loading recent_files-dev...");
-	bool b = LoadRecentFilesResource(freyja_rc_map_string("recent_files-dev").GetCString());
-	freyja_print("Loading recent_files-dev %s", b ? "successful" : "failed");
+	freyja_print("Loading %s...", FREYJA_RECENT_FILES);
+	bool b = LoadRecentFilesResource(freyja_rc_map_string(FREYJA_RECENT_FILES).GetCString());
+	freyja_print("Loading %s %s", FREYJA_RECENT_FILES, b ? "successful" : "failed");
 
 	/* Set some basic defaults */
 	SetControlScheme(eScheme_Model);
@@ -452,7 +453,7 @@ void FreyjaControl::AddRecentFilename(const char *filename)
 	/* Save recent_files to disk */
 	SystemIO::TextFileWriter w;
 
-	if (w.Open(freyja_rc_map_string("recent_files-dev").GetCString()))
+	if (w.Open(freyja_rc_map_string(FREYJA_RECENT_FILES).GetCString()))
 	{
 		String swap;
 		uint32 n = mRecentFiles.end();
@@ -653,16 +654,6 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 
 
 	int32 matIndex;
-
-	if (mFlags & fLoadMaterialInSlot)  
-	{
-		matIndex = freyjaGetCurrentMaterial();
-	}
-	else
-	{
-		matIndex = freyjaMaterialCreate();
-	}
-
 	uint32 mode = 0;
 	bool perlinLoaded = false;
 	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
@@ -677,6 +668,15 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 
 		if (strncmp(buffer, "[Material]", 11) == 0)
 		{
+			if (mFlags & fLoadMaterialInSlot)  
+			{
+				matIndex = freyjaGetCurrentMaterial();
+			}
+			else
+			{
+				matIndex = freyjaMaterialCreate();
+			}
+
 			mode = 1;
 		}
 		else if (strncmp(buffer, "[PerlinNoise]", 14) == 0)
@@ -1841,61 +1841,18 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case eOpenFileTexture:
-		freyja_event_file_dialog("Open texture...", FREYJA_MODE_LOAD_TEXTURE);
+#if 0
+	case eExportFile:
+		freyja_event_file_dialog("Export model...", FREYJA_MODE_SAVE_MODEL);
+		freyja_print("Exporting is handled from Save As using file extentions...");
 		break;
 
-	case eOpenFile:
-		switch (GetControlScheme())
-		{
-		case eScheme_UV:
-			freyja_event_file_dialog("Open texture...", FREYJA_MODE_LOAD_TEXTURE);
-			break;
-
-		case eScheme_Model:
-			if (!mCleared)
-			{
-				if (freyja_create_confirm_dialog("gtk-dialog-question",
-												 "You must close the current model to open a new one.",
-												 "Open the new model and lose unsaved changes?",
-												 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
-				{
-					Clear();
-					freyja_print("Closing Model...");
-					freyja_set_main_window_title(BUILD_NAME);
-
-				
-					freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
-				}
-			}
-			else
-			{
-				freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
-			}
-			break;
-
-		case eScheme_Material:
-			freyja_event_file_dialog("Open material...", FREYJA_MODE_LOAD_MATERIAL);
-			break;
-		}
+	case eImportFile:
+		freyja_event_file_dialog("Import model...", FREYJA_MODE_LOAD_MODEL);
+		freyja_print("Importing is handled automatically from Open...");
 		break;
 
 
-	case eSaveAsFile:
-		switch (GetControlScheme())
-		{
-		case eScheme_Model:
-			freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);
-			break;
-
-		case eScheme_Material:
-			freyja_event_file_dialog("Save material as...", FREYJA_MODE_SAVE_MATERIAL);
-			break;
-
-		default:
-			;
-		}
-		break;
 
 	case eSaveFile:
 		switch (GetControlScheme())
@@ -1937,14 +1894,60 @@ bool FreyjaControl::event(int command)
 		}
 		break;
 
-	case eAppendFile:
-		freyja_event_file_dialog("Append to model...", FREYJA_MODE_LOAD_MODEL);
-		freyja_print("Append mode is default Open mode in this build...");
+
+	case eOpenFile:
+		switch (GetControlScheme())
+		{
+		case eScheme_UV:
+			freyja_event_file_dialog("Open texture...", FREYJA_MODE_LOAD_TEXTURE);
+			break;
+
+		case eScheme_Model:
+			if (!mCleared)
+			{
+				if (freyja_create_confirm_dialog("gtk-dialog-question",
+												 "You must close the current model to open a new one.",
+												 "Open the new model and lose unsaved changes?",
+												 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
+				{
+					Clear();
+					freyja_print("Closing Model...");
+					freyja_set_main_window_title(BUILD_NAME);
+
+				
+					freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
+				}
+			}
+			else
+			{
+				freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
+			}
+			break;
+
+		case eScheme_Material:
+			freyja_event_file_dialog("Open material...", FREYJA_MODE_LOAD_MATERIAL);
+			break;
+		}
 		break;
 
-	case eSaveAsFileModel:
-		freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);
+
+
+	case eSaveAsFile:
+		switch (GetControlScheme())
+		{
+		case eScheme_Model:
+			freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);
+			break;
+
+		case eScheme_Material:
+			freyja_event_file_dialog("Save material as...", FREYJA_MODE_SAVE_MATERIAL);
+			break;
+
+		default:
+			;
+		}
 		break;
+
 
 	case eSaveFileModel:
 		if (mCleared) // safety
@@ -1990,6 +1993,17 @@ bool FreyjaControl::event(int command)
 			//freyja_event_file_dialog2("Open model...", eLoadModelText);
 		}
 		break;
+#else
+	case eExportFile:
+	case eImportFile:
+	case eSaveFile:
+	case eOpenFile:
+	case eSaveAsFile:
+	case eSaveFileModel:
+	case eOpenFileModel:
+		BUG_ME("FIXME integrate these old events with new interface!\n");
+		break;
+#endif
 
 	case eRevertFile:
 		if (mCurrentlyOpenFilename.Empty())
@@ -2011,17 +2025,6 @@ bool FreyjaControl::event(int command)
 				mCleared = false;
 		}
 		break;
-
-	case eExportFile:
-		freyja_event_file_dialog("Export model...", FREYJA_MODE_SAVE_MODEL);
-		freyja_print("Exporting is handled from Save As using file extentions...");
-		break;
-
-	case eImportFile:
-		freyja_event_file_dialog("Import model...", FREYJA_MODE_LOAD_MODEL);
-		freyja_print("Importing is handled automatically from Open...");
-		break;
-
 
 	case eShutdown:
 		if (mCleared ||
@@ -4357,7 +4360,8 @@ void FreyjaControl::LoadResource()
 		mResource.Flush();
 	}
 
-	/* Image file dialog patterns */
+	// FIXME: Rework image plugins with flags like model plugins
+	/* Image file dialog patterns - texture */
 	mgtk_event_fileselection_append_pattern(eOpenTexture, 
 											"All Files (*.*)", "*.*");
 	mgtk_event_fileselection_append_pattern(eOpenTexture, 
@@ -4375,6 +4379,7 @@ void FreyjaControl::LoadResource()
 	mgtk_event_fileselection_append_pattern(eOpenTexture, 
 											"TARGA Image (*.tga)", "*.tga");
 
+	/* Image file dialog patterns - textureB */
 	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
 											"All Files (*.*)", "*.*");
 	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
@@ -4395,8 +4400,8 @@ void FreyjaControl::LoadResource()
 
 	/* Material file dialog patterns */
 	{
-		int loadEventId = resourceGetEventId1s("eOpenMaterial");
-		int saveEventId = resourceGetEventId1s("eSaveMaterial");
+		int loadEventId = GetEventIdByName("eOpenMaterial");
+		int saveEventId = GetEventIdByName("eSaveMaterial");
 
 		
 		mgtk_event_fileselection_append_pattern(loadEventId, 
@@ -4413,8 +4418,8 @@ void FreyjaControl::LoadResource()
 	{
 		extern void mgtk_add_menu_item(char *text, long event);
 		// yes, you can even query eventIds for even func binds
-		int loadEventId = resourceGetEventId1s("eOpenModel");
-		int saveEventId = resourceGetEventId1s("eSaveModel");
+		int loadEventId = GetEventIdByName("eOpenModel");
+		int saveEventId = GetEventIdByName("eSaveModel");
 		long i, count = freyjaGetPluginCount();
 
 		mgtk_event_fileselection_append_pattern(loadEventId, 

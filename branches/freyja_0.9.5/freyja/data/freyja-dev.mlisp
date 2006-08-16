@@ -60,14 +60,13 @@
 
 	;; Window container
 	(vbox 0 0 0 1 0
-				
 
 	;; Menubar
 	(handlebox 1
 	(menubar
 		(submenu "_File"
 			(menu_item "_New"			"C-n"	eNewFile	"gtk-new")
-			(filechoosermenu_item "_Open Model..."	"Open Model..."	"C-o"	eOpenModel	"selection=freyja_model_pattern_callback"	"gtk-open")
+			(filechoosermenu_item "_Open Model..."	"Open Model..."	"C-o"	eOpenModel	"mode=open"	"gtk-open")
 			(menu_item "Ap_pend Model..."  		eAppendFile		"gtk-paste")
 
 			(menu_seperator)

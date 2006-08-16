@@ -369,6 +369,8 @@ class Resource
    * Mongoose - Created
    ------------------------------------------------------*/
 
+
+	int GetEventIdByName(const char *symbol) { return getIntByName(symbol); }
 	int getIntByName(const char *symbol);
 
 	bool Lookup(char *symbol, arg_list_t **adt);

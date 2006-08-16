@@ -21,16 +21,12 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#define FREYJA_APP_PLUGINS
+#define FREYJA_APP_PLUGINS 1
 
-#ifdef FREYJA_APP_PLUGINS
-#   include <freyja/FreyjaPluginABI.h>
-#endif
-
+#include <freyja/FreyjaPluginABI.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
 
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
@@ -164,6 +160,8 @@ void eNoImplementation(ResourceEvent *e)
 
 void freyja_plugin_generic(const char *symbol, void *something)
 {
+	// NOTICE I don't actually let plugins query the Resource for safety ;)
+
 	// 1. look for symbol in the 'hack bind list'
 	// 2. return what you found via the void pointer
 
@@ -221,27 +219,27 @@ void freyja_init_get_basename(const char *filename, char *basename, uint32 size)
 
 void freyja_init_application_plugins(const char *dir)
 {
-#ifdef FREYJA_APP_PLUGINS
-	FreyjaFileReader reader;
+#if FREYJA_APP_PLUGINS
+	SystemIO::FileReader reader;
 	char module_name[128];
 	char module_symbol[128];
 	void (*init)(void (*func)(const char*, void*));
 	bool done = false;
-	char *module_filename;
+	const char *module_filename;
 	void *handle;
 
 
 	freyja_print("![Freyja application plugin system invoked]");
 
-	if (!reader.openDirectory(dir))
+	if (!reader.OpenDir(dir))
 	{
 		freyja_print("!Couldn't access application plugin directory.");
 		return;
 	}
 
-	while (!done && (module_filename = reader.getNextDirectoryListing()))
+	while (!done && (module_filename = reader.GetNextDirectoryListing()))
 	{
-		if (reader.isDirectory(module_filename))
+		if (reader.IsDirectory(module_filename))
 			continue;
 
 		// FIXME: Add check here for SO check
@@ -275,7 +273,7 @@ void freyja_init_application_plugins(const char *dir)
 		}
 	}
 
-	reader.closeDirectory();
+	reader.CloseDir();
 
 	freyja_print("![Freyja application plugin loader sleeps now]\n");
 
@@ -283,11 +281,6 @@ void freyja_init_application_plugins(const char *dir)
 	freyja_print("FreyjaAppPlugin: This build was compiled w/o plugin support");
 #endif
 }
-
-void freyja_handle_resource_start();
-void freyja_callback_get_image_data_rgb24(const char *filename, 
-										unsigned char **image, 
-										int *width, int *height);
 
 
 void freyja_handle_application_window_close()
@@ -918,9 +911,8 @@ void freyja_handle_resource_init(Resource &r)
 	//r.RegisterSymbol();
 
 	/* Load and init plugins */
-	char *dir = freyja_rc_map("plugins");	
-	freyja_init_application_plugins(dir);
-	delete [] dir;
+	String dir = freyja_rc_map_string("plugins");	
+	freyja_init_application_plugins(dir.GetCString());
 
 	/* Hook plugins to resource */
 	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
@@ -1247,38 +1239,6 @@ void freyja_install_user()
 }
 
 
-void freyja_event_file_dialog(char *s, int eventId)
-{
-	static bool on = false;
-
-	gFileDialogEvent = eventId;
-	mgtk_event_file_dialog(eventId, s);
-
-	if (!on)
-	{
-		extern void mgtk_add_menu_item(char *text, long event);
-		long i, count = freyjaGetPluginCount();
-
-		//mgtk_add_menu_item("All Files (*.*)", 9000);
-		mgtk_event_fileselection_append_pattern(eventId, "All Files (*.*)", "*.*");
-
-		for (i = 0; i < count; ++i)
-		{
-			FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(i);
-			
-			if (plugin && plugin->mImportFlags)
-			{
-				mgtk_event_fileselection_append_pattern(eventId, 
-														plugin->mDescription,
-														plugin->mExtention);
-			}
-		}
-
-		on = 1;
-	}
-}
-
-
 void freyja_application_window_move(int x, int y)
 {
 	mgtk_application_window_move(x, y);
@@ -1361,35 +1321,24 @@ int freyja_event2i(int event, int cmd)
 }
 
 
-FILE *get_log_file()
+FILE *freyja_get_log_file()
 {
-	static FILE *f = 0x0;
-	char *s;
+	static FILE *f = NULL;
 
 	if (!f)
 	{
-#ifdef LOG_CHECK_AND_WRITE
-		unsigned int i;
-		char filename[128];
-
-		for (i = 0; i < 256; ++i)
-		{
-			snprintf(filename, 128, "/tmp/Freyja%i.log", i);
-
-			f = fopen(filename, "rb");
-
-			if (!f)
-				break;
-		}
-
-		f = fopen(filename, "w");
-#else
-		s = freyja_rc_map("Freyja-chimera.log");
-		f = fopen(s, "w");
-#endif
+		String s = freyja_rc_map_string(FREYJA_LOG_FILE);
+		f = fopen(s.GetCString(), "w");
 	}
 
 	return f;
+}
+
+
+void freyja_close_log_file()
+{
+	if (freyja_get_log_file())
+		fclose(freyja_get_log_file());
 }
 
 
@@ -1399,16 +1348,9 @@ void freyja_swap_buffers()
 }
 
 
-void close_log_file()
-{
-	if (get_log_file())
-		fclose(get_log_file());
-}
-
-
 void freyja_print_args(char *format, va_list *args)
 {
-	FILE *f = get_log_file();
+	FILE *f = freyja_get_log_file();
 	char buffer[1024];
 	unsigned int l;
 
@@ -1471,7 +1413,7 @@ void freyja_event_shutdown()
 	freyja_print("!   Email addr: %s", EMAIL_ADDRESS);
 	freyja_print("!   Web site  : %s", PROJECT_URL);
 
-	close_log_file();
+	freyja_close_log_file();
 }
 
 
