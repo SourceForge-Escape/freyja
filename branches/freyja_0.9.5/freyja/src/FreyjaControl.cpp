@@ -344,23 +344,22 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaControl::ActionModelModified(FreyjaState *state)
+void FreyjaControl::ActionModelModified(Action *action)
 {
 	mCleared = false;
 
-	if (state)
+	if (action)
 	{
 		static Freyja3dCursor::Flags lastMode;
 		lastMode = mCursor.GetMode();
 
 		if (mToken)
 		{
-			//mCursor.ForceChangeState(state, Freyja3dCursor::Translation);
+			mActionManager.Push(action);
 		}
 		else // This is an extranous event if it doesn't have a token
 		{
 			DEBUG_MSG("Extranous event dropped.");
-			delete state;
 		}
 	}
 

@@ -117,7 +117,23 @@ public:
 	}
 
 
-	stack<Type> operator=(const stack<Type> &s) 
+	stack<Type> *get_reverse()
+	{
+		stack<Type> *s = new stack<Type>();
+		StackNode<Type> *cur = mTop;
+
+		while (cur)
+		{
+			Type data = cur->Data();
+			cur = cur->Prev();
+			s->push(data);
+		}
+
+		return s;
+	}
+
+
+	stack<Type> &operator=(const stack<Type> &s) 
 	{
 		mCount = 0;
 		mTop = NULL;
@@ -246,6 +262,12 @@ public:
 	unsigned int size()
 	{
 		return mCount;
+	}
+
+
+	StackNode<Type> *top()
+	{
+		return mTop;
 	}
 
 

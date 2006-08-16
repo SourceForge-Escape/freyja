@@ -1040,6 +1040,9 @@ void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton,
 	/* Transform child bones */
 	glPushMatrix();
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
+
+	freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
+	bone.rotate *= 57.295779513082323f;
 	glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
 	glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
 	glRotatef(bone.rotate.mVec[xr], 1, 0, 0);

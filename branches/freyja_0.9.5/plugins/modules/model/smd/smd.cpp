@@ -80,8 +80,8 @@ int freyja_model__smd_import(char *filename)
 	vec_t x, y, z, rx, ry, rz;
 	int index, idx;
 	unsigned int i, n;
-	vec_t scale = 0.15;
-	vec_t r2d = 57.295779513082323;
+	vec_t scale = 0.15f;
+	vec_t r2d = 1.0f;//57.295779513082323;
 
 
 	if (freyja_model__smd_check(filename) < 0 || !r.openFile(filename))
@@ -113,6 +113,7 @@ int freyja_model__smd_import(char *filename)
 		else if (!strncmp(symbol, "skeleton", 8))
 		{
 			freyjaBegin(FREYJA_SKELETON);
+			index_t skeletonIndex = freyjaGetCurrent(FREYJA_SKELETON);
 
 			symbol = r.parseSymbol();
 			index = r.parseInteger();  // time
@@ -142,6 +143,7 @@ int freyja_model__smd_import(char *filename)
 
 					freyjaBegin(FREYJA_BONE);
 					idx = freyjaGetCurrent(FREYJA_BONE);
+					freyjaSkeletonAddBone(skeletonIndex, idx);
 					freyjaBoneFlags(idx, 0x0);
 					freyjaBoneParent(idx, bone->parent);
 					freyjaBoneName(idx, bone->name);
@@ -151,8 +153,7 @@ int freyja_model__smd_import(char *filename)
 					if (!index)
 					{
 						freyjaBoneTranslate3f(idx, x*scale, z*scale, y*scale);
-						freyjaBoneRotateEuler3f(idx, 
-												rx*r2d,(ry*r2d)-90.0f,rz*r2d);
+						freyjaBoneRotateEuler3f(idx, rx*r2d,(ry*r2d)-HEL_DEG_TO_RAD(90.0f),rz*r2d);
 					}
 					else
 					{

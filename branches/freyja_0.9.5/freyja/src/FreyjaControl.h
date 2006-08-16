@@ -326,15 +326,13 @@ class FreyjaControl
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 	
-	void ActionModelModified(FreyjaState *s);
+	void ActionModelModified(Action *action);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : New event 'helper' for undo/redo.
 	 *
 	 *        Call this after every modification outside the
-	 *        normal state system.  Should be obsoleted later.
-	 *
-	 *        Currently not fully implemented.
+	 *        normal state system.
 	 ------------------------------------------------------*/
 
 	void AddRecentFilename(const char *filename);
