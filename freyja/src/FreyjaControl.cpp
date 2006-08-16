@@ -3833,7 +3833,7 @@ void FreyjaControl::Transform(object_type_t obj,
 	case tMesh:	
 		if (mToken) 
 		{
-			Action *a = new ActionMeshTransformExt(GetSelectedMesh(), action, u.mVec, mCursor.mPos);
+			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			mActionManager.Push(a);
 			mToken = false;
 		}
@@ -3938,7 +3938,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	switch (mObjectMode)
 	{
 	case tMesh:	
-		if (mToken) 
+		if (mToken)
 		{
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
