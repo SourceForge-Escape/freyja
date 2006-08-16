@@ -1,5 +1,5 @@
 [Material]
-Name = Copper3
+Name = "Copper3"
 EnableBlending = false
 BlendSource = GL_ZERO
 BlendDest = GL_ZERO
