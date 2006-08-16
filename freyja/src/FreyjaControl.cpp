@@ -2340,6 +2340,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 
+	/* Transform box */
 	case eMove:
 		mToken = true;
 		Transform(mObjectMode, fTranslate,
@@ -3824,14 +3825,14 @@ void FreyjaControl::Transform(object_type_t obj,
 		break;
 
 	default:
-		MARK_MSGF("Not implemented");
+		MARK_MSGF("Undo for %s action=%i not implemented", ObjectTypeToString(obj).GetCString(), action);
 	}
 
 
 	switch (obj)
 	{
-	case tMesh:	
-		if (mToken) 
+	case tMesh:
+		if (mToken)
 		{
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			mActionManager.Push(a);
@@ -4571,8 +4572,42 @@ void eSaveMaterial(char *filename)
 }
 
 
+void eMeshUnselectFaces()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if ( m )
+	{
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+		{
+			m->ClearFaceFlags(i, Vertex::fSelected);
+		}
+
+		freyja_print("Reset selected flag on all faces in mesh.");
+	}
+}
+
+
+void eMeshUnselectVertices()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if ( m )
+	{
+		for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+		{
+			m->ClearVertexFlags(i, Vertex::fSelected);
+		}
+
+		freyja_print("Reset selected flag on all vertices in mesh.");
+	}
+}
+
+
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
+	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
 	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
 	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
 	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
