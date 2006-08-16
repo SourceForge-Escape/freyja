@@ -898,6 +898,8 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 		}
 	}
 
+	freyja_refresh_material_interface();
+
 	return true;
 }
 

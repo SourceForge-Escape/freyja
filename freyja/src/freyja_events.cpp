@@ -1580,7 +1580,8 @@ mgtk_togglebutton_value_set(eMaterialTex, false);
 		mgtk_togglebutton_value_set(eMaterialTex, false);
 	}
 
-	mgtk_textentry_value_set(799, freyjaGetMaterialName(mIndex));
+	mgtk_textentry_value_set(freyja_get_event_id_by_name("eSetMaterialName"), 
+							 freyjaGetMaterialName(mIndex));
 	mgtk_spinbutton_value_set(eSetMaterialTexture,
                               freyjaGetMaterialTexture(mIndex));	
 	mgtk_textentry_value_set(eSetTextureNameA,
