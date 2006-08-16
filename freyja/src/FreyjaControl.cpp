@@ -28,6 +28,7 @@
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEvent.h>
+#include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
@@ -4355,6 +4356,92 @@ void FreyjaControl::LoadResource()
 	{
 		mResource.Flush();
 	}
+
+	/* Image file dialog patterns */
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"All Files (*.*)", "*.*");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"BMP Image (*.bmp)", "*.bmp");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"DDS Image (*.dds)", "*.dds");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"JPEG Image (*.jpg)", "*.jpg");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"PCX Image (*.pcx)", "*.pcx");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"PNG Image (*.png)", "*.png");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"PPM Image (*.ppm)", "*.ppm");
+	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+											"TARGA Image (*.tga)", "*.tga");
+
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"All Files (*.*)", "*.*");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"BMP Image (*.bmp)", "*.bmp");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"DDS Image (*.dds)", "*.dds");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"JPEG Image (*.jpg)", "*.jpg");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"PCX Image (*.pcx)", "*.pcx");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"PNG Image (*.png)", "*.png");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"PPM Image (*.ppm)", "*.ppm");
+	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+											"TARGA Image (*.tga)", "*.tga");
+
+
+	/* Material file dialog patterns */
+	{
+		int loadEventId = resourceGetEventId1s("eOpenMaterial");
+		int saveEventId = resourceGetEventId1s("eSaveMaterial");
+
+		
+		mgtk_event_fileselection_append_pattern(loadEventId, 
+												"Freyja Material (*.mat)", "*.mat");
+
+		mgtk_event_fileselection_append_pattern(saveEventId, 
+												"Freyja Material (*.mat)", "*.mat");
+	}
+
+
+	/* Model file dialog patterns */
+	freyjaPluginsInit();
+
+	{
+		extern void mgtk_add_menu_item(char *text, long event);
+		// yes, you can even query eventIds for even func binds
+		int loadEventId = resourceGetEventId1s("eOpenModel");
+		int saveEventId = resourceGetEventId1s("eSaveModel");
+		long i, count = freyjaGetPluginCount();
+
+		mgtk_event_fileselection_append_pattern(loadEventId, 
+												"All Files (*.*)", "*.*");
+
+		mgtk_event_fileselection_append_pattern(saveEventId, 
+												"All Files (*.*)", "*.*");
+
+		for (i = 0; i < count; ++i)
+		{
+			FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(i);
+			
+			if (plugin && plugin->mImportFlags)
+			{
+				mgtk_event_fileselection_append_pattern(loadEventId, 
+														plugin->mDescription,
+														plugin->mExtention);
+			}
+
+			if (plugin && plugin->mExportFlags)
+			{
+				mgtk_event_fileselection_append_pattern(saveEventId, 
+														plugin->mDescription,
+														plugin->mExtention);
+			}
+		}
+	}
 }
 
 
@@ -4687,13 +4774,14 @@ void eRenderToggleGridZClear()
 void eImplementationRemoved()
 {
 	freyja_print("Implementation removed");
-	BUG_ME("Implementation removed");
+	DEBUG_MSG("Implementation removed");
 }
+
 
 void eImplementationRemovedUInt(unsigned int u)
 {
 	freyja_print("Implementation removed");
-	BUG_ME("Implementation removed");
+	DEBUG_MSG("Implementation removed");
 }
 
 
