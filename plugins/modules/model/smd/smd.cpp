@@ -248,7 +248,7 @@ int freyja_model__smd_export(char *filename)
 	int index;
 	unsigned int i, n;
 	vec_t scale = 1.0 / 0.15;
-	vec_t d2r = 0.017453292519943295;
+	vec_t d2r = 1.0f;//0.017453292519943295;
 	vec3_t translation, rotation;
 
 
@@ -307,7 +307,7 @@ int freyja_model__smd_export(char *filename)
 
 			if (!i)
 			{
-				rotation[1] += 90.0;
+				rotation[1] += HEL_DEG_TO_RAD(90.0f);
 
 				w.print("%3i %f %f %f %f %f %f\n", i,
 						translation[0], translation[2], translation[1], 
