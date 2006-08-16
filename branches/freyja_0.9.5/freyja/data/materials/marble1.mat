@@ -1,0 +1,21 @@
+[Material]
+Name = "Marble1"
+BlendSource = GL_ZERO
+BlendDest = GL_ZERO
+Ambient = 0.390000, 0.390000, 0.390000, 1.000000
+Diffuse = 0.209030, 0.209030, 0.209030, 1.000000
+Specular = 0.290318, 0.290318, 0.290318, 1.000000
+Emissive = 0.000000, 0.000000, 0.000000, 1.000000
+Shininess = 20.459999
+
+
+[PerlinNoise]
+Seed = 221
+Width = 512
+Height = 512
+Clamp = true
+iA = 30.000000
+iB = 50.000000
+d = 15.000000
+ModulateColor = 0.798856, 0.798856, 0.798856
+AddColor = 0.474205, 0.474205, 0.474205
