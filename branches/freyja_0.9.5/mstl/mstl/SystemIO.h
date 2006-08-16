@@ -225,6 +225,19 @@ class SystemIO
 		}
 
 
+		static void GetCurrentWorkingDir(char *buf, long size)
+		{
+#ifdef WIN32
+#   if defined(_MSC_VER)
+#      define getcwd _getcwd
+#   endif
+			getcwd(buf, size);
+#else
+			getcwd(buf, size);
+#endif
+		}
+
+
 		const char *GetNextDirectoryListing()
 		{
 			struct dirent *d_ptr;

@@ -1021,12 +1021,15 @@ void freyja_get_rc_path(char *s, long sz)
 
 	snprintf(s, len, "%s/.freyja/", env);
 #else
-	len = strlen("C:/freyja/");
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+
+	len = strlen(cwd);
 
 	if (sz < len)
 		return;
 	
-	snprintf(s, len, "C:/freyja/");
+	snprintf(s, len, cwd);
 #endif
 }
 
@@ -1039,7 +1042,9 @@ void freyja_get_share_path(char *s, long sz)
 #ifdef unix
 	snprintf(s, strlen("/usr/share/freyja/"), "/usr/share/freyja/");
 #else
-	snprintf(s, strlen("C:/freyja/"), "C:/freyja/");
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+	snprintf(s, strlen(cwd), cwd);
 #endif
 }
 
@@ -1069,12 +1074,15 @@ void freyja_get_rc_filename(char *s, const char *filename, long sz)
 
 	snprintf(s, len, "%s/.freyja/%s", env, filename);
 #else
-	len = strlen("C:/freyja/") + strlen(filename);
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+
+	len = strlen(cwd) + strlen(filename);
 
 	if (sz < len)
 		return;
 	
-	snprintf(s, len, "C:/freyja/%s", filename);
+	snprintf(s, len, "%s/%s", cwd, filename);
 #endif
 }
 
@@ -1106,12 +1114,15 @@ void freyja_get_share_filename(char *s, const char *filename, long sz)
 
 	snprintf(s, len, "/usr/share/freyja/%s", filename);
 #else
-	len = strlen("C:/freyja/") + strlen(filename);
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+
+	len = strlen(cwd) + strlen(filename);
 
 	if (sz < len)
 		return;
 	
-	snprintf(s, len, "C:/freyja/%s", filename);
+	snprintf(s, len, "%s/%s", cwd, filename);
 #endif
 }
 
@@ -1447,22 +1458,25 @@ char *freyja_rc_map(char *s)
 	char *env;
 
 	env = getenv("HOME");
-
+	
 	if (!env || !env[0])
 	{
 		printf("ERROR: Bad HOME envronment\n");
 		return NULL;
 	}
-
+	
 	len += strlen(env) + 8;
-
-   rc = new char[len + 1];
-   snprintf(rc, len, "%s/.%s/%s", env, path, s);
+	
+	rc = new char[len + 1];
+	snprintf(rc, len, "%s/.%s/%s", env, path, s);
 #else
-	len += 8;
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
 
-   rc = new char[len + 1];
-   snprintf(rc, len, "C:/%s/%s", path, s);
+	len = strlen(cwd) + strlen(s) + 8;
+
+	rc = new char[len + 1];
+	snprintf(rc, len, "%s/%s", cwd, s);
 #endif
 	
 	return rc;
@@ -1640,7 +1654,9 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 	snprintf(dest, size, "%s/.freyja/icons/%s",
 			 (char *)getenv("HOME"), icon_name);
 #else
-	snprintf(dest, size, "C:/freyja/icons/%s", icon_name);
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+	snprintf(dest, size, "%s/icons/%s", cwd, icon_name);
 #endif
 
 	dest[size-1] = 0;
@@ -1658,7 +1674,7 @@ int main(int argc, char *argv[])
 	mgtk_win32_import("win32_mgtk_handle_command2i", (void*)freyja_handle_command2i);
 	mgtk_win32_import("win32_mgtk_handle_event1u", (void*)freyja_handle_event1u);
 	mgtk_win32_import("win32_mgtk_handle_event1f", (void*)freyja_handle_event1f);
-	mgtk_win32_import("win32_mgtk_handle_file_dialog_selection", (void*)freyja_handle_file_dialog_selection);
+	//	mgtk_win32_import("win32_mgtk_handle_file_dialog_selection", (void*)freyja_handle_file_dialog_selection);
 	mgtk_win32_import("win32_mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
 	mgtk_win32_import("win32_mgtk_handle_glresize", (void*)freyja_handle_glresize);
 	mgtk_win32_import("win32_mgtk_handle_key_press", (void*)freyja_handle_key_press);

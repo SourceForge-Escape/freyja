@@ -310,14 +310,6 @@ typedef enum {
 // Freyja mgtk interface
 //////////////////////////////////////////////////////////////////////////////
 
-void freyja_event_start();       /* Starts up Freyja subsystems */
-
-void freyja_event_exit();        /* Calls shutdown and exits GUI */
-
-void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
-
-
-
 void freyja_append_eventid(char *symbol, int eventid);
 
 int freyja_append_item_to_menu(int event, const char *label, int item_event);
@@ -335,10 +327,18 @@ int freyja_create_confirm_dialog(char *dialog_icon,
 								 char *accept_icon, char *accept_text);
 
 
+
+void freyja_event_start();       /* Starts up Freyja subsystems */
+
+void freyja_event_exit();        /* Calls shutdown and exits GUI */
+
+void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
+
+
 void freyja_event_fileselection_append_pattern(char *label, char *pattern);
 
 #define freyja_event_get_color mgtk_event_get_color
-void freyja_event_get_color(int colorId, float &r, float &g, float &b, float &a);
+void freyja_event_get_color(int colorId,float &r, float &g, float &b, float &a);
 
 void freyja_event_set_color(int colorId, float r, float g, float b, float a);
 
@@ -370,32 +370,6 @@ void freyja_event_key_press(int key, int mod);
 
 void freyja_event_new_key_cmd(int key, int event, int cmd);
 
-void freyja_handle_resource_start();
-
-void freyja_handle_color(int id, float r, float g, float b, float a);
-
-
-
-void freyja_set_main_window_title(char *title);
-
-int freyja_get_event_id_by_name(char *symbol);
-
-long freyja_get_new_plugin_eventid();
-
-char freyja_is_user_installed();
-
-void freyja_install_user();
-
-void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
-
-void freyja_get_rc_path(char *s, long sz);
-
-void freyja_get_share_path(char *s, long sz);
-
-void freyja_get_rc_filename(char *s, const char *filename, long sz);
-
-void freyja_get_share_filename(char *s, const char *filename, long sz);
-
 int freyja_event2i(int event, int cmd);
 /*------------------------------------------------------
  * Pre  : <event> and <cmd> are an valid event pair
@@ -407,6 +381,110 @@ int freyja_event2i(int event, int cmd);
  *
  * 2002.01.19:
  *  Mongoose - Created
+ ------------------------------------------------------*/
+
+int freyja_get_event_id_by_name(char *symbol);
+
+long freyja_get_new_plugin_eventid();
+
+void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets full path filename for icons
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_get_rc_path(char *s, long sz);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets user resource dir
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_get_rc_filename(char *s, const char *filename, long sz);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets user resource dir relative filename
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_get_share_path(char *s, long sz);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets system share dir
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_get_share_filename(char *s, const char *filename, long sz);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets system share dir relative filename
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_handle_color(int id, float r, float g, float b, float a);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : mgtk callback handles color button value change
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_handle_resource_start();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : mgtk callback inits the modeler application
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_install_user();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Copies files from system share dir to user dir
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+char freyja_is_user_installed();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns non zero if it can find a user resource
+ *        directory.
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp);
@@ -499,6 +577,17 @@ int freyja_remove_all_items_to_menu(int event);
 /*------------------------------------------------------
  * Pre  : <event> is the Id of the menu subject 
  * Post : Removes all submenus and menuitems from menu
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_set_main_window_title(char *title);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : <title> is set as the new window title
  *
  *-- History ------------------------------------------
  *
