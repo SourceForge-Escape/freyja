@@ -3802,46 +3802,38 @@ void FreyjaControl::Transform(object_type_t obj,
 							  vec_t x, vec_t y, vec_t z) 
 {
 	Vec3 v(x, y, z);
+	Vec3 u;
+
+	switch (action)
+	{
+	case fRotateAboutPoint:
+	case fRotate:
+		v *= HEL_PI_OVER_180;
+		u = -v;
+		break;
+
+	case fScaleAboutPoint:
+	case fScale:
+		u.mVec[0] = 1.0f / v.mVec[0];
+		u.mVec[1] = 1.0f / v.mVec[1];
+		u.mVec[2] = 1.0f / v.mVec[2];
+		break;
+		
+	case fTranslate:
+		u = -v;
+		break;
+
+	default:
+		MARK_MSGF("Not implemented");
+	}
+
 
 	switch (obj)
 	{
 	case tMesh:	
 		if (mToken) 
 		{
-			Vec3 u;
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-
-			if (m)
-			{
-				mCursor.mPos = m->GetPosition();
-				//u = mCursor.mPos;
-			}
-
-			switch (action)
-			{
-			case fRotateAboutPoint:
-			case fRotate:
-				u = -v;
-				break;
-
-			case fScaleAboutPoint:
-			case fScale:
-				//u = v;
-				u.mVec[0] = 1.0f / v.mVec[0];
-				u.mVec[1] = 1.0f / v.mVec[1];
-				u.mVec[2] = 1.0f / v.mVec[2];
-				break;
-
-			case fTranslate:
-				u = -v;
-				break;
-
-			default:
-				MARK_MSGF("Not implemented");
-			}
-
 			Action *a = new ActionMeshTransformExt(GetSelectedMesh(), action, u.mVec, mCursor.mPos);
-
 			mActionManager.Push(a);
 			mToken = false;
 		}
