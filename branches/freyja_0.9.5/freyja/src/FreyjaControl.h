@@ -657,19 +657,21 @@ private:
 		freyja_print("%f %f %f", xyz[0], xyz[1], xyz[2]);
 	}
 
-	void Transform(int mode, freyja_transform_action_t action, 
-				   float x, float y, float z) { BUG_ME("Not implemented"); }
+
+	void Transform(object_type_t obj, 
+				   freyja_transform_action_t action,
+				   vec_t x, vec_t y, vec_t z);// { MARK_MSGF("Not Implemented"); }
+	void Transform(freyja_transform_t obj, 
+				   freyja_transform_action_t action,
+				   index_t owner, index_t id,
+				   vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
-	 * Pre  : mode is {FRAME, MESH, SCENE, BONE, etc}
+	 * Pre  : obj is {fTransformModel, fTransformMesh, etc }
 	 *        action is { fTranslate, fRotate, fScale, etc }
-	 *        x, y, z are in degrees or units
+	 *        x, y, z are in radians or units
 	 *
 	 * Post : Transform is performed
 	 *
-	 * Notes: FRAME  : Transform current frame of current mesh
-	 *        MESH   : Transform current mesh
-	 *        SCENE  : Transform entire scene
-	 *        BONETAG: Transform current bone tag
 	 *-- History ------------------------------------------
 	 *
 	 * 2000.09.10: 
