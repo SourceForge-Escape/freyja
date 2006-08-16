@@ -167,14 +167,11 @@
 
 			(menu_seperator)
 
-			;(submenu "_Scene"
-			;	(menu_item "Generate _Normals"	eGenerateNormals	"gtk-polygon"))
-
 			(submenu "_Vertex"
 				(menu_item "_New"		eEvent  eVertexNew)
 				(menu_item "_Delete"	eEvent  eVertexDelete)
 				(menu_item "_Combine"	eEvent  eVertexCombine)
-				;;(menu_item "_Extrude"	eEvent  eVertexExtrude)
+				;(menu_item "_Extrude"	eEvent  eVertexExtrude)
 			)
 
 			(submenu "_Face"
@@ -198,7 +195,6 @@
 				(menu_item "_New"		eEvent	eMeshNew)
 				(menu_item "_Delete"	eEvent	eMeshDelete)
 				(menu_item "_Select"	eEvent	eMeshSelect)
-				;(menu_item "Re_center"	eEvent	eTransformMeshPivot)
 				(menu_item "_Tesselate"	eEvent	eMeshTesselate)
 				(menu_item "_Generate Normals"	eEvent	eMeshGenerateNormals)
 				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals)

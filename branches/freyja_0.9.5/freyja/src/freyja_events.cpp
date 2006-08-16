@@ -970,6 +970,7 @@ void freyja_handle_resource_start()
 		}
 	}
 
+
 	/* Setup material interface */
 	freyja_refresh_material_interface();
 
