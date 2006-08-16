@@ -4501,20 +4501,6 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 		/* Compare UVs as 2 space coords ( for the most part ) */
 		if (f->mFlags & Face::fPolyMappedTexCoords)
 		{
-#if 0
-			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
-			{
-				m->GetTexCoord(f->mTexCoordIndices[j], uvB.mVec);
-				uvB.mVec[2] = 0.0f;
-				dist = helDist3v(uv.mVec, uvB.mVec);
-				
-				if (dist < cutoff && dist < bestDist)
-				{
-					bestDist = dist;
-					mTexCoordArrayIndex = f->mTexCoordIndices[j];
-				}
-			}
-#else
 			uint32 j;
 			foreach (f->mTexCoordIndices, j)
 			{
@@ -4528,7 +4514,6 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 					mTexCoordArrayIndex = f->mTexCoordIndices.current(j);
 				}
 			}
-#endif
 		}
 		else
 		{

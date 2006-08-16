@@ -64,7 +64,7 @@ void (*win32_mgtk_handle_command)(int) = NULL;
 void (*win32_mgtk_handle_command2i)(int, int) = NULL;
 void (*win32_mgtk_handle_event1u)(int, unsigned int) = NULL;
 void (*win32_mgtk_handle_event1f)(int, float) = NULL;
-void (*win32_mgtk_handle_file_dialog_selection)(char *) = NULL;
+void (*win32_mgtk_handle_file_dialog_selection)(int, char *) = NULL;
 void (*win32_mgtk_handle_gldisplay)() = NULL;
 void (*win32_mgtk_handle_glresize)(unsigned int, unsigned int) = NULL;
 void (*win32_mgtk_handle_key_press)(int, int) = NULL;
@@ -109,7 +109,7 @@ void mgtk_win32_import(char *symbol, void *func)
 	}
 	else if (strncmp("win32_mgtk_handle_file_dialog_selection", symbol, 40) == 0)
 	{
-		win32_mgtk_handle_file_dialog_selection = (void (*)(char*))func;
+		win32_mgtk_handle_file_dialog_selection = (void (*)(int, char*))func;
 	}
 	else if (strncmp("win32_mgtk_handle_gldisplay", symbol, 28) == 0)
 	{
@@ -486,7 +486,9 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
 				{
 					if (strcmp(value, "true") == 0)
 					{
+#ifndef WIN32 // FIXME: Doesn't seem to have this feature in win32 env build
 						gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+#endif
 					}
 				}
 			}

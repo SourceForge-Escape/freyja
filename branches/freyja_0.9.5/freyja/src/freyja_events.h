@@ -311,22 +311,78 @@ typedef enum {
 //////////////////////////////////////////////////////////////////////////////
 
 void freyja_append_eventid(char *symbol, int eventid);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Aliases another <symbol> for existing <eventid>
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 int freyja_append_item_to_menu(int event, const char *label, int item_event);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Appends menuitem <label>, <item_event> to menu <event>
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 void freyja_application_window_move(int x, int y);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Moves application window without user input
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 void freyja_callback_get_image_data_rgb24(const char *filename, 
-										unsigned char **image, 
-										int *width, int *height);
+										  unsigned char **image, 
+										  int *width, int *height);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Callback retrieves image data from filename
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 int freyja_create_confirm_dialog(char *dialog_icon,
 								 char *information_message, 
 								 char *question_message,
 								 char *cancel_icon, char *cancel_text,
 								 char *accept_icon, char *accept_text);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Contructs a confirmation dialog
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
-
+int freyja_event2i(int event, int cmd);
+/*------------------------------------------------------
+ * Pre  : <event> and <cmd> are an valid event pair
+ * Post : Passes event to freyja master control
+ *
+ *        Returns -1 on unhandled event
+ *
+ *-- History ------------------------------------------
+ *
+ * 2002.01.19:
+ *  Mongoose - Created
+ ------------------------------------------------------*/
 
 void freyja_event_start();       /* Starts up Freyja subsystems */
 
@@ -366,26 +422,40 @@ void freyja_event_notify_observer1f(event_subject_id e, float value);
 
 void freyja_event_notify_view_log(const char *message);
 
-void freyja_event_key_press(int key, int mod);
+//void freyja_event_key_press(int key, int mod);
 
-void freyja_event_new_key_cmd(int key, int event, int cmd);
-
-int freyja_event2i(int event, int cmd);
+//void freyja_event_new_key_cmd(int key, int event, int cmd);
 /*------------------------------------------------------
- * Pre  : <event> and <cmd> are an valid event pair
- * Post : Passes event to freyja master control
- *
- *        Returns -1 on unhandled event
+ * Pre  : 
+ * Post : 
  *
  *-- History ------------------------------------------
  *
- * 2002.01.19:
- *  Mongoose - Created
+ * Unknown:
+ * Mongoose - Created
  ------------------------------------------------------*/
 
 int freyja_get_event_id_by_name(char *symbol);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets event Id from the symbol name
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 long freyja_get_new_plugin_eventid();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Gets next UID for a plugin event
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 /*------------------------------------------------------
