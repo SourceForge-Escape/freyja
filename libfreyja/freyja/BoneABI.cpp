@@ -188,7 +188,7 @@ void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 
 	if (b)
 	{
-		//MARK_MSGF(" ! set %f %f %f", p, h, r);
+		MARK_MSGF(" ! set %f %f %f", p, h, r);
 		b->mRotation = Quaternion(p, h, r);
 		b->UpdateBindPose();
 	}

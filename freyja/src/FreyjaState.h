@@ -5,7 +5,7 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
- * Object  : FreyjaState
+ * Object  : Action classes to implement undo feature more cleanly
  * License : No use w/o permission (C) 2006 Mongoose
  * Comments: This is a simple action event stack for undo/redo
  *
@@ -30,126 +30,9 @@
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <freyja/freyja.h>
-#include <freyja/FreyjaFileWriter.h>
-#include <freyja/FreyjaFileReader.h>
 #include <freyja/MeshABI.h>
 #include <freyja/Mesh.h>
 #include <mstl/Action.h>
-
-
-class FreyjaState
-{
- public:
-
-	typedef enum {
-
-		eEvent = 0,
-		eTransform = 1
-
-	} state_t;
-
-
-	////////////////////////////////////////////////////////////
-	// Constructors
-	////////////////////////////////////////////////////////////
-
-	FreyjaState() :
-		mState(eEvent),
-		mEvent(-1),
-		mMode(-1),
-		mIndex(INDEX_INVALID)
-	{
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of FreyjaState
-	 ------------------------------------------------------*/
-
-	FreyjaState::FreyjaState(int event, int objIndex, int mode) :
-		mEvent(event),
-		mMode(mode),
-		mIndex(objIndex)
-	{
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of FreyjaState
-	 ------------------------------------------------------*/
-
-	virtual ~FreyjaState() {}
-	/*------------------------------------------------------
-	 * Pre  : FreyjaState object is allocated
-	 * Post : Deconstructs an object of FreyjaState
-	 ------------------------------------------------------*/
-
-	virtual bool Undo() { return false; }
-
-	virtual bool Redo() { return false; }
-
-	void FreyjaState::operator =(FreyjaState s) 
-	{
-		mEvent = s.mEvent; 
-		mIndex = s.mIndex; 
-		mMode = s.mMode; 
-	}
-
-
-	bool FreyjaState::operator ==(FreyjaState b) 
-	{
-		return (b.mEvent == mEvent && b.mIndex == mIndex && b.mMode == mMode); 
-	}
-
-
-	bool FreyjaState::operator !=(FreyjaState b) 
-	{
-		return (b.mEvent != mEvent || b.mIndex != mIndex || b.mMode != mMode); 
-	}
-
-	int GetEvent() { return mEvent; }
-
-	void SetEvent(int i) { mEvent = i; }
-
-	int GetIndex() { return mIndex; }
-
-	int GetMode() { return mMode; }
-
-	void SetMode(int i) { mMode = i; }
-
-	state_t GetType() { return mState; }
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	virtual bool SerializeUndoHistory(FreyjaFileWriter &w) { return false; }
-
-	virtual bool SerializeUndoHistory(FreyjaFileReader &r) { return false; }
-
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-
- protected:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
-	state_t mState;
-
-	int mEvent;           /* Event to generate */
-
-	int mMode;            /* Mode of the event */
-
-	index_t mIndex;       /* Index of object on which to operate */
-};
 
 
 class ActionMeshTransformExt : public Action

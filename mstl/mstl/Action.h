@@ -167,6 +167,32 @@ public:
 		return true;
 	}
 
+	virtual bool Serialize(SystemIO::FileReader &r)
+	{
+		long idx;
+		foreach (mActions, idx)
+		{
+			if (mActions.current(idx))
+				mActions.current(idx)->Serialize(r);
+		}
+
+		return true;
+
+	}
+
+	virtual bool Serialize(SystemIO::FileWriter &w)
+	{
+		long idx;
+		foreach (mActions, idx)
+		{
+			if (mActions.current(idx))
+				mActions.current(idx)->Serialize(w);
+		}
+
+		return true;
+
+	}
+
 	virtual bool Undo() 
 	{
 		long idx;

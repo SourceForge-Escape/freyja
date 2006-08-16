@@ -68,7 +68,21 @@ class ActionManager
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool Serialize(SystemIO::FileWriter &w) { return false; }
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{
+		mstl::stack<Action *> *r = mActions.get_reverse();
+		Action *a;
+
+		while ( (a = r->pop()) )
+		{
+			if (a)
+				a->Serialize(w);
+		}
+
+		delete r;
+
+		return true; 
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
