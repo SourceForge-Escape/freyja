@@ -65,11 +65,11 @@ class ActionMeshTransformExt : public Action
 class ActionMeshTransform : public Action
 {
  public:
-	ActionMeshTransform(index_t mesh, freyja_transform_action_t a, vec3_t xyz) :
+	ActionMeshTransform(index_t mesh, freyja_transform_action_t a, Vec3 v) :
 		Action(),
 		mMesh(mesh),
 		mAction(a),
-		mXYZ(xyz)
+		mXYZ(v)
 	{}
 
 	virtual bool Redo() { return false; }
