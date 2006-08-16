@@ -140,10 +140,10 @@
 				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
 		(submenu "_Create" 
-				(submenu "_Primatives"
-						(menu_item "_Vertex"		eEvent  eVertexNew)
-						(menu_item "_Polygon"		eEvent  ePolygonNew)
-						(menu_item "_Bone"			eEvent  eBoneNew))
+				;(submenu "_Primatives"
+				;		(menu_item "_Vertex"		eEvent  eVertexNew)
+				;		(menu_item "_Polygon"		eEvent  ePolygonNew)
+				;		(menu_item "_Bone"			eEvent  eBoneNew))
 
 				(submenu "P_olygon Primatives"
 					(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
@@ -198,10 +198,15 @@
 				(menu_item "_New"		eEvent	eMeshNew)
 				(menu_item "_Delete"	eEvent	eMeshDelete)
 				(menu_item "_Select"	eEvent	eMeshSelect)
-				(menu_item "Re_center"	eEvent	eTransformMeshPivot)
+				;(menu_item "Re_center"	eEvent	eTransformMeshPivot)
 				(menu_item "_Tesselate"	eEvent	eMeshTesselate)
 				(menu_item "_Generate Normals"	eEvent	eMeshGenerateNormals)
-				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals))
+				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals)
+
+				(menu_item "_Unselect faces"	eEvent	eMeshUnselectFaces)
+				(menu_item "Unselect _vertices" eEvent	eMeshUnselectVertices)
+
+			) ;; submenu _Mesh
 
 			(submenu "_Bone"
 				(menu_item "_New"			eEvent	eBoneNew)

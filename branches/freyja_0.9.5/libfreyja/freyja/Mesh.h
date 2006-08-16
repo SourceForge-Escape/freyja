@@ -619,7 +619,12 @@ public:
 
 	void Translate(vec_t x, vec_t y, vec_t z) { Translate(Vec3(x,y,z)); }
 
-	void Translate(Vec3 v) { TripleVec_Addition(mVertexPool, v.mVec); }
+	void Translate(Vec3 v) 
+	{
+		v += GetPosition();
+		SetPosition(v);
+		TripleVec_Addition(mVertexPool, v.mVec);
+	}
 
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
 	{

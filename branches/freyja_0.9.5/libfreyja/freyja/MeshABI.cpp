@@ -281,10 +281,7 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 
 	case fTranslate:
 		{
-			Vec3 origin = mesh->GetPosition();
-			Vec3 translate(xyz);
-			mesh->Translate(translate - origin);
-			mesh->SetPosition(translate);
+			mesh->Translate(Vec3(xyz));
 		}
 		break;
 		
