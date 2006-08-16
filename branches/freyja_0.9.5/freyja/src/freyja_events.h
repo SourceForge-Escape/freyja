@@ -218,6 +218,7 @@ typedef enum {
 	eSetCurrentBoneName,
 	eSetTextureNameA,
 	eSetTextureNameB,
+	eSetMaterialName,
 
 	/* OLD EVENTS */
 	FREYJA_MODE_MODEL_EDIT,
@@ -298,10 +299,7 @@ typedef enum {
 	CMD_MISC_SCENE_ROTATE,
 
 	eMeshFlipNormals,
-	ePluginEventBase = 10000,
-
-	/* Misbehaved text events */
-	eSetMaterialName = 799
+	ePluginEventBase = 10000
 
 } event_subject_id;
 
@@ -384,14 +382,39 @@ int freyja_event2i(int event, int cmd);
  *  Mongoose - Created
  ------------------------------------------------------*/
 
-void freyja_event_start();       /* Starts up Freyja subsystems */
+void freyja_event_exit();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Calls shutdown and exits GUI
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
-void freyja_event_exit();        /* Calls shutdown and exits GUI */
+#define freyja_event_file_dialog mgtk_event_file_dialog
+void freyja_event_file_dialog(char *s, int eventId);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Spawns file dialog for <eventId> with title <s>
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
-void freyja_event_shutdown();    /* Cleans up Freyja subsystems */
-
-
-void freyja_event_fileselection_append_pattern(char *label, char *pattern);
+void freyja_event_fullscreen();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Make application fullscreen
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 #define freyja_event_get_color mgtk_event_get_color
 void freyja_event_get_color(int colorId,float &r, float &g, float &b, float &a);
@@ -401,33 +424,89 @@ void freyja_event_set_color(int colorId, float r, float g, float b, float a);
 #define freyja_event_get_float mgtk_event_get_float
 float freyja_event_get_float(int event);
 
+void freyja_event_gl_refresh();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Display callback
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_event_info_dialog(char *icon, char *message);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Spawns info dialog with <message> and <icon>
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_event_notify_observer1f(event_subject_id e, float value);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : This back propagates value changes to widgets
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
 void freyja_event_set_float(int event, float value);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Set float <value> for widget <event>
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
 
 #define freyja_event_set_range mgtk_event_set_range
 int freyja_event_set_range(int event, unsigned int value,
 						   unsigned int min, unsigned int max);
-
-#define freyja_event_file_dialog mgtk_event_file_dialog
-void freyja_event_file_dialog(char *s, int eventId);
-
-void freyja_event_gl_refresh();
-
-void freyja_event_info_dialog(char *icon, char *message);
-
-void freyja_event_fullscreen();
-
-void freyja_event_unfullscreen();
-
-void freyja_event_notify_observer1f(event_subject_id e, float value);
-
-void freyja_event_notify_view_log(const char *message);
-
-//void freyja_event_key_press(int key, int mod);
-
-//void freyja_event_new_key_cmd(int key, int event, int cmd);
 /*------------------------------------------------------
  * Pre  : 
- * Post : 
+ * Post : Set range for a spinbutton
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_event_shutdown();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Cleans up Freyja subsystems
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_event_start();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Starts up Freyja subsystems
+ *
+ *-- History ------------------------------------------
+ *
+ * Unknown:
+ * Mongoose - Created
+ ------------------------------------------------------*/
+
+void freyja_event_unfullscreen();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Restore application from fullscreen
  *
  *-- History ------------------------------------------
  *
