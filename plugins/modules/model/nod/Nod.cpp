@@ -558,6 +558,10 @@ int freyja_model__nod_import(char *filename)
 		snprintf(name, 64, "bone[%i]", b);
 		nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
 
+		rot[0] = HEL_DEG_TO_RAD(rot[0]);
+		rot[1] = HEL_DEG_TO_RAD(rot[1]);
+		rot[2] = HEL_DEG_TO_RAD(rot[2]);
+
 		bone = freyjaBoneCreate(skeleton); // transb[]
 		freyjaSkeletonAddBone(skeleton, bone);
 		freyjaBoneFlags(bone, 0x0);
@@ -576,7 +580,7 @@ int freyja_model__nod_import(char *filename)
 								  nod.bones[b].RestTranslate[2]*scale,
 								  nod.bones[b].RestTranslate[1]*scale);
 			freyjaBoneRotateEuler3f(bone, 
-			                       rot[0] - 90, rot[2] + 180, rot[1]);
+			                       rot[0] - HEL_DEG_TO_RAD(90), rot[2] + HEL_DEG_TO_RAD(180), rot[1]);
 		}
 
 		freyjaPrintMessage("bone[%i].rotate = %f %f %f", b, 
