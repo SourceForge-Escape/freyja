@@ -119,16 +119,17 @@ class ActionTexCoordTransform : public Action
 };
 
 
-class ActionGenericTransformExt : public Action
+class ActionGenericTransform : public Action
 {
  public:
-	ActionGenericTransformExt(index_t idx, freyja_transform_t t, freyja_transform_action_t a, vec3_t xyz, Vec3 &v) :
+	ActionGenericTransform(freyja_transform_t t, freyja_transform_action_t a, 
+						   index_t owner, index_t id, Vec3 &v) :
 		Action(),
-		mCursorXYZ(v),
-		mIndex(idx),
 		mTransform(t),
 		mAction(a),
-		mXYZ(xyz)
+		mOwner(owner),
+		mId(id),
+		mXYZ(v)
 	{ }
 
 	virtual bool Redo() { return false; }
@@ -137,7 +138,7 @@ class ActionGenericTransformExt : public Action
 	{
 		Vec3 xyz;
 
-		freyjaGetGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
+		freyjaGetGenericTransform3fv(mTransform, mAction, mId, xyz.mVec);
 		
 		switch (mAction)
 		{
@@ -150,19 +151,17 @@ class ActionGenericTransformExt : public Action
 		}
 
 		freyjaPrintMessage("! FreyjaStateTransform::Undo() %i %i %i %f %f %f",
-						   mTransform, mAction, mIndex,
+						   mTransform, mAction, mId,
 						   xyz.mVec[0], xyz.mVec[1], xyz.mVec[2]);
 
-		freyjaGenericTransform3fv(mTransform, mAction, mIndex, xyz.mVec);
-
-		mCursorXYZ = mXYZ;
+		freyjaGenericTransform3fv(mTransform, mAction, mId, xyz.mVec);
 		return true;
 	}
 
-	Vec3 &mCursorXYZ;
-	index_t mIndex;
 	freyja_transform_t mTransform;      /* Object type */
 	freyja_transform_action_t mAction;  /* Type of transform */
+	index_t mOwner;
+	index_t mId;
 	Vector3d mXYZ;                      /* Storage for 3d transform event */
 };
 

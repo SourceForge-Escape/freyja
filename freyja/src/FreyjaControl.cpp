@@ -2341,39 +2341,42 @@ bool FreyjaControl::event(int command)
 
 
 	case eMove:
+		mToken = true;
 		Transform(mObjectMode, fTranslate,
-						  freyja_event_get_float(eMove_X),
-						  freyja_event_get_float(eMove_Y),
-						  freyja_event_get_float(eMove_Z));
-		freyja_event_gl_refresh();
-		
+				  freyja_event_get_float(eMove_X),
+				  freyja_event_get_float(eMove_Y),
+				  freyja_event_get_float(eMove_Z));
+
 		freyja_event_set_float(eMove_X, 0.0f);
 		freyja_event_set_float(eMove_Y, 0.0f);
 		freyja_event_set_float(eMove_Z, 0.0f);
+		freyja_event_gl_refresh();
 		break;
 
 	case eRotate:
+		mToken = true;
 		Transform(mObjectMode, fRotate,
-						  freyja_event_get_float(eRotate_X),
-						  freyja_event_get_float(eRotate_Y),
-						  freyja_event_get_float(eRotate_Z));
-		freyja_event_gl_refresh();
+				  freyja_event_get_float(eRotate_X),
+				  freyja_event_get_float(eRotate_Y),
+				  freyja_event_get_float(eRotate_Z));
 		
 		freyja_event_set_float(eRotate_X, 0.0f);
 		freyja_event_set_float(eRotate_Y, 0.0f);
 		freyja_event_set_float(eRotate_Z, 0.0f);
+		freyja_event_gl_refresh();
 		break;
 
 	case eScale:
+		mToken = true;
 		Transform(mObjectMode, fScale,
-						  freyja_event_get_float(eScale_X),
-						  freyja_event_get_float(eScale_Y),
-						  freyja_event_get_float(eScale_Z));
-		freyja_event_gl_refresh();
+				  freyja_event_get_float(eScale_X),
+				  freyja_event_get_float(eScale_Y),
+				  freyja_event_get_float(eScale_Z));
 		
 		freyja_event_set_float(eScale_X, 1.0f);
 		freyja_event_set_float(eScale_Y, 1.0f);
 		freyja_event_set_float(eScale_Z, 1.0f);
+		freyja_event_gl_refresh();
 		break;
 
 
@@ -3789,6 +3792,90 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			freyja_print("SelectObject '%s' not supported.", s.GetCString());
 			MARK_MSGF("Case '%s' not supported", s.GetCString());
 		}
+	}
+}
+
+
+
+void FreyjaControl::Transform(object_type_t obj, 
+							  freyja_transform_action_t action,
+							  vec_t x, vec_t y, vec_t z) 
+{
+	Vec3 v(x, y, z);
+
+	switch (obj)
+	{
+	case tMesh:	
+		if (mToken) 
+		{
+			Vec3 u;
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				mCursor.mPos = m->GetPosition();
+				//u = mCursor.mPos;
+			}
+
+			switch (action)
+			{
+			case fRotateAboutPoint:
+			case fRotate:
+				u = -v;
+				break;
+
+			case fScaleAboutPoint:
+			case fScale:
+				//u = v;
+				u.mVec[0] = 1.0f / v.mVec[0];
+				u.mVec[1] = 1.0f / v.mVec[1];
+				u.mVec[2] = 1.0f / v.mVec[2];
+				break;
+
+			case fTranslate:
+				u = -v;
+				break;
+
+			default:
+				MARK_MSGF("Not implemented");
+			}
+
+			Action *a = new ActionMeshTransformExt(GetSelectedMesh(), action, u.mVec, mCursor.mPos);
+
+			mActionManager.Push(a);
+			mToken = false;
+		}
+
+		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+		break;
+
+	default:
+		MARK_MSGF("Not Implemented"); 
+	}
+}
+
+
+void FreyjaControl::Transform(freyja_transform_t obj, 
+							  freyja_transform_action_t action,
+							  index_t owner, index_t id,
+							  vec_t x, vec_t y, vec_t z) 
+{ 
+	Vec3 v(x, y, z);
+
+	if (mToken) 
+	{
+		Action *a = new ActionGenericTransform(obj, action, owner, id, v);
+		mActionManager.Push(a);
+	}
+
+	switch (obj)
+	{
+	case fTransformMesh:
+		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+		break;
+
+	default:
+		MARK_MSGF("Not Implemented");
 	}
 }
 
