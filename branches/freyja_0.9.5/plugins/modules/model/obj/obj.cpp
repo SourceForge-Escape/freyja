@@ -144,7 +144,7 @@ int freyja_model__obj_export(char *filename)
 {
 #ifdef OBJ_EXPORT_ENABLED
 	const vec_t scale = 1.0;
-	FreyjaFileWriter w;
+	SystemIO::FileWriter w;
 	long modelIndex = 0; // make plugin option
 	long i, j, k, v;
 	long meshCount, meshIndex;
@@ -154,13 +154,13 @@ int freyja_model__obj_export(char *filename)
 	vec2_t uv;
 
 
-	if (!w.openFile(filename))
+	if (!w.Open(filename))
 	{
 		return -1;
 	}
 
 	/* Comment */
-	w.print("# Exported from %s\n",	FREYJA_API_VERSION);
+	w.Print("# Exported from %s\n",	FREYJA_API_VERSION);
 
 
 	/* Meshes */
@@ -174,64 +174,64 @@ int freyja_model__obj_export(char *filename)
 		vertexCount = freyjaGetMeshVertexCount(meshIndex);
 		polygonCount = freyjaGetMeshPolygonCount(meshIndex);
 
-		w.print("\ng mesh%03li\n", i);
+		w.Print("\ng mesh%03li\n", i);
 
 		/* Vertices */
-		w.print("\n# vertexCount %li\n", vertexCount);
+		w.Print("\n# vertexCount %li\n", vertexCount);
 		for (j = 0; j < vertexCount; ++j)
 		{
 			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
 			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
-			//w.print("# vertex %li -> %li\n", j, vertexIndex);
-			w.print("v %f %f %f\n",
+			//w.Print("# vertex %li -> %li\n", j, vertexIndex);
+			w.Print("v %f %f %f\n",
 					xyz[0]*scale, xyz[1]*scale, xyz[2]*scale);
 		}
 
 		/* Normals */
-		w.print("\n# normalCount %li\n", vertexCount);
+		w.Print("\n# normalCount %li\n", vertexCount);
 		for (j = 0; j < vertexCount; ++j)
 		{
 			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
 			freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
 
-			w.print("vn %f %f %f\n",
+			w.Print("vn %f %f %f\n",
 					xyz[0], xyz[1], xyz[2]);
 		}
 
 		/* Texcoords */
-		w.print("\n# texcoordCount %li\n", vertexCount);
+		w.Print("\n# texcoordCount %li\n", vertexCount);
 		for (j = 0; j < vertexCount; ++j)
 		{
 			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
 			freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 
-			w.print("vt %f %f\n", uv[0], uv[1]);
+			w.Print("vt %f %f\n", uv[0], uv[1]);
 		}
 
 		/* Faces */
-		w.print("\n# faceCount %li\n", polygonCount);
+		w.Print("\n# faceCount %li\n", polygonCount);
 		for (j = 0; j < polygonCount; ++j)
 		{
 			polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, j);
 			faceVertexCount = freyjaGetPolygonVertexCount(polygonIndex);
 
-			w.print("f ");
+			w.Print("f ");
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
 				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
 
-				//w.print("\n# %li. %li -> %li\n", j, faceVertex, vertexIndex);
+				//w.Print("\n# %li. %li -> %li\n", j, faceVertex, vertexIndex);
 
 				// Assumes UV mapped vertices exported
 				// Remember obj indices start at 1
-				w.print("%li/%li/%li ", 
+				w.Print("%li/%li/%li ", 
 						v+vertexIndex+1, v+vertexIndex+1, v+vertexIndex+1);
 			}
 
-			w.print("\n");			
+			w.Print("\n");			
 		}
 
 		v += vertexCount;
@@ -267,14 +267,14 @@ int freyja_model__obj_export(char *filename)
 			{
 				rotation[1] += 90.0;
 
-				w.print("#bone %3i \"%s\" %i %f %f %f %f %f %f\n", i,
+				w.Print("#bone %3i \"%s\" %i %f %f %f %f %f %f\n", i,
 						name, freyjaGetBoneParent(index),
 						translation[0], translation[2], translation[1], 
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
 			else
 			{
-				w.print("#bone %3i \"%s\" %i %f %f %f %f %f %f\n", i,
+				w.Print("#bone %3i \"%s\" %i %f %f %f %f %f %f\n", i,
 						name, freyjaGetBoneParent(index),
 						translation[0], translation[1], translation[2], 
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
@@ -285,7 +285,7 @@ int freyja_model__obj_export(char *filename)
 	}
 #   endif
 
-	w.closeFile();
+	w.Close();
 
 	return 0;
 #else
