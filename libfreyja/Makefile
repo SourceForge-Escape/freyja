@@ -200,8 +200,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaPlugin.o \
 	$(BUILDDIR)/FreyjaCamera.o \
 	$(BUILDDIR)/FreyjaPrinter.o \
-	$(BUILDDIR)/FreyjaFileReader.o \
-	$(BUILDDIR)/FreyjaFileWriter.o \
 	$(BUILDDIR)/FreyjaImage.o \
 	$(BUILDDIR)/FreyjaLight.o \
 	$(BUILDDIR)/FreyjaMaterial.o \
