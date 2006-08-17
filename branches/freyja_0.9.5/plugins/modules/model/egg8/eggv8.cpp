@@ -25,8 +25,6 @@
 
 #include <mstl/Vector.h>
 #include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
 
 #include <mstl/Map.h>
 
@@ -913,7 +911,7 @@ int freyja_model__eggv8_export(char *filename)
 }
 
 
-
+#if 0
 
 //FIXME: Only size is handled, like the rest of this file I/O code
 //       it needs ordering code in parts, and etc - but I have no
@@ -1257,4 +1255,4 @@ int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
 	return 0;
 }
 
-
+#endif

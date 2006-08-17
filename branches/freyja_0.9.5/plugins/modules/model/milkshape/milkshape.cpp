@@ -23,9 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
 
+
+using namespace mstl;
 
 extern "C" {
 
@@ -252,25 +253,22 @@ int import_model(char *filename)
 
 int freyja_model__milkshape_check(char *filename)
 {
-	FILE *f;
-	ms3d_header_t header;
+	SystemIO::FileReader r;
+	long version;
+	char buf[12];
 
-
-	f = fopen(filename, "rb");
-
-	if (!f)
+	if (!r.Open(filename))
 	{
 		//perror("milkshape_check> fopen failed");
 		return -1;
 	}
 
-	fread(&header.id, 10, 1, f);
-	fread(&header.version, 4, 1, f);
-	fclose(f);
+	r.ReadString(10, buf);
+	version = r.ReadLong();
+	r.Close();
 
 	/* MilkShape 1.3 or 1.4 model check */
-	if (!strncmp(header.id, "MS3D000000", 10) && 
-		header.version == 3 || header.version == 4)
+	if (!strncmp(buf, "MS3D000000", 10) && version == 3 || version == 4)
 		return 0;
 
 	return -2;
@@ -280,7 +278,7 @@ int freyja_model__milkshape_check(char *filename)
 int freyja_model__milkshape_import(char *filename)
 {
 	const vec_t scale = 0.4f; 
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	Ms3dModel mdl;
 	long i, j, k;
 
@@ -288,14 +286,14 @@ int freyja_model__milkshape_import(char *filename)
 	if (freyja_model__milkshape_check(filename))
 		return -1;
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 	{
 		//perror("milkshape_import> fopen failed");
 		return -2;
 	}
 
-	r.readCharString(10, mdl.header.id);
-	mdl.header.version = r.readLong();
+	r.ReadString(10, mdl.header.id);
+	mdl.header.version = r.ReadLong();
 
 	/* No use checking twice
 	if (strncmp(mdl.header.id, "MS3D000000", 10) || mdl.header.version != 3)
@@ -305,135 +303,135 @@ int freyja_model__milkshape_import(char *filename)
 	}
 	*/
 
-	mdl.nNumVertices = r.readInt16U();
+	mdl.nNumVertices = r.ReadInt16U();
 	mdl.vertices = new ms3d_vertex_t[mdl.nNumVertices];
 
 	for (i = 0; i < mdl.nNumVertices; ++i)
 	{
-		mdl.vertices[i].flags = r.readInt8U();
-		mdl.vertices[i].vertex[0] = r.readFloat32();
-		mdl.vertices[i].vertex[1] = r.readFloat32();
-		mdl.vertices[i].vertex[2] = r.readFloat32();
-		mdl.vertices[i].boneId = r.readInt8();
-		mdl.vertices[i].refCount = r.readInt8U();
+		mdl.vertices[i].flags = r.ReadInt8U();
+		mdl.vertices[i].vertex[0] = r.ReadFloat32();
+		mdl.vertices[i].vertex[1] = r.ReadFloat32();
+		mdl.vertices[i].vertex[2] = r.ReadFloat32();
+		mdl.vertices[i].boneId = r.ReadInt8();
+		mdl.vertices[i].refCount = r.ReadInt8U();
 	}
 
-	mdl.nNumTriangles = r.readInt16U();
+	mdl.nNumTriangles = r.ReadInt16U();
 	mdl.tris = new ms3d_triangle_t[mdl.nNumTriangles];
 	
 	for (i = 0; i < mdl.nNumTriangles; ++i)
 	{
-		mdl.tris[i].flags = r.readInt16();
-		mdl.tris[i].vertexIndices[0] = r.readInt16();
-		mdl.tris[i].vertexIndices[1] = r.readInt16();
-		mdl.tris[i].vertexIndices[2] = r.readInt16();
+		mdl.tris[i].flags = r.ReadInt16();
+		mdl.tris[i].vertexIndices[0] = r.ReadInt16();
+		mdl.tris[i].vertexIndices[1] = r.ReadInt16();
+		mdl.tris[i].vertexIndices[2] = r.ReadInt16();
 	
 		for (j = 0; j < 3; ++j)
 		{
 			for (k = 0; k < 3; ++k)
 			{
-				mdl.tris[i].vertexNormals[j][k] = r.readFloat32();
+				mdl.tris[i].vertexNormals[j][k] = r.ReadFloat32();
 			}
 		}
 
-		mdl.tris[i].s[0] = r.readFloat32();
-		mdl.tris[i].s[1] = r.readFloat32();
-		mdl.tris[i].s[2] = r.readFloat32();
-		mdl.tris[i].t[0] = r.readFloat32();
-		mdl.tris[i].t[1] = r.readFloat32();
-		mdl.tris[i].t[2] = r.readFloat32();
-		mdl.tris[i].smoothingGroup = r.readInt8U();
-		mdl.tris[i].groupIndex = r.readInt8U();
+		mdl.tris[i].s[0] = r.ReadFloat32();
+		mdl.tris[i].s[1] = r.ReadFloat32();
+		mdl.tris[i].s[2] = r.ReadFloat32();
+		mdl.tris[i].t[0] = r.ReadFloat32();
+		mdl.tris[i].t[1] = r.ReadFloat32();
+		mdl.tris[i].t[2] = r.ReadFloat32();
+		mdl.tris[i].smoothingGroup = r.ReadInt8U();
+		mdl.tris[i].groupIndex = r.ReadInt8U();
 	}
 
-	mdl.nNumGroups = r.readInt16U();
+	mdl.nNumGroups = r.ReadInt16U();
 	mdl.groups = new ms3d_group_t[mdl.nNumGroups];
 	
 	for (i = 0; i < mdl.nNumGroups; ++i)
 	{
-		mdl.groups[i].flags = r.readInt8U();
-		r.readCharString(32, mdl.groups[i].name);
-		mdl.groups[i].numtriangles = r.readInt16U();
+		mdl.groups[i].flags = r.ReadInt8U();
+		r.ReadString(32, mdl.groups[i].name);
+		mdl.groups[i].numtriangles = r.ReadInt16U();
 
 		mdl.groups[i].triangleIndices = new word[mdl.groups[i].numtriangles];
 
 		for (j = 0; j < mdl.groups[i].numtriangles; ++j)
-			mdl.groups[i].triangleIndices[j] = r.readInt16U();
+			mdl.groups[i].triangleIndices[j] = r.ReadInt16U();
 
-		mdl.groups[i].materialIndex = r.readInt8();
+		mdl.groups[i].materialIndex = r.ReadInt8();
 	}
 
 
-	mdl.nNumMaterials = r.readInt16U();
+	mdl.nNumMaterials = r.ReadInt16U();
 	mdl.materials = new ms3d_material_t[mdl.nNumMaterials];
 	
 	for (i = 0; i < mdl.nNumMaterials; ++i)
 	{
-		r.readCharString(32, mdl.materials[i].name);
-		mdl.materials[i].ambient[0] = r.readFloat32();
-		mdl.materials[i].ambient[1] = r.readFloat32();
-		mdl.materials[i].ambient[2] = r.readFloat32();
-		mdl.materials[i].ambient[3] = r.readFloat32();
-		mdl.materials[i].diffuse[0] = r.readFloat32();
-		mdl.materials[i].diffuse[1] = r.readFloat32();
-		mdl.materials[i].diffuse[2] = r.readFloat32();
-		mdl.materials[i].diffuse[3] = r.readFloat32();
-		mdl.materials[i].specular[0] = r.readFloat32();
-		mdl.materials[i].specular[1] = r.readFloat32();
-		mdl.materials[i].specular[2] = r.readFloat32();
-		mdl.materials[i].specular[3] = r.readFloat32();
-		mdl.materials[i].emissive[0] = r.readFloat32();
-		mdl.materials[i].emissive[1] = r.readFloat32();
-		mdl.materials[i].emissive[2] = r.readFloat32();
-		mdl.materials[i].emissive[3] = r.readFloat32();
-		mdl.materials[i].shininess = r.readFloat32();
-		mdl.materials[i].transparency = r.readFloat32();
-		mdl.materials[i].mode = r.readInt8();
-		r.readCharString(128, mdl.materials[i].texture);
-		r.readCharString(128, mdl.materials[i].alphamap);
+		r.ReadString(32, mdl.materials[i].name);
+		mdl.materials[i].ambient[0] = r.ReadFloat32();
+		mdl.materials[i].ambient[1] = r.ReadFloat32();
+		mdl.materials[i].ambient[2] = r.ReadFloat32();
+		mdl.materials[i].ambient[3] = r.ReadFloat32();
+		mdl.materials[i].diffuse[0] = r.ReadFloat32();
+		mdl.materials[i].diffuse[1] = r.ReadFloat32();
+		mdl.materials[i].diffuse[2] = r.ReadFloat32();
+		mdl.materials[i].diffuse[3] = r.ReadFloat32();
+		mdl.materials[i].specular[0] = r.ReadFloat32();
+		mdl.materials[i].specular[1] = r.ReadFloat32();
+		mdl.materials[i].specular[2] = r.ReadFloat32();
+		mdl.materials[i].specular[3] = r.ReadFloat32();
+		mdl.materials[i].emissive[0] = r.ReadFloat32();
+		mdl.materials[i].emissive[1] = r.ReadFloat32();
+		mdl.materials[i].emissive[2] = r.ReadFloat32();
+		mdl.materials[i].emissive[3] = r.ReadFloat32();
+		mdl.materials[i].shininess = r.ReadFloat32();
+		mdl.materials[i].transparency = r.ReadFloat32();
+		mdl.materials[i].mode = r.ReadInt8();
+		r.ReadString(128, mdl.materials[i].texture);
+		r.ReadString(128, mdl.materials[i].alphamap);
 	}
 
-	mdl.fAnimationFPS = r.readFloat32();
-	mdl.fCurrentTime = r.readFloat32();
-	mdl.iTotalFrames = r.readLong();
+	mdl.fAnimationFPS = r.ReadFloat32();
+	mdl.fCurrentTime = r.ReadFloat32();
+	mdl.iTotalFrames = r.ReadLong();
 
-	mdl.nNumJoints = r.readInt16U();
+	mdl.nNumJoints = r.ReadInt16U();
 	mdl.joints = new ms3d_joint_t[mdl.nNumJoints];
 
 	for (i = 0; i < mdl.nNumJoints; ++i)
 	{
-		mdl.joints[i].flags = r.readInt8();
-		r.readCharString(32, mdl.joints[i].name);
-		r.readCharString(32, mdl.joints[i].parentName);
-		mdl.joints[i].rotation[0] = r.readFloat32();
-		mdl.joints[i].rotation[1] = r.readFloat32();
-		mdl.joints[i].rotation[2] = r.readFloat32();
-		mdl.joints[i].position[0] = r.readFloat32();
-		mdl.joints[i].position[1] = r.readFloat32();
-		mdl.joints[i].position[2] = r.readFloat32();
-		mdl.joints[i].numRotationKeyframes = r.readInt16U();
+		mdl.joints[i].flags = r.ReadInt8();
+		r.ReadString(32, mdl.joints[i].name);
+		r.ReadString(32, mdl.joints[i].parentName);
+		mdl.joints[i].rotation[0] = r.ReadFloat32();
+		mdl.joints[i].rotation[1] = r.ReadFloat32();
+		mdl.joints[i].rotation[2] = r.ReadFloat32();
+		mdl.joints[i].position[0] = r.ReadFloat32();
+		mdl.joints[i].position[1] = r.ReadFloat32();
+		mdl.joints[i].position[2] = r.ReadFloat32();
+		mdl.joints[i].numRotationKeyframes = r.ReadInt16U();
 		mdl.joints[i].keyFramesRot = new ms3d_keyframe_rot_t[mdl.joints[i].numRotationKeyframes];
-		mdl.joints[i].numPositionKeyframes = r.readInt16U();
+		mdl.joints[i].numPositionKeyframes = r.ReadInt16U();
 		mdl.joints[i].keyFramesPos = new ms3d_keyframe_pos_t[mdl.joints[i].numPositionKeyframes];
 
 		for (j = 0; j < mdl.joints[i].numRotationKeyframes; ++j)
 		{
-			mdl.joints[i].keyFramesRot[j].time = r.readFloat32();
-			mdl.joints[i].keyFramesRot[j].rotation[0] = r.readFloat32();
-			mdl.joints[i].keyFramesRot[j].rotation[1] = r.readFloat32();
-			mdl.joints[i].keyFramesRot[j].rotation[2] = r.readFloat32();
+			mdl.joints[i].keyFramesRot[j].time = r.ReadFloat32();
+			mdl.joints[i].keyFramesRot[j].rotation[0] = r.ReadFloat32();
+			mdl.joints[i].keyFramesRot[j].rotation[1] = r.ReadFloat32();
+			mdl.joints[i].keyFramesRot[j].rotation[2] = r.ReadFloat32();
 		}
 
 		for (j = 0; j < mdl.joints[i].numPositionKeyframes; ++j)
 		{
-			mdl.joints[i].keyFramesPos[j].time = r.readFloat32();
-			mdl.joints[i].keyFramesPos[j].position[0] = r.readFloat32();
-			mdl.joints[i].keyFramesPos[j].position[1] = r.readFloat32();
-			mdl.joints[i].keyFramesPos[j].position[2] = r.readFloat32();
+			mdl.joints[i].keyFramesPos[j].time = r.ReadFloat32();
+			mdl.joints[i].keyFramesPos[j].position[0] = r.ReadFloat32();
+			mdl.joints[i].keyFramesPos[j].position[1] = r.ReadFloat32();
+			mdl.joints[i].keyFramesPos[j].position[2] = r.ReadFloat32();
 		}
 	}
 
-	r.closeFile();
+	r.Close();
 
 
 	/// Import ///////////////////////////////////////
@@ -587,7 +585,7 @@ int freyja_model__milkshape_import(char *filename)
 int freyja_model__milkshape_export(char *filename)
 {
 	const vec_t scale = 2.5;
-	FreyjaFileWriter w;
+	SystemIO::FileWriter w;
 	char name[128];
 	long modelIndex = 0;    // make plugin option
 	long skeletonIndex = 0; // make plugin option
@@ -599,13 +597,13 @@ int freyja_model__milkshape_export(char *filename)
 	vec2_t uv;
 
 
-	if (!w.openFile(filename))
+	if (!w.Open(filename))
 	{
 		return -1;
 	}
 
-	w.writeCharString(10, "MS3D000000");
-	w.writeLong(4);
+	w.WriteString(10, "MS3D000000");
+	w.WriteLong(4);
 
 	meshCount = freyjaGetModelMeshCount(modelIndex);
 
@@ -616,7 +614,7 @@ int freyja_model__milkshape_export(char *filename)
 		polygonCount += freyjaGetMeshPolygonCount(meshIndex);
 	}
 
-	w.writeInt16U(vertexCount);
+	w.WriteInt16U(vertexCount);
 
 	for (i = 0; i < meshCount; ++i)
 	{
@@ -628,16 +626,16 @@ int freyja_model__milkshape_export(char *filename)
 			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
 			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
-			w.writeInt8U(0); // flags
-			w.writeFloat32(xyz[0]*scale); // x
-			w.writeFloat32(xyz[1]*scale); // y
-			w.writeFloat32(xyz[2]*scale); // z
-			w.writeInt8(-1); // boneId ( Only 1:1 vertex:bone, so for now skip )
-			w.writeInt8U(0); // refCount
+			w.WriteInt8U(0); // flags
+			w.WriteFloat32(xyz[0]*scale); // x
+			w.WriteFloat32(xyz[1]*scale); // y
+			w.WriteFloat32(xyz[2]*scale); // z
+			w.WriteInt8(-1); // boneId ( Only 1:1 vertex:bone, so for now skip )
+			w.WriteInt8U(0); // refCount
 		}
 	}
 
-	w.writeInt16U(polygonCount);
+	w.WriteInt16U(polygonCount);
 	
 	for (i = 0; i < meshCount; ++i)
 	{
@@ -655,13 +653,13 @@ int freyja_model__milkshape_export(char *filename)
 								  * or handle it here, don't fuck with freyja 
 								  * object state from export plugins! */
 
-			w.writeInt16(0); // flags
+			w.WriteInt16(0); // flags
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
 				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
-				w.writeInt16(vertexIndex);
+				w.WriteInt16(vertexIndex);
 			}
 
 			for (k = 0; k < faceVertexCount; ++k)
@@ -670,9 +668,9 @@ int freyja_model__milkshape_export(char *filename)
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
 				freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
 				
-				w.writeFloat32(xyz[0]);
-				w.writeFloat32(xyz[1]);
-				w.writeFloat32(xyz[2]);
+				w.WriteFloat32(xyz[0]);
+				w.WriteFloat32(xyz[1]);
+				w.WriteFloat32(xyz[2]);
 			}
 
 			for (k = 0; k < faceVertexCount; ++k)
@@ -681,7 +679,7 @@ int freyja_model__milkshape_export(char *filename)
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
 				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 				
-				w.writeFloat32(uv[0]);
+				w.WriteFloat32(uv[0]);
 			}
 
 			for (k = 0; k < faceVertexCount; ++k)
@@ -690,16 +688,16 @@ int freyja_model__milkshape_export(char *filename)
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
 				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 				
-				w.writeFloat32(uv[1]);
+				w.WriteFloat32(uv[1]);
 			}
 
-			w.writeInt8U(0); // smoothingGroup
-			w.writeInt8U(i);
+			w.WriteInt8U(0); // smoothingGroup
+			w.WriteInt8U(i);
 		}
 	}
 
 
-	w.writeInt16U(meshCount);
+	w.WriteInt16U(meshCount);
 
 	for (k = 0, i = 0; i < meshCount; ++i)
 	{
@@ -707,107 +705,107 @@ int freyja_model__milkshape_export(char *filename)
 
 		snprintf(name, 32, "mesh%li", i);
 
-		w.writeInt8U(0); // flags
-		w.writeCharString(32, name); // name
-		w.writeInt16U(polygonCount);  // tris count
+		w.WriteInt8U(0); // flags
+		w.WriteString(32, name); // name
+		w.WriteInt16U(polygonCount);  // tris count
 
 		for (j = 0; j < polygonCount; ++j, ++k)
 		{
-			w.writeInt16U(j+k); // tris indeices
+			w.WriteInt16U(j+k); // tris indeices
 		}
 
-		w.writeInt8(-1); // materialIndex
+		w.WriteInt8(-1); // materialIndex
 	}
 
 
-	w.writeInt16U(0); // materialCount
+	w.WriteInt16U(0); // materialCount
  
 	for (i = 0; i < 0; ++i)
 	{
 		snprintf(name, 32, "mat%li", i);
-		w.writeCharString(32, name);
+		w.WriteString(32, name);
 
-		w.writeFloat32(0); // ambient
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0); // diffuse
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0); // specular
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0); // emissive
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0);
-		w.writeFloat32(0); // shininess
-		w.writeFloat32(0); // transparency
+		w.WriteFloat32(0); // ambient
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0); // diffuse
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0); // specular
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0); // emissive
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0);
+		w.WriteFloat32(0); // shininess
+		w.WriteFloat32(0); // transparency
 
-		w.writeInt8(0); // mode
+		w.WriteInt8(0); // mode
 		
 		snprintf(name, 128, "texturemap.png"); // he he he
-		w.writeCharString(128, name); // texturemap
+		w.WriteString(128, name); // texturemap
 
 		snprintf(name, 128, "alphamap.png");
-		w.writeCharString(128, name); // alphamap
+		w.WriteString(128, name); // alphamap
 	}
 
-	w.writeFloat32(30.0f); // fAnimationFPS
-	w.writeFloat32(0.0f);  // fCurrentTime
-	w.writeLong(0);        // iTotalFrames
+	w.WriteFloat32(30.0f); // fAnimationFPS
+	w.WriteFloat32(0.0f);  // fCurrentTime
+	w.WriteLong(0);        // iTotalFrames
 
 	long boneIndex;
 	long boneCount = freyjaGetSkeletonBoneCount(skeletonIndex);
 
-	w.writeInt16U(boneCount); // boneCount
+	w.WriteInt16U(boneCount); // boneCount
 
 	for (i = 0; i < boneCount; ++i)
 	{
 		boneIndex = freyjaGetSkeletonBoneIndex(skeletonIndex, i);
 
-		w.writeInt8(0); // flags
+		w.WriteInt8(0); // flags
 
 		freyjaGetBoneName(boneIndex, 32, name);
-		w.writeCharString(32, name); // this bone's name
+		w.WriteString(32, name); // this bone's name
 
 		name[0] = 0;
 		freyjaGetBoneName(freyjaGetBoneParent(boneIndex), 32, name);
-		w.writeCharString(32, name); // parent name
+		w.WriteString(32, name); // parent name
 
 		freyjaGetBoneRotationEuler3fv(boneIndex, xyz);
-		w.writeFloat32(helDegToRad(xyz[0]));
-		w.writeFloat32(helDegToRad(xyz[1]));
-		w.writeFloat32(helDegToRad(xyz[2]));
+		w.WriteFloat32(helDegToRad(xyz[0]));
+		w.WriteFloat32(helDegToRad(xyz[1]));
+		w.WriteFloat32(helDegToRad(xyz[2]));
 
 		freyjaGetBoneTranslation3fv(boneIndex, xyz);
-		w.writeFloat32(xyz[0]*scale);
-		w.writeFloat32(xyz[1]*scale);
-		w.writeFloat32(xyz[2]*scale);
+		w.WriteFloat32(xyz[0]*scale);
+		w.WriteFloat32(xyz[1]*scale);
+		w.WriteFloat32(xyz[2]*scale);
 
-		w.writeInt16U(0); // numRotationKeyframes
-		w.writeInt16U(0); // numPositionKeyframes
+		w.WriteInt16U(0); // numRotationKeyframes
+		w.WriteInt16U(0); // numPositionKeyframes
 
 		for (j = 0; j < 0; ++j) // numRotationKeyframes
 		{
-			w.writeFloat32(0.0f);  // time
-			w.writeFloat32(0.0f);  // x
-			w.writeFloat32(0.0f);  // y
-			w.writeFloat32(0.0f);  // z
+			w.WriteFloat32(0.0f);  // time
+			w.WriteFloat32(0.0f);  // x
+			w.WriteFloat32(0.0f);  // y
+			w.WriteFloat32(0.0f);  // z
 		}
 
 		for (j = 0; j < 0; ++j) // numPositionKeyframes
 		{
-			w.writeFloat32(0.0f);  // time
-			w.writeFloat32(0.0f);  // x
-			w.writeFloat32(0.0f);  // y
-			w.writeFloat32(0.0f);  // z
+			w.WriteFloat32(0.0f);  // time
+			w.WriteFloat32(0.0f);  // x
+			w.WriteFloat32(0.0f);  // y
+			w.WriteFloat32(0.0f);  // z
 		}
 	}
 
-	w.closeFile();
+	w.Close();
 
 	return 0;
 }
