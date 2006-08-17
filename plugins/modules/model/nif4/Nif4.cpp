@@ -49,21 +49,21 @@ Nif4::~Nif4()
 
 bool Nif4::loadModel(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	Vector<NiNode *> ninodes;
 	Chunk chunk;
 
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return false;
 
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
-	r.readCharString(mHeaderSz, mHeader);
+	r.ReadString(mHeaderSz, mHeader);
 
 	if (strncmp(NIF4_HEADER_START, mHeader, 34))
 		return false;
 
-	while (chunk.readHeader(r) && !r.endOfFile())
+	while (chunk.readHeader(r) && !r.IsEndOfFile())
 	{
 		printf("Ni Chunk: '%s'\n", chunk.name);
 
@@ -123,15 +123,15 @@ bool Nif4::loadModel(const char *filename)
 		}
 		else
 		{
-			printf("Ni Chunk: '%s', %i @ %inot implemented\n",
-				   chunk.name, chunk.len, r.getFileOffset());
+			printf("Ni Chunk: '%s', %i @ %li not implemented\n",
+				   chunk.name, chunk.len, r.GetOffset());
 
-			r.closeFile();
+			r.Close();
 			break;
 		}
 	}
 
-	r.closeFile();
+	r.Close();
 
 	return true;
 }
@@ -185,16 +185,16 @@ int import_model(char *filename)
 
 int freyja_model__nif4_check(char *filename)
 {	
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	char header[48];
 	unsigned int headerSz = 48;
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return -1;
 
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
-	r.readCharString(headerSz, header);
-	r.closeFile();
+	r.ReadString(headerSz, header);
+	r.Close();
 
 	if (strncmp(NIF4_HEADER_START, header, 34))
 		return -1;

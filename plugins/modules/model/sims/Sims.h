@@ -28,10 +28,9 @@
 #define GUARD__FREYJA_MONGOOSE_SIMS_H_
 
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
 
 using namespace mstl;
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
 
 
 /* NOTE: This is a BIG_ENDIAN format */
@@ -82,7 +81,7 @@ public:
 
 private:
 
-	bool loadChunk(FreyjaFileReader &r);
+	bool loadChunk(SystemIO::FileReader &r);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if valid and loads

@@ -25,11 +25,12 @@
 #include <string.h>
 #include <math.h>
 
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
 
 #include "Nod.h"
 
+
+using namespace mstl;
 
 Nod::Nod()
 {
@@ -214,34 +215,34 @@ void Nod::print()
 
 bool Nod::load(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	long i, j, k;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return false;
 
-	header1.Version = r.readLong();
-	header1.NumMaterials = r.readLong();
+	header1.Version = r.ReadLong();
+	header1.NumMaterials = r.ReadLong();
 
 
 	materials = new nod_material_t[header1.NumMaterials];
 
 	for (i = 0; i < header1.NumMaterials; ++i)
 	{
-		r.readCharString(32, materials[i].MaterialName);
+		r.ReadString(32, materials[i].MaterialName);
 	}
 
-	header2.NumBones = r.readInt16();
-	header2.NumMeshs = r.readInt16();
-	header2.NumVertices = r.readLong();
-	header2.NumFaces = r.readLong();
-	header2.NumGroups = r.readInt16();
-	header2.ModelFlags = r.readLong();
+	header2.NumBones = r.ReadInt16();
+	header2.NumMeshs = r.ReadInt16();
+	header2.NumVertices = r.ReadLong();
+	header2.NumFaces = r.ReadLong();
+	header2.NumGroups = r.ReadInt16();
+	header2.ModelFlags = r.ReadLong();
 
 	for (i = 0; i < 6; ++i)
 	{
-		header2.Bounds[i] = r.readFloat32();
+		header2.Bounds[i] = r.ReadFloat32();
 	}
 
 
@@ -249,21 +250,21 @@ bool Nod::load(const char *filename)
 
 	for (i = 0; i < header2.NumBones; ++i)
 	{
-		bones[i].RestTranslate[0] = r.readFloat32();
-		bones[i].RestTranslate[1] = r.readFloat32();
-		bones[i].RestTranslate[2] = r.readFloat32();
+		bones[i].RestTranslate[0] = r.ReadFloat32();
+		bones[i].RestTranslate[1] = r.ReadFloat32();
+		bones[i].RestTranslate[2] = r.ReadFloat32();
 
 		for (j = 0; j < 3; ++j)
 		{
 			for (k = 0; k < 4; ++k)
 			{
-				bones[i].RestMatrixInverse[j][k] = r.readFloat32();
+				bones[i].RestMatrixInverse[j][k] = r.ReadFloat32();
 			}
 		}
 
-		bones[i].SiblingID = r.readInt16();
-		bones[i].ChildID = r.readInt16();
-		bones[i].ParentID = r.readInt16();
+		bones[i].SiblingID = r.ReadInt16();
+		bones[i].ChildID = r.ReadInt16();
+		bones[i].ParentID = r.ReadInt16();
 	}
 
 
@@ -271,27 +272,27 @@ bool Nod::load(const char *filename)
 
 	for (i = 0; i < header2.NumMeshs; ++i)
 	{
-		r.readCharString(32, meshes[i].MeshName);
+		r.ReadString(32, meshes[i].MeshName);
 	}
 
 	vertices = new nod_vertex_t[header2.NumVertices];
 
 	for (i = 0; i < header2.NumVertices; ++i)
 	{
-		vertices[i].Pos[0] = r.readFloat32();
-		vertices[i].Pos[1] = r.readFloat32();
-		vertices[i].Pos[2] = r.readFloat32();
+		vertices[i].Pos[0] = r.ReadFloat32();
+		vertices[i].Pos[1] = r.ReadFloat32();
+		vertices[i].Pos[2] = r.ReadFloat32();
 
-		vertices[i].Norm[0] = r.readFloat32();
-		vertices[i].Norm[1] = r.readFloat32();
-		vertices[i].Norm[2] = r.readFloat32();
+		vertices[i].Norm[0] = r.ReadFloat32();
+		vertices[i].Norm[1] = r.ReadFloat32();
+		vertices[i].Norm[2] = r.ReadFloat32();
 
-		vertices[i].UV[0] = r.readFloat32();
-		vertices[i].UV[1] = r.readFloat32();
+		vertices[i].UV[0] = r.ReadFloat32();
+		vertices[i].UV[1] = r.ReadFloat32();
 
-		vertices[i].Weight = r.readFloat32();
+		vertices[i].Weight = r.ReadFloat32();
 
-		vertices[i].BoneNum = r.readLong();
+		vertices[i].BoneNum = r.ReadLong();
 	}
 
 
@@ -299,7 +300,7 @@ bool Nod::load(const char *filename)
 	{
 		for (i = 0; i < header2.NumVertices; ++i)
 		{
-			r.readInt16();  // ?
+			r.ReadInt16();  // ?
 		}
 	}
 
@@ -307,27 +308,27 @@ bool Nod::load(const char *filename)
 
 	for (i = 0; i < header2.NumFaces; ++i)
 	{
-		faces[i].indices[0] = r.readInt16();
-		faces[i].indices[1] = r.readInt16();
-		faces[i].indices[2] = r.readInt16();
+		faces[i].indices[0] = r.ReadInt16();
+		faces[i].indices[1] = r.ReadInt16();
+		faces[i].indices[2] = r.ReadInt16();
 	}
 
 	mesh_groups = new nod_meshgroup_t[header2.NumGroups];
  
 	for (i = 0; i < header2.NumGroups; ++i)
 	{
-		mesh_groups[i].MaterialID = r.readLong();
-		r.readBufferUnsignedChar(12, mesh_groups[i].RESERVED);
-		mesh_groups[i].NumFaces = r.readInt16();
-		mesh_groups[i].NumVertices = r.readInt16();
-		mesh_groups[i].MinVertices = r.readInt16();
-		mesh_groups[i].dummy = r.readInt16();
-		mesh_groups[i].GroupFlags = r.readInt16();
-		mesh_groups[i].BoneNum = r.readInt8U();
-		mesh_groups[i].MeshNum = r.readInt8U();
+		mesh_groups[i].MaterialID = r.ReadLong();
+		r.ReadBuffer(12, mesh_groups[i].RESERVED);
+		mesh_groups[i].NumFaces = r.ReadInt16();
+		mesh_groups[i].NumVertices = r.ReadInt16();
+		mesh_groups[i].MinVertices = r.ReadInt16();
+		mesh_groups[i].dummy = r.ReadInt16();
+		mesh_groups[i].GroupFlags = r.ReadInt16();
+		mesh_groups[i].BoneNum = r.ReadInt8U();
+		mesh_groups[i].MeshNum = r.ReadInt8U();
 	}
 
-	r.closeFile();
+	r.Close();
 	
 	return true;
 }
@@ -336,34 +337,34 @@ bool Nod::load(const char *filename)
 bool Nod::save(const char *filename)
 {
 #ifdef FIXME
-	FreyjaFileWriter w;
+	SystemIO::FileWriter w;
 	long i, j, k;
 
 
 	if (!r.openFile(filename))
 		return false;
 
-	header1.Version = r.readLong();
-	header1.NumMaterials = r.readLong();
+	header1.Version = r.ReadLong();
+	header1.NumMaterials = r.ReadLong();
 
 
 	materials = new nod_material_t[header1.NumMaterials];
 
 	for (i = 0; i < header1.NumMaterials; ++i)
 	{
-		r.readCharString(32, materials[i].MaterialName);
+		r.ReadCharString(32, materials[i].MaterialName);
 	}
 
-	header2.NumBones = r.readInt16();
-	header2.NumMeshs = r.readInt16();
-	header2.NumVertices = r.readLong();
-	header2.NumFaces = r.readLong();
-	header2.NumGroups = r.readInt16();
-	header2.ModelFlags = r.readLong();
+	header2.NumBones = r.ReadInt16();
+	header2.NumMeshs = r.ReadInt16();
+	header2.NumVertices = r.ReadLong();
+	header2.NumFaces = r.ReadLong();
+	header2.NumGroups = r.ReadInt16();
+	header2.ModelFlags = r.ReadLong();
 
 	for (i = 0; i < 6; ++i)
 	{
-		header2.Bounds[i] = r.readFloat32();
+		header2.Bounds[i] = r.ReadFloat32();
 	}
 
 
@@ -371,21 +372,21 @@ bool Nod::save(const char *filename)
 
 	for (i = 0; i < header2.NumBones; ++i)
 	{
-		bones[i].RestTranslate[0] = r.readFloat32();
-		bones[i].RestTranslate[1] = r.readFloat32();
-		bones[i].RestTranslate[2] = r.readFloat32();
+		bones[i].RestTranslate[0] = r.ReadFloat32();
+		bones[i].RestTranslate[1] = r.ReadFloat32();
+		bones[i].RestTranslate[2] = r.ReadFloat32();
 
 		for (j = 0; j < 3; ++j)
 		{
 			for (k = 0; k < 4; ++k)
 			{
-				bones[i].RestMatrixInverse[j][k] = r.readFloat32();
+				bones[i].RestMatrixInverse[j][k] = r.ReadFloat32();
 			}
 		}
 
-		bones[i].SiblingID = r.readInt16();
-		bones[i].ChildID = r.readInt16();
-		bones[i].ParentID = r.readInt16();
+		bones[i].SiblingID = r.ReadInt16();
+		bones[i].ChildID = r.ReadInt16();
+		bones[i].ParentID = r.ReadInt16();
 	}
 
 
@@ -393,27 +394,27 @@ bool Nod::save(const char *filename)
 
 	for (i = 0; i < header2.NumMeshs; ++i)
 	{
-		r.readCharString(32, meshes[i].MeshName);
+		r.ReadCharString(32, meshes[i].MeshName);
 	}
 
 	vertices = new nod_vertex_t[header2.NumVertices];
 
 	for (i = 0; i < header2.NumVertices; ++i)
 	{
-		vertices[i].Pos[0] = r.readFloat32();
-		vertices[i].Pos[1] = r.readFloat32();
-		vertices[i].Pos[2] = r.readFloat32();
+		vertices[i].Pos[0] = r.ReadFloat32();
+		vertices[i].Pos[1] = r.ReadFloat32();
+		vertices[i].Pos[2] = r.ReadFloat32();
 
-		vertices[i].Norm[0] = r.readFloat32();
-		vertices[i].Norm[1] = r.readFloat32();
-		vertices[i].Norm[2] = r.readFloat32();
+		vertices[i].Norm[0] = r.ReadFloat32();
+		vertices[i].Norm[1] = r.ReadFloat32();
+		vertices[i].Norm[2] = r.ReadFloat32();
 
-		vertices[i].UV[0] = r.readFloat32();
-		vertices[i].UV[1] = r.readFloat32();
+		vertices[i].UV[0] = r.ReadFloat32();
+		vertices[i].UV[1] = r.ReadFloat32();
 
-		vertices[i].Weight = r.readFloat32();
+		vertices[i].Weight = r.ReadFloat32();
 
-		vertices[i].BoneNum = r.readLong();
+		vertices[i].BoneNum = r.ReadLong();
 	}
 
 
@@ -421,7 +422,7 @@ bool Nod::save(const char *filename)
 	{
 		for (i = 0; i < header2.NumVertices; ++i)
 		{
-			r.readInt16();  // ?
+			r.ReadInt16();  // ?
 		}
 	}
 
@@ -429,24 +430,24 @@ bool Nod::save(const char *filename)
 
 	for (i = 0; i < header2.NumFaces; ++i)
 	{
-		faces[i].indices[0] = r.readInt16();
-		faces[i].indices[1] = r.readInt16();
-		faces[i].indices[2] = r.readInt16();
+		faces[i].indices[0] = r.ReadInt16();
+		faces[i].indices[1] = r.ReadInt16();
+		faces[i].indices[2] = r.ReadInt16();
 	}
 
 	mesh_groups = new nod_meshgroup_t[header2.NumGroups];
  
 	for (i = 0; i < header2.NumGroups; ++i)
 	{
-		mesh_groups[i].MaterialID = r.readLong();
-		r.readBufferUnsignedChar(12, mesh_groups[i].RESERVED);
-		mesh_groups[i].NumFaces = r.readInt16();
-		mesh_groups[i].NumVertices = r.readInt16();
-		mesh_groups[i].MinVertices = r.readInt16();
-		mesh_groups[i].dummy = r.readInt16();
-		mesh_groups[i].GroupFlags = r.readInt16();
-		mesh_groups[i].BoneNum = r.readInt8U();
-		mesh_groups[i].MeshNum = r.readInt8U();
+		mesh_groups[i].MaterialID = r.ReadLong();
+		r.ReadBufferUnsignedChar(12, mesh_groups[i].RESERVED);
+		mesh_groups[i].NumFaces = r.ReadInt16();
+		mesh_groups[i].NumVertices = r.ReadInt16();
+		mesh_groups[i].MinVertices = r.ReadInt16();
+		mesh_groups[i].dummy = r.ReadInt16();
+		mesh_groups[i].GroupFlags = r.ReadInt16();
+		mesh_groups[i].BoneNum = r.ReadInt8U();
+		mesh_groups[i].MeshNum = r.ReadInt8U();
 	}
 
 	r.closeFile();

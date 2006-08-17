@@ -21,11 +21,12 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
+#include <mstl/String.h>
 
 #include "Md5.h"
 
+using namespace mstl;
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -80,15 +81,15 @@ float Md5::decodeIdQuaternion(float qx, float qy, float qz)
 
 bool Md5::isMd5Model(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::TextFileReader r;
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return false;
 
-	if (r.parseMatchingSymbol("MD5Version"))
+	if (r.ParseMatchingSymbol("MD5Version"))
 		return true;
 
-	r.closeFile();
+	r.Close();
 
 	return false;
 }
@@ -96,73 +97,73 @@ bool Md5::isMd5Model(const char *filename)
 
 bool Md5::saveModel(const char *filename)
 {
-	FreyjaFileWriter w;
+	SystemIO::TextFileWriter w;
 	int i, j;  /* I hate everyone that uses signed indices in file formats */
 
 
-	if (FreyjaFileReader::doesFileExist(filename))
+	if (SystemIO::File::DoesFileExist(filename))
 	{
 		printf("Can't cycle Md5mesh with missing metadata -- won't overwrite '%s'.\n", filename);
 		return false;
 	}
 
-	if (w.openFile(filename) == false)
+	if (w.Open(filename) == false)
 		return false;
 
 	/* Header */
-	w.print("MD5Version 10\n");
+	w.Print("MD5Version 10\n");
 
 	/* Some Id thingys */
-	w.print("commandline \"FIXME FOR YOUR MODEL\"\n\n");
+	w.Print("commandline \"FIXME FOR YOUR MODEL\"\n\n");
 
 	/* Joint and mesh counts */
-	w.print("numJoints %i\n", mNumJoints);
-	w.print("numMeshes %i\n\n", mNumMeshes);
+	w.Print("numJoints %i\n", mNumJoints);
+	w.Print("numMeshes %i\n\n", mNumMeshes);
 
 	/* Joint data */
-	w.print("joints {\n");
+	w.Print("joints {\n");
 
 	for (i = 0; i < mNumJoints; ++i)
 	{
-		w.print("\t\"%s\"\t%i ", mJoints[i].name, mJoints[i].parent);
+		w.Print("\t\"%s\"\t%i ", mJoints[i].name, mJoints[i].parent);
 
 		/* translate X Y Z */
-		w.print("( %f %f %f ) ",
+		w.Print("( %f %f %f ) ",
 			mJoints[i].translate[0],
 			mJoints[i].translate[1],
 			mJoints[i].translate[2]);
 
-		w.print("( %f %f %f )\t\t",
+		w.Print("( %f %f %f )\t\t",
 			mJoints[i].rotate[0],
 			mJoints[i].rotate[1],
 			mJoints[i].rotate[2]);
 		
 		/* Recover metadata of parent comment */
-		w.print("// ");
+		w.Print("// ");
 
 		if (mJoints[i].parent > 0)
 		{
-			w.print("%s", mJoints[mJoints[i].parent].name);
+			w.Print("%s", mJoints[mJoints[i].parent].name);
 		}
 
-		w.print("\n");
+		w.Print("\n");
 	}
 
-	w.print("}\n");
+	w.Print("}\n");
 
 	/* Write mesh data*/
 	for (i = 0; i < mNumMeshes; ++i)
 	{
-		w.print("\n");
-		w.print("mesh {\n");
-		w.print("\t// meshes: %s\n", mMeshes[i].name);
-		w.print("\tshader \"%s\"\n", mMeshes[i].shader);
+		w.Print("\n");
+		w.Print("mesh {\n");
+		w.Print("\t// meshes: %s\n", mMeshes[i].name);
+		w.Print("\tshader \"%s\"\n", mMeshes[i].shader);
 
-		w.print("\n\tnumverts %i\n", mMeshes[i].numverts);
+		w.Print("\n\tnumverts %i\n", mMeshes[i].numverts);
 
 		for (j = 0; j < mMeshes[i].numverts; ++j)
 		{
-			w.print("\tvert %i ( %lf %lf ) %i %i\n", 
+			w.Print("\tvert %i ( %lf %lf ) %i %i\n", 
 					j, // mMeshes[i].verts[j].index // Should == j
 					mMeshes[i].verts[j].uv[0], 
 					mMeshes[i].verts[j].uv[1],
@@ -170,22 +171,22 @@ bool Md5::saveModel(const char *filename)
 					mMeshes[i].verts[j].numbones);
 		}
 
-		w.print("\n\tnumtris %i\n", mMeshes[i].numtriangles);
+		w.Print("\n\tnumtris %i\n", mMeshes[i].numtriangles);
 
 		for (j = 0; j < mMeshes[i].numtriangles; ++j)
 		{
-			w.print("\ttri %i %i %i %i\n",
+			w.Print("\ttri %i %i %i %i\n",
 				j,
 				mMeshes[i].triangles[j].vertex[0],
 				mMeshes[i].triangles[j].vertex[1],
 				mMeshes[i].triangles[j].vertex[2]);
 		}
 
-		w.print("\n\tnumweights %i\n", mMeshes[i].numweights);
+		w.Print("\n\tnumweights %i\n", mMeshes[i].numweights);
 
 		for (j = 0; j < mMeshes[i].numweights; ++j)
 		{
-			w.print("\tweight %i %i %f ( %f %f %f )\n",
+			w.Print("\tweight %i %i %f ( %f %f %f )\n",
 					j, // mMeshes[i].weights[j].index
 					mMeshes[i].weights[j].joint,
 					mMeshes[i].weights[j].weight,
@@ -194,10 +195,10 @@ bool Md5::saveModel(const char *filename)
 					mMeshes[i].weights[j].pos[2]);			
 		}
 		
-		w.print("}\n");
+		w.Print("}\n");
 	}
 
-	w.closeFile();
+	w.Close();
 
 	return true;
 }
@@ -209,20 +210,20 @@ bool Md5::saveModel(const char *filename)
 
 bool Md5::loadModel(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::TextFileReader r;
 	int i, j;  /* I hate everyone that uses signed indices in file formats */
 
 
 	if (isMd5Model(filename) == false)
 		return false;
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return false;
 
-	if (!r.parseMatchingSymbol("MD5Version"))
+	if (!r.ParseMatchingSymbol("MD5Version"))
 		return false;
 
-	mVersion = r.parseInteger();
+	mVersion = r.ParseInteger();
 
 	switch (mVersion)
 	{
@@ -235,17 +236,17 @@ bool Md5::loadModel(const char *filename)
 
 
 	/* Some Id thingys */
-	if (!r.parseMatchingSymbol("commandline"))
+	if (!r.ParseMatchingSymbol("commandline"))
 		return false;
 
-	mCommandLine = r.parseString();
+	mCommandLine = String::Strdup(r.ParseStringLiteral());
 
 
 	/* Joint setup */
-	if (!r.parseMatchingSymbol("numJoints"))
+	if (!r.ParseMatchingSymbol("numJoints"))
 		return false;
 
-	mNumJoints = r.parseInteger();
+	mNumJoints = r.ParseInteger();
 
 	if (mNumJoints < 0)
 	{
@@ -258,10 +259,10 @@ bool Md5::loadModel(const char *filename)
 
 
 	/* Mesh setup */
-	if (!r.parseMatchingSymbol("numMeshes"))
+	if (!r.ParseMatchingSymbol("numMeshes"))
 		return false;
 
-	mNumMeshes = r.parseInteger();
+	mNumMeshes = r.ParseInteger();
 
 	if (mNumMeshes < 0)
 	{
@@ -274,43 +275,43 @@ bool Md5::loadModel(const char *filename)
 
 
 	/* Joint data */
-	if (mNumJoints && r.parseMatchingSymbol("joints"))
+	if (mNumJoints && r.ParseMatchingSymbol("joints"))
 	{
-		if (!r.parseMatchingSymbol("{"))
+		if (!r.ParseMatchingSymbol("{"))
 			return false;
 			
 		for (i = 0; i < mNumJoints; ++i)
 		{
-			mJoints[i].name = r.parseString();
-			mJoints[i].parent = r.parseInteger();
+			mJoints[i].name = String::Strdup(r.ParseStringLiteral());
+			mJoints[i].parent = r.ParseInteger();
 
 			/* translate X Y Z */
-			if (!r.parseMatchingSymbol("("))
+			if (!r.ParseMatchingSymbol("("))
 				return false;
 
-			mJoints[i].translate[0] = r.parseFloat();
-			mJoints[i].translate[1] = r.parseFloat();
-			mJoints[i].translate[2] = r.parseFloat();
+			mJoints[i].translate[0] = r.ParseFloat();
+			mJoints[i].translate[1] = r.ParseFloat();
+			mJoints[i].translate[2] = r.ParseFloat();
 
-			if (!r.parseMatchingSymbol(")"))
+			if (!r.ParseMatchingSymbol(")"))
 				return false;
 
 
 			/* rotate X Y Z */
-			if (!r.parseMatchingSymbol("("))
+			if (!r.ParseMatchingSymbol("("))
 				return false;
 			
-			mJoints[i].rotate[0] = r.parseFloat();
-			mJoints[i].rotate[1] = r.parseFloat();
-			mJoints[i].rotate[2] = r.parseFloat();
+			mJoints[i].rotate[0] = r.ParseFloat();
+			mJoints[i].rotate[1] = r.ParseFloat();
+			mJoints[i].rotate[2] = r.ParseFloat();
 
-			if (!r.parseMatchingSymbol(")"))
+			if (!r.ParseMatchingSymbol(")"))
 				return false;
 
 			// FIXME: Save comment at end of line for something?
 		}
 		
-		if (!r.parseMatchingSymbol("}"))
+		if (!r.ParseMatchingSymbol("}"))
 			return false;
 	}
 	else
@@ -321,23 +322,23 @@ bool Md5::loadModel(const char *filename)
 	
 	for (i = 0; i < mNumMeshes; ++i)
 	{
-		if (r.parseMatchingSymbol("mesh"))
+		if (r.ParseMatchingSymbol("mesh"))
 		{
-			if (!r.parseMatchingSymbol("{"))
+			if (!r.ParseMatchingSymbol("{"))
 				return false;
 
 			// FIXME: // meshes: MESHNAME?
 			strncpy(mMeshes[i].name, "mynameis?", 24);
 
-			if (!r.parseMatchingSymbol("shader"))
+			if (!r.ParseMatchingSymbol("shader"))
 				return false;
 
-			mMeshes[i].shader = r.parseString();
+			mMeshes[i].shader = String::Strdup(r.ParseStringLiteral());
 
-			if (!r.parseMatchingSymbol("numverts"))
+			if (!r.ParseMatchingSymbol("numverts"))
 				return false;
 
-			mMeshes[i].numverts = r.parseInteger();
+			mMeshes[i].numverts = r.ParseInteger();
 
 			if (mMeshes[i].numverts < 0)
 			{
@@ -350,74 +351,74 @@ bool Md5::loadModel(const char *filename)
 
 			for (j = 0; j < mMeshes[i].numverts; ++j)
 			{
-				if (!r.parseMatchingSymbol("vert"))
+				if (!r.ParseMatchingSymbol("vert"))
 					return false;
 
-				mMeshes[i].verts[j].index = r.parseInteger();
+				mMeshes[i].verts[j].index = r.ParseInteger();
 
-				if (!r.parseMatchingSymbol("("))
+				if (!r.ParseMatchingSymbol("("))
 					return false;
 
-				mMeshes[i].verts[j].uv[0] = r.parseFloat(); 
-				mMeshes[i].verts[j].uv[1] = r.parseFloat();
+				mMeshes[i].verts[j].uv[0] = r.ParseFloat(); 
+				mMeshes[i].verts[j].uv[1] = r.ParseFloat();
 
-				if (!r.parseMatchingSymbol(")"))
+				if (!r.ParseMatchingSymbol(")"))
 					return false;
 				
-				mMeshes[i].verts[j].weight = r.parseInteger();
-				mMeshes[i].verts[j].numbones =r. parseInteger();
+				mMeshes[i].verts[j].weight = r.ParseInteger();
+				mMeshes[i].verts[j].numbones =r.ParseInteger();
 			}
 
-			if (!r.parseMatchingSymbol("numtris"))
+			if (!r.ParseMatchingSymbol("numtris"))
 				return false;
 
-			mMeshes[i].numtriangles = r.parseInteger();
+			mMeshes[i].numtriangles = r.ParseInteger();
 			mMeshes[i].triangles = new Md5Triangle[mMeshes[i].numtriangles];
 
 			for (j = 0; j < mMeshes[i].numtriangles; ++j)
 			{
-				if (!r.parseMatchingSymbol("tri"))
+				if (!r.ParseMatchingSymbol("tri"))
 					return false;
 				
-				r.parseInteger(); // integer == j
-				mMeshes[i].triangles[j].vertex[0] = r.parseInteger();
-				mMeshes[i].triangles[j].vertex[1] = r.parseInteger();
-				mMeshes[i].triangles[j].vertex[2] = r.parseInteger();
+				r.ParseInteger(); // integer == j
+				mMeshes[i].triangles[j].vertex[0] = r.ParseInteger();
+				mMeshes[i].triangles[j].vertex[1] = r.ParseInteger();
+				mMeshes[i].triangles[j].vertex[2] = r.ParseInteger();
 			}
 
-			if (!r.parseMatchingSymbol("numweights"))
+			if (!r.ParseMatchingSymbol("numweights"))
 				return false;
 
-			mMeshes[i].numweights = r.parseInteger();
+			mMeshes[i].numweights = r.ParseInteger();
 			mMeshes[i].weights = new Md5Weight[mMeshes[i].numweights];
 
 			for (j = 0; j < mMeshes[i].numweights; ++j)
 			{
-				if (!r.parseMatchingSymbol("weight"))
+				if (!r.ParseMatchingSymbol("weight"))
 					return false;
 
-				mMeshes[i].weights[j].index = r.parseInteger();
-				mMeshes[i].weights[j].joint = r.parseInteger();
-				mMeshes[i].weights[j].weight = r.parseFloat();
+				mMeshes[i].weights[j].index = r.ParseInteger();
+				mMeshes[i].weights[j].joint = r.ParseInteger();
+				mMeshes[i].weights[j].weight = r.ParseFloat();
 
-				if (!r.parseMatchingSymbol("("))
+				if (!r.ParseMatchingSymbol("("))
 					return false;
 
-				mMeshes[i].weights[j].pos[0] = r.parseFloat();
-				mMeshes[i].weights[j].pos[1] = r.parseFloat();
-				mMeshes[i].weights[j].pos[2] = r.parseFloat();
+				mMeshes[i].weights[j].pos[0] = r.ParseFloat();
+				mMeshes[i].weights[j].pos[1] = r.ParseFloat();
+				mMeshes[i].weights[j].pos[2] = r.ParseFloat();
 
-				if (!r.parseMatchingSymbol(")"))
+				if (!r.ParseMatchingSymbol(")"))
 					return false;
 			}
 			
 		}
 		
-		if (!r.parseMatchingSymbol("}"))
+		if (!r.ParseMatchingSymbol("}"))
 			return false;
 	}
 
-	r.closeFile();
+	r.Close();
 
 	return true;
 }

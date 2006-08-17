@@ -28,8 +28,10 @@
 PyObject *initPlugins();
 #endif
 
-#include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
+#include <freyja/FreyjaPluginABI.h>
+#include <mstl/SystemIO.h>
+
+using namespace mstl;
 
 
 extern "C" {
@@ -66,7 +68,7 @@ int import_model(char *filename)
 {
 #ifdef USING_PYTHON
 	Vector <char *> pyPluginDirectories;
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 	int ret = -1;
 	FILE *f;
 	//char *plugin = "/usr/local/lib/freyja/modules/model/python/import.py";

@@ -19,10 +19,11 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 
 #include "GLMModel.h"
 
+using namespace mstl;
 
 
 ////////////////////////////////////////////////////////////
@@ -175,28 +176,28 @@ void GLMModel::print()
 
 bool GLMModel::load(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	long i, j, k, weightCount, tell;
 
 	
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return false;
 
-	mMDXMHeader.ident = r.readLong();
-	mMDXMHeader.version = r.readLong();
-	r.readCharString(MAX_QPATH, mMDXMHeader.name);
-	r.readCharString(MAX_QPATH, mMDXMHeader.animName);
-	mMDXMHeader.animIndex = r.readLong();
-	mMDXMHeader.numBones = r.readLong();
-	mMDXMHeader.numLODs = r.readLong();
-	mMDXMHeader.ofsLODs = r.readLong();
-	mMDXMHeader.numSurfaces = r.readLong();
-	mMDXMHeader.ofsSurfHierarchy = r.readLong();
-	mMDXMHeader.ofsEnd = r.readLong();
+	mMDXMHeader.ident = r.ReadLong();
+	mMDXMHeader.version = r.ReadLong();
+	r.ReadString(MAX_QPATH, mMDXMHeader.name);
+	r.ReadString(MAX_QPATH, mMDXMHeader.animName);
+	mMDXMHeader.animIndex = r.ReadLong();
+	mMDXMHeader.numBones = r.ReadLong();
+	mMDXMHeader.numLODs = r.ReadLong();
+	mMDXMHeader.ofsLODs = r.ReadLong();
+	mMDXMHeader.numSurfaces = r.ReadLong();
+	mMDXMHeader.ofsSurfHierarchy = r.ReadLong();
+	mMDXMHeader.ofsEnd = r.ReadLong();
 
 	if (mMDXMHeader.ident != MDXM_IDENT)
 	{
-		r.closeFile();
+		r.Close();
 		return false;
 	}
 
@@ -204,7 +205,7 @@ bool GLMModel::load(const char *filename)
 
 	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
 	{
-		mMDXMHierarchyOffsets[i].offsets = r.readLong();
+		mMDXMHierarchyOffsets[i].offsets = r.ReadLong();
 	}
 
 
@@ -213,16 +214,16 @@ bool GLMModel::load(const char *filename)
 
 	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
 	{
-		r.readCharString(MAX_QPATH, mMDXMHierarchy[i].name);
-		mMDXMHierarchy[i].flags = r.readLong();
-		r.readCharString(MAX_QPATH, mMDXMHierarchy[i].shader);
-		mMDXMHierarchy[i].shaderIndex = r.readLong();
-		mMDXMHierarchy[i].parentIndex = r.readLong();
-		mMDXMHierarchy[i].numChildren = r.readLong();
+		r.ReadString(MAX_QPATH, mMDXMHierarchy[i].name);
+		mMDXMHierarchy[i].flags = r.ReadLong();
+		r.ReadString(MAX_QPATH, mMDXMHierarchy[i].shader);
+		mMDXMHierarchy[i].shaderIndex = r.ReadLong();
+		mMDXMHierarchy[i].parentIndex = r.ReadLong();
+		mMDXMHierarchy[i].numChildren = r.ReadLong();
 		mMDXMHierarchy[i].childIndexes = new int[mMDXMHierarchy[i].numChildren];
 
 		for (j = 0; j < mMDXMHierarchy[i].numChildren; ++j)
-			mMDXMHierarchy[i].childIndexes[j] = r.readLong();
+			mMDXMHierarchy[i].childIndexes[j] = r.ReadLong();
 	}
 
 
@@ -230,7 +231,7 @@ bool GLMModel::load(const char *filename)
 
 	for (i = 0; i < 1/*mMDXMHeader.numLODs*/; ++i)
 	{
-		mMDXMLODs[i].ofsEnd = r.readLong();
+		mMDXMLODs[i].ofsEnd = r.ReadLong();
 	}
 
 
@@ -238,7 +239,7 @@ bool GLMModel::load(const char *filename)
 
 	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
 	{
-		mMDXMSurfOffsets[i].offsets = r.readLong();
+		mMDXMSurfOffsets[i].offsets = r.ReadLong();
 	}
 
 
@@ -249,18 +250,18 @@ bool GLMModel::load(const char *filename)
 	for (i = 0; i < mMDXMHeader.numSurfaces; ++i)
 	{
 		/* Offsets are relative to this header */
-		tell = r.getFileOffset();
+		tell = r.GetOffset();
 
-		mMDXMSurfaces[i].ident = r.readLong();
-		mMDXMSurfaces[i].thisSurfaceIndex = r.readLong();
-		mMDXMSurfaces[i].ofsHeader = r.readLong();
-		mMDXMSurfaces[i].numVerts = r.readLong();
-		mMDXMSurfaces[i].ofsVerts = r.readLong();
-		mMDXMSurfaces[i].numTriangles = r.readLong();
-		mMDXMSurfaces[i].ofsTriangles = r.readLong();
-		mMDXMSurfaces[i].numBoneReferences = r.readLong();
-		mMDXMSurfaces[i].ofsBoneReferences = r.readLong();
-		mMDXMSurfaces[i].ofsEnd = r.readLong();
+		mMDXMSurfaces[i].ident = r.ReadLong();
+		mMDXMSurfaces[i].thisSurfaceIndex = r.ReadLong();
+		mMDXMSurfaces[i].ofsHeader = r.ReadLong();
+		mMDXMSurfaces[i].numVerts = r.ReadLong();
+		mMDXMSurfaces[i].ofsVerts = r.ReadLong();
+		mMDXMSurfaces[i].numTriangles = r.ReadLong();
+		mMDXMSurfaces[i].ofsTriangles = r.ReadLong();
+		mMDXMSurfaces[i].numBoneReferences = r.ReadLong();
+		mMDXMSurfaces[i].ofsBoneReferences = r.ReadLong();
+		mMDXMSurfaces[i].ofsEnd = r.ReadLong();
 
 		mMDXMeshes[i].triangleCount = mMDXMSurfaces[i].numTriangles;
 		mMDXMeshes[i].vertexCount = mMDXMSurfaces[i].numVerts;
@@ -271,28 +272,28 @@ bool GLMModel::load(const char *filename)
 
 		for (j = 0; j < mMDXMeshes[i].triangleCount; ++j)
 		{
-			mMDXMeshes[i].triangles[j].indexes[0] = r.readLong();
-			mMDXMeshes[i].triangles[j].indexes[1] = r.readLong();
-			mMDXMeshes[i].triangles[j].indexes[2] = r.readLong();
+			mMDXMeshes[i].triangles[j].indexes[0] = r.ReadLong();
+			mMDXMeshes[i].triangles[j].indexes[1] = r.ReadLong();
+			mMDXMeshes[i].triangles[j].indexes[2] = r.ReadLong();
 		}
 
 		for (j = 0; j < mMDXMeshes[i].vertexCount; ++j)
 		{
-			mMDXMeshes[i].vertices[j].normal[0] = r.readFloat32();
-			mMDXMeshes[i].vertices[j].normal[1] = r.readFloat32();
-			mMDXMeshes[i].vertices[j].normal[2] = r.readFloat32();
+			mMDXMeshes[i].vertices[j].normal[0] = r.ReadFloat32();
+			mMDXMeshes[i].vertices[j].normal[1] = r.ReadFloat32();
+			mMDXMeshes[i].vertices[j].normal[2] = r.ReadFloat32();
 
-			mMDXMeshes[i].vertices[j].vertCoords[0] = r.readFloat32();
-			mMDXMeshes[i].vertices[j].vertCoords[1] = r.readFloat32();
-			mMDXMeshes[i].vertices[j].vertCoords[2] = r.readFloat32();
+			mMDXMeshes[i].vertices[j].vertCoords[0] = r.ReadFloat32();
+			mMDXMeshes[i].vertices[j].vertCoords[1] = r.ReadFloat32();
+			mMDXMeshes[i].vertices[j].vertCoords[2] = r.ReadFloat32();
 
-			mMDXMeshes[i].vertices[j].uiNmWeightsAndBoneIndexes = r.readLongU();
+			mMDXMeshes[i].vertices[j].uiNmWeightsAndBoneIndexes = r.ReadLongU();
 
 			weightCount = (mMDXMeshes[i].vertices[j].uiNmWeightsAndBoneIndexes>>30)+1;
 
 			for (k = 0; k < iMAX_G2_BONEWEIGHTS_PER_VERT; ++k)
 			{
-				mMDXMeshes[i].vertices[j].BoneWeightings[k] = r.readInt8U();
+				mMDXMeshes[i].vertices[j].BoneWeightings[k] = r.ReadInt8U();
 			}
 
 			k = (mMDXMeshes[i].vertices[j].uiNmWeightsAndBoneIndexes>>30)+1;
@@ -300,29 +301,29 @@ bool GLMModel::load(const char *filename)
 
 		for (j = 0; j < mMDXMeshes[i].texcoordCount; ++j)
 		{
-			mMDXMeshes[i].texcoords[j].texCoords[0] = r.readFloat32();
-			mMDXMeshes[i].texcoords[j].texCoords[1] = r.readFloat32();
+			mMDXMeshes[i].texcoords[j].texCoords[0] = r.ReadFloat32();
+			mMDXMeshes[i].texcoords[j].texCoords[1] = r.ReadFloat32();
 		}
 
 		for (j = 0; j < mMDXMSurfaces[i].numBoneReferences; ++j)
 		{
-			k = r.readLongU(); /* Bone references aren't stored, just read */
+			k = r.ReadLongU(); /* Bone references aren't stored, just read */
 		}
 
-		if ((int)r.getFileOffset() != tell + mMDXMSurfaces[i].ofsEnd)
+		if ((int)r.GetOffset() != tell + mMDXMSurfaces[i].ofsEnd)
 		{
-			printf("@ %i, expected %li\n", 
-				   r.getFileOffset(), tell + mMDXMSurfaces[i].ofsEnd);
+			printf("@ %li, expected %li\n", 
+				   r.GetOffset(), tell + mMDXMSurfaces[i].ofsEnd);
 		}
 
-		r.setFileOffset(tell + mMDXMSurfaces[i].ofsEnd);
+		r.SetOffset(tell + mMDXMSurfaces[i].ofsEnd);
 	}
 
 	//////////////
 
-	printf("@ %i \n", r.getFileOffset());
+	printf("@ %li \n", r.GetOffset());
 
-	if ((i = r.readLongU()) == MDXA_IDENT)
+	if ((i = r.ReadLongU()) == MDXA_IDENT)
 	{
 		printf("FOUNDMDXA_IDENT \n");
 	}
@@ -332,7 +333,7 @@ bool GLMModel::load(const char *filename)
 	}
 
 
-	r.closeFile();
+	r.Close();
 
 	return true;
 }
@@ -413,16 +414,16 @@ int import_model(char *filename)
 
 int freyja_model__glm_check(char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	long ident, version;
 
 	
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return false;
 
-	ident = r.readLong();
-	version = r.readLong();
-	r.closeFile();
+	ident = r.ReadLong();
+	version = r.ReadLong();
+	r.Close();
 
 	if (ident == MDXM_IDENT && version == 6)
 	{

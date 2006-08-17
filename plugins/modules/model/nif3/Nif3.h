@@ -32,11 +32,12 @@
 #ifndef GUARD__FREYJA_MONGOOSE_NIF3_H_
 #define GUARD__FREYJA_MONGOOSE_NIF3_H_
 
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 
-
 #define NIF4_HEADER_START "NetImmerse File Format, Version 4.0.0.2"
+
+using namespace mstl;
 
 
 class Nif3
@@ -52,12 +53,12 @@ class Nif3
 	class Chunk {
 	public:           /* unsigned or signed? */
 
-		bool readHeader(EggFileReader &r)
+		bool readHeader(SystemIO::FileReader &r)
 		{
-			len = r.readInt32();
+			len = r.ReadInt32();
 			name = new char[len];
-			r.readCharString(len, name);
-			id = r.readInt32();
+			r.ReadString(len, name);
+			id = r.ReadInt32();
 
 			return true;
 		}
@@ -70,53 +71,53 @@ class Nif3
 	class NiNode {
 	public:
 
-		bool readChunk(EggFileReader &r)
+		bool readChunk(SystemIO::FileReader &r)
 		{
 			unsigned int i, n;
 
 
-			 len = r.readInt32();
+			 len = r.ReadInt32();
 			 node_name = new char[len];
-			 r.readCharString(len, node_name);
-			 associated_keyframe_controller_id = r.readInt32U();
-			 associated_lookat_controller_id = r.readInt32U();
-			 unknown = r.readInt16();
-			 x = r.readFloat32();
-			 y = r.readFloat32();
-			 z = r.readFloat32();
-			 vector_x_axis_x = r.readFloat32();
-			 vector_x_axis_y = r.readFloat32();
-			 vector_x_axis_z = r.readFloat32();
-			 vector_y_axis_x = r.readFloat32();
-			 vector_y_axis_y = r.readFloat32();
-			 vector_y_axis_z = r.readFloat32();
-			 vector_z_axis_x = r.readFloat32();
-			 vector_z_axis_y = r.readFloat32();
-			 vector_z_axis_z = r.readFloat32();
-			 unknown2[0] = r.readFloat32();
-			 unknown2[1] = r.readFloat32();
-			 unknown2[2] = r.readFloat32();
-			 unknown3 = r.readInt32();
+			 r.ReadString(len, node_name);
+			 associated_keyframe_controller_id = r.ReadInt32U();
+			 associated_lookat_controller_id = r.ReadInt32U();
+			 unknown = r.ReadInt16();
+			 x = r.ReadFloat32();
+			 y = r.ReadFloat32();
+			 z = r.ReadFloat32();
+			 vector_x_axis_x = r.ReadFloat32();
+			 vector_x_axis_y = r.ReadFloat32();
+			 vector_x_axis_z = r.ReadFloat32();
+			 vector_y_axis_x = r.ReadFloat32();
+			 vector_y_axis_y = r.ReadFloat32();
+			 vector_y_axis_z = r.ReadFloat32();
+			 vector_z_axis_x = r.ReadFloat32();
+			 vector_z_axis_y = r.ReadFloat32();
+			 vector_z_axis_z = r.ReadFloat32();
+			 unknown2[0] = r.ReadFloat32();
+			 unknown2[1] = r.ReadFloat32();
+			 unknown2[2] = r.ReadFloat32();
+			 unknown3 = r.ReadInt32();
 
-			 num_properties = r.readInt32();
+			 num_properties = r.ReadInt32();
 			 propertyIDs = new unsigned int[num_properties];
 			 
 			 for (i = 0, n = num_properties; i < n; ++i)
-				 propertyIDs[i]  = r.readInt32U();
+				 propertyIDs[i]  = r.ReadInt32U();
 
-			 unkn2 = r.readInt32U();
+			 unkn2 = r.ReadInt32U();
 			 
-			 num_children = r.readInt32();
+			 num_children = r.ReadInt32();
 			 childrenIDs = new unsigned int[num_children];
 			 
 			 for (i = 0, n = num_children; i < n; ++i)
-				 childrenIDs[i]  = r.readInt32U();
+				 childrenIDs[i]  = r.ReadInt32U();
 			 
-			 num_blocks = r.readInt32();
+			 num_blocks = r.ReadInt32();
 			 blockIDs = new unsigned int[num_blocks];
 
 			 for (i = 0, n = num_blocks; i < n; ++i)
-				 blockIDs[i]  = r.readInt32U();
+				 blockIDs[i]  = r.ReadInt32U();
 
 			 return true;
 		}
@@ -235,26 +236,26 @@ class Nif3
 	class NiImage {
 	public:
 		
-		bool readChunk(EggFileReader &r)
+		bool readChunk(SystemIO::FileReader &r)
 		{	
-			type = r.readInt8U();
+			type = r.ReadInt8U();
 			
 			if (type == 0)
 			{
-				associated_raw_image_data_id = r.readInt32U();
+				associated_raw_image_data_id = r.ReadInt32U();
 				file_len = 0;
 				filename = 0x0;
 			}
 			else // 1 only?
 			{
 				associated_raw_image_data_id = 0;
-				file_len = r.readInt32();
+				file_len = r.ReadInt32();
 				filename = new char[file_len];
-				r.readCharString(file_len, filename);
+				r.ReadString(file_len, filename);
 			}
 
-			unknown = r.readInt32();
-			unknown2 = r.readFloat32();
+			unknown = r.ReadInt32();
+			unknown2 = r.ReadFloat32();
 
 			return true;
 		}
@@ -278,24 +279,24 @@ class Nif3
 		} pixel_t;
 
 
-		bool readChunk(EggFileReader &r)
+		bool readChunk(SystemIO::FileReader &r)
 		{
 			unsigned int i, n;
 
-			w = r.readInt32();
-			h = r.readInt32();
-			type = r.readInt32();  // 1 for RGB, 2 for RGBA
+			w = r.ReadInt32();
+			h = r.ReadInt32();
+			type = r.ReadInt32();  // 1 for RGB, 2 for RGBA
 			pixels = new pixel_t[w*h];
 
 			for (i = 0, n = w*h; i < n; ++i)
 			{
-				pixels[i].r = r.readInt8();
-				pixels[i].g = r.readInt8();
-				pixels[i].b = r.readInt8();
+				pixels[i].r = r.ReadInt8();
+				pixels[i].g = r.ReadInt8();
+				pixels[i].b = r.ReadInt8();
 				pixels[i].a = 255;
 
 				if (type == 2) 
-					pixels[i].a =r.readInt8();
+					pixels[i].a =r.ReadInt8();
 			}
 
 			return true;
@@ -312,13 +313,13 @@ class Nif3
 	class NiStringExtraData {
 	public:
 		
-		bool readChunk(EggFileReader &r)
+		bool readChunk(SystemIO::FileReader &r)
 		{
-			unknown = r.readInt32();
-			unknown2 = r.readInt32();
-			len = r.readInt32();
+			unknown = r.ReadInt32();
+			unknown2 = r.ReadInt32();
+			len = r.ReadInt32();
 			string = new char[len];
-			r.readCharString(len, string);
+			r.ReadString(len, string);
 
 			return true;
 		}
@@ -350,37 +351,37 @@ class Nif3
 		} unknown_t;
 
 
-		bool readChunk(EggFileReader &r)
+		bool readChunk(SystemIO::FileReader &r)
 		{
 			unsigned int i, n, j, jn;
 
-			num_vertices = r.readInt16();
-			id_of_vertices = r.readInt32U();
+			num_vertices = r.ReadInt16();
+			id_of_vertices = r.ReadInt32U();
 			coordinates = new vertex_t[num_vertices];
 
 			for (i = 0, n = num_vertices; i < n; ++i)
 			{
-				coordinates[i].x = r.readFloat32();
-				coordinates[i].y = r.readFloat32();
-				coordinates[i].z = r.readFloat32();
+				coordinates[i].x = r.ReadFloat32();
+				coordinates[i].y = r.ReadFloat32();
+				coordinates[i].z = r.ReadFloat32();
 			}
 
-			id_of_normals = r.readInt32U();
+			id_of_normals = r.ReadInt32U();
 
 			for (i = 0, n = num_vertices; i < n; ++i)
 			{
-				normals[i].x = r.readFloat32();
-				normals[i].y = r.readFloat32();
-				normals[i].z = r.readFloat32();
+				normals[i].x = r.ReadFloat32();
+				normals[i].y = r.ReadFloat32();
+				normals[i].z = r.ReadFloat32();
 			}
 
-			unknown[0] = r.readInt32();
-			unknown[1] = r.readInt32();
-			unknown1[0] = r.readInt32U();
-			unknown1[1] = r.readInt32U();
-			unknown2 = r.readInt32();
-			num_uv_sets = r.readInt16U();
-			unknown3 = r.readInt32U();
+			unknown[0] = r.ReadInt32();
+			unknown[1] = r.ReadInt32();
+			unknown1[0] = r.ReadInt32U();
+			unknown1[1] = r.ReadInt32U();
+			unknown2 = r.ReadInt32();
+			num_uv_sets = r.ReadInt16U();
+			unknown3 = r.ReadInt32U();
 
 			uv_set = new uv_set_t[num_uv_sets];
 
@@ -390,37 +391,37 @@ class Nif3
 				
 				for (j = 0, jn = num_vertices; j < jn; ++j)
 				{
-					uv_set[i].textureinfo[j].u = r.readFloat32();
-					uv_set[i].textureinfo[j].v = r.readFloat32();
+					uv_set[i].textureinfo[j].u = r.ReadFloat32();
+					uv_set[i].textureinfo[j].v = r.ReadFloat32();
 				}
 			}
 		
 			if (num_uv_sets == 0) 
-				unknown4 = r.readInt32();
+				unknown4 = r.ReadInt32();
 			
-			num_triangles = r.readInt16U();
-			unknown5 = r.readInt32U(); // num_trianges*3?
+			num_triangles = r.ReadInt16U();
+			unknown5 = r.ReadInt32U(); // num_trianges*3?
 			
 			triangles = new triangle_t[num_triangles];
 
 			for (i = 0, n = num_triangles; i < n; ++i)
 			{
-				triangles[i].v[0] = r.readInt16U();
-				triangles[i].v[1] = r.readInt16U();
-				triangles[i].v[2] = r.readInt16U();
+				triangles[i].v[0] = r.ReadInt16U();
+				triangles[i].v[1] = r.ReadInt16U();
+				triangles[i].v[2] = r.ReadInt16U();
 			}
 
-			num_something_3 = r.readInt16U();  	// 0 or num_vertices?
+			num_something_3 = r.ReadInt16U();  	// 0 or num_vertices?
 			something = new unknown_t[num_something_3];	
 
 			for (i = 0, n = num_something_3; i < n; ++i)
 			{
-				something[i].len = r.readInt16U();
+				something[i].len = r.ReadInt16U();
 				something[i].unknown = new short[something[i].len];
 
 				for (j = 0, jn = something[i].len; j < jn; ++j)
 				{
-					something[i].unknown[j] = r.readInt16U();
+					something[i].unknown[j] = r.ReadInt16U();
 				}
 			}
 
@@ -764,7 +765,7 @@ class Nif3
 
 	char mHeader[48];	              /* Header is just a string */
 
-	EggFileReader mReader;
+	SystemIO::FileReader mReader;
 };
 
 #endif
