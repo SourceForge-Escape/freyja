@@ -25,15 +25,15 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <mstl/SystemIO.h>
+
 #ifdef FREYJAIMAGE_PLUGINS
 #   include "FreyjaPluginABI.h"
 #endif
 
-#include "FreyjaFileReader.h"
-#include "FreyjaFileWriter.h"
-
 #include "FreyjaImage.h"
 
+using namespace mstl;
 
 
 FreyjaImage::FreyjaImage() :
@@ -481,19 +481,19 @@ void FreyjaImage::getPaletteColor(unsigned int i, color3_t rgb)
 int FreyjaImage::loadImage(const char *filename)
 {
 #ifdef FREYJAIMAGE_PLUGINS
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 	int (*import_img)(char *filename, unsigned char **image,
 					  unsigned int *width, unsigned int *height, 
 					  char *type);
 	bool done = false;
-	char *module_filename;
+	const char *module_filename;
 	void *handle;
 	unsigned char *image = 0x0;
 	unsigned int width = 0, height = 0;
 	char type = 0;
 
 
-	if (!reader.doesFileExist(filename))
+	if (!reader.DoesFileExist(filename))
 	{
 		print("File '%s' couldn't be accessed.", filename);
 		return -1;
@@ -502,23 +502,23 @@ int FreyjaImage::loadImage(const char *filename)
 	print("[FreyjaImage plugin system invoked]");
 
 #ifdef WIN32
-	if (!reader.openDirectory("modules/image"))
+	if (!reader.OpenDir("modules/image"))
 	{
 		printError("Couldn't access image plugin directory");
 		return -2;
 	}
 #else
-	if (!reader.openDirectory(PLUGIN_IMAGE_DIR) || 
-		!reader.openDirectory("modules/image"))
+	if (!reader.OpenDir(PLUGIN_IMAGE_DIR) || 
+		!reader.OpenDir("modules/image"))
 	{
 		printError("Couldn't access image plugin directory");
 		return -2;
 	}
 #endif
 
-	while (!done && (module_filename = reader.getNextDirectoryListing()))
+	while (!done && (module_filename = reader.GetNextDirectoryListing()))
 	{
-		if (reader.isDirectory(module_filename))
+		if (reader.IsDirectory(module_filename))
 			continue;
 
 		if (!(handle = freyjaModuleLoad(module_filename)))
@@ -545,7 +545,7 @@ int FreyjaImage::loadImage(const char *filename)
 		}
 	}
 
-	reader.closeDirectory();
+	reader.CloseDir();
 
 	print("[FreyjaPlugin module loader sleeps now]\n");
 
@@ -648,27 +648,27 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 {
 
 #ifdef FREYJAIMAGE_PLUGINS
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 	char symbol[256];
 	int (*export_img)(char *filename, unsigned char *image,
 					  unsigned int width, unsigned int height, 
 					  char type);
 	bool done = false;
-	char *module_filename;
+	const char *module_filename;
 	void *handle;
 
 
 	print("[FreyjaImage plugin system invoked]");
 
-	if (!reader.openDirectory(PLUGIN_IMAGE_DIR))
+	if (!reader.OpenDir(PLUGIN_IMAGE_DIR))
 	{
 		printError("Couldn't access image plugin directory");
 		return -2;
 	}
 
-	while (!done && (module_filename = reader.getNextDirectoryListing()))
+	while (!done && (module_filename = reader.GetNextDirectoryListing()))
 	{
-		if (reader.isDirectory(module_filename))
+		if (reader.IsDirectory(module_filename))
 			continue;
 
 		//#define DISABLE_MODULES
@@ -706,7 +706,7 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 		}
 	}
 
-	reader.closeDirectory();
+	reader.CloseDir();
 
 	print("[FreyjaPlugin module loader sleeps now]\n");
 

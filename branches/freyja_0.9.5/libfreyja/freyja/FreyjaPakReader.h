@@ -30,8 +30,8 @@
 
 #include <hel/math.h>
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
 #include <mstl/String.h>
-#include "FreyjaFileReader.h"
 #include "FreyjaPluginABI.h"
 
 using namespace mstl;
@@ -76,11 +76,11 @@ class FreyjaPakFile
 
 	void setXORKey(unsigned char key) { mXORKey = key; }
 
-	byte *getCopyOfData(FreyjaFileReader &r)
+	byte *getCopyOfData(SystemIO::FileReader &r)
 	{
 		byte *buffer = new byte[mSize];
-		r.setFileOffset(mOffset);
-		r.readBuffer(mSize, buffer);
+		r.SetOffset(mOffset);
+		r.ReadBuffer(mSize, buffer);
 
 		if (mXORKey)
 		{

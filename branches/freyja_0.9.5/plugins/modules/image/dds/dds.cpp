@@ -25,8 +25,9 @@
  ==========================================================================*/
 
 #include <stdio.h>
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -535,70 +536,70 @@ void dds_decompress_DXT4(dds_image_t &dds,
 int import_image(char *filename, unsigned char **image, 
 					  unsigned int *w, unsigned int *h, char *bpp)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	dds_image_t dds;
 	unsigned int i, blocksize;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 	{
 		printf("File '%s' couldn't be accessed.", filename);
 		return -1;
 	}
 
 	/* File magic */
-	dds.magic = r.readInt32U();
+	dds.magic = r.ReadInt32U();
 
 	if (dds.magic != 0x20534444)
 	{
 		printf("dds.so: Inavlid or unknown DDS format.\n");
-		r.closeFile();
+		r.Close();
 		return -2;
 	}
 	
 	/* Surface header */
-	dds.header.size = r.readInt32U();
+	dds.header.size = r.ReadInt32U();
 
 	if (dds.header.size != 124)
 	{
 		printf("dds.so: Inavlid or unknown DDS format.\n");
-		r.closeFile();
+		r.Close();
 		return -2;
 	}
 
-	dds.header.flags = r.readInt32U();
-	dds.header.height = r.readInt32U();
-	dds.header.width = r.readInt32U();
-	dds.header.pitch_or_linear_size = r.readInt32U();
-	dds.header.depth = r.readInt32U();
-	dds.header.mipmap_count = r.readInt32U();
+	dds.header.flags = r.ReadInt32U();
+	dds.header.height = r.ReadInt32U();
+	dds.header.width = r.ReadInt32U();
+	dds.header.pitch_or_linear_size = r.ReadInt32U();
+	dds.header.depth = r.ReadInt32U();
+	dds.header.mipmap_count = r.ReadInt32U();
 
 	for (i = 0; i < 11; ++i)
-		dds.header.reserved[i] = r.readInt32U();
+		dds.header.reserved[i] = r.ReadInt32U();
 
-	dds.header.pixelformat.size = r.readInt32U();
+	dds.header.pixelformat.size = r.ReadInt32U();
 
 	if (dds.header.pixelformat.size != 32)
 	{
 		printf("dds.so: Inavlid or unknown DDS format.\n");
-		r.closeFile();
+		r.Close();
 		return -2;
 	}
 
-	dds.header.pixelformat.flags = r.readInt32U();
-	dds.header.pixelformat.encoding = r.readInt32U();
-	dds.header.pixelformat.bits_per_pixel = r.readInt32U();
-	dds.header.pixelformat.red_bit_mask = r.readInt32U();
-	dds.header.pixelformat.green_bit_mask = r.readInt32U();
-	dds.header.pixelformat.blue_bit_mask = r.readInt32U();
-	dds.header.pixelformat.alpha_bit_mask = r.readInt32U();
+	dds.header.pixelformat.flags = r.ReadInt32U();
+	dds.header.pixelformat.encoding = r.ReadInt32U();
+	dds.header.pixelformat.bits_per_pixel = r.ReadInt32U();
+	dds.header.pixelformat.red_bit_mask = r.ReadInt32U();
+	dds.header.pixelformat.green_bit_mask = r.ReadInt32U();
+	dds.header.pixelformat.blue_bit_mask = r.ReadInt32U();
+	dds.header.pixelformat.alpha_bit_mask = r.ReadInt32U();
 
-	dds.header.capabilities.capabilities = r.readInt32U();
-	dds.header.capabilities.capabilities2 = r.readInt32U();
-	dds.header.capabilities.reserved[0] = r.readInt32U();
-	dds.header.capabilities.reserved[1] = r.readInt32U();
+	dds.header.capabilities.capabilities = r.ReadInt32U();
+	dds.header.capabilities.capabilities2 = r.ReadInt32U();
+	dds.header.capabilities.reserved[0] = r.ReadInt32U();
+	dds.header.capabilities.reserved[1] = r.ReadInt32U();
 
-	dds.header.reserved2 = r.readInt32U();
+	dds.header.reserved2 = r.ReadInt32U();
 
 	/* Surface data */
 	switch (dds.header.pixelformat.encoding)
@@ -619,9 +620,9 @@ int import_image(char *filename, unsigned char **image,
 	}	
 
 	dds.surface_data = new unsigned char[blocksize];
-	r.readBufferUnsignedChar(blocksize, dds.surface_data);
+	r.ReadBuffer(blocksize, dds.surface_data);
 
-	r.closeFile();
+	r.Close();
 
 	/* Dump debug info about loaded surface */
 	printf("dds.so: %c%c%c%c %ux%u %ibpp, %ubytes, %i mipmaps, %s\n", 

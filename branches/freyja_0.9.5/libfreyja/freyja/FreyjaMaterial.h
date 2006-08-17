@@ -28,11 +28,11 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJAMATERIAL_H_
 
 #include <hel/math.h>
+#include <mstl/SystemIO.h>
 
 #include "FreyjaTexture.h"
-#include "FreyjaFileReader.h"
-#include "FreyjaFileWriter.h"
 
+using namespace mstl;
 
 class FreyjaMaterial
 {
@@ -116,7 +116,7 @@ class FreyjaMaterial
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(FreyjaFileWriter &w);
+	virtual bool serialize(SystemIO::FileWriter &w);
 	/*------------------------------------------------------
 	 * Pre  : Writes this material out to disk
 	 * Post : Returns true on success
@@ -133,7 +133,7 @@ class FreyjaMaterial
 	 * Post : Unsets passed flag
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(FreyjaFileReader &r);
+	virtual bool serialize(SystemIO::FileReader &r);
 	/*------------------------------------------------------
 	 * Pre  : Reads the material data from disk
 	 * Post : Returns true on success

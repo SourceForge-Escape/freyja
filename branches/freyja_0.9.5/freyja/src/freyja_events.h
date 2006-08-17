@@ -394,10 +394,10 @@ void freyja_event_exit();
  ------------------------------------------------------*/
 
 #define freyja_event_file_dialog mgtk_event_file_dialog
-void freyja_event_file_dialog(char *s, int eventId);
+void freyja_event_file_dialog(int event, char *s);
 /*------------------------------------------------------
  * Pre  : 
- * Post : Spawns file dialog for <eventId> with title <s>
+ * Post : Spawns file dialog for <event> with title <s>
  *
  *-- History ------------------------------------------
  *

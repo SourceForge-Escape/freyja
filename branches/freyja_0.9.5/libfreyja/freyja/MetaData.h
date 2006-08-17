@@ -28,9 +28,12 @@
 #define GUARD__FREYJA_MONGOOSE_METADATA_H_
 
 #include <hel/math.h>
+#include <mstl/SystemIO.h>
+
 #include "freyja.h"
-#include "FreyjaFileWriter.h"
-#include "FreyjaFileReader.h"
+
+
+using namespace mstl;
 
 namespace freyja {
 
@@ -88,7 +91,7 @@ class MetaData
 	byte *GetData() { return mData; }
 
 
-	bool Serialize(FreyjaFileWriter &w)
+	bool Serialize(SystemIO::FileWriter &w)
 	{
 		freyja_file_chunk_t chunk;
 
@@ -104,16 +107,16 @@ class MetaData
 		chunk.size += 4;         // uint32 mDataSize;
 
 		/* Write chunk header to diskfile */
-		w.writeLong(FREYJA_CHUNK_MESH);
-		w.writeLong(chunk.size);
-		w.writeLong(chunk.flags);
-		w.writeLong(chunk.version);
+		w.WriteLong(FREYJA_CHUNK_MESH);
+		w.WriteLong(chunk.size);
+		w.WriteLong(chunk.flags);
+		w.WriteLong(chunk.version);
 
 		/* Write chunk data to diskfile */
-		w.writeLong(mId);
-		w.writeLong(mTypeId);
-		w.writeLong(mDataSize);
-		w.writeBuffer(mDataSize, mData);
+		w.WriteLong(mId);
+		w.WriteLong(mTypeId);
+		w.WriteLong(mDataSize);
+		w.WriteBuffer(mDataSize, mData);
 
 		return true;
 	}
@@ -134,25 +137,25 @@ class MetaData
 		mDataSize = size;
 	}
 
-	bool Serialize(FreyjaFileReader &r)
+	bool Serialize(SystemIO::FileReader &r)
 	{
 		freyja_file_chunk_t chunk;
 
 		/* Read chunk header from diskfile */
-		chunk.type = r.readLong();
-		chunk.size = r.readLong();
-		chunk.flags = r.readLong();
-		chunk.version = r.readLong();
+		chunk.type = r.ReadLong();
+		chunk.size = r.ReadLong();
+		chunk.flags = r.ReadLong();
+		chunk.version = r.ReadLong();
 
 		/* Read chunk data from diskfile */
-		mId = r.readLong();
-		mTypeId = r.readLong();
-		mDataSize = r.readLong();
+		mId = r.ReadLong();
+		mTypeId = r.ReadLong();
+		mDataSize = r.ReadLong();
 
 		if ( mDataSize > 0 )
 		{
 			mData = new byte[mDataSize];
-			r.readBuffer(mDataSize, mData);
+			r.ReadBuffer(mDataSize, mData);
 		}
 
 		if ( chunk.type != FREYJA_CHUNK_METADATA )
