@@ -30,8 +30,9 @@
 #include <string.h>
 #include <hel/Matrix.h>
 #include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
+
+using namespace mstl;
 
 
 extern "C" {
@@ -67,7 +68,7 @@ int import_model(char *filename)
 
 int freyja_model__skn_check(char *filename)
 {
-	if (FreyjaFileReader::compareFilenameExtention(filename, ".skn") == 0)
+	if (SystemIO::File::CompareFilenameExtention(filename, ".skn") == 0)
 		return 0;
 
 	return -1;
@@ -370,15 +371,15 @@ int freyja_model__skn_import(char *filename)
 {
 	const vec_t scale = 5.0;
 	Vector <unsigned int> transV, transT;
-	FreyjaFileReader r;
+	SystemIO::TextFileReader r;
 	cmx_bone_t skeleton[29];
-	char *symbol;
+	const char *symbol;
 	char name[64];
 	char material[64];
 	int32 i, j, k, index, pluginId;
 
 
-	if (freyja_model__skn_check(filename) < 0 || !r.openFile(filename))
+	if (freyja_model__skn_check(filename) < 0 || !r.Open(filename))
 	{
 		return -1;
 	}
@@ -404,50 +405,50 @@ int freyja_model__skn_import(char *filename)
 	// Currently only have adult reference skeleton, so use it anyway
 	cmx_import_adult_skeleton(skeleton);
 
-	symbol = r.parseSymbol();
+	symbol = r.ParseSymbol();
 	strncpy(name, symbol, 64);
 	name[63] = 0;
 
-	symbol = r.parseSymbol();
+	symbol = r.ParseSymbol();
 	strncpy(material, symbol, 64);
 	material[63] = 0;
 
 
-	long boneCount = r.parseInteger();
+	long boneCount = r.ParseInteger();
 	skn_bone_t bones[boneCount];
 	freyjaPrintMessage("boneCount = %li\n", boneCount);
 
 	for (i = 0; i < boneCount; ++i)
 	{
-		symbol = r.parseSymbol();
+		symbol = r.ParseSymbol();
 		strncpy(bones[i].name, symbol, 64);
 		bones[i].name[63] = 0;
 	}
 
 
-	long trisCount = r.parseInteger();
+	long trisCount = r.ParseInteger();
 	long tris[trisCount][3];
 	freyjaPrintMessage("trisCount = %li\n", trisCount);
 
 	for (i = 0; i < trisCount; ++i)
 	{
-		tris[i][0] = r.parseInteger();
-		tris[i][1] = r.parseInteger();
-		tris[i][2] = r.parseInteger();
+		tris[i][0] = r.ParseInteger();
+		tris[i][1] = r.ParseInteger();
+		tris[i][2] = r.ParseInteger();
 	}
 
 
-	long bindingCount = r.parseInteger();
+	long bindingCount = r.ParseInteger();
 	skn_bone_binding_t bindings[bindingCount];
 	freyjaPrintMessage("bindingCount = %li\n", bindingCount);
 
 	for (i = 0; i < bindingCount; ++i)
 	{
-		bindings[i].boneIndex = r.parseInteger();
-		bindings[i].vertexOffset = r.parseInteger();
-		bindings[i].vertexCount = r.parseInteger();
-		bindings[i].blendedVertexOffset = r.parseInteger();
-		bindings[i].blendedVertexCount = r.parseInteger();
+		bindings[i].boneIndex = r.ParseInteger();
+		bindings[i].vertexOffset = r.ParseInteger();
+		bindings[i].vertexCount = r.ParseInteger();
+		bindings[i].blendedVertexOffset = r.ParseInteger();
+		bindings[i].blendedVertexCount = r.ParseInteger();
 
 		freyjaPrintMessage("binding[%li] = { %li Vert @ %li x %li, Blended Vert @ %li x %li}\n", i,
 			   bindings[i].boneIndex, 
@@ -458,42 +459,42 @@ int freyja_model__skn_import(char *filename)
 	}
 
 	
-	long texcoordCount = r.parseInteger();
+	long texcoordCount = r.ParseInteger();
 	vec2_t texcoords[texcoordCount];
 	freyjaPrintMessage("texcoordCount = %li\n", texcoordCount);
 
 	for (i = 0; i < texcoordCount; ++i)
 	{
-		texcoords[i][0] = r.parseFloat();
-		texcoords[i][1] = r.parseFloat();
+		texcoords[i][0] = r.ParseFloat();
+		texcoords[i][1] = r.ParseFloat();
 	}
 
 	
-	long blendDataCount = r.parseInteger();
+	long blendDataCount = r.ParseInteger();
 	skn_blend_data_t blenddata[blendDataCount];
 	freyjaPrintMessage("blendDataCount = %li\n", blendDataCount);
 
 	for (i = 0; i < blendDataCount; ++i)
 	{
-		blenddata[i].vertexIndex = r.parseInteger();
-		blenddata[i].weight = r.parseInteger();
+		blenddata[i].vertexIndex = r.ParseInteger();
+		blenddata[i].weight = r.ParseInteger();
 	}
 
 
-	long vertexCount = r.parseInteger();
+	long vertexCount = r.ParseInteger();
 	vec3_t vertices[vertexCount];
 	vec3_t normals[vertexCount];
 	freyjaPrintMessage("vertexCount = %li\n", vertexCount);
 
 	for (i = 0; i < vertexCount; ++i)
 	{
-		vertices[i][0] = r.parseFloat();
-		vertices[i][1] = r.parseFloat();
-		vertices[i][2] = r.parseFloat();
+		vertices[i][0] = r.ParseFloat();
+		vertices[i][1] = r.ParseFloat();
+		vertices[i][2] = r.ParseFloat();
 
-		normals[i][0] = r.parseFloat();
-		normals[i][1] = r.parseFloat();
-		normals[i][2] = r.parseFloat();
+		normals[i][0] = r.ParseFloat();
+		normals[i][1] = r.ParseFloat();
+		normals[i][2] = r.ParseFloat();
 	}
 
 
