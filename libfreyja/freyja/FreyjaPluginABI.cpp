@@ -33,6 +33,7 @@
 #endif
 
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
@@ -41,7 +42,6 @@
 #include "CopyModel.h"
 #include "FreyjaCamera.h"
 #include "FreyjaFSM.h"
-#include "FreyjaFileWriter.h"
 #include "FreyjaImage.h"
 #include "FreyjaLight.h"
 #include "FreyjaMaterial.h"
@@ -55,6 +55,7 @@
 
 
 using namespace freyja;
+using namespace mstl;
 
 /* Internal / hidden API methods not exported by header */
 
@@ -427,21 +428,21 @@ void freyjaGenericTransform3fv(freyja_transform_t transform,
 
 int32 freyjaCheckModel(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	freyja_file_header_t header;
 	int32 offset;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return -1;
 
 	/* Data is LITTLE_ENDIAN */
-	r.littleEndianMode();
+	r.SetByteOrder(SystemIO::File::LITTLE);
 
 	/* Read header */
-	offset = r.getFileOffset();
-	r.readCharString(16, header.magic);
-	r.closeFile();
+	offset = r.GetOffset();
+	r.ReadString(16, header.magic);
+	r.Close();
 
 	if (!strncmp(header.magic, FREYJA_API_VERSION, 7)) // 'Freyja '
 	{
@@ -452,7 +453,7 @@ int32 freyjaCheckModel(const char *filename)
 }
 
 
-int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
+int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r)
 {
 	Vector<long> verticesMap, texcoordsMap;
 	vec3_t xyz;
@@ -470,13 +471,13 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 
 
 	/* Read from diskfile */
-	meshFlags = r.readLong();
-	vertexCount = r.readLong();
-	vertexWeightCount = r.readLong();
-	vertexFrameCount = r.readLong();
-	texCoordCount = r.readLong();
-	polygonCount = r.readLong();
-	vertexGroupCount = r.readLong();
+	meshFlags = r.ReadLong();
+	vertexCount = r.ReadLong();
+	vertexWeightCount = r.ReadLong();
+	vertexFrameCount = r.ReadLong();
+	texCoordCount = r.ReadLong();
+	polygonCount = r.ReadLong();
+	vertexGroupCount = r.ReadLong();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -484,20 +485,20 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	/* Vertices */
 	for (i = 0; i < vertexCount; ++i)
 	{
-		flags = r.readLong();
+		flags = r.ReadLong();
 
 		for (j = 0; j < 3; ++j)
-			xyz[j] = r.readFloat32();
+			xyz[j] = r.ReadFloat32();
 
 		idx = freyjaVertexCreate3fv(xyz);
 
 		for (j = 0; j < 3; ++j)
-			xyz[j] = r.readFloat32();
+			xyz[j] = r.ReadFloat32();
 
 		freyjaVertexNormal3fv(idx, xyz);
 
 		for (j = 0; j < 2; ++j)
-			uv[j] = r.readFloat32();
+			uv[j] = r.ReadFloat32();
 		
 		freyjaVertexTexCoord2fv(idx, uv);
 
@@ -509,9 +510,9 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	/* VertexWeights */
 	for (i = 0; i < vertexWeightCount; ++i)
 	{
-		idx = r.readLong();
-		bone = r.readLong();
-		weight = r.readFloat32();
+		idx = r.ReadLong();
+		bone = r.ReadLong();
+		weight = r.ReadFloat32();
 		
 		freyjaVertexWeight(verticesMap[idx], weight, bone);
 	}
@@ -519,10 +520,10 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	/* VertexFrames */
 	for (i = 0; i < vertexFrameCount; ++i)
 	{
-		idx = r.readLong();
-		frame = r.readLong(); // Reserved use
+		idx = r.ReadLong();
+		frame = r.ReadLong(); // Reserved use
 		for (j = 0; j < 3; ++j)
-			xyz[j] = r.readFloat32();
+			xyz[j] = r.ReadFloat32();
 		
 		freyjaVertexFrame3f(verticesMap[idx], xyz[0], xyz[1], xyz[2]);
 	}
@@ -531,7 +532,7 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	for (i = 0; i < texCoordCount; ++i)
 	{
 		for (j = 0; j < 2; ++j)
-			uv[j] = r.readFloat32();
+			uv[j] = r.ReadFloat32();
 
 		idx = freyjaTexCoordCreate2fv(uv);
 		texcoordsMap.pushBack(idx);
@@ -541,23 +542,23 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
 	for (i = 0; i < polygonCount; ++i)
 	{
 		freyjaBegin(FREYJA_POLYGON);
-		flags = r.readLong();
-		material = r.readLong();
+		flags = r.ReadLong();
+		material = r.ReadLong();
 		freyjaPolygonMaterial1i(material);
 
-		count = r.readLong();
+		count = r.ReadLong();
 
 		for (j = 0; j < count; ++j)
 		{
-			idx = r.readLong();
+			idx = r.ReadLong();
 			freyjaPolygonVertex1i(verticesMap[idx]);
 		}
 
-		count = r.readLong();
+		count = r.ReadLong();
 
 		for (j = 0; j < count; ++j)
 		{
-			idx = r.readLong();
+			idx = r.ReadLong();
 			freyjaPolygonTexCoord1i(texcoordsMap[idx]);
 		}
 
@@ -575,7 +576,7 @@ int32 freyjaLoadMeshChunkV1(FreyjaFileReader &r)
  * the entire junky backend cruft like undo data which remains
  *
  * Vector maps are very memory wasteful */  // use a materialMap
-int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
+int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 {
 	const int32 version = 1;
 	Vector<long> polygons, vertices, texcoords;
@@ -714,18 +715,18 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 	chunk.flags = 0x0;
 	chunk.version = version;
 
-	w.writeLong(chunk.type);
-	w.writeLong(chunk.size);
-	w.writeLong(chunk.flags);
-	w.writeLong(chunk.version);
+	w.WriteLong(chunk.type);
+	w.WriteLong(chunk.size);
+	w.WriteLong(chunk.flags);
+	w.WriteLong(chunk.version);
 
-	w.writeLong(meshFlags);
-	w.writeLong(vertexCount);
-	w.writeLong(vertexWeightCount);
-	w.writeLong(vertexFrameCount);
-	w.writeLong(texCoordCount);
-	w.writeLong(polygonCount);
-	w.writeLong(vertexGroupCount);
+	w.WriteLong(meshFlags);
+	w.WriteLong(vertexCount);
+	w.WriteLong(vertexWeightCount);
+	w.WriteLong(vertexFrameCount);
+	w.WriteLong(texCoordCount);
+	w.WriteLong(polygonCount);
+	w.WriteLong(vertexGroupCount);
 
 	/* Vertices */
 	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
@@ -733,19 +734,19 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 		vertex = vertices[i];
 
 		flags = freyjaGetVertexFlags(vertex);
-		w.writeLong(flags);
+		w.WriteLong(flags);
 
 		freyjaGetVertexXYZ3fv(vertex, xyz);
 		for (j = 0; j < 3; ++j)
-			w.writeFloat32(xyz[j]);
+			w.WriteFloat32(xyz[j]);
 
 		freyjaGetVertexNormalXYZ3fv(vertex, xyz);
 		for (j = 0; j < 3; ++j)
-			w.writeFloat32(xyz[j]);
+			w.WriteFloat32(xyz[j]);
 
 		freyjaGetVertexTexcoord2fv(vertex, uv);
 		for (j = 0; j < 2; ++j)
-			w.writeFloat32(uv[j]);
+			w.WriteFloat32(uv[j]);
 	}
 
 	/* VertexWeights */
@@ -757,9 +758,9 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 		for (j = 0; j < count; ++j)
 		{
 			freyjaGetVertexWeight(vertex, j, &bone, &weight);
-			w.writeLong(verticesMap[vertex]);
-			w.writeLong(bone); // boneIndex -- FIXME: Should be translated
-			w.writeFloat32(weight);
+			w.WriteLong(verticesMap[vertex]);
+			w.WriteLong(bone); // boneIndex -- FIXME: Should be translated
+			w.WriteFloat32(weight);
 		}
 	}
 
@@ -772,10 +773,10 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 		for (j = 0; j < count; ++j)
 		{
 			freyjaGetVertexFrame(vertex, j, &frame, xyz);
-			w.writeLong(verticesMap[vertex]);
-			w.writeLong(frame); // frameIndex -- FIXME: Should be translated
+			w.WriteLong(verticesMap[vertex]);
+			w.WriteLong(frame); // frameIndex -- FIXME: Should be translated
 			for (k = 0; k < 3; ++k)
-				w.writeFloat32(xyz[k]);
+				w.WriteFloat32(xyz[k]);
 		}
 	}
 
@@ -787,7 +788,7 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 		freyjaGetTexCoord2fv(texcoord, uv);
 
 		for (j = 0; j < 2; ++j)
-			w.writeFloat32(uv[j]);
+			w.WriteFloat32(uv[j]);
 	}
 
 	/* Polygons */
@@ -796,27 +797,27 @@ int32 freyjaSaveMeshChunkV1(FreyjaFileWriter &w, index_t meshIndex)
 		idx = polygons[i];
 
 		flags = freyjaGetPolygonFlags(idx);
-		w.writeLong(flags);
+		w.WriteLong(flags);
 
 		material= freyjaGetPolygonMaterial(idx);
-		w.writeLong(material);
+		w.WriteLong(material);
 
 		count = freyjaGetPolygonVertexCount(idx);
-		w.writeLong(count);
+		w.WriteLong(count);
 
 		for (j = 0; j < count; ++j)
 		{
 			vertex = freyjaGetPolygonVertexIndex(idx, j);
-			w.writeLong(verticesMap[vertex]);
+			w.WriteLong(verticesMap[vertex]);
 		}
 
 		count = freyjaGetPolygonTexCoordCount(idx);
-		w.writeLong(count);
+		w.WriteLong(count);
 
 		for (j = 0; j < count; ++j)
 		{
 			texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
-			w.writeLong(texcoordsMap[texcoord]);
+			w.WriteLong(texcoordsMap[texcoord]);
 		}
 	}
 
@@ -879,7 +880,7 @@ void freyjaMeshClampTexCoords(index_t meshIndex)
 
 int32 freyjaLoadModel(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	freyja_file_header_t header;
 	Vector<long> vertices, texcoords, bones;
 	freyja_file_chunk_t chunk;
@@ -892,40 +893,40 @@ int32 freyjaLoadModel(const char *filename)
 	if (freyjaCheckModel((char *)filename) != 0)
 		return -1;
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return -1;
 
 	/* Data is LITTLE_ENDIAN */
-	r.littleEndianMode();
+	r.SetByteOrder(SystemIO::File::LITTLE);
 
 	/* Read header */
-	offset = r.getFileOffset();
-	r.readCharString(8, header.magic);
-	header.version = r.readLong();
+	offset = r.GetOffset();
+	r.ReadString(8, header.magic);
+	header.version = r.ReadLong();
 
 	if (header.version != 1)
 	{
-		r.setFileOffset(offset);
-		r.readCharString(16, header.magic);
-		header.version = r.readLong();
+		r.SetOffset(offset);
+		r.ReadString(16, header.magic);
+		header.version = r.ReadLong();
 	}
 
-	header.flags = r.readLong();
-	header.reserved = r.readLong();
-	r.readCharString(64, header.comment);	
+	header.flags = r.ReadLong();
+	header.reserved = r.ReadLong();
+	r.ReadString(64, header.comment);	
 
 	if (strncmp(header.magic, FREYJA_API_VERSION, 7)) // 'Freyja '
 	{
 		return -1;
 	}
 
-	while (!r.endOfFile())
+	while (!r.IsEndOfFile())
 	{
-		chunk.type = r.readLong();
-		chunk.size = r.readLong();
-		chunk.flags = r.readLong();
-		chunk.version = r.readLong();
-		offset = r.getFileOffset() + chunk.size;
+		chunk.type = r.ReadLong();
+		chunk.size = r.ReadLong();
+		chunk.flags = r.ReadLong();
+		chunk.version = r.ReadLong();
+		offset = r.GetOffset() + chunk.size;
 
 		switch (chunk.type)
 		{
@@ -935,38 +936,38 @@ int32 freyjaLoadModel(const char *filename)
 			bones.pushBack(index);
 
 			memset(buffer, 0, 64);
-			r.readCharString(64, buffer);
+			r.ReadString(64, buffer);
 			freyjaBoneName(index, buffer);
 			freyjaBoneFlags(index, 0x0);
-			freyjaBoneParent(index, r.readLong());
-			flags = r.readLong();
+			freyjaBoneParent(index, r.ReadLong());
+			flags = r.ReadLong();
  
 			for (j = 0; j < 3; ++j)
-				xyz[j] = r.readFloat32();
+				xyz[j] = r.ReadFloat32();
 
 			freyjaBoneTranslate3fv(index, xyz);
 			
 			if (flags & 32)
 			{
-				r.readLong();
+				r.ReadLong();
 
 				for (j = 0; j < 3; ++j)
-					xyz[j] = r.readFloat32();
+					xyz[j] = r.ReadFloat32();
 
 				freyjaBoneRotateEuler3fv(index, xyz);
 			}
 			else
 			{
 				for (j = 0; j < 4; ++j)
-					wxyz[j] = r.readFloat32();
+					wxyz[j] = r.ReadFloat32();
 
 				freyjaBoneRotateQuat4fv(index, wxyz);
 			}
 
 			freyjaEnd(); // FREYJA_BONE
 
-			if ((long)r.getFileOffset() != offset)
-				printf("BONE @ %i not %i!\n", r.getFileOffset(), offset);
+			if ((long)r.GetOffset() != offset)
+				printf("BONE @ %li not %i!\n", r.GetOffset(), offset);
 			break;
 
 
@@ -986,7 +987,7 @@ int32 freyjaLoadModel(const char *filename)
 					// FIXME use string name matching like skeletalkeyframes
                     // to avoid dupe textures in the future
 
-					if (FreyjaFileReader::doesFileExist(mat->getTextureName()))
+					if (SystemIO::File::DoesFileExist(mat->getTextureName()))
 					{
 						index_t textureIndex = freyjaTextureCreateFilename(mat->getTextureName());
 
@@ -1004,8 +1005,8 @@ int32 freyjaLoadModel(const char *filename)
 		case FREYJA_CHUNK_MESH:
 			freyjaLoadMeshChunkV1(r);
 
-			if ((long)r.getFileOffset() != offset)
-				printf("MESH @ %i not %i!\n", r.getFileOffset(), offset);
+			if ((long)r.GetOffset() != offset)
+				printf("MESH @ %li not %i!\n", r.GetOffset(), offset);
 			break;
 
 
@@ -1013,7 +1014,7 @@ int32 freyjaLoadModel(const char *filename)
 			continue;
 		}
 
-		r.setFileOffset(offset);
+		r.SetOffset(offset);
 	}
 
 
@@ -1038,7 +1039,7 @@ int32 freyjaLoadModel(const char *filename)
 		freyjaEnd(); // FREYJA_SKELETON
 	}
 
-	r.closeFile();
+	r.Close();
 
 	return 0;
 }
@@ -1047,7 +1048,7 @@ int32 freyjaLoadModel(const char *filename)
 int32 freyjaSaveModel(const char *filename)
 {
 	Vector<long> vertices, texcoords;
-	FreyjaFileWriter w;
+	SystemIO::FileWriter w;
 	freyja_file_header_t header;
 	freyja_file_chunk_t chunk;
 	vec3_t xyz;
@@ -1056,7 +1057,7 @@ int32 freyjaSaveModel(const char *filename)
 	int32 i, j, index, idx, count, meshIndex;
 
 
-	if (!w.openFile(filename))
+	if (!w.Open(filename))
 		return -1;
 
 	memset(header.magic, 0, 16);
@@ -1068,14 +1069,14 @@ int32 freyjaSaveModel(const char *filename)
 	strcpy(header.comment, "Freyja 3d: http://icculus.org/freyja");
 
 	/* Data is LITTLE_ENDIAN */
-	w.littleEndianMode();
+	w.SetByteOrder(SystemIO::File::LITTLE);
 
 	/* Write header */
-	w.writeCharString(16, header.magic);
-	w.writeLong(header.version);
-	w.writeLong(header.flags);
-	w.writeLong(header.reserved);
-	w.writeCharString(64, header.comment);
+	w.WriteString(16, header.magic);
+	w.WriteLong(header.version);
+	w.WriteLong(header.flags);
+	w.WriteLong(header.reserved);
+	w.WriteString(64, header.comment);
 
 
 	/* Write chunks... */
@@ -1099,33 +1100,33 @@ int32 freyjaSaveModel(const char *filename)
 			chunk.flags = 0x0;
 			chunk.version = 1;
 
-			w.writeLong(chunk.type);
-			w.writeLong(chunk.size);
-			w.writeLong(chunk.flags);
-			w.writeLong(chunk.version);
-			w.writeCharString(64, buffer);
-			w.writeLong(idx);
+			w.WriteLong(chunk.type);
+			w.WriteLong(chunk.size);
+			w.WriteLong(chunk.flags);
+			w.WriteLong(chunk.version);
+			w.WriteString(64, buffer);
+			w.WriteLong(idx);
 #if QUAT_BACKEND
-			w.writeLong(0x0);
+			w.WriteLong(0x0);
 #else
-			w.writeLong(32); // Flag 32 - Using euler angles
+			w.WriteLong(32); // Flag 32 - Using euler angles
 #endif
 
 			freyjaGetBoneTranslation3fv(index, xyz);
 
 			for (j = 0; j < 3; ++j)
-				w.writeFloat32(xyz[j]);
+				w.WriteFloat32(xyz[j]);
 
 #if QUAT_BACKEND
 			freyjaGetBoneRotationQuat4fv(index, wxyz);
 			
 			for (j = 0; j < 4; ++j)
-				w.writeFloat32(wxyz[j]);
+				w.WriteFloat32(wxyz[j]);
 #else
 			freyjaGetBoneRotationEuler3fv(index, xyz);
-			w.writeLong(0x0); // pad out
+			w.WriteLong(0x0); // pad out
 			for (j = 0; j < 3; ++j)
-				w.writeFloat32(xyz[j]);
+				w.WriteFloat32(xyz[j]);
 #endif
 
 			index = freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
@@ -1152,10 +1153,10 @@ int32 freyjaSaveModel(const char *filename)
 				chunk.flags = 0x0;
 				chunk.version = FreyjaMaterial::mVersion;
 
-				w.writeLong(chunk.type);
-				w.writeLong(chunk.size);
-				w.writeLong(chunk.flags);
-				w.writeLong(chunk.version);
+				w.WriteLong(chunk.type);
+				w.WriteLong(chunk.size);
+				w.WriteLong(chunk.flags);
+				w.WriteLong(chunk.version);
 
 				mat->serialize(w);
 			}
@@ -1182,7 +1183,7 @@ int32 freyjaSaveModel(const char *filename)
 
 
 	/* That wasn't so bad, was it? */
-	w.closeFile();
+	w.Close();
 
 	return 0;
 }
@@ -1892,7 +1893,7 @@ void freyjaPluginAddDirectory(const char *dir)
 	char *dir2;
 
 
-	if (!dir || !dir[0] || !FreyjaFileReader::isDirectory(dir))
+	if (!dir || !dir[0] || !SystemIO::File::IsDirectory(dir))
 		return;
 
 	l = strlen(dir);
@@ -1918,9 +1919,9 @@ void freyjaPluginFilename1s(const char *filename)
 void freyjaPluginsInit()
 {
 #ifdef FREYJA_PLUGINS
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 	FreyjaPluginDesc plugin;
-	char *module_filename;
+	const char *module_filename;
 	void (*import)();
 	void *handle;
 	unsigned int i;
@@ -1956,15 +1957,15 @@ void freyjaPluginsInit()
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
-		if (!reader.openDirectory(gPluginDirectories[i]))
+		if (!reader.OpenDir(gPluginDirectories[i]))
 		{
 			freyjaPrintError("Couldn't access plugin directory[%d].", i);
 			continue;
 		}
 
-		while ((module_filename = reader.getNextDirectoryListing()))
+		while ((module_filename = reader.GetNextDirectoryListing()))
 		{
-			if (reader.isDirectory(module_filename))
+			if (reader.IsDirectory(module_filename))
 				continue;
 
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
@@ -2004,7 +2005,7 @@ void freyjaPluginsInit()
 			}
 		}
 
-		reader.closeDirectory();
+		reader.Close();
 	}
 
 	gCurrentFreyjaPlugin = -1;
@@ -2015,9 +2016,9 @@ void freyjaPluginsInit()
 int32 freyjaImportModel(const char *filename)
 {
 #ifdef FREYJA_PLUGINS
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 	bool loaded = false, done = false;
-	char *module_filename;
+	const char *module_filename;
 	int (*import)(char *filename);
 	void *handle;
 	unsigned int i;
@@ -2025,7 +2026,7 @@ int32 freyjaImportModel(const char *filename)
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]");
 
-	if (!reader.doesFileExist(filename))
+	if (!reader.DoesFileExist(filename))
 	{
 		freyjaPrintError("File '%s' couldn't be accessed.", filename);
 		return -1;
@@ -2040,36 +2041,19 @@ int32 freyjaImportModel(const char *filename)
 		return -1;
 	}
 
-#ifdef USING_EGG
-	/* Check for native egg format */
-	if (freyja__getEggBackend())
-	{
-		if (Egg::checkFile(filename) == 0)
-		{
-			if (freyja__getEggBackend()->loadFile(filename) == 0)
-			{
-				return 0;
-			}
-			else
-			{
-				return -1;
-			}
-		}
-	}
-#endif
 
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
-		if (!reader.openDirectory(gPluginDirectories[i]))
+		if (!reader.OpenDir(gPluginDirectories[i]))
 		{
 			freyjaPrintError("Couldn't access plugin directory[%d].", i);
 			continue;
 		}
 
-		while (!done && (module_filename = reader.getNextDirectoryListing()))
+		while (!done && (module_filename = reader.GetNextDirectoryListing()))
 		{
-			if (reader.isDirectory(module_filename))
+			if (reader.IsDirectory(module_filename))
 				continue;
 
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
@@ -2121,7 +2105,7 @@ int32 freyjaImportModel(const char *filename)
 			}
 		}
 
-		reader.closeDirectory();
+		reader.CloseDir();
 
 		if (done)
 		{
@@ -2134,7 +2118,7 @@ int32 freyjaImportModel(const char *filename)
 	if (loaded)
 		return 0; // sucess
 #else
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 
 	if (!reader.doesFileExist(filename))
 	{
@@ -2174,7 +2158,7 @@ int32 freyjaImportModel(const char *filename)
 int32 freyjaExportModel(const char *filename, const char *type)
 {
 #ifdef FREYJA_PLUGINS
-	FreyjaFileReader reader;
+	SystemIO::FileReader reader;
 	bool saved = false;
 	char module_filename[256];
 	char module_export[128];
@@ -2192,15 +2176,6 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	{
 		return freyjaSaveModel(filename); // FIXME: true or false needed?
 	}
-#ifdef USING_EGG
-	else if (strcmp(type, "egg") == 0)
-	{
-		if (freyja__getEggBackend())
-		{
-			return freyja__getEggBackend()->saveFile(filename);
-		}
-	}
-#endif
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
 
@@ -2209,7 +2184,7 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
-		if (!reader.openDirectory(gPluginDirectories[i]))
+		if (!reader.OpenDir(gPluginDirectories[i]))
 		{
 			freyjaPrintError("Couldn't access plugin directory");
 			continue;

@@ -84,7 +84,7 @@ void Mesh::GetSelectedVertices(Vector<index_t> &list)
 }
 
 
-bool Mesh::Serialize(FreyjaFileWriter &w)
+bool Mesh::Serialize(SystemIO::FileWriter &w)
 {
 	freyja_file_chunk_t chunk;
 
@@ -113,45 +113,45 @@ bool Mesh::Serialize(FreyjaFileWriter &w)
 	chunk.size += 4 + mWeights.size() * Weight::SerializedSize();
 
 	/* Write chunk header to diskfile */
-	w.writeLong(FREYJA_CHUNK_MESH);
-	w.writeLong(chunk.size);
-	w.writeLong(chunk.flags);
-	w.writeLong(chunk.version);
+	w.WriteLong(FREYJA_CHUNK_MESH);
+	w.WriteLong(chunk.size);
+	w.WriteLong(chunk.flags);
+	w.WriteLong(chunk.version);
 
 	/* Write chunk data to diskfile */
-	w.writeLong(mUID);
-	w.writeLong(mFlags);
-	w.writeLong(mMaterialIndex);
-	w.writeFloat32(mPosition.mVec[0]);
-	w.writeFloat32(mPosition.mVec[1]);
-	w.writeFloat32(mPosition.mVec[2]);
-	w.writeFloat32(mRotation.mVec[0]);
-	w.writeFloat32(mRotation.mVec[1]);
-	w.writeFloat32(mRotation.mVec[2]);
-	w.writeFloat32(mScale.mVec[0]);
-	w.writeFloat32(mScale.mVec[1]);
-	w.writeFloat32(mScale.mVec[2]);
+	w.WriteLong(mUID);
+	w.WriteLong(mFlags);
+	w.WriteLong(mMaterialIndex);
+	w.WriteFloat32(mPosition.mVec[0]);
+	w.WriteFloat32(mPosition.mVec[1]);
+	w.WriteFloat32(mPosition.mVec[2]);
+	w.WriteFloat32(mRotation.mVec[0]);
+	w.WriteFloat32(mRotation.mVec[1]);
+	w.WriteFloat32(mRotation.mVec[2]);
+	w.WriteFloat32(mScale.mVec[0]);
+	w.WriteFloat32(mScale.mVec[1]);
+	w.WriteFloat32(mScale.mVec[2]);
 
 	SerializePool(w, mVertexPool, mFreedVertices);
 	SerializePool(w, mNormalPool, mFreedNormals);
 	SerializePool(w, mColorPool, mFreedColors);
 	SerializePool(w, mTexCoordPool, mFreedTexCoords);
 
-	w.writeLong(mFaces.size());
+	w.WriteLong(mFaces.size());
 	for ( uint32 i = 0; i < mFaces.size(); ++i )
 	{
 		if ( mFaces[i] ) 
 			mFaces[i]->Serialize(w);
 	}
 
-	w.writeLong(mVertices.size());
+	w.WriteLong(mVertices.size());
 	for ( uint32 i = 0; i < mVertices.size(); ++i )
 	{
 		if ( mVertices[i] ) 
 			mVertices[i]->Serialize(w);
 	}
 
-	w.writeLong(mWeights.size());
+	w.WriteLong(mWeights.size());
 	for ( uint32 i = 0; i < mWeights.size(); ++i )
 	{
 		if ( mWeights[i] ) 
@@ -640,25 +640,25 @@ void Mesh::Scale(vec_t x, vec_t y, vec_t z)
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-bool Mesh::SerializePool(FreyjaFileWriter &w, 
+bool Mesh::SerializePool(SystemIO::FileWriter &w, 
 						 Vector<vec_t> &v, mstl::stack<index_t> &s)
 {
 	mstl::stack<index_t> copy; // We don't really care about order
 
-	w.writeLong(v.size());
+	w.WriteLong(v.size());
 
 	for ( uint32 i = 0; i < v.size(); ++i )
 	{
-		w.writeFloat32(v[i]);
+		w.WriteFloat32(v[i]);
 	}
 		
-	w.writeLong(s.size());
+	w.WriteLong(s.size());
 
 	for ( uint32 i = 0; i < s.size(); ++i )
 	{
 		index_t item = s.pop();
 		copy.push(item);
-		w.writeLong(item);
+		w.WriteLong(item);
 	}
 
 	while ( !copy.empty() )

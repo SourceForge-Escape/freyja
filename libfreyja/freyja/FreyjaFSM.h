@@ -42,7 +42,6 @@
 #include <hel/math.h>
 
 #include "FreyjaPluginABI.h"
-#include "FreyjaFileReader.h"
 #include "FreyjaPlugin.h"
 #include "Mesh.h"
 

@@ -28,9 +28,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
 
+#include "ObjModel.h"
+
+using namespace mstl;
 
 extern "C" {
 
@@ -60,8 +62,8 @@ int import_model(char *filename)
 
 int freyja_model__obj_check(char *filename)
 {
-	if (FreyjaFileReader::compareFilenameExtention(filename, ".obj") == 0 ||
-		FreyjaFileReader::compareFilenameExtention(filename, ".OBJ") == 0)
+	if (SystemIO::File::CompareFilenameExtention(filename, ".obj") == 0 ||
+		SystemIO::File::CompareFilenameExtention(filename, ".OBJ") == 0)
 	{
 		freyjaPrintMessage("obj.so: '%s' is an obj model", filename);
 		return 0;
@@ -73,196 +75,65 @@ int freyja_model__obj_check(char *filename)
 
 int freyja_model__obj_import(char *filename)
 {
-	FreyjaFileReader r;
-	Vector <unsigned int> transV;
-	Vector <unsigned int> transT;
-	Vector <vec_t> normals;
-	//Vector <unsigned int> transN;
-	char *symbol;
-	vec_t x, y, z, u, v;
-	int i, vertexIndex, index;
-	bool hasUV = false;
-	bool hasNormal = false;
+	ObjModel obj;
 
-
-	if (!r.openFile(filename))
+	if (!obj.Load(filename))
 	{
 		return -1;
 	}
 
 	freyjaBegin(FREYJA_MODEL);
-	freyjaBegin(FREYJA_MESH);
-	freyjaBegin(FREYJA_VERTEX_GROUP);
 
-	while ((symbol = r.parseSymbol()) && !r.endOfFile())
+	uint32 m, v, f, i;
+	foreach (obj.mMeshes, m)
 	{
-		if (!strncmp(symbol, "#", 1))
-		{
-			char c;
+		freyjaBegin(FREYJA_MESH);
+		//freyjaBegin(FREYJA_VERTEX_GROUP);
 
-			while ((c = r.readInt8()) && !r.endOfFile())
+		foreach (obj.mMeshes[m].mVertices, v)
+		{
+			i = freyjaVertexCreate3fv(obj.mMeshes[m].mVertices[v].mVec);
+
+			// FIXME Polymapped not supported this way
+			if (obj.mMeshes[m].mHasNormals)
+				freyjaVertexNormal3fv(i, obj.mMeshes[m].mNormals[v].mVec);
+		}
+
+		//freyjaEnd(); //FREYJA_VERTEX_GROUP
+
+		if (obj.mMeshes[m].mHasTexCoords)
+		{
+			foreach (obj.mMeshes[m].mTexCoords, i)
 			{
-				if (c == '\n')
-					break;
+				freyjaTexCoordCreate2fv(obj.mMeshes[m].mTexCoords[i].mVec);
 			}
 		}
-		else if (!strcmp(symbol, "mtllib"))
-		{
-			// Filename of the material
-			symbol = r.parseSymbol();
-			freyjaPrintMessage("FIXME: Material '%s' is not used\n", symbol);
-		}
-		else if (!strcmp(symbol, "usemtl"))
-		{
-			// Filename of the material
-			symbol = r.parseSymbol();
-			freyjaPrintMessage("FIXME: Material '%s' is not used\n", symbol);
-		}
-		else if (!strncmp(symbol, "mg", 2))
-		{
-			freyjaPrintMessage("FIXME: Merging Groups is not used\n");
-		}
-		else if (!strncmp(symbol, "vp", 2))
-		{
-			freyjaPrintMessage("FIXME: Parameter space vertices are not used\n");
-		}
-		else if (!strcmp(symbol, "vt"))
-		{
-			u = r.parseFloat();
-			v = r.parseFloat();
-			hasUV = true;
 
-			transT.pushBack(freyjaTexCoordCreate2f(u, v));
-		}
-		else if (!strcmp(symbol, "vn"))  // Assumes normals come after v
+		foreach (obj.mMeshes[m].mFaces, f)
 		{
-			x = r.parseFloat();
-			y = r.parseFloat();
-			z = r.parseFloat();
-			hasNormal = true;
-
-			// polymapped normals not in Freyja
-			normals.pushBack(x);
-			normals.pushBack(y);
-			normals.pushBack(z);
-		}
-		else if (!strcmp(symbol, "v"))
-		{
-			x = r.parseFloat();
-			y = r.parseFloat();
-			z = r.parseFloat();
-
-			transV.pushBack(freyjaVertexCreate3f(x, y, z));
-		}
-		else if (!strcmp(symbol, "o"))
-		{
-			// Name of the new group, but no used here
-			symbol = r.parseSymbol();
-			freyjaPrintMessage("FIXME: Object name '%s' is not used\n", symbol);
-		}
-		else if (!strcmp(symbol, "g"))
-		{
-			// Name of the new group, but no used here
-			symbol = r.parseSymbol();
-			freyjaPrintMessage("FIXME: Group name '%s' is not used\n", symbol);
-		}
-		else if (!strcmp(symbol, "s"))
-		{
-			index = r.parseInteger();
-			freyjaPrintMessage("FIXME: Smoothing Group %i is not used\n", i);
-		}
-		else if (!strcmp(symbol, "f")) // f 1/1/1 2/2/2 3/3/3
-		{
-			// Start a new polygon
 			freyjaBegin(FREYJA_POLYGON);
 
-			// FIXME: Add state machine parser to handle all the quirks like 1//1
+			
 
-			for (i = 0; i < 3; ++i)
+			foreach (obj.mMeshes[m].mFaces[f].mVertexRefs, v)
 			{
-				index = r.parseInteger();
-				freyjaPolygonVertex1i(transV[index-1]); // index starts at 1 not 0
-				vertexIndex = transV[index-1];
-
-				if (hasUV)
-				{
-					r.readInt8(); // '/' no whitespace
-					index = r.parseInteger();
-
-					index = transT[index-1]; // index starts at 1 not 0
-					freyjaPolygonTexCoord1i(index);
-				}
-				else
-				{
-					freyjaVertexTexcoord2f(index, 0.25*i, 0.25*(i%2));
-				}
-
-				if (hasNormal) // polymapped normals aren't in Freyja atm
-				{
-					r.readInt8(); // '/' no whitespace
-					index = r.parseInteger();
-
-					//index = transN[index-1]; // index starts at 1 not 0
-					//freyjaNormal1i(index);
-
-					if (!normals.empty())
-					{
-						if ((index-1)*3+2 > (int)normals.size())
-						{
-							freyjaPrintError("obj.so> bad normal parse?");
-						}
-						else
-						{
-							freyjaVertexNormal3f(vertexIndex,
-												 normals[(index-1)*3],
-												 normals[(index-1)*3+1],
-												 normals[(index-1)*3+2]);
-						}
-					}
-				}
+				freyjaPolygonVertex1i(obj.mMeshes[m].mFaces[f].mVertexRefs[v]);
 			}
 
-			// Handle quad faces
-			i = r.getFileOffset();
-			symbol = r.parseSymbol();
-			r.setFileOffset(i);
-
-			if (isdigit(symbol[0]))
+			if (obj.mMeshes[m].mHasTexCoords)
 			{
-				index = r.parseInteger();
-				freyjaPolygonVertex1i(transV[index-1]); // index starts at 1 not 0
-
-				if (hasUV)
+				foreach (obj.mMeshes[m].mFaces[f].mTexCoordRefs, v)
 				{
-					r.readInt8(); // '/' no whitespace
-					index = r.parseInteger();
-
-					index = transT[index-1]; // index starts at 1 not 0
-					freyjaPolygonTexCoord1i(index);
-				}
-				else
-				{
-					freyjaVertexTexcoord2f(index, 0.25*i, 0.25*(i%2));
-				}
-
-				if (hasNormal) // polymapped normals aren't in Freyja atm
-				{
-					r.readInt8(); // '/' no whitespace
-					index = r.parseInteger();
-
-					//index = transN[index-1]; // index starts at 1 not 0
-					//freyjaNormal1i(index);
+					freyjaPolygonTexCoord1i(obj.mMeshes[m].mFaces[f].mTexCoordRefs[v]);
 				}
 			}
-
-			freyjaPolygonMaterial1i(0);
 
 			freyjaEnd(); // FREYJA_POLYGON
 		}
+
+		freyjaEnd(); // FREYJA_MESH
 	}
 
-	freyjaEnd(); // FREYJA_GROUP
-	freyjaEnd(); // FREYJA_MESH
 	freyjaEnd(); // FREYJA_MODEL
 
 	return 0;

@@ -27,13 +27,14 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJAMESH_H_
 
 #include <hel/math.h>
+
 #include <hel/BoundingVolume.h>
 #include <hel/Ray.h>
 #include <mstl/Vector.h>
 #include <mstl/stack.h>
+#include <mstl/SystemIO.h>
+
 #include "freyja.h"
-#include "FreyjaFileWriter.h"
-#include "FreyjaFileReader.h"
 
 
 using namespace mstl;
@@ -45,7 +46,7 @@ class Weight
 public:
 
 	static size_t SerializedSize() { return 0; }
-	bool Serialize(FreyjaFileWriter &w) { return true; }
+	bool Serialize(SystemIO::FileWriter &w) { return true; }
 	
 	index_t mVertexIndex;
 	index_t mBoneIndex;
@@ -95,7 +96,7 @@ public:
 		return ( 1 + 4 * 6); 
 	}
 
-	bool Serialize(FreyjaFileWriter &w) 
+	bool Serialize(SystemIO::FileWriter &w) 
 	{ 
 		freyja_file_chunk_t chunk;
 
@@ -104,13 +105,13 @@ public:
 		chunk.flags = 0x0;
 		chunk.version = 10;
 
-		w.writeInt8U(mFlags);
-		w.writeLong(mVertexIndex);
-		w.writeLong(mTexCoordIndex);
-		w.writeLong(mNormalIndex);
-		//w.writeLong(mColor);
-		w.writeLong(mMaterial);
-		//w.writeLong(mPolygonReference);
+		w.WriteInt8U(mFlags);
+		w.WriteLong(mVertexIndex);
+		w.WriteLong(mTexCoordIndex);
+		w.WriteLong(mNormalIndex);
+		//w.WriteLong(mColor);
+		w.WriteLong(mMaterial);
+		//w.WriteLong(mPolygonReference);
 
 		return true; 
 	}
@@ -220,7 +221,7 @@ public:
 		return 0; 
 	}
 
-	bool Serialize(FreyjaFileWriter &w) { return false; }
+	bool Serialize(SystemIO::FileWriter &w) { return false; }
 
 	index_t mMaterial;
 	byte mFlags;
@@ -449,7 +450,7 @@ public:
 	 *        Always sets fRayHit flag on face0, clears old results. 
 	 ------------------------------------------------------*/
 
-	bool Serialize(FreyjaFileWriter &w);
+	bool Serialize(SystemIO::FileWriter &w);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Serializes the mesh to diskfile as a chunk
@@ -522,7 +523,7 @@ public:
 	void SetDeltaScaleZ(vec_t z) {}
 
 
-	bool Serialize(FreyjaFileReader &r)
+	bool Serialize(SystemIO::FileReader &r)
 	{
 		BUG_ME("Serialize disabled for incomplete class");
 		return false;
@@ -839,7 +840,7 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	bool SerializePool(FreyjaFileWriter &w, 
+	bool SerializePool(SystemIO::FileWriter &w, 
 					   Vector<vec_t> &v, mstl::stack<index_t> &s);
 
 

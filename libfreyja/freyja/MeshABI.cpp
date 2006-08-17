@@ -421,9 +421,9 @@ void freyjaGetVertexPolygonRef(Vector<long> &polygons)
 
 index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
 {
-	MARK_MSG("Obsolete function call.");
-
 	Mesh *mesh = freyjaGetCurrentMeshClass();
+
+	DEBUG_MSG("Obsolete function call. %p", mesh);
 
 	if (mesh)
 	{
@@ -846,6 +846,16 @@ void freyjaMeshMaterial(index_t meshIndex, uint32 materialIndex)
 
 	if (mesh)
 	{
+		for (uint32 i = 0, n = mesh->GetFaceCount(); i < n; ++i)
+		{
+			Face *f = mesh->GetFace(i);
+
+			if (f)
+			{
+				f->mMaterial = materialIndex;
+			}
+		}
+
 		mesh->SetMaterial(materialIndex);
 	}
 }

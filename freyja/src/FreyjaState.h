@@ -34,15 +34,16 @@
 #include <freyja/Mesh.h>
 #include <mstl/Action.h>
 
+using namespace freyja;
 
-class ActionMeshTransformExt : public Action
+
+class ActionMeshTranslateExt : public Action
 {
  public:
-	ActionMeshTransformExt(index_t mesh, freyja_transform_action_t a, vec3_t xyz, Vec3 &v) :
+	ActionMeshTranslateExt(index_t mesh, Vec3 xyz, Vec3 &v) :
 		Action(),
 		mCursorXYZ(v),
 		mMesh(mesh),
-		mAction(a),
 		mXYZ(xyz)
 	{ }
 
@@ -50,14 +51,24 @@ class ActionMeshTransformExt : public Action
 
 	virtual bool Undo() 
 	{
-		freyjaModelMeshTransform3fv(0, mMesh, mAction, mXYZ.mVec);
+		Mesh *m = freyjaModelGetMeshClass(0, mMesh);
+
+		if (m)
+		{
+			// Adjust relative translation to absolete position
+			Matrix t;
+			Vec3 u = mXYZ - m->GetPosition();
+			t.translate(u.mVec[0], u.mVec[1], u.mVec[2]);
+			m->SetPosition(mXYZ);
+			m->TransformVertices(t);
+		}
+
 		mCursorXYZ = mXYZ;
 		return true;
 	}
 
 	Vec3 &mCursorXYZ;
 	index_t mMesh;                      /* Which mesh? */
-	freyja_transform_action_t mAction;  /* Type of transform */
 	Vector3d mXYZ;                      /* Storage for 3d transform event */
 };
 
@@ -169,7 +180,7 @@ class ActionGenericTransform : public Action
 class ActionVertexTransformExt : public Action
 {
  public:
-	ActionVertexTransformExt(index_t mesh, index_t vertex, freyja_transform_action_t a, vec3_t xyz, Vec3 &v) :
+	ActionVertexTransformExt(index_t mesh, index_t vertex, freyja_transform_action_t a, Vec3 xyz, Vec3 &v) :
 		Action(),
 		mCursorXYZ(v),
 		mMesh(mesh),

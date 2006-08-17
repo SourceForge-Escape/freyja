@@ -1129,7 +1129,7 @@ void freyja_get_share_filename(char *s, const char *filename, long sz)
 
 char freyja_is_user_installed()
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	char path[128];
 
 	freyja_get_rc_path(path, 128);
@@ -1138,32 +1138,32 @@ char freyja_is_user_installed()
 	return 1;
 #endif
 
-	return (r.doesFileExist(path));
+	return (r.DoesFileExist(path));
 }
 
 
 void freyja_install_user()
 {
-	FreyjaFileReader r;
-	FreyjaFileWriter w;
+	SystemIO::FileReader r;
+	SystemIO::FileWriter w;
 	char rc[512];
 	char share[512];
-	char *filename;
+	const char *filename;
 
 
 	/* Copy top level rc files */
 	freyja_get_rc_path(rc, 512);
 	freyja_get_share_path(share, 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
-	if (r.openDirectory(share))
+	if (r.OpenDir(share))
 	{
-		while ((filename = r.getNextDirectoryListing()))
+		while ((filename = r.GetNextDirectoryListing()))
 		{
-			if (r.isDirectory(filename))
+			if (r.IsDirectory(filename))
 				continue;
 
-			w.copyFileToPath(filename, rc);
+			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
 
@@ -1171,16 +1171,16 @@ void freyja_install_user()
 	/* Copy icon files */
 	freyja_get_rc_filename(rc, "icons/", 512);
 	freyja_get_share_filename(share, "icons/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
-	if (r.openDirectory(share))
+	if (r.OpenDir(share))
 	{
-		while ((filename = r.getNextDirectoryListing()))
+		while ((filename = r.GetNextDirectoryListing()))
 		{
-			if (r.isDirectory(filename))
+			if (r.IsDirectory(filename))
 				continue;
 
-			w.copyFileToPath(filename, rc);
+			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
 
@@ -1188,16 +1188,16 @@ void freyja_install_user()
 	/* Copy material files */
 	freyja_get_rc_filename(rc, "materials/", 512);
 	freyja_get_share_filename(share, "materials/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
-	if (r.openDirectory(share))
+	if (r.OpenDir(share))
 	{
-		while ((filename = r.getNextDirectoryListing()))
+		while ((filename = r.GetNextDirectoryListing()))
 		{
-			if (r.isDirectory(filename))
+			if (r.IsDirectory(filename))
 				continue;
 
-			w.copyFileToPath(filename, rc);
+			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
 
@@ -1205,46 +1205,46 @@ void freyja_install_user()
 	/* Copy palettes files */
 	freyja_get_rc_filename(rc, "palettes/", 512);
 	freyja_get_share_filename(share, "palettes/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
-	if (r.openDirectory(share))
+	if (r.OpenDir(share))
 	{
-		while ((filename = r.getNextDirectoryListing()))
+		while ((filename = r.GetNextDirectoryListing()))
 		{
-			if (r.isDirectory(filename))
+			if (r.IsDirectory(filename))
 				continue;
 
-			w.copyFileToPath(filename, rc);
+			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
 
 
 	/* Misc */
 	freyja_get_rc_filename(rc, "models/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
 	freyja_get_rc_filename(rc, "animations/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
 	freyja_get_rc_filename(rc, "textures/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
 	//freyja_get_rc_filename(rc, "particles/", 512);
-	//FreyjaFileWriter::createDirectory(rc);
+	//SystemIO::File::CreateDir(rc);
 
 	/* Copy plugins */
 	freyja_get_rc_filename(rc, "plugins/", 512);
 	freyja_get_share_filename(share, "plugins/", 512);
-	FreyjaFileWriter::createDirectory(rc);
+	SystemIO::File::CreateDir(rc);
 
-	if (r.openDirectory(share))
+	if (r.OpenDir(share))
 	{
-		while ((filename = r.getNextDirectoryListing()))
+		while ((filename = r.GetNextDirectoryListing()))
 		{
-			if (r.isDirectory(filename))
+			if (r.IsDirectory(filename))
 				continue;
 
-			w.copyFileToPath(filename, rc);
+			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
 }

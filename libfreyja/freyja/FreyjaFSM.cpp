@@ -30,7 +30,6 @@
 #include "Mesh.h"
 #include "BoneABI.h"
 #include "SkeletonABI.h"
-#include "FreyjaFileReader.h"
 #include "FreyjaPluginABI.h"
 #include "FreyjaFSM.h"
 

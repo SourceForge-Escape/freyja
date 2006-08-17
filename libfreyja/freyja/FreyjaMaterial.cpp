@@ -102,49 +102,49 @@ uint32 FreyjaMaterial::getSerializeSize()
 }
 
 
-bool FreyjaMaterial::serialize(FreyjaFileWriter &w)
+bool FreyjaMaterial::serialize(SystemIO::FileWriter &w)
 {
 	uint32 length = 0;
 
 
-	w.writeInt32U(mVersion);
-	w.writeCharString(64, mName);
-	w.writeInt32U(mFlags);
-	w.writeInt32U(mBlendSrc);
-	w.writeInt32U(mBlendDest);
+	w.WriteInt32U(mVersion);
+	w.WriteString(64, mName);
+	w.WriteInt32U(mFlags);
+	w.WriteInt32U(mBlendSrc);
+	w.WriteInt32U(mBlendDest);
 
 	if (mTextureName != 0x0)
 	{
 		length = strlen(mTextureName);
-		w.writeInt32U(length);
-		w.writeCharString(length, mTextureName);
+		w.WriteInt32U(length);
+		w.WriteString(length, mTextureName);
 	}
 	else
 	{
-		w.writeInt32U(0); // length
+		w.WriteInt32U(0); // length
 	}
 
-	w.writeFloat32(mShininess);
+	w.WriteFloat32(mShininess);
 
-	w.writeFloat32(mAmbient[0]);
-	w.writeFloat32(mAmbient[1]);
-	w.writeFloat32(mAmbient[2]);
-	w.writeFloat32(mAmbient[3]);
+	w.WriteFloat32(mAmbient[0]);
+	w.WriteFloat32(mAmbient[1]);
+	w.WriteFloat32(mAmbient[2]);
+	w.WriteFloat32(mAmbient[3]);
 
-	w.writeFloat32(mDiffuse[0]);
-	w.writeFloat32(mDiffuse[1]);
-	w.writeFloat32(mDiffuse[2]);
-	w.writeFloat32(mDiffuse[3]);
+	w.WriteFloat32(mDiffuse[0]);
+	w.WriteFloat32(mDiffuse[1]);
+	w.WriteFloat32(mDiffuse[2]);
+	w.WriteFloat32(mDiffuse[3]);
 
-	w.writeFloat32(mSpecular[0]);
-	w.writeFloat32(mSpecular[1]);
-	w.writeFloat32(mSpecular[2]);
-	w.writeFloat32(mSpecular[3]);
+	w.WriteFloat32(mSpecular[0]);
+	w.WriteFloat32(mSpecular[1]);
+	w.WriteFloat32(mSpecular[2]);
+	w.WriteFloat32(mSpecular[3]);
 
-	w.writeFloat32(mEmissive[0]);
-	w.writeFloat32(mEmissive[1]);
-	w.writeFloat32(mEmissive[2]);
-	w.writeFloat32(mEmissive[3]);
+	w.WriteFloat32(mEmissive[0]);
+	w.WriteFloat32(mEmissive[1]);
+	w.WriteFloat32(mEmissive[2]);
+	w.WriteFloat32(mEmissive[3]);
 
 	return true;
 }
@@ -155,53 +155,53 @@ bool FreyjaMaterial::serialize(FreyjaFileWriter &w)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool FreyjaMaterial::serialize(FreyjaFileReader &r)
+bool FreyjaMaterial::serialize(SystemIO::FileReader &r)
 {
-	uint32 version = r.readInt32U();
+	uint32 version = r.ReadInt32U();
 	uint32 length = 0;
 
 
 	if (version != mVersion)
 		return false;
 
-	r.readCharString(64, mName);
-	mFlags = r.readInt32U();
-	mBlendSrc = r.readInt32U();
-	mBlendDest = r.readInt32U();
+	r.ReadString(64, mName);
+	mFlags = r.ReadInt32U();
+	mBlendSrc = r.ReadInt32U();
+	mBlendDest = r.ReadInt32U();
 
-	length = r.readInt32U();
+	length = r.ReadInt32U();
 
 	if (length > 0)
 	{
 		char name[length+1];
 
-		r.readCharString(length, name);
+		r.ReadString(length, name);
 		name[length] = 0;		
 		//printf("'%s'\n", name);
 		setTextureName(name);
 	}
 
-	mShininess = r.readFloat32();
+	mShininess = r.ReadFloat32();
 
-	mAmbient[0] = r.readFloat32();
-	mAmbient[1] = r.readFloat32();
-	mAmbient[2] = r.readFloat32();
-	mAmbient[3] = r.readFloat32();
+	mAmbient[0] = r.ReadFloat32();
+	mAmbient[1] = r.ReadFloat32();
+	mAmbient[2] = r.ReadFloat32();
+	mAmbient[3] = r.ReadFloat32();
 
-	mDiffuse[0] = r.readFloat32();
-	mDiffuse[1] = r.readFloat32();
-	mDiffuse[2] = r.readFloat32();
-	mDiffuse[3] = r.readFloat32();
+	mDiffuse[0] = r.ReadFloat32();
+	mDiffuse[1] = r.ReadFloat32();
+	mDiffuse[2] = r.ReadFloat32();
+	mDiffuse[3] = r.ReadFloat32();
 
-	mSpecular[0] = r.readFloat32();
-	mSpecular[1] = r.readFloat32();
-	mSpecular[2] = r.readFloat32();
-	mSpecular[3] = r.readFloat32();
+	mSpecular[0] = r.ReadFloat32();
+	mSpecular[1] = r.ReadFloat32();
+	mSpecular[2] = r.ReadFloat32();
+	mSpecular[3] = r.ReadFloat32();
 
-	mEmissive[0] = r.readFloat32();
-	mEmissive[1] = r.readFloat32();
-	mEmissive[2] = r.readFloat32();
-	mEmissive[3] = r.readFloat32();
+	mEmissive[0] = r.ReadFloat32();
+	mEmissive[1] = r.ReadFloat32();
+	mEmissive[2] = r.ReadFloat32();
+	mEmissive[3] = r.ReadFloat32();
 
 	return true;
 }

@@ -54,7 +54,7 @@ void freyja_init()
 
 /* Flags */
 typedef enum
-{ 
+{
 	SELECTED       = 1,
 	HIDDEN         = 2,
 	SELECTED2      = 4,

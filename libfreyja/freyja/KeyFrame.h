@@ -34,9 +34,9 @@
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
+
 #include "freyja.h"
-#include "FreyjaFileWriter.h"
-#include "FreyjaFileReader.h"
 
 
 using namespace mstl;
@@ -81,8 +81,8 @@ class KeyFrameObject
 	virtual void PushRedoState() {}
 	virtual void Undo() {}
 	virtual void Redo() {}
-	virtual bool SerializeUndoHistory(FreyjaFileWriter &w) { return false; }
-	virtual bool SerializeUndoHistory(FreyjaFileReader &r) { return false; }
+	virtual bool SerializeUndoHistory(SystemIO::FileWriter &w) { return false; }
+	virtual bool SerializeUndoHistory(SystemIO::FileReader &r) { return false; }
 
 	// 'Location' interface
 	virtual void SetPosition(vec3_t xyz) {}

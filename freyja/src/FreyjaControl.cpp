@@ -348,12 +348,10 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 
 void FreyjaControl::ActionModelModified(Action *action)
 {
-	mCleared = false;
-
 	if (action)
 	{
-		static Freyja3dCursor::Flags lastMode;
-		lastMode = mCursor.GetMode();
+		//static Freyja3dCursor::Flags lastMode;
+		//lastMode = mCursor.GetMode();
 
 		if (mToken)
 		{
@@ -361,10 +359,12 @@ void FreyjaControl::ActionModelModified(Action *action)
 		}
 		else // This is an extranous event if it doesn't have a token
 		{
-			DEBUG_MSG("Extranous event dropped.");
+			DEBUG_MSG("Extranous event dropped, so action is deleted.");
+			delete action;
 		}
 	}
 
+	mCleared = false;
 	mToken = false;
 }
 
@@ -691,6 +691,17 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 			if (strncmp(buffer, "Shininess", 9) == 0)
 			{				
 				freyjaMaterialShininess(matIndex, r.ParseFloat());
+			}
+			else if  (strncmp(buffer, "Texture", 7) == 0)
+			{
+				if (LoadTexture(r.ParseStringLiteral()))
+				{
+					if (mTextureId > -1)
+					{
+						freyjaMaterialTexture(matIndex, mTextureId-1);
+						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+					}
+				}
 			}
 			else if  (strncmp(buffer, "TextureName", 11) == 0)
 			{
@@ -1148,6 +1159,12 @@ bool FreyjaControl::SaveModel(const char *filename)
 		return !ret;
 	}
   
+	String title;
+	title.Set("%s - Freyja", filename);
+	freyja_set_main_window_title((char*)title.GetCString());
+	mCurrentlyOpenFilename = filename;
+	mCleared = true;
+
 	return true;
 }
 
@@ -1160,7 +1177,7 @@ bool FreyjaControl::LoadTexture(const char *filename)
 	int err = -1;
 
 	// Mongoose 2002.01.10, Evil...
-	if (FreyjaFileReader::compareFilenameExtention(filename, ".lst") == 0)
+	if (SystemIO::File::CompareFilenameExtention(filename, ".lst") == 0)
 	{
 		FILE *f;
 		const unsigned int bufferSize = 256;
@@ -1843,14 +1860,14 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-#if 0
+	/* File dialog operations */
 	case eExportFile:
-		freyja_event_file_dialog("Export model...", FREYJA_MODE_SAVE_MODEL);
+		freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Export model...");
 		freyja_print("Exporting is handled from Save As using file extentions...");
 		break;
 
 	case eImportFile:
-		freyja_event_file_dialog("Import model...", FREYJA_MODE_LOAD_MODEL);
+		freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Import model...");
 		freyja_print("Importing is handled automatically from Open...");
 		break;
 
@@ -1868,7 +1885,7 @@ bool FreyjaControl::event(int command)
 
 			if (mCurrentlyOpenFilename.Empty())
 			{
-				freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);				
+				freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
 			}
 			else
 			{
@@ -1888,7 +1905,7 @@ bool FreyjaControl::event(int command)
 			break;
 
 		case eScheme_Material:
-			freyja_event_file_dialog("Save material as...", FREYJA_MODE_SAVE_MATERIAL);
+			freyja_event_file_dialog(FREYJA_MODE_SAVE_MATERIAL, "Save material as...");
 			break;
 
 		default:
@@ -1901,7 +1918,7 @@ bool FreyjaControl::event(int command)
 		switch (GetControlScheme())
 		{
 		case eScheme_UV:
-			freyja_event_file_dialog("Open texture...", FREYJA_MODE_LOAD_TEXTURE);
+			freyja_event_file_dialog(FREYJA_MODE_LOAD_TEXTURE, "Open texture...");
 			break;
 
 		case eScheme_Model:
@@ -1917,39 +1934,20 @@ bool FreyjaControl::event(int command)
 					freyja_set_main_window_title(BUILD_NAME);
 
 				
-					freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
+					freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 				}
 			}
 			else
 			{
-				freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
+				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 			}
 			break;
 
 		case eScheme_Material:
-			freyja_event_file_dialog("Open material...", FREYJA_MODE_LOAD_MATERIAL);
+			freyja_event_file_dialog(FREYJA_MODE_LOAD_MATERIAL, "Open material...");
 			break;
 		}
 		break;
-
-
-
-	case eSaveAsFile:
-		switch (GetControlScheme())
-		{
-		case eScheme_Model:
-			freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);
-			break;
-
-		case eScheme_Material:
-			freyja_event_file_dialog("Save material as...", FREYJA_MODE_SAVE_MATERIAL);
-			break;
-
-		default:
-			;
-		}
-		break;
-
 
 	case eSaveFileModel:
 		if (mCleared) // safety
@@ -1960,7 +1958,7 @@ bool FreyjaControl::event(int command)
 
 		if (mCurrentlyOpenFilename.Empty())
 		{
-			freyja_event_file_dialog("Save model as...", FREYJA_MODE_SAVE_MODEL);				
+			freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
 		}
 		else
 		{
@@ -1985,27 +1983,17 @@ bool FreyjaControl::event(int command)
 				freyja_set_main_window_title(BUILD_NAME);
 
 				
-				freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
+				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 				//freyja_event_file_dialog2("Open model...", eLoadModelText);
 			}
 		}
 		else
 		{
-			freyja_event_file_dialog("Open model...", FREYJA_MODE_LOAD_MODEL);
+			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 			//freyja_event_file_dialog2("Open model...", eLoadModelText);
 		}
 		break;
-#else
-	case eExportFile:
-	case eImportFile:
-	case eSaveFile:
-	case eOpenFile:
-	case eSaveAsFile:
-	case eSaveFileModel:
-	case eOpenFileModel:
-		BUG_ME("FIXME integrate these old events with new interface!\n");
-		break;
-#endif
+
 
 	case eRevertFile:
 		if (mCurrentlyOpenFilename.Empty())
@@ -3841,8 +3829,7 @@ void FreyjaControl::Transform(object_type_t obj,
 		if (mToken)
 		{
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
-			mActionManager.Push(a);
-			mToken = false;
+			ActionModelModified(a);
 		}
 
 		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
@@ -3864,7 +3851,7 @@ void FreyjaControl::Transform(freyja_transform_t obj,
 	if (mToken) 
 	{
 		Action *a = new ActionGenericTransform(obj, action, owner, id, v);
-		mActionManager.Push(a);
+		ActionModelModified(a);
 	}
 
 	switch (obj)
@@ -3944,21 +3931,27 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	switch (mObjectMode)
 	{
-	case tMesh:	
-		if (mToken)
-		{
+	case tMesh:
+		{	
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
 			if (m)
 			{
-				mCursor.mPos = m->GetPosition();
+				if (mToken)
+				{
+					// This is always a relative transform due to implementation
+					Action *a = new ActionMeshTranslateExt(GetSelectedMesh(), m->GetPosition(), mCursor.mPos);
+					ActionModelModified(a);
+				}
+
+				// Set mesh position to be at cursor pos
+				Matrix t;
+				Vec3 u = mCursor.mPos - m->GetPosition();
+				t.translate(u.mVec[0], u.mVec[1], u.mVec[2]);
+				m->SetPosition(mCursor.mPos);
+				m->TransformVertices(t);
 			}
-
-			mActionManager.Push(new ActionMeshTransformExt(GetSelectedMesh(), fTranslate, mCursor.mPos.mVec, mCursor.mPos));
-			mToken = false;
 		}
-
-		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fTranslate, mCursor.mPos.mVec);
 		break;
 
 	case tPoint:
@@ -3971,8 +3964,8 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				m->GetVertexPos(GetSelectedVertex(), mCursor.mPos.mVec);
 			}
 
-			mActionManager.Push(new ActionVertexTransformExt(GetSelectedMesh(), GetSelectedVertex(), fTranslate, mCursor.mPos.mVec, mCursor.mPos));
-			mToken = false;
+			Action *a = new ActionVertexTransformExt(GetSelectedMesh(), GetSelectedVertex(), fTranslate, mCursor.mPos.mVec, mCursor.mPos);
+			ActionModelModified(a);
 		}
 		freyjaMeshVertexTranslate3fv(GetSelectedMesh(), GetSelectedVertex(), mCursor.mPos.mVec);
 		break;

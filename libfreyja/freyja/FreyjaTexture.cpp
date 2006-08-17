@@ -74,7 +74,7 @@ uint32 FreyjaTexture::getSerializeSize()
 }
 
 
-bool FreyjaTexture::serialize(FreyjaFileWriter &w)
+bool FreyjaTexture::serialize(SystemIO::FileWriter &w)
 {
 #ifdef FIXME
 	uint32 length;
@@ -82,12 +82,12 @@ bool FreyjaTexture::serialize(FreyjaFileWriter &w)
 	if (name)
 	{
 		length = strlen(name);
-		w.writeInt32U(length);
-		w.writeCharString(length, name);
+		w.WriteInt32U(length);
+		w.WriteCharString(length, name);
 	}
 	else
 	{
-		w.writeInt32U(0);
+		w.WriteInt32U(0);
 	}
 #endif
 
@@ -100,7 +100,7 @@ bool FreyjaTexture::serialize(FreyjaFileWriter &w)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool FreyjaTexture::serialize(FreyjaFileReader &r)
+bool FreyjaTexture::serialize(SystemIO::FileReader &r)
 {
 	// FIXME
 	return false;

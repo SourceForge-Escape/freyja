@@ -49,7 +49,7 @@ FreyjaPakReader::~FreyjaPakReader()
 
 byte *FreyjaPakReader::getFileByFullPathName(const char *vfsFilename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	FreyjaPakDirectory *pakDir = &mRoot; // cd /
 	FreyjaPakFile *pakFile;
 	const uint32 blimit = 127;
@@ -110,7 +110,7 @@ byte *FreyjaPakReader::getFileByFullPathName(const char *vfsFilename)
 		}
 	}
 
-	if (pakFile != 0x0 && r.openFile(mPakFile))
+	if (pakFile != 0x0 && r.Open(mPakFile))
 	{
 		return pakFile->getCopyOfData(r);
 	}
