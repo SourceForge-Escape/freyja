@@ -23,9 +23,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
 
+using namespace mstl;
 
 extern "C" {
 	int freyja_model__nwnascii_check(char *filename);
@@ -54,18 +54,18 @@ int import_model(char *filename)
 
 int freyja_model__nwnascii_check(char *filename)
 {
-	FreyjaFileReader r;
-	char *symbol;
+	SystemIO::TextFileReader r;
+	const char *symbol;
 
 
-	if (FreyjaFileReader::compareFilenameExtention(filename, ".mdl") == 0)
+	if (SystemIO::File::CompareFilenameExtention(filename, ".mdl") == 0)
 	{
-		if (!r.openFile(filename))
+		if (!r.Open(filename))
 		{
 			return -1;
 		}
 
-		symbol = r.parseSymbol();
+		symbol = r.ParseSymbol();
 
 		if (strncmp("#MAXMODEL", symbol, 9) == 0)
 		{
@@ -82,11 +82,11 @@ int freyja_model__nwnascii_check(char *filename)
 int freyja_model__nwnascii_import(char *filename)
 {
 	const vec_t scale = 20.0f;
-	FreyjaFileReader r;
+	SystemIO::TextFileReader r;
 	Vector <unsigned int> transV;
 	Vector <unsigned int> transT;
 	Vector <long> faces;
-	char *symbol;
+	const char *symbol;
 	vec_t x, y, z, u, v;
 	vec4_t orientation;
 	vec3_t position;
@@ -99,7 +99,7 @@ int freyja_model__nwnascii_import(char *filename)
 		return -1;
 	}
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 	{
 		return -1;
 	}
@@ -107,13 +107,13 @@ int freyja_model__nwnascii_import(char *filename)
 
 	freyjaBegin(FREYJA_MODEL);
 
-	while ((symbol = r.parseSymbol()) && !r.endOfFile())
+	while ((symbol = r.ParseSymbol()) && !r.IsEndOfFile())
 	{
 		if (!strncmp(symbol, "#", 1))
 		{
 			char c;
 
-			while ((c = r.readInt8()) && !r.endOfFile())
+			while ((c = r.NextChar()) && !r.IsEndOfFile())
 			{
 				if (c == '\n')
 					break;
@@ -121,12 +121,12 @@ int freyja_model__nwnascii_import(char *filename)
 		}
 		else if (!strncmp(symbol, "node", 4))
 		{
-			symbol = r.parseSymbol();
+			symbol = r.ParseSymbol();
 
 			if (!strncmp(symbol, "trimesh", 7))
 			{
 
-			symbol = r.parseSymbol();
+			symbol = r.ParseSymbol();
 
 			freyjaPrintMessage("New mesh '%s'\n", symbol);
 		
@@ -134,13 +134,13 @@ int freyja_model__nwnascii_import(char *filename)
 			meshIndex = freyjaGetCurrent(FREYJA_MESH);
 			freyjaMeshName1s(meshIndex, symbol);
 
-			while ((symbol = r.parseSymbol()) && !r.endOfFile())
+			while ((symbol = r.ParseSymbol()) && !r.IsEndOfFile())
 			{
 				if (!strncmp(symbol, "#", 1))
 				{
 					char c;
 
-					while ((c = r.readInt8()) && !r.endOfFile())
+					while ((c = r.NextChar()) && !r.IsEndOfFile())
 					{
 						if (c == '\n')
 							break;
@@ -149,16 +149,16 @@ int freyja_model__nwnascii_import(char *filename)
 				else if (!strncmp(symbol, "orientation", 8))
 				{
 					// Euler encoding or axis?
-					orientation[0] = r.parseFloat(); // x
-					orientation[1] = r.parseFloat(); // y
-					orientation[2] = r.parseFloat(); // z
-					orientation[3] = r.parseFloat(); // angle
+					orientation[0] = r.ParseFloat(); // x
+					orientation[1] = r.ParseFloat(); // y
+					orientation[2] = r.ParseFloat(); // z
+					orientation[3] = r.ParseFloat(); // angle
 				}
 				else if (!strncmp(symbol, "position", 8))
 				{
-					position[0] = r.parseFloat();
-					position[1] = r.parseFloat();
-					position[2] = r.parseFloat();
+					position[0] = r.ParseFloat();
+					position[1] = r.ParseFloat();
+					position[2] = r.ParseFloat();
 				}
 				else if (!strncmp(symbol, "endnode", 7))
 				{
@@ -166,15 +166,15 @@ int freyja_model__nwnascii_import(char *filename)
 				}
 				else if (!strncmp(symbol, "tverts", 7))
 				{
-					count = r.parseInteger();
+					count = r.ParseInteger();
 
 					//printf("\n# %li texcoords\n", count);
 
-					for (i = 0; i < count && !r.endOfFile(); ++i)
+					for (i = 0; i < count && !r.IsEndOfFile(); ++i)
 					{
-						u = r.parseFloat();
-						v = r.parseFloat();
-						r.parseFloat(); // w
+						u = r.ParseFloat();
+						v = r.ParseFloat();
+						r.ParseFloat(); // w
 
 						//printf("vt %f %f\n", u, v);
 						transT.pushBack(freyjaTexCoordCreate2f(u, 1.0 - v));
@@ -184,17 +184,17 @@ int freyja_model__nwnascii_import(char *filename)
 				{
 					freyjaBegin(FREYJA_VERTEX_GROUP);
 
-					count = r.parseInteger();
+					count = r.ParseInteger();
 
 					transV.reserve(count+1);
 
 					//printf("\n# %li vertices\n", count);
 
-					for (i = 0; i < count && !r.endOfFile(); ++i)
+					for (i = 0; i < count && !r.IsEndOfFile(); ++i)
 					{
-						x = r.parseFloat() + position[0];
-						y = r.parseFloat() + position[1];
-						z = r.parseFloat() + position[2];
+						x = r.ParseFloat() + position[0];
+						y = r.ParseFloat() + position[1];
+						z = r.ParseFloat() + position[2];
 
 						//printf("v %f %f %f\n", x, z, y);
 						transV.pushBack(freyjaVertexCreate3f(x*scale,
@@ -206,18 +206,18 @@ int freyja_model__nwnascii_import(char *filename)
 				}
 				else if (!strncmp(symbol, "faces", 5))
 				{
-					faceCount = count = r.parseInteger();
+					faceCount = count = r.ParseInteger();
 
-					for (i = 0; i < count && !r.endOfFile(); ++i)
+					for (i = 0; i < count && !r.IsEndOfFile(); ++i)
 					{
-						a = r.parseInteger();
-						b = r.parseInteger();
-						c = r.parseInteger();
-						r.parseInteger(); // Smoothing group bitflag?
-						ta = r.parseInteger();
-						tb = r.parseInteger();
-						tc = r.parseInteger();
-						r.parseInteger(); // Unknown
+						a = r.ParseInteger();
+						b = r.ParseInteger();
+						c = r.ParseInteger();
+						r.ParseInteger(); // Smoothing group bitflag?
+						ta = r.ParseInteger();
+						tb = r.ParseInteger();
+						tc = r.ParseInteger();
+						r.ParseInteger(); // Unknown
 
 						//printf("f %li/%li %li/%li %li/%li\n",  a, b, c, ta, tb, tc);
 
@@ -272,7 +272,7 @@ int freyja_model__nwnascii_import(char *filename)
 
 	freyjaEnd(); // FREYJA_MODEL
 
-	r.closeFile();
+	r.Close();
 
 	return 0;
 }

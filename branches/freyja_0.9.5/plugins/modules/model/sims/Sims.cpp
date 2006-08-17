@@ -43,18 +43,18 @@ Sims::~Sims()
 
 bool IFFPak::check(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return false;
 
 	/* Data is BIG_ENDIAN */
-	r.bigEndianMode();
+	r.SetByteOrder(SystemIO::File::BIG);
 
-	r.readCharString(35, mId);
-	r.readCharString(25, mId2);
-	r.closeFile();
+	r.ReadString(35, mId);
+	r.ReadString(25, mId2);
+	r.Close();
 	
 	if (strncmp(mId, "IFF FILE 2.5:TYPE FOLLOWED BY SIZE", 34))
 		return false;
@@ -72,16 +72,16 @@ bool IFFPak::check(const char *filename)
 
 bool IFFPak::load(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 		return false;
 
 	/* Data is BIG_ENDIAN */
-	r.bigEndianMode();
+	r.SetByteOrder(SystemIO::File::BIG);
 
-	r.readCharString(35, mId);
-	r.readCharString(25, mId2);
+	r.ReadString(35, mId);
+	r.ReadString(25, mId2);
 	
 	if (strncmp(mId, "IFF FILE 2.5:TYPE FOLLOWED BY SIZE", 34))
 		return false;
@@ -89,19 +89,19 @@ bool IFFPak::load(const char *filename)
 	if (strncmp(mId2, " JAMIE DOORNBOS & MAXIS 1", 25))
 		return false;
 
-	mResourceMapOffset = r.readLong();
+	mResourceMapOffset = r.ReadLong();
 	printf("mResourceMapOffset = %li\n", mResourceMapOffset);
 
 	while (loadChunk(r))
 		;
 
-	r.closeFile();
+	r.Close();
 
 	return true;
 }
 
 
-bool IFFPak::loadChunk(FreyjaFileReader &r)
+bool IFFPak::loadChunk(SystemIO::FileReader &r)
 {
 	long type, size, off;
 	short id, flags;
@@ -109,61 +109,61 @@ bool IFFPak::loadChunk(FreyjaFileReader &r)
 	char name[4];
 
 
-	type = r.readLong();
+	type = r.ReadLong();
 
-	if (r.endOfFile())
+	if (r.IsEndOfFile())
 		return false;
 
-	size = r.readLong();
-	id = r.readInt16();
-	flags = r.readInt16();
-	r.readCharString(64, buffer);	
+	size = r.ReadLong();
+	id = r.ReadInt16();
+	flags = r.ReadInt16();
+	r.ReadString(64, buffer);	
 	memcpy(name, (char*)&type, 4);
 
 	printf("%c%c%c%c Chunk: 0x%lx %li %i 0x%x '%s'\n", 
 		   name[3], name[2], name[1], name[0],
 		   type, size, id, flags, buffer);
 
-	off = (size - 76) + r.getFileOffset();
+	off = (size - 76) + r.GetOffset();
 
 	switch (type)
 	{
 	case IFF_BCON:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_BHAV:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_BMP_:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_CTSS:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_DGRP:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_FWAV:
 		printf("FWAV {\n");
-		r.readCharString(14, buffer);
+		r.ReadString(14, buffer);
 		printf("\tWav = '%s'\n", buffer);
 		printf("}\n");
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_OBJD:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
@@ -171,50 +171,50 @@ bool IFFPak::loadChunk(FreyjaFileReader &r)
 		{
 			unsigned char *rgbPal = new unsigned char[784];
 
-			r.readLong(); // Always 1
-			r.readLong(); // Always 256
-			r.readLong(); // Always 0
-			r.readLong(); // Always 0
+			r.ReadLong(); // Always 1
+			r.ReadLong(); // Always 256
+			r.ReadLong(); // Always 0
+			r.ReadLong(); // Always 0
 
-			r.readBuffer(784, rgbPal);
+			r.ReadBuffer(784, rgbPal);
 			mPalettes.pushBack(rgbPal);
 		}
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_rsmp:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_SLOT:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_SPR2:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_STRN:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_TTAs:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_TTAB:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
 	case IFF_XXXX:
-		r.setFileOffset(off);
+		r.SetOffset(off);
 		return true;
 		break;
 
@@ -227,11 +227,11 @@ bool IFFPak::loadChunk(FreyjaFileReader &r)
 
 		printf("\n");
 
-		printf("case IFF_%c%c%c%c:\nr.setFileOffset(off);\nreturn true;\nbreak;\n", name[3], name[2], name[1], name[0]);
+		printf("case IFF_%c%c%c%c:\nr.SetOffset(off);\nreturn true;\nbreak;\n", name[3], name[2], name[1], name[0]);
 
 		printf("\n");
 
-		r.setFileOffset(off);
+		r.SetOffset(off);
 	}
 
 	return false;

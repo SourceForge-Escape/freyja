@@ -27,10 +27,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
 
 #include "Mdl.h"
+
+using namespace mstl;
 
 
 unsigned char Mdl::mPaletteHexen2[] = {
@@ -917,40 +918,40 @@ int Mdl::Save(char *filename)
 	return 0;
 }
 
-bool fread_int_small(int *ptr, FreyjaFileReader &r)
+bool fread_int_small(int *ptr, SystemIO::FileReader &r)
 {
-	*ptr = r.readInt32();
-	return !r.endOfFile();
+	*ptr = r.ReadInt32();
+	return !r.IsEndOfFile();
 }
 
 
-bool fread_u_int_small(unsigned int *ptr, FreyjaFileReader &r)
+bool fread_u_int_small(unsigned int *ptr, SystemIO::FileReader &r)
 {
-	*ptr = r.readInt32U();
-	return !r.endOfFile();
+	*ptr = r.ReadInt32U();
+	return !r.IsEndOfFile();
 }
 
 
-bool fread_float_small(float *ptr, FreyjaFileReader &r)
+bool fread_float_small(float *ptr, SystemIO::FileReader &r)
 {
-	*ptr = r.readFloat32();
-	return !r.endOfFile();
+	*ptr = r.ReadFloat32();
+	return !r.IsEndOfFile();
 }
 
-bool fread_buffer(unsigned char *buffer, unsigned long sz, FreyjaFileReader &r)
+bool fread_buffer(unsigned char *buffer, unsigned long sz, SystemIO::FileReader &r)
 {
-	return !r.readBufferUnsignedChar(sz, buffer);
+	return !r.ReadBuffer(sz, buffer);
 }
 
 
 int Mdl::Load(char *filename)
 {
-	FreyjaFileReader f;
+	SystemIO::FileReader f;
 	int i, skin_sz;
 	unsigned j;
 
 
-	if (!f.openFile(filename))
+	if (!f.Open(filename))
 	{
 		printf("Mdl::Load> File '%s' not found.\n", filename);
 		return -1;
@@ -1219,7 +1220,7 @@ int Mdl::Load(char *filename)
 		}
 	}
 
-	f.closeFile();
+	f.Close();
 
 	return 0;
 }

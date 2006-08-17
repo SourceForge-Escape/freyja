@@ -20,9 +20,11 @@
  ==========================================================================*/
 
 #include <math.h>
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 
 #include "ETModel.h"
+
+using namespace mstl;
 
 
 ////////////////////////////////////////////////////////////
@@ -59,28 +61,28 @@ void MDMModel::print()
 
 bool MDMModel::load(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	long i, j, k;
 
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return false;
 
-	r.readCharString(4, mHeader.ident);
-	mHeader.version = r.readLong();
-	r.readCharString(64, mHeader.name);
-	mHeader.lodBias = r.readFloat32();
-	mHeader.lodScale = r.readFloat32();
-	mHeader.numSurfaces = r.readLong();
-	mHeader.surfaceDataOffset = r.readLong();
-	mHeader.numTags = r.readLong();
-	mHeader.tagDataOffset = r.readLong();
-	mHeader.fileSize = r.readLong();
+	r.ReadString(4, mHeader.ident);
+	mHeader.version = r.ReadLong();
+	r.ReadString(64, mHeader.name);
+	mHeader.lodBias = r.ReadFloat32();
+	mHeader.lodScale = r.ReadFloat32();
+	mHeader.numSurfaces = r.ReadLong();
+	mHeader.surfaceDataOffset = r.ReadLong();
+	mHeader.numTags = r.ReadLong();
+	mHeader.tagDataOffset = r.ReadLong();
+	mHeader.fileSize = r.ReadLong();
 
 	if (strncmp(mHeader.ident, "MDMW", 4) || mHeader.version != 3)
 	{
 		printf("Not a valid MDM model.\n");
-		r.closeFile();
+		r.Close();
 		return false;
 	}
 
@@ -88,20 +90,20 @@ bool MDMModel::load(const char *filename)
 
 	for (i = 0; i < mHeader.numSurfaces; ++i)
 	{
-		mSurfaces[i].header.ident = r.readLong();
-		r.readCharString(64, mSurfaces[i].header.name);
-		r.readCharString(64, mSurfaces[i].header.shader_name);
-		mSurfaces[i].header.shader_index = r.readLong();
-		mSurfaces[i].header.LoD_minimum = r.readLong();
-		mSurfaces[i].header.surface_header_offset = r.readLong();
-		mSurfaces[i].header.num_vertices = r.readLong();
-		mSurfaces[i].header.offset_vertices = r.readLong();
-		mSurfaces[i].header.num_triangles = r.readLong();
-		mSurfaces[i].header.offset_triangles = r.readLong();
-		mSurfaces[i].header.offset_collaspemap = r.readLong();
-		mSurfaces[i].header.number_bonerefs = r.readLong();
-		mSurfaces[i].header.offset_bonerefs = r.readLong();
-		mSurfaces[i].header.offset_surface_data_end = r.readLong();
+		mSurfaces[i].header.ident = r.ReadLong();
+		r.ReadString(64, mSurfaces[i].header.name);
+		r.ReadString(64, mSurfaces[i].header.shader_name);
+		mSurfaces[i].header.shader_index = r.ReadLong();
+		mSurfaces[i].header.LoD_minimum = r.ReadLong();
+		mSurfaces[i].header.surface_header_offset = r.ReadLong();
+		mSurfaces[i].header.num_vertices = r.ReadLong();
+		mSurfaces[i].header.offset_vertices = r.ReadLong();
+		mSurfaces[i].header.num_triangles = r.ReadLong();
+		mSurfaces[i].header.offset_triangles = r.ReadLong();
+		mSurfaces[i].header.offset_collaspemap = r.ReadLong();
+		mSurfaces[i].header.number_bonerefs = r.ReadLong();
+		mSurfaces[i].header.offset_bonerefs = r.ReadLong();
+		mSurfaces[i].header.offset_surface_data_end = r.ReadLong();
 
 		printf("surface = '%s', %li v %li f %li br\n", 
 			   mSurfaces[i].header.name, 
@@ -113,23 +115,23 @@ bool MDMModel::load(const char *filename)
 
 		for (j = 0; j < mSurfaces[i].header.num_vertices; ++j)
 		{
-			mSurfaces[i].vertices[j].normal[0] = r.readFloat32();
-			mSurfaces[i].vertices[j].normal[1] = r.readFloat32();
-			mSurfaces[i].vertices[j].normal[2] = r.readFloat32();
-			mSurfaces[i].vertices[j].uv[0] = r.readFloat32();
-			mSurfaces[i].vertices[j].uv[1] = r.readFloat32();
-			mSurfaces[i].vertices[j].num_weights = r.readLong();
+			mSurfaces[i].vertices[j].normal[0] = r.ReadFloat32();
+			mSurfaces[i].vertices[j].normal[1] = r.ReadFloat32();
+			mSurfaces[i].vertices[j].normal[2] = r.ReadFloat32();
+			mSurfaces[i].vertices[j].uv[0] = r.ReadFloat32();
+			mSurfaces[i].vertices[j].uv[1] = r.ReadFloat32();
+			mSurfaces[i].vertices[j].num_weights = r.ReadLong();
 
 
 			mSurfaces[i].vertices[j].weights = new BoneWeight[mSurfaces[i].vertices[j].num_weights];
 
 			for (k = 0; k < mSurfaces[i].vertices[j].num_weights; ++k)
 			{
-				mSurfaces[i].vertices[j].weights[k].bone_index = r.readLong();
-				mSurfaces[i].vertices[j].weights[k].weight = r.readFloat32();
-				mSurfaces[i].vertices[j].weights[k].bone_space[0] = r.readFloat32();
-				mSurfaces[i].vertices[j].weights[k].bone_space[1] = r.readFloat32();
-				mSurfaces[i].vertices[j].weights[k].bone_space[2] = r.readFloat32();
+				mSurfaces[i].vertices[j].weights[k].bone_index = r.ReadLong();
+				mSurfaces[i].vertices[j].weights[k].weight = r.ReadFloat32();
+				mSurfaces[i].vertices[j].weights[k].bone_space[0] = r.ReadFloat32();
+				mSurfaces[i].vertices[j].weights[k].bone_space[1] = r.ReadFloat32();
+				mSurfaces[i].vertices[j].weights[k].bone_space[2] = r.ReadFloat32();
 			}
 		}
 		
@@ -138,35 +140,35 @@ bool MDMModel::load(const char *filename)
 
 		for (j = 0; j < mSurfaces[i].header.num_triangles; ++j)
 		{
-			mSurfaces[i].triangles[j].indices[0] = r.readLong();
-			mSurfaces[i].triangles[j].indices[1] = r.readLong();
-			mSurfaces[i].triangles[j].indices[2] = r.readLong();
+			mSurfaces[i].triangles[j].indices[0] = r.ReadLong();
+			mSurfaces[i].triangles[j].indices[1] = r.ReadLong();
+			mSurfaces[i].triangles[j].indices[2] = r.ReadLong();
 		}
 
 		/* Collapse maps */
-		printf("@ %u, offset_collaspemap = %li?\n",
-			   r.getFileOffset(), mSurfaces[i].header.offset_collaspemap);
+		printf("@ %li, offset_collaspemap = %li?\n",
+			   r.GetOffset(), mSurfaces[i].header.offset_collaspemap);
 		mSurfaces[i].map= new long[mSurfaces[i].header.num_vertices];
 			
 		for (j = 0; j < mSurfaces[i].header.num_vertices; ++j)
 		{
-			mSurfaces[i].map[j] = r.readLong();
+			mSurfaces[i].map[j] = r.ReadLong();
 		}	
 
 		/* Bone refs */
-		printf("@ %u, bone off = %li?\n",
-			   r.getFileOffset(), mSurfaces[i].header.offset_bonerefs);
+		printf("@ %li, bone off = %li?\n",
+			   r.GetOffset(), mSurfaces[i].header.offset_bonerefs);
 
 		mSurfaces[i].bonerefs = new long[mSurfaces[i].header.number_bonerefs];
 
 		for (j = 0; j < mSurfaces[i].header.number_bonerefs; ++j)
 		{
-			mSurfaces[i].bonerefs[j] = r.readLong();
+			mSurfaces[i].bonerefs[j] = r.ReadLong();
 			printf("%li\n", mSurfaces[i].bonerefs[j]);
 		}
 
-		printf("@ %u, offset_surface_data_end = %li?\n",
-			   r.getFileOffset(), mSurfaces[i].header.offset_surface_data_end);
+		printf("@ %li, offset_surface_data_end = %li?\n",
+			   r.GetOffset(), mSurfaces[i].header.offset_surface_data_end);
 
 	}
 
@@ -175,31 +177,31 @@ bool MDMModel::load(const char *filename)
 
 	for (i = 0; i < mHeader.numTags; ++i)
 	{
-		r.readCharString(64, mTags[i].name);
+		r.ReadString(64, mTags[i].name);
 
 		for (j = 0; j < 9; ++j)	
-			mTags[i].tag_triangles_vector[j] = r.readFloat32();
+			mTags[i].tag_triangles_vector[j] = r.ReadFloat32();
 
-		mTags[i].attach_bone_number = r.readLong();
+		mTags[i].attach_bone_number = r.ReadLong();
 
 		printf("bone[%li] '%s', parent = %li\n", i,
 			   mTags[i].name, mTags[i].attach_bone_number);
 
-		mTags[i].tag_pos_vector_to_bone[0] = r.readFloat32();
-		mTags[i].tag_pos_vector_to_bone[1] = r.readFloat32();
-		mTags[i].tag_pos_vector_to_bone[2] = r.readFloat32();
+		mTags[i].tag_pos_vector_to_bone[0] = r.ReadFloat32();
+		mTags[i].tag_pos_vector_to_bone[1] = r.ReadFloat32();
+		mTags[i].tag_pos_vector_to_bone[2] = r.ReadFloat32();
 
-		mTags[i].bone_number_list_size = r.readLong();
-		mTags[i].bone_list_offset = r.readLong();
-		mTags[i].tag_data_size = r.readLong();
+		mTags[i].bone_number_list_size = r.ReadLong();
+		mTags[i].bone_list_offset = r.ReadLong();
+		mTags[i].tag_data_size = r.ReadLong();
 
 		mTags[i].bone_index_list = new long[mTags[i].bone_number_list_size];
 
 		for (j = 0; j < mTags[i].bone_number_list_size; ++j)
-			mTags[i].bone_index_list[j] = r.readLong();
+			mTags[i].bone_index_list[j] = r.ReadLong();
 	}
 
-	r.closeFile();
+	r.Close();
 
 	return true;
 }
@@ -246,17 +248,17 @@ int import_model(char *filename)
 
 int freyja_model__mdm_check(char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	char ident[4];
 	long version;
 
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return false;
 
-	r.readCharString(4, ident);
-	version = r.readLong();
-	r.closeFile();
+	r.ReadString(4, ident);
+	version = r.ReadLong();
+	r.Close();
 
 	if (!strncmp(ident, "MDMW", 4) && version == 3)
 		return 0;
