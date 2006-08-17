@@ -19,10 +19,11 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#include <freyja/FreyjaFileWriter.h>
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 
 #include "BSAPakReader.h"
+
+using namespace mstl;
 
 
 ////////////////////////////////////////////////////////////
@@ -58,48 +59,48 @@ BSAPakReader::~BSAPakReader()
 
 bool BSAPakReader::load(const char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	char buffer[128];
 	long i, j, base;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 	{
 		return false;
 	}
 
-	r.littleEndianMode();
+	r.SetByteOrder(SystemIO::File::LITTLE);
 
-	mHeader.mVersion = r.readLong();
+	mHeader.mVersion = r.ReadLong();
 
 	if (mHeader.mVersion != BSA_VERSION)
 		return false;
 
-	mHeader.mTableOffset = r.readLong();
-	mHeader.mFileCount = r.readLong();
+	mHeader.mTableOffset = r.ReadLong();
+	mHeader.mFileCount = r.ReadLong();
 
 	mTable = new BSATable[mHeader.mFileCount];
 
 	for (i = 0; i < mHeader.mFileCount; ++i)
 	{
-		mTable[i].mSize = r.readLong();
-		mTable[i].mOffset = r.readLong();
+		mTable[i].mSize = r.ReadLong();
+		mTable[i].mOffset = r.ReadLong();
 	}
 
 	for (i = 0; i < mHeader.mFileCount; ++i)
 	{
-		mTable[i].mFilenameOffset = r.readLong();
+		mTable[i].mFilenameOffset = r.ReadLong();
 	}
 
-	base = r.getFileOffset();
+	base = r.GetOffset();
 
 	for (i = 0; i < mHeader.mFileCount; ++i)
 	{
-		r.setFileOffset(base + mTable[i].mFilenameOffset);
+		r.SetOffset(base + mTable[i].mFilenameOffset);
 		
 		for (j = 0; j < 126; ++j)
 		{
-			buffer[j] = r.readInt8();
+			buffer[j] = r.ReadInt8();
 			buffer[j+1] = 0;
 
 			if (buffer[j] == 0)
@@ -111,11 +112,11 @@ bool BSAPakReader::load(const char *filename)
 
 	for (i = 0; i < mHeader.mFileCount; ++i)
 	{
-		mTable[i].mHash1 = r.readLong();
-		mTable[i].mHash2 = r.readLong();
+		mTable[i].mHash1 = r.ReadLong();
+		mTable[i].mHash2 = r.ReadLong();
 	}
 
-	mDataOffset = r.getFileOffset();
+	mDataOffset = r.GetOffset();
 
 	return true;
 }
@@ -169,8 +170,8 @@ void bsa_get_command(char *cmd, long size)
 int runBSAPakReaderUnitTest(int argc, char *argv[])
 {
 	BSAPakReader bsa;
-	FreyjaFileReader r;
-	FreyjaFileWriter w;
+	SystemIO::FileReader r;
+	SystemIO::FileWriter w;
 	Vector<char *> cache;
 	char *s;
 	char cmd[128];
@@ -185,7 +186,7 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 		return -1;
 	}
 
-	if (!bsa.load(argv[1]) || !r.openFile(argv[1]))
+	if (!bsa.load(argv[1]) || !r.Open(argv[1]))
 	{
 		printf("Couldn't load pakfile %s \n", argv[1]);
 		return -1;
@@ -290,8 +291,8 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 				if (!strcmp(s, bsa.mTable[i].mFilename))
 				{
 					unsigned char *data =new unsigned char[bsa.mTable[i].mSize];
-					r.setFileOffset(bsa.mDataOffset+bsa.mTable[i].mOffset);
-					r.readBuffer(bsa.mTable[i].mSize, data);
+					r.SetOffset(bsa.mDataOffset+bsa.mTable[i].mOffset);
+					r.ReadBuffer(bsa.mTable[i].mSize, data);
 
 					strcpy(filename, bsa.mTable[i].mFilename);
 					
@@ -300,15 +301,15 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 						if (s[0] == '\\')
 						{
 							s[0] = 0;
-							FreyjaFileWriter::createDirectory(filename);
+							SystemIO::File::CreateDir(filename);
 							s[0] = '/';
 						}
 					}
 
-					if (w.openFile(filename))
+					if (w.Open(filename))
 					{
-						w.writeBuffer(bsa.mTable[i].mSize, data);
-						w.closeFile();
+						w.WriteBuffer(bsa.mTable[i].mSize, data);
+						w.Close();
 
 						printf("  extracted %s\n", filename);
 					}
@@ -326,7 +327,7 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 		cache.clear();
 	}
 
-	r.closeFile();
+	r.Close();
 
 	return 0;
 }
@@ -372,23 +373,23 @@ void freyja_init()
 
 int freyja_model__bsa_check(char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	long version;
 
 
-	if (!r.openFile(filename))
+	if (!r.Open(filename))
 	{
 		return false;
 	}
 
-	r.littleEndianMode();
+	r.SetByteOrder(SystemIO::File::LITTLE);
 
-	version = r.readLong();
+	version = r.ReadLong();
 
 	if (version != BSA_VERSION)
 		return -1;
 
-	r.closeFile();
+	r.Close();
 
 	return 0;
 }

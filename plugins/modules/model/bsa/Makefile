@@ -203,9 +203,9 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) targets NAME=ase SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
-	PROG_OBJS="$(BUILD_TEST_DIR)/Ase.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
+	$(MAKE) targets NAME=bsa SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
+	PROG_OBJS="$(BUILD_TEST_DIR)/BSAPakReader.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_BSAPAKREADER $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 

@@ -23,9 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <freyja/FreyjaPluginABI.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
+#include <mstl/String.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -56,7 +57,7 @@ int import_model(char *filename)
 
 int freyja_model__smd_check(char *filename)
 {
-	if (FreyjaFileReader::compareFilenameExtention(filename, ".smd") == 0)
+	if (SystemIO::File::CompareFilenameExtention(filename, ".smd") == 0)
 		return 0;
 
 	return -1;
@@ -66,17 +67,17 @@ int freyja_model__smd_check(char *filename)
 typedef struct {
 
 	int parent;
-	char *name;
+	String name;
 
 } smd_bone_t;
 
 
 int freyja_model__smd_import(char *filename)
 {
-	FreyjaFileReader r;
+	SystemIO::TextFileReader r;
 	Vector <unsigned int> transV;
 	Vector <smd_bone_t *> bones;
-	char *symbol;
+	const char *symbol;
 	vec_t x, y, z, rx, ry, rz;
 	int index, idx;
 	unsigned int i, n;
@@ -84,20 +85,20 @@ int freyja_model__smd_import(char *filename)
 	vec_t r2d = 1.0f;//57.295779513082323;
 
 
-	if (freyja_model__smd_check(filename) < 0 || !r.openFile(filename))
+	if (freyja_model__smd_check(filename) < 0 || !r.Open(filename))
 	{
 		return -1;
 	}
 
-	while ((symbol = r.parseSymbol()) && !r.endOfFile())
+	while ((symbol = r.ParseSymbol()) && !r.IsEndOfFile())
 	{
 		if (!strncmp(symbol, "version", 7))
 		{
-			index = r.parseInteger();
+			index = r.ParseInteger();
 		}
 		else if (!strncmp(symbol, "nodes", 5))
 		{
-			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0)
+			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0)
 			{
 				smd_bone_t *bone = new smd_bone_t;
 
@@ -105,8 +106,8 @@ int freyja_model__smd_import(char *filename)
 					break;
 
 				index = atoi(symbol);
-				bone->name = r.parseString();
-				bone->parent = r.parseInteger();
+				bone->name = r.ParseStringLiteral();
+				bone->parent = r.ParseInteger();
 				bones.pushBack(bone);
 			}
 		}
@@ -115,12 +116,12 @@ int freyja_model__smd_import(char *filename)
 			freyjaBegin(FREYJA_SKELETON);
 			index_t skeletonIndex = freyjaGetCurrent(FREYJA_SKELETON);
 
-			symbol = r.parseSymbol();
-			index = r.parseInteger();  // time
+			symbol = r.ParseSymbol();
+			index = r.ParseInteger();  // time
 
 			printf("%s = %i\n", symbol, index);
 
-			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.endOfFile())
+			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
 				if (!symbol)
 					break;
@@ -133,20 +134,20 @@ int freyja_model__smd_import(char *filename)
 
 				if (bone && index < (int)bones.end())
 				{
-					x = r.parseFloat();
-					y = r.parseFloat();
-					z = r.parseFloat();
+					x = r.ParseFloat();
+					y = r.ParseFloat();
+					z = r.ParseFloat();
 
-					rx = r.parseFloat();
-					ry = r.parseFloat();
-					rz = r.parseFloat();
+					rx = r.ParseFloat();
+					ry = r.ParseFloat();
+					rz = r.ParseFloat();
 
 					freyjaBegin(FREYJA_BONE);
 					idx = freyjaGetCurrent(FREYJA_BONE);
 					freyjaSkeletonAddBone(skeletonIndex, idx);
 					freyjaBoneFlags(idx, 0x0);
 					freyjaBoneParent(idx, bone->parent);
-					freyjaBoneName(idx, bone->name);
+					freyjaBoneName(idx, bone->name.GetCString());
 
 					//printf("%3i: %s %i\n", idx, bone->name, bone->parent);
 
@@ -185,7 +186,7 @@ int freyja_model__smd_import(char *filename)
 			freyjaBegin(FREYJA_MESH);
 			freyjaBegin(FREYJA_VERTEX_GROUP);
 
-			while ((symbol = r.parseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.endOfFile())
+			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
 				if (!symbol)
 					break;
@@ -197,36 +198,36 @@ int freyja_model__smd_import(char *filename)
 
 				freyjaBegin(FREYJA_POLYGON);
 
-				index = r.parseInteger();
+				index = r.ParseInteger();
 				freyjaPolygonMaterial1i(index);
 
-				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.parseFloat()*scale,
-														 r.parseFloat()*scale,
-														 r.parseFloat()*scale));
-				freyjaVertexNormal3f(i, r.parseFloat(),
-									 r.parseFloat(),
-									 r.parseFloat());
-				freyjaVertexTexcoord2f(i, r.parseFloat(), r.parseFloat());
+				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.ParseFloat()*scale,
+														 r.ParseFloat()*scale,
+														 r.ParseFloat()*scale));
+				freyjaVertexNormal3f(i, r.ParseFloat(),
+									 r.ParseFloat(),
+									 r.ParseFloat());
+				freyjaVertexTexcoord2f(i, r.ParseFloat(), r.ParseFloat());
 
 
-				index = r.parseInteger();
-				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.parseFloat()*scale,
-														 r.parseFloat()*scale,
-														 r.parseFloat()*scale));
-				freyjaVertexNormal3f(i, r.parseFloat(),
-									 r.parseFloat(),
-									 r.parseFloat());
-				freyjaVertexTexcoord2f(i, r.parseFloat(), r.parseFloat());
+				index = r.ParseInteger();
+				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.ParseFloat()*scale,
+														 r.ParseFloat()*scale,
+														 r.ParseFloat()*scale));
+				freyjaVertexNormal3f(i, r.ParseFloat(),
+									 r.ParseFloat(),
+									 r.ParseFloat());
+				freyjaVertexTexcoord2f(i, r.ParseFloat(), r.ParseFloat());
 
 
-				index = r.parseInteger();
-				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.parseFloat()*scale, 
-														 r.parseFloat()*scale,
-														 r.parseFloat()*scale));
-				freyjaVertexNormal3f(i, r.parseFloat(), 
-									 r.parseFloat(),
-									 r.parseFloat());
-				freyjaVertexTexcoord2f(i, r.parseFloat(), r.parseFloat());
+				index = r.ParseInteger();
+				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.ParseFloat()*scale, 
+														 r.ParseFloat()*scale,
+														 r.ParseFloat()*scale));
+				freyjaVertexNormal3f(i, r.ParseFloat(), 
+									 r.ParseFloat(),
+									 r.ParseFloat());
+				freyjaVertexTexcoord2f(i, r.ParseFloat(), r.ParseFloat());
 							  							  
 				freyjaEnd(); // FREYJA_POLYGON
 			}
@@ -236,6 +237,7 @@ int freyja_model__smd_import(char *filename)
 		}
 	}
 
+	r.Close();
 
 	return 0;
 }
@@ -243,7 +245,7 @@ int freyja_model__smd_import(char *filename)
 
 int freyja_model__smd_export(char *filename)
 {
-	FreyjaFileWriter w;
+	SystemIO::TextFileWriter w;
 	char name[64];
 	int index;
 	unsigned int i, n;
@@ -252,16 +254,16 @@ int freyja_model__smd_export(char *filename)
 	vec3_t translation, rotation;
 
 
-	if (!w.openFile(filename))
+	if (!w.Open(filename))
 	{
 		return -1;
 	}
 
 	/* version */
-	w.print("version 1\n");
+	w.Print("version 1\n");
 
 	/* nodes */
-	w.print("nodes\n");
+	w.Print("nodes\n");
 
 	if (freyjaGetCount(FREYJA_BONE))
 	{
@@ -275,17 +277,17 @@ int freyja_model__smd_export(char *filename)
 			index = freyjaGetCurrent(FREYJA_BONE);
 
 			freyjaGetBoneName(index, 64, name);
-			w.print("%3i \"%s\" %i\n", i, name, freyjaGetBoneParent(index));
+			w.Print("%3i \"%s\" %i\n", i, name, freyjaGetBoneParent(index));
 
 			freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
 		}
 	}
 
-	w.print("end\n"); // nodes
+	w.Print("end\n"); // nodes
 
 	/* skeleton */
-	w.print("skeleton\n");
-	w.print("time 0\n");
+	w.Print("skeleton\n");
+	w.Print("time 0\n");
 
 	if (freyjaGetCount(FREYJA_BONE))
 	{
@@ -309,13 +311,13 @@ int freyja_model__smd_export(char *filename)
 			{
 				rotation[1] += HEL_DEG_TO_RAD(90.0f);
 
-				w.print("%3i %f %f %f %f %f %f\n", i,
+				w.Print("%3i %f %f %f %f %f %f\n", i,
 						translation[0], translation[2], translation[1], 
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
 			else
 			{
-				w.print("%3i %f %f %f %f %f %f\n", i,
+				w.Print("%3i %f %f %f %f %f %f\n", i,
 						translation[0], translation[1], translation[2], 
 						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
 			}
@@ -323,10 +325,10 @@ int freyja_model__smd_export(char *filename)
 			freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
 		}
 	}
-	w.print("end\n");
+	w.Print("end\n");
 
 	/* triangles */
-	w.print("triangles\n");
+	w.Print("triangles\n");
 #ifdef SMD_MESH_EXPORT
 	unsigned int j, k, group;
 	vec3_t vert;
@@ -355,8 +357,8 @@ int freyja_model__smd_export(char *filename)
 				freyjaGetPolygon3f(FREYJA_VERTEX, j, &vert);
 				freyjaGetPolygon3f(FREYJA_TEXCOORD, j, &uv);
 
-				w.print("null.png");
-				w.print("%3i  %f %f %f  %f %f %f  %f %f\n", group,
+				w.Print("null.png");
+				w.Print("%3i  %f %f %f  %f %f %f  %f %f\n", group,
 						vert[0]*scale, vert[2]*scale, vert[1]*scale, 
 						norm[0], norm[2], norm[1],
 						uv[0], uv[1]);
@@ -366,9 +368,9 @@ int freyja_model__smd_export(char *filename)
 		}
 	}
 #endif
-	w.print("end\n");
+	w.Print("end\n");
 
-	w.closeFile();
+	w.Close();
 
 	return 0;
 }

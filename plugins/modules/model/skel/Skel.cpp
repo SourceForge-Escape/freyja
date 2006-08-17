@@ -23,9 +23,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 
 #include "Skel.h"
+
+using namespace mstl;
 
 
 ////////////////////////////////////////////////////////////
@@ -54,7 +56,7 @@ Skel::~Skel()
 
 int Skel::check(char *filename)
 {
-	if (FreyjaFileReader::compareFilenameExtention(filename, "skel") == 0)
+	if (SystemIO::File::CompareFilenameExtention(filename, "skel") == 0)
 		return 0;
 
 	return -1;
