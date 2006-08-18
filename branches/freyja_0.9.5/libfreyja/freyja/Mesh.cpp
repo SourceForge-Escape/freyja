@@ -66,6 +66,63 @@ Mesh::Mesh() :
 }
 
 
+Mesh::Mesh(const Mesh &mesh) :
+	mUID(mNextUID++),
+	mFlags(mesh.mFlags),
+	mMaterialIndex(mesh.mMaterialIndex),
+	mPosition(mesh.mPosition),
+	mRotation(mesh.mRotation),
+	mScale(mesh.mScale),
+	mBoundingVolume(mesh.mBoundingVolume),
+	mVertexPool(mesh.mVertexPool),
+	mFreedVertices(mesh.mFreedVertices),
+	mNormalPool(mesh.mNormalPool),
+	mFreedNormals(mesh.mFreedNormals),
+	mColorPool(mesh.mColorPool),
+	mFreedColors(mesh.mFreedColors),
+	mTexCoordPool(mesh.mTexCoordPool),
+	mFreedTexCoords(mesh.mFreedTexCoords),
+	mFaces(),
+	mVertices(),
+	mWeights()
+{
+	uint32 i;
+
+	foreach (((Mesh&)mesh).mVertices, i)
+	{
+		if (((Mesh&)mesh).mVertices[i])
+		{
+			mVertices.pushBack(new Vertex(*(((Mesh&)mesh).mVertices[i])));
+		}
+		else  // Need to NULL pad to exact match if needed
+		{
+			mVertices.pushBack(NULL);
+		}
+
+		DEBUG_MSG("\t%i - vertices copied\n", i);
+	}
+
+
+	foreach (((Mesh&)mesh).mFaces, i)
+	{
+		if (((Mesh&)mesh).mFaces[i])
+		{
+			mFaces.pushBack(new Face(*(((Mesh&)mesh).mFaces[i])));
+		}
+		else  // Need to NULL pad to exact match if needed
+		{
+			mFaces.pushBack(NULL);
+		}
+
+		DEBUG_MSG("\t%i - vertices copied\n", i);
+	}
+
+#if 0
+	mesh.mWeights;
+#endif
+}
+
+
 Mesh::~Mesh()
 {
 	mFaces.erase();

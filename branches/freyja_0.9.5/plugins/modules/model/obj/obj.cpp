@@ -88,7 +88,6 @@ int freyja_model__obj_import(char *filename)
 	foreach (obj.mMeshes, m)
 	{
 		freyjaBegin(FREYJA_MESH);
-		//freyjaBegin(FREYJA_VERTEX_GROUP);
 
 		foreach (obj.mMeshes[m].mVertices, v)
 		{
@@ -98,8 +97,6 @@ int freyja_model__obj_import(char *filename)
 			if (obj.mMeshes[m].mHasNormals)
 				freyjaVertexNormal3fv(i, obj.mMeshes[m].mNormals[v].mVec);
 		}
-
-		//freyjaEnd(); //FREYJA_VERTEX_GROUP
 
 		if (obj.mMeshes[m].mHasTexCoords)
 		{

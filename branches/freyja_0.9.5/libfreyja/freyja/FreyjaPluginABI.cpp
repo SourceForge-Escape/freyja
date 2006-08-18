@@ -1916,6 +1916,24 @@ void freyjaPluginFilename1s(const char *filename)
 }
 
 
+int qSort_FreyjaPluginDesc(const void *a, const void *b)
+{
+	FreyjaPluginDesc *ca = (FreyjaPluginDesc *)a;
+	FreyjaPluginDesc *cb = (FreyjaPluginDesc *)b;
+
+#if 0
+	if (!ca || !cb || !ca->mExtention || !cb->mExtention)
+		return 0;
+
+	return strcmp(ca->mExtention, cb->mExtention);
+#else
+	if (!ca || !cb || !ca->mDescription || !cb->mDescription)
+		return 0;
+	return strcmp(ca->mDescription, cb->mDescription);
+#endif
+}
+
+
 void freyjaPluginsInit()
 {
 #ifdef FREYJA_PLUGINS
@@ -2007,6 +2025,19 @@ void freyjaPluginsInit()
 
 		reader.Close();
 	}
+
+#   if 0   // useless really  =)
+	/* Sort the plugins for interface usage */
+	gFreyjaPlugins.qSort(qSort_FreyjaPluginDesc);
+
+	foreach (gFreyjaPlugins, i)
+	{
+		DEBUG_MSG("\t+ '%s', '%s'\n", 
+				  gFreyjaPlugins[i]->mDescription,
+				  gFreyjaPlugins[i]->mExtention);
+	}
+
+#   endif
 
 	gCurrentFreyjaPlugin = -1;
 #endif
