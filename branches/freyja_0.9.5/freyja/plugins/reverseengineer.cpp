@@ -22,13 +22,13 @@
 #include <math.h>
 #include <hel/math.h>
 #include <mstl/String.h>
+#include <mstl/SystemIO.h>
 #include <freyja/FreyjaPluginABI.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -60,7 +60,7 @@ void freyja_reverseengineer_init(void (*func)(const char*, void*))
 
 void eReverseEngineer()
 {
-	FreyjaFileReader r;
+	SystemIO::FileReader r;
 	uint32 i, j, b, count, vCount, size;
 	vec_t x, y, z, u, v, tmpf;
 	uint32 aa, bb, cc, dd, material = 0, tmp;
@@ -69,7 +69,7 @@ void eReverseEngineer()
 	bool quad = false, uv = false;
 
 
-	if (r.openFile(gReverseEngineerFilename) == false)
+	if (r.Open(gReverseEngineerFilename) == false)
 		return;
 
 	freyjaBegin(FREYJA_MESH);
@@ -80,8 +80,8 @@ void eReverseEngineer()
 	mgtk_print("! eReverseEngineer> %ibytes in file", size);
 
 	/* Vertex extractor */
-	size = r.getFileSize();
-	r.setFileOffset(gReverseEngineerVOffset);
+	size = r.GetSize();
+	r.SetOffset(gReverseEngineerVOffset);
 	count = strlen(gReverseEngineerVString);
 
 	for (i = 0, b = 0; i < gReverseEngineerVCount && b < size; ++i)
@@ -108,22 +108,22 @@ void eReverseEngineer()
 					break;
 
 				case 'u':
-					tmpf = r.readInt32U();
+					tmpf = r.ReadInt32U();
 					b += 4;
 					break;
 
 				case 's':
-					tmpf = r.readInt16U();
+					tmpf = r.ReadInt16U();
 					b += 2;
 					break;
 
 				case 'b':
-					tmpf = r.readInt8U();
+					tmpf = r.ReadInt8U();
 					b += 1;
 					break;
 
 				case 'f':
-					tmpf = r.readFloat32();
+					tmpf = r.ReadFloat32();
 					b += 4;
 					break;
 				}
@@ -183,7 +183,7 @@ void eReverseEngineer()
 		{
 			for (j = 0; j < gReverseEngineerVSkip && b < size; ++j, ++b)
 			{
-				r.readInt8U();
+				r.ReadInt8U();
 			}
 		}
 	}
@@ -191,8 +191,8 @@ void eReverseEngineer()
 
 
 	/* Face extractor */
-	size = r.getFileSize();
-	r.setFileOffset(gReverseEngineerFOffset);
+	size = r.GetSize();
+	r.SetOffset(gReverseEngineerFOffset);
 	count = strlen(gReverseEngineerFString);
 
 	for (i = 0, b = 0; i < gReverseEngineerFCount && b < size; ++i)
@@ -211,17 +211,17 @@ void eReverseEngineer()
 					break;
 
 				case 'i':
-					tmp = r.readInt32U();
+					tmp = r.ReadInt32U();
 					b += 4;
 					break;
 
 				case 's':
-					tmp = r.readInt16U();
+					tmp = r.ReadInt16U();
 					b += 2;
 					break;
 
 				case 'f':
-					r.readFloat32();
+					r.ReadFloat32();
 					b += 4;
 					break;
 				}
@@ -284,7 +284,7 @@ void eReverseEngineer()
 	freyjaEnd();
 	freyjaEnd();
 
-	r.closeFile();
+	r.Close();
 
 	mgtk_print("! eReverseEngineer> %ibytes read; %i %i %i", i*12,
                gReverseEngineerVOffset, gReverseEngineerVCount,

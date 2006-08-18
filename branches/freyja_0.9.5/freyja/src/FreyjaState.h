@@ -230,8 +230,8 @@ class ActionMeshDelete : public Action
 										 "Are you sure you want to use this experimental feature?",
 										 "gtk-cancel", "_Cancel", "gtk-ok", "_Undo"))
 		{
-			DEBUG_MSG("EXPERIMETAL - Ids not 'fixed up'\n");
-			freyja_print("! EXPERIMETAL - Ids not 'fixed up'\n");
+			DEBUG_MSG("EXPERIMENTAL - Ids not 'fixed up'\n");
+			freyja_print("! EXPERIMENTAL - Ids not 'fixed up'\n");
 			
 			extern Vector<Mesh *> gFreyjaMeshes;
 			

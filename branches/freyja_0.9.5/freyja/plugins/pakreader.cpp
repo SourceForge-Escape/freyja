@@ -189,12 +189,12 @@ void ePakReaderSelect(unsigned int value)
 	}
 	else
 	{
-		FreyjaFileReader r;
-		FreyjaFileWriter w;
+		SystemIO::FileReader r;
+		SystemIO::FileWriter w;
 		char tmpfilename[256];
 
 
-		if (r.openFile(pak->getPakFile()))
+		if (r.Open(pak->getPakFile()))
 		{
 			file = dir->getPakFile(value - dir->getDirCount());
 			buffer = file->getCopyOfData(r);
@@ -207,9 +207,9 @@ void ePakReaderSelect(unsigned int value)
 #else
 				snprintf(tmpfilename, 255, "/tmp/%s", file->getName());
 #endif
-				w.openFile(tmpfilename);
-				w.writeBuffer(file->getDataSize(), buffer);
-				w.closeFile();
+				w.Open(tmpfilename);
+				w.WriteBuffer(file->getDataSize(), buffer);
+				w.Close();
 
 				mgtk_print("Wrote '%s' from pak", tmpfilename);
 
@@ -218,7 +218,7 @@ void ePakReaderSelect(unsigned int value)
 				pak_reader_try_upload(tmpfilename);
 			}
 
-			r.closeFile();
+			r.Close();
 		}
 
 		return;  // don't update menu
