@@ -91,6 +91,16 @@ public:
 	{
 	}
 
+	Vertex(const Vertex &v) :
+		mFlags(v.mFlags),
+		mVertexIndex(v.mVertexIndex),
+		mTexCoordIndex(v.mTexCoordIndex),    
+		mNormalIndex(v.mNormalIndex),
+		mMaterial(v.mMaterial),
+		mPolyRefIndices(v.mPolyRefIndices)
+	{
+	}
+
 	static size_t SerializedSize() 
 	{
 		return ( 1 + 4 * 6); 
@@ -241,6 +251,17 @@ public:
 	////////////////////////////////////////////////////////////
 
 	Mesh();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Mesh
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.10.22: 
+	 * Mongoose - Created, from FreyjaMesh in Freyja
+	 ------------------------------------------------------*/
+
+	Mesh(const Mesh &mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Mesh

@@ -55,7 +55,7 @@ class ActionMeshTranslateExt : public Action
 
 		if (m)
 		{
-			// Adjust relative translation to absolete position
+			// Adjust relative translation to absolote position
 			Matrix t;
 			Vec3 u = mXYZ - m->GetPosition();
 			t.translate(u.mVec[0], u.mVec[1], u.mVec[2]);
@@ -204,6 +204,52 @@ class ActionVertexTransformExt : public Action
 	index_t mVertex;
 	freyja_transform_action_t mAction;  /* Type of transform */
 	Vector3d mXYZ;                      /* Storage for 3d transform event */
+};
+
+
+class ActionMeshDelete : public Action
+{
+ public:
+	ActionMeshDelete(index_t mesh) :
+		Action(),
+		mMesh(NULL),
+		mOldMeshId(mesh)
+	{
+		freyja::Mesh *m = freyjaModelGetMeshClass(0, mesh);
+
+		if (m)
+			mMesh = new Mesh(*m);
+	}
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You requested to Undo a Mesh Delete operation.",
+										 "Are you sure you want to use this experimental feature?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Undo"))
+		{
+			DEBUG_MSG("EXPERIMETAL - Ids not 'fixed up'\n");
+			freyja_print("! EXPERIMETAL - Ids not 'fixed up'\n");
+			
+			extern Vector<Mesh *> gFreyjaMeshes;
+			
+			if (gFreyjaMeshes[mOldMeshId])
+				gFreyjaMeshes[mOldMeshId] = mMesh;
+			else
+				gFreyjaMeshes.pushBack(mMesh);
+		}
+		else
+		{
+			delete mMesh;
+		}
+
+		return true;
+	}
+
+	freyja::Mesh *mMesh;
+	index_t mOldMeshId;
 };
 
 #endif

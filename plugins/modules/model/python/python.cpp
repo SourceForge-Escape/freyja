@@ -46,7 +46,10 @@ extern "C" {
 void freyja_init()
 {
 	// Isn't an a model importer/exporter directly
-	freyjaPluginDescription1s("Python language binding");
+	freyjaPluginDescription1s("Python script");
+	freyjaPluginAddExtention1s("*.py");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH);
 }
 
 void import_functions()

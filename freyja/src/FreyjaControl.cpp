@@ -1962,11 +1962,17 @@ bool FreyjaControl::event(int command)
 		}
 		else
 		{
-			const char *s = mCurrentlyOpenFilename.GetCString();
-			if (SaveModel(s))
-				freyja_print("Model '%s' Saved", s);
-			else
-				freyja_print("Model '%s' failed to save", s);
+			if (freyja_create_confirm_dialog("gtk-dialog-question",
+											 "You are about to save a file in the EXPERIMENTAL dev build of Freyja.",
+											 "Are you sure you want to save the file instead of making a copy?",
+											 "gtk-cancel", "_Cancel", "gtk-ok", "_Save"))
+			{
+				const char *s = mCurrentlyOpenFilename.GetCString();
+				if (SaveModel(s))
+					freyja_print("Model '%s' Saved", s);
+				else
+					freyja_print("Model '%s' failed to save", s);
+			}
 		}
 		break;
 
@@ -3553,6 +3559,7 @@ void FreyjaControl::DeleteSelectedObject()
 	{
 	case tPoint:
 		mEventMode = POINT_DEL_MODE;
+		freyja_print("Click select to delete -- this will delete all selected later");
 		break;
 
 	case tFace:
@@ -3574,6 +3581,11 @@ void FreyjaControl::DeleteSelectedObject()
 		break;
 
 	case tMesh:
+		if (freyjaModelGetMeshClass(0, GetSelectedMesh()))
+		{
+			mToken = true;
+			ActionModelModified(new ActionMeshDelete(GetSelectedMesh()));
+		}
 		freyjaMeshDelete(GetSelectedMesh());
 		break;
 
