@@ -114,7 +114,7 @@ Mesh::Mesh(const Mesh &mesh) :
 			mFaces.pushBack(NULL);
 		}
 
-		DEBUG_MSG("\t%i - vertices copied\n", i);
+		DEBUG_MSG("\t%i - Facees copied\n", i);
 	}
 
 #if 0

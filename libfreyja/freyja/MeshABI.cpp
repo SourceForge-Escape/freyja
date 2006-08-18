@@ -1635,12 +1635,17 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 
 void freyjaPolygonTexCoordPurge(index_t polygonIndex)
 {
-	//Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
 
-	//	if (!mesh)
-	//	return;
+	if (!mesh)
+		return;
 
-	BUG_ME("Not Implemented");
+	Face *f = mesh->GetFace(polygonIndex);
+
+	if (f)
+	{
+		f->mTexCoordIndices.clear();
+	}
 }
 
 

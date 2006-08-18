@@ -366,7 +366,7 @@
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0
-						(label "Transform: " 0.0 0.5)
+						;(label "Transform: " 0.0 0.5)
 
 						(optionmenu		eEvent	eTransformMenu
 							(menu_item	"Scene"		eEvent eTransformScene)
@@ -375,7 +375,7 @@
 							(menu_item	"Face"		eEvent eTransformFace)
 							(menu_item	"Bone"		eEvent eTransformBone)
 							(menu_item	"Group"		eEvent eTransformGroup)
-							(menu_item	"Vertex List"	eEvent eTransformSelectedVertices)
+							(menu_item	"Selected Vertices"	eEvent eTransformSelectedVertices)
 							(menu_item	"MeshPivot"	eEvent eTransformMeshPivot))
 
 						(optionmenu		eEvent	eObjectMenu
@@ -499,7 +499,8 @@
 
 
 					;; Material selector / name editor
-					(label "Material Select" 0.0 0.5)
+					(hbox 0 1 0 1 1
+						(label "Material Select" 0.0 0.5))
 					(hbox 0 1 0 1 1
 						;;(label "Name" 0.0 0.5)
 						(spinbutton 0 0 1024 eSelectMaterial)
@@ -507,7 +508,8 @@
 
 					;; Texture loader interface
 					(hbox 1 0 0 1 0 (hsep))
-					(label "Material Textures" 0.0 0.5)
+					(hbox 0 1 0 1 1
+						(label "Material Textures" 0.0 0.5))
 					(hbox 0 1 0 1 1
 						(spinbutton 0 0 128 eSetMaterialTexture)
 						(textbox eSetTextureNameA)

@@ -3966,6 +3966,48 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		}
 		break;
 
+	case tSelectedVertices:
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				Vec3 u;
+
+				for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+				{
+					Vertex *v = m->GetVertex(i);
+	
+					if (v && v->mFlags & Vertex::fSelected)
+					{
+						u= mCursor.mPos - m->GetVertexPosition(v->mVertexIndex);
+						m->SetVertexPos(v->mVertexIndex, u.mVec);
+					}
+				}
+			}
+		}
+		break;
+
+	case tFace: 
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				Face *f = m->GetFace(GetSelectedFace());
+				Vec3 u;
+				uint32 i, idx;
+				if (f)
+				foreach (f->mIndices, i)
+				{
+					idx = f->mIndices[i];
+					u = mCursor.mPos - m->GetVertexPosition(idx);
+					m->SetVertexPos(idx, u.mVec);
+				}
+			}
+		}
+		break;
+
 	case tPoint:
 		if (mToken) 
 		{
