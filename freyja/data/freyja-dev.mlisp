@@ -53,7 +53,10 @@
 	; IconSize_Toolbar
 	; IconSize_Button
 	; IconSize_Dialog
-
+;(filechoosermenu_item "label" "dialog title" ["key"] eEvent "special" "icon")
+	;; Special file chooser options
+	; mode=create-folder|select-folder|(open)|save  
+    ; confirm-overwrite=true|(false)
 
 ;; Application Window
 (window "Freyja" "freyja.png"
@@ -74,10 +77,6 @@
 			(submenu eRecentFiles "R_ecent Models...")			
 
 			(menu_seperator)
-
-	;; Special file chooser options
-	; mode=create-folder|select-folder|(open)|save  
-    ; confirm-overwrite=true|(false)
 
 			(menu_item "_Save Model"			"C-s"	eSaveFileModel	"gtk-save")
 			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save,confirm-overwrite=true,"	"gtk-save-as")
@@ -682,14 +681,23 @@
 
 (dialog "Freyja :: Help" eHelpDialog 0
 	(vbox 0 0 0 0 0
-		(label2 "Use the object drop down to select edit mode.
+		(label2 "
+ If you'd like to work on documentation email me.  
 
-If you'd like to work on documentation email me. 
+ Help, bug reports, and feature requests:
 
-Send bug reports and feature requests:
-<small>  · http://icculus.org/freyja
-  · irc://irc.freenode.net/#freyja
-  · mongoose@icculus.org</small>")))
+	· http://icculus.org/freyja
+
+	· http://icculus.org/freyja/forum.html
+
+	· irc://irc.freenode.net/#freyja
+
+	· mongooseichiban@gmail.com
+
+")
+
+	) ; vbox
+) ; dialog
 
 
 (dialog "Freyja :: About" eAboutDialog 0
@@ -699,8 +707,14 @@ Send bug reports and feature requests:
 		(hbox 1 0 0 1 0 
 			(label2 " <big>Freyja 0.9.5 Development Branch</big>
  Freyja is an Open Source 3d modeling system.
- This build is a mix of stable and unstable builds.
- <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II</small>"))))
+ This build is from the development branch.
+
+ 	· mongooseichiban@gmail.com ·
+
+ <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>")
+		) ; hbox
+	) ; vbox
+) ; dialog
 
 
 (dialog "Freyja :: Preferences" ePreferencesDialog 0
