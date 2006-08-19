@@ -207,6 +207,53 @@ class ActionVertexTransformExt : public Action
 };
 
 
+class ActionVertexListTransformExt : public Action
+{
+ public:
+	ActionVertexListTransformExt(index_t mesh, const Vector<index_t> &list, 
+								 freyja_transform_action_t a, Vector<Vec3> &list2, 
+								 Vec3 &v) :
+		Action(),
+		mCursorXYZ(v),
+		mMesh(mesh),
+		mVertexList(list),
+		mAction(a),
+		mXYZList(list2)
+	{ }
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		switch (mAction)
+		{
+		case fTranslate:
+			{
+				uint32 i;
+				foreach(mVertexList, i)
+				{
+					freyjaMeshVertexTranslate3fv(mMesh, mVertexList[i], mXYZList[i].mVec);
+				}
+			}
+			break;
+
+		default:
+			freyja_print("(%s:%i) %s %i Not implemented", mAction, 
+						 __FILE__, __LINE__, __func__);
+		}
+
+		mCursorXYZ = mXYZList[0];
+		return true;
+	}
+
+	Vec3 &mCursorXYZ;
+	index_t mMesh;
+	Vector<index_t> mVertexList;
+	freyja_transform_action_t mAction;  /* Type of transform */
+	Vector<Vec3> mXYZList;                      /* Storage for 3d transform event */
+};
+
+
 class ActionMeshDelete : public Action
 {
  public:
