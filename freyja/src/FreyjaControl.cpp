@@ -3976,8 +3976,9 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			{
 				if (mToken) 
 				{
-					mToken = false;
-					// FIXME: Add undo action
+					Vector<index_t> list;
+					Vector<Vec3> list2;
+					bool found = false;
 
 					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
 					{
@@ -3985,10 +3986,21 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 						
 						if (v && v->mFlags & Vertex::fSelected)
 						{
-							mCursor.mPos = m->GetVertexPosition(v->mVertexIndex);
-							return;
+							if (!found)
+							{
+								mCursor.mPos = m->GetVertexPosition(v->mVertexIndex);
+								found = true;
+							}
+
+							list.pushBack(i);
+							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
 						}
-					}		
+					}
+
+					
+					Action *a = new ActionVertexListTransformExt(GetSelectedMesh(), list, fTranslate, list2, mCursor.mPos);
+					ActionModelModified(a);
+
 					return;
 				}
 
@@ -4005,6 +4017,16 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 					}
 				}
 			}
+		}
+		break;
+
+	case tBone: 
+		{
+			// Get _WORLD_ position of bone, and use _WORLD_ space transforms
+			// to match the rest of this system, since local space design
+			// was canned
+
+			
 		}
 		break;
 
@@ -4044,9 +4066,6 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		freyjaMeshVertexTranslate3fv(GetSelectedMesh(), GetSelectedVertex(), mCursor.mPos.mVec);
 		break;
 
-	case tBone:
-		//moveBone(xx, yy);
-		break;
 
 	default:
 		if (mToken) 
