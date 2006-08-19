@@ -34,9 +34,11 @@
 
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
-
+#include <mstl/SystemIO.h>
 
 #include "Egg.h"
+
+using namespace mstl;
 
 
 void __print_unsigned_int(unsigned int u)
@@ -212,19 +214,17 @@ void Egg::print(char *s, ...)
 int Egg::checkFile(const char *filename)
 {
 	unsigned long id, version;
-	FILE *f;
+	SystemIO::FileReader r;
 
 
-	f = fopen(filename, "rb");
-
-	if (!f)
+	if (!r.Open(filename))
 	{
-		perror("Egg::CheckFile> ");
+		perror(filename);
 		return -1;
 	}
 
-	fread(&id, 4, 1, f);
-	fread(&version, 4, 1, f);
+	id = r.ReadLong();
+	version = r.ReadLong();
 
 	if (id == EGG_FILE)
 	{
@@ -240,6 +240,8 @@ int Egg::checkFile(const char *filename)
 			return 0;
 		}
 	}
+
+	r.Close();
 	
 	return -2;
 }
@@ -329,7 +331,7 @@ void Egg::clear()
 	mAnimations.clear();
 }
 
-
+#if 0
 int Egg::saveFile(const char *filename)
 {
 	FILE *f;
@@ -402,42 +404,42 @@ int Egg::saveFile(const char *filename)
 	// Header ///////////////////////////////
 	id = EGG_FILE;
 	version = EGG_VERSION;
-	fwrite(&id, 4, 1, f);
-	fwrite(&version, 4, 1, f);
+	fwrite(&id = r.ReadLongU();
+	fwrite(&version = r.ReadLongU();
 
 
 	u = vertexCount;
 	print("%i vertices", u);
 	//u = getVertexCount();
-	fwrite(&u, 4, 1, f);   
+	fwrite(&u = r.ReadLongU();   
 
 
 	u = texelCount;
 	print("%i texels", u);
 	//u = getTexelCount();
-	fwrite(&u, 4, 1, f); 
+	fwrite(&u = r.ReadLongU(); 
 
 
 	u = polygonCount;
 	print("%i polygons", u);
 	//u = getPolygonCount();
-	fwrite(&u, 4, 1, f);  
+	fwrite(&u = r.ReadLongU();  
 
 
 	u = 0;  // Mongoose 2002.07.05, Marker system removed
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 
 	u = groupCount;
 	print("%i groups", u);
 	//u = getGroupCount();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 
 	u = meshCount;
 	print("%i meshes", u);
 	//u = getMeshCount();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 
  	for (u = 0, i = mTags.begin(); i < mTags.end(); ++i)
@@ -447,7 +449,7 @@ int Egg::saveFile(const char *filename)
 	}
 	print("%i tags", u);
 	//u = getTagCount();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
     
 	
  	for (u = 0, i = mBoneFrames.begin(); i < mBoneFrames.end(); ++i)
@@ -457,7 +459,7 @@ int Egg::saveFile(const char *filename)
 	}
 	print("%i boneframes", u);
 	//u = getBoneFrameCount();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 	
  	for (u = 0, i = mAnimations.begin(); i < mAnimations.end(); ++i)
@@ -467,7 +469,7 @@ int Egg::saveFile(const char *filename)
 	}
 	print("%i animations", u);
 	//u = getAnimationCount();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
   
 	////////////////////////////////////////
 
@@ -479,15 +481,15 @@ int Egg::saveFile(const char *filename)
 			continue;
     
 		u = vertex->id;
-		fwrite(&u, 4, 1, f);
-		fwrite(&vertex->pos[0], sizeof(vec_t), 1, f);
-		fwrite(&vertex->pos[1], sizeof(vec_t), 1, f);
-		fwrite(&vertex->pos[2], sizeof(vec_t), 1, f);
-		fwrite(&vertex->uv[0], sizeof(vec_t), 1, f);
-		fwrite(&vertex->uv[1], sizeof(vec_t), 1, f);
-		fwrite(&vertex->norm[0], sizeof(vec_t), 1, f);
-		fwrite(&vertex->norm[1], sizeof(vec_t), 1, f);
-		fwrite(&vertex->norm[2], sizeof(vec_t), 1, f);
+		fwrite(&u = r.ReadLongU();
+		fwrite(&vertex->pos[0] = r.ReadFloat32();
+		fwrite(&vertex->pos[1] = r.ReadFloat32();
+		fwrite(&vertex->pos[2] = r.ReadFloat32();
+		fwrite(&vertex->uv[0] = r.ReadFloat32();
+		fwrite(&vertex->uv[1] = r.ReadFloat32();
+		fwrite(&vertex->norm[0] = r.ReadFloat32();
+		fwrite(&vertex->norm[1] = r.ReadFloat32();
+		fwrite(&vertex->norm[2] = r.ReadFloat32();
 	}
 
 	for (i = mTexels.begin(); i < mTexels.end(); ++i)
@@ -498,9 +500,9 @@ int Egg::saveFile(const char *filename)
 			continue;
     
 		u = texel->id;
-		fwrite(&u, 4, 1, f);
-		fwrite(&texel->st[0], sizeof(vec_t), 1, f);
-		fwrite(&texel->st[1], sizeof(vec_t), 1, f);
+		fwrite(&u = r.ReadLongU();
+		fwrite(&texel->st[0] = r.ReadFloat32();
+		fwrite(&texel->st[1] = r.ReadFloat32();
 	} 
 
 	// PolyMesh //////////////////////
@@ -515,25 +517,25 @@ int Egg::saveFile(const char *filename)
 		//print("polygon %i %p\n", i, polygon);
 
 		u = polygon->id;
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
 		fwrite(&polygon->shader, sizeof(int), 1, f);
 
 		u = polygon->vertex.size();
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
 
 		for (j = polygon->vertex.begin(); j < polygon->vertex.end(); ++j)
 		{
 			u = polygon->vertex[j];
-			fwrite(&u, 4, 1, f);
+			fwrite(&u = r.ReadLongU();
 		}
 
 		u = polygon->texel.size();
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
 
 		for (j = polygon->texel.begin(); j < polygon->texel.end(); ++j)
 		{
 			u = polygon->texel[j];
-			fwrite(&u, 4, 1, f);
+			fwrite(&u = r.ReadLongU();
 		}
 	}
 
@@ -547,15 +549,15 @@ int Egg::saveFile(const char *filename)
 			continue;
     
 		u = group->id;
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
     
 		u = group->vertex.size();
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
     
 		for (j = group->vertex.begin(); j < group->vertex.end(); ++j)
 		{
 			u = group->vertex[j];
-			fwrite(&u, 4, 1, f);
+			fwrite(&u = r.ReadLongU();
 		}
 	}
 
@@ -579,20 +581,28 @@ int Egg::saveFile(const char *filename)
 		AnimationSave(mAnimations[i], f);
    }
 
-   fclose(f);
+   r.Close();
 
    return 0;
 }
+#endif
 
-
-int Egg::loadFile(const char *filename)
+bool Egg::Load(const char *filename)
 {
+	SystemIO::FileReader r;
+
+	if (!r.Open(filename))
+	{
+		perror(filename);
+		return false;
+	}
+
+
 	long si;
 	unsigned long u, version, id, i, j, n;
 	float dummy;
 	unsigned long num_vertex, num_texel, num_poly, num_marker;
 	unsigned long num_grp, numMeshes, numTags, num_frame, num_aframe;
-	FILE *f;
 	Map<unsigned int, unsigned int> transV;
 	Map<unsigned int, unsigned int> transT;
 	Map<unsigned int, unsigned int> transP;
@@ -611,72 +621,64 @@ int Egg::loadFile(const char *filename)
 	unsigned int polygonId;
 
 
-	f = fopen(filename, "rb");
-
-	if (!f)
-	{
-		perror("Egg::Load> ");
-		return -1;
-	}
-
 	// Header ////////////////////////////
-	fread(&id, 4, 1, f);
+	id = r.ReadLongU();
 
 	if (id != EGG_FILE)
 	{
 		printError("Load> invalid header 0x%x", id);
-		return -2;
+		return false;
 	}
 
-	fread(&version, 4, 1, f);
+	version = r.ReadLongU();
 
 	if (version != EGG_VERSION && 
-		 version != EGG_8_10 &&
-		 version != EGG_8_09)
+		version != EGG_8_10 &&
+		version != EGG_8_09)
 	{
-		printError("Load> invalid or unsupported version 0x%x", version);
-		return -3;
+		//printError("Load> invalid or unsupported version 0x%x", version);
+		return false;
 	}
 
-	fread(&num_vertex, 4, 1, f);   
-	fread(&num_texel, 4, 1, f);   
-	fread(&num_poly, 4, 1, f);   
-	fread(&num_marker, 4, 1, f);   
+	num_vertex = r.ReadLongU();
+	num_texel = r.ReadLongU();
+	num_poly = r.ReadLongU();
+	num_marker = r.ReadLongU();
 
-	fread(&num_grp, 4, 1, f);   
-	fread(&numMeshes, 4, 1, f);   
-	fread(&numTags, 4, 1, f);   
-	fread(&num_frame, 4, 1, f);   
-	fread(&num_aframe, 4, 1, f);
+	num_grp = r.ReadLongU();
+	numMeshes = r.ReadLongU();
+	numTags = r.ReadLongU();
+	num_frame = r.ReadLongU();
+	num_aframe = r.ReadLongU();
 
 	////////////////////////////////////////
 
 	for (i = 0; i < num_vertex; ++i)
 	{
-		fread(&id, 4, 1, f);
-		fread(&x, sizeof(vec_t), 1, f);
-		fread(&y, sizeof(vec_t), 1, f);
-		fread(&z, sizeof(vec_t), 1, f);
+		id = r.ReadLongU();
+		x = r.ReadFloat32();
+		y = r.ReadFloat32();
+		z = r.ReadFloat32();
 
 		s = t = nx = ny = nz = 0.0;
 
 		switch (version)
 		{
 		case EGG_VERSION:
-			fread(&s, sizeof(vec_t), 1, f);
-			fread(&t, sizeof(vec_t), 1, f);
+			s = r.ReadFloat32();
+			t = r.ReadFloat32();
 
-			fread(&nx, sizeof(vec_t), 1, f);
-			fread(&ny, sizeof(vec_t), 1, f);
-			fread(&nz, sizeof(vec_t), 1, f);
+			nx = r.ReadFloat32();
+			ny = r.ReadFloat32();
+			nz = r.ReadFloat32();
 			break;
 		case EGG_8_10:
-			fread(&si, 4, 1, f);
+			si = r.ReadLongU();
 			old_texel = si;
 
 			// Mongoose 2002.03.02, This normal index was never 
 			//   implemented in a public release - so don't use
-			fread(&si, 4, 1, f);
+			si = r.ReadLongU();
 			break;
 		}
 
@@ -693,9 +695,9 @@ int Egg::loadFile(const char *filename)
   
 	for (i = 0; i < num_texel; ++i)
 	{
-		fread(&id, 4, 1, f); 
-		fread(&s, sizeof(float), 1, f);
-		fread(&t, sizeof(float), 1, f);
+		id = r.ReadLongU(); 
+		s = r.ReadFloat32();
+		t = r.ReadFloat32();
 
 		switch (version)
 		{
@@ -715,24 +717,24 @@ int Egg::loadFile(const char *filename)
 
 	for (i = 0; i < num_poly; ++i)
 	{
-		fread(&id, 4, 1, f);
-		fread(&shader, 4, 1, f);
+		id = r.ReadLongU();
+		shader = r.ReadLongU();
 
 		// Vertex indeces, translated to new ids
-		fread(&n, 4, 1, f);
+		n = r.ReadLongU();
 
 		for (j = 0; j < n; ++j)
 		{
-			fread(&u, 4, 1, f);
+			u = r.ReadLongU();
 			vertexlist.pushBack(transV[u]);
 		}
 
 		// Texel indices, translated to new ids
-		fread(&n, 4, 1, f);
+		n = r.ReadLongU();
 
 		for (j = 0; j < n; ++j)
 		{
-			fread(&u, 4, 1, f);
+			u = r.ReadLongU();
 			texellist.pushBack(transT[u]);
 		}
 
@@ -751,23 +753,23 @@ int Egg::loadFile(const char *filename)
 	// Mongoose 2002.07.05, Marker system removed
 	for (i = 0; i < num_marker; ++i)
 	{
-		fread(&u, 4, 1, f); // id
-		fread(&u, 4, 1, f); // type
+		u = r.ReadLongU(); // id
+		u = r.ReadLongU(); // type
 
 		// pos
-		fread(&dummy, sizeof(vec_t), 1, f);
-		fread(&dummy, sizeof(vec_t), 1, f);
-		fread(&dummy, sizeof(vec_t), 1, f);
+		dummy = r.ReadFloat32();
+		dummy = r.ReadFloat32();
+		dummy = r.ReadFloat32();
 
 		// sizeof data
-		fread(&u, 4, 1, f);
+		u = r.ReadLongU();
 
 		if (u)
 		{
 			unsigned char *marker_data = new unsigned char[u];
 
 			// data
-			fread(marker_data, u, 1, f);
+			r.ReadBuffer(u, marker_data);
 
 			delete [] marker_data;
 		}
@@ -778,20 +780,20 @@ int Egg::loadFile(const char *filename)
 
 	for (i = 0; i < num_grp; ++i)
 	{
-		fread(&id, 4, 1, f);
+		id = r.ReadLongU();
 
 		group = newGroup();
 		addGroup(group);
 		transG.Add(id, group->id);
 
 		// vertices
-		fread(&n, 4, 1, f);
+		n = r.ReadLongU();
 
 		group->vertex.reserve(n);
 
 		for (j = 0; j < n; ++j)
 		{
-			fread(&u, 4, 1, f);
+			u = r.ReadLongU();
 			group->vertex.pushBack(transV[u]);
 		}
 
@@ -824,7 +826,7 @@ int Egg::loadFile(const char *filename)
 
 	for (i = 0; i < numMeshes; ++i)
 	{
-		mesh = MeshLoad(f);
+		mesh = MeshLoad(r);
 
 		if (!mesh)
 		{
@@ -832,7 +834,7 @@ int Egg::loadFile(const char *filename)
 
 			// FIXME: Hhhmm... could be bad for prefabs... ( clears whole model )
 			clear();
-			fclose(f);
+			r.Close();
 
 			return -10;
 		}
@@ -844,12 +846,12 @@ int Egg::loadFile(const char *filename)
 
 	for (i = 0; i < numTags; ++i)
 	{
-		tag = loadTag(f);
+		tag = loadTag(r);
 
 		if (!tag)
 		{
 			// FIXME: Hhhmm... could be bad for prefabs... ( clears whole model )
-			fclose(f);
+			r.Close();
 			clear();
 			return -20;
 		}
@@ -888,12 +890,12 @@ int Egg::loadFile(const char *filename)
 
 	for (i = 0; i < num_frame; ++i)
 	{
-		boneframe = BoneFrameLoad(f);
+		boneframe = BoneFrameLoad(r);
 
 		if (!boneframe)
 		{
 			// FIXME: Hhhmm... could be bad for prefabs... ( clears whole model )
-			fclose(f);
+			r.Close();
 			clear();
 			return -30;
 		}
@@ -903,12 +905,12 @@ int Egg::loadFile(const char *filename)
 
 	for (i = 0; i < num_aframe; ++i)
 	{
-		animation = AnimationLoad(f);
+		animation = AnimationLoad(r);
 
 		if (!animation)
 		{
 			// FIXME: Hhhmm... could be bad for prefabs... ( clears whole model )
-			fclose(f);
+			r.Close();
 			clear();
 			return -40;
 		}
@@ -916,8 +918,8 @@ int Egg::loadFile(const char *filename)
 		addAnimation(animation);
 	}
 
-	fclose(f);
-	return 0;
+	r.Close();
+	return true;
 }
 
 
@@ -1656,7 +1658,7 @@ void Egg::addMesh(egg_mesh_t *mesh)
 	mesh->id = mMeshes.size() - 1;
 }
 
-
+#if 0
 int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
 {
 	unsigned long u;
@@ -1668,41 +1670,42 @@ int Egg::MeshSave(egg_mesh_t *mesh, FILE *f)
   
 	// Check point
 	u = EGG_MESH_CHUNK_START;
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 	// Vertex Group indices
 	u = mesh->group.size();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 	for (i = mesh->group.begin(); i < mesh->group.end(); ++i)
 	{
 		u = mesh->group[i];
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
 	}
 
 	// Check point
 	u = 0xbdbdbdbd;
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 	// Polygon indices
 	u = mesh->polygon.size();
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 	for (i = mesh->polygon.begin(); i < mesh->polygon.end(); ++i)
 	{
 		u = mesh->polygon[i];
-		fwrite(&u, 4, 1, f);
+		fwrite(&u = r.ReadLongU();
 	}
 
 	// Check point
 	u = EGG_MESH_CHUNK_END;
-	fwrite(&u, 4, 1, f);
+	fwrite(&u = r.ReadLongU();
 
 	return 0;
 }
+#endif
 
 
-egg_mesh_t *Egg::MeshLoad(FILE *f)
+egg_mesh_t *Egg::MeshLoad(SystemIO::FileReader &r)
 {
 	egg_mesh_t *mesh;
 	unsigned int u, i, n;
@@ -1712,7 +1715,7 @@ egg_mesh_t *Egg::MeshLoad(FILE *f)
 	//MeshAdd(mesh);
 
 	// Check point
-	fread(&u, 4, 1, f);
+	u = r.ReadLongU();
 
 	if (u != EGG_MESH_CHUNK_START)
 	{
@@ -1720,16 +1723,16 @@ egg_mesh_t *Egg::MeshLoad(FILE *f)
 	}
 
 	// Vertex Group indices
-	fread(&n, 4, 1, f);
+	n = r.ReadLongU();
 
 	for (i = 0; i < n; ++i)
 	{
-		fread(&u, 4, 1, f);
+		u = r.ReadLongU();
 		mesh->group.pushBack(u);
 	}
 
 	// Check point
-	fread(&u, 4, 1, f);
+	u = r.ReadLongU();
 
 	if (u != 0xbdbdbdbd)
 	{
@@ -1737,24 +1740,18 @@ egg_mesh_t *Egg::MeshLoad(FILE *f)
 	}
 
 	// Polygon indices
-	fread(&n, 4, 1, f);
-
-#ifdef DEBUG_EGG_LOAD
-	printDebug(5, "MeshLoad> Loading %i polygons\n", n);
-#endif
+	n = r.ReadLongU();
+	//printDebug(5, "MeshLoad> Loading %i polygons\n", n);
 
 	for (i = 0; i < n; ++i)
 	{
-		fread(&u, 4, 1, f);
+		u = r.ReadLongU();
 		mesh->polygon.pushBack(u);
-
-#ifdef DEBUG_EGG_LOAD
-		printDebug(5, "MeshLoad> Adding polygon[%i] = %i\n", i, u);
-#endif
+		//printDebug(5, "MeshLoad> Adding polygon[%i] = %i\n", i, u);
 	}
 
 	// Check point
-	fread(&u, 4, 1, f);
+	u = r.ReadLongU();
   
 	if (u != EGG_MESH_CHUNK_END)
 	{
@@ -1763,6 +1760,7 @@ egg_mesh_t *Egg::MeshLoad(FILE *f)
 
 	return mesh;
 }
+
 
 /// Tags //////////////////////////////////////////////////
 
@@ -1810,10 +1808,13 @@ egg_tag_t *Egg::getTag(unsigned int id)
 	return mTags[id];
 }
 
+// NOTE: Just replacing this OLD ASS code with mstl file i/o would add endian
+//       support
+#if 0
 //FIXME: Only size is handled, like the rest of this file I/O code
 //       it needs ordering code in parts, and etc - but I have no
 //       big endian machines at home
-int Egg::saveTag(egg_tag_t *tag, FILE *f)
+int Egg::saveTag(egg_tag_t *tag, SystemIO::FileWriter &w)
 {
 	long li;
 	unsigned long lu;  
@@ -1825,55 +1826,55 @@ int Egg::saveTag(egg_tag_t *tag, FILE *f)
 
 	// Check point
 	lu = EGG_BTAG_CHUNK_START;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	/* Extention to 8.12 format!!! */
 	lu = 0x454D414E;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 	fwrite(tag->name, 64, 1, f);
 
 	li = tag->id;
-	fwrite(&li, 4, 1, f);
+	fwrite(&li = r.ReadLongU();
 
 	lu = tag->slave.size();
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	for (i = tag->slave.begin(); i < tag->slave.end(); ++i)
 	{
 		lu = tag->slave[i];
-		fwrite(&lu, 4, 1, f);
+		fwrite(&lu = r.ReadLongU();
 	}
 
 	lu = tag->mesh.size();
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	for (i = tag->mesh.begin(); i < tag->mesh.end(); ++i)
 	{
 		lu = tag->mesh[i];
-		fwrite(&lu, 4, 1, f);
+		fwrite(&lu = r.ReadLongU();
 	}
 
 	fwrite(&tag->flag, 1, 1, f);
 
-	fwrite(&tag->center[0], sizeof(vec_t), 1, f);
-	fwrite(&tag->center[1], sizeof(vec_t), 1, f);
-	fwrite(&tag->center[2], sizeof(vec_t), 1, f);
+	fwrite(&tag->center[0] = r.ReadFloat32();
+	fwrite(&tag->center[1] = r.ReadFloat32();
+	fwrite(&tag->center[2] = r.ReadFloat32();
 
 	// tag's 'transform matrix' isn't used yet, so ignore it for now  =)
 
-	fwrite(&tag->rot[0], sizeof(vec_t), 1, f);
-	fwrite(&tag->rot[1], sizeof(vec_t), 1, f);
-	fwrite(&tag->rot[2], sizeof(vec_t), 1, f);
+	fwrite(&tag->rot[0] = r.ReadFloat32();
+	fwrite(&tag->rot[1] = r.ReadFloat32();
+	fwrite(&tag->rot[2] = r.ReadFloat32();
 
 	// Check point
 	lu = EGG_BTAG_CHUNK_END;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	return 0;
 }
+#endif
 
-
-egg_tag_t *Egg::loadTag(FILE *f)
+egg_tag_t *Egg::loadTag(SystemIO::FileReader &r)
 {
 	egg_tag_t *tag;
 	long li;
@@ -1884,57 +1885,57 @@ egg_tag_t *Egg::loadTag(FILE *f)
 	tag = new egg_tag_t;
 
 	// Check point
-	fread(&lu, 4, 1, f);
+	lu = r.ReadLongU();
 
 	if (lu != EGG_BTAG_CHUNK_START)
 	{
 		printError("TagLoad> start checkpoint [ERROR]\n");
 	}
 
-	fread(&li, 4, 1, f);
+	li = r.ReadLongU();
 	tag->id = li;
 
 	/* Extention to 8.12 format!!! */
 	if (li == 0x454D414E)
 	{
-		fread(tag->name, 64, 1, f);
+		r.ReadString(64, tag->name);
 
-		fread(&li, 4, 1, f);
+		li = r.ReadLongU();
 		tag->id = li;
 	}
 
-	fread(&lu, 4, 1, f);
+	lu = r.ReadLongU();
 	n = lu;
 
 	for (i = 0; i < n; i++)
 	{
-		fread(&lu, 4, 1, f);
+		lu = r.ReadLongU();
 		tag->slave.pushBack(lu);
 	}
 
-	fread(&lu, 4, 1, f);
+	lu = r.ReadLongU();
 	n = lu;
 
 	for (i = 0; i < n; i++)
 	{
-		fread(&lu, 4, 1, f);
+		lu = r.ReadLongU();
 		tag->mesh.pushBack(lu);
 	}
 
-	fread(&tag->flag, 1, 1, f);
+	tag->flag = r.ReadByte();
 
-	fread(&tag->center[0], sizeof(vec_t), 1, f);
-	fread(&tag->center[1], sizeof(vec_t), 1, f);
-	fread(&tag->center[2], sizeof(vec_t), 1, f);
+	tag->center[0] = r.ReadFloat32();
+	tag->center[1] = r.ReadFloat32();
+	tag->center[2] = r.ReadFloat32();
 
 	// tag's 'transform matrix' isn't used yet, so ignore it for now  =)
 
-	fread(&tag->rot[0], sizeof(vec_t), 1, f);
-	fread(&tag->rot[1], sizeof(vec_t), 1, f);
-	fread(&tag->rot[2], sizeof(vec_t), 1, f);
+	tag->rot[0] = r.ReadFloat32();
+	tag->rot[1] = r.ReadFloat32();
+	tag->rot[2] = r.ReadFloat32();
 
 	// Check point
-	fread(&lu, 4, 1, f);  
+	lu = r.ReadLongU();  
 
 	if (lu != EGG_BTAG_CHUNK_END)
 	{
@@ -2258,6 +2259,7 @@ egg_boneframe_t *Egg::BoneFrame(unsigned int id)
 }
 
 
+#if 0
 int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 {
 	long li;
@@ -2270,33 +2272,34 @@ int Egg::BoneFrameSave(egg_boneframe_t *boneframe, FILE *f)
 
 	// Check point
 	lu = EGG_TFRM_CHUNK_START;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	li = boneframe->id;
-	fwrite(&li, 4, 1, f);
+	fwrite(&li = r.ReadLongU();
 
 	lu = boneframe->tag.size();
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	for (i = boneframe->tag.begin(); i < boneframe->tag.end(); ++i)
 	{
 		lu = boneframe->tag[i];
-		fwrite(&lu, 4, 1, f);
+		fwrite(&lu = r.ReadLongU();
 	}
 
-	fwrite(&boneframe->center[0], sizeof(vec_t), 1, f);
-	fwrite(&boneframe->center[1], sizeof(vec_t), 1, f);
-	fwrite(&boneframe->center[2], sizeof(vec_t), 1, f);
+	fwrite(&boneframe->center[0] = r.ReadFloat32();
+	fwrite(&boneframe->center[1] = r.ReadFloat32();
+	fwrite(&boneframe->center[2] = r.ReadFloat32();
 
 	// Check point
 	lu = EGG_TFRM_CHUNK_END;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	return 0;
 }
+#endif
 
 
-egg_boneframe_t *Egg::BoneFrameLoad(FILE *f)
+egg_boneframe_t *Egg::BoneFrameLoad(SystemIO::FileReader &r)
 {
 	egg_boneframe_t *boneframe;
 	long li;
@@ -2307,31 +2310,31 @@ egg_boneframe_t *Egg::BoneFrameLoad(FILE *f)
 	boneframe = new egg_boneframe_t;
   
 	// Check point
-	fread(&lu, 4, 1, f);  
+	lu = r.ReadLongU();  
 
 	if (lu != EGG_TFRM_CHUNK_START)
 	{
 		printError("BoneFrameLoad> start checkpoint [ERROR]\n");
 	}
 
-	fread(&li, 4, 1, f);
+	li = r.ReadLongU();
 	boneframe->id = li;
 
-	fread(&lu, 4, 1, f);
+	lu = r.ReadLongU();
 	n = lu;
 
 	for (i = 0; i < n; i++)
 	{
-		fread(&lu, 4, 1, f);
+		lu = r.ReadLongU();
 		boneframe->tag.pushBack(lu);
 	}
 
-	fread(&boneframe->center[0], sizeof(vec_t), 1, f);
-	fread(&boneframe->center[1], sizeof(vec_t), 1, f);
-	fread(&boneframe->center[2], sizeof(vec_t), 1, f);
+	boneframe->center[0] = r.ReadFloat32();
+	boneframe->center[1] = r.ReadFloat32();
+	boneframe->center[2] = r.ReadFloat32();
 
 	// Check point
-	fread(&lu, 4, 1, f);
+	lu = r.ReadLongU();
 
 	if (lu != EGG_TFRM_CHUNK_END)
 	{
@@ -2381,6 +2384,7 @@ egg_animation_t *Egg::getAnimation(unsigned int frame)
 }
 
 
+#if 0
 int Egg::AnimationSave(egg_animation_t *a, FILE *f)
 {
 	long li;
@@ -2392,29 +2396,30 @@ int Egg::AnimationSave(egg_animation_t *a, FILE *f)
 
 	// Check point
 	lu = EGG_AFRM_CHUNK_START;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	li = a->id;
-	fwrite(&li, 4, 1, f);
+	fwrite(&li = r.ReadLongU();
 
 	lu = a->frame.size();
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	for (i = a->frame.begin(); i < a->frame.end(); ++i)
 	{
 		lu = a->frame[i];
-		fwrite(&lu, 4, 1, f);
+		fwrite(&lu = r.ReadLongU();
 	}
 
 	// Check point
 	lu = EGG_AFRM_CHUNK_END;
-	fwrite(&lu, 4, 1, f);
+	fwrite(&lu = r.ReadLongU();
 
 	return 0;
 }
+#endif
 
 
-egg_animation_t *Egg::AnimationLoad(FILE *f)
+egg_animation_t *Egg::AnimationLoad(SystemIO::FileReader &r)
 {
 	egg_animation_t *a;
 	long li;
@@ -2425,27 +2430,27 @@ egg_animation_t *Egg::AnimationLoad(FILE *f)
 	a = new egg_animation_t;
   
 	// Check point
-	fread(&lu, 4, 1, f);  
+	lu = r.ReadLongU();  
 
 	if (lu != EGG_AFRM_CHUNK_START)
 	{
 		printError("AnimationLoad> start checkpoint [ERROR]\n");
 	}
 
-	fread(&li, 4, 1, f);
+	li = r.ReadLongU();
 	a->id = li;
 
-	fread(&lu, 4, 1, f);
+	lu = r.ReadLongU();
 	n = lu;
 
 	for (i = 0; i < n; i++)
 	{
-		fread(&lu, 4, 1, f);
+		lu = r.ReadLongU();
 		a->frame.pushBack(lu);
 	}
 
 	// Check point
-	fread(&lu, 4, 1, f);  
+	lu = r.ReadLongU();  
 
 	if (lu != EGG_AFRM_CHUNK_END)
 	{
@@ -3197,6 +3202,183 @@ int main(int argc, char *argv[])
 	return 0;
 }
 #endif
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// Special Interface code
+////////////////////////////////////////////////////////////
+
+#ifdef FREYJA_PLUGINS
+
+#include <mstl/Vector.h>
+#include <mstl/Map.h>
+#include <freyja/FreyjaPlugin.h>
+
+
+extern "C" {
+
+	int freyja_model__eggv9_check(char *filename);
+	int freyja_model__eggv9_import(char *filename);
+	int freyja_model__eggv9_export(char *filename);
+
+	int import_model(char *filename);
+	void freyja_init();
+}
+
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("EGG model (*.egg)");
+	freyjaPluginAddExtention1s("*.egg");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);
+}
+
+
+int import_model(char *filename)
+{
+	if (!freyja_model__eggv9_check(filename))
+		return freyja_model__eggv9_import(filename);
+
+	return -1;
+}
+
+
+int freyja_model__eggv9_check(char *filename)
+{
+	SystemIO::FileReader r;
+	long magic, version;
+
+
+	if (!r.Open(filename))
+	{
+		perror(filename);
+		return -1;
+	}
+
+	r.SetByteOrder(SystemIO::File::LITTLE);
+	
+
+	// Header ////////////////////////////
+	magic = r.ReadLong();
+
+	if (magic != EGG_FILE)
+	{
+		//freyjaPrintError("Load> invalid header 0x%x", magic);
+		return -2;
+	}
+
+	version= r.ReadLong();
+
+	if (version != EGG_VERSION && 
+		version != EGG_8_10 &&
+		version != EGG_8_09)
+	{
+		//freyjaPrintError("Load> invalid or unsupported version 0x%x", version);
+		return -3;
+	}
+
+	r.Close();
+
+	return 0;
+}
+
+int freyja_model__eggv9_import(char *filename)
+{
+	Egg egg;
+
+	if (!egg.Load(filename))
+		return -1;
+
+	
+	freyjaBegin(FREYJA_MODEL);
+
+	uint32 m, v, f, i;
+	foreach (egg.GetMeshes(), m)
+	{
+		egg_mesh_t *mesh = egg.GetMeshes()[m];
+
+		if (!mesh)
+			continue;
+
+		freyjaBegin(FREYJA_MESH);
+
+		/* Vertices with index mappings */
+		Vector<uint32> vertices;
+		Map<long, uint32> verticesMap;
+
+		foreach (mesh->polygon, f)
+		{
+			egg_polygon_t *polygon = egg.GetPolygons()[f];
+
+			foreach (polygon->vertex, v)
+			{
+				uint32 vv = polygon->vertex[v];
+
+				if (vertices.SearchIndex(vv) == vertices.GetErrorIndex())
+				{
+					verticesMap.Add(vv, vertices.size());
+					vertices.pushBack(vv);
+	
+					egg_vertex_t *vertex = egg.GetVertices()[vv];
+
+					i = freyjaVertexCreate3fv(vertex->pos);
+					freyjaVertexNormal3fv(i, vertex->norm);
+					freyjaVertexTexCoord2fv(i, vertex->uv);
+				}
+			}
+		}
+
+		foreach (mesh->polygon, f)
+		{
+			egg_polygon_t *polygon = egg.GetPolygons()[f];
+
+			freyjaBegin(FREYJA_POLYGON);
+
+			foreach (polygon->vertex, v)
+			{
+				uint32 vv = verticesMap[polygon->vertex[v]];
+				freyjaPolygonVertex1i(vv);
+			}
+
+			// FIXME: not supporting polymapped
+			foreach (polygon->texel, v)
+			{
+				//uint32 vv = polygon->texel[v];
+				//freyjaPolygonTexCoord1i(vv);
+			}
+
+			freyjaPolygonMaterial1i(polygon->shader);
+
+			freyjaEnd(); // FREYJA_POLYGON
+		}
+
+		freyjaEnd(); // FREYJA_MESH
+	}
+
+	freyjaEnd(); // FREYJA_MODEL
+
+
+	return 0;
+}
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

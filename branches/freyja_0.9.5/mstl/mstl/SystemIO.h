@@ -443,6 +443,16 @@ class SystemIO
 		}
 
 
+		unsigned char ReadByte()
+		{
+			unsigned char u;
+
+			fread(&u, 1, 1, mFileHandle);  // heh, yeah
+
+			return u;
+		}
+
+
 		unsigned char ReadInt8U()
 		{
 			unsigned char u;

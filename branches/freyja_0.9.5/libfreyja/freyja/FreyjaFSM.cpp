@@ -525,12 +525,7 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 	{
 	case FREYJA_MESH:
 		mStack.push(FREYJA_MESH);
-#ifdef USING_EGG
-		mMesh = mEgg->newMesh();
-		mEgg->addMesh(mMesh);
-#else
 		mIndexMesh = gFreyjaCurrentMesh = freyjaModelCreateMesh(mIndexModel);
-#endif
 		break;
 
 	case FREYJA_VERTEX_FRAME:
