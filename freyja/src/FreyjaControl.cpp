@@ -3976,6 +3976,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			{
 				if (mToken) 
 				{
+					mToken = false;
 					// FIXME: Add undo action
 
 					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
