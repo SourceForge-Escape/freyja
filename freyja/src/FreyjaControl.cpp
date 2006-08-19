@@ -3988,11 +3988,13 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 						{
 							if (!found)
 							{
+								// should be i?
 								mCursor.mPos = m->GetVertexPosition(v->mVertexIndex);
 								found = true;
 							}
 
 							list.pushBack(i);
+							// should be i?
 							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
 						}
 					}
@@ -4035,7 +4037,43 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
 			if (m)
-			{
+			{				
+				if (mToken) 
+				{
+					Vector<index_t> list;
+					Vector<Vec3> list2;
+					bool found = false;
+
+					Face *f = m->GetFace(GetSelectedFace());
+					uint32 i, idx;
+					foreach (f->mIndices, i)
+					{
+						idx = f->mIndices[i];
+
+						Vertex *v = m->GetVertex(idx);
+
+						if (v)
+						{
+							if (!found)
+							{
+								// should be idx?
+								mCursor.mPos = m->GetVertexPosition(v->mVertexIndex);
+								found = true;
+							}
+
+							list.pushBack(idx);
+							// should be idx?
+							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
+						}
+					}
+
+					
+					Action *a = new ActionVertexListTransformExt(GetSelectedMesh(), list, fTranslate, list2, mCursor.mPos);
+					ActionModelModified(a);
+
+					return;
+				}
+
 				Face *f = m->GetFace(GetSelectedFace());
 				Vec3 u;
 				uint32 i, idx;
