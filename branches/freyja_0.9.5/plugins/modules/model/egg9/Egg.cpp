@@ -518,7 +518,7 @@ int Egg::saveFile(const char *filename)
 
 		u = polygon->id;
 		fwrite(&u = r.ReadLongU();
-		fwrite(&polygon->shader, sizeof(int), 1, f);
+		fwrite(&polygon->shader = r.ReadInt32();
 
 		u = polygon->vertex.size();
 		fwrite(&u = r.ReadLongU();
@@ -3215,10 +3215,14 @@ int main(int argc, char *argv[])
 
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
+#include <mstl/List.h>
 #include <freyja/FreyjaPlugin.h>
 
 
 extern "C" {
+
+	int freyja_model__eggv7_check(char *filename);
+	int freyja_model__eggv7_import(char *filename);
 
 	int freyja_model__eggv9_check(char *filename);
 	int freyja_model__eggv9_import(char *filename);
@@ -3231,19 +3235,46 @@ extern "C" {
 
 void freyja_init()
 {
-	freyjaPluginDescription1s("EGG model (*.egg)");
+	freyjaPluginDescription1s("EGG 7,8,9 (*.egg)");
 	freyjaPluginAddExtention1s("*.egg");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
-	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
 }
 
 
 int import_model(char *filename)
 {
+	if (!freyja_model__eggv7_check(filename))
+		return freyja_model__eggv7_import(filename);
+
 	if (!freyja_model__eggv9_check(filename))
 		return freyja_model__eggv9_import(filename);
 
 	return -1;
+}
+
+
+int freyja_model__eggv7_check(char *filename)
+{
+	SystemIO::FileReader r;
+	char header[32];
+
+	if (!r.Open(filename))
+	{
+		perror(filename);
+		return -1;
+	}
+
+	r.ReadString(32, header);      
+	header[9] = 0;
+
+	r.Close();
+
+	if (strcmp(header, "Egg v7B") == 0)
+		return 0;
+
+	return -2;
 }
 
 
@@ -3365,6 +3396,225 @@ int freyja_model__eggv9_import(char *filename)
 	return 0;
 }
 
+
+int freyja_model__eggv7_import(char *filename)
+{
+	SystemIO::FileReader r;
+
+	int id, size, texture, material, type, slaves;
+	int animation_count, mesh_count, bone_count, free_poly_count;
+	int frame_count, marker_count, polygon_count, vertex_count;
+	int i, ii, tmp, j, m;
+	char header[32];
+	bool bad_poly;
+	float center[3];
+	float pos[3];
+	float st[2];
+	List<unsigned int> trans;
+	List<unsigned int> actual;
+	Map<unsigned int, unsigned int> transM;
+	Map<unsigned int, unsigned int> transT;
+	unsigned int vertex, vt;
+	long index;
+
+
+	if (!r.Open(filename))
+	{
+		perror(filename);
+		return -1;
+	}
+
+	r.ReadString(8, header);
+
+	if (!(strcmp(header, "Egg v7B") == 0))
+	{
+		printf("Load> ERROR %s isn't Egg v7B.\n", filename);
+		r.Close();
+		return -2;
+	}
+  
+	mesh_count = r.ReadInt32();    
+	free_poly_count = r.ReadInt32();    
+	bone_count = r.ReadInt32();
+	animation_count = r.ReadInt32();
+
+	freyjaBegin(FREYJA_MODEL);
+
+	for (m = 0; m < mesh_count; m++)
+	{
+		r.ReadString(8, header);
+
+		if (!(strcmp(header, "Egg m7D") == 0))
+		{
+			printf("LoadV7> Mesh isn't a valid 'Egg m7D' mesh\n");
+			return -3;
+		}
+
+		freyjaBegin(FREYJA_MESH);
+		transM.Add(m, freyjaGetCurrent(FREYJA_MESH));
+
+		frame_count = r.ReadInt32();    
+		marker_count = r.ReadInt32();
+		polygon_count = r.ReadInt32();
+
+		printf("LoadV7> %i frames, %i markers\n", frame_count, marker_count);
+
+		vt = 0;
+
+		for (i = 0; i < frame_count; i++)
+		{
+			center[0] = r.ReadFloat32();
+			center[1] = r.ReadFloat32();
+			center[2] = r.ReadFloat32();
+
+			tmp = r.ReadInt32();
+			vertex_count = r.ReadInt32();
+    
+			printf("LoadV7> group[%i] { %i vertices }\n", i, vertex_count);
+
+			// Start a new vertex group
+			freyjaBegin(FREYJA_VERTEX_GROUP);
+			freyjaGroupCenter3f(center[0], center[1], center[2]);
+
+			// ALL frames (groups) have same number of vertices in V7
+			for (ii = 0; ii < vertex_count; ii++)
+			{
+				pos[0] = r.ReadFloat32();
+				pos[1] = r.ReadFloat32();
+				pos[2] = r.ReadFloat32();
+				id = r.ReadInt32();
+	
+				// Store vertices in group
+				vertex = freyjaVertexCreate3f(pos[0], pos[1], pos[2]);
+	
+				// Mongoose: Here I track the loaded id and actual id vs the ii id
+				//           You fear it, I'm sure... this let's us map on 1:n 
+				//           objects ( why we don't use Map here )
+				trans.Add(id);
+				actual.Add(vertex);
+
+				//printf("LoadV7> trans[%i] = %i\n", id, vertex);
+			}
+
+			// End FREYJA_GROUP
+			freyjaEnd();
+		}
+    
+		for (ii = 0; ii < polygon_count; ii++)
+		{      
+			// Start a new polygon
+			freyjaBegin(FREYJA_POLYGON);
+      
+			size = r.ReadInt32();
+			texture = r.ReadInt32();
+			material = r.ReadInt32();
+
+			bad_poly = false;
+       
+			for (j = 0; j < size; j++)
+			{
+				id = r.ReadInt32();
+				st[0] = r.ReadFloat32();
+				st[1] = r.ReadFloat32();
+
+				// Mongoose: Get actual id based on loaded id and packed id 
+				//printf("trans[%i] = ", id);
+				id = actual[trans.SearchKey(id)];
+				//printf("%i\n", id);
+
+				freyjaPolygonVertex1i(id);  
+				freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
+			}
+       
+			if (!bad_poly)
+			{
+				freyjaPolygonMaterial1i(texture);
+	 
+				// End FREYJA_POLYGON
+				freyjaEnd();
+			}
+		}
+
+		// Mongoose: Flush the id translation tables per "frame"
+		trans.Clear();
+		actual.Clear();
+
+		for (i = 0; i < marker_count; i++)
+		{
+			id = r.ReadInt32();
+			type = r.ReadByte();
+			pos[0] = r.ReadFloat32();
+			pos[1] = r.ReadFloat32();
+			pos[2] = r.ReadFloat32();
+       
+			// FIXME: No support for markers, but never used as far as I rememeber
+			printf("eggv7_import> Eggv7 Metadata not exported from plugin\n");
+		}
+
+		// End FREYJA_MESH
+		freyjaEnd();
+	}
+
+	for (j = 0; j < bone_count; j++)
+	{
+		id = r.ReadInt32();
+
+		// Note: No longer allow plugin to control backend
+		//       and the backend supports more than one model,
+		//       so swaping m and mesh_count works around that
+		//       by seeing how many meshes where loaded from above
+		mesh_count = r.ReadInt32();
+
+		if (mesh_count > m)
+			return -5;
+
+		slaves = r.ReadInt32();
+		pos[0] = r.ReadFloat32();
+		pos[1] = r.ReadFloat32();
+		pos[2] = r.ReadFloat32();
+
+		printf("tag[%i] {\n", id);
+		printf(" center ( %f %f %f )\n", pos[0], pos[1], pos[2]);
+
+		// Start bone tag/bolton
+		freyjaBegin(FREYJA_BONE);
+		index = freyjaGetCurrent(FREYJA_BONE);
+		transT.Add(id, index);
+		freyjaBoneTranslate3fv(index, pos);
+		freyjaBoneFlags(index, 0x00);
+
+		printf(" %i meshes:\n   ", mesh_count);
+
+		for (i = 0; i < mesh_count; i++)
+		{
+			id = r.ReadInt32();
+			printf(" %i", id);
+
+			freyjaBoneAddMesh(index, transM[id]);
+		}
+
+		printf("\n %i slaves:\n   ", slaves);
+
+		for (i = 0; i < slaves; i++)
+		{
+			id = r.ReadInt32();
+			printf(" %i", id);
+
+			freyjaBoneAddChild(index, transT[id]);
+		}
+
+		printf("\n}\n");
+
+		// End FREYJA_BONE_TAG
+		freyjaEnd();
+	}
+
+	freyjaEnd(); // FREYJA_MODEL
+
+	r.Close();
+
+	return 0;
+}
 #endif
 
 
