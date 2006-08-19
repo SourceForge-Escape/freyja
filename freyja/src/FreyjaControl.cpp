@@ -3953,7 +3953,9 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				{
 					// This is always a relative transform due to implementation
 					Action *a = new ActionMeshTranslateExt(GetSelectedMesh(), m->GetPosition(), mCursor.mPos);
+					mCursor.mPos = m->GetPosition();
 					ActionModelModified(a);
+					return;
 				}
 
 				// Set mesh position to be at cursor pos
@@ -3972,6 +3974,23 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 			if (m)
 			{
+				if (mToken) 
+				{
+					// FIXME: Add undo action
+
+					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+					{
+						Vertex *v = m->GetVertex(i);
+						
+						if (v && v->mFlags & Vertex::fSelected)
+						{
+							mCursor.mPos = m->GetVertexPosition(v->mVertexIndex);
+							return;
+						}
+					}		
+					return;
+				}
+
 				Vec3 u;
 
 				for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
@@ -3980,7 +3999,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	
 					if (v && v->mFlags & Vertex::fSelected)
 					{
-						u= mCursor.mPos - m->GetVertexPosition(v->mVertexIndex);
+						u = t + m->GetVertexPosition(v->mVertexIndex);
 						m->SetVertexPos(v->mVertexIndex, u.mVec);
 					}
 				}
@@ -4001,7 +4020,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				foreach (f->mIndices, i)
 				{
 					idx = f->mIndices[i];
-					u = mCursor.mPos - m->GetVertexPosition(idx);
+					u = t + m->GetVertexPosition(idx);
 					m->SetVertexPos(idx, u.mVec);
 				}
 			}

@@ -366,8 +366,10 @@
 					(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0
-						;(label "Transform: " 0.0 0.5)
+						(label "Transform: " 0.0 0.5))
 
+					(hbox 1 0 0 1 0
+						
 						(optionmenu		eEvent	eTransformMenu
 							(menu_item	"Scene"		eEvent eTransformScene)
 							(menu_item	"Mesh"		eEvent eTransformMesh)
