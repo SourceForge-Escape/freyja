@@ -219,7 +219,16 @@ class FreyjaControl
 	void SetSelectedMesh(uint32 i) 
 	{
 		if (i < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(i))
+		{
 			mSelectedMesh = i;
+					
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				mCursor.mPos = m->GetPosition();
+			}
+		}
 	}
 	uint32 mSelectedMesh;
 	/*------------------------------------------------------
