@@ -788,6 +788,7 @@ void freyjaPolygonAddTexCoord1i(index_t polygonIndex, index_t texcoordIndex)
 	
 	if (f)
 	{
+		f->mFlags |= Face::fPolyMappedTexCoords;
 		f->mTexCoordIndices.pushBack(texcoordIndex);
 	}
 }

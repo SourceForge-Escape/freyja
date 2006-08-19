@@ -396,7 +396,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int saveFile(const char *filename);
+	//int saveFile(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Saves model to disk file
@@ -407,7 +407,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int loadFile(const char *filename);
+	bool Load(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : File is valid format and exists
 	 * Post : Loads model from disk file
@@ -417,6 +417,20 @@ public:
 	 * 1999.08.01:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	egg_mesh_t *MeshLoad(SystemIO::FileReader &r);
+	/*!----------------------------------------
+	 * Created  : 1999-08-01, Mongoose
+	 * Modified : 
+	 * 
+	 * Pre  : f is set to start of valid mesh chunk
+	 * Post : Loads mesh chunk from disk file 
+	 -----------------------------------------*/
+
+	
+
+
+
 
 	// Mongoose 2002.07.05, Reorder from here down later... to be broken up
 
@@ -796,22 +810,13 @@ public:
 	 * Post : Returns mesh with id from model
 	 -----------------------------------------*/
 
-	int MeshSave(egg_mesh_t *mesh, FILE *f);
+	//int MeshSave(egg_mesh_t *mesh, FILE *f);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
 	 * 
 	 * Pre  : f is set to start of valid mesh chunk
 	 * Post : Saves mesh chunk to disk file
-	 -----------------------------------------*/
-
-	egg_mesh_t *MeshLoad(FILE *f);
-	/*!----------------------------------------
-	 * Created  : 1999-08-01, Mongoose
-	 * Modified : 
-	 * 
-	 * Pre  : f is set to start of valid mesh chunk
-	 * Post : Loads mesh chunk from disk file 
 	 -----------------------------------------*/
     
 	void MeshMirror(egg_mesh_t *mesh);
@@ -902,7 +907,7 @@ public:
 	 * Post : Return number of bone tags
 	 -----------------------------------------*/
 
-	int saveTag(egg_tag_t *bone, FILE *f);
+	//int saveTag(egg_tag_t *bone, FILE *f);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -911,7 +916,7 @@ public:
 	 * Post : Saves tag chunk to disk file
 	 -----------------------------------------*/
 
-	egg_tag_t *loadTag(FILE *f);
+	egg_tag_t *loadTag(SystemIO::FileReader &r);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -1064,7 +1069,7 @@ public:
 
 	void BoneFrameAdd(egg_boneframe_t *boneframe);
 
-	int BoneFrameSave(egg_boneframe_t *frame, FILE *f);
+	//int BoneFrameSave(egg_boneframe_t *frame, FILE *f);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -1073,7 +1078,7 @@ public:
 	 * Post : Saves frame chunk to disk file
 	 -----------------------------------------*/
 
-	egg_boneframe_t *BoneFrameLoad(FILE *f);
+	egg_boneframe_t *BoneFrameLoad(SystemIO::FileReader &r);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -1117,7 +1122,7 @@ public:
 
 	egg_animation_t *getAnimation(unsigned int frame);
 
-	int AnimationSave(egg_animation_t *frame, FILE *f);
+	//int AnimationSave(egg_animation_t *frame, FILE *f);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -1126,7 +1131,7 @@ public:
 	 * Post : Saves aframe chunk to disk file
 	 -----------------------------------------*/
 
-	egg_animation_t *AnimationLoad(FILE *f);
+	egg_animation_t *AnimationLoad(SystemIO::FileReader &r);
 	/*!----------------------------------------
 	 * Created  : 1999-08-01, Mongoose
 	 * Modified : 
@@ -1284,6 +1289,24 @@ public:
 	 * Pre  :
 	 * Post : Return BoneFrame list
 	 -----------------------------------------*/
+
+
+	Vector<egg_vertex_t *> &GetVertices() { return mVertices; }
+
+	Vector<egg_texel_t *> &GetTexels() { return mTexels; }
+	
+	Vector<egg_polygon_t *> &GetPolygons() { return mPolygons; }
+	
+	Vector<egg_group_t *> &GetGroups() { return mGroups; }
+	
+	Vector<egg_mesh_t *> &GetMeshes() { return mMeshes; }
+	
+	Vector<egg_tag_t *> &GetTags() { return mTags; }
+	
+	Vector<egg_boneframe_t *> &GetBoneFrames() { return mBoneFrames; }
+	
+	Vector<egg_animation_t *> &GetAnimations() { return mAnimations; }
+
 
 protected:
 

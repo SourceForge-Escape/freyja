@@ -131,6 +131,9 @@ public:
 	}
 
 
+	unsigned int GetErrorIndex() { return UINT_MAX; }
+
+
 	long findFirstMatch(Object obj)
 	{
 		unsigned int i;

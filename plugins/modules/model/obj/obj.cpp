@@ -110,8 +110,6 @@ int freyja_model__obj_import(char *filename)
 		{
 			freyjaBegin(FREYJA_POLYGON);
 
-			
-
 			foreach (obj.mMeshes[m].mFaces[f].mVertexRefs, v)
 			{
 				freyjaPolygonVertex1i(obj.mMeshes[m].mFaces[f].mVertexRefs[v]);
