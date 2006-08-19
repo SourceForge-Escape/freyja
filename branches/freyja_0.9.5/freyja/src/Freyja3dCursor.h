@@ -111,7 +111,16 @@ class Freyja3dCursor
 			glDisable(GL_LIGHTING);
 			glDisable(GL_BLEND);
 			glClear(GL_DEPTH_BUFFER_BIT);
+
+			glPushMatrix();
+			if (GetMode() == Freyja3dCursor::Rotation)
+			{
+				glRotatef(mRotate.mVec[0], 1, 0, 0);
+				glRotatef(mRotate.mVec[1], 0, 1, 0);
+				glRotatef(mRotate.mVec[2], 0, 0, 1);
+			}
 			Draw3dCursorRot(min, mid, max);
+			glPopMatrix();
 			glPopAttrib();
 			break;
 
@@ -143,7 +152,7 @@ class Freyja3dCursor
 		mMode = Invisible;
 		mPos = Vector3d(0.0f, 0.0f, 0.0f);
 		mScale = Vector3d(1.0f, 1.0f, 1.0f);
-		mRotate = Quaternion();
+		mRotate = Vector3d(0.0f, 0.0f, 0.0f);//Quaternion();
 	}
 
 	bool mSelected;
@@ -154,7 +163,9 @@ class Freyja3dCursor
 
 	Vector3d mScale;
 
-	Quaternion mRotate;
+	Vector3d mRotate;
+
+	//Quaternion mRotate;
 
 
  private:

@@ -4212,7 +4212,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		{
 			BUG_ME("This interface is broken");
 			Vec3 r(xf, yf, zf);
-			freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, r.mVec);
+			mCursor.mRotate += r;
+			mCursor.SetMode(Freyja3dCursor::Rotation);
+			//freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, r.mVec);
 		}
 		break;
 
@@ -4221,7 +4223,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		rotate = fRotate;
 	}
 
-	Transform(mObjectMode, rotate, xf, yf, zf);
+	//Transform(mObjectMode, rotate, xf, yf, zf);
 	
 	old_x = x;
 	old_y = y;

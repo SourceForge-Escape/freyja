@@ -758,6 +758,13 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	//m->GetPosition(u.mVec);
 	//glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
 
+	if (FreyjaControl::mInstance->GetCursor().GetMode() == Freyja3dCursor::Rotation)
+	{
+		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0], 1,0,0);
+		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1], 0,1,0);
+		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2], 0,0,1);
+	}
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
