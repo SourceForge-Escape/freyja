@@ -4070,6 +4070,24 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	 * but limited to a plane of movement */
 	switch (GetSelectedView())
 	{
+	case PLANE_BACK:
+		t.mVec[0] = -vx - t.mVec[0];
+		t.mVec[1] = vy - t.mVec[1];
+		t.mVec[2] = 0;
+		break;
+
+	case PLANE_BOTTOM:
+		t.mVec[0] = vx - t.mVec[0];
+		t.mVec[1] = 0;
+		t.mVec[2] = -vy - t.mVec[2];
+		break;
+
+	case PLANE_RIGHT:
+		t.mVec[0] = 0;
+		t.mVec[1] = vy - t.mVec[1];
+		t.mVec[2] = -vx - t.mVec[2];
+		break;
+
 	case PLANE_XY:
 		t.mVec[0] = vx - t.mVec[0];
 		t.mVec[1] = vy - t.mVec[1];
