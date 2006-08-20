@@ -521,17 +521,32 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 
 		switch (GetSelectedView())
 		{
-		case PLANE_XY: // Front
+		case PLANE_BACK:
+			r.mOrigin = Vec3(x, y, z - 100);
+			r.mDir = Vec3(0, 0, 1);
+			break;
+
+		case PLANE_FRONT: // Front, XY
 			r.mOrigin = Vec3(x, y, z + 100);
 			r.mDir = Vec3(0, 0, -1);
 			break;
 
-		case PLANE_XZ: // Top
+		case PLANE_BOTTOM:
+			r.mOrigin = Vec3(x, y - 100, -z);
+			r.mDir = Vec3(0, 1, 0);
+			break;
+
+		case PLANE_TOP: // Top, XZ
 			r.mOrigin = Vec3(x, y + 100, -z);
 			r.mDir = Vec3(0, -1, 0);
 			break;
 
-		case PLANE_ZY: // Side
+		case PLANE_RIGHT:
+			r.mOrigin = Vec3(x + 100, y, z);
+			r.mDir = Vec3(-1, 0, 0);
+			break;
+
+		case PLANE_LEFT: // Side, ZY
 			r.mOrigin = Vec3(x - 100, y, z);
 			r.mDir = Vec3(1, 0, 0);
 			break;
@@ -2736,6 +2751,27 @@ bool FreyjaControl::event(int command)
 		SetControlScheme(eScheme_Material);
 		break;
 
+	case FREYJA_MODE_PLANE_BACK:
+		mRender->clearFlag(FreyjaRender::fViewports);
+		freyja_print("Back view");
+		SetSelectedView(PLANE_BACK);
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_PLANE_BOTTOM:
+		mRender->clearFlag(FreyjaRender::fViewports);
+		freyja_print("Bottom view");  
+		SetSelectedView(PLANE_BOTTOM);
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_PLANE_RIGHT:
+		mRender->clearFlag(FreyjaRender::fViewports);
+		freyja_print("Right view");
+		SetSelectedView(PLANE_RIGHT);
+		freyja_event_gl_refresh();
+		break;
+
 	case FREYJA_MODE_PLANE_XY:
 		mRender->clearFlag(FreyjaRender::fViewports);
 		freyja_print("Plane XY");
@@ -3016,7 +3052,45 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 
 			switch (GetSelectedView())
 			{
-			case PLANE_XY: // Front
+			case PLANE_BACK:
+				o = Vec3(1.0f*Freyja3dCursor::mid,0,0) + mCursor.mPos;
+
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eX;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked X");
+					mToken = true;
+					return;
+				}
+
+				o = Vec3(0, Freyja3dCursor::mid,0) + mCursor.mPos;
+
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eY;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked Y");
+					mToken = true;
+					return;
+				}
+
+				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
+				
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked All");
+					mToken = true;
+					return;
+				}
+				break;
+
+			case PLANE_FRONT: // Front, XY
 				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
 
 				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
@@ -3142,6 +3216,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 {
 	bool ret = false;
+	bool swappedModes = false;
 	vec_t vx = x, vy = y;
 	EventMode mode = mEventMode;
 	mMouseButton = btn;
@@ -3191,10 +3266,12 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		if (mod & KEY_LCTRL)
 		{
 			handleEvent(eEvent, eSelect);
+			swappedModes = true;
 		}
 		else if (mod & KEY_LSHIFT)
 		{
 			handleEvent(eEvent, eRotate);
+			swappedModes = true;
 		}
 
 
@@ -3374,7 +3451,6 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 
 	// Mongoose 2002.01.12, Reset mode
 	mEventMode = mode;
-
 	return true;
 }
 
@@ -3393,15 +3469,25 @@ void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 
 	switch (GetSelectedView())
 	{
-	case PLANE_XY:
+	case PLANE_BACK: // Back, X-Y
+		x = -x;
+		break;
+
+	case PLANE_FRONT: // Front, XY
 		/* Nothing to do for XY */
 		break;
 		
-	case PLANE_XZ:
+	case PLANE_BOTTOM: // Bottom, X-Z
+		z = -z;
+
+	case PLANE_TOP: // Top, XZ
 		y = -z;
 		break;
 		
-	case PLANE_ZY: // side
+	case PLANE_RIGHT: // Right, Z-Y
+		z = -z;
+
+	case PLANE_LEFT: // Left, ZY
 		x = z;
 		break;
 
@@ -3479,6 +3565,24 @@ void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 	
 	switch (GetSelectedView())
 	{
+	case PLANE_BACK:
+		x = scroll.mVec[0] - x;
+		y -= scroll.mVec[1];
+		z = 0.0f;
+		break;
+
+	case PLANE_BOTTOM:
+		x = -x - scroll.mVec[0];
+		z = y - scroll.mVec[2];
+		y = 0.0f;
+		break;
+
+	case PLANE_RIGHT:
+		z = -x - scroll.mVec[2];
+		y -= scroll.mVec[1];
+		x = 0.0f;
+		break;
+
 	case PLANE_XY:
 		x -= scroll.mVec[0];
 		y -= scroll.mVec[1];

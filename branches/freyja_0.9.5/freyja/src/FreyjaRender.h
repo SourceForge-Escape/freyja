@@ -57,8 +57,14 @@ typedef enum {
 	PLANE_XY = 0, 
 	PLANE_ZY = 1, 
 	PLANE_XZ = 2,
-	PLANE_FREE
-
+	PLANE_FRONT = 0, // aliasing
+	PLANE_LEFT = 1,
+	PLANE_TOP = 2,
+	PLANE_FREE,
+	PLANE_BACK, 
+	PLANE_BOTTOM, 
+	PLANE_RIGHT
+	
 } freyja_plane_t;
 
 
