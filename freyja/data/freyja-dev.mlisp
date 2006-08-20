@@ -334,12 +334,17 @@
 					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					(hbox 1 0 0 1 0
 						(label "Select edit plane: "  0.0 0.5)
-						(optionmenu			eEvent	eNone
+						(optionmenu	eEvent	eNone
 							(menu_item "Viewports"		eEvent	eViewports)
 							(menu_item	"Free"	eEvent	FREYJA_MODE_PLANE_FREE)
 							(menu_item	"Front"	eEvent	FREYJA_MODE_PLANE_XY)
-				  			(menu_item	"Side"	eEvent	FREYJA_MODE_PLANE_YZ)
-				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)))
+							(menu_item	"Back"	eEvent	FREYJA_MODE_PLANE_BACK)
+				  			(menu_item	"Right"	eEvent	FREYJA_MODE_PLANE_RIGHT)
+				  			(menu_item	"Left"	eEvent	FREYJA_MODE_PLANE_YZ)
+				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)
+				  			(menu_item	"Bottom" eEvent FREYJA_MODE_PLANE_BOTTOM)
+						) ; optionmenu
+					) ; hbox
 
 
 					;; Seperator
@@ -700,6 +705,15 @@
 
 ")
 
+		(label2 "		<u>Common keys</u>
+
+ · F4 - Extrude 
+ · F5 - Move 		· Ctrl  (held) - tSelect 
+ · F6 - Rotate 		· Shift (held) - tUnSelect
+ · F7 - Scale
+
+")
+
 	) ; vbox
 ) ; dialog
 
@@ -729,6 +743,52 @@
 		;;(hbox 1 0 0 1 0
 		;;	(label "Near Height "  0.0 0.5) 
 		;;	(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
+
+
+		(vbox 0 0 0 0 0	
+		(hbox 1 0 0 1 0
+			(label "Viewports setting"  0.0 0.5))	
+			(hbox 1 0 0 1 0
+				(optionmenu	eEvent	eNone
+					(menu_item	"Free"		eEvent	eNone);eViewBack)
+					(menu_item	"Front"		eEvent	eNone);eViewFront)
+				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
+				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
+					(menu_item	"Back"		eEvent	eNone);eViewBack)
+				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
+				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
+				(optionmenu	eEvent	eNone
+					(menu_item	"Free"		eEvent	eNone);eViewBack)
+					(menu_item	"Front"		eEvent	eNone);eViewFront)
+				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
+				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
+					(menu_item	"Back"		eEvent	eNone);eViewBack)
+				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
+				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
+
+			) ; hbox
+
+			(hbox 1 0 0 1 0
+				(optionmenu	eEvent	eNone
+					(menu_item	"Free"		eEvent	eNone);eViewBack)
+					(menu_item	"Front"		eEvent	eNone);eViewFront)
+				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
+				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
+					(menu_item	"Back"		eEvent	eNone);eViewBack)
+				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
+				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
+				(optionmenu	eEvent	eNone
+					(menu_item	"Free"		eEvent	eNone);eViewBack)
+					(menu_item	"Front"		eEvent	eNone);eViewFront)
+				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
+				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
+					(menu_item	"Back"		eEvent	eNone);eViewBack)
+				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
+				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
+
+			) ; hbox
+
+		) ; vbox
 
 		(hbox 1 0 0 1 0
 			(label "Render scaling"  0.0 0.5) 

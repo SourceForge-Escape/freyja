@@ -1361,7 +1361,9 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 	switch (plane)
 	{
-	case PLANE_XY:
+		//case PLANE_XY:
+	case PLANE_FRONT:
+	case PLANE_BACK:
 		x = (int)mScroll[0];
 		y = (int)mScroll[1];
 
@@ -1377,7 +1379,9 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		break;
 
 
-	case PLANE_XZ:
+		//case PLANE_XZ:
+	case PLANE_TOP:
+	case PLANE_BOTTOM:
 		x = (int)mScroll[0];
 		y = (int)mScroll[2];
 
@@ -1393,7 +1397,9 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		break;
 
 
-	case PLANE_ZY:
+		//case PLANE_ZY:
+	case PLANE_LEFT:
+	case PLANE_RIGHT:
 	   x = (int)mScroll[2];
 	   y = (int)mScroll[1];
 
@@ -1480,14 +1486,29 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	switch (plane)
 	{
-	case PLANE_XY:
+	case PLANE_FRONT: // XY
 		break;
-	case PLANE_XZ:
-		glRotatef(-90.0, 1.0, 0.0, 0.0);
+
+	case PLANE_BACK: // XY
+		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
 		break;
-	case PLANE_ZY:
-		glRotatef(90.0, 0.0, 1.0, 0.0);
+
+	case PLANE_TOP: // XZ
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 		break;
+
+	case PLANE_BOTTOM: // XZ
+		glRotatef(-90.0f, 1.0f, 0.0, 0.0);
+		break;
+
+	case PLANE_LEFT: // ZY
+		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+		break;
+
+	case PLANE_RIGHT: // ZY
+		glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+		break;
+
 	default:
 		;
 	}
@@ -1502,17 +1523,35 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 
 	switch (plane)
 	{
-	case PLANE_XY: // front
+	case PLANE_FRONT: // XY
 		glTranslatef(mScroll[0], mScroll[1], 0.0);
 		break;
-	case PLANE_XZ: // top
+
+	case PLANE_BACK: // XY
+		glTranslatef(mScroll[0], mScroll[1], 0.0);
+		glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+		break;
+
+	case PLANE_TOP: // XZ
 		glTranslatef(mScroll[0], mScroll[2], 0.0);
-		glRotatef(90.0, 1.0, 0.0, 0.0);
+		glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 		break;
-	case PLANE_ZY: // side
+
+	case PLANE_BOTTOM: // XZ
+		glTranslatef(mScroll[0], mScroll[2], 0.0);
+		glRotatef(-90.0f, 1.0f, 0.0, 0.0);
+		break;
+
+	case PLANE_LEFT: // ZY
 		glTranslatef(mScroll[2], mScroll[1], 0.0);
-		glRotatef(90.0, 0.0, 1.0, 0.0);
+		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
 		break;
+
+	case PLANE_RIGHT: // ZY
+		glTranslatef(mScroll[2], mScroll[1], 0.0);
+		glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+		break;
+
 	default:
 		;
 	}

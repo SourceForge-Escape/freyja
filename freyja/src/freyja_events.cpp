@@ -899,6 +899,11 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
+
+	r.RegisterInt("FREYJA_MODE_PLANE_BACK", FREYJA_MODE_PLANE_BACK);
+	r.RegisterInt("FREYJA_MODE_PLANE_RIGHT", FREYJA_MODE_PLANE_RIGHT);
+				  r.RegisterInt("FREYJA_MODE_PLANE_BOTTOM", FREYJA_MODE_PLANE_BOTTOM);
+
 	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
 	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
 	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
