@@ -58,6 +58,9 @@ FreyjaRender *FreyjaRender::mSingleton = 0x0;
 
 Ray FreyjaRender::mTestRay;
 
+vec4_t gBoneColor = { 0.207843137f, 0.654901961f, 0.917647059f, 1.0f };
+vec4_t gBoneHighlightColor = { 1.0,  0.0,  1.0, 1.0};
+
 vec4_t FreyjaRender::mColorBackground;
 vec4_t FreyjaRender::mColorText;
 vec4_t FreyjaRender::mColorWireframe;
@@ -755,6 +758,29 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	vec_t *array = m->GetVertexArray();
 
 	glPushMatrix();
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glPointSize(mVertexPointSize);
+
+	// 'World effects' 
+
+	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
+	{
+		vec3_t min, max;
+		m->GetBBox(min, max);
+		mglDrawSelectBox(min, max, WHITE);
+		mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
+						m->GetBoundingVolumeRadius(), 
+						64, 0, false);
+		mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
+						m->GetBoundingVolumeRadius(), 
+						64, 2, false);
+	}
+
+
 	//m->GetPosition(u.mVec);
 	//glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
 
@@ -764,12 +790,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1], 0,1,0);
 		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2], 0,0,1);
 	}
-
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glPointSize(mVertexPointSize);
 
 	if (mRenderMode & RENDER_POINTS)
 	{
@@ -1041,7 +1061,7 @@ void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton,
 
 	/* Render bone */
 	((FreyjaRender::mSelectedBone == currentBone) ? 
-	 glColor3fv(CYAN) : glColor3fv(WHITE));
+	 glColor3fv(gBoneHighlightColor) : glColor3fv(gBoneColor));
 	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
 
 	/* Transform child bones */

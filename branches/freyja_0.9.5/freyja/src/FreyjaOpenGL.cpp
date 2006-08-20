@@ -684,15 +684,15 @@ void mglDraw3dCircle(const vec3_t center, const vec_t radius, uint32 count,
 		switch (plane)
 		{
 		case 0:
-			glVertex3f(x, z, 0.0f);
+			glVertex3f(center[0] + x, center[1] + z, center[2] + 0.0f);
 			break;
 
 		case 1:
-			glVertex3f(0.0f, x, z);
+			glVertex3f(center[0] + 0.0f, center[1] + x, center[2] + z);
 			break;
 
 		default:
-			glVertex3f(x, 0.0f, z);
+			glVertex3f(center[0] + x, center[1] + 0.0f, center[2] + z);
 			break;
 		}
 	}

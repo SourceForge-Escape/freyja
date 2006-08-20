@@ -285,6 +285,50 @@ public:
 
 
 	////////////////////////////////////////////////////////////
+	// Bounding Volume properties
+	////////////////////////////////////////////////////////////
+
+	void SetBBox(const vec3_t min, const vec3_t max)
+	{
+		// Update bbox
+		HEL_VEC3_COPY(min, mBoundingVolume.mBox.mMin);
+		HEL_VEC3_COPY(max, mBoundingVolume.mBox.mMax);
+
+		// Update sphere
+		Vector3d vMin(min), vMax(max);
+		Vec3 origin = ( vMin + vMax ) * 0.5; // midpoint
+		vec_t radius = Vec3(origin - vMax).magnitude();
+
+		origin.Get(mBoundingVolume.mSphere.mCenter);
+		mBoundingVolume.mSphere.mRadius = radius;
+	}
+
+	void GetBBox(vec3_t min, vec3_t max)
+	{
+		HEL_VEC3_COPY(mBoundingVolume.mBox.mMin, min);
+		HEL_VEC3_COPY(mBoundingVolume.mBox.mMax, max);
+	}
+
+
+	Vec3 GetBoundingVolumeCenter()
+	{
+		return Vec3(mBoundingVolume.mSphere.mCenter);
+	}
+
+
+	vec_t GetBoundingVolumeRadius()
+	{
+		return mBoundingVolume.mSphere.mRadius;
+	}
+
+
+	Vec3 GetBBoxCenter()
+	{
+		return GetBoundingVolumeCenter();
+	}
+
+
+	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
@@ -297,22 +341,6 @@ public:
 	 * Pre  : 
 	 * Post : Clone this mesh
 	 ------------------------------------------------------*/
-
-
-	void GetBBox(vec3_t min, vec3_t max)
-	{
-		HEL_VEC3_COPY(mBoundingVolume.mBox.mMin, min);
-		HEL_VEC3_COPY(mBoundingVolume.mBox.mMax, max);
-	}
-
-
-	Vector3d GetBBoxCenter()
-	{
-		Vector3d u, v;
-		u.Set(mBoundingVolume.mBox.mMax);
-		v.Set(mBoundingVolume.mBox.mMin);
-		return (u - v);
-	}
 
 
 	void GetColor(index_t colorIndex, vec4_t rgba)
@@ -440,6 +468,13 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	bool Intersect(Ray &r, vec_t &t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if 'hit', and <t> the time along ray
 	 ------------------------------------------------------*/
 
 	
@@ -804,6 +839,34 @@ public:
 			}
 		}
 
+		// Adjust bounding volume
+		{
+			vec3_t min;
+			vec3_t max;
+			bool update = false;
+
+			GetBBox(min, max);
+
+			for (uint32 i = 0; i < 3; ++i)
+			{
+				if (xyz[i] < min[i])
+				{
+					min[i] = xyz[i];
+					update = true;
+				}
+				else if (xyz[i] > max[i])
+				{
+					max[i] = xyz[i];
+					update = true;
+				}
+			}
+
+			if (update)
+			{
+				SetBBox(min, max);
+			}
+		}
+
 		mVertices.pushBack(vert);
 		return mVertices.size() - 1;
 	}
@@ -848,11 +911,7 @@ public:
 		ClampVecValues(mTexCoordPool, min, max);
 	}
 
-	void SetBBox(const vec3_t min, const vec3_t max)
-	{
-		HEL_VEC3_COPY(min, mBoundingVolume.mBox.mMin);
-		HEL_VEC3_COPY(max, mBoundingVolume.mBox.mMax);
-	}
+
 
 
 private:
