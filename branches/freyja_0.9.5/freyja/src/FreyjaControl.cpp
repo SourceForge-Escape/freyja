@@ -3166,6 +3166,83 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				}
 				break;
 
+
+			case PLANE_BOTTOM:
+				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eX;
+					mCursor.mSelected = true;
+					mToken = true;
+					freyja_print("! Cursor ray picked X");
+					return;
+				}
+
+				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
+
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eZ;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked Z");
+					mToken = true;
+					return;
+				}
+
+				o = Vec3(0, Freyja3dCursor::mid, 0) + mCursor.mPos;
+				
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked All");
+					mToken = true;
+					return;
+				}
+				break;
+
+			case PLANE_RIGHT:
+				o = Vec3(0,0,Freyja3dCursor::mid) + mCursor.mPos;
+
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eZ;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked Z");
+					mToken = true;
+					return;
+				}
+
+				o = Vec3(0, Freyja3dCursor::mid,0) + mCursor.mPos;
+
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eY;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked Y");
+					mToken = true;
+					return;
+				}
+
+				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				
+				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				{
+					DEBUG_MSGF("Sphere hit!");
+					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mSelected = true;
+					freyja_print("! Cursor ray picked All");
+					mToken = true;
+					return;
+				}
+				break;
+
 			case PLANE_ZY: // Side 
 				o = Vec3(0,0,Freyja3dCursor::mid) + mCursor.mPos;
 
@@ -3572,13 +3649,13 @@ void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 		break;
 
 	case PLANE_BOTTOM:
-		x = -x - scroll.mVec[0];
-		z = y - scroll.mVec[2];
+		x = x - scroll.mVec[0];
+		z = -y + scroll.mVec[2];
 		y = 0.0f;
 		break;
 
 	case PLANE_RIGHT:
-		z = -x - scroll.mVec[2];
+		z = -x + scroll.mVec[2];
 		y -= scroll.mVec[1];
 		x = 0.0f;
 		break;
