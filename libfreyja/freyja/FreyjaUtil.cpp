@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 
 #include <math.h>
 #include <hel/math.h>
@@ -528,7 +529,6 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 	(radius < 0) ? radius = -radius : 0;
 	(segments < 1) ? segments = 1 : 0;
 	(count < 3) ? count = 3 : 0;
-
 	height = radius * 2.0;
 
 	freyjaCriticalSectionLock();
@@ -542,7 +542,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 		y = height * ((float)i/(float)segments);
 		v = 0.5 * ((float)i/(float)segments) + 0.5;
 
-		r = sin(helDegToRad(180 * ((float)i/(float)segments)));
+		r = sin(helDegToRad(180.0 * ((float)i/(float)segments)));
 		(i > segments/2) ? y = height*(1.0-r)+y*r : y *= r;
 
 		if (i == 0)

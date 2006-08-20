@@ -33,6 +33,18 @@
  ChangeLog 0.9.5 ( development - This will not always compile from svn )
  =====================================================================
 
+ 20060820 Mongoose
+ - Finishing up testing of some features before view abstraction
+ - UV editor fixes
+ - Material editor fixes 
+ - Operations over multi-selected objects
+ - Undo for about all the currently working features
+ - More 'ideal planes' for editing
+ - Cursor/Ray/View fixes
+ - All plugins rewritten
+ - FreyjaFile* replaced by mstl SystemIO
+
+
  20060803 Mongoose
  - Major rewrite/refactor of MVC into a View and Controller to be used
    as a template for the new Plugin Arch style control scheme

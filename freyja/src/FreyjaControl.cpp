@@ -3973,6 +3973,42 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
+	case tMesh:
+		{
+			vec_t t, best = 9999.9f;
+			int32 selected = -1;
+
+			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
+			{
+				Mesh *m = freyjaModelGetMeshClass(0, i);
+
+				if (!m)
+					continue;
+
+				if (m->Intersect(FreyjaRender::mTestRay, t))
+				{
+					if (t < best)
+					{
+						best = t;
+						selected = i;
+					}
+				}
+			}
+
+			if ( selected > -1 )
+			{
+				freyja_print("Mesh[%i] selected by pick ray.", selected);
+				SetSelectedMesh(selected);
+#if 0
+				Mesh *m = freyjaModelGetMeshClass(0, selected);
+				m->SetFlags(selected, Mesh::fSelected);
+				mCursor.mPos = m->GetPosition();
+#endif
+			}
+		}
+		break;
+
+
 	default:
 		{
 			String s;
