@@ -3482,17 +3482,22 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 		switch (GetObjectMode())
 		{
 		case tMesh:
-			// FIXME: Put the Undo call here push back -- unless the last
-			//        operation was the same mesh ( then we pop first )
-
-			//freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, 
-			//							mCursor.mRotate.mVec);
-
-			freyja_print("! Mesh[%i] rotate %f %f %f disabled",
+			freyja_print("! Mesh[%i] Rotate %f %f %f",
 						 GetSelectedMesh(),
 						 mCursor.mRotate.mVec[0],
 						 mCursor.mRotate.mVec[1],
 						 mCursor.mRotate.mVec[2]);
+			{
+				// Mongoose - Does transform, undo, etc for ya, bub
+				mToken = true;
+				Transform(GetObjectMode(), fRotate, 
+						  mCursor.mRotate.mVec[0],
+						  mCursor.mRotate.mVec[1],
+						  mCursor.mRotate.mVec[2]);
+
+				// Reset rotation transform in the cursor
+				mCursor.mRotate = Vec3(0,0,0);
+			}
 			break;
 
 		default:
