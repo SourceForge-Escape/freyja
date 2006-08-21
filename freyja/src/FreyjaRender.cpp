@@ -767,38 +767,44 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 	// 'World effects' 
 
-	if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
-	switch (FreyjaControl::mInstance->GetCursor().GetMode())
-	{
-	case Freyja3dCursor::Rotation: // About mesh center ( abuse of matrices )
-		glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
-					 m->GetBoundingVolumeCenter().mVec[1],
-					 m->GetBoundingVolumeCenter().mVec[2]);
-		
-		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0], 1,0,0);
-		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1], 0,1,0);
-		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2], 0,0,1);
-
-		glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
-					 -m->GetBoundingVolumeCenter().mVec[1],
-					 -m->GetBoundingVolumeCenter().mVec[2]);
-		break;
-
-	case Freyja3dCursor::Translation:
-		if (0) // Haven't got the backend / frontend ready for this yet
-		{
-			glTranslatef(FreyjaControl::mInstance->GetCursor().mPos.mVec[0],
-						 FreyjaControl::mInstance->GetCursor().mPos.mVec[1],
-						 FreyjaControl::mInstance->GetCursor().mPos.mVec[2]);
-		}
-		break;
-
-	default:
-		;
-	}
-
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
 	{
+		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
+		{
+			switch (FreyjaControl::mInstance->GetCursor().GetMode())
+			{
+			case Freyja3dCursor::Rotation: // About mesh center ( matrix abuse )
+				glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
+							 m->GetBoundingVolumeCenter().mVec[1],
+							 m->GetBoundingVolumeCenter().mVec[2]);
+				
+				glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0],
+						  1,0,0);
+				glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1],
+						  0,1,0);
+				glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2],
+						  0,0,1);
+				
+				glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
+							 -m->GetBoundingVolumeCenter().mVec[1],
+							 -m->GetBoundingVolumeCenter().mVec[2]);
+				break;
+				
+			case Freyja3dCursor::Translation:
+				// Haven't got the backend / frontend ready for this yet
+#if 0
+				glTranslatef(FreyjaControl::mInstance->GetCursor().mPos.mVec[0],
+							 FreyjaControl::mInstance->GetCursor().mPos.mVec[1],
+							 FreyjaControl::mInstance->GetCursor().mPos.mVec[2]);
+#endif		
+				break;
+				
+			default:
+				;
+			}
+		}
+
+
 		vec3_t min, max;
 		m->GetBBox(min, max);
 		mglDrawSelectBox(min, max, WHITE);

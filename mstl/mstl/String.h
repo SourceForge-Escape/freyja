@@ -132,6 +132,12 @@ class String
 	}
 
 
+	const char *c_str()
+	{
+		return mString;
+	}
+
+
 	// How overboard is this I ask you?
 	void Set(const char *format, ...)
 	{
