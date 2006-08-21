@@ -2336,7 +2336,21 @@ bool FreyjaControl::event(int command)
 	case eRotateObject:
 		mEventMode = modeRotate;
 		mCursor.SetMode(Freyja3dCursor::Rotation);
-		freyja_print("Rotate object...");
+
+		switch (GetObjectMode())
+		{
+		case tMesh:
+			{
+				Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+				if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
+				freyja_print("Rotate %s... (Won't modify data until fixed)", ObjectTypeToString(GetObjectMode()).c_str());
+			}
+			break;
+
+		default:
+			freyja_print("Rotate %s...", ObjectTypeToString(GetObjectMode()).c_str());
+		}
+
 		freyja_event_gl_refresh();
 		break;
 
@@ -4464,16 +4478,17 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 
 	case tMesh:
-		/* Mongoose: Scaled rotation for better response */
-		rotate = fRotateAboutPoint;
 		{
-			BUG_ME("This interface is broken");
 			Vec3 r(xf, yf, zf);
 			mCursor.mRotate += r;
 			mCursor.SetMode(Freyja3dCursor::Rotation);
+
+			// handle ctrl selects ( select without leaving rotate mode )
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 			if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
-			//freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, r.mVec);
+
+			//rotate = fRotateAboutPoint;
+			//freyjaModelMeshTransform3fv(0,GetSelectedMesh(), fRotate, r.mVec);
 		}
 		break;
 
