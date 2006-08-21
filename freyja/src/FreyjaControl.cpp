@@ -4481,6 +4481,16 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		{
 			Vec3 r(xf, yf, zf);
 			mCursor.mRotate += r;
+
+			if (mCursor.mRotate.mVec[0] > 360.0f) 
+				mCursor.mRotate.mVec[0] -= 360.0f;
+
+			if (mCursor.mRotate.mVec[1] > 360.0f)
+				mCursor.mRotate.mVec[1] -= 360.0f;
+
+			if (mCursor.mRotate.mVec[2] > 360.0f)
+				mCursor.mRotate.mVec[2] -= 360.0f;
+
 			mCursor.SetMode(Freyja3dCursor::Rotation);
 
 			// handle ctrl selects ( select without leaving rotate mode )

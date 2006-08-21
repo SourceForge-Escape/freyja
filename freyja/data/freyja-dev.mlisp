@@ -373,8 +373,9 @@
 					(hbox 1 0 0 1 0
 						
 						(optionmenu	eEvent	eTransformMenu
-							(menu_item	"Selected Meshes"	eEvent eNone);eTransformSelectedMeshes)
+							(menu_item	"Model"		eEvent eNone); eTransformModel)
 							(menu_item	"Mesh"		eEvent eTransformMesh)
+							(menu_item	"Selected Meshes"	eEvent eNone);eTransformSelectedMeshes)
 							(menu_item	"Face"		eEvent eTransformFace)
 							(menu_item	"Selected Faces"	eEvent eNone);eTransformSelectedFaces)
 							(menu_item	"Vertex"	eEvent eTransformPoint)
