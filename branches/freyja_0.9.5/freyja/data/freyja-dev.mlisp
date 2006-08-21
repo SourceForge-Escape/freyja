@@ -347,16 +347,13 @@
 					) ; hbox
 
 
-					;; Seperator
-					(hbox 1 0 0 1 0 (hsep))
-
 					;; Object operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					(hbox 1 0 0 1 0 (hsep))
 					(hbox 0 0 0 1 0
 						(label "Object operations" 0.0 0.5))
-					(hbox 1 0 0 1 0 (hsep))
-					(hbox 1 0 0 1 0
-						(label "Current Mesh  #"  0.0 0.5) 
-						(spinbutton 0 0 100 eMeshIterator))
+					;(hbox 1 0 0 1 0
+					;	(label "Current Mesh  #"  0.0 0.5) 
+					;	(spinbutton 0 0 100 eMeshIterator))
 					;(hbox 1 0 0 1 0
 					;	(label "Current Group #" 0.0 0.5) 
 					;	(spinbutton 0 0 500 eGroupIterator))

@@ -34,6 +34,7 @@
  =====================================================================
 
  20060820 Mongoose
+ - Mesh selection
  - Finishing up testing of some features before view abstraction
  - UV editor fixes
  - Material editor fixes 
