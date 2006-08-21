@@ -3463,6 +3463,32 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 		freyja_print("! Cursor was released.");
 	}
 
+	if (!btn && !state && mCursor.GetMode() == Freyja3dCursor::Rotation)
+	{
+		switch (GetObjectMode())
+		{
+		case tMesh:
+			// FIXME: Put the Undo call here push back -- unless the last
+			//        operation was the same mesh ( then we pop first )
+
+			//freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, 
+			//							mCursor.mRotate.mVec);
+
+			freyja_print("! Mesh[%i] rotate %f %f %f disabled",
+						 GetSelectedMesh(),
+						 mCursor.mRotate.mVec[0],
+						 mCursor.mRotate.mVec[1],
+						 mCursor.mRotate.mVec[2]);
+			break;
+
+		default:
+			freyja_print("! Cursor would send rotate event %f %f %f.", 
+						 mCursor.mRotate.mVec[0],
+						 mCursor.mRotate.mVec[1],
+						 mCursor.mRotate.mVec[2]);
+		}
+	}
+
 	if (MouseEdit(btn, state, mod, x, y)) return true;
 
 	EventMode mode = mEventMode;
@@ -4439,16 +4465,14 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	case tMesh:
 		/* Mongoose: Scaled rotation for better response */
-		xf *= 0.4f;
-		yf *= 0.4f;
-		zf *= 0.4f;
-
 		rotate = fRotateAboutPoint;
 		{
 			BUG_ME("This interface is broken");
 			Vec3 r(xf, yf, zf);
 			mCursor.mRotate += r;
 			mCursor.SetMode(Freyja3dCursor::Rotation);
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
 			//freyjaModelMeshTransform3fv(0, GetSelectedMesh(), fRotate, r.mVec);
 		}
 		break;

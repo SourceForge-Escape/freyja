@@ -770,10 +770,18 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 	if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
 	switch (FreyjaControl::mInstance->GetCursor().GetMode())
 	{
-	case Freyja3dCursor::Rotation:
+	case Freyja3dCursor::Rotation: // About mesh center ( abuse of matrices )
+		glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
+					 m->GetBoundingVolumeCenter().mVec[1],
+					 m->GetBoundingVolumeCenter().mVec[2]);
+		
 		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0], 1,0,0);
 		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1], 0,1,0);
 		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2], 0,0,1);
+
+		glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
+					 -m->GetBoundingVolumeCenter().mVec[1],
+					 -m->GetBoundingVolumeCenter().mVec[2]);
 		break;
 
 	case Freyja3dCursor::Translation:
