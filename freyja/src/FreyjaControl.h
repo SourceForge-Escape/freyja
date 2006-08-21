@@ -324,6 +324,12 @@ class FreyjaControl
 	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
+	object_type_t GetObjectMode() { return mObjectMode; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	String ObjectTypeToString(object_type_t t);
 	/*------------------------------------------------------
 	 * Pre  : 

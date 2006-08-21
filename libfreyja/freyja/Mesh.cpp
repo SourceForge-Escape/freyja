@@ -381,6 +381,8 @@ bool Mesh::Intersect(Ray &r, vec_t &t)
 
 bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 {
+	//no 'editor side' scale support vec_t t; if (!Intersect(r, t)) return false;
+
 	vec_t bestDist = 99999.0f;
 	r.mDir.normalize();
 	face0 = -1;
@@ -418,7 +420,7 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 				a = b;
 				b = c;
 			}
-		
+
 			// Clear old hit flags
 			f->mFlags |= Face::fRayHit;
 			f->mFlags ^= Face::fRayHit;
@@ -457,8 +459,12 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 
 bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 {
+	vec_t t;
+
+	//no 'editor side' scale support if (!Intersect(r, t)) return false;
+
 	Vec3 center, normal;
-	vec_t t, bestDist = 99999.0f;
+	vec_t bestDist = 99999.0f;
 	r.mDir.normalize();
 	vertex0 = -1;
 	

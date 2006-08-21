@@ -767,6 +767,28 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 
 	// 'World effects' 
 
+	if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
+	switch (FreyjaControl::mInstance->GetCursor().GetMode())
+	{
+	case Freyja3dCursor::Rotation:
+		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0], 1,0,0);
+		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1], 0,1,0);
+		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2], 0,0,1);
+		break;
+
+	case Freyja3dCursor::Translation:
+		if (0) // Haven't got the backend / frontend ready for this yet
+		{
+			glTranslatef(FreyjaControl::mInstance->GetCursor().mPos.mVec[0],
+						 FreyjaControl::mInstance->GetCursor().mPos.mVec[1],
+						 FreyjaControl::mInstance->GetCursor().mPos.mVec[2]);
+		}
+		break;
+
+	default:
+		;
+	}
+
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
 	{
 		vec3_t min, max;
@@ -778,17 +800,6 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
 						m->GetBoundingVolumeRadius(), 
 						64, 2, false);
-	}
-
-
-	//m->GetPosition(u.mVec);
-	//glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
-
-	if (FreyjaControl::mInstance->GetCursor().GetMode() == Freyja3dCursor::Rotation)
-	{
-		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0], 1,0,0);
-		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1], 0,1,0);
-		glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2], 0,0,1);
 	}
 
 	if (mRenderMode & RENDER_POINTS)
