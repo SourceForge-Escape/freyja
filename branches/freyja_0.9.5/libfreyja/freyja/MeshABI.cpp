@@ -263,11 +263,25 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 	{
 	case fRotate:
 		{
-			Matrix r;
+			Matrix t, r, t2, mat;
+			// Rotate about bounding volume center instead of origin
+			t.translate(mesh->GetBoundingVolumeCenter().mVec);
 			r.rotate(xyz);
+			t2.translate((-mesh->GetBoundingVolumeCenter()).mVec);
+			//mat = t*r*t2;
+			//mesh->TransformVertices(mat);
+
+			// FIXME: Fix the damn matrix backend to avoid such expensive
+			//        processing here ( only want to transform once )
+			mesh->TransformVertices(t2);
 			mesh->TransformVertices(r);
-			r.invert();
-			mesh->TransformNormals(r);
+			mesh->TransformVertices(t);
+
+			// Transform normals by inverted rotation to stay correct
+			Matrix nr;
+			nr.rotate(xyz);
+			nr.invert();
+			mesh->TransformNormals(nr);
 		}
 		break;
 

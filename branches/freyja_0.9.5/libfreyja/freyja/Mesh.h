@@ -678,9 +678,22 @@ public:
 
 	void Translate(Vec3 v) 
 	{
-		v += GetPosition();
-		SetPosition(v);
+		// Position (world)
+		SetPosition(v+GetPosition());
+		
+		// Vertices
 		TripleVec_Addition(mVertexPool, v.mVec);
+
+		// Bounding Vol
+		mBoundingVolume.mSphere.mCenter[0] += v.mVec[0];
+		mBoundingVolume.mSphere.mCenter[1] += v.mVec[1];
+		mBoundingVolume.mSphere.mCenter[2] += v.mVec[2];
+		mBoundingVolume.mBox.mMax[0] += v.mVec[0];
+		mBoundingVolume.mBox.mMax[1] += v.mVec[1];
+		mBoundingVolume.mBox.mMax[2] += v.mVec[2];
+		mBoundingVolume.mBox.mMin[0] += v.mVec[0];
+		mBoundingVolume.mBox.mMin[1] += v.mVec[1];
+		mBoundingVolume.mBox.mMin[2] += v.mVec[2];
 	}
 
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
@@ -820,7 +833,65 @@ public:
 	void TransformVertices(Matrix &mat)
 	{
 		TripleVec_Transform(mVertexPool, mat);
+
+		// Transform BV too, now
+		//vec3_t min, max;
+		//GetBBox(min, max);
+		//mat.Multiply3v(min);
+		//mat.Multiply3v(max);
+		//SetBBox(min, max);
+		mInitBoundingVol = false;
+		UpdateBoundingVolume(); // Handles rotations correctly ( keeps AABB )
 	}
+
+
+	void UpdateBoundingVolume()
+	{
+		vec3_t min;
+		vec3_t max;
+		vec3_t xyz;
+		bool update = false;
+
+
+		for ( uint32 i = 0, count = mVertices.size(); i < count; ++i )
+		{
+			if (!mVertices[i])
+				continue;
+
+			GetVertexArrayPos(mVertices[i]->mVertexIndex, xyz);
+
+			// Adjust bounding volume in loop to handle gaps
+			if (!mInitBoundingVol)
+			{
+				mInitBoundingVol = true;
+				SetBBox(xyz, xyz);
+				continue;
+			}
+
+			GetBBox(min, max);
+
+			for (uint32 i = 0; i < 3; ++i)
+			{
+				if (xyz[i] < min[i])
+				{
+					min[i] = xyz[i];
+					update = true;
+				}
+				else if (xyz[i] > max[i])
+				{
+					max[i] = xyz[i];
+					update = true;
+				}
+			}
+
+			if (update)
+			{
+				update = false;
+				SetBBox(min, max);
+			}
+		}
+	}
+
 
 	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
 	{
