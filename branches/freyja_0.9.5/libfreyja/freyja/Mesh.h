@@ -840,6 +840,12 @@ public:
 		}
 
 		// Adjust bounding volume
+		if (!mInitBoundingVol)
+		{
+			mInitBoundingVol = true;
+			SetBBox(xyz, xyz);
+		}
+		else
 		{
 			vec3_t min;
 			vec3_t max;
@@ -1090,6 +1096,8 @@ private:
 	char mName[mNameSize];  // Human readable name of mesh
 
 	index_t mUID;
+
+	bool mInitBoundingVol;
 
 	uint32 mFlags;
 
