@@ -2052,14 +2052,14 @@ bool FreyjaControl::event(int command)
 	case eCamera:
 		mRender->toggleFlag(FreyjaRender::RENDER_CAMERA);
 		freyja_print("Camera rendering [%s]", 
-					(mRender->getFlags() & FreyjaRender::RENDER_CAMERA) ? 
+					(GetViewFlags() & FreyjaRender::RENDER_CAMERA) ? 
 					"ON" : "OFF");
 		break;
 
 	case eViewports:
 		mRender->toggleFlag(FreyjaRender::fViewports);
 		freyja_print("Viewport rendering [%s]", 
-					(mRender->getFlags() & FreyjaRender::fViewports) ? 
+					(GetViewFlags() & FreyjaRender::fViewports) ? 
 					"ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2176,7 +2176,7 @@ bool FreyjaControl::event(int command)
 	case eRenderBbox:
 		mRender->toggleFlag(FreyjaRender::RENDER_BBOX);
 		freyja_print("BoundingBox rendering [%s]", 
-					(mRender->getFlags() & FreyjaRender::RENDER_BBOX) ? 
+					(GetViewFlags() & FreyjaRender::RENDER_BBOX) ? 
 					"ON" : "OFF");
 		break;
 
@@ -2673,7 +2673,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_BONETAG:
 		mRender->toggleFlag(FreyjaRender::RENDER_BONES);
 		freyja_print("Bone Rendering [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_BONES) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_BONES) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2681,7 +2681,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_POINTS:
 		mRender->toggleFlag(FreyjaRender::RENDER_POINTS);
 		freyja_print("Point Rendering [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_POINTS) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_POINTS) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2689,7 +2689,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_WIREFRAME:
 		mRender->toggleFlag(FreyjaRender::RENDER_WIREFRAME);
 		freyja_print("Wireframe Rendering [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2697,7 +2697,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_FACE:
 		mRender->toggleFlag(FreyjaRender::RENDER_FACE);
 		freyja_print("Face Rendering [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_FACE) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_FACE) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2705,16 +2705,15 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_NORMALS:
 		mRender->toggleFlag(FreyjaRender::RENDER_NORMALS);
 		freyja_print("Normal Rendering [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_NORMALS) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_NORMALS) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_RENDER_LIGHTING:
-		mRender->toggleFlag(FreyjaRender::RENDER_NORMAL);
 		mRender->toggleFlag(FreyjaRender::RENDER_LIGHTING);
 		freyja_print("GL Lighting is [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_LIGHTING) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_LIGHTING) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2722,7 +2721,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_TEXTURE:
 		mRender->toggleFlag(FreyjaRender::RENDER_TEXTURE);
 		freyja_print("Texture rendering is [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_TEXTURE) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_TEXTURE) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2730,7 +2729,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_MATERIAL:
 		mRender->toggleFlag(FreyjaRender::RENDER_MATERIAL);
 		freyja_print("Material rendering is [%s]", 
-					 (mRender->getFlags() & FreyjaRender::RENDER_MATERIAL) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_MATERIAL) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -2738,7 +2737,7 @@ bool FreyjaControl::event(int command)
 	case FREYJA_MODE_RENDER_GRID:
 		mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
 		freyja_print("Edit Grid rendering [%s]",
-					 (mRender->getFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
+					 (GetViewFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -3477,19 +3476,22 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 		freyja_print("! Cursor was released.");
 	}
 
-	if (!btn && !state && mCursor.GetMode() == Freyja3dCursor::Rotation)
+	if (!btn && !state && 
+		GetControlScheme() == eScheme_Model &&
+		mCursor.GetMode() == Freyja3dCursor::Rotation)
 	{
 		switch (GetObjectMode())
 		{
 		case tMesh:
-			freyja_print("! Mesh[%i] Rotate %f %f %f",
-						 GetSelectedMesh(),
-						 mCursor.mRotate.mVec[0],
-						 mCursor.mRotate.mVec[1],
-						 mCursor.mRotate.mVec[2]);
+			if (mToken)
 			{
+				freyja_print("! Mesh[%i] Rotate %f %f %f",
+							 GetSelectedMesh(),
+							 mCursor.mRotate.mVec[0],
+							 mCursor.mRotate.mVec[1],
+							 mCursor.mRotate.mVec[2]);
+
 				// Mongoose - Does transform, undo, etc for ya, bub
-				mToken = true;
 				Transform(GetObjectMode(), fRotate, 
 						  mCursor.mRotate.mVec[0],
 						  mCursor.mRotate.mVec[1],
@@ -4402,23 +4404,21 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
-	const float t = 1.0f, m = 1.0f;
-	//float xr, yr, zr;
+	const float t = 0.5f, m = 1.0f;
 	float xf, yf, zf;
 	int swap;
-	freyja_transform_action_t rotate;
 
 
 	/* Mongoose: Compute a relative movement value too here */
 	swap = x;
 	x = -y;
 	y = -swap;
-	
+
 	switch (plane)
 	{
 	case PLANE_XY:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		yf = -((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0.0f;
 		break;
 
@@ -4442,51 +4442,27 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	switch (mObjectMode)
 	{
 	case tBone:
-//#define EDIT_LIKE_BONE_0_9_3
-#ifdef EDIT_LIKE_BONE_0_9_3
-		getBoneRotation(&xr, &yr, &zr);
-		setBoneRotation(xr + xf, yr + yf, zr + zf);
-		getBoneRotation(&xr, &yr, &zr);
-
-		if (xr > 180.0f)
-			setBoneRotation(-180.0f, yr, zr);
-
-		if (xr > 180.0f)
-			setBoneRotation(xr, -180.0f, zr);
-
-		if (xr > 180.0f)
-			setBoneRotation(xr, yr, -180.0f);
-#else
 		{
-			const vec_t scale = 2.0f;
 			vec3_t xyz;
 
 			freyjaGetBoneRotationEuler3fv(GetSelectedBone(), xyz);
-			xyz[0] += HEL_DEG_TO_RAD(xf*scale);
-			xyz[1] += HEL_DEG_TO_RAD(yf*scale);
-			xyz[2] += HEL_DEG_TO_RAD(zf*scale);
-		
-			// FIXME: Limit range -pi/2 to pi/2
+
+			xyz[0] += HEL_DEG_TO_RAD(xf);
+			xyz[1] += HEL_DEG_TO_RAD(yf);
+			xyz[2] += HEL_DEG_TO_RAD(zf);
 
 			freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
-			//freyjaPrintMessage("bone[%i].setEuler(%f, %f, %f)", 
-			//                  GetSelectedBone(), xyz[0], xyz[1], xyz[2]);
 		}
-
-		rotate = fRotate;
-
-		old_x = x;
-		old_y = y;
-		return;
-#endif
 		break;
 
 
 	case tMesh:
 		{
 			Vec3 r(xf, yf, zf);
+
 			mCursor.mRotate += r;
 
+			// Interface is in degrees, while backend is radians
 			if (mCursor.mRotate.mVec[0] > 360.0f) 
 				mCursor.mRotate.mVec[0] -= 360.0f;
 
@@ -4498,21 +4474,21 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 			mCursor.SetMode(Freyja3dCursor::Rotation);
 
-			// handle ctrl selects ( select without leaving rotate mode )
+			// This handles ctrl selects ( select without leaving rotate mode )
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-			if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
+			if (m) 
+			{
+				mCursor.mPos = m->GetBoundingVolumeCenter();
+			}
 
-			//rotate = fRotateAboutPoint;
-			//freyjaModelMeshTransform3fv(0,GetSelectedMesh(), fRotate, r.mVec);
+			mToken = true;
 		}
 		break;
 
 
 	default:
-		rotate = fRotate;
+		;
 	}
-
-	//Transform(mObjectMode, rotate, xf, yf, zf);
 	
 	old_x = x;
 	old_y = y;
@@ -4631,15 +4607,27 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 
 			switch (GetSelectedView())
 			{
-			case PLANE_XY: // front
+			case PLANE_BACK:
 				mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
 				break;
 				
-			case PLANE_XZ: // top
+			case PLANE_BOTTOM:
 				mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
 				break;
 				
-			case PLANE_ZY: // side
+			case PLANE_RIGHT:
+				mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
+				break;
+
+			case PLANE_FRONT: // front, xy
+				mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
+				break;
+				
+			case PLANE_TOP: // top, xz
+				mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
+				break;
+				
+			case PLANE_LEFT: // left, zy
 				mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
 				break;
 				
@@ -5157,24 +5145,24 @@ void eSetZoomLevel(vec_t f)
 
 void eRenderToggleBoneZClear()
 {
-	if (FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderBonesClearedZBuffer)
+	if (FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderBonesClearedZBuffer)
 		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderBonesClearedZBuffer);
 	else
 		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderBonesClearedZBuffer);
 
 	freyja_print("Bone rendering with cleared Z buffer [%s]",
-				(FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderBonesClearedZBuffer) ? "on" : "off");
+				(FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderBonesClearedZBuffer) ? "on" : "off");
 }
 
 void eRenderToggleGridZClear()
 {
-	if (FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderGridClearedZBuffer)
+	if (FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderGridClearedZBuffer)
 		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderGridClearedZBuffer);
 	else
 		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderGridClearedZBuffer);
 
 	freyja_print("Grid rendering with cleared Z buffer [%s]",
-				(FreyjaRender::mSingleton->getFlags() & FreyjaRender::fRenderGridClearedZBuffer) ? "on" : "off");
+				(FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderGridClearedZBuffer) ? "on" : "off");
 }
 
 

@@ -184,14 +184,8 @@ void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz)
 
 void freyjaBoneRotateEuler3f(index_t boneIndex, vec_t p, vec_t h, vec_t r)
 {
-	Bone *b = Bone::GetBone(boneIndex);
-
-	if (b)
-	{
-		MARK_MSGF(" ! set %f %f %f", p, h, r);
-		b->mRotation = Quaternion(p, h, r);
-		b->UpdateBindPose();
-	}
+	vec3_t phr = {p, h, r};
+	freyjaBoneRotateEuler3fv(boneIndex, phr);
 }
 
 
@@ -201,7 +195,6 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 
 	if (b)
 	{
-		//MARK_MSGF(" ! set %f %f %f", phr[0], phr[1], phr[2]);
 		b->mRotation.setByEulerAngles(phr);
 		b->UpdateBindPose();
 	}
@@ -211,6 +204,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 void freyjaBoneRotateQuat4f(index_t boneIndex,
 							vec_t w, vec_t x, vec_t y, vec_t z)
 {
+#if 0
 	Bone *b = Bone::GetBone(boneIndex);
 
 	if (b)
@@ -218,6 +212,10 @@ void freyjaBoneRotateQuat4f(index_t boneIndex,
 		b->mRotation = Quaternion(w, x, y, z);
 		b->UpdateBindPose();
 	}
+#else
+	vec4_t wxyz = {w,x,y,z};
+	freyjaBoneRotateQuat4fv(boneIndex, wxyz);
+#endif
 }
 
 
