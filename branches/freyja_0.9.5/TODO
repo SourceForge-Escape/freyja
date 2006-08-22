@@ -1,78 +1,100 @@
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO  ( Last Update: 2004.11.01 )
-  Author   : Terry 'Mongoose' Hendrix II
-  Project  : freyja
+ TODO 
 
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+ Freyja 0.10.x ( Development branch merge )
+ =====================================================================
+
+ - Merge with 0.10 libfreyja
+   - Break 0.9.x ABI / API and replace with 0.10 ABI/API
+   - Backport freyja dancer keyframes
+   - Seperate smoothing groups and clusters ( vertex groups )
+     - Smoothing groups as vertex flags
+   - Move vertex 'frames' to keyframes of vertex transforms
+   - Merge new freyja 0.10 editor features and plugins
+   - Storage of bone rotation as euler, rotation with quats ( all quats now )
+   - Curves support for keyframes
+
+ - Merge free and view edit window interfaces
+   - Refactor to use true singletons/other patterns where systems require
+     - Break up Render/Control into 'controls with views'
+   - Finish up viewport editing test
+   - Rewrite renderer to use viewports for views correctly
+   - Billboard/sprite support outside edit data for user diagrams and icons
+   - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
+     - Hook up 3d cursor modes to offset bboxes for the cursor's axies
+     - Run id maps over types to allow undo/redo to allow for cut/copy/paste 
 
 
- TODO
+ Freyja 0.9.5 ( Development branch )
+ =====================================================================
 
- General
-	o Editor plugins in freyja using freyja_append_eventid, event system, and freyja_append_item_to_menu
-	o Keyframe editor
-	o Merge texture / material systems -- let mesh just bind to material id
-	  materials use solid color, texture, multitexture, and/or material data
-	o Polygon winding control ccw/cw/etc
-	o Let users save preferences
-	o Set recent files limit with prefs
-	o Remove tab controlled file menu stuff
-	o Model/Mesh editing with decentralized data structures
-	o Make a command pattern test with colors system
-	o Material plugins, Cg shader test
-	o Finish Freyja editor interactive plugins 
-	o Add free camera editing back
-	o Make sure order doesn't matter where Vector<> is used
-	o Observer and Command patterns
-	o Event logger system Undo / Redo / Macro / Playback
-	o Hard ABI with stricter event control
+ - Documentation
+
+ - Full featured skinning system
+	- Bbox/Sphere/Magnet vertex picker for weighting
+
+ - New Animation
+	- Keyframe editor that makes sense unlike 0.8.x series
+	- Various joint types: hinge, b&s, etc
+	- IK solver for skeletal animation
+	- Deform skeletal mesh animation with animation blending
+	- Timer for animation playback and keyframe timing
+
+ - Event logger system refinement { Undo, Redo, Macro, Playback }
+	- Enforce usage of Observer and Command patterns for all events
+
+ - Paint interface
+	- DMAP geometery brush interface
+	- Point vertex color/paint
+	- Paint on texture with GIMP interface hooks
+
+ - Rendering
+	- Animated textures
+	- Normal map, DOT3, and maybe matrix palette skinning support if begged
+	- glColorMaterial use
+	- Shadow maps
+	- Different skyboxes/floors for animation view
+
+ - Interactive Tristrip creation tool to replace the old point and connect
+   polgon creation some people seem to love
+
+ - Pak browser for tombraider / UT paks ( Gtk+ list? )
+
+ - GNOME MIME setup script
+
+ - Perferences, init.mlisp
+
+ - Polygon winding control ccw/cw/etc
+	
+ - Add camera editing back
 
  libmgtk
-	o Port to C# with gtk# and cocoa# bindings
-	o Tree widgets (tree eAction )
-	o Mlisp doesn't lookup symbols for like "true" if just setq
-	o Milsp wish list: garbage collection, fully featured lisp
+	- Merge Resource and Mlisp
+	- Port to C# with gtk# and cocoa# bindings
+	- Tree widget abstraction
+	- Mlisp doesn't lookup symbols for like "true" if just setq
+	- Mlisp wish list: garbage collection, fully featured lisp
 
  libfreyja
-	o Documentation
-	o Add vertex/polygon list based texcoord mapping methods to ABI
-	o Add subdiv algorithms like catmull-clark, n-patches, etc
-	o Add polymesh CSG back 
-	o Subdivision Loop and Sabin/Doo surfaces
-	o Mesh smoothing
-	o Normal smoothing
-	o Polygon groups
+	- Documentation
+	- Add vertex/polygon list based texcoord mapping methods to ABI
+	- Add subdiv algorithms like catmull-clark, n-patches, etc
+	- Add polymesh CSG back 
+	- Subdivision Loop and Sabin/Doo surfaces
+	- Mesh smoothing
+	- Normal smoothing
+	- Polygon groups
 
  plugins
-	o Finish Morrowind import plugin (nif4)
-	o Add support for 'nvidia' ASE skel animation (ase)
-	o Finish PSK export (PSKModel)
-	o UTX export (UTPackage)
+	- Editor plugins in freyja using:
+	  freyja_append_eventid, event system, and freyja_append_item_to_menu
+	- Finish LineageII pak vfs plugin
+	- Add Oblivion plugin?
+	- Finish Morrowind import plugin (nif4)
+	- Add support for 'nvidia' ASE skel animation (ase)
+	- Finish PSK export (PSKModel)
+	- UTX export (UTPackage)
+	- Material plugins, Cg shader test
 
- Freyja
-	o Make clear texture export option
-	o Remove context sensitive new/open/save go back to old per tab toolbar
-	  it confused the hell out of users
-	o Documentation
-	o Normal map, DOT3, and matrix palette skinning support
-	o glColorMaterial use
-	o Polygon creation from vertex selection should be seperate from creation
-	  by generating vertices to make a polygon
-	o Interactive Tristrip creation tool
-	o Animated textures
-	o Bone name editor / Id picker from tree
-	o Deform skeletal mesh animation with animation blending
-	o Bbox vertex picker for bone grouping
-	o IK solver use for skeletal animation
-	o Ray based pick face
-	o Pak browser for tombraider / UT paks ( Gtk+ list? )
-	o Timer for animation playback and keyframe timing
-	o Skinning system
-	o Point vertex color/paint
-	o Color picker dialog use
-	o DMAP geometery brush interface
-	o GNOME MIME setup script
-	o Perferences, init.mlisp
-	o Recent files / Home dir
-	o Different skyboxes/floors for animation view
+
+
