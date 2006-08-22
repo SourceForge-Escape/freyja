@@ -4036,7 +4036,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 				if (!m)
 					continue;
 
-				if (m->Intersect(FreyjaRender::mTestRay, t))
+				if (m->IntersectPerFace(FreyjaRender::mTestRay, t))
 				{
 					if (t < best)
 					{
@@ -4069,7 +4069,6 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 	}
 }
-
 
 
 void FreyjaControl::Transform(object_type_t obj, 
@@ -4120,7 +4119,6 @@ void FreyjaControl::Transform(object_type_t obj,
 		{
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
-			mToken = false;
 		}
 
 		{

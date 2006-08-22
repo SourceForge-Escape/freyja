@@ -294,6 +294,67 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 }
 
 
+bool Mesh::IntersectPerFace(Ray &r, vec_t &t)
+{
+	if (!Intersect(r, t))
+		return false;
+
+	vec_t bestDist = 99999.0f;
+	r.mDir.normalize();
+	int32 face0 = -1;
+	
+	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
+	{
+		Face *f = GetFace(i);
+		
+		if (!f) 
+			continue;
+	
+		// Quick and dirty hit test that pretends you can 
+		// pusedo tesselate a face and get as good results
+		bool intersect = false;
+					
+		if (f->mIndices.size() > 2)
+		{
+			uint32 jCount = f->mIndices.size();
+			Vec3 a, b, c, tuv;
+
+			GetVertexPos(f->mIndices[0], a.mVec);
+			GetVertexPos(f->mIndices[1], b.mVec);
+
+
+			for (uint32 j = 2; j < jCount; ++j)
+			{
+				GetVertexPos(f->mIndices[j], c.mVec);
+				intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tuv.mVec);
+
+				if (intersect)
+				{
+					break;
+				}
+			
+				a = b;
+				b = c;
+			}
+
+			if (intersect)
+			{
+				vec_t dist = tuv.mVec[0];
+
+				if (face0 == -1 || dist < bestDist)
+				{
+					t = bestDist = dist;
+					face0 = i;
+				}
+			}
+		}
+	}
+
+	// Did we have a 'best hit'?
+	return (face0 > -1);
+}
+
+
 bool Mesh::Intersect(Ray &r, vec_t &t)
 {
 	r.mDir.normalize();
