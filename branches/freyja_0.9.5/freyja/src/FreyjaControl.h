@@ -642,7 +642,7 @@ private:
 		switch (action)
 		{
 		case fTranslate:
-			v = mCursor.mPos;
+			v = mCursor.mPos - mCursor.mLastPos;
 			break;
 
 		case fRotateAboutPoint:
