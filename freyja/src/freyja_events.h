@@ -90,7 +90,7 @@ typedef enum {
 	eMeshTexcoordCylindrical,
 	eMeshTesselate,
 	eSetMaterialTexture,
-	eTransformMeshPivot,
+	eTransformModel,
 	eAnimationNext,
 	eAnimationPrev,
 	eAnimationSlider,

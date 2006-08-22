@@ -73,6 +73,32 @@ class ActionMeshTranslateExt : public Action
 };
 
 
+class ActionModelTransform : public Action
+{
+ public:
+	ActionModelTransform(index_t model, freyja_transform_action_t a, Vec3 v) :
+		Action(),
+		mModel(model),
+		mAction(a),
+		mXYZ(v)
+	{}
+
+	virtual bool Redo() { return false; }
+
+	virtual bool Undo() 
+	{
+		for (uint32 i = 0, n = freyjaModelGetMeshCount(mModel); i < n; ++i)
+			freyjaModelMeshTransform3fv(mModel, i, mAction, mXYZ.mVec);
+
+		return true;
+	}
+
+	index_t mModel;                     /* Which model? */
+	freyja_transform_action_t mAction;  /* Type of transform */
+	Vector3d mXYZ;                      /* Storage for 3d transform event */
+};
+
+
 class ActionMeshTransform : public Action
 {
  public:

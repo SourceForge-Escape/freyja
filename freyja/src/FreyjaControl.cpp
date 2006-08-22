@@ -2260,6 +2260,10 @@ bool FreyjaControl::event(int command)
 		mObjectMode = tMesh;
 		break;
 
+	case eTransformModel:
+		mObjectMode = tModel;
+		break;
+
 	case eTransformBone:
 		mObjectMode = tBone;
 		break;
@@ -4109,6 +4113,20 @@ void FreyjaControl::Transform(object_type_t obj,
 		}
 
 		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+		break;
+
+	case tModel:
+		if (mToken)
+		{
+			Action *a = new ActionModelTransform(0, action, u);
+			ActionModelModified(a);
+			mToken = false;
+		}
+
+		{
+			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
+				freyjaModelMeshTransform3fv(0, i, action, v.mVec);
+		}
 		break;
 
 	default:
