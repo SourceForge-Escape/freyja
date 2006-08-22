@@ -159,6 +159,8 @@ class Freyja3dCursor
 
 	axis_t mAxis;
 
+	Vector3d mLastPos;
+
 	Vector3d mPos;
 
 	Vector3d mScale;

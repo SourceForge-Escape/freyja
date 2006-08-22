@@ -1886,8 +1886,6 @@ bool FreyjaControl::event(int command)
 		freyja_print("Importing is handled automatically from Open...");
 		break;
 
-
-
 	case eSaveFile:
 		switch (GetControlScheme())
 		{
@@ -3066,6 +3064,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			vec_t t;
 
 			mCursor.mAxis = Freyja3dCursor::eNone;
+			mCursor.mLastPos = mCursor.mPos;
 
 			switch (GetSelectedView())
 			{
@@ -3301,7 +3300,6 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			default:
 				;
 			}
-
 		}
 	}
 }
