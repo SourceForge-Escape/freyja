@@ -377,7 +377,7 @@
 					(hbox 1 0 0 1 0
 						
 						(optionmenu	eEvent	eTransformMenu
-							(menu_item	"Model"		eEvent eNone); eTransformModel)
+							(menu_item	"Model"		eEvent	eTransformModel)
 							(menu_item	"Mesh"		eEvent eTransformMesh)
 							(menu_item	"Selected Meshes"	eEvent eNone);eTransformSelectedMeshes)
 							(menu_item	"Face"		eEvent eTransformFace)
@@ -386,15 +386,16 @@
 							(menu_item	"Selected Vertices"	eEvent eTransformSelectedVertices)
 							(menu_item	"Bone"		eEvent eTransformBone)
 							(menu_item	"Group"		eEvent eTransformGroup)
-							
-							(menu_item	"MeshPivot"	eEvent eTransformMeshPivot))
+						) ; optionmenu
 
 						(optionmenu	eEvent	eObjectMenu
 							(menu_item "Move"    eEvent	eMoveObject)
 				  			(menu_item "Rotate"  eEvent	eRotateObject)
 				  			(menu_item "Scale"   eEvent	eScaleObject)
 				  			(menu_item "Select"  eEvent	eSelect)
-				  			(menu_item "Unselect"  eEvent	eUnselect)))
+				  			(menu_item "Unselect"  eEvent	eUnselect)
+						) ; optionmenu
+					) ; hbox
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -420,8 +421,8 @@
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
 
-					(hbox 1 0 0 1 0 
-						(button "Mesh from Patch"  eEvent eGeneratePatchMesh))
+					;(hbox 1 0 0 1 0 
+					;	(button "Mesh from Patch"  eEvent eGeneratePatchMesh))
 
 					;; Animation ;;;;;;;;;;;;;;;
 
