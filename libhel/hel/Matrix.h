@@ -354,7 +354,7 @@ class Matrix
 	void translate(vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Translates ( moves ) object in 3 space
+	 * Post : This matrix becomes the translation x,y,z
 	 *
 	 *-- History ------------------------------------------
 	 *
@@ -365,7 +365,7 @@ class Matrix
 	void translate(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Translates ( moves ) object in 3 space
+	 * Post : This matrix becomes the translation x,y,z
 	 *
 	 *-- History ------------------------------------------
 	 *
