@@ -475,8 +475,16 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if 'hit', and <t> the time along ray
+	 *        This checks the bsphere, then bbox for collision.
 	 ------------------------------------------------------*/
 
+	bool IntersectPerFace(Ray &r, vec_t &t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if 'hit', and <t> the time along ray
+	 *        This checks per face for the final validation on 
+	 *        top of just bounding volume checks.
+	 ------------------------------------------------------*/
 	
 	bool IntersectClosestFace(Ray &r, int &face0) 
 	{ return IntersectFaces(r, face0, false); }
