@@ -3318,6 +3318,56 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	mModKey = mod;
 
 
+	if (!btn && !state && mToken && GetControlScheme() == eScheme_Model)
+	{
+		switch (GetObjectMode())
+		{
+		case tModel:
+			{
+				Vec3 v = GetCursorData(GetEventAction());
+
+				freyja_print("! Model[%i] transform %i %f %f %f",
+							 0, GetEventAction(),
+							 v.mVec[0], v.mVec[1], v.mVec[2]);
+
+				// Mongoose - Does transform, undo, etc for ya, bub
+				Transform(GetObjectMode(), GetEventAction(),
+						  v.mVec[0], v.mVec[1], v.mVec[2]);
+					
+				// Reset transforms in the cursor
+				mCursor.mRotate = Vec3(0,0,0);
+				mCursor.mScale = Vec3(1,1,1);
+				//mCursor.mPos = Vec3(0,0,0);
+			}			
+			break;
+
+		case tMesh:
+			if (mCursor.GetMode() == Freyja3dCursor::Rotation)
+			{
+				freyja_print("! Mesh[%i] Rotate %f %f %f",
+							 GetSelectedMesh(),
+							 mCursor.mRotate.mVec[0],
+							 mCursor.mRotate.mVec[1],
+							 mCursor.mRotate.mVec[2]);
+
+				// Mongoose - Does transform, undo, etc for ya, bub
+				Transform(GetObjectMode(), fRotate, 
+						  mCursor.mRotate.mVec[0],
+						  mCursor.mRotate.mVec[1],
+						  mCursor.mRotate.mVec[2]);
+
+				// Reset rotation transform in the cursor
+				mCursor.mRotate = Vec3(0,0,0);
+			}
+			break;
+
+
+		default:
+			;
+		}
+	}
+
+
 	/* Handle mode */
 	/* FIXME: These should be seperate 'windows' with their own 
 	 * MouseEdit() methods or the like later */
@@ -3480,41 +3530,9 @@ bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
 		freyja_print("! Cursor was released.");
 	}
 
-	if (!btn && !state && 
-		GetControlScheme() == eScheme_Model &&
-		mCursor.GetMode() == Freyja3dCursor::Rotation)
-	{
-		switch (GetObjectMode())
-		{
-		case tMesh:
-			if (mToken)
-			{
-				freyja_print("! Mesh[%i] Rotate %f %f %f",
-							 GetSelectedMesh(),
-							 mCursor.mRotate.mVec[0],
-							 mCursor.mRotate.mVec[1],
-							 mCursor.mRotate.mVec[2]);
-
-				// Mongoose - Does transform, undo, etc for ya, bub
-				Transform(GetObjectMode(), fRotate, 
-						  mCursor.mRotate.mVec[0],
-						  mCursor.mRotate.mVec[1],
-						  mCursor.mRotate.mVec[2]);
-
-				// Reset rotation transform in the cursor
-				mCursor.mRotate = Vec3(0,0,0);
-			}
-			break;
-
-		default:
-			freyja_print("! Cursor would send rotate event %f %f %f.", 
-						 mCursor.mRotate.mVec[0],
-						 mCursor.mRotate.mVec[1],
-						 mCursor.mRotate.mVec[2]);
-		}
-	}
-
-	if (MouseEdit(btn, state, mod, x, y)) return true;
+	// New mouse Edit event handler
+	if (MouseEdit(btn, state, mod, x, y)) 
+		return true;
 
 	EventMode mode = mEventMode;
 	mMouseButton = btn;
@@ -4119,9 +4137,7 @@ void FreyjaControl::Transform(object_type_t obj,
 		{
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
-		}
 
-		{
 			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
 				freyjaModelMeshTransform3fv(0, i, action, v.mVec);
 		}
@@ -4241,6 +4257,12 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	switch (mObjectMode)
 	{
+	case tModel: 
+		{
+			mToken = true;
+		}
+		break;
+
 	case tMesh:
 		{	
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
@@ -4500,9 +4522,27 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		}
 		break;
 
+	case tModel:
+		mToken = true;
 
 	default:
-		;
+		{
+			Vec3 r(xf, yf, zf);
+
+			mCursor.mRotate += r;
+
+			// Interface is in degrees, while backend is radians
+			if (mCursor.mRotate.mVec[0] > 360.0f) 
+				mCursor.mRotate.mVec[0] -= 360.0f;
+
+			if (mCursor.mRotate.mVec[1] > 360.0f)
+				mCursor.mRotate.mVec[1] -= 360.0f;
+
+			if (mCursor.mRotate.mVec[2] > 360.0f)
+				mCursor.mRotate.mVec[2] -= 360.0f;
+
+			mCursor.SetMode(Freyja3dCursor::Rotation);
+		}
 	}
 	
 	old_x = x;

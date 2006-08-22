@@ -631,6 +631,65 @@ private:
 	 * Post : Wrapper for view flags accessor
 	 ------------------------------------------------------*/
 
+	Vec3 GetCursorData(freyja_transform_action_t action)
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		Vec3 v;
+
+		switch (action)
+		{
+		case fTranslate:
+			v = mCursor.mPos;
+			break;
+
+		case fRotateAboutPoint:
+		case fRotate:
+			v = mCursor.mRotate;
+			break;
+
+		case fScaleAboutPoint:
+		case fScale:
+			v = mCursor.mScale;
+			break;
+
+		default:
+			DEBUG_MSG("\tInvalid mode\n");;
+		}
+
+		return v;
+	}
+
+	freyja_transform_action_t GetEventAction()
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		switch (mEventMode)
+		{
+		case modeMove:
+			return fTranslate;
+			break;
+
+		case modeRotate:
+			return fRotate;
+			break;
+
+		case modeScale:
+			return fScale;
+			break;
+
+		default:
+			;
+		}
+
+		DEBUG_MSG("\tUnknown Action\n");
+		return fScaleAboutPoint;
+	}
+
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators

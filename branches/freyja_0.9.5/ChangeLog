@@ -34,7 +34,9 @@
  =====================================================================
 
  20060820 Mongoose
- - Mesh selection
+ - Removed some old classes no longer needed
+ - Model transforms
+ - Mesh selection ( with per face collision )
  - Finishing up testing of some features before view abstraction
  - UV editor fixes
  - Material editor fixes 
