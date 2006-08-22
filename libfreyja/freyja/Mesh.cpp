@@ -32,6 +32,7 @@ index_t Mesh::mNextUID = 0;
 
 Mesh::Mesh() :
 	mUID(mNextUID++),
+	mInitBoundingVol(false),
 	mFlags(0),
 	mMaterialIndex(0),
 	mPosition(),
@@ -68,6 +69,7 @@ Mesh::Mesh() :
 
 Mesh::Mesh(const Mesh &mesh) :
 	mUID(mNextUID++),
+	mInitBoundingVol(false),
 	mFlags(mesh.mFlags),
 	mMaterialIndex(mesh.mMaterialIndex),
 	mPosition(mesh.mPosition),
