@@ -45,7 +45,6 @@ enum rotate_flags {
 	Y_F = 2,
 	Z_F = 4
 };
-
 void getOpenGLViewport(int *viewportXYWH); // int[4]
 void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
@@ -83,7 +82,7 @@ public:
 		RENDER_MATERIAL         = 128,
 		RENDER_CAMERA           = 256,        /* Enable panning  */
 		RENDER_BBOX             = 512,        /* Rendering bounding box */
-		RENDER_NORMAL           = 1024, 
+		fDrawBoundingVolumes    = 1024, 
 		RENDER_NORMALS          = 2048, 
 		fHightlightPolygonWireframe = 4096, 
 		RENDER_BBOX_SEL         = 8192,
@@ -126,7 +125,7 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	unsigned int getFlags();
+	unsigned int GetFlags() { return mRenderMode; }
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : Returns control flags for model
@@ -161,6 +160,8 @@ public:
 	 ------------------------------------------------------*/
 
 	unsigned int GetMode() { return mRenderMode; }
+
+	unsigned int GetViewMode() { return mRenderMode; }
 
 	const vec_t &getNearHeight() { return mScaleEnv; } 
 	/*------------------------------------------------------

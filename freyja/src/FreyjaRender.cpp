@@ -100,7 +100,7 @@ FreyjaRender::FreyjaRender() :
 	mFovY(40.0f),
 	mNearHeight(20.0f)
 {
-	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer;
+	mRenderMode = RENDER_BBOX | fRenderBonesClearedZBuffer | fDrawBoundingVolumes;
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
 	mAngles[2] = 0.0f;
@@ -124,12 +124,6 @@ FreyjaRender::~FreyjaRender()
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
-
-unsigned int FreyjaRender::getFlags()
-{
-	return mRenderMode;
-}
-
 
 void FreyjaRender::getRotation(vec3_t v)
 {
@@ -805,15 +799,22 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		}
 
 
-		vec3_t min, max;
-		m->GetBBox(min, max);
-		mglDrawSelectBox(min, max, WHITE);
-		mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
-						m->GetBoundingVolumeRadius(), 
-						64, 0, false);
-		mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
-						m->GetBoundingVolumeRadius(), 
-						64, 2, false);
+		if (GetFlags() & fDrawBoundingVolumes)
+		{
+			vec3_t min, max;
+
+			// Box
+			m->GetBBox(min, max);
+			mglDrawSelectBox(min, max, WHITE);
+
+			// Sphere
+			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
+							m->GetBoundingVolumeRadius(), 
+							64, 0, false);
+			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
+							m->GetBoundingVolumeRadius(), 
+							64, 2, false);
+		}
 	}
 
 	if (mRenderMode & RENDER_POINTS)

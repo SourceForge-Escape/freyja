@@ -521,6 +521,7 @@ class FreyjaControl
 
 	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
 
+	uint32 GetViewMode() { return mRender->GetViewMode(); }
 
 	int GetResourceInt(const char *symbol)
 	{
@@ -610,7 +611,6 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
 	void GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z);
 	/*------------------------------------------------------
 	 * Pre  : X and Y are the mouse position
@@ -622,6 +622,12 @@ private:
 	 *
 	 * 2000.08.25: 
 	 * Mongoose - Created from ScreenToWorld from GooseEgg
+	 ------------------------------------------------------*/
+
+	uint32 GetViewFlags() { return mRender->GetFlags(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Wrapper for view flags accessor
 	 ------------------------------------------------------*/
 
 
@@ -640,7 +646,8 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	// Collection of some hasty merging 
+	// Collection of some hasty merging  ///////////////////////////
+
 	bool SaveKeyFrame(char const *filename)
 	{
 		char filename2[512];
