@@ -117,8 +117,8 @@
 			(menu_seperator)
 			(menu_item "_Grid"			eEvent	eRenderGrid)
 			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
-			(menu_item "_Camera"		eEvent	eCamera)
-			(menu_item "P_atch"			eEvent	eRenderPatch)
+			;(menu_item "_Camera"		eEvent	eCamera)
+			;(menu_item "P_atch"			eEvent	eRenderPatch)
 			(submenu "_Mesh"
 				(menu_item "_Points"	eEvent	eRenderVertex)
 				(menu_item "_Wireframe"	eEvent	eRenderWireframe)
@@ -154,14 +154,20 @@
 
 				) ;; submenu Create
 
-		(submenu "_Tools"
+		(submenu "_Modify"
 
 			;; Transforms
 			(submenu "_Transforms"
-				(menu_item "Move"    "F5"	eMoveObject "gtk-polygon")
-				(menu_item "Rotate"  "F6"	eRotateObject "gtk-polygon")
-				(menu_item "Scale"   "F7"	eScaleObject "gtk-polygon")
-				(menu_item "Select"  "F8"	eSelect "gtk-polygon"))
+				(menu_item "Move"		"F5"	eMoveObject		"gtk-polygon")
+				(menu_item "Rotate"	"F6"	eRotateObject	"gtk-polygon")
+				(menu_item "Scale"		"F7"	eScaleObject	"gtk-polygon")
+				(menu_item "Select"	"F8"	eSelect			"gtk-polygon")
+				(menu_item "Unselect"	"F9"	eUnselect		"gtk-polygon"))
+
+				(submenu "Mesh _UV Mapping"
+					(menu_item "_Planar"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
+					(menu_item "_Cylindrical" eMeshTexcoordCylindrical	"gtk-polygon")
+					(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-polygon"))
 
 			(menu_seperator)
 
@@ -172,6 +178,12 @@
 				;(menu_item "_Extrude"	eEvent  eVertexExtrude)
 			)
 
+			(submenu "V_ertices..."
+				(menu_item "_Unselect" eEvent	eMeshUnselectVertices)
+				(menu_item "Mirror _X"	eEvent	eMeshMirrorX)
+				(menu_item "Mirror _Y"	eEvent	eMeshMirrorY)
+				(menu_item "Mirror _Z"	eEvent	eMeshMirrorZ))
+
 			(submenu "_Face"
 				(menu_item "_New"		eEvent	ePolygonNew)
 				(menu_item "_Select"	eEvent	ePolygonSelect)
@@ -180,16 +192,8 @@
 				(menu_item "_Collapse"	eEvent	eCollapseFace)
 				(menu_item "_Extrude"	"F4"	eExtrude	"gtk-polygon"))
 
-			(submenu "_Vertices..."
-				(menu_item "Mirror_X"	eEvent	eMeshMirrorX)
-				(menu_item "Mirror_Y"	eEvent	eMeshMirrorY)
-				(menu_item "Mirror_Z"	eEvent	eMeshMirrorZ))
-
 			(submenu "_Mesh"
-				(submenu "_UV Texcoord Mapping"
-					(menu_item "_Planar"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
-					(menu_item "_Cylindrical" eMeshTexcoordCylindrical	"gtk-polygon")
-					(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-polygon"))
+
 				(menu_item "_New"		eEvent	eMeshNew)
 				(menu_item "_Delete"	eEvent	eMeshDelete)
 				(menu_item "_Select"	eEvent	eMeshSelect)

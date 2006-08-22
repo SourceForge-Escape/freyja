@@ -4479,9 +4479,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			if (m) 
 			{
 				mCursor.mPos = m->GetBoundingVolumeCenter();
+				mToken = true;
 			}
-
-			mToken = true;
 		}
 		break;
 

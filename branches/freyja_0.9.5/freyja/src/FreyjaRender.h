@@ -128,7 +128,7 @@ public:
 	unsigned int GetFlags() { return mRenderMode; }
 	/*------------------------------------------------------
 	 * Pre  :
-	 * Post : Returns control flags for model
+	 * Post : Returns options flags for view
 	 *
 	 *-- History ------------------------------------------
 	 *
