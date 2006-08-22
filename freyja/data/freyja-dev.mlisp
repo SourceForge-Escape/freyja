@@ -78,9 +78,9 @@
 
 			(menu_seperator)
 
-			(menu_item "_Save Model"			"C-s"	eSaveFileModel	"gtk-save")
+			(menu_item "_Save Model"	"C-s"	eSaveFileModel	"gtk-save")
 			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save,confirm-overwrite=true,"	"gtk-save-as")
-			(menu_item "_Revert Model"     			eRevertFile	"gtk-revert-to-saved")
+			(menu_item "_Revert Model"		eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
 			(menu_item "Proper_ties"		eInfo		"gtk-properties")
@@ -89,7 +89,7 @@
 
 			(menu_seperator)
 
-			(menu_item "_Close"			"C-w"	eCloseFile	"gtk-close")
+			(menu_item "_Close"		"C-w"	eCloseFile	"gtk-close")
 			(menu_item "_Quit"			"C-q"	eShutdown	"gtk-quit"))
 
 
@@ -100,7 +100,7 @@
 			(menu_item "_Redo"			"S-C-z"	eRedo		"gtk-redo")
 			(menu_seperator)
 			(menu_item "Cu_t"     		"C-x"	eCut		"gtk-cut")
-			(menu_item "_Copy" 	    	"C-c"	eCopy		"gtk-copy")
+			(menu_item "_Copy" 	    "C-c"	eCopy		"gtk-copy")
 			(menu_item "_Paste"     	"C-v"	ePaste		"gtk-paste")
 			(menu_item "_Delete"    	"C-d"	eDelete		"gtk-delete")
 			(menu_seperator)
@@ -138,41 +138,46 @@
 				(menu_item "_PolyMesh" 	ePolyMeshBone	"gtk-blanked")))
 
 		(submenu "_Create" 
-				;(submenu "_Primatives"
-				;		(menu_item "_Vertex"		eEvent  eVertexNew)
-				;		(menu_item "_Polygon"		eEvent  ePolygonNew)
-				;		(menu_item "_Bone"			eEvent  eBoneNew))
+				(submenu "_Objects"
+						(menu_item "_Vertex"		eEvent  eVertexNew)
+						(menu_item "_Face"			eEvent  ePolygonNew)
+						(menu_item "_Mesh"			eEvent	eMeshNew)
+						(menu_seperator)
+						(menu_item "_Bone"			eEvent  eBoneNew)
+				)
 
 				(submenu "P_olygon Primatives"
-					(menu_item "_Cube"		eGenerateCube		"gtk-polygon")
-					(menu_item "_Plane"		eGeneratePlane		"gtk-polygon")
-					(menu_item "_Tube"		eGenerateTube		"gtk-polygon")
-					(menu_item "C_ircle"	eGenerateCircle		"gtk-polygon")
-					(menu_item "C_one"		eGenerateCone		"gtk-polygon")
-					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-draw-cylinder")
-					(menu_item "_Sphere"	eGenerateSphere		"gtk-polygon"))
+					(menu_item "_Cube"		eGenerateCube		"gtk-cube")
+					(menu_item "_Plane"	eGeneratePlane		"gtk-plane")
+					(menu_item "_Tube"		eGenerateTube		"gtk-tube")
+					(menu_item "C_ircle"	eGenerateCircle		"gtk-circle")
+					(menu_item "C_one"		eGenerateCone		"gtk-cone")
+					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-cylinder")
+					(menu_item "_Sphere"	eGenerateSphere		"gtk-sphere")
+				)
 
-				) ;; submenu Create
+		) ;; submenu Create
 
 		(submenu "_Modify"
 
 			;; Transforms
 			(submenu "_Transforms"
-				(menu_item "Move"		"F5"	eMoveObject		"gtk-polygon")
-				(menu_item "Rotate"	"F6"	eRotateObject	"gtk-polygon")
-				(menu_item "Scale"		"F7"	eScaleObject	"gtk-polygon")
-				(menu_item "Select"	"F8"	eSelect			"gtk-polygon")
-				(menu_item "Unselect"	"F9"	eUnselect		"gtk-polygon"))
+				(menu_item "Move"		"F5"	eMoveObject		"gtk-move")
+				(menu_item "Rotate"	"F6"	eRotateObject	"gtk-rotate")
+				(menu_item "Scale"		"F7"	eScaleObject	"gtk-scale")
+				(menu_item "Select"	"F8"	eSelect			"gtk-select")
+				(menu_item "Unselect"	"F9"	eUnselect		"gtk-unselect")
+			)
 
-				(submenu "Mesh _UV Mapping"
-					(menu_item "_Planar"	CMD_MISC_GEN_TEXMAP_XY	"gtk-polygon")
-					(menu_item "_Cylindrical" eMeshTexcoordCylindrical	"gtk-polygon")
-					(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-polygon"))
+			(submenu "_UV Mapping"
+				(menu_item "_Planar"		CMD_MISC_GEN_TEXMAP_XY	"gtk-uv")
+				(menu_item "_Cylindrical"	eMeshTexcoordCylindrical	"gtk-uv")
+				(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-uv"))
 
 			(menu_seperator)
 
 			(submenu "_Vertex"
-				(menu_item "_New"		eEvent  eVertexNew)
+				;(menu_item "_New"		eEvent  eVertexNew)
 				(menu_item "_Delete"	eEvent  eVertexDelete)
 				(menu_item "_Combine"	eEvent  eVertexCombine)
 				;(menu_item "_Extrude"	eEvent  eVertexExtrude)
@@ -180,40 +185,46 @@
 
 			(submenu "V_ertices..."
 				(menu_item "_Unselect" eEvent	eMeshUnselectVertices)
+				(menu_item "_Delete"	eEvent	eNone);eSelectedVertsDelete)
 				(menu_item "Mirror _X"	eEvent	eMeshMirrorX)
 				(menu_item "Mirror _Y"	eEvent	eMeshMirrorY)
 				(menu_item "Mirror _Z"	eEvent	eMeshMirrorZ))
 
 			(submenu "_Face"
-				(menu_item "_New"		eEvent	ePolygonNew)
+				;(menu_item "_New"		eEvent	ePolygonNew)
 				(menu_item "_Select"	eEvent	ePolygonSelect)
 				(menu_item "_Delete"	eEvent	ePolygonDelete)
 				(menu_item "_Split"	eEvent	ePolygonSplit)
 				(menu_item "_Collapse"	eEvent	eCollapseFace)
 				(menu_item "_Extrude"	"F4"	eExtrude	"gtk-polygon"))
 
+			(submenu "F_aces..."
+				(menu_item "_Unselect faces"	eEvent	eMeshUnselectFaces)
+				(menu_item "_Delete"	eEvent	eNone));eSelectedFacesDelete))
+
 			(submenu "_Mesh"
 
-				(menu_item "_New"		eEvent	eMeshNew)
-				(menu_item "_Delete"	eEvent	eMeshDelete)
+				;(menu_item "_New"		eEvent	eMeshNew)
 				(menu_item "_Select"	eEvent	eMeshSelect)
+				(menu_item "_Delete"	eEvent	eMeshDelete)
 				(menu_item "_Tesselate"	eEvent	eMeshTesselate)
 				(menu_item "_Generate Normals"	eEvent	eMeshGenerateNormals)
 				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals)
 
-				(menu_item "_Unselect faces"	eEvent	eMeshUnselectFaces)
-				(menu_item "Unselect _vertices" eEvent	eMeshUnselectVertices)
-
-			) ;; submenu _Mesh
+			) ; submenu _Mesh
 
 			(submenu "_Bone"
-				(menu_item "_New"			eEvent	eBoneNew)
-				(menu_item "_Link child"	eEvent	eBoneLinkChild)
-				(menu_item "_Unlink child"	eEvent	eBoneUnLinkChild)
-				(menu_item "L_ink mesh"		eEvent	eBoneLinkMesh)
-				(menu_item "U_nlink mesh"	eEvent	eBoneUnLinkMesh)
-				(menu_item "_Select"		eEvent	eBoneSelect)
-				(menu_item "_Move"			eEvent	eBoneMoveJoint)))
+				;(menu_item "_New"		eEvent	eBoneNew)
+				(menu_item "_Delete"	eEvent	eNone)
+				(menu_item "_Select"	eEvent	eBoneSelect)
+				(menu_item "_Parent"	eEvent	eBoneLinkChild)
+				(menu_item "_Unparent"	eEvent	eBoneUnLinkChild)
+				;old (menu_item "L_ink mesh"	eEvent	eBoneLinkMesh)
+				;old (menu_item "U_nlink mesh"	eEvent	eBoneUnLinkMesh)
+				;(menu_item "_Move"			eEvent	eBoneMoveJoint)
+			)
+
+		) ; submenu "_Modify"
 
 		(submenu ePluginMenu "_Plugins...")
 
@@ -673,14 +684,20 @@
 			(hbox 0 1 0 1 0
 				(hslider eAnimationSlider 0 100)
 					(toolbar
-						(toolbar_button "gtk-goto-first" "Prev"	
-									"Previous" eEvent eAnimationPrev)
-						(toolbar_button "gtk-go-forward" "Play"	
-									"Play" eEvent eAnimationPlay)
-						(toolbar_button "gtk-stop" "Stop"	
-									"Stop" eEvent eAnimationStop)
-						(toolbar_button "gtk-goto-last" "Next"	
-									"Next" eEvent eAnimationNext) )
+						(toolbar_button "gtk-media-record"
+									"Set" "Set Keyframe" eEvent eNone)
+						(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 	
+									"Prev" "Previous" eEvent eAnimationPrev)
+						(toolbar_button "gtk-media-rewind"
+									"?" "?" eEvent eNone)
+						(toolbar_button "gtk-media-play" ;"gtk-go-forward" 	
+									"Play" "Play" eEvent eAnimationPlay)
+						(toolbar_button "gtk-media-stop" ;"gtk-stop" 	
+									"Stop" "Stop" eEvent eAnimationStop)
+						(toolbar_button "gtk-media-forward"
+									"?" "?" eEvent eNone)
+						(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
+									"Next" "Next" eEvent eAnimationNext) )
 			) ;; hbox
 		) ;; vbox
 	) ;; handlebox

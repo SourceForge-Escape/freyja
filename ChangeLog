@@ -1,39 +1,14 @@
 
- TODO 0.10 ( trunk merge )
- =====================================================================
- - Merge with 0.10 libfreyja
-   - Remove Egg from libfreyja 
-   - Break 0.9.x ABI / API and replace with 0.10 ABI/API
-   - Backport freyja dancer keyframes
-   - Seperate smoothing groups and clusters ( vertex groups )
-     - Smoothing groups as vertex flags
-   - Seperate keyframes and data structures ( vertices shouldn't have frames )
-     - Remove concept of mesh 'groups/frames'
-     - Move vertex 'frames' to keyframes of vertex transforms
-   - Remove model dependency on concept of edit planes { XY, YZ, XZ }
-   - Merge new freyja 0.10 editor features and plugins
-   - Purge unused classes
-   - Storage of bone rotation as euler, rotation with quats ( all quats now )
-   - Curves support for keyframes
+ ChangeLog 
 
- - Merge free and view edit window interfaces
-   - Refactor to use true singletons/other patterns where systems require
-     - Break up Model/Render/Control into windows/views
-   - Move BezierPatch, etc into libfreyja
-   - Finish up viewport editing test
-   - Rewrite renderer to use viewports for views correctly
-   - Billboard/sprite support outside edit data for user diagrams and icons
-   - Default 'zoom' to x1
-   - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
-     - Hook up virtual planes in free mode using pickray ( cubes )
-     - Hook up 3d cursor modes to offset bboxes for the cursor's axies
-     - Run maps over types to allow undo/redo to allow for cut/copy/paste
-
-
- ChangeLog 0.9.5 ( development - This will not always compile from svn )
+ Freyja 0.9.5 ( Development - This will not always compile from svn )
  =====================================================================
 
- 20060820 Mongoose
+ 20060820 Terry 'Mongoose' Hendrix II
+ - Updated TODO
+ - Interface evolution continues
+ - Bone pick / name edit from tree *was checked in
+ - Forgot to mention new command pattern system
  - Removed some old classes no longer needed
  - Model transforms
  - Mesh selection ( with per face collision )
@@ -48,7 +23,7 @@
  - FreyjaFile* replaced by mstl SystemIO
 
 
- 20060803 Mongoose
+ 20060803 Terry 'Mongoose' Hendrix II
  - Major rewrite/refactor of MVC into a View and Controller to be used
    as a template for the new Plugin Arch style control scheme
  - Merging FreyjaControl and FreyjaModel into a single class, and will
@@ -59,7 +34,7 @@
  - All new Ray casting and controls using it
 
 
- 20060704 Mongoose
+ 20060704 Terry 'Mongoose' Hendrix II
  - Crash fixes
  - Local plugins 
  - New test system to avoid installing to test the whole system
@@ -67,21 +42,21 @@
  - Masssive build update
 
 
- 20060617 Mongoose
+ 20060617 Terry 'Mongoose' Hendrix II
  - Fixes for mesh creation and rendering
  - Updates to build system
  - Finalized new plugin build structure
  - Egg removed
 
 
- 20060430 Mongoose
+ 20060430 Terry 'Mongoose' Hendrix II
  - 0.9.5 build with stubs ( Has 0.9.3 API wrappers to 0.9.5 API )
  - Code clean up
  - FreyjaFSM a real singleton now --
    Kids don't use this in plugins use the C ABI for state machine access
 
 
- 20060423 Mongoose
+ 20060423 Terry 'Mongoose' Hendrix II
  - win32 builds of lineageII tools
  - Several bug fixes
  - New boundingvolume update in libhel
@@ -89,13 +64,13 @@
  - Minor refactoring pass in libfreyja cont
 
 
- 20060304 Mongoose
+ 20060304 Terry 'Mongoose' Hendrix II
  - Minor refactoring pass in libfreyja
  - Generic transforms like 0.10 for trunk ( new implementation )
  - Undo test converted into full subsystem with serialization support
 
 
- 20060225 Mongoose
+ 20060225 Terry 'Mongoose' Hendrix II
  - bsa.so plugin enabled in build again
  - Fix for FreyjaFileReader integer reads on 64bit arch
  - 3d cursor UI with test control off vertex move
@@ -107,17 +82,17 @@
  - Undo test for bone transforms in free view using 3d cursor
 
 
- 20060216 Mongoose
+ 20060216 Terry 'Mongoose' Hendrix II
  - Python plugin requires USING_PYTHON define now
  - Fix for Makefiles to build on AMD64 and newer gcc 4s
  - Fix for vargs bug in freyja_print_args for newer implementations
 
 
- 20050831 Mongoose
+ 20050831 Terry 'Mongoose' Hendrix II
  - libfreyja backend for anim/keyframing
 
 
- 20050830 Mongoose
+ 20050830 Terry 'Mongoose' Hendrix II
  - psk.so Fix for dancer skeleton loader
  - freyja (win32) freyja.lnk and freyja.ico added to svn
  - freyja Fix for material texture loading to automate ids, etc
