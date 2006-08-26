@@ -786,11 +786,13 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 				
 			case Freyja3dCursor::Translation:
 				// Haven't got the backend / frontend ready for this yet
-#if 0
-				glTranslatef(FreyjaControl::mInstance->GetCursor().mPos.mVec[0],
-							 FreyjaControl::mInstance->GetCursor().mPos.mVec[1],
-							 FreyjaControl::mInstance->GetCursor().mPos.mVec[2]);
-#endif		
+				if (FreyjaControl::mInstance->GetCursor().mSelected)
+				{
+					Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
+							  FreyjaControl::mInstance->GetCursor().mLastPos);
+
+					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
+				}
 				break;
 				
 			default:
@@ -1027,11 +1029,50 @@ void FreyjaRender::renderModel(RenderModel &model)
 
 
 	/* Render meshes */
+	glPushMatrix();
+	
+	if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tModel)
+	{
+		switch (FreyjaControl::mInstance->GetCursor().GetMode())
+		{
+		case Freyja3dCursor::Rotation: // About model center ( matrix abuse )
+			//glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
+			//			 m->GetBoundingVolumeCenter().mVec[1],
+			//			 m->GetBoundingVolumeCenter().mVec[2]);
+			
+			glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0],
+					  1,0,0);
+			glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1],
+					  0,1,0);
+			glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2],
+					  0,0,1);
+				
+			//glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
+			//			 -m->GetBoundingVolumeCenter().mVec[1],
+			//			 -m->GetBoundingVolumeCenter().mVec[2]);
+			break;
+				
+			case Freyja3dCursor::Translation:
+				{
+					Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
+							  FreyjaControl::mInstance->GetCursor().mLastPos);
+
+					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
+				}
+				break;
+
+		default:
+			;
+		}
+	}
+
 	for (i = 0, count = model.getMeshCount(); i < count; ++i)
 	{
 		if (model.getMesh(i, rmesh, 0))
 			renderMesh(rmesh);
 	}
+
+	glPopMatrix();
 
 
 	/* Render skeleton */

@@ -594,6 +594,44 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
+	String ActionToString(freyja_transform_action_t action)
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+	{
+		String s;
+
+		switch (action)
+		{
+		case fTranslate:
+			s = "fTranslate";
+			break;
+
+		case fRotateAboutPoint:
+			s = "fRotateAboutPoint";
+			break;
+
+		case fRotate:
+			s = "fRotate";
+			break;
+
+		case fScaleAboutPoint:
+			s = "fScaleAboutPoint";
+			break;
+
+		case fScale:
+			s = "fScale";
+			break;
+
+		default:
+			s = "Unknown Transform";
+		}
+
+		return s;
+	}
+
+
 	void getPickRay(vec_t mouseX, vec_t mouseY, 
 					double *rayOrigin, double *rayVector);
 	/*------------------------------------------------------
