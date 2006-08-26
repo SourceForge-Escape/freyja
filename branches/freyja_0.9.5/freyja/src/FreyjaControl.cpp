@@ -47,7 +47,7 @@ using namespace freyja;
 
 #define DEBUG_PICK_RAY 0
 #define DEBUG_PICK_RAY_PLANAR 0
-#define DEBUG_SCREEN_TO_WORLD 1
+#define DEBUG_SCREEN_TO_WORLD 0
 #define DEBUG_VIEWPORT_MOUSE 0
 #define FREYJA_RECENT_FILES "recent_files-dev"
 
@@ -3324,14 +3324,16 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			{
 				Vec3 v = GetCursorData(GetEventAction());
 
-				freyja_print("! Model[%i] transform %i %f %f %f",
-							 0, GetEventAction(),
+				freyja_print("! Model[%i] %s %f %f %f",
+							 0, 
+							 ActionToString(GetEventAction()).c_str(),
+							 GetEventAction(),
 							 v.mVec[0], v.mVec[1], v.mVec[2]);
 
 				// Mongoose - Does transform, undo, etc for ya, bub
 				Transform(GetObjectMode(), GetEventAction(),
 						  v.mVec[0], v.mVec[1], v.mVec[2]);
-					
+
 				// Reset transforms in the cursor
 				mCursor.mRotate = Vec3(0,0,0);
 				mCursor.mScale = Vec3(1,1,1);
@@ -3340,22 +3342,17 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			break;
 
 		case tMesh:
-			if (mCursor.GetMode() == Freyja3dCursor::Rotation)
 			{
-				freyja_print("! Mesh[%i] Rotate %f %f %f",
-							 GetSelectedMesh(),
-							 mCursor.mRotate.mVec[0],
-							 mCursor.mRotate.mVec[1],
-							 mCursor.mRotate.mVec[2]);
+				Vec3 v = GetCursorData(GetEventAction());
 
 				// Mongoose - Does transform, undo, etc for ya, bub
-				Transform(GetObjectMode(), fRotate, 
-						  mCursor.mRotate.mVec[0],
-						  mCursor.mRotate.mVec[1],
-						  mCursor.mRotate.mVec[2]);
+				Transform(GetObjectMode(), GetEventAction(),
+						  v.mVec[0], v.mVec[1], v.mVec[2]);
 
-				// Reset rotation transform in the cursor
+				// Reset transforms in the cursor
 				mCursor.mRotate = Vec3(0,0,0);
+				mCursor.mScale = Vec3(1,1,1);
+				//mCursor.mPos = Vec3(0,0,0);
 			}
 			break;
 
@@ -4114,9 +4111,37 @@ void FreyjaControl::Transform(object_type_t obj,
 		break;
 
 	default:
-		MARK_MSGF("Undo for %s action=%i not implemented", ObjectTypeToString(obj).GetCString(), action);
+		MARK_MSGF("Undo for %s action=%i not implemented", ObjectTypeToString(obj).c_str(), action);
 	}
 
+	
+	if (mToken)
+	{
+		int32 id = -1;
+
+		
+		switch (obj)
+		{
+		case tModel:
+			id = 0;
+			break;
+
+		case tMesh:
+			id = GetSelectedMesh();
+			break;
+
+		default:
+			id = -1;
+		}
+
+		freyja_print("! %s[%i] %s <%f, %f, %f>",
+					 ObjectTypeToString(obj).c_str(),
+					 id, 
+					 ActionToString(GetEventAction()).c_str(),
+					 GetEventAction(),
+					 v.mVec[0], v.mVec[1], v.mVec[2]);
+
+	}
 
 	switch (obj)
 	{
@@ -4125,9 +4150,9 @@ void FreyjaControl::Transform(object_type_t obj,
 		{
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			ActionModelModified(a);
-		}
 
-		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+			freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+		}
 		break;
 
 	case tModel:
@@ -4263,6 +4288,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tMesh:
 		{	
+#if 0
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
 			if (m)
@@ -4283,6 +4309,16 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				m->SetPosition(mCursor.mPos);
 				m->TransformVertices(t);
 			}
+#else
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				mCursor.mLastPos = m->GetPosition();
+			}
+
+			mToken = true;	
+#endif
 		}
 		break;
 
