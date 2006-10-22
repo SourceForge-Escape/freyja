@@ -4,6 +4,15 @@
  Freyja 0.9.5 ( Development - This will not always compile from svn )
  =====================================================================
 
+ 20061021 Terry 'Mongoose' Hendrix II
+ - 'View' toolbar completely disabled you can reenable it via uncommenting
+   the code in your freyja-dev.mlisp file and restarting freyja
+ - mgtk menu_item_toggle for check/togglable menu items ( closes todo )
+ - Bounding volume on selected mesh render toggle ( closes todo )
+ - UI reduction / changes for more screen space for meshes
+ - Lots of misc changes
+
+
  20060820 Terry 'Mongoose' Hendrix II
  - Updated TODO
  - Interface evolution continues

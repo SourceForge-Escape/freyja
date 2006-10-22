@@ -55,22 +55,20 @@
 	- Shadow maps
 	- Different skyboxes/floors for animation view
 
- - Interactive Tristrip creation tool to replace the old point and connect
-   polgon creation some people seem to love
-
- - Pak browser for tombraider / UT paks ( Gtk+ list? )
-
- - GNOME MIME setup script
-
- - Perferences, init.mlisp
-
- - Polygon winding control ccw/cw/etc
-	
- - Add camera editing back
+ Misc
+	- Add patch -> mesh support back!
+	- Interactive Tristrip creation tool to replace the old point and connect
+   	  polgon creation some people seem to love
+	- Pak browser for tombraider / UT paks ( Gtk+ list? )
+	- GNOME MIME setup script
+	- Perferences, init.mlisp
+	- Polygon winding control ccw/cw/etc
+	- Add camera editing back
 
  libmgtk
 	- Merge Resource and Mlisp
-	- Port to C# with gtk# and cocoa# bindings
+	- Radio buttons / boxes
+	- Toggle settings should be factored out to event functions to set value
 	- Tree widget abstraction
 	- Mlisp doesn't lookup symbols for like "true" if just setq
 	- Mlisp wish list: garbage collection, fully featured lisp
@@ -81,11 +79,13 @@
 	- Add subdiv algorithms like catmull-clark, n-patches, etc
 	- Add polymesh CSG back 
 	- Subdivision Loop and Sabin/Doo surfaces
+	- Mesh/Vertex mirroring
 	- Mesh smoothing
 	- Normal smoothing
 	- Polygon groups
 
  plugins
+	- Finish LinageII import for all versions of the game
 	- Editor plugins in freyja using:
 	  freyja_append_eventid, event system, and freyja_append_item_to_menu
 	- Finish LineageII pak vfs plugin
@@ -94,7 +94,8 @@
 	- Add support for 'nvidia' ASE skel animation (ase)
 	- Finish PSK export (PSKModel)
 	- UTX export (UTPackage)
-	- Material plugins, Cg shader test
+	- Material plugins
+	- Cg shaders
 
 
 

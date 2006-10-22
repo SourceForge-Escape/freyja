@@ -90,7 +90,7 @@ FreyjaControl::FreyjaControl() :
 	freyja__setPrinter(&mPrinter, false);
 
 	/* Spawn 0th light, and set the light iterator */
-	vec4_t lightPos = {64,64,64,0};
+	vec4_t lightPos = {12,35,8,0}; // Make this RCed {64,64,64,0};
 	freyjaCurrentLight(freyjaLightCreate());
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
@@ -577,26 +577,26 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 
 void FreyjaControl::CursorMove(float xx, float yy)
 {
-	mCursor.SetMode( Freyja3dCursor::Translation );
+	mCursor.SetMode( freyja3d::Cursor::Translation );
 
 	switch (GetSelectedView())
 	{
 	case PLANE_XY: // front
 		switch ( mCursor.mAxis )
 		{
-		case Freyja3dCursor::eNone:
+		case freyja3d::Cursor::eNone:
 			break;
-		case Freyja3dCursor::eAll:
+		case freyja3d::Cursor::eAll:
 			mCursor.mPos.mVec[0] = xx;  // side to side on screen
 			mCursor.mPos.mVec[1] = yy; // up and down on screen
 			break;
-		case Freyja3dCursor::eX:
+		case freyja3d::Cursor::eX:
 			mCursor.mPos.mVec[0] = xx;  // side to side on screen
 			break;
-		case Freyja3dCursor::eY:
+		case freyja3d::Cursor::eY:
 			mCursor.mPos.mVec[1] = yy; // up and down on screen
 			break;
-		case Freyja3dCursor::eZ:
+		case freyja3d::Cursor::eZ:
 			// In and out of screen by up and down mouse
 			mCursor.mPos.mVec[2] = yy;
 			break;
@@ -606,20 +606,20 @@ void FreyjaControl::CursorMove(float xx, float yy)
 	case PLANE_XZ: // top
 		switch ( mCursor.mAxis )
 		{
-		case Freyja3dCursor::eNone:
+		case freyja3d::Cursor::eNone:
 			break;
-		case Freyja3dCursor::eAll:
+		case freyja3d::Cursor::eAll:
 			mCursor.mPos.mVec[0] = xx;  // side to side on screen
 			mCursor.mPos.mVec[2] = yy; // up and down on screen
 			break;
-		case Freyja3dCursor::eX:
+		case freyja3d::Cursor::eX:
 			mCursor.mPos.mVec[0] = xx;  // side to side on screen
 			break;
-		case Freyja3dCursor::eY:
+		case freyja3d::Cursor::eY:
 			// In and out of screen by up and down mouse
 			mCursor.mPos.mVec[1] = yy;
 			break;
-		case Freyja3dCursor::eZ:
+		case freyja3d::Cursor::eZ:
 			mCursor.mPos.mVec[2] = yy; // up and down on screen
 			break;
 		}
@@ -628,20 +628,20 @@ void FreyjaControl::CursorMove(float xx, float yy)
 	case PLANE_ZY: // side
 		switch ( mCursor.mAxis )
 		{
-		case Freyja3dCursor::eNone:
+		case freyja3d::Cursor::eNone:
 			break;
-		case Freyja3dCursor::eAll:
+		case freyja3d::Cursor::eAll:
 			mCursor.mPos.mVec[2] = xx;  // side to side on screen
 			mCursor.mPos.mVec[1] = yy; // up and down on screen
 			break;
-		case Freyja3dCursor::eX:
+		case freyja3d::Cursor::eX:
 			// In and out of screen by up and down mouse
 			mCursor.mPos.mVec[0] = yy;
 			break;
-		case Freyja3dCursor::eY:
+		case freyja3d::Cursor::eY:
 			mCursor.mPos.mVec[1] = yy; // up and down on screen
 			break;
-		case Freyja3dCursor::eZ:
+		case freyja3d::Cursor::eZ:
 			mCursor.mPos.mVec[2] = xx; // side to side on screen
 			break;
 		}
@@ -1471,6 +1471,23 @@ bool FreyjaControl::event(int event, unsigned int value)
 		mGenMeshSegements = value;
 		break;
 
+	case eRenderBbox:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::fDrawBoundingVolumes);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::fDrawBoundingVolumes);
+		}
+
+		//mRender->toggleFlag(FreyjaRender::fDrawBoundingVolumes);//FreyjaRender::RENDER_BBOX);
+		freyja_print("Bounding volume rendering [%s]", 
+					 (GetViewFlags() & FreyjaRender::fDrawBoundingVolumes/*FreyjaRender::RENDER_BBOX*/) ? 
+					"ON" : "OFF");
+			freyja_event_gl_refresh();
+		break;
+
 	default:
 		freyja_print("!Unhandled { event = %d, value = %u }", event, value);
 		return false;
@@ -2171,12 +2188,7 @@ bool FreyjaControl::event(int command)
 
 
 
-	case eRenderBbox:
-		mRender->toggleFlag(FreyjaRender::RENDER_BBOX);
-		freyja_print("BoundingBox rendering [%s]", 
-					(GetViewFlags() & FreyjaRender::RENDER_BBOX) ? 
-					"ON" : "OFF");
-		break;
+
 
 
 	case eMirrorUV_X:
@@ -2323,21 +2335,21 @@ bool FreyjaControl::event(int command)
 
 	case eMoveObject:
 		mEventMode = modeMove;
-		mCursor.SetMode(Freyja3dCursor::Translation);
+		mCursor.SetMode(freyja3d::Cursor::Translation);
 		freyja_print("Move object...");
 		freyja_event_gl_refresh();
 		break;
 
 	case eScaleObject:
 		mEventMode = modeScale;
-		mCursor.SetMode(Freyja3dCursor::Scale);
+		mCursor.SetMode(freyja3d::Cursor::Scale);
 		freyja_print("Scale object...");
 		freyja_event_gl_refresh();
 		break;
 
 	case eRotateObject:
 		mEventMode = modeRotate;
-		mCursor.SetMode(Freyja3dCursor::Rotation);
+		mCursor.SetMode(freyja3d::Cursor::Rotation);
 
 		switch (GetObjectMode())
 		{
@@ -2358,14 +2370,14 @@ bool FreyjaControl::event(int command)
 
 	case eSelect:
 		mEventMode = modeSelect;
-		mCursor.SetMode(Freyja3dCursor::Invisible);
+		mCursor.SetMode(freyja3d::Cursor::Invisible);
 		freyja_print("Select object...");
 		freyja_event_gl_refresh();
 		break;
 
 	case eUnselect:
 		mEventMode = modeUnselect;
-		mCursor.SetMode(Freyja3dCursor::Invisible);
+		mCursor.SetMode(freyja3d::Cursor::Invisible);
 		freyja_print("Unselect object...");
 		freyja_event_gl_refresh();
 		break;
@@ -2817,17 +2829,17 @@ bool FreyjaControl::event(int command)
 
 	case FREYJA_MODE_AXIS_X:
 		freyja_print("X locked"); 
-		mCursor.mAxis = Freyja3dCursor::eX;
+		mCursor.mAxis = freyja3d::Cursor::eX;
 		freyja_event_gl_refresh();
 		break;
 	case FREYJA_MODE_AXIS_Y:
 		freyja_print("Y locked"); 
-		mCursor.mAxis = Freyja3dCursor::eY;
+		mCursor.mAxis = freyja3d::Cursor::eY;
 		freyja_event_gl_refresh();
 		break;	
 	case FREYJA_MODE_AXIS_Z:
 		freyja_print("Z locked"); 
-		mCursor.mAxis = Freyja3dCursor::eZ;
+		mCursor.mAxis = freyja3d::Cursor::eZ;
 		freyja_event_gl_refresh();
 		break;
 
@@ -2849,14 +2861,14 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 	{
 	case eSelect:
 		mEventMode = modeSelect;
-		mCursor.SetMode(Freyja3dCursor::Invisible);
+		mCursor.SetMode(freyja3d::Cursor::Invisible);
 		freyja_print("! (mode) Select object...");
 		freyja_event_gl_refresh();
 		break;
 
 	case eUnselect:
 		mEventMode = modeUnselect;
-		mCursor.SetMode(Freyja3dCursor::Invisible);
+		mCursor.SetMode(freyja3d::Cursor::Invisible);
 		freyja_print("! (mode) Unselect object...");
 		freyja_event_gl_refresh();
 		break;
@@ -3047,10 +3059,10 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 {
 	switch (mCursor.GetMode())
 	{
-	case Freyja3dCursor::Invisible:
+	case freyja3d::Cursor::Invisible:
 		break;
 
-	case Freyja3dCursor::Rotation:
+	case freyja3d::Cursor::Rotation:
 		break;
 		
 	default:
@@ -3063,42 +3075,42 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			Vec3 o;
 			vec_t t;
 
-			mCursor.mAxis = Freyja3dCursor::eNone;
+			mCursor.mAxis = freyja3d::Cursor::eNone;
 			mCursor.mLastPos = mCursor.mPos;
 
 			switch (GetSelectedView())
 			{
 			case PLANE_BACK:
-				o = Vec3(1.0f*Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				o = Vec3(1.0f*freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eX;
+					mCursor.mAxis = freyja3d::Cursor::eX;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked X");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, Freyja3dCursor::mid,0) + mCursor.mPos;
+				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eY;
+					mCursor.mAxis = freyja3d::Cursor::eY;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Y");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
+				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
 				
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mAxis = freyja3d::Cursor::eAll;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked All");
 					mToken = true;
@@ -3107,36 +3119,36 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				break;
 
 			case PLANE_FRONT: // Front, XY
-				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eX;
+					mCursor.mAxis = freyja3d::Cursor::eX;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked X");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, Freyja3dCursor::mid,0) + mCursor.mPos;
+				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eY;
+					mCursor.mAxis = freyja3d::Cursor::eY;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Y");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
+				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
 				
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mAxis = freyja3d::Cursor::eAll;
 						mCursor.mSelected = true;
 						freyja_print("! Cursor ray picked All");
 						mToken = true;
@@ -3145,36 +3157,36 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				break;
 
 			case PLANE_XZ: // Top
-				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eX;
+					mCursor.mAxis = freyja3d::Cursor::eX;
 					mCursor.mSelected = true;
 					mToken = true;
 					freyja_print("! Cursor ray picked X");
 					return;
 				}
 
-				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
+				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eZ;
+					mCursor.mAxis = freyja3d::Cursor::eZ;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Z");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, Freyja3dCursor::mid, 0) + mCursor.mPos;
+				o = Vec3(0, freyja3d::Cursor::mid, 0) + mCursor.mPos;
 				
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mAxis = freyja3d::Cursor::eAll;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked All");
 					mToken = true;
@@ -3184,36 +3196,36 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 
 
 			case PLANE_BOTTOM:
-				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eX;
+					mCursor.mAxis = freyja3d::Cursor::eX;
 					mCursor.mSelected = true;
 					mToken = true;
 					freyja_print("! Cursor ray picked X");
 					return;
 				}
 
-				o = Vec3(0, 0, Freyja3dCursor::mid) + mCursor.mPos;
+				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eZ;
+					mCursor.mAxis = freyja3d::Cursor::eZ;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Z");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, Freyja3dCursor::mid, 0) + mCursor.mPos;
+				o = Vec3(0, freyja3d::Cursor::mid, 0) + mCursor.mPos;
 				
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mAxis = freyja3d::Cursor::eAll;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked All");
 					mToken = true;
@@ -3222,36 +3234,36 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				break;
 
 			case PLANE_RIGHT:
-				o = Vec3(0,0,Freyja3dCursor::mid) + mCursor.mPos;
+				o = Vec3(0,0,freyja3d::Cursor::mid) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eZ;
+					mCursor.mAxis = freyja3d::Cursor::eZ;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Z");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, Freyja3dCursor::mid,0) + mCursor.mPos;
+				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eY;
+					mCursor.mAxis = freyja3d::Cursor::eY;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Y");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 				
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mAxis = freyja3d::Cursor::eAll;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked All");
 					mToken = true;
@@ -3260,36 +3272,36 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				break;
 
 			case PLANE_ZY: // Side 
-				o = Vec3(0,0,Freyja3dCursor::mid) + mCursor.mPos;
+				o = Vec3(0,0,freyja3d::Cursor::mid) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eZ;
+					mCursor.mAxis = freyja3d::Cursor::eZ;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Z");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(0, Freyja3dCursor::mid,0) + mCursor.mPos;
+				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
 
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eY;
+					mCursor.mAxis = freyja3d::Cursor::eY;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked Y");
 					mToken = true;
 					return;
 				}
 
-				o = Vec3(Freyja3dCursor::mid,0,0) + mCursor.mPos;
+				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 				
-				if (r.IntersectSphere(o.mVec, Freyja3dCursor::min*2, t))
+				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
 				{
 					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = Freyja3dCursor::eAll;
+					mCursor.mAxis = freyja3d::Cursor::eAll;
 					mCursor.mSelected = true;
 					freyja_print("! Cursor ray picked All");
 					mToken = true;
@@ -4252,31 +4264,31 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	/* Cursor axis determined limited movement */
 	switch (mCursor.mAxis)
 	{
-	case Freyja3dCursor::eAll:
+	case freyja3d::Cursor::eAll:
 		break;
 
-	case Freyja3dCursor::eX:
+	case freyja3d::Cursor::eX:
 		t.mVec[1] = 0;
 		t.mVec[2] = 0;
 		break;
 
-	case Freyja3dCursor::eY:
+	case freyja3d::Cursor::eY:
 		t.mVec[0] = 0;
 		t.mVec[2] = 0;
 		break;
 
-	case Freyja3dCursor::eZ:
+	case freyja3d::Cursor::eZ:
 		t.mVec[0] = 0;
 		t.mVec[1] = 0;
 		break;
 
-	case Freyja3dCursor::eNone:
+	case freyja3d::Cursor::eNone:
 		return;
 		break;
 	}
 
 	mCursor.mPos += t;
-	mCursor.SetMode(Freyja3dCursor::Translation);
+	mCursor.SetMode(freyja3d::Cursor::Translation);
 
 	switch (mObjectMode)
 	{
@@ -4544,7 +4556,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			if (mCursor.mRotate.mVec[2] > 360.0f)
 				mCursor.mRotate.mVec[2] -= 360.0f;
 
-			mCursor.SetMode(Freyja3dCursor::Rotation);
+			mCursor.SetMode(freyja3d::Cursor::Rotation);
 
 			// This handles ctrl selects ( select without leaving rotate mode )
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
@@ -4575,7 +4587,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			if (mCursor.mRotate.mVec[2] > 360.0f)
 				mCursor.mRotate.mVec[2] -= 360.0f;
 
-			mCursor.SetMode(Freyja3dCursor::Rotation);
+			mCursor.SetMode(freyja3d::Cursor::Rotation);
 		}
 	}
 	
@@ -5195,18 +5207,27 @@ void FreyjaControlEventsAttach()
 // View Events
 ////////////////////////////////////////////////////////////////
 
+void mgtk_checkmenuitem_value_set(int event, bool val);
+
 void ePointJoint()
 {
+	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eSphereJoint"), 0);
+	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eAxisJoint"), 0);
 	FreyjaRender::mJointRenderType = 1;
 }
 
 void eSphereJoint()
 {
+	freyja_print("! *** %i", FreyjaControl::mInstance->GetResourceInt("ePointJoint"));
+	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("ePointJoint"), 0);
+	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eAxisJoint"), 0);
 	FreyjaRender::mJointRenderType = 2;
 }
 
 void eAxisJoint()
 {
+	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eSphereJoint"), 0);
+	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("ePointJoint"), 0);
 	FreyjaRender::mJointRenderType = 3;
 }
 
@@ -5271,6 +5292,7 @@ void eImplementationRemovedUInt(unsigned int u)
 
 void FreyjaViewEventsAttach()
 {
+	ResourceEventCallbackUInt::add("eRenderPickRay", &eImplementationRemovedUInt); 
 	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
 	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
 	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);

@@ -20,8 +20,8 @@
  ==========================================================================*/
 
 
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJA3DCURSOR_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJA3DCURSOR_H_
+#ifndef GUARD__FREYJA_MONGOOSE_FREYJA3D_CURSOR_H_
+#define GUARD__FREYJA_MONGOOSE_FREYJA3D_CURSOR_H_
 
 
 #include <hel/math.h>
@@ -33,7 +33,9 @@
 #include "FreyjaOpenGL.h"
 
 
-class Freyja3dCursor
+namespace freyja3d {
+
+class Cursor
 {
  public:
 
@@ -59,12 +61,14 @@ class Freyja3dCursor
 	const static vec_t min = 0.5f, mid = 2.4f, max = 1.744f;
 
 
-	Freyja3dCursor()
+	Cursor()
 	{
 		Reset();
 	}
 
-	~Freyja3dCursor() { }
+	~Cursor() 
+	{ 
+	}
 
 	bool CheckForRayCollision(Ray &r)
 	{
@@ -72,14 +76,14 @@ class Freyja3dCursor
 
 		switch (GetMode())
 		{
-		case Freyja3dCursor::Scale:
+		case freyja3d::Cursor::Scale:
 			break;
 
 
-		case Freyja3dCursor::Rotation:
+		case freyja3d::Cursor::Rotation:
 			break;
 
-		case Freyja3dCursor::Translation:
+		case freyja3d::Cursor::Translation:
 			break;
 
 		default:
@@ -96,7 +100,7 @@ class Freyja3dCursor
 
 		switch (GetMode())
 		{
-		case Freyja3dCursor::Scale:
+		case freyja3d::Cursor::Scale:
 			glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_BLEND);
@@ -106,14 +110,14 @@ class Freyja3dCursor
 			break;
 
 
-		case Freyja3dCursor::Rotation:
+		case freyja3d::Cursor::Rotation:
 			glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_BLEND);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glPushMatrix();
-			if (GetMode() == Freyja3dCursor::Rotation)
+			if (GetMode() == freyja3d::Cursor::Rotation)
 			{
 				glRotatef(mRotate.mVec[0], 1, 0, 0);
 				glRotatef(mRotate.mVec[1], 0, 1, 0);
@@ -124,7 +128,7 @@ class Freyja3dCursor
 			glPopAttrib();
 			break;
 
-		case Freyja3dCursor::Translation:
+		case freyja3d::Cursor::Translation:
 			glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_BLEND);
@@ -134,7 +138,7 @@ class Freyja3dCursor
 			break;
 
 		default:
-		case Freyja3dCursor::Invisible:
+		case freyja3d::Cursor::Invisible:
 			break;
 		}
 
@@ -323,5 +327,6 @@ class Freyja3dCursor
 	Flags mMode;
 };
 
+} //namespace freyja3d 
 
 #endif // GUARD__FREYJA_MONGOOSE_FREYJA3DCURSOR_H_

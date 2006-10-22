@@ -40,7 +40,7 @@
 #include "freyja_events.h"
 #include "FreyjaRender.h"
 #include "Texture.h"
-#include "Freyja3dCursor.h"
+#include "Cursor.h"
 
 
 class FreyjaControl
@@ -301,7 +301,7 @@ class FreyjaControl
 	 *        entire context.
 	 ------------------------------------------------------*/
 
-	Freyja3dCursor &GetCursor() { return mCursor; }
+	freyja3d::Cursor &GetCursor() { return mCursor; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -969,7 +969,7 @@ private:
 
 	Vec3 mSceneTrans;                       /* Offset of scene in 3 space */
 
-	Freyja3dCursor mCursor;                 /* Special mouse input handler */
+	freyja3d::Cursor mCursor;               /* Special mouse input handler */
 
 	Resource mResource;                     /* Resource system */
 	
