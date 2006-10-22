@@ -58,8 +58,9 @@ FreyjaRender *FreyjaRender::mSingleton = 0x0;
 
 Ray FreyjaRender::mTestRay;
 
-vec4_t gBoneColor = { 0.207843137f, 0.654901961f, 0.917647059f, 1.0f };
-vec4_t gBoneHighlightColor = { 1.0,  0.0,  1.0, 1.0};
+vec4_t gBoneColor = { 0.839215686f, 0.0f, 1.0f, 1.0f };
+// { 0.207843137f, 0.654901961f, 0.917647059f, 1.0f };
+vec4_t gBoneHighlightColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 
 vec4_t FreyjaRender::mColorBackground;
 vec4_t FreyjaRender::mColorText;
@@ -767,7 +768,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 		{
 			switch (FreyjaControl::mInstance->GetCursor().GetMode())
 			{
-			case Freyja3dCursor::Rotation: // About mesh center ( matrix abuse )
+			case freyja3d::Cursor::Rotation: // About mesh center ( matrix abuse )
 				glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
 							 m->GetBoundingVolumeCenter().mVec[1],
 							 m->GetBoundingVolumeCenter().mVec[2]);
@@ -784,7 +785,7 @@ void FreyjaRender::renderMesh(RenderMesh &mesh)
 							 -m->GetBoundingVolumeCenter().mVec[2]);
 				break;
 				
-			case Freyja3dCursor::Translation:
+			case freyja3d::Cursor::Translation:
 				// Haven't got the backend / frontend ready for this yet
 				if (FreyjaControl::mInstance->GetCursor().mSelected)
 				{
@@ -1035,7 +1036,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 	{
 		switch (FreyjaControl::mInstance->GetCursor().GetMode())
 		{
-		case Freyja3dCursor::Rotation: // About model center ( matrix abuse )
+		case freyja3d::Cursor::Rotation: // About model center ( matrix abuse )
 			//glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
 			//			 m->GetBoundingVolumeCenter().mVec[1],
 			//			 m->GetBoundingVolumeCenter().mVec[2]);
@@ -1052,7 +1053,7 @@ void FreyjaRender::renderModel(RenderModel &model)
 			//			 -m->GetBoundingVolumeCenter().mVec[2]);
 			break;
 				
-			case Freyja3dCursor::Translation:
+			case freyja3d::Cursor::Translation:
 				{
 					Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
 							  FreyjaControl::mInstance->GetCursor().mLastPos);

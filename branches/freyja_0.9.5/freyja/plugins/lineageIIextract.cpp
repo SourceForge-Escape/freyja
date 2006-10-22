@@ -210,6 +210,13 @@ void eDialogL2Extract()
 } 
 
 
+void eDialogL2ExtractClose()
+{
+	mgtk_event_dialog_visible_set(Resource::mInstance->getIntByName("eDialogL2Extract"), 0);
+} 
+
+
+
 //////////////////////////////////////////////////////////////////////////
 // Weak 'expert system' pattern matcher
 //////////////////////////////////////////////////////////////////////////
@@ -803,6 +810,7 @@ void L2ExtractEventsAttach()
 	ResourceEventCallbackUInt::add("eL2ExtractOffset", &eL2ExtractOffset);
 	ResourceEventCallbackUInt::add("eL2ExtractSize", &eL2ExtractSize);
 	ResourceEventCallback::add("eDialogL2Extract", &eDialogL2Extract);
+	ResourceEventCallback::add("eDialogL2ExtractClose", &eDialogL2ExtractClose);
 }
 
 

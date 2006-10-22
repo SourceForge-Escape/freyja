@@ -46,12 +46,14 @@
 #      define mglGetProcAddress(string) glXGetProcAddressARB((GLubyte *)string)
 #   endif
 
+#   ifdef OPENGL_EXT_MULTITEXTURE
 extern PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB;
 extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB;
 extern PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB;
 extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
+#   endif
 
 #else
 #   error "This module requires an OpenGL SDK"

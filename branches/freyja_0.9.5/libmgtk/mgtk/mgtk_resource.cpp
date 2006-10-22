@@ -3089,6 +3089,86 @@ arg_list_t *mgtk_rc_menu_seperator(arg_list_t *container)
 }
 
 
+// (menu_item_toggle "Label" eToggleEvent InitStateBool)
+void mgtk_check_menu_item_handler(GtkCheckMenuItem *item, gpointer e)
+{
+	mgtk_handle_event1u(GPOINTER_TO_INT(e), 
+						gtk_check_menu_item_get_active(item));
+}
+
+arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
+{
+	GtkWidget *item;
+	arg_list_t *text, *event, *cmd, *ret;
+
+
+	if (!menu)
+	{
+		rc_assertion_error("check_menu_item", "menu != NULL");
+		return NULL;
+	}
+
+	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET); // ARG_GTK_MENU_WIDGET
+
+	if (!menu)
+	{
+		rc_assertion_error("check_menu_item", "menu == ARG_GTK_MENU_WIDGET");
+		return NULL;
+	}
+
+	text = symbol();
+	event = symbol();
+	cmd = symbol();
+	ret = NULL;
+
+	arg_enforce_type(&text,  CSTRING);
+	arg_enforce_type(&event, INT);
+	arg_enforce_type(&cmd, INT);
+
+
+	if (!text || !event || !cmd)
+	{
+		if (!text)
+			rc_assertion_error("menu_item", "text == CSTRING");
+
+		if (!event)
+			rc_assertion_error("menu_item", "event == INT");
+
+		if (!cmd)
+			rc_assertion_error("menu_item", "cmd == INT");
+	}
+	else
+	{
+		item = gtk_check_menu_item_new_with_mnemonic((char *)text->data);
+
+		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
+		
+		gtk_menu_append(GTK_MENU(menu->data), item);
+		gtk_widget_show(item);
+		
+		gtk_signal_connect(GTK_OBJECT(item), "toggled",
+						   GTK_SIGNAL_FUNC(mgtk_check_menu_item_handler), 
+						   GINT_TO_POINTER(get_int(event)));
+
+		if (get_int(cmd))
+		{
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), TRUE);
+		}
+
+		// Mongoose 2002.02.01, Add this widget to a special 
+		//   lookup table by it's event id
+		//index_add_gtk_widget(get_int(event), item);
+		mgtk_event_subscribe_gtk_widget(get_int(event), item);
+	}
+
+	delete_arg(&text);
+	delete_arg(&event);
+	delete_arg(&cmd);
+
+	return ret;
+}
+
+
 arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 {
 	GtkWidget *item;

@@ -135,7 +135,8 @@ void delete_arg(arg_list_t **a)
 
 	switch ((*a)->type)
 	{
-	case FUNC:		
+	case FUNC:
+		// We don't free function pointers, but we need to free container 'a'  ;)
 		break;
 	case CSTRING:
 		if ((*a)->data)
@@ -412,6 +413,7 @@ arg_list_t *mgtk_rc_spinbutton2(arg_list_t *args);
 arg_list_t *mgtk_rc_submenu(arg_list_t *args);
 arg_list_t *mgtk_rc_menu_seperator(arg_list_t *args);
 arg_list_t *mgtk_rc_menu_item(arg_list_t *args);
+arg_list_t *mgtk_rc_check_menu_item(arg_list_t *args);
 arg_list_t *mgtk_rc_optionmenu(arg_list_t *args);
 arg_list_t *mgtk_rc_popup_menu(arg_list_t *args);
 arg_list_t *mgtk_rc_menubar(arg_list_t *args);
@@ -475,6 +477,7 @@ Resource::Resource()
 	RegisterFunction("spinbutton", mgtk_rc_spinbutton);
 	RegisterFunction("spinbutton2", mgtk_rc_spinbutton2);
 	RegisterFunction("menu_item", mgtk_rc_menu_item);
+	RegisterFunction("toggle_menu_item", mgtk_rc_check_menu_item);
 	RegisterFunction("submenu", mgtk_rc_submenu);
 	RegisterFunction("menu_seperator", mgtk_rc_menu_seperator);
 	RegisterFunction("optionmenu", mgtk_rc_optionmenu);

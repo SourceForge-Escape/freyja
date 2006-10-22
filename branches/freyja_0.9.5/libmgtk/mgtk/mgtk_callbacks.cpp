@@ -261,6 +261,39 @@ void mgtk_togglebutton_value_set(int event, bool val)
 	}
 }
 
+void mgtk_checkmenuitem_value_set(int event, bool val)
+{
+	Vector<GtkWidget*> *widgets;
+	GtkWidget *test;
+	unsigned int i;
+	gboolean is_active = val ? TRUE : FALSE;
+
+
+	widgets = gWidgetMap[event];
+
+	if (!widgets)
+		return;
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		test = (*widgets)[i];
+
+		if (test && GTK_IS_CHECK_MENU_ITEM(test))
+		{
+			if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(test)) != 
+				is_active)
+			{
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(test),  
+											 is_active);
+			mgtk_print("! mgtk_checkmenuitem_value_set> %i:%d", event, i);
+			}
+		}
+		else
+		{
+			mgtk_print("mgtk_checkmenuitem_value_set> %i:%d failed", event, i);
+		}
+	}
+}
 
 // Mongoose 2002.01.31, Hack for adjusting widget values by event id
 void mgtk_spinbutton_value_set(int event, float val)

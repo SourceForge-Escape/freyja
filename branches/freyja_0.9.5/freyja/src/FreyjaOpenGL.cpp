@@ -29,19 +29,20 @@
 #include <freyja/FreyjaPluginABI.h>
 #include <hel/math.h>
 
-#include "Freyja3dCursor.h"
+#include "Cursor.h"
 #include "Texture.h"
 
 #include "FreyjaOpenGL.h"
 
 
+#ifdef OPENGL_EXT_MULTITEXTURE
 PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB = NULL;
 PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
 PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB = NULL;
 PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB = NULL;
 PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
-
+#endif
 
 using namespace freyja3d;
 
@@ -67,12 +68,14 @@ OpenGL::OpenGL() :
 	glGetIntegerv(GL_MAX_LIGHTS, &mMaxLightsCount);
 
 	// Hook up functions
+#ifdef OPENGL_EXT_MULTITEXTURE
 	glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
 	glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
 	glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
 	glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)mglGetProcAddress("glMultiTexCoord4fARB");
 	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)mglGetProcAddress("glActiveTextureARB");
 	glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)mglGetProcAddress("glClientActiveTextureARB");
+#endif
 
 	mSingleton = this;
 }
