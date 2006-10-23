@@ -28,32 +28,108 @@
  Freyja 0.9.5 ( Development branch )
  =====================================================================
 
- - Documentation
+[  [ [ Animation Focus ] ]  ]
 
- - Full featured skinning system
-	- Bbox/Sphere/Magnet vertex picker for weighting
+Top 7
 
- - New Animation
+ Misc
+	- Use status bar for mouse over tooltips also
+	- Make all mlisp events use ids instead of numbers
+	- Selected mesh shader / color option
+
+- Animation and Keyframe features
+	- Vertex keyframes
+	- Bone H-matrix / inverted H-matrix
+	  Bones with transforms in/outside of hierarchy
+	- New skeleton system
+	- New Keyframe animation system
+
+- Cursor operations:
+	- Vertex ops undo
+	- Render changes and constantly update
+	- When confirmed by click actually modify
+	- Opposite mouse click 'undo' by not modifying
+	- Don't scale cursor
+	- Cursor rotation pivot setting for vertices
+
+- Copy / Cut / Paste
+	- Partial mesh cut / copy / paste
+
+- Object proprieties dialog?
+	- Hidden property / Show object
+  	- [d] Tree view for all objects in scene
+
+- Modeler Properties
+	- Set radius of vertex and texcoord picks
+	- Option to hide the pick ray
+
+- Mesh / Vertex / Face transforms fully working
+
+- freyjaPak* 
+  - Encryption support
+  - Direct set functions to import / export
+  - New vfs plugin UI
+  - Buffered/fileread/filewrite file plugin interface
+
+----------------------------------------------------------------------------
+
+ Animation
 	- Keyframe editor that makes sense unlike 0.8.x series
 	- Various joint types: hinge, b&s, etc
 	- IK solver for skeletal animation
 	- Deform skeletal mesh animation with animation blending
 	- Timer for animation playback and keyframe timing
 
- - Event logger system refinement { Undo, Redo, Macro, Playback }
+
+ Event system
+	- Sync up 'toggles' using direct sets and feedback events ala spinnas
+	- Remove default settings for 'toggles' in future?
+	- Logger system refinement { Undo, Redo, Macro, Playback }
 	- Enforce usage of Observer and Command patterns for all events
 
- - Paint interface
+
+ Paint interface
+	- 3d paint ( for normal maps? )
 	- DMAP geometery brush interface
 	- Point vertex color/paint
 	- Paint on texture with GIMP interface hooks
 
- - Rendering
+
+ Rendering
 	- Animated textures
-	- Normal map, DOT3, and maybe matrix palette skinning support if begged
+	- Normal maps, DOT3, and maybe matrix palette skinning support if begged
 	- glColorMaterial use
 	- Shadow maps
 	- Different skyboxes/floors for animation view
+	- Arrays to fill of verts/faces/etc in a render mesh
+	- New renderer for new mesh system
+		- Local vs World for mesh owned objects / atoms
+
+
+ Splines and Simulation packages
+	- Considering...
+
+
+ Interface
+	- Reimplement and enable Camera system
+	- Add camera editing back
+	- Viewport view / control abstraction
+	- Point / edge / face / mesh editing tools
+	- Mark groups by face select
+	- Normal editor / Extrude guide / Control point view
+	- Extrude multiple adj faces
+	- Merge adj faces
+	- Selection masks saving as layers?
+	- Guided UV unwrap ( face pick )
+	- Multiple select ops vs single select
+	- MsgBox assert system to fix errors faster
+	- Visibility layers using flags
+	- Skinning tools
+		- Full featured skinning system
+		- Bbox/Sphere/Magnet vertex picker for weighting
+	- 3d text using just libfreetype
+	- Breakup GUI into modules
+
 
  Misc
 	- Add patch -> mesh support back!
@@ -63,7 +139,8 @@
 	- GNOME MIME setup script
 	- Perferences, init.mlisp
 	- Polygon winding control ccw/cw/etc
-	- Add camera editing back
+	- Remappable windows drive support
+
 
  libmgtk
 	- Merge Resource and Mlisp
@@ -73,18 +150,28 @@
 	- Mlisp doesn't lookup symbols for like "true" if just setq
 	- Mlisp wish list: garbage collection, fully featured lisp
 
+
  libfreyja
 	- Documentation
+	- State machine should only use C API for abstraction
+	- Fix Collapse edges, etc req vertex refs
 	- Add vertex/polygon list based texcoord mapping methods to ABI
 	- Add subdiv algorithms like catmull-clark, n-patches, etc
 	- Add polymesh CSG back 
+		- Polygon CSG face intersection
 	- Subdivision Loop and Sabin/Doo surfaces
 	- Mesh/Vertex mirroring
 	- Mesh smoothing
 	- Normal smoothing
 	- Polygon groups
+	- Polymapped normal support?
+	- Primitives: Cone / Disk / Cylinder ? ( Not polygonal )
+	- API standard Interfaces for 'Copy/cut/paste' and 'Rot/Pos/Scale/etc'
+
 
  plugins
+	- Find and fix all the bugs caused by all new backend ( many skeletal formats were broke )
+	- Check PSK and Halflife unit tests for anim
 	- Finish LinageII import for all versions of the game
 	- Editor plugins in freyja using:
 	  freyja_append_eventid, event system, and freyja_append_item_to_menu

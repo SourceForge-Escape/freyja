@@ -307,6 +307,8 @@ public:
 	static vec4_t mColorVertexHighlight;
 	static vec4_t mColorWireframeHighlight;
 	static vec4_t mColorWireframe;
+	static vec4_t mColorBoneHighlight;
+	static vec4_t mColorBone;
 	static vec4_t mColorText;
 	static vec4_t mColorBoundingBox;
 	static vec4_t mColorGridSeperator;

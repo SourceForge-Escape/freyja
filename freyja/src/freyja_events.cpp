@@ -372,6 +372,16 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
 		break;
 
+	case eColorBone:
+		setColor(FreyjaRender::mColorBone, color);
+		freyja_event_set_color(eColorBone, r, g, b, a);
+		break;
+
+	case eColorBoneHighlight:
+		setColor(FreyjaRender::mColorBoneHighlight, color);
+		freyja_event_set_color(eColorBoneHighlight, r, g, b, a);
+		break;
+
 	default:
 		return;
 	}
@@ -822,6 +832,10 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eCamera", eCamera);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
+	r.RegisterInt("eLightPosX", eLightPosX);
+	r.RegisterInt("eLightPosY", eLightPosY);
+	r.RegisterInt("eLightPosZ", eLightPosZ);
+
 	r.RegisterInt("eModelIterator", eModelIterator);
 	r.RegisterInt("ePolygonIterator", ePolygonIterator);
 	r.RegisterInt("eMeshIterator", eMeshIterator);
@@ -854,6 +868,8 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorVertex", eColorVertex);
 	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
 	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
+	r.RegisterInt("eColorBone", eColorBone);
+	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
 
 	r.RegisterInt("eViewports", eViewports);
 
@@ -1591,24 +1607,6 @@ mgtk_togglebutton_value_set(eMaterialTex, false);
                               freyjaGetMaterialTexture(mIndex));	
 	mgtk_textentry_value_set(eSetTextureNameA,
                              freyjaGetMaterialTextureName(mIndex));
-
-#ifdef UMBRA_LIGHTS_NOT_BACKPORTED
-	freyja_event_set_color(eColorLightAmbient, 
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[0],
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[1],
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[2],
-						   OpenGLFreyjaScene::mMaterialLight.mAmbient[3]);
-	freyja_event_set_color(eColorLightDiffuse, 
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[0],
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[1],
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[2],
-						   OpenGLFreyjaScene::mMaterialLight.mDiffuse[3]);
-	freyja_event_set_color(eColorLightSpecular,
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[0],
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[1],
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[2],
-						   OpenGLFreyjaScene::mMaterialLight.mSpecular[3]);
-#endif
 }
 
 

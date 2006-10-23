@@ -186,6 +186,10 @@ typedef enum {
 	eMoveBone_Y,
 	eMoveBone_Z,
 
+	eLightPosX,
+	eLightPosY,
+	eLightPosZ,
+
 	ePolyMapTexturePolygon,
 	eSetFacesMaterial,
 
@@ -202,6 +206,8 @@ typedef enum {
 	eColorVertexHighlight,
 	eColorMesh,
 	eColorMeshHighlight,
+	eColorBone,
+	eColorBoneHighlight,
 
 	eModelIterator,
 	ePolygonIterator,

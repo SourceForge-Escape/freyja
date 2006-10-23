@@ -1610,13 +1610,31 @@ bool FreyjaControl::event(int event, vec_t value)
 		break;
 
 
-	case 800:
-	case 801:
-	case 802:
-		freyjaGetLightPosition4v(0, pos);
-		pos[event - 800] = value;
-		freyjaLightPosition4v(0, pos);
-		freyja_event_gl_refresh();
+	case eLightPosX:
+	case eLightPosY:
+	case eLightPosZ:
+		{
+			int i;
+
+			switch (event)
+			{
+			case eLightPosX:
+				i = 0;
+				break;
+			case eLightPosY:
+				i = 1;
+				break;
+			case eLightPosZ:				
+			default:
+				i = 2;
+			}
+
+			freyjaGetLightPosition4v(0, pos);
+
+			pos[i] = value;
+			freyjaLightPosition4v(0, pos);
+			freyja_event_gl_refresh();
+		}
 		break;
 
 
@@ -5187,6 +5205,12 @@ void eMeshUnselectVertices()
 }
 
 
+void eNotImplementedVec(vec_t v)
+{
+	freyja_print("Not Implementated");	
+}
+
+
 void FreyjaControlEventsAttach()
 {
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
@@ -5199,7 +5223,8 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
 	ResourceEventCallback::add("eCurrentFaceFlagAlpha", &eCurrentFaceFlagAlpha);
-	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
+	ResourceEventCallbackVec::add("eUVPickRadius", &eNotImplementedVec);
+	ResourceEventCallbackVec::add("eVertexPickRadius", &eNotImplementedVec); 
 }
 
 
@@ -5218,7 +5243,6 @@ void ePointJoint()
 
 void eSphereJoint()
 {
-	freyja_print("! *** %i", FreyjaControl::mInstance->GetResourceInt("ePointJoint"));
 	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("ePointJoint"), 0);
 	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eAxisJoint"), 0);
 	FreyjaRender::mJointRenderType = 2;
