@@ -136,6 +136,7 @@ typedef enum {
 	eTransformFace,
 	eTransformPoint,
 
+	eRenderShadow,
 	eRenderBbox,
 	eCamera,
 	

@@ -905,6 +905,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 
+	r.RegisterInt("eRenderShadow", eRenderShadow);
 	r.RegisterInt("eRenderPatch", eRenderPatch);
 	r.RegisterInt("eRenderWireframe",FREYJA_MODE_RENDER_WIREFRAME);
 	r.RegisterInt("eRenderFace", FREYJA_MODE_RENDER_FACE);

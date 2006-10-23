@@ -6,6 +6,9 @@ $(BUILDDIR)/BoneABI.o: freyja/BoneABI.cpp freyja/freyja.h freyja/Bone.h \
   freyja/BoneABI.h
 	 $(DO_CC)
 
+$(BUILDDIR)/BezierPatch.o: freyja/BezierPatch.cpp freyja/BezierPatch.h
+	 $(DO_CC)
+
 $(BUILDDIR)/FreyjaUtil.o: freyja/FreyjaUtil.cpp freyja/FreyjaPluginABI.h \
   freyja/freyja.h freyja/BoneABI.h freyja/MeshABI.h freyja/SkeletonABI.h
 	 $(DO_CC)
