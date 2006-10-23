@@ -245,7 +245,7 @@
 
 		;; Toolbars
 		(vbox 0 1 0 1 0
-		(notebook 0 0 eNone
+		(notebook 0 0 eNop
 
 		(tab "View" eNone
 			(toolbar
@@ -259,10 +259,10 @@
 					"Normals render mode"		eEvent	eRenderNormals)
 
 				(toolbar_togglebutton false "24x24/solid.png" "Faces"
-					"Solid face render mode"		eEvent	eRenderFace)
+					"Solid face render mode"		eRenderFace	eRenderFace)
 
 				(toolbar_togglebutton false "24x24/texture.png" "Texture" 
-					"Texture used when rendering"	eEvent	eRenderTexture)
+					"Texture used when rendering"	eRenderTexture	eRenderTexture)
 
 				(toolbar_togglebutton false "24x24/light.png" "Light" 
 					"Light used when rendering"		eEvent	eRenderLighting)
@@ -830,14 +830,14 @@
 
  	· mongooseichiban@gmail.com ·
 
- <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>")
-		) ; hbox
+ <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>")) 
 	) ; vbox
 ) ; dialog
 
 ;(dialog "Freyja :: 趣味" ePreferencesDialog 0
 (dialog "Freyja :: Preferences" ePreferencesDialog 0
 	(vbox 0 0 0 0 0
+
 		(hbox 1 0 0 1 0
 			(icon "freyja.png" IconSize_Dialog))
 
@@ -847,8 +847,8 @@
 
 
 		(vbox 0 0 0 0 0	
-		(hbox 1 0 0 1 0
-			(label "Viewports setting"  0.0 0.5))	
+			(hbox 1 0 0 1 0
+				(label "Viewports setting"  0.0 0.5))	
 			(hbox 1 0 0 1 0
 				(optionmenu	eEvent	eNone
 					(menu_item	"Free"		eEvent	eNone);eViewBack)
@@ -866,7 +866,6 @@
 					(menu_item	"Back"		eEvent	eNone);eViewBack)
 				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
 				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
-
 			) ; hbox
 
 			(hbox 1 0 0 1 0
@@ -886,7 +885,6 @@
 					(menu_item	"Back"		eEvent	eNone);eViewBack)
 				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
 				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
-
 			) ; hbox
 
 		) ; vbox
@@ -946,7 +944,8 @@
 
 		(hbox 1 0 0 1 2 
 ; About time to start using string tables instead of this...
-;			(label (if (eq locale "jp") "現行Meshの呈色" "Mesh highlight ") 0.0 0.5)
+;			(label (if (eq locale "jp") 
+;				"現行Meshの呈色" "Mesh highlight ") 0.0 0.5)
 			(label "Wireframe highlight " 0.0 0.5)
 			(colorbutton 1 eColorMeshHighlight))
 
@@ -979,7 +978,6 @@
 )) ;; End Preferences dialog
 
 
-
 ;; Custom colors -- After widgets so widgets can be updated to match 
 ;  all widgets with this properity
 (color	eColorBackground		0.5	0.5	0.5	1.0) 
@@ -993,4 +991,17 @@
 (color	eColorLightAmbient		0.8 0.8 0.8 1.0)
 (color	eColorLightDiffuse		0.8 0.8 0.8 1.0)
 (color	eColorLightSpecular		0.8 0.8 0.8 1.0)
+
+; Custom 'toggles'
+(func_set_toggle	eRenderGrid	1)
+(func_set_toggle	eRenderFace	1)
+(func_set_toggle	eRenderTexture	1)
+(func_set_toggle	eRenderLighting	1)
+(func_set_toggle	eRenderMaterial	1)
+(func_set_toggle	eRenderBbox	1)
+(func_set_toggle	eRenderSkeleton	1)
+(func_set_toggle	eRenderPickRay	1)
+(func_set_toggle	ePointJoint	1)
+(func_set_toggle	eLineBone	1)
+
 

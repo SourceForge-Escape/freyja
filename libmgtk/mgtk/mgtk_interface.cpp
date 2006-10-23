@@ -984,6 +984,7 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 	gtk_widget_show(togglebutton);
 
 
+	/*
 	if (event_func)
 	{
 		gtk_signal_connect(GTK_OBJECT(togglebutton), "toggled",
@@ -995,6 +996,7 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(togglebutton), TRUE);
 		}
 	}
+	*/
 
 	return togglebutton;
 }

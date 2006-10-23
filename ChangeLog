@@ -5,6 +5,7 @@
  =====================================================================
 
  20061021 Terry 'Mongoose' Hendrix II
+ - Unified 'toggle' event widgets to sync in mgtk layer ( fuck yes it's above tk and not in app )
  - Added colored lighting back in
  - Bone color prefs
  - Stubs for various things like vertex/uv radius settings and toggles

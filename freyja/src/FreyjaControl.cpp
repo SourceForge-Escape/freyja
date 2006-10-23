@@ -1471,13 +1471,161 @@ bool FreyjaControl::event(int event, unsigned int value)
 		mGenMeshSegements = value;
 		break;
 
+
+	case FREYJA_MODE_RENDER_BONETAG:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_BONES);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_BONES);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_BONES);
+		freyja_print("Bone Rendering [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_BONES) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_POINTS:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_POINTS);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_POINTS);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_POINTS);
+		freyja_print("Point Rendering [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_POINTS) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_WIREFRAME:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_WIREFRAME);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_WIREFRAME);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_WIREFRAME);
+		freyja_print("Wireframe Rendering [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+
+
+	case FREYJA_MODE_RENDER_NORMALS:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_NORMALS);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_NORMALS);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_NORMALS);
+		freyja_print("Normal Rendering [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_NORMALS) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_LIGHTING:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_LIGHTING);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_LIGHTING);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_LIGHTING);
+		freyja_print("GL Lighting is [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_LIGHTING) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_TEXTURE:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_TEXTURE);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_TEXTURE);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_TEXTURE);
+		freyja_print("Texture rendering is [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_TEXTURE) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_MATERIAL:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_MATERIAL);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_MATERIAL);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_MATERIAL);
+		freyja_print("Material rendering is [%s]", 
+					 (GetViewFlags() & FreyjaRender::RENDER_MATERIAL) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_GRID:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_EDIT_GRID);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_EDIT_GRID);
+		}
+		//mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
+		freyja_print("Edit Grid rendering [%s]",
+					 (GetViewFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
+					 "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case FREYJA_MODE_RENDER_FACE:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::RENDER_FACE);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::RENDER_FACE);
+		}
+
+		freyja_print("Face rendering is [%s]", value ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
 	case eRenderBbox:
 		if (value)
 		{
+			// radio button like func for multiple widgets on same event
+			//mgtk_toggle_value_set(eRenderBbox, 1);
 			mRender->setFlag(FreyjaRender::fDrawBoundingVolumes);
 		}
 		else
 		{
+			//mgtk_toggle_value_set(eRenderBbox, 0);
 			mRender->clearFlag(FreyjaRender::fDrawBoundingVolumes);
 		}
 
@@ -1486,6 +1634,36 @@ bool FreyjaControl::event(int event, unsigned int value)
 					 (GetViewFlags() & FreyjaRender::fDrawBoundingVolumes/*FreyjaRender::RENDER_BBOX*/) ? 
 					"ON" : "OFF");
 			freyja_event_gl_refresh();
+		break;
+
+	case ePointJoint:
+		if (value)
+		{
+			// radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eSphereJoint, 0);
+			mgtk_toggle_value_set(eAxisJoint, 0);
+			FreyjaRender::mJointRenderType = 1;
+		}
+		break;
+
+	case eSphereJoint:
+		if (value)
+		{
+			// radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(ePointJoint, 0);
+			mgtk_toggle_value_set(eAxisJoint, 0);
+			FreyjaRender::mJointRenderType = 2;
+		}
+		break;
+
+	case eAxisJoint:
+		if (value)
+		{
+			// radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eSphereJoint, 0);
+			mgtk_toggle_value_set(ePointJoint, 0);
+			FreyjaRender::mJointRenderType = 3;
+		}
 		break;
 
 	default:
@@ -2701,80 +2879,6 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-
-	case FREYJA_MODE_RENDER_BONETAG:
-		mRender->toggleFlag(FreyjaRender::RENDER_BONES);
-		freyja_print("Bone Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_BONES) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_POINTS:
-		mRender->toggleFlag(FreyjaRender::RENDER_POINTS);
-		freyja_print("Point Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_POINTS) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_WIREFRAME:
-		mRender->toggleFlag(FreyjaRender::RENDER_WIREFRAME);
-		freyja_print("Wireframe Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_FACE:
-		mRender->toggleFlag(FreyjaRender::RENDER_FACE);
-		freyja_print("Face Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_FACE) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_NORMALS:
-		mRender->toggleFlag(FreyjaRender::RENDER_NORMALS);
-		freyja_print("Normal Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_NORMALS) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_LIGHTING:
-		mRender->toggleFlag(FreyjaRender::RENDER_LIGHTING);
-		freyja_print("GL Lighting is [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_LIGHTING) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_TEXTURE:
-		mRender->toggleFlag(FreyjaRender::RENDER_TEXTURE);
-		freyja_print("Texture rendering is [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_TEXTURE) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_MATERIAL:
-		mRender->toggleFlag(FreyjaRender::RENDER_MATERIAL);
-		freyja_print("Material rendering is [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_MATERIAL) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_RENDER_GRID:
-		mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
-		freyja_print("Edit Grid rendering [%s]",
-					 (GetViewFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-
 	case FREYJA_MODE_TEXTURE_EDIT:
 		mRender->setViewMode(VIEWMODE_TEXTURE_EDIT);
 		freyja_event_gl_refresh();
@@ -3903,11 +4007,11 @@ void FreyjaControl::addObject()
 		break;
 
 	case tBone:
-		//index = NewBone(0.0, 0.0, 0.0, 0x0);
+		index = freyjaBoneCreate(GetSelectedSkeleton());
 
 		if (index > 0)
 		{
-			//ConnectBone(GetSelectedBone(), index);
+			freyjaBoneParent(index, GetSelectedBone());
 		}
 
 		if (index > -1)
@@ -3917,6 +4021,7 @@ void FreyjaControl::addObject()
 						 index, index, GetSelectedBone());
 		}
 
+		SetSelectedBone(index);
 		ActionModelModified(NULL);
 		break;
 
@@ -5234,6 +5339,7 @@ void FreyjaControlEventsAttach()
 
 void mgtk_checkmenuitem_value_set(int event, bool val);
 
+/*
 void ePointJoint()
 {
 	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eSphereJoint"), 0);
@@ -5254,6 +5360,7 @@ void eAxisJoint()
 	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("ePointJoint"), 0);
 	FreyjaRender::mJointRenderType = 3;
 }
+*/
 
 void eLineBone()
 {
@@ -5327,9 +5434,9 @@ void FreyjaViewEventsAttach()
 	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	ResourceEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
 	ResourceEventCallback::add("eLineBone", &eLineBone);
-	ResourceEventCallback::add("eAxisJoint", &eAxisJoint);
-	ResourceEventCallback::add("eSphereJoint", &eSphereJoint);
-	ResourceEventCallback::add("ePointJoint", &ePointJoint);
+	//ResourceEventCallback::add("eAxisJoint", &eAxisJoint);
+	//ResourceEventCallback::add("eSphereJoint", &eSphereJoint);
+	//ResourceEventCallback::add("ePointJoint", &ePointJoint);
 	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
 	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
 }

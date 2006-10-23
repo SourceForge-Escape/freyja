@@ -254,6 +254,15 @@ void mgtk_togglebutton_value_set(int event, bool val)
 											 is_active);
 			}
 		}
+		else if (test && GTK_IS_TOGGLE_TOOL_BUTTON(test))
+		{
+			if (gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(test)) != 
+				is_active)
+			{
+				gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(test),  
+											 is_active);
+			}
+		}
 		else
 		{
 			mgtk_print("mgtk_togglebutton_value_set> %i:%d failed", event, i);
@@ -284,8 +293,8 @@ void mgtk_checkmenuitem_value_set(int event, bool val)
 				is_active)
 			{
 				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(test),  
-											 is_active);
-			mgtk_print("! mgtk_checkmenuitem_value_set> %i:%d", event, i);
+											   is_active);
+				mgtk_print("! mgtk_checkmenuitem_value_set> %i:%d", event, i);
 			}
 		}
 		else
@@ -294,6 +303,63 @@ void mgtk_checkmenuitem_value_set(int event, bool val)
 		}
 	}
 }
+
+
+
+void mgtk_toggle_value_set(int event, int val)
+{
+	Vector<GtkWidget*> *widgets;
+	GtkWidget *item;
+	unsigned int i;
+	gboolean b = val ? TRUE : FALSE;
+
+
+	widgets = gWidgetMap[event];
+
+	if (!widgets)
+		return;
+
+	for (i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		item = (*widgets)[i];
+
+		if (!item)
+		{
+			mgtk_print("mgtk_toggle_value_set> %i:%d NULL widget", event, i);
+		}
+		else if (GTK_IS_CHECK_MENU_ITEM(item))
+		{
+			if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)) != b)
+			{
+				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), b);
+			}
+		}
+		else if (GTK_IS_TOGGLE_BUTTON(item))
+		{
+			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item)) != b)
+			{
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), b);
+			}
+		}
+		else if (GTK_IS_TOGGLE_TOOL_BUTTON(item))
+		{
+			GtkToggleToolButton *ttb = GTK_TOGGLE_TOOL_BUTTON(item);
+
+			if (gtk_toggle_tool_button_get_active(ttb) != b)
+			{
+				gtk_toggle_tool_button_set_active(ttb, b);
+			}
+		}
+		else
+		{
+			mgtk_print("mgtk_toggle_value_set> %i:%d unknown widget type", event, i);
+		}
+	}
+
+	//mgtk_checkmenuitem_value_set(event, val);
+	//mgtk_togglebutton_value_set(event, val);
+}
+
 
 // Mongoose 2002.01.31, Hack for adjusting widget values by event id
 void mgtk_spinbutton_value_set(int event, float val)
@@ -1269,8 +1335,8 @@ void mgtk_event_notebook_switch_page(GtkNotebook *notebook,
 {
 	mgtk_notebook_eventmap_t *emap;
 
-	mgtk_print("notebook_switch_page_event> %i:%i", 
-				page_num, GPOINTER_TO_INT(event));
+	//mgtk_print("notebook_switch_page_event> %i:%i", 
+	//			page_num, GPOINTER_TO_INT(event));
 
 	emap = (mgtk_notebook_eventmap_t*)gtk_object_get_data(GTK_OBJECT(notebook), 
 														  "notebook_eventmap");

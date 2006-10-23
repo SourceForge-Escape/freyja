@@ -11,7 +11,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
- 
+ - Bone componet creation is broken / not completely hooked up
  - Box buttons look like labels to people
  - Object rotate operation for meshes is reversed from the 'preview'
  - Object scale is broken
