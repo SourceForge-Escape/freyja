@@ -267,10 +267,6 @@
 				(toolbar_togglebutton false "24x24/light.png" "Light" 
 					"Light used when rendering"		eEvent	eRenderLighting)
 
-				; Move this into new patch editor ui when it comes
-				;(toolbar_togglebutton false "patch.png" "Patch"
-				;	"Render/enable patch tool"	eEvent	eRenderPatch)
-
 				(toolbar_togglebutton false "24x24/bvol.png" "BoundingBox"
 					"Render Bounding boxes"	eEvent	eRenderBbox)
 
@@ -279,6 +275,9 @@
 
 				(toolbar_togglebutton false "24x24/grid.png" "Grid"
 					"Toggle plane grid rendering"	eEvent eRenderGrid)
+
+				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
+					"Render shadows"		eEvent	eRenderShadow)
 
 				(toolbar_togglebutton false "24x24/deform.png" "Skeletal deform"
 					"Deform using skeleton"		eEvent	eSkeletalDeform) 
@@ -318,7 +317,7 @@
 
 					(toolbar_button "24x24/patch.png"
 						" "	"Create polygon patch"
-						eEvent	eNone)
+						eEvent	eRenderPatch)
 				)
 			)
 
