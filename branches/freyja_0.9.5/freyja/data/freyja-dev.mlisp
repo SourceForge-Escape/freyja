@@ -27,7 +27,7 @@
 (setq WINDOW_X 32)             ; Offset of the window on load
 (setq WINDOW_Y 32)
 
-(setq WIDTH  700)              ; Set GL window width and height
+(setq WIDTH  663);700)              ; Set GL window width and height
 (setq HEIGHT 640)
 
 (setq NOTEBOOK_WIDTH 340)      ; Set sidebar notebook width and height
@@ -146,7 +146,7 @@
 		) ; End submenu "_View"
 
 		(submenu "_Create" 
-				(submenu "_Objects"
+				(submenu "_Componets"
 						(menu_item "_Vertex"		eEvent  eVertexNew)
 						(menu_item "_Face"			eEvent  ePolygonNew)
 						(menu_item "_Mesh"			eEvent	eMeshNew)
@@ -244,57 +244,119 @@
 
 
 		;; Toolbars
-		(hbox 0 1 0 1 0
+		(vbox 0 1 0 1 0
+		(notebook 0 0 eNone
 
-		;; Toolbar View
-	    ;(handlebox 1 
-        ;(vbox 0 0 0 1 0
-		;(hbox 0 1 0 1 0
+		(tab "View" eNone
+			(toolbar
+				(toolbar_togglebutton false "24x24/point.png" "Points" 
+					"Point render mode"		eEvent	eRenderVertex)
 
-		;	(toolbar
+				(toolbar_togglebutton false "24x24/wireframe.png" "Wireframe" 
+					"Wireframe render mode"		eEvent	eRenderWireframe)
 
-		;		(toolbar_togglebutton true "point.png" "Points" 
-		;			"Point render mode"		eEvent	eRenderVertex)
+				(toolbar_togglebutton false "24x24/normals.png" "Normals" 
+					"Normals render mode"		eEvent	eRenderNormals)
 
-		;		(toolbar_togglebutton true "wireframe.png" "Wireframe" 
-		;			"Wireframe render mode"		eEvent	eRenderWireframe)
+				(toolbar_togglebutton false "24x24/solid.png" "Faces"
+					"Solid face render mode"		eEvent	eRenderFace)
 
-		;		(toolbar_togglebutton false "normals.png" "Normals" 
-		;			"Normals render mode"		eEvent	eRenderNormals)
+				(toolbar_togglebutton false "24x24/texture.png" "Texture" 
+					"Texture used when rendering"	eEvent	eRenderTexture)
 
-		;		(toolbar_togglebutton true "solid.png" "Faces"
-		;			"Solid face render mode"		eEvent	eRenderFace)
-
-		;		(toolbar_togglebutton false "texture.png" "Texture" 
-		;			"Texture used when rendering"	eEvent	eRenderTexture)
-
-		;		(toolbar_togglebutton false "light.png" "Light" 
-		;			"Light used when rendering"		eEvent	eRenderLighting)
+				(toolbar_togglebutton false "24x24/light.png" "Light" 
+					"Light used when rendering"		eEvent	eRenderLighting)
 
 				; Move this into new patch editor ui when it comes
 				;(toolbar_togglebutton false "patch.png" "Patch"
 				;	"Render/enable patch tool"	eEvent	eRenderPatch)
 
-		;		(toolbar_togglebutton false "bvol.png" "BoundingBox"
-		;			"Render Bounding boxes"	eEvent	eRenderBbox)
+				(toolbar_togglebutton false "24x24/bvol.png" "BoundingBox"
+					"Render Bounding boxes"	eEvent	eRenderBbox)
 
-		;		(toolbar_togglebutton true "bone-tag.png" "Bones"
-		;			"Show bones when rendering"		eEvent	eRenderSkeleton)
+				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones"
+					"Show bones when rendering"		eEvent	eRenderSkeleton)
 
-		;		(toolbar_togglebutton true "grid.png" "Grid"
-		;			"Toggle plane grid rendering"	eEvent eRenderGrid)
+				(toolbar_togglebutton false "24x24/grid.png" "Grid"
+					"Toggle plane grid rendering"	eEvent eRenderGrid)
 
-		;		(toolbar_togglebutton false "deform.png" "Skeletal deform"
-		;			"Deform using skeleton"		eEvent	eSkeletalDeform) 
+				(toolbar_togglebutton false "24x24/deform.png" "Skeletal deform"
+					"Deform using skeleton"		eEvent	eSkeletalDeform) 
 
-		;	) ; End toolbar
-		;))) ; End handlebox
+			) ; End toolbar
+		)
 
+			(tab "Create" eNone
+				(toolbar
+					(toolbar_button "24x24/cube.png"
+						" "	"Create polygon cube"
+						eEvent	eGenerateCube)
+
+					(toolbar_button "24x24/plane.png"
+						" "	"Create polygon plane"
+						eEvent	eGeneratePlane)
+
+					(toolbar_button "24x24/tube.png"
+						" "	"Create polygon tube"
+						eEvent	eGenerateTube)
+
+					(toolbar_button "24x24/circle.png"
+						" "	"Create polygon circle"
+						eEvent	eGenerateCircle)
+
+					(toolbar_button "24x24/cone.png"
+						" "	"Create polygon cone"
+						eEvent	eGenerateCone)
+
+					(toolbar_button "24x24/cylinder.png"
+						" "	"Create polygon cylinder"
+						eEvent	eGenerateCylinder)
+
+					(toolbar_button "24x24/sphere.png"
+						" "	"Create polygon sphere"	
+						eEvent	eGenerateSphere)
+
+					(toolbar_button "24x24/patch.png"
+						" "	"Create polygon patch"
+						eEvent	eNone)
+				)
+			)
+
+			(tab "Modify" eNone
+			; Need to group toggles like radio buttons
+			(toolbar
+				(toolbar_togglebutton false
+					"24x24/bbox-select.png" "Select object" "Select by bounding box" 
+					eEvent eSelectionByBox)
+
+				(toolbar_button "24x24/cursor-select.png" "Select by cursor" 
+					"Select object" eEvent	eSelect)
+
+				(toolbar_button "24x24/move.png" "Move" 
+					"Move object" eEvent	eMoveObject)
+
+				(toolbar_button "24x24/rotate.png" "Rotate" 
+					"Rotate object" eEvent	eRotateObject)
+
+				(toolbar_button "24x24/scale.png" "Scale" 
+					"Scale object" eEvent	eScaleObject)
+
+				(toolbar_togglebutton false 
+					"24x24/clone.png" "CopyM"	"Copy multiple objects" 
+					eEvent eCopyAppendMode)
+
+				(toolbar_button
+					"24x24/split.png" "Split" "Split object" 
+					eEvent eSplitObject)
+			)
+		)
 		) ; End Toolbars
 
 
 		;; Main window body ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		(hbox 0 1 1 1 1
+
+
 
 			;; GL window
 			(gl_widget WIDTH HEIGHT)
@@ -306,7 +368,7 @@
 				;; Model tab
 				(tab "Model" eModeModel
 
-					(hbox 0 0 0 1 0 
+					(hbox 1 1 0 1 1
 						(toolbar 
 							(toolbar_button "gtk-new" "New"	
 								"New model"		eEvent eNewFile)
@@ -319,25 +381,26 @@
 								"gtk-save-as" "Save as..." "Saves model file" 
 								"Save Model..." eSaveModel "mode=save,confirm-overwrite=true,")
 
-							(toolbar_togglebutton true
-								"cursor-select.png" "Select" "Select by pointer"
-								eEvent eSelect)
+							;(toolbar_togglebutton true
+							;	"24x24/cursor-select.png" "Select" "Select by pointer"
+							;	eEvent eSelect)
 
-							(toolbar_togglebutton false
-								"bbox-select.png" "Select" "Select by bounding box" 
-								eEvent eSelectionByBox)
+							;(toolbar_togglebutton false
+							;	"24x24/bbox-select.png" "Select" "Select by bounding box" 
+							;	eEvent eSelectionByBox)
 
-							(toolbar_togglebutton false 
-								"clone.png" "CopyM"	"Copy multiple objects" 
-								eEvent eCopyAppendMode)
+							;(toolbar_togglebutton false 
+							;	"24x24/clone.png" "CopyM"	"Copy multiple objects" 
+							;	eEvent eCopyAppendMode)
 
-							(toolbar_button
-								"split.png" "Split" "Split object" 
-								eEvent eSplitObject)
+							;(toolbar_button
+							;	"24x24/split.png" "Split" "Split object" 
+							;	eEvent eSplitObject)
 
-							(toolbar_button
-								"texmap.png" "TexelGen" "Texture Map, XY Plane"
-								eEvent eTextureMapProjection)))
+							;(toolbar_button
+							;	"24x24/texmap.png" "TexelGen" "Texture Map, XY Plane"
+							;	eEvent eTextureMapProjection)
+						))
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
@@ -439,18 +502,9 @@
 					;(hbox 1 0 0 1 0 
 					;	(button "Mesh from Patch"  eEvent eGeneratePatchMesh))
 
-					;; Animation ;;;;;;;;;;;;;;;
 
-					;; Seperator
-					(hbox 1 0 0 1 0 (hsep))
 
-					(hbox 1 0 0 1 0
-						(label "Animation" 0.0 0.5))
-
-					(hbox 1 0 0 1 0
-						(label "KeyFrame #" 0.0 0.5) 
-						(spinbutton 0 0 500 eGroupIterator))
-
+					;; Skeleton ;;;;;;;;;;;;;;;
 
 					;; Skeleton attribute editor  
 					(hbox 1 0 0 1 0 (hsep))
@@ -465,6 +519,49 @@
 							(label "Bone: " 0.0 0.5))
 						(spinbutton 0 0 100 eBoneIterator)
 						(textbox eSetCurrentBoneName))
+
+					;; Animation ;;;;;;;;;;;;;;;
+
+					;; Seperator
+					(hbox 1 0 0 1 0 (hsep))
+
+					
+
+					
+
+	;; Animation bar
+   	(handlebox 1 
+		(vbox 0 0 0 1 0	
+
+			;(hbox 1 0 0 1 0
+			;	(label "Animation" 0.0 0.5))
+
+			(hbox 1 0 0 1 0
+				(label "KeyFrame #" 0.0 0.5) 
+				(spinbutton 0 0 500 eGroupIterator))
+
+
+			(hbox 0 1 0 1 0
+				(hslider eAnimationSlider 0 100))
+
+			(hbox 0 1 0 1 0
+				(toolbar
+					(toolbar_button "gtk-media-record"
+								"Set" "Set Keyframe" eEvent eNone)
+					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 	
+								"Prev" "Previous" eEvent eAnimationPrev)
+					(toolbar_button "gtk-media-rewind"
+								"?" "?" eEvent eNone)
+					(toolbar_button "gtk-media-play" ;"gtk-go-forward" 	
+								"Play" "Play" eEvent eAnimationPlay)
+					(toolbar_button "gtk-media-stop" ;"gtk-stop" 	
+								"Stop" "Stop" eEvent eAnimationStop)
+					(toolbar_button "gtk-media-forward"
+								"?" "?" eEvent eNone)
+					(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
+								"Next" "Next" eEvent eAnimationNext)))
+		) ;; vbox
+	) ;; End Animation handlebox
 
 			)  ;; end tab
 
@@ -682,29 +779,7 @@
 )
 )
 
-	;; Animation bar
-   	(handlebox 1 
-		(vbox 0 0 0 1 0	
-			(hbox 0 1 0 1 0
-				(hslider eAnimationSlider 0 100)
-					(toolbar
-						(toolbar_button "gtk-media-record"
-									"Set" "Set Keyframe" eEvent eNone)
-						(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 	
-									"Prev" "Previous" eEvent eAnimationPrev)
-						(toolbar_button "gtk-media-rewind"
-									"?" "?" eEvent eNone)
-						(toolbar_button "gtk-media-play" ;"gtk-go-forward" 	
-									"Play" "Play" eEvent eAnimationPlay)
-						(toolbar_button "gtk-media-stop" ;"gtk-stop" 	
-									"Stop" "Stop" eEvent eAnimationStop)
-						(toolbar_button "gtk-media-forward"
-									"?" "?" eEvent eNone)
-						(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
-									"Next" "Next" eEvent eAnimationNext) )
-			) ;; hbox
-		) ;; vbox
-	) ;; handlebox
+	;; a box here would be under the tabs and the main window
 
 
 	) ;; vbox
@@ -760,7 +835,7 @@
 	) ; vbox
 ) ; dialog
 
-
+;(dialog "Freyja :: 趣味" ePreferencesDialog 0
 (dialog "Freyja :: Preferences" ePreferencesDialog 0
 	(vbox 0 0 0 0 0
 		(hbox 1 0 0 1 0
@@ -836,29 +911,53 @@
 			(label "GenMesh # of segments "  0.0 0.5) 
 			(spinbutton 4 3 32 eGenMeshSegements))
 
+		(hbox 1 0 0 1 0
+			(label "UV texcoord pick radius"  0.0 0.5) 
+			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eUVPickRadius))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex pick radius"  0.0 0.5) 
+			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eVertexPickRadius))
+
 		(hbox 1 0 0 1 2 
+;			(label "遠景の呈色" 0.0 0.5)
 			(label "Background color " 0.0 0.5)
 			(colorbutton 1 eColorBackground))
 
 		(hbox 1 0 0 1 2 
+;			(label "基底の呈色" 0.0 0.5)
 			(label "Grid color " 0.0 0.5)
 			(colorbutton 1 eColorGrid))
 
 		(hbox 1 0 0 1 2 
+;				(label "天頂の呈色" 0.0 0.5)
 			(label "Vertex color " 0.0 0.5)
 			(colorbutton 1 eColorVertex))
 
 		(hbox 1 0 0 1 2 
+;				(label "現行天頂の呈色" 0.0 0.5)
 			(label "Vertex highlight " 0.0 0.5)
 			(colorbutton 1 eColorVertexHighlight))
 
 		(hbox 1 0 0 1 2 
+;				(label "Meshの呈色" 0.0 0.5)
 			(label "Wireframe color " 0.0 0.5)
 			(colorbutton 1 eColorMesh))
 
 		(hbox 1 0 0 1 2 
+; About time to start using string tables instead of this...
+;			(label (if (eq locale "jp") "現行Meshの呈色" "Mesh highlight ") 0.0 0.5)
 			(label "Wireframe highlight " 0.0 0.5)
 			(colorbutton 1 eColorMeshHighlight))
+
+		(hbox 1 0 0 1 2 
+			(label "Bone color " 0.0 0.5)
+			(colorbutton 1 eColorBone))
+
+		(hbox 1 0 0 1 2 
+			(label "Bone highlight " 0.0 0.5)
+			(colorbutton 1 eColorBoneHighlight))
+
 		
 		(hbox 1 1 0 1 1	(hsep))
 
@@ -868,55 +967,30 @@
 			(label "Diffuse" 0.0 0.5)
 			(label "Specular" 0.0 0.5))
 		(hbox 1 1 0 1 1
-			;(label " " 0.0 0.5)
 			(spinbutton 0 0 100 eSelectLight)
 			(colorbutton 1 eColorLightAmbient)
 			(colorbutton 1 eColorLightDiffuse)
 			(colorbutton 1 eColorLightSpecular))
 		(hbox 1 1 0 1 1
-			;(label "Light0" 0.0 0.5)
-			(spinbutton 0.0 -10000.0 10000.0 800)
-			(spinbutton 0.0 -10000.0 10000.0 801)
-			(spinbutton 0.0 -10000.0 10000.0 802))
+			(spinbutton 0.0 -10000.0 10000.0 eLightPosX)
+			(spinbutton 0.0 -10000.0 10000.0 eLightPosY)
+			(spinbutton 0.0 -10000.0 10000.0 eLightPosZ))
 
-)) ;; Preferences dialog
+)) ;; End Preferences dialog
 
-
-;(dialog "Freyja :: 趣味" ePreferencesDialog 0
-;	(vbox 0 0 0 0 0
-;
-;		(hbox 1 0 0 1 0 
-;			(label "遠景の呈色" 0.0 0.5)
-;			(colorbutton 1 eColorBackground))
-;
-;		(hbox 1 0 0 1 0 
-;			(label "基底の呈色" 0.0 0.5)
-;			(colorbutton 1 eColorGrid))
-;
-;			(hbox 1 0 0 1 0 
-;				(label "天頂の呈色" 0.0 0.5)
-;				(colorbutton 1 eColorVertex))
-;
-;			(hbox 1 0 0 1 0 
-;				(label "現行天頂の呈色" 0.0 0.5)
-;				(colorbutton 1 eColorVertexHighlight))
-;
-;			(hbox 1 0 0 1 0 
-;				(label "Meshの呈色" 0.0 0.5)
-;				(colorbutton 1 eColorMesh))
-;
-;			(hbox 1 0 0 1 0 
-;				(label "現行Meshの呈色" 0.0 0.5)
-;				(colorbutton 1 eColorMeshHighlight))))
-;
 
 
 ;; Custom colors -- After widgets so widgets can be updated to match 
+;  all widgets with this properity
 (color	eColorBackground		0.5	0.5	0.5	1.0) 
 (color	eColorGrid				0.4	0.4	0.4	0.9)
 (color	eColorMesh				0.0	0.0	0.0	1.0)
 (color	eColorMeshHighlight		0.2	0.2	1.0	1.0)
 (color	eColorVertex			0.2	1.0	1.0	1.0)
 (color	eColorVertexHighlight	1.0	0.0	0.86 1.0)
-
+(color	eColorBone				0.882352941 0.654901961 0.219607843 1.0)
+(color	eColorBoneHighlight		0.956862745 0.415686275 0.2 1.0)
+(color	eColorLightAmbient		0.8 0.8 0.8 1.0)
+(color	eColorLightDiffuse		0.8 0.8 0.8 1.0)
+(color	eColorLightSpecular		0.8 0.8 0.8 1.0)
 

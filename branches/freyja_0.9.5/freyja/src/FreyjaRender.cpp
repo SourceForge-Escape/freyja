@@ -58,14 +58,12 @@ FreyjaRender *FreyjaRender::mSingleton = 0x0;
 
 Ray FreyjaRender::mTestRay;
 
-vec4_t gBoneColor = { 0.839215686f, 0.0f, 1.0f, 1.0f };
-// { 0.207843137f, 0.654901961f, 0.917647059f, 1.0f };
-vec4_t gBoneHighlightColor = { 1.0f, 0.0f, 1.0f, 1.0f };
-
 vec4_t FreyjaRender::mColorBackground;
 vec4_t FreyjaRender::mColorText;
 vec4_t FreyjaRender::mColorWireframe;
 vec4_t FreyjaRender::mColorWireframeHighlight;
+vec4_t FreyjaRender::mColorBone;
+vec4_t FreyjaRender::mColorBoneHighlight;
 vec4_t FreyjaRender::mColorBoundingBox;
 vec4_t FreyjaRender::mColorGridSeperator;
 vec4_t FreyjaRender::mColorGridLine;
@@ -735,6 +733,14 @@ void FreyjaRender::renderLights()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
 		glLightfv(GL_LIGHT0, GL_POSITION, pos);
+
+		vec4_t color;
+		freyjaGetLightAmbient(freyjaGetCurrentLight(), color);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, color);
+		freyjaLightDiffuse(freyjaGetCurrentLight(), color);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+		freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, color);
 	}
 }
 
@@ -1129,7 +1135,7 @@ void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton,
 
 	/* Render bone */
 	((FreyjaRender::mSelectedBone == currentBone) ? 
-	 glColor3fv(gBoneHighlightColor) : glColor3fv(gBoneColor));
+	 glColor3fv(FreyjaRender::mColorBoneHighlight) : glColor3fv(FreyjaRender::mColorBone));
 	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
 
 	/* Transform child bones */
@@ -1702,6 +1708,14 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+
+	vec4_t color;
+	freyjaGetLightAmbient(freyjaGetCurrentLight(), color);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, color);
+	freyjaLightDiffuse(freyjaGetCurrentLight(), color);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+	freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, color);
 
 #ifdef USE_TORUS_TEST
 	glPushMatrix();

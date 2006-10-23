@@ -5,6 +5,9 @@
  =====================================================================
 
  20061021 Terry 'Mongoose' Hendrix II
+ - Added colored lighting back in
+ - Bone color prefs
+ - Stubs for various things like vertex/uv radius settings and toggles
  - 'View' toolbar completely disabled you can reenable it via uncommenting
    the code in your freyja-dev.mlisp file and restarting freyja
  - mgtk menu_item_toggle for check/togglable menu items ( closes todo )
