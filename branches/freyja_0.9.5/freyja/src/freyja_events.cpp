@@ -687,6 +687,7 @@ void freyja_handle_resource_init(Resource &r)
 	// Event types used for flow control of event ids
 	r.RegisterInt("eMode", eMode);
 	r.RegisterInt("eEvent", eEvent);
+	r.RegisterInt("eNop", eNop);
 
 
 	// Event ids
@@ -711,6 +712,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eUnselect", eUnselect);
 	r.RegisterInt("eSelectAll", eSelectAll);
 
+	r.RegisterInt("eAxisJoint", eAxisJoint);
+	r.RegisterInt("eSphereJoint", eSphereJoint);
+	r.RegisterInt("ePointJoint", ePointJoint);
 
 	r.RegisterInt("eSplitObject", eSplitObject);
 	r.RegisterInt("eAppendFile", eAppendFile);
@@ -1338,7 +1342,7 @@ void freyja_event_set_color(int colorId, float r, float g, float b, float a)
 
 int freyja_event2i(int event, int cmd)
 {
-	if (FreyjaControl::mInstance)
+	if (FreyjaControl::mInstance && event != eNop)
 	{
 		if (!FreyjaControl::mInstance->handleEvent(event, cmd))
 		{

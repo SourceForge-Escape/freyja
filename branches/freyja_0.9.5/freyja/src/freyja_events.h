@@ -42,6 +42,8 @@ typedef enum {
 	// Event flow control modes ( majors )
 	eMode,     /* These events change modes ( modify states ) */
 	eEvent,    /* These events request handling ( perform actions ) */
+	eNop,      /* Event to be ignored */
+
 
 	// Event ids ( minors )
 	eNewFile,
@@ -219,6 +221,10 @@ typedef enum {
 	eObjectMenu,
 
 	eSkeletalDeform,
+
+	eAxisJoint,
+	eSphereJoint,
+	ePointJoint,
 
 	/* Text events */
 	eSetCurrentBoneName,

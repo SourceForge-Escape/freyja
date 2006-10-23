@@ -433,6 +433,8 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *box);
 arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box);
 
 
+arg_list_t *mgtk_func_toggle_set(arg_list_t *args);
+
 ////////////////////////////////////////////////////////////////
 
 
@@ -494,6 +496,7 @@ Resource::Resource()
 	RegisterFunction("filechooserbutton", mgtk_rc_filechooserbutton);
 	RegisterFunction("filechoosermenu_item", mgtk_rc_filechoosermenu_item);
 	RegisterFunction("filechoosertoolbar_button", mgtk_rc_filechoosertoolbar_button);
+	RegisterFunction("func_set_toggle", mgtk_func_toggle_set);
 
 	RegisterInt("IconSize_Menu", 1);
 	RegisterInt("IconSize_ToolbarSmall", 2);

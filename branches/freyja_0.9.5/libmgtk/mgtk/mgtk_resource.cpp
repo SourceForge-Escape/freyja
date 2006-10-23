@@ -952,6 +952,29 @@ arg_list_t *mgtk_rc_toolbar_box(arg_list_t *box)
 }
 
 
+void mgtk_tool_toggle_button_handler(GtkWidget *item, gpointer e)
+{
+	int val = 0;
+
+	if (GTK_IS_TOGGLE_BUTTON(item))
+	{
+		val = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item));
+	}
+	else if (GTK_IS_TOGGLE_TOOL_BUTTON(item))
+	{ 
+		val = gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(item));
+	}
+	else
+	{
+		mgtk_print("! unknown type %s:%i", __FILE__, __LINE__);
+	}
+
+	mgtk_handle_event1u(GPOINTER_TO_INT(e), val);
+
+	// Update any other widgets sharing the same event
+	mgtk_toggle_value_set(GPOINTER_TO_INT(e), val);
+}
+
 arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 {
 	arg_list_t *ret, *icon, *label, *help, *toggled, *event, *cmd;
@@ -1030,6 +1053,15 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 										  event_func, event_cmd);
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)toggle_button);
+
+		gtk_signal_connect(GTK_OBJECT(toggle_button), "toggled",
+						   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
+						   GINT_TO_POINTER(get_int(cmd)));
+
+		// Mongoose 2002.02.01, Add this widget to a special 
+		//   lookup table by it's event id
+		//index_add_gtk_widget(get_int(event), item);
+		mgtk_event_subscribe_gtk_widget(get_int(cmd), toggle_button);
 	}
 
 	delete_arg(&toggled);
@@ -3089,11 +3121,46 @@ arg_list_t *mgtk_rc_menu_seperator(arg_list_t *container)
 }
 
 
+void mgtk_toggle_value_set(int event, int val);
+arg_list_t *mgtk_func_toggle_set(arg_list_t *args)
+{
+	arg_list_t *event, *val;
+
+	event = symbol();
+	arg_enforce_type(&event, INT);
+
+	val = symbol();
+	arg_enforce_type(&val, INT);
+
+	if (!event || !val)
+	{
+		if (!event)
+			rc_assertion_error("toggle_set", "event == INT");
+
+		if (!val)
+			rc_assertion_error("toggle_set", "val == INT");
+	}
+	else
+	{
+		mgtk_toggle_value_set(get_int(event), get_int(val));
+	}
+
+	delete_arg(&event);
+	delete_arg(&val);
+
+	return NULL;
+}
+
+
 // (menu_item_toggle "Label" eToggleEvent InitStateBool)
 void mgtk_check_menu_item_handler(GtkCheckMenuItem *item, gpointer e)
 {
 	mgtk_handle_event1u(GPOINTER_TO_INT(e), 
 						gtk_check_menu_item_get_active(item));
+
+	// Update any other widgets sharing the same event
+	mgtk_toggle_value_set(GPOINTER_TO_INT(e), 
+						  gtk_check_menu_item_get_active(item));
 }
 
 arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
