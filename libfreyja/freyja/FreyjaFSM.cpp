@@ -339,9 +339,9 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 			mIndexSkeleton = item;
 		}
 
-		if (freyjaIsBoneAllocated(mIndexBone))
+		if (freyjaIsSkeletonAllocated(mIndexSkeleton))
 		{
-			return mIndexBone;
+			return mIndexSkeleton;
 		}
 
 		break;

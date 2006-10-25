@@ -39,7 +39,6 @@
 #include <hel/Quaternion.h>
 #include <hel/BoundingVolume.h>
 
-#include "CopyModel.h"
 #include "FreyjaCamera.h"
 #include "FreyjaFSM.h"
 #include "FreyjaImage.h"
@@ -71,7 +70,6 @@ Vector<FreyjaLight *>  gFreyjaLights;
 Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 
 Vector<char *> gPluginDirectories;
-Vector<CopyModel *>  gCopyModels;
 int32 gCurrentFreyjaPlugin = -1;
 
 
@@ -1814,10 +1812,10 @@ uint32 freyjaGetModelCount()
 
 char freyjaGetModelAppendMeshMode(index_t modelIndex)
 {
-	if (modelIndex < gCopyModels.size())
-	{
-		return gCopyModels[modelIndex]->getAppendMeshMode();
-	}
+	//if (modelIndex < gCopyModels.size())
+	//{
+	//	return gCopyModels[modelIndex]->getAppendMeshMode();
+	//}
 
 	return -1;
 }
@@ -1825,19 +1823,19 @@ char freyjaGetModelAppendMeshMode(index_t modelIndex)
 
 void freyjaModelAppendMeshMode(index_t modelIndex, char on)
 {
-	if (modelIndex < gCopyModels.size())
-	{
-		gCopyModels[modelIndex]->setAppendMeshMode(on);
-	}
+	//if (modelIndex < gCopyModels.size())
+	//{
+	//	gCopyModels[modelIndex]->setAppendMeshMode(on);
+	//}
 }
 
 
 char freyjaModelCopyMesh(index_t modelIndex, index_t mesh, index_t frame)
 {
-	if (modelIndex < gCopyModels.size())
-	{
-		return gCopyModels[modelIndex]->copyMesh(mesh, frame);
-	}
+	//if (modelIndex < gCopyModels.size())
+	//{
+	//	return gCopyModels[modelIndex]->copyMesh(mesh, frame);
+	//}
 
 	return -1;
 }
@@ -1845,10 +1843,10 @@ char freyjaModelCopyMesh(index_t modelIndex, index_t mesh, index_t frame)
 
 char freyjaModelPasteMesh(index_t modelIndex)
 {
-	if (modelIndex < gCopyModels.size())
-	{
-		return gCopyModels[modelIndex]->pasteMesh();
-	}
+	//if (modelIndex < gCopyModels.size())
+	//{
+	//	return gCopyModels[modelIndex]->pasteMesh();
+	//}
 
 	return -1;
 }
@@ -1858,10 +1856,10 @@ char freyjaModelCopyVertexList(index_t modelIndex,
 							   Vector<unsigned int> &list,
 							   int mesh, int frame)
 {
-	if (modelIndex < gCopyModels.size())
-	{
-		return gCopyModels[modelIndex]->copyVertexBuffer(list, mesh, frame);
-	}
+	//if (modelIndex < gCopyModels.size())
+	//{
+	//	return gCopyModels[modelIndex]->copyVertexBuffer(list, mesh, frame);
+	//}
 
 	return -1;
 }

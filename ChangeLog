@@ -5,6 +5,10 @@
  =====================================================================
 
  20061021 Terry 'Mongoose' Hendrix II
+ - PickRay visibility toggle enabled in interface
+ - Removed libfreyja CopyModel subsystem
+ - Removal of some dead libfreyja code
+ - UI hook up for new skeleton backend slowly finishing up
  - Unified 'toggle' event widgets to sync in mgtk layer ( fuck yes it's above tk and not in app )
  - Added colored lighting back in
  - Bone color prefs

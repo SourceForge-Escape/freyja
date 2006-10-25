@@ -779,6 +779,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
 	r.RegisterInt("eRenderBbox", eRenderBbox);
+	r.RegisterInt("eRenderPickRay", eRenderPickRay);
 
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
 	r.RegisterInt("eTmpUVMapOff",eTmpUVMapOff);

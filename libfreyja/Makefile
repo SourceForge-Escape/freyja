@@ -194,7 +194,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/freyja.o \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/BoneABI.o \
-	$(BUILDDIR)/CopyModel.o \
 	$(BUILDDIR)/FreyjaFSM.o \
 	$(BUILDDIR)/FreyjaPluginABI.o \
 	$(BUILDDIR)/FreyjaPlugin.o \
