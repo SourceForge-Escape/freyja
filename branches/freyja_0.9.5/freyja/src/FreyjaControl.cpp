@@ -556,7 +556,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		}	
 	}
 
-	mRender->setFlag(FreyjaRender::fDrawPickRay);
+	//mRender->setFlag(FreyjaRender::fDrawPickRay);
 
 #if DEBUG_PICK_RAY_PLANAR
 	// DEBUG case is a triangle ABC...
@@ -1616,6 +1616,20 @@ bool FreyjaControl::event(int event, unsigned int value)
 		freyja_event_gl_refresh();
 		break;
 
+	case eRenderPickRay:
+		if (value)
+		{
+			mRender->setFlag(FreyjaRender::fDrawPickRay);
+		}
+		else
+		{
+			mRender->clearFlag(FreyjaRender::fDrawPickRay);
+		}
+
+		freyja_print("Pick ray visibility is [%s]", value ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
 	case eRenderBbox:
 		if (value)
 		{
@@ -2515,16 +2529,18 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eCut:
-		if (copySelectedObject())
+		if (CopySelectedObject())
 			DeleteSelectedObject();
 		freyja_event_gl_refresh();
 		break;
+
 	case eCopy:
-		copySelectedObject();
+		CopySelectedObject();
 		freyja_event_gl_refresh();
 		break;
+
 	case ePaste:
-		pasteSelectedObject();
+		PasteSelectedObject();
 		freyja_event_gl_refresh();
 		break;
 
@@ -3890,7 +3906,7 @@ void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-bool FreyjaControl::copySelectedObject()
+bool FreyjaControl::CopySelectedObject()
 {
 	switch (mObjectMode)
 	{
@@ -3911,7 +3927,7 @@ bool FreyjaControl::copySelectedObject()
 }
 
 
-bool FreyjaControl::pasteSelectedObject()
+bool FreyjaControl::PasteSelectedObject()
 {
 	switch (mObjectMode)
 	{
@@ -3956,7 +3972,7 @@ void FreyjaControl::DeleteSelectedObject()
 		break;
 
 	case tBone:
-		freyjaBoneDelete(GetSelectedMesh());
+		freyjaBoneDelete(GetSelectedBone());
 		break;
 
 	case tMesh:
@@ -3997,7 +4013,7 @@ void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
 
 void FreyjaControl::addObject()
 {
-	int index = -1;
+	int index = -1, root;
 
 
 	switch (mObjectMode)
@@ -4007,21 +4023,46 @@ void FreyjaControl::addObject()
 		break;
 
 	case tBone:
+		if (!freyjaGetCount(FREYJA_SKELETON))
+		{
+			SetSelectedSkeleton(freyjaSkeletonCreate());
+		}
+
+		root = GetSelectedBone(); // really parent
 		index = freyjaBoneCreate(GetSelectedSkeleton());
 
-		if (index > 0)
+		if (index == 0)
 		{
-			freyjaBoneParent(index, GetSelectedBone());
+			freyjaSkeletonRootIndex(GetSelectedSkeleton(), index);
+		}
+
+		if (index > 0 && index != root)
+		{
+			freyjaBoneParent(index, root);
 		}
 
 		if (index > -1)
 		{
+			String s;
+			int skel = GetSelectedSkeleton();
+
+			freyjaBoneTranslate3f(index, 0.0f, 0.0f, 0.0f);
+			freyjaBoneRotateEuler3f(index, 0.0f, 0.0f, 0.0f);
+			freyjaBoneFlags(index, 0x0);
+			s.Set("bone_%i", index);
+			freyjaBoneName(index, s.GetCString());
+			freyjaSkeletonAddBone(skel, index);
+			freyjaSkeletonUpdateBones(skel);
+			UpdateSkeletonUI_Callback(skel);
+
+			SetSelectedBone(index);
+
 			freyja_event_gl_refresh();
-			freyja_print("New Bone[%u], Bone[%u].parent = %i",
-						 index, index, GetSelectedBone());
+			freyja_print("New Skel[%u].Bone[%u], parent = %i",
+						 skel, index, root);
 		}
 
-		SetSelectedBone(index);
+
 		ActionModelModified(NULL);
 		break;
 
@@ -4038,7 +4079,7 @@ void FreyjaControl::addObject()
 void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 {
 	// Look for objects with depth ( was using planar projection )
-	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
+	//mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
 	switch (mObjectMode)
@@ -4095,7 +4136,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 {
 	// Look for objects with depth ( was using planar projection )
-	mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
+	//mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
 	switch (mObjectMode)
@@ -5423,7 +5464,6 @@ void eImplementationRemovedUInt(unsigned int u)
 
 void FreyjaViewEventsAttach()
 {
-	ResourceEventCallbackUInt::add("eRenderPickRay", &eImplementationRemovedUInt); 
 	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
 	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
 	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);

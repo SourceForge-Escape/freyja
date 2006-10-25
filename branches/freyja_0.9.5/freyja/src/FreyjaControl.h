@@ -853,8 +853,18 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool copySelectedObject();
-	bool pasteSelectedObject();
+	bool CopySelectedObject();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2004.11.30: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	bool PasteSelectedObject();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

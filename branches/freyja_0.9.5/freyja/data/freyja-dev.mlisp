@@ -276,6 +276,9 @@
 				(toolbar_togglebutton false "24x24/grid.png" "Grid"
 					"Toggle plane grid rendering"	eEvent eRenderGrid)
 
+				(toolbar_togglebutton false "24x24/pickray.png" "Pick Ray"
+					"Toggle pick ray rendering"	eEvent eRenderPickRay)
+
 				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
 					"Render shadows"		eEvent	eRenderShadow)
 
@@ -314,6 +317,7 @@
 					(toolbar_button "24x24/sphere.png"
 						" "	"Create polygon sphere"	
 						eEvent	eGenerateSphere)
+
 
 					(toolbar_button "24x24/patch.png"
 						" "	"Create polygon patch"
@@ -976,6 +980,8 @@
 
 )) ;; End Preferences dialog
 
+
+;; All these could be factored into init.mlisp
 
 ;; Custom colors -- After widgets so widgets can be updated to match 
 ;  all widgets with this properity

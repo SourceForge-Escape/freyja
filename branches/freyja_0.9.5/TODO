@@ -1,79 +1,33 @@
 
- TODO 
-
- Freyja 0.10.x ( Development branch merge )
- =====================================================================
-
- - Merge with 0.10 libfreyja
-   - Break 0.9.x ABI / API and replace with 0.10 ABI/API
-   - Backport freyja dancer keyframes
-   - Seperate smoothing groups and clusters ( vertex groups )
-     - Smoothing groups as vertex flags
-   - Move vertex 'frames' to keyframes of vertex transforms
-   - Merge new freyja 0.10 editor features and plugins
-   - Storage of bone rotation as euler, rotation with quats ( all quats now )
-   - Curves support for keyframes
-
- - Merge free and view edit window interfaces
-   - Refactor to use true singletons/other patterns where systems require
-     - Break up Render/Control into 'controls with views'
-   - Finish up viewport editing test
-   - Rewrite renderer to use viewports for views correctly
-   - Billboard/sprite support outside edit data for user diagrams and icons
-   - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
-     - Hook up 3d cursor modes to offset bboxes for the cursor's axies
-     - Run id maps over types to allow undo/redo to allow for cut/copy/paste 
-
+ TODO
 
  Freyja 0.9.5 ( Development branch )
  =====================================================================
 
-[  [ [ Animation Focus ] ]  ]
-
-Top 7
-
  Misc
+	- Allow user to set radius of vertex and texcoord picks
+	- Mesh / Vertex / Face transforms fully working in dev branch
 	- Use status bar for mouse over tooltips also
 	- Make all mlisp events use ids instead of numbers
 	- Selected mesh shader / color option
+	- Copy / Cut / Paste fully working with at least meshes
+	- Partial mesh cut / copy / paste fully working with at least meshes
+	- Add patch -> mesh support back!
+	- Interactive Tristrip creation tool to replace the old point and connect
+   	  polgon creation some people seem to love
+	- Pak browser for tombraider / UT paks ( Gtk+ list? )
+	- GNOME MIME setup script
+	- Perferences, init.mlisp
+	- Polygon winding control ccw/cw/etc
+	- Remappable windows drive support
 
-- Animation and Keyframe features
+
+ Animation
 	- Vertex keyframes
 	- Bone H-matrix / inverted H-matrix
 	  Bones with transforms in/outside of hierarchy
 	- New skeleton system
 	- New Keyframe animation system
-
-- Cursor operations:
-	- Vertex ops undo
-	- Render changes and constantly update
-	- When confirmed by click actually modify
-	- Opposite mouse click 'undo' by not modifying
-	- Don't scale cursor
-	- Cursor rotation pivot setting for vertices
-
-- Copy / Cut / Paste
-	- Partial mesh cut / copy / paste
-
-- Object proprieties dialog?
-	- Hidden property / Show object
-  	- [d] Tree view for all objects in scene
-
-- Modeler Properties
-	- Set radius of vertex and texcoord picks
-	- Option to hide the pick ray
-
-- Mesh / Vertex / Face transforms fully working
-
-- freyjaPak* 
-  - Encryption support
-  - Direct set functions to import / export
-  - New vfs plugin UI
-  - Buffered/fileread/filewrite file plugin interface
-
-----------------------------------------------------------------------------
-
- Animation
 	- Keyframe editor that makes sense unlike 0.8.x series
 	- Various joint types: hinge, b&s, etc
 	- IK solver for skeletal animation
@@ -81,18 +35,20 @@ Top 7
 	- Timer for animation playback and keyframe timing
 
 
+ Cursor operations
+	- Vertex ops undo
+	- Render changes and constantly update
+	- When confirmed by click actually modify
+	- Opposite mouse click 'undo' by not modifying
+	- Don't scale cursor
+	- Cursor rotation pivot setting for vertices
+
+
  Event system
 	- Sync up 'toggles' using direct sets and feedback events ala spinnas
 	- Remove default settings for 'toggles' in future?
 	- Logger system refinement { Undo, Redo, Macro, Playback }
 	- Enforce usage of Observer and Command patterns for all events
-
-
- Paint interface
-	- 3d paint ( for normal maps? )
-	- DMAP geometery brush interface
-	- Point vertex color/paint
-	- Paint on texture with GIMP interface hooks
 
 
  Rendering
@@ -104,10 +60,6 @@ Top 7
 	- Arrays to fill of verts/faces/etc in a render mesh
 	- New renderer for new mesh system
 		- Local vs World for mesh owned objects / atoms
-
-
- Splines and Simulation packages
-	- Considering...
 
 
  Interface
@@ -129,18 +81,13 @@ Top 7
 		- Bbox/Sphere/Magnet vertex picker for weighting
 	- 3d text using just libfreetype
 	- Breakup GUI into modules
+	- Object proprieties dialog?
+	- Hidden property / Show object
+  	- [d] Tree view for all objects in scene
 
 
- Misc
-	- Add patch -> mesh support back!
-	- Interactive Tristrip creation tool to replace the old point and connect
-   	  polgon creation some people seem to love
-	- Pak browser for tombraider / UT paks ( Gtk+ list? )
-	- GNOME MIME setup script
-	- Perferences, init.mlisp
-	- Polygon winding control ccw/cw/etc
-	- Remappable windows drive support
-
+ Subsystem specific
+ ----------------------------------------------------------------------------
 
  libmgtk
 	- Merge Resource and Mlisp
@@ -167,10 +114,14 @@ Top 7
 	- Polymapped normal support?
 	- Primitives: Cone / Disk / Cylinder ? ( Not polygonal )
 	- API standard Interfaces for 'Copy/cut/paste' and 'Rot/Pos/Scale/etc'
-
+	- freyjaPak*
+		- Encryption support
+		- Direct set functions to import / export
+		- New vfs plugin UI
+		- Buffered/fileread/filewrite file plugin interface
 
  plugins
-	- Find and fix all the bugs caused by all new backend ( many skeletal formats were broke )
+	- Find and fix all the bugs caused by all new backend
 	- Check PSK and Halflife unit tests for anim
 	- Finish LinageII import for all versions of the game
 	- Editor plugins in freyja using:
@@ -183,6 +134,41 @@ Top 7
 	- UTX export (UTPackage)
 	- Material plugins
 	- Cg shaders
+
+
+ Freyja 0.10.x ( Dancer branch merge )
+ =====================================================================
+
+ Merge with 0.10 libfreyja
+   - Break 0.9.x ABI / API and replace with 0.10 ABI/API
+   - Backport freyja dancer keyframes
+   - Seperate smoothing groups and clusters ( vertex groups )
+     - Smoothing groups as vertex flags
+   - Move vertex 'frames' to keyframes of vertex transforms
+   - Merge new freyja 0.10 editor features and plugins
+   - Storage of bone rotation as euler, rotation with quats ( all quats now )
+   - Curves support for keyframes
+
+ Merge free and view edit window interfaces
+   - Refactor to use true singletons/other patterns where systems require
+     - Break up Render/Control into 'controls with views'
+   - Finish up viewport editing test
+   - Rewrite renderer to use viewports for views correctly
+   - Billboard/sprite support outside edit data for user diagrams and icons
+   - Rewrite the UI to use 3d cursor w/ undo/redo/init events 
+     - Hook up 3d cursor modes to offset bboxes for the cursor's axies
+     - Run id maps over types to allow undo/redo to allow for cut/copy/paste 
+
+ Paint interface
+	- 3d paint ( for normal maps? )
+	- DMAP geometery brush interface
+	- Point vertex color/paint
+	- Paint on texture with GIMP interface hooks
+
+ Splines and Simulation packages
+	- Considering...
+
+
 
 
 
