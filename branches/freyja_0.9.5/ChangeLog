@@ -5,6 +5,13 @@
  =====================================================================
 
  20061021 Terry 'Mongoose' Hendrix II
+ - mgtk generic tree update
+ - mgtk removed extra checking code, leaks, etc
+ - mgtk using MSTL assert messages ( for fun debug sessions )
+ - Tinkering with 3d transform cursors
+ - BoneABI World pos accessor ( doesn't use cached transforms yet )
+ - Cleaned up prefs dialog with tabs
+ - Some more trashy new icons
  - PickRay visibility toggle enabled in interface
  - Removed libfreyja CopyModel subsystem
  - Removal of some dead libfreyja code

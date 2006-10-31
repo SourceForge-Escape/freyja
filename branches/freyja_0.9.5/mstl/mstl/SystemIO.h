@@ -46,6 +46,25 @@
 #   define DEBUG_MSG(...)
 #endif
 
+// This is for warnings and spew that should always bulid
+#define MSTL_MSG SystemIO::Print("(%s:%i): %s() ", __FILE__, __LINE__, __func__); SystemIO::Print
+
+// This is for assert messages that should always bulid
+#define MSTL_ASSERTMSG(expr, format, ...)  if (!(expr)) SystemIO::AssertMsgMarker(__FILE__, __LINE__, __func__, false, #expr, format, ##__VA_ARGS__)
+
+//	const char szAssert[] = #_expr;								 
+// static bool can be added for skipping some asserts in another macro
+#define MSTL_ASSERTMSG2(_expr, _szFmt, ...)										\
+   do {																						\
+      if (!(_expr))																		\
+		{																						\
+         const char szAssert[] = #_expr;											\
+         const char *format = _szFmt;												\
+         SystemIO::AssertMsgMarker(__FILE__, __LINE__, __func__, false, szAssert, format, __VA_ARGS__); \
+		}																						\
+	} while(0)
+
+
 // Some very old byte swapping routines
 #define SWAP_2(x) ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
 #define SWAP_4(x) ( ((x) << 24) | \
@@ -1068,17 +1087,18 @@ class SystemIO
 
 	static bool AssertMsgMarker(const char *file, unsigned int line, 
 										 const char *function,
-										 bool expr, const char *format, ...)
+										 bool expr, const char *exprs,
+										 const char *format, ...)
 	{
 		if (expr)
 			return false;
 
-		printf("%s:%u %s\n", file, line, function);
+		printf("(%s:%u): %s Assertion '%s' failed: \n", file, line, function, exprs);
 
 		va_list args;
 		va_start(args, format);	
 		vfprintf(stdout, format, args);
-		printf("\n");
+		fprintf(stdout, "\n");
 		va_end(args);
 
 		// TODO: Add attachable helper objects here to handle assert events
@@ -1100,8 +1120,8 @@ class SystemIO
 		va_list args;
 		va_start(args, format);	
 		vfprintf(stdout, format, args);
-		printf("\n");
 		va_end(args);
+		fprintf(stdout, "\n");
 
 		// TODO: Add attachable helper objects here to handle assert events
 		// useful for making GUI MsgBox asserts, etc

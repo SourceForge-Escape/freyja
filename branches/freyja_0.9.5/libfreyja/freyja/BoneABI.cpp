@@ -303,6 +303,47 @@ void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 }
 
 
+
+void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
+{
+#if 0
+	Bone *b = Bone::GetBone(boneIndex);
+
+	if (b)
+	{
+		HEL_VEC3_COPY(b->mTranslation.mVec, xyz);
+		Vec3 v;
+		v = b->mBindToWorld * v;
+		HEL_VEC3_COPY(v.mVec, xyz);
+		return;
+	}
+
+	index_t parent = freyjaGetBoneParent(boneIndex);
+
+	if (freyjaIsBoneAllocated(parent))
+	{
+		vec3_t off;
+		freyjaGetBoneWorldPos3fv(parent, off);
+
+		xyz[0] += off[0];
+		xyz[1] += off[1];
+		xyz[2] += off[2];
+	}
+#else
+	Bone *b = Bone::GetBone(boneIndex);
+
+	if (b)
+	{
+		Vec3 v;
+		
+		v = b->mBindPose * v;
+		HEL_VEC3_COPY(v.mVec, xyz);
+		MARK_MSGF("%f %f %f", xyz[0], xyz[1], xyz[2]);
+	}
+#endif
+}
+
+
 void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz)
 {
 	Bone *b = Bone::GetBone(boneIndex);

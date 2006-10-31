@@ -81,7 +81,60 @@ class Cursor
 
 
 		case freyja3d::Cursor::Rotation:
+#if 0
+			{
+				// Ray test to pick rings of rotation
+				// 1. Take the ray and generate a rect prism
+				// 2. Use line segment / bbox detection to find
+				//    nearest hit
+				// 3. Return true if hit found, and set selected axis
+
+				//mPos <- center
+				vec_t radius = max * 4.0f;
+				const uint32 count = 64;
+
+				// red
+				//glColor3fv(RED);
+				//mglDraw3dCircle(mPos.mVec, radius, count, 1, true);
+				
+				// green
+				//glColor3fv(GREEN);
+				//mglDraw3dCircle(mPos.mVec, radius, count, 2, true);
+
+				// blue
+				//glColor3fv(BLUE);
+				//mglDraw3dCircle(mPos.mVec, radius, count, 0, true);
+
+				vec_t x, z, i;
+
+				glBegin(solid ? GL_LINE_LOOP : GL_LINES);
+
+				for (i = 0.0f; i < fCount; ++i)
+				{
+					helSinCosf(helDegToRad(360.0f * (i / fCount)), &x, &z);
+					
+					x *= radius;
+					z *= radius;
+					
+					switch (plane)
+					{
+					case 0:
+						glVertex3f(center[0] + x, center[1] + z, center[2] + 0.0f);
+						break;
+						
+					case 1:
+						glVertex3f(center[0] + 0.0f, center[1] + x, center[2] + z);
+						break;
+						
+					default:
+						glVertex3f(center[0] + x, center[1] + 0.0f, center[2] + z);
+						break;
+					}
+				}
+			}
+#endif
 			break;
+
 
 		case freyja3d::Cursor::Translation:
 			break;

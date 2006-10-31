@@ -3201,6 +3201,80 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 		break;
 
 	case freyja3d::Cursor::Rotation:
+		if (GetControlScheme() == eScheme_Model)
+		{
+			freyja_print("! SelectCursorAxis...");
+			CastPickRay(vx, vy);
+			Ray &r = FreyjaRender::mTestRay;
+			mCursor.mAxis = freyja3d::Cursor::eNone;
+
+			Vec3 o = r.GetOrigin();
+			Vec3 d = r.GetDir();
+			Vec3 v = o + d;
+			Vec3 u = o + d*2.0f;
+			Vec3 n = Vector3d::cross(v, u);
+
+
+			freyja_print("!------------");
+			freyja_print("!o <%f %f %f>", o.mVec[0], o.mVec[1], o.mVec[2]);
+			freyja_print("!d <%f %f %f>", d.mVec[0], d.mVec[1], d.mVec[2]);
+
+			freyja_print("!v <%f %f %f>", v.mVec[0], v.mVec[1], v.mVec[2]);
+			freyja_print("!u <%f %f %f>", u.mVec[0], u.mVec[1], u.mVec[2]);
+			freyja_print("!n <%f %f %f>", n.mVec[0], n.mVec[1], n.mVec[2]);
+			n.normalize();
+			freyja_print("!n <%f %f %f>", n.mVec[0], n.mVec[1], n.mVec[2]);
+
+			// Now you have a normal to the ray
+			// Generate a bbox to test with the transformed line segments
+			// composing the circles in the rotation cursor
+			Vec3 min, max; // FIXME generate prism by these points
+
+			min = o + n;
+			max = o + d - n;
+
+			// Pick the closest 'hit' from each 'axis' ring
+			vec_t dist, best;
+			bool fhit = false, hit;
+
+			// X
+			for (int i = 0, n = 64; i < n; ++i)
+			{
+				Ray r; // FIXME generate a ray from each segment
+				hit = r.IntersectBox(min.mVec, max.mVec, dist);
+				if (hit && !fhit || dist < best)
+				{
+					fhit = true;
+					mCursor.mAxis = freyja3d::Cursor::eX;
+					best = dist;
+				}
+			}
+
+			// Y
+			for (int i = 0, n = 64; i < n; ++i)
+			{
+				Ray r; // FIXME generate a ray from each segment
+				hit = r.IntersectBox(min.mVec, max.mVec, dist);
+				if (hit && !fhit || dist < best)
+				{
+					mCursor.mAxis = freyja3d::Cursor::eY;
+					best = dist;
+				}
+			}
+
+			// Z
+			for (int i = 0, n = 64; i < n; ++i)
+			{
+				Ray r; // FIXME generate a ray from each segment
+				hit = r.IntersectBox(min.mVec, max.mVec, dist);
+				if (hit && !fhit || dist < best)
+				{
+					mCursor.mAxis = freyja3d::Cursor::eZ;
+					best = dist;
+				}
+			}
+			
+		}
 		break;
 		
 	default:
@@ -4653,14 +4727,17 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
 	static int old_y = 0, old_x = 0;
 	const float t = 0.5f, m = 1.0f;
+	Vec3 o, d;
 	float xf, yf, zf;
 	int swap;
-
 
 	/* Mongoose: Compute a relative movement value too here */
 	swap = x;
 	x = -y;
 	y = -swap;
+
+
+	// Rewrite this to use pivot and arc delta ( and generate the delta sweep )
 
 	switch (plane)
 	{
@@ -4686,6 +4763,66 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		;
 	}
 
+	d = Vec3(xf, yf, zf);
+
+	/* Cursor axis determined limited movement */
+	switch (mCursor.mAxis)
+	{
+	case freyja3d::Cursor::eAll:
+		break;
+
+	case freyja3d::Cursor::eX:
+		d.mVec[1] = 0;
+		d.mVec[2] = 0;
+		break;
+
+	case freyja3d::Cursor::eY:
+		d.mVec[0] = 0;
+		d.mVec[2] = 0;
+		break;
+
+	case freyja3d::Cursor::eZ:
+		d.mVec[0] = 0;
+		d.mVec[1] = 0;
+		break;
+
+	case freyja3d::Cursor::eNone:
+		return;
+		break;
+	}
+
+	switch (mObjectMode)
+	{
+	case tBone:
+		{
+			// Set cursor pos and rotation
+			freyjaGetBoneTranslation3fv(GetSelectedBone(), mCursor.mPos.mVec);
+			//freyjaGetBoneWorldPos3fv(GetSelectedBone(), mCursor.mPos.mVec);
+			freyjaGetBoneRotationEuler3fv(GetSelectedBone(), o.mVec);
+
+			mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
+			mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
+			mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
+		}
+		break;
+
+	default:
+		freyja_print("!Case not handled in rotateObject");
+	}
+
+	mCursor.mRotate += d; 
+
+	// Interface is in degrees, while backend is radians
+	if (mCursor.mRotate.mVec[0] > 360.0f) 
+		mCursor.mRotate.mVec[0] -= 360.0f;
+
+	if (mCursor.mRotate.mVec[1] > 360.0f)
+		mCursor.mRotate.mVec[1] -= 360.0f;
+
+	if (mCursor.mRotate.mVec[2] > 360.0f)
+		mCursor.mRotate.mVec[2] -= 360.0f;
+
+	mCursor.SetMode(freyja3d::Cursor::Rotation);
 
 	switch (mObjectMode)
 	{
@@ -4693,11 +4830,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		{
 			vec3_t xyz;
 
-			freyjaGetBoneRotationEuler3fv(GetSelectedBone(), xyz);
-
-			xyz[0] += HEL_DEG_TO_RAD(xf);
-			xyz[1] += HEL_DEG_TO_RAD(yf);
-			xyz[2] += HEL_DEG_TO_RAD(zf);
+			xyz[0] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[0]);
+			xyz[1] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[1]);
+			xyz[2] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[2]);
 
 			freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
 		}
@@ -4706,20 +4841,6 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	case tMesh:
 		{
-			Vec3 r(xf, yf, zf);
-
-			mCursor.mRotate += r;
-
-			// Interface is in degrees, while backend is radians
-			if (mCursor.mRotate.mVec[0] > 360.0f) 
-				mCursor.mRotate.mVec[0] -= 360.0f;
-
-			if (mCursor.mRotate.mVec[1] > 360.0f)
-				mCursor.mRotate.mVec[1] -= 360.0f;
-
-			if (mCursor.mRotate.mVec[2] > 360.0f)
-				mCursor.mRotate.mVec[2] -= 360.0f;
-
 			mCursor.SetMode(freyja3d::Cursor::Rotation);
 
 			// This handles ctrl selects ( select without leaving rotate mode )

@@ -14,8 +14,19 @@
 		(menubar
 		(submenu "_File"
 			(filechoosermenu_item "_Open Pak..."	"Open Pak..."	"C-o"	eL2ExtractFilename	"mode=open,"	"gtk-open")
-		;	(menu_item "_Close"			"C-w"	eL2Close	"gtk-close")
+			(menu_item "_Close"	"C-w"	eNone	"gtk-close") ;DialogL2ExtractClose
 			(menu_seperator) ) )
+
+		(hbox 1 1 0 1 1
+			(toolbar
+				(filechoosertoolbar_button 
+					"gtk-open" "Open" "Loads LineageII Pak" 
+					"Open UKX..." eL2ExtractFilename "mode=open")
+				(filechoosertoolbar_button 
+					"gtk-save-as" "Save as..." "Saves OBJ File" 
+					"Save OBJ..." eL2ExtractOut "mode=save,confirm-overwrite=true,")
+			) ; toolbar
+		) ; hbox
 
 		
 		(hbox 1 0 0 1 0
@@ -26,6 +37,7 @@
 		(button "Extract" eMode eL2Extract)
 
 		(label "Input Filename" 0.0 0.5)
+
 		;(filechooserbutton "_Open Pak..."	"Open Pak..."	"C-o"	eL2ExtractFilename	"mode=open,"	"gtk-open")
 		(textbox eL2ExtractFilename)
 
@@ -33,9 +45,6 @@
 
 		(label "Output Filename" 0.0 0.5)
 		(textbox eL2ExtractOut)
-		(filechoosertoolbar_button 
-			"gtk-save-as" "Save as..." "Saves OBJ file" 
-			"Save OBJ..." eL2ExtractOut "mode=save,confirm-overwrite=true,")
 
 		(hbox 1 0 0 1 0
 			(label "Offset "  0.0 0.5)

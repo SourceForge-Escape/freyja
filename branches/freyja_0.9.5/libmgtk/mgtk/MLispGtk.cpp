@@ -24,7 +24,7 @@
 
 
 void mlisp_gtk_init(MLisp &rc)
-{
+{rc.registerLispFunction
 	rc.registerLispFunction("window", mgtk_rc_window);
 	rc.registerLispFunction("icon", mgtk_rc_icon);
 	rc.registerLispFunction("gl_widget", mgtk_rc_gl_widget);
@@ -45,6 +45,7 @@ void mlisp_gtk_init(MLisp &rc)
 	rc.registerLispFunction("spinbutton", mgtk_rc_spinbutton);
 	rc.registerLispFunction("spinbutton2", mgtk_rc_spinbutton2);
 	rc.registerLispFunction("menu_item", mgtk_rc_menu_item);
+	rc.registerLispFunction("toggle_menu_item", mgtk_rc_check_menu_item);
 	rc.registerLispFunction("submenu", mgtk_rc_submenu);
 	rc.registerLispFunction("menu_seperator", mgtk_rc_menu_seperator);
 	rc.registerLispFunction("optionmenu", mgtk_rc_optionmenu);
@@ -58,6 +59,10 @@ void mlisp_gtk_init(MLisp &rc)
 	rc.registerLispFunction("hslider", mgtk_rc_hslider);
 	rc.registerLispFunction("dialog", mgtk_rc_dialog);
 	rc.registerLispFunction("fileselection_hack", mgtk_rc_fileselection_drop_down_menu);
+	rc.registerLispFunction("filechooserbutton", mgtk_rc_filechooserbutton);
+	rc.registerLispFunction("filechoosermenu_item", mgtk_rc_filechoosermenu_item);
+	rc.registerLispFunction("filechoosertoolbar_button", mgtk_rc_filechoosertoolbar_button);
+	rc.registerLispFunction("func_set_toggle", mgtk_func_toggle_set);
 
 	rc.registerSymbolValue("IconSize_Menu", 1);
 	rc.registerSymbolValue("IconSize_ToolbarSmall", 2);

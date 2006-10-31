@@ -181,26 +181,34 @@ void Bone::SetName(const char *name)
 
 void Bone::UpdateBindPose()
 {
-	Bone *b;
-	Matrix m(mRotation);
+	Matrix m;
 	uint32 i, n;
+
+	m.setIdentity();
+	m = mRotation;
+	m.translate(mTranslation.mVec);
+
+	Bone *parent = GetBone(mParent);
+
+	if (parent)
+	{
+		mBindPose = parent->mBindPose * m;
+	}
+	else
+	{
+		mBindPose = m;
+	}
+
+	// Cache off a 'to world' 
+	mBindToWorld = mBindPose;
+	mBindPose.invert();
 
 	for (i = 0, n = mChildren.size(); i < n; ++i)
 	{
-		b = GetBone(mChildren[i]);
+		Bone *b = GetBone(mChildren[i]);
 
 		if (b)
 		{
-			b->mBindToWorld.setIdentity();
-			b->mBindToWorld = m; // m.rotate(rxyz); 
-			b->mBindToWorld.translate(mTranslation.mVec);
-
-			vec3_t o = {0,0,0}, t;
-			b->mBindToWorld.multiply3v(o, t);
-			
-			freyjaPrintMessage("! %i=>%i. %f, %f, %f -> %f, %f, %f",
-								mUID, mChildren[i], o[0], o[1], o[2], t[0], t[1], t[2]);
-
 			b->UpdateBindPose();
 		}
 	}

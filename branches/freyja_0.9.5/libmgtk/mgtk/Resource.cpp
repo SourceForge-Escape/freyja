@@ -1309,8 +1309,9 @@ void Resource::Print()
 // Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef __TEST__
+#ifdef UNIT_TEST_RESOURCE
 
+#if 0
 arg_list_t *color(arg_list_t *args)
 {
 	arg_list_t *sym, *r, *g, *b;
@@ -1400,14 +1401,25 @@ int Resource::_RegressionTest(int argc, char *argv[])
 
 	return -1;
 }
+#endif
 
+
+#include "mgtk_events.h"
 
 int main(int argc, char *argv[])
 {
-  Resource test;
+	Resource test;
 
-  printf("[Resource class test]\n");
+	printf("[Resource class test]\n");
+	
+	if (argc > 1)
+	{
+		mgtk_init(argc, argv);
 
-  return test._RegressionTest(argc, argv);
+		test.Load(argv[1]);
+		test.Print();
+
+		mgtk_start();
+	}
 }
 #endif

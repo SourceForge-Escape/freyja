@@ -151,6 +151,12 @@ extern "C" {
 	 * Post : Gets bone[index]'s orientation in Euler angles
 	 ------------------------------------------------------*/
 
+	void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s world position
+	 ------------------------------------------------------*/
+
 	void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 

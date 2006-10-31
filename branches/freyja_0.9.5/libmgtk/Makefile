@@ -203,7 +203,8 @@ PROG_OBJS = \
 	$(BUILDDIR)/ResourceEvent.o \
 	$(BUILDDIR)/mgtk_callbacks.o \
 	$(BUILDDIR)/mgtk_interface.o \
-	$(BUILDDIR)/mgtk_resource.o
+	$(BUILDDIR)/mgtk_resource.o \
+	$(BUILDDIR)/mgtk_tree.o
 
 $(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
@@ -412,17 +413,22 @@ backup:
 MLispWX.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	gcc -Wall -ggdb -DUNIT_TEST_MLISPWX -lstdc++ `wx-config --libs --cxxflags --gl-libs` \
-	src/MLisp.cpp src/MLispWX.cpp -o $(BUILD_TEST_DIR)/MLispWX.test
+	mgtk/MLisp.cpp mgtk/MLispWX.cpp -o $(BUILD_TEST_DIR)/MLispWX.test
 
 MLisp.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	gcc -Wall -ggdb -DUNIT_TEST_MLISP -lstdc++ \
-	src/MLisp.cpp -o $(BUILD_TEST_DIR)/MLisp.test
+	gcc -Wall -g -DUNIT_TEST_MLISP -lstdc++ \
+	mgtk/MLisp.cpp -o $(BUILD_TEST_DIR)/MLisp.test
 
 Resource.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	gcc -Wall -g -DUNIT_TEST_RESOURCE -DDEBUG -Isrc -lstdc++ \
-	src/Resource.cpp -o $(BUILD_TEST_DIR)/Resource.test  
+	gcc -Wall -g -DUNIT_TEST_RESOURCE -DDEBUG -Isrc -lstdc++ $(GTK2_LDFLAGS)  $(GTK2_CFLAGS) -DEMAIL_ADDRESS="\"No\"" -DBUILD_NAME="\"unit\"" -I../mstl/ \
+	mgtk/Resource.cpp 
+
+Resource2.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	gcc -Wall -g -DUNIT_TEST_RESOURCE -DDEBUG -Isrc -lstdc++ $(GTK2_LDFLAGS)  $(GTK2_CFLAGS) $(CONFIGURE_CFLAGS) -DNOLAZYCB -DEMAIL_ADDRESS="\"No\"" -DBUILD_NAME="\"unit\"" -I../mstl/ \
+	mgtk/Resource.cpp mgtk/ResourceEvent.cpp mgtk/mgtk_callbacks.cpp mgtk/mgtk_interface.cpp mgtk/mgtk_resource.cpp mgtk/mgtk_tree.cpp -o $(BUILD_TEST_DIR)/Resource.test  
 
 
 

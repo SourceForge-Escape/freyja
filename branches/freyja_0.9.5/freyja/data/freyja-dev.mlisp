@@ -110,7 +110,6 @@
 
 
 		(submenu "_View"
-			;; These should use check menus here -- they are toggles!
 			(menu_seperator)
 			(menu_item "_Fullscreen"	"M-E"	eFullscreen	"gtk-fullscreen")
 			(toggle_menu_item	"_Viewports"	eViewports	0)
@@ -163,8 +162,8 @@
 					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-cylinder")
 					(menu_item "_Sphere"	eGenerateSphere		"gtk-sphere")
 				)
+		) ;; End submenu Create
 
-		) ;; submenu Create
 
 		(submenu "_Modify"
 
@@ -839,14 +838,19 @@
 
 ;(dialog "Freyja :: 趣味" ePreferencesDialog 0
 (dialog "Freyja :: Preferences" ePreferencesDialog 0
+
 	(vbox 0 0 0 0 0
 
-		(hbox 1 0 0 1 0
-			(icon "freyja.png" IconSize_Dialog))
+	(notebook 0 0 eNop
+		(tab "General" eNone
+
+		;(hbox 1 0 0 1 0
+		;	(icon "freyja.png" IconSize_Dialog))
 
 		;;(hbox 1 0 0 1 0
 		;;	(label "Near Height "  0.0 0.5) 
 		;;	(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
+
 
 
 		(vbox 0 0 0 0 0	
@@ -920,6 +924,10 @@
 			(label "Vertex pick radius"  0.0 0.5) 
 			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eVertexPickRadius))
 
+		) ; End (tab "General"
+
+		(tab "Colors" eNone
+
 		(hbox 1 0 0 1 2 
 ;			(label "遠景の呈色" 0.0 0.5)
 			(label "Background color " 0.0 0.5)
@@ -960,24 +968,29 @@
 			(label "Bone highlight " 0.0 0.5)
 			(colorbutton 1 eColorBoneHighlight))
 
+		) ; End (tab "Colors"
 		
-		(hbox 1 1 0 1 1	(hsep))
+		(tab "Lights" eNone
+			(hbox 1 1 0 1 1
+				(label "Light" 0.0 0.5)
+				(label "Ambient" 0.0 0.5)
+				(label "Diffuse" 0.0 0.5)
+				(label "Specular" 0.0 0.5))
+			(hbox 1 1 0 1 1
+				(spinbutton 0 0 100 eSelectLight)
+				(colorbutton 1 eColorLightAmbient)
+				(colorbutton 1 eColorLightDiffuse)
+				(colorbutton 1 eColorLightSpecular))
+			(hbox 1 1 0 1 1
+				(spinbutton 0.0 -10000.0 10000.0 eLightPosX)
+				(spinbutton 0.0 -10000.0 10000.0 eLightPosY)
+				(spinbutton 0.0 -10000.0 10000.0 eLightPosZ)))
 
-		(hbox 1 1 0 1 1
-			(label "Light" 0.0 0.5)
-			(label "Ambient" 0.0 0.5)
-			(label "Diffuse" 0.0 0.5)
-			(label "Specular" 0.0 0.5))
-		(hbox 1 1 0 1 1
-			(spinbutton 0 0 100 eSelectLight)
-			(colorbutton 1 eColorLightAmbient)
-			(colorbutton 1 eColorLightDiffuse)
-			(colorbutton 1 eColorLightSpecular))
-		(hbox 1 1 0 1 1
-			(spinbutton 0.0 -10000.0 10000.0 eLightPosX)
-			(spinbutton 0.0 -10000.0 10000.0 eLightPosY)
-			(spinbutton 0.0 -10000.0 10000.0 eLightPosZ))
+		
+		(tab "Cameras" eNone
+			)
 
+) ; End Notebook
 )) ;; End Preferences dialog
 
 
@@ -1008,5 +1021,7 @@
 (func_set_toggle	eRenderPickRay	1)
 (func_set_toggle	ePointJoint	1)
 (func_set_toggle	eLineBone	1)
+
+
 
 
