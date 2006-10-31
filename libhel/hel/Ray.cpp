@@ -59,6 +59,81 @@ Ray::~Ray()
 ////////////////////////////////////////////////////////////
 
 
+bool Ray::IntersectBox(vec3_t min, vec3_t max, vec_t &t)
+{
+	mDir.normalize();
+
+	vec_t bestDist = 99999.0f;
+	const uint32 count = 6;
+	Vec3 v[count];
+
+	v[0] = Vec3(max[0], max[1], max[2]);
+	v[1] = Vec3(min[0], min[1], min[2]);
+	v[2] = Vec3(max[0], min[1], max[2]);
+	v[3] = Vec3(min[0], max[1], max[2]);
+	v[4] = Vec3(max[0], max[1], min[2]);
+	v[5] = Vec3(min[0], min[1], max[2]);
+	v[6] = Vec3(min[0], max[1], min[2]);
+	v[7] = Vec3(max[0], min[1], min[2]);
+
+	bool intersect = false;
+	Vec3 tuv;
+
+	// Quick and dirty hit test that assumes you can pusedo tesselate 
+	// a quad here and always get as good results...
+	for (uint32 i = 0, a, b, c, d; i < count; ++i)
+	{
+		switch (i)
+		{
+		case 0:    
+			a = 1, b = 6, c = 4, d = 7;
+			break;
+
+		case 1:
+			a = 6, b = 3, c = 0, d = 4;
+			break;
+
+		case 2:
+			a = 1, b = 5, c = 2, d = 7;
+			break;
+
+		case 3:
+			a = 1, b = 6, c = 3, d = 5;
+			break;
+
+		case 4:
+			a = 4, b = 0, c = 2, d = 7;
+			break;
+
+		case 5:
+			a = 3, b = 0, c = 2, d = 5;
+			break;
+		}
+
+		if (IntersectTriangle(v[a].mVec, v[b].mVec, v[c].mVec, tuv.mVec))
+		{
+			intersect = true;
+			
+			if (tuv.mVec[0] < bestDist)
+			{
+				t = bestDist = tuv.mVec[0];
+			}
+		}
+		else if (IntersectTriangle(v[c].mVec, v[d].mVec, v[a].mVec, tuv.mVec))
+		{
+			intersect = true;
+			
+			if (tuv.mVec[0] < bestDist)
+			{
+				t = bestDist = tuv.mVec[0];
+			}
+		}
+	}
+
+	return intersect;
+}
+
+
 bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
 {
 	return false; // need to pick an algorithm and implement I guess  =)

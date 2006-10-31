@@ -71,12 +71,12 @@ class Ray
 
 	const Vec3 &GetOrigin() { return mOrigin; }
 
+	// Very lame method until I pick an actual AABB method
+	bool IntersectBox(vec3_t min, vec3_t max, vec_t &t);
 
 	bool IntersectAABB(vec3_t min, vec3_t max, vec_t &t);
 
-
 	bool IntersectSphere(vec3_t center, vec_t radius, vec_t &t);
-	
 
 	bool IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv);
 	/*------------------------------------------------------

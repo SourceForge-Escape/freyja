@@ -4,6 +4,16 @@
  Freyja 0.9.5 ( Development branch )
  =====================================================================
 
+ Hot
+	- Fix rotation cursor
+		- Delta radius sweeps from center to cursor pos like following a circle
+	- Fix scale cursor
+	- Fix bone world coord
+	- Sphere brush for weight painting, etc
+
+	- Single joint animation for shishi odoshi test
+
+
  Misc
 	- Allow user to set radius of vertex and texcoord picks
 	- Mesh / Vertex / Face transforms fully working in dev branch
@@ -63,6 +73,7 @@
 
 
  Interface
+	- Sphere shaped brushes for input ( like magnets and paint selection )
 	- Reimplement and enable Camera system
 	- Add camera editing back
 	- Viewport view / control abstraction
@@ -90,7 +101,8 @@
  ----------------------------------------------------------------------------
 
  libmgtk
-	- Merge Resource and Mlisp
+	- Mlisp to replace Resource
+	- MlispEvent to replace ResourceEvent
 	- Radio buttons / boxes
 	- Toggle settings should be factored out to event functions to set value
 	- Tree widget abstraction

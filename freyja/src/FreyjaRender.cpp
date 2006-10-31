@@ -165,7 +165,7 @@ void FreyjaRender::Rotate(int flags, float n)
 void FreyjaRender::drawFreeWindow()
 {
 	RenderModel model;
-	unsigned int i;
+	//unsigned int i;
 
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
@@ -263,12 +263,6 @@ void FreyjaRender::drawFreeWindow()
 		glPointSize(mDefaultPointSize);
 
 		glPopAttrib();
-	}
-
-	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
-	{
-		freyjaGetRenderModel(i, model);
-		renderModel(model);
 	}
 
 	//glPopMatrix();

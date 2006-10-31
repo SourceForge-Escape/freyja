@@ -957,7 +957,8 @@ void mgtk_event_update_gtk_tree(mgtk_tree_t *tree,
 			mgtk_event_update_gtk_tree(&tree->children[i], store, root);
 		}
 
-		mgtk_resource_rebuild_treeview(GTK_TREE_MODEL(store));
+		// FIXME Rebuild the tree with correct ID
+		mgtk_resource_rebuild_treeview(0, GTK_TREE_MODEL(store));
 	}
 	else if (!store)
 	{
