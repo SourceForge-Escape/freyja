@@ -40,8 +40,6 @@
 arg_list_t *freyja_rc_color(arg_list_t *args);
 
 
-int gSkelTreeWidgetIndex;
-int gFileDialogEvent;
 
 void eRecentFiles(unsigned int value)
 {
@@ -120,7 +118,7 @@ void UpdateSkeletonUI_Callback(uint32 skelIndex)
 	tree = generateSkeletalUI(skelIndex, 
 							  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
 
-	mgtk_event_update_tree(gSkelTreeWidgetIndex, tree);
+	mgtk_event_update_tree(eBoneIterator, tree);
 }
 
 int freyja_get_event_id_by_name(char *symbol)

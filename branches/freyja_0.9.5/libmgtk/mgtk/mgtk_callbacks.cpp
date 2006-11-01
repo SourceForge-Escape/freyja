@@ -926,7 +926,7 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 }
 
 
-void mgtk_event_update_gtk_tree(mgtk_tree_t *tree,
+void mgtk_event_update_gtk_tree(int event, mgtk_tree_t *tree,
 								GtkTreeStore *store, GtkTreeIter root)
 {
 	GtkTreeIter child;
@@ -954,11 +954,10 @@ void mgtk_event_update_gtk_tree(mgtk_tree_t *tree,
 
 		for (i = 0; i < tree->numChildren; ++i)
 		{
-			mgtk_event_update_gtk_tree(&tree->children[i], store, root);
+			mgtk_event_update_gtk_tree(event, &tree->children[i], store, root);
 		}
 
-		// FIXME Rebuild the tree with correct ID
-		mgtk_resource_rebuild_treeview(0, GTK_TREE_MODEL(store));
+		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
 	}
 	else if (!store)
 	{
@@ -974,7 +973,7 @@ void mgtk_event_update_gtk_tree(mgtk_tree_t *tree,
 
 		for (i = 0; i < tree->numChildren; ++i)
 		{
-			mgtk_event_update_gtk_tree(&tree->children[i], store, child);
+			mgtk_event_update_gtk_tree(event, &tree->children[i], store, child);
 		}
 	}
 }
@@ -1068,7 +1067,7 @@ void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree)
 #else
 	GtkTreeIter root;
 
-	mgtk_event_update_gtk_tree(tree, NULL, root);
+	mgtk_event_update_gtk_tree(id, tree, NULL, root);
 #endif
 }
 

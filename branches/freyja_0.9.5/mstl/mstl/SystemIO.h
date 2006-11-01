@@ -52,18 +52,6 @@
 // This is for assert messages that should always bulid
 #define MSTL_ASSERTMSG(expr, format, ...)  if (!(expr)) SystemIO::AssertMsgMarker(__FILE__, __LINE__, __func__, false, #expr, format, ##__VA_ARGS__)
 
-//	const char szAssert[] = #_expr;								 
-// static bool can be added for skipping some asserts in another macro
-#define MSTL_ASSERTMSG2(_expr, _szFmt, ...)										\
-   do {																						\
-      if (!(_expr))																		\
-		{																						\
-         const char szAssert[] = #_expr;											\
-         const char *format = _szFmt;												\
-         SystemIO::AssertMsgMarker(__FILE__, __LINE__, __func__, false, szAssert, format, __VA_ARGS__); \
-		}																						\
-	} while(0)
-
 
 // Some very old byte swapping routines
 #define SWAP_2(x) ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )

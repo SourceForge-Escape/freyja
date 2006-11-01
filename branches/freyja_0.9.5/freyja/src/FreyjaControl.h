@@ -838,6 +838,7 @@ private:
 	void Clear()
 	{
 		freyjaModelClear(0); // Only 1 edit model supported in this bulid
+		UpdateSkeletonUI_Callback(0); // Update skeletal UI
 		mCursor.Reset();
 		mCleared = true;
 	}
