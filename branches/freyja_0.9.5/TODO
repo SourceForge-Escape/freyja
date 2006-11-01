@@ -5,6 +5,8 @@
  =====================================================================
 
  Hot
+	- Generic tree 'easy layer' to avoid C struct hell
+
 	- Fix rotation cursor
 		- Delta radius sweeps from center to cursor pos like following a circle
 	- Fix scale cursor

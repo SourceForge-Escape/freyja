@@ -940,7 +940,16 @@ void mgtk_event_update_gtk_tree(int event, mgtk_tree_t *tree,
 	mgtk_print("mgtk_event_update_gtk_tree %d::\n", tree->id);
 #endif
 
-	if (tree->id == 0) // Root bone
+	if (tree->id == -1 && tree->children) // 'Hidden root' to make a 'flat' list
+	{
+		for (i = 1; i < tree->numChildren; ++i)
+		{
+			mgtk_event_update_gtk_tree(event, &tree->children[i], store, child);
+		}
+
+		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
+	}
+	else if (tree->id == 0) // Root bone
 	{
 		store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
 								   G_TYPE_STRING,   /* Bone Name */

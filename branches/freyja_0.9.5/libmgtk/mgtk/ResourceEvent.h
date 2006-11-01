@@ -73,9 +73,20 @@ class ResourceEvent
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	char *getName()
+	unsigned int getUID() { return mUID; }
+
+	char *getName() { return mName;	}
+
+	static int GetResourceIdBySymbol(char *symbol)
 	{
-		return mName;
+		int id = -1;
+		
+		if (mResource)
+		{
+			mResource->Lookup(symbol, &id);
+		}
+		
+		return id;
 	}
 
 

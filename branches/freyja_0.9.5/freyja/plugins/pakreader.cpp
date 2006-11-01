@@ -23,10 +23,9 @@
 #include <math.h>
 #include <hel/math.h>
 #include <freyja/FreyjaPluginABI.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
 #include <freyja/FreyjaPakReader.h>
 #include <freyja/FreyjaImage.h>
+#include "freyja_events.h"
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
 #include <mstl/SystemIO.h>
@@ -44,6 +43,8 @@ void PakReaderGUIAttach();
 
 uint32 gPakReaderUID = 0;
 FreyjaPakDirectory *gPakReaderDir = 0x0;
+int gPakReaderFiles = -1;
+int gPakReaderDirs = -1;
 
 void freyja_pakreader_init(void (*func)(const char*, void*))
 {
@@ -62,7 +63,6 @@ void ePakReaderMenuUpdate()
 	uint32 event = Resource::mInstance->getIntByName("ePakReaderSelect");
 	uint32 i, j, count;
 
-
 	if (pak == 0x0)
 		return;
 
@@ -70,16 +70,25 @@ void ePakReaderMenuUpdate()
 
 	mgtk_remove_all_items_to_menu(menu);
 
+	mgtk_tree_t *dirs = mgtk_event_tree_new(0, "Dirs");
+
 	for (i = 0, count = dir->getDirCount(); i < count; ++i)
 	{
 		tmpDir = dir->getPakDir(i);
 	
 		if (tmpDir)
 		{
+			mgtk_event_tree_add_new_child(dirs, i+1, tmpDir->getName());
 			mgtk_append_item_to_menu2i(menu, tmpDir->getName(), event, i);
 			freyjaPrintMessage("! %s/", tmpDir->getName());
 		}
 	}
+
+	MSTL_MSG("*** Update %i %p", gPakReaderDirs, dirs);
+	mgtk_event_update_tree(gPakReaderDirs, dirs);
+	mgtk_event_update_tree(eBoneIterator, dirs);
+
+	mgtk_tree_t *files = mgtk_event_tree_new(0, "Files");
 
 	for (j = 0, count = dir->getFileCount(); j < count; ++j)
 	{
@@ -87,10 +96,13 @@ void ePakReaderMenuUpdate()
 
 		if (file)
 		{
+			mgtk_event_tree_add_new_child(files, i+j+1, file->getName());
 			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
 			freyjaPrintMessage("! %s", file->getName());
 		}
 	}
+
+	mgtk_event_update_tree(gPakReaderFiles, files);
 }
 
 
@@ -168,8 +180,8 @@ void ePakReaderSelect(unsigned int value)
 	FreyjaPakReader *pak = freyjaGetPakReader(gPakReaderUID);
 	FreyjaPakDirectory *dir, *tmpDir;
 	FreyjaPakFile *file;
-	uint32 menu = Resource::mInstance->getIntByName("ePakReaderMenu");
-	uint32 event = Resource::mInstance->getIntByName("ePakReaderSelect");
+	uint32 menu = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenu");
+	uint32 event = ResourceEvent::GetResourceIdBySymbol("ePakReaderSelect");
 	uint32 i, j, count;
 	byte *buffer;
 
@@ -227,16 +239,25 @@ void ePakReaderSelect(unsigned int value)
 		return;  // don't update menu
 	}
 
+	mgtk_tree_t *dirs = mgtk_event_tree_new(0, "Dirs");
+
 	for (i = 0, count = dir->getDirCount(); i < count; ++i)
 	{
 		tmpDir = dir->getPakDir(i);
 	
 		if (tmpDir)
 		{
+			mgtk_event_tree_add_new_child(dirs, i+1, tmpDir->getName());
 			mgtk_append_item_to_menu2i(menu, tmpDir->getName(), event, i);
 			freyjaPrintMessage("! %s/", tmpDir->getName());
 		}
 	}
+
+	MSTL_MSG("*** Update %i %p", gPakReaderDirs, dirs);
+	mgtk_event_update_tree(gPakReaderDirs, dirs);
+	mgtk_event_update_tree(eBoneIterator, dirs);
+
+	mgtk_tree_t *files = mgtk_event_tree_new(0, "Files");
 
 	for (j = 0, count = dir->getFileCount(); j < count; ++j)
 	{
@@ -244,10 +265,13 @@ void ePakReaderSelect(unsigned int value)
 
 		if (file)
 		{
+			mgtk_event_tree_add_new_child(files, i+j+1, file->getName());
 			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
 			freyjaPrintMessage("! %s", file->getName());
 		}
 	}
+
+	mgtk_event_update_tree(gPakReaderFiles, files);
 }
 
 
@@ -257,9 +281,9 @@ void eDialogPakReader()
 } 
 
 
-void ePakReaderNotImplemented(unsigned int value)
+void ePakReaderTreeSelect(unsigned int value)
 {
-	MSTL_MSG("Not implemented.");
+	ePakReaderSelect(value-1);
 }
 
 
@@ -273,8 +297,15 @@ void PakReaderEventsAttach()
 {
 	ResourceEventCallbackString::add("eSetCurrentPakDirname", &ePakReaderTextEvent);
 	ResourceEventCallbackString::add("eSetCurrentPakFilename", &ePakReaderTextEvent);
-	ResourceEventCallbackUInt::add("ePakReaderFiles", &ePakReaderNotImplemented);
-	ResourceEventCallbackUInt::add("ePakReaderDirs", &ePakReaderNotImplemented);
+
+	ResourceEventCallbackUInt::add("ePakReaderFiles",&ePakReaderTreeSelect);
+	gPakReaderFiles = ResourceEvent::GetResourceIdBySymbol("ePakReaderFiles");
+	MSTL_MSG("*** gPakReaderFiles = %i", gPakReaderFiles);
+
+	ResourceEventCallbackUInt::add("ePakReaderDirs", &ePakReaderTreeSelect);
+	gPakReaderDirs = ResourceEvent::GetResourceIdBySymbol("ePakReaderDirs");
+	MSTL_MSG("*** gPakReaderDirs = %i", gPakReaderDirs);
+
 	ResourceEventCallbackUInt::add("ePakReaderSelect", &ePakReaderSelect);
 	ResourceEventCallback::add("ePakReaderMenu", &ePakReaderMenu);
 	ResourceEventCallback::add("eDialogPakReader", &eDialogPakReader);

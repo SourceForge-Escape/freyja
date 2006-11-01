@@ -5415,6 +5415,13 @@ void eOpenModel(char *filename)
 		snprintf(title, 1024, "%s - Freyja", filename);
 		freyja_set_main_window_title(title);
 		FreyjaControl::mInstance->AddRecentFilename(filename);
+
+		int e = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
+
+		if (e > 0)
+		{
+			ResourceEvent::listen((unsigned long)e);
+		}
 	}
 }
 
