@@ -5,6 +5,7 @@
  =====================================================================
 
  20061021 Terry 'Mongoose' Hendrix II
+ - Improved mgtk tree system with new helper layer
  - mgtk generic tree update
  - mgtk removed extra checking code, leaks, etc
  - mgtk using MSTL assert messages ( for fun debug sessions )

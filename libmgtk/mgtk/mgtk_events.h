@@ -107,6 +107,12 @@ void mgtk_application_window_fullscreen();
 void mgtk_application_window_unfullscreen();
 
 
+//////////////////////////////////////////////////////////////////
+// mgtk_tree
+// Use the functional API to avoid near future breakage...
+// of your knees
+//////////////////////////////////////////////////////////////////
+
 typedef struct mgtk_tree_s 
 {
 	int id;
@@ -118,8 +124,45 @@ typedef struct mgtk_tree_s
 
 } mgtk_tree_t;
 
-void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree);
+mgtk_tree_t *mgtk_event_tree_new(int id, const char *label);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Allocates a new <tree> and initializes members
+ ------------------------------------------------------*/
+
+void mgtk_event_tree_copy(mgtk_tree_t *src, mgtk_tree_t *dest);
+/*------------------------------------------------------
+ * Pre  : You have to know what you're doing by calling this.
+ * Post : _Shallow_ copies members of <src> to <dest>
+ ------------------------------------------------------*/
+
+void mgtk_event_tree_add_child(mgtk_tree_t *parent, mgtk_tree_t *child);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Adds an existing child tree to an existing tree
+ ------------------------------------------------------*/
+
+void mgtk_event_tree_add_new_child(mgtk_tree_t *parent, int id, const char *label);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Adds a new child tree to an existing tree
+ ------------------------------------------------------*/
+
+void mgtk_event_tree_delete(mgtk_tree_t *tree);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Deallocates <tree> and all it's children
+ ------------------------------------------------------*/
+
 void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
+/*------------------------------------------------------
+ * Pre  : <id> is valid mgtk event
+ *        <tree> is a valid mgtk tree model 
+ *
+ * Post : This signals to update the view(s) for event <id> 
+ *        using <tree> as the updated/new data model
+ ------------------------------------------------------*/
+
 
 typedef struct mgtk_mouse_event_s
 {

@@ -97,15 +97,15 @@ void mgtk_resource_rebuild_treeview(int event, GtkTreeModel *model)
 }
 
 
-void  mgtk_treeview_onRowActivated (GtkTreeView        *treeview,
-						   GtkTreePath        *path,
-						   GtkTreeViewColumn  *col,
-						   gpointer            userdata)
+void mgtk_treeview_onRowActivated(GtkTreeView *treeview,
+								  GtkTreePath        *path,
+								  GtkTreeViewColumn  *col,
+								  gpointer            userdata)
 {
 	GtkTreeModel *model;
 	GtkTreeIter   iter;
 
-	MSTL_MSG("A row has been double-clicked!\n");
+	//MSTL_MSG("A row has been double-clicked!\n");
 	
     model = gtk_tree_view_get_model(treeview);
 
@@ -243,3 +243,96 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 	return ret;
 }
 
+
+//////////////////////////////////////////////////////////////////////
+// mgtk event - tree model builder helper
+//////////////////////////////////////////////////////////////////////
+
+mgtk_tree_t *mgtk_event_tree_new(int id, const char *label)
+{
+	mgtk_tree_t *tree = new mgtk_tree_t;
+	tree->parent = NULL;
+	snprintf(tree->label, 64, label);
+	tree->label[63] = 0;
+	tree->id = id;
+	tree->numChildren = 0;
+	tree->children = NULL;
+
+	return tree;
+}
+
+
+void mgtk_event_tree_copy(mgtk_tree_t *src, mgtk_tree_t *dest)
+{
+	if (src && dest)
+	{
+		snprintf(dest->label, 64, src->label);
+		dest->label[63] = 0;
+		dest->id = src->id;
+		dest->parent = src->parent;
+
+		// NOTE: Shallow copy
+		dest->numChildren = src->numChildren;
+		dest->children = src->children;
+		//MSTL_MSG("*** '%s' %i", dest->label, dest->id);
+	}
+}
+
+
+void mgtk_event_tree_add_child(mgtk_tree_t *parent, mgtk_tree_t *child)
+{
+	if (parent && child)
+	{
+		if (child->parent)
+		{
+			// Might want to do something here later
+		}
+
+		MSTL_ASSERTMSG(child->parent == NULL, "Overwriting tree->parent");
+		child->parent = parent;
+
+		// NOTE: Until the new mgtk_tree struct is introduced this will 
+		//       be a horrible 'dumb vector' merry-go-round insertion
+		mgtk_tree_t *array = parent->children;
+		parent->children = new mgtk_tree_t[parent->numChildren+1];
+
+		for (int i = 0, n = parent->numChildren; i < n; ++i)
+		{
+			//MSTL_MSG("*** '%s' %i", array[i].label, array[i].id);
+			mgtk_event_tree_copy(array+i, parent->children+i);
+		}
+		
+		if (array)
+			delete [] array;
+
+		mgtk_event_tree_copy(child, parent->children+parent->numChildren);
+		parent->numChildren++;
+		delete child;
+	}
+}
+
+
+void mgtk_event_tree_add_new_child(mgtk_tree_t *parent, int id, const char *label)
+{
+	mgtk_event_tree_add_child(parent, mgtk_event_tree_new(id, label));
+}
+
+
+void mgtk_event_tree_delete(mgtk_tree_t *tree)
+{
+	if (tree)
+	{
+		if (tree->children)
+			delete [] tree->children;
+
+		delete tree;
+	}
+}
+
+
+// EXP: This is a test to see if you can run the other func via CLI-like
+//      interface to avoid passing C-structs
+void mgtk_event_tree_builder(mgtk_tree_t *&tree, const char *format, ...)
+{
+	// Removed
+}

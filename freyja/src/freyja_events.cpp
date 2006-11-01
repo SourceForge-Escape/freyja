@@ -48,8 +48,6 @@ void eRecentFiles(unsigned int value)
 }
 
 
-//extern void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
-
 mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
 								mgtk_tree_t *tree)
 {
@@ -120,6 +118,7 @@ void UpdateSkeletonUI_Callback(uint32 skelIndex)
 
 	mgtk_event_update_tree(eBoneIterator, tree);
 }
+
 
 int freyja_get_event_id_by_name(char *symbol)
 {

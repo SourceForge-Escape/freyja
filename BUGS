@@ -11,6 +11,7 @@
 
  =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
+ - Spaces in recent files fails?
  - Rotation cursor doesn't work using rings yet
  - Scale cursor doesn't work with stretch yet
  - Bone rotate only works on Front
