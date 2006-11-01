@@ -514,7 +514,7 @@
 						(label "Skeleton" 0.0 0.5))
 
 					; Make a UID string for trees later so to be fully generic
-					(animation_tab_hack eBoneIterator eSetCurrentBoneName)
+					(tree eBoneIterator eSetCurrentBoneName)
 					;; Replace these with improved tree support
 					(hbox 0 0 0 1 0
 						(hbox 1 0 0 1 0
