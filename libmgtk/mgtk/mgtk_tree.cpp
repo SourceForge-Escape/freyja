@@ -44,6 +44,25 @@
 using namespace mstl;
 
 
+// Multiple trees widgets possibly sharing the same event id
+//Map<int, Vector<GtkTreeView *> *> gTreeWidgetMap;
+
+// Multiple tree widgets with unique event ids 
+Map<int, GtkTreeView *> gTreeWidgetMap;
+
+
+GtkTreeView *mgtk_tree_get_treeview(int event)
+{
+	return gTreeWidgetMap[event];
+}
+
+
+void mgtk_tree_set_treeview(int event, GtkTreeView *tree)
+{
+	gTreeWidgetMap.Add(event, tree);
+}
+
+
 void mgtk_tree_cell_edited_callback (GtkCellRendererText *cell,
 									 gchar               *path_string,
 									 gchar               *new_text,
@@ -64,16 +83,6 @@ gboolean mgtk_GtkTreeSelectionFunc(GtkTreeSelection *selection,
 	mgtk_print("!$$$$$$$$$$$$$\n tree selected\n$$$$$$$$$$$$$$$$\n");
 
 	return TRUE;
-}
-
-
-/* Mongoose 2004.10.28, 
- * FIXME This only allows one gobal tree widget and it's crappy to boot */
-GtkTreeView *SKELETON_TREEVIEW = 0x0;
-
-GtkTreeView *mgtk_tree_get_treeview(int event)
-{
-	return SKELETON_TREEVIEW;
 }
 
 
@@ -119,64 +128,44 @@ void  mgtk_treeview_onRowActivated (GtkTreeView        *treeview,
 }
 
 
-
 /* Mongoose 2002.01.24,
  * Tree widget should be factored out for general widget use */
 arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 {
-	arg_list_t *ret;
-	GtkWidget *box = NULL;
-
-
-	if (!container)
-	{
-		MSTL_MSG("container != NULL");
-		return NULL;
-	}
-
 	arg_enforce_type(&container, ARG_GTK_BOX_WIDGET);
+	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
-		MSTL_MSG("container == ARG_GTK_BOX_WIDGET");
 		return NULL;
 	}
-
 
 	// Read in an event id
 	arg_list_t *event = symbol();
 	arg_enforce_type(&event, INT);
-	if (!event)
-	{
-		MSTL_MSG("event == INT");
-		return NULL;
-	}
+	MSTL_ASSERTMSG(event, "event == INT");
 
 	arg_list_t *event2 = symbol();
 	arg_enforce_type(&event2, INT);
-	if (!event2)
+	MSTL_ASSERTMSG(event2, "event2 == INT");
+
+	if (!event || !event2)
 	{
-		MSTL_MSG("event2 == INT");
 		return NULL;
 	}	
 
 
-	ret = NULL;
-
-	box = (GtkWidget *)container->data;
-
-
     /* Tree: New for Gtk+ 2.0 working Animation Tree */
+	arg_list_t *ret = NULL;
+	GtkWidget *box = (GtkWidget *)container->data;
 	GtkTreeViewColumn *col;
 	GtkCellRenderer *renderer;
 	GtkWidget *view;
 	GtkTreeModel *model;
 	GtkTreeStore *store;
-	GtkTreeIter root, child;
-
 
 	view = gtk_tree_view_new();	
-	SKELETON_TREEVIEW = GTK_TREE_VIEW(view);
+	mgtk_tree_set_treeview(get_int(event), GTK_TREE_VIEW(view));
 
 	g_signal_connect(view, "row-activated", (GCallback)mgtk_treeview_onRowActivated, GINT_TO_POINTER(get_int(event)));
 
@@ -210,6 +199,8 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 							   G_TYPE_STRING,   /* Bone Name */
                                G_TYPE_INT);     /* Bone Id */
 
+#if 0 // The new tree widgets don't need dummy stores
+	GtkTreeIter root, child;
 	gtk_tree_store_append(store, &root, NULL);
 	gtk_tree_store_set(store, &root,
                    	   NAME_COLUMN, "root",
@@ -221,6 +212,7 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
                    	   NAME_COLUMN, "dummy",
                    	   ID_COLUMN, 1,
 		               -1);
+#endif
 
 	model = GTK_TREE_MODEL(store);
 
