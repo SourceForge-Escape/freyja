@@ -29,6 +29,9 @@
 #include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
+#include <mstl/SystemIO.h>
+
+using namespace mstl;
 
 
 extern "C" {
@@ -254,8 +257,24 @@ void eDialogPakReader()
 } 
 
 
+void ePakReaderNotImplemented(unsigned int value)
+{
+	MSTL_MSG("Not implemented.");
+}
+
+
+void ePakReaderTextEvent(char *text)
+{
+	MSTL_MSG("Not implemented.");
+}
+
+
 void PakReaderEventsAttach()
 {
+	ResourceEventCallbackString::add("eSetCurrentPakDirname", &ePakReaderTextEvent);
+	ResourceEventCallbackString::add("eSetCurrentPakFilename", &ePakReaderTextEvent);
+	ResourceEventCallbackUInt::add("ePakReaderFiles", &ePakReaderNotImplemented);
+	ResourceEventCallbackUInt::add("ePakReaderDirs", &ePakReaderNotImplemented);
 	ResourceEventCallbackUInt::add("ePakReaderSelect", &ePakReaderSelect);
 	ResourceEventCallback::add("ePakReaderMenu", &ePakReaderMenu);
 	ResourceEventCallback::add("eDialogPakReader", &eDialogPakReader);
