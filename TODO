@@ -5,8 +5,6 @@
  =====================================================================
 
  Hot
-	- Generic tree 'easy layer' to avoid C struct hell
-
 	- Fix rotation cursor
 		- Delta radius sweeps from center to cursor pos like following a circle
 	- Fix scale cursor
@@ -105,9 +103,7 @@
  libmgtk
 	- Mlisp to replace Resource
 	- MlispEvent to replace ResourceEvent
-	- Radio buttons / boxes
-	- Toggle settings should be factored out to event functions to set value
-	- Tree widget abstraction
+	- Radio buttons / menu items?
 	- Mlisp doesn't lookup symbols for like "true" if just setq
 	- Mlisp wish list: garbage collection, fully featured lisp
 

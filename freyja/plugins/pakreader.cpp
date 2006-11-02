@@ -86,7 +86,6 @@ void ePakReaderMenuUpdate()
 
 	MSTL_MSG("*** Update %i %p", gPakReaderDirs, dirs);
 	mgtk_event_update_tree(gPakReaderDirs, dirs);
-	mgtk_event_update_tree(eBoneIterator, dirs);
 
 	mgtk_tree_t *files = mgtk_event_tree_new(0, "Files");
 
@@ -255,7 +254,6 @@ void ePakReaderSelect(unsigned int value)
 
 	MSTL_MSG("*** Update %i %p", gPakReaderDirs, dirs);
 	mgtk_event_update_tree(gPakReaderDirs, dirs);
-	mgtk_event_update_tree(eBoneIterator, dirs);
 
 	mgtk_tree_t *files = mgtk_event_tree_new(0, "Files");
 
