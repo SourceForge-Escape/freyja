@@ -476,7 +476,8 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
 	Ray &r = mRender->mTestRay;
 
-	if (GetControlScheme() != eScheme_Model)
+	if (!(GetControlScheme() == eScheme_Model ||
+		  GetControlScheme() == eScheme_Animation))
 		return;
 
 	if (GetSelectedView() == PLANE_FREE)

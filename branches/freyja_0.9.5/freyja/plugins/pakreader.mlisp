@@ -11,23 +11,19 @@
 
 (dialog "Freyja :: Pak Reader" eDialogPakReader 0
 	(vbox 0 0 1 1 0
-		;(menubar
-		;	(submenu ePakReaderMenu "vfs://"))
 
-		(hbox 1 0 0 1 0
-			(icon "freyja-plugin.png" IconSize_Dialog))
+		(hbox 1 1 0 1 1
+			(icon "freyja-plugin.png"	IconSize_Dialog)
+			(label "Pak Reader "	0.0	1.5))
 
-		(label "Pak Reader "	0.0 0.5)
+		(hbox 1 1 0 1 1
+			(button "Reset VFS"	eMode	ePakReaderMenuUpdate))
 
-		(hbox 0 0 1 1 1
+		(hbox 1 1 1 1 1
 			(vbox 0 0 1 1 1
-				(tree ePakReaderDirs eSetCurrentPakDirname))
+				(tree	ePakReaderDirs	eSetCurrentPakDirname))
 			(vbox 0 0 1 1 1
-				(tree ePakReaderFiles eSetCurrentPakFilename)))
-
-		(button "Reset VFS" eMode ePakReaderMenuUpdate)
-
-		(label "Improved UI coming soon?"	0.0 0.5)
+				(tree	ePakReaderFiles	eSetCurrentPakFilename)))
 	)
 )
 

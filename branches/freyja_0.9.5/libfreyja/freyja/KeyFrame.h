@@ -215,6 +215,25 @@ class KeyFrame
 };
 
 
+
+class VecKeyFrame
+{
+ public:
+
+	VecKeyFrame();
+
+	~VecKeyFrame();
+
+	byte mFlags;                        /* Options */
+
+	index_t mIndex;                     /* Keyframe number */
+
+	vec_t mWeight;                      /* Weight modifier */
+
+	vec_t mVec;                         /* Keyframe data */
+};
+
+
 class KeyFrameGroup
 {
 	// A Hybrid of keygroup and animation now
