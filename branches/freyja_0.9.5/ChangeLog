@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II
+ - Viewport code clean up and new dynamic control
  - FIX utpackage vfs loads correct human readable labels now
  - Animation/key toggles from mesh / skeleton editing to animation modes now
  - Curve editor window test ( just a render test don't wet yourself )

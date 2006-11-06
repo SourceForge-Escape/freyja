@@ -62,9 +62,27 @@ typedef enum {
 	PLANE_FREE,
 	PLANE_BACK, 
 	PLANE_BOTTOM, 
-	PLANE_RIGHT
+	PLANE_RIGHT,
+
+	DRAW_CAMERA,
+	DRAW_UV,
+	DRAW_MATERIAL,
+	DRAW_CURVE
 	
 } freyja_plane_t;
+
+
+namespace freyja3d {
+
+typedef struct veiw_s {
+
+	long x, y, w, h;
+	freyja_plane_t plane;
+	long mode;
+
+} veiw_t;
+
+}
 
 
 class FreyjaRender
@@ -482,8 +500,7 @@ private:
 
 	vec_t mAspectRatio;                        /* Cached context aspect ratio */
 
-	vec4_t mViewports[4];                      /* Size and offset of viewports
-															  * if enabled */
+	freyja3d::veiw_t mViewports[4];            /* Viewports information */
 	
 	static unsigned int mRenderMode;           /* Rendering mode */
 
