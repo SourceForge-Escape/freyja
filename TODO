@@ -20,8 +20,6 @@
 	- Make 4 window 'windows' controled by prefs dialog
 		- Abstract 'windows'
 
-	- Pak vfs extras: offset in file, size, and dump
-
 	- Fix bone world coord
 
 	- Sphere brush for weight painting, etc

@@ -38,6 +38,8 @@
 (setq GRID_ON true)            ; Toggle edit grid rendering
 (setq PATH "~/.freyja")        ; Set initial data path
 
+;(setq INIT "~/.freyja/init-dev.mlisp")
+
 ;; Gtk+ Interface
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; (textbox "text" EVENT COMMAND)
@@ -353,10 +355,6 @@
 				(toolbar_button
 					"24x24/split.png" "Split" "Split object" 
 					eEvent eSplitObject)
-
-				(toolbar_togglebutton false
-					"24x24/key.png" "Animation" "Animation"
-					eEvent eModeAnimation)
 			)
 		))
 		) ; End Toolbars
@@ -540,20 +538,22 @@
 
 			(hbox 0 1 0 1 0
 				(toolbar
-					(toolbar_button "gtk-media-record"
-								"Set" "Set Keyframe" eEvent eSetKeyFrame)
-					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 	
-								"Prev" "Previous" eEvent eAnimationPrev)
+					(toolbar_togglebutton false "gtk-media-record"
+						"Auto" "Auto Keyframe" eEvent eModeAnimation)
+					(toolbar_button "24x24/key.png"
+						"Set" "Set Keyframe" eEvent eSetKeyFrame)
+					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 
+						"Prev" "Previous" eEvent eAnimationPrev)
 					(toolbar_button "gtk-media-rewind"
-								"?" "?" eEvent eNone)
+						"?" "?" eEvent eNone)
 					(toolbar_button "gtk-media-play" ;"gtk-go-forward" 	
-								"Play" "Play" eEvent eAnimationPlay)
+						"Play" "Play" eEvent eAnimationPlay)
 					(toolbar_button "gtk-media-stop" ;"gtk-stop" 	
-								"Stop" "Stop" eEvent eAnimationStop)
+						"Stop" "Stop" eEvent eAnimationStop)
 					(toolbar_button "gtk-media-forward"
-								"?" "?" eEvent eNone)
+						"?" "?" eEvent eNone)
 					(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
-								"Next" "Next" eEvent eAnimationNext)))
+						"Next" "Next" eEvent eAnimationNext)))
 		) ;; vbox
 	) ;; End Animation handlebox
 
