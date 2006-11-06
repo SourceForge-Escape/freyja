@@ -206,6 +206,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/KeyFrame.o \
+	$(BUILDDIR)/KeyFrameABI.o \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/MeshABI.o \
 	$(BUILDDIR)/PerlinNoise.o \

@@ -510,7 +510,7 @@ class UTPackage
 		unsigned int offset;
 		unsigned int size;
 		unsigned char key;
-		UTVFSObj() { next = NULL; }
+		UTVFSObj() : next(NULL) { }
 		UTVFSObj *next;
 		void add(UTVFSObj*d) { next ? d->next = next, next = d : next = d; }
 	};
@@ -591,7 +591,8 @@ class UTPackage
 				{
 					UTVFSObj *obj = new UTVFSObj();
 
-					strcpy( obj->filename, file );
+					strncpy( obj->filename, file, 63 );
+					obj->filename[63] = 0;
 					obj->signature=signature;
 					obj->offset=offset;
 					obj->size=size;
@@ -672,13 +673,13 @@ class UTPackage
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	unsigned char *UTPackage::GetVFSObject( const char *type, const char *file );
+	unsigned char *GetVFSObject( const char *type, const char *file );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	UTVFSDir *UTPackage::GetVFSRoot( );
+	UTVFSDir *GetVFSRoot( );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

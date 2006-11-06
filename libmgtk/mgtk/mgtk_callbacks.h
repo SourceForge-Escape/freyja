@@ -102,7 +102,5 @@ void mgtk_event_subscribe_gtk_widget(int id, GtkWidget *widget);
 
 void mgtk_event_text(GtkWidget *widget, gpointer user_data);
 
-void mgtk_event_tree_item_selected(GtkWidget *item);
-
 
 #endif

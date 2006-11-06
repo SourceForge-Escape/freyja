@@ -330,6 +330,8 @@ public:
 
 	static Ray mTestRay;
 
+	static int mFourWindow[4];
+
 private:    
 
 	////////////////////////////////////////////////////////////
@@ -382,6 +384,12 @@ private:
 	 * Pre  : Called from proper method
 	 * Post : Renders skeleton
 	 *
+	 ------------------------------------------------------*/
+
+	void renderCurveWindow();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	void renderUVWindow();

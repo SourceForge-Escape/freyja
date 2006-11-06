@@ -244,6 +244,7 @@
 
 		;; Toolbars
 		(vbox 0 1 0 1 0
+		(hbox 0 0 0 0 0
 		(notebook 0 0 eNop
 
 		(tab "View" eNone
@@ -281,8 +282,8 @@
 				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
 					"Render shadows"		eEvent	eRenderShadow)
 
-				(toolbar_togglebutton false "24x24/deform.png" "Skeletal deform"
-					"Deform using skeleton"		eEvent	eSkeletalDeform) 
+				(toolbar_togglebutton false "24x24/deform.png" "Deform"
+					"Toggle skelmesh deform"	eEvent	eSkeletalDeform) 
 
 			) ; End toolbar
 		)
@@ -317,10 +318,12 @@
 						" "	"Create polygon sphere"	
 						eEvent	eGenerateSphere)
 
-
 					(toolbar_button "24x24/patch.png"
 						" "	"Create polygon patch"
 						eEvent	eRenderPatch)
+
+					;(toolbar_button "24x24/extrude.png"
+					;	" "	"Extrude face"	eEvent eExtrude)
 				)
 			)
 
@@ -350,8 +353,12 @@
 				(toolbar_button
 					"24x24/split.png" "Split" "Split object" 
 					eEvent eSplitObject)
+
+				(toolbar_togglebutton false
+					"24x24/key.png" "Animation" "Animation"
+					eEvent eModeAnimation)
 			)
-		)
+		))
 		) ; End Toolbars
 
 
@@ -383,9 +390,6 @@
 								"gtk-save-as" "Save as..." "Saves model file" 
 								"Save Model..." eSaveModel "mode=save,confirm-overwrite=true,")
 
-							;(toolbar_togglebutton true
-							;	"24x24/cursor-select.png" "Select" "Select by pointer"
-							;	eEvent eSelect)
 
 							;(toolbar_togglebutton false
 							;	"24x24/bbox-select.png" "Select" "Select by bounding box" 
@@ -501,11 +505,7 @@
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
 
-					;(hbox 1 0 0 1 0 
-					;	(button "Mesh from Patch"  eEvent eGeneratePatchMesh))
-
-
-
+	
 					;; Skeleton ;;;;;;;;;;;;;;;
 
 					;; Skeleton attribute editor  
@@ -535,21 +535,13 @@
    	(handlebox 1 
 		(vbox 0 0 0 1 0	
 
-			;(hbox 1 0 0 1 0
-			;	(label "Animation" 0.0 0.5))
-
-			(hbox 1 0 0 1 0
-				(label "KeyFrame #" 0.0 0.5) 
-				(spinbutton 0 0 500 eGroupIterator))
-
-
 			(hbox 0 1 0 1 0
 				(hslider eAnimationSlider 0 100))
 
 			(hbox 0 1 0 1 0
 				(toolbar
 					(toolbar_button "gtk-media-record"
-								"Set" "Set Keyframe" eEvent eNone)
+								"Set" "Set Keyframe" eEvent eSetKeyFrame)
 					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 	
 								"Prev" "Previous" eEvent eAnimationPrev)
 					(toolbar_button "gtk-media-rewind"
@@ -565,11 +557,11 @@
 		) ;; vbox
 	) ;; End Animation handlebox
 
-			)  ;; end tab
+			)  ;; end tab Model
 
 
 			;; UV editor tab
-			(tab "UV" eModeSkin
+			(tab "UV" eModeUV
 				(hbox 1 0 0 1 0 
 					(togglebutton "Merge Texcoords" 0 eEvent eTexcoordCombine))
 				(hbox 1 0 0 1 0
@@ -858,13 +850,16 @@
 				(label "Viewports setting"  0.0 0.5))	
 			(hbox 1 0 0 1 0
 				(optionmenu	eEvent	eNone
-					(menu_item	"Free"		eEvent	eNone);eViewBack)
-					(menu_item	"Front"		eEvent	eNone);eViewFront)
-				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
-				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
-					(menu_item	"Back"		eEvent	eNone);eViewBack)
-				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
-				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
+					(menu_item	"Free"		eEvent	e4W1ViewFree)
+					(menu_item	"Back"		eEvent	e4W1ViewBack)
+					(menu_item	"Front"		eEvent	e4W1ViewFront)
+				  	(menu_item	"Right"		eEvent	e4W1ViewRight)
+				  	(menu_item	"Left"		eEvent	e4W1ViewLeft)
+				  	(menu_item	"Top"		eEvent	e4W1ViewTop)
+				  	(menu_item	"Bottom"	eEvent	e4W1ViewBottom)
+				  	(menu_item	"Material"	eEvent	e4W1ViewMaterial)
+				  	(menu_item	"UV Editor"	eEvent	e4W1ViewUV)
+				  	(menu_item	"Curves"	eEvent	e4W1ViewCurve))
 				(optionmenu	eEvent	eNone
 					(menu_item	"Free"		eEvent	eNone);eViewBack)
 					(menu_item	"Front"		eEvent	eNone);eViewFront)
@@ -991,7 +986,7 @@
 			)
 
 ) ; End Notebook
-)) ;; End Preferences dialog
+))) ;; End Preferences dialog
 
 
 ;; All these could be factored into init.mlisp

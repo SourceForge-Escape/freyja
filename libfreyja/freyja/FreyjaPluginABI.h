@@ -35,6 +35,7 @@
 #include <stdarg.h>
 #include <hel/math.h>
 #include "freyja.h"
+#include "KeyFrameABI.h"
 #include "BoneABI.h"
 #include "MeshABI.h"
 #include "SkeletonABI.h"
@@ -478,24 +479,6 @@ extern "C" {
 	index_t freyjaGetPolygonVertexIndex(index_t polygonIndex, uint32 element);
 
 	index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element);
-
-
-	///////////////////////////////////////////////////////////////////////
-	// KeyFrame
-	///////////////////////////////////////////////////////////////////////
-
-	index_t freyjaKeyFrameCreate(index_t animationIndex, vec_t time);
-	/*------------------------------------------------------
-	 * Pre  : Animation <animationIndex> exists
-	 *        Animation Bone <boneIndex> exists
-	 *
-	 * Post : Returns the keyframe's local Animation's Bone's
-	 *        Keyframe element index or -1 on error
-	 ------------------------------------------------------*/
-
-	void freyjaKeyFrameTime(index_t keyframeIndex, vec_t time);
-
-	vec_t freyjaGetKeyFrameTime(index_t keyframeIndex);
 
 
 	///////////////////////////////////////////////////////////////////////

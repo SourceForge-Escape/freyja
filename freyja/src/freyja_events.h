@@ -108,6 +108,9 @@ typedef enum {
 	eMeshMirrorZ,
 	eMeshSelect,
 
+	eKeyFrame,
+	eSetKeyFrame,
+
 	ePolygonSplit,
 
 	eCopyAppendMode,

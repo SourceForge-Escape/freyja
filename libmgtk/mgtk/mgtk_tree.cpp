@@ -252,8 +252,8 @@ mgtk_tree_t *mgtk_event_tree_new(int id, const char *label)
 {
 	mgtk_tree_t *tree = new mgtk_tree_t;
 	tree->parent = NULL;
-	snprintf(tree->label, 64, label);
-	tree->label[63] = 0;
+	snprintf(tree->label, mgtk_tree_label_size, label);
+	tree->label[mgtk_tree_label_size-1] = 0;
 	tree->id = id;
 	tree->numChildren = 0;
 	tree->children = NULL;
@@ -266,8 +266,8 @@ void mgtk_event_tree_copy(mgtk_tree_t *src, mgtk_tree_t *dest)
 {
 	if (src && dest)
 	{
-		snprintf(dest->label, 64, src->label);
-		dest->label[63] = 0;
+		snprintf(dest->label, mgtk_tree_label_size, src->label);
+		dest->label[mgtk_tree_label_size-1] = 0;
 		dest->id = src->id;
 		dest->parent = src->parent;
 
@@ -336,3 +336,74 @@ void mgtk_event_tree_builder(mgtk_tree_t *&tree, const char *format, ...)
 {
 	// Removed
 }
+
+
+void mgtk_event_update_gtk_tree(int event, mgtk_tree_t *tree,
+								GtkTreeStore *store, GtkTreeIter root)
+{
+	GtkTreeIter child;
+	unsigned int i;
+	
+	
+	if (!tree)
+		return;
+	
+#ifdef DEBUG_UPDATE_GTK_TREE
+	mgtk_print("mgtk_event_update_gtk_tree %d::\n", tree->id);
+#endif
+
+	if (tree->id == -1 && tree->children) // 'Hidden root' to make a 'flat' list
+	{
+		for (i = 1; i < tree->numChildren; ++i)
+		{
+			mgtk_event_update_gtk_tree(event, &tree->children[i], store, child);
+		}
+
+		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
+	}
+	else if (tree->id == 0) // Root bone
+	{
+		store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
+								   G_TYPE_STRING,   /* Bone Name */
+    	                           G_TYPE_INT);     /* Bone Id */
+
+		gtk_tree_store_append(store, &root, NULL);
+		gtk_tree_store_set(store, &root,
+						   NAME_COLUMN, tree->label,
+						   ID_COLUMN, tree->id,
+						   -1);
+
+		for (i = 0; i < tree->numChildren; ++i)
+		{
+			mgtk_event_update_gtk_tree(event, &tree->children[i], store, root);
+		}
+
+		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
+	}
+	else if (!store)
+	{
+		mgtk_print("mgtk_event_update_gtk_tree> ERROR: Invalid tree model\n");
+	}
+	else
+	{
+		gtk_tree_store_append(store, &child, &root);
+		gtk_tree_store_set(store, &child,
+						   NAME_COLUMN, tree->label,
+						   ID_COLUMN, tree->id,
+						   -1);
+
+		for (i = 0; i < tree->numChildren; ++i)
+		{
+			mgtk_event_update_gtk_tree(event, &tree->children[i], store, child);
+		}
+	}
+}
+
+
+void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree)
+{
+	GtkTreeIter root;
+
+	mgtk_event_update_gtk_tree(id, tree, NULL, root);
+}
+

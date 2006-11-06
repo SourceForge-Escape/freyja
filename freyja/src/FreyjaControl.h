@@ -51,7 +51,8 @@ class FreyjaControl
 	typedef enum {        
 		eScheme_UV = 0,
 		eScheme_Model,
-		eScheme_Material
+		eScheme_Material,
+		eScheme_Animation
 		
 	} ControlScheme;
 
@@ -105,7 +106,8 @@ class FreyjaControl
 		modeRotate,
 		modeScale,
 		modeSelect,
-		modeUnselect
+		modeUnselect,
+		modeKeyframe
 		
 	} EventMode;
 
@@ -564,6 +566,7 @@ class FreyjaControl
 		freyja_event_set_color(event, r, g, b, a);
 	}
 
+	void SetKeyFrame();
 
 	int GetEventIdByName(const char *symbol)
 	{
@@ -838,7 +841,9 @@ private:
 	void Clear()
 	{
 		freyjaModelClear(0); // Only 1 edit model supported in this bulid
-		UpdateSkeletonUI_Callback(0); // Update skeletal UI
+		freyjaKeyFramePoolClear();
+		UpdateSkeletalUI();
+		//UpdateSkeletonUI_Callback(0); // Update skeletal UI
 		mCursor.Reset();
 		mCleared = true;
 	}

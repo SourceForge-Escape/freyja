@@ -77,6 +77,7 @@ unsigned int FreyjaRender::mSelectedBone = 0;
 unsigned int FreyjaRender::mBoneRenderType = 1;
 unsigned char FreyjaRender::mJointRenderType = 1;
 int FreyjaRender::mPatchDisplayList = -1;
+int FreyjaRender::mFourWindow[4] = {0, 1, 2, 3};
 
 vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
 vec_t FreyjaRender::mBonePointSize = 5.0;
@@ -266,6 +267,12 @@ void FreyjaRender::drawFreeWindow()
 	}
 
 	//glPopMatrix();
+
+	for (uint32 i = 0; i < freyjaGetRenderModelCount(); ++i)
+	{
+		freyjaGetRenderModel(i, model);
+		renderModel(model);
+	}
 
 	FreyjaControl::mInstance->GetCursor().Display();
 }
@@ -570,8 +577,42 @@ void FreyjaRender::display()
 
 			glPopAttrib();
 
-			drawFreeWindow();
-			//renderUVWindow();
+			// test for abstract 'windows'
+			switch (mFourWindow[0])
+			{
+			default:
+			case 0:
+				drawFreeWindow();
+				break;
+			case 1:
+				drawWindow(PLANE_BACK);
+				break;
+			case 2:
+				drawWindow(PLANE_FRONT);
+				break;
+			case 3:
+				drawWindow(PLANE_RIGHT);
+				break;
+			case 4:
+				drawWindow(PLANE_LEFT);
+				break;
+			case 5:
+				drawWindow(PLANE_TOP);
+				break;
+			case 6:
+				drawWindow(PLANE_BOTTOM);
+				break;
+			case 7:
+				DrawMaterialEditWindow();
+				break;
+			case 8:
+				renderUVWindow();
+				break;
+			case 9:
+				renderCurveWindow();
+				break;
+			}
+
 			glPopMatrix();
 
 			glViewport(vp[0], vp[1], vp[2], vp[3]);
@@ -1153,6 +1194,117 @@ void FreyjaRender::renderSkeleton(RenderSkeleton &skeleton,
 		}
 	}
 
+	glPopMatrix();
+}
+
+Vector<Vec3> gCurveTest;
+
+
+void FreyjaRender::renderCurveWindow()
+{
+	unsigned int width = GetWindowWidth();
+	unsigned int height = GetWindowHeight();
+	float x = 0.0f, y = 0.0f;
+
+
+	if (gCurveTest.size() == 0)
+	{
+		vec_t xx = 0, yy = 0;
+		for (int i = 0; i < 64; ++i)
+		{
+			xx = helRandomNum(xx+1.0f, xx+11.0f);
+			yy = helRandomNum(0.0f, height/2);
+
+			Vec3 v(xx, yy, 0.0f);
+			gCurveTest.pushBack(v);
+		}
+	}
+
+	glPushMatrix();
+	mgl2dProjection(width, height);
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+	glDisable(GL_LIGHTING);
+	glLineWidth(mDefaultLineWidth);
+	glPointSize(mDefaultPointSize);
+
+	// Fake 'data' to test the rendering look and feel
+	glColor3fv(GREEN);
+	glBegin(GL_POINTS);
+	unsigned int idx;
+	foreach (gCurveTest, idx)
+	{
+		Vec3 v = gCurveTest[idx] + Vec3(x, y, 0.0f);
+		glVertex2fv(v.mVec);
+	}
+	glEnd();
+
+	glColor3fv(YELLOW);
+	glBegin(GL_LINES);
+	glVertex2f(x, y);
+	foreach (gCurveTest, idx)
+	{
+		Vec3 v = gCurveTest[idx] + Vec3(x, y, 0.0f);
+		glVertex2fv(v.mVec);
+		glVertex2fv(v.mVec);
+	}
+	glVertex2f(width, y);
+	glEnd();
+
+
+	if (mRenderMode & RENDER_EDIT_GRID)
+	{
+		const int szA = 20, szB = 80;
+		int xi = (int)x;
+		int yi = (int)y;
+		int offset_x = (int)x;//(xi % size) - width;
+		int offset_y = (int)y;//(yi % size) - height;
+
+		glLineWidth(1.0);
+		glColor3fv(mColorGridLine);
+		glBegin(GL_LINES);
+		for (yi = offset_y; yi < (int)width; yi+=szA)
+		{
+			glVertex2i(-width, yi);
+			glVertex2i(width, yi);
+		}
+
+		for (xi = offset_x; xi < (int)height; xi+=szA)
+		{
+			glVertex2i(xi, -height);
+			glVertex2i(xi, height);
+		}
+		glEnd();
+
+		glLineWidth(1.75);
+		glColor3fv(mColorGridSeperator);
+		glBegin(GL_LINES);
+		for (yi = offset_y; yi < (int)width; yi+=szB)
+		{
+			glVertex2i(-width, yi);
+			glVertex2i(width, yi);
+		}
+
+		for (xi = offset_x; xi < (int)height; xi+=szB)
+		{
+			glVertex2i(xi, -height);
+			glVertex2i(xi, height);
+		}
+		glEnd();
+	}
+
+
+	glColor3fv(mColorBackground);
+	glBegin(GL_QUADS);
+	glVertex2f(x, y);
+	glVertex2f(x, y+height);
+	glVertex2f(x+width, y+height);
+	glVertex2f(x+width, y);
+	glEnd();
+
+	resizeContext(width, height);
+	glPopAttrib();
 	glPopMatrix();
 }
 

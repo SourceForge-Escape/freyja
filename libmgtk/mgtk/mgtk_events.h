@@ -113,10 +113,12 @@ void mgtk_application_window_unfullscreen();
 // of your knees
 //////////////////////////////////////////////////////////////////
 
+#define mgtk_tree_label_size 64
+
 typedef struct mgtk_tree_s 
 {
 	int id;
-	char label[64];
+	char label[mgtk_tree_label_size];
 
 	unsigned int numChildren;
 	mgtk_tree_s *parent;
