@@ -3930,6 +3930,9 @@ void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 	case PLANE_FREE:
 		/* Not Implemented, since there is no such 'ideal plane' concept */
 		break;
+
+	default:
+		; // This isn't a 3d view or it's some fucked up user raster
 	}
 }
 

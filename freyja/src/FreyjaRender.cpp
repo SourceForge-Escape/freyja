@@ -46,10 +46,8 @@
 
 #include "FreyjaRender.h"
 
-
 #define TEST_NEW_BACKEND_FORMAT 1
 #define COLORED_POLYGON -1
-#define VIEWPORT_TEST 1
 
 using namespace freyja;
 
@@ -481,13 +479,8 @@ void FreyjaRender::display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-#if VIEWPORT_TEST
-    GLint vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);    
-    long width = vp[2] / 2;
-    long height = vp[3];
-#endif
-
+	// Disable lighting and texture here until the color visualizations
+	// are updated
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glLoadIdentity();
@@ -501,136 +494,77 @@ void FreyjaRender::display()
 		break;
 
 	case VIEWMODE_MODEL_EDIT:
-#ifdef VIEWPORT_TEST
 		if (mRenderMode & fViewports)
 		{
-			mViewports[0][0] = 0;
-			mViewports[0][1] = 0;
-			mViewports[0][2] = width;
-			mViewports[0][3] = height/2;
+			// Get viewport size info
+			GLint vp[4];
+			glGetIntegerv(GL_VIEWPORT, vp);    
+			long width = vp[2] / 2;
+			long height = vp[3];
+			long i = 0;
 
-			// Viewport ( front )
-			glViewport(0, 0, width, height/2);
-			glPushMatrix();
+			// Test viewports 0-3...
+			long numViewports = 4;
 
-			/* Viewport seperator */
-			glColor3fv(BLACK);  // FIXME: hardcoded
-			glBegin(GL_LINES);
-			glVertex2f(-width*0.25, 19.85);
-			glVertex2f(width*0.25, 19.85);
-			glVertex2f(21.75, -height*0.25);
-			glVertex2f(21.75, height*0.25);
-			glEnd();
+			// 0 ( Lower left here )
+			mViewports[0].x = 0;
+			mViewports[0].y = 0;
+			mViewports[0].w = width;
+			mViewports[0].h = height/2;
+			mViewports[0].plane = PLANE_FRONT;
 
-			drawWindow(PLANE_XY);
-			glPopMatrix();
+			// 1 ( Lower right here )
+			mViewports[1].x = width;
+			mViewports[1].y = 0;
+			mViewports[1].w = width;
+			mViewports[1].h = height/2;
+			mViewports[1].plane = PLANE_LEFT;
 
-			mViewports[1][0] = width;
-			mViewports[1][1] = 0;
-			mViewports[1][2] = width;
-			mViewports[1][3] = height/2;
+			// 2 ( Upper right here )
+			mViewports[2].x = width;
+			mViewports[2].y = height/2;
+			mViewports[2].w = width;
+			mViewports[2].h = height/2;
+			mViewports[2].plane = PLANE_TOP;
 
-			// Viewport ( side )
-			glViewport(width, 0, width, height/2);
-			glPushMatrix();			/* Viewport seperator */
+			// 3 ( Upper left here )
+			mViewports[3].x = 0;
+			mViewports[3].y = height/2;
+			mViewports[3].w = width;
+			mViewports[3].h = height/2;
+			mViewports[3].plane = PLANE_FREE;
 
-			glColor3fv(BLACK);  // FIXME: hardcoded
-			glBegin(GL_LINES);
-			glVertex2f(-width*0.25, 19.85);
-			glVertex2f(width*0.25, 19.85);
-			glEnd();
-
-			drawWindow(PLANE_ZY);
-			glPopMatrix();
-
-			mViewports[2][0] = width;
-			mViewports[2][1] = height/2;
-			mViewports[2][2] = width;
-			mViewports[2][3] = height/2;
-
-			// Viewport ( top )
-			glViewport(width, height/2, width, height/2);
-			glPushMatrix();
-			drawWindow(PLANE_XZ);
-			glPopMatrix();
-
-			mViewports[3][0] = 0;
-			mViewports[3][1] = height/2;
-			mViewports[3][2] = width;
-			mViewports[3][3] = height/2;
-
-			// Viewport ( free )
-			glViewport(0, height/2, width, height/2);
-			glPushMatrix();
-
-			/* Viewport seperator */
-			glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_BLEND);
-
-			glColor3fv(BLACK);  // FIXME: hardcoded
-			glBegin(GL_LINES);
-			glVertex2f(21.75, -height*0.25);
-			glVertex2f(21.75, height*0.25);
-			glEnd();
-
-			glPopAttrib();
-
-			// test for abstract 'windows'
-			switch (mFourWindow[0])
+			for (; i < numViewports; ++i)
 			{
-			default:
-			case 0:
-				drawFreeWindow();
-				break;
-			case 1:
-				drawWindow(PLANE_BACK);
-				break;
-			case 2:
-				drawWindow(PLANE_FRONT);
-				break;
-			case 3:
-				drawWindow(PLANE_RIGHT);
-				break;
-			case 4:
-				drawWindow(PLANE_LEFT);
-				break;
-			case 5:
-				drawWindow(PLANE_TOP);
-				break;
-			case 6:
-				drawWindow(PLANE_BOTTOM);
-				break;
-			case 7:
-				DrawMaterialEditWindow();
-				break;
-			case 8:
-				renderUVWindow();
-				break;
-			case 9:
-				renderCurveWindow();
-				break;
+				glPushAttrib(GL_ENABLE_BIT);
+				glDisable(GL_TEXTURE_2D);
+				glDisable(GL_LIGHTING);
+				glDisable(GL_BLEND);
+
+				glColor3fv(BLACK);
+				glBegin(GL_LINES);
+				glVertex2f(mViewports[i].x, mViewports[i].y);
+				glVertex2f(mViewports[i].x, mViewports[i].h);
+				glVertex2f(mViewports[i].x, mViewports[i].y);
+				glVertex2f(mViewports[i].w, mViewports[i].y);
+				glEnd();
+
+				glPopAttrib();
+
+				glViewport(mViewports[i].x, mViewports[i].y, 
+						   mViewports[i].w, mViewports[i].h);
+				// Removed extra GL matrix stack frame around this call
+				drawWindow(mViewports[i].plane);
+
+				// Clear depth after each viewport
+				glMatrixMode(GL_MODELVIEW);
+				glLoadIdentity();
+				glClear(GL_DEPTH_BUFFER_BIT);
+
+
 			}
 
-			glPopMatrix();
-
 			glViewport(vp[0], vp[1], vp[2], vp[3]);
-		
-			glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_BLEND);
-
-			glBegin(GL_LINES);
-			glColor3fv(BLACK);
-			glVertex2f(width*mZoom, 0);
-			glVertex2f(width*mZoom, height*mZoom);
-			glVertex2f(0, height*mZoom/2);
-			glVertex2f(width, height/2);
-			glEnd();
-
-			glPopAttrib();
 		}
 		else
 		{
@@ -638,14 +572,9 @@ void FreyjaRender::display()
 			drawWindow(FreyjaControl::mInstance->GetSelectedView());
 			glPopMatrix();
 		}
-#else
-		glPushMatrix();
-		drawWindow(FreyjaControl::mInstance->GetSelectedView());
-		glPopMatrix();
-#endif
 		break;
+
 	case VIEWMODE_TEXTURE_EDIT:
-		//DrawTextureEditWindow(getWindowWidth(), getWindowHeight());
 		renderUVWindow();
 		break;
 
@@ -761,8 +690,12 @@ void FreyjaRender::renderLights()
 		
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2]);
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
 		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 		mglDrawSphere(16, 16, 0.75f);
+		glPopAttrib();
 		glPopMatrix();
 		
 		glEnable(GL_LIGHTING);
@@ -1601,7 +1534,6 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 	switch (plane)
 	{
-		//case PLANE_XY:
 	case PLANE_FRONT:
 	case PLANE_BACK:
 		x = (int)mScroll[0];
@@ -1619,7 +1551,6 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		break;
 
 
-		//case PLANE_XZ:
 	case PLANE_TOP:
 	case PLANE_BOTTOM:
 		x = (int)mScroll[0];
@@ -1637,7 +1568,6 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		break;
 
 
-		//case PLANE_ZY:
 	case PLANE_LEFT:
 	case PLANE_RIGHT:
 	   x = (int)mScroll[2];
@@ -1704,14 +1634,27 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
 void FreyjaRender::drawWindow(freyja_plane_t plane)
 {
-	RenderModel model;
-	unsigned int i;
-
-
-	if (plane == PLANE_FREE)
+	switch (plane)
 	{
+	case DRAW_CAMERA:
+	case PLANE_FREE:
 		drawFreeWindow();
 		return;
+	   
+	case DRAW_UV:
+		renderUVWindow();
+		return;
+		
+	case DRAW_MATERIAL:
+		DrawMaterialEditWindow();
+		return;
+
+	case DRAW_CURVE:
+		renderCurveWindow();
+		return;
+
+	default:
+		;
 	}
 
 	glPushAttrib(GL_ENABLE_BIT);
@@ -1829,7 +1772,10 @@ void FreyjaRender::drawWindow(freyja_plane_t plane)
 		glPopAttrib();
 	}
 
-	for (i = 0; i < freyjaGetRenderModelCount(); ++i)
+	// Draw model geometry, metadata visualizations, and all that good stuff
+	RenderModel model;
+
+	for (unsigned int i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
 		freyjaGetRenderModel(i, model);
 		renderModel(model);
