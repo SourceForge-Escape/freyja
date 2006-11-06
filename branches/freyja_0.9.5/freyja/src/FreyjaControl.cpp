@@ -1120,6 +1120,20 @@ bool FreyjaControl::LoadModel(const char *filename)
 	mCurrentlyOpenFilename = String(filename);
 	mCleared = false;
 
+	// FIXME: Only do this for vfspak open
+		int e1 = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
+
+		ResourceEvent::listen((unsigned long)e1);
+
+		int e = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
+
+		if (e > 0)
+		{
+			ResourceEvent::listen((unsigned long)e);
+		}
+
+		MSTL_MSG("*** %i %i\n", e, e1);
+
 	return true;
 }
 
@@ -2077,6 +2091,10 @@ bool FreyjaControl::event(int command)
 	case eNewFile:
 		switch (GetControlScheme())
 		{
+		case eScheme_Animation:
+			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+						 __FILE__, __LINE__, __func__);
+			break;
 		case eScheme_Model:
 			if (freyja_create_confirm_dialog("gtk-dialog-question",
 			  "You must close the currently open model to create a new model.",
@@ -2116,6 +2134,10 @@ bool FreyjaControl::event(int command)
 	case eSaveFile:
 		switch (GetControlScheme())
 		{
+		case eScheme_Animation:
+			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+						 __FILE__, __LINE__, __func__);
+			break;
 		case eScheme_Model:
 			if (mCleared) // safety
 			{
@@ -2157,6 +2179,11 @@ bool FreyjaControl::event(int command)
 	case eOpenFile:
 		switch (GetControlScheme())
 		{
+		case eScheme_Animation:
+			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+						 __FILE__, __LINE__, __func__);
+			break;
+
 		case eScheme_UV:
 			freyja_event_file_dialog(FREYJA_MODE_LOAD_TEXTURE, "Open texture...");
 			break;
@@ -2594,6 +2621,12 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
+	case eKeyFrame:
+		mEventMode = modeKeyframe;
+		mCursor.SetMode(freyja3d::Cursor::Invisible);
+		freyja_print("Keyframe object...");
+		freyja_event_gl_refresh();
+		break;
 
 	/* Transform box */
 	case eMove:
@@ -2811,9 +2844,9 @@ bool FreyjaControl::event(int command)
 		freyja_print("Animation[%i].", GetSelectedAnimation());
 		break;
 
-
-
-
+	case eSetKeyFrame:
+		SetKeyFrame();
+		break;
 
 
 	case eZoom:
@@ -2900,6 +2933,23 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		freyja_print("UV Editor Scheme");
 		SetControlScheme(eScheme_UV);
+		break;
+
+	case FREYJA_MODE_ANIMATION:
+		if (GetControlScheme() == eScheme_Animation)
+		{
+			mRender->setViewMode(VIEWMODE_MODEL_EDIT);
+			freyja_event_gl_refresh();
+			freyja_print("Model Editor Scheme");
+			SetControlScheme(eScheme_Model);
+		}
+		else
+		{
+			mRender->setViewMode(VIEWMODE_MODEL_EDIT);
+			freyja_event_gl_refresh();
+			freyja_print("Animation Scheme");
+			SetControlScheme(eScheme_Animation);
+		}
 		break;
 
 	case FREYJA_MODE_MODEL_EDIT:
@@ -3193,6 +3243,24 @@ bool FreyjaControl::motionEvent(int x, int y)
 }
 
 
+void FreyjaControl::SetKeyFrame()
+{
+	switch (mObjectMode)
+	{
+	case tMesh:
+		{
+			index_t id = freyjaKeyFrameCreate(mSelectedKeyFrame);
+			freyja_print("Created keyframe[%i] <- %i", mSelectedKeyFrame, id);
+		}
+		break;
+
+	default:
+		freyja_print("%s: Type '%s' not supported yet.", 
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
+	}
+}
+
+
 void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 {
 	switch (mCursor.GetMode())
@@ -3201,7 +3269,8 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 		break;
 
 	case freyja3d::Cursor::Rotation:
-		if (GetControlScheme() == eScheme_Model)
+		if (GetControlScheme() == eScheme_Model ||
+			GetControlScheme() == eScheme_Animation)
 		{
 			freyja_print("! SelectCursorAxis...");
 			CastPickRay(vx, vy);
@@ -3278,7 +3347,8 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 		break;
 		
 	default:
-		if (GetControlScheme() == eScheme_Model)
+		if (GetControlScheme() == eScheme_Model ||
+			GetControlScheme() == eScheme_Animation)
 		{
 			freyja_print("! SelectCursorAxis...");
 			CastPickRay(vx, vy);
@@ -5415,17 +5485,6 @@ void eOpenModel(char *filename)
 		snprintf(title, 1024, "%s - Freyja", filename);
 		freyja_set_main_window_title(title);
 		FreyjaControl::mInstance->AddRecentFilename(filename);
-
-		int e1 = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
-
-		ResourceEvent::listen((unsigned long)e1);
-
-		int e = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
-
-		if (e > 0)
-		{
-			ResourceEvent::listen((unsigned long)e);
-		}
 	}
 }
 
@@ -5593,9 +5652,93 @@ void eImplementationRemovedUInt(unsigned int u)
 	DEBUG_MSG("Implementation removed");
 }
 
+/* Four Window prefs */
+void e4W1ViewFree()
+{
+	FreyjaRender::mFourWindow[0] = 0;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewBack()
+{
+	FreyjaRender::mFourWindow[0] = 1;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewFront()
+{
+	FreyjaRender::mFourWindow[0] = 2;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewTop()
+{
+	FreyjaRender::mFourWindow[0] = 3;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewBottom()
+{
+	FreyjaRender::mFourWindow[0] = 4;
+	freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewLeft()
+{
+	FreyjaRender::mFourWindow[0] = 5;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewRight()
+{
+	FreyjaRender::mFourWindow[0] = 6;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewMaterial()
+{
+	FreyjaRender::mFourWindow[0] = 7;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewUV()
+{
+	FreyjaRender::mFourWindow[0] = 8;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+void e4W1ViewCurve()
+{
+	FreyjaRender::mFourWindow[0] = 9;
+	//freyja_print("Implementation removed");
+	freyja_event_gl_refresh();
+}
+
+
+
 
 void FreyjaViewEventsAttach()
 {
+	ResourceEventCallback::add("e4W1ViewFree", e4W1ViewFree);
+	ResourceEventCallback::add("e4W1ViewBack", e4W1ViewBack);
+	ResourceEventCallback::add("e4W1ViewFront", e4W1ViewFront);
+	ResourceEventCallback::add("e4W1ViewTop", e4W1ViewTop);
+	ResourceEventCallback::add("e4W1ViewBottom", e4W1ViewBottom);
+	ResourceEventCallback::add("e4W1ViewLeft", e4W1ViewLeft);
+	ResourceEventCallback::add("e4W1ViewRight", e4W1ViewRight);
+	ResourceEventCallback::add("e4W1ViewMaterial", e4W1ViewMaterial);
+	ResourceEventCallback::add("e4W1ViewUV", e4W1ViewUV);
+	ResourceEventCallback::add("e4W1ViewCurve", e4W1ViewCurve);
+
 	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
 	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
 	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);

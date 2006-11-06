@@ -34,6 +34,8 @@
 #include <mstl/stack.h>
 #include <mstl/SystemIO.h>
 
+#include "KeyFrame.h"
+
 #include "freyja.h"
 
 

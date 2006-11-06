@@ -2307,15 +2307,14 @@ int freyja_model__utpackage_import(char *filename)
 		long pakIndex = freyjaPakBegin(filename);
 		char buf[256];
 
-
 		while ( cur )
 		{
 			obj = cur->obj;
 			
 			while ( obj )
 			{
-				freyjaPrintMessage("%s/%s", cur->name, cur->obj->filename);
-				snprintf(buf, 255, "%s/%s", cur->name, cur->obj->filename);
+				freyjaPrintMessage("%s/%s", cur->name, obj->filename);
+				snprintf(buf, 255, "%s/%s", cur->name, obj->filename);
 				buf[255] = 0;
 				freyjaPakAddFullPathFile(pakIndex, buf, obj->offset, obj->size);
 				obj = obj->next;

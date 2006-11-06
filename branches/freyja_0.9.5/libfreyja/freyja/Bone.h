@@ -34,11 +34,44 @@
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
+#include "KeyFrame.h"
 #include "freyja.h"
 
 using namespace mstl;
 
 namespace freyja {
+
+class KeyFrameBone : public KeyFrameObject
+{
+ public:
+
+	KeyFrameBone();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of KeyFrameSkeleton
+	 ------------------------------------------------------*/
+
+	~KeyFrameBone();
+	/*------------------------------------------------------
+	 * Pre  : KeyFrameSkeleton object is allocated
+	 * Post : Deconstructs an object of KeyFrameSkeleton
+	 ------------------------------------------------------*/
+
+	virtual const char *GetTypeName() { return "Bone"; }
+
+	vec_t mTime;
+
+	Vec3 mTranslation;
+
+	Vec3 mScale;
+
+	Quaternion mRotation;
+
+
+ private:
+
+};
+
 
 class Bone 
 {

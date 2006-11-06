@@ -46,7 +46,6 @@
 #include "FreyjaMaterial.h"
 #include "FreyjaTexture.h"
 #include "MetaData.h"
-#include "KeyFrame.h"
 
 #include "FreyjaPluginABI.h"
 
@@ -56,14 +55,11 @@
 using namespace freyja;
 using namespace mstl;
 
-/* Internal / hidden API methods not exported by header */
-
 
 /* Until Freyja completely replaces Egg backend, 
  * let these vector pools float here.
  * These should be storged in the Scene and accessed from the
  * SceneManager singleton  */
-//Vector<Model *> gFreyjaMeshes; 
 Vector<MetaData *> gFreyjaMetaData; 
 Vector<FreyjaCamera *>  gFreyjaCameras;
 Vector<FreyjaLight *>  gFreyjaLights;

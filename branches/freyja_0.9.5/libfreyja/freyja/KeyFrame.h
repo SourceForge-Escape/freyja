@@ -144,7 +144,7 @@ class KeyFrameObject
 	virtual void SetPointer(void *ptr) {}
 	virtual void *GetPointer() { return NULL; }
 
-	virtual char *GetTypeName() { return "Object"; }
+	virtual const char *GetTypeName() { return "Object"; }
 
  private:
 
@@ -190,6 +190,8 @@ class KeyFrame
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	byte mFlags;                        /* Options */
 
 	index_t mIndex;                     /* Keyframe number */
 

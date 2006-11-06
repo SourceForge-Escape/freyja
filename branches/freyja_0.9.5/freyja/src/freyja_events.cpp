@@ -699,7 +699,13 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
-	// Edit actions and modes
+	// Freyja modes
+	r.RegisterInt("eModeModel", FREYJA_MODE_MODEL_EDIT);
+	r.RegisterInt("eModeMaterial", FREYJA_MODE_MATERIAL_EDIT);
+	r.RegisterInt("eModeUV", FREYJA_MODE_TEXTURE_EDIT);
+	r.RegisterInt("eModeAnimation", FREYJA_MODE_ANIMATION);
+
+	// Edit actions
 	r.RegisterInt("eUndo", eUndo);
 	r.RegisterInt("eCut", eCut);
 	r.RegisterInt("eCopy", eCopy);
@@ -770,6 +776,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshTexcoordSpherical",eMeshTexcoordSpherical);
 	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
 	r.RegisterInt("eMeshTesselate", eMeshTesselate);
+
+	r.RegisterInt("eKeyFrame", eKeyFrame);
+	r.RegisterInt("eSetKeyFrame", eSetKeyFrame);
 
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
@@ -896,10 +905,6 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eSelectionByBox", CMD_MISC_BBOX_SELECT);
 	r.RegisterInt("eTextureMapProjection", CMD_MISC_GEN_TEXMAP_XY);
-	r.RegisterInt("eModeModel", FREYJA_MODE_MODEL_EDIT);
-	r.RegisterInt("eModeMaterial", FREYJA_MODE_MATERIAL_EDIT);
-	r.RegisterInt("eModeSkin", FREYJA_MODE_TEXTURE_EDIT);
-	r.RegisterInt("eModeAnimation", FREYJA_MODE_MODEL_VIEW);
 
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 

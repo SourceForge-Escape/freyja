@@ -5,13 +5,32 @@
  =====================================================================
 
  Hot
-	- Fix rotation cursor
-		- Delta radius sweeps from center to cursor pos like following a circle
-	- Fix scale cursor
+	- Single joint animation for shishi odoshi test
+		- Finish hooking up eScheme_Animation in FreyjaControl
+		- Keyframe editor
+			- Mesh keyframes
+			- Mesh vertex group keyframes ( vertex animation )
+		- Curve editor ( OpenGL based editor )
+		- Fix rotation cursor
+			- Delta radius sweeps from center to cursor pos following an arc
+		- Fix scale cursor
+
+	- Out of heirarchy skeleton rendering / backend support
+
+	- Make 4 window 'windows' controled by prefs dialog
+		- Abstract 'windows'
+
+	- Pak vfs extras: offset in file, size, and dump
+
 	- Fix bone world coord
+
 	- Sphere brush for weight painting, etc
 
-	- Single joint animation for shishi odoshi test
+	- Joint/Bone tool that creates and connects to last on each click
+
+	- init-dev.mlisp
+
+	- Pivot: 3d cursor, bbox center, etc
 
 
  Misc
@@ -95,6 +114,7 @@
 	- Object proprieties dialog?
 	- Hidden property / Show object
   	- [d] Tree view for all objects in scene
+	- UV Projection on selected faces
 
 
  Subsystem specific

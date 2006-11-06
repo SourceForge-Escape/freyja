@@ -4,6 +4,16 @@
  Freyja 0.9.5 ( Development - This will not always compile from svn )
  =====================================================================
 
+ 20061102 Terry 'Mongoose' Hendrix II
+ - FIX utpackage vfs loads correct human readable labels now
+ - Animation/key toggles from mesh / skeleton editing to animation modes now
+ - Curve editor window test ( just a render test don't wet yourself )
+ - Four window view test for pref controlled window
+ - FIX for Free view not rendering model
+ - New UI for keyframing
+ - Refactoring KeyFrame API, so it can be extendable to all object types
+
+
  20061021 Terry 'Mongoose' Hendrix II
  - Improved mgtk tree system with new helper layer
  - mgtk generic tree update
@@ -17,7 +27,7 @@
  - Removed libfreyja CopyModel subsystem
  - Removal of some dead libfreyja code
  - UI hook up for new skeleton backend slowly finishing up
- - Unified 'toggle' event widgets to sync in mgtk layer ( fuck yes it's above tk and not in app )
+ - Unified 'toggle' event widgets to sync in mgtk layer not app
  - Added colored lighting back in
  - Bone color prefs
  - Stubs for various things like vertex/uv radius settings and toggles
