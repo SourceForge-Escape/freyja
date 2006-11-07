@@ -111,7 +111,7 @@ public:
 		fViewports        = 4096, 
 		fBoundingVolSelection      = 8192,
 		fSkeletalVertexBlending    = 16384,
-		fRenderBonesClearedZBuffer = 32768,
+		fBonesNoZbuffer            = 32768,
 		fRenderGridClearedZBuffer  = 65536,
 		fReserved131072            = 131072,
 		fReserved262144            = 262144,

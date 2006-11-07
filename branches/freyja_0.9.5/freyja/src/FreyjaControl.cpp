@@ -5640,26 +5640,35 @@ void eSetZoomLevel(vec_t f)
 }
 
 
-void eRenderToggleBoneZClear()
+void eRenderToggleBoneZClear(unsigned int value)
 {
-	if (FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderBonesClearedZBuffer)
-		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderBonesClearedZBuffer);
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fBonesNoZbuffer);
+	}
 	else
-		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fRenderBonesClearedZBuffer);
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fBonesNoZbuffer);
+	}
 
 	freyja_print("Bone rendering with cleared Z buffer [%s]",
-				(FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderBonesClearedZBuffer) ? "on" : "off");
+				 value ? "ON" : "OFF");
 }
 
-void eRenderToggleGridZClear()
+
+void eRenderToggleGridZClear(unsigned int value)
 {
-	if (FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderGridClearedZBuffer)
-		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderGridClearedZBuffer);
-	else
+	if (value)
+	{
 		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fRenderGridClearedZBuffer);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderGridClearedZBuffer);
+	}
 
 	freyja_print("Grid rendering with cleared Z buffer [%s]",
-				(FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderGridClearedZBuffer) ? "on" : "off");
+				 value ? "ON" : "OFF");
 }
 
 
@@ -5676,94 +5685,23 @@ void eImplementationRemovedUInt(unsigned int u)
 	DEBUG_MSG("Implementation removed");
 }
 
-/* Window view types */
-void eViewPortFree(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_FREE);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortBack(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_BACK);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortFront(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_FRONT);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortTop(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_TOP);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortBottom(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_BOTTOM);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortLeft(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_LEFT);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortRight(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_RIGHT);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortMaterial(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, DRAW_MATERIAL);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortUV(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, DRAW_UV);
-	freyja_event_gl_refresh();
-}
-
-void eViewPortCurve(unsigned int idx)
-{
-	FreyjaRender::mSingleton->SetViewportWindow(idx, DRAW_CURVE);
-	freyja_event_gl_refresh();
-}
-
 
 void FreyjaViewEventsAttach()
 {
-	ResourceEventCallbackUInt::add("eViewPortFree", eViewPortFree);
-	ResourceEventCallbackUInt::add("eViewPortBack", eViewPortBack);
-	ResourceEventCallbackUInt::add("eViewPortFront", eViewPortFront);
-	ResourceEventCallbackUInt::add("eViewPortTop", eViewPortTop);
-	ResourceEventCallbackUInt::add("eViewPortBottom", eViewPortBottom);
-	ResourceEventCallbackUInt::add("eViewPortLeft", eViewPortLeft);
-	ResourceEventCallbackUInt::add("eViewPortRight", eViewPortRight);
-	ResourceEventCallbackUInt::add("eViewPortMaterial", eViewPortMaterial);
-	ResourceEventCallbackUInt::add("eViewPortUV", eViewPortUV);
-	ResourceEventCallbackUInt::add("eViewPortCurve", eViewPortCurve);
-
-	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
 	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
 	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);
 	ResourceEventCallback::add("eCollapseFace", &eImplementationRemoved);
 
 
-	ResourceEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
-	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
+	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
+	ResourceEventCallbackUInt::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
+	ResourceEventCallbackUInt::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	ResourceEventCallbackUInt::add("ePolyMeshBone", &ePolyMeshBone);
 	ResourceEventCallbackUInt::add("eLineBone", &eLineBone);
+
+
 	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
 	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
 }
 
 
-////////////////////////////////////////////////////////////////
