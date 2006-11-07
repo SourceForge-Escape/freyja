@@ -27,7 +27,7 @@
 (setq WINDOW_X 32)             ; Offset of the window on load
 (setq WINDOW_Y 32)
 
-(setq WIDTH  663);700)              ; Set GL window width and height
+(setq WIDTH  663);700)         ; Set GL window width and height
 (setq HEIGHT 640)
 
 (setq NOTEBOOK_WIDTH 340)      ; Set sidebar notebook width and height
@@ -264,10 +264,10 @@
 					"Solid face render mode"		eRenderFace	eRenderFace)
 
 				(toolbar_togglebutton false "24x24/texture.png" "Texture" 
-					"Texture used when rendering"	eRenderTexture	eRenderTexture)
+					"Texture toggle"	eRenderTexture	eRenderTexture)
 
 				(toolbar_togglebutton false "24x24/light.png" "Light" 
-					"Light used when rendering"		eEvent	eRenderLighting)
+					"Lighting toggle"		eEvent	eRenderLighting)
 
 				(toolbar_togglebutton false "24x24/bvol.png" "BoundingBox"
 					"Render Bounding boxes"	eEvent	eRenderBbox)
@@ -285,44 +285,39 @@
 					"Render shadows"		eEvent	eRenderShadow)
 
 				(toolbar_togglebutton false "24x24/deform.png" "Deform"
-					"Toggle skelmesh deform"	eEvent	eSkeletalDeform) 
+					"Toggle skelmesh deform"	eEvent	eSkeletalDeform)
+
+				(toolbar_togglebutton false "24x24/fourwin.png" "Deform"
+					"Enable four window view"	eEvent	eViewports)
 
 			) ; End toolbar
 		)
 
 			(tab "Create" eNone
 				(toolbar
-					(toolbar_button "24x24/cube.png"
-						" "	"Create polygon cube"
-						eEvent	eGenerateCube)
+					(toolbar_button "24x24/cube.png"	" "	
+						"Polygon cube"	eEvent	eGenerateCube)
 
-					(toolbar_button "24x24/plane.png"
-						" "	"Create polygon plane"
-						eEvent	eGeneratePlane)
+					(toolbar_button "24x24/plane.png"	" "
+						"Polygon plane"	eEvent	eGeneratePlane)
 
-					(toolbar_button "24x24/tube.png"
-						" "	"Create polygon tube"
-						eEvent	eGenerateTube)
+					(toolbar_button "24x24/tube.png"	" "
+						"Polygon tube"	eEvent	eGenerateTube)
 
-					(toolbar_button "24x24/circle.png"
-						" "	"Create polygon circle"
-						eEvent	eGenerateCircle)
+					(toolbar_button "24x24/circle.png"	" "
+						"Polygon circle" eEvent	eGenerateCircle)
 
-					(toolbar_button "24x24/cone.png"
-						" "	"Create polygon cone"
-						eEvent	eGenerateCone)
+					(toolbar_button "24x24/cone.png"	" "
+						"Polygon cone" eEvent	eGenerateCone)
 
-					(toolbar_button "24x24/cylinder.png"
-						" "	"Create polygon cylinder"
-						eEvent	eGenerateCylinder)
+					(toolbar_button "24x24/cylinder.png" " "	
+						"Polygon cylinder" eEvent eGenerateCylinder)
 
-					(toolbar_button "24x24/sphere.png"
-						" "	"Create polygon sphere"	
-						eEvent	eGenerateSphere)
+					(toolbar_button "24x24/sphere.png"	" "	
+						"Polygon sphere"	eEvent	eGenerateSphere)
 
-					(toolbar_button "24x24/patch.png"
-						" "	"Create polygon patch"
-						eEvent	eRenderPatch)
+					(toolbar_button "24x24/patch.png"	" "
+						"Polygon patch"	eEvent	eNone)
 
 					;(toolbar_button "24x24/extrude.png"
 					;	" "	"Extrude face"	eEvent eExtrude)
@@ -332,29 +327,26 @@
 			(tab "Modify" eNone
 			; Need to group toggles like radio buttons
 			(toolbar
-				(toolbar_togglebutton false
-					"24x24/bbox-select.png" "Select object" "Select by bounding box" 
-					eEvent eSelectionByBox)
+				(toolbar_togglebutton false	"24x24/bbox-select.png" "SelectB"
+					"Select by bounding box" eEvent eSelectionByBox)
 
-				(toolbar_button "24x24/cursor-select.png" "Select by cursor" 
-					"Select object" eEvent	eSelect)
+				(toolbar_togglebutton true "24x24/cursor-select.png" "Select" 
+					"Select object by cursor" eEvent	eSelect)
 
-				(toolbar_button "24x24/move.png" "Move" 
+				(toolbar_togglebutton false "24x24/move.png" "Move" 
 					"Move object" eEvent	eMoveObject)
 
-				(toolbar_button "24x24/rotate.png" "Rotate" 
+				(toolbar_togglebutton false "24x24/rotate.png" "Rotate" 
 					"Rotate object" eEvent	eRotateObject)
 
-				(toolbar_button "24x24/scale.png" "Scale" 
+				(toolbar_togglebutton false "24x24/scale.png" "Scale" 
 					"Scale object" eEvent	eScaleObject)
 
-				(toolbar_togglebutton false 
-					"24x24/clone.png" "CopyM"	"Copy multiple objects" 
-					eEvent eCopyAppendMode)
+				(toolbar_togglebutton false "24x24/clone.png" "CopyM"
+					"Copy multiple objects" eEvent eCopyAppendMode)
 
-				(toolbar_button
-					"24x24/split.png" "Split" "Split object" 
-					eEvent eSplitObject)
+				(toolbar_button	"24x24/split.png"
+					"Split" "Split object" eEvent eSplitObject)
 			)
 		))
 		) ; End Toolbars
@@ -411,16 +403,15 @@
 
 					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					(hbox 1 0 0 1 0
-						(label "Select edit plane: "  0.0 0.5)
+						(label "Select view: "  0.0 0.5)
 						(optionmenu	eEvent	eNone
-							(menu_item "Viewports"		eEvent	eViewports)
-							(menu_item	"Free"	eEvent	FREYJA_MODE_PLANE_FREE)
-							(menu_item	"Front"	eEvent	FREYJA_MODE_PLANE_XY)
-							(menu_item	"Back"	eEvent	FREYJA_MODE_PLANE_BACK)
-				  			(menu_item	"Right"	eEvent	FREYJA_MODE_PLANE_RIGHT)
-				  			(menu_item	"Left"	eEvent	FREYJA_MODE_PLANE_YZ)
-				  			(menu_item	"Top"	eEvent	FREYJA_MODE_PLANE_XZ)
-				  			(menu_item	"Bottom" eEvent FREYJA_MODE_PLANE_BOTTOM)
+							(menu_item	"Orbit"	eEvent	eViewportOrbit)
+							(menu_item	"Front"	eEvent	eViewportFront)
+							(menu_item	"Back"	eEvent	eViewportBack)
+				  			(menu_item	"Right"	eEvent	eViewportRight)
+				  			(menu_item	"Left"	eEvent	eViewportLeft)
+				  			(menu_item	"Top"	eEvent	eViewportTop)
+				  			(menu_item	"Bottom" eEvent eViewportBottom)
 						) ; optionmenu
 					) ; hbox
 
@@ -539,7 +530,7 @@
 			(hbox 0 1 0 1 0
 				(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
-						"Auto" "Auto Keyframe" eEvent eModeAnimation)
+						"Auto" "Auto Keyframe" eEvent eModeAutoKeyframe)
 					(toolbar_button "24x24/key.png"
 						"Set" "Set Keyframe" eEvent eSetKeyFrame)
 					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 
@@ -843,54 +834,6 @@
 		;;	(label "Near Height "  0.0 0.5) 
 		;;	(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
 
-
-
-		(vbox 0 0 0 0 0	
-			(hbox 1 0 0 1 0
-				(label "Viewports setting"  0.0 0.5))	
-			(hbox 1 0 0 1 0
-				(optionmenu	eEvent	eNone
-					(menu_item	"Free"		eEvent	e4W1ViewFree)
-					(menu_item	"Back"		eEvent	e4W1ViewBack)
-					(menu_item	"Front"		eEvent	e4W1ViewFront)
-				  	(menu_item	"Right"		eEvent	e4W1ViewRight)
-				  	(menu_item	"Left"		eEvent	e4W1ViewLeft)
-				  	(menu_item	"Top"		eEvent	e4W1ViewTop)
-				  	(menu_item	"Bottom"	eEvent	e4W1ViewBottom)
-				  	(menu_item	"Material"	eEvent	e4W1ViewMaterial)
-				  	(menu_item	"UV Editor"	eEvent	e4W1ViewUV)
-				  	(menu_item	"Curves"	eEvent	e4W1ViewCurve))
-				(optionmenu	eEvent	eNone
-					(menu_item	"Free"		eEvent	eNone);eViewBack)
-					(menu_item	"Front"		eEvent	eNone);eViewFront)
-				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
-				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
-					(menu_item	"Back"		eEvent	eNone);eViewBack)
-				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
-				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
-			) ; hbox
-
-			(hbox 1 0 0 1 0
-				(optionmenu	eEvent	eNone
-					(menu_item	"Free"		eEvent	eNone);eViewBack)
-					(menu_item	"Front"		eEvent	eNone);eViewFront)
-				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
-				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
-					(menu_item	"Back"		eEvent	eNone);eViewBack)
-				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
-				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
-				(optionmenu	eEvent	eNone
-					(menu_item	"Free"		eEvent	eNone);eViewBack)
-					(menu_item	"Front"		eEvent	eNone);eViewFront)
-				  	(menu_item	"Right"		eEvent	eNone);eViewRight)
-				  	(menu_item	"Top"		eEvent	eNone);eViewTop)
-					(menu_item	"Back"		eEvent	eNone);eViewBack)
-				  	(menu_item	"Left"		eEvent	eNone);eViewLeft)
-				  	(menu_item	"Bottom"	eEvent	eNone));eViewRight))
-			) ; hbox
-
-		) ; vbox
-
 		(hbox 1 0 0 1 0
 			(label "Render scaling"  0.0 0.5) 
 			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom))
@@ -972,7 +915,7 @@
 				(label "Diffuse" 0.0 0.5)
 				(label "Specular" 0.0 0.5))
 			(hbox 1 1 0 1 1
-				(spinbutton 0 0 100 eSelectLight)
+				;(spinbutton 0 0 100 eSelectLight)
 				(colorbutton 1 eColorLightAmbient)
 				(colorbutton 1 eColorLightDiffuse)
 				(colorbutton 1 eColorLightSpecular))

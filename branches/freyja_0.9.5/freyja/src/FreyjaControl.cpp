@@ -44,6 +44,7 @@
 
 using namespace mstl;
 using namespace freyja;
+using namespace freyja3d;
 
 #define DEBUG_PICK_RAY 0
 #define DEBUG_PICK_RAY_PLANAR 0
@@ -142,8 +143,8 @@ void FreyjaControl::Init()
 	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
 	uint32 width = 740;
 	uint32 height = 560;
-	mRender->initContext(width, height, true);
-	mRender->resizeContext(width, height);
+	mRender->InitContext(width, height, true);
+	mRender->ResizeContext(width, height);
 	InitTexture();
 
 	// Handle loaded from system call
@@ -234,7 +235,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Front XY viewport ( not using viewport class yet )
 		if ( x < halfW && y > halfH )
 		{
-			SetSelectedView(PLANE_XY);
+			SetSelectedView(PLANE_FRONT);
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -244,7 +245,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Top XZ viewport ( not using viewport class yet )
 		else if ( x > halfW && y < halfH )
 		{
-			SetSelectedView(PLANE_XZ);
+			SetSelectedView(PLANE_TOP);
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -254,7 +255,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Side ZY viewport ( not using viewport class yet )
 		else if ( x > halfW && y > halfH )
 		{
-			SetSelectedView(PLANE_ZY);
+			SetSelectedView(PLANE_LEFT);
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -500,7 +501,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 
 		y += 10.0f * 1/GetZoom();
 		vec3_t u = {x, y, z};
-		mRender->getRotation(v);
+		mRender->GetRotation(v);
 		//v[0] = 0;
 		v[0] = HEL_DEG_TO_RAD(v[0]);
 		v[1] = HEL_DEG_TO_RAD(v[1]);
@@ -582,7 +583,7 @@ void FreyjaControl::CursorMove(float xx, float yy)
 
 	switch (GetSelectedView())
 	{
-	case PLANE_XY: // front
+	case PLANE_FRONT: // xy
 		switch ( mCursor.mAxis )
 		{
 		case freyja3d::Cursor::eNone:
@@ -604,7 +605,7 @@ void FreyjaControl::CursorMove(float xx, float yy)
 		}
 		break;
 
-	case PLANE_XZ: // top
+	case PLANE_TOP: // xz
 		switch ( mCursor.mAxis )
 		{
 		case freyja3d::Cursor::eNone:
@@ -626,7 +627,7 @@ void FreyjaControl::CursorMove(float xx, float yy)
 		}
 		break;
 
-	case PLANE_ZY: // side
+	case PLANE_LEFT: // zy
 		switch ( mCursor.mAxis )
 		{
 		case freyja3d::Cursor::eNone:
@@ -1122,18 +1123,11 @@ bool FreyjaControl::LoadModel(const char *filename)
 	mCleared = false;
 
 	// FIXME: Only do this for vfspak open
-		int e1 = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
-
-		ResourceEvent::listen((unsigned long)e1);
-
-		int e = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
-
-		if (e > 0)
-		{
-			ResourceEvent::listen((unsigned long)e);
-		}
-
-		MSTL_MSG("*** %i %i\n", e, e1);
+	MSTL_MSG("*** VFS plugin 'auto load test' enabled\n");
+	uint32 id = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
+	ResourceEvent::listen(id);
+	id = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
+	ResourceEvent::listen(id);
 
 	return true;
 }
@@ -1462,12 +1456,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
-
-	case eSelectLight:
-		freyja_print("Light editing not backported");
-		break;
-
-
 	case eSetMaterialTexture:
 		SetSelectedTexture(value);
 		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
@@ -1477,7 +1465,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 		freyja_event_gl_refresh();
 		break;
 
-
 	case eGenMeshCount:
 		mGenMeshCount = value;
 		break;
@@ -1486,35 +1473,189 @@ bool FreyjaControl::event(int event, unsigned int value)
 		mGenMeshSegements = value;
 		break;
 
+	case eModeAutoKeyframe:
+		if (value)
+		{
+			mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+			freyja_event_gl_refresh();
+			freyja_print("Animation Scheme");
+			SetControlScheme(eScheme_Animation);
+		}
+		else
+		{
+			// If you disable auto keyframe you must set a new major mode
+			mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+			freyja_event_gl_refresh();
+			freyja_print("Model Editor Scheme");
+			SetControlScheme(eScheme_Model);
+		}
+		break;
+
+	case eSelectionByBox:
+		if (value)
+		{
+			// Radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eRotateObject, 0);
+			mgtk_toggle_value_set(eScaleObject, 0);
+			mgtk_toggle_value_set(eMoveObject, 0);
+			mgtk_toggle_value_set(eUnselect, 0);
+			mgtk_toggle_value_set(eSelect, 0);
+			
+			// FIXME: Add bbox selection back to this build
+			mCursor.SetMode(freyja3d::Cursor::Invisible);
+			mEventMode = VERTEX_BBOX_SELECT_MODE;
+			mRender->SetFlag(FreyjaRender::fBoundingVolSelection);
+			freyja_print("Press right mouse to end selection");
+			freyja_event_gl_refresh();
+		}
+		else
+		{
+			mRender->ClearFlag(FreyjaRender::fBoundingVolSelection);
+		}
+		break;
+
+	case eSelect:
+		if (value)
+		{
+			// Radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eRotateObject, 0);
+			mgtk_toggle_value_set(eScaleObject, 0);
+			mgtk_toggle_value_set(eMoveObject, 0);
+			mgtk_toggle_value_set(eUnselect, 0);
+			mgtk_toggle_value_set(eSelectionByBox, 0);
+
+			mEventMode = modeSelect;
+			mCursor.SetMode(freyja3d::Cursor::Invisible);
+			freyja_print("Select object, hold SHIFT to unselect...");
+			freyja_event_gl_refresh();
+		}
+		break;
+
+	case eUnselect:
+		if (value)
+		{
+			// Radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eRotateObject, 0);
+			mgtk_toggle_value_set(eScaleObject, 0);
+			mgtk_toggle_value_set(eSelect, 0);
+			mgtk_toggle_value_set(eMoveObject, 0);
+			mgtk_toggle_value_set(eSelectionByBox, 0);
+
+			mEventMode = modeUnselect;
+			mCursor.SetMode(freyja3d::Cursor::Invisible);
+			freyja_print("Unselect object...");
+			freyja_event_gl_refresh();
+		}
+		break;
+
+	case eMoveObject:
+		if (value)
+		{
+			// Radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eRotateObject, 0);
+			mgtk_toggle_value_set(eScaleObject, 0);
+			mgtk_toggle_value_set(eSelect, 0);
+			mgtk_toggle_value_set(eUnselect, 0);
+			mgtk_toggle_value_set(eSelectionByBox, 0);
+
+			mEventMode = modeMove;
+			mCursor.SetMode(freyja3d::Cursor::Translation);
+			freyja_print("Move object...");
+			freyja_event_gl_refresh();
+		}
+		break;
+
+	case eScaleObject:
+		if (value)
+		{
+			// Radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eRotateObject, 0);
+			mgtk_toggle_value_set(eMoveObject, 0);
+			mgtk_toggle_value_set(eSelect, 0);
+			mgtk_toggle_value_set(eUnselect, 0);
+			mgtk_toggle_value_set(eSelectionByBox, 0);
+
+			mEventMode = modeScale;
+			mCursor.SetMode(freyja3d::Cursor::Scale);
+			freyja_print("Scale object...");
+			freyja_event_gl_refresh();
+		}
+		break;
+
+	case eRotateObject:
+		if (value)
+		{
+			// Radio button like func for multiple widgets on same event
+			mgtk_toggle_value_set(eMoveObject, 0);
+			mgtk_toggle_value_set(eScaleObject, 0);
+			mgtk_toggle_value_set(eSelect, 0);
+			mgtk_toggle_value_set(eUnselect, 0);
+			mgtk_toggle_value_set(eSelectionByBox, 0);
+
+			mEventMode = modeRotate;
+			mCursor.SetMode(freyja3d::Cursor::Rotation);
+			
+			switch (GetObjectMode())
+			{
+			case tMesh:
+				{
+					Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+					if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
+					freyja_print("Rotate %s... (Won't modify data until fixed)",
+								 ObjectTypeToString(GetObjectMode()).c_str());
+				}
+				break;
+
+			default:
+				freyja_print("Rotate %s...", 
+							 ObjectTypeToString(GetObjectMode()).c_str());
+			}
+
+			freyja_event_gl_refresh();
+		}
+		break;
+
+	case eViewports:
+		if (value)
+		{
+			mRender->SetFlag(FreyjaRender::fViewports);
+		}
+		else
+		{
+			mRender->ClearFlag(FreyjaRender::fViewports);
+		}
+		freyja_print("Viewport rendering [%s]", 
+					(GetViewFlags() & FreyjaRender::fViewports) ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
 
 	case FREYJA_MODE_RENDER_BONETAG:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_BONES);
+			mRender->SetFlag(FreyjaRender::fBones);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_BONES);
+			mRender->ClearFlag(FreyjaRender::fBones);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_BONES);
+
 		freyja_print("Bone Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_BONES) ? 
-					 "ON" : "OFF");
+					 (GetViewFlags() & FreyjaRender::fBones) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_RENDER_POINTS:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_POINTS);
+			mRender->SetFlag(FreyjaRender::fPoints);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_POINTS);
+			mRender->ClearFlag(FreyjaRender::fPoints);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_POINTS);
+
 		freyja_print("Point Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_POINTS) ? 
+					 (GetViewFlags() & FreyjaRender::fPoints) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -1522,33 +1663,30 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case FREYJA_MODE_RENDER_WIREFRAME:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_WIREFRAME);
+			mRender->SetFlag(FreyjaRender::fWireframe);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_WIREFRAME);
+			mRender->ClearFlag(FreyjaRender::fWireframe);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_WIREFRAME);
+
 		freyja_print("Wireframe Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_WIREFRAME) ? 
-					 "ON" : "OFF");
+					 (GetViewFlags() & FreyjaRender::fWireframe) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
-
-
 
 	case FREYJA_MODE_RENDER_NORMALS:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_NORMALS);
+			mRender->SetFlag(FreyjaRender::fNormals);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_NORMALS);
+			mRender->ClearFlag(FreyjaRender::fNormals);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_NORMALS);
+
 		freyja_print("Normal Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_NORMALS) ? 
+					 (GetViewFlags() & FreyjaRender::fNormals) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -1556,47 +1694,45 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case FREYJA_MODE_RENDER_LIGHTING:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_LIGHTING);
+			mRender->SetFlag(FreyjaRender::fLighting);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_LIGHTING);
+			mRender->ClearFlag(FreyjaRender::fLighting);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_LIGHTING);
+
 		freyja_print("GL Lighting is [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_LIGHTING) ? 
-					 "ON" : "OFF");
+					 (GetViewFlags() & FreyjaRender::fLighting) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_RENDER_TEXTURE:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_TEXTURE);
+			mRender->SetFlag(FreyjaRender::fTexture);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_TEXTURE);
+			mRender->ClearFlag(FreyjaRender::fTexture);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_TEXTURE);
+
 		freyja_print("Texture rendering is [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_TEXTURE) ? 
-					 "ON" : "OFF");
+					 (GetViewFlags() & FreyjaRender::fTexture) ? "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_RENDER_MATERIAL:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_MATERIAL);
+			mRender->SetFlag(FreyjaRender::fMaterial);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_MATERIAL);
+			mRender->ClearFlag(FreyjaRender::fMaterial);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_MATERIAL);
+		//mRender->toggleFlag(FreyjaRender::fMaterial);
 		freyja_print("Material rendering is [%s]", 
-					 (GetViewFlags() & FreyjaRender::RENDER_MATERIAL) ? 
+					 (GetViewFlags() & FreyjaRender::fMaterial) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -1604,15 +1740,15 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case FREYJA_MODE_RENDER_GRID:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_EDIT_GRID);
+			mRender->SetFlag(FreyjaRender::fGrid);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_EDIT_GRID);
+			mRender->ClearFlag(FreyjaRender::fGrid);
 		}
-		//mRender->toggleFlag(FreyjaRender::RENDER_EDIT_GRID);
+		//mRender->toggleFlag(FreyjaRender::fGrid);
 		freyja_print("Edit Grid rendering [%s]",
-					 (GetViewFlags() & FreyjaRender::RENDER_EDIT_GRID) ? 
+					 (GetViewFlags() & FreyjaRender::fGrid) ? 
 					 "ON" : "OFF");
 		freyja_event_gl_refresh();
 		break;
@@ -1620,11 +1756,11 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case FREYJA_MODE_RENDER_FACE:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_FACE);
+			mRender->SetFlag(FreyjaRender::fFace);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_FACE);
+			mRender->ClearFlag(FreyjaRender::fFace);
 		}
 
 		freyja_print("Face rendering is [%s]", value ? "ON" : "OFF");
@@ -1634,11 +1770,11 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eRenderPickRay:
 		if (value)
 		{
-			mRender->setFlag(FreyjaRender::fDrawPickRay);
+			mRender->SetFlag(FreyjaRender::fDrawPickRay);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::fDrawPickRay);
+			mRender->ClearFlag(FreyjaRender::fDrawPickRay);
 		}
 
 		freyja_print("Pick ray visibility is [%s]", value ? "ON" : "OFF");
@@ -1650,17 +1786,17 @@ bool FreyjaControl::event(int event, unsigned int value)
 		{
 			// radio button like func for multiple widgets on same event
 			//mgtk_toggle_value_set(eRenderBbox, 1);
-			mRender->setFlag(FreyjaRender::fDrawBoundingVolumes);
+			mRender->SetFlag(FreyjaRender::fBoundingVolumes);
 		}
 		else
 		{
 			//mgtk_toggle_value_set(eRenderBbox, 0);
-			mRender->clearFlag(FreyjaRender::fDrawBoundingVolumes);
+			mRender->ClearFlag(FreyjaRender::fBoundingVolumes);
 		}
 
-		//mRender->toggleFlag(FreyjaRender::fDrawBoundingVolumes);//FreyjaRender::RENDER_BBOX);
+		//mRender->toggleFlag(FreyjaRender::fBoundingVolumes);//FreyjaRender::fBoundingVol);
 		freyja_print("Bounding volume rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::fDrawBoundingVolumes/*FreyjaRender::RENDER_BBOX*/) ? 
+					 (GetViewFlags() & FreyjaRender::fBoundingVolumes/*FreyjaRender::fBoundingVol*/) ? 
 					"ON" : "OFF");
 			freyja_event_gl_refresh();
 		break;
@@ -2096,6 +2232,7 @@ bool FreyjaControl::event(int command)
 			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
 						 __FILE__, __LINE__, __func__);
 			break;
+
 		case eScheme_Model:
 			if (freyja_create_confirm_dialog("gtk-dialog-question",
 			  "You must close the currently open model to create a new model.",
@@ -2258,13 +2395,11 @@ bool FreyjaControl::event(int command)
 
 				
 				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
-				//freyja_event_file_dialog2("Open model...", eLoadModelText);
 			}
 		}
 		else
 		{
 			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
-			//freyja_event_file_dialog2("Open model...", eLoadModelText);
 		}
 		break;
 
@@ -2299,22 +2434,6 @@ bool FreyjaControl::event(int command)
 		{
 			freyja_event_exit();
 		}
-		break;
-
-
-	case eCamera:
-		mRender->toggleFlag(FreyjaRender::RENDER_CAMERA);
-		freyja_print("Camera rendering [%s]", 
-					(GetViewFlags() & FreyjaRender::RENDER_CAMERA) ? 
-					"ON" : "OFF");
-		break;
-
-	case eViewports:
-		mRender->toggleFlag(FreyjaRender::fViewports);
-		freyja_print("Viewport rendering [%s]", 
-					(GetViewFlags() & FreyjaRender::fViewports) ? 
-					"ON" : "OFF");
-		freyja_event_gl_refresh();
 		break;
 
 	case eFullscreen:
@@ -2516,8 +2635,6 @@ bool FreyjaControl::event(int command)
 		mObjectMode = tBone;
 		break;
 
-
-
 	case eDelete:
 		DeleteSelectedObject();
 		freyja_event_gl_refresh();
@@ -2572,56 +2689,27 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-
 	case eMoveObject:
-		mEventMode = modeMove;
-		mCursor.SetMode(freyja3d::Cursor::Translation);
-		freyja_print("Move object...");
-		freyja_event_gl_refresh();
-		break;
-
-	case eScaleObject:
-		mEventMode = modeScale;
-		mCursor.SetMode(freyja3d::Cursor::Scale);
-		freyja_print("Scale object...");
-		freyja_event_gl_refresh();
+		event(eScaleObject, (uint32)1);
 		break;
 
 	case eRotateObject:
-		mEventMode = modeRotate;
-		mCursor.SetMode(freyja3d::Cursor::Rotation);
+		event(eScaleObject, (uint32)1);
+		break;
 
-		switch (GetObjectMode())
-		{
-		case tMesh:
-			{
-				Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-				if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
-				freyja_print("Rotate %s... (Won't modify data until fixed)", ObjectTypeToString(GetObjectMode()).c_str());
-			}
-			break;
-
-		default:
-			freyja_print("Rotate %s...", ObjectTypeToString(GetObjectMode()).c_str());
-		}
-
-		freyja_event_gl_refresh();
+	case eScaleObject:
+		event(eScaleObject, (uint32)1);
 		break;
 
 	case eSelect:
-		mEventMode = modeSelect;
-		mCursor.SetMode(freyja3d::Cursor::Invisible);
-		freyja_print("Select object...");
-		freyja_event_gl_refresh();
+		event(eSelect, (uint32)1);
 		break;
 
 	case eUnselect:
-		mEventMode = modeUnselect;
-		mCursor.SetMode(freyja3d::Cursor::Invisible);
-		freyja_print("Unselect object...");
-		freyja_event_gl_refresh();
+		event(eUnselect, (uint32)1);
 		break;
 
+	// FIXME: WTF was this for?  it's not autokey frame or set keyframe iirc
 	case eKeyFrame:
 		mEventMode = modeKeyframe;
 		mCursor.SetMode(freyja3d::Cursor::Invisible);
@@ -2849,29 +2937,10 @@ bool FreyjaControl::event(int command)
 		SetKeyFrame();
 		break;
 
-
 	case eZoom:
 		SetZoom(freyja_event_get_float(eZoom));
 		freyja_event_gl_refresh();
 		break;
-
-
-	case CMD_MISC_BBOX_SELECT:
-		if (mEventMode == VERTEX_BBOX_SELECT_MODE)
-		{
-			mEventMode = modeNone;
-			mRender->clearFlag(FreyjaRender::RENDER_BBOX_SEL);
-			//boxSelectionListBuild();
-			freyja_print("Vertex box select: Vertex list built");
-		}
-		else
-		{
-			mEventMode = VERTEX_BBOX_SELECT_MODE;
-			mRender->setFlag(FreyjaRender::RENDER_BBOX_SEL);
-			freyja_print("Vertex box select: Press agian to end selection");
-		}
-		break;
-
 
 	case eTexcoordCombine:
 		if (mEventMode != TEXEL_COMBINE)
@@ -2894,14 +2963,6 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-	case CMD_MISC_SIDES_M:
-		SetFaceEdgeCount(GetFaceEdgeCount()-1);
-		freyja_print("Making %i sided polygons", GetFaceEdgeCount());
-		break;
-	case CMD_MISC_SIDES_P:
-		SetFaceEdgeCount(GetFaceEdgeCount()+1);
-		freyja_print("Making %i sided polygons", GetFaceEdgeCount());
-		break;
 
 	case CMD_MISC_ZOOM_IN:
 		if (mRender->GetZoom() <= 0.02)
@@ -2930,105 +2991,75 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case FREYJA_MODE_TEXTURE_EDIT:
-		mRender->setViewMode(VIEWMODE_TEXTURE_EDIT);
+		mRender->SetViewMode(VIEWMODE_TEXTURE_EDIT);
 		freyja_event_gl_refresh();
 		freyja_print("UV Editor Scheme");
 		SetControlScheme(eScheme_UV);
 		break;
 
-	case FREYJA_MODE_ANIMATION:
-		if (GetControlScheme() == eScheme_Animation)
-		{
-			mRender->setViewMode(VIEWMODE_MODEL_EDIT);
-			freyja_event_gl_refresh();
-			freyja_print("Model Editor Scheme");
-			SetControlScheme(eScheme_Model);
-		}
-		else
-		{
-			mRender->setViewMode(VIEWMODE_MODEL_EDIT);
-			freyja_event_gl_refresh();
-			freyja_print("Animation Scheme");
-			SetControlScheme(eScheme_Animation);
-		}
-		break;
-
 	case FREYJA_MODE_MODEL_EDIT:
-		mRender->setViewMode(VIEWMODE_MODEL_EDIT);
+		// Radio button like func for multiple widgets on same event
+		mgtk_toggle_value_set(eModeAutoKeyframe, 0);
+
+		mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
 		freyja_event_gl_refresh();
 		freyja_print("Model Editor Scheme");
 		SetControlScheme(eScheme_Model);
 		break;
 
 	case FREYJA_MODE_MATERIAL_EDIT:
-		mRender->setViewMode(VIEWMODE_MATERIAL_EDIT);
+		mRender->SetViewMode(VIEWMODE_MATERIAL_EDIT);
 		freyja_event_gl_refresh();
 		freyja_print("Material Editor Scheme");
 		SetControlScheme(eScheme_Material);
 		break;
 
 	case FREYJA_MODE_PLANE_BACK:
-		mRender->clearFlag(FreyjaRender::fViewports);
+		mRender->ClearFlag(FreyjaRender::fViewports);
 		freyja_print("Back view");
 		SetSelectedView(PLANE_BACK);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_BOTTOM:
-		mRender->clearFlag(FreyjaRender::fViewports);
+		mRender->ClearFlag(FreyjaRender::fViewports);
 		freyja_print("Bottom view");  
 		SetSelectedView(PLANE_BOTTOM);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_RIGHT:
-		mRender->clearFlag(FreyjaRender::fViewports);
+		mRender->ClearFlag(FreyjaRender::fViewports);
 		freyja_print("Right view");
 		SetSelectedView(PLANE_RIGHT);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_XY:
-		mRender->clearFlag(FreyjaRender::fViewports);
-		freyja_print("Plane XY");
-		SetSelectedView(PLANE_XY);
+		mRender->ClearFlag(FreyjaRender::fViewports);
+		freyja_print("Front view");
+		SetSelectedView(PLANE_FRONT);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_XZ:
-		mRender->clearFlag(FreyjaRender::fViewports);
-		freyja_print("Plane XZ");  
-		SetSelectedView(PLANE_XZ);
+		mRender->ClearFlag(FreyjaRender::fViewports);
+		freyja_print("Top view");  
+		SetSelectedView(PLANE_TOP);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_YZ:
-		mRender->clearFlag(FreyjaRender::fViewports);
-		freyja_print("Plane ZY");
-		SetSelectedView(PLANE_ZY);
+		mRender->ClearFlag(FreyjaRender::fViewports);
+		freyja_print("Left view");
+		SetSelectedView(PLANE_LEFT);
 		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_PLANE_FREE:
-		mRender->clearFlag(FreyjaRender::fViewports);
+		mRender->ClearFlag(FreyjaRender::fViewports);
 		freyja_print("Plane Free");
 		SetSelectedView(PLANE_FREE);
-		freyja_event_gl_refresh();
-		break;
-
-	case FREYJA_MODE_AXIS_X:
-		freyja_print("X locked"); 
-		mCursor.mAxis = freyja3d::Cursor::eX;
-		freyja_event_gl_refresh();
-		break;
-	case FREYJA_MODE_AXIS_Y:
-		freyja_print("Y locked"); 
-		mCursor.mAxis = freyja3d::Cursor::eY;
-		freyja_event_gl_refresh();
-		break;	
-	case FREYJA_MODE_AXIS_Z:
-		freyja_print("Z locked"); 
-		mCursor.mAxis = freyja3d::Cursor::eZ;
 		freyja_event_gl_refresh();
 		break;
 
@@ -3439,7 +3470,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				}
 				break;
 
-			case PLANE_XZ: // Top
+			case PLANE_TOP: // XZ
 				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
 
 				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
@@ -3554,7 +3585,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 				}
 				break;
 
-			case PLANE_ZY: // Side 
+			case PLANE_LEFT: // ZY 
 				o = Vec3(0,0,freyja3d::Cursor::mid) + mCursor.mPos;
 
 				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
@@ -4022,19 +4053,19 @@ void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 		x = 0.0f;
 		break;
 
-	case PLANE_XY:
+	case PLANE_FRONT: // XY
 		x -= scroll.mVec[0];
 		y -= scroll.mVec[1];
 		z = 0.0f;
 		break;
 
-	case PLANE_XZ:
+	case PLANE_TOP: // XZ
 		x -= scroll.mVec[0];
 		z = y - scroll.mVec[2];
 		y = 0.0f;
 		break;
 
-	case PLANE_ZY: // side ZY! change
+	case PLANE_LEFT: // ZY
 		z = x - scroll.mVec[2];
 		y -= scroll.mVec[1];
 		x = 0.0f;
@@ -4227,7 +4258,7 @@ void FreyjaControl::addObject()
 void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 {
 	// Look for objects with depth ( was using planar projection )
-	//mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
+	//mRender->SetFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
 	switch (mObjectMode)
@@ -4284,7 +4315,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 {
 	// Look for objects with depth ( was using planar projection )
-	//mRender->setFlag(FreyjaRender::fDrawPickRay); // debugging
+	//mRender->SetFlag(FreyjaRender::fDrawPickRay); // debugging
 	CastPickRay(mouseX, mouseY);
 
 	switch (mObjectMode)
@@ -4550,19 +4581,19 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		t.mVec[2] = -vx - t.mVec[2];
 		break;
 
-	case PLANE_XY:
+	case PLANE_FRONT:
 		t.mVec[0] = vx - t.mVec[0];
 		t.mVec[1] = vy - t.mVec[1];
 		t.mVec[2] = 0;
 		break;
 
-	case PLANE_XZ:
+	case PLANE_TOP:
 		t.mVec[0] = vx - t.mVec[0];
 		t.mVec[1] = 0;
 		t.mVec[2] = vy - t.mVec[2];
 		break;
 
-	case PLANE_ZY: // side
+	case PLANE_LEFT:
 		t.mVec[0] = 0;
 		t.mVec[1] = vy - t.mVec[1];
 		t.mVec[2] = vx - t.mVec[2];
@@ -4815,19 +4846,19 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	switch (plane)
 	{
-	case PLANE_XY:
+	case PLANE_FRONT:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = -((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
 		zf = 0.0f;
 		break;
 
-	case PLANE_XZ:
+	case PLANE_TOP:
 		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = 0.0f;
 		zf = ((y < old_y-t) ? m : ((y > old_y+t) ? -m : 0));
 		break;
 
-	case PLANE_ZY: //side
+	case PLANE_LEFT:
 		xf = 0.0f;
 		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
 		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
@@ -4963,13 +4994,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 	{
 		switch (plane)
 		{
-		case PLANE_XY:
+		case PLANE_FRONT:
 			Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
 			break;
-		case PLANE_XZ:
+		case PLANE_TOP:
 			Transform(mObjectMode, fScale, 1.0, 1.0, 1.01);
 			break;
-		case PLANE_ZY: // side
+		case PLANE_LEFT:
 			Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
 			break;
 		default:
@@ -4980,13 +5011,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 	{
 		switch (plane)
 		{
-		case PLANE_XY:
+		case PLANE_FRONT:
 			Transform(mObjectMode, fScale, 1.0, 1.01, 1.0);
 			break;
-		case PLANE_XZ:
+		case PLANE_TOP:
 			Transform(mObjectMode, fScale, 1.0, 1.0, 0.99);
 			break;
-		case PLANE_ZY: // side
+		case PLANE_LEFT:
 			Transform(mObjectMode, fScale, 1.0, 1.01, 1.0);
 		default:
 			;
@@ -4997,13 +5028,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 	{
 		switch (plane)
 		{
-		case PLANE_XY:
+		case PLANE_FRONT:
 			Transform(mObjectMode, fScale, 0.99, 1.0, 1.0);
 			break;
-		case PLANE_XZ:
+		case PLANE_TOP:
 			Transform(mObjectMode, fScale, 0.99, 1.0, 1.0);
 			break;
-		case PLANE_ZY: // side
+		case PLANE_LEFT:
 			Transform(mObjectMode, fScale, 1.0, 1.0, 0.99);
 			break;
 		default:
@@ -5014,13 +5045,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 	{
 		switch (plane)
 		{
-		case PLANE_XY:
+		case PLANE_FRONT:
 			Transform(mObjectMode, fScale, 1.01, 1.0, 1.0);
 			break;
-		case PLANE_XZ:
+		case PLANE_TOP:
 			Transform(mObjectMode, fScale, 1.01, 1.0, 1.0);
 			break;
-		case PLANE_ZY: // side
+		case PLANE_LEFT:
 			Transform(mObjectMode, fScale, 1.0, 1.0, 1.01);
 		default:
 			;
@@ -5212,11 +5243,11 @@ void FreyjaControl::LoadResource()
 	{
 		if (i)
 		{
-			mRender->setFlag(FreyjaRender::RENDER_EDIT_GRID);
+			mRender->SetFlag(FreyjaRender::fGrid);
 		}
 		else
 		{
-			mRender->clearFlag(FreyjaRender::RENDER_EDIT_GRID);
+			mRender->ClearFlag(FreyjaRender::fGrid);
 		}
 	}
 
@@ -5573,59 +5604,48 @@ void FreyjaControlEventsAttach()
 // View Events
 ////////////////////////////////////////////////////////////////
 
-void mgtk_checkmenuitem_value_set(int event, bool val);
-
-/*
-void ePointJoint()
+void eLineBone(unsigned int value)
 {
-	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eSphereJoint"), 0);
-	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eAxisJoint"), 0);
-	FreyjaRender::mJointRenderType = 1;
+	if (value)
+	{
+		uint32 id = ResourceEvent::GetResourceIdBySymbol("ePolyMeshBone");
+		mgtk_toggle_value_set(id, 0);
+		FreyjaRender::mBoneRenderType = 1;
+	}
 }
 
-void eSphereJoint()
-{
-	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("ePointJoint"), 0);
-	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eAxisJoint"), 0);
-	FreyjaRender::mJointRenderType = 2;
-}
 
-void eAxisJoint()
+void ePolyMeshBone(unsigned int value)
 {
-	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("eSphereJoint"), 0);
-	mgtk_checkmenuitem_value_set(FreyjaControl::mInstance->GetResourceInt("ePointJoint"), 0);
-	FreyjaRender::mJointRenderType = 3;
-}
-*/
-
-void eLineBone()
-{
-	FreyjaRender::mBoneRenderType = 1;
-}
-
-void ePolyMeshBone()
-{
+	if (value)
+	{
+		uint32 id = ResourceEvent::GetResourceIdBySymbol("eLineBone");
+		mgtk_toggle_value_set(id, 0);
 		FreyjaRender::mBoneRenderType = 2;
+	}
 }
+
 
 void eSetNearHeight(vec_t f)
 {
-	FreyjaRender::mSingleton->setNearHeight(f);
+	FreyjaRender::mSingleton->SetNearHeight(f);
 	freyja_event_gl_refresh();
 }
 
+
 void eSetZoomLevel(vec_t f)
 {
-	FreyjaRender::mSingleton->setNearHeight(f*20.0f);
+	FreyjaRender::mSingleton->SetNearHeight(f*20.0f);
 	freyja_event_gl_refresh();
 }
+
 
 void eRenderToggleBoneZClear()
 {
 	if (FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderBonesClearedZBuffer)
-		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderBonesClearedZBuffer);
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderBonesClearedZBuffer);
 	else
-		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderBonesClearedZBuffer);
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fRenderBonesClearedZBuffer);
 
 	freyja_print("Bone rendering with cleared Z buffer [%s]",
 				(FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderBonesClearedZBuffer) ? "on" : "off");
@@ -5634,9 +5654,9 @@ void eRenderToggleBoneZClear()
 void eRenderToggleGridZClear()
 {
 	if (FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderGridClearedZBuffer)
-		FreyjaRender::mSingleton->clearFlag(FreyjaRender::fRenderGridClearedZBuffer);
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderGridClearedZBuffer);
 	else
-		FreyjaRender::mSingleton->setFlag(FreyjaRender::fRenderGridClearedZBuffer);
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fRenderGridClearedZBuffer);
 
 	freyja_print("Grid rendering with cleared Z buffer [%s]",
 				(FreyjaRender::mSingleton->GetFlags() & FreyjaRender::fRenderGridClearedZBuffer) ? "on" : "off");
@@ -5656,92 +5676,80 @@ void eImplementationRemovedUInt(unsigned int u)
 	DEBUG_MSG("Implementation removed");
 }
 
-/* Four Window prefs */
-void e4W1ViewFree()
+/* Window view types */
+void eViewPortFree(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 0;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_FREE);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewBack()
+void eViewPortBack(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 1;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_BACK);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewFront()
+void eViewPortFront(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 2;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_FRONT);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewTop()
+void eViewPortTop(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 3;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_TOP);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewBottom()
+void eViewPortBottom(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 4;
-	freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_BOTTOM);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewLeft()
+void eViewPortLeft(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 5;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_LEFT);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewRight()
+void eViewPortRight(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 6;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, PLANE_RIGHT);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewMaterial()
+void eViewPortMaterial(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 7;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, DRAW_MATERIAL);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewUV()
+void eViewPortUV(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 8;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, DRAW_UV);
 	freyja_event_gl_refresh();
 }
 
-void e4W1ViewCurve()
+void eViewPortCurve(unsigned int idx)
 {
-	FreyjaRender::mFourWindow[0] = 9;
-	//freyja_print("Implementation removed");
+	FreyjaRender::mSingleton->SetViewportWindow(idx, DRAW_CURVE);
 	freyja_event_gl_refresh();
 }
-
-
 
 
 void FreyjaViewEventsAttach()
 {
-	ResourceEventCallback::add("e4W1ViewFree", e4W1ViewFree);
-	ResourceEventCallback::add("e4W1ViewBack", e4W1ViewBack);
-	ResourceEventCallback::add("e4W1ViewFront", e4W1ViewFront);
-	ResourceEventCallback::add("e4W1ViewTop", e4W1ViewTop);
-	ResourceEventCallback::add("e4W1ViewBottom", e4W1ViewBottom);
-	ResourceEventCallback::add("e4W1ViewLeft", e4W1ViewLeft);
-	ResourceEventCallback::add("e4W1ViewRight", e4W1ViewRight);
-	ResourceEventCallback::add("e4W1ViewMaterial", e4W1ViewMaterial);
-	ResourceEventCallback::add("e4W1ViewUV", e4W1ViewUV);
-	ResourceEventCallback::add("e4W1ViewCurve", e4W1ViewCurve);
+	ResourceEventCallbackUInt::add("eViewPortFree", eViewPortFree);
+	ResourceEventCallbackUInt::add("eViewPortBack", eViewPortBack);
+	ResourceEventCallbackUInt::add("eViewPortFront", eViewPortFront);
+	ResourceEventCallbackUInt::add("eViewPortTop", eViewPortTop);
+	ResourceEventCallbackUInt::add("eViewPortBottom", eViewPortBottom);
+	ResourceEventCallbackUInt::add("eViewPortLeft", eViewPortLeft);
+	ResourceEventCallbackUInt::add("eViewPortRight", eViewPortRight);
+	ResourceEventCallbackUInt::add("eViewPortMaterial", eViewPortMaterial);
+	ResourceEventCallbackUInt::add("eViewPortUV", eViewPortUV);
+	ResourceEventCallbackUInt::add("eViewPortCurve", eViewPortCurve);
 
 	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
 	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
@@ -5751,11 +5759,8 @@ void FreyjaViewEventsAttach()
 
 	ResourceEventCallback::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
 	ResourceEventCallback::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
-	ResourceEventCallback::add("ePolyMeshBone", &ePolyMeshBone);
-	ResourceEventCallback::add("eLineBone", &eLineBone);
-	//ResourceEventCallback::add("eAxisJoint", &eAxisJoint);
-	//ResourceEventCallback::add("eSphereJoint", &eSphereJoint);
-	//ResourceEventCallback::add("ePointJoint", &ePointJoint);
+	ResourceEventCallbackUInt::add("ePolyMeshBone", &ePolyMeshBone);
+	ResourceEventCallbackUInt::add("eLineBone", &eLineBone);
 	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
 	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
 }

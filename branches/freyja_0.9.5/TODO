@@ -17,6 +17,8 @@
 
 	- Out of heirarchy skeleton rendering / backend support
 
+	- Trim out 'dead' events, esp ones registers to mgtk
+
 	- Make 4 window 'windows' controled by prefs dialog
 		- Abstract 'windows'
 
@@ -27,6 +29,8 @@
 	- Joint/Bone tool that creates and connects to last on each click
 
 	- init-dev.mlisp
+
+	- Camera rendering as viewport
 
 	- Pivot: 3d cursor, bbox center, etc
 
@@ -119,6 +123,7 @@
  ----------------------------------------------------------------------------
 
  libmgtk
+	- 'Radio object' to auto uncheck toggle event when others trigger
 	- Mlisp to replace Resource
 	- MlispEvent to replace ResourceEvent
 	- Radio buttons / menu items?

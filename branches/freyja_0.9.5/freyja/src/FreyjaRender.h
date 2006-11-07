@@ -45,20 +45,20 @@ enum rotate_flags {
 	Y_F = 2,
 	Z_F = 4
 };
+
 void getOpenGLViewport(int *viewportXYWH); // int[4]
 void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
 void FreyjaViewEventsAttach();
 
 
+namespace freyja3d {
+
 typedef enum { 
 	
-	PLANE_XY = 0, 
-	PLANE_ZY = 1, 
-	PLANE_XZ = 2,
-	PLANE_FRONT = 0, // aliasing
-	PLANE_LEFT = 1,
-	PLANE_TOP = 2,
+	PLANE_FRONT = 0, // XY
+	PLANE_LEFT  = 1, // ZY
+	PLANE_TOP   = 2, // XZ
 	PLANE_FREE,
 	PLANE_BACK, 
 	PLANE_BOTTOM, 
@@ -72,17 +72,23 @@ typedef enum {
 } freyja_plane_t;
 
 
-namespace freyja3d {
+class Viewport
+{
+public:
+	Viewport()
+	{
+	}
 
-typedef struct veiw_s {
+	~Viewport() 
+	{
+	}
 
 	long x, y, w, h;
+
 	freyja_plane_t plane;
+
 	long mode;
-
-} veiw_t;
-
-}
+};
 
 
 class FreyjaRender
@@ -90,26 +96,26 @@ class FreyjaRender
 public:
 
 	typedef enum {                 /* Rendering modes */
-		RENDER_WIREFRAME        = 1,
-		RENDER_TEXTURE          = 2,
-		RENDER_FACE             = 4,
-		RENDER_EDIT_GRID        = 8,
-		RENDER_LIGHTING         = 16,         /* Render with GL lighting */
-		RENDER_PARTICLES        = 32,
-		RENDER_BONES            = 64,
-		RENDER_MATERIAL         = 128,
-		RENDER_CAMERA           = 256,        /* Enable panning  */
-		RENDER_BBOX             = 512,        /* Rendering bounding box */
-		fDrawBoundingVolumes    = 1024, 
-		RENDER_NORMALS          = 2048, 
-		fHightlightPolygonWireframe = 4096, 
-		RENDER_BBOX_SEL         = 8192,
-		fSkeletalVertexBlending     = 16384,
-		RENDER_POINTS           = 32768,
-		fRenderBonesClearedZBuffer = 65536,
-		fViewports              = 131072,
-		fRenderGridClearedZBuffer = 262144,
-		fDrawPickRay              = 524288   /* Draw the pick ray for debug */
+		fWireframe        = 1,
+		fTexture          = 2,
+		fFace             = 4,
+		fGrid             = 8,
+		fLighting         = 16,    /* Render with GL lighting */
+		fParticles        = 32,
+		fBones            = 64,
+		fMaterial         = 128,
+		fPoints           = 256,   
+		fDrawPickRay      = 512,   /* Render the pick ray */
+		fBoundingVolumes  = 1024,  /* Render geometry bounding volumes */ 
+		fNormals          = 2048,  /* Render vectors for normals */
+		fViewports        = 4096, 
+		fBoundingVolSelection      = 8192,
+		fSkeletalVertexBlending    = 16384,
+		fRenderBonesClearedZBuffer = 32768,
+		fRenderGridClearedZBuffer  = 65536,
+		fReserved131072            = 131072,
+		fReserved262144            = 262144,
+		fReserved524288            = 524288
 	} flags_t;
 
 
@@ -154,7 +160,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void getRotation(vec3_t v);
+	void GetRotation(vec3_t v);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -178,8 +184,18 @@ public:
 	 ------------------------------------------------------*/
 
 	unsigned int GetMode() { return mRenderMode; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	unsigned int GetViewMode() { return mRenderMode; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	const vec_t &getNearHeight() { return mScaleEnv; } 
 	/*------------------------------------------------------
@@ -230,14 +246,14 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void clearFlag(flags_t flag);
+	void ClearFlag(flags_t flag);
 	/*------------------------------------------------------
 	 * Pre  : Flag is valid
 	 * Post : Clears control flag for model
 	 *
 	 ------------------------------------------------------*/
 
-	void display();
+	void Display();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Renders a frame to GL context
@@ -248,10 +264,10 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void initContext(unsigned int width, unsigned int height, bool fast_card);
+	void InitContext(uint32 width, uint32 height, bool fastCard);
 	/*------------------------------------------------------
-	 * Pre  : Width and Height are the GL context dim 
-    *        Fast_card is true if GL hw accel is present
+	 * Pre  : <width> and <height> are the GL context dimensions 
+	 *        <fastCard> is true if GL hw accel is present
 	 *
 	 * Post : Sets up GL parms for GL context
 	 *
@@ -261,7 +277,7 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void resizeContext(unsigned int width, unsigned int height);
+	void ResizeContext(unsigned int width, unsigned int height);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Resizes GL context
@@ -272,17 +288,26 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setFlag(flags_t flag);
+	void SetFlag(flags_t flag);
 	/*------------------------------------------------------
 	 * Pre  : Flag is valid
 	 * Post : Sets control flag for model
 	 *
 	 ------------------------------------------------------*/
 
-	void setNearHeight(vec_t scale) { mScaleEnv = scale; resizeContext(mWidth, mHeight); } 
+	void SetNearHeight(vec_t scale) 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+	{ 
+		mScaleEnv = scale; 
+		ResizeContext(mWidth, mHeight); 
+	} 
 
 
-	void setViewMode(int mode);
+	void SetViewMode(int mode);
 	/*------------------------------------------------------
 	 * Pre  : Mode are valid view_mode(s)
 	 * Post : Sets viewing options
@@ -293,17 +318,21 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void SetViewportWindow(long idx, freyja_plane_t win)
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+	{
+		if (idx < mViewportsCount)
+			mViewports[idx].plane = win;
+	}
+
 	void SetZoom(vec_t zoom) { mZoom = zoom; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set current zoom factor for the scene
-	 *
-	 ------------------------------------------------------*/
-
-	void toggleFlag(flags_t flag);
-	/*------------------------------------------------------
-	 * Pre  : Flag is valid
-	 * Post : Toggles control flag for model
 	 *
 	 ------------------------------------------------------*/
 
@@ -348,7 +377,6 @@ public:
 
 	static Ray mTestRay;
 
-	static int mFourWindow[4];
 
 private:    
 
@@ -361,69 +389,40 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	void renderBox(vec3_t min, vec3_t max);
+	void RenderLights();
 	/*------------------------------------------------------
-	 * Pre  : Group exists
-	 * Post : Renders bounding box in default color, etc
-	 *
-	 ------------------------------------------------------*/
-
-	void renderLights();
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
+	 * Pre  : Called from viewport interface renderer
 	 * Post : Renders light symbol and does lighting setup
 	 *
 	 ------------------------------------------------------*/
 
-	void renderMesh(RenderMesh &mesh);
+	void Render(RenderMesh &mesh);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders mesh
 	 *
 	 ------------------------------------------------------*/
 
-	void renderModel(RenderModel &model);
+	void Render(RenderModel &model);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders model
 	 *
 	 ------------------------------------------------------*/
 
-	void renderPolygon(RenderPolygon &face);
+	void Render(RenderPolygon &face);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders polygon
 	 *
 	 ------------------------------------------------------*/
 
-	void renderSkeleton(RenderSkeleton &skeleton, unsigned int currentBone,
-							  vec_t scale);
+	void Render(RenderSkeleton &skeleton, uint32 currentBone, vec_t scale);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders skeleton
 	 *
 	 ------------------------------------------------------*/
-
-	void renderCurveWindow();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void renderUVWindow();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renders texel editing quad
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-
-	///////// Refactoring below here still...
 
 	void DrawQuad(float x, float y, float w, float h);
 	/*------------------------------------------------------
@@ -449,27 +448,39 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void drawFreeWindow();
-	void drawWindow(freyja_plane_t plane);
+	void DrawCurveWindow();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Renders 3d model/particles/etc editor in viewports
+	 * Post : Renders curve editing interface in viewport
 	 *
-	 *-- History ------------------------------------------
+	 ------------------------------------------------------*/
+
+	void DrawFreeWindow();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renders oribital model editor interface in viewport
 	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void DrawMaterialEditWindow();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Renders material editing sphere
+	 * Post : Renders material editing interface in viewport
 	 *
-	 *-- History ------------------------------------------
+	 ------------------------------------------------------*/
+
+	void DrawUVWindow();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renders UV editing interface in viewport
 	 *
-	 * 2002.01.24:
-	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void DrawWindow(freyja_plane_t plane);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renders given editor interface in viewport
+	 *
 	 ------------------------------------------------------*/
 
 	void Rotate(float n, int axis);
@@ -494,35 +505,39 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	unsigned int mWidth;                       /* Width of context */
+	uint32 mViewMode;                          /* View mode */
 
-	unsigned int mHeight;                      /* Height of context */
+	uint32 mRenderMode;                        /* Rendering mode */
+
+	uint32 mWidth;                             /* Width of context */
+
+	uint32 mHeight;                            /* Height of context */
 
 	vec_t mAspectRatio;                        /* Cached context aspect ratio */
 
-	freyja3d::veiw_t mViewports[4];            /* Viewports information */
-	
-	static unsigned int mRenderMode;           /* Rendering mode */
+	uint32 mViewportsCount;                    /* How many viewports are used */
 
-	float mZoom;                               /* Used to cache zoom */
+	Viewport mViewports[4];                    /* Viewports information */
 
-	unsigned int mTextureId;                   /* Currently bound texture */
+	vec_t mZoom;                               /* Used to cache zoom */
+
+	uint32 mTextureId;                         /* Currently bound texture */
 
 	bool mInitContext;                         /* OpenGL context started? */
 
-	int mViewMode;                             /* View mode */
+	vec3_t mScroll;                            /* Used to cache scroll */
 
-	float mScroll[3];                          /* Used to cache scroll */
+	vec3_t mAngles;                            /* Used to rotate the scene */
 
-	float mAngles[3];                          /* Used to rotate the scene */
-
-	float mScaleEnv;                           /* OpenGL context use */
-	float mFar;	// zFar
-	float mNear;	// zNear
-	float mFovY;
-	float mNearHeight;
+	vec_t mScaleEnv;                           /* OpenGL context use */
+	vec_t mFar;
+	vec_t mNear;
+	vec_t mFovY;
+	vec_t mNearHeight;
 
 	bool mScrollingUV_X;
 };
+
+} /* End namespace freyja3d */
 
 #endif
