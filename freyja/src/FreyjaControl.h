@@ -796,6 +796,9 @@ private:
 		freyja_print("%f %f %f", xyz[0], xyz[1], xyz[2]);
 	}
 
+	void KeyframeTransform(object_type_t obj, 
+						   freyja_transform_action_t action,
+						   vec_t x, vec_t y, vec_t z);
 
 	void Transform(object_type_t obj, 
 				   freyja_transform_action_t action,

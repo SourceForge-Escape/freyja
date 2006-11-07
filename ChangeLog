@@ -5,6 +5,8 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II
+ - Unsmoothed/filtered keyframe animation test for 'Pos' 
+ - Fix for animation scheme not being able to adjust viewport offset
  - FIX recent files with spaces should cache and reload now
  - User controled four window render setting ( Not all controls hooked up )
  - Reverse Engineer plugin UI updated

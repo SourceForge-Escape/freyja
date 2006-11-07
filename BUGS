@@ -12,6 +12,8 @@
 
  Known bugs
 
+ - Scale tool sucks it's so broke nothing works properly
+	- Keyframe scaling edits geometery instead of keyframe
  - Face scale, scale doesn't work
  - Can't move viewport space in auto keyframe mode
  - Skeleton tree widget not cleared on Clear()
