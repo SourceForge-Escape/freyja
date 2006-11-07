@@ -24,6 +24,7 @@
 		- Add generic box selection back
 		- Trim out 'dead' events, esp ones registers to mgtk
 		- Make viewport 'windows' abstract with seperate controls
+			- Support for dynamic resizing and 2/3/4 layouts
 			- FreyjaRender -> OpenGLContext, *ViewportRenderer
 			- FreyjaControl -> Freyja3d, *ViewportControl
 			- Combine controls and view into a seperate class/pkg

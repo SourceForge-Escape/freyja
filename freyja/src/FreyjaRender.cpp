@@ -169,10 +169,6 @@ void FreyjaRender::Rotate(int flags, float n)
 
 void FreyjaRender::DrawFreeWindow()
 {
-	RenderModel model;
-	//unsigned int i;
-
-
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
 	glPushAttrib(GL_ENABLE_BIT);
@@ -198,7 +194,7 @@ void FreyjaRender::DrawFreeWindow()
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
+	glTranslatef(mScroll[0], mScroll[1]/*+8.0f*/, mScroll[2]);
 
 	if (mRenderMode & fGrid)
 	{
@@ -271,6 +267,8 @@ void FreyjaRender::DrawFreeWindow()
 	}
 
 	//glPopMatrix();
+
+	RenderModel model;
 
 	for (uint32 i = 0; i < freyjaGetRenderModelCount(); ++i)
 	{
