@@ -64,6 +64,7 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 
 FreyjaControl::FreyjaControl() :
 	mSelectedTexture(0),
+	mSelectedViewport(0),
 	mActionManager(),
 	mFlags(fNone),
 	mObjectMode(tScene),
@@ -235,7 +236,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Front XY viewport ( not using viewport class yet )
 		if ( x < halfW && y > halfH )
 		{
-			SetSelectedView(PLANE_FRONT);
+			SetSelectedView(mRender->mViewports[0].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -245,7 +246,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Top XZ viewport ( not using viewport class yet )
 		else if ( x > halfW && y < halfH )
 		{
-			SetSelectedView(PLANE_TOP);
+			SetSelectedView(mRender->mViewports[2].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -255,7 +256,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle Side ZY viewport ( not using viewport class yet )
 		else if ( x > halfW && y > halfH )
 		{
-			SetSelectedView(PLANE_LEFT);
+			SetSelectedView(mRender->mViewports[1].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -265,7 +266,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle 'Free' viewport ( not using viewport class yet )
 		else if ( x < halfW && y < halfH )
 		{
-			SetSelectedView(PLANE_FREE);
+			SetSelectedView(mRender->mViewports[3].plane); // PLANE_FREE
 
 			// Adjust actual window space mouse x, y to fit to viewport
 			// This makes the x, y fill the 'window' for the viewport
@@ -1503,7 +1504,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 			
 			// FIXME: Add bbox selection back to this build
 			mCursor.SetMode(freyja3d::Cursor::Invisible);
-			mEventMode = VERTEX_BBOX_SELECT_MODE;
+			mEventMode = modeSelectByBox;
 			mRender->SetFlag(FreyjaRender::fBoundingVolSelection);
 			freyja_print("Press right mouse to end selection");
 			freyja_event_gl_refresh();
@@ -3014,52 +3015,83 @@ bool FreyjaControl::event(int command)
 		SetControlScheme(eScheme_Material);
 		break;
 
-	case FREYJA_MODE_PLANE_BACK:
-		mRender->ClearFlag(FreyjaRender::fViewports);
+	case eViewportBack:
 		freyja_print("Back view");
 		SetSelectedView(PLANE_BACK);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_BACK;
 		freyja_event_gl_refresh();
 		break;
 
-	case FREYJA_MODE_PLANE_BOTTOM:
-		mRender->ClearFlag(FreyjaRender::fViewports);
+	case eViewportBottom:
 		freyja_print("Bottom view");  
 		SetSelectedView(PLANE_BOTTOM);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_BOTTOM;
 		freyja_event_gl_refresh();
 		break;
 
-	case FREYJA_MODE_PLANE_RIGHT:
-		mRender->ClearFlag(FreyjaRender::fViewports);
+	case eViewportRight:
 		freyja_print("Right view");
 		SetSelectedView(PLANE_RIGHT);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_RIGHT;
 		freyja_event_gl_refresh();
 		break;
 
-	case FREYJA_MODE_PLANE_XY:
-		mRender->ClearFlag(FreyjaRender::fViewports);
+	case eViewportFront:
 		freyja_print("Front view");
 		SetSelectedView(PLANE_FRONT);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_FRONT;
 		freyja_event_gl_refresh();
 		break;
 
-	case FREYJA_MODE_PLANE_XZ:
-		mRender->ClearFlag(FreyjaRender::fViewports);
+	case eViewportTop:
 		freyja_print("Top view");  
 		SetSelectedView(PLANE_TOP);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_TOP;
 		freyja_event_gl_refresh();
 		break;
 
-	case FREYJA_MODE_PLANE_YZ:
-		mRender->ClearFlag(FreyjaRender::fViewports);
+	case eViewportLeft:
 		freyja_print("Left view");
 		SetSelectedView(PLANE_LEFT);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_LEFT;
 		freyja_event_gl_refresh();
 		break;
 
-	case FREYJA_MODE_PLANE_FREE:
-		mRender->ClearFlag(FreyjaRender::fViewports);
-		freyja_print("Plane Free");
+	case eViewportOrbit:
+		freyja_print("Orbital view");
 		SetSelectedView(PLANE_FREE);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = PLANE_FREE;
+		freyja_event_gl_refresh();
+		break;
+
+	case eViewportUV:
+		freyja_print("UV Editor view");
+		SetSelectedView(DRAW_UV);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = DRAW_UV;
+		freyja_event_gl_refresh();
+		break;
+
+	case eViewportCurve:
+		freyja_print("Curve editor view");
+		SetSelectedView(DRAW_CURVE);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = DRAW_CURVE;
+		freyja_event_gl_refresh();
+		break;
+
+	case eViewportMaterial:
+		freyja_print("Material preview");
+		SetSelectedView(DRAW_MATERIAL);
+		if (mRender->GetFlags() & FreyjaRender::fViewports)
+			mRender->mViewports[mSelectedViewport].plane = DRAW_MATERIAL;
 		freyja_event_gl_refresh();
 		break;
 
@@ -3758,15 +3790,19 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 				mXYZMouseState = 0;
 			}
 			break;
-		case VERTEX_BBOX_SELECT_MODE:
+
+		case modeSelectByBox:
 			if (mXYZMouseState == 0)
 			{
-				//BBoxSelect(xx, yy);
+				freyja_print("! FIXME: Selection by box was removed after 0.9.3!");
 				mXYZMouseState = 1;
 			}
 			else
+			{
 				mXYZMouseState = 0;
+			}
 			break;
+
 		case BONE_CONNECT_MODE:
 			MARK_MSGF("FIXME");
 			//master_tag = GetSelectedBone();
@@ -5168,8 +5204,8 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 			scaleObject(x, y, plane);
 			break;
 
-		case VERTEX_BBOX_SELECT_MODE:
-			//BBoxMove(xx, yy);
+		case modeSelectByBox:
+			freyja_print("! FIXME: Selection by box was removed after 0.9.3!");
 			break;
 			
 
@@ -5582,6 +5618,11 @@ void eNotImplementedVec(vec_t v)
 	freyja_print("Not Implementated");	
 }
 
+void eSetSelectedViewport(unsigned int value)
+{
+	FreyjaControl::mInstance->SetSelectedViewport(value);
+}
+
 
 void FreyjaControlEventsAttach()
 {
@@ -5595,6 +5636,9 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
 	ResourceEventCallback::add("eCurrentFaceFlagAlpha", &eCurrentFaceFlagAlpha);
+
+	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
+
 	ResourceEventCallbackVec::add("eUVPickRadius", &eNotImplementedVec);
 	ResourceEventCallbackVec::add("eVertexPickRadius", &eNotImplementedVec); 
 }

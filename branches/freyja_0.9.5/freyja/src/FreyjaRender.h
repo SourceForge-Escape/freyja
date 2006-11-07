@@ -296,16 +296,12 @@ public:
 	 ------------------------------------------------------*/
 
 	void SetNearHeight(vec_t scale) 
+	{ mScaleEnv = scale; ResizeContext(mWidth, mHeight); } 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
-	{ 
-		mScaleEnv = scale; 
-		ResizeContext(mWidth, mHeight); 
-	} 
-
 
 	void SetViewMode(int mode);
 	/*------------------------------------------------------
@@ -319,15 +315,12 @@ public:
 	 ------------------------------------------------------*/
 
 	void SetViewportWindow(long idx, freyja_plane_t win)
+	{ if (idx < mViewportsCount) mViewports[idx].plane = win; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
-	{
-		if (idx < mViewportsCount)
-			mViewports[idx].plane = win;
-	}
 
 	void SetZoom(vec_t zoom) { mZoom = zoom; }
 	/*------------------------------------------------------
@@ -377,6 +370,10 @@ public:
 
 	static Ray mTestRay;
 
+	uint32 mViewportsCount;                    /* How many viewports are used */
+
+	Viewport mViewports[4];                    /* Viewports information */
+
 
 private:    
 
@@ -407,13 +404,6 @@ private:
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders model
-	 *
-	 ------------------------------------------------------*/
-
-	void Render(RenderPolygon &face);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders polygon
 	 *
 	 ------------------------------------------------------*/
 
@@ -514,10 +504,6 @@ private:
 	uint32 mHeight;                            /* Height of context */
 
 	vec_t mAspectRatio;                        /* Cached context aspect ratio */
-
-	uint32 mViewportsCount;                    /* How many viewports are used */
-
-	Viewport mViewports[4];                    /* Viewports information */
 
 	vec_t mZoom;                               /* Used to cache zoom */
 

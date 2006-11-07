@@ -921,13 +921,17 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
-	r.RegisterInt("eViewportBack", FREYJA_MODE_PLANE_BACK);
-	r.RegisterInt("eViewportRight", FREYJA_MODE_PLANE_RIGHT);
-	r.RegisterInt("eViewportBottom", FREYJA_MODE_PLANE_BOTTOM);
-	r.RegisterInt("eViewportFront", FREYJA_MODE_PLANE_XY);
-	r.RegisterInt("eViewportLeft", FREYJA_MODE_PLANE_YZ);
-	r.RegisterInt("eViewportTop", FREYJA_MODE_PLANE_XZ);
-	r.RegisterInt("eViewportOrbit", FREYJA_MODE_PLANE_FREE);
+	// Viewport renderers ( default package )
+	r.RegisterInt("eViewportBack", eViewportBack);
+	r.RegisterInt("eViewportRight", eViewportRight);
+	r.RegisterInt("eViewportBottom", eViewportBottom);
+	r.RegisterInt("eViewportFront", eViewportFront);
+	r.RegisterInt("eViewportLeft", eViewportLeft);
+	r.RegisterInt("eViewportTop", eViewportTop);
+	r.RegisterInt("eViewportOrbit", eViewportOrbit);
+	r.RegisterInt("eViewportMaterial", eViewportMaterial);
+	r.RegisterInt("eViewportUV", eViewportUV);
+	r.RegisterInt("eViewportCurve", eViewportCurve);
 
 	//r.RegisterSymbol();
 
