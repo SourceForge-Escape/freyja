@@ -111,6 +111,11 @@ FreyjaRender::FreyjaRender() :
 		mColorAxisZ[i] = BLUE[i] * 0.75f;
 	}
 
+	mViewports[0].plane = PLANE_FRONT;
+	mViewports[1].plane = PLANE_LEFT;
+	mViewports[2].plane = PLANE_TOP;
+	mViewports[3].plane = PLANE_FREE;
+
 	mSingleton = this;
 }
 
@@ -508,28 +513,28 @@ void FreyjaRender::Display()
 			mViewports[0].y = 0;
 			mViewports[0].w = width;
 			mViewports[0].h = height/2;
-			mViewports[0].plane = PLANE_FRONT;
+			//mViewports[0].plane = PLANE_FRONT;
 
 			// 1 ( Lower right here )
 			mViewports[1].x = width;
 			mViewports[1].y = 0;
 			mViewports[1].w = width;
 			mViewports[1].h = height/2;
-			mViewports[1].plane = PLANE_LEFT;
+			//mViewports[1].plane = PLANE_LEFT;
 
 			// 2 ( Upper right here )
 			mViewports[2].x = width;
 			mViewports[2].y = height/2;
 			mViewports[2].w = width;
 			mViewports[2].h = height/2;
-			mViewports[2].plane = PLANE_TOP;
+			//mViewports[2].plane = PLANE_TOP;
 
 			// 3 ( Upper left here )
 			mViewports[3].x = 0;
 			mViewports[3].y = height/2;
 			mViewports[3].w = width;
 			mViewports[3].h = height/2;
-			mViewports[3].plane = PLANE_FREE;
+			//mViewports[3].plane = PLANE_FREE;
 
 			for (long i = 0; i < mViewportsCount; ++i)
 			{
@@ -708,7 +713,6 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	static Vector3d u, v;
 	static RenderPolygon face;
 	Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
-
 
 	if (!m)
 		return;
@@ -1497,8 +1501,7 @@ void FreyjaRender::DrawUVWindow()
 
 void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 {
-	static int x, y, offset_x, offset_y;
-
+	int x, y;
 
 	glPushMatrix();
 
@@ -1568,8 +1571,8 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 
    if (mRenderMode & fGrid)
    {
-		offset_x = (x % size) - w;
-		offset_y = (y % size) - h;
+		int offset_x = (x % size) - w;
+		int offset_y = (y % size) - h;
 
 		glLineWidth(1.0);
 		glColor3fv(mColorGridLine);

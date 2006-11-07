@@ -170,6 +170,16 @@ typedef enum {
 	eTextureSlotLoad,
 
 	eViewports,
+	eViewportBack,
+	eViewportRight,
+	eViewportBottom,
+	eViewportFront,
+	eViewportLeft,
+	eViewportTop,
+	eViewportOrbit,
+	eViewportMaterial,
+	eViewportUV,
+	eViewportCurve,
 
 	eOpenTexture,
 	eOpenTextureB,
@@ -231,6 +241,9 @@ typedef enum {
 	eSphereJoint,
 	ePointJoint,
 
+	/* Major control modes */
+	eModeAutoKeyframe,
+
 	/* Text events */
 	eSetCurrentBoneName,
 	eSetTextureNameA,
@@ -241,15 +254,7 @@ typedef enum {
 	FREYJA_MODE_MODEL_EDIT,
 	FREYJA_MODE_MODEL_VIEW,
 	FREYJA_MODE_TEXTURE_EDIT,
-	eModeAutoKeyframe,
 	FREYJA_MODE_MODEL_VIEW2,
-	FREYJA_MODE_PLANE_BACK,
-	FREYJA_MODE_PLANE_RIGHT,
-	FREYJA_MODE_PLANE_BOTTOM,
-	FREYJA_MODE_PLANE_XY,
-	FREYJA_MODE_PLANE_XZ,
-	FREYJA_MODE_PLANE_YZ,
-	FREYJA_MODE_PLANE_FREE,
 
 	FREYJA_MODE_RENDER_TEXTURE,
 	FREYJA_MODE_RENDER_FACE,

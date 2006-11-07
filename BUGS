@@ -1,19 +1,20 @@
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : BUGS  ( Last Audit: 2005.06.18 )
-  Author   : Terry 'Mongoose' Hendrix II
-  Project  : freyja
+ BUGS
 
-   Sending Bug reports:
-   Send your system.info file and any other specs that would be helpful
-   including: stack trace, libc version, graphics driver,  windowing 
-   system version, and distrobution/OS.
+ Freyja 0.9.5 ( Development branch )
+ =====================================================================
 
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+  Sending Bug reports:
+
+   Send your Freyja-dev.log with the bug report, since it contains 
+   a lot of useful information including your GPU info and event log.
+ =====================================================================
+
+ Known bugs
 
  - Face scale, scale doesn't work
-
- - Skeleton not cleared in skeleton tree during clear
+ - Can't move viewport space in auto keyframe mode
+ - Skeleton tree widget not cleared on Clear()
  - Spaces in recent files fails cause list to drop files
  - Rotation cursor doesn't work using rings yet
  - Scale cursor doesn't work with stretch yet

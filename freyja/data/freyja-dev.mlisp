@@ -401,16 +401,20 @@
 					(hbox 1 0 0 1 0 (hsep))
 
 					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-					(hbox 1 0 0 1 0
-						(label "Select view: "  0.0 0.5)
+					(hbox 0 0 0 1 0
+						(label "Select viewport: "  0.0 0.5)
+						(spinbutton 0 0 3 eSetSelectedViewport)
 						(optionmenu	eEvent	eNone
-							(menu_item	"Orbit"	eEvent	eViewportOrbit)
+							(menu_item	"Orbit      "	eEvent	eViewportOrbit)
 							(menu_item	"Front"	eEvent	eViewportFront)
 							(menu_item	"Back"	eEvent	eViewportBack)
 				  			(menu_item	"Right"	eEvent	eViewportRight)
 				  			(menu_item	"Left"	eEvent	eViewportLeft)
 				  			(menu_item	"Top"	eEvent	eViewportTop)
 				  			(menu_item	"Bottom" eEvent eViewportBottom)
+				  			(menu_item	"Material" eEvent eViewportMaterial)
+				  			(menu_item	"UV"	eEvent eViewportUV)
+				  			(menu_item	"Curve" eEvent eViewportCurve)
 						) ; optionmenu
 					) ; hbox
 
@@ -799,6 +803,9 @@
 
 ")
 
+		(hbox 1 0 0 1 0 
+			(label2 "The last viewport you click in becomes your main window")) 
+
 	) ; vbox
 ) ; dialog
 
@@ -814,7 +821,7 @@
 
  	· mongooseichiban@gmail.com ·
 
- <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>")) 
+ <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>"))
 	) ; vbox
 ) ; dialog
 

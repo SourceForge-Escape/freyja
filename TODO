@@ -15,25 +15,25 @@
 			- Delta radius sweeps from center to cursor pos following an arc
 		- Fix scale cursor
 
-	- Out of heirarchy skeleton rendering / backend support
+	- Skeletal animation
+		- Fix bone world coord
+		- Out of heirarchy skeleton rendering / backend support
+		- Joint/Bone tool that creates and connects to last on each click
 
-	- Trim out 'dead' events, esp ones registers to mgtk
+	- Interface
+		- Add generic box selection back
+		- Trim out 'dead' events, esp ones registers to mgtk
+		- Make viewport 'windows' abstract with seperate controls
+			- FreyjaRender -> OpenGLContext, *ViewportRenderer
+			- FreyjaControl -> Freyja3d, *ViewportControl
+			- Combine controls and view into a seperate class/pkg
+			  This will make it easier to scale and fix UI issues
+		- Sphere brush for weight painting, etc
+		- init-dev.mlisp
+		- Camera render mode for viewport
+		- Pivot: 3d cursor, bbox center, etc
 
-	- Make 4 window 'windows' controled by prefs dialog
-		- Abstract 'windows'
-
-	- Fix bone world coord
-
-	- Sphere brush for weight painting, etc
-
-	- Joint/Bone tool that creates and connects to last on each click
-
-	- init-dev.mlisp
-
-	- Camera rendering as viewport
-
-	- Pivot: 3d cursor, bbox center, etc
-
+ ----------------------------------------------------------------------------
 
  Misc
 	- Allow user to set radius of vertex and texcoord picks

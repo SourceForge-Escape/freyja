@@ -100,7 +100,6 @@ class FreyjaControl
 		BONE_ADD_MODE,
 		TEXEL_COMBINE,
 		VERTEX_COMBINE,
-		VERTEX_BBOX_SELECT_MODE,
 		POLYGON_SELECT_MODE,
 		
 		/* Generic transforms */
@@ -108,6 +107,7 @@ class FreyjaControl
 		modeRotate,
 		modeScale,
 		modeSelect,
+		modeSelectByBox,
 		modeUnselect,
 		modeKeyframe
 		
@@ -278,7 +278,15 @@ class FreyjaControl
 
 	freyja_plane_t GetSelectedView() { return mSelectedView; }
 	void SetSelectedView(freyja_plane_t p) { mSelectedView = p; }
-	freyja_plane_t  mSelectedView;
+	freyja_plane_t mSelectedView;
+	/*------------------------------------------------------
+	 * Pre  : - TEMP USE ONLY -
+	 * Post : Returns currently selected view
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedViewport() { return mSelectedViewport; }
+	void SetSelectedViewport(uint32 i) { if (i < 4) mSelectedViewport = i; }
+	uint32 mSelectedViewport;
 	/*------------------------------------------------------
 	 * Pre  : - TEMP USE ONLY -
 	 * Post : Returns currently selected view

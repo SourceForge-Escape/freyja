@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II
+ - User controled four window render setting ( Not all controls hooked up )
  - Reverse Engineer plugin UI updated
  - 'Radio toggle' fix for various modifier and major modes
  - Removal of a ton of obsolete code
