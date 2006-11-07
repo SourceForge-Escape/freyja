@@ -88,7 +88,7 @@ double gMatrix[16];
 FreyjaRender::FreyjaRender() :
 	mViewMode(VIEWMODE_MODEL_VIEW),
 	mRenderMode(fBoundingVolSelection | 
-				fRenderBonesClearedZBuffer | 
+				fBonesNoZbuffer | 
 				fBoundingVolumes),
 	mWidth(640),
 	mHeight(480),
@@ -1036,7 +1036,7 @@ void FreyjaRender::Render(RenderModel &model)
 
 		/* Yay, let thou bones show through thine meshes 
 		 * and it was good for editing */
-		if (mRenderMode & fRenderBonesClearedZBuffer)
+		if (mRenderMode & fBonesNoZbuffer)
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
 		}

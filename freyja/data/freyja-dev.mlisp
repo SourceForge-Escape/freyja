@@ -117,9 +117,8 @@
 			(toggle_menu_item	"_Viewports"	eViewports	0)
 			(menu_seperator)
 			(toggle_menu_item	"_Grid"			eRenderGrid	1)
-			;;(menu_item "_Grid ZBuffer"	eRenderToggleGridZClear	"gtk-blanked")
-			;(menu_item "_Camera"		eEvent	eCamera)
-			;(menu_item "P_atch"			eEvent	eRenderPatch)
+			;(toggle_menu_item	"_Grid ZBuffer"	eRenderToggleGridZClear	0)
+
 			(submenu "_Mesh"
 				(toggle_menu_item	"_Points"		eRenderVertex	0)
 				(toggle_menu_item	"_Wireframe"	eRenderWireframe	0)
@@ -949,6 +948,8 @@
 (color	eColorLightSpecular		0.8 0.8 0.8 1.0)
 
 ; Custom 'toggles'
+(func_set_toggle	eSelect	1)
+(func_set_toggle	eRenderToggleBoneZClear	1)
 (func_set_toggle	eRenderGrid	1)
 (func_set_toggle	eRenderFace	1)
 (func_set_toggle	eRenderTexture	1)
