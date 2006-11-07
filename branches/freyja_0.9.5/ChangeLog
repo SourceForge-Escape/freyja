@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II
+ - FIX recent files with spaces should cache and reload now
  - User controled four window render setting ( Not all controls hooked up )
  - Reverse Engineer plugin UI updated
  - 'Radio toggle' fix for various modifier and major modes

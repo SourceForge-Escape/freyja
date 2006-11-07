@@ -219,7 +219,9 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 
 	// Trap the junk 0,0 states that are often tossed around on
 	// just mouse button updates
-	if ( GetControlScheme() != eScheme_Model || x == 0 && y == 0 )
+	if ( GetControlScheme() != eScheme_Model &&
+		 GetControlScheme() != eScheme_Animation || 
+		 x == 0 && y == 0 )
 	{
 	}
 	else if (mRender->GetMode() & FreyjaRender::fViewports)
@@ -233,7 +235,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		vec_t halfW = w * 0.5f;
 		vec_t halfH = h * 0.5f;
 		
-		// Handle Front XY viewport ( not using viewport class yet )
+		// Handle viewport 0
 		if ( x < halfW && y > halfH )
 		{
 			SetSelectedView(mRender->mViewports[0].plane);
@@ -243,7 +245,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 			x = x*2.0f;
 			y = y*2.0f - h;
 		}
-		// Handle Top XZ viewport ( not using viewport class yet )
+		// Handle viewport 2
 		else if ( x > halfW && y < halfH )
 		{
 			SetSelectedView(mRender->mViewports[2].plane);
@@ -253,7 +255,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 			x = x*2.0f - w;
 			y = y*2.0f;
 		}
-		// Handle Side ZY viewport ( not using viewport class yet )
+		// Handle viewport 1
 		else if ( x > halfW && y > halfH )
 		{
 			SetSelectedView(mRender->mViewports[1].plane);
@@ -263,7 +265,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 			x = x*2.0f - w;
 			y = y*2.0f - h;
 		}
-		// Handle 'Free' viewport ( not using viewport class yet )
+		// Handle viewport 3
 		else if ( x < halfW && y < halfH )
 		{
 			SetSelectedView(mRender->mViewports[3].plane); // PLANE_FREE
@@ -5208,7 +5210,6 @@ void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
 			freyja_print("! FIXME: Selection by box was removed after 0.9.3!");
 			break;
 			
-
 		default:
 			break;
 		}
@@ -5228,7 +5229,8 @@ bool FreyjaControl::LoadRecentFilesResource(const char *filename)
 	{
 		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
 		{
-			const char *sym = r.ParseSymbol();
+			const char *sym = r.GetLine();//r.ParseSymbol();
+			MSTL_MSG("**** %s", sym);
 			AddRecentFilename(sym);
 		}
 		

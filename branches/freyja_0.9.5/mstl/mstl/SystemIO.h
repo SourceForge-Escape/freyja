@@ -749,6 +749,34 @@ class SystemIO
 		}
 
 
+		const char *GetLine()
+		{
+			long i = 0;
+			char c;
+
+			AllocateBuffer();
+
+			while (i < mBufferSize && fscanf(mFileHandle, "%c", &c) != EOF)
+			{
+				switch (c)
+				{
+				case '\r':
+					break;
+
+				case '\n':
+					i = mBufferSize;
+					break;
+
+				default:
+					mBuffer[i++] = c;
+					mBuffer[i] = 0;
+				}
+			}
+
+			return mBuffer;
+		}
+
+
 		// Delimited by until string eg "," stops parsing at the first ','
 		const char *ParseSymbol(const char *until)
 		{
