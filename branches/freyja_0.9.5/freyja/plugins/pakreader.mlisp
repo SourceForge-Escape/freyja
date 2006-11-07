@@ -8,7 +8,6 @@
 ; Comment: Interface for pak vfs plugin
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 (dialog "Freyja :: Pak Reader" eDialogPakReader 0
 	(vbox 0 0 1 1 0
 
@@ -26,7 +25,4 @@
 				(tree	ePakReaderFiles	eSetCurrentPakFilename)))
 	)
 )
-
-
-
 
