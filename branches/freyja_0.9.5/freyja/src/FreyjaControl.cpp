@@ -1480,6 +1480,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 		if (value)
 		{
 			mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+			mRender->SetFlag(FreyjaRender::fKeyFrameAnimation);
 			freyja_event_gl_refresh();
 			freyja_print("Animation Scheme");
 			SetControlScheme(eScheme_Animation);
@@ -1488,6 +1489,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 		{
 			// If you disable auto keyframe you must set a new major mode
 			mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+			mRender->ClearFlag(FreyjaRender::fKeyFrameAnimation);
 			freyja_event_gl_refresh();
 			freyja_print("Model Editor Scheme");
 			SetControlScheme(eScheme_Model);
@@ -3295,6 +3297,7 @@ bool FreyjaControl::motionEvent(int x, int y)
 		break;
 
 
+	case eScheme_Animation:
 	case eScheme_Model:
 		MotionEdit(x, y, GetSelectedView());
 		break;
@@ -3708,6 +3711,52 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 				// Mongoose - Does transform, undo, etc for ya, bub
 				Transform(GetObjectMode(), GetEventAction(),
 						  v.mVec[0], v.mVec[1], v.mVec[2]);
+
+				// Reset transforms in the cursor
+				mCursor.mRotate = Vec3(0,0,0);
+				mCursor.mScale = Vec3(1,1,1);
+				//mCursor.mPos = Vec3(0,0,0);
+			}
+			break;
+
+
+		default:
+			;
+		}
+	}
+	else if (!btn && !state && mToken && 
+			 GetControlScheme() == eScheme_Animation)
+	{
+		switch (GetObjectMode())
+		{
+		case tModel:
+			{
+				Vec3 v = GetCursorData(GetEventAction());
+
+				freyja_print("! Model[%i] %s %f %f %f",
+							 0, 
+							 ActionToString(GetEventAction()).c_str(),
+							 GetEventAction(),
+							 v.mVec[0], v.mVec[1], v.mVec[2]);
+
+				// Mongoose - Does transform, undo, etc for ya, bub
+				KeyframeTransform(GetObjectMode(), GetEventAction(),
+								  v.mVec[0], v.mVec[1], v.mVec[2]);
+
+				// Reset transforms in the cursor
+				mCursor.mRotate = Vec3(0,0,0);
+				mCursor.mScale = Vec3(1,1,1);
+				//mCursor.mPos = Vec3(0,0,0);
+			}			
+			break;
+
+		case tMesh:
+			{
+				Vec3 v = GetCursorData(GetEventAction());
+
+				// Mongoose - Does transform, undo, etc for ya, bub
+				KeyframeTransform(GetObjectMode(), GetEventAction(),
+								  v.mVec[0], v.mVec[1], v.mVec[2]);
 
 				// Reset transforms in the cursor
 				mCursor.mRotate = Vec3(0,0,0);
@@ -4477,6 +4526,94 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 }
 
 
+void FreyjaControl::KeyframeTransform(object_type_t obj, 
+									  freyja_transform_action_t action,
+									  vec_t x, vec_t y, vec_t z)
+{
+	// Pretty meger atm
+	Vec3 v(x, y, z);
+	Vec3 u;
+
+	switch (action)
+	{
+	case fRotateAboutPoint:
+	case fRotate:
+		v *= HEL_PI_OVER_180;
+		u = -v;
+		break;
+
+	case fScaleAboutPoint:
+	case fScale:
+		u.mVec[0] = 1.0f / v.mVec[0];
+		u.mVec[1] = 1.0f / v.mVec[1];
+		u.mVec[2] = 1.0f / v.mVec[2];
+		break;
+		
+	case fTranslate:
+		u = -v;
+		break;
+
+	default:
+		MARK_MSGF("Undo for %s action=%i not implemented", ObjectTypeToString(obj).c_str(), action);
+	}
+
+	
+	if (mToken)
+	{
+		int32 id = -1;
+
+		
+		switch (obj)
+		{
+		case tModel:
+			id = 0;
+			break;
+
+		case tMesh:
+			id = GetSelectedMesh();
+			break;
+
+		default:
+			id = -1;
+		}
+
+		freyja_print("! %s[%i] %s <%f, %f, %f>",
+					 ObjectTypeToString(obj).c_str(),
+					 id, 
+					 ActionToString(GetEventAction()).c_str(),
+					 GetEventAction(),
+					 v.mVec[0], v.mVec[1], v.mVec[2]);
+	}
+
+	switch (obj)
+	{
+	case tMesh:
+		if (mToken)
+		{
+			//Action *a = new ActionMeshKeyframe(GetSelectedMesh(), action, u);
+			//ActionModelModified(a);
+
+			if (mSelectedKeyFrame < FreyjaRender::mSingleton->mCurveTest.size())
+			{
+				switch (action)
+				{
+				case fTranslate:
+					FreyjaRender::mSingleton->mCurveTest[mSelectedKeyFrame] = v;
+					break;
+
+				default:
+					freyja_print("! This keyframe transform type is unsupported in this test");
+				}
+			}
+		}
+		break;
+
+	default:
+		MARK_MSGF("Not Implemented"); 
+	}
+}
+
+
 void FreyjaControl::Transform(object_type_t obj, 
 							  freyja_transform_action_t action,
 							  vec_t x, vec_t y, vec_t z) 
@@ -5230,7 +5367,6 @@ bool FreyjaControl::LoadRecentFilesResource(const char *filename)
 		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
 		{
 			const char *sym = r.GetLine();//r.ParseSymbol();
-			MSTL_MSG("**** %s", sym);
 			AddRecentFilename(sym);
 		}
 		

@@ -727,6 +727,21 @@ void FreyjaRender::Render(RenderMesh &mesh)
 
 	// 'World effects' 
 
+	// Keyframe animation curve input test...  
+	if (mRenderMode & fKeyFrameAnimation)
+	{
+		uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+
+		if (k < mCurveTest.size())
+		{
+			vec_t x = 0.0f, y = 0.0f, z = 0.0f;
+			x = mCurveTest[k].mVec[0];
+			y = mCurveTest[k].mVec[1];
+			z = mCurveTest[k].mVec[2];
+			glTranslatef(x, y, z);
+		}
+	}
+
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
 	{
 		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
@@ -1110,26 +1125,25 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	glPopMatrix();
 }
 
-Vector<Vec3> gCurveTest;
-
 
 void FreyjaRender::DrawCurveWindow()
 {
+	const vec_t scale = 6.5f;
 	unsigned int width = GetWindowWidth();
 	unsigned int height = GetWindowHeight();
-	float x = 0.0f, y = 0.0f;
+	uint32 curKey = FreyjaControl::mInstance->GetSelectedKeyFrame();
+	float x = 0.0f, y = 80.0f;
 
-
-	if (gCurveTest.size() == 0)
+	if (mCurveTest.size() == 0)
 	{
 		vec_t xx = 0, yy = 0;
-		for (int i = 0; i < 64; ++i)
+		for (int i = 0; i < 100; ++i)
 		{
-			xx = helRandomNum(xx+1.0f, xx+11.0f);
-			yy = helRandomNum(0.0f, height/2);
+			xx = 0;
+			yy = helRandomNum(0.0f, 8.0f);
 
 			Vec3 v(xx, yy, 0.0f);
-			gCurveTest.pushBack(v);
+			mCurveTest.pushBack(v);
 		}
 	}
 
@@ -1143,28 +1157,38 @@ void FreyjaRender::DrawCurveWindow()
 	glPointSize(mDefaultPointSize);
 
 	// Fake 'data' to test the rendering look and feel
-	glColor3fv(GREEN);
-	glBegin(GL_POINTS);
-	unsigned int idx;
-	foreach (gCurveTest, idx)
+	if (curKey < mCurveTest.size())
 	{
-		Vec3 v = gCurveTest[idx] + Vec3(x, y, 0.0f);
+		Vec3 v(x + curKey*scale, y + mCurveTest[curKey].mVec[1], 0.0f);
+		glColor3fv(RED);
+		glBegin(GL_POINTS);
+		glVertex2fv(v.mVec);
+		glEnd();
+	}
+	glColor3fv(YELLOW);
+	glBegin(GL_POINTS);
+	unsigned int idx = 0;
+	foreach (mCurveTest, idx)
+	{
+		Vec3 v(x + idx*scale, y + mCurveTest[idx].mVec[1], 0.0f);
 		glVertex2fv(v.mVec);
 	}
 	glEnd();
 
-	glColor3fv(YELLOW);
+	glColor3fv(GREEN);
 	glBegin(GL_LINES);
 	glVertex2f(x, y);
-	foreach (gCurveTest, idx)
+	idx = 0;
+	foreach (mCurveTest, idx)
 	{
-		Vec3 v = gCurveTest[idx] + Vec3(x, y, 0.0f);
+		Vec3 v(x + idx*scale, y + mCurveTest[idx].mVec[1], 0.0f);
 		glVertex2fv(v.mVec);
 		glVertex2fv(v.mVec);
 	}
 	glVertex2f(width, y);
 	glEnd();
 
+	y = 0;
 
 	if (mRenderMode & fGrid)
 	{
