@@ -43,6 +43,8 @@
 #include "Cursor.h"
 
 
+namespace freyja3d {
+
 class FreyjaControl
 {
  public:
@@ -511,14 +513,14 @@ class FreyjaControl
 	void Display()
 	{
 		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
-		mRender->display();
+		mRender->Display();
 	}
 
 
 	void HandleResize(uint32 width, uint32 height)
 	{
 		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
-		mRender->resizeContext(width, height);
+		mRender->ResizeContext(width, height);
 	}
 
 
@@ -1018,6 +1020,9 @@ private:
 	bool mToken;                            /* This puts the breaks on over
 											 * doing pushing actions */
 };
+
+
+} /* End namespace freyja3d */
 
 void FreyjaControlEventsAttach();
 

@@ -5,6 +5,10 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II
+ - Reverse Engineer plugin UI updated
+ - 'Radio toggle' fix for various modifier and major modes
+ - Removal of a ton of obsolete code
+ - Style clean up in FreyjaRender to guidelines, so it's more readable
  - Viewport code clean up and new dynamic control
  - FIX utpackage vfs loads correct human readable labels now
  - Animation/key toggles from mesh / skeleton editing to animation modes now

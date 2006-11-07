@@ -39,7 +39,7 @@
 
 arg_list_t *freyja_rc_color(arg_list_t *args);
 
-
+using namespace freyja3d;
 
 void eRecentFiles(unsigned int value)
 {
@@ -703,7 +703,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eModeModel", FREYJA_MODE_MODEL_EDIT);
 	r.RegisterInt("eModeMaterial", FREYJA_MODE_MATERIAL_EDIT);
 	r.RegisterInt("eModeUV", FREYJA_MODE_TEXTURE_EDIT);
-	r.RegisterInt("eModeAnimation", FREYJA_MODE_ANIMATION);
+	r.RegisterInt("eModeAutoKeyframe", eModeAutoKeyframe);
 
 	// Edit actions
 	r.RegisterInt("eUndo", eUndo);
@@ -711,6 +711,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eCopy", eCopy);
 	r.RegisterInt("ePaste", ePaste);
 	r.RegisterInt("eDelete", eDelete);
+	r.RegisterInt("eSelectionByBox", eSelectionByBox);
 	r.RegisterInt("eSelect", eSelect);
 	r.RegisterInt("eUnselect", eUnselect);
 	r.RegisterInt("eSelectAll", eSelectAll);
@@ -862,7 +863,6 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eZoomIn", eZoomIn);
 	r.RegisterInt("eZoomOut", eZoomOut);
-	r.RegisterInt("eSelectLight", eSelectLight);
 
 	r.RegisterInt("ePolyMapTexturePolygon", ePolyMapTexturePolygon);
 
@@ -898,18 +898,16 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eBoneSelect", CMD_BONE_SELECT);
 	r.RegisterInt("eBoneLinkChild", CMD_BONE_CONNECT);
 	r.RegisterInt("eBoneUnLinkChild", CMD_BONE_DISCONNECT);
-	r.RegisterInt("eBoneLinkMesh", CMD_BONE_ADD_MESH);
-	r.RegisterInt("eBoneUnLinkMesh", CMD_BONE_DELETE_MESH);
+	//r.RegisterInt("eBoneLinkMesh", CMD_BONE_ADD_MESH);
+	//r.RegisterInt("eBoneUnLinkMesh", CMD_BONE_DELETE_MESH);
 	r.RegisterInt("eBoneMoveJoint", CMD_BONE_MOVE_PIVOT);
 
-
-	r.RegisterInt("eSelectionByBox", CMD_MISC_BBOX_SELECT);
+	r.RegisterInt("eSelectionByBox", eSelectionByBox);
 	r.RegisterInt("eTextureMapProjection", CMD_MISC_GEN_TEXMAP_XY);
 
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 
 	r.RegisterInt("eRenderShadow", eRenderShadow);
-	r.RegisterInt("eRenderPatch", eRenderPatch);
 	r.RegisterInt("eRenderWireframe",FREYJA_MODE_RENDER_WIREFRAME);
 	r.RegisterInt("eRenderFace", FREYJA_MODE_RENDER_FACE);
 	r.RegisterInt("eRenderVertex", FREYJA_MODE_RENDER_POINTS);
@@ -923,19 +921,13 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
-
-	r.RegisterInt("FREYJA_MODE_PLANE_BACK", FREYJA_MODE_PLANE_BACK);
-	r.RegisterInt("FREYJA_MODE_PLANE_RIGHT", FREYJA_MODE_PLANE_RIGHT);
-				  r.RegisterInt("FREYJA_MODE_PLANE_BOTTOM", FREYJA_MODE_PLANE_BOTTOM);
-
-	r.RegisterInt("FREYJA_MODE_PLANE_XY", FREYJA_MODE_PLANE_XY);
-	r.RegisterInt("FREYJA_MODE_PLANE_YZ", FREYJA_MODE_PLANE_YZ);
-	r.RegisterInt("FREYJA_MODE_PLANE_XZ", FREYJA_MODE_PLANE_XZ);
-	r.RegisterInt("FREYJA_MODE_PLANE_FREE", FREYJA_MODE_PLANE_FREE);
-
-	r.RegisterInt("FREYJA_MODE_AXIS_X", FREYJA_MODE_AXIS_X);
-	r.RegisterInt("FREYJA_MODE_AXIS_Y", FREYJA_MODE_AXIS_Y);
-	r.RegisterInt("FREYJA_MODE_AXIS_Z", FREYJA_MODE_AXIS_Z);
+	r.RegisterInt("eViewportBack", FREYJA_MODE_PLANE_BACK);
+	r.RegisterInt("eViewportRight", FREYJA_MODE_PLANE_RIGHT);
+	r.RegisterInt("eViewportBottom", FREYJA_MODE_PLANE_BOTTOM);
+	r.RegisterInt("eViewportFront", FREYJA_MODE_PLANE_XY);
+	r.RegisterInt("eViewportLeft", FREYJA_MODE_PLANE_YZ);
+	r.RegisterInt("eViewportTop", FREYJA_MODE_PLANE_XZ);
+	r.RegisterInt("eViewportOrbit", FREYJA_MODE_PLANE_FREE);
 
 	//r.RegisterSymbol();
 
