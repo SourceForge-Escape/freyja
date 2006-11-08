@@ -27,25 +27,25 @@ using namespace mstl;
 using namespace freyja;
 
 //Map<int32, index_t> gKeyFrameMap;
-Vector<KeyFrame *> gKeyFrames;
+//Vector<KeyFrame *> gKeyFrames;
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-KeyFrame::KeyFrame() :
-	mFlags(0x0),
-	mIndex(INDEX_INVALID),
-	mTime(0.0f),
-	mObjects()
-{
-}
+//KeyFrame::KeyFrame() :
+//	mFlags(0x0),
+//	mIndex(INDEX_INVALID),
+//	mTime(0.0f),
+//	mObjects()
+//{
+//}
 
 
-KeyFrame::~KeyFrame()
-{
-}
+//KeyFrame::~KeyFrame()
+//{
+//}
 
 
 ////////////////////////////////////////////////////////////

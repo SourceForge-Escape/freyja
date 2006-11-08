@@ -45,19 +45,21 @@ class BoneTransform
 {
 public:
 
-	BoneTransform()
+	BoneTransform() :
+		mSkeletalKeyFrameUID(INDEX_INVALID),
+		mRestBoneUID(INDEX_INVALID),
+		mRotate(),
+		mTranslate(),
+		mBoneToWorld(),
+		mCombined()
 	{
-		mSkeletalKeyFrameUID = INDEX_INVALID;
-		mRestBoneUID = INDEX_INVALID;
 	}
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	~BoneTransform()
-	{
-	}
+	~BoneTransform() { }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -87,11 +89,12 @@ class SkeletalKeyFrame
 {
 public:
 
-	SkeletalKeyFrame()
+	SkeletalKeyFrame() : 
+		mAnimation(INDEX_INVALID),
+		time(0.0f),
+		lastTime(0.0f),
+		mBones()
 	{
-		mAnimation = INDEX_INVALID;
-		time = 0.0f;
-		lastTime = 0.0f;
 	}
 
 	~SkeletalKeyFrame()
@@ -113,10 +116,11 @@ class SkeletalAnimation
 {
 public:
 
-	SkeletalAnimation()
+	SkeletalAnimation() :
+		mId(INDEX_INVALID),
+		mSkeleton(INDEX_INVALID),
+		mKeyFrames()
  	{
-		mId = INDEX_INVALID;
-		mSkeleton = INDEX_INVALID;
 		mName[0] = 0;
 	}
 
@@ -132,6 +136,8 @@ public:
 	char mName[64];
 
 	//char mSkeletonName[64]; /* 'Symbolic pointer' to link to skeleton by name */
+
+	//bool mHasRootAnimation;
 
 	Vector<SkeletalKeyFrame *> mKeyFrames;
 };

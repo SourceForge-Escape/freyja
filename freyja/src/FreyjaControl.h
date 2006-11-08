@@ -186,6 +186,14 @@ class FreyjaControl
 	 * Post : Returns xyz offset of the scene
 	 ------------------------------------------------------*/
 	
+	uint32 GetSelectedLight() { return mSelectedLight; }
+	void SetSelectedLight(uint32 i) { mSelectedLight = i; }
+	uint32 mSelectedLight;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected Light index
+	 ------------------------------------------------------*/
+
 	uint32 GetSelectedAnimation() { return mSelectedAnimation; }
 	void SetSelectedAnimation(uint32 i) { mSelectedAnimation = i; }
 	uint32 mSelectedAnimation;

@@ -41,35 +41,27 @@ using namespace mstl;
 
 namespace freyja {
 
-class KeyFrameBone : public KeyFrameObject
+class KeyFrameBone : public KeyFrame
 {
  public:
 
-	KeyFrameBone();
+	KeyFrameBone() : KeyFrame(), mLoc(), mScale(1.0f, 1.0f, 1.0f), mRot() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of KeyFrameSkeleton
 	 ------------------------------------------------------*/
 
-	~KeyFrameBone();
+	~KeyFrameBone() {}
 	/*------------------------------------------------------
 	 * Pre  : KeyFrameSkeleton object is allocated
 	 * Post : Deconstructs an object of KeyFrameSkeleton
 	 ------------------------------------------------------*/
 
-	virtual const char *GetTypeName() { return "Bone"; }
-
-	vec_t mTime;
-
-	Vec3 mTranslation;
+	Vec3 mLoc;
 
 	Vec3 mScale;
 
-	Quaternion mRotation;
-
-
- private:
-
+	Quaternion mRot;
 };
 
 

@@ -735,10 +735,12 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		if (k < mCurveTest.size())
 		{
 			vec_t x = 0.0f, y = 0.0f, z = 0.0f;
-			x = mCurveTest[k].mVec[0];
+			x = 1;//mCurveTest[k].mVec[0];
 			y = mCurveTest[k].mVec[1];
-			z = mCurveTest[k].mVec[2];
+			z = 1;//mCurveTest[k].mVec[2];
 			glTranslatef(x, y, z);
+			
+			//glScalef(x, y, z);
 		}
 	}
 

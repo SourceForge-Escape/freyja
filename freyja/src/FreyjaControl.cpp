@@ -2640,6 +2640,10 @@ bool FreyjaControl::event(int command)
 		mObjectMode = tBone;
 		break;
 
+	case eTransformLight:
+		mObjectMode = tLight;
+		break;
+
 	case eDelete:
 		DeleteSelectedObject();
 		freyja_event_gl_refresh();
@@ -4453,8 +4457,8 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			{
 				freyjaCurrentLight(selected);
 				mCursor.mPos = xyz;
+				freyja_print("! Light[%i] selected by pick ray.", selected);
 			}
-
 		}
 		break;
 
@@ -4810,6 +4814,16 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	switch (mObjectMode)
 	{
+	case tLight:
+		{
+			vec3_t pos;
+			freyjaGetLightPosition4v(GetSelectedLight(), pos);
+			mCursor.mLastPos = Vec3(pos);
+			freyjaLightPosition4v(GetSelectedLight(), mCursor.mPos.mVec);
+		}
+		break;
+
+
 	case tModel: 
 		{
 			mToken = true;

@@ -64,6 +64,7 @@ void freyjaKeyFramePoolClear()
 
 index_t freyjaKeyFrameGetIndexFromId(uint32 id)
 {
+#if 0
 	KeyFrame **array = gKeyFramePool.getVectorArray();
 
 	for ( uint32 i = 0, count = gKeyFramePool.size(); i < count; ++i )
@@ -71,7 +72,8 @@ index_t freyjaKeyFrameGetIndexFromId(uint32 id)
 		if (array[i] == NULL && array[i]->mIndex == id)
 			return i;
 	}
-	
+#endif
+
 	return INDEX_INVALID;
 }
 
@@ -89,7 +91,7 @@ index_t freyjaKeyFrameCreate(int32 id)
 	{
 		if (array[i] == NULL)
 		{
-			obj->mIndex = i;
+			//obj->mIndex = i;
 			array[i] = obj;
 			return i;
 		}
