@@ -34,6 +34,7 @@ Vector<Skeleton *> Skeleton::mGobalPool;
 Skeleton::Skeleton() :
 	mBones(),
 	mRoot(0),
+	mAnimations(),
 	mUID(INDEX_INVALID)
 {
 	mName[0] = '\0';

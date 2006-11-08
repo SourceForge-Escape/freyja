@@ -6,7 +6,7 @@
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
  * Object  : KeyFrame
- * License : No use w/o permission (C) 2005 Mongoose
+ * License : No use w/o permission (C) 2005-2006 Mongoose
  * Comments: KeyFrame class
  *
  *
@@ -19,42 +19,238 @@
  *
  *-- History ------------------------------------------------ 
  *
+ * 2006.11.06:
+ * Mongoose - New KISS implementation is so nice
+ *
  * 2005.07.08:
  * Mongoose - Created
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_KEYFRAME_H_
 #define GUARD__FREYJA_MONGOOSE_KEYFRAME_H_
 
-// TODO: Decide where control curves should go to drive all this
-
+#include <math.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
+#include <mstl/String.h>
 
 #include "freyja.h"
-
 
 using namespace mstl;
 
 
 namespace freyja {
 
-	// Need to get scale and translation tests up by end of the week
-	// TtoL  	time_t -> distance_t
-	// TtoA 	time_t -> angle_t
-	// TtoT 	time_t -> time_t
-	// TtoU 	time_t -> double_t
-	// UtoL 	unit_t -> distance_t
-	// UtoA 	unit_t -> angle_t
-	// UtoT 	unit_t -> time_t
-	// UtoU 	unit_t -> unit_t
+class KeyFrame
+{
+public:
 
-class KeyFrameObject
+	KeyFrame() : mFlags(0x0), mTime(0.0f) { }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of KeyFrame
+	 ------------------------------------------------------*/
+
+	virtual ~KeyFrame() { }
+	/*------------------------------------------------------
+	 * Pre  : KeyFrame object is allocated
+	 * Post : Deconstructs an object of KeyFrame
+	 ------------------------------------------------------*/
+
+	vec_t GetTime() { return mTime; }
+
+	virtual void SetTime(vec_t time) { mTime = time; }
+
+	byte mFlags;       /* Used in obsolete code */
+
+	//	index_t mIndex;    /* Used in obsolete code - List index for speedy insertion */
+
+	vec_t mTime;       /* Time offset to this frame in sec */
+};
+
+
+class VecKeyFrame : public KeyFrame
+{
+ public:
+
+	VecKeyFrame() : KeyFrame(), mData(0.0f) {}
+
+	virtual ~VecKeyFrame() {}
+
+	vec_t GetData() { return mData; }
+
+	virtual void SetData(const vec_t v) { mData = v; }
+
+	vec_t mData;                      /* Keyframe data */
+};
+
+
+class Vec3KeyFrame : public KeyFrame
+{
+ public:
+
+	Vec3KeyFrame() : KeyFrame(), mData(0.0f, 0.0f, 0.0f) {}
+
+	virtual ~Vec3KeyFrame() {}
+
+	Vec3 GetData() { return mData; }
+
+	virtual void SetData(const Vec3 &v) { mData = v; }
+
+	Vec3 mData;                      /* Keyframe data */
+};
+
+
+class ScaleKeyFrame : public Vec3KeyFrame
+{
+ public:
+
+	ScaleKeyFrame() : Vec3KeyFrame() { mData = Vec3(1.0f, 1.0f, 1.0f); }
+
+	~ScaleKeyFrame() {}
+
+	virtual void SetData(const Vec3 &v) 
+	{
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			// Scale = 0.0f undefined property, so filter it out
+			if (v.mVec[i] > 0.0f)
+				mData.mVec[i] = v.mVec[i]; 
+		}
+	}
+
+	virtual void Scale(Vec3 v) { SetData(v); }	
+
+	virtual void Scale(vec3_t xyz) { SetData(Vec3(xyz)); }	
+
+	virtual void Scale(vec_t s) { SetData(Vec3(s, s, s)); }
+
+	virtual void ScaleX(vec_t x) { SetData(Vec3(x, 1.0f, 1.0f)); }
+
+	virtual void ScaleY(vec_t y) { SetData(Vec3(1.0f, y, 1.0f)); }
+
+	virtual void ScaleZ(vec_t z) { SetData(Vec3(1.0f, 1.0f, z)); }
+};
+
+
+class Track
+{
+public:
+
+	Track() : 
+		mKeyFrames(),
+		mName("UnNamed"), 
+		mStart(0.0f), 
+		mRate(30.0f), 
+		mDuration(10.0f)
+	{
+		// Don't screw around rebuild a pointer array every time, 
+		// so we can just use direct indices in the interface
+		for ( uint32 i = 0, count = GetKeyframeCount(); i < count; ++i )
+		{
+			mKeyFrames.pushBack(NULL);
+		}
+	}
+
+	virtual ~Track() { }
+
+
+	void DeleteKeyFrame(index_t idx)
+	{
+		KeyFrame **array = mKeyFrames.getVectorArray();
+		
+		if ( idx < mKeyFrames.size() && array[idx] )
+		{
+			delete array[idx];
+			array[idx] = NULL;
+		}
+	}
+
+	virtual KeyFrame *NewTrackKeyFrame(vec_t time) = 0;
+
+	virtual void UpdateKeyframes() = 0;
+
+	index_t NewKeyframe(vec_t time)
+	{
+		KeyFrame **array = mKeyFrames.getVectorArray();
+		uint32 keyframe = GetKeyfameIndexFromTime(time);
+
+		if ( keyframe < mKeyFrames.size() )
+		{
+			if ( array[keyframe] == NULL )
+				array[keyframe] = NewTrackKeyFrame(time);
+
+			return keyframe;
+		}
+		
+		return INDEX_INVALID;
+	}
+
+
+	KeyFrame *GetKeyframe(index_t idx) 
+	{ return (idx < mKeyFrames.size()) ? 
+		(mKeyFrames.getVectorArray())[idx] : NULL; }
+	/*------------------------------------------------------
+	 * Pre  : <time> > 0.0f
+	 * Post : Returns keyframe if it exists or NULL
+	 ------------------------------------------------------*/
+
+	int32 GetKeyfameIndexFromTime(vec_t time) { return (int32)(mRate * time); }
+	/*------------------------------------------------------
+	 * Pre  : <time> > 0.0f
+	 * Post : Returns claculated keyframe
+	 ------------------------------------------------------*/
+
+	uint32 GetKeyframeCount() { return (uint32)(mRate * mDuration); } 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns max number of keyframes for duration
+	 ------------------------------------------------------*/
+
+	vec_t GetRate() { return mRate; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates animation rate and adjusts keyframe list 
+	 ------------------------------------------------------*/
+
+	void SetRate(vec_t fps) { mRate = fps; UpdateKeyframes(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates animation rate and adjusts keyframe list 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
+
+	Vector<KeyFrame *> mKeyFrames;   /* Keyframe data */
+
+	String mName;		             /* Human readable name for this track */
+
+	vec_t mStart;                    /* Whence track starts ( playback only ) */
+
+	vec_t mRate;                     /* Playback rate */
+
+	vec_t mDuration;		         /* How long is this track */	
+};
+
+
+#ifdef OBSOLETE
+
+class InterfaceTrack
 {
 	////////////////////////////////////////////////////////////
 	// This class is the base for keyframe 'typing' aggregate.
@@ -66,23 +262,16 @@ class KeyFrameObject
 	// By providing commonly used curve transforms here, you shouldn't
 	// have to hack around anything.  
 	//
-	// Generics are added to give you plenty of rope.  Write a
-	// damn message system handler inside an kfobj if you want.
 	////////////////////////////////////////////////////////////
 
  public:
 
-	KeyFrameObject();
+	InterfaceTrack() { }
 
-	virtual ~KeyFrameObject();
+	virtual ~InterfaceTrack() { }
 
-	// 'Signal' interface ( TODO: Merge with Action objects )
-	virtual void PushUndoState() {}
-	virtual void PushRedoState() {}
-	virtual void Undo() {}
-	virtual void Redo() {}
-	virtual bool SerializeUndoHistory(SystemIO::FileWriter &w) { return false; }
-	virtual bool SerializeUndoHistory(SystemIO::FileReader &r) { return false; }
+	// Might want to put 'tmp/edit' keyframe support in here instead of UI
+	// for use when creating a keyframe using auto
 
 	// 'Location' interface
 	virtual void SetPosition(vec3_t xyz) {}
@@ -94,17 +283,19 @@ class KeyFrameObject
 	virtual void SetDeltaPositionY(float y) {}
 	virtual void SetDeltaPositionZ(float z) {}
 
-	// 'Rotation' Quaternion and Euler angle interface 
-	virtual void SetRotation(vec3_t xyz) {}
+	// 'Rotation' Quaternion interface 
 	virtual void SetRotationQuat(vec4_t wxyz) {}
-	virtual void SetRotationX(float x) {}
-	virtual void SetRotationY(float y) {}
-	virtual void SetRotationZ(float z) {}
-	virtual void SetDeltaRotation(vec3_t xyz) {}	
 	virtual void SetDeltaRotationQuat(vec4_t wxyz) {}
-	virtual void SetDeltaRotationX(float x) {}
-	virtual void SetDeltaRotationY(float y) {}
-	virtual void SetDeltaRotationZ(float z) {}
+
+	// 'Rotation'Euler angle interface 
+	virtual void SetRotationEuler(vec3_t xyz) {}
+	virtual void SetRotationEulerX(float x) {}
+	virtual void SetRotationEulerY(float y) {}
+	virtual void SetRotationEulerZ(float z) {}
+	virtual void SetDeltaRotationEuler(vec3_t xyz) {}	
+	virtual void SetDeltaRotationEulerX(float x) {}
+	virtual void SetDeltaRotationEulerY(float y) {}
+	virtual void SetDeltaRotationEulerZ(float z) {}
 
 	// 'Size' interface
 	virtual void SetScale(vec_t s) {}
@@ -118,229 +309,21 @@ class KeyFrameObject
 	virtual void SetDeltaScaleZ(float z) {}
 
 	// 'Color' interface
+	virtual void SetColorARGB(vec4_t argb) {}
 	virtual void SetColorRGB(vec3_t rgb) {}
 	virtual void SetColorRGBA(vec4_t rgba) {}
-	virtual void SetColorR(float r) {}
-	virtual void SetColorB(float b) {}
-	virtual void SetColorG(float g) {}
-	virtual void SetColorA(float a) {}
-	virtual void SetTransparentcy(float t) {}
-	virtual void SetVisibility(float v) {}
+	virtual void SetColorR(vec_t r) {}
+	virtual void SetColorB(vec_t b) {}
+	virtual void SetColorG(vec_t g) {}
+	virtual void SetColorA(vec_t a) {}
+	virtual void SetTransparentcy(vec_t t) {}
+	virtual void SetVisibility(vec_t v) {}
 
 	// 'Light' interface
-	virtual void SetFalloff(float d) {}
-
-	// 'Generic' interface for message passing
-	virtual void SetBitFlags(unsigned int flags) {}
-	virtual unsigned int GetBitFlags() { return 0; }
-	virtual void SetInteger(int i) {}
-	virtual int GetInteger() { return 0; }
-	virtual void SetUInteger(unsigned int u) {}
-	virtual unsigned int SetUInteger() { return 0; }
-	virtual void SetFloat(float f) {}
-	virtual float GetFloat() { return 0.0f; }
-	virtual void SetCString(const char *s) {}
-	virtual const char *GetCString() { return NULL; }
-	virtual void SetPointer(void *ptr) {}
-	virtual void *GetPointer() { return NULL; }
-
-	virtual const char *GetTypeName() { return "Object"; }
-
- private:
+	virtual void SetFalloff(vec_t d) {}
 
 };
-
-
-class KeyFrame
-{
- public:
-
-	////////////////////////////////////////////////////////////
-	// Constructors
-	////////////////////////////////////////////////////////////
-
-	KeyFrame();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of KeyFrame
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.07.08: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	~KeyFrame();
-	/*------------------------------------------------------
-	 * Pre  : KeyFrame object is allocated
-	 * Post : Deconstructs an object of KeyFrame
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.07.08: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-	byte mFlags;                        /* Options */
-
-	index_t mIndex;                     /* Keyframe number */
-
-	vec_t mTime;                        /* Time offset to this frame */
-
-	Vector<KeyFrameObject *> mObjects;  /* All objects bound to this frame */
-
-
-
- private:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
-};
-
-
-
-class VecKeyFrame
-{
- public:
-
-	VecKeyFrame();
-
-	~VecKeyFrame();
-
-	byte mFlags;                        /* Options */
-
-	index_t mIndex;                     /* Keyframe number */
-
-	vec_t mWeight;                      /* Weight modifier */
-
-	vec_t mVec;                         /* Keyframe data */
-};
-
-
-class KeyFrameGroup
-{
-	// A Hybrid of keygroup and animation now
-
-	////////////////////////////////////////////////////////////
-	// Groups keyframes for indepentdent playback and blending
-	////////////////////////////////////////////////////////////
-
- public:
-
-	KeyFrameGroup() :
-		mPool(),
-		mTimeStart(0.0f),
-		mTimeEnd(0.0f),
-		mRate(30.0f),
-		mDuration(0.0f),
-		mUID(INDEX_INVALID),
-		mHasRootAnimation(false)
-	{
-	}
-
-
-	~KeyFrameGroup()
-	{
-	}
-
-	void FreeKeyFrame(index_t idx)
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-	{
-		KeyFrame **array = mPool.getVectorArray();
-		
-		if ( idx < mPool.size() && array[idx] )
-		{
-			delete array[idx];
-			array[idx] = NULL;
-		}
-	}
-
-	index_t NewKeyframe()
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-	{
-		KeyFrame **array = mPool.getVectorArray();
-		KeyFrame *obj = new KeyFrame();
-
-		for ( uint32 i = 0, count = mPool.size(); i < count; ++i )
-		{
-			if (array[i] == NULL)
-			{
-				obj->mIndex = i;
-				array[i] = obj;
-				return i;
-			}
-		}
-
-		mPool.pushBack(obj);
-		return mPool.size() - 1;
-	}
-
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	KeyFrame *GetKeyframe(index_t idx)
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-	{
-		KeyFrame **array = mPool.getVectorArray();
-		
-		if ( idx < mPool.size() )
-		{
-			return array[idx];
-		}
-
-		return NULL;
-	}
-
-
-	Vector<KeyFrame *> mPool;    /* Storage for all Keyframes */
-
-	char mName[64];		    /* Human readable name for this group eg 'Run0' */
-
-	vec_t mTimeStart;
-
-	vec_t mTimeEnd;
-
-	vec_t mRate;
-
-	vec_t mDuration;		/* How long is this track */
-
-	index_t mUID;			/* Unique numeric identifer for this group */
-
-	bool mHasRootAnimation;
-
-
- private:
-
-};
-
+#endif
 
 } // namespace freyja
 

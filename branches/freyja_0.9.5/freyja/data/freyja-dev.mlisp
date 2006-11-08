@@ -462,6 +462,7 @@
 							(menu_item	"Selected Vertices"	eEvent eTransformSelectedVertices)
 							(menu_item	"Bone"		eEvent eTransformBone)
 							(menu_item	"Group"		eEvent eTransformGroup)
+							(menu_item	"Light"		eEvent	eTransformLight)
 						) ; optionmenu
 
 						(optionmenu	eEvent	eObjectMenu

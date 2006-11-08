@@ -819,6 +819,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eTransformMesh", eTransformMesh);
 	r.RegisterInt("eTransformModel", eTransformModel);
 	r.RegisterInt("eTransformBone", eTransformBone);
+	r.RegisterInt("eTransformLight", eTransformLight);
 	r.RegisterInt("eTransformPoint", eTransformPoint);
 
 	r.RegisterInt("eSetFacesMaterial", eSetFacesMaterial);
