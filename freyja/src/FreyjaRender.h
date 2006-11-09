@@ -264,6 +264,13 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Flag(flags_t flag, bool t);
+	/*------------------------------------------------------
+	 * Pre  : <flag> is valid
+	 * Post : Sets control flag on or off
+	 *
+	 ------------------------------------------------------*/
+
 	void InitContext(uint32 width, uint32 height, bool fastCard);
 	/*------------------------------------------------------
 	 * Pre  : <width> and <height> are the GL context dimensions 

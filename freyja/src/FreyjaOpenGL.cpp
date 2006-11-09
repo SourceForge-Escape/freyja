@@ -562,10 +562,15 @@ void mglDrawEditorAxis()
 
 	if (drawList == -1)
 	{
-		const vec_t min = 0.5f, mid = 1.2f, max = 0.872f;
+		const vec_t min = 0.5f, mid = 2.4f, max = 1.744f;
+		//const vec_t min = 0.5f, mid = 1.2f, max = 0.872f;
+		vec_t scale = 0.5f;
 		drawList = glGenLists(1);
 		glNewList(drawList, GL_COMPILE);
+		glPushMatrix();
+		glScalef(scale, scale, scale);
 		mglDrawAxisWithCones(min, mid, max, 8);
+		glPopMatrix();
 		glEndList();
 	}
 	else

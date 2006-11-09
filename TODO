@@ -8,20 +8,20 @@
 	- Single joint animation for shishi odoshi test
 		- Finish hooking up eScheme_Animation in FreyjaControl
 		- Keyframe editor
-			- Mesh keyframes
 			- Mesh vertex group keyframes ( vertex animation )
-		- Curve editor ( OpenGL based editor )
-		- Fix rotation cursor
-			- Delta radius sweeps from center to cursor pos following an arc
-		- Fix scale cursor
+		- Curve editor ( OpenGL UI based editor )
+			- Work OpenGLPrinter into main line build now for text support
+		- Rotation cursor with radius sweeps to cursor pos following an arc
 
 	- Skeletal animation
-		- Fix bone world coord
+		- Bone keyframes
+		- Fix bone rendering to support unparented bones that aren't root? 
+			- Fix bone world coord
 		- Out of heirarchy skeleton rendering / backend support
 		- Joint/Bone tool that creates and connects to last on each click
 
 	- Interface
-		- Add generic box selection back
+		- Add generic box selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registers to mgtk
 		- Make viewport 'windows' abstract with seperate controls
 			- Support for dynamic resizing and 2/3/4 layouts

@@ -248,7 +248,8 @@
 		(hbox 0 0 0 0 0
 		(notebook 0 0 eNop
 
-		(tab "View" eNone
+		(tab "View" eNone			
+			(hbox 0 1 0 1 1		
 			(toolbar
 				(toolbar_togglebutton false "24x24/point.png" "Points" 
 					"Point render mode"		eEvent	eRenderVertex)
@@ -285,45 +286,54 @@
 
 				(toolbar_togglebutton false "24x24/deform.png" "Deform"
 					"Toggle skelmesh deform"	eEvent	eSkeletalDeform)
+			) ;  toolbar
 
+			(toolbar
 				(toolbar_togglebutton false "24x24/fourwin.png" "Deform"
 					"Enable four window view"	eEvent	eViewports)
+			) ; toolbar
 
-			) ; End toolbar
-		)
+			) ; hbox
+		) ; tab
 
-			(tab "Create" eNone
-				(toolbar
-					(toolbar_button "24x24/cube.png"	" "	
-						"Polygon cube"	eEvent	eGenerateCube)
+		(tab "Create" eNone		
+			(hbox 0 1 0 1 1	
+			(toolbar
+				(toolbar_button "24x24/cube.png"	" "	
+					"Polygon cube"	eEvent	eGenerateCube)
 
-					(toolbar_button "24x24/plane.png"	" "
-						"Polygon plane"	eEvent	eGeneratePlane)
+				(toolbar_button "24x24/plane.png"	" "
+					"Polygon plane"	eEvent	eGeneratePlane)
 
-					(toolbar_button "24x24/tube.png"	" "
-						"Polygon tube"	eEvent	eGenerateTube)
+				(toolbar_button "24x24/tube.png"	" "
+					"Polygon tube"	eEvent	eGenerateTube)
 
-					(toolbar_button "24x24/circle.png"	" "
-						"Polygon circle" eEvent	eGenerateCircle)
+				(toolbar_button "24x24/circle.png"	" "
+					"Polygon circle" eEvent	eGenerateCircle)
 
-					(toolbar_button "24x24/cone.png"	" "
-						"Polygon cone" eEvent	eGenerateCone)
+				(toolbar_button "24x24/cone.png"	" "
+					"Polygon cone" eEvent	eGenerateCone)
 
-					(toolbar_button "24x24/cylinder.png" " "	
-						"Polygon cylinder" eEvent eGenerateCylinder)
+				(toolbar_button "24x24/cylinder.png" " "	
+					"Polygon cylinder" eEvent eGenerateCylinder)
 
-					(toolbar_button "24x24/sphere.png"	" "	
-						"Polygon sphere"	eEvent	eGenerateSphere)
+				(toolbar_button "24x24/sphere.png"	" "	
+					"Polygon sphere"	eEvent	eGenerateSphere)
 
-					(toolbar_button "24x24/patch.png"	" "
-						"Polygon patch"	eEvent	eNone)
+				(toolbar_button "24x24/patch.png"	" "
+					"Polygon patch"	eEvent	eNone)
 
-					;(toolbar_button "24x24/extrude.png"
-					;	" "	"Extrude face"	eEvent eExtrude)
-				)
-			)
+			) ;  toolbar
 
-			(tab "Modify" eNone
+			(toolbar
+				(toolbar_button "gtk-add"	" "
+					"Extrude face"	eEvent eExtrude)
+			) ; toolbar
+			) ; hbox
+		) ; tab
+
+		(tab "Modify" eNone		
+			(hbox 0 1 0 1 1	
 			; Need to group toggles like radio buttons
 			(toolbar
 				(toolbar_togglebutton false	"24x24/bbox-select.png" "SelectB"
@@ -340,15 +350,63 @@
 
 				(toolbar_togglebutton false "24x24/scale.png" "Scale" 
 					"Scale object" eEvent	eScaleObject)
+			) ;  toolbar
 
+			(toolbar
 				(toolbar_togglebutton false "24x24/clone.png" "CopyM"
 					"Copy multiple objects" eEvent eCopyAppendMode)
 
 				(toolbar_button	"24x24/split.png"
 					"Split" "Split object" eEvent eSplitObject)
-			)
-		))
-		) ; End Toolbars
+			) ; toolbar
+			) ; hbox
+		) ; tab
+
+		(tab "Animation" eNone
+			(hbox 1 1 0 1 1
+
+			)	
+		)
+	
+		(tab "Material" eNone
+			(hbox 0 1 0 1 1				
+				(toolbar
+					(toolbar_button "gtk-new" "New"
+						"New material"	eEvent	eNewMaterial)
+
+					(filechoosertoolbar_button	"gtk-open" "Open"
+						"Loads material from disk" 
+						"Open Material..." eOpenMaterial "mode=open")
+
+					(toolbar_togglebutton false "gtk-apply" "Lock"
+						"Overwrite material on load" eEvent eMaterialSlotLoadToggle)
+
+					(filechoosertoolbar_button	"gtk-save-as" "Save as..." 
+						"Saves material to disk" 
+						"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,")
+				) ;  toolbar
+
+				(toolbar
+					(toolbar_button "gtk-add" " "
+						"Set Mesh Material"	eEvent	eSetMeshTexture)
+
+					(toolbar_button "gtk-add" " "
+						"Set Selected Faces Material" eEvent eSetFacesMaterial)
+
+				) ; toolbar
+
+				;; Material selector / name editor
+				(hbox 0 1 0 1 1
+					(label "Current" 0.0 0.5)
+					(spinbutton 0 0 1024 eSelectMaterial)
+					(textbox eSetMaterialName))
+
+
+			) ; hbox
+		) ; tab
+
+		) ; notebook
+	) ; hbox
 
 
 		;; Main window body ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -600,7 +658,7 @@
 					(hbox 1 1 0 1 1
 						(toolbar
 							(toolbar_button "gtk-new" "New"
-								"New material"			eEvent	eNewFile)
+								"New material"			eEvent	eNewMaterial)
 							(filechoosertoolbar_button 
 								"gtk-open" "Open" "Loads material file" 
 								"Open Material..." eOpenMaterial "mode=open")

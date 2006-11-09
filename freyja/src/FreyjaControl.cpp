@@ -92,7 +92,7 @@ FreyjaControl::FreyjaControl() :
 	freyja__setPrinter(&mPrinter, false);
 
 	/* Spawn 0th light, and set the light iterator */
-	vec4_t lightPos = {12,35,8,0}; // Make this RCed {64,64,64,0};
+	vec4_t lightPos = {12,35,8,0}; // Make this RCed
 	freyjaCurrentLight(freyjaLightCreate());
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
@@ -101,13 +101,14 @@ FreyjaControl::FreyjaControl() :
 	vec4_t rgba = {0,0,0,1};
 	freyjaCurrentMaterial(mIndex);
 	freyjaMaterialName(mIndex, "Boring default");
-	freyjaMaterialSpecular(mIndex, rgba);
 	freyjaMaterialEmissive(mIndex, rgba);
 	rgba[0] = rgba[1] = rgba[2] = 0.9;
 	freyjaMaterialDiffuse(mIndex, rgba);
 	rgba[0] = rgba[1] = rgba[2] = 0.2;
 	freyjaMaterialAmbient(mIndex, rgba);
-	freyjaMaterialShininess(mIndex, 0.0f);
+	rgba[0] = rgba[1] = rgba[2] = 0.2;
+	freyjaMaterialSpecular(mIndex, rgba);
+	freyjaMaterialShininess(mIndex, 32.0f);
 
 	/* Hook up the view */
 	mRender = new FreyjaRender();
@@ -1395,6 +1396,14 @@ bool FreyjaControl::event(int event, unsigned int value)
 				freyja_refresh_material_interface();
 				freyja_event_gl_refresh();
 			}
+
+			// This is here to support the obsolete idea of texture -> mesh
+			// binding, since we do material -> mesh binding now
+			if (value != GetSelectedTexture())
+			{
+				SetSelectedTexture(value);
+				freyja_event_gl_refresh();
+			}
 		}
 		break;
 
@@ -1580,8 +1589,10 @@ bool FreyjaControl::event(int event, unsigned int value)
 			mgtk_toggle_value_set(eUnselect, 0);
 			mgtk_toggle_value_set(eSelectionByBox, 0);
 
+			// Reset cursor
 			mEventMode = modeScale;
 			mCursor.SetMode(freyja3d::Cursor::Scale);
+			mCursor.mScale = Vec3(1.0f, 1.0f, 1.0f);
 			freyja_print("Scale object...");
 			freyja_event_gl_refresh();
 		}
@@ -1621,189 +1632,52 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 	case eViewports:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fViewports);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fViewports);
-		}
-		freyja_print("Viewport rendering [%s]", 
-					(GetViewFlags() & FreyjaRender::fViewports) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fViewports, value, "Four window view");
 		break;
 
 	case FREYJA_MODE_RENDER_BONETAG:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fBones);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fBones);
-		}
-
-		freyja_print("Bone Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::fBones) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fBones, value, "Skeleton rendering");
 		break;
 
 	case FREYJA_MODE_RENDER_POINTS:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fPoints);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fPoints);
-		}
-
-		freyja_print("Point Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::fPoints) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fPoints, value, "Point Rendering");
 		break;
 
 	case FREYJA_MODE_RENDER_WIREFRAME:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fWireframe);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fWireframe);
-		}
-
-		freyja_print("Wireframe Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::fWireframe) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fWireframe, value, "Wireframe");
 		break;
 
 	case FREYJA_MODE_RENDER_NORMALS:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fNormals);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fNormals);
-		}
-
-		freyja_print("Normal Rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::fNormals) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fNormals, value, "Normal visualisation");
 		break;
 
 	case FREYJA_MODE_RENDER_LIGHTING:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fLighting);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fLighting);
-		}
-
-		freyja_print("GL Lighting is [%s]", 
-					 (GetViewFlags() & FreyjaRender::fLighting) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fLighting, value, "OpenGL lighting");
 		break;
 
 	case FREYJA_MODE_RENDER_TEXTURE:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fTexture);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fTexture);
-		}
-
-		freyja_print("Texture rendering is [%s]", 
-					 (GetViewFlags() & FreyjaRender::fTexture) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fTexture, value, "Texture mapping");
 		break;
 
 	case FREYJA_MODE_RENDER_MATERIAL:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fMaterial);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fMaterial);
-		}
-		//mRender->toggleFlag(FreyjaRender::fMaterial);
-		freyja_print("Material rendering is [%s]", 
-					 (GetViewFlags() & FreyjaRender::fMaterial) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fMaterial, value, "Material usage");
 		break;
 
 	case FREYJA_MODE_RENDER_GRID:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fGrid);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fGrid);
-		}
-		//mRender->toggleFlag(FreyjaRender::fGrid);
-		freyja_print("Edit Grid rendering [%s]",
-					 (GetViewFlags() & FreyjaRender::fGrid) ? 
-					 "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fGrid, value, "Grid");
 		break;
 
 	case FREYJA_MODE_RENDER_FACE:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fFace);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fFace);
-		}
-
-		freyja_print("Face rendering is [%s]", value ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fFace, value, "Face rendering");
 		break;
 
 	case eRenderPickRay:
-		if (value)
-		{
-			mRender->SetFlag(FreyjaRender::fDrawPickRay);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fDrawPickRay);
-		}
-
-		freyja_print("Pick ray visibility is [%s]", value ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fDrawPickRay, value, "Pick ray visibility");
 		break;
 
 	case eRenderBbox:
-		if (value)
-		{
-			// radio button like func for multiple widgets on same event
-			//mgtk_toggle_value_set(eRenderBbox, 1);
-			mRender->SetFlag(FreyjaRender::fBoundingVolumes);
-		}
-		else
-		{
-			//mgtk_toggle_value_set(eRenderBbox, 0);
-			mRender->ClearFlag(FreyjaRender::fBoundingVolumes);
-		}
-
-		//mRender->toggleFlag(FreyjaRender::fBoundingVolumes);//FreyjaRender::fBoundingVol);
-		freyja_print("Bounding volume rendering [%s]", 
-					 (GetViewFlags() & FreyjaRender::fBoundingVolumes/*FreyjaRender::fBoundingVol*/) ? 
-					"ON" : "OFF");
-			freyja_event_gl_refresh();
+		SetRenderFlag(FreyjaRender::fBoundingVolumes, value, 
+					  "Bounding volume rendering");
 		break;
 
 	case ePointJoint:
@@ -1986,12 +1860,7 @@ bool FreyjaControl::event(int event, vec_t value)
 		break;
 
 
-	/* Move/Rotate/Scale generics are used by a larger event as a vector */
-	case eMoveBone_X:
-	case eMoveBone_Y:
-	case eMoveBone_Z:
-		break;
-
+	/* These Transform Box events don't trigger on their own */
 	case eMove_X:
 	case eMove_Y:
 	case eMove_Z:
@@ -2547,12 +2416,6 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-
-
-
-
-
-
 	case eMirrorUV_X:
 		freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, true, false);
 		freyja_event_gl_refresh();
@@ -2699,11 +2562,11 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eMoveObject:
-		event(eScaleObject, (uint32)1);
+		event(eMoveObject, (uint32)1);
 		break;
 
 	case eRotateObject:
-		event(eScaleObject, (uint32)1);
+		event(eRotateObject, (uint32)1);
 		break;
 
 	case eScaleObject:
@@ -2726,7 +2589,7 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-	/* Transform box */
+	/* Transform box events... */
 	case eMove:
 		mToken = true;
 		Transform(mObjectMode, fTranslate,
@@ -2966,11 +2829,9 @@ bool FreyjaControl::event(int command)
 		break;
 
 
-
 	case CMD_MISC_GEN_TEXMAP_XY:
 		freyjaMeshUVMapPlanar(GetSelectedMesh());
 		break;
-
 
 
 	case CMD_MISC_ZOOM_IN:
@@ -3322,8 +3183,21 @@ void FreyjaControl::SetKeyFrame()
 	{
 	case tMesh:
 		{
-			index_t id = freyjaKeyFrameCreate(mSelectedKeyFrame);
-			freyja_print("Created keyframe[%i] <- %i", mSelectedKeyFrame, id);
+			//index_t id = freyjaKeyFrameCreate(mSelectedKeyFrame);
+			//freyja_print("Created keyframe[%i] <- %i", mSelectedKeyFrame, id);
+
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			if (m)
+			{
+				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
+				vec_t time = (vec_t)k / m->mTrack.GetRate(); 
+				index_t id = m->mTrack.NewKeyframe(time);
+				uint32 count = m->mTrack.GetKeyframeCount();
+			
+				freyja_print("Created keyframe[%i] <- %.3fs, %i/%i | %i", 
+							 mSelectedKeyFrame, time, id, count,
+							 m->mTrack.mKeyFrames.size());
+			}
 		}
 		break;
 
@@ -4542,8 +4416,7 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 	{
 	case fRotateAboutPoint:
 	case fRotate:
-		v *= HEL_PI_OVER_180;
-		u = -v;
+		u = v;
 		break;
 
 	case fScaleAboutPoint:
@@ -4558,7 +4431,8 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 		break;
 
 	default:
-		MARK_MSGF("Undo for %s action=%i not implemented", ObjectTypeToString(obj).c_str(), action);
+		MARK_MSGF("%s(): Undo type=%s, action=%i not implemented.", 
+				  __func__, ObjectTypeToString(obj).c_str(), action);
 	}
 
 	
@@ -4566,7 +4440,6 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 	{
 		int32 id = -1;
 
-		
 		switch (obj)
 		{
 		case tModel:
@@ -4581,9 +4454,10 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 			id = -1;
 		}
 
-		freyja_print("! %s[%i] %s <%f, %f, %f>",
+		freyja_print("! %s[%i].keyframe[%i] %s <%f, %f, %f>",
 					 ObjectTypeToString(obj).c_str(),
 					 id, 
+					 GetSelectedKeyFrame(),
 					 ActionToString(GetEventAction()).c_str(),
 					 GetEventAction(),
 					 v.mVec[0], v.mVec[1], v.mVec[2]);
@@ -4597,16 +4471,32 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 			//Action *a = new ActionMeshKeyframe(GetSelectedMesh(), action, u);
 			//ActionModelModified(a);
 
-			if (mSelectedKeyFrame < FreyjaRender::mSingleton->mCurveTest.size())
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			if (m)
 			{
-				switch (action)
+				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+				Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
+				
+				if (key)
 				{
-				case fTranslate:
-					FreyjaRender::mSingleton->mCurveTest[mSelectedKeyFrame] = v;
-					break;
+					switch (action)
+					{
+					case fRotate:
+						key->mData[0] = v;
+						break;
+						
+					case fScale:
+						key->mData[1] = v;
+						break;
+						
+					case fTranslate:
+						key->mData[2] = v;
+						break;
 
-				default:
-					freyja_print("! This keyframe transform type is unsupported in this test");
+					default:
+						freyja_print("! Keyframe transform (%s) is unsupported",
+									 ActionToString(action).c_str());
+					}
 				}
 			}
 		}
@@ -4629,7 +4519,7 @@ void FreyjaControl::Transform(object_type_t obj,
 	{
 	case fRotateAboutPoint:
 	case fRotate:
-		v *= HEL_PI_OVER_180;
+		v *= -HEL_PI_OVER_180;
 		u = -v;
 		break;
 
@@ -5019,45 +4909,52 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 //       mark off displacement of motion and rotate by that angle
 void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 {
+	// TODO Rewrite this to use pivot and arc delta ( Generate the delta sweep )
 	static int old_y = 0, old_x = 0;
 	const float t = 0.5f, m = 1.0f;
 	Vec3 o, d;
 	float xf, yf, zf;
 	int swap;
 
-	/* Mongoose: Compute a relative movement value too here */
+	// Swap x, y and truncate for stepping...
 	swap = x;
 	x = -y;
 	y = -swap;
 
-
-	// Rewrite this to use pivot and arc delta ( and generate the delta sweep )
+	/* Mongoose: Compute a relative movement value too here */
+	vec_t dx = ((x < old_x - t) ? -m : ((x > old_x + t) ? m : 0));
+	vec_t dy = ((y < old_y - t) ? m : ((y > old_y + t) ? -m : 0));
 
 	switch (plane)
 	{
+	case PLANE_BACK:
+		d = Vec3(dx, dy, 0.0f);
+		break;
+
 	case PLANE_FRONT:
-		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = -((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
-		zf = 0.0f;
+		d = Vec3(dx, -dy, 0.0f);
+		break;
+
+	case PLANE_BOTTOM:
+		d = Vec3(-dx, 0.0f, dy);
 		break;
 
 	case PLANE_TOP:
-		xf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = 0.0f;
-		zf = ((y < old_y-t) ? m : ((y > old_y+t) ? -m : 0));
+		d = Vec3(dx, 0.0f, dy);
+		break;
+
+	case PLANE_RIGHT:
+		d = Vec3(0.0f, dy, -dx);
 		break;
 
 	case PLANE_LEFT:
-		xf = 0.0f;
-		zf = ((x < old_x-t) ? -m : ((x > old_x+t) ? m : 0));
-		yf = ((y < old_y-t) ? -m : ((y > old_y+t) ? m : 0));
+		d = Vec3(0.0f, dy, dx);
 		break;
 
 	default:
-		;
+		freyja_print("! RotateObject(): This view (%i) isn't supported.",plane);
 	}
 
-	d = Vec3(xf, yf, zf);
 
 	/* Cursor axis determined limited movement */
 	switch (mCursor.mAxis)
@@ -5101,7 +4998,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		break;
 
 	default:
-		freyja_print("!Case not handled in rotateObject");
+		;
+		//freyja_print("!Case not handled in rotateObject");
 	}
 
 	mCursor.mRotate += d; 
@@ -5168,6 +5066,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 			mCursor.SetMode(freyja3d::Cursor::Rotation);
 		}
+
+		freyja_print("! RotateObject(): ObjectType (%i) not handled.", 
+					 ObjectTypeToString(mObjectMode).c_str());
 	}
 	
 	old_x = x;
@@ -5177,78 +5078,44 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 {
-	static int old_y = 0, old_x = 0;
+	const vec_t up = 1.01f, down = 0.99f, stay = 1.0f;
+	static int32 old_y = 0, old_x = 0;
+	vec_t dx = (x > old_x) ? up : (x < old_x) ? down : stay;
+	vec_t dy = (y > old_y) ? down : (y < old_y) ? up : stay;
 
-	if (y > old_y)
+	switch (plane)
 	{
-		switch (plane)
-		{
-		case PLANE_FRONT:
-			Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
-			break;
-		case PLANE_TOP:
-			Transform(mObjectMode, fScale, 1.0, 1.0, 1.01);
-			break;
-		case PLANE_LEFT:
-			Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
-			break;
-		default:
-			;
-		}
+	case PLANE_BACK:
+		dx = (x > old_x) ? down : (x < old_x) ? up : stay;
+	case PLANE_FRONT:
+		mCursor.mScale.mVec[0] *= dx;
+		mCursor.mScale.mVec[1] *= dy;
+		break;
+		
+	case PLANE_TOP:
+		dy = (y > old_y) ? up : (y < old_y) ? down : stay;
+	case PLANE_BOTTOM:
+		mCursor.mScale.mVec[0] *= dx;
+		mCursor.mScale.mVec[2] *= dy;
+		break;
+		
+	case PLANE_RIGHT:
+		dx = (x > old_x) ? down : (x < old_x) ? up : stay;
+	case PLANE_LEFT:
+		mCursor.mScale.mVec[2] *= dx;
+		mCursor.mScale.mVec[1] *= dy;
+		break;
+
+	default:
+		freyja_print("! ScaleObject(): This view (%i) isn't supported.", plane);
 	}
-	else if (y < old_y)
-	{
-		switch (plane)
-		{
-		case PLANE_FRONT:
-			Transform(mObjectMode, fScale, 1.0, 1.01, 1.0);
-			break;
-		case PLANE_TOP:
-			Transform(mObjectMode, fScale, 1.0, 1.0, 0.99);
-			break;
-		case PLANE_LEFT:
-			Transform(mObjectMode, fScale, 1.0, 1.01, 1.0);
-		default:
-			;
-		}
-	}
-	
-	if (x < old_x)
-	{
-		switch (plane)
-		{
-		case PLANE_FRONT:
-			Transform(mObjectMode, fScale, 0.99, 1.0, 1.0);
-			break;
-		case PLANE_TOP:
-			Transform(mObjectMode, fScale, 0.99, 1.0, 1.0);
-			break;
-		case PLANE_LEFT:
-			Transform(mObjectMode, fScale, 1.0, 1.0, 0.99);
-			break;
-		default:
-			;
-		}
-	}
-	else if (x > old_x)
-	{
-		switch (plane)
-		{
-		case PLANE_FRONT:
-			Transform(mObjectMode, fScale, 1.01, 1.0, 1.0);
-			break;
-		case PLANE_TOP:
-			Transform(mObjectMode, fScale, 1.01, 1.0, 1.0);
-			break;
-		case PLANE_LEFT:
-			Transform(mObjectMode, fScale, 1.0, 1.0, 1.01);
-		default:
-			;
-		}
-	}
-	
+
 	old_x = x;
 	old_y = y;
+
+	// WTF! It was doing direct scaling like the old, old codebase
+	// Leaving this here as reminder for next code clean up
+	//Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
 }
 
 
@@ -5718,6 +5585,13 @@ void eSaveModel(char *filename)
 }
 
 
+void eNewMaterial()
+{
+	index_t i = freyjaMaterialCreate();
+	freyja_print("New material [%i] created.", i);
+}
+
+
 void eOpenMaterial(char *filename)
 {
 	if (FreyjaControl::mInstance->LoadMaterial(filename))
@@ -5780,6 +5654,7 @@ void FreyjaControlEventsAttach()
 {
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
 	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
+	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);
 	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
 	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
 	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);

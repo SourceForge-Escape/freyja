@@ -105,6 +105,18 @@ class Vec3KeyFrame : public KeyFrame
 };
 
 
+class Vec3x3KeyFrame : public KeyFrame
+{
+ public:
+
+	Vec3x3KeyFrame() : KeyFrame() {}
+
+	virtual ~Vec3x3KeyFrame() {}
+
+	Vec3 mData[3];                    /* Keyframe data */
+};
+
+
 class ScaleKeyFrame : public Vec3KeyFrame
 {
  public:
@@ -137,23 +149,42 @@ class ScaleKeyFrame : public Vec3KeyFrame
 };
 
 
+class MatrixKeyFrame : public KeyFrame
+{
+ public:
+
+	MatrixKeyFrame() : KeyFrame(), mData() {}
+
+	virtual ~MatrixKeyFrame() {}
+
+	const Matrix &GetData() { return mData; }
+
+	virtual void SetData(const Matrix &m) { mData = m; }
+
+	Matrix mData;
+};
+
+
+
 class Track
 {
 public:
+
+	typedef enum {
+		fCreateMissingKeys = 1
+		
+	} flags_t;
+
 
 	Track() : 
 		mKeyFrames(),
 		mName("UnNamed"), 
 		mStart(0.0f), 
 		mRate(30.0f), 
-		mDuration(10.0f)
+		mDuration(10.0f),
+		mFlags(0x0)
 	{
-		// Don't screw around rebuild a pointer array every time, 
-		// so we can just use direct indices in the interface
-		for ( uint32 i = 0, count = GetKeyframeCount(); i < count; ++i )
-		{
-			mKeyFrames.pushBack(NULL);
-		}
+		UpdateKeyframes();
 	}
 
 	virtual ~Track() { }
@@ -171,8 +202,26 @@ public:
 	}
 
 	virtual KeyFrame *NewTrackKeyFrame(vec_t time) = 0;
+	/*------------------------------------------------------
+	 * Pre  : <time> > 0.0f
+	 *        No generics, we want specialized Track interfaces 
+	 * Post : Returns keyframe type specific to Track type
+	 ------------------------------------------------------*/
 
-	virtual void UpdateKeyframes() = 0;
+	virtual void UpdateKeyframes()
+	{
+		// FIXME: ATM this _WIPES_ all keyframes, we should
+		// shuffle the old keyframes into the new list matching
+		// their new index ( after all we just shuffle pointers )
+		
+		// Don't screw around rebuild a pointer array every time, 
+		// so we can just use direct indices in the interface
+		for ( uint32 i = 0, count = GetKeyframeCount(); i < count; ++i )
+		{
+			mKeyFrames.pushBack(NULL);
+		}
+	}
+
 
 	index_t NewKeyframe(vec_t time)
 	{
@@ -191,7 +240,7 @@ public:
 	}
 
 
-	KeyFrame *GetKeyframe(index_t idx) 
+	virtual KeyFrame *GetKeyframe(index_t idx) 
 	{ return (idx < mKeyFrames.size()) ? 
 		(mKeyFrames.getVectorArray())[idx] : NULL; }
 	/*------------------------------------------------------
@@ -211,30 +260,42 @@ public:
 	 * Post : Returns max number of keyframes for duration
 	 ------------------------------------------------------*/
 
+	vec_t GetDuration() { return mDuration; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets track duration
+	 ------------------------------------------------------*/
+
+	void SetDuration(vec_t lenght) { mDuration = lenght; UpdateKeyframes(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates animation duration and adjusts keyframe list 
+	 ------------------------------------------------------*/
+
 	vec_t GetRate() { return mRate; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Updates animation rate and adjusts keyframe list 
+	 * Post : Updates track rate
 	 ------------------------------------------------------*/
 
 	void SetRate(vec_t fps) { mRate = fps; UpdateKeyframes(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Updates animation rate and adjusts keyframe list 
+	 * Post : Updates track rate and adjusts keyframe list 
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileWriter &w) = 0;
+	// FIXME: Add serialzation support for Track
+	virtual bool Serialize(SystemIO::FileWriter &w) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) = 0;
+	virtual bool Serialize(SystemIO::FileReader &r) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
-
 
 	Vector<KeyFrame *> mKeyFrames;   /* Keyframe data */
 
@@ -245,6 +306,137 @@ public:
 	vec_t mRate;                     /* Playback rate */
 
 	vec_t mDuration;		         /* How long is this track */	
+
+	byte mFlags;
+};
+
+
+class TransformTrack : public Track
+{
+public:
+
+	TransformTrack() : Track() { }
+
+	~TransformTrack() {}
+
+	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
+	{
+		Vec3x3KeyFrame *key = new Vec3x3KeyFrame();
+
+		key->mData[0] = Vec3(0,0,0); // Rotate
+		key->mData[1] = Vec3(1,1,1); // Scale
+		key->mData[0] = Vec3(0,0,0); // Translate
+		return key;
+	}
+
+
+	virtual Vec3x3KeyFrame *GetKeyframe(index_t idx) 
+	{
+		return (Vec3x3KeyFrame *)Track::GetKeyframe(idx);
+	}
+
+
+	Vec3 GetRotation(index_t idx) 
+	{ 
+		Vec3 v;
+		Vec3x3KeyFrame *key = GetKeyframe(idx);
+
+		if (key)
+		{
+			v = key->mData[0];
+		}
+
+		return v;
+	}
+
+
+	void SetRotation(index_t idx, const Vec3 &v) 
+	{ 
+		Vec3x3KeyFrame *key = GetKeyframe(idx);
+
+		if (key)
+		{
+			key->mData[0] = v;
+		}
+	}
+
+
+	Vec3 GetScale(index_t idx) 
+	{ 
+		Vec3 v;
+		Vec3x3KeyFrame *key = GetKeyframe(idx);
+
+		if (key)
+		{
+			v = key->mData[1];
+		}
+
+		return v;
+	}
+
+
+	void SetScale(index_t idx, const Vec3 &v) 
+	{ 
+		Vec3x3KeyFrame *key = GetKeyframe(idx);
+
+		if (mFlags & fCreateMissingKeys && key == NULL)
+		{
+			// FIXME: Not like this  =0
+		}
+
+		if (key)
+		{
+			for (uint32 i = 0; i < 3; ++i)
+			{
+				// Scale = 0.0f undefined property, so filter it out
+				if (v.mVec[i] > 0.0f)
+					key->mData[1].mVec[i] = v.mVec[i]; 
+			}
+		}
+	}
+
+
+	Vec3 GetPosition(index_t idx) 
+	{
+		Vec3 v;
+		Vec3x3KeyFrame *key = GetKeyframe(idx);
+
+		if (key)
+		{
+			v = key->mData[2];
+		}
+
+		return v;
+	}
+
+
+	void SetPosition(index_t idx, const Vec3 &v) 
+	{ 
+		Vec3x3KeyFrame *key = GetKeyframe(idx);
+
+		if (key)
+		{
+			key->mData[2] = v; 
+		}
+	}
+
+
+	void Scale(index_t idx, Vec3 v) { SetScale(idx, v); }	
+
+	void Scale(index_t idx, vec3_t xyz) { SetScale(idx, Vec3(xyz)); }	
+
+	void Scale(index_t idx, vec_t s) { SetScale(idx, Vec3(s, s, s)); }
+
+	void ScaleX(index_t idx, vec_t x) { SetScale(idx, Vec3(x, 1.0f, 1.0f)); }
+
+	void ScaleY(index_t idx, vec_t y) { SetScale(idx, Vec3(1.0f, y, 1.0f)); }
+
+	void ScaleZ(index_t idx, vec_t z) { SetScale(idx, Vec3(1.0f, 1.0f, z)); }
+
+
+	//Matrix mTransform;                /* Cached transform */
+
+	//Matrix mInverse;                  /* Cached inverse of transform */
 };
 
 

@@ -1,14 +1,20 @@
 
  ChangeLog 
 
- Freyja 0.9.5 ( Development - This will not always compile from svn )
+ Freyja 0.9.5 Development branch
  =====================================================================
 
- 20061102 Terry 'Mongoose' Hendrix II
+ (20061102 Terry 'Mongoose' Hendrix II)
+ - Fix for mesh keyframe rotation
+ - Keyframe backend test with mesh animation done
+ - FIX for the pull down modifier events
+ - FIX for scale cursor 
+ - FIX rotation cursor reversal bug
+ - Material control 'shelf tab' -- very nice
  - Light 3d cursor events hooked up real quick
  - Tune up for backend keyfame implementation ( ch-ch-changes )
  - Unsmoothed/filtered keyframe animation test for 'Pos' 
- - Fix for animation scheme not being able to adjust viewport offset
+ - FIX for animation scheme not being able to adjust viewport offset
  - FIX recent files with spaces should cache and reload now
  - User controled four window render setting ( Not all controls hooked up )
  - Reverse Engineer plugin UI updated
@@ -25,7 +31,7 @@
  - Refactoring KeyFrame API, so it can be extendable to all object types
 
 
- 20061021 Terry 'Mongoose' Hendrix II
+ (20061021 Terry 'Mongoose' Hendrix II)
  - Improved mgtk tree system with new helper layer
  - mgtk generic tree update
  - mgtk removed extra checking code, leaks, etc
