@@ -11,6 +11,9 @@
  =====================================================================
 
  Known bugs
+
+ - Keyframes should keep transform of last keyframe as init
+   to avoid interpolation issues ( eg extra rotation in 'tweens )
  
  - Texture uploading in perlinnoise plugin seems broken
 
