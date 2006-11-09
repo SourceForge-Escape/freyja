@@ -6,9 +6,6 @@
 
  Hot
 	- Single joint animation for shishi odoshi test
-		- Interpolation on the backend side
-			- Request keyframe, if it does exist generate tmp and pass by
-			  value back -- then we're done with the major stuff  ;)
 		- Keyframe editor improvements ( autokeyframe is really anim mode atm )
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support

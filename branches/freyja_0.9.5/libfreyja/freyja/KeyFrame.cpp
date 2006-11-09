@@ -181,7 +181,13 @@ void TransformTrack::GetTransform(vec_t time,
 			pos.mVec[1] = pos.mVec[1] + w * (posNext.mVec[1] - pos.mVec[1]);
 			pos.mVec[2] = pos.mVec[2] + w * (posNext.mVec[2] - pos.mVec[2]);
 
+			rot.mVec[0] = rot.mVec[0] + w * (rotNext.mVec[0] - rot.mVec[0]);
+			rot.mVec[1] = rot.mVec[1] + w * (rotNext.mVec[1] - rot.mVec[1]);
+			rot.mVec[2] = rot.mVec[2] + w * (rotNext.mVec[2] - rot.mVec[2]);
 
+			scale.mVec[0] = scale.mVec[0] + w * (scaleNext.mVec[0] - scale.mVec[0]);
+			scale.mVec[1] = scale.mVec[1] + w * (scaleNext.mVec[1] - scale.mVec[1]);
+			scale.mVec[2] = scale.mVec[2] + w * (scaleNext.mVec[2] - scale.mVec[2]);
 
 			//freyjaPrintMessage("   => %f = %f + %f * (%f - %f)\n",
 			//				   pos.mVec[1], pos.mVec[1], 
