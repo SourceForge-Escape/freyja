@@ -11,17 +11,28 @@
  =====================================================================
 
  Known bugs
+ 
+ - Texture uploading in perlinnoise plugin seems broken
+
+ - What happened to ray picked UV faces in UV editor?
+
+ - Orbital/Free view ray pick is off
 
  - Scale tool sucks it's so broke nothing works properly
 	- Keyframe scaling edits geometery instead of keyframe
+
  - Face scale, scale doesn't work
- - Can't move viewport space in auto keyframe mode
+
  - Skeleton tree widget not cleared on Clear()
+
  - Rotation cursor doesn't work using rings yet
+
  - Scale cursor doesn't work with stretch yet
+
  - Bone rotate only works on Front
+
  - Bone componet creation is broken / not completely hooked up
+
  - Box buttons look like labels to people
- - Object rotate operation for meshes is reversed from the 'preview'
- - Object scale is broken
+
 

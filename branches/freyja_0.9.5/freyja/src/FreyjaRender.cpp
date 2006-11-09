@@ -194,7 +194,7 @@ void FreyjaRender::DrawFreeWindow()
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glTranslatef(mScroll[0], mScroll[1]/*+8.0f*/, mScroll[2]);
+	glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
 
 	if (mRenderMode & fGrid)
 	{
@@ -373,7 +373,6 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 {
 	bool arb_multitexture, ext_texture_env_combine;
 
-
 	/* Log OpenGL driver support information */
 	freyja_print("[GL Driver Info]");
 	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
@@ -436,7 +435,6 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 	glDisable(GL_TEXTURE_1D);
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_FOG);
-
 	glDisable(GL_NORMALIZE);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -445,13 +443,7 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 	glDisableClientState(GL_NORMAL_ARRAY);
 
 	glPolygonMode(GL_FRONT, GL_FILL);
-
 	glMatrixMode(GL_MODELVIEW);
-
-	// Generate XYZ Axis symbol display list
-	//glNewList(1, GL_COMPILE);
-	//mglDrawAxis(0.25f, 1.2f, 0.872f);
-	//glEndList();
 
 	SetNearHeight(20.0f);
 
@@ -731,16 +723,21 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	if (mRenderMode & fKeyFrameAnimation)
 	{
 		uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+		Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
 
-		if (k < mCurveTest.size())
+		if (key)
 		{
-			vec_t x = 0.0f, y = 0.0f, z = 0.0f;
-			x = 1;//mCurveTest[k].mVec[0];
-			y = mCurveTest[k].mVec[1];
-			z = 1;//mCurveTest[k].mVec[2];
-			glTranslatef(x, y, z);
+			glTranslatef(key->mData[2].mVec[0], 
+						 key->mData[2].mVec[1], 
+						 key->mData[2].mVec[2]);	
 			
-			//glScalef(x, y, z);
+			glRotatef(key->mData[0].mVec[0], 1,0,0);
+			glRotatef(key->mData[0].mVec[1], 0,1,0);
+			glRotatef(key->mData[0].mVec[2], 0,0,1);
+
+			glScalef(key->mData[1].mVec[0], 
+					 key->mData[1].mVec[1],
+					 key->mData[1].mVec[2]);
 		}
 	}
 
@@ -767,6 +764,15 @@ void FreyjaRender::Render(RenderMesh &mesh)
 							 -m->GetBoundingVolumeCenter().mVec[2]);
 				break;
 				
+			case freyja3d::Cursor::Scale:
+				// Haven't got the backend / frontend ready for this yet
+				if (FreyjaControl::mInstance->GetCursor().mSelected)
+				{
+					Vec3 u = FreyjaControl::mInstance->GetCursor().mScale;
+					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
+				}
+				break;
+
 			case freyja3d::Cursor::Translation:
 				// Haven't got the backend / frontend ready for this yet
 				if (FreyjaControl::mInstance->GetCursor().mSelected)
@@ -946,6 +952,12 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	glPopAttrib();
 
 	glPopMatrix();
+}
+
+
+void FreyjaRender::Flag(flags_t flag, bool t)
+{
+	t ? SetFlag(flag) : ClearFlag(flag);
 }
 
 
@@ -1135,6 +1147,26 @@ void FreyjaRender::DrawCurveWindow()
 	unsigned int height = GetWindowHeight();
 	uint32 curKey = FreyjaControl::mInstance->GetSelectedKeyFrame();
 	float x = 0.0f, y = 80.0f;
+
+#if 0
+	uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+	Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
+
+	if (key)
+	{
+		glTranslatef(key->mData[2].mVec[0], 
+					 key->mData[2].mVec[1], 
+					 key->mData[2].mVec[2]);	
+		
+		glRotatef(key->mData[0].mVec[0], 1,0,0);
+		glRotatef(key->mData[0].mVec[1], 0,1,0);
+		glRotatef(key->mData[0].mVec[2], 0,0,1);
+		
+		glScalef(key->mData[1].mVec[0], 
+				 key->mData[1].mVec[1],
+				 key->mData[1].mVec[2]);
+	}
+#endif
 
 	if (mCurveTest.size() == 0)
 	{

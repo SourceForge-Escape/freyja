@@ -285,6 +285,10 @@ public:
 	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
+	// Testing embedded keyframing as public attribute, so bare with us...
+	TransformTrack mTrack;
+	//VertexAnimationTrack mVertexAnimTrack;
+
 
 	////////////////////////////////////////////////////////////
 	// Bounding Volume properties

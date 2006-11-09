@@ -526,6 +526,13 @@ class FreyjaControl
 	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
+	void SetRenderFlag(FreyjaRender::flags_t flag, bool t, const char *s)
+	{
+		mRender->Flag(flag, t);
+		freyja_print("%s is [%s]", s, t ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+	}
+
 	void Display()
 	{
 		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
@@ -962,7 +969,6 @@ private:
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-
 
 	void MotionEdit(int x, int y, freyja_plane_t plane);
 	/*--------------------------------------------
