@@ -6,14 +6,16 @@
 
  Hot
 	- Single joint animation for shishi odoshi test
-		- Finish hooking up eScheme_Animation in FreyjaControl
-		- Keyframe editor
-			- Mesh vertex group keyframes ( vertex animation )
+		- Interpolation on the backend side
+			- Request keyframe, if it does exist generate tmp and pass by
+			  value back -- then we're done with the major stuff  ;)
+		- Keyframe editor improvements ( autokeyframe is really anim mode atm )
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
 
 	- Skeletal animation
+		- Mesh vertex group keyframes ( vertex animation ties into deforming )
 		- Bone keyframes
 		- Fix bone rendering to support unparented bones that aren't root? 
 			- Fix bone world coord
@@ -37,6 +39,7 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- Path animation
 	- Allow user to set radius of vertex and texcoord picks
 	- Mesh / Vertex / Face transforms fully working in dev branch
 	- Use status bar for mouse over tooltips also

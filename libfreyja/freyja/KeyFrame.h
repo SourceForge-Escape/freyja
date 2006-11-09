@@ -239,7 +239,6 @@ public:
 		return INDEX_INVALID;
 	}
 
-
 	virtual KeyFrame *GetKeyframe(index_t idx) 
 	{ return (idx < mKeyFrames.size()) ? 
 		(mKeyFrames.getVectorArray())[idx] : NULL; }
@@ -307,7 +306,7 @@ public:
 
 	vec_t mDuration;		         /* How long is this track */	
 
-	byte mFlags;
+	byte mFlags;                     /* Control flags */
 };
 
 
@@ -315,7 +314,7 @@ class TransformTrack : public Track
 {
 public:
 
-	TransformTrack() : Track() { }
+	TransformTrack() : Track() { mName = "Transform"; }
 
 	~TransformTrack() {}
 
@@ -325,7 +324,7 @@ public:
 
 		key->mData[0] = Vec3(0,0,0); // Rotate
 		key->mData[1] = Vec3(1,1,1); // Scale
-		key->mData[0] = Vec3(0,0,0); // Translate
+		key->mData[2] = Vec3(0,0,0); // Translate
 		return key;
 	}
 
@@ -334,6 +333,9 @@ public:
 	{
 		return (Vec3x3KeyFrame *)Track::GetKeyframe(idx);
 	}
+
+
+	virtual void GetTransform(vec_t time, Vec3 &pos, Vec3 &rot, Vec3 &scale) ;
 
 
 	Vec3 GetRotation(index_t idx) 

@@ -723,6 +723,7 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	if (mRenderMode & fKeyFrameAnimation)
 	{
 		uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+#if 0
 		Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
 
 		if (key)
@@ -739,6 +740,17 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					 key->mData[1].mVec[1],
 					 key->mData[1].mVec[2]);
 		}
+#else
+		vec_t time = (vec_t)k / m->mTrack.GetRate();
+		Vec3 pos, rot, scale;
+		m->mTrack.GetTransform(time, pos, rot, scale);
+
+		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
+		glRotatef(rot.mVec[0], 1,0,0);
+		glRotatef(rot.mVec[1], 0,1,0);
+		glRotatef(rot.mVec[2], 0,0,1);
+		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
+#endif
 	}
 
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)

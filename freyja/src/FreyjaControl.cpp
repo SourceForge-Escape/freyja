@@ -4431,8 +4431,9 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 		break;
 
 	default:
-		MARK_MSGF("%s(): Undo type=%s, action=%i not implemented.", 
+		MARK_MSGF("%s(): type=%s, action=%i not implemented.", 
 				  __func__, ObjectTypeToString(obj).c_str(), action);
+		return;
 	}
 
 	
@@ -4503,7 +4504,8 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 		break;
 
 	default:
-		MARK_MSGF("Not Implemented"); 
+		freyja_print("%s(): type=%s, action=%i not implemented.", 
+					 __func__, ObjectTypeToString(obj).c_str(), action);
 	}
 }
 
