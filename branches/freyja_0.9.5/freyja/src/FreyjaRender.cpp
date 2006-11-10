@@ -1161,6 +1161,8 @@ void FreyjaRender::DrawCurveWindow()
 	if (!m)
 		return;
 
+	vec2_t p;
+
 	glPushMatrix();
 	mgl2dProjection(width, height);
 	glPushAttrib(GL_ENABLE_BIT);
@@ -1172,21 +1174,19 @@ void FreyjaRender::DrawCurveWindow()
 
 	if (curKey < m->mTrack.mKeyFrames.size())
 	{
-		vec_t time = (vec_t)curKey / m->mTrack.GetRate();
-		Vec3 pos, rot, scale;
-		m->mTrack.GetTransform(time, pos, rot, scale);
-
-		Vec3 v(x + time, yT + pos.mVec[1], 0.0f);
-		glColor3fv(RED);
-		glBegin(GL_POINTS);
-		glVertex2fv(v.mVec);
+		p[0] = x + curKey*s;		
+		p[1] = 0.0f;
+		glColor3fv(PINK); // gSweepColor
+		glBegin(GL_LINES);
+		glVertex2fv(p);
+		p[1] = height;
+		glVertex2fv(p);
 		glEnd();
 	}
 
 	glColor3fv(YELLOW);
 	glBegin(GL_POINTS);
 	unsigned int idx = 0;
-	vec2_t p;
 	foreach (m->mTrack.mKeyFrames, idx)
 	{
 		Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(idx);

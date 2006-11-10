@@ -212,7 +212,8 @@ PROG_OBJS = \
 	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
-	$(BUILDDIR)/Skeleton.o
+	$(BUILDDIR)/Skeleton.o \
+	$(BUILDDIR)/Track.o 
 
 
 
