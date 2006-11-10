@@ -114,7 +114,7 @@ public:
 		fBonesNoZbuffer            = 32768,
 		fRenderGridClearedZBuffer  = 65536,
 		fKeyFrameAnimation         = 131072,
-		fReserved262144            = 262144,
+		fSolidPlane                = 262144,
 		fReserved524288            = 524288
 	} flags_t;
 
@@ -376,8 +376,6 @@ public:
 	static FreyjaRender *mSingleton;  // Not really, but will be later
 
 	static Ray mTestRay;
-
-	Vector<Vec3> mCurveTest;
 
 	uint32 mViewportsCount;                    /* How many viewports are used */
 

@@ -114,6 +114,8 @@ void mglDrawBone(unsigned char type, const vec3_t pos);
 
 void mglDrawJoint(unsigned char type, const vec3_t pos);
 
+void mglDrawPlane(vec_t size, vec_t step, vec_t scale);
+
 void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale);
 
 void mglGetOpenGLViewport(int *viewportXYWH); // int[4]

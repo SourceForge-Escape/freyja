@@ -32,6 +32,7 @@ index_t Mesh::mNextUID = 0;
 
 Mesh::Mesh() :
 	mTrack(),
+	mVertexAnimTrack(),
 	mUID(mNextUID++),
 	mInitBoundingVol(false),
 	mFlags(0),
@@ -70,6 +71,7 @@ Mesh::Mesh() :
 
 Mesh::Mesh(const Mesh &mesh) :
 	mTrack(),
+	mVertexAnimTrack(),
 	mUID(mNextUID++),
 	mInitBoundingVol(false),
 	mFlags(mesh.mFlags),
