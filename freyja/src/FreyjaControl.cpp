@@ -4672,7 +4672,9 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		break;
 
 	default:
-		;
+		freyja_print("! %s(): This view (%i) isn't supported.", 
+					__func__, GetSelectedView());
+		return;
 	}
 
 
@@ -4956,6 +4958,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	default:
 		freyja_print("! RotateObject(): This view (%i) isn't supported.",plane);
+		return;
 	}
 
 

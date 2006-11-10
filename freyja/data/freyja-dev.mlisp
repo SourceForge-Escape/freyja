@@ -249,7 +249,7 @@
 		(notebook 0 0 eNop
 
 		(tab "View" eNone			
-			(hbox 0 1 0 1 1		
+			(hbox 0 1 0 1 0		
 			(toolbar
 				(toolbar_togglebutton false "24x24/point.png" "Points" 
 					"Point render mode"		eEvent	eRenderVertex)

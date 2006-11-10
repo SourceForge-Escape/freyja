@@ -30,6 +30,10 @@ $(BUILDDIR)/FreyjaFSM.o: freyja/FreyjaFSM.cpp freyja/freyja.h freyja/Mesh.h \
   freyja/FreyjaFSM.h freyja/FreyjaPlugin.h freyja/FreyjaPrinter.h
 	 $(DO_CC)
 
+$(BUILDDIR)/Track.o: freyja/Track.cpp freyja/Track.h freyja/KeyFrame.h \
+  freyja/freyja.h
+	 $(DO_CC)
+
 $(BUILDDIR)/KeyFrame.o: freyja/KeyFrame.cpp freyja/KeyFrame.h freyja/freyja.h
 	 $(DO_CC)
 
