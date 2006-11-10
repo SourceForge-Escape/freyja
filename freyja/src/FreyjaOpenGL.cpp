@@ -806,6 +806,43 @@ void mglDrawJoint(unsigned char type, const vec3_t pos)
 }
 
 
+void mglDrawPlane(vec_t size, vec_t step, vec_t scale)
+{
+	vec_t x, z;
+
+	/* Draw grid without using GL Scaling, which is 'teh bad' */
+	glPushMatrix();
+
+	for (x = -size; x < size; x += step)
+	{
+		glBegin(GL_QUADS);
+
+		for (z = -size; z < size; z += step)
+		{
+			glNormal3f(0, 1, 0);
+			glTexCoord2f((x + step)/size, z/size);
+			glVertex3f((x + step) * scale, 0.0f, z * scale);
+
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(x/size, z/size);
+			glVertex3f(x * scale, 0.0f, z * scale);	
+
+			glNormal3f(0, 1, 0);
+			glTexCoord2f(x/size, (z + step)/size);
+			glVertex3f(x * scale, 0.0f, (z + step) * scale);
+
+			glNormal3f(0, 1, 0);
+			glTexCoord2f((x + step)/size, (z + step)/size);
+			glVertex3f((x + step) * scale, 0.0f, (z + step) * scale);
+		}
+
+		glEnd();
+	}
+
+	glPopMatrix();
+}
+
+
 void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 {
 	vec_t x, z;

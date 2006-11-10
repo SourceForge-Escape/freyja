@@ -6,6 +6,9 @@
 
  Hot
 	- Single joint animation for shishi odoshi test
+		- Might want to add rotation types or always do 'about center' pivots
+			- Pivot: 3d cursor, bbox center, etc
+		- freyja ABI wrapper for new keyframe backend
 		- Keyframe editor improvements ( autokeyframe is really anim mode atm )
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
@@ -31,7 +34,6 @@
 		- Sphere brush for weight painting, etc
 		- init-dev.mlisp
 		- Camera render mode for viewport
-		- Pivot: 3d cursor, bbox center, etc
 
  ----------------------------------------------------------------------------
 

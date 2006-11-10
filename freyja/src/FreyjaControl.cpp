@@ -4421,6 +4421,7 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 
 	case fScaleAboutPoint:
 	case fScale:
+		u = v;
 		u.mVec[0] = 1.0f / v.mVec[0];
 		u.mVec[1] = 1.0f / v.mVec[1];
 		u.mVec[2] = 1.0f / v.mVec[2];

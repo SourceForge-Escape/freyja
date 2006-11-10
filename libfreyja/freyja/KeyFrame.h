@@ -65,9 +65,7 @@ public:
 
 	virtual void SetTime(vec_t time) { mTime = time; }
 
-	byte mFlags;       /* Used in obsolete code */
-
-	//	index_t mIndex;    /* Used in obsolete code - List index for speedy insertion */
+	byte mFlags;       /* Used in obsolete code for interface use */
 
 	vec_t mTime;       /* Time offset to this frame in sec */
 };
@@ -164,6 +162,50 @@ class MatrixKeyFrame : public KeyFrame
 	Matrix mData;
 };
 
+
+class VertexAnimKeyFrame : public KeyFrame
+{
+public:
+	VertexAnimKeyFrame() : KeyFrame(), mVertices() { }
+	
+	~VertexAnimKeyFrame() {}
+
+	void ArrayResize(uint32 sz) { mVertices.resize(sz); } 
+
+	vec_t *GetArray() { return mVertices.getVectorArray(); }
+
+	uint32 GetArraySize() { return mVertices.size(); }
+
+	Vec3 GetPos(uint32 i)
+	{
+		Vec3 pos(0,0,0);
+
+		if (i < mVertices.end())
+		{
+			vec_t *array = mVertices.getVectorArray();
+			i *= 3;
+			pos.mVec[0] = array[i];
+			pos.mVec[1] = array[i+1];
+			pos.mVec[2] = array[i+2];
+		}
+
+		return pos;
+	}
+
+	void SetPos(uint32 i, Vec3 pos)
+	{
+		if (i < mVertices.end())
+		{
+			vec_t *array = mVertices.getVectorArray();
+			i *= 3;
+			array[i  ] = pos.mVec[0];
+			array[i+1] = pos.mVec[1];
+			array[i+2] = pos.mVec[2];
+		}
+	}
+
+	Vector<vec_t> mVertices;
+};
 
 
 class Track
@@ -310,6 +352,27 @@ public:
 };
 
 
+class VertexAnimTrack : public Track
+{
+public:
+	VertexAnimTrack() : Track() { mName = "VertexAnim"; }
+	
+	~VertexAnimTrack() {}
+
+	
+	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
+	{
+		VertexAnimKeyFrame *key = new VertexAnimKeyFrame();
+		return key;
+	}
+
+	virtual VertexAnimKeyFrame *GetKeyframe(index_t idx) 
+	{
+		return (VertexAnimKeyFrame *)Track::GetKeyframe(idx);
+	}
+};
+
+
 class TransformTrack : public Track
 {
 public:
@@ -335,7 +398,7 @@ public:
 	}
 
 
-	virtual void GetTransform(vec_t time, Vec3 &pos, Vec3 &rot, Vec3 &scale) ;
+	virtual void GetTransform(vec_t time, Vec3 &pos, Vec3 &rot, Vec3 &scale);
 
 
 	Vec3 GetRotation(index_t idx) 

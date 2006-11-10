@@ -196,7 +196,12 @@ void FreyjaRender::DrawFreeWindow()
 
 	glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
 
-	if (mRenderMode & fGrid)
+	if (mRenderMode & fSolidPlane)
+	{
+		glColor3fv(WHITE);
+		mglDrawPlane(50.0f, 2.0f, 1.0f);
+	}
+	else if (mRenderMode & fGrid)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
@@ -206,16 +211,21 @@ void FreyjaRender::DrawFreeWindow()
 		glLineWidth(1.25f);
 		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
 
-		glLineWidth(1.75f);
+		glColor3fv(mColorGridLine);
+		glLineWidth(4.0f);
 		glBegin(GL_LINES);
-		glColor3fv(RED);
+		//glColor3fv(RED);
 		glVertex3f(-50.0f, 0.0f, 0.0f);	
 		glVertex3f(50.0f, 0.0f, 0.0f);
-		glColor3fv(BLUE);
+		//glColor3fv(BLUE);
 		glVertex3f(0.0f, 0.0f, -50.0f);	
 		glVertex3f(0.0f, 0.0f, 50.0f);
+		glEnd();
 
-		glColor3fv(mColorGridLine);
+#if 1
+		//glColor3fv(mColorGridLine);
+		glLineWidth(1.75f);
+		glBegin(GL_LINES);
 
 		for (float x = -50.0f; x < 60.0f; x += 10.f)
 		{
@@ -227,10 +237,13 @@ void FreyjaRender::DrawFreeWindow()
 			glVertex3f(-50.0f, 0.0f, x);	
 			glVertex3f(50.0f, 0.0f, x);
 		}
+
 		glEnd();
+#endif
 
 		glPopAttrib();
 	}
+
 	//glPopMatrix();
 
 	//glPushMatrix();
@@ -723,24 +736,8 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	if (mRenderMode & fKeyFrameAnimation)
 	{
 		uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
-#if 0
-		Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
 
-		if (key)
-		{
-			glTranslatef(key->mData[2].mVec[0], 
-						 key->mData[2].mVec[1], 
-						 key->mData[2].mVec[2]);	
-			
-			glRotatef(key->mData[0].mVec[0], 1,0,0);
-			glRotatef(key->mData[0].mVec[1], 0,1,0);
-			glRotatef(key->mData[0].mVec[2], 0,0,1);
-
-			glScalef(key->mData[1].mVec[0], 
-					 key->mData[1].mVec[1],
-					 key->mData[1].mVec[2]);
-		}
-#else
+		// Mesh animation
 		vec_t time = (vec_t)k / m->mTrack.GetRate();
 		Vec3 pos, rot, scale;
 		m->mTrack.GetTransform(time, pos, rot, scale);
@@ -750,7 +747,6 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		glRotatef(rot.mVec[1], 0,1,0);
 		glRotatef(rot.mVec[2], 0,0,1);
 		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
-#endif
 	}
 
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
@@ -1154,44 +1150,16 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 
 void FreyjaRender::DrawCurveWindow()
 {
-	const vec_t scale = 6.5f;
+	const vec_t s = 6.5f;
 	unsigned int width = GetWindowWidth();
 	unsigned int height = GetWindowHeight();
 	uint32 curKey = FreyjaControl::mInstance->GetSelectedKeyFrame();
-	float x = 0.0f, y = 80.0f;
+	vec_t x = 0.0f, y = 0.0f, yS = 80.0f, yT = 80.0f, yR = 80.0f;
 
-#if 0
-	uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
-	Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
 
-	if (key)
-	{
-		glTranslatef(key->mData[2].mVec[0], 
-					 key->mData[2].mVec[1], 
-					 key->mData[2].mVec[2]);	
-		
-		glRotatef(key->mData[0].mVec[0], 1,0,0);
-		glRotatef(key->mData[0].mVec[1], 0,1,0);
-		glRotatef(key->mData[0].mVec[2], 0,0,1);
-		
-		glScalef(key->mData[1].mVec[0], 
-				 key->mData[1].mVec[1],
-				 key->mData[1].mVec[2]);
-	}
-#endif
-
-	if (mCurveTest.size() == 0)
-	{
-		vec_t xx = 0, yy = 0;
-		for (int i = 0; i < 100; ++i)
-		{
-			xx = 0;
-			yy = helRandomNum(0.0f, 8.0f);
-
-			Vec3 v(xx, yy, 0.0f);
-			mCurveTest.pushBack(v);
-		}
-	}
+	if (!m)
+		return;
 
 	glPushMatrix();
 	mgl2dProjection(width, height);
@@ -1202,47 +1170,104 @@ void FreyjaRender::DrawCurveWindow()
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mDefaultPointSize);
 
-	// Fake 'data' to test the rendering look and feel
-	if (curKey < mCurveTest.size())
+	if (curKey < m->mTrack.mKeyFrames.size())
 	{
-		Vec3 v(x + curKey*scale, y + mCurveTest[curKey].mVec[1], 0.0f);
+		vec_t time = (vec_t)curKey / m->mTrack.GetRate();
+		Vec3 pos, rot, scale;
+		m->mTrack.GetTransform(time, pos, rot, scale);
+
+		Vec3 v(x + time, yT + pos.mVec[1], 0.0f);
 		glColor3fv(RED);
 		glBegin(GL_POINTS);
 		glVertex2fv(v.mVec);
 		glEnd();
 	}
+
 	glColor3fv(YELLOW);
 	glBegin(GL_POINTS);
 	unsigned int idx = 0;
-	foreach (mCurveTest, idx)
+	vec2_t p;
+	foreach (m->mTrack.mKeyFrames, idx)
 	{
-		Vec3 v(x + idx*scale, y + mCurveTest[idx].mVec[1], 0.0f);
+		Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(idx);
+
+		if (key)
+		{
+			p[0] = x + idx*s;
+
+			p[1] = yT + key->mData[2].mVec[0];
+			glVertex2fv(p);
+
+			p[1] = yT + key->mData[2].mVec[1];
+			glVertex2fv(p);
+
+			p[1] = yT + key->mData[2].mVec[2];
+			glVertex2fv(p);
+		}
+	}
+	glEnd();
+
+	vec_t time;
+	Vec3 v, pos, rot, scale;
+	m->mTrack.GetTransform(time, pos, rot, scale);
+
+	glColor3fv(RED);
+	glBegin(GL_LINES);
+	glVertex2f(x, yT);
+	vec_t rateInverse = 1.0f / m->mTrack.GetRate();
+	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
+	{
+		time = (vec_t)i * rateInverse;
+		m->mTrack.GetTransform(time, pos, rot, scale);
+		v.mVec[0] = x + i*s;
+		v.mVec[1] = yT + pos.mVec[0];
+		glVertex2fv(v.mVec);
 		glVertex2fv(v.mVec);
 	}
+	glVertex2f(width, yT);
 	glEnd();
 
 	glColor3fv(GREEN);
 	glBegin(GL_LINES);
-	glVertex2f(x, y);
-	idx = 0;
-	foreach (mCurveTest, idx)
+	glVertex2f(x, yT);
+	rateInverse = 1.0f / m->mTrack.GetRate();
+	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
 	{
-		Vec3 v(x + idx*scale, y + mCurveTest[idx].mVec[1], 0.0f);
+		time = (vec_t)i * rateInverse;
+		m->mTrack.GetTransform(time, pos, rot, scale);
+		v.mVec[0] = x + i*s;
+		v.mVec[1] = yT + pos.mVec[1];
 		glVertex2fv(v.mVec);
 		glVertex2fv(v.mVec);
 	}
-	glVertex2f(width, y);
+	glVertex2f(width, yT);
 	glEnd();
 
-	y = 0;
+
+	glColor3fv(BLUE);
+	glBegin(GL_LINES);
+	glVertex2f(x, yT);
+	rateInverse = 1.0f / m->mTrack.GetRate();
+	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
+	{
+		time = (vec_t)i * rateInverse;
+		m->mTrack.GetTransform(time, pos, rot, scale);
+		v.mVec[0] = x + i*s;
+		v.mVec[1] = yT + pos.mVec[2];
+		glVertex2fv(v.mVec);
+		glVertex2fv(v.mVec);
+	}
+	glVertex2f(width, yT);
+	glEnd();
+
 
 	if (mRenderMode & fGrid)
 	{
 		const int szA = 20, szB = 80;
-		int xi = (int)x;
-		int yi = (int)y;
-		int offset_x = (int)x;//(xi % size) - width;
-		int offset_y = (int)y;//(yi % size) - height;
+		int xi = 0;
+		int yi = 0;
+		int offset_x = (int)xi;//(xi % size) - width;
+		int offset_y = (int)yi;//(yi % size) - height;
 
 		glLineWidth(1.0);
 		glColor3fv(mColorGridLine);
