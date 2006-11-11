@@ -35,19 +35,16 @@
 #include <time.h>
 #include <assert.h>
 
-#include <mgtk/ResourceEvent.h>
+//#include <mgtk/ResourceEvent.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
-
 
 #include "freyja_events.h"
 #include "FreyjaControl.h"
 
 #include "FreyjaRender.h"
 
-#define TEST_NEW_BACKEND_FORMAT 1
-#define COLORED_POLYGON -1
 
 using namespace freyja;
 using namespace freyja3d;
@@ -198,8 +195,13 @@ void FreyjaRender::DrawFreeWindow()
 
 	if (mRenderMode & fSolidPlane)
 	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
+		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedTexture());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
+		glPopAttrib();
 	}
 	else if (mRenderMode & fGrid)
 	{
@@ -293,33 +295,22 @@ void FreyjaRender::DrawFreeWindow()
 }
 
 
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
 
 
-///////// PRIVATE METHODS ////////////////////////////////
+////////////////////////////////////////////////////////////
+// Private Mutators
+////////////////////////////////////////////////////////////
 
-void FreyjaRender::BindTexture(unsigned int texture)
+void FreyjaRender::BindTexture(uint32 texture)
 {
-	static int hack = 0;
-
-
 	if (mRenderMode & fTexture && texture != mTextureId)
 	{
-		if ((int)texture == COLORED_POLYGON)
-		{
-			hack = COLORED_POLYGON;
-			glDisable(GL_TEXTURE_2D);
-		}
-		else
-		{
-			if (hack == COLORED_POLYGON)
-			{
-				hack = 0;
-				glEnable(GL_TEXTURE_2D);
-			}
-
-			mTextureId = texture;  // First texture is white for colored_poly
-			glBindTexture(GL_TEXTURE_2D, texture+1);
-		}
+		mTextureId = texture;
+		// First texture is reserved for 'white texture' for color
+		glBindTexture(GL_TEXTURE_2D, mTextureId + 1);
 	}
 }
 
@@ -403,15 +394,20 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 	freyja_print("\tGL_EXT_texture_env_combine\t\t[%s]",
 			 ext_texture_env_combine ? "YES" : "NO");
 
+	// FIXME: This should be user defined in mlisp as mvars
+
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	//glDepthFunc(GL_LEQUAL);
 
 	glEnable(GL_TEXTURE_2D);
 
 	// Set up culling
 	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_FRONT);
 	//glFrontFace(GL_CCW);
+	//glCullFace(GL_BACK);
 
 	// Set background to black
 	glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
@@ -1154,7 +1150,8 @@ void FreyjaRender::DrawCurveWindow()
 	unsigned int width = GetWindowWidth();
 	unsigned int height = GetWindowHeight();
 	uint32 curKey = FreyjaControl::mInstance->GetSelectedKeyFrame();
-	vec_t x = 0.0f, y = 0.0f, yS = 80.0f, yT = 80.0f, yR = 80.0f;
+	vec_t x = 0.0f, y = 0.0f;
+	vec3_t yT = { 80.0f, 160.0f, 240.0f };
 
 	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
 
@@ -1184,28 +1181,31 @@ void FreyjaRender::DrawCurveWindow()
 		glEnd();
 	}
 
-	glColor3fv(YELLOW);
-	glBegin(GL_POINTS);
-	unsigned int idx = 0;
-	foreach (m->mTrack.mKeyFrames, idx)
+	for ( uint32 ii = 0; ii < 3; ++ii )
 	{
-		Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(idx);
-
-		if (key)
+		glColor3fv(YELLOW);
+		glBegin(GL_POINTS);
+		unsigned int idx = 0;
+		foreach (m->mTrack.mKeyFrames, idx)
 		{
-			p[0] = x + idx*s;
-
-			p[1] = yT + key->mData[2].mVec[0];
-			glVertex2fv(p);
-
-			p[1] = yT + key->mData[2].mVec[1];
-			glVertex2fv(p);
-
-			p[1] = yT + key->mData[2].mVec[2];
-			glVertex2fv(p);
+			Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(idx);
+			
+			if (key)
+			{
+				p[0] = x + idx*s;
+				
+				p[1] = yT[ii] + key->mData[ii].mVec[0];
+				glVertex2fv(p);
+				
+				p[1] = yT[ii] + key->mData[ii].mVec[1];
+				glVertex2fv(p);
+				
+				p[1] = yT[ii] + key->mData[ii].mVec[2];
+				glVertex2fv(p);
+			}
 		}
+		glEnd();
 	}
-	glEnd();
 
 	vec_t time;
 	Vec3 v, pos, rot, scale;
@@ -1213,51 +1213,51 @@ void FreyjaRender::DrawCurveWindow()
 
 	glColor3fv(RED);
 	glBegin(GL_LINES);
-	glVertex2f(x, yT);
+	glVertex2f(x, yT[2]);
 	vec_t rateInverse = 1.0f / m->mTrack.GetRate();
 	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
 	{
 		time = (vec_t)i * rateInverse;
 		m->mTrack.GetTransform(time, pos, rot, scale);
 		v.mVec[0] = x + i*s;
-		v.mVec[1] = yT + pos.mVec[0];
+		v.mVec[1] = yT[2] + pos.mVec[0];
 		glVertex2fv(v.mVec);
 		glVertex2fv(v.mVec);
 	}
-	glVertex2f(width, yT);
+	glVertex2f(width, yT[2]);
 	glEnd();
 
 	glColor3fv(GREEN);
 	glBegin(GL_LINES);
-	glVertex2f(x, yT);
+	glVertex2f(x, yT[2]);
 	rateInverse = 1.0f / m->mTrack.GetRate();
 	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
 	{
 		time = (vec_t)i * rateInverse;
 		m->mTrack.GetTransform(time, pos, rot, scale);
 		v.mVec[0] = x + i*s;
-		v.mVec[1] = yT + pos.mVec[1];
+		v.mVec[1] = yT[2] + pos.mVec[1];
 		glVertex2fv(v.mVec);
 		glVertex2fv(v.mVec);
 	}
-	glVertex2f(width, yT);
+	glVertex2f(width, yT[2]);
 	glEnd();
 
 
 	glColor3fv(BLUE);
 	glBegin(GL_LINES);
-	glVertex2f(x, yT);
+	glVertex2f(x, yT[2]);
 	rateInverse = 1.0f / m->mTrack.GetRate();
 	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
 	{
 		time = (vec_t)i * rateInverse;
 		m->mTrack.GetTransform(time, pos, rot, scale);
 		v.mVec[0] = x + i*s;
-		v.mVec[1] = yT + pos.mVec[2];
+		v.mVec[1] = yT[2] + pos.mVec[2];
 		glVertex2fv(v.mVec);
 		glVertex2fv(v.mVec);
 	}
-	glVertex2f(width, yT);
+	glVertex2f(width, yT[2]);
 	glEnd();
 
 

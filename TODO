@@ -8,12 +8,13 @@
 	- Single joint animation for shishi odoshi test
 		- Might want to add rotation types or always do 'about center' pivots
 			- Pivot: 3d cursor, bbox center, etc
-		- freyja ABI wrapper for new keyframe backend
 		- Keyframe editor improvements ( autokeyframe is really anim mode atm )
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
-		- Track and Keyframe ABI
+		- freyja ABI wrapper for new keyframe backend
+			- BoneAnim, Transform, and VertexAnim type ABI support
+			- Track and Keyframe ABI
 
 	- Skeletal animation
 		- Mesh vertex group keyframes ( vertex animation ties into deforming )
@@ -26,6 +27,7 @@
 	- Interface
 		- Add generic box selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registers to mgtk
+		- Two window layout for curve / viewport usage
 		- Make viewport 'windows' abstract with seperate controls
 			- Support for dynamic resizing and 2/3/4 layouts
 			- FreyjaRender -> OpenGLContext, *ViewportRenderer
@@ -33,8 +35,9 @@
 			- Combine controls and view into a seperate class/pkg
 			  This will make it easier to scale and fix UI issues
 		- Sphere brush for weight painting, etc
-		- init-dev.mlisp
+		- Perferences, init-dev.mlisp
 		- Camera render mode for viewport
+			- OpenGL depth / culling / etc control?
 
  ----------------------------------------------------------------------------
 
@@ -50,9 +53,7 @@
 	- Add patch -> mesh support back!
 	- Interactive Tristrip creation tool to replace the old point and connect
    	  polgon creation some people seem to love
-	- Pak browser for tombraider / UT paks ( Gtk+ list? )
 	- GNOME MIME setup script
-	- Perferences, init.mlisp
 	- Polygon winding control ccw/cw/etc
 	- Remappable windows drive support
 

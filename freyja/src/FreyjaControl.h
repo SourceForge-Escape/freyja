@@ -547,6 +547,10 @@ class FreyjaControl
 	}
 
 
+	void SetFlag(options_t flag, bool t) 
+	{ (t) ? mFlags |= flag : mFlags ^= flag; }
+
+
 	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
 
 	uint32 GetViewMode() { return mRender->GetViewMode(); }
