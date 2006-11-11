@@ -5,7 +5,10 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Curve editor test starts
+ - Toolbar seperator
+ - Keyframe/Track serialization routinues ( yay )
+ - New Skeletal animation keyframes
+ - Curve editor test starts ( just outputting linear interpolation atm )
  - Vertex animation added to mesh in backend ( no interface yet )
  - Fix for mesh keyframe rotation
  - Keyframe backend test with mesh animation done

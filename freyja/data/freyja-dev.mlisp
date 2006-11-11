@@ -278,6 +278,9 @@
 				(toolbar_togglebutton false "24x24/grid.png" "Grid"
 					"Toggle plane grid rendering"	eEvent eRenderGrid)
 
+				(toolbar_togglebutton false "24x24/grid.png" "Ground"
+					"Toggle plane solid rendering"	eEvent eRenderSolidGround)
+
 				(toolbar_togglebutton false "24x24/pickray.png" "Pick Ray"
 					"Toggle pick ray rendering"	eEvent eRenderPickRay)
 
@@ -286,9 +289,9 @@
 
 				(toolbar_togglebutton false "24x24/deform.png" "Deform"
 					"Toggle skelmesh deform"	eEvent	eSkeletalDeform)
-			) ;  toolbar
 
-			(toolbar
+				(toolbar_separator)
+
 				(toolbar_togglebutton false "24x24/fourwin.png" "Deform"
 					"Enable four window view"	eEvent	eViewports)
 			) ; toolbar
@@ -323,9 +326,8 @@
 				(toolbar_button "24x24/patch.png"	" "
 					"Polygon patch"	eEvent	eNone)
 
-			) ;  toolbar
+				(toolbar_separator)
 
-			(toolbar
 				(toolbar_button "gtk-add"	" "
 					"Extrude face"	eEvent eExtrude)
 			) ; toolbar
@@ -350,9 +352,27 @@
 
 				(toolbar_togglebutton false "24x24/scale.png" "Scale" 
 					"Scale object" eEvent	eScaleObject)
-			) ;  toolbar
 
-			(toolbar
+				(toolbar_separator)
+
+				(toolbar_button	"gtk-undo" "Undo"
+					"Undo" eEvent eUndo)
+				(toolbar_button	"gtk-redo" "Redo"
+					"Redo" eEvent eRedo)
+
+				(toolbar_separator)
+
+				(toolbar_button	"gtk-cut" "Cut"
+					"Cut object" eEvent eCut)
+				(toolbar_button	"gtk-copy" "Copy"
+					"Copy object" eEvent eCopy)
+				(toolbar_button	"gtk-paste" "Paste"
+					"Paste object" eEvent ePaste)
+				(toolbar_button	"gtk-delete" "Delete"
+					"Delete object" eEvent eDelete)
+
+				(toolbar_separator)
+
 				(toolbar_togglebutton false "24x24/clone.png" "CopyM"
 					"Copy multiple objects" eEvent eCopyAppendMode)
 
@@ -384,9 +404,9 @@
 					(filechoosertoolbar_button	"gtk-save-as" "Save as..." 
 						"Saves material to disk" 
 						"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,")
-				) ;  toolbar
 
-				(toolbar
+				(toolbar_separator)
+
 					(toolbar_button "gtk-add" " "
 						"Set Mesh Material"	eEvent	eSetMeshTexture)
 

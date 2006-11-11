@@ -85,13 +85,12 @@ index_t freyjaKeyFrameCreate(int32 id)
 		return idx;
 
 	KeyFrame **array = gKeyFramePool.getVectorArray();
-	KeyFrame *obj = new KeyFrame();
+	KeyFrame *obj = new VecKeyFrame();
 
 	for ( uint32 i = 0, count = gKeyFramePool.size(); i < count; ++i )
 	{
 		if (array[i] == NULL)
 		{
-			//obj->mIndex = i;
 			array[i] = obj;
 			return i;
 		}

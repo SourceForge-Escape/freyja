@@ -918,6 +918,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eRenderMaterial", FREYJA_MODE_RENDER_MATERIAL);
 	r.RegisterInt("eRenderSkeleton",FREYJA_MODE_RENDER_BONETAG);
 	r.RegisterInt("eRenderGrid", FREYJA_MODE_RENDER_GRID);
+	r.RegisterInt("eRenderSolidGround", eRenderSolidGround);
 
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);

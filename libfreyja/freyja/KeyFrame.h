@@ -62,8 +62,34 @@ public:
 	 ------------------------------------------------------*/
 
 	vec_t GetTime() { return mTime; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	virtual void SetTime(vec_t time) { mTime = time; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual uint32 GetSerializedSize() = 0;
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
 
 	byte mFlags;       /* Used in obsolete code for interface use */
 
@@ -83,6 +109,26 @@ class VecKeyFrame : public KeyFrame
 
 	virtual void SetData(const vec_t v) { mData = v; }
 
+	virtual uint32 GetSerializedSize() { return 4; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{ return w.WriteFloat32(mData); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{ mData = r.ReadFloat32(); return true; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
 	vec_t mData;                      /* Keyframe data */
 };
 
@@ -99,6 +145,36 @@ class Vec3KeyFrame : public KeyFrame
 
 	virtual void SetData(const Vec3 &v) { mData = v; }
 
+	virtual uint32 GetSerializedSize() { return 4*3; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{
+		w.WriteFloat32(mData.mVec[0]);
+		w.WriteFloat32(mData.mVec[1]);
+		w.WriteFloat32(mData.mVec[2]);
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{ 
+		mData.mVec[0] = r.ReadFloat32();
+		mData.mVec[1] = r.ReadFloat32();
+		mData.mVec[2] = r.ReadFloat32(); 
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
 	Vec3 mData;                      /* Keyframe data */
 };
 
@@ -110,6 +186,42 @@ class Vec3x3KeyFrame : public KeyFrame
 	Vec3x3KeyFrame() : KeyFrame() {}
 
 	virtual ~Vec3x3KeyFrame() {}
+
+	virtual uint32 GetSerializedSize() { return 4*3*3; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			w.WriteFloat32(mData[i].mVec[0]);
+			w.WriteFloat32(mData[i].mVec[1]);
+			w.WriteFloat32(mData[i].mVec[2]);
+		}
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{ 
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			mData[i].mVec[0] = r.ReadFloat32();
+			mData[i].mVec[1] = r.ReadFloat32();
+			mData[i].mVec[2] = r.ReadFloat32(); 
+		}
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
 
 	Vec3 mData[3];                    /* Keyframe data */
 };
@@ -159,6 +271,38 @@ class MatrixKeyFrame : public KeyFrame
 
 	virtual void SetData(const Matrix &m) { mData = m; }
 
+	virtual uint32 GetSerializedSize() { return 4*16; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{
+		for (uint32 i = 0; i < 16; ++i)
+		{
+			w.WriteFloat32(mData.mMatrix[i]);
+		}
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{ 
+		for (uint32 i = 0; i < 16; ++i)
+		{
+			mData.mMatrix[i] = r.ReadFloat32();
+		}
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
 	Matrix mData;
 };
 
@@ -203,6 +347,47 @@ public:
 			array[i+2] = pos.mVec[2];
 		}
 	}
+
+	virtual uint32 GetSerializedSize() { return 4+4*mVertices.end(); }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{
+		uint32 sz = mVertices.end();
+		w.WriteInt32U(sz);
+
+		for (uint32 i = 0; i < sz; ++i)
+		{
+			w.WriteFloat32(mVertices[i]);
+		}
+
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{ 
+		mVertices.clear();
+
+		uint32 sz = r.ReadInt32U();
+
+		for (uint32 i = 0; i < sz; ++i)
+		{
+			mVertices.pushBack(r.ReadFloat32());
+		}
+
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
 
 	Vector<vec_t> mVertices;
 };

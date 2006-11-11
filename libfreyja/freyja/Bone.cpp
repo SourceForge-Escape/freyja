@@ -39,10 +39,7 @@ Bone::Bone() :
 	mTranslation(0.0f, 0.0f, 0.0f),
 	mBindPose(),
 	mBindToWorld(),
-	mFrameRotation(0.0f, 0.0f, 0.0f),
-	mFrameTranslation(0.0f, 0.0f, 0.0f),
-	mWorldPose(),
-	mCombined(),
+	mKeyframes(),
 	mUID(INDEX_INVALID)
 {
 	mName[0] = '\0';
