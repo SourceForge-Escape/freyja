@@ -26,7 +26,6 @@
 #ifndef GUARD__MONGOOSE_FREYJA_FREYJARENDER_H_
 #define GUARD__MONGOOSE_FREYJA_FREYJARENDER_H_
 
-
 #include <hel/ViewVolume.h>
 #include <hel/Ray.h>
 #include <freyja/RenderModel.h>
@@ -172,6 +171,13 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void GetShadowMap();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Draws from light's view and saves depth to texture
+	 *
+	 ------------------------------------------------------*/
+
 	const vec_t &GetWindowAspectRatio() { return mAspectRatio; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -197,7 +203,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const vec_t &getNearHeight() { return mScaleEnv; } 
+	const vec_t &GetNearHeight() { return mScaleEnv; } 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get GL context window height
@@ -393,31 +399,10 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	void RenderLights();
+	void BindTexture(uint32 texture);
 	/*------------------------------------------------------
-	 * Pre  : Called from viewport interface renderer
-	 * Post : Renders light symbol and does lighting setup
-	 *
-	 ------------------------------------------------------*/
-
-	void Render(RenderMesh &mesh);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders mesh
-	 *
-	 ------------------------------------------------------*/
-
-	void Render(RenderModel &model);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders model
-	 *
-	 ------------------------------------------------------*/
-
-	void Render(RenderSkeleton &skeleton, uint32 currentBone, vec_t scale);
-	/*------------------------------------------------------
-	 * Pre  : Called from proper method
-	 * Post : Renders skeleton
+	 * Pre  : texture is valid texture id
+	 * Post : Binds GL texture 
 	 *
 	 ------------------------------------------------------*/
 
@@ -466,6 +451,20 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void DrawShadowCasters(bool fromLight);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void DrawShadowRecievers();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void DrawUVWindow();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -480,6 +479,34 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void Render(RenderMesh &mesh);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders mesh
+	 *
+	 ------------------------------------------------------*/
+
+	void Render(RenderModel &model);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders model
+	 *
+	 ------------------------------------------------------*/
+
+	void Render(RenderSkeleton &skeleton, uint32 currentBone, vec_t scale);
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders skeleton
+	 *
+	 ------------------------------------------------------*/
+
+	void RenderLights();
+	/*------------------------------------------------------
+	 * Pre  : Called from viewport interface renderer
+	 * Post : Renders light symbol and does lighting setup
+	 *
+	 ------------------------------------------------------*/
+
 	void Rotate(float n, int axis);
 	/*------------------------------------------------------
 	 * Pre  : Axis is 0 = x, 1 = y, 2 = z
@@ -491,16 +518,13 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void BindTexture(unsigned int texture);
+	void ShadowedSceneSetup();
 	/*------------------------------------------------------
-	 * Pre  : texture is valid texture id
-	 * Post : Binds GL texture 
+	 * Pre  : 
+	 * Post : Light coordinate system conversion, etc
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.28:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
 
 	uint32 mViewMode;                          /* View mode */
 

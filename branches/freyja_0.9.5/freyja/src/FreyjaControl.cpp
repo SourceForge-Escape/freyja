@@ -1370,6 +1370,20 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
+	case eMaterialTex:
+		if (value)
+		{
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+		}
+		else
+		{
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+		}
+
+		freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
 	case ePolygonSize:
 		SetFaceEdgeCount(value);
 		freyja_print("Polygons creation using %i sides", GetFaceEdgeCount());
@@ -2016,18 +2030,6 @@ bool FreyjaControl::event(int command)
 		freyja_print("Flipping normals for mesh[%i]", GetSelectedMesh());
 		break;
 
-	case eMaterialTex:
-		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
-		
-		if (flags & fFreyjaMaterial_Texture)
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
-		else
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
-		
-		freyja_print("OpenGL texturing is [%s]", 
-					 !(flags & fFreyjaMaterial_Texture) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
 
 	case eMaterialMultiTex:
 		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
@@ -3982,7 +3984,7 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 {
 	Vec3 scroll(GetSceneTranslation());
-	vec_t nearHeight = mRender->getNearHeight() * 2.0f;
+	vec_t nearHeight = mRender->GetNearHeight() * 2.0f;
 	vec_t width = mRender->GetWindowWidth();
 	vec_t height = mRender->GetWindowHeight();
 	
@@ -4058,16 +4060,28 @@ bool FreyjaControl::CopySelectedObject()
 {
 	switch (mObjectMode)
 	{
+#if 0
 	case tSelectedVertices:
-		//return CopyVertexBuffer();
+		return CopyVertexBuffer();
 		break;
+#endif
 
+#if 0
 	case tMesh:
-		//return CopySelectedMesh();
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (m)
+			{
+				SetCopyMesh(m->Copy());
+			}
+		}
 		break;
+#endif
 
 	default:
-		freyja_print("This object type is not supported by Generic Copy.");
+		freyja_print("%s(): type '%s' is not supported.", 
+					 __func__, ObjectTypeToString(mObjectMode).GetCString());
 		return false;
 	}
 
@@ -4079,16 +4093,20 @@ bool FreyjaControl::PasteSelectedObject()
 {
 	switch (mObjectMode)
 	{
+
+#if 0
 	case tSelectedVertices:
-		//return PasteSelectedMesh(); // vertexbuffercopy shares buf
+		return PasteSelectedMesh(); // vertexbuffercopy shares buf
 		break;
 
 	case tMesh:
-		//return pasteSelectedMesh();
+		return pasteSelectedMesh();
 		break;
+#endif
 
 	default:
-		freyja_print("This object type '%s' is not supported by Generic Paste.", ObjectTypeToString(mObjectMode).GetCString());
+		freyja_print("%s(): type '%s' is not supported.", 
+					 __func__, ObjectTypeToString(mObjectMode).GetCString());
 		return false;
 	}
 
@@ -4102,13 +4120,14 @@ void FreyjaControl::DeleteSelectedObject()
 	{
 	case tPoint:
 		mEventMode = POINT_DEL_MODE;
-		freyja_print("Click select to delete -- this will delete all selected later");
+		freyja_print("Click select to delete each vertex");
 		break;
 
 	case tFace:
 		freyjaMeshPolygonDelete(GetSelectedMesh(), GetSelectedFace());
 		break;
 
+#if 0
 	case tSelectedVertices:
 		if (freyja_create_confirm_dialog("gtk-dialog-question",
 										 "You are about to delete the selected vertices.",
@@ -4118,6 +4137,7 @@ void FreyjaControl::DeleteSelectedObject()
 			BUG_ME("FIXME");//CullUsingVertexBuffer();
 		}
 		break;
+#endif
 
 	case tBone:
 		freyjaBoneDelete(GetSelectedBone());
@@ -4133,7 +4153,8 @@ void FreyjaControl::DeleteSelectedObject()
 		break;
 
 	default:
-		freyja_print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
+		freyja_print("%s Object type '%s' is not supported.", 
+					 __func__, ObjectTypeToString(mObjectMode).GetCString());
 	}
 }
 
@@ -5529,12 +5550,10 @@ void eTextureSlotLoadToggle()
 }
 
 
-void eMaterialSlotLoadToggle()
+void eMaterialSlotLoadToggle(unsigned int i)
 {
-	bool on = FreyjaControl::mInstance->ToggleFlag(FreyjaControl::fLoadMaterialInSlot);
-
-	freyja_print("Texture loading into current slot [%s]",
-				on ? "on" : "off");
+	FreyjaControl::mInstance->SetFlag(FreyjaControl::fLoadMaterialInSlot, i);
+	freyja_print("Material slot overwrite on load is [%s]", i ? "ON" : "OFF");
 }
 
 
@@ -5671,7 +5690,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallbackString::add("eSaveModel", &eSaveModel);
 	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
-	ResourceEventCallback::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallbackUInt::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
 	ResourceEventCallback::add("eCurrentFaceFlagAlpha", &eCurrentFaceFlagAlpha);
 
 	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);

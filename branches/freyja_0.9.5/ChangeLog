@@ -5,6 +5,9 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Removed age old COLORED_POLYGON support ( this was very old )
+ - 'Solid plane' for testing out models in orbit view unleashed
+ - Misc fixes, material UI moved to shelf
  - Toolbar seperator
  - Keyframe/Track serialization routinues ( yay )
  - New Skeletal animation keyframes

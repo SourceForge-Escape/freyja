@@ -405,7 +405,21 @@
 						"Saves material to disk" 
 						"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,")
 
-				(toolbar_separator)
+					(toolbar_separator)
+
+					(toolbar_togglebutton false "gtk-add" "Texture"
+						"Enable texture mapping" eEvent eMaterialTex)
+
+					(toolbar_togglebutton false "gtk-add" "Detail"
+						"Enable detail texture" eEvent eMaterialMultiTex)
+
+					(toolbar_togglebutton false "gtk-add" "Normalize"
+						"Enable normalization" eEvent eOpenGLNormalize)
+
+					(toolbar_togglebutton false "gtk-add" "Blend"
+						"Enable blending" eEvent eOpenGLBlend)
+
+					(toolbar_separator)
 
 					(toolbar_button "gtk-add" " "
 						"Set Mesh Material"	eEvent	eSetMeshTexture)
@@ -417,6 +431,7 @@
 
 				;; Material selector / name editor
 				(hbox 0 1 0 1 1
+					;(colorbutton 1 eColorMaterialAmbient)
 					(label "Current" 0.0 0.5)
 					(spinbutton 0 0 1024 eSelectMaterial)
 					(textbox eSetMaterialName))
@@ -675,27 +690,24 @@
 
 				(tab "Material" eModeMaterial
 
-					(hbox 1 1 0 1 1
-						(toolbar
-							(toolbar_button "gtk-new" "New"
-								"New material"			eEvent	eNewMaterial)
-							(filechoosertoolbar_button 
-								"gtk-open" "Open" "Loads material file" 
-								"Open Material..." eOpenMaterial "mode=open")
-							(filechoosertoolbar_button 
-								"gtk-save-as" "Save as..." "Saves material file" 
-								"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,"))
-
-						(togglebutton "Slot Load" 0 eEvent eMaterialSlotLoadToggle))
-
+					;(hbox 1 1 0 1 1
+					;	(toolbar
+					;		(toolbar_button "gtk-new" "New"
+					;			"New material"			eEvent	eNewMaterial)
+					;		(filechoosertoolbar_button 
+					;			"gtk-open" "Open" "Loads material file" 
+					;			"Open Material..." eOpenMaterial "mode=open")
+					;		(filechoosertoolbar_button 
+					;			"gtk-save-as" "Save as..." "Saves material file" 
+					;			"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,"))
+					;	(togglebutton "Slot Load" 0 eEvent eMaterialSlotLoadToggle))
 
 					;; Material selector / name editor
-					(hbox 0 1 0 1 1
-						(label "Material Select" 0.0 0.5))
-					(hbox 0 1 0 1 1
-						;;(label "Name" 0.0 0.5)
-						(spinbutton 0 0 1024 eSelectMaterial)
-						(textbox eSetMaterialName))
+					;(hbox 0 1 0 1 1
+					;	(label "Material Select" 0.0 0.5))
+					;(hbox 0 1 0 1 1
+					;	(spinbutton 0 0 1024 eSelectMaterial)
+					;	(textbox eSetMaterialName))
 
 					;; Texture loader interface
 					(hbox 1 0 0 1 0 (hsep))
