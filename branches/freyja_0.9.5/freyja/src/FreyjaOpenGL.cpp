@@ -47,6 +47,18 @@ PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
 using namespace freyja3d;
 
 
+bool OpenGL::arb_multitexture = false;
+bool OpenGL::arb_texture_env_combine = false;
+bool OpenGL::arb_vertex_shader = false;
+bool OpenGL::arb_fragment_shader = false;
+bool OpenGL::arb_shader_objects = false;
+bool OpenGL::arb_shadow = false;
+bool OpenGL::arb_depth_texture = false;
+bool OpenGL::arb_shading_language_100 = false;
+bool OpenGL::arb_vertex_buffer_object = false;
+bool OpenGL::ext_cg_shader = false;
+
+
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
@@ -59,13 +71,36 @@ OpenGL *OpenGL::Instance()
 }
 
 OpenGL::OpenGL() :
-	mFlags(fNone),
 	mTextureUnitCount(2),
-	mMaxLightsCount(2)
+	mMaxLightsCount(2),
+	mFlags(fNone)
 {
+	/* Log OpenGL driver support information */
+	freyja_print("[GL Driver Info]");
+	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
+	freyja_print("\tRenderer   : %s", glGetString(GL_RENDERER));
+	freyja_print("\tVersion    : %s", glGetString(GL_VERSION));
+	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
+
 	// Get hardware info
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &mTextureUnitCount);
+	freyja_print("\tGL_MAX_TEXTURE_UNITS_ARB \t\t[%i]", mTextureUnitCount);
+
 	glGetIntegerv(GL_MAX_LIGHTS, &mMaxLightsCount);
+	freyja_print("\tGL_MAX_LIGHTS            \t\t[%i]", mMaxLightsCount);
+
+	arb_multitexture = mglHardwareExtTest("GL_ARB_multitexture");
+	arb_texture_env_combine = mglHardwareExtTest("GL_ARB_texture_env_combine");
+
+	arb_shadow = mglHardwareExtTest("GL_ARB_shadow");
+	arb_depth_texture = mglHardwareExtTest("GL_ARB_depth_texture");
+
+	arb_vertex_buffer_object = mglHardwareExtTest("GL_ARB_vertex_buffer_object");
+	arb_vertex_shader = mglHardwareExtTest("GL_ARB_vertex_shader");
+	arb_fragment_shader = mglHardwareExtTest("GL_ARB_fragment_shader");
+	arb_shader_objects = mglHardwareExtTest("GL_ARB_shader_objects");
+	arb_shading_language_100 = mglHardwareExtTest("GL_ARB_shading_language_100");
+	ext_cg_shader = mglHardwareExtTest("GL_EXT_Cg_shader");
 
 	// Hook up functions
 #ifdef OPENGL_EXT_MULTITEXTURE
@@ -105,21 +140,8 @@ OpenGL::~OpenGL()
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-const char *gOpenGLExt[] =
-{
-	"GL_ARB_multitexture",
-	"GL_EXT_texture_env_combine",
-	"GL_EXT_Cg_shader",
-	"GL_ARB_vertex_shader",
-	"GL_ARB_shadow",
-	"GL_ARB_fragment_shader",
-};
-
 void OpenGLContext::Init(uint32 width, uint32 height)
 {
-	bool arb_multitexture, ext_texture_env_combine;
-
-
 	/* Log OpenGL driver support information */
 	freyja_print("[GL Driver Info]");
 	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
@@ -130,14 +152,6 @@ void OpenGLContext::Init(uint32 width, uint32 height)
 	/* Test for extentions */
 	if (mglHardwareExtTest("GL_ARB_multitexture"))
 		;
-
-
-
-	freyja_print("\tGL_ARB_multitexture       \t\t[%s]",
-			 arb_multitexture ? "YES" : "NO");
-
-	freyja_print("\tGL_EXT_texture_env_combine\t\t[%s]",
-			 ext_texture_env_combine ? "YES" : "NO");
 
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
@@ -263,11 +277,18 @@ bool mglHardwareExtTest(const char *ext)
 {
 	bool ret = false;
 	
-	
 	if (strstr((const char*)glGetString(GL_EXTENSIONS), ext))
 	{
 		ret = true;
 	}
+
+	// Make logs easier to read!
+	char pretty[32];
+	long l = strlen(ext);
+	l = (l < 32) ? 32 - l : 2;
+	strncpy(pretty, "                                ", l);
+	pretty[l] = 0;
+	freyja_print("\t%s%s\t[%s]", ext, pretty, ret ? "YES" : "NO");
 	
 	return ret;
 }
@@ -568,8 +589,17 @@ void mglDrawEditorAxis()
 		drawList = glGenLists(1);
 		glNewList(drawList, GL_COMPILE);
 		glPushMatrix();
+		
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
 		glScalef(scale, scale, scale);
 		mglDrawAxisWithCones(min, mid, max, 8);
+
+		glPopAttrib();
+
 		glPopMatrix();
 		glEndList();
 	}

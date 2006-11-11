@@ -399,6 +399,14 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	void BindColorTexture();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Binds a generated white texture used for colors,
+	 *        which helps avoid overuse of altering texture state. 
+	 *
+	 ------------------------------------------------------*/
+
 	void BindTexture(uint32 texture);
 	/*------------------------------------------------------
 	 * Pre  : texture is valid texture id
@@ -451,10 +459,11 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
-	void DrawShadowCasters(bool fromLight);
+	void DrawShadowCasters(bool depthMapPass);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Draw the objects in the scene which cast shadows
+	 *        During depth map pass turn off a lot of stuff ;)
 	 *
 	 ------------------------------------------------------*/
 
@@ -555,6 +564,8 @@ private:
 	bool mScrollingUV_X;
 };
 
+
 } /* End namespace freyja3d */
+
 
 #endif

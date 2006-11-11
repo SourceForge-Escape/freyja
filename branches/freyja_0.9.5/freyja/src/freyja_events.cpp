@@ -1389,14 +1389,14 @@ void freyja_swap_buffers()
 void freyja_print_args(char *format, va_list *args)
 {
 	FILE *f = freyja_get_log_file();
-	char buffer[1024];
+	const uint32 sz = 1023;
+	char buffer[sz+1];
 	unsigned int l;
-
 
 	// Strip message of an trailing carrage return 
 	//  and print to stdout and the status bar
-	vsnprintf(buffer, 1023, format, *args);
-	buffer[1023] = 0;
+	vsnprintf(buffer, sz, format, *args);
+	buffer[sz] = 0;
 
 	l = strlen(buffer);
   
@@ -1406,10 +1406,7 @@ void freyja_print_args(char *format, va_list *args)
 	if (buffer[l-1] == '\n')
 		buffer[l-1] = 0;
 
-#ifdef DEBUG_EVENT_PRINT
-	fprintf(stdout, "DEBUG> %s\n", buffer);
-#endif
-
+	// Text starting with '!' are sent to stderr was well
 	if (buffer[0] == '!')
 	{
 		buffer[0] = ' ';
@@ -1420,9 +1417,7 @@ void freyja_print_args(char *format, va_list *args)
 
 	if (f)
 	{
-		fprintf(f, "> ");
-		fprintf( f, buffer );
-		fprintf(f, "\n");
+		fprintf(f, "> %s\n", buffer);
 		fflush(f);
 	}
 }

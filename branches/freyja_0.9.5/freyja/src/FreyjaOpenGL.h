@@ -199,6 +199,21 @@ class OpenGL
 
 	static OpenGL *mSingleton;
 
+	int32 mTextureUnitCount;   /* */
+
+	int32 mMaxLightsCount;     /* */
+
+	/* Extentions */
+	static bool arb_multitexture;
+	static bool arb_texture_env_combine;
+	static bool arb_vertex_shader;
+	static bool arb_fragment_shader;
+	static bool arb_shader_objects;
+	static bool arb_shadow;
+	static bool arb_depth_texture;
+	static bool arb_shading_language_100;
+	static bool arb_vertex_buffer_object;
+	static bool ext_cg_shader;
 
  protected:
 
@@ -228,10 +243,6 @@ class OpenGL
 	Vector<OpenGLContext> mContexts;
 
 	uint32 mFlags;             /* */
-
-	int32 mTextureUnitCount;   /* */
-
-	int32 mMaxLightsCount;     /* */
 };
 
 } // namespace freyja3d

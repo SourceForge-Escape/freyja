@@ -5,6 +5,8 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - OpenGL extentions enabled again, please report bugs
  - Removed age old COLORED_POLYGON support ( this was very old )
  - 'Solid plane' for testing out models in orbit view unleashed
  - Misc fixes, material UI moved to shelf
