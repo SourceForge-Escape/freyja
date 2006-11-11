@@ -12,6 +12,12 @@
 
  Known bugs
 
+ - Actual bug report: 'generated sphere looks retarded' it's true too
+
+ - Material name textbox not updating?
+
+ - UV projection seems broken now yay
+
  - Keyframes should be able to use the Transform Box during animation
 
  - Keyframes should keep transform of last keyframe as init

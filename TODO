@@ -42,6 +42,7 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- GLSL shader 'materials' generated from tree UI
 	- Path animation
 	- Allow user to set radius of vertex and texcoord picks
 	- Mesh / Vertex / Face transforms fully working in dev branch

@@ -91,10 +91,10 @@ FreyjaRender::FreyjaRender() :
 	mHeight(480),
 	mTextureId(0),
 	mInitContext(false),
-	mScaleEnv(40.0f), //20.0; // 40.0f for higher res
+	mScaleEnv(30.0f), // Use a larger number for higher res
 	mFar(6000.0f),
 	mNear(0.1f),
-	mFovY(40.0f),
+	mFovY(90.0f), // 40.0f
 	mNearHeight(20.0f)
 {
 	mAngles[0] = 18.0f;
@@ -166,32 +166,15 @@ void FreyjaRender::Rotate(int flags, float n)
 
 void FreyjaRender::DrawFreeWindow()
 {
-#ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-
-	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
-
-	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
-	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
-	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
-
-	mglDrawEditorAxis();
-
-	glPopAttrib();
-	glPopMatrix();
-#endif
-
-	//glPushMatrix();
-
-	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
-	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
-	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
 	glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
+
+	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+
+	//glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
 
 	if (mRenderMode & fSolidPlane)
 	{
@@ -281,8 +264,6 @@ void FreyjaRender::DrawFreeWindow()
 		glPopAttrib();
 	}
 
-	//glPopMatrix();
-
 	RenderModel model;
 
 	for (uint32 i = 0; i < freyjaGetRenderModelCount(); ++i)
@@ -291,7 +272,28 @@ void FreyjaRender::DrawFreeWindow()
 		Render(model);
 	}
 
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	BindColorTexture();
 	FreyjaControl::mInstance->GetCursor().Display();
+	glPopAttrib();
+
+	glPopMatrix();
+
+
+#ifdef PLANE_NOTIFY_WITH_AXIS
+	glPushMatrix();
+	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
+	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	mglDrawEditorAxis();
+	glPopMatrix();
+#endif
 }
 
 
@@ -304,9 +306,20 @@ void FreyjaRender::DrawFreeWindow()
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
+void FreyjaRender::BindColorTexture()
+{
+	if (0 != mTextureId)
+	{
+		mTextureId = -1;
+		// First texture is reserved for 'white texture' for color
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+}
+
+
 void FreyjaRender::BindTexture(uint32 texture)
 {
-	if (mRenderMode & fTexture && texture != mTextureId)
+	if (texture != mTextureId)
 	{
 		mTextureId = texture;
 		// First texture is reserved for 'white texture' for color
@@ -375,33 +388,15 @@ void FreyjaRender::ClearFlag(flags_t flag)
 
 void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 {
-	bool arb_multitexture, ext_texture_env_combine;
+	OpenGL::Instance();
 
-	/* Log OpenGL driver support information */
-	freyja_print("[GL Driver Info]");
-	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
-	freyja_print("\tRenderer   : %s", glGetString(GL_RENDERER));
-	freyja_print("\tVersion    : %s", glGetString(GL_VERSION));
-	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
-
-	/* Test for extentions */
-	arb_multitexture = mglHardwareExtTest("GL_ARB_multitexture");
-	ext_texture_env_combine = mglHardwareExtTest("GL_EXT_texture_env_combine");
-
-	freyja_print("\tGL_ARB_multitexture       \t\t[%s]",
-			 arb_multitexture ? "YES" : "NO");
-
-	freyja_print("\tGL_EXT_texture_env_combine\t\t[%s]",
-			 ext_texture_env_combine ? "YES" : "NO");
-
-	// FIXME: This should be user defined in mlisp as mvars
+	// Due to whacky bullshit we're seriously going to have to use
+	// GL_LESS depth and GL_FRONT culling or the interface will break
 
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	//glDepthFunc(GL_LEQUAL);
-
-	glEnable(GL_TEXTURE_2D);
 
 	// Set up culling
 	//glEnable(GL_CULL_FACE);
@@ -411,9 +406,6 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 
 	// Set background to black
 	glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
-
-	// Disable lighting 
-	glDisable(GL_LIGHTING);
 
 	// Setup shading
 	glShadeModel(GL_SMOOTH);
@@ -437,6 +429,9 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 		glDisable(GL_POLYGON_SMOOTH);
 	}
 
+	// Setup some general states
+	glDisable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_POINT_SMOOTH);
 	glDisable(GL_LINE_SMOOTH);
 	glDisable(GL_AUTO_NORMAL);
@@ -454,7 +449,7 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glMatrixMode(GL_MODELVIEW);
 
-	SetNearHeight(20.0f);
+	SetNearHeight(mScaleEnv);
 
 	mWidth = width;
 	mHeight = height;
@@ -482,7 +477,7 @@ void FreyjaRender::Display()
 
 	// Disable lighting and texture here until the color visualizations
 	// are updated
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glLoadIdentity();
 	
@@ -1168,6 +1163,19 @@ void FreyjaRender::DrawCurveWindow()
 	glDisable(GL_LIGHTING);
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mDefaultPointSize);
+
+	if (curKey < m->mTrack.mKeyFrames.size())
+	{
+		p[0] = x + curKey*s;		
+		p[1] = 0.0f;
+		glColor3fv(PINK); // gSweepColor
+		glBegin(GL_LINES);
+		glVertex2fv(p);
+		p[1] = height;
+		glVertex2fv(p);
+		glEnd();
+	}
+
 
 	if (curKey < m->mTrack.mKeyFrames.size())
 	{
