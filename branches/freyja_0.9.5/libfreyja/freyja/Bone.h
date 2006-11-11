@@ -34,34 +34,93 @@
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
+
 #include "KeyFrame.h"
+#include "Track.h"
 #include "freyja.h"
 
 using namespace mstl;
 
+
 namespace freyja {
 
-class KeyFrameBone : public KeyFrame
+class BoneKeyFrame : public KeyFrame
 {
  public:
 
-	KeyFrameBone() : KeyFrame(), mLoc(), mScale(1.0f, 1.0f, 1.0f), mRot() {}
+	BoneKeyFrame() : KeyFrame(), mLoc(), mRot(), mWorldPose(), mCombined() {}
+
+	virtual ~BoneKeyFrame() {}
+
+	virtual uint32 GetSerializedSize() { return 4*4+4*3; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{
+		w.WriteFloat32(mLoc.mVec[0]);
+		w.WriteFloat32(mLoc.mVec[1]);
+		w.WriteFloat32(mLoc.mVec[2]);
+
+		vec4_t wxyz;
+		mRot.getQuaternion4fv(wxyz);
+		w.WriteFloat32(wxyz[0]);
+		w.WriteFloat32(wxyz[1]);
+		w.WriteFloat32(wxyz[2]);
+		w.WriteFloat32(wxyz[3]);
+		return true;
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of KeyFrameSkeleton
+	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
-	~KeyFrameBone() {}
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{ 
+		mLoc.mVec[0] = r.ReadFloat32();
+		mLoc.mVec[1] = r.ReadFloat32();
+		mLoc.mVec[2] = r.ReadFloat32(); 
+
+		mRot = Quaternion(r.ReadFloat32(), r.ReadFloat32(), 
+						  r.ReadFloat32(), r.ReadFloat32());
+		return true; 
+	}
 	/*------------------------------------------------------
-	 * Pre  : KeyFrameSkeleton object is allocated
-	 * Post : Deconstructs an object of KeyFrameSkeleton
+	 * Pre  : 
+	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	Vec3 mLoc;
-
-	Vec3 mScale;
+	Vec3 mLoc;                       /* Keyframe data */
 
 	Quaternion mRot;
+
+	Matrix mWorldPose;               /* This is here for ease of use only */
+
+	Matrix mCombined;                /* <= mWorldPose * mBindToWorld, 
+									  * Convenice storage of deformation  */
+};
+
+
+class BoneTrack : public Track
+{
+public:
+	BoneTrack() : Track() { mName = "Bone"; }
+	
+	~BoneTrack() {}
+	
+	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
+	{
+		BoneKeyFrame *key = new BoneKeyFrame();
+		key->mTime = time;
+		return key;
+	}
+
+	virtual BoneKeyFrame *GetKeyframe(index_t idx) 
+	{
+		return (BoneKeyFrame *)Track::GetKeyframe(idx);
+	}
 };
 
 
@@ -185,6 +244,9 @@ public:
 									  * this cache of the current orientation 
 									  * and translation in matrix form */
 
+	BoneTrack mKeyframes;   // Test, only supporting one 'range/anim' in test
+
+#if OBSOLETE
 	// Starting in 0.9.5 moved world transforms here from keyframing,
 	// Makes it easier to control the beast, and stops bone sharing schemes.
 	// The actual transforms 'we care about' in the keyframes.
@@ -199,6 +261,7 @@ public:
 
 	Matrix mCombined;                /* <= mWorldPose * mBindToWorld, 
 									  * Convenice storage of deformation  */
+#endif
 
 private:
 

@@ -13,6 +13,7 @@
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
+		- Track and Keyframe ABI
 
 	- Skeletal animation
 		- Mesh vertex group keyframes ( vertex animation ties into deforming )

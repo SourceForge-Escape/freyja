@@ -102,13 +102,32 @@ public:
 	}
 
 
+	KeyFrame *NewKeyframeByIndex(uint32 keyframe)
+	{
+		if ( keyframe < mKeyFrames.size() )
+		{
+			KeyFrame **array = mKeyFrames.getVectorArray();
+
+			if ( array[keyframe] == NULL )
+			{
+				vec_t time = (vec_t)keyframe / mRate;
+				array[keyframe] = NewTrackKeyFrame(time);
+				return array[keyframe];
+			}
+		}
+
+		return NULL;
+	}
+
+
 	index_t NewKeyframe(vec_t time)
 	{
-		KeyFrame **array = mKeyFrames.getVectorArray();
 		uint32 keyframe = GetKeyfameIndexFromTime(time);
 
 		if ( keyframe < mKeyFrames.size() )
 		{
+			KeyFrame **array = mKeyFrames.getVectorArray();
+
 			if ( array[keyframe] == NULL )
 				array[keyframe] = NewTrackKeyFrame(time);
 
@@ -119,8 +138,10 @@ public:
 	}
 
 	virtual KeyFrame *GetKeyframe(index_t idx) 
-	{ return (idx < mKeyFrames.size()) ? 
-		(mKeyFrames.getVectorArray())[idx] : NULL; }
+	{ 
+		return ((idx < mKeyFrames.size()) ? 
+				(mKeyFrames.getVectorArray())[idx] : NULL); 
+	}
 	/*------------------------------------------------------
 	 * Pre  : <time> > 0.0f
 	 * Post : Returns keyframe if it exists or NULL
@@ -162,14 +183,120 @@ public:
 	 * Post : Updates track rate and adjusts keyframe list 
 	 ------------------------------------------------------*/
 
-	// FIXME: Add serialzation support for Track
-	virtual bool Serialize(SystemIO::FileWriter &w) { return false; }
+	uint32 ComputeSerializedSize()
+	{
+		uint32 i, sz = 0;
+
+		sz += 4 + 4;
+		foreach(mKeyFrames, i)
+		{
+			if (mKeyFrames[i])
+			{
+				sz = 4 + mKeyFrames[i]->GetSerializedSize();
+			}
+		}
+
+		sz += 4 + mName.GetLength();
+		sz += 4 + 4 + 4 + 1;
+
+		return sz;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::FileWriter &w) 
+	{		
+		freyja_file_chunk_t chunk;
+
+		chunk.type = FREYJA_CHUNK_TRACK;
+		chunk.size = ComputeSerializedSize();
+		chunk.flags = 0x0;
+		chunk.version = 1;
+
+		/* Write chunk header to diskfile */
+		w.WriteLong(FREYJA_CHUNK_MESH);
+		w.WriteLong(chunk.size);
+		w.WriteLong(chunk.flags);
+		w.WriteLong(chunk.version);
+
+		w.WriteLong(mName.GetLength());
+		w.WriteString(mName.GetLength(), mName.c_str());
+		w.WriteFloat32(mStart);
+		w.WriteFloat32(mRate);
+		w.WriteFloat32(mDuration);
+		w.WriteInt8U(mFlags);
+
+		uint32 i = 0;
+		w.WriteLong(mKeyFrames.end());
+		foreach(mKeyFrames, i)
+		{
+			if (mKeyFrames[i])
+			{
+				w.WriteInt32(i);
+				mKeyFrames[i]->Serialize(w);
+			}
+		}
+
+		w.WriteInt32(-1);
+
+		return true; 
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) { return false; }
+	virtual bool Serialize(SystemIO::FileReader &r) 
+	{		
+		freyja_file_chunk_t chunk;
+
+		// This class expects:
+		// chunk.type = FREYJA_CHUNK_TRACK
+		// chunk.version = 1
+
+		chunk.type = r.ReadLong();
+		chunk.size = r.ReadLong();
+		chunk.flags = r.ReadLong();
+		chunk.version = r.ReadLong();
+
+		if (chunk.type != FREYJA_CHUNK_TRACK || chunk.version != 1)
+			return false;
+
+		long sz = r.ReadLong();
+		char name[sz];
+		r.ReadString(sz, name);
+		name[sz - 1] = 0;
+		mName.Set(name);
+
+		mStart = r.ReadFloat32();
+		mRate = r.ReadFloat32();
+		mDuration = r.ReadFloat32();
+		mFlags = r.ReadInt8U();
+
+		uint32 i, count = r.ReadLong();
+		for (i = 0; i < count; ++i)
+		{
+			mKeyFrames.pushBack(NULL);
+		}
+
+		int32 j = r.ReadInt32();
+
+		while ( j != -1 )
+		{
+			KeyFrame *key = NewKeyframeByIndex(j);
+
+			if (key)
+			{
+				key->Serialize(r);
+			}
+
+			j = r.ReadInt32();
+		}
+		
+		return true;
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read data into this object from disk

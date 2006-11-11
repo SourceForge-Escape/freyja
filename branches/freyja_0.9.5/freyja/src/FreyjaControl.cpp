@@ -1667,6 +1667,10 @@ bool FreyjaControl::event(int event, unsigned int value)
 		SetRenderFlag(FreyjaRender::fGrid, value, "Grid");
 		break;
 
+	case eRenderSolidGround:
+		SetRenderFlag(FreyjaRender::fSolidPlane, value, "Solid ground");
+		break;
+
 	case FREYJA_MODE_RENDER_FACE:
 		SetRenderFlag(FreyjaRender::fFace, value, "Face rendering");
 		break;

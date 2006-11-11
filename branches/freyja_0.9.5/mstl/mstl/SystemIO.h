@@ -940,6 +940,12 @@ class SystemIO
 		}
 
 
+		bool WriteString(unsigned int length, const char *buffer)
+		{
+			return (fwrite(buffer, length, 1, mFileHandle) == 1);  // heh, yeah
+		}
+
+
 		bool WriteString(unsigned int length, char *buffer)
 		{
 			return (fwrite(buffer, length, 1, mFileHandle) == 1);  // heh, yeah

@@ -821,6 +821,31 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 }
 
 
+arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
+{
+	arg_list_t *ret = NULL;
+	GtkWidget *widget;
+	void *event_func;
+	int event_cmd;
+
+	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
+	MSTL_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
+
+	if (!box)
+	{
+		return NULL;
+	}
+
+	widget = (GtkWidget *)gtk_separator_tool_item_new();
+	gtk_toolbar_append_widget((GtkToolbar *)box->data, widget, "", "");
+	gtk_widget_show(widget);
+
+	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
+
+	return ret;
+}
+
+
 arg_list_t *mgtk_rc_toolbar(arg_list_t *box)
 {
 	arg_list_t *ret = NULL;

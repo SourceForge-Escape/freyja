@@ -131,6 +131,8 @@ class String
 		return mString;
 	}
 
+	
+	unsigned int GetLength() { return mLength; }
 
 	const char *c_str()
 	{
