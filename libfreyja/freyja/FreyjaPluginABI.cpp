@@ -491,6 +491,8 @@ int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r)
 
 		freyjaVertexNormal3fv(idx, xyz);
 
+		MSTL_MSG("\nn[%i] <%f, %f, %f>", idx, xyz[0], xyz[1], xyz[2]);
+
 		for (j = 0; j < 2; ++j)
 			uv[j] = r.ReadFloat32();
 		

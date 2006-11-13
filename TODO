@@ -38,11 +38,19 @@
 		- Perferences, init-dev.mlisp
 		- Camera render mode for viewport
 			- OpenGL depth / culling / etc control?
+		- Smoothing groups need to come in to fix normal generation at least
+			- Might as well force polymapped normals when this is checked in
+		- Add support for mlisp widget 'vargs' for the niiice
+		- Remove state value from all mlisp toggle widgets
+		  ( they have a set func )
+
 
  ----------------------------------------------------------------------------
 
  Misc
 	- GLSL shader 'materials' generated from tree UI
+		- Heat fx shader ( turb with frag prob best )
+		- DoF shader
 	- Path animation
 	- Allow user to set radius of vertex and texcoord picks
 	- Mesh / Vertex / Face transforms fully working in dev branch

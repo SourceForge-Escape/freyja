@@ -63,7 +63,7 @@ ResourceEvent::ResourceEvent(const char *name)
 		printf("+ %u : '%s'\n", mUID, mName);
 	}
 
-	mResource->RegisterInt(mName, /*ePluginEventBase*/ 10000 + mUID);
+	mResource->RegisterInt(mName, eBaseEvent + mUID);
 	++mCounter;
 }
 
@@ -86,6 +86,12 @@ ResourceEvent::~ResourceEvent()
 ////////////////////////////////////////////////////////////
 
 bool ResourceEvent::action(long value)
+{
+	return false;
+}
+
+
+bool ResourceEvent::action(unsigned int value, unsigned int value2)
 {
 	return false;
 }
@@ -141,6 +147,20 @@ bool ResourceEvent::listen(unsigned long event)
 	if (e)
 	{
 		return e->action();
+	}
+
+	return false;
+}
+
+
+bool ResourceEvent::listen(unsigned long event, unsigned int value, 
+						   unsigned int value2)
+{
+	ResourceEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value, value2);
 	}
 
 	return false;

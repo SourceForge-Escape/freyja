@@ -369,6 +369,35 @@ void bind(arg_list_t *symbol, arg_list_t *data)
 }
 
 
+char mlisp_peek_for_vargs()
+{
+	if (!__RESOURCE_AGENT_)
+		return 0;
+
+	__RESOURCE_AGENT_->Seperator();
+
+	return __RESOURCE_AGENT_->Is(')');
+}
+
+
+const char *mlisp_get_filename()
+{
+	if (!__RESOURCE_AGENT_)
+		return 0;
+
+	return __RESOURCE_AGENT_->GetFilename();
+}
+
+
+int mlisp_get_line_num()
+{
+	if (!__RESOURCE_AGENT_)
+		return 0;
+
+	return __RESOURCE_AGENT_->GetLine();
+}
+
+
 /// External built-in funcs //////////////////////////////////////
 
 arg_list_t *nil(arg_list_t *arg)
@@ -438,19 +467,21 @@ arg_list_t *mgtk_func_toggle_set(arg_list_t *args);
 ////////////////////////////////////////////////////////////////
 
 
-Resource::Resource()
+Resource::Resource() :
+	_symbol(NULL),
+	_buffer(NULL),
+	_buffer_len(0),
+	_symbol_len(256),
+	_top(0),
+	_look(0),
+	_tape(NULL),
+	_line(1),	
+	_string(0),
+	_error(0),
+	_stack(NULL),
+	_sym_tab(NULL)
 {
-	_buffer = NULL;
-	_symbol = NULL;
-	_sym_tab = NULL;
-	_stack = NULL;
-	_buffer_len = 0;
-	_symbol_len = 256;
-	_top = 0;
-	_look = 0;
-	_string = 0;
-	_error = 0;
-	_line = 1;
+	mFilename[0] = 0;
 
 	RegisterFunction("setq", setq);
 	RegisterFunction("nil", nil);
@@ -954,7 +985,7 @@ bool Resource::Match(char c)
 
 bool Resource::Is(char c)
 {
-  return (c == _look);
+	return (c == _look);
 }
 
 
@@ -1007,6 +1038,9 @@ int Resource::Load(char *filename)
 #ifdef MULTI_EVAL
 	printf("Resource::Load> '%s'\n", filename);
 #endif
+
+	strncpy(mFilename, filename, 95);
+	mFilename[95] = 0;
 
 	if (_buffer)
 	{

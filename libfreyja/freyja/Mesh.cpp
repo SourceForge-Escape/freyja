@@ -677,6 +677,110 @@ void Mesh::ExtrudeFace(index_t faceIndex, vec3_t displacement)
 }
 
 
+void Mesh::SelectedFacesMarkSmoothingGroup(uint32 group, bool t)
+{
+	/* Compute face normals */
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		if (!face || !(face->mFlags & Face::fSelected))
+			continue;
+
+		if (t)
+		{
+			face->SetSmoothingGroup(group);
+		}
+		else
+		{
+			face->ClearSmoothingGroup(group);
+		}
+	}
+}
+
+
+void Mesh::SelectedFacesGenerateVertexNormals()
+{
+	// FIXME: Cached face refs would be smart for all the connectivty use
+	BUG_ME("Function local vertex refs implementation used.");
+	Vector<Vec3> faceNormals;
+	Vec3 a, b, c, normal;
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (vertex)
+			vertex->mPolyRefIndices.clear();
+	}
+
+	/* Compute face normals */
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider selected facets here... you filter updates here
+		if (!face || !(face->mFlags & Face::fSelected))
+		{
+			faceNormals.pushBack(normal);  // For alignment purposes push a 'V0'
+			continue;
+		}
+
+		for (uint32 v = 0, vn = face->mIndices.size(); v < vn; ++v)
+		{
+			Vertex *vertex = GetVertex(face->mIndices[v]);
+			
+			if (vertex)
+				vertex->mPolyRefIndices.pushBack(f);
+		}
+
+		GetVertexPos(face->mIndices[0], a.mVec);
+		GetVertexPos(face->mIndices[1], b.mVec);
+		GetVertexPos(face->mIndices[2], c.mVec);
+
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
+		faceNormals.pushBack(normal);
+	}
+
+
+	/* Compute vertex normals */
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (!vertex)
+			continue;
+
+		normal.zero();
+
+		if (vertex->mPolyRefIndices.size() == 0)
+		{
+			// This means it's not selected for update, or
+			// has no faces containing this vertex
+			continue;
+		}
+
+		for (uint32 j = 0, jn = vertex->mPolyRefIndices.size(); j < jn; ++j)
+		{
+			if (vertex->mPolyRefIndices[j] == INDEX_INVALID)
+			{
+				freyjaPrintError("%s> ERROR Bad face reference\n", __func__);
+				continue;
+			}
+
+			normal += faceNormals[vertex->mPolyRefIndices[j]];
+		}
+
+		normal.normalize();
+
+		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
+		SetNormal(v, normal.mVec);
+    }
+}
+
+
 void Mesh::SplitFace(index_t faceIndex)
 {
 	Face *face = GetFace(faceIndex);

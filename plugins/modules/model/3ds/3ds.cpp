@@ -16,21 +16,26 @@
  *
  *-- History ---------------------------------------------------------- 
  *
+ * 2006.11.11:
+ * Mongoose - Removed the trash endian unsafe file I/O,
+ *            and replaced with mstl readers ( removed lots of annoying crap 
+ *            like stdio and exit() calls everywhere )
+ *
  * 2004.04.27:
  * Mongoose - Created, port and fix of Load 3ds by Alexi Leontopolis, WVU VEL
  ==========================================================================*/
 
+
 #include "3ds.h"
 
 //Constructor with no file name (produces and error)
-File3ds::File3ds ()
+File3ds::File3ds() : fin()
 {
-	cerr << "Error:  Filename must be supplied";
-	exit(1);
+	MSTL_ASSERTMSG(false, "This class orignally didn't allow this constructor");
 }
 
 //Constructor with file name.  Loads the file given.
-File3ds::File3ds(char *fname) 
+File3ds::File3ds(char *fname) : fin()
 {
 	//Set up object lists.
 	headObject = tailObject = object = NULL;
@@ -38,19 +43,19 @@ File3ds::File3ds(char *fname)
 	nObjects = 0;
 	nMaterials = 0;
 
-	//open the file.
-	fin.open(fname, ios::in | ios::binary); // ios::nocreate | 
-	if (fin.fail())
+	//open the file.  
+	if (!fin.Open(fname))
 	{
-		cerr << "Can't open " << fname << " file for input:\n";
-		exit(1);
+		MSTL_MSG("Can't open %s file for input\n", fname);
 	}
-
-	//call Parse to retrieve all the information.
-	Parse3dsMain();
+	else
+	{
+		//call Parse to retrieve all the information.
+		Parse3dsMain();
 	
-	//Close the file.
-	fin.close();
+		//Close the file.
+		fin.Close();
+	}
 }
 //**********************************
 
@@ -179,53 +184,56 @@ void File3ds::Parse3dsMain()
 	word		id_chunk;
 	long		len;
 	long		header;
-	streampos	end, curr, tmp;
+	long	end, curr, tmp;
 
 
 	//  Reads a word -- Presumably the first Chunk ID 
-	fin.read((char *) &id_chunk, sizeof id_chunk);
+	id_chunk = fin.ReadUint16();
 
 	//  Check to see if this is a proper 3DS file
-	if (id_chunk == MAIN_CHUNK){
-		fin.read((char *) &fsize, sizeof fsize); 
-		header = sizeof ( word ) + sizeof ( long );
+	if (id_chunk == MAIN_CHUNK)
+	{
+		fsize = fin.ReadLong();
+		header = 6;//sizeof ( word ) + sizeof ( long );
 
-		end	 = fin.tellg(); 
-		end += (fsize - header); // gcc 3.4 work around
-													//	Sets the end of this Block
-													//	at the current position plus
-													//	the length of the block minus
-													//	the size of the chunk id and
-													//	size of chunk variables that
-													//	have already been read.
+		end = fin.GetOffset() + fsize - header;
+		// I left this here at a warning to the next person! work around? =)
+		//end	 = fin.GetOffset()(); 
+		//end += (fsize - header);// gcc 3.4 work around
+								//	Sets the end of this Block
+								//	at the current position plus
+								//	the length of the block minus
+								//	the size of the chunk id and
+								//	size of chunk variables that
+								//	have already been read.
 
 		do
 		{ 
 			//  Read Subchunk ID inside the Main Chunk	
-			fin.read((char *) &id_chunk, sizeof id_chunk);
+			id_chunk = fin.ReadUint16();
 			switch(id_chunk)
 			{
 			case VERSION_3DS:
-				fin.read((char *) &len,	sizeof len);
-				fin.read((char *) &version,	sizeof version );
+				len = fin.ReadLong();
+				version = fin.ReadLongU();
 				break;
 			case EDITOR:
-				fin.read((char *) &len, sizeof len);
+				len = fin.ReadLong();
 				Parse3dsEditor(len);
 				break;
 			default:
-				fin.read((char *) &len,	sizeof len);
+				len = fin.ReadLong();
 				tmp = curr; tmp += len; // gcc 3.4 work around
-				fin.seekg(tmp);
+				fin.SetOffset(tmp);
 				break;
 			}
-			curr = fin.tellg();
+			curr = fin.GetOffset();
 		} while(end != curr);
 	}
 	else
 	{
-		cerr << "Error: Not 3DS file";
-		exit(1);
+		MSTL_MSG("Error: Not 3DS file");
+		//exit(1);
 	}
 }
 //************************************
@@ -239,8 +247,8 @@ void File3ds::Parse3dsEditor  (long len)
 	long		header;
 	streampos	end, curr, tmp;
 
-	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg(); end += len - header;  // gcc 3.4 work around
+	header = 6;//sizeof ( word ) + sizeof ( long );
+	end	 = fin.GetOffset(); end += len - header;  // gcc 3.4 work around
 											//	Sets the end of this Block
 											//	at the current position plus
 											//	the length of the block minus										//	the size of the chunk id and
@@ -249,12 +257,12 @@ void File3ds::Parse3dsEditor  (long len)
 	do
 	{
 		int x;
-		fin.read((char *) &id_chunk, sizeof id_chunk);
+		id_chunk = fin.ReadUint16();
 		switch(id_chunk)
 		{
 		case OBJECT_BLOCK:
 			NewObject();
-			fin.read((char *) &sub_len, sizeof sub_len);
+			sub_len = fin.ReadLong();
    			ParseObjectBlock(sub_len);
 			for(x = 0; x < object->nFaces; x++)
 			{
@@ -262,25 +270,25 @@ void File3ds::Parse3dsEditor  (long len)
 			}
 			break;
 		case MESH_VERSION:
-			fin.read((char *) &sub_len, sizeof sub_len);
-			fin.read((char *) &mversion, sizeof mversion);
+			sub_len = fin.ReadLong();
+			mversion = fin.ReadLongU();
 			break;
 		case ONE_UNIT:
-			fin.read((char *) &sub_len, sizeof sub_len);
-			fin.read((char *) &fdata, sizeof fdata);
+			sub_len = fin.ReadLong();
+			fdata = fin.ReadFloat32(); 
 			break;
 		case MATERIAL_EDITOR:
-			fin.read((char *) &len, sizeof len);
+			len = fin.ReadLong();
 			NewMaterial();
 			ParseMaterialBlock(len);
 			break;
 		default:
-			fin.read((char *) &sub_len,	sizeof sub_len);
+			sub_len = fin.ReadLong();
 			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
-			fin.seekg(tmp);
+			fin.SetOffset(tmp);
 			break;
 		}
-		curr = fin.tellg();
+		curr = fin.GetOffset();
 	} while(end != curr);
 }
 //************************************
@@ -295,8 +303,8 @@ void File3ds::ParseObjectBlock(long len)
 	streampos end, curr, tmp;
 
 	
-	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg(); end += len - header;  // gcc 3.4 work around
+	header = 6;//sizeof ( word ) + sizeof ( long );
+	end	 = fin.GetOffset(); end += len - header;  // gcc 3.4 work around
 													//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
@@ -315,7 +323,7 @@ void File3ds::ParseObjectBlock(long len)
 		strpos++;
 	} 
 
-	curr = fin.tellg();
+	curr = fin.GetOffset()();
 
 	do
 	{
@@ -331,10 +339,10 @@ void File3ds::ParseObjectBlock(long len)
 			fin.read((char *) &sub_len,	sizeof sub_len);
 			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
 			fin.seekg(tmp);
-			curr = fin.tellg();
+			curr = fin.GetOffset()();
 			break;
 		}
-		curr = fin.tellg();
+		curr = fin.GetOffset()();
 	} while(end != curr);
 }
 //************************************
@@ -352,14 +360,14 @@ void File3ds::ParseMaterialBlock  (long len)
 	streampos	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg(); end += len - header; // gcc 3.4 work around
+	end	 = fin.GetOffset()(); end += len - header; // gcc 3.4 work around
 				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
 													//	size of chunk variables that
 													//	have already been read.
-	curr = fin.tellg();
+	curr = fin.GetOffset()();
 	if (*material->texture1.filename)
 		memset((void *) material->texture1.filename, '\0', sizeof MAXLEN);
 	do
@@ -417,7 +425,7 @@ void File3ds::ParseMaterialBlock  (long len)
 			break;
 		case MATERIAL_TEXTURE1:
 			fin.read((char *) &sub_len,		sizeof sub_len);
-			curr = fin.tellg();
+			curr = fin.GetOffset()();
 			ParseSubMapBlock(sub_len, &material->texture1);
 			break;
 		default:
@@ -426,7 +434,7 @@ void File3ds::ParseMaterialBlock  (long len)
 			fin.seekg(tmp);
 			break;
 		}
-		curr = fin.tellg();
+		curr = fin.GetOffset()();
 	} while(end != curr);
 }
 //************************************
@@ -442,7 +450,7 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 	streampos	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.tellg(); end += len - header; // gcc 3.4 work around
+	end	 = fin.GetOffset()(); end += len - header; // gcc 3.4 work around
 				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
@@ -452,7 +460,7 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 	sm->UScale = 1.0;
 	sm->VScale = 1.0;
 
-	curr = fin.tellg();
+	curr = fin.GetOffset()();
 	do
 	{
 		fin.read((char *) &id_chunk, sizeof id_chunk);
@@ -486,7 +494,7 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 			fin.seekg(tmp);
 			break;
 		}
-		curr = fin.tellg();
+		curr = fin.GetOffset()();
 	} while(end != curr);
 }
 //************************************
@@ -579,7 +587,7 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 	streampos end, curr, tmp;
 	
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin->tellg(); end += len - header;  // gcc 3.4 work around
+	end	 = fin->GetOffset()(); end += len - header;  // gcc 3.4 work around
 				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
@@ -639,7 +647,7 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 			c = 1;
 			while (c != 0)
 			{ 
-				curr = fin->tellg();
+				curr = fin->GetOffset()();
 				fin->read(&c, sizeof c);
 				*strpos = c;
 				strpos++;
@@ -653,11 +661,11 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 			}
 			break;
 		case VERTEX_MAP_COORD:
-			curr = fin->tellg();
+			curr = fin->GetOffset()();
 			fin->read((char *) &sub_len,	sizeof sub_len);
-			curr = fin->tellg();
+			curr = fin->GetOffset()();
 			fin->read((char *) &nVertTemp,	sizeof (word));
-			curr = fin->tellg();
+			curr = fin->GetOffset()();
 			matmap = new MatMap[nVertTemp];
 			for (i = 0; i < nVertTemp; i++)
 			{
@@ -671,7 +679,7 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 			fin->seekg(tmp);
 			break;
 		}
-		curr = fin->tellg();
+		curr = fin->GetOffset()();
 	} while(end != curr);
 }
 //************************************
