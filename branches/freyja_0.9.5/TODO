@@ -25,8 +25,8 @@
 		- Joint/Bone tool that creates and connects to last on each click
 
 	- Interface
-		- Add generic box selection back for multivertex editing, etc
-		- Trim out 'dead' events, esp ones registers to mgtk
+		- Add generic bbox selection back for multivertex editing, etc
+		- Trim out 'dead' events, esp ones registering to mgtk
 		- Two window layout for curve / viewport usage
 		- Make viewport 'windows' abstract with seperate controls
 			- Support for dynamic resizing and 2/3/4 layouts
@@ -40,7 +40,7 @@
 			- OpenGL depth / culling / etc control?
 		- Smoothing groups need to come in to fix normal generation at least
 			- Might as well force polymapped normals when this is checked in
-		- Add support for mlisp widget 'vargs' for the niiice
+		- Allow smoothing group picking ( from a face selection? )
 		- Remove state value from all mlisp toggle widgets
 		  ( they have a set func )
 

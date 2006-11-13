@@ -242,6 +242,9 @@ typedef enum {
 	eSphereJoint,
 	ePointJoint,
 
+	eBlendDest,
+	eBlendSrc,
+
 	/* Major control modes */
 	eModeAutoKeyframe,
 

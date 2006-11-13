@@ -40,25 +40,6 @@
 
 ;(setq INIT "~/.freyja/init-dev.mlisp")
 
-;; Gtk+ Interface
-;::::::::::::::::::::::::::::::::::::::::::::::::::::::
-; (textbox "text" EVENT COMMAND)
-; (option_menu (menu_item "label"  EVENT COMMAND))
-; (togglebutton "label" pressed EVENT [COMMAND])
-; (button "label" EVENT COMMAND)
-; (vbox homogenous spacing expand fill pading ...)
-; (hbox homogenous spacing expand fill pading ...)
-; (hslider EVENT min max)
-; (icon filename/iconname IconSize_*)
-	; IconSize_Menu
-	; IconSize_ToolbarSmall
-	; IconSize_Toolbar
-	; IconSize_Button
-	; IconSize_Dialog
-;(filechoosermenu_item "label" "dialog title" ["key"] eEvent "special" "icon")
-	;; Special file chooser options
-	; mode=create-folder|select-folder|(open)|save  
-    ; confirm-overwrite=true|(false)
 
 ;; Application Window
 (window "Freyja" "freyja.png"
@@ -70,9 +51,9 @@
 	(handlebox 1
 	(menubar
 		(submenu "_File"
-			(menu_item "_New"			"C-n"	eNewFile	"gtk-new")
+			(menu_item "_New"	eNewFile	"C-n"	"gtk-new")
 			(filechoosermenu_item "_Open Model..."	"Open Model..."	"C-o"	eOpenModel	"mode=open"	"gtk-open")
-			(menu_item "Ap_pend Model..."  		eAppendFile		"gtk-paste")
+			(menu_item "Ap_pend Model..."	eAppendFile	"gtk-paste")
 
 			(menu_seperator)
 
@@ -80,41 +61,41 @@
 
 			(menu_seperator)
 
-			(menu_item "_Save Model"	"C-s"	eSaveFileModel	"gtk-save")
+			(menu_item "_Save Model"	eSaveFileModel	"C-s"	"gtk-save")
 			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save,confirm-overwrite=true,"	"gtk-save-as")
 			(menu_item "_Revert Model"		eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
 			(menu_item "Proper_ties"		eInfo		"gtk-properties")
-			(menu_item "_Import"		"C-i"	eImportFile	"gtk-go-forward")
-			(menu_item "_Export"		"C-e"	eExportFile	"gtk-go-back")
+			(menu_item "_Import"		eImportFile	"C-i"	"gtk-go-forward")
+			(menu_item "_Export"	eExportFile		"C-e"	"gtk-go-back")
 
 			(menu_seperator)
 
-			(menu_item "_Close"		"C-w"	eCloseFile	"gtk-close")
-			(menu_item "_Quit"			"C-q"	eShutdown	"gtk-quit"))
+			(menu_item "_Close"	eCloseFile		"C-w"	"gtk-close")
+			(menu_item "_Quit"	eShutdown			"C-q"	"gtk-quit"))
 
 
 		(submenu "_Edit"
 			(menu_item "Take _Screenshot"		eScreenShot	"gtk-screenshot")
 			(menu_seperator)
-			(menu_item "_Undo"			"C-z"	eUndo		"gtk-undo")
-			(menu_item "_Redo"			"S-C-z"	eRedo		"gtk-redo")
+			(menu_item "_Undo"	eUndo			"C-z"		"gtk-undo")
+			(menu_item "_Redo"	eRedo			"S-C-z"		"gtk-redo")
 			(menu_seperator)
-			(menu_item "Cu_t"     		"C-x"	eCut		"gtk-cut")
-			(menu_item "_Copy" 	    "C-c"	eCopy		"gtk-copy")
-			(menu_item "_Paste"     	"C-v"	ePaste		"gtk-paste")
-			(menu_item "_Delete"    	"C-d"	eDelete		"gtk-delete")
+			(menu_item "Cu_t"	eCut     		"C-x"		"gtk-cut")
+			(menu_item "_Copy"	eCopy 	    "C-c"		"gtk-copy")
+			(menu_item "_Paste"	ePaste     	"C-v"		"gtk-paste")
+			(menu_item "_Delete"	eDelete    	"C-d"		"gtk-delete")
 			(menu_seperator)
-			(menu_item "Select _All"	"C-a"	eSelectAll	"gtk-select-table")
+			(menu_item "Select _All"	eSelectAll	"C-a"	"gtk-select-table")
 			(menu_seperator)
 			(menu_item "Pr_eferences"    ePreferencesDialog	"gtk-preferences"))
 
 
 		(submenu "_View"
 			(menu_seperator)
-			;(menu_item "_Fullscreen"	"M-E"	eFullscreen	"gtk-fullscreen")
-			(menu_item "_Fullscreen"	"F11"	eFullscreen	"gtk-fullscreen")
+			;(menu_item "_Fullscreen"	eFullscreen	"M-E"	"gtk-fullscreen")
+			(menu_item "_Fullscreen"	eFullscreen	"F11"	"gtk-fullscreen")
 			(toggle_menu_item	"_Viewports"	eViewports	0)
 			(menu_seperator)
 			(toggle_menu_item	"_Grid"			eRenderGrid	1)
@@ -148,11 +129,11 @@
 
 		(submenu "_Create" 
 				(submenu "_Componets"
-						(menu_item "_Vertex"		eEvent  eVertexNew)
-						(menu_item "_Face"			eEvent  ePolygonNew)
-						(menu_item "_Mesh"			eEvent	eMeshNew)
+						(menu_item "_Vertex"		  eVertexNew)
+						(menu_item "_Face"			  ePolygonNew)
+						(menu_item "_Mesh"				eMeshNew)
 						(menu_seperator)
-						(menu_item "_Bone"			eEvent  eBoneNew)
+						(menu_item "_Bone"			  eBoneNew)
 				)
 
 				(submenu "P_olygon Primatives"
@@ -171,11 +152,11 @@
 
 			;; Transforms
 			(submenu "_Transforms"
-				(menu_item "Move"		"F5"	eMoveObject		"gtk-move")
-				(menu_item "Rotate"	"F6"	eRotateObject	"gtk-rotate")
-				(menu_item "Scale"		"F7"	eScaleObject	"gtk-scale")
-				(menu_item "Select"	"F8"	eSelect			"gtk-select")
-				(menu_item "Unselect"	"F9"	eUnselect		"gtk-unselect")
+				(menu_item "Move"	eMoveObject		"F5"		"gtk-move")
+				(menu_item "Rotate"	eRotateObject	"F6"	"gtk-rotate")
+				(menu_item "Scale"	eScaleObject		"F7"	"gtk-scale")
+				(menu_item "Select"	eSelect	"F8"			"gtk-select")
+				(menu_item "Unselect"	eUnselect	"F9"		"gtk-unselect")
 			)
 
 			(submenu "_UV Mapping"
@@ -186,53 +167,53 @@
 			(menu_seperator)
 
 			(submenu "_Vertex"
-				;(menu_item "_New"		eEvent  eVertexNew)
-				(menu_item "_Delete"	eEvent  eVertexDelete)
-				(menu_item "_Combine"	eEvent  eVertexCombine)
-				;(menu_item "_Extrude"	eEvent  eVertexExtrude)
+				;(menu_item "_New"		  eVertexNew)
+				(menu_item "_Delete"	  eVertexDelete)
+				(menu_item "_Combine"	  eVertexCombine)
+				;(menu_item "_Extrude"	  eVertexExtrude)
 			)
 
 			(submenu "V_ertices..."
-				(menu_item "_Unselect" eEvent	eMeshUnselectVertices)
-				(menu_item "_Delete"	eEvent	eNone);eSelectedVertsDelete)
-				(menu_item "Mirror _X"	eEvent	eMeshMirrorX)
-				(menu_item "Mirror _Y"	eEvent	eMeshMirrorY)
-				(menu_item "Mirror _Z"	eEvent	eMeshMirrorZ))
+				(menu_item "_Unselect" 	eMeshUnselectVertices)
+				(menu_item "_Delete"		eNone);eSelectedVertsDelete)
+				(menu_item "Mirror _X"		eMeshMirrorX)
+				(menu_item "Mirror _Y"		eMeshMirrorY)
+				(menu_item "Mirror _Z"		eMeshMirrorZ))
 
 			(submenu "_Face"
-				;(menu_item "_New"		eEvent	ePolygonNew)
-				(menu_item "_Select"	eEvent	ePolygonSelect)
-				(menu_item "_Delete"	eEvent	ePolygonDelete)
-				(menu_item "_Split"	eEvent	ePolygonSplit)
-				(menu_item "_Collapse"	eEvent	eCollapseFace)
-				(menu_item "_Extrude"	"F4"	eExtrude	"gtk-polygon"))
+				;(menu_item "_New"			ePolygonNew)
+				(menu_item "_Select"		ePolygonSelect)
+				(menu_item "_Delete"		ePolygonDelete)
+				(menu_item "_Split"		ePolygonSplit)
+				(menu_item "_Collapse"		eCollapseFace)
+				(menu_item "_Extrude"	eExtrude	"F4"	"gtk-polygon"))
 
 			(submenu "F_aces..."
-				(menu_item "_Unselect faces"	eEvent	eMeshUnselectFaces)
-				(menu_item "_Smoothing groups"	eEvent	eSmoothingGroupsDialog)
-				(menu_item "_Smooth"	eEvent	eSelectedFacesGenerateNormals)
-				(menu_item "_Delete"	eEvent	eNone));eSelectedFacesDelete))
+				(menu_item "_Unselect faces"		eMeshUnselectFaces)
+				(menu_item "_Smoothing groups"		eSmoothingGroupsDialog)
+				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
+				(menu_item "_Delete"		eNone));eSelectedFacesDelete))
 
 			(submenu "_Mesh"
 
-				;(menu_item "_New"		eEvent	eMeshNew)
-				(menu_item "_Select"	eEvent	eMeshSelect)
-				(menu_item "_Delete"	eEvent	eMeshDelete)
-				(menu_item "_Tesselate"	eEvent	eMeshTesselate)
-				(menu_item "_Generate Normals"	eEvent	eMeshGenerateNormals)
-				(menu_item "_Flip Normals"	eEvent	eMeshFlipNormals)
+				;(menu_item "_New"			eMeshNew)
+				(menu_item "_Select"		eMeshSelect)
+				(menu_item "_Delete"		eMeshDelete)
+				(menu_item "_Tesselate"		eMeshTesselate)
+				(menu_item "_Generate Normals"		eMeshGenerateNormals)
+				(menu_item "_Flip Normals"		eMeshFlipNormals)
 
 			) ; submenu _Mesh
 
 			(submenu "_Bone"
-				;(menu_item "_New"		eEvent	eBoneNew)
-				(menu_item "_Delete"	eEvent	eNone)
-				(menu_item "_Select"	eEvent	eBoneSelect)
-				(menu_item "_Parent"	eEvent	eBoneLinkChild)
-				(menu_item "_Unparent"	eEvent	eBoneUnLinkChild)
-				;old (menu_item "L_ink mesh"	eEvent	eBoneLinkMesh)
-				;old (menu_item "U_nlink mesh"	eEvent	eBoneUnLinkMesh)
-				;(menu_item "_Move"			eEvent	eBoneMoveJoint)
+				;(menu_item "_New"			eBoneNew)
+				(menu_item "_Delete"		eNone)
+				(menu_item "_Select"		eBoneSelect)
+				(menu_item "_Parent"		eBoneLinkChild)
+				(menu_item "_Unparent"		eBoneUnLinkChild)
+				;old (menu_item "L_ink mesh"		eBoneLinkMesh)
+				;old (menu_item "U_nlink mesh"		eBoneUnLinkMesh)
+				;(menu_item "_Move"				eBoneMoveJoint)
 			)
 
 		) ; submenu "_Modify"
@@ -242,8 +223,8 @@
 		(menu_seperator)
 
 		(submenu "_Help"
-			(menu_item "_Contents"	"F1"	eHelpDialog	"gtk-help")
-			(menu_item "_About"  			eAboutDialog "gtk-about"))))
+			(menu_item "_Contents"	eHelpDialog	"F1"	"gtk-help")
+			(menu_item "_About"  	eAboutDialog "gtk-about"))))
 
 
 		;; Toolbars
@@ -500,17 +481,17 @@
 					(hbox 0 0 0 1 0
 						(label "Select viewport: "  0.0 0.5)
 						(spinbutton 0 0 3 eSetSelectedViewport)
-						(optionmenu	eEvent	eNone
-							(menu_item	"Orbit      "	eEvent	eViewportOrbit)
-							(menu_item	"Front"	eEvent	eViewportFront)
-							(menu_item	"Back"	eEvent	eViewportBack)
-				  			(menu_item	"Right"	eEvent	eViewportRight)
-				  			(menu_item	"Left"	eEvent	eViewportLeft)
-				  			(menu_item	"Top"	eEvent	eViewportTop)
-				  			(menu_item	"Bottom" eEvent eViewportBottom)
-				  			(menu_item	"Material" eEvent eViewportMaterial)
-				  			(menu_item	"UV"	eEvent eViewportUV)
-				  			(menu_item	"Curve" eEvent eViewportCurve)
+						(optionmenu	eEvent	324324
+							(menu_item	"Orbit      "		eViewportOrbit)
+							(menu_item	"Front"		eViewportFront)
+							(menu_item	"Back"		eViewportBack)
+				  			(menu_item	"Right"		eViewportRight)
+				  			(menu_item	"Left"		eViewportLeft)
+				  			(menu_item	"Top"		eViewportTop)
+				  			(menu_item	"Bottom"  eViewportBottom)
+				  			(menu_item	"Material"  eViewportMaterial)
+				  			(menu_item	"UV"	 eViewportUV)
+				  			(menu_item	"Curve"  eViewportCurve)
 						) ; optionmenu
 					) ; hbox
 
@@ -549,24 +530,24 @@
 					(hbox 1 0 0 1 0
 						
 						(optionmenu	eEvent	eTransformMenu
-							(menu_item	"Model"		eEvent	eTransformModel)
-							(menu_item	"Mesh"		eEvent eTransformMesh)
-							(menu_item	"Selected Meshes"	eEvent eNone);eTransformSelectedMeshes)
-							(menu_item	"Face"		eEvent eTransformFace)
-							(menu_item	"Selected Faces"	eEvent eNone);eTransformSelectedFaces)
-							(menu_item	"Vertex"	eEvent eTransformPoint)
-							(menu_item	"Selected Vertices"	eEvent eTransformSelectedVertices)
-							(menu_item	"Bone"		eEvent eTransformBone)
-							(menu_item	"Group"		eEvent eTransformGroup)
-							(menu_item	"Light"		eEvent	eTransformLight)
+							(menu_item	"Model"		eTransformModel)
+							(menu_item	"Mesh"		eTransformMesh)
+							(menu_item	"Selected Meshes"	 eNone);eTransformSelectedMeshes)
+							(menu_item	"Face"		eTransformFace)
+							(menu_item	"Selected Faces"	 eNone);eTransformSelectedFaces)
+							(menu_item	"Vertex"	eTransformPoint)
+							(menu_item	"Selected Vertices"	 eTransformSelectedVertices)
+							(menu_item	"Bone"		eTransformBone)
+							(menu_item	"Group"		eTransformGroup)
+							(menu_item	"Light"		eTransformLight)
 						) ; optionmenu
 
-						(optionmenu	eEvent	eObjectMenu
-							(menu_item "Move"    eEvent	eMoveObject)
-				  			(menu_item "Rotate"  eEvent	eRotateObject)
-				  			(menu_item "Scale"   eEvent	eScaleObject)
-				  			(menu_item "Select"  eEvent	eSelect)
-				  			(menu_item "Unselect"  eEvent	eUnselect)
+						(optionmenu	eEvent  	eObjectMenu
+							(menu_item "Move"    	eMoveObject)
+				  			(menu_item "Rotate"  	eRotateObject)
+				  			(menu_item "Scale"   	eScaleObject)
+				  			(menu_item "Select"  	eSelect)
+				  			(menu_item "Unselect"	eUnselect)
 						) ; optionmenu
 					) ; hbox
 
@@ -781,42 +762,42 @@
 				; FIXME This should use vargs soon and finally remove the #ids
 				(hbox 1 0 0 1 0
 					(optionmenu eEvent 780
-						(menu_item "GL__ZERO"	eEvent 1000)
-						(menu_item "GL__ONE"	eEvent 1001)
-						(menu_item "GL__SRC__COLOR"		eEvent 1002)
-						(menu_item "GL__ONE__MINUS__SRC__COLOR" eEvent 1003)
-						(menu_item "GL__DST__COLOR"	eEvent 1004)
-						(menu_item "GL__ONE__MINUS__DST__COLOR" eEvent 1005)
-						(menu_item "GL__SRC__ALPHA"	eEvent 1006)
-						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eEvent 1007)
-						(menu_item "GL__DST__ALPHA"	eEvent 1008)
-						(menu_item "GL__ONE__MINUS__DST__ALPHA" eEvent 1009)
-						(menu_item "GL__SRC__ALPHA__SATURATE"	eEvent 1010)
-						(menu_item "GL__CONSTANT__COLOR"		eEvent 1011)
-						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eEvent 1012)
-						(menu_item "GL__CONSTANT__ALPHA" eEvent 1013)
-						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eEvent 1014)))
+						(menu_item "GL__ZERO"					eBlendSrc 0)
+						(menu_item "GL__ONE"					eBlendSrc 1)
+						(menu_item "GL__SRC__COLOR"			eBlendSrc 2)
+						(menu_item "GL__ONE__MINUS__SRC__COLOR" eBlendSrc 3)
+						(menu_item "GL__DST__COLOR"	 		eBlendSrc 4)
+						(menu_item "GL__ONE__MINUS__DST__COLOR" eBlendSrc 5)
+						(menu_item "GL__SRC__ALPHA"			eBlendSrc 6)
+						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eBlendSrc 7)
+						(menu_item "GL__DST__ALPHA"			eBlendSrc 8)
+						(menu_item "GL__ONE__MINUS__DST__ALPHA" eBlendSrc 9)
+						(menu_item "GL__SRC__ALPHA__SATURATE"	eBlendSrc 10)
+						(menu_item "GL__CONSTANT__COLOR"		eBlendSrc 11)
+						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eBlendSrc  12)
+						(menu_item "GL__CONSTANT__ALPHA"  		eBlendSrc 13)
+						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eBlendSrc  14)))
 
 				(hbox 1 0 0 1 0
 					(label "Dest" 0.0 0.5))
 
 				(hbox 1 0 0 1 0
-						(optionmenu eEvent 781
-						(menu_item "GL__ZERO"	eEvent 2000)
-						(menu_item "GL__ONE"	eEvent 2001)
-						(menu_item "GL__SRC__COLOR"		eEvent 2002)
-						(menu_item "GL__ONE__MINUS__SRC__COLOR" eEvent 2003)
-						(menu_item "GL__DST__COLOR"	eEvent 2004)
-						(menu_item "GL__ONE__MINUS__DST__COLOR" eEvent 2005)
-						(menu_item "GL__SRC__ALPHA"	eEvent 2006)
-						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eEvent 2007)
-						(menu_item "GL__DST__ALPHA"	eEvent 2008)
-						(menu_item "GL__ONE__MINUS__DST__ALPHA" eEvent 2009)
-						(menu_item "GL__SRC__ALPHA__SATURATE"	eEvent 2010)
-						(menu_item "GL__CONSTANT__COLOR"		eEvent 2011)
-						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eEvent 2012)
-						(menu_item "GL__CONSTANT__ALPHA" eEvent 2013)
-						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eEvent 2014)))
+					(optionmenu eEvent 781
+						(menu_item "GL__ZERO"					eBlendDest 0)
+						(menu_item "GL__ONE"					eBlendDest 1)
+						(menu_item "GL__SRC__COLOR"			eBlendDest 2)
+						(menu_item "GL__ONE__MINUS__SRC__COLOR" eBlendDest 3)
+						(menu_item "GL__DST__COLOR"			eBlendDest 4)
+						(menu_item "GL__ONE__MINUS__DST__COLOR" eBlendDest 5)
+						(menu_item "GL__SRC__ALPHA"			eBlendDest 6)
+						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eBlendDest 7)
+						(menu_item "GL__DST__ALPHA"			eBlendDest 8)
+						(menu_item "GL__ONE__MINUS__DST__ALPHA" eBlendDest 9)
+						(menu_item "GL__SRC__ALPHA__SATURATE"	eBlendDest 10)
+						(menu_item "GL__CONSTANT__COLOR"		eBlendDest 11)
+						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eBlendDest 12)
+						(menu_item "GL__CONSTANT__ALPHA" 		eBlendDest 13)
+						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eBlendDest 14)))
 
 				(hbox 1 0 0 1 0
 					(vbox 1 0 0 1 0
@@ -1074,5 +1055,34 @@
 (func_set_toggle	eLineBone	1)
 
 
-
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;; mgtk widgets
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;
+; menu_item:
+;  (menu_item	"Label"		eEvent)
+;  (menu_item	"Label"		eEvent		number-or-subevent)
+;  (menu_item	"Label"		eEvent		"gtk-icon")
+;  (menu_item	"Label"		eEvent		"accel"			"gtk-icon")
+;
+; togglebutton:
+;  (togglebutton	"Label"		eEvent)
+;  (togglebutton	"Label"		eEvent		eSubEvent)
+;
+; (textbox "text" EVENT COMMAND)
+; (option_menu (menu_item ...))
+; (button "label" EVENT COMMAND)
+; (vbox homogenous spacing expand fill pading ...)
+; (hbox homogenous spacing expand fill pading ...)
+; (hslider EVENT min max)
+; (icon filename/iconname IconSize_*)
+	; IconSize_Menu
+	; IconSize_ToolbarSmall
+	; IconSize_Toolbar
+	; IconSize_Button
+	; IconSize_Dialog
+;(filechoosermenu_item "label" "dialog title" ["key"] eEvent "special" "icon")
+	;; Special file chooser options
+	; mode=create-folder|select-folder|(open)|save  
+    ; confirm-overwrite=true|(false)
 

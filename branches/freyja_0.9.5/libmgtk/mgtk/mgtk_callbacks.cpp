@@ -1210,6 +1210,14 @@ void mgtk_event_notify_statusbar(const char *message)
 }
 
 
+void mgtk_event_dual_command(GtkWidget *widget, gpointer user_data)
+{
+	unsigned int sube = 
+	GPOINTER_TO_INT(gtk_object_get_data((GtkObject*)widget, "mlisp_event"));
+	mgtk_handle_event1u(GPOINTER_TO_INT(user_data), sube);
+}
+
+
 void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 {
 	mgtk_handle_command(GPOINTER_TO_INT(user_data));
@@ -1230,24 +1238,6 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 
 	mgtk_handle_command2i(e1, e2);
 }
-
-
-// FIXME
-#if 0
-void mgtk_event_dual_command(GtkWidget *widget, gpointer user_data)
-{
-	unsigned int e1 = GPOINTER_TO_INT(user_data);
-	unsigned int e2 = 
-	GPOINTER_TO_INT(gtk_object_get_data((GtkObject*)widget, "mlisp_event"));
-
-	//MSTL_MSG("*** %i, %i", e1, e2);
-
-	if (ResourceEvent::listen(e1 - ResourceEvent::eBaseEvent, e2, ))
-		return;
-
-	mgtk_handle_command2i(e1, e2);
-}
-#endif
 
 
 ////////////////////////////////////////////////////////////////

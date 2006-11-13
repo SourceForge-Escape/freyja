@@ -376,7 +376,7 @@ char mlisp_peek_for_vargs()
 
 	__RESOURCE_AGENT_->Seperator();
 
-	return __RESOURCE_AGENT_->Is(')');
+	return !__RESOURCE_AGENT_->Is(')');
 }
 
 

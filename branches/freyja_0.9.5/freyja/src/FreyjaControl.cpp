@@ -1370,6 +1370,106 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
+	case eBlendSrc:
+		switch (value+1000)
+		{
+		case 1000:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ZERO);
+			break;
+		case 1001:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE);
+			break;
+		case 1002:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
+			break;
+		case 1003:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
+			break;
+		case 1004:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_COLOR);
+			break;
+		case 1005:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
+			break;
+		case 1006:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
+			break;
+		case 1007:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
+			break;
+		case 1008:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
+			break;
+		case 1009:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
+			break;
+		case 1010:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
+			break;
+		case 1011:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
+			break;
+		case 1012:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
+			break;
+		case 1013:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
+			break;
+		case 1014:
+			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
+			break;
+		}
+
+	case eBlendDest:
+		switch (value)
+		{
+		case 0:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ZERO);
+			break;
+		case 1:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE);
+			break;
+		case 2:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
+			break;
+		case 3:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
+			break;
+		case 4:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_COLOR);
+			break;
+		case 5:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
+			break;
+		case 6:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
+			break;
+		case 7:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
+			break;
+		case 8:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
+			break;
+		case 9:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
+			break;
+		case 10:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
+			break;
+		case 11:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
+			break;
+		case 12:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
+			break;
+		case 13:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
+			break;
+		case 14:
+			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
+			break;
+		}
+		break;
 
 	case eMaterialMultiTex:
 		if (value)
@@ -1973,105 +2073,11 @@ bool FreyjaControl::event(int command)
 {
 	unsigned int i;
 
-
 	if (ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
 		return true;
 
 	switch (command)
 	{
-	case 1000:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ZERO);
-		break;
-	case 1001:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE);
-		break;
-	case 1002:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
-		break;
-	case 1003:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
-		break;
-	case 1004:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_COLOR);
-		break;
-	case 1005:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
-		break;
-	case 1006:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
-		break;
-	case 1007:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
-		break;
-	case 1008:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
-		break;
-	case 1009:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
-		break;
-	case 1010:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
-		break;
-	case 1011:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
-		break;
-	case 1012:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
-		break;
-	case 1013:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
-		break;
-	case 1014:
-		freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
-		break;
-
-
-	case 2000:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ZERO);
-		break;
-	case 2001:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE);
-		break;
-	case 2002:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
-		break;
-	case 2003:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
-		break;
-	case 2004:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_COLOR);
-		break;
-	case 2005:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
-		break;
-	case 2006:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
-		break;
-	case 2007:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
-		break;
-	case 2008:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
-		break;
-	case 2009:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
-		break;
-	case 2010:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
-		break;
-	case 2011:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
-		break;
-	case 2012:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
-		break;
-	case 2013:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
-		break;
-	case 2014:
-		freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
-		break;
-
 	case ePolygonSplit:
 		freyjaPolygonSplit(GetSelectedMesh(), GetSelectedFace());
 		freyja_print("Splitting polygon[%i]", GetSelectedFace());
@@ -5719,10 +5725,8 @@ void eSmooth(unsigned int group, unsigned int value)
 	{
 		freyja_print("Selected faces %s smoothing group (%i).", 
 					 value ? "set to" : "removed from", group);
-		//m->SelectedFacesMarkSmoothingGroup(group, value);
+		m->SelectedFacesMarkSmoothingGroup(group, value);
 	}
-
-	MSTL_MSG("*** %i %i", group, value);
 }
 
 

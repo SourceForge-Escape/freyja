@@ -923,6 +923,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
+	r.RegisterInt("eBlendDest", eBlendDest);
+	r.RegisterInt("eBlendSrc", eBlendSrc);
+
 	// Viewport renderers ( default package )
 	r.RegisterInt("eViewportBack", eViewportBack);
 	r.RegisterInt("eViewportRight", eViewportRight);

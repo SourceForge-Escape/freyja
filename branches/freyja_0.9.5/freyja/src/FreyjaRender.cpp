@@ -229,7 +229,6 @@ void FreyjaRender::DrawFreeWindow()
 		glPopAttrib();
 	}
 
-	//glPopMatrix();
 
 	//glPushMatrix();
 
@@ -271,6 +270,8 @@ void FreyjaRender::DrawFreeWindow()
 		freyjaGetRenderModel(i, model);
 		Render(model);
 	}
+
+	//glPopMatrix(); // Remove scaling
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
@@ -907,6 +908,14 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			if (f->mFlags & Face::fSelected)
 			{
 				glColor3fv(RED);
+			}
+			else if (f->mSmoothingGroups & (1<<1))
+			{
+				glColor3fv(PINK);
+			}
+			else if (f->mSmoothingGroups & (1<<2))
+			{
+				glColor3fv(GREEN);
 			}
 			else
 			{
