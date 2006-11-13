@@ -71,6 +71,8 @@ void symbol_enforce_type(arg_list_t **a, int type);
 
 //#define get_string(a) (a->type == CSTRING) ? ((char *)a->type) : 0
 
+#define mlisp_is_cstring(a) (a && a->type == CSTRING)
+
 void delete_arg(arg_list_t **a);
 char *get_string(arg_list_t *a);
 float get_float(arg_list_t *a);

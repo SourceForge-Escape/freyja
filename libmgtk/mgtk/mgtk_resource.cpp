@@ -49,8 +49,6 @@
 #define ARG_GTK_TOOLBOX_WIDGET   4096
 
 
-#define MGTK_ASSERT(_expr) if (!_expr) MSTL_MSG("MLISP (%s:%i)", mlisp_get_filename(), mlisp_get_line_num())
-
 using namespace mstl;
 
 Map<long, GtkWidget *> gFileDialogWidgetMap;
@@ -1538,8 +1536,8 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 {
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MGTK_ASSERT(container);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!container)
 	{
@@ -1548,20 +1546,20 @@ arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 
 	arg_list_t *label = NULL;
 	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERT(label);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *cmd = NULL;
 	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERT(cmd);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MSTL_ASSERTMSG(cmd, "cmd == INT\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *event = NULL;
-	if (!mlisp_peek_for_vargs())
+	if (mlisp_peek_for_vargs())
 	{
 		symbol_enforce_type(&event, INT);
-		MGTK_ASSERT(event);
-		MSTL_ASSERTMSG(event, "event == INT");
+		MSTL_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
 	arg_list_t *ret = NULL;
@@ -2601,7 +2599,6 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 	arg_enforce_type(&cmd, INT);
 	MSTL_ASSERTMSG(cmd, "cmd == INT");
 
-
 	if (text && event && cmd)
 	{
 		item = gtk_check_menu_item_new_with_mnemonic((char *)text->data);
@@ -2634,177 +2631,213 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 }
 
 
+void mgtk_accel_support(GtkWidget *item, arg_list_t *accel)
+{
+#ifdef ACCEL_SUPPORT_ON
+
+	if (accel != 0 && accel->data != 0 && ((char *)accel->data)[0] != 0)
+	{  
+		GtkAccelGroup *accel_group;
+		unsigned int i, len, key, mod;
+		char *s = (char *)(accel->data);
+		
+		mgtk_print("Key accel %s", (char *)(accel->data));
+		
+		len = strlen(s);
+
+		for (mod = 0, i = 0; i < len; ++i)
+		{
+			switch (s[i])
+			{
+			case 'C':
+				mod |= GDK_CONTROL_MASK;
+				break;
+			case 'S':
+				mod |= GDK_SHIFT_MASK;
+				break;
+			case 'M':
+				mod |= GDK_MOD1_MASK;
+				break;
+			case 'E':
+				key = GDK_Return;
+						
+				i = len + 8;
+				break;
+			case 'F':
+				switch (s[i+1])
+				{
+				case '1':
+					switch (s[i+2])
+					{
+					case '0':
+						key = GDK_F10;
+						break;
+					case '1':
+						key = GDK_F11;
+						break;
+					case '2':
+						key = GDK_F12;
+						break;
+					default:
+						key = GDK_F1;
+						break;
+					}
+					break;
+				case '2':
+					key = GDK_F2;
+					break;
+				case '3':
+					key = GDK_F3;
+					break;
+				case '4':
+					key = GDK_F4;
+					break;
+				case '5':
+					key = GDK_F5;
+					break;
+				case '6':
+					key = GDK_F6;
+					break;
+				case '7':
+					key = GDK_F7;
+					break;
+				case '8':
+					key = GDK_F8;
+					break;
+				case '9':
+					key = GDK_F9;
+					break;
+				}
+
+				i = len + 8;
+				break;
+			case '-':
+				break;
+			default:
+				key = gdk_unicode_to_keyval(s[i]);
+				break;
+			}
+		}
+				
+		/* Add code here to translate accel string to GDK key / mods */
+
+		accel_group = gtk_accel_group_new();
+  
+		// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
+
+		gtk_widget_add_accelerator(item, "activate", 
+								   accel_group,
+								   key, (GdkModifierType)mod,
+								   GTK_ACCEL_VISIBLE);
+
+		gtk_window_add_accel_group(GTK_WINDOW(mgtk_get_application_window()),
+								   accel_group);
+	}
+#endif
+}
+
+
+// Four cases
+//  (menu_item "Label"		  eEvent)
+//  (menu_item "Label"		  eEvent       number-or-subevent)
+//  (menu_item "Label"        eEvent	   "gtk-icon")
+//  (menu_item "Label"        eEvent	   "accel"        "gtk-icon")
 arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 {
-	GtkWidget *item;
-	arg_list_t *text, *event, *cmd, *accel, *ret = NULL;
-	void *agtk_event;
-
+	// 2006.11.13, Mongoose - I made this easier to read and better for you too!
 	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
-
+	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 	if (!menu)
 	{
 		return NULL;
 	}
 
-	text = symbol();
-	accel = symbol();
-	event = symbol();
+	arg_list_t *ret = NULL;
 
-	if (accel->type == CSTRING)
-	{
-		cmd = symbol();
-	}
-	else
-	{
-		cmd = event;
-		event = accel;
-		accel = 0x0;
-	}
+	arg_list_t *label = symbol();
+	arg_enforce_type(&label,  CSTRING);
+	MSTL_ASSERTMSG(label, "text == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
-	arg_enforce_type(&text,  CSTRING);
-	MSTL_ASSERTMSG(text, "text == CSTRING");
-
+	arg_list_t *event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MSTL_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
-	arg_enforce_type(&cmd,   INT | CSTRING); // this was commented out
-	MSTL_ASSERTMSG(cmd, "cmd == INT | CSTRING");
-
-	if (text && event && cmd)// cmd->type == INT || cmd->type == CSTRING)
+	arg_list_t *subevent = NULL;
+	arg_list_t *icon = NULL;
+	if (mlisp_peek_for_vargs())
 	{
-		item = gtk_image_menu_item_new_with_mnemonic((char *)text->data);
+		icon = symbol();
 
-		if (cmd->type == CSTRING)
+		if (mlisp_is_cstring(icon))
+		{
+			arg_enforce_type(&icon, CSTRING);
+			MSTL_ASSERTMSG(icon, "icon|accel == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+		}
+		else
+		{
+			subevent = icon;
+			icon = NULL;
+			arg_enforce_type(&subevent, INT);
+			MSTL_ASSERTMSG(subevent, "subevent == INT\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+		}
+	}
+
+	arg_list_t *accel = NULL;
+	if (mlisp_peek_for_vargs())
+	{
+		accel = icon;
+		icon = symbol();
+		arg_enforce_type(&icon, CSTRING);
+		MSTL_ASSERTMSG(icon, "icon == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+	}
+
+	if (label && event)
+	{
+		GtkWidget *item = gtk_image_menu_item_new_with_mnemonic((char *)label->data);
+
+		if (icon)
 		{
 			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item),
-										  mgtk_create_icon((char *)cmd->data, 
+										  mgtk_create_icon((char *)icon->data, 
 														   GTK_ICON_SIZE_MENU));
-
-#ifdef ACCEL_SUPPORT_ON
-			if (accel != 0 &&
-				accel->data != 0 &&
-				((char *)accel->data)[0] != 0)
-			{  
-				GtkAccelGroup *accel_group;
-				unsigned int i, len, key, mod;
-				char *s = (char *)(accel->data);
-
-				mgtk_print("Key accel %s", (char *)(accel->data));
-
-				len = strlen(s);
-
-				for (mod = 0, i = 0; i < len; ++i)
-				{
-					switch (s[i])
-					{
-					case 'C':
-						mod |= GDK_CONTROL_MASK;
-						break;
-					case 'S':
-						mod |= GDK_SHIFT_MASK;
-						break;
-					case 'M':
-						mod |= GDK_MOD1_MASK;
-						break;
-					case 'E':
-						key = GDK_Return;
-						
-						i = len + 8;
-						break;
-					case 'F':
-						switch (s[i+1])
-						{
-						case '1':
-							switch (s[i+2])
-							{
-							case '0':
-								key = GDK_F10;
-								break;
-							case '1':
-								key = GDK_F11;
-								break;
-							case '2':
-								key = GDK_F12;
-								break;
-							default:
-								key = GDK_F1;
-								break;
-							}
-							break;
-						case '2':
-							key = GDK_F2;
-							break;
-						case '3':
-							key = GDK_F3;
-							break;
-						case '4':
-							key = GDK_F4;
-							break;
-						case '5':
-							key = GDK_F5;
-							break;
-						case '6':
-							key = GDK_F6;
-							break;
-						case '7':
-							key = GDK_F7;
-							break;
-						case '8':
-							key = GDK_F8;
-							break;
-						case '9':
-							key = GDK_F9;
-							break;
-						}
-
-						i = len + 8;
-						break;
-					case '-':
-						break;
-					default:
-						key = gdk_unicode_to_keyval(s[i]);
-						break;
-					}
-				}
-				
-				/* Add code here to translate accel string to GDK key / mods */
-
-				accel_group = gtk_accel_group_new();
-  
-				// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
-
-				gtk_widget_add_accelerator(item, "activate", 
-										   accel_group,
-										   key, (GdkModifierType)mod,
-										   GTK_ACCEL_VISIBLE);
-
-				gtk_window_add_accel_group(GTK_WINDOW(mgtk_get_application_window()),
-										   accel_group);
-			}
-#endif
 		}
 
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
-		
+		if (accel)
+		{
+			mgtk_accel_support(item, accel);
+		}
+
+		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item);		
 		gtk_menu_append(GTK_MENU(menu->data), item);
 		gtk_widget_show(item);
-		
-		agtk_event = rc_gtk_event_func(get_int(event));
 
-		if (agtk_event)
+		if (subevent)
+		{
+			gtk_object_set_data(GTK_OBJECT(item), "mlisp_event", 
+								GINT_TO_POINTER(get_int(subevent)));
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_dual_command), 
+							   GINT_TO_POINTER(get_int(event)));
+		}
+		else
 		{
 			gtk_signal_connect(GTK_OBJECT(item), "activate",
-							   GTK_SIGNAL_FUNC(agtk_event), 
-							   GINT_TO_POINTER(((cmd->type == INT) ? 
-												get_int(cmd) : get_int(event))));
+							   GTK_SIGNAL_FUNC(mgtk_event_command), 
+							   GINT_TO_POINTER(get_int(event)));
 		}
 	}
 
-	delete_arg(&text);
+	delete_arg(&label);
 	delete_arg(&event);
-	delete_arg(&cmd);
+	delete_arg(&subevent);
+	delete_arg(&icon);
+	delete_arg(&accel);
 
 	return ret;
 }

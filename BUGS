@@ -12,7 +12,12 @@
 
  Known bugs
 
+ - Quad ray pick sucks - fix it  ;_;
+
+ - Scaling on cursors needs fixing
+
  - Actual bug report: 'generated sphere looks retarded' it's true too
+   just needs to be subdiv with quads
 
  - Material name textbox not updating?
 
