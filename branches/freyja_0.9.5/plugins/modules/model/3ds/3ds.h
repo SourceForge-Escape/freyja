@@ -16,20 +16,25 @@
  *
  *-- History ---------------------------------------------------------- 
  *
+ * 2006.11.11:
+ * Mongoose - Removed the trash endian unsafe file I/O,
+ *            and replaced with mstl readers
+ *
  * 2004.04.27:
  * Mongoose - Created, port and fix of Load 3ds by Alexi Leontopolis, WVU VEL
  ==========================================================================*/
 
+#ifndef GUARD__3DS_H_
+#define GUARD__3DS_H_
 
-#include <iostream>
-#include <fstream>
 #include <stdlib.h>
-#include <memory.h>
 #include <string.h>
 
-using namespace std;
+#include <mstl/SystemIO.h>
 
-#define MAXLEN		256
+using namespace mstl;
+
+#define MAXLEN			256
 #define MAIN_CHUNK		0x4D4D
 #define VERSION_3DS		0x0002
 #define	ONE_UNIT		0x0100
@@ -162,7 +167,7 @@ public:
 	Object3d();
 	~Object3d();
 
-	void ParseMeshBlock		(long len, ifstream *fin);
+	void ParseMeshBlock(long len, SystemIO::FileReader &fin);
 };
 
 class Material
@@ -187,7 +192,7 @@ public:
 class File3ds 
 {
 protected:
-	ifstream	fin;			// file stream for reading input
+	SystemIO::FileReader fin;	// file stream for reading input
 	
 	long		fsize;			// file size
 	dword		version;		// 3DS version
@@ -242,3 +247,4 @@ public:
 void AssignMat(Face3DS *f);
 void XYZ3DSInit(XYZ3DS *v);
 
+#endif

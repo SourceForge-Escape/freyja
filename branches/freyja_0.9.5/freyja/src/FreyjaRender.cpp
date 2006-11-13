@@ -393,6 +393,9 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 	// Due to whacky bullshit we're seriously going to have to use
 	// GL_LESS depth and GL_FRONT culling or the interface will break
 
+	// NOTE: The 'whacky bullshit' is due to various windings and
+	// 'native' formats are allowed, so until that changes don't change this
+
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);

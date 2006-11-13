@@ -953,7 +953,7 @@ void mgtk_event_text(GtkWidget *widget, gpointer user_data)
 	char *text = (char *)gtk_entry_get_text(GTK_ENTRY(widget));
 	int event = GPOINTER_TO_INT(user_data);
 
-	if (!ResourceEvent::listen(event - ResourceEvent::eBase, text))
+	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, text))
 		mgtk_handle_text(event, text);
 }
 
@@ -1216,7 +1216,6 @@ void mgtk_event_command(GtkWidget *widget, gpointer user_data)
 }
 
 
-
 void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 {
 	long event = GPOINTER_TO_INT(user_data);
@@ -1226,14 +1225,29 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 	memcpy(&e1, buf, sizeof(short));
 	memcpy(&e2, buf+sizeof(short), sizeof(short));
 
-	//mgtk_handle_command2i(e1, e2);
-
-	if (ResourceEvent::listen(e1 - 10000 /*ePluginEventBase*/, (unsigned int)e2))
+	if (ResourceEvent::listen(e1 - ResourceEvent::eBaseEvent, (unsigned int)e2))
 		return;
 
 	mgtk_handle_command2i(e1, e2);
 }
 
+
+// FIXME
+#if 0
+void mgtk_event_dual_command(GtkWidget *widget, gpointer user_data)
+{
+	unsigned int e1 = GPOINTER_TO_INT(user_data);
+	unsigned int e2 = 
+	GPOINTER_TO_INT(gtk_object_get_data((GtkObject*)widget, "mlisp_event"));
+
+	//MSTL_MSG("*** %i, %i", e1, e2);
+
+	if (ResourceEvent::listen(e1 - ResourceEvent::eBaseEvent, e2, ))
+		return;
+
+	mgtk_handle_command2i(e1, e2);
+}
+#endif
 
 
 ////////////////////////////////////////////////////////////////
@@ -1310,7 +1324,7 @@ void mgtk_event_fileselection_action(int event)
 	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
 #endif
 
-	if (!ResourceEvent::listen(event - ResourceEvent::eBase, filename))
+	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
 		mgtk_handle_text(event, filename);
 
 	gtk_widget_hide(file);
@@ -1330,7 +1344,7 @@ void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
 
 	int event = GPOINTER_TO_INT(user_data);
 
-	if (!ResourceEvent::listen(event - ResourceEvent::eBase, filename))
+	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
 		mgtk_handle_text(event, filename);
 
 	gtk_widget_hide(file);

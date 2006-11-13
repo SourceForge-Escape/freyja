@@ -14,16 +14,18 @@ mkdir -p ~/.freyja/materials/
 mkdir -p ~/.freyja/icons/
 mkdir -p ~/.freyja/plugins/
 
-# Plugins
-cp bin/plugins/*.so  ~/.freyja/plugins/
-cp bin/plugins/*.dll ~/.freyja/plugins/
+# Plugins ( UI plugins )
+cp ../bin/freyja/debug/plugins/*.so  ~/.freyja/plugins/
+cp ../bin/freyja/debug/plugins/*.dll ~/.freyja/plugins/
 cp plugins/*.mlisp ~/.freyja/plugins/
 
 # Main data
 cp ./data/freyja-dev.mlisp ~/.freyja/
 cp ./data/palettes/*.pal ~/.freyja/palettes/
 cp ./data/materials/*.mat ~/.freyja/materials/
-cp ./data/icons/* ~/.freyja/icons/
+cp ./data/icons/*.png ~/.freyja/icons/
+mkdir -p ~/.freyja/icons/24x24/
+cp ./data/icons/24x24/*.png ~/.freyja/icons/24x24/
 
 # GNOME Setup
 #cp ./data/freyja.desktop /usr/share/applications/

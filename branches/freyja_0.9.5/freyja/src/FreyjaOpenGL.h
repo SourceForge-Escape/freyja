@@ -199,9 +199,9 @@ class OpenGL
 
 	static OpenGL *mSingleton;
 
-	int32 mTextureUnitCount;   /* */
-
-	int32 mMaxLightsCount;     /* */
+	/* Hardware/driver limits */
+	int32 mTextureUnitCount;
+	int32 mMaxLightsCount;
 
 	/* Extentions */
 	static bool arb_multitexture;

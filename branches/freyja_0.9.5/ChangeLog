@@ -5,7 +5,9 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - Interface for smoothing groups, selected faces gets normal gen
+   usage in backend too
+ - New UI elements, fixes for toggle buttons, and new dual events/vargs
  - OpenGL extentions enabled again, please report bugs
  - Removed age old COLORED_POLYGON support ( this was very old )
  - 'Solid plane' for testing out models in orbit view unleashed

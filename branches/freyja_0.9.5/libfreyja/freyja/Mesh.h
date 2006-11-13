@@ -221,6 +221,19 @@ public:
 		mIndices.pushBack(idx);
 	}
 
+	void ClearSmoothingGroup(uint32 g) { mSmoothingGroups ^= (1 << g); }
+	void SetSmoothingGroup(uint32 g) { mSmoothingGroups |= (1 << g); }
+	/*------------------------------------------------------
+	 * Pre  : -1 < <g> < 33 ( Relates to power of 2, bitmap ) 
+	 *        Groups:  0-24,    Normal smoothing groups
+	 *                25-32,    Reserved for special use
+	 *
+	 *        NOTE Groups may later use crease flags in other
+	 *             'geometery types'.
+	 *
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void Rotate(vec_t x, vec_t y, vec_t z);
 
@@ -335,6 +348,19 @@ public:
 	}
 
 
+	void SelectedFacesMarkSmoothingGroup(uint32 group, bool t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void SelectedFacesGenerateVertexNormals();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
@@ -346,7 +372,7 @@ public:
 	Mesh *Copy();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Clone this mesh
+	 * Post : Clone this mesh ( doesn't reside in interal map )
 	 ------------------------------------------------------*/
 
 

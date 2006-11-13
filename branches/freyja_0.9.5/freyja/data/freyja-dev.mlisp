@@ -44,7 +44,7 @@
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; (textbox "text" EVENT COMMAND)
 ; (option_menu (menu_item "label"  EVENT COMMAND))
-; (togglebutton "label" pressed EVENT COMMAND)
+; (togglebutton "label" pressed EVENT [COMMAND])
 ; (button "label" EVENT COMMAND)
 ; (vbox homogenous spacing expand fill pading ...)
 ; (hbox homogenous spacing expand fill pading ...)
@@ -113,7 +113,8 @@
 
 		(submenu "_View"
 			(menu_seperator)
-			(menu_item "_Fullscreen"	"M-E"	eFullscreen	"gtk-fullscreen")
+			;(menu_item "_Fullscreen"	"M-E"	eFullscreen	"gtk-fullscreen")
+			(menu_item "_Fullscreen"	"F11"	eFullscreen	"gtk-fullscreen")
 			(toggle_menu_item	"_Viewports"	eViewports	0)
 			(menu_seperator)
 			(toggle_menu_item	"_Grid"			eRenderGrid	1)
@@ -124,7 +125,7 @@
 				(toggle_menu_item	"_Wireframe"	eRenderWireframe	0)
 				(toggle_menu_item	"_Normals"		eRenderNormals	0)
 				(toggle_menu_item	"_Faces"		eRenderFace		1)
-				(toggle_menu_item	"_Texture"		eRenderTexture	1)
+				;(toggle_menu_item	"_Texture"		eRenderTexture	1)
 				(toggle_menu_item	"_Lighting"		eRenderLighting	1)
 				(toggle_menu_item	"_Material"		eRenderMaterial	1)
 				(toggle_menu_item	"_Bounding Volume"	eRenderBbox 1)
@@ -208,6 +209,8 @@
 
 			(submenu "F_aces..."
 				(menu_item "_Unselect faces"	eEvent	eMeshUnselectFaces)
+				(menu_item "_Smoothing groups"	eEvent	eSmoothingGroupsDialog)
+				(menu_item "_Smooth"	eEvent	eSelectedFacesGenerateNormals)
 				(menu_item "_Delete"	eEvent	eNone));eSelectedFacesDelete))
 
 			(submenu "_Mesh"
@@ -263,8 +266,8 @@
 				(toolbar_togglebutton false "24x24/solid.png" "Faces"
 					"Solid face render mode"		eRenderFace	eRenderFace)
 
-				(toolbar_togglebutton false "24x24/texture.png" "Texture" 
-					"Texture toggle"	eRenderTexture	eRenderTexture)
+				(toolbar_togglebutton false "24x24/texture.png" "Material" 
+					"Material toggle"	eRenderTexture	eRenderMaterial)
 
 				(toolbar_togglebutton false "24x24/light.png" "Light" 
 					"Lighting toggle"		eEvent	eRenderLighting)
@@ -651,13 +654,12 @@
 			;; UV editor tab
 			(tab "UV" eModeUV
 				(hbox 1 0 0 1 0 
-					(togglebutton "Merge Texcoords" 0 eEvent eTexcoordCombine))
+					(togglebutton "Merge Texcoords" eTexcoordCombine))
 				(hbox 1 0 0 1 0
 					(button "Set Mesh Material" eEvent eSetMeshTexture))
 
 				(hbox 1 0 0 1 0
 					(button "Set Selected Faces Material" eEvent eSetFacesMaterial))
-					 
 				(hbox 1 0 0 1 0 
 					(label "Material index: " 0.0 0.5) 
 					(spinbutton 0 0 100 503))
@@ -688,177 +690,148 @@
 				;; Material tab 
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-				(tab "Material" eModeMaterial
+			(tab "Material" eModeMaterial
 
-					;(hbox 1 1 0 1 1
-					;	(toolbar
-					;		(toolbar_button "gtk-new" "New"
-					;			"New material"			eEvent	eNewMaterial)
-					;		(filechoosertoolbar_button 
-					;			"gtk-open" "Open" "Loads material file" 
-					;			"Open Material..." eOpenMaterial "mode=open")
-					;		(filechoosertoolbar_button 
-					;			"gtk-save-as" "Save as..." "Saves material file" 
-					;			"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,"))
-					;	(togglebutton "Slot Load" 0 eEvent eMaterialSlotLoadToggle))
+				;(hbox 1 1 0 1 1
+				;	(toolbar
+				;		(toolbar_button "gtk-new" "New"
+				;			"New material"			eEvent	eNewMaterial)
+				;		(filechoosertoolbar_button 
+				;			"gtk-open" "Open" "Loads material file" 
+				;			"Open Material..." eOpenMaterial "mode=open")
+				;		(filechoosertoolbar_button 
+				;			"gtk-save-as" "Save as..." "Saves material file" 
+				;			"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,"))
+				;	(togglebutton "Slot Load" eMaterialSlotLoadToggle))
 
-					;; Material selector / name editor
-					;(hbox 0 1 0 1 1
-					;	(label "Material Select" 0.0 0.5))
-					;(hbox 0 1 0 1 1
-					;	(spinbutton 0 0 1024 eSelectMaterial)
-					;	(textbox eSetMaterialName))
+				;; Material selector / name editor
+				;(hbox 0 1 0 1 1
+				;	(label "Material Select" 0.0 0.5))
+				;(hbox 0 1 0 1 1
+				;	(spinbutton 0 0 1024 eSelectMaterial)
+				;	(textbox eSetMaterialName))
 
-					;; Texture loader interface
-					(hbox 1 0 0 1 0 (hsep))
-					(hbox 0 1 0 1 1
-						(label "Material Textures" 0.0 0.5))
-					(hbox 0 1 0 1 1
-						(spinbutton 0 0 128 eSetMaterialTexture)
-						(textbox eSetTextureNameA)
-						(togglebutton "Slot" 0 eEvent eTextureSlotLoadToggle)
-						(filechooserbutton "..." "Open Texture..." eOpenTexture "texture_pattern")
-					)
+				;; Texture loader interface
+				(hbox 1 0 0 1 0 (hsep))
+				(hbox 0 1 0 1 1
+					(label "Material Textures" 0.0 0.5))
+				(hbox 0 1 0 1 1
+					(spinbutton 0 0 128 eSetMaterialTexture)
+					(textbox eSetTextureNameA)
+					(togglebutton "Slot" eTextureSlotLoadToggle)
+					(filechooserbutton "..." "Open Texture..." eOpenTexture "texture_pattern")
+				)
 
-					(hbox 0 1 0 1 1
-						(spinbutton 0 0 128 eSetMaterialTextureB)
-						(textbox eSetTextureNameB)
-						(togglebutton "Slot" 0 eEvent eTextureSlotLoadToggleB)
-						(filechooserbutton "..." "Open TextureB..." eOpenTextureB "texture_pattern")
-					)
+				(hbox 0 1 0 1 1
+					(spinbutton 0 0 128 eSetMaterialTextureB)
+					(textbox eSetTextureNameB)
+					(togglebutton "Slot" eTextureSlotLoadToggleB)
+					(filechooserbutton "..." "Open TextureB..." eOpenTextureB "texture_pattern")
+				)
 
-					(hbox 1 0 0 1 0 (hsep))
+				(hbox 1 0 0 1 0 (hsep))
 
-					(hbox 1 1 0 1 1
-						(label "Ambient" 0.0 0.5))
+				(hbox 1 1 0 1 1
+					(label "Ambient" 0.0 0.5))
 
-					(hbox 1 1 0 1 1
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 700)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 701)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 702)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 703)
-						(colorbutton 1 eColorMaterialAmbient))
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 700)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 701)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 702)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 703)
+					(colorbutton 1 eColorMaterialAmbient))
 
-					(hbox 1 1 0 1 1
-						(label "Diffuse" 0.0 0.5))
+				(hbox 1 1 0 1 1
+					(label "Diffuse" 0.0 0.5))
  
-					(hbox 1 1 0 1 1
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 704)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 705)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 706)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 707)
-						(colorbutton 1 eColorMaterialDiffuse))
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 704)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 705)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 706)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 707)
+					(colorbutton 1 eColorMaterialDiffuse))
 
-					(hbox 1 1 0 1 1
-						(label "Specular" 0.0 0.5))
+				(hbox 1 1 0 1 1
+					(label "Specular" 0.0 0.5))
 
-					(hbox 1 1 0 1 1
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 708)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 709)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 710)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 711)
-						(colorbutton 1 eColorMaterialSpecular))
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 708)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 709)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 710)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 711)
+					(colorbutton 1 eColorMaterialSpecular))
 
-					(hbox 1 1 0 1 1
-						(label "Emissive" 0.0 0.5))
+				(hbox 1 1 0 1 1
+					(label "Emissive" 0.0 0.5))
 
-					(hbox 1 1 0 1 1
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 712)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 713)
-						(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 714)
-						(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 715)
-						(colorbutton 1 eColorMaterialEmissive))
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 712)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 713)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 714)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 715)
+					(colorbutton 1 eColorMaterialEmissive))
 
-					(hbox 1 1 0 1 1
-						(label "Shininess" 0.0 0.5)
-						(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 716))
+				(hbox 1 1 0 1 1
+					(label "Shininess" 0.0 0.5)
+					(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 716))
 
-					(hbox 1 0 0 1 0
-						(label "Source" 0.0 0.5))
+				(hbox 1 0 0 1 0
+					(label "Source" 0.0 0.5))
 
-					(hbox 1 0 0 1 0
-						(optionmenu eEvent 780
-							(menu_item "GL__ZERO"
-								eEvent 1000)
-							(menu_item "GL__ONE"
-								eEvent 1001)
-							(menu_item "GL__SRC__COLOR"
-								eEvent 1002)
-							(menu_item "GL__ONE__MINUS__SRC__COLOR"
-								eEvent 1003)
-							(menu_item "GL__DST__COLOR"
-								eEvent 1004)
-							(menu_item "GL__ONE__MINUS__DST__COLOR"
-								eEvent 1005)
-							(menu_item "GL__SRC__ALPHA"
-								eEvent 1006)
-							(menu_item "GL__ONE__MINUS__SRC__ALPHA"
-								eEvent 1007)
-							(menu_item "GL__DST__ALPHA"
-								eEvent 1008)
-							(menu_item "GL__ONE__MINUS__DST__ALPHA"
-								eEvent 1009)
-							(menu_item "GL__SRC__ALPHA__SATURATE"
-								eEvent 1010)
-							(menu_item "GL__CONSTANT__COLOR"
-								eEvent 1011)
-							(menu_item "GL__ONE__MINUS__CONSTANT__COLOR"
-								eEvent 1012)
-							(menu_item "GL__CONSTANT__ALPHA"
-								eEvent 1013)
-							(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" 
-								eEvent 1014)))
+				; FIXME This should use vargs soon and finally remove the #ids
+				(hbox 1 0 0 1 0
+					(optionmenu eEvent 780
+						(menu_item "GL__ZERO"	eEvent 1000)
+						(menu_item "GL__ONE"	eEvent 1001)
+						(menu_item "GL__SRC__COLOR"		eEvent 1002)
+						(menu_item "GL__ONE__MINUS__SRC__COLOR" eEvent 1003)
+						(menu_item "GL__DST__COLOR"	eEvent 1004)
+						(menu_item "GL__ONE__MINUS__DST__COLOR" eEvent 1005)
+						(menu_item "GL__SRC__ALPHA"	eEvent 1006)
+						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eEvent 1007)
+						(menu_item "GL__DST__ALPHA"	eEvent 1008)
+						(menu_item "GL__ONE__MINUS__DST__ALPHA" eEvent 1009)
+						(menu_item "GL__SRC__ALPHA__SATURATE"	eEvent 1010)
+						(menu_item "GL__CONSTANT__COLOR"		eEvent 1011)
+						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eEvent 1012)
+						(menu_item "GL__CONSTANT__ALPHA" eEvent 1013)
+						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eEvent 1014)))
 
-					(hbox 1 0 0 1 0
-						(label "Dest" 0.0 0.5))
+				(hbox 1 0 0 1 0
+					(label "Dest" 0.0 0.5))
 
-					(hbox 1 0 0 1 0
+				(hbox 1 0 0 1 0
 						(optionmenu eEvent 781
-							(menu_item "GL__ZERO" 
-								eEvent 2000)
-							(menu_item "GL__ONE"
-								eEvent 2001)
-							(menu_item "GL__SRC__COLOR" 
-								eEvent 2002)
-							(menu_item "GL__ONE__MINUS__SRC__COLOR"
-								eEvent 2003)
-							(menu_item "GL__DST__COLOR"
-								eEvent 2004)
-							(menu_item "GL__ONE__MINUS__DST__COLOR"
-								eEvent 2005)
-							(menu_item "GL__SRC__ALPHA"
-								eEvent 2006)
-							(menu_item "GL__ONE__MINUS__SRC__ALPHA"
-								eEvent 2007)
-							(menu_item "GL__DST__ALPHA"
-								eEvent 2008)
-							(menu_item "GL__ONE__MINUS__DST__ALPHA"
-								eEvent 2009)
-							(menu_item "GL__SRC__ALPHA__SATURATE"
-								eEvent 2010)
-							(menu_item "GL__CONSTANT__COLOR"
-								eEvent 2011)
-							(menu_item "GL__ONE__MINUS__CONSTANT__COLOR"
-								eEvent 2012)
-							(menu_item "GL__CONSTANT__ALPHA"
-								eEvent 2013)
-							(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" 
-								eEvent 2014)))
+						(menu_item "GL__ZERO"	eEvent 2000)
+						(menu_item "GL__ONE"	eEvent 2001)
+						(menu_item "GL__SRC__COLOR"		eEvent 2002)
+						(menu_item "GL__ONE__MINUS__SRC__COLOR" eEvent 2003)
+						(menu_item "GL__DST__COLOR"	eEvent 2004)
+						(menu_item "GL__ONE__MINUS__DST__COLOR" eEvent 2005)
+						(menu_item "GL__SRC__ALPHA"	eEvent 2006)
+						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eEvent 2007)
+						(menu_item "GL__DST__ALPHA"	eEvent 2008)
+						(menu_item "GL__ONE__MINUS__DST__ALPHA" eEvent 2009)
+						(menu_item "GL__SRC__ALPHA__SATURATE"	eEvent 2010)
+						(menu_item "GL__CONSTANT__COLOR"		eEvent 2011)
+						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eEvent 2012)
+						(menu_item "GL__CONSTANT__ALPHA" eEvent 2013)
+						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eEvent 2014)))
 
-					(hbox 1 0 0 1 0
-						(vbox 1 0 0 1 0
-							(togglebutton "Texture" 0 eEvent eMaterialTex)
-							(togglebutton "Detail texture" 0 eEvent eMaterialMultiTex))
-
+				(hbox 1 0 0 1 0
 					(vbox 1 0 0 1 0
-						(togglebutton "GL_NORMALIZE" 0 eEvent eOpenGLNormalize)
-						(togglebutton "GL_BLEND" 0 eEvent eOpenGLBlend))))
+						(togglebutton "Texture"	eMaterialTex)
+						(togglebutton "Detail texture" eMaterialMultiTex))
+
+				(vbox 1 0 0 1 0
+					(togglebutton "GL_NORMALIZE" eOpenGLNormalize)
+					(togglebutton "GL_BLEND"	eOpenGLBlend))))
 
 )
 )
 )
 
-	;; a box here would be under the tabs and the main window
+	;; A box here would be under the tabs and the main window
 
 
 	) ;; vbox
@@ -913,8 +886,49 @@
  	· mongooseichiban@gmail.com ·
 
  <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>"))
+
 	) ; vbox
 ) ; dialog
+
+
+(dialog "Smoothing Groups - freyja" eSmoothingGroupsDialog 0
+	(vbox 0 0 0 0 0
+		(label2 "Smoothing Groups")
+
+		(hbox 1 0 0 1 0
+			(togglebutton " 1" eSmooth 1)
+			(togglebutton " 2" eSmooth 2)
+			(togglebutton " 3" eSmooth 3)
+			(togglebutton " 4" eSmooth 4)
+			(togglebutton " 5" eSmooth 5)
+			(togglebutton " 6" eSmooth 6)
+			(togglebutton " 7" eSmooth 7)
+			(togglebutton " 8" eSmooth 8)
+		) ; hbox
+		(hbox 1 0 0 1 0
+			(togglebutton " 9"  eSmooth 9)
+			(togglebutton " 10" eSmooth 10)
+			(togglebutton " 11" eSmooth 11)
+			(togglebutton " 12" eSmooth 12)
+			(togglebutton " 13" eSmooth 13)
+			(togglebutton " 14" eSmooth 14)
+			(togglebutton " 15" eSmooth 15)
+			(togglebutton " 16" eSmooth 16)
+		) ; hbox
+		(hbox 1 0 0 1 0
+			(togglebutton " 17" eSmooth 17)
+			(togglebutton " 18" eSmooth 18)
+			(togglebutton " 19" eSmooth 19)
+			(togglebutton " 20" eSmooth 20)
+			(togglebutton " 21" eSmooth 21)
+			(togglebutton " 22" eSmooth 22)
+			(togglebutton " 23" eSmooth 23)
+			(togglebutton " 24" eSmooth 24)
+		) ; hbox
+
+	) ; vbox
+) ; dialog
+
 
 ;(dialog "Freyja :: 趣味" ePreferencesDialog 0
 (dialog "Freyja :: Preferences" ePreferencesDialog 0

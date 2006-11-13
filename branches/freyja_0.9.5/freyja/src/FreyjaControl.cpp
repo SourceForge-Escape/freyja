@@ -1370,14 +1370,66 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
-	case eMaterialTex:
+
+	case eMaterialMultiTex:
 		if (value)
 		{
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+								  fFreyjaMaterial_DetailTexture);
 		}
 		else
 		{
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+									fFreyjaMaterial_DetailTexture);
+		}
+		freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+	case eOpenGLNormalize:
+		if (value)
+		{
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+								  fFreyjaMaterial_Normalize);
+		}
+		else
+		{
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+									fFreyjaMaterial_Normalize);
+		}
+
+		freyja_print("OpenGL normalization is [%s]", value ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+
+	case eOpenGLBlend:
+		if (value)
+		{
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+								  fFreyjaMaterial_Blending);
+		}
+		else
+		{
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+									fFreyjaMaterial_Blending);
+		}
+
+		freyja_print("OpenGL blending [%s]", value ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+		break;
+
+
+	case eMaterialTex:
+		if (value)
+		{
+			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+								  fFreyjaMaterial_Texture);
+		}
+		else
+		{
+			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+									fFreyjaMaterial_Texture);
 		}
 
 		freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
@@ -1919,7 +1971,7 @@ bool FreyjaControl::event(int event, vec_t value)
 
 bool FreyjaControl::event(int command)
 {
-	unsigned int i, flags;
+	unsigned int i;
 
 
 	if (ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
@@ -2028,47 +2080,6 @@ bool FreyjaControl::event(int command)
 	case eMeshFlipNormals:
 		freyjaMeshNormalFlip(GetSelectedMesh());
 		freyja_print("Flipping normals for mesh[%i]", GetSelectedMesh());
-		break;
-
-
-	case eMaterialMultiTex:
-		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
-
-		if (flags & fFreyjaMaterial_DetailTexture)
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
-		else
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
-
-		freyja_print("OpenGL detail texturing is [%s]", 
-					 !(flags & fFreyjaMaterial_DetailTexture) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case eOpenGLNormalize:
-		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
-
-		if (flags & fFreyjaMaterial_Normalize)
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
-		else
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
-
-		freyja_print("OpenGL normalization of normals is [%s]", 
-					 !(flags & fFreyjaMaterial_Normalize) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-
-	case eOpenGLBlend:
-		flags = freyjaGetMaterialFlags(freyjaGetCurrentMaterial());
-		
-		if (flags & fFreyjaMaterial_Blending)
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
-		else
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
-		
-		freyja_print("OpenGL blending [%s]", 
-					 !(flags & fFreyjaMaterial_Blending) ? "ON" : "OFF");
-		freyja_event_gl_refresh();
 		break;
 
 
@@ -5679,8 +5690,48 @@ void eSetSelectedViewport(unsigned int value)
 }
 
 
+
+
+
+void eSelectedFacesGenerateNormals()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->SelectedFacesGenerateVertexNormals();
+	}
+}
+
+
+void eSmoothingGroupsDialog()
+{
+	uint32 id = ResourceEvent::GetResourceIdBySymbol("eSmoothingGroupsDialog");
+	mgtk_event_dialog_visible_set(id, 1);	
+}
+
+
+void eSmooth(unsigned int group, unsigned int value)
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		freyja_print("Selected faces %s smoothing group (%i).", 
+					 value ? "set to" : "removed from", group);
+		//m->SelectedFacesMarkSmoothingGroup(group, value);
+	}
+
+	MSTL_MSG("*** %i %i", group, value);
+}
+
+
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
+	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
+
+	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
 	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
 	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);

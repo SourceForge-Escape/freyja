@@ -39,7 +39,7 @@ class ResourceEvent
 {
  public:
 
-	static const unsigned int eBase = 10000;
+	static const unsigned int eBaseEvent = 10000;
 
 
 	////////////////////////////////////////////////////////////
@@ -96,6 +96,7 @@ class ResourceEvent
 
 	virtual bool action() = 0;
 	virtual bool action(unsigned int value) { return false; };
+	virtual bool action(unsigned int value, unsigned int value2);
 	virtual bool action(long value);
 	virtual bool action(long *value, unsigned long size);
 	virtual bool action(float value);
@@ -121,6 +122,7 @@ class ResourceEvent
 	static bool listen(unsigned long event);
 	static bool listen(unsigned long event, long value);
 	static bool listen(unsigned long event, unsigned int value);
+	static bool listen(unsigned long event, unsigned int value, unsigned int value);
 	static bool listen(unsigned long event, long *value, unsigned long size);
 	static bool listen(unsigned long event, float value);
 	static bool listen(unsigned long event, float *value, unsigned long size);
@@ -350,6 +352,52 @@ public:
 private:
 
 	void (*mHandler)(unsigned int);       /* Function pointer callback */
+};
+
+
+class ResourceEventCallbackUInt2 : public ResourceEvent
+{
+public:
+
+	ResourceEventCallbackUInt2(const char *name, void (*func)(unsigned int, unsigned int)) : ResourceEvent(name)
+	{
+		setHandler(func);
+	}
+
+	static void add(const char *name, void (*func)(unsigned int, unsigned int))
+	{
+		ResourceEventCallbackUInt2 *e = new ResourceEventCallbackUInt2(name, func);
+
+		if (e)
+		{
+		}
+	}
+
+	virtual bool action()
+	{
+		return false;
+	}
+
+	virtual bool action(unsigned int value, unsigned int value2)
+	{
+		if (mHandler)
+		{
+			(*mHandler)(value, value2);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setHandler(void (*func)(unsigned int, unsigned int))
+	{
+		mHandler = func;
+	}
+
+
+private:
+
+	void (*mHandler)(unsigned int, unsigned int);       /* Function pointer callback */
 };
 
 

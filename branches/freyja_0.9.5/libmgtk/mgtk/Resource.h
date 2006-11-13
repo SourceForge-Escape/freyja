@@ -78,7 +78,9 @@ int get_int(arg_list_t *a);
 void new_adt(arg_list_t **a, int type, void *data);
 void arg_enforce_type(arg_list_t **a, int type);
 arg_list_t *symbol();
-
+char mlisp_peek_for_vargs();
+int mlisp_get_line_num();
+const char *mlisp_get_filename();
 
 class Resource
 {
@@ -401,6 +403,19 @@ class Resource
    * Mongoose - Created
    ------------------------------------------------------*/
 
+	const char *GetFilename() { return mFilename; }
+  /*------------------------------------------------------
+   * Pre  : 
+   * Post : Current script file loaded
+   *
+   ------------------------------------------------------*/
+
+	int GetLine() { return _line; }
+  /*------------------------------------------------------
+   * Pre  : 
+   * Post : Current line in mlisp source
+   *
+   ------------------------------------------------------*/
 
 	void Print();
   /*------------------------------------------------------
@@ -434,6 +449,7 @@ class Resource
 
  private:
 
+	char mFilename[96];
 
 	char *_symbol;  	             /* */
 

@@ -30,6 +30,7 @@
 #include <mstl/SystemIO.h>
 
 #include "Resource.h"
+#include "ResourceEvent.h"
 
 #include "mgtk_interface.h"
 #include "mgtk_callbacks.h"
@@ -47,6 +48,8 @@
 #define ARG_GTK_NOTEBOOK         2048
 #define ARG_GTK_TOOLBOX_WIDGET   4096
 
+
+#define MGTK_ASSERT(_expr) if (!_expr) MSTL_MSG("MLISP (%s:%i)", mlisp_get_filename(), mlisp_get_line_num())
 
 using namespace mstl;
 
@@ -823,11 +826,6 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 
 arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
 {
-	arg_list_t *ret = NULL;
-	GtkWidget *widget;
-	void *event_func;
-	int event_cmd;
-
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
 	MSTL_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
 
@@ -836,10 +834,11 @@ arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
 		return NULL;
 	}
 
-	widget = (GtkWidget *)gtk_separator_tool_item_new();
+	GtkWidget *widget = (GtkWidget *)gtk_separator_tool_item_new();
 	gtk_toolbar_append_widget((GtkToolbar *)box->data, widget, "", "");
 	gtk_widget_show(widget);
 
+	arg_list_t *ret = NULL;
 	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
 
 	return ret;
@@ -897,6 +896,42 @@ arg_list_t *mgtk_rc_toolbar_box(arg_list_t *box)
 	new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
 
 	return ret;
+}
+
+
+void mgtk_tool_toggle_button_dual_handler(GtkWidget *item, gpointer e)
+{
+	int val = 0;
+	unsigned int e1 = GPOINTER_TO_INT(e);
+	unsigned int e2 = 
+	GPOINTER_TO_INT(gtk_object_get_data((GtkObject*)item, "mlisp_event"));
+	MSTL_MSG("*** %i, %i", e1, e2);
+
+	if (GTK_IS_TOGGLE_BUTTON(item))
+	{
+		val = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item));
+	}
+	else if (GTK_IS_TOGGLE_TOOL_BUTTON(item))
+	{ 
+		val = gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(item));
+	}
+	else
+	{
+		mgtk_print("! unknown type %s:%i", __FILE__, __LINE__);
+	}
+
+	if (ResourceEvent::listen(e1 - ResourceEvent::eBaseEvent, e2, val))
+	{
+		// Update any other widgets sharing the same event
+		//FIXME mgtk_toggle_dual_value_set(e1, e2, val);
+		return;
+	}
+
+	// FIXME: Not Implemented
+	//FIXME mgtk_handle_event2u(e1, e2, val);
+
+	// Update any other widgets sharing the same event
+	//FIXME mgtk_toggle_dual_value_set(e1, e2, val);
 }
 
 
@@ -1502,12 +1537,8 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 
 arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 {
-	arg_list_t *label, *toggled, *event, *cmd, *ret = NULL;
-	GtkWidget *item;
-	//void (*agtk_event)(GtkWidget *, void *);
-	void *agtk_event;
-
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
+	MGTK_ASSERT(container);
 	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
@@ -1515,45 +1546,54 @@ arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 		return NULL;
 	}
 
+	arg_list_t *label = NULL;
 	symbol_enforce_type(&label, CSTRING);
+	MGTK_ASSERT(label);
 	MSTL_ASSERTMSG(label, "label == CSTRING");
 
-	symbol_enforce_type(&toggled, INT);
-	MSTL_ASSERTMSG(toggled, "toggled == INT");
-
-	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
-
+	arg_list_t *cmd = NULL;
 	symbol_enforce_type(&cmd, INT);
+	MGTK_ASSERT(cmd);
 	MSTL_ASSERTMSG(cmd, "cmd == INT");
 
-	if (label && toggled && event && cmd)
+	arg_list_t *event = NULL;
+	if (!mlisp_peek_for_vargs())
 	{
-		item = gtk_toggle_button_new_with_label(get_string(label));
+		symbol_enforce_type(&event, INT);
+		MGTK_ASSERT(event);
+		MSTL_ASSERTMSG(event, "event == INT");
+	}
+
+	arg_list_t *ret = NULL;
+	if (label && cmd)
+	{
+		GtkWidget *item = gtk_toggle_button_new_with_label(get_string(label));
 		gtk_widget_ref(item);
 		gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)container->data), 
-										 "button1", item,
-										 (GtkDestroyNotify)gtk_widget_unref);
+								 "button1", item,
+								 (GtkDestroyNotify)gtk_widget_unref);
 		gtk_widget_show(item);
 
 		gtk_box_pack_start(GTK_BOX((GtkWidget *)container->data), 
-								 item, TRUE, TRUE, 0);
+						   item, TRUE, TRUE, 0);
 
-		agtk_event = rc_gtk_event_func(get_int(event));
-
-		if (get_int(toggled))
+		if (event)
 		{
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), TRUE);
+			gtk_object_set_data(GTK_OBJECT(item), "mlisp_event", 
+								GINT_TO_POINTER(get_int(event)));
+
+			gtk_signal_connect(GTK_OBJECT(item), "toggled",
+							   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_dual_handler), 
+							   GINT_TO_POINTER(get_int(cmd)));
 		}
-		
-		if (agtk_event)
+		else
 		{
 			gtk_signal_connect(GTK_OBJECT(item), "toggled",
-									 GTK_SIGNAL_FUNC(agtk_event), 
-									 GINT_TO_POINTER(get_int(cmd)));
+							   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
+							   GINT_TO_POINTER(get_int(cmd)));
 		}
-		
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+
+		new_adt(&ret, ARG_GTK_WIDGET, (void *)item);
 	}
 
 	delete_arg(&label);
