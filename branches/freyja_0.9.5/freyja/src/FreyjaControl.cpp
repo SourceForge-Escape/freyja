@@ -5726,6 +5726,9 @@ void eSmooth(unsigned int group, unsigned int value)
 		freyja_print("Selected faces %s smoothing group (%i).", 
 					 value ? "set to" : "removed from", group);
 		m->SelectedFacesMarkSmoothingGroup(group, value);
+
+		if (value)
+			m->GroupedFacesGenerateVertexNormals(group);
 	}
 }
 
