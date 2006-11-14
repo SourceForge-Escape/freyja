@@ -1194,6 +1194,49 @@ void mgtk_destroy_notebook(GtkWidget *widget)
 	}
 }
 
+arg_list_t *mgtk_rc_expander(arg_list_t *box)
+{
+	arg_enforce_type(&box,  ARG_GTK_BOX_WIDGET);
+	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+
+	if (!box)
+	{
+		return NULL;
+	}
+
+	arg_list_t *label;
+	symbol_enforce_type(&label,  CSTRING);
+	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+
+	arg_list_t *show;
+	symbol_enforce_type(&show, INT);
+	MSTL_ASSERTMSG(show, "show == INT\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+
+	arg_list_t *ret = NULL;
+
+	if (label && show)
+	{
+		GtkWidget *expander = gtk_expander_new(mlisp_get_string(label));
+		GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+		gtk_container_add((GtkContainer *)box->data, expander);
+		gtk_container_add((GtkContainer *)expander, vbox);
+		gtk_widget_show_all(expander);
+
+		gtk_expander_set_expanded((GtkExpander*)expander, 
+								  get_int(show)? TRUE : FALSE);
+
+		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
+	}
+
+	delete_arg(&label);
+	delete_arg(&show);
+
+	return ret;
+}
+
 
 arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 {
@@ -1231,6 +1274,7 @@ arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 		// Notebook widget
 		notebook = gtk_notebook_new();
 		gtk_widget_ref(notebook);
+
 		gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)box->data), 
 								 "nb1", notebook,
 								 (GtkDestroyNotify)gtk_widget_unref);
@@ -2757,7 +2801,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 
 	arg_list_t *label = symbol();
 	arg_enforce_type(&label,  CSTRING);
-	MSTL_ASSERTMSG(label, "text == CSTRING\nMLISP (%s:%i)", 
+	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *event = symbol();

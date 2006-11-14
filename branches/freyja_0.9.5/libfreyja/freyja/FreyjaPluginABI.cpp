@@ -447,7 +447,7 @@ int32 freyjaCheckModel(const char *filename)
 }
 
 
-int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r)
+int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 {
 	Vector<long> verticesMap, texcoordsMap;
 	vec3_t xyz;
@@ -490,8 +490,6 @@ int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r)
 			xyz[j] = r.ReadFloat32();
 
 		freyjaVertexNormal3fv(idx, xyz);
-
-		MSTL_MSG("\nn[%i] <%f, %f, %f>", idx, xyz[0], xyz[1], xyz[2]);
 
 		for (j = 0; j < 2; ++j)
 			uv[j] = r.ReadFloat32();
@@ -562,6 +560,25 @@ int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r)
 	}
 
 	freyjaEnd(); // FREYJA_MESH
+
+	// If chunk.flags & 0x1 ( 0.9.5+ ) we write out extra things
+	// appended to the end of mesh chunk ( 0.9.3 will just skip it )
+	Mesh *m = freyjaModelGetMeshClass(0, freyjaGetFSMMeshIndex());
+	if (m)
+	{
+		// Note we're starting a versioned subblock, use the C++ serialize ver
+		//uint32 faceChunkVersion = 
+		r.ReadLong();
+		int32 count = r.ReadLong();
+		for (i = 0; i < count; ++i)
+		{
+			Face *f = m->GetFace(i);
+			if (f)
+			{
+				f->mSmoothingGroups = r.ReadLong();
+			}
+		}
+	}
 
 	return 0;
 }
@@ -705,10 +722,26 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 
 	vertexGroupCount = 0;
 
+	// If chunk.flags & 0x1 ( 0.9.5+ ) we write out extra things
+	// appended to the end of mesh chunk ( 0.9.3 will just skip it )
+	Mesh *m = freyjaModelGetMeshClass(0, meshIndex);
+	if (m)
+	{
+		// Note we're starting a versioned subblock, use the C++ serialize ver
+		byteSize += 4;
+		int32 count = m->GetFaceCount();
+		byteSize += 4;
+		for (i = 0; i < count; ++i)
+		{
+			byteSize += 4;
+		}
+	}
+
+
 	/* Write to diskfile */
 	chunk.type = FREYJA_CHUNK_MESH;
 	chunk.size = byteSize;
-	chunk.flags = 0x0;
+	chunk.flags = 0x1;      // 0x0 means 0.9.3 version!
 	chunk.version = version;
 
 	w.WriteLong(chunk.type);
@@ -737,6 +770,7 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 			w.WriteFloat32(xyz[j]);
 
 		freyjaGetVertexNormalXYZ3fv(vertex, xyz);
+
 		for (j = 0; j < 3; ++j)
 			w.WriteFloat32(xyz[j]);
 
@@ -814,6 +848,22 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 		{
 			texcoord = freyjaGetPolygonTexCoordIndex(idx, j);
 			w.WriteLong(texcoordsMap[texcoord]);
+		}
+	}
+
+	// If chunk.flags & 0x1 ( 0.9.5+ ) we write out extra things
+	// appended to the end of mesh chunk ( 0.9.3 will just skip it )
+	m = freyjaModelGetMeshClass(0, meshIndex);
+	if (m)
+	{
+		// Note we're starting a versioned subblock, use the C++ serialize ver
+		w.WriteLong(Face::GetChunkVersion());
+		int32 count = m->GetFaceCount();
+		w.WriteLong(count);
+		for (i = 0; i < count; ++i)
+		{
+			Face *f = m->GetFace(i);
+			w.WriteLong(f ? f->mSmoothingGroups : 0x0);
 		}
 	}
 
@@ -999,7 +1049,7 @@ int32 freyjaLoadModel(const char *filename)
 
 
 		case FREYJA_CHUNK_MESH:
-			freyjaLoadMeshChunkV1(r);
+			freyjaLoadMeshChunkV1(r, chunk);
 
 			if ((long)r.GetOffset() != offset)
 				printf("MESH @ %li not %i!\n", r.GetOffset(), offset);

@@ -223,6 +223,7 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
                                 GTK_SELECTION_NONE);
 	gtk_widget_show(view);
 
+
 #ifdef ANIM_TREE_IN_BOX
 	gtk_box_pack_start(GTK_BOX(box), view, FALSE, FALSE, FALSE);
 #else

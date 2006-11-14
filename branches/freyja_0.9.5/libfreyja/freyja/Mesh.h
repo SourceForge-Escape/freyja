@@ -177,6 +177,7 @@ public:
 		fPolyMappedNormals = 64
 	} Flags;
 
+
 	Face() :
 		mMaterial(0), // Always have a valid material
 		mFlags(fNone),
@@ -198,6 +199,11 @@ public:
 		mFlags ^= fPolyMappedTexCoords;
 		mTexCoordIndices.clear();
 	}
+
+
+	static const char *GetChunkType() { return "Face"; }
+
+	static uint32 GetChunkVersion() { return 9500; /* 0.9.5-00 */ }
 
 
 	void AppendNormal(index_t idx)

@@ -346,6 +346,7 @@ extern "C" {
 
 	void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex);
 
+	index_t freyjaGetFSMMeshIndex();
 }
 
 

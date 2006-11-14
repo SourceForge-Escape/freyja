@@ -94,7 +94,7 @@ FreyjaRender::FreyjaRender() :
 	mScaleEnv(30.0f), // Use a larger number for higher res
 	mFar(6000.0f),
 	mNear(0.1f),
-	mFovY(90.0f), // 40.0f
+	mFovY(40.0f),
 	mNearHeight(20.0f)
 {
 	mAngles[0] = 18.0f;
@@ -916,6 +916,10 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			else if (f->mSmoothingGroups & (1<<2))
 			{
 				glColor3fv(GREEN);
+			}
+			else if (f->mSmoothingGroups & (1<<4))
+			{
+				glColor3fv(YELLOW);
 			}
 			else
 			{
