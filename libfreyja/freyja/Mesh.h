@@ -305,8 +305,10 @@ public:
 	 ------------------------------------------------------*/
 
 	// Testing embedded keyframing as public attribute, so bare with us...
+	TransformTrack &GetTransformTrack(uint32 track) { return mTrack; }
 	TransformTrack mTrack;
 
+	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
 	VertexAnimTrack mVertexAnimTrack;
 
 

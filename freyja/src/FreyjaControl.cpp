@@ -30,6 +30,7 @@
 #include <mgtk/ResourceEvent.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaPluginABI.h>
+#include <freyja/Bone.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
 #include <freyja/FreyjaImage.h>
@@ -3204,22 +3205,49 @@ void FreyjaControl::SetKeyFrame()
 {
 	switch (mObjectMode)
 	{
+	case tBone:
+		{
+			// FIXME: There is no way to support multiple skeletons like this
+			// in ABI *yet
+			//Bone *b = freyjaModelGetBoneClass(GetSelectedSkeleton(), 
+			//								  GetSelectedBone());
+			Bone *b = Bone::GetBone(GetSelectedBone());
+
+			if (b)
+			{
+				BoneTrack &track = b->GetTransformTrack(GetSelectedAnimation());
+				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
+				vec_t time = (vec_t)k / track.GetRate(); 
+				index_t id = track.NewKeyframe(time);
+				uint32 count = track.GetKeyframeCount();
+
+				BoneKeyFrame *key = track.GetKeyframe(id);
+				freyjaGetBoneRotationEuler3fv(GetSelectedBone(),key->mRot.mVec);
+				key->mRot *= 57.295779513082323f;
+				freyjaGetBoneTranslation3fv(GetSelectedBone(), key->mLoc.mVec);
+
+				freyja_print("Created tBone keyframe[%i] <- %.3fs, %i/%i | %i", 
+							 mSelectedKeyFrame, time, id, count,
+							 track.mKeyFrames.size());
+			}
+		}
+		break;
+
 	case tMesh:
 		{
-			//index_t id = freyjaKeyFrameCreate(mSelectedKeyFrame);
-			//freyja_print("Created keyframe[%i] <- %i", mSelectedKeyFrame, id);
-
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
 			if (m)
 			{
+				Track &track = m->GetTransformTrack(GetSelectedAnimation());
 				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
-				vec_t time = (vec_t)k / m->mTrack.GetRate(); 
-				index_t id = m->mTrack.NewKeyframe(time);
-				uint32 count = m->mTrack.GetKeyframeCount();
+				vec_t time = (vec_t)k / track.GetRate(); 
+				index_t id = track.NewKeyframe(time);
+				uint32 count = track.GetKeyframeCount();
 			
-				freyja_print("Created keyframe[%i] <- %.3fs, %i/%i | %i", 
+				freyja_print("Created tMesh keyframe[%i] <- %.3fs, %i/%i | %i", 
 							 mSelectedKeyFrame, time, id, count,
-							 m->mTrack.mKeyFrames.size());
+							 track.mKeyFrames.size());
 			}
 		}
 		break;
@@ -5033,15 +5061,40 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	switch (mObjectMode)
 	{
 	case tBone:
-		{
-			// Set cursor pos and rotation
-			freyjaGetBoneTranslation3fv(GetSelectedBone(), mCursor.mPos.mVec);
-			//freyjaGetBoneWorldPos3fv(GetSelectedBone(), mCursor.mPos.mVec);
-			freyjaGetBoneRotationEuler3fv(GetSelectedBone(), o.mVec);
+		{	
+			switch (GetControlScheme())
+			{
+			case eScheme_Animation:
+				{
+					Bone *b = Bone::GetBone(GetSelectedBone());
+					if (b)
+					{
+						BoneTrack &track = b->GetTransformTrack(GetSelectedAnimation());
+						uint32 k = GetSelectedKeyFrame();
+						BoneKeyFrame *key = track.GetKeyframe(k);
 
-			mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
-			mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
-			mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
+						if (key)
+						{
+							mCursor.mRotate = key->GetEulerRotation();
+						}
+					}
+				}
+				break;
+
+			case eScheme_Model:
+				// Set cursor pos and rotation
+				//freyjaGetBoneTranslation3fv(GetSelectedBone(), mCursor.mPos.mVec);
+				//freyjaGetBoneWorldPos3fv(GetSelectedBone(), mCursor.mPos.mVec);
+				freyjaGetBoneRotationEuler3fv(GetSelectedBone(), o.mVec);
+				
+				mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
+				mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
+				mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
+				break;
+
+			default:
+				;
+			}
 		}
 		break;
 
@@ -5074,7 +5127,32 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			xyz[1] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[1]);
 			xyz[2] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[2]);
 
-			freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
+			switch (GetControlScheme())
+			{
+			case eScheme_Animation:
+				{
+					Bone *b = Bone::GetBone(GetSelectedBone());
+					if (b)
+					{
+						BoneTrack &track = b->GetTransformTrack(GetSelectedAnimation());
+						uint32 k = GetSelectedKeyFrame();
+						BoneKeyFrame *key = track.GetKeyframe(k);
+
+						if (key)
+						{
+							key->SetEulerRotation(mCursor.mRotate);
+						}
+					}
+				}
+				break;
+
+			case eScheme_Model:
+				freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
+				break;
+
+			default:
+				;
+			}
 		}
 		break;
 

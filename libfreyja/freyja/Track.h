@@ -102,6 +102,36 @@ public:
 	}
 
 
+	virtual uint32 GetNextKeyframe(uint32 frame)
+	{
+		KeyFrame **array = mKeyFrames.getVectorArray();
+		for ( uint32 count = mKeyFrames.size()-1; frame < count; ++frame )
+		{
+			if (array[frame])
+			{
+				break;
+			}
+		}
+
+		return frame;
+	}
+
+
+	virtual uint32 GetPrevKeyframe(uint32 frame)
+	{
+		KeyFrame **array = mKeyFrames.getVectorArray();
+		for ( ; frame > 0; --frame )
+		{
+			if (array[frame])
+			{
+				break;
+			}
+		}
+
+		return frame;
+	}
+
+
 	KeyFrame *NewKeyframeByIndex(uint32 keyframe)
 	{
 		if ( keyframe < mKeyFrames.size() )

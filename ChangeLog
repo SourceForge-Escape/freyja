@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Lame skeletal animation test in using linear interpolation ( no skinning )
  - JA v1 extention to save smoothing groups ( upwards compatible )
  - FIX mesh normals saved back correctly in JA v1
  - New expander widget ( widget crazy this month it seems )
