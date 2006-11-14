@@ -3,7 +3,7 @@ $(BUILDDIR)/MetaData.o: freyja/MetaData.cpp freyja/MetaData.h freyja/freyja.h
 	 $(DO_CC)
 
 $(BUILDDIR)/BoneABI.o: freyja/BoneABI.cpp freyja/freyja.h freyja/Bone.h \
-  freyja/KeyFrame.h freyja/BoneABI.h
+  freyja/KeyFrame.h freyja/Track.h freyja/BoneABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/BezierPatch.o: freyja/BezierPatch.cpp freyja/BezierPatch.h
@@ -25,7 +25,7 @@ $(BUILDDIR)/FreyjaPrinter.o: freyja/FreyjaPrinter.cpp freyja/FreyjaPrinter.h
 	 $(DO_CC)
 
 $(BUILDDIR)/FreyjaFSM.o: freyja/FreyjaFSM.cpp freyja/freyja.h freyja/Mesh.h \
-  freyja/KeyFrame.h freyja/BoneABI.h freyja/SkeletonABI.h \
+  freyja/Track.h freyja/KeyFrame.h freyja/BoneABI.h freyja/SkeletonABI.h \
   freyja/FreyjaPluginABI.h freyja/KeyFrameABI.h freyja/MeshABI.h \
   freyja/FreyjaFSM.h freyja/FreyjaPlugin.h freyja/FreyjaPrinter.h
 	 $(DO_CC)
@@ -85,11 +85,13 @@ $(BUILDDIR)/RigidBody.o: freyja/RigidBody.cpp freyja/RigidBody.h
 $(BUILDDIR)/FreyjaImage.o: freyja/FreyjaImage.cpp freyja/FreyjaImage.h
 	 $(DO_CC)
 
-$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/KeyFrame.h freyja/freyja.h
+$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/KeyFrame.h freyja/freyja.h \
+  freyja/Track.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Skeleton.o: freyja/Skeleton.cpp freyja/SkeletonABI.h freyja/freyja.h \
-  freyja/Skeleton.h freyja/Bone.h freyja/KeyFrame.h freyja/BoneABI.h
+  freyja/Skeleton.h freyja/Bone.h freyja/KeyFrame.h freyja/Track.h \
+  freyja/BoneABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/PerlinNoise.o: freyja/PerlinNoise.cpp freyja/PerlinNoise.h
@@ -98,7 +100,8 @@ $(BUILDDIR)/PerlinNoise.o: freyja/PerlinNoise.cpp freyja/PerlinNoise.h
 $(BUILDDIR)/FreyjaCamera.o: freyja/FreyjaCamera.cpp freyja/FreyjaCamera.h
 	 $(DO_CC)
 
-$(BUILDDIR)/Mesh.o: freyja/Mesh.cpp freyja/Mesh.h freyja/KeyFrame.h freyja/freyja.h
+$(BUILDDIR)/Mesh.o: freyja/Mesh.cpp freyja/Mesh.h freyja/Track.h freyja/KeyFrame.h \
+  freyja/freyja.h
 	 $(DO_CC)
 
 $(BUILDDIR)/freyja.o: freyja/freyja.cpp freyja/FreyjaPrinter.h freyja/FreyjaFSM.h \
@@ -107,8 +110,9 @@ $(BUILDDIR)/freyja.o: freyja/freyja.cpp freyja/FreyjaPrinter.h freyja/FreyjaFSM.
   freyja/FreyjaPlugin.h freyja/Mesh.h
 	 $(DO_CC)
 
-$(BUILDDIR)/MeshABI.o: freyja/MeshABI.cpp freyja/Mesh.h freyja/KeyFrame.h \
-  freyja/freyja.h freyja/MeshABI.h freyja/FreyjaPluginABI.h \
-  freyja/KeyFrameABI.h freyja/BoneABI.h freyja/SkeletonABI.h
+$(BUILDDIR)/MeshABI.o: freyja/MeshABI.cpp freyja/Mesh.h freyja/Track.h \
+  freyja/KeyFrame.h freyja/freyja.h freyja/MeshABI.h \
+  freyja/FreyjaPluginABI.h freyja/KeyFrameABI.h freyja/BoneABI.h \
+  freyja/SkeletonABI.h
 	 $(DO_CC)
 
