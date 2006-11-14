@@ -280,6 +280,15 @@
 					"Enable four window view"	eEvent	eViewports)
 			) ; toolbar
 
+				(hbox 0 0 0 1 0
+					;; This really adjusts view height ( removing feature soon )
+					;(label "  View Height "  0.0 0.4) 
+					;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
+
+					(label "  Zoom "  0.0 0.4) 
+					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
+				) ; hbox
+
 			) ; hbox
 		) ; tab
 
@@ -495,14 +504,14 @@
 						) ; optionmenu
 					) ; hbox
 
-				(hbox 1 0 0 1 0
+				;(hbox 0 0 0 1 0
 					;; This really adjusts view height ( removing feature soon )
 					;(label "  View Height "  0.0 0.4) 
 					;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
 
-					(label "  Zoom "  0.0 0.4) 
-					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
-				) ; hbox
+				;	(label "  Zoom "  0.0 0.4) 
+				;	(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
+				;) ; hbox
 
 					;; Object operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					(hbox 1 0 0 1 0 (hsep))
@@ -571,7 +580,45 @@
 
 					) ; expander
 
-	
+	(expander "Groups Box" 0
+	;(vbox 0 0 0 0 0
+		;(label2 "Smoothing Groups")
+
+		(hbox 1 0 0 1 0
+			(togglebutton " 1" eSmooth 1)
+			(togglebutton " 2" eSmooth 2)
+			(togglebutton " 3" eSmooth 3)
+			(togglebutton " 4" eSmooth 4)
+			(togglebutton " 5" eSmooth 5)
+			(togglebutton " 6" eSmooth 6)
+			(togglebutton " 7" eSmooth 7)
+			(togglebutton " 8" eSmooth 8)
+		) ; hbox
+		(hbox 1 0 0 1 0
+			(togglebutton " 9"  eSmooth 9)
+			(togglebutton " 10" eSmooth 10)
+			(togglebutton " 11" eSmooth 11)
+			(togglebutton " 12" eSmooth 12)
+			(togglebutton " 13" eSmooth 13)
+			(togglebutton " 14" eSmooth 14)
+			(togglebutton " 15" eSmooth 15)
+			(togglebutton " 16" eSmooth 16)
+		) ; hbox
+		(hbox 1 0 0 1 0
+			(togglebutton " 17" eSmooth 17)
+			(togglebutton " 18" eSmooth 18)
+			(togglebutton " 19" eSmooth 19)
+			(togglebutton " 20" eSmooth 20)
+			(togglebutton " 21" eSmooth 21)
+			(togglebutton " 22" eSmooth 22)
+			(togglebutton " 23" eSmooth 23)
+			(togglebutton " 24" eSmooth 24)
+		) ; hbox
+
+	;) ; vbox
+
+				) ; expander
+
 					;; Skeleton ;;;;;;;;;;;;;;;
 					;(hbox 1 0 0 1 0 (hsep))
 
@@ -865,43 +912,43 @@
 ) ; dialog
 
 
-(dialog "Smoothing Groups - freyja" eSmoothingGroupsDialog 0
-	(vbox 0 0 0 0 0
-		(label2 "Smoothing Groups")
-
-		(hbox 1 0 0 1 0
-			(togglebutton " 1" eSmooth 1)
-			(togglebutton " 2" eSmooth 2)
-			(togglebutton " 3" eSmooth 3)
-			(togglebutton " 4" eSmooth 4)
-			(togglebutton " 5" eSmooth 5)
-			(togglebutton " 6" eSmooth 6)
-			(togglebutton " 7" eSmooth 7)
-			(togglebutton " 8" eSmooth 8)
-		) ; hbox
-		(hbox 1 0 0 1 0
-			(togglebutton " 9"  eSmooth 9)
-			(togglebutton " 10" eSmooth 10)
-			(togglebutton " 11" eSmooth 11)
-			(togglebutton " 12" eSmooth 12)
-			(togglebutton " 13" eSmooth 13)
-			(togglebutton " 14" eSmooth 14)
-			(togglebutton " 15" eSmooth 15)
-			(togglebutton " 16" eSmooth 16)
-		) ; hbox
-		(hbox 1 0 0 1 0
-			(togglebutton " 17" eSmooth 17)
-			(togglebutton " 18" eSmooth 18)
-			(togglebutton " 19" eSmooth 19)
-			(togglebutton " 20" eSmooth 20)
-			(togglebutton " 21" eSmooth 21)
-			(togglebutton " 22" eSmooth 22)
-			(togglebutton " 23" eSmooth 23)
-			(togglebutton " 24" eSmooth 24)
-		) ; hbox
-
-	) ; vbox
-) ; dialog
+;(dialog "Smoothing Groups - freyja" eSmoothingGroupsDialog 0
+;	(vbox 0 0 0 0 0
+;		(label2 "Smoothing Groups")
+;
+;		(hbox 1 0 0 1 0
+;			(togglebutton " 1" eSmooth 1)
+;			(togglebutton " 2" eSmooth 2)
+;			(togglebutton " 3" eSmooth 3)
+;			(togglebutton " 4" eSmooth 4)
+;			(togglebutton " 5" eSmooth 5)
+;			(togglebutton " 6" eSmooth 6)
+;			(togglebutton " 7" eSmooth 7)
+;			(togglebutton " 8" eSmooth 8)
+;		) ; hbox
+;		(hbox 1 0 0 1 0
+;			(togglebutton " 9"  eSmooth 9)
+;			(togglebutton " 10" eSmooth 10)
+;			(togglebutton " 11" eSmooth 11)
+;			(togglebutton " 12" eSmooth 12)
+;			(togglebutton " 13" eSmooth 13)
+;			(togglebutton " 14" eSmooth 14)
+;			(togglebutton " 15" eSmooth 15)
+;			(togglebutton " 16" eSmooth 16)
+;		) ; hbox
+;		(hbox 1 0 0 1 0
+;			(togglebutton " 17" eSmooth 17)
+;			(togglebutton " 18" eSmooth 18)
+;			(togglebutton " 19" eSmooth 19)
+;			(togglebutton " 20" eSmooth 20)
+;			(togglebutton " 21" eSmooth 21)
+;			(togglebutton " 22" eSmooth 22)
+;			(togglebutton " 23" eSmooth 23)
+;			(togglebutton " 24" eSmooth 24)
+;		) ; hbox
+;
+;	) ; vbox
+;) ; dialog
 
 
 ;(dialog "Freyja :: 趣味" ePreferencesDialog 0

@@ -58,18 +58,37 @@ class BoneKeyFrame : public KeyFrame
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	Vec3 GetEulerRotation()
+	{
+		return mRot;
+	}
+
+
+	void SetEulerRotation(Vec3 v)
+	{
+		mRot = v;
+	}
+
+
 	virtual bool Serialize(SystemIO::FileWriter &w) 
 	{
 		w.WriteFloat32(mLoc.mVec[0]);
 		w.WriteFloat32(mLoc.mVec[1]);
 		w.WriteFloat32(mLoc.mVec[2]);
 
+#if 1
+		w.WriteFloat32(mRot.mVec[0]);
+		w.WriteFloat32(mRot.mVec[1]);
+		w.WriteFloat32(mRot.mVec[2]);
+		w.WriteFloat32(0.0f); // padding in case I want to store quat
+#else
 		vec4_t wxyz;
 		mRot.getQuaternion4fv(wxyz);
 		w.WriteFloat32(wxyz[0]);
 		w.WriteFloat32(wxyz[1]);
 		w.WriteFloat32(wxyz[2]);
 		w.WriteFloat32(wxyz[3]);
+#endif
 		return true;
 	}
 	/*------------------------------------------------------
@@ -83,8 +102,15 @@ class BoneKeyFrame : public KeyFrame
 		mLoc.mVec[1] = r.ReadFloat32();
 		mLoc.mVec[2] = r.ReadFloat32(); 
 
+#if 1
+		mRot.mVec[0] = r.ReadFloat32();
+		mRot.mVec[1] = r.ReadFloat32();
+		mRot.mVec[2] = r.ReadFloat32();
+		r.ReadFloat32();
+#else
 		mRot = Quaternion(r.ReadFloat32(), r.ReadFloat32(), 
 						  r.ReadFloat32(), r.ReadFloat32());
+#endif
 		return true; 
 	}
 	/*------------------------------------------------------
@@ -92,9 +118,14 @@ class BoneKeyFrame : public KeyFrame
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
+
 	Vec3 mLoc;                       /* Keyframe data */
 
+#if 1
+	Vec3 mRot;
+#else
 	Quaternion mRot;
+#endif
 
 	Matrix mWorldPose;               /* This is here for ease of use only */
 
@@ -120,6 +151,69 @@ public:
 	virtual BoneKeyFrame *GetKeyframe(index_t idx) 
 	{
 		return (BoneKeyFrame *)Track::GetKeyframe(idx);
+	}
+
+	void GetTransform(vec_t time, Vec3 &pos, Vec3 &rot) 
+	{
+		// Ran off the rails here... could wrap around, but just return for now
+		if (time > GetDuration() || time < 0.0f)
+		{
+			pos = Vec3(0,0,0);
+			rot = Vec3(0,0,0);
+			return;
+		}
+	
+		// Given time assertion this should be a 'valid' frame here...
+		int32 frame = GetKeyfameIndexFromTime(time);
+		BoneKeyFrame *key = GetKeyframe(frame);
+	
+		if (key)
+		{
+			pos = key->mLoc;
+			rot = key->mRot;
+		}
+		else
+		{
+			pos = Vec3(0,0,0);
+			rot = Vec3(0,0,0);
+		
+			// Find last keyframe ( not last played, that's for a game engine )
+			uint32 prev = GetPrevKeyframe(frame);
+			uint32 next = GetNextKeyframe(frame);
+
+			// <= Interpolate(prev, next, time);
+
+			key = GetKeyframe(prev);
+
+			// Found a 'start' keyframe, or if you don't you'll use a
+			// dummy keyframe with reflexive transforms @ 0.0 seconds
+			vec_t start = 0.0f;
+			if (key)
+			{
+				// Prev bundle
+				pos = key->mLoc;
+				rot = key->mRot;
+				start = (vec_t)prev / GetRate();
+			}
+		
+			key = GetKeyframe(next);
+
+			// Found an 'end' keyframe, or if you don't you'll use a
+			// dummy keyframe with reflexive transforms @ 0.0 seconds
+			if (key)
+			{
+				// Next bundle
+				Vec3 posNext = key->mLoc;
+				Vec3 rotNext = key->mRot;
+				vec_t end = (vec_t)next / GetRate();
+
+				// Actual time displacement weight
+				vec_t w = (time - start) / (end - start);
+
+				pos = pos + ((posNext - pos) * w);
+				rot = rot + ((rotNext - rot) * w);
+			}
+		}
 	}
 };
 
@@ -244,7 +338,10 @@ public:
 									  * this cache of the current orientation 
 									  * and translation in matrix form */
 
-	BoneTrack mKeyframes;   // Test, only supporting one 'range/anim' in test
+
+	// Test, only supporting one 'range/anim' in test: F(track) <- F(0)
+	BoneTrack &GetTransformTrack(uint32 track) { return mKeyframes; }
+	BoneTrack mKeyframes;
 
 #if OBSOLETE
 	// Starting in 0.9.5 moved world transforms here from keyframing,

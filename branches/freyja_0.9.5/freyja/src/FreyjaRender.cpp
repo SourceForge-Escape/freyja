@@ -37,6 +37,7 @@
 
 //#include <mgtk/ResourceEvent.h>
 #include <freyja/SkeletonABI.h>
+#include <freyja/Bone.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
 
@@ -1134,11 +1135,44 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	glPushMatrix();
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
-	freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
-	bone.rotate *= 57.295779513082323f;
-	glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
-	glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
-	glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
+
+	switch (FreyjaControl::mInstance->GetControlScheme())
+	{
+	case FreyjaControl::eScheme_Animation:
+		{
+			Bone *b = Bone::GetBone(currentBone);
+			if (b)
+			{
+				BoneTrack &track = b->GetTransformTrack(FreyjaControl::mInstance->GetSelectedAnimation());
+				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
+				//BoneKeyFrame *key = track.GetKeyframe(k);
+
+				Vec3 pos, rot;
+				track.GetTransform((vec_t)k / track.GetRate(), pos, rot);
+				glRotatef(rot.mVec[zr], 0, 0, 1);
+				glRotatef(rot.mVec[yr], 0, 1, 0);
+				glRotatef(rot.mVec[xr], 1, 0, 0);
+			}
+			else
+			{
+				freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, 
+											  bone.rotate.mVec);
+				bone.rotate *= 57.295779513082323f;
+				glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
+				glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
+				glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
+			}
+		}
+		break;
+
+	default:
+		freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
+		bone.rotate *= 57.295779513082323f;
+		glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
+		glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
+		glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
+	}
+
 	n = bone.getChildrenCount();
 
 	for (i = 0; i < n; ++i)
