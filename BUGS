@@ -12,9 +12,11 @@
 
  Known bugs
 
+ - JA v1 doesn't seem to save out multimesh anymore ( oops )
+
  - Quad ray pick sucks - fix it  ;_;
 
- - Scaling on cursors needs fixing
+ - Scaling on cursors needs fixing during zoom
 
  - Actual bug report: 'generated sphere looks retarded' it's true too
    just needs to be subdiv with quads

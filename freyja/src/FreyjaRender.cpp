@@ -332,7 +332,7 @@ void FreyjaRender::BindTexture(uint32 texture)
 
 void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 {
-	if (!(mRenderMode & fTexture))
+	if (!(mRenderMode & fMaterial))
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
