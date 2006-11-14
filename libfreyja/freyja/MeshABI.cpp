@@ -39,6 +39,12 @@ index_t gFreyjaCurrentModel = 0;
 index_t gFreyjaCurrentMesh = INDEX_INVALID;
 
 
+index_t freyjaGetFSMMeshIndex()
+{
+	return gFreyjaCurrentMesh;	
+}
+
+
 uint32 freyjaModelGetMeshCount(index_t modelIndex)
 {
 	return gFreyjaMeshes.size();	
@@ -1076,7 +1082,7 @@ void freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz)
 
 		if (v)
 		{
-			mesh->GetTexCoord(v->mNormalIndex, nxyz);
+			mesh->GetNormal(v->mNormalIndex, nxyz);
 		}
 	}
 }

@@ -524,11 +524,7 @@
 
 					(hbox 1 0 0 1 0 (hsep))
 
-					(hbox 1 0 0 1 0
-						(label "Transform: " 0.0 0.5))
-
-					(hbox 1 0 0 1 0
-						
+					(hbox 1 0 0 1 0						
 						(optionmenu	eEvent	eTransformMenu
 							(menu_item	"Model"		eTransformModel)
 							(menu_item	"Mesh"		eTransformMesh)
@@ -554,6 +550,7 @@
 					(hbox 1 0 0 1 0 (hsep))
 
 					;; Generic Transform box
+					(expander "Transform Box" 1
 					(hbox 1 1 0 1 1
 						(button "Move" eEvent eMove)
 						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_X)
@@ -572,44 +569,38 @@
 						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Y)
 						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Z))
 
-					;; Seperator
-					(hbox 1 0 0 1 0 (hsep))
+					) ; expander
 
 	
 					;; Skeleton ;;;;;;;;;;;;;;;
-
-					;; Skeleton attribute editor  
-					(hbox 1 0 0 1 0 (hsep))
-					(hbox 1 0 0 1 0
-						(label "Skeleton" 0.0 0.5))
+					;(hbox 1 0 0 1 0 (hsep))
 
 					; Make a UID string for trees later so to be fully generic
-					(tree eBoneIterator eSetCurrentBoneName)
-					;; Replace these with improved tree support
-					(hbox 0 0 0 1 0
-						(hbox 1 0 0 1 0
-							(label "Bone: " 0.0 0.5))
-						(spinbutton 0 0 100 eBoneIterator)
-						(textbox eSetCurrentBoneName))
+					(expander "Skeleton" 1
+						(tree eBoneIterator eSetCurrentBoneName)
+
+						(hbox 0 0 0 1 0
+							(hbox 1 0 0 1 0
+								(label "Bone: " 0.0 0.5))
+							(spinbutton 0 0 100 eBoneIterator)
+							(textbox eSetCurrentBoneName)))
+
 
 					;; Animation ;;;;;;;;;;;;;;;
 
 					;; Seperator
 					(hbox 1 0 0 1 0 (hsep))
-
 					
 
-					
+					;; Animation bar
+   					(handlebox 1 
+						(vbox 0 0 0 1 0	
 
-	;; Animation bar
-   	(handlebox 1 
-		(vbox 0 0 0 1 0	
+					(hbox 0 1 0 1 0
+						(hslider eAnimationSlider 0 100))
 
-			(hbox 0 1 0 1 0
-				(hslider eAnimationSlider 0 100))
-
-			(hbox 0 1 0 1 0
-				(toolbar
+					(hbox 0 1 0 1 0
+						(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
 						"Auto" "Auto Keyframe" eEvent eModeAutoKeyframe)
 					(toolbar_button "24x24/key.png"
@@ -626,8 +617,8 @@
 						"?" "?" eEvent eNone)
 					(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
 						"Next" "Next" eEvent eAnimationNext)))
-		) ;; vbox
-	) ;; End Animation handlebox
+					) ;; vbox
+				) ;; End Animation handlebox
 
 			)  ;; end tab Model
 
@@ -814,6 +805,8 @@
 
 	;; A box here would be under the tabs and the main window
 
+			;(hbox 0 1 0 1 0
+			;	(hslider eAnimationSlider 0 100))
 
 	) ;; vbox
 )  ;; Window
@@ -1068,6 +1061,10 @@
 ; togglebutton:
 ;  (togglebutton	"Label"		eEvent)
 ;  (togglebutton	"Label"		eEvent		eSubEvent)
+;
+;  (expander "Label" boolean-opened ...)
+;
+;  (scrollarea ...)
 ;
 ; (textbox "text" EVENT COMMAND)
 ; (option_menu (menu_item ...))
