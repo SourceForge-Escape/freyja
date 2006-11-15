@@ -16,8 +16,6 @@
 
  - Cursor reset on undo ( use a freaking seperate undo state system )
 
- - Material/mattex setting bug ( new materials also start at #7 )
-
  - Plugins
 	- 3ds is broken
 	- MD3 is broken
@@ -38,18 +36,12 @@
 
  - Material name textbox not updating?
 
- - UV projection seems broken now yay
-
- - Keyframes should be able to use the Transform Box during animation
-
  - Keyframes should keep transform of last keyframe as init
    to avoid interpolation issues ( eg extra rotation in 'tweens )
    FIX this in the backend to "to it right" during allocation of new frame
  
  - Keyframe and cursor transforms 'fight' each other during editing
    FIX this in FreyjaRender by having a special mode for this case
-
- - Texture uploading in perlinnoise plugin seems broken
 
  - What happened to ray picked UV faces in UV editor?
 

@@ -5,6 +5,12 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Texture uploading in perlinnoise plugin wasn't hooked to mlisp
+ - Only load filenames checked to module extentions at least ( save some time )
+ - FIX for some texture/material rendering issues
+ - FIX UV projections fixed, but not improved besides adding forced guides
+ - FIX Keyframes should be able to use the Transform Box now
+ - Guide UV unwrap using crappy uv gen algorithms for now
  - Mesh copy/cut/paste back in, however doesn't behave the same
  - Some new transform implementations
  - Groups utils ( very niice )

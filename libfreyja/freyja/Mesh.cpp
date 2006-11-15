@@ -751,7 +751,90 @@ void Mesh::SetSelectedOnGroupFaces(uint32 groups)
 }
 
 
-// FIXME: Need one for UV Map Group bitflag too once that is checked in ;)
+void Mesh::UpdateVertexReferenceWithSelectedBias()
+{
+	// FIXME: Add some kind of conditional flag here to avoid
+	//        uneeded updates.  This isn't so important *yet, since
+	//        only 'one-offs' call this for now.
+	//
+	//        You need one flag for 'mesh not modified' and one for prev filter.
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (vertex)
+		{
+			vertex->mPolyRefIndices.clear();
+		}
+	}
+
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider facets in given group(s)...
+		if (!face || !(face->mFlags & Face::fSelected))
+		{
+			continue;
+		}
+
+		// Very expensive
+		for (uint32 v = 0, vn = face->mIndices.size(); v < vn; ++v)
+		{
+			Vertex *vertex = GetVertex(face->mIndices[v]);
+			
+			if (vertex)
+			{
+				vertex->mPolyRefIndices.pushBack(f);
+			}
+		}
+	}	
+}
+
+
+void Mesh::UpdateVertexReferenceWithUVMapBias(uint32 uvmap)
+{
+	// FIXME: Add some kind of conditional flag here to avoid
+	//        uneeded updates.  This isn't so important *yet, since
+	//        only 'one-offs' call this for now.
+	//
+	//        You need one flag for 'mesh not modified' and one for prev filter.
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (vertex)
+		{
+			vertex->mPolyRefIndices.clear();
+		}
+	}
+
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider facets in given group(s)...
+		if (!face || !(uvmap == face->mUVMap))
+		{
+			continue;
+		}
+
+		// Very expensive
+		for (uint32 v = 0, vn = face->mIndices.size(); v < vn; ++v)
+		{
+			Vertex *vertex = GetVertex(face->mIndices[v]);
+			
+			if (vertex)
+			{
+				vertex->mPolyRefIndices.pushBack(f);
+			}
+		}
+	}
+}
+
+
 void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
 {
 	// FIXME: Add some kind of conditional flag here to avoid
@@ -789,6 +872,163 @@ void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
 			{
 				vertex->mPolyRefIndices.pushBack(f);
 			}
+		}
+	}
+}
+
+ 
+void Mesh::UVMapSelectedFaces_Spherical()
+{
+	vec_t longitude, latitude;
+	vec3_t xyz;
+	vec3_t uvw;
+
+	UpdateVertexReferenceWithSelectedBias();
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		// Was this allocated and also marked by group bias?
+		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		{
+			GetVertexArrayPos(vertex->mVertexIndex, xyz);
+
+			longitude = atan2((float)-xyz[0], xyz[2]);
+			latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+			
+			longitude = 1.0 - longitude / (HEL_2_PI);
+			latitude = fabs(0.5 - latitude / HEL_PI);
+			
+			uvw[0] = longitude - floor(longitude);
+			uvw[1] = latitude;
+			uvw[2] = 0.0f;
+
+			SetTexCoord(vertex->mTexCoordIndex, uvw);
+		}
+	}
+}
+
+
+void Mesh::UVMapSelectedFaces_Cylindrical()
+{
+	UpdateVertexReferenceWithSelectedBias();
+	vec_t longitude, latitude, ysize;
+	vec3_t min = {999999.0f, 999999.0f, 999999.0f};
+	vec3_t max = {-999999.0f, -999999.0f, -999999.0f};
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		// Was this allocated and also marked by group bias?
+		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		{
+			vec3_t xyz;
+
+			GetVertexArrayPos(vertex->mVertexIndex, xyz);
+
+
+			for (uint32 j = 0; j < 3; ++j)
+			{
+				if (xyz[j] < min[j])
+					min[j] = xyz[j];
+
+				if (xyz[j] > max[j])
+					max[j] = xyz[j];
+			}
+		
+		
+			if (max[1] >= 0)
+			{
+				if (min[1] >= 0)
+				{
+					ysize = max[1] - min[1];
+				}
+				else
+				{
+					ysize = max[1] + -min[1];
+				}
+			}
+			else
+			{
+				ysize = -max[1] + min[1];
+			}
+
+			if (ysize < 0.0001 && ysize > -0.0001)
+				ysize = 1.0f;
+		}
+	}
+
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		// Was this allocated and also marked by group bias?
+		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		{
+			vec3_t xyz;
+			vec3_t uvw;
+
+			GetVertexArrayPos(vertex->mVertexIndex, xyz);
+
+
+			longitude = atan2((float)-xyz[0], xyz[2]);
+			latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+
+			longitude = 1.0 - longitude / (HEL_2_PI);
+			latitude = fabs(0.5 - latitude / HEL_PI);
+
+			uvw[0] = longitude - floor(longitude);
+			uvw[1] = xyz[1] / ysize;
+			uvw[2] = 0.0f;	
+
+			SetTexCoord(vertex->mTexCoordIndex, uvw);
+		}
+	}
+}
+
+
+void Mesh::UVMapSelectedFaces_Plane()
+{
+	UpdateVertexReferenceWithSelectedBias();
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		// Was this allocated and also marked by group bias?
+		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		{
+			vec3_t xyz;
+			vec3_t uvw;
+
+			GetVertexArrayPos(vertex->mVertexIndex, xyz);
+	
+			uvw[0] = (xyz[0] > 0) ? xyz[0] : -xyz[0];	
+			vec_t s = 0.025;
+  
+			while (uvw[0] > 1.0)
+			{
+				uvw[0] *= s;
+				s *= 0.01;
+			}
+  
+			uvw[1] = (xyz[1] > 0) ? xyz[1] : -xyz[1];
+			s = 0.025;
+  
+			while (uvw[1] > 1.0)
+			{
+				uvw[1] *= s;
+				s *= 0.01;
+			}
+  
+			uvw[0] = 1.0 - uvw[0];
+			uvw[1] = 1.0 - uvw[1];
+			uvw[2] = 0.0f;	
+
+			SetTexCoord(vertex->mTexCoordIndex, uvw);
 		}
 	}
 }

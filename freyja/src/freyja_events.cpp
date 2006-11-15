@@ -774,6 +774,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshMirrorX", eMeshMirrorX);
 	r.RegisterInt("eMeshMirrorY", eMeshMirrorY);
 	r.RegisterInt("eMeshMirrorZ", eMeshMirrorZ);
+	r.RegisterInt("eMeshTexcoordPlaneProj", eMeshTexcoordPlaneProj);
 	r.RegisterInt("eMeshTexcoordSpherical",eMeshTexcoordSpherical);
 	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
 	r.RegisterInt("eMeshTesselate", eMeshTesselate);
@@ -856,7 +857,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eBoneIterator", eBoneIterator);
 
 	r.RegisterInt("eTexcoordCombine", eTexcoordCombine);
-	r.RegisterInt("CMD_MISC_GEN_TEXMAP_XY", CMD_MISC_GEN_TEXMAP_XY);
 
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
 	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);
@@ -904,7 +904,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eBoneMoveJoint", CMD_BONE_MOVE_PIVOT);
 
 	r.RegisterInt("eSelectionByBox", eSelectionByBox);
-	r.RegisterInt("eTextureMapProjection", CMD_MISC_GEN_TEXMAP_XY);
 
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 

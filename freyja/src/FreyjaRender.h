@@ -96,7 +96,7 @@ public:
 
 	typedef enum {                 /* Rendering modes */
 		fWireframe        = 1,
-		fTexture          = 2,
+		fReserved2        = 2,
 		fFace             = 4,
 		fGrid             = 8,
 		fLighting         = 16,    /* Render with GL lighting */

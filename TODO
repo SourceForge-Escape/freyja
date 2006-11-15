@@ -54,6 +54,7 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- DBUS support now that it's hit stable ABI at 1.0
 	- Better UV unwrap ( write smart algorithms for projections )
 	- Selected <--> Groups assignments for faces
 	- Transforms for selected faces/groups in UV editor

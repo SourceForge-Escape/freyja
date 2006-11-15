@@ -160,7 +160,7 @@
 			)
 
 			(submenu "_UV Mapping"
-				(menu_item "_Planar"		CMD_MISC_GEN_TEXMAP_XY	"gtk-uv")
+				(menu_item "_Planar"		eMeshTexcoordPlaneProj	"gtk-uv")
 				(menu_item "_Cylindrical"	eMeshTexcoordCylindrical	"gtk-uv")
 				(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-uv"))
 
@@ -281,11 +281,9 @@
 			) ; toolbar
 
 				(hbox 0 1 0 1 1
-					;; This really adjusts view height ( removing feature soon )
-					;(label "  View Height "  0.0 0.4) 
+					;(label " View Height "  0.0 0.4) 
 					;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
-
-					(label "  Zoom "  0.0 0.4) 
+					(label " Zoom "  0.0 0.4) 
 					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
 				) ; hbox
 
@@ -388,8 +386,16 @@
 				(toolbar_button	"24x24/split.png"
 					"Split" "Split object" eEvent eSplitObject)
 
+				(toolbar_separator)
+
 				(toolbar_button "24x24/texmap.png" "UVMap" 
-					"UVMap Spherical"	eEvent eMeshTexcoordSpherical)
+					"UVMap selected faces, Planar"	eEvent eMeshTexcoordPlaneProj)
+
+				(toolbar_button "24x24/texmap.png" "UVMap" 
+					"UVMap selected faces, Spherical"	eEvent eMeshTexcoordSpherical)
+
+				(toolbar_button "24x24/texmap.png" "UVMap" 
+					"UVMap selected faces, Cylindrical"	eEvent eMeshTexcoordCylindrical)
 
 			) ; toolbar
 			) ; hbox
@@ -620,6 +626,11 @@
 			(togglebutton " 23" eSmooth 23)
 			(togglebutton " 24" eSmooth 24)
 		) ; hbox
+
+		;(hbox 1 0 0 1 0
+			;(label2 "Groups:")
+		;	(togglebutton "Assign"	eNone 1)
+		;	(togglebutton "Clear"	eNone 0))
 
 	;) ; vbox
 
