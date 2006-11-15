@@ -715,8 +715,6 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	if (!m)
 		return;
 
-	vec_t *array = m->GetVertexArray();
-
 	glPushMatrix();
 
 	glPushAttrib(GL_ENABLE_BIT);
@@ -727,7 +725,12 @@ void FreyjaRender::Render(RenderMesh &mesh)
 
 	// 'World effects' 
 
-	// Keyframe animation curve input test...  
+	// NOTE: Right here if you swap out the vertex array 'array', then
+	// all the elements to be rendered will use that instead of the 
+	// the current mesh vertex array.  Good for animation, skinning, etc.
+	vec_t *array = m->GetVertexArray();
+
+	// Keyframe animation
 	if (mRenderMode & fKeyFrameAnimation)
 	{
 		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
@@ -750,10 +753,10 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
 		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
 
-		if (kv && kv->GetVertexCount())// == m->GetVertexCount())
+		if (kv && kv->GetVertexCount() == m->GetVertexCount())
 		{
 			array = kv->GetVertexArray();
-			freyja_print("vertex array update");
+			//freyja_print("vertex array update");
 		}
 	}
 

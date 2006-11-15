@@ -389,7 +389,7 @@ public:
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	uint32 GetVertexCount() { return mVertices.size(); }
+	uint32 GetVertexCount() { return mVertices.size()/3; }
  
 	vec_t *GetVertexArray() {  return mVertices.getVectorArray(); }
 

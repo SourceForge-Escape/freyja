@@ -666,7 +666,8 @@
 					(hbox 0 1 0 1 0
 						(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
-						"Auto" "Auto Keyframe" eEvent eModeAutoKeyframe)
+						"Auto" "Animation mode (Not Auto Keyframe yet)"  
+						eEvent eModeAutoKeyframe)
 					(toolbar_button "24x24/key.png"
 						"Set" "Set Keyframe" eEvent eSetKeyFrame)
 					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 
