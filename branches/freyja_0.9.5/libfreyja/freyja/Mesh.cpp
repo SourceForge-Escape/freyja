@@ -699,6 +699,134 @@ void Mesh::SelectedFacesMarkSmoothingGroup(uint32 group, bool t)
 }
 
 
+void Mesh::AssignGroupsToSelectedFaces(uint32 groups, bool overwrite)
+{
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider facets in given group(s)...
+		if (face && face->mFlags & Face::fSelected)
+		{
+			if (overwrite)
+			{
+				face->mSmoothingGroups = groups; 
+			}
+			else
+			{
+				face->mSmoothingGroups |= groups;
+			}
+		}
+	}
+}
+
+
+void Mesh::ClearSelectedOnGroupFaces(uint32 groups)
+{
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider facets in given group(s)...
+		if (face && groups & face->mSmoothingGroups)
+		{
+			face->mFlags ^= Face::fSelected;
+		}
+	}
+}
+
+
+void Mesh::SetSelectedOnGroupFaces(uint32 groups)
+{
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider facets in given group(s)...
+		if (face && groups & face->mSmoothingGroups)
+		{
+			face->mFlags |= Face::fSelected;
+		}
+	}
+}
+
+
+// FIXME: Need one for UV Map Group bitflag too once that is checked in ;)
+void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
+{
+	// FIXME: Add some kind of conditional flag here to avoid
+	//        uneeded updates.  This isn't so important *yet, since
+	//        only 'one-offs' call this for now.
+	//
+	//        You need one flag for 'mesh not modified' and one for prev filter.
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (vertex)
+		{
+			vertex->mPolyRefIndices.clear();
+		}
+	}
+
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		// We only consider facets in given group(s)...
+		if (!face || !(groupFilter & face->mSmoothingGroups))
+		{
+			continue;
+		}
+
+		// Very expensive
+		for (uint32 v = 0, vn = face->mIndices.size(); v < vn; ++v)
+		{
+			Vertex *vertex = GetVertex(face->mIndices[v]);
+			
+			if (vertex)
+			{
+				vertex->mPolyRefIndices.pushBack(f);
+			}
+		}
+	}
+}
+
+
+void Mesh::UVMapSpherical(uint32 groups)
+{
+	vec_t longitude, latitude;
+	vec3_t xyz;
+	vec3_t uvw;
+
+	UpdateVertexReferenceWithSmoothingGroupBias(groups);
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		// Was this allocated and also marked by group bias?
+		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		{
+			GetVertexArrayPos(vertex->mVertexIndex, xyz);
+
+			longitude = atan2((float)-xyz[0], xyz[2]);
+			latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
+			
+			longitude = 1.0 - longitude / (HEL_2_PI);
+			latitude = fabs(0.5 - latitude / HEL_PI);
+			
+			uvw[0] = longitude - floor(longitude);
+			uvw[1] = latitude;
+			uvw[2] = 0.0f;
+
+			SetTexCoord(vertex->mTexCoordIndex, uvw);
+		}
+	}
+}
+
+
 void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 {
 	// FIXME: Cached face refs would be smart for all the connectivty use

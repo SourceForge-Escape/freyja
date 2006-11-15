@@ -5,6 +5,9 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Mesh copy/cut/paste back in, however doesn't behave the same
+ - Some new transform implementations
+ - Groups utils ( very niice )
  - FIX UV window now bound to fMaterial to toggle color cube / material
  - Lame skeletal animation test in using linear interpolation ( no skinning )
  - JA v1 extention to save smoothing groups ( upwards compatible )
