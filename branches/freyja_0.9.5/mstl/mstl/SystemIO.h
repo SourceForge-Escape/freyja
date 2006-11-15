@@ -1460,6 +1460,16 @@ class SystemIO
 		return symbol;
 	}
 
+	
+	static bool CheckModuleExt(const char *filename)
+	{
+#ifdef WIN32
+		return (File::CompareFilenameExtention(filename, ".dll") == 0);
+#else
+		return (File::CompareFilenameExtention(filename, ".so") == 0);
+#endif
+	}
+
 
 	static void *ModuleLoad(const char *module)
 	{

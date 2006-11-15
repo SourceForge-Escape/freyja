@@ -90,6 +90,7 @@ typedef enum {
 	eMeshScale,
 	eMeshTexcoordSpherical,
 	eMeshTexcoordCylindrical,
+	eMeshTexcoordPlaneProj,
 	eMeshTesselate,
 	eSetMaterialTexture,
 	eTransformModel,
@@ -320,7 +321,7 @@ typedef enum {
 	//CMD_MISC_FPS,
 	//CMD_MISC_WIDGETSHOWN,
 	//CMD_MISC_BBOX_SELECT,
-	CMD_MISC_GEN_TEXMAP_XY,
+	//CMD_MISC_GEN_TEXMAP_XY,
 	CMD_MISC_VERTEX_UV,
 	CMD_MISC_SCENE_ROTATE,
 

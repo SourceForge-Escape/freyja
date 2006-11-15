@@ -55,6 +55,7 @@ using namespace freyja3d;
 
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
+void polymap_update_question();
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 
@@ -1831,9 +1832,9 @@ bool FreyjaControl::event(int event, unsigned int value)
 		SetRenderFlag(FreyjaRender::fLighting, value, "OpenGL lighting");
 		break;
 
-	case FREYJA_MODE_RENDER_TEXTURE:
-		SetRenderFlag(FreyjaRender::fTexture, value, "Texture mapping");
-		break;
+	//case FREYJA_MODE_RENDER_TEXTURE:
+		//SetRenderFlag(FreyjaRender::fTexture, value, "Texture mapping");
+		//break;
 
 	case FREYJA_MODE_RENDER_MATERIAL:
 		SetRenderFlag(FreyjaRender::fMaterial, value, "Material usage");
@@ -2798,30 +2799,35 @@ bool FreyjaControl::event(int command)
 		{
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 			if (m)
-				m->UVMapSpherical(mGroupBitmap);
-		
-			if (m && freyja_create_confirm_dialog("gtk-dialog-question",
-												  "You just generated a UV map using vertex UVs.\nSome model formats perfer polygon-mapped UVs, and \nmay not display without being polymapped.",
-												  "Would you like to promote it to ploymapped texcoords per face?",
-												  "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
 			{
-				freyjaMeshPromoteTexcoordsToPloymapping(GetSelectedMesh());
+				m->UVMapSelectedFaces_Spherical();
+				polymap_update_question();
 			}
 		}
 		break;
 
 	case eMeshTexcoordCylindrical:
-		freyjaMeshUVMapCylindrical(GetSelectedMesh());
-
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You generated vertex UV mapping, but it is not polymapped.",
-										 "Would you like to promote it to ploymapped texcoords?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
 		{
-			freyjaMeshPromoteTexcoordsToPloymapping(GetSelectedMesh());
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			if (m)
+			{
+				m->UVMapSelectedFaces_Cylindrical();
+				polymap_update_question();
+			}
 		}
-
 		break;
+
+	case eMeshTexcoordPlaneProj:
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			if (m)
+			{
+				m->UVMapSelectedFaces_Plane();
+				polymap_update_question();
+			}
+		}
+		break;
+
 	case eMeshGenerateNormals:
 		freyjaMeshGenerateVertexNormals(GetSelectedMesh());
 		freyja_event_gl_refresh();
@@ -2888,11 +2894,6 @@ bool FreyjaControl::event(int command)
 
 		freyja_print("Texel combine [%s]", 
 					(mEventMode == TEXEL_COMBINE) ? "on" : "off");
-		break;
-
-
-	case CMD_MISC_GEN_TEXMAP_XY:
-		freyjaMeshUVMapPlanar(GetSelectedMesh());
 		break;
 
 
@@ -4596,6 +4597,17 @@ void FreyjaControl::Transform(object_type_t obj,
 							  freyja_transform_action_t action,
 							  vec_t x, vec_t y, vec_t z) 
 {
+	switch (GetControlScheme())
+	{
+	case eScheme_Animation:
+		KeyframeTransform(obj, action, x, y, z);
+		return;
+		break;
+
+	default:
+		;
+	}
+
 	Vec3 v(x, y, z);
 	Vec3 u;
 
@@ -6082,10 +6094,20 @@ void FreyjaViewEventsAttach()
 	ResourceEventCallbackUInt::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	ResourceEventCallbackUInt::add("ePolyMeshBone", &ePolyMeshBone);
 	ResourceEventCallbackUInt::add("eLineBone", &eLineBone);
-
+	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
 
 	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
 	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
 }
 
 
+void polymap_update_question()
+{
+	if (freyja_create_confirm_dialog("gtk-dialog-question",
+									 "You just generated a UV map using vertex UVs.\n\nSome model formats perfer polygon-mapped UVs, and \nmay not export without being polymapped.\n",
+									 "Would you like to promote it to ploymapped texcoords per face?",
+									 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
+	{
+		freyjaMeshPromoteTexcoordsToPloymapping(FreyjaControl::mInstance->GetSelectedMesh());
+	}
+}

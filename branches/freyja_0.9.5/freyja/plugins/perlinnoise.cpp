@@ -128,12 +128,14 @@ void ePerlinNoiseGen()
 	freyja_load_texture_buffer(rgb, w, h, 24);
 #else
 	unsigned int tid = freyjaTextureCreateBuffer(rgb, 3, w, h, RGB_24);
-	unsigned long id = Resource::mInstance->getIntByName("eTextureUpload");
+	unsigned long id = ResourceEvent::GetResourceIdBySymbol("eTextureUpload");
 
-	mgtk_print("!Uploading texture %i, using function %i...", tid, id);
+	mgtk_print("!Uploading texture %i, using function #%i...", tid, id);
 
 	if (ResourceEvent::listen(id - 10000, tid))
 		mgtk_print("!ePerlinNoiseGen generated texture successfully.");
+	else
+		mgtk_print("!ePerlinNoiseGen failed to upload texture to application.");
 
 	freyjaTextureDelete(tid);
 #endif

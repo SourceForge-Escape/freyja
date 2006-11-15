@@ -2032,6 +2032,9 @@ void freyjaPluginsInit()
 			if (reader.IsDirectory(module_filename))
 				continue;
 
+			if (!SystemIO::CheckModuleExt(module_filename))
+				continue;
+
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
 
 			if (!(handle = freyjaModuleLoad(module_filename)))

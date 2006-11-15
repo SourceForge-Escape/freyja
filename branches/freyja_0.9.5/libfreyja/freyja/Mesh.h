@@ -182,6 +182,7 @@ public:
 		mMaterial(0), // Always have a valid material
 		mFlags(fNone),
 		mSmoothingGroups(0x0), // Bitmap of groups 
+		mUVMap(0),
 		mIndices(),
 		mTexCoordIndices(),
 		mNormalsIndices()
@@ -270,6 +271,7 @@ public:
 	index_t mMaterial;
 	byte mFlags;
 	uint32 mSmoothingGroups; // bitmap
+	index_t mUVMap;
 	Vector<index_t> mIndices;
 	Vector<index_t> mTexCoordIndices; // Only used with fPolyMappedTexCoords
 	Vector<index_t> mNormalsIndices; // Only used with fPolyMappedNormals
@@ -602,12 +604,17 @@ public:
 	////////////////////////////////////////////////////////////
 
 	// FIXME: This should use UV groups when they get checked in...
+	void UVMapSelectedFaces_Spherical();
+	void UVMapSelectedFaces_Cylindrical();
+	void UVMapSelectedFaces_Plane();
 	void UVMapSpherical(uint32 groups);
 	/*------------------------------------------------------
 	 * Pre  : <groupFilter> is valid smoothing group or none
 	 * Post : Generates a UV map with spherical projection for groups
 	 ------------------------------------------------------*/
 
+	void UpdateVertexReferenceWithSelectedBias();
+	void UpdateVertexReferenceWithUVMapBias(uint32 uvmap);
 	void UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter);
 	/*------------------------------------------------------
 	 * Pre  : <groupFilter> is valid smoothing group or none

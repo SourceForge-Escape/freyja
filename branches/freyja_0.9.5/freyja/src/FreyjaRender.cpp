@@ -334,10 +334,11 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 {
 	if (!(mRenderMode & fMaterial))
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
+		//glPushAttrib(GL_ENABLE_BIT);
+		//glDisable(GL_TEXTURE_2D);
 
 		glColor3fv(WHITE);
+		BindColorTexture();
 
 		glBegin(GL_QUADS);
 		glColor3f(0.0f, 1.0f, 0.5f);
@@ -350,15 +351,13 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glVertex2f(x + w, y);
 		glEnd();
 
-		glPopAttrib();
+		//glPopAttrib();
 	}
 	else  // If fTexture draw textured quad
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_TEXTURE_2D);
-
 		glColor3fv(WHITE);
-
 		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedTexture());
 
 		glBegin(GL_QUADS);
@@ -894,9 +893,10 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	{
 		uint32 material = 99999;
 
-		if (mRenderMode & fTexture)
+		if (mRenderMode & fMaterial)
 		{
 			glEnable(GL_TEXTURE_2D);
+			mglApplyMaterial(material);
 		}
 
 #if 0
@@ -1168,7 +1168,15 @@ void FreyjaRender::Render(RenderModel &model)
 	for (uint32 i = 0, count = model.getMeshCount(); i < count; ++i)
 	{
 		if (model.getMesh(i, rmesh, 0))
+		{
+			if (mRenderMode & fMaterial)
+			{
+				glEnable(GL_TEXTURE_2D);
+				
+			}
+
 			Render(rmesh);
+		}
 	}
 
 	glPopMatrix();
@@ -1467,8 +1475,10 @@ void FreyjaRender::DrawCurveWindow()
 	glVertex2f(x+width, y);
 	glEnd();
 
-	ResizeContext(width, height);
 	glPopAttrib();
+
+	ResizeContext(width, height);
+
 	glPopMatrix();
 }
 
@@ -1486,7 +1496,6 @@ void FreyjaRender::DrawUVWindow()
 	RenderPolygon face;
 	unsigned int width, height;
 
-
 	width = GetWindowWidth();
 	height = GetWindowHeight();
 
@@ -1494,7 +1503,7 @@ void FreyjaRender::DrawUVWindow()
 
 	mgl2dProjection(width, height);
 	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mDefaultPointSize);
@@ -1758,7 +1767,8 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);	
+	glDisable(GL_TEXTURE);
 	glDisable(GL_BLEND);
 	glLineWidth(2.0);
 
@@ -1893,6 +1903,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE);
 
 	if (mRenderMode & fGrid)
 		DrawGrid(plane, GetWindowWidth(), GetWindowHeight(), 10);
