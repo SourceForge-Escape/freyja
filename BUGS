@@ -12,7 +12,22 @@
 
  Known bugs
 
+ - New mesh copy system doesn't buffer, since copy = copy + paste
+
+ - Cursor reset on undo ( use a freaking seperate undo state system )
+
+ - Material/mattex setting bug ( new materials also start at #7 )
+
+ - Plugins
+	- 3ds is broken
+	- MD3 is broken
+	- ASE is broken
+
+ - Certain modes like vertex transforms should prob enable point rendering
+
  - JA v1 doesn't seem to save out multimesh anymore ( oops )
+
+ - Fix UV projection to handle cross boundries ( axes )
 
  - Quad ray pick sucks - fix it  ;_;
 
@@ -38,7 +53,7 @@
 
  - What happened to ray picked UV faces in UV editor?
 
- - Orbital/Free view ray pick is off
+ - Orbital/Free view ray pick is off only when you translate the editor scene
 
  - Scale tool sucks it's so broke nothing works properly
 	- Keyframe scaling edits geometery instead of keyframe

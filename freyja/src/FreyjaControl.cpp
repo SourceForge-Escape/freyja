@@ -64,6 +64,7 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 ////////////////////////////////////////////////////////////
 
 FreyjaControl::FreyjaControl() :
+	mGroupBitmap(0x0),
 	mSelectedTexture(0),
 	mSelectedViewport(0),
 	mActionManager(),
@@ -313,6 +314,10 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 
 	case tKeyFrame:
 		s = String("tKeyFrame");
+		break;
+
+	case tLight:
+		s = String("tLight");
 		break;
 
 	case tSkeleton:
@@ -1707,7 +1712,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 			mEventMode = modeSelect;
 			mCursor.SetMode(freyja3d::Cursor::Invisible);
-			freyja_print("Select object, hold SHIFT to unselect...");
+			freyja_print("Select %s, hold SHIFT to unselect...", 
+						 ObjectTypeToString(GetObjectMode()).c_str());
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1724,7 +1730,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 			mEventMode = modeUnselect;
 			mCursor.SetMode(freyja3d::Cursor::Invisible);
-			freyja_print("Unselect object...");
+			freyja_print("Unselect %s...", 
+						 ObjectTypeToString(GetObjectMode()).c_str());
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1741,7 +1748,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 			mEventMode = modeMove;
 			mCursor.SetMode(freyja3d::Cursor::Translation);
-			freyja_print("Move object...");
+			freyja_print("Move %s...", 
+						 ObjectTypeToString(GetObjectMode()).c_str());
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1760,7 +1768,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 			mEventMode = modeScale;
 			mCursor.SetMode(freyja3d::Cursor::Scale);
 			mCursor.mScale = Vec3(1.0f, 1.0f, 1.0f);
-			freyja_print("Scale object...");
+			freyja_print("Scale %s...", 
+						 ObjectTypeToString(GetObjectMode()).c_str());
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -1784,15 +1793,15 @@ bool FreyjaControl::event(int event, unsigned int value)
 				{
 					Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 					if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
-					freyja_print("Rotate %s... (Won't modify data until fixed)",
-								 ObjectTypeToString(GetObjectMode()).c_str());
 				}
 				break;
 
 			default:
-				freyja_print("Rotate %s...", 
-							 ObjectTypeToString(GetObjectMode()).c_str());
+				;
 			}
+
+			freyja_print("Rotate %s...", 
+						 ObjectTypeToString(GetObjectMode()).c_str());
 
 			freyja_event_gl_refresh();
 		}
@@ -2501,34 +2510,56 @@ bool FreyjaControl::event(int command)
 
 	case eTransformSelectedVertices:
 		mObjectMode = tSelectedVertices;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformScene:
 		mObjectMode = tScene;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformPoint:
 		mObjectMode = tPoint;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
+		break;
+
+	case eTransformFaces:
+		mObjectMode = tSelectedFaces;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformFace:
 		mObjectMode = tFace;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformMesh:
 		mObjectMode = tMesh;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformModel:
 		mObjectMode = tModel;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformBone:
 		mObjectMode = tBone;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eTransformLight:
 		mObjectMode = tLight;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
 	case eDelete:
@@ -2762,17 +2793,23 @@ bool FreyjaControl::event(int command)
 	case eMeshTesselate:
 		freyjaMeshTesselateTriangles(GetSelectedMesh());
 		break;
-	case eMeshTexcoordSpherical:
-		freyjaMeshUVMapSpherical(GetSelectedMesh());
 
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You generated vertex UV mapping, but it is not polymapped.",
-										 "Would you like to promote it to ploymapped texcoords?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
+	case eMeshTexcoordSpherical:
 		{
-			freyjaMeshPromoteTexcoordsToPloymapping(GetSelectedMesh());
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			if (m)
+				m->UVMapSpherical(mGroupBitmap);
+		
+			if (m && freyja_create_confirm_dialog("gtk-dialog-question",
+												  "You just generated a UV map using vertex UVs.\nSome model formats perfer polygon-mapped UVs, and \nmay not display without being polymapped.",
+												  "Would you like to promote it to ploymapped texcoords per face?",
+												  "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
+			{
+				freyjaMeshPromoteTexcoordsToPloymapping(GetSelectedMesh());
+			}
 		}
 		break;
+
 	case eMeshTexcoordCylindrical:
 		freyjaMeshUVMapCylindrical(GetSelectedMesh());
 
@@ -2783,6 +2820,7 @@ bool FreyjaControl::event(int command)
 		{
 			freyjaMeshPromoteTexcoordsToPloymapping(GetSelectedMesh());
 		}
+
 		break;
 	case eMeshGenerateNormals:
 		freyjaMeshGenerateVertexNormals(GetSelectedMesh());
@@ -3613,41 +3651,16 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		switch (GetObjectMode())
 		{
 		case tModel:
+		case tMesh:
+		case tSelectedFaces:
 			{
 				Vec3 v = GetCursorData(GetEventAction());
-
-				freyja_print("! Model[%i] %s %f %f %f",
-							 0, 
-							 ActionToString(GetEventAction()).c_str(),
-							 GetEventAction(),
-							 v.mVec[0], v.mVec[1], v.mVec[2]);
 
 				// Mongoose - Does transform, undo, etc for ya, bub
 				Transform(GetObjectMode(), GetEventAction(),
 						  v.mVec[0], v.mVec[1], v.mVec[2]);
-
-				// Reset transforms in the cursor
-				mCursor.mRotate = Vec3(0,0,0);
-				mCursor.mScale = Vec3(1,1,1);
-				//mCursor.mPos = Vec3(0,0,0);
 			}			
 			break;
-
-		case tMesh:
-			{
-				Vec3 v = GetCursorData(GetEventAction());
-
-				// Mongoose - Does transform, undo, etc for ya, bub
-				Transform(GetObjectMode(), GetEventAction(),
-						  v.mVec[0], v.mVec[1], v.mVec[2]);
-
-				// Reset transforms in the cursor
-				mCursor.mRotate = Vec3(0,0,0);
-				mCursor.mScale = Vec3(1,1,1);
-				//mCursor.mPos = Vec3(0,0,0);
-			}
-			break;
-
 
 		default:
 			;
@@ -4111,18 +4124,16 @@ bool FreyjaControl::CopySelectedObject()
 		break;
 #endif
 
-#if 0
 	case tMesh:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			index_t id = freyjaMeshCopy(GetSelectedMesh());
 
-			if (m)
+			if (id != INDEX_INVALID)
 			{
-				SetCopyMesh(m->Copy());
+				SetSelectedMesh(id);
 			}
 		}
 		break;
-#endif
 
 	default:
 		freyja_print("%s(): type '%s' is not supported.", 
@@ -4608,7 +4619,8 @@ void FreyjaControl::Transform(object_type_t obj,
 		break;
 
 	default:
-		MARK_MSGF("Undo for %s action=%i not implemented", ObjectTypeToString(obj).c_str(), action);
+		MARK_MSGF("Undo for %s action=%i not implemented", 
+				  ObjectTypeToString(obj).c_str(), action);
 	}
 
 	
@@ -4642,6 +4654,87 @@ void FreyjaControl::Transform(object_type_t obj,
 
 	switch (obj)
 	{
+	case tSelectedFaces:		
+		if (mToken)
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if (!m)
+			{
+				freyja_print("No mesh selected");
+				return;
+			}
+
+			if (action != fTranslate)
+			{
+				freyja_print("%s(): Only supports fTranslate for (Faces...)", 
+							 __func__);
+				return;
+			}
+
+			Vector<index_t> list;
+			Vector<Vec3> list2;
+			bool found = false;
+
+			for (uint32 fi = 0, fn = m->GetFaceCount(); fi < fn; ++fi)
+			{
+				Face *f = m->GetFace(fi);
+				
+				if (!f || !(f->mFlags & Face::fSelected))
+					continue;
+				
+				uint32 i, idx;
+				
+				foreach (f->mIndices, i)
+				{
+					idx = f->mIndices[i];
+					Vertex *vert = m->GetVertex(idx);
+					
+					if (vert)
+					{
+						bool skip = false;
+						for(uint32 j = 0, jcount = list.size(); j < jcount; ++j)
+						{
+							if (list[j] == idx)
+							{
+								skip = true;
+								break;
+							}
+						}
+						
+						if (skip)
+							continue;
+						
+						if (!found)
+						{
+							// should be idx?
+							mCursor.mPos = m->GetVertexPosition(vert->mVertexIndex);
+							found = true;
+						}
+						
+						list.pushBack(idx);
+						// should be idx?
+						list2.pushBack(m->GetVertexPosition(vert->mVertexIndex));
+					}
+					
+					Vec3 pos = v + m->GetVertexPosition(idx);
+					m->SetVertexPos(idx, pos.mVec);
+				}
+			}
+			
+			Action *a = new ActionVertexListTransformExt(GetSelectedMesh(), 
+														 list, 
+														 action, 
+														 list2, 
+														 u);
+			ActionModelModified(a);
+
+			// Reset cursor transform
+			if (action != fTranslate)
+				mCursor.mPos = u;
+		}
+		break;
+
 	case tMesh:
 		if (mToken)
 		{
@@ -4649,6 +4742,10 @@ void FreyjaControl::Transform(object_type_t obj,
 			ActionModelModified(a);
 
 			freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+
+			// Reset cursor transform
+			if (action != fTranslate)
+				mCursor.mPos = u;
 		}
 		break;
 
@@ -4660,12 +4757,22 @@ void FreyjaControl::Transform(object_type_t obj,
 
 			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
 				freyjaModelMeshTransform3fv(0, i, action, v.mVec);
+
+			// Reset cursor transform
+			if (action != fTranslate)
+				mCursor.mPos = u;
 		}
 		break;
 
 	default:
 		MARK_MSGF("Not Implemented"); 
 	}
+
+
+	// Reset transforms in the cursor
+	mCursor.mRotate = Vec3(0,0,0);
+	mCursor.mScale = Vec3(1,1,1);
+	//mCursor.mPos = Vec3(0,0,0);
 }
 
 
@@ -4948,6 +5055,15 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 					m->SetVertexPos(idx, u.mVec);
 				}
 			}
+		}
+		break;
+
+
+	case tSelectedFaces:		
+		{
+			// FIXME: Update render list for fSelected or you will only
+			//        see the cursor move!
+			mToken = true;
 		}
 		break;
 
@@ -5806,13 +5922,45 @@ void eSmooth(unsigned int group, unsigned int value)
 		m->SelectedFacesMarkSmoothingGroup(group, value);
 
 		if (value)
+		{
 			m->GroupedFacesGenerateVertexNormals(group);
+			FreyjaControl::mInstance->mGroupBitmap |= (1<<group);
+		}
+		else
+		{
+			FreyjaControl::mInstance->mGroupBitmap ^= (1<<group);
+		}
+	}
+}
+
+
+void eClearSelected()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->ClearSelectedOnGroupFaces(FreyjaControl::mInstance->mGroupBitmap);
+	}
+}
+
+
+void eMarkSelected()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->SetSelectedOnGroupFaces(FreyjaControl::mInstance->mGroupBitmap);
 	}
 }
 
 
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallback::add("eMarkSelected", &eMarkSelected);
+	ResourceEventCallback::add("eClearSelected", &eClearSelected);
+
 	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
 	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
 

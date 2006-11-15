@@ -899,6 +899,96 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			glEnable(GL_TEXTURE_2D);
 		}
 
+#if 0
+		// FIXME: Call a 'cache list' here based on:
+		//  1. Vertex/edge count
+		//  2. Material
+		//  3. Flagged/Special property ( eg Polymapped UV )
+		//
+		// These lists can be used the new array and VBO
+		// renderer.
+		//
+		// m->UpdateRenderArrays();
+
+		//glBegin(GL_TRIANGLES);
+
+
+		// For this test we generate each frame instead of using
+		// backed 'cache lists' - start by allocating more space than needed ;)
+		static Vector<index_t> mTriList(20000);
+		static Vector<index_t> mQuadList(20000);
+		static Vector<index_t> mPolyList(20000);
+
+		mTriList.clear(); // Reset used range to 0
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+		{
+			Face *f = m->GetFace(i);
+
+			if (!f)
+				continue;
+
+			switch(f->mIndices.size())
+			{
+			case 3:
+				//if (f->mFlags & Face::fPolyMappedTexCoords)
+				//	mTriListPolyMapped.pushBack(i);
+				//else
+				mTriList.pushBack(i);
+				break;
+
+			case 4:
+				mQuadList.pushBack(i);
+				break;
+
+			default:
+				mPolyList.pushBack(i);
+			}
+		}
+
+		mglApplyMaterial(material);
+		glBegin(GL_TRIANGLES);
+
+		for (uint32 i = 0, n = mTriList.end(); i < n; ++i)
+		{
+			Face *f = m->GetFace(mTriList[i]);
+
+			if (!f)
+			{
+				// HOW?
+				freyja_print("%i -> %i", i, mTriList[i]);
+				continue;
+			}
+
+			if (f->mFlags & Face::fPolyMappedTexCoords)
+			{
+				for (uint32 j = 0; j < 3; ++j)
+				{
+					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+					glTexCoord2fv(v.mVec);
+					m->GetNormal(f->mIndices[j], v.mVec);
+					glNormal3fv(v.mVec);
+					m->GetVertexPos(f->mIndices[j], v.mVec);
+					glVertex3fv(v.mVec);
+				}
+			}
+			else
+			{
+				for (uint32 j = 0; j < 3; ++j)
+				{
+					m->GetTexCoord(f->mIndices[j], v.mVec);
+					glTexCoord2fv(v.mVec);
+					m->GetNormal(f->mIndices[j], v.mVec);
+					glNormal3fv(v.mVec);
+					m->GetVertexPos(f->mIndices[j], v.mVec);
+					glVertex3fv(v.mVec);
+				}
+			}
+		}
+
+		glEnd();
+
+#else
+
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
@@ -908,22 +998,27 @@ void FreyjaRender::Render(RenderMesh &mesh)
 
 			if (f->mFlags & Face::fSelected)
 			{
+				//glMaterialfv(GL_FRONT, GL_AMBIENT, RED);
 				glColor3fv(RED);
 			}
 			else if (f->mSmoothingGroups & (1<<1))
 			{
+				//glMaterialfv(GL_FRONT, GL_AMBIENT, PINK);
 				glColor3fv(PINK);
 			}
 			else if (f->mSmoothingGroups & (1<<2))
 			{
+				//glMaterialfv(GL_FRONT, GL_AMBIENT, GREEN);
 				glColor3fv(GREEN);
 			}
 			else if (f->mSmoothingGroups & (1<<4))
 			{
+				//glMaterialfv(GL_FRONT, GL_AMBIENT, YELLOW);
 				glColor3fv(YELLOW);
 			}
 			else
 			{
+				//mglApplyMaterial(material);
 				glColor3fv(WHITE);
 			}
 
@@ -962,6 +1057,9 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			
 			glEnd();
 		}
+
+		//glEnd();
+#endif
 		
 	}
 

@@ -163,6 +163,8 @@ class FreyjaControl
 	// Public Properties
 	////////////////////////////////////////////////////////////
 
+	uint32 mGroupBitmap;
+
 	ControlScheme GetControlScheme() { return mControlScheme; }
 	void SetControlScheme(ControlScheme scheme) { mControlScheme = scheme; }
 	/*------------------------------------------------------

@@ -181,7 +181,7 @@ public:
 	Face() :
 		mMaterial(0), // Always have a valid material
 		mFlags(fNone),
-		mSmoothingGroups(0), // Bitmap of groups 
+		mSmoothingGroups(0x0), // Bitmap of groups 
 		mIndices(),
 		mTexCoordIndices(),
 		mNormalsIndices()
@@ -225,6 +225,19 @@ public:
 		// FIXME: Now you should append this Face's id to the vertex's polyref
 		// FIXME: Might want to cache edge map too
 		mIndices.pushBack(idx);
+	}
+
+	index_t FindCorrespondingTexCoord(index_t vertexIndex)
+	{
+		for (uint32 i = 0, n = mIndices.size(); i < n; ++i)
+		{
+			if (mIndices[i] == vertexIndex)
+			{
+				return mTexCoordIndices[i];
+			}
+		}
+		
+		return INDEX_INVALID;
 	}
 
 	void ClearSmoothingGroup(uint32 g) { mSmoothingGroups ^= (1 << g); }
@@ -311,6 +324,10 @@ public:
 	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
 	VertexAnimTrack mVertexAnimTrack;
 
+	// Getting ready to test arrays / VBO with dynamic backend, which
+	// requires caching here in the backend to be effective
+	//Vector<index_t> mTriangleList;
+	//Vector<index_t> mQuadList;
 
 	////////////////////////////////////////////////////////////
 	// Bounding Volume properties
@@ -379,6 +396,10 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	static const char *GetChunkType() { return "Mesh"; }
+
+	static uint32 GetChunkVersion() { return 9500; /* 0.9.5-00 */ }
+
 	void CollapseEdge(index_t faceIndex,uint32 a, uint32 b, uint32 c, uint32 d);
 
 	void SplitFace(index_t faceIndex);
@@ -388,6 +409,14 @@ public:
 	 * Pre  : 
 	 * Post : Clone this mesh ( doesn't reside in interal map )
 	 ------------------------------------------------------*/
+
+
+	void AssignGroupsToSelectedFaces(uint32 groups, bool overwrite);
+
+
+	void SetSelectedOnGroupFaces(uint32 groups);
+
+	void ClearSelectedOnGroupFaces(uint32 groups);
 
 
 	void GetColor(index_t colorIndex, vec4_t rgba)
@@ -571,6 +600,25 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	// FIXME: This should use UV groups when they get checked in...
+	void UVMapSpherical(uint32 groups);
+	/*------------------------------------------------------
+	 * Pre  : <groupFilter> is valid smoothing group or none
+	 * Post : Generates a UV map with spherical projection for groups
+	 ------------------------------------------------------*/
+
+	void UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter);
+	/*------------------------------------------------------
+	 * Pre  : <groupFilter> is valid smoothing group or none
+	 * Post : Will mark all vertex references for faces of group(s).
+	 *
+	 * NOTE: This means some vertices will be 'dropped' from reverse lookup, so
+	 *       only use this if you're doing group connectivity filtering.
+	 *
+	 *       If you want a 'full' graph, then pass in 0xFFFF as groups bitmap.
+	 *       All facets will be added to their vertex references.
+	 ------------------------------------------------------*/
 
 	void ClearFaceFlags(index_t face, uint32 flags);
 

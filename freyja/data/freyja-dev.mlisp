@@ -280,7 +280,7 @@
 					"Enable four window view"	eEvent	eViewports)
 			) ; toolbar
 
-				(hbox 0 0 0 1 0
+				(hbox 0 1 0 1 1
 					;; This really adjusts view height ( removing feature soon )
 					;(label "  View Height "  0.0 0.4) 
 					;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
@@ -328,7 +328,23 @@
 		) ; tab
 
 		(tab "Modify" eNone		
-			(hbox 0 1 0 1 1	
+			(hbox 0 1 0 0 1	
+
+				; Object mode selection
+				(hbox 0 1 0 1 1
+					(optionmenu	eEvent	eTransformMenu
+						(menu_item	"Model      "	eTransformModel)
+						(menu_item	"Mesh       "	eTransformMesh)
+						(menu_item	"Meshes...  "	eNone)
+						(menu_item	"Face       "	eTransformFace)
+						(menu_item	"Faces...   "	eTransformFaces)
+						(menu_item	"Vertex     "	eTransformPoint)
+						(menu_item	"Vertices..."	eTransformSelectedVertices)
+						(menu_item	"Bone       "	eTransformBone)
+						(menu_item	"Light      "	eTransformLight)
+					) ; optionmenu
+				) ; hbox
+
 			; Need to group toggles like radio buttons
 			(toolbar
 				(toolbar_togglebutton false	"24x24/bbox-select.png" "SelectB"
@@ -371,6 +387,10 @@
 
 				(toolbar_button	"24x24/split.png"
 					"Split" "Split object" eEvent eSplitObject)
+
+				(toolbar_button "24x24/texmap.png" "UVMap" 
+					"UVMap Spherical"	eEvent eMeshTexcoordSpherical)
+
 			) ; toolbar
 			) ; hbox
 		) ; tab
@@ -465,22 +485,6 @@
 								"gtk-save-as" "Save as..." "Saves model file" 
 								"Save Model..." eSaveModel "mode=save,confirm-overwrite=true,")
 
-
-							;(toolbar_togglebutton false
-							;	"24x24/bbox-select.png" "Select" "Select by bounding box" 
-							;	eEvent eSelectionByBox)
-
-							;(toolbar_togglebutton false 
-							;	"24x24/clone.png" "CopyM"	"Copy multiple objects" 
-							;	eEvent eCopyAppendMode)
-
-							;(toolbar_button
-							;	"24x24/split.png" "Split" "Split object" 
-							;	eEvent eSplitObject)
-
-							;(toolbar_button
-							;	"24x24/texmap.png" "TexelGen" "Texture Map, XY Plane"
-							;	eEvent eTextureMapProjection)
 						))
 
 					;; Seperator
@@ -533,28 +537,27 @@
 
 					(hbox 1 0 0 1 0 (hsep))
 
-					(hbox 1 0 0 1 0						
-						(optionmenu	eEvent	eTransformMenu
-							(menu_item	"Model"		eTransformModel)
-							(menu_item	"Mesh"		eTransformMesh)
-							(menu_item	"Selected Meshes"	 eNone);eTransformSelectedMeshes)
-							(menu_item	"Face"		eTransformFace)
-							(menu_item	"Selected Faces"	 eNone);eTransformSelectedFaces)
-							(menu_item	"Vertex"	eTransformPoint)
-							(menu_item	"Selected Vertices"	 eTransformSelectedVertices)
-							(menu_item	"Bone"		eTransformBone)
-							(menu_item	"Group"		eTransformGroup)
-							(menu_item	"Light"		eTransformLight)
-						) ; optionmenu
+					;(hbox 1 0 0 1 0						
+						;(optionmenu	eEvent	eTransformMenu
+						;	(menu_item	"Model"		eTransformModel)
+						;	(menu_item	"Mesh"		eTransformMesh)
+						;	(menu_item	"Meshes..."	eNone)
+						;	(menu_item	"Face"		eTransformFace)
+						;	(menu_item	"Faces..."	eTransformFaces)
+						;	(menu_item	"Vertex"	eTransformPoint)
+						;	(menu_item	"Vertices..."	eTransformSelectedVertices)
+						;	(menu_item	"Bone"		eTransformBone)
+						;	(menu_item	"Light"		eTransformLight)
+						;) ; optionmenu
 
-						(optionmenu	eEvent  	eObjectMenu
-							(menu_item "Move"    	eMoveObject)
-				  			(menu_item "Rotate"  	eRotateObject)
-				  			(menu_item "Scale"   	eScaleObject)
-				  			(menu_item "Select"  	eSelect)
-				  			(menu_item "Unselect"	eUnselect)
-						) ; optionmenu
-					) ; hbox
+						;(optionmenu	eEvent  	eObjectMenu
+						;	(menu_item "Move"    	eMoveObject)
+				  		;	(menu_item "Rotate"  	eRotateObject)
+				  		;	(menu_item "Scale"   	eScaleObject)
+				  		;	(menu_item "Select"  	eSelect)
+				  		;	(menu_item "Unselect"	eUnselect)
+						;) ; optionmenu
+					;) ; hbox
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -581,8 +584,11 @@
 					) ; expander
 
 	(expander "Groups Box" 0
-	;(vbox 0 0 0 0 0
-		;(label2 "Smoothing Groups")
+		(hbox 1 0 0 1 0
+			(label2 "Face select:");)
+		;(hbox 1 0 0 1 0
+			(button "Mark" eEvent eMarkSelected)
+			(button "Clear" eEvent eClearSelected))
 
 		(hbox 1 0 0 1 0
 			(togglebutton " 1" eSmooth 1)

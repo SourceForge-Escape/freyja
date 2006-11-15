@@ -813,7 +813,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eTransformMenu", eTransformMenu);
 	r.RegisterInt("eTransformSelectedVertices", eTransformSelectedVertices);
-	r.RegisterInt("eTransformGroup", eTransformGroup);
+	r.RegisterInt("eTransformFaces", eTransformFaces);
 	r.RegisterInt("eTransformScene", eTransformScene);
 	r.RegisterInt("eTransformFace", eTransformFace);
 	r.RegisterInt("eTransformMesh", eTransformMesh);

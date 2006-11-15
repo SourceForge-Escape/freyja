@@ -137,6 +137,7 @@ typedef enum {
 	eTransformMesh,
 	eTransformBone,
 	eTransformFace,
+	eTransformFaces,
 	eTransformPoint,
 	eTransformLight,
 

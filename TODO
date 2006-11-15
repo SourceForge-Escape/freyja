@@ -5,6 +5,12 @@
  =====================================================================
 
  Hot
+
+	// FIXME: Temp test garbage... this is very poor, but tests an idea
+	// ( namely how the hell should rendering lists be built for 'previews'
+	// Looks like selected faces needs a special list or vertices should
+	// be treated like they're in the vertex animation / skinning buffer mode 	
+
 	- Single joint animation for shishi odoshi test
 		- Might want to add rotation types or always do 'about center' pivots
 			- Pivot: 3d cursor, bbox center, etc
@@ -19,7 +25,6 @@
 
 	- Skeletal animation
 		- Mesh vertex group keyframes ( vertex animation ties into deforming )
-		- Bone keyframes
 		- Fix bone rendering to support unparented bones that aren't root? 
 			- Fix bone world coord
 		- Out of heirarchy skeleton rendering / backend support
@@ -49,6 +54,11 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- Better UV unwrap ( write smart algorithms for projections )
+	- Selected <--> Groups assignments for faces
+	- Transforms for selected faces/groups in UV editor
+	- Make Mesh enforce only 1 kind of Face type in the sense of:
+		- PolyMapping UV / Normal / etc
 	- GLSL shader 'materials' generated from tree UI
 		- Heat fx shader ( turb with frag prob best )
 		- DoF shader

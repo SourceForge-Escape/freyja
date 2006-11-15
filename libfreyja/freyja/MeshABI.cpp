@@ -1559,6 +1559,21 @@ void freyjaMeshUVMapPlanar(index_t meshIndex)
 }
 
 
+index_t freyjaMeshCopy(index_t meshIndex)
+{
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	
+	if (m)
+	{
+		Mesh *meshCopy = new Mesh(*m);
+		gFreyjaMeshes.pushBack(meshCopy);
+		return gFreyjaMeshes.size() - 1;
+	}
+
+	return INDEX_INVALID;
+}
+
+
 void freyjaMeshUVMapSpherical(index_t meshIndex)
 {
 	int32 i, vertexCount, vertexIndex;
@@ -1566,6 +1581,10 @@ void freyjaMeshUVMapSpherical(index_t meshIndex)
 	vec3_t xyz;
 	vec3_t uv;
 
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (!m)
+		return;
 
 	vertexCount = freyjaGetMeshVertexCount(meshIndex);
 
@@ -1597,7 +1616,6 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 	vec3_t min = {999999.0f, 999999.0f, 999999.0f};
 	vec3_t max = {-999999.0f, -999999.0f, -999999.0f};
 	vec2_t uv;
-	
 
 	vertexCount = freyjaGetMeshVertexCount(meshIndex);
 
