@@ -314,7 +314,7 @@ public:
 	
 	~VertexAnimKeyFrame() {}
 
-	void ArrayResize(uint32 sz) { mVertices.resize(sz); } 
+	void ArrayResize(uint32 sz) { mVertices.resize(sz*3); } 
 
 	vec_t *GetArray() { return mVertices.getVectorArray(); }
 
@@ -388,6 +388,10 @@ public:
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
+
+	uint32 GetVertexCount() { return mVertices.size(); }
+ 
+	vec_t *GetVertexArray() {  return mVertices.getVectorArray(); }
 
 	Vector<vec_t> mVertices;
 };

@@ -68,12 +68,12 @@ index_t freyjaModelCreateMesh(index_t modelIndex)
 		if ( array[i] == NULL )
 		{
 			array[i] = mesh;
-			freyjaPrintMessage("Model[%i].Mesh[%i] created.", modelIndex, i );
+			//freyjaPrintMessage("Model[%i].Mesh[%i] created.", modelIndex, i );
 			return i;
 		}
 	}
 
-	freyjaPrintMessage("Model[%i].Mesh[%i] created", modelIndex, idx );
+	//freyjaPrintMessage("Model[%i].Mesh[%i] created", modelIndex, idx );
 	gFreyjaMeshes.pushBack(mesh);
 	return idx;
 }
@@ -88,8 +88,7 @@ void freyjaModelDeleteMesh(index_t modelIndex, index_t meshIndex)
 	{
 		delete array[meshIndex];
 		array[meshIndex] = NULL;
-		freyjaPrintMessage("Model[%i].Mesh[%i] deleted.", 
-						   modelIndex, meshIndex );
+		//freyjaPrintMessage("Model[%i].Mesh[%i] deleted.", modelIndex, meshIndex );
 	}
 }
 
@@ -140,8 +139,8 @@ index_t freyjaModelMeshVertexCreate(index_t modelIndex, index_t meshIndex,
 	if ( mesh != NULL )
 	{
 		index_t vertex = mesh->CreateVertex(xyz, uvw, nxyz);
-		freyjaPrintMessage("Model[%i].Mesh[%i].Vertex[%i] created.",
-						   modelIndex, meshIndex, vertex);
+		//freyjaPrintMessage("Model[%i].Mesh[%i].Vertex[%i] created.",
+		//				   modelIndex, meshIndex, vertex);
 
 		// Debug Check
 		//freyjaPrintMessage("-> %f %f %f", xyz[0], xyz[0], xyz[2]);
@@ -161,8 +160,8 @@ void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex)
 	if (mesh)
 	{
 		mesh->DeleteFace(polygonIndex);
-		freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] deleted.",
-						   gFreyjaCurrentModel, meshIndex, polygonIndex);
+		//freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] deleted.",
+		//				   gFreyjaCurrentModel, meshIndex, polygonIndex);
 	}
 }
 
@@ -173,8 +172,8 @@ index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex)
 	if ( mesh != NULL )
 	{
 		index_t polygon = mesh->CreateFace();
-		freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] created.",
-						   modelIndex, meshIndex, polygon);
+		//freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] created.",
+		//				   modelIndex, meshIndex, polygon);
 		return polygon;
 	}
 
@@ -509,10 +508,67 @@ index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB)
 }
 
 
-void freyjaVertexFrame3f(index_t index, vec_t x, vec_t y, vec_t z)
+index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate)
 {
-	// FIXME: Should use keyframes
-	BUG_ME("Not Implemented");
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+
+	if ( m )
+	{
+		index_t track = m->NewVertexAnimTrack();
+		VertexAnimTrack &t = m->GetVertexAnimTrack(track);
+		t.SetRate((rate < 15.0f) ? 15.0f : rate);
+		t.SetDuration((duration < 10.0f) ? 10.0f : duration);
+
+		return track;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshVertexKeyFrameNew(index_t mesh, index_t track, vec_t time)
+{
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+
+	if ( m )
+	{
+		VertexAnimTrack &t = m->GetVertexAnimTrack(track);
+		index_t key = t.NewKeyframe(time);
+		VertexAnimKeyFrame *k = t.GetKeyframe(key);
+		
+		if (k)
+		{
+			k->ArrayResize(m->GetVertexCount());
+			return key;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaMeshVertexKeyFrame3f(index_t mesh, index_t track, index_t key,
+								uint32 vert, vec_t x, vec_t y, vec_t z)
+{
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+
+	if ( m )
+	{
+		VertexAnimTrack &t = m->GetVertexAnimTrack(track);
+		VertexAnimKeyFrame *k = t.GetKeyframe(key);
+
+		if (k)
+		{
+			//MSTL_ASSERTMSG(false, "Debug me");
+			k->SetPos(vert, Vec3(x, y, z));
+		}
+	}
+}
+
+
+void freyjaVertexFrame3f(index_t idx, vec_t x, vec_t y, vec_t z)
+{
+	BUG_ME("OBSOLETE ABI CALL");
 }
 
 

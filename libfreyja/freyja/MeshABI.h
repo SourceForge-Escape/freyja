@@ -330,25 +330,60 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMeshVertexFrameIndex(index_t meshIndex, uint32 element); // Not Implemented
+	index_t freyjaGetMeshVertexFrameIndex(index_t meshIndex, uint32 element);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Not Implemented, Obsolete
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex); // Not Implemented
+	uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Not Implemented, Obsolete
 	 ------------------------------------------------------*/
 
-	// 0.9.5 EXT
+
+	///////////////////////////////////////////////////////////////
+	// 0.9.5 ABI Extensions
+	///////////////////////////////////////////////////////////////
+
+	index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make a new vertex animation track for mesh
+	 ------------------------------------------------------*/
+	
+	index_t freyjaMeshVertexKeyFrameNew(index_t mesh, index_t track, 
+										vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make a new vertex animation keyframe for track
+	 ------------------------------------------------------*/
+
+	void freyjaMeshVertexKeyFrame3f(index_t mesh, index_t track, index_t key,
+									uint32 vert, vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Update vertex position in keyframe
+	 ------------------------------------------------------*/
 
 	void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t freyjaGetFSMMeshIndex();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t freyjaMeshCopy(index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 }
 
 

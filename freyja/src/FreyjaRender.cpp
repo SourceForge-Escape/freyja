@@ -730,18 +730,31 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	// Keyframe animation curve input test...  
 	if (mRenderMode & fKeyFrameAnimation)
 	{
+		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
 		uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
 
 		// Mesh animation
-		vec_t time = (vec_t)k / m->mTrack.GetRate();
+		TransformTrack &tt = m->GetTransformTrack(a);
+		vec_t time = (vec_t)k / tt.GetRate();
 		Vec3 pos, rot, scale;
-		m->mTrack.GetTransform(time, pos, rot, scale);
+		tt.GetTransform(time, pos, rot, scale);
 
 		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
 		glRotatef(rot.mVec[0], 1,0,0);
 		glRotatef(rot.mVec[1], 0,1,0);
 		glRotatef(rot.mVec[2], 0,0,1);
 		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
+
+		// FIXME: You'll have to store a cache for this array in track really
+		//        you have to be dynamic in an editor  =)
+		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
+		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
+
+		if (kv && kv->GetVertexCount())// == m->GetVertexCount())
+		{
+			array = kv->GetVertexArray();
+			freyja_print("vertex array update");
+		}
 	}
 
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
@@ -847,7 +860,10 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			if (vertex)
 			{
 				// FIXME: later this will use vertex/face remapped index
-				m->GetVertexPos(i, v.mVec);
+				v.mVec[0] = array[vertex->mVertexIndex*3];
+				v.mVec[1] = array[vertex->mVertexIndex*3+1];
+				v.mVec[2] = array[vertex->mVertexIndex*3+2];
+				//m->GetVertexPos(i, v.mVec);
 				m->GetNormal(i, n.mVec);
 				n = v + (n*1.75f);
 				glVertex3fv(v.mVec);
@@ -874,7 +890,15 @@ void FreyjaRender::Render(RenderMesh &mesh)
 
 			for (uint32 j = 0; j < f->mIndices.size(); ++j)
 			{
-				m->GetVertexPos(f->mIndices[j], v.mVec);
+				//m->GetVertexPos(f->mIndices[j], v.mVec);
+				
+				Vertex *vert = m->GetVertex(f->mIndices[j]);
+				if (vert)
+				{
+					v.mVec[0] = array[vert->mVertexIndex*3];
+					v.mVec[1] = array[vert->mVertexIndex*3+1];
+					v.mVec[2] = array[vert->mVertexIndex*3+2];
+				}
 				v *= scale; // Scale out a little to avoid z-fighting
 				glVertex3fv(v.mVec);
 			}
@@ -967,7 +991,14 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					glTexCoord2fv(v.mVec);
 					m->GetNormal(f->mIndices[j], v.mVec);
 					glNormal3fv(v.mVec);
-					m->GetVertexPos(f->mIndices[j], v.mVec);
+					//m->GetVertexPos(f->mIndices[j], v.mVec);
+					Vertex *vert = m->GetVertex(f->mIndices[j]);
+					if (vert)
+					{
+						v.mVec[0] = array[vert->mVertexIndex*3];
+						v.mVec[1] = array[vert->mVertexIndex*3+1];
+						v.mVec[2] = array[vert->mVertexIndex*3+2];
+					}
 					glVertex3fv(v.mVec);
 				}
 			}
@@ -979,7 +1010,14 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					glTexCoord2fv(v.mVec);
 					m->GetNormal(f->mIndices[j], v.mVec);
 					glNormal3fv(v.mVec);
-					m->GetVertexPos(f->mIndices[j], v.mVec);
+					//m->GetVertexPos(f->mIndices[j], v.mVec);					
+					Vertex *vert = m->GetVertex(f->mIndices[j]);
+					if (vert)
+					{
+						v.mVec[0] = array[vert->mVertexIndex*3];
+						v.mVec[1] = array[vert->mVertexIndex*3+1];
+						v.mVec[2] = array[vert->mVertexIndex*3+2];
+					}
 					glVertex3fv(v.mVec);
 				}
 			}
@@ -1038,7 +1076,14 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					glTexCoord2fv(v.mVec);
 					m->GetNormal(f->mIndices[j], v.mVec);
 					glNormal3fv(v.mVec);
-					m->GetVertexPos(f->mIndices[j], v.mVec);
+					//m->GetVertexPos(f->mIndices[j], v.mVec);
+					Vertex *vert = m->GetVertex(f->mIndices[j]);
+					if (vert)
+					{
+						v.mVec[0] = array[vert->mVertexIndex*3];
+						v.mVec[1] = array[vert->mVertexIndex*3+1];
+						v.mVec[2] = array[vert->mVertexIndex*3+2];
+					}
 					glVertex3fv(v.mVec);
 				}
 			}
@@ -1050,7 +1095,14 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					glTexCoord2fv(v.mVec);
 					m->GetNormal(f->mIndices[j], v.mVec);
 					glNormal3fv(v.mVec);
-					m->GetVertexPos(f->mIndices[j], v.mVec);
+					//m->GetVertexPos(f->mIndices[j], v.mVec);
+					Vertex *vert = m->GetVertex(f->mIndices[j]);
+					if (vert)
+					{
+						v.mVec[0] = array[vert->mVertexIndex*3];
+						v.mVec[1] = array[vert->mVertexIndex*3+1];
+						v.mVec[2] = array[vert->mVertexIndex*3+2];
+					}
 					glVertex3fv(v.mVec);
 				}
 			}

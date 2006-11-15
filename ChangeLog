@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Vertex animation you can see  ;)
  - FIX Texture uploading in perlinnoise plugin wasn't hooked to mlisp
  - Only load filenames checked to module extentions at least ( save some time )
  - FIX for some texture/material rendering issues

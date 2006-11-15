@@ -320,9 +320,12 @@ public:
 	 ------------------------------------------------------*/
 
 	// Testing embedded keyframing as public attribute, so bare with us...
+	// these methods only support one 'animation' atm, but forcing interface
+	// use makes it easy to fix that later =p
 	TransformTrack &GetTransformTrack(uint32 track) { return mTrack; }
 	TransformTrack mTrack;
 
+	index_t NewVertexAnimTrack() {return 0;}
 	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
 	VertexAnimTrack mVertexAnimTrack;
 
