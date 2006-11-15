@@ -67,6 +67,7 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 FreyjaControl::FreyjaControl() :
 	mGroupBitmap(0x0),
 	mSelectedTexture(0),
+	mSelectedView(PLANE_FRONT),
 	mSelectedViewport(0),
 	mActionManager(),
 	mFlags(fNone),

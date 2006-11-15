@@ -169,8 +169,7 @@ public:
 
 	virtual KeyFrame *GetKeyframe(index_t idx) 
 	{ 
-		return ((idx < mKeyFrames.size()) ? 
-				(mKeyFrames.getVectorArray())[idx] : NULL); 
+		return (idx < mKeyFrames.size()) ? mKeyFrames[idx] : NULL; 
 	}
 	/*------------------------------------------------------
 	 * Pre  : <time> > 0.0f
@@ -207,9 +206,10 @@ public:
 	 * Post : Updates track rate
 	 ------------------------------------------------------*/
 
-	void SetRate(vec_t fps) { mRate = fps; UpdateKeyframes(); }
+	void SetRate(vec_t fps) 
+	{ if ( fps > 1.0f ) { mRate = fps; UpdateKeyframes(); } }
 	/*------------------------------------------------------
-	 * Pre  : 
+	 * Pre  : <fps? must be at least 1 frame / second
 	 * Post : Updates track rate and adjusts keyframe list 
 	 ------------------------------------------------------*/
 

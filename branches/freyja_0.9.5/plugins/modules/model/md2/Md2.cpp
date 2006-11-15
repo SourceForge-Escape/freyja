@@ -555,10 +555,11 @@ int freyja_model__md2_import(char *filename)
 		
 	freyjaEnd(); // FREYJA_VERTEX_GROUP
 
+#ifdef FREYJA_0_9_3 
 	for (f = 1; f < md2_header->numFrames; ++f)
 	{
 		md2_vertex = md2.Frame(f);
-		    
+		   
 		freyjaBegin(FREYJA_VERTEX_FRAME);
 
 		for (v = 0; v < md2_header->numXYZ; ++v)
@@ -572,6 +573,28 @@ int freyja_model__md2_import(char *filename)
 		
 		freyjaEnd(); // FREYJA_VERTEX_FRAME
 	}
+#else
+	index_t mesh = freyjaGetFSMMeshIndex();
+	index_t track = freyjaMeshVertexTrackNew(mesh, 
+											(md2_header->numFrames+3)/15.0f, 15.0f);
+
+	for (f = 1; f < md2_header->numFrames; ++f)
+	{
+		md2_vertex = md2.Frame(f);
+
+		index_t key = freyjaMeshVertexKeyFrameNew(mesh, track, (vec_t)f/15.0f);
+
+		for (v = 0; v < md2_header->numXYZ; ++v)
+		{
+			// Store vertices in frame, swap Y and Z for freyja
+			freyjaMeshVertexKeyFrame3f(mesh, track, key,
+												transV[v],
+									  			md2_vertex[v].x*scale,
+									  			md2_vertex[v].z*scale + transY,
+									  			md2_vertex[v].y*scale);
+		}
+	}
+#endif
 
 	// Md2 uses symetric vertex morph frames, so only need it once
 	for (p = 0; p < md2_header->numTris; ++p)

@@ -30,6 +30,10 @@ elif [ ${ARG1} = "alleyoop" ]
 then
 	cd ../bin && alleyoop ${BIN}
 	exit 0
+elif [ ${ARG1} = "valgrind" ]
+then
+	cd ../bin && valgrind $2 $3 $4 ${BIN}
+	exit 0
 else
 	cd ../bin && ${BIN} $@
 fi
