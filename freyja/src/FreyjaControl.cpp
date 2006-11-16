@@ -3333,65 +3333,28 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			Vec3 n = Vector3d::cross(v, u);
 
 
-			freyja_print("!------------");
-			freyja_print("!o <%f %f %f>", o.mVec[0], o.mVec[1], o.mVec[2]);
-			freyja_print("!d <%f %f %f>", d.mVec[0], d.mVec[1], d.mVec[2]);
-
-			freyja_print("!v <%f %f %f>", v.mVec[0], v.mVec[1], v.mVec[2]);
-			freyja_print("!u <%f %f %f>", u.mVec[0], u.mVec[1], u.mVec[2]);
-			freyja_print("!n <%f %f %f>", n.mVec[0], n.mVec[1], n.mVec[2]);
-			n.normalize();
-			freyja_print("!n <%f %f %f>", n.mVec[0], n.mVec[1], n.mVec[2]);
-
-			// Now you have a normal to the ray
-			// Generate a bbox to test with the transformed line segments
-			// composing the circles in the rotation cursor
-			Vec3 min, max; // FIXME generate prism by these points
-
-			min = o + n;
-			max = o + d - n;
-
-			// Pick the closest 'hit' from each 'axis' ring
-			vec_t dist, best;
-			bool fhit = false, hit;
-
-			// X
-			for (int i = 0, n = 64; i < n; ++i)
+			if (mCursor.CheckForRayCollision(r))
 			{
-				Ray r; // FIXME generate a ray from each segment
-				hit = r.IntersectBox(min.mVec, max.mVec, dist);
-				if (hit && !fhit || dist < best)
-				{
-					fhit = true;
-					mCursor.mAxis = freyja3d::Cursor::eX;
-					best = dist;
-				}
-			}
+				mToken = true;
 
-			// Y
-			for (int i = 0, n = 64; i < n; ++i)
-			{
-				Ray r; // FIXME generate a ray from each segment
-				hit = r.IntersectBox(min.mVec, max.mVec, dist);
-				if (hit && !fhit || dist < best)
+				switch (mCursor.mAxis)
 				{
-					mCursor.mAxis = freyja3d::Cursor::eY;
-					best = dist;
-				}
-			}
+				case freyja3d::Cursor::eX:
+					freyja_print("Cursor ray picked X");
+					break;
 
-			// Z
-			for (int i = 0, n = 64; i < n; ++i)
-			{
-				Ray r; // FIXME generate a ray from each segment
-				hit = r.IntersectBox(min.mVec, max.mVec, dist);
-				if (hit && !fhit || dist < best)
-				{
-					mCursor.mAxis = freyja3d::Cursor::eZ;
-					best = dist;
+				case freyja3d::Cursor::eY:
+					freyja_print("Cursor ray picked Y");
+					break;
+
+				case freyja3d::Cursor::eZ:
+					freyja_print("Cursor ray picked Z");
+					break;
+
+				default:
+					;
 				}
-			}
-			
+			}			
 		}
 		break;
 		
@@ -5760,7 +5723,6 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 // Non-object Event Handler Functions
 ////////////////////////////////////////////////////////////
 
-
 void eCurrentFaceFlagAlpha()
 {
 	freyjaPolygonFlagAlpha(FreyjaControl::mInstance->GetSelectedFace(), 1);
@@ -5908,13 +5870,11 @@ void eNotImplementedVec(vec_t v)
 	freyja_print("Not Implementated");	
 }
 
+
 void eSetSelectedViewport(unsigned int value)
 {
 	FreyjaControl::mInstance->SetSelectedViewport(value);
 }
-
-
-
 
 
 void eSelectedFacesGenerateNormals()

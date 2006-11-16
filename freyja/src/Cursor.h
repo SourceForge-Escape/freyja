@@ -81,8 +81,11 @@ class Cursor
 
 
 		case freyja3d::Cursor::Rotation:
-#if 0
 			{
+				mSelected = false;
+
+				// if this returns true mark mToken in Control
+
 				// Ray test to pick rings of rotation
 				// 1. Take the ray and generate a rect prism
 				// 2. Use line segment / bbox detection to find
@@ -106,16 +109,21 @@ class Cursor
 				//mglDraw3dCircle(mPos.mVec, radius, count, 0, true);
 
 				vec_t x, z, i;
+				Vector<vec_t> xs, zs;
 
-				glBegin(solid ? GL_LINE_LOOP : GL_LINES);
+				//glBegin(solid ? GL_LINE_LOOP : GL_LINES);
 
-				for (i = 0.0f; i < fCount; ++i)
+				for (i = 0.0f; i < count; ++i)
 				{
-					helSinCosf(helDegToRad(360.0f * (i / fCount)), &x, &z);
+					helSinCosf(helDegToRad(360.0f * (i / count)), &x, &z);
 					
 					x *= radius;
 					z *= radius;
 					
+					xs.pushBack(x);
+					zs.pushBack(z);
+
+					/*
 					switch (plane)
 					{
 					case 0:
@@ -130,9 +138,79 @@ class Cursor
 						glVertex3f(center[0] + x, center[1] + 0.0f, center[2] + z);
 						break;
 					}
+					*/
 				}
+
+				// Pick the closest 'hit' from each 'axis' ring
+				Vec3 min, max;
+				vec_t dist, best = 999.9f;
+				bool hit;
+
+				for (uint j = 0; j < (count-1); ++j)
+				{
+					{
+					Vec3 a = mPos + Vec3(0.0f, xs[j  ], zs[j  ]);
+					Vec3 b = mPos + Vec3(0.0f, xs[j+1], zs[j+1]);
+					Vec3 n = mPos - a;
+					n.normalize();
+					Vec3 side = Vector3d::cross(a-b, n);
+
+					min = a - n * -1 - side * -1;
+					max = b - n * 1 - side * 1;
+
+					hit = r.IntersectBox(min.mVec, max.mVec, dist);
+					
+					if (hit && dist < best)
+					{
+						mAxis = eX;
+						mSelected = true;
+						best = dist;
+					}
+					}
+
+					{
+					Vec3 a = mPos + Vec3(xs[j  ], 0.0f, zs[j  ]);
+					Vec3 b = mPos + Vec3(xs[j+1], 0.0f, zs[j+1]);
+					Vec3 n = mPos - a;
+					n.normalize();
+					Vec3 side = Vector3d::cross(a-b, n);
+
+					min = a - n * -1 - side * -1;
+					max = b - n * 1 - side * 1;
+
+					hit = r.IntersectBox(min.mVec, max.mVec, dist);
+					
+					if (hit && dist < best)
+					{
+						mAxis = eY;
+						mSelected = true;
+						best = dist;
+					}
+					}
+
+					{
+					Vec3 a = mPos + Vec3(xs[j  ], zs[j  ], 0.0f);
+					Vec3 b = mPos + Vec3(xs[j+1], zs[j+1], 0.0f);
+					Vec3 n = mPos - a;
+					n.normalize();
+					Vec3 side = Vector3d::cross(a-b, n);
+
+					min = a - n * -1 - side * -1;
+					max = b - n * 1 - side * 1;
+
+					hit = r.IntersectBox(min.mVec, max.mVec, dist);
+					
+					if (hit && dist < best)
+					{
+						mAxis = eZ;
+						mSelected = true;
+						best = dist;
+					}
+					}
+				}
+
+				ret = mSelected;
 			}
-#endif
 			break;
 
 
