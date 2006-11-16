@@ -1549,6 +1549,9 @@ void freyja_refresh_material_interface()
 	uint32 mIndex = freyjaGetCurrentMaterial();
 
 
+	mgtk_textentry_value_set(eSetMaterialName, freyjaGetMaterialName(mIndex));
+
+
 	freyjaGetMaterialAmbient(mIndex, ambient);
 	freyjaGetMaterialDiffuse(mIndex, diffuse);
 	freyjaGetMaterialSpecular(mIndex, specular);
@@ -1596,7 +1599,7 @@ void freyja_refresh_material_interface()
 		mgtk_togglebutton_value_set(790, false);
 	}
 
-mgtk_togglebutton_value_set(eMaterialTex, false);
+	mgtk_togglebutton_value_set(eMaterialTex, false);
 	if (flags & fFreyjaMaterial_Texture)
 	{
 		mgtk_togglebutton_value_set(eMaterialTex, true);
@@ -1606,8 +1609,6 @@ mgtk_togglebutton_value_set(eMaterialTex, false);
 		mgtk_togglebutton_value_set(eMaterialTex, false);
 	}
 
-	mgtk_textentry_value_set(freyja_get_event_id_by_name("eSetMaterialName"), 
-							 freyjaGetMaterialName(mIndex));
 	mgtk_spinbutton_value_set(eSetMaterialTexture,
                               freyjaGetMaterialTexture(mIndex));	
 	mgtk_textentry_value_set(eSetTextureNameA,

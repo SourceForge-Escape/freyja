@@ -921,6 +921,9 @@ int32 freyjaGetMaterialBlendDestination(index_t materialIndex)
 
 void freyjaMaterialName(index_t materialIndex, const char *name)
 {
+	if (!name || !name[0])
+		return;
+
 	if (materialIndex < gFreyjaMaterials.size())
 	{
 		if (!gFreyjaMaterials[materialIndex])

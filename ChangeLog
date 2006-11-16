@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Material names no longer 'nuked' by any interface usage
  - FreyjaRender changes to use arrays based rendering for solid, no material
  - FIX Oh yeah... forgot to fix the damn rotation cursor did that now  =)
  - Select multiviewport 'window' by clicking instead of silly spinbutton
