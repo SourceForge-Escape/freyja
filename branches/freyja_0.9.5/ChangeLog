@@ -5,6 +5,7 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX jpeg and png plugins Makefiles didn't link to required libs
  - Ported all the interface plugins to use new 'summonbox' widget,
    which means you can see plugins when you're in fullscreen now via the tab
  - FIX Bug in mgtk vargs peek ( it's about time to swtich to full mlisp )

@@ -67,7 +67,7 @@ BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 	$(BASE_DEFS)
 
-LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
+LDFLAGS=$(CONFIGURE_LNK) -lm -ldl -ljpeg
 #LDFLAGS += -Wl,-z,defs
 #LDFLAGS += -Wl,-O1
 RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
