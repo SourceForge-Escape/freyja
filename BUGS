@@ -54,8 +54,6 @@
 
  - Skeleton tree widget not cleared on Clear()
 
- - Rotation cursor doesn't work using rings yet
-
  - Scale cursor doesn't work with stretch yet
 
  - Bone rotate only works on Front

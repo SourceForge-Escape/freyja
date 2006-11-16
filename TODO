@@ -18,6 +18,7 @@
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
+			- Also replace the old RotateObject() code to just use cursor now
 		- freyja ABI wrapper for new keyframe backend
 			- BoneAnim, Transform, and VertexAnim type ABI support
 			- Track and Keyframe ABI
