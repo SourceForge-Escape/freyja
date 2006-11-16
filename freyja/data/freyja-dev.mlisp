@@ -360,7 +360,7 @@
 						(menu_item	"Face       "	eTransformFace)
 						(menu_item	"Faces...   "	eTransformFaces)
 						(menu_item	"Vertex     "	eTransformPoint)
-						(menu_item	"Vertices..."	eTransformSelectedVertices)
+						(menu_item	"Vertices..."	eTransformVertices)
 						(menu_item	"Bone       "	eTransformBone)
 						(menu_item	"Light      "	eTransformLight)
 					) ; optionmenu
@@ -521,8 +521,8 @@
 
 					(hbox 1 0 0 1 0 (hsep))
 
-					;; Generic Transform box
-					(expander "Transform Box" 1
+				;; Generic Transform box
+				(expander "Transform Box" 1
 					(hbox 1 1 0 1 1
 						(button "Move" eEvent eMove)
 						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_X)
@@ -669,9 +669,9 @@
 						(button "Flag alpha" eEvent eCurrentFaceFlagAlpha))))
 
 
-				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-				;; Material tab 
-				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;; Material tab 
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 			(tab "Material" eModeMaterial
 
@@ -810,6 +810,15 @@
 					(togglebutton "GL_NORMALIZE" eOpenGLNormalize)
 					(togglebutton "GL_BLEND"	eOpenGLBlend))))
 
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;; Material tab 
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+			(tab "Plugins" eNone
+				(expander "Freyja Plugins   "	1	"FirstPartyPluginSlot")
+				(hbox 1 0 0 1 0 (hsep))
+				(expander "Community Plugins"	1	"ThirdPartyPluginSlot")
+			) ; tab Plugins
 )
 )
 )
@@ -1054,7 +1063,7 @@
 (func_set_toggle	eRenderMaterial	1)
 (func_set_toggle	eRenderBbox	1)
 (func_set_toggle	eRenderSkeleton	1)
-(func_set_toggle	eRenderPickRay	1)
+(func_set_toggle	eRenderPickRay	0)
 (func_set_toggle	ePointJoint	1)
 (func_set_toggle	eLineBone	1)
 
@@ -1073,7 +1082,11 @@
 ;  (togglebutton	"Label"		eEvent)
 ;  (togglebutton	"Label"		eEvent		eSubEvent)
 ;
+; expander:
 ;  (expander "Label" boolean-opened ...)
+;  (expander "Label" boolean-opened "MLispSymbolBindName" ...)
+;
+;  (summonbox "MLispSymbolBindName" ...)
 ;
 ;  (scrollarea ...)
 ;

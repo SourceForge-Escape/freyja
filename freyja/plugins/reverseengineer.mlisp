@@ -9,8 +9,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(dialog "Freyja :: Reverse Engineer" eDialogReverseEngineer 0
-	(vbox 0 0 0 0 0
+;(dialog "Freyja :: Reverse Engineer" eDialogReverseEngineer 0
+;	(vbox 0 0 0 0 0
+
+(summonbox "FirstPartyPluginSlot"
+	(expander "Reverse Engineer 2.0" 0 
+
 		(hbox 0 0 0 1 0
 			(icon "freyja.png" IconSize_Dialog)
 			(vbox 0 0 0 0 0

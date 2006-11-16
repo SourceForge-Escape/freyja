@@ -26,11 +26,11 @@
 #include <stdio.h>
 
 // Avoiding namespacing for C export
-#define ATOM MGTK_C_EXPORTABLE_ATOM
-#define INT MGTK_C_EXPORTABLE_INT
-#define FLOAT MGTK_C_EXPORTABLE_FLOAT
-#define CSTRING MGTK_C_EXPORTABLE_CSTRING
-#define FUNC MGTK_C_EXPORTABLE_FUNC
+#define ATOM        MGTK_C_EXPORTABLE_ATOM
+#define INT         MGTK_C_EXPORTABLE_INT
+#define FLOAT       MGTK_C_EXPORTABLE_FLOAT
+#define CSTRING     MGTK_C_EXPORTABLE_CSTRING
+#define FUNC        MGTK_C_EXPORTABLE_FUNC
 
 typedef enum
 {
@@ -85,6 +85,9 @@ arg_list_t *symbol();
 char mlisp_peek_for_vargs();
 int mlisp_get_line_num();
 const char *mlisp_get_filename();
+void mlisp_bind(arg_list_t *symbol, arg_list_t *data);
+void *mlisp_recall(const char *symbol);
+
 
 class Resource
 {

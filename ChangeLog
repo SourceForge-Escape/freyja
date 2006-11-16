@@ -5,6 +5,11 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Ported all the interface plugins to use new 'summonbox' widget,
+   which means you can see plugins when you're in fullscreen now via the tab
+ - FIX Bug in mgtk vargs peek ( it's about time to swtich to full mlisp )
+ - New expander option to let you 'seat' other widgets inside ( even plugins )
+ - FIX Application plugin system attempts to only open files with proper ext
  - FIX Material names no longer 'nuked' by any interface usage
  - FreyjaRender changes to use arrays based rendering for solid, no material
  - FIX Oh yeah... forgot to fix the damn rotation cursor did that now  =)

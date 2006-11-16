@@ -2522,7 +2522,7 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-	case eTransformSelectedVertices:
+	case eTransformVertices:
 		mObjectMode = tSelectedVertices;
 		freyja_print("Object mode set to %s...",
 					 ObjectTypeToString(mObjectMode).c_str());
@@ -2764,17 +2764,6 @@ bool FreyjaControl::event(int command)
 		mEventMode = BONE_DISCONNECT_MODE;
 		break;
 
-	case CMD_BONE_NEXT:
-		mObjectMode = tBone;
-		SetSelectedBone(GetSelectedBone() + 1);
-		break;
-
-	case CMD_BONE_PREV:
-		mObjectMode = tBone;
-		if (GetSelectedBone())
-			SetSelectedBone(GetSelectedBone() - 1);
-		break;
-
 	case eExtrude:
 		{
 			Vec3 v = FreyjaRender::mTestRay.mDir;
@@ -2907,33 +2896,6 @@ bool FreyjaControl::event(int command)
 
 		freyja_print("Texel combine [%s]", 
 					(mEventMode == TEXEL_COMBINE) ? "on" : "off");
-		break;
-
-
-	case CMD_MISC_ZOOM_IN:
-		if (mRender->GetZoom() <= 0.02)
-		{
-			mRender->SetZoom(mRender->GetZoom() + 0.0001);
-		}
-		else
-		{
-			mRender->SetZoom(mRender->GetZoom() + 0.01);
-		}
-
-		freyja_event_gl_refresh();
-		break;
-
-	case CMD_MISC_ZOOM_OUT:
-		if (mRender->GetZoom() <= 0.02)
-		{
-			mRender->SetZoom(mRender->GetZoom() - 0.0001);
-		}
-		else
-		{
-			mRender->SetZoom(mRender->GetZoom() - 0.01);
-		}
-
-		freyja_event_gl_refresh();
 		break;
 
 	case FREYJA_MODE_TEXTURE_EDIT:

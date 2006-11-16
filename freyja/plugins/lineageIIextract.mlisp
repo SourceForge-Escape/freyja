@@ -9,12 +9,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(dialog "Freyja :: LineageII Extractor" eDialogL2Extract 0
-	(vbox 0 0 0 0 0
+;(dialog "Freyja :: LineageII Extractor" eDialogL2Extract 0
+;	(vbox 0 0 0 0 0
+
+(summonbox "FirstPartyPluginSlot"
+	(expander "Lineage II Extract 1.0" 0 
 		(menubar
 		(submenu "_File"
 			(filechoosermenu_item "_Open Pak..."	"Open Pak..."	"C-o"	eL2ExtractFilename	"mode=open,"	"gtk-open")
-			(menu_item "_Close"	"C-w"	eNone	"gtk-close") ;DialogL2ExtractClose
+			(menu_item "_Close"	eNone	"C-w"	"gtk-close") ;DialogL2ExtractClose
 			(menu_seperator) ) )
 
 		(hbox 1 1 0 1 1
@@ -30,11 +33,8 @@
 
 		
 		(hbox 1 0 0 1 0
-			(icon "freyja-plugin.png" IconSize_Dialog))
-
-		(label "LineageII Extractor "  0.0 0.5)
-
-		(button "Extract" eMode eL2Extract)
+			(icon "freyja-plugin.png" IconSize_Dialog)
+			(label "LineageII Extractor "  0.0 0.5))
 
 		(label "Input Filename" 0.0 0.5)
 
@@ -54,6 +54,7 @@
 			(label "Size "  0.0 0.5)
 			(spinbutton 0 0 999999 eL2ExtractSize))
 
+		(button "Extract" eMode eL2Extract)
 	)
 )
 
