@@ -54,6 +54,7 @@ FreyjaRender *FreyjaRender::mSingleton = 0x0;
 
 Ray FreyjaRender::mTestRay;
 
+vec4_t FreyjaRender::mColors[16];
 vec4_t FreyjaRender::mColorBackground;
 vec4_t FreyjaRender::mColorText;
 vec4_t FreyjaRender::mColorWireframe;
@@ -113,6 +114,27 @@ FreyjaRender::FreyjaRender() :
 	mViewports[1].plane = PLANE_LEFT;
 	mViewports[2].plane = PLANE_TOP;
 	mViewports[3].plane = PLANE_FREE;
+
+	// To avoid branching by wasting a little memory 
+	for (uint32 i = 0; i < 3; ++i)
+	{
+		mColors[ 0][i] = WHITE[i];
+		mColors[ 1][i] = NEXT_PURPLE2[i];
+		mColors[ 2][i] = PINK[i];
+		mColors[ 3][i] = GREEN[i];
+		mColors[ 4][i] = YELLOW[i];
+		mColors[ 5][i] = ORANGE[i];  // FIXME, needs more colors
+		mColors[ 6][i] = CYAN[i];
+		mColors[ 7][i] = YELLOW[i];
+		mColors[ 8][i] = YELLOW[i];
+		mColors[ 9][i] = YELLOW[i];
+		mColors[10][i] = YELLOW[i];
+		mColors[11][i] = YELLOW[i];
+		mColors[12][i] = YELLOW[i];
+		mColors[13][i] = YELLOW[i];
+		mColors[14][i] = YELLOW[i];
+		mColors[15][i] = YELLOW[i];
+	}
 
 	mSingleton = this;
 }
@@ -446,9 +468,10 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 	glDisable(GL_NORMALIZE);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_EDGE_FLAG_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
 
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glMatrixMode(GL_MODELVIEW);
@@ -723,12 +746,15 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	glDisable(GL_BLEND);
 	glPointSize(mVertexPointSize);
 
-	// 'World effects' 
+	// 'World effects'
+
 
 	// NOTE: Right here if you swap out the vertex array 'array', then
 	// all the elements to be rendered will use that instead of the 
 	// the current mesh vertex array.  Good for animation, skinning, etc.
 	vec_t *array = m->GetVertexArray();
+	vec_t *normalArray = m->GetNormalArray();
+	vec_t *texcoordArray = m->GetTexCoordArray();
 
 	// Keyframe animation
 	if (mRenderMode & fKeyFrameAnimation)
@@ -748,17 +774,30 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		glRotatef(rot.mVec[2], 0,0,1);
 		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
 
-		// FIXME: You'll have to store a cache for this array in track really
-		//        you have to be dynamic in an editor  =)
+		// FIXME: You'll have to store a cache for this array in anim/track
+		//        really.  You have to be dynamic in an editor  =)
 		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
 		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
 
 		if (kv && kv->GetVertexCount() == m->GetVertexCount())
 		{
 			array = kv->GetVertexArray();
-			//freyja_print("vertex array update");
 		}
 	}
+
+	// NOTE: Once we switch to more advanced arrays we have to
+	//       start locking the dynamic reallocation.
+#ifndef USE_IMM_VERTEX
+	glPushClientAttrib(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	// Load vertex array
+	glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
+	glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
+	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
+	
+#endif
 
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
 	{
@@ -841,7 +880,11 @@ void FreyjaRender::Render(RenderMesh &mesh)
 				(vertex->mFlags & Vertex::fSelected) ?
 				glColor3fv(mColorVertexHighlight) :
 				glColor3fv(mColorVertex);
+#if USE_IMM_VERTEX
 				glVertex3fv(array+vertex->mVertexIndex*3);
+#else
+				glArrayElement(vertex->mVertexIndex);
+#endif
 			}
 		}
 
@@ -862,14 +905,18 @@ void FreyjaRender::Render(RenderMesh &mesh)
 
 			if (vertex)
 			{
+#if 1 //USE_IMM_VERTEX
 				// FIXME: later this will use vertex/face remapped index
+				//m->GetVertexPos(i, v.mVec);
 				v.mVec[0] = array[vertex->mVertexIndex*3];
 				v.mVec[1] = array[vertex->mVertexIndex*3+1];
 				v.mVec[2] = array[vertex->mVertexIndex*3+2];
-				//m->GetVertexPos(i, v.mVec);
+				glVertex3fv(v.mVec);
+#else
+				glArrayElement(vertex->mVertexIndex);
+#endif
 				m->GetNormal(i, n.mVec);
 				n = v + (n*1.75f);
-				glVertex3fv(v.mVec);
 				glVertex3fv(n.mVec);
 			}
 		}
@@ -877,22 +924,38 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		glEnd();
 	}
 
-	// Render wireframe faces	
-	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+
+	/* Render face as wireframe */
+	if ( mRenderMode & fWireframe )
 	{
-		Face *f = m->GetFace(i);
+		glPushMatrix();
+		glScalef(scale, scale, scale);
 
-		if (!f) 
-			continue;
-
-		/* Render face as wireframe */
-		if ( mRenderMode & fWireframe )
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
+			Face *f = m->GetFace(i);
+
+			if (!f) 
+				continue;
+
+#if 1
+			// NOTE: This is a test rendering, since you can't
+			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
+			//       mappings in the Mesh  =)
+			glColor3fv(mColorWireframeHighlight);
+			glDrawElements(GL_LINE_LOOP, 
+						   f->mIndices.size(), 
+						   GL_UNSIGNED_INT,
+						   f->mIndices.get_array());
+			continue;
+#endif
+
 			glBegin(GL_LINE_LOOP);
 			glColor3fv(mColorWireframeHighlight);
 
 			for (uint32 j = 0; j < f->mIndices.size(); ++j)
 			{
+#ifdef USE_IMM_VERTEX
 				//m->GetVertexPos(f->mIndices[j], v.mVec);
 				
 				Vertex *vert = m->GetVertex(f->mIndices[j]);
@@ -902,12 +965,20 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					v.mVec[1] = array[vert->mVertexIndex*3+1];
 					v.mVec[2] = array[vert->mVertexIndex*3+2];
 				}
-				v *= scale; // Scale out a little to avoid z-fighting
+				// Use gl for scaling ( we have hw accel now days, heh )
+				//v *= scale; // Scale out a little to avoid z-fighting
 				glVertex3fv(v.mVec);
+#else
+				Vertex *vert = m->GetVertex(f->mIndices[j]);
+				if (vert)
+					glArrayElement(vert->mVertexIndex);
+#endif
 			}
 				
 			glEnd();
 		}
+
+		glPopMatrix();
 	}
 
 	glPopAttrib();
@@ -926,110 +997,6 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			mglApplyMaterial(material);
 		}
 
-#if 0
-		// FIXME: Call a 'cache list' here based on:
-		//  1. Vertex/edge count
-		//  2. Material
-		//  3. Flagged/Special property ( eg Polymapped UV )
-		//
-		// These lists can be used the new array and VBO
-		// renderer.
-		//
-		// m->UpdateRenderArrays();
-
-		//glBegin(GL_TRIANGLES);
-
-
-		// For this test we generate each frame instead of using
-		// backed 'cache lists' - start by allocating more space than needed ;)
-		static Vector<index_t> mTriList(20000);
-		static Vector<index_t> mQuadList(20000);
-		static Vector<index_t> mPolyList(20000);
-
-		mTriList.clear(); // Reset used range to 0
-		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-		{
-			Face *f = m->GetFace(i);
-
-			if (!f)
-				continue;
-
-			switch(f->mIndices.size())
-			{
-			case 3:
-				//if (f->mFlags & Face::fPolyMappedTexCoords)
-				//	mTriListPolyMapped.pushBack(i);
-				//else
-				mTriList.pushBack(i);
-				break;
-
-			case 4:
-				mQuadList.pushBack(i);
-				break;
-
-			default:
-				mPolyList.pushBack(i);
-			}
-		}
-
-		mglApplyMaterial(material);
-		glBegin(GL_TRIANGLES);
-
-		for (uint32 i = 0, n = mTriList.end(); i < n; ++i)
-		{
-			Face *f = m->GetFace(mTriList[i]);
-
-			if (!f)
-			{
-				// HOW?
-				freyja_print("%i -> %i", i, mTriList[i]);
-				continue;
-			}
-
-			if (f->mFlags & Face::fPolyMappedTexCoords)
-			{
-				for (uint32 j = 0; j < 3; ++j)
-				{
-					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-					glTexCoord2fv(v.mVec);
-					m->GetNormal(f->mIndices[j], v.mVec);
-					glNormal3fv(v.mVec);
-					//m->GetVertexPos(f->mIndices[j], v.mVec);
-					Vertex *vert = m->GetVertex(f->mIndices[j]);
-					if (vert)
-					{
-						v.mVec[0] = array[vert->mVertexIndex*3];
-						v.mVec[1] = array[vert->mVertexIndex*3+1];
-						v.mVec[2] = array[vert->mVertexIndex*3+2];
-					}
-					glVertex3fv(v.mVec);
-				}
-			}
-			else
-			{
-				for (uint32 j = 0; j < 3; ++j)
-				{
-					m->GetTexCoord(f->mIndices[j], v.mVec);
-					glTexCoord2fv(v.mVec);
-					m->GetNormal(f->mIndices[j], v.mVec);
-					glNormal3fv(v.mVec);
-					//m->GetVertexPos(f->mIndices[j], v.mVec);					
-					Vertex *vert = m->GetVertex(f->mIndices[j]);
-					if (vert)
-					{
-						v.mVec[0] = array[vert->mVertexIndex*3];
-						v.mVec[1] = array[vert->mVertexIndex*3+1];
-						v.mVec[2] = array[vert->mVertexIndex*3+2];
-					}
-					glVertex3fv(v.mVec);
-				}
-			}
-		}
-
-		glEnd();
-
-#else
-
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
@@ -1037,30 +1004,14 @@ void FreyjaRender::Render(RenderMesh &mesh)
 			if (!f) 
 				continue;
 
+			// Replaces group branching on bitflags
 			if (f->mFlags & Face::fSelected)
 			{
-				//glMaterialfv(GL_FRONT, GL_AMBIENT, RED);
 				glColor3fv(RED);
-			}
-			else if (f->mSmoothingGroups & (1<<1))
-			{
-				//glMaterialfv(GL_FRONT, GL_AMBIENT, PINK);
-				glColor3fv(PINK);
-			}
-			else if (f->mSmoothingGroups & (1<<2))
-			{
-				//glMaterialfv(GL_FRONT, GL_AMBIENT, GREEN);
-				glColor3fv(GREEN);
-			}
-			else if (f->mSmoothingGroups & (1<<4))
-			{
-				//glMaterialfv(GL_FRONT, GL_AMBIENT, YELLOW);
-				glColor3fv(YELLOW);
 			}
 			else
 			{
-				//mglApplyMaterial(material);
-				glColor3fv(WHITE);
+				glColor3fv(mColors[f->mSmoothingGroup]);
 			}
 
 			if ( f->mMaterial != material )
@@ -1068,6 +1019,16 @@ void FreyjaRender::Render(RenderMesh &mesh)
 				mglApplyMaterial(f->mMaterial);
 				material = f->mMaterial;
 			}
+#if 0
+			// NOTE: This is a test rendering, since you can't
+			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
+			//       mappings in the Mesh  =)
+			glDrawElements(GL_POLYGON, 
+						   f->mIndices.size(), 
+						   GL_UNSIGNED_INT,
+						   f->mIndices.get_array());
+			continue;
+#endif
 
 			glBegin(GL_POLYGON);
 
@@ -1079,6 +1040,7 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					glTexCoord2fv(v.mVec);
 					m->GetNormal(f->mIndices[j], v.mVec);
 					glNormal3fv(v.mVec);
+#if 0
 					//m->GetVertexPos(f->mIndices[j], v.mVec);
 					Vertex *vert = m->GetVertex(f->mIndices[j]);
 					if (vert)
@@ -1088,6 +1050,11 @@ void FreyjaRender::Render(RenderMesh &mesh)
 						v.mVec[2] = array[vert->mVertexIndex*3+2];
 					}
 					glVertex3fv(v.mVec);
+#else
+					Vertex *vert = m->GetVertex(f->mIndices[j]);
+					if (vert) 
+						glArrayElement(vert->mVertexIndex);
+#endif
 				}
 			}
 			else
@@ -1098,6 +1065,7 @@ void FreyjaRender::Render(RenderMesh &mesh)
 					glTexCoord2fv(v.mVec);
 					m->GetNormal(f->mIndices[j], v.mVec);
 					glNormal3fv(v.mVec);
+#if 0
 					//m->GetVertexPos(f->mIndices[j], v.mVec);
 					Vertex *vert = m->GetVertex(f->mIndices[j]);
 					if (vert)
@@ -1107,16 +1075,21 @@ void FreyjaRender::Render(RenderMesh &mesh)
 						v.mVec[2] = array[vert->mVertexIndex*3+2];
 					}
 					glVertex3fv(v.mVec);
+#else
+					Vertex *vert = m->GetVertex(f->mIndices[j]);
+					if (vert) 
+						glArrayElement(vert->mVertexIndex);
+#endif
 				}
 			}
 			
 			glEnd();
 		}
-
-		//glEnd();
-#endif
-		
 	}
+
+#ifndef USE_IMM_VERTEX
+	glPopClientAttrib();
+#endif
 
 	glPopAttrib();
 

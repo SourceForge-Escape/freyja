@@ -179,10 +179,10 @@ public:
 
 
 	Face() :
-		mMaterial(0), // Always have a valid material
 		mFlags(fNone),
-		mSmoothingGroups(0x0), // Bitmap of groups 
-		mUVMap(0),
+		mSmoothingGroup(0),
+		mColor(0),
+		mMaterial(0), // Always have a valid material Id
 		mIndices(),
 		mTexCoordIndices(),
 		mNormalsIndices()
@@ -191,14 +191,6 @@ public:
 
 	~Face()
 	{
-	}
-
-
-	void PurgePolyMappedTexCoords()
-	{
-		mFlags |= fPolyMappedTexCoords;
-		mFlags ^= fPolyMappedTexCoords;
-		mTexCoordIndices.clear();
 	}
 
 
@@ -241,40 +233,56 @@ public:
 		return INDEX_INVALID;
 	}
 
-	void ClearSmoothingGroup(uint32 g) { mSmoothingGroups ^= (1 << g); }
-	void SetSmoothingGroup(uint32 g) { mSmoothingGroups |= (1 << g); }
+
+	void PurgePolyMappedTexCoords()
+	{
+		mFlags |= fPolyMappedTexCoords;
+		mFlags ^= fPolyMappedTexCoords;
+		mTexCoordIndices.clear();
+	}
+
+	void ClearSmoothingGroup() { mSmoothingGroup = 0; }
+	void SetSmoothingGroup(uint32 g) { mSmoothingGroup = g; }
 	/*------------------------------------------------------
 	 * Pre  : -1 < <g> < 33 ( Relates to power of 2, bitmap ) 
-	 *        Groups:  0-24,    Normal smoothing groups
+	 *        Groups:  1-24,    Normal smoothing groups
 	 *                25-32,    Reserved for special use
 	 *
-	 *        NOTE Groups may later use crease flags in other
+	 *        NOTE Groups/Colors may later use crease flags in other
 	 *             'geometery types'.
 	 *
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void Rotate(vec_t x, vec_t y, vec_t z);
-
-	void Scale(vec_t x, vec_t y, vec_t z);
-
-	void Translate(vec_t x, vec_t y, vec_t z);
-
-	static size_t SerializedSize() 
-	{
-		return 0; 
-	}
+	size_t SerializedSize() { return 0; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	bool Serialize(SystemIO::FileWriter &w) { return false; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	index_t mMaterial;
-	byte mFlags;
-	uint32 mSmoothingGroups; // bitmap
-	index_t mUVMap;
-	Vector<index_t> mIndices;
-	Vector<index_t> mTexCoordIndices; // Only used with fPolyMappedTexCoords
-	Vector<index_t> mNormalsIndices; // Only used with fPolyMappedNormals
+
+	byte mFlags;                      /* Options flags */
+
+	byte mSmoothingGroup;             /* Group bit index */
+
+	byte mColor;                      /* Reserved use for future algorithms */
+
+	index_t mMaterial;                /* Material index */
+
+	Vector<index_t> mIndices;         /* Indices to the Vertex *class */
+
+	Vector<index_t> mTexCoordIndices; /* Only used with fPolyMappedTexCoords */
+
+	Vector<index_t> mNormalsIndices;  /* Only used with fPolyMappedNormals */
 };
 
 
@@ -402,27 +410,48 @@ public:
 	////////////////////////////////////////////////////////////
 
 	static const char *GetChunkType() { return "Mesh"; }
-
-	static uint32 GetChunkVersion() { return 9500; /* 0.9.5-00 */ }
-
-	void CollapseEdge(index_t faceIndex,uint32 a, uint32 b, uint32 c, uint32 d);
-
-	void SplitFace(index_t faceIndex);
-
-	Mesh *Copy();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Clone this mesh ( doesn't reside in interal map )
+	 * Post : 
 	 ------------------------------------------------------*/
 
+	static uint32 GetChunkVersion() { return 9500; /* 0.9.5-00 */ }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	void AssignGroupsToSelectedFaces(uint32 groups, bool overwrite);
+	void CollapseEdge(index_t faceIndex,uint32 a, uint32 b, uint32 c, uint32 d);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
+	void SplitFace(index_t faceIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	void SetSelectedOnGroupFaces(uint32 groups);
+	void AssignGroupToSelectedFaces(uint32 groups);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : All faces mark selected are assigned to group 
+	 ------------------------------------------------------*/
 
-	void ClearSelectedOnGroupFaces(uint32 groups);
+	void SetGroupsFaceSelected(uint32 groups);
+	/*------------------------------------------------------
+	 * Pre  : <groups> is a valid bitmap of groups
+	 * Post : All faces in group(s) are marked selected
+	 *
+	 ------------------------------------------------------*/
 
+	void ClearGroupsFaceSelected(uint32 groups);
+	/*------------------------------------------------------
+	 * Pre  : <groups> is a valid bitmap of groups
+	 * Post : All faces in group(s) are marked unselected
+	 *
+	 ------------------------------------------------------*/
 
 	void GetColor(index_t colorIndex, vec4_t rgba)
 	{	GetVec(mColorPool, 4, colorIndex, rgba);	}
@@ -612,12 +641,12 @@ public:
 	void UVMapSelectedFaces_Plane();
 	void UVMapSpherical(uint32 groups);
 	/*------------------------------------------------------
-	 * Pre  : <groupFilter> is valid smoothing group or none
+	 * Pre  : <groupFilter> is valid smoothing group(s) as bitflag
 	 * Post : Generates a UV map with spherical projection for groups
 	 ------------------------------------------------------*/
 
 	void UpdateVertexReferenceWithSelectedBias();
-	void UpdateVertexReferenceWithUVMapBias(uint32 uvmap);
+	void UpdateVertexReferenceWithColorBias(uint32 uvmap);
 	void UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter);
 	/*------------------------------------------------------
 	 * Pre  : <groupFilter> is valid smoothing group or none
@@ -913,6 +942,19 @@ public:
 	{
 		return mVertexPool.getVectorArray();
 	}
+
+
+	vec_t *GetNormalArray()
+	{
+		return mNormalPool.getVectorArray();
+	}
+
+
+	vec_t *GetTexCoordArray()
+	{
+		return mTexCoordPool.getVectorArray();
+	}
+
 
 	index_t CreateVertex(const vec3_t xyz)
 	{

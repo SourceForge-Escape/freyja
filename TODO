@@ -22,6 +22,7 @@
 			- BoneAnim, Transform, and VertexAnim type ABI support
 			- Track and Keyframe ABI
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
+		- Timers for display 'sleep' and animation playback
 
 	- Skeletal animation
 		- Mesh vertex group keyframes ( vertex animation ties into deforming )

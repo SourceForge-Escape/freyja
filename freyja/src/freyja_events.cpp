@@ -812,6 +812,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eExtrude", eExtrude);
 
+	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
 	r.RegisterInt("eTransformMenu", eTransformMenu);
 	r.RegisterInt("eTransformSelectedVertices", eTransformSelectedVertices);
 	r.RegisterInt("eTransformFaces", eTransformFaces);
@@ -996,6 +997,7 @@ void freyja_handle_resource_start()
 	freyja_refresh_material_interface();
 
 	/* Setup editor modes and drop-down menus */
+	mgtk_option_menu_value_set(eViewportModeMenu, 1);
 	mgtk_option_menu_value_set(eTransformMenu, 1);
 	mgtk_option_menu_value_set(eObjectMenu, 0);
 	freyja_event2i(eEvent, FREYJA_MODE_MODEL_EDIT);

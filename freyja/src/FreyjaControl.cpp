@@ -222,6 +222,9 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 	freyja_print("> Mouse x = %f y = %f", x, y);
 #endif
 
+	// FIXME: Add UV editor / Curve support here before breaking these
+	// into seperate control classes.  Also Update the view pick drop down menu.
+
 	// Trap the junk 0,0 states that are often tossed around on
 	// just mouse button updates
 	if ( GetControlScheme() != eScheme_Model &&
@@ -243,6 +246,8 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle viewport 0
 		if ( x < halfW && y > halfH )
 		{
+			SetSelectedViewport(0);
+			freyja_print("Selected viewport 0");
 			SetSelectedView(mRender->mViewports[0].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -253,6 +258,8 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle viewport 2
 		else if ( x > halfW && y < halfH )
 		{
+			SetSelectedViewport(2);
+			freyja_print("Selected viewport 2");
 			SetSelectedView(mRender->mViewports[2].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -263,6 +270,8 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle viewport 1
 		else if ( x > halfW && y > halfH )
 		{
+			SetSelectedViewport(1);
+			freyja_print("Selected viewport 1");
 			SetSelectedView(mRender->mViewports[1].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -273,6 +282,8 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		// Handle viewport 3
 		else if ( x < halfW && y < halfH )
 		{
+			SetSelectedViewport(3);
+			freyja_print("Selected viewport 3");
 			SetSelectedView(mRender->mViewports[3].plane); // PLANE_FREE
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -5930,49 +5941,74 @@ void eSmooth(unsigned int group, unsigned int value)
 
 	if (m)
 	{
-		freyja_print("Selected faces %s smoothing group (%i).", 
-					 value ? "set to" : "removed from", group);
-		m->SelectedFacesMarkSmoothingGroup(group, value);
+		freyja_print("Faces in group (%i) %s.", 
+					 group, value ? "selected" : "unselected");
 
 		if (value)
 		{
-			m->GroupedFacesGenerateVertexNormals(group);
 			FreyjaControl::mInstance->mGroupBitmap |= (1<<group);
+			m->SetGroupsFaceSelected(FreyjaControl::mInstance->mGroupBitmap);
 		}
 		else
 		{
+			m->ClearGroupsFaceSelected(FreyjaControl::mInstance->mGroupBitmap);
 			FreyjaControl::mInstance->mGroupBitmap ^= (1<<group);
 		}
+
+		freyja_event_gl_refresh();
 	}
 }
 
 
-void eClearSelected()
+void eGroupClear()
 {
 	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
-		m->ClearSelectedOnGroupFaces(FreyjaControl::mInstance->mGroupBitmap);
+		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+
+		if (group > 24)
+		{
+			freyja_print("Make sure only one group is toggled while assigning");
+			return;
+		}
+
+		freyja_print("Selected faces removed from smoothing group (%i).",group);
+		m->SelectedFacesMarkSmoothingGroup(group, 0);
+		freyja_event_gl_refresh();
 	}
 }
 
 
-void eMarkSelected()
+void eGroupAssign()
 {
 	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
-		m->SetSelectedOnGroupFaces(FreyjaControl::mInstance->mGroupBitmap);
+		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+
+		if (group > 24)
+		{
+			freyja_print("Make sure only one group is toggled while assigning");
+			return;
+		}
+
+		freyja_print("Selected faces assigned to smoothing group (%i).", group);
+		m->SelectedFacesMarkSmoothingGroup(group, 1);
+
+		// Go ahead and update the vertex normals here automatically for now
+		m->GroupedFacesGenerateVertexNormals(group);
+		freyja_event_gl_refresh();
 	}
 }
 
 
 void FreyjaControlEventsAttach()
 {
-	ResourceEventCallback::add("eMarkSelected", &eMarkSelected);
-	ResourceEventCallback::add("eClearSelected", &eClearSelected);
+	ResourceEventCallback::add("eGroupClear", &eGroupClear);
+	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
 
 	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
 	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);

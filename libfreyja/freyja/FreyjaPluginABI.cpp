@@ -575,7 +575,17 @@ int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 			Face *f = m->GetFace(i);
 			if (f)
 			{
-				f->mSmoothingGroups = r.ReadLong();
+				f->mSmoothingGroup = r.ReadInt8U();
+				r.ReadInt8U();
+				r.ReadInt8U();
+				r.ReadInt8U();
+			}
+			else
+			{
+				r.ReadInt8U();
+				r.ReadInt8U();
+				r.ReadInt8U();
+				r.ReadInt8U();
 			}
 		}
 	}
@@ -863,7 +873,21 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 		for (i = 0; i < count; ++i)
 		{
 			Face *f = m->GetFace(i);
-			w.WriteLong(f ? f->mSmoothingGroups : 0x0);
+
+			if (f)
+			{
+				w.WriteInt8U(f->mSmoothingGroup);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+			}
+			else
+			{
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+			}
 		}
 	}
 
