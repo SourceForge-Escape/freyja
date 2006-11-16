@@ -48,6 +48,7 @@
 			- OpenGL depth / culling / etc control?
 		- Remove state value from all mlisp toggle widgets
 		  ( they have a set func )
+		- VFS needs to provide metadata like XOR keys, size, offset, etc
 
 
  ----------------------------------------------------------------------------
