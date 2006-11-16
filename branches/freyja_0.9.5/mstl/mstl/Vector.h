@@ -455,6 +455,12 @@ public:
 	}
 
 
+	Object *get_array() /* Danger, Danger ;) */
+	{
+		return mData;
+	}
+
+
 	Object *getVectorArray() /* Danger, Danger ;) */
 	{
 		return mData;

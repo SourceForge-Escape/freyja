@@ -383,6 +383,8 @@ public:
 
 	static Ray mTestRay;
 
+	static vec4_t mColors[16];
+
 	uint32 mViewportsCount;                    /* How many viewports are used */
 
 	Viewport mViewports[4];                    /* Viewports information */

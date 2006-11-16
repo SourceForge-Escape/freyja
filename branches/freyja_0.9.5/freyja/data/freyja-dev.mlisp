@@ -233,8 +233,35 @@
 		(notebook 0 0 eNop
 
 		(tab "View" eNone			
-			(hbox 0 1 0 1 0		
+			(hbox 0 1 0 1 0	
+
+				(hbox 0 1 0 1 1
+					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					(hbox 0 0 0 1 0
+						;(label "Select viewport: "  0.0 0.5)
+						;(spinbutton 0 0 3 eSetSelectedViewport)
+						(optionmenu	eEvent	eViewportModeMenu
+							(menu_item	"Orbit   "	eViewportOrbit)
+							(menu_item	"Front   "	eViewportFront)
+							(menu_item	"Back    "	eViewportBack)
+				  			(menu_item	"Right   "	eViewportRight)
+				  			(menu_item	"Left    "	eViewportLeft)
+				  			(menu_item	"Top     "	eViewportTop)
+				  			(menu_item	"Bottom  "  eViewportBottom)
+				  			(menu_item	"Material"  eViewportMaterial)
+				  			(menu_item	"UV      "	eViewportUV)
+				  			(menu_item	"Curve   "	eViewportCurve)
+						) ; optionmenu
+					) ; hbox
+				) ; hbox
+
 			(toolbar
+
+				(toolbar_togglebutton false "24x24/fourwin.png" "Four Window"
+					"Enable four window view"	eEvent	eViewports)
+
+				(toolbar_separator)
+
 				(toolbar_togglebutton false "24x24/point.png" "Points" 
 					"Point render mode"		eEvent	eRenderVertex)
 
@@ -274,10 +301,6 @@
 				(toolbar_togglebutton false "24x24/deform.png" "Deform"
 					"Toggle skelmesh deform"	eEvent	eSkeletalDeform)
 
-				(toolbar_separator)
-
-				(toolbar_togglebutton false "24x24/fourwin.png" "Deform"
-					"Enable four window view"	eEvent	eViewports)
 			) ; toolbar
 
 				(hbox 0 1 0 1 1
@@ -494,76 +517,7 @@
 						))
 
 					;; Seperator
-					(hbox 1 0 0 1 0 (hsep))
-
-					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-					(hbox 0 0 0 1 0
-						(label "Select viewport: "  0.0 0.5)
-						(spinbutton 0 0 3 eSetSelectedViewport)
-						(optionmenu	eEvent	324324
-							(menu_item	"Orbit      "		eViewportOrbit)
-							(menu_item	"Front"		eViewportFront)
-							(menu_item	"Back"		eViewportBack)
-				  			(menu_item	"Right"		eViewportRight)
-				  			(menu_item	"Left"		eViewportLeft)
-				  			(menu_item	"Top"		eViewportTop)
-				  			(menu_item	"Bottom"  eViewportBottom)
-				  			(menu_item	"Material"  eViewportMaterial)
-				  			(menu_item	"UV"	 eViewportUV)
-				  			(menu_item	"Curve"  eViewportCurve)
-						) ; optionmenu
-					) ; hbox
-
-				;(hbox 0 0 0 1 0
-					;; This really adjusts view height ( removing feature soon )
-					;(label "  View Height "  0.0 0.4) 
-					;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
-
-				;	(label "  Zoom "  0.0 0.4) 
-				;	(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
-				;) ; hbox
-
-					;; Object operations ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-					(hbox 1 0 0 1 0 (hsep))
-					(hbox 0 0 0 1 0
-						(label "Object operations" 0.0 0.5))
-					;(hbox 1 0 0 1 0
-					;	(label "Current Mesh  #"  0.0 0.5) 
-					;	(spinbutton 0 0 100 eMeshIterator))
-					;(hbox 1 0 0 1 0
-					;	(label "Current Group #" 0.0 0.5) 
-					;	(spinbutton 0 0 500 eGroupIterator))
-					;(hbox 1 0 0 1 0
-					;	(label "Current Face #" 0.0 0.5) 
-					;	(spinbutton 0 0 500 ePolygonIterator))
-
-					;(hbox 1 0 0 1 0
-					;	(button "New"     eEvent  eAddObject)
-					;	(button "Delete"  eEvent  eDelete))
-
-					(hbox 1 0 0 1 0 (hsep))
-
-					;(hbox 1 0 0 1 0						
-						;(optionmenu	eEvent	eTransformMenu
-						;	(menu_item	"Model"		eTransformModel)
-						;	(menu_item	"Mesh"		eTransformMesh)
-						;	(menu_item	"Meshes..."	eNone)
-						;	(menu_item	"Face"		eTransformFace)
-						;	(menu_item	"Faces..."	eTransformFaces)
-						;	(menu_item	"Vertex"	eTransformPoint)
-						;	(menu_item	"Vertices..."	eTransformSelectedVertices)
-						;	(menu_item	"Bone"		eTransformBone)
-						;	(menu_item	"Light"		eTransformLight)
-						;) ; optionmenu
-
-						;(optionmenu	eEvent  	eObjectMenu
-						;	(menu_item "Move"    	eMoveObject)
-				  		;	(menu_item "Rotate"  	eRotateObject)
-				  		;	(menu_item "Scale"   	eScaleObject)
-				  		;	(menu_item "Select"  	eSelect)
-				  		;	(menu_item "Unselect"	eUnselect)
-						;) ; optionmenu
-					;) ; hbox
+					;(hbox 1 0 0 1 0 (hsep))
 
 					(hbox 1 0 0 1 0 (hsep))
 
@@ -589,13 +543,7 @@
 
 					) ; expander
 
-	(expander "Groups Box" 0
-		(hbox 1 0 0 1 0
-			(label2 "Face select:");)
-		;(hbox 1 0 0 1 0
-			(button "Mark" eEvent eMarkSelected)
-			(button "Clear" eEvent eClearSelected))
-
+	(expander "Groups Box" 1
 		(hbox 1 0 0 1 0
 			(togglebutton " 1" eSmooth 1)
 			(togglebutton " 2" eSmooth 2)
@@ -627,14 +575,12 @@
 			(togglebutton " 24" eSmooth 24)
 		) ; hbox
 
-		;(hbox 1 0 0 1 0
-			;(label2 "Groups:")
-		;	(togglebutton "Assign"	eNone 1)
-		;	(togglebutton "Clear"	eNone 0))
+		; Assign/Clear group assoications with selected faces
+		(hbox 1 0 0 1 0
+			(button "Assign"	eEvent	eGroupAssign)
+			(button "Clear "	eEvent	eGroupClear))
 
-	;) ; vbox
-
-				) ; expander
+	) ; expander
 
 					;; Skeleton ;;;;;;;;;;;;;;;
 					;(hbox 1 0 0 1 0 (hsep))

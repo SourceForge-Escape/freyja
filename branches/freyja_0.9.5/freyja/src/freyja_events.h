@@ -235,6 +235,7 @@ typedef enum {
 	eGroupIterator,
 	eBoneIterator,
 
+	eViewportModeMenu,
 	eTransformMenu,
 	eObjectMenu,
 

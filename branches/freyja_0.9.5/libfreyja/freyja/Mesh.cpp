@@ -156,6 +156,8 @@ bool Mesh::Serialize(SystemIO::FileWriter &w)
 	chunk.flags = 0x0;
 	chunk.version = 10;
 
+	// FIXME: Screw this -- 
+	// just use file seek to come back and write the value =P
 	/* Compute byte size here */
 	chunk.size += 4;  // index_t mUID;
 	chunk.size += 4;  // uint32 mFlags;
@@ -171,7 +173,7 @@ bool Mesh::Serialize(SystemIO::FileWriter &w)
 	chunk.size += 4 + mFreedColors.size() * 4;
 	chunk.size += 4 + mTexCoordPool.size() * 4;
 	chunk.size += 4 + mFreedTexCoords.size() * 4;
-	chunk.size += 4 + mFaces.size() * Face::SerializedSize();
+	chunk.size += 4 + mFaces.size() * 0;//Face::SerializedSize();
 	chunk.size += 4 + mVertices.size() * Vertex::SerializedSize();
 	chunk.size += 4 + mWeights.size() * Weight::SerializedSize();
 
@@ -693,13 +695,13 @@ void Mesh::SelectedFacesMarkSmoothingGroup(uint32 group, bool t)
 		}
 		else
 		{
-			face->ClearSmoothingGroup(group);
+			face->ClearSmoothingGroup();
 		}
 	}
 }
 
 
-void Mesh::AssignGroupsToSelectedFaces(uint32 groups, bool overwrite)
+void Mesh::AssignGroupToSelectedFaces(uint32 group)
 {
 	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
 	{
@@ -708,27 +710,20 @@ void Mesh::AssignGroupsToSelectedFaces(uint32 groups, bool overwrite)
 		// We only consider facets in given group(s)...
 		if (face && face->mFlags & Face::fSelected)
 		{
-			if (overwrite)
-			{
-				face->mSmoothingGroups = groups; 
-			}
-			else
-			{
-				face->mSmoothingGroups |= groups;
-			}
+			face->mSmoothingGroup = group; 
 		}
 	}
 }
 
 
-void Mesh::ClearSelectedOnGroupFaces(uint32 groups)
+void Mesh::ClearGroupsFaceSelected(uint32 groups)
 {
 	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
 	{
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group(s)...
-		if (face && groups & face->mSmoothingGroups)
+		if (face && groups & face->mSmoothingGroup)
 		{
 			face->mFlags ^= Face::fSelected;
 		}
@@ -736,14 +731,14 @@ void Mesh::ClearSelectedOnGroupFaces(uint32 groups)
 }
 
 
-void Mesh::SetSelectedOnGroupFaces(uint32 groups)
+void Mesh::SetGroupsFaceSelected(uint32 groups)
 {
 	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
 	{
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group(s)...
-		if (face && groups & face->mSmoothingGroups)
+		if (face && groups & face->mSmoothingGroup)
 		{
 			face->mFlags |= Face::fSelected;
 		}
@@ -793,7 +788,7 @@ void Mesh::UpdateVertexReferenceWithSelectedBias()
 }
 
 
-void Mesh::UpdateVertexReferenceWithUVMapBias(uint32 uvmap)
+void Mesh::UpdateVertexReferenceWithColorBias(uint32 color)
 {
 	// FIXME: Add some kind of conditional flag here to avoid
 	//        uneeded updates.  This isn't so important *yet, since
@@ -816,7 +811,7 @@ void Mesh::UpdateVertexReferenceWithUVMapBias(uint32 uvmap)
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group(s)...
-		if (!face || !(uvmap == face->mUVMap))
+		if (!face || !(color == face->mColor))
 		{
 			continue;
 		}
@@ -858,7 +853,7 @@ void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group(s)...
-		if (!face || !(groupFilter & face->mSmoothingGroups))
+		if (!face || !(groupFilter & (1 << face->mSmoothingGroup)))
 		{
 			continue;
 		}
@@ -1088,7 +1083,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		Face *face = GetFace(f);
 
 		// We only consider selected facets here... you filter updates here
-		if (!face || !(face->mSmoothingGroups & (1<<group)))
+		if (!face || !(face->mSmoothingGroup & (1<<group)))
 		{
 			faceNormals.pushBack(normal);  // For alignment purposes push a 'V0'
 			continue;

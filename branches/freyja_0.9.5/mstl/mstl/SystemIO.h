@@ -65,10 +65,51 @@
 
 namespace mstl {
 
-class SystemIO
+#if 0
+class Timer
 {
  public:	
 
+	static float GetTicks(bool reset)
+	{
+		static struct timeval start;
+		static struct timeval stop;
+		static struct timeval total;
+		static struct timezone tz;
+		vec_t time = 0.0f;
+
+		if (reset)
+		{
+			gettimeofday(&start, &tz);
+			total.tv_sec = 0;
+			total.tv_usec = 0;
+		}
+		else
+		{
+			gettimeofday(&stop, &tz);
+			
+			if (start.tv_usec > stop.tv_usec) 
+			{ 
+				stop.tv_usec = (1000 + stop.tv_usec); 
+				stop.tv_sec--; 
+			} 
+			
+			stop.tv_usec -= start.tv_usec; 
+			stop.tv_sec -= start.tv_sec;
+
+			time = ( (stop.tv_sec - start.tv_sec) * 1000.0f +
+						(stop.tv_usec - start.tv_usec) / 1000.0f );
+		}
+
+		return time;
+	}
+};
+#endif
+
+
+class SystemIO
+{
+ public:	
 
 	class File
 	{

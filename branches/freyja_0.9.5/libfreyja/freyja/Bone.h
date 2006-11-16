@@ -137,7 +137,7 @@ class BoneKeyFrame : public KeyFrame
 class BoneTrack : public Track
 {
 public:
-	BoneTrack() : Track() { mName = "Bone"; }
+	BoneTrack() : Track(), mVertices() { mName = "Bone"; }
 	
 	~BoneTrack() {}
 	
@@ -215,6 +215,46 @@ public:
 			}
 		}
 	}
+
+
+	// NOTE: We store a vertex buffer here -- just for rendering right now
+	//       There is no reason to store to disk, etc.
+	void ArrayResize(uint32 sz) { mVertices.resize(sz*3); } 
+
+	vec_t *GetVertexArray() { return mVertices.getVectorArray(); }
+
+	uint32 GetVertexCount() { return mVertices.size()/3; }
+
+	Vec3 GetArrayElement(uint32 i)
+	{
+		Vec3 pos(0,0,0);
+
+		if (i < mVertices.end())
+		{
+			vec_t *array = mVertices.getVectorArray();
+			i *= 3;
+			pos.mVec[0] = array[i];
+			pos.mVec[1] = array[i+1];
+			pos.mVec[2] = array[i+2];
+		}
+
+		return pos;
+	}
+
+	void SetArrayElement(uint32 i, Vec3 pos)
+	{
+		if (i < mVertices.end())
+		{
+			vec_t *array = mVertices.getVectorArray();
+			i *= 3;
+			array[i  ] = pos.mVec[0];
+			array[i+1] = pos.mVec[1];
+			array[i+2] = pos.mVec[2];
+		}
+	}
+
+
+	Vector<vec_t> mVertices;
 };
 
 

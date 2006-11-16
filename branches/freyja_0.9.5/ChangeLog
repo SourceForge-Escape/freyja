@@ -5,6 +5,8 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Select multiviewport 'window' by clicking instead of silly spinbutton
+ - New GL arrays based rendering (memory shared in 0.9.5, so no extra overhead)
  - Vertex animation you can see  ;)
  - FIX Texture uploading in perlinnoise plugin wasn't hooked to mlisp
  - Only load filenames checked to module extentions at least ( save some time )
