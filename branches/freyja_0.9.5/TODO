@@ -6,27 +6,24 @@
 
  Hot
 
-	// FIXME: Temp test garbage... this is very poor, but tests an idea
-	// ( namely how the hell should rendering lists be built for 'previews'
-	// Looks like selected faces needs a special list or vertices should
-	// be treated like they're in the vertex animation / skinning buffer mode 	
-
 	- Single joint animation for shishi odoshi test
 		- Might want to add rotation types or always do 'about center' pivots
 			- Pivot: 3d cursor, bbox center, etc
-		- Keyframe editor improvements ( autokeyframe is really anim mode atm )
+		- Keyframe editor improvements
+			- Auto keyframe
+			- Finalize the interpolation system in the backend
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
-			- Also replace the old RotateObject() code to just use cursor now
+			- Also replace the old RotateObject() code to just use cursor
+			- Using the pick ray + segment you can get a normal parallel to
+			  screen to figure out your screen coord basis
 		- freyja ABI wrapper for new keyframe backend
-			- BoneAnim, Transform, and VertexAnim type ABI support
-			- Track and Keyframe ABI
+			- BoneAnim and Mesh type ABI support
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
 		- Timers for display 'sleep' and animation playback
 
 	- Skeletal animation
-		- Mesh vertex group keyframes ( vertex animation ties into deforming )
 		- Fix bone rendering to support unparented bones that aren't root? 
 			- Fix bone world coord
 		- Out of heirarchy skeleton rendering / backend support
@@ -46,9 +43,6 @@
 		- Perferences, init-dev.mlisp
 		- Camera render mode for viewport
 			- OpenGL depth / culling / etc control?
-		- Smoothing groups need to come in to fix normal generation at least
-			- Might as well force polymapped normals when this is checked in
-		- Allow smoothing group picking ( from a face selection? )
 		- Remove state value from all mlisp toggle widgets
 		  ( they have a set func )
 

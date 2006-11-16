@@ -4717,8 +4717,8 @@ void FreyjaControl::Transform(object_type_t obj,
 			ActionModelModified(a);
 
 			// Reset cursor transform
-			if (action != fTranslate)
-				mCursor.mPos = u;
+			//if (action != fTranslate)
+			//	mCursor.mPos = u;
 		}
 		break;
 
@@ -4757,7 +4757,7 @@ void FreyjaControl::Transform(object_type_t obj,
 
 
 	// Reset transforms in the cursor
-	mCursor.mRotate = Vec3(0,0,0);
+	//mCursor.mRotate = Vec3(0,0,0);
 	mCursor.mScale = Vec3(1,1,1);
 	//mCursor.mPos = Vec3(0,0,0);
 }
