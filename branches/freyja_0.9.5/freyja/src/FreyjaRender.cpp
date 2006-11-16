@@ -1297,7 +1297,6 @@ void FreyjaRender::DrawCurveWindow()
 		glEnd();
 	}
 
-
 	if (curKey < m->mTrack.mKeyFrames.size())
 	{
 		p[0] = x + curKey*s;		

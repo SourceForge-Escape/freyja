@@ -1577,7 +1577,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 			if (value != freyjaGetCurrentMaterial())
 			{
 				freyjaCurrentMaterial(value);
-				freyja_print("Selected material[%i].", value);
+				freyja_print("Selected material[%i] = '%s'.", value,
+							 freyjaGetMaterialName(value));
 				freyja_refresh_material_interface();
 				freyja_event_gl_refresh();
 			}
@@ -1656,9 +1657,9 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eSetMaterialTexture:
 		SetSelectedTexture(value);
 		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
-		freyja_print("Material[%i].texture = %i",
-					 freyjaGetCurrentMaterial(), 
-					 freyjaGetMaterialTexture(freyjaGetCurrentMaterial()));
+		//freyja_print("Material[%i].texture = %i",
+		//			 freyjaGetCurrentMaterial(), 
+		//			 freyjaGetMaterialTexture(freyjaGetCurrentMaterial()));
 		freyja_event_gl_refresh();
 		break;
 
