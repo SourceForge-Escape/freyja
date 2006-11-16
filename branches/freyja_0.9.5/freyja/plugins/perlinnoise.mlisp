@@ -9,14 +9,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(dialog "Freyja :: PerlinNoise test" eDialogPerlinNoise 0
-	(vbox 0 0 0 0 0
+;(dialog "Freyja :: PerlinNoise test" eDialogPerlinNoise 0
+	;(vbox 0 0 0 0 0
+(summonbox "FirstPartyPluginSlot"
+	(expander "PerlinNoise Plugin 1.0" 0 
 		(hbox 1 0 0 1 0
-			(icon "freyja.png" IconSize_Dialog))
-
-		(label "Perlin Noise "  0.0 0.5)
-
-		(button "Generate texture" eMode ePerlinNoiseGen)
+			(icon "freyja-dev.png" IconSize_Menu)
+			(label "Perlin Noise "  0.0 0.5))
 
 		(hbox 1 0 0 1 0
 			(label "Seed "  0.0 0.5)
@@ -52,7 +51,13 @@
 
 		(hbox 1 0 0 1 2 
 			(label "Add color " 0.0 0.5)
-			(colorbutton 1 eColorPerlinAdd))))
+			(colorbutton 1 eColorPerlinAdd))
+
+		(hbox 1 0 0 1 0
+			(button "Generate texture" eMode ePerlinNoiseGen))
+
+	) ; Local expander
+) ; Dialog / Summon
 
 (color	eColorPerlinMult		0.61	0.51	0.35	1.0) 
 (color	eColorPerlinAdd			0.51	0.51	0.29	1.0) 

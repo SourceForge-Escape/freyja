@@ -360,12 +360,23 @@ void seperator()
 }
 
 
-void bind(arg_list_t *symbol, arg_list_t *data)
+void mlisp_bind(arg_list_t *symbol, arg_list_t *data)
 {
 	if (!__RESOURCE_AGENT_)
 		return;
 
 	__RESOURCE_AGENT_->Bind(symbol, data);
+}
+
+
+void *mlisp_recall(const char *symbol)
+{
+	if (!__RESOURCE_AGENT_)
+		return NULL;
+
+	arg_list_t *becareful;
+	__RESOURCE_AGENT_->Lookup((char*)symbol, &becareful);
+	return becareful ? becareful->data : NULL;
 }
 
 
@@ -376,7 +387,7 @@ char mlisp_peek_for_vargs()
 
 	__RESOURCE_AGENT_->Seperator();
 
-	return !__RESOURCE_AGENT_->Is(')');
+	return ( !__RESOURCE_AGENT_->Is(')') && !__RESOURCE_AGENT_->Is('('));
 }
 
 
@@ -412,7 +423,7 @@ arg_list_t *setq(arg_list_t *arg)
 
 	a = symbol();
 	b = symbol();
-	bind(a, b);
+	mlisp_bind(a, b);
 
 	return NULL;
 }
@@ -462,6 +473,7 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *box);
 arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box);
 arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box);
 arg_list_t *mgtk_rc_expander(arg_list_t *box);
+arg_list_t *mgtk_rc_summonbox(arg_list_t *box);
 
 arg_list_t *mgtk_func_toggle_set(arg_list_t *args);
 
@@ -531,6 +543,7 @@ Resource::Resource() :
 	RegisterFunction("toolbar_separator", mgtk_rc_toolbar_separator);
 	RegisterFunction("func_set_toggle", mgtk_func_toggle_set);
 	RegisterFunction("expander", mgtk_rc_expander);
+	RegisterFunction("summonbox", mgtk_rc_summonbox);
 
 	RegisterInt("IconSize_Menu", 1);
 	RegisterInt("IconSize_ToolbarSmall", 2);

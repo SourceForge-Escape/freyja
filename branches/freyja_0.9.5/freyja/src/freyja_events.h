@@ -35,14 +35,18 @@
 
 typedef enum {
 
-	// Special events
+	/* Special events */
+
 	eNone = 0,
 	eShutdown = 1,
+	eNop,           /* Event to be ignored */
 
-	// Event flow control modes ( majors )
-	eMode,     /* These events change modes ( modify states ) */
-	eEvent,    /* These events request handling ( perform actions ) */
-	eNop,      /* Event to be ignored */
+
+	/* Event flow control modes ( majors ) */
+
+	eMode,          /* These events change modes ( modify states ) */
+	eEvent,         /* These events request handling ( perform actions ) */
+	eModeAutoKeyframe,
 
 
 	// Event ids ( minors )
@@ -132,7 +136,7 @@ typedef enum {
 	eRotateObject,
 	eScaleObject,
 
-	eTransformSelectedVertices,
+	eTransformVertices,
 	eTransformGroup,
 	eTransformScene,
 	eTransformMesh,
@@ -248,9 +252,6 @@ typedef enum {
 	eBlendDest,
 	eBlendSrc,
 
-	/* Major control modes */
-	eModeAutoKeyframe,
-
 	/* Text events */
 	eSetCurrentBoneName,
 	eSetTextureNameA,
@@ -301,12 +302,8 @@ typedef enum {
 	CMD_POINT_DELETE,
 	CMD_POINT_COMBINE,
 
-	CMD_BONE_PREV,
-	CMD_BONE_NEXT,
 	CMD_BONE_NEW,
 	CMD_BONE_SELECT,
-	//CMD_BONE_ADD_MESH,
-	//CMD_BONE_DELETE_MESH,
 	CMD_BONE_CONNECT,
 	CMD_BONE_DISCONNECT,
 	CMD_BONE_MOVE_PIVOT,
@@ -314,15 +311,6 @@ typedef enum {
 	CMD_MESH_ADD,
 	CMD_MESH_MOVE_CENTER,
 
-	CMD_MISC_ZOOM_IN,
-	CMD_MISC_ZOOM_OUT,
-	//CMD_MISC_SIDES_P,
-	//CMD_MISC_SIDES_M,
-	//CMD_MISC_INFO,
-	//CMD_MISC_FPS,
-	//CMD_MISC_WIDGETSHOWN,
-	//CMD_MISC_BBOX_SELECT,
-	//CMD_MISC_GEN_TEXMAP_XY,
 	CMD_MISC_VERTEX_UV,
 	CMD_MISC_SCENE_ROTATE,
 

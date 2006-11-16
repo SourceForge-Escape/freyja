@@ -8,11 +8,13 @@
 ; Comment: Interface for pak vfs plugin
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(dialog "Freyja :: Pak Reader" eDialogPakReader 0
-	(vbox 0 0 1 1 0
+;(dialog "Freyja :: Pak Reader" eDialogPakReader 0
+;	(vbox 0 0 1 1 0
+(summonbox "FirstPartyPluginSlot"
+	(expander "Pak Reader Plugin 1.0" 0 
 
 		(hbox 1 1 0 1 1
-			(icon "freyja-plugin.png"	IconSize_Dialog)
+			(icon "freyja-dev.png"	IconSize_Dialog)
 			(label "Pak Reader "	0.0	1.5))
 
 		(hbox 1 1 0 1 1

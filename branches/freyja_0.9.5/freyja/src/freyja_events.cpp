@@ -239,7 +239,8 @@ void freyja_init_application_plugins(const char *dir)
 		if (reader.IsDirectory(module_filename))
 			continue;
 
-		// FIXME: Add check here for SO check
+		if (!SystemIO::CheckModuleExt(module_filename))
+			continue;
 
 		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
@@ -814,7 +815,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
 	r.RegisterInt("eTransformMenu", eTransformMenu);
-	r.RegisterInt("eTransformSelectedVertices", eTransformSelectedVertices);
+	r.RegisterInt("eTransformVertices", eTransformVertices);
 	r.RegisterInt("eTransformFaces", eTransformFaces);
 	r.RegisterInt("eTransformScene", eTransformScene);
 	r.RegisterInt("eTransformFace", eTransformFace);

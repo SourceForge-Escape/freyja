@@ -30,6 +30,9 @@
 		- Joint/Bone tool that creates and connects to last on each click
 
 	- Interface
+		- New mgtk box widget for plugins ( can be read via mlisp )
+			- This can let you do cooky things like load plugin interfaces
+			  inside other containers like the notebook
 		- Add generic bbox selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registering to mgtk
 		- Two window layout for curve / viewport usage
