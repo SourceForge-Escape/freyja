@@ -4731,8 +4731,8 @@ void FreyjaControl::Transform(object_type_t obj,
 			freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
 
 			// Reset cursor transform
-			if (action != fTranslate)
-				mCursor.mPos = u;
+			//if (action != fTranslate)
+			//	mCursor.mPos = u;
 		}
 		break;
 
@@ -5127,6 +5127,10 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	case PLANE_LEFT:
 		d = Vec3(0.0f, dy, dx);
+		break;
+
+	case PLANE_FREE:
+		d = Vec3(dy, dy, dy);
 		break;
 
 	default:
