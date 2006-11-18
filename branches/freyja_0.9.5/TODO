@@ -4,9 +4,13 @@
  Freyja 0.9.5 ( Development branch )
  =====================================================================
 
- Hot
+ Hot  
+
+	python plugin?
 
 	- Single joint animation for shishi odoshi test
+		- Visualize weights over mesh
+		- Make sure you can do: OBJ + SMD dumps for the ASCII groupies
 		- Might want to add rotation types or always do 'about center' pivots
 			- Pivot: 3d cursor, bbox center, etc
 		- Keyframe editor improvements
@@ -54,6 +58,10 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- Subdiv ABI ( this way at least stubs in svn interface! )
+	- Patch ABI ( this way at least stubs in svn interface! )
+	- Direct edge selection
+	- Go do a sweep of all the plugins to make sure they use new ABI
 	- DBUS support now that it's hit stable ABI at 1.0
 	- Better UV unwrap ( write smart algorithms for projections )
 	- Selected <--> Groups assignments for faces
@@ -121,6 +129,7 @@
 
 
  Interface
+	- Generic control points
 	- Sphere shaped brushes for input ( like magnets and paint selection )
 	- Reimplement and enable Camera system
 	- Add camera editing back

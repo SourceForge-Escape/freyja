@@ -551,12 +551,10 @@ int freyja_model__milkshape_import(char *filename)
 							  mdl.joints[i].position[0]*scale,
 							  mdl.joints[i].position[1]*scale,
 							  mdl.joints[i].position[2]*scale);
-		
-
 		freyjaBoneRotateEuler3f(index,
-								helRadToDeg(mdl.joints[i].rotation[0]),
-								helRadToDeg(mdl.joints[i].rotation[1]),
-								helRadToDeg(mdl.joints[i].rotation[2]));
+								mdl.joints[i].rotation[0],
+								mdl.joints[i].rotation[1],
+								mdl.joints[i].rotation[2]);
 
 		for (j = 0; j < mdl.nNumJoints; ++j)
 		{
@@ -569,6 +567,32 @@ int freyja_model__milkshape_import(char *filename)
 			{
 				freyjaBoneParent(index, j);
 			}
+		}
+
+		/* 0.9.5 keyframes */
+		index_t track = freyjaBoneTrackNew(index);
+		//freyjaBoneTrackRate(index, track, 30.0f);  // milkshape have a default?
+
+		for (j = 0; j < mdl.joints[i].numRotationKeyframes; ++j)
+		{
+			vec_t t = mdl.joints[i].keyFramesRot[j].time;
+			vec_t x = (mdl.joints[i].keyFramesRot[j].rotation[0]);
+			vec_t y = (mdl.joints[i].keyFramesRot[j].rotation[1]);
+			vec_t z = (mdl.joints[i].keyFramesRot[j].rotation[2]);
+
+			index_t key = freyjaBoneKeyFrameNew(index, track, t);
+			freyjaBoneRotKeyFrameEuler3f(index, track, key, x, y, z);
+		}
+
+		for (j = 0; j < mdl.joints[i].numPositionKeyframes; ++j)
+		{
+			vec_t t = mdl.joints[i].keyFramesPos[j].time;
+			vec_t x = mdl.joints[i].keyFramesPos[j].position[0]*scale;
+			vec_t y = mdl.joints[i].keyFramesPos[j].position[1]*scale;
+			vec_t z = mdl.joints[i].keyFramesPos[j].position[2]*scale;
+			
+			index_t key = freyjaBoneKeyFrameNew(index, track, t);
+			freyjaBonePosKeyFrame3f(index, track, key, x, y, z);
 		}
 
 		freyjaEnd(); // FREYJA_BONE

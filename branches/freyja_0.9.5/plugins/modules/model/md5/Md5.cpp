@@ -594,6 +594,10 @@ int freyja_model__md5_import(char *filename)
 		}
 	}
 
+	/* Generate normals to be pretty */
+	freyjaMeshGenerateVertexNormals(freyjaGetFSMMeshIndex());
+	freyjaMeshNormalFlip(freyjaGetFSMMeshIndex());
+
 	freyjaEnd(); // FREYJA_MODEL
 
 	freyjaBegin(FREYJA_SKELETON);

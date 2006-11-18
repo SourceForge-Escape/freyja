@@ -89,15 +89,27 @@ public:
 
 	virtual void UpdateKeyframes()
 	{
-		// FIXME: ATM this _WIPES_ all keyframes, we should
-		// shuffle the old keyframes into the new list matching
-		// their new index ( after all we just shuffle pointers )
+		// Copy old keyframes if they exist
+		Vector<KeyFrame *> tmp(mKeyFrames);
 		
 		// Don't screw around rebuild a pointer array every time, 
 		// so we can just use direct indices in the interface
+		mKeyFrames.resize(0);
 		for ( uint32 i = 0, count = GetKeyframeCount(); i < count; ++i )
 		{
 			mKeyFrames.pushBack(NULL);
+		}
+
+		// FIXME: Since, this design is about to be axed don't bother updating
+		//        the keyframe id for rate/duration unless this is release. =/
+		//
+		//        Truncate off if you shrink for now... might just move this
+		//        to a tree/list later since N is always small and list sparse.
+		uint32 i;
+		foreach(tmp, i)
+		{
+			if ( i < mKeyFrames.size() )
+				mKeyFrames[i] = tmp[i];
 		}
 	}
 

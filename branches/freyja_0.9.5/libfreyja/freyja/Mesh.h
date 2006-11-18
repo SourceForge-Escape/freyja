@@ -3,11 +3,11 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.icculus.org/~mongoose/
- * Email   : mongoose@icculus.org
+ * Website : http://www.icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
  * Object  : FreyjaMesh
- * License : No use w/o permission (C) 2004 Mongoose
- * Comments: This is the FreyjaMesh and classes that compose it.
+ * License : No use w/o permission (C) 2004-2006 Mongoose
+ * Comments: This is the freyja::Mesh and classes that compose it.
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -15,7 +15,11 @@
  * 
  *-- Test Defines -----------------------------------------------
  *           
- * UNIT_TEST_FREYJAMESH - Builds FreyjaMesh class as a unit test 
+ * UNIT_TEST_MESH - Builds Mesh class as a unit test 
+ *
+ *-- Todo ---------------------------------------------------
+ *
+ * o It might help to move some clutter out of this header  =p
  *
  *-- History ------------------------------------------------ 
  *
@@ -46,17 +50,51 @@ namespace freyja {
 class Weight
 {
 public:
-
-	static size_t SerializedSize() { return 0; }
-	bool Serialize(SystemIO::FileWriter &w) { return true; }
 	
+	Weight(index_t vertex, index_t bone, vec_t weight) : 
+		mVertexIndex(vertex),
+		mBoneIndex(bone),
+		mWeight(weight)
+	{
+		freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
+	}
+
+	Weight() : mVertexIndex(INDEX_INVALID),
+			   mBoneIndex(INDEX_INVALID),
+			   mWeight(0.0f)
+	{
+		freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
+	}
+
+	~Weight()
+	{
+	}
+
+
+	static size_t SerializedSize() { return 4*2 + 4; }
+
+	bool Serialize(SystemIO::FileReader &r) 
+	{ 
+		mVertexIndex = r.ReadLong();
+		mBoneIndex = r.ReadLong();
+		mWeight = r.ReadFloat32();
+		return true; 
+	}
+
+	bool Serialize(SystemIO::FileWriter &w) 
+	{ 
+		w.WriteLong(mVertexIndex);
+		w.WriteLong(mBoneIndex);
+		w.WriteFloat32(mWeight);
+		return true;
+	}
+
 	index_t mVertexIndex;
 	index_t mBoneIndex;
 	vec_t mWeight;
 };
 
 
-// This class allows polymapping Normals, UVs, etc
 class Vertex
 {
 public:
@@ -74,10 +112,9 @@ public:
 		mVertexIndex(vertex),
 		mTexCoordIndex(texcoord),    
 		mNormalIndex(normal),
-		//mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
-		//mPolygonReference(INDEX_INVALID)
-		mPolyRefIndices()
+		mFaceRefs(),
+		mTmpRefs()
 	{
 	}
 
@@ -86,10 +123,9 @@ public:
 		mVertexIndex(INDEX_INVALID),
 		mTexCoordIndex(INDEX_INVALID),    
 		mNormalIndex(INDEX_INVALID),
-		//mColor(INDEX_INVALID),      
 		mMaterial(INDEX_INVALID),
-		//mPolygonReference(INDEX_INVALID)
-		mPolyRefIndices()
+		mFaceRefs(),
+		mTmpRefs()
 	{
 	}
 
@@ -99,7 +135,8 @@ public:
 		mTexCoordIndex(v.mTexCoordIndex),    
 		mNormalIndex(v.mNormalIndex),
 		mMaterial(v.mMaterial),
-		mPolyRefIndices(v.mPolyRefIndices)
+		mFaceRefs(v.mFaceRefs),
+		mTmpRefs(v.mTmpRefs)
 	{
 	}
 
@@ -121,28 +158,33 @@ public:
 		w.WriteLong(mVertexIndex);
 		w.WriteLong(mTexCoordIndex);
 		w.WriteLong(mNormalIndex);
-		//w.WriteLong(mColor);
 		w.WriteLong(mMaterial);
-		//w.WriteLong(mPolygonReference);
+
+		// No use in storing face references to disk!
 
 		return true; 
 	}
 
-	byte mFlags;
+	Vector<index_t> &GetFaceRefs() { return mFaceRefs; }
 
-	index_t mVertexIndex; 		// Pool storage of XYZ position
+	Vector<index_t> &GetTmpRefs() { return mTmpRefs; }
 
-	index_t mTexCoordIndex;     // Pool storage of UV[W] coordinate
 
-	index_t mNormalIndex; 		// Pool storage of XYZ normal
+	byte mFlags;                /* State flags */
 
-	//index_t mColor;       		// Pool storage of color
+	index_t mVertexIndex; 		/* Pool storage of XYZ position */
 
-	index_t mMaterial;          // Material index
-	
-	//index_t mPolygonReference;  // PolygonReference index
+	index_t mTexCoordIndex;     /* Pool storage of UV[W] coordinate */
 
-	Vector<index_t> mPolyRefIndices;
+	index_t mNormalIndex; 		/* Pool storage of XYZ normal */
+
+	index_t mMaterial;          /* Material index */
+
+private:
+
+	Vector<index_t> mFaceRefs;  /* Face references */
+
+	Vector<index_t> mTmpRefs;   /* Face references used for special methods */
 };
 
 
@@ -840,7 +882,7 @@ public:
 
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
 	{
-		BUG_ME("Not Implemented");
+		mWeights.pushBack(new Weight(vertexIndex, bone, weight));
 	}
 
 

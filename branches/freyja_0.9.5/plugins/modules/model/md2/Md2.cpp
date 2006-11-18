@@ -629,6 +629,11 @@ int freyja_model__md2_import(char *filename)
       freyjaEnd(); // FREYJA_POLYGON
 	}
    
+
+	/* Generate normals to be pretty */
+	freyjaMeshGenerateVertexNormals(freyjaGetFSMMeshIndex());
+	freyjaMeshNormalFlip(freyjaGetFSMMeshIndex());
+
 	freyjaEnd(); // FREYJA_MESH
 	freyjaEnd(); // FREYJA_MODEL
 	

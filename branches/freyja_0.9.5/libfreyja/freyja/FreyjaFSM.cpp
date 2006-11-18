@@ -569,6 +569,7 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 	case FREYJA_BONE:
 		mStack.push(FREYJA_BONE);
 		mIndexBone = freyjaBoneCreate(mIndexSkeleton);
+		freyjaSkeletonAddBone(mIndexSkeleton, mIndexBone);
 		break;
 
 	case FREYJA_SKELETON:

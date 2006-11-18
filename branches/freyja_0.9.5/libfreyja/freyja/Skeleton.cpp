@@ -86,6 +86,13 @@ Skeleton *Skeleton::getSkeleton(index_t uid)
 
 void Skeleton::addBone(index_t bone)
 {
+	uint32 i;
+	foreach(mBones, i)
+	{
+		if (mBones[i] == bone)
+			return;
+	}
+
 	mBones.pushBack(bone);
 }
 
