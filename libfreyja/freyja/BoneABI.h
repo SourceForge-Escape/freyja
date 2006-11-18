@@ -180,6 +180,72 @@ extern "C" {
 	 * Pre  : 
 	 * Post : Count of bone children
 	 ------------------------------------------------------*/
+
+
+	///////////////////////////////////////////////////////////////
+	// 0.9.5 ABI Extensions
+	///////////////////////////////////////////////////////////////
+
+	/*------------------------------------------------------
+	 * NOTE 
+	 * The new keyframing ABI should only be used now, so
+	 * update all plugins for great victory!
+	 *  
+	 * The implementation will change, but the ABI should be stable.
+	 ------------------------------------------------------ */
+
+	index_t freyjaBoneTrackNew(index_t bone);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make a new bone animation track for mesh
+	 *
+	 ------------------------------------------------------*/
+	
+	void freyjaBoneTrackDuration(index_t bone, index_t track, vec_t duration);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make a new bone animation keyframe for track
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneTrackRate(index_t bone, index_t track, vec_t fps);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make a new bone animation keyframe for track
+	 *
+	 ------------------------------------------------------*/
+
+	index_t freyjaBoneKeyFrameNew(index_t bone, index_t track, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make a new bone animation keyframe for track
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBonePosKeyFrame3f(index_t bone, index_t track, index_t key,
+								 vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Update bone position in keyframe
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneRotKeyFrameEuler3f(index_t bone, index_t track, index_t key,
+									  vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : x,y,z in degrees
+	 * Post : Update bone rotation in keyframe
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneRotKeyFrameQuat4f(index_t bone, index_t track, index_t key,
+									 vec_t w, vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : Quaterion is WXYZ order to match 0.9.3 ABIs! 
+	 * Post : Update bone rotation in keyframe
+	 *
+	 ------------------------------------------------------*/
+
 }
 
 #endif

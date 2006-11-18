@@ -437,3 +437,98 @@ void freyjaBoneTransform(index_t boneIndex,
 	}
 }
 
+
+index_t freyjaBoneTrackNew(index_t bone)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		index_t track = b->NewTransformTrack();
+		return track;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaBoneTrackDuration(index_t bone, index_t track, vec_t duration)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		Track &t = b->GetTransformTrack(track);
+		t.SetDuration(duration);
+	}
+}
+
+
+void freyjaBoneTrackRate(index_t bone, index_t track, vec_t fps)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		Track &t = b->GetTransformTrack(track);
+		t.SetRate(fps);
+	}
+}
+
+
+index_t freyjaBoneKeyFrameNew(index_t bone, index_t track, vec_t time)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		BoneTrack &t = b->GetTransformTrack(track);
+		index_t key = t.NewKeyframe(time);
+		return key;
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaBonePosKeyFrame3f(index_t bone, index_t track, index_t key,
+							 vec_t x, vec_t y, vec_t z)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		BoneTrack &t = b->GetTransformTrack(track);
+		BoneKeyFrame *k = t.GetKeyframe(key);
+		
+		if (k)
+		{
+			k->SetPosition(Vec3(x, y, z));
+		}
+	}
+}
+
+
+void freyjaBoneRotKeyFrameEuler3f(index_t bone, index_t track, index_t key,
+								  vec_t x, vec_t y, vec_t z)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		BoneTrack &t = b->GetTransformTrack(track);
+		BoneKeyFrame *k = t.GetKeyframe(key);
+		
+		if (k)
+		{
+			k->SetEulerRotation(Vec3(x, y, z));
+		}
+	}
+}
+
+
+void freyjaBoneRotKeyFrameQuat4f(index_t bone, index_t track, index_t key,
+								 vec_t w, vec_t x, vec_t y, vec_t z)
+{
+	freyjaPrintError("%s(): Not Implemented %s:%i", __func__,__FILE__,__LINE__);
+}

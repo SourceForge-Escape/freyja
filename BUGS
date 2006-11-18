@@ -12,6 +12,8 @@
 
  Known bugs
 
+ - Reverse engineer plugin isn't taking values correctly from spin buttons
+
  - New mesh copy system doesn't buffer, since copy = copy + paste
 
  - Cursor reset on undo ( use a freaking seperate undo state system )

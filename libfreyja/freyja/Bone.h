@@ -58,16 +58,23 @@ class BoneKeyFrame : public KeyFrame
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	Vec3 GetEulerRotation()
-	{
-		return mRot;
-	}
+	Vec3 GetEulerRotation() { return mRot; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
 
+	void SetEulerRotation(Vec3 v) { mRot = v; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	void SetEulerRotation(Vec3 v)
-	{
-		mRot = v;
-	}
+	void SetPosition(Vec3 v) { mLoc = v;	}
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : 
+	 ------------------------------------------------------*/
 
 
 	virtual bool Serialize(SystemIO::FileWriter &w) 
@@ -380,6 +387,7 @@ public:
 
 
 	// Test, only supporting one 'range/anim' in test: F(track) <- F(0)
+	index_t NewTransformTrack() {return 0;}
 	BoneTrack &GetTransformTrack(uint32 track) { return mKeyframes; }
 	BoneTrack mKeyframes;
 

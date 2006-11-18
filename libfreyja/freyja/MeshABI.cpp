@@ -1500,7 +1500,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 		Vertex *vertex = mesh->GetVertex(v);
 
 		if (vertex)
-			vertex->mPolyRefIndices.clear();
+			vertex->GetTmpRefs().clear();
 	}
 
 	/* Compute face normals */
@@ -1519,7 +1519,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 			Vertex *vertex = mesh->GetVertex(face->mIndices[v]);
 			
 			if (vertex)
-				vertex->mPolyRefIndices.pushBack(f);
+				vertex->GetTmpRefs().pushBack(f);
 		}
 
 		mesh->GetVertexPos(face->mIndices[0], a.mVec);
@@ -1546,21 +1546,21 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 
 		//ASSERT_MSG(vertex->mPolyRefIndices.size(), "WTF vertex[%i] with no faces...", v);
 
-		if (vertex->mPolyRefIndices.size() == 0)
+		if (vertex->GetTmpRefs().size() == 0)
 		{
 			//DEBUG_MSGF("WTF vertex[%i] with no faces...", v);
 			continue;
 		}
 
-		for (uint32 j = 0, jn = vertex->mPolyRefIndices.size(); j < jn; ++j)
+		for (uint32 j = 0, jn = vertex->GetTmpRefs().size(); j < jn; ++j)
 		{
-			if (vertex->mPolyRefIndices[j] == INDEX_INVALID)
+			if (vertex->GetTmpRefs()[j] == INDEX_INVALID)
 			{
 				freyjaPrintError("freyjaGenerateMeshVertexNormals> ERROR Bad face reference\n");
 				continue;
 			}
 
-			normal += faceNormals[vertex->mPolyRefIndices[j]];
+			normal += faceNormals[vertex->GetTmpRefs()[j]];
 		}
 
 

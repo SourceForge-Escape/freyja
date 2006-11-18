@@ -760,7 +760,7 @@ void Mesh::UpdateVertexReferenceWithSelectedBias()
 
 		if (vertex)
 		{
-			vertex->mPolyRefIndices.clear();
+			vertex->GetTmpRefs();
 		}
 	}
 
@@ -781,7 +781,7 @@ void Mesh::UpdateVertexReferenceWithSelectedBias()
 			
 			if (vertex)
 			{
-				vertex->mPolyRefIndices.pushBack(f);
+				vertex->GetTmpRefs().pushBack(f);
 			}
 		}
 	}	
@@ -802,7 +802,7 @@ void Mesh::UpdateVertexReferenceWithColorBias(uint32 color)
 
 		if (vertex)
 		{
-			vertex->mPolyRefIndices.clear();
+			vertex->GetTmpRefs().clear();
 		}
 	}
 
@@ -823,7 +823,7 @@ void Mesh::UpdateVertexReferenceWithColorBias(uint32 color)
 			
 			if (vertex)
 			{
-				vertex->mPolyRefIndices.pushBack(f);
+				vertex->GetTmpRefs().pushBack(f);
 			}
 		}
 	}
@@ -844,7 +844,7 @@ void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
 
 		if (vertex)
 		{
-			vertex->mPolyRefIndices.clear();
+			vertex->GetTmpRefs().clear();
 		}
 	}
 
@@ -865,7 +865,7 @@ void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
 			
 			if (vertex)
 			{
-				vertex->mPolyRefIndices.pushBack(f);
+				vertex->GetTmpRefs().pushBack(f);
 			}
 		}
 	}
@@ -885,7 +885,7 @@ void Mesh::UVMapSelectedFaces_Spherical()
 		Vertex *vertex = GetVertex(v);
 
 		// Was this allocated and also marked by group bias?
-		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		if (vertex && vertex->GetTmpRefs().size() > 0)
 		{
 			GetVertexArrayPos(vertex->mVertexIndex, xyz);
 
@@ -917,7 +917,7 @@ void Mesh::UVMapSelectedFaces_Cylindrical()
 		Vertex *vertex = GetVertex(v);
 
 		// Was this allocated and also marked by group bias?
-		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		if (vertex && vertex->GetTmpRefs().size() > 0)
 		{
 			vec3_t xyz;
 
@@ -961,7 +961,7 @@ void Mesh::UVMapSelectedFaces_Cylindrical()
 		Vertex *vertex = GetVertex(v);
 
 		// Was this allocated and also marked by group bias?
-		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		if (vertex && vertex->GetTmpRefs().size() > 0)
 		{
 			vec3_t xyz;
 			vec3_t uvw;
@@ -994,7 +994,7 @@ void Mesh::UVMapSelectedFaces_Plane()
 		Vertex *vertex = GetVertex(v);
 
 		// Was this allocated and also marked by group bias?
-		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		if (vertex && vertex->GetTmpRefs().size() > 0)
 		{
 			vec3_t xyz;
 			vec3_t uvw;
@@ -1042,7 +1042,7 @@ void Mesh::UVMapSpherical(uint32 groups)
 		Vertex *vertex = GetVertex(v);
 
 		// Was this allocated and also marked by group bias?
-		if (vertex && vertex->mPolyRefIndices.size() > 0)
+		if (vertex && vertex->GetTmpRefs().size() > 0)
 		{
 			GetVertexArrayPos(vertex->mVertexIndex, xyz);
 
@@ -1074,7 +1074,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		Vertex *vertex = GetVertex(v);
 
 		if (vertex)
-			vertex->mPolyRefIndices.clear();
+			vertex->GetTmpRefs().clear();
 	}
 
 	/* Compute face normals */
@@ -1094,7 +1094,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 			Vertex *vertex = GetVertex(face->mIndices[v]);
 			
 			if (vertex)
-				vertex->mPolyRefIndices.pushBack(f);
+				vertex->GetTmpRefs().pushBack(f);
 		}
 
 		GetVertexPos(face->mIndices[0], a.mVec);
@@ -1118,22 +1118,22 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 
 		normal.zero();
 
-		if (vertex->mPolyRefIndices.size() == 0)
+		if (vertex->GetTmpRefs().size() == 0)
 		{
 			// This means it's not selected for update, or
 			// has no faces containing this vertex
 			continue;
 		}
 
-		for (uint32 j = 0, jn = vertex->mPolyRefIndices.size(); j < jn; ++j)
+		for (uint32 j = 0, jn = vertex->GetTmpRefs().size(); j < jn; ++j)
 		{
-			if (vertex->mPolyRefIndices[j] == INDEX_INVALID)
+			if (vertex->GetTmpRefs()[j] == INDEX_INVALID)
 			{
 				freyjaPrintError("%s> ERROR Bad face reference\n", __func__);
 				continue;
 			}
 
-			normal += faceNormals[vertex->mPolyRefIndices[j]];
+			normal += faceNormals[vertex->GetTmpRefs()[j]];
 		}
 
 		normal.normalize();
@@ -1156,7 +1156,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 		Vertex *vertex = GetVertex(v);
 
 		if (vertex)
-			vertex->mPolyRefIndices.clear();
+			vertex->GetTmpRefs().clear();
 	}
 
 	/* Compute face normals */
@@ -1176,7 +1176,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 			Vertex *vertex = GetVertex(face->mIndices[v]);
 			
 			if (vertex)
-				vertex->mPolyRefIndices.pushBack(f);
+				vertex->GetTmpRefs().pushBack(f);
 		}
 
 		GetVertexPos(face->mIndices[0], a.mVec);
@@ -1200,22 +1200,22 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 
 		normal.zero();
 
-		if (vertex->mPolyRefIndices.size() == 0)
+		if (vertex->GetTmpRefs().size() == 0)
 		{
 			// This means it's not selected for update, or
 			// has no faces containing this vertex
 			continue;
 		}
 
-		for (uint32 j = 0, jn = vertex->mPolyRefIndices.size(); j < jn; ++j)
+		for (uint32 j = 0, jn = vertex->GetTmpRefs().size(); j < jn; ++j)
 		{
-			if (vertex->mPolyRefIndices[j] == INDEX_INVALID)
+			if (vertex->GetTmpRefs()[j] == INDEX_INVALID)
 			{
 				freyjaPrintError("%s> ERROR Bad face reference\n", __func__);
 				continue;
 			}
 
-			normal += faceNormals[vertex->mPolyRefIndices[j]];
+			normal += faceNormals[vertex->GetTmpRefs()[j]];
 		}
 
 		normal.normalize();

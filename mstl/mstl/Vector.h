@@ -213,6 +213,14 @@ public:
 
 	void resize(unsigned int count)
 	{
+		if (!count)
+		{
+			/* I don't do deallocation here, call erase */
+			mStart = 0;
+			mEnd = 0;
+			return;
+		}
+
 #if OLD_VECTOR_PTR_HELPER
 		resize(count, 0x0);
 #else
@@ -254,11 +262,22 @@ public:
 	}
 
 
+	void push_back()
+	{
+		pushBack();
+	}
+	
+	
 	void pushBack()
 	{
 		pushBack(0x0);
 	}
 	
+
+	void push_back(Object object)
+	{
+		pushBack(object);
+	}
 
 	void pushBack(Object object)
 	{

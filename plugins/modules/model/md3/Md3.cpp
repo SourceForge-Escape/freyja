@@ -1068,7 +1068,8 @@ int freyja_model__md3_import(char *filename)
 	{
 		freyjaBegin(FREYJA_MESH);
 
-		for (f = 0; f < md3_mesh[m].num_frames; ++f)
+		/* 0.9.3 FREYJA_VERTEX_FRAME deprecated! */
+		for (f = 0; f < 1/*md3_mesh[m].num_frames*/; ++f)
 		{  
 			freyjaPrintMessage("Importing mesh: %d, frame: %d of %d", 
 							m, f, md3_mesh[m].num_frames);
@@ -1112,6 +1113,34 @@ int freyja_model__md3_import(char *filename)
 
 			freyjaEnd(); // End FREYJA_GROUP
 		}
+
+		/* 0.9.5 vertex morph keyframes */
+		index_t mesh = freyjaGetFSMMeshIndex();
+		index_t track = freyjaMeshVertexTrackNew(mesh, 
+			(md3_mesh[m].num_frames+3)/15.0f, 15.0f);
+
+		for (f = 1; f < md3_mesh[m].num_frames; ++f)
+		{  
+			//freyjaPrintMessage("Importing mesh: %d, frame: %d of %d", 
+			//				m, f, md3_mesh[m].num_frames);
+			index_t key = freyjaMeshVertexKeyFrameNew(mesh, 
+													  track, (vec_t)f/15.0f);
+			off = f * md3_mesh[m].num_vertices;
+
+			for (v = 0; v < md3_mesh[m].num_vertices; ++v)
+			{
+				pos[0] = md3_mesh[m].vertex[v+off].pos[0] * scale;
+				pos[1] = md3_mesh[m].vertex[v+off].pos[1] * scale;
+				pos[2] = md3_mesh[m].vertex[v+off].pos[2] * scale;
+
+				freyjaMeshVertexKeyFrame3f(mesh, track, key,
+										   transV[v],
+										   pos[1], pos[2], pos[0]);
+			}
+		}
+
+		/* End 0.9.5 vertex morph keyframes */
+
 
 		num_texels = md3_mesh[m].num_vertices * md3_mesh[m].num_frames;
 

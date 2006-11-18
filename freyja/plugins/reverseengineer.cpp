@@ -188,6 +188,14 @@ void eReverseEngineer()
 		}
 	}
 
+	if (!gReverseEngineerFCount && vCount > 3)
+	{
+		freyjaBegin(FREYJA_POLYGON);
+		freyjaPolygonVertex1i(0);
+		freyjaPolygonVertex1i(1);
+		freyjaPolygonVertex1i(2);
+		freyjaEnd();
+	}
 
 
 	/* Face extractor */
@@ -260,12 +268,12 @@ void eReverseEngineer()
 				bb > vCount ||
 				cc > vCount)
 			{
-				mgtk_print("! %i %i %i invalid skipping", aa, bb, cc);
+				mgtk_print("! A%i B%i C%i invalid skipping", aa, bb, cc);
 				continue;
 			}
 			else
 			{
-				mgtk_print("! %i (%i %i %i)", material, aa, bb, cc);
+				mgtk_print("! M%i (A%i B%i C%i)", material, aa, bb, cc);
 			}
 
 			freyjaBegin(FREYJA_POLYGON);
@@ -286,7 +294,7 @@ void eReverseEngineer()
 
 	r.Close();
 
-	mgtk_print("! eReverseEngineer> %ibytes read; %i %i %i", i*12,
+	mgtk_print("! eReverseEngineer> %ibytes read; voff %i, vcount %i, vskip %i", i*12,
                gReverseEngineerVOffset, gReverseEngineerVCount,
                gReverseEngineerVSkip);
 	mgtk_event_gl_refresh();

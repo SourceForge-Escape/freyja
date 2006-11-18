@@ -414,7 +414,7 @@
 				(toolbar_button "24x24/texmap.png" "UVMap" 
 					"UVMap selected faces, Planar"	eEvent eMeshTexcoordPlaneProj)
 
-				(toolbar_button "24x24/texmap.png" "UVMap" 
+				(toolbar_button "24x24/texgen-sphere.png" "UVMap" 
 					"UVMap selected faces, Spherical"	eEvent eMeshTexcoordSpherical)
 
 				(toolbar_button "24x24/texmap.png" "UVMap" 

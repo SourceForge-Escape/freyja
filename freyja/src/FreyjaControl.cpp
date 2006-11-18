@@ -2834,6 +2834,7 @@ bool FreyjaControl::event(int command)
 		freyjaMeshGenerateVertexNormals(GetSelectedMesh());
 		freyja_event_gl_refresh();
 		break;
+
 	case eMeshNew:
 		mObjectMode = tMesh;
 		addObject();
