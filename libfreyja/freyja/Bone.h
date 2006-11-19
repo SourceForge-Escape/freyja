@@ -50,6 +50,10 @@ class BoneKeyFrame : public KeyFrame
 
 	BoneKeyFrame() : KeyFrame(), mLoc(), mRot(), mWorldPose(), mCombined() {}
 
+	BoneKeyFrame(BoneKeyFrame &key) : 
+		KeyFrame(), 
+		mLoc(key.mLoc), mRot(key.mRot), mWorldPose(), mCombined() {}
+
 	virtual ~BoneKeyFrame() {}
 
 	virtual uint32 GetSerializedSize() { return 4*4+4*3; }
@@ -70,7 +74,7 @@ class BoneKeyFrame : public KeyFrame
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void SetPosition(Vec3 v) { mLoc = v;	}
+	void SetPosition(Vec3 v) { mLoc = v; }
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : 
@@ -83,19 +87,11 @@ class BoneKeyFrame : public KeyFrame
 		w.WriteFloat32(mLoc.mVec[1]);
 		w.WriteFloat32(mLoc.mVec[2]);
 
-#if 1
 		w.WriteFloat32(mRot.mVec[0]);
 		w.WriteFloat32(mRot.mVec[1]);
 		w.WriteFloat32(mRot.mVec[2]);
 		w.WriteFloat32(0.0f); // padding in case I want to store quat
-#else
-		vec4_t wxyz;
-		mRot.getQuaternion4fv(wxyz);
-		w.WriteFloat32(wxyz[0]);
-		w.WriteFloat32(wxyz[1]);
-		w.WriteFloat32(wxyz[2]);
-		w.WriteFloat32(wxyz[3]);
-#endif
+
 		return true;
 	}
 	/*------------------------------------------------------
@@ -109,15 +105,11 @@ class BoneKeyFrame : public KeyFrame
 		mLoc.mVec[1] = r.ReadFloat32();
 		mLoc.mVec[2] = r.ReadFloat32(); 
 
-#if 1
 		mRot.mVec[0] = r.ReadFloat32();
 		mRot.mVec[1] = r.ReadFloat32();
 		mRot.mVec[2] = r.ReadFloat32();
 		r.ReadFloat32();
-#else
-		mRot = Quaternion(r.ReadFloat32(), r.ReadFloat32(), 
-						  r.ReadFloat32(), r.ReadFloat32());
-#endif
+
 		return true; 
 	}
 	/*------------------------------------------------------
@@ -128,11 +120,7 @@ class BoneKeyFrame : public KeyFrame
 
 	Vec3 mLoc;                       /* Keyframe data */
 
-#if 1
 	Vec3 mRot;
-#else
-	Quaternion mRot;
-#endif
 
 	Matrix mWorldPose;               /* This is here for ease of use only */
 
@@ -150,7 +138,8 @@ public:
 	
 	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
 	{
-		BoneKeyFrame *key = new BoneKeyFrame();
+		BoneKeyFrame *prev = (BoneKeyFrame *)GetPrevKey(time);
+		BoneKeyFrame *key = prev ? new BoneKeyFrame(*prev) : new BoneKeyFrame();
 		key->mTime = time;
 		return key;
 	}

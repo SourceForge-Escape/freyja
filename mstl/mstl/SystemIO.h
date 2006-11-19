@@ -441,6 +441,8 @@ class SystemIO
 
 		void ReadInt32(int &i) { i = ReadInt32(); }
 
+		void ReadLong(long &l) { l = ReadLong(); }
+
 		void ReadInt32U(unsigned int &u) { u = ReadInt32U(); }
 
 		void ReadFloat32(float &f) { f = ReadFloat32(); }
@@ -451,6 +453,15 @@ class SystemIO
 			for (int i = 0; i < size; ++i)
 			{
 				ReadInt32(array[i]);
+			}
+		}
+
+
+		void ReadLongArray(long size, long array[])
+		{	
+			for (int i = 0; i < size; ++i)
+			{
+				ReadLong(array[i]);
 			}
 		}
 
@@ -484,9 +495,7 @@ class SystemIO
 		char ReadInt8()
 		{
 			char c;
-
 			fread(&c, 1, 1, mFileHandle);  // heh, yeah
-
 			return c;
 		}
 
@@ -494,9 +503,7 @@ class SystemIO
 		unsigned char ReadByte()
 		{
 			unsigned char u;
-
 			fread(&u, 1, 1, mFileHandle);  // heh, yeah
-
 			return u;
 		}
 
@@ -504,9 +511,7 @@ class SystemIO
 		unsigned char ReadInt8U()
 		{
 			unsigned char u;
-
 			fread(&u, 1, 1, mFileHandle);  // heh, yeah
-
 			return u;
 		}
 
@@ -603,6 +608,246 @@ class SystemIO
 
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
+
+		#ifdef HAVE_BIG_ENDIAN
+			if (!mHostOrder == LITTLE)
+				FIX_INT(*ptr);
+		#else
+			if (mHostOrder == BIG)
+				u = SWAP_4(u);
+		#endif
+			return u;
+		}
+
+	};
+
+
+	// FIXME: This should really use sliding windows instead of one large 
+	//        buffer, so until then only load small files with this.
+	class BufferedFileReader : public FileReader
+	{
+	public:
+		BufferedFileReader() : FileReader(), 
+			mFileData(NULL), mCursor(0), mEnd(0) { }
+
+		BufferedFileReader(const BufferedFileReader &b) : FileReader(), 
+			mFileData(NULL), mCursor(b.mCursor), mEnd(b.mEnd) 
+		{
+			mFileData = new unsigned char[b.mEnd+1];
+			memcpy(mFileData, b.mFileData, b.mEnd);
+		}
+
+		BufferedFileReader &operator=(const BufferedFileReader &b) 
+		{
+			FlushBuffer();
+			mCursor = b.mCursor;
+			mEnd = b.mEnd;
+			mFileData = new unsigned char[b.mEnd+1];
+			memcpy(mFileData, b.mFileData, b.mEnd);
+			
+			return *this;
+		}
+
+		~BufferedFileReader() { FlushBuffer();  }
+
+		unsigned char *mFileData;
+		unsigned long mCursor;
+		unsigned long mEnd;
+
+		void FlushBuffer() 
+		{ if (mFileData) delete [] mFileData; mCursor = mEnd = 0; }
+
+		bool IsValidRead(long sz) { return mCursor + sz <= mEnd; }
+
+		bool MemRead(void *ptr, size_t size)
+		{
+			bool read = false;
+
+			// FIXME: Should I do partial reads here to match file I/O?
+			if (IsValidRead(size))
+			{
+				memcpy(ptr, mFileData+mCursor, size);
+				mCursor += size;
+				read = true;
+			}
+
+			return read;
+		}
+
+		bool Open(const char *filename) 
+		{
+			bool load = false;
+			if (!mFileData && FileReader::Open(filename))
+			{
+				mEnd = GetSize();
+				mFileData = new unsigned char[mEnd+1];
+				FileReader::ReadBuffer(mEnd, mFileData);
+				mCursor = 0;
+				load = true;
+			}
+
+			return load;
+		}
+		
+		bool ReadBuffer(unsigned long length, unsigned char *buffer)
+		{
+			return MemRead(buffer, length);
+		}
+
+
+		bool ReadString(unsigned long length, char *buffer)
+		{
+			return MemRead(buffer, length);
+		}
+
+		void ReadInt32(int &i) { i = ReadInt32(); }
+
+		void ReadLong(long &l) { l = ReadLong(); }
+
+		void ReadInt32U(unsigned int &u) { u = ReadInt32U(); }
+
+		void ReadFloat32(float &f) { f = ReadFloat32(); }
+
+
+		void ReadInt32Array(long size, int array[])
+		{	
+			for (int i = 0; i < size; ++i)
+			{
+				ReadInt32(array[i]);
+			}
+		}
+
+
+		void ReadLongArray(long size, long array[])
+		{	
+			for (int i = 0; i < size; ++i)
+			{
+				ReadLong(array[i]);
+			}
+		}
+
+
+		void ReadFloat32Array(long size, float array[])
+		{	
+			for (int i = 0; i < size; ++i)
+			{
+				ReadFloat32(array[i]);
+			}
+		}
+
+
+		float ReadFloat32()
+		{	
+			float r = 0.0f;
+			void *ptr = &r;
+			MemRead(ptr, 4);
+
+#if HAVE_BIG_ENDIAN
+			FIX_FLOAT(*ptr)
+#endif
+
+			return r;
+		}
+
+
+		char ReadInt8()
+		{
+			char c;
+			MemRead(&c, 1);
+			return c;
+		}
+
+
+		unsigned char ReadByte()
+		{
+			unsigned char u;
+			MemRead(&u, 1);
+			return u;
+		}
+
+
+		unsigned char ReadInt8U()
+		{
+			unsigned char u;
+			MemRead(&u, 1);
+			return u;
+		}
+
+
+		short ReadInt16()
+		{
+			short int i = 0;
+			void *ptr = &i;
+			MemRead(ptr, 2);
+
+		#ifdef HAVE_BIG_ENDIAN
+			FIX_SHORT(*ptr)
+		#endif
+			return i;
+		}
+
+	
+		unsigned short ReadInt16U()
+		{
+			unsigned short int u = 0;
+			void *ptr = &u;
+			MemRead(ptr, 2);
+
+		#ifdef HAVE_BIG_ENDIAN
+			FIX_SHORT(*ptr)
+		#endif
+			return u;
+		}
+
+
+		int ReadInt32()
+		{
+			int i = 0;
+			void *ptr = &i;
+			MemRead(ptr, 4);
+
+		#ifdef HAVE_BIG_ENDIAN
+			FIX_INT(*ptr)
+		#endif
+			return i;
+		}
+
+
+		unsigned int ReadInt32U()
+		{
+			unsigned int u = 0;
+			void *ptr = &u;
+			MemRead(ptr, 4);
+
+		#ifdef HAVE_BIG_ENDIAN
+			FIX_INT(*ptr)
+		#endif
+			return u;
+		}
+
+
+		long ReadLong()
+		{
+			long i = 0;
+			void *ptr = &i;
+			MemRead(ptr, 4);
+
+		#ifdef HAVE_BIG_ENDIAN
+			if (mHostOrder == LITTLE)
+				FIX_INT(*ptr);
+		#else
+			if (mHostOrder == BIG)
+				FIX_INT(*(unsigned int*)ptr);//i = SWAP_4(i);
+		#endif
+			return i;
+		}
+
+
+		unsigned long ReadLongU()
+		{
+			unsigned long u = 0;
+			void *ptr = &u;
+			MemRead(ptr, 4);
 
 		#ifdef HAVE_BIG_ENDIAN
 			if (!mHostOrder == LITTLE)

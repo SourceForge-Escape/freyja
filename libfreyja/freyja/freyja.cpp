@@ -90,7 +90,7 @@ void freyjaModuleUnload(void *handle)
 
 void freyjaSpawn()
 {
-	if (!FreyjaFSM::GetInstance())
+	if (FreyjaFSM::GetInstance())
 	{
 		FreyjaFSM *fsm = FreyjaFSM::GetInstance();
 
@@ -106,6 +106,10 @@ void freyjaSpawn()
 
 		freyjaPrintMessage("libfreyja invoked using freyjaSpawn()");
 	}
+	else
+	{
+		freyjaPrintMessage("libfreyja freyjaSpawn() failed unexpectedly");
+	}
 }
 
 
@@ -113,15 +117,9 @@ void freyjaFree()
 {
 	FreyjaFSM *FreyjaFSM = FreyjaFSM::GetInstance();
 	
-
 	if (FreyjaFSM)
 	{
 		delete FreyjaFSM;
-	}
-
-	if (gPrinter)
-	{
-		delete gPrinter;
 	}
 
 	gPluginDirectories.erase();
@@ -131,6 +129,12 @@ void freyjaFree()
 
 	// Memory stats
 	freyjaPrintMessage("\nMemoryPool stats:\n %u allocations\n %u deallocations\n %u operations\n\n", gFreyjaMemoryNews, gFreyjaMemoryDeletes, gFreyjaMemoryTick);
+
+	if (gPrinter)
+	{
+		freyjaPrintMessage("\nlibfreyja stopping line printer");
+		delete gPrinter;
+	}
 }
 
 void freyjaStoreMark(const char *file, unsigned int line, const char *func)

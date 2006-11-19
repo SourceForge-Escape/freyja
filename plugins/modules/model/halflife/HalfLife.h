@@ -18,11 +18,8 @@
  * See the source file's header. 
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_HALFLIFE_H
 #define GUARD__FREYJA_MONGOOSE_HALFLIFE_H
-
-//#include <vector>
 
 
 #define MAXSTUDIOTRIANGLES	20000	// TODO: tune this

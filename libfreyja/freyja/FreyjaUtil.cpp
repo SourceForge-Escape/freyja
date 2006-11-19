@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <hel/math.h>
+#include <mstl/Vector.h>
 #include "FreyjaPluginABI.h"
 
 

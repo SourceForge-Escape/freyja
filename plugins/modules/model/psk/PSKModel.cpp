@@ -2686,6 +2686,10 @@ int freyja_model__psk_import(char *filename)
 		freyjaEnd(); // FREYJA_POLYGON
 	}
 
+	/* Generate normals to be pretty */
+	freyjaMeshGenerateVertexNormals(freyjaGetFSMMeshIndex());
+	//freyjaMeshNormalFlip(freyjaGetFSMMeshIndex());
+
 	freyjaEnd(); // FREYJA_MESH
 
 	/*** Import skeleton *********************/

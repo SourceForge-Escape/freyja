@@ -1204,8 +1204,8 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 
 	/* Transform child bones */
 	glPushMatrix();
-	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
+	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
 	switch (FreyjaControl::mInstance->GetControlScheme())
 	{
@@ -1219,7 +1219,9 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 				//BoneKeyFrame *key = track.GetKeyframe(k);
 
 				Vec3 pos, rot;
+				
 				track.GetTransform((vec_t)k / track.GetRate(), pos, rot);
+
 				glRotatef(rot.mVec[zr], 0, 0, 1);
 				glRotatef(rot.mVec[yr], 0, 1, 0);
 				glRotatef(rot.mVec[xr], 1, 0, 0);

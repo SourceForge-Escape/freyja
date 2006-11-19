@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <mstl/Vector.h>
 
 #include "FreyjaPluginABI.h"
 

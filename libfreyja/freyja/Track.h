@@ -129,18 +129,37 @@ public:
 	}
 
 
-	virtual uint32 GetPrevKeyframe(uint32 frame)
+	virtual KeyFrame *GetPrevKey(vec_t time)
+	{
+		KeyFrame *key = NULL;
+		KeyFrame **array = mKeyFrames.getVectorArray();
+		uint32 keyframe = GetKeyfameIndexFromTime(time);
+		uint32 size = mKeyFrames.size();
+
+		for ( ; keyframe > 0; --keyframe )
+		{
+			if (keyframe < size && array[keyframe])
+			{
+				key = array[keyframe];
+				break;
+			}
+		}
+
+		return key;
+	}
+
+	virtual uint32 GetPrevKeyframe(uint32 keyframe)
 	{
 		KeyFrame **array = mKeyFrames.getVectorArray();
-		for ( ; frame > 0; --frame )
+		for ( ; keyframe > 0; --keyframe )
 		{
-			if (array[frame])
+			if (array[keyframe])
 			{
 				break;
 			}
 		}
 
-		return frame;
+		return keyframe;
 	}
 
 

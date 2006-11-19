@@ -23,7 +23,6 @@
  * Mongoose - Created, based on test
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 
@@ -35,6 +34,9 @@
 #include <mstl/Action.h>
 
 using namespace freyja;
+
+// Argh, CPP ABI calls in headers are bad news...
+freyja::Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
 
 
 class ActionMeshTranslateExt : public Action

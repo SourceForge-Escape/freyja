@@ -19,6 +19,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#define USING_FREYJA_CPP_ABI
+
 #include <stdlib.h> 
 #include <stdio.h> 
 #include <math.h> 
@@ -5313,6 +5315,28 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 	// WTF! It was doing direct scaling like the old, old codebase
 	// Leaving this here as reminder for next code clean up
 	//Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
+}
+
+
+void FreyjaControl::SetSelectedMesh(uint32 i) 
+{
+	if (i < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(i))
+	{
+		mSelectedMesh = i;
+		
+		Mesh *m = GetModelMeshClass(0, GetSelectedMesh());
+		
+		if (m)
+		{
+			mCursor.mPos = m->GetPosition();
+		}
+	}
+}
+
+
+Mesh *FreyjaControl::GetModelMeshClass(index_t model, index_t mesh) 
+{
+	return freyjaModelGetMeshClass(model, mesh);
 }
 
 
