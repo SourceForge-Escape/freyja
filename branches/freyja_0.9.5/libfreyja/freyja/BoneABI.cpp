@@ -530,5 +530,18 @@ void freyjaBoneRotKeyFrameEuler3f(index_t bone, index_t track, index_t key,
 void freyjaBoneRotKeyFrameQuat4f(index_t bone, index_t track, index_t key,
 								 vec_t w, vec_t x, vec_t y, vec_t z)
 {
-	freyjaPrintError("%s(): Not Implemented %s:%i", __func__,__FILE__,__LINE__);
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		BoneTrack &t = b->GetTransformTrack(track);
+		BoneKeyFrame *k = t.GetKeyframe(key);
+		
+		if (k)
+		{
+			Quaternion q;
+			q.getEulerAngles(&x, &y, &z);
+			k->SetEulerRotation(Vec3(x, y, z));
+		}
+	}
 }

@@ -20,6 +20,8 @@
  * Mongoose - Created, based on python test code
  ==========================================================================*/
 
+#define USING_FREYJA_CPP_ABI
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

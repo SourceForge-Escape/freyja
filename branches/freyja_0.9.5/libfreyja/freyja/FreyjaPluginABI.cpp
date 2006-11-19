@@ -22,6 +22,8 @@
  *
  ==========================================================================*/
 
+#define USING_FREYJA_CPP_ABI
+
 #include <math.h>
 
 #if defined (FREYJA_PLUGINS) && !(WIN32)
@@ -34,6 +36,7 @@
 
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
+#include <mstl/String.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
@@ -1950,6 +1953,11 @@ void freyjaPluginDirectoriesInit()
 #ifdef WIN32
 	freyjaPluginAddDirectory("modules/model");
 #else
+	String s = getenv("HOME");
+	s += "/.freyja/plugins/model";
+   	freyjaPluginAddDirectory(s.c_str());
+	//MSTL_MSG(s.c_str());
+
    	freyjaPluginAddDirectory("/usr/lib/freyja/modules/model");
    	freyjaPluginAddDirectory("/usr/local/lib/freyja/modules/model");
 	freyjaPluginAddDirectory("/usr/share/freyja/modules/model");

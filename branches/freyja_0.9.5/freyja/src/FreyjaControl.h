@@ -31,6 +31,7 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
 #include <freyja/FreyjaPrinter.h>
+#include <freyja/MeshABI.h>
 #include <mstl/ActionManager.h>
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
@@ -230,21 +231,9 @@ class FreyjaControl
 	 * Post : Returns currently selected keyframe index
 	 ------------------------------------------------------*/
 
+	Mesh *GetModelMeshClass(index_t model, index_t mesh);
 	uint32 GetSelectedMesh() { return mSelectedMesh; }
-	void SetSelectedMesh(uint32 i) 
-	{
-		if (i < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(i))
-		{
-			mSelectedMesh = i;
-					
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-
-			if (m)
-			{
-				mCursor.mPos = m->GetPosition();
-			}
-		}
-	}
+	void SetSelectedMesh(uint32 i);
 	uint32 mSelectedMesh;
 	/*------------------------------------------------------
 	 * Pre  : 

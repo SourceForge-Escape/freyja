@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <mstl/Vector.h>
 #include "FreyjaPluginABI.h"
 #include "FreyjaImage.h"
 #include "FreyjaTexture.h"

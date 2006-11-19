@@ -19,9 +19,14 @@
  - Cursor reset on undo ( use a freaking seperate undo state system )
 
  - Plugins
+	- I guess I forgot to port some plugins to support 64bit/big endian oops
+	- Halflife is broken ( looks like a deformed umbra loader, 
+	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )
 	- 3ds is broken
 	- MD3 is broken
 	- ASE is broken
+	- PSK skeleton broken
+	- GRN skeleton broken
 
  - Certain modes like vertex transforms should prob enable point rendering
 

@@ -92,12 +92,24 @@ class String
 	}
 
 
+	String &operator+=(const String &s)
+	{
+		return *this = *this + s;
+	}
+
+
 	String operator+(const String &s)
 	{
-		String t(s); // argh
-		char tmp[mLength + s.mLength + 1];
-		snprintf("%s%s", mLength + s.mLength, GetCString(), t.GetCString());
-		return String(tmp);
+		String s2 = s;
+		char *tmp = new char[mLength + s2.mLength + 2];
+		snprintf(tmp, mLength + s2.mLength + 1, "%s%s", 
+					c_str() ? c_str() : "", 
+					s2.c_str() ? s2.c_str() : "");
+		tmp[mLength + s2.mLength + 1] = 0;
+		s2 = tmp;
+		delete [] tmp;
+
+		return s2;
 	}
 
 

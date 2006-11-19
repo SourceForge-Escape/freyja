@@ -30,13 +30,21 @@
 #include <stdio.h>
 #include <iostream>
 
+#include "GRN/grannyfile.h"
+
 #include <hel/math.h>
 #include <hel/Quaternion.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/FreyjaPluginABI.h>
 #include <mstl/Map.h>
-
+#include <mstl/Vector.h>
 
 using namespace mstl;
+using namespace std;
+
+
+#ifdef WIN32
+#   define snprintf _snprintf
+#endif
 
 /* Export as C functions */
 extern "C" {
@@ -64,14 +72,6 @@ int import_model(char *filename)
 	return -1;
 }
 
-
-#include "GRN/grannyfile.h"
-
-using namespace std;
-
-#ifdef WIN32
-#   define snprintf _snprintf
-#endif
 
 unsigned int freyja_model_grn_info()
 {
@@ -282,18 +282,35 @@ int freyja_model__grn_import(char *filename)
 			}
 			
 			q = r * q;
+#   if 0
+
 			q.getQuaternion4fv(wxyz);
 			freyjaBoneRotateQuat4fv(index, wxyz);
+#   else
+
+			{
+				vec_t x, y, z;
+
+				q.getEulerAngles(&x, &y, &z);
+				x = helRadToDeg(x);
+				y = helRadToDeg(y);
+				z = helRadToDeg(z);
+				freyjaBoneRotateEuler3f(index, x, y, z);
+			}
+#   endif
 
 			// Experimental
 			//q.getEulerAngles(wxyz);
 			//freyjaBoneRotateEuler3f(index, wxyz[2], wxyz[0], wxyz[1]);
 #else
+
 			freyjaBoneRotateQuat4f(index,
 										bone->quaternion.points[3], // wxyz
 										bone->quaternion.points[0], 
 										bone->quaternion.points[1],
 										bone->quaternion.points[2]);
+
+
 #endif
 
 			if (bone->parent == bone->id)

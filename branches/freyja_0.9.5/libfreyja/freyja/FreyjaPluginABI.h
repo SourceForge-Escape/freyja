@@ -1028,7 +1028,7 @@ extern "C" {
 
 /* Mongoose 2004.12.19, C++ API for interface with the modeler */
 
-#   ifdef __cplusplus
+#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
 #   include <mstl/Vector.h>
 
 using namespace mstl;

@@ -28,12 +28,15 @@ unsigned int FreyjaLight::mCounter = 0;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-FreyjaLight::FreyjaLight()
+FreyjaLight::FreyjaLight() :
+	mId(mCounter++),
+	mOptions(0),
+	mType(ePoint),
+	mCutOff(15.0f),
+	mExponent(0.0f),
+	mAttenuation(1.0f)
 {
 	mName[0] = 0;
-	mOptions = 0;
-	mId = mCounter++;
-	mType = ePoint;
 
 	mAmbient[0] = 0.1f; mAmbient[1] = 0.1f; mAmbient[2] = 0.1f;
 	mAmbient[3] = 1.0f;
@@ -46,10 +49,6 @@ FreyjaLight::FreyjaLight()
 
 	mPos[0] = 0.0f; mPos[1] = 0.0f; mPos[2] = 0.0f; mPos[3] = 1.0f;
 	mDir[0] = 0.0f; mDir[1] = 1.0f; mDir[2] = 0.0f; mDir[3] = 0.0f;
-
-	mCutOff = 15.0f;
-	mExponent = 0.0f;
-	mAttenuation = 1.0f;
 }
 
 

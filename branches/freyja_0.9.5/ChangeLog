@@ -5,6 +5,10 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Finally wrote a generic buffered file reader class to speed up loading
+ - Unit testing maddness as it's time to polish up and bug fix
+ - SDLUnitTest fixed up to use the older versions of classes it depended on
+   and work with other newer APIs
  - Some plugin updates for keyframes, skeletons, etc
  - FIX jpeg and png plugins Makefiles didn't link to required libs
  - Ported all the interface plugins to use new 'summonbox' widget,

@@ -6,6 +6,12 @@
 
  Hot  
 
+	+ SystemIO:: Buffered file read/write
+	+ Improve extrude UI
+	+ Move / Scale in free
+	+ Pick bones with mouse
+	+ Time to seperate rot / pos keys?  rotations look broken in skeleton
+
 	python plugin?
 
 	- Single joint animation for shishi odoshi test
@@ -58,6 +64,7 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- Loop cuts needed for box modeling
 	- Subdiv ABI ( this way at least stubs in svn interface! )
 	- Patch ABI ( this way at least stubs in svn interface! )
 	- Direct edge selection

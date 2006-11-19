@@ -22,8 +22,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <mstl/SystemIO.h>
+#include <mstl/String.h>
 
 #include "HalfLife.h"
+
+using namespace mstl;
 
 
 HalfLife::HalfLife()
@@ -70,67 +74,70 @@ HalfLife::~HalfLife()
 }
 
 
-#ifdef BUFFERED_READ
-int HalfLife::loadBuffered(const char *filename)
-{
-	FILE *f;
-	unsigned char *buffer;
-	long size, magic;
-
-
-	f = fopen(filename, "rb");
-
-	if (!f)
-	{
-		printf("HalfLife::load> Couldn't load file.\n");
-		perror(filename);
-
-		return -1;
-	}
-
-	fread(&magic, 4, 1, f);
-
-	if (magic != 0x54534449)
-	{
-		printf("Not a valid halflife model\n");
-		fclose(f);
-
-		return -2;
-	}
-
-	fseek(f, 0, SEEK_END);
-	size = ftell(f);
-	buffer = new unsigned char[size];
-	rewind(f);
-	fread(buffer, size, 1, f);
-	fclose(f);
-}
-#endif
-
-
 int HalfLife::load(const char *filename)
 {
-	FILE *f;
+	SystemIO::FileReader f;
 	unsigned int i, j, k, m;
 
-
-	f = fopen(filename, "rb");
-
-	if (!f)
+	if (!f.Open(filename))
 	{
 		printf("HalfLife::load> Couldn't load file.\n");
 		perror(filename);
-
 		return -1;
 	}
 
-	fread(&mHeader, sizeof(studiohdr_t), 1, f);
+	//fread(&mHeader, sizeof(studiohdr_t), 1, f);
+	mHeader.id = f.ReadLong();
+	mHeader.version = f.ReadLong();
+	f.ReadString(64, mHeader.name);
+	mHeader.length = f.ReadLong();
+	mHeader.eyeposition[0] = f.ReadFloat32();
+	mHeader.eyeposition[1] = f.ReadFloat32();
+	mHeader.eyeposition[2] = f.ReadFloat32();
+	mHeader.min[0] = f.ReadFloat32();
+	mHeader.min[1] = f.ReadFloat32();
+	mHeader.min[2] = f.ReadFloat32();
+	mHeader.max[0] = f.ReadFloat32();	
+	mHeader.max[1]= f.ReadFloat32();	
+	mHeader.max[2] = f.ReadFloat32();			
+	mHeader.bbmin[0] = f.ReadFloat32();			
+	mHeader.bbmin[1] = f.ReadFloat32();			
+	mHeader.bbmin[2] = f.ReadFloat32();	
+	mHeader.bbmax[0] = f.ReadFloat32();	
+	mHeader.bbmax[1] = f.ReadFloat32();	
+	mHeader.bbmax[2] = f.ReadFloat32();		
+	mHeader.flags = f.ReadLong();
+	mHeader.numbones = f.ReadLong();
+	mHeader.boneindex = f.ReadLong();
+	mHeader.numbonecontrollers = f.ReadLong(); 
+	mHeader.bonecontrollerindex = f.ReadLong();
+	mHeader.numhitboxes = f.ReadLong();
+	mHeader.hitboxindex = f.ReadLong();			
+	mHeader.numseq = f.ReadLong();	
+	mHeader.seqindex = f.ReadLong();
+	mHeader.numseqgroups = f.ReadLong();
+	mHeader.seqgroupindex = f.ReadLong();
+	mHeader.numtextures = f.ReadLong();
+	mHeader.textureindex = f.ReadLong();
+	mHeader.texturedataindex = f.ReadLong();
+	mHeader.numskinref = f.ReadLong();	
+	mHeader.numskinfamilies = f.ReadLong();
+	mHeader.skinindex = f.ReadLong();
+	mHeader.numbodyparts = f.ReadLong();		
+	mHeader.bodypartindex = f.ReadLong();
+	mHeader.numattachments = f.ReadLong();
+	mHeader.attachmentindex = f.ReadLong();
+	mHeader.soundtable = f.ReadLong();
+	mHeader.soundindex = f.ReadLong();
+	mHeader.soundgroups = f.ReadLong();
+	mHeader.soundgroupindex = f.ReadLong();
+	mHeader.numtransitions = f.ReadLong();
+	mHeader.transitionindex = f.ReadLong();
 
 	if (mHeader.id != 0x54534449)
 	{
 		printf("Not a valid halflife model\n");
-		fclose(f);
-
+		f.Close();
 		return -2;
 	}
 
@@ -165,17 +172,26 @@ int HalfLife::load(const char *filename)
 		unsigned int size;
 		byte pixel;
 
-
 		mTextureCount = mHeader.numtextures;
 		mTextures = new mstudio_texture_t[mTextureCount];
 		mImages = new hl_image_t[mTextureCount];
 
-		fseek(f, mHeader.textureindex, SEEK_SET);
-		fread(mTextures, mTextureCount, sizeof(mstudio_texture_t), f);
-    
+		//fseek(f, mHeader.textureindex, SEEK_SET);
+		f.SetOffset(mHeader.textureindex);
+		//fread(mTextures, mTextureCount, sizeof(mstudio_texture_t), f);
 		for (i = 0; i < mTextureCount; ++i)
 		{
-			fseek(f, mTextures[i].index, SEEK_SET);
+			f.ReadString(64, mTextures[i].name);
+			mTextures[i].flags = f.ReadLong();
+			mTextures[i].width = f.ReadLong();
+			mTextures[i].height = f.ReadLong();
+			mTextures[i].index = f.ReadLong();    
+		}
+
+		for (i = 0; i < mTextureCount; ++i)
+		{
+			//fseek(f, mTextures[i].index, SEEK_SET);
+			f.SetOffset(mTextures[i].index);
 
 			printf("Texture[%i] %lix%li @ offset = %li\n", 
 				   i, 
@@ -188,8 +204,10 @@ int HalfLife::load(const char *filename)
 			mImages[i].image = new byte[size * 3];
 
 			image = new byte[size];
-			fread(image, size, 1, f);
-			fread(palette, 768, 1, f);
+			//fread(image, size, 1, f);
+			//fread(palette, 768, 1, f);
+			f.ReadBuffer(size, image);
+			f.ReadBuffer(768, palette);
 
 			/* Convert indexed image to RGB image using palette */
 			for (j = 0; j < size; ++j)
@@ -224,9 +242,14 @@ int HalfLife::load(const char *filename)
 	for (i = 0; i < mBodyPartCount; ++i)
 	{
 		size = sizeof(mstudio_bodyparts_t);
+		//fseek(f, mHeader.bodypartindex + i * size, SEEK_SET);
+		f.SetOffset(mHeader.bodypartindex + i * size);
 
-		fseek(f, mHeader.bodypartindex + i * size, SEEK_SET);
-		fread(&bodyPart, 1, size, f);
+		//fread(&bodyPart, 1, size, f);
+		f.ReadString(64, bodyPart.name);
+		bodyPart.nummodels = f.ReadLong();
+		bodyPart.base = f.ReadLong();
+		bodyPart.modelindex = f.ReadLong();
 
 		printf("mBodyParts[%i].name = '%s'\n", i, bodyPart.name);
 		printf("mBodyParts[%i].nummodels = %li\n", i, bodyPart.nummodels);
@@ -237,24 +260,32 @@ int HalfLife::load(const char *filename)
 		for (m = 0; (int)m < bodyPart.nummodels; ++m)
 		{
 			//bodyPart.modelindex
-			fseek(f, bodyPart.modelindex+((i/bodyPart.base)%bodyPart.nummodels), SEEK_SET);
-			fseek(f, m*sizeof(mstudio_model_t), SEEK_CUR);
-			fread(&model, 1, sizeof(mstudio_model_t), f);
+			//fseek(f, bodyPart.modelindex+((i/bodyPart.base)%bodyPart.nummodels), SEEK_SET);
+			//fseek(f, m*sizeof(mstudio_model_t), SEEK_CUR);
+			f.SetOffset(bodyPart.modelindex+((i/bodyPart.base)%bodyPart.nummodels)+m*sizeof(mstudio_model_t));
 
+			//fread(&model, 1, sizeof(mstudio_model_t), f);
+			f.ReadString(64, model.name);
+			model.type = f.ReadLong();
+			model.boundingradius = f.ReadFloat32();
+			model.nummesh = f.ReadLong();
+	 		model.meshindex = f.ReadLong();
+	 		model.numverts = f.ReadLong();        
+	 		model.vertinfoindex = f.ReadLong();  
+	 		model.vertindex = f.ReadLong();      
+	 		model.numnorms = f.ReadLong();       
+	 		model.norminfoindex = f.ReadLong();  
+			model.normindex = f.ReadLong();      
+			model.numgroups = f.ReadLong();    
+			model.groupindex = f.ReadLong();
+	
 			printf("  model.name = '%s'\n", model.name);
 			printf("  model.nummesh = %li\n", model.nummesh);
 			printf("  model.numverts = %li\n", model.numverts);
 
 			if (model.nummesh < 0 || model.numverts < 0)
 			{
-				mBodyParts[i].models[m].meshCount = 0;
-				mBodyParts[i].models[m].meshes = 0x0;
-				mBodyParts[i].models[m].groupCount = 0;
-				mBodyParts[i].models[m].groups = 0x0;
-				mBodyParts[i].models[m].vertexCount = 0;
-				mBodyParts[i].models[m].vertices = 0x0;
-				mBodyParts[i].models[m].normalCount = 0;
-				mBodyParts[i].models[m].normals = 0x0;
+				memset(&model, sizeof(mstudio_model_t), 0);
 				continue;
 			}
 
@@ -267,20 +298,30 @@ int HalfLife::load(const char *filename)
 			mBodyParts[i].models[m].normalCount = model.numnorms;
 			mBodyParts[i].models[m].normals = new vec3_t[model.numnorms];
 
-			fseek(f, model.vertindex, SEEK_SET);
-			fread(mBodyParts[i].models[m].vertices, sizeof(vec3_t),
-				  model.numverts, f);
-			fseek(f, model.normindex, SEEK_SET);
-			fread(mBodyParts[i].models[m].normals, sizeof(vec3_t),
-				  model.numnorms, f);
+			//fseek(f, model.vertindex, SEEK_SET);
+			f.SetOffset(model.vertindex);
+			//fread(mBodyParts[i].models[m].vertices, sizeof(vec3_t), model.numverts, f);
+			for (j = 0; (int)j < model.numverts; ++j)
+				f.ReadFloat32Array(3, mBodyParts[i].models[m].vertices[j]);
+			//fseek(f, model.normindex, SEEK_SET);
+			f.SetOffset(model.normindex);
+			//fread(mBodyParts[i].models[m].normals, sizeof(vec3_t), model.numnorms, f);
+			for (j = 0; (int)j < model.numnorms; ++j)
+				f.ReadFloat32Array(3, mBodyParts[i].models[m].normals[j]);
 
 			printf("    Reading %li meshes...\n", model.nummesh);
 
 			for (j = 0; (int)j < model.nummesh; ++j)
 			{
 				size = sizeof(mstudio_mesh_t);
-				fseek(f, model.meshindex + j * size, SEEK_SET);
-				fread(&mesh, size, 1, f);
+				//fseek(f, model.meshindex + j * size, SEEK_SET);
+				f.SetOffset(model.meshindex + j * size);
+				//fread(&mesh, size, 1, f);
+				mesh.numtris = f.ReadLong();
+				mesh.triindex = f.ReadLong();
+				mesh.skinref = f.ReadLong();
+				mesh.numnorms = f.ReadLong(); 
+				mesh.index = f.ReadLong();    
 
 				// Hacky stack space jujitsu to avoid more vectors/arrays
 				short numFaces, vertex, norm, st1, st2;
@@ -297,8 +338,10 @@ int HalfLife::load(const char *filename)
 
 				for (tri = 0, k = 0; (int)k < mesh.numtris; ++k)
 				{
-					fseek(f, mesh.triindex + 2*k, SEEK_SET);
-					fread(&numFaces, 1, 2, f);
+					//fseek(f, mesh.triindex + 2*k, SEEK_SET);
+					f.SetOffset(mesh.triindex + 2*k);
+					//fread(&numFaces, 1, 2, f);
+					numFaces = f.ReadInt16();
 
 					tri += (numFaces > 0) ? numFaces : -numFaces;
 				}
@@ -315,8 +358,10 @@ int HalfLife::load(const char *filename)
 
 				for (tri = 0, k = 0; (int)k < mesh.numtris; ++k)
 				{
-					fseek(f, mesh.triindex + 2*k, SEEK_SET);
-					fread(&numFaces, 1, 2, f);
+					//fseek(f, mesh.triindex + 2*k, SEEK_SET);
+					f.SetOffset(mesh.triindex + 2*k);
+					//fread(&numFaces, 1, 2, f);
+					numFaces = f.ReadInt16();
 
 //#define DEBUG_HALFLIFE_FACETS
 #ifdef DEBUG_HALFLIFE_FACETS
@@ -328,10 +373,14 @@ int HalfLife::load(const char *filename)
 
 					for (t = 0; t < tn; ++t)
 					{
-						fread(&vertex, 1, 2, f);
-						fread(&norm, 1, 2, f);
-						fread(&st1, 1, 2, f);
-						fread(&st2, 1, 2, f);
+						//fread(&vertex, 1, 2, f);
+						vertex= f.ReadInt16();
+						//fread(&norm, 1, 2, f); 
+						norm= f.ReadInt16();
+						//fread(&st1, 1, 2, f); 
+						st1= f.ReadInt16();
+						//fread(&st2, 1, 2, f);
+						st2= f.ReadInt16();
 
 						if (t == 0)
 						{
@@ -375,7 +424,8 @@ int HalfLife::load(const char *filename)
 							vert[2].s = st1;
 							vert[2].t = st2;
 
-#ifdef DEBUG_HALFLIFE_FACETS
+//#define DEBUG_HALFLIFE_FACETS_FACE
+#ifdef DEBUG_HALFLIFE_FACETS_FACE
 							printf("%i/%li\n%c %i %i %i\n",
 								   tri, mesh.numtris,
 								   (numFaces > 0) ? 'f' : 's',
@@ -412,8 +462,19 @@ int HalfLife::load(const char *filename)
 	mBoneCount = mHeader.numbones;
  	mBones = new mstudio_bone_t[mHeader.numbones];
 	printf("Reading %li bones...\n", mHeader.numbones);
-	fseek(f, mHeader.boneindex, SEEK_SET);
-	fread(mBones, 1, mHeader.numbones*sizeof(mstudio_bone_t), f);
+	//fseek(f, mHeader.boneindex, SEEK_SET);
+	f.SetOffset(mHeader.boneindex);
+	//fread(mBones, 1, mHeader.numbones*sizeof(mstudio_bone_t), f);
+	
+	for (i = 0; i < mHeader.numbones; ++i)
+	{
+		f.ReadString(32, mBones[i].name);
+		mBones[i].parent = f.ReadLong(); 
+		mBones[i].flags = f.ReadLong();
+		f.ReadLongArray(6, mBones[i].bonecontroller);
+		f.ReadFloat32Array(6, mBones[i].value);
+		f.ReadFloat32Array(6, mBones[i].scale);
+	}
 
 #ifdef HALFLIFE_DEBUG_LOG
 	for (i = 0; (int)i < mHeader.numbones; ++i)
@@ -472,28 +533,25 @@ int import_model(char *filename)
 
 int freyja_model__halflife_check(char *filename)
 {
-	FILE *f;
-	char header[32];
+	SystemIO::FileReader r;
 
-
-	f = fopen(filename, "rb");
-
-	if (!f)
+	if (!r.Open(filename))
 	{
 		perror("mdl_check> fopen failed");
 		return -1;
 	}
 
-	fread(&header, 32, 1, f);      
-	fclose(f);
-
+	char header[32];
+	r.ReadString(32, header);
 	header[4] = 0;
+	r.Close();
 
 	// HalfLife
 	if (strcmp(header, "IDST") == 0)
 	{
 		return 0;
 	}
+
 	return -2;
 }
 
@@ -534,7 +592,7 @@ int freyja_model__halflife_import(char *filename)
 	printf("Processing HalfLife bodyparts...\n");
 
 	// DISABLE FOR NOW 
-	if (0)
+	//if (0)
 	for (b = 0; b < hl.mBodyPartCount; ++b)
 	{
 		freyjaBegin(FREYJA_MESH);

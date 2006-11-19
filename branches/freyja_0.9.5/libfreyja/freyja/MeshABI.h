@@ -387,7 +387,7 @@ extern "C" {
 }
 
 
-#   ifdef __cplusplus
+#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
 #      include <freyja/Mesh.h>
 freyja::Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
 #   endif
