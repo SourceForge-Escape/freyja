@@ -4,13 +4,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <mstl/SystemIO.h>
+
+using namespace mstl;
 
 int main(int argc, char *argv[])
 {
-	FreyjaFileWriter w;
-	FreyjaFileReader r;
+	SystemIO::FileWriter w;
+	SystemIO::FileReader r;
 	unsigned char *buffer;
 	unsigned int offset, size;
 
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if (!r.openFile(argv[1]))
+	if (!r.Open(argv[1]))
 	{
 		printf("File '%s' couldn't be accessed.", argv[1]);
 		return -1;
@@ -36,7 +37,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if (w.doesFileExist(argv[2]))
+	if (w.DoesFileExist(argv[2]))
 	{
 		printf("File '%s' exists\n", argv[2]);
 		return -1;
@@ -44,13 +45,13 @@ int main(int argc, char *argv[])
 
 	buffer = new unsigned char[size];
 
-	r.setFileOffset(offset);
-	r.readBufferUnsignedChar(size, buffer);
-	r.closeFile();
+	r.SetOffset(offset);
+	r.ReadBuffer(size, buffer);
+	r.Close();
 
-	w.openFile(argv[2]);
-	w.writeBufferUnsignedChar(size, buffer);
-	w.closeFile();
+	w.Open(argv[2]);
+	w.WriteBuffer(size, buffer);
+	w.Close();
 
 	delete [] buffer;
 

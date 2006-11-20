@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <stdio.h>
 #include <freyja/FreyjaPluginABI.h>
 
 int main(int argc, char *argv[])

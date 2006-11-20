@@ -44,7 +44,7 @@ BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=src
 LOCAL_INCLUDES=-I../mstl -I../libhel/ -I../libfreyja/
-LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libfreyja/$(BUILD_SELECT)/ 
+LOCAL_LIBS=-L../bin/libhel/debug/ -L../bin/libfreyja/debug/ 
 
 
 ################################################################
@@ -125,7 +125,8 @@ TESTS=$(BUILDDIR)/$(NAME).test
 # Build rules
 ################################################################
 
-tools: freyjautil.test bsa.test raw2riff.test cull.test freyjaimageutil.test
+tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test
+#bsa.test 
 
 auto: $(BUILD_SELECT)
 
@@ -326,21 +327,21 @@ freyjaimageutil.test:
 	$(MAKE) test NAME=freyjaimageutil BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/freyjaimageutil.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_DDS2TGA $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 cull.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=cull BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/cull.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_CULL $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 raw2riff.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=raw2riff BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/raw2riff.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
@@ -348,7 +349,7 @@ freyjautil.test:
 	NAME=freyjautil \
 	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
-	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++ -lhel0 -lfreyja"
 
 cycle-win32: win32 install-win32 test-win32
 
