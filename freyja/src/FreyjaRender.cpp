@@ -334,7 +334,7 @@ void FreyjaRender::BindColorTexture()
 {
 	if (0 != mTextureId)
 	{
-		mTextureId = -1;
+		mTextureId = 1024; // FIXME: -1
 		// First texture is reserved for 'white texture' for color
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}

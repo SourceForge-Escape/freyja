@@ -5,6 +5,8 @@
  =====================================================================
 
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Scale/Move cursor working in oribital view
+ - FIX tools build for 0.9.5 and some useful scripts for lib path / debugging
  - Finally wrote a generic buffered file reader class to speed up loading
  - Unit testing maddness as it's time to polish up and bug fix
  - SDLUnitTest fixed up to use the older versions of classes it depended on

@@ -278,7 +278,7 @@ int freyja_model__milkshape_check(char *filename)
 int freyja_model__milkshape_import(char *filename)
 {
 	const vec_t scale = 0.4f; 
-	SystemIO::FileReader r;
+	SystemIO::BufferedFileReader r;
 	Ms3dModel mdl;
 	long i, j, k;
 
@@ -288,20 +288,20 @@ int freyja_model__milkshape_import(char *filename)
 
 	if (!r.Open(filename))
 	{
-		//perror("milkshape_import> fopen failed");
+		MSTL_MSG("Failed to open file '%s'", filename);
 		return -2;
 	}
 
 	r.ReadString(10, mdl.header.id);
 	mdl.header.version = r.ReadLong();
 
-	/* No use checking twice
-	if (strncmp(mdl.header.id, "MS3D000000", 10) || mdl.header.version != 3)
+	if (strncmp(mdl.header.id, "MS3D000000", 10) || 
+		!(mdl.header.version == 3 || mdl.header.version == 4))
 	{
-		r.closeFile();
-		return -1;
+		MSTL_MSG("Invalid header '%s' %i\n", mdl.header.id, mdl.header.version);
+		r.Close();
+		return 0;//-1;
 	}
-	*/
 
 	mdl.nNumVertices = r.ReadInt16U();
 	mdl.vertices = new ms3d_vertex_t[mdl.nNumVertices];
@@ -458,47 +458,8 @@ int freyja_model__milkshape_import(char *filename)
 		// mdl.materials[i].alphamap; // Not used, mask filename
 	}
 
-#ifdef SKELANIM_TEST
-	// Test for keyframe import
-	long animationIndex, keyFrameIndex, frame, frameCount;
-
-	frameCount = 1;
-
-	for (frame = 0; frame < frameCount; ++frame)
-	{
-		animationIndex = freyjaAnimationCreate();
-		//freyjaAnimationFrameRate(animationIndex, mdl.fAnimationFPS);
-
-		for (i = 0; i < mdl.nNumJoints; ++i)
-		{
-			keyFrameIndex = freyjaAnimationKeyFrameCreate(animationIndex);
-
-			if (frame < mdl.joints[i].numRotationKeyframes)
-			{
-				freyjaAnimationKeyFrameTime(animationIndex, 
-											keyFrameIndex,
-											mdl.joints[i].keyFramesRot[frame].time);
-				freyjaAnimationKeyFrameOrientationXYZ(animationIndex, 
-													  keyFrameIndex,
-													  mdl.joints[frame].keyFramesRot[j].rotation);
-			}
-
-			if (frame < mdl.joints[i].numPositionKeyframes)
-			{
-				freyjaAnimationKeyFrameTime(animationIndex, 
-											keyFrameIndex,
-											mdl.joints[i].keyFramesPos[frame].time);
-				freyjaAnimationKeyFramePosition(animationIndex,
-												keyFrameIndex,
-												mdl.joints[i].keyFramesPos[frame].position);
-			}
-		}
-	}
-#endif
 
 	/* ABI 0.9.3 Calls END */
-
-
 	freyjaBegin(FREYJA_MODEL);
 
 	freyjaBegin(FREYJA_MESH);
@@ -519,6 +480,7 @@ int freyja_model__milkshape_import(char *filename)
 	{			
 		freyjaBegin(FREYJA_POLYGON);
 		freyjaPolygonMaterial1i(0);
+		//freyjaPolygonGroup1i(mdl.tris[i].smoothingGroup);
 
 		for (j = 0; j < 3; ++j)
 		{

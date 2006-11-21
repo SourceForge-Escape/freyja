@@ -1,10 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 # Local libs used to run local bin tests
 ARGS=`pwd`/$@
 
-if [ ! $1 ]
+if [ ! ${1} ]
 then
 	ARGS=""
+elif [ ${1:0:1} -eq "/" ]
+then
+	ARGS=$@
 fi
 
 cd /home/mongoose/Projects/freyja/freyja_0.9.5/libfreyja

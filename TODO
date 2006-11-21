@@ -6,9 +6,9 @@
 
  Hot  
 
-	+ SystemIO:: Buffered file read/write
+	+ Cap FPS
+	+ Remove the drag/motion with depressed button cursor to replace with mouse2?
 	+ Improve extrude UI
-	+ Move / Scale in free
 	+ Pick bones with mouse
 	+ Time to seperate rot / pos keys?  rotations look broken in skeleton
 

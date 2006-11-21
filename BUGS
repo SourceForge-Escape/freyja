@@ -12,6 +12,8 @@
 
  Known bugs
 
+ - Cursor axis select might be broke for some views on 'ALL' picks
+
  - Reverse engineer plugin isn't taking values correctly from spin buttons
 
  - New mesh copy system doesn't buffer, since copy = copy + paste

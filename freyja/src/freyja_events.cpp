@@ -1327,7 +1327,7 @@ void freyja_handle_motion(int x, int y)
 {
 	if (FreyjaControl::mInstance)
 	{
-		FreyjaControl::mInstance->motionEvent(x, y);
+		FreyjaControl::mInstance->MotionEvent(x, y);
 	}
 }
 
