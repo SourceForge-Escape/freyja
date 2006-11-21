@@ -3136,10 +3136,131 @@ void FreyjaControl::PrintInfo()
 }
 
 
-bool FreyjaControl::motionEvent(int x, int y)
+bool FreyjaControl::MotionEvent(int x, int y)
 {
+	//	freyja_print("motion -> %i, %i", x, y);
+
+
 	switch (GetControlScheme())
 	{
+	case eScheme_Animation:
+	case eScheme_Model:
+
+		switch (mMouseButton)
+		{
+		case MOUSE_BTN_MIDDLE:
+			{
+				static int old_y = 0, old_x = 0;
+				const float treshold = 1.0f;
+				float xyz[3];
+
+				xyz[0] = 0.0f;
+				xyz[1] = 0.0f;
+				xyz[2] = 0.0f;
+		
+				if (x > old_x + treshold)
+					xyz[0] = 1.0f;
+				else if (x < old_x - treshold)
+					xyz[0] = -1.0f;
+		
+				if (y > old_y + treshold)
+					xyz[1] = -1.0f;
+				else if (y < old_y - treshold)
+					xyz[1] = 1.0f;
+		
+				old_x = x;
+				old_y = y;
+
+				if (xyz[0] == 0.0f && xyz[1] == 0.0f)
+				{
+					//DEBUG_MSG("Early out");
+					return true;
+				}
+
+				switch (GetSelectedView())
+				{
+				case PLANE_BACK:
+					mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
+					break;
+				
+				case PLANE_BOTTOM:
+					mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
+					break;
+				
+				case PLANE_RIGHT:
+					mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
+					break;
+
+				case PLANE_FRONT: // front, xy
+					mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
+					break;
+				
+				case PLANE_TOP: // top, xz
+					mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
+					break;
+				
+				case PLANE_LEFT: // left, zy
+					mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
+					break;
+				
+				default:
+					;
+				}
+			}
+			break;
+
+
+		case MOUSE_BTN_RIGHT: 
+			if (GetSelectedView() == PLANE_FREE)
+			{
+				static float old_x = x, old_y = y;
+
+				if (x > old_x)
+					mRender->Rotate(Y_F, -1.0f);
+				else if (x < old_x)
+					mRender->Rotate(Y_F, 1.0f);
+			
+				if (y > old_y)
+					mRender->Rotate(X_F, -1.0f);
+				else if (y < old_y)
+					mRender->Rotate(X_F, 1.0f);
+
+				old_x = x;
+				old_y = y;
+			}
+			break;
+
+		case MOUSE_BTN_LEFT:
+			switch (mEventMode)
+			{
+			case modeMove:
+				{
+					vec_t vx = x, vy = y;
+					AdjustMouseXYForViewports(vx, vy);
+					MoveObject(vx, vy);
+				}
+				break;
+
+			case modeRotate: 
+				rotateObject(x, y, GetSelectedView());
+				break;
+			
+			case modeScale:
+				scaleObject(x, y, GetSelectedView());
+				break;
+
+			case modeSelectByBox:
+				freyja_print("! FIXME: Box selection was removed after 0.9.3.");
+				break;
+			
+			default:
+				break;
+			}
+
+			break;
+		}
+		break;
+
 	case eScheme_UV:
 		switch (mMouseButton)
 		{
@@ -3161,58 +3282,14 @@ bool FreyjaControl::motionEvent(int x, int y)
 			}
 			break;
 
-
-		case MOUSE_BTN_MIDDLE:
-			{
-				float s;
-				float t;
-				
-				s = (float)x / (float)mRender->GetWindowWidth();
-				t = (float)y / (float)mRender->GetWindowHeight();
-
-				if (s > 1.0) s = 1.0;
-				if (s < 0.0) s = 0.0;
-				if (t > 1.0) t = 1.0;
-				if (t < 0.0) t = 0.0;
-				
-				//UVMapMotion(s, t);
-				return true;
-			}
-			break;
-
-
-		case MOUSE_BTN_LEFT:
-			if (mUVMouseState)
-			{
-				float s;
-				float t;
-				
-				s = (float)x / (float)mRender->GetWindowWidth();
-				t = (float)y / (float)mRender->GetWindowHeight();
-				
-				if (s > 1.0) s = 1.0;
-				if (s < 0.0) s = 0.0;
-				if (t > 1.0) t = 1.0;
-				if (t < 0.0) t = 0.0;
-				
-				//TexelMove(s, t);
-				return true;
-			}
-			break;
+		default:
+			;
 		}
 		break;
 
-
-	case eScheme_Animation:
-	case eScheme_Model:
-		MotionEdit(x, y, GetSelectedView());
-		break;
-
 	default:
-		;
+		; // Unhandled
 	}
-	
-	//	freyja_print("motion -> %i, %i", x, y);
 
 	return true;
 }
@@ -3292,13 +3369,6 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			Ray &r = FreyjaRender::mTestRay;
 			mCursor.mAxis = freyja3d::Cursor::eNone;
 
-			Vec3 o = r.GetOrigin();
-			Vec3 d = r.GetDir();
-			Vec3 v = o + d;
-			Vec3 u = o + d*2.0f;
-			Vec3 n = Vector3d::cross(v, u);
-
-
 			if (mCursor.CheckForRayCollision(r))
 			{
 				mToken = true;
@@ -3333,244 +3403,35 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			Ray &r = FreyjaRender::mTestRay;
 			//bool picked = false;
 			Vec3 o;
-			vec_t t;
 
 			mCursor.mAxis = freyja3d::Cursor::eNone;
 			mCursor.mLastPos = mCursor.mPos;
 
-			switch (GetSelectedView())
+			if (mCursor.CheckForRayCollision(r))
 			{
-			case PLANE_BACK:
-				o = Vec3(1.0f*freyja3d::Cursor::mid,0,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
+				mToken = true;
+					
+				switch (mCursor.mAxis)
 				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eX;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked X");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eY;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Y");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
-				
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eAll;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked All");
-					mToken = true;
-					return;
-				}
-				break;
-
-			case PLANE_FRONT: // Front, XY
-				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eX;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked X");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eY;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Y");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
-				
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eAll;
-						mCursor.mSelected = true;
-						freyja_print("! Cursor ray picked All");
-						mToken = true;
-						return;
-				}
-				break;
-
-			case PLANE_TOP: // XZ
-				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eX;
-					mCursor.mSelected = true;
-					mToken = true;
-					freyja_print("! Cursor ray picked X");
-					return;
-				}
-
-				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eZ;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Z");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, freyja3d::Cursor::mid, 0) + mCursor.mPos;
-				
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eAll;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked All");
-					mToken = true;
-					return;
-				}
-				break;
-
-
-			case PLANE_BOTTOM:
-				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eX;
-					mCursor.mSelected = true;
-					mToken = true;
-					freyja_print("! Cursor ray picked X");
-					return;
-				}
-
-				o = Vec3(0, 0, freyja3d::Cursor::mid) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eZ;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Z");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, freyja3d::Cursor::mid, 0) + mCursor.mPos;
-				
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eAll;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked All");
-					mToken = true;
-					return;
-				}
-				break;
-
-			case PLANE_RIGHT:
-				o = Vec3(0,0,freyja3d::Cursor::mid) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eZ;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Z");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eY;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Y");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
-				
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eAll;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked All");
-					mToken = true;
-					return;
-				}
-				break;
-
-			case PLANE_LEFT: // ZY 
-				o = Vec3(0,0,freyja3d::Cursor::mid) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eZ;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Z");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(0, freyja3d::Cursor::mid,0) + mCursor.mPos;
-
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eY;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked Y");
-					mToken = true;
-					return;
-				}
-
-				o = Vec3(freyja3d::Cursor::mid,0,0) + mCursor.mPos;
-				
-				if (r.IntersectSphere(o.mVec, freyja3d::Cursor::min*2, t))
-				{
-					DEBUG_MSGF("Sphere hit!");
-					mCursor.mAxis = freyja3d::Cursor::eAll;
-					mCursor.mSelected = true;
-					freyja_print("! Cursor ray picked All");
-					mToken = true;
-					return;
-				}
-				break;
-
-			default:
-				;
+				case freyja3d::Cursor::eX:
+					freyja_print("Cursor ray picked X");
+					break;
+					
+				case freyja3d::Cursor::eY:
+					freyja_print("Cursor ray picked Y");
+					break;
+					
+				case freyja3d::Cursor::eZ:
+					freyja_print("Cursor ray picked Z");
+					break;
+					
+				case freyja3d::Cursor::eAll:
+					freyja_print("Cursor ray picked ALL");
+					break;
+					
+				default:
+					;
+				}			
 			}
 		}
 	}
@@ -3614,14 +3475,15 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		switch (GetObjectMode())
 		{
 		case tModel:
+		case tMesh:
 			{
-				Vec3 v = GetCursorData(GetEventAction());
+				//freyja_print("! Model[%i] %s %f %f %f",
+				//			 0, 
+				//			 ActionToString(GetEventAction()).c_str(),
+				//			 GetEventAction(),
+				//			 v.mVec[0], v.mVec[1], v.mVec[2]);
 
-				freyja_print("! Model[%i] %s %f %f %f",
-							 0, 
-							 ActionToString(GetEventAction()).c_str(),
-							 GetEventAction(),
-							 v.mVec[0], v.mVec[1], v.mVec[2]);
+				Vec3 v = GetCursorData(GetEventAction());
 
 				// Mongoose - Does transform, undo, etc for ya, bub
 				KeyframeTransform(GetObjectMode(), GetEventAction(),
@@ -3634,22 +3496,6 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			}			
 			break;
 
-		case tMesh:
-			{
-				Vec3 v = GetCursorData(GetEventAction());
-
-				// Mongoose - Does transform, undo, etc for ya, bub
-				KeyframeTransform(GetObjectMode(), GetEventAction(),
-								  v.mVec[0], v.mVec[1], v.mVec[2]);
-
-				// Reset transforms in the cursor
-				mCursor.mRotate = Vec3(0,0,0);
-				mCursor.mScale = Vec3(1,1,1);
-				//mCursor.mPos = Vec3(0,0,0);
-			}
-			break;
-
-
 		default:
 			;
 		}
@@ -3658,7 +3504,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 
 	/* Handle mode */
 	/* FIXME: These should be seperate 'windows' with their own 
-	 * MouseEdit() methods or the like later */
+	 * MouseEvent() methods or the like later */
 	switch (GetControlScheme())
 	{
 	case eScheme_UV:
@@ -3811,7 +3657,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 }
 
 
-bool FreyjaControl::mouseEvent(int btn, int state, int mod, int x, int y)
+bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 {
 	//freyja_print("!.. %i %i", btn, state);
 
@@ -4801,6 +4647,12 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		t.mVec[2] = vx - t.mVec[2];
 		break;
 
+	case PLANE_FREE: // FIXME: Use ray casting to move cursor along basis
+		t.mVec[0] = vx - t.mVec[0];
+		t.mVec[1] = vy - t.mVec[1];
+		t.mVec[2] = vx - t.mVec[2];
+		break;
+
 	default:
 		freyja_print("! %s(): This view (%i) isn't supported.", 
 					__func__, GetSelectedView());
@@ -5337,124 +5189,6 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 Mesh *FreyjaControl::GetModelMeshClass(index_t model, index_t mesh) 
 {
 	return freyjaModelGetMeshClass(model, mesh);
-}
-
-
-void FreyjaControl::MotionEdit(int x, int y, freyja_plane_t plane)
-{
-	switch (mMouseButton)
-	{
-	case MOUSE_BTN_MIDDLE:
-		{
-			static int old_y = 0, old_x = 0;
-			const float treshold = 1.0f;
-			float xyz[3];
-
-			xyz[0] = 0.0f;
-			xyz[1] = 0.0f;
-			xyz[2] = 0.0f;
-		
-			if (x > old_x + treshold)
-				xyz[0] = 1.0f;
-			else if (x < old_x - treshold)
-				xyz[0] = -1.0f;
-		
-			if (y > old_y + treshold)
-				xyz[1] = -1.0f;
-			else if (y < old_y - treshold)
-				xyz[1] = 1.0f;
-		
-			old_x = x;
-			old_y = y;
-
-			if (xyz[0] == 0.0f && xyz[1] == 0.0f)
-			{
-				//DEBUG_MSG("Early out");
-				return;
-			}
-
-			switch (GetSelectedView())
-			{
-			case PLANE_BACK:
-				mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
-				break;
-				
-			case PLANE_BOTTOM:
-				mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
-				break;
-				
-			case PLANE_RIGHT:
-				mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
-				break;
-
-			case PLANE_FRONT: // front, xy
-				mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
-				break;
-				
-			case PLANE_TOP: // top, xz
-				mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
-				break;
-				
-			case PLANE_LEFT: // left, zy
-				mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
-				break;
-				
-			default:
-				;
-			}
-		}
-		break;
-
-
-	case MOUSE_BTN_RIGHT: 
-		if (GetSelectedView() == PLANE_FREE)
-		{
-			static float old_x = x, old_y = y;
-
-			if (x > old_x)
-				mRender->Rotate(Y_F, -1.0f);
-			else if (x < old_x)
-				mRender->Rotate(Y_F, 1.0f);
-			
-			if (y > old_y)
-				mRender->Rotate(X_F, -1.0f);
-			else if (y < old_y)
-				mRender->Rotate(X_F, 1.0f);
-
-			old_x = x;
-			old_y = y;
-		}
-		break;
-
-	case MOUSE_BTN_LEFT:
-		switch (mEventMode)
-		{
-		case modeMove:
-			{
-				vec_t vx = x, vy = y;
-				AdjustMouseXYForViewports(vx, vy);
-				MoveObject(vx, vy);
-			}
-			break;
-
-		case modeRotate: 
-			rotateObject(x, y, plane);
-			break;
-			
-		case modeScale:
-			scaleObject(x, y, plane);
-			break;
-
-		case modeSelectByBox:
-			freyja_print("! FIXME: Selection by box was removed after 0.9.3!");
-			break;
-			
-		default:
-			break;
-		}
-
-		break;
-	}
 }
 
 

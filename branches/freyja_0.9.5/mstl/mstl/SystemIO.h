@@ -308,13 +308,13 @@ class SystemIO
 		}
 
 
-		long GetOffset()
+		virtual long GetOffset()
 		{
 			return ftell(mFileHandle);
 		}
 
 
-		long GetSize()
+		virtual long GetSize()
 		{
 			long whence = GetOffset();
 			fseek(mFileHandle, 0, SEEK_END);
@@ -377,13 +377,13 @@ class SystemIO
 		void SetByteOrder(ByteOrder order) { mHostOrder = order; }
 
 
-		bool SetOffset(long offset)
+		virtual bool SetOffset(long offset)
 		{
 			return (fseek(mFileHandle, offset, SEEK_SET) == 0);
 		}
 
 
-		void SetOffsetToEnd()
+		virtual void SetOffsetToEnd()
 		{
 			fseek(mFileHandle, 0, SEEK_END);
 		}
@@ -426,29 +426,30 @@ class SystemIO
 		FileReader() : File() { }
 		~FileReader() { }
 
-		bool Open(const char *filename) { return File::Open(filename, "rb"); }
+		virtual bool Open(const char *filename) 
+		{ return File::Open(filename, "rb"); }
 		
-		bool ReadBuffer(unsigned long length, unsigned char *buffer)
+		virtual bool ReadBuffer(unsigned long length, unsigned char *buffer)
 		{
 			return (fread(buffer, length, 1, mFileHandle) == 1);	
 		}
 
 
-		bool ReadString(unsigned long length, char *buffer)
+		virtual bool ReadString(unsigned long length, char *buffer)
 		{
 			return (fread(buffer, length, 1, mFileHandle) == 1);
 		}
 
-		void ReadInt32(int &i) { i = ReadInt32(); }
+		virtual void ReadInt32(int &i) { i = ReadInt32(); }
 
-		void ReadLong(long &l) { l = ReadLong(); }
+		virtual void ReadLong(long &l) { l = ReadLong(); }
 
-		void ReadInt32U(unsigned int &u) { u = ReadInt32U(); }
+		virtual void ReadInt32U(unsigned int &u) { u = ReadInt32U(); }
 
-		void ReadFloat32(float &f) { f = ReadFloat32(); }
+		virtual void ReadFloat32(float &f) { f = ReadFloat32(); }
 
 
-		void ReadInt32Array(long size, int array[])
+		virtual void ReadInt32Array(long size, int array[])
 		{	
 			for (int i = 0; i < size; ++i)
 			{
@@ -457,7 +458,7 @@ class SystemIO
 		}
 
 
-		void ReadLongArray(long size, long array[])
+		virtual void ReadLongArray(long size, long array[])
 		{	
 			for (int i = 0; i < size; ++i)
 			{
@@ -466,7 +467,7 @@ class SystemIO
 		}
 
 
-		void ReadFloat32Array(long size, float array[])
+		virtual void ReadFloat32Array(long size, float array[])
 		{	
 			for (int i = 0; i < size; ++i)
 			{
@@ -475,7 +476,7 @@ class SystemIO
 		}
 
 
-		float ReadFloat32()
+		virtual float ReadFloat32()
 		{	
 			float r;
 			void *ptr = &r;
@@ -492,7 +493,7 @@ class SystemIO
 		}
 
 
-		char ReadInt8()
+		virtual char ReadInt8()
 		{
 			char c;
 			fread(&c, 1, 1, mFileHandle);  // heh, yeah
@@ -500,7 +501,7 @@ class SystemIO
 		}
 
 
-		unsigned char ReadByte()
+		virtual unsigned char ReadByte()
 		{
 			unsigned char u;
 			fread(&u, 1, 1, mFileHandle);  // heh, yeah
@@ -508,7 +509,7 @@ class SystemIO
 		}
 
 
-		unsigned char ReadInt8U()
+		virtual unsigned char ReadInt8U()
 		{
 			unsigned char u;
 			fread(&u, 1, 1, mFileHandle);  // heh, yeah
@@ -516,7 +517,7 @@ class SystemIO
 		}
 
 
-		short ReadInt16()
+		virtual short ReadInt16()
 		{
 			short int i = 0;
 			void *ptr = &i;
@@ -532,7 +533,7 @@ class SystemIO
 		}
 
 	
-		unsigned short ReadInt16U()
+		virtual unsigned short ReadInt16U()
 		{
 			unsigned short int u = 0;
 			void *ptr = &u;
@@ -548,7 +549,7 @@ class SystemIO
 		}
 
 
-		int ReadInt32()
+		virtual int ReadInt32()
 		{
 			int i = 0;
 			void *ptr = &i;
@@ -564,7 +565,7 @@ class SystemIO
 		}
 
 
-		unsigned int ReadInt32U()
+		virtual unsigned int ReadInt32U()
 		{
 			unsigned int u = 0;
 			void *ptr = &u;
@@ -580,7 +581,7 @@ class SystemIO
 		}
 
 
-		long ReadLong()
+		virtual long ReadLong()
 		{
 			long i = 0;
 			void *ptr = &i;
@@ -600,7 +601,7 @@ class SystemIO
 		}
 
 
-		unsigned long ReadLongU()
+		virtual unsigned long ReadLongU()
 		{
 			unsigned long u = 0;
 			void *ptr = &u;
@@ -657,7 +658,7 @@ class SystemIO
 		void FlushBuffer() 
 		{ if (mFileData) delete [] mFileData; mCursor = mEnd = 0; }
 
-		bool IsValidRead(long sz) { return mCursor + sz <= mEnd; }
+		bool IsValidRead(long sz) { return ((mCursor + sz) <= mEnd); }
 
 		bool MemRead(void *ptr, size_t size)
 		{
@@ -670,46 +671,77 @@ class SystemIO
 				mCursor += size;
 				read = true;
 			}
+			else
+			{
+				MSTL_MSG("Invalid read size %i.  %i / %i", size, mCursor, mEnd);
+			}
 
 			return read;
 		}
 
-		bool Open(const char *filename) 
+		virtual long GetOffset()
+		{
+			return mCursor;
+		}
+
+		virtual bool SetOffset(long offset)
+		{
+			bool t = (offset <= (long)mEnd);
+			if (t) mCursor = offset;
+			return t;
+		}
+
+		virtual void SetOffsetToEnd()
+		{
+			mCursor = mEnd;
+		}
+
+		virtual bool Open(const char *filename) 
 		{
 			bool load = false;
-			if (!mFileData && FileReader::Open(filename))
+			FlushBuffer();
+
+			if (File::Open(filename, "rb"))
 			{
-				mEnd = GetSize();
+				fseek(mFileHandle, 0, SEEK_END);
+				mEnd = ftell(mFileHandle);
+				fseek(mFileHandle, 0, SEEK_SET);
 				mFileData = new unsigned char[mEnd+1];
-				FileReader::ReadBuffer(mEnd, mFileData);
+#ifdef DEBUG
+				memset(mFileData, 0xcd, mEnd);
+#endif
+				fread(mFileData, 1, mEnd, mFileHandle); 
+				//FileReader::ReadBuffer(mEnd, mFileData);
+
 				mCursor = 0;
+
 				load = true;
 			}
 
 			return load;
 		}
 		
-		bool ReadBuffer(unsigned long length, unsigned char *buffer)
+		virtual bool ReadBuffer(unsigned long length, unsigned char *buffer)
 		{
 			return MemRead(buffer, length);
 		}
 
 
-		bool ReadString(unsigned long length, char *buffer)
+		virtual bool ReadString(unsigned long length, char *buffer)
 		{
 			return MemRead(buffer, length);
 		}
 
-		void ReadInt32(int &i) { i = ReadInt32(); }
+		virtual void ReadInt32(int &i) { i = ReadInt32(); }
 
-		void ReadLong(long &l) { l = ReadLong(); }
+		virtual void ReadLong(long &l) { l = ReadLong(); }
 
-		void ReadInt32U(unsigned int &u) { u = ReadInt32U(); }
+		virtual void ReadInt32U(unsigned int &u) { u = ReadInt32U(); }
 
-		void ReadFloat32(float &f) { f = ReadFloat32(); }
+		virtual void ReadFloat32(float &f) { f = ReadFloat32(); }
 
 
-		void ReadInt32Array(long size, int array[])
+		virtual void ReadInt32Array(long size, int array[])
 		{	
 			for (int i = 0; i < size; ++i)
 			{
@@ -718,7 +750,7 @@ class SystemIO
 		}
 
 
-		void ReadLongArray(long size, long array[])
+		virtual void ReadLongArray(long size, long array[])
 		{	
 			for (int i = 0; i < size; ++i)
 			{
@@ -727,7 +759,7 @@ class SystemIO
 		}
 
 
-		void ReadFloat32Array(long size, float array[])
+		virtual void ReadFloat32Array(long size, float array[])
 		{	
 			for (int i = 0; i < size; ++i)
 			{
@@ -736,7 +768,7 @@ class SystemIO
 		}
 
 
-		float ReadFloat32()
+		virtual float ReadFloat32()
 		{	
 			float r = 0.0f;
 			void *ptr = &r;
@@ -750,7 +782,7 @@ class SystemIO
 		}
 
 
-		char ReadInt8()
+		virtual char ReadInt8()
 		{
 			char c;
 			MemRead(&c, 1);
@@ -758,7 +790,7 @@ class SystemIO
 		}
 
 
-		unsigned char ReadByte()
+		virtual unsigned char ReadByte()
 		{
 			unsigned char u;
 			MemRead(&u, 1);
@@ -766,7 +798,7 @@ class SystemIO
 		}
 
 
-		unsigned char ReadInt8U()
+		virtual unsigned char ReadInt8U()
 		{
 			unsigned char u;
 			MemRead(&u, 1);
@@ -774,7 +806,7 @@ class SystemIO
 		}
 
 
-		short ReadInt16()
+		virtual short ReadInt16()
 		{
 			short int i = 0;
 			void *ptr = &i;
@@ -787,7 +819,7 @@ class SystemIO
 		}
 
 	
-		unsigned short ReadInt16U()
+		virtual unsigned short ReadInt16U()
 		{
 			unsigned short int u = 0;
 			void *ptr = &u;
@@ -800,7 +832,7 @@ class SystemIO
 		}
 
 
-		int ReadInt32()
+		virtual int ReadInt32()
 		{
 			int i = 0;
 			void *ptr = &i;
@@ -813,7 +845,7 @@ class SystemIO
 		}
 
 
-		unsigned int ReadInt32U()
+		virtual unsigned int ReadInt32U()
 		{
 			unsigned int u = 0;
 			void *ptr = &u;
@@ -826,7 +858,7 @@ class SystemIO
 		}
 
 
-		long ReadLong()
+		virtual long ReadLong()
 		{
 			long i = 0;
 			void *ptr = &i;
@@ -843,7 +875,7 @@ class SystemIO
 		}
 
 
-		unsigned long ReadLongU()
+		virtual unsigned long ReadLongU()
 		{
 			unsigned long u = 0;
 			void *ptr = &u;

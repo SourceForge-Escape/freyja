@@ -48,6 +48,7 @@
 #endif
 
 #include <mstl/SystemIO.h>
+#include <mstl/Vector.h>
 
 #include "Md3.h"
 

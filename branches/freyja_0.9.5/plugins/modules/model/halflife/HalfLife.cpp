@@ -76,7 +76,7 @@ HalfLife::~HalfLife()
 
 int HalfLife::load(const char *filename)
 {
-	SystemIO::FileReader f;
+	SystemIO::BufferedFileReader f;
 	unsigned int i, j, k, m;
 
 	if (!f.Open(filename))
@@ -675,6 +675,7 @@ int freyja_model__halflife_import(char *filename)
 		freyjaBoneParent(idx, hl.mBones[b].parent);
 		freyjaBoneName(idx, hl.mBones[b].name);
 
+#if 1
 		if (b == 0)
 		{
 			freyjaBoneTranslate3f(idx,
@@ -682,20 +683,21 @@ int freyja_model__halflife_import(char *filename)
 								  hl.mBones[b].value[2]*scale, 
 								  hl.mBones[b].value[1]*scale);
 			freyjaBoneRotateEuler3f(idx,
-								   hl.mBones[b].value[3]*57.295779513082323, 
-								   hl.mBones[b].value[4]*57.295779513082323 -90.0, 
-								   hl.mBones[b].value[5]*57.295779513082323);
+								   hl.mBones[b].value[3], 
+								   hl.mBones[b].value[4] - 90.0f, 
+								   hl.mBones[b].value[5]);
 		}
 		else
+#endif
 		{
 			freyjaBoneTranslate3f(idx,
 								  hl.mBones[b].value[0]*scale, 
 								  hl.mBones[b].value[1]*scale, 
 								  hl.mBones[b].value[2]*scale);
 			freyjaBoneRotateEuler3f(idx,
-									hl.mBones[b].value[3]*57.295779513082323, 
-									hl.mBones[b].value[4]*57.295779513082323, 
-									hl.mBones[b].value[5]*57.295779513082323);
+									hl.mBones[b].value[3], 
+									hl.mBones[b].value[4], 
+									hl.mBones[b].value[5]);
 		}
 
 		for (i = 0; i < hl.mBoneCount; ++i)

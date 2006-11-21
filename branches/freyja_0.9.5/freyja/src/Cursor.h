@@ -76,10 +76,6 @@ class Cursor
 
 		switch (GetMode())
 		{
-		case freyja3d::Cursor::Scale:
-			break;
-
-
 		case freyja3d::Cursor::Rotation:
 			{
 				mSelected = false;
@@ -177,7 +173,45 @@ class Cursor
 			break;
 
 
+		case freyja3d::Cursor::Scale:
 		case freyja3d::Cursor::Translation:
+			{
+				vec_t z = 1.0f;
+				vec_t t;
+				Vec3 o = Vec3(z*freyja3d::Cursor::mid,0,0) + mPos;
+
+				if (r.IntersectSphere(mPos.mVec, 1.0f, t))
+				{
+					mAxis = Cursor::eAll;
+					mSelected = true;
+					ret = true;
+				}
+
+				if (r.IntersectSphere(o.mVec, Cursor::min*2, t))
+				{
+					mAxis = Cursor::eX;
+					mSelected = true;
+					ret = true;
+				}
+
+				o = Vec3(0, z*Cursor::mid,0) + mPos;
+
+				if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
+				{
+					mAxis = Cursor::eY;
+					mSelected = true;
+					ret = true;
+				}
+
+				o = Vec3(0, 0, z*Cursor::mid) + mPos;
+				
+				if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
+				{
+					mAxis = Cursor::eZ;
+					mSelected = true;
+					ret = true;
+				}
+			}
 			break;
 
 		default:

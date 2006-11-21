@@ -471,7 +471,7 @@ class FreyjaControl
 	 * Post     : Process mouse input
 	 --------------------------------------------*/
 	
-	bool motionEvent(int x, int y);
+	bool MotionEvent(int x, int y);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
 	 * Modified : 
@@ -965,15 +965,6 @@ private:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void MotionEdit(int x, int y, freyja_plane_t plane);
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : 
-	 * Post     : Process mouse motion input
-	 *            in edit mode
-	 --------------------------------------------*/
-	
 	bool MouseEdit(int btn, int state, int mod, int x, int y);
 	/*------------------------------------------------------
 	 * Pre  : 
