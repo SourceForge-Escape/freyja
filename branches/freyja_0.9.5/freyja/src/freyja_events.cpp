@@ -1336,7 +1336,7 @@ void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 {
 	if (FreyjaControl::mInstance)
 	{
-		FreyjaControl::mInstance->mouseEvent(button, state, mod, x, y);
+		FreyjaControl::mInstance->MouseEvent(button, state, mod, x, y);
 	}
 }
 

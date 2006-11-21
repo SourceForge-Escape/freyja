@@ -463,7 +463,8 @@ class FreyjaControl
 	 * Post : Loads a texture given a pixel buffer
 	 ------------------------------------------------------*/
 
-	bool mouseEvent(int btn, int state, int mod, int x, int y);
+	// HandleMouseEvent
+	bool MouseEvent(int btn, int state, int mod, int x, int y);
 	/*--------------------------------------------
 	 * Created  : 2000-09-10 by Mongoose
 	 * Modified : 

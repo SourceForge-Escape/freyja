@@ -524,7 +524,10 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		vec3_t v;
 		z += 100;
 
-		y += 10.0f * 1/GetZoom();
+		//	y += /*10.0f*/GetSceneTranslation().mVec[1] * 1/GetZoom();
+		x -= GetSceneTranslation().mVec[0];
+		y -= GetSceneTranslation().mVec[1];
+		z -= GetSceneTranslation().mVec[2];
 		vec3_t u = {x, y, z};
 		mRender->GetRotation(v);
 		//v[0] = 0;

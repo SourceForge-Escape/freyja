@@ -675,7 +675,6 @@ int freyja_model__halflife_import(char *filename)
 		freyjaBoneParent(idx, hl.mBones[b].parent);
 		freyjaBoneName(idx, hl.mBones[b].name);
 
-#if 1
 		if (b == 0)
 		{
 			freyjaBoneTranslate3f(idx,
@@ -688,7 +687,6 @@ int freyja_model__halflife_import(char *filename)
 								   hl.mBones[b].value[5]);
 		}
 		else
-#endif
 		{
 			freyjaBoneTranslate3f(idx,
 								  hl.mBones[b].value[0]*scale, 
