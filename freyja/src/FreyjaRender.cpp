@@ -191,13 +191,11 @@ void FreyjaRender::DrawFreeWindow()
 {
 	glPushMatrix();
 
-	glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
+	glTranslatef(mScroll[0], mScroll[1]/*+8.0f*/, mScroll[2]);
 
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
-
-	//glTranslatef(mScroll[0], mScroll[1]+8.0f, mScroll[2]);
 
 	if (mRenderMode & fSolidPlane)
 	{
