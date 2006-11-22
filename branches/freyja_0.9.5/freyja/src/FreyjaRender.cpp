@@ -93,7 +93,7 @@ FreyjaRender::FreyjaRender() :
 	mHeight(480),
 	mTextureId(0),
 	mInitContext(false),
-	mScaleEnv(30.0f), // Use a larger number for higher res
+	mScaleEnv(40.0f), // Use a larger number for higher res
 	mFar(6000.0f),
 	mNear(0.1f),
 	mFovY(40.0f),

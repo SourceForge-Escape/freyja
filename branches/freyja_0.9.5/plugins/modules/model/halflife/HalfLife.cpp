@@ -324,26 +324,36 @@ int HalfLife::load(const char *filename)
 				mesh.index = f.ReadLong();    
 
 				// Hacky stack space jujitsu to avoid more vectors/arrays
-				short numFaces, vertex, norm, st1, st2;
+				short numFaces, vertex, norm;
+				short st1, st2, st1A, st2A; 
 				short centervertex, lastvertex, lastlastvertex;
 				short centerst1, lastst1, lastlastst1;
 				short centerst2, lastst2, lastlastst2;
 				short centernorm, lastnorm, lastlastnorm;
-				short normA, vertexA, st1A, st2A;
+				short normA, vertexA;
 				unsigned int t, tn, tri;
 
 
 				/* Face loader: triangle fans and strips */
 				printf("Reading %li faces...\n", mesh.numtris);
 
-				for (tri = 0, k = 0; (int)k < mesh.numtris; ++k)
+				f.SetOffset(mesh.triindex);
+				for (k = 0, tri = 0; k < mesh.numtris; ++k)
 				{
-					//fseek(f, mesh.triindex + 2*k, SEEK_SET);
-					f.SetOffset(mesh.triindex + 2*k);
-					//fread(&numFaces, 1, 2, f);
 					numFaces = f.ReadInt16();
 
+					if (!numFaces)
+						break;
+
 					tri += (numFaces > 0) ? numFaces : -numFaces;
+
+					for (; numFaces > 0; --numFaces)
+					{
+						f.ReadInt16(); // vertex
+						f.ReadInt16(); // normal
+						f.ReadInt16(); // s
+						f.ReadInt16(); // t
+					}
 				}
 
 				printf("Expecting %i actual faces...\n", tri);
@@ -356,31 +366,30 @@ int HalfLife::load(const char *filename)
 				mBodyParts[i].models[m].meshes[j].material = mesh.skinref;
 
 
-				for (tri = 0, k = 0; (int)k < mesh.numtris; ++k)
+				f.SetOffset(mesh.triindex);
+
+				for (k = 0, tri = 0; k < mesh.numtris; ++k)
 				{
-					//fseek(f, mesh.triindex + 2*k, SEEK_SET);
-					f.SetOffset(mesh.triindex + 2*k);
-					//fread(&numFaces, 1, 2, f);
 					numFaces = f.ReadInt16();
 
-//#define DEBUG_HALFLIFE_FACETS
+					if (!numFaces)
+						break;
+
+					tn = (numFaces > 0) ? numFaces : -numFaces;
+
+#define DEBUG_HALFLIFE_FACETS
 #ifdef DEBUG_HALFLIFE_FACETS
-					printf("Reading %i %s...\n",
-						   (numFaces > 0) ? numFaces : -numFaces, 
+					printf("# Reading %i %s...\n",
+						   tn, 
 						   (numFaces > 0) ? "triangle fans" : "triangle strips");
 #endif
-					tn = (numFaces > 0) ? numFaces : -numFaces;
 
 					for (t = 0; t < tn; ++t)
 					{
-						//fread(&vertex, 1, 2, f);
 						vertex= f.ReadInt16();
-						//fread(&norm, 1, 2, f); 
 						norm= f.ReadInt16();
-						//fread(&st1, 1, 2, f); 
-						st1= f.ReadInt16();
-						//fread(&st2, 1, 2, f);
-						st2= f.ReadInt16();
+						st1 = f.ReadInt16();
+						st2 = f.ReadInt16();
 
 						if (t == 0)
 						{
@@ -394,20 +403,23 @@ int HalfLife::load(const char *filename)
 							mstudio_trivert_t *vert;
 							vert = mBodyParts[i].models[m].meshes[j].faces[tri].vertex; // Yeah, yeah -- it works
 
-							if (numFaces > 0)  // fan -> triangle
+							if (numFaces < 0)  // fan -> triangle
 							{
 								vertexA = centervertex;
 								normA = centernorm;
 								st1A = centerst1;
 								st2A = centerst2;
 							}
-							else if (numFaces < 0) // strip -> triangle
+							else if (numFaces > 0) // strip -> triangle
 							{
 								vertexA = lastlastvertex;
 								normA = lastlastnorm;
 								st1A = lastlastst1;
 								st2A = lastlastst2;
 							}
+
+							printf("# %i\n", tri);
+							printf("f %i %i %i\n", vertexA, lastvertex, vertex);
 
 							vert[0].vertindex = vertexA;
 							vert[1].vertindex = lastvertex;
@@ -423,20 +435,6 @@ int HalfLife::load(const char *filename)
 							vert[1].t = lastst2;
 							vert[2].s = st1;
 							vert[2].t = st2;
-
-//#define DEBUG_HALFLIFE_FACETS_FACE
-#ifdef DEBUG_HALFLIFE_FACETS_FACE
-							printf("%i/%li\n%c %i %i %i\n",
-								   tri, mesh.numtris,
-								   (numFaces > 0) ? 'f' : 's',
-								   //vertexA, lastvertex, vertex);
-
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[0].vertindex,
-							
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[1].vertindex,
-		   
-							mBodyParts[i].models[m].meshes[j].faces[tri].vertex[2].vertindex);
-#endif
 
 							++tri;
 						}
@@ -560,9 +558,7 @@ int freyja_model__halflife_import(char *filename)
 {
 	HalfLife hl;
 	Map<unsigned int, unsigned int> trans;
-	unsigned int i, b, f, m, vert;
-	float u, v, w, h;
-	short s, t;
+	unsigned int b, f, m, vert;
 	vec_t scale = 0.5; // DoD needs 0.5
 	long idx;
 
@@ -577,7 +573,7 @@ int freyja_model__halflife_import(char *filename)
 	/* Read texture data */
 	printf("Processing HalfLife textures...\n");
 
-	for (i = 0; i < hl.mTextureCount; ++i)
+	for (uint32 i = 0; i < hl.mTextureCount; ++i)
 	{
 		if (hl.mImages[i].image && hl.mImages[i].w > 0 && hl.mImages[i].h > 0)
 		{
@@ -591,8 +587,6 @@ int freyja_model__halflife_import(char *filename)
 	/* Read mesh data */
 	printf("Processing HalfLife bodyparts...\n");
 
-	// DISABLE FOR NOW 
-	//if (0)
 	for (b = 0; b < hl.mBodyPartCount; ++b)
 	{
 		freyjaBegin(FREYJA_MESH);
@@ -603,7 +597,7 @@ int freyja_model__halflife_import(char *filename)
 		freyjaBegin(FREYJA_VERTEX_GROUP);	
 		trans.Clear();
 
-		for (i = 0; i < hl.mBodyParts[b].models[mdl].vertexCount; ++i)
+		for (uint32 i = 0; i < hl.mBodyParts[b].models[mdl].vertexCount; ++i)
 		{
 			vert = freyjaVertexCreate3f(hl.mBodyParts[b].models[mdl].vertices[i*3][0],
 								  hl.mBodyParts[b].models[mdl].vertices[i*3][1],
@@ -632,28 +626,19 @@ int freyja_model__halflife_import(char *filename)
 				/* Generate, Store, and link UVs to polygon */
 				if (hl.mImages) // should only be null while fixing this plugin
 				{
-					w = (float)hl.mImages[hl.mBodyParts[b].models[mdl].meshes[m].material].w;
-					h = (float)hl.mImages[hl.mBodyParts[b].models[mdl].meshes[m].material].h;
+					int mat = hl.mBodyParts[b].models[mdl].meshes[m].material;
+					vec_t w = 1.0f / (float)hl.mImages[mat].w;
+					vec_t h = 1.0f / (float)hl.mImages[mat].h;
+					vec_t s, t;
 
-					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[0].s;
-					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[0].t;
-					u = s / w;
-					v = t / h;
-					freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(u, v));
+					freyjaPolygonMaterial1i(mat);
 
-					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].s;
-					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[1].t;
-					u = s / w;
-					v = t / h;
-					freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(u, v));
-
-					s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].s;
-					t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[2].t;
-					u = s / w;
-					v = t / h;
-					freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(u, v));
-
-					freyjaPolygonMaterial1i(hl.mBodyParts[b].models[mdl].meshes[m].material);
+					for (uint32 i = 0; i < 3; ++i)
+					{
+						s = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[i].s;
+						t = hl.mBodyParts[b].models[mdl].meshes[m].faces[f].vertex[i].t;
+						freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(s*w, t*h));
+					}
 				}
 
 				freyjaEnd(); // FREYJA_POLYGON
@@ -698,7 +683,7 @@ int freyja_model__halflife_import(char *filename)
 									hl.mBones[b].value[5]);
 		}
 
-		for (i = 0; i < hl.mBoneCount; ++i)
+		for (uint32 i = 0; i < hl.mBoneCount; ++i)
 		{
 			if (hl.mBones[i].parent == (int)b)
 			{ 

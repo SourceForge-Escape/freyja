@@ -1967,16 +1967,11 @@ void freyjaPluginDirectoriesInit()
 
 void freyjaPluginAddDirectory(const char *dir)
 {
-	unsigned int l;
-	char *dir2;
-
-
 	if (!dir || !dir[0] || !SystemIO::File::IsDirectory(dir))
 		return;
 
-	l = strlen(dir);
-
-	dir2 = new char[l+1];
+	unsigned int l = strlen(dir);
+	char *dir2 = new char[l+1];
 	strncpy(dir2, dir, l);
 	dir2[l] = 0;
 
