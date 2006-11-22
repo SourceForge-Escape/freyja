@@ -366,6 +366,7 @@ typedef struct {
 	hl_mesh_t *meshes;
 	hl_group_t *groups;
 	vec3_t *vertices;
+	byte *weights;
 	vec3_t *normals;
 
 } hl_model_t;

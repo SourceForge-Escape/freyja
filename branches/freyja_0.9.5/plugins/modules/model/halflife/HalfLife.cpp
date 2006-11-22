@@ -295,19 +295,33 @@ int HalfLife::load(const char *filename)
 			mBodyParts[i].models[m].groups = new hl_group_t[model.numgroups];
 			mBodyParts[i].models[m].vertexCount = model.numverts;
 			mBodyParts[i].models[m].vertices = new vec3_t[model.numverts];
+			mBodyParts[i].models[m].weights = new byte[model.numverts];
 			mBodyParts[i].models[m].normalCount = model.numnorms;
 			mBodyParts[i].models[m].normals = new vec3_t[model.numnorms];
 
-			//fseek(f, model.vertindex, SEEK_SET);
-			f.SetOffset(model.vertindex);
-			//fread(mBodyParts[i].models[m].vertices, sizeof(vec3_t), model.numverts, f);
+			// Vertex bone map ( 1.0f weights )
+			f.SetOffset(model.vertinfoindex);
 			for (j = 0; (int)j < model.numverts; ++j)
+			{
+				mBodyParts[i].models[m].weights[j] = f.ReadByte();
+			}
+
+
+			// Vertex data
+			f.SetOffset(model.vertindex);
+			for (j = 0; (int)j < model.numverts; ++j)
+			{
 				f.ReadFloat32Array(3, mBodyParts[i].models[m].vertices[j]);
-			//fseek(f, model.normindex, SEEK_SET);
+			}
+
+
+			// Normals
 			f.SetOffset(model.normindex);
-			//fread(mBodyParts[i].models[m].normals, sizeof(vec3_t), model.numnorms, f);
 			for (j = 0; (int)j < model.numnorms; ++j)
+			{
 				f.ReadFloat32Array(3, mBodyParts[i].models[m].normals[j]);
+			}
+
 
 			printf("    Reading %li meshes...\n", model.nummesh);
 
@@ -377,9 +391,9 @@ int HalfLife::load(const char *filename)
 
 					tn = (numFaces > 0) ? numFaces : -numFaces;
 
-#define DEBUG_HALFLIFE_FACETS
+//#define DEBUG_HALFLIFE_FACETS
 #ifdef DEBUG_HALFLIFE_FACETS
-					printf("# Reading %i %s...\n",
+					printf("# Reading %i vertices [%s]...\n",
 						   tn, 
 						   (numFaces > 0) ? "triangle fans" : "triangle strips");
 #endif
@@ -398,7 +412,7 @@ int HalfLife::load(const char *filename)
 							centerst1 = st1;
 							centerst2 = st2;
 						}
-						else if (t > 2)
+						else if (t >= 2)
 						{
 							mstudio_trivert_t *vert;
 							vert = mBodyParts[i].models[m].meshes[j].faces[tri].vertex; // Yeah, yeah -- it works
@@ -417,10 +431,9 @@ int HalfLife::load(const char *filename)
 								st1A = lastlastst1;
 								st2A = lastlastst2;
 							}
-
-							printf("# %i\n", tri);
-							printf("f %i %i %i\n", vertexA, lastvertex, vertex);
-
+#ifdef DEBUG_HALFLIFE_FACETS
+							printf("f[%i] %i %i %i\n", t, vertexA, lastvertex, vertex);
+#endif
 							vert[0].vertindex = vertexA;
 							vert[1].vertindex = lastvertex;
 							vert[2].vertindex = vertex;
@@ -460,9 +473,7 @@ int HalfLife::load(const char *filename)
 	mBoneCount = mHeader.numbones;
  	mBones = new mstudio_bone_t[mHeader.numbones];
 	printf("Reading %li bones...\n", mHeader.numbones);
-	//fseek(f, mHeader.boneindex, SEEK_SET);
 	f.SetOffset(mHeader.boneindex);
-	//fread(mBones, 1, mHeader.numbones*sizeof(mstudio_bone_t), f);
 	
 	for (i = 0; i < mHeader.numbones; ++i)
 	{
@@ -500,6 +511,8 @@ int HalfLife::load(const char *filename)
 
 #include <freyja/FreyjaPlugin.h>
 #include <mstl/Map.h>
+#include <hel/Vector3d.h>
+#include <hel/Matrix.h>
 
 using namespace mstl;
 
@@ -558,6 +571,7 @@ int freyja_model__halflife_import(char *filename)
 {
 	HalfLife hl;
 	Map<unsigned int, unsigned int> trans;
+	Map<unsigned int, unsigned int> transBone;
 	unsigned int b, f, m, vert;
 	vec_t scale = 0.5; // DoD needs 0.5
 	long idx;
@@ -584,6 +598,61 @@ int freyja_model__halflife_import(char *filename)
 	}
 
 
+	/* Read skeleton data */
+	freyjaBegin(FREYJA_SKELETON);
+	
+	for (b = 0; b < hl.mBoneCount; ++b)
+	{
+		freyjaBegin(FREYJA_BONE);
+		idx = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneParent(idx, hl.mBones[b].parent);
+		freyjaBoneName(idx, hl.mBones[b].name);
+
+		if (b == 0)
+		{
+			freyjaBoneTranslate3f(idx,
+								  hl.mBones[b].value[0]*scale, 
+								  hl.mBones[b].value[2]*scale, 
+								  hl.mBones[b].value[1]*scale);
+			freyjaBoneRotateEuler3f(idx,
+								   hl.mBones[b].value[3], 
+								   hl.mBones[b].value[4] - 90.0f, 
+								   hl.mBones[b].value[5]);
+		}
+		else
+		{
+			freyjaBoneTranslate3f(idx,
+								  hl.mBones[b].value[0]*scale, 
+								  hl.mBones[b].value[1]*scale, 
+								  hl.mBones[b].value[2]*scale);
+			freyjaBoneRotateEuler3f(idx,
+									hl.mBones[b].value[3], 
+									hl.mBones[b].value[4], 
+									hl.mBones[b].value[5]);
+		}
+
+		for (uint32 i = 0; i < hl.mBoneCount; ++i)
+		{
+			if (hl.mBones[i].parent == (int)b)
+			{ 
+				freyjaBoneAddChild(idx, i);
+			}
+		}
+
+		freyjaEnd(); // FREYJA_BONE
+
+		// Generate id translator list
+		transBone.Add(b, idx);	
+	}
+
+	freyjaEnd(); // FREYJA_SKELETON	
+
+	for (b = 0; b < hl.mBoneCount; ++b)
+	{
+		//freyjaBoneUpdateBindPose(transBone[b]);
+	}
+
+
 	/* Read mesh data */
 	printf("Processing HalfLife bodyparts...\n");
 
@@ -599,11 +668,21 @@ int freyja_model__halflife_import(char *filename)
 
 		for (uint32 i = 0; i < hl.mBodyParts[b].models[mdl].vertexCount; ++i)
 		{
-			vert = freyjaVertexCreate3f(hl.mBodyParts[b].models[mdl].vertices[i*3][0],
-								  hl.mBodyParts[b].models[mdl].vertices[i*3][1],
-								  hl.mBodyParts[b].models[mdl].vertices[i*3][2]);
-			//freyjaVertexNormal3fv(vert, hl.mBodyParts[b].models[mdl].normals[i*3]);
-			
+			byte bone = hl.mBodyParts[b].models[mdl].weights[i];
+			Vec3 v;
+			v.mVec[0] = hl.mBodyParts[b].models[mdl].vertices[i*3][0];
+			v.mVec[1] = hl.mBodyParts[b].models[mdl].vertices[i*3][1];
+			v.mVec[2] = hl.mBodyParts[b].models[mdl].vertices[i*3][2];
+
+			fprintf(stderr, "%f %f %f -> ", v.mVec[0], v.mVec[1], v.mVec[2]);
+			freyjaBoneBindTransformVertex(transBone[bone], v.mVec, 1.0f);
+			fprintf(stderr, "%f %f %f\n", v.mVec[0], v.mVec[1], v.mVec[2]);
+
+			vert = freyjaVertexCreate3f(v.mVec[0], v.mVec[1], v.mVec[2]);
+
+			if (hl.mBodyParts[b].models[mdl].normalCount > i)
+				freyjaVertexNormal3fv(vert, hl.mBodyParts[b].models[mdl].normals[i*3]);
+			freyjaVertexWeight(vert, 1.0f, transBone[bone]);
 			// Mongoose 2002.02.09, Generates id translator list
 			trans.Add(i, vert);	
 		}
@@ -650,51 +729,6 @@ int freyja_model__halflife_import(char *filename)
 	}
 
 
-	freyjaBegin(FREYJA_SKELETON);
-
-	
-	for (b = 0; b < hl.mBoneCount; ++b)
-	{
-		freyjaBegin(FREYJA_BONE);
-		idx = freyjaGetCurrent(FREYJA_BONE);
-		freyjaBoneParent(idx, hl.mBones[b].parent);
-		freyjaBoneName(idx, hl.mBones[b].name);
-
-		if (b == 0)
-		{
-			freyjaBoneTranslate3f(idx,
-								  hl.mBones[b].value[0]*scale, 
-								  hl.mBones[b].value[2]*scale, 
-								  hl.mBones[b].value[1]*scale);
-			freyjaBoneRotateEuler3f(idx,
-								   hl.mBones[b].value[3], 
-								   hl.mBones[b].value[4] - 90.0f, 
-								   hl.mBones[b].value[5]);
-		}
-		else
-		{
-			freyjaBoneTranslate3f(idx,
-								  hl.mBones[b].value[0]*scale, 
-								  hl.mBones[b].value[1]*scale, 
-								  hl.mBones[b].value[2]*scale);
-			freyjaBoneRotateEuler3f(idx,
-									hl.mBones[b].value[3], 
-									hl.mBones[b].value[4], 
-									hl.mBones[b].value[5]);
-		}
-
-		for (uint32 i = 0; i < hl.mBoneCount; ++i)
-		{
-			if (hl.mBones[i].parent == (int)b)
-			{ 
-				freyjaBoneAddChild(idx, i);
-			}
-		}
-
-		freyjaEnd(); // FREYJA_BONE
-	}
-
-	freyjaEnd(); // FREYJA_SKELETON
 	freyjaEnd(); // FREYJA_MODEL
 
 	return 0;
