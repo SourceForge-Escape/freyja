@@ -6,14 +6,6 @@
 
  Hot  
 
-	+ Cap FPS
-	+ Remove the drag/motion with depressed button cursor to replace with mouse2?
-	+ Improve extrude UI
-	+ Pick bones with mouse
-	+ Time to seperate rot / pos keys?  rotations look broken in skeleton
-
-	python plugin?
-
 	- Single joint animation for shishi odoshi test
 		- Visualize weights over mesh
 		- Make sure you can do: OBJ + SMD dumps for the ASCII groupies
@@ -40,9 +32,8 @@
 		- Joint/Bone tool that creates and connects to last on each click
 
 	- Interface
-		- New mgtk box widget for plugins ( can be read via mlisp )
-			- This can let you do cooky things like load plugin interfaces
-			  inside other containers like the notebook
+		- Cap FPS
+			- Generic system abstracted timers
 		- Add generic bbox selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registering to mgtk
 		- Two window layout for curve / viewport usage
@@ -64,6 +55,10 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- Improve extrude UI
+	- Pick bones with mouse
+	- Time to seperate rot / pos keys?  rotations look broken in skeleton
+	- Generated python plugin API from C ABI ( replace old, static version )
 	- Loop cuts needed for box modeling
 	- Subdiv ABI ( this way at least stubs in svn interface! )
 	- Patch ABI ( this way at least stubs in svn interface! )

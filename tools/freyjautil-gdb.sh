@@ -1,6 +1,7 @@
 #!/bin/bash
 # Local libs used to run local bin tests
-ARGS=`pwd`/$@
+#ARGS=`pwd`/$@
+ARGS=$@
 
 if [ ! ${1} ]
 then
