@@ -4,6 +4,20 @@
  Freyja 0.9.5 Development branch
  =====================================================================
 
+ Kuroi Kinyoubi 
+ 20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Curve view KISS - <Object mode, Current selected> eg 'Bone, 1', 'Mesh, 0'
+   No editing still, since I might add b-splines or something nice later
+ - Minor plugin touch ups
+ - FIX for face select by group
+ - Skel Vertex blending in interface and backend ( for vertex morph conversion )
+   Still pretty buggy
+ - Many minor ABI updates and util functions related to skeletal keyframes
+ - New BoneTrack implementation to 'split' rot/loc, inside a pretty API
+ - FIX plugin directory system now weeds out dupes and filters
+   for 0.9.5 version by directory naming
+
+
  20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - FIX free view zoom
  - FIX free view wasn't generating correct pick ray when scene translated

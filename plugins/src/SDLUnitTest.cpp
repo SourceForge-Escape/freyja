@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <freyja/FreyjaImage.h>
 #include <mstl/Vector.h>
+#include <mstl/String.h>
 
 #include "SDLUnitTest.h"
 

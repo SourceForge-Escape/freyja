@@ -258,7 +258,16 @@
 			(toolbar
 
 				(toolbar_togglebutton false "24x24/fourwin.png" "Four Window"
-					"Enable four window view"	eEvent	eViewports)
+					"Four window view"	eEvent	eViewports)
+
+				(toolbar_togglebutton false "24x24/grid.png" "Grid"
+					"Plane grid rendering"	eEvent eRenderGrid)
+
+				(toolbar_togglebutton false "24x24/grid.png" "Ground"
+					"Plane solid rendering"	eEvent eRenderSolidGround)
+
+				(toolbar_togglebutton false "24x24/pickray.png" "Pick Ray"
+					"Pick ray rendering"	eEvent eRenderPickRay)
 
 				(toolbar_separator)
 
@@ -286,20 +295,11 @@
 				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones"
 					"Show bones when rendering"		eEvent	eRenderSkeleton)
 
-				(toolbar_togglebutton false "24x24/grid.png" "Grid"
-					"Toggle plane grid rendering"	eEvent eRenderGrid)
-
-				(toolbar_togglebutton false "24x24/grid.png" "Ground"
-					"Toggle plane solid rendering"	eEvent eRenderSolidGround)
-
-				(toolbar_togglebutton false "24x24/pickray.png" "Pick Ray"
-					"Toggle pick ray rendering"	eEvent eRenderPickRay)
-
 				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
 					"Render shadows"		eEvent	eRenderShadow)
 
-				(toolbar_togglebutton false "24x24/deform.png" "Deform"
-					"Toggle skelmesh deform"	eEvent	eSkeletalDeform)
+				(toolbar_togglebutton false "24x24/deform.png" "Blend"
+					"Skeletal vertex blending"	eEvent	eSkeletalDeform)
 
 			) ; toolbar
 
@@ -545,34 +545,34 @@
 
 	(expander "Groups Box" 1
 		(hbox 1 0 0 1 0
-			(togglebutton " 1" eSmooth 1)
-			(togglebutton " 2" eSmooth 2)
-			(togglebutton " 3" eSmooth 3)
-			(togglebutton " 4" eSmooth 4)
-			(togglebutton " 5" eSmooth 5)
-			(togglebutton " 6" eSmooth 6)
-			(togglebutton " 7" eSmooth 7)
-			(togglebutton " 8" eSmooth 8)
+			(togglebutton " 1" eSmooth 0)
+			(togglebutton " 2" eSmooth 1)
+			(togglebutton " 3" eSmooth 2)
+			(togglebutton " 4" eSmooth 3)
+			(togglebutton " 5" eSmooth 4)
+			(togglebutton " 6" eSmooth 5)
+			(togglebutton " 7" eSmooth 6)
+			(togglebutton " 8" eSmooth 7)
 		) ; hbox
 		(hbox 1 0 0 1 0
-			(togglebutton " 9"  eSmooth 9)
-			(togglebutton " 10" eSmooth 10)
-			(togglebutton " 11" eSmooth 11)
-			(togglebutton " 12" eSmooth 12)
-			(togglebutton " 13" eSmooth 13)
-			(togglebutton " 14" eSmooth 14)
-			(togglebutton " 15" eSmooth 15)
-			(togglebutton " 16" eSmooth 16)
+			(togglebutton " 9"  eSmooth 8)
+			(togglebutton " 10" eSmooth 9)
+			(togglebutton " 11" eSmooth 10)
+			(togglebutton " 12" eSmooth 11)
+			(togglebutton " 13" eSmooth 12)
+			(togglebutton " 14" eSmooth 13)
+			(togglebutton " 15" eSmooth 14)
+			(togglebutton " 16" eSmooth 15)
 		) ; hbox
 		(hbox 1 0 0 1 0
-			(togglebutton " 17" eSmooth 17)
-			(togglebutton " 18" eSmooth 18)
-			(togglebutton " 19" eSmooth 19)
-			(togglebutton " 20" eSmooth 20)
-			(togglebutton " 21" eSmooth 21)
-			(togglebutton " 22" eSmooth 22)
-			(togglebutton " 23" eSmooth 23)
-			(togglebutton " 24" eSmooth 24)
+			(togglebutton " 17" eSmooth 16)
+			(togglebutton " 18" eSmooth 17)
+			(togglebutton " 19" eSmooth 18)
+			(togglebutton " 20" eSmooth 19)
+			(togglebutton " 21" eSmooth 20)
+			(togglebutton " 22" eSmooth 21)
+			(togglebutton " 23" eSmooth 22)
+			(togglebutton " 24" eSmooth 23)
 		) ; hbox
 
 		; Assign/Clear group assoications with selected faces

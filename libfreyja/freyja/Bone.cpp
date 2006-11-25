@@ -39,7 +39,7 @@ Bone::Bone() :
 	mTranslation(0.0f, 0.0f, 0.0f),
 	mBindPose(),
 	mBindToWorld(),
-	mKeyframes(),
+	mTrack(),
 	mUID(INDEX_INVALID)
 {
 	mName[0] = '\0';
@@ -179,7 +179,6 @@ void Bone::SetName(const char *name)
 void Bone::UpdateBindPose()
 {
 	Matrix m;
-	uint32 i, n;
 
 	m.setIdentity();
 	m = mRotation;
@@ -200,7 +199,18 @@ void Bone::UpdateBindPose()
 	mBindToWorld = mBindPose;
 	mBindPose.invert();
 
-	for (i = 0, n = mChildren.size(); i < n; ++i)
+#if 0
+	Vec3 v(0,0,0);
+	v = mBindToWorld * v;
+	MSTL_MSG("mParent = %i, %i, %s\n", mParent, mUID, mName);
+	MSTL_MSG("mBindToWorld: %f %f %f\n", v.mVec[0], v.mVec[1], v.mVec[2]);
+	v = Vec3(0,0,0);
+	v = mBindPose * v;
+	MSTL_MSG("   mBindPose: %f %f %f\n\n", v.mVec[0], v.mVec[1], v.mVec[2]);
+#endif
+
+#if 0
+	for (uint32 i = 0, n = mChildren.size(); i < n; ++i)
 	{
 		Bone *b = GetBone(mChildren[i]);
 
@@ -209,6 +219,7 @@ void Bone::UpdateBindPose()
 			b->UpdateBindPose();
 		}
 	}
+#endif
 }
 
 

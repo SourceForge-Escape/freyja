@@ -438,13 +438,83 @@ void freyjaBoneTransform(index_t boneIndex,
 }
 
 
+void freyjaBoneUpdateBindPose(index_t bone)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		b->UpdateBindPose();
+	}
+}
+
+
+void freyjaBoneGetBindTransform(index_t bone, matrix_t m)
+{	
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		b->mBindPose.getMatrix(m);
+	}
+}
+
+
+void freyjaBoneGetBindTransformInverse(index_t bone, matrix_t m)
+{	
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		b->mBindPose.getInvert(m);
+	}
+}
+
+
+void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w)
+{	
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+#if 1 // Local test to factor out API issues
+		Matrix m, t;
+		Vec3 v(p);
+		t.setIdentity();
+		t = b->mRotation;
+		t.translate(b->mTranslation.mVec);
+
+		Bone *parent = Bone::GetBone(b->GetParent());
+
+		while (parent)
+		{
+			m.setIdentity();
+			m = parent->mRotation;
+			m.translate(parent->mTranslation.mVec);
+
+			t = m * t;
+
+			parent = Bone::GetBone(parent->GetParent());
+		}
+
+		v = (t * v) * w;
+		HEL_VEC3_COPY(v.mVec, p);
+#else
+		Vec3 v(p);
+		v = (b->mBindPose * v) * w;
+		HEL_VEC3_COPY(v.mVec, p);
+#endif
+	}
+}
+
+
 index_t freyjaBoneTrackNew(index_t bone)
 {
 	Bone *b = Bone::GetBone(bone);
 
 	if ( b )
 	{
-		index_t track = b->NewTransformTrack();
+		index_t track = b->NewTrack();
 		return track;
 	}
 
@@ -458,7 +528,7 @@ void freyjaBoneTrackDuration(index_t bone, index_t track, vec_t duration)
 
 	if ( b )
 	{
-		Track &t = b->GetTransformTrack(track);
+		BoneTrack &t = b->GetTrack(track);
 		t.SetDuration(duration);
 	}
 }
@@ -470,7 +540,7 @@ void freyjaBoneTrackRate(index_t bone, index_t track, vec_t fps)
 
 	if ( b )
 	{
-		Track &t = b->GetTransformTrack(track);
+		BoneTrack &t = b->GetTrack(track);
 		t.SetRate(fps);
 	}
 }
@@ -482,8 +552,12 @@ index_t freyjaBoneKeyFrameNew(index_t bone, index_t track, vec_t time)
 
 	if ( b )
 	{
-		BoneTrack &t = b->GetTransformTrack(track);
-		index_t key = t.NewKeyframe(time);
+		BoneTrack &t = b->GetTrack(track);
+
+		// Rot / Loc now atomix, so instead return index to unallocated key
+		//index_t key = t.NewKeyframe(time);
+		index_t key = t.GetKeyfameIndex(time);
+
 		return key;
 	}
 
@@ -498,12 +572,13 @@ void freyjaBonePosKeyFrame3f(index_t bone, index_t track, index_t key,
 
 	if ( b )
 	{
-		BoneTrack &t = b->GetTransformTrack(track);
-		BoneKeyFrame *k = t.GetKeyframe(key);
+		BoneTrack &t = b->GetTrack(track);
+		Vec3KeyFrame *k = t.GetLocKeyframe(key);
 		
 		if (k)
 		{
-			k->SetPosition(Vec3(x, y, z));
+			//k->SetPosition(Vec3(x, y, z));
+			k->SetData(Vec3(x, y, z));
 		}
 	}
 }
@@ -516,12 +591,13 @@ void freyjaBoneRotKeyFrameEuler3f(index_t bone, index_t track, index_t key,
 
 	if ( b )
 	{
-		BoneTrack &t = b->GetTransformTrack(track);
-		BoneKeyFrame *k = t.GetKeyframe(key);
+		BoneTrack &t = b->GetTrack(track);
+		Vec3KeyFrame *k = t.GetRotKeyframe(key);
 		
 		if (k)
 		{
-			k->SetEulerRotation(Vec3(x, y, z));
+			//k->SetEulerRotation(Vec3(x, y, z));
+			k->SetData(Vec3(x, y, z));
 		}
 	}
 }
@@ -534,14 +610,15 @@ void freyjaBoneRotKeyFrameQuat4f(index_t bone, index_t track, index_t key,
 
 	if ( b )
 	{
-		BoneTrack &t = b->GetTransformTrack(track);
-		BoneKeyFrame *k = t.GetKeyframe(key);
+		BoneTrack &t = b->GetTrack(track);
+		Vec3KeyFrame *k = t.GetRotKeyframe(key);
 		
 		if (k)
 		{
 			Quaternion q;
 			q.getEulerAngles(&x, &y, &z);
-			k->SetEulerRotation(Vec3(x, y, z));
+			//k->SetEulerRotation(Vec3(x, y, z));
+			k->SetData(Vec3(x, y, z));
 		}
 	}
 }

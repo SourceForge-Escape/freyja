@@ -438,11 +438,39 @@ void freyjaGetVertexPolygonRef(Vector<long> &polygons)
 }
 
 
+index_t freyjaMeshTexCoordCreate2f(index_t meshIndex, vec_t u, vec_t v)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (mesh)
+	{
+		vec3_t uvw = {u, v, 0.0f };
+		return mesh->CreateTexCoord(uvw);
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshTexCoordCreate3f(index_t meshIndex, vec_t u, vec_t v, vec_t w)
+{
+	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+
+	if (mesh)
+	{
+		vec3_t uvw = {u, v, w };
+		return mesh->CreateTexCoord(uvw);
+	}
+
+	return INDEX_INVALID;
+}
+
+
 index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
 {
 	Mesh *mesh = freyjaGetCurrentMeshClass();
 
-	DEBUG_MSG("Obsolete function call. %p", mesh);
+	//DEBUG_MSG("Obsolete function call. %p", mesh);
 
 	if (mesh)
 	{
@@ -1256,6 +1284,17 @@ uint32 freyjaGetMeshPolygonCount(index_t meshIndex)
 }
 
 
+void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group)
+{
+	Mesh *m = freyjaModelGetMeshClass( gFreyjaCurrentModel, mesh );
+
+	if (m)
+	{
+		return m->SetFaceSmoothingGroup(face, group);
+	}
+}
+
+
 index_t freyjaGetMeshPolygonVertexIndex(index_t meshIndex, index_t faceVertexIndex)
 {
 	BUG_ME("Not Implemented");
@@ -1775,6 +1814,82 @@ void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex)
 			}
 		}
 	}
+}
+
+
+#include "Bone.h"
+
+void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
+{
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	
+	if (m)
+	{
+		// Make sure we have enough blend vertices, and
+		// this is 'smart' enough not to reallocate if we do
+		m->SyncBlendVertices();
+		vec_t *array = m->GetBlendVerticesArray();
+
+		//if (!array)
+		//	return;
+
+		m->ResetBlendVertices();
+
+		// Forget about 'cobbling' random skeletons with reused weights!
+		//Skeleton *s = Skeleton::getSkeleton(skeleton);
+		
+		for (uint i = 0, n = m->GetWeightCount(); i < n; ++i)
+		{
+			Weight *w = m->GetWeight(i);
+
+			if (!w)
+				continue;
+
+			Bone *b = Bone::GetBone(w->mBoneIndex);
+
+			if (!b)
+				continue;
+
+			Vertex *v = m->GetVertex(w->mVertexIndex);
+
+			if (!v)
+				continue;
+
+			BoneTrack &t = b->GetTrack(track);	
+			Vec3 rot = t.GetRot(time);
+			Vec3 loc = t.GetLoc(time);
+			Vec3 p;
+			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
+
+			Matrix world;
+			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
+			world.rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]);
+
+#if 0
+			Matrix combined = world * b->GetInverseBindPose();
+#else
+			world.invert();
+			Matrix combined = b->GetInverseBindPose() * world;
+#endif
+
+			p = (combined * p) * w->mWeight;
+
+			array[v->mVertexIndex*3  ] += p.mVec[0]; 
+			array[v->mVertexIndex*3+1] += p.mVec[1]; 
+			array[v->mVertexIndex*3+2] += p.mVec[2]; 
+		}
+	}
+}
+
+
+vec_t *freyjaGetMeshBlendVertices(index_t mesh)
+{
+
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	
+	if (m) return m->GetBlendVerticesArray();
+
+	return NULL;
 }
 
 

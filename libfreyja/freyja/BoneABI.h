@@ -109,6 +109,19 @@ extern "C" {
 	 * Post : Set bone orientation
 	 ------------------------------------------------------*/
 
+	void freyjaGetBoneRotationQuat4fv(index_t boneIndex, vec4_t wxyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s orientation as a Quaternion
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+	void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s orientation in Euler angles
+	 ------------------------------------------------------*/
+
 	void freyjaBoneTransform(index_t boneIndex, 
 	                         freyja_transform_action_t action, 
 	                         vec_t x, vec_t y, vec_t z);
@@ -136,19 +149,6 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns bone[index]'s parent id
-	 ------------------------------------------------------*/
-
-	void freyjaGetBoneRotationQuat4fv(index_t boneIndex, vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets bone[index]'s orientation as a Quaternion
-	 *        Returns FREYJA_PLUGIN_ERROR on error
-	 ------------------------------------------------------*/
-
-	void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets bone[index]'s orientation in Euler angles
 	 ------------------------------------------------------*/
 
 	void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz);
@@ -185,6 +185,34 @@ extern "C" {
 	///////////////////////////////////////////////////////////////
 	// 0.9.5 ABI Extensions
 	///////////////////////////////////////////////////////////////
+
+	void freyjaBoneUpdateBindPose(index_t bone);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Force bind pose transform update
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneGetBindTransform(index_t bone, matrix_t m);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get bind pose transform for <bone>
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneGetBindTransformInverse(index_t bone, matrix_t m);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get bind pose transform for <bone>
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Transform vertex by bind pose for <bone>
+	 *
+	 ------------------------------------------------------*/
 
 	/*------------------------------------------------------
 	 * NOTE 

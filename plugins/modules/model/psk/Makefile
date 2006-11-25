@@ -67,19 +67,21 @@ BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 	$(BASE_DEFS)
 
-LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
-#LDFLAGS += -Wl,-z,defs
-#LDFLAGS += -Wl,-O1
-RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
-	-fomit-frame-pointer -fexpensive-optimizations -O2
-DEBUG_CFLAGS=$(BASE_CFLAGS) -g $(DEBUG_DEFS)
-
 ################################################################
 # Local Build Environment
 ################################################################
 
 -include ../../../freyja.env
 
+
+################################################################
+
+LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
+#LDFLAGS += -Wl,-z,defs
+#LDFLAGS += -Wl,-O1
+RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
+	-fomit-frame-pointer -fexpensive-optimizations -O2
+DEBUG_CFLAGS=$(BASE_CFLAGS) -g $(DEBUG_DEFS)
 
 # Library ######################################################
 SHLIBEXT=$(EXT).$(VERSION)
@@ -90,13 +92,6 @@ MODULE_CFLAGS=$(BASE_CFLAGS) -g -DFREYJA_PLUGINS
 MODULE_LD_FLAGS=-lfreyja -lstdc++ -shared -fPIC -ldl -rdynamic 
 #MODULE_LD_FLAGS += --warn-unresolved-symbols -Wl -z defs
 MODULE_LD_FLAGS += --warn-unresolved-symbols -Wl
-
-# Unit test ####################################################
-SDLUNIT_CFLAGS=$(BASE_CFLAGS) $(shell sdl-config --cflags) \
-		-DHAVE_SDL -DHAVE_OPENGL -DHAVE_SDL_TTF -DHAVE_FREYJA
-SDLUNIT_LDFLAGS=$(shell sdl-config --libs) -lSDL_ttf -lGL -lGLU \
-		-lm -lstdc++ -lhel0 -lfreyja
-SDLUNIT_OBJS=$(BUILD_TEST_DIR)/SDLUnitTest.o
 
 
 ################################################################
@@ -199,14 +194,23 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 # Implemented builds
 ######################################################################
 
+
+######################################################################
+
 #tools:
+
+#$(BUILDDIR)/UTPackage.o: ../utpackage/UTPackage.cpp ../utpackage/URTexture.h ../utpackage/UTPackage.h
+#		$(DO_CC)
+#
+#$(BUILDDIR)/URTexture.o: ../utpackage/URTexture.cpp ../utpackage/URTexture.h ../utpackage/UTPackage.h
+#		$(DO_CC)
 
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) targets NAME=ase SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
-	PROG_OBJS="$(BUILD_TEST_DIR)/Ase.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	$(MAKE) targets NAME=PSKModel SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
+	PROG_OBJS="$(BUILD_TEST_DIR)/SDLUnitTest.o $(BUILD_TEST_DIR)/Texture.o $(BUILD_TEST_DIR)/Resource.o $(BUILD_TEST_DIR)/PSKModel.o $(BUILD_TEST_DIR)/UTPackage.o  $(BUILD_TEST_DIR)/URTexture.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PSKMODEL  $(MSTL_INC) $(SDLUNIT_CFLAGS)" \
+	LD_FLAGS="$(HEL_LIB) $(SDLUNIT_LDFLAGS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 
 ##########################################################################

@@ -480,7 +480,7 @@ int freyja_model__milkshape_import(char *filename)
 	{			
 		freyjaBegin(FREYJA_POLYGON);
 		freyjaPolygonMaterial1i(0);
-		//freyjaPolygonGroup1i(mdl.tris[i].smoothingGroup);
+		freyjaPolygonGroup1u(mdl.tris[i].smoothingGroup);
 
 		for (j = 0; j < 3; ++j)
 		{
@@ -518,6 +518,8 @@ int freyja_model__milkshape_import(char *filename)
 								mdl.joints[i].rotation[1],
 								mdl.joints[i].rotation[2]);
 
+		MSTL_MSG("%s", mdl.joints[i].name);
+
 		for (j = 0; j < mdl.nNumJoints; ++j)
 		{
 			if (!strncmp(mdl.joints[i].name, mdl.joints[j].parentName, 32))
@@ -527,14 +529,16 @@ int freyja_model__milkshape_import(char *filename)
 			
 			if (!strncmp(mdl.joints[i].parentName, mdl.joints[j].name, 32))
 			{
+				MSTL_MSG("%s <- %s", mdl.joints[i].parentName, mdl.joints[i].name);
 				freyjaBoneParent(index, j);
 			}
 		}
 
 		/* 0.9.5 keyframes */
 		index_t track = freyjaBoneTrackNew(index);
-		//freyjaBoneTrackRate(index, track, 30.0f);  // milkshape have a default?
+		//freyjaBoneTrackRate(index, track, 30.0f);  
 
+		//printf("*** rotkeys %i\n", mdl.joints[i].numRotationKeyframes);
 		for (j = 0; j < mdl.joints[i].numRotationKeyframes; ++j)
 		{
 			vec_t t = mdl.joints[i].keyFramesRot[j].time;
@@ -542,17 +546,30 @@ int freyja_model__milkshape_import(char *filename)
 			vec_t y = (mdl.joints[i].keyFramesRot[j].rotation[1]);
 			vec_t z = (mdl.joints[i].keyFramesRot[j].rotation[2]);
 
+			x += mdl.joints[i].rotation[0];
+			y += mdl.joints[i].rotation[1];
+			z += mdl.joints[i].rotation[2];
+
+			//printf("*** rot %f  %f %f %f\n", t, x, y, z);
+
 			index_t key = freyjaBoneKeyFrameNew(index, track, t);
 			freyjaBoneRotKeyFrameEuler3f(index, track, key, x, y, z);
 		}
 
+		//printf("*** lockeys %i\n", mdl.joints[i].numPositionKeyframes);
 		for (j = 0; j < mdl.joints[i].numPositionKeyframes; ++j)
 		{
 			vec_t t = mdl.joints[i].keyFramesPos[j].time;
 			vec_t x = mdl.joints[i].keyFramesPos[j].position[0]*scale;
 			vec_t y = mdl.joints[i].keyFramesPos[j].position[1]*scale;
 			vec_t z = mdl.joints[i].keyFramesPos[j].position[2]*scale;
-			
+
+			x += mdl.joints[i].position[0]*scale;
+			y += mdl.joints[i].position[1]*scale;
+			z += mdl.joints[i].position[2]*scale;
+
+			//printf("*** loc %f  %f %f %f\n", t, x, y, z);
+
 			index_t key = freyjaBoneKeyFrameNew(index, track, t);
 			freyjaBonePosKeyFrame3f(index, track, key, x, y, z);
 		}

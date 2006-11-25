@@ -168,6 +168,13 @@ public:
 	 * Post : Adds a texel to a polygon
 	 ------------------------------------------------------*/
 
+	void freyjaPolygonGroup1u(uint32 group);
+	/*------------------------------------------------------
+	 * Pre  : eggBegin(FREYJA_POLYGON);
+	 *        Egg_id is the native index
+	 * Post : Adds polygon to group
+	 ------------------------------------------------------*/
+
 	void freyjaPolygonMaterial1i(index_t index);
 	/*------------------------------------------------------
 	 * Pre  : eggBegin(FREYJA_POLYGON);
@@ -280,6 +287,8 @@ private:
 	freyja::Mesh *mMesh;                /* Mesh outside Scene for FSM use */
 
 	index_t mTextureId;                 /* Texture id for current polygon */
+
+	index_t mGroupId;                   /* Texture id for current polygon */
 
 	index_t mIndexModel;
 

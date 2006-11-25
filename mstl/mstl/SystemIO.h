@@ -674,6 +674,7 @@ class SystemIO
 			else
 			{
 				MSTL_MSG("Invalid read size %i.  %i / %i", size, mCursor, mEnd);
+				//Assert(false);
 			}
 
 			return read;
@@ -1312,6 +1313,12 @@ class SystemIO
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
 			return !(sz < 1);
+		}
+
+
+		bool WriteByte(unsigned char u)
+		{
+			return (fwrite(&u, 1, 1, mFileHandle) == 1);
 		}
 
 

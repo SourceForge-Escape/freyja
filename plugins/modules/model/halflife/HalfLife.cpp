@@ -241,7 +241,7 @@ int HalfLife::load(const char *filename)
 
 	for (i = 0; i < mBodyPartCount; ++i)
 	{
-		size = sizeof(mstudio_bodyparts_t);
+		size = 76;//sizeof(mstudio_bodyparts_t);
 		//fseek(f, mHeader.bodypartindex + i * size, SEEK_SET);
 		f.SetOffset(mHeader.bodypartindex + i * size);
 
@@ -262,7 +262,14 @@ int HalfLife::load(const char *filename)
 			//bodyPart.modelindex
 			//fseek(f, bodyPart.modelindex+((i/bodyPart.base)%bodyPart.nummodels), SEEK_SET);
 			//fseek(f, m*sizeof(mstudio_model_t), SEEK_CUR);
-			f.SetOffset(bodyPart.modelindex+((i/bodyPart.base)%bodyPart.nummodels)+m*sizeof(mstudio_model_t));
+
+			size = 64+48;
+			f.SetOffset(m * size+
+						bodyPart.modelindex+
+						0*((i/bodyPart.base)%bodyPart.nummodels)
+						);
+
+			printf("*** %li / %li\n", f.GetOffset(), f.GetSize());
 
 			//fread(&model, 1, sizeof(mstudio_model_t), f);
 			f.ReadString(64, model.name);
@@ -327,10 +334,9 @@ int HalfLife::load(const char *filename)
 
 			for (j = 0; (int)j < model.nummesh; ++j)
 			{
-				size = sizeof(mstudio_mesh_t);
-				//fseek(f, model.meshindex + j * size, SEEK_SET);
+				// 32bit platform longs
+				size = 20;//sizeof(mstudio_mesh_t);
 				f.SetOffset(model.meshindex + j * size);
-				//fread(&mesh, size, 1, f);
 				mesh.numtris = f.ReadLong();
 				mesh.triindex = f.ReadLong();
 				mesh.skinref = f.ReadLong();
@@ -359,7 +365,8 @@ int HalfLife::load(const char *filename)
 					if (!numFaces)
 						break;
 
-					tri += (numFaces > 0) ? numFaces : -numFaces;
+					numFaces = (numFaces > 0) ? numFaces : -numFaces;
+					tri += numFaces;
 
 					for (; numFaces > 0; --numFaces)
 					{
@@ -370,7 +377,7 @@ int HalfLife::load(const char *filename)
 					}
 				}
 
-				printf("Expecting %i actual faces...\n", tri);
+				printf("Expecting %i actual vertices...\n", tri);
 
 				//printf("    mesh[%i].faces = %li...\n", j, mesh.numtris);
 
@@ -616,8 +623,8 @@ int freyja_model__halflife_import(char *filename)
 								  hl.mBones[b].value[1]*scale);
 			freyjaBoneRotateEuler3f(idx,
 								   hl.mBones[b].value[3], 
-								   hl.mBones[b].value[4] - 90.0f, 
-								   hl.mBones[b].value[5]);
+								   hl.mBones[b].value[5], 
+								   hl.mBones[b].value[4]-helDegToRad(90.0f));
 		}
 		else
 		{

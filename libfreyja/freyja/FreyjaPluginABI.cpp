@@ -1958,9 +1958,9 @@ void freyjaPluginDirectoriesInit()
    	freyjaPluginAddDirectory(s.c_str());
 	//MSTL_MSG(s.c_str());
 
-   	freyjaPluginAddDirectory("/usr/lib/freyja/modules/model");
-   	freyjaPluginAddDirectory("/usr/local/lib/freyja/modules/model");
-	freyjaPluginAddDirectory("/usr/share/freyja/modules/model");
+   	freyjaPluginAddDirectory("/usr/lib/freyja_0.9.5/modules/model");
+   	freyjaPluginAddDirectory("/usr/local/lib/freyja_0.9.5/modules/model");
+	freyjaPluginAddDirectory("/usr/share/freyja_0.9.5/modules/model");
 #endif
 }
 
@@ -1969,6 +1969,13 @@ void freyjaPluginAddDirectory(const char *dir)
 {
 	if (!dir || !dir[0] || !SystemIO::File::IsDirectory(dir))
 		return;
+
+	uint32 i;
+	foreach(gPluginDirectories, i)
+	{
+		if (!strcmp(gPluginDirectories[i], dir))
+			return;
+	}
 
 	unsigned int l = strlen(dir);
 	char *dir2 = new char[l+1];

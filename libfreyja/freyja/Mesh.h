@@ -56,14 +56,14 @@ public:
 		mBoneIndex(bone),
 		mWeight(weight)
 	{
-		freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
+		//freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
 	}
 
 	Weight() : mVertexIndex(INDEX_INVALID),
 			   mBoneIndex(INDEX_INVALID),
 			   mWeight(0.0f)
 	{
-		freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
+		//freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
 	}
 
 	~Weight()
@@ -379,6 +379,29 @@ public:
 	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
 	VertexAnimTrack mVertexAnimTrack;
 
+	vec_t mBlendVerticesTime;       /* Last time this was updated */
+	Vector<vec_t> mBlendVertices;   /* Skeletal vertex blending use  */
+
+	vec_t *GetBlendVerticesArray() { return mBlendVertices.get_array(); }
+
+	uint32 GetBlendVerticesCount() { return mBlendVertices.size(); }
+
+	void ResetBlendVertices()
+	{
+		vec_t *array = mBlendVertices.get_array();
+
+		if (array)
+			memset(array, 0, mBlendVertices.size()*sizeof(vec_t));
+	}
+
+	void SyncBlendVertices()
+	{
+		if (mBlendVertices.size() < mVertexPool.size())
+		{
+			mBlendVertices.resize(mVertexPool.size());
+		}
+	}
+
 	// Getting ready to test arrays / VBO with dynamic backend, which
 	// requires caching here in the backend to be effective
 	//Vector<index_t> mTriangleList;
@@ -427,6 +450,11 @@ public:
 		return GetBoundingVolumeCenter();
 	}
 
+	void SetFaceSmoothingGroup(index_t face, uint32 group);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void SelectedFacesMarkSmoothingGroup(uint32 group, bool t);
 	/*------------------------------------------------------
@@ -615,6 +643,12 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	Weight *GetWeight(index_t w) 
+	{ return (w < mWeights.size()) ? mWeights[w] : NULL; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	uint32 GetWeightCount() { return mWeights.size(); }
 	/*------------------------------------------------------
@@ -1359,9 +1393,9 @@ private:
 
 	const static uint32 mNameSize = 32;
 
-	static index_t mNextUID;  // UIDs outside of owner's array index
+	static index_t mNextUID;  /* UIDs outside of model (owner's) array index */
 
-	char mName[mNameSize];  // Human readable name of mesh
+	char mName[mNameSize];    /* Human readable name of mesh */
 
 	index_t mUID;
 
@@ -1373,7 +1407,7 @@ private:
 
 	Vector3d mPosition;
 
-	Vector3d mRotation;  // Store as Euler Angles for 'Size' interface
+	Vector3d mRotation;        /* Store as Euler Angles for 'Size' interface */
 
 	Vector3d mScale;
 

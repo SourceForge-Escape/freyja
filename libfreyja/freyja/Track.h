@@ -163,6 +163,7 @@ public:
 	}
 
 
+	// Returns existing keyframe if allocated
 	KeyFrame *NewKeyframeByIndex(uint32 keyframe)
 	{
 		if ( keyframe < mKeyFrames.size() )
@@ -173,14 +174,16 @@ public:
 			{
 				vec_t time = (vec_t)keyframe / mRate;
 				array[keyframe] = NewTrackKeyFrame(time);
-				return array[keyframe];
 			}
+
+			return array[keyframe];
 		}
 
 		return NULL;
 	}
 
 
+	// Returns existing keyframe if allocated
 	index_t NewKeyframe(vec_t time)
 	{
 		uint32 keyframe = GetKeyfameIndexFromTime(time);
@@ -606,6 +609,96 @@ class InterfaceTrack
 
 };
 #endif
+
+
+class Vec3Track : public Track
+{
+public:
+	Vec3Track() : Track() { mName = "Vec3"; }
+	
+	~Vec3Track() {}
+	
+	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
+	{
+		return new Vec3KeyFrame(time);
+	}
+
+
+	virtual Vec3KeyFrame *GetKeyframe(index_t idx) 
+	{
+		return (Vec3KeyFrame *)Track::GetKeyframe(idx);
+	}
+
+
+	Vec3 GetTransform(vec_t time)
+	{
+		Vec3 v;
+		GetTransform(time, v);
+		return v;
+	}
+
+
+	bool GetTransform(vec_t time, Vec3 &v) 
+	{
+		// Don't alter v, if out of bounds
+		//v = Vec3(0,0,0);
+
+		// Ran off the rails here... could wrap around, but just return for now
+		if (time > GetDuration() || time < 0.0f)
+		{
+			return false;
+		}
+	
+		// Given time assertion this should be a 'valid' frame here...
+		int32 frame = GetKeyfameIndexFromTime(time);
+		Vec3KeyFrame *key = GetKeyframe(frame);
+	
+		if (key)
+		{
+			v = key->mData;
+		}
+		else
+		{
+			// Find last keyframe ( not last played, that's for a game engine )
+			uint32 prev = GetPrevKeyframe(frame);
+			uint32 next = GetNextKeyframe(frame);
+
+			// <= Interpolate(prev, next, time);
+
+			key = GetKeyframe(prev);
+
+			// Found a 'start' keyframe, or if you don't you'll use a
+			// dummy keyframe with reflexive transforms @ 0.0 seconds
+			vec_t start = 0.0f;
+			if (key)
+			{
+				// Prev bundle
+				v = key->mData;
+				start = (vec_t)prev / GetRate();
+			}
+		
+			key = GetKeyframe(next);
+
+			// Found an 'end' keyframe, or if you don't you'll use a
+			// dummy keyframe with reflexive transforms @ 0.0 seconds
+			if (key)
+			{
+				// Next bundle
+				Vec3 vNext = key->mData;
+				vec_t end = (vec_t)next / GetRate();
+
+				// Actual time displacement weight
+				vec_t w = (time - start) / (end - start);
+
+				v = v + ((vNext - v) * w);
+			}
+		}
+
+		return true;
+	}
+
+};
+
 
 } // namespace freyja
 

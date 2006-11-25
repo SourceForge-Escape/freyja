@@ -51,6 +51,7 @@ FreyjaFSM::FreyjaFSM() :
 	mTexCoordList(),
 	mMesh(NULL),
 	mTextureId(0),
+	mGroupId(0),
 	mIndexModel(0),
 	mIndexVertex(INDEX_INVALID), 
 	mIndexTexCoord(INDEX_INVALID),
@@ -556,6 +557,7 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 		break;
 
 	case FREYJA_POLYGON:
+		mGroupId = 0;
 		mStack.push(FREYJA_POLYGON);
 		mVertexList.clear();
 		mTexCoordList.clear();
@@ -604,6 +606,8 @@ void FreyjaFSM::freyjaEnd()
 
 		polygon = freyjaModelMeshPolygonCreate(mIndexModel, mIndexMesh);
 		
+		freyjaMeshPolygonGroup1u(mIndexMesh, polygon, mGroupId);
+
 		for (i = 0, count = mVertexList.size(); i < count; ++i)
 		{
 			vertex = mVertexList[i];
@@ -641,6 +645,20 @@ index_t FreyjaFSM::freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 void FreyjaFSM::freyjaGetVertexNormal(vec3_t nxyz)
 {
 	freyjaGetVertexNormalXYZ3fv(mIndexVertex, nxyz);
+}
+
+
+void FreyjaFSM::freyjaPolygonGroup1u(uint32 group)
+{
+
+	if (mStack.peek() == FREYJA_POLYGON)
+	{
+		mGroupId = group;
+	}
+	else
+	{
+		freyjaPrintError("%s> Texture defined outside POLYGON!\n", __func__);
+	}
 }
 
 
@@ -910,6 +928,13 @@ void freyjaPolygonTexCoord1i(index_t id)
 {
 	FreyjaFSM::GetInstance()->freyjaPolygonAddTexCoord1i(id);
 }
+
+
+void freyjaPolygonGroup1u(uint32 id)
+{
+	FreyjaFSM::GetInstance()->freyjaPolygonGroup1u(id);  
+}
+
 
 void freyjaPolygonMaterial1i(index_t id)
 {
