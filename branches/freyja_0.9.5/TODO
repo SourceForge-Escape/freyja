@@ -7,7 +7,10 @@
  Hot  
 
 	- Single joint animation for shishi odoshi test
-		- Visualize weights over mesh
+		- ABI Only in interface for bone keyframe render / edit
+		- Deform mesh
+			- Visualize weights over mesh
+		- Edge picking
 		- Make sure you can do: OBJ + SMD dumps for the ASCII groupies
 		- Might want to add rotation types or always do 'about center' pivots
 			- Pivot: 3d cursor, bbox center, etc
@@ -18,12 +21,12 @@
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
 			- Also replace the old RotateObject() code to just use cursor
-			- Using the pick ray + segment you can get a normal parallel to
-			  screen to figure out your screen coord basis
 		- freyja ABI wrapper for new keyframe backend
 			- BoneAnim and Mesh type ABI support
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
 		- Timers for display 'sleep' and animation playback
+			- Cap FPS
+			- Generic system abstracted timers
 
 	- Skeletal animation
 		- Fix bone rendering to support unparented bones that aren't root? 
@@ -32,8 +35,6 @@
 		- Joint/Bone tool that creates and connects to last on each click
 
 	- Interface
-		- Cap FPS
-			- Generic system abstracted timers
 		- Add generic bbox selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registering to mgtk
 		- Two window layout for curve / viewport usage
@@ -55,6 +56,10 @@
  ----------------------------------------------------------------------------
 
  Misc
+	- Gobal mesh UIDs ala bones/joints to remove need for model+mesh reference
+	- Add material colors for 'editing while rendering'? ( seems bad idea )
+	- UI to toggle group color rendering and set color
+	- Paint with ray test
 	- Improve extrude UI
 	- Pick bones with mouse
 	- Time to seperate rot / pos keys?  rotations look broken in skeleton

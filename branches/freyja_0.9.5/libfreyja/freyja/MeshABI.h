@@ -73,6 +73,19 @@ extern "C" {
 	 * Post : Returns index of vertex created
 	 ------------------------------------------------------*/
 
+	index_t freyjaMeshTexCoordCreate2f(index_t meshIndex, vec_t u, vec_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns index of texcoord created
+	 ------------------------------------------------------*/
+
+	index_t freyjaMeshTexCoordCreate3f(index_t meshIndex, 
+									  vec_t u, vec_t v, vec_t w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns index of texcoord created
+	 ------------------------------------------------------*/
+
 	void freyjaMeshVertexTranslate3fv(index_t meshIndex, 
 									  index_t vertexIndex, vec3_t xyz);
 	/*------------------------------------------------------
@@ -347,6 +360,21 @@ extern "C" {
 	// 0.9.5 ABI Extensions
 	///////////////////////////////////////////////////////////////
 
+	// FIXME: Add ABI for only certain bone updates too!
+
+	void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates <mesh> blend vertex array for
+	 *        animation at <time> for <skeleton> and <track>
+	 ------------------------------------------------------*/
+
+	vec_t *freyjaGetMeshBlendVertices(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Retrieves <mesh> blend vertex array for rendering, etc
+	 ------------------------------------------------------*/
+
 	index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -384,6 +412,13 @@ extern "C" {
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 }
 
 

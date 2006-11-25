@@ -55,6 +55,12 @@ public:
 	 * Post : Constructs an object of KeyFrame
 	 ------------------------------------------------------*/
 
+	KeyFrame(vec_t time) : mFlags(0x0), mTime(time) { }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of KeyFrame
+	 ------------------------------------------------------*/
+
 	virtual ~KeyFrame() { }
 	/*------------------------------------------------------
 	 * Pre  : KeyFrame object is allocated
@@ -103,6 +109,8 @@ class VecKeyFrame : public KeyFrame
 
 	VecKeyFrame() : KeyFrame(), mData(0.0f) {}
 
+	VecKeyFrame(vec_t time) : KeyFrame(time), mData(0.0f) {}
+
 	virtual ~VecKeyFrame() {}
 
 	vec_t GetData() { return mData; }
@@ -139,13 +147,15 @@ class Vec3KeyFrame : public KeyFrame
 
 	Vec3KeyFrame() : KeyFrame(), mData(0.0f, 0.0f, 0.0f) {}
 
+	Vec3KeyFrame(vec_t time) : KeyFrame(time), mData(0.0f, 0.0f, 0.0f) {}
+
 	virtual ~Vec3KeyFrame() {}
 
 	Vec3 GetData() { return mData; }
 
 	virtual void SetData(const Vec3 &v) { mData = v; }
 
-	virtual uint32 GetSerializedSize() { return 4*3; }
+	virtual uint32 GetSerializedSize() { return 1+4+4*3; }
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : 
@@ -153,6 +163,8 @@ class Vec3KeyFrame : public KeyFrame
 
 	virtual bool Serialize(SystemIO::FileWriter &w) 
 	{
+		w.WriteByte(mFlags);
+		w.WriteFloat32(mTime);
 		w.WriteFloat32(mData.mVec[0]);
 		w.WriteFloat32(mData.mVec[1]);
 		w.WriteFloat32(mData.mVec[2]);
@@ -165,6 +177,8 @@ class Vec3KeyFrame : public KeyFrame
 
 	virtual bool Serialize(SystemIO::FileReader &r) 
 	{ 
+		mFlags = r.ReadByte();
+		mTime = r.ReadFloat32();
 		mData.mVec[0] = r.ReadFloat32();
 		mData.mVec[1] = r.ReadFloat32();
 		mData.mVec[2] = r.ReadFloat32(); 

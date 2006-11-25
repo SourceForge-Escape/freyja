@@ -2017,14 +2017,15 @@ void PSKModelRenderer::transformVertices()
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_PSKMODEL
+#if! defined( FREYJA_PLUGINS ) && defined( UNIT_TEST_PSKMODEL )
 
 PSKModel gModel;
 PSAAnimation gAnim;
 
 
 #ifdef HAVE_OPENGL
-#   include "SDLUnitTest.h"
+#   include "../../../src/SDLUnitTest.h"
+#   include "../utpackage/UTPackage.h"
 
 PSKModelRenderer gModelRenderer;
 SDLUnitTest ut;
@@ -2120,9 +2121,9 @@ void displayFrame()
 	if (ut.mFlags & SDLUnitTest::fWireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glEnterMode2d(ut.getWidth(), ut.getHeight());
+	mglEnterMode2d(ut.getWidth(), ut.getHeight());
 	ut.drawWidgets();
-	glExitMode2d();
+	mglExitMode2d();
 
 	if (ut.mFlags & SDLUnitTest::fWireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -2172,7 +2173,7 @@ void initScene(int argc, char *argv[])
 
 #ifdef HAVE_SDL_TTF
 	ut.mTexture.loadFontTTF("font.ttf", 32, 126 - 32);
-	bufferedPrintf(ut.mMessage, 256, "PSKModel Unit Test");
+	snprintf(ut.mMessage, 256, "PSKModel Unit Test");
 #endif
 
 	printf("\n");
@@ -2214,26 +2215,26 @@ void handleKeyPressEvent(unsigned int key, unsigned int mod)
 	case SDLK_F1:
 		ut.mTexture.glScreenShot("PSKModel.test", 
 								ut.getWidth(), ut.getHeight());
-		bufferedPrintf(ut.mMessage, 256, "Took screenshot...");
+		snprintf(ut.mMessage, 256, "Took screenshot...");
 		break;
 	case SDLK_F2:
 		ut.toggleFullscreen();
 		break;
 	case SDLK_F9:
 		ut.resize(640, 460);
-		bufferedPrintf(ut.mMessage, 256, "Switching to 640x480 resolution");
+		snprintf(ut.mMessage, 256, "Switching to 640x480 resolution");
 		break;
 	case SDLK_F10:
 		ut.resize(800, 600);
-		bufferedPrintf(ut.mMessage, 256, "Switching to 800x600 resolution");
+		snprintf(ut.mMessage, 256, "Switching to 800x600 resolution");
 		break;
 	case SDLK_F11:
 		ut.resize(1024, 768);
-		bufferedPrintf(ut.mMessage, 256, "Switching to 1024x768 resolution");
+		snprintf(ut.mMessage, 256, "Switching to 1024x768 resolution");
 		break;
 	case SDLK_F12:
 		ut.resize(1280, 1024);
-		bufferedPrintf(ut.mMessage, 256, "Switching to 1280x1024 resolution");
+		snprintf(ut.mMessage, 256, "Switching to 1280x1024 resolution");
 		break;
 	case SDLK_RIGHT:
 		++ut.mYaw;
@@ -2550,13 +2551,15 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#ifdef FREYJA_PLUGINS
-#include <freyja/FreyjaPlugin.h>
+#if defined( FREYJA_PLUGINS ) && ! defined( UNIT_TEST_PSKMODEL )
+#include <freyja/FreyjaPluginABI.h>
 #include <mstl/Map.h>
+#include <mstl/Vector.h>
 #include <hel/Matrix.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -2615,14 +2618,11 @@ int freyja_model__psk_import(char *filename)
 {
 	PSKModel psk;
 	unsigned int i, j, v, t, m;
-	const float scale = 0.1f;
+	const float scale = 0.25f; // 0.1f;
 	Vector<unsigned int> transV;
 	Quaternion q, r, r2;
 	Vector3d u;
 	Matrix M;
-	vec4_t wxyz;
-	long index;
-
 
 	if (freyja_model__psk_check(filename) < 0)
 		return -1;
@@ -2702,135 +2702,71 @@ int freyja_model__psk_import(char *filename)
 	}
 
 
-	vec_t theta, x, y, z;
-	double aascale;
-
+	// SKELETON
 	freyjaBegin(FREYJA_SKELETON);
-
-	Matrix local[psk.mNumBones];
-	Matrix localInverse[psk.mNumBones];
-
-	for (i = 0; i < psk.mNumBones; ++i)
+	
+	// Root
+	vec_t x, y, z, tx, ty, tz;
+	i = 0;
 	{
-		/* Convert quaternion to axis angles, theta in radians */
-		theta = (float)acos(psk.mBones[i].restDir[3]) * 2.0;
-		aascale = ((float)sin(theta * 0.5));
-		x = psk.mBones[i].restDir[0] / aascale;
-		y = psk.mBones[i].restDir[1] / aascale;
-		z = psk.mBones[i].restDir[2] / aascale;
+		q = Quaternion(psk.mBones[i].restDir[3],
+					   psk.mBones[i].restDir[0],
+					   psk.mBones[i].restDir[1],
+					   psk.mBones[i].restDir[2]);
+		q.getEulerAngles(&x, &z, &y);
 
-		q.setByAxisAngles(-theta, x, y, z);
-
-		local[i] = Matrix(q);
-		local[i].translate(psk.mBones[i].restLoc[0]*scale,
-							psk.mBones[i].restLoc[1]*scale,
-							psk.mBones[i].restLoc[2]*scale);
-
-		localInverse[i] = local[i];
-		localInverse[i].invert();
-	}
-
-
-	vec_t tx, ty, tz;
-
-
-	for (i = 0; i < psk.mNumBones; ++i)
-	{
-		/* Convert quaternion to axis angles, theta in radians */
-		theta = (float)acos(psk.mBones[i].restDir[3]) * 2.0;
-		aascale = ((float)sin(theta * 0.5));
-		x = psk.mBones[i].restDir[0] / aascale;
-		y = psk.mBones[i].restDir[1] / aascale;
-		z = psk.mBones[i].restDir[2] / aascale;
-
-		q.setByAxisAngles(-theta, x, y, z);
-
-		tx = psk.mBones[i].restLoc[0];
-		ty = psk.mBones[i].restLoc[1];
-		tz = psk.mBones[i].restLoc[2];
-
+		tx = psk.mBones[i].restLoc[0]*scale;
+		tz = -psk.mBones[i].restLoc[1]*scale;
+		ty = psk.mBones[i].restLoc[2]*scale;
 
 		/* Start a new bone */
 		freyjaBegin(FREYJA_BONE);
-		index = freyjaGetCurrent(FREYJA_BONE);
-		freyjaSkeletonAddBone(freyjaGetCurrent(FREYJA_SKELETON), index);
-		freyjaBoneFlags(index, 0x0);
-		freyjaBoneName(index, psk.mBones[i].name);
-		freyjaBoneTranslate3f(index, 
-							  psk.mBones[i].restLoc[0]*scale,
-							  psk.mBones[i].restLoc[1]*scale,
-							  psk.mBones[i].restLoc[2]*scale);
-
-		j = i;
-		r.setIdentity();
-		printf("%i> ", 1);
-		while (j > 0)
-		{
-			j = psk.mBones[j].parentIndex;  
-
-			if (j == 1)
-			{
-				break;
-			}
-
-			printf("%i ", j);
-
-			r2 = Quaternion(psk.mBones[j].restDir[3],  // qw
-							psk.mBones[j].restDir[0],  // qx
-							psk.mBones[j].restDir[1],  // qy
-							psk.mBones[j].restDir[2]); // qz
-
-		/* Convert quaternion to axis angles, theta in radians */
-		theta = (float)acos(psk.mBones[i].restDir[3]) * 2.0;
-		aascale = ((float)sin(theta * 0.5));
-		x = psk.mBones[j].restDir[0] / aascale;
-		y = psk.mBones[j].restDir[1] / aascale;
-		z = psk.mBones[j].restDir[2] / aascale;
-
-		r2.setByAxisAngles(-theta, x, y, z);
-
-		tx += psk.mBones[i].restLoc[0];
-		ty += psk.mBones[i].restLoc[1];
-		tz += psk.mBones[i].restLoc[2];
-
-			//	r2.normalize();
-			r = r * r2;
-		}
-		printf("\n");
-
-		//	q.normalize();
-		q = q * r.conjugate();
-		q.getQuaternion4fv(wxyz);
-		freyjaBoneRotateQuat4fv(index, wxyz);
-
-		switch (i)
-		{
-		case 0:
-			{
-				freyjaBoneTranslate3f(index,
-									  psk.mBones[i].restLoc[0]*scale,
-									  psk.mBones[i].restLoc[2]*scale,
-									  psk.mBones[i].restLoc[1]*scale);
-			}
-			break;
-		case 1:
-			{
-				r.set(helDegToRad(90.0f), 0, 1, 0);
-				q = r * q;
-				q.getQuaternion4fv(wxyz);
-				freyjaBoneRotateQuat4fv(index, wxyz);
-			}
-			break;
-		default:
-			;
-		}
+		index_t bone = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneFlags(bone, 0x0);
+		freyjaBoneName(bone, psk.mBones[i].name);
+		freyjaBoneTranslate3f(bone, tx, ty, tz);
+		freyjaBoneRotateEuler3f(bone, x, y, z);
 
 		/* Setup children */
 		for (j = 0; j < psk.mNumBones; ++j)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
-				freyjaBoneAddChild(index, j);
+				freyjaBoneAddChild(bone, j);
+			}
+		}
+
+		freyjaEnd(); // FREYJA_BONE
+	}
+
+	for (i = 1; i < psk.mNumBones; ++i)
+	{
+		q = Quaternion(psk.mBones[i].restDir[3],
+					   psk.mBones[i].restDir[0],
+					   psk.mBones[i].restDir[1],
+					   psk.mBones[i].restDir[2]);
+		q.getEulerAngles(&x, &z, &y);
+		z = -z;
+		y = -y;
+
+		tx = psk.mBones[i].restLoc[0]*scale;
+		ty = psk.mBones[i].restLoc[1]*scale;
+		tz = psk.mBones[i].restLoc[2]*scale;
+
+		/* Start a new bone */
+		freyjaBegin(FREYJA_BONE);
+		index_t bone = freyjaGetCurrent(FREYJA_BONE);
+		freyjaBoneFlags(bone, 0x0);
+		freyjaBoneName(bone, psk.mBones[i].name);
+		freyjaBoneTranslate3f(bone, tx, ty, tz);
+		freyjaBoneRotateEuler3f(bone, x, y, z);
+
+		/* Setup children */
+		for (j = 0; j < psk.mNumBones; ++j)
+		{
+			if (psk.mBones[j].parentIndex == i && i != j)
+			{
+				freyjaBoneAddChild(bone, j);
 			}
 		}
 

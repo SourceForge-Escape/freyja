@@ -69,7 +69,7 @@ FreyjaControl *FreyjaControl::mInstance = NULL;
 FreyjaControl::FreyjaControl() :
 	mGroupBitmap(0x0),
 	mSelectedTexture(0),
-	mSelectedView(PLANE_FRONT),
+	mSelectedView(PLANE_FREE),
 	mSelectedViewport(0),
 	mActionManager(),
 	mFlags(fNone),
@@ -3300,20 +3300,20 @@ void FreyjaControl::SetKeyFrame()
 
 			if (b)
 			{
-				BoneTrack &track = b->GetTransformTrack(GetSelectedAnimation());
+				BoneTrack &track = b->GetTrack(GetSelectedAnimation());
 				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
 				vec_t time = (vec_t)k / track.GetRate(); 
-				index_t id = track.NewKeyframe(time);
-				uint32 count = track.GetKeyframeCount();
+				index_t id = track.NewRotKeyframe(time);
+				uint32 count = track.GetRotKeyframeCount();
 
-				BoneKeyFrame *key = track.GetKeyframe(id);
-				freyjaGetBoneRotationEuler3fv(GetSelectedBone(),key->mRot.mVec);
-				key->mRot *= 57.295779513082323f;
-				freyjaGetBoneTranslation3fv(GetSelectedBone(), key->mLoc.mVec);
+				Vec3KeyFrame *key = track.GetRotKeyframe(id);
+				freyjaGetBoneRotationEuler3fv(GetSelectedBone(), key->mData.mVec);
+				key->mData *= 57.295779513082323f;
+				//FIXME
+				//freyjaGetBoneTranslation3fv(GetSelectedBone(), key->mLoc.mVec);
 
-				freyja_print("Created tBone keyframe[%i] <- %.3fs, %i/%i | %i", 
-							 mSelectedKeyFrame, time, id, count,
-							 track.mKeyFrames.size());
+				freyja_print("Created tBone keyframe[%i] <- %.3fs, %i/%i", 
+							 mSelectedKeyFrame, time, id, count);
 			}
 		}
 		break;
@@ -4985,13 +4985,13 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 					Bone *b = Bone::GetBone(GetSelectedBone());
 					if (b)
 					{
-						BoneTrack &track = b->GetTransformTrack(GetSelectedAnimation());
+						BoneTrack &track = b->GetTrack(GetSelectedAnimation());
 						uint32 k = GetSelectedKeyFrame();
-						BoneKeyFrame *key = track.GetKeyframe(k);
+						Vec3KeyFrame *key = track.GetRotKeyframe(k);
 
 						if (key)
 						{
-							mCursor.mRotate = key->GetEulerRotation();
+							mCursor.mRotate = key->GetData();//GetEulerRotation();
 						}
 					}
 				}
@@ -5050,13 +5050,14 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 					Bone *b = Bone::GetBone(GetSelectedBone());
 					if (b)
 					{
-						BoneTrack &track = b->GetTransformTrack(GetSelectedAnimation());
+						BoneTrack &track = b->GetTrack(GetSelectedAnimation());
 						uint32 k = GetSelectedKeyFrame();
-						BoneKeyFrame *key = track.GetKeyframe(k);
+						Vec3KeyFrame *key = track.GetRotKeyframe(k);
 
 						if (key)
 						{
-							key->SetEulerRotation(mCursor.mRotate);
+							//key->SetEulerRotation(mCursor.mRotate);
+							key->SetData(mCursor.mRotate);
 						}
 					}
 				}
@@ -5796,8 +5797,26 @@ void eImplementationRemovedUInt(unsigned int u)
 }
 
 
+void eRenderSkeletalDeform(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fSkeletalVertexBlending);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fSkeletalVertexBlending);
+	}
+
+	freyja_print("Animation with skeletal vertex blending is [%s]",
+				 value ? "ON" : "OFF");
+	freyja_event_gl_refresh();
+}
+
+
 void FreyjaViewEventsAttach()
 {
+	ResourceEventCallbackUInt::add("eSkeletalDeform", &eRenderSkeletalDeform);
 	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
 	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);
 	ResourceEventCallback::add("eCollapseFace", &eImplementationRemoved);

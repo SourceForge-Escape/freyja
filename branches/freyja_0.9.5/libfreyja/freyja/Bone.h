@@ -44,213 +44,57 @@ using namespace mstl;
 
 namespace freyja {
 
-class BoneKeyFrame : public KeyFrame
-{
- public:
-
-	BoneKeyFrame() : KeyFrame(), mLoc(), mRot(), mWorldPose(), mCombined() {}
-
-	BoneKeyFrame(BoneKeyFrame &key) : 
-		KeyFrame(), 
-		mLoc(key.mLoc), mRot(key.mRot), mWorldPose(), mCombined() {}
-
-	virtual ~BoneKeyFrame() {}
-
-	virtual uint32 GetSerializedSize() { return 4*4+4*3; }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	Vec3 GetEulerRotation() { return mRot; }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void SetEulerRotation(Vec3 v) { mRot = v; }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void SetPosition(Vec3 v) { mLoc = v; }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-
-	virtual bool Serialize(SystemIO::FileWriter &w) 
-	{
-		w.WriteFloat32(mLoc.mVec[0]);
-		w.WriteFloat32(mLoc.mVec[1]);
-		w.WriteFloat32(mLoc.mVec[2]);
-
-		w.WriteFloat32(mRot.mVec[0]);
-		w.WriteFloat32(mRot.mVec[1]);
-		w.WriteFloat32(mRot.mVec[2]);
-		w.WriteFloat32(0.0f); // padding in case I want to store quat
-
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Write data from this object to disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileReader &r) 
-	{ 
-		mLoc.mVec[0] = r.ReadFloat32();
-		mLoc.mVec[1] = r.ReadFloat32();
-		mLoc.mVec[2] = r.ReadFloat32(); 
-
-		mRot.mVec[0] = r.ReadFloat32();
-		mRot.mVec[1] = r.ReadFloat32();
-		mRot.mVec[2] = r.ReadFloat32();
-		r.ReadFloat32();
-
-		return true; 
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Read data into this object from disk
-	 ------------------------------------------------------*/
-
-
-	Vec3 mLoc;                       /* Keyframe data */
-
-	Vec3 mRot;
-
-	Matrix mWorldPose;               /* This is here for ease of use only */
-
-	Matrix mCombined;                /* <= mWorldPose * mBindToWorld, 
-									  * Convenice storage of deformation  */
-};
-
-
-class BoneTrack : public Track
+class BoneTrack
 {
 public:
-	BoneTrack() : Track(), mVertices() { mName = "Bone"; }
+
+	BoneTrack() : mRot(), mLoc() { }
+
+	~BoneTrack() { }
+
+	index_t GetKeyfameIndex(vec_t time) // mRot and mLoc have same rate/duration
+	{ return mRot.GetKeyfameIndexFromTime(time); }
+
+	Vec3KeyFrame *GetRotKeyframe(index_t key) // 'New' will return prev allocated as well
+	//{ return mRot.GetKeyframe(key); }
+	{ return (Vec3KeyFrame *)mRot.NewKeyframeByIndex(key); }
 	
-	~BoneTrack() {}
+
+	index_t NewRotKeyframe(vec_t time) { return mRot.NewKeyframe(time); }
+
+	Vec3KeyFrame *GetLocKeyframe(index_t key) // 'New' will return prev allocated as well
+	//{ return mLoc.GetKeyframe(key); }
+	{ return (Vec3KeyFrame *)mLoc.NewKeyframeByIndex(key); }
+
+	index_t NewLocKeyframe(vec_t time) { return mLoc.NewKeyframe(time); }
+
 	
-	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
-	{
-		BoneKeyFrame *prev = (BoneKeyFrame *)GetPrevKey(time);
-		BoneKeyFrame *key = prev ? new BoneKeyFrame(*prev) : new BoneKeyFrame();
-		key->mTime = time;
-		return key;
-	}
+	vec_t GetDuration() { return mRot.GetDuration(); }
 
-	virtual BoneKeyFrame *GetKeyframe(index_t idx) 
-	{
-		return (BoneKeyFrame *)Track::GetKeyframe(idx);
-	}
+	void SetDuration(vec_t d) { mRot.SetDuration(d); mLoc.SetDuration(d); }
 
-	void GetTransform(vec_t time, Vec3 &pos, Vec3 &rot) 
-	{
-		// Ran off the rails here... could wrap around, but just return for now
-		if (time > GetDuration() || time < 0.0f)
-		{
-			pos = Vec3(0,0,0);
-			rot = Vec3(0,0,0);
-			return;
-		}
-	
-		// Given time assertion this should be a 'valid' frame here...
-		int32 frame = GetKeyfameIndexFromTime(time);
-		BoneKeyFrame *key = GetKeyframe(frame);
-	
-		if (key)
-		{
-			pos = key->mLoc;
-			rot = key->mRot;
-		}
-		else
-		{
-			pos = Vec3(0,0,0);
-			rot = Vec3(0,0,0);
-		
-			// Find last keyframe ( not last played, that's for a game engine )
-			uint32 prev = GetPrevKeyframe(frame);
-			uint32 next = GetNextKeyframe(frame);
+	vec_t GetRate() { return mRot.GetRate(); }
 
-			// <= Interpolate(prev, next, time);
+	void SetRate(vec_t fps) { mRot.SetRate(fps); mLoc.SetRate(fps); }
 
-			key = GetKeyframe(prev);
+	uint32 GetRotKeyframeCount() { return mRot.GetKeyframeCount(); }
 
-			// Found a 'start' keyframe, or if you don't you'll use a
-			// dummy keyframe with reflexive transforms @ 0.0 seconds
-			vec_t start = 0.0f;
-			if (key)
-			{
-				// Prev bundle
-				pos = key->mLoc;
-				rot = key->mRot;
-				start = (vec_t)prev / GetRate();
-			}
-		
-			key = GetKeyframe(next);
-
-			// Found an 'end' keyframe, or if you don't you'll use a
-			// dummy keyframe with reflexive transforms @ 0.0 seconds
-			if (key)
-			{
-				// Next bundle
-				Vec3 posNext = key->mLoc;
-				Vec3 rotNext = key->mRot;
-				vec_t end = (vec_t)next / GetRate();
-
-				// Actual time displacement weight
-				vec_t w = (time - start) / (end - start);
-
-				pos = pos + ((posNext - pos) * w);
-				rot = rot + ((rotNext - rot) * w);
-			}
-		}
-	}
+	uint32 GetLocKeyframeCount() { return mLoc.GetKeyframeCount(); }
 
 
-	// NOTE: We store a vertex buffer here -- just for rendering right now
-	//       There is no reason to store to disk, etc.
-	void ArrayResize(uint32 sz) { mVertices.resize(sz*3); } 
+	Vec3 GetRot(vec_t time) { return mRot.GetTransform(time); }
 
-	vec_t *GetVertexArray() { return mVertices.getVectorArray(); }
-
-	uint32 GetVertexCount() { return mVertices.size()/3; }
-
-	Vec3 GetArrayElement(uint32 i)
-	{
-		Vec3 pos(0,0,0);
-
-		if (i < mVertices.end())
-		{
-			vec_t *array = mVertices.getVectorArray();
-			i *= 3;
-			pos.mVec[0] = array[i];
-			pos.mVec[1] = array[i+1];
-			pos.mVec[2] = array[i+2];
-		}
-
-		return pos;
-	}
-
-	void SetArrayElement(uint32 i, Vec3 pos)
-	{
-		if (i < mVertices.end())
-		{
-			vec_t *array = mVertices.getVectorArray();
-			i *= 3;
-			array[i  ] = pos.mVec[0];
-			array[i+1] = pos.mVec[1];
-			array[i+2] = pos.mVec[2];
-		}
-	}
+	bool GetRot(vec_t t, Vec3 &v)  { return mRot.GetTransform(t, v); }
 
 
-	Vector<vec_t> mVertices;
+	Vec3 GetLoc(vec_t time) { return mLoc.GetTransform(time); }
+
+	bool GetLoc(vec_t t, Vec3 &v)  { return mLoc.GetTransform(t, v); }
+
+
+	Vec3Track mRot;
+
+	Vec3Track mLoc;
 };
 
 
@@ -350,6 +194,30 @@ public:
 	 * Post : Pass transform changes up the heirarchy
 	 ------------------------------------------------------*/
 
+	index_t GetParent() { return mParent; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const char *GetName() { return mName; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	Matrix &GetBindPose() { return mBindPose; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	Matrix &GetInverseBindPose() { return mBindToWorld; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
 
 	byte mFlags;                     /* Options bitmap */
 
@@ -376,9 +244,10 @@ public:
 
 
 	// Test, only supporting one 'range/anim' in test: F(track) <- F(0)
-	index_t NewTransformTrack() {return 0;}
-	BoneTrack &GetTransformTrack(uint32 track) { return mKeyframes; }
-	BoneTrack mKeyframes;
+	index_t NewTrack() {return 0;}
+	BoneTrack &GetTrack(uint32 track) { return mTrack; }
+	BoneTrack mTrack;
+
 
 #if OBSOLETE
 	// Starting in 0.9.5 moved world transforms here from keyframing,

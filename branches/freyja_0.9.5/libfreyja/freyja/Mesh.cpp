@@ -33,6 +33,8 @@ index_t Mesh::mNextUID = 0;
 Mesh::Mesh() :
 	mTrack(),
 	mVertexAnimTrack(),
+	mBlendVerticesTime(-1.0f),
+	mBlendVertices(),
 	mUID(mNextUID++),
 	mInitBoundingVol(false),
 	mFlags(0),
@@ -72,6 +74,8 @@ Mesh::Mesh() :
 Mesh::Mesh(const Mesh &mesh) :
 	mTrack(),
 	mVertexAnimTrack(),
+	mBlendVerticesTime(-1.0f),
+	mBlendVertices(),
 	mUID(mNextUID++),
 	mInitBoundingVol(false),
 	mFlags(mesh.mFlags),
@@ -676,6 +680,17 @@ void Mesh::ExtrudeFace(index_t faceIndex, vec3_t displacement)
 			genFace->mTexCoordIndices.pushBack(D);
 		}
 	}
+}
+
+
+void Mesh::SetFaceSmoothingGroup(index_t face, uint32 group)
+{
+	Face *f = GetFace(face);
+
+	if (f)
+	{
+		f->SetSmoothingGroup(group);
+	}	
 }
 
 

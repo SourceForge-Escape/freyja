@@ -781,6 +781,15 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		{
 			array = kv->GetVertexArray();
 		}
+
+		if (mRenderMode & fSkeletalVertexBlending)
+		{
+			// FIXME: Only updating in render loop for testing only!
+			freyjaMeshUpdateBlendVertices(mesh.id, a, time);
+
+			if (freyjaGetMeshBlendVertices(mesh.id))
+				array = freyjaGetMeshBlendVertices(mesh.id);
+		}
 	}
 
 	// NOTE: Once we switch to more advanced arrays we have to
@@ -1177,7 +1186,7 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	const unsigned char x = 0, y = 1, z = 2;
 	const unsigned char xr = 0, yr = 1, zr = 2;
 	RenderBone bone, child;
-	Vector3d pos;
+	Vector3d pos, rot;
 	unsigned int i, n, index;
 
 
@@ -1190,6 +1199,37 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	/* Scale bones to match mesh scaling */
 	pos = bone.translate * scale;
 
+	/* Get orientation */
+	//freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
+	freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, rot.mVec);
+
+	/* Animation, if any... */
+	if (FreyjaControl::mInstance->GetControlScheme() == 
+		FreyjaControl::eScheme_Animation)
+	{
+		Bone *b = Bone::GetBone(currentBone);
+		if (b)
+		{
+			uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
+			uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
+			BoneTrack &track = b->GetTrack(a);
+
+			if (track.GetRot((vec_t)k / track.GetRate(), rot))
+			{
+			}
+
+			if (track.GetLoc((vec_t)k / track.GetRate(), pos))
+			{
+			}
+		}
+	}
+
+	/* Radians to degrees */
+	rot *= 57.295779513082323f;
+
+	/* Scale bones to match mesh scaling */
+	pos *= scale;
+
 	/* Render bone joint */
 	((FreyjaRender::mSelectedBone == currentBone) ? 
 	 glColor3fv(RED) : glColor3fv(GREEN));
@@ -1200,49 +1240,15 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	 glColor3fv(FreyjaRender::mColorBoneHighlight) : glColor3fv(FreyjaRender::mColorBone));
 	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
 
+
 	/* Transform child bones */
 	glPushMatrix();
 
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
-	switch (FreyjaControl::mInstance->GetControlScheme())
-	{
-	case FreyjaControl::eScheme_Animation:
-		{
-			Bone *b = Bone::GetBone(currentBone);
-			if (b)
-			{
-				BoneTrack &track = b->GetTransformTrack(FreyjaControl::mInstance->GetSelectedAnimation());
-				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
-				//BoneKeyFrame *key = track.GetKeyframe(k);
-
-				Vec3 pos, rot;
-				
-				track.GetTransform((vec_t)k / track.GetRate(), pos, rot);
-
-				glRotatef(rot.mVec[zr], 0, 0, 1);
-				glRotatef(rot.mVec[yr], 0, 1, 0);
-				glRotatef(rot.mVec[xr], 1, 0, 0);
-			}
-			else
-			{
-				freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, 
-											  bone.rotate.mVec);
-				bone.rotate *= 57.295779513082323f;
-				glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
-				glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
-				glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
-			}
-		}
-		break;
-
-	default:
-		freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
-		bone.rotate *= 57.295779513082323f;
-		glRotatef(bone.rotate.mVec[zr], 0, 0, 1);
-		glRotatef(bone.rotate.mVec[yr], 0, 1, 0);
-		glRotatef(bone.rotate.mVec[xr], 1, 0, 0);
-	}
+	glRotatef(rot.mVec[zr], 0, 0, 1);
+	glRotatef(rot.mVec[yr], 0, 1, 0);
+	glRotatef(rot.mVec[xr], 1, 0, 0);
 
 	n = bone.getChildrenCount();
 
@@ -1335,58 +1341,114 @@ void FreyjaRender::DrawCurveWindow()
 		glEnd();
 	}
 
-	vec_t time;
-	Vec3 v, pos, rot, scale;
-	m->mTrack.GetTransform(time, pos, rot, scale);
 
-	glColor3fv(RED);
-	glBegin(GL_LINES);
-	glVertex2f(x, yT[2]);
-	vec_t rateInverse = 1.0f / m->mTrack.GetRate();
-	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
+	if (m && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
 	{
-		time = (vec_t)i * rateInverse;
-		m->mTrack.GetTransform(time, pos, rot, scale);
-		v.mVec[0] = x + i*s;
-		v.mVec[1] = yT[2] + pos.mVec[0];
-		glVertex2fv(v.mVec);
-		glVertex2fv(v.mVec);
-	}
-	glVertex2f(width, yT[2]);
-	glEnd();
+		vec_t time;
+		Vec3 v, pos, rot, scale;
+		vec_t rateInverse = 1.0f / m->mTrack.GetRate();
+		uint32 count = m->mTrack.GetKeyframeCount();
 
-	glColor3fv(GREEN);
-	glBegin(GL_LINES);
-	glVertex2f(x, yT[2]);
-	rateInverse = 1.0f / m->mTrack.GetRate();
-	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
+		for (uint32 j = 0; j < 3; ++j)
+		{
+			switch (j)
+			{
+			case 0:
+				glColor3fv(RED);
+				break;
+
+			case 1:
+				glColor3fv(GREEN);
+				break;
+
+			default:
+				glColor3fv(BLUE);
+				break;
+			}
+
+			glBegin(GL_LINES);
+			glVertex2f(x, yT[2]);
+
+			for (uint32 i = 0; i < count; ++i)
+			{
+				time = (vec_t)i * rateInverse;
+				m->mTrack.GetTransform(time, pos, rot, scale);
+				v.mVec[0] = x + i*s;
+				v.mVec[1] = yT[2] + pos.mVec[j];
+				glVertex2fv(v.mVec);
+				glVertex2fv(v.mVec);
+			}
+
+			glVertex2f(width, yT[2]);
+			glEnd();
+
+			glBegin(GL_LINES);
+			glVertex2f(x, yT[2]+30.0f);
+
+			for (uint32 i = 0; i < count; ++i)
+			{
+				time = (vec_t)i * rateInverse;
+				m->mTrack.GetTransform(time, pos, rot, scale);
+				v.mVec[0] = x + i*s;
+				v.mVec[1] = yT[2]+30.0f + rot.mVec[j];
+				glVertex2fv(v.mVec);
+				glVertex2fv(v.mVec);
+			}
+
+			glVertex2f(width, yT[2]+30.0f);
+			glEnd();
+		}
+	}
+
+
+	/* Skeletal animation, if any... */
+	uint32 bone = FreyjaControl::mInstance->GetSelectedBone();
+	Bone *b = Bone::GetBone(bone);
+	
+	if (b && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tBone)
 	{
-		time = (vec_t)i * rateInverse;
-		m->mTrack.GetTransform(time, pos, rot, scale);
-		v.mVec[0] = x + i*s;
-		v.mVec[1] = yT[2] + pos.mVec[1];
-		glVertex2fv(v.mVec);
-		glVertex2fv(v.mVec);
-	}
-	glVertex2f(width, yT[2]);
-	glEnd();
+		vec_t time;
+		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
+		BoneTrack &track = b->GetTrack(a);
+		vec_t rateInverse = 1.0f / track.GetRate();
+		Vec3 v, p;
 
+		yT[2] += 20.0f;
 
-	glColor3fv(BLUE);
-	glBegin(GL_LINES);
-	glVertex2f(x, yT[2]);
-	rateInverse = 1.0f / m->mTrack.GetRate();
-	for (uint32 i = 0, count = m->mTrack.GetKeyframeCount(); i < count; ++i)
-	{
-		time = (vec_t)i * rateInverse;
-		m->mTrack.GetTransform(time, pos, rot, scale);
-		v.mVec[0] = x + i*s;
-		v.mVec[1] = yT[2] + pos.mVec[2];
-		glVertex2fv(v.mVec);
-		glVertex2fv(v.mVec);
+		for (uint32 j = 0; j < 3; ++j)
+		{
+			switch (j)
+			{
+			case 0:
+				glColor3fv(RED);
+				break;
+
+			case 1:
+				glColor3fv(GREEN);
+				break;
+
+			default:
+				glColor3fv(BLUE);
+				break;
+			}
+
+			glBegin(GL_LINES);
+			glVertex2f(x, yT[2]);
+
+			for (uint32 i = 0; i < track.GetRotKeyframeCount(); ++i)
+			{
+				time = (vec_t)i * rateInverse;
+				p = track.GetRot(time) * 57.295779513082323f;
+				v.mVec[0] = x + i*s;
+				v.mVec[1] = yT[2] + p.mVec[j];
+				glVertex2fv(v.mVec);
+				glVertex2fv(v.mVec);
+			}
+
+			glVertex2f(width, yT[2]);
+			glEnd();
+		}
 	}
-	glVertex2f(width, yT[2]);
-	glEnd();
 
 
 	if (mRenderMode & fGrid)
@@ -1429,7 +1491,6 @@ void FreyjaRender::DrawCurveWindow()
 		}
 		glEnd();
 	}
-
 
 	glColor3fv(mColorBackground);
 	glBegin(GL_QUADS);
