@@ -1487,7 +1487,7 @@ class SystemIO
 			return;
 
 		// Soft breakpoint insertion
-#if defined(__x86_64__) || defined(__x86_32__)
+#if defined(__x86_64__) || defined(__i386__)
 		asm(
 			 "int $3 \n" 
 		);

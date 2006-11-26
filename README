@@ -1,0 +1,89 @@
+
+ Freyja 0.9.5
+ ----------------------------------------------------------------------------
+
+ Freyja is a low polygon count 3d modler and animator.
+
+
+ * Starting new feature listing here to be comprehensive, and this is of
+   course incomplete.  Remove this line once it is complete...
+
+
+ Animation
+
+	* Object animation
+
+	* Vertex animation
+
+	* Skeletal animation
+
+	* Forward kinematics
+
+
+ Mesh editing
+
+	* Basic polygonal mesh editing
+
+	* Basic face exruding
+
+	* Texcoord generation
+
+	* Normal generation, flipping
+
+	* Tesselation
+
+	* Copy/Cut/Paste/Undo/Redo
+
+
+ Plugins
+
+	* NOD
+	* MDL/MD2/MD3/MD5 ( Doom3 )
+	* NIF4 ( Morrowind )
+	* PSK/PSA
+	* ...
+	* SMD - Full import / export, it's even save/load cycle safe
+	* EGG - Full import / export, Eggv7 and Eggv8
+	* JA  - Full import / export
+	* ASE - Import / export, However doesn't use all 3ds features
+	* OBJ - Import / export, No surface support
+	* MDL - ( Halflife ) Import skeleton, mesh import disabled
+	* MDL - ( Quake ) Import, export?, imports morph frames
+	* MD2 - Import, imports morph frames
+	* MD3 - Import/export, vertex morph frame import/export, no tags support
+	* GLM - ( Jedi Knight II, etc ) Import, can 'guess' bones from glm mesh too
+	* TR  - ( Tombraider 1-4 ) Import, disabled in current build
+	* PSK, PSA
+
+
+
+ DEVELOPER NOTES
+ ----------------------------------------------------------------------------
+
+
+ Adding a new widget to mgtk ( Resource.cpp version )
+ ----------------------------------------------------------------------------
+ 1. Add the new Gtk+ implemetation to mgtk_resource.cpp.  Remember you must
+	take an 'arg' and pass an 'arg' back.
+
+ 2. Hookup any callbacks in mgtk_callbacks.cpp or mgtk_resource.cpp if wrapping.
+
+ 3. Add declaration of Gtk+ implementation function to Resource.cpp.
+
+ 4. Add an mlisp symbol to C function binding in Resource::Resource() using 
+	RegisterFunction(...).
+
+
+ SVN examples
+ ----------------------------------------------------------------------------
+
+	svn commit -m "Comment"
+
+	svn co svn://svn.icculus.org/freyja/trunk freyja
+
+	svn co svn+ssh://USERNAME@svn.icculus.org/public/freyja/trunk/ freyja
+
+
+
+
+

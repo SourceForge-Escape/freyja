@@ -6,6 +6,8 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Documentation clean up
+ - FIX for soft breakpoint insertion on i386 arch builds
  - Curve view KISS - <Object mode, Current selected> eg 'Bone, 1', 'Mesh, 0'
    No editing still, since I might add b-splines or something nice later
  - Minor plugin touch ups

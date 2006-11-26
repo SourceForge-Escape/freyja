@@ -1863,13 +1863,20 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 
 			Matrix world;
 			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			world.rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]);
+			world.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
 
 #if 0
+			// If this was a 'normal' data stream.. this would work 
 			Matrix combined = world * b->GetInverseBindPose();
 #else
-			world.invert();
-			Matrix combined = b->GetInverseBindPose() * world;
+			Matrix local;
+			loc = b->mTranslation;
+			b->mRotation.getEulerAngles(rot.mVec, rot.mVec+2, rot.mVec+1);
+			local.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
+			local.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]);
+			
+			local.invert();
+			Matrix combined = local * world;
 #endif
 
 			p = (combined * p) * w->mWeight;
