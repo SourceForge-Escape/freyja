@@ -4700,28 +4700,6 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tMesh:
 		{	
-#if 0
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-
-			if (m)
-			{
-				if (mToken)
-				{
-					// This is always a relative transform due to implementation
-					Action *a = new ActionMeshTranslateExt(GetSelectedMesh(), m->GetPosition(), mCursor.mPos);
-					mCursor.mPos = m->GetPosition();
-					ActionModelModified(a);
-					return;
-				}
-
-				// Set mesh position to be at cursor pos
-				Matrix t;
-				Vec3 u = mCursor.mPos - m->GetPosition();
-				t.translate(u.mVec[0], u.mVec[1], u.mVec[2]);
-				m->SetPosition(mCursor.mPos);
-				m->TransformVertices(t);
-			}
-#else
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 
 			if (m)
@@ -4729,8 +4707,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				mCursor.mLastPos = m->GetPosition();
 			}
 
-			mToken = true;	
-#endif
+			mToken = true;
 		}
 		break;
 
@@ -5188,13 +5165,12 @@ bool FreyjaControl::LoadRecentFilesResource(const char *filename)
 {
 	/* Recent files persistance */
 	SystemIO::TextFileReader r;
-	//String file = freyja_rc_map_string(filename);
 	
-	if (r.Open(filename/*file.GetCString()*/))
+	if (r.Open(filename))
 	{
 		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
 		{
-			const char *sym = r.GetLine();//r.ParseSymbol();
+			const char *sym = r.GetLine();
 			AddRecentFilename(sym);
 		}
 		

@@ -1341,7 +1341,7 @@ void FreyjaRender::DrawCurveWindow()
 		glEnd();
 	}
 
-
+	// FIXME: Use cursor mode to determine which to 'modify and render here'
 	if (m && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
 	{
 		vec_t time;
@@ -1404,9 +1404,11 @@ void FreyjaRender::DrawCurveWindow()
 	/* Skeletal animation, if any... */
 	uint32 bone = FreyjaControl::mInstance->GetSelectedBone();
 	Bone *b = Bone::GetBone(bone);
-	
+
+	// FIXME: Use cursor mode to determine which to 'modify and render here'
 	if (b && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tBone)
 	{
+		const vec_t shift = 60.0f;
 		vec_t time;
 		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
 		BoneTrack &track = b->GetTrack(a);
@@ -1415,20 +1417,22 @@ void FreyjaRender::DrawCurveWindow()
 
 		yT[2] += 20.0f;
 
+		glLineWidth(1.5);
+
 		for (uint32 j = 0; j < 3; ++j)
 		{
 			switch (j)
 			{
 			case 0:
-				glColor3fv(RED);
+				glColor3fv(DARK_RED);
 				break;
 
 			case 1:
-				glColor3fv(GREEN);
+				glColor3fv(DARK_GREEN);
 				break;
 
 			default:
-				glColor3fv(BLUE);
+				glColor3fv(DARK_BLUE);
 				break;
 			}
 
@@ -1445,9 +1449,42 @@ void FreyjaRender::DrawCurveWindow()
 				glVertex2fv(v.mVec);
 			}
 
+#if 1
 			glVertex2f(width, yT[2]);
 			glEnd();
+
+			switch (j)
+			{
+			case 0:
+				glColor3fv(RED);
+				break;
+
+			case 1:
+				glColor3fv(GREEN);
+				break;
+
+			default:
+				glColor3fv(BLUE);
+				break;
+			}
+
+			glBegin(GL_LINES);
+			glVertex2f(x, yT[2]+shift);
+
+			for (uint32 i = 0; i < track.GetRotKeyframeCount(); ++i)
+			{
+				time = (vec_t)i * rateInverse;
+				p = track.GetLoc(time) * 2.0f;;
+				v.mVec[0] = x + i*s;
+				v.mVec[1] = yT[2]+shift + p.mVec[j];
+				glVertex2fv(v.mVec);
+				glVertex2fv(v.mVec);
+			}
+
+			glVertex2f(width, yT[2]+shift);
+			glEnd();
 		}
+#endif
 	}
 
 

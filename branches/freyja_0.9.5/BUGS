@@ -12,13 +12,17 @@
 
  Known bugs
 
+ - Copy / Cut / Paste not fully working with meshes anymore
+
  - Cursor axis select might be broke for some views on 'ALL' picks
 
- - Reverse engineer plugin isn't taking values correctly from spin buttons
+ - Reverse engineer plugin spin buttons don't always update
+	- Tabbing always updates
+	- Sometimes typing space and enter updates.. weird
 
  - New mesh copy system doesn't buffer, since copy = copy + paste
 
- - Cursor reset on undo ( use a freaking seperate undo state system )
+ - Cursor reset on undo ( use a freaking seperate undo state system for cursor )
 
  - Plugins
 	- I guess I forgot to port some plugins to support 64bit/big endian oops
@@ -42,33 +46,21 @@
 
  - Actual bug report: 'generated sphere looks retarded' it's true too
    just needs to be subdiv with quads
-
- - Material name textbox not updating?
-
- - Keyframes should keep transform of last keyframe as init
-   to avoid interpolation issues ( eg extra rotation in 'tweens )
-   FIX this in the backend to "to it right" during allocation of new frame
  
  - Keyframe and cursor transforms 'fight' each other during editing
    FIX this in FreyjaRender by having a special mode for this case
 
  - What happened to ray picked UV faces in UV editor?
 
- - Orbital/Free view ray pick is off only when you translate the editor scene
-
  - Scale tool sucks it's so broke nothing works properly
 	- Keyframe scaling edits geometery instead of keyframe
+	- Scale cursor doesn't stretch all pretty and useless like!
 
- - Face scale, scale doesn't work
+ - Face rotate, scale doesn't work in interface
 
- - Skeleton tree widget not cleared on Clear()
-
- - Scale cursor doesn't work with stretch yet
-
- - Bone rotate only works on Front
+ - Skeleton tree widget not cleared on Close / New
 
  - Bone componet creation is broken / not completely hooked up
 
- - Box buttons look like labels to people
 
 

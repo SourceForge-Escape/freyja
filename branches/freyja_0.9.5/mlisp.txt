@@ -1,0 +1,34 @@
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;; mgtk widgets
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;
+; menu_item:
+;  (menu_item	"Label"		eEvent)
+;  (menu_item	"Label"		eEvent		number-or-subevent)
+;  (menu_item	"Label"		eEvent		"gtk-icon")
+;  (menu_item	"Label"		eEvent		"accel"			"gtk-icon")
+;
+; togglebutton:
+;  (togglebutton	"Label"		eEvent)
+;  (togglebutton	"Label"		eEvent		eSubEvent)
+;
+;  (expander "Label" boolean-opened ...)
+;
+;  (scrollarea ...)
+;
+; (textbox "text" EVENT COMMAND)
+; (option_menu (menu_item ...))
+; (button "label" EVENT COMMAND)
+; (vbox homogenous spacing expand fill pading ...)
+; (hbox homogenous spacing expand fill pading ...)
+; (hslider EVENT min max)
+; (icon filename/iconname IconSize_*)
+	; IconSize_Menu
+	; IconSize_ToolbarSmall
+	; IconSize_Toolbar
+	; IconSize_Button
+	; IconSize_Dialog
+;(filechoosermenu_item "label" "dialog title" ["key"] eEvent "special" "icon")
+	;; Special file chooser options
+	; mode=create-folder|select-folder|(open)|save  
+    ; confirm-overwrite=true|(false)
