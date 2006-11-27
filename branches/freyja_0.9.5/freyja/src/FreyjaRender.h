@@ -28,6 +28,7 @@
 
 #include <hel/ViewVolume.h>
 #include <hel/Ray.h>
+#include <mstl/SystemIO.h>
 #include <freyja/RenderModel.h>
 
 
@@ -536,6 +537,7 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	mstl::Timer mTimer;
 
 	uint32 mViewMode;                          /* View mode */
 

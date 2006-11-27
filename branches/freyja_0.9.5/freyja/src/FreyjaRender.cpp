@@ -85,6 +85,7 @@ double gMatrix[16];
 
 
 FreyjaRender::FreyjaRender() :
+	mTimer(),
 	mViewMode(VIEWMODE_MODEL_VIEW),
 	mRenderMode(fBoundingVolSelection | 
 				fBonesNoZbuffer | 
@@ -484,8 +485,9 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 
 void FreyjaRender::Display() 
 { 
-	if (!mInitContext)
-	{ 
+	if (!mInitContext || mTimer.GetTicks() < 1667) // ~60.0 fps cap
+	{
+		//freyja_print("%f frames dropped", (float)mTimer.GetTicks()/1000.0f);
 		return;
 	}
 	
@@ -609,6 +611,8 @@ void FreyjaRender::Display()
 	
 	glFlush();
 	freyja_swap_buffers();
+
+	mTimer.Reset();
 }
 
 
@@ -1135,6 +1139,7 @@ void FreyjaRender::Render(RenderModel &model)
 		}
 	}
 
+
 	RenderMesh rmesh;
 
 	for (uint32 i = 0, count = model.getMeshCount(); i < count; ++i)
@@ -1153,6 +1158,35 @@ void FreyjaRender::Render(RenderModel &model)
 
 	glPopMatrix();
 
+	{
+		Vec3 p;
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		for (uint32 i = 0; i < freyjaGetCount(FREYJA_BONE); ++i)
+		{
+			freyjaGetBoneWorldPos3fv(i, p.mVec);
+			glPushMatrix();
+			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
+			glColor3fv(YELLOW);
+			mglDrawSphere(12, 12, 0.5f);
+			glPopMatrix();
+
+			glBegin(GL_LINES);
+			glColor3fv(GREEN);
+			glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
+			freyjaGetBoneWorldPos3fv(freyjaGetBoneParent(i), p.mVec);
+			glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
+			glEnd();
+
+			//	MSTL_MSG("\t%i %f %f %f", i, p.mVec[0], p.mVec[1], p.mVec[2]);
+		}
+
+		glPopAttrib();
+	}
 
 	/* Render skeleton */
 	if (mRenderMode & fBones)

@@ -4017,9 +4017,6 @@ void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
 
 void FreyjaControl::addObject()
 {
-	int index = -1, root;
-
-
 	switch (mObjectMode)
 	{
 	case tPoint:
@@ -4027,47 +4024,50 @@ void FreyjaControl::addObject()
 		break;
 
 	case tBone:
-		if (!freyjaGetCount(FREYJA_SKELETON))
 		{
-			SetSelectedSkeleton(freyjaSkeletonCreate());
+			if (freyjaGetCount(FREYJA_SKELETON) == 0)
+			{
+				SetSelectedSkeleton(freyjaSkeletonCreate());
+			}
+
+			index_t skel = GetSelectedSkeleton();
+			index_t parent = GetSelectedBone();
+			index_t idx = freyjaBoneCreate(skel);
+
+			if (idx == 0)
+			{
+				freyjaSkeletonRootIndex(skel, idx);
+				freyjaBoneParent(idx, -1);
+			}
+			else //if (index > 0 && index != root)
+			{
+				freyjaBoneParent(idx, parent);
+				freyjaBoneAddChild(parent, idx);
+			}
+
+			//if (idx > -1)
+			{
+				String s;
+
+				freyjaBoneTranslate3f(idx, 0.0f, 0.0f, 0.0f);
+				freyjaBoneRotateEuler3f(idx, 0.0f, 0.0f, 0.0f);
+				freyjaBoneFlags(idx, 0x0);
+				s.Set("bone_%i", idx);
+				freyjaBoneName(idx, s.GetCString());
+				freyjaSkeletonAddBone(skel, idx);
+				freyjaSkeletonUpdateBones(skel);
+				UpdateSkeletonUI_Callback(skel);
+
+				SetSelectedBone(idx);
+
+				freyja_event_gl_refresh();
+				freyja_print("New Skel[%u].Bone[%u], parent = %i",
+							 skel, idx, freyjaGetBoneParent(idx));
+			}
+
+
+			ActionModelModified(NULL);
 		}
-
-		root = GetSelectedBone(); // really parent
-		index = freyjaBoneCreate(GetSelectedSkeleton());
-
-		if (index == 0)
-		{
-			freyjaSkeletonRootIndex(GetSelectedSkeleton(), index);
-		}
-
-		if (index > 0 && index != root)
-		{
-			freyjaBoneParent(index, root);
-		}
-
-		if (index > -1)
-		{
-			String s;
-			int skel = GetSelectedSkeleton();
-
-			freyjaBoneTranslate3f(index, 0.0f, 0.0f, 0.0f);
-			freyjaBoneRotateEuler3f(index, 0.0f, 0.0f, 0.0f);
-			freyjaBoneFlags(index, 0x0);
-			s.Set("bone_%i", index);
-			freyjaBoneName(index, s.GetCString());
-			freyjaSkeletonAddBone(skel, index);
-			freyjaSkeletonUpdateBones(skel);
-			UpdateSkeletonUI_Callback(skel);
-
-			SetSelectedBone(index);
-
-			freyja_event_gl_refresh();
-			freyja_print("New Skel[%u].Bone[%u], parent = %i",
-						 skel, index, root);
-		}
-
-
-		ActionModelModified(NULL);
 		break;
 
 	case tMesh:
@@ -4214,6 +4214,12 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 					//mCursor.mPos = m->GetFacePosition();
 				}
 			}
+		}
+		break;
+
+	case tBone:
+		{
+			freyjaGetBoneWorldPos3fv(GetSelectedBone(), mCursor.mPos.mVec);
 		}
 		break;
 
@@ -4767,11 +4773,28 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tBone: 
 		{
+			// FIXME: This shouldn't be 'set' here
+
 			// Get _WORLD_ position of bone, and use _WORLD_ space transforms
 			// to match the rest of this system, since local space design
 			// was canned
 
+			index_t bone = GetSelectedBone();
+			index_t parent = freyjaGetBoneParent(bone);
 			
+			if (bone != parent && parent != INDEX_INVALID)
+			{
+				Vec3 p;
+				freyjaGetBoneWorldPos3fv(parent, p.mVec);
+				Bone *b = Bone::GetBone(bone);
+
+				if (b)
+				{
+					p = b->mRotation.rotate(p);
+					p = mCursor.mPos - p;
+					freyjaBoneTranslate3fv(bone, p.mVec);
+				}
+			}
 		}
 		break;
 

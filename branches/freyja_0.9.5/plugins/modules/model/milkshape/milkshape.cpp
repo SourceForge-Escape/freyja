@@ -518,7 +518,7 @@ int freyja_model__milkshape_import(char *filename)
 								mdl.joints[i].rotation[1],
 								mdl.joints[i].rotation[2]);
 
-		MSTL_MSG("%s", mdl.joints[i].name);
+		//MSTL_MSG("%s", mdl.joints[i].name);
 
 		for (j = 0; j < mdl.nNumJoints; ++j)
 		{
@@ -529,7 +529,7 @@ int freyja_model__milkshape_import(char *filename)
 			
 			if (!strncmp(mdl.joints[i].parentName, mdl.joints[j].name, 32))
 			{
-				MSTL_MSG("%s <- %s", mdl.joints[i].parentName, mdl.joints[i].name);
+				//MSTL_MSG("%s <- %s", mdl.joints[i].parentName, mdl.joints[i].name);
 				freyjaBoneParent(index, j);
 			}
 		}

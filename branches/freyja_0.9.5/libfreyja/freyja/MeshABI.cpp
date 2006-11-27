@@ -1900,8 +1900,30 @@ vec_t *freyjaGetMeshBlendVertices(index_t mesh)
 }
 
 
+void freyjaDebugMeshBlendVertices(index_t mesh)
+{
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	
+	if (m && m->GetBlendVerticesArray()) 
+	{
+		vec_t *array = m->GetBlendVerticesArray();
+	
+		for (uint i = 0, n = m->GetVertexCount(); i < n; ++i)
+		{
+			Vertex *v = m->GetVertex(i);
 
+			if (!v)
+				continue;
+			
+			Vec3 p;
+			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
 
-
+			printf("%i, mesh, %f, %f, %f\n", 
+				   i, p.mVec[0], p.mVec[1], p.mVec[2]);
+			printf("%i, blnd, %f, %f, %f\n", 
+				   i, array[i*3], array[i*3+1], array[i*3+2]);
+		}
+	}
+}
 
 

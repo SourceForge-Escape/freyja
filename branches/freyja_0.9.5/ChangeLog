@@ -6,6 +6,9 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Bone/Joint editing fixes -- don't worry it's still mostly broken
+ - FPS cap at 60fps
+ - Simple timer mstl::Timer
  - Documentation clean up
  - FIX for soft breakpoint insertion on i386 arch builds
  - Curve view KISS - <Object mode, Current selected> eg 'Bone, 1', 'Mesh, 0'
