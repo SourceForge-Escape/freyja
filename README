@@ -61,6 +61,15 @@
  ----------------------------------------------------------------------------
 
 
+ Compiling for ATi systems
+ ----------------------------------------------------------------------------
+ 1. Open freyja/Makefile
+
+ 2. Remove the line -DUSE_ARB_MULTITEXTURE -DOPENGL_EXT_MULTITEXTURE
+
+ 3. Remove the \ character at the end of the line above that one
+
+
  Adding a new widget to mgtk ( Resource.cpp version )
  ----------------------------------------------------------------------------
  1. Add the new Gtk+ implemetation to mgtk_resource.cpp.  Remember you must

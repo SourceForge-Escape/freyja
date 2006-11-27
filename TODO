@@ -11,6 +11,7 @@
 		- ABI Only in interface for bone keyframe render / edit?
 		- Visualize weights over skinned mesh
 		- Edge picking
+		- Facet knife
 		- Make sure you can do: OBJ + SMD dumps for the ASCII groupies
 		- Might want to add rotation types or always do 'about center' pivots
 			- Pivot: 3d cursor, bbox center, etc
@@ -21,12 +22,8 @@
 			- Work OpenGLPrinter into main line build now for text support
 		- Rotation cursor with radius sweeps to cursor pos following an arc
 			- Also replace the old RotateObject() code to just use cursor
-		- freyja ABI wrapper for new keyframe backend
-			- BoneAnim and Mesh type ABI support
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
-		- Timers for display 'sleep' and animation playback
-			- Cap FPS in display()
-			- Generic system abstracted timers
+		- Timers for animation playback
 
 	* Skeletal animation
 		- Fix bone rendering to support unparented bones that aren't root? 
@@ -62,6 +59,7 @@
 		- Direct edge selection
 		- Spline interface
 		- Improve extrude UI
+		- Bi-symmetry modeling support
 
 	* Sphere/ray brush ( aka paint interface )
 		- Paint with ray test

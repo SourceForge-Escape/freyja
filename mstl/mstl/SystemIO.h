@@ -25,11 +25,13 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <dirent.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 #ifdef WIN32
 #   include <windows.h>
@@ -65,46 +67,60 @@
 
 namespace mstl {
 
-#if 0
 class Timer
 {
  public:	
 
-	static float GetTicks(bool reset)
-	{
-		static struct timeval start;
-		static struct timeval stop;
-		static struct timeval total;
-		static struct timezone tz;
-		vec_t time = 0.0f;
+	Timer() : mTZ(), mStart(), mStop() { Reset(); }
 
-		if (reset)
-		{
-			gettimeofday(&start, &tz);
-			total.tv_sec = 0;
-			total.tv_usec = 0;
-		}
-		else
-		{
-			gettimeofday(&stop, &tz);
-			
-			if (start.tv_usec > stop.tv_usec) 
-			{ 
-				stop.tv_usec = (1000 + stop.tv_usec); 
-				stop.tv_sec--; 
-			} 
-			
-			stop.tv_usec -= start.tv_usec; 
-			stop.tv_sec -= start.tv_sec;
+	~Timer() { }
 
-			time = ( (stop.tv_sec - start.tv_sec) * 1000.0f +
-						(stop.tv_usec - start.tv_usec) / 1000.0f );
-		}
-
-		return time;
+	void Reset() 
+	{ 
+		gettimeofday(&mStart, &mTZ);
+		//mTotal.tv_sec = mTotal.tv_usec = 0; 
 	}
+ 
+	unsigned int GetTicks()
+	{
+		gettimeofday(&mStop, &mTZ);
+			
+		if (mStart.tv_usec > mStop.tv_usec) 
+		{ 
+			mStop.tv_usec = (1000 + mStop.tv_usec); 
+			--mStop.tv_sec; 
+		} 
+
+		//mStop.tv_usec -= mStart.tv_usec; 
+		//mStop.tv_sec -= mStart.tv_sec;
+
+		return ( ((mStop.tv_sec - mStart.tv_sec)*1000) + 
+					(mStop.tv_usec - mStart.tv_usec));
+	}
+
+	float GetElapsed()
+	{
+		const float uinv = 1 / 1000.0f;
+
+		gettimeofday(&mStop, &mTZ);
+			
+		if (mStart.tv_usec > mStop.tv_usec) 
+		{ 
+			mStop.tv_usec = (1000 + mStop.tv_usec); 
+			--mStop.tv_sec; 
+		} 
+			
+		//mStop.tv_usec -= mStart.tv_usec; 
+		//mStop.tv_sec -= mStart.tv_sec;
+
+		return ( ((float)(mStop.tv_sec - mStart.tv_sec)) +
+					((float)(mStop.tv_usec - mStart.tv_usec)) * uinv);
+	}
+
+	struct timezone mTZ;
+	struct timeval mStart;
+	struct timeval mStop;
 };
-#endif
 
 
 class SystemIO
