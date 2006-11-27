@@ -4219,7 +4219,30 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	case tBone:
 		{
-			freyjaGetBoneWorldPos3fv(GetSelectedBone(), mCursor.mPos.mVec);
+			Vec3 p;
+			vec_t t, closest;
+			int selected = -1;
+
+			for (uint32 i = 0, count = freyjaGetCount(FREYJA_BONE); i < count; ++i)
+			{
+				freyjaGetBoneWorldPos3fv(i, p.mVec);
+
+				if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, 0.5f, t))
+				{
+					if (selected == -1 || t < closest)
+					{
+						selected = i;
+						closest = t;
+					}
+				}
+			}
+
+			if (selected > -1)
+			{
+				SetSelectedBone(selected);
+				mCursor.mPos = p;
+				freyja_print("! Bone[%i] selected by pick ray.", selected);
+			}
 		}
 		break;
 
