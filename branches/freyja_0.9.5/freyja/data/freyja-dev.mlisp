@@ -274,11 +274,11 @@
 				(toolbar_togglebutton false "24x24/point.png" "Points" 
 					"Point render mode"		eEvent	eRenderVertex)
 
-				(toolbar_togglebutton false "24x24/wireframe.png" "Wireframe" 
-					"Wireframe render mode"		eEvent	eRenderWireframe)
-
 				(toolbar_togglebutton false "24x24/normals.png" "Normals" 
 					"Normals render mode"		eEvent	eRenderNormals)
+
+				(toolbar_togglebutton false "24x24/wireframe.png" "Wireframe" 
+					"Wireframe render mode"		eEvent	eRenderWireframe)
 
 				(toolbar_togglebutton false "24x24/solid.png" "Faces"
 					"Solid face render mode"		eRenderFace	eRenderFace)
