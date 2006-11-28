@@ -24,12 +24,15 @@
 			- Also replace the old RotateObject() code to just use cursor
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
 		- Timers for animation playback
+		- Ray/Vector based orbital view cursor guides ( 'go where I want' )
+		- Rotation cursor needs final, real implementation added now
+			- Circle around projected center or do something equally clever
+			  for more tacticle control
+
 
 	* Skeletal animation
-		- Fix bone rendering to support unparented bones that aren't root? 
-			- Fix bone world coord
-		- Out of heirarchy skeleton rendering / backend support
-		- Joint/Bone tool that creates and connects to last on each click
+		- Fix bone bind, bindtoworld setup in backend
+		- Joint/Bone tool that creates and connects to last on each click?
 
 	* Interface
 		- Add generic bbox selection back for multivertex editing, etc

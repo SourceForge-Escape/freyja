@@ -308,14 +308,13 @@ void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 {
 #if 1
 	index_t parent = freyjaGetBoneParent(boneIndex);
-	Vec3 v;
+	Vec3 v(0,0,0);
 
 	if (freyjaIsBoneAllocated(parent))
 	{
 		freyjaGetBoneWorldPos3fv(parent, v.mVec);
 	}
 
-	
 	Bone *b = Bone::GetBone(boneIndex);
 
 	if (b)
@@ -327,39 +326,6 @@ void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 	xyz[0] = v.mVec[0];
 	xyz[1] = v.mVec[1];
 	xyz[2] = v.mVec[2];
-
-#elif 1
-	Bone *b = Bone::GetBone(boneIndex);
-
-	if (!b)
-	{
-		return;
-	}
-
-	Vec3 loc = b->mTranslation;
-	Vec3 rot;
-	Vec3 v(0,0,0);
-	b->mRotation.getEulerAngles(rot.mVec, rot.mVec+1, rot.mVec+2);
-	Matrix world;
-	//rot *= 57.0f;
-	world.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
-	world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-	v = world * v;
-	xyz[0] = v.mVec[0];
-	xyz[1] = v.mVec[1];
-	xyz[2] = v.mVec[2];
-
-	index_t parent = freyjaGetBoneParent(boneIndex);
-
-	if (freyjaIsBoneAllocated(parent))
-	{
-		vec3_t off;
-		freyjaGetBoneWorldPos3fv(parent, off);
-
-		xyz[0] += off[0];
-		xyz[1] += off[1];
-		xyz[2] += off[2];
-	}
 #else
 	Bone *b = Bone::GetBone(boneIndex);
 
