@@ -2726,6 +2726,7 @@ int freyja_model__psk_import(char *filename)
 		freyjaBoneName(bone, psk.mBones[i].name);
 		freyjaBoneTranslate3f(bone, tx, ty, tz);
 		freyjaBoneRotateEuler3f(bone, x, y, z);
+		freyjaBoneParent(bone, -1);
 
 		/* Setup children */
 		for (j = 0; j < psk.mNumBones; ++j)
@@ -2760,6 +2761,7 @@ int freyja_model__psk_import(char *filename)
 		freyjaBoneName(bone, psk.mBones[i].name);
 		freyjaBoneTranslate3f(bone, tx, ty, tz);
 		freyjaBoneRotateEuler3f(bone, x, y, z);
+		freyjaBoneParent(bone, psk.mBones[i].parentIndex);
 
 		/* Setup children */
 		for (j = 0; j < psk.mNumBones; ++j)

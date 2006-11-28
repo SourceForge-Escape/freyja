@@ -3422,7 +3422,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					
 				default:
 					;
-				}			
+				}
 			}
 		}
 	}
@@ -3435,6 +3435,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	bool swappedModes = false;
 	vec_t vx = x, vy = y;
 	EventMode mode = mEventMode;
+	Cursor::Flags cm = mCursor.GetMode();
 	mMouseButton = btn;
 	mMouseState = state;
 	mModKey = mod;
@@ -3539,7 +3540,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		}
 		else if (mod & KEY_LSHIFT)
 		{
-			handleEvent(eEvent, eRotate);
+			handleEvent(eEvent, eUnselect);
 			swappedModes = true;
 		}
 
@@ -3642,6 +3643,11 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		}
 	}
 
+	if (mEventMode != mode)
+	{
+		mCursor.SetMode(cm);
+	}
+
 	mEventMode = mode;
 
 	return ret;
@@ -3664,6 +3670,7 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 		return true;
 
 	EventMode mode = mEventMode;
+	Cursor::Flags cm = mCursor.GetMode();
 	mMouseButton = btn;
 	mMouseState = state;
 	mModKey = mod;
@@ -3715,7 +3722,7 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 		}
 		else if (mod & KEY_LSHIFT)
 		{
-			handleEvent(eEvent, eRotate);
+			handleEvent(eEvent, eUnselect);
 		}
 
 		MouseEdit(btn, state, mod, x, y);
@@ -3725,6 +3732,11 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 	}
 
 	// Mongoose 2002.01.12, Reset mode
+	if (mEventMode != mode)
+	{
+		mCursor.SetMode(cm);
+	}
+
 	mEventMode = mode;
 	return true;
 }
@@ -4240,7 +4252,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if (selected > -1)
 			{
 				SetSelectedBone(selected);
-				mCursor.mPos = p;
+				freyjaGetBoneWorldPos3fv(selected, mCursor.mPos.mVec);
 				freyja_print("! Bone[%i] selected by pick ray.", selected);
 			}
 		}
@@ -4804,19 +4816,23 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 			index_t bone = GetSelectedBone();
 			index_t parent = freyjaGetBoneParent(bone);
-			
-			if (bone != parent && parent != INDEX_INVALID)
+			Bone *b = Bone::GetBone(bone);
+
+			if (!b)
+			{
+				freyja_print("Tried to move invalid bone");
+			}
+			else if (parent == INDEX_INVALID)
+			{
+				freyjaBoneTranslate3fv(bone, mCursor.mPos.mVec);
+			}
+			else if (bone != parent)
 			{
 				Vec3 p;
 				freyjaGetBoneWorldPos3fv(parent, p.mVec);
-				Bone *b = Bone::GetBone(bone);
-
-				if (b)
-				{
-					p = b->mRotation.rotate(p);
-					p = mCursor.mPos - p;
-					freyjaBoneTranslate3fv(bone, p.mVec);
-				}
+				//p = b->mRotation.rotate(p);
+				p = mCursor.mPos - p;
+				freyjaBoneTranslate3fv(bone, p.mVec);
 			}
 		}
 		break;
@@ -5000,7 +5016,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	switch (mObjectMode)
 	{
 	case tBone:
-		{	
+		{
+			d *= 0.25f;
+
 			switch (GetControlScheme())
 			{
 			case eScheme_Animation:
@@ -5014,7 +5032,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 						if (key)
 						{
-							mCursor.mRotate = key->GetData();//GetEulerRotation();
+							mCursor.mRotate = key->GetData();
 						}
 					}
 				}
@@ -5022,10 +5040,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 			case eScheme_Model:
 				// Set cursor pos and rotation
-				//freyjaGetBoneTranslation3fv(GetSelectedBone(), mCursor.mPos.mVec);
-				//freyjaGetBoneWorldPos3fv(GetSelectedBone(), mCursor.mPos.mVec);
 				freyjaGetBoneRotationEuler3fv(GetSelectedBone(), o.mVec);
-				
+
 				mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
 				mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
 				mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
@@ -5039,7 +5055,6 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	default:
 		;
-		//freyja_print("!Case not handled in rotateObject");
 	}
 
 	mCursor.mRotate += d; 

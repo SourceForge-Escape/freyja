@@ -1158,6 +1158,10 @@ void FreyjaRender::Render(RenderModel &model)
 
 	glPopMatrix();
 
+	/* Point type setting shows actual bind pose skeleton */
+	if (mRenderMode & fBones && 
+		FreyjaRender::mJointRenderType == 2 || 
+		FreyjaRender::mJointRenderType == 1)
 	{
 		Vec3 p;
 		glPushAttrib(GL_ENABLE_BIT);
@@ -1171,25 +1175,32 @@ void FreyjaRender::Render(RenderModel &model)
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
 			glPushMatrix();
 			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
-			glColor3fv(YELLOW);
+
+			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+			glColor3fv(PINK) : glColor3fv(YELLOW);
 			mglDrawSphere(12, 12, 0.5f);
+
 			glPopMatrix();
 
-			glBegin(GL_LINES);
-			glColor3fv(GREEN);
-			glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
-			freyjaGetBoneWorldPos3fv(freyjaGetBoneParent(i), p.mVec);
-			glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
-			glEnd();
+			if (freyjaGetBoneParent(i) != INDEX_INVALID)
+			{
+				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+				glColor3fv(DARK_GREEN) : glColor3fv(GREEN);
 
-			//	MSTL_MSG("\t%i %f %f %f", i, p.mVec[0], p.mVec[1], p.mVec[2]);
+				glBegin(GL_LINES);
+				glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
+				freyjaGetBoneWorldPos3fv(freyjaGetBoneParent(i), p.mVec);
+				glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
+				glEnd();
+			}
 		}
 
 		glPopAttrib();
 	}
 
 	/* Render skeleton */
-	if (mRenderMode & fBones)
+	if (mRenderMode & fBones &&
+		FreyjaRender::mJointRenderType != 2)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 

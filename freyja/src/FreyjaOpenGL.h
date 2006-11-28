@@ -73,15 +73,15 @@ const float DARK_RED[]     = {  0.75, 0.0,  0.0,  1.0 };
 const float DARK_GREEN[]   = {  0.0,  0.75, 0.0,  1.0 };
 const float DARK_BLUE[]    = {  0.0,  0.0,  0.75, 1.0 };
 
-const float CYAN[]         = {  0.0,  1.0,  1.0, 1.0 };
-const float PINK[]         = {  1.0,  0.75,  0.75, 1.0 };
-const float ORANGE[]       = {  1.0,  7.0,  0.0, 1.0 };
-const float YELLOW[]       = {  1.0,  1.0,  0.0, 1.0 };
-const float DARK_YELLOW[]  = {  0.75, 0.75,  0.0, 1.0 };
-const float BLACK[]        = {  0.0,  0.0,  0.0, 1.0 };
-const float WHITE[]        = {  1.0,  1.0,  1.0, 1.0 };
-const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5, 1.0 };
-const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6, 1.0 };
+const float CYAN[]         = {  0.0,  1.0,  1.0,  1.0 };
+const float PINK[]         = {  1.0,  0.75, 0.75, 1.0 };
+const float ORANGE[]       = {  0.9,  0.7,  0.2,  1.0 };
+const float YELLOW[]       = {  1.0,  1.0,  0.0,  1.0 };
+const float DARK_YELLOW[]  = {  0.75, 0.75, 0.0,  1.0 };
+const float BLACK[]        = {  0.0,  0.0,  0.0,  1.0 };
+const float WHITE[]        = {  1.0,  1.0,  1.0,  1.0 };
+const float NEXT_PURPLE[]  = {  0.3,  0.3,  0.5,  1.0 };
+const float NEXT_PURPLE2[] = {  0.4,  0.4,  0.6,  1.0 };
 
 
 

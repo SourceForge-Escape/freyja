@@ -1861,14 +1861,17 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			Vec3 p;
 			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
 
+#if 0
+			Matrix world;
+			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
+			world.rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1
+			// If this was a 'normal' data stream.. this would work 
+			Matrix combined = world * b->GetInverseBindPose();
+			p = (combined * p) * w->mWeight;
+#elif 1
 			Matrix world;
 			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			world.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
-
-#if 0
-			// If this was a 'normal' data stream.. this would work 
-			Matrix combined = world * b->GetInverseBindPose();
-#else
 			Matrix local;
 			loc = b->mTranslation;
 			b->mRotation.getEulerAngles(rot.mVec, rot.mVec+2, rot.mVec+1);
@@ -1877,9 +1880,42 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			
 			local.invert();
 			Matrix combined = local * world;
-#endif
-
 			p = (combined * p) * w->mWeight;
+#else
+			int bone = w->mBoneIndex;
+			Vec3 u;
+
+			while (bone > -1)
+			{
+				index_t parent = freyjaGetBoneParent(bone);
+				Vec3 v(0,0,0);
+				
+				if (freyjaIsBoneAllocated(parent))
+				{
+					freyjaGetBoneWorldPos3fv(parent, v.mVec);
+				}
+				else
+				{
+					bone = -1;
+				}
+				
+				Bone *b = Bone::GetBone(bone);
+				
+				if (b)
+				{
+					v = b->mRotation.rotate(v);
+					v += b->mTranslation;
+				}
+			}
+
+			Vec3 o;
+			freyjaGetBoneWorldPos3fv(w->mBoneIndex, o.mVec);
+			p = p - o;
+			//v = b->mRotation.rotate(v);
+			//v += b->mTranslation;
+
+			p *= w->mWeight;
+#endif
 
 			array[v->mVertexIndex*3  ] += p.mVec[0]; 
 			array[v->mVertexIndex*3+1] += p.mVec[1]; 

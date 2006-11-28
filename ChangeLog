@@ -6,6 +6,8 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX for cursor placement/mode with 'keyboard modifier modes'
+ - FIX for Bone creation/root transforms
  - FIX Bone/Joint editing fixes -- don't worry it's still mostly broken
  - FPS cap at 60fps
  - Simple timer mstl::Timer

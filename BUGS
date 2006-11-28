@@ -13,7 +13,9 @@
  Known bugs
  -----------------------------------------------------------------------------
 
- * Bone rotation needs to be 'synced' to heirachry to make sense
+ * Bone rotation
+	- Needs to be 'synced' to heirachry to make sense
+	- Doesn't work at all really with backend changes
 
  * Copy / Cut / Paste not fully working with meshes anymore
 
