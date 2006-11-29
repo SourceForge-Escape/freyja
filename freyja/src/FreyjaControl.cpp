@@ -4253,6 +4253,50 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			{
 				SetSelectedBone(selected);
 				freyjaGetBoneWorldPos3fv(selected, mCursor.mPos.mVec);
+
+				switch (GetControlScheme())
+				{
+				case eScheme_Animation:
+					{
+						Bone *b = Bone::GetBone(GetSelectedBone());
+						if (b)
+						{
+							uint32 anim = GetSelectedAnimation();
+							BoneTrack &track = b->GetTrack(anim);
+							uint32 k = GetSelectedKeyFrame();
+							Vec3KeyFrame *key = track.GetRotKeyframe(k);
+							
+							if (key)
+							{
+								mCursor.mRotate = key->GetData();
+							}
+
+							Vec3KeyFrame *keyLoc = track.GetLocKeyframe(k);
+							
+							if (keyLoc)
+							{
+								// Assumes all Keyframes as offsets 
+								mCursor.mPos += keyLoc->GetData();
+							}
+						}
+					}
+					break;
+
+				case eScheme_Model:
+					{
+						Vec3 o;
+						// Set cursor rotation
+						freyjaGetBoneRotationEuler3fv(GetSelectedBone(),o.mVec);
+						mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
+						mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
+						mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
+					}
+					break;
+					
+				default:
+					;
+				}
+
 				freyja_print("! Bone[%i] selected by pick ray.", selected);
 			}
 		}
@@ -5017,8 +5061,11 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	{
 	case tBone:
 		{
+			// Reduce rotation for bones to 1/4 normal rate
 			d *= 0.25f;
 
+			// You have to reset cursor on selection / mode change now!
+#if 0
 			switch (GetControlScheme())
 			{
 			case eScheme_Animation:
@@ -5039,7 +5086,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 				break;
 
 			case eScheme_Model:
-				// Set cursor pos and rotation
+				// Set cursor rotation
 				freyjaGetBoneRotationEuler3fv(GetSelectedBone(), o.mVec);
 
 				mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
@@ -5050,6 +5097,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			default:
 				;
 			}
+#endif
 		}
 		break;
 
@@ -5077,10 +5125,15 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 		{
 			vec3_t xyz;
 
+#if 1
 			xyz[0] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[0]);
 			xyz[1] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[1]);
 			xyz[2] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[2]);
-
+#else
+			// DeltaRot
+			d *= HEL_PI_OVER_180;
+			d.Get(xyz);
+#endif
 			switch (GetControlScheme())
 			{
 			case eScheme_Animation:
@@ -5102,7 +5155,19 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 				break;
 
 			case eScheme_Model:
-				freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
+				// FIXME!
+				//if (!SystemIO::IsFloatNan(xyz[0]) && !SystemIO::IsFloatNan(xyz[1]) &&	!SystemIO::IsFloatNan(xyz[2]))
+				{
+					Vec3 p;
+					freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
+#if 0
+					freyjaGetBoneTranslation3fv(GetSelectedBone(), p.mVec);
+					freyja_print("rot %f %f %f, loc %f %f %f", 
+								 xyz[0], xyz[1], xyz[2],
+								 p.mVec[0], p.mVec[1], p.mVec[2]);
+#endif
+				}
+				freyja_print("rot %f %f %f", xyz[0], xyz[1], xyz[2]);
 				break;
 
 			default:

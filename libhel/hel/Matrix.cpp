@@ -207,8 +207,6 @@ void Matrix::getTransposeMatrix(matrix_t m)
 Matrix Matrix::multiply(const Matrix &a, const Matrix &b)
 {
 	Matrix c;
-
-
 	multiply(a.mMatrix, b.mMatrix, c.mMatrix);
 
 	return c;

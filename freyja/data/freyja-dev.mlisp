@@ -133,7 +133,7 @@
 						(menu_item "_Face"			  ePolygonNew)
 						(menu_item "_Mesh"				eMeshNew)
 						(menu_seperator)
-						(menu_item "_Bone"			  eBoneNew)
+						(menu_item	"_Bone"	eBoneNew	"C-B"	"gtk-bone")
 				)
 
 				(submenu "P_olygon Primatives"
@@ -425,9 +425,18 @@
 		) ; tab
 
 		(tab "Animation" eNone
-			(hbox 1 1 0 1 1
+			(hbox 0 1 0 1 1			
+				(toolbar
+					(toolbar_button "gtk-add"	" "
+						"Assign vertices to joint  "	eEvent eAssignWeight)
+					(toolbar_button "gtk-add"	" "
+						"Remove vertices weighting "	eEvent eClearWeight)
+				)
 
-			)	
+				(hbox 0 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
+
+			) ; hbox
 		)
 	
 		(tab "Material" eNone
@@ -612,7 +621,7 @@
 					(hbox 0 1 0 1 0
 						(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
-						"Auto" "Animation mode (Not Auto Keyframe yet)"  
+						"Auto" "Animation mode (Auto Keyframe)"  
 						eEvent eModeAutoKeyframe)
 					(toolbar_button "24x24/key.png"
 						"Set" "Set Keyframe" eEvent eSetKeyFrame)

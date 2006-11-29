@@ -176,10 +176,53 @@ void Bone::SetName(const char *name)
 }
 
 
+void Bone::UpdateBindPose(index_t boneIndex, Matrix &m)
+{
+	Bone *b = Bone::GetBone(boneIndex);
+
+	if (b)
+	{
+		if (Bone::GetBone(b->GetParent()) != NULL)
+		{
+			UpdateBindPose(b->GetParent(), m);
+		}
+
+		Matrix n;
+		n = b->mRotation;
+		n.Translate(b->mTranslation);
+
+		m = m * n;
+		b->mBindPose = m;
+	}
+}
+
+
+void Bone::UpdateBindPose(const Matrix &m)
+{
+	mBindPose = Matrix(mRotation) * m;
+	mBindPose.translate(mTranslation.mVec);
+
+	for (uint32 i = 0; i < mChildren.size(); ++i)
+	{
+		Bone *b = GetBone(mChildren[i]);
+
+		if (b)
+		{
+			b->UpdateBindPose(mBindPose);
+		}
+	}
+}
+
+
 void Bone::UpdateBindPose()
 {
+#if 0
+	// MSTL_MSG("\tDisabled");
+#elif 1
 	Matrix m;
-
+	UpdateBindPose(GetUID(), m);
+#else
+	Matrix m;
 	m.setIdentity();
 	m = mRotation;
 	m.translate(mTranslation.mVec);
@@ -198,27 +241,6 @@ void Bone::UpdateBindPose()
 	// Cache off a 'to world' 
 	mBindToWorld = mBindPose;
 	mBindPose.invert();
-
-#if 0
-	Vec3 v(0,0,0);
-	v = mBindToWorld * v;
-	MSTL_MSG("mParent = %i, %i, %s\n", mParent, mUID, mName);
-	MSTL_MSG("mBindToWorld: %f %f %f\n", v.mVec[0], v.mVec[1], v.mVec[2]);
-	v = Vec3(0,0,0);
-	v = mBindPose * v;
-	MSTL_MSG("   mBindPose: %f %f %f\n\n", v.mVec[0], v.mVec[1], v.mVec[2]);
-#endif
-
-#if 0
-	for (uint32 i = 0, n = mChildren.size(); i < n; ++i)
-	{
-		Bone *b = GetBone(mChildren[i]);
-
-		if (b)
-		{
-			b->UpdateBindPose();
-		}
-	}
 #endif
 }
 

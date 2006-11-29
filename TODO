@@ -10,27 +10,32 @@
 	* Single joint animation for shishi odoshi test
 		- ABI Only in interface for bone keyframe render / edit?
 		- Visualize weights over skinned mesh
-		- Edge picking
-		- Facet knife
 		- Make sure you can do: OBJ + SMD dumps for the ASCII groupies
-		- Might want to add rotation types or always do 'about center' pivots
-			- Pivot: 3d cursor, bbox center, etc
 		- Keyframe editor improvements
-			- Auto keyframe
 			- Finalize the interpolation system in the backend
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
-		- Rotation cursor with radius sweeps to cursor pos following an arc
-			- Also replace the old RotateObject() code to just use cursor
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
 		- Timers for animation playback
+
+	* Cursor system
+		- Object modifiers should update cursor loc/rot/size only
+			- On object select update cursor values
+			- On modifier mode update cursor values via a 'bump' select (reuse)
+		- Rotation cursor with radius sweeps to cursor pos following an arc
+			- Also replace the old RotateObject() code to just use cursor
+		  on select mode switch as per new design to prevent feedback loops
 		- Ray/Vector based orbital view cursor guides ( 'go where I want' )
 		- Rotation cursor needs final, real implementation added now
 			- Circle around projected center or do something equally clever
 			  for more tacticle control
 
+	* Modeling
+		- Edge picking
+		- Facet knife
 
 	* Skeletal animation
+		- Merge the two bone rendering systems once debugging is done
 		- Fix bone bind, bindtoworld setup in backend
 		- Joint/Bone tool that creates and connects to last on each click?
 
@@ -50,6 +55,7 @@
 			- OpenGL depth / culling / etc control?
 		- Remove state value from all mlisp toggle widgets
 		  ( they have a set func )
+		- Have a widget numeric set function like toggle widgets have for bool 
 		- VFS needs to provide metadata like XOR keys, size, offset, etc
 
 

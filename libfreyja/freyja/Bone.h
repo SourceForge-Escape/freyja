@@ -44,7 +44,7 @@ using namespace mstl;
 
 namespace freyja {
 
-class BoneTrack
+class BoneTrack // : public InterfaceTrack
 {
 public:
 
@@ -102,6 +102,17 @@ class Bone
 {
 public:
 
+	typedef enum {
+		fNone        =  0,
+		fHighlighted =  1,
+		fDof         =  2,
+		fSelected    =  4,
+		fHidden      =  8,
+		fRayHit      = 16,
+		fRoot        = 32
+	} BoneFlags;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -120,25 +131,86 @@ public:
 
 
 	////////////////////////////////////////////////////////////
-	// Public Accessors
+	// Gobal pool API
 	////////////////////////////////////////////////////////////
-
-	index_t GetUID();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
 
 	static uint32 GetCount();
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Returns number of bones in gobal store
 	 ------------------------------------------------------*/
 
 	static Bone *GetBone(index_t uid);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Returns bone matching gobal store UID
+	 ------------------------------------------------------*/
+
+	static void ResetPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Erase the gobal bone store
+	 ------------------------------------------------------*/
+
+	index_t AddToPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Add this bone to the gobal store
+	 *        Return UID
+	 ------------------------------------------------------*/
+
+	index_t GetUID();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns this bone's gobal store UID
+	 ------------------------------------------------------*/
+
+	void RemoveFromPool();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Remove this bone from gobal store
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	Matrix &GetBindPose() { return mBindPose; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns this bone's rest/bind pose transform
+	 ------------------------------------------------------*/
+
+	Matrix &GetInverseBindPose() { return mBindToWorld; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns this bone's 'rest to world' transform
+	 ------------------------------------------------------*/
+
+	byte GetFlags() { return mFlags; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get this bone's option flags
+	 ------------------------------------------------------*/
+
+	const char *GetName() { return mName; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get the human readable name of this bone
+	 ------------------------------------------------------*/
+
+	index_t GetParent() { return mParent; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get the UID of this bone's parent bone or 
+	 *        INDEX_INVALID if it has no parent
+	 ------------------------------------------------------*/
+
+	BoneTrack &GetTrack(uint32 track) { return mTrack; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Only supporting one 'range/anim' in test: F(track) <- F(0)
 	 ------------------------------------------------------*/
 
 
@@ -149,37 +221,37 @@ public:
 	void AddChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Add child bone to this bone by by UID
 	 ------------------------------------------------------*/
 
-	index_t AddToPool();
+	index_t NewTrack() {return 0;}
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
+	 * Pre  : 
+	 * Post : Only supporting one 'range/anim' in test: F(track) <- F(0) 
 	 ------------------------------------------------------*/
 
 	void RemoveChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void RemoveFromPool();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	static void ResetPool();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
+	 * Post : Remove child bone of this bone by by UID
 	 ------------------------------------------------------*/
 
 	void SetName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Set human readable name
+	 ------------------------------------------------------*/
+
+	void SetLoc(const Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set parent relative translation
+	 ------------------------------------------------------*/
+
+	void SetRot(const Quaternion &q);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set parent relative rotation
 	 ------------------------------------------------------*/
 
 	void UpdateBindPose();
@@ -194,25 +266,25 @@ public:
 	 * Post : Pass transform changes up the heirarchy
 	 ------------------------------------------------------*/
 
-	index_t GetParent() { return mParent; }
+	void ClearFlag(BoneFlags f) { mFlags ^= f; }
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post :Set a single flag 'off' 
 	 ------------------------------------------------------*/
 
-	const char *GetName() { return mName; }
+	void SetFlag(BoneFlags f) { mFlags |= f; }
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Set a single flag 'on'
 	 ------------------------------------------------------*/
 
-	Matrix &GetBindPose() { return mBindPose; }
+	void UpdateBindPose(const Matrix &m);
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
+	 * Pre  : Pass in parent's bind transform
+	 * Post : Updates this bone and children bind transforms
 	 ------------------------------------------------------*/
 
-	Matrix &GetInverseBindPose() { return mBindToWorld; }
+	static void UpdateBindPose(index_t boneIndex, Matrix &m);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -242,29 +314,8 @@ public:
 									  * this cache of the current orientation 
 									  * and translation in matrix form */
 
+	BoneTrack mTrack;                /* Animation track(s) - only one in test */
 
-	// Test, only supporting one 'range/anim' in test: F(track) <- F(0)
-	index_t NewTrack() {return 0;}
-	BoneTrack &GetTrack(uint32 track) { return mTrack; }
-	BoneTrack mTrack;
-
-
-#if OBSOLETE
-	// Starting in 0.9.5 moved world transforms here from keyframing,
-	// Makes it easier to control the beast, and stops bone sharing schemes.
-	// The actual transforms 'we care about' in the keyframes.
-	// This is for use as a callback a bone to do rendering/pose transforms.
-
-	Quaternion mFrameRotation;       /* AnimFrame Orientation of this bone */
-
-	Vec3 mFrameTranslation;          /* AnimFrame Offset of this bone from parent */
-
-	Matrix mWorldPose;               /* This is the animated frame transform 
-									  * from origin */
-
-	Matrix mCombined;                /* <= mWorldPose * mBindToWorld, 
-									  * Convenice storage of deformation  */
-#endif
 
 private:
 

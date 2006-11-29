@@ -153,6 +153,10 @@ typedef enum {
 	
 	eExtrude,
 
+	eWeight,
+	eAssignWeight,
+	eClearWeight,
+
 	eMeshGenerateNormals,
 
 	eGenerateNormals,

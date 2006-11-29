@@ -670,8 +670,10 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback::add("eGenerateNormals", &eModelGenerateNormals);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
-	//ResourceEventCallback2::add("eUndo", &eNoImplementation);
 	ResourceEventCallback2::add("eRedo", &eNoImplementation);
+	ResourceEventCallback2::add("eWeight", &eNoImplementation);
+	ResourceEventCallback2::add("eAssignWeight", &eNoImplementation);
+	ResourceEventCallback2::add("eClearWeight", &eNoImplementation);
 
 	FreyjaViewEventsAttach();
 	FreyjaControlEventsAttach();
