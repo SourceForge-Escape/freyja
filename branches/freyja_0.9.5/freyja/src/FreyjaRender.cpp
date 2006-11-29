@@ -1242,7 +1242,7 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 		return;
 
 	/* Scale bones to match mesh scaling */
-	pos = bone.translate * scale;
+	pos = bone.translate;
 
 	/* Get orientation */
 	//freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
@@ -1255,16 +1255,19 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 		Bone *b = Bone::GetBone(currentBone);
 		if (b)
 		{
+			Vec3 p, o;
 			uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
 			uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
 			BoneTrack &track = b->GetTrack(a);
 
-			if (track.GetRot((vec_t)k / track.GetRate(), rot))
+			if (track.GetRot((vec_t)k / track.GetRate(), o))
 			{
+				rot += o;
 			}
 
-			if (track.GetLoc((vec_t)k / track.GetRate(), pos))
+			if (track.GetLoc((vec_t)k / track.GetRate(), p))
 			{
+				pos += p;
 			}
 		}
 	}

@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <dirent.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -64,6 +65,8 @@
 #define FIX_SHORT(x) (*(unsigned short *)&(x) = SWAP_2(*(unsigned short *)&(x)))
 #define FIX_INT(x)   (*(unsigned int *)&(x)   = SWAP_4(*(unsigned int *)&(x)))
 #define FIX_FLOAT(x) FIX_INT(x)
+
+//INFINITY
 
 namespace mstl {
 
@@ -1670,6 +1673,46 @@ class SystemIO
 			string[len-1] = 0;
 			va_end(args);
 		}	
+	}
+
+
+	static bool IsFloatNan(float r) 
+	{ 
+		return (r == FP_NAN); 
+	}
+
+
+	static int DebugFloat(float r)
+	{
+		int i = fpclassify(r);
+
+		switch (i)
+		{
+		case FP_NAN:
+			fprintf(stdout, "FP_NAN: %f\n", r);
+			break;
+
+		case FP_INFINITE:
+			fprintf(stdout, "FP_INFINITE: %f\n", r);
+			break;
+
+		case FP_ZERO:
+			fprintf(stdout, "FP_ZERO: %f\n", r);
+			break;
+
+		case FP_SUBNORMAL:
+			fprintf(stdout, "FP_SUBNORMAL: %f\n", r);
+			break;
+
+		case FP_NORMAL:
+			//fprintf(stdout, "FP_NORMAL: %f\n", r);
+			break;
+
+		default:
+			fprintf(stdout, "Unknown state: %f\n", r);
+		}
+
+		return i;
 	}
 
 	static void Print(const char *format, ...)

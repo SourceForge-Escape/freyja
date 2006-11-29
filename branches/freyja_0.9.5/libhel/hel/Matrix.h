@@ -318,6 +318,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Rotate(const Vec3 v) { rotate(v.mVec); }
 	void rotate(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : Rotates object in 3 space, Radian input
@@ -340,6 +341,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Scale(const Vec3 v) { scale(v.mVec); }
 	void scale(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -362,6 +364,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void Translate(const Vec3 v) { translate(v.mVec); }
 	void translate(const vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -398,7 +401,7 @@ class Matrix
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	void copy(matrix_t source, matrix_t dest);
+	static void copy(matrix_t source, matrix_t dest);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Copys value of source to dest
@@ -409,7 +412,7 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void multiply(const matrix_t a, const matrix_t b, matrix_t result);
+	static void multiply(const matrix_t a, const matrix_t b, matrix_t result);
 	/*------------------------------------------------------
 	 * Pre  : Multiplies matrices a and b
 	 *        Neither a or b is also the result

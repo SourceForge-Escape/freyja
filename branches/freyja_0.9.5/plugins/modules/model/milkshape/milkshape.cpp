@@ -542,9 +542,9 @@ int freyja_model__milkshape_import(char *filename)
 			vec_t y = (mdl.joints[i].keyFramesRot[j].rotation[1]);
 			vec_t z = (mdl.joints[i].keyFramesRot[j].rotation[2]);
 
-			x += mdl.joints[i].rotation[0];
-			y += mdl.joints[i].rotation[1];
-			z += mdl.joints[i].rotation[2];
+			//x += mdl.joints[i].rotation[0];
+			//y += mdl.joints[i].rotation[1];
+			//z += mdl.joints[i].rotation[2];
 
 			index_t key = freyjaBoneKeyFrameNew(index, track, t);
 			freyjaBoneRotKeyFrameEuler3f(index, track, key, x, y, z);
@@ -557,9 +557,9 @@ int freyja_model__milkshape_import(char *filename)
 			vec_t y = mdl.joints[i].keyFramesPos[j].position[1]*scale;
 			vec_t z = mdl.joints[i].keyFramesPos[j].position[2]*scale;
 
-			x += mdl.joints[i].position[0]*scale;
-			y += mdl.joints[i].position[1]*scale;
-			z += mdl.joints[i].position[2]*scale;
+			//x += mdl.joints[i].position[0]*scale;
+			//y += mdl.joints[i].position[1]*scale;
+			//z += mdl.joints[i].position[2]*scale;
 
 			index_t key = freyjaBoneKeyFrameNew(index, track, t);
 			freyjaBonePosKeyFrame3f(index, track, key, x, y, z);
