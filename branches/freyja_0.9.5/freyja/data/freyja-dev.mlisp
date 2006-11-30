@@ -434,7 +434,7 @@
 				)
 
 				(hbox 0 1 0 1 1
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
 
 			) ; hbox
 		)

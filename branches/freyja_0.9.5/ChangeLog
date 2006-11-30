@@ -6,6 +6,7 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 'Old school' weighting assignment ala freyja 0.8.x added back
  - FIX scale in orbital view
  - FIX for pick bones with mouse wasn't logged here
  - Skeletal debug rendering
