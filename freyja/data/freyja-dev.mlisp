@@ -426,15 +426,15 @@
 
 		(tab "Animation" eNone
 			(hbox 0 1 0 1 1			
-				(toolbar
-					(toolbar_button "gtk-add"	" "
-						"Assign vertices to joint  "	eEvent eAssignWeight)
-					(toolbar_button "gtk-add"	" "
-						"Remove vertices weighting "	eEvent eClearWeight)
-				)
+				;(toolbar
+				;	(toolbar_button "gtk-add"	" "
+				;		"Assign vertices to joint  "	eEvent eAssignWeight)
+				;	(toolbar_button "gtk-add"	" "
+				;		"Remove vertices weighting "	eEvent eClearWeight)
+				;)
 
-				(hbox 0 1 0 1 1
-					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
+				;(hbox 0 1 0 1 1
+				;	(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
 
 			) ; hbox
 		)
@@ -602,8 +602,23 @@
 							(hbox 1 0 0 1 0
 								(label "Bone: " 0.0 0.5))
 							(spinbutton 0 0 100 eBoneIterator)
-							(textbox eSetCurrentBoneName)))
+							(textbox eSetCurrentBoneName))
 
+						(hbox 0 1 0 1 1
+							(toolbar
+								(toolbar_button "gtk-add"	" "
+									"Weight vertices"	eEvent eAssignWeight)
+								(toolbar_button "gtk-add"	" "
+									"Unweight vertices"	eEvent eClearWeight)
+							) ; toolbar
+							(hbox 0 1 0 1 1
+								(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
+						) ; hbox
+					
+					) ; expander
+				;)
+
+			
 
 					;; Animation ;;;;;;;;;;;;;;;
 
