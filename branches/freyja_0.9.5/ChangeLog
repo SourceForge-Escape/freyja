@@ -6,6 +6,8 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX scale in orbital view
+ - FIX for pick bones with mouse wasn't logged here
  - Skeletal debug rendering
  - Forgot to mention autokeyframe was merged in.. isn't that important?  ;) 
  - FIX for cursor placement/mode with 'keyboard modifier modes'

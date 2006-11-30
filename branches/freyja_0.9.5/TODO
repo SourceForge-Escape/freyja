@@ -19,6 +19,8 @@
 		- Timers for animation playback
 
 	* Cursor system
+		- Orbital / Camera view need special orientation constraints
+		- Heirarchical systems like skeletons need fixes for world cursor 
 		- Object modifiers should update cursor loc/rot/size only
 			- On object select update cursor values
 			- On modifier mode update cursor values via a 'bump' select (reuse)
@@ -35,11 +37,13 @@
 		- Facet knife
 
 	* Skeletal animation
+		- Rework weight system to support zeroed weights and grouping
 		- Merge the two bone rendering systems once debugging is done
 		- Fix bone bind, bindtoworld setup in backend
 		- Joint/Bone tool that creates and connects to last on each click?
 
 	* Interface
+		- Dialogs using actual dialogs to avoid fullscreen showing panels
 		- Add generic bbox selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registering to mgtk
 		- Two window layout for curve / viewport usage
@@ -151,8 +155,6 @@
  Animation
  -----------------------------------------------------------------------------
 
-	* Pick bones with mouse
-
 	* Curves support for keyframe editor
 
 	* Bone H-matrix / inverted H-matrix
@@ -163,15 +165,18 @@
 
 	* Keyframe editor that makes sense unlike 0.8.x series
 
-	* Various joint types: hinge, b&s, etc
+	* Various joint types: hinge, ball&socket, etc
 
 	* IK solver and interface
-
-	* Deform skeletal mesh animation with animation blending
 
 	* Timer for animation playback and keyframe timing
 
 	* Path animation
+
+	* Channels support
+		- Ordering support
+		- Type of transform support
+		- Constraints support
 
 
  Misc
@@ -215,7 +220,7 @@
 
 	* Normal maps, DOT3, and maybe matrix palette skinning test renders
 
-	* glColorMaterial use
+	* glColorMaterial optional use
 
 	* Shadow maps and volumes
 
@@ -226,12 +231,15 @@
  ----------------------------------------------------------------------------
 
 	* libmgtk specific
+		- Mlisp wish list
+			- Fully featured lisp with C bindings ( dangerous )
+			- Garbage collection
 		- 'Radio object' to auto uncheck toggle event when others trigger
+			- Radio buttons / menu items?
+		- mgtk Event type to replace numeric event ids
 		- Mlisp to replace Resource
 		- MlispEvent to replace ResourceEvent
-		- Radio buttons / menu items?
 		- Mlisp doesn't lookup symbols for like "true" if just setq
-		- Mlisp wish list: garbage collection, fully featured lisp
 
 	* Viewport view / control abstraction
 		- Reimplement and enable Camera system

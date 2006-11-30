@@ -5061,8 +5061,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	{
 	case tBone:
 		{
-			// Reduce rotation for bones to 1/4 normal rate
-			d *= 0.25f;
+			// Reduce rotation for bones to be 1/2 normal rate
+			d *= 0.5f;
 
 			// You have to reset cursor on selection / mode change now!
 #if 0
@@ -5250,6 +5250,33 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 	case PLANE_LEFT:
 		mCursor.mScale.mVec[2] *= dx;
 		mCursor.mScale.mVec[1] *= dy;
+		break;
+
+	case PLANE_FREE:
+		// FIXME: Needs to account for view orientation
+		switch (mCursor.mAxis)
+		{
+		case freyja3d::Cursor::eAll:
+			mCursor.mScale.mVec[2] *= dx;
+			mCursor.mScale.mVec[1] *= dx;
+			mCursor.mScale.mVec[0] *= dx;
+			break;
+			
+		case freyja3d::Cursor::eX:
+			mCursor.mScale.mVec[0] *= dx;
+			break;
+			
+		case freyja3d::Cursor::eY:
+			mCursor.mScale.mVec[1] *= dx;
+			break;
+			
+		case freyja3d::Cursor::eZ:
+			mCursor.mScale.mVec[2] *= dx;
+			break;
+
+		default:
+			;
+		}
 		break;
 
 	default:
@@ -5708,6 +5735,17 @@ void eSelectedFacesGenerateNormals()
 }
 
 
+void eSelectedFacesDelete()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->DeleteSelectedFaces();
+	}
+}
+
+
 void eSmoothingGroupsDialog()
 {
 	uint32 id = ResourceEvent::GetResourceIdBySymbol("eSmoothingGroupsDialog");
@@ -5794,6 +5832,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
 
 	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
+	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
 	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
 	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);

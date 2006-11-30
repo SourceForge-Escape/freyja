@@ -192,7 +192,7 @@
 				(menu_item "_Unselect faces"		eMeshUnselectFaces)
 				(menu_item "_Smoothing groups"		eSmoothingGroupsDialog)
 				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
-				(menu_item "_Delete"		eNone));eSelectedFacesDelete))
+				(menu_item "_Delete"		eSelectedFacesDelete))
 
 			(submenu "_Mesh"
 
@@ -342,8 +342,19 @@
 
 				(toolbar_separator)
 
-				(toolbar_button "gtk-add"	" "
+				(toolbar_button "24x24/extrude.png"	" "
 					"Extrude face"	eEvent eExtrude)
+
+				(toolbar_separator)
+
+				(toolbar_button "24x24/plane.png" "UVMap" 
+					"UVMap selected faces, Planar"	eEvent eMeshTexcoordPlaneProj)
+
+				(toolbar_button "24x24/texgen-sphere.png" "UVMap" 
+					"UVMap selected faces, Spherical"	eEvent eMeshTexcoordSpherical)
+
+				(toolbar_button "24x24/cylinder.png" "UVMap" 
+					"UVMap selected faces, Cylindrical"	eEvent eMeshTexcoordCylindrical)
 			) ; toolbar
 			) ; hbox
 		) ; tab
@@ -408,17 +419,6 @@
 
 				(toolbar_button	"24x24/split.png"
 					"Split" "Split object" eEvent eSplitObject)
-
-				(toolbar_separator)
-
-				(toolbar_button "24x24/texmap.png" "UVMap" 
-					"UVMap selected faces, Planar"	eEvent eMeshTexcoordPlaneProj)
-
-				(toolbar_button "24x24/texgen-sphere.png" "UVMap" 
-					"UVMap selected faces, Spherical"	eEvent eMeshTexcoordSpherical)
-
-				(toolbar_button "24x24/texmap.png" "UVMap" 
-					"UVMap selected faces, Cylindrical"	eEvent eMeshTexcoordCylindrical)
 
 			) ; toolbar
 			) ; hbox

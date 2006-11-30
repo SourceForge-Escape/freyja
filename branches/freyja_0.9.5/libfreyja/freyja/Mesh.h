@@ -1000,6 +1000,31 @@ public:
 		return mFaces.size() - 1;
 	}
 
+
+	void FaceRemovalCleanup(Face *face)
+	{
+		BUG_ME("This implementation doesn't clean up deps, which it prob shouldn't until vertex reference design is finalized");		
+	}
+
+
+	void DeleteSelectedFaces()
+	{
+		Face **array = mFaces.getVectorArray();
+
+		for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
+		{
+			Face *face = array[i];
+
+			if (face && face->mFlags & Face::fSelected)
+			{
+				FaceRemovalCleanup(face);
+				delete face;
+				array[i] = NULL;
+			}
+		}
+	}
+
+
 	void DeleteFace(index_t idx)
 	{
 		Face **array = mFaces.getVectorArray();
@@ -1007,8 +1032,7 @@ public:
 
 		if ( face )
 		{
-			// FIXME
-			BUG_ME("This implementation doesn't clean up deps, which it prob shouldn't until vertex reference design is finalized");
+			FaceRemovalCleanup(face);
 			delete face;
 			array[idx] = NULL;
 		}
