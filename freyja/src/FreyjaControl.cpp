@@ -5065,39 +5065,6 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			d *= 0.5f;
 
 			// You have to reset cursor on selection / mode change now!
-#if 0
-			switch (GetControlScheme())
-			{
-			case eScheme_Animation:
-				{
-					Bone *b = Bone::GetBone(GetSelectedBone());
-					if (b)
-					{
-						BoneTrack &track = b->GetTrack(GetSelectedAnimation());
-						uint32 k = GetSelectedKeyFrame();
-						Vec3KeyFrame *key = track.GetRotKeyframe(k);
-
-						if (key)
-						{
-							mCursor.mRotate = key->GetData();
-						}
-					}
-				}
-				break;
-
-			case eScheme_Model:
-				// Set cursor rotation
-				freyjaGetBoneRotationEuler3fv(GetSelectedBone(), o.mVec);
-
-				mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
-				mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
-				mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
-				break;
-
-			default:
-				;
-			}
-#endif
 		}
 		break;
 
@@ -5823,8 +5790,54 @@ void eGroupAssign()
 }
 
 
+void eNopControl(ResourceEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
+
+vec_t gWeight = 1.0f;
+void eWeight(vec_t w)
+{
+	gWeight = w;
+	freyja_print("Weight set to %f", gWeight);
+}
+
+void eAssignWeight()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+		m->SetWeightSelectedVertices(bone, gWeight);
+		freyja_print("Selected vertices set to bone %i weighting to %f.", bone, gWeight);
+	}
+}
+
+void eClearWeight()
+{
+	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+		m->RemoveWeightSelectedVertices(bone);
+		freyja_print("Selected vertices removing bone %i weighting...", bone);
+	}
+}
+
+
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
+	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);
+ 
+	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
+	ResourceEventCallback::add("eClearWeight", &eClearWeight);
+	ResourceEventCallbackVec::add("eWeight", &eWeight);
+
+
 	ResourceEventCallback::add("eGroupClear", &eGroupClear);
 	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
 
@@ -5846,9 +5859,6 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eCurrentFaceFlagAlpha", &eCurrentFaceFlagAlpha);
 
 	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
-
-	ResourceEventCallbackVec::add("eUVPickRadius", &eNotImplementedVec);
-	ResourceEventCallbackVec::add("eVertexPickRadius", &eNotImplementedVec); 
 }
 
 

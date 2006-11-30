@@ -914,9 +914,88 @@ public:
 		mBoundingVolume.mBox.mMin[2] += v.mVec[2];
 	}
 
+	
+	void RemoveWeightSelectedVertices(index_t bone)
+	{
+		for (int32 i = mVertices.size()-1; i > -1; --i)
+		{
+			Vertex *v = mVertices[i];
+
+			if (v && v->mFlags & Vertex::fSelected)
+			{
+				RemoveWeight(i, bone);
+			}
+		}
+	}
+
+
+	void SetWeightSelectedVertices(index_t bone, vec_t weight)
+	{
+		for (int32 i = mVertices.size()-1; i > -1; --i)
+		{
+			Vertex *v = mVertices[i];
+
+			if (v && v->mFlags & Vertex::fSelected)
+			{
+				SetWeight(i, bone, weight);
+			}
+		}
+	}
+
+
+	// FIXME: Will make weights maped off actual Vertex later to speed lookup,
+	//        and ensure weighting limits
+	// NOTE: This doesn't do 'balancing' of the 1.0f limit
+	void SetWeight(index_t vertex, index_t bone, vec_t weight)
+	{
+		for (int32 i = mWeights.size()-1; i > -1; --i)
+		{
+			Weight *w = mWeights[i];
+
+			if (w && w->mVertexIndex == vertex && w->mBoneIndex == bone)
+			{
+				w->mWeight = weight;
+				return;
+			}
+		}
+
+		mWeights.pushBack(new Weight(vertex, bone, weight));
+	}
+
+	void RemoveWeight(index_t vertex, index_t bone)
+	{
+		for (int32 i = mWeights.size()-1; i > -1; --i)
+		{
+			Weight *w = mWeights[i];
+
+			if (w && w->mVertexIndex == vertex && w->mBoneIndex == bone)
+			{
+				delete w;
+				mWeights[i] = NULL;
+				return;
+			}
+		}
+	}
+
+	void RemoveWeight(index_t vertex)
+	{
+		for (int32 i = mWeights.size()-1; i > -1; --i)
+		{
+			Weight *w = mWeights[i];
+
+			if (w && w->mVertexIndex == vertex)
+			{
+				delete w;
+				mWeights[i] = NULL;
+				return;
+			}
+		}
+	}
+
+
 	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
 	{
-		mWeights.pushBack(new Weight(vertexIndex, bone, weight));
+		SetWeight(vertexIndex, bone, weight);
 	}
 
 

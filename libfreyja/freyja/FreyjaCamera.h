@@ -47,6 +47,7 @@
 #include <hel/math.h>
 #include <hel/Matrix.h>
 #include <hel/Quaternion.h>
+#include <hel/Vector3d.h>
 
 #include <mstl/Vector.h>
 
@@ -66,9 +67,12 @@ class FreyjaCamera
 	class FlyByNode
 	{
 	public:
+		FlyByNode() : orientation(), position(), direction(), 
+					  speed(0.0f), time(0.0f) {}
+
 		Quaternion orientation;
-		vec3_t position;
-		vec3_t direction;
+		Vec3 position;
+		Vec3 direction;
 		vec_t speed;
 		vec_t time;
 	};
@@ -76,6 +80,9 @@ class FreyjaCamera
 	class FlyByPath
 	{ 
 	public:
+		FlyByPath() : path() { }
+		~FlyByPath() { }
+
 		mstl::Vector <FlyByNode *> path;  /* Flyby path */
 	};
 

@@ -49,8 +49,13 @@ unsigned int FreyjaCamera::mCounter = 0;
 FreyjaCamera::FreyjaCamera() :
 	mId(++mCounter),
 	mMode(eStationary),
+	mPath(),
+	mQ(),
 	mViewDistance(14.0f),
-	mSpeed(0)
+	mTheta(0.0f),
+	mTheta2(0.0f),
+	mSpeed(0),
+	mUpdate(false)
 {
 	reset();
 }
