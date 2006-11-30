@@ -19,6 +19,8 @@
 
 	* Forward kinematics
 
+	* Autokeyframing
+
 
  Mesh editing
 
@@ -42,7 +44,7 @@
 	* NIF4 ( Morrowind )
 	* PSK/PSA
 	* ...
-	* SMD - Full import / export, it's even save/load cycle safe
+	* SMD - Full import / export, fully save/load cycle safe
 	* EGG - Full import / export, Eggv7 and Eggv8
 	* JA  - Full import / export
 	* ASE - Import / export, However doesn't use all 3ds features
@@ -53,7 +55,7 @@
 	* MD3 - Import/export, vertex morph frame import/export, no tags support
 	* GLM - ( Jedi Knight II, etc ) Import, can 'guess' bones from glm mesh too
 	* TR  - ( Tombraider 1-4 ) Import, disabled in current build
-	* PSK, PSA
+	* Others not listed yet
 
 
 
@@ -68,6 +70,8 @@
  2. Remove the line -DUSE_ARB_MULTITEXTURE -DOPENGL_EXT_MULTITEXTURE
 
  3. Remove the \ character at the end of the line above that one
+
+ 4. Rebuild
 
 
  Adding a new widget to mgtk ( Resource.cpp version )

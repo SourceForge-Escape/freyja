@@ -18,6 +18,8 @@
 	- Doesn't work at all really with backend changes
 	- Looks like we're getting a sqrt(-1) and INFINITY passed around
 
+ * Mesh scale on doesn't 'scale about cursor'
+
  * Copy / Cut / Paste not fully working with meshes anymore
 
  * Cursor axis select might be broke for some views on 'ALL' picks
