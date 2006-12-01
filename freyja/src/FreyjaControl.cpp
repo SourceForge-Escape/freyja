@@ -5536,21 +5536,32 @@ bool FreyjaControl::SaveUserPreferences()
 
 	w.Print("\n");
 
-#if 0
-; Custom 'toggles'
-(func_set_toggle	eSelect	1)
-(func_set_toggle	eRenderToggleBoneZClear	1)
-(func_set_toggle	eRenderGrid	1)
-(func_set_toggle	eRenderFace	1)
-(func_set_toggle	eRenderTexture	1)
-(func_set_toggle	eRenderLighting	1)
-(func_set_toggle	eRenderMaterial	1)
-(func_set_toggle	eRenderBbox	1)
-(func_set_toggle	eRenderSkeleton	1)
-(func_set_toggle	eRenderPickRay	0)
-(func_set_toggle	ePointJoint	1)
-(func_set_toggle	eLineBone	1)
-#endif
+	{
+		w.Print("; Custom 'toggles'n");
+		int n = (mRender->GetFlags() & FreyjaRender::fGrid) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderGrid %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fFace) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderFace %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fBoundingVolumes) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderBbox %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fPoints) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderVertex %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fWireframe) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderWireframe %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fLighting) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderLighting %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fMaterial) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderMaterial %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fDrawPickRay) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderPickRay %i)\n", n);
+	}
 
 	return true;
 }
