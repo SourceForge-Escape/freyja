@@ -35,10 +35,8 @@
 
 (setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
 (setq FAST_CARD true)          ; Toggle OpenGL accel features
-(setq GRID_ON true)            ; Toggle edit grid rendering
 (setq PATH "~/.freyja")        ; Set initial data path
-
-;(setq INIT "~/.freyja/init-dev.mlisp")
+(setq INIT "init-dev.mlisp")   ; Init resource filename
 
 
 ;; Application Window

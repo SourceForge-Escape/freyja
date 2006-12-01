@@ -518,6 +518,20 @@ class FreyjaControl
 	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
+	bool LoadUserPreferences();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Loads the user resource from disk and sets cvars
+	 *        Returns true if found and loads.
+	 ------------------------------------------------------*/
+
+	bool SaveUserPreferences();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Saves the user resource to disk for some cvars
+	 *        Returns true if sucessful.
+	 ------------------------------------------------------*/
+
 	void SetRenderFlag(FreyjaRender::flags_t flag, bool t, const char *s)
 	{
 		mRender->Flag(flag, t);
@@ -994,6 +1008,8 @@ private:
 	FreyjaControlPrinter mPrinter;          /* Reroute text msg from backend */
 
 	String mResourceFilename;	            /* Resource file for control */
+
+	String mUserPrefsFilename;	            /* Resource file for prefs */
 
 	String mCurrentlyOpenFilename;          /* What file is loaded now? */
 

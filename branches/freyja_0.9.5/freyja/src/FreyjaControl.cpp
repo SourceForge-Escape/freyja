@@ -75,6 +75,7 @@ FreyjaControl::FreyjaControl() :
 	mFlags(fNone),
 	mObjectMode(tScene),
 	mResourceFilename("freyja-dev.mlisp"),
+	mUserPrefsFilename("freyja-dev_prefs.mlisp"),
 	mCurrentlyOpenFilename(),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
 	mResource(),
@@ -2346,6 +2347,7 @@ bool FreyjaControl::event(int command)
 						  "Would you like to exit?", 
 						  "gtk-cancel", "_Cancel", "gtk-quit", "_Exit"))
 		{
+			SaveUserPreferences();
 			freyja_event_exit();
 		}
 		break;
@@ -5304,25 +5306,33 @@ bool FreyjaControl::LoadRecentFilesResource(const char *filename)
 
 void FreyjaControl::LoadResource()
 {
-	String s = freyja_rc_map_string(mResourceFilename.GetCString());
+	String s = freyja_rc_map_string(mResourceFilename.c_str());
 	int i, x, y;
 	bool failed = true;
 
 
 	// Setup the UI
-	if (!mResource.Load((char *)s.GetCString()))
+	if (!mResource.Load((char *)s.c_str()))
 	{
 		failed = false;
 	}
 
 	if (failed)
 	{
-		MARK_MSGF("ERROR: Couldn't find resource file '%s'\n", s.GetCString());
+		MARK_MSGF("ERROR: Couldn't find resource file '%s'\n", s.c_str());
 		freyja_event_shutdown();
 	}
 
 
 	/* GUI stuff */
+	//char *tmp;
+	//if (mResource.Lookup("INIT", &tmp))
+	//{
+	//	String init = freyja_rc_map_string(tmp);
+	//	LoadUserResource(init.c_str());
+	//}
+	LoadUserPreferences();
+
 	if (mResource.Lookup("WINDOW_X", &x))
 	{
 		if (mResource.Lookup("WINDOW_Y", &y))
@@ -5335,18 +5345,6 @@ void FreyjaControl::LoadResource()
 	if (mResource.Lookup("DUMP_SYMTAB", &i) && i)
 	{
 		mResource.Print();
-	}
-
-	if (mResource.Lookup("GRID_ON", &i))
-	{
-		if (i)
-		{
-			mRender->SetFlag(FreyjaRender::fGrid);
-		}
-		else
-		{
-			mRender->ClearFlag(FreyjaRender::fGrid);
-		}
 	}
 
 	if (mResource.Lookup("FLUSH_RESOURCE", &i) && i)
@@ -5441,6 +5439,120 @@ void FreyjaControl::LoadResource()
 			}
 		}
 	}
+}
+
+
+bool FreyjaControl::LoadUserPreferences()
+{
+	String filename = freyja_rc_map_string(mUserPrefsFilename.c_str());
+	MSTL_MSG("\tLoading '%s'...", filename.c_str());	
+
+	return mResource.Load((char *)filename.c_str());	
+}
+
+
+bool FreyjaControl::SaveUserPreferences()
+{
+	String filename = freyja_rc_map_string(mUserPrefsFilename.c_str());
+	SystemIO::TextFileWriter w;
+	MSTL_MSG("\tSaving '%s'...", filename.c_str());	
+
+	if (!w.Open(filename.c_str()))
+		return false;
+
+
+	w.Print(";; Custom colors\n");
+
+	for (uint32 i = 0; i < 11; ++i)
+	{
+		String s;
+		float r, g, b, a;
+		int id;
+	 
+		switch (i)
+		{
+		case 0:
+			s = "eColorBackground";
+			id = eColorBackground;
+			break;
+
+		case 1:
+			s = "eColorGrid";
+			id = eColorGrid;
+			break;
+
+		case 2:
+			s = "eColorMesh";
+			id = eColorMesh;
+			break;
+
+		case 3:
+			s = "eColorMeshHighlight";
+			id = eColorMeshHighlight;
+			break;
+
+		case 4:
+			s = "eColorVertex";
+			id = eColorVertex;
+			break;
+
+		case 5:
+			s = "eColorVertexHighlight";
+			id = eColorVertexHighlight;
+			break;
+
+		case 6:
+			s = "eColorBone";
+			id = eColorBone;
+			break;
+
+		case 7:
+			s = "eColorBoneHighlight";
+			id = eColorBoneHighlight;
+			break;
+
+		case 8:
+			s = "eColorLightAmbient";
+			id = eColorLightAmbient;
+			break;
+
+		case 9:
+			s = "eColorLightDiffuse";
+			id = eColorLightDiffuse;
+			break;
+
+		case 10:
+			s = "eColorLightSpecular";
+			id = eColorLightSpecular;
+			break;
+
+		default:
+			continue;
+		}
+
+		freyja_event_get_color(id, r, g, b, a);
+		w.Print("(color\t%s\t%f %f %f %f)\n", s.c_str(), r, g, b, a);
+	}
+
+	w.Print("\n");
+
+#if 0
+; Custom 'toggles'
+(func_set_toggle	eSelect	1)
+(func_set_toggle	eRenderToggleBoneZClear	1)
+(func_set_toggle	eRenderGrid	1)
+(func_set_toggle	eRenderFace	1)
+(func_set_toggle	eRenderTexture	1)
+(func_set_toggle	eRenderLighting	1)
+(func_set_toggle	eRenderMaterial	1)
+(func_set_toggle	eRenderBbox	1)
+(func_set_toggle	eRenderSkeleton	1)
+(func_set_toggle	eRenderPickRay	0)
+(func_set_toggle	ePointJoint	1)
+(func_set_toggle	eLineBone	1)
+#endif
+
+	return true;
 }
 
 
