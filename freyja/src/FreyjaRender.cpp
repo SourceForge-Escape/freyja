@@ -812,7 +812,8 @@ void FreyjaRender::Render(RenderMesh &mesh)
 
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
 	{
-		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
+		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh &&
+			FreyjaControl::mControlPoints.size() == 0)
 		{
 			switch (FreyjaControl::mInstance->GetCursor().GetMode())
 			{

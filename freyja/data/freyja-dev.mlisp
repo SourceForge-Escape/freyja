@@ -378,7 +378,7 @@
 			; Need to group toggles like radio buttons
 			(toolbar
 				(toolbar_togglebutton false	"24x24/bbox-select.png" "SelectB"
-					"Select by bounding box" eEvent eSelectionByBox)
+					"Select by bounding box, Ctrl+RMouse ends selection" eEvent eSelectionByBox)
 
 				(toolbar_togglebutton true "24x24/cursor-select.png" "Select" 
 					"Select object by cursor" eEvent	eSelect)
