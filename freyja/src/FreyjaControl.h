@@ -959,6 +959,13 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void SelectObjectByBox(Vec3 min, Vec3 max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void SelectObject(vec_t mouseX, vec_t mouseY);
 	void UnselectObject(vec_t mouseX, vec_t mouseY);
 	//void SelectObject(vec_t x, vec_t y, freyja_plane_t plane);
