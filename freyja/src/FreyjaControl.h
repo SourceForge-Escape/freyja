@@ -75,7 +75,8 @@ class FreyjaControl
 		tSelectedVertices,
 		tSelectedFaces,
 		tSelectedBones,
-		tSelectedMeshes
+		tSelectedMeshes,
+		tControlPoint
 	} object_type_t;
 
 
@@ -429,6 +430,14 @@ class FreyjaControl
 	 *
 	 * 2000.09.10: 
 	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	static uint32 mSelectedControlPoint;
+	static Vector<Vec3> mControlPoints;
+	static Vector<Vec3> &GetControlPoints() { return mControlPoints; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	const char *GetRecentFilename(uint32 i)

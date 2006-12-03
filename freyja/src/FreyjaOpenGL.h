@@ -96,6 +96,8 @@ void mgl2dProjection(const unsigned int width, const unsigned int height);
 void mglDrawBbox(const vec3_t min, const vec3_t max, 
 				 const vec4_t pointColor, const vec4_t lineColor);
 
+void mglDrawSelectionBox(const vec3_t min, const vec3_t max, const vec4_t color);
+
 void mglDrawSelectBox(const vec3_t min, const vec3_t max, const vec4_t color);
 
 void mglDrawCone(vec3_t origin, vec_t height, uint32 count);

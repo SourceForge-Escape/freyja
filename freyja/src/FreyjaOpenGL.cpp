@@ -362,6 +362,40 @@ void mglDrawBbox(const vec3_t min, const vec3_t max,
 }
 
 
+void mglDrawSelectionBox(const vec3_t min, const vec3_t max, const vec4_t lineColor)
+{
+	glColor4fv(lineColor);
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3fv(min);
+	glVertex3f(max[0], min[1], min[2]);
+	glVertex3f(max[0], min[1], max[2]);
+	glVertex3f(min[0], min[1], max[2]);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(max[0], max[1], min[2]);
+	glVertex3fv(max);
+	glVertex3f(min[0], max[1], max[2]);
+	glVertex3f(min[0], max[1], min[2]);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(max[0], max[1], min[2]);
+	glVertex3fv(max);
+	glVertex3f(max[0], min[1], max[2]);
+	glVertex3f(max[0], min[1], min[2]);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3fv(min);
+	glVertex3f(min[0], min[1], max[2]);
+	glVertex3f(min[0], max[1], max[2]);
+	glVertex3f(min[0], max[1], min[2]);
+	glEnd();
+}
+
+
 void mglDrawSelectBox(const vec3_t min, const vec3_t max, const vec4_t lineColor)
 {
 	vec_t w = (max[0] - min[0]);

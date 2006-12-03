@@ -6,6 +6,7 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Control points and bounding box selector added back ( kinda hacky )
  - User preferences set in UI now persist without editing any files
  - 'Old school' weighting assignment ala freyja 0.8.x added back
  - FIX scale in orbital view
