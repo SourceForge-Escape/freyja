@@ -1,6 +1,9 @@
 
+info:
+	@-printf "To do an auto build choose either:\n\tmake native\n\tmake win32\n"
 
-lazybuild:
+
+native:
 	@-printf "Building libhel\n"
 	@-cd libhel && ./autogen.sh && make
 

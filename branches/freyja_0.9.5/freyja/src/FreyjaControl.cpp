@@ -1709,7 +1709,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 			mCursor.mPos = mControlPoints[0];
 			mCursor.SetMode(Cursor::Translation);
 
-			freyja_print("Press right mouse to end selection");
+			freyja_print("Press Ctrl+Right Mouse to end selection");
 			freyja_event_gl_refresh();
 		}
 		else
@@ -3571,7 +3571,10 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 
 	case eScheme_Model:
 		// Mongoose 2002.01.12, Allow temp mode override
-		if (mod & KEY_LCTRL)
+		if (mEventMode == modeSelectByBox)
+		{
+		}
+		else if (mod & KEY_LCTRL)
 		{
 			handleEvent(eEvent, eSelect);
 			swappedModes = true;
@@ -3605,7 +3608,6 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		case modeSelectByBox:
 			if (mXYZMouseState == 0)
 			{
-				freyja_print("! FIXME: Selection by box was removed after 0.9.3!");
 				mXYZMouseState = 1;
 			}
 			else
@@ -3652,7 +3654,15 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	AdjustMouseXYForViewports(vx, vy);
 
 	/* Handle key modifers -- notice this are temp state changes */
-	if (mod & KEY_LCTRL)
+	if (mEventMode == modeSelectByBox)
+	{
+		if (mod & KEY_LCTRL || mod & KEY_RCTRL &&
+			btn == MOUSE_BTN_RIGHT && state == MOUSE_BTN_STATE_PRESSED)
+		{
+			SelectObjectByBox(mControlPoints[0], mControlPoints[1]);
+		}
+	}
+	else if (mod & KEY_LCTRL)
 	{
 		handleEvent(eEvent, eSelect);
 	}
@@ -3754,7 +3764,10 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 
 	case eScheme_Model:
 		// Mongoose 2002.01.12, Allow temp mode override
-		if (mod & KEY_LCTRL)
+		if (mEventMode == modeSelectByBox)
+		{
+		}
+		else if (mod & KEY_LCTRL)
 		{
 			handleEvent(eEvent, eSelect);
 		}
@@ -3764,15 +3777,6 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 		}
 
 		MouseEdit(btn, state, mod, x, y);
-
-		if (mEventMode == modeSelectByBox)
-		{
-			if (btn == MOUSE_BTN_RIGHT && state == MOUSE_BTN_STATE_PRESSED)
-			{
-				SelectObjectByBox(mControlPoints[0], mControlPoints[1]);
-			}
-		}
-
 		break;
 	default:
 		;
@@ -5730,7 +5734,7 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 
 	((mTexCoordArrayIndex == INDEX_INVALID) ? 
 	 freyja_print("No UVs selected!") : 
-	 freyja_print("Selected UV[%i].  Move with right mouse button.", mTexCoordArrayIndex));
+	 freyja_print("Selected UV[%i].  Move with Right Mouse Button.", mTexCoordArrayIndex));
 }
 
 

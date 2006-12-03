@@ -47,7 +47,6 @@
 
 	* Interface
 		- Dialogs using actual dialogs to avoid fullscreen showing panels
-		- Add generic bbox selection back for multivertex editing, etc
 		- Trim out 'dead' events, esp ones registering to mgtk
 		- Two window layout for curve / viewport usage
 		- Make viewport 'windows' abstract with seperate controls
