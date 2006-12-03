@@ -60,6 +60,8 @@ extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 void polymap_update_question();
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
+uint32 FreyjaControl::mSelectedControlPoint = 0;
+Vector<Vec3> FreyjaControl::mControlPoints;
 
 
 ////////////////////////////////////////////////////////////
@@ -1591,8 +1593,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eBoneIterator:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_BONE)))
 		{
-			char dupname[64];
-
 			SetSelectedBone(value);
 
 			if (value == GetSelectedBone() && freyjaIsBoneAllocated(value))
@@ -1620,6 +1620,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 				 * 1. Dup string to avoid evil widgets that want to mutate it
 				 * 2. Disable event hook up in case of event loop */
 				extern void mgtk_textentry_value_set(int event, const char *s);
+				char dupname[64];
 				strncpy(dupname, GetBoneName(value), 64);
 				mAllowBoneNameUpdate = false;
 				mgtk_textentry_value_set(eSetCurrentBoneName, dupname);
@@ -1699,12 +1700,23 @@ bool FreyjaControl::event(int event, unsigned int value)
 			mCursor.SetMode(freyja3d::Cursor::Invisible);
 			mEventMode = modeSelectByBox;
 			mRender->SetFlag(FreyjaRender::fBoundingVolSelection);
+
+			// We only need 2 control points for bbox selector
+			mControlPoints.resize(0);
+			mSelectedControlPoint = 0;
+			mControlPoints.push_back(Vec3(20, 20, 10));
+			mControlPoints.push_back(Vec3(-20, 10, -10));
+			mCursor.mPos = mControlPoints[0];
+			mCursor.SetMode(Cursor::Translation);
+
 			freyja_print("Press right mouse to end selection");
 			freyja_event_gl_refresh();
 		}
 		else
 		{
+			mControlPoints.resize(0);
 			mRender->ClearFlag(FreyjaRender::fBoundingVolSelection);
+			freyja_event_gl_refresh();
 		}
 		break;
 
@@ -1838,10 +1850,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case FREYJA_MODE_RENDER_LIGHTING:
 		SetRenderFlag(FreyjaRender::fLighting, value, "OpenGL lighting");
 		break;
-
-	//case FREYJA_MODE_RENDER_TEXTURE:
-		//SetRenderFlag(FreyjaRender::fTexture, value, "Texture mapping");
-		//break;
 
 	case FREYJA_MODE_RENDER_MATERIAL:
 		SetRenderFlag(FreyjaRender::fMaterial, value, "Material usage");
@@ -3226,6 +3234,7 @@ bool FreyjaControl::MotionEvent(int x, int y)
 		case MOUSE_BTN_LEFT:
 			switch (mEventMode)
 			{
+			case modeSelectByBox:
 			case modeMove:
 				{
 					vec_t vx = x, vy = y;
@@ -3240,10 +3249,6 @@ bool FreyjaControl::MotionEvent(int x, int y)
 			
 			case modeScale:
 				scaleObject(x, y, GetSelectedView());
-				break;
-
-			case modeSelectByBox:
-				freyja_print("! FIXME: Box selection was removed after 0.9.3.");
 				break;
 			
 			default:
@@ -3395,7 +3400,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 			CastPickRay(vx, vy);
 			Ray &r = FreyjaRender::mTestRay;
 			//bool picked = false;
-			Vec3 o;
+			//Vec3 o;
 
 			mCursor.mAxis = freyja3d::Cursor::eNone;
 			mCursor.mLastPos = mCursor.mPos;
@@ -3426,6 +3431,37 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 					;
 				}
 			}
+		}
+	}
+
+
+	// No cursor 'hit' while in bbox select look for a control point pick
+	if (mEventMode == modeSelectByBox)
+	{
+		CastPickRay(vx, vy);
+		Ray &r = FreyjaRender::mTestRay;
+		Vec3 p;
+		vec_t t, closest;
+		int selected = -1;
+
+		for (uint32 i = 0, count = mControlPoints.size(); i < count; ++i)
+		{
+			p = mControlPoints[i];
+			
+			if (r.IntersectSphere(p.mVec, 0.5f, t))
+			{
+				if (selected == -1 || t < closest)
+				{
+					selected = i;
+					closest = t;
+				}
+			}
+		}
+
+		if (selected > -1)
+		{
+			mSelectedControlPoint = selected;
+			mCursor.mPos = mControlPoints[selected];
 		}
 	}
 }
@@ -4767,6 +4803,12 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	mCursor.mPos += t;
 	mCursor.SetMode(freyja3d::Cursor::Translation);
 
+	if (mEventMode == modeSelectByBox)
+	{
+		mControlPoints[mSelectedControlPoint] = mCursor.mPos;
+		return;
+	}
+
 	switch (mObjectMode)
 	{
 	case tLight:
@@ -5561,6 +5603,9 @@ bool FreyjaControl::SaveUserPreferences()
 
 		n = (mRender->GetFlags() & FreyjaRender::fDrawPickRay) ? 1 : 0;
 		w.Print("(func_set_toggle eRenderPickRay %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fSkeletalVertexBlending) ? 1 : 0;
+		w.Print("(func_set_toggle eSkeletalDeform %i)\n", n);
 	}
 
 	return true;

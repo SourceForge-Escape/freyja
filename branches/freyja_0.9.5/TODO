@@ -7,6 +7,9 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* FINISH control points system!1111
+
+
 	* Single joint animation for shishi odoshi test
 		- ABI Only in interface for bone keyframe render / edit?
 		- Visualize weights over skinned mesh
@@ -54,13 +57,12 @@
 			- Combine controls and view into a seperate class/pkg
 			  This will make it easier to scale and fix UI issues
 		- Sphere brush for weight painting, etc
-		- Perferences, init-dev.mlisp
 		- Camera render mode for viewport
 			- OpenGL depth / culling / etc control?
 		- Remove state value from all mlisp toggle widgets
 		  ( they have a set func )
 		- Have a widget numeric set function like toggle widgets have for bool 
-		- VFS needs to provide metadata like XOR keys, size, offset, etc
+		- VFS UI needs to provide metadata like XOR keys, size, offset, etc
 
 
  Modeling

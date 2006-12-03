@@ -1158,6 +1158,37 @@ void FreyjaRender::Render(RenderModel &model)
 
 	glPopMatrix();
 
+
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		Vector<Vec3> ctrlpnts = FreyjaControl::GetControlPoints();
+		uint32 i;
+		foreach (ctrlpnts, i)
+		{
+			Vec3 p = ctrlpnts[i];
+
+			glPushMatrix();
+			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
+			glColor3fv(RED);
+			mglDrawSphere(8, 8, 0.5f);
+			glPopMatrix();
+		}
+
+		if (mRenderMode & fBoundingVolSelection && ctrlpnts.size() == 2)
+		{ 
+			Vec3 min = ctrlpnts[0];
+			Vec3 max = ctrlpnts[1];
+			mglDrawSelectionBox(min.mVec, max.mVec, DARK_YELLOW);
+		}
+
+		glPopAttrib();
+	}
+
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones && 
 		FreyjaRender::mJointRenderType == 2 || 
