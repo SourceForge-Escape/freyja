@@ -530,6 +530,47 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 }
 
 
+void Mesh::SelectVerticesByBox(Vec3 &min, Vec3 &max)
+{
+	Vec3 mina(min), maxa(max);
+
+	// Reorder as needed, since we don't trust input
+	for (int32 i = 2; i >= 0; --i)
+	{
+		if (min[i] > max[i])
+		{
+			mina[i] = max[i];
+			maxa[i] = min[i];
+		}
+	}
+
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (!v) 
+			continue;
+
+		Vec3 p;
+		bool inside = true;
+		GetVertexArrayPos(v->mVertexIndex, p.mVec);
+		
+		for (int32 j = 2; inside && j >= 0; --j)
+		{
+			if (p[j] > maxa[j] || p[j] < mina[j])
+			{
+				inside = false;
+			}
+		}
+
+		if (inside)
+		{
+			v->mFlags |= Vertex::fSelected;
+		}
+	}	
+}
+
+
 bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 {
 	vec_t t;

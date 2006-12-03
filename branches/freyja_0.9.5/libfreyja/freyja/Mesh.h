@@ -681,6 +681,11 @@ public:
 	 *        Clears old fRayHit results on all other faces.
 	 ------------------------------------------------------*/
 
+	void SelectVerticesByBox(Vec3 &min, Vec3 &max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	bool IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius);
 	/*------------------------------------------------------

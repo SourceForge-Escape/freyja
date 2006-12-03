@@ -3764,6 +3764,15 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 		}
 
 		MouseEdit(btn, state, mod, x, y);
+
+		if (mEventMode == modeSelectByBox)
+		{
+			if (btn == MOUSE_BTN_RIGHT && state == MOUSE_BTN_STATE_PRESSED)
+			{
+				SelectObjectByBox(mControlPoints[0], mControlPoints[1]);
+			}
+		}
+
 		break;
 	default:
 		;
@@ -4184,6 +4193,30 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 			MARK_MSGF("Case '%s' not supported", s.GetCString());
 		}
 	}
+}
+
+
+void FreyjaControl::SelectObjectByBox(Vec3 min, Vec3 max)
+{
+	switch (mObjectMode)
+	{
+	case tPoint:
+		{
+			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+
+			if ( m )
+			{
+				m->SelectVerticesByBox(min, max);
+			}
+		}
+		break;
+
+	default:
+		{
+			String s = ObjectTypeToString(mObjectMode);
+			freyja_print("%s() '%s' not supported.", __func__, s.GetCString());
+		}
+	}	
 }
 
 
