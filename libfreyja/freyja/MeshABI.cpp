@@ -1198,17 +1198,60 @@ uint32 freyjaGetVertexFrameCount(index_t vertexIndex)
 }
 
 
+// FIXME: Might move back to old 'weights embedded in wedge/Vertex' later
+// This implementation is only for legacy support, and it's very slow...
 void freyjaGetVertexWeight(index_t vertexIndex, uint32 element,
 						   index_t *bone, vec_t *weight)
 {
-	BUG_ME("Not Implemented");
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+	uint32 count = 0;
+
+	if (m)
+	{
+		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
+		{
+			Weight *w = m->GetWeight(i);
+
+			if (w)
+			{
+				if (w->mVertexIndex == vertexIndex)
+				{
+					if (count == element)
+					{
+						*bone = w->mBoneIndex;
+						*weight = w->mWeight;
+						return;
+					}
+					++count;
+				}
+			}
+		}
+	}
 }
 
 
+// FIXME: Might move back to old 'weights embedded in wedge/Vertex' later
+// This implementation is only for legacy support, and it's very slow...
 index_t freyjaGetVertexWeightCount(index_t vertexIndex)
 {
-	BUG_ME("Not Implemented");
-	return 0;
+	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+	uint32 count = 0;
+
+	if (m)
+	{
+		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
+		{
+			Weight *w = m->GetWeight(i);
+
+			if (w)
+			{
+				if (w->mVertexIndex == vertexIndex)
+					++count;
+			}
+		}
+	}
+
+	return count;
 }
 
 

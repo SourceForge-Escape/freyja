@@ -3704,8 +3704,6 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 
 bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 {
-	//freyja_print("!.. %i %i", btn, state);
-
 	// We've just let go of the button that was being held down
 	if (mCursor.mSelected && !btn && !state) 
 	{
@@ -3762,6 +3760,7 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 		}
 		break;
 
+#if 0
 	case eScheme_Model:
 		// Mongoose 2002.01.12, Allow temp mode override
 		if (mEventMode == modeSelectByBox)
@@ -3778,6 +3777,8 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 
 		MouseEdit(btn, state, mod, x, y);
 		break;
+#endif
+
 	default:
 		;
 	}
