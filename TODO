@@ -19,7 +19,10 @@
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
-		- Timers for animation playback
+		- Timers for animation playback	
+		- Add Mesh ABI calls for only specific bone updates too!
+		- Make sure vertex facerefs are always synced or make hup sig
+
 
 	* Cursor system
 		- Orbital / Camera view need special orientation constraints

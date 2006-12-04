@@ -209,6 +209,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/KeyFrameABI.o \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/MeshABI.o \
+	$(BUILDDIR)/LegacyMeshABI.o \
 	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \

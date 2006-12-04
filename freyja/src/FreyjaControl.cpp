@@ -2105,7 +2105,7 @@ bool FreyjaControl::event(int command)
 	switch (command)
 	{
 	case ePolygonSplit:
-		freyjaPolygonSplit(GetSelectedMesh(), GetSelectedFace());
+		freyjaMeshPolygonSplit(GetSelectedMesh(), GetSelectedFace());
 		freyja_print("Splitting polygon[%i]", GetSelectedFace());
 		break;
 
@@ -2467,12 +2467,14 @@ bool FreyjaControl::event(int command)
 
 
 	case eMirrorUV_X:
-		freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, true, false);
+		freyja_print("FIXME: freyjaModelMirrorTexCoord");
+		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, true, false);
 		freyja_event_gl_refresh();
 		break;
 
 	case eMirrorUV_Y:
-		freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, false, true);
+		freyja_print("FIXME: freyjaModelMirrorTexCoord");
+		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, false, true);
 		freyja_event_gl_refresh();
 		break;
 
@@ -2497,12 +2499,13 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case ePolyMapTexturePolygon:
-		freyjaMeshPolygonSplitTexCoords(GetSelectedMesh(),
-									GetSelectedFace());
+		freyja_print("FIXME: freyjaMeshPolygonSplitTexCoords");
+		//freyjaMeshPolygonSplitTexCoords(GetSelectedMesh(), GetSelectedFace());
 		break;
 
 	case eScaleUV:
-		freyjaModelTransformTexCoord(0, GetSelectedTexCoord(), fScale, 0.5, 0.5);
+		freyja_print("FIXME: freyjaModelTransformTexCoord");
+		//freyjaModelTransformTexCoord(0, GetSelectedTexCoord(), fScale, 0.5, 0.5);
 		break;
 
 	case eSetMeshTexture:
@@ -4692,7 +4695,7 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			ActionModelModified(a);
 
-			freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+			freyjaMeshTransform3fv(GetSelectedMesh(), action, v.mVec);
 
 			// Reset cursor transform
 			//if (action != fTranslate)
@@ -4706,8 +4709,9 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
 
+			// FIXME: WRONG!!
 			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
-				freyjaModelMeshTransform3fv(0, i, action, v.mVec);
+				freyjaMeshTransform3fv(i, action, v.mVec);
 
 			// Reset cursor transform
 			if (action != fTranslate)
@@ -4743,7 +4747,7 @@ void FreyjaControl::Transform(freyja_transform_t obj,
 	switch (obj)
 	{
 	case fTransformMesh:
-		freyjaModelMeshTransform3fv(0, GetSelectedMesh(), action, v.mVec);
+		freyjaMeshTransform3fv(GetSelectedMesh(), action, v.mVec);
 		break;
 
 	default:
@@ -5041,7 +5045,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			Action *a = new ActionVertexTransformExt(GetSelectedMesh(), GetSelectedVertex(), fTranslate, mCursor.mPos.mVec, mCursor.mPos);
 			ActionModelModified(a);
 		}
-		freyjaMeshVertexTranslate3fv(GetSelectedMesh(), GetSelectedVertex(), mCursor.mPos.mVec);
+		freyjaMeshVertexPos3fv(GetSelectedMesh(), GetSelectedVertex(), mCursor.mPos.mVec);
 		break;
 
 
@@ -5743,12 +5747,6 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 // Non-object Event Handler Functions
 ////////////////////////////////////////////////////////////
 
-void eCurrentFaceFlagAlpha()
-{
-	freyjaPolygonFlagAlpha(FreyjaControl::mInstance->GetSelectedFace(), 1);
-}
-
-
 void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
 {
 	if (bpp == 24)
@@ -6036,6 +6034,7 @@ void eClearWeight()
 
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallback2::add("eCurrentFaceFlagAlpha", &eNopControl);
 	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
 	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);
  
@@ -6062,7 +6061,6 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallbackUInt::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
-	ResourceEventCallback::add("eCurrentFaceFlagAlpha", &eCurrentFaceFlagAlpha);
 
 	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
 }

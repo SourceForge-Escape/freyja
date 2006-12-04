@@ -6,6 +6,7 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Legacy MeshABI calls moved into separate object or completely removed.
  - FIX Ja and legacy ABI weight support back
  - FIX to make selection box dominate over 'move'
  - Control points and bounding box selector added back ( kinda hacky )

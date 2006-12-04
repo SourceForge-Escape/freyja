@@ -19,190 +19,53 @@
  * Mongoose - Created, moved from other headers
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJAMESHABI_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJAMESHABI_H_
+#ifndef GUARD__LIBFREYJA_MESHABI_H_
+#define GUARD__LIBFREYJA_MESHABI_H_
 
 #include "freyja.h"
 
 extern "C" {
 
-	// TMP model stuff
-	uint32 freyjaModelGetMeshCount(index_t modelIndex);
-
-	void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex, 
-									freyja_transform_action_t action, vec3_t xyz);
-
-
 	///////////////////////////////////////////////////////////////////////
-	// MESH
+	// MESH mutators
 	///////////////////////////////////////////////////////////////////////
-
 
 	index_t freyjaMeshCreate();
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Returns index of mesh spawned
+	 * Post : Returns UID of mesh spawned
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetCurrentMesh();
+	index_t freyjaMeshCopy(index_t mesh);
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns index using meshIndex state 
+	 * Pre  : <mesh> exists
+	 * Post : Returns UID of clone mesh after cloning.
+	 *        Returns INDEX_INVALID if failed. 
 	 ------------------------------------------------------*/
 
-	void freyjaCurrentMesh(index_t idx);
+	void freyjaMeshDelete(index_t mesh);
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Sets index, which is useful for 0.9.3 usage 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshDelete(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : Mesh <meshIndex> exists
+	 * Pre  : Mesh <mesh> exists
 	 * Post : Mesh is removed from mesh pool
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshVertexCreate3f(index_t meshIndex, 
-									 index_t groupIndex,
-									 vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : Note in 0.9.3 API group isn't smoothing group
-	 *        After 0.10 merge it will be
-	 *
-	 * Post : Returns index of vertex created
-	 ------------------------------------------------------*/
-
-	index_t freyjaMeshTexCoordCreate2f(index_t meshIndex, vec_t u, vec_t v);
+	void freyjaMeshMaterial(index_t mesh, index_t material);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns index of texcoord created
-	 ------------------------------------------------------*/
-
-	index_t freyjaMeshTexCoordCreate3f(index_t meshIndex, 
-									  vec_t u, vec_t v, vec_t w);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns index of texcoord created
-	 ------------------------------------------------------*/
-
-	void freyjaMeshVertexTranslate3fv(index_t meshIndex, 
-									  index_t vertexIndex, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Alter a single vertex position
-	 ------------------------------------------------------*/
-
-
-	void freyjaMeshTransform(index_t meshIndex, uint32 frame,
-								freyja_transform_action_t action, 
-								vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshFrameTransform(index_t meshIndex, uint32 frame,
-									freyja_transform_action_t action, 
-									vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshClampTexCoords(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Makes sure all UVs are inside 0,0 - 1,1
-	 ------------------------------------------------------*/
-
-	void freyjaMeshMaterial(index_t meshIndex, index_t materialIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaGetMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Takes vertex UVs and promotes them to polymapped
-	 *        texcoords ( stored in polygon ala texture polygons )
-	 ------------------------------------------------------*/
-
-	void freyjaMeshAddPolygon(index_t meshIndex, index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaMeshRemovePolygon(index_t meshIndex, index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Removes references to polygonIndex in mesh, but
-	 *        it doesn't free the allocated polygon
-	 ------------------------------------------------------*/
-
-	void freyjaMeshPolygonSplitTexCoords(index_t meshIndex,
-                                         index_t polygonIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : All TexCoords are duplicated, then references to old
-	 *        TexCoords are removed -- this is useful for making a single
-	 *        polymapped texture polygon when all others will remain
-	 *        in a UV Mesh
-	 ------------------------------------------------------*/
-
-	void freyjaMeshUVMapPlanar(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Texcoords computed with Planar mapping algorithm
-	 ------------------------------------------------------*/
-
-	void freyjaMeshUVMapSpherical(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Texcoords computed with Spherical mapping algorithm
-	 ------------------------------------------------------*/
-
-	void freyjaMeshUVMapCylindrical(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Texcoords computed with Cylindrical mapping algorithm
-	 ------------------------------------------------------*/
-
-	void freyjaMeshTesselateTriangles(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Divides all polygons in mesh into triangles
-	 ------------------------------------------------------*/
-
-	void freyjaMeshNormalFlip(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Flips all vertex normals in mesh
-	 ------------------------------------------------------*/
-
-	void freyjaMeshGenerateVertexNormals(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : meshIndex references a valid mesh
-	 * Post : Recalculates all vertex normals in mesh
+	 * Post : Sets <mesh> material reference to <material>.
 	 ------------------------------------------------------*/
 
 	void freyjaMeshPosition(index_t meshIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets the mesh position attribute.
+	 ------------------------------------------------------*/
 
 	void freyjaMeshName1s(index_t meshIndex, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set human readable name for mesh.
+	 ------------------------------------------------------*/
 
 	void freyjaMeshFlags1u(uint32 flags);
 	/*------------------------------------------------------
@@ -210,169 +73,174 @@ extern "C" {
 	 * Post : Sets flags for current mesh
 	 ------------------------------------------------------*/
 
-	void freyjaMeshPolygonExtrudeQuad1f(index_t meshIndex, index_t polygonIndex,
- vec3_t v);
-
-
-	// Mesh accessors //////////////
-
-	char freyjaIsMeshAllocated(index_t meshIndex);
+	void freyjaMeshTransform3fv(index_t mesh, 
+								freyja_transform_action_t action, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Generic transform function.
 	 ------------------------------------------------------*/
 
-	void freyjaGetMeshFrameBoundingBox(index_t meshIndex, 
-										uint32 frame, vec3_t min, vec3_t max);
+	index_t freyjaMeshVertexCreate3fv(index_t mesh, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns mesh local index of vertex created.
 	 ------------------------------------------------------*/
 
-	index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex);
+	void freyjaMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Sets vertex position.  
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMeshFlags(index_t meshIndex);
+	index_t freyjaMeshTexCoordCreate2f(index_t mesh, vec_t u, vec_t v);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns mesh local index of texcoord created
 	 ------------------------------------------------------*/
 
-	void freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz);
+	index_t freyjaMeshTexCoordCreate3f(index_t mesh, 
+									  vec_t u, vec_t v, vec_t w);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns mesh local index of texcoord created
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetMeshNameString(index_t meshIndex);
+	void freyjaMeshTexCoord2fv(index_t mesh, index_t texcoord, vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Sets <mesh> local index of <texcoord>'s value.
 	 ------------------------------------------------------*/
 
-	void freyjaGetMeshName1s(index_t meshIndex, uint32 lenght, char *name);
+	void freyjaMeshClampTexCoords(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Makes sure all UVs clamp: 0.0f <= u,v <= 1.0f
+	 ------------------------------------------------------*/
+
+	index_t freyjaMeshPolygonCreate(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Creates polygon and returns <mesh> local index.
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMeshTexCoordCount(index_t meshIndex);
+	void freyjaMeshPolygonDelete(index_t mesh, index_t polygon);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Deletes <polygon> in <mesh>.
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMeshTexCoordIndex(index_t meshIndex, index_t element);
+	void freyjaMeshPolygonAddVertex1i(index_t mesh, index_t polygon, 
+									  index_t vertex);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Append <mesh> <vertex> to <polygon>.
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMeshVertexIndex(index_t meshIndex, index_t element);
+	void freyjaMeshPolygonAddTexCoord1i(index_t mesh, index_t polygon, 
+										index_t texcoord);
 	/*------------------------------------------------------
-	 * Pre  : freyjaGetMeshVertexCount must be called before
-	 *        this is valid while using the Egg backend
+	 * Pre  : 
+	 * Post : Append <mesh> <texcoord> to <polygon>.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonMaterial(index_t mesh, index_t polygon, 
+								   index_t material);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets <mesh> <face> <material>.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonClearFlag1u(index_t mesh, index_t face, byte flag);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clears <mesh> <face> flag.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonSetFlag1u(index_t mesh, index_t face, byte flag);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets <mesh> <face> flag.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Assigns <mesh> <face> to [smoothing] <group>.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshUVMapPlanar(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : mesh references a valid mesh
+	 * Post : Texcoords computed by Planar algorithm
+	 ------------------------------------------------------*/
+
+	void freyjaMeshUVMapSpherical(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : mesh references a valid mesh
+	 * Post : Texcoords computed by Spherical algorithm
+	 ------------------------------------------------------*/
+
+	void freyjaMeshUVMapCylindrical(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : mesh references a valid mesh
+	 * Post : Texcoords computed by Cylindrical algorithm
+	 ------------------------------------------------------*/
+
+	void freyjaMeshTesselateTriangles(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : mesh references a valid mesh
+	 * Post : Divides all polygons in mesh into triangles
+	 ------------------------------------------------------*/
+
+	void freyjaMeshNormalFlip(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : mesh references a valid mesh
+	 * Post : Flips all vertex normals in mesh
+	 ------------------------------------------------------*/
+
+	void freyjaMeshGenerateVertexNormals(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : mesh references a valid mesh
+	 * Post : Recalculates all vertex normals in mesh as
+	 *        a single smoothing group.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonExtrudeQuad1f(index_t mesh, index_t quad,	vec3_t n);
+	/*------------------------------------------------------
+	 * Pre  : Polygon index <quad> is a quadrilateral.
+	 * Post : Extrudes <quad> over normal <n> in <mesh>.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshVertexWeight(index_t mesh, index_t vertex, 
+								index_t bone, vec_t weight);
+	/*------------------------------------------------------------
+	 * Pre  : All <weight>s for <vertex> combined must be 1.0
+	 *        Each weight must fit 0.0f < w <= 1.0f
 	 *
-	 * Post : Returns the index of the local vertex <element>
-	 *        for mesh <meshIndex> or -1 on error
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMeshVertexCount(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the number of local vertices
-	 *        for mesh <meshIndex> or 0 on error
+	 * Post : Sets <weight> of influence of <bone> on <vertex> in <mesh>
 	 *
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetMeshPolygonVertexIndex(index_t meshIndex,
-                                            index_t faceVertexIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the index of local vertices
-	 *        for mesh <meshIndex> with local
-	 *        mapping from polygon to mesh ids or -1 on error
+	 *        If there is already a weight for the corresponding
+	 *        bone it is replaced.
 	 *
-	 ------------------------------------------------------*/
+	 -----------------------------------------------------------*/
 
-	// 'free vertices' outside of polygons as well as 'grouped' vertices
-	void freyjaMeshVertexGroupAppendGobalVertex(index_t meshIndex, uint32 element, 
-												index_t vertexIndex);
+	index_t freyjaMeshTexCoordWeld(index_t mesh, index_t a, index_t b);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : Texcoords <a> and <b> exist in <mesh>
+	 * Post : Replaces all references in <mesh> to <b> with <a>
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMeshVertexGroupVertexCount(index_t meshIndex, uint32 element);
+	index_t freyjaMeshVertexWeld(index_t mesh, index_t a, index_t b);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : Vertices <a> and <b> exist in <mesh>
+	 * Post : Replaces all references in <mesh> to <b> with <a>
 	 ------------------------------------------------------*/
-
-	index_t freyjaGetMeshVertexGroupVertexIndex(index_t meshIndex, uint32 element,
-											  uint32 vertexElement);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetMeshPolygonIndex(index_t meshIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMeshPolygonCount(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetMeshVertexGroupIndex(index_t meshIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMeshVertexGroupCount(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetMeshVertexFrameIndex(index_t meshIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Not Implemented, Obsolete
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Not Implemented, Obsolete
-	 ------------------------------------------------------*/
-
-
-	///////////////////////////////////////////////////////////////
-	// 0.9.5 ABI Extensions
-	///////////////////////////////////////////////////////////////
-
-	// FIXME: Add ABI for only certain bone updates too!
 
 	void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Updates <mesh> blend vertex array for
 	 *        animation at <time> for <skeleton> and <track>
-	 ------------------------------------------------------*/
-
-	vec_t *freyjaGetMeshBlendVertices(index_t mesh);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Retrieves <mesh> blend vertex array for rendering, etc
 	 ------------------------------------------------------*/
 
 	index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate);
@@ -395,34 +263,164 @@ extern "C" {
 	 * Post : Update vertex position in keyframe
 	 ------------------------------------------------------*/
 
-	void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex);
+	void freyjaMeshPolygonSplit(index_t mesh, index_t polygon);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Randomly splits face ( adding guided split later ).
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetFSMMeshIndex();
+
+	///////////////////////////////////////////////////////////////////////
+	// MESH accessors
+	///////////////////////////////////////////////////////////////////////
+
+	uint32 freyjaGetMeshCount();
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  :  
+	 * Post : Returns number of mesh UIDs used.
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCopy(index_t meshIndex);
+	char freyjaIsMeshAllocated(index_t mesh);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : Given UID of <mesh>.
+	 * Post : Returns 1 if <mesh> is allocated, or 0.
 	 ------------------------------------------------------*/
 
-	void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group);
+	void freyjaGetMeshBoundingBox(index_t mesh, vec3_t min, vec3_t max);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns min and max of axis aligned bounding volume.
 	 ------------------------------------------------------*/
 
-	void freyjaDebugMeshBlendVertices(index_t mesh);
+	void freyjaGetMeshBoundingSphere(index_t mesh, 
+									 vec3_t origin, vec_t &radius);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns min and max of spherical bounding volume.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshFlags(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns option bitflags for <mesh>.
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshPosition(index_t mesh, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> position attribute.
+	 ------------------------------------------------------*/
+
+	const char *freyjaGetMeshNameString(index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> human readable name.
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshName1s(index_t mesh, uint32 lenght, char *name);
+	/*------------------------------------------------------
+	 * Pre  : <name> is allocated with <lenght> bytes.
+	 * Post : Returns <mesh> human readable inside buffer <name>.
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> pos.
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshVertexTexCoord(index_t mesh, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> texcoord index.
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshVertexPolygonRefIndex(index_t mesh,
+											   index_t vertex, uint32 element);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> face reference index for <element>.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshVertexPolygonRefCount(index_t mesh, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> face reference count.
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshTexCoord2fv(index_t mesh, index_t texcoord, vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets <mesh> local index of <texcoord>'s value.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshPolygonVertexCount(index_t mesh, index_t polygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns vertex count for <polygon>.
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshPolygonVertexIndex(index_t mesh, index_t polygon,
+											uint32 element);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns vertex index for <element> of <polygon>.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshPolygonTexCoordCount(index_t mesh, index_t polygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns texcoord count for <polygon>.
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshPolygonTexCoordIndex(index_t mesh, index_t polygon,
+											  uint32 element);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns texcoord index for <element> of <polygon>.
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshPolygonMaterial(index_t mesh, index_t polygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns material reference for <polygon>.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshTexCoordCount(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns texcoord count for <mesh>.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshVertexCount(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns vertex count for <mesh>.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshPolygonCount(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns polygon count for <mesh>.
+	 ------------------------------------------------------*/
+
+	vec_t *freyjaGetMeshBlendVertices(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Retrieves <mesh> blend vertex array for rendering, etc
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshWeight(index_t mesh, index_t weight,
+							 index_t &vertex, index_t &bone, vec_t &weightv);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets <weight> values from <mesh>
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshWeightCount(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets number of vertex:bone weights in mesh
 	 ------------------------------------------------------*/
 
 }
@@ -430,7 +428,9 @@ extern "C" {
 
 #   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
 #      include <freyja/Mesh.h>
-freyja::Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
+
+freyja::Mesh *freyjaGetMeshClass(index_t meshUID); 
+
 #   endif
 
 #endif

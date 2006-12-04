@@ -38,32 +38,11 @@
 #include "KeyFrameABI.h"
 #include "BoneABI.h"
 #include "MeshABI.h"
+#include "LegacyMeshABI.h"
 #include "SkeletonABI.h"
 
 
 extern "C" {
-
-
-	///////////////////////////////////////////////////////////////////////
-	// Freyja ABI 0.9.5
-	///////////////////////////////////////////////////////////////////////
-	
-	void freyjaModelMeshPolygonAddTexCoord1i(index_t modelIndex, index_t meshIndex, 
-											 index_t polygonIndex, index_t texcoordIndex);
-
-	void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex, 
-										   index_t polygonIndex, index_t vertexIndex);
-
-
-	void freyjaPolygonGroup1u(uint32 group);
-
-
-	///////////////////////////////////////////////////////////////////////
-	// Freyja ABI 0.9.3 
-	///////////////////////////////////////////////////////////////////////
-
-
-
 
 	////////////////////////////////////////////////////////////////
 	// Models
@@ -158,20 +137,6 @@ extern "C" {
 	 *        Returns the native index of that texcoord
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex,
-                                             uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : texcoordIndex exists
-	 * Post : Gets index of polygon referencing this texcoord
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetTexCoordPolygonRefCount(index_t texcoordIndex);
-	/*------------------------------------------------------
-	 * Pre  : texcoordIndex exists
-	 * Post : Gets number of polygons referencing this texcoord
-	 ------------------------------------------------------*/
-
-	void freyjaGetTexCoord2fv(index_t texcoordIndex, vec2_t uv);
 	vec2_t *freyjaGetTexCoordUV(index_t texcoordIndex);
 	/*------------------------------------------------------
 	 * Pre  : texcoordIndex exists
@@ -185,7 +150,6 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 	void freyjaTexCoord2f(index_t texcoordIndex, vec_t u, vec_t v);
-	void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : texcoordIndex exists
 	 * Post : Alters the texcoord's values
@@ -337,18 +301,7 @@ extern "C" {
 
 	void freyjaVertexPosition3fv(index_t vertexIndex, vec3_t xyz);
 
-	void freyjaVertexWeight(index_t index, vec_t weight, index_t bone);
-	/*------------------------------------------------------------
-	 * Pre  : <weight> of influence of <bone> on vertex[<index>]
-	 *
-	 * Post : Vertex <index> in the model gets weight added	
-	 *        to influence list, if there is a weight for the
-	 *        corresponding bone it is replaced
-	 *
-	 *        <weight> <= 0.0 removes weight	
-	 *
-	 *        All weights for the vertex combined must be 1.0
-	 -----------------------------------------------------------*/
+
 
 	index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element);
 
@@ -364,11 +317,6 @@ extern "C" {
 							  index_t *frameIndex, vec3_t xyz);
 
 	uint32 freyjaGetVertexFrameCount(index_t vertexIndex);
-
-	void freyjaGetVertexWeight(index_t vertexIndex, uint32 element,
-							   index_t *bone, vec_t *weight);
-
-	uint32 freyjaGetVertexWeightCount(index_t vertexIndex);
 
 	uint32 freyjaGetVertexFlags(index_t vertexIndex);
 
@@ -999,9 +947,6 @@ extern "C" {
 
 	void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
 							int32 count, int32 segments); // radius
-
-
-	void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v);
 
 
 	///////////////////////////////////////////////////////////////////////

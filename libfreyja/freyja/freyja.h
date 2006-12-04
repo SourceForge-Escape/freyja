@@ -56,6 +56,8 @@
 
 #define MARK_MSGF freyjaPrintMessage("\n[%s] %s:%i, %s() ", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyjaPrintMessage
 
+#define OBS_CALL(...) freyjaPrintMessage("[%s] %s:%i, %s() Obsolete ABI call", FREYJA_API_VERSION, __FILE__, __LINE__, __func__)
+
 
 #ifdef DEBUG
 #   define STORE_MARK freyjaStoreMark
