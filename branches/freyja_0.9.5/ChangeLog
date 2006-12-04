@@ -6,6 +6,7 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Ja and legacy ABI weight support back
  - FIX to make selection box dominate over 'move'
  - Control points and bounding box selector added back ( kinda hacky )
  - User preferences set in UI now persist without editing any files
