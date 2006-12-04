@@ -604,21 +604,19 @@ void FreyjaFSM::freyjaEnd()
 	{
 	case FREYJA_POLYGON:
 
-		polygon = freyjaModelMeshPolygonCreate(mIndexModel, mIndexMesh);
+		polygon = freyjaMeshPolygonCreate(mIndexMesh);
 		
 		freyjaMeshPolygonGroup1u(mIndexMesh, polygon, mGroupId);
 
 		for (i = 0, count = mVertexList.size(); i < count; ++i)
 		{
 			vertex = mVertexList[i];
-			freyjaModelMeshPolygonAddVertex1i(mIndexModel, 
-											  mIndexMesh, polygon, vertex);
+			freyjaMeshPolygonAddVertex1i(mIndexMesh, polygon, vertex);
 
 			if ( i < mTexCoordList.size() )
 			{
 				vertex = mTexCoordList[i];
-				freyjaModelMeshPolygonAddTexCoord1i(mIndexModel, 
-													mIndexMesh, polygon, vertex);
+				freyjaMeshPolygonAddTexCoord1i(mIndexMesh, polygon, vertex);
 			}
 		}
 

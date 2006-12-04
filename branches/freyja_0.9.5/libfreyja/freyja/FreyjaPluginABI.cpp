@@ -289,7 +289,7 @@ void freyjaGenericTransform3fv(freyja_transform_t transform,
 		{
 		case fTranslate:
 			//freyjaMeshPosition(id, xyz);
-			freyjaMeshTransform(id, freyjaGetMeshVertexGroupIndex(id, 0),
+			freyjaMeshTransform(id, 0,//freyjaGetMeshVertexGroupIndex(id, 0),
 								action, xyz[0], xyz[1], xyz[2]);
 			break;
 		case fRotate:
@@ -522,7 +522,7 @@ int32 freyjaLoadMeshChunkV1(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 		for (j = 0; j < 3; ++j)
 			xyz[j] = r.ReadFloat32();
 		
-		freyjaVertexFrame3f(verticesMap[idx], xyz[0], xyz[1], xyz[2]);
+		//freyjaVertexFrame3f(verticesMap[idx], xyz[0], xyz[1], xyz[2]);
 	}
 
 	/* TexCoords */
@@ -611,7 +611,7 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 	vec3_t xyz;
 	vec2_t uv;
 	vec_t weight;
-	index_t bone, frame;
+	index_t bone;
 	int32 flags, material;
 	int32 i, j, k, count, idx, vertex, texcoord;
 	int32 polygonCount = freyjaGetMeshPolygonCount(meshIndex);
@@ -638,7 +638,8 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 	/* Polygons, filtered by mesh */
 	for (i = 0, count = 0; i < polygonCount; ++i)
 	{
-		idx = freyjaGetMeshPolygonIndex(meshIndex, i);
+		// polygons are no longer gobal objects
+		idx = i;//freyjaGetMeshPolygonIndex(meshIndex, i);
 		count = freyjaGetPolygonEdgeCount(idx);
 
 		/* Weed out invalid polygons */
@@ -696,8 +697,8 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 
 				vertexWeightCount += freyjaGetVertexWeightCount(vertex);
 				byteSize += 12 * freyjaGetVertexWeightCount(vertex); // vidx weight bone
-				vertexFrameCount += freyjaGetVertexFrameCount(vertex);
-				byteSize += 20 * freyjaGetVertexFrameCount(vertex); // vidx frame xyz
+				vertexFrameCount += 0;//freyjaGetVertexFrameCount(vertex);
+				byteSize += 20 * 0;//freyjaGetVertexFrameCount(vertex); // vidx frame xyz
 			}
 		}
 
@@ -730,7 +731,7 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 	/* Groups WARNING currently not written to disk */
 	for (i = 0; i < vertexGroupCount; ++i)
 	{
-		idx = freyjaGetMeshVertexGroupIndex(meshIndex, i);
+		//idx = freyjaGetMeshVertexGroupIndex(meshIndex, i);
 	}
 
 	vertexGroupCount = 0;
@@ -807,11 +808,12 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 		}
 	}
 
+#if 0
 	/* VertexFrames */
 	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
 	{
 		vertex = vertices[i];
-		count = freyjaGetVertexFrameCount(vertex);
+		count = 0;//freyjaGetVertexFrameCount(vertex);
 
 		for (j = 0; j < count; ++j)
 		{
@@ -822,13 +824,14 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 				w.WriteFloat32(xyz[k]);
 		}
 	}
+#endif
 
 	/* TexCoords */
 	for (i = texcoords.begin(); i < (long)texcoords.end(); ++i)
 	{
 		texcoord = texcoords[i];
 
-		freyjaGetTexCoord2fv(texcoord, uv);
+		freyjaGetMeshTexCoord2fv(meshIndex, texcoord, uv);
 
 		for (j = 0; j < 2; ++j)
 			w.WriteFloat32(uv[j]);
@@ -895,59 +898,6 @@ int32 freyjaSaveMeshChunkV1(SystemIO::FileWriter &w, index_t meshIndex)
 	}
 
 	return 0;
-}
-
-
-void freyjaMeshClampTexCoords(index_t meshIndex)
-{
-	uint32 i, item, count;
-	vec2_t uv;
-
-
-	// FIXME: Might have to use gobal texcoords here?
-
-	/* Clamp texcoords */
-	count = freyjaGetMeshTexCoordCount(meshIndex);
-
-	for (i = 0; i < count; ++i)
-	{
-		item = freyjaGetMeshTexCoordIndex(meshIndex, i);
-		freyjaGetTexCoord2fv(item, uv);
-
-		if (uv[0] < 0.0f)
-			uv[0] = 0.0f;
-		else if (uv[0] > 1.0f)
-			uv[0] = 1.0f;
-
-		if (uv[1] < 0.0f)
-			uv[1] = 0.0f;
-		else if (uv[1] > 1.0f)
-			uv[1] = 1.0f;
-		
-		freyjaTexCoord2fv(item, uv);
-	}
-
-
-	/* Clamp vertex UVs*/
-	count = freyjaGetMeshVertexCount(meshIndex);
-
-	for (i = 0; i < count; ++i)
-	{
-		item = freyjaGetMeshVertexIndex(meshIndex, i);
-		freyjaGetVertexTexcoord2fv(item, uv);
-
-		if (uv[0] < 0.0f)
-			uv[0] = 0.0f;
-		else if (uv[0] > 1.0f)
-			uv[0] = 1.0f;
-
-		if (uv[1] < 0.0f)
-			uv[1] = 0.0f;
-		else if (uv[1] > 1.0f)
-			uv[1] = 1.0f;
-		
-		freyjaVertexTexCoord2fv(item, uv);
-	}
 }
 
 
@@ -1349,40 +1299,6 @@ Vector<unsigned int> *eggFindVerticesInBox(vec3_t bbox[2],
 }
 
 
-void freyjaGenerateUVFromXYZ(vec3_t xyz, vec_t *u, vec_t *v)
-{
-	vec_t s;
-
-
-	if (!u || !v)
-	{
-		freyjaPrintMessage("freyjaGenerateUVFromXYZ> ERROR: Invalid UV");
-		return;
-	}
-
-	*u = (xyz[0] > 0) ? xyz[0] : -xyz[0];
-	s = 0.025;
-  
-	while (*u > 1.0)
-	{
-		*u *= s;
-		s *= 0.01;
-	}
-  
-	*v = (xyz[1] > 0) ? xyz[1] : -xyz[1];
-	s = 0.025;
-  
-	while (*v > 1.0)
-	{
-		*v *= s;
-		s *= 0.01;
-	}
-  
-	*u = 1.0 - *u;
-	*v = 1.0 - *v;
-}
-
-
 void freyjaModelGenerateVertexNormals(index_t modelIndex)
 {
 	Vector <Vector3d *> faceNormals;
@@ -1390,13 +1306,13 @@ void freyjaModelGenerateVertexNormals(index_t modelIndex)
 	Vector3d a, b, c, aa, bb, normal;
 	unsigned int i, j, vertexCount, faceCount;
 	int32 v0, v1, v2, index;
-	index_t face;
+	index_t face, mesh;
 
 
 	freyjaCriticalSectionLock();
 	
 	freyjaPrintMessage("freyjaGenerateVertexNormals()");
-
+	mesh = freyjaGetCurrent(FREYJA_MESH);
 	vertexCount = freyjaGetCount(FREYJA_VERTEX);
 	faceCount = freyjaGetCount(FREYJA_POLYGON); 
 
@@ -1441,11 +1357,12 @@ void freyjaModelGenerateVertexNormals(index_t modelIndex)
 
 		normal.zero();
 
-		freyjaGetVertexPolygonRef(ref);
-
-		for (j = ref.begin(); j < ref.end(); ++j)
+		//freyjaGetVertexPolygonRef(ref);
+		//for (j = ref.begin(); j < ref.end(); ++j)
+		uint32 jn = freyjaGetMeshVertexPolygonRefCount(mesh, index);
+		for (j = 0; j < jn; ++j)
 		{
-			normal += *faceNormals[ref[j]];
+			normal += *faceNormals[freyjaGetMeshVertexPolygonRefIndex(mesh, index, j)];
 		}
 
 		normal.normalize();
@@ -1686,100 +1603,6 @@ void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular)
 }
 
 
-
-void freyjaMeshTesselateTriangles(index_t meshIndex)
-{
-	Vector<long> purge;
-	int32 i, j, polygonCount, polygonIndex, vertexCount, vertexIndex;
-	int32 a, b, c, d, ta, tb, tc, td, material;
-	unsigned int ii;
-
-
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-
-	for (i = 0; i < polygonCount; ++i)
-	{
-		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
-		material = freyjaGetPolygonMaterial(polygonIndex);
-
-		if (polygonIndex > -1)
-		{
-			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
-			if (vertexCount < 4)
-				continue;
-			
-			if (vertexCount == 4)
-			{
-				/* 1. Get ABCD quad vertices */
-				a = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-				b = freyjaGetPolygonVertexIndex(polygonIndex, 1);
-				c = freyjaGetPolygonVertexIndex(polygonIndex, 2);
-				d = freyjaGetPolygonVertexIndex(polygonIndex, 3);
-
-				if (freyjaGetPolygonTexCoordCount(polygonIndex))
-				{
-					ta = freyjaGetPolygonTexCoordIndex(polygonIndex, 0);
-					tb = freyjaGetPolygonTexCoordIndex(polygonIndex, 1);
-					tc = freyjaGetPolygonTexCoordIndex(polygonIndex, 2);
-					td = freyjaGetPolygonTexCoordIndex(polygonIndex, 3);
-				}
-
-
-				/* 2. Make ABC ACD triangles */
-				freyjaBegin(FREYJA_POLYGON);
-				freyjaPolygonMaterial1i(material);
-				freyjaPolygonVertex1i(a);
-				freyjaPolygonVertex1i(b);
-				freyjaPolygonVertex1i(c);
-
-				if (freyjaGetPolygonTexCoordCount(polygonIndex))
-				{
-					freyjaPolygonTexCoord1i(ta);
-					freyjaPolygonTexCoord1i(tb);
-					freyjaPolygonTexCoord1i(tc);
-				}
-
-				freyjaEnd();
-
-				freyjaBegin(FREYJA_POLYGON);
-				freyjaPolygonMaterial1i(material);
-				freyjaPolygonVertex1i(a);
-				freyjaPolygonVertex1i(c);
-				freyjaPolygonVertex1i(d);
-
-				if (freyjaGetPolygonTexCoordCount(polygonIndex))
-				{
-					freyjaPolygonTexCoord1i(ta); // should dupe a?
-					freyjaPolygonTexCoord1i(tc);
-					freyjaPolygonTexCoord1i(td);
-				}
-
-				freyjaEnd();
-
-
-				/* 3. Prepare to remove ABCD polygon and update references */
-				purge.pushBack(polygonIndex);
-			}
-			else  // Hhhhmm... can of worms...  doesn't touch polygons atm
-			{
-				for (j = 0; j < vertexCount; ++j)
-				{
-					// 0 1 2, 0 2 3, ..
-					freyjaPrintError("freyjaMeshTesselateTriangles> No Implementation due to lack of constraints on 5+ edges");
-					vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
-				}
-			}
-		}
-	}
-
-	for (ii = purge.begin(); ii < purge.end(); ++ii)
-	{
-		freyjaMeshRemovePolygon(meshIndex, purge[ii]);
-	}
-}
-
-
 void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex)
 {
 	uint32 i, count;
@@ -1788,7 +1611,7 @@ void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex)
 
 	for (i = 0; i < count; ++i)
 	{
-		freyjaBoneRemoveVertex(boneIndex, freyjaGetMeshVertexIndex(meshIndex, i));
+		//freyjaBoneRemoveVertex(boneIndex, i);//freyjaGetMeshVertexIndex(meshIndex, i));
 	}
 }
 
@@ -1801,7 +1624,7 @@ void freyjaBoneAddMesh(index_t boneIndex, index_t meshIndex)
 
 	for (i = 0; i < count; ++i)
 	{
-		freyjaBoneAddVertex(boneIndex, freyjaGetMeshVertexIndex(meshIndex, i));
+		//freyjaBoneAddVertex(boneIndex, i);//freyjaGetMeshVertexIndex(meshIndex, i));
 	}
 }
 
@@ -1815,44 +1638,6 @@ index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
 void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex)
 {
 	freyjaVertexWeight(vertexIndex, 1.0f, boneIndex);
-}
-
-
-void freyjaTexCoord2f(index_t texcoordIndex, vec_t u, vec_t v)
-{
-	vec2_t uv = {u, v};
-
-	freyjaTexCoord2fv(texcoordIndex, uv);
-}
-
-
-uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex)
-{
-	uint32 polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-	uint32 i, j, frames, maxFrames = 0;
-	index_t vertexIndex, vertexCount, polygonIndex;
-
-	/* Mongoose 2005.01.01, 
-	 * Vertex frames are stored in the vertices themselves, find the 
-	 * max frame count -- indexing greater than frame count will
-	 * return frame[0] position in vertices with less than maxFrames
-	 * frame, so it's safe and does what one would expect asymmetrically */
-	for (i = 0; i < polygonCount; ++i)
-	{
-		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
-		for (j = 0; j < vertexCount; ++j)
-		{
-			vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, j);
-			frames = freyjaGetVertexFrameCount(vertexIndex);
-
-			if (frames > maxFrames)
-				maxFrames = frames;
-		}
-	}
-
-	return maxFrames;
 }
 
 

@@ -89,8 +89,9 @@ class ActionModelTransform : public Action
 
 	virtual bool Undo() 
 	{
-		for (uint32 i = 0, n = freyjaModelGetMeshCount(mModel); i < n; ++i)
-			freyjaModelMeshTransform3fv(mModel, i, mAction, mXYZ.mVec);
+		// FIXME: WRONG!
+		for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
+			freyjaMeshTransform3fv(i, mAction, mXYZ.mVec);
 
 		return true;
 	}
@@ -115,7 +116,7 @@ class ActionMeshTransform : public Action
 
 	virtual bool Undo() 
 	{
-		freyjaModelMeshTransform3fv(0, mMesh, mAction, mXYZ.mVec);
+		freyjaMeshTransform3fv(mMesh, mAction, mXYZ.mVec);
 		return true;
 	}
 
@@ -222,7 +223,7 @@ class ActionVertexTransformExt : public Action
 	virtual bool Undo() 
 	{
 		if (mAction == fTranslate)
-			freyjaMeshVertexTranslate3fv(mMesh, mVertex, mXYZ.mVec);
+			freyjaMeshVertexPos3fv(mMesh, mVertex, mXYZ.mVec);
 		mCursorXYZ = mXYZ;
 		return true;
 	}
@@ -260,7 +261,7 @@ class ActionVertexListTransformExt : public Action
 				uint32 i;
 				foreach(mVertexList, i)
 				{
-					freyjaMeshVertexTranslate3fv(mMesh, mVertexList[i], mXYZList[i].mVec);
+					freyjaMeshVertexPos3fv(mMesh, mVertexList[i], mXYZList[i].mVec);
 				}
 			}
 			break;

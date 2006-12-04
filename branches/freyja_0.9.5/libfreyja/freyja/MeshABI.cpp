@@ -22,131 +22,93 @@
 #include <math.h>
 #include "Mesh.h"
 #include "MeshABI.h"
-#include "FreyjaPluginABI.h"
+//#include "FreyjaPluginABI.h"
 
 using namespace freyja;
 
 
-////////////////////////////////////////////////////////////
-// C ABI code
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+// 0.9.5 C++ ABI
+////////////////////////////////////////////////////////////////////////
 
-// FIXME: Currently not using Model, since we're just 
-// going to support 0.9.3 API in interface, plugins, etc
-// until 0.10 release 
 Vector<Mesh *> gFreyjaMeshes;
-index_t gFreyjaCurrentModel = 0;
-index_t gFreyjaCurrentMesh = INDEX_INVALID;
 
 
-index_t freyjaGetFSMMeshIndex()
-{
-	return gFreyjaCurrentMesh;	
-}
-
-
-uint32 freyjaModelGetMeshCount(index_t modelIndex)
-{
-	return gFreyjaMeshes.size();	
-}
-
-
-////////////////////////////////////
-// 0.9.5 ABI
-////////////////////////////////////
-
-// FIXME: No model usage
-index_t freyjaModelCreateMesh(index_t modelIndex)
-{
-	Mesh **array = gFreyjaMeshes.getVectorArray();
-	Mesh *mesh = new Mesh();
-	index_t idx = gFreyjaMeshes.size();
-
-
-	for ( uint32 i = 0; i < idx; ++i )
-	{
-		if ( array[i] == NULL )
-		{
-			array[i] = mesh;
-			//freyjaPrintMessage("Model[%i].Mesh[%i] created.", modelIndex, i );
-			return i;
-		}
-	}
-
-	//freyjaPrintMessage("Model[%i].Mesh[%i] created", modelIndex, idx );
-	gFreyjaMeshes.pushBack(mesh);
-	return idx;
-}
-
-
-// FIXME: No model usage
-void freyjaModelDeleteMesh(index_t modelIndex, index_t meshIndex)
+Mesh *freyjaGetMeshClass(index_t meshUID)
 {
 	Mesh **array = gFreyjaMeshes.getVectorArray();
 
-	if ( meshIndex < gFreyjaMeshes.size() && array[meshIndex] != NULL )
+	if ( meshUID < gFreyjaMeshes.size() )
 	{
-		delete array[meshIndex];
-		array[meshIndex] = NULL;
-		//freyjaPrintMessage("Model[%i].Mesh[%i] deleted.", modelIndex, meshIndex );
-	}
-}
-
-
-// FIXME: No model usage`
-Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex)
-{
-	Mesh **array = gFreyjaMeshes.getVectorArray();
-
-	//ASSERT_MSG( meshIndex < gFreyjaMeshes.size(), "meshIndex [%i] < gFreyjaMeshes.size() [%i]", meshIndex, gFreyjaMeshes.size() );
-
-	if ( meshIndex < gFreyjaMeshes.size() && array[meshIndex] != NULL )
-	{
-		return array[meshIndex];
+		return array[meshUID];
 	}
 
 	return NULL;
 }
 
 
-Mesh *freyjaGetCurrentMeshClass()
+////////////////////////////////////////////////////////////////////////
+// 0.9.5 ABI
+////////////////////////////////////////////////////////////////////////
+
+char freyjaIsMeshAllocated(index_t mesh)
 {
-	return freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+	return ( freyjaGetMeshClass(mesh) != NULL );
 }
 
 
-// Useful for 0.9.3 ABI functions
-Vertex *freyjaGetCurrentMeshVertexClass(index_t vertexIndex)
+uint32 freyjaGetMeshFlags(index_t mesh)
 {
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-	return (mesh) ? mesh->GetVertex(vertexIndex) : NULL;
-}
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-
-// Useful for 0.9.3 ABI functions
-Face *freyjaGetCurrentMeshFaceClass(index_t faceIndex)
-{
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-	return (mesh) ? mesh->GetFace(faceIndex) : NULL;
-}
-
-
-index_t freyjaModelMeshVertexCreate(index_t modelIndex, index_t meshIndex,
-									vec3_t xyz, vec3_t uvw, vec3_t nxyz)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
-
-	if ( mesh != NULL )
+	if (m)
 	{
-		index_t vertex = mesh->CreateVertex(xyz, uvw, nxyz);
-		//freyjaPrintMessage("Model[%i].Mesh[%i].Vertex[%i] created.",
-		//				   modelIndex, meshIndex, vertex);
+		return m->GetFlags();
+	}
 
-		// Debug Check
-		//freyjaPrintMessage("-> %f %f %f", xyz[0], xyz[0], xyz[2]);
-		//mesh->GetVertexPos(vertex, xyz);		
-		//freyjaPrintMessage("<- %f %f %f", xyz[0], xyz[0], xyz[2]);
-		return vertex;
+	return 0x0;
+}
+
+
+index_t freyjaMeshCreate()
+{
+	Mesh **array = gFreyjaMeshes.getVectorArray();
+	Mesh *mesh = new Mesh();
+	index_t idx = gFreyjaMeshes.size();
+
+	for ( uint32 i = 0; i < idx; ++i )
+	{
+		if ( array[i] == NULL )
+		{
+			array[i] = mesh;
+			return i;
+		}
+	}
+
+	gFreyjaMeshes.pushBack(mesh);
+	return idx;
+}
+
+
+void freyjaMeshDelete(index_t mesh)
+{
+	Mesh **array = gFreyjaMeshes.getVectorArray();
+
+	if ( mesh < gFreyjaMeshes.size() && array[mesh] != NULL )
+	{
+		delete array[mesh];
+		array[mesh] = NULL;
+	}
+}
+
+
+index_t freyjaMeshPolygonCreate(index_t mesh)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		return m->CreateFace();
 	}
 
 	return INDEX_INVALID;
@@ -155,113 +117,178 @@ index_t freyjaModelMeshVertexCreate(index_t modelIndex, index_t meshIndex,
 
 void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
 		mesh->DeleteFace(polygonIndex);
-		//freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] deleted.",
-		//				   gFreyjaCurrentModel, meshIndex, polygonIndex);
 	}
 }
 
-index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
 
-	if ( mesh != NULL )
+uint32 freyjaGetMeshPolygonVertexCount(index_t mesh, index_t polygon)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
 	{
-		index_t polygon = mesh->CreateFace();
-		//freyjaPrintMessage("Model[%i].Mesh[%i].Polygon[%i] created.",
-		//				   modelIndex, meshIndex, polygon);
-		return polygon;
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mIndices.size();
+		}
+	}
+
+	return 0;
+}
+
+
+index_t freyjaGetMeshPolygonVertexIndex(index_t mesh, index_t polygon, 
+										uint32 element)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mIndices[element];
+		}
 	}
 
 	return INDEX_INVALID;
 }
 
 
-void freyjaModelMeshPolygonAddTexCoord1i(index_t modelIndex, index_t meshIndex, 
-										 index_t polygonIndex, index_t texcoordIndex)
+uint32 freyjaGetMeshPolygonTexCoordCount(index_t mesh, index_t polygon)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	if (mesh)
+	if (m)
 	{
-		Face *f = mesh->GetFace(polygonIndex);
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mTexCoordIndices.size();
+		}
+	}
+
+	return 0;
+}
+
+
+index_t freyjaGetMeshPolygonTexCoordIndex(index_t mesh, index_t polygon, 
+										  uint32 element)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mTexCoordIndices[element];
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaMeshPolygonMaterial(index_t mesh, index_t polygon, index_t material)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			f->mMaterial = material;
+		}
+	}	
+}
+
+
+index_t freyjaGetMeshPolygonMaterial(index_t mesh, index_t polygon)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mMaterial;
+		}
+	}	
+
+	return 0;
+}
+
+
+void freyjaMeshPolygonAddTexCoord1i(index_t mesh, index_t polygon, 
+									index_t texcoord)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
 
 		if (f)
 		{
 			f->mFlags |= Face::fPolyMappedTexCoords;
-			f->mTexCoordIndices.pushBack(texcoordIndex);
+			f->mTexCoordIndices.pushBack(texcoord);
 		}
 	}
 }
 
 
-void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex, 
-									   index_t polygonIndex, index_t vertexIndex)
+void freyjaMeshPolygonAddVertex1i(index_t mesh, index_t polygon, index_t vertex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	ASSERT_MSG(mesh != NULL, "Model[%i].Mesh[%i] == NULL", modelIndex, meshIndex);
+	ASSERT_MSG(m != NULL, "Mesh[%i] == NULL", mesh);
 
-	if ( mesh != NULL )
+	if ( m != NULL )
 	{
-		Face *face = mesh->GetFace(polygonIndex);
-		Vertex *vertex = mesh->GetVertex(vertexIndex);
+		Face *face = m->GetFace(polygon);
+		Vertex *v = m->GetVertex(vertex);
 
-		ASSERT_MSG(face != NULL, "Model[%i].Mesh[%i].Polygon[%i] == NULL", modelIndex, meshIndex, polygonIndex);
+		ASSERT_MSG(face != NULL, "Mesh[%i].Polygon[%i] == NULL", mesh, polygon);
+		ASSERT_MSG(v != NULL, "vertex == NULL");
 
-		ASSERT_MSG(vertex != NULL, "vertex == NULL");
-
-		if ( face != NULL && vertex != NULL )
+		if ( face != NULL && v != NULL )
 		{
 			for ( uint32 i = 0; i < face->mIndices.size(); ++i )
 			{
-				if (face->mIndices[i] == vertexIndex)
+				if (face->mIndices[i] == vertex)
 				{
-					MARK_MSGF("freyjaModelMeshPolygonAddVertex1i, Tried to insert duplicate vertex into face[%i].  %i  %i", polygonIndex, face->mIndices[i], vertexIndex);
+					MARK_MSGF("%s, Tried to insert duplicate vertex into face[%i].  %i  %i", __func__, polygon, face->mIndices[i], vertex);
 					return;
 				}
 			}
 
-			face->mIndices.pushBack(vertexIndex);
+			face->mIndices.pushBack(vertex);
 		}
 	}
 }
 
 
-void freyjaMeshVertexTranslate3fv(index_t meshIndex, 
-								  index_t vertexIndex, vec3_t xyz)
+void freyjaMeshTransform3fv(index_t mesh, 
+							freyja_transform_action_t action, vec3_t xyz)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	if (mesh)
-	{
-		Vertex *vert = mesh->GetVertex(vertexIndex);
-
-		if (vert)
-		{
-#if 0
-			Vec3 v;
-			Vec3 u(xyz);
-			mesh->GetVertexArrayPos(vert->mVertexIndex, v.mVec);
-			mesh->SetVertexArrayPos(vert->mVertexIndex, (v+(u-v)).mVec);
-#else
-			mesh->SetVertexArrayPos(vert->mVertexIndex, xyz);
-#endif
-		}
-	}
-}
-
-
-void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex, 
-								freyja_transform_action_t action, vec3_t xyz)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(modelIndex, meshIndex);
-
-	if (mesh == NULL)
+	if (m == NULL)
 		return;
 
 	switch (action)
@@ -270,23 +297,23 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 		{
 			Matrix t, r, t2, mat;
 			// Rotate about bounding volume center instead of origin
-			t.translate(mesh->GetBoundingVolumeCenter().mVec);
+			t.translate(m->GetBoundingVolumeCenter().mVec);
 			r.rotate(xyz);
-			t2.translate((-mesh->GetBoundingVolumeCenter()).mVec);
+			t2.translate((-m->GetBoundingVolumeCenter()).mVec);
 			//mat = t*r*t2;
 			//mesh->TransformVertices(mat);
 
 			// FIXME: Fix the damn matrix backend to avoid such expensive
 			//        processing here ( only want to transform once )
-			mesh->TransformVertices(t2);
-			mesh->TransformVertices(r);
-			mesh->TransformVertices(t);
+			m->TransformVertices(t2);
+			m->TransformVertices(r);
+			m->TransformVertices(t);
 
 			// Transform normals by inverted rotation to stay correct
 			Matrix nr;
 			nr.rotate(xyz);
 			nr.invert();
-			mesh->TransformNormals(nr);
+			m->TransformNormals(nr);
 		}
 		break;
 
@@ -294,13 +321,13 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 		{
 			Matrix s;
 			s.scale(xyz);
-			mesh->TransformVertices(s);
+			m->TransformVertices(s);
 		}
 		break;
 
 	case fTranslate:
 		{
-			mesh->Translate(Vec3(xyz));
+			m->Translate(Vec3(xyz));
 		}
 		break;
 		
@@ -310,137 +337,41 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 }
 
 
-////////////////////////////////////
-// 0.9.3 <- 0.9.5 ABI
-////////////////////////////////////
-
-char freyjaIsVertexAllocated(index_t vertexIndex)
+index_t freyjaMeshVertexCreate3fv(index_t mesh, vec3_t xyz)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	if (mesh)
-		return (mesh->GetVertex(vertexIndex) != NULL);
-
-	return 0;
-}
-
-
-index_t freyjaGetCurrentMesh()
-{
-	return gFreyjaCurrentMesh;
-}
-
-
-void freyjaCurrentMesh(index_t idx)
-{
-	gFreyjaCurrentMesh = idx;
-}
-
-
-index_t freyjaMeshCreate()
-{
-	return freyjaModelCreateMesh(gFreyjaCurrentModel);
-}
-
-
-void freyjaMeshDelete(index_t meshIndex)
-{
-	return freyjaModelDeleteMesh(gFreyjaCurrentModel, meshIndex);
-}
-
-
-void freyjaMeshTransform(index_t meshIndex, uint32 frame,
-						 freyja_transform_action_t action, 
-						 vec_t x, vec_t y, vec_t z)
-{
-	MARK_MSG("WARNING 0.9.5 API has no concept of 0.9.3 'mesh frames'");
-	vec3_t v = {x,y,z};
-	freyjaModelMeshTransform3fv(gFreyjaCurrentModel, meshIndex, action, v);
-}
-
-
-void freyjaMeshFrameTransform(index_t meshIndex, uint32 frame,
-							  freyja_transform_action_t action, 
-							  vec_t x, vec_t y, vec_t z)
-{
-	MARK_MSG("ERROR 0.9.5 API has no concept of 0.9.3 'mesh frames', No object on which to operate.");
-}
-
-
-void freyjaMeshAddPolygon(index_t meshIndex, index_t polygonIndex)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-
-void freyjaModelTransform(index_t modelIndex,
-						  freyja_transform_action_t action, 
-						  vec_t x, vec_t y, vec_t z)
-{
-	switch (action)
+	if ( m != NULL )
 	{
-	case fTranslate:
-		break;
+		vec3_t uvw = {0.5f, 0.5f, 0.0f};
+		vec3_t nxyz = {0.0f, 1.0f, 0.0f};
 
-	case fRotate:
-		break;
-
-	case fScale:
-		break;
-
-	case fScaleAboutPoint:
-		break;
-
-	case fRotateAboutPoint:
-		break;
+		return m->CreateVertex(xyz, uvw, nxyz);
 	}
 
-	BUG_ME("Not Implemented");
+	return INDEX_INVALID;
 }
 
 
-void freyjaVertexListTransform(Vector<uint32> &list,
-							   freyja_transform_action_t action, 
-							   vec_t x, vec_t y, vec_t z)
+void freyjaMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz)
 {
-	switch (action)
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if ( m != NULL )
 	{
-	case fTranslate:
-		break;
+		Vertex *v = m->GetVertex(vertex);
 
-	case fRotate:
-		break;
-
-	case fScale:
-		break;
-
-	case fScaleAboutPoint:
-		break;
-
-	case fRotateAboutPoint:
-		break;
+		if (v)
+		{
+			m->SetVertexArrayPos(v->mVertexIndex, xyz);
+		}
 	}
-
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaGetVertexPolygonRef1i(index_t vertexIndex, Vector<long> &polygons)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaGetVertexPolygonRef(Vector<long> &polygons)
-{
-	BUG_ME("Not Implemented");
 }
 
 
 index_t freyjaMeshTexCoordCreate2f(index_t meshIndex, vec_t u, vec_t v)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -454,7 +385,7 @@ index_t freyjaMeshTexCoordCreate2f(index_t meshIndex, vec_t u, vec_t v)
 
 index_t freyjaMeshTexCoordCreate3f(index_t meshIndex, vec_t u, vec_t v, vec_t w)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -466,70 +397,26 @@ index_t freyjaMeshTexCoordCreate3f(index_t meshIndex, vec_t u, vec_t v, vec_t w)
 }
 
 
-index_t freyjaTexCoordCreate2f(vec_t u, vec_t v)
+void freyjaMeshVertexWeight(index_t mesh, index_t vertex, 
+							index_t bone, vec_t weight)
 {
-	Mesh *mesh = freyjaGetCurrentMeshClass();
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	//DEBUG_MSG("Obsolete function call. %p", mesh);
-
-	if (mesh)
+	if ( m != NULL )
 	{
-		vec3_t uvw = {u, v, 0.0f };
-		return mesh->CreateTexCoord(uvw);
-	}
-
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaTexCoordCreate2fv(const vec2_t uv)
-{
-	return freyjaTexCoordCreate2f(uv[0], uv[1]);
-}
-
-
-void freyjaVertexWeight(index_t vertexIndex, vec_t weight, index_t bone)
-{
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		mesh->AddWeight(vertexIndex, weight, bone);
+		m->AddWeight(vertex, weight, bone);
 	}
 }
 
 
-void freyjaVertexPosition3fv(index_t vertexIndex, vec3_t xyz)
+index_t freyjaMeshVertexWeld(index_t mesh, index_t a, index_t b)
 {
-	Mesh *mesh = freyjaGetCurrentMeshClass();
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	if ( mesh != NULL )
+	if ( m != NULL )
 	{
-		// FIXME: I think to keep 0.9.3 compat it should ref GetVertexPos
-		mesh->GetVertexArrayPos(vertexIndex, xyz);
-	}
-}
-
-
-void freyjaVertexDelete(index_t vertexIndex)
-{	
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		mesh->DeleteVertex(vertexIndex);
-	}
-}
-
-
-index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB)
-{	
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		if (mesh->WeldVertices(vertexIndexA, vertexIndexB))
-			return vertexIndexA;
+		if (m->WeldVertices(a, b))
+			return a;
 	}	
 
 	return INDEX_INVALID;
@@ -538,7 +425,7 @@ index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB)
 
 index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate)
 {
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if ( m )
 	{
@@ -556,7 +443,7 @@ index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate)
 
 index_t freyjaMeshVertexKeyFrameNew(index_t mesh, index_t track, vec_t time)
 {
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if ( m )
 	{
@@ -578,7 +465,7 @@ index_t freyjaMeshVertexKeyFrameNew(index_t mesh, index_t track, vec_t time)
 void freyjaMeshVertexKeyFrame3f(index_t mesh, index_t track, index_t key,
 								uint32 vert, vec_t x, vec_t y, vec_t z)
 {
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if ( m )
 	{
@@ -594,122 +481,9 @@ void freyjaMeshVertexKeyFrame3f(index_t mesh, index_t track, index_t key,
 }
 
 
-void freyjaVertexFrame3f(index_t idx, vec_t x, vec_t y, vec_t z)
+void freyjaMeshPolygonSplit(index_t meshIndex, index_t polygonIndex)
 {
-	BUG_ME("OBSOLETE ABI CALL");
-}
-
-
-void freyjaVertexTexCoord2fv(index_t vIndex, vec2_t uv)
-{	
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		mesh->SetTexCoord(vIndex, uv);
-	}	
-}
-
-
-void freyjaVertexTexcoord2f(index_t vIndex, vec_t u, vec_t v)
-{	
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		vec2_t uv = {u, v};
-		mesh->SetTexCoord(vIndex, uv);
-	}
-}
-
-
-void freyjaVertexNormalFlip(index_t vIndex)
-{	
-	Vector3d n;
-
-
-	freyjaGetVertexNormalXYZ3fv(vIndex, n.mVec);
-	n = -n;
-	n.normalize();
-	freyjaVertexNormal3fv(vIndex, n.mVec);
-}
-
-
-void freyjaVertexNormal3fv(index_t vIndex, vec3_t nxyz)
-{
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		mesh->SetNormal(vIndex, nxyz);
-	}
-}
-
-
-void freyjaVertexNormal3f(index_t vIndex, vec_t x, vec_t y, vec_t z)
-{
-	vec3_t nxyz = {x,y,z};
-	freyjaVertexNormal3fv(vIndex, nxyz);
-}
-
-
-
-void freyja__PolygonReplaceReference(index_t polygonIndex, 
-									 index_t vertexA, index_t vertexB)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-
-void freyja__GetCommonPolygonReferences(index_t vertexA, index_t vertexB,
-										Vector<unsigned int> &common)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyja__GetDifferenceOfPolygonReferences(index_t vertexA, index_t vertexB,
-											  Vector<unsigned int> &diffA)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaMeshPolygonSplitTexCoords(index_t meshIndex, index_t polygonIndex)
-{	
-	BUG_ME("Not Implemented");
-}
-
-
-index_t freyjaPolygonCreate()
-{
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		return mesh->CreateFace();
-	}
-
-	return INDEX_INVALID;
-}
-
-
-void freyjaPolygonDelete(index_t polygonIndex)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaPolygonFlagAlpha(index_t polygonIndex, char on)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 	
 	if (mesh)
 	{
@@ -720,198 +494,29 @@ void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex)
 
 void freyjaMeshPolygonExtrudeQuad1f(index_t meshIndex, index_t polygonIndex, vec3_t v)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 	if (mesh) 
 		mesh->ExtrudeFace(polygonIndex, v);
 }
 
 
-int32 freyjaVertexXYZ3fv(index_t vertexIndex, vec3_t xyz)
+index_t freyjaMeshTexCoordWeld(index_t mesh, index_t a, index_t b)
 {
-	Mesh *mesh = freyjaGetCurrentMeshClass();
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	if ( mesh != NULL )
+	if ( m != NULL )
 	{
-		Vertex *vert = mesh->GetVertex(vertexIndex);
-
-		if (vert)
-		{
-			//mesh->GetVertexArrayPos(vertexIndex, xyz);
-			mesh->GetVertexPos(vertexIndex, xyz);
-		 
-			return 0;
-		}
-	}
-
-	return -1;
-}
-
-
-void freyjaPolygonAddVertex1i(index_t polygonIndex, index_t vertexIndex)
-{
-	MARK_MSG("Obsolete function call");
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-
-	if (f)
-	{
-		f->mIndices.pushBack(polygonIndex);
-	}
-}
-
-
-void freyjaTexCoordCombine(uint32 indexA, uint32 indexB)
-{
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if ( mesh != NULL )
-	{
-		mesh->WeldTexCoords(indexA, indexB);
+		if (m->WeldTexCoords(a, b))
+			return a;
 	}	
-}
 
-
-int freyjaVertexExtrude(index_t vertexIndex, vec_t midpointScale, vec3_t normal)
-{
-	Vector<long> faces, edges;
-	Vector3d a, b, c, ab, ac;
-	vec3_t xyz;
-	vec2_t uv;
-	uint32 A, B, C, i, j, material, polygonCount, polygonIndex, vertexCount, texcoordCount, v;
-	int32 last;
-
-
-	freyjaGetVertexPolygonRef1i(vertexIndex, faces);
-	polygonCount = faces.end();
-
-	if (!polygonCount)
-		return -1;
-
-	for (i = 0; i < polygonCount; ++i)
-	{
-		polygonIndex = faces[i];
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-		texcoordCount = freyjaGetPolygonTexCoordCount(polygonIndex);
-		material = freyjaGetPolygonMaterial(polygonIndex);
-
-
-		// 1. Get edges containing vertexIndex in ith face
-		edges.clear();
-		
-		for (j = 0, last = -1; j < vertexCount; ++j)
-		{
-			v = freyjaGetPolygonVertexIndex(polygonIndex, j);
-
-			if (v == vertexIndex)
-			{
-				if (j == vertexCount - 1)
-				{
-					A = v;
-					B = freyjaGetPolygonVertexIndex(polygonIndex, 0);
-					C = last;
-				}
-				else
-				{
-					A = v;
-					B = freyjaGetPolygonVertexIndex(polygonIndex, j+1);
-					C = last;
-
-					if (j == 0)
-					{
-						C = freyjaGetPolygonVertexIndex(polygonIndex, 
-														vertexCount - 1);
-					}
-				}
-				break;
-			}
-
-			last = v;
-		}
-
-
-		// 2. Compute midpoint of edges AB AC and scale by midpointScale
-		freyjaGetVertexXYZ3fv(A, a.mVec);
-		freyjaGetVertexXYZ3fv(B, b.mVec);
-		freyjaGetVertexXYZ3fv(C, c.mVec);
-		ab = a + b;
-		ab *= 0.5 * midpointScale;
-		ac = a + c;
-		ac *= 0.5 * midpointScale;
-
-
-		// 3. Generate new vertices at scaled midpoints of edges
-		B = freyjaVertexCreate3fv(ab.mVec);
-		freyjaGetVertexTexcoord2fv(A, uv);
-		freyjaVertexTexCoord2fv(B, uv); // FIXME
-		freyjaGetVertexNormalXYZ3fv(A, xyz);
-		freyjaVertexNormal3fv(B, xyz); // FIXME
-
-		C = freyjaVertexCreate3fv(ac.mVec);
-		freyjaGetVertexTexcoord2fv(A, uv);
-		freyjaVertexTexCoord2fv(C, uv); // FIXME
-		freyjaGetVertexNormalXYZ3fv(A, xyz);
-		freyjaVertexNormal3fv(C, xyz); // FIXME
-
-
-		// 4. Replace references to vertexIndex with each new vertex
-		freyja__PolygonReplaceReference(polygonIndex, A, B);
-		//freyja__PolygonInsertReferenceAfter(polygonIndex, B, C);
-
-		// 5. Generate new a face ABC for new vertices and vertexIndex
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(material);
-		freyjaPolygonVertex1i(A);
-		freyjaPolygonVertex1i(B);
-		freyjaPolygonVertex1i(C);
-
-		// FIXME: Should be able to generate mixing both uvs
-		if (freyjaGetPolygonTexCoordCount(polygonIndex))
-		{
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.25, 0.25));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.25));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.5));
-		}
-
-		freyjaEnd();
-	}
-
-
-	// 6. Move vertexIndex vertex by 'normal'
-	freyjaGetVertexXYZ3fv(vertexIndex, xyz);
-	xyz[0] += normal[0];
-	xyz[1] += normal[1];
-	xyz[2] += normal[2];
-	freyjaVertexXYZ3fv(vertexIndex, xyz);
-
-	return 0;
-}
-
-
-void freyjaPolygonAddTexCoord1i(index_t polygonIndex, index_t texcoordIndex)
-{
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
-	{
-		f->mFlags |= Face::fPolyMappedTexCoords;
-		f->mTexCoordIndices.pushBack(texcoordIndex);
-	}
-}
-
-
-void freyjaPolygonSetMaterial1i(index_t polygonIndex, index_t materialIndex)
-{
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
-	{
-		f->mMaterial = materialIndex;
-	}
+	return INDEX_INVALID;
 }
 
 
 const char *freyjaGetMeshNameString(index_t meshIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -924,7 +529,7 @@ const char *freyjaGetMeshNameString(index_t meshIndex)
 
 void freyjaGetMeshName1s(index_t meshIndex, int32 lenght, char *name)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -936,7 +541,7 @@ void freyjaGetMeshName1s(index_t meshIndex, int32 lenght, char *name)
 
 void freyjaGetMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -947,7 +552,7 @@ void freyjaGetMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz)
 
 void freyjaMeshMaterial(index_t meshIndex, uint32 materialIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -968,7 +573,7 @@ void freyjaMeshMaterial(index_t meshIndex, uint32 materialIndex)
 
 void freyjaMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -980,7 +585,7 @@ void freyjaMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz)
 void freyjaGetMeshFrameBoundingBox(index_t meshIndex, uint32 frame, 
 									vec3_t min, vec3_t max)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -992,7 +597,7 @@ void freyjaGetMeshFrameBoundingBox(index_t meshIndex, uint32 frame,
 
 void freyjaMeshName1s(index_t meshIndex, const char *name)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -1003,7 +608,7 @@ void freyjaMeshName1s(index_t meshIndex, const char *name)
 
 void freyjaMeshPosition(index_t meshIndex, vec3_t xyz)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (mesh)
 	{
@@ -1012,286 +617,109 @@ void freyjaMeshPosition(index_t meshIndex, vec3_t xyz)
 }
 
 
-void freyjaMeshRemovePolygon(index_t meshIndex, index_t polygonIndex)
+uint32 freyjaGetMeshCount()
 {
-	BUG_ME("Not Implemented");
+	return gFreyjaMeshes.size();
 }
 
 
-void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex)
+void freyjaGetMeshBoundingBox(index_t mesh, vec3_t min, vec3_t max)
 {
-	BUG_ME("Not Implemented");
-}
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-
-index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex, uint32 element)
-{
-	BUG_ME("Not Implemented");
-	return INDEX_INVALID;
-}
-
-
-uint32 freyjaGetTexCoordPolygonRefCount(index_t texcoordIndex)
-{
-	BUG_ME("Not Implemented");
-	return 0;
-}
-
-
-void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaGetTexCoord2fv(index_t tindex, vec2_t uv)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-vec3_t *freyjaGetVertexXYZ(index_t vertexIndex)
-{
-	//BUG_ME("Not Implemented");
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
-
-	if (mesh && vertexIndex < mesh->GetVertexCount())
+	if (m)
 	{
-		return (vec3_t *)(mesh->GetVertexArray() + vertexIndex * 3);
-	}
-
-	return NULL;
-}
-
-
-vec2_t *freyjaGetVertexUV(index_t vertexIndex)
-{
-	BUG_ME("Not Implemented");
-	return NULL;
-}
-
-
-vec2_t *freyjaGetTexCoordUV(index_t texcoordIndex)
-{
-	BUG_ME("Not Implemented");
-	return NULL;
-}
-
-
-index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element)
-{
-	BUG_ME("Not Implemented");
-
-	return INDEX_INVALID;
-}
-
-
-uint32 freyjaGetVertexPolygonRefCount(index_t vertexIndex)
-{
-	BUG_ME("Not Implemented");
-
-	return 0;
-}
-
-
-index_t freyjaMeshVertexCreate3f(index_t meshIndex, index_t groupIndex,
-								 vec_t x, vec_t y, vec_t z)
-{
-	vec3_t xyz = {x,y,z};
-	vec3_t uvw = {.5,.5,0};
-	vec3_t nxyz = {0,1,0};
-	return freyjaModelMeshVertexCreate(gFreyjaCurrentModel,
-									   meshIndex, xyz, uvw, nxyz);
-}
-
-
-uint32 freyjaGetPolygonVertexCount(index_t polygonIndex)
-{
-	MARK_MSG("Obsolete function call.");
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	return f ? f->mIndices.size() : 0;
-}
-
-
-uint32 freyjaGetPolygonTexCoordCount(index_t polygonIndex)
-{
-	MARK_MSG("Obsolete function call.");
-
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if (mesh)
-	{
-		Face *f = mesh->GetFace(polygonIndex);
-
-		if (f && f->mFlags & Face::fPolyMappedTexCoords)
-		{
-			return f->mTexCoordIndices.size();
-		}
-	}
-
-	return 0;
-}
-
-
-void freyjaGetVertexTexcoord2fv(index_t vertexIndex, vec2_t uv)
-{
-	MARK_MSG("Obsolete function call.");
-
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if (mesh)
-	{
-		Vertex *v = mesh->GetVertex(vertexIndex);
-
-		if (v)
-		{
-			vec3_t uvw;
-			mesh->GetTexCoord(v->mTexCoordIndex, uvw);
-			uv[0] = uvw[0];
-			uv[1] = uvw[1];
-		}
+		m->GetBBox(min, max);
 	}
 }
 
 
-void freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz)
+void freyjaGetMeshBoundingSphere(index_t mesh, vec3_t origin, vec_t &radius)
 {
-	MARK_MSG("Obsolete function call.");
+	Mesh *m = freyjaGetMeshClass(mesh);
 
-	Mesh *mesh = freyjaGetCurrentMeshClass();
-
-	if (mesh)
+	if (m)
 	{
-		Vertex *v = mesh->GetVertex(vertexIndex);
-
-		if (v)
-		{
-			mesh->GetNormal(v->mNormalIndex, nxyz);
-		}
+		Vec3 o = m->GetBoundingVolumeCenter();
+		o.Get(origin);
+		radius = m->GetBoundingVolumeRadius();
 	}
 }
 
 
-void freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz)
+uint32 freyjaGetMeshWeightCount(index_t mesh)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
-
-	if (mesh)
-	{
-		Vector3d v = mesh->GetVertexPosition(vertexIndex);
-		HEL_VEC3_COPY(v.mVec, xyz);
-	}
-}
-
-
-void freyjaGetVertexFrame(index_t vertexIndex, uint32 element,
-						  index_t *frameIndex, vec3_t xyz)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-uint32 freyjaGetVertexFrameCount(index_t vertexIndex)
-{
-	BUG_ME("Not Implemented");
-	return 0;
-}
-
-
-// FIXME: Might move back to old 'weights embedded in wedge/Vertex' later
-// This implementation is only for legacy support, and it's very slow...
-void freyjaGetVertexWeight(index_t vertexIndex, uint32 element,
-						   index_t *bone, vec_t *weight)
-{
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 	uint32 count = 0;
 
 	if (m)
 	{
-		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
-		{
-			Weight *w = m->GetWeight(i);
-
-			if (w)
-			{
-				if (w->mVertexIndex == vertexIndex)
-				{
-					if (count == element)
-					{
-						*bone = w->mBoneIndex;
-						*weight = w->mWeight;
-						return;
-					}
-					++count;
-				}
-			}
-		}
-	}
-}
-
-
-// FIXME: Might move back to old 'weights embedded in wedge/Vertex' later
-// This implementation is only for legacy support, and it's very slow...
-index_t freyjaGetVertexWeightCount(index_t vertexIndex)
-{
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
-	uint32 count = 0;
-
-	if (m)
-	{
-		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
-		{
-			Weight *w = m->GetWeight(i);
-
-			if (w)
-			{
-				if (w->mVertexIndex == vertexIndex)
-					++count;
-			}
-		}
+		count = m->GetWeightCount();
 	}
 
 	return count;
 }
 
 
-index_t freyjaGetVertexFlags(index_t vertexIndex)
+void freyjaGetMeshWeight(index_t mesh, index_t weight,
+						 index_t &vertex, index_t &bone, vec_t &weightv)
 {
-	Vertex *v = freyjaGetCurrentMeshVertexClass(vertexIndex);
-	return v ? v->mFlags : 0;
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Weight *w = m->GetWeight(weight);
+
+		if (w)
+		{
+			vertex = w->mVertexIndex;
+			bone = w->mBoneIndex;
+			weightv = w->mWeight;
+		}
+	}
 }
 
 
-index_t freyjaGetModelFlags(index_t modelIndex)
+index_t freyjaGetMeshVertexPolygonRefIndex(index_t mesh, 
+										   index_t vertex, uint32 element)
 {
-	BUG_ME("Not Implemented");
-	return 0x0;
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v && element < v->GetFaceRefs().size())
+		{
+			return v->GetFaceRefs()[element];
+		}
+	}
+
+	return INDEX_INVALID;
 }
 
 
-index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element)
+uint32 freyjaGetMeshVertexPolygonRefCount(index_t mesh, index_t vertex)
 {
-	BUG_ME("Not Implemented");
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			return v->GetFaceRefs().size();
+		}
+	}
+
 	return 0;
-}
-
-
-index_t freyjaGetModelMeshCount(index_t modelIndex)
-{
-	// FIXME: Not using model
-	return gFreyjaMeshes.size();
-}
-
-
-char freyjaIsMeshAllocated(index_t meshIndex)
-{
-	return (freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex) != NULL);
 }
 
 
 void freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz)
 {
-	Mesh *mesh = freyjaModelGetMeshClass( gFreyjaCurrentModel, meshIndex );
+	Mesh *mesh = freyjaGetMeshClass(meshIndex );
 
 	if (mesh)
 	{
@@ -1300,23 +728,9 @@ void freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz)
 }
 
 
-uint32 freyjaGetMeshFlags(index_t meshIndex)
-{
-	BUG_ME("Not Implemented");
-	return 0x0;
-}
-
-
-index_t freyjaGetMeshVertexFrameIndex(index_t meshIndex, uint32 element)
-{
-	BUG_ME("Not Implemented");
-	return 0;//INDEX_INVALID;
-}
-
-
 uint32 freyjaGetMeshPolygonCount(index_t meshIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass( gFreyjaCurrentModel, meshIndex );
+	Mesh *mesh = freyjaGetMeshClass(meshIndex );
 
 	if (mesh)
 	{
@@ -1329,7 +743,7 @@ uint32 freyjaGetMeshPolygonCount(index_t meshIndex)
 
 void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group)
 {
-	Mesh *m = freyjaModelGetMeshClass( gFreyjaCurrentModel, mesh );
+	Mesh *m = freyjaGetMeshClass( mesh );
 
 	if (m)
 	{
@@ -1338,23 +752,9 @@ void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group)
 }
 
 
-index_t freyjaGetMeshPolygonVertexIndex(index_t meshIndex, index_t faceVertexIndex)
-{
-	BUG_ME("Not Implemented");
-	return INDEX_INVALID;
-}
-
-
-index_t freyjaGetMeshVertexIndex(index_t meshIndex, uint32 element)
-{
-	BUG_ME("Not Implemented");
-	return INDEX_INVALID;
-}
-
-
 uint32 freyjaGetMeshVertexCount(index_t meshIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass( gFreyjaCurrentModel, meshIndex );
+	Mesh *mesh = freyjaGetMeshClass(meshIndex );
 
 	if (mesh)
 	{
@@ -1365,16 +765,9 @@ uint32 freyjaGetMeshVertexCount(index_t meshIndex)
 }
 
 
-index_t freyjaGetMeshTexCoordIndex(index_t meshIndex, uint32 element)
-{
-	BUG_ME("Not Implemented");
-	return INDEX_INVALID;
-}
-
-
 uint32 freyjaGetMeshTexCoordCount(index_t meshIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass( gFreyjaCurrentModel, meshIndex );
+	Mesh *mesh = freyjaGetMeshClass(meshIndex );
 
 	if (mesh)
 	{
@@ -1385,190 +778,31 @@ uint32 freyjaGetMeshTexCoordCount(index_t meshIndex)
 }
 
 
-void freyjaMeshVertexGroupAppendGobalVertex(index_t meshIndex, uint32 element, 
-											index_t vertexIndex)
+void freyjaMeshPolygonClearFlag1u(index_t mesh, index_t face, byte flag)
 {
-	BUG_ME("Not Implemented");
-}
+	Mesh *m = freyjaGetMeshClass( mesh );
 
-
-uint32 freyjaGetMeshVertexGroupVertexCount(index_t meshIndex, uint32 element)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
-
-	if (mesh == NULL)
-		return 0;
-
-	return mesh->GetVertexCount();
-}
-
-
-// NOTE: Only 1 'vertex group' per mesh in 0.9.5
-index_t freyjaGetMeshVertexGroupVertexIndex(index_t meshIndex, uint32 element,
-										  uint32 vertexElement)
-{
-	//FIXME("freyjaGetMeshVertexGroupVertexIndex Implementation might need artifical gobal mapping to retian 0.9.3 function", __FILE__, __LINE__);
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
-
-	if ( !mesh || vertexElement > mesh->GetVertexCount() || element > 0 )
-		return INDEX_INVALID;
-
-	return element;
-}
-
-
-// NOTE: Only 1 'vertex group' per mesh in 0.9.5
-uint32 freyjaGetMeshVertexGroupCount(index_t meshIndex)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
-
-	if (mesh && mesh->GetVertexCount()) 
-		return 1;
-
-	return 0;
-}
-
-
-index_t freyjaGetMeshPolygonIndex(index_t meshIndex, uint32 element)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
-
-	if (!mesh || element > mesh->GetFaceCount())
-		return INDEX_INVALID;
-
-	return element;
-}
-
-
-index_t freyjaGetMeshVertexGroupIndex(index_t meshIndex, uint32 element)
-{
-	//BUG_ME("Not Implemented");
-
-	if (element > 0)
-		return INDEX_INVALID;
-
-	return 0;
-}
-
-
-index_t freyjaGetPolygonVertexIndex(index_t polygonIndex, uint32 element)
-{
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
+	if (m)
 	{
-		return f->mIndices[element];
-	}
-
-	return 0;
-}
-
-
-index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element)
-{
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
-	{
-		return f->mTexCoordIndices[element];
-	}
-
-	return 0;
-}
-
-
-index_t freyjaGetPolygonMaterial(index_t polygonIndex)
-{
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
-	{
-		return f->mMaterial;
-	}
-
-	return 0;
-}
-
-
-index_t freyjaGetPolygonFlags(index_t polygonIndex)
-{
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
-	{
-		return f->mFlags;
-	}
-
-	return 0;
-}
-
-
-uint32 freyjaGetPolygonEdgeCount(index_t polygonIndex)
-{
-	MARK_MSG("Obsolete function call.");
-	Face *f = freyjaGetCurrentMeshFaceClass(polygonIndex);
-	
-	if (f)
-	{
-		return f->mIndices.size();
-	}
-
-	return 0;
-}
-
-
-void freyjaModelMirrorTexCoord(index_t modelIndex, index_t texcoordIndex,
-								Vector<int32> uvMap, bool x, bool y)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaModelTransformTexCoord(index_t modelIndex, index_t texcoordIndex,
-									freyja_transform_action_t action,
-									vec_t x, vec_t y)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaModelClear(index_t modelIndex)
-{
-	MARK_MSG("Not using model class\n");
-
-	// Currently there is no multimodel while egg is being used
-	freyjaSkeletonPoolClear();
-	freyjaBonePoolClear();
-	
-
-	// Purge meshes
-	uint32 i, count = freyjaModelGetMeshCount(modelIndex);
-
-	for ( i = 0; i < count; ++i )
-	{
-		freyjaModelDeleteMesh(modelIndex, i);
+		return m->ClearFaceFlags(face, flag);
 	}
 }
 
 
-void freyjaModelClampTexCoords(index_t modelIndex)
+void freyjaMeshPolygonSetFlag1u(index_t mesh, index_t face, byte flag)
 {
-	uint32 i, count = freyjaModelGetMeshCount(modelIndex);
+	Mesh *m = freyjaGetMeshClass( mesh );
 
-	for ( i = 0; i < count; ++i )
+	if (m)
 	{
-		// FIXME: GetNext? ForEach?
-		Mesh *mesh = freyjaModelGetMeshClass(modelIndex, i);
-
-		if (mesh != NULL)
-			mesh->ClampAllTexCoords();
+		return m->SetFaceFlags(face, flag);
 	}
 }
 
 
 void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (!mesh)
 		return;
@@ -1658,7 +892,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 
 void freyjaMeshNormalFlip(index_t meshIndex)
 {
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
 	if (!mesh)
 		return;
@@ -1675,31 +909,101 @@ void freyjaMeshNormalFlip(index_t meshIndex)
 }
 
 
+void freyjaGetMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		m->GetVertexPos(vertex, xyz);
+	}
+}
+
+
+index_t freyjaGetMeshVertexTexCoord(index_t mesh, index_t vertex)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			return v->mTexCoordIndex;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaMeshTexCoord2fv(index_t mesh, index_t texcoord, vec2_t uv)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		vec3_t uvw = { uv[0], uv[1], 0.0f };
+		m->SetTexCoord(texcoord, uvw);
+	}
+}
+
+
+void freyjaGetMeshTexCoord2fv(index_t mesh, index_t texcoord, vec2_t uv)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		vec3_t uvw = { uv[0], uv[1], 0.0f };
+		m->GetTexCoord(texcoord, uvw);
+	}
+}
+
 
 void freyjaMeshUVMapPlanar(index_t meshIndex)
 {
-	uint32 i, vertexCount;
-	index_t vertexIndex;
+	uint32 vertexCount = freyjaGetMeshVertexCount(meshIndex);
+	uint32 idx;
 	vec3_t xyz;
 	vec2_t uv;
+	vec_t s;
 
-
-	vertexCount = freyjaGetMeshVertexCount(meshIndex);
-
-    for (i = 0; i < vertexCount; ++i)
+    for (uint32 i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		freyjaGetMeshVertexPos3fv(meshIndex, i, xyz);
+
+		uv[0] = (xyz[0] > 0) ? xyz[0] : -xyz[0];
+		s = 0.025;
+  
+		while (uv[0] > 1.0)
+		{
+			uv[0] *= s;
+			s *= 0.01;
+		}
+  
+		uv[1] = (xyz[1] > 0) ? xyz[1] : -xyz[1];
+		s = 0.025;
 		
-		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
-		freyjaGenerateUVFromXYZ(xyz, uv+0, uv+1);
-		freyjaVertexTexCoord2fv(vertexIndex, uv);
+		while (uv[1] > 1.0)
+		{
+			uv[1] *= s;
+			s *= 0.01;
+		}
+		
+		uv[0] = 1.0 - uv[0];
+		uv[1] = 1.0 - uv[1];
+
+		idx = freyjaGetMeshVertexTexCoord(meshIndex, i);
+		freyjaMeshTexCoord2fv(meshIndex, idx, uv);
 	}
 }
 
 
 index_t freyjaMeshCopy(index_t meshIndex)
 {
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *m = freyjaGetMeshClass(meshIndex);
 	
 	if (m)
 	{
@@ -1714,12 +1018,12 @@ index_t freyjaMeshCopy(index_t meshIndex)
 
 void freyjaMeshUVMapSpherical(index_t meshIndex)
 {
-	int32 i, vertexCount, vertexIndex;
+	int32 i, vertexCount;
 	vec_t longitude, latitude;
 	vec3_t xyz;
 	vec3_t uv;
 
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, meshIndex);
+	Mesh *m = freyjaGetMeshClass(meshIndex);
 
 	if (!m)
 		return;
@@ -1728,9 +1032,9 @@ void freyjaMeshUVMapSpherical(index_t meshIndex)
 
     for (i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
-		
-		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		//vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		//freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		freyjaGetMeshVertexPos3fv(meshIndex, i, xyz);
 
 		longitude = atan2((float)-xyz[0], xyz[2]);
 		latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
@@ -1741,14 +1045,16 @@ void freyjaMeshUVMapSpherical(index_t meshIndex)
 		uv[0] = longitude - floor(longitude);
 		uv[1] = latitude;
 
-		freyjaVertexTexCoord2fv(vertexIndex, uv);
+		//freyjaVertexTexCoord2fv(vertexIndex, uv);
+		index_t idx = freyjaGetMeshVertexTexCoord(meshIndex, i);
+		freyjaMeshTexCoord2fv(meshIndex, idx, uv);
 	}
 }
 
 
 void freyjaMeshUVMapCylindrical(index_t meshIndex)
 {
-	int32 i, j, vertexCount, vertexIndex;
+	int32 i, j, vertexCount;
 	vec_t longitude, latitude, ysize;
 	vec3_t xyz;
 	vec3_t min = {999999.0f, 999999.0f, 999999.0f};
@@ -1759,8 +1065,9 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 
     for (i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
-		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		//vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		//freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		freyjaGetMeshVertexPos3fv(meshIndex, i, xyz);
 
 		for (j = 0; j < 3; ++j)
 		{
@@ -1793,8 +1100,9 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 
     for (i = 0; i < vertexCount; ++i)
     {
-		vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
-		freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		//vertexIndex = freyjaGetMeshVertexIndex(meshIndex, i);
+		//freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+		freyjaGetMeshVertexPos3fv(meshIndex, i, xyz);
 
 		longitude = atan2((float)-xyz[0], xyz[2]);
 		latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
@@ -1805,57 +1113,9 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 		uv[0] = longitude - floor(longitude);
 		uv[1] = xyz[1] / ysize;
 
-		freyjaVertexTexCoord2fv(vertexIndex, uv);
-	}
-}
-
-
-void freyjaPolygonTexCoordPurge(index_t polygonIndex)
-{
-	Mesh *mesh = freyjaModelGetMeshClass(gFreyjaCurrentModel, gFreyjaCurrentMesh);
-
-	if (!mesh)
-		return;
-
-	Face *f = mesh->GetFace(polygonIndex);
-
-	if (f)
-	{
-		f->mTexCoordIndices.clear();
-	}
-}
-
-
-void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex)
-{
-	vec2_t uv;
-	int32 i, j, k, vertexCount, vertexIndex, texcoordIndex, polygonIndex, polygonCount;
-
-
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-
-    for (i = 0; i < polygonCount; ++i)
-    {
-		polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, i);
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
-		for (j = 0; j < vertexCount; ++j)
-		{
-			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
-			// NOTE: I just update all UV -> polymapp to avoid corrupt 
-			//       'texture faces' eg not completely polymapped
-			freyjaPolygonTexCoordPurge(polygonIndex);
-
-			for (k = 0; k < vertexCount; ++k) 
-			{
-				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
-
-				texcoordIndex = freyjaTexCoordCreate2fv(uv);
-				freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
-			}
-		}
+		//freyjaVertexTexCoord2fv(vertexIndex, uv);
+		index_t idx = freyjaGetMeshVertexTexCoord(meshIndex, i);
+		freyjaMeshTexCoord2fv(meshIndex, idx, uv);
 	}
 }
 
@@ -1864,7 +1124,7 @@ void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex)
 
 void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 {
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 	
 	if (m)
 	{
@@ -1971,7 +1231,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 vec_t *freyjaGetMeshBlendVertices(index_t mesh)
 {
 
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 	
 	if (m) return m->GetBlendVerticesArray();
 
@@ -1981,7 +1241,7 @@ vec_t *freyjaGetMeshBlendVertices(index_t mesh)
 
 void freyjaDebugMeshBlendVertices(index_t mesh)
 {
-	Mesh *m = freyjaModelGetMeshClass(gFreyjaCurrentModel, mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
 	
 	if (m && m->GetBlendVerticesArray()) 
 	{
@@ -2005,4 +1265,123 @@ void freyjaDebugMeshBlendVertices(index_t mesh)
 	}
 }
 
+
+void freyjaMeshClampTexCoords(index_t meshIndex)
+{
+	uint32 count = freyjaGetMeshTexCoordCount(meshIndex);
+	vec2_t uv;
+
+	for (uint32 i = 0; i < count; ++i)
+	{
+		freyjaGetMeshTexCoord2fv(meshIndex, i, uv);
+
+		for (int32 j = 1; j >= 0; --j)
+		{
+			if (uv[j] < 0.0f)
+			{
+				uv[j] = 0.0f;
+			}
+			else if (uv[j] > 1.0f)
+			{
+				uv[j] = 1.0f;
+			}
+		}
+		
+		freyjaMeshTexCoord2fv(meshIndex, i, uv);
+	}
+}
+
+
+void freyjaMeshTesselateTriangles(index_t meshIndex)
+{
+	Vector<long> purge;
+	int32 i, j, polygonCount, polygonIndex, vertexCount, vertexIndex;
+	int32 a, b, c, d, ta, tb, tc, td, material;
+	unsigned int ii;
+
+
+	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+
+	for (i = 0; i < polygonCount; ++i)
+	{
+		polygonIndex = i;//freyjaGetMeshPolygonIndex(meshIndex, i);
+		material = freyjaGetMeshPolygonMaterial(meshIndex, polygonIndex);
+
+		if (polygonIndex > -1)
+		{
+			vertexCount = freyjaGetMeshPolygonVertexCount(meshIndex, polygonIndex);
+
+			if (vertexCount < 4)
+				continue;
+			
+			if (vertexCount == 4)
+			{
+				/* 1. Get ABCD quad vertices */
+				a = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 0);
+				b = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 1);
+				c = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 2);
+				d = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 3);
+
+				if (freyjaGetMeshPolygonTexCoordCount(meshIndex, polygonIndex))
+				{
+					ta = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 0);
+					tb = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 1);
+					tc = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 2);
+					td = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 3);
+				}
+
+				// FIXME: Using gobal FSM and 0.9.x API
+
+				/* 2. Make ABC ACD triangles */
+				freyjaBegin(FREYJA_POLYGON);
+				freyjaPolygonMaterial1i(material);
+				freyjaPolygonVertex1i(a);
+				freyjaPolygonVertex1i(b);
+				freyjaPolygonVertex1i(c);
+
+				if (freyjaGetMeshPolygonTexCoordCount(meshIndex, polygonIndex))
+				{
+					freyjaPolygonTexCoord1i(ta);
+					freyjaPolygonTexCoord1i(tb);
+					freyjaPolygonTexCoord1i(tc);
+				}
+
+				freyjaEnd();
+
+				freyjaBegin(FREYJA_POLYGON);
+				freyjaPolygonMaterial1i(material);
+				freyjaPolygonVertex1i(a);
+				freyjaPolygonVertex1i(c);
+				freyjaPolygonVertex1i(d);
+
+				if (freyjaGetMeshPolygonTexCoordCount(meshIndex, polygonIndex))
+				{
+					freyjaPolygonTexCoord1i(ta); // should dupe a?
+					freyjaPolygonTexCoord1i(tc);
+					freyjaPolygonTexCoord1i(td);
+				}
+
+				freyjaEnd();
+
+
+				/* 3. Prepare to remove ABCD polygon and update references */
+				purge.pushBack(polygonIndex);
+			}
+			else  // Hhhhmm... can of worms...  doesn't touch polygons atm
+			{
+				for (j = 0; j < vertexCount; ++j)
+				{
+					// 0 1 2, 0 2 3, ..
+					freyjaPrintError("freyjaMeshTesselateTriangles> No Implementation due to lack of constraints on 5+ edges");
+					vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, j);
+				}
+			}
+		}
+	}
+
+	for (ii = purge.begin(); ii < purge.end(); ++ii)
+	{
+		freyjaMeshPolygonDelete(meshIndex, purge[ii]);
+	}
+}
 
