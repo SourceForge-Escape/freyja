@@ -988,6 +988,7 @@ class SystemIO
 			return found;
 		}
 
+		char ReadChar() { return NextChar(); }
 
 		char NextChar()
 		{

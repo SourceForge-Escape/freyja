@@ -899,6 +899,18 @@ index_t freyjaGetMeshPolygonIndex(index_t meshIndex, uint32 element)
 
 #if FREYJA_OBSOLETE_ABI
 
+void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv)
+{
+	BUG_ME("Not Implemented");
+}
+
+
+void freyjaGetTexCoord2fv(index_t tindex, vec2_t uv)
+{
+	BUG_ME("Not Implemented");
+}
+
+
 uint32 freyjaGetMeshVertexFrameCount(index_t meshIndex)
 {
 	uint32 polygonCount = freyjaGetMeshPolygonCount(meshIndex);
@@ -1108,19 +1120,6 @@ uint32 freyjaGetTexCoordPolygonRefCount(index_t texcoordIndex)
 	BUG_ME("Not Implemented");
 	return 0;
 }
-
-
-void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv)
-{
-	BUG_ME("Not Implemented");
-}
-
-
-void freyjaGetTexCoord2fv(index_t tindex, vec2_t uv)
-{
-	BUG_ME("Not Implemented");
-}
-
 
 
 vec2_t *freyjaGetVertexUV(index_t vertexIndex)

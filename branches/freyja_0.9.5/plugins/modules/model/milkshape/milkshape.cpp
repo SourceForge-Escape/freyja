@@ -617,7 +617,7 @@ int freyja_model__milkshape_export(char *filename)
 
 		for (j = 0; j < vertexCount; ++j)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
+			vertexIndex = j;//freyjaGetMeshVertexIndex(meshIndex, j);
 			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
 			w.WriteInt8U(0); // flags
@@ -638,7 +638,7 @@ int freyja_model__milkshape_export(char *filename)
 
 		for (j = 0; j < polygonCount; ++j)
 		{
-			polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, j);
+			polygonIndex = j;//freyjaGetMeshPolygonIndex(meshIndex, j);
 			faceVertexCount = freyjaGetPolygonVertexCount(polygonIndex);
 
 			faceVertexCount = 3; /* Milkshape only handles triangles,
@@ -651,15 +651,13 @@ int freyja_model__milkshape_export(char *filename)
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
 				w.WriteInt16(vertexIndex);
 			}
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
 				freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
 				
 				w.WriteFloat32(xyz[0]);
@@ -669,8 +667,7 @@ int freyja_model__milkshape_export(char *filename)
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
 				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 				
 				w.WriteFloat32(uv[0]);
@@ -678,8 +675,7 @@ int freyja_model__milkshape_export(char *filename)
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
 				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 				
 				w.WriteFloat32(uv[1]);

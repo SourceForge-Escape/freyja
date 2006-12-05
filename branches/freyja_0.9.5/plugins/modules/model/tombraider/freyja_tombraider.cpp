@@ -30,14 +30,15 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-
 #include <mstl/List.h>
-
 #include <freyja/FreyjaPluginABI.h>
-
 #include <hel/Matrix.h>
+#include <mstl/Map.h>
+#include <mstl/Vector.h>
 
 #include "TombRaider.h"
+
+using namespace mstl;
 
 
 vec_t gTRScaling = 0.05f;
@@ -45,11 +46,33 @@ vec_t gTRScaling = 0.05f;
 // Export functions
 extern "C" {
 
-  int freyja_model__tombraider_check(char *filename);
-  int freyja_model__tombraider_import(char *filename);
-  int freyja_model__tombraider_export(char *filename);
+	int freyja_model__tombraider_check(char *filename);
+	int freyja_model__tombraider_import(char *filename);
+	int freyja_model__tombraider_export(char *filename);
+	int import_model(char *filename);
+	void freyja_init();
 }
 
+void freyja_init()
+{
+	// FIXME: Should use pak interface not model!
+
+	freyjaPluginDescription1s("Tombraider pak (*.phd,*.tr2,*.tr4)");
+	freyjaPluginAddExtention1s("*.phd,*.tr2,*.tr4");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH );//| FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH );//| FREYJA_PLUGIN_SKELETON);
+}
+
+
+int import_model(char *filename)
+{
+	if (!freyja_model__tombraider_check(filename))
+	{
+		return freyja_model__tombraider_import(filename);
+	}
+
+	return -1;
+}
 
 int freyja_model__tombraider_check(char *filename)
 {
@@ -117,11 +140,11 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		fflush(stdout);
 
 		// Need to inculde for mesh compatibilty? (make empty mesh)
-		eggBegin(FREYJA_MESH);
-		mesh = eggGetCurrent(FREYJA_MESH);
-		eggBegin(FREYJA_GROUP);		
-		eggEnd();
-		eggEnd();
+		freyjaBegin(FREYJA_MESH);
+		mesh = freyjaGetCurrent(FREYJA_MESH);
+		//freyjaBegin(FREYJA_GROUP);		
+		//freyjaEnd();
+		freyjaEnd();
 
 		return mesh;
 	}
@@ -131,11 +154,11 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 	//r_mesh->radius = meshes[index].collision_size;
 	
 	// Start a new mesh
-	eggBegin(FREYJA_MESH);
-	mesh = eggGetCurrent(FREYJA_MESH);
+	freyjaBegin(FREYJA_MESH);
+	mesh = freyjaGetCurrent(FREYJA_MESH);
 
 	// Start a new vertex group
-	eggBegin(FREYJA_GROUP); 
+	//freyjaBegin(FREYJA_GROUP); 
 
 #ifdef FIXME
    if (meshes[index].mesh_lights && meshes[index].num_vertices != -1) 
@@ -181,45 +204,45 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		t_index = meshes[index].textured_triangles[i].texture;
 
       // Start a new polygon
-      eggBegin(FREYJA_POLYGON);
+      freyjaBegin(FREYJA_POLYGON);
 
 		// Store vertices
 		v = meshes[index].textured_triangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].textured_triangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].textured_triangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 
 		// Store texels
 		tombraider.ComputeUV(object_texture[t_index].vertices, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+1, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+2, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		// Set texture index mapping
-		eggTexture1i(object_texture[t_index].tile);
+		freyjaPolygonMaterial1i(object_texture[t_index].tile);
 
 		// set_transparency = object_texture[t_index].transparency_flags;
       
       // End FREYJA_POLYGON
-      eggEnd();
+      freyjaEnd();
 	}
 
 
@@ -229,52 +252,52 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		t_index = meshes[index].textured_rectangles[i].texture;
 
       // Start a new polygon
-      eggBegin(FREYJA_POLYGON);
+      freyjaBegin(FREYJA_POLYGON);
 
 		// Store vertices
 		v = meshes[index].textured_rectangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].textured_rectangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].textured_rectangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].textured_rectangles[i].vertices[3];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 										  -meshes[index].vertices[v].y*gTRScaling,
 										  meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		
 		// Store texels
 		tombraider.ComputeUV(object_texture[t_index].vertices, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+1, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+2, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		tombraider.ComputeUV(object_texture[t_index].vertices+3, st, st+1);
-		eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 		// Set texture index mapping
-		eggTexture1i(object_texture[t_index].tile);
+		freyjaPolygonMaterial1i(object_texture[t_index].tile);
 
       // End FREYJA_POLYGON
-      eggEnd();
+      freyjaEnd();
 	}
     
 
@@ -282,26 +305,26 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 	for (i = 0; i < meshes[index].num_coloured_triangles; ++i)
    {
       // Start a new polygon
-      eggBegin(FREYJA_POLYGON);
+      freyjaBegin(FREYJA_POLYGON);
 
 		// Store vertices
 		v = meshes[index].coloured_triangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].coloured_triangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].coloured_triangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		
 		// Store texels
@@ -317,52 +340,52 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		}
 
 		// Color texel hack
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
 
 		// Set texture index mapping
-		eggTexture1i(COLORED_POLYGON);
+		freyjaPolygonMaterial1i(-1);//COLORED_POLYGON);
 
       // End FREYJA_POLYGON
-      eggEnd();
+      freyjaEnd();
 	}
 
 
 	for (i = 0; i < meshes[index].num_coloured_rectangles; ++i)
    {
       // Start a new polygon
-      eggBegin(FREYJA_POLYGON);
+      freyjaBegin(FREYJA_POLYGON);
 
 		// Store vertices
 		v = meshes[index].coloured_rectangles[i].vertices[0];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].coloured_rectangles[i].vertices[1];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].coloured_rectangles[i].vertices[2];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		v = meshes[index].coloured_rectangles[i].vertices[3];
-		vertex = eggVertexStore3f(meshes[index].vertices[v].x*gTRScaling,
+		vertex = freyjaVertexCreate3f(meshes[index].vertices[v].x*gTRScaling,
 									 -meshes[index].vertices[v].y*gTRScaling,
 									 meshes[index].vertices[v].z*gTRScaling);
-		eggVertex1i(vertex);
+		freyjaPolygonVertex1i(vertex);
 
 		// Store texels
 		switch (tombraider.Engine())
@@ -377,27 +400,27 @@ int load_mesh(TombRaider &tombraider, int index, bool tesselate)
 		}
 
 		// Color texel hack
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[0], rgba[1]));
-		eggTexCoord1i(eggTexCoordStore2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[0], rgba[1]));
+		freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(rgba[2], rgba[3]));
 
 		// Set texture index mapping
-		eggTexture1i(COLORED_POLYGON);
+		freyjaPolygonMaterial1i(-1);//COLORED_POLYGON);
 
       // End FREYJA_POLYGON
-      eggEnd();
+      freyjaEnd();
 	}
 	
 	// End FREYJA_GROUP
-	eggEnd();
+	//freyjaEnd();
 
 	// End FREYJA_MESH
-	eggEnd();
+	freyjaEnd();
 	
 	printf("m");
 	fflush(stdout);
@@ -420,20 +443,12 @@ int load_animation(TombRaider &tombraider,
 						 List<unsigned int> &cache2,
 						 List<unsigned int> &cache3)
 {
-	int l, f, j, k, n, frame_count;
 	bool lara = false;
-	bool layer = false;
-	int mesh_id, model_id, ponytail = -1;
-	int *tree;
 	unsigned short *frame = NULL;
-	float rot[3];
-	unsigned short itmp, itmp2;
-	double angle;
 	tr2_moveable_t *moveable = NULL;
 	tr2_animation_t *animation = NULL;
 	tr2_meshtree_t *meshtree = NULL;
-	tr2_meshtree_t *mesh_tree = NULL;
-	unsigned int anim, tag;
+	unsigned int anim;
 
 
 	frame = tombraider.Frame();
@@ -455,10 +470,26 @@ int load_animation(TombRaider &tombraider,
 		lara = false;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	// FIXME: This code needs to be reworked to use modern freyja keyframing,
+	//        skeletons, and joints API
+	//////////////////////////////////////////////////////////////////////////
+#if 0
+	//int k, n, , ponytail = -1;
+	int l, f, j, frame_count;
+	bool layer = false;
+	int mesh_id, model_id;
+	int *tree;
+	unsigned short itmp, itmp2;
+	float rot[3];
+	double angle;
+	tr2_meshtree_t *mesh_tree = NULL;
+	unsigned int anim, tag;
+
 	// Start new mesh tree animation
-	eggBegin(FREYJA_SKEL_ANIM);
-	anim = eggGetCurrent(FREYJA_SKEL_ANIM);
-	//eggAnim1u(ANIM_MESH_TREE);
+	freyjaBegin(FREYJA_SKEL_ANIM);
+	anim = freyjaGetCurrent(FREYJA_SKEL_ANIM);
+	freyjaAnim1u(ANIM_MESH_TREE);
 
 	frame_count = (animation[a].frame_end - animation[a].frame_start) + 1;
 
@@ -528,10 +559,10 @@ int load_animation(TombRaider &tombraider,
 		}
 
 		// Generate bone frames and tags per frame ////////////
-		eggMeshTreeAddFrame3f((short)frame[frame_offset + 6]*gTRScaling,
+		freyjaMeshTreeAddFrame3f((short)frame[frame_offset + 6]*gTRScaling,
 									 -(short)frame[frame_offset + 7]*gTRScaling,
 									 (short)frame[frame_offset + 8]*gTRScaling);
-		
+
 #ifdef DEBUG_TR_FRAMES
 		printf("\nf[%i]", frame_offset);
 		fflush(stdout);
@@ -542,16 +573,17 @@ int load_animation(TombRaider &tombraider,
 		// Run through the tags and calculate the rotation and offset
 		for (j = 0; j < (int)moveable[index].num_meshes; ++j) 
 		{ 
-			eggBegin(FREYJA_BONE);
-			eggTagPos3f(0.0, 0.0, 0.0);
-			eggTagRotate3f(0.0, 0.0, 0.0);
-			eggTagFlags1u(0x00);
-			eggEnd();
+			freyjaBegin(FREYJA_BONE);
+			index_t bone = freyjaGetCurrent(FREYJA_BONE);
+			freyjaBoneTranslate3f(bone, 0.0f, 0.0f, 0.0f);
+			freyjaBoneRotateEuler3f(bone, 0.0f, 0.0f, 0.0f);
+			freyjaBoneFlags(bone, 0x0);
+			freyjaEnd();
 
-			tag = eggGetCurrent(FREYJA_BONE);
+			tag = freyjaGetCurrent(FREYJA_BONE);
 			
 			// Link to mesh tree frame
-			eggMeshTreeTag1u(tag);
+			freyjaMeshTreeTag1u(tag);
 
 #ifdef DEBUG_TR_FRAMES
 			printf("t");
@@ -565,8 +597,8 @@ int load_animation(TombRaider &tombraider,
 			{
 				model_id = load_mesh(tombraider, mesh_id, false);
 
-				eggIterator(FREYJA_BONE, tag);
-				eggTagAddMesh1u(model_id);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaBoneAddMesh1u(model_id);
 
 				cache2.Add(mesh_id);
 				cache3.Add(model_id);
@@ -588,8 +620,8 @@ int load_animation(TombRaider &tombraider,
 				fflush(stdout);
 #endif
 
-				eggIterator(FREYJA_BONE, tag);
-				eggTagAddMesh1u(cache3[cache2.SearchKey(mesh_id)]);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaBoneAddMesh1u(cache3[cache2.SearchKey(mesh_id)]);
 			}
 
 	
@@ -601,7 +633,7 @@ int load_animation(TombRaider &tombraider,
 				//   mesh tree
 
 				// Mongoose 2002.01.19, Add layer mesh to tag
-				eggTagAddMesh1u(meshtree_frame0[j]);
+				freyjaBoneAddMesh1u(meshtree_frame0[j]);
 			}
 
 			
@@ -609,11 +641,11 @@ int load_animation(TombRaider &tombraider,
 			if (j == 0)
 			{
 				// Since we use bone's offset, these aren't used
-				eggIterator(FREYJA_BONE, tag);
-				eggTagPos3f(0.0, 0.0, 0.0);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaBonePos3f(0.0, 0.0, 0.0);
 
 				// Always push tag[0], this isn't really used either
-				eggTagFlags1u(0x02);
+				freyjaBoneFlags(0x02);
 			}
 			else  // Nonprimary tag - position relative to first tag
 			{
@@ -623,9 +655,9 @@ int load_animation(TombRaider &tombraider,
 				mesh_tree = (tr2_meshtree_t *)&tree[moveable[index].mesh_tree 
 																+ ((j - 1) * 4)];
 				
-				eggIterator(FREYJA_BONE, tag);
-				eggTagPos3f(mesh_tree->x*gTRScaling, -mesh_tree->y*gTRScaling, -mesh_tree->z*gTRScaling);
-				eggTagFlags1u(mesh_tree->flags);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaBonePos3f(mesh_tree->x*gTRScaling, -mesh_tree->y*gTRScaling, -mesh_tree->z*gTRScaling);
+				freyjaBoneFlags(mesh_tree->flags);
 			}
 			
 			// Setup tag rotations
@@ -653,8 +685,8 @@ int load_animation(TombRaider &tombraider,
 				angle *= 360.0 / 1024.0;
 				rot[2] = angle;
 
-				eggIterator(FREYJA_BONE, tag);
-				eggTagRotate3f(-rot[0], rot[1], -rot[2]);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaBoneRotate3f(-rot[0], rot[1], -rot[2]);
 			}
 			else if (itmp & 0xc000) 
 			{ 
@@ -672,8 +704,8 @@ int load_animation(TombRaider &tombraider,
 					angle *= 360.0;
 				}
 				
-				eggIterator(FREYJA_BONE, tag);
-				eggGetTagRotate3f(&rot[0], &rot[1], &rot[2]);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaGetBoneRotate3f(&rot[0], &rot[1], &rot[2]);
 
 				switch (itmp & 0xc000)
 				{
@@ -688,7 +720,7 @@ int load_animation(TombRaider &tombraider,
 					break;
 				}
 
-				eggTagRotate3f(-rot[0], rot[1], -rot[2]);
+				freyjaBoneRotate3f(-rot[0], rot[1], -rot[2]);
 			}
 			else    // TR2, TR3, TR4 - three axes
 			{
@@ -708,8 +740,8 @@ int load_animation(TombRaider &tombraider,
 				angle *= 360.0 / 1024.0;
 				rot[2] = angle;
 
-				eggIterator(FREYJA_BONE, tag);
-				eggTagRotate3f(-rot[0], rot[1], -rot[2]);
+				freyjaIterator(FREYJA_BONE, tag);
+				freyjaBoneRotate3f(-rot[0], rot[1], -rot[2]);
 			}
 		}
 
@@ -736,40 +768,41 @@ int load_animation(TombRaider &tombraider,
 		
 		for (k = 0; k < gPonyTailCount; ++k)
 		{			
-			eggBegin(FREYJA_BONE);
+			freyjaBegin(FREYJA_BONE);
 			
 			switch (k)
 			{
 			case 0:
-				eggTagPos3f(0.0, -16.0*gTRScaling, -32.0*gTRScaling);
-				eggTagRotate3f(60.0, 0.0, 0.0);
+				freyjaTagPos3f(0.0, -16.0*gTRScaling, -32.0*gTRScaling);
+				freyjaTagRotate3f(60.0, 0.0, 0.0);
 				break;
 			case 1:
-				eggTagPos3f(0.0, 0.0, 32.0*gTRScaling);
-				//eggTagRotate3f(5.0, 0.0, 0.0);
+				freyjaTagPos3f(0.0, 0.0, 32.0*gTRScaling);
+				//freyjaTagRotate3f(5.0, 0.0, 0.0);
 				break;
 			default:
-				eggTagPos3f(0.0, 0.0, 32.0*gTRScaling);
-				//eggTagRotate3f(1.0, 0.0, 0.0);
+				freyjaTagPos3f(0.0, 0.0, 32.0*gTRScaling);
+				//freyjaTagRotate3f(1.0, 0.0, 0.0);
 			}
 
-			eggTagFlags1u(0x02);
-			eggTagAddMesh1u(gPonyTailIDs[k]);
-			eggEnd();
+			freyjaTagFlags1u(0x02);
+			freyjaTagAddMesh1u(gPonyTailIDs[k]);
+			freyjaEnd();
 			
 			// Link to mesh tree frame
-			eggMeshTreeTag1u(eggGetCurrent(FREYJA_BONE));
+			freyjaMeshTreeTag1u(freyjaGetCurrent(FREYJA_BONE));
 		}
 		
-		eggIterator(FREYJA_BONE, tag);
+		freyjaIterator(FREYJA_BONE, tag);
 #endif
 
 		// End FREYJA_MESHTREE_ANIM_FRAME
-		//eggEnd();
+		freyjaEnd();
 	}
 
 	// End FREYJA_MESHTREE_ANIM
-	eggEnd();
+	freyjaEnd();
+#endif
 
 	return anim;
 }
@@ -802,14 +835,14 @@ int tombraider_map_import(TombRaider *tombraider)
 					  room[i].info.z);
 
     // Start new mesh
-	 eggBegin(FREYJA_MESH);
-	 mesh = eggGetCurrent(FREYJA_MESH);
+	 freyjaBegin(FREYJA_MESH);
+	 mesh = freyjaGetCurrent(FREYJA_MESH);
 
 	 // Clear translation table
     trans.Clear();
 
 	 // Start new vertex group
-	 eggBegin(FREYJA_GROUP);
+	 //freyjaBegin(FREYJA_GROUP);
 
     for (ii = 0; ii < room[i].room_data.num_vertices; ii++)
     {
@@ -822,42 +855,42 @@ int tombraider_map_import(TombRaider *tombraider)
       m.multiply3v(p, p);
 
       // Alloc vertex and keep a vertex index translation table
-      trans.Add(ii, eggVertexStore3f(p[0], -p[1], p[2]));
+      trans.Add(ii, freyjaVertexCreate3f(p[0], -p[1], p[2]));
     }
 
     // End FREYJA_GROUP
-    eggEnd();
+    //freyjaEnd();
 
 
     // Textured polygons
     for (t = 0; t < room[i].room_data.num_triangles; t++, tt++)
     {
       // Start a new polygon
-      eggBegin(FREYJA_POLYGON);
+      freyjaBegin(FREYJA_POLYGON);
 
       // Store vertices by true id, using translation table
-      eggVertex1i(trans[room[i].room_data.triangles[t].vertices[0]]);
-      eggVertex1i(trans[room[i].room_data.triangles[t].vertices[1]]);
-      eggVertex1i(trans[room[i].room_data.triangles[t].vertices[2]]);
+      freyjaPolygonVertex1i(trans[room[i].room_data.triangles[t].vertices[0]]);
+      freyjaPolygonVertex1i(trans[room[i].room_data.triangles[t].vertices[1]]);
+      freyjaPolygonVertex1i(trans[room[i].room_data.triangles[t].vertices[2]]);
 
       t_index = room[i].room_data.triangles[t].texture;
 
       st[0] = (float)object_texture[t_index].vertices[0].xpixel / 255.0;
       st[1] = (float)object_texture[t_index].vertices[0].ypixel / 255.0;
-      eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+      freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
       st[0] = (float)object_texture[t_index].vertices[1].xpixel / 255.0;
       st[1] = (float)object_texture[t_index].vertices[1].ypixel / 255.0;
-      eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+      freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
       st[0] = (float)object_texture[t_index].vertices[2].xpixel / 255.0;
       st[1] = (float)object_texture[t_index].vertices[2].ypixel / 255.0;
-      eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+      freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
-      eggTexture1i(object_texture[t_index].tile);
+      freyjaPolygonMaterial1i(object_texture[t_index].tile);
       
       // End FREYJA_POLYGON
-      eggEnd();
+      freyjaEnd();
     }
 
     for (r = 0; r < room[i].room_data.num_rectangles; r++, rt++)
@@ -878,12 +911,12 @@ int tombraider_map_import(TombRaider *tombraider)
 	///////////////////////////////////////////////////////////////////
 
 	// Start a new polygon
-	eggBegin(FREYJA_POLYGON);
+	freyjaBegin(FREYJA_POLYGON);
 
 	// Store vertices by true id, using translation table
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[t1_1]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[t1_2]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[t1_3]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[t1_1]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[t1_2]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[t1_3]]);
 
 	t_index = room[i].room_data.rectangles[r].texture;
 
@@ -895,31 +928,31 @@ int tombraider_map_import(TombRaider *tombraider)
 	// Asumming no mapping needed for tris? ( can't be complex polygons )
 	st[0] = (float)object_texture[t_index].vertices[t1_1].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t1_1].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t1_2].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t1_2].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t1_3].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t1_3].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 	// Set texture index mapping
-	eggTexture1i(object_texture[t_index].tile);
+	freyjaTexture1i(object_texture[t_index].tile);
 	
 	// End FREYJA_POLYGON
-	eggEnd();
+	freyjaEnd();
 
 	///////////////////////////////////////////////////////////////
 
 	// Start a new polygon
-	eggBegin(FREYJA_POLYGON);
+	freyjaBegin(FREYJA_POLYGON);
 
 	// Store vertices by true id, using translation table
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[t2_1]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[t2_2]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[t2_3]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[t2_1]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[t2_2]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[t2_3]]);
 
 	t_index = room[i].room_data.rectangles[r].texture;
 
@@ -931,30 +964,30 @@ int tombraider_map_import(TombRaider *tombraider)
 	// Asumming no mapping needed for tris? ( can't be complex polygons )
 	st[0] = (float)object_texture[t_index].vertices[t2_1].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t2_1].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t2_2].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t2_2].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 	st[0] = (float)object_texture[t_index].vertices[t2_3].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[t2_3].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 
 	// Set texture index mapping
-	eggTexture1i(object_texture[t_index].tile);
+	freyjaTexture1i(object_texture[t_index].tile);
 	
 	// End FREYJA_POLYGON
-	eggEnd();
+	freyjaEnd();
 #else
 	// Start a new polygon
-	eggBegin(FREYJA_POLYGON);
+	freyjaBegin(FREYJA_POLYGON);
 	
 	// Store vertices by true id, using translation table
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[0]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[1]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[2]]);
-	eggVertex1i(trans[room[i].room_data.rectangles[r].vertices[3]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[0]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[1]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[2]]);
+	freyjaPolygonVertex1i(trans[room[i].room_data.rectangles[r].vertices[3]]);
 	
 	t_index = room[i].room_data.rectangles[r].texture;
 	
@@ -968,35 +1001,35 @@ int tombraider_map_import(TombRaider *tombraider)
 	// FIXME: Account for ordering later
 	st[0] = (float)object_texture[t_index].vertices[0].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[0].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 	
 	st[0] = (float)object_texture[t_index].vertices[1].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[1].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 	
 	st[0] = (float)object_texture[t_index].vertices[2].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[2].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 	
 	st[0] = (float)object_texture[t_index].vertices[3].xpixel / 255.0;
 	st[1] = (float)object_texture[t_index].vertices[3].ypixel / 255.0;
-	eggTexCoord1i(eggTexCoordStore2f(st[0], st[1]));
+	freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
 	
   	// Set texture index mapping
-	eggTexture1i(object_texture[t_index].tile);
+	freyjaPolygonMaterial1i(object_texture[t_index].tile);
 	
 	// End FREYJA_POLYGON
-	eggEnd();
+	freyjaEnd();
 #endif
     }
 
     n += room[i].room_data.num_vertices;
 
 	 // End FREYJA_MESH
-	 eggEnd();
+	 freyjaEnd();
   }
 
-  printf("%i vertices and %i polygons in egg\n", n, tt + rt);
+  printf("%i vertices and %i polygons in freyja\n", n, tt + rt);
 
   return n;
 }
@@ -1059,7 +1092,7 @@ int freyja_model__tombraider_import(char *filename)
 
 		_tombraider.Texture(i, &image, &bumpmap);
 
-		eggTextureStoreBuffer(image, 4, 256, 256, EGG_COLORMODE_RGBA);
+		freyjaTextureCreateBuffer(image, 4, 256, 256, RGBA_32);
 
 		if (bumpmap)
 			delete [] bumpmap;
@@ -1207,11 +1240,11 @@ int freyja_model__tombraider_import(char *filename)
 	}
 
 	printf("\n");
-	printf("Loaded %i Mesh tree animations\n", 
-			 eggGetNum(FREYJA_SKEL_ANIM));
+	printf("Loaded ? Mesh tree animations\n");//,
+	//freyjaGetCount(FREYJA_SKEL_ANIM));
 
 	printf("Loaded ? Mesh tree animation frames\n");//, 
-			 //eggGetNum(FREYJA_MESHTREE_ANIM_FRAME));
+	//freyjaGetCount(FREYJA_MESHTREE_ANIM_FRAME));
 
 	return 0;
 }

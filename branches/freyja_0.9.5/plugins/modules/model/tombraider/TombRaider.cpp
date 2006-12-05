@@ -1102,6 +1102,7 @@ int TombRaider::LoadTR5(FILE *f, void (*percent)(int))
 
 		for (j = 0; j < (int)tr5_num_lights; j++)
 		{
+			unsigned int unknown_int;
 			Fread(&unknown_int, 4, 1, f);
 			DebugPrint("LoadTR5> light[%i].unknown  x? = %i | %f", 
 						  j, unknown_int, *((float*)(&unknown_int)));
@@ -1298,6 +1299,7 @@ int TombRaider::LoadTR5(FILE *f, void (*percent)(int))
 		// Static meshes
 		for (j = 0; j < (int)tr5_num_portals; j++)
 		{
+			long unknown_int;
 			Fread(&unknown_int, 4, 1, f);
 			DebugPrint("LoadTR5> static_mesh[%i].x = %i", j, unknown_int);
 			Fread(&unknown_int, 4, 1, f);
@@ -1320,7 +1322,7 @@ int TombRaider::LoadTR5(FILE *f, void (*percent)(int))
 		// Layers /////////////////
 		for (j = 0; j < (int)num_layers; j++)
 		{
-
+			long unknown_int;
 			Fread(&unknown_int, 4, 1, f);
 			DebugPrint("LoadTR5> layer[%i].num_vertices = %i", j, unknown_int);
 

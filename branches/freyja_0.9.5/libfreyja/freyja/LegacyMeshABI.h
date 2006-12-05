@@ -218,6 +218,18 @@ extern "C" {
 
 #if FREYJA_OBSOLETE_ABI
 
+	void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaGetTexCoord2fv(index_t texcoordIndex, vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	index_t freyjaGetMeshVertexFrameIndex(index_t mesh, uint32 element);
 	/*------------------------------------------------------
 	 * Pre  : Replace with keyframe ABI.
@@ -245,18 +257,6 @@ extern "C" {
 	 *        for <mesh> with local
 	 *        mapping from polygon to mesh ids or -1 on error
 	 *
-	 ------------------------------------------------------*/
-
-	void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaGetTexCoord2fv(index_t texcoordIndex, vec2_t uv);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
 	 ------------------------------------------------------*/
 
 	index_t freyjaGetTexCoordPolygonRefIndex(index_t texcoordIndex,

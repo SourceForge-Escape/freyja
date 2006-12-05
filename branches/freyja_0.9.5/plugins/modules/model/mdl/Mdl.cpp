@@ -1337,7 +1337,7 @@ int freyja_model__mdl_import(char *filename)
 	// Start a new mesh
 	freyjaBegin(FREYJA_MESH);
 
-	for (f = 0; f < num_frames; ++f)
+	for (f = 0; f < 1/*num_frames*/; ++f)
 	{
 		// Start a new vertex group
 		if (!f)
@@ -1363,15 +1363,41 @@ int freyja_model__mdl_import(char *filename)
 				// Generates id translator list
 				transV.pushBack(vertex);
 			}
-			else
-			{
-				freyjaVertexFrame3f(transV[v], x, z, y);
-			}
+			//else
+			//{
+			//	freyjaVertexFrame3f(transV[v], x, z, y);
+			//}
 		}
 
 		// End FREYJA_GROUP
 		freyjaEnd(); 
 	}
+
+	/* 0.9.5 vertex morph keyframes */
+	index_t mesh = freyjaGetFSMMeshIndex();
+	index_t track = freyjaMeshVertexTrackNew(mesh, (num_frames+3)/15.0f, 15.0f);
+	vec3_t pos;
+
+	for (f = 1; f < num_frames; ++f)
+	{  
+		//freyjaPrintMessage("Importing mesh: %d, frame: %d of %d", 
+		//				m, f, md3_mesh[m].num_frames);
+		index_t key = freyjaMeshVertexKeyFrameNew(mesh, 
+												  track, (vec_t)f/15.0f);
+		
+		for (v = 0; v < header->numverts; ++v)
+		{
+			pos[0] = frame[f].sframe.tv[v].v[0] * header->scale[0]+header->scale_origin[0];
+			pos[1] = frame[f].sframe.tv[v].v[1] * header->scale[1]+header->scale_origin[1];
+			pos[2] = frame[f].sframe.tv[v].v[2] * header->scale[2]+header->scale_origin[2];
+			
+			freyjaMeshVertexKeyFrame3f(mesh, track, key,
+									   transV[v],
+									   pos[1], pos[2], pos[0]);
+		}
+	}
+	/* End 0.9.5 vertex morph keyframes */
+
 
     for (i = 0; i < header->numtris; ++i)
 	{

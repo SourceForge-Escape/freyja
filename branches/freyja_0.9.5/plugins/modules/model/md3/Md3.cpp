@@ -1103,8 +1103,8 @@ int freyja_model__md3_import(char *filename)
 				}
 				else
 				{
-					freyjaVertexFrame3f(transV[v],
-										pos[1], pos[2], pos[0]);
+					//freyjaVertexFrame3f(transV[v],
+					//					pos[1], pos[2], pos[0]);
 				}
 			}
 

@@ -7,9 +7,6 @@
  Hot  
  -----------------------------------------------------------------------------
 
-	* FINISH control points system!1111
-
-
 	* Single joint animation for shishi odoshi test
 		- ABI Only in interface for bone keyframe render / edit?
 		- Visualize weights over skinned mesh
@@ -22,6 +19,8 @@
 		- Timers for animation playback	
 		- Add Mesh ABI calls for only specific bone updates too!
 		- Make sure vertex facerefs are always synced or make hup sig
+		- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
+		- Make generic plugin interface for control points
 
 
 	* Cursor system

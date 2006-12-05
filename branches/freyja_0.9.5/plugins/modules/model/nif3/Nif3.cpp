@@ -19,7 +19,10 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <mstl/SystemIO.h>
 #include "Nif3.h"
+
+using namespace mstl;
 
 
 ////////////////////////////////////////////////////////////
@@ -49,17 +52,17 @@ Nif3::~Nif3()
 
 bool Nif3::loadModel(const char *filename)
 {
-	EggFileReader r;
+	SystemIO::FileReader r;
 	Vector<NiNode *> ninodes;
 	Chunk chunk;
 	bool done = false;
 
 
-	if (r.openFile(filename) == false)
+	if (r.Open(filename) == false)
 		return false;
 
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
-	r.readCharString(mHeaderSz, mHeader);
+	r.ReadString(mHeaderSz, mHeader);
 
 	if (strncmp(NIF3_HEADER_START, mHeader, 34))
 		return false;
@@ -78,7 +81,7 @@ bool Nif3::loadModel(const char *filename)
 		}
 	}
 
-	r.closeFile();
+	r.Close();
 
 	return true;
 }
@@ -128,8 +131,8 @@ int freyja_model__nif3_check(char *filename)
 		return -1;
 
 	/* Get header and check to see if this is a Nifv4.0.0.2 */
-	r.readCharString(headerSz, header);
-	r.closeFile();
+	r.ReadCharString(headerSz, header);
+	r.Close();
 
 	if (strncmp(NIF3_HEADER_START, header, 34))
 		return -1;
