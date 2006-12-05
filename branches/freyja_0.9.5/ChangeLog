@@ -6,6 +6,7 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for material blending
  - Several plugins fixed after ABI change: mdl, 3ds, mel, etc
  - Run around and made sure plugins at least built with ABI changes
  - Disabled some plugins there were never implemented and shouldn't have
