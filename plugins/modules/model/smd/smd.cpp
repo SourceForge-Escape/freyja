@@ -22,9 +22,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
+#include <mstl/Vector.h>
 
 using namespace mstl;
 

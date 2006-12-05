@@ -19,7 +19,7 @@
  * 2006.11.11:
  * Mongoose - Removed the trash endian unsafe file I/O,
  *            and replaced with mstl readers ( removed lots of annoying crap 
- *            like stdio and exit() calls everywhere )
+ *            like stdio and exit() calls everywhere also fixed some 'gcc 3.4 workaround' bullshit )
  *
  * 2004.04.27:
  * Mongoose - Created, port and fix of Load 3ds by Alexi Leontopolis, WVU VEL
@@ -188,7 +188,7 @@ void File3ds::Parse3dsMain()
 
 
 	//  Reads a word -- Presumably the first Chunk ID 
-	id_chunk = fin.ReadUint16();
+	id_chunk = fin.ReadInt16U();
 
 	//  Check to see if this is a proper 3DS file
 	if (id_chunk == MAIN_CHUNK)
@@ -210,7 +210,7 @@ void File3ds::Parse3dsMain()
 		do
 		{ 
 			//  Read Subchunk ID inside the Main Chunk	
-			id_chunk = fin.ReadUint16();
+			id_chunk = fin.ReadInt16U();
 			switch(id_chunk)
 			{
 			case VERSION_3DS:
@@ -245,7 +245,7 @@ void File3ds::Parse3dsEditor  (long len)
 	long		sub_len;
 	float		fdata;
 	long		header;
-	streampos	end, curr, tmp;
+	long	end, curr, tmp;
 
 	header = 6;//sizeof ( word ) + sizeof ( long );
 	end	 = fin.GetOffset(); end += len - header;  // gcc 3.4 work around
@@ -257,7 +257,7 @@ void File3ds::Parse3dsEditor  (long len)
 	do
 	{
 		int x;
-		id_chunk = fin.ReadUint16();
+		id_chunk = fin.ReadInt16U();
 		switch(id_chunk)
 		{
 		case OBJECT_BLOCK:
@@ -300,7 +300,7 @@ void File3ds::ParseObjectBlock(long len)
 	long	sub_len;
 	long	header; 
 	char	*strpos, c;
-	streampos end, curr, tmp;
+	long end, curr, tmp;
 
 	
 	header = 6;//sizeof ( word ) + sizeof ( long );
@@ -318,31 +318,31 @@ void File3ds::ParseObjectBlock(long len)
 	
 	while (c != 0)
 	{
-		fin.read(&c, sizeof c);
+		c = fin.ReadByte();
 		*strpos = c;
 		strpos++;
 	} 
 
-	curr = fin.GetOffset()();
+	curr = fin.GetOffset();
 
 	do
 	{
-		fin.read((char *) &id_chunk, sizeof id_chunk);
+		id_chunk = fin.ReadInt16U();
 	
 		switch(id_chunk)
 		{
 		case TRIANGLE_MESH:
-			fin.read((char *) &sub_len,		 sizeof sub_len);
-			object->ParseMeshBlock(sub_len, &fin);
+			sub_len = fin.ReadLong();
+			object->ParseMeshBlock(sub_len, fin);
 			break;
 		default:
-			fin.read((char *) &sub_len,	sizeof sub_len);
+			sub_len = fin.ReadLong();
 			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
-			fin.seekg(tmp);
-			curr = fin.GetOffset()();
+			fin.SetOffset(tmp);
+			curr = fin.GetOffset();
 			break;
 		}
-		curr = fin.GetOffset()();
+		curr = fin.GetOffset();
 	} while(end != curr);
 }
 //************************************
@@ -357,84 +357,98 @@ void File3ds::ParseMaterialBlock  (long len)
 	long		header;
 	char		*strpos, c;
 
-	streampos	end, curr, tmp;
+	long	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.GetOffset()(); end += len - header; // gcc 3.4 work around
+	end	 = fin.GetOffset(); end += len - header; // gcc 3.4 work around
 				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
 													//	the size of the chunk id and
 													//	size of chunk variables that
 													//	have already been read.
-	curr = fin.GetOffset()();
+	curr = fin.GetOffset();
 	if (*material->texture1.filename)
 		memset((void *) material->texture1.filename, '\0', sizeof MAXLEN);
 	do
 	{
-		fin.read((char *) &id_chunk, sizeof id_chunk);
+		id_chunk = fin.ReadInt16U();
 		switch(id_chunk)
 		{
 		case MATERIAL_NAME:
-			fin.read((char *) &sub_len, sizeof sub_len);
+			sub_len = fin.ReadLong();
 			strpos = material->name;
 			*strpos = '\0';
 			c = 1;
 			while (c != 0)
 			{
-				fin.read(&c, sizeof c);
+				c = fin.ReadByte();
 				*strpos = c;
 				strpos++;
 			} 
 			break;
+
 		case MATERIAL_AMBIENT:
-			fin.read((char *) &sub_len,			  sizeof sub_len);
-			fin.read((char *) &sub_id,			  sizeof sub_id);
-			fin.read((char *) &sub_sub_len,		  sizeof sub_sub_len);
-			fin.read((char *) &material->ambient, sizeof (RGBByte));
+			sub_len = fin.ReadLong();
+			sub_id = fin.ReadInt16U();
+			sub_sub_len = fin.ReadLong();
+			material->ambient.r = fin.ReadByte();
+			material->ambient.g = fin.ReadByte();
+			material->ambient.b = fin.ReadByte();
 			break;
+
 		case MATERIAL_DIFFUSE:
-			fin.read((char *) &sub_len,		sizeof sub_len);
-			fin.read((char *) &sub_id,		sizeof sub_id);
-			fin.read((char *) &sub_sub_len, sizeof sub_sub_len);
-			fin.read((char *) &material->diffuse, sizeof (RGBByte));
+			sub_len = fin.ReadLong();
+			sub_id = fin.ReadInt16U();
+			sub_sub_len = fin.ReadLong();
+			material->diffuse.r = fin.ReadByte();
+			material->diffuse.g = fin.ReadByte();
+			material->diffuse.b = fin.ReadByte();
 			break;
+
 		case MATERIAL_SPECULAR:
-			fin.read((char *) &sub_len,		sizeof sub_len);
-			fin.read((char *) &sub_id,		sizeof sub_id);
-			fin.read((char *) &sub_sub_len,	sizeof sub_sub_len);
-			fin.read((char *) &material->specular, sizeof (RGBByte));
+			sub_len = fin.ReadLong();
+			sub_id = fin.ReadInt16U();
+			sub_sub_len = fin.ReadLong();
+			material->specular.r = fin.ReadByte();
+			material->specular.g = fin.ReadByte();
+			material->specular.b = fin.ReadByte();
 			break;
+
 		case MATERIAL_SHINE_PER:
-			fin.read((char *) &sub_len,		sizeof sub_len);
-			fin.read((char *) &sub_id,		sizeof sub_id);
-			fin.read((char *) &sub_sub_len,	sizeof sub_sub_len);
-			fin.read((char *) &material->MatShinPer, sizeof (word));
+			sub_len = fin.ReadLong();
+			sub_id = fin.ReadInt16U();
+			sub_sub_len = fin.ReadLong();
+			material->MatShinPer = fin.ReadInt16U();
 			break;
+
 		case MATERIAL_SHINE_STR:
-			fin.read((char *) &sub_len,		sizeof sub_len);
-			fin.read((char *) &sub_id,		sizeof sub_id);
-			fin.read((char *) &sub_sub_len,	sizeof sub_sub_len);
-			fin.read((char *) &material->MatShinStr,	sizeof (word));
+			sub_len = fin.ReadLong();
+			sub_id = fin.ReadInt16U();
+			sub_sub_len = fin.ReadLong();
+			material->MatShinStr = fin.ReadInt16U();
 			break;
+
 		case MATERIAL_TRANS_PER:
-			fin.read((char *) &sub_len,		sizeof sub_len);
-			fin.read((char *) &sub_id,		sizeof sub_id);	
-			fin.read((char *) &sub_sub_len,	sizeof sub_sub_len);
-			fin.read((char *) &material->MatTransPer, sizeof (word));
+			sub_len = fin.ReadLong();
+			sub_id = fin.ReadInt16U();
+			sub_sub_len = fin.ReadLong();
+			material->MatTransPer = fin.ReadInt16U();
 			break;
+
 		case MATERIAL_TEXTURE1:
-			fin.read((char *) &sub_len,		sizeof sub_len);
-			curr = fin.GetOffset()();
+			sub_len = fin.ReadLong();
+			curr = fin.GetOffset();
 			ParseSubMapBlock(sub_len, &material->texture1);
 			break;
+
 		default:
-			fin.read((char *) &sub_len,	sizeof sub_len);
+			sub_len = fin.ReadLong();
 			 tmp = curr; tmp += sub_len;// gcc 3.4 work around
-			fin.seekg(tmp);
+			fin.SetOffset(tmp);
 			break;
 		}
-		curr = fin.GetOffset()();
+		curr = fin.GetOffset();
 	} while(end != curr);
 }
 //************************************
@@ -447,10 +461,10 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 	long		sub_len;
 	long		header;
 	char		*strpos, c;
-	streampos	end, curr, tmp;
+	long	end, curr, tmp;
 
 	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin.GetOffset()(); end += len - header; // gcc 3.4 work around
+	end	 = fin.GetOffset(); end += len - header; // gcc 3.4 work around
 				//	Sets the end of this Block
 													//	at the current position plus
 													//	the length of the block minus
@@ -460,41 +474,43 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 	sm->UScale = 1.0;
 	sm->VScale = 1.0;
 
-	curr = fin.GetOffset()();
+	curr = fin.GetOffset();
 	do
 	{
-		fin.read((char *) &id_chunk, sizeof id_chunk);
+		id_chunk = fin.ReadInt16U();
 
 		switch(id_chunk)
 		{
 		case MAPPING_FILENAME:
-			fin.read((char *) &sub_len, sizeof sub_len);
+			sub_len = fin.ReadLong();
 			strpos = sm->filename;
 			*strpos = '\0';
 			c = 1;
 			while (c != 0)
 			{
-				fin.read(&c, sizeof c);
+				c = fin.ReadByte();
 				*strpos = c;
 				strpos++;
 			} 
+			break;
 
-			break;
 		case U_SCALE:
-			fin.read((char *) &sub_len, sizeof sub_len);
-			fin.read((char *) &sm->UScale,  sizeof (float));
+			sub_len = fin.ReadLong();
+			sm->UScale = fin.ReadFloat32();
 			break;
+
 		case V_SCALE:
-			fin.read((char *) &sub_len, sizeof sub_len);
-			fin.read((char *) &sm->VScale,  sizeof (float));
+			sub_len = fin.ReadLong();
+			sm->VScale = fin.ReadFloat32();
 			break;
+
 		default:
-			fin.read((char *) &sub_len,	sizeof sub_len);
+			sub_len = fin.ReadLong();
 			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
-			fin.seekg(tmp);
+			fin.SetOffset(tmp);
 			break;
 		}
-		curr = fin.GetOffset()();
+		curr = fin.GetOffset();
 	} while(end != curr);
 }
 //************************************
@@ -576,40 +592,43 @@ Object3d::Object3d ()
 
 
 // Object3d::ParseMeshBlock **********
-void Object3d::ParseMeshBlock(long len, ifstream *fin)
+void Object3d::ParseMeshBlock(long len, mstl::SystemIO::FileReader &fin)
 {
-	word	id_chunk;
-	long	sub_len;
-	long	header;
-	int		x;
+	word id_chunk;
+	long sub_len;
+	long header;
+	int x;
+	long end, curr, tmp;
 	
+	header = 2 + 4;
+	end	= fin.GetOffset() + len - header;
+	curr = fin.GetOffset();
 
-	streampos end, curr, tmp;
-	
-	header = sizeof ( word ) + sizeof ( long );
-	end	 = fin->GetOffset()(); end += len - header;  // gcc 3.4 work around
-				//	Sets the end of this Block
-													//	at the current position plus
-													//	the length of the block minus
-													//	the size of the chunk id and
-													//	size of chunk variables that
-													//	have already been read.
-	
+	// gcc 3.4 work around
+	//	Sets the end of this Block
+	//	at the current position plus
+	//	the length of the block minus
+	//	the size of the chunk id and
+	//	size of chunk variables that
+	//	have already been read.
+
 	do
 	{
 		int i;
-		word nVertTemp;								// A dummy value since number of vertices has
-													// already been stored
-		fin->read((char *) &id_chunk, sizeof id_chunk);
+		word nVertTemp; // dummy value since vertex count has already been stored
+		id_chunk = fin.ReadInt16U();
 		switch(id_chunk)
 		{
 		case VERTEX_LIST:
-			fin->read((char *) &sub_len,	sizeof sub_len);
-			fin->read((char *) &nVertices,	sizeof nVertices);
+			sub_len = fin.ReadLong();
+			nVertices = fin.ReadInt16U();
 			vertex = new XYZ3DS[nVertices];
 			for (x = 0; x < nVertices; x++)
 			{
-				fin->read((char *) &vertex[x], sizeof( XYZ3DS));
+				vertex[x].x = fin.ReadFloat32();
+				vertex[x].y = fin.ReadFloat32();
+				vertex[x].z = fin.ReadFloat32();
+
 				if (x) 
 				{
 					if (vertex[x].x > max.x)
@@ -628,59 +647,70 @@ void Object3d::ParseMeshBlock(long len, ifstream *fin)
 					
 			}
 			break;
+
 		case FACE_LIST:
-			fin->read((char *) &sub_len,	sizeof sub_len);
-			fin->read((char *) &nFaces,		sizeof nFaces);
+			sub_len = fin.ReadLong();
+			nFaces = fin.ReadInt16U();
+
 			face = new Face3DS[nFaces];
 			for (x = 0; x < nFaces; x++)
 			{
-				fin->read((char *) &face[x], (sizeof (word)) * 4);
+				face[x].vcA = fin.ReadInt16U();
+				face[x].vcB = fin.ReadInt16U();
+				face[x].vcC = fin.ReadInt16U();
+				face[x].fFlag = fin.ReadInt16U();
 			}
 			break;
+
 		case FACE_MAT_LIST:
 			word nEntries;
 			char	*strpos, tmpstr[MAXLEN], c;	
 
-			fin->read((char *) &sub_len,	sizeof sub_len);
+			sub_len = fin.ReadLong();
 			strpos = tmpstr;
 			*strpos = '\0';
 			c = 1;
 			while (c != 0)
 			{ 
-				curr = fin->GetOffset()();
-				fin->read(&c, sizeof c);
+				curr = fin.GetOffset();
+				c = fin.ReadByte();
 				*strpos = c;
 				strpos++;
 			} 
-			fin->read((char *) &nEntries, sizeof (word));
+			nEntries = fin.ReadInt16U();
 			for (i = 0; i < nEntries; i++)
 			{
 				word faceIndex;
-				fin->read((char *) &faceIndex, sizeof (word));
+				faceIndex = fin.ReadInt16U();
 				strcpy(face[faceIndex].matName, tmpstr);
 			}
 			break;
+
 		case VERTEX_MAP_COORD:
-			curr = fin->GetOffset()();
-			fin->read((char *) &sub_len,	sizeof sub_len);
-			curr = fin->GetOffset()();
-			fin->read((char *) &nVertTemp,	sizeof (word));
-			curr = fin->GetOffset()();
+			curr = fin.GetOffset();
+			sub_len = fin.ReadLong();
+			curr = fin.GetOffset();
+			nVertTemp = fin.ReadInt16U();
+			curr = fin.GetOffset();
 			matmap = new MatMap[nVertTemp];
 			for (i = 0; i < nVertTemp; i++)
 			{
-				fin->read((char *) &matmap[i],	sizeof (MatMap)); 
+				matmap[i].U = fin.ReadFloat32();
+				matmap[i].V = fin.ReadFloat32();
 			}
 	
 			break;
+
 		default:
-			fin->read((char *) &sub_len,	sizeof sub_len);
+			sub_len = fin.ReadLong();
 			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
-			fin->seekg(tmp);
+			fin.SetOffset(tmp);
 			break;
 		}
-		curr = fin->GetOffset()();
-	} while(end != curr);
+
+		curr = fin.GetOffset();
+
+	} while (end != curr && curr < end); // safety feature for bad reads
 }
 //************************************
 

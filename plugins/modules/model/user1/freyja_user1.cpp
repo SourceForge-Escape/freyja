@@ -24,7 +24,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <freyja/FreyjaPluginABI.h>
+#include <mstl/Map.h>
+#include <mstl/Vector.h>
 
+using namespace mstl;
 
 extern "C" {
 
@@ -112,10 +115,10 @@ int freyja_model__user1_import(char *filename)
 
 
 	// Start a new mesh
-	eggBegin(FREYJA_MESH);
+	freyjaBegin(FREYJA_MESH);
 		
 	// Start a new vertex group
-	eggBegin(FREYJA_GROUP);
+	//freyjaBegin(FREYJA_GROUP);
 
 	index = 0;
 
@@ -123,47 +126,46 @@ int freyja_model__user1_import(char *filename)
 	{
 		for (j = 0; j < 3; ++j)
 		{
-			v = eggVertexStore3f(polygon[i].vertex[j].pos.x,
-										polygon[i].vertex[j].pos.y,
-										polygon[i].vertex[j].pos.z);
+			v = freyjaVertexCreate3f(polygon[i].vertex[j].pos.x,
+											 polygon[i].vertex[j].pos.y,
+											 polygon[i].vertex[j].pos.z);
 			
 			trans.Add(index++, v);
-			
-			eggVertexNormalStore3f(v,
-										  polygon[i].vertex[j].norm.x,
-										  polygon[i].vertex[j].norm.y,
-										  polygon[i].vertex[j].norm.z);
+			freyjaVertexNormal3f(v, 
+										polygon[i].vertex[j].norm.x,
+										polygon[i].vertex[j].norm.y,
+										polygon[i].vertex[j].norm.z);
 		}
 	}
 
-	eggEnd(); // FREYJA_GROUP
+	//freyjaEnd(); // FREYJA_GROUP
 
 	index = 0;
 
 	for (i = 0; i < polygon_count; ++i)
 	{
 		// Start a new polygon
-		eggBegin(FREYJA_POLYGON);
+		freyjaBegin(FREYJA_POLYGON);
 
 		// Format doesn't have texels
-		t = eggTexelStore2f(0.5, 0.5);
-		eggTexel1i(t);
-		t = eggTexelStore2f(0.5, 0.5);
-		eggTexel1i(t);
-		t = eggTexelStore2f(0.5, 0.5);
-		eggTexel1i(t);
+		t = freyjaTexCoordCreate2f(0.5, 0.5);
+		freyjaPolygonAddTexCoord1i(i, t);
+		t = freyjaTexCoordCreate2f(0.5, 0.5);
+		freyjaPolygonAddTexCoord1i(i, t);
+		t = freyjaTexCoordCreate2f(0.5, 0.5);
+		freyjaPolygonAddTexCoord1i(i, t);
 		
-		eggVertex1i(trans[index++]);
-		eggVertex1i(trans[index++]);
-		eggVertex1i(trans[index++]);
+		freyjaPolygonAddVertex1i(i, trans[index++]);
+		freyjaPolygonAddVertex1i(i, trans[index++]);
+		freyjaPolygonAddVertex1i(i, trans[index++]);
 
-		eggTexture1i(0);
+		freyjaPolygonMaterial1i(0);
 
-		eggEnd(); // FREYJA_POLYGON
+		freyjaEnd(); // FREYJA_POLYGON
 	}
 	
 
-	eggEnd(); // FREYJA_MESH
+	freyjaEnd(); // FREYJA_MESH
 
 	return 0;
 }

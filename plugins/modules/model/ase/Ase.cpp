@@ -802,7 +802,7 @@ int freyja_model__ase_import(char *filename)
 int freyja_model__ase_export(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
-	index_t face, vert, tex;
+	index_t mesh, face, vert, tex;
 	//float st[2];
 	int v, t, texel;
 	Ase ase;
@@ -857,7 +857,7 @@ int freyja_model__ase_export(char *filename)
 		}
 
 		//freyjaPrintMessage("%i / %i\n", t, ase.mFaceCount);
-
+		mesh = freyjaGetCurrent(FREYJA_MESH);
 		face = freyjaGetCurrent(FREYJA_POLYGON);
 
 		// FIXME: Could export quads too, but ase tris needs update first
@@ -876,11 +876,11 @@ int freyja_model__ase_export(char *filename)
 		if (freyjaGetPolygonTexCoordCount(face))
 		{
 			tex = freyjaGetPolygonTexCoordIndex(face, 0);
-			freyjaGetTexCoord2fv(tex, ase.mUVWs[ase.mFaces[t].uvwIndex[0]]);
+			freyjaGetMeshTexCoord2fv(mesh, tex, ase.mUVWs[ase.mFaces[t].uvwIndex[0]]);
 			tex = freyjaGetPolygonTexCoordIndex(face, 1);
-			freyjaGetTexCoord2fv(tex, ase.mUVWs[ase.mFaces[t].uvwIndex[1]]);
+			freyjaGetMeshTexCoord2fv(mesh, tex, ase.mUVWs[ase.mFaces[t].uvwIndex[1]]);
 			tex = freyjaGetPolygonTexCoordIndex(face, 2);
-			freyjaGetTexCoord2fv(tex, ase.mUVWs[ase.mFaces[t].uvwIndex[2]]);
+			freyjaGetMeshTexCoord2fv(mesh, tex, ase.mUVWs[ase.mFaces[t].uvwIndex[2]]);
 		}
 
 		ase.mFaces[t].uvwIndex[0] = texel++;

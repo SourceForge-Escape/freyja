@@ -786,7 +786,7 @@ int freyja_model__md5_export(char *filename)
 
 		for (v = 0, count = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, v);
+			vertexIndex = v;//freyjaGetMeshVertexIndex(meshIndex, v);
 			count += freyjaGetVertexWeightCount(vertexIndex);
 		}
 
@@ -795,7 +795,7 @@ int freyja_model__md5_export(char *filename)
 
 		for (v = 0; v < md5.mMeshes[m].numweights; ++v)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, v);
+			vertexIndex = v;//freyjaGetMeshVertexIndex(meshIndex, v);
 			count = freyjaGetVertexWeightCount(vertexIndex);
 
 			for (i = 0; i < count; ++i)
@@ -811,7 +811,7 @@ int freyja_model__md5_export(char *filename)
 
 		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, v);
+			vertexIndex = v;//freyjaGetMeshVertexIndex(meshIndex, v);
 
 			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
 
@@ -829,24 +829,24 @@ int freyja_model__md5_export(char *filename)
 		// Assumes user tesselated model
 		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
 		{
-			faceIndex = freyjaGetMeshPolygonIndex(meshIndex, t);
+			faceIndex = t;//freyjaGetMeshPolygonIndex(meshIndex, t);
 
-			vertexIndex = freyjaGetPolygonVertexIndex(faceIndex, 0);
-			texcoordIndex = freyjaGetPolygonTexCoordIndex(faceIndex, 0);
-			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, vertexIndex);
-			freyjaGetTexCoord2fv(texcoordIndex, md5.mMeshes[m].verts[vertexIndex].uv);
+			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, t, 0);
+			texcoordIndex = freyjaGetMeshPolygonTexCoordIndex(meshIndex, t, 0);
+			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, t, vertexIndex);
+			freyjaGetMeshTexCoord2fv(meshIndex, texcoordIndex, md5.mMeshes[m].verts[vertexIndex].uv);
 			md5.mMeshes[m].triangles[t].vertex[0] = vertexIndex;
 
 			vertexIndex = freyjaGetPolygonVertexIndex(faceIndex, 1);
 			texcoordIndex = freyjaGetPolygonTexCoordIndex(faceIndex, 2);
-			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, vertexIndex);
-			freyjaGetTexCoord2fv(texcoordIndex, md5.mMeshes[m].verts[vertexIndex].uv);
+			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceIndex, vertexIndex);
+			freyjaGetMeshTexCoord2fv(meshIndex, texcoordIndex, md5.mMeshes[m].verts[vertexIndex].uv);
 			md5.mMeshes[m].triangles[t].vertex[1] = vertexIndex;
 
 			vertexIndex = freyjaGetPolygonVertexIndex(faceIndex, 2);
 			texcoordIndex = freyjaGetPolygonTexCoordIndex(faceIndex, 2);
-			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, vertexIndex);
-			freyjaGetTexCoord2fv(texcoordIndex, md5.mMeshes[m].verts[vertexIndex].uv);
+			vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, vertexIndex, vertexIndex);
+			freyjaGetMeshTexCoord2fv(meshIndex,texcoordIndex, md5.mMeshes[m].verts[vertexIndex].uv);
 			md5.mMeshes[m].triangles[t].vertex[2] = vertexIndex;
 
 

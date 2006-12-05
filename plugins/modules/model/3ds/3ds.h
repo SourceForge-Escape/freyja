@@ -192,7 +192,7 @@ public:
 class File3ds 
 {
 protected:
-	SystemIO::FileReader fin;	// file stream for reading input
+	SystemIO::BufferedFileReader fin;	// file stream for reading input
 	
 	long		fsize;			// file size
 	dword		version;		// 3DS version

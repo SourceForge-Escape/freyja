@@ -170,7 +170,7 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS=$(BUILDDIR)/freyja_tombraider.o \
-	(BUILDDIR)/TombRaider.o
+	$(BUILDDIR)/TombRaider.o
 
 $(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)

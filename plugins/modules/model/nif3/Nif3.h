@@ -35,7 +35,7 @@
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 
-#define NIF4_HEADER_START "NetImmerse File Format, Version 4.0.0.2"
+#define NIF3_HEADER_START "NetImmerse File Format, Version 3.0.0.0"
 
 using namespace mstl;
 
@@ -705,7 +705,7 @@ class Nif3
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Nif4();
+	Nif3();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Nif4
@@ -716,7 +716,7 @@ class Nif3
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~Nif4();
+	~Nif3();
 	/*------------------------------------------------------
 	 * Pre  : Nif4 object is allocated
 	 * Post : Deconstructs an object of Nif4
