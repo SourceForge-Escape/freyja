@@ -449,7 +449,7 @@ void File3ds::ParseMaterialBlock  (long len)
 			break;
 		}
 		curr = fin.GetOffset();
-	} while(end != curr);
+	} while(end != curr && curr < end);
 }
 //************************************
 

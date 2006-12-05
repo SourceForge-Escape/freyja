@@ -1433,7 +1433,9 @@ bool FreyjaControl::event(int event, unsigned int value)
 		case 1014:
 			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 			break;
-		}
+		}		
+		freyja_event_gl_refresh();
+		break;
 
 	case eBlendDest:
 		switch (value)
@@ -1483,7 +1485,8 @@ bool FreyjaControl::event(int event, unsigned int value)
 		case 14:
 			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
 			break;
-		}
+		}		
+		freyja_event_gl_refresh();
 		break;
 
 	case eMaterialMultiTex:
