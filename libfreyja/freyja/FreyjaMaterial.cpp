@@ -104,38 +104,29 @@ uint32 FreyjaMaterial::getSerializeSize()
 
 bool FreyjaMaterial::Serialize(SystemIO::TextFileWriter &w)
 {
-	uint32 length = 0;
-
-	w.Print("Material\n");
+	w.Print("[Material]\n");
 	w.Print("\tmVersion %u\n", mVersion);
 	w.Print("\tmName \"%s\"\n", mName);
 	w.Print("\tmFlags %u\n", mFlags);
-	w.Print("\tmBlendDest %u\n", mBlendSrc);
+	w.Print("\tmBlendSrc %u\n", mBlendSrc);
 	w.Print("\tmBlendDest %u\n", mBlendDest);
-	w.Print("\tmTextureName \"%s\"\n", mTextureName ? mTextureName ? "");
+	w.Print("\tmTextureName \"%s\"\n", mTextureName ? mTextureName : "");
 
 	w.Print("\tmShininess %f\n", mShininess);
 
 	w.Print("\tmAmbient %f %f %f %f\n", 
 			mAmbient[0], mAmbient[1], mAmbient[2], mAmbient[3]);
 
-	w.Print("\tmDiffuse %f %f %f %f\n", );
-	w.WriteFloat32(mDiffuse[0]);
-	w.WriteFloat32(mDiffuse[1]);
-	w.WriteFloat32(mDiffuse[2]);
-	w.WriteFloat32(mDiffuse[3]);
+	w.Print("\tmDiffuse %f %f %f %f\n", 
+			mDiffuse[0], mDiffuse[1], mDiffuse[2], mDiffuse[3]);
 
-	w.Print("\tmSpecular %f %f %f %f\n", );
-	w.WriteFloat32(mSpecular[0]);
-	w.WriteFloat32(mSpecular[1]);
-	w.WriteFloat32(mSpecular[2]);
-	w.WriteFloat32(mSpecular[3]);
+	w.Print("\tmSpecular %f %f %f %f\n", 
+			mSpecular[0], mSpecular[1], mSpecular[2], mSpecular[3]);
 
-	w.Print("\tmEmissive %f %f %f %f\n", );
-	w.WriteFloat32(mEmissive[0]);
-	w.WriteFloat32(mEmissive[1]);
-	w.WriteFloat32(mEmissive[2]);
-	w.WriteFloat32(mEmissive[3]);
+	w.Print("\tmEmissive %f %f %f %f\n", 
+			mEmissive[0], mEmissive[1], mEmissive[2], mEmissive[3]);
+
+	w.Print("END\n");
 
 	return true;
 }
@@ -144,7 +135,6 @@ bool FreyjaMaterial::Serialize(SystemIO::TextFileWriter &w)
 bool FreyjaMaterial::serialize(SystemIO::FileWriter &w)
 {
 	uint32 length = 0;
-
 
 	w.WriteInt32U(mVersion);
 	w.WriteString(64, mName);
@@ -196,6 +186,85 @@ bool FreyjaMaterial::serialize(SystemIO::FileWriter &w)
 
 bool FreyjaMaterial::Serialize(SystemIO::TextFileReader &r)
 {
+	if (strcmp(r.ParseSymbol(), "[Material]"))
+		return false;
+
+	uint32 version = r.ParseInteger();
+
+	if (version != mVersion)
+		return false;
+
+	const char *symbol;
+	while ((symbol = r.ParseSymbol()))
+	{
+		if (strcmp(symbol, "END") == 0)
+		{
+			break;
+		}
+		else if (strcmp(symbol, "mName") == 0)
+		{
+			const char *s = r.ParseStringLiteral();
+			if (s)
+			{
+				setName(s);
+				delete [] s;
+			}
+		}
+		else if (strcmp(symbol, "mFlags") == 0)
+		{
+			mFlags = r.ParseInteger();
+		}
+		else if (strcmp(symbol, "mBlendSrc") == 0)
+		{
+			mBlendSrc = r.ParseInteger();
+		}
+		else if (strcmp(symbol, "mBlendDest") == 0)
+		{
+			mBlendDest = r.ParseInteger();
+		}
+		else if (strcmp(symbol, "mTextureName") == 0)
+		{
+			const char *s = r.ParseStringLiteral();
+			if (s)
+			{
+				setTextureName(s);
+				delete [] s;
+			}
+		}
+		else if (strcmp(symbol, "mShininess") == 0)
+		{
+			mShininess = r.ParseFloat();
+		}
+		else if (strcmp(symbol, "mAmbient") == 0)
+		{
+			mAmbient[0] = r.ParseFloat();
+			mAmbient[1] = r.ParseFloat();
+			mAmbient[2] = r.ParseFloat();
+			mAmbient[3] = r.ParseFloat();
+		}
+		else if (strcmp(symbol, "mDiffuse") == 0)
+		{
+			mDiffuse[0] = r.ParseFloat();
+			mDiffuse[1] = r.ParseFloat();
+			mDiffuse[2] = r.ParseFloat();
+			mDiffuse[3] = r.ParseFloat();
+		}
+		else if (strcmp(symbol, "mSpecular") == 0)
+		{
+			mSpecular[0] = r.ParseFloat();
+			mSpecular[1] = r.ParseFloat();
+			mSpecular[2] = r.ParseFloat();
+			mSpecular[3] = r.ParseFloat();
+		}
+		else if (strcmp(symbol, "mEmissive") == 0)
+		{
+			mEmissive[0] = r.ParseFloat(); 
+			mEmissive[1] = r.ParseFloat();
+			mEmissive[2] = r.ParseFloat();
+			mEmissive[3] = r.ParseFloat();
+		}
+	}
+
 	return false;
 }
 
