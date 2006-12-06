@@ -1062,6 +1062,25 @@ int32 freyjaImportModel(const char *filename)
 		return -1;
 	}
 
+	if (SystemIO::File::CompareFilenameExtention(filename, ".freyja") == 0)
+	{
+		SystemIO::TextFileReader tr; 
+
+		if (tr.Open(filename))
+		{
+			tr.ParseSymbol(); // Freyja
+			tr.ParseSymbol(); // 0.9.5
+			int32 count = tr.ParseInteger();
+			while (count > 0)
+			{
+				freyjaMeshLoadChunkTextJA(tr);
+				--count;
+			}
+		}
+		return 0;
+	}
+
+
 	/* Check for native freyja JA format */
 	if (freyjaCheckModel(filename) == 0)
 	{
@@ -1070,7 +1089,6 @@ int32 freyjaImportModel(const char *filename)
 		
 		return -1;
 	}
-
 
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
@@ -1205,6 +1223,24 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	if (strcmp(type, "ja") == 0)
 	{
 		return freyjaSaveModel(filename); // FIXME: true or false needed?
+	}
+
+	if (strcmp(type, "freyja") == 0)
+	{
+		SystemIO::TextFileWriter tw; 
+
+		if (tw.Open(filename))
+		{
+			tw.Print("Freyja 0.9.5\n");
+			uint32 count = freyjaGetMeshCount();
+			tw.Print("%u\n", count);
+			for (uint32 i = 0; i < count; ++i)
+			{
+				if (freyjaGetMeshClass(i))
+					freyjaMeshSaveChunkTextJA(tw, i);
+			}
+		}
+		return 0;
 	}
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
@@ -1703,4 +1739,350 @@ const char *freyjaGetObjectName(freyja_object_t obj)
 }
 
 
+
+
+void freyjaGetGenericTransform3fv(freyja_transform_t transform,
+								  freyja_transform_action_t action,
+								  index_t id, vec3_t xyz)
+{
+	switch (transform)
+	{
+	case fTransformScene:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformModel:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformMesh:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetMeshPosition(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexFrame:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformSkeleton:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformBone:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetBoneTranslation3fv(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformUVMap:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexGroup:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertex:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetVertexXYZ3fv(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformTexCoord:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+	}
+}
+
+		
+void freyjaGenericTransform3fv(freyja_transform_t transform,
+							   freyja_transform_action_t action,
+							   index_t id, vec3_t xyz)
+{
+	switch (transform)
+	{
+	case fTransformScene:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformModel:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformMesh:
+		switch (action)
+		{
+		case fTranslate:
+			//freyjaMeshPosition(id, xyz);
+			freyjaMeshTransform(id, 0,//freyjaGetMeshVertexGroupIndex(id, 0),
+								action, xyz[0], xyz[1], xyz[2]);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexFrame:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformSkeleton:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformBone:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaBoneTransform(id, action, xyz[0], xyz[1], xyz[2]);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformUVMap:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertexGroup:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformVertex:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaVertexPosition3fv(id, xyz);
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+
+	case fTransformTexCoord:
+		switch (action)
+		{
+		case fTranslate:
+			break;
+		case fRotate:
+			break;
+		case fScale:
+			break;
+		case fRotateAboutPoint:
+			break;
+		case fScaleAboutPoint:
+			break;
+		}
+		break;
+	}
+}
 

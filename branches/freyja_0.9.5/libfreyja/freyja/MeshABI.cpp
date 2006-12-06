@@ -47,6 +47,13 @@ Mesh *freyjaGetMeshClass(index_t meshUID)
 }
 
 
+Weight *freyjaGetMeshWeightClass(index_t meshUID, index_t weight)
+{
+	Mesh *m = freyjaGetMeshClass(meshUID);
+	return m ? m->GetWeight(weight) : NULL;
+}
+
+
 Vertex *freyjaGetMeshVertexClass(index_t meshUID, index_t vertex)
 {
 	Mesh *m = freyjaGetMeshClass(meshUID);
@@ -111,7 +118,6 @@ int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
 	}
 
 	polygonCount = polygons.end();
-
 
 	/* Vertices and polymapped TexCoords, filtered by filtered polygons */
 	count = freyjaGetMeshVertexCount(meshIndex);
@@ -397,11 +403,6 @@ int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
 		}
 	}
 
-	String s;
-	s.Set("/tmp/test%i.yja", meshIndex);
-	SystemIO::TextFileWriter wt;
-	wt.Open(s.c_str());
-	freyjaMeshSaveChunkTextJA(wt, meshIndex);
 
 	return 0;
 }
@@ -410,38 +411,17 @@ int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
 bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh)
 {
 	freyjaPrintMessage("> Writing out mesh %i...", mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
+	return m ? m->Serialize(w) : false;
+}
 
-	w.Print("start mesh version 1\n");
 
-	w.Print("\tflags 0x%x\n", freyjaGetMeshFlags(mesh));
-
-	w.Print("\tvertexArrayCount %u\n", freyjaGetMeshVertexCount(mesh));
-
-	for (uint32 i = 0, n = freyjaGetMeshVertexCount(mesh); i < n; ++i)
-	{
-		vec3_t v;
-		freyjaGetMeshVertexPos3fv(mesh, i, v);
-		w.Print("\t\t%f %f %f\n", v[0], v[1], v[2]);
-	}
-
-	w.Print("\tnormalArrayCount %u\n", freyjaGetMeshVertexCount(mesh));
-
-	for (uint32 i = 0, n = freyjaGetMeshVertexCount(mesh); i < n; ++i)
-	{
-		vec3_t v;
-		freyjaGetMeshVertexNormal3fv(mesh, i, v);
-		w.Print("\t\t%f %f %f\n", v[0], v[1], v[2]);
-	}
-
-	w.Print("\ttexcoordArrayCount %u\n", freyjaGetMeshTexCoordCount(mesh));
-
-	w.Print("\tvertexCount %u\n", freyjaGetMeshVertexCount(mesh));
-
-	w.Print("\tfaceCount %u\n", freyjaGetMeshPolygonCount(mesh));
-
-	w.Print("\tweightCount %u\n", freyjaGetMeshWeightCount(mesh));
-
-	return true;
+bool freyjaMeshLoadChunkTextJA(SystemIO::TextFileReader &r)
+{
+	index_t mesh = freyjaMeshCreate();
+	freyjaPrintMessage("> Reading in mesh %i...", mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
+	return m ? m->Serialize(r) : false;
 }
 
 

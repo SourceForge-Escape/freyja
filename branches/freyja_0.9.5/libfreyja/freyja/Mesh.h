@@ -89,6 +89,21 @@ public:
 		return true;
 	}
 
+	bool Serialize(SystemIO::TextFileWriter &w) 
+	{ 
+		w.Print("\t\tw %u %u %f\n", mVertexIndex, mBoneIndex, mWeight);
+		return true;
+	}
+
+	bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		r.ParseSymbol(); // "w"
+		mVertexIndex = r.ParseInteger();
+		mBoneIndex = r.ParseInteger();
+		mWeight = r.ParseFloat();
+		return true;
+	}
+
 	index_t mVertexIndex;
 	index_t mBoneIndex;
 	vec_t mWeight;
@@ -163,6 +178,24 @@ public:
 		// No use in storing face references to disk!
 
 		return true; 
+	}
+
+	bool Serialize(SystemIO::TextFileWriter &w) 
+	{ 
+		w.Print("\t\tv %u %u %u %u %u\n", 
+				mFlags, mVertexIndex, mTexCoordIndex, mNormalIndex, mMaterial);
+		return true;
+	}
+
+	bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		r.ParseSymbol(); // "v"
+		mFlags = r.ParseInteger();
+		mVertexIndex = r.ParseInteger();
+		mTexCoordIndex = r.ParseInteger();
+		mNormalIndex = r.ParseInteger();
+		mMaterial = r.ParseInteger();
+		return true;
 	}
 
 	Vector<index_t> &GetFaceRefs() { return mFaceRefs; }
@@ -311,6 +344,64 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	bool Serialize(SystemIO::TextFileWriter &w) 
+	{ 
+		w.Print("\t\tface %u %u %u %u %u\n", 
+				mFlags, mSmoothingGroup, mColor, mMaterial);
+
+		uint32 i;
+		w.Print("\t\t\tfv %u ", mIndices.size()); 
+		foreach(mIndices, i)
+		{
+			w.Print("%u ", mIndices[i]);
+		}
+		w.Print("\n");
+
+		w.Print("\t\t\tft %u ", mTexCoordIndices.size());
+		foreach(mTexCoordIndices, i)
+		{
+			w.Print("%u ", mTexCoordIndices[i]);
+		}
+		w.Print("\n");
+
+		w.Print("\t\t\tfn %u ", mNormalsIndices.size());
+		foreach(mNormalsIndices, i)
+		{
+			w.Print("%u ", mNormalsIndices[i]);
+		}
+		w.Print("\n");
+
+		return true;
+	}
+
+	bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		r.ParseSymbol(); // "face"
+		mFlags = r.ParseInteger();
+		mSmoothingGroup = r.ParseInteger();
+		mColor = r.ParseInteger();
+		mMaterial = r.ParseInteger();
+
+		r.ParseSymbol(); // "fv"
+		for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
+		{
+			mIndices.push_back(r.ParseInteger());
+		}
+
+		r.ParseSymbol(); // "ft"
+		for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
+		{
+			mTexCoordIndices.push_back(r.ParseInteger());
+		}
+
+		r.ParseSymbol(); // "fn"
+		for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
+		{
+			mNormalsIndices.push_back(r.ParseInteger());
+		}
+
+		return true;
+	}
 
 	byte mFlags;                      /* Options flags */
 
@@ -697,6 +788,32 @@ public:
 	 * Post : <face0> First face encountered along ray, or -1 if DNE.
 	 *        <markAll> If true sets fRayHit flag on all faces hit.
 	 *        Always sets fRayHit flag on face0, clears old results. 
+	 ------------------------------------------------------*/
+
+	bool SerializePool(SystemIO::TextFileWriter &w, const char *name,
+					   Vector<vec_t> &array, mstl::stack<index_t> &stack);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the given pool to diskfile as a chunk
+	 ------------------------------------------------------*/
+
+	bool Serialize(SystemIO::TextFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the mesh to diskfile as a chunk
+	 ------------------------------------------------------*/
+
+	bool SerializePool(SystemIO::TextFileReader &r, const char *name,
+					   Vector<vec_t> &array, mstl::stack<index_t> &stack);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the given pool to diskfile as a chunk
+	 ------------------------------------------------------*/
+
+	bool Serialize(SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the mesh to diskfile as a chunk
 	 ------------------------------------------------------*/
 
 	bool Serialize(SystemIO::FileWriter &w);
