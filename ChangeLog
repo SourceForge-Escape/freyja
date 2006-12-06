@@ -6,6 +6,7 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Text based 'freyja' file format for 'native' testing ( no anim / skel yet )
  - MeshABI update cont ( including file I/O )
  - Bigger UI update than intended  ;)
  - Fix for material blending

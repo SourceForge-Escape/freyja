@@ -509,6 +509,12 @@ extern "C" {
 	 * Post : Returns pointer to Mesh with UID or NULL
 	 ------------------------------------------------------*/
 
+    freyja::Weight *freyjaGetMeshWeightClass(index_t meshUID, index_t weight);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to Weight with UID or NULL
+	 ------------------------------------------------------*/
+
     freyja::Vertex *freyjaGetMeshVertexClass(index_t meshUID, index_t vertex); 
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -535,6 +541,12 @@ extern "C" {
 	 ------------------------------------------------------*/
 
     bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format mesh chunk
+	 ------------------------------------------------------*/
+
+    bool freyjaMeshLoadChunkTextJA(SystemIO::TextFileReader &r);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Serialiser for JA format mesh chunk
