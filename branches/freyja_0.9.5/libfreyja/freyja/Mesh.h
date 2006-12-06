@@ -559,14 +559,12 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
 	void GetSelectedVertices(Vector<index_t> &list);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Return a list of vertices flagged fSelected 
 	 *        ( by index )
 	 ------------------------------------------------------*/
-
 
 	void GetTexCoord(index_t texCoordIndex, vec3_t uvw)
 	{	GetTripleVec(mTexCoordPool, texCoordIndex, uvw);	}
@@ -575,13 +573,11 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
 	uint32 GetTexCoordCount() { return mTexCoordPool.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-
 
 	Vertex *GetVertex(index_t vertexIndex);
 	/*------------------------------------------------------
@@ -589,13 +585,11 @@ public:
 	 * Post : Return vertex if it exists or NULL
 	 ------------------------------------------------------*/
 
-
 	Vector3d GetVertexNormal(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-
 
 	Vector3d GetVertexPosition(index_t idx);
 	/*------------------------------------------------------

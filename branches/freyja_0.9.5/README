@@ -8,6 +8,8 @@
  * Starting new feature listing here to be comprehensive, and this is of
    course incomplete.  Remove this line once it is complete...
 
+ Features ( incomplete )
+ ----------------------------------------------------------------------------
 
  Animation
 
@@ -56,6 +58,15 @@
 	* GLM - ( Jedi Knight II, etc ) Import, can 'guess' bones from glm mesh too
 	* TR  - ( Tombraider 1-4 ) Import, disabled in current build
 	* Others not listed yet
+
+
+ USER NOTES
+ ----------------------------------------------------------------------------
+
+ 1. My vertex morphing animation fails to animate!
+
+	Make sure you have skeletal mesh deformation turned off.  ;)
+
 
 
 

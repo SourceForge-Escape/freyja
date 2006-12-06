@@ -1158,8 +1158,6 @@ bool FreyjaControl::SaveModel(const char *filename)
 	int ret = -1;
 	char ext[32];
 
-
-  
 	if (!filename)
 		return false;
 
@@ -1176,7 +1174,19 @@ bool FreyjaControl::SaveModel(const char *filename)
 		char buffer[4096];
 		snprintf(buffer, 4095, "%s.ja", filename);
 		buffer[4095] = 0;
-		ret = freyjaExportModel(buffer, "ja");
+
+		if (!SystemIO::File::DoesFileExist(filename) ||
+			freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You are about to overwrite a file.",
+										 "Are you sure you want to overwrite the file?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite"))
+		{
+			ret = freyjaExportModel(buffer, "ja");
+		}
+		else
+		{
+			return false;
+		}
 	}
 	else
 	{
@@ -1192,7 +1202,18 @@ bool FreyjaControl::SaveModel(const char *filename)
 			ext[i] = filename[s];
 		}
 
-		ret = freyjaExportModel(filename, ext);
+		if (!SystemIO::File::DoesFileExist(filename) ||
+			freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You are about to overwrite a file.",
+										 "Are you sure you want to overwrite the file?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite"))
+		{
+			ret = freyjaExportModel(filename, ext);
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	if (ret)
@@ -2215,17 +2236,17 @@ bool FreyjaControl::event(int command)
 			}
 			else
 			{
-				if (freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You are about to overwrite a file.",
-										 "Are you sure you want to overwrite the file?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite"))
 				{
 					const char *s = mCurrentlyOpenFilename.GetCString();
 					
 					if (SaveModel(s))
+					{
 						freyja_print("Model '%s' Saved", s);
+					}
 					else
+					{
 						freyja_print("Model '%s' failed to save", s);
+					}
 				}
 			}
 			break;
@@ -2293,10 +2314,6 @@ bool FreyjaControl::event(int command)
 		}
 		else
 		{
-			if (freyja_create_confirm_dialog("gtk-dialog-question",
-											 "You are about to save a file in the EXPERIMENTAL dev build of Freyja.",
-											 "Are you sure you want to save the file instead of making a copy?",
-											 "gtk-cancel", "_Cancel", "gtk-ok", "_Save"))
 			{
 				const char *s = mCurrentlyOpenFilename.GetCString();
 				if (SaveModel(s))
@@ -2873,7 +2890,7 @@ bool FreyjaControl::event(int command)
 	/* ANIMATIONS */
 	case eAnimationNext:
 		SetSelectedAnimation(GetSelectedAnimation() + 1);
-		freyja_print("Animation[%i].", GetSelectedAnimation());
+		freyja_print("Animation Track[%i].", GetSelectedAnimation());
 		break;
 
 	case eAnimationPrev:
@@ -2882,7 +2899,7 @@ bool FreyjaControl::event(int command)
 		else
 			SetSelectedAnimation(0);
 
-		freyja_print("Animation[%i].", GetSelectedAnimation());
+		freyja_print("Animation Track[%i].", GetSelectedAnimation());
 		break;
 
 	case eSetKeyFrame:
@@ -4410,11 +4427,16 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			{
 				freyja_print("Mesh[%i] selected by pick ray.", selected);
 				SetSelectedMesh(selected);
+
+				Mesh *m = freyjaGetMeshClass(selected);
+
+				if (m)
+				{
 #if 0
-				Mesh *m = freyjaModelGetMeshClass(0, selected);
-				m->SetFlags(selected, Mesh::fSelected);
-				mCursor.mPos = m->GetPosition();
+					m->SetFlags(selected, Mesh::fSelected);
 #endif
+					mCursor.mPos = m->GetPosition(); // why was this disabled?
+				}
 			}
 		}
 		break;
@@ -5828,7 +5850,15 @@ void eOpenModel(char *filename)
 
 void eSaveModel(char *filename)
 {
-	FreyjaControl::mInstance->SaveModel(filename);
+	//MSTL_ASSERTMSG(false, "Breakpoint");
+
+	if (FreyjaControl::mInstance->SaveModel(filename))
+	{
+		char title[1024];
+		snprintf(title, 1024, "%s - Freyja", filename);
+		freyja_set_main_window_title(title);
+		FreyjaControl::mInstance->AddRecentFilename(filename);
+	}
 }
 
 
