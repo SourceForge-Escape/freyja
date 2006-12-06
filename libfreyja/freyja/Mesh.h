@@ -346,7 +346,7 @@ public:
 
 	bool Serialize(SystemIO::TextFileWriter &w) 
 	{ 
-		w.Print("\t\tface %u %u %u %u %u\n", 
+		w.Print("\t\tface %u %u %u %u\n", 
 				mFlags, mSmoothingGroup, mColor, mMaterial);
 
 		uint32 i;

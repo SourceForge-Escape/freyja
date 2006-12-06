@@ -122,6 +122,12 @@ class FreyjaMaterial
 	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 
+	virtual bool Serialize(SystemIO::TextFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the to diskfile as a chunk
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -131,6 +137,12 @@ class FreyjaMaterial
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Unsets passed flag
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes from diskfile
 	 ------------------------------------------------------*/
 
 	virtual bool serialize(SystemIO::FileReader &r);

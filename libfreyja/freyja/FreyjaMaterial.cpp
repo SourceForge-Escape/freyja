@@ -79,7 +79,6 @@ FreyjaMaterial::~FreyjaMaterial()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-
 const char *FreyjaMaterial::getTextureName()
 {
 	return mTextureName;
@@ -100,6 +99,45 @@ uint32 FreyjaMaterial::getSerializeSize()
 			4 +	length +
 			4 + 
 			16 + 16 + 16 + 16);
+}
+
+
+bool FreyjaMaterial::Serialize(SystemIO::TextFileWriter &w)
+{
+	uint32 length = 0;
+
+	w.Print("Material\n");
+	w.Print("\tmVersion %u\n", mVersion);
+	w.Print("\tmName \"%s\"\n", mName);
+	w.Print("\tmFlags %u\n", mFlags);
+	w.Print("\tmBlendDest %u\n", mBlendSrc);
+	w.Print("\tmBlendDest %u\n", mBlendDest);
+	w.Print("\tmTextureName \"%s\"\n", mTextureName ? mTextureName ? "");
+
+	w.Print("\tmShininess %f\n", mShininess);
+
+	w.Print("\tmAmbient %f %f %f %f\n", 
+			mAmbient[0], mAmbient[1], mAmbient[2], mAmbient[3]);
+
+	w.Print("\tmDiffuse %f %f %f %f\n", );
+	w.WriteFloat32(mDiffuse[0]);
+	w.WriteFloat32(mDiffuse[1]);
+	w.WriteFloat32(mDiffuse[2]);
+	w.WriteFloat32(mDiffuse[3]);
+
+	w.Print("\tmSpecular %f %f %f %f\n", );
+	w.WriteFloat32(mSpecular[0]);
+	w.WriteFloat32(mSpecular[1]);
+	w.WriteFloat32(mSpecular[2]);
+	w.WriteFloat32(mSpecular[3]);
+
+	w.Print("\tmEmissive %f %f %f %f\n", );
+	w.WriteFloat32(mEmissive[0]);
+	w.WriteFloat32(mEmissive[1]);
+	w.WriteFloat32(mEmissive[2]);
+	w.WriteFloat32(mEmissive[3]);
+
+	return true;
 }
 
 
@@ -155,6 +193,12 @@ bool FreyjaMaterial::serialize(SystemIO::FileWriter &w)
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+bool FreyjaMaterial::Serialize(SystemIO::TextFileReader &r)
+{
+	return false;
+}
+
 
 bool FreyjaMaterial::serialize(SystemIO::FileReader &r)
 {

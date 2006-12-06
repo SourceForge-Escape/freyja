@@ -13,6 +13,9 @@
  Known bugs
  -----------------------------------------------------------------------------
 
+ * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
+	after a 'jump'
+
  * Multi-mesh ja export is broken!
 
  * Issue with overwrite in file dialog

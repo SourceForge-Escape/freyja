@@ -183,11 +183,13 @@ bool Mesh::SerializePool(SystemIO::TextFileWriter &w, const char *name,
 bool Mesh::SerializePool(SystemIO::TextFileReader &r, const char *name,
 						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
 {
+	freyjaPrintMessage("Loading %s pool...\n", name);
+
 	{
 		r.ParseSymbol(); // name + "Stack"
 		int32 count = r.ParseInteger();
 
-		while (count >= 0)
+		while (count > 0)
 		{
 			stack.push(r.ParseInteger());
 			--count;
@@ -197,7 +199,7 @@ bool Mesh::SerializePool(SystemIO::TextFileReader &r, const char *name,
 	r.ParseSymbol(); // name + "Array"
 	int32 count = r.ParseInteger();
 
-	while (count >= 0)
+	while (count > 0)
 	{
 		array.push_back(r.ParseFloat());
 		--count;
@@ -316,10 +318,11 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 	SerializePool(r, "texcoord", mTexCoordPool, mFreedTexCoords);
 	SerializePool(r, "normal", mNormalPool, mFreedNormals);
 
+	freyjaPrintMessage("Loading weights...\n");
 	r.ParseSymbol(); // Weight
 	{
 		int32 count = r.ParseInteger();
-		while (count >= 0)
+		while (count > 0)
 		{
 			Weight *w = new Weight();
 			w->Serialize(r);
@@ -328,10 +331,11 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 		}
 	}
 
+	freyjaPrintMessage("Loading vertices...\n");
 	r.ParseSymbol(); // Vertex
 	{
 		int32 count = r.ParseInteger();
-		while (count >= 0)
+		while (count > 0)
 		{
 			Vertex *v = new Vertex();
 			v->Serialize(r);
@@ -340,10 +344,11 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 		}
 	}
 
+	freyjaPrintMessage("Loading faces...\n");
 	r.ParseSymbol(); // Face
 	{
 		int32 count = r.ParseInteger();
-		while (count >= 0)
+		while (count > 0)
 		{
 			Face *f = new Face();
 			f->Serialize(r);
