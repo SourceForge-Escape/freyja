@@ -793,10 +793,12 @@ private:
 
 	// Collection of some hasty merging  ///////////////////////////
 
+	// FIXME: This currently won't dump keyframe as you'd expect in the new API
 	bool SaveKeyFrame(char const *filename)
 	{
 		char filename2[512];
-		snprintf(filename2, 512, "%s-keyframe.smd", filename);
+		snprintf(filename2, 512, "%s-keyframe-%i.smd", filename, 
+				 GetSelectedKeyFrame());
 		return SaveModel(filename2);
 	}
 

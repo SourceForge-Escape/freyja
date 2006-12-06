@@ -6,6 +6,8 @@
 
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - MeshABI update cont ( including file I/O )
+ - Bigger UI update than intended  ;)
  - Fix for material blending
  - Several plugins fixed after ABI change: mdl, 3ds, mel, etc
  - Run around and made sure plugins at least built with ABI changes

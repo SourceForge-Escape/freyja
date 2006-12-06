@@ -26,6 +26,10 @@ if [ ${ARG1} = "gdb" ]
 then
 	cd ../bin && gdb ${BIN}
 	exit 0
+elif [ ${ARG1} = "ddd" ]
+then
+	cd ../bin && ddd ${BIN}
+	exit 0
 elif [ ${ARG1} = "alleyoop" ]
 then
 	cd ../bin && alleyoop ${BIN}

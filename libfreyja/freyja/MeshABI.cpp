@@ -47,6 +47,551 @@ Mesh *freyjaGetMeshClass(index_t meshUID)
 }
 
 
+Vertex *freyjaGetMeshVertexClass(index_t meshUID, index_t vertex)
+{
+	Mesh *m = freyjaGetMeshClass(meshUID);
+	return m ? m->GetVertex(vertex) : NULL;
+}
+
+
+Face *freyjaGetMeshFaceClass(index_t meshUID, index_t face)
+{
+	Mesh *m = freyjaGetMeshClass(meshUID);
+	return m ? m->GetFace(face) : NULL;
+}
+
+
+bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh);
+/* This is to fix all the problems with the backend delete corruption
+ * It filters and realigns indices to only save valid data, not
+ * the entire junky backend cruft like undo data which remains
+ *
+ * Vector maps are very memory wasteful */  // use a materialMap
+int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
+{
+	const int32 version = 1;
+	Vector<long> polygons, vertices, texcoords;
+	Vector<long> verticesMap, texcoordsMap;
+	freyja_file_chunk_t chunk;
+	vec3_t xyz;
+	vec2_t uv;
+	int32 flags, material;
+	int32 i, j, k, idx, count, vertex, texcoord;
+	int32 polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+	int32 byteSize = 0;
+	int32 meshFlags = freyjaGetMeshFlags(meshIndex);
+	int32 vertexCount = 0;
+	int32 vertexWeightCount = 0;
+	int32 vertexFrameCount = 0;
+	int32 texCoordCount = 0;
+
+	if (polygonCount < 1)
+		return -1;
+
+	byteSize += 4; // meshFlags
+	byteSize += 4; // vertexCount
+	byteSize += 4; // vertexWeightCount
+	byteSize += 4; // vertexFrameCount
+	byteSize += 4; // texCoordCount
+	byteSize += 4; // polygonCount
+	byteSize += 4; // vertexGroupCount
+
+	/* Polygons, filtered by mesh */
+	for (i = 0, count = 0; i < polygonCount; ++i)
+	{
+		count = freyjaGetMeshPolygonEdgeCount(meshIndex, i);
+
+		/* Weed out deformed or 'sparse' (NULL) polygons */
+		if (count < 3) 
+		{
+			continue;
+		}
+
+		polygons.pushBack(i);
+	}
+
+	polygonCount = polygons.end();
+
+
+	/* Vertices and polymapped TexCoords, filtered by filtered polygons */
+	count = freyjaGetMeshVertexCount(meshIndex);
+	verticesMap.reserve(count+1);
+	for (i = 0; i < count; ++i)
+		verticesMap.pushBack(0);
+
+	count = freyjaGetMeshTexCoordCount(meshIndex);
+	texcoordsMap.reserve(count+1);
+	for (i = 0; i < count; ++i)
+		texcoordsMap.pushBack(0);
+
+	for (i = polygons.begin(); i < (long)polygons.end(); ++i)
+	{
+		idx = polygons[i];
+		count = freyjaGetMeshPolygonVertexCount(meshIndex, idx);
+
+		byteSize += 4 + 4 + 4 + 4; // flags vertCount texCount material
+		byteSize += (freyjaGetMeshPolygonVertexCount(meshIndex, idx) * 4 +
+					 freyjaGetMeshPolygonTexCoordCount(meshIndex, idx) * 4);
+
+		for (j = 0; j < count; ++j)
+		{
+			vertex = freyjaGetMeshPolygonVertexIndex(meshIndex, idx, j);
+
+			for (k = vertices.begin(); k < (long)vertices.end(); ++k)
+			{
+				if (vertex == vertices[k])
+				{
+					vertex = -2;
+					break;
+				}
+			}
+
+			if (vertex > -2)
+			{
+				verticesMap.assign(vertex, vertexCount);
+				++vertexCount;
+				vertices.pushBack(vertex);
+				byteSize += (4 + 12 + 12 + 8); // flags xyz nxyz uv
+
+				uint32 wcount = 0;
+				Mesh *m = freyjaGetMeshClass(meshIndex);
+
+				if (m)
+				{
+					for (uint32 k = 0, n = m->GetWeightCount(); k < n; ++k)
+					{
+						Weight *w = m->GetWeight(k);
+						
+						if (w)
+						{
+							if ((int)w->mVertexIndex == vertex)
+							{
+								++wcount;
+							}
+						}
+					}
+				}
+
+				vertexWeightCount += wcount;
+				byteSize += 12 * wcount; // vidx weight bone
+				uint32 vertexframeCount = 0;//freyjaGetVertexFrameCount(vertex);
+				vertexFrameCount += vertexframeCount;
+				byteSize += 20 * vertexframeCount; // vidx frame xyz
+			}
+		}
+
+		count = freyjaGetMeshPolygonTexCoordCount(meshIndex, idx);
+
+		for (j = 0; j < count; ++j)
+		{
+			texcoord = freyjaGetMeshPolygonTexCoordIndex(meshIndex, idx, j);
+
+			for (k = texcoords.begin(); k < (long)texcoords.end(); ++k)
+			{
+				if (texcoord == texcoords[k])
+				{
+					texcoord = -2;
+					break;
+				}
+			}
+
+			if (texcoord > -2)
+			{
+				texcoordsMap.assign(texcoord, texCoordCount);
+				++texCoordCount;
+				texcoords.pushBack(texcoord);
+				byteSize += 8; // uv
+			}
+		}
+	}
+
+
+	/* VertexGroups */
+	// Where never written to disk anyway, so removed code
+
+
+	// If chunk.flags & 0x1 ( 0.9.5+ ) we write out extra things
+	// appended to the end of mesh chunk ( 0.9.3 readers will just skip it )
+	Mesh *m = freyjaGetMeshClass(meshIndex);
+	if (m)
+	{
+		// Note we're starting a versioned subblock, use the C++ serialize ver
+		byteSize += 4;
+		int32 count = m->GetFaceCount();
+		byteSize += 4;
+		for (i = 0; i < count; ++i)
+		{
+			byteSize += 4;
+		}
+	}
+
+
+	/* Write to diskfile */
+	chunk.type = FREYJA_CHUNK_MESH;
+	chunk.size = byteSize;
+	chunk.flags = 0x1;      // 0x0 means 0.9.3 version!
+	chunk.version = version;
+
+	w.WriteLong(chunk.type);
+	w.WriteLong(chunk.size);
+	w.WriteLong(chunk.flags);
+	w.WriteLong(chunk.version);
+
+	w.WriteLong(meshFlags);
+	w.WriteLong(vertexCount);
+	w.WriteLong(vertexWeightCount);
+	w.WriteLong(vertexFrameCount);
+	w.WriteLong(texCoordCount);
+	w.WriteLong(polygonCount);
+	w.WriteLong(0); // vertexGroupCount, Never used in older format anyway
+
+	/* Vertices */
+	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
+	{
+		vertex = vertices[i];
+
+		flags = freyjaGetMeshVertexFlags(meshFlags, vertex);
+		w.WriteLong(flags);
+
+		freyjaGetMeshVertexPos3fv(meshFlags, vertex, xyz);
+		for (j = 0; j < 3; ++j)
+			w.WriteFloat32(xyz[j]);
+
+		freyjaGetMeshVertexNormal3fv(meshFlags, vertex, xyz);
+
+		for (j = 0; j < 3; ++j)
+			w.WriteFloat32(xyz[j]);
+
+		freyjaGetMeshVertexTexCoord3fv(meshFlags, vertex, xyz);
+		for (j = 0; j < 2; ++j) // U V only in JA v1  =p
+			w.WriteFloat32(xyz[j]);
+	}
+
+	/* VertexWeights */
+	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
+	{
+		vertex = vertices[i];
+		//count = freyjaGetVertexWeightCount(vertex);
+		count = 0;
+		m = freyjaGetMeshClass(meshIndex);
+		Vector<index_t> lst;
+
+		if (m)
+		{
+			for (uint32 k = 0, n = m->GetWeightCount(); k < n; ++k)
+			{
+				Weight *w = m->GetWeight(k);
+				
+				if (w)
+				{
+					if ((int)w->mVertexIndex == vertex)
+					{
+						lst.push_back(k);
+						++count;
+					}
+				}
+			}
+		}
+
+		vec_t weight;
+		index_t bone, vert;
+		for (j = 0; j < count; ++j)
+		{
+			freyjaGetMeshWeight(meshIndex, lst[j], vert, bone, weight);
+			//freyjaGetVertexWeight(vertex, j, &bone, &weight);
+			w.WriteLong(vert);
+			w.WriteLong(bone);
+			w.WriteFloat32(weight);
+		}
+	}
+
+
+	/* VertexFrames */
+#if 0
+	for (i = vertices.begin(); i < (long)vertices.end(); ++i)
+	{
+		vertex = vertices[i];
+		count = freyjaGetVertexFrameCount(vertex);
+
+		for (j = 0; j < count; ++j)
+		{
+			freyjaGetVertexFrame(vertex, j, &frame, xyz);
+			w.WriteLong(verticesMap[vertex]);
+			w.WriteLong(frame);
+			for (k = 0; k < 3; ++k)
+				w.WriteFloat32(xyz[k]);
+		}
+	}
+#endif
+
+
+	/* TexCoords */
+	for (i = texcoords.begin(); i < (long)texcoords.end(); ++i)
+	{
+		texcoord = texcoords[i];
+
+		freyjaGetMeshTexCoord2fv(meshIndex, texcoord, uv);
+
+		for (j = 0; j < 2; ++j)
+			w.WriteFloat32(uv[j]);
+	}
+
+
+	/* Polygons */
+	for (i = polygons.begin(); i < (long)polygons.end(); ++i)
+	{
+		idx = polygons[i];
+
+		flags = freyjaGetMeshPolygonFlags(meshIndex, idx);
+		w.WriteLong(flags);
+
+		material= freyjaGetMeshPolygonMaterial(meshIndex, idx);
+		w.WriteLong(material);
+
+		count = freyjaGetMeshPolygonVertexCount(meshIndex, idx);
+		w.WriteLong(count);
+
+		for (j = 0; j < count; ++j)
+		{
+			vertex = freyjaGetMeshPolygonVertexIndex(meshIndex, idx, j);
+			w.WriteLong(verticesMap[vertex]);
+		}
+
+		count = freyjaGetMeshPolygonTexCoordCount(meshIndex, idx);
+		w.WriteLong(count);
+
+		for (j = 0; j < count; ++j)
+		{
+			texcoord = freyjaGetMeshPolygonTexCoordIndex(meshIndex, idx, j);
+			w.WriteLong(texcoordsMap[texcoord]);
+		}
+	}
+
+	// If chunk.flags & 0x1 ( 0.9.5+ ) we write out extra things
+	// appended to the end of mesh chunk ( 0.9.3 will just skip it )
+	m = freyjaGetMeshClass(meshIndex);
+	if (m)
+	{
+		// Note we're starting a versioned subblock, use the C++ serialize ver
+		w.WriteLong(Face::GetChunkVersion());
+		int32 count = m->GetFaceCount();
+		w.WriteLong(count);
+		for (i = 0; i < count; ++i)
+		{
+			Face *f = m->GetFace(i);
+
+			if (f)
+			{
+				w.WriteInt8U(f->mSmoothingGroup);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+			}
+			else
+			{
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+				w.WriteInt8U(0);
+			}
+		}
+	}
+
+	String s;
+	s.Set("/tmp/test%i.yja", meshIndex);
+	SystemIO::TextFileWriter wt;
+	wt.Open(s.c_str());
+	freyjaMeshSaveChunkTextJA(wt, meshIndex);
+
+	return 0;
+}
+
+
+bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh)
+{
+	freyjaPrintMessage("> Writing out mesh %i...", mesh);
+
+	w.Print("start mesh version 1\n");
+
+	w.Print("\tflags 0x%x\n", freyjaGetMeshFlags(mesh));
+
+	w.Print("\tvertexArrayCount %u\n", freyjaGetMeshVertexCount(mesh));
+
+	for (uint32 i = 0, n = freyjaGetMeshVertexCount(mesh); i < n; ++i)
+	{
+		vec3_t v;
+		freyjaGetMeshVertexPos3fv(mesh, i, v);
+		w.Print("\t\t%f %f %f\n", v[0], v[1], v[2]);
+	}
+
+	w.Print("\tnormalArrayCount %u\n", freyjaGetMeshVertexCount(mesh));
+
+	for (uint32 i = 0, n = freyjaGetMeshVertexCount(mesh); i < n; ++i)
+	{
+		vec3_t v;
+		freyjaGetMeshVertexNormal3fv(mesh, i, v);
+		w.Print("\t\t%f %f %f\n", v[0], v[1], v[2]);
+	}
+
+	w.Print("\ttexcoordArrayCount %u\n", freyjaGetMeshTexCoordCount(mesh));
+
+	w.Print("\tvertexCount %u\n", freyjaGetMeshVertexCount(mesh));
+
+	w.Print("\tfaceCount %u\n", freyjaGetMeshPolygonCount(mesh));
+
+	w.Print("\tweightCount %u\n", freyjaGetMeshWeightCount(mesh));
+
+	return true;
+}
+
+
+int32 freyjaMeshLoadChunkJA(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
+{
+	Vector<long> verticesMap, texcoordsMap;
+	vec3_t xyz;
+	vec2_t uv;
+	vec_t weight;
+	int32 bone, frame, material;
+	int32 i, j, count, idx, flags;
+	int32 polygonCount;
+	int32 vertexGroupCount;
+	int32 meshFlags;
+	int32 vertexCount;
+	int32 vertexWeightCount;
+	int32 vertexFrameCount;
+	int32 texCoordCount;
+
+
+	/* Read from diskfile */
+	meshFlags = r.ReadLong();
+	vertexCount = r.ReadLong();
+	vertexWeightCount = r.ReadLong();
+	vertexFrameCount = r.ReadLong();
+	texCoordCount = r.ReadLong();
+	polygonCount = r.ReadLong();
+	vertexGroupCount = r.ReadLong();
+
+	index_t mesh = freyjaMeshCreate();
+	//freyjaBegin(FREYJA_MESH);
+	//freyjaBegin(FREYJA_VERTEX_GROUP);
+	
+	/* Vertices */
+	for (i = 0; i < vertexCount; ++i)
+	{
+		flags = r.ReadLong();
+
+		for (j = 0; j < 3; ++j)
+			xyz[j] = r.ReadFloat32();
+
+		idx = freyjaMeshVertexCreate3fv(mesh, xyz);
+
+		for (j = 0; j < 3; ++j)
+			xyz[j] = r.ReadFloat32();
+
+		freyjaMeshVertexNormal3fv(mesh, idx, xyz);
+
+		for (j = 0; j < 2; ++j)
+			xyz[j] = r.ReadFloat32();
+		xyz[2] = 0.0f;
+
+		freyjaMeshVertexTexCoord3fv(mesh, idx, xyz);
+
+		verticesMap.pushBack(idx);
+	}
+
+	//freyjaEnd(); // FREYJA_VERTEX_GROUP
+
+	/* VertexWeights */
+	for (i = 0; i < vertexWeightCount; ++i)
+	{
+		idx = r.ReadLong();
+		bone = r.ReadLong();
+		weight = r.ReadFloat32();
+		
+		freyjaMeshVertexWeight(mesh, verticesMap[idx], bone, weight);
+	}
+
+	/* VertexFrames */
+	for (i = 0; i < vertexFrameCount; ++i)
+	{
+		idx = r.ReadLong();
+		frame = r.ReadLong(); // Reserved use
+		for (j = 0; j < 3; ++j)
+			xyz[j] = r.ReadFloat32();
+		
+		//freyjaVertexFrame3f(verticesMap[idx], xyz[0], xyz[1], xyz[2]);
+	}
+
+	/* TexCoords */
+	for (i = 0; i < texCoordCount; ++i)
+	{
+		for (j = 0; j < 2; ++j)
+			uv[j] = r.ReadFloat32();
+
+		idx = freyjaMeshTexCoordCreate2fv(mesh, uv);
+		texcoordsMap.pushBack(idx);
+	}
+
+	/* Polygons */
+	for (i = 0; i < polygonCount; ++i)
+	{
+		//freyjaBegin(FREYJA_POLYGON);
+		index_t face = freyjaMeshPolygonCreate(mesh);
+
+		flags = r.ReadLong();
+		freyjaMeshPolygonSetFlag1u(mesh, face, flags);
+
+		material = r.ReadLong();
+		//freyjaPolygonMaterial1i(material);
+		freyjaMeshPolygonMaterial(mesh, face, material);
+
+		count = r.ReadLong();
+
+		for (j = 0; j < count; ++j)
+		{
+			idx = r.ReadLong();
+			//freyjaPolygonVertex1i(verticesMap[idx]);
+			freyjaMeshPolygonAddVertex1i(mesh, face, verticesMap[idx]);
+		}
+
+		count = r.ReadLong();
+
+		for (j = 0; j < count; ++j)
+		{
+			idx = r.ReadLong();
+			//freyjaPolygonTexCoord1i(texcoordsMap[idx]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoordsMap[idx]);
+		}
+
+		//freyjaEnd(); // FREYJA_POLYGON
+	}
+
+	//freyjaEnd(); // FREYJA_MESH
+
+	// If chunk.flags & 0x1 ( 0.9.5+ ) we write out extra things
+	// appended to the end of mesh chunk ( 0.9.3 will just skip it )
+	if (chunk.flags & 0x1)
+	{
+		// Note we're starting a versioned subblock, use the C++ serialize ver
+		//uint32 faceChunkVersion = 
+		r.ReadLong();
+
+		for (i = 0, count = r.ReadLong(); i < count; ++i)
+		{
+			byte flags = r.ReadInt8U();
+			freyjaMeshPolygonGroup1u(mesh, i, flags);
+
+			r.ReadInt8U();
+			r.ReadInt8U();
+			r.ReadInt8U();
+		}
+	}
+
+	return 0;
+}
+
+
+
 ////////////////////////////////////////////////////////////////////////
 // 0.9.5 ABI
 ////////////////////////////////////////////////////////////////////////
@@ -123,6 +668,24 @@ void freyjaMeshPolygonDelete(index_t meshIndex, index_t polygonIndex)
 	{
 		mesh->DeleteFace(polygonIndex);
 	}
+}
+
+
+byte freyjaGetMeshPolygonFlags(index_t mesh, index_t polygon)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mFlags;
+		}
+	}
+
+	return 0;	
 }
 
 
@@ -369,6 +932,121 @@ void freyjaMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz)
 }
 
 
+void freyjaMeshVertexNormal3fv(index_t mesh, index_t vertex, vec3_t xyz)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			m->SetNormal(v->mNormalIndex, xyz);
+		}
+	}
+}
+
+
+void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t vertex, vec3_t xyz)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			m->SetTexCoord(v->mTexCoordIndex, xyz);
+		}
+	}
+}
+
+
+index_t freyjaGetMeshVertexTexCoord(index_t mesh, index_t vertex)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			return v->mTexCoordIndex;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+byte freyjaGetMeshVertexFlags(index_t mesh, index_t vertex)
+{
+	Vertex *v = freyjaGetMeshVertexClass(mesh, vertex);
+
+	return v ? v->mFlags : 0x0;
+}
+
+
+void freyjaGetMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		m->GetVertexPos(vertex, xyz);
+	}
+}
+
+
+void freyjaGetMeshVertexNormal3fv(index_t mesh, index_t vertex, vec3_t xyz)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if ( m != NULL )
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			m->GetNormal(v->mNormalIndex, xyz);
+		}
+	}
+}
+
+
+void freyjaGetMeshVertexTexCoord3fv(index_t mesh, index_t vertex, vec3_t xyz)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if ( m != NULL )
+	{
+		Vertex *v = m->GetVertex(vertex);
+
+		if (v)
+		{
+			m->GetTexCoord(v->mTexCoordIndex, xyz);
+		}
+	}
+}
+
+
+index_t freyjaMeshTexCoordCreate2fv(index_t mesh, vec2_t uv)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		vec3_t uvw = {uv[0], uv[1], 0.0f };
+		return m->CreateTexCoord(uvw);
+	}
+
+	return INDEX_INVALID;
+}
+
+
 index_t freyjaMeshTexCoordCreate2f(index_t meshIndex, vec_t u, vec_t v)
 {
 	Mesh *mesh = freyjaGetMeshClass(meshIndex);
@@ -391,6 +1069,19 @@ index_t freyjaMeshTexCoordCreate3f(index_t meshIndex, vec_t u, vec_t v, vec_t w)
 	{
 		vec3_t uvw = {u, v, w };
 		return mesh->CreateTexCoord(uvw);
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshTexCoordCreate3fv(index_t mesh, vec3_t uvw)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		return m->CreateTexCoord(uvw);
 	}
 
 	return INDEX_INVALID;
@@ -765,16 +1456,10 @@ uint32 freyjaGetMeshVertexCount(index_t meshIndex)
 }
 
 
-uint32 freyjaGetMeshTexCoordCount(index_t meshIndex)
+uint32 freyjaGetMeshTexCoordCount(index_t mesh)
 {
-	Mesh *mesh = freyjaGetMeshClass(meshIndex );
-
-	if (mesh)
-	{
-		return mesh->GetTexCoordCount();
-	}
-
-	return 0;
+	Mesh *m = freyjaGetMeshClass(mesh);
+	return m ? m->GetTexCoordCount() : 0;
 }
 
 
@@ -909,32 +1594,21 @@ void freyjaMeshNormalFlip(index_t meshIndex)
 }
 
 
-void freyjaGetMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz)
+uint32 freyjaGetMeshPolygonEdgeCount(index_t mesh, index_t polygon)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if (m)
 	{
-		m->GetVertexPos(vertex, xyz);
-	}
-}
-
-
-index_t freyjaGetMeshVertexTexCoord(index_t mesh, index_t vertex)
-{
-	Mesh *m = freyjaGetMeshClass(mesh);
-
-	if (m)
-	{
-		Vertex *v = m->GetVertex(vertex);
-
-		if (v)
+		Face *f = m->GetFace(polygon);
+	
+		if (f)
 		{
-			return v->mTexCoordIndex;
+			return f->mIndices.size();
 		}
 	}
 
-	return INDEX_INVALID;
+	return 0;
 }
 
 
@@ -1169,7 +1843,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			world.rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1
 			// If this was a 'normal' data stream.. this would work 
-			Matrix combined = world * b->GetInverseBindPose();
+			Matrix combined = b->GetInverseBindPose() * world;
 			p = (combined * p) * w->mWeight;
 #elif 1
 			Matrix world;

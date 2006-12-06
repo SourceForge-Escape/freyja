@@ -21,11 +21,15 @@
 		- Make sure vertex facerefs are always synced or make hup sig
 		- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
 		- Make generic plugin interface for control points
+		- Renable 'direct' vertex animation creation
+		  ( Letting the user move points in vertex mode )
+		- Ref weights from vertex to fix blending issues
 
 
 	* Cursor system
+		- Consistency across cursor usage
 		- Orbital / Camera view need special orientation constraints
-		- Heirarchical systems like skeletons need fixes for world cursor 
+		- Hierarchical systems like skeletons need fixes for world cursor 
 		- Object modifiers should update cursor loc/rot/size only
 			- On object select update cursor values
 			- On modifier mode update cursor values via a 'bump' select (reuse)
@@ -35,7 +39,7 @@
 		- Ray/Vector based orbital view cursor guides ( 'go where I want' )
 		- Rotation cursor needs final, real implementation added now
 			- Circle around projected center or do something equally clever
-			  for more tacticle control
+			  for more tactical control
 
 	* Modeling
 		- Edge picking

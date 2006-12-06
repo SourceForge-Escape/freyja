@@ -1591,11 +1591,11 @@ void freyja_refresh_material_interface()
 
 	if (flags & fFreyjaMaterial_Blending)
 	{
-		mgtk_togglebutton_value_set(790, true);
+		mgtk_togglebutton_value_set(eOpenGLBlend, true);
 	}
 	else
 	{
-		mgtk_togglebutton_value_set(790, false);
+		mgtk_togglebutton_value_set(eOpenGLBlend, false);
 	}
 
 	mgtk_togglebutton_value_set(eMaterialTex, false);

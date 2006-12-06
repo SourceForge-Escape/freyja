@@ -13,6 +13,10 @@
  Known bugs
  -----------------------------------------------------------------------------
 
+ * Multi-mesh ja export is broken!
+
+ * Issue with overwrite in file dialog
+
  * Bone rotation
 	- Needs to be 'synced' to heirachry to make sense
 	- Doesn't work at all really with backend changes

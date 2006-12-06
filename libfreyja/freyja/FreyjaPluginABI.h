@@ -271,8 +271,6 @@ extern "C" {
 	//
 	////////////////////////////////////////////////////////////////
 
-	//USING FSM FIXME index_t freyjaVertexCreate3fv(vec3_t xyz);
-
 	index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB);
 
 	void freyjaVertexDelete(index_t vertexIndex);
@@ -323,13 +321,6 @@ extern "C" {
 	vec3_t *freyjaGetVertexXYZ(index_t vertexIndex);
 
 	vec2_t *freyjaGetVertexUV(index_t vertexIndex);
-
-
-
-	////////////////////////////////////////////////////////////////
-	// Mesh
-	//
-	////////////////////////////////////////////////////////////////
 
 
 

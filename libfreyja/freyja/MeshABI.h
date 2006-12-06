@@ -92,7 +92,25 @@ extern "C" {
 	 * Post : Sets vertex position.  
 	 ------------------------------------------------------*/
 
+	void freyjaMeshVertexNormal3fv(index_t mesh, index_t vertex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Vertex based normal setting.
+	 ------------------------------------------------------*/
+
+	index_t freyjaMeshTexCoordCreate2fv(index_t mesh, vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns mesh local index of texcoord created
+	 ------------------------------------------------------*/
+
 	index_t freyjaMeshTexCoordCreate2f(index_t mesh, vec_t u, vec_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns mesh local index of texcoord created
+	 ------------------------------------------------------*/
+
+	index_t freyjaMeshTexCoordCreate3fv(index_t mesh, vec3_t uvw);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns mesh local index of texcoord created
@@ -109,6 +127,13 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets <mesh> local index of <texcoord>'s value.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t texcoord, 
+									 vec3_t uvw);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Vertex based texcoord setting.
 	 ------------------------------------------------------*/
 
 	void freyjaMeshClampTexCoords(index_t mesh);
@@ -323,16 +348,41 @@ extern "C" {
 	 * Post : Returns <mesh> human readable inside buffer <name>.
 	 ------------------------------------------------------*/
 
+	byte freyjaGetMeshVertexFlags(index_t mesh, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> flags.
+	 ------------------------------------------------------*/
+
 	void freyjaGetMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns <mesh> <vertex> pos.
 	 ------------------------------------------------------*/
 
+	void freyjaGetMeshVertexNormal3fv(index_t mesh, index_t vertex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> normal.
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshVertexTexCoord3fv(index_t mesh, index_t vertex,
+										vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> texcoord.
+	 ------------------------------------------------------*/
+
 	index_t freyjaGetMeshVertexTexCoord(index_t mesh, index_t vertex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns <mesh> <vertex> texcoord index.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshVertexPolygonRefCount(index_t mesh, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> face reference count.
 	 ------------------------------------------------------*/
 
 	index_t freyjaGetMeshVertexPolygonRefIndex(index_t mesh,
@@ -342,16 +392,22 @@ extern "C" {
 	 * Post : Returns <mesh> <vertex> face reference index for <element>.
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMeshVertexPolygonRefCount(index_t mesh, index_t vertex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns <mesh> <vertex> face reference count.
-	 ------------------------------------------------------*/
-
 	void freyjaGetMeshTexCoord2fv(index_t mesh, index_t texcoord, vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets <mesh> local index of <texcoord>'s value.
+	 ------------------------------------------------------*/
+
+	byte freyjaGetMeshPolygonFlags(index_t mesh, index_t polygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <polygon> flags.
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetMeshPolygonEdgeCount(index_t mesh, index_t polygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns vertex count for <polygon>.
 	 ------------------------------------------------------*/
 
 	uint32 freyjaGetMeshPolygonVertexCount(index_t mesh, index_t polygon);
@@ -398,6 +454,12 @@ extern "C" {
 	 * Post : Returns vertex count for <mesh>.
 	 ------------------------------------------------------*/
 
+	uint32 freyjaGetMeshTexCoordCount(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns texcoord count for <mesh>.
+	 ------------------------------------------------------*/
+
 	uint32 freyjaGetMeshPolygonCount(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -423,13 +485,60 @@ extern "C" {
 	 * Post : Gets number of vertex:bone weights in mesh
 	 ------------------------------------------------------*/
 
+	index_t freyjaGetMeshVertexTrackCount(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets number of tracks in <mesh>
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshVertexKeyFrameCount(index_t mesh, index_t track);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets number of keyframes in <track> of <mesh>
+	 ------------------------------------------------------*/
 }
 
 
 #   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
+#      include <mstl/SystemIO.h>
 #      include <freyja/Mesh.h>
 
-freyja::Mesh *freyjaGetMeshClass(index_t meshUID); 
+    freyja::Mesh *freyjaGetMeshClass(index_t meshUID); 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to Mesh with UID or NULL
+	 ------------------------------------------------------*/
+
+    freyja::Vertex *freyjaGetMeshVertexClass(index_t meshUID, index_t vertex); 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to Vertex with UID or NULL
+	 ------------------------------------------------------*/
+
+    freyja::Face *freyjaGetMeshFaceClass(index_t meshUID, index_t face); 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to Face with UID or NULL
+	 ------------------------------------------------------*/
+
+    int32 freyjaMeshLoadChunkJA(mstl::SystemIO::FileReader &r,
+								freyja_file_chunk_t &chunk);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format mesh chunk
+	 ------------------------------------------------------*/
+
+    int32 freyjaMeshSaveChunkJA(mstl::SystemIO::FileWriter &w, index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format mesh chunk
+	 ------------------------------------------------------*/
+
+    bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format mesh chunk
+	 ------------------------------------------------------*/
 
 #   endif
 
