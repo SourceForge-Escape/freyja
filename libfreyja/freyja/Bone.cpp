@@ -76,6 +76,59 @@ Bone *Bone::GetBone(index_t uid)
 }
 
 
+bool Bone::Serialize(SystemIO::TextFileWriter &w)
+{
+	w.Print("Bone\n");
+	w.Print("\t mVersion 1\n");
+
+	w.Print("\t mUID %u\n", mUID);
+	
+	w.Print("\t mFlags %u\n", mFlags);
+
+	w.Print("\t mName \"%s\"\n", mName);
+
+	w.Print("\t mSkeleton %u\n", mSkeleton);
+
+	w.Print("\t mParent %u\n", mParent);
+
+	w.Print("\t mChildren %u ", mChildren.size());
+
+	uint32 i;
+	foreach(mChildren, i)
+	{
+		w.Print("%u ", mChildren[i]);
+	}
+	w.Print("\n");
+
+	w.Print("\t mRotation %f %f %f %f\n", 
+			mRotation.X(), mRotation.Y(), mRotation.Z(), mRotation.W());
+
+	w.Print("\t mTranslation %f %f %f\n", 
+			mTranslation[0], mTranslation[1], mTranslation[2]);
+
+	w.Print("\t mBindPose ");
+	for (i = 0; i < 16; ++i)
+	{
+		w.Print("%f ", mBindPose[i]);		
+	}
+	w.Print("\n");
+
+	w.Print("\t mBindToWorld \n");
+	for (i = 0; i < 16; ++i)
+	{
+		w.Print("%f ", mBindToWorld[i]);		
+	}
+	w.Print("\n");
+
+
+	w.Print("\t mTracks %u\n", 0);
+
+	//BoneTrack mTrack;                /* Animation track(s) - only one in test */
+
+	return true;
+}
+
+
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
@@ -242,6 +295,71 @@ void Bone::UpdateBindPose()
 	mBindToWorld = mBindPose;
 	mBindPose.invert();
 #endif
+}
+
+
+bool Bone::Serialize(SystemIO::TextFileReader &r)
+{
+	r.ParseSymbol(); // Bone
+	
+	r.ParseSymbol(); // mVersion
+	r.ParseInteger(); // == 1
+
+	r.ParseSymbol(); // mUID
+	r.ParseInteger();
+
+	r.ParseSymbol(); // mFlags
+	mFlags = r.ParseInteger();
+
+	r.ParseSymbol(); // mName
+	SetName(r.ParseStringLiteral()); // might want to free returned string =p
+
+	r.ParseSymbol(); // mSkeleton
+	mSkeleton = r.ParseInteger();
+
+	r.ParseSymbol(); // mParent
+	mParent = r.ParseInteger();
+
+	r.ParseSymbol(); // mChildren
+	uint32 count = r.ParseInteger();
+	while (count > 0)
+	{
+		mChildren.push_back(r.ParseInteger());
+		--count;
+	}
+
+	r.ParseSymbol(); // mRotation
+	mRotation.X(r.ParseFloat());
+	mRotation.Y(r.ParseFloat());
+	mRotation.Z(r.ParseFloat());
+	mRotation.W(r.ParseFloat());
+
+	r.ParseSymbol(); // mTranslation
+	mTranslation[0] = r.ParseFloat();
+	mTranslation[1] = r.ParseFloat();
+	mTranslation[2] = r.ParseFloat();
+
+	r.ParseSymbol(); // mBindPose
+	for (uint32 i = 0; i < 16; ++i)
+	{ 
+		mBindPose[i] = r.ParseFloat();
+	}
+
+	r.ParseSymbol(); //mBindToWorld
+	for (uint32 i = 0; i < 16; ++i)
+	{
+		mBindToWorld[i] = r.ParseFloat();
+	}
+
+	r.ParseSymbol(); // mTracks
+	count = r.ParseInteger();
+	while (count > 0)
+	{
+		//mTracks...
+		--count;
+	}
+
+	return true;
 }
 
 

@@ -4,8 +4,17 @@
  Freyja 0.9.5 Development branch
  =====================================================================
 
+ Dancer (RC2)
+ 20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - The blood of an Elf was taken to purify this release
+ - ChangeLog date stamp now is range of first patch to 'release' 
+   instead of first patch, which confused people to no end.
+
+
  Kuroi Kinyoubi 
  20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Mesh API clean up cont... 
+ - Fixes for freyja modeler material load / editor UI updates
  - Text based 'freyja' file format for 'native' testing ( no anim / skel yet )
  - MeshABI update cont ( including file I/O )
  - Bigger UI update than intended  ;)

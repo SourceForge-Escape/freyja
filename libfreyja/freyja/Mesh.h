@@ -460,30 +460,72 @@ public:
 	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
-	// Testing embedded keyframing as public attribute, so bare with us...
-	// these methods only support one 'animation' atm, but forcing interface
-	// use makes it easy to fix that later =p
+
+	//////////////////////////////////////////////////////////////////////////
+	// FIXME
+	// Testing embedded keyframing, so bare with me...
+	// these methods only support one 'animation' atm, but enforcing interface
+	// API usage makes it a transparent fix to API users later.
+	//////////////////////////////////////////////////////////////////////////
+
+	uint32 GetTransformTrackCount() {return 1;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t NewTransformTrack() {return 0;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	TransformTrack &GetTransformTrack(uint32 track) { return mTrack; }
-	TransformTrack mTrack;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	uint32 GetVertexAnimTrackCount() {return 1;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t NewVertexAnimTrack() {return 0;}
-	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
-	VertexAnimTrack mVertexAnimTrack;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	vec_t mBlendVerticesTime;       /* Last time this was updated */
-	Vector<vec_t> mBlendVertices;   /* Skeletal vertex blending use  */
+	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	vec_t *GetBlendVerticesArray() { return mBlendVertices.get_array(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	uint32 GetBlendVerticesCount() { return mBlendVertices.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void ResetBlendVertices()
 	{
 		vec_t *array = mBlendVertices.get_array();
-
 		if (array)
 			memset(array, 0, mBlendVertices.size()*sizeof(vec_t));
 	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void SyncBlendVertices()
 	{
@@ -492,11 +534,16 @@ public:
 			mBlendVertices.resize(mVertexPool.size());
 		}
 	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	// Getting ready to test arrays / VBO with dynamic backend, which
 	// requires caching here in the backend to be effective
 	//Vector<index_t> mTriangleList;
 	//Vector<index_t> mQuadList;
+
 
 	////////////////////////////////////////////////////////////
 	// Bounding Volume properties
@@ -621,13 +668,11 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
 	uint32 GetFaceCount() { return mFaces.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-
 
 	const char *GetName() { return mName; }
 	/*------------------------------------------------------
@@ -635,14 +680,12 @@ public:
 	 * Post : Get human readable name of mesh
 	 ------------------------------------------------------*/
 
-
 	void GetNormal(index_t normalIndex, vec3_t xyz)
 	{ GetTripleVec(mNormalPool, normalIndex, xyz); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-
 
 	uint32 GetNormalCount() { return mNormalPool.size(); }
 	/*------------------------------------------------------
@@ -1612,12 +1655,19 @@ private:
 		array[tIndex + 2] = xyz[2];
 	}
 
-
 	const static uint32 mNameSize = 32;
 
 	static index_t mNextUID;  /* UIDs outside of model (owner's) array index */
 
-	char mName[mNameSize];    /* Human readable name of mesh */
+	TransformTrack mTrack;            /* Mesh transform animation track */
+
+	VertexAnimTrack mVertexAnimTrack; /* Mesh vertex animation track  */
+
+	vec_t mBlendVerticesTime;         /* Last time this was updated */
+
+	Vector<vec_t> mBlendVertices;     /* Skeletal vertex blending use  */
+
+	char mName[mNameSize];            /* Human readable name of mesh */
 
 	index_t mUID;
 

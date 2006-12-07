@@ -771,7 +771,7 @@
 								(hbox 1 0 0 1 0
 					(label "Source" 0.0 0.5))
 				(hbox 1 0 0 1 0
-					(optionmenu eEvent 780
+					(optionmenu eEvent eBlendSrcMenu
 						(menu_item "GL__ZERO"					eBlendSrc 0)
 						(menu_item "GL__ONE"					eBlendSrc 1)
 						(menu_item "GL__SRC__COLOR"			eBlendSrc 2)
@@ -791,7 +791,7 @@
 				(hbox 1 0 0 1 0
 					(label "Dest" 0.0 0.5))
 				(hbox 1 0 0 1 0
-					(optionmenu eEvent 781
+					(optionmenu eEvent eBlendDestMenu
 						(menu_item "GL__ZERO"					eBlendDest 0)
 						(menu_item "GL__ONE"					eBlendDest 1)
 						(menu_item "GL__SRC__COLOR"			eBlendDest 2)

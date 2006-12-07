@@ -961,12 +961,28 @@ void freyjaPluginsInit()
 	freyjaPluginAddExtention1s("*.ja");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
 						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_BLENDING |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
 						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_BLENDING |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);
 	freyjaPluginEnd();
 
+
+
+	freyjaPluginBegin();
+	freyjaPluginDescription1s("Freyja Model (*.freyja)");
+	freyjaPluginAddExtention1s("*.freyja");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_BLENDING |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
+						 FREYJA_PLUGIN_SKELETON |
+						 FREYJA_PLUGIN_VERTEX_BLENDING |
+						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginEnd();
 
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
@@ -1070,12 +1086,37 @@ int32 freyjaImportModel(const char *filename)
 		{
 			tr.ParseSymbol(); // Freyja
 			tr.ParseSymbol(); // 0.9.5
-			int32 count = tr.ParseInteger();
+
+			tr.ParseSymbol(); // Version
+			tr.ParseInteger(); // == 1
+
+			tr.ParseSymbol(); // mMeshCount
+			uint32 mMeshCount = tr.ParseInteger();
+
+			tr.ParseSymbol(); // mBoneCount
+			uint32 mBoneCount = tr.ParseInteger();
+
+			tr.ParseSymbol(); // mSkeletonCount
+			uint32 mSkeletonCount = tr.ParseInteger();
+
+			tr.ParseSymbol(); // mMaterialCount
+			uint32 mMaterialCount = tr.ParseInteger();
+
+			uint32 count = mMeshCount;
 			while (count > 0)
 			{
 				freyjaMeshLoadChunkTextJA(tr);
 				--count;
 			}
+
+			count = mBoneCount;
+			while (count > 0)
+			{
+				freyjaBoneLoadChunkTextJA(tr);
+				--count;
+			}
+
+			// ...
 		}
 		return 0;
 	}
@@ -1232,12 +1273,41 @@ int32 freyjaExportModel(const char *filename, const char *type)
 		if (tw.Open(filename))
 		{
 			tw.Print("Freyja 0.9.5\n");
-			uint32 count = freyjaGetMeshCount();
-			tw.Print("%u\n", count);
-			for (uint32 i = 0; i < count; ++i)
+			tw.Print("Version 1\n");
+
+			uint32 mcount = freyjaGetMeshCount();
+			uint32 mallocated = 0;
+			for (uint32 i = 0; i < mcount; ++i)
+			{
+				if (freyjaGetMeshClass(i))
+					++mallocated;
+			}
+				
+			tw.Print("mMeshCount %u\n", mallocated);
+
+			uint32 bcount = freyjaGetBoneCount();
+			uint32 ballocated = 0;
+			for (uint32 i = 0; i < bcount; ++i)
+			{
+				if (freyjaIsBoneAllocated(i))
+					++ballocated;
+			}
+			
+			tw.Print("mBoneCount %u\n", ballocated);
+
+			tw.Print("mSkeletonCount 0\n");
+			tw.Print("mMaterialCount 0\n");
+
+			for (uint32 i = 0; i < mcount; ++i)
 			{
 				if (freyjaGetMeshClass(i))
 					freyjaMeshSaveChunkTextJA(tw, i);
+			}
+
+			for (uint32 i = 0; i < bcount; ++i)
+			{
+				if (freyjaIsBoneAllocated(i))
+					freyjaBoneSaveChunkTextJA(tw, i);
 			}
 		}
 		return 0;

@@ -166,7 +166,7 @@ class Vector3d
 	vec_t &operator [] (uint32 idx) { return mVec[idx]; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets the vector position
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	Vector3d operator +(const Vector3d &v);
