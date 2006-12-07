@@ -27,6 +27,47 @@ using namespace freyja;
 
 
 ////////////////////////////////////////////////////////////
+// C++ ABI for Bone
+////////////////////////////////////////////////////////////
+
+Bone *freyjaGetBoneClass(index_t boneUID)
+{
+	return Bone::GetBone(boneUID);
+}
+
+
+bool freyjaBoneSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t bone)
+{
+	freyjaPrintMessage("> Writing out bone %i...", bone);
+	Bone *b = freyjaGetBoneClass(bone);
+	return b ? b->Serialize(w) : false;
+}
+
+
+bool freyjaBoneLoadChunkTextJA(SystemIO::TextFileReader &r)
+{
+	index_t bone = freyjaBoneCreate(0); // FIXME: This just assumes one skeleton
+	freyjaPrintMessage("> Reading in bone %i...", bone);
+	Bone *b = freyjaGetBoneClass(bone);
+	return b ? b->Serialize(r) : false;
+}
+
+
+int32 freyjaBoneSaveChunkJA(SystemIO::FileReader &r, index_t bone)
+{
+	//FIXME
+	return 0;
+}
+
+
+int32 freyjaBoneLoadChunkJA(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
+{
+	//FIXME
+	return 0;
+}
+
+
+////////////////////////////////////////////////////////////
 // C ABI for Bone
 ////////////////////////////////////////////////////////////
 

@@ -276,4 +276,40 @@ extern "C" {
 
 }
 
+#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
+#      include <mstl/SystemIO.h>
+#      include <freyja/Bone.h>
+
+    freyja::Bone *freyjaGetBoneClass(index_t boneUID); 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to Bone with UID or NULL
+	 ------------------------------------------------------*/
+
+    int32 freyjaBoneLoadChunkJA(mstl::SystemIO::FileReader &r,
+								freyja_file_chunk_t &chunk);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format bone chunk
+	 ------------------------------------------------------*/
+
+    int32 freyjaBoneSaveChunkJA(mstl::SystemIO::FileWriter &w, index_t bone);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format bone chunk
+	 ------------------------------------------------------*/
+
+    bool freyjaBoneSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t bone);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format bone chunk
+	 ------------------------------------------------------*/
+
+    bool freyjaBoneLoadChunkTextJA(SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialiser for JA format bone chunk
+	 ------------------------------------------------------*/
+
+#   endif
 #endif

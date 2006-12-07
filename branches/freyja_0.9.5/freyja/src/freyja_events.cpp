@@ -923,7 +923,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
 	r.RegisterInt("eBlendDest", eBlendDest);
+	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
 	r.RegisterInt("eBlendSrc", eBlendSrc);
+	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
 
 	// Viewport renderers ( default package )
 	r.RegisterInt("eViewportBack", eViewportBack);
@@ -1542,52 +1544,61 @@ void freyja_set_main_window_title(char *title)
 
 void freyja_refresh_material_interface()
 {
-	vec4_t ambient, diffuse, specular, emissive;
-	uint32 src, dest, flags;
-	vec_t shininess;
 	uint32 mIndex = freyjaGetCurrentMaterial();
-
 
 	mgtk_textentry_value_set(eSetMaterialName, freyjaGetMaterialName(mIndex));
 
+	mgtk_spinbutton_value_set(eSetMaterialTexture,
+                              freyjaGetMaterialTexture(mIndex));
+	mgtk_textentry_value_set(eSetTextureNameA,
+                             freyjaGetMaterialTextureName(mIndex));
 
+	vec4_t ambient;
 	freyjaGetMaterialAmbient(mIndex, ambient);
-	freyjaGetMaterialDiffuse(mIndex, diffuse);
-	freyjaGetMaterialSpecular(mIndex, specular);
-	freyjaGetMaterialEmissive(mIndex, emissive);
-	shininess = freyjaGetMaterialShininess(mIndex);
-	src = freyjaGetMaterialBlendSource(mIndex);
-	dest = freyjaGetMaterialBlendDestination(mIndex);
-	flags = freyjaGetMaterialFlags(mIndex);
-
 	freyja_event_set_color(eColorMaterialAmbient, 
 						   ambient[0], ambient[1], ambient[2], ambient[3]);
-	freyja_event_set_color(eColorMaterialDiffuse, 
-						   diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
-	freyja_event_set_color(eColorMaterialSpecular, 
-						   specular[0], specular[1], specular[2], specular[3]);
-	freyja_event_set_color(eColorMaterialEmissive, 
-						   emissive[0], emissive[1], emissive[2], emissive[3]);
-
 	mgtk_spinbutton_value_set(700, ambient[0]);	
 	mgtk_spinbutton_value_set(701, ambient[1]);
 	mgtk_spinbutton_value_set(702, ambient[2]);
 	mgtk_spinbutton_value_set(703, ambient[3]);
+
+	vec4_t diffuse;
+	freyjaGetMaterialDiffuse(mIndex, diffuse);
+	freyja_event_set_color(eColorMaterialDiffuse, 
+						   diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
 	mgtk_spinbutton_value_set(704, diffuse[0]);
 	mgtk_spinbutton_value_set(705, diffuse[1]);
 	mgtk_spinbutton_value_set(706, diffuse[2]);
 	mgtk_spinbutton_value_set(707, diffuse[3]);
+
+	vec4_t specular;
+	freyjaGetMaterialSpecular(mIndex, specular);
+	freyja_event_set_color(eColorMaterialSpecular, 
+						   specular[0], specular[1], specular[2], specular[3]);
 	mgtk_spinbutton_value_set(708, specular[0]);
 	mgtk_spinbutton_value_set(709, specular[1]);
 	mgtk_spinbutton_value_set(710, specular[2]);
 	mgtk_spinbutton_value_set(711, specular[3]);
+
+	vec4_t emissive;
+	freyjaGetMaterialEmissive(mIndex, emissive);
+	freyja_event_set_color(eColorMaterialEmissive, 
+						   emissive[0], emissive[1], emissive[2], emissive[3]);
 	mgtk_spinbutton_value_set(712, emissive[0]);
 	mgtk_spinbutton_value_set(713, emissive[1]);
 	mgtk_spinbutton_value_set(714, emissive[2]);
 	mgtk_spinbutton_value_set(715, emissive[3]);
+
+	vec_t shininess = freyjaGetMaterialShininess(mIndex);
 	mgtk_spinbutton_value_set(716, shininess);
-	mgtk_option_menu_value_set(780, src);
-	mgtk_option_menu_value_set(781, dest);
+
+	uint32 src = freyjaGetMaterialBlendSource(mIndex);
+	mgtk_option_menu_value_set(eBlendSrcMenu, src);
+
+	uint32 dest = freyjaGetMaterialBlendDestination(mIndex);
+	mgtk_option_menu_value_set(eBlendDestMenu, dest);
+
+	uint32 flags = freyjaGetMaterialFlags(mIndex);
 
 	if (flags & fFreyjaMaterial_Blending)
 	{
@@ -1608,10 +1619,8 @@ void freyja_refresh_material_interface()
 		mgtk_togglebutton_value_set(eMaterialTex, false);
 	}
 
-	mgtk_spinbutton_value_set(eSetMaterialTexture,
-                              freyjaGetMaterialTexture(mIndex));	
-	mgtk_textentry_value_set(eSetTextureNameA,
-                             freyjaGetMaterialTextureName(mIndex));
+	// Just go ahead and render a new frame in case the function calling this fails to do so
+	freyja_event_gl_refresh();
 }
 
 

@@ -249,7 +249,10 @@ typedef enum {
 	eSphereJoint,
 	ePointJoint,
 
+	
+	eBlendDestMenu,
 	eBlendDest,
+	eBlendSrcMenu,
 	eBlendSrc,
 
 	/* Text events */

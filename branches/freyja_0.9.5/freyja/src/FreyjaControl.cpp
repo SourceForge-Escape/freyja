@@ -741,7 +741,9 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 			}
 			else if  (strncmp(buffer, "TextureName", 11) == 0)
 			{
-				if (LoadTexture(r.ParseStringLiteral()))
+				const char *s = r.ParseStringLiteral();
+
+				if (LoadTexture(s))
 				{
 					if (mTextureId > -1)
 					{
@@ -756,10 +758,11 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 			}
 			else if  (strncmp(buffer, "EnableBlending", 14) == 0)
 			{
-				r.ParseBool();
+				if (r.ParseBool())
+					freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Blending);
 			}
 			else if (strncmp(buffer, "Blend", 5) == 0)
-			{
+			{						
 				bool is_src = false;
 				if (strncmp(buffer, "BlendSource", 11) == 0)
 					is_src = true;
@@ -1003,8 +1006,9 @@ bool FreyjaControl::SaveMaterial(const char *filename)
 		fprintf(f, "TextureName = \"%s\"\n", freyjaGetMaterialTextureName(matIndex));
 	}
 
-	//fprintf(f, "EnableBlending=%s\n", 
-	//		  (m_flags & fEnable_Blending) ? "true" : "false");
+	fprintf(f, "EnableBlending = %s\n", 
+			(freyjaGetMaterialFlags(matIndex) & fFreyjaMaterial_Blending) ? 
+			"true" : "false");
 
 	fprintf(f, "BlendSource = %s\n", 
 			  (blend_src == GL_ZERO) ? "GL_ZERO" :
@@ -4524,9 +4528,12 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
 			if (m)
-			{
+			{				
+				// FIXME: This is temp test constant - replace with track switching later
+				const uint32 track = 0;
+
 				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
-				Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(k);
+				Vec3x3KeyFrame *key = m->GetTransformTrack(track).GetKeyframe(k);
 				
 				if (key)
 				{

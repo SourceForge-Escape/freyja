@@ -1371,7 +1371,12 @@ void FreyjaRender::DrawCurveWindow()
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mDefaultPointSize);
 
-	if (curKey < m->mTrack.mKeyFrames.size())
+	// FIXME: This is temp test constant - replace with track switching later
+	const uint32 track = 0;
+
+	// FIXME: Need to handle DNE Tracks when sparse tracks are brought online.
+
+	if (curKey < m->GetTransformTrack(track).mKeyFrames.size())
 	{
 		p[0] = x + curKey*s;		
 		p[1] = 0.0f;
@@ -1383,7 +1388,7 @@ void FreyjaRender::DrawCurveWindow()
 		glEnd();
 	}
 
-	if (curKey < m->mTrack.mKeyFrames.size())
+	if (curKey < m->GetTransformTrack(track).mKeyFrames.size())
 	{
 		p[0] = x + curKey*s;		
 		p[1] = 0.0f;
@@ -1400,9 +1405,9 @@ void FreyjaRender::DrawCurveWindow()
 		glColor3fv(YELLOW);
 		glBegin(GL_POINTS);
 		unsigned int idx = 0;
-		foreach (m->mTrack.mKeyFrames, idx)
+		foreach (m->GetTransformTrack(track).mKeyFrames, idx)
 		{
-			Vec3x3KeyFrame *key = m->mTrack.GetKeyframe(idx);
+			Vec3x3KeyFrame *key = m->GetTransformTrack(track).GetKeyframe(idx);
 			
 			if (key)
 			{
@@ -1426,8 +1431,8 @@ void FreyjaRender::DrawCurveWindow()
 	{
 		vec_t time;
 		Vec3 v, pos, rot, scale;
-		vec_t rateInverse = 1.0f / m->mTrack.GetRate();
-		uint32 count = m->mTrack.GetKeyframeCount();
+		vec_t rateInverse = 1.0f / m->GetTransformTrack(track).GetRate();
+		uint32 count = m->GetTransformTrack(track).GetKeyframeCount();
 
 		for (uint32 j = 0; j < 3; ++j)
 		{
@@ -1452,7 +1457,7 @@ void FreyjaRender::DrawCurveWindow()
 			for (uint32 i = 0; i < count; ++i)
 			{
 				time = (vec_t)i * rateInverse;
-				m->mTrack.GetTransform(time, pos, rot, scale);
+				m->GetTransformTrack(track).GetTransform(time, pos, rot, scale);
 				v.mVec[0] = x + i*s;
 				v.mVec[1] = yT[2] + pos.mVec[j];
 				glVertex2fv(v.mVec);
@@ -1468,7 +1473,7 @@ void FreyjaRender::DrawCurveWindow()
 			for (uint32 i = 0; i < count; ++i)
 			{
 				time = (vec_t)i * rateInverse;
-				m->mTrack.GetTransform(time, pos, rot, scale);
+				m->GetTransformTrack(track).GetTransform(time, pos, rot, scale);
 				v.mVec[0] = x + i*s;
 				v.mVec[1] = yT[2]+30.0f + rot.mVec[j];
 				glVertex2fv(v.mVec);
