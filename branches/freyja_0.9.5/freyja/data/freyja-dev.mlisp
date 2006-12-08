@@ -507,9 +507,12 @@
 							"gtk-open" "Open" "Loads model file" 
 							"Open Model..." eOpenModel "mode=open")
 
+						(toolbar_button  "gtk-save" "Save" 
+							"Save Model"	eEvent eSaveFileModel)
+
 						(filechoosertoolbar_button 
-							"gtk-save-as" "Save as..." "Saves model file" 
-							"Save Model..." eSaveModel "mode=save,confirm-overwrite=true,")
+							"gtk-save-as" "Save as..." "Saves model file as..." 
+							"Save Model..." eSaveModel "mode=save,")
 
 					))
 
@@ -591,6 +594,7 @@
 				(handlebox 1
 				(vbox 1 1 0 1 1
 					(expander "Skeleton" 1
+						(textbox eSkeletonName)
 						(tree eBoneIterator eSetCurrentBoneName)
 
 						(hbox 0 0 0 1 0

@@ -91,6 +91,19 @@ public:
 
 	bool GetLoc(vec_t t, Vec3 &v)  { return mLoc.GetTransform(t, v); }
 
+	bool Serialize(SystemIO::TextFileWriter &w)
+	{
+		mRot.Serialize(w);
+		mLoc.Serialize(w);
+		return true;
+	}
+
+	bool Serialize(SystemIO::TextFileReader &r)
+	{
+		mRot.Serialize(r);
+		mLoc.Serialize(r);
+		return true;
+	}
 
 	Vec3Track mRot;
 

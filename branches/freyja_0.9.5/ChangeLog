@@ -7,6 +7,8 @@
  Dancer (RC2)
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - More API / ABI clean up for upcoming release!
+ - freyja text format support for all track types
+ - Dump serialized mesh pool's stack if array is empty ( no undo to disk )
  - freyja text format flushes materials before loading now
  - More freyja text format polish ( can autoload materials via callback, etc )
  - The blood of an Elf was taken to purify this release

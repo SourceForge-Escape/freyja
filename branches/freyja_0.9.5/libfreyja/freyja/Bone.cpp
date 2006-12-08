@@ -122,10 +122,8 @@ bool Bone::Serialize(SystemIO::TextFileWriter &w)
 	}
 	w.Print("\n");
 
-
-	w.Print("\t mTracks %u\n", 0);
-
-	//BoneTrack mTrack;                /* Animation track(s) - only one in test */
+	w.Print("\t mTracks %u\n", 1); // only have one in test =p
+	mTrack.Serialize(w);
 
 	return true;
 }
@@ -357,7 +355,8 @@ bool Bone::Serialize(SystemIO::TextFileReader &r)
 	count = r.ParseInteger();
 	while (count > 0)
 	{
-		//mTracks...
+		// only have one in test =p
+		mTrack.Serialize(r);
 		--count;
 	}
 

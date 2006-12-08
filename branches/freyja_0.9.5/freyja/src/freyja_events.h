@@ -188,6 +188,7 @@ typedef enum {
 	eViewportUV,
 	eViewportCurve,
 
+	eSkeletonName,
 	eOpenTexture,
 	eOpenTextureB,
 

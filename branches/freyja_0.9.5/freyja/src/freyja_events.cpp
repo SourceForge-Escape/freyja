@@ -24,6 +24,7 @@
 #define FREYJA_APP_PLUGINS 1
 
 #include <freyja/FreyjaPluginABI.h>
+#include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
 #include <mstl/SystemIO.h>
@@ -112,6 +113,10 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 void UpdateSkeletonUI_Callback(uint32 skelIndex)
 {
 	mgtk_tree_t *tree;
+
+
+	mgtk_textentry_value_set(ResourceEvent::GetResourceIdBySymbol("eSkeletonName"),
+							 freyjaGetSkeletonName(skelIndex));
 
 	tree = generateSkeletalUI(skelIndex, 
 							  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
@@ -728,7 +733,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenTexture", eOpenTexture);
 	r.RegisterInt("eOpenTextureB", eOpenTextureB);
-
+	r.RegisterInt("eSkeletonName", eSkeletonName);
 
 	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
 

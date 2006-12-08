@@ -398,3 +398,19 @@ void freyjaSkeletonTransform(index_t skeleton,
 		freyjaBoneTransform(skel->GetRoot(), action, x, y, z);
 }
 
+
+void freyjaSkeletonName(index_t skeleton, const char *name)
+{
+	Skeleton *skel = Skeleton::GetSkeleton(skeleton);
+	if (skel)
+		skel->SetName(name);
+}
+
+
+const char *freyjaGetSkeletonName(index_t skeleton)
+{
+	Skeleton *skel = Skeleton::GetSkeleton(skeleton);
+	if (skel)
+		return skel->GetName();
+	return NULL;
+}

@@ -1168,82 +1168,56 @@ bool FreyjaControl::LoadModel(const char *filename)
 
 bool FreyjaControl::SaveModel(const char *filename)
 {
-	unsigned int l, s, i;
-	int ret = -1;
-	char ext[32];
-
-	if (!filename)
+	if (!filename || !filename[0])
 		return false;
 
-	l = strlen(filename);
-  
-	for (s = l; s > 0; s--)
+	unsigned int len = strlen(filename);
+	unsigned int cur;
+	for (cur = len; cur > 0; --cur)
 	{
-		if (filename[s] == '.')
+		if (filename[cur] == '.')
 			break;
 	}
 
-	if (!s) /* No extention given, so make it '.ja' */
-	{
-		char buffer[4096];
-		snprintf(buffer, 4095, "%s.ja", filename);
-		buffer[4095] = 0;
+	String select = filename;
+	bool ret = false;
 
-		if (!SystemIO::File::DoesFileExist(filename) ||
-			freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You are about to overwrite a file.",
-										 "Are you sure you want to overwrite the file?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite"))
-		{
-			ret = freyjaExportModel(buffer, "ja");
-		}
-		else
-		{
-			return false;
-		}
+	if (!cur) /* No extention given, so make it '<filename>.freyja' */
+	{
+		select += ".freyja";
+		cur = len + 1; // Skip '.'
 	}
 	else
 	{
-		if (s == 0 || (l - s) > 30)
-			return false;
-
-		s++;
-
-		memset(ext, 0, 32);
-
-		for (i = 0; s < l; s++, i++)
-		{
-			ext[i] = filename[s];
-		}
-
-		if (!SystemIO::File::DoesFileExist(filename) ||
-			freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You are about to overwrite a file.",
-										 "Are you sure you want to overwrite the file?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite"))
-		{
-			ret = freyjaExportModel(filename, ext);
-		}
-		else
-		{
-			return false;
-		}
+		select = filename;
+		++cur; // Skip '.'
 	}
-
-	if (ret)
+ 
+	if (SystemIO::File::DoesFileExist(select.c_str()) &&
+		!freyja_create_confirm_dialog("gtk-dialog-question",
+									  "You are about to overwrite a file.",
+									  "Are you sure you want to overwrite the file?",
+									  "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite") )
 	{
-		freyja_print("Unknown file export extention: '%s', try using '.ja'", 
-					ext);
-		return !ret;
+		ret = false;
 	}
-  
-	String title;
-	title.Set("%s - Freyja", filename);
-	freyja_set_main_window_title((char*)title.GetCString());
-	mCurrentlyOpenFilename = filename;
-	mCleared = true;
+	else if (freyjaExportModel(select.c_str(), select.c_str()+cur) == 0)
+	{
+		String title;
+		title.Set("%s - Freyja", select.c_str());
+		freyja_set_main_window_title((char*)title.c_str());
+		mCurrentlyOpenFilename = select;
+		mCleared = true;
+		ret = true;
+	}
+	else
+	{
+		freyja_print("Unable to save with extention '.%s', try using '.freyja'", 
+					 select.c_str()+cur);
+		ret = false;
+	}
 
-	return true;
+	return ret;
 }
 
 
@@ -2315,6 +2289,7 @@ bool FreyjaControl::event(int command)
 		}
 		break;
 
+
 	case eSaveFileModel:
 		if (mCleared) // safety
 		{
@@ -3145,6 +3120,10 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
 		break;
 
+	case eSkeletonName:
+		freyjaSkeletonName(GetSelectedSkeleton(), text);
+		break;
+
 	case eSetTextureNameB:
 		// FIXME: Need to make N level texture support in backend first
 		/* Text here is assumed to be a filename */
@@ -3154,6 +3133,10 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 	case eSetCurrentBoneName:
 		if (mAllowBoneNameUpdate)
 			SetBoneName(GetSelectedBone(), text);
+		break;
+
+	case FREYJA_MODE_SAVE_MODEL:
+		SaveModel(text);
 		break;
 
 	default:
@@ -6085,6 +6068,8 @@ void eClearWeight()
 		freyja_print("Selected vertices removing bone %i weighting...", bone);
 	}
 }
+
+
 
 
 void FreyjaControlEventsAttach()
