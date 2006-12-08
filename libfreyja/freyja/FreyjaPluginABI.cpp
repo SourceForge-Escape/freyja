@@ -1102,7 +1102,14 @@ int32 freyjaImportModel(const char *filename)
 			tr.ParseSymbol(); // mMaterialCount
 			uint32 mMaterialCount = tr.ParseInteger();
 
-			uint32 count = mMeshCount;
+			uint32 count = mMaterialCount;
+			while (count > 0)
+			{
+				freyjaMaterialLoadChunkTextJA(tr);
+				--count;
+			}
+
+			count = mMeshCount;
 			while (count > 0)
 			{
 				freyjaMeshLoadChunkTextJA(tr);
@@ -1116,7 +1123,12 @@ int32 freyjaImportModel(const char *filename)
 				--count;
 			}
 
-			// ...
+			count = mSkeletonCount;
+			while (count > 0)
+			{
+				//freyjaBoneLoadChunkTextJA(tr);
+				--count;
+			}
 		}
 		return 0;
 	}
@@ -1296,7 +1308,24 @@ int32 freyjaExportModel(const char *filename, const char *type)
 			tw.Print("mBoneCount %u\n", ballocated);
 
 			tw.Print("mSkeletonCount 0\n");
-			tw.Print("mMaterialCount 0\n");
+
+			uint32 matcount = freyjaGetMaterialCount();
+			uint32 matallocated = 0;
+			for (uint32 i = 0; i < matcount; ++i)
+			{
+				if (freyjaGetMaterialClass(i))
+					++matallocated;
+			}
+			
+			tw.Print("mMaterialCount %u\n", matallocated);
+
+
+			// Classes
+			for (uint32 i = 0; i < matcount; ++i)
+			{
+				if (freyjaGetMaterialClass(i))
+					freyjaGetMaterialClass(i)->Serialize(tw);
+			}
 
 			for (uint32 i = 0; i < mcount; ++i)
 			{

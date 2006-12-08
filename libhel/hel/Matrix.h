@@ -312,6 +312,15 @@ class Matrix
 	 * 2002.05.08:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+	
+	void Rotate2(const Vec3 v) { Rotate2(v.mVec); }
+	void Rotate2(const vec3_t v) { Rotate2(v[0], v[1], v[2]); }
+	void Rotate2(vec_t alpha, vec_t beta, vec_t gamma);
+	/*------------------------------------------------------
+	 * Pre  : Angles are in radians
+	 * Post : Rotates object in 3 space in better implementation
+	 *
+	 ------------------------------------------------------*/
 
 	void rotate(vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------

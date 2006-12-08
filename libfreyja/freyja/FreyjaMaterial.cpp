@@ -31,6 +31,7 @@
 using namespace mstl;
 
 Vector<FreyjaMaterial *> gFreyjaMaterials;
+int (*FreyjaMaterial::mLoadTextureFunc)(const char *filename) = NULL;
 
 
 ////////////////////////////////////////////////////////////
@@ -47,10 +48,11 @@ FreyjaMaterial::FreyjaMaterial() :
 	mBlendDest(0),
 	mTexture(0),
 	mHasAlphaChannel(false),
-	mTextureName(NULL)
+	mBlendSrcString("GL_ONE"),
+	mBlendDestString("GL_ONE"),
+	mTextureFilename()
 {
 	mName[0] = '\0';
-	//setTextureName("No shader");
 
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2;
 	mAmbient[3]  = 1.0;
@@ -70,8 +72,6 @@ FreyjaMaterial::FreyjaMaterial() :
 
 FreyjaMaterial::~FreyjaMaterial()
 {
-	if (mTextureName)
-		delete [] mTextureName;
 }
 
 
@@ -81,7 +81,7 @@ FreyjaMaterial::~FreyjaMaterial()
 
 const char *FreyjaMaterial::getTextureName()
 {
-	return mTextureName;
+	return mTextureFilename.c_str();
 }
 
 
@@ -89,10 +89,9 @@ uint32 FreyjaMaterial::getSerializeSize()
 {
 	uint32 length = 0;
 
-
-	if (mTextureName != 0x0)
+	if (mTextureFilename.c_str() != 0x0)
 	{
-		length = strlen(mTextureName);	
+		length = mTextureFilename.length();	
 	}
 
 	return (4 + 64 + 4 + 4 + 4 +
@@ -106,11 +105,13 @@ bool FreyjaMaterial::Serialize(SystemIO::TextFileWriter &w)
 {
 	w.Print("[Material]\n");
 	w.Print("\tmVersion %u\n", mVersion);
+	w.Print("\tmId %u\n", mId);
 	w.Print("\tmName \"%s\"\n", mName);
 	w.Print("\tmFlags %u\n", mFlags);
 	w.Print("\tmBlendSrc %u\n", mBlendSrc);
 	w.Print("\tmBlendDest %u\n", mBlendDest);
-	w.Print("\tmTextureName \"%s\"\n", mTextureName ? mTextureName : "");
+	w.Print("\tmTextureName \"%s\"\n", 
+			mTextureFilename.c_str() ? mTextureFilename.c_str() : "");
 
 	w.Print("\tmShininess %f\n", mShininess);
 
@@ -142,11 +143,11 @@ bool FreyjaMaterial::serialize(SystemIO::FileWriter &w)
 	w.WriteInt32U(mBlendSrc);
 	w.WriteInt32U(mBlendDest);
 
-	if (mTextureName != 0x0)
+	if (mTextureFilename.c_str() != 0x0)
 	{
-		length = strlen(mTextureName);
+		length = mTextureFilename.length();
 		w.WriteInt32U(length);
-		w.WriteString(length, mTextureName);
+		w.WriteString(length, mTextureFilename.c_str());
 	}
 	else
 	{
@@ -189,11 +190,6 @@ bool FreyjaMaterial::Serialize(SystemIO::TextFileReader &r)
 	if (strcmp(r.ParseSymbol(), "[Material]"))
 		return false;
 
-	uint32 version = r.ParseInteger();
-
-	if (version != mVersion)
-		return false;
-
 	const char *symbol;
 	while ((symbol = r.ParseSymbol()))
 	{
@@ -209,6 +205,14 @@ bool FreyjaMaterial::Serialize(SystemIO::TextFileReader &r)
 				setName(s);
 				delete [] s;
 			}
+		}
+		else if (strcmp(symbol, "mVersion") == 0)
+		{
+			r.ParseInteger(); // Idealy this should == mVersion (const)
+		}
+		else if (strcmp(symbol, "mId") == 0)
+		{
+			r.ParseInteger(); // Old mId
 		}
 		else if (strcmp(symbol, "mFlags") == 0)
 		{
@@ -228,6 +232,10 @@ bool FreyjaMaterial::Serialize(SystemIO::TextFileReader &r)
 			if (s)
 			{
 				setTextureName(s);
+				if (mLoadTextureFunc)
+				{
+					mTexture = mLoadTextureFunc(s);
+				} 
 				delete [] s;
 			}
 		}
@@ -362,24 +370,12 @@ void FreyjaMaterial::setName(const char *name)
 
 void FreyjaMaterial::setTextureName(const char *name)
 {
-	int len;
-
-
 	if (!name || !name[0])
 	{
 		return;
 	}
 
-	len = strlen(name);
-
-	if (mTextureName)
-	{
-		delete [] mTextureName;
-	}
-
-	mTextureName = new char[len+1];
-	strncpy(mTextureName, name, len);
-	mTextureName[len] = 0;
+	mTextureFilename = name;
 }
 
 
@@ -879,7 +875,7 @@ const char *freyjaGetMaterialName(index_t materialIndex)
 	if (materialIndex < gFreyjaMaterials.size())
 	{
 		if (gFreyjaMaterials[materialIndex])
-			return gFreyjaMaterials[materialIndex]->mName;
+			return gFreyjaMaterials[materialIndex]->GetName();
 	}	
 
 	return 0x0;
@@ -1035,16 +1031,12 @@ int32 freyjaGetMaterialBlendDestination(index_t materialIndex)
 
 void freyjaMaterialName(index_t materialIndex, const char *name)
 {
-	if (!name || !name[0])
-		return;
-
 	if (materialIndex < gFreyjaMaterials.size())
 	{
 		if (!gFreyjaMaterials[materialIndex])
 			return;
 
-		strncpy(gFreyjaMaterials[materialIndex]->mName, name, 64);
-		gFreyjaMaterials[materialIndex]->mName[63] = 0;
+		gFreyjaMaterials[materialIndex]->SetName(name);
 	}	
 }
 
@@ -1228,3 +1220,10 @@ FreyjaMaterial *freyjaGetMaterialClass(index_t materialIndex)
 }
 
 
+bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r)
+{
+	index_t mat = freyjaMaterialCreate();
+	freyjaPrintMessage("> Reading in material %i...", mat);
+	FreyjaMaterial *m = freyjaGetMaterialClass(mat);
+	return m ? m->Serialize(r) : false;
+}

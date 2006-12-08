@@ -347,7 +347,6 @@ void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 void freyjaBone_Transform_TmpUtil(index_t boneIndex, Matrix &m)
 {
 	index_t parent = freyjaGetBoneParent(boneIndex);
-	//Matrix n;
 
 	if (freyjaIsBoneAllocated(parent))
 	{
@@ -358,12 +357,24 @@ void freyjaBone_Transform_TmpUtil(index_t boneIndex, Matrix &m)
 
 	if (b)
 	{
-		Matrix n;
-		n = b->mRotation;
-		n.Translate(b->mTranslation);
+#if 0
+		//m[12] += b->mTranslation[0];
+		//m[13] += b->mTranslation[1];
+		//m[14] += b->mTranslation[2];
+		// * m.getQuat();
 
+		//b->mBindPose = b->mRotation;
+		//b->mBindPose.Translate(b->mTranslation);
+		//m = m * b->mBindPose;
+
+		
+		m = m * b->mBindPose;
+#else
+		Matrix n = b->mRotation;
+		n.Translate(b->mTranslation);
 		m = m * n;
 		b->mBindPose = m;
+#endif
 	}
 }
 

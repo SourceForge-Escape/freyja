@@ -109,14 +109,16 @@ bool Bone::Serialize(SystemIO::TextFileWriter &w)
 	w.Print("\t mBindPose ");
 	for (i = 0; i < 16; ++i)
 	{
-		w.Print("%f ", mBindPose[i]);		
+		if (i % 4 == 0) w.Print("\n\t");			
+		w.Print("%f\t", mBindPose[i]);		
 	}
 	w.Print("\n");
 
-	w.Print("\t mBindToWorld \n");
+	w.Print("\t mBindToWorld ");
 	for (i = 0; i < 16; ++i)
 	{
-		w.Print("%f ", mBindToWorld[i]);		
+		if (i % 4 == 0) w.Print("\n\t");			
+		w.Print("%f\t", mBindToWorld[i]);
 	}
 	w.Print("\n");
 

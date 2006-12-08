@@ -527,6 +527,17 @@ class FreyjaControl
 	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
+	bool LoadTexture(const char *filename, int &id)
+	{
+		bool b = false;
+		if (LoadTexture(filename)) { id = mTextureId-1; b = true; }
+		return b;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Reads material from disk
+	 * Post : Returns true if sucessful
+	 ------------------------------------------------------*/
+
 	bool LoadUserPreferences();
 	/*------------------------------------------------------
 	 * Pre  : 

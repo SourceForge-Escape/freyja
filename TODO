@@ -24,6 +24,7 @@
 		- Renable 'direct' vertex animation creation
 		  ( Letting the user move points in vertex mode )
 		- Ref weights from vertex to fix blending issues
+		- ZIP file based pak format for freyja format models w/ textures, etc
 
 
 	* Cursor system
@@ -42,6 +43,9 @@
 			  for more tactical control
 
 	* Modeling
+		- Add back partial mesh copying ( vertex based )
+		- Add back partial mesh mirroring ( vertex based )
+		- Add back UI for vertex welding 
 		- Edge picking
 		- Facet knife
 
