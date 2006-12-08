@@ -219,51 +219,57 @@ bool Mesh::SerializePool(SystemIO::TextFileReader &r, const char *name,
 bool Mesh::Serialize(SystemIO::TextFileWriter &w)
 {
 	w.Print("Mesh\n");
-	w.Print("\tversion 1\n");
-	w.Print("\tname \"%s\"\n", mName);
-	w.Print("\tuid %u\n", mUID);
-	w.Print("\tflags %u\n", mFlags);
-	w.Print("\tmaterial %u\n", mMaterialIndex);
-	w.Print("\tloc %f %f %f\n", mPosition[0], mPosition[1], mPosition[2]);
-	w.Print("\trot %f %f %f\n", mRotation[0], mRotation[1], mRotation[2]);
-	w.Print("\tsiz %f %f %f\n", mScale[0], mScale[1], mScale[2]);
-	w.Print("\tbbox %f %f %f %f %f %f\n", 
+	w.Print("\t mVersion 2\n");
+	w.Print("\t mName \"%s\"\n", mName);
+	w.Print("\t mUID %u\n", mUID);
+	w.Print("\t mFlags %u\n", mFlags);
+	w.Print("\t mMaterial %u\n", mMaterialIndex);
+	w.Print("\t mPosition %f %f %f\n", mPosition[0], mPosition[1], mPosition[2]);
+	w.Print("\t mRotation %f %f %f\n", mRotation[0], mRotation[1], mRotation[2]);
+	w.Print("\t mScale %f %f %f\n", mScale[0], mScale[1], mScale[2]);
+	w.Print("\t mBoundingVolume.mBox %f %f %f %f %f %f\n", 
 			mBoundingVolume.mBox.mMin[0],
 			mBoundingVolume.mBox.mMin[1],
 			mBoundingVolume.mBox.mMin[2],
 			mBoundingVolume.mBox.mMax[0],
 			mBoundingVolume.mBox.mMax[1],
 			mBoundingVolume.mBox.mMax[2]);
-	w.Print("\tbsphere %f %f %f %f\n", 
+	w.Print("\t mBoundingVolume.mSphere %f %f %f %f\n", 
 			mBoundingVolume.mSphere.mRadius,
 			mBoundingVolume.mSphere.mCenter[0], 
 			mBoundingVolume.mSphere.mCenter[1], 
 			mBoundingVolume.mSphere.mCenter[2]);
 
-	SerializePool(w, "vertex", mVertexPool, mFreedVertices);
-	SerializePool(w, "texcoord", mTexCoordPool, mFreedTexCoords);
-	SerializePool(w, "normal", mNormalPool, mFreedNormals);
+	SerializePool(w, "mVertex", mVertexPool, mFreedVertices);
+	SerializePool(w, "mTexCoord", mTexCoordPool, mFreedTexCoords);
+	SerializePool(w, "mNormal", mNormalPool, mFreedNormals);
 
-	w.Print("\tWeight %u\n", mWeights.size());
+	w.Print("\t mWeights %u\n", mWeights.size());
 	for (uint32 i = 0, n = mWeights.size(); i < n; ++i)
 	{
 		Weight *ww = GetWeight(i);
 		if (ww) ww->Serialize(w);
 	}
 
-	w.Print("\tVertex %u\n", mVertices.size());
+	w.Print("\t mVertices %u\n", mVertices.size());
 	for (uint32 i = 0, n = mVertices.size(); i < n; ++i)
 	{
 		Vertex *v = GetVertex(i);
 		if (v) v->Serialize(w);
 	}
 
-	w.Print("\tFace %u\n", mFaces.size());
+	w.Print("\t mFaces %u\n", mFaces.size());
 	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
 	{
 		Face *f = GetFace(i);
 		if (f) f->Serialize(w);
 	}
+
+	w.Print("\t mTracks %u\n", 1); // only have one in test =p
+	mTrack.Serialize(w);
+
+	w.Print("\t mVertexAnimTracks %u\n", 1); // only have one in test =p
+	mVertexAnimTrack.Serialize(w);
 
 	return true;
 }
@@ -276,7 +282,7 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 	r.ParseSymbol(); // Mesh
 
 	r.ParseSymbol(); // version
-	r.ParseInteger();
+	uint32 version = r.ParseInteger();
 
 	r.ParseSymbol(); // name
 	const char *s = r.ParseStringLiteral();
@@ -360,6 +366,31 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 			Face *f = new Face();
 			f->Serialize(r);
 			mFaces.push_back(f);
+			--count;
+		}
+	}
+
+	if (version == 1)
+		return true;
+
+	r.ParseSymbol(); // mTracks
+	{
+		int32 count = r.ParseInteger();
+		while (count > 0)
+		{
+			// only have one in test =p
+			mTrack.Serialize(r);
+			--count;
+		}
+	}
+
+	r.ParseSymbol(); // mVertexAnimTracks
+	{
+		int32 count = r.ParseInteger();
+		while (count > 0)
+		{
+			// only have one in test =p
+			mVertexAnimTrack.Serialize(r);
 			--count;
 		}
 	}
