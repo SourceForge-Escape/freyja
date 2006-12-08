@@ -698,7 +698,6 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 		return false;
 	}
 
-
 	int32 matIndex;
 	uint32 mode = 0;
 	bool perlinLoaded = false;
@@ -714,7 +713,7 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 
 		if (strncmp(buffer, "[Material]", 11) == 0)
 		{
-			if (mFlags & fLoadMaterialInSlot)  
+			if (mFlags & fLoadMaterialInSlot)
 			{
 				matIndex = freyjaGetCurrentMaterial();
 			}
