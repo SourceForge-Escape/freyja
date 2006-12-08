@@ -32,10 +32,9 @@ Vector<Skeleton *> Skeleton::mGobalPool;
 ////////////////////////////////////////////////////////////
 
 Skeleton::Skeleton() :
+	mUID(INDEX_INVALID),
 	mBones(),
-	mRoot(0),
-	mAnimations(),
-	mUID(INDEX_INVALID)
+	mRoot(0)
 {
 	mName[0] = '\0';
 }
@@ -50,28 +49,13 @@ Skeleton::~Skeleton()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-SkeletalAnimation *Skeleton::getAnimation(index_t animationIndex)
-{
-	if (animationIndex < mAnimations.size())
-		return mAnimations[animationIndex];
-
-	return 0x0;
-}
-
-
-index_t Skeleton::getUID()
-{
-	return mUID;
-}
-
-
-uint32 Skeleton::getCount()
+uint32 Skeleton::GetCount()
 {
 	return mGobalPool.size();
 }
 
 
-Skeleton *Skeleton::getSkeleton(index_t uid)
+Skeleton *Skeleton::GetSkeleton(index_t uid)
 {
 	if (uid < mGobalPool.size())
 		return mGobalPool[uid];
@@ -80,11 +64,35 @@ Skeleton *Skeleton::getSkeleton(index_t uid)
 }
 
 
+bool Skeleton::Serialize(SystemIO::TextFileWriter &w)
+{
+	w.Print("Skeleton\n");
+	w.Print("\t mVersion 1\n");
+	
+	w.Print("\t mUID %u\n", mUID);
+
+	w.Print("\t mName \"%s\"\n", mName);
+
+	w.Print("\t mBones %u ", mBones.size());
+	for (uint32 i = 0, n = mBones.size(); i < n; ++i)
+	{
+		w.Print("%u ", mBones[i]);
+	}
+	w.Print("\n");
+
+	w.Print("\t mRoot %u\n", mRoot);
+
+	w.Print("END");
+
+	return true;
+}
+
+
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void Skeleton::addBone(index_t bone)
+void Skeleton::AddBone(index_t bone)
 {
 	uint32 i;
 	foreach(mBones, i)
@@ -93,11 +101,18 @@ void Skeleton::addBone(index_t bone)
 			return;
 	}
 
+	// Mongoose 2006.12.08, Getting double hardcore with refs now
+	Bone *b = Bone::GetBone(bone);
+	if (b)
+	{
+		b->mSkeleton = GetUID();
+	}
+
 	mBones.pushBack(bone);
 }
 
 
-index_t Skeleton::addToPool()
+index_t Skeleton::AddToPool()
 {
 	uint32 i, count;
 	bool found = false;
@@ -130,49 +145,7 @@ index_t Skeleton::addToPool()
 }
 
 
-index_t Skeleton::createAnimation()
-{
-	SkeletalAnimation *anim = new SkeletalAnimation();
-	uint32 i, count;
-	bool found = false;
-
-	anim->mSkeleton = mUID;
-
-	/* Setup Animation ID and class container reference */
-	anim->mId = count = mAnimations.size();
-
-	for (i = 0; i < count; ++i)
-	{
-		if (mAnimations[i] == 0x0)
-		{
-			anim->mId = i;
-			mAnimations.assign(mUID, anim);
-			found = true;
-		}	
-	}
-
-	if (!found)
-	{
-		mAnimations.pushBack(anim);
-	}
-
-	return anim->mId;
-}
-
-
-void Skeleton::deleteAnimation(index_t animationIndex)
-{
-	if (animationIndex < mAnimations.size())
-	{
-		if (mAnimations[animationIndex])
-			delete mAnimations[animationIndex];
-
-		mAnimations.assign(animationIndex, 0x0);
-	}
-}
-
-
-void Skeleton::removeBone(index_t bone)
+void Skeleton::RemoveBone(index_t bone)
 {
 	Vector<index_t> bones;
 	uint32 i, n;
@@ -196,7 +169,7 @@ void Skeleton::removeBone(index_t bone)
 }
 
 
-void Skeleton::removeFromPool()
+void Skeleton::RemoveFromPool()
 {
 	if (mUID < mGobalPool.size())
 		mGobalPool.assign(mUID, 0x0);
@@ -205,13 +178,44 @@ void Skeleton::removeFromPool()
 }
 
 
-void Skeleton::resetPool()
+void Skeleton::ResetPool()
 {
 	mGobalPool.clear();
 }
 
 
-void Skeleton::setName(const char *name)
+bool Skeleton::Serialize(SystemIO::TextFileReader &r)
+{
+	if (strcmp(r.ParseSymbol(), "Skeleton"))
+		return false;
+
+	r.ParseSymbol(); // mVersion
+	r.ParseInteger(); // == 1
+	
+	r.ParseSymbol(); // mUID
+	r.ParseInteger(); // old mUID
+
+	r.ParseSymbol(); // mName
+	SetName(r.ParseStringLiteral());
+
+	r.ParseSymbol(); // mBones
+	uint32 count = r.ParseInteger();
+	while (count > 0)
+	{
+		AddBone(r.ParseInteger());
+		--count;
+	}
+
+	r.ParseSymbol(); // mRoot
+	mRoot = r.ParseInteger();
+
+	r.ParseSymbol(); // END
+
+	return true;
+}
+
+
+void Skeleton::SetName(const char *name)
 {
 	uint32 i;
 
@@ -223,7 +227,6 @@ void Skeleton::setName(const char *name)
 		}
 
 		mName[i] = 0;
-		
 		mName[63] = 0;
 	}
 }
@@ -274,7 +277,7 @@ index_t gFreyjaCurrentSkeleton = INDEX_INVALID;
 void freyjaSkeletonPoolClear()
 {
 	gFreyjaCurrentSkeleton = INDEX_INVALID;
-	Skeleton::resetPool();
+	Skeleton::ResetPool();
 }
 
 
@@ -295,17 +298,17 @@ index_t freyjaSkeletonCreate()
 {
 	Skeleton *skel = new Skeleton();
 
-	return skel->addToPool();
+	return skel->AddToPool();
 }
 
 
 void freyjaSkeletonDelete(index_t skeletonIndex)
 {
-	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
 
 	if (skel)
 	{
-		skel->removeFromPool();
+		skel->RemoveFromPool();
 		delete skel;
 	}
 }
@@ -323,23 +326,23 @@ void freyjaSkeletonUpdateBones(index_t skeletonIndex)
 
 void freyjaSkeletonRootIndex(index_t skeletonIndex, index_t boneIndex)
 {
-	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
 	Bone *bone = Bone::GetBone(boneIndex);
 
 	if (skel && bone)
-		skel->mRoot = boneIndex;
+		skel->SetRoot(boneIndex);
 }
 
 
 void freyjaSkeletonAddBone(index_t skeletonIndex, index_t boneIndex)
 {
-	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
 	Bone *bone = Bone::GetBone(boneIndex);
 
 	if (skel && bone)
 	{
-		skel->addBone(boneIndex);
-		bone->mSkeleton = skel->getUID();
+		skel->AddBone(boneIndex);
+		bone->mSkeleton = skel->GetUID();
 	}
 }
 
@@ -347,16 +350,16 @@ void freyjaSkeletonAddBone(index_t skeletonIndex, index_t boneIndex)
 
 uint32 freyjaGetSkeletonCount()
 {
-	return Skeleton::getCount();
+	return Skeleton::GetCount();
 }
 
 
 uint32 freyjaGetSkeletonBoneCount(index_t skeletonIndex)
 {
-	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
 
 	if (skel)
-		return skel->mBones.size();
+		return skel->GetBoneCount();
 
 	return 0;
 }
@@ -364,10 +367,10 @@ uint32 freyjaGetSkeletonBoneCount(index_t skeletonIndex)
 
 index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element)
 {
-	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
 
-	if (skel && element < skel->mBones.size())
-		return skel->mBones[element];
+	if (skel && element < skel->GetBoneCount())
+		return skel->GetBone(element);
 
 	return INDEX_INVALID;
 }
@@ -375,40 +378,23 @@ index_t freyjaGetSkeletonBoneIndex(index_t skeletonIndex, uint32 element)
 
 index_t freyjaGetSkeletonRootIndex(index_t skeletonIndex)
 {
-	Skeleton *skel = Skeleton::getSkeleton(skeletonIndex);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
 
 	if (skel)
-		return skel->mRoot;
+		return skel->GetRoot();
 
 	return INDEX_INVALID;
 }
 
 
-void freyjaSkeletonTransform(index_t boneIndex, 
+void freyjaSkeletonTransform(index_t skeleton, 
                              freyja_transform_action_t action, 
                              vec_t x, vec_t y, vec_t z)
 {
-	//Matrix m;
+	
+	Skeleton *skel = Skeleton::GetSkeleton(skeleton);
 
-
-	switch (action)
-	{
-	case fTranslate:
-		break;
-
-	case fRotate:
-		break;
-
-	case fScale:
-		break;
-
-	case fScaleAboutPoint:
-		break;
-
-	case fRotateAboutPoint:
-		break;
-	}
-
-	freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
+	if (skel)
+		freyjaBoneTransform(skel->GetRoot(), action, x, y, z);
 }
 

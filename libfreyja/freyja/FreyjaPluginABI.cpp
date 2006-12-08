@@ -49,6 +49,7 @@
 #include "FreyjaMaterial.h"
 #include "FreyjaTexture.h"
 #include "MetaData.h"
+#include "Skeleton.h"
 
 #include "FreyjaPluginABI.h"
 
@@ -1103,6 +1104,11 @@ int32 freyjaImportModel(const char *filename)
 			uint32 mMaterialCount = tr.ParseInteger();
 
 			uint32 count = mMaterialCount;
+			if (count)
+			{
+				extern Vector<FreyjaMaterial *> gFreyjaMaterials;
+				gFreyjaMaterials.erase();
+			}
 			while (count > 0)
 			{
 				freyjaMaterialLoadChunkTextJA(tr);
@@ -1126,7 +1132,11 @@ int32 freyjaImportModel(const char *filename)
 			count = mSkeletonCount;
 			while (count > 0)
 			{
-				//freyjaBoneLoadChunkTextJA(tr);
+				index_t skel = freyjaSkeletonCreate();
+				freyjaPrintMessage("> Reading in skeleton %i...", skel);
+				if (Skeleton::GetSkeleton(skel))
+					Skeleton::GetSkeleton(skel)->Serialize(tr);
+
 				--count;
 			}
 		}
@@ -1307,7 +1317,7 @@ int32 freyjaExportModel(const char *filename, const char *type)
 			
 			tw.Print("mBoneCount %u\n", ballocated);
 
-			tw.Print("mSkeletonCount 0\n");
+			tw.Print("mSkeletonCount %u\n", Skeleton::GetCount()); // FIXME
 
 			uint32 matcount = freyjaGetMaterialCount();
 			uint32 matallocated = 0;
@@ -1337,6 +1347,13 @@ int32 freyjaExportModel(const char *filename, const char *type)
 			{
 				if (freyjaIsBoneAllocated(i))
 					freyjaBoneSaveChunkTextJA(tw, i);
+			}
+
+			for (uint32 i = 0; i < Skeleton::GetCount(); ++i)
+			{
+				freyjaPrintMessage("> Wrtitng skeleton %i...", i);
+				if (Skeleton::GetSkeleton(i))
+					Skeleton::GetSkeleton(i)->Serialize(tw);
 			}
 		}
 		return 0;
