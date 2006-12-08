@@ -25,6 +25,7 @@
 		  ( Letting the user move points in vertex mode )
 		- Ref weights from vertex to fix blending issues
 		- ZIP file based pak format for freyja format models w/ textures, etc
+		- FIX all the plugins using obsolete iterators ( won't export using it )
 
 
 	* Cursor system

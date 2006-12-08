@@ -366,6 +366,91 @@ public:
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
+	bool Serialize(SystemIO::TextFileWriter &w)
+	{
+		w.Print("Track\n");
+		w.Print("\t mVersion 1\n");
+
+		w.Print("\t mName \"%s\"\n", mName.c_str());
+
+		w.Print("\t mFlags %u\n", mFlags);
+
+		w.Print("\t mDuration %f\n", mDuration);
+
+		w.Print("\t mStart %f\n", mStart);
+
+		w.Print("\t mRate %f\n", mRate);
+
+		// Weed out this junky sparse array...
+		uint32 i = 0, count = 0;
+		foreach(mKeyFrames, i)
+		{
+			if (mKeyFrames[i])
+			{
+				++count;
+			}
+		}
+
+		w.Print("\t mKeyFrames %u\n", count);
+
+		i = 0;
+		foreach(mKeyFrames, i)
+		{
+			if (mKeyFrames[i])
+			{
+				w.Print("\t Key %u ", i);
+				mKeyFrames[i]->Serialize(w);
+				w.Print("\n");
+			}
+		}
+
+		w.Print("END\n");
+
+		return true; 
+	}
+
+
+	bool Serialize(SystemIO::TextFileReader &r)
+	{		
+		r.ParseSymbol(); // Track
+
+		r.ParseSymbol(); // mVersion
+		r.ParseInteger(); // == 1
+
+		r.ParseSymbol(); // mName
+		mName = r.ParseStringLiteral();
+
+		r.ParseSymbol(); // mFlags
+		mFlags = r.ParseInteger();
+
+		r.ParseSymbol(); // mDuration
+		mDuration = r.ParseFloat();
+
+		r.ParseSymbol(); // mStart
+		mStart = r.ParseFloat();
+
+		r.ParseSymbol(); // mRate
+		mRate = r.ParseFloat();
+
+		UpdateKeyframes(); // Allocate junky sparse array...
+
+		r.ParseSymbol(); // mKeyFrames
+		uint32 count = r.ParseInteger();
+		while (count > 0)
+		{
+			r.ParseSymbol(); // Key
+			uint32 key = r.ParseInteger();
+			NewKeyframeByIndex(key)->Serialize(r);
+
+			--count;
+		}
+
+		r.ParseSymbol(); // END
+
+		return true;
+	}
+
+
 	Vector<KeyFrame *> mKeyFrames;   /* Keyframe data */
 
 	String mName;		             /* Human readable name for this track */
@@ -696,7 +781,6 @@ public:
 
 		return true;
 	}
-
 };
 
 

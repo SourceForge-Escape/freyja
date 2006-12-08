@@ -115,26 +115,13 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
-	////////////////////////////////////////////////////////////////
-	// SkeletalAnimation
-	//
-	////////////////////////////////////////////////////////////////
-
-	index_t freyjaSkeletalAnimCreate(index_t skeletalIndex);
+	void freyjaSkeletonName(index_t skeleton, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaSkeletalAnimDelete(index_t skeletonIndex, uint32 animation);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaSkeletalAnimName(index_t skeletonIndex, uint32 animation,
-	                            const char *animName);
+	const char *freyjaGetSkeletonName(index_t skeleton);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

@@ -86,12 +86,14 @@ public:
 	 ------------------------------------------------------*/
 
 	virtual bool Serialize(SystemIO::FileWriter &w) = 0;
+	virtual bool Serialize(SystemIO::TextFileWriter &w) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
 	virtual bool Serialize(SystemIO::FileReader &r) = 0;
+	virtual bool Serialize(SystemIO::TextFileReader &r) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read data into this object from disk
@@ -130,8 +132,32 @@ class VecKeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
+	virtual bool Serialize(SystemIO::TextFileWriter &w) 
+	{
+		w.Print(" %f", mTime);
+		w.Print(" %u", mFlags);
+		w.Print(" %f\n", mData);
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
 	virtual bool Serialize(SystemIO::FileReader &r) 
 	{ mData = r.ReadFloat32(); return true; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		mTime = r.ParseFloat();
+		mFlags = r.ParseInteger();
+		mData = r.ParseFloat();
+		return true; 
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read data into this object from disk
@@ -175,6 +201,18 @@ class Vec3KeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
+	virtual bool Serialize(SystemIO::TextFileWriter &w) 
+	{
+		w.Print(" %f", mTime);
+		w.Print(" %u", mFlags);
+		w.Print(" %f %f %f\n", mData.mVec[0], mData.mVec[1], mData.mVec[2]);
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
 	virtual bool Serialize(SystemIO::FileReader &r) 
 	{ 
 		mFlags = r.ReadByte();
@@ -182,6 +220,20 @@ class Vec3KeyFrame : public KeyFrame
 		mData.mVec[0] = r.ReadFloat32();
 		mData.mVec[1] = r.ReadFloat32();
 		mData.mVec[2] = r.ReadFloat32(); 
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		mTime = r.ParseFloat();
+		mFlags = r.ParseInteger();
+		mData.mVec[0] = r.ParseFloat();
+		mData.mVec[1] = r.ParseFloat();
+		mData.mVec[2] = r.ParseFloat();
 		return true; 
 	}
 	/*------------------------------------------------------
@@ -201,7 +253,7 @@ class Vec3x3KeyFrame : public KeyFrame
 
 	virtual ~Vec3x3KeyFrame() {}
 
-	virtual uint32 GetSerializedSize() { return 4*3*3; }
+	virtual uint32 GetSerializedSize() { return 1+4+4*3*3; }
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : 
@@ -209,6 +261,8 @@ class Vec3x3KeyFrame : public KeyFrame
 
 	virtual bool Serialize(SystemIO::FileWriter &w) 
 	{
+		w.WriteByte(mFlags);
+		w.WriteFloat32(mTime);		
 		for (uint32 i = 0; i < 3; ++i)
 		{
 			w.WriteFloat32(mData[i].mVec[0]);
@@ -222,13 +276,47 @@ class Vec3x3KeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
+	virtual bool Serialize(SystemIO::TextFileWriter &w) 
+	{
+		w.Print(" %f", mTime);
+		w.Print(" %u", mFlags);
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			w.Print(" %f %f %f\n", mData[i].mVec[0], mData[i].mVec[1], mData[i].mVec[2]);
+		}
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
 	virtual bool Serialize(SystemIO::FileReader &r) 
 	{ 
+		mFlags = r.ReadByte();
+		mTime = r.ReadFloat32();
 		for (uint32 i = 0; i < 3; ++i)
 		{
 			mData[i].mVec[0] = r.ReadFloat32();
 			mData[i].mVec[1] = r.ReadFloat32();
 			mData[i].mVec[2] = r.ReadFloat32(); 
+		}
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		mTime = r.ParseFloat();
+		mFlags = r.ParseInteger();
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			mData[i].mVec[0] = r.ParseFloat();
+			mData[i].mVec[1] = r.ParseFloat();
+			mData[i].mVec[2] = r.ParseFloat();
 		}
 		return true; 
 	}
@@ -304,6 +392,21 @@ class MatrixKeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
+	virtual bool Serialize(SystemIO::TextFileWriter &w) 
+	{
+		w.Print(" %f", mTime);
+		w.Print(" %u", mFlags);
+		for (uint32 i = 0; i < 16; ++i)
+		{
+			w.Print(" %f", mData.mMatrix[i]);
+		}
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
 	virtual bool Serialize(SystemIO::FileReader &r) 
 	{ 
 		for (uint32 i = 0; i < 16; ++i)
@@ -316,6 +419,22 @@ class MatrixKeyFrame : public KeyFrame
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		mTime = r.ParseFloat();
+		mFlags = r.ParseInteger();
+		for (uint32 i = 0; i < 16; ++i)
+		{
+			mData.mMatrix[i] = r.ParseFloat();
+		}
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
 
 	Matrix mData;
 };
@@ -385,6 +504,22 @@ public:
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
+	virtual bool Serialize(SystemIO::TextFileWriter &w) 
+	{
+		w.Print(" %f", mTime);
+		w.Print(" %u", mFlags);
+		w.Print(" %u", mVertices.end());
+		for (uint32 i = 0; i < mVertices.end(); ++i)
+		{
+			w.Print(" %f", mVertices[i]);
+		}
+		return true;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Write data from this object to disk
+	 ------------------------------------------------------*/
+
 	virtual bool Serialize(SystemIO::FileReader &r) 
 	{ 
 		mVertices.clear();
@@ -394,6 +529,24 @@ public:
 		for (uint32 i = 0; i < sz; ++i)
 		{
 			mVertices.pushBack(r.ReadFloat32());
+		}
+
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read data into this object from disk
+	 ------------------------------------------------------*/
+
+	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	{ 
+		mTime = r.ParseFloat();
+		mFlags = r.ParseInteger();
+		uint32 sz = r.ParseInteger();
+
+		for (uint32 i = 0; i < sz; ++i)
+		{
+			mVertices.pushBack(r.ParseFloat());
 		}
 
 		return true; 

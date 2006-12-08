@@ -154,6 +154,13 @@ void Mesh::GetSelectedVertices(Vector<index_t> &list)
 bool Mesh::SerializePool(SystemIO::TextFileWriter &w, const char *name,
 						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
 {
+	if (!array.size())
+	{
+		w.Print("\t%sStack %u\n", name, 0);
+		w.Print("\t%sArray %u\n", name, 0);	
+		return true;
+	}
+
 	{
 		w.Print("\t%sStack %u\n", name, stack.size());
 		mstl::StackNode<index_t> *cur = stack.top();
