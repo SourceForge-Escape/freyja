@@ -6,6 +6,7 @@
 
  Dancer (RC2)
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - More freyja text format polish ( can autoload materials via callback, etc )
  - The blood of an Elf was taken to purify this release
  - ChangeLog date stamp now is range of first patch to 'release' 
    instead of first patch, which confused people to no end.

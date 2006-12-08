@@ -400,6 +400,26 @@ void Matrix::rotate(const vec3_t xyz)
 }
 
 
+void Matrix::Rotate2(vec_t alpha, vec_t beta, vec_t gamma)
+{
+	vec_t cosA, sinA;
+	helSinCosf(alpha, &sinA, &cosA);
+	vec_t cosB, sinB;
+	helSinCosf(beta, &sinB, &cosB);
+	vec_t cosG, sinG;
+	helSinCosf(gamma, &sinG, &cosG);
+
+   matrix_t rot;
+
+   rot[ 0]=cosB*cosG;   rot[ 1]=sinA*sinB*cosG+cosA*sinG;   rot[ 2]=-cosA*sinB*cosG+sinA*sinG;        rot[ 3]=0;
+   rot[ 4]=-cosB*sinG;  rot[ 5]=-sinA*sinB*sinG+cosA*cosG;  rot[ 6]=cosA*sinB*sinG+sinA*cosG;  rot[ 7]=0;
+   rot[ 8]=sinB;        rot[ 9]=-sinA*cosB;                 rot[10]=cosA*cosB;  rot[11]=0;
+   rot[12]=0;           rot[13]=0;        rot[14]=0;        rot[15]=1;
+
+   multiply(mMatrix, rot, mMatrix);
+}
+
+
 // row order
 void Matrix::rotate(vec_t ax, vec_t ay, vec_t az)
 {

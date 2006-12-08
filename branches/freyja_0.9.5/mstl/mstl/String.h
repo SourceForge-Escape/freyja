@@ -142,9 +142,10 @@ class String
 	{
 		return mString;
 	}
-
 	
 	unsigned int GetLength() { return mLength; }
+
+	unsigned int length() { return mLength; }
 
 	const char *c_str()
 	{

@@ -37,6 +37,7 @@
 #include <freyja/MeshABI.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/PerlinNoise.h>
+#include <freyja/FreyjaMaterial.h>
 #include <hel/math.h>
 #include <hel/Ray.h>
 
@@ -64,6 +65,15 @@ uint32 FreyjaControl::mSelectedControlPoint = 0;
 Vector<Vec3> FreyjaControl::mControlPoints;
 
 
+int load_texture(const char *filename)
+{
+	int id = 0;
+	FreyjaControl::mInstance->LoadTexture(filename, id);
+	freyja_print("! Texture callback %i : '%s'...", id, filename);
+	return id;
+}
+
+
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
@@ -88,7 +98,6 @@ FreyjaControl::FreyjaControl() :
 {
 	/* Search local paths first ( mostly debugging ) */
 	freyjaPluginAddDirectory("plugins/model/debug");
-
 	/* Search local paths for things like windows builds */
 	freyjaPluginAddDirectory("modules/model");
 
@@ -106,6 +115,7 @@ FreyjaControl::FreyjaControl() :
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
 	/* Spawn 0th material, set the iterator, and make a default material */
+	FreyjaMaterial::mLoadTextureFunc = load_texture;
 	int32 mIndex = freyjaMaterialCreate();
 	vec4_t rgba = {0,0,0,1};
 	freyjaCurrentMaterial(mIndex);
@@ -747,6 +757,7 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 				{
 					if (mTextureId > -1)
 					{
+						freyjaMaterialTextureName(matIndex, s);
 						freyjaMaterialTexture(matIndex, mTextureId-1);
 						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
 					}
@@ -1239,9 +1250,6 @@ bool FreyjaControl::SaveModel(const char *filename)
 
 bool FreyjaControl::LoadTexture(const char *filename)
 {
-	FreyjaImage img;
-	unsigned char *image;
-	unsigned int w, h;
 	int err = -1;
 
 	// Mongoose 2002.01.10, Evil...
@@ -1294,12 +1302,15 @@ bool FreyjaControl::LoadTexture(const char *filename)
 	printf("[FreyjaModel::loadTexture]\n");
 	printf(" Loading texture '%s'\n", filename);
 
+	FreyjaImage img;
+	unsigned char *image;
+	unsigned int w, h;
+
 	if (!img.loadImage(filename))
 	{
 		img.getImage(&image);
 		w = img.getWidth();
 		h = img.getHeight();
-
 
 		switch (img.getColorMode())
 		{
@@ -3073,6 +3084,7 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 
 void FreyjaControl::handleTextEvent(int event, const char *text)
 {
+	static bool haltTextureA = false;
 	bool empty = (text == NULL || text[0] == 0);
 
 
@@ -3089,12 +3101,15 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 				uint32 texture = mTextureId - 1;
 				uint32 mat = freyjaGetCurrentMaterial();
 
+				haltTextureA = true;
 				mgtk_textentry_value_set(e, text);
 				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
 				mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
 				freyjaMaterialTexture(mat, texture);
-				
+				freyjaMaterialTextureName(mat, text);
+
 				freyja_event_gl_refresh();
+				haltTextureA = false;
 			}
 
 			freyja_print("%s %s", text, loaded ? "loaded" : "failed to load");
@@ -3127,7 +3142,8 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		break;
 
 	case eSetTextureNameA:
-		freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
+		if (!haltTextureA)
+			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
 		break;
 
 	case eSetTextureNameB:

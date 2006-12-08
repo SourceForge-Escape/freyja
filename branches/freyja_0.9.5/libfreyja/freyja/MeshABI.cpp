@@ -1826,6 +1826,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			Matrix combined = b->GetInverseBindPose() * world;
 			p = (combined * p) * w->mWeight;
 #elif 1
+			//rot *= HEL_PI_OVER_180;
 			Matrix world;
 			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			world.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1

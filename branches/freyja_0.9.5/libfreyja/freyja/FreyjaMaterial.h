@@ -29,6 +29,7 @@
 
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
+#include <mstl/String.h>
 
 #include "FreyjaTexture.h"
 
@@ -98,7 +99,8 @@ class FreyjaMaterial
 	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
 	 ------------------------------------------------------*/
 
-	const char *getName();
+	const char *GetName() { return getName(); }
+	const char *getName() { return mName; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Material's name or NULL
@@ -157,6 +159,7 @@ class FreyjaMaterial
 	 * Post : Sets passed flag
 	 ------------------------------------------------------*/
 
+	void SetName(const char *name) { setName(name); }
 	void setName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
@@ -172,8 +175,6 @@ class FreyjaMaterial
 	const static uint32 mVersion = 2;
 
 	int32 mId;                  /* Unique identifier */
-
-	char mName[64];             /* Material name */
 
 	uint32 mFlags;              /* Bit flags */
 
@@ -201,6 +202,9 @@ class FreyjaMaterial
 
 	bool mHasAlphaChannel;      /* For depth sorting use */
 
+	// int load_texture(const char *filename)
+	static int (*mLoadTextureFunc)(const char *filename);
+
 
  private:
 
@@ -214,10 +218,19 @@ class FreyjaMaterial
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	char *mTextureName;         /* This is used for file I/O to map classes */
+	char mName[64];             /* Material name */
+
+	String mBlendSrcString;     /* Blending source human readable string */
+
+	String mBlendDestString;    /* Blending source human readable string */
+
+	String mTextureFilename;    /* This is used for file I/O to map classes */
 };
 
 
 FreyjaMaterial *freyjaGetMaterialClass(index_t materialIndex);
+
+bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r);
+
 
 #endif
