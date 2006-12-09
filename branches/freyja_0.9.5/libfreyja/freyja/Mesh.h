@@ -56,14 +56,20 @@ public:
 		mBoneIndex(bone),
 		mWeight(weight)
 	{
-		//freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
 	}
+
+	Weight(const Weight &weight) :
+		mVertexIndex(weight.mVertexIndex),
+		mBoneIndex(weight.mBoneIndex),
+		mWeight(weight.mWeight)
+	{
+	}
+
 
 	Weight() : mVertexIndex(INDEX_INVALID),
 			   mBoneIndex(INDEX_INVALID),
 			   mWeight(0.0f)
 	{
-		//freyjaPrintMessage("w %i %i %f", mVertexIndex, mBoneIndex, mWeight);
 	}
 
 	~Weight()
@@ -308,13 +314,17 @@ public:
 		return INDEX_INVALID;
 	}
 
-
 	void PurgePolyMappedTexCoords()
 	{
 		mFlags |= fPolyMappedTexCoords;
 		mFlags ^= fPolyMappedTexCoords;
 		mTexCoordIndices.clear();
 	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Disables polymapped texCoords for this face 
+	 *
+	 ------------------------------------------------------*/
 
 	void ClearSmoothingGroup() { mSmoothingGroup = 0; }
 	void SetSmoothingGroup(uint32 g) { mSmoothingGroup = g; }
@@ -419,10 +429,18 @@ public:
 };
 
 
-
 class Mesh
 {
 public:	
+	typedef enum {
+		fNone        =  0,
+		fHighlighted =  1,
+		fSelected    =  2,
+		fHidden      =  4,
+		fRayHit      =  8
+	} Flags;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -461,155 +479,74 @@ public:
 	 ------------------------------------------------------*/
 
 
-	//////////////////////////////////////////////////////////////////////////
-	// FIXME
-	// Testing embedded keyframing, so bare with me...
-	// these methods only support one 'animation' atm, but enforcing interface
-	// API usage makes it a transparent fix to API users later.
-	//////////////////////////////////////////////////////////////////////////
-
-	uint32 GetTransformTrackCount() {return 1;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t NewTransformTrack() {return 0;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	TransformTrack &GetTransformTrack(uint32 track) { return mTrack; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 GetVertexAnimTrackCount() {return 1;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t NewVertexAnimTrack() {return 0;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	vec_t *GetBlendVerticesArray() { return mBlendVertices.get_array(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 GetBlendVerticesCount() { return mBlendVertices.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void ResetBlendVertices()
-	{
-		vec_t *array = mBlendVertices.get_array();
-		if (array)
-			memset(array, 0, mBlendVertices.size()*sizeof(vec_t));
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void SyncBlendVertices()
-	{
-		if (mBlendVertices.size() < mVertexPool.size())
-		{
-			mBlendVertices.resize(mVertexPool.size());
-		}
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	// Getting ready to test arrays / VBO with dynamic backend, which
-	// requires caching here in the backend to be effective
-	//Vector<index_t> mTriangleList;
-	//Vector<index_t> mQuadList;
-
-
 	////////////////////////////////////////////////////////////
-	// Bounding Volume properties
+	// Properities
 	////////////////////////////////////////////////////////////
 
-	void SetBBox(const vec3_t min, const vec3_t max)
-	{
-		// Update bbox
-		HEL_VEC3_COPY(min, mBoundingVolume.mBox.mMin);
-		HEL_VEC3_COPY(max, mBoundingVolume.mBox.mMax);
-
-		// Update sphere
-		Vector3d vMin(min), vMax(max);
-		Vec3 origin = ( vMin + vMax ) * 0.5; // midpoint
-		vec_t radius = Vec3(origin - vMax).magnitude();
-
-		origin.Get(mBoundingVolume.mSphere.mCenter);
-		mBoundingVolume.mSphere.mRadius = radius;
-	}
-
-	void GetBBox(vec3_t min, vec3_t max)
-	{
-		HEL_VEC3_COPY(mBoundingVolume.mBox.mMin, min);
-		HEL_VEC3_COPY(mBoundingVolume.mBox.mMax, max);
-	}
-
-
-	Vec3 GetBoundingVolumeCenter()
-	{
-		return Vec3(mBoundingVolume.mSphere.mCenter);
-	}
-
-
-	vec_t GetBoundingVolumeRadius()
-	{
-		return mBoundingVolume.mSphere.mRadius;
-	}
-
-
-	Vec3 GetBBoxCenter()
-	{
-		return GetBoundingVolumeCenter();
-	}
-
-	void SetFaceSmoothingGroup(index_t face, uint32 group);
+	uint32 GetFlags() { return mFlags; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns option flag bitmap for this mesh
 	 ------------------------------------------------------*/
 
-	void SelectedFacesMarkSmoothingGroup(uint32 group, bool t);
+	void ClearFlag(Flags flag) { mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Clears option flag for this mesh
 	 ------------------------------------------------------*/
 
-	void GroupedFacesGenerateVertexNormals(uint32 group);
+	void SetFlag(Flags flag) { mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Sets option flag for this mesh
 	 ------------------------------------------------------*/
 
-	void SelectedFacesGenerateVertexNormals();
+	const char *GetName() { return mName; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Get human readable name of this mesh
+	 ------------------------------------------------------*/
+
+	void SetName(const char *name) { strncpy(mName, name, 31); mName[31] = 0; }
+	/*------------------------------------------------------
+	 * Pre  : <name> != NULL && <name>[0] != 0
+	 * Post : Sets human readable name of this mesh
+	 ------------------------------------------------------*/
+
+	const Vec3 &GetPosition() { return mPosition; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets mesh position attribute
+	 ------------------------------------------------------*/
+
+	void SetPosition(const Vec3 &v) { mPosition = v; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets mesh position attribute
+	 ------------------------------------------------------*/
+
+	const Vec3 &GetRotation() { return mRotation; }
+	/*------------------------------------------------------
+	 * Pre  : Euler angles in radians
+	 * Post : Gets mesh position attribute
+	 ------------------------------------------------------*/
+
+	void SetRotation(const Vec3 &v) { mRotation = v; }
+	/*------------------------------------------------------
+	 * Pre  : Euler angles in radians
+	 * Post : Sets mesh rotation attribute
+	 ------------------------------------------------------*/
+
+	const Vec3 &GetScale() { return mScale; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets mesh scale attribute
+	 ------------------------------------------------------*/
+
+	void SetScale(const Vec3 &v) { mScale = v; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets mesh scale attribute
 	 ------------------------------------------------------*/
 
 
@@ -623,13 +560,13 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	static uint32 GetChunkVersion() { return 9500; /* 0.9.5-00 */ }
+	static uint32 GetChunkVersion() { return 2; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void CollapseEdge(index_t faceIndex,uint32 a, uint32 b, uint32 c, uint32 d);
+	void CollapseEdge(index_t face, uint32 a, uint32 b, uint32 c, uint32 d);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -672,12 +609,6 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 ------------------------------------------------------*/
-
-	const char *GetName() { return mName; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get human readable name of mesh
 	 ------------------------------------------------------*/
 
 	void GetNormal(index_t normalIndex, vec3_t xyz)
@@ -731,20 +662,17 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
 	Vector3d GetVertexTexCoord(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
 	uint32 GetVertexCount() { return mVertices.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-
 
 	void GetVertexPos(index_t vertexIndex, vec3_t xyz)
 	{
@@ -833,24 +761,10 @@ public:
 	 *        Always sets fRayHit flag on face0, clears old results. 
 	 ------------------------------------------------------*/
 
-	bool SerializePool(SystemIO::TextFileWriter &w, const char *name,
-					   Vector<vec_t> &array, mstl::stack<index_t> &stack);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes the given pool to diskfile as a chunk
-	 ------------------------------------------------------*/
-
 	bool Serialize(SystemIO::TextFileWriter &w);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Serializes the mesh to diskfile as a chunk
-	 ------------------------------------------------------*/
-
-	bool SerializePool(SystemIO::TextFileReader &r, const char *name,
-					   Vector<vec_t> &array, mstl::stack<index_t> &stack);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes the given pool to diskfile as a chunk
 	 ------------------------------------------------------*/
 
 	bool Serialize(SystemIO::TextFileReader &r);
@@ -870,14 +784,29 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	// FIXME: This should use UV groups when they get checked in...
-	void UVMapSelectedFaces_Spherical();
 	void UVMapSelectedFaces_Cylindrical();
-	void UVMapSelectedFaces_Plane();
-	void UVMapSpherical(uint32 groups);
 	/*------------------------------------------------------
-	 * Pre  : <groupFilter> is valid smoothing group(s) as bitflag
-	 * Post : Generates a UV map with spherical projection for groups
+	 * Pre  : 
+	 * Post : Makes UV cylindrical projection for selected faces
+	 ------------------------------------------------------*/
+
+	void UVMapSelectedFaces_Plane();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Makes UV planar projection for selected faces
+	 ------------------------------------------------------*/
+
+	void UVMapSelectedFaces_Spherical();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Makes UV spherical projection for selected faces
+	 ------------------------------------------------------*/
+
+	void RebuildVertexPolygonReferences();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Completely rebuilds each Vertices' FaceReferences,
+	 *        and you don't want to do that very often.
 	 ------------------------------------------------------*/
 
 	void UpdateVertexReferenceWithSelectedBias();
@@ -895,119 +824,68 @@ public:
 	 ------------------------------------------------------*/
 
 	void ClearFaceFlags(index_t face, uint32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clears option flag for <face>
+	 ------------------------------------------------------*/
 
 	void SetFaceFlags(index_t face, uint32 flags);
-
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets option flag for <face>
+	 ------------------------------------------------------*/
 
 	void ClearVertexFlags(index_t vertex, uint32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clears option flag for <vertex>
+	 ------------------------------------------------------*/
 
 	void SetVertexFlags(index_t vertex, uint32 flags);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets option flag for <vertex>
+	 ------------------------------------------------------*/
 
+	bool Serialize(SystemIO::FileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	void SetName(const char *name)
-	{
-		strncpy(mName, name, 31);
-		mName[31] = 0;
-	}
-
-	// 'Location' interface
-	const Vec3 &GetPosition() { return mPosition; }
-	void GetPosition(vec3_t xyz) { mPosition.Set(xyz); }
-	void SetPosition(const vec3_t xyz) { HEL_VEC3_COPY(xyz, mPosition.mVec); }
-	void SetPosition(const Vec3 &v) { mPosition = v; }
-	void SetPositionX(vec_t x) { mPosition.mVec[0] = x; }
-	void SetPositionY(vec_t y) { mPosition.mVec[1] = y; }
-	void SetPositionZ(vec_t z) { mPosition.mVec[2] = z; }
-
-	void SetDeltaPosition(const vec3_t xyz) 
-	{
-		mPosition.mVec[0] += xyz[0]; 
-		mPosition.mVec[1] += xyz[1];
-		mPosition.mVec[2] += xyz[2];
-	}
-
-	void SetDeltaPositionX(vec_t x) { mPosition.mVec[0]+=x; }
-	void SetDeltaPositionY(vec_t y)	{ mPosition.mVec[1]+=y; }
-	void SetDeltaPositionZ(vec_t z) { mPosition.mVec[2]+=z; }
-
-	// 'Rotation' Euler angle interface 
-	void GetRotation(vec3_t xyz) { mRotation.Set(xyz); }
-	void SetRotationQuat(const vec4_t wxyz) {}
-	void SetDeltaRotationQuat(const vec4_t wxyz) {}
-
-	// 'Rotation' Quaternion interface 
-	void SetRotation(const vec3_t xyz) {}
-	void SetRotationX(vec_t x) {}
-	void SetRotationY(vec_t y) {}
-	void SetRotationZ(vec_t z) {}
-	void SetDeltaRotation(const vec3_t xyz) {}	
-	void SetDeltaRotationX(vec_t x) {}
-	void SetDeltaRotationY(vec_t y) {}
-	void SetDeltaRotationZ(vec_t z) {}
-
-	// 'Size' interface
-	void SetScale(const vec3_t xyz) {}	
-	void SetScaleX(vec_t x) {}
-	void SetScaleY(vec_t y) {}
-	void SetScaleZ(vec_t z) {}
-	void SetDeltaScale(const vec3_t xyz) {}	
-	void SetDeltaScaleX(vec_t x) {}
-	void SetDeltaScaleY(vec_t y) {}
-	void SetDeltaScaleZ(vec_t z) {}
-
-
-	bool Serialize(SystemIO::FileReader &r)
-	{
-		BUG_ME("Serialize disabled for incomplete class");
-		return false;
-	}
-
-
-	Mesh *CopyPartial(Vector<index_t> &list);
-	/*-----------------------------------------
-	 * Created  : 2000-11-30, Mongoose
-	 * Modified : 
+	void Merge(Mesh *mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Not like the old school 2000.11.30 API, Read
 	 *
-	 * Pre  : mesh is a valid mesh
-	 *        list is a valid vertex list of mesh
-	 * Post : Returns newly allocated mesh
-	 *        that is a copy of mesh 
-	 *        determined by the list
-	 -----------------------------------------*/
-
-	void Merge(Mesh *meshA, Vector<index_t> &list);
-	/*-----------------------------------------
-	 * Created  : 2000-11-30, Mongoose
-	 * Modified : 
+	 *        The passed <mesh> will be duplicated entirely
+	 *        into this mesh.  There is no 'partial merge'
+	 *        anymore.  If you want partial do a Split() first.
 	 *
-	 * Pre  : meshA is a valid mesh
-	 *        list is a valid vertex list of meshA
-	 *  
-	 * Post : Makes one mesh of of two, by
-	 *        merging vertices in list with this
-	 *        and removing from A 
+	 *        Also this doesn't make a 3rd mesh, but adds
+	 *        to this existing one.  Copy() if you want that.
 	 *
-	 *        Passing all vertices makes a 
-	 *        full merge
-	 -----------------------------------------*/
+	 *        If you want <mesh> to not exist after merge
+	 *        then you'll have to delete it yourself.
+	 ------------------------------------------------------*/
 
-	Mesh *Split(Vector<index_t> &list);
-	/*-----------------------------------------
-	 * Created  : 2000-11-30, Mongoose
-	 * Modified : 
+	Mesh *Split(bool trim);
+	/*------------------------------------------------------
+	 * Pre  : If <trim> is true remove the selected faces
+	 *        from this mesh after splitting off to another mesh.
+	 * 
+	 * Post : Not like the old school 2000.11.30 API, Read
 	 *
-	 * Pre  : mesh is a valid mesh
-	 *        list is a valid vertex list of mesh
-	 * Post : Removes the vertices in list
-	 *        from mesh, then generates a new
-	 *        mesh ( splits one mesh into two )
-	 *        The newly made mesh is returned
-	 -----------------------------------------*/    
+	 *        A new mesh is made from this mesh based on the
+	 *        currently fSelected flagged Faces.
+	 *
+	 *        This mesh exists outside of the gobal pool.
+	 *        If you want to add use the AddToPool() method.
+	 ------------------------------------------------------*/
 
-
-	Mesh *CsgUnion(Mesh *a);
-	Mesh *CsgIntersection(Mesh *a);
-	Mesh *CsgDifference(Mesh *a);
+	Mesh *CsgUnion(Mesh *a) { return NULL; }
+	Mesh *CsgIntersection(Mesh *a) { return NULL; }
+	Mesh *CsgDifference(Mesh *a) { return NULL; }
 	/*------------------------------------------------------
 	 * Pre  : Don't count on more than simple vertex culling now
 	 *
@@ -1033,49 +911,47 @@ public:
 	 * 2004.04.08:
 	 * Mongoose - Created with new generic API based on mtk
 	 ------------------------------------------------------*/
-
-
-	uint32 GetFlags() { return mFlags; }
 	
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void ExtrudeFace(index_t faceIndex, vec3_t displacement);
+	index_t CreateTexCoord(const vec3_t uvw)
+	{ return AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns local index of new texcoord array element
+	 ------------------------------------------------------*/
 
-	Mesh *Cut();
+	index_t CreateVertex(const Vec3 &v) { return CreateVertex(v.mVec); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns local index of new Vertex
+	 ------------------------------------------------------*/
 
-	void Paste(Mesh *model);
-
-	void Rotate(vec_t x, vec_t y, vec_t z);
-
-	void RotateAboutPoint(vec3_t point, vec_t x, vec_t y, vec_t z);
-
-	void Scale(vec_t x, vec_t y, vec_t z);
-
-	void Translate(vec_t x, vec_t y, vec_t z) { Translate(Vec3(x,y,z)); }
-
-	void Translate(Vec3 v) 
+	index_t CreateVertex(const vec3_t xyz)
 	{
-		// Position (world)
-		SetPosition(v+GetPosition());
-		
-		// Vertices
-		TripleVec_Addition(mVertexPool, v.mVec);
-
-		// Bounding Vol
-		mBoundingVolume.mSphere.mCenter[0] += v.mVec[0];
-		mBoundingVolume.mSphere.mCenter[1] += v.mVec[1];
-		mBoundingVolume.mSphere.mCenter[2] += v.mVec[2];
-		mBoundingVolume.mBox.mMax[0] += v.mVec[0];
-		mBoundingVolume.mBox.mMax[1] += v.mVec[1];
-		mBoundingVolume.mBox.mMax[2] += v.mVec[2];
-		mBoundingVolume.mBox.mMin[0] += v.mVec[0];
-		mBoundingVolume.mBox.mMin[1] += v.mVec[1];
-		mBoundingVolume.mBox.mMin[2] += v.mVec[2];
+		Vec3 n(0.0f, 1.0f, 0.0f); 
+		Vec3 t(0.5f, 0.5f, 0.0f);
+		return CreateVertex(xyz, t.mVec, n.mVec);
 	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns local index of new Vertex
+	 ------------------------------------------------------*/
 
+	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns local index of new Vertex
+	 ------------------------------------------------------*/
+
+	void ExtrudeFace(index_t face, vec3_t displacement);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Extrudes <face> along vector <displacement>
+	 ------------------------------------------------------*/
 	
 	void RemoveWeightSelectedVertices(index_t bone)
 	{
@@ -1191,7 +1067,6 @@ public:
 	{
 		Face *face;
 
-
 		// Make all polygons referencing A point to B
 		for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
 		{
@@ -1266,6 +1141,24 @@ public:
 	}
 
 
+	void DeleteUnSelectedFaces()
+	{
+		Face **array = mFaces.getVectorArray();
+
+		for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
+		{
+			Face *face = array[i];
+
+			if (face && !(face->mFlags & Face::fSelected))
+			{
+				FaceRemovalCleanup(face);
+				delete face;
+				array[i] = NULL;
+			}
+		}
+	}
+
+
 	void DeleteFace(index_t idx)
 	{
 		Face **array = mFaces.getVectorArray();
@@ -1278,6 +1171,93 @@ public:
 			array[idx] = NULL;
 		}
 	}
+
+
+
+
+	void SetMaterial(index_t idx) { mMaterialIndex = idx; }
+
+
+	void UpdateBoundingVolume();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Rotates mesh about bounding volume center
+	 ------------------------------------------------------*/
+
+	void DeleteVertex(index_t vertexIndex)
+	{
+		BUG_ME("Not Implemented");
+	}
+
+
+	bool WeldVertices(index_t a, index_t b)
+	{
+		Face *face;
+		unsigned int i;
+
+		// Make all polygons referencing A point to B
+		for (i = mFaces.begin(); i < mFaces.end(); ++i)
+		{
+			face = mFaces[i];
+
+			if (face)
+			{
+				//FIXME face->WeldVertices(a, b);
+			}
+		}
+
+		// Mark A as unused in the vertex pool
+		mFreedVertices.push(a);
+
+		return true;
+	}
+
+
+	void ClampAllTexCoords()
+	{
+		ClampAllTexCoords(0.0f, 1.0f);
+	}
+
+
+	void ClampAllTexCoords(vec_t min, vec_t max)
+	{
+		ClampVecValues(mTexCoordPool, min, max);
+	}
+
+	void SetFaceSmoothingGroup(index_t face, uint32 group);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void SelectedFacesMarkSmoothingGroup(uint32 group, bool t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void GroupedFacesGenerateVertexNormals(uint32 group);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void SelectedFacesGenerateVertexNormals();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void SelectedFacesFlipVertexNormals();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Array exposure
+	////////////////////////////////////////////////////////////
 
 	vec_t *GetVertexArray()
 	{
@@ -1297,194 +1277,266 @@ public:
 	}
 
 
-	index_t CreateVertex(const vec3_t xyz)
+	//////////////////////////////////////////////////////////////////////////
+	// Animation tracks interface
+	// Testing embedded keyframing, so bare with me...
+	// these methods only support one 'animation' atm, but enforcing interface
+	// API usage makes it a transparent fix to API users later.
+	//////////////////////////////////////////////////////////////////////////
+
+	uint32 GetTransformTrackCount() {return 1;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t NewTransformTrack() {return 0;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	TransformTrack &GetTransformTrack(uint32 track) { return mTrack; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	uint32 GetVertexAnimTrackCount() {return 1;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	index_t NewVertexAnimTrack() {return 0;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	vec_t *GetBlendVerticesArray() { return mBlendVertices.get_array(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	uint32 GetBlendVerticesCount() { return mBlendVertices.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void ResetBlendVertices()
 	{
-		vec3_t nxyz = {0.0f, 1.0f, 0.0f};
-		vec3_t uvw = {0.5f, 0.5f, 0.0f};
-		return CreateVertex(xyz, uvw, nxyz);
+		vec_t *array = mBlendVertices.get_array();
+		if (array)
+			memset(array, 0, mBlendVertices.size()*sizeof(vec_t));
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void SyncBlendVertices()
+	{
+		if (mBlendVertices.size() < mVertexPool.size())
+		{
+			mBlendVertices.resize(mVertexPool.size());
+		}
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Bounding Volume properties
+	////////////////////////////////////////////////////////////
+
+	void SetBBox(const vec3_t min, const vec3_t max)
+	{
+		// Update bbox
+		HEL_VEC3_COPY(min, mBoundingVolume.mBox.mMin);
+		HEL_VEC3_COPY(max, mBoundingVolume.mBox.mMax);
+
+		// Update sphere
+		Vector3d vMin(min), vMax(max);
+		Vec3 origin = ( vMin + vMax ) * 0.5; // midpoint
+		vec_t radius = Vec3(origin - vMax).magnitude();
+
+		origin.Get(mBoundingVolume.mSphere.mCenter);
+		mBoundingVolume.mSphere.mRadius = radius;
 	}
 
-	void SetMaterial(index_t idx)
+
+	void GetBBox(vec3_t min, vec3_t max)
 	{
-		mMaterialIndex = idx;
+		HEL_VEC3_COPY(mBoundingVolume.mBox.mMin, min);
+		HEL_VEC3_COPY(mBoundingVolume.mBox.mMax, max);
 	}
 
 
-	index_t CreateTexCoord(const vec3_t uvw)
+	Vec3 GetBoundingVolumeCenter()
 	{
-		return AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw);
+		return Vec3(mBoundingVolume.mSphere.mCenter);
 	}
 
+
+	vec_t GetBoundingVolumeRadius()
+	{
+		return mBoundingVolume.mSphere.mRadius;
+	}
+
+
+	Vec3 GetBBoxCenter()
+	{
+		return GetBoundingVolumeCenter();
+	}
+
+
+	////////////////////////////////////////////////////////////
+	// Transforms
+	////////////////////////////////////////////////////////////
 
 	void TransformTexCoords(Matrix &mat)
-	{
-		TripleVec_Transform(mTexCoordPool, mat);
-	}
+	{ TripleVec_Transform(mTexCoordPool, mat); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to texcoord pool
+	 ------------------------------------------------------*/
 
 	void TransformNormals(Matrix &mat)
-	{
-		TripleVec_Transform(mNormalPool, mat);
-	}
+	{ TripleVec_Transform(mNormalPool, mat); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to normal pool
+	 ------------------------------------------------------*/
 
 	void TransformVertices(Matrix &mat)
 	{
 		TripleVec_Transform(mVertexPool, mat);
-
-		// Transform BV too, now
-		//vec3_t min, max;
-		//GetBBox(min, max);
-		//mat.Multiply3v(min);
-		//mat.Multiply3v(max);
-		//SetBBox(min, max);
 		mInitBoundingVol = false;
 		UpdateBoundingVolume(); // Handles rotations correctly ( keeps AABB )
 	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to vertices pool
+	 ------------------------------------------------------*/
+
+	void Rotate(const Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Rotates mesh about bounding volume center
+	 ------------------------------------------------------*/
+
+	void RotateAboutPoint(const Vec3 &point, const Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Rotates mesh about <point>
+	 ------------------------------------------------------*/
+
+	void Scale(const Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Scales mesh about Position()
+	 ------------------------------------------------------*/
+
+	void ScaleAboutPoint(const Vec3 &point, const Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Scales mesh about <point>
+	 ------------------------------------------------------*/
+
+	void Translate(const Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Translates mesh based on Position()
+	 ------------------------------------------------------*/
 
 
-	void UpdateBoundingVolume()
+	////////////////////////////////////////////////////////////
+	// Gobal pool API
+	////////////////////////////////////////////////////////////
+
+	static uint32 GetCount() { return mGobalPool.size(); } 
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns number of meshes in gobal store
+	 ------------------------------------------------------*/
+
+	static Mesh *GetMesh(index_t uid) 
+	{ return (uid < mGobalPool.size()) ?  mGobalPool[uid] : 0x0; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns mesh matching gobal store UID
+	 ------------------------------------------------------*/
+
+	static void ResetPool() { mGobalPool.erase(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Erase the gobal mesh store
+	 ------------------------------------------------------*/
+
+	index_t AddToPool()
 	{
-		vec3_t min;
-		vec3_t max;
-		vec3_t xyz;
-		bool update = false;
+		uint32 i, count;
+		bool found = false;
 
-
-		for ( uint32 i = 0, count = mVertices.size(); i < count; ++i )
+		if (mUID == INDEX_INVALID)
 		{
-			if (!mVertices[i])
-				continue;
+			/* Setup UID and class container reference */
+			mUID = count = mGobalPool.size();
 
-			GetVertexArrayPos(mVertices[i]->mVertexIndex, xyz);
-
-			// Adjust bounding volume in loop to handle gaps
-			if (!mInitBoundingVol)
+			for (i = 0; i < count; ++i)
 			{
-				mInitBoundingVol = true;
-				SetBBox(xyz, xyz);
-				continue;
-			}
-
-			GetBBox(min, max);
-
-			for (uint32 i = 0; i < 3; ++i)
-			{
-				if (xyz[i] < min[i])
+				if (mGobalPool[i] == 0x0)
 				{
-					min[i] = xyz[i];
-					update = true;
-				}
-				else if (xyz[i] > max[i])
-				{
-					max[i] = xyz[i];
-					update = true;
-				}
+					mUID = i;
+					mGobalPool.assign(mUID, this);
+					found = true;
+				}	
 			}
 
-			if (update)
+			if (!found)
 			{
-				update = false;
-				SetBBox(min, max);
-			}
-		}
-	}
-
-
-	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
-	{
-		Vertex **array = mVertices.getVectorArray();
-		index_t vertex = AddTripleVec(mVertexPool, mFreedVertices, (vec_t*)xyz);
-		index_t texcoord = AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw);
-		index_t normal = AddTripleVec(mNormalPool, mFreedNormals, (vec_t*)nxyz);
-		Vertex *vert = new Vertex(vertex, texcoord, normal);
-
-		for ( uint32 i = 0, count = mVertices.size(); i < count; ++i )
-		{
-			if (array[i] == NULL)
-			{
-				array[i] = vert;
-				return i;
+				mGobalPool.pushBack(this);
 			}
 		}
 
-		// Adjust bounding volume
-		if (!mInitBoundingVol)
-		{
-			mInitBoundingVol = true;
-			SetBBox(xyz, xyz);
-		}
-		else
-		{
-			vec3_t min;
-			vec3_t max;
-			bool update = false;
-
-			GetBBox(min, max);
-
-			for (uint32 i = 0; i < 3; ++i)
-			{
-				if (xyz[i] < min[i])
-				{
-					min[i] = xyz[i];
-					update = true;
-				}
-				else if (xyz[i] > max[i])
-				{
-					max[i] = xyz[i];
-					update = true;
-				}
-			}
-
-			if (update)
-			{
-				SetBBox(min, max);
-			}
-		}
-
-		mVertices.pushBack(vert);
-		return mVertices.size() - 1;
+		return mUID;
 	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Add this mesh to the gobal store
+	 *        Return UID
+	 ------------------------------------------------------*/
 
+	index_t GetUID() { return mUID; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns this mesh's gobal store UID
+	 ------------------------------------------------------*/
 
-	void DeleteVertex(index_t vertexIndex)
+	void RemoveFromPool()
 	{
-		BUG_ME("Not Implemented");
+		if (mUID < mGobalPool.size())
+			mGobalPool.assign(mUID, 0x0);
+
+		mUID = INDEX_INVALID;
 	}
 
-
-	bool WeldVertices(index_t a, index_t b)
-	{
-		Face *face;
-		unsigned int i;
-
-
-		// Make all polygons referencing A point to B
-		for (i = mFaces.begin(); i < mFaces.end(); ++i)
-		{
-			face = mFaces[i];
-
-			if (face)
-			{
-				//FIXME face->WeldVertices(a, b);
-			}
-		}
-
-		// Mark A as unused in the vertex pool
-		mFreedVertices.push(a);
-
-		return true;
-	}
-
-	void ClampAllTexCoords()
-	{
-		ClampAllTexCoords(0.0f, 1.0f);
-	}
-
-	void ClampAllTexCoords(vec_t min, vec_t max)
-	{
-		ClampVecValues(mTexCoordPool, min, max);
-	}
-
-
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Remove this mesh from gobal store 
+	 *        Does not delete mesh ( obviously )
+	 ------------------------------------------------------*/
 
 
 private:
@@ -1495,11 +1547,36 @@ private:
 
 	bool SerializePool(SystemIO::FileWriter &w, 
 					   Vector<vec_t> &v, mstl::stack<index_t> &s);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the given pool to diskfile as a chunk
+	 ------------------------------------------------------*/
+
+	bool SerializePool(SystemIO::TextFileWriter &w, const char *name,
+					   Vector<vec_t> &array, mstl::stack<index_t> &stack);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the given pool to diskfile as a chunk
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	bool SerializePool(SystemIO::FileReader &r, 
+					   Vector<vec_t> &v, mstl::stack<index_t> &s);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the given pool to diskfile as a chunk
+	 ------------------------------------------------------*/
+
+	bool SerializePool(SystemIO::TextFileReader &r, const char *name,
+					   Vector<vec_t> &array, mstl::stack<index_t> &stack);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the given pool to diskfile as a chunk
+	 ------------------------------------------------------*/
 
 	void ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max)
 	{
@@ -1655,9 +1732,11 @@ private:
 		array[tIndex + 2] = xyz[2];
 	}
 
+	static Vector<Mesh *> mGobalPool; /* Storage for gobal access */
+
 	const static uint32 mNameSize = 32;
 
-	static index_t mNextUID;  /* UIDs outside of model (owner's) array index */
+	static index_t mNextUID;          /* UIDs outside of gobal pool */
 
 	TransformTrack mTrack;            /* Mesh transform animation track */
 
@@ -1705,14 +1784,7 @@ private:
 };
 
 
-class ObjectManager
-{
-public:
-
-	//mDeletedObjectCount;
-};
-
-}
+} // End namespace freyja
 
 
 #endif

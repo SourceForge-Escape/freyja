@@ -902,31 +902,33 @@ void freyjaPolygonSetMaterial1i(index_t polygonIndex, index_t materialIndex)
 
 void freyjaMeshPromoteTexcoordsToPloymapping(index_t meshIndex)
 {
-	vec2_t uv;
-	int32 i, j, k, vertexCount, vertexIndex, texcoordIndex, polygonIndex, polygonCount;
+	int32  polygonCount = freyjaGetMeshPolygonCount(meshIndex);
 
-
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-
-    for (i = 0; i < polygonCount; ++i)
+    for (int32 i = 0; i < polygonCount; ++i)
     {
-		polygonIndex = i;//freyjaGetMeshPolygonIndex(meshIndex, i);
-		vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+		int32 polygonIndex = i;//freyjaGetMeshPolygonIndex(meshIndex, i);
+		int32 vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+		int32 texcoordCount = freyjaGetPolygonTexCoordCount(polygonIndex);
 
-		for (j = 0; j < vertexCount; ++j)
+		// Mongoose 2006.12.06: This changes old behavoir! 
+		// Don't overwrite existing polymapped UVs
+		if (vertexCount == texcoordCount)
+			continue;
+
+		for (int32 j = 0; j < vertexCount; ++j)
 		{
-			vertexCount = freyjaGetPolygonVertexCount(polygonIndex);
-
 			// NOTE: I just update all UV -> polymapp to avoid corrupt 
 			//       'texture faces' eg not completely polymapped
 			freyjaPolygonTexCoordPurge(polygonIndex);
 
-			for (k = 0; k < vertexCount; ++k) 
+			vec2_t uv;
+
+			for (int32 k = 0; k < vertexCount; ++k) 
 			{
-				vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
+				int32 vertexIndex = freyjaGetPolygonVertexIndex(polygonIndex, k);
 				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
 
-				texcoordIndex = freyjaTexCoordCreate2fv(uv);
+				int32 texcoordIndex = freyjaTexCoordCreate2fv(uv);
 				freyjaPolygonAddTexCoord1i(polygonIndex, texcoordIndex);
 			}
 		}

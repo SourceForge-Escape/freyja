@@ -13,69 +13,97 @@
  Known bugs
  -----------------------------------------------------------------------------
 
+ A
+ ----------------------------
+
+ * Quad ray pick sucks - fix it  ;_;
+
+ * UV viewmode in Model tab editor doesn't work the same as UV tab editor
+
+ * Copy / Cut / Paste 
+	- Not fully working with meshes anymore
+
+ * New mesh copy system doesn't buffer, since copy = copy + paste
+
+ * Scale tool sucks it's so broke nothing works properly
+	- Keyframe scaling edits geometery instead of keyframe
+	- Mesh scaling on Y 'hops' during preview, but is correct when transformed
+
+ * Face rotate, scale doesn't work in interface
+
+ * Keyframe and cursor transforms 'fight' each other during editing
+   FIX this in FreyjaRender by having a special mode for this case
+
+ * Fix UV unwrap
+	- Projection across boundries ( axes ) aren't handled
+	- No fitting functionality
+	- No overlap fixup provided
+
+
+ B
+ ----------------------------
+
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
 	after a 'jump'
 
- * Multi-mesh ja export is broken!
+ * Multi-mesh .Ja v1 export is broken... use .Freyja export instead for now
+	- Fix will be using a pure serialized format .Ja v2 ( binary .Freyja )
 
  * Issue with overwrite in file dialog
+	- Often prompts to overwrite twice, since the event fires twice
+	- It shouldn't save and then save again!
+	- This is due to odd Gtk+ signal handling when a question dialog is fired
+	  while the file dialog is active.  Checking to see if gtk+ update helps.
 
  * Bone rotation
 	- Needs to be 'synced' to heirachry to make sense
 	- Doesn't work at all really with backend changes
 	- Looks like we're getting a sqrt(-1) and INFINITY passed around
 
- * Mesh scale on doesn't 'scale about cursor'
-
- * Copy / Cut / Paste not fully working with meshes anymore
-
  * Cursor axis select might be broke for some views on 'ALL' picks
-
- * Reverse engineer plugin spin buttons don't always update
-	- Tabbing always updates
-	- Sometimes typing space and enter updates.. weird
-
- * New mesh copy system doesn't buffer, since copy = copy + paste
 
  * Cursor reset on undo ( use a freaking seperate undo state system for cursor )
 
- * Plugins
-	- I guess I forgot to port some plugins to support 64bit/big endian oops
-	- Halflife is broken ( looks like a deformed umbra loader, 
-	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )
-	- 3ds is broken
-	- MD3 is broken
-	- ASE is broken
-	- PSK skeleton broken
-	- GRN skeleton broken
+ * What happened to ray picking for UV faces in UV editor?
 
- * Certain modes like vertex transforms should prob enable point rendering
 
- * JA v1 doesn't seem to save out multimesh anymore ( oops )
+ C
+ ----------------------------
 
- * Fix UV projection to handle cross boundries ( axes )
-
- * Quad ray pick sucks - fix it  ;_;
-
- * Scaling on cursors needs fixing during zoom
+ * Visual scaling of cursors may need to be adjusted during zoom != 1.0f
+	- This means sphere/ray targets must be scaled to match visual also
 
  * Actual bug report: 'generated sphere looks retarded' it's true too
    just needs to be subdiv with quads
- 
- * Keyframe and cursor transforms 'fight' each other during editing
-   FIX this in FreyjaRender by having a special mode for this case
-
- * What happened to ray picking for UV faces in UV editor?
-
- * Scale tool sucks it's so broke nothing works properly
-	- Keyframe scaling edits geometery instead of keyframe
-	- Scale cursor doesn't stretch all pretty and useless like!
-
- * Face rotate, scale doesn't work in interface
 
  * Skeleton tree widget not cleared on Close / New
 
- * Bone componet creation is broken / not completely hooked up
+ * Plugins
+	- All iterator use is now not just deprecated but obsoloete ( rewrite )
+		- 3ds export is broken
+		- ASE export is broken
+	- I guess I forgot to port some plugins to support 64bit/big endian oops
+	- Halflife is broken ( looks like a deformed umbra loader, 
+	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )
+	- PSK skeleton broken
+	- GRN skeleton broken
+
+ * Reverse engineer plugin spin buttons don't always update
+	- Tabbing always updates
+	- Sometimes typing space and enter updates.. weird Gtk+ events
+
+ * Certain modes like vertex transforms should prob enable point rendering
+   by default
+
+
+
+
+
+ 
+
+
+
+
 
 
 

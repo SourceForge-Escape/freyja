@@ -119,6 +119,7 @@ typedef enum {
 
 	eCopyAppendMode,
 	eSplitObject,
+	eMergeObject,
 
 	eDelete,
 	eSelect,

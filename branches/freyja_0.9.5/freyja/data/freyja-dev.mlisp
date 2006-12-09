@@ -418,11 +418,14 @@
 
 				(toolbar_separator)
 
-				(toolbar_togglebutton false "24x24/clone.png" "CopyM"
-					"Copy multiple objects" eEvent eCopyAppendMode)
+				;(toolbar_togglebutton false "24x24/clone.png" "CopyM"
+				;	"Copy multiple objects" eEvent eCopyAppendMode)
 
-				(toolbar_button	"24x24/split.png"
+				(toolbar_button	"24x24/msplit.png"
 					"Split" "Split object" eEvent eSplitObject)
+
+				(toolbar_button	"24x24/mmerge.png"
+					"Merge" "Merge objects" eEvent eMergeObject)
 
 			) ; toolbar
 			) ; hbox
@@ -583,6 +586,9 @@
 		(hbox 1 0 0 1 0
 			(button "Assign"	eEvent	eGroupAssign)
 			(button "Clear "	eEvent	eGroupClear))
+		(hbox 1 0 0 1 0
+			(button "Smooth"	eEvent eSelectedFacesGenerateNormals)
+			(button "Flip  "	eEvent eSelectedFacesFlipNormals))
 
 	) ; expander
 	))

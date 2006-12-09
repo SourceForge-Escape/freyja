@@ -72,8 +72,8 @@ Mesh::Mesh() :
 
 
 Mesh::Mesh(const Mesh &mesh) :
-	mTrack(),
-	mVertexAnimTrack(),
+	mTrack(mesh.mTrack),
+	mVertexAnimTrack(mesh.mVertexAnimTrack),
 	mBlendVerticesTime(-1.0f),
 	mBlendVertices(),
 	mUID(mNextUID++),
@@ -127,9 +127,20 @@ Mesh::Mesh(const Mesh &mesh) :
 		DEBUG_MSG("\t%i - Facees copied\n", i);
 	}
 
-#if 0
-	mesh.mWeights;
-#endif
+
+	foreach (((Mesh&)mesh).mWeights, i)
+	{
+		if (((Mesh&)mesh).mWeights[i])
+		{
+			mWeights.pushBack(new Weight(*(((Mesh&)mesh).mWeights[i])));
+		}
+		else  // Need to NULL pad to exact match if needed
+		{
+			mWeights.pushBack(NULL);
+		}
+
+		DEBUG_MSG("\t%i - weights copied\n", i);
+	}
 }
 
 
@@ -147,7 +158,20 @@ Mesh::~Mesh()
 
 void Mesh::GetSelectedVertices(Vector<index_t> &list) 
 {
-	BUG_ME("Not Implemented");
+	list.clear();
+
+	for (uint32 i = 0, icount = GetVertexCount(); i < icount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (!v) 
+			continue;
+
+		if (v->mFlags & Vertex::fSelected)
+		{
+			list.push_back(i);
+		}
+	}	
 }
 
 
@@ -876,6 +900,169 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
+{
+	Vertex **array = mVertices.getVectorArray();
+	index_t vertex = AddTripleVec(mVertexPool, mFreedVertices, (vec_t*)xyz);
+	index_t texcoord = AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw);
+	index_t normal = AddTripleVec(mNormalPool, mFreedNormals, (vec_t*)nxyz);
+	Vertex *vert = new Vertex(vertex, texcoord, normal);
+	
+	for ( uint32 i = 0, count = mVertices.size(); i < count; ++i )
+	{
+		if (array[i] == NULL)
+		{
+			array[i] = vert;
+			return i;
+		}
+	}
+	
+	// Adjust bounding volume
+	if (!mInitBoundingVol)
+	{
+		mInitBoundingVol = true;
+		SetBBox(xyz, xyz);
+	}
+	else
+	{
+		vec3_t min;
+		vec3_t max;
+		bool update = false;
+
+		GetBBox(min, max);
+		
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			if (xyz[i] < min[i])
+			{
+				min[i] = xyz[i];
+				update = true;
+			}
+			else if (xyz[i] > max[i])
+			{
+				max[i] = xyz[i];
+				update = true;
+			}
+		}
+
+		if (update)
+		{
+			SetBBox(min, max);
+		}
+	}
+
+	mVertices.pushBack(vert);
+	return mVertices.size() - 1;
+}
+
+
+void Mesh::Merge(Mesh *mesh)
+{
+	if (mesh == NULL)
+		return;
+
+	// FIXME: Merge doesn't merge animations...
+	//TransformTrack mTrack;
+	//VertexAnimTrack mVertexAnimTrack;
+
+	Vector<index_t> transV; // need to translate ids to 'this' mesh ids
+
+	uint32 i;
+
+	foreach (mesh->mVertices, i)
+	{
+		if (mesh->mVertices[i])
+		{
+			Vec3 n = mesh->GetVertexNormal(i);
+			Vec3 p = mesh->GetVertexPosition(i);
+			Vec3 t = mesh->GetVertexTexCoord(i);
+			// pos, uvw, normal order
+			index_t idx = CreateVertex(p.mVec, t.mVec, n.mVec);
+			transV.push_back(idx);
+
+			Vertex *a =	mesh->GetVertex(i);
+			Vertex *b = GetVertex(idx);
+			b->mFlags = a->mFlags;
+		}
+		else  // Need to NULL pad to exact match if needed
+		{
+			transV.push_back(INDEX_INVALID);
+		}
+	}
+
+
+	foreach (mesh->mFaces, i)
+	{
+		Face *face = mesh->GetFace(i);
+		if (face)
+		{
+			Face *newFace = GetFace(CreateFace());
+
+			newFace->mFlags = face->mFlags;
+			newFace->mColor = face->mColor;
+			newFace->mMaterial = face->mMaterial;
+			newFace->mSmoothingGroup = face->mSmoothingGroup;
+
+#if 0 // atm only vertex normals allowed
+			if (face->mFlags & Face::fPolyMappedNormals)
+			{
+				uint32 j;
+				foreach (face->mNormalIndices, j)
+				{
+					vec3_t uvw;
+					index_t idx = face->mNormalIndices[j];
+					mesh->GetNormal(idx, uvw);
+					newFace->AppendNormal(CreateNormal(uvw));
+				}
+			}
+#endif
+
+			if (face->mFlags & Face::fPolyMappedTexCoords)
+			{
+				uint32 j;
+				foreach (face->mTexCoordIndices, j)
+				{
+					vec3_t uvw;
+					index_t idx = face->mTexCoordIndices[j];
+					mesh->GetTexCoord(idx, uvw);
+					newFace->AppendTexCoord(CreateTexCoord(uvw));
+				}
+			}
+
+			uint32 j;
+			foreach (face->mIndices, j)
+			{
+				newFace->AppendVertex(transV[face->mIndices[j]]);
+			}
+		}
+	}
+
+
+	foreach (mesh->mWeights, i)
+	{
+		Weight *w = mesh->mWeights[i];
+
+		if (w)
+		{
+			// vertex, weight, bone order
+			AddWeight(transV[w->mVertexIndex], w->mWeight, w->mBoneIndex);
+		}
+	}
+}
+
+
+Mesh *Mesh::Split(bool trim)
+{
+	Mesh *mesh = new Mesh(*this);
+	mesh->DeleteUnSelectedFaces();
+
+	if (trim)
+		DeleteSelectedFaces();
+
+	return mesh;
+}
+
+
 void Mesh::CollapseEdge(index_t faceIndex, 
 						uint32 a, uint32 b, uint32 c, uint32 d)
 {
@@ -1050,6 +1237,38 @@ void Mesh::SetGroupsFaceSelected(uint32 groups)
 }
 
 
+void Mesh::RebuildVertexPolygonReferences()
+{
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (vertex)
+		{
+			vertex->GetFaceRefs().clear();
+		}
+	}	
+
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		if (face)
+		{
+			uint32 i;
+			foreach (face->mIndices, i)
+			{
+				Vertex *vertex = GetVertex(face->mIndices[i]);
+				if (vertex)
+				{
+					vertex->GetFaceRefs().push_back(f);
+				}	
+			}
+		}
+	}	
+}
+
+
 void Mesh::UpdateVertexReferenceWithSelectedBias()
 {
 	// FIXME: Add some kind of conditional flag here to avoid
@@ -1064,7 +1283,7 @@ void Mesh::UpdateVertexReferenceWithSelectedBias()
 
 		if (vertex)
 		{
-			vertex->GetTmpRefs();
+			vertex->GetTmpRefs().clear();
 		}
 	}
 
@@ -1236,29 +1455,27 @@ void Mesh::UVMapSelectedFaces_Cylindrical()
 				if (xyz[j] > max[j])
 					max[j] = xyz[j];
 			}
-		
-		
-			if (max[1] >= 0)
-			{
-				if (min[1] >= 0)
-				{
-					ysize = max[1] - min[1];
-				}
-				else
-				{
-					ysize = max[1] + -min[1];
-				}
-			}
-			else
-			{
-				ysize = -max[1] + min[1];
-			}
-
-			if (ysize < 0.0001 && ysize > -0.0001)
-				ysize = 1.0f;
 		}
 	}
 
+	if (max[1] >= 0)
+	{
+		if (min[1] >= 0)
+		{
+			ysize = max[1] - min[1];
+		}
+		else
+		{
+			ysize = max[1] + -min[1];
+		}
+	}
+	else
+	{
+		ysize = -max[1] + min[1];
+	}
+	
+	if (ysize < 0.0001 && ysize > -0.0001)
+		ysize = 1.0f;
 
     for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
     {
@@ -1272,7 +1489,6 @@ void Mesh::UVMapSelectedFaces_Cylindrical()
 
 			GetVertexArrayPos(vertex->mVertexIndex, xyz);
 
-
 			longitude = atan2((float)-xyz[0], xyz[2]);
 			latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
 
@@ -1281,9 +1497,21 @@ void Mesh::UVMapSelectedFaces_Cylindrical()
 
 			uvw[0] = longitude - floor(longitude);
 			uvw[1] = xyz[1] / ysize;
-			uvw[2] = 0.0f;	
+			uvw[2] = 0.0f;
 
 			SetTexCoord(vertex->mTexCoordIndex, uvw);
+
+			// Force face to drop polymapping
+			uint32 i;
+			foreach (vertex->GetTmpRefs(), i)
+			{
+				Face *f = GetFace(vertex->GetTmpRefs()[i]);
+				if (f)
+				{
+					SetTexCoord(f->FindCorrespondingTexCoord(v), uvw);
+					//f->PurgePolyMappedTexCoords();
+				}
+			}
 		}
 	}
 }
@@ -1333,39 +1561,6 @@ void Mesh::UVMapSelectedFaces_Plane()
 }
 
 
-void Mesh::UVMapSpherical(uint32 groups)
-{
-	vec_t longitude, latitude;
-	vec3_t xyz;
-	vec3_t uvw;
-
-	UpdateVertexReferenceWithSmoothingGroupBias(groups);
-
-    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
-    {
-		Vertex *vertex = GetVertex(v);
-
-		// Was this allocated and also marked by group bias?
-		if (vertex && vertex->GetTmpRefs().size() > 0)
-		{
-			GetVertexArrayPos(vertex->mVertexIndex, xyz);
-
-			longitude = atan2((float)-xyz[0], xyz[2]);
-			latitude = atan(xyz[1] / sqrt(xyz[0]*xyz[0] + xyz[2]*xyz[2]));
-			
-			longitude = 1.0 - longitude / (HEL_2_PI);
-			latitude = fabs(0.5 - latitude / HEL_PI);
-			
-			uvw[0] = longitude - floor(longitude);
-			uvw[1] = latitude;
-			uvw[2] = 0.0f;
-
-			SetTexCoord(vertex->mTexCoordIndex, uvw);
-		}
-	}
-}
-
-
 void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 {
 	// FIXME: Cached face refs would be smart for all the connectivty use
@@ -1387,7 +1582,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		Face *face = GetFace(f);
 
 		// We only consider selected facets here... you filter updates here
-		if (!face || !(face->mSmoothingGroup & (1<<group)))
+		if (!face || !(group & (1<<face->mSmoothingGroup)))
 		{
 			faceNormals.pushBack(normal);  // For alignment purposes push a 'V0'
 			continue;
@@ -1445,6 +1640,28 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
 		SetNormal(v, normal.mVec);
     }
+}
+
+
+void Mesh::SelectedFacesFlipVertexNormals()
+{
+	UpdateVertexReferenceWithSelectedBias();  
+
+	for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+    {
+		Vertex *vertex = GetVertex(v);
+
+		if (!vertex)
+			continue;
+
+		if (vertex->GetTmpRefs().size())
+		{
+			Vec3 normal;
+			GetNormal(vertex->mNormalIndex, normal.mVec);
+			normal = -normal;
+			SetNormal(vertex->mNormalIndex, normal.mVec);
+		}
+	}
 }
 
 
@@ -1694,15 +1911,127 @@ void Mesh::ClearVertexFlags(index_t face, uint32 flags)
 }
 
 
-void Mesh::Rotate(vec_t x, vec_t y, vec_t z)
+void Mesh::UpdateBoundingVolume()
 {
-	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	vec3_t min;
+	vec3_t max;
+	vec3_t xyz;
+	bool update = false;
+
+
+	for ( uint32 i = 0, count = mVertices.size(); i < count; ++i )
+	{
+		if (!mVertices[i])
+			continue;
+
+		GetVertexArrayPos(mVertices[i]->mVertexIndex, xyz);
+
+		// Adjust bounding volume in loop to handle gaps
+		if (!mInitBoundingVol)
+		{
+			mInitBoundingVol = true;
+			SetBBox(xyz, xyz);
+			continue;
+		}
+
+		GetBBox(min, max);
+
+		for (uint32 i = 0; i < 3; ++i)
+		{
+			if (xyz[i] < min[i])
+			{
+				min[i] = xyz[i];
+				update = true;
+			}
+			else if (xyz[i] > max[i])
+			{
+				max[i] = xyz[i];
+				update = true;
+			}
+		}
+
+		if (update)
+		{
+			update = false;
+			SetBBox(min, max);
+		}
+	}
 }
 
 
-void Mesh::Scale(vec_t x, vec_t y, vec_t z)
+////////////////////////////////////////////////////////////
+// Transforms
+////////////////////////////////////////////////////////////
+
+void Mesh::Rotate(const Vec3 &v)
 {
-	BUG_ME("Not Implemented", __FILE__, __LINE__);
+	RotateAboutPoint(GetBoundingVolumeCenter(), v);
+}
+
+
+void Mesh::RotateAboutPoint(const Vec3 &point, const Vec3 &v)
+{
+	Matrix t, r, t2, mat;
+	// Rotate about bounding volume center instead of origin
+	t.translate(point.mVec);
+	r.rotate(v.mVec);
+	t2.translate((-Vec3(point)).mVec);
+	
+	// FIXME: Fix the damn matrix backend to avoid such expensive
+	//        processing here ( only want to transform once )
+	TransformVertices(t2);
+	TransformVertices(r);
+	TransformVertices(t);
+	
+	// Transform normals by inverted rotation to stay correct
+	Matrix nr;
+	nr.rotate(v.mVec);
+	nr.invert();
+	TransformNormals(nr);
+}
+
+
+void Mesh::Scale(const Vec3 &v)
+{
+	ScaleAboutPoint(GetPosition(), v);
+}
+
+
+void Mesh::ScaleAboutPoint(const Vec3 &point, const Vec3 &v)
+{
+	Matrix t, s, t2, mat;
+
+	// Scale about bounding volume center instead of origin
+	t.translate(point.mVec);
+	s.scale(v.mVec);
+	t2.translate((-Vec3(point)).mVec);
+
+	// FIXME: Fix the damn matrix backend to avoid such expensive
+	//        processing here ( only want to transform once )
+	TransformVertices(t2);
+	TransformVertices(s);
+	TransformVertices(t);
+}
+
+
+void Mesh::Translate(const Vec3 &v) 
+{
+	// Position (world)
+	SetPosition(Vec3(v)+GetPosition());
+	
+	// Vertices
+	TripleVec_Addition(mVertexPool, v.mVec);
+	
+	// Bounding Vol
+	mBoundingVolume.mSphere.mCenter[0] += v.mVec[0];
+	mBoundingVolume.mSphere.mCenter[1] += v.mVec[1];
+	mBoundingVolume.mSphere.mCenter[2] += v.mVec[2];
+	mBoundingVolume.mBox.mMax[0] += v.mVec[0];
+	mBoundingVolume.mBox.mMax[1] += v.mVec[1];
+	mBoundingVolume.mBox.mMax[2] += v.mVec[2];
+	mBoundingVolume.mBox.mMin[0] += v.mVec[0];
+	mBoundingVolume.mBox.mMin[1] += v.mVec[1];
+	mBoundingVolume.mBox.mMin[2] += v.mVec[2];
 }
 
 
