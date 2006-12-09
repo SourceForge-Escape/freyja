@@ -227,22 +227,6 @@ private:
 };
 
 
-class UVMap
-{
-public:
-	void rotate(vec_t x, vec_t y);
-
-	void scale(vec_t x, vec_t y);
-
-	void translate(vec_t x, vec_t y);
-
-	static size_t SerializedSize() { return 0; }
-
-	Vector<index_t> mFaceIndices;   /* Contains UVs composing group
-									 * either polymapped or by vertex */
-};
-
-
 class Face
 {
 public:
@@ -691,14 +675,6 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void GetVertexArrayPos(index_t vertexIndex, vec3_t xyz);
-	void SetVertexArrayPos(index_t vertexIndex, const vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : NOTE This is not the same as GetVertexClassPos
-	 *        This is the ith point stored in the point array
-	 * Post : 
-	 ------------------------------------------------------*/
-
 	Weight *GetWeight(index_t w) 
 	{ return (w < mWeights.size()) ? mWeights[w] : NULL; }
 	/*------------------------------------------------------
@@ -712,10 +688,10 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
 	bool Intersect(Ray &r, vec_t &t);
 	/*------------------------------------------------------
-	 * Pre  : 
+	 * Pre  : If mesh is fHidden intersects will always return false
+	 *
 	 * Post : Returns true if 'hit', and <t> the time along ray
 	 *        This checks the bsphere, then bbox for collision.
 	 ------------------------------------------------------*/
@@ -917,6 +893,24 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	index_t CreateFace()
+	{
+		Face **array = mFaces.getVectorArray();
+		Face *face = new Face();
+
+		for ( uint32 i = 0, count = mFaces.size(); i < count; ++i )
+		{
+			if (array[i] == NULL)
+			{
+				array[i] = face;
+				return i;
+			}
+		}
+
+		mFaces.pushBack(face);
+		return mFaces.size() - 1;
+	}
+
 	index_t CreateTexCoord(const vec3_t uvw)
 	{ return AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw); }
 	/*------------------------------------------------------
@@ -1098,25 +1092,6 @@ public:
 	}
 
 
-	index_t CreateFace()
-	{
-		Face **array = mFaces.getVectorArray();
-		Face *face = new Face();
-
-		for ( uint32 i = 0, count = mFaces.size(); i < count; ++i )
-		{
-			if (array[i] == NULL)
-			{
-				array[i] = face;
-				return i;
-			}
-		}
-
-		mFaces.pushBack(face);
-		return mFaces.size() - 1;
-	}
-
-
 	void FaceRemovalCleanup(Face *face)
 	{
 		BUG_ME("This implementation doesn't clean up deps, which it prob shouldn't until vertex reference design is finalized");		
@@ -1259,22 +1234,34 @@ public:
 	// Array exposure
 	////////////////////////////////////////////////////////////
 
-	vec_t *GetVertexArray()
-	{
-		return mVertexPool.getVectorArray();
-	}
+	void GetVertexArrayPos(index_t vertexIndex, vec3_t xyz);
+	void SetVertexArrayPos(index_t vertexIndex, const vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : NOTE This is not the same as GetVertexClassPos
+	 *        This is the ith point stored in the point array
+	 * Post : 
+	 ------------------------------------------------------*/
 
+	vec_t *GetVertexArray()
+	{ return mVertexPool.getVectorArray(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns vertex array ( great for rendering )
+	 ------------------------------------------------------*/
 
 	vec_t *GetNormalArray()
-	{
-		return mNormalPool.getVectorArray();
-	}
-
+	{ return mNormalPool.getVectorArray(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns normal array ( great for rendering )
+	 ------------------------------------------------------*/
 
 	vec_t *GetTexCoordArray()
-	{
-		return mTexCoordPool.getVectorArray();
-	}
+	{ return mTexCoordPool.getVectorArray(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns texcoord array ( great for rendering )
+	 ------------------------------------------------------*/
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1460,6 +1447,24 @@ public:
 	 * Post : Translates mesh based on Position()
 	 ------------------------------------------------------*/
 
+	void SelectedFacesRotateUVMap(vec_t z);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Translates mesh based on Position()
+	 ------------------------------------------------------*/
+
+	void SelectedFacesScaleUVMap(vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Translates mesh based on Position()
+	 ------------------------------------------------------*/
+
+	void SelectedFacesTranslateUVMap(vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Translates mesh based on Position()
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Gobal pool API
@@ -1472,7 +1477,7 @@ public:
 	 ------------------------------------------------------*/
 
 	static Mesh *GetMesh(index_t uid) 
-	{ return (uid < mGobalPool.size()) ?  mGobalPool[uid] : 0x0; }
+	{ return (uid < mGobalPool.size()) ?  mGobalPool[uid] : NULL; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns mesh matching gobal store UID
@@ -1736,7 +1741,7 @@ private:
 
 	const static uint32 mNameSize = 32;
 
-	static index_t mNextUID;          /* UIDs outside of gobal pool */
+	//static index_t mNextUID;          /* UID creation outside of gobal pool */
 
 	TransformTrack mTrack;            /* Mesh transform animation track */
 
@@ -1748,7 +1753,7 @@ private:
 
 	char mName[mNameSize];            /* Human readable name of mesh */
 
-	index_t mUID;
+	index_t mUID;                     /* Gobal pool UID */
 
 	bool mInitBoundingVol;
 

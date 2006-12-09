@@ -23,7 +23,8 @@
 
 using namespace freyja;
 
-index_t Mesh::mNextUID = 0;
+Vector<Mesh *> Mesh::mGobalPool;
+//index_t Mesh::mNextUID = 0;
 
 
 ////////////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ Mesh::Mesh() :
 	mVertexAnimTrack(),
 	mBlendVerticesTime(-1.0f),
 	mBlendVertices(),
-	mUID(mNextUID++),
+	mUID(INDEX_INVALID),
 	mInitBoundingVol(false),
 	mFlags(0),
 	mMaterialIndex(0),
@@ -55,8 +56,6 @@ Mesh::Mesh() :
 	mVertices(),
 	mWeights()
 {
-	//mUID = mNextUID++;
-
 	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
 	mName[mNameSize-1] = 0;
 	
@@ -76,7 +75,7 @@ Mesh::Mesh(const Mesh &mesh) :
 	mVertexAnimTrack(mesh.mVertexAnimTrack),
 	mBlendVerticesTime(-1.0f),
 	mBlendVertices(),
-	mUID(mNextUID++),
+	mUID(INDEX_INVALID),
 	mInitBoundingVol(false),
 	mFlags(mesh.mFlags),
 	mMaterialIndex(mesh.mMaterialIndex),
@@ -639,6 +638,9 @@ bool Mesh::IntersectPerFace(Ray &r, vec_t &t)
 
 bool Mesh::Intersect(Ray &r, vec_t &t)
 {
+	if (GetFlags() & fHidden)
+		return false;
+
 	r.mDir.normalize();
 
 	// Sphere test
@@ -2032,6 +2034,23 @@ void Mesh::Translate(const Vec3 &v)
 	mBoundingVolume.mBox.mMin[0] += v.mVec[0];
 	mBoundingVolume.mBox.mMin[1] += v.mVec[1];
 	mBoundingVolume.mBox.mMin[2] += v.mVec[2];
+}
+
+
+void Mesh::SelectedFacesRotateUVMap(vec_t z)
+{
+	MSTL_MSG("FIXME");
+}
+
+void Mesh::SelectedFacesScaleUVMap(vec_t x, vec_t y)
+{
+	MSTL_MSG("FIXME");
+}
+
+
+void Mesh::SelectedFacesTranslateUVMap(vec_t x, vec_t y)
+{
+	MSTL_MSG("FIXME");
 }
 
 

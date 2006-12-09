@@ -25,10 +25,11 @@
 #include "freyja.h"
 #include <hel/math.h>
 #include "Mesh.h"
+#include "MeshABI.h"
+#include "LegacyMeshABI.h"
 
 using namespace freyja;
 
-extern Vector<Mesh*> gFreyjaMeshes;
 Vector<RenderModel *> gRenderModels;
 
 
@@ -55,14 +56,13 @@ RenderModel::~RenderModel()
 RenderSkeleton &RenderModel::getSkeleton()
 {
 	mSkeleton.set(freyjaGetCurrentSkeleton());
-
 	return mSkeleton;
 }
 
 
 unsigned int RenderModel::getMeshCount()
 {
-	return gFreyjaMeshes.size();
+	return freyjaGetModelMeshCount(0);
 }
 
 
@@ -81,7 +81,7 @@ bool RenderModel::getMesh(int32 index, RenderMesh &mesh, int32 frame)
 bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &rface)
 {
 	MARK_MSGF("getRenderPolygon Not Implemented");
-	freyja::Mesh *mesh = gFreyjaMeshes[mIndex];
+	freyja::Mesh *mesh = Mesh::GetMesh(mIndex);
 
 	if (mesh == NULL)
 		return false;
@@ -113,7 +113,7 @@ bool RenderModel::getRenderPolygon(unsigned int index, RenderPolygon &rface)
 
 bool RenderMesh::getPolygon(unsigned int index, RenderPolygon &rface)
 {
-	freyja::Mesh *mesh = gFreyjaMeshes[id];
+	freyja::Mesh *mesh = Mesh::GetMesh(id);
 
 	if (mesh == NULL)
 		return false;
@@ -146,11 +146,11 @@ bool RenderMesh::getPolygon(unsigned int index, RenderPolygon &rface)
 bool RenderModel::getRenderMesh(uint32 meshIndex, RenderMesh &rmesh,
 								int32 frame)
 {
-	if (gFreyjaMeshes.size() == 0)
+	if (Mesh::GetCount() == 0)
 		return false;
 
 	// FIXME: Fix this when we have true models in later
-	freyja::Mesh *mesh = gFreyjaMeshes[meshIndex];
+	freyja::Mesh *mesh = Mesh::GetMesh(meshIndex);
 
 	rmesh.count = 0;
 
