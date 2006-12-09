@@ -876,7 +876,6 @@ void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height,
 				index2 = count * (i + 1);
 				freyjaBegin(FREYJA_POLYGON);
 				// A
-				index =freyjaTexCoordCreate2f(u, v);
 				freyjaPolygonTexCoord1i(segTex[index]);
 				freyjaPolygonVertex1i(segVert[index]);
 
