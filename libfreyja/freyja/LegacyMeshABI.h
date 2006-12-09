@@ -26,11 +26,36 @@
 
 extern "C" {
 
-	// Rejected 0.10.x prototype ABI used in 0.9.5 public build
-	uint32 freyjaModelGetMeshCount(index_t modelIndex);
+	index_t freyjaGetCurrentModelIndex();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-	void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex, 
-									freyja_transform_action_t action, vec3_t xyz);
+	index_t freyjaModelCreateMesh(index_t model);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaModelClampTexCoords(index_t modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clamps UVs and TexCoords to 0.0 to 1.0
+	 ------------------------------------------------------*/
+
+	void freyjaModelGenerateVertexNormals(index_t modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaModelMeshTransform3fv(index_t model, index_t mesh, 
+									 freyja_transform_action_t action,vec3_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t freyjaModelMeshPolygonCreate(index_t model, index_t meshIndex);
 	/*------------------------------------------------------

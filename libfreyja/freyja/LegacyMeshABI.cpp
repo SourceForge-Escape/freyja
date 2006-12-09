@@ -42,42 +42,6 @@ index_t freyjaGetFSMMeshIndex()
 // Rejected 0.10.0 ABI
 ////////////////////////////////////
 
-
-//////////////////////////////////////////////////////
-// Model
-//
-//////////////////////////////////////////////////////
-
-uint32 freyjaGetModelCount()
-{
-	return 1;  // Egg backend is single model
-}
-
-
-uint32 freyjaModelGetMeshCount(index_t modelIndex)
-{
-	return freyjaGetMeshCount();	
-}
-
-
-index_t freyjaGetModelMeshCount(index_t modelIndex)
-{
-	return freyjaGetMeshCount();
-}
-
-
-index_t freyjaGetModelFlags(index_t modelIndex)
-{
-	return 0x0;
-}
-
-
-index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element)
-{
-	return element;
-}
-
-
 index_t freyjaModelCreateMesh(index_t modelIndex)
 {
 	return freyjaMeshCreate();
@@ -322,7 +286,7 @@ index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element)
 
 void freyjaModelClampTexCoords(index_t modelIndex)
 {
-	uint32 i, count = freyjaModelGetMeshCount(modelIndex);
+	uint32 i, count = freyjaGetModelMeshCount(modelIndex);
 
 	for ( i = 0; i < count; ++i )
 	{
@@ -494,10 +458,9 @@ void freyjaModelClear(index_t modelIndex)
 	// Currently there is no multimodel while egg is being used
 	freyjaSkeletonPoolClear();
 	freyjaBonePoolClear();
-	
 
 	// Purge meshes
-	uint32 i, count = freyjaModelGetMeshCount(modelIndex);
+	uint32 i, count = freyjaGetModelMeshCount(modelIndex);
 
 	for ( i = 0; i < count; ++i )
 	{

@@ -29,8 +29,6 @@
 #include <hel/ViewVolume.h>
 #include <hel/Ray.h>
 #include <mstl/SystemIO.h>
-#include <freyja/RenderModel.h>
-
 
 enum view_mode {                   /* View|Edit mode */     
 	VIEWMODE_MODEL_EDIT       = 1,
@@ -497,21 +495,21 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
-	void Render(RenderMesh &mesh);
+	void RenderMesh(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders mesh
 	 *
 	 ------------------------------------------------------*/
 
-	void Render(RenderModel &model);
+	void RenderModel(index_t model);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders model
 	 *
 	 ------------------------------------------------------*/
 
-	void Render(RenderSkeleton &skeleton, uint32 currentBone, vec_t scale);
+	void RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method
 	 * Post : Renders skeleton

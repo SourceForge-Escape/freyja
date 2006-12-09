@@ -232,7 +232,14 @@ class FreyjaControl
 	 * Post : Returns currently selected keyframe index
 	 ------------------------------------------------------*/
 
-	Mesh *GetModelMeshClass(index_t model, index_t mesh);
+	uint32 GetSelectedModel() { return mSelectedModel; }
+	void SetSelectedModel(uint32 i) { mSelectedModel = i; }
+	uint32 mSelectedModel;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected model index
+	 ------------------------------------------------------*/
+
 	uint32 GetSelectedMesh() { return mSelectedMesh; }
 	void SetSelectedMesh(uint32 i);
 	uint32 mSelectedMesh;
