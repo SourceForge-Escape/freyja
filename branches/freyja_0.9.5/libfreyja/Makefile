@@ -210,8 +210,9 @@ PROG_OBJS = \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/MeshABI.o \
 	$(BUILDDIR)/LegacyMeshABI.o \
+	$(BUILDDIR)/Model.o \
+	$(BUILDDIR)/ModelABI.o \
 	$(BUILDDIR)/PerlinNoise.o \
-	$(BUILDDIR)/RenderModel.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o \
 	$(BUILDDIR)/Track.o 

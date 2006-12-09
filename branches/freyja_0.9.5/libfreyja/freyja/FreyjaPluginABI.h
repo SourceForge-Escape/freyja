@@ -38,79 +38,12 @@
 #include "KeyFrameABI.h"
 #include "BoneABI.h"
 #include "MeshABI.h"
+#include "ModelABI.h"
 #include "LegacyMeshABI.h"
 #include "SkeletonABI.h"
 
 
 extern "C" {
-
-	////////////////////////////////////////////////////////////////
-	// Models
-	//
-	////////////////////////////////////////////////////////////////
-
-	uint32 freyjaGetModelCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetCurrentModelIndex();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaModelCreateMesh(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaModelGenerateVertexNormals(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetModelFlags(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetModelMeshCount(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaModelTransform(index_t modelIndex,
-								freyja_transform_action_t action, 
-								vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaModelClear(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : All data in model is reset/cleared
-	 ------------------------------------------------------*/
-
-	void freyjaModelClampTexCoords(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Clamps UVs and TexCoords to 0.0 to 1.0
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////////
 	// Texcoords

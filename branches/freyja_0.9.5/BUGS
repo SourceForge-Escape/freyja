@@ -16,6 +16,8 @@
  A
  ----------------------------
 
+ * FIX freyjaModelTransform
+
  * Quad ray pick sucks - fix it  ;_;
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor

@@ -37,7 +37,6 @@
 #include <time.h>
 #include <assert.h>
 
-//#include <mgtk/ResourceEvent.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/Bone.h>
 #include <freyja/Mesh.h>
@@ -287,12 +286,9 @@ void FreyjaRender::DrawFreeWindow()
 		glPopAttrib();
 	}
 
-	RenderModel model;
-
-	for (uint32 i = 0; i < freyjaGetRenderModelCount(); ++i)
+	for (uint32 i = 0; i < freyjaGetModelCount(); ++i)
 	{
-		freyjaGetRenderModel(i, model);
-		Render(model);
+		RenderModel(i);
 	}
 
 	//glPopMatrix(); // Remove scaling
@@ -732,15 +728,15 @@ void FreyjaRender::RenderLights()
 }
 
 
-void FreyjaRender::Render(RenderMesh &mesh)
+void FreyjaRender::RenderMesh(index_t mesh)
 {
 	const vec_t scale = 1.0001f;
-	static Vector3d u, v;
-	static RenderPolygon face;
-	Mesh *m = freyjaModelGetMeshClass(0, mesh.id);
+	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if (!m)
 		return;
+
+	Vec3 u, v;
 
 	glPushMatrix();
 
@@ -791,10 +787,10 @@ void FreyjaRender::Render(RenderMesh &mesh)
 		if (mRenderMode & fSkeletalVertexBlending)
 		{
 			// FIXME: Only updating in render loop for testing only!
-			freyjaMeshUpdateBlendVertices(mesh.id, a, time);
+			freyjaMeshUpdateBlendVertices(mesh, a, time);
 
-			if (freyjaGetMeshBlendVertices(mesh.id))
-				array = freyjaGetMeshBlendVertices(mesh.id);
+			if (freyjaGetMeshBlendVertices(mesh))
+				array = freyjaGetMeshBlendVertices(mesh);
 		}
 	}
 
@@ -812,7 +808,7 @@ void FreyjaRender::Render(RenderMesh &mesh)
 	
 #endif
 
-	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh.id)
+	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh)
 	{
 		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh &&
 			FreyjaControl::mControlPoints.size() == 0)
@@ -1054,63 +1050,9 @@ void FreyjaRender::Flag(flags_t flag, bool t)
 }
 
 
-void FreyjaRender::Render(RenderModel &model)
+void FreyjaRender::RenderModel(index_t model)
 {
 	glPushMatrix();
-
-	// This is the old vertex bbox selection highlighting 
-#if 0
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-
-	//Vector<unsigned int> *list;
-	//vec3_t min, max;
-	//vec3_t *xyz;
-	//int32 meshIndex = mModel->getCurrentMesh();
-
-	/* Highlight current vertex group
-	 * -- this should be model specific later:
-	 * eg mModel->getCurrentGroup() -> model.index */
-	if (mRenderMode & fBoundingVolSelection && model.getMeshCount() > 0)
-	{
-		/* Render bounding box */
-		freyjaGetMeshFrameBoundingBox(mModel->getCurrentMesh(),
-									  mModel->getCurrentGroup(), min, max);
-		mglDrawSelectBox(min, max, WHITE);
-	}
-
-	/* Render bounding box selection */
-	mModel->getVertexSelection(min, max, &list);
-
-	if (mRenderMode & fBoundingVolSelection)
-	{
-		mglDrawBbox(min, max, RED, mColorWireframe);
-	}
-
-	/* Render selected vertices */
-	if (list && !list->empty())
-	{
-		glPointSize(mDefaultPointSize + 2.0f);
-		glColor3fv(RED);
-		glBegin(GL_POINTS);
-		 
-		for (i = list->begin(), count = list->end(); i < count; ++i)
-		{
-			xyz = freyjaGetVertexXYZ((*list)[i]);
-
-			if (xyz)
-			{
-				glVertex3fv(*xyz);
-			}
-		}
-		 
-		glEnd();
-		glPointSize(mDefaultPointSize);
-	}
-
-	glPopAttrib();
-#endif
 
 	/* Render meshes */
 	glPushMatrix();
@@ -1142,20 +1084,14 @@ void FreyjaRender::Render(RenderModel &model)
 		}
 	}
 
-
-	RenderMesh rmesh;
-
-	for (uint32 i = 0, count = model.getMeshCount(); i < count; ++i)
+	// Render each mesh of this model in turn
+	for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
 	{
-		if (model.getMesh(i, rmesh, 0))
-		{
-			if (mRenderMode & fMaterial)
-			{
-				glEnable(GL_TEXTURE_2D);
-				
-			}
+		index_t mesh = freyjaGetModelMeshIndex(model, i);
 
-			Render(rmesh);
+		if (freyjaIsMeshAllocated(mesh))
+		{
+			RenderMesh(mesh);
 		}
 	}
 
@@ -1192,6 +1128,7 @@ void FreyjaRender::Render(RenderModel &model)
 		glPopAttrib();
 	}
 
+	// FIXME: This renders all skeletons at once by design 
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones && 
 		FreyjaRender::mJointRenderType == 2 || 
@@ -1250,7 +1187,7 @@ void FreyjaRender::Render(RenderModel &model)
 		glDisable(GL_BLEND);
 
 		FreyjaRender::mSelectedBone = FreyjaControl::mInstance->GetSelectedBone();
-		Render(model.getSkeleton(), 0, 1.0f);
+		RenderSkeleton(freyjaGetModelSkeleton(model), 0, 1.0f);
 
 		glPopAttrib();
 	}
@@ -1259,34 +1196,33 @@ void FreyjaRender::Render(RenderModel &model)
 }
 
 
-void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
-						  vec_t scale)
+void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 {
 	const unsigned char x = 0, y = 1, z = 2;
 	const unsigned char xr = 0, yr = 1, zr = 2;
-	RenderBone bone, child;
-	Vector3d pos, rot;
-	unsigned int i, n, index;
 
-
-	if (!skeleton.getBoneCount())
+	if (!freyjaGetSkeletonBoneCount(skeleton))
 		return;
 
-	if (!skeleton.getBone(currentBone, bone))
+	index_t boneIndex = freyjaGetSkeletonBoneIndex(skeleton, bone);
+
+	if (!freyjaIsBoneAllocated(boneIndex))
 		return;
+
+	Vec3 pos, rot;
 
 	/* Scale bones to match mesh scaling */
-	pos = bone.translate;
+	freyjaGetBoneTranslation3fv(boneIndex, pos.mVec);
 
 	/* Get orientation */
-	//freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, bone.rotate.mVec);
-	freyjaGetBoneRotationEuler3fv(bone.mBoneIndex, rot.mVec);
+	freyjaGetBoneRotationEuler3fv(boneIndex, rot.mVec);
 
 	/* Animation, if any... */
 	if (FreyjaControl::mInstance->GetControlScheme() == 
 		FreyjaControl::eScheme_Animation)
 	{
-		Bone *b = Bone::GetBone(currentBone);
+		Bone *b = Bone::GetBone(boneIndex);
+
 		if (b)
 		{
 			Vec3 p, o;
@@ -1313,12 +1249,12 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	pos *= scale;
 
 	/* Render bone joint */
-	((FreyjaRender::mSelectedBone == currentBone) ? 
+	((FreyjaRender::mSelectedBone == boneIndex) ? 
 	 glColor3fv(RED) : glColor3fv(GREEN));
 	mglDrawJoint(FreyjaRender::mJointRenderType, pos.mVec);
 
 	/* Render bone */
-	((FreyjaRender::mSelectedBone == currentBone) ? 
+	((FreyjaRender::mSelectedBone == boneIndex) ? 
 	 glColor3fv(FreyjaRender::mColorBoneHighlight) : glColor3fv(FreyjaRender::mColorBone));
 	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
 
@@ -1332,15 +1268,13 @@ void FreyjaRender::Render(RenderSkeleton &skeleton, uint32 currentBone,
 	glRotatef(rot.mVec[yr], 0, 1, 0);
 	glRotatef(rot.mVec[xr], 1, 0, 0);
 
-	n = bone.getChildrenCount();
-
-	for (i = 0; i < n; ++i)
+	for (uint32 i = 0, n = freyjaGetBoneChildCount(boneIndex); i < n; ++i)
 	{
-		index = bone.getBoneIndex(i);
+		index_t idx = freyjaGetBoneChild(boneIndex, i);
 
-		if (index != currentBone)
+		if (idx != boneIndex)
 		{
-			Render(skeleton, index, scale);
+			RenderSkeleton(skeleton, idx, scale);
 		}
 	}
 
@@ -2003,12 +1937,9 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	}
 
 	// Draw model geometry, metadata visualizations, and all that good stuff
-	RenderModel model;
-
-	for (unsigned int i = 0; i < freyjaGetRenderModelCount(); ++i)
+	for (unsigned int i = 0; i < freyjaGetModelCount(); ++i)
 	{
-		freyjaGetRenderModel(i, model);
-		Render(model);
+		RenderModel(i);
 	}
 
 	FreyjaControl::mInstance->GetCursor().Display();

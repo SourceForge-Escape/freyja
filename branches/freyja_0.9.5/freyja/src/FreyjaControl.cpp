@@ -80,6 +80,7 @@ int load_texture(const char *filename)
 
 FreyjaControl::FreyjaControl() :
 	mGroupBitmap(0x0),
+	mSelectedModel(0),
 	mSelectedTexture(0),
 	mSelectedView(PLANE_FREE),
 	mSelectedViewport(0),
@@ -4405,9 +4406,9 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			vec_t t, best = 9999.9f;
 			int32 selected = -1;
 
-			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
+			for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
 			{
-				Mesh *m = freyjaModelGetMeshClass(0, i);
+				Mesh *m = freyjaGetMeshClass(i);
 
 				if (!m)
 					continue;
@@ -4736,9 +4737,7 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
 
-			// FIXME: WRONG!!
-			for (uint32 i = 0, n = freyjaModelGetMeshCount(0); i < n; ++i)
-				freyjaMeshTransform3fv(i, action, v.mVec);
+			freyjaModelTransform(GetSelectedModel(), action, u[0], u[1], u[2]);
 
 			// Reset cursor transform
 			if (action != fTranslate)
@@ -5378,19 +5377,13 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 	{
 		mSelectedMesh = i;
 		
-		Mesh *m = GetModelMeshClass(0, GetSelectedMesh());
+		Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 		
 		if (m)
 		{
 			mCursor.mPos = m->GetPosition();
 		}
 	}
-}
-
-
-Mesh *FreyjaControl::GetModelMeshClass(index_t model, index_t mesh) 
-{
-	return freyjaModelGetMeshClass(model, mesh);
 }
 
 
