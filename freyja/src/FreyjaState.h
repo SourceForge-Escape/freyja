@@ -35,9 +35,6 @@
 
 using namespace freyja;
 
-// Argh, CPP ABI calls in headers are bad news...
-freyja::Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
-
 
 class ActionMeshTranslateExt : public Action
 {
@@ -53,7 +50,7 @@ class ActionMeshTranslateExt : public Action
 
 	virtual bool Undo() 
 	{
-		Mesh *m = freyjaModelGetMeshClass(0, mMesh);
+		Mesh *m = Mesh::GetMesh(mMesh);
 
 		if (m)
 		{
@@ -141,8 +138,7 @@ class ActionTexCoordTransform : public Action
 
 	virtual bool Undo() 
 	{
-		//DEBUG_MSG("$$$$$$$$$$$$ UNDO - %u %u %f %f\n", mMesh, mTexCoordArrayIndex, mU, mV);
-		freyja::Mesh *m = freyjaModelGetMeshClass(0, mMesh);
+		freyja::Mesh *m = Mesh::GetMesh(mMesh);
 
 		if (m)
 		{
@@ -291,34 +287,22 @@ class ActionMeshDelete : public Action
 		mMesh(NULL),
 		mOldMeshId(mesh)
 	{
-		freyja::Mesh *m = freyjaModelGetMeshClass(0, mesh);
+		freyja::Mesh *m = Mesh::GetMesh(mesh);
 
 		if (m)
+		{
+			// Copy of mesh outside of pool
 			mMesh = new Mesh(*m);
+		}
 	}
 
 	virtual bool Redo() { return false; }
 
 	virtual bool Undo() 
 	{
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You requested to Undo a Mesh Delete operation.",
-										 "Are you sure you want to use this experimental feature?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Undo"))
+		if (mMesh)
 		{
-			DEBUG_MSG("EXPERIMENTAL - Ids not 'fixed up'\n");
-			freyja_print("! EXPERIMENTAL - Ids not 'fixed up'\n");
-			
-			extern Vector<Mesh *> gFreyjaMeshes;
-			
-			if (gFreyjaMeshes[mOldMeshId])
-				gFreyjaMeshes[mOldMeshId] = mMesh;
-			else
-				gFreyjaMeshes.pushBack(mMesh);
-		}
-		else
-		{
-			delete mMesh;
+			mMesh->AddToPool();
 		}
 
 		return true;

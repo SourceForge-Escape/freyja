@@ -28,7 +28,6 @@
 
 using namespace freyja;
 
-extern Vector<Mesh *> gFreyjaMeshes;
 index_t gFreyjaCurrentModel = 0;
 index_t gFreyjaCurrentMesh = INDEX_INVALID;
 
@@ -55,69 +54,15 @@ uint32 freyjaGetModelCount()
 }
 
 
-char freyjaGetModelAppendMeshMode(index_t modelIndex)
-{
-	//if (modelIndex < gCopyModels.size())
-	//{
-	//	return gCopyModels[modelIndex]->getAppendMeshMode();
-	//}
-
-	return -1;
-}
-
-
-void freyjaModelAppendMeshMode(index_t modelIndex, char on)
-{
-	//if (modelIndex < gCopyModels.size())
-	//{
-	//	gCopyModels[modelIndex]->setAppendMeshMode(on);
-	//}
-}
-
-
-char freyjaModelCopyMesh(index_t modelIndex, index_t mesh, index_t frame)
-{
-	//if (modelIndex < gCopyModels.size())
-	//{
-	//	return gCopyModels[modelIndex]->copyMesh(mesh, frame);
-	//}
-
-	return -1;
-}
-
-
-char freyjaModelPasteMesh(index_t modelIndex)
-{
-	//if (modelIndex < gCopyModels.size())
-	//{
-	//	return gCopyModels[modelIndex]->pasteMesh();
-	//}
-
-	return -1;
-}
-
-
-char freyjaModelCopyVertexList(index_t modelIndex, 
-							   Vector<unsigned int> &list,
-							   int mesh, int frame)
-{
-	//if (modelIndex < gCopyModels.size())
-	//{
-	//	return gCopyModels[modelIndex]->copyVertexBuffer(list, mesh, frame);
-	//}
-
-	return -1;
-}
-
 uint32 freyjaModelGetMeshCount(index_t modelIndex)
 {
-	return gFreyjaMeshes.size();	
+	return freyjaGetMeshCount();	
 }
 
 
 index_t freyjaGetModelMeshCount(index_t modelIndex)
 {
-	return gFreyjaMeshes.size();
+	return freyjaGetMeshCount();
 }
 
 

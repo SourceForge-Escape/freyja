@@ -3,26 +3,22 @@
  * 
  * Project : freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.icculus.org/~mongoose/
- * Email   : mongoose@icculus.org
+ * Website : http://www.icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (C) 2005 Mongoose
+ * License : No use w/o permission (C) 2005,2006 Mongoose
  * Comments: This is the ABI to expose Mesh class and utils to C.
  *
- *
- *           This file was generated using Mongoose's C++ 
- *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
  * 2006.07.09:
- * Mongoose - Created, Split from Bone.cpp
+ * Mongoose - Created, Split from Mesh.cpp
  ==========================================================================*/
 
 #include <math.h>
 #include "Mesh.h"
 #include "MeshABI.h"
-//#include "FreyjaPluginABI.h"
 
 using namespace freyja;
 
@@ -31,19 +27,9 @@ using namespace freyja;
 // 0.9.5 C++ ABI
 ////////////////////////////////////////////////////////////////////////
 
-Vector<Mesh *> gFreyjaMeshes;
-
-
 Mesh *freyjaGetMeshClass(index_t meshUID)
 {
-	Mesh **array = gFreyjaMeshes.getVectorArray();
-
-	if ( meshUID < gFreyjaMeshes.size() )
-	{
-		return array[meshUID];
-	}
-
-	return NULL;
+	return Mesh::GetMesh(meshUID);
 }
 
 
@@ -68,12 +54,28 @@ Face *freyjaGetMeshFaceClass(index_t meshUID, index_t face)
 }
 
 
-bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh);
+bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh)
+{
+	freyjaPrintMessage("> Writing out mesh %i...", mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
+	return m ? m->Serialize(w) : false;
+}
+
+
+bool freyjaMeshLoadChunkTextJA(SystemIO::TextFileReader &r)
+{
+	index_t mesh = freyjaMeshCreate();
+	freyjaPrintMessage("> Reading in mesh %i...", mesh);
+	Mesh *m = freyjaGetMeshClass(mesh);
+	return m ? m->Serialize(r) : false;
+}
+
+
 /* This is to fix all the problems with the backend delete corruption
  * It filters and realigns indices to only save valid data, not
  * the entire junky backend cruft like undo data which remains
  *
- * Vector maps are very memory wasteful */  // use a materialMap
+ * Vector maps are very memory wasteful */
 int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
 {
 	const int32 version = 1;
@@ -408,23 +410,6 @@ int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
 }
 
 
-bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh)
-{
-	freyjaPrintMessage("> Writing out mesh %i...", mesh);
-	Mesh *m = freyjaGetMeshClass(mesh);
-	return m ? m->Serialize(w) : false;
-}
-
-
-bool freyjaMeshLoadChunkTextJA(SystemIO::TextFileReader &r)
-{
-	index_t mesh = freyjaMeshCreate();
-	freyjaPrintMessage("> Reading in mesh %i...", mesh);
-	Mesh *m = freyjaGetMeshClass(mesh);
-	return m ? m->Serialize(r) : false;
-}
-
-
 int32 freyjaMeshLoadChunkJA(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 {
 	Vector<long> verticesMap, texcoordsMap;
@@ -597,32 +582,18 @@ uint32 freyjaGetMeshFlags(index_t mesh)
 
 index_t freyjaMeshCreate()
 {
-	Mesh **array = gFreyjaMeshes.getVectorArray();
 	Mesh *mesh = new Mesh();
-	index_t idx = gFreyjaMeshes.size();
-
-	for ( uint32 i = 0; i < idx; ++i )
-	{
-		if ( array[i] == NULL )
-		{
-			array[i] = mesh;
-			return i;
-		}
-	}
-
-	gFreyjaMeshes.pushBack(mesh);
-	return idx;
+	return mesh->AddToPool();
 }
 
 
 void freyjaMeshDelete(index_t mesh)
 {
-	Mesh **array = gFreyjaMeshes.getVectorArray();
-
-	if ( mesh < gFreyjaMeshes.size() && array[mesh] != NULL )
+	Mesh *m = Mesh::GetMesh(mesh);
+	if (m)
 	{
-		delete array[mesh];
-		array[mesh] = NULL;
+		m->RemoveFromPool();
+		delete m;
 	}
 }
 
@@ -1305,7 +1276,7 @@ void freyjaMeshPosition(index_t meshIndex, vec3_t xyz)
 
 uint32 freyjaGetMeshCount()
 {
-	return gFreyjaMeshes.size();
+	return Mesh::GetCount();
 }
 
 
@@ -1677,8 +1648,7 @@ index_t freyjaMeshCopy(index_t meshIndex)
 	if (m)
 	{
 		Mesh *meshCopy = new Mesh(*m);
-		gFreyjaMeshes.pushBack(meshCopy);
-		return gFreyjaMeshes.size() - 1;
+		return meshCopy->AddToPool();
 	}
 
 	return INDEX_INVALID;

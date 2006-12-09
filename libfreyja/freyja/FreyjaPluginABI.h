@@ -50,29 +50,53 @@ extern "C" {
 	////////////////////////////////////////////////////////////////
 
 	uint32 freyjaGetModelCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t freyjaGetCurrentModelIndex();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t freyjaModelCreateMesh(index_t modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaModelGenerateVertexNormals(index_t modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	uint32 freyjaGetModelFlags(index_t modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	uint32 freyjaGetModelMeshCount(index_t modelIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	void freyjaModelTransform(index_t modelIndex,
 								freyja_transform_action_t action, 
 								vec_t x, vec_t y, vec_t z);
-
-	char freyjaGetModelAppendMeshMode(index_t modelIndex);
 	/*------------------------------------------------------
-	 * Pre  : Model <modelIndex> exists and has an active copy buffer
-	 * Post : Model's mesh buffer mode is returned or -1 on error
-	 *         enabled when returning  1
-	 *         disabled when returning  0 
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	void freyjaModelClear(index_t modelIndex);
@@ -81,40 +105,10 @@ extern "C" {
 	 * Post : All data in model is reset/cleared
 	 ------------------------------------------------------*/
 
-	void freyjaModelTransformTexCoord(index_t modelIndex,
-                                      index_t texCoordIndex,
-                                      freyja_transform_action_t action,
-                                      vec_t x, vec_t y);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
 	void freyjaModelClampTexCoords(index_t modelIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Clamps UVs and TexCoords to 0.0 to 1.0
-	 ------------------------------------------------------*/
-
-	void freyjaModelAppendMeshMode(index_t modelIndex, char on);
-	/*------------------------------------------------------
-	 * Pre  : Model <modelIndex> exists and has an active copy buffer
-	 * Post : Model's mesh buffer mode is 
-	 *         enabled when <on> = 1
-	 *         disabled when <on> = 0 
-	 ------------------------------------------------------*/
-
-	char freyjaModelCopyMesh(index_t modelIndex, index_t mesh, index_t frame);
-	/*------------------------------------------------------
-	 * Pre  : Model <modelIndex> exists and has an active copy buffer
-	 * Post : Model's copy buffer is modified to include new mesh duplicate
-	 *        using the *local <mesh> index and vertex morph <frame>
-	 ------------------------------------------------------*/
-
-	char freyjaModelPasteMesh(index_t modelIndex);
-	/*------------------------------------------------------
-	 * Pre  : Model <modelIndex> exists and has an active copy buffer
-	 * Post : Model's copy buffer is added to freyja as world object
 	 ------------------------------------------------------*/
 
 

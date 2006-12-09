@@ -142,6 +142,14 @@ extern "C" {
 	 * Post : Makes sure all UVs clamp: 0.0f <= u,v <= 1.0f
 	 ------------------------------------------------------*/
 
+	//void freyjaMeshTransformTexCoord(index_t mesh, index_t texcoord,
+	//								 freyja_transform_action_t action,
+	//								 vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : I can't believe I ever made an ABI wrapper for this either
+	 ------------------------------------------------------*/
+
 	index_t freyjaMeshPolygonCreate(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 

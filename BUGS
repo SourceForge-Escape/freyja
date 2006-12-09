@@ -24,6 +24,7 @@
 	- Not fully working with meshes anymore
 
  * New mesh copy system doesn't buffer, since copy = copy + paste
+	- Use fHidden flag to temp buffer meshes, and avoid it's use in raypick, etc
 
  * Scale tool sucks it's so broke nothing works properly
 	- Keyframe scaling edits geometery instead of keyframe
