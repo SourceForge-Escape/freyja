@@ -725,6 +725,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("ePointJoint", ePointJoint);
 
 	r.RegisterInt("eSplitObject", eSplitObject);
+	r.RegisterInt("eMergeObject", eMergeObject);
 	r.RegisterInt("eAppendFile", eAppendFile);
 	r.RegisterInt("eRevertFile", eRevertFile);
 	r.RegisterInt("eExportFile", eExportFile);

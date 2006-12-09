@@ -482,6 +482,12 @@ private:
 	 * Pre  : 
 	 * Post : Renders UV editing interface in viewport
 	 *
+	 * Mongoose 2004.03.30, 
+	 * Dependences of this method:
+	 * x GL context width and height
+	 * - Current mesh to skin
+	 * - OpenGL 2d view helper function
+	 * - Quad to render skin helper function
 	 ------------------------------------------------------*/
 
 	void DrawWindow(freyja_plane_t plane);

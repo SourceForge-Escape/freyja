@@ -23,6 +23,8 @@
  *
  ==========================================================================*/
 
+#define USING_FREYJA_CPP_ABI
+
 #include "FreyjaOpenGL.h" // includes <windows.h>
 
 #include <sys/time.h>
@@ -124,10 +126,10 @@ FreyjaRender::FreyjaRender() :
 		mColors[ 2][i] = PINK[i];
 		mColors[ 3][i] = GREEN[i];
 		mColors[ 4][i] = YELLOW[i];
-		mColors[ 5][i] = ORANGE[i];  // FIXME, needs more colors
-		mColors[ 6][i] = CYAN[i];
-		mColors[ 7][i] = YELLOW[i];
-		mColors[ 8][i] = YELLOW[i];
+		mColors[ 5][i] = CYAN[i];
+		mColors[ 6][i] = DARK_YELLOW[i];
+		mColors[ 7][i] = DARK_BLUE[i];
+		mColors[ 8][i] = ORANGE[i];  // FIXME, needs more colors
 		mColors[ 9][i] = YELLOW[i];
 		mColors[10][i] = YELLOW[i];
 		mColors[11][i] = YELLOW[i];
@@ -1630,272 +1632,108 @@ void FreyjaRender::DrawCurveWindow()
 }
 
 
-/* Mongoose 2004.03.30, 
- * Dependences of this method:
- * x GL context width and height
- * - Current mesh to skin
- * - OpenGL 2d view helper function
- * - Quad to render skin helper function
- */
 void FreyjaRender::DrawUVWindow()
 {
-	RenderMesh mesh;
-	RenderPolygon face;
-	unsigned int width, height;
-
-	width = GetWindowWidth();
-	height = GetWindowHeight();
+	unsigned int width = GetWindowWidth();
+	unsigned int height = GetWindowHeight();
 
 	glPushMatrix();
 
 	mgl2dProjection(width, height);
+
 	glPushAttrib(GL_ENABLE_BIT);
-	//glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
 	glLineWidth(mDefaultLineWidth);
-	glPointSize(mDefaultPointSize);
+	glPointSize(mVertexPointSize);
 
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
 
-	// Until multi model editing comes just use model[0]
-	RenderModel model;
-	bool valid = false;
-	if (freyjaGetRenderModel(0, model))
+	if (m)
 	{
-		if (model.getMesh(FreyjaControl::mInstance->GetSelectedMesh(), mesh, 0))
-		{
-			valid = true;
-		}
-	}
-	
-
-	if (!valid)
-	{
-		DrawQuad(0.0, 0.0, width, height);
-		ResizeContext(width, height);
-		glPopAttrib();
-		glPopMatrix();
-		return;
-	}
-
-#if 0
-	float x = 0.0f, y = 0.0f;
-
-	for (i = mModel->mUVMap.begin(), n = mModel->mUVMap.end();  i < n; ++i)
-	{
-		// Until multi model editing comes just use model[0]
-		//if (!freyjaGetRenderModelPolygon(0, mModel->mUVMap[i], face))
-		//	continue;
-		
-		if (!mesh.getPolygon(mModel->mUVMap[i], face))
-			continue;
-
-		if (face.material != (int)mModel->getCurrentTextureIndex())
-			continue;
-
-		glBegin(GL_LINE_LOOP);
-		glColor3fv(BLUE);
-
-		for (j = 0; j < face.count; ++j)
-		{
-			x = face.texcoords[j].mVec[0] * width;
-			y = face.texcoords[j].mVec[1] * height;
-					
-			glVertex2f(x, height - y);
-		}
-		
-		glEnd();
-	}
-#endif
-
-
-
-#if 0
-	for (i = 0, n = mesh.getPolygonCount(); i < n; ++i)
-	{
-		if (!mesh.getPolygon(i, face))
-			continue;
-
-		if (mesh.id == FreyjaControl::mInstance->GetSelectedMesh())
-		{
-			if (face.id == FreyjaControl::mInstance->GetSelectedFace())
-				glColor3fv(RED);
-			else if (face.flags & fPolygon_Alpha)  
-				glColor3fv(ORANGE);
-			else
-				glColor3fv(CYAN);
-		}
-		else
-		{
-			glColor3fv(mColorWireframe);
-		}
-		
-		if (face.material != (int)FreyjaControl::mInstance->GetSelectedTexture())
-		{
-			if (mesh.id == FreyjaControl::mInstance->GetSelectedMesh())
-			{
-				glColor3fv(GREEN);
-			}
-			else
-			{
-				continue;
-			}
-		}		
-
-		// Mongoose: Draw texel polygons
-		glBegin(GL_LINE_LOOP);
-		
-		for (j = 0; j < face.count; ++j)
-		{
-			x = face.texcoords[j].mVec[0] * width;
-			y = face.texcoords[j].mVec[1] * height;
-					
-			glVertex2f(x, height - y);
-		}
-			
-		glEnd();
-
-
-		// Mongoose: Draw vertices
+		/* Render UVs as points */
+		// FIXME: This will do many points for each point, opt later
+		//        when we can't have mixed polymaps
 		glBegin(GL_POINTS);
-		
-		for (j = 0; j < face.count; ++j)
+		glColor3fv(mColorVertexHighlight);	
+
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
-			if ((int)FreyjaControl::mInstance->GetSelectedTexture() == face.material)
+			Face *f = m->GetFace(i);
+			Vec3 v;
+
+			if (!f ||f->mMaterial != FreyjaControl::mInstance->GetSelectedTexture())
+				continue;
+
+			if (f->mFlags & Face::fPolyMappedTexCoords)
 			{
-				switch (j)
+				for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
 				{
-				case 0:
-					glColor3fv(GREEN);
-					break;
-				case 2:
-					glColor3fv(BLUE);
-					break;
-				case 3:
-					glColor3fv(ORANGE);
-					break;
-				case 4:
-					glColor3fv(WHITE);
-					break;
-				default:
-					glColor3fv(YELLOW);
+					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+					v[0] *= width;
+					//v[1] *= height;
+					v[1] = height - v[1]*height;
+					glVertex2fv(v.mVec);
 				}
 			}
 			else
 			{
-				glColor3fv(mColorVertexHighlight);
+				for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
+				{
+					m->GetTexCoord(f->mIndices[j], v.mVec);
+					v[0] *= width;
+					//v[1] *= height;
+					v[1] = height - v[1]*height;
+					glVertex2fv(v.mVec);
+				}
 			}
-				
-			x = face.texcoords[j].mVec[0] * width;
-			y = face.texcoords[j].mVec[1] * height;
-				
-			glVertex2f(x, height - y);
 		}
+
+		glEnd();
+
+
+		// Render wireframe faces	
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+		{
+			Face *f = m->GetFace(i);
+			Vec3 v;
 			
-		glEnd();
-	}
-#else
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+			if (!f) 
+				continue;
+			
+			/* Render face as wireframe */
+			glBegin(GL_LINE_LOOP);
 
-
-	if (!m)
-		return;
-
-	glPushMatrix();
-
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glPointSize(mVertexPointSize);
-
-	/* Render UVs as points */
-	// FIXME: This will do many points for each point, opt later
-	//        when we can't have mixed polymaps
-	glBegin(GL_POINTS);
-	glColor3fv(mColorVertexHighlight);	
-
-	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-	{
-		Face *f = m->GetFace(i);
-		Vec3 v;
-
-		if (!f ||f->mMaterial != FreyjaControl::mInstance->GetSelectedTexture())
-			continue;
-
-		if (f->mFlags & Face::fPolyMappedTexCoords)
-		{
-			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
+			if (f->mFlags & Face::fSelected)
+				glColor3fv(mColorWireframeHighlight);
+			else
+				glColor3fv(mColorWireframe);
+			
+			if (f->mFlags & Face::fPolyMappedTexCoords)
 			{
-				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-				v.mVec[0] *= width;
-				//v.mVec[1] *= height;
-				v.mVec[1] = height - v.mVec[1]*height;
-				glVertex2fv(v.mVec);
+				for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
+				{
+					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+					v.mVec[0] *= width;
+					v.mVec[1] = height - v.mVec[1]*height;
+					glVertex2fv(v.mVec);
+				}
 			}
-		}
-		else
-		{
-			for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
+			else
 			{
-				m->GetTexCoord(f->mIndices[j], v.mVec);
-				v.mVec[0] *= width;
-				//v.mVec[1] *= height;
-				v.mVec[1] = height - v.mVec[1]*height;
-				glVertex2fv(v.mVec);
+				for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
+				{
+					m->GetTexCoord(f->mIndices[j], v.mVec);
+					v.mVec[0] *= width;
+					v.mVec[1] = height - v.mVec[1]*height;
+					glVertex2fv(v.mVec);
+				}
 			}
+			
+			glEnd();
 		}
 	}
-
-	glEnd();
-
-
-	// Render wireframe faces	
-	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-	{
-		Face *f = m->GetFace(i);
-		Vec3 v;
-
-		if (!f) 
-			continue;
-
-		/* Render face as wireframe */
-		glBegin(GL_LINE_LOOP);
-
-		if (f->mFlags & Face::fSelected)
-			glColor3fv(mColorWireframeHighlight);
-		else
-			glColor3fv(mColorWireframe);
-
-		if (f->mFlags & Face::fPolyMappedTexCoords)
-		{
-			for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
-			{
-				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-				v.mVec[0] *= width;
-				//v.mVec[1] *= height;
-				v.mVec[1] = height - v.mVec[1]*height;
-				glVertex2fv(v.mVec);
-			}
-		}
-		else
-		{
-			for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
-			{
-				m->GetTexCoord(f->mIndices[j], v.mVec);
-				v.mVec[0] *= width;
-				//v.mVec[1] *= height;
-				v.mVec[1] = height - v.mVec[1]*height;
-				glVertex2fv(v.mVec);
-			}
-		}
-				
-		glEnd();
-	}
-
-	//glPopAttrib();
-
-
-#endif
 
 	DrawQuad(0.0, 0.0, width, height);
 	glPopAttrib();

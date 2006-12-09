@@ -862,9 +862,24 @@ void freyjaMeshTransform3fv(index_t mesh,
 
 	case fScale:
 		{
+#if 0
 			Matrix s;
 			s.scale(xyz);
 			m->TransformVertices(s);
+#else
+			Matrix t, s, t2, mat;
+
+			// Scale about bounding volume center instead of origin
+			t.translate(m->GetPosition().mVec);
+			s.scale(xyz);
+			t2.translate((-Vec3(m->GetPosition())).mVec);
+
+			// FIXME: Fix the damn matrix backend to avoid such expensive
+			//        processing here ( only want to transform once )
+			m->TransformVertices(t2);
+			m->TransformVertices(s);
+			m->TransformVertices(t);
+#endif
 		}
 		break;
 
@@ -1216,7 +1231,7 @@ void freyjaGetMeshFrameCenter(index_t meshIndex, uint32 frame, vec3_t xyz)
 
 	if (mesh)
 	{
-		mesh->GetPosition(xyz);
+		Vec3(mesh->GetPosition()).Get(xyz);
 	}
 }
 
@@ -1394,7 +1409,7 @@ void freyjaGetMeshPosition(index_t meshIndex, vec3_t xyz)
 
 	if (mesh)
 	{
-		mesh->GetPosition(xyz);
+		Vec3(mesh->GetPosition()).Get(xyz);
 	}
 }
 

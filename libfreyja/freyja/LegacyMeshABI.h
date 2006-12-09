@@ -72,6 +72,8 @@ extern "C" {
 	 * Post : Sets index, which is useful for 0.9.3 usage 
 	 ------------------------------------------------------*/
 
+	// Historical note -- it's amazing how long that's been mispelled
+	// good thing it's deprecated now =)
 	void freyjaMeshPromoteTexcoordsToPloymapping(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : mesh references a valid mesh

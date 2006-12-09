@@ -7,6 +7,12 @@
  Dancer (RC2)
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - More API / ABI clean up for upcoming release!
+ - Touching up Mesh class to remove legacy usage like vertex list delimiting
+   anding things like internal / external object split/merge/etc operations
+ - Per group normal flipping
+ - FIX for render error in FreyjaRender::DrawUVWindow and removed legacy code
+ - FIX for Mesh::UpdateVertexReferenceWithSelectedBias() wasn't clearing cache
+ - Mesh scale is now a 'scale about cursor' operation
  - freyja text format support for all track types
  - Dump serialized mesh pool's stack if array is empty ( no undo to disk )
  - freyja text format flushes materials before loading now

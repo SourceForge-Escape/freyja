@@ -2104,8 +2104,50 @@ bool FreyjaControl::event(int event, vec_t value)
 }
 
 
-// HACK FIXME
-#include <GL/gl.h>
+#ifdef OBSOLETE
+	case eMirrorUV_X:
+		freyja_print("FIXME: freyjaModelMirrorTexCoord");
+		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, true, false);
+		freyja_event_gl_refresh();
+		break;
+
+	case eMirrorUV_Y:
+		freyja_print("FIXME: freyjaModelMirrorTexCoord");
+		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, false, true);
+		freyja_event_gl_refresh();
+		break;
+
+	case eTmpUVMapOn:
+		CreatePolyMappedUVMap(GetSelectedFace());
+		freyja_event_gl_refresh();
+		break;
+
+	case eTmpUVMapOff:
+		CreatePolyMappedUVMap(-1);
+		freyja_event_gl_refresh();
+		break;
+
+	case eTranslateUV:
+		break;
+
+	case eRotateUV:
+		CreatePolyMappedUVMap(GetSelectedFace());
+		//mModel->transformTexCoord(GetSelectedTexCoord(),
+		//						  fRotateAboutPoint, 45, 0); 
+		freyja_event_gl_refresh();
+		break;
+
+	case ePolyMapTexturePolygon:
+		freyja_print("FIXME: freyjaMeshPolygonSplitTexCoords");
+		//freyjaMeshPolygonSplitTexCoords(GetSelectedMesh(), GetSelectedFace());
+		break;
+
+	case eScaleUV:
+		freyja_print("FIXME: freyjaModelTransformTexCoord");
+		//freyjaModelTransformTexCoord(0, GetSelectedTexCoord(), fScale, 0.5, 0.5);
+		break;
+#endif
+
 
 bool FreyjaControl::event(int command)
 {
@@ -2125,7 +2167,6 @@ bool FreyjaControl::event(int command)
 		freyjaMeshNormalFlip(GetSelectedMesh());
 		freyja_print("Flipping normals for mesh[%i]", GetSelectedMesh());
 		break;
-
 
 	case eInfo:
 		PrintInfo();
@@ -2474,49 +2515,6 @@ bool FreyjaControl::event(int command)
 		}
 		break;
 
-
-	case eMirrorUV_X:
-		freyja_print("FIXME: freyjaModelMirrorTexCoord");
-		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, true, false);
-		freyja_event_gl_refresh();
-		break;
-
-	case eMirrorUV_Y:
-		freyja_print("FIXME: freyjaModelMirrorTexCoord");
-		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, false, true);
-		freyja_event_gl_refresh();
-		break;
-
-	case eTmpUVMapOn:
-		CreatePolyMappedUVMap(GetSelectedFace());
-		freyja_event_gl_refresh();
-		break;
-
-	case eTmpUVMapOff:
-		CreatePolyMappedUVMap(-1);
-		freyja_event_gl_refresh();
-		break;
-
-	case eTranslateUV:
-		break;
-
-	case eRotateUV:
-		CreatePolyMappedUVMap(GetSelectedFace());
-		//mModel->transformTexCoord(GetSelectedTexCoord(),
-		//						  fRotateAboutPoint, 45, 0); 
-		freyja_event_gl_refresh();
-		break;
-
-	case ePolyMapTexturePolygon:
-		freyja_print("FIXME: freyjaMeshPolygonSplitTexCoords");
-		//freyjaMeshPolygonSplitTexCoords(GetSelectedMesh(), GetSelectedFace());
-		break;
-
-	case eScaleUV:
-		freyja_print("FIXME: freyjaModelTransformTexCoord");
-		//freyjaModelTransformTexCoord(0, GetSelectedTexCoord(), fScale, 0.5, 0.5);
-		break;
-
 	case eSetMeshTexture:
 		freyja_print("Switching all of Mesh[%i]'s faces to material %i",
 					 GetSelectedMesh(), GetSelectedTexture());
@@ -2608,6 +2606,10 @@ bool FreyjaControl::event(int command)
 
 	case eSplitObject:
 		freyja_print("Object splitting removed from this build");
+		break;
+
+	case eMergeObject:
+		freyja_print("Object merging removed from this build");
 		break;
 
 	case eSelectAll:
@@ -5935,7 +5937,7 @@ void eSetSelectedViewport(unsigned int value)
 
 void eSelectedFacesGenerateNormals()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -5943,10 +5945,20 @@ void eSelectedFacesGenerateNormals()
 	}
 }
 
+void eSelectedFacesFlipNormals()
+{
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->SelectedFacesFlipVertexNormals();
+	}
+}
+
 
 void eSelectedFacesDelete()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -6002,7 +6014,7 @@ void eGroupClear()
 		}
 
 		freyja_print("Selected faces removed from smoothing group (%i).",group);
-		m->SelectedFacesMarkSmoothingGroup(group, 0);
+		m->SelectedFacesMarkSmoothingGroup(group, false);
 		freyja_event_gl_refresh();
 	}
 }
@@ -6031,12 +6043,6 @@ void eGroupAssign()
 	}
 }
 
-
-void eNopControl(ResourceEvent *e)
-{
-	freyja_print("!'%s' : No longer implemented or disabled.",
-				(e && e->getName()) ? e->getName() : "Unknown event");
-}
 
 vec_t gWeight = 1.0f;
 void eWeight(vec_t w)
@@ -6070,6 +6076,11 @@ void eClearWeight()
 }
 
 
+void eNopControl(ResourceEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
 
 
 void FreyjaControlEventsAttach()
@@ -6089,6 +6100,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
 	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
 
+	ResourceEventCallback::add("eSelectedFacesFlipNormals", &eSelectedFacesFlipNormals);
 	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
 	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
