@@ -207,9 +207,10 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/KeyFrame.o \
 	$(BUILDDIR)/KeyFrameABI.o \
+	$(BUILDDIR)/LegacyABI.o \
+	$(BUILDDIR)/LightABI.o \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/MeshABI.o \
-	$(BUILDDIR)/LegacyMeshABI.o \
 	$(BUILDDIR)/Model.o \
 	$(BUILDDIR)/ModelABI.o \
 	$(BUILDDIR)/PerlinNoise.o \

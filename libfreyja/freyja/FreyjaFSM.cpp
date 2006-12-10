@@ -75,10 +75,10 @@ FreyjaFSM::~FreyjaFSM()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-// FIXME: Move all these gobal iterators to FSMs or the FSM singleton
+// FIXME: Move all these gobal iterators to OBJECT based FSMs
 index_t freyjaGetCurrentModelIndex()
 {
-	return 0; // Egg has a single model data structure
+	return gFreyjaCurrentModel; 
 }
 
 
@@ -114,10 +114,6 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 		return freyjaGetModelMeshCount(gFreyjaCurrentModel);
 		break;
 
-	case FREYJA_VERTEX_GROUP:
-		MARK_MSGF("FREYJA_VERTEX_GROUP Obsolete");
-		break;
-
 	case FREYJA_POLYGON:
 		return freyjaGetMeshPolygonCount(gFreyjaCurrentMesh);
 		break;
@@ -145,13 +141,10 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 	case FREYJA_MATERIAL:
 		return freyjaGetMaterialCount();
 		break;
-
-	case FREYJA_VERTEX_FRAME:
-		MARK_MSGF("FREYJA_VERTEX_FRAME Obsolete");
-		break;
 		
 	default:
-		MARK_MSGF("Invalid state %i", type);
+		MARK_MSGF("%s(%s) is not implemented in this branch.", 
+				  __func__, freyjaObjectToString(type) );
 	}
 
 	return 0;
@@ -160,232 +153,11 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 
 index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 {
-#ifdef USING_EGG
-	Vector<egg_vertex_t *> *vertex;
-	Vector<egg_texel_t *> *texel;
-	Vector<egg_mesh_t *> *mesh;
-	Vector<egg_group_t *> *group;
-	Vector<egg_polygon_t *> *polygon;
-	Vector<egg_animation_t *> *skelanim;
-
-	switch (type)
-	{
-	case FREYJA_MODEL:
-		return 0;  // This was disabled
-		break;
-
-	case FREYJA_VERTEX:
-		vertex = mEgg->VertexList();
-    
-		if (!vertex)
-			return INDEX_INVALID;
- 
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexVertex = vertex->begin();
-			break;
-		case FREYJA_NEXT:
-			++mIndexVertex;
-			break;
-		default:
-			mIndexVertex = item;
-		}
-
-		if (mIndexVertex < vertex->end())
-		{
-			return mIndexVertex;
-		}
-		break;
-
-	case FREYJA_TEXCOORD:
-		texel = mEgg->TexelList();
-    
-		if (!texel)
-			return INDEX_INVALID;
- 
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexTexCoord = texel->begin();
-			break;
-		case FREYJA_NEXT:
-			++mIndexTexCoord;
-			break;
-		default:
-			mIndexTexCoord = item;
-		}
-
-		if (mIndexTexCoord < texel->end())
-		{
-			return mIndexTexCoord;
-		}
-		break;
-
-	case FREYJA_MESH:
-		mesh = mEgg->MeshList();
-    
-		if (!mesh)
-			return INDEX_INVALID;
- 
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexMesh = mesh->begin();
-			break;
-		case FREYJA_NEXT:
-			++mIndexMesh;
-			break;
-		default:
-			mIndexMesh = item;
-		}
-
-		if (mIndexMesh < mesh->end())
-		{
-			return mIndexMesh;
-		}
-		break;
-
-	case FREYJA_VERTEX_FRAME:
-	case FREYJA_VERTEX_GROUP:
-		group = mEgg->GroupList();
-    
-		if (!group)
-			return INDEX_INVALID;
- 
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexGroup = group->begin();
-			break;
-		case FREYJA_NEXT:
-			++mIndexGroup;
-			break;
-		default:
-			mIndexGroup = item;
-		}
-
-		if (mIndexGroup < group->end())
-		{
-			return mIndexGroup;
-		}
-		break;
-
-	case FREYJA_POLYGON:
-		polygon = mEgg->PolygonList();
-    
-		if (!polygon)
-			return INDEX_INVALID;
- 
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexPolygon = polygon->begin();
-			break;
-		case FREYJA_NEXT:
-			++mIndexPolygon;
-			break;
-		default:
-			mIndexPolygon = item;
-		}
-
-		if (mIndexPolygon < polygon->end())
-		{
-			return mIndexPolygon;
-		}
-		break;
-
-	case FREYJA_BONE:
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexBone = 0;
-			break;
-		case FREYJA_NEXT:
-			++mIndexBone;
-			break;
-		default:
-			mIndexBone = item;
-		}
-
-		if (freyjaIsBoneAllocated(mIndexBone))
-		{
-			return mIndexBone;
-		}
-		break;
-
-
-	case FREYJA_SKELETON:
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexSkeleton = 0;
-			break;
-		case FREYJA_NEXT:
-			++mIndexSkeleton;
-			break;
-		default:
-			mIndexSkeleton = item;
-		}
-
-		if (freyjaIsSkeletonAllocated(mIndexSkeleton))
-		{
-			return mIndexSkeleton;
-		}
-
-		break;
-
-	case FREYJA_SKEL_KEYFRAME:
-		skelanim = mEgg->AnimationList();
-    
-		if (!skelanim)
-			return INDEX_INVALID;
- 
-		switch (item)
-		{
-		case FREYJA_CURRENT:
-			break;
-		case FREYJA_RESET:
-			mIndexSkeletonAnim = skelanim->begin();
-			break;
-		case FREYJA_NEXT:
-			++mIndexSkeletonAnim;
-			break;
-		default:
-			mIndexSkeletonAnim = item;
-		}
-
-		if (mIndexSkeletonAnim < skelanim->end())
-		{
-			return mIndexSkeletonAnim;
-		}
-		break;
-
-	case FREYJA_MATERIAL:
-	case FREYJA_TEXTURE:
-	case FREYJA_SKEL_ANIMATION:
-		break;
-	}
-#else
 	switch (type)
 	{
 	case FREYJA_POLYGON:
 		{
-			Mesh *m = freyjaModelGetMeshClass( mIndexModel, mIndexMesh );
+			Mesh *m = freyjaGetMeshClass( mIndexMesh );
 			uint32 count = m ? m->GetFaceCount() : 0;
 
 			switch (item)
@@ -432,9 +204,9 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 		break;
 
 	default:	
-		MARK_MSGF("'type = %s' Not implemented in this branch", freyjaGetObjectName(type) );
+		MARK_MSGF("%s(%s) is not implemented in this branch.", 
+				  __func__, freyjaObjectToString(type) );
 	}
-#endif
 
 	return INDEX_INVALID;
 }

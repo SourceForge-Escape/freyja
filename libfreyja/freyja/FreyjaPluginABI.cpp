@@ -63,7 +63,6 @@ using namespace mstl;
  * SceneManager singleton  */
 Vector<MetaData *> gFreyjaMetaData; 
 Vector<FreyjaCamera *>  gFreyjaCameras;
-Vector<FreyjaLight *>  gFreyjaLights;
 Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 
 Vector<char *> gPluginDirectories;
@@ -412,396 +411,6 @@ int32 freyjaSaveModel(const char *filename)
 	return 0;
 }
 
-
-Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2])
-{
-	Vector<unsigned int> *list;
-	int32 i, count;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	count = freyjaGetCount(FREYJA_VERTEX); 
-
-	list = new Vector<unsigned int>();
-
-	if (count < 1)
-	{
-		/* Return empty list */
-		return list;
-	}
-
-
-	/* Using freyja iterator interface */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-	
-	for (i = 0; i < count; ++i)
-	{
-		freyjaGetVertex3fv(xyz);
-		
-		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
-		{
-			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
-			{
-				if (xyz[2] >= bbox[0][2] && xyz[2] <= bbox[1][2])
-				{
-					list->pushBack(freyjaIterator(FREYJA_VERTEX, 
-												  FREYJA_CURRENT));
-				}
-			}
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-Vector<unsigned int> *eggFindVerticesInBox(vec3_t bbox[2],
-										   Vector<unsigned int> &vertices)
-{
-	Vector<unsigned int> *list;
-	unsigned int i, count;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	list = new Vector<unsigned int>();
-
-	/* Using egg iterator interface */
-	for (i = 0; i < count; ++i)
-	{
-		if (INDEX_INVALID == freyjaIterator(FREYJA_VERTEX, vertices[i]))
-			continue;
-
-		freyjaGetVertex3fv(xyz);
-		
-		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
-		{
-			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
-			{
-				if (xyz[2] >= bbox[0][2] && xyz[2] <= bbox[1][2])
-				{
-					list->pushBack(freyjaIterator(FREYJA_VERTEX, 
-												  FREYJA_CURRENT));
-				}
-			}
-		}
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-void freyjaModelGenerateVertexNormals(index_t modelIndex)
-{
-	Vector <Vector3d *> faceNormals;
-	Vector <long> ref;
-	Vector3d a, b, c, aa, bb, normal;
-	unsigned int i, j, vertexCount, faceCount;
-	int32 v0, v1, v2, index;
-	index_t face, mesh;
-
-
-	freyjaCriticalSectionLock();
-	
-	freyjaPrintMessage("freyjaGenerateVertexNormals()");
-	mesh = freyjaGetCurrent(FREYJA_MESH);
-	vertexCount = freyjaGetCount(FREYJA_VERTEX);
-	faceCount = freyjaGetCount(FREYJA_POLYGON); 
-
-	freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
-
-    for (i = 0; i < faceCount; ++i)
-    {
-		face = freyjaGetCurrent(FREYJA_POLYGON);
-		v0 = freyjaGetPolygonVertexIndex(face, 0);
-		v1 = freyjaGetPolygonVertexIndex(face, 1);
-		v2 = freyjaGetPolygonVertexIndex(face, 2);
-
-		freyjaPrintMessage("<%d %d %d>", v0, v1, v2);
-		freyjaGetVertexXYZ3fv(v0, a.mVec);
-		freyjaGetVertexXYZ3fv(v1, b.mVec);
-		freyjaGetVertexXYZ3fv(v2, c.mVec);
-
-		/* Compute 2 vectors from the triangle face */	
-		//aa = b - a;
-		//bb = b - c;
-		
-		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
-		faceNormals.pushBack(new Vector3d(normal));
-
-		freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
-	}
-
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-
-	/* Compute vertex normals */
-    for (i = 0; i < vertexCount; ++i)
-    {
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-
-		if (index < 0)
-		{
-			freyjaPrintError("freyjaGenerateVertexNormals> ERROR bad vertex\n");
-			continue;
-		}
-
-		normal.zero();
-
-		//freyjaGetVertexPolygonRef(ref);
-		//for (j = ref.begin(); j < ref.end(); ++j)
-		uint32 jn = freyjaGetMeshVertexPolygonRefCount(mesh, index);
-		for (j = 0; j < jn; ++j)
-		{
-			normal += *faceNormals[freyjaGetMeshVertexPolygonRefIndex(mesh, index, j)];
-		}
-
-		normal.normalize();
-
-		freyjaVertexNormal3fv(index,normal.mVec);
-
-		freyjaPrintMessage("%d :: %d faces :: %f %f %f", index,
-						   ref.size(),
-						   normal.mVec[0], normal.mVec[1], normal.mVec[2]);
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-    }
-
-	faceNormals.erase();
-	
-	freyjaCriticalSectionUnlock();
-}
-
-
-Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(BoundingVolume &vol)
-{
-	Vector<unsigned int> *list;
-	unsigned int i, count, index;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	count = freyjaGetCount(FREYJA_VERTEX); 
-
-	if (count < 1)
-	{
-		return 0x0;
-	}
-
-	list = new Vector<unsigned int>();
-
-	/* Using freyja iterator interface */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-	
-	for (i = 0; i < count; ++i)
-	{
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-
-		freyjaGetVertexXYZ3fv(index, xyz);
-		
-		if (vol.IsPointInside(xyz))
-		{
-			list->pushBack(index);
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
-											  Vector<unsigned int> &vertices)
-{
-	Vector<unsigned int> *list;
-	unsigned int i, count, index;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	list = new Vector<unsigned int>();
-
-	/* Using freyja iterator interface */
-	for (i = 0; i < count; ++i)
-	{
-		if (INDEX_INVALID == freyjaIterator(FREYJA_VERTEX, vertices[i]))
-			continue;
-
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-		freyjaGetVertexXYZ3fv(index, xyz);
-		
-		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
-		{
-			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
-			{
-				if (xyz[0] >= bbox[0][2] && xyz[0] <= bbox[1][2])
-				{
-					list->pushBack(index);
-				}
-			}
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-////////////////////////////////////////////////////////////////////
-
-index_t gFreyjaLightIndex = INDEX_INVALID;
-
-
-index_t freyjaLightCreate()
-{
-	index_t lightIndex = gFreyjaLights.size();
-
-	gFreyjaLights.pushBack(new FreyjaLight());
-	// gFreyjaLights[lightIndex]->mId = lightIndex;
-
-	return lightIndex;	
-}
-
-
-uint32 freyjaGetLightCount()
-{
-	return gFreyjaLights.size();
-}
-
-
-index_t freyjaGetCurrentLight()
-{
-	return gFreyjaLightIndex;
-}
-
-
-void freyjaCurrentLight(uint32 lightIndex)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		gFreyjaLightIndex = lightIndex;
-	}
-}
-
-
-void freyjaLightDelete(int32 lightIndex)
-{
-}
-
-
-// Light mutators /////////////////
-
-void freyjaLightPosition4v(uint32 lightIndex, vec4_t position)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		gFreyjaLights[lightIndex]->setPosition(position);
-	}
-}
-
-
-void freyjaLightAmbient(uint32 lightIndex, vec4_t ambient)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		gFreyjaLights[lightIndex]->mAmbient[0] = ambient[0];
-		gFreyjaLights[lightIndex]->mAmbient[1] = ambient[1];
-		gFreyjaLights[lightIndex]->mAmbient[2] = ambient[2];
-		gFreyjaLights[lightIndex]->mAmbient[3] = ambient[3];
-	}
-}
-
-
-void freyjaLightDiffuse(uint32 lightIndex, vec4_t diffuse)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		gFreyjaLights[lightIndex]->mDiffuse[0] = diffuse[0];
-		gFreyjaLights[lightIndex]->mDiffuse[1] = diffuse[1];
-		gFreyjaLights[lightIndex]->mDiffuse[2] = diffuse[2];
-		gFreyjaLights[lightIndex]->mDiffuse[3] = diffuse[3];
-	}
-}
-
-
-void freyjaLightSpecular(uint32 lightIndex, vec4_t specular)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		gFreyjaLights[lightIndex]->mSpecular[0] = specular[0];
-		gFreyjaLights[lightIndex]->mSpecular[1] = specular[1];
-		gFreyjaLights[lightIndex]->mSpecular[2] = specular[2];
-		gFreyjaLights[lightIndex]->mSpecular[3] = specular[3];
-	}
-}
-
-
-// Light accessors /////////////////
-
-void freyjaGetLightPosition4v(uint32 lightIndex, vec4_t position)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		position[0] = gFreyjaLights[lightIndex]->mPos[0];
-		position[1] = gFreyjaLights[lightIndex]->mPos[1];
-		position[2] = gFreyjaLights[lightIndex]->mPos[2];
-		position[3] = gFreyjaLights[lightIndex]->mPos[3];
-	}
-}
-
-
-void freyjaGetLightAmbient(uint32 lightIndex, vec4_t ambient)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		ambient[0] = gFreyjaLights[lightIndex]->mAmbient[0];
-		ambient[1] = gFreyjaLights[lightIndex]->mAmbient[1];
-		ambient[2] = gFreyjaLights[lightIndex]->mAmbient[2];
-		ambient[3] = gFreyjaLights[lightIndex]->mAmbient[3];
-	}
-}
-
-
-void freyjaGetLightDiffuse(uint32 lightIndex, vec4_t diffuse)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		diffuse[0] = gFreyjaLights[lightIndex]->mDiffuse[0];
-		diffuse[1] = gFreyjaLights[lightIndex]->mDiffuse[1];
-		diffuse[2] = gFreyjaLights[lightIndex]->mDiffuse[2];
-		diffuse[3] = gFreyjaLights[lightIndex]->mDiffuse[3];
-	}
-}
-
-
-void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular)
-{
-	if (lightIndex < gFreyjaLights.size())
-	{
-		specular[0] = gFreyjaLights[lightIndex]->mSpecular[0];
-		specular[1] = gFreyjaLights[lightIndex]->mSpecular[1];
-		specular[2] = gFreyjaLights[lightIndex]->mSpecular[2];
-		specular[3] = gFreyjaLights[lightIndex]->mSpecular[3];
-	}
-}
 
 
 void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex)
@@ -1794,155 +1403,27 @@ int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
 }
 
 
-const char *freyjaGetObjectName(freyja_object_t obj)
-{
-	switch (obj)
-	{
-	case FREYJA_MODEL:
-		return "FREYJA_MODEL";
-		break;
-
-	case FREYJA_MESH:
-		return "FREYJA_MESH";
-		break;
-
-	case FREYJA_POLYGON:
-		return "FREYJA_POLYGON";
-		break;
-
-	case FREYJA_BONE:
-		return "FREYJA_BONE";
-		break;
-
-	case FREYJA_SKELETON:
-		return "FREYJA_SKELETON";
-		break;
-
-	case FREYJA_VERTEX_FRAME:
-		return "FREYJA_VERTEX_FRAME";
-		break;
-
-	case FREYJA_VERTEX_GROUP:
-		return "FREYJA_VERTEX_GROUP";
-		break;
-
-	case FREYJA_VERTEX:
-		return "FREYJA_VERTEX";
-		break;
-
-	case FREYJA_TEXCOORD:
-		return "FREYJA_TEXCOORD";
-		break;
-
-	case FREYJA_MATERIAL:
-		return "FREYJA_MATERIAL";
-		break;
-
-	case FREYJA_TEXTURE:
-		return "FREYJA_TEXTURE";
-		break;
-
-	case FREYJA_SKEL_ANIMATION:
-		return "FREYJA_SKEL_ANIMATION";
-		break;
-
-	case FREYJA_SKEL_KEYFRAME:
-		return "FREYJA_SKEL_KEYFRAME";
-		break;
-	}
-
-	return "UNKNOWN";
-}
-
-
-
-
 void freyjaGetGenericTransform3fv(freyja_transform_t transform,
 								  freyja_transform_action_t action,
 								  index_t id, vec3_t xyz)
 {
 	switch (transform)
 	{
-	case fTransformScene:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
-	case fTransformModel:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
 	case fTransformMesh:
 		switch (action)
 		{
 		case fTranslate:
 			freyjaGetMeshPosition(id, xyz);
 			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
 		}
 		break;
 
-	case fTransformVertexFrame:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
-	case fTransformSkeleton:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
 
 	case fTransformBone:
 		switch (action)
@@ -1950,46 +1431,12 @@ void freyjaGetGenericTransform3fv(freyja_transform_t transform,
 		case fTranslate:
 			freyjaGetBoneTranslation3fv(id, xyz);
 			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
 
-	case fTransformUVMap:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
-	case fTransformVertexGroup:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
 		}
 		break;
 
@@ -1999,32 +1446,20 @@ void freyjaGetGenericTransform3fv(freyja_transform_t transform,
 		case fTranslate:
 			freyjaGetVertexXYZ3fv(id, xyz);
 			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
 		}
 		break;
 
-	case fTransformTexCoord:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
+	default:
+		MSTL_MSG("%s(%s, %s) not supported\n", 
+				 __func__,
+				 freyjaTransformToString(transform),
+				 freyjaActionToString(action));
 	}
 }
 
@@ -2035,86 +1470,18 @@ void freyjaGenericTransform3fv(freyja_transform_t transform,
 {
 	switch (transform)
 	{
-	case fTransformScene:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
-	case fTransformModel:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
 	case fTransformMesh:
 		switch (action)
 		{
 		case fTranslate:
-			//freyjaMeshPosition(id, xyz);
-			freyjaMeshTransform(id, 0,//freyjaGetMeshVertexGroupIndex(id, 0),
-								action, xyz[0], xyz[1], xyz[2]);
+			freyjaMeshTransform(id, 0, action, xyz[0], xyz[1], xyz[2]);
 			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
 
-	case fTransformVertexFrame:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
-	case fTransformSkeleton:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
 		}
 		break;
 
@@ -2124,46 +1491,12 @@ void freyjaGenericTransform3fv(freyja_transform_t transform,
 		case fTranslate:
 			freyjaBoneTransform(id, action, xyz[0], xyz[1], xyz[2]);
 			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
 
-	case fTransformUVMap:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
-
-	case fTransformVertexGroup:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
 		}
 		break;
 
@@ -2173,32 +1506,20 @@ void freyjaGenericTransform3fv(freyja_transform_t transform,
 		case fTranslate:
 			freyjaVertexPosition3fv(id, xyz);
 			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
 		}
 		break;
 
-	case fTransformTexCoord:
-		switch (action)
-		{
-		case fTranslate:
-			break;
-		case fRotate:
-			break;
-		case fScale:
-			break;
-		case fRotateAboutPoint:
-			break;
-		case fScaleAboutPoint:
-			break;
-		}
-		break;
+	default:
+		MSTL_MSG("%s(%s, %s) not supported\n", 
+				 __func__,
+				 freyjaTransformToString(transform),
+				 freyjaActionToString(action));
 	}
 }
 

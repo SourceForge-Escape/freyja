@@ -345,8 +345,44 @@ extern "C" {
 }
 
 #   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
-#      include <freyja/Mesh.h>
-freyja::Mesh *freyjaModelGetMeshClass(index_t modelIndex, index_t meshIndex);
+#      include <mstl/Vector.h>
+
+
+void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
+							   mstl::Vector<int32> uvMap, bool x, bool y);
+
+char freyjaModelCopyVertexList(index_t modelIndex, 
+							   mstl::Vector<unsigned int> &list,
+							   int mesh, int frame);
+/*------------------------------------------------------
+ * Pre  : Model <modelIndex> exists and has an active copy buffer
+ * Post : Model's copy buffer is modified to include new mesh duplicate
+ *        using the *local <mesh> index and vertex morph <frame>
+ ------------------------------------------------------*/
+
+int32 freyjaFindPolygonByVertices(mstl::Vector<uint32> vertices);
+
+mstl::Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
+
+void freyjaGetVertexPolygonRef1i(index_t vertexIndex, mstl::Vector<long> &polygons);
+void freyjaGetVertexPolygonRef(mstl::Vector<long> &polygons);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns a list of indices of polygons that
+ *        use current vertex in iterator
+ *
+ *        List can be empty
+ *
+ *-- History ------------------------------------------
+ *
+ * 2004.12.17:
+ * Mongoose - Created, wrapper for old Egg style
+ *            reverse reference system ( very handy )
+ ------------------------------------------------------*/
+
+void freyjaVertexListTransform(mstl::Vector<uint32> &list,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z);
 #   endif
 
 #endif

@@ -505,15 +505,23 @@ void freyjaBoneTransform(index_t boneIndex,
 		break;
 
 	case fScale:
+#if 0 
+		freyjaGetBoneTranslation3fv(boneIndex, xyz);
+		xyz[0] *= x;
+		xyz[1] *= y;
+		xyz[2] *= z;
+		freyjaBoneTranslate3fv(boneIndex, xyz);
+#endif
+		MSTL_MSG("fScale Not implemented");
+		break;
+
+	case fScaleAboutOrigin:
+		MSTL_MSG("fScaleAboutOrigin Not implemented");
 		freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
 		break;
 
-	case fScaleAboutPoint:
-		freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
-		break;
-
-	case fRotateAboutPoint:
-		freyjaPrintError("FIXME %s:%i", __FILE__, __LINE__);
+	case fRotateAboutOrigin:
+		MSTL_MSG("fRotateAboutOrigin Not implemented");
 		break;
 	}
 }
