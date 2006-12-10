@@ -16,23 +16,18 @@
  A
  ----------------------------
 
- * FIX freyjaModelTransform
-
  * Quad ray pick sucks - fix it  ;_;
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
 
  * Copy / Cut / Paste 
-	- Not fully working with meshes anymore
-
- * New mesh copy system doesn't buffer, since copy = copy + paste
+    - New mesh copy system doesn't buffer, since copy = copy + paste
 	- Use fHidden flag to temp buffer meshes, and avoid it's use in raypick, etc
 
  * Scale tool sucks it's so broke nothing works properly
 	- Keyframe scaling edits geometery instead of keyframe
 	- Mesh scaling on Y 'hops' during preview, but is correct when transformed
-
- * Face rotate, scale doesn't work in interface
+    - Face rotate, scale doesn't work in interface
 
  * Keyframe and cursor transforms 'fight' each other during editing
    FIX this in FreyjaRender by having a special mode for this case
