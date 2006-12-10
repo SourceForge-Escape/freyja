@@ -651,11 +651,13 @@
 							(button "Selected Faces..." eEvent eSetFacesMaterial))
 						(vbox 0 0 0 1 0
 							(spinbutton 0 0 100000 eMeshIterator)
-							(spinbutton 0 0 100000 ePolygonIterator)))
+							(spinbutton 0 0 100000 ePolygonIterator)
+							(label2 " ") ))
 
 				)) ; vbox, hbox
 				
 				;; Per face editing
+				(hbox 1 1 0 1 1	(label2 " "))
 				(hbox 1 1 0 1 1	(label "Texcoord operations" 0.0 0.5))
 				(hbox 1 1 0 1 1	(hsep))
 				(hbox 1 0 0 1 0

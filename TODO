@@ -13,7 +13,6 @@
 			- Finalize the interpolation system in the backend
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
-		- Factor the ABI JA I/O out as a class, and port to C++ serialize use
 		- Timers for animation playback
 		- Make sure Vertex faceRefs are always synced via
 			- Mesh/Face functional interface
@@ -36,8 +35,7 @@
 		- Mesh::WeldTexCoords() is non-functunal 
 		- Mesh::WeldVertices() is non-functunal 
 		- Mesh::Serialize(...) for binary Files needs to be updated for format
-		- Mesh::FaceRemovalCleanup() either needs to purge refcounted verts
-		  or hook it up and leave it empty with a note we don't do that.
+		- Mesh::FaceRemovalCleanup() stub to optional purge refcounted verts
 
 	* UV
 		- Add back UV/Texcoord transforms for unwrapping editing
@@ -49,11 +47,8 @@
 		- Selectable patterns like colorcube, checkerboard, gray as bg
 
 	* Modeling
-		- Add back partial mesh duplication ( selected face based )
-		- Add back partial mesh mirroring ( selected face based )
 		- Add back UI for vertex welding 
 		- Edge picking
-		- Facet knife
 
 	* Cursor system
 		- Consistency across cursor usage
