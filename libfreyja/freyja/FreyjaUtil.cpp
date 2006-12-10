@@ -4,6 +4,7 @@
 #include <hel/math.h>
 #include <mstl/Vector.h>
 #include "FreyjaPluginABI.h"
+#include "LegacyABI.h"
 
 
 using namespace mstl;

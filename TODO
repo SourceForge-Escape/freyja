@@ -28,11 +28,11 @@
 		- Extra viewmode to toggle groups colors on/off
 	
 	* To be finalized Sat
+		- Hook up faces... delete to generic icon event
 		- Add menu action to clamp texcoords on selected Mesh
 		- Fix all remaining mesh issues like uv editing, welds, and c/c/p
 		- Mesh::Merge() doesn't merge animations ( shouldn't matter for now )
 		- Mesh::DeleteVertex() DNE
-		- Mesh::Mesh(const Mesh &mesh) shouldn't inc UID ( pool > legacy )
 		- Mesh::WeldTexCoords() is non-functunal 
 		- Mesh::WeldVertices() is non-functunal 
 		- Mesh::Serialize(...) for binary Files needs to be updated for format

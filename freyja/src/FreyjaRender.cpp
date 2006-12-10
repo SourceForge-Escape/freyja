@@ -42,6 +42,7 @@
 #include <freyja/Bone.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
+#include <freyja/MaterialABI.h>
 
 #include "freyja_events.h"
 #include "FreyjaControl.h"
@@ -1138,9 +1139,7 @@ void FreyjaRender::RenderModel(index_t model)
 
 	// FIXME: This renders all skeletons at once by design 
 	/* Point type setting shows actual bind pose skeleton */
-	if (mRenderMode & fBones && 
-		FreyjaRender::mJointRenderType == 2 || 
-		FreyjaRender::mJointRenderType == 1)
+	if (mRenderMode & fBones)
 	{
 		Vec3 p;
 		glPushAttrib(GL_ENABLE_BIT);
@@ -1178,8 +1177,7 @@ void FreyjaRender::RenderModel(index_t model)
 	}
 
 	/* Render skeleton */
-	if (mRenderMode & fBones &&
-		FreyjaRender::mJointRenderType != 2)
+	if (mRenderMode & fBones)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 

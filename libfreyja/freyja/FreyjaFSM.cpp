@@ -206,13 +206,14 @@ index_t FreyjaFSM::freyjaIterator(freyja_object_t type, index_t item)
 
 void FreyjaFSM::freyjaGetVertex(vec3_t xyz)
 {
-	freyjaGetVertexXYZ3fv(mIndexVertex, xyz);
+	freyjaGetMeshVertexPos3fv(mIndexMesh, mIndexVertex, xyz);
 }
 
 
 void FreyjaFSM::freyjaGetVertexTexCoord(vec2_t uv)
 {
-	freyjaGetVertexTexcoord2fv(mIndexVertex, uv);
+	index_t texcoord = freyjaGetMeshVertexTexCoord(mIndexMesh, mIndexVertex);
+	freyjaGetMeshTexCoord2fv(mIndexMesh, texcoord, uv);
 }
 
 
@@ -407,7 +408,7 @@ index_t FreyjaFSM::freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 
 void FreyjaFSM::freyjaGetVertexNormal(vec3_t nxyz)
 {
-	freyjaGetVertexNormalXYZ3fv(mIndexVertex, nxyz);
+	freyjaGetMeshVertexNormal3fv(mIndexMesh, mIndexVertex, nxyz);
 }
 
 

@@ -25,6 +25,7 @@
 
 #include <freyja/FreyjaPluginABI.h>
 #include <freyja/LightABI.h>
+#include <freyja/MaterialABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>

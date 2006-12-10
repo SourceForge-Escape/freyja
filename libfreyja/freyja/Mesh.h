@@ -127,7 +127,7 @@ public:
 		fHidden      =  8,
 		fRayHit      = 16,
 		fSelected2   = 32   // Only used internally per method in Mesh
-	} VertexFlags;
+	} Flags;
 
 	Vertex(index_t vertex, index_t texcoord, index_t normal) :
 		mFlags(fNone),
@@ -1085,6 +1085,18 @@ public:
 		return true;
 	}
 
+	void MarkVerticesOfFacesWithFlag(Face::Flags flag, 
+									 Vertex::Flags mark, bool clear);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Every face with <flag> set will set all its
+	 *        vertices with flag <mark>.
+	 *
+	 *        If <clear> is true all vertices not marked will
+	 *        have flag <mark> cleared.
+	 ------------------------------------------------------*/
+
+
 	void ConvertAllFacesToTexCoordPloymapping();
 
 	void ConvertFaceToTexCoordPloymapping(index_t face);
@@ -1425,6 +1437,18 @@ public:
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to vertices pool
+	 ------------------------------------------------------*/
+
+	void TransformFacesWithFlag(Face::Flags flag, Matrix &mat);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to face with flag set
+	 ------------------------------------------------------*/
+
+	void TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to vertices with flag set
 	 ------------------------------------------------------*/
 
 	void Rotate(const Vec3 &v);
