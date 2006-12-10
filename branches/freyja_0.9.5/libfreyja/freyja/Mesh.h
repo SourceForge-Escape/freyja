@@ -103,10 +103,14 @@ public:
 
 	bool Serialize(SystemIO::TextFileReader &r) 
 	{ 
-		r.ParseSymbol(); // "w"
+		const char *symbol = r.ParseSymbol();
+		if (symbol[0] == 'w')
+			return false;
+
 		mVertexIndex = r.ParseInteger();
 		mBoneIndex = r.ParseInteger();
 		mWeight = r.ParseFloat();
+		
 		return true;
 	}
 
@@ -196,12 +200,16 @@ public:
 
 	bool Serialize(SystemIO::TextFileReader &r) 
 	{ 
-		r.ParseSymbol(); // "v"
+		const char *symbol = r.ParseSymbol();
+		if (symbol[0] != 'v')
+			return false;
+
 		mFlags = r.ParseInteger();
 		mVertexIndex = r.ParseInteger();
 		mTexCoordIndex = r.ParseInteger();
 		mNormalIndex = r.ParseInteger();
 		mMaterial = r.ParseInteger();
+
 		return true;
 	}
 
@@ -371,7 +379,11 @@ public:
 
 	bool Serialize(SystemIO::TextFileReader &r) 
 	{ 
-		r.ParseSymbol(); // "face"
+		const char *symbol = r.ParseSymbol();
+		if (strncmp(symbol, "face", 4))
+			return false;
+
+		r.ParseSymbol();
 		mFlags = r.ParseInteger();
 		mSmoothingGroup = r.ParseInteger();
 		mColor = r.ParseInteger();

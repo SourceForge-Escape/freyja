@@ -202,6 +202,7 @@ bool Mesh::SerializePool(SystemIO::TextFileWriter &w, const char *name,
 	w.Print("\t%sArray %u\n", name, array.size());
 	for (uint32 i = 0, n = array.size(); i < n; ++i)
 	{
+		if (i % 3 == 0) w.Print("\n\t"); // Makes it easier on text editors
 		w.Print("%f ", array[i]);
 	}
 	w.Print("\n");
@@ -271,21 +272,26 @@ bool Mesh::Serialize(SystemIO::TextFileWriter &w)
 	for (uint32 i = 0, n = mWeights.size(); i < n; ++i)
 	{
 		Weight *ww = GetWeight(i);
-		if (ww) ww->Serialize(w);
+		if (ww) ww->Serialize(w); else w.Print("\t\tNULL\n");
 	}
 
 	w.Print("\t mVertices %u\n", mVertices.size());
 	for (uint32 i = 0, n = mVertices.size(); i < n; ++i)
 	{
 		Vertex *v = GetVertex(i);
-		if (v) v->Serialize(w);
+		if (v) v->Serialize(w); else w.Print("\t\tNULL\n");
+	}
+
+	for (uint32 i = 0, n = mFaces.size(), count = 0; i < n; ++i)
+	{
+		if (GetFace(i)) ++count;
 	}
 
 	w.Print("\t mFaces %u\n", mFaces.size());
 	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
 	{
 		Face *f = GetFace(i);
-		if (f) f->Serialize(w);
+		if (f) f->Serialize(w); else w.Print("\t\tNULL\n");
 	}
 
 	w.Print("\t mTracks %u\n", 1); // only have one in test =p
@@ -361,8 +367,15 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 		while (count > 0)
 		{
 			Weight *w = new Weight();
-			w->Serialize(r);
-			mWeights.push_back(w);
+			if (w->Serialize(r))
+			{
+				mWeights.push_back(w);
+			}
+			else
+			{
+				delete w;
+				mWeights.push_back(NULL);
+			}
 			--count;
 		}
 	}
@@ -374,8 +387,15 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 		while (count > 0)
 		{
 			Vertex *v = new Vertex();
-			v->Serialize(r);
-			mVertices.push_back(v);
+			if (v->Serialize(r))
+			{
+				mVertices.push_back(v);
+			}
+			else
+			{
+				delete v;
+				mVertices.push_back(NULL);
+			}
 			--count;
 		}
 	}
@@ -387,8 +407,15 @@ bool Mesh::Serialize(SystemIO::TextFileReader &r)
 		while (count > 0)
 		{
 			Face *f = new Face();
-			f->Serialize(r);
-			mFaces.push_back(f);
+			if (f->Serialize(r))
+			{
+				mFaces.push_back(f);
+			}
+			else
+			{
+				delete f;
+				mFaces.push_back(NULL);
+			}
 			--count;
 		}
 	}
@@ -2152,8 +2179,6 @@ void Mesh::MarkVerticesOfFacesWithFlag(Face::Flags flag,
 		if (!v) 
 			continue;
 
-		bool selected = false;
-
 		if (clear)
 		{
 			v->mFlags &= ~mark;
@@ -2163,16 +2188,11 @@ void Mesh::MarkVerticesOfFacesWithFlag(Face::Flags flag,
 		{
 			Face *f = GetFace(v->GetFaceRefs()[j]);
 			
-			if (f && f->mFlags & flag)
+			if (f && (f->mFlags & flag))
 			{
-				selected = true;
+				v->mFlags |= mark;
 				break;
 			}
-		}
-
-		if (selected)
-		{
-			v->mFlags |= mark;
 		}
 	}
 }
