@@ -6333,19 +6333,31 @@ void eMirrorFacesX()
 
 void eMirrorFacesY()
 {
-	Matrix mat;
-	mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
 	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
-	if (m) m->TransformFacesWithFlag(Face::fSelected, mat);
+
+	if (m)
+	{
+		Matrix mat;
+		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+		freyja_print("Mirroring selected faces over Y...");
+		m->TransformFacesWithFlag(Face::fSelected, mat);
+		m->TransformVertices(mat);
+	}
 }
 
 
 void eMirrorFacesZ()
 {
-	Matrix mat;
-	mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
 	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
-	if (m) m->TransformFacesWithFlag(Face::fSelected, mat);
+
+	if (m)
+	{
+		Matrix mat;
+		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+		freyja_print("Mirroring selected faces over Z...");
+		m->TransformFacesWithFlag(Face::fSelected, mat);
+		m->TransformVertices(mat);
+	}
 }
 
 

@@ -643,17 +643,16 @@
 				(hbox 1 1 0 1 1	(label "Set material for..." 0.0 0.5))
 				(hbox 1 1 0 1 1	(hsep))
 				(hbox 1 0 0 1 0
-				(vbox 1 0 0 1 0						
-					(hbox 1 0 0 1 0
+				(vbox 0 1 0 1 0						
+					(hbox 0 0 0 1 0
 						(vbox 0 0 0 1 0
 							(button "Mesh Index" eEvent eSetMeshTexture)
-							(button "Face Index" eEvent eSetPolygonTexture))
+							(button "Face Index" eEvent eSetPolygonTexture)
+							(button "Selected Faces..." eEvent eSetFacesMaterial))
 						(vbox 0 0 0 1 0
 							(spinbutton 0 0 100000 eMeshIterator)
 							(spinbutton 0 0 100000 ePolygonIterator)))
 
-					(hbox 1 0 0 1 0
-						(button "Selected Faces..." eEvent eSetFacesMaterial))
 				)) ; vbox, hbox
 				
 				;; Per face editing
