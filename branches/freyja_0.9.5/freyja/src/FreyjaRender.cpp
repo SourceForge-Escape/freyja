@@ -977,7 +977,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 		if (mRenderMode & fMaterial)
 		{
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 			mglApplyMaterial(material);
 		}
 		else
@@ -1686,15 +1686,11 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 {
 	int x, y;
 
-	glPushMatrix();
+	//glPushMatrix();
 
 	if (mRenderMode & fRenderGridClearedZBuffer)
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);	
-	glDisable(GL_TEXTURE);
-	glDisable(GL_BLEND);
 	glLineWidth(2.0);
 
 	switch (plane)
@@ -1753,7 +1749,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		return;
    }
 
-   if (mRenderMode & fGrid)
+	//if (mRenderMode & fGrid)
    {
 		int offset_x = (x % size) - w;
 		int offset_y = (y % size) - h;
@@ -1792,8 +1788,8 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 		glEnd();
    }
 
-   glPopAttrib();
-   glPopMatrix();
+   //glPopAttrib();
+   //glPopMatrix();
 }
 
 
@@ -1829,6 +1825,8 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE);
+	glDisable(GL_BLEND);
+	glBindTexture(GL_TEXTURE_2D, 0); // color
 
 	if (mRenderMode & fGrid)
 		DrawGrid(plane, GetWindowWidth(), GetWindowHeight(), 10);
