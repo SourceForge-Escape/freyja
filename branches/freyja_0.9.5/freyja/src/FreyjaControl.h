@@ -31,7 +31,10 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
 #include <freyja/FreyjaPrinter.h>
+#include <freyja/KeyFrameABI.h>
+#include <freyja/ModelABI.h>
 #include <freyja/MeshABI.h>
+#include <freyja/BoneABI.h>
 #include <mstl/ActionManager.h>
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>

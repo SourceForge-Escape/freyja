@@ -42,6 +42,13 @@
 #include <hel/math.h>
 
 #include "FreyjaPluginABI.h"
+#include "BoneABI.h"
+#include "LightABI.h"
+#include "MeshABI.h"
+#include "SkeletonABI.h"
+#include "MaterialABI.h"
+#include "ModelABI.h"
+
 #include "FreyjaPlugin.h"
 #include "Mesh.h"
 

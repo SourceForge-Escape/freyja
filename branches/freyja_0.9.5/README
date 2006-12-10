@@ -28,6 +28,8 @@
 
 	* Basic polygonal mesh editing
 
+	* Various merge / split / dupe utils
+
 	* Basic face exruding
 
 	* Texcoord generation

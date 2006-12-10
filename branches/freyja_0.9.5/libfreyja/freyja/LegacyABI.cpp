@@ -26,6 +26,11 @@
 #include "MeshABI.h"
 #include "Material.h"
 #include "FreyjaPluginABI.h"
+#include "ModelABI.h"
+#include "MeshABI.h"
+#include "BoneABI.h"
+#include "MaterialABI.h"
+#include "SkeletonABI.h"
 
 #include "LegacyABI.h"
 

@@ -2119,6 +2119,65 @@ void Mesh::SelectedFacesTranslateUVMap(vec_t x, vec_t y)
 }
 
 
+void Mesh::TransformFacesWithFlag(Face::Flags flag, Matrix &mat)
+{
+	MarkVerticesOfFacesWithFlag(flag, Vertex::fSelected2, true);
+	TransformVerticesWithFlag(Vertex::fSelected2, mat);
+}
+
+
+void Mesh::TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat)
+{
+	vec_t *array = mVertexPool.get_array();
+
+	for (uint32 i = 0, n = GetVertexCount(); i < n; ++i)
+	{
+		Vertex *v = GetVertex(i);
+		
+		if (v && v->mFlags & flag)
+		{			
+			mat.Multiply3v(array + v->mVertexIndex);
+		}
+	}
+}
+
+
+void Mesh::MarkVerticesOfFacesWithFlag(Face::Flags flag, 
+									   Vertex::Flags mark, bool clear)
+{
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (!v) 
+			continue;
+
+		bool selected = false;
+
+		if (clear)
+		{
+			v->mFlags &= ~mark;
+		}
+
+		for (int32 j = 0, jCount = v->GetFaceRefs().size(); j < jCount; ++j)
+		{
+			Face *f = GetFace(v->GetFaceRefs()[j]);
+			
+			if (f && f->mFlags & flag)
+			{
+				selected = true;
+				break;
+			}
+		}
+
+		if (selected)
+		{
+			v->mFlags |= mark;
+		}
+	}
+}
+
+
 void Mesh::ConvertAllFacesToTexCoordPloymapping()
 {
 	for (uint32 i = 0, n = GetFaceCount(); i < n; ++i)

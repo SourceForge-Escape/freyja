@@ -36,7 +36,9 @@
 #include <freyja/LightABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
+#include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaImage.h>
+#include <freyja/MaterialABI.h>
 #include <freyja/PerlinNoise.h>
 #include <freyja/Material.h>
 #include <hel/math.h>
@@ -60,19 +62,11 @@ using namespace freyja3d;
 void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 void polymap_update_question();
+int load_texture(const char *filename);
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
 Vector<Vec3> FreyjaControl::mControlPoints;
-
-
-int load_texture(const char *filename)
-{
-	int id = 0;
-	FreyjaControl::mInstance->LoadTexture(filename, id);
-	freyja_print("! Texture callback %i : '%s'...", id, filename);
-	return id;
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -200,13 +194,13 @@ void FreyjaControl::SetFaceMaterial(index_t faceIndex, index_t material)
 	{
 		for (uint32 i = mUVMap.begin(); i < mUVMap.end(); ++i)
 		{
-			freyjaPolygonSetMaterial1i(mUVMap[i], material);
+			freyjaMeshPolygonMaterial(GetSelectedMesh(), mUVMap[i], material);
 		}
 
 		return;
 	}
 
-	freyjaPolygonSetMaterial1i(faceIndex, material);
+	freyjaMeshPolygonMaterial(GetSelectedMesh(), faceIndex, material);
 }
 
 
@@ -4224,7 +4218,7 @@ void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
 
 		if (f && f->mFlags & Face::fSelected)
 		{
-			freyjaPolygonSetMaterial1i(i, material);
+			freyjaMeshPolygonMaterial(GetSelectedMesh(), i, material);
 		}
 	}   
 }
@@ -6280,6 +6274,80 @@ void eClearWeight()
 	}
 }
 
+void eMirrorMeshX()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		Matrix mat;
+		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
+		freyja_print("Mirroring mesh over X...");
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorMeshY()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		Matrix mat;
+		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+		freyja_print("Mirroring mesh over Y...");
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorMeshZ()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		Matrix mat;
+		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+		freyja_print("Mirroring mesh over Z...");
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorFacesX()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		Matrix mat;
+		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
+		freyja_print("Mirroring selected faces over X...");
+		//m->TransformFacesWithFlag(Face::fSelected, mat);
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorFacesY()
+{
+	Matrix mat;
+	mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	if (m) m->TransformFacesWithFlag(Face::fSelected, mat);
+}
+
+
+void eMirrorFacesZ()
+{
+	Matrix mat;
+	mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	if (m) m->TransformFacesWithFlag(Face::fSelected, mat);
+}
+
 
 void eNopControl(ResourceEvent *e)
 {
@@ -6297,6 +6365,14 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
 	ResourceEventCallback::add("eClearWeight", &eClearWeight);
 	ResourceEventCallbackVec::add("eWeight", &eWeight);
+
+	ResourceEventCallback::add("eMirrorFacesX", &eMirrorFacesX);
+	ResourceEventCallback::add("eMirrorFacesY", &eMirrorFacesY);
+	ResourceEventCallback::add("eMirrorFacesZ", &eMirrorFacesZ);
+
+	ResourceEventCallback::add("eMirrorMeshX", &eMirrorMeshX);
+	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
+	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
 
 
 	ResourceEventCallback::add("eGroupClear", &eGroupClear);
@@ -6395,20 +6471,6 @@ void eRenderToggleGridZClear(unsigned int value)
 }
 
 
-void eImplementationRemoved()
-{
-	freyja_print("Implementation removed");
-	DEBUG_MSG("Implementation removed");
-}
-
-
-void eImplementationRemovedUInt(unsigned int u)
-{
-	freyja_print("Implementation removed");
-	DEBUG_MSG("Implementation removed");
-}
-
-
 void eRenderSkeletalDeform(unsigned int value)
 {
 	if (value)
@@ -6428,13 +6490,12 @@ void eRenderSkeletalDeform(unsigned int value)
 
 void FreyjaViewEventsAttach()
 {
+	ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNopControl);
+	ResourceEventCallback2::add("eOpenFileTextureB", &eNopControl);
+	ResourceEventCallback2::add("eCollapseFace", &eNopControl);
+	ResourceEventCallback2::add("eSetMaterialTextureB", &eNopControl);
+
 	ResourceEventCallbackUInt::add("eSkeletalDeform", &eRenderSkeletalDeform);
-	ResourceEventCallback::add("eTextureSlotLoadToggleB", &eImplementationRemoved);
-	ResourceEventCallback::add("eOpenFileTextureB", &eImplementationRemoved);
-	ResourceEventCallback::add("eCollapseFace", &eImplementationRemoved);
-
-
-	ResourceEventCallbackUInt::add("eSetMaterialTextureB", &eImplementationRemovedUInt);
 	ResourceEventCallbackUInt::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
 	ResourceEventCallbackUInt::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
 	ResourceEventCallbackUInt::add("ePolyMeshBone", &ePolyMeshBone);
@@ -6456,4 +6517,13 @@ void polymap_update_question()
 		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 		m->ConvertAllFacesToTexCoordPloymapping();
 	}
+}
+
+
+int load_texture(const char *filename)
+{
+	int id = 0;
+	FreyjaControl::mInstance->LoadTexture(filename, id);
+	freyja_print("! Texture callback %i : '%s'...", id, filename);
+	return id;
 }

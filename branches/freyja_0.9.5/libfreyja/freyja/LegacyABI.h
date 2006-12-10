@@ -33,6 +33,195 @@ extern "C" {
 	// They are deprecated as of 0.9.5, since public 0.10.x will be threaded.
 	//////////////////////////////////////////////////////////////////////////
 
+
+	////////////////////////////////////////////////////////////////
+	// Texcoords
+	//
+	////////////////////////////////////////////////////////////////
+
+	char freyjaIsTexCoordAllocated(index_t texcoordIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns 1 if texcoord exists
+	 ------------------------------------------------------*/
+
+	index_t freyjaTexCoordCreate2f(vec_t u, vec_t v);
+	index_t freyjaTexCoordCreate2fv(const vec2_t uv);
+	/*------------------------------------------------------
+	 * Pre  : u, v are clamped/scaled to 0.0f to 1.0f
+	 * Post : A new texcoord is created
+	 *        Returns the native index of that texcoord
+	 ------------------------------------------------------*/
+
+	vec2_t *freyjaGetTexCoordUV(index_t texcoordIndex);
+	/*------------------------------------------------------
+	 * Pre  : texcoordIndex exists
+	 * Post : Sets passed float array to texcoord u, v
+	 ------------------------------------------------------*/
+
+	void freyjaTexCoordCombine(uint32 A, uint32 B);
+	/*------------------------------------------------------
+	 * Pre  : texcoord indices A and B exist
+	 * Post : replaces all references to B with A
+	 ------------------------------------------------------*/
+
+	void freyjaTexCoord2f(index_t texcoordIndex, vec_t u, vec_t v);
+	/*------------------------------------------------------
+	 * Pre  : texcoordIndex exists
+	 * Post : Alters the texcoord's values
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////////
+	// Vertices
+	//
+	////////////////////////////////////////////////////////////////
+
+	index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB);
+
+	void freyjaVertexDelete(index_t vertexIndex);
+
+	index_t freyjaGetCurrentVertex();
+
+	void freyjaCurrentVertex(index_t vertexIndex);
+
+	char freyjaIsVertexAllocated(index_t vertexIndex);
+
+	void freyjaVertexFrame3f(index_t vertexIndex, vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Appends a new mesh animation frame to this vertex
+	 ------------------------------------------------------*/
+
+	void freyjaVertexNormalFlip(index_t vertexIndex);
+
+	void freyjaVertexTexcoord2f(index_t vertexIndex, vec_t u, vec_t v);
+
+	void freyjaVertexTexCoord2fv(index_t vertexIndex, vec2_t uv);
+
+	void freyjaVertexNormal3f(index_t vertexIndex, vec_t nx, vec_t ny, vec_t nz);
+
+	void freyjaVertexNormal3fv(index_t vertexIndex, vec3_t nxyz);
+
+	void freyjaVertexPosition3fv(index_t vertexIndex, vec3_t xyz);
+
+
+
+	index_t freyjaGetVertexPolygonRefIndex(index_t vertexIndex, uint32 element);
+
+	uint32 freyjaGetVertexPolygonRefCount(index_t vertexIndex);
+
+	void freyjaGetVertexTexcoord2fv(index_t vertexIndex, vec2_t uv);
+
+	void freyjaGetVertexNormalXYZ3fv(index_t vertexIndex, vec3_t nxyz);
+
+	void freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz);
+
+	void freyjaGetVertexFrame(index_t vertexIndex, uint32 element,
+							  index_t *frameIndex, vec3_t xyz);
+
+	uint32 freyjaGetVertexFrameCount(index_t vertexIndex);
+
+	uint32 freyjaGetVertexFlags(index_t vertexIndex);
+
+	vec3_t *freyjaGetVertexXYZ(index_t vertexIndex);
+
+	vec2_t *freyjaGetVertexUV(index_t vertexIndex);
+
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Polygon
+	///////////////////////////////////////////////////////////////////////
+
+	index_t freyjaPolygonCreate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Makes invalid/empty polygon to be filled, returns index
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonDelete(index_t polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Removes polygon 
+	 ------------------------------------------------------*/
+
+	char freyjaIsPolygonAllocated(index_t polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns 1 if exists
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonFlagAlpha(index_t polygonIndex, char on);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonSplit(index_t meshIndex, index_t polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *
+	 * Post : Polygon is split into 2 smaller polygons 
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonTexCoordPurge(index_t polygonIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *
+	 * Post : All polymapped texcoords are dereferenced
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonExtrudeQuad1f(index_t polygonIndex, vec_t dist);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *        the 'normal' is the vector you wish to follow with extrude
+	 *
+	 * Post : Adds a quad where every edge is on this face by
+	 *        extruding by face normal scaled by dist
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonExtrudeQuad(index_t polygonIndex, vec3_t v);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 *        the 'normal' is the vector you wish to follow with extrude
+	 *
+	 * Post : Adds a quad where every edge is on this face by
+	 *        extruding by 'normal' v ( or partial spline or ray )
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonAddVertex1i(index_t polygonIndex, index_t vertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 * Post : Adds a vertex to a polygon
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonAddTexCoord1i(index_t polygonIndex, index_t texcoordIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 * Post : Adds a texcoord to a polygon
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonSetMaterial1i(index_t polygonIndex, index_t materialIndex);
+	/*------------------------------------------------------
+	 * Pre  : Polygon polygonIndex exists
+	 * Post : Sets material for a polygon
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetPolygonMaterial(index_t polygonIndex);
+
+	uint32 freyjaGetPolygonFlags(index_t polygonIndex);
+
+	uint32 freyjaGetPolygonEdgeCount(index_t polygonIndex);
+
+	uint32 freyjaGetPolygonVertexCount(index_t polygonIndex);
+
+	uint32 freyjaGetPolygonTexCoordCount(index_t polygonIndex);
+
+	index_t freyjaGetPolygonVertexIndex(index_t polygonIndex, uint32 element);
+
+	index_t freyjaGetPolygonTexCoordIndex(index_t polygonIndex, uint32 element);
+
 	index_t freyjaGetCurrentModelIndex();
 	/*------------------------------------------------------
 	 * Pre  : 

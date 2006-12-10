@@ -190,6 +190,9 @@
 				(menu_item "_Unselect faces"		eMeshUnselectFaces)
 				(menu_item "_Smoothing groups"		eSmoothingGroupsDialog)
 				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
+				(menu_item "Mirror _X"		eMirrorFacesX)
+				(menu_item "Mirror _Y"		eMirrorFacesY)
+				(menu_item "Mirror _Z"		eMirrorFacesZ)
 				(menu_item "_Delete"		eSelectedFacesDelete))
 
 			(submenu "_Mesh"
@@ -200,6 +203,9 @@
 				(menu_item "_Tesselate"		eMeshTesselate)
 				(menu_item "_Generate Normals"		eMeshGenerateNormals)
 				(menu_item "_Flip Normals"		eMeshFlipNormals)
+				(menu_item "Mirror _X"		eMirrorMeshX)
+				(menu_item "Mirror _Y"		eMirrorMeshY)
+				(menu_item "Mirror _Z"		eMirrorMeshZ)
 
 			) ; submenu _Mesh
 
