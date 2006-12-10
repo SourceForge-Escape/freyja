@@ -200,19 +200,21 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaCamera.o \
 	$(BUILDDIR)/FreyjaPrinter.o \
 	$(BUILDDIR)/FreyjaImage.o \
-	$(BUILDDIR)/FreyjaLight.o \
-	$(BUILDDIR)/FreyjaMaterial.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/KeyFrame.o \
 	$(BUILDDIR)/KeyFrameABI.o \
 	$(BUILDDIR)/LegacyABI.o \
+	$(BUILDDIR)/Light.o \
 	$(BUILDDIR)/LightABI.o \
+	$(BUILDDIR)/Material.o \
+	$(BUILDDIR)/MaterialABI.o \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/MeshABI.o \
 	$(BUILDDIR)/Model.o \
 	$(BUILDDIR)/ModelABI.o \
+	$(BUILDDIR)/PakABI.o \
 	$(BUILDDIR)/PerlinNoise.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o \

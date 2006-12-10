@@ -29,8 +29,8 @@
  *
  ==========================================================================*/
 
-#ifndef GUARD__MONGOOSE_FREYJAPLUGINABI_H
-#define GUARD__MONGOOSE_FREYJAPLUGINABI_H
+#ifndef GUARD__FREYJA_PLUGINABI_H_
+#define GUARD__FREYJA_PLUGINABI_H_
 
 #include <stdarg.h>
 #include <hel/math.h>
@@ -41,8 +41,6 @@
 #include "MeshABI.h"
 #include "ModelABI.h"
 #include "SkeletonABI.h"
-
-#include "LegacyMeshABI.h"
 
 
 extern "C" {
@@ -83,28 +81,6 @@ extern "C" {
 	 * Pre  : texcoordIndex exists
 	 * Post : Alters the texcoord's values
 	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////////
-	// 0.9.3 Bone utils for 10.0 bones
-	//
-	////////////////////////////////////////////////////////////////
-
-	void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex);
-	void freyjaBoneAddMesh(index_t boneIndex, index_t meshIndex);
-	/*------------------------------------------------------
-	 * Pre  : freyjaBegin(FREYJA_BONE);
-	 * Post : Mesh is added to Bone's child list
-	 *
-	 *        Either makes mesh tree connection or
-	 *        simulates by vertex weights and pivots
-	 ------------------------------------------------------*/
-
-	index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex);
-
-	void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex);
-
-	void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex);
 
 
 	////////////////////////////////////////////////////////////////
@@ -383,43 +359,6 @@ extern "C" {
 								 int32 len, char *arg);
 
 
-	///////////////////////////////////////////////////////////////////////
-	//  Pak VFS 
-	///////////////////////////////////////////////////////////////////////
-
-	index_t freyjaPakBegin(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Starts a new VFS from a 'pak file'
-	 *        Returns vfs index
-	 ------------------------------------------------------*/
-
-	void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Used to decrypt or uncompress files in a pak
-	 *        using an external module and one of it's
-	 *        C accessable functions using freyjaPak ABI.
-	 *
-	 *        NOT IMPLEMENTED!
-	 ------------------------------------------------------*/
-
-	void freyjaPakAddFullPathFile(index_t pakIndex,
-								  const char *vfsFilename,
-								  int32 offset, int32 size);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Adds a new entry to VFS mapping a chunk from
-	 *        offset to offset+size as a file named vfsFilename
-	 *
-	 *        Returns 1 if it is successfully 'loaded'
-	 ------------------------------------------------------*/
-
-	void freyjaPakEnd(index_t pakIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Finalizes VFS for pakIndex
-	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////////

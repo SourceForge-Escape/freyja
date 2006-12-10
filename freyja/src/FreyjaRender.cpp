@@ -37,6 +37,7 @@
 #include <time.h>
 #include <assert.h>
 
+#include <freyja/LightABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/Bone.h>
 #include <freyja/Mesh.h>
@@ -1298,7 +1299,7 @@ void FreyjaRender::DrawCurveWindow()
 	vec_t x = 0.0f, y = 0.0f;
 	vec3_t yT = { 80.0f, 160.0f, 240.0f };
 
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (!m)
 		return;

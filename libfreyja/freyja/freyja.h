@@ -126,6 +126,7 @@ extern "C" {
 
 
 	typedef enum {
+		fTransformActionNone = 0,
 		fTranslate = 1,
 		fRotate,
 		fScale,
@@ -359,8 +360,7 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 	index_t freyjaCriticalSectionLock();
-	void freyjaCriticalSectionUnlock(); // for null locks ( fake )
-	void freyjaCriticalSectionUnLock(index_t lockId);
+	void freyjaCriticalSectionUnlock(index_t lockId);
 	/*------------------------------------------------------
 	 * Pre  : FreyjaPlugin singleton exists
 	 *

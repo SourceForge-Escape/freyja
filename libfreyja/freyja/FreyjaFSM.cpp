@@ -130,14 +130,6 @@ uint32 FreyjaFSM::freyjaGetCount(freyja_object_t type)
 		return freyjaGetTextureCount();
 		break;
 
-	case FREYJA_SKEL_ANIMATION:
-		return freyjaGetAnimationCount();
-		break;
-
-	case FREYJA_SKEL_KEYFRAME:
-		return freyjaGetAnimationFrameCount(mIndexSkeletonAnim);
-		break;
-
 	case FREYJA_MATERIAL:
 		return freyjaGetMaterialCount();
 		break;
@@ -300,7 +292,7 @@ void FreyjaFSM::freyjaBegin(freyja_object_t type)
 	{
 	case FREYJA_MESH:
 		mStack.push(FREYJA_MESH);
-		mIndexMesh = gFreyjaCurrentMesh = freyjaModelCreateMesh(mIndexModel);
+		mIndexMesh = gFreyjaCurrentMesh = freyjaMeshCreate();
 		break;
 
 	case FREYJA_VERTEX_FRAME:
@@ -408,7 +400,8 @@ void FreyjaFSM::freyjaEnd()
 
 index_t FreyjaFSM::freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z)
 {
-	return freyjaMeshVertexCreate3f(mIndexMesh, mIndexGroup, x, y, z);
+	vec3_t v = { x, y, z };
+	return freyjaMeshVertexCreate3fv(mIndexMesh, v);
 }
 
 

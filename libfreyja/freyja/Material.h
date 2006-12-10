@@ -23,48 +23,51 @@
  * Mongoose - Created, based on old Material class
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJAMATERIAL_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJAMATERIAL_H_
+#ifndef GUARD__FREYJA_MATERIAL_H_
+#define GUARD__FREYJA_MATERIAL_H_
 
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
-
 #include "FreyjaTexture.h"
 
 using namespace mstl;
 
-class FreyjaMaterial
+
+namespace freyja {
+
+class Material
 {
  public:
 
-	enum Flags
-	{
+	typedef enum {
 		fMaterial_DetailTexure = 1,		
-	};
+	} Flags;
 
 
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaMaterial();
+	Material();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaMaterial
 	 ------------------------------------------------------*/
 
-	FreyjaMaterial(const FreyjaMaterial &fm);
+	Material(const Material &fm);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaMaterial
 	 ------------------------------------------------------*/
 
-	FreyjaMaterial &operator=(const FreyjaMaterial &fm);
+	Material &operator=(const Material &fm);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
 
-
-	virtual ~FreyjaMaterial();
+	virtual ~Material();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaMaterial object is allocated
 	 * Post : Deconstructs an object of FreyjaMaterial
@@ -227,8 +230,9 @@ class FreyjaMaterial
 	String mTextureFilename;    /* This is used for file I/O to map classes */
 };
 
+} // End namespace freyja
 
-FreyjaMaterial *freyjaGetMaterialClass(index_t materialIndex);
+freyja::Material *freyjaGetMaterialClass(index_t materialIndex);
 
 bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r);
 

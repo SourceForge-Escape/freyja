@@ -24,7 +24,11 @@
 #include <math.h>
 #include "Mesh.h"
 #include "MeshABI.h"
+#include "Material.h"
 #include "FreyjaPluginABI.h"
+
+#include "LegacyABI.h"
+
 
 using namespace freyja;
 
@@ -101,14 +105,6 @@ index_t freyjaGetCurrentMesh()
 void freyjaCurrentMesh(index_t idx)
 {
 	gFreyjaCurrentMesh = idx;
-}
-
-
-void freyjaVertexListTransform(Vector<uint32> &list,
-							   freyja_transform_action_t action, 
-							   vec_t x, vec_t y, vec_t z)
-{
-	MSTL_MSG("Not Implemented");
 }
 
 
@@ -845,6 +841,688 @@ index_t freyjaGetMeshPolygonIndex(index_t meshIndex, uint32 element)
 }
 
 
+
+
+Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2])
+{
+	Vector<unsigned int> *list;
+	int32 i, count;
+	vec3_t xyz;
+
+	index_t lock = freyjaCriticalSectionLock();
+
+	count = freyjaGetCount(FREYJA_VERTEX); 
+
+	list = new Vector<unsigned int>();
+
+	if (count < 1)
+	{
+		/* Return empty list */
+		return list;
+	}
+
+
+	/* Using freyja iterator interface */
+	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
+	
+	for (i = 0; i < count; ++i)
+	{
+		freyjaGetVertex3fv(xyz);
+		
+		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
+		{
+			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
+			{
+				if (xyz[2] >= bbox[0][2] && xyz[2] <= bbox[1][2])
+				{
+					list->pushBack(freyjaIterator(FREYJA_VERTEX, 
+												  FREYJA_CURRENT));
+				}
+			}
+		}
+
+		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
+	}
+
+	freyjaCriticalSectionUnlock(lock);
+	
+	return list;
+}
+
+
+Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(BoundingVolume &vol)
+{
+	Vector<unsigned int> *list;
+	unsigned int i, count, index;
+	vec3_t xyz;
+
+
+	index_t lock = freyjaCriticalSectionLock();
+
+	count = freyjaGetCount(FREYJA_VERTEX); 
+
+	if (count < 1)
+	{
+		return 0x0;
+	}
+
+	list = new Vector<unsigned int>();
+
+	/* Using freyja iterator interface */
+	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
+	
+	for (i = 0; i < count; ++i)
+	{
+		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
+
+		freyjaGetVertexXYZ3fv(index, xyz);
+		
+		if (vol.IsPointInside(xyz))
+		{
+			list->pushBack(index);
+		}
+
+		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
+	}
+
+	freyjaCriticalSectionUnlock(lock);
+	
+	return list;
+}
+
+
+Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
+											  Vector<unsigned int> &vertices)
+{
+	Vector<unsigned int> *list;
+	unsigned int i, count, index;
+	vec3_t xyz;
+
+
+	index_t lock = freyjaCriticalSectionLock();
+
+	list = new Vector<unsigned int>();
+
+	/* Using freyja iterator interface */
+	for (i = 0; i < count; ++i)
+	{
+		if (INDEX_INVALID == freyjaIterator(FREYJA_VERTEX, vertices[i]))
+			continue;
+
+		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
+		freyjaGetVertexXYZ3fv(index, xyz);
+		
+		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
+		{
+			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
+			{
+				if (xyz[0] >= bbox[0][2] && xyz[0] <= bbox[1][2])
+				{
+					list->pushBack(index);
+				}
+			}
+		}
+
+		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
+	}
+
+	freyjaCriticalSectionUnlock(lock);
+	
+	return list;
+}
+
+
+void freyjaModelGenerateVertexNormals(index_t modelIndex)
+{
+	// Legacy ////////////////////////////////////////////////
+
+	Vector <Vector3d *> faceNormals;
+	Vector <long> ref;
+	Vector3d a, b, c, aa, bb, normal;
+	unsigned int i, j, vertexCount, faceCount;
+	int32 v0, v1, v2, index;
+	index_t face, mesh;
+
+
+	index_t lock = freyjaCriticalSectionLock();
+	
+	freyjaPrintMessage("freyjaGenerateVertexNormals()");
+	mesh = freyjaGetCurrent(FREYJA_MESH);
+	vertexCount = freyjaGetCount(FREYJA_VERTEX);
+	faceCount = freyjaGetCount(FREYJA_POLYGON); 
+
+	freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
+
+    for (i = 0; i < faceCount; ++i)
+    {
+		face = freyjaGetCurrent(FREYJA_POLYGON);
+		v0 = freyjaGetPolygonVertexIndex(face, 0);
+		v1 = freyjaGetPolygonVertexIndex(face, 1);
+		v2 = freyjaGetPolygonVertexIndex(face, 2);
+
+		freyjaPrintMessage("<%d %d %d>", v0, v1, v2);
+		freyjaGetVertexXYZ3fv(v0, a.mVec);
+		freyjaGetVertexXYZ3fv(v1, b.mVec);
+		freyjaGetVertexXYZ3fv(v2, c.mVec);
+
+		/* Compute 2 vectors from the triangle face */	
+		//aa = b - a;
+		//bb = b - c;
+		
+		/* Compute normal for the face, and store it */
+		normal = Vector3d::cross(a - b, c - b);
+		normal.normalize();
+		faceNormals.pushBack(new Vector3d(normal));
+
+		freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
+	}
+
+	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
+
+	/* Compute vertex normals */
+    for (i = 0; i < vertexCount; ++i)
+    {
+		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
+
+		if (index < 0)
+		{
+			freyjaPrintError("freyjaGenerateVertexNormals> ERROR bad vertex\n");
+			continue;
+		}
+
+		normal.zero();
+
+		//freyjaGetVertexPolygonRef(ref);
+		//for (j = ref.begin(); j < ref.end(); ++j)
+		uint32 jn = freyjaGetMeshVertexPolygonRefCount(mesh, index);
+		for (j = 0; j < jn; ++j)
+		{
+			normal += *faceNormals[freyjaGetMeshVertexPolygonRefIndex(mesh, index, j)];
+		}
+
+		normal.normalize();
+
+		freyjaVertexNormal3fv(index,normal.mVec);
+
+		freyjaPrintMessage("%d :: %d faces :: %f %f %f", index,
+						   ref.size(),
+						   normal.mVec[0], normal.mVec[1], normal.mVec[2]);
+
+		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
+    }
+
+	faceNormals.erase();
+	
+	freyjaCriticalSectionUnlock(lock);
+}
+
+
+void freyjaGetGenericTransform3fv(freyja_transform_t transform,
+								  freyja_transform_action_t action,
+								  index_t id, vec3_t xyz)
+{
+	switch (transform)
+	{
+	case fTransformMesh:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetMeshPosition(id, xyz);
+			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
+		}
+		break;
+
+
+	case fTransformBone:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetBoneTranslation3fv(id, xyz);
+			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
+		}
+		break;
+
+	case fTransformVertex:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaGetVertexXYZ3fv(id, xyz);
+			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
+		}
+		break;
+
+	default:
+		MSTL_MSG("%s(%s, %s) not supported\n", 
+				 __func__,
+				 freyjaTransformToString(transform),
+				 freyjaActionToString(action));
+	}
+}
+
+		
+void freyjaGenericTransform3fv(freyja_transform_t transform,
+							   freyja_transform_action_t action,
+							   index_t id, vec3_t xyz)
+{
+	switch (transform)
+	{
+	case fTransformMesh:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaMeshTransform3fv(id, action, xyz);
+			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
+		}
+		break;
+
+	case fTransformBone:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaBoneTransform(id, action, xyz[0], xyz[1], xyz[2]);
+			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
+		}
+		break;
+
+	case fTransformVertex:
+		switch (action)
+		{
+		case fTranslate:
+			freyjaVertexPosition3fv(id, xyz);
+			break;
+
+		default:
+			MSTL_MSG("%s(%s, %s) not supported\n", 
+					 __func__,
+					 freyjaTransformToString(transform),
+					 freyjaActionToString(action));
+		}
+		break;
+
+	default:
+		MSTL_MSG("%s(%s, %s) not supported\n", 
+				 __func__,
+				 freyjaTransformToString(transform),
+				 freyjaActionToString(action));
+	}
+}
+
+// JA Version 1 file format
+
+
+int32 freyjaCheckModel(const char *filename)
+{
+	SystemIO::FileReader r;
+	freyja_file_header_t header;
+	int32 offset;
+
+
+	if (!r.Open(filename))
+		return -1;
+
+	/* Data is LITTLE_ENDIAN */
+	r.SetByteOrder(SystemIO::File::LITTLE);
+
+	/* Read header */
+	offset = r.GetOffset();
+	r.ReadString(16, header.magic);
+	r.Close();
+
+	if (!strncmp(header.magic, FREYJA_API_VERSION, 7)) // 'Freyja '
+	{
+		return 0;
+	}
+
+	return -1;
+}
+
+
+int32 freyjaLoadModel(const char *filename)
+{
+	SystemIO::FileReader r;
+	freyja_file_header_t header;
+	Vector<long> vertices, texcoords, bones;
+	freyja_file_chunk_t chunk;
+	int32 offset, i, j, index, flags;
+	vec4_t wxyz;
+	vec3_t xyz;
+	char buffer[64];
+	
+	
+	if (freyjaCheckModel((char *)filename) != 0)
+		return -1;
+
+	if (!r.Open(filename))
+		return -1;
+
+	/* Data is LITTLE_ENDIAN */
+	r.SetByteOrder(SystemIO::File::LITTLE);
+
+	/* Read header */
+	offset = r.GetOffset();
+	r.ReadString(8, header.magic);
+	header.version = r.ReadLong();
+
+	if (header.version != 1)
+	{
+		r.SetOffset(offset);
+		r.ReadString(16, header.magic);
+		header.version = r.ReadLong();
+	}
+
+	header.flags = r.ReadLong();
+	header.reserved = r.ReadLong();
+	r.ReadString(64, header.comment);	
+
+	if (strncmp(header.magic, FREYJA_API_VERSION, 7)) // 'Freyja '
+	{
+		return -1;
+	}
+
+	while (!r.IsEndOfFile())
+	{
+		chunk.type = r.ReadLong();
+		chunk.size = r.ReadLong();
+		chunk.flags = r.ReadLong();
+		chunk.version = r.ReadLong();
+		offset = r.GetOffset() + chunk.size;
+
+		switch (chunk.type)
+		{
+		case FREYJA_CHUNK_BONE:
+			freyjaBegin(FREYJA_BONE);
+			index = freyjaGetCurrent(FREYJA_BONE);
+			bones.pushBack(index);
+
+			memset(buffer, 0, 64);
+			r.ReadString(64, buffer);
+			freyjaBoneName(index, buffer);
+			freyjaBoneFlags(index, 0x0);
+			freyjaBoneParent(index, r.ReadLong());
+			flags = r.ReadLong();
+ 
+			for (j = 0; j < 3; ++j)
+				xyz[j] = r.ReadFloat32();
+
+			freyjaBoneTranslate3fv(index, xyz);
+			
+			if (flags & 32)
+			{
+				r.ReadLong();
+
+				for (j = 0; j < 3; ++j)
+					xyz[j] = r.ReadFloat32();
+
+				freyjaBoneRotateEuler3fv(index, xyz);
+			}
+			else
+			{
+				for (j = 0; j < 4; ++j)
+					wxyz[j] = r.ReadFloat32();
+
+				freyjaBoneRotateQuat4fv(index, wxyz);
+			}
+
+			freyjaEnd(); // FREYJA_BONE
+
+			if ((long)r.GetOffset() != offset)
+				printf("BONE @ %li not %i!\n", r.GetOffset(), offset);
+			break;
+
+
+		/* Materials */
+		case FREYJA_CHUNK_MATERIAL:
+			{
+				Material *mat;
+
+				index = freyjaMaterialCreate();
+				mat = freyjaGetMaterialClass(index);
+
+				if (mat)
+				{
+					/* Read in new material */
+					mat->serialize(r);
+
+					// FIXME use string name matching like skeletalkeyframes
+                    // to avoid dupe textures in the future
+
+					if (SystemIO::File::DoesFileExist(mat->getTextureName()))
+					{
+						index_t textureIndex = freyjaTextureCreateFilename(mat->getTextureName());
+
+						if (textureIndex != INDEX_INVALID)
+						{
+							mat->mTexture = textureIndex;
+							mat->mFlags |= fFreyjaMaterial_Texture;
+						}
+					}
+				}
+			}
+			break;
+
+
+		case FREYJA_CHUNK_MESH:
+			freyjaMeshLoadChunkJA(r, chunk);
+
+			if ((long)r.GetOffset() != offset)
+				printf("MESH @ %li not %i!\n", r.GetOffset(), offset);
+			break;
+
+
+		default:
+			continue;
+		}
+
+		r.SetOffset(offset);
+	}
+
+
+	if (!bones.empty())
+	{
+		freyjaBegin(FREYJA_SKELETON);
+		index_t skeleton = freyjaGetCurrent(FREYJA_SKELETON);
+
+		for (i = bones.begin(); i < (long)bones.end(); ++i)
+		{
+			freyjaSkeletonAddBone(skeleton, bones[i]);
+
+			for (j = bones.begin(); j < (long)bones.end(); ++j)
+			{
+				if (bones[i] == (long)freyjaGetBoneParent(bones[j]))
+				{
+					freyjaBoneAddChild(bones[i], bones[j]);
+				}
+			} 		
+		} 
+
+		freyjaEnd(); // FREYJA_SKELETON
+	}
+
+	r.Close();
+
+	return 0;
+}
+
+
+#define QUAT_BACKEND 0
+int32 freyjaSaveModel(const char *filename)
+{
+	Vector<long> vertices, texcoords;
+	SystemIO::FileWriter w;
+	freyja_file_header_t header;
+	freyja_file_chunk_t chunk;
+	vec3_t xyz;
+	//vec4_t wxyz;
+	char buffer[64];
+	int32 i, j, index, idx, count;
+
+
+	if (!w.Open(filename))
+		return -1;
+
+	memset(header.magic, 0, 16);
+	memset(header.comment, 0, 64);
+	strncpy(header.magic, FREYJA_API_VERSION, 12);
+	header.version = 2;
+	header.flags = 0x0;
+	header.reserved = 0x0;
+	strcpy(header.comment, "Freyja 3d: http://icculus.org/freyja");
+
+	/* Data is LITTLE_ENDIAN */
+	w.SetByteOrder(SystemIO::File::LITTLE);
+
+	/* Write header */
+	w.WriteString(16, header.magic);
+	w.WriteLong(header.version);
+	w.WriteLong(header.flags);
+	w.WriteLong(header.reserved);
+	w.WriteString(64, header.comment);
+
+
+	/* Write chunks... */
+
+
+	/* Bones */
+	if (freyjaGetCount(FREYJA_BONE))
+	{
+		freyjaIterator(FREYJA_SKELETON, FREYJA_RESET);
+		index = freyjaIterator(FREYJA_BONE, FREYJA_RESET);
+		count = freyjaGetCount(FREYJA_BONE);
+
+		for (i = 0; i < count; ++i)
+		{
+			memset(buffer, 0, 64);
+			freyjaGetBoneName(index, 64, buffer);
+			idx = freyjaGetBoneParent(index);
+
+			chunk.type = FREYJA_CHUNK_BONE;
+			chunk.size = 64 + 4 + 4 + 12 + 16;
+			chunk.flags = 0x0;
+			chunk.version = 1;
+
+			w.WriteLong(chunk.type);
+			w.WriteLong(chunk.size);
+			w.WriteLong(chunk.flags);
+			w.WriteLong(chunk.version);
+			w.WriteString(64, buffer);
+			w.WriteLong(idx);
+#if QUAT_BACKEND
+			w.WriteLong(0x0);
+#else
+			w.WriteLong(32); // Flag 32 - Using euler angles
+#endif
+
+			freyjaGetBoneTranslation3fv(index, xyz);
+
+			for (j = 0; j < 3; ++j)
+				w.WriteFloat32(xyz[j]);
+
+#if QUAT_BACKEND
+			freyjaGetBoneRotationQuat4fv(index, wxyz);
+			
+			for (j = 0; j < 4; ++j)
+				w.WriteFloat32(wxyz[j]);
+#else
+			freyjaGetBoneRotationEuler3fv(index, xyz);
+			w.WriteLong(0x0); // pad out
+			for (j = 0; j < 3; ++j)
+				w.WriteFloat32(xyz[j]);
+#endif
+
+			index = freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
+		}
+	}
+
+
+	/* Skeletons */
+
+
+	/* Materials */
+	if (freyjaGetMaterialCount())
+	{
+		count = freyjaGetMaterialCount();
+
+		for (i = 0; i < count; ++i)
+		{
+			Material *mat = freyjaGetMaterialClass(i);
+
+			if (mat)
+			{
+				chunk.type = FREYJA_CHUNK_MATERIAL;
+				chunk.size = mat->getSerializeSize();
+				chunk.flags = 0x0;
+				chunk.version = Material::mVersion;
+
+				w.WriteLong(chunk.type);
+				w.WriteLong(chunk.size);
+				w.WriteLong(chunk.flags);
+				w.WriteLong(chunk.version);
+
+				mat->serialize(w);
+			}
+		}		
+	}
+
+
+	/* Vertex groups */
+
+
+	/* Meshes */
+#if 0
+	count = freyjaGetModelMeshCount();
+	for (i = 0; i < count; ++i)
+	{
+		int meshIndex = freyjaGetModelMeshIndex(0, i);
+		freyjaSaveMeshChunkV1(w, meshIndex);
+	}
+#else
+	for (i = 0, count = freyjaGetMeshCount(); i < count; ++i)
+	{
+		freyjaPrintMessage("Writing mesh %i/%i...", i, count);
+		freyjaMeshSaveChunkJA(w, i);
+	}
+#endif
+
+	/* Metadata */
+
+
+	/* That wasn't so bad, was it? */
+	w.Close();
+
+	return 0;
+}
+
+
 #if FREYJA_OBSOLETE_ABI
 
 void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv)
@@ -1214,220 +1892,58 @@ int freyjaVertexExtrude(index_t vertexIndex, vec_t midpointScale, vec3_t normal)
 	return 0;
 }
 
+int32 freyjaFindPolygonByVertices(Vector<uint32> vertices)
+{
+#ifdef USING_EGG
+	if (freyja__getEggBackend())
+		return freyja__getEggBackend()->selectPolygon(&vertices);
+#else
+	BUG_ME("Not Implemented");
+#endif
+
+	return -1;
+}
+
+
+
+
+void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex)
+{
+	uint32 i, count;
+
+	count = freyjaGetMeshVertexCount(meshIndex);
+
+	for (i = 0; i < count; ++i)
+	{
+		//freyjaBoneRemoveVertex(boneIndex, i);//freyjaGetMeshVertexIndex(meshIndex, i));
+	}
+}
+
+
+void freyjaBoneAddMesh(index_t boneIndex, index_t meshIndex)
+{
+	uint32 i, count;
+
+	count = freyjaGetMeshVertexCount(meshIndex);
+
+	for (i = 0; i < count; ++i)
+	{
+		//freyjaBoneAddVertex(boneIndex, i);//freyjaGetMeshVertexIndex(meshIndex, i));
+	}
+}
+
+
+index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex)
+{
+	return boneIndex; // Assumes single skeleton model, FIXME when Skeleton added to backend API
+}
+
+
+void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex)
+{
+	freyjaVertexWeight(vertexIndex, 1.0f, boneIndex);
+}
+
+
 
 #endif // FREYJA_OBSOLETE_ABI
-
-
-Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2])
-{
-	Vector<unsigned int> *list;
-	int32 i, count;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	count = freyjaGetCount(FREYJA_VERTEX); 
-
-	list = new Vector<unsigned int>();
-
-	if (count < 1)
-	{
-		/* Return empty list */
-		return list;
-	}
-
-
-	/* Using freyja iterator interface */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-	
-	for (i = 0; i < count; ++i)
-	{
-		freyjaGetVertex3fv(xyz);
-		
-		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
-		{
-			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
-			{
-				if (xyz[2] >= bbox[0][2] && xyz[2] <= bbox[1][2])
-				{
-					list->pushBack(freyjaIterator(FREYJA_VERTEX, 
-												  FREYJA_CURRENT));
-				}
-			}
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(BoundingVolume &vol)
-{
-	Vector<unsigned int> *list;
-	unsigned int i, count, index;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	count = freyjaGetCount(FREYJA_VERTEX); 
-
-	if (count < 1)
-	{
-		return 0x0;
-	}
-
-	list = new Vector<unsigned int>();
-
-	/* Using freyja iterator interface */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-	
-	for (i = 0; i < count; ++i)
-	{
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-
-		freyjaGetVertexXYZ3fv(index, xyz);
-		
-		if (vol.IsPointInside(xyz))
-		{
-			list->pushBack(index);
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
-											  Vector<unsigned int> &vertices)
-{
-	Vector<unsigned int> *list;
-	unsigned int i, count, index;
-	vec3_t xyz;
-
-
-	freyjaCriticalSectionLock();
-
-	list = new Vector<unsigned int>();
-
-	/* Using freyja iterator interface */
-	for (i = 0; i < count; ++i)
-	{
-		if (INDEX_INVALID == freyjaIterator(FREYJA_VERTEX, vertices[i]))
-			continue;
-
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-		freyjaGetVertexXYZ3fv(index, xyz);
-		
-		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
-		{
-			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
-			{
-				if (xyz[0] >= bbox[0][2] && xyz[0] <= bbox[1][2])
-				{
-					list->pushBack(index);
-				}
-			}
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock();
-	
-	return list;
-}
-
-
-void freyjaModelGenerateVertexNormals(index_t modelIndex)
-{
-	// Legacy ////////////////////////////////////////////////
-
-	Vector <Vector3d *> faceNormals;
-	Vector <long> ref;
-	Vector3d a, b, c, aa, bb, normal;
-	unsigned int i, j, vertexCount, faceCount;
-	int32 v0, v1, v2, index;
-	index_t face, mesh;
-
-
-	freyjaCriticalSectionLock();
-	
-	freyjaPrintMessage("freyjaGenerateVertexNormals()");
-	mesh = freyjaGetCurrent(FREYJA_MESH);
-	vertexCount = freyjaGetCount(FREYJA_VERTEX);
-	faceCount = freyjaGetCount(FREYJA_POLYGON); 
-
-	freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
-
-    for (i = 0; i < faceCount; ++i)
-    {
-		face = freyjaGetCurrent(FREYJA_POLYGON);
-		v0 = freyjaGetPolygonVertexIndex(face, 0);
-		v1 = freyjaGetPolygonVertexIndex(face, 1);
-		v2 = freyjaGetPolygonVertexIndex(face, 2);
-
-		freyjaPrintMessage("<%d %d %d>", v0, v1, v2);
-		freyjaGetVertexXYZ3fv(v0, a.mVec);
-		freyjaGetVertexXYZ3fv(v1, b.mVec);
-		freyjaGetVertexXYZ3fv(v2, c.mVec);
-
-		/* Compute 2 vectors from the triangle face */	
-		//aa = b - a;
-		//bb = b - c;
-		
-		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
-		faceNormals.pushBack(new Vector3d(normal));
-
-		freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
-	}
-
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-
-	/* Compute vertex normals */
-    for (i = 0; i < vertexCount; ++i)
-    {
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-
-		if (index < 0)
-		{
-			freyjaPrintError("freyjaGenerateVertexNormals> ERROR bad vertex\n");
-			continue;
-		}
-
-		normal.zero();
-
-		//freyjaGetVertexPolygonRef(ref);
-		//for (j = ref.begin(); j < ref.end(); ++j)
-		uint32 jn = freyjaGetMeshVertexPolygonRefCount(mesh, index);
-		for (j = 0; j < jn; ++j)
-		{
-			normal += *faceNormals[freyjaGetMeshVertexPolygonRefIndex(mesh, index, j)];
-		}
-
-		normal.normalize();
-
-		freyjaVertexNormal3fv(index,normal.mVec);
-
-		freyjaPrintMessage("%d :: %d faces :: %f %f %f", index,
-						   ref.size(),
-						   normal.mVec[0], normal.mVec[1], normal.mVec[2]);
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-    }
-
-	faceNormals.erase();
-	
-	freyjaCriticalSectionUnlock();
-}

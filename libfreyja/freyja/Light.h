@@ -23,14 +23,14 @@
  * Mongoose - Created, based on Freyja's Light class from 2002.01.27
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJALIGHT_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJALIGHT_H_
+#ifndef GUARD__FREYJA_LIGHT_H_
+#define GUARD__FREYJA_LIGHT_H_
 
 #include <hel/math.h>
 
+namespace freyja {
 
-class FreyjaLight
+class Light
 {
  public:
 
@@ -46,7 +46,7 @@ class FreyjaLight
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaLight();
+	Light();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaLight
@@ -58,7 +58,7 @@ class FreyjaLight
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~FreyjaLight();
+	~Light();
 	/*------------------------------------------------------
 	 * Pre  : FreyjaLight object is allocated
 	 * Post : Deconstructs an object of FreyjaLight
@@ -126,5 +126,7 @@ private:
 
 	static unsigned int mCounter;   /* Id generator counter */
 };
+
+} // End namespace freyja
 
 #endif

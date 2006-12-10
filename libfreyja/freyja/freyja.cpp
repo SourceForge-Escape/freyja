@@ -359,6 +359,16 @@ const char *freyjaActionToString(freyja_transform_action_t action)
 }
 
 
+index_t freyjaCriticalSectionLock()
+{
+	return INDEX_INVALID;
+}
+
+
+void freyjaCriticalSectionUnlock(index_t lock)
+{
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // Freyja Memory management and logging

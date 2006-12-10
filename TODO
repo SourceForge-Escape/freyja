@@ -28,6 +28,7 @@
 		- Extra viewmode to toggle groups colors on/off
 	
 	* To be finalized Sat
+		- Add menu action to clamp texcoords on selected Mesh
 		- Fix all remaining mesh issues like uv editing, welds, and c/c/p
 		- Mesh::Merge() doesn't merge animations ( shouldn't matter for now )
 		- Mesh::DeleteVertex() DNE

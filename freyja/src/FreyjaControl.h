@@ -660,42 +660,11 @@ private:
 	////////////////////////////////////////////////////////////
 
 	String ActionToString(freyja_transform_action_t action)
+	{ return String(freyjaActionToString(action)); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
-	{
-		String s;
-
-		switch (action)
-		{
-		case fTranslate:
-			s = "fTranslate";
-			break;
-
-		case fRotateAboutPoint:
-			s = "fRotateAboutPoint";
-			break;
-
-		case fRotate:
-			s = "fRotate";
-			break;
-
-		case fScaleAboutPoint:
-			s = "fScaleAboutPoint";
-			break;
-
-		case fScale:
-			s = "fScale";
-			break;
-
-		default:
-			s = "Unknown Transform";
-		}
-
-		return s;
-	}
-
 
 	void getPickRay(vec_t mouseX, vec_t mouseY, 
 					double *rayOrigin, double *rayVector);
@@ -748,12 +717,12 @@ private:
 			v = mCursor.mPos - mCursor.mLastPos;
 			break;
 
-		case fRotateAboutPoint:
+		case fRotateAboutOrigin:
 		case fRotate:
 			v = mCursor.mRotate;
 			break;
 
-		case fScaleAboutPoint:
+		case fScaleAboutOrigin:
 		case fScale:
 			v = mCursor.mScale;
 			break;
@@ -790,7 +759,7 @@ private:
 		}
 
 		DEBUG_MSG("\tUnknown Action\n");
-		return fScaleAboutPoint;
+		return fTransformActionNone;
 	}
 
 

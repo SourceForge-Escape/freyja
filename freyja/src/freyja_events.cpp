@@ -24,6 +24,7 @@
 #define FREYJA_APP_PLUGINS 1
 
 #include <freyja/FreyjaPluginABI.h>
+#include <freyja/LightABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
@@ -49,6 +50,11 @@ void eRecentFiles(unsigned int value)
 }
 
 
+// FIXME: Rewrite this to be Skeleton based!!  Allow for bones outside of root
+//        and include Skeleton in tree
+//
+//        Also have tree root be skeleton name, so you can do multiple skeletons
+//        in the widget if needed later ala scene graphs
 mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
 								mgtk_tree_t *tree)
 {
@@ -63,7 +69,7 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 
 	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
 	const char *rootName = freyjaGetBoneNameString(rootIndex);
-	uint32 rootSkelBID = freyjaGetBoneSkeletalBoneIndex(rootIndex);
+	uint32 rootSkelBID = rootIndex;//freyjaGetBoneSkeletalBoneIndex(rootIndex);
 
 	if (tree == 0x0)
 	{
@@ -659,12 +665,6 @@ void freyja_handle_command(int command)
 }
 
 
-void eModelGenerateNormals()
-{
-	freyjaModelGenerateVertexNormals(0); // only 1 model atm
-}
-
-
 void freyja_handle_resource_init(Resource &r)
 {
 	////////////////////////////////////////////////////////////////////
@@ -672,7 +672,6 @@ void freyja_handle_resource_init(Resource &r)
 	////////////////////////////////////////////////////////////////////
 
 	ResourceEventCallbackUInt::add("eRecentFiles", &eRecentFiles);
-	ResourceEventCallback::add("eGenerateNormals", &eModelGenerateNormals);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
 	ResourceEventCallback2::add("eRedo", &eNoImplementation);
