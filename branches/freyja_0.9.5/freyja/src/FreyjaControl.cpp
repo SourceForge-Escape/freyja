@@ -33,11 +33,12 @@
 #include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaPluginABI.h>
 #include <freyja/Bone.h>
+#include <freyja/LightABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/PerlinNoise.h>
-#include <freyja/FreyjaMaterial.h>
+#include <freyja/Material.h>
 #include <hel/math.h>
 #include <hel/Ray.h>
 
@@ -116,7 +117,7 @@ FreyjaControl::FreyjaControl() :
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
 	/* Spawn 0th material, set the iterator, and make a default material */
-	FreyjaMaterial::mLoadTextureFunc = load_texture;
+	Material::mLoadTextureFunc = load_texture;
 	int32 mIndex = freyjaMaterialCreate();
 	vec4_t rgba = {0,0,0,1};
 	freyjaCurrentMaterial(mIndex);
@@ -1110,7 +1111,8 @@ bool FreyjaControl::LoadModel(const char *filename)
 	}
 	else
 	{
-		freyjaModelClampTexCoords(0); // Only support 1 model per edit atm
+		// 2006.12.09, Not forcing clamping by default -- might revert later
+		//freyjaModelClampTexCoords(0); // Only support 1 model per edit atm
 
 		unsigned int i, w, h, bpp, type, count;
 		unsigned char *image = 0x0;
@@ -1573,7 +1575,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eAnimationSlider: // FIXME: Wrapping and bounds 
 		if (value != GetSelectedKeyFrame())
 		{
-			freyja_event_set_range(event, value, 0, freyjaGetAnimationFrameCount(GetSelectedAnimation()));
+			freyja_event_set_range(event, value, 0, 500);//freyjaGetAnimationFrameCount(GetSelectedAnimation()));
 			SetSelectedKeyFrame(value);
 			freyja_event_gl_refresh();
 		}
@@ -1824,7 +1826,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 			{
 			case tMesh:
 				{
-					Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+					Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 					if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
 				}
 				break;
@@ -2822,7 +2824,7 @@ bool FreyjaControl::event(int command)
 
 	case eMeshTexcoordSpherical:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
 			{
 				m->UVMapSelectedFaces_Spherical();
@@ -2833,7 +2835,7 @@ bool FreyjaControl::event(int command)
 
 	case eMeshTexcoordCylindrical:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
 			{
 				m->UVMapSelectedFaces_Cylindrical();
@@ -2844,7 +2846,7 @@ bool FreyjaControl::event(int command)
 
 	case eMeshTexcoordPlaneProj:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
 			{
 				m->UVMapSelectedFaces_Plane();
@@ -3360,7 +3362,7 @@ void FreyjaControl::SetKeyFrame()
 
 	case tMesh:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if (m)
 			{
@@ -4193,7 +4195,7 @@ void FreyjaControl::DeleteSelectedObject()
 		break;
 
 	case tMesh:
-		if (freyjaModelGetMeshClass(0, GetSelectedMesh()))
+		if (Mesh::GetMesh(GetSelectedMesh()))
 		{
 			mToken = true;
 			ActionModelModified(new ActionMeshDelete(GetSelectedMesh()));
@@ -4210,8 +4212,7 @@ void FreyjaControl::DeleteSelectedObject()
 
 void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
 {
-	Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
-
+	Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 	if (!m)
 		return;
@@ -4304,7 +4305,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 	{
 	case tPoint:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if ( m )
 			{
@@ -4324,7 +4325,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 	case tFace:
 		{
 			// New backend ( picks faces and marks them selected )
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if ( m )
 			{
@@ -4393,9 +4394,21 @@ void FreyjaControl::SelectObjectByBox(Vec3 min, Vec3 max)
 {
 	switch (mObjectMode)
 	{
+	case tSelectedFaces:
+	case tFace:
+		{
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+
+			if ( m )
+			{
+				m->SelectFacesByBox(min, max);
+			}
+		}
+		break;
+
 	case tPoint:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if ( m )
 			{
@@ -4462,7 +4475,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	case tPoint:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if ( m )
 			{
@@ -4514,7 +4527,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 	case tFace:
 		{
 			// New backend ( picks faces and marks them selected )
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if ( m )
 			{
@@ -4667,12 +4680,12 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 
 	switch (action)
 	{
-	case fRotateAboutPoint:
+	case fRotateAboutOrigin:
 	case fRotate:
 		u = v;
 		break;
 
-	case fScaleAboutPoint:
+	case fScaleAboutOrigin:
 	case fScale:
 		u = v;
 		u.mVec[0] = 1.0f / v.mVec[0];
@@ -4726,7 +4739,7 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 			//Action *a = new ActionMeshKeyframe(GetSelectedMesh(), action, u);
 			//ActionModelModified(a);
 
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
 			{				
 				// FIXME: This is temp test constant - replace with track switching later
@@ -4787,13 +4800,13 @@ void FreyjaControl::Transform(object_type_t obj,
 
 	switch (action)
 	{
-	case fRotateAboutPoint:
+	case fRotateAboutOrigin:
 	case fRotate:
 		v *= -HEL_PI_OVER_180;
 		u = -v;
 		break;
 
-	case fScaleAboutPoint:
+	case fScaleAboutOrigin:
 	case fScale:
 		u.mVec[0] = 1.0f / v.mVec[0];
 		u.mVec[1] = 1.0f / v.mVec[1];
@@ -4843,7 +4856,7 @@ void FreyjaControl::Transform(object_type_t obj,
 	case tSelectedFaces:		
 		if (mToken)
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if (!m)
 			{
@@ -5101,7 +5114,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tMesh:
 		{	
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if (m)
 			{
@@ -5114,7 +5127,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tSelectedVertices:
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if (m)
 			{
@@ -5199,7 +5212,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tFace: 
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if (m)
 			{				
@@ -5265,7 +5278,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	case tPoint:
 		if (mToken) 
 		{
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 			if (m)
 			{
@@ -5465,7 +5478,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			mCursor.SetMode(freyja3d::Cursor::Rotation);
 
 			// This handles ctrl selects ( select without leaving rotate mode )
-			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m) 
 			{
 				mCursor.mPos = m->GetBoundingVolumeCenter();
@@ -5880,7 +5893,7 @@ bool FreyjaControl::SaveUserPreferences()
 
 void FreyjaControl::TexCoordMove(vec_t u, vec_t v)
 {
-	Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 	if (!m || mTexCoordArrayIndex == INDEX_INVALID)
 		return;
@@ -5906,7 +5919,7 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 {
 	mTexCoordArrayIndex = INDEX_INVALID;
 
-	Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
 	if (!m)
 		return;
@@ -6085,7 +6098,7 @@ void eSaveMaterial(char *filename)
 
 void eMeshUnselectFaces()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if ( m )
 	{
@@ -6101,7 +6114,7 @@ void eMeshUnselectFaces()
 
 void eMeshUnselectVertices()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if ( m )
 	{
@@ -6168,7 +6181,7 @@ void eSmoothingGroupsDialog()
 
 void eSmooth(unsigned int group, unsigned int value)
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -6193,7 +6206,7 @@ void eSmooth(unsigned int group, unsigned int value)
 
 void eGroupClear()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -6214,7 +6227,7 @@ void eGroupClear()
 
 void eGroupAssign()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -6245,7 +6258,7 @@ void eWeight(vec_t w)
 
 void eAssignWeight()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -6257,7 +6270,7 @@ void eAssignWeight()
 
 void eClearWeight()
 {
-	Mesh *m = freyjaModelGetMeshClass(0, FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 
 	if (m)
 	{
@@ -6440,6 +6453,7 @@ void polymap_update_question()
 									 "Would you like to promote it to ploymapped texcoords per face?",
 									 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
 	{
-		freyjaMeshPromoteTexcoordsToPloymapping(FreyjaControl::mInstance->GetSelectedMesh());
+		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+		m->ConvertAllFacesToTexCoordPloymapping();
 	}
 }

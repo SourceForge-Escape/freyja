@@ -19,12 +19,19 @@
  * Mongoose - Created, moved from other headers
  ==========================================================================*/
 
-#ifndef GUARD__LIBFREYJA_LEGACYMESHABI_H_
-#define GUARD__LIBFREYJA_LEGACYMESHABI_H_
+#ifndef GUARD__FREYJA_LEGACYABI_H_
+#define GUARD__FREYJA_LEGACYABI_H_
 
 #include "freyja.h"
 
 extern "C" {
+
+	//////////////////////////////////////////////////////////////////////////
+	// Legacy ABI methods. 
+	//
+	// Legacy calls are often dependent on a gobal index to work.
+	// They are deprecated as of 0.9.5, since public 0.10.x will be threaded.
+	//////////////////////////////////////////////////////////////////////////
 
 	index_t freyjaGetCurrentModelIndex();
 	/*------------------------------------------------------
@@ -69,15 +76,6 @@ extern "C" {
 
 	void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex, 
 										   index_t polygonIndex, index_t vertexIndex);
-
-
-
-	//////////////////////////////////////////////////////////////////////////
-	// Legacy ABI methods. 
-	//
-	// Legacy calls are often dependent on a gobal index to work.
-	// They are deprecated as of 0.9.5, since public 0.10.x will be threaded.
-	//////////////////////////////////////////////////////////////////////////
 
 	index_t freyjaGetFSMMeshIndex();
 	/*------------------------------------------------------
@@ -245,6 +243,23 @@ extern "C" {
 
 #if FREYJA_OBSOLETE_ABI
 
+	void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex);
+	void freyjaBoneAddMesh(index_t boneIndex, index_t meshIndex);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_BONE);
+	 * Post : Mesh is added to Bone's child list
+	 *
+	 *        Either makes mesh tree connection or
+	 *        simulates by vertex weights and pivots
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetBoneSkeletalBoneIndex(index_t boneIndex);
+
+	void freyjaBoneAddVertex(index_t boneIndex, index_t vertexIndex);
+
+	void freyjaBoneRemoveVertex(index_t boneIndex, index_t vertexIndex);
+
+
 	void freyjaTexCoord2fv(index_t texcoordIndex, const vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -341,12 +356,16 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-#endif
+#endif // FREYJA_OBSOLETE_ABI
 }
 
 #   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
 #      include <mstl/Vector.h>
 
+#      if FREYJA_OBSOLETE_ABI
+void freyjaVertexListTransform(mstl::Vector<uint32> &list,
+								freyja_transform_action_t action, 
+								vec_t x, vec_t y, vec_t z);
 
 void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
 							   mstl::Vector<int32> uvMap, bool x, bool y);
@@ -354,11 +373,6 @@ void freyjaModelMirrorTexCoord(uint32 modelIndex, uint32 texCoordIndex,
 char freyjaModelCopyVertexList(index_t modelIndex, 
 							   mstl::Vector<unsigned int> &list,
 							   int mesh, int frame);
-/*------------------------------------------------------
- * Pre  : Model <modelIndex> exists and has an active copy buffer
- * Post : Model's copy buffer is modified to include new mesh duplicate
- *        using the *local <mesh> index and vertex morph <frame>
- ------------------------------------------------------*/
 
 int32 freyjaFindPolygonByVertices(mstl::Vector<uint32> vertices);
 
@@ -366,23 +380,9 @@ mstl::Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 
 void freyjaGetVertexPolygonRef1i(index_t vertexIndex, mstl::Vector<long> &polygons);
 void freyjaGetVertexPolygonRef(mstl::Vector<long> &polygons);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Returns a list of indices of polygons that
- *        use current vertex in iterator
- *
- *        List can be empty
- *
- *-- History ------------------------------------------
- *
- * 2004.12.17:
- * Mongoose - Created, wrapper for old Egg style
- *            reverse reference system ( very handy )
- ------------------------------------------------------*/
 
-void freyjaVertexListTransform(mstl::Vector<uint32> &list,
-								freyja_transform_action_t action, 
-								vec_t x, vec_t y, vec_t z);
-#   endif
+#      endif // FREYJA_OBSOLETE_ABI
 
-#endif
+#   endif // defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
+
+#endif // GUARD__FREYJA_LEGACYABI_H_

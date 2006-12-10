@@ -804,6 +804,71 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 }
 
 
+void Mesh::SelectFacesByBox(Vec3 &min, Vec3 &max)
+{
+	Vec3 mina(min), maxa(max);
+
+	// Reorder as needed, since we don't trust input
+	for (int32 i = 2; i >= 0; --i)
+	{
+		if (min[i] > max[i])
+		{
+			mina[i] = max[i];
+			maxa[i] = min[i];
+		}
+	}
+
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (!v) 
+			continue;
+
+		Vec3 p;
+		bool inside = true;
+		v->mFlags &= ~Vertex::fSelected2;
+		GetVertexArrayPos(v->mVertexIndex, p.mVec);
+		
+		for (int32 j = 2; inside && j >= 0; --j)
+		{
+			if (p[j] > maxa[j] || p[j] < mina[j])
+			{
+				inside = false;
+			}
+		}
+
+		if (inside)
+		{
+			v->mFlags |= Vertex::fSelected2;
+		}
+	}
+
+	
+	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
+	{
+		Face *f = GetFace(i);
+
+		if (f)
+		{
+			bool select = true;
+			uint32 j;
+			foreach (f->mIndices, j)
+			{
+				Vertex *v = GetVertex(f->mIndices[j]);
+				if (!(v->mFlags & Vertex::fSelected2))
+				{
+					select = false;
+				}
+			}
+
+			if (select)
+				f->mFlags |= Face::fSelected;
+		}
+	}
+}
+
+
 void Mesh::SelectVerticesByBox(Vec3 &min, Vec3 &max)
 {
 	Vec3 mina(min), maxa(max);
@@ -2051,6 +2116,39 @@ void Mesh::SelectedFacesScaleUVMap(vec_t x, vec_t y)
 void Mesh::SelectedFacesTranslateUVMap(vec_t x, vec_t y)
 {
 	MSTL_MSG("FIXME");
+}
+
+
+void Mesh::ConvertAllFacesToTexCoordPloymapping()
+{
+	for (uint32 i = 0, n = GetFaceCount(); i < n; ++i)
+	{
+		ConvertFaceToTexCoordPloymapping(i);
+	}
+}
+
+
+void Mesh::ConvertFaceToTexCoordPloymapping(index_t face)
+{
+	Face *f = GetFace(face);
+
+	if (f)
+	{
+		if (f->mFlags & Face::fPolyMappedTexCoords &&
+			f->mIndices.size() == f->mTexCoordIndices.size())
+		{
+		}
+		else
+		{
+			f->mTexCoordIndices.clear();
+
+			for (uint32 i = 0, n = f->mIndices.size(); i < n; ++i)
+			{
+				Vec3 t = GetVertexTexCoord(f->mIndices[i]);
+				f->mTexCoordIndices.push_back(CreateTexCoord(t.mVec));
+			}
+		}
+	}
 }
 
 

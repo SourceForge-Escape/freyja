@@ -15,7 +15,7 @@ void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side)
 	int32 index;
 
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -62,7 +62,7 @@ void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side)
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -72,7 +72,7 @@ void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side)
 	int32 index;
 
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -220,7 +220,7 @@ void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side)
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -234,7 +234,7 @@ void freyjaGenerateCircleMesh(vec3_t origin, int32 count)
 	if (count < 3)
 		count = 3;
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -293,7 +293,7 @@ void freyjaGenerateCircleMesh(vec3_t origin, int32 count)
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -307,7 +307,7 @@ void freyjaGenerateConeMesh(vec3_t origin, vec_t height, int32 count)
 	if (count < 3)
 		count = 3;
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -405,7 +405,7 @@ void freyjaGenerateConeMesh(vec3_t origin, vec_t height, int32 count)
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -423,7 +423,7 @@ void freyjaGenerateFunctionalSphereMesh(vec3_t origin, vec_t radius,
 
 	height = radius * 2.0;
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -516,7 +516,7 @@ void freyjaGenerateFunctionalSphereMesh(vec3_t origin, vec_t radius,
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -532,7 +532,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 	(count < 3) ? count = 3 : 0;
 	height = radius * 2.0;
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -736,7 +736,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -751,7 +751,7 @@ void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height,
 	(segments < 1) ? segments = 1 : 0;
 	(count < 3) ? count = 3 : 0;
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -974,7 +974,7 @@ void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height,
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }
 
 
@@ -989,7 +989,7 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 	(segments < 1) ? segments = 1 : 0;
 	(count < 3) ? count = 3 : 0;
 
-	freyjaCriticalSectionLock();
+	index_t lock = freyjaCriticalSectionLock();
 
 	freyjaBegin(FREYJA_MESH);
 	freyjaBegin(FREYJA_VERTEX_GROUP);
@@ -1150,5 +1150,5 @@ void freyjaGenerateTubeMesh(vec3_t origin, vec_t height,
 
 	freyjaEnd(); // FREYJA_MESH
 
-	freyjaCriticalSectionUnlock();
+	freyjaCriticalSectionUnlock(lock);
 }

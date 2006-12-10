@@ -19,10 +19,16 @@
  * Mongoose - Created, moved from other headers
  ==========================================================================*/
 
+#include <mstl/Vector.h>
+#include "Light.h"
 #include "LightABI.h"
 
+using namespace freyja;
+using namespace mstl;
+
 index_t gFreyjaLightIndex = INDEX_INVALID;
-Vector<FreyjaLight *>  gFreyjaLights;
+Vector<Light *> gFreyjaLights;
+
 
 // FIXME: Update to class internal pool system
 
@@ -30,7 +36,7 @@ index_t freyjaLightCreate()
 {
 	index_t lightIndex = gFreyjaLights.size();
 
-	gFreyjaLights.pushBack(new FreyjaLight());
+	gFreyjaLights.pushBack(new Light());
 
 	return lightIndex;	
 }

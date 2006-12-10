@@ -125,7 +125,8 @@ public:
 		fMaterial    =  2,
 		fSelected    =  4,
 		fHidden      =  8,
-		fRayHit      = 16
+		fRayHit      = 16,
+		fSelected2   = 32   // Only used internally per method in Mesh
 	} VertexFlags;
 
 	Vertex(index_t vertex, index_t texcoord, index_t normal) :
@@ -634,19 +635,19 @@ public:
 	 * Post : Return vertex if it exists or NULL
 	 ------------------------------------------------------*/
 
-	Vector3d GetVertexNormal(index_t idx);
+	Vec3 GetVertexNormal(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	Vector3d GetVertexPosition(index_t idx);
+	Vec3 GetVertexPosition(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	Vector3d GetVertexTexCoord(index_t idx);
+	Vec3 GetVertexTexCoord(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -714,6 +715,12 @@ public:
 	 ------------------------------------------------------*/
 
 	void SelectVerticesByBox(Vec3 &min, Vec3 &max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void SelectFacesByBox(Vec3 &min, Vec3 &max);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -1078,6 +1085,9 @@ public:
 		return true;
 	}
 
+	void ConvertAllFacesToTexCoordPloymapping();
+
+	void ConvertFaceToTexCoordPloymapping(index_t face);
 
 	Face *GetFace(index_t idx)
 	{
