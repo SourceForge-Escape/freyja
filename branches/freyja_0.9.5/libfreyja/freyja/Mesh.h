@@ -383,7 +383,6 @@ public:
 		if (strncmp(symbol, "face", 4))
 			return false;
 
-		r.ParseSymbol();
 		mFlags = r.ParseInteger();
 		mSmoothingGroup = r.ParseInteger();
 		mColor = r.ParseInteger();
