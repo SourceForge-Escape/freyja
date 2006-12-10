@@ -2079,6 +2079,8 @@ bool FreyjaControl::event(int event, vec_t value)
 	case eScale_X:
 	case eScale_Y:
 	case eScale_Z:
+		if (value == 0.0f)
+			freyja_event_set_float(event, 1.0f);
 		break;
 
 
