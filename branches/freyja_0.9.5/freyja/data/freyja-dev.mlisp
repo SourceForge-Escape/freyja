@@ -520,7 +520,7 @@
 							"Save Model"	eEvent eSaveFileModel)
 
 						(filechoosertoolbar_button 
-							"gtk-save-as" "Save as..." "Saves model file as..." 
+							"gtk-save-as" "Save as..." "Saves model as..." 
 							"Save Model..." eSaveModel "mode=save,")
 
 					))
@@ -546,9 +546,9 @@
 
 					(hbox 1 1 0 1 1
 						(button "Scale" eEvent eScale)
-						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_X)
-						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Y)
-						(spinbutton2 1.0 0.0 20.0 0.01 0.1 0.1 2 eScale_Z))
+						(spinbutton2 1.0 -1.0 20.0 0.01 0.1 0.1 2 eScale_X)
+						(spinbutton2 1.0 -1.0 20.0 0.01 0.1 0.1 2 eScale_Y)
+						(spinbutton2 1.0 -1.0 20.0 0.01 0.1 0.1 2 eScale_Z))
 
 					) ; expander
 				))
