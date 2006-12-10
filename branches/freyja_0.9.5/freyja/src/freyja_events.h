@@ -118,6 +118,7 @@ typedef enum {
 	ePolygonSplit,
 
 	eCopyAppendMode,
+	eDupeObject,
 	eSplitObject,
 	eMergeObject,
 
@@ -141,6 +142,7 @@ typedef enum {
 	eTransformGroup,
 	eTransformScene,
 	eTransformMesh,
+	eTransformMeshes,
 	eTransformBone,
 	eTransformFace,
 	eTransformFaces,

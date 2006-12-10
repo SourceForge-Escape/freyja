@@ -365,7 +365,7 @@
 					(optionmenu	eEvent	eTransformMenu
 						(menu_item	"Model      "	eTransformModel)
 						(menu_item	"Mesh       "	eTransformMesh)
-						(menu_item	"Meshes...  "	eNone)
+						(menu_item	"Meshes...  "	eTransformMeshes)
 						(menu_item	"Face       "	eTransformFace)
 						(menu_item	"Faces...   "	eTransformFaces)
 						(menu_item	"Vertex     "	eTransformPoint)
@@ -418,8 +418,8 @@
 
 				(toolbar_separator)
 
-				;(toolbar_togglebutton false "24x24/clone.png" "CopyM"
-				;	"Copy multiple objects" eEvent eCopyAppendMode)
+				(toolbar_button	"24x24/mdupe.png"
+					"Duplicate" "Duplicate object" eEvent eDupeObject)
 
 				(toolbar_button	"24x24/msplit.png"
 					"Split" "Split object" eEvent eSplitObject)

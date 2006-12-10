@@ -724,6 +724,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eSphereJoint", eSphereJoint);
 	r.RegisterInt("ePointJoint", ePointJoint);
 
+	r.RegisterInt("eDupeObject", eDupeObject);
 	r.RegisterInt("eSplitObject", eSplitObject);
 	r.RegisterInt("eMergeObject", eMergeObject);
 	r.RegisterInt("eAppendFile", eAppendFile);
@@ -824,6 +825,7 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eTransformScene", eTransformScene);
 	r.RegisterInt("eTransformFace", eTransformFace);
 	r.RegisterInt("eTransformMesh", eTransformMesh);
+	r.RegisterInt("eTransformMeshes", eTransformMeshes);
 	r.RegisterInt("eTransformModel", eTransformModel);
 	r.RegisterInt("eTransformBone", eTransformBone);
 	r.RegisterInt("eTransformLight", eTransformLight);

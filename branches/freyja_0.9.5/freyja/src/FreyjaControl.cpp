@@ -2572,6 +2572,12 @@ bool FreyjaControl::event(int command)
 					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
+	case eTransformMeshes:
+		mObjectMode = tSelectedMeshes;
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
+		break;
+
 	case eTransformModel:
 		mObjectMode = tModel;
 		freyja_print("Object mode set to %s...",
@@ -2600,12 +2606,16 @@ bool FreyjaControl::event(int command)
 		mCleared = false;
 		break;
 
+	case eDupeObject:
+		DuplicateSelectedObject();
+		break;
+
 	case eSplitObject:
-		freyja_print("Object splitting removed from this build");
+		SplitSelectedObject();
 		break;
 
 	case eMergeObject:
-		freyja_print("Object merging removed from this build");
+		MergeSelectedObjects();
 		break;
 
 	case eSelectAll:
@@ -3980,6 +3990,123 @@ void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
+bool FreyjaControl::DuplicateSelectedObject()
+{
+	switch (mObjectMode)
+	{
+	case tMesh:
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+									 "You are about to duplicate the selected mesh.\n",
+									 "Would you like to continue?",
+									 "gtk-cancel", "_Cancel", "gtk-ok", "_Duplicate"))
+		{
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+			if (m)
+			{
+				Mesh *dupe = new Mesh(*m);
+				dupe->AddToPool();
+			}
+		}
+		break;
+
+	default:
+		freyja_print("%s(): type '%s' is not supported.", 
+					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+		return false;
+	}
+
+	return true;
+}
+
+
+bool FreyjaControl::SplitSelectedObject()
+{
+	switch (mObjectMode)
+	{
+	case tMesh:
+#if 0
+		if (freyja_create_confirm_dialog("gtk-dialog-question",
+										 "You are about to split the selected faces \n from the currently selected mesh into a new mesh.\n",
+										 "Would you like to continue?",
+										 "gtk-cancel", "_Cancel", "gtk-ok", "_Split"))
+#endif
+		{
+			bool duplicate = freyja_create_confirm_dialog("gtk-dialog-question",
+														  "You have the option to cull or duplicate the selected faces\n from the current mesh.\n",
+														  "Would you like to duplicate or cull the selected faces?",
+														  "gtk-cancel", "_Cull", "gtk-ok", "_Duplicate");
+
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+			if (m)
+			{
+				// Passing false would cause duplication
+				Mesh *split = m->Split(!duplicate);
+				split->AddToPool();
+			}
+		}
+		break;
+
+	default:
+		freyja_print("%s(): type '%s' is not supported.", 
+					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+		return false;
+	}
+
+	return true;
+}
+
+
+bool FreyjaControl::MergeSelectedObjects()
+{
+	switch (mObjectMode)
+	{
+	case tSelectedMeshes:
+		{
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+			if (m)
+			{
+				// Only merge every mesh marked fSelected with selected mesh...
+				for (uint32 i = 0, n = Mesh::GetCount(); i < n; ++i)
+				{
+					Mesh *mergee = Mesh::GetMesh(i);
+
+					if (m != mergee)
+					{
+						bool remove = freyja_create_confirm_dialog("gtk-dialog-question",
+																   "You have the option to delete the mesh being merged.\n",
+														  "Would you like to delete or keep the merged mesh?",
+														  "gtk-cancel", "_Keep", "gtk-ok", "_Delete");
+
+						m->Merge(mergee);
+						
+						if (remove)
+						{
+							// Allow for undo here...
+							index_t uid = mergee->GetUID();
+							if (Mesh::GetMesh(uid))
+							{
+								mToken = true;
+								ActionModelModified(new ActionMeshDelete(uid));
+							}
+
+							freyjaMeshDelete(uid);
+						}
+					}
+				}
+			}
+		}
+		break;
+
+	default:
+		freyja_print("%s(): type '%s' is not supported.", 
+					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+		return false;
+	}
+
+	return true;
+}
+
+
 bool FreyjaControl::CopySelectedObject()
 {
 	switch (mObjectMode)
@@ -4213,6 +4340,44 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
+	case tSelectedMeshes:
+		{
+			vec_t t, best = 9999.9f;
+			int32 selected = -1;
+
+			for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
+			{
+				Mesh *m = freyjaGetMeshClass(i);
+
+				if (!m)
+					continue;
+
+				if (m->IntersectPerFace(FreyjaRender::mTestRay, t))
+				{
+					if (t < best)
+					{
+						best = t;
+						selected = i;
+					}
+				}
+			}
+
+			if ( selected > -1 )
+			{
+				freyja_print("Mesh[%i] unselected by pick ray.", selected);
+				//SetSelectedMesh(selected);
+
+				Mesh *m = freyjaGetMeshClass(selected);
+
+				if (m)
+				{
+					m->ClearFlag(Mesh::fSelected);
+					//mCursor.mPos = m->GetPosition(); // why was this disabled?
+				}
+			}
+		}
+		break;
+
 	default:
 		{
 			String s;
@@ -4256,6 +4421,45 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	switch (mObjectMode)
 	{
+	case tSelectedMeshes:
+		{
+			vec_t t, best = 9999.9f;
+			int32 selected = -1;
+
+			for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
+			{
+				Mesh *m = freyjaGetMeshClass(i);
+
+				if (!m)
+					continue;
+
+				if (m->IntersectPerFace(FreyjaRender::mTestRay, t))
+				{
+					if (t < best)
+					{
+						best = t;
+						selected = i;
+					}
+				}
+			}
+
+			if ( selected > -1 )
+			{
+				freyja_print("Mesh[%i] selected and marked by pick ray.", selected);
+				SetSelectedMesh(selected);
+
+				Mesh *m = freyjaGetMeshClass(selected);
+
+				if (m)
+				{
+					m->SetFlag(Mesh::fSelected);
+					mCursor.mPos = m->GetPosition(); // why was this disabled?
+				}
+			}
+		}
+		break;
+
+
 	case tPoint:
 		{
 			Mesh *m = freyjaModelGetMeshClass(0, GetSelectedMesh());
