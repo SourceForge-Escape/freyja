@@ -23,8 +23,8 @@
  * Mongoose - Created, expanded from Freyja class
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJA__H_
-#define GUARD__FREYJA_MONGOOSE_FREYJA__H_
+#ifndef GUARD__FREYJA_FREYJA__H_
+#define GUARD__FREYJA_FREYJA__H_
 
 #include <hel/math.h>
 
@@ -129,8 +129,8 @@ extern "C" {
 		fTranslate = 1,
 		fRotate,
 		fScale,
-		fRotateAboutPoint,
-		fScaleAboutPoint
+		fRotateAboutOrigin,
+		fScaleAboutOrigin
 	
 	} freyja_transform_action_t;
 
@@ -268,6 +268,24 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets a transform generically 
+	 ------------------------------------------------------*/
+
+	const char *freyjaObjectToString(freyja_object_t obj);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const char *freyjaTransformToString(freyja_transform_t transform);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const char *freyjaActionToString(freyja_transform_action_t action);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 
@@ -491,6 +509,28 @@ void *operator new [](size_t size, const char *file, int line, const char *func)
 #         define FREYJA_NEW new
 #         define FREYJA_DELETE delete
 #      endif
+#   endif
+
+#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
+#   include <mstl/Vector.h>
+
+class Memtrack
+{
+public:
+	Memtrack() :
+		line(0),
+		ptr(NULL)
+	{
+		func[0] = '\0';
+		file[0] = '\0';
+	}
+
+	char func[32];
+	char file[64];
+	long line;
+	void *ptr;
+};
+
 #   endif
 
 #endif

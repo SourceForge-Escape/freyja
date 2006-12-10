@@ -214,6 +214,152 @@ void freyjaPrintError(const char *format, ...)
 }
 
 
+const char *freyjaObjectToString(freyja_object_t obj)
+{
+	switch (obj)
+	{
+	case FREYJA_MODEL:
+		return "FREYJA_MODEL";
+		break;
+
+	case FREYJA_MESH:
+		return "FREYJA_MESH";
+		break;
+
+	case FREYJA_POLYGON:
+		return "FREYJA_POLYGON";
+		break;
+
+	case FREYJA_BONE:
+		return "FREYJA_BONE";
+		break;
+
+	case FREYJA_SKELETON:
+		return "FREYJA_SKELETON";
+		break;
+
+	case FREYJA_VERTEX_FRAME:
+		return "FREYJA_VERTEX_FRAME";
+		break;
+
+	case FREYJA_VERTEX_GROUP:
+		return "FREYJA_VERTEX_GROUP";
+		break;
+
+	case FREYJA_VERTEX:
+		return "FREYJA_VERTEX";
+		break;
+
+	case FREYJA_TEXCOORD:
+		return "FREYJA_TEXCOORD";
+		break;
+
+	case FREYJA_MATERIAL:
+		return "FREYJA_MATERIAL";
+		break;
+
+	case FREYJA_TEXTURE:
+		return "FREYJA_TEXTURE";
+		break;
+
+	case FREYJA_SKEL_ANIMATION:
+		return "FREYJA_SKEL_ANIMATION";
+		break;
+
+	case FREYJA_SKEL_KEYFRAME:
+		return "FREYJA_SKEL_KEYFRAME";
+		break;
+	}
+
+	return "UNKNOWN";
+}
+
+
+const char *freyjaTransformToString(freyja_transform_t transform)
+{
+	switch (transform)
+	{
+	case fTransformScene:
+		return "fTransformScene";
+		break;
+
+	case fTransformModel:
+		return "fTransformModel";
+		break;
+
+	case fTransformMesh:
+		return "fTransformMesh";
+		break;
+
+	case fTransformVertexFrame:
+		return "fTransformVertexFrame";
+		break;
+
+	case fTransformSkeleton:
+		return "fTransformSkeleton";
+		break;
+
+	case fTransformBone:
+		return "fTransformBone";
+		break;
+
+	case fTransformUVMap:
+		return "fTransformUVMap";
+		break;
+
+	case fTransformVertexGroup:
+		return "fTransformVertexGroup";
+		break;
+
+	case fTransformVertex:
+		return "fTransformVertex";
+		break;
+
+	case fTransformTexCoord:
+		return "fTransformTexCoord";
+		break;
+
+	default:
+		;
+	}
+
+	return "Unknown_Transform";	
+}
+
+
+const char *freyjaActionToString(freyja_transform_action_t action)
+{
+	switch (action)
+	{
+	case fTranslate:
+		return "fTranslate";
+		break;
+
+	case fRotateAboutOrigin:
+		return "fRotateAboutOrigin";
+		break;
+
+	case fRotate:
+		return "fRotate";
+		break;
+
+	case fScaleAboutOrigin:
+		return "fScaleAboutOrigin";
+		break;
+
+	case fScale:
+		return "fScale";
+		break;
+
+	default:
+		;
+	}
+
+	return "Unknown_Action";
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////
 // Freyja Memory management and logging
 // Based on mtk_mememory, however I removed the expensive RBTree  =)

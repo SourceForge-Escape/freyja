@@ -89,15 +89,42 @@ void freyjaModelTransform(index_t model,
 						  freyja_transform_action_t action, 
 						  vec_t x, vec_t y, vec_t z)
 {
-	vec3_t xyz = { x, y, z };
+	Vec3 v(x, y, z), min, max, center;
+
+	
 
 	// FIXME: Scaling and Rotation should use model center
 	for (uint32 i = 0, n = freyjaGetModelMeshCount(model); i < n; ++i)
 	{
 		index_t mesh = freyjaGetModelMeshIndex(model, i);
 
-		freyjaMeshTransform3fv(mesh, action, xyz);
+		switch (action)
+		{
+		case fRotate:
+			{
+				Mesh *m = Mesh::GetMesh(mesh);
+				if (m)
+				{
+					m->RotateAboutPoint(center, v);
+				}
+			}
+			break;
+
+		case fScale:
+			{
+				Mesh *m = Mesh::GetMesh(mesh);
+				if (m)
+				{
+					m->ScaleAboutPoint(center, v);
+				}
+			}
+			break;
+
+		default:
+			freyjaMeshTransform3fv(mesh, action, v.mVec);
+		}
 	}
 
 	// FIXME: No skeleton support yet
 }
+
