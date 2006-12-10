@@ -7,6 +7,7 @@
  Dancer (Public Beta RC2)
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - More API / ABI clean up for upcoming release!
+ - Mesh split hooked up in UI
  - Ask me if I'm brave -- replacing RenderModel a few days before RC2  =)
  - Touching up Mesh class to remove legacy usage like vertex list delimiting
    anding things like internal / external object split/merge/etc operations

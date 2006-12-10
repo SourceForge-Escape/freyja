@@ -873,6 +873,13 @@ void FreyjaRender::RenderMesh(index_t mesh)
 							m->GetBoundingVolumeRadius(), 
 							64, 2, false);
 		}
+
+		if (m->GetFlags() & Mesh::fSelected)
+		{
+			vec3_t min, max;
+			m->GetBBox(min, max);
+			mglDrawSelectBox(min, max, RED);
+		}
 	}
 
 	if (mRenderMode & fPoints)
