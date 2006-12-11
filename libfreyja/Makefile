@@ -216,6 +216,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/ModelABI.o \
 	$(BUILDDIR)/PakABI.o \
 	$(BUILDDIR)/PerlinNoise.o \
+	$(BUILDDIR)/PythonABI.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o \
 	$(BUILDDIR)/Track.o 

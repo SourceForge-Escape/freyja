@@ -75,7 +75,7 @@ extern "C" {
 	 * Post : Set bone parent
 	 *
 	 *        This doesn't affect skeleton, a follow up
-	 *        call to freyjaBoneAddChild1i is needed after
+	 *        call to AddChild is needed after
 	 *        all bones in skeleton are allocated
 	 ------------------------------------------------------*/
 
