@@ -23,10 +23,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_TRACK_H_
-#define GUARD__FREYJA_MONGOOSE_TRACK_H_
-
+#ifndef GUARD__FREYJA_TRACK_H_
+#define GUARD__FREYJA_TRACK_H_
 
 #include <math.h>
 #include <hel/math.h>

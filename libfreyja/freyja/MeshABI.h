@@ -374,8 +374,7 @@ extern "C" {
 	 * Post : Returns <mesh> <vertex> normal.
 	 ------------------------------------------------------*/
 
-	void freyjaGetMeshVertexTexCoord3fv(index_t mesh, index_t vertex,
-										vec3_t xyz);
+	void freyjaGetMeshVertexTexCoord3fv(index_t mesh, index_t vert,	vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns <mesh> <vertex> texcoord.
@@ -410,6 +409,12 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns <mesh> <polygon> flags.
+	 ------------------------------------------------------*/
+
+	byte freyjaGetMeshPolygonGroup(index_t mesh, index_t polygon);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <polygon> group.
 	 ------------------------------------------------------*/
 
 	uint32 freyjaGetMeshPolygonEdgeCount(index_t mesh, index_t polygon);

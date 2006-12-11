@@ -1540,7 +1540,6 @@ void Mesh::UVMapSelectedFaces_Cylindrical()
 
 			GetVertexArrayPos(vertex->mVertexIndex, xyz);
 
-
 			for (uint32 j = 0; j < 3; ++j)
 			{
 				if (xyz[j] < min[j])

@@ -127,7 +127,7 @@ FreyjaControl::FreyjaControl() :
 
 	/* Hook up the view */
 	mRender = new FreyjaRender();
-	ASSERT_MSG(mRender, "FreyjaRender Singleton control allocation failure");
+	FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton control allocation failure");
 
 	if (!mRender)
 	{
@@ -212,7 +212,7 @@ float FreyjaControl::GetZoom()
 
 void FreyjaControl::SetZoom(float zoom)
 {
-	ASSERT_MSG(zoom > 0.0f, "You can't have a zoom less than 0.0f");
+	FREYJA_ASSERTMSG(zoom > 0.0f, "You can't have a zoom less than 0.0f");
 
 	freyja_event_notify_observer1f(eZoom, zoom);
 	mRender->SetZoom(zoom);
@@ -258,7 +258,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		if ( x < halfW && y > halfH )
 		{
 			SetSelectedViewport(0);
-			freyja_print("Selected viewport 0");
+			// freyja_print("Selected viewport 0");
 			SetSelectedView(mRender->mViewports[0].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -270,7 +270,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		else if ( x > halfW && y < halfH )
 		{
 			SetSelectedViewport(2);
-			freyja_print("Selected viewport 2");
+			// freyja_print("Selected viewport 2");
 			SetSelectedView(mRender->mViewports[2].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -282,7 +282,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		else if ( x > halfW && y > halfH )
 		{
 			SetSelectedViewport(1);
-			freyja_print("Selected viewport 1");
+			// freyja_print("Selected viewport 1");
 			SetSelectedView(mRender->mViewports[1].plane);
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -294,7 +294,7 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		else if ( x < halfW && y < halfH )
 		{
 			SetSelectedViewport(3);
-			freyja_print("Selected viewport 3");
+			// freyja_print("Selected viewport 3");
 			SetSelectedView(mRender->mViewports[3].plane); // PLANE_FREE
 
 			// Adjust actual window space mouse x, y to fit to viewport
@@ -3833,7 +3833,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 {
 	vec_t z;
 
-	//ASSERT_MSG(false, "Obsolete function call.");
+	//FREYJA_ASSERTMSG(false, "Obsolete function call.");
 
 	GetWorldFromScreen(x, y, z);
 
@@ -4930,12 +4930,24 @@ void FreyjaControl::Transform(object_type_t obj,
 		}
 		break;
 
+	case tBone:
+		if (mToken)
+		{
+			//Action *a = new ActionBoneTransform(GetSelectedBone(), action, u);
+			//ActionModelModified(a);
+			freyjaBoneTransform3fv(GetSelectedBone(), action, v.mVec);
+
+			// Reset cursor transform
+			//if (action != fTranslate)
+			//	mCursor.mPos = u;
+		}
+		break;
+
 	case tMesh:
 		if (mToken)
 		{
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			ActionModelModified(a);
-
 			freyjaMeshTransform3fv(GetSelectedMesh(), action, v.mVec);
 
 			// Reset cursor transform

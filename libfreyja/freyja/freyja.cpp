@@ -23,23 +23,13 @@
 #include <mstl/Vector.h>
 #include "FreyjaPrinter.h"
 #include "FreyjaFSM.h"
-
-
-const char *gStoreFile = 0x0;
-unsigned int gStoreLine = 0;
-const char *gStoreFunc = 0x0;
-
-
 #include "freyja.h"
-
 
 using namespace mstl;
 
-FreyjaPrinter *gPrinter = NULL;
 extern Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 extern Vector<char *> gPluginDirectories;
-
-// We want to keep up with the order of operations too for future logging
+FreyjaPrinter *gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
 uint32 gFreyjaMemoryDeletes = 0;
@@ -137,20 +127,16 @@ void freyjaFree()
 	}
 }
 
-void freyjaStoreMark(const char *file, unsigned int line, const char *func)
-{
-	gStoreFile = file;
-	gStoreLine = line;
-	gStoreFunc = func;
-}
 
-
-byte freyjaAssertMessage(bool expr, const char *format, ...)
+byte freyjaAssertMessage(const char *file, unsigned int line, 
+						 const char *function, const char *exprString,
+						 bool expr, const char *format, ...)
 {
 	if (expr)
 		return 0;
 
-	freyjaPrintMessage("Assert encountered: %s:%i %s", gStoreFile, gStoreLine, gStoreFunc);
+	freyjaPrintMessage("Assert encountered: %s:%i %s() '%s'", 
+					   file, line, function, exprString);
 
 	if (gPrinter)
 	{
@@ -393,7 +379,6 @@ void freyjaRemoveTrack(void *ptr, const char *file, int line, const char *func, 
 	++gFreyjaMemoryDeletes;
 	++gFreyjaMemoryTick;
 }
-
 
 void operator delete(void *ptr)//, const char *file, int line, const char *func)
 {

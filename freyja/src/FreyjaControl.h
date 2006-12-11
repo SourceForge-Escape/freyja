@@ -571,14 +571,14 @@ class FreyjaControl
 
 	void Display()
 	{
-		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
+		FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton not allocated");
 		mRender->Display();
 	}
 
 
 	void HandleResize(uint32 width, uint32 height)
 	{
-		ASSERT_MSG(mRender, "FreyjaRender Singleton not allocated");
+		FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton not allocated");
 		mRender->ResizeContext(width, height);
 	}
 

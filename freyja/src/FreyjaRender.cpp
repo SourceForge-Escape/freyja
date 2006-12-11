@@ -1141,24 +1141,48 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones)
 	{
-		Vec3 p;
+		Vec3 p, r, n;
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		for (uint32 i = 0; i < freyjaGetCount(FREYJA_BONE); ++i)
+		// Render spheres and lines
+		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
 		{
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
-			glPushMatrix();
-			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
+			freyjaGetBoneRotationEuler3fv(i, r.mVec);
 
+			glPushMatrix();
+#if 0
+			glRotatef(r[0], 1, 0, 0);
+			glRotatef(r[1], 0, 1, 0);
+			glRotatef(r[2], 0, 0, 1);
+			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
+#else
+			glMultMatrixf(freyjaGetBoneBindPose16fv(i));
+#endif
 			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
 			glColor3fv(PINK) : glColor3fv(YELLOW);
 			mglDrawSphere(12, 12, 0.5f);
 
 			glPopMatrix();
+
+			if (freyjaGetBoneParent(i) != INDEX_INVALID)
+			{
+				glPushMatrix();
+				freyjaGetBoneWorldPos3fv(freyjaGetBoneParent(i), p.mVec);
+				glMultMatrixf(freyjaGetBoneBindPose16fv(freyjaGetBoneParent(i)));
+
+				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+				glColor3fv(PINK) : glColor3fv(FreyjaRender::mColorBoneHighlight);
+
+				freyjaGetBoneTranslation3fv(i, n.mVec);
+				mglDrawBone(2, n.mVec);
+
+				glPopMatrix();
+			}
 
 			if (freyjaGetBoneParent(i) != INDEX_INVALID)
 			{

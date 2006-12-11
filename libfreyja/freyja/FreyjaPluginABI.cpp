@@ -25,15 +25,6 @@
 #define USING_FREYJA_CPP_ABI
 
 #include <math.h>
-
-#if defined (FREYJA_PLUGINS) && !(WIN32)
-#   include <dlfcn.h>
-#endif
-
-#ifdef WIN32
-#   include <windows.h>
-#endif
-
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
@@ -497,7 +488,7 @@ int32 freyjaExportModel(const char *filename, const char *type)
 
 		if (tw.Open(filename))
 		{
-			tw.Print("Freyja 0.9.5\n");
+			tw.Print("%s\n", FREYJA_API_VERSION);
 			tw.Print("Version 1\n");
 
 			uint32 mcount = freyjaGetMeshCount();

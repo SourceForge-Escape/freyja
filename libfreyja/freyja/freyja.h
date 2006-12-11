@@ -28,7 +28,6 @@
 
 #include <hel/math.h>
 
-
 #define FREYJA_API_VERSION   "Freyja 0.9.5"
 
 /* index_t invalid state is equal to UINT_MAX 32bit */
@@ -60,12 +59,9 @@
 
 
 #ifdef DEBUG
-#   define STORE_MARK freyjaStoreMark
-#   define DEBUG_MSGF freyjaPrintMessage 
-#   define ASSERT_MSG STORE_MARK(__FILE__, __LINE__, __func__); freyjaAssertMessage
-#   define DEBUG_MSGF freyjaPrintMessage
+#   define FREYJA_ASSERTMSG(expr, format, ...) \
+if (!(expr)) freyjaAssertMessage(__FILE__, __LINE__, __func__, #expr, false, format, ##__VA_ARGS__)
 #else
-#   define DEBUG_MSGF(...)
 #   define ASSERT_MSG(...)
 #endif
 
@@ -219,13 +215,9 @@ extern "C" {
 	 * Post : Report messages to stderr or gPrinter
 	 ------------------------------------------------------*/
 
-	void freyjaStoreMark(const char *file, unsigned int line, const char *func);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : This is just useful for tmp info storage for debugging
-	 ------------------------------------------------------*/
-
-	byte freyjaAssertMessage(bool expr, const char *format, ...);
+	byte freyjaAssertMessage(const char *file, unsigned int line, 
+							 const char *function, const char *exprString,
+							 bool expr, const char *format, ...);
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stdout or gPrinter
@@ -487,9 +479,9 @@ extern "C" {
 
 
 /* Internal memory management and logging system ala mtk_memeory */
-#   ifdef __cplusplus
+#   if defined ( __cplusplus )
 #      include <stddef.h>
-#      define USING_FREYJA_MEMORY 1
+#      include "MemTrack.h"
 
 #      if USING_FREYJA_MEMORY
 void freyjaRemoveTrack(void *ptr, const char *file, int line, const char *func, uint32 flags);
@@ -504,33 +496,11 @@ void *operator new [](size_t size, const char *file, int line, const char *func)
 //void operator delete(void *p);
 //void operator delete [](void *p); 
 
-
 #      else
 #         define FREYJA_NEW new
 #         define FREYJA_DELETE delete
-#      endif
-#   endif
+#      endif // USING_FREYJA_MEMORY
+#   endif // __cplusplus
 
-#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
-#   include <mstl/Vector.h>
 
-class Memtrack
-{
-public:
-	Memtrack() :
-		line(0),
-		ptr(NULL)
-	{
-		func[0] = '\0';
-		file[0] = '\0';
-	}
-
-	char func[32];
-	char file[64];
-	long line;
-	void *ptr;
-};
-
-#   endif
-
-#endif
+#endif // GUARD__FREYJA_FREYJA__H_

@@ -26,28 +26,28 @@
 
 extern "C" {
 
+	uint32 freyjaGetModelCount();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns gobal model count
+	 ------------------------------------------------------*/
+
 	index_t freyjaModelCreate();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaModelAddSkeleton(index_t skeleton);
+	void freyjaModelAddSkeleton(index_t model, index_t skeleton);
 	/*------------------------------------------------------
 	 * Pre  : Only assign one skeleton to model
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void freyjaModelAddMesh(index_t mesh);
+	void freyjaModelAddMesh(index_t model, index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetModelCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns gobal model count
 	 ------------------------------------------------------*/
 
 	uint32 freyjaGetModelFlags(index_t model);

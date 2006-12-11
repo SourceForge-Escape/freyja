@@ -397,21 +397,22 @@ index_t freyjaModelMeshPolygonCreate(index_t modelIndex, index_t meshIndex)
 	return INDEX_INVALID;
 }
 
+
 void freyjaModelMeshPolygonAddVertex1i(index_t modelIndex, index_t meshIndex, 
 									   index_t polygonIndex, index_t vertexIndex)
 {
 	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
-	ASSERT_MSG(mesh != NULL, "Model[%i].Mesh[%i] == NULL", modelIndex, meshIndex);
+	FREYJA_ASSERTMSG(mesh != NULL, "Model[%i].Mesh[%i] == NULL", modelIndex, meshIndex);
 
 	if ( mesh != NULL )
 	{
 		Face *face = mesh->GetFace(polygonIndex);
 		Vertex *vertex = mesh->GetVertex(vertexIndex);
 
-		ASSERT_MSG(face != NULL, "Model[%i].Mesh[%i].Polygon[%i] == NULL", modelIndex, meshIndex, polygonIndex);
+		FREYJA_ASSERTMSG(face != NULL, "Model[%i].Mesh[%i].Polygon[%i] == NULL", modelIndex, meshIndex, polygonIndex);
 
-		ASSERT_MSG(vertex != NULL, "vertex == NULL");
+		FREYJA_ASSERTMSG(vertex != NULL, "vertex == NULL");
 
 		if ( face != NULL && vertex != NULL )
 		{

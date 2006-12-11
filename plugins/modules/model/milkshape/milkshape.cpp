@@ -22,8 +22,15 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/FreyjaPluginABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/MaterialABI.h>
 #include <mstl/SystemIO.h>
+#include <mstl/Vector.h>
+#include <hel/Vector3d.h>
 
 
 using namespace mstl;
@@ -434,15 +441,16 @@ int freyja_model__milkshape_import(char *filename)
 	r.Close();
 
 
-	/// Import ///////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
+	// Import, 0.9.5 ABI
+	//////////////////////////////////////////////////////////////////
 
-	Vector<long> transV;
-	long index, materialIndex;
+	//Vector<long> transV;
+	//long index, materialIndex;
 
-	/* ABI 0.9.3 Calls BEGIN */
 	for (i = 0; i < mdl.nNumMaterials; ++i)
 	{
-		materialIndex = freyjaMaterialCreate();
+		index_t materialIndex = freyjaMaterialCreate();
 
 		freyjaMaterialName(materialIndex, mdl.materials[i].name);
 		freyjaMaterialAmbient(materialIndex, mdl.materials[i].ambient);
@@ -451,69 +459,64 @@ int freyja_model__milkshape_import(char *filename)
 		freyjaMaterialEmissive(materialIndex, mdl.materials[i].emissive);
 		freyjaMaterialShininess(materialIndex, mdl.materials[i].shininess);
 		freyjaMaterialTransparency(materialIndex,mdl.materials[i].transparency);
-		freyjaMaterialTexture(materialIndex, i); // should use texture below
+
+		// Texture ID will be overwritten if exists and loads
+		freyjaMaterialTexture(materialIndex, 0);
+		freyjaMaterialTextureName(materialIndex, mdl.materials[i].texture);
 
 		// mdl.materials[i].mode; // Not used, milkshape flag
-		// mdl.materials[i].texture; // Not used, texture filename
-		// mdl.materials[i].alphamap; // Not used, mask filename
+		// mdl.materials[i].alphamap; // Not used, alpha mask filename
 	}
 
-
-	/* ABI 0.9.3 Calls END */
-	freyjaBegin(FREYJA_MODEL);
-
-	freyjaBegin(FREYJA_MESH);
-	freyjaBegin(FREYJA_VERTEX_GROUP);
+	index_t model = freyjaModelCreate();
+	index_t mesh = freyjaMeshCreate();
+	freyjaModelAddMesh(model, mesh);
 
 	for (i = 0; i < mdl.nNumVertices; ++i)
 	{
-		index = freyjaVertexCreate3f(mdl.vertices[i].vertex[0]*scale,
-								mdl.vertices[i].vertex[1]*scale,
-								mdl.vertices[i].vertex[2]*scale);
-		freyjaVertexWeight(index, 1.0f, mdl.vertices[i].boneId);
-		transV.pushBack(index);
+		Vec3 v(mdl.vertices[i].vertex);
+		v *= scale;
+		index_t vertex = freyjaMeshVertexCreate3fv(mesh, v.mVec);
+		freyjaMeshVertexWeight(mesh, vertex, mdl.vertices[i].boneId, 1.0f);
+		//transV.pushBack(index);
 	}
 
 	// Should use groups ( like freyja meshes )
 
 	for (i = 0; i < mdl.nNumTriangles; ++i)
 	{			
-		freyjaBegin(FREYJA_POLYGON);
-		freyjaPolygonMaterial1i(0);
-		freyjaPolygonGroup1u(mdl.tris[i].smoothingGroup);
+		index_t face = freyjaMeshPolygonCreate(mesh);
+		freyjaMeshPolygonMaterial(mesh, face, 0);
+		freyjaMeshPolygonGroup1u(mesh, face, mdl.tris[i].smoothingGroup);
 
 		for (j = 0; j < 3; ++j)
 		{
-			index = transV[mdl.tris[i].vertexIndices[j]];
-			freyjaPolygonVertex1i(index);
-			freyjaVertexNormal3f(index, 
-									mdl.tris[i].vertexNormals[j][0],
-									mdl.tris[i].vertexNormals[j][1],
-									mdl.tris[i].vertexNormals[j][2]);
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(mdl.tris[i].s[j],
-														mdl.tris[i].t[j]));
+			//index = transV[mdl.tris[i].vertexIndices[j]];
+			index_t vertex = mdl.tris[i].vertexIndices[j];
+			freyjaMeshPolygonAddVertex1i(mesh, face, vertex);
 
+			// FIXME: These are really polymapped normals here
+			freyjaMeshVertexNormal3fv(mesh, vertex, mdl.tris[i].vertexNormals[j]);
+			index_t texcoord = freyjaMeshTexCoordCreate2f(mesh, mdl.tris[i].s[j], mdl.tris[i].t[j]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
 		}
-
-		freyjaEnd(); // FREYJA_POLYGON
 	}
-		
-	freyjaEnd(); // FREYJA_GROUP
-	freyjaEnd(); // FREYJA_MESH
 
-	freyjaBegin(FREYJA_SKELETON);
+	index_t skeleton = freyjaSkeletonCreate();
+	freyjaModelAddSkeleton(model, skeleton);
 	
 	for (i = 0; i < mdl.nNumJoints; ++i)
 	{
-		freyjaBegin(FREYJA_BONE);
-		index = freyjaGetCurrent(FREYJA_BONE);
-		freyjaBoneFlags(index, 0x0);
-		freyjaBoneName(index, mdl.joints[i].name);
-		freyjaBoneTranslate3f(index,
+		index_t bone = freyjaBoneCreate(skeleton);
+		// This will nop if the allocation of bone happens after skeleton
+		freyjaSkeletonAddBone(skeleton, bone); 
+		freyjaBoneFlags(bone, 0x0);
+		freyjaBoneName(bone, mdl.joints[i].name);
+		freyjaBoneTranslate3f(bone,
 							  mdl.joints[i].position[0]*scale,
 							  mdl.joints[i].position[1]*scale,
 							  mdl.joints[i].position[2]*scale);
-		freyjaBoneRotateEuler3f(index,
+		freyjaBoneRotateEuler3f(bone,
 								mdl.joints[i].rotation[0],
 								mdl.joints[i].rotation[1],
 								mdl.joints[i].rotation[2]);
@@ -522,18 +525,17 @@ int freyja_model__milkshape_import(char *filename)
 		{
 			if (!strncmp(mdl.joints[i].name, mdl.joints[j].parentName, 32))
 			{
-				freyjaBoneAddChild(index, j);
+				freyjaBoneAddChild(bone, j);
 			}
 			
 			if (!strncmp(mdl.joints[i].parentName, mdl.joints[j].name, 32))
 			{
-				freyjaBoneParent(index, j);
+				freyjaBoneParent(bone, j);
 			}
 		}
 
-		/* 0.9.5 keyframes */
-		index_t track = freyjaBoneTrackNew(index);
-		//freyjaBoneTrackRate(index, track, 30.0f);  
+		index_t track = freyjaBoneTrackNew(bone);
+		//freyjaBoneTrackRate(bone, track, 30.0f);  
 
 		for (j = 0; j < mdl.joints[i].numRotationKeyframes; ++j)
 		{
@@ -546,8 +548,8 @@ int freyja_model__milkshape_import(char *filename)
 			//y += mdl.joints[i].rotation[1];
 			//z += mdl.joints[i].rotation[2];
 
-			index_t key = freyjaBoneKeyFrameNew(index, track, t);
-			freyjaBoneRotKeyFrameEuler3f(index, track, key, x, y, z);
+			index_t key = freyjaBoneKeyFrameNew(bone, track, t);
+			freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);
 		}
 
 		for (j = 0; j < mdl.joints[i].numPositionKeyframes; ++j)
@@ -561,16 +563,10 @@ int freyja_model__milkshape_import(char *filename)
 			//y += mdl.joints[i].position[1]*scale;
 			//z += mdl.joints[i].position[2]*scale;
 
-			index_t key = freyjaBoneKeyFrameNew(index, track, t);
-			freyjaBonePosKeyFrame3f(index, track, key, x, y, z);
+			index_t key = freyjaBoneKeyFrameNew(bone, track, t);
+			freyjaBonePosKeyFrame3f(bone, track, key, x, y, z);
 		}
-
-		freyjaEnd(); // FREYJA_BONE
 	}
-
-	freyjaEnd(); // FREYJA_SKELETON
-
-	freyjaEnd(); // FREYJA_MODEL
 
 	return 0;
 }
@@ -586,9 +582,9 @@ int freyja_model__milkshape_export(char *filename)
 	long i, j, k;
 	long meshCount, meshIndex;
 	long vertexCount, vertexIndex;
-	long polygonCount, polygonIndex, faceVertexCount, faceVertex;
+	long polygonCount, polygonIndex, faceVertexCount;//, faceVertex;
 	vec3_t xyz;
-	vec2_t uv;
+	//vec2_t uv;
 
 
 	if (!w.Open(filename))
@@ -618,13 +614,13 @@ int freyja_model__milkshape_export(char *filename)
 		for (j = 0; j < vertexCount; ++j)
 		{
 			vertexIndex = j;//freyjaGetMeshVertexIndex(meshIndex, j);
-			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
+			freyjaGetMeshVertexPos3fv(meshIndex, vertexIndex, xyz);
 
 			w.WriteInt8U(0); // flags
 			w.WriteFloat32(xyz[0]*scale); // x
 			w.WriteFloat32(xyz[1]*scale); // y
 			w.WriteFloat32(xyz[2]*scale); // z
-			w.WriteInt8(-1); // boneId ( Only 1:1 vertex:bone, so for now skip )
+			w.WriteInt8(-1); // boneId FIXME: ( ms is 1:1 vertex:bone, so for now skip )
 			w.WriteInt8U(0); // refCount
 		}
 	}
@@ -639,7 +635,7 @@ int freyja_model__milkshape_export(char *filename)
 		for (j = 0; j < polygonCount; ++j)
 		{
 			polygonIndex = j;//freyjaGetMeshPolygonIndex(meshIndex, j);
-			faceVertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+			faceVertexCount = freyjaGetMeshPolygonVertexCount(meshIndex, polygonIndex);
 
 			faceVertexCount = 3; /* Milkshape only handles triangles,
 								  * make user tesselate model to triangles
@@ -658,7 +654,7 @@ int freyja_model__milkshape_export(char *filename)
 			for (k = 0; k < faceVertexCount; ++k)
 			{
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
-				freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
+				freyjaGetMeshVertexNormal3fv(meshIndex, vertexIndex, xyz);
 				
 				w.WriteFloat32(xyz[0]);
 				w.WriteFloat32(xyz[1]);
@@ -668,17 +664,17 @@ int freyja_model__milkshape_export(char *filename)
 			for (k = 0; k < faceVertexCount; ++k)
 			{
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
-				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
+				freyjaGetMeshVertexTexCoord3fv(meshIndex, vertexIndex, xyz);
 				
-				w.WriteFloat32(uv[0]);
+				w.WriteFloat32(xyz[0]);
 			}
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
 				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
-				freyjaGetVertexTexcoord2fv(vertexIndex, uv);
+				freyjaGetMeshVertexTexCoord3fv(meshIndex, vertexIndex, xyz);
 				
-				w.WriteFloat32(uv[1]);
+				w.WriteFloat32(xyz[1]);
 			}
 
 			w.WriteInt8U(0); // smoothingGroup
