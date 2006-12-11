@@ -9,6 +9,15 @@
 # Object  : 
 # Comments: This is the binding generator for the python system.
 #
+# -- Notes ------------------------------------------------------------
+#
+# Enabling python support in libfreyja:
+#
+#  Set gForcePythonDefine = 1 for force compiliation of Python 
+#  support, or add USING_PYTHON to compile flags in Makefile.
+#
+#  Then (re)build libfreyja.
+#
 # -- History ---------------------------------------------------------- 
 #
 # 2006.12.09:
@@ -21,7 +30,7 @@ import string
 import time
 
 gDateStamp = time.localtime(time.time())
-gForcePythonDefine = 1
+gForcePythonDefine = 0
 gPath = "./freyja"
 gPythonHeader = "python2.4/Python.h"
 gFuncWrappers = []

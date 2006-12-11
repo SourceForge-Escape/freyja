@@ -16,7 +16,6 @@
  * Mongoose - Generated, Based on C ABI for freyja
  ==========================================================================*/
 
-#define USING_PYTHON
 #ifdef USING_PYTHON
 #include <python2.4/Python.h>
 #include "SkeletonABI.h"
