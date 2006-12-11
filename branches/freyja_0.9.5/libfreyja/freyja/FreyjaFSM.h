@@ -33,23 +33,19 @@
  * Mongoose - Created, based on python test code
  ==========================================================================*/
 
-#ifndef GUARD__MONGOOSE_FREYJA_FREYJAFSM_H
-#define GUARD__MONGOOSE_FREYJA_FREYJAFSM_H
+#ifndef GUARD__FREYJA_FREYJAFSM_H_
+#define GUARD__FREYJA_FREYJAFSM_H_
 
 #include <stdarg.h>
 #include <mstl/stack.h>
 #include <mstl/Vector.h>
 #include <hel/math.h>
-
-#include "FreyjaPluginABI.h"
 #include "BoneABI.h"
 #include "LightABI.h"
 #include "MeshABI.h"
 #include "SkeletonABI.h"
 #include "MaterialABI.h"
 #include "ModelABI.h"
-
-#include "FreyjaPlugin.h"
 #include "Mesh.h"
 
 using namespace mstl;

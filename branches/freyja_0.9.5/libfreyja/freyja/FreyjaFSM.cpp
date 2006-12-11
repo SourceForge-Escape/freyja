@@ -32,7 +32,7 @@
 #include "Mesh.h"
 #include "BoneABI.h"
 #include "SkeletonABI.h"
-#include "FreyjaPluginABI.h"
+#include "TextureABI.h"
 #include "FreyjaFSM.h"
 
 using namespace freyja;

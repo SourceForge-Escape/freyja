@@ -19,16 +19,17 @@
  * Mongoose - Created, This is a general library lib util module
  ==========================================================================*/
 
+#define USING_FREYJA_CPP_ABI
+
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 #include "FreyjaPrinter.h"
+#include "PluginABI.h"
 #include "FreyjaFSM.h"
 #include "freyja.h"
 
 using namespace mstl;
 
-extern Vector<FreyjaPluginDesc *> gFreyjaPlugins;
-extern Vector<char *> gPluginDirectories;
 FreyjaPrinter *gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
@@ -112,8 +113,7 @@ void freyjaFree()
 		delete FreyjaFSM;
 	}
 
-	gPluginDirectories.erase();
-	gFreyjaPlugins.erase();
+	freyjaPluginShutdown();
 
 	freyjaPrintMessage("\nlibfreyja stopped using freyjaFree()");
 

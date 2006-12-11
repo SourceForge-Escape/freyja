@@ -1,22 +1,14 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*===========================================================================
  * 
- * Project : Freyja
+ * Project : freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://icculus.org/freyja
- * Email   : mongoose@icculus.org
+ * Website : http://icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
  * Object  : Plugin
- * License : GPL, also (C) 2000 Mongoose
- * Comments: This is the python plugin handler class
+ * License : GPL, also (C) 2000-2006 Mongoose
+ * Comments: This is the Plugin management class.
  *
- *           EggPlugin alters Egg's state when used
- *
- *           Always assume Egg to have different iterator
- *           and data states once EggPlugin is called on it
- * 
- *-- Test Defines -------------------------------------------
- *           
- * TEST_PLUGIN  Builds module test code as a console program
  *
  *-- History ------------------------------------------------ 
  *
@@ -44,27 +36,16 @@
  *
  ==========================================================================*/
 
-#ifndef GUARD__MONGOOSE_FREYJA_FREYJAPLUGIN_H
-#define GUARD__MONGOOSE_FREYJA_FREYJAPLUGIN_H
+#ifndef GUARD__FREYJA_PLUGIN_H_
+#define GUARD__FREYJA_PLUGIN_H_
 
 #include <stdarg.h>
 #include <string.h>
 #include <mstl/stack.h>
 #include <mstl/Vector.h>
-
 #include "freyja.h"
-#include "FreyjaPrinter.h"
-#include "FreyjaPluginABI.h"
 
 using namespace mstl;
-
-// Oddly my new windows build system is missing it too
-//#ifdef MACOSX
-#   ifndef strnlen
-#      include <mstl/String.h>
-#      define strnlen String::Strnlen
-#   endif
-//#endif
 
 
 class FreyjaPluginDescEvent
@@ -330,11 +311,6 @@ private:
 
 	long mId;
 };
-
-
-// ABI functions
-FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name);
-FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex);
 
 #endif
 

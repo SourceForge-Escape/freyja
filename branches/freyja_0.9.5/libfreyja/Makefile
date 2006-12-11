@@ -194,15 +194,12 @@ PROG_OBJS = \
 	$(BUILDDIR)/freyja.o \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/BoneABI.o \
+	$(BUILDDIR)/Camera.o \
 	$(BUILDDIR)/FreyjaFSM.o \
-	$(BUILDDIR)/FreyjaPluginABI.o \
-	$(BUILDDIR)/FreyjaPlugin.o \
-	$(BUILDDIR)/FreyjaCamera.o \
 	$(BUILDDIR)/FreyjaPrinter.o \
 	$(BUILDDIR)/FreyjaImage.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaTexture.o \
-	$(BUILDDIR)/FreyjaUtil.o \
 	$(BUILDDIR)/KeyFrame.o \
 	$(BUILDDIR)/KeyFrameABI.o \
 	$(BUILDDIR)/LegacyABI.o \
@@ -216,6 +213,8 @@ PROG_OBJS = \
 	$(BUILDDIR)/ModelABI.o \
 	$(BUILDDIR)/PakABI.o \
 	$(BUILDDIR)/PerlinNoise.o \
+	$(BUILDDIR)/PluginABI.o \
+	$(BUILDDIR)/Plugin.o \
 	$(BUILDDIR)/PythonABI.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o \

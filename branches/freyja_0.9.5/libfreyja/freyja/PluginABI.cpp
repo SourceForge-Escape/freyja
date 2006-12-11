@@ -32,9 +32,9 @@
 #include "MeshABI.h"
 #include "BoneABI.h"
 #include "SkeletonABI.h"
-#include "FreyjaPlugin.h"
+#include "PluginABI.h"
 #include "Skeleton.h"
-#include "FreyjaPluginABI.h"
+#include "Plugin.h"
 
 using namespace freyja;
 using namespace mstl;
@@ -45,7 +45,59 @@ int32 gCurrentFreyjaPlugin = -1;
 
 
 //////////////////////////////////////////////////////////////////////
-// Plugin subsystem
+// Plugin C++ ABI
+//////////////////////////////////////////////////////////////////////
+
+Vector<FreyjaPluginDesc *> &freyjaGetPluginDescriptions()
+{
+	return gFreyjaPlugins;
+}
+
+
+Vector<char *> &freyjaGetPluginDirectories()
+{
+	return gPluginDirectories;
+}
+
+
+FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
+{
+	long i, l;
+
+	if (!name || !name[0])
+		return 0x0;
+
+	l = strnlen(name, 8192);
+
+	for (i = gFreyjaPlugins.begin(); i < (long)gFreyjaPlugins.end(); ++i)
+	{
+		if (gFreyjaPlugins[i] && 
+			gFreyjaPlugins[i]->mFilename && gFreyjaPlugins[i]->mFilename[0])
+		{
+			if (!strncmp(gFreyjaPlugins[i]->mFilename, name, l))
+			{
+				return gFreyjaPlugins[i];
+			}
+		}
+	}
+
+	return 0x0;
+}
+
+
+FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex)
+{
+	if (pluginIndex > 0 && pluginIndex < (long)gFreyjaPlugins.end())
+	{
+		return gFreyjaPlugins[pluginIndex];
+	}
+
+	return 0x0;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// Plugin 0.9.5 ABI
 //////////////////////////////////////////////////////////////////////
 
 void freyjaPluginDirectoriesInit()
@@ -660,41 +712,16 @@ uint32 freyjaGetPluginCount()
 }
 
 
-FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
+void freyjaPluginShutdown()
 {
-	long i, l;
-
-	if (!name || !name[0])
-		return 0x0;
-
-	l = strnlen(name, 8192);
-
-	for (i = gFreyjaPlugins.begin(); i < (long)gFreyjaPlugins.end(); ++i)
-	{
-		if (gFreyjaPlugins[i] && 
-			gFreyjaPlugins[i]->mFilename && gFreyjaPlugins[i]->mFilename[0])
-		{
-			if (!strncmp(gFreyjaPlugins[i]->mFilename, name, l))
-			{
-				return gFreyjaPlugins[i];
-			}
-		}
-	}
-
-	return 0x0;
+	gPluginDirectories.erase();
+	gFreyjaPlugins.erase();
 }
 
 
-FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex)
-{
-	if (pluginIndex > 0 && pluginIndex < (long)gFreyjaPlugins.end())
-	{
-		return gFreyjaPlugins[pluginIndex];
-	}
-
-	return 0x0;
-}
-
+///////////////////////////////////////////////////////////////////////
+//  Plugin import/export iteraction
+///////////////////////////////////////////////////////////////////////
 
 void freyjaPluginBegin()
 {
