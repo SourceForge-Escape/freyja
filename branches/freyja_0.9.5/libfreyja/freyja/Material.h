@@ -232,9 +232,4 @@ class Material
 
 } // End namespace freyja
 
-freyja::Material *freyjaGetMaterialClass(index_t materialIndex);
-
-bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r);
-
-
 #endif
