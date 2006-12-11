@@ -85,8 +85,7 @@ extern "C" {
 
 
 	///////////////////////////////////////////////////////////////////////
-	// Freyja plugin subsystem
-	//
+	// Plugin ABI 0.9.3 - 0.9.5
 	///////////////////////////////////////////////////////////////////////
 
 	void freyjaPluginDirectoriesInit();
@@ -157,29 +156,6 @@ extern "C" {
 
 
 
-
-	////////////////////////////////////////////////////////////////
-	// Util
-	//
-	////////////////////////////////////////////////////////////////
-
-	void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side);
-
-	void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
-
-	void freyjaGenerateCircleMesh(vec3_t origin, int32 count); // radius
-
-	void freyjaGenerateConeMesh(vec3_t origin, vec_t height, int32 count); // radius
-
-	void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
-								int32 count, int32 segments); // radius
-
-	void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
-							  int32 count, int32 segments);
-
-	void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
-							int32 count, int32 segments); // radius
-
 }
 
-#endif
+#endif // GUARD__FREYJA_PLUGINABI_H_

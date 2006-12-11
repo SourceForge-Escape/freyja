@@ -7,6 +7,7 @@
  Dancer (Public Beta RC2)
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - More API / ABI clean up for upcoming release!
+ - Python binding generator... written in python for fun
  - Legacy free plugins: milkshape
  - Freyja text format supports 'gaps' now
  - Slash and Burn: Various legacy ABIs either completely removed or partitioned
