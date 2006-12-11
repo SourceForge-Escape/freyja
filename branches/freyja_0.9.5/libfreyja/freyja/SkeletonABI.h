@@ -75,7 +75,8 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 	void freyjaSkeletonTransform(index_t boneIndex, 
-	                             freyja_transform_action_t action, 	                             vec_t x, vec_t y, vec_t z);
+	                             freyja_transform_action_t action,
+ 	                             vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
