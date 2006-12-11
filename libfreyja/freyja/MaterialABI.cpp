@@ -54,6 +54,12 @@ index_t freyjaMaterialCreate()
 }
 
 
+void freyjaMaterialClearAll()
+{
+	gFreyjaMaterials.erase();
+}
+
+
 int32 freyjaLoadMaterialASCII(index_t materialIndex, const char *filename)
 {
 	FILE *f;

@@ -27,30 +27,19 @@
 #include <math.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
-#include <mstl/String.h>
-#include <hel/math.h>
-#include <hel/Vector3d.h>
-#include <hel/Quaternion.h>
-#include <hel/BoundingVolume.h>
-
-#include "FreyjaCamera.h"
-#include "FreyjaFSM.h"
-#include "FreyjaImage.h"
-#include "FreyjaTexture.h"
-#include "Light.h"
-#include "Material.h"
-#include "MetaData.h"
+#include "MaterialABI.h"
+#include "ModelABI.h"
+#include "MeshABI.h"
+#include "BoneABI.h"
+#include "SkeletonABI.h"
+#include "FreyjaPlugin.h"
 #include "Skeleton.h"
-
 #include "FreyjaPluginABI.h"
 
 using namespace freyja;
 using namespace mstl;
 
-Vector<MetaData *> gFreyjaMetaData; 
-Vector<FreyjaCamera *>  gFreyjaCameras;
 Vector<FreyjaPluginDesc *> gFreyjaPlugins;
-
 Vector<char *> gPluginDirectories;
 int32 gCurrentFreyjaPlugin = -1;
 
@@ -300,8 +289,7 @@ int32 freyjaImportModel(const char *filename)
 			uint32 count = mMaterialCount;
 			if (count)
 			{
-				extern Vector<Material *> gFreyjaMaterials;
-				gFreyjaMaterials.erase();
+				freyjaMaterialClearAll();
 			}
 			while (count > 0)
 			{

@@ -181,6 +181,8 @@ class MetaData
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	static Vector<MetaData *> mGobalPool;
+
 	index_t mId;                /* Unique MetaData object identifier */
 
 	uint32 mTypeId;             /* This should help you identify your data

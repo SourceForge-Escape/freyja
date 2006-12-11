@@ -21,6 +21,8 @@
 
 #include "MetaData.h"
 
+Vector<MetaData *> MetaData::mGobalPool;
+
 
 ////////////////////////////////////////////////////////////
 // Constructors
