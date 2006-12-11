@@ -20,8 +20,8 @@
  ==========================================================================*/
 
 #include <mstl/Vector.h>
-#include "FreyjaPluginABI.h"
 #include "FreyjaImage.h"
+#include "TextureABI.h"
 #include "FreyjaTexture.h"
 
 using namespace mstl;

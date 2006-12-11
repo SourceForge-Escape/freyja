@@ -24,15 +24,15 @@
  ==========================================================================*/
 
 
-#ifndef GUARD__FREYJA_MONGOOSE_PAKBROWSER_H_
-#define GUARD__FREYJA_MONGOOSE_PAKBROWSER_H_
+#ifndef GUARD__FREYJA_PAKBROWSER_H_
+#define GUARD__FREYJA_PAKBROWSER_H_
 
 
 #include <hel/math.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
-#include "FreyjaPluginABI.h"
+#include "freyja.h"
 
 using namespace mstl;
 

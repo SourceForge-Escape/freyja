@@ -30,7 +30,7 @@
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 
-#include "FreyjaPluginABI.h"
+#include "freyja.h"
 
 using namespace mstl;
 

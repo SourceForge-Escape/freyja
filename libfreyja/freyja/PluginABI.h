@@ -138,6 +138,12 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 	
+	void freyjaPluginShutdown();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : After calling this libfreyja disables plugins.
+	 ------------------------------------------------------*/
+
 
 	///////////////////////////////////////////////////////////////////////
 	//  Plugin import/export iteraction
@@ -157,5 +163,34 @@ extern "C" {
 
 
 }
+
+#   if defined(__cplusplus) && defined(USING_FREYJA_CPP_ABI)
+#   include <freyja/Plugin.h>
+
+    Vector<FreyjaPluginDesc *> &freyjaGetPluginDescriptions();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+    Vector<char *> &freyjaGetPluginDirectories();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+    FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+    FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+#   endif
 
 #endif // GUARD__FREYJA_PLUGINABI_H_

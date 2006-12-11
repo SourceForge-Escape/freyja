@@ -327,7 +327,7 @@ def UpdateBindings():
 	print "#include <" + gPythonHeader + ">"
 
 	for i in li:
-		if re.match('.*ABI.h', i) and not re.match('Legacy', i):
+		if re.match('.*ABI.h', i) and not re.match('(Legacy|.*~)', i):
 			print "#include \"" + i + '"'
 			sucess = ImportBindings(gPath, i)
 

@@ -37,7 +37,7 @@
  ==========================================================================*/
 
 #include <math.h>
-#include "FreyjaCamera.h"
+#include "Camera.h"
 
 
 unsigned int FreyjaCamera::mCounter = 0;
