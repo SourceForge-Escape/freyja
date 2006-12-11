@@ -467,10 +467,10 @@ extern "C" {
 	 * Post : Returns vertex count for <mesh>.
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMeshTexCoordCount(index_t mesh);
+	uint32 freyjaGetMeshNormalCount(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns texcoord count for <mesh>.
+	 * Post : Returns normal count for <mesh>.
 	 ------------------------------------------------------*/
 
 	uint32 freyjaGetMeshPolygonCount(index_t mesh);

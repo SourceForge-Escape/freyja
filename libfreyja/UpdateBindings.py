@@ -21,7 +21,7 @@ import string
 import time
 
 gDateStamp = time.localtime(time.time())
-gForcePythonDefine = 0
+gForcePythonDefine = 1
 gPath = "./freyja"
 gPythonHeader = "python2.4/Python.h"
 gFuncWrappers = []
@@ -83,7 +83,7 @@ def StoreWrapperFunction(li):
 
 	for i in li:
 		count = count + 1
-		if re.match('.*freyja.*', i):
+		if re.match('.*freyja', i):
 			name = i
 			nameat = count
 			break
@@ -102,18 +102,18 @@ def StoreWrapperFunction(li):
 			tmp = re.sub(';.*', ';\n', li[i])
 			func_vars += tmp
 		else:
-			if re.match('(index_t|int32|char|uint32|byte)', li[i]):
+			if re.match('(.*char\\*)', li[i]):
+				parse_types += "s"
+				pass_vars += li[i+1] + ", "
+				parse_vars += "&" + li[i+1] + ", "
+				func_vars += "\t" + li[i] + " "
+			elif re.match('(index_t|int32|char|uint32|byte)', li[i]):
 				parse_types += "i"
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
 				func_vars += "\t" + li[i] + " "
 			elif re.match('(freyja_transform_action_t)', li[i]):
 				parse_types += "i"
-				pass_vars += li[i+1] + ", "
-				parse_vars += "&" + li[i+1] + ", "
-				func_vars += "\t" + li[i] + " "
-			elif re.match('(.*char\\*)', li[i]):
-				parse_types += "s"
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
 				func_vars += "\t" + li[i] + " "
@@ -146,7 +146,12 @@ def StoreWrapperFunction(li):
 			else:
 				func_vars += li[i]
 
-	if len(li) > 3:
+	unsupported = False	
+
+	if re.match('.*vec_t\\*', li[0]):
+		unsupported = True
+
+	if len(li) > 3 and not parse_types == "":
 		# List dumped into code
 		#for i in li:
 		#	s += "\t/* " + i + " */\n"
@@ -161,21 +166,28 @@ def StoreWrapperFunction(li):
 		s += "\n\tif (!PyArg_ParseTuple(args, "+ '"' + parse_types + '"' + ", " + parse_vars + "))\n" 
 		s += "\t\treturn NULL;\n\n"
 
-	if re.match('(index_t|int32|uint32|byte|char)', li[0]):
+	if unsupported:
+		s += "#if FIXME\n\t/* No support for returning pointers yet... */\n"
+
+
+	if re.match('(.*char\\*)', li[0]) or re.match('(.*char\\*)', li[1]):
+		# Returns string
+		s += "\treturn PyString_FromString(" + name + "(" + pass_vars +"));"
+	elif re.match('(index_t|int32|uint32|byte|char)', li[0]):
 		# Returns integer
 		s += "\treturn PyInt_FromLong(" + name + "(" + pass_vars +"));"
 	elif re.match('(vec_t|float)', li[0]):
 		# Returns float
 		s += "\treturn PyFloat_FromDouble(" + name + "(" + pass_vars +"));"
-	elif re.match('(.*char\\*)', li[0]) or re.match('(.*char\\*)', li[1]):
-		# Returns string
-		s += "\treturn PyString_FromString(" + name + "(" + pass_vars +"));"
 	else:
 		# Returns void
 		s += "\t" + name + "(" + pass_vars + ");\n"
 		s += "\treturn PyInt_FromLong(0);"
 
-	s += "\n}\n\n"
+	if unsupported:
+		s += "\n#endif // FIXME\n\n\treturn NULL;\n}\n\n"
+	else:
+		s += "\n}\n\n"
 
 	gFuncWrappers.append(s)
 
@@ -186,19 +198,29 @@ def StoreBindFunction(name):
 	gFuncBindings.append(s)
 
 
+# Yes, this is lame -- however the python file iterator has issues with
+# multiline statement parsing on my machine even using f.next().
+def BufferFunctionDeclaration(f):
+	buf = ""
+	while True:
+		c = f.read(1)
+		buf += c
+		if c == '' or c == ';':
+			break;
 
-def GetNext(f, s):
-	if not re.match('.*;', s):
-		try:
-			s2 = f.next()
-			s2 = re.sub('\n', ' ', s2)
-			return s2
+	# Strip comments //, newlines, and directives
+	buf = re.sub('(//.*\n|\n|#.*\n)', '', buf)
+	
+	# Strip comments /* */
+	buf = re.sub('\/\\*.*\\*\/', '', buf)
 
-		except StopIteration:
-			return ""
+	# Strip out references
+	buf = re.sub('&', '', buf)
 
-	return ""
+	# Dump parsed 'lines' into generated file for debugging
+	#print "/* $$$ " + buf + " $$$ */"
 
+	return buf
 
 
 def ImportBindings(filepath, basename):
@@ -215,41 +237,46 @@ def ImportBindings(filepath, basename):
 
 	except IOError:
 		print "ERROR opening file '" + filename + "'" 
-		return 0
+		return False
 
 	over = ""
 
-	for i in f:
-		l = over + i
-		#if not re.match('.*;', l):
-		#	over = i
+	#for i in f:
+	while True:
+		i = BufferFunctionDeclaration(f)
 
-		if re.match('^.*' + accessor + '.*\\(', l):
+		if i == "":
+			break
+
+		if not re.match('.*freyja.*\\(.*\\);', i):
+			i = ""
+
+		elif re.match('^.*' + accessor + '.*\\(', i):
 			# Don't expose C++ ABI to python
-			if not re.match('.*::', l):
-				p = re.sub('.\\*', '* ', l)
+			if not re.match('.*::', i):
+				p = re.sub('.\\*', '* ', i)
 				p = re.sub(',', ';\n', p)
 				p = re.sub('(\\(|\\)|\n)', ' ', p)
 				li = p.split()
 				StoreWrapperFunction(li)
 
-				s = re.sub('\\(.*', '', l)
+				s = re.sub('\\(.*', '', i)
 				s = re.sub('.* ', '', s)
 				s = re.sub(' ', '', s)
 				s = re.sub('(\\*|\n)', '', s)
 				StoreBindFunction(s)
 				over = ""
 
-		elif re.match('^.*' + mutator + '.*\\(', l):
+		elif re.match('^.*' + mutator + '.*\\(', i):
 			# Don't expose C++ ABI to python
-			if not re.match('.*::', l):
-				p = re.sub('.\\*', '* ', l)
+			if not re.match('.*::', i):
+				p = re.sub('.\\*', '* ', i)
 				p = re.sub(',', ';\n', p)
 				p = re.sub('(\\(|\\)|\n)', ' ', p)
 				li = p.split()
 				StoreWrapperFunction(li)
 
-				s = re.sub('\\(.*', '', l)
+				s = re.sub('\\(.*', '', i)
 				s = re.sub('.* ', '', s)
 				s = re.sub(' ', '', s)
 				s = re.sub('\\*', '', s)
@@ -259,7 +286,8 @@ def ImportBindings(filepath, basename):
 
 	f.close()
 
-	return 1
+	return True
+
 
 
 def UpdateBindings():
