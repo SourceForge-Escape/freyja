@@ -217,8 +217,12 @@ def ImportBindings(filepath, basename):
 		print "ERROR opening file '" + filename + "'" 
 		return 0
 
+	over = ""
+
 	for i in f:
-		l = i + GetNext(f, i)
+		l = over + i
+		#if not re.match('.*;', l):
+		#	over = i
 
 		if re.match('^.*' + accessor + '.*\\(', l):
 			# Don't expose C++ ABI to python
@@ -234,6 +238,7 @@ def ImportBindings(filepath, basename):
 				s = re.sub(' ', '', s)
 				s = re.sub('(\\*|\n)', '', s)
 				StoreBindFunction(s)
+				over = ""
 
 		elif re.match('^.*' + mutator + '.*\\(', l):
 			# Don't expose C++ ABI to python
@@ -250,6 +255,7 @@ def ImportBindings(filepath, basename):
 				s = re.sub('\\*', '', s)
 				s = re.sub('\n', '', s)
 				StoreBindFunction(s)
+				over = ""
 
 	f.close()
 

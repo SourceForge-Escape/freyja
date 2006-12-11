@@ -30,9 +30,142 @@
 #include "freyja.h"
 
 
+PyObject *py_freyjaSkeletonCreate(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaSkeletonCreate());
+}
+
+
+PyObject *py_freyjaSkeletonPoolClear(PyObject *self, PyObject *args)
+{
+	freyjaSkeletonPoolClear();
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaSkeletonDelete(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &skeletonIndex))
+		return NULL;
+
+	freyjaSkeletonDelete(skeletonIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaSkeletonUpdateBones(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &skeletonIndex))
+		return NULL;
+
+	freyjaSkeletonUpdateBones(skeletonIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaSkeletonAddBone(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "ii", &skeletonIndex, &boneIndex))
+		return NULL;
+
+	freyjaSkeletonAddBone(skeletonIndex, boneIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaSkeletonRootIndex(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "ii", &skeletonIndex, &boneIndex))
+		return NULL;
+
+	freyjaSkeletonRootIndex(skeletonIndex, boneIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaSkeletonTransform(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
+		return NULL;
+
+	freyjaSkeletonTransform(boneIndex);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaGetSkeletonCount(PyObject *self, PyObject *args)
 {
 	return PyInt_FromLong(freyjaGetSkeletonCount());
+}
+
+
+PyObject *py_freyjaGetSkeletonBoneCount(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &skeletonIndex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetSkeletonBoneCount(skeletonIndex));
+}
+
+
+PyObject *py_freyjaGetSkeletonBoneIndex(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+	uint32 element;
+
+	if (!PyArg_ParseTuple(args, "ii", &skeletonIndex, &element))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetSkeletonBoneIndex(skeletonIndex, element));
+}
+
+
+PyObject *py_freyjaGetSkeletonRootIndex(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &skeletonIndex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetSkeletonRootIndex(skeletonIndex));
+}
+
+
+PyObject *py_freyjaSkeletonName(PyObject *self, PyObject *args)
+{
+	index_t skeleton;
+	char* name;
+
+	if (!PyArg_ParseTuple(args, "ii", &skeleton, &name))
+		return NULL;
+
+	freyjaSkeletonName(skeleton, name);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetSkeletonName(PyObject *self, PyObject *args)
+{
+	index_t skeleton;
+
+	if (!PyArg_ParseTuple(args, "i", &skeleton))
+		return NULL;
+
+	return PyString_FromString(freyjaGetSkeletonName(skeleton));
 }
 
 
@@ -48,9 +181,253 @@ PyObject *py_freyjaKeyFrameGroupCreate(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaKeyFrameGroupDelete(PyObject *self, PyObject *args)
+{
+	index_t groupIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &groupIndex))
+		return NULL;
+
+	freyjaKeyFrameGroupDelete(groupIndex);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaGetKeyFrameCount(PyObject *self, PyObject *args)
 {
 	return PyInt_FromLong(freyjaGetKeyFrameCount());
+}
+
+
+PyObject *py_freyjaKeyFramePoolClear(PyObject *self, PyObject *args)
+{
+	freyjaKeyFramePoolClear();
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaKeyFrameGetIndexFromId(PyObject *self, PyObject *args)
+{
+	uint32 id;
+
+	if (!PyArg_ParseTuple(args, "i", &id))
+		return NULL;
+
+	return PyInt_FromLong(freyjaKeyFrameGetIndexFromId(id));
+}
+
+
+PyObject *py_freyjaKeyFrameCreate(PyObject *self, PyObject *args)
+{
+	int32 id;
+
+	if (!PyArg_ParseTuple(args, "i", &id))
+		return NULL;
+
+	return PyInt_FromLong(freyjaKeyFrameCreate(id));
+}
+
+
+PyObject *py_freyjaKeyFrameDelete(PyObject *self, PyObject *args)
+{
+	index_t keyframeIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &keyframeIndex))
+		return NULL;
+
+	freyjaKeyFrameDelete(keyframeIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaKeyFrameTime(PyObject *self, PyObject *args)
+{
+	index_t keyframeIndex;
+	vec_t time;
+
+	if (!PyArg_ParseTuple(args, "if", &keyframeIndex, &time))
+		return NULL;
+
+	freyjaKeyFrameTime(keyframeIndex, time);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetKeyFrameTime(PyObject *self, PyObject *args)
+{
+	index_t keyframeIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &keyframeIndex))
+		return NULL;
+
+	return PyFloat_FromDouble(freyjaGetKeyFrameTime(keyframeIndex));
+}
+
+
+PyObject *py_freyjaKeyFrameFlags(PyObject *self, PyObject *args)
+{
+	index_t keyframeIndex;
+	byte flags;
+
+	if (!PyArg_ParseTuple(args, "ii", &keyframeIndex, &flags))
+		return NULL;
+
+	freyjaKeyFrameFlags(keyframeIndex, flags);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetKeyFrameFlags(PyObject *self, PyObject *args)
+{
+	index_t keyframeIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &keyframeIndex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetKeyFrameFlags(keyframeIndex));
+}
+
+
+PyObject *py_freyjaKeyFrameTransform(PyObject *self, PyObject *args)
+{
+	index_t keyframeIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &keyframeIndex))
+		return NULL;
+
+	freyjaKeyFrameTransform(keyframeIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetModelCount(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaGetModelCount());
+}
+
+
+PyObject *py_freyjaModelCreate(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaModelCreate());
+}
+
+
+PyObject *py_freyjaModelAddSkeleton(PyObject *self, PyObject *args)
+{
+	index_t model;
+	index_t skeleton;
+
+	if (!PyArg_ParseTuple(args, "ii", &model, &skeleton))
+		return NULL;
+
+	freyjaModelAddSkeleton(model, skeleton);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaModelAddMesh(PyObject *self, PyObject *args)
+{
+	index_t model;
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "ii", &model, &mesh))
+		return NULL;
+
+	freyjaModelAddMesh(model, mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetModelFlags(PyObject *self, PyObject *args)
+{
+	index_t model;
+
+	if (!PyArg_ParseTuple(args, "i", &model))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetModelFlags(model));
+}
+
+
+PyObject *py_freyjaGetModelMeshCount(PyObject *self, PyObject *args)
+{
+	index_t model;
+
+	if (!PyArg_ParseTuple(args, "i", &model))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetModelMeshCount(model));
+}
+
+
+PyObject *py_freyjaGetModelMeshIndex(PyObject *self, PyObject *args)
+{
+	index_t model;
+	uint32 element;
+
+	if (!PyArg_ParseTuple(args, "ii", &model, &element))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetModelMeshIndex(model, element));
+}
+
+
+PyObject *py_freyjaGetModelSkeleton(PyObject *self, PyObject *args)
+{
+	index_t model;
+
+	if (!PyArg_ParseTuple(args, "i", &model))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetModelSkeleton(model));
+}
+
+
+PyObject *py_freyjaModelTransform(PyObject *self, PyObject *args)
+{
+	index_t model;
+
+	if (!PyArg_ParseTuple(args, "i", &model))
+		return NULL;
+
+	freyjaModelTransform(model);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaModelClear(PyObject *self, PyObject *args)
+{
+	index_t model;
+
+	if (!PyArg_ParseTuple(args, "i", &model))
+		return NULL;
+
+	freyjaModelClear(model);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetBoneCount(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaGetBoneCount());
+}
+
+
+PyObject *py_freyjaBonePoolClear(PyObject *self, PyObject *args)
+{
+	freyjaBonePoolClear();
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneCreate(PyObject *self, PyObject *args)
+{
+	index_t skeletonIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &skeletonIndex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaBoneCreate(skeletonIndex));
 }
 
 
@@ -62,6 +439,58 @@ PyObject *py_freyjaBoneDelete(PyObject *self, PyObject *args)
 		return NULL;
 
 	freyjaBoneDelete(boneIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneFlags(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	byte flags;
+
+	if (!PyArg_ParseTuple(args, "ii", &boneIndex, &flags))
+		return NULL;
+
+	freyjaBoneFlags(boneIndex, flags);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneParent(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	index_t parentIndex;
+
+	if (!PyArg_ParseTuple(args, "ii", &boneIndex, &parentIndex))
+		return NULL;
+
+	freyjaBoneParent(boneIndex, parentIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneName(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	char* name;
+
+	if (!PyArg_ParseTuple(args, "ii", &boneIndex, &name))
+		return NULL;
+
+	freyjaBoneName(boneIndex, name);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneRemoveChild(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	index_t childIndex;
+
+	if (!PyArg_ParseTuple(args, "ii", &boneIndex, &childIndex))
+		return NULL;
+
+	freyjaBoneRemoveChild(boneIndex, childIndex);
 	return PyInt_FromLong(0);
 }
 
@@ -79,6 +508,21 @@ PyObject *py_freyjaBoneAddChild(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaBoneTranslate3f(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	vec_t x;
+	vec_t y;
+	vec_t z;
+
+	if (!PyArg_ParseTuple(args, "ifff", &boneIndex, &x, &y, &z))
+		return NULL;
+
+	freyjaBoneTranslate3f(boneIndex, x, y, z);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaBoneTranslate3fv(PyObject *self, PyObject *args)
 {
 	index_t boneIndex;
@@ -88,6 +532,21 @@ PyObject *py_freyjaBoneTranslate3fv(PyObject *self, PyObject *args)
 		return NULL;
 
 	freyjaBoneTranslate3fv(boneIndex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneRotateEuler3f(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	vec_t p;
+	vec_t h;
+	vec_t r;
+
+	if (!PyArg_ParseTuple(args, "ifff", &boneIndex, &p, &h, &r))
+		return NULL;
+
+	freyjaBoneRotateEuler3f(boneIndex, p, h, r);
 	return PyInt_FromLong(0);
 }
 
@@ -108,15 +567,11 @@ PyObject *py_freyjaBoneRotateEuler3fv(PyObject *self, PyObject *args)
 PyObject *py_freyjaBoneRotateQuat4f(PyObject *self, PyObject *args)
 {
 	index_t boneIndex;
-	vec_t w;
-	vec_t x;
-	vec_t y;
-	vec_t z;
 
-	if (!PyArg_ParseTuple(args, "iffff", &boneIndex, &w, &x, &y, &z))
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
 		return NULL;
 
-	freyjaBoneRotateQuat4f(boneIndex, w, x, y, z);
+	freyjaBoneRotateQuat4f(boneIndex);
 	return PyInt_FromLong(0);
 }
 
@@ -134,6 +589,19 @@ PyObject *py_freyjaBoneRotateQuat4fv(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaGetBoneRotationQuat4fv(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	vec4_t wxyz;
+
+	if (!PyArg_ParseTuple(args, "iffff", &boneIndex, wxyz+0, wxyz+1, wxyz+2, wxyz+3))
+		return NULL;
+
+	freyjaGetBoneRotationQuat4fv(boneIndex, wxyz);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaGetBoneRotationEuler3fv(PyObject *self, PyObject *args)
 {
 	index_t boneIndex;
@@ -147,6 +615,55 @@ PyObject *py_freyjaGetBoneRotationEuler3fv(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaBoneTransform(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
+		return NULL;
+
+	freyjaBoneTransform(boneIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaBoneTransform3fv(PyObject *self, PyObject *args)
+{
+	index_t bone;
+
+	if (!PyArg_ParseTuple(args, "i", &bone))
+		return NULL;
+
+	freyjaBoneTransform3fv(bone);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetBoneNameString(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
+		return NULL;
+
+	return PyString_FromString(freyjaGetBoneNameString(boneIndex));
+}
+
+
+PyObject *py_freyjaGetBoneName(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	uint32 size;
+	char* name;
+
+	if (!PyArg_ParseTuple(args, "iii", &boneIndex, &size, &name))
+		return NULL;
+
+	freyjaGetBoneName(boneIndex, size, name);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaGetBoneParent(PyObject *self, PyObject *args)
 {
 	index_t boneIndex;
@@ -155,6 +672,77 @@ PyObject *py_freyjaGetBoneParent(PyObject *self, PyObject *args)
 		return NULL;
 
 	return PyInt_FromLong(freyjaGetBoneParent(boneIndex));
+}
+
+
+PyObject *py_freyjaGetBoneBindPose16fv(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
+		return NULL;
+
+	return PyFloat_FromDouble(freyjaGetBoneBindPose16fv(boneIndex));
+}
+
+
+PyObject *py_freyjaGetBoneWorldPos3fv(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "ifff", &boneIndex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaGetBoneWorldPos3fv(boneIndex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetBoneTranslation3fv(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "ifff", &boneIndex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaGetBoneTranslation3fv(boneIndex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetBoneSkeletonIndex(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetBoneSkeletonIndex(boneIndex));
+}
+
+
+PyObject *py_freyjaGetBoneChild(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+	uint32 element;
+
+	if (!PyArg_ParseTuple(args, "ii", &boneIndex, &element))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetBoneChild(boneIndex, element));
+}
+
+
+PyObject *py_freyjaGetBoneChildCount(PyObject *self, PyObject *args)
+{
+	index_t boneIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &boneIndex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetBoneChildCount(boneIndex));
 }
 
 
@@ -267,14 +855,11 @@ PyObject *py_freyjaBonePosKeyFrame3f(PyObject *self, PyObject *args)
 	index_t bone;
 	index_t track;
 	index_t key;
-	vec_t x;
-	vec_t y;
-	vec_t z;
 
-	if (!PyArg_ParseTuple(args, "iiifff", &bone, &track, &key, &x, &y, &z))
+	if (!PyArg_ParseTuple(args, "iii", &bone, &track, &key))
 		return NULL;
 
-	freyjaBonePosKeyFrame3f(bone, track, key, x, y, z);
+	freyjaBonePosKeyFrame3f(bone, track, key);
 	return PyInt_FromLong(0);
 }
 
@@ -284,14 +869,11 @@ PyObject *py_freyjaBoneRotKeyFrameEuler3f(PyObject *self, PyObject *args)
 	index_t bone;
 	index_t track;
 	index_t key;
-	vec_t x;
-	vec_t y;
-	vec_t z;
 
-	if (!PyArg_ParseTuple(args, "iiifff", &bone, &track, &key, &x, &y, &z))
+	if (!PyArg_ParseTuple(args, "iii", &bone, &track, &key))
 		return NULL;
 
-	freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);
+	freyjaBoneRotKeyFrameEuler3f(bone, track, key);
 	return PyInt_FromLong(0);
 }
 
@@ -301,16 +883,18 @@ PyObject *py_freyjaBoneRotKeyFrameQuat4f(PyObject *self, PyObject *args)
 	index_t bone;
 	index_t track;
 	index_t key;
-	vec_t w;
-	vec_t x;
-	vec_t y;
-	vec_t z;
 
-	if (!PyArg_ParseTuple(args, "iiiffff", &bone, &track, &key, &w, &x, &y, &z))
+	if (!PyArg_ParseTuple(args, "iii", &bone, &track, &key))
 		return NULL;
 
-	freyjaBoneRotKeyFrameQuat4f(bone, track, key, w, x, y, z);
+	freyjaBoneRotKeyFrameQuat4f(bone, track, key);
 	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaLightCreate(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaLightCreate());
 }
 
 
@@ -436,6 +1020,25 @@ PyObject *py_freyjaGetLightSpecular(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaMaterialCreate(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaMaterialCreate());
+}
+
+
+PyObject *py_freyjaMaterialClearAll(PyObject *self, PyObject *args)
+{
+	freyjaMaterialClearAll();
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMaterialCount(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaGetMaterialCount());
+}
+
+
 PyObject *py_freyjaGetMaterialIndex(PyObject *self, PyObject *args)
 {
 	index_t material;
@@ -445,6 +1048,28 @@ PyObject *py_freyjaGetMaterialIndex(PyObject *self, PyObject *args)
 		return NULL;
 
 	return PyInt_FromLong(freyjaGetMaterialIndex(material, element));
+}
+
+
+PyObject *py_freyjaGetMaterialName(PyObject *self, PyObject *args)
+{
+	index_t material;
+
+	if (!PyArg_ParseTuple(args, "i", &material))
+		return NULL;
+
+	return PyString_FromString(freyjaGetMaterialName(material));
+}
+
+
+PyObject *py_freyjaGetMaterialFlags(PyObject *self, PyObject *args)
+{
+	index_t material;
+
+	if (!PyArg_ParseTuple(args, "i", &material))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMaterialFlags(material));
 }
 
 
@@ -759,18 +1384,58 @@ PyObject *py_freyjaPakBegin(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaPakAddDecoderFunction2s(PyObject *self, PyObject *args)
+{
+	char* module;
+	char* symbol;
+
+	if (!PyArg_ParseTuple(args, "ii", &module, &symbol))
+		return NULL;
+
+	freyjaPakAddDecoderFunction2s(module, symbol);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaPakAddFullPathFile(PyObject *self, PyObject *args)
 {
 	index_t pakIndex;
 	char* vfsFilename;
-	int32 offset;
-	int32 size;
 
-	if (!PyArg_ParseTuple(args, "iiii", &pakIndex, &vfsFilename, &offset, &size))
+	if (!PyArg_ParseTuple(args, "ii", &pakIndex, &vfsFilename))
 		return NULL;
 
-	freyjaPakAddFullPathFile(pakIndex, vfsFilename, offset, size);
+	freyjaPakAddFullPathFile(pakIndex, vfsFilename);
 	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaPakEnd(PyObject *self, PyObject *args)
+{
+	index_t pakIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &pakIndex))
+		return NULL;
+
+	freyjaPakEnd(pakIndex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshCreate(PyObject *self, PyObject *args)
+{
+	return PyInt_FromLong(freyjaMeshCreate());
+}
+
+
+PyObject *py_freyjaMeshCopy(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCopy(mesh));
 }
 
 
@@ -782,6 +1447,386 @@ PyObject *py_freyjaMeshDelete(PyObject *self, PyObject *args)
 		return NULL;
 
 	freyjaMeshDelete(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshMaterial(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t material;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &material))
+		return NULL;
+
+	freyjaMeshMaterial(mesh, material);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPosition(PyObject *self, PyObject *args)
+{
+	index_t meshIndex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "ifff", &meshIndex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaMeshPosition(meshIndex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshName1s(PyObject *self, PyObject *args)
+{
+	index_t meshIndex;
+	char* name;
+
+	if (!PyArg_ParseTuple(args, "ii", &meshIndex, &name))
+		return NULL;
+
+	freyjaMeshName1s(meshIndex, name);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshFlags1u(PyObject *self, PyObject *args)
+{
+	uint32 flags;
+
+	if (!PyArg_ParseTuple(args, "i", &flags))
+		return NULL;
+
+	freyjaMeshFlags1u(flags);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshTransform3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshTransform3fv(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshVertexCreate3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "ifff", &mesh, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshVertexCreate3fv(mesh, xyz));
+}
+
+
+PyObject *py_freyjaMeshVertexPos3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "iifff", &mesh, &vertex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaMeshVertexPos3fv(mesh, vertex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshVertexNormal3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "iifff", &mesh, &vertex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaMeshVertexNormal3fv(mesh, vertex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshTexCoordCreate2fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	vec2_t uv;
+
+	if (!PyArg_ParseTuple(args, "iff", &mesh, uv+0, uv+1))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshTexCoordCreate2fv(mesh, uv));
+}
+
+
+PyObject *py_freyjaMeshTexCoordCreate2f(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	vec_t u;
+	vec_t v;
+
+	if (!PyArg_ParseTuple(args, "iff", &mesh, &u, &v))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshTexCoordCreate2f(mesh, u, v));
+}
+
+
+PyObject *py_freyjaMeshTexCoordCreate3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	vec3_t uvw;
+
+	if (!PyArg_ParseTuple(args, "ifff", &mesh, uvw+0, uvw+1, uvw+2))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshTexCoordCreate3fv(mesh, uvw));
+}
+
+
+PyObject *py_freyjaMeshTexCoordCreate3f(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshTexCoordCreate3f(mesh));
+}
+
+
+PyObject *py_freyjaMeshTexCoord2fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t texcoord;
+	vec2_t uv;
+
+	if (!PyArg_ParseTuple(args, "iiff", &mesh, &texcoord, uv+0, uv+1))
+		return NULL;
+
+	freyjaMeshTexCoord2fv(mesh, texcoord, uv);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshVertexTexCoord3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t texcoord;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &texcoord))
+		return NULL;
+
+	freyjaMeshVertexTexCoord3fv(mesh, texcoord);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshClampTexCoords(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshClampTexCoords(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshTransformTexCoord(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t texcoord;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &texcoord))
+		return NULL;
+
+	freyjaMeshTransformTexCoord(mesh, texcoord);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonCreate(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshPolygonCreate(mesh));
+}
+
+
+PyObject *py_freyjaMeshPolygonDelete(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	freyjaMeshPolygonDelete(mesh, polygon);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonAddVertex1i(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	freyjaMeshPolygonAddVertex1i(mesh, polygon);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonAddTexCoord1i(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	freyjaMeshPolygonAddTexCoord1i(mesh, polygon);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonMaterial(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	freyjaMeshPolygonMaterial(mesh, polygon);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonClearFlag1u(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t face;
+	byte flag;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &face, &flag))
+		return NULL;
+
+	freyjaMeshPolygonClearFlag1u(mesh, face, flag);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonSetFlag1u(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t face;
+	byte flag;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &face, &flag))
+		return NULL;
+
+	freyjaMeshPolygonSetFlag1u(mesh, face, flag);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonGroup1u(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t face;
+	uint32 group;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &face, &group))
+		return NULL;
+
+	freyjaMeshPolygonGroup1u(mesh, face, group);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshUVMapPlanar(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshUVMapPlanar(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshUVMapSpherical(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshUVMapSpherical(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshUVMapCylindrical(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshUVMapCylindrical(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshTesselateTriangles(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshTesselateTriangles(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshNormalFlip(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshNormalFlip(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshGenerateVertexNormals(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaMeshGenerateVertexNormals(mesh);
 	return PyInt_FromLong(0);
 }
 
@@ -800,6 +1845,59 @@ PyObject *py_freyjaMeshPolygonExtrudeQuad1f(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaMeshVertexWeight(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &vertex))
+		return NULL;
+
+	freyjaMeshVertexWeight(mesh, vertex);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshTexCoordWeld(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t a;
+	index_t b;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &a, &b))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshTexCoordWeld(mesh, a, b));
+}
+
+
+PyObject *py_freyjaMeshVertexWeld(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t a;
+	index_t b;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &a, &b))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshVertexWeld(mesh, a, b));
+}
+
+
+PyObject *py_freyjaMeshUpdateBlendVertices(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t track;
+	vec_t time;
+
+	if (!PyArg_ParseTuple(args, "iif", &mesh, &track, &time))
+		return NULL;
+
+	freyjaMeshUpdateBlendVertices(mesh, track, time);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaMeshVertexTrackNew(PyObject *self, PyObject *args)
 {
 	index_t mesh;
@@ -813,9 +1911,424 @@ PyObject *py_freyjaMeshVertexTrackNew(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaMeshVertexKeyFrameNew(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t track;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &track))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshVertexKeyFrameNew(mesh, track));
+}
+
+
+PyObject *py_freyjaMeshVertexKeyFrame3f(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t track;
+	index_t key;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &track, &key))
+		return NULL;
+
+	freyjaMeshVertexKeyFrame3f(mesh, track, key);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaMeshPolygonSplit(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	freyjaMeshPolygonSplit(mesh, polygon);
+	return PyInt_FromLong(0);
+}
+
+
 PyObject *py_freyjaGetMeshCount(PyObject *self, PyObject *args)
 {
 	return PyInt_FromLong(freyjaGetMeshCount());
+}
+
+
+PyObject *py_freyjaGetMeshBoundingBox(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	vec3_t min;
+	vec3_t max;
+
+	if (!PyArg_ParseTuple(args, "iffffff", &mesh, min+0, min+1, min+2, max+0, max+1, max+2))
+		return NULL;
+
+	freyjaGetMeshBoundingBox(mesh, min, max);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshBoundingSphere(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	freyjaGetMeshBoundingSphere(mesh);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshFlags(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshFlags(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshPosition(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "ifff", &mesh, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaGetMeshPosition(mesh, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshNameString(PyObject *self, PyObject *args)
+{
+	index_t meshIndex;
+
+	if (!PyArg_ParseTuple(args, "i", &meshIndex))
+		return NULL;
+
+	return PyString_FromString(freyjaGetMeshNameString(meshIndex));
+}
+
+
+PyObject *py_freyjaGetMeshName1s(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	uint32 lenght;
+	char* name;
+
+	if (!PyArg_ParseTuple(args, "iii", &mesh, &lenght, &name))
+		return NULL;
+
+	freyjaGetMeshName1s(mesh, lenght, name);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshVertexFlags(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &vertex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexFlags(mesh, vertex));
+}
+
+
+PyObject *py_freyjaGetMeshVertexPos3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "iifff", &mesh, &vertex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaGetMeshVertexPos3fv(mesh, vertex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshVertexNormal3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "iifff", &mesh, &vertex, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaGetMeshVertexNormal3fv(mesh, vertex, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshVertexTexCoord3fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vert;
+	vec3_t xyz;
+
+	if (!PyArg_ParseTuple(args, "iifff", &mesh, &vert, xyz+0, xyz+1, xyz+2))
+		return NULL;
+
+	freyjaGetMeshVertexTexCoord3fv(mesh, vert, xyz);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshVertexTexCoord(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &vertex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexTexCoord(mesh, vertex));
+}
+
+
+PyObject *py_freyjaGetMeshVertexPolygonRefCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t vertex;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &vertex))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexPolygonRefCount(mesh, vertex));
+}
+
+
+PyObject *py_freyjaGetMeshVertexPolygonRefIndex(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexPolygonRefIndex(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshTexCoord2fv(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t texcoord;
+	vec2_t uv;
+
+	if (!PyArg_ParseTuple(args, "iiff", &mesh, &texcoord, uv+0, uv+1))
+		return NULL;
+
+	freyjaGetMeshTexCoord2fv(mesh, texcoord, uv);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshPolygonFlags(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonFlags(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonGroup(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonGroup(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonEdgeCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonEdgeCount(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonVertexCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonVertexCount(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonVertexIndex(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonVertexIndex(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonTexCoordCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonTexCoordCount(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonTexCoordIndex(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonTexCoordIndex(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonMaterial(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t polygon;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &polygon))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonMaterial(mesh, polygon));
+}
+
+
+PyObject *py_freyjaGetMeshTexCoordCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshTexCoordCount(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshVertexCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexCount(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshTexCoordCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshTexCoordCount(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshPolygonCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshPolygonCount(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshBlendVertices(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyFloat_FromDouble(freyjaGetMeshBlendVertices(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshWeight(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t weight;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &weight))
+		return NULL;
+
+	freyjaGetMeshWeight(mesh, weight);
+	return PyInt_FromLong(0);
+}
+
+
+PyObject *py_freyjaGetMeshWeightCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshWeightCount(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshVertexTrackCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+
+	if (!PyArg_ParseTuple(args, "i", &mesh))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexTrackCount(mesh));
+}
+
+
+PyObject *py_freyjaGetMeshVertexKeyFrameCount(PyObject *self, PyObject *args)
+{
+	index_t mesh;
+	index_t track;
+
+	if (!PyArg_ParseTuple(args, "ii", &mesh, &track))
+		return NULL;
+
+	return PyInt_FromLong(freyjaGetMeshVertexKeyFrameCount(mesh, track));
 }
 
 
@@ -823,13 +2336,11 @@ PyObject *py_freyjaMeshCreateSheet(PyObject *self, PyObject *args)
 {
 	vec3_t origin;
 	vec_t size;
-	uint32 rows;
-	uint32 columns;
 
-	if (!PyArg_ParseTuple(args, "ffffii", origin+0, origin+1, origin+2, &size, &rows, &columns))
+	if (!PyArg_ParseTuple(args, "ffff", origin+0, origin+1, origin+2, &size))
 		return NULL;
 
-	return PyInt_FromLong(freyjaMeshCreateSheet(origin, size, rows, columns));
+	return PyInt_FromLong(freyjaMeshCreateSheet(origin, size));
 }
 
 
@@ -863,12 +2374,11 @@ PyObject *py_freyjaMeshCreateCone(PyObject *self, PyObject *args)
 	vec3_t origin;
 	vec_t height;
 	vec_t radius;
-	uint32 wedges;
 
-	if (!PyArg_ParseTuple(args, "fffffi", origin+0, origin+1, origin+2, &height, &radius, &wedges))
+	if (!PyArg_ParseTuple(args, "fffff", origin+0, origin+1, origin+2, &height, &radius))
 		return NULL;
 
-	return PyInt_FromLong(freyjaMeshCreateCone(origin, height, radius, wedges));
+	return PyInt_FromLong(freyjaMeshCreateCone(origin, height, radius));
 }
 
 
@@ -877,28 +2387,103 @@ PyObject *py_freyjaMeshCreateCylinder(PyObject *self, PyObject *args)
 	vec3_t origin;
 	vec_t height;
 	vec_t radius;
-	uint32 sides;
-	uint32 rings;
 
-	if (!PyArg_ParseTuple(args, "fffffii", origin+0, origin+1, origin+2, &height, &radius, &sides, &rings))
+	if (!PyArg_ParseTuple(args, "fffff", origin+0, origin+1, origin+2, &height, &radius))
 		return NULL;
 
-	return PyInt_FromLong(freyjaMeshCreateCylinder(origin, height, radius, sides, rings));
+	return PyInt_FromLong(freyjaMeshCreateCylinder(origin, height, radius));
+}
+
+
+PyObject *py_freyjaMeshCreateSphere(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t radius;
+
+	if (!PyArg_ParseTuple(args, "ffff", origin+0, origin+1, origin+2, &radius))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateSphere(origin, radius));
+}
+
+
+PyObject *py_freyjaMeshCreateTube(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t height;
+	vec_t radius;
+
+	if (!PyArg_ParseTuple(args, "fffff", origin+0, origin+1, origin+2, &height, &radius))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateTube(origin, height, radius));
 }
 
 
 PyMethodDef Plugin_methods[] = {
+	{ "freyjaSkeletonCreate", py_freyjaSkeletonCreate, METH_VARARGS },
+	{ "freyjaSkeletonPoolClear", py_freyjaSkeletonPoolClear, METH_VARARGS },
+	{ "freyjaSkeletonDelete", py_freyjaSkeletonDelete, METH_VARARGS },
+	{ "freyjaSkeletonUpdateBones", py_freyjaSkeletonUpdateBones, METH_VARARGS },
+	{ "freyjaSkeletonAddBone", py_freyjaSkeletonAddBone, METH_VARARGS },
+	{ "freyjaSkeletonRootIndex", py_freyjaSkeletonRootIndex, METH_VARARGS },
+	{ "freyjaSkeletonTransform", py_freyjaSkeletonTransform, METH_VARARGS },
 	{ "freyjaGetSkeletonCount", py_freyjaGetSkeletonCount, METH_VARARGS },
+	{ "freyjaGetSkeletonBoneCount", py_freyjaGetSkeletonBoneCount, METH_VARARGS },
+	{ "freyjaGetSkeletonBoneIndex", py_freyjaGetSkeletonBoneIndex, METH_VARARGS },
+	{ "freyjaGetSkeletonRootIndex", py_freyjaGetSkeletonRootIndex, METH_VARARGS },
+	{ "freyjaSkeletonName", py_freyjaSkeletonName, METH_VARARGS },
+	{ "freyjaGetSkeletonName", py_freyjaGetSkeletonName, METH_VARARGS },
 	{ "freyjaKeyFrameGroupCreate", py_freyjaKeyFrameGroupCreate, METH_VARARGS },
+	{ "freyjaKeyFrameGroupDelete", py_freyjaKeyFrameGroupDelete, METH_VARARGS },
 	{ "freyjaGetKeyFrameCount", py_freyjaGetKeyFrameCount, METH_VARARGS },
+	{ "freyjaKeyFramePoolClear", py_freyjaKeyFramePoolClear, METH_VARARGS },
+	{ "freyjaKeyFrameGetIndexFromId", py_freyjaKeyFrameGetIndexFromId, METH_VARARGS },
+	{ "freyjaKeyFrameCreate", py_freyjaKeyFrameCreate, METH_VARARGS },
+	{ "freyjaKeyFrameDelete", py_freyjaKeyFrameDelete, METH_VARARGS },
+	{ "freyjaKeyFrameTime", py_freyjaKeyFrameTime, METH_VARARGS },
+	{ "freyjaGetKeyFrameTime", py_freyjaGetKeyFrameTime, METH_VARARGS },
+	{ "freyjaKeyFrameFlags", py_freyjaKeyFrameFlags, METH_VARARGS },
+	{ "freyjaGetKeyFrameFlags", py_freyjaGetKeyFrameFlags, METH_VARARGS },
+	{ "freyjaKeyFrameTransform", py_freyjaKeyFrameTransform, METH_VARARGS },
+	{ "freyjaGetModelCount", py_freyjaGetModelCount, METH_VARARGS },
+	{ "freyjaModelCreate", py_freyjaModelCreate, METH_VARARGS },
+	{ "freyjaModelAddSkeleton", py_freyjaModelAddSkeleton, METH_VARARGS },
+	{ "freyjaModelAddMesh", py_freyjaModelAddMesh, METH_VARARGS },
+	{ "freyjaGetModelFlags", py_freyjaGetModelFlags, METH_VARARGS },
+	{ "freyjaGetModelMeshCount", py_freyjaGetModelMeshCount, METH_VARARGS },
+	{ "freyjaGetModelMeshIndex", py_freyjaGetModelMeshIndex, METH_VARARGS },
+	{ "freyjaGetModelSkeleton", py_freyjaGetModelSkeleton, METH_VARARGS },
+	{ "freyjaModelTransform", py_freyjaModelTransform, METH_VARARGS },
+	{ "freyjaModelClear", py_freyjaModelClear, METH_VARARGS },
+	{ "freyjaGetBoneCount", py_freyjaGetBoneCount, METH_VARARGS },
+	{ "freyjaBonePoolClear", py_freyjaBonePoolClear, METH_VARARGS },
+	{ "freyjaBoneCreate", py_freyjaBoneCreate, METH_VARARGS },
 	{ "freyjaBoneDelete", py_freyjaBoneDelete, METH_VARARGS },
+	{ "freyjaBoneFlags", py_freyjaBoneFlags, METH_VARARGS },
+	{ "freyjaBoneParent", py_freyjaBoneParent, METH_VARARGS },
+	{ "freyjaBoneName", py_freyjaBoneName, METH_VARARGS },
+	{ "freyjaBoneRemoveChild", py_freyjaBoneRemoveChild, METH_VARARGS },
 	{ "freyjaBoneAddChild", py_freyjaBoneAddChild, METH_VARARGS },
+	{ "freyjaBoneTranslate3f", py_freyjaBoneTranslate3f, METH_VARARGS },
 	{ "freyjaBoneTranslate3fv", py_freyjaBoneTranslate3fv, METH_VARARGS },
+	{ "freyjaBoneRotateEuler3f", py_freyjaBoneRotateEuler3f, METH_VARARGS },
 	{ "freyjaBoneRotateEuler3fv", py_freyjaBoneRotateEuler3fv, METH_VARARGS },
 	{ "freyjaBoneRotateQuat4f", py_freyjaBoneRotateQuat4f, METH_VARARGS },
 	{ "freyjaBoneRotateQuat4fv", py_freyjaBoneRotateQuat4fv, METH_VARARGS },
+	{ "freyjaGetBoneRotationQuat4fv", py_freyjaGetBoneRotationQuat4fv, METH_VARARGS },
 	{ "freyjaGetBoneRotationEuler3fv", py_freyjaGetBoneRotationEuler3fv, METH_VARARGS },
+	{ "freyjaBoneTransform", py_freyjaBoneTransform, METH_VARARGS },
+	{ "freyjaBoneTransform3fv", py_freyjaBoneTransform3fv, METH_VARARGS },
+	{ "freyjaGetBoneNameString", py_freyjaGetBoneNameString, METH_VARARGS },
+	{ "freyjaGetBoneName", py_freyjaGetBoneName, METH_VARARGS },
 	{ "freyjaGetBoneParent", py_freyjaGetBoneParent, METH_VARARGS },
+	{ "freyjaGetBoneBindPose16fv", py_freyjaGetBoneBindPose16fv, METH_VARARGS },
+	{ "freyjaGetBoneWorldPos3fv", py_freyjaGetBoneWorldPos3fv, METH_VARARGS },
+	{ "freyjaGetBoneTranslation3fv", py_freyjaGetBoneTranslation3fv, METH_VARARGS },
+	{ "freyjaGetBoneSkeletonIndex", py_freyjaGetBoneSkeletonIndex, METH_VARARGS },
+	{ "freyjaGetBoneChild", py_freyjaGetBoneChild, METH_VARARGS },
+	{ "freyjaGetBoneChildCount", py_freyjaGetBoneChildCount, METH_VARARGS },
 	{ "freyjaBoneUpdateBindPose", py_freyjaBoneUpdateBindPose, METH_VARARGS },
 	{ "freyjaBoneGetBindTransform", py_freyjaBoneGetBindTransform, METH_VARARGS },
 	{ "freyjaBoneGetBindTransformInverse", py_freyjaBoneGetBindTransformInverse, METH_VARARGS },
@@ -910,6 +2495,7 @@ PyMethodDef Plugin_methods[] = {
 	{ "freyjaBonePosKeyFrame3f", py_freyjaBonePosKeyFrame3f, METH_VARARGS },
 	{ "freyjaBoneRotKeyFrameEuler3f", py_freyjaBoneRotKeyFrameEuler3f, METH_VARARGS },
 	{ "freyjaBoneRotKeyFrameQuat4f", py_freyjaBoneRotKeyFrameQuat4f, METH_VARARGS },
+	{ "freyjaLightCreate", py_freyjaLightCreate, METH_VARARGS },
 	{ "freyjaGetLightCount", py_freyjaGetLightCount, METH_VARARGS },
 	{ "freyjaLightDelete", py_freyjaLightDelete, METH_VARARGS },
 	{ "freyjaLightPosition4v", py_freyjaLightPosition4v, METH_VARARGS },
@@ -920,7 +2506,12 @@ PyMethodDef Plugin_methods[] = {
 	{ "freyjaGetLightAmbient", py_freyjaGetLightAmbient, METH_VARARGS },
 	{ "freyjaGetLightDiffuse", py_freyjaGetLightDiffuse, METH_VARARGS },
 	{ "freyjaGetLightSpecular", py_freyjaGetLightSpecular, METH_VARARGS },
+	{ "freyjaMaterialCreate", py_freyjaMaterialCreate, METH_VARARGS },
+	{ "freyjaMaterialClearAll", py_freyjaMaterialClearAll, METH_VARARGS },
+	{ "freyjaGetMaterialCount", py_freyjaGetMaterialCount, METH_VARARGS },
 	{ "freyjaGetMaterialIndex", py_freyjaGetMaterialIndex, METH_VARARGS },
+	{ "freyjaGetMaterialName", py_freyjaGetMaterialName, METH_VARARGS },
+	{ "freyjaGetMaterialFlags", py_freyjaGetMaterialFlags, METH_VARARGS },
 	{ "freyjaGetMaterialTexture", py_freyjaGetMaterialTexture, METH_VARARGS },
 	{ "freyjaGetMaterialTextureName", py_freyjaGetMaterialTextureName, METH_VARARGS },
 	{ "freyjaGetMaterialAmbient", py_freyjaGetMaterialAmbient, METH_VARARGS },
@@ -946,16 +2537,90 @@ PyMethodDef Plugin_methods[] = {
 	{ "freyjaMaterialBlendSource", py_freyjaMaterialBlendSource, METH_VARARGS },
 	{ "freyjaMaterialBlendDestination", py_freyjaMaterialBlendDestination, METH_VARARGS },
 	{ "freyjaPakBegin", py_freyjaPakBegin, METH_VARARGS },
+	{ "freyjaPakAddDecoderFunction2s", py_freyjaPakAddDecoderFunction2s, METH_VARARGS },
 	{ "freyjaPakAddFullPathFile", py_freyjaPakAddFullPathFile, METH_VARARGS },
+	{ "freyjaPakEnd", py_freyjaPakEnd, METH_VARARGS },
+	{ "freyjaMeshCreate", py_freyjaMeshCreate, METH_VARARGS },
+	{ "freyjaMeshCopy", py_freyjaMeshCopy, METH_VARARGS },
 	{ "freyjaMeshDelete", py_freyjaMeshDelete, METH_VARARGS },
+	{ "freyjaMeshMaterial", py_freyjaMeshMaterial, METH_VARARGS },
+	{ "freyjaMeshPosition", py_freyjaMeshPosition, METH_VARARGS },
+	{ "freyjaMeshName1s", py_freyjaMeshName1s, METH_VARARGS },
+	{ "freyjaMeshFlags1u", py_freyjaMeshFlags1u, METH_VARARGS },
+	{ "freyjaMeshTransform3fv", py_freyjaMeshTransform3fv, METH_VARARGS },
+	{ "freyjaMeshVertexCreate3fv", py_freyjaMeshVertexCreate3fv, METH_VARARGS },
+	{ "freyjaMeshVertexPos3fv", py_freyjaMeshVertexPos3fv, METH_VARARGS },
+	{ "freyjaMeshVertexNormal3fv", py_freyjaMeshVertexNormal3fv, METH_VARARGS },
+	{ "freyjaMeshTexCoordCreate2fv", py_freyjaMeshTexCoordCreate2fv, METH_VARARGS },
+	{ "freyjaMeshTexCoordCreate2f", py_freyjaMeshTexCoordCreate2f, METH_VARARGS },
+	{ "freyjaMeshTexCoordCreate3fv", py_freyjaMeshTexCoordCreate3fv, METH_VARARGS },
+	{ "freyjaMeshTexCoordCreate3f", py_freyjaMeshTexCoordCreate3f, METH_VARARGS },
+	{ "freyjaMeshTexCoord2fv", py_freyjaMeshTexCoord2fv, METH_VARARGS },
+	{ "freyjaMeshVertexTexCoord3fv", py_freyjaMeshVertexTexCoord3fv, METH_VARARGS },
+	{ "freyjaMeshClampTexCoords", py_freyjaMeshClampTexCoords, METH_VARARGS },
+	{ "freyjaMeshTransformTexCoord", py_freyjaMeshTransformTexCoord, METH_VARARGS },
+	{ "freyjaMeshPolygonCreate", py_freyjaMeshPolygonCreate, METH_VARARGS },
+	{ "freyjaMeshPolygonDelete", py_freyjaMeshPolygonDelete, METH_VARARGS },
+	{ "freyjaMeshPolygonAddVertex1i", py_freyjaMeshPolygonAddVertex1i, METH_VARARGS },
+	{ "freyjaMeshPolygonAddTexCoord1i", py_freyjaMeshPolygonAddTexCoord1i, METH_VARARGS },
+	{ "freyjaMeshPolygonMaterial", py_freyjaMeshPolygonMaterial, METH_VARARGS },
+	{ "freyjaMeshPolygonClearFlag1u", py_freyjaMeshPolygonClearFlag1u, METH_VARARGS },
+	{ "freyjaMeshPolygonSetFlag1u", py_freyjaMeshPolygonSetFlag1u, METH_VARARGS },
+	{ "freyjaMeshPolygonGroup1u", py_freyjaMeshPolygonGroup1u, METH_VARARGS },
+	{ "freyjaMeshUVMapPlanar", py_freyjaMeshUVMapPlanar, METH_VARARGS },
+	{ "freyjaMeshUVMapSpherical", py_freyjaMeshUVMapSpherical, METH_VARARGS },
+	{ "freyjaMeshUVMapCylindrical", py_freyjaMeshUVMapCylindrical, METH_VARARGS },
+	{ "freyjaMeshTesselateTriangles", py_freyjaMeshTesselateTriangles, METH_VARARGS },
+	{ "freyjaMeshNormalFlip", py_freyjaMeshNormalFlip, METH_VARARGS },
+	{ "freyjaMeshGenerateVertexNormals", py_freyjaMeshGenerateVertexNormals, METH_VARARGS },
 	{ "freyjaMeshPolygonExtrudeQuad1f", py_freyjaMeshPolygonExtrudeQuad1f, METH_VARARGS },
+	{ "freyjaMeshVertexWeight", py_freyjaMeshVertexWeight, METH_VARARGS },
+	{ "freyjaMeshTexCoordWeld", py_freyjaMeshTexCoordWeld, METH_VARARGS },
+	{ "freyjaMeshVertexWeld", py_freyjaMeshVertexWeld, METH_VARARGS },
+	{ "freyjaMeshUpdateBlendVertices", py_freyjaMeshUpdateBlendVertices, METH_VARARGS },
 	{ "freyjaMeshVertexTrackNew", py_freyjaMeshVertexTrackNew, METH_VARARGS },
+	{ "freyjaMeshVertexKeyFrameNew", py_freyjaMeshVertexKeyFrameNew, METH_VARARGS },
+	{ "freyjaMeshVertexKeyFrame3f", py_freyjaMeshVertexKeyFrame3f, METH_VARARGS },
+	{ "freyjaMeshPolygonSplit", py_freyjaMeshPolygonSplit, METH_VARARGS },
 	{ "freyjaGetMeshCount", py_freyjaGetMeshCount, METH_VARARGS },
+	{ "freyjaGetMeshBoundingBox", py_freyjaGetMeshBoundingBox, METH_VARARGS },
+	{ "freyjaGetMeshBoundingSphere", py_freyjaGetMeshBoundingSphere, METH_VARARGS },
+	{ "freyjaGetMeshFlags", py_freyjaGetMeshFlags, METH_VARARGS },
+	{ "freyjaGetMeshPosition", py_freyjaGetMeshPosition, METH_VARARGS },
+	{ "freyjaGetMeshNameString", py_freyjaGetMeshNameString, METH_VARARGS },
+	{ "freyjaGetMeshName1s", py_freyjaGetMeshName1s, METH_VARARGS },
+	{ "freyjaGetMeshVertexFlags", py_freyjaGetMeshVertexFlags, METH_VARARGS },
+	{ "freyjaGetMeshVertexPos3fv", py_freyjaGetMeshVertexPos3fv, METH_VARARGS },
+	{ "freyjaGetMeshVertexNormal3fv", py_freyjaGetMeshVertexNormal3fv, METH_VARARGS },
+	{ "freyjaGetMeshVertexTexCoord3fv", py_freyjaGetMeshVertexTexCoord3fv, METH_VARARGS },
+	{ "freyjaGetMeshVertexTexCoord", py_freyjaGetMeshVertexTexCoord, METH_VARARGS },
+	{ "freyjaGetMeshVertexPolygonRefCount", py_freyjaGetMeshVertexPolygonRefCount, METH_VARARGS },
+	{ "freyjaGetMeshVertexPolygonRefIndex", py_freyjaGetMeshVertexPolygonRefIndex, METH_VARARGS },
+	{ "freyjaGetMeshTexCoord2fv", py_freyjaGetMeshTexCoord2fv, METH_VARARGS },
+	{ "freyjaGetMeshPolygonFlags", py_freyjaGetMeshPolygonFlags, METH_VARARGS },
+	{ "freyjaGetMeshPolygonGroup", py_freyjaGetMeshPolygonGroup, METH_VARARGS },
+	{ "freyjaGetMeshPolygonEdgeCount", py_freyjaGetMeshPolygonEdgeCount, METH_VARARGS },
+	{ "freyjaGetMeshPolygonVertexCount", py_freyjaGetMeshPolygonVertexCount, METH_VARARGS },
+	{ "freyjaGetMeshPolygonVertexIndex", py_freyjaGetMeshPolygonVertexIndex, METH_VARARGS },
+	{ "freyjaGetMeshPolygonTexCoordCount", py_freyjaGetMeshPolygonTexCoordCount, METH_VARARGS },
+	{ "freyjaGetMeshPolygonTexCoordIndex", py_freyjaGetMeshPolygonTexCoordIndex, METH_VARARGS },
+	{ "freyjaGetMeshPolygonMaterial", py_freyjaGetMeshPolygonMaterial, METH_VARARGS },
+	{ "freyjaGetMeshTexCoordCount", py_freyjaGetMeshTexCoordCount, METH_VARARGS },
+	{ "freyjaGetMeshVertexCount", py_freyjaGetMeshVertexCount, METH_VARARGS },
+	{ "freyjaGetMeshTexCoordCount", py_freyjaGetMeshTexCoordCount, METH_VARARGS },
+	{ "freyjaGetMeshPolygonCount", py_freyjaGetMeshPolygonCount, METH_VARARGS },
+	{ "freyjaGetMeshBlendVertices", py_freyjaGetMeshBlendVertices, METH_VARARGS },
+	{ "freyjaGetMeshWeight", py_freyjaGetMeshWeight, METH_VARARGS },
+	{ "freyjaGetMeshWeightCount", py_freyjaGetMeshWeightCount, METH_VARARGS },
+	{ "freyjaGetMeshVertexTrackCount", py_freyjaGetMeshVertexTrackCount, METH_VARARGS },
+	{ "freyjaGetMeshVertexKeyFrameCount", py_freyjaGetMeshVertexKeyFrameCount, METH_VARARGS },
 	{ "freyjaMeshCreateSheet", py_freyjaMeshCreateSheet, METH_VARARGS },
 	{ "freyjaMeshCreateCube", py_freyjaMeshCreateCube, METH_VARARGS },
 	{ "freyjaMeshCreateCircle", py_freyjaMeshCreateCircle, METH_VARARGS },
 	{ "freyjaMeshCreateCone", py_freyjaMeshCreateCone, METH_VARARGS },
 	{ "freyjaMeshCreateCylinder", py_freyjaMeshCreateCylinder, METH_VARARGS },
+	{ "freyjaMeshCreateSphere", py_freyjaMeshCreateSphere, METH_VARARGS },
+	{ "freyjaMeshCreateTube", py_freyjaMeshCreateTube, METH_VARARGS },
 	{ NULL }
 };
 
