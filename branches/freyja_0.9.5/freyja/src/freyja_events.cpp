@@ -46,7 +46,7 @@ using namespace freyja3d;
 
 void eRecentFiles(unsigned int value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	FreyjaControl::mInstance->LoadModel(FreyjaControl::mInstance->GetRecentFilename(value));
 }
 
@@ -295,7 +295,7 @@ void freyja_init_application_plugins(const char *dir)
 
 void freyja_handle_application_window_close()
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	FreyjaControl::mInstance->event(eShutdown);
 }
 
@@ -445,7 +445,7 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 
 void mgtk_handle_command(int command)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated, Event %i not handled", command);
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated, Event %i not handled", command);
 	FreyjaControl::mInstance->event(command);
 }
 
@@ -458,7 +458,7 @@ void mgtk_handle_command2i(int event, int command)
 
 void mgtk_handle_event1u(int event, unsigned int value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	if (!FreyjaControl::mInstance->event(event, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
@@ -469,7 +469,7 @@ void mgtk_handle_event1u(int event, unsigned int value)
 
 void mgtk_handle_event1f(int event, float value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	if (!FreyjaControl::mInstance->event(event, value))
 	{
@@ -481,7 +481,7 @@ void mgtk_handle_event1f(int event, float value)
 
 void mgtk_handle_gldisplay()
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	//if (FreyjaControl::mInstance)
 		FreyjaControl::mInstance->Display();
 }
@@ -489,7 +489,7 @@ void mgtk_handle_gldisplay()
 
 void mgtk_handle_glresize(unsigned int width, unsigned int height)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	//if (FreyjaControl::mInstance)
 		FreyjaControl::mInstance->HandleResize(width, height);
 }
@@ -509,14 +509,14 @@ void mgtk_handle_resource_start()
 
 void mgtk_handle_slider1u(int event, unsigned int value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	FreyjaControl::mInstance->event(event, value);
 }
 
 
 void mgtk_handle_text(int event, char *text)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	//if (FreyjaControl::mInstance)
 		FreyjaControl::mInstance->handleTextEvent(event, text);
 }
@@ -552,7 +552,7 @@ void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
 
 void mgtk_event_gldisplay()
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	//if (FreyjaControl::mInstance)
 		FreyjaControl::mInstance->Display();
 }
@@ -560,7 +560,7 @@ void mgtk_event_gldisplay()
 
 void mgtk_event_glresize(unsigned int width, unsigned int height)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	//if (FreyjaControl::mInstance)
 		FreyjaControl::mInstance->HandleResize(width, height);
 }
@@ -585,7 +585,7 @@ void freyja_handle_command2i(int event, int command)
 
 void freyja_handle_event1u(int event, unsigned int value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	if (!FreyjaControl::mInstance->event(event, value))
 	{
@@ -597,7 +597,7 @@ void freyja_handle_event1u(int event, unsigned int value)
 
 void freyja_handle_event1f(int event, float value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	if (!FreyjaControl::mInstance->event(event, value))
 	{
@@ -609,28 +609,28 @@ void freyja_handle_event1f(int event, float value)
 
 void freyja_handle_gldisplay()
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
 	FreyjaControl::mInstance->Display();
 }
 
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
 	FreyjaControl::mInstance->HandleResize(width, height);
 }
 
 
 void freyja_handle_slider1u(int event, unsigned int value)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	FreyjaControl::mInstance->event(event, value);
 }
 
 
 void freyja_handle_text(int event, char *text)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	//if (FreyjaControl::mInstance)
 		FreyjaControl::mInstance->handleTextEvent(event, text);
 }
@@ -661,7 +661,7 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 
 void freyja_handle_command(int command)
 {
-	ASSERT_MSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 	FreyjaControl::mInstance->event(command);
 }
 

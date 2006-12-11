@@ -640,6 +640,24 @@ byte freyjaGetMeshPolygonFlags(index_t mesh, index_t polygon)
 }
 
 
+byte freyjaGetMeshPolygonGroup(index_t mesh, index_t polygon)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Face *f = m->GetFace(polygon);
+
+		if (f)
+		{
+			return f->mSmoothingGroup;
+		}
+	}
+
+	return 0;	
+}
+
+
 uint32 freyjaGetMeshPolygonVertexCount(index_t mesh, index_t polygon)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
@@ -770,15 +788,15 @@ void freyjaMeshPolygonAddVertex1i(index_t mesh, index_t polygon, index_t vertex)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
 
-	ASSERT_MSG(m != NULL, "Mesh[%i] == NULL", mesh);
+	FREYJA_ASSERTMSG(m != NULL, "Mesh[%i] == NULL", mesh);
 
 	if ( m != NULL )
 	{
 		Face *face = m->GetFace(polygon);
 		Vertex *v = m->GetVertex(vertex);
 
-		ASSERT_MSG(face != NULL, "Mesh[%i].Polygon[%i] == NULL", mesh, polygon);
-		ASSERT_MSG(v != NULL, "vertex == NULL");
+		FREYJA_ASSERTMSG(face != NULL, "Mesh[%i].Polygon[%i] == NULL", mesh, polygon);
+		FREYJA_ASSERTMSG(v != NULL, "vertex == NULL");
 
 		if ( face != NULL && v != NULL )
 		{
@@ -1511,7 +1529,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 
 		normal.zero();
 
-		//ASSERT_MSG(vertex->mPolyRefIndices.size(), "WTF vertex[%i] with no faces...", v);
+		//FREYJA_ASSERTMSG(vertex->mPolyRefIndices.size(), "WTF vertex[%i] with no faces...", v);
 
 		if (vertex->GetTmpRefs().size() == 0)
 		{

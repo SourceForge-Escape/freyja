@@ -115,7 +115,6 @@ byte freyjaIsBoneAllocated(index_t boneIndex)
 index_t freyjaBoneCreate(index_t skeletonIndex)
 {
 	Bone *b = FREYJA_NEW Bone();
-
 	b->mSkeleton = skeletonIndex;
 	b->AddToPool();
 	return b->GetUID();
@@ -378,6 +377,17 @@ void freyjaBone_Transform_TmpUtil(index_t boneIndex, Matrix &m)
 	}
 }
 
+matrix_t gBoneABIIdentity = { 1, 0, 0, 0,
+							  0, 1, 0, 0,
+							  0, 0, 1, 0,
+							  0, 0, 0, 1 };
+
+vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
+{
+	Bone *b = Bone::GetBone(boneIndex);
+	return b ? b->mBindPose.mMatrix : gBoneABIIdentity;
+}
+
 
 void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 {
@@ -475,6 +485,13 @@ uint32 freyjaGetBoneChildCount(index_t boneIndex)
 }
 
 #include <hel/Matrix.h>
+
+void freyjaBoneTransform3fv(index_t bone, 
+							freyja_transform_action_t action, vec3_t v)
+{
+	freyjaBoneTransform(bone, action, v[0], v[1], v[2]);
+}
+
 
 void freyjaBoneTransform(index_t boneIndex, 
                          freyja_transform_action_t action, 

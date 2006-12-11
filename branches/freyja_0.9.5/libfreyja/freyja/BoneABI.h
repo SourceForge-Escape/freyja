@@ -130,6 +130,13 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaBoneTransform3fv(index_t bone, 
+								freyja_transform_action_t action, vec3_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	const char *freyjaGetBoneNameString(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -149,6 +156,12 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns bone[index]'s parent id
+	 ------------------------------------------------------*/
+
+	vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s bind pose transform
 	 ------------------------------------------------------*/
 
 	void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz);

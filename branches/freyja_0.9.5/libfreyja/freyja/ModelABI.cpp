@@ -37,27 +37,27 @@ using namespace freyja;
 
 // ModelABI is currently an empty vessel as you can see
 
+uint32 freyjaGetModelCount()
+{
+	return 1;
+}
+
+
 index_t freyjaModelCreate()
 {
 	return 0;
 }
 
 
-void freyjaModelAddSkeleton(index_t skeleton)
+void freyjaModelAddSkeleton(index_t model, index_t skeleton)
 {
 	
 }
 
 
-void freyjaModelAddMesh(index_t mesh)
+void freyjaModelAddMesh(index_t model, index_t mesh)
 {
 	
-}
-
-
-uint32 freyjaGetModelCount()
-{
-	return 1;
 }
 
 
@@ -67,19 +67,19 @@ index_t freyjaGetModelMeshCount(index_t modelIndex)
 }
 
 
-index_t freyjaGetModelFlags(index_t modelIndex)
+index_t freyjaGetModelFlags(index_t model)
 {
 	return 0x0;
 }
 
 
-index_t freyjaGetModelMeshIndex(index_t modelIndex, uint32 element)
+index_t freyjaGetModelMeshIndex(index_t model, uint32 element)
 {
 	return element;
 }
 
 
-index_t freyjaGetModelSkeleton(index_t modelIndex)
+index_t freyjaGetModelSkeleton(index_t model)
 {
 	return 0;
 }

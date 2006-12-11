@@ -100,6 +100,12 @@
 	RegisterFunction(...).
 
 
+ Adjusting FPS cap
+ ----------------------------------------------------------------------------
+ 1. Goto void FreyjaRender::Display()
+ 2. Adjust time value ( in milliseconds )
+
+
  SVN examples
  ----------------------------------------------------------------------------
 

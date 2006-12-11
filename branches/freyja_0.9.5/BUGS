@@ -16,6 +16,9 @@
  A
  ----------------------------
 
+ * Crash on some model clears!
+	- hafu.freyja reproduces 100%, just open and close over and over
+
  * Quad ray pick sucks - fix it  ;_;
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
