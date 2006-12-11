@@ -148,9 +148,9 @@ def StoreWrapperFunction(li):
 
 	if len(li) > 3:
 		# List dumped into code
-		for i in li:
-			s += "\t/* " + i + " */\n"
-		s += "\n\n"
+		#for i in li:
+		#	s += "\t/* " + i + " */\n"
+		#s += "\n\n"
 
 		pass_vars = re.sub(';', '', pass_vars)
 		pass_vars = re.sub(',.$', '', pass_vars)
