@@ -110,7 +110,7 @@ extern "C" {
 	 * Post : Returns mesh local index of texcoord created
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshTexCoordCreate3fv(index_t mesh, vec3_t uvw);
+	index_t freyjaMeshTexCoordCreate3fv(index_t mesh, vec3_t uvw); 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns mesh local index of texcoord created

@@ -46,8 +46,7 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaPakAddFullPathFile(index_t pakIndex,
-								  const char *vfsFilename,
+	void freyjaPakAddFullPathFile(index_t pakIndex, const char *vfsFilename,
 								  int32 offset, int32 size);
 	/*------------------------------------------------------
 	 * Pre  : 
