@@ -44,6 +44,8 @@
 #include <hel/math.h>
 #include <hel/Ray.h>
 
+#include <freyja/LegacyABI.h>  // FIXME: Still using old, legacy polymesh gen
+
 #include "freyja_events.h"
 
 #include "FreyjaControl.h"

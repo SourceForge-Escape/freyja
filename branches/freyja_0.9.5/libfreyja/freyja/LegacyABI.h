@@ -429,7 +429,23 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaGenerateQuadCubeMesh(vec3_t origin, vec_t side);
 
+	void freyjaGenerateQuadPlaneMesh(vec3_t origin, vec_t side);
+
+	void freyjaGenerateCircleMesh(vec3_t origin, int32 count);
+
+	void freyjaGenerateConeMesh(vec3_t origin, vec_t height, int32 count);
+
+	void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
+								  int32 count, int32 segments);
+
+	void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
+									int32 count, int32 segments);
+
+	void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
+								int32 count, int32 segments);
+	
 #if FREYJA_OBSOLETE_ABI
 
 	void freyjaBoneRemoveMesh(index_t boneIndex, index_t meshIndex);
