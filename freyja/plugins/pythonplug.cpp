@@ -43,7 +43,7 @@ void freyja_pythonplug_init(void (*func)(const char*, void*))
 }
 
 
-mstl::String gPythonPluginSymbol = "ModelImport";
+mstl::String gPythonPluginSymbol = "ImportModel";
 void ePythonPluginSymbol(char *s)
 {
 	if (s && s[0])
@@ -61,8 +61,9 @@ void ePythonPluginArgs(char *s)
 
 void eLoadPythonPlugin(char *filename)
 {
-	freyjaPython1s(filename, 
-				   gPythonPluginSymbol.c_str(), gPythonPluginArgs.c_str());
+	if (filename && filename[0])
+		freyjaPython1s(filename, 
+					   gPythonPluginSymbol.c_str(), gPythonPluginArgs.c_str());
 }
 
 
