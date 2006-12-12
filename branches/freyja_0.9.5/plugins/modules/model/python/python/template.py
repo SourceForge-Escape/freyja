@@ -52,6 +52,22 @@ def ImportModel(filename):
 	return True
 
 
+def UnitTest(args):
+	mesh = freyjaMeshCreate()
+	v = []
+	v.append(freyjaMeshVertexCreate3fv(mesh, 0, 0, 0))
+	v.append(freyjaMeshVertexCreate3fv(mesh, 10, 0, 0))
+	v.append(freyjaMeshVertexCreate3fv(mesh, 10, 10, 0))
+	v.append(freyjaMeshVertexCreate3fv(mesh, 0, 10, 10))
+
+	face = freyjaMeshPolygonCreate(mesh)
+
+	for i in v:
+		freyjaMeshPolygonAddVertex1i(mesh, face, v[i])
+
+	return True
+
+
 
 def PluginEntry(symbol, args):
 
@@ -66,6 +82,8 @@ def PluginEntry(symbol, args):
 	elif re.match('.*InitPlugin', symbol):
 		InitPlugin(args)
 	
+	elif re.match('.*UnitTest', symbol):
+		UnitTest(args)
 
 
 PluginEntry(FreyjaSymbol, FreyjaArgs)
