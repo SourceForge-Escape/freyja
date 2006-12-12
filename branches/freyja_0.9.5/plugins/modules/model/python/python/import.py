@@ -1,19 +1,18 @@
-'''
- ======================================================================
- * 
- * Project : libfreyja
- * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://icculus.org/~mongoose
- * Email   : mongoose@icculus.org
- * Object  : 
- * Comments: This is the template plugin for the python system.
- * 
- *-- History ---------------------------------------------------------- 
- *
- * 2004.12.09:
- * Mongoose: Created
- ======================================================================
-'''
+
+#======================================================================
+#  
+#  Project : libfreyja
+#  Author  : Terry 'Mongoose' Hendrix II
+#  Website : http://icculus.org/~mongoose
+#  Email   : mongoose@icculus.org
+#  Object  : 
+#  Comments: This is the template plugin for the python system.
+#  
+# -- History ---------------------------------------------------------- 
+# 
+#  2004.12.09:
+#  Mongoose: Created
+#======================================================================
 
 import FreyjaModeler
 from FreyjaModeler import *

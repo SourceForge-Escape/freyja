@@ -64,10 +64,6 @@ public:
 	 * Pre  : 
 	 * Post : Constructs an object of Mesh
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.10.22: 
-	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
 	Mesh(const Mesh &mesh);
@@ -75,10 +71,6 @@ public:
 	 * Pre  : 
 	 * Post : Constructs an object of Mesh
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.10.22: 
-	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
 	~Mesh();
@@ -86,10 +78,6 @@ public:
 	 * Pre  : Mesh object is allocated
 	 * Post : Deconstructs an object of Mesh
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.10.22: 
-	 * Mongoose - Created, from FreyjaMesh in Freyja
 	 ------------------------------------------------------*/
 
 
@@ -101,66 +89,84 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns option flag bitmap for this mesh
+	 *
 	 ------------------------------------------------------*/
 
 	void ClearFlag(Flags flag) { mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Clears option flag for this mesh
+	 *
 	 ------------------------------------------------------*/
 
 	void SetFlag(Flags flag) { mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets option flag for this mesh
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMaterial(index_t idx) { mMaterialIndex = idx; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	const char *GetName() { return mName; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get human readable name of this mesh
+	 *
 	 ------------------------------------------------------*/
 
 	void SetName(const char *name) { strncpy(mName, name, 31); mName[31] = 0; }
 	/*------------------------------------------------------
 	 * Pre  : <name> != NULL && <name>[0] != 0
 	 * Post : Sets human readable name of this mesh
+	 *
 	 ------------------------------------------------------*/
 
 	const Vec3 &GetPosition() { return mPosition; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets mesh position attribute
+	 *
 	 ------------------------------------------------------*/
 
 	void SetPosition(const Vec3 &v) { mPosition = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets mesh position attribute
+	 *
 	 ------------------------------------------------------*/
 
 	const Vec3 &GetRotation() { return mRotation; }
 	/*------------------------------------------------------
 	 * Pre  : Euler angles in radians
 	 * Post : Gets mesh position attribute
+	 *
 	 ------------------------------------------------------*/
 
 	void SetRotation(const Vec3 &v) { mRotation = v; }
 	/*------------------------------------------------------
 	 * Pre  : Euler angles in radians
 	 * Post : Sets mesh rotation attribute
+	 *
 	 ------------------------------------------------------*/
 
 	const Vec3 &GetScale() { return mScale; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets mesh scale attribute
+	 *
 	 ------------------------------------------------------*/
 
 	void SetScale(const Vec3 &v) { mScale = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets mesh scale attribute
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -799,56 +805,42 @@ public:
 	}
 
 
-
-
-	void SetMaterial(index_t idx) { mMaterialIndex = idx; }
-
-
 	void UpdateBoundingVolume();
 	/*------------------------------------------------------
-	 * Pre  :  
+	 * Pre  : 
 	 * Post : Rotates mesh about bounding volume center
+	 *
 	 ------------------------------------------------------*/
 
-	void DeleteVertex(index_t vertexIndex)
-	{
-		BUG_ME("Not Implemented");
-	}
+	void DeleteVertex(index_t vertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-
-	bool WeldVertices(index_t a, index_t b)
-	{
-		Face *face;
-		unsigned int i;
-
-		// Make all polygons referencing A point to B
-		for (i = mFaces.begin(); i < mFaces.end(); ++i)
-		{
-			face = mFaces[i];
-
-			if (face)
-			{
-				//FIXME face->WeldVertices(a, b);
-			}
-		}
-
-		// Mark A as unused in the vertex pool
-		mFreedVertices.push(a);
-
-		return true;
-	}
-
+	bool WeldVertices(index_t a, index_t b);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void ClampAllTexCoords()
-	{
-		ClampAllTexCoords(0.0f, 1.0f);
-	}
-
+	{ ClampAllTexCoords(0.0f, 1.0f); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void ClampAllTexCoords(vec_t min, vec_t max)
-	{
-		ClampVecValues(mTexCoordPool, min, max);
-	}
+	{ ClampVecValues(mTexCoordPool, min, max); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void SetFaceSmoothingGroup(index_t face, uint32 group);
 	/*------------------------------------------------------
