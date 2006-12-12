@@ -1050,26 +1050,62 @@ index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz
 }
 
 
+bool Mesh::DeleteVertex(index_t vertex)
+{
+	bool result = false;
+
+	// We don't trust anyone calling this method...
+	RebuildVertexPolygonReferences(vertex);
+
+	Vertex **array = mVertices.get_array();
+	Vertex *v = GetVertex(vertex);
+
+	if ( v && v->GetFaceRefs().size() == 0)
+	{
+		delete v;
+		array[vertex] = NULL;
+
+		mFreedVertices.push(v->mVertexIndex);
+		mFreedTexCoords.push(v->mTexCoordIndex);
+		mFreedNormals.push(v->mNormalIndex);
+
+		result = true;
+	}
+
+	return result;
+}
+
+
+void Mesh::MeldVertices(index_t a, index_t b)
+{
+	Vertex *va = GetVertex(a);
+	Vertex *vb = GetVertex(b);
+
+	if (va && vb)
+		va->Meld(*vb);
+}
+
+
 bool Mesh::WeldVertices(index_t a, index_t b)
 {
-	Face *face;
-	unsigned int i;
+	Vertex *va = GetVertex(a);
+	Vertex *vb = GetVertex(b);
+
+	if (!va || !vb)
+		return false;
 
 	// Make all polygons referencing A point to B
-	for (i = mFaces.begin(); i < mFaces.end(); ++i)
+	for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
 	{
-		face = mFaces[i];
-
-		if (face)
+		if (mFaces[i])
 		{
-			//FIXME face->WeldVertices(a, b);
+			mFaces[i]->WeldVertices(a, b);
 		}
 	}
 
-	// Mark A as unused in the vertex pool
-	mFreedVertices.push(a);
-
-	return true;
+	// Delete A from the vertex pool
+	va->GetFaceRefs().clear();
+	return DeleteVertex(a);
 }
 
 
@@ -1351,6 +1387,32 @@ void Mesh::SetGroupsFaceSelected(uint32 groups)
 			face->mFlags |= Face::fSelected;
 		}
 	}
+}
+
+
+void Mesh::RebuildVertexPolygonReferences(index_t vertex)
+{
+	Vertex *v = GetVertex(vertex);
+
+	if (!v)
+		return;
+
+	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
+	{
+		Face *face = GetFace(f);
+
+		if (!face)
+			continue;
+		
+		uint32 i;
+		foreach (face->mIndices, i)
+		{
+			if (face->mIndices[i] == vertex)
+			{
+				v->GetFaceRefs().push_back(f);	
+			}
+		}
+	}	
 }
 
 

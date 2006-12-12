@@ -101,6 +101,33 @@ public:
 		return INDEX_INVALID;
 	}
 
+
+	void WeldTexCoords(index_t replace, index_t texcoord)
+	{
+		for (uint32 i = 0, n = mTexCoordIndices.size(); i < n; ++i)
+		{
+			if (mTexCoordIndices[i] == replace)
+			{
+				mTexCoordIndices[i] = texcoord;
+				break;
+			}
+		}
+	}
+
+
+	void WeldVertices(index_t replace, index_t vertex)
+	{
+		for (uint32 i = 0, n = mIndices.size(); i < n; ++i)
+		{
+			if (mIndices[i] == replace)
+			{
+				mIndices[i] = vertex;
+				break;
+			}
+		}
+	}
+
+
 	void PurgePolyMappedTexCoords()
 	{
 		mFlags |= fPolyMappedTexCoords;

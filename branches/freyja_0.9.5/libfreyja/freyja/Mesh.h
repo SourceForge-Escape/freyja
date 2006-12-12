@@ -258,6 +258,12 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	uint32 GetVertexArrayCount() { return mVertexPool.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	uint32 GetTexCoordCount() { return mTexCoordPool.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -294,21 +300,26 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void GetVertexPos(index_t vertexIndex, vec3_t xyz)
+	void GetVertexPos(index_t vertex, vec3_t xyz)
 	{
-		Vertex *vert;
-		if (vertexIndex < mVertices.size() && (vert = mVertices[vertexIndex]))
-			GetVertexArrayPos(vert->mVertexIndex, xyz);
-	}
-	void SetVertexPos(index_t vertexIndex, vec3_t xyz)
-	{
-		Vertex *vert;
-		if (vertexIndex < mVertices.size() && (vert = mVertices[vertexIndex]))
-			SetVertexArrayPos(vert->mVertexIndex, xyz);
+		if (vertex < mVertices.size() && mVertices[vertex])
+			GetVertexArrayPos(mVertices[vertex]->mVertexIndex, xyz);
 	}
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : <vertex> is an mVertices[] index.
+	 * Post : Correct Get method for class Vertex position
+	 *        with bounds checking.
+	 ------------------------------------------------------*/
+
+	void SetVertexPos(index_t vertex, vec3_t xyz)
+	{
+		if (vertex < mVertices.size() && mVertices[vertex])
+			SetVertexArrayPos(mVertices[vertex]->mVertexIndex, xyz);
+	}
+	/*------------------------------------------------------
+	 * Pre  : <vertex> is an mVertices[] index.
+	 * Post : Correct Set method for class Vertex position
+	 *        with bounds checking.
 	 ------------------------------------------------------*/
 
 	Weight *GetWeight(index_t w) 
@@ -418,6 +429,13 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Makes UV spherical projection for selected faces
+	 ------------------------------------------------------*/
+
+	void RebuildVertexPolygonReferences(index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Completely rebuilds <vertex> FaceReferences,
+	 *        and you don't want to do that very often.
 	 ------------------------------------------------------*/
 
 	void RebuildVertexPolygonReferences();
@@ -812,17 +830,34 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void DeleteVertex(index_t vertexIndex);
+	bool DeleteVertex(index_t vertex);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : If vertex polygon reference is empty it will 
+	 *        be deleted and this will return true.
+	 *
+	 ------------------------------------------------------*/
+
+	void MeldVertices(index_t a, index_t b);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Vertex <a> clones all of <b>'s array indices.
+	 *        Both vertices will continue to exist while 
+	 *        maintaining separate reference lists and flags.
+	 *
+	 *        Operations done on either will operate on the
+	 *        same pos/texcoord/normal array elements.
+	 *        This allows for undo operations for example.  
 	 *
 	 ------------------------------------------------------*/
 
 	bool WeldVertices(index_t a, index_t b);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Vertex <a> is destoried and all references 
+	 *        to <a> are replaced with <b>.
+	 *
+	 *        Returns true if <a> is sucessfully purged.
 	 *
 	 ------------------------------------------------------*/
 

@@ -31,7 +31,6 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 
 #include <freyja/FreyjaPrinter.h>
-#include <freyja/KeyFrameABI.h>
 #include <freyja/ModelABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/BoneABI.h>
@@ -880,9 +879,8 @@ private:
 	void Clear()
 	{
 		freyjaModelClear(0); // Only 1 edit model supported in this bulid
-		freyjaKeyFramePoolClear();
 		UpdateSkeletalUI();
-		//UpdateSkeletonUI_Callback(0); // Update skeletal UI
+		UpdateSkeletonUI_Callback(-1); // Update skeletal UI
 		mCursor.Reset();
 		mCleared = true;
 	}

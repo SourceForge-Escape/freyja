@@ -277,17 +277,17 @@ void freyjaTextureDelete(index_t textureIndex)
 
 
 void freyjaGetTextureImage(index_t textureIndex,
-                           uint32 *w, uint32 *h, uint32 *bitDepth,  
-                           uint32 *type, byte **image)
+                           uint32 &w, uint32 &h, uint32 &bitDepth,  
+                           uint32 &type, byte *&image)
 {
 	FreyjaTexture *texture;
 
 	/* Init */
-	*image = 0x0;
-	*bitDepth = 0;
-	*type = 0;
-	*w = 0;
-	*h = 0;
+	image = 0x0;
+	bitDepth = 0;
+	type = 0;
+	w = 0;
+	h = 0;
 
 	if (textureIndex < gFreyjaTextures.size())
 	{
@@ -295,23 +295,23 @@ void freyjaGetTextureImage(index_t textureIndex,
 
 		if (texture != 0x0)
 		{
-			*image = texture->mImage;
-			*bitDepth = texture->mBitDepth;
-			*w = texture->mWidth;
-			*h = texture->mHeight;
+			image = texture->mImage;
+			bitDepth = texture->mBitDepth;
+			w = texture->mWidth;
+			h = texture->mHeight;
 
 			switch (texture->mPixelFormat)
 			{
 			case FreyjaTexture::RGBA32:
-				*type = RGBA_32; 
+				type = RGBA_32; 
 				break;
 
 			case FreyjaTexture::RGB24:
-				*type = RGB_24; 
+				type = RGB_24; 
 				break;
 
 			case FreyjaTexture::Indexed8:
-				*type = INDEXED_8; 
+				type = INDEXED_8; 
 				break;
 			}
 		}

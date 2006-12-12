@@ -7,6 +7,9 @@
 # 
 # /bin/sh INSTALL
 
+
+#./UpdateBindings.py > freyja/PythonABI.cpp
+
 rm -f depend
 make debug
 #make install

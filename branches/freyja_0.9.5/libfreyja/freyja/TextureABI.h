@@ -56,8 +56,8 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 	void freyjaGetTextureImage(index_t textureIndex,
-                               uint32 *w, uint32 *h, uint32 *bitDepth,  
-                               uint32 *type, byte **image);
+                               uint32 &w, uint32 &h, uint32 &bitDepth,  
+                               uint32 &type, byte *&image);
 	/*------------------------------------------------------
 	 * Pre  : Do not attempt to alter <image> on return
 	 *

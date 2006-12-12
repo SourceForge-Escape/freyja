@@ -18,12 +18,9 @@
 
 #include "SkeletonABI.h"
 #include "PythonABI.h"
-#include ".#KeyFrameABI.h"
-ERROR opening file './freyja/.#KeyFrameABI.h'
 #include "TextureABI.h"
 #include "ModelABI.h"
 #include "BoneABI.h"
-#include "#KeyFrameABI.h#"
 #include "LightABI.h"
 #include "MaterialABI.h"
 #include "PakABI.h"
@@ -233,16 +230,16 @@ PyObject *py_freyjaTextureDelete(PyObject *self, PyObject *args)
 PyObject *py_freyjaGetTextureImage(PyObject *self, PyObject *args)
 {
 	index_t textureIndex;
-	uint32* w;
-	uint32* h;
-	uint32* bitDepth;
-	uint32* type;
-	byte* *image;
+	uint32 w;
+	uint32 h;
+	uint32 bitDepth;
+	uint32 type;
+	byte* image;
 
-	if (!PyArg_ParseTuple(args, "iiiiii", &textureIndex, &w, &h, &bitDepth, &type, &*image))
+	if (!PyArg_ParseTuple(args, "iiiiii", &textureIndex, &w, &h, &bitDepth, &type, &image))
 		return NULL;
 
-	freyjaGetTextureImage(textureIndex, w, h, bitDepth, type, *image);
+	freyjaGetTextureImage(textureIndex, w, h, bitDepth, type, image);
 	return PyInt_FromLong(0);
 }
 
@@ -2018,20 +2015,6 @@ PyObject *py_freyjaGetMeshNameString(PyObject *self, PyObject *args)
 }
 
 
-PyObject *py_freyjaGetMeshName1s(PyObject *self, PyObject *args)
-{
-	index_t mesh;
-	uint32 lenght;
-	char* name;
-
-	if (!PyArg_ParseTuple(args, "iis", &mesh, &lenght, &name))
-		return NULL;
-
-	freyjaGetMeshName1s(mesh, lenght, name);
-	return PyInt_FromLong(0);
-}
-
-
 PyObject *py_freyjaGetMeshVertexFlags(PyObject *self, PyObject *args)
 {
 	index_t mesh;
@@ -2345,6 +2328,20 @@ PyObject *py_freyjaGetMeshVertexKeyFrameCount(PyObject *self, PyObject *args)
 }
 
 
+PyObject *py_freyjaMeshCreateSheet(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t size;
+	uint32 rows;
+	uint32 columns;
+
+	if (!PyArg_ParseTuple(args, "ffffii", origin+0, origin+1, origin+2, &size, &rows, &columns))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateSheet(origin, size, rows, columns));
+}
+
+
 PyObject *py_freyjaMeshCreateCube(PyObject *self, PyObject *args)
 {
 	vec3_t origin;
@@ -2353,8 +2350,7 @@ PyObject *py_freyjaMeshCreateCube(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "ffff", origin+0, origin+1, origin+2, &size))
 		return NULL;
 
-	freyjaMeshCreateCube(origin, size);
-	return PyInt_FromLong(0);
+	return PyInt_FromLong(freyjaMeshCreateCube(origin, size));
 }
 
 
@@ -2367,8 +2363,65 @@ PyObject *py_freyjaMeshCreateCircle(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "ffffi", origin+0, origin+1, origin+2, &radius, &count))
 		return NULL;
 
-	freyjaMeshCreateCircle(origin, radius, count);
-	return PyInt_FromLong(0);
+	return PyInt_FromLong(freyjaMeshCreateCircle(origin, radius, count));
+}
+
+
+PyObject *py_freyjaMeshCreateCone(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t height;
+	vec_t radius;
+	uint32 wedges;
+
+	if (!PyArg_ParseTuple(args, "fffffi", origin+0, origin+1, origin+2, &height, &radius, &wedges))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateCone(origin, height, radius, wedges));
+}
+
+
+PyObject *py_freyjaMeshCreateCylinder(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t height;
+	vec_t radius;
+	uint32 sides;
+	uint32 rings;
+
+	if (!PyArg_ParseTuple(args, "fffffii", origin+0, origin+1, origin+2, &height, &radius, &sides, &rings))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateCylinder(origin, height, radius, sides, rings));
+}
+
+
+PyObject *py_freyjaMeshCreateSphere(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t radius;
+	int32 sides;
+	int32 rings;
+
+	if (!PyArg_ParseTuple(args, "ffffii", origin+0, origin+1, origin+2, &radius, &sides, &rings))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateSphere(origin, radius, sides, rings));
+}
+
+
+PyObject *py_freyjaMeshCreateTube(PyObject *self, PyObject *args)
+{
+	vec3_t origin;
+	vec_t height;
+	vec_t radius;
+	int32 sides;
+	int32 rings;
+
+	if (!PyArg_ParseTuple(args, "fffffii", origin+0, origin+1, origin+2, &height, &radius, &sides, &rings))
+		return NULL;
+
+	return PyInt_FromLong(freyjaMeshCreateTube(origin, height, radius, sides, rings));
 }
 
 
@@ -2534,7 +2587,6 @@ PyMethodDef Plugin_methods[] = {
 	{ "freyjaGetMeshFlags", py_freyjaGetMeshFlags, METH_VARARGS },
 	{ "freyjaGetMeshPosition", py_freyjaGetMeshPosition, METH_VARARGS },
 	{ "freyjaGetMeshNameString", py_freyjaGetMeshNameString, METH_VARARGS },
-	{ "freyjaGetMeshName1s", py_freyjaGetMeshName1s, METH_VARARGS },
 	{ "freyjaGetMeshVertexFlags", py_freyjaGetMeshVertexFlags, METH_VARARGS },
 	{ "freyjaGetMeshVertexPos3fv", py_freyjaGetMeshVertexPos3fv, METH_VARARGS },
 	{ "freyjaGetMeshVertexNormal3fv", py_freyjaGetMeshVertexNormal3fv, METH_VARARGS },
@@ -2560,8 +2612,13 @@ PyMethodDef Plugin_methods[] = {
 	{ "freyjaGetMeshWeightCount", py_freyjaGetMeshWeightCount, METH_VARARGS },
 	{ "freyjaGetMeshVertexTrackCount", py_freyjaGetMeshVertexTrackCount, METH_VARARGS },
 	{ "freyjaGetMeshVertexKeyFrameCount", py_freyjaGetMeshVertexKeyFrameCount, METH_VARARGS },
+	{ "freyjaMeshCreateSheet", py_freyjaMeshCreateSheet, METH_VARARGS },
 	{ "freyjaMeshCreateCube", py_freyjaMeshCreateCube, METH_VARARGS },
 	{ "freyjaMeshCreateCircle", py_freyjaMeshCreateCircle, METH_VARARGS },
+	{ "freyjaMeshCreateCone", py_freyjaMeshCreateCone, METH_VARARGS },
+	{ "freyjaMeshCreateCylinder", py_freyjaMeshCreateCylinder, METH_VARARGS },
+	{ "freyjaMeshCreateSphere", py_freyjaMeshCreateSphere, METH_VARARGS },
+	{ "freyjaMeshCreateTube", py_freyjaMeshCreateTube, METH_VARARGS },
 	{ NULL }
 };
 
