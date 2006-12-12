@@ -437,6 +437,26 @@ perlinnoise.dll:
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
 		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 
+pythonplug.so:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=pythonplug \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pythonplug.o" \
+		CFLAGS="$(PLUGIN_CFLAGS)" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
+
+pythonplug.dll:
+	@-mkdir -p $(PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+		MOD_NAME=pythonplug \
+		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pythonplug.o" \
+		CC=$(WIN32_CC) \
+		CPP=$(WIN32_CPP) \
+		LD=$(WIN32_LD) \
+		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
+		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
+		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+
 reverseengineer.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)
 	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \

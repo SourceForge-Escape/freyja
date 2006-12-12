@@ -59,6 +59,7 @@ void mgtk_print(char *format, ...);
 
 void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 char *mgtk_rc_map(char *filename_or_dirname);
+const char *mgtk_get_resource_path();
 
 void mgtk_toggle_value_set(int event, int val);
 }

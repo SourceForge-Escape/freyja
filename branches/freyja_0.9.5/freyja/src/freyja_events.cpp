@@ -534,6 +534,16 @@ char *mgtk_rc_map(char *filename_or_dirname)
 }
 
 
+const char *mgtk_get_resource_path()
+{
+	static String s;
+ 
+	s = freyja_get_resource_path(); // in case it's changed somehow
+
+	return s.c_str();
+}
+
+
 void freyja_handle_motion(int x, int y);
 void mgtk_handle_motion(int x, int y)
 {
@@ -1463,18 +1473,6 @@ void freyja_event_shutdown()
 }
 
 
-String freyja_rc_map_string(const char *s)
-{
-	char *cs = freyja_rc_map((char *)s);
-	String str(cs);
-
-	if (cs) 
-		delete [] cs;
-
-	return str;
-}
-
-
 String freyja_get_resource_path()
 {
 	mstl::String s;
@@ -1501,6 +1499,14 @@ String freyja_get_resource_path()
 	s += "/";
 #endif
 
+	return s;
+}
+
+
+String freyja_rc_map_string(const char *filename)
+{
+	String s = freyja_get_resource_path();
+	s += filename;
 	return s;
 }
 
