@@ -707,7 +707,8 @@ void freyja_print_args(char *format, va_list *args);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-mstl::String freyja_rc_map_string(const char *s);
+mstl::String freyja_get_resource_path();
+mstl::String freyja_rc_map_string(const char *filename);
 /*------------------------------------------------------
  * Pre  : <s> is a valid filename or dir in resource dir
  * Post : Returns fullpath filename as string
