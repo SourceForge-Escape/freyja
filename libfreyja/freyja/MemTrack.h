@@ -64,8 +64,8 @@ public:
 	{
 	}
 
-	String mFunc;
-	String mFile;
+	mstl::String mFunc;
+	mstl::String mFile;
 	long mLine;
 	void *mPtr;
 };

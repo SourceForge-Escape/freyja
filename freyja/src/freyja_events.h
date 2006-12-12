@@ -27,7 +27,7 @@
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
 #include <mstl/String.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/freyja.h>
 
 
 #define FREYJA_LOG_FILE "Freyja-dev.log"
@@ -707,7 +707,7 @@ void freyja_print_args(char *format, va_list *args);
  * Mongoose - Created
  ------------------------------------------------------*/
 
-String freyja_rc_map_string(const char *s);
+mstl::String freyja_rc_map_string(const char *s);
 /*------------------------------------------------------
  * Pre  : <s> is a valid filename or dir in resource dir
  * Post : Returns fullpath filename as string

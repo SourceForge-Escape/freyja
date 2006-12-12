@@ -28,7 +28,7 @@
 #include <mstl/SystemIO.h>
 
 #ifdef FREYJAIMAGE_PLUGINS
-#   include "FreyjaPluginABI.h"
+#   include "PluginABI.h"
 #endif
 
 #include "FreyjaImage.h"
