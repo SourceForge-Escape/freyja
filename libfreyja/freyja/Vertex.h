@@ -39,7 +39,9 @@ public:
 		fSelected    =  4,
 		fHidden      =  8,
 		fRayHit      = 16,
-		fSelected2   = 32   // Only used internally per method in Mesh
+		fSelected2   = 32,   // Only used internally per method in Mesh
+		fMuted       = 64
+
 	} Flags;
 
 	Vertex(index_t vertex, index_t texcoord, index_t normal) :
@@ -122,9 +124,73 @@ public:
 		return true;
 	}
 
+	
+	void Meld(Vertex &v)
+	{
+		// We don't want transform operations on this anymore, so
+		// we make it unselectable and hidden.
+		mFlags = fHidden | fMuted;
+		mVertexIndex = v.mVertexIndex;
+		mTexCoordIndex = v.mTexCoordIndex;
+		mNormalIndex = v.mNormalIndex;
+		mMaterial = v.mMaterial;
+	}
+	
+	const byte &GetFlags() { return mFlags; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns option flag bitmap.
+	 *
+	 ------------------------------------------------------*/
+
+	void ClearFlag(Flags flag) { if (!(mFlags & fMuted)) mFlags &= ~flag; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clears option flag if not mute.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetFlag(Flags flag) { if (!(mFlags & fMuted)) mFlags |= flag; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets option flag if not mute.
+	 *
+	 ------------------------------------------------------*/
+
+	bool IsMuted() { return (mFlags & fMuted); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 'Unlocks' current option flags.
+	 *
+	 ------------------------------------------------------*/
+
+	void ClearMuted() { mFlags &= ~fMuted; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 'Unlocks' current option flags.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMuted() { mFlags |= fMuted; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 'Locks' current option flags.
+	 *
+	 ------------------------------------------------------*/
+	
 	Vector<index_t> &GetFaceRefs() { return mFaceRefs; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Access the Face references.
+	 *
+	 ------------------------------------------------------*/
 
 	Vector<index_t> &GetTmpRefs() { return mTmpRefs; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Access the Temp references.
+	 *
+	 ------------------------------------------------------*/
 
 
 	byte mFlags;                /* State flags */

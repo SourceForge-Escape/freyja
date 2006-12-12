@@ -20,8 +20,10 @@
  ==========================================================================*/
 
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
 #include "Light.h"
 #include "LightABI.h"
+#include "freyja.h"
 
 using namespace freyja;
 using namespace mstl;
@@ -39,6 +41,12 @@ index_t freyjaLightCreate()
 	gFreyjaLights.pushBack(new Light());
 
 	return lightIndex;	
+}
+
+
+void freyjaLightDelete(index_t lightIndex)
+{
+	MSTL_MSG("Called stub function...");
 }
 
 
@@ -60,11 +68,6 @@ void freyjaCurrentLight(uint32 lightIndex)
 	{
 		gFreyjaLightIndex = lightIndex;
 	}
-}
-
-
-void freyjaLightDelete(int32 lightIndex)
-{
 }
 
 

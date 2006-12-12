@@ -1116,6 +1116,21 @@ index_t freyjaMeshVertexTrackNew(index_t mesh, vec_t duration, vec_t rate)
 }
 
 
+uint32 freyjaGetMeshVertexKeyFrameCount(index_t mesh, index_t track)
+{
+
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if ( m )
+	{
+		VertexAnimTrack &t = m->GetVertexAnimTrack(track);
+		return t.GetKeyframeCount();
+	}
+
+	return 0;
+}
+
+
 index_t freyjaMeshVertexKeyFrameNew(index_t mesh, index_t track, vec_t time)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
@@ -1134,6 +1149,19 @@ index_t freyjaMeshVertexKeyFrameNew(index_t mesh, index_t track, vec_t time)
 	}
 
 	return INDEX_INVALID;
+}
+
+
+uint32 freyjaGetMeshVertexTrackCount(index_t mesh)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if ( m )
+	{
+		return m->GetVertexAnimTrackCount();
+	}
+
+	return 0;
 }
 
 
@@ -1424,6 +1452,19 @@ void freyjaMeshPolygonGroup1u(index_t mesh, index_t face, uint32 group)
 	{
 		return m->SetFaceSmoothingGroup(face, group);
 	}
+}
+
+
+uint32 freyjaGetMeshNormalCount(index_t mesh)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		return m->GetNormalCount();
+	}
+
+	return 0;
 }
 
 
@@ -2043,3 +2084,56 @@ void freyjaMeshTesselateTriangles(index_t meshIndex)
 	}
 }
 
+
+index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size, 
+							  uint32 rows, uint32 columns)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
+							 uint32 wedges)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshCreateCylinder(vec3_t origin, vec_t height, vec_t radius, 
+								 uint32 sides, uint32 rings)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius, 
+							   int32 sides, int32 rings)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius, 
+							 int32 sides, int32 rings)
+{
+	MSTL_MSG("Calling stub function");
+	return INDEX_INVALID;
+}

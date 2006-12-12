@@ -350,11 +350,10 @@ index_t freyjaGetMaterialCount()
 }
 
 
-index_t freyjaGetMaterialIndex(index_t materialIndex, int32 element)
+// This is kind of worthless... ax it before release?
+index_t freyjaGetMaterialIndex(index_t materialIndex, uint32 element)
 {
-	// This is mainly reserved for future use
-
-	if (element > -1 && element < (long)gFreyjaMaterials.size())
+	if (element < (long)gFreyjaMaterials.size())
 	{
 		return element;
 	}

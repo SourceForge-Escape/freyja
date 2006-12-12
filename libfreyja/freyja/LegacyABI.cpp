@@ -1750,13 +1750,14 @@ index_t freyjaVertexCombine(index_t vertexIndexA, index_t vertexIndexB)
 	return INDEX_INVALID;
 }
 
+
 void freyjaVertexDelete(index_t vertexIndex)
 {	
 	Mesh *mesh = freyjaGetCurrentMeshClass();
 
 	if ( mesh != NULL )
 	{
-		mesh->DeleteVertex(vertexIndex);
+		//mesh-> D e l e t e V e r t e x (vertexIndex);
 	}
 }
 

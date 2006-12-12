@@ -76,7 +76,7 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns the gobal object index ( from the local
-	 *        Material element index ) or -1 on error
+	 *        Material element index ) or INDEX_INVALID
 	 *
 	 ------------------------------------------------------*/
 

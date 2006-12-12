@@ -121,7 +121,11 @@ $(BUILDDIR)/LightABI.o: freyja/LightABI.cpp freyja/Light.h freyja/LightABI.h \
   freyja/freyja.h freyja/MemTrack.h
 	 $(DO_CC)
 
-$(BUILDDIR)/	 $(DO_CC)
+$(BUILDDIR)/PythonABI.o: freyja/PythonABI.cpp freyja/SkeletonABI.h freyja/freyja.h \
+  freyja/MemTrack.h freyja/PythonABI.h freyja/TextureABI.h \
+  freyja/ModelABI.h freyja/BoneABI.h freyja/LightABI.h \
+  freyja/MaterialABI.h freyja/PakABI.h freyja/MeshABI.h
+	 $(DO_CC)
 
 $(BUILDDIR)/PakABI.o: freyja/PakABI.cpp freyja/freyja.h freyja/MemTrack.h \
   freyja/PakABI.h freyja/FreyjaPakReader.h

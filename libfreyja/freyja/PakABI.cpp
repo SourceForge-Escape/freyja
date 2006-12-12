@@ -41,6 +41,12 @@ FreyjaPakReader *freyjaGetPakReader(index_t uid)
 }
 
 
+void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol)
+{
+	MSTL_MSG("Calling stub function");
+}
+
+
 void freyjaPakDelete(index_t uid)
 {
 	if (uid < gFreyjaPaks.size() && gFreyjaPaks[uid] != 0x0)

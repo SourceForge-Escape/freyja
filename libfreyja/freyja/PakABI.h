@@ -35,7 +35,7 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	//void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol);
+	void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Used to decrypt or uncompress files in a pak

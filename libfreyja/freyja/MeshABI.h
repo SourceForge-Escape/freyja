@@ -350,12 +350,6 @@ extern "C" {
 	 * Post : Returns <mesh> human readable name.
 	 ------------------------------------------------------*/
 
-	void freyjaGetMeshName1s(index_t mesh, uint32 lenght, char *name);
-	/*------------------------------------------------------
-	 * Pre  : <name> is allocated with <lenght> bytes.
-	 * Post : Returns <mesh> human readable inside buffer <name>.
-	 ------------------------------------------------------*/
-
 	byte freyjaGetMeshVertexFlags(index_t mesh, index_t vertex);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -498,13 +492,13 @@ extern "C" {
 	 * Post : Gets number of vertex:bone weights in mesh
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMeshVertexTrackCount(index_t mesh);
+	uint32 freyjaGetMeshVertexTrackCount(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets number of tracks in <mesh>
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMeshVertexKeyFrameCount(index_t mesh, index_t track);
+	uint32 freyjaGetMeshVertexKeyFrameCount(index_t mesh, index_t track);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets number of keyframes in <track> of <mesh>
@@ -515,38 +509,38 @@ extern "C" {
 	// Mesh utilities ABI
 	////////////////////////////////////////////////////////////////
 
-	//index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size, 
-	//							  uint32 rows, uint32 columns);
+	index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size, 
+								  uint32 rows, uint32 columns);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Quadrilateral mesh sheet is created.
 	 *
 	 ------------------------------------------------------*/
 
-	//index_t freyjaMeshCreateCube(vec3_t origin, vec_t size);
+	index_t freyjaMeshCreateCube(vec3_t origin, vec_t size);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Quadrilateral mesh cube is created.
 	 *
 	 ------------------------------------------------------*/
 
-	//index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count);
+	index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Triangular center point circle mesh is created.
 	 *
 	 ------------------------------------------------------*/
 
-	//index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
-	//							 uint32 wedges);
+	index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
+								 uint32 wedges);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Triangular center point cone mesh is created.
 	 *
 	 ------------------------------------------------------*/
 
-	//index_t freyjaMeshCreateCylinder(vec3_t origin, vec_t height, vec_t radius, 
-	//								 uint32 sides, uint32 rings); 
+	index_t freyjaMeshCreateCylinder(vec3_t origin, vec_t height, vec_t radius, 
+									 uint32 sides, uint32 rings); 
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Triangular center point capped, 
@@ -554,15 +548,15 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	//index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius, 
-	//							   int32 sides, int32 rings);
+	index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius, 
+								   int32 sides, int32 rings);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	//index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius, 
-	//							 int32 sides, int32 rings);
+	index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius, 
+								 int32 sides, int32 rings);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Quadrilateral cylinder mesh is created.
