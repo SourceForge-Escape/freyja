@@ -212,8 +212,6 @@
 
 	* Simulation package revival
 
-	* Generated python plugin API from C ABI ( replace old, static version )
-
 	* Go do a sweep of all the plugins to make sure they use new ABI
 
 	* DBUS support now that it's hit stable ABI at 1.0

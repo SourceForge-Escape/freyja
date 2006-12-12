@@ -16,13 +16,11 @@
  * Mongoose - Generated, Based on C ABI for freyja
  ==========================================================================*/
 
-#ifdef USING_PYTHON
-#include <python2.4/Python.h>
+#define USING_PYTHON
 #include "SkeletonABI.h"
 #include "PythonABI.h"
 #include "KeyFrameABI.h"
 #include "TextureABI.h"
-#include "PluginABI.h"
 #include "ModelABI.h"
 #include "BoneABI.h"
 #include "LightABI.h"
@@ -30,6 +28,8 @@
 #include "PakABI.h"
 #include "MeshABI.h"
 #include "freyja.h"
+#ifdef USING_PYTHON
+#include <python2.4/Python.h>
 
 
 PyObject *py_freyjaSkeletonCreate(PyObject *self, PyObject *args)
@@ -344,12 +344,12 @@ PyObject *py_freyjaTextureCreateBuffer(PyObject *self, PyObject *args)
 	uint32 byteDepth;
 	uint32 width;
 	uint32 height;
-freyja_colormode_ttype;
+	freyja_colormode_t type;
 
-	if (!PyArg_ParseTuple(args, "iiii", &image, &byteDepth, &width, &height))
+	if (!PyArg_ParseTuple(args, "iiiii", &image, &byteDepth, &width, &height, &type))
 		return NULL;
 
-	return PyInt_FromLong(freyjaTextureCreateBuffer(image, byteDepth, width, height));
+	return PyInt_FromLong(freyjaTextureCreateBuffer(image, byteDepth, width, height, type));
 }
 
 
@@ -367,17 +367,7 @@ PyObject *py_freyjaTextureDelete(PyObject *self, PyObject *args)
 
 PyObject *py_freyjaGetTextureImage(PyObject *self, PyObject *args)
 {
-	index_t textureIndex;
-	uint32* w;
-	uint32* h;
-	uint32* bitDepth;
-	uint32* type;
-	byte* *image;
 
-	if (!PyArg_ParseTuple(args, "iiiiii", &textureIndex, &w, &h, &bitDepth, &type, &*image))
-		return NULL;
-
-	freyjaGetTextureImage(textureIndex, w, h, bitDepth, type, *image);
 	return PyInt_FromLong(0);
 }
 
@@ -391,192 +381,6 @@ PyObject *py_freyjaGetTexturePoolCount(PyObject *self, PyObject *args)
 PyObject *py_freyjaGetTextureCount(PyObject *self, PyObject *args)
 {
 	return PyInt_FromLong(freyjaGetTextureCount());
-}
-
-
-PyObject *py_freyjaPluginDirectoriesInit(PyObject *self, PyObject *args)
-{
-	freyjaPluginDirectoriesInit();
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaPluginsInit(PyObject *self, PyObject *args)
-{
-	freyjaPluginsInit();
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaPluginAddDirectory(PyObject *self, PyObject *args)
-{
-	char* dir;
-
-	if (!PyArg_ParseTuple(args, "s", &dir))
-		return NULL;
-
-	freyjaPluginAddDirectory(dir);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaPluginDescription(PyObject *self, PyObject *args)
-{
-	uint32 pluginIndex;
-	char* info_line;
-
-	if (!PyArg_ParseTuple(args, "is", &pluginIndex, &info_line))
-		return NULL;
-
-	freyjaPluginDescription(pluginIndex, info_line);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaPluginImportFlags(PyObject *self, PyObject *args)
-{
-	uint32 pluginIndex;
-	int32 flags;
-
-	if (!PyArg_ParseTuple(args, "ii", &pluginIndex, &flags))
-		return NULL;
-
-	freyjaPluginImportFlags(pluginIndex, flags);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaPluginExportFlags(PyObject *self, PyObject *args)
-{
-	uint32 pluginIndex;
-	int32 flags;
-
-	if (!PyArg_ParseTuple(args, "ii", &pluginIndex, &flags))
-		return NULL;
-
-	freyjaPluginExportFlags(pluginIndex, flags);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaPluginExtention(PyObject *self, PyObject *args)
-{
-	uint32 pluginIndex;
-	char* ext;
-
-	if (!PyArg_ParseTuple(args, "is", &pluginIndex, &ext))
-		return NULL;
-
-	freyjaPluginExtention(pluginIndex, ext);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginCount(PyObject *self, PyObject *args)
-{
-	return PyInt_FromLong(freyjaGetPluginCount());
-}
-
-
-PyObject *py_freyjaPluginShutdown(PyObject *self, PyObject *args)
-{
-	freyjaPluginShutdown();
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginId(PyObject *self, PyObject *args)
-{
-	return PyInt_FromLong(freyjaGetPluginId());
-}
-
-
-PyObject *py_freyjaGetPluginArg1f(PyObject *self, PyObject *args)
-{
-	int32 pluginId;
-	char* name;
-	float* arg;
-
-	if (!PyArg_ParseTuple(args, "isf", &pluginId, &name, &arg))
-		return NULL;
-
-	freyjaGetPluginArg1f(pluginId, name, arg);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginArg1i(PyObject *self, PyObject *args)
-{
-	int32 pluginId;
-	char* name;
-	int32* arg;
-
-	if (!PyArg_ParseTuple(args, "isi", &pluginId, &name, &arg))
-		return NULL;
-
-	freyjaGetPluginArg1i(pluginId, name, arg);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginArg1s(PyObject *self, PyObject *args)
-{
-	int32 pluginId;
-	char* name;
-	char* *arg;
-
-	if (!PyArg_ParseTuple(args, "iss", &pluginId, &name, &*arg))
-		return NULL;
-
-	freyjaGetPluginArg1s(pluginId, name, *arg);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginArgString(PyObject *self, PyObject *args)
-{
-	int32 pluginId;
-	char* name;
-	int32 len;
-	char* arg;
-
-	if (!PyArg_ParseTuple(args, "isis", &pluginId, &name, &len, &arg))
-		return NULL;
-
-	freyjaGetPluginArgString(pluginId, name, len, arg);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginDescriptions(PyObject *self, PyObject *args)
-{
-	freyjaGetPluginDescriptions();
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginDirectories(PyObject *self, PyObject *args)
-{
-	return PyString_FromString(freyjaGetPluginDirectories());
-}
-
-
-PyObject *py_freyjaGetPluginClassByName(PyObject *self, PyObject *args)
-{
-	char* name;
-
-	if (!PyArg_ParseTuple(args, "s", &name))
-		return NULL;
-
-	freyjaGetPluginClassByName(name);
-	return PyInt_FromLong(0);
-}
-
-
-PyObject *py_freyjaGetPluginClassByIndex(PyObject *self, PyObject *args)
-{
-	freyjaGetPluginClassByIndex();
-	return PyInt_FromLong(0);
 }
 
 
@@ -2796,24 +2600,6 @@ PyMethodDef Plugin_methods[] = {
 	{ "freyjaGetTextureImage", py_freyjaGetTextureImage, METH_VARARGS },
 	{ "freyjaGetTexturePoolCount", py_freyjaGetTexturePoolCount, METH_VARARGS },
 	{ "freyjaGetTextureCount", py_freyjaGetTextureCount, METH_VARARGS },
-	{ "freyjaPluginDirectoriesInit", py_freyjaPluginDirectoriesInit, METH_VARARGS },
-	{ "freyjaPluginsInit", py_freyjaPluginsInit, METH_VARARGS },
-	{ "freyjaPluginAddDirectory", py_freyjaPluginAddDirectory, METH_VARARGS },
-	{ "freyjaPluginDescription", py_freyjaPluginDescription, METH_VARARGS },
-	{ "freyjaPluginImportFlags", py_freyjaPluginImportFlags, METH_VARARGS },
-	{ "freyjaPluginExportFlags", py_freyjaPluginExportFlags, METH_VARARGS },
-	{ "freyjaPluginExtention", py_freyjaPluginExtention, METH_VARARGS },
-	{ "freyjaGetPluginCount", py_freyjaGetPluginCount, METH_VARARGS },
-	{ "freyjaPluginShutdown", py_freyjaPluginShutdown, METH_VARARGS },
-	{ "freyjaGetPluginId", py_freyjaGetPluginId, METH_VARARGS },
-	{ "freyjaGetPluginArg1f", py_freyjaGetPluginArg1f, METH_VARARGS },
-	{ "freyjaGetPluginArg1i", py_freyjaGetPluginArg1i, METH_VARARGS },
-	{ "freyjaGetPluginArg1s", py_freyjaGetPluginArg1s, METH_VARARGS },
-	{ "freyjaGetPluginArgString", py_freyjaGetPluginArgString, METH_VARARGS },
-	{ "freyjaGetPluginDescriptions", py_freyjaGetPluginDescriptions, METH_VARARGS },
-	{ "freyjaGetPluginDirectories", py_freyjaGetPluginDirectories, METH_VARARGS },
-	{ "freyjaGetPluginClassByName", py_freyjaGetPluginClassByName, METH_VARARGS },
-	{ "freyjaGetPluginClassByIndex", py_freyjaGetPluginClassByIndex, METH_VARARGS },
 	{ "freyjaGetModelCount", py_freyjaGetModelCount, METH_VARARGS },
 	{ "freyjaModelCreate", py_freyjaModelCreate, METH_VARARGS },
 	{ "freyjaModelAddSkeleton", py_freyjaModelAddSkeleton, METH_VARARGS },
@@ -3008,9 +2794,13 @@ PyObject *Freyja_Plugin_Gobals()
 }
 
 
+#endif // USING_PYTHON
+
+
 void freyjaPython1s(const char *plugin, const char *symbol, const char *s)
 {
-	PyObject *module, *dict, *tmp;
+#ifdef USING_PYTHON
+	PyObject *module, *dict, *tmp, *tmp2;
 
 	/* Start up python */
 	Py_Initialize();
@@ -3018,9 +2808,12 @@ void freyjaPython1s(const char *plugin, const char *symbol, const char *s)
 	dict = PyModule_GetDict(module);
 
 	/* Append gobal constants, pass <s> as <symbol> in python */
-	tmp = PyString_FromFormat(s);
-	PyDict_SetItemString(dict, symbol, tmp);
+	tmp = PyString_FromFormat(symbol);
+	PyDict_SetItemString(dict, "FreyjaSymbol", tmp);
 	Py_DECREF(tmp);
+	tmp2 = PyString_FromFormat(s);
+	PyDict_SetItemString(dict, "FreyjaArgs", tmp2);
+	Py_DECREF(tmp2);
 
 	freyjaPrintMessage("[Module '%s' opened.]", plugin);
 	FILE *f = fopen(plugin, "r");
@@ -3035,7 +2828,9 @@ void freyjaPython1s(const char *plugin, const char *symbol, const char *s)
 		PyRun_SimpleFile(f, plugin);
 		Py_Finalize();
 	}
+#else
+	freyjaPrintError("[Module '%s' failed to load.  Rebuild with USING_PYTHON.]", plugin);
+#endif // USING_PYTHON
 }
 
 
-#endif // USING_PYTHON

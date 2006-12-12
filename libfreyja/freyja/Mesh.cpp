@@ -1050,6 +1050,29 @@ index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz
 }
 
 
+bool Mesh::WeldVertices(index_t a, index_t b)
+{
+	Face *face;
+	unsigned int i;
+
+	// Make all polygons referencing A point to B
+	for (i = mFaces.begin(); i < mFaces.end(); ++i)
+	{
+		face = mFaces[i];
+
+		if (face)
+		{
+			//FIXME face->WeldVertices(a, b);
+		}
+	}
+
+	// Mark A as unused in the vertex pool
+	mFreedVertices.push(a);
+
+	return true;
+}
+
+
 void Mesh::Merge(Mesh *mesh)
 {
 	if (mesh == NULL)

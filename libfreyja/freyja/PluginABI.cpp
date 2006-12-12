@@ -33,6 +33,7 @@
 #include "BoneABI.h"
 #include "SkeletonABI.h"
 #include "PluginABI.h"
+#include "PythonABI.h"
 #include "Skeleton.h"
 #include "Plugin.h"
 
@@ -235,7 +236,12 @@ void freyjaPluginsInit()
 				continue;
 
 			if (!SystemIO::CheckModuleExt(module_filename))
+			{
+				if (SystemIO::CheckFilenameExt(module_filename, ".py"))
+					freyjaPython1s(module_filename, "<symbol>InitPlugin</symbol>", "init;");
+					
 				continue;
+			}
 
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
 
@@ -400,6 +406,14 @@ int32 freyjaImportModel(const char *filename)
 		{
 			if (reader.IsDirectory(module_filename))
 				continue;
+
+			if (!SystemIO::CheckModuleExt(module_filename))
+			{
+				if (SystemIO::CheckFilenameExt(module_filename, ".py"))
+					freyjaPython1s(module_filename, "<symbol>ImportModel</symbol>", filename);
+					
+				continue;
+			}
 
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
 
@@ -617,6 +631,9 @@ int32 freyjaExportModel(const char *filename, const char *type)
 
 		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
+			snprintf(module_filename, 255, "%s/%s.py", gPluginDirectories[i], name);
+			module_filename[255] = 0;
+			freyjaPython1s(module_filename, "<symbol>ExportModel</symbol>", filename);
 		}
 		else
 		{

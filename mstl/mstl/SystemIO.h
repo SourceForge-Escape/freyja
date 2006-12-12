@@ -1845,6 +1845,12 @@ class SystemIO
 		return symbol;
 	}
 
+
+	static bool CheckFilenameExt(const char *filename, const char *ext)
+	{
+		return (File::CompareFilenameExtention(filename, ext) == 0);
+	}
+
 	
 	static bool CheckModuleExt(const char *filename)
 	{

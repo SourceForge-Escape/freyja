@@ -30,7 +30,7 @@ import string
 import time
 
 gDateStamp = time.localtime(time.time())
-gForcePythonDefine = 0
+gForcePythonDefine = 1
 gPath = "./freyja"
 gPythonHeader = "python2.4/Python.h"
 gFuncWrappers = []
@@ -40,7 +40,8 @@ gFuncBindings = []
 def PrintOutFreyjaPythonABI():
 	print "void freyjaPython1s(const char *plugin, const char *symbol, const char *s)"
 	print "{"
-	print "\tPyObject *module, *dict, *tmp;"
+	print "#ifdef USING_PYTHON"
+	print "\tPyObject *module, *dict, *tmp, *tmp2;"
 	print ""
 	print "\t/* Start up python */"
 	print "\tPy_Initialize();"
@@ -48,9 +49,12 @@ def PrintOutFreyjaPythonABI():
 	print "\tdict = PyModule_GetDict(module);"
 	print ""
 	print "\t/* Append gobal constants, pass <s> as <symbol> in python */"
-	print "\ttmp = PyString_FromFormat(s);"
-	print "\tPyDict_SetItemString(dict, symbol, tmp);"
+	print "\ttmp = PyString_FromFormat(symbol);"
+	print "\tPyDict_SetItemString(dict, \"FreyjaSymbol\", tmp);"
 	print "\tPy_DECREF(tmp);"
+	print "\ttmp2 = PyString_FromFormat(s);"
+	print "\tPyDict_SetItemString(dict, \"FreyjaArgs\", tmp2);"
+	print "\tPy_DECREF(tmp2);"
 	print ""
 	print "\tfreyjaPrintMessage(\"[Module '%s' opened.]\", plugin);"
 	print "\tFILE *f = fopen(plugin, \"r\");"
@@ -65,6 +69,9 @@ def PrintOutFreyjaPythonABI():
 	print "\t\tPyRun_SimpleFile(f, plugin);"
 	print "\t\tPy_Finalize();"
 	print "\t}"
+	print "#else"
+	print "\tfreyjaPrintError(\"[Module '%s' failed to load.  Rebuild with USING_PYTHON.]\", plugin);"
+	print "#endif // USING_PYTHON"
 	print "}"
 	print "\n"
 
@@ -121,7 +128,7 @@ def StoreWrapperFunction(li):
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
 				func_vars += "\t" + li[i] + " "
-			elif re.match('(freyja_transform_action_t)', li[i]):
+			elif re.match('(freyja_transform_action_t|freyja_colormode_t)', li[i]):
 				parse_types += "i"
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
@@ -323,15 +330,15 @@ def UpdateBindings():
 
 	if gForcePythonDefine == 1:
 		print "#define USING_PYTHON"
-	print "#ifdef USING_PYTHON"
-	print "#include <" + gPythonHeader + ">"
 
 	for i in li:
-		if re.match('.*ABI.h', i) and not re.match('(Legacy|.*~)', i):
+		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|.*~)', i):
 			print "#include \"" + i + '"'
 			sucess = ImportBindings(gPath, i)
 
 	print "#include \"freyja.h\""
+	print "#ifdef USING_PYTHON"
+	print "#include <" + gPythonHeader + ">"
 	print "\n"
 
 	for i in gFuncWrappers:
@@ -344,9 +351,9 @@ def UpdateBindings():
 
 	PrintOutFreyjaPythonGobals()
 
-	PrintOutFreyjaPythonABI()
+	print "#endif // USING_PYTHON\n\n"
 
-	print "#endif // USING_PYTHON"
+	PrintOutFreyjaPythonABI()
 
 
 if __name__ == "__main__":

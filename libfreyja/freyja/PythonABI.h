@@ -33,7 +33,7 @@ extern "C" {
 	void freyjaPython1s(const char *plugin, const char *symbol, const char *s);
 	/*------------------------------------------------------
 	 * Pre  : <plugin> is the filename of the python plugin
-	 *        <symbol> is the python varible name for <s>
+	 *        <symbol> for internal use, eg "<symbol>ImportModel</symbol>" 
 	 *        <s> is the actual string data passed to the plugin
 	 * 
 	 * Post : 
