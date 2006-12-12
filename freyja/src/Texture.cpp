@@ -45,13 +45,6 @@
 #   include "mtk_png.h"
 #endif
 
-#ifdef HAVE_OPENGL
-#   include <GL/gl.h>
-#   include <GL/glu.h>
-#else
-#   error Texture class requires HAVE_OPENGL
-#endif
-
 #ifdef HAVE_FREYJA_IMAGE
 #   include <freyja/FreyjaImage.h>
 #endif
