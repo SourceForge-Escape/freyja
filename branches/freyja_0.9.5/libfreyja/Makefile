@@ -201,7 +201,6 @@ PROG_OBJS = \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/KeyFrame.o \
-	$(BUILDDIR)/KeyFrameABI.o \
 	$(BUILDDIR)/LegacyABI.o \
 	$(BUILDDIR)/Light.o \
 	$(BUILDDIR)/LightABI.o \

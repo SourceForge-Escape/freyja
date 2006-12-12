@@ -23,11 +23,11 @@
 
 #define FREYJA_APP_PLUGINS 1
 
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/Plugin.h>
 #include <freyja/LightABI.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/SkeletonABI.h>
-#include <freyja/FreyjaPlugin.h>
 #include <freyja/FreyjaImage.h>
 #include <mstl/SystemIO.h>
 
@@ -1475,46 +1475,41 @@ String freyja_rc_map_string(const char *s)
 }
 
 
-char *freyja_rc_map(char *s)
+String freyja_get_resource_path()
 {
-	char *rc = NULL;
-	char *path = "freyja";
-	unsigned int len;
-	
-	
-	if (!s || !s[0])
-	{
-		return NULL;
-	}
+	mstl::String s;
 
-	len = strlen(s) + strlen(path);
-  
 #if defined unix || MACOSX
-	char *env;
-
-	env = getenv("HOME");
+	char *env = getenv("HOME");
 	
 	if (!env || !env[0])
 	{
-		printf("ERROR: Bad HOME envronment\n");
-		return NULL;
+		MSTL_MSG("ERROR: Bad HOME envronment\n");
+		s = "/usr/share/freyja";
+	}
+	else
+	{
+		s = env;
 	}
 	
-	len += strlen(env) + 8;
-	
-	rc = new char[len + 1];
-	snprintf(rc, len, "%s/.%s/%s", env, path, s);
+	s += "/.freyja/";
 #else
 	char cwd[1024];
 	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
-
-	len = strlen(cwd) + strlen(s) + 8;
-
-	rc = new char[len + 1];
-	snprintf(rc, len, "%s/%s", cwd, s);
-#endif
 	
-	return rc;
+	s = cwd;
+	s += "/";
+#endif
+
+	return s;
+}
+
+
+char *freyja_rc_map(char *basename)
+{
+	String s = freyja_get_resource_path();
+	s += basename;
+	return mstl::String::Strdup(s.c_str());;
 }
 
 

@@ -515,38 +515,38 @@ extern "C" {
 	// Mesh utilities ABI
 	////////////////////////////////////////////////////////////////
 
-	index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size, 
-								  uint32 rows, uint32 columns);
+	//index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size, 
+	//							  uint32 rows, uint32 columns);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Quadrilateral mesh sheet is created.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateCube(vec3_t origin, vec_t size);
+	//index_t freyjaMeshCreateCube(vec3_t origin, vec_t size);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Quadrilateral mesh cube is created.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count);
+	//index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Triangular center point circle mesh is created.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
-								 uint32 wedges);
+	//index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
+	//							 uint32 wedges);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Triangular center point cone mesh is created.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateCylinder(vec3_t origin, vec_t height, vec_t radius, 
-									 uint32 sides, uint32 rings); 
+	//index_t freyjaMeshCreateCylinder(vec3_t origin, vec_t height, vec_t radius, 
+	//								 uint32 sides, uint32 rings); 
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Triangular center point capped, 
@@ -554,15 +554,15 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius, 
-								   int32 sides, int32 rings);
+	//index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius, 
+	//							   int32 sides, int32 rings);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius, 
-								 int32 sides, int32 rings);
+	//index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius, 
+	//							 int32 sides, int32 rings);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Quadrilateral cylinder mesh is created.

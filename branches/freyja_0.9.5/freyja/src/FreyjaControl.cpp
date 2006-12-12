@@ -30,8 +30,8 @@
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEvent.h>
-#include <freyja/FreyjaPlugin.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/Plugin.h>
+#include <freyja/PluginABI.h>
 #include <freyja/Bone.h>
 #include <freyja/LightABI.h>
 #include <freyja/Mesh.h>

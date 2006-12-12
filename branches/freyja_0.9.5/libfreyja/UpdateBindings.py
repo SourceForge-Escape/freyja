@@ -30,7 +30,7 @@ import string
 import time
 
 gDateStamp = time.localtime(time.time())
-gForcePythonDefine = 1
+gForcePythonDefine = 0
 gPath = "./freyja"
 gPythonHeader = "python2.4/Python.h"
 gFuncWrappers = []
@@ -48,7 +48,7 @@ def PrintOutFreyjaPythonABI():
 	print "\tmodule = Freyja_Plugin_Gobals();"
 	print "\tdict = PyModule_GetDict(module);"
 	print ""
-	print "\t/* Append gobal constants, pass <s> as <symbol> in python */"
+	print "\t/* Append gobal constants, string in as \"Symbol\" in python */"
 	print "\ttmp = PyString_FromFormat(symbol);"
 	print "\tPyDict_SetItemString(dict, \"FreyjaSymbol\", tmp);"
 	print "\tPy_DECREF(tmp);"

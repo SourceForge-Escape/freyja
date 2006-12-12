@@ -26,7 +26,6 @@
 #include <math.h>
 
 #include <freyja/freyja.h>
-#include <freyja/FreyjaPluginABI.h>
 #include <freyja/MaterialABI.h>
 #include <hel/math.h>
 

@@ -35,14 +35,12 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol);
+	//void freyjaPakAddDecoderFunction2s(const char *module, const char *symbol);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Used to decrypt or uncompress files in a pak
 	 *        using an external module and one of it's
 	 *        C accessable functions using freyjaPak ABI.
-	 *
-	 *        NOT IMPLEMENTED!
 	 *
 	 ------------------------------------------------------*/
 
