@@ -22,7 +22,8 @@
 #include <string.h>
 #include <math.h>
 #include <hel/math.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/TextureABI.h>
 #include <freyja/FreyjaPakReader.h>
 #include <freyja/FreyjaImage.h>
 #include "freyja_events.h"
