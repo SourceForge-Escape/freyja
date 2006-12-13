@@ -4250,7 +4250,7 @@ void FreyjaControl::addObject()
 			if (idx == 0)
 			{
 				freyjaSkeletonRootIndex(skel, idx);
-				freyjaBoneParent(idx, -1);
+				freyjaBoneParent(idx, INDEX_INVALID);
 			}
 			else //if (index > 0 && index != root)
 			{
