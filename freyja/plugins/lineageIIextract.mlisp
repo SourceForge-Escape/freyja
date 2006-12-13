@@ -13,6 +13,8 @@
 ;	(vbox 0 0 0 0 0
 
 (summonbox "FirstPartyPluginSlot"
+	(handlebox 1
+	(vbox 1 1 0 1 1
 	(expander "Lineage II Extract 1.0" 0 
 		(menubar
 		(submenu "_File"
@@ -56,7 +58,9 @@
 
 		(button "Extract" eMode eL2Extract)
 	)
+
+;(hbox 1 0 0 1 0 (hsep))
 )
 
+))
 
-S

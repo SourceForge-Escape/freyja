@@ -11,6 +11,8 @@
 ;(dialog "Freyja :: Pak Reader" eDialogPakReader 0
 ;	(vbox 0 0 1 1 0
 (summonbox "FirstPartyPluginSlot"
+	(handlebox 1
+	(vbox 1 1 0 1 1
 	(expander "Pak Reader Plugin 1.0" 0 
 
 		(hbox 1 1 0 1 1
@@ -26,5 +28,8 @@
 			(vbox 0 0 1 1 1
 				(tree	ePakReaderFiles	eSetCurrentPakFilename)))
 	)
+
+;	(hbox 1 0 0 1 0 (hsep))
 )
+))
 
