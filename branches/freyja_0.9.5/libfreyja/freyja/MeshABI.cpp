@@ -1946,7 +1946,7 @@ void freyjaDebugMeshBlendVertices(index_t mesh)
 	{
 		vec_t *array = m->GetBlendVerticesArray();
 	
-		for (uint i = 0, n = m->GetVertexCount(); i < n; ++i)
+		for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
 		{
 			Vertex *v = m->GetVertex(i);
 
