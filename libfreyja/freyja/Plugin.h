@@ -169,7 +169,8 @@ public:
 		if (!name || !name[0])
 			return -1; // oh well
 
-		l = strnlen(name, 64);
+		l = strlen(name);
+		l = (l > 64) ? 64 : l;
 
 		for (i = mIntArgsDesc.begin(); i < (long)mIntArgsDesc.end(); ++i)
 		{
@@ -188,7 +189,8 @@ public:
 		if (!name || !name[0])
 			return -1; // oh well
 
-		l = strnlen(name, 64);
+		l = strlen(name);
+		l = (l > 64) ? 64 : l;
 
 		for (i = mFloatArgsDesc.begin(); i < (long)mFloatArgsDesc.end(); ++i)
 		{
@@ -207,7 +209,8 @@ public:
 		if (!name || !name[0])
 			return 0x0; // oh well
 
-		l = strnlen(name, 64);
+		l = strlen(name);
+		l = (l > 64) ? 64 : l;
 
 		for (i = mStringArgsDesc.begin(); i < (long)mStringArgsDesc.end(); ++i)
 		{
@@ -226,7 +229,8 @@ public:
 		if (!name || !name[0])
 			return;
 
-		l = strnlen(name, 64);
+		l = strlen(name);
+		l = (l > 64) ? 64 : l;
 		s = new char[64];
 		strncpy(s, name, 64);
 		s[63] = 0;
@@ -244,7 +248,8 @@ public:
 		if (!name || !name[0])
 			return;
 
-		l = strnlen(name, 64);
+		l = strlen(name);
+		l = (l > 64) ? 64 : l;
 		s = new char[64];
 		strncpy(s, name, 64);
 		s[63] = 0;
@@ -262,7 +267,8 @@ public:
 		if (!name || !name[0])
 			return;
 
-		l = strnlen(name, 64);
+		l = strlen(name);
+		l = (l > 64) ? 64 : l;
 		s = new char[64];
 		strncpy(s, name, 64);
 		s[63] = 0;
@@ -271,7 +277,8 @@ public:
 
 		if (data && data[0])
 		{
-			l = strnlen(name, 64);
+			l = strlen(name);
+			l = (l > 64) ? 64 : l;
 			s = new char[l+1];
 			strncpy(s, data, l);
 			s[l-1] = 0;
