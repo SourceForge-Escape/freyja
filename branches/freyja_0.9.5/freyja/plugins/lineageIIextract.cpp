@@ -23,9 +23,7 @@
 #include <hel/math.h>
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
-#include <freyja/FreyjaPluginABI.h>
-#include <freyja/FreyjaFileReader.h>
-#include <freyja/FreyjaFileWriter.h>
+#include <freyja/PluginABI.h>
 #include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>

@@ -22,15 +22,15 @@
 #include <string.h>
 #include <math.h>
 #include <hel/math.h>
-#include <freyja/FreyjaFileReader.h>
+#include <mstl/SystemIO.h>
 #include <freyja/PerlinNoise.h>
 #include <freyja/FreyjaImage.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/TextureABI.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
 
-//#include "freyja_events.h"
-
+using namespace mstl;
 
 extern "C" {
 
