@@ -13,13 +13,15 @@
 ;	(vbox 0 0 0 0 0
 
 (summonbox "FirstPartyPluginSlot"
+	(handlebox 1
+	(vbox 1 1 0 1 1
 	(expander "Reverse Engineer 2.0" 0 
 
 		(hbox 0 0 0 1 0
-			(icon "freyja.png" IconSize_Dialog)
+			(icon "freyja-dev.png" IconSize_Dialog)
 			(vbox 0 0 0 0 0
 				(label "Reverse Engineer Plugin"  0.0 0.5)
-				(label "Help add more model support!"  0.0 0.25)))
+				(label2 "Help add more model support!")))
 
 		;; Input filename
 		(label "1. Open a file" 0.0 0.5)
@@ -32,9 +34,11 @@
 		(hbox 1 0 0 1 0 (hsep))
 
 		(label "2. Make your best guess"  0.0 0.5)
+		(hbox 1 0 0 1 0 (hsep))
 
 		;; Vertex extractor
-		(label "Vertex extractor "  0.0 0.5)
+		(label "Vertex extractor"  0.0 0.5)
+		(label2 "<small>Operator: X Y Z U V / *   Type: 0 1 2 u s b f</small>")
 		(textbox eReverseEngineerVString)
 		(hbox 1 0 0 1 0
 			(label "Vertex Offset "  0.0 0.5)
@@ -49,6 +53,7 @@
 		;; Face extractor
 		(hbox 1 0 0 1 0 (hsep))
 		(label "Face extractor "  0.0 0.5)
+		(label2 "<small>Operator: A B C D M     Type: 0 i s f</small>")
 		(textbox eReverseEngineerFString)
 		(hbox 1 0 0 1 0
 			(label "Face Offset "  0.0 0.5)
@@ -65,7 +70,10 @@
 		(label "4. Erase model to restart"  0.0 0.5)
 		(button "Erase" eMode eReverseEngineerDelete)
 	)
+
+	;(hbox 1 0 0 1 0 (hsep))
 )
+))
 
 
 
