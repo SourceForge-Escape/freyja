@@ -68,7 +68,7 @@ FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
 	if (!name || !name[0])
 		return 0x0;
 
-	l = strnlen(name, 8192);
+	l = strlen(name);
 
 	for (i = gFreyjaPlugins.begin(); i < (long)gFreyjaPlugins.end(); ++i)
 	{
