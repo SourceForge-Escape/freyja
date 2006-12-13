@@ -19,7 +19,6 @@
  * Mongoose - Barrowed from my libfreyja, and then made more generic
  ================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_SYSTEMIO_H_
 #define GUARD__FREYJA_MONGOOSE_SYSTEMIO_H_
 
@@ -66,7 +65,7 @@
 #define FIX_INT(x)   (*(unsigned int *)&(x)   = SWAP_4(*(unsigned int *)&(x)))
 #define FIX_FLOAT(x) FIX_INT(x)
 
-//INFINITY
+//INFINITY IEEE
 
 namespace mstl {
 
@@ -80,12 +79,20 @@ class Timer
 
 	void Reset() 
 	{ 
+#ifdef WIN32
+		mStart = GetTickCount();
+#else
 		gettimeofday(&mStart, &mTZ);
 		//mTotal.tv_sec = mTotal.tv_usec = 0; 
+#endif
 	}
  
 	unsigned int GetTicks()
 	{
+#ifdef WIN32
+		mStop = GetTickCount();
+		return mStop - mStart;
+#else
 		gettimeofday(&mStop, &mTZ);
 			
 		if (mStart.tv_usec > mStop.tv_usec) 
@@ -98,11 +105,16 @@ class Timer
 		//mStop.tv_sec -= mStart.tv_sec;
 
 		return ( ((mStop.tv_sec - mStart.tv_sec)*1000) + 
-					(mStop.tv_usec - mStart.tv_usec));
+					(mStop.tv_usec - mStart.tv_usec)); 
+#endif
 	}
 
 	float GetElapsed()
 	{
+#ifdef WIN32
+		mStop = GetTickCount();
+		return mStop - mStart;
+#else
 		const float uinv = 1 / 1000.0f;
 
 		gettimeofday(&mStop, &mTZ);
@@ -118,11 +130,18 @@ class Timer
 
 		return ( ((float)(mStop.tv_sec - mStart.tv_sec)) +
 					((float)(mStop.tv_usec - mStart.tv_usec)) * uinv);
+#endif
 	}
 
+#ifdef WIN32
+	DWORD mTZ;
+	DWORD mStart;
+	DWORD mStop;
+#else
 	struct timezone mTZ;
 	struct timeval mStart;
 	struct timeval mStop;
+#endif
 };
 
 
@@ -130,20 +149,31 @@ class SystemIO
 {
  public:	
 
+
 	class File
 	{
 	public:
 
-		enum ByteOrder {
+		typedef enum {
 			
 			BIG    = 1,
 			LITTLE 
 			
-		};
+		} ByteOrder;
+
+
+		ByteOrder GetByteOrder()
+		{
+#ifdef __BIG_ENDIAN__
+			return BIG;
+#else
+			return LITTLE;
+#endif
+		}
 
 
 		File() :
-			mHostOrder(LITTLE),
+			mHostOrder(LITTLE),  // Host order file will USE for I/O
 			mFileHandle(NULL),
 			mBuffer(NULL),
 			mBufferSize(0),
@@ -504,7 +534,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 32bit float\n");
 
-		#if HAVE_BIG_ENDIAN
+		#if __BIG_ENDIAN__
 			FIX_FLOAT(*ptr)
 		#endif
 
@@ -545,7 +575,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 16bit int\n");
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_SHORT(*ptr)
 		#endif
 			return i;
@@ -561,7 +591,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 16bit uint\n");
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_SHORT(*ptr)
 		#endif
 			return u;
@@ -577,7 +607,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			return i;
@@ -593,7 +623,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			return u;
@@ -609,7 +639,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			if (mHostOrder == LITTLE)
 				FIX_INT(*ptr);
 		#else
@@ -629,7 +659,7 @@ class SystemIO
 			if (sz < 1)
 				printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			if (!mHostOrder == LITTLE)
 				FIX_INT(*ptr);
 		#else
@@ -794,7 +824,7 @@ class SystemIO
 			void *ptr = &r;
 			MemRead(ptr, 4);
 
-#if HAVE_BIG_ENDIAN
+#if __BIG_ENDIAN__
 			FIX_FLOAT(*ptr)
 #endif
 
@@ -832,7 +862,7 @@ class SystemIO
 			void *ptr = &i;
 			MemRead(ptr, 2);
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_SHORT(*ptr)
 		#endif
 			return i;
@@ -845,7 +875,7 @@ class SystemIO
 			void *ptr = &u;
 			MemRead(ptr, 2);
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_SHORT(*ptr)
 		#endif
 			return u;
@@ -858,7 +888,7 @@ class SystemIO
 			void *ptr = &i;
 			MemRead(ptr, 4);
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			return i;
@@ -871,7 +901,7 @@ class SystemIO
 			void *ptr = &u;
 			MemRead(ptr, 4);
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			return u;
@@ -884,7 +914,7 @@ class SystemIO
 			void *ptr = &i;
 			MemRead(ptr, 4);
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			if (mHostOrder == LITTLE)
 				FIX_INT(*ptr);
 		#else
@@ -901,7 +931,7 @@ class SystemIO
 			void *ptr = &u;
 			MemRead(ptr, 4);
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			if (!mHostOrder == LITTLE)
 				FIX_INT(*ptr);
 		#else
@@ -1327,7 +1357,7 @@ class SystemIO
 		bool WriteFloat32(float r)
 		{	
 			void *ptr = &r;
-		#if HAVE_BIG_ENDIAN
+		#if __BIG_ENDIAN__
 			FIX_FLOAT(*ptr)
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
@@ -1357,7 +1387,7 @@ class SystemIO
 		bool WriteInt16(short i)
 		{
 			void *ptr = &i;
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_SHORT(*ptr)
 		#endif
 			size_t sz = fwrite(ptr, 2, 1, mFileHandle);
@@ -1369,7 +1399,7 @@ class SystemIO
 		bool WriteInt16U(unsigned short u)
 		{
 			void *ptr = &u;
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_SHORT(*ptr)
 		#endif
 			size_t sz = fwrite(ptr, 2, 1, mFileHandle);
@@ -1381,7 +1411,7 @@ class SystemIO
 		bool WriteInt32(int i)
 		{
 			void *ptr = &i;
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
@@ -1393,7 +1423,7 @@ class SystemIO
 		bool WriteInt32U(unsigned int u)
 		{
 			void *ptr = &u;
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
@@ -1407,7 +1437,7 @@ class SystemIO
 			void *ptr = &l;
 			size_t sz;
 
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 
@@ -1420,7 +1450,7 @@ class SystemIO
 		bool WriteLongU(unsigned long ul)
 		{
 			void *ptr = &ul;
-		#ifdef HAVE_BIG_ENDIAN
+		#ifdef __BIG_ENDIAN__
 			FIX_INT(*ptr)
 		#endif
 			size_t sz = fwrite(ptr, 4, 1, mFileHandle);
