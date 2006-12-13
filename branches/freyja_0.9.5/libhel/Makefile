@@ -240,16 +240,18 @@ debian-package:
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
-	yes | dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
+	yes | dh_make -n -c gpl -s -e mongooseichiban@gmail.com -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
 	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert up to 60 chars description>/Freyja math utils/g" debian/control.old > debian/control
+	@-sed -e "s/<insert up to 60 chars description>/The freyja math library./g" debian/control.old > debian/control
 	@-rm -f debian/control.old
 	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
+	@-sed -e "s/<insert long description, indented with spaces>/The freyja math library provides basic 3d math, geometric utility, and collision support./g" debian/control.old > debian/control
 	@-rm -f debian/control.old
 
 deb:
 	dpkg-buildpackage -rfakeroot
+	dpkg --infolibhel_*.deb
+	dpkg --contents libhel_*.deb
 
 install: install-lib install-headers
 

@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/ModelABI.h>
 #include <freyja/MeshABI.h>
