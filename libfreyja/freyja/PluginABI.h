@@ -38,53 +38,6 @@
 extern "C" {
 
 	///////////////////////////////////////////////////////////////////////
-	// Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
-	///////////////////////////////////////////////////////////////////////
-
-	index_t freyjaTextureCreateFilename(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns new index or INDEX_INVALID
-	 ------------------------------------------------------*/
-
-	index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
-                                      uint32 width, uint32 height,
-                                      freyja_colormode_t type);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns new index or INDEX_INVALID
-	 ------------------------------------------------------*/
-
-	void freyjaTextureDelete(index_t textureIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Deletes texture given any valid index 
-	 ------------------------------------------------------*/
-
-	void freyjaGetTextureImage(index_t textureIndex,
-                               uint32 *w, uint32 *h, uint32 *bitDepth,  
-                               uint32 *type, byte **image);
-	/*------------------------------------------------------
-	 * Pre  : Do not attempt to alter <image> on return
-	 *
-	 * Post : Gets pointers to texture[index]'s data members
-	 *        Returns 0 on success.
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetTexturePoolCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the number of texture slots
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetTextureCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns the number of texture slots used
-	 ------------------------------------------------------*/
-
-
-	///////////////////////////////////////////////////////////////////////
 	// Plugin ABI 0.9.3 - 0.9.5
 	///////////////////////////////////////////////////////////////////////
 

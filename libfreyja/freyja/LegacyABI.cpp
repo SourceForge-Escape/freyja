@@ -33,6 +33,7 @@
 #include "MeshABI.h"
 #include "BoneABI.h"
 #include "MaterialABI.h"
+#include "TextureABI.h"
 #include "SkeletonABI.h"
 
 #include "LegacyABI.h"
