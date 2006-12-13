@@ -4,7 +4,10 @@ TEST=../bin/test
 SELECT=debug
 BIN=../bin/freyja/${SELECT}/freyja
 
-cd ~/Projects/freyja/freyja_0.9.5/freyja
+if [ -d  ~/Projects/freyja/freyja_0.9.5/freyja ]
+then
+	cd ~/Projects/freyja/freyja_0.9.5/freyja
+fi
 
 mkdir -p ${TEST}
 export LD_LIBRARY_PATH=${TEST}
