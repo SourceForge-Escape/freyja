@@ -2644,6 +2644,9 @@ PyObject *Freyja_Plugin_Gobals()
 
 void freyjaPython1s(const char *plugin, const char *symbol, const char *s)
 {
+	if (!plugin || !plugin[0] || !symbol || !symbol[0] || !s || !s[0])
+		return;
+
 #ifdef USING_PYTHON
 	PyObject *module, *dict, *tmp, *tmp2;
 
@@ -2672,6 +2675,7 @@ void freyjaPython1s(const char *plugin, const char *symbol, const char *s)
 	{
 		PyRun_SimpleFile(f, plugin);
 		Py_Finalize();
+		fclose(f);
 	}
 #else
 	freyjaPrintError("[Module '%s' failed to load.  Rebuild with USING_PYTHON.]", plugin);
