@@ -327,7 +327,7 @@ public:
 	 ------------------------------------------------------*/
 
 	void SetViewportWindow(long idx, freyja_plane_t win)
-	{ if (idx < mViewportsCount) mViewports[idx].plane = win; }
+	{ if (idx < (long)mViewportsCount) mViewports[idx].plane = win; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

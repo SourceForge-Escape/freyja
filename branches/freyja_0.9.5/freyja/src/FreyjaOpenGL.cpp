@@ -36,12 +36,12 @@
 
 
 #ifdef OPENGL_EXT_MULTITEXTURE
-PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB = NULL;
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
-PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB = NULL;
-PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB = NULL;
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
-PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
+PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB = NULL;
+PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB = NULL;
+PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB = NULL;
+PFNGLMULTITEXCOORD4FARBPROC h_glMultiTexCoord4fARB = NULL;
+PFNGLACTIVETEXTUREARBPROC h_glActiveTextureARB = NULL;
+PFNGLCLIENTACTIVETEXTUREARBPROC h_glClientActiveTextureARB = NULL;
 #endif
 
 using namespace freyja3d;
@@ -103,14 +103,12 @@ OpenGL::OpenGL() :
 	ext_cg_shader = mglHardwareExtTest("GL_EXT_Cg_shader");
 
 	// Hook up functions
-#ifdef OPENGL_EXT_MULTITEXTURE
-	glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
-	glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
-	glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
-	glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)mglGetProcAddress("glMultiTexCoord4fARB");
-	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)mglGetProcAddress("glActiveTextureARB");
-	glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)mglGetProcAddress("glClientActiveTextureARB");
-#endif
+	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
+	h_glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
+	h_glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
+	h_glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)mglGetProcAddress("glMultiTexCoord4fARB");
+	h_glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)mglGetProcAddress("glActiveTextureARB");
+	h_glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)mglGetProcAddress("glClientActiveTextureARB");
 
 	mSingleton = this;
 }

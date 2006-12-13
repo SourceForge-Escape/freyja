@@ -169,7 +169,7 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void clearFlag(TextureFlag flag);
+	void clearFlag(TextureFlag flag) { mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : CLears a option flag
@@ -238,28 +238,6 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int loadPNG(char *filename);
-	/*------------------------------------------------------
-	 * Pre  : Texture is init and filename/file is valid
-	 * Post : Loads PNG as texture and returns ID or -1 error
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.06.16:
-	 * Mongoose - Created, from Freyja
-	 ------------------------------------------------------*/
-
-	int loadTGA(char *filename);
-	/*------------------------------------------------------
-	 * Pre  : Texture is init and filename/file is valid
-	 * Post : Loads TGA as texture and returns ID or -1 error
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.06.16:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
    void reset();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -274,7 +252,7 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setFlag(TextureFlag flag);
+	void setFlag(TextureFlag flag) { mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets a option flag
