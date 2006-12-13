@@ -1839,7 +1839,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 		// Forget about 'cobbling' random skeletons with reused weights!
 		//Skeleton *s = Skeleton::getSkeleton(skeleton);
 		
-		for (uint i = 0, n = m->GetWeightCount(); i < n; ++i)
+		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
 		{
 			Weight *w = m->GetWeight(i);
 
