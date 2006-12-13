@@ -557,7 +557,7 @@ void FreyjaRender::Display()
 			mViewports[3].h = height/2;
 			//mViewports[3].plane = PLANE_FREE;
 
-			for (long i = 0; i < mViewportsCount; ++i)
+			for (uint32 i = 0; i < mViewportsCount; ++i)
 			{
 				glPushAttrib(GL_ENABLE_BIT);
 				glDisable(GL_TEXTURE_2D);
