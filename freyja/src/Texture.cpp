@@ -114,21 +114,6 @@ int Texture::loadColorTexture(unsigned char rgba[4],
 }
 
 
-
-
-void Texture::setFlag(TextureFlag flag)
-{
-	mFlags |= flag;
-}
-
-
-void Texture::clearFlag(TextureFlag flag)
-{
-	mFlags |= flag;
-	mFlags ^= flag;
-}
-
-
 void Texture::reset()
 {
 	glEnable(GL_TEXTURE_2D);
@@ -153,9 +138,10 @@ void Texture::disableMultiTexture()
 
 	glDisable(GL_TEXTURE_2D);
 
-#ifndef DISABLE_MULTITEXTURE
-	glActiveTextureARB(GL_TEXTURE0_ARB);
-#endif
+	if (h_glActiveTextureARB)
+	{
+		h_glActiveTextureARB(GL_TEXTURE0_ARB);
+	}
 }
 
 
@@ -164,10 +150,11 @@ void Texture::useMultiTexture(float aU, float aV, float bU, float bV)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
-#ifndef DISABLE_MULTITEXTURE
-	glMultiTexCoord2fARB(GL_TEXTURE0_ARB, aU, aV);
-	glMultiTexCoord2fARB(GL_TEXTURE1_ARB, bU, bV);
-#endif
+	if (h_glMultiTexCoord2fARB)
+	{
+		h_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, aU, aV);
+		h_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, bU, bV);
+	}
 }
 
 
@@ -176,24 +163,26 @@ void Texture::useMultiTexture(float u, float v)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
-#ifndef DISABLE_MULTITEXTURE
-	glMultiTexCoord2fARB(GL_TEXTURE0_ARB, u, v);
-	glMultiTexCoord2fARB(GL_TEXTURE1_ARB, u, v);
-#endif
+	if (h_glMultiTexCoord2fARB)
+	{
+		h_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, u, v);
+		h_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, u, v);
+	}
 }
 
 
 void freyja_renders_old_multi(int texture, int texture2)
 {
-#ifndef DISABLE_MULTITEXTURE
-		glActiveTextureARB(GL_TEXTURE0_ARB);
+	if (h_glActiveTextureARB)
+	{
+		h_glActiveTextureARB(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		// bump
 		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
 	
-		glActiveTextureARB(GL_TEXTURE1_ARB);
+		h_glActiveTextureARB(GL_TEXTURE1_ARB);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		// bump
@@ -203,7 +192,7 @@ void freyja_renders_old_multi(int texture, int texture2)
 		// Combine, gamma correct
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
-#endif
+	}
 }
 
 
@@ -221,15 +210,16 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 	mTextureId  = texture0;
 	mTextureId2 = texture1;
 
-#ifndef DISABLE_MULTITEXTURE
-	glActiveTextureARB(GL_TEXTURE0_ARB);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, mTextureIds[texture0]);
+	if (h_glActiveTextureARB)
+	{
+		h_glActiveTextureARB(GL_TEXTURE0_ARB);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, mTextureIds[texture0]);
 
-	glActiveTextureARB(GL_TEXTURE1_ARB);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, mTextureIds[texture1]);
-#endif
+		h_glActiveTextureARB(GL_TEXTURE1_ARB);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, mTextureIds[texture1]);
+	}
 }
 
 
@@ -571,118 +561,6 @@ void Texture::glScreenShot(const char *base,
   delete [] image;
 
   printf("Took screenshot '%s'.\n", filename);
-#endif
-}
-
-
-int Texture::loadPNG(char *filename)
-{
-#ifdef USING_MTK_PNG
-	FILE *f;
-	unsigned char *image = NULL;
-	unsigned char *image2 = NULL;
-	unsigned int w, h, bpp;
-	int id = -1;
-
-
-	f = fopen(filename, "rb");
-  
-	if (!f)
-	{
-		perror("Couldn't load file");
-	}
-	else if (!mtk_image__png_check(f))
-	{
-		mtk_image__png_load(f, &image, &w, &h, &bpp);
-
-		image2 = scaleBuffer(image, w, h, bpp/8);
-
-		if (image2)
-		{
-			image = image2;
-			w = h = 256;
-		}
-		
-		if (image)
-		{
-			id = loadBuffer(image, w, h, (bpp == 32) ? RGBA : RGB, bpp);
-
-			printf("%c", (id == -1) ? 'x' : 'o');
-			fflush(stdout);
-
-			delete [] image;
-		}
-
-		if (f)
-		{
-			fclose(f);
-		}
-	}
-
-	if (id == -1)
-	{
-		printf("Texture::loadPNG> ERROR: Failed to load '%s'\n", filename);
-	}
-
-	return id;
-#else
-	printf("ERROR: MTK PNG support not enabled in this build\n");
-	return -1;
-#endif
-}
-
-
-int Texture::loadTGA(char *filename)
-{
-#ifdef USING_MTK_TGA
-	FILE *f;
-	unsigned char *image = NULL;
-	unsigned char *image2 = NULL;
-	unsigned int w, h, bpp;
-	int id = -1;
-
-
-	f = fopen(filename, "rb");
-  
-	if (!f)
-	{
-		perror("Couldn't load file");
-	}
-	else if (!mtk_image__tga_check(f))
-	{
-		mtk_image__tga_load(f, &image, &w, &h, &bpp);
-		image2 = scaleBuffer(image, w, h, bpp/8);
-
-		if (image2)
-		{
-			image = image2;
-			w = h = 256;
-		}
-
-		if (image)
-		{
-			id = loadBuffer(image, w, h, 
-								 (bpp == 32) ? RGBA : RGB,
-								 bpp);
-			
-			printf("%c", (id == -1) ? 'x' : 'o');
-			fflush(stdout);
-
-			delete [] image;
-		}
-
-		fclose(f);
-	}
-
-	if (id == -1)
-	{
-		printf("Texture::loadTGA> ERROR: Failed to load '%s'\n", filename);
-	}
-
-	return id;
-#else
-	printf("ERROR: MTK TGA support not enabled in this build\n");
-	return -1;
 #endif
 }
 

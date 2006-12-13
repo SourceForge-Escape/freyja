@@ -20,7 +20,6 @@
  *            Normalized the API to be more consistant
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_
 
@@ -46,16 +45,13 @@
 #      define mglGetProcAddress(string) glXGetProcAddressARB((GLubyte *)string)
 #   endif
 
-#   ifdef OPENGL_EXT_MULTITEXTURE
-extern PFNGLMULTITEXCOORD1FARBPROC glMultiTexCoord1fARB;
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-extern PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB;
-extern PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB;
-extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
-#      define glMultiTexCoord p_glMultiTexCoord
-#      define glClientActive p_glClientActive
-#   endif
+extern PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB;
+extern PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB;
+extern PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB;
+extern PFNGLMULTITEXCOORD4FARBPROC h_glMultiTexCoord4fARB;
+extern PFNGLACTIVETEXTUREARBPROC h_glActiveTextureARB;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC h_glClientActiveTextureARB;
+
 
 #else
 #   error "This module requires an OpenGL SDK"
