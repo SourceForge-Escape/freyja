@@ -112,9 +112,9 @@ class Cursor
 				vec_t dist, best = 999.9f;
 				bool hit;
 
-				for (uint j = 0; j < (count-1); ++j)
+				for (uint32  j = 0; j < (count-1); ++j)
 				{
-					for (uint k = 0; k < 3; ++k)
+					for (uint32  k = 0; k < 3; ++k)
 					{
 						Vec3 a, b;
 

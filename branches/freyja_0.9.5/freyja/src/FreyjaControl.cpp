@@ -39,6 +39,7 @@
 #include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/MaterialABI.h>
+#include <freyja/TextureABI.h>
 #include <freyja/PerlinNoise.h>
 #include <freyja/Material.h>
 #include <hel/math.h>
@@ -1119,7 +1120,7 @@ bool FreyjaControl::LoadModel(const char *filename)
 		/* Texture image was stored as raw buffer */
 		for (i = 0; i < count; ++i)
 		{
-			freyjaGetTextureImage(i, &w, &h, &bpp, &type, &image);
+			freyjaGetTextureImage(i, w, h, bpp, type, image);
 
 			if (!image)
 				continue;
@@ -6031,7 +6032,7 @@ void eTextureUpload(unsigned int id)
 	uint32 w, h, bpp, type;
 
 	/* Texture image was stored as raw buffer */
-	freyjaGetTextureImage(id, &w, &h, &bpp, &type, &image);
+	freyjaGetTextureImage(id, w, h, bpp, type, image);
 	freyja_print("!test");
 
 	if (image)
