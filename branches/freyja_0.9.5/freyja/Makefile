@@ -36,9 +36,7 @@ CONFIGURE_CFLAGS=-DPROTOTYPE_02 -DPLANE_NOTIFY_WITH_AXIS \
 		-DUSE_ARB_MULTITEXTURE -DOPENGL_EXT_MULTITEXTURE
 CONFIGURE_LDFLAGS=
 
-# Uncomment PKG_LIB_ADD and comment out LIB_ADD to use gtkglext
 PKG_LIB_ADD=gtkglext-1.0
-#LIB_ADD=-lgtkgl-2.0
 
 
 ################################################################
@@ -112,7 +110,13 @@ LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
 
 CG_LD_FLAGS=-lCgGL -lCg
 
-LD_FLAGS_OSX=-framework OpenGL
+ifdef __darwin__
+LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
+		-lstdc++ -lm -lz \
+		-lhel0 -lfreyja -lmgtk \
+		$(shell pkg-config --libs gtk+-2.0 $(PKG_LIB_ADD)) $(LIB_ADD)
+LD_FLAGS += -framework OpenGL
+endif
 
 ################################################################
 

@@ -33,30 +33,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#ifdef DEBUG_MEMEORY
-#   include "memeory_test.h"
-#endif
-
-#ifdef USING_MTK_TGA
-#   include "mtk_tga.h"
-#endif
-
-#ifdef USING_MTK_PNG
-#   include "mtk_png.h"
-#endif
-
 #ifdef HAVE_FREYJA_IMAGE
 #   include <freyja/FreyjaImage.h>
 #endif
 
 #include "FreyjaOpenGL.h"
 #include "Texture.h"
-
-#ifdef USE_ARB_MULTITEXTURE
-#   define glActiveTexture glActiveTextureARB
-#   define glMultiTexCoord2f glMultiTexCoord2fARB
-#endif
-
 
 
 Texture *Texture::mSingleton = NULL;
@@ -172,7 +154,7 @@ void Texture::disableMultiTexture()
 	glDisable(GL_TEXTURE_2D);
 
 #ifndef DISABLE_MULTITEXTURE
-	glActiveTexture(GL_TEXTURE0_ARB);
+	glActiveTextureARB(GL_TEXTURE0_ARB);
 #endif
 }
 
@@ -183,8 +165,8 @@ void Texture::useMultiTexture(float aU, float aV, float bU, float bV)
 		return;
 
 #ifndef DISABLE_MULTITEXTURE
-	glMultiTexCoord2f(GL_TEXTURE0_ARB, aU, aV);
-	glMultiTexCoord2f(GL_TEXTURE1_ARB, bU, bV);
+	glMultiTexCoord2fARB(GL_TEXTURE0_ARB, aU, aV);
+	glMultiTexCoord2fARB(GL_TEXTURE1_ARB, bU, bV);
 #endif
 }
 
@@ -195,8 +177,8 @@ void Texture::useMultiTexture(float u, float v)
 		return;
 
 #ifndef DISABLE_MULTITEXTURE
-	glMultiTexCoord2f(GL_TEXTURE0_ARB, u, v);
-	glMultiTexCoord2f(GL_TEXTURE1_ARB, u, v);
+	glMultiTexCoord2fARB(GL_TEXTURE0_ARB, u, v);
+	glMultiTexCoord2fARB(GL_TEXTURE1_ARB, u, v);
 #endif
 }
 
@@ -204,14 +186,14 @@ void Texture::useMultiTexture(float u, float v)
 void freyja_renders_old_multi(int texture, int texture2)
 {
 #ifndef DISABLE_MULTITEXTURE
-		glActiveTexture(GL_TEXTURE0_ARB);
+		glActiveTextureARB(GL_TEXTURE0_ARB);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		// bump
 		//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 		//glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
 	
-		glActiveTexture(GL_TEXTURE1_ARB);
+		glActiveTextureARB(GL_TEXTURE1_ARB);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		// bump
@@ -240,11 +222,11 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 	mTextureId2 = texture1;
 
 #ifndef DISABLE_MULTITEXTURE
-	glActiveTexture(GL_TEXTURE0_ARB);
+	glActiveTextureARB(GL_TEXTURE0_ARB);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, mTextureIds[texture0]);
 
-	glActiveTexture(GL_TEXTURE1_ARB);
+	glActiveTextureARB(GL_TEXTURE1_ARB);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, mTextureIds[texture1]);
 #endif

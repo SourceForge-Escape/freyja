@@ -53,6 +53,8 @@ extern PFNGLMULTITEXCOORD3FARBPROC glMultiTexCoord3fARB;
 extern PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB;
 extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
+#      define glMultiTexCoord p_glMultiTexCoord
+#      define glClientActive p_glClientActive
 #   endif
 
 #else
