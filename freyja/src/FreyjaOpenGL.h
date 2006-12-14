@@ -20,8 +20,8 @@
  *            Normalized the API to be more consistant
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJAOPENGL_H_
+#ifndef GUARD__FREYJA_FREYJAOPENGL_H_
+#define GUARD__FREYJA_FREYJAOPENGL_H_
 
 #ifdef HAVE_OPENGL
 #   ifdef MACOSX
@@ -44,7 +44,11 @@
 #      include <GL/glxext.h>
 #      define mglGetProcAddress(string) glXGetProcAddressARB((GLubyte *)string)
 #   endif
+#else
+#   error "This module requires an OpenGL SDK"
+#endif
 
+#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT)
 extern PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB;
 extern PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB;
 extern PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB;
@@ -52,16 +56,42 @@ extern PFNGLMULTITEXCOORD4FARBPROC h_glMultiTexCoord4fARB;
 extern PFNGLACTIVETEXTUREARBPROC h_glActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC h_glClientActiveTextureARB;
 
+extern PFNGLGENPROGRAMSARBPROC h_glGenProgramsARB;
+extern PFNGLBINDPROGRAMARBPROC h_glBindProgramARB;
+extern PFNGLPROGRAMSTRINGARBPROC h_glProgramStringARB;
+extern PFNGLGETPROGRAMIVARBPROC h_glGetProgramivARB;
 
+extern	PFNGLCREATESHADEROBJECTARBPROC h_glCreateShaderObjectARB;
+extern	PFNGLSHADERSOURCEARBPROC h_glShaderSourceARB;
+extern	PFNGLCOMPILESHADERARBPROC h_glCompileShaderARB;
+extern	PFNGLCREATEPROGRAMOBJECTARBPROC h_glCreateProgramObjectARB;
+extern	PFNGLATTACHOBJECTARBPROC h_glAttachObjectARB;	
+extern	PFNGLLINKPROGRAMARBPROC h_glLinkProgramARB;
+extern	PFNGLUSEPROGRAMOBJECTARBPROC h_glUseProgramObjectARB;
 #else
-#   error "This module requires an OpenGL SDK"
+extern void *h_glMultiTexCoord1fARB;
+extern void *h_glMultiTexCoord2fARB;
+extern void *h_glMultiTexCoord3fARB;
+extern void *h_glMultiTexCoord4fARB;
+extern void *h_glActiveTextureARB;
+extern void *h_glClientActiveTextureARB;
+
+extern void *h_glGenProgramsARB;
+extern void *h_glBindProgramARB;
+extern void *h_glProgramStringARB;
+extern void *h_glGetProgramivARB;
+
+extern	void *h_glCreateShaderObjectARB;
+extern	void *h_glShaderSourceARB;
+extern	void *h_glCompileShaderARB;
+extern	void *h_glCreateProgramObjectARB;
+extern	void *h_glAttachObjectARB;	
+extern	void *h_glLinkProgramARB;
+extern	void *h_glUseProgramObjectARB;
 #endif
 
 #include <hel/math.h>
-
 #include <mstl/Vector.h>
-
-using namespace mstl;
 
 const float RED[]          = {  1.0,  0.0,  0.0, 1.0 };
 const float GREEN[]        = {  0.0,  1.0,  0.0, 1.0 };
@@ -157,38 +187,20 @@ public:
 
 class OpenGL
 {
- public:
-
-	enum Flags {
-		fNone = 0
-	};
-
-
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	~OpenGL();
+ protected:
+
+	OpenGL();
 	/*------------------------------------------------------
-	 * Pre  : OpenGL object is allocated
-	 * Post : Deconstructs an object of OpenGL
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGL
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2006.07.22: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
+ public:
 
 	static OpenGL *Instance();
 	/*------------------------------------------------------
@@ -196,11 +208,56 @@ class OpenGL
 	 * Post : Constructs an object of OpenGL if not already 
 	 *        allocated
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2006.07.22: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	~OpenGL();
+	/*------------------------------------------------------
+	 * Pre  : OpenGL object is allocated
+	 * Post : Deconstructs an object of OpenGL
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// EXT and ARB wrappers
+	////////////////////////////////////////////////////////////
+
+	static bool LoadFragmentARB(const char *filename, uint32 &fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	static void BindFragmentARB(int32 fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : if <fragmentId> < 0 fragments are disabled.
+	 *        Otherwise the referenced fragment is bound.
+	 ------------------------------------------------------*/
+
+	static bool LoadFragmentGLSL(const char *filename, uint32 &fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	static void BindFragmentGLSL(int32 fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : if <fragmentId> < 0 fragments are disabled.
+	 *        Otherwise the referenced fragment is bound.
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public attributes
+	////////////////////////////////////////////////////////////
+
+	enum {
+		fNone = 0
+	} Flags;
 
 	static OpenGL *mSingleton;
 
@@ -220,20 +277,6 @@ class OpenGL
 	static bool arb_vertex_buffer_object;
 	static bool ext_cg_shader;
 
- protected:
-
-	OpenGL();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of OpenGL
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2006.07.22: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
  private:
 
 	////////////////////////////////////////////////////////////
@@ -245,7 +288,7 @@ class OpenGL
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	Vector<OpenGLContext> mContexts;
+	mstl::Vector<OpenGLContext> mContexts;
 
 	uint32 mFlags;             /* */
 };

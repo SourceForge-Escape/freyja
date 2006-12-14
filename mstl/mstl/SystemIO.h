@@ -704,6 +704,10 @@ class SystemIO
 		unsigned long mCursor;
 		unsigned long mEnd;
 
+		unsigned char *GetCompleteFileBuffer() { return mFileData; }
+
+		unsigned long GetCompleteFileBufferSize() { return mEnd; }
+
 		void FlushBuffer() 
 		{ if (mFileData) delete [] mFileData; mCursor = mEnd = 0; }
 
@@ -723,7 +727,6 @@ class SystemIO
 			else
 			{
 				MSTL_MSG("Invalid read size %i.  %i / %i", size, mCursor, mEnd);
-				//Assert(false);
 			}
 
 			return read;
