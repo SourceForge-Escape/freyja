@@ -570,7 +570,9 @@ void Lwo::ReadPnts(FILE *f, int nbytes)
 
 #ifdef FREYJA_PLUGINS
 #include <stdio.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
 #include <mstl/Map.h>
 
 using namespace mstl;

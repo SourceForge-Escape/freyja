@@ -2184,12 +2184,22 @@ int get_utx_property(utx_header_t *header, FILE *f,
 
 
 #ifdef FREYJA_PLUGINS
-#include <freyja/FreyjaPlugin.h>
 #include <mstl/Map.h>
 #include <hel/Matrix.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
+#include <freyja/PakABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
 
+using namespace mstl;
 
 extern "C" {
 

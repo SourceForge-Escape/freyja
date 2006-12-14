@@ -25,7 +25,8 @@
 		- FIX all the plugins using obsolete iterators ( won't export using it )
 			- Obj, Smd, ...
 		- Extra viewmode to toggle groups colors on/off
-	
+		- Fragments bound properly to materials and varying support
+
 	* To be finalized
 		- Track and Keyframe classes 
 			- Keyframe vector issue

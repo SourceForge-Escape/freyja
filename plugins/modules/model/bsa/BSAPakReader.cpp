@@ -350,7 +350,9 @@ int main(int argc, char *argv[])
 
 #include <string.h>
 #include <stdio.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/PakABI.h>
+#include <freyja/freyja.h>
 #include <hel/Matrix.h>
 
 

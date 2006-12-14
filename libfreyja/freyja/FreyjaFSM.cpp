@@ -33,6 +33,7 @@
 #include "BoneABI.h"
 #include "SkeletonABI.h"
 #include "TextureABI.h"
+#include "LegacyABI.h"
 #include "FreyjaFSM.h"
 
 using namespace freyja;

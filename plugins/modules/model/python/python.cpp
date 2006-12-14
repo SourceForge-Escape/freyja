@@ -28,7 +28,15 @@
 PyObject *initPlugins();
 #endif
 
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 
 using namespace mstl;

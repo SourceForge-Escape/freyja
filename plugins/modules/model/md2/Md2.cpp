@@ -443,9 +443,14 @@ void Md2::render(unsigned int frame, unsigned int texture)
 #ifdef FREYJA_PLUGINS
 #include <string.h>
 #include <stdio.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
 
-
+using namespace mstl;
 
 
 extern "C" {

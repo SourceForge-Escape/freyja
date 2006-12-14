@@ -77,6 +77,7 @@ Vector<Vec3> FreyjaControl::mControlPoints;
 ////////////////////////////////////////////////////////////
 
 FreyjaControl::FreyjaControl() :
+	mUsingARBFragments(false),
 	mGroupBitmap(0x0),
 	mSelectedModel(0),
 	mSelectedTexture(0),
@@ -168,7 +169,7 @@ void FreyjaControl::Init()
 	InitTexture();
 
 	// Handle loaded from system call
-	if (!freyjaGetCount(FREYJA_BONE) && !freyjaGetCount(FREYJA_VERTEX))
+	if (!freyjaGetBoneCount() && !freyjaGetMeshCount())
 		mCleared = true;
 	else
 		mCleared = false;
@@ -1603,7 +1604,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eBoneIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_BONE)))
+		if (!freyja_event_set_range(event, value, 0, freyjaGetBoneCount()))
 		{
 			SetSelectedBone(value);
 
@@ -1643,7 +1644,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case ePolygonIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_POLYGON)))
+		if (!freyja_event_set_range(event, value, 0, freyjaGetMeshPolygonCount(GetSelectedMesh())))
 		{
 			SetSelectedFace(value);			
 			freyja_event_gl_refresh();
@@ -1653,7 +1654,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 
 
 	case eMeshIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetCount(FREYJA_MESH)))
+		if (!freyja_event_set_range(event, value, 0, freyjaGetMeshCount()))
 		{
 			SetSelectedMesh(value);			
 			freyja_event_gl_refresh();
@@ -3111,14 +3112,15 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 			uint32 fragmentId; // Gets fragment id
 			bool load = false;
 
-			if (freyja3d::OpenGL::LoadFragmentGLSL(text, fragmentId))
-			{
-				freyja3d::OpenGL::BindFragmentGLSL(fragmentId);
-				load = true;
-			}
-			else if (freyja3d::OpenGL::LoadFragmentARB(text, fragmentId))
+			if (mUsingARBFragments && 
+				freyja3d::OpenGL::LoadFragmentARB(text, fragmentId))
 			{
 				freyja3d::OpenGL::BindFragmentARB(fragmentId);
+				load = true;
+			}
+			else if (freyja3d::OpenGL::LoadFragmentGLSL(text, fragmentId))
+			{
+				freyja3d::OpenGL::BindFragmentGLSL(fragmentId);
 				load = true;
 			}
 
@@ -3173,18 +3175,28 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 void FreyjaControl::PrintInfo()
 {
-	const long bufSz = 511;
-	char buf[bufSz+1];
+	String s, t;
+	index_t model = GetSelectedModel();
 
-	snprintf(buf, bufSz, 
-			 "Current Model Properties\n Bones    \t%d\n Meshes  \t%d\n Polygons \t%d\n Vertices  \t%d\n",
-			 freyjaGetCount(FREYJA_BONE), 
-			 freyjaGetCount(FREYJA_MESH), 
-			 freyjaGetCount(FREYJA_POLYGON), 
-			 freyjaGetCount(FREYJA_VERTEX));	
-	buf[bufSz] = 0;
+	s = "Current Model Properties\n";
 
-	freyja_event_info_dialog("gtk-dialog-info", buf);
+	t.Set("   %i Bones\n", freyjaGetBoneCount());
+	s += t;
+
+	t.Set("   %i Meshes\n", freyjaGetModelMeshCount(model));
+	s += t;
+
+	for (uint32 i = 0, n = freyjaGetModelMeshCount(model); i < n; ++i)
+	{
+		index_t mesh = freyjaGetModelMeshIndex(model, i);
+		t.Set("      %i. '%s' %i Polyons, %i Vertices\n", i, 
+			  freyjaGetMeshNameString(mesh), 
+			  freyjaGetMeshVertexCount(mesh), 
+			  freyjaGetMeshPolygonCount(mesh));
+		s += t;
+	}
+
+	freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());
 }
 
 
@@ -4256,7 +4268,7 @@ void FreyjaControl::addObject()
 
 	case tBone:
 		{
-			if (freyjaGetCount(FREYJA_SKELETON) == 0)
+			if (freyjaGetSkeletonCount() == 0)
 			{
 				SetSelectedSkeleton(freyjaSkeletonCreate());
 			}
@@ -4567,7 +4579,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			vec_t t, closest;
 			int selected = -1;
 
-			for (uint32 i = 0, count = freyjaGetCount(FREYJA_BONE); i < count; ++i)
+			for (uint32 i = 0, count = freyjaGetBoneCount(); i < count; ++i)
 			{
 				freyjaGetBoneWorldPos3fv(i, p.mVec);
 
@@ -5618,12 +5630,13 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 
 void FreyjaControl::SetSelectedMesh(uint32 i) 
 {
-	if (i < freyjaGetCount(FREYJA_MESH) && freyjaIsMeshAllocated(i))
-	{
+	index_t model = GetSelectedModel();
+
+	if (i < freyjaGetModelMeshCount(model) && freyjaIsMeshAllocated(i))
+	{		
+		Mesh *m = Mesh::GetMesh(freyjaGetModelMeshIndex(model, i));
 		mSelectedMesh = i;
-		
-		Mesh *m = Mesh::GetMesh(GetSelectedMesh());
-		
+
 		if (m)
 		{
 			mCursor.mPos = m->GetPosition();
@@ -5910,6 +5923,9 @@ bool FreyjaControl::SaveUserPreferences()
 
 		n = (mRender->GetFlags() & FreyjaRender::fDrawPickRay) ? 1 : 0;
 		w.Print("(func_set_toggle eRenderPickRay %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fBones) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderSkeleton %i)\n", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fSkeletalVertexBlending) ? 1 : 0;
 		w.Print("(func_set_toggle eSkeletalDeform %i)\n", n);
@@ -6401,6 +6417,28 @@ void eNopControl(ResourceEvent *e)
 }
 
 
+void eARBFragmentMode(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaControl::mInstance->mUsingARBFragments = true;
+		mgtk_toggle_value_set(ResourceEvent::GetResourceIdBySymbol("eGLSLFragmentMode"), 0);
+		freyja_print("ARB fragment shader mode");
+	}
+}
+
+
+void eGLSLFragmentMode(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaControl::mInstance->mUsingARBFragments = false;
+		mgtk_toggle_value_set(ResourceEvent::GetResourceIdBySymbol("eARBFragmentMode"), 0);
+		freyja_print("GLSL fragment shader mode");
+	}
+}
+
+
 void FreyjaControlEventsAttach()
 {
 	ResourceEventCallback2::add("eEnableMaterialFragment", &eNopControl);
@@ -6408,6 +6446,9 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
 	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);
  
+	ResourceEventCallbackUInt::add("eGLSLFragmentMode", &eGLSLFragmentMode);
+	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
+
 	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
 	ResourceEventCallback::add("eClearWeight", &eClearWeight);
 	ResourceEventCallbackVec::add("eWeight", &eWeight);

@@ -57,7 +57,6 @@ void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
 }
 
 
-/* Thanks to Sam for the WIN32 module loader example */
 void *freyjaModuleImportFunction(void *handle, const char *name)
 {
 	return SystemIO::ImportFunction(handle, name);
@@ -345,20 +344,10 @@ const char *freyjaActionToString(freyja_transform_action_t action)
 }
 
 
-index_t freyjaCriticalSectionLock()
-{
-	return INDEX_INVALID;
-}
-
-
-void freyjaCriticalSectionUnlock(index_t lock)
-{
-}
-
-
 ///////////////////////////////////////////////////////////////////////
 // Freyja Memory management and logging
-// Based on mtk_mememory, however I removed the expensive RBTree  =)
+// Based on mtk_mememory, however I removed the expensive RBTree 
+// and all the cool features like profiling if you didn't notice  =p
 ///////////////////////////////////////////////////////////////////////
 #define USING_FREYJA_MEMORY 1
 

@@ -31,7 +31,16 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <mstl/List.h>
-#include <freyja/FreyjaPluginABI.h>
+
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
 #include <hel/Matrix.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>

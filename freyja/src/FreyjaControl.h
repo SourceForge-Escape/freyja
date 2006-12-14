@@ -167,6 +167,7 @@ class FreyjaControl
 	// Public Properties
 	////////////////////////////////////////////////////////////
 
+	bool mUsingARBFragments;
 	uint32 mGroupBitmap;
 
 	ControlScheme GetControlScheme() { return mControlScheme; }
@@ -210,7 +211,7 @@ class FreyjaControl
 
 	uint32 GetSelectedBone() { return mSelectedBone; }
 	void SetSelectedBone(uint32 i) 
-	{ if (i < freyjaGetCount(FREYJA_BONE)) mSelectedBone = i; }
+	{ if (i < freyjaGetBoneCount()) mSelectedBone = i; }
 	uint32 mSelectedBone;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -219,7 +220,7 @@ class FreyjaControl
 
 	uint32 GetSelectedFace() { return mSelectedFace; }
 	void SetSelectedFace(uint32 i) 
-	{ if (i < freyjaGetCount(FREYJA_POLYGON)) mSelectedFace = i; }
+	{ if (i < freyjaGetMeshPolygonCount(mSelectedMesh)) mSelectedFace = i; }
 	uint32 mSelectedFace;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -252,7 +253,7 @@ class FreyjaControl
 
 	uint32 GetSelectedSkeleton() { return mSelectedSkeleton; }
 	void SetSelectedSkeleton(uint32 i) 
-	{ if (i < freyjaGetCount(FREYJA_SKELETON)) mSelectedSkeleton = i; }
+	{ if (i < freyjaGetSkeletonCount()) mSelectedSkeleton = i; }
 	uint32 mSelectedSkeleton;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -261,7 +262,7 @@ class FreyjaControl
 
 	uint32 GetSelectedTexCoord() { return mSelectedTexCoord; }
 	void SetSelectedTexCoord(uint32 i) 
-	{ if (i < freyjaGetCount(FREYJA_TEXCOORD)) mSelectedTexCoord = i; }
+	{ if (i < freyjaGetMeshTexCoordCount(mSelectedMesh)) mSelectedTexCoord = i; }
 	uint32 mSelectedTexCoord;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -278,7 +279,7 @@ class FreyjaControl
 
 	uint32 GetSelectedVertex() { return mSelectedVertex; }
 	void SetSelectedVertex(uint32 i) 
-	{ if (i < freyjaGetCount(FREYJA_VERTEX)) mSelectedVertex = i; }
+	{ if (i < freyjaGetMeshVertexCount(mSelectedMesh)) mSelectedVertex = i; }
 	uint32  mSelectedVertex;
 	/*------------------------------------------------------
 	 * Pre  : 

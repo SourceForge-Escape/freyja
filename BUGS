@@ -17,9 +17,9 @@
  ----------------------------
 
  * Doesn't build in OS X
-<Chunky_Ks> tiger/latest XCode default
-<Mongoose> well, thanks for test building on OS X -- I keep nuking my installs
-<Chunky_Ks> i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 (Apple Computer, Inc. build 5367)
+	<Chunky_Ks> tiger/latest XCode default
+	<Mongoose> well, thanks for test building on OS X -- I keep nuking my installs
+	<Chunky_Ks> i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 (Apple Computer, Inc. build 5367)
 
  * Crash on some model clears!
 	- hafu.freyja reproduces 100%, just open and close over and over

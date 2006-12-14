@@ -715,6 +715,13 @@
 
 					(toolbar_separator)
 
+					(toolbar_togglebutton false "gtk-add" "GLSL Fragment"
+						"GLSL fragment mode" eEvent eGLSLFragmentMode)
+					(toolbar_togglebutton false "gtk-add" "ARB Fragment"
+						"ARB fragment mode" eEvent eARBFragmentMode)
+
+					(toolbar_separator)
+
 					(toolbar_togglebutton false "gtk-add" "Detail"
 						"Enable detail texture" eEvent eMaterialMultiTex)
 
@@ -1118,6 +1125,7 @@
 (func_set_toggle	eRenderPickRay	0)
 (func_set_toggle	ePointJoint	1)
 (func_set_toggle	eLineBone	1)
+(func_set_toggle	eGLSLFragmentMode	1)
 
 
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::

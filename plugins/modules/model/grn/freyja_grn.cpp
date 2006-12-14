@@ -34,7 +34,12 @@
 
 #include <hel/math.h>
 #include <hel/Quaternion.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
 
@@ -108,7 +113,7 @@ int freyja_model__grn_import(char *filename)
 	unsigned int i, j;
 	string out;
 	long index;
-	vec4_t wxyz;
+	//vec4_t wxyz;
 
 
 

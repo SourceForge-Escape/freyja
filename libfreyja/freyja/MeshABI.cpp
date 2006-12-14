@@ -724,7 +724,15 @@ index_t freyjaGetMeshPolygonTexCoordIndex(index_t mesh, index_t polygon,
 
 		if (f)
 		{
-			return f->mTexCoordIndices[element];
+			if (f->mFlags & Face::fPolyMappedTexCoords &&
+				f->mTexCoordIndices.size() > element)
+			{
+				return f->mTexCoordIndices[element];
+			}
+			else if (f->mIndices.size() > element)
+			{
+				return freyjaGetMeshVertexTexCoord(f->mIndices[element]);
+			}
 		}
 	}
 
@@ -1991,97 +1999,16 @@ void freyjaMeshClampTexCoords(index_t meshIndex)
 }
 
 
-void freyjaMeshTesselateTriangles(index_t meshIndex)
+byte freyjaIsMeshSelected(index_t mesh)
 {
-	Vector<long> purge;
-	int32 i, j, polygonCount, polygonIndex, vertexCount, vertexIndex;
-	int32 a, b, c, d, ta, tb, tc, td, material;
-	unsigned int ii;
+	Mesh *m = Mesh::GetMesh(mesh);
 
-
-	polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-
-	for (i = 0; i < polygonCount; ++i)
+	if (m)
 	{
-		polygonIndex = i;//freyjaGetMeshPolygonIndex(meshIndex, i);
-		material = freyjaGetMeshPolygonMaterial(meshIndex, polygonIndex);
-
-		if (polygonIndex > -1)
-		{
-			vertexCount = freyjaGetMeshPolygonVertexCount(meshIndex, polygonIndex);
-
-			if (vertexCount < 4)
-				continue;
-			
-			if (vertexCount == 4)
-			{
-				/* 1. Get ABCD quad vertices */
-				a = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 0);
-				b = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 1);
-				c = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 2);
-				d = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, 3);
-
-				if (freyjaGetMeshPolygonTexCoordCount(meshIndex, polygonIndex))
-				{
-					ta = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 0);
-					tb = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 1);
-					tc = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 2);
-					td = freyjaGetMeshPolygonTexCoordIndex(meshIndex, polygonIndex, 3);
-				}
-
-				// FIXME: Using gobal FSM and 0.9.x API
-
-				/* 2. Make ABC ACD triangles */
-				freyjaBegin(FREYJA_POLYGON);
-				freyjaPolygonMaterial1i(material);
-				freyjaPolygonVertex1i(a);
-				freyjaPolygonVertex1i(b);
-				freyjaPolygonVertex1i(c);
-
-				if (freyjaGetMeshPolygonTexCoordCount(meshIndex, polygonIndex))
-				{
-					freyjaPolygonTexCoord1i(ta);
-					freyjaPolygonTexCoord1i(tb);
-					freyjaPolygonTexCoord1i(tc);
-				}
-
-				freyjaEnd();
-
-				freyjaBegin(FREYJA_POLYGON);
-				freyjaPolygonMaterial1i(material);
-				freyjaPolygonVertex1i(a);
-				freyjaPolygonVertex1i(c);
-				freyjaPolygonVertex1i(d);
-
-				if (freyjaGetMeshPolygonTexCoordCount(meshIndex, polygonIndex))
-				{
-					freyjaPolygonTexCoord1i(ta); // should dupe a?
-					freyjaPolygonTexCoord1i(tc);
-					freyjaPolygonTexCoord1i(td);
-				}
-
-				freyjaEnd();
-
-
-				/* 3. Prepare to remove ABCD polygon and update references */
-				purge.pushBack(polygonIndex);
-			}
-			else  // Hhhhmm... can of worms...  doesn't touch polygons atm
-			{
-				for (j = 0; j < vertexCount; ++j)
-				{
-					// 0 1 2, 0 2 3, ..
-					freyjaPrintError("freyjaMeshTesselateTriangles> No Implementation due to lack of constraints on 5+ edges");
-					vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, polygonIndex, j);
-				}
-			}
-		}
+		return (m->GetFlags() & Mesh::fSelected);
 	}
 
-	for (ii = purge.begin(); ii < purge.end(); ++ii)
-	{
-		freyjaMeshPolygonDelete(meshIndex, purge[ii]);
-	}
+	return 0;
 }
 
 

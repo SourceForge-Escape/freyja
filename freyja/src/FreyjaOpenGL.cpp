@@ -229,6 +229,9 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 					 (!program_limits) ? "Exceeded native limit, " : "",
 					 (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 
+		freyja_event_info_dialog("gtk-dialog-info", 
+								 (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+
 		return false;
     }
 

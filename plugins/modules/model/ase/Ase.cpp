@@ -654,7 +654,10 @@ void Ase::readModelData(FILE *f)
 ////////////////////////////////////////////////////////////
 
 #ifdef FREYJA_PLUGINS
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/TextureABI.h>
 #include <mstl/Map.h>
 
 using namespace mstl;
@@ -698,7 +701,7 @@ int freyja_model__ase_import(char *filename)
 	Ase ase;
 	Map<unsigned int, unsigned int> trans;
 	Map<unsigned int, unsigned int> trans2;
-	unsigned int i, v, t, textureId;
+	unsigned int i, textureId;
 
 
 	if (ase.load(filename))
@@ -711,46 +714,39 @@ int freyja_model__ase_import(char *filename)
 	
 	freyjaPrintMessage("ase_import> WARNING Not fully implemented\n");
 
-	/* Start a new model */
-	freyjaBegin(FREYJA_MODEL);
-
+	/* Load material texture */
 	textureId = 0;
 
 	if (ase.mMaterialCount > 0)
 	{
-		freyjaBegin(FREYJA_MATERIAL);
-		
-		freyjaEnd();
-
 		int texture = freyjaTextureCreateFilename(ase.mTexture.name);
 
 		if (texture > -1)
 			textureId = texture;
 	}
 
-	/* Start a new mesh */
-	freyjaBegin(FREYJA_MESH);
-	
-	/* Vertices */
-	freyjaBegin(FREYJA_VERTEX_GROUP);
+	/* Start a new model */
+	index_t model = freyjaModelCreate();
+	index_t mesh = freyjaMeshCreate();
+	freyjaModelAddMesh(model, mesh);
+
 	for (i = 0; (int)i < ase.mVertexCount; ++i)
 	{
 		/* Store vertices in group */
-		v = freyjaVertexCreate3fv(ase.mVertices[i]);
-		
+		index_t vertex = freyjaMeshVertexCreate3fv(mesh, ase.mVertices[i]);
+	   		
 		/* Generates id translator list */
-		trans.Add(i, v);
+		trans.Add(i, vertex);
 	}
-	freyjaEnd();
 
 	/* TexCoords */	
 	for (i = 0; (int)i < ase.mUVWCount; ++i)
 	{
 		/* Store texels */
-		t = freyjaTexCoordCreate2f(ase.mUVWs[i][0], ase.mUVWs[i][1]);
+		index_t texcoord = freyjaMeshTexCoordCreate2f(mesh, ase.mUVWs[i][0], ase.mUVWs[i][1]);
 		
 		/* Generates id translator list */
-		trans2.Add(i, t);
+		trans2.Add(i, texcoord);
 	}
 
 	/* Normals */
@@ -758,8 +754,7 @@ int freyja_model__ase_import(char *filename)
 	{
 		for (i = 0; (int)i < ase.mVertexCount; ++i)
 		{
-			//freyjaVertexNormal3fv(trans[i], ase.mNormals[i]);
-			freyjaVertexNormal3fv(trans[i], ase.mNormals[i]);
+			freyjaMeshVertexNormal3fv(mesh, trans[i], ase.mNormals[i]);
 		}
 	}
 
@@ -767,131 +762,100 @@ int freyja_model__ase_import(char *filename)
 	for (i = 0; (int)i < ase.mFaceCount; ++i)
 	{
 		/* Start a new polygon */
-		freyjaBegin(FREYJA_POLYGON);
+		index_t face = freyjaMeshPolygonCreate(mesh);
 
-		/* Store vertices and texels by true id, using translator lists */
-		freyjaPolygonVertex1i(trans[ase.mFaces[i].vertIndex[0]]);
-		freyjaPolygonVertex1i(trans[ase.mFaces[i].vertIndex[1]]);
-		freyjaPolygonVertex1i(trans[ase.mFaces[i].vertIndex[2]]);
+		for (uint32 j = 0, texcoord = 0, vertex = 0; j < 3; ++j)
+		{ 
+			/* Store vertices and texels by true id, using translator lists */
+			vertex = trans[ase.mFaces[i].vertIndex[0]];
+			freyjaMeshPolygonAddVertex1i(mesh, face, vertex);
 
-		if (!ase.mUVWCount)
-		{
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.0, 0.5));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.5, 0.5));
-			freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(0.0, 0.0));			
-		}
-		else
-		{
-			freyjaPolygonTexCoord1i(trans2[ase.mFaces[i].uvwIndex[0]]);
-			freyjaPolygonTexCoord1i(trans2[ase.mFaces[i].uvwIndex[1]]);
-			freyjaPolygonTexCoord1i(trans2[ase.mFaces[i].uvwIndex[2]]);
+			if (ase.mUVWCount)
+			{
+				texcoord = trans2[ase.mFaces[i].uvwIndex[j]];
+				freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
+			}
 		}
 		
-		freyjaPolygonMaterial1i(textureId);
-		
-		freyjaEnd(); // FREYJA_POLYGON
+		freyjaMeshPolygonMaterial(mesh, face, textureId);
 	}
 
-	freyjaEnd(); // FREYJA_MESH
-	freyjaEnd(); // FREYJA_MODEL
 
 	return 0;
 }
 
 
 int freyja_model__ase_export(char *filename)
-{
-	Map<unsigned int, unsigned int> trans;
-	index_t mesh, face, vert, tex;
-	//float st[2];
-	int v, t, texel;
-	Ase ase;
-	
-
-	freyjaPrintMessage("ase_export> WARNING Not fully implemented\n");
-	
-	if (!freyjaGetCount(FREYJA_MESH))
+{	
+	if (!freyjaGetMeshCount())
 	{
 		return -1;
 	}
 	
-	// Don't allow use of internal iterators or
-	// changes of data by other processes
-	freyjaCriticalSectionLock();
-	
-	ase.mVertexCount = freyjaGetCount(FREYJA_VERTEX);
-	ase.mUVWCount = freyjaGetCount(FREYJA_POLYGON) * 3;
-	ase.mFaceCount = freyjaGetCount(FREYJA_POLYGON); 
-	ase.mNormalCount = ase.mVertexCount;
+	index_t mesh = 0;
 
+	for (uint32 i = 0; i < freyjaGetMeshCount(); ++i)
+	{
+		if (freyjaIsMeshSelected(mesh))
+			mesh = i;
+	}
+
+	if (!freyjaIsMeshAllocated(mesh))
+	{
+		return -1;
+	}
+
+	Ase ase;
+	ase.mVertexCount = freyjaGetMeshVertexCount(mesh);
+	ase.mUVWCount = freyjaGetMeshTexCoordCount(mesh);
+	ase.mFaceCount = freyjaGetMeshPolygonCount(mesh); 
+	ase.mNormalCount = ase.mVertexCount;
 	ase.mVertices = new vec3_t[ase.mVertexCount];
 	ase.mNormals = new vec3_t[ase.mVertexCount];
 	ase.mFaces = new ase_triangle_t[ase.mUVWCount];
 	ase.mUVWs = new vec3_t[ase.mUVWCount];
 
-	/* Using freyja iterator interface */
-	freyjaIterator(FREYJA_VERTEX, FREYJA_RESET);
-
-	for (v = 0; v < ase.mVertexCount; ++v)
+	for (uint32 v = 0; (int)v < ase.mVertexCount; ++v)
 	{
-		freyjaGetVertex3fv(ase.mVertices[v]);
-		freyjaGetVertexNormal3fv(ase.mNormals[v]);
-		
-		// Use translator list
-		vert = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-		trans.Add(vert, v);
-		
-		//printf("trans.Add(%i, %i)\n", vert, v);
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-	
-	// Using list interface, as opposed to array
-	freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
-
-	for (t = 0, texel = 0; t < ase.mFaceCount; ++t)
-	{
-		if (freyjaIterator(FREYJA_POLYGON, FREYJA_CURRENT) < 0)
-		{
-			freyjaPrintError("Bad polygon!");
-			continue;
-		}
-
-		//freyjaPrintMessage("%i / %i\n", t, ase.mFaceCount);
-		mesh = freyjaGetCurrent(FREYJA_MESH);
-		face = freyjaGetCurrent(FREYJA_POLYGON);
-
-		// FIXME: Could export quads too, but ase tris needs update first
-
-		// Use translator lists
-		vert = freyjaGetPolygonVertexIndex(face, 0);
-		freyjaGetVertexTexcoord2fv(vert, ase.mUVWs[ase.mFaces[t].uvwIndex[0]]);
-		ase.mFaces[t].vertIndex[0] = trans[vert];
-		vert = freyjaGetPolygonVertexIndex(face, 1);
-		freyjaGetVertexTexcoord2fv(vert, ase.mUVWs[ase.mFaces[t].uvwIndex[1]]);
-		ase.mFaces[t].vertIndex[1] = trans[vert];
-		vert = freyjaGetPolygonVertexIndex(face, 2);
-		freyjaGetVertexTexcoord2fv(vert, ase.mUVWs[ase.mFaces[t].uvwIndex[2]]);
-		ase.mFaces[t].vertIndex[2] = trans[vert];
-		
-		if (freyjaGetPolygonTexCoordCount(face))
-		{
-			tex = freyjaGetPolygonTexCoordIndex(face, 0);
-			freyjaGetMeshTexCoord2fv(mesh, tex, ase.mUVWs[ase.mFaces[t].uvwIndex[0]]);
-			tex = freyjaGetPolygonTexCoordIndex(face, 1);
-			freyjaGetMeshTexCoord2fv(mesh, tex, ase.mUVWs[ase.mFaces[t].uvwIndex[1]]);
-			tex = freyjaGetPolygonTexCoordIndex(face, 2);
-			freyjaGetMeshTexCoord2fv(mesh, tex, ase.mUVWs[ase.mFaces[t].uvwIndex[2]]);
-		}
-
-		ase.mFaces[t].uvwIndex[0] = texel++;
-		ase.mFaces[t].uvwIndex[1] = texel++;
-		ase.mFaces[t].uvwIndex[2] = texel++;
-		
-		// Using list interface, as opposed to array
-		freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
+		freyjaGetMeshVertexPos3fv(mesh, v, ase.mVertices[v]);
+		freyjaGetMeshVertexNormal3fv(mesh, v, ase.mNormals[v]);
 	}
 
-	freyjaCriticalSectionUnlock();
+	for (uint32 f = 0, uv = 0, count = 0, tcount = 0; (int)f < ase.mFaceCount; ++f)
+	{
+		count = freyjaGetMeshPolygonVertexCount(mesh, f);
+		
+		for (uint32 i = 0; i < count; ++i)
+		{
+			index_t vertex = freyjaGetMeshPolygonVertexIndex(mesh, f, i);
+			ase.mFaces[f].vertIndex[i] = vertex;
+		}
+
+		// Polymapped UVs
+		tcount = freyjaGetMeshPolygonTexCoordCount(mesh, f);
+		if (tcount)
+		{
+			for (uint32 i = 0; i < tcount; ++i)
+			{
+				uv = freyjaGetMeshPolygonTexCoordIndex(mesh, f, i);
+				ase.mFaces[f].uvwIndex[i] = uv;
+				freyjaGetMeshTexCoord2fv(mesh, uv, ase.mUVWs[uv]);
+			}
+		}
+		else
+		{
+			tcount = count;
+			for (uint32 i = 0; i < tcount; ++i)
+			{
+				index_t vertex = freyjaGetMeshPolygonVertexIndex(mesh, f, i);
+				uv = freyjaGetMeshVertexTexCoord(mesh, vertex);
+				ase.mFaces[f].uvwIndex[i] = uv;
+				freyjaGetMeshTexCoord2fv(mesh, uv, ase.mUVWs[uv]);
+			}
+		}
+	}
+
+	//freyjaCriticalSectionUnlock();
 	
 	return (ase.save(filename));
 }
