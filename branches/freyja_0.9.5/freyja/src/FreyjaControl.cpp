@@ -3099,22 +3099,45 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		}
 		break;
 
+
+	case eSetTextureNameB:
+		// textbox is just for looks -- user can't alter filename here
+		break;
+
 	case eOpenTextureB:
 		{
 			if (empty) return;
 
-			if (LoadTexture(text))
-			{
-				uint32 e = resourceGetEventId1s("eSetTextureNameB");
-				//uint32 texture = mTextureId - 1;
-				uint32 mat = freyjaGetCurrentMaterial();
+			uint32 fragmentId; // Gets fragment id
+			bool load = false;
 
+			if (freyja3d::OpenGL::LoadFragmentGLSL(text, fragmentId))
+			{
+				freyja3d::OpenGL::BindFragmentGLSL(fragmentId);
+				load = true;
+			}
+			else if (freyja3d::OpenGL::LoadFragmentARB(text, fragmentId))
+			{
+				freyja3d::OpenGL::BindFragmentARB(fragmentId);
+				load = true;
+			}
+
+			if (load)
+			{
+				uint32 e = 
+				ResourceEvent::GetResourceIdBySymbol("eSetTextureNameB");
+
+				//uint32 texture = mTextureId - 1;
 				mgtk_textentry_value_set(e, text);
-				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-				DEBUG_MSG("Not implemented in backend yet");
-				//mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
-				//freyjaMaterialTexture(mat, texture);
-				//
+
+				// Propagate to material backend
+#if 0
+				uint32 mat = freyjaGetCurrentMaterial();
+				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
+				mgtk_spinbutton_value_set(eSetMaterialShader, fragmentId);
+				freyjaMaterialShader(mat, fragmentId);
+#endif		
+				freyja_print("Loaded fragment program %i", fragmentId);
 				freyja_event_gl_refresh();
 			}
 		}
@@ -3131,12 +3154,6 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	case eSkeletonName:
 		freyjaSkeletonName(GetSelectedSkeleton(), text);
-		break;
-
-	case eSetTextureNameB:
-		// FIXME: Need to make N level texture support in backend first
-		/* Text here is assumed to be a filename */
-		//mMaterial->loadDetailTexture(text);
 		break;
 
 	case eSetCurrentBoneName:
@@ -6304,7 +6321,6 @@ void eMirrorMeshX()
 	}
 }
 
-
 void eMirrorMeshY()
 {
 	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
@@ -6387,6 +6403,7 @@ void eNopControl(ResourceEvent *e)
 
 void FreyjaControlEventsAttach()
 {
+	ResourceEventCallback2::add("eEnableMaterialFragment", &eNopControl);
 	ResourceEventCallback2::add("eCurrentFaceFlagAlpha", &eNopControl);
 	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
 	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);

@@ -44,10 +44,10 @@ enum rotate_flags {
 	Z_F = 4
 };
 
+void FreyjaViewEventsAttach();
 void getOpenGLViewport(int *viewportXYWH); // int[4]
 void getOpenGLModelviewMatrix(double *modelview); // double[16]
 void getOpenGLProjectionMatrix(double *projection); // double[16]
-void FreyjaViewEventsAttach();
 
 
 namespace freyja3d {

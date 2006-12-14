@@ -138,10 +138,12 @@ void Texture::disableMultiTexture()
 
 	glDisable(GL_TEXTURE_2D);
 
+#ifdef USING_OPENGL_EXT
 	if (h_glActiveTextureARB)
 	{
 		h_glActiveTextureARB(GL_TEXTURE0_ARB);
 	}
+#endif
 }
 
 
@@ -150,11 +152,13 @@ void Texture::useMultiTexture(float aU, float aV, float bU, float bV)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
+#ifdef USING_OPENGL_EXT
 	if (h_glMultiTexCoord2fARB)
 	{
 		h_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, aU, aV);
 		h_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, bU, bV);
 	}
+#endif
 }
 
 
@@ -163,16 +167,19 @@ void Texture::useMultiTexture(float u, float v)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
+#ifdef USING_OPENGL_EXT
 	if (h_glMultiTexCoord2fARB)
 	{
 		h_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, u, v);
 		h_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, u, v);
 	}
+#endif
 }
 
 
 void freyja_renders_old_multi(int texture, int texture2)
 {
+#ifdef USING_OPENGL_EXT
 	if (h_glActiveTextureARB)
 	{
 		h_glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -193,6 +200,7 @@ void freyja_renders_old_multi(int texture, int texture2)
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 		glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
 	}
+#endif
 }
 
 
@@ -210,6 +218,7 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 	mTextureId  = texture0;
 	mTextureId2 = texture1;
 
+#ifdef USING_OPENGL_EXT
 	if (h_glActiveTextureARB)
 	{
 		h_glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -220,6 +229,7 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, mTextureIds[texture1]);
 	}
+#endif
 }
 
 
@@ -396,52 +406,6 @@ void Texture::bindTextureId(unsigned int n)
 void Texture::glScreenShot(const char *base, 
 						   unsigned int width, unsigned int height)
 {
-#ifdef USING_MTK_PNG_SSHOT
-  FILE *f;
-  int sz = width*height;
-  unsigned char *image = new unsigned char[sz*3];
-  char filename[1024];
-  static int count = 0;
-  bool done = false;
-
-
-  if (!image)
-  {
-    printf("glScreenShot> ERROR: Couldn't allocate image!\n");
-    return;
-  }
-
-  while (!done)
-  {
-    snprintf(filename, 1024, "%s-%03i.png", base, count++);
-    
-    f = fopen(filename, "rb");
-
-    if (f)
-      fclose(f);
-    else
-      done = true;
-  }
-
-  f = fopen(filename, "wb");
-
-  if (!f)
-  {
-    printf("glScreenShot> ERROR: Couldn't write screenshot.\n");
-    perror("glScreenShot> ERROR: ");
-    return;
-  }
-
-  // Capture frame buffer
-  glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-  mtk_image__png_save(f, image, width, height, 3);
-  fclose(f);
-	
-  delete [] image;
-
-  printf("glScreenShot> Took screenshot '%s'.\n", filename);
-#else
   FILE *f;
   int sz = width*height;
   unsigned char *image = new unsigned char[sz*3];
@@ -561,7 +525,6 @@ void Texture::glScreenShot(const char *base,
   delete [] image;
 
   printf("Took screenshot '%s'.\n", filename);
-#endif
 }
 
 

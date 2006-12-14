@@ -20,28 +20,57 @@
  *            Normalized the API to be more consistant
  ==========================================================================*/
 
-
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
 #include <freyja/freyja.h>
 #include <freyja/MaterialABI.h>
 #include <hel/math.h>
-
+#include <mstl/SystemIO.h>
 #include "Cursor.h"
 #include "Texture.h"
-
 #include "FreyjaOpenGL.h"
 
-
-#ifdef OPENGL_EXT_MULTITEXTURE
+#ifdef USING_OPENGL_EXT
 PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB = NULL;
 PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB = NULL;
 PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB = NULL;
 PFNGLMULTITEXCOORD4FARBPROC h_glMultiTexCoord4fARB = NULL;
 PFNGLACTIVETEXTUREARBPROC h_glActiveTextureARB = NULL;
 PFNGLCLIENTACTIVETEXTUREARBPROC h_glClientActiveTextureARB = NULL;
+
+PFNGLGENPROGRAMSARBPROC h_glGenProgramsARB = NULL;
+PFNGLBINDPROGRAMARBPROC h_glBindProgramARB = NULL;
+PFNGLPROGRAMSTRINGARBPROC h_glProgramStringARB = NULL;
+PFNGLGETPROGRAMIVARBPROC h_glGetProgramivARB = NULL;
+
+PFNGLCREATESHADEROBJECTARBPROC h_glCreateShaderObjectARB = NULL;
+PFNGLSHADERSOURCEARBPROC h_glShaderSourceARB = NULL;
+PFNGLCOMPILESHADERARBPROC h_glCompileShaderARB = NULL;
+PFNGLCREATEPROGRAMOBJECTARBPROC h_glCreateProgramObjectARB = NULL;
+PFNGLATTACHOBJECTARBPROC h_glAttachObjectARB = NULL;	
+PFNGLLINKPROGRAMARBPROC h_glLinkProgramARB = NULL;
+PFNGLUSEPROGRAMOBJECTARBPROC h_glUseProgramObjectARB = NULL;
+#else
+void *h_glMultiTexCoord1fARB = NULL;
+void *h_glMultiTexCoord2fARB = NULL;
+void *h_glMultiTexCoord3fARB = NULL;
+void *h_glMultiTexCoord4fARB = NULL;
+void *h_glActiveTextureARB = NULL;
+void *h_glClientActiveTextureARB = NULL;
+
+void *h_glGenProgramsARB = NULL;
+void *h_glBindProgramARB = NULL;
+void *h_glProgramStringARB = NULL;
+void *h_glGetProgramivARB = NULL;
+
+void *h_glCreateShaderObjectARB = NULL;
+void *h_glShaderSourceARB = NULL;
+void *h_glCompileShaderARB = NULL;
+void *h_glCreateProgramObjectARB = NULL;
+void *h_glAttachObjectARB = NULL;	
+void *h_glLinkProgramARB = NULL;
+void *h_glUseProgramObjectARB = NULL;
 #endif
 
 using namespace freyja3d;
@@ -103,12 +132,27 @@ OpenGL::OpenGL() :
 	ext_cg_shader = mglHardwareExtTest("GL_EXT_Cg_shader");
 
 	// Hook up functions
+#ifdef USING_OPENGL_EXT
 	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
 	h_glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
 	h_glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
 	h_glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)mglGetProcAddress("glMultiTexCoord4fARB");
 	h_glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)mglGetProcAddress("glActiveTextureARB");
 	h_glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)mglGetProcAddress("glClientActiveTextureARB");
+
+	h_glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)mglGetProcAddress("glGenProgramsARB");
+	h_glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)mglGetProcAddress("glBindProgramARB");
+	h_glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)mglGetProcAddress("glProgramStringARB");
+	h_glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)mglGetProcAddress("glGetProgramivARB");
+
+	h_glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)mglGetProcAddress("glCreateShaderObjectARB");
+	h_glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)mglGetProcAddress("glShaderSourceARB");
+	h_glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)mglGetProcAddress("glCompileShaderARB");
+	h_glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)mglGetProcAddress("glCreateProgramObjectARB");
+	h_glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)mglGetProcAddress("glAttachObjectARB");	
+	h_glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)mglGetProcAddress("glLinkProgramARB");
+	h_glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)mglGetProcAddress("glUseProgramObjectARB");
+#endif
 
 	mSingleton = this;
 }
@@ -127,6 +171,132 @@ OpenGL::~OpenGL()
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
+{
+	if (!filename || !filename[0])
+		return false;
+
+	mstl::SystemIO::BufferedFileReader r;
+	uint32 length = 0;
+	char *program = NULL;
+
+	if (r.Open(filename))
+	{
+		// The pointer program addresses will be freed when r's scope ends
+		program = (char *)r.GetCompleteFileBuffer();
+		length = r.GetCompleteFileBufferSize();
+	}
+	else
+	{
+		freyja_print("!Failed to open fragment from disk.");
+		return false;
+	}
+
+
+#ifdef USING_OPENGL_EXT
+	if (!h_glGenProgramsARB || !h_glBindProgramARB || !h_glProgramStringARB ||
+		!h_glGetProgramivARB)
+	{
+		freyja_print("!Failed to aquire fragment functions from OpenGL.");
+		return false;
+	}
+
+	GLuint id = fragmentId;
+	h_glGenProgramsARB(1, &id);
+	fragmentId = id;
+	
+	if (id == 0)
+	{
+		freyja_print("!Failed to get fragment Id from OpenGL.\n");
+		return false;
+	}
+
+    h_glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, id);
+    h_glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, 
+						 GL_PROGRAM_FORMAT_ASCII_ARB,
+						 length, program);
+
+	// Try to detect program load errors
+	GLint program_error_pos, program_limits;
+	glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &program_error_pos);
+	h_glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB,
+						GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &program_limits);
+
+	if ( program_error_pos != -1 || program_limits != 1 )
+	{
+		freyja_print("!Failed to load fragment in OpenGL: %s%s",
+					 (!program_limits) ? "Exceeded native limit, " : "",
+					 (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+
+		return false;
+    }
+
+	h_glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, id);
+
+	return true;
+#else
+	freyja_print("!OpenGL extensions are disabled.");
+	return false;
+#endif
+}
+
+
+void OpenGL::BindFragmentARB(int32 fragmentId)
+{
+#ifdef USING_OPENGL_EXT
+	if (fragmentId < 0)
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+	}
+	else if (h_glBindProgramARB)
+	{
+		glEnable(GL_FRAGMENT_PROGRAM_ARB);
+		h_glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragmentId);
+	}
+#endif
+}
+
+
+bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
+{
+	if (!filename || !filename[0])
+		return false;
+
+	mstl::SystemIO::BufferedFileReader r;
+	char *program = NULL;
+	uint32 length = 0;
+
+	if (r.Open(filename))
+	{
+		// The pointer program addresses will be freed when r's scope ends
+		program = (char *)r.GetCompleteFileBuffer();
+		length = r.GetCompleteFileBufferSize();
+	}
+	else
+	{
+		freyja_print("!Failed to open fragment from disk.");
+		return false;
+	}
+
+	GLhandleARB fragment = h_glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+	const GLcharARB *ptr = (GLcharARB *)program;
+	h_glShaderSourceARB(fragment, 1, &ptr, NULL);
+	h_glCompileShaderARB(fragment);
+	
+	GLhandleARB	prog = h_glCreateProgramObjectARB();
+	h_glAttachObjectARB(prog, fragment);	
+	h_glLinkProgramARB(prog);
+	h_glUseProgramObjectARB(prog);
+
+	fragmentId = prog;
+	return true;
+}
+
+
+void OpenGL::BindFragmentGLSL(int32 fragmentId)
+{
+}
 
 
 ////////////////////////////////////////////////////////////

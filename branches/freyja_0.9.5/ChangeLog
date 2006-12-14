@@ -4,6 +4,12 @@
  Freyja 0.9.5 Development branch
  =====================================================================
 
+ Dancer (Public Beta RC3)
+ 20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Support for OpenGL GLSL fragment programs
+ - Support for OpenGL ARB fragment programs
+
+
  Dancer (Public Beta RC2)
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Fixes, packaging, and porting for release
