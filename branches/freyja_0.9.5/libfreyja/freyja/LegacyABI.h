@@ -34,6 +34,100 @@ extern "C" {
 	//////////////////////////////////////////////////////////////////////////
 
 
+	///////////////////////////////////////////////////////////////////////
+	// Freyja Iterator functions
+	//
+	///////////////////////////////////////////////////////////////////////
+
+	void freyjaBegin(freyja_object_t type);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 * Post : A new object of type is constructed.
+	 ------------------------------------------------------*/
+
+	void freyjaEnd();
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(...) is called to start the state
+	 * Post : The object is finialized and construction ends
+	 ------------------------------------------------------*/
+
+	index_t freyjaCriticalSectionLock();
+	void freyjaCriticalSectionUnlock(index_t lockId);
+	/*------------------------------------------------------
+	 * Pre  : FreyjaPlugin singleton exists
+	 *
+	 * Post : If FreyjaPlugin is locked this will block
+	 *        in the future. For now it's just to test if
+	 *        the singleton is up and running.
+	 ------------------------------------------------------*/
+
+	index_t freyjaIterator(freyja_object_t type, index_t item);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 *        <item> is a FREYJA_LIST_... command or item index
+	 *
+	 * Post : Sets current item in internal iterator to
+	 *        do operations on util a new construction or
+	 *        iterator operation of the same type is done.
+	 *
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetCount(freyja_object_t type);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 * Post : Returns total number of objects of type in 
+	 *        parent frame type eg [model]'s meshes
+	 *
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetCurrent(freyja_object_t type);
+	/*------------------------------------------------------
+	 * Pre  : <type> is valid
+	 * Post : Returns index of current internal complex type
+	 *        ( Last constructed or iterated )
+	 *
+	 *        Returns FREYJA_PLUGIN_ERROR on error
+	 ------------------------------------------------------*/
+
+	void freyjaGroupCenter3f(vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : freyjaIterator has initialized a vertexgroup
+	 * Post : Sets vertexgroups[FREYJA_LIST_CURRENT]'s
+	 *        pivot / center
+	 ------------------------------------------------------*/
+
+	void freyjaPolygonVertex1i(index_t index);
+	void freyjaPolygonTexCoord1i(index_t index);
+	void freyjaPolygonMaterial1i(index_t id);
+	/*------------------------------------------------------
+	 * Pre  : freyjaIterator has initialized a polygon
+	 *
+	 * Post : Appends/sets polygon[FREYJA_LIST_CURRENT]'s
+	 *        vertices, texcoord, or material
+	 ------------------------------------------------------*/
+
+	void freyjaGetVertexTexCoord2fv(vec2_t uv);
+	void freyjaGetVertexNormal3fv(vec3_t xyz);
+	void freyjaGetVertex3fv(vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : freyjaIterator has initialized a vertex
+	 *
+	 * Post : Gets vertex[FREYJA_LIST_CURRENT]'s
+	 *        position, normal, or texcoord
+	 ------------------------------------------------------*/
+
+	index_t freyjaVertexCreate3f(vec_t x, vec_t y, vec_t z);
+	index_t freyjaVertexCreate3fv(vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : freyjaBegin(FREYJA_GROUP);
+	 *        x,y,z are valid 3space coors
+	 * Post : A new vertex created in the model
+	 *        Returns the native index of that vertex
+	 ------------------------------------------------------*/
+
+
 	////////////////////////////////////////////////////////////////
 	// Texcoords
 	//

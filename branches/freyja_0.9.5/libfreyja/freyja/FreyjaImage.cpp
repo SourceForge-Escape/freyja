@@ -26,6 +26,8 @@
 #include <stdio.h>
 
 #include <mstl/SystemIO.h>
+#include <mstl/Vector.h>
+#include <mstl/String.h>
 
 #ifdef FREYJAIMAGE_PLUGINS
 #   include "PluginABI.h"
@@ -35,6 +37,7 @@
 
 using namespace mstl;
 
+extern Vector<mstl::String> gImagePluginDirectories;
 
 FreyjaImage::FreyjaImage() :
 	_image(NULL),
@@ -501,20 +504,16 @@ int FreyjaImage::loadImage(const char *filename)
 
 	print("[FreyjaImage plugin system invoked]");
 
-#ifdef WIN32
-	if (!reader.OpenDir("modules/image"))
+	// It IS very funny to see a C++ foreach implementation along side code that
+	// was used with software renderers years ago  =)
+	unsigned int i;
+	foreach (gImagePluginDirectories, i)
 	{
-		printError("Couldn't access image plugin directory");
-		return -2;
-	}
-#else
-	if (!reader.OpenDir(PLUGIN_IMAGE_DIR) || 
-		!reader.OpenDir("modules/image"))
-	{
-		printError("Couldn't access image plugin directory");
-		return -2;
-	}
-#endif
+		if (!reader.OpenDir(gImagePluginDirectories[i].c_str()))
+		{
+			printError("Couldn't access image plugin directory");
+			continue;
+		}
 
 	while (!done && (module_filename = reader.GetNextDirectoryListing()))
 	{
@@ -576,6 +575,7 @@ int FreyjaImage::loadImage(const char *filename)
 		default:
 			;
 		}
+	}
 	}
 #else
 	print("FreyjaImage: This build was compiled w/o plugin support");

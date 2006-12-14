@@ -217,7 +217,15 @@ bool MDMModel::load(const char *filename)
 ////////////////////////////////////////////////////////////
 
 
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
+
+
+using namespace mstl;
+
 
 extern "C" {
 

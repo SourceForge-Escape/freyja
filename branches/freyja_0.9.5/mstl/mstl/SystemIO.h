@@ -1845,6 +1845,7 @@ class SystemIO
 		void *symbol = NULL;
 
 #ifdef WIN32
+		/* Thanks to Sam for the WIN32 module loader example */
 		char errbuf[512];
 
 		symbol = (void *)GetProcAddress((HMODULE)handle, name);

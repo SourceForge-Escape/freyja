@@ -754,7 +754,10 @@ Material::Material ()
 
 
 #ifdef FREYJA_PLUGINS
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/TextureABI.h>
 #include <mstl/Map.h>
 #include <stdio.h>
 
@@ -823,17 +826,12 @@ int freyja_model__3ds_import(char *filename)
 {
 	Map<unsigned int, unsigned int> trans;
 	Map<unsigned int, unsigned int> trans2;
-	unsigned int i, t, v, o;
+	unsigned int i, o;
 
-	
 	if (freyja_model__3ds_check(filename) < 0)
 	{
-		//freyjaPrintError("freyja_model__3ds_import> Failed to load file\n");
 		return -1;
 	}
-
-	//freyjaPrintMessage("freyja_model__3ds_import> entry!");
-
 
 	File3ds tds(filename);
 
@@ -854,77 +852,64 @@ int freyja_model__3ds_import(char *filename)
 		unsigned int vertCount = tds.numVertices(o);
 		unsigned int faceCount = tds.numFaces(o);
 		
+		index_t model = freyjaModelCreate();
+		index_t mesh = freyjaMeshCreate();
+		freyjaModelAddMesh(model, mesh);
 
-		// Start a new model
-		freyjaBegin(FREYJA_MODEL);
-
-		// Start a new mesh
-		freyjaBegin(FREYJA_MESH);
-		
-		// Start a new vertex group
-		//freyjaBegin(FREYJA_GROUP);  
-		
 		// Clear for each group
 		trans.Clear();
 
 		for (i = 0; i < vertCount; i++) 
 		{
 			// Store vertices in group
-			v = freyjaVertexCreate3f(verts[i].x, verts[i].z, -verts[i].y); // XZY
+			vec3_t v = {verts[i].x, verts[i].z, -verts[i].y};
+			index_t vertex = freyjaMeshVertexCreate3fv(mesh, v);
 			
 			// Generates id translator list
-			trans.Add(i, v);
+			trans.Add(i, vertex);
 		}
-
-		//freyjaEnd(); // GROUP
 		
 		for (i = 0; i < faceCount; i++) 
 		{
-			// Start a new polygon
-			freyjaBegin(FREYJA_POLYGON);
-			
-			// Store vertices by true id, using translator list
-			freyjaPolygonVertex1i(trans[faces[i].vcA]);
-			freyjaPolygonVertex1i(trans[faces[i].vcB]);
-			freyjaPolygonVertex1i(trans[faces[i].vcC]);
-
-			// Store texels by true id, using translator list
-			if (uvs)
-			{
-				t = freyjaTexCoordCreate2f(uvs[faces[i].vcA].U, uvs[faces[i].vcA].V);
-				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoordCreate2f(uvs[faces[i].vcB].U, uvs[faces[i].vcB].V);
-				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoordCreate2f(uvs[faces[i].vcC].U, uvs[faces[i].vcC].V);
-				freyjaPolygonTexCoord1i(t);				
-			}
-			else
-			{
-				t = freyjaTexCoordCreate2f(0.0, 0.5);
-				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoordCreate2f(0.5, 0.5);
-				freyjaPolygonTexCoord1i(t);
-				t = freyjaTexCoordCreate2f(0.0, 0.0);
-				freyjaPolygonTexCoord1i(t);
-			}
-
+			index_t face = freyjaMeshPolygonCreate(mesh);
 
 			if (faces[i].material && faces[i].material->texture1.filename &&
 			    faces[i].material->texture1.filename[0])
 			{
-				t = freyjaTextureCreateFilename(faces[i].material->texture1.filename);
-				freyjaPolygonMaterial1i(t);
+				index_t texture = freyjaTextureCreateFilename(faces[i].material->texture1.filename);
+				freyjaMeshPolygonMaterial(mesh, face, texture);
 			}
 			else
 			{
-				freyjaPolygonMaterial1i(0);
+				freyjaMeshPolygonMaterial(mesh, face, 0);
+			}
+						
+			// Store vertices by true id, using translator list
+			freyjaMeshPolygonAddVertex1i(mesh, face, trans[faces[i].vcA]);
+			freyjaMeshPolygonAddVertex1i(mesh, face, trans[faces[i].vcB]);
+			freyjaMeshPolygonAddVertex1i(mesh, face, trans[faces[i].vcC]);
+
+			// Store texels by true id, using translator list
+			if (uvs)
+			{
+				vec_t u = uvs[faces[i].vcA].U;
+				vec_t v = uvs[faces[i].vcA].V;
+				index_t texcoord = freyjaMeshTexCoordCreate2f(mesh, u, v);
+				freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
+
+				u = uvs[faces[i].vcB].U;
+				v = uvs[faces[i].vcB].V;
+				texcoord = freyjaMeshTexCoordCreate2f(mesh, u, v);
+				freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
+
+				u = uvs[faces[i].vcC].U;
+				v = uvs[faces[i].vcC].V;
+				texcoord = freyjaMeshTexCoordCreate2f(mesh, u, v);
+				freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);			
 			}
 
-			freyjaEnd(); // polygon
 		}
 
-		freyjaEnd(); // mesh
-		freyjaEnd(); // model
 	}
 
 	return 0;

@@ -313,6 +313,12 @@ extern "C" {
 	 * Post : Returns number of mesh UIDs used.
 	 ------------------------------------------------------*/
 
+	byte freyjaIsMeshSelected(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Checks mesh flags for a selection set.
+	 ------------------------------------------------------*/
+
 	char freyjaIsMeshAllocated(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : Given UID of <mesh>.

@@ -516,7 +516,12 @@ int HalfLife::load(const char *filename)
 
 #ifdef FREYJA_PLUGINS
 
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/freyja.h>
 #include <mstl/Map.h>
 #include <hel/Vector3d.h>
 #include <hel/Matrix.h>

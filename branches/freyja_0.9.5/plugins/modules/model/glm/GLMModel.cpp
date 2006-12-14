@@ -381,9 +381,14 @@ int main(int argc, char *argv[])
 
 #include <stdio.h>
 #include <string.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/freyja.h>
 #include <hel/Matrix.h>
+#include <mstl/Vector.h>
 
+using namespace mstl;
 
 extern "C" {
 

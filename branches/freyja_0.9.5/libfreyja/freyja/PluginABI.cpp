@@ -42,6 +42,7 @@ using namespace mstl;
 
 Vector<FreyjaPluginDesc *> gFreyjaPlugins;
 Vector<char *> gPluginDirectories;
+Vector<mstl::String> gImagePluginDirectories;
 int32 gCurrentFreyjaPlugin = -1;
 
 
@@ -105,11 +106,15 @@ void freyjaPluginDirectoriesInit()
 {
 #ifdef WIN32
 	freyjaPluginAddDirectory("modules/model");
+	gImagePluginDirectories.push_back(mstl::String("modules/image"));
 #else
 	String s = getenv("HOME");
 	s += "/.freyja/plugins/model";
    	freyjaPluginAddDirectory(s.c_str());
-	//MSTL_MSG(s.c_str());
+
+	s = getenv("HOME");
+	s += "/.freyja/plugins/image";
+	gImagePluginDirectories.push_back(s);
 
    	freyjaPluginAddDirectory("/usr/lib/freyja_0.9.5/modules/model");
    	freyjaPluginAddDirectory("/usr/local/lib/freyja_0.9.5/modules/model");

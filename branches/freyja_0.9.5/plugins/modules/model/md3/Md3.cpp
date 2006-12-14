@@ -980,8 +980,15 @@ void Md3::createBones(unsigned int num)
 
 #include <string.h>
 #include <stdio.h>
-#include <freyja/FreyjaPluginABI.h>
 #include <hel/Matrix.h>
+#include <freyja/PluginABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
+
+using namespace mstl;
 
 #include "Md3.h"
 

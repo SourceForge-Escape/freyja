@@ -27,7 +27,15 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 
 #include "ObjModel.h"

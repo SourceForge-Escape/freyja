@@ -3216,7 +3216,11 @@ int main(int argc, char *argv[])
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
 #include <mstl/List.h>
-#include <freyja/FreyjaPlugin.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/freyja.h>
 
 
 extern "C" {
@@ -3590,7 +3594,8 @@ int freyja_model__eggv7_import(char *filename)
 			id = r.ReadInt32();
 			printf(" %i", id);
 
-			freyjaBoneAddMesh(index, transM[id]);
+			// FIXME: 0.9.5 obsolete ABI call
+			//freyjaBoneAddMesh(index, transM[id]);
 		}
 
 		printf("\n %i slaves:\n   ", slaves);

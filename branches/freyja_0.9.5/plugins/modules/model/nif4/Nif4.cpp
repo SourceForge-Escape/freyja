@@ -153,7 +153,17 @@ bool Nif4::loadModel(const char *filename)
 ////////////////////////////////////////////////////////////
 
 #ifdef FREYJA_PLUGINS
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
+
+using namespace mstl;
 
 extern "C" {
 

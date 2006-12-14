@@ -6,6 +6,15 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - More ABI cleanup to purge legacy usage
+ - All plugins should build again, but many use legacy ABI
+ - Bone rendering now user prefs controlled
+ - libfreyja FreyjaImage support for more plugin paths
+ - All freyja iterator/fsm code marked legacy status
+ - GLSL / ARB fragment UI control and info dialog debugging
+ - Some more plugins updated to 0.9.5 ABI
+ - Fix for linux snapshots ( missing freyja.sh shell script )
+ - linux ia32 python2.4 enabled snapshot builds
  - Support for OpenGL GLSL fragment programs
  - Support for OpenGL ARB fragment programs
 
