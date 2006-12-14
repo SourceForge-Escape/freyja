@@ -28,11 +28,9 @@ def InitPlugin(args):
 	return True
 
 
-
 def ExportModel(filename):
 	print "ExportModel() called"
 	return False
-
 
 
 def ImportModel(filename):

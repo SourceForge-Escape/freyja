@@ -26,6 +26,9 @@
 			- Obj, Smd, ...
 		- Extra viewmode to toggle groups colors on/off
 		- Fragments bound properly to materials and varying support
+		- Two-way python function/script UI, reporting ala C plugins
+		  or offically endorse pygtk, etc
+
 
 	* To be finalized
 		- Track and Keyframe classes 
