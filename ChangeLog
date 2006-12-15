@@ -6,6 +6,9 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Merging debian control files, etc into svn
+ - Merging FreyjaOpenGL and the aging Texture class begins
+ - Lots of packaging and fixing package bugs
  - More ABI cleanup to purge legacy usage
  - All plugins should build again, but many use legacy ABI
  - Bone rendering now user prefs controlled

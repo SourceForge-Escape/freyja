@@ -28,6 +28,8 @@
 		- Fragments bound properly to materials and varying support
 		- Two-way python function/script UI, reporting ala C plugins
 		  or offically endorse pygtk, etc
+		- glGetObjectParameterivARB and GLSL debug hookup in UI like ARB has
+		- 
 
 
 	* To be finalized

@@ -1,0 +1,6 @@
+libfreyja (0.9.5.20061124-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- mongoose <mongoose@icculus.org>  Thu, 14 Dec 2006 15:45:55 -0500
+

@@ -304,7 +304,6 @@ VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
 
 DESTDIR =
 NO_DEB=
-NO_DEB=local/
 INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
 INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
 INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
@@ -322,6 +321,8 @@ debian-package:
 	$(MAKE) tarball
 	mkdir -p $(DEB_DIR)
 	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
+	cp -R ../mstl  $(DEB_DIR)
+	cp -R ../libhel  $(DEB_DIR)
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
@@ -343,7 +344,7 @@ install: install-gtkglext
 install-gtkglext:
 	@-echo -n "Installing selected build                     "
 	@-mkdir -p  $(INSTALL_LIB)
-	@-cp bin/debug.gtkglext/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
+	@-cp $(BUILD_DEBUG_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)/
 	@-echo "[done]"
 	@-$(MAKE) install-link
 	@-$(MAKE) install-headers

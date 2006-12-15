@@ -26,7 +26,6 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
 

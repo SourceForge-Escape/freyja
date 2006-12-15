@@ -731,7 +731,7 @@ index_t freyjaGetMeshPolygonTexCoordIndex(index_t mesh, index_t polygon,
 			}
 			else if (f->mIndices.size() > element)
 			{
-				return freyjaGetMeshVertexTexCoord(f->mIndices[element]);
+				return freyjaGetMeshVertexTexCoord(mesh, f->mIndices[element]);
 			}
 		}
 	}

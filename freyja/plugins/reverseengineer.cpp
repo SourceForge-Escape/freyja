@@ -25,6 +25,7 @@
 #include <mstl/SystemIO.h>
 #include <freyja/PluginABI.h>
 #include <freyja/ModelABI.h>
+#include <freyja/LegacyABI.h>
 #include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>

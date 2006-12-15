@@ -29,6 +29,7 @@
 #include <freyja/MaterialABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaImage.h>
+#include <freyja/freyja.h>
 #include <mstl/SystemIO.h>
 
 #include "FreyjaRender.h"

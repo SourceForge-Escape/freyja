@@ -25,6 +25,11 @@
 #include <math.h>
 #include <freyja/freyja.h>
 #include <freyja/MaterialABI.h>
+
+#ifdef HAVE_FREYJA_IMAGE
+#   include <freyja/FreyjaImage.h>
+#endif
+
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include "Cursor.h"
@@ -51,6 +56,9 @@ PFNGLCREATEPROGRAMOBJECTARBPROC h_glCreateProgramObjectARB = NULL;
 PFNGLATTACHOBJECTARBPROC h_glAttachObjectARB = NULL;	
 PFNGLLINKPROGRAMARBPROC h_glLinkProgramARB = NULL;
 PFNGLUSEPROGRAMOBJECTARBPROC h_glUseProgramObjectARB = NULL;
+PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB = NULL;
+PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB = NULL;
+PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB = NULL;
 #else
 void *h_glMultiTexCoord1fARB = NULL;
 void *h_glMultiTexCoord2fARB = NULL;
@@ -71,6 +79,9 @@ void *h_glCreateProgramObjectARB = NULL;
 void *h_glAttachObjectARB = NULL;	
 void *h_glLinkProgramARB = NULL;
 void *h_glUseProgramObjectARB = NULL;
+void *h_glGetInfoLogARB = NULL;
+void *h_glDeleteObjectARB = NULL;
+void *h_glGetObjectParameterivARB = NULL;
 #endif
 
 using namespace freyja3d;
@@ -102,7 +113,12 @@ OpenGL *OpenGL::Instance()
 OpenGL::OpenGL() :
 	mTextureUnitCount(2),
 	mMaxLightsCount(2),
-	mFlags(fNone)
+	mFlags(fNone),
+	mTextureIds(NULL),
+	mTextureCount(2), // FIXME: Use new OpenGL ext wrapper class
+	mTextureLimit(64),
+	mTextureId(1),
+	mTextureId2(-1)
 {
 	/* Log OpenGL driver support information */
 	freyja_print("[GL Driver Info]");
@@ -131,6 +147,9 @@ OpenGL::OpenGL() :
 	arb_shading_language_100 = mglHardwareExtTest("GL_ARB_shading_language_100");
 	ext_cg_shader = mglHardwareExtTest("GL_EXT_Cg_shader");
 
+	// Depends on class Texture replacement
+	//SetMaxTextureCount(mTextureLimit);
+
 	// Hook up functions
 #ifdef USING_OPENGL_EXT
 	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
@@ -152,6 +171,9 @@ OpenGL::OpenGL() :
 	h_glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)mglGetProcAddress("glAttachObjectARB");	
 	h_glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)mglGetProcAddress("glLinkProgramARB");
 	h_glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)mglGetProcAddress("glUseProgramObjectARB");
+	h_glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)mglGetProcAddress("glGetInfoLogARB");
+	h_glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)mglGetProcAddress("glDeleteObjectARB");
+	h_glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)mglGetProcAddress("glGetObjectParameterivARB");
 #endif
 
 	mSingleton = this;
@@ -160,6 +182,8 @@ OpenGL::OpenGL() :
 
 OpenGL::~OpenGL()
 {
+	if (mTextureIds) 
+		delete [] mTextureIds;
 }
 
 
@@ -171,6 +195,18 @@ OpenGL::~OpenGL()
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void OpenGL::SetMaxTextureCount(uint32 max)
+{
+	mTextureLimit = max;
+
+	if (mTextureIds) 
+		delete [] mTextureIds;
+
+	mTextureIds = new uint32[max];
+	glGenTextures(max, mTextureIds);
+}
+
 
 bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 {
@@ -282,23 +318,66 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 		return false;
 	}
 
+#ifdef USING_OPENGL_EXT
 	GLhandleARB fragment = h_glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 	const GLcharARB *ptr = (GLcharARB *)program;
 	h_glShaderSourceARB(fragment, 1, &ptr, NULL);
 	h_glCompileShaderARB(fragment);
 	
-	GLhandleARB	prog = h_glCreateProgramObjectARB();
+	GLhandleARB prog = h_glCreateProgramObjectARB();
 	h_glAttachObjectARB(prog, fragment);	
 	h_glLinkProgramARB(prog);
 	h_glUseProgramObjectARB(prog);
 
 	fragmentId = prog;
 	return true;
+#else
+	return false;
+#endif
 }
 
 
 void OpenGL::BindFragmentGLSL(int32 fragmentId)
 {
+#ifdef USING_OPENGL_EXT
+	GLhandleARB prog = fragmentId;
+	h_glUseProgramObjectARB(prog);
+#endif
+}
+
+//void glDeleteObjectARB(GLhandleARB object)
+
+void OpenGL::DebugFragmentGLSL(int32 fragmentId)
+{
+#ifdef USING_OPENGL_EXT
+	char buffer[2048];
+	GLhandleARB object = fragmentId;
+	GLsizei maxLenght = 2048;
+	GLsizei length;
+	GLcharARB *infoLog = (GLcharARB *)buffer;
+
+	h_glGetInfoLogARB(object, maxLenght, &length, infoLog);
+	buffer[2047] = '\0';
+
+	freyja_event_info_dialog("gtk-dialog-info", buffer);
+#endif
+}
+
+
+byte *OpenGL::GenerateColorTexture(byte rgba[4], uint32 width, uint32 height)
+{
+	byte *image = new unsigned char[height*width*4];
+
+	for (uint32 i = 0, size = width*height; i < size; ++i)
+	{
+		/* RBGA */
+		image[i*4]   = rgba[0];
+		image[i*4+1] = rgba[1];
+		image[i*4+2] = rgba[2];
+		image[i*4+3] = rgba[3];
+	}
+
+	return image;
 }
 
 
