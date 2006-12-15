@@ -6,7 +6,7 @@
  * Website : http://icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
  * Object  : 
- * License : No use w/o permission (C)2001 Mongoose
+ * License : No use w/o permission (C)2001-2006 Mongoose
  * Comments: GL context rendering backend for Freyja
  *
  *
@@ -68,6 +68,10 @@ extern	PFNGLCREATEPROGRAMOBJECTARBPROC h_glCreateProgramObjectARB;
 extern	PFNGLATTACHOBJECTARBPROC h_glAttachObjectARB;	
 extern	PFNGLLINKPROGRAMARBPROC h_glLinkProgramARB;
 extern	PFNGLUSEPROGRAMOBJECTARBPROC h_glUseProgramObjectARB;
+extern	PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB;
+extern  PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB;
+extern  PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB;
+
 #else
 extern void *h_glMultiTexCoord1fARB;
 extern void *h_glMultiTexCoord2fARB;
@@ -88,6 +92,10 @@ extern	void *h_glCreateProgramObjectARB;
 extern	void *h_glAttachObjectARB;	
 extern	void *h_glLinkProgramARB;
 extern	void *h_glUseProgramObjectARB;
+extern	void *h_glGetInfoLogARB;
+extern  void *h_glDeleteObjectARB;
+extern  void *h_glGetObjectParameterivARB;
+
 #endif
 
 #include <hel/math.h>
@@ -187,6 +195,22 @@ public:
 
 class OpenGL
 {
+	typedef enum {
+		GREYSCALE = 1,
+		INDEXED,
+		RGB,
+		RGBA,
+		ARGB
+	} ColorMode;
+
+	typedef enum {
+		fNone = 0,
+		fUseMipmaps			= 1,
+		fUseMultiTexture	= 2,
+		fUseSDL_TTF			= 4
+	} Flags;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -210,6 +234,14 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
+	static const OpenGL *Singleton() { return mSingleton; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGL if not already 
+	 *        allocated
+	 *
+	 ------------------------------------------------------*/
+
 	~OpenGL();
 	/*------------------------------------------------------
 	 * Pre  : OpenGL object is allocated
@@ -219,8 +251,86 @@ class OpenGL
 
 
 	////////////////////////////////////////////////////////////
-	// EXT and ARB wrappers
+	// OpenGL
 	////////////////////////////////////////////////////////////
+
+	byte *GenerateColorTexture(byte rgba[4], uint32 width, uint32 height);
+	/*------------------------------------------------------
+	 * Pre  : <rgba> is 32bpp RGBA color
+	 *        <width> and <height> are the dimensions of image
+	 * Post : 
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2003.06.30:
+	 * Mongoose - Created, taken from class Texture
+	 ------------------------------------------------------*/
+
+	// Need to 'update' this to be more OpenGL focused than generic now
+	int LoadTexture(byte *image, uint32 width, uint32 height, 
+					ColorMode mode, uint32 bpp);
+	/*------------------------------------------------------
+	 * Pre  : image must be a valid pixmap that agrees
+	 *        with mode, width, and height
+	 *
+	 * Post : Returns texture id or < 0 error flag
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.05.29:
+	 * Mongoose - Big code clean up, documentation
+	 *
+	 * 2000.10.05: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+   int loadBufferSlot(unsigned char *image, 
+					  unsigned int width, unsigned int height, 
+					  ColorMode mode, unsigned int bpp,
+					  unsigned int slot);
+	/*------------------------------------------------------
+	 * Pre  : image must be a valid pixmap that agrees
+	 *        with mode, width, and height, slot ( ID )
+	 *
+	 * Post : Returns texture id or < 0 error flag
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.09.05: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	int loadColorTexture(unsigned char rgba[4],
+						 unsigned int width, unsigned int height);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Generates and loads a solid color texture,
+	 *        returns texture Id or -1 if failed
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2003.06.30:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void SetMaxTextureCount(uint32 max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// ARB 
+	////////////////////////////////////////////////////////////
+
+	static void BindFragmentARB(int32 fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : if <fragmentId> < 0 fragments are disabled.
+	 *        Otherwise the referenced fragment is bound.
+	 ------------------------------------------------------*/
 
 	static bool LoadFragmentARB(const char *filename, uint32 &fragmentId);
 	/*------------------------------------------------------
@@ -229,11 +339,23 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
-	static void BindFragmentARB(int32 fragmentId);
+
+	////////////////////////////////////////////////////////////
+	// GLSL
+	////////////////////////////////////////////////////////////
+
+	static void BindFragmentGLSL(int32 fragmentId);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : if <fragmentId> < 0 fragments are disabled.
 	 *        Otherwise the referenced fragment is bound.
+	 ------------------------------------------------------*/
+
+	static void DebugFragmentGLSL(int32 fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Dump the GLSL log for this object to a dialog.
+	 *
 	 ------------------------------------------------------*/
 
 	static bool LoadFragmentGLSL(const char *filename, uint32 &fragmentId);
@@ -243,23 +365,10 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
-	static void BindFragmentGLSL(int32 fragmentId);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : if <fragmentId> < 0 fragments are disabled.
-	 *        Otherwise the referenced fragment is bound.
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Public attributes
 	////////////////////////////////////////////////////////////
-
-	enum {
-		fNone = 0
-	} Flags;
-
-	static OpenGL *mSingleton;
 
 	/* Hardware/driver limits */
 	int32 mTextureUnitCount;
@@ -288,9 +397,21 @@ class OpenGL
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
+	static OpenGL *mSingleton;
+
 	mstl::Vector<OpenGLContext> mContexts;
 
-	uint32 mFlags;             /* */
+	uint32 mFlags;              /* Options */
+
+	uint32 *mTextureIds;		/* GL texture list */
+
+	uint32 mTextureCount;	    /* Texture counter */
+	
+	uint32 mTextureLimit;	    /* The texture limit */
+	
+	int32 mTextureId;	    	/* Currently bound texture id */
+	
+	int32 mTextureId2;			/* Multitexture Texture Id */
 };
 
 } // namespace freyja3d

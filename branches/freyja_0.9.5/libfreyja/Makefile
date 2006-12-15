@@ -64,7 +64,7 @@ DEPS=./deps.sh
 
 DESTDIR =
 NO_DEB=
-NO_DEB=local/
+NO_DEB=
 INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
 INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
 INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
@@ -303,7 +303,10 @@ debian-package:
 	$(MAKE) clean-deb
 	$(MAKE) tarball
 	mkdir -p $(DEB_DIR)
+	cp -R ../mstl  $(DEB_DIR)
+	cp -R ../libhel  $(DEB_DIR)
 	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
+	cd $(DEB_DIR)/libhel && make
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
@@ -315,7 +318,7 @@ deb-init:
 	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
 	@-rm -f debian/control.old
 	@-cp debian/rules debian/rules.old
-	@-sed -e "s/MAKE) install/MAKE) install plugins install-plugins tools install-tools/g" debian/rules.old > debian/rules
+	@-sed -e "s/MAKE) install/MAKE) install/g" debian/rules.old > debian/rules
 	@-rm -f debian/rules.old
 
 deb:
@@ -332,10 +335,11 @@ install:
 	@-$(MAKE) install-link
 	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
-	@-echo $(MAKE) plugins
-	@-echo $(MAKE) install-plugins
-	@-echo $(MAKE) tools
-	@-echo $(MAKE) install-tools
+
+#	@-echo $(MAKE) plugins
+#	@-echo $(MAKE) install-plugins
+#	@-echo $(MAKE) tools
+#	@-echo $(MAKE) install-tools
 
 install-win32:
 	@-mkdir -p $(INSTALL_LIB)

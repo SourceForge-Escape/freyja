@@ -1,0 +1,12 @@
+Source: freyja
+Section: unknown
+Priority: optional
+Maintainer: mongoose <mongoose@icculus.org>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: freyja
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libmgtk, libhel, libfreyja
+Description: Freyja 3d modeler
+ 3d Modeler.

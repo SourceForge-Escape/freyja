@@ -543,7 +543,7 @@ int Texture::nextPower(int seed)
 }
 
 
-/* This code based off on gluScaleImage()  */
+/* This code based off code based on gluScaleImage()  */
 unsigned char *Texture::scaleBuffer(unsigned char *image, 
 												int width,  int height,	
 												int components)

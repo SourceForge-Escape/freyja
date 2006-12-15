@@ -1,0 +1,12 @@
+Source: libhel
+Section: unknown
+Priority: optional
+Maintainer: Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: libhel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The freyja math library.
+ The freyja math library provides basic 3d math, geometric utility, and collision support.

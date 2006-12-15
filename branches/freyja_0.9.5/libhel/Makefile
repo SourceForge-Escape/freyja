@@ -10,8 +10,8 @@
 NAME=hel
 MAJOR_VERSION=0
 MINOR_VERSION=0
-MICRO_VERSION=1
-BUILD_ID=20040406
+MICRO_VERSION=2
+BUILD_ID=20061212
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 TREE_DIR=libhel
 TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
@@ -19,9 +19,10 @@ TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
 ################################################################
 
 BUILD_SELECT=debug
-INSTALL_INC_DIR=/usr/local/include
-INSTALL_LIB_DIR=/usr/local/lib
-INSTALL_BIN_DIR=/usr/local/bin
+INSTALL_PREFIX=/usr
+INSTALL_INC_DIR=$(INSTALL_PREFIX)/include
+INSTALL_LIB_DIR=$(INSTALL_PREFIX)/lib
+INSTALL_BIN_DIR=$(INSTALL_PREFIX)/bin
 API=0
 
 ################################################################
@@ -219,12 +220,11 @@ VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
 
 DESTDIR =
 NO_DEB=
-NO_DEB=local/
-INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
-INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
+INSTALL_BIN=$(DESTDIR)$(INSTALL_BIN_DIR)
+INSTALL_LIB=$(DESTDIR)$(INSTALL_LIB_DIR)
+INSTALL_INCLUDE=$(DESTDIR)$(INSTALL_INC_DIR)
 INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
 INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
-INSTALL_INCLUDE=$(DESTDIR)/usr/$(NO_DEB)include
 INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
 clean-deb:
@@ -236,6 +236,7 @@ debian-package:
 	$(MAKE) clean-deb
 	$(MAKE) tarball
 	mkdir -p $(DEB_DIR)
+	cp -R ../mstl  $(DEB_DIR)
 	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 

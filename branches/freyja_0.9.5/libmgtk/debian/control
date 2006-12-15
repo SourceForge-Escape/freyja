@@ -1,0 +1,12 @@
+Source: libmgtk
+Section: unknown
+Priority: optional
+Maintainer: mongoose <mongoose@icculus.org>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: libmgtk
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libhel
+Description: MLISP gtk+ binding
+ 3d Modeler.

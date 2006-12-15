@@ -62,7 +62,7 @@ LOCAL_WIN32_LIBS=-L../bin/libfreyja/win32/ -L../bin/libhel/win32/ -L../bin/libmg
 
 DESTDIR =
 NO_DEB=
-NO_DEB=local/
+NO_DEB=
 INSTALL_BIN=$(DESTDIR)/usr/$(NO_DEB)bin
 INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
 INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
@@ -220,12 +220,6 @@ clean-builds:
 	@-rm -f $(BUILD_TEST_DIR)/*.test
 	@-echo [done]
 
-	@-echo -n "Cleaning Gtk+ 2.0 build                     "
-	@-rm -f $(BUILD_GTK2_DIR)*/*.o
-	@-rm -f $(BUILD_GTK2_DIR)*/$(NAME)
-	@-rm -f $(BUILD_GTK2_DIR)*/*.test
-	@-echo [done]
-
 	@-echo -n "Cleaning Win32 build                        "
 	@-rm -f $(BUILD_WIN32_DIR)*/*.o
 	@-rm -f $(BUILD_WIN32_DIR)*/$(NAME).exe
@@ -268,7 +262,14 @@ debian-package:
 	$(MAKE) clean-deb
 	$(MAKE) tarball
 	mkdir -p $(DEB_DIR)
+	cp -R ../mstl  $(DEB_DIR)
+	cp -R ../libhel  $(DEB_DIR)
+	cp -R ../libmgtk  $(DEB_DIR)
+	cp -R ../libfreyja  $(DEB_DIR)
 	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
+	cd $(DEB_DIR)/libhel && make
+	cd $(DEB_DIR)/libmgtk && make
+	cd $(DEB_DIR)/libfreyja && make
 	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
 
 deb-init:
