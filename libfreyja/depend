@@ -26,8 +26,8 @@ $(BUILDDIR)/LegacyABI.o: freyja/LegacyABI.cpp freyja/Mesh.h freyja/freyja.h \
   freyja/MemTrack.h freyja/Track.h freyja/KeyFrame.h freyja/Weight.h \
   freyja/Vertex.h freyja/Face.h freyja/MeshABI.h freyja/Material.h \
   freyja/FreyjaTexture.h freyja/PluginABI.h freyja/ModelABI.h \
-  freyja/BoneABI.h freyja/MaterialABI.h freyja/SkeletonABI.h \
-  freyja/LegacyABI.h
+  freyja/BoneABI.h freyja/MaterialABI.h freyja/TextureABI.h \
+  freyja/SkeletonABI.h freyja/LegacyABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Material.o: freyja/Material.cpp freyja/MaterialABI.h freyja/freyja.h \
@@ -50,8 +50,9 @@ $(BUILDDIR)/FreyjaPrinter.o: freyja/FreyjaPrinter.cpp freyja/FreyjaPrinter.h
 $(BUILDDIR)/FreyjaFSM.o: freyja/FreyjaFSM.cpp freyja/freyja.h freyja/MemTrack.h \
   freyja/Mesh.h freyja/Track.h freyja/KeyFrame.h freyja/Weight.h \
   freyja/Vertex.h freyja/Face.h freyja/BoneABI.h freyja/SkeletonABI.h \
-  freyja/TextureABI.h freyja/FreyjaFSM.h freyja/LightABI.h \
-  freyja/MeshABI.h freyja/MaterialABI.h freyja/ModelABI.h
+  freyja/TextureABI.h freyja/LegacyABI.h freyja/FreyjaFSM.h \
+  freyja/LightABI.h freyja/MeshABI.h freyja/MaterialABI.h \
+  freyja/ModelABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Track.o: freyja/Track.cpp freyja/Track.h freyja/KeyFrame.h \

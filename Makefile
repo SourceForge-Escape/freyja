@@ -3,11 +3,11 @@
 ################################################################
 
 ARCH = $(shell uname -m)
-APT_DIR = apt/$(ARCH)
+APT_DIR = apt_repo/$(ARCH)
 DEB_DIR = /tmp/$(ARCH)
 DATE=`date +%Y%m%d`
 UDATE=`date +%Y%m%d%H%M%S`
-VERSION=freyja_0.9.5rc3-$(DATE)
+VERSION=freyja_0.9.5rc3-$(DATE)-$(ARCH)
 LINUX_SANDBOX=linux-$(ARCH)
 
 WIN32_BUNDLE_DIR=bin/freyja-win32
@@ -33,7 +33,7 @@ info:
 	@-printf "\n"
 
 
-native:
+native-old:
 	@-printf "Building libhel\n"
 	@-cd libhel && ./autogen.sh && make
 
@@ -48,6 +48,28 @@ native:
 
 	@-printf "Building freyja\n"
 	@-cd freyja && ./autogen.sh && make && make plugins
+
+	@-printf "\n\n o If your build failed:\n"
+	@-printf "       * Make sure you have a complete glext.h header\n"
+	@-printf "       * Look in freyja/Makefile for options to disable\n"
+	@-printf "\n\n o Now 'make user-install' as a user\n\n"
+
+
+native:
+	@-printf "Building libhel\n" && \
+	cd libhel && ./autogen.sh && make && cd .. &&  \
+	\
+	printf "Building libfreyja\n" && \
+	cd libfreyja && ./autogen.sh && make && cd .. &&  \
+	\
+	printf "Building libfreyja plugins\n" && \
+	cd plugins && make && cd .. &&  \
+	\
+	printf "Building libmgtk\n" && \
+	cd libmgtk && ./autogen.sh && make && cd .. &&  \
+	\
+	printf "Building freyja\n" && \
+	cd freyja && ./autogen.sh && make && make plugins
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -176,10 +198,10 @@ deb:
 
 apt:
 	@-mkdir -p $(APT_DIR)
-	@-cp *.deb $(APT_DIR)/
-	@-cp *.dsc $(APT_DIR)/
-	@-cp *.changes $(APT_DIR)/
-	@-cp *.gz $(APT_DIR)/
+	@-for i in *.deb; do mv $${i%_*.deb}.tar.gz $(APT_DIR)/; done
+	@-mv *.deb $(APT_DIR)/
+	@-mv *.dsc $(APT_DIR)/
+	@-mv *.changes $(APT_DIR)/
 	cd $(APT_DIR) && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
 	cd $(APT_DIR) && dpkg-scansources . /dev/null | gzip -9c > Sources.gz
 
@@ -189,7 +211,7 @@ apt-upload:
 		$(APT_DIR)/*.deb  \
 		$(APT_DIR)/*.dsc \
 		$(APT_DIR)/*.changes \
-		$(APT_DIR)/*.gz \
+		$(APT_DIR)/*.tar.gz \
 	icculus.org:~/freyja/files/debian/$(ARCH)/
 
 

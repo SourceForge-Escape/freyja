@@ -115,6 +115,12 @@ class String
 	}
 
 
+	char &operator [] (unsigned int i)
+	{
+		return mString[i];
+	}
+
+
 	~String()
 	{
 		Clear();

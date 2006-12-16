@@ -344,11 +344,20 @@ class OpenGL
 	// GLSL
 	////////////////////////////////////////////////////////////
 
+	// TODO: Might rename these to reflect program/object and no use in being parallel to ARB fragment methods above
+
 	static void BindFragmentGLSL(int32 fragmentId);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : if <fragmentId> < 0 fragments are disabled.
 	 *        Otherwise the referenced fragment is bound.
+	 ------------------------------------------------------*/
+
+	static void DeleteFragmentGLSL(int32 fragmentId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Delete the given GLSL object.
+	 *
 	 ------------------------------------------------------*/
 
 	static void DebugFragmentGLSL(int32 fragmentId);

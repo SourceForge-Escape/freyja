@@ -6,6 +6,8 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Vertex program automatically loaded with fragment by filename
+ - More packaging and rules fixes
  - New snapshot packaging rules
  - New debian packaging rules, partial osx rules merge, cleanup
  - Merging debian control files, etc into svn
