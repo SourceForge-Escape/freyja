@@ -366,12 +366,27 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	const GLcharARB *ptrFrag = (GLcharARB *)frag;
 	h_glShaderSourceARB(fragment, 1, &ptrFrag, NULL);
 
+	bool failure = false;
+	GLint ok;
+
 	// Compile objects
 	h_glCompileShaderARB(vertex);
+	h_glGetObjectParameterivARB(vertex, GL_OBJECT_COMPILE_STATUS_ARB, &ok);
+
+	if (!ok)
+	{
+		DebugFragmentGLSL("<b>Compiling vertex failed...</b>\n", vertex);
+		failure = true;
+	}
+
 	h_glCompileShaderARB(fragment);
-	
-	DebugFragmentGLSL(vertex);
-	DebugFragmentGLSL(fragment);
+	h_glGetObjectParameterivARB(fragment, GL_OBJECT_COMPILE_STATUS_ARB, &ok);
+
+	if (!ok)
+	{
+		DebugFragmentGLSL("<b>Compiling fragment failed...</b>\n", fragment);
+		failure = true;
+	}
 
 	// Attach object dependices to program
 	h_glAttachObjectARB(program, vertex);	
@@ -379,16 +394,27 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 
 	// Link program
 	h_glLinkProgramARB(program);
+	h_glGetObjectParameterivARB(program, GL_OBJECT_LINK_STATUS_ARB, &ok);
 
-	DebugFragmentGLSL(program);
+	if (!ok)
+	{
+		DebugFragmentGLSL("<b>Program linking failed...</b>\n", program);
+		failure = true;
+	}
 
 	// Use program for rendering
-	h_glUseProgramObjectARB(program);
+	if (!failure)
+	{
+		h_glUseProgramObjectARB(program);
+		fragmentId = program;
+	}
 
-	fragmentId = program;
-
-	return true;
+	r.Close();
+	r2.Close();
+	return !failure;
 #else
+	r.Close();
+	r2.Close();
 	return false;
 #endif
 }
@@ -412,7 +438,7 @@ void OpenGL::DeleteFragmentGLSL(int32 obj)
 }
 
 
-void OpenGL::DebugFragmentGLSL(int32 obj)
+void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 {
 #ifdef USING_OPENGL_EXT
 	char buffer[2048];
@@ -429,11 +455,12 @@ void OpenGL::DebugFragmentGLSL(int32 obj)
 		//String s;
 		//s.Set("No GLSL errors for object (%i).", obj);
 		//freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());	
+		//return;
 	}
-	else
-	{
-		freyja_event_info_dialog("gtk-dialog-info", buffer);
-	}
+
+	String s = comment;
+	if (length) s += buffer;
+	freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());
 #endif
 }
 

@@ -360,7 +360,7 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
-	static void DebugFragmentGLSL(int32 fragmentId);
+	static void DebugFragmentGLSL(const char *comment, int32 fragmentId);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Dump the GLSL log for this object to a dialog.
