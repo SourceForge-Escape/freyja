@@ -1,6 +1,36 @@
+################################################################
+# Terry Hendrix (Mongoose) <mongooseichban@gmail.com>
+################################################################
+
+ARCH = $(shell uname -m)
+APT_DIR = apt/$(ARCH)
+DEB_DIR = /tmp/$(ARCH)
+DATE=`date +%Y%m%d`
+UDATE=`date +%Y%m%d%H%M%S`
+VERSION=freyja_0.9.5rc3-$(DATE)
+LINUX_SANDBOX=linux-$(ARCH)
+
+WIN32_BUNDLE_DIR=bin/freyja-win32
+WIN32_MODEL_MOD_DIR=bin/freyja-win32/modules/model
+WIN32_IMAGE_MOD_DIR=bin/freyja-win32/modules/image
+
+
+#################################################################
 
 info:
-	@-printf "To do an auto build choose either:\n\tmake native\n\tmake win32\n"
+	@-printf "\n"
+	@-printf " To do an auto build choose either:\n"
+	@-printf "\tmake native\n"
+	@-printf "\tmake win32\n"
+	@-printf "\tmake osx\n"
+	@-printf "\n"
+	@-printf " Packaging options:\n"
+	@-printf "\tmake debian\n"
+	@-printf "\tmake ubuntu\n"
+	@-printf "\tmake snapshot\n"
+	@-printf "\tmake redhat\n"
+	@-printf "\tmake apt\n"
+	@-printf "\n"
 
 
 native:
@@ -25,6 +55,27 @@ native:
 	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
 
+osx:
+	@-printf "Building libhel\n"
+	@-cd libhel && ./autogen.sh && make osx
+
+	@-printf "Building libfreyja\n"
+	@-cd libfreyja && ./autogen.sh && make osx
+
+	@-printf "Building libfreyja plugins\n"
+	@-cd plugins && make osx
+
+	@-printf "Building libmgtk\n"
+	@-cd libmgtk && ./autogen.sh && make osx
+
+	@-printf "Building freyja\n"
+	@-cd freyja && ./autogen.sh && make osx && make plugins-osx
+
+	@-printf "\n\n o If your build failed:\n"
+	@-printf "       * Make sure you have a complete glext.h header\n"
+	@-printf "       * Look in freyja/Makefile for options to disable\n"
+	@-printf "\n\n o Now 'make user-install' as a user\n\n"
+
 win32:
 	@-printf "Building libhel\n"
 	@-cd libhel && ./autogen.sh && make win32
@@ -43,11 +94,9 @@ win32:
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
+	@-printf "       * Look in freyja/Makefile for options to disable\n"
+	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
-
-WIN32_BUNDLE_DIR=bin/freyja-win32
-WIN32_MODEL_MOD_DIR=bin/freyja-win32/modules/model
-WIN32_IMAGE_MOD_DIR=bin/freyja-win32/modules/image
 win32-bundle:
 	@-printf "Building win32 bundle...\n"
 	mkdir -p $(WIN32_BUNDLE_DIR)
@@ -96,48 +145,60 @@ user-install:
 
 #################################################################
 
-DEB_DIR=/tmp/FreyjaMaster.deb
-
-# Edited for Debian GNU/Linux.
-DESTDIR =
-INSTALL_BIN=$(DESTDIR)/usr/bin
-INSTALL_LIB=$(DESTDIR)/usr/lib
-INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
-INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
-INSTALL_INCLUDE=$(DESTDIR)/usr/include
-
 snapshot:
-	tar zcvf freyja-trunk-snapshot-`date +%Y%m%d%H%M%S`.tar.gz --exclude=.svn /usr/local/bin/freyja /usr/local/lib/libfreyja.so.0.9.3 /usr/local/lib/libfreyja.so /usr/local/lib/libhel0.so.0.0.1 /usr/local/lib/libhel0.so /usr/local/lib/libmgtk.so.0.1.0 /usr/local/lib/libmgtk.so /usr/local/lib/freyja/ /usr/share/freyja/
+	tar zcvf $(VERSION).tar.gz \
+	--exclude=.svn \
+	--exclude=*~ \
+	--exclude=*.xcf \
+	--exclude=*.o \
+	--exclude=*.dll \
+	--dereference $(LINUX_SANDBOX)
+
+#################################################################
 
 
-redhat:
-	cd $(DEB_DIR) && \
-		alien --to-rpm $(NAME_DEB)_$(VERSION_DEB)-1_$(ARCH).deb
+ubuntu: debian
 
-debian-package:
-	@-cd libmgtk; make debian-package
+debian:
+	$(MAKE) deb
+	$(MAKE) apt
+
+
+deb:
+	@-cd libhel; make deb
 	@-cd ..
-	@-cd libhel; make debian-package
+	@-cd libmgtk; make deb
 	@-cd ..
-	@-cd libfreyja; make debian-package
+	@-cd libfreyja; make deb
 	@-cd ..
-	@-cd freyja; make debian-package
+	@-cd freyja; make deb
 	@-cd ..
 
 apt:
-	@-mkdir -p $(DEB_DIR)
-	@-cp $(DEB_DIR)/../*.deb/*.deb $(DEB_DIR)/
-	@-cp $(DEB_DIR)/../*.deb/*.dsc $(DEB_DIR)/
-	@-cp $(DEB_DIR)/../*.deb/*.changes $(DEB_DIR)/
-	@-cp $(DEB_DIR)/../*.deb/*.gz $(DEB_DIR)/
-	cd $(DEB_DIR) && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
-	cd $(DEB_DIR) && dpkg-scansources . /dev/null | gzip -9c > Sources.gz
+	@-mkdir -p $(APT_DIR)
+	@-cp *.deb $(APT_DIR)/
+	@-cp *.dsc $(APT_DIR)/
+	@-cp *.changes $(APT_DIR)/
+	@-cp *.gz $(APT_DIR)/
+	cd $(APT_DIR) && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+	cd $(APT_DIR) && dpkg-scansources . /dev/null | gzip -9c > Sources.gz
 
 apt-upload:
-	scp $(DEB_DIR)/Packages.gz \
-		$(DEB_DIR)/Sources.gz \
-		$(DEB_DIR)/$(NAME_DEB)*.diff.gz  \
-		$(DEB_DIR)/$(NAME_DEB)*.deb \
-		$(DEB_DIR)/$(NAME_DEB)*.dsc \
-		$(DEB_DIR)/$(NAME_DEB)*.orig.tar.gz \
-	icculus.org:~/freyja/files/debian
+	scp $(APT_DIR)/Packages.gz \
+		$(APT_DIR)/Sources.gz \
+		$(APT_DIR)/*.deb  \
+		$(APT_DIR)/*.dsc \
+		$(APT_DIR)/*.changes \
+		$(APT_DIR)/*.gz \
+	icculus.org:~/freyja/files/debian/$(ARCH)/
+
+
+#################################################################
+
+redhat:
+	for i in *.deb; \
+	do \
+		alien --to-rpm $i.deb; \
+	done
+
+

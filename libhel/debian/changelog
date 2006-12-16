@@ -1,5 +1,5 @@
-libhel (0.0.2.20061212) unstable; urgency=low
+libhel (0.0.2-2) edgy; urgency=low
 
   * Initial Release.
 
- -- mongoose <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:03:35 -0500
+ -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:03:35 -0500

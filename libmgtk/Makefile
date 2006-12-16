@@ -311,31 +311,16 @@ INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
 INSTALL_INCLUDE=$(DESTDIR)/usr/$(NO_DEB)include
 INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
-clean-deb:
-	@-echo -n "Cleaning DEBs                                "
-	@-rm -rf $(DEB_DIR)
-	@-echo "[DONE]"
-
-debian-package:
-	$(MAKE) clean-deb
-	$(MAKE) tarball
-	mkdir -p $(DEB_DIR)
-	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
-	cp -R ../mstl  $(DEB_DIR)
-	cp -R ../libhel  $(DEB_DIR)
-	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
-
-deb-init:
-	yes | dh_make -c gpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
-	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert up to 60 chars description>/MLISP gtk+ binding/g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-
 deb:
 	dpkg-buildpackage -rfakeroot
+	$(MAKE) deb-info
+
+deb-info:
+	@-printf "================================================================================\n"
+	dpkg --info ../libmgtk_*.deb
+	@-printf " -------------------------------------------------------------------------------\n"
+	dpkg --contents ../libmgtk_*.deb
+	@-printf "================================================================================\n"
 
 ################################################################
 

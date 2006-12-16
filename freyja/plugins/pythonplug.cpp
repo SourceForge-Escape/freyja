@@ -43,7 +43,7 @@ void freyja_pythonplug_init(void (*func)(const char*, void*))
 }
 
 
-mstl::String gPythonPluginSymbol = "ImportModel";
+mstl::String gPythonPluginSymbol = "DefaultAction";
 void ePythonPluginSymbol(char *s)
 {
 	if (s && s[0])

@@ -91,6 +91,8 @@ def PluginEntry(symbol, args):
 
 	if re.match('.*GenerateCube', symbol):
 		GenerateCube(9.0)
+	elif re.match('.*DefaultAction', symbol):
+		GenerateCube(9.0)
 
 #	if re.match('.*ImportModel', symbol):
 #		ImportModel(args)
@@ -103,7 +105,8 @@ def PluginEntry(symbol, args):
 #	
 #	elif re.match('.*UnitTest', symbol):
 #		UnitTest(args)
-
+#	else:
+#		eval(symbol)
 
 PluginEntry(FreyjaSymbol, FreyjaArgs)
 
