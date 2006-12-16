@@ -1049,7 +1049,11 @@ int UTPackage::load(const char *filename)
 
 		if (mFlags & fDecryptOnly)
 		{
+#ifdef WIN32
+			printf("Writing decrypted file to utpak.decrypted\n");
+#else
 			printf("Writing decrypted file to /tmp/utpak.decrypted\n");
+#endif
 
 			if (mDecyrptFilename && mDecyrptFilename[0])
 			{
@@ -1057,7 +1061,11 @@ int UTPackage::load(const char *filename)
 			}
 			else
 			{
+#ifdef WIN32
+				decryptDumpXOR("utpak.decrypted", mKeyXOR, mStream);
+#else
 				decryptDumpXOR("/tmp/utpak.decrypted", mKeyXOR, mStream);
+#endif
 			}
 
 			fclose(mStream);
@@ -1316,6 +1324,11 @@ int UTPackage::load(const char *filename)
 
 			printf("Writing %s\n", buf );
 			FILE *f2 = fopen(buf, "wb");
+
+			if (!f2)
+			{
+				perror(buf);
+			}
 
 			if (f2)
 			{

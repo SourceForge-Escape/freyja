@@ -365,6 +365,27 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
+	static void BindVertexGLSL(int32 vertexId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : if <vertexId> < 0 fragments are disabled.
+	 *        Otherwise the referenced fragment is bound.
+	 ------------------------------------------------------*/
+
+	static void DebugVertexGLSL(int32 vertexId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Dump the GLSL log for this object to a dialog.
+	 *
+	 ------------------------------------------------------*/
+
+	static bool LoadVertexGLSL(const char *filename, uint32 &vertexId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public attributes

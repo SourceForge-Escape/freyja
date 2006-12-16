@@ -253,45 +253,16 @@ clean-conf:
 
 #################################################################
 
-clean-deb:
-	@-echo -n "Cleaning DEBs                                "
-	@-rm -rf $(DEB_DIR)
-	@-echo "[DONE]"
-
-debian-package:
-	$(MAKE) clean-deb
-	$(MAKE) tarball
-	mkdir -p $(DEB_DIR)
-	cp -R ../mstl  $(DEB_DIR)
-	cp -R ../libhel  $(DEB_DIR)
-	cp -R ../libmgtk  $(DEB_DIR)
-	cp -R ../libfreyja  $(DEB_DIR)
-	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
-	cd $(DEB_DIR)/libhel && make
-	cd $(DEB_DIR)/libmgtk && make
-	cd $(DEB_DIR)/libfreyja && make
-	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
-
-deb-init:
-	yes | dh_make -c lgpl -s -e mongoose@icculus.org -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
-	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert up to 60 chars description>/Freyja 3d modeler/g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/control debian/control.old
-	@-sed -e "s/[$][{]misc:Depends[}]/libmgtk, libhel, libfreyja/g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/control debian/control.old
-	@-sed -e "s/[$][{]shlibs:Depends[}]//g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/rules debian/rules.old
-	@-sed -e "s/MAKE) install/MAKE) plugins install/g" debian/rules.old > debian/rules
-	@-rm -f debian/rules.old
-
 deb:
 	dpkg-buildpackage -rfakeroot
+	$(MAKE) deb-info
+
+deb-info:
+	@-printf "================================================================================\n"
+	dpkg --info ../freyja_*.deb
+	@-printf " -------------------------------------------------------------------------------\n"
+	dpkg --contents ../freyja_*.deb
+	@-printf "================================================================================\n"
 
 ################################################################
 
@@ -394,9 +365,12 @@ clean-plugins:
 	@-rm -f $(PLUGIN_BUILD_DIR)*/*.dll
 	@-echo [done]
 
-plugins: pakreader.so perlinnoise.so reverseengineer.so lineageIIextract.so
+plugins: pakreader.so perlinnoise.so reverseengineer.so lineageIIextract.so pythonplug.so
 
 plugins-win32: pakreader.dll perlinnoise.dll reverseengineer.dll lineageIIextract.dll
+
+plugins-osx:
+	@-printf "Not implemented\n"
 
 pakreader.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)

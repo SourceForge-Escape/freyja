@@ -293,36 +293,17 @@ clean-build:
 
 #################################################################
 
-clean-deb:
-	@-echo -n "Cleaning DEBs                                "
-	@-rm -rf $(DEB_DIR)
-	@-echo "[DONE]"
-
-debian-package:
-	$(MAKE) clean
-	$(MAKE) clean-deb
-	$(MAKE) tarball
-	mkdir -p $(DEB_DIR)
-	cp -R ../mstl  $(DEB_DIR)
-	cp -R ../libhel  $(DEB_DIR)
-	cp ../$(NAME_DEB)-$(VERSION_DEB).tar.gz $(DEB_DIR)
-	cd $(DEB_DIR)/libhel && make
-	cd $(DEB_DIR) && tar zxvf $(NAME_DEB)-$(VERSION_DEB).tar.gz && mv $(TREE_DIR) $(NAME_DEB)-$(VERSION_DEB) && cd $(NAME_DEB)-$(VERSION_DEB) && make deb-init && make deb
-
-deb-init:
-	yes | dh_make -c $(LICENSE) $(FLAGS_DEB) -e $(EMAIL) -f ../$(NAME_DEB)-$(VERSION_DEB).tar.gz
-	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert up to 60 chars description>/Freyja backbone/g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/control debian/control.old
-	@-sed -e "s/<insert long description, indented with spaces>/3d Modeler./g" debian/control.old > debian/control
-	@-rm -f debian/control.old
-	@-cp debian/rules debian/rules.old
-	@-sed -e "s/MAKE) install/MAKE) install/g" debian/rules.old > debian/rules
-	@-rm -f debian/rules.old
-
 deb:
 	dpkg-buildpackage -rfakeroot
+	$(MAKE) deb-info
+
+deb-info:
+	@-printf "================================================================================\n"
+	dpkg --info ../libfreyja_*.deb
+	@-printf " -------------------------------------------------------------------------------\n"
+	dpkg --contents ../libfreyja_*.deb
+	@-printf "================================================================================\n"
+
 
 ################################################################
 

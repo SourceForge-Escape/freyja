@@ -75,6 +75,16 @@
  DEVELOPER NOTES
  ----------------------------------------------------------------------------
 
+  Programming guidelines:
+    1. Remove duplicate functionality where possible.
+    2. Fix all FIXMEs when possible.
+    3. Check assertions, when assertions are made.
+    4. Audit memory managment code regularly.
+    5. Replace temporary hacks with robust, clean code.
+    6. Make and use test code per module/class.
+    7. Abstraction is a good thing, but do not layer APIs.
+    8. Document code as it is written.
+
 
  Compiling for ATi systems
  ----------------------------------------------------------------------------
