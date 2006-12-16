@@ -302,34 +302,91 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	if (!filename || !filename[0])
 		return false;
 
+	if (mstl::SystemIO::File::CompareFilenameExtention(filename, ".frag"))
+	{
+		freyja_print("!Not a .frag file.");
+		return false;
+	}
+
 	mstl::SystemIO::BufferedFileReader r;
-	char *program = NULL;
-	uint32 length = 0;
+	char *frag = NULL;
+	uint32 fragLength = 0;
 
 	if (r.Open(filename))
 	{
 		// The pointer program addresses will be freed when r's scope ends
-		program = (char *)r.GetCompleteFileBuffer();
-		length = r.GetCompleteFileBufferSize();
+		frag = (char *)r.GetCompleteFileBuffer();
+		fragLength = r.GetCompleteFileBufferSize();
 	}
 	else
 	{
-		freyja_print("!Failed to open fragment from disk.");
+		freyja_print("!Failed to open .frag from disk.");
+		return false;
+	}
+
+
+	String s = filename;
+
+	for (uint32 i = s.length() - 1; i > 0; --i)
+	{
+		if (s[i] == '.')
+		{
+			s[i] = '\0';
+			break;
+		}
+	}
+
+	s += ".vert";
+
+	mstl::SystemIO::BufferedFileReader r2;
+	char *vert = NULL;
+	uint32 vertLength = 0;
+
+	if (r2.Open(s.c_str()))
+	{
+		// The pointer program addresses will be freed when r2's scope ends
+		vert = (char *)r2.GetCompleteFileBuffer();
+		vertLength = r2.GetCompleteFileBufferSize();
+	}
+	else
+	{
+		freyja_print("!Failed to open .vert '%s' from disk.", s.c_str());
 		return false;
 	}
 
 #ifdef USING_OPENGL_EXT
+	// Get object handles
+	GLhandleARB program = h_glCreateProgramObjectARB();
+	GLhandleARB vertex = h_glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 	GLhandleARB fragment = h_glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-	const GLcharARB *ptr = (GLcharARB *)program;
-	h_glShaderSourceARB(fragment, 1, &ptr, NULL);
+
+	// Load source for objects
+	const GLcharARB *ptrVert = (GLcharARB *)vert;
+	h_glShaderSourceARB(vertex, 1, &ptrVert, NULL);
+	const GLcharARB *ptrFrag = (GLcharARB *)frag;
+	h_glShaderSourceARB(fragment, 1, &ptrFrag, NULL);
+
+	// Compile objects
+	h_glCompileShaderARB(vertex);
 	h_glCompileShaderARB(fragment);
 	
-	GLhandleARB prog = h_glCreateProgramObjectARB();
-	h_glAttachObjectARB(prog, fragment);	
-	h_glLinkProgramARB(prog);
-	h_glUseProgramObjectARB(prog);
+	DebugFragmentGLSL(vertex);
+	DebugFragmentGLSL(fragment);
 
-	fragmentId = prog;
+	// Attach object dependices to program
+	h_glAttachObjectARB(program, vertex);	
+	h_glAttachObjectARB(program, fragment);	
+
+	// Link program
+	h_glLinkProgramARB(program);
+
+	DebugFragmentGLSL(program);
+
+	// Use program for rendering
+	h_glUseProgramObjectARB(program);
+
+	fragmentId = program;
+
 	return true;
 #else
 	return false;
@@ -345,13 +402,21 @@ void OpenGL::BindFragmentGLSL(int32 fragmentId)
 #endif
 }
 
-//void glDeleteObjectARB(GLhandleARB object)
 
-void OpenGL::DebugFragmentGLSL(int32 fragmentId)
+void OpenGL::DeleteFragmentGLSL(int32 obj)
+{
+#ifdef USING_OPENGL_EXT
+	GLhandleARB object = obj;
+	h_glDeleteObjectARB(object);
+#endif
+}
+
+
+void OpenGL::DebugFragmentGLSL(int32 obj)
 {
 #ifdef USING_OPENGL_EXT
 	char buffer[2048];
-	GLhandleARB object = fragmentId;
+	GLhandleARB object = obj;
 	GLsizei maxLenght = 2048;
 	GLsizei length;
 	GLcharARB *infoLog = (GLcharARB *)buffer;
@@ -359,7 +424,16 @@ void OpenGL::DebugFragmentGLSL(int32 fragmentId)
 	h_glGetInfoLogARB(object, maxLenght, &length, infoLog);
 	buffer[2047] = '\0';
 
-	freyja_event_info_dialog("gtk-dialog-info", buffer);
+	if (length == 0)
+	{
+		//String s;
+		//s.Set("No GLSL errors for object (%i).", obj);
+		//freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());	
+	}
+	else
+	{
+		freyja_event_info_dialog("gtk-dialog-info", buffer);
+	}
 #endif
 }
 

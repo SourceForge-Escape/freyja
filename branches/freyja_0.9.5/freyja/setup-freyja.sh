@@ -12,19 +12,25 @@ mkdir -p ~/.freyja/textures/
 mkdir -p ~/.freyja/particles/
 mkdir -p ~/.freyja/materials/
 mkdir -p ~/.freyja/icons/
+mkdir -p ~/.freyja/icons/24x24/
 mkdir -p ~/.freyja/plugins/
+mkdir -p ~/.freyja/plugins/image/
+mkdir -p ~/.freyja/plugins/model/
+mkdir -p ~/.freyja/plugins/python/
 
 # Plugins ( UI plugins )
-cp ../bin/freyja/debug/plugins/*.so  ~/.freyja/plugins/
-cp ../bin/freyja/debug/plugins/*.dll ~/.freyja/plugins/
+cp ../bin/freyja/debug/plugins/*.so ~/.freyja/plugins/
 cp plugins/*.mlisp ~/.freyja/plugins/
+
+# libfreyja plugins
+cp ../bin/plugins/model/debug/*.so ~/.freyja/plugins/model/
+cp ../bin/plugins/image/debug/*.so ~/.freyja/plugins/image/
 
 # Main data
 cp ./data/freyja-dev.mlisp ~/.freyja/
 cp ./data/palettes/*.pal ~/.freyja/palettes/
 cp ./data/materials/*.mat ~/.freyja/materials/
 cp ./data/icons/*.png ~/.freyja/icons/
-mkdir -p ~/.freyja/icons/24x24/
 cp ./data/icons/24x24/*.png ~/.freyja/icons/24x24/
 
 # GNOME Setup
