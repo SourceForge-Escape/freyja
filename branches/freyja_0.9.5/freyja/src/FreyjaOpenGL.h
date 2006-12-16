@@ -71,6 +71,7 @@ extern	PFNGLUSEPROGRAMOBJECTARBPROC h_glUseProgramObjectARB;
 extern	PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB;
 extern  PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB;
 extern  PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB;
+extern  PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB;
 
 #else
 extern void *h_glMultiTexCoord1fARB;
@@ -95,6 +96,7 @@ extern	void *h_glUseProgramObjectARB;
 extern	void *h_glGetInfoLogARB;
 extern  void *h_glDeleteObjectARB;
 extern  void *h_glGetObjectParameterivARB;
+extern  void *h_glGetUniformLocationARB;
 
 #endif
 
@@ -428,6 +430,8 @@ class OpenGL
 	////////////////////////////////////////////////////////////
 
 	static OpenGL *mSingleton;
+
+	static uint32 mObjects;     /* Count how many objects we load */
 
 	mstl::Vector<OpenGLContext> mContexts;
 

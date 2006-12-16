@@ -59,6 +59,7 @@ PFNGLUSEPROGRAMOBJECTARBPROC h_glUseProgramObjectARB = NULL;
 PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB = NULL;
 PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB = NULL;
 PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB = NULL;
+PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB = NULL;
 #else
 void *h_glMultiTexCoord1fARB = NULL;
 void *h_glMultiTexCoord2fARB = NULL;
@@ -82,6 +83,7 @@ void *h_glUseProgramObjectARB = NULL;
 void *h_glGetInfoLogARB = NULL;
 void *h_glDeleteObjectARB = NULL;
 void *h_glGetObjectParameterivARB = NULL;
+void *h_glGetUniformLocationARB = NULL;
 #endif
 
 using namespace freyja3d;
@@ -104,11 +106,14 @@ bool OpenGL::ext_cg_shader = false;
 ////////////////////////////////////////////////////////////
 
 OpenGL *OpenGL::mSingleton = NULL;
+uint32 OpenGL::mObjects = 0;
+
 
 OpenGL *OpenGL::Instance()
 {
 	return mSingleton ? mSingleton : new OpenGL();
 }
+
 
 OpenGL::OpenGL() :
 	mTextureUnitCount(2),
@@ -174,6 +179,7 @@ OpenGL::OpenGL() :
 	h_glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)mglGetProcAddress("glGetInfoLogARB");
 	h_glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)mglGetProcAddress("glDeleteObjectARB");
 	h_glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)mglGetProcAddress("glGetObjectParameterivARB");
+	h_glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)mglGetProcAddress("glGetUniformLocationARB");
 #endif
 
 	mSingleton = this;
@@ -184,6 +190,10 @@ OpenGL::~OpenGL()
 {
 	if (mTextureIds) 
 		delete [] mTextureIds;
+
+	
+	for (uint32 i = 0; i < mObjects; --i)
+		DeleteFragmentGLSL(i);
 }
 
 
@@ -317,6 +327,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 		// The pointer program addresses will be freed when r's scope ends
 		frag = (char *)r.GetCompleteFileBuffer();
 		fragLength = r.GetCompleteFileBufferSize();
+		frag[fragLength-1] = 0; // strip off EOF
 	}
 	else
 	{
@@ -347,6 +358,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 		// The pointer program addresses will be freed when r2's scope ends
 		vert = (char *)r2.GetCompleteFileBuffer();
 		vertLength = r2.GetCompleteFileBufferSize();
+		vert[vertLength-1] = 0; // strip off EOF
 	}
 	else
 	{
@@ -407,6 +419,9 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	{
 		h_glUseProgramObjectARB(program);
 		fragmentId = program;
+
+		if (program > mObjects)
+			mObjects = program;
 	}
 
 	r.Close();
@@ -447,6 +462,7 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 	GLsizei length;
 	GLcharARB *infoLog = (GLcharARB *)buffer;
 
+	buffer[0] = '\0';
 	h_glGetInfoLogARB(object, maxLenght, &length, infoLog);
 	buffer[2047] = '\0';
 
@@ -458,8 +474,23 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 		//return;
 	}
 
+	freyja_print("! %s%s", comment, buffer);
+
 	String s = comment;
-	if (length) s += buffer;
+
+	for (int32 i = 0; i < length; ++i)
+	{
+		switch (buffer[i])
+		{
+		// Strip out stuff that would confuse pango markup
+		case '>':
+		case '<':
+			buffer[i] = '\'';
+			break;
+		}
+	}
+
+	s += (length) ? buffer : "Couldn't get a GLSL log.";
 	freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());
 #endif
 }
