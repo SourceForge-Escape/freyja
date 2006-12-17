@@ -110,7 +110,6 @@ class String
 	}
 #endif
 
-
 	String operator+(const String &s)
 	{
 		String s2 = s;

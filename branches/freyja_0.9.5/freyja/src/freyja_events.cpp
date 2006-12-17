@@ -1561,6 +1561,11 @@ void freyja_refresh_material_interface()
 
 	mgtk_textentry_value_set(eSetMaterialName, freyjaGetMaterialName(mIndex));
 
+	mgtk_spinbutton_value_set(eSetMaterialShader,
+                              freyjaGetMaterialShader(mIndex));
+	mgtk_textentry_value_set(eSetMaterialShaderFilename, 
+							 freyjaGetMaterialShaderName(mIndex));
+
 	mgtk_spinbutton_value_set(eSetMaterialTexture,
                               freyjaGetMaterialTexture(mIndex));
 	mgtk_textentry_value_set(eSetTextureNameA,

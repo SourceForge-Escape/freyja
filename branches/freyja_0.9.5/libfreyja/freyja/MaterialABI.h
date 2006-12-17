@@ -121,6 +121,13 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	const char *freyjaGetMaterialShaderName(index_t material);
+	/*------------------------------------------------------
+	 * Pre  : Material <material> exists
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	const char *freyjaGetMaterialTextureName(index_t material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
