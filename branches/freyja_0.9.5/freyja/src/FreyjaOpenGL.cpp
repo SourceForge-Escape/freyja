@@ -1334,7 +1334,6 @@ void mglGetOpenGLProjectionMatrix(double *projection) // double[16]
 }
 
 
-
 void mglApplyMaterial(uint32 materialIndex)
 {
 	vec4_t ambient, diffuse, specular, emissive;
@@ -1346,6 +1345,9 @@ void mglApplyMaterial(uint32 materialIndex)
 	{
 		materialIndex = 0;
 	}
+
+	// Id 0 disables ( no weird index scheme here )
+	freyja3d::OpenGL::BindFragmentGLSL(freyjaGetMaterialShader(materialIndex));
 
 	flags = freyjaGetMaterialFlags(materialIndex);
 	texture = freyjaGetMaterialTexture(materialIndex);

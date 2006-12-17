@@ -386,6 +386,18 @@ index_t freyjaGetMaterialFlags(index_t materialIndex)
 }
 
 
+index_t freyjaGetMaterialShader(index_t materialIndex)
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->mShaderId;
+	}	
+
+	return 0; // Never pass shader system a huge number, use default 'off'
+}
+
+
 index_t freyjaGetMaterialTexture(index_t materialIndex)
 {
 	if (materialIndex < gFreyjaMaterials.size())
@@ -398,12 +410,24 @@ index_t freyjaGetMaterialTexture(index_t materialIndex)
 }
 
 
+const char *freyjaGetMaterialShaderName(index_t materialIndex)
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->GetShaderFilename();
+	}
+
+	return 0x0;
+}
+
+
 const char *freyjaGetMaterialTextureName(index_t materialIndex)
 {
 	if (materialIndex < gFreyjaMaterials.size())
 	{
 		if (gFreyjaMaterials[materialIndex])
-			return gFreyjaMaterials[materialIndex]->getTextureName();
+			return gFreyjaMaterials[materialIndex]->GetTextureFilename();
 	}
 
 	return 0x0;
@@ -570,6 +594,18 @@ void freyjaMaterialFlags(index_t materialIndex, uint32 flags)
 }
 
 
+void freyjaMaterialShader(index_t material, index_t shader)
+{
+	if (material < gFreyjaMaterials.size())
+	{
+		if (!gFreyjaMaterials[material])
+			return;
+
+		gFreyjaMaterials[material]->mShaderId = shader;
+	}
+}
+
+
 void freyjaMaterialTexture(index_t materialIndex, index_t textureIndex)
 {
 	if (materialIndex < gFreyjaMaterials.size())
@@ -587,7 +623,17 @@ void freyjaMaterialTextureName(index_t materialIndex, const char *name)
 	if (materialIndex < gFreyjaMaterials.size())
 	{
 		if (gFreyjaMaterials[materialIndex])
-			gFreyjaMaterials[materialIndex]->setTextureName(name);
+			gFreyjaMaterials[materialIndex]->SetTextureFilename(name);
+	}
+}
+
+
+void freyjaMaterialShaderName(index_t materialIndex, const char *filename)
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			gFreyjaMaterials[materialIndex]->SetShaderFilename(filename);
 	}
 }
 

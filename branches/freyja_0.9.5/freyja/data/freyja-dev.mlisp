@@ -743,10 +743,10 @@
 				(hbox 0 1 0 1 1
 					(label "Fragment" 0.0 0.5))
 				(hbox 0 1 0 1 1
-					(spinbutton 0 0 128 eSetMaterialTextureB)
-					(textbox eSetTextureNameB)
-					(togglebutton "Slot" eTextureSlotLoadToggleB)
-					(filechooserbutton "..." "Open Fragment program..." eOpenTextureB "texture_pattern")
+					(spinbutton 0 0 128 eSetMaterialShader)
+					(textbox eSetMaterialShaderFilename)
+					(togglebutton "Slot" eShaderSlotLoadToggle)
+					(filechooserbutton "..." "Open Fragment program..." eOpenShader "texture_pattern")
 				)
 
 				(hbox 1 0 0 1 0 (hsep))

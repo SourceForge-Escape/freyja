@@ -66,6 +66,7 @@ void mgtk_event_dialog_visible_set(int dialog, int visible);
 extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
 void polymap_update_question();
 int load_texture(const char *filename);
+int load_shader(const char *filename);
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
@@ -116,6 +117,7 @@ FreyjaControl::FreyjaControl() :
 
 	/* Spawn 0th material, set the iterator, and make a default material */
 	Material::mLoadTextureFunc = load_texture;
+	Material::mLoadShaderFunc = load_shader;
 	int32 mIndex = freyjaMaterialCreate();
 	vec4_t rgba = {0,0,0,1};
 	freyjaCurrentMaterial(mIndex);
@@ -1662,6 +1664,12 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
+	case eSetMaterialShader:
+		//SetSelectedShader(value);
+		freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
+		freyja_event_gl_refresh();
+		break;
+
 	case eSetMaterialTexture:
 		SetSelectedTexture(value);
 		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
@@ -3101,15 +3109,15 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		break;
 
 
-	case eSetTextureNameB:
+	case eSetMaterialShaderFilename:
 		// textbox is just for looks -- user can't alter filename here
 		break;
 
-	case eOpenTextureB:
+	case eOpenShader:
 		{
 			if (empty) return;
 
-			uint32 fragmentId; // Gets fragment id
+			uint32 fragmentId = 0; // Gets fragment id
 			bool load = false;
 
 			if (mUsingARBFragments && 
@@ -3127,17 +3135,18 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 			if (load)
 			{
 				uint32 e = 
-				ResourceEvent::GetResourceIdBySymbol("eSetTextureNameB");
+				ResourceEvent::GetResourceIdBySymbol("eSetMaterialShaderFilename");
 
 				//uint32 texture = mTextureId - 1;
 				mgtk_textentry_value_set(e, text);
 
 				// Propagate to material backend
-#if 0
+#if 1
 				uint32 mat = freyjaGetCurrentMaterial();
-				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
+				//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
 				mgtk_spinbutton_value_set(eSetMaterialShader, fragmentId);
 				freyjaMaterialShader(mat, fragmentId);
+				freyjaMaterialShaderName(mat, text);
 #endif		
 				freyja_print("Loaded fragment program %i", fragmentId);
 				freyja_event_gl_refresh();
@@ -5733,24 +5742,13 @@ void FreyjaControl::LoadResource()
 	mgtk_event_fileselection_append_pattern(eOpenTexture, 
 											"TARGA Image (*.tga)", "*.tga");
 
-	/* Image file dialog patterns - textureB */
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
+	/* Shader file dialog patterns */
+	mgtk_event_fileselection_append_pattern(eOpenShader, 
 											"All Files (*.*)", "*.*");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"BMP Image (*.bmp)", "*.bmp");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"DDS Image (*.dds)", "*.dds");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"JPEG Image (*.jpg)", "*.jpg");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"PCX Image (*.pcx)", "*.pcx");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"PNG Image (*.png)", "*.png");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"PPM Image (*.ppm)", "*.ppm");
-	mgtk_event_fileselection_append_pattern(eOpenTextureB, 
-											"TARGA Image (*.tga)", "*.tga");
-
+	mgtk_event_fileselection_append_pattern(eOpenShader, 
+											"GLSL Fragment (*.frag)", "*.frag");
+	mgtk_event_fileselection_append_pattern(eOpenShader, 
+											"ARB Fragment (*.frag)", "*.frag");
 
 	/* Material file dialog patterns */
 	{
@@ -6612,5 +6610,18 @@ int load_texture(const char *filename)
 	int id = 0;
 	FreyjaControl::mInstance->LoadTexture(filename, id);
 	freyja_print("! Texture callback %i : '%s'...", id, filename);
+	return id;
+}
+
+
+int load_shader(const char *filename)
+{
+	uint32 id = 0;
+
+	freyja_print("! Shader callback %i : '%s'...", id, filename);
+
+	if (!freyja3d::OpenGL::LoadFragmentGLSL(filename, id))
+		return 0;
+
 	return id;
 }

@@ -1107,6 +1107,8 @@ void FreyjaRender::RenderModel(index_t model)
 	glPopMatrix();
 
 
+	freyja3d::OpenGL::BindFragmentGLSL(0); // Disable shaders
+
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);

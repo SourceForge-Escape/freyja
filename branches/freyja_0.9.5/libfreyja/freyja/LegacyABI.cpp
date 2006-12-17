@@ -2487,14 +2487,14 @@ int32 freyjaLoadModel(const char *filename)
 				if (mat)
 				{
 					/* Read in new material */
-					mat->serialize(r);
+					mat->Serialize(r);
 
 					// FIXME use string name matching like skeletalkeyframes
                     // to avoid dupe textures in the future
 
-					if (SystemIO::File::DoesFileExist(mat->getTextureName()))
+					if (SystemIO::File::DoesFileExist(mat->GetTextureFilename()))
 					{
-						index_t textureIndex = freyjaTextureCreateFilename(mat->getTextureName());
+						index_t textureIndex = freyjaTextureCreateFilename(mat->GetTextureFilename());
 
 						if (textureIndex != INDEX_INVALID)
 						{
@@ -2655,7 +2655,7 @@ int32 freyjaSaveModel(const char *filename)
 			if (mat)
 			{
 				chunk.type = FREYJA_CHUNK_MATERIAL;
-				chunk.size = mat->getSerializeSize();
+				chunk.size = mat->GetSerializeSize();
 				chunk.flags = 0x0;
 				chunk.version = Material::mVersion;
 
@@ -2664,7 +2664,7 @@ int32 freyjaSaveModel(const char *filename)
 				w.WriteLong(chunk.flags);
 				w.WriteLong(chunk.version);
 
-				mat->serialize(w);
+				mat->Serialize(w);
 			}
 		}		
 	}

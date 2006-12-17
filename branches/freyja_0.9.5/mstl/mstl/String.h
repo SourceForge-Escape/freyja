@@ -100,6 +100,17 @@ class String
 	}
 
 
+#if 0
+	bool operator==(const String &s)
+	{
+		if (s.c_str() == NULL || c_str() == NULL)
+			return ( s.c_str() == NULL && c_str() == NULL );
+
+		return ( strcmp(s.c_str(), c_str()) == 0 );
+	}
+#endif
+
+
 	String operator+(const String &s)
 	{
 		String s2 = s;

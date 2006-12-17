@@ -13,6 +13,7 @@ mkdir -p ~/.freyja/particles/
 mkdir -p ~/.freyja/materials/
 mkdir -p ~/.freyja/icons/
 mkdir -p ~/.freyja/icons/24x24/
+mkdir -p ~/.freyja/shaders/
 mkdir -p ~/.freyja/plugins/
 mkdir -p ~/.freyja/plugins/image/
 mkdir -p ~/.freyja/plugins/model/
@@ -28,6 +29,8 @@ cp ../bin/plugins/image/debug/*.so ~/.freyja/plugins/image/
 
 # Main data
 cp ./data/freyja-dev.mlisp ~/.freyja/
+cp ./data/shaders/*.frag ~/.freyja/shaders/
+cp ./data/shaders/*.vert ~/.freyja/shaders/
 cp ./data/palettes/*.pal ~/.freyja/palettes/
 cp ./data/materials/*.mat ~/.freyja/materials/
 cp ./data/icons/*.png ~/.freyja/icons/
