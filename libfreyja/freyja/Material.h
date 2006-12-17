@@ -78,50 +78,55 @@ class Material
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-   static int32 getBlendIndex(int blend);
+   static int32 GetBlendIndex(int blend);
 	/*------------------------------------------------------
 	 * Pre  : Pass blend value, Built with HAVE_GL
 	 * Post : Returns -1 if not used, or index if used
 	 ------------------------------------------------------*/
 
-	static uint32 getCount();
+	static uint32 GetCount();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns number of unique materials
 	 ------------------------------------------------------*/
 
-	uint32 getFlags();
+	uint32 GetFlags();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get currently set flags
 	 ------------------------------------------------------*/
 
-	uint32 getId();
+	uint32 GetId();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
 	 ------------------------------------------------------*/
 
-	const char *GetName() { return getName(); }
-	const char *getName() { return mName; }
+	const char *GetName() { return mName; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Material's name or NULL
 	 ------------------------------------------------------*/
 
-	const char *getTextureName();
+	const char *GetShaderFilename();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets Material's shader filename or NULL
+	 ------------------------------------------------------*/
+
+	const char *GetTextureFilename();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's texture filename or NULL
 	 ------------------------------------------------------*/
 
-	uint32 getSerializeSize();
+	uint32 GetSerializeSize();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(SystemIO::FileWriter &w);
+	virtual bool Serialize(SystemIO::FileWriter &w);
 	/*------------------------------------------------------
 	 * Pre  : Writes this material out to disk
 	 * Post : Returns true on success
@@ -138,7 +143,7 @@ class Material
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void clearFlag(Flags flag);
+	void ClearFlag(Flags flag) { mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Unsets passed flag
@@ -150,32 +155,37 @@ class Material
 	 * Post : Serializes from diskfile
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(SystemIO::FileReader &r);
+	virtual bool Serialize(SystemIO::FileReader &r);
 	/*------------------------------------------------------
 	 * Pre  : Reads the material data from disk
 	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 
-	void setFlag(Flags flag);
+	void SetFlag(Flags flag) { mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets passed flag
 	 ------------------------------------------------------*/
 
-	void SetName(const char *name) { setName(name); }
-	void setName(const char *name);
+	void SetName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
 	 * Post : Sets Material's name
 	 ------------------------------------------------------*/
 
-	void setTextureName(const char *name);
+	void SetShaderFilename(const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets Material's shader filename or NULL
+	 ------------------------------------------------------*/
+
+	void SetTextureFilename(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's texture filename or NULL
 	 ------------------------------------------------------*/
 
-	const static uint32 mVersion = 2;
+	const static uint32 mVersion = 3;
 
 	int32 mId;                  /* Unique identifier */
 
@@ -203,11 +213,15 @@ class Material
 
 	int32 mTexture;             /* TextureData index */
 
+	int32 mShaderId;            /* Shader index */
+
 	bool mHasAlphaChannel;      /* For depth sorting use */
 
 	// int load_texture(const char *filename)
 	static int (*mLoadTextureFunc)(const char *filename);
 
+	// int load_shader(const char *filename)
+	static int (*mLoadShaderFunc)(const char *filename);
 
  private:
 
@@ -228,6 +242,8 @@ class Material
 	String mBlendDestString;    /* Blending source human readable string */
 
 	String mTextureFilename;    /* This is used for file I/O to map classes */
+
+	String mShaderFilename;     /* This is used for file I/O to map classes */
 };
 
 } // End namespace freyja

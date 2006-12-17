@@ -80,6 +80,16 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	const char *freyjaGetShaderName(index_t material);
+	/*------------------------------------------------------
+	 * Pre  : Material <material> exists
+	 *        Don't alter the returned string
+	 *
+	 * Post : Returns a pointer to NULL terminated name string
+	 *        Returns 0x0 on error
+	 *
+	 ------------------------------------------------------*/
+
 	const char *freyjaGetMaterialName(index_t material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
@@ -94,6 +104,13 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns flags or -1 on error
+	 *
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMaterialShader(index_t material);
+	/*------------------------------------------------------
+	 * Pre  : Material <material> exists
+	 * Post : Returns shader index or 0 for error or no shader
 	 *
 	 ------------------------------------------------------*/
 
@@ -193,6 +210,13 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	void freyjaMaterialShaderName(index_t material, const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : Material <material> exists
+	 * Post : Material shader <filename> is set
+	 *
+	 ------------------------------------------------------*/
+
 	void freyjaMaterialTextureName(index_t material, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
@@ -200,7 +224,15 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTexture(index_t material, index_t textureIndex);
+	void freyjaMaterialShader(index_t material, index_t shader);
+	/*------------------------------------------------------
+	 * Pre  : Material <material> exists
+	 * Post : Material's <shader> index is set
+	 *        0 will disable shading
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialTexture(index_t material, index_t texture);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <texture> index is set

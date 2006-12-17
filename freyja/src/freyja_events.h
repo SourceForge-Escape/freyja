@@ -177,7 +177,6 @@ typedef enum {
 	eScaleUV,
 	eTmpUVMapOn,
 	eTmpUVMapOff,
-	eTextureSlotLoad,
 
 	eViewports,
 	eViewportBack,
@@ -193,7 +192,11 @@ typedef enum {
 
 	eSkeletonName,
 	eOpenTexture,
-	eOpenTextureB,
+	eTextureSlotLoad,
+	eOpenShader,
+	eShaderSlotLoadToggle,
+	eSetMaterialShader,
+	eSetMaterialShaderFilename,
 
 	/* Widget interaction events */
 	eZoom,

@@ -745,7 +745,10 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eNewFile", eNewFile);
 	r.RegisterInt("eCloseFile", eCloseFile);
 	r.RegisterInt("eOpenTexture", eOpenTexture);
-	r.RegisterInt("eOpenTextureB", eOpenTextureB);
+	r.RegisterInt("eOpenShader", eOpenShader);
+	r.RegisterInt("eShaderSlotLoadToggle", eShaderSlotLoadToggle);
+	r.RegisterInt("eSetMaterialShader", eSetMaterialShader);
+	r.RegisterInt("eSetMaterialShaderFilename", eSetMaterialShaderFilename);
 	r.RegisterInt("eSkeletonName", eSkeletonName);
 
 	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */

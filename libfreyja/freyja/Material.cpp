@@ -30,6 +30,7 @@ using namespace mstl;
 using namespace freyja;
 
 int (*Material::mLoadTextureFunc)(const char *filename) = NULL;
+int (*Material::mLoadShaderFunc)(const char *filename) = NULL;
 
 
 ////////////////////////////////////////////////////////////
@@ -45,10 +46,12 @@ Material::Material() :
 	mBlendSrc(0),
 	mBlendDest(0),
 	mTexture(0),
+	mShaderId(0),
 	mHasAlphaChannel(false),
 	mBlendSrcString("GL_ONE"),
 	mBlendDestString("GL_ONE"),
-	mTextureFilename()
+	mTextureFilename(),
+	mShaderFilename()
 {
 	mName[0] = '\0';
 
@@ -77,22 +80,33 @@ Material::~Material()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-const char *Material::getTextureName()
+const char *Material::GetShaderFilename()
+{
+	return mShaderFilename.c_str();
+}
+
+
+const char *Material::GetTextureFilename()
 {
 	return mTextureFilename.c_str();
 }
 
 
-uint32 Material::getSerializeSize()
+uint32 Material::GetSerializeSize()
 {
 	uint32 length = 0;
 
 	if (mTextureFilename.c_str() != 0x0)
 	{
-		length = mTextureFilename.length();	
+		length += mTextureFilename.length();	
 	}
 
-	return (4 + 64 + 4 + 4 + 4 +
+	if (mShaderFilename.c_str() != 0x0)
+	{
+		length += mShaderFilename.length();	
+	}
+
+	return (4 + 4 + 64 + 4 + 4 + 4 +
 			4 +	length +
 			4 + 
 			16 + 16 + 16 + 16);
@@ -110,6 +124,10 @@ bool Material::Serialize(SystemIO::TextFileWriter &w)
 	w.Print("\tmBlendDest %u\n", mBlendDest);
 	w.Print("\tmTextureName \"%s\"\n", 
 			mTextureFilename.c_str() ? mTextureFilename.c_str() : "");
+
+	// mVersion >= 3
+	w.Print("\tmShaderFilename \"%s\"\n", 
+			mShaderFilename.c_str() ? mShaderFilename.c_str() : "");
 
 	w.Print("\tmShininess %f\n", mShininess);
 
@@ -131,7 +149,7 @@ bool Material::Serialize(SystemIO::TextFileWriter &w)
 }
 
 
-bool Material::serialize(SystemIO::FileWriter &w)
+bool Material::Serialize(SystemIO::FileWriter &w)
 {
 	uint32 length = 0;
 
@@ -146,6 +164,18 @@ bool Material::serialize(SystemIO::FileWriter &w)
 		length = mTextureFilename.length();
 		w.WriteInt32U(length);
 		w.WriteString(length, mTextureFilename.c_str());
+	}
+	else
+	{
+		w.WriteInt32U(0); // length
+	}
+
+	// Version >= 3 only
+	if (mTextureFilename.c_str() != 0x0)
+	{
+		length = mShaderFilename.length();
+		w.WriteInt32U(length);
+		w.WriteString(length, mShaderFilename.c_str());
 	}
 	else
 	{
@@ -188,6 +218,13 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 	if (strcmp(r.ParseSymbol(), "[Material]"))
 		return false;
 
+	
+	if (strcmp(r.ParseSymbol(), "mVersion"))
+		;
+
+	//uint32 version = 
+	r.ParseInteger();
+
 	const char *symbol;
 	while ((symbol = r.ParseSymbol()))
 	{
@@ -200,13 +237,9 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 			const char *s = r.ParseStringLiteral();
 			if (s)
 			{
-				setName(s);
+				SetName(s);
 				delete [] s;
 			}
-		}
-		else if (strcmp(symbol, "mVersion") == 0)
-		{
-			r.ParseInteger(); // Idealy this should == mVersion (const)
 		}
 		else if (strcmp(symbol, "mId") == 0)
 		{
@@ -229,10 +262,23 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 			const char *s = r.ParseStringLiteral();
 			if (s)
 			{
-				setTextureName(s);
+				SetTextureFilename(s);
 				if (mLoadTextureFunc)
 				{
 					mTexture = mLoadTextureFunc(s);
+				} 
+				delete [] s;
+			}
+		}
+		else if (strcmp(symbol, "mShaderFilename") == 0)
+		{
+			const char *s = r.ParseStringLiteral();
+			if (s)
+			{
+				SetShaderFilename(s);
+				if (mLoadShaderFunc)
+				{
+					mTexture = mLoadShaderFunc(s);
 				} 
 				delete [] s;
 			}
@@ -275,7 +321,7 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 }
 
 
-bool Material::serialize(SystemIO::FileReader &r)
+bool Material::Serialize(SystemIO::FileReader &r)
 {
 	uint32 version = r.ReadInt32U();
 	uint32 length = 0;
@@ -298,7 +344,19 @@ bool Material::serialize(SystemIO::FileReader &r)
 		r.ReadString(length, name);
 		name[length] = 0;		
 		//printf("'%s'\n", name);
-		setTextureName(name);
+		SetTextureFilename(name);
+	}
+
+	length = (version >= 3) ? r.ReadInt32U() : 0;
+
+	if (length > 0)
+	{
+		char name[length+1];
+
+		r.ReadString(length, name);
+		name[length] = 0;		
+		//printf("'%s'\n", name);
+		SetShaderFilename(name);
 	}
 
 	mShininess = r.ReadFloat32();
@@ -327,20 +385,7 @@ bool Material::serialize(SystemIO::FileReader &r)
 }
 
 
-void Material::setFlag(Flags flag)
-{
-	mFlags |= flag;
-}
-
-
-void Material::clearFlag(Flags flag)
-{
-	mFlags |= flag;
-	mFlags ^= flag;
-}
-
-
-void Material::setName(const char *name)
+void Material::SetName(const char *name)
 {
 	int len;
 
@@ -360,7 +405,7 @@ void Material::setName(const char *name)
 }
 
 
-void Material::setTextureName(const char *name)
+void Material::SetTextureFilename(const char *name)
 {
 	if (!name || !name[0])
 	{
@@ -370,6 +415,16 @@ void Material::setTextureName(const char *name)
 	mTextureFilename = name;
 }
 
+
+void Material::SetShaderFilename(const char *name)
+{
+	if (!name || !name[0])
+	{
+		return;
+	}
+
+	mShaderFilename = name;
+}
 
 
 ////////////////////////////////////////////////////////////
