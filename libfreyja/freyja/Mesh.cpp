@@ -144,7 +144,7 @@ Mesh::Mesh(const Mesh &mesh) :
 		DEBUG_MSG("\t%i - weights copied\n", i);
 	}
 
-	VertexCleanup();
+	//VertexCleanup();
 }
 
 
@@ -1179,8 +1179,11 @@ void Mesh::Merge(Mesh *mesh)
 			Vec3 n = mesh->GetVertexNormal(i);
 			Vec3 p = mesh->GetVertexPosition(i);
 			Vec3 t = mesh->GetVertexTexCoord(i);
+
 			// pos, uvw, normal order
 			index_t idx = CreateVertex(p.mVec, t.mVec, n.mVec);
+
+			// transV[i] <= idx
 			transV.push_back(idx);
 
 			Vertex *a =	mesh->GetVertex(i);
@@ -1313,7 +1316,9 @@ Mesh *Mesh::Split(bool trim)
 	mesh->DeleteUnSelectedFaces();
 
 	if (trim)
+	{
 		DeleteSelectedFaces();
+	}
 
 	return mesh;
 }

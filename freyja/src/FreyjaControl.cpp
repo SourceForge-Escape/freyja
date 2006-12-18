@@ -4112,7 +4112,13 @@ bool FreyjaControl::MergeSelectedObjects()
 				{
 					Mesh *mergee = Mesh::GetMesh(i);
 
-					if (m != mergee)
+#if 0
+					if (freyja_create_confirm_dialog("gtk-dialog-question",
+																   "You are about to merge two objects.\n",
+														  "Would you like to continue the merge?",
+													 "gtk-cancel", "_Cancel", "gtk-ok", "_Merge"))
+#endif
+					if (m != mergee && mergee->GetFlags() & Mesh::fSelected)
 					{
 						bool remove = freyja_create_confirm_dialog("gtk-dialog-question",
 																   "You have the option to delete the mesh being merged.\n",
@@ -6456,6 +6462,16 @@ void eSnapWeldVerts()
 	}
 }
 
+void eCleanupVertices()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->VertexCleanup();
+	}
+}
+
 
 void FreyjaControlEventsAttach()
 {
@@ -6481,6 +6497,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
 	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
 
+	ResourceEventCallback::add("eCleanupVertices", eCleanupVertices);
 	ResourceEventCallback::add("eSnapWeldVerts", &eSnapWeldVerts);
 
 	ResourceEventCallback::add("eGroupClear", &eGroupClear);

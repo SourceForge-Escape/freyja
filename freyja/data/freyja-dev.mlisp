@@ -208,7 +208,8 @@
 				(menu_item "Mirror _X"		eMirrorMeshX)
 				(menu_item "Mirror _Y"		eMirrorMeshY)
 				(menu_item "Mirror _Z"		eMirrorMeshZ)
-				(menu_item "Snap-_Weld verts"	eSnapWeldVerts)
+				(menu_item "Snap-_Weld vertices"	eSnapWeldVerts)
+				(menu_item "Cleanup vertices" eCleanupVertices)
 
 			) ; submenu _Mesh
 

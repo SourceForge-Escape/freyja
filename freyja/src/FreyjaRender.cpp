@@ -876,12 +876,19 @@ void FreyjaRender::RenderMesh(index_t mesh)
 							64, 2, false);
 		}
 
+	
 		if (m->GetFlags() & Mesh::fSelected)
 		{
 			vec3_t min, max;
 			m->GetBBox(min, max);
-			mglDrawSelectBox(min, max, RED);
-		}
+			mglDrawSelectBox(min, max, YELLOW);
+		}	
+	}
+	else if (m->GetFlags() & Mesh::fSelected)
+	{
+		vec3_t min, max;
+		m->GetBBox(min, max);
+		mglDrawSelectBox(min, max, RED);
 	}
 
 	if (mRenderMode & fPoints)
