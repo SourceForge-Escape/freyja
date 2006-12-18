@@ -1289,6 +1289,7 @@ void Mesh::DeleteSelectedFaces()
 	}
 
 	VertexCleanup();
+	UpdateBoundingVolume();
 }
 
 
@@ -1302,13 +1303,14 @@ void Mesh::DeleteUnSelectedFaces()
 
 		if (face && !(face->mFlags & Face::fSelected))
 		{
+			array[i] = NULL;
 			//FaceRemovalCleanup(face);
 			delete face;
-			array[i] = NULL;
 		}
 	}
 
 	VertexCleanup();
+	UpdateBoundingVolume();
 }
 
 
