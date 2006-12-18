@@ -766,62 +766,42 @@ public:
 		return NULL;
 	}
 
+	void VertexCleanup();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Any 'loose' vertices that are unreferenced 
+	 *        will be deleted.
+	 *
+	 ------------------------------------------------------*/
 
-	void FaceRemovalCleanup(Face *face)
-	{
-		BUG_ME("This implementation doesn't clean up deps, which it prob shouldn't until vertex reference design is finalized");		
-	}
+	void FaceRemovalCleanup(Face *face);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Any 'loose' vertices referenced by this face
+	 *        will be deleted.
+	 *
+	 ------------------------------------------------------*/
 
+	void DeleteSelectedFaces();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : All faces marked selected are removed from mesh.
+	 *
+	 ------------------------------------------------------*/
 
-	void DeleteSelectedFaces()
-	{
-		Face **array = mFaces.getVectorArray();
+	void DeleteUnSelectedFaces();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : All faces not marked selected are removed from mesh.
+	 *
+	 ------------------------------------------------------*/
 
-		for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
-		{
-			Face *face = array[i];
-
-			if (face && face->mFlags & Face::fSelected)
-			{
-				FaceRemovalCleanup(face);
-				delete face;
-				array[i] = NULL;
-			}
-		}
-	}
-
-
-	void DeleteUnSelectedFaces()
-	{
-		Face **array = mFaces.getVectorArray();
-
-		for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
-		{
-			Face *face = array[i];
-
-			if (face && !(face->mFlags & Face::fSelected))
-			{
-				FaceRemovalCleanup(face);
-				delete face;
-				array[i] = NULL;
-			}
-		}
-	}
-
-
-	void DeleteFace(index_t idx)
-	{
-		Face **array = mFaces.getVectorArray();
-		Face *face = GetFace(idx);
-
-		if ( face )
-		{
-			FaceRemovalCleanup(face);
-			delete face;
-			array[idx] = NULL;
-		}
-	}
-
+	void DeleteFace(index_t face);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : All face is removed from mesh.
+	 *
+	 ------------------------------------------------------*/
 
 	void UpdateBoundingVolume();
 	/*------------------------------------------------------
@@ -858,6 +838,14 @@ public:
 	 *        to <a> are replaced with <b>.
 	 *
 	 *        Returns true if <a> is sucessfully purged.
+	 *
+	 ------------------------------------------------------*/
+
+	void WeldVerticesByDistance(vec_t tolerance);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : All vertices are tested to be within a distance
+	 *        of tolerance to each other vertex to be welded.
 	 *
 	 ------------------------------------------------------*/
 

@@ -140,6 +140,8 @@ Mesh::Mesh(const Mesh &mesh) :
 
 		DEBUG_MSG("\t%i - weights copied\n", i);
 	}
+
+	VertexCleanup();
 }
 
 
@@ -1062,12 +1064,11 @@ bool Mesh::DeleteVertex(index_t vertex)
 
 	if ( v && v->GetFaceRefs().size() == 0)
 	{
-		delete v;
 		array[vertex] = NULL;
-
 		mFreedVertices.push(v->mVertexIndex);
 		mFreedTexCoords.push(v->mTexCoordIndex);
 		mFreedNormals.push(v->mNormalIndex);
+		delete v;
 
 		result = true;
 	}
@@ -1106,6 +1107,23 @@ bool Mesh::WeldVertices(index_t a, index_t b)
 	// Delete A from the vertex pool
 	va->GetFaceRefs().clear();
 	return DeleteVertex(a);
+}
+
+
+void Mesh::WeldVerticesByDistance(vec_t tolerance)
+{
+	for (uint32 i = 0, iCount = GetVertexCount(), jCount = GetVertexCount();
+		 i < iCount; ++i)
+	{
+		for (uint32 j = 0; j < jCount; ++j)
+		{
+			vec_t dist = helDist3v(GetVertexPosition(i).mVec, 
+								   GetVertexPosition(j).mVec);
+			
+			if (dist < tolerance)
+				WeldVertices(i, j);
+		}
+	}
 }
 
 
@@ -1201,6 +1219,60 @@ void Mesh::Merge(Mesh *mesh)
 			AddWeight(transV[w->mVertexIndex], w->mWeight, w->mBoneIndex);
 		}
 	}
+}
+
+
+void Mesh::DeleteFace(index_t face)
+{
+	Face **array = mFaces.get_array();
+	Face *f = GetFace(face);
+
+	if ( f )
+	{
+		array[face] = NULL; // this has to marked NULL before cleanup is called
+		FaceRemovalCleanup(f);
+		delete f;
+	}
+}
+
+
+void Mesh::DeleteSelectedFaces()
+{
+	Face **array = mFaces.getVectorArray();
+
+	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
+	{
+		Face *face = array[i];
+
+		if (face && face->mFlags & Face::fSelected)
+		{
+			array[i] = NULL;
+			//FaceRemovalCleanup(face);
+			delete face;
+		}
+	}
+
+	VertexCleanup();
+}
+
+
+void Mesh::DeleteUnSelectedFaces()
+{
+	Face **array = mFaces.getVectorArray();
+
+	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
+	{
+		Face *face = array[i];
+
+		if (face && !(face->mFlags & Face::fSelected))
+		{
+			//FaceRemovalCleanup(face);
+			delete face;
+			array[i] = NULL;
+		}
+	}
+
+	VertexCleanup();
 }
 
 
@@ -1390,12 +1462,49 @@ void Mesh::SetGroupsFaceSelected(uint32 groups)
 }
 
 
+void Mesh::VertexCleanup()
+{
+	RebuildVertexPolygonReferences();
+	Vertex **array = mVertices.get_array();
+	Vertex *vert;
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+	{
+		vert = array[v];
+
+		if ( vert && vert->GetFaceRefs().size() == 0)
+		{
+			array[v] = NULL;			
+			mFreedVertices.push(vert->mVertexIndex);
+			mFreedTexCoords.push(vert->mTexCoordIndex);
+			mFreedNormals.push(vert->mNormalIndex);
+			delete vert;
+		}
+	}
+}
+
+
+void Mesh::FaceRemovalCleanup(Face *face)
+{
+	if (face && face->mIndices.size())
+	{
+		uint32 i;
+		foreach (face->mIndices, i)
+		{
+			DeleteVertex(face->mIndices[i]);
+		}
+	}
+}
+
+
 void Mesh::RebuildVertexPolygonReferences(index_t vertex)
 {
 	Vertex *v = GetVertex(vertex);
 
 	if (!v)
 		return;
+
+	v->GetFaceRefs().clear();
 
 	for (uint32 f = 0, fn = GetFaceCount(); f < fn; ++f)
 	{

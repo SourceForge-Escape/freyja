@@ -16,10 +16,9 @@
  A
  ----------------------------
 
- * Doesn't build in OS X
-	<Chunky_Ks> tiger/latest XCode default
-	<Mongoose> well, thanks for test building on OS X -- I keep nuking my installs
-	<Chunky_Ks> i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 (Apple Computer, Inc. build 5367)
+ * Doesn't build in OS X since 0.9.5  ( No access to a machine atm )
+
+ * Crash on repeated failed compile / linking with shaders ( driver issue? )
 
  * Crash on some model clears!
 	- hafu.freyja reproduces 100%, just open and close over and over

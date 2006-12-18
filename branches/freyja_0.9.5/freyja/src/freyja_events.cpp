@@ -60,9 +60,6 @@ void eRecentFiles(unsigned int value)
 mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
 								mgtk_tree_t *tree)
 {
-	uint32 i, boneChild, count;
-
-
 	if (!freyjaIsBoneAllocated(rootIndex))
 	{
 		freyja_print("!generateSkeletalUI> ERROR: NULL skeletal bone!\n");
@@ -73,20 +70,29 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 	const char *rootName = freyjaGetBoneNameString(rootIndex);
 	uint32 rootSkelBID = rootIndex;//freyjaGetBoneSkeletalBoneIndex(rootIndex);
 
+	if (rootChildCount > freyjaGetBoneCount())
+	{
+		freyja_print("!generateSkeletalUI> ERROR: Invalid skeletal bone!\n");
+		return 0x0;
+	}
+
 	if (tree == 0x0)
 	{
 		tree = new mgtk_tree_t;
-		snprintf(tree->label, 64, "root");	
+		snprintf(tree->label, 63, "root");	
+		tree->label[63] = '\0';
 		tree->parent = 0x0;
 	}
 	else
 	{
-		snprintf(tree->label, 64, "bone%03i", rootSkelBID);
+		snprintf(tree->label, 63, "bone%03i", rootSkelBID);
+		tree->label[63] = '\0';
 	}
 
 	if (rootName[0])
 	{
-		snprintf(tree->label, 64, "%s", rootName);
+		snprintf(tree->label, 63, "%s", rootName);
+		tree->label[63] = '\0';
 	}
 
 	tree->id = rootIndex;
@@ -103,9 +109,9 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 
 	tree->children = new mgtk_tree_t[tree->numChildren+1];
 
-	for (count = 0, i = 0; i < rootChildCount; ++i)
+	for (uint32 count = 0, i = 0; i < rootChildCount; ++i)
 	{
-		boneChild = freyjaGetBoneChild(rootIndex, i);
+		uint32 boneChild = freyjaGetBoneChild(rootIndex, i);
 
 		if (freyjaIsBoneAllocated(boneChild))
 		{
