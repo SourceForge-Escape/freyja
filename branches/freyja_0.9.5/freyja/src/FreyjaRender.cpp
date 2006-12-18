@@ -877,14 +877,14 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		}
 
 	
-		if (m->GetFlags() & Mesh::fSelected)
+		if (GetFlags() & fBoundingVolumes && m->GetFlags() & Mesh::fSelected)
 		{
 			vec3_t min, max;
 			m->GetBBox(min, max);
 			mglDrawSelectBox(min, max, YELLOW);
 		}	
 	}
-	else if (m->GetFlags() & Mesh::fSelected)
+	else if (GetFlags() & fBoundingVolumes && m->GetFlags() & Mesh::fSelected)
 	{
 		vec3_t min, max;
 		m->GetBBox(min, max);
@@ -952,6 +952,12 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		glPushMatrix();
 		glScalef(scale, scale, scale);
 
+		Vec3 color(mColorWireframe);
+		if (m->GetFlags() & Mesh::fSelected)
+		{
+			color = Vec3(mColorWireframeHighlight);
+		}
+
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
@@ -962,7 +968,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 			// NOTE: This is a test rendering, since you can't
 			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
 			//       mappings in the Mesh.   =)
-			glColor3fv(mColorWireframeHighlight);
+			glColor3fv(color.mVec);
 			glDrawElements(GL_LINE_LOOP, 
 						   f->mIndices.size(), 
 						   GL_UNSIGNED_INT,

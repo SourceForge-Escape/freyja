@@ -806,7 +806,7 @@ public:
 	void UpdateBoundingVolume();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Rotates mesh about bounding volume center
+	 * Post : Rebuilds bounding volumes.
 	 *
 	 ------------------------------------------------------*/
 

@@ -16,8 +16,6 @@
  A
  ----------------------------
 
- * Merge, etc can cause bounding volumes to deform
-
  * Crash / vertex clean-up broke current mesh merge implementation
 
  * Render Faces... transforms 'previews' (could use vertex blend buffer)
