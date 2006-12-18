@@ -1253,6 +1253,8 @@ void Mesh::Merge(Mesh *mesh)
 			AddWeight(transV[w->mVertexIndex], w->mWeight, w->mBoneIndex);
 		}
 	}
+
+	UpdateBoundingVolume();
 }
 
 
@@ -2279,6 +2281,8 @@ void Mesh::UpdateBoundingVolume()
 			SetBBox(min, max);
 		}
 	}
+
+	SetPosition(GetBoundingVolumeCenter());
 }
 
 
