@@ -95,6 +95,9 @@ Mesh::Mesh(const Mesh &mesh) :
 	mVertices(),
 	mWeights()
 {
+	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
+	mName[mNameSize-1] = 0;
+
 	uint32 i;
 
 	foreach (((Mesh&)mesh).mVertices, i)
@@ -147,9 +150,38 @@ Mesh::Mesh(const Mesh &mesh) :
 
 Mesh::~Mesh()
 {
-	mFaces.erase();
-	mVertices.erase();
-	mWeights.erase();
+	// Force removal in case of bad delete calls
+	if (GetMesh(mUID) == this)
+		RemoveFromPool();
+
+	uint32 i;
+
+	foreach (mWeights, i)
+	{
+		if (mWeights[i])
+		{
+			delete mWeights[i];
+			mWeights[i] = NULL;
+		}
+	}
+
+	foreach (mVertices, i)
+	{
+		if (mVertices[i])
+		{
+			delete mVertices[i];
+			mVertices[i] = NULL;
+		}
+	}
+
+	foreach (mFaces, i)
+	{
+		if (mFaces[i])
+		{
+			delete mFaces[i];
+			mFaces[i] = NULL;
+		}
+	}
 }
 
 
@@ -1200,14 +1232,13 @@ void Mesh::Merge(Mesh *mesh)
 				}
 			}
 
-			uint32 j;
+			uint32 j = 0;
 			foreach (face->mIndices, j)
 			{
 				newFace->AppendVertex(transV[face->mIndices[j]]);
 			}
 		}
 	}
-
 
 	foreach (mesh->mWeights, i)
 	{

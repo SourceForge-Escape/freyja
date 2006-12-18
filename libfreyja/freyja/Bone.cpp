@@ -157,8 +157,8 @@ index_t Bone::AddToPool()
 			{
 				mUID = i;
 				mGobalPool.assign(mUID, this);
-
 				found = true;
+				break;
 			}	
 		}
 

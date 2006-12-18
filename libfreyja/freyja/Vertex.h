@@ -77,6 +77,10 @@ public:
 	{
 	}
 
+	~Vertex()
+	{
+	}
+
 	static size_t SerializedSize() 
 	{
 		return ( 1 + 4 * 6); 

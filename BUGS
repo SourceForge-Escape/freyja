@@ -16,12 +16,13 @@
  A
  ----------------------------
 
+ * Crash / vertex clean-up broke current mesh merge implementation
+
+ * Render Faces... transforms 'previews' (could use vertex blend buffer)
+
  * Doesn't build in OS X since 0.9.5  ( No access to a machine atm )
 
  * Crash on repeated failed compile / linking with shaders ( driver issue? )
-
- * Crash on some model clears!
-	- hafu.freyja reproduces 100%, just open and close over and over
 
  * Quad ray pick sucks - fix it  ;_;
 

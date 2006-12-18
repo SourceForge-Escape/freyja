@@ -2775,8 +2775,13 @@ void mgtk_accel_support(GtkWidget *item, arg_list_t *accel)
 			case 'M':
 				mod |= GDK_MOD1_MASK;
 				break;
-			case 'E':
+			case 'E': // Enter
 				key = GDK_Return;
+						
+				i = len + 8;
+				break;
+			case 'D': // Delete
+				key = GDK_Delete;
 						
 				i = len + 8;
 				break;

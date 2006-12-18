@@ -3198,11 +3198,14 @@ void FreyjaControl::PrintInfo()
 	for (uint32 i = 0, n = freyjaGetModelMeshCount(model); i < n; ++i)
 	{
 		index_t mesh = freyjaGetModelMeshIndex(model, i);
-		t.Set("      %i. '%s' %i Polyons, %i Vertices\n", i, 
-			  freyjaGetMeshNameString(mesh), 
-			  freyjaGetMeshVertexCount(mesh), 
-			  freyjaGetMeshPolygonCount(mesh));
-		s += t;
+		if (freyjaIsMeshAllocated(mesh))
+		{
+			t.Set("      %i. '%s' %i Polyons, %i Vertices\n", i, 
+				  freyjaGetMeshNameString(mesh), 
+				  freyjaGetMeshPolygonCount(mesh),
+				  freyjaGetMeshVertexCount(mesh));
+			s += t;
+		}
 	}
 
 	freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());
@@ -6436,6 +6439,23 @@ void eGLSLFragmentMode(unsigned int value)
 	}
 }
 
+vec_t gSnapWeldVertsDist = 0.001f;
+void eSnapWeldVertsDist(vec_t d)
+{
+	gSnapWeldVertsDist = d;
+}
+
+
+void eSnapWeldVerts()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->WeldVerticesByDistance(gSnapWeldVertsDist);
+	}
+}
+
 
 void FreyjaControlEventsAttach()
 {
@@ -6446,6 +6466,8 @@ void FreyjaControlEventsAttach()
  
 	ResourceEventCallbackUInt::add("eGLSLFragmentMode", &eGLSLFragmentMode);
 	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
+
+	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
 
 	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
 	ResourceEventCallback::add("eClearWeight", &eClearWeight);
@@ -6459,6 +6481,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
 	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
 
+	ResourceEventCallback::add("eSnapWeldVerts", &eSnapWeldVerts);
 
 	ResourceEventCallback::add("eGroupClear", &eGroupClear);
 	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
