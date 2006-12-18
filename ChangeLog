@@ -6,6 +6,10 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Avoid crash generating UI tree for bad data
+ - Vertex welding by tolerance distance
+ - Unreferenced vertices are stripped on face deletes now
+ - A few sample shaders provided
  - Material support for shaders back in ( shaders will serialise and set )
  - GLSL example programs for per-pixel lighting, etc
  - Pretty GLSL compile and link error/warning dialogs

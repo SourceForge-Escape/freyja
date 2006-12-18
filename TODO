@@ -22,13 +22,7 @@
 		  ( Letting the user move points in vertex mode )
 		- Ref weights from vertex to fix blending issues
 		- ZIP file based pak format for freyja format models w/ textures, etc
-		- FIX all the plugins using obsolete iterators ( won't export using it )
-			- Obj, Smd, ...
-		- Extra viewmode to toggle groups colors on/off
-		- Fragments bound properly to materials and varying support
-		- Two-way python function/script UI, reporting ala C plugins
-		  or offically endorse pygtk, etc
-		- glGetObjectParameterivARB and GLSL debug hookup in UI like ARB has
+		- <Mongoose> leileiloll: but you'd like a built-in 'snap-weld' vertices?
 
 
 	* To be finalized
@@ -43,7 +37,29 @@
 		- Mesh::Serialize(...) for binary Files needs to be updated for format
 		- Mesh::FaceRemovalCleanup() stub to optional purge refcounted verts
 
-	* UV
+	* Skeletal animation
+		- Rework weight system to support zeroed weights and grouping
+		- Merge the two bone rendering systems once debugging is done
+		- Fix bone bind, bindtoworld setup in backend
+		- Joint/Bone tool that creates and connects to last on each click?
+
+
+
+ Modeling
+ -----------------------------------------------------------------------------
+
+	* Box modeling
+		- Add back UI for vertex welding 
+		- Edge picking / editing / subdiv / extrude
+		- Instancing for bisymmetry ( use a flag to enable a render mode )
+		- Loop cuts needed for box modeling
+		- Subdiv ABI
+		- Direct edge selection
+		- Spline interface
+		- Improve extrude UI
+		- Bi-symmetry modeling support
+
+	* UV editing
 		- Add back UV/Texcoord transforms for unwrapping editing
 		- Texcoord split
 		- Texcoord transforms with selected faces as UVMap
@@ -52,57 +68,6 @@
 		- UV color button for default bg color
 		- Selectable patterns like colorcube, checkerboard, gray as bg
 
-	* Modeling
-		- Add back UI for vertex welding 
-		- Edge picking
-
-	* Cursor system
-		- Consistency across cursor usage
-		- Orbital / Camera view need special orientation constraints
-		- Hierarchical systems like skeletons need fixes for world cursor 
-		- Object modifiers should update cursor loc/rot/size only
-			- On object select update cursor values
-			- On modifier mode update cursor values via a 'bump' select (reuse)
-		- Rotation cursor with radius sweeps to cursor pos following an arc
-			- Also replace the old RotateObject() code to just use cursor
-		  on select mode switch as per new design to prevent feedback loops
-		- Ray/Vector based orbital view cursor guides ( 'go where I want' )
-		- Rotation cursor needs final, real implementation added now
-			- Circle around projected center or do something equally clever
-			  for more tactical control
-
-	* Skeletal animation
-		- Rework weight system to support zeroed weights and grouping
-		- Merge the two bone rendering systems once debugging is done
-		- Fix bone bind, bindtoworld setup in backend
-		- Joint/Bone tool that creates and connects to last on each click?
-
-	* Interface
-		- Trim out 'dead' events, esp ones registering to mgtk
-		- Two window layout for curve / viewport usage
-		- Make viewport 'windows' abstract with seperate controls
-			- Support for dynamic resizing and 2/3/4 layouts
-			- FreyjaRender -> OpenGLContext, *ViewportRenderer
-			- FreyjaControl -> Freyja3d, *ViewportControl
-			- Combine controls and view into a seperate class/pkg
-			  This will make it easier to scale and fix UI issues
-		- Camera render mode for viewport
-			- OpenGL depth / culling / etc control?
-		- Remove state value from all mlisp toggle widgets ( use the set func )
-		- Have a widget numeric set function like toggle widgets have for bool 
-		- VFS UI needs to provide metadata like XOR keys, size, offset, etc
-
-
- Modeling
- -----------------------------------------------------------------------------
-
-	* Box modeling
-		- Loop cuts needed for box modeling
-		- Subdiv ABI
-		- Direct edge selection
-		- Spline interface
-		- Improve extrude UI
-		- Bi-symmetry modeling support
 
 	* Sphere/ray brush ( aka paint interface )
 		- Paint with ray test
@@ -240,9 +205,13 @@
  Rendering
  ----------------------------------------------------------------------------
 
-	* GLSL shader 'materials' generated from tree UI
+	* GLSL shaders
+		- FreyjaOpenGL should remap shaders to make sure two of the same
+		  shader aren't loaded at once ( just pass back the orig program id )
 		- Heat fx shader ( turb with frag prob best )
 		- DoF shader
+
+	* Material tree editor
 
 	* Animated texcoords
 
@@ -259,6 +228,7 @@
  ----------------------------------------------------------------------------
 
 	* libmgtk specific
+		- Automate callbacks from mlisp directly? (write events in just mlisp)
 		- Mlisp wish list
 			- Fully featured lisp with C bindings ( dangerous )
 			- Garbage collection
@@ -269,6 +239,23 @@
 		- MlispEvent to replace ResourceEvent
 		- Mlisp doesn't lookup symbols for like "true" if just setq
 
+	* Interface ( cold, was hot )
+		- Trim out 'dead' events, esp ones registering to mgtk
+		- Two window layout for curve / viewport usage
+		- Make viewport 'windows' abstract with seperate controls
+			- Support for dynamic resizing and 2/3/4 layouts
+			- FreyjaRender -> OpenGLContext, *ViewportRenderer
+			- FreyjaControl -> Freyja3d, *ViewportControl
+			- Combine controls and view into a seperate class/pkg
+			  This will make it easier to scale and fix UI issues
+		- Camera render mode for viewport
+			- OpenGL depth / culling / etc control?
+		- Remove state value from all mlisp toggle widgets ( use the set func )
+		- Have a widget numeric set function like toggle widgets have for bool 
+		- VFS UI needs to provide metadata like XOR keys, size, offset, etc			- Extra viewmode to toggle groups colors on/off
+		- Two-way python function/script UI, reporting ala C plugins
+		  or offically endorse pygtk, etc
+
 	* Viewport view / control abstraction
 		- Reimplement and enable Camera system
 		- Add camera editing back
@@ -276,7 +263,20 @@
   	* Scene tree view for all objects in scene
 		- Parenting interface
 
-	* Cursor operations
+	* Cursor system
+		- Consistency across cursor usage
+		- Orbital / Camera view need special orientation constraints
+		- Hierarchical systems like skeletons need fixes for world cursor 
+		- Object modifiers should update cursor loc/rot/size only
+			- On object select update cursor values
+			- On modifier mode update cursor values via a 'bump' select (reuse)
+		- Rotation cursor with radius sweeps to cursor pos following an arc
+			- Also replace the old RotateObject() code to just use cursor
+		  on select mode switch as per new design to prevent feedback loops
+		- Ray/Vector based orbital view cursor guides ( 'go where I want' )
+		- Rotation cursor needs final, real implementation added now
+			- Circle around projected center or do something equally clever
+			  for more tactical control
 		- Vertex ops undo (all)
 		- Render changes and constantly update
 		- Enforce rule when confirmed by click actually modify

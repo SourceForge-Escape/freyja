@@ -43,8 +43,8 @@ BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
 BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=freyja
-LOCAL_INCLUDES=-I../mstl -I../libhel/ -lhel0 
-LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ 
+LOCAL_INCLUDES=-I../mstl -I../libhel/
+LOCAL_LIBS=-L../bin/libhel/$(BUILD_SELECT)/ -lhel0 
 LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ 
 
 
