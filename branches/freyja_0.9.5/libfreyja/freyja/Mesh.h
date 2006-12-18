@@ -1155,7 +1155,7 @@ public:
 	 ------------------------------------------------------*/
 
 	static Mesh *GetMesh(index_t uid) 
-	{ return (uid < mGobalPool.size()) ?  mGobalPool[uid] : NULL; }
+	{ return (uid < mGobalPool.size()) ? mGobalPool[uid] : NULL; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns mesh matching gobal store UID
@@ -1179,11 +1179,12 @@ public:
 
 			for (i = 0; i < count; ++i)
 			{
-				if (mGobalPool[i] == 0x0)
+				if (mGobalPool[i] == NULL)
 				{
 					mUID = i;
 					mGobalPool.assign(mUID, this);
 					found = true;
+					break;
 				}	
 			}
 
@@ -1210,7 +1211,9 @@ public:
 	void RemoveFromPool()
 	{
 		if (mUID < mGobalPool.size())
-			mGobalPool.assign(mUID, 0x0);
+		{
+			mGobalPool[mUID] = NULL;
+		}
 
 		mUID = INDEX_INVALID;
 	}

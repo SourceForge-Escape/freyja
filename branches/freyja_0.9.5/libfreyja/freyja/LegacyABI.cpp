@@ -1619,6 +1619,8 @@ void freyjaModelClear(index_t modelIndex)
 	{
 		freyjaModelDeleteMesh(modelIndex, i);
 	}
+
+	Mesh::ResetPool();
 }
 
 

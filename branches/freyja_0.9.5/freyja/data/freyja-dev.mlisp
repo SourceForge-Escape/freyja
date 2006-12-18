@@ -83,9 +83,11 @@
 			(menu_item "Cu_t"	eCut     		"C-x"		"gtk-cut")
 			(menu_item "_Copy"	eCopy 	    "C-c"		"gtk-copy")
 			(menu_item "_Paste"	ePaste     	"C-v"		"gtk-paste")
-			(menu_item "_Delete"	eDelete    	"C-d"		"gtk-delete")
+			(menu_item "_Delete"	eDelete    	"Delete"		"gtk-delete")
 			(menu_seperator)
 			(menu_item "Select _All"	eSelectAll	"C-a"	"gtk-select-table")
+			(menu_seperator)
+			(menu_item "D_uplicate"	eDupeObject    	"C-d"	"gtk-convert")
 			(menu_seperator)
 			(menu_item "Pr_eferences"    ePreferencesDialog	"gtk-preferences"))
 
@@ -206,6 +208,7 @@
 				(menu_item "Mirror _X"		eMirrorMeshX)
 				(menu_item "Mirror _Y"		eMirrorMeshY)
 				(menu_item "Mirror _Z"		eMirrorMeshZ)
+				(menu_item "Snap-_Weld verts"	eSnapWeldVerts)
 
 			) ; submenu _Mesh
 
@@ -1025,6 +1028,10 @@
 		(hbox 1 0 0 1 0
 			(label "Vertex pick radius"  0.0 0.5) 
 			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eVertexPickRadius))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex snap-weld dist"  0.0 0.5) 
+			(spinbutton2 0.1 0.001 1000.0 0.0001 0.001 0.001 4 eSnapWeldVertsDist))
 
 		) ; End (tab "General"
 
