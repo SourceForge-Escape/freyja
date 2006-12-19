@@ -23,7 +23,6 @@
  * Mongoose - Created
  ================================================================*/
 
-
 #ifndef GUARD__MSTL_MONGOOSE_STRING_H_
 #define GUARD__MSTL_MONGOOSE_STRING_H_
 
@@ -97,6 +96,15 @@ class String
 	String &operator+=(const String &s)
 	{
 		return *this = *this + s;
+	}
+
+
+	bool operator==(const char *s)
+	{
+		if (s == NULL || c_str() == NULL)
+			return ( s == NULL && c_str() == NULL );
+
+		return ( strcmp(s, c_str()) == 0 );
 	}
 
 

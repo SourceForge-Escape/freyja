@@ -27,7 +27,6 @@
 #define GUARD__MGTK_MONGOOSE_MGTK_EVENT_H_
 
 #define ACCEL_SUPPORT_ON
-#define EXTEND_FILE_TEST
 
 // Arg list types for Resource use
 #define ARG_GTK_WIDGET           64

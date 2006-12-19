@@ -6,6 +6,8 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for double save due to odd Gtk+ event using static guard in UI
+ - Removed compile time support for old fileselection dialog 
  - Partitioned off file dialog in mgtk
  - Debian package for freyja includes user data again ( oops )
  - Hooked up faces... delete to generic delete

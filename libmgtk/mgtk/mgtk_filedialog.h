@@ -42,20 +42,6 @@ void mgtk_event_filedialog_cancel(GtkWidget *widget, gpointer user_data);
  *
  ------------------------------------------------------*/
 
-//void mgtk_event_filedialog_action(int event);
-/*------------------------------------------------------
- * Pre  : 
- * Post : 
- *
- ------------------------------------------------------*/
-
-//void mgtk_event_filedialog_cancel(int event);
-/*------------------------------------------------------
- * Pre  : 
- * Post : 
- *
- ------------------------------------------------------*/
-
 void mgtk_event_filedialog_homedir(int event, GtkWidget *file, void *data);
 /*------------------------------------------------------
  * Pre  : 
