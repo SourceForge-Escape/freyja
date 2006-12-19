@@ -204,6 +204,7 @@ PROG_OBJS = \
 	$(BUILDDIR)/mgtk_callbacks.o \
 	$(BUILDDIR)/mgtk_interface.o \
 	$(BUILDDIR)/mgtk_resource.o \
+	$(BUILDDIR)/mgtk_filedialog.o \
 	$(BUILDDIR)/mgtk_tree.o
 
 $(BUILDDIR)/lib$(NAME)$(SHLIBEXT) : $(PROG_OBJS)

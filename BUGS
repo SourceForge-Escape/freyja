@@ -16,7 +16,7 @@
  A
  ----------------------------
 
- * Render Faces... transforms 'previews' (could use vertex blend buffer)
+ * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
 
  * Crash on multiple merge with 'created' objects, but not imported
 
@@ -60,8 +60,7 @@
  * Issue with overwrite in file dialog
 	- Often prompts to overwrite twice, since the event fires twice
 	- It shouldn't save and then save again!
-	- This is due to odd Gtk+ signal handling when a question dialog is fired
-	  while the file dialog is active.  Checking to see if gtk+ update helps.
+	- This is due to Gtk+ signal handling with the filedialog buttons.
 
  * Bone rotation
 	- Needs to be 'synced' to heirachry to make sense
@@ -90,8 +89,6 @@
 
  * Plugins
 	- All iterator use is now not just deprecated but obsoloete ( rewrite )
-		- 3ds export is broken
-		- ASE export is broken
 	- I guess I forgot to port some plugins to support 64bit/big endian oops
 	- Halflife is broken ( looks like a deformed umbra loader, 
 	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )

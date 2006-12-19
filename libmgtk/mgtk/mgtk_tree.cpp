@@ -29,18 +29,6 @@
 #include "mgtk_resource.h"
 #include "mgtk_events.h"
 
-#define ACCEL_SUPPORT_ON
-#define EXTEND_FILE_TEST
-
-// Arg list types for Resource use
-#define ARG_GTK_WIDGET           64
-#define ARG_GTK_BOX_WIDGET       128
-#define ARG_GTK_WINDOW           256
-#define ARG_GTK_MENU_WIDGET      1024
-#define ARG_GTK_NOTEBOOK         2048
-#define ARG_GTK_TOOLBOX_WIDGET   4096
-
-
 using namespace mstl;
 
 

@@ -49,20 +49,6 @@ void mgtk_event_command(GtkWidget *widget, gpointer user_data);
 
 
 
-void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data);
-
-void mgtk_event_filechooser_cancel(GtkWidget *widget, gpointer user_data);
-
-void mgtk_event_fileselection_action(int event);
-
-void mgtk_event_fileselection_cancel(int event);
-
-void mgtk_event_fileselection_homedir(int event, GtkWidget *file, void *data);
-
-void mgtk_event_fileselection_pattern(int event, char *pattern);
-
-
-
 void mgtk_event_key_release(GtkWidget *widget, GdkEventKey *event);
 
 void mgtk_event_key_press(GtkWidget *widget, GdkEventKey *event);

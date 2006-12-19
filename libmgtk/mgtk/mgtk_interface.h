@@ -54,10 +54,6 @@ GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func);
 
 GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_filename);
 
-GtkWidget *mgtk_create_fileselection(int event, char *title);
-
-GtkWidget *mgtk_create_filechooser(int event, char *title);
-
 GtkWidget *mgtk_create_text_entry(GtkWidget *box);
 
 GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size);
@@ -102,4 +98,6 @@ GtkWidget *mgtk_create_color_button(void *func, int id);
 void mgtk_destroy_window(GtkWidget *widget);
 
 void mgtk_refresh_glarea(GtkWidget *glarea);
+
+
 #endif

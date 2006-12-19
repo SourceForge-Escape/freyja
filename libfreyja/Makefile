@@ -312,6 +312,7 @@ install:
 	@-mkdir -p $(INSTALL_LIB)
 	@-mkdir -p $(INSTALL_LIB)/$(BASE_NAME)
 	@-cp $(BUILD_INSTALL_DIR)/$(NAME)$(SHLIBEXT) $(INSTALL_LIB)
+	@-cp -R data/* $(INSTALL_SHARE)/
 	@-echo "[done]"
 	@-$(MAKE) install-link
 	@-$(MAKE) install-headers

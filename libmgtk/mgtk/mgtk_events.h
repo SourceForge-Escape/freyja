@@ -26,6 +26,17 @@
 #ifndef GUARD__MGTK_MONGOOSE_MGTK_EVENT_H_
 #define GUARD__MGTK_MONGOOSE_MGTK_EVENT_H_
 
+#define ACCEL_SUPPORT_ON
+#define EXTEND_FILE_TEST
+
+// Arg list types for Resource use
+#define ARG_GTK_WIDGET           64
+#define ARG_GTK_BOX_WIDGET       128
+#define ARG_GTK_WINDOW           256
+#define ARG_GTK_MENU_WIDGET      1024
+#define ARG_GTK_NOTEBOOK         2048
+#define ARG_GTK_TOOLBOX_WIDGET   4096
+
 
 /* Handle mgtk widget events by implementing these functions in your code */
 /* Repeat: You have to implement these following call backs */

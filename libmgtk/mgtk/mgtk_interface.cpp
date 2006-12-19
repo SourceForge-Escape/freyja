@@ -809,106 +809,6 @@ GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name,
 }
 
 
-GtkWidget *mgtk_create_fileselection(int event, char *title)
-{
-	GtkWidget *fileselection;
-	GtkWidget *ok_button;
-	GtkWidget *cancel_button;
-
-
-	fileselection = gtk_file_selection_new(title);
-
-	gtk_object_set_data(GTK_OBJECT(fileselection), "fileselection", 
-							  fileselection);
-	gtk_container_set_border_width(GTK_CONTAINER(fileselection), 10);
-
-	// Mongoose 2002.01.18, Don't allow resize/grow
-	gtk_window_set_policy(&(GTK_DIALOG(fileselection)->window), 
-								 FALSE, FALSE, TRUE);
-
-	// OK button
-	ok_button = GTK_FILE_SELECTION(fileselection)->ok_button;
-	gtk_object_set_data(GTK_OBJECT(fileselection), "ok_button", ok_button);
-	gtk_widget_show(ok_button);
-	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
-
-	// Mongoose 2006.08.13, Pass event id back ( allows many dialogs to be made  instead of reusing one over and over )
-	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
-					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_action),
-					   GINT_TO_POINTER(event));
-
-
-	// Cancel button
-	cancel_button = GTK_FILE_SELECTION(fileselection)->cancel_button;
-	gtk_object_set_data(GTK_OBJECT(fileselection), "cancel_button", 
-						cancel_button);
-	gtk_widget_show(cancel_button);
-	GTK_WIDGET_SET_FLAGS(cancel_button, GTK_CAN_DEFAULT);
-	
-	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
-					   GTK_SIGNAL_FUNC(mgtk_event_fileselection_cancel),
-					   GINT_TO_POINTER(event));
-
-	return fileselection;
-}
-
-void mgtk_update_filechooser_preview(GtkFileChooser *filechooser,gpointer data);
-
-GtkWidget *mgtk_create_filechooser(int event, char *title)
-{
-	GtkWidget *filechooser = NULL;
-#ifndef USE_OLD_FILE_SELECTION_WIDGET
-	GtkWidget *vbox;
-	GtkWidget *action_area;
-	GtkWidget *cancel_button;
-	GtkWidget *ok_button;
-
-
-	filechooser = gtk_file_chooser_dialog_new(title, NULL, GTK_FILE_CHOOSER_ACTION_OPEN, NULL, NULL);
-	//gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(filechooser), TRUE);
-	gtk_window_set_type_hint(GTK_WINDOW(filechooser), GDK_WINDOW_TYPE_HINT_DIALOG);
-
-	vbox = GTK_DIALOG(filechooser)->vbox;
-	gtk_widget_show(vbox);
-
-	action_area = GTK_DIALOG(filechooser)->action_area;
-	gtk_widget_show(action_area);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(action_area), GTK_BUTTONBOX_END);
-
-	/* Add cancel button */
-	cancel_button = gtk_button_new_from_stock("gtk-cancel");
-	gtk_widget_show(cancel_button);
-	gtk_dialog_add_action_widget(GTK_DIALOG(filechooser), cancel_button, GTK_RESPONSE_CANCEL);
-	GTK_WIDGET_SET_FLAGS(cancel_button, GTK_CAN_DEFAULT);
-
-	gtk_signal_connect(GTK_OBJECT(cancel_button), "clicked",
-					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_cancel),
-					   GINT_TO_POINTER(event));
-
-	/* Add ok button -- this is used due to multiuse of single filedialog in mtk */
-	ok_button = gtk_button_new_from_stock("gtk-ok");
-	gtk_widget_show(ok_button);
-	gtk_dialog_add_action_widget(GTK_DIALOG(filechooser), ok_button, GTK_RESPONSE_OK);
-	GTK_WIDGET_SET_FLAGS(ok_button, GTK_CAN_DEFAULT);
-
-	gtk_signal_connect(GTK_OBJECT(ok_button), "clicked",
-					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_action),
-					   GINT_TO_POINTER(event));
-
-	gtk_widget_grab_default(ok_button);
-
-
-	/* Add preview widget for images */
-	GtkWidget *preview = gtk_image_new();
-	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(filechooser), preview);
-	g_signal_connect(filechooser, "update-preview",
-					 G_CALLBACK(mgtk_update_filechooser_preview), preview);
-#endif
-
-	return filechooser;
-}
-
-
 GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 {
 	GtkWidget *toolbar;
@@ -965,38 +865,31 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 {
 	GtkWidget *togglebutton;
 	GtkWidget *toolbar_icon;
-	
 
 	toolbar_icon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
 
+#if USE_DEP_GTK_TOOLBAR
 	togglebutton = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 											  GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
 											  NULL,
 											  (!label[0]) ? NULL : label,
 											  help, NULL,
 											  toolbar_icon, NULL, NULL);
+#else
+	GtkToolItem *item = gtk_toggle_tool_button_new();
+	gtk_tool_button_set_label((GtkToolButton*)item, (!label[0]) ? NULL : label);
+	gtk_tool_button_set_icon_widget((GtkToolButton*)item, toolbar_icon);
+	gtk_widget_show(toolbar_icon);
 
+	togglebutton = (GtkWidget *)item;
+	gtk_toolbar_append_widget((GtkToolbar *)toolbar, togglebutton, help, NULL);
+#endif
 	
 	gtk_widget_ref(togglebutton);
 	gtk_object_set_data_full(GTK_OBJECT(toolbar), "tb_tbtn",
 							 togglebutton,
 							 (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(togglebutton);
-
-
-	/*
-	if (event_func)
-	{
-		gtk_signal_connect(GTK_OBJECT(togglebutton), "toggled",
-						   GTK_SIGNAL_FUNC(event_func),
-						   GINT_TO_POINTER(event_cmd));
-
-		if (toggled)
-		{
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(togglebutton), TRUE);
-		}
-	}
-	*/
 
 	return togglebutton;
 }
@@ -1012,27 +905,34 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
 	
 	toolbar_icon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
 
+#if USE_DEP_GTK_TOOLBAR
 	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 										GTK_TOOLBAR_CHILD_BUTTON,
 										NULL,
 										(!label[0]) ? NULL : label,
 										help, NULL,
 										toolbar_icon, NULL, NULL);
-
+#else
+	GtkToolItem *item = gtk_tool_button_new(toolbar_icon,
+											(!label[0]) ? NULL : label);
+	gtk_widget_show(toolbar_icon);
+	//gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1);
+	button = (GtkWidget *)item;
+	gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, help, NULL);
+#endif
 	
+	if (event_func)
+	{
+		gtk_signal_connect(GTK_OBJECT(button), "clicked",
+						   GTK_SIGNAL_FUNC(event_func),
+						   GINT_TO_POINTER(event_cmd));
+	}
+
 	gtk_widget_ref(button);
 	gtk_object_set_data_full(GTK_OBJECT(toolbar), "tb_btn",
 							 button,
 							 (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(button);
-
-
-	if (event_func)
-	{
-		gtk_signal_connect(GTK_OBJECT(button), "pressed",
-						   GTK_SIGNAL_FUNC(event_func),
-						   GINT_TO_POINTER(event_cmd));
-	}
 
 	return button;
 }

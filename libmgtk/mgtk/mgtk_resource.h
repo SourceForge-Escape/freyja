@@ -51,4 +51,5 @@ GtkWidget *mgtk_get_fileselection_pattern_widget(int event);
 
 void mgtk_resource_rebuild_treeview(int event, GtkTreeModel *model);
 
+
 #endif
