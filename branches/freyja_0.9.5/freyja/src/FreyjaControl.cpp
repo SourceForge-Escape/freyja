@@ -6149,10 +6149,13 @@ void eOpenModel(char *filename)
 
 void eSaveModel(char *filename)
 {
-	static mstl::String s = "fuck gtk bugs";
+	// This is only called by Gtk+ SaveAs... directly hence the guard for
+	// the 'double event' bug is added here.
+	static mstl::String s = "avoid gtk bugs";
 
 	if (s == filename)
 	{
+		//freyja_print("%s == %s, work around for tk bug", s.c_str(), filename);
 		return;
 	}
 
