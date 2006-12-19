@@ -16,11 +16,9 @@
  A
  ----------------------------
 
- * Crash / vertex clean-up broke current mesh merge implementation
-
  * Render Faces... transforms 'previews' (could use vertex blend buffer)
 
- * Doesn't build in OS X since 0.9.5  ( No access to a machine atm )
+ * Crash on multiple merge with 'created' objects, but not imported
 
  * Crash on repeated failed compile / linking with shaders ( driver issue? )
 
@@ -29,7 +27,6 @@
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
 
  * Copy / Cut / Paste 
-    - New mesh copy system doesn't buffer, since copy = copy + paste
 	- Use fHidden flag to temp buffer meshes, and avoid it's use in raypick, etc
 
  * Scale tool sucks it's so broke nothing works properly
@@ -48,6 +45,11 @@
 
  B
  ----------------------------
+
+ * 'Size' cursor has interesting recentering... it's correct, but maybe it
+   should floor on a y value to avoid confusing people?
+
+ * Extruding faces can cause invalid mesh pieces for odd topologies
 
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
 	after a 'jump'
@@ -75,6 +77,8 @@
 
  C
  ----------------------------
+
+ * Doesn't build in OS X since 0.9.5  ( No access to a machine atm )
 
  * Visual scaling of cursors may need to be adjusted during zoom != 1.0f
 	- This means sphere/ray targets must be scaled to match visual also

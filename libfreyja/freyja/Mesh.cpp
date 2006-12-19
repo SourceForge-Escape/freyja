@@ -1084,6 +1084,62 @@ index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz
 }
 
 
+void Mesh::DeleteVertexHelper(Vertex **array, index_t vertex)
+{
+	Vertex *vert = array[vertex]; 
+
+	// You have to remove vertex from the list to check for OTHER deps...
+	array[vertex] = NULL;
+	
+#if 0
+	// Do ref checks for faces that share indices
+	if (!CheckVertexArrayRefs(vert->mVertexIndex))
+		mFreedVertices.push(vert->mVertexIndex);
+	
+	if (!CheckTexCoordArrayRefs(vert->mTexCoordIndex))
+		mFreedTexCoords.push(vert->mTexCoordIndex);
+	
+	if (!CheckNormalArrayRefs(vert->mNormalIndex))
+		mFreedNormals.push(vert->mNormalIndex);
+#elif 1
+	bool v, n, t;
+	CheckArrayRefs(vert->mVertexIndex, v, 
+				   vert->mNormalIndex, n, 
+				   vert->mTexCoordIndex, t);
+
+	if (!v)
+		mFreedVertices.push(vert->mVertexIndex);
+	
+	if (!t)
+		mFreedTexCoords.push(vert->mTexCoordIndex);
+	
+	if (!n)
+		mFreedNormals.push(vert->mNormalIndex);
+#endif
+
+	// Now you can finally delete the vertex
+	delete vert;
+}
+
+
+void Mesh::VertexCleanup()
+{
+	RebuildVertexPolygonReferences();
+	Vertex **array = mVertices.get_array();
+	Vertex *vert;
+
+    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
+	{
+		vert = array[v];
+
+		if ( vert && vert->GetFaceRefs().size() == 0)
+		{
+			DeleteVertexHelper(array, v);
+		}
+	}
+}
+
+
 bool Mesh::DeleteVertex(index_t vertex)
 {
 	bool result = false;
@@ -1096,12 +1152,7 @@ bool Mesh::DeleteVertex(index_t vertex)
 
 	if ( v && v->GetFaceRefs().size() == 0)
 	{
-		array[vertex] = NULL;
-		mFreedVertices.push(v->mVertexIndex);
-		mFreedTexCoords.push(v->mTexCoordIndex);
-		mFreedNormals.push(v->mNormalIndex);
-		delete v;
-
+		DeleteVertexHelper(array, vertex);
 		result = true;
 	}
 
@@ -1159,6 +1210,91 @@ void Mesh::WeldVerticesByDistance(vec_t tolerance)
 }
 
 
+void Mesh::CheckArrayRefs(index_t vertex, bool &v, 
+						  index_t normal, bool &n,
+						  index_t texcoord, bool &t)
+{
+	v = n = t = false;
+
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *vert = GetVertex(i);
+
+		if (vert)
+		{
+			if (vert->mNormalIndex == normal)
+				n = true;
+			
+			if (vert->mVertexIndex == vertex)
+				v = true;
+
+			if (vert->mTexCoordIndex == texcoord)
+				t = true;
+
+			if (n && t && v)
+				break;
+		}
+	}	
+}
+
+
+bool Mesh::CheckNormalArrayRefs(index_t arrayIndex)
+{
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (v && v->mNormalIndex == arrayIndex)
+			return true;
+	}
+
+	return false;
+}
+
+
+bool Mesh::CheckTexCoordArrayRefs(index_t arrayIndex)
+{
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (v && v->mTexCoordIndex == arrayIndex)
+			return true;
+	}
+
+	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
+	{
+		Face *f = GetFace(i);
+
+		if (f && f->mFlags & Face::fPolyMappedTexCoords)
+		{
+			uint j;
+			foreach (f->mIndices, j)
+			{
+				if (f->mIndices[j] == arrayIndex)
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+
+bool Mesh::CheckVertexArrayRefs(index_t arrayIndex)
+{
+	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
+	{
+		Vertex *v = GetVertex(i);
+
+		if (v && v->mVertexIndex == arrayIndex)
+			return true;
+	}
+
+	return false;
+}
+
+
 void Mesh::Merge(Mesh *mesh)
 {
 	if (mesh == NULL)
@@ -1209,6 +1345,14 @@ void Mesh::Merge(Mesh *mesh)
 			newFace->mMaterial = face->mMaterial;
 			newFace->mSmoothingGroup = face->mSmoothingGroup;
 
+			{
+				uint32 j;
+				foreach (face->mIndices, j)
+				{
+					newFace->AppendVertex(transV[face->mIndices[j]]);
+				}
+			}
+
 #if 0 // atm only vertex normals allowed
 			if (face->mFlags & Face::fPolyMappedNormals)
 			{
@@ -1233,12 +1377,6 @@ void Mesh::Merge(Mesh *mesh)
 					mesh->GetTexCoord(idx, uvw);
 					newFace->AppendTexCoord(CreateTexCoord(uvw));
 				}
-			}
-
-			uint32 j = 0;
-			foreach (face->mIndices, j)
-			{
-				newFace->AppendVertex(transV[face->mIndices[j]]);
 			}
 		}
 	}
@@ -1497,28 +1635,6 @@ void Mesh::SetGroupsFaceSelected(uint32 groups)
 		if (face && groups & face->mSmoothingGroup)
 		{
 			face->mFlags |= Face::fSelected;
-		}
-	}
-}
-
-
-void Mesh::VertexCleanup()
-{
-	RebuildVertexPolygonReferences();
-	Vertex **array = mVertices.get_array();
-	Vertex *vert;
-
-    for (uint32 v = 0, vn = GetVertexCount(); v < vn; ++v)
-	{
-		vert = array[v];
-
-		if ( vert && vert->GetFaceRefs().size() == 0)
-		{
-			array[v] = NULL;			
-			mFreedVertices.push(vert->mVertexIndex);
-			mFreedTexCoords.push(vert->mTexCoordIndex);
-			mFreedNormals.push(vert->mNormalIndex);
-			delete vert;
 		}
 	}
 }

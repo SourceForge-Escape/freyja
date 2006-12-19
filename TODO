@@ -25,6 +25,11 @@
 		- <Mongoose> leileiloll: but you'd like a built-in 'snap-weld' vertices?
 
 
+	* Misc
+		- Stiching mode for making faces from existing vertices
+			- This is an old 'Fan favorite' feature of freyja 
+		- Mesh parenting and grouping?
+
 	* To be finalized
 		- Track and Keyframe classes 
 			- Keyframe vector issue
