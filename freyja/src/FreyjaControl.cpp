@@ -4171,7 +4171,7 @@ bool FreyjaControl::CopySelectedObject()
 
 			if (m)
 			{
-				if (mCopyMeshes.size() == 0)
+				if (mCopyMeshes.size() == 0 || mCopyMeshes[0] == NULL)
 				{ 
 					// FIXME: ATM only allowing copy of one mesh at a time
 					if (!mCopyMeshes.size())
@@ -4244,6 +4244,10 @@ void FreyjaControl::DeleteSelectedObject()
 
 	case tFace:
 		freyjaMeshPolygonDelete(GetSelectedMesh(), GetSelectedFace());
+		break;
+
+	case tSelectedFaces:
+		eSelectedFacesDelete();
 		break;
 
 #if 0
