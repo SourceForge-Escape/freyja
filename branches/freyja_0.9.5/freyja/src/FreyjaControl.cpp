@@ -4154,7 +4154,7 @@ bool FreyjaControl::MergeSelectedObjects()
 	return true;
 }
 
-
+Vector<Mesh *> mCopyMeshes;
 bool FreyjaControl::CopySelectedObject()
 {
 	switch (mObjectMode)
@@ -4167,11 +4167,23 @@ bool FreyjaControl::CopySelectedObject()
 
 	case tMesh:
 		{
-			index_t id = freyjaMeshCopy(GetSelectedMesh());
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 
-			if (id != INDEX_INVALID)
+			if (m)
 			{
-				SetSelectedMesh(id);
+				if (mCopyMeshes.size() == 0)
+				{ 
+					// FIXME: ATM only allowing copy of one mesh at a time
+					if (!mCopyMeshes.size())
+						mCopyMeshes.push_back(NULL);
+
+					mCopyMeshes[0] = new Mesh(*m);
+					freyja_print("Copied mesh (%i)...", GetSelectedMesh());
+				}
+				else
+				{
+					freyja_print("The mesh copy buffer is already full...");
+				}
 			}
 		}
 		break;
@@ -4195,11 +4207,21 @@ bool FreyjaControl::PasteSelectedObject()
 	case tSelectedVertices:
 		return PasteSelectedMesh(); // vertexbuffercopy shares buf
 		break;
+#endif
 
 	case tMesh:
-		return pasteSelectedMesh();
+		{
+			uint32 i;
+			foreach (mCopyMeshes, i)
+			{
+				if (mCopyMeshes[i])
+					mCopyMeshes[i]->AddToPool();
+
+				mCopyMeshes[i] = NULL;
+			}
+		}
 		break;
-#endif
+
 
 	default:
 		freyja_print("%s(): type '%s' is not supported.", 
@@ -4247,6 +4269,7 @@ void FreyjaControl::DeleteSelectedObject()
 			ActionModelModified(new ActionMeshDelete(GetSelectedMesh()));
 		}
 		freyjaMeshDelete(GetSelectedMesh());
+		freyja_print("Deleted mesh (%i)...", GetSelectedMesh());
 		break;
 
 	default:

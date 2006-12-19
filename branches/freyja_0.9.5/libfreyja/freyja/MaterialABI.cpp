@@ -386,12 +386,12 @@ index_t freyjaGetMaterialFlags(index_t materialIndex)
 }
 
 
-index_t freyjaGetMaterialShader(index_t materialIndex)
+index_t freyjaGetMaterialShader(index_t material)
 {
-	if (materialIndex < gFreyjaMaterials.size())
+	if (material < gFreyjaMaterials.size())
 	{
-		if (gFreyjaMaterials[materialIndex])
-			return gFreyjaMaterials[materialIndex]->mShaderId;
+		if (gFreyjaMaterials[material])
+			return gFreyjaMaterials[material]->mShaderId;
 	}	
 
 	return 0; // Never pass shader system a huge number, use default 'off'

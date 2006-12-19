@@ -381,7 +381,6 @@ public:
 	 *        Clears old fRayHit results on all other vertices.
 	 ------------------------------------------------------*/
 
-
 	bool IntersectFaces(Ray &r, int &face0, bool markAll);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -519,6 +518,7 @@ public:
 	 *        If you want to add use the AddToPool() method.
 	 ------------------------------------------------------*/
 
+	// In case you can't tell these are no longer implemented
 	Mesh *CsgUnion(Mesh *a) { return NULL; }
 	Mesh *CsgIntersection(Mesh *a) { return NULL; }
 	Mesh *CsgDifference(Mesh *a) { return NULL; }
@@ -606,7 +606,19 @@ public:
 	 * Pre  :  
 	 * Post : Extrudes <face> along vector <displacement>
 	 ------------------------------------------------------*/
-	
+
+	void CheckArrayRefs(index_t vertex, bool &v, 
+						index_t normal, bool &n,
+						index_t texcoord, bool &t);	
+	bool CheckNormalArrayRefs(index_t arrayIndex);
+	bool CheckTexCoordArrayRefs(index_t arrayIndex);
+	bool CheckVertexArrayRefs(index_t arrayIndex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns true if array index is being referenced.
+	 *
+	 ------------------------------------------------------*/
+
 	void RemoveWeightSelectedVertices(index_t bone)
 	{
 		for (int32 i = mVertices.size()-1; i > -1; --i)
@@ -1249,6 +1261,13 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	void DeleteVertexHelper(Vertex **array, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : This is called by methods that also do ref fixing.
+	 *
+	 ------------------------------------------------------*/
 
 	bool SerializePool(SystemIO::FileReader &r, 
 					   Vector<vec_t> &v, mstl::stack<index_t> &s);
