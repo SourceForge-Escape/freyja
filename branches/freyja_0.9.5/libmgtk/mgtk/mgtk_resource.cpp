@@ -37,22 +37,7 @@
 #include "mgtk_resource.h"
 #include "mgtk_events.h"
 
-#define ACCEL_SUPPORT_ON
-#define EXTEND_FILE_TEST
-
-// Arg list types for Resource use
-#define ARG_GTK_WIDGET           64
-#define ARG_GTK_BOX_WIDGET       128
-#define ARG_GTK_WINDOW           256
-#define ARG_GTK_MENU_WIDGET      1024
-#define ARG_GTK_NOTEBOOK         2048
-#define ARG_GTK_TOOLBOX_WIDGET   4096
-
-
 using namespace mstl;
-
-Map<long, GtkWidget *> gFileDialogWidgetMap;
-Map<long, GtkWidget *> gFileDialogPatternWidgetMap;
 
 
 // Could use mlisp to replace this, but let's not go there for this
@@ -340,7 +325,6 @@ char *mgtk_rc_map(char *filename_or_dirname)
 
 /* Mongoose 2004.10.28, 
  * These are the only gobals that should be used here */
-//GtkWidget *GTK_FILESELECTION_DROP_DOWN_MENU = 0x0;
 GtkWidget *GTK_MAIN_WINDOW = 0x0;
 GtkWidget *GTK_GL_AREA_WIDGET = 0x0;
 GtkWidget *GTK_STATUS_BAR_WIDGET = 0x0;
@@ -351,289 +335,17 @@ GtkWidget *mgtk_get_application_window()
 	return GTK_MAIN_WINDOW;
 }
 
+
 GtkWidget *mgtk_get_gl_widget()
 {
 	return GTK_GL_AREA_WIDGET;
 }
 
+
 GtkWidget *mgtk_get_statusbar_widget()
 {
 	return GTK_STATUS_BAR_WIDGET;
 }
-
-
-GtkWidget *mgtk_get_fileselection_pattern_widget(int event)
-{
-	return gFileDialogPatternWidgetMap[event];
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-// File chooser init
-///////////////////////////////////////////////////////////////////////////
-
-void mgtk_filechooser_spawn_event(GtkWidget *widget, gpointer user_data)
-{
-	GtkWidget *dialog = gFileDialogWidgetMap[GPOINTER_TO_INT(user_data)];
-
-	DEBUG_MSG("%p %i\n", widget, user_data, dialog);
-
-	if (dialog)
-		gtk_widget_show_all(dialog);
-}
-
-void mgtk_filechooser_close_event(GtkWidget *widget, gpointer user_data)
-{
-	GtkWidget *dialog = gFileDialogWidgetMap[GPOINTER_TO_INT(user_data)];
-
-	DEBUG_MSG("%p %i %p\n", widget, user_data, dialog);
-
-	if (dialog)
-		gtk_widget_hide_all(dialog);
-}
-
-
-GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
-{
-	GtkWidget *dialog = gFileDialogWidgetMap[event];
-
-	if (dialog)
-		return dialog;
-
-	/* Didn't find it created, so create and then link it */
-	dialog = mgtk_create_filechooser(event, title);
-	gFileDialogWidgetMap.Add(event, dialog);
-
-	/*Hide on calls to close */
-	gtk_signal_connect(GTK_OBJECT(dialog), "close",
-					   GTK_SIGNAL_FUNC(mgtk_filechooser_close_event), 
-					   GINT_TO_POINTER(event));
-
-	/* Hide on window manager calls to close */
-	gtk_signal_connect(GTK_OBJECT(dialog), "delete_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_cancel), 
-					   GINT_TO_POINTER(event));
-
-
-	/* 'Home' directory links */
-	char *path = mgtk_rc_map("/");
-		
-	if (path)
-	{
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
-		gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), path, NULL);
-		delete [] path;
-	}
-
-
-	/* Uber string options */
-	const char *buffer = option;
-	long len = strlen(buffer), state = 0;
-	char symbol[64];
-	char value[64];
-
-	for (long i = 0, j = 0; i < len; ++i)
-	{
-		if (j == 63) j = 0;
-		
-		switch ( state )
-		{
-		case 0:
-			if (buffer[i] == '=')
-			{
-				state = 1;
-				j = 0;
-			}
-			else
-			{
-				symbol[j++] = buffer[i];
-				symbol[j] = 0;
-			}
-			break;
-			
-		case 1:
-			if (buffer[i] == ',' || !buffer[i])
-			{
-				state = j = 0;
-				
-				if (strcmp(symbol, "mode") == 0)
-				{
-					if (strcmp(value, "save") == 0)
-					{
-						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
-													GTK_FILE_CHOOSER_ACTION_SAVE);
-					}
-					else if (strcmp(value, "open") == 0)
-					{
-						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
-													GTK_FILE_CHOOSER_ACTION_OPEN);
-					}
-					else if (strcmp(value, "select-folder") == 0)
-					{
-						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
-													GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-					}
-					else if (strcmp(value, "create-folder") == 0)
-					{
-						gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dialog), 
-													GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER);
-					}
-				}
-				else if (strcmp(symbol, "confirm-overwrite") == 0)
-				{
-					if (strcmp(value, "true") == 0)
-					{
-#ifndef WIN32 // FIXME: Doesn't seem to have this feature in win32 env build
-						gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
-#endif
-					}
-				}
-			}
-			else
-			{
-				value[j++] = buffer[i];
-				value[j] = 0;
-			}
-			break;
-		}
-	}
-
-	return dialog;
-}
-
-
-void mgtk_callback_free_image_data(guchar *pixels, gpointer data)
-{
-	if (pixels)
-		delete [] (unsigned char *)pixels;
-}
-
-
-#ifndef USE_OLD_FILE_SELECTION_WIDGET
-void mgtk_update_filechooser_preview(GtkFileChooser *file_chooser, 
-									 gpointer data)
-{
-	GtkWidget *preview = GTK_WIDGET(data);
-	char *filename = gtk_file_chooser_get_preview_filename(file_chooser);
-
-	/*
-	pixbuf = gdk_pixbuf_new_from_data(const guchar *image,
-									  GdkColorspace colorspace,
-									  gboolean has_alpha,
-									  int bits_per_sample,
-									  int width,
-									  int height,
-									  int rowstride,
-									  GdkPixbufDestroyNotify destroy_fn,
-									  gpointer destroy_fn_data);
-	*/
-	unsigned char *image;
-	int width, height;
-
-	mgtk_callback_get_image_data_rgb24(filename, &image, &width, &height);
-	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(image, 
-												 GDK_COLORSPACE_RGB, FALSE, 8,
-												 width, height, width*3, 
-												 mgtk_callback_free_image_data,
-												 data);
-	gboolean have_preview = (pixbuf != NULL);
-	g_free(filename);
-
-	gtk_image_set_from_pixbuf(GTK_IMAGE(preview), pixbuf);
-
-	if (pixbuf)
-	{
-		gdk_pixbuf_unref(pixbuf);
-	}
-
-	gtk_file_chooser_set_preview_widget_active(file_chooser, have_preview);
-}
-#endif
-
-
-GtkWidget *mgtk_get_fileselection_widget(int event)
-{
-	GtkWidget *file = gFileDialogWidgetMap[event];
-	char *path;
-
-	if (!file)
-	{
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-		file = mgtk_create_fileselection(event, "Select file");
-#else
-		file = mgtk_create_filechooser(event, "Select file");
-#endif
-
-		gFileDialogWidgetMap.Add(event, file);
-
-		path = mgtk_rc_map("/");
-		
-		if (path)
-		{
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-			gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), path);
-#else
-			gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(file), path);
-			gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(file), path,
-												 NULL);
-			gtk_file_chooser_set_action(GTK_FILE_CHOOSER(file), GTK_FILE_CHOOSER_ACTION_SAVE);
-#endif
-			delete [] path;
-		}
-
-#ifdef EXTEND_FILE_TEST
-#   ifdef USE_OLD_FILE_SELECTION_WIDGET
-		GtkWidget *homeButton;
-		GtkWidget *vbox = GTK_FILE_SELECTION(file)->main_vbox;
-
-		GtkWidget *hbox = mgtk_create_hbox(vbox, "hbox", 0, 0, 0, 0, 0);
-
-		homeButton = gtk_button_new_with_label("Home");
-		gtk_widget_ref(homeButton);
-		gtk_object_set_data_full(GTK_OBJECT(hbox), 
-								 "home_button", homeButton,
-								 (GtkDestroyNotify)gtk_widget_unref);
-		gtk_widget_show(homeButton);
-		gtk_box_pack_start(GTK_BOX(hbox), homeButton, TRUE, TRUE, FALSE);
-		
-		gtk_signal_connect(GTK_OBJECT(homeButton), "pressed",
-						   GTK_SIGNAL_FUNC(mgtk_event_fileselection_homedir), 
-						   GINT_TO_POINTER(file));
-
-		GtkWidget *optionmenu = gtk_option_menu_new();
-		gtk_widget_ref(optionmenu);
-		gtk_object_set_data_full(GTK_OBJECT(hbox), "optionmenu", optionmenu,
-								 (GtkDestroyNotify)gtk_widget_unref);
-		gtk_widget_show(optionmenu);
-		gtk_box_pack_start(GTK_BOX(hbox), optionmenu, TRUE, TRUE, 0);
-
-		GtkWidget *optionmenu_menu = gtk_menu_new();
-		gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
-		//mgtk_event_subscribe_gtk_widget(0, optionmenu);
-		GTK_FILESELECTION_DROP_DOWN_MENU = optionmenu_menu;
-
-		GtkWidget *sep = gtk_menu_item_new();
-		gtk_menu_append(GTK_MENU(GTK_FILESELECTION_DROP_DOWN_MENU), sep);
-		gtk_widget_show(sep);
-		gtk_widget_set_usize(sep, 164, 1);
-#   else
-		//GtkWidget *vbox = GTK_DIALOG(file)->vbox;
-		GtkWidget *preview;
-
-		preview = gtk_image_new();
-		gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(file), preview);
-		g_signal_connect(file, "update-preview",
-						 G_CALLBACK (mgtk_update_filechooser_preview), preview);
-#   endif
-#endif
-	}
-
-	return file;
-}
-
-
-
-/////////////////////////////////////////////////////////////
 
 
 void mgtk_application_window_fullscreen()
@@ -1101,81 +813,6 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 	delete_arg(&help);
 	delete_arg(&event);
 	delete_arg(&cmd);
-
-	return ret;
-}
-
-
-
-// (filechoosertoolbar_button "icon" "name" "tooltip" "Title..." eEvent "your_mgtk_rc_pattern_callback") 
-arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
-{
-	arg_list_t *ret = NULL, *icon, *label, *help, *title, *event, *options;
-	GtkWidget *button;
-
-	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
-
-	if (!box)
-	{
-		return NULL;
-	}
-
-	symbol_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == CSTRING");
-	
-	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
-	
-	symbol_enforce_type(&help, CSTRING);
-	MSTL_ASSERTMSG(help, "help == CSTRING");
-	
-	symbol_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == CSTRING");
-	
-	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
-	
-	symbol_enforce_type(&options, CSTRING);
-	MSTL_ASSERTMSG(options, "options == CSTRING");
-			
-	if (icon && label && help && title && event && options)
-	{
-		// FIXME: Should be removed and replaced with lisp function
-		char icon_filename[1024];
-
-		if (!strncmp(get_string(icon), "gtk", 3))
-		{
-			strncpy(icon_filename, get_string(icon), 1024);
-			icon_filename[1023] = 0;
-		}
-		else
-		{
-			mgtk_get_pixmap_filename(icon_filename, 1024, get_string(icon));
-			icon_filename[1023] = 0;
-		}
-
-		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(options));
-
-		button =
-		mgtk_create_toolbar_button((GtkWidget *)box->data, icon_filename, 
-								   get_string(label), get_string(help),
-								   NULL, GPOINTER_TO_INT(get_int(event)));
-		
-
-		gtk_signal_connect(GTK_OBJECT(button), "pressed",
-						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
-						   GINT_TO_POINTER(get_int(event)));
-
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
-	}
-
-	delete_arg(&icon);
-	delete_arg(&label);
-	delete_arg(&help);
-	delete_arg(&title);
-	delete_arg(&event);
-	delete_arg(&options);
 
 	return ret;
 }
@@ -2285,12 +1922,22 @@ GtkWidget *append_toolbar_button(GtkWidget *box, GtkWidget *toolbar,
 
 
 	toolbar_icon = gtk_image_new_from_stock(stockId, size);
+
+#if USE_DEP_GTK_TOOLBAR
 	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
 										GTK_TOOLBAR_CHILD_BUTTON,
 										NULL,
 										name,
 										NULL, NULL,
 										toolbar_icon, NULL, NULL);
+#else
+	GtkToolItem *item = gtk_tool_button_new(toolbar_icon,
+											(!name[0]) ? NULL : name);
+	gtk_widget_show(toolbar_icon);
+	button = (GtkWidget *)item;
+	gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, NULL, NULL);
+#endif
+
 	gtk_widget_ref(button);
 	gtk_object_set_data_full(GTK_OBJECT(box), buttonId, button,
 							 (GtkDestroyNotify)gtk_widget_unref);
@@ -2353,276 +2000,9 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 }
 
 
-// Hacky extention
-arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box)
-{
-	arg_list_t *event, *ret = NULL;
-	
-	mgtk_print("fileselection_drop_down_menu entry");
-
-	event = symbol();
-	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
-
-	GtkWidget *dd = event ? gFileDialogPatternWidgetMap[get_int(event)] : NULL;
-	MSTL_ASSERTMSG(dd, "fileselection_drop_down_menu != NULL");
-
-	if (!dd)
-	{
-		return NULL;
-	}
-
-	new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)dd);
-	delete_arg(&event);
-
-	return ret;
-}
-
-
-// (filechooser* ... "Title..." eEvent "your_mgtk_rc_pattern_callback") 
-// (filechooserbutton "Button label" "Title..." eFileDialogEvent "your_mgtk_rc_pattern_callback") 
-arg_list_t *mgtk_rc_filechooserbutton(arg_list_t *box)
-{
-	arg_list_t *label, *event, *title, *pattern_func, *ret = NULL;
-
-	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET); // ARG_GTK_BOX_WIDGET
-
-	if (!box)
-	{
-		MSTL_ASSERTMSG("mgtk_rc_filechooserbutton", "container == ARG_GTK_BOX_WIDGET");
-		return NULL;
-	}
-
-	label = symbol();
-	arg_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
-
-	title = symbol();
-	arg_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == STRING");
-
-	event = symbol();
-	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
-
-	pattern_func = symbol();
-	arg_enforce_type(&pattern_func, CSTRING);
-	MSTL_ASSERTMSG(pattern_func, "pattern_func == CSTRING");
-
-	if (label && title && event && pattern_func)
-	{
-		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(pattern_func));
-
-		GtkWidget *item = gtk_button_new_with_label(get_string(label));
-		gtk_widget_ref(item);
-		gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)box->data), 
-								 "filechooserbutton1", item,
-								 (GtkDestroyNotify)gtk_widget_unref);
-		gtk_widget_show(item);
-
-		gtk_box_pack_start(GTK_BOX((GtkWidget *)box->data), 
-								 item, TRUE, TRUE, 0);
-
-		gtk_signal_connect(GTK_OBJECT(item), "pressed",
-						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
-						   GINT_TO_POINTER(get_int(event)));
-		
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_WIDGET
-	}
-
-	delete_arg(&label);
-	delete_arg(&title);
-	delete_arg(&event);
-	delete_arg(&pattern_func);
-
-	return ret;
-}
-
-
 ////////////////////////////////////////////////////////////////
 // Gtk+ menu widgets
 ////////////////////////////////////////////////////////////////
-
-// (filechoosermenu_item "Label" "Title..." [F1] eFileDialogEvent "your_mgtk_rc_pattern_callback" "icon") 
-arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
-{
-	GtkWidget *item;
-	arg_list_t *ret = NULL;
-
-	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
-
-	if (!menu)
-	{
-		return NULL;
-	}
-
-	arg_list_t *text = symbol();
-	arg_enforce_type(&text,  CSTRING);
-	MSTL_ASSERTMSG(text, "text == STRING");
-
-	arg_list_t *title = symbol();
-	arg_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == STRING");
-
-	// Accel is optional
-	arg_list_t *accel = symbol();
-	arg_list_t *event;
-
-	if (accel->type == CSTRING)
-	{
-		event = symbol();
-	}
-	else
-	{
-		event = accel;
-		accel = 0x0;
-	}
-
-	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
-
-	arg_list_t *pattern_func = symbol();
-	arg_enforce_type(&pattern_func, CSTRING);
-	MSTL_ASSERTMSG(pattern_func, "pattern_func == CSTRING");
-
-	arg_list_t *icon = symbol();
-	arg_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == STRING");
-
-	if (text && event && pattern_func && icon)
-	{
-		item = gtk_image_menu_item_new_with_mnemonic((char *)text->data);
-		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item),
-									  mgtk_create_icon((char *)icon->data, 
-													   GTK_ICON_SIZE_MENU));
-
-#ifdef ACCEL_SUPPORT_ON
-		if (accel != 0 &&
-			accel->data != 0 &&
-			((char *)accel->data)[0] != 0)
-		{  
-			GtkAccelGroup *accel_group;
-			unsigned int i, len, key, mod;
-			char *s = (char *)(accel->data);
-			
-			mgtk_print("Key accel %s", (char *)(accel->data));
-			
-			len = strlen(s);
-			
-			for (mod = 0, i = 0; i < len; ++i)
-			{
-				switch (s[i])
-				{
-				case 'C':
-					mod |= GDK_CONTROL_MASK;
-					break;
-				case 'S':
-					mod |= GDK_SHIFT_MASK;
-					break;
-				case 'M':
-					mod |= GDK_MOD1_MASK;
-					break;
-				case 'E':
-					key = GDK_Return;
-					
-					i = len + 8;
-					break;
-				case 'F':
-					switch (s[i+1])
-					{
-					case '1':
-						switch (s[i+2])
-						{
-						case '0':
-							key = GDK_F10;
-							break;
-						case '1':
-							key = GDK_F11;
-							break;
-						case '2':
-							key = GDK_F12;
-							break;
-						default:
-							key = GDK_F1;
-							break;
-						}
-						break;
-					case '2':
-						key = GDK_F2;
-						break;
-					case '3':
-						key = GDK_F3;
-						break;
-					case '4':
-						key = GDK_F4;
-						break;
-					case '5':
-						key = GDK_F5;
-						break;
-					case '6':
-						key = GDK_F6;
-						break;
-					case '7':
-						key = GDK_F7;
-						break;
-					case '8':
-						key = GDK_F8;
-						break;
-					case '9':
-						key = GDK_F9;
-						break;
-					}
-					
-					i = len + 8;
-					break;
-				case '-':
-					break;
-				default:
-					key = gdk_unicode_to_keyval(s[i]);
-					break;
-				}
-			}
-				
-			/* Add code here to translate accel string to GDK key / mods */
-
-			accel_group = gtk_accel_group_new();
-			
-			// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
-
-			gtk_widget_add_accelerator(item, "activate", 
-									   accel_group,
-									   key, (GdkModifierType)mod,
-									   GTK_ACCEL_VISIBLE);
-			
-			gtk_window_add_accel_group(GTK_WINDOW(mgtk_get_application_window()),
-									   accel_group);
-		}
-#endif
-
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
-		
-		gtk_menu_append(GTK_MENU(menu->data), item);
-		gtk_widget_show(item);
-		
-
-		gtk_signal_connect(GTK_OBJECT(item), "activate",
-						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
-						   GINT_TO_POINTER(get_int(event)));
-
-		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(pattern_func));
-	}
-
-	delete_arg(&text);
-	delete_arg(&title);
-	delete_arg(&event);
-	delete_arg(&accel);
-	delete_arg(&pattern_func);
-	delete_arg(&icon);
-
-	return ret;
-}
-
 
 arg_list_t *mgtk_rc_menu_seperator(arg_list_t *container)
 {

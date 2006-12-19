@@ -5811,7 +5811,6 @@ void FreyjaControl::LoadResource()
 	freyjaPluginsInit();
 
 	{
-		extern void mgtk_add_menu_item(char *text, long event);
 		// yes, you can even query eventIds for even func binds
 		int loadEventId = GetEventIdByName("eOpenModel");
 		int saveEventId = GetEventIdByName("eSaveModel");

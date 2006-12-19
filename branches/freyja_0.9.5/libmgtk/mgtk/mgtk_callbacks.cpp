@@ -625,38 +625,6 @@ int mgtk_event_set_range(int event, unsigned int value,
 }
 
 
-void mgtk_gtk_event_fileselection_pattern(GtkWidget *widget, gpointer data)
-{
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-	mgtk_event_fileselection_pattern((char*)data);
-#else
-#endif
-}
-
-
-void mgtk_event_fileselection_pattern(int event, char *pattern)
-{
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-
-	gtk_file_selection_complete(GTK_FILE_SELECTION(file), pattern);
-#else
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(file), 
-								gtk_file_chooser_get_filter(GTK_FILE_CHOOSER(file)));
-#endif
-}
-
-
-void mgtk_event_file_dialog(int event, char *title)
-{
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-	
-	gtk_window_set_title(GTK_WINDOW(file), title);
-	gtk_widget_show(file);
-}
-
-
 //////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////
@@ -923,23 +891,6 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 	gl_state->mouse_y = y;
 	mgtk_handle_motion(x, y);
 	mgtk_refresh_glarea(widget);
-}
-
-
-void mgtk_event_fileselection_homedir(GtkWidget *file, void *data)
-{
-	char *path = mgtk_rc_map("/");
-	
-	if (path)
-	{
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-		gtk_file_selection_set_filename(GTK_FILE_SELECTION(data), path);
-#else
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(data), path);
-#endif
-
-		delete [] path;
-	}
 }
 
 
@@ -1237,140 +1188,6 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 		return;
 
 	mgtk_handle_command2i(e1, e2);
-}
-
-
-////////////////////////////////////////////////////////////////
-// File dialog support func
-////////////////////////////////////////////////////////////////
-
-void mgtk_event_fileselection_append_pattern(int event, char *label, char *pattern)
-{
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-	GtkWidget *menu = mgtk_get_fileselection_pattern_widget(event);
-	GtkWidget *item;
-
-
-	if (!menu)
-	{
-		mgtk_print("mgtk_event_fileselection_append_pattern> failed to append '%s':'%s'", label, pattern);
-		return;
-	}
-
-	item = gtk_image_menu_item_new_with_label(label);	
-	gtk_menu_append(GTK_MENU(menu), item);
-	gtk_widget_show(item);
-
-	gtk_signal_connect(GTK_OBJECT(item), "activate",
-					   GTK_SIGNAL_FUNC(mgtk_gtk_event_fileselection_pattern), 
-					   (gpointer)pattern);
-
-#else
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-	GtkFileFilter *filter = gtk_file_filter_new();
-	gtk_file_filter_add_pattern(filter, (char*)pattern);
-	gtk_file_filter_set_name(filter, (char*)label);
-	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file), filter);
-#endif
-}
-
-
-void mgtk_add_menu_item(int eventId, char *text, long event)
-{
-	GtkWidget *dropdown = mgtk_get_fileselection_pattern_widget(eventId);
-
-	if (!dropdown)
-	{
-		DEBUG_MSG("%s %p\n", text, dropdown);
-		return;
-	}
-
-	GtkWidget *item;
-	extern void *rc_gtk_event_func(int event);
-	void *agtk_event;
-
-	item = gtk_image_menu_item_new_with_mnemonic(text);		
-	gtk_menu_append(GTK_MENU(dropdown), item);
-	gtk_widget_show(item);
-		
-	agtk_event = rc_gtk_event_func(event);
-
-	if (agtk_event)
-	{
-		gtk_signal_connect(GTK_OBJECT(item), "activate",
-						   GTK_SIGNAL_FUNC(agtk_event), 
-						   GINT_TO_POINTER(event));
-	}
-}
-
-void mgtk_event_fileselection_action(int event)
-{
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-	char *filename;
-
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-	filename = (char *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(file));
-#else
-	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
-#endif
-
-	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
-		mgtk_handle_text(event, filename);
-
-	gtk_widget_hide(file);
-}
-
-
-void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
-{
-	GtkWidget *file = mgtk_get_fileselection_widget(GPOINTER_TO_INT(user_data));
-	char *filename;
-
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-	filename = (char *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(file));
-#else
-	filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
-#endif
-
-	int event = GPOINTER_TO_INT(user_data);
-
-	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
-		mgtk_handle_text(event, filename);
-
-	gtk_widget_hide(file);
-}
-
-
-void mgtk_event_filechooser_cancel(GtkWidget *widget, gpointer user_data)
-{
-	GtkWidget *file = mgtk_get_fileselection_widget(GPOINTER_TO_INT(user_data));
-
-	if (file)
-		gtk_widget_hide(file);
-}
-
-
-void mgtk_event_fileselection_cancel(int event)
-{
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-	gtk_widget_hide(file);
-}
-
-
-void mgtk_event_fileselection_set_dir(int event, char *dir)
-{
-	GtkWidget *file = mgtk_get_fileselection_widget(event);
-	
-	if (!dir || !dir[0])
-	{
-		return;
-	}
-
-#ifdef USE_OLD_FILE_SELECTION_WIDGET
-	gtk_file_selection_set_filename(GTK_FILE_SELECTION(file), dir);
-#else
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(file), dir);
-#endif
 }
 
 
