@@ -23,7 +23,11 @@
 
 	* Misc
 		- Stiching mode for making faces from existing vertices
-			- This is an old 'Fan favorite' feature of freyja 
+			- This is an old 'Fan favorite' feature of freyja
+			- Stiching existing vertices should be a seperate mode
+			- This new implementation will use control points and a quad/tri
+			  strip mode for the control point renderer to avoid writes to mesh
+			- Have the user press <ctrl> mouse2 to generate the polygons
 		- Mesh parenting and grouping?
 
 	* To be finalized

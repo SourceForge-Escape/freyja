@@ -92,31 +92,27 @@ class String
 		return *this;
 	}
 
+	char &operator [] (unsigned int i) { return mString[i]; }
 
-	String &operator+=(const String &s)
-	{
-		return *this = *this + s;
-	}
+	String &operator+=(const String &s) { return *this = *this + s; }
 
+	bool operator!=(const char *s) { return ( Strcmp(s) != 0 );	}
+	bool operator!=(const String &s) { return ( Strcmp(s.mString) != 0 ); }
 
-	bool operator==(const char *s)
-	{
-		if (s == NULL || c_str() == NULL)
-			return ( s == NULL && c_str() == NULL );
+	bool operator==(const char *s) { return ( Strcmp(s) == 0 );	}
+	bool operator==(const String &s) { return ( Strcmp(s.mString) == 0 );	}
 
-		return ( strcmp(s, c_str()) == 0 );
-	}
+	bool operator<(const String &s) { return ( Strcmp(s.mString) == -1 ); }
+	bool operator<(const char *s) { return ( Strcmp(s) == -1 ); }
 
+	bool operator<=(const String &s)	{ return ( Strcmp(s.mString) <= 0 ); }
+	bool operator<=(const char *s) { return ( Strcmp(s) <= 0 ); }
 
-#if 0
-	bool operator==(const String &s)
-	{
-		if (s.c_str() == NULL || c_str() == NULL)
-			return ( s.c_str() == NULL && c_str() == NULL );
+	bool operator>(const String &s) { return ( Strcmp(s.mString) == 1 ); }
+	bool operator>(const char *s) { return ( Strcmp(s) == 1 ); }
 
-		return ( strcmp(s.c_str(), c_str()) == 0 );
-	}
-#endif
+	bool operator>=(const String &s) { return ( Strcmp(s.mString) >= 0 ); }
+	bool operator>=(const char *s) {	return ( Strcmp(s) >= 0 ); }
 
 	String operator+(const String &s)
 	{
@@ -130,12 +126,6 @@ class String
 		delete [] tmp;
 
 		return s2;
-	}
-
-
-	char &operator [] (unsigned int i)
-	{
-		return mString[i];
 	}
 
 
@@ -198,6 +188,22 @@ class String
 			mLength = strlen(buf);
 			mString = String::Strdup(buf);
 		}
+	}
+
+
+	int Strcmp(const char *s)
+	{
+		// Don't assume strlen can handle NULL or even empty strings
+		size_t len = (s == NULL || s[0] == '\0') ? 0 : strlen(s);
+
+		if (len == 0 || mLength == 0)
+		{
+			return ( ( !len && !mLength ) ? 0 :	( ( !mLength ) ? -1 : 1 ) );
+		}
+
+		len = ( len < mLength ) ? len : mLength;
+
+		return strncmp(c_str(), s, len);
 	}
 
 
