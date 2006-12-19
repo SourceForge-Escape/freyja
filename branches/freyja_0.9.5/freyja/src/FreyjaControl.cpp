@@ -2264,6 +2264,7 @@ bool FreyjaControl::event(int command)
 						 __FILE__, __LINE__, __func__);
 			break;
 		case eScheme_Model:
+#if 1
 			if (mCleared) // safety
 			{
 				freyja_print("We don't save empty files anymore");
@@ -2289,6 +2290,7 @@ bool FreyjaControl::event(int command)
 					}
 				}
 			}
+#endif
 			break;
 
 		case eScheme_Material:
@@ -2341,7 +2343,7 @@ bool FreyjaControl::event(int command)
 		}
 		break;
 
-
+#if 1
 	case eSaveFileModel:
 		if (mCleared) // safety
 		{
@@ -2364,6 +2366,7 @@ bool FreyjaControl::event(int command)
 			}
 		}
 		break;
+#endif
 
 	case eOpenFileModel:
 		if (!mCleared)
@@ -6146,10 +6149,16 @@ void eOpenModel(char *filename)
 
 void eSaveModel(char *filename)
 {
-	//MSTL_ASSERTMSG(false, "Breakpoint");
+	static mstl::String s = "fuck gtk bugs";
+
+	if (s == filename)
+	{
+		return;
+	}
 
 	if (FreyjaControl::mInstance->SaveModel(filename))
 	{
+		s = filename;
 		char title[1024];
 		snprintf(title, 1024, "%s - Freyja", filename);
 		freyja_set_main_window_title(title);

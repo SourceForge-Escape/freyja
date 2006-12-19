@@ -57,11 +57,6 @@
  * Multi-mesh .Ja v1 export is broken... use .Freyja export instead for now
 	- Fix will be using a pure serialized format .Ja v2 ( binary .Freyja )
 
- * Issue with overwrite in file dialog
-	- Often prompts to overwrite twice, since the event fires twice
-	- It shouldn't save and then save again!
-	- This is due to Gtk+ signal handling with the filedialog buttons.
-
  * Bone rotation
 	- Needs to be 'synced' to heirachry to make sense
 	- Doesn't work at all really with backend changes
