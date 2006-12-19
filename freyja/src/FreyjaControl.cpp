@@ -4247,7 +4247,14 @@ void FreyjaControl::DeleteSelectedObject()
 		break;
 
 	case tSelectedFaces:
-		eSelectedFacesDelete();
+		{		
+			Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+			
+			if (m)
+			{
+				m->DeleteSelectedFaces();
+			}
+		}
 		break;
 
 #if 0
