@@ -6,7 +6,8 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Fixed mesh copy/cut/paste
+ - Hooked up faces... delete to generic delete
+ - Fixed mesh copy/cut/paste ( single meshes only for now )
  - Merge selection fix, bounding vol update on merge, center update on vol delta
  - Fix Multimesh selection boxes 
  - Snap-weld distance in UI for vertices

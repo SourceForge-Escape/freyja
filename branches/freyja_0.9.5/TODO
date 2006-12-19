@@ -14,16 +14,12 @@
 		- Curve editor ( OpenGL UI based editor )
 			- Work OpenGLPrinter into main line build now for text support
 		- Timers for animation playback
-		- Make sure Vertex faceRefs are always synced via
-			- Mesh/Face functional interface
 		- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
 		- Make generic plugin interface for new UI control points
 		- Renable 'direct' vertex animation creation
 		  ( Letting the user move points in vertex mode )
 		- Ref weights from vertex to fix blending issues
 		- ZIP file based pak format for freyja format models w/ textures, etc
-		- <Mongoose> leileiloll: but you'd like a built-in 'snap-weld' vertices?
-
 
 	* Misc
 		- Stiching mode for making faces from existing vertices
@@ -34,19 +30,16 @@
 		- Track and Keyframe classes 
 			- Keyframe vector issue
 		- Add Meld/fMuted support for Vertex operations in Mesh
-		- Hook up faces... delete to generic icon event
 		- Add menu action to clamp texcoords on selected Mesh
-		- Fix all remaining mesh issues like uv editing, welds, and c/c/p
+		- Fix all remaining mesh issues like uv editing and manual welds
 		- Mesh::Merge() doesn't merge animations ( shouldn't matter for now )
 		- Mesh::WeldTexCoords() is non-functunal 
 		- Mesh::Serialize(...) for binary Files needs to be updated for format
-		- Mesh::FaceRemovalCleanup() stub to optional purge refcounted verts
 
 	* Skeletal animation
 		- Rework weight system to support zeroed weights and grouping
 		- Merge the two bone rendering systems once debugging is done
 		- Fix bone bind, bindtoworld setup in backend
-		- Joint/Bone tool that creates and connects to last on each click?
 
 
 
