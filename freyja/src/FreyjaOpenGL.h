@@ -23,6 +23,8 @@
 #ifndef GUARD__FREYJA_FREYJAOPENGL_H_
 #define GUARD__FREYJA_FREYJAOPENGL_H_
 
+#define WIN32_GL_EXT
+
 #ifdef HAVE_OPENGL
 #   ifdef MACOSX
 #      include <OpenGL/OpenGL.h>
