@@ -367,6 +367,13 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	}
 
 #ifdef USING_OPENGL_EXT
+	if (!h_glCreateProgramObjectARB || !h_glCreateShaderObjectARB ||
+		!h_glCompileShaderARB || !h_glLinkProgramARB || !h_glGetObjectParameterivARB || !h_glUseProgramObjectARB)
+	{
+		freyja_print("!Failed to aquire shader functions from OpenGL.");
+		return false;
+	}
+
 	// Get object handles
 	GLhandleARB program = h_glCreateProgramObjectARB();
 	GLhandleARB vertex = h_glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
@@ -438,8 +445,11 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 void OpenGL::BindFragmentGLSL(int32 fragmentId)
 {
 #ifdef USING_OPENGL_EXT
-	GLhandleARB prog = fragmentId;
-	h_glUseProgramObjectARB(prog);
+	if (h_glUseProgramObjectARB)
+	{
+		GLhandleARB prog = fragmentId;
+		h_glUseProgramObjectARB(prog);
+	}
 #endif
 }
 
@@ -447,8 +457,11 @@ void OpenGL::BindFragmentGLSL(int32 fragmentId)
 void OpenGL::DeleteFragmentGLSL(int32 obj)
 {
 #ifdef USING_OPENGL_EXT
-	GLhandleARB object = obj;
-	h_glDeleteObjectARB(object);
+	if (h_glDeleteObjectARB)
+	{
+		GLhandleARB object = obj;
+		h_glDeleteObjectARB(object);
+	}
 #endif
 }
 
@@ -456,6 +469,9 @@ void OpenGL::DeleteFragmentGLSL(int32 obj)
 void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 {
 #ifdef USING_OPENGL_EXT
+	if (h_glGetInfoLogARB == NULL)
+		return;
+
 	char buffer[2048];
 	GLhandleARB object = obj;
 	GLsizei maxLenght = 2048;
