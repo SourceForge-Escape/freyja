@@ -519,6 +519,22 @@ public:
 	{
 	}
 
+
+	VectorIterator(VectorIterator<Object> &it) :
+		mVector(it.mVector),
+		mIndex(it.mIndex)
+	{
+	}
+
+
+	VectorIterator<Object> &operator=(const VectorIterator<Object> &it)
+	{
+		mVector = it.mVector;
+		mIndex = it.mIndex;
+		return *this;
+	}
+
+
 	void start()
 	{
 		mIndex = mVector->begin();
