@@ -1268,7 +1268,7 @@ bool Mesh::CheckTexCoordArrayRefs(index_t arrayIndex)
 
 		if (f && f->mFlags & Face::fPolyMappedTexCoords)
 		{
-			uint j;
+			uint32 j;
 			foreach (f->mIndices, j)
 			{
 				if (f->mIndices[j] == arrayIndex)
