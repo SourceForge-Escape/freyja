@@ -35,6 +35,32 @@
 #      include <windows.h>
 #      include <wingdi.h>
 #      define mglGetProcAddress(string) wglGetProcAddress(string)
+
+#   ifndef APIENTRYP
+#      define APIENTRYP APIENTRY *
+#   endif
+
+typedef void (APIENTRYP PFNGLGENPROGRAMSARBPROC) (GLsizei n, GLuint *programs);
+typedef void (APIENTRYP PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint id);
+typedef void (APIENTRYP PFNGLGETPROGRAMSTRINGARBPROC) (GLuint id, GLenum pname, GLubyte *program);
+typedef void (APIENTRYP PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format
+, GLsizei len, const GLvoid *string);
+typedef void (APIENTRYP PFNGLGETPROGRAMIVARBPROC) (GLenum target, GLenum pname, 
+GLint *params);
+typedef GLhandleARB (APIENTRYP PFNGLCREATESHADEROBJECTARBPROC) (GLenum shaderTyp
+e);
+typedef void (APIENTRYP PFNGLSHADERSOURCEARBPROC) (GLhandleARB shaderObj, GLsizei count, const GLcharARB* *string, const GLint *length);
+typedef void (APIENTRYP PFNGLCOMPILESHADERARBPROC) (GLhandleARB shaderObj);
+typedef GLhandleARB (APIENTRYP PFNGLCREATEPROGRAMOBJECTARBPROC) (void);
+typedef void (APIENTRYP PFNGLATTACHOBJECTARBPROC) (GLhandleARB containerObj, GLhandleARB obj);
+typedef void (APIENTRYP PFNGLLINKPROGRAMARBPROC) (GLhandleARB programObj);
+typedef void (APIENTRYP PFNGLUSEPROGRAMOBJECTARBPROC) (GLhandleARB programObj);
+typedef void (APIENTRYP PFNGLGETINFOLOGARBPROC) (GLhandleARB obj, GLsizei maxLength, GLsizei *length, GLcharARB *infoLog);
+typedef void (APIENTRYP PFNGLDELETEOBJECTARBPROC) (GLhandleARB obj);
+typedef void (APIENTRYP PFNGLGETOBJECTPARAMETERIVARBPROC) (GLhandleARB obj, GLenum pname, GLint *params);
+typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONPROC) (GLuint program, const GLchar *name);
+
+
 #   else
 #      include <GL/gl.h>
 #      include <GL/glu.h>
