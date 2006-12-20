@@ -40,6 +40,14 @@
 #      define APIENTRYP APIENTRY *
 #   endif
 
+#   ifndef GLcharARB
+#      define GLcharARB char
+#   endif
+
+#   ifndef GLhandleARB
+#      define GLhandleARB GLuint
+#   endif
+
 typedef void (APIENTRYP PFNGLGENPROGRAMSARBPROC) (GLsizei n, GLuint *programs);
 typedef void (APIENTRYP PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint id);
 typedef void (APIENTRYP PFNGLGETPROGRAMSTRINGARBPROC) (GLuint id, GLenum pname, GLubyte *program);
