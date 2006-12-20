@@ -40,8 +40,12 @@
 #      define APIENTRYP APIENTRY *
 #   endif
 
+#   ifndef GLchar
+#      define GLchar char
+#   endif
+
 #   ifndef GLcharARB
-#      define GLcharARB char
+#      define GLcharARB GLchar
 #   endif
 
 #   ifndef GLhandleARB
