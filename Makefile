@@ -100,16 +100,16 @@ osx:
 
 win32:
 	@-printf "Building libhel\n" && \
-	cd libhel && ./autogen.sh && make win32 && \
+	cd libhel && ./autogen.sh && make win32 && cd .. && \
 	\
 	printf "Building libfreyja\n" && \
-	cd libfreyja && ./autogen.sh && make win32 && \
+	cd libfreyja && ./autogen.sh && make win32 && cd .. && \
 	\
 	printf "Building libfreyja plugins\n" && \
-	cd plugins && make win32 && \
+	cd plugins && make win32 && cd .. && \
 	\
 	printf "Building libmgtk\n" && \
-	cd libmgtk && ./autogen.sh && make win32 && \
+	cd libmgtk && ./autogen.sh && make win32 && cd .. && \
 	\
 	printf "Building freyja\n" && \
 	cd freyja && ./autogen.sh && make win32 && make plugins-win32
