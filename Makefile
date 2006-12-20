@@ -99,20 +99,20 @@ osx:
 	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
 win32:
-	@-printf "Building libhel\n"
-	@-cd libhel && ./autogen.sh && make win32
-
-	@-printf "Building libfreyja\n"
-	@-cd libfreyja && ./autogen.sh && make win32
-
-	@-printf "Building libfreyja plugins\n"
-	@-cd plugins && make win32
-
-	@-printf "Building libmgtk\n"
-	@-cd libmgtk && ./autogen.sh && make win32
-
-	@-printf "Building freyja\n"
-	@-cd freyja && ./autogen.sh && make win32 && make plugins-win32
+	@-printf "Building libhel\n" && \
+	cd libhel && ./autogen.sh && make win32 && \
+	\
+	printf "Building libfreyja\n" && \
+	cd libfreyja && ./autogen.sh && make win32 && \
+	\
+	printf "Building libfreyja plugins\n" && \
+	cd plugins && make win32 && \
+	\
+	printf "Building libmgtk\n" && \
+	cd libmgtk && ./autogen.sh && make win32 && \
+	\
+	printf "Building freyja\n" && \
+	cd freyja && ./autogen.sh && make win32 && make plugins-win32
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
