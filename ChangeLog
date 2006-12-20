@@ -10,6 +10,7 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 build fixes
  - Touch up for the trusty String class
  - Fix for double save due to odd Gtk+ event using static guard in UI
  - Removed compile time support for old fileselection dialog 

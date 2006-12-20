@@ -2,9 +2,9 @@
 /*================================================================
  * 
  * Project : Freyja
- * Author  : Mongoose
- * Website : http://icculus.org/~mongoose/
- * Email   : mongoose@icculus.org
+ * Author  : Terry Hendrix ( Mongoose )
+ * Website : http://icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
  * Object  : SystemIO w/ endian support
  * License : No use w/o permission (C) 2001-2006 Mongoose
  * Comments: Lots of nice utils from libfreyja moved to mstl
@@ -19,8 +19,8 @@
  * Mongoose - Barrowed from my libfreyja, and then made more generic
  ================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_SYSTEMIO_H_
-#define GUARD__FREYJA_MONGOOSE_SYSTEMIO_H_
+#ifndef GUARD__MSTL_SYSTEMIO_H_
+#define GUARD__MSTL_SYSTEMIO_H_
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -147,8 +147,7 @@ class Timer
 
 class SystemIO
 {
- public:	
-
+public:
 
 	class File
 	{
@@ -1955,28 +1954,8 @@ class SystemIO
 #endif
 	}
 
-
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-
- private:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
-
-	/* */
-};
+}; // class SystemIO
 
 } // namespace mstl
 
-#endif // GUARD__FREYJA_MONGOOSE_DEBUG_H_
+#endif // GUARD__MSTL_SYSTEMIO_H_
