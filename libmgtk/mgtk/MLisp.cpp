@@ -53,16 +53,16 @@
 /// Lisp Object functions //////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-mObject *newFloatObj(float n)
+MlispObject *mlisp_new_float_obj(float n)
 {
-	mObject *obj;
+	MlispObject *obj;
 	float *f;
 
 
 	f = new float;
 	*f = n;
 
-	obj = new mObject;
+	obj = new MlispObject;
 	obj->symbol = NULL;
 	obj->type = FLOAT;
 	obj->data = (void *)f;
@@ -72,15 +72,15 @@ mObject *newFloatObj(float n)
 }
 
 
-mObject *newIntObj(int n)
+MlispObject *mlisp_new_int_obj(int n)
 {
-	mObject *obj;
+	MlispObject *obj;
 	int *i;
 
 	i = new int;
 	*i = n;
 
-	obj = new mObject;
+	obj = new MlispObject;
 	obj->symbol = NULL;
 	obj->type = INT;
 	obj->data = (void *)i;
@@ -90,13 +90,13 @@ mObject *newIntObj(int n)
 }
 
 
-mObject *newStringObj(const char *s)
+MlispObject *mlisp_new_str_obj(const char *s)
 {
-	mObject *obj = NULL;
+	MlispObject *obj = NULL;
 	unsigned int lenght;
 
 
-	obj = new mObject;
+	obj = new MlispObject;
 	obj->symbol = NULL;
 	obj->type = CSTRING;
 	obj->data = NULL;
@@ -119,9 +119,9 @@ mObject *newStringObj(const char *s)
 
 
 /* (define FUNC_PTR, PARM_TYPE_LIST, NAME) */
-mObject *newFuncObj(mObject *(*f)(mObjectList *), const char *name)
+MlispObject *mlisp_new_func_obj(MlispObject *(*f)(MlispObjectList *), const char *name)
 {
-	mObject *obj = NULL;
+	MlispObject *obj = NULL;
 	unsigned int lenght;
 
 
@@ -130,7 +130,7 @@ mObject *newFuncObj(mObject *(*f)(mObjectList *), const char *name)
 
 	lenght = strlen(name);
 
-	obj = new mObject;
+	obj = new MlispObject;
 	obj->type = FUNC;
 	obj->data = (void *)f;
 	obj->symbol = new char[lenght+1];
@@ -142,11 +142,11 @@ mObject *newFuncObj(mObject *(*f)(mObjectList *), const char *name)
 }
 
 
-mObject *newListObj(mObjectList *list)
+MlispObject *mlisp_new_list_obj(MlispObjectList *list)
 {
-	mObject *obj;
+	MlispObject *obj;
 
-	obj = new mObject;
+	obj = new MlispObject;
 	obj->symbol = NULL;
 	obj->type = LIST;
 	obj->data = (void *)list;
@@ -156,9 +156,9 @@ mObject *newListObj(mObjectList *list)
 }
 
 
-mObject *newABDTObj(unsigned int type, void *data)
+MlispObject *mlisp_new_obj(unsigned int type, void *data)
 {
-	mObject *obj = new mObject;
+	MlispObject *obj = new MlispObject;
 
 	obj->symbol = NULL;
 	obj->type = type;
@@ -169,25 +169,7 @@ mObject *newABDTObj(unsigned int type, void *data)
 }
 
 
-mObject *newADTObj(unsigned int type, void *data)
-{
-	mObject *obj = new mObject;
-
-	obj->symbol = NULL;
-	obj->type = type;
-	obj->data = data;
-	obj->flags = 0;
-
-	if (type < 33)
-	{
-		printf("ERROR: Likely type index conflict\n");
-	}
-
-	return obj;
-}
-
-
-void deleteObj(mObject **object)
+void mlisp_delete_obj(MlispObject **object)
 {
 	if (!(*object) || ((*object)->flags & mObjDisableGarbageCollection))
 		return;
@@ -199,28 +181,34 @@ void deleteObj(mObject **object)
 	{
 	case FUNC:
 		break;
+
 	case BUILTINFUNC:
 		if ((*object)->data)
 			delete [] (char *)(*object)->data;
 		break;
+
 	case CSTRING:
 		if ((*object)->data)
 			delete [] (char *)(*object)->data;		
 		break;
+
 	case INT:
 		if ((*object)->data)
 			delete (int*)(*object)->data;
 		break;
+
 	case FLOAT:
 		if ((*object)->data)
 			delete (float*)(*object)->data;
 		break;
+
 	case LIST:
-		while ((mObjectList *)(*object)->data)
+		while ((MlispObjectList *)(*object)->data)
 		{
-			objPop((mObjectList **)&(*object)->data);
+			mlisp_obj_pop((MlispObjectList **)&(*object)->data);
 		}
 		break;
+
 	default:
 		;
 	}
@@ -230,19 +218,19 @@ void deleteObj(mObject **object)
 }
 
 
-void objPush(mObjectList **list, mObject *object)
+void mlisp_obj_push(MlispObjectList **list, MlispObject *object)
 {
-	mObjectList *newList;
+	MlispObjectList *newList;
 
 
 	if (!(*list))
 	{
-		*list = new mObjectList;
+		*list = new MlispObjectList;
 		(*list)->next = NULL;
 	}
 	else
 	{
-		newList = new mObjectList;
+		newList = new MlispObjectList;
 		newList->next = *list;
 		*list = newList;
 	}
@@ -251,10 +239,10 @@ void objPush(mObjectList **list, mObject *object)
 }
 
 
-mObject *objPop(mObjectList **list)
+MlispObject *mlisp_obj_pop(MlispObjectList **list)
 {
-	mObjectList *oldHead;
-	mObject *object;
+	MlispObjectList *oldHead;
+	MlispObject *object;
 
 
 	if (!(*list))
@@ -272,7 +260,7 @@ mObject *objPop(mObjectList **list)
 }
 
 
-mObject *objPeek(mObjectList *list)
+MlispObject *mlisp_obj_peek(MlispObjectList *list)
 {
 	if (!list)
 	{
@@ -284,14 +272,14 @@ mObject *objPeek(mObjectList *list)
 
 
 /* Heh, this should be two lists in, one back out */
-mObjectList *objAppend(mObject *object, mObjectList *list)
+MlispObjectList *mlisp_obj_append(MlispObject *object, MlispObjectList *list)
 {
-	mObjectList *current = 0x0;
+	MlispObjectList *current = 0x0;
 
 
 	if (!list)
 	{
-		list = new mObjectList;
+		list = new MlispObjectList;
 		list->next = NULL;
 		list->data = object;
 	}
@@ -302,7 +290,7 @@ mObjectList *objAppend(mObject *object, mObjectList *list)
 		while (current->next)
 			current = current->next;
 
-		current->next = new mObjectList;
+		current->next = new MlispObjectList;
 		current->next->next = NULL;
 		current->next->data = object;
 	}
@@ -311,16 +299,16 @@ mObjectList *objAppend(mObject *object, mObjectList *list)
 }
 
 
-void deleteObjectList(mObjectList **list)
+void mlisp_delete_list_obj(MlispObjectList **list)
 {
 	while (*list)
 	{
-		objPop(list);
+		mlisp_obj_pop(list);
 	}
 }
 
 
-void printObj(mObject *obj)
+void mlisp_print_obj(MlispObject *obj)
 {
 	if (!obj)
 	{
@@ -361,10 +349,10 @@ void printObj(mObject *obj)
 }
 
 
-void printObjList(mObjectList *list)
+void mlisp_print_list_obj(MlispObjectList *list)
 {
-	mObjectList *current = list;
-	mObject *obj;
+	MlispObjectList *current = list;
+	MlispObject *obj;
 
 
 	if (!list)
@@ -375,18 +363,18 @@ void printObjList(mObjectList *list)
 
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
-		printObj(obj);
+		mlisp_print_obj(obj);
 	}
 }
 
 
-void printObjList2(mObjectList *list, char *s)
+void mlisp_print_list_obj2(MlispObjectList *list, char *s)
 {
-	mObjectList *current = list;
-	mObject *obj;
+	MlispObjectList *current = list;
+	MlispObject *obj;
 
 
 	if (!list)
@@ -397,11 +385,11 @@ void printObjList2(mObjectList *list, char *s)
 
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		printf("%s", s);
-		printObj(obj);
+		mlisp_print_obj(obj);
 	}
 }
 
@@ -415,22 +403,22 @@ void printObjList2(mObjectList *list, char *s)
  * ELEMENT appended to the end. */
 
 
-mObject *numberp(mObjectList *parms)
+MlispObject *numberp(MlispObjectList *parms)
 {
 	//if (object->type == INT || object->type == FLOAT)
-	//	return (mObject *)1;  /* FIXME: ew bad form old bean */
+	//	return (MlispObject *)1;  /* FIXME: ew bad form old bean */
 
 	return NULL;
 }
 
 
-mObject *nil(mObjectList *parms)
+MlispObject *nil(MlispObjectList *parms)
 {
 	return NULL; // (NULL == parms->data || something)
 }
 
 
-mObject *setq(mObjectList *parms)
+MlispObject *setq(MlispObjectList *parms)
 {
 	return NULL;
 }
@@ -439,10 +427,10 @@ mObject *setq(mObjectList *parms)
 /* (rest LIST)
  * Returns the list of remaining elements 
  * after the first element of LIST. */
-mObject *rest(mObjectList *list)
+MlispObject *rest(MlispObjectList *list)
 {
 	if (list)
-		return newListObj(list->next);
+		return mlisp_new_list_obj(list->next);
 
 	return NULL;
 }
@@ -455,7 +443,7 @@ mObject *rest(mObjectList *list)
 
 /* (first LIST) 
  * Returns the first element of LIST. */
-mObject *first(mObjectList *list)
+MlispObject *first(MlispObjectList *list)
 {
 	//if (list)
 	//	return list->data;
@@ -466,7 +454,7 @@ mObject *first(mObjectList *list)
 /* (cons ELEMENT LIST)
  * Returns a new list consisting of the ELEMENT, 
  * followed by the elements of LIST. */
-mObject *cons(mObjectList *list)
+MlispObject *cons(MlispObjectList *list)
 {
 	/* FIXME */
 
@@ -479,15 +467,15 @@ mObject *cons(mObjectList *list)
 ////////////////////////////////////////////////////////////
 
 /* Assign value */
-mObject *assign(mObjectList *list)
+MlispObject *assign(MlispObjectList *list)
 {
-	mObjectList *current = list;
-	mObject *objA = NULL, *objB = NULL;
+	MlispObjectList *current = list;
+	MlispObject *objA = NULL, *objB = NULL;
 	unsigned int lenght;
 
 
-	objA = objPop(&current);
-	objB = objPop(&current);
+	objA = mlisp_obj_pop(&current);
+	objB = mlisp_obj_pop(&current);
 
 	if (objA && objB && objA->type == objB->type)
 	{
@@ -518,16 +506,16 @@ mObject *assign(mObjectList *list)
 }
 
 
-mObject *add(mObjectList *list)
+MlispObject *add(MlispObjectList *list)
 {
-	mObjectList *current = list;
-	mObject *obj;
+	MlispObjectList *current = list;
+	MlispObject *obj;
 	float n = 0.0;
 
 	
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		switch (obj->type)
@@ -543,21 +531,21 @@ mObject *add(mObjectList *list)
 		}
 	}
 
-	return newFloatObj(n); 
+	return mlisp_new_float_obj(n); 
 }
 
 
-mObject *subtract(mObjectList *list)
+MlispObject *subtract(MlispObjectList *list)
 {
-	mObjectList *current = list;
-	mObject *obj;
+	MlispObjectList *current = list;
+	MlispObject *obj;
 	float n = 0.0, s;
 	char first = 1;
 
 	
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		switch (obj->type)
@@ -583,21 +571,21 @@ mObject *subtract(mObjectList *list)
 		}
 	}
 
-	return newFloatObj(n); 
+	return mlisp_new_float_obj(n); 
 }
 
 
-mObject *multiply(mObjectList *list)
+MlispObject *multiply(MlispObjectList *list)
 {
-	mObjectList *current = list;
-	mObject *obj;
+	MlispObjectList *current = list;
+	MlispObject *obj;
 	float n = 0.0, m;
 	char first = 1;
 
 	
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		switch (obj->type)
@@ -623,21 +611,21 @@ mObject *multiply(mObjectList *list)
 		}
 	}
 
-	return newFloatObj(n); 
+	return mlisp_new_float_obj(n); 
 }
 
 
-mObject *divide(mObjectList *list)
+MlispObject *divide(MlispObjectList *list)
 {
-	mObjectList *current = list;
-	mObject *obj;
+	MlispObjectList *current = list;
+	MlispObject *obj;
 	float n = 0.0, d;
 	char first = 1;
 
 	
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		switch (obj->type)
@@ -670,7 +658,7 @@ mObject *divide(mObjectList *list)
 		}
 	}
 
-	return newFloatObj(n); 
+	return mlisp_new_float_obj(n); 
 }
 
 
@@ -683,8 +671,8 @@ MLisp::MLisp()
 	mSymbolTable = NULL;
 	mExecStack = NULL;
 	mDataStack = NULL;
-	mScopeBegin = newABDTObj(BEGIN, NULL);
-	mScopeEnd = newABDTObj(END, NULL);
+	mScopeBegin = mlisp_new_obj(BEGIN, NULL);
+	mScopeEnd = mlisp_new_obj(END, NULL);
 	mBuffer = NULL;
 	mSymbol = NULL;
 	mBufferSize = 0;
@@ -710,32 +698,32 @@ MLisp::MLisp()
 	 *
 	 * (define <name> (<parms>) <form>)    - Define functions
 	 *
-	 * mObject     - Element
-	 * mObjectList - List
+	 * MlispObject     - Element
+	 * MlispObjectList - List
 	 */
 	
 	/* Append lisp built-in functions to symbol table */
-	registerLispFunctionBuiltIn("setq", SetQ); 
-	registerLispFunction("nil", nil);
-	registerLispFunction("first", first);
-	registerLispFunction("rest", rest);
+	RegisterLispFunctionBuiltIn("setq", SetQ); 
+	RegisterLispFunction("nil", nil);
+	RegisterLispFunction("first", first);
+	RegisterLispFunction("rest", rest);
 
-	registerLispFunction("+", add);
-	registerLispFunction("add", add);
-	registerLispFunction("sub", subtract);
-	registerLispFunction("-", subtract);
-	registerLispFunction("*", multiply);
-	registerLispFunction("/", divide);
+	RegisterLispFunction("+", add);
+	RegisterLispFunction("add", add);
+	RegisterLispFunction("sub", subtract);
+	RegisterLispFunction("-", subtract);
+	RegisterLispFunction("*", multiply);
+	RegisterLispFunction("/", divide);
 
 	/* Append lisp built-in variables */
-	registerSymbolValue("T", 0);
-	registerSymbol("cDebugLevel", INT, (void *)(&mDebug));
+	RegisterSymbolValue("T", 0);
+	RegisterSymbol("cDebugLevel", INT, (void *)(&mDebug));
 }
 
 
 MLisp::~MLisp()
 {
-	clear();
+	Clear();
 }
 
 
@@ -743,19 +731,19 @@ MLisp::~MLisp()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-void MLisp::dumpSymbols()
+void MLisp::DumpSymbols()
 {
 	printf("\n\nDumping symbols:\n");
 	printf("------------------------------------------------------------\n");
-	printObjList(mSymbolTable);
+	mlisp_print_list_obj(mSymbolTable);
 	printf("------------------------------------------------------------\n");
 }
 
 
-mObject *MLisp::getSymbol(const char *symbol)
+MlispObject *MLisp::GetSymbol(const char *symbol)
 {
-	mObjectList *current;
-	mObject *obj;
+	MlispObjectList *current;
+	MlispObject *obj;
 	
 
 	if (!symbol || !symbol[0])
@@ -765,7 +753,7 @@ mObject *MLisp::getSymbol(const char *symbol)
 
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		// Mongoose 2002.01.12, FIXME, string
@@ -779,10 +767,10 @@ mObject *MLisp::getSymbol(const char *symbol)
 }
 
 
-int MLisp::getSymbolData(char *symbol, unsigned int type, void **data)
+int MLisp::GetSymbolData(char *symbol, unsigned int type, void **data)
 {
-	mObjectList *current;
-	mObject *obj;
+	MlispObjectList *current;
+	MlispObject *obj;
 
 
 	if (!symbol || !symbol[0])
@@ -792,7 +780,7 @@ int MLisp::getSymbolData(char *symbol, unsigned int type, void **data)
 
 	while (current)
 	{
-		obj = objPeek(current);
+		obj = mlisp_obj_peek(current);
 		current = current->next;
 
 		/* If type == 0 then return the whole object */
@@ -824,13 +812,13 @@ int MLisp::getSymbolData(char *symbol, unsigned int type, void **data)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void MLisp::setDebugLevel(int level)
+void MLisp::SetDebugLevel(int level)
 {
 	mDebug = level;
 }
 
 
-int MLisp::evalBuffer(const char *buffer)
+int MLisp::EvalBuffer(const char *buffer)
 {
 	if (mSymbolSize < 65)
 	{
@@ -864,14 +852,14 @@ int MLisp::evalBuffer(const char *buffer)
 	}
 #endif
 
-	if (!parseEvalBuffer(buffer))
-		eval();
+	if (!ParseEvalBuffer(buffer))
+		Eval();
 
 	return 0;
 }
 
 
-int MLisp::evalFile(const char *filename)
+int MLisp::EvalFile(const char *filename)
 {
 	if (mBuffer)
 	{
@@ -890,9 +878,9 @@ int MLisp::evalFile(const char *filename)
 
 	mSymbol = new char[mSymbolSize];
 
-	if (!bufferFile(filename, &mBuffer, &mBufferSize))
+	if (!BufferFile(filename, &mBuffer, &mBufferSize))
 	{
-		if (!evalBuffer(mBuffer))
+		if (!EvalBuffer(mBuffer))
 		{
 			return 0;
 		}
@@ -906,25 +894,25 @@ int MLisp::evalFile(const char *filename)
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-bool MLisp::isAtoZ(char c)
+bool MLisp::IsAtoZ(char c)
 {
 	return ((unsigned char)c > 64 && (unsigned char)c < 91);
 }
 
 
-bool MLisp::isatoz(char c)
+bool MLisp::Isatoz(char c)
 {
 	return ((unsigned char)c > 96 && (unsigned char)c < 123);
 }
 
 
-bool MLisp::isDigit(char c)
+bool MLisp::IsDigit(char c)
 {
 	return ((unsigned char)c > 47 && (unsigned char)c < 58);
 }
 
 
-bool MLisp::isMisc(char c)
+bool MLisp::IsMisc(char c)
 {
 	if ((unsigned char)c == 95)
 		return true;
@@ -933,7 +921,7 @@ bool MLisp::isMisc(char c)
 }
 
 
-bool MLisp::isNumeric(char *symbol, float *n)
+bool MLisp::IsNumeric(char *symbol, float *n)
 {
 	int len, i;
 	bool real = false;
@@ -959,7 +947,7 @@ bool MLisp::isNumeric(char *symbol, float *n)
 			i++;
 		}
 
-		if (!isDigit(symbol[i]))
+		if (!IsDigit(symbol[i]))
 		{
 			return false;
 		}
@@ -978,7 +966,7 @@ bool MLisp::isNumeric(char *symbol, float *n)
 }
 
 
-void MLisp::printError(char *format, ...)
+void MLisp::PrintError(char *format, ...)
 {
 	char buffer[256];
 	va_list args;
@@ -1012,15 +1000,15 @@ void MLisp::printError(char *format, ...)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-int MLisp::appendSymbolTable(mObject *object)
+int MLisp::AppendSymbolTable(MlispObject *object)
 {
-	mSymbolTable = objAppend(object, mSymbolTable);
+	mSymbolTable = mlisp_obj_append(object, mSymbolTable);
 
 	return !(mSymbolTable == NULL);
 }
 
 
-void MLisp::bind(const char *symbol, mObject *data)
+void MLisp::Bind(const char *symbol, MlispObject *data)
 {
 	int len;
 
@@ -1028,8 +1016,8 @@ void MLisp::bind(const char *symbol, mObject *data)
 	if (!symbol || !symbol[0] || !data)
 	{
 		++mErrors;
-		printError("BIND receieved invalid symbol for binding");
-		deleteObj(&data);
+		PrintError("BIND receieved invalid symbol for binding");
+		mlisp_delete_obj(&data);
 		return;
 	}
 
@@ -1040,11 +1028,11 @@ void MLisp::bind(const char *symbol, mObject *data)
 	data->symbol[len] = 0;
 
 	/* Append to the lisp object/symbol table */
-	appendSymbolTable(data);
+	AppendSymbolTable(data);
 }
 
 
-int MLisp::bufferFile(const char *filename, 
+int MLisp::BufferFile(const char *filename, 
 					  char **buffer, unsigned int *bytes)
 {
 	FILE *f;
@@ -1082,33 +1070,33 @@ int MLisp::bufferFile(const char *filename,
 }
 
 
-void MLisp::clear()
+void MLisp::Clear()
 {
 	while (mDataStack)
 	{
-		objPop(&mDataStack);
+		mlisp_obj_pop(&mDataStack);
 	}
 
 	while (mExecStack)
 	{
-		objPop(&mExecStack);
+		mlisp_obj_pop(&mExecStack);
 	}
 
 	while (mSymbolTable)
 	{
-		mObject *obj = objPeek(mSymbolTable);
-		deleteObj(&obj);
-		objPop(&mSymbolTable);
+		MlispObject *obj = mlisp_obj_peek(mSymbolTable);
+		mlisp_delete_obj(&obj);
+		mlisp_obj_pop(&mSymbolTable);
 	}
 
 	if (mScopeBegin)
 	{
-		deleteObj(&mScopeBegin);
+		mlisp_delete_obj(&mScopeBegin);
 	}
 
 	if (mScopeEnd)
 	{
-		deleteObj(&mScopeEnd);
+		mlisp_delete_obj(&mScopeEnd);
 	}
 
 	if (mBuffer)
@@ -1123,35 +1111,35 @@ void MLisp::clear()
 }
 
 
-mObjectList *getNextScopeStack(mObjectList **stack)
+MlispObjectList *getNextScopeStack(MlispObjectList **stack)
 {
-	mObjectList *tmpStack = NULL;
-	mObject *obj = NULL;
+	MlispObjectList *tmpStack = NULL;
+	MlispObject *obj = NULL;
 		
 		
 	while (*stack)
 	{
-		obj = objPop(stack);
+		obj = mlisp_obj_pop(stack);
 		
 		if (!obj || obj->type == END)
 		{
 			/* End with NIL Object for var parm func (func ...) */
-			//objPush(&tmpStack, NULL); // No longer valid?
+			//mlisp_obj_push(&tmpStack, NULL); // No longer valid?
 			break; 
 		}
 		
 		//Console.Write(">> ");
 		//obj.print();
 		
-		objPush(&tmpStack, obj);
+		mlisp_obj_push(&tmpStack, obj);
 	}
 	
 	/* Reverse stack, so that order is maintained in execution from parsing */
-	mObjectList *reverse = NULL;
+	MlispObjectList *reverse = NULL;
 	while (tmpStack)
 	{
-		obj = objPop(&tmpStack);
-		objPush(&reverse, obj);
+		obj = mlisp_obj_pop(&tmpStack);
+		mlisp_obj_push(&reverse, obj);
 	}
 	
 	return reverse;
@@ -1162,11 +1150,11 @@ mObjectList *getNextScopeStack(mObjectList **stack)
 
 
 // FIXME: Not trimming given stack, so (setq (add ...)) calls (add ...) agian
-mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
+MlispObject *MLisp::EvalFunction(MlispObjectList **stack, MlispObject *func)
 {
-	mObject *(*callFunction)(mObjectList *);
-	mObjectList *parms = NULL, *reverse = NULL, *fstack = NULL;
-	mObject *obj, *result = NULL;
+	MlispObject *(*callFunction)(MlispObjectList *);
+	MlispObjectList *parms = NULL, *reverse = NULL, *fstack = NULL;
+	MlispObject *obj, *result = NULL;
 	int scopeMatch = 0;
 
 
@@ -1180,21 +1168,21 @@ mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 	}
 	else
 	{
-		printObj(func);
+		mlisp_print_obj(func);
 	}
 
 
 	/* 0. Push func obj to grouped function stack */
-	objPush(&fstack, func);
+	mlisp_obj_push(&fstack, func);
 
 
 	/* 1. Pop a Scope BEGIN obj */
-	obj = objPeek(*stack);
+	obj = mlisp_obj_peek(*stack);
 	
-	if (!objTypeP(obj, BEGIN))
+	if (!mlisp_obj_typep(obj, BEGIN))
 	{
 		printf("FATAL ERROR: Lisp stack corrupt... BEGIN !=");
-		printObj(obj);
+		mlisp_print_obj(obj);
 
 		// FIXME: Add stack dump here for debugging
 
@@ -1206,30 +1194,30 @@ mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 	 *    function's scope is reached, eval passed functions as well */
 	while (stack)
 	{
-		obj = objPeek(*stack);
+		obj = mlisp_obj_peek(*stack);
 
 		if (mDebug > 2)
 		{
 			printf(" ");
-			printObj(obj);
+			mlisp_print_obj(obj);
 		}
 
 		if (obj->type == BEGIN)
 		{
 			++scopeMatch;
-			objPush(&parms, obj); // Push BEGIN
+			mlisp_obj_push(&parms, obj); // Push BEGIN
 		}
 		else if (obj->type == END)
 		{
 			--scopeMatch;
-			objPush(&parms, obj); // Push END
+			mlisp_obj_push(&parms, obj); // Push END
 			
 			if (scopeMatch == 0)
 			{
 				if (mDebug > 1)
 				{
 					printf("xxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-					printObjList(fstack);
+					mlisp_print_list_obj(fstack);
 					printf("xxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 				}
 
@@ -1239,17 +1227,17 @@ mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 				
 				/* 2. If the function is passed no args, make a null list */
 				//if (!parms)
-				//	objPush(&parms, NULL); // Is this no longer valid?
+				//	mlisp_obj_push(&parms, NULL); // Is this no longer valid?
 
 				/* 3. Reverse order of stack for use as args list */
 				while (parms)
 				{
-					obj = objPop(&parms);
+					obj = mlisp_obj_pop(&parms);
 
 					if (mDebug > 1)
 					{
 						printf("Buffering AR... ");
-						printObj(obj);
+						mlisp_print_obj(obj);
 					}
 
 
@@ -1266,57 +1254,57 @@ mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 							{
 								printf("--- FUNC ---------------------\n");
 								printf(" Calling ");
-								printObj(obj);
-								printObjList2(reverse, "\te> ");
+								mlisp_print_obj(obj);
+								mlisp_print_list_obj2(reverse, "\te> ");
 							}
 
-							mObjectList *tmp = getNextScopeStack(&reverse);
+							MlispObjectList *tmp = getNextScopeStack(&reverse);
 							
 							if (obj->type == FUNC)
 							{
-								callFunction = (mObject * (*)(mObjectList *))obj->data;
+								callFunction = (MlispObject * (*)(MlispObjectList *))obj->data;
 								obj = (*callFunction)(tmp);
 							}
 							// Use external BUILTINFUNC method w/ indices later
 							else if (!strncmp("setq", obj->symbol, 4))
 							{
-								obj = builtin_setq(tmp); 
+								obj = Builtin_setq(tmp); 
 							}
 							else
 							{
 								printf("ERROR '%s' not implemented\n", obj->symbol);
 							}
 
-							//objPush(&reverse, obj); // could fall through
-							objPop(&fstack);
+							//mlisp_obj_push(&reverse, obj); // could fall through
+							mlisp_obj_pop(&fstack);
 						}
 						break;
 
 					}
 
-					objPush(&reverse, obj);
+					mlisp_obj_push(&reverse, obj);
 				}
 
 				parms = reverse; // FIXME: Memory leak
 
-				func = objPop(&fstack);
+				func = mlisp_obj_pop(&fstack);
 				
 				if (func->type == FUNC)
 				{
-					callFunction = (mObject * (*)(mObjectList *))func->data;
+					callFunction = (MlispObject * (*)(MlispObjectList *))func->data;
 					result = (*callFunction)(reverse);
 				}
 				else if (!strncmp("setq", func->symbol, 4)) // use external method and indices later
 				{
-					result = builtin_setq(reverse); 
+					result = Builtin_setq(reverse); 
 				}
 				
-				objPush(&parms, result);
+				mlisp_obj_push(&parms, result);
 
 				if (mDebug > 1)
 				{
 					printf("\t <-- : ");
-					printObj(result);
+					mlisp_print_obj(result);
 				}
 				
 
@@ -1335,11 +1323,11 @@ mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 
 		case BUILTINFUNC:
 		case FUNC:
-			objPush(&fstack, obj);
+			mlisp_obj_push(&fstack, obj);
 
 		default:
 
-			objPush(&parms, obj);
+			mlisp_obj_push(&parms, obj);
 		}
 
 		*stack = (*stack)->next;
@@ -1354,11 +1342,11 @@ mObject *MLisp::evalFunction(mObjectList **stack, mObject *func)
 }
 
 
-void MLisp::eval()
+void MLisp::Eval()
 {
-	mObject *(*callFunction)(mObjectList *);
-	mObjectList *parms = NULL, *currentStack = NULL, *curStack, *cur;
-	mObject *obj, *result;
+	MlispObject *(*callFunction)(MlispObjectList *);
+	MlispObjectList *parms = NULL, *currentStack = NULL, *curStack, *cur;
+	MlispObject *obj, *result;
 	unsigned int frame = 0;
 
 
@@ -1370,12 +1358,12 @@ void MLisp::eval()
 
 
 	/* Reverse stack, so that order is maintained in execution from parsing */
-	mObjectList *reverse = NULL;
+	MlispObjectList *reverse = NULL;
 	while (mExecStack)
 	{
-		obj = objPop(&mExecStack);
-		objPush(&reverse, obj);
-		//printObj(obj);
+		obj = mlisp_obj_pop(&mExecStack);
+		mlisp_obj_push(&reverse, obj);
+		//mlisp_print_obj(obj);
 	}
 
 	mExecStack = reverse;
@@ -1383,18 +1371,18 @@ void MLisp::eval()
 
 	while (mExecStack)
 	{
-		obj = objPop(&mExecStack);
+		obj = mlisp_obj_pop(&mExecStack);
 
 		if (obj && obj->type == FUNC || obj->type ==BUILTINFUNC)
 		{
-			printf("evalFunction <-- "); printObj(obj);
-			evalFunction(&mExecStack, obj);
+			printf("evalFunction <-- "); mlisp_print_obj(obj);
+			EvalFunction(&mExecStack, obj);
 		}
 	}
 
 	while (mExecStack)
 	{
-		obj = objPop(&mExecStack);
+		obj = mlisp_obj_pop(&mExecStack);
 
 		if (mDebug > 4)
 		{
@@ -1404,7 +1392,7 @@ void MLisp::eval()
 
 		if (!obj)
 		{
-			printError("FATAL ERROR: eval() feed NULL data");
+			PrintError("FATAL ERROR: eval() feed NULL data");
 			return;
 		}
 		else
@@ -1416,12 +1404,12 @@ void MLisp::eval()
 				
 
 				/* 1. Pop a Scope BEGIN obj */
-				obj = objPop(&currentStack);
+				obj = mlisp_obj_pop(&currentStack);
 
-				if (!objTypeP(obj, BEGIN))
+				if (!mlisp_obj_typep(obj, BEGIN))
 				{
 					printf("FATAL ERROR: Lisp data stack corrupt... BEGIN !=");
-					printObj(obj);
+					mlisp_print_obj(obj);
 				}
 
 				/* 2. Copy currentStack items to parms stack in same order */
@@ -1431,23 +1419,23 @@ void MLisp::eval()
 				//printf("=\n");
 				while (curStack)
 				{
-					obj = objPeek(curStack);
+					obj = mlisp_obj_peek(curStack);
 
 					if (obj->type == END)
 						break;
 
 					if (!parms)
 					{
-						parms = new mObjectList;
+						parms = new MlispObjectList;
 						cur = parms;
 					}
 					else
 					{
-						cur->next = new mObjectList;
+						cur->next = new MlispObjectList;
 						cur = cur->next;
 					}
 
-					//printObj(obj);						
+					//mlisp_print_obj(obj);						
 					cur->data = obj;
 					cur->next = NULL;
 
@@ -1460,16 +1448,16 @@ void MLisp::eval()
 				{
 				case FUNC:
 					printf("FUNC: calling %s\n", obj->symbol);
-					callFunction = (mObject * (*)(mObjectList *))obj->data;
+					callFunction = (MlispObject * (*)(MlispObjectList *))obj->data;
 					result = (*callFunction)(parms);
 					break;
 				default:
 				case BUILTINFUNC:
-					//mObject *(MLisp::*func)(mObjectList *);
-					//func =(mObject *(MLisp::*)(mObjectList *))(*(obj->data));
+					//MlispObject *(MLisp::*func)(MlispObjectList *);
+					//func =(MlispObject *(MLisp::*)(MlispObjectList *))(*(obj->data));
 					//result = (this->*func)(parms);
 					printf("BUILTINFUNC: calling %s\n", obj->symbol);
-					result = builtin_setq(parms);
+					result = Builtin_setq(parms);
 					break;
 					//default:
 					//printf("%s\n", obj->symbol);
@@ -1477,12 +1465,12 @@ void MLisp::eval()
 				}
 
 				/* 4. Pop off this entire scope now */
-				while ((obj = objPop(&currentStack)))
+				while ((obj = mlisp_obj_pop(&currentStack)))
 				{
 					if (mDebug > 4)
 					{
 						printf("POP ");
-						printObj(obj);
+						mlisp_print_obj(obj);
 					}
 
 					if (obj->type == END)
@@ -1491,7 +1479,7 @@ void MLisp::eval()
 					if (mGarbageCollection)
 					{
 						/* Weak garbage collect for now */
-						deleteObj(&obj);
+						mlisp_delete_obj(&obj);
 					}
 				}
 
@@ -1499,10 +1487,10 @@ void MLisp::eval()
 				if (mDebug > 4)
 				{
 					printf("RESULT_PUSH ");
-					printObj(result);
+					mlisp_print_obj(result);
 				}
 
-				objPush(&currentStack, result);
+				mlisp_obj_push(&currentStack, result);
 				break;
 			case BEGIN:
 				/* END objects mark the end of a function parm list */
@@ -1512,11 +1500,11 @@ void MLisp::eval()
 					printf("BEGIN_PUSH\n");
 				}
 
-				objPush(&currentStack, obj);
+				mlisp_obj_push(&currentStack, obj);
 
-				//objPush(&mDataStack, newListObj(currentStack));
-				//obj = objPeek(mDataStack);
-				//currentStack = (mObjectList *)obj->data;
+				//mlisp_obj_push(&mDataStack, mlisp_new_list_obj(currentStack));
+				//obj = mlisp_obj_peek(mDataStack);
+				//currentStack = (MlispObjectList *)obj->data;
 				break;
 			case END:
 				/* BEGIN objects mark the start of a function parm list */
@@ -1526,10 +1514,10 @@ void MLisp::eval()
 					printf("END_PUSH\n");
 				}
 
-				objPush(&currentStack, obj);
+				mlisp_obj_push(&currentStack, obj);
 
-				//obj = objPop(&mDataStack);
-				//currentStack = (mObjectList *)obj->data;
+				//obj = mlisp_obj_pop(&mDataStack);
+				//currentStack = (MlispObjectList *)obj->data;
 				//printObjectList(currentStack);
 				break;
 			default:
@@ -1538,10 +1526,10 @@ void MLisp::eval()
 				if (mDebug > 4)
 				{
 					printf("DATA_PUSH ");
-					printObj(obj);
+					mlisp_print_obj(obj);
 				}
 
-				objPush(&currentStack, obj);
+				mlisp_obj_push(&currentStack, obj);
 			}
 		}
 	}
@@ -1554,11 +1542,11 @@ void MLisp::eval()
 #endif
 
 	  //dumpListSymbols(currentStack);
-	  //objPush(&mStack, newListObj(currentStack));
+	  //mlisp_obj_push(&mStack, mlisp_new_list_obj(currentStack));
 }
 
 
-void MLisp::expected(char c)
+void MLisp::Expected(char c)
 {
 	char s[4];
 
@@ -1580,36 +1568,36 @@ void MLisp::expected(char c)
 	}
 
 	++mErrors;
-	printError("Expected '%c', not '%s' (%u)\nLast symbol before error: '%s'", 
+	PrintError("Expected '%c', not '%s' (%u)\nLast symbol before error: '%s'", 
 			   c, s, mLook, mSymbol);
 }
 
 
-mObject *MLisp::getNextSymbol()
+MlispObject *MLisp::GetNextSymbol()
 {
-	mObject *obj;
+	MlispObject *obj;
 
-	parseSeperator();
+	ParseSeperator();
 
 	if (mLook == ';' && !mString)
 	{
-		parseComment();
-		parseSeperator();
+		ParseComment();
+		ParseSeperator();
 	}
 
-	obj = parseNextSymbol();
+	obj = ParseNextSymbol();
 	
 	return obj;
 }
 
 
-bool MLisp::is(char c)
+bool MLisp::Is(char c)
 {
   return (c == mLook);
 }
 
 
-void MLisp::lex()
+void MLisp::Lex()
 {
   if (mTop < mBufferSize)
   {
@@ -1626,7 +1614,7 @@ void MLisp::lex()
 
 	  if (mLook == ';' && !mString)
 	  {
-		  parseComment();
+		  ParseComment();
 	  }
   }
   else
@@ -1636,41 +1624,40 @@ void MLisp::lex()
 }
 
 
-bool MLisp::match(char c)
+bool MLisp::Match(char c)
 {
-  bool r = is(c);
+	bool r = Is(c);
 
+	if (!r)
+	{
+		Expected(c);
+	}
 
-  if (!r)
-  {
-    expected(c);
-  }
+	Lex();
 
-  lex();
-
-  return r;
+	return r;
 }
 
 
-void MLisp::parseComment()
+void MLisp::ParseComment()
 {
-	match(';');
+	Match(';');
 
-	while (!is('\n') && !is(EOF))
+	while (!Is('\n') && !Is(EOF))
 	{
-		lex();
+		Lex();
 	}
 
-	if (is(';'))
+	if (Is(';'))
 	{
-		parseComment();
+		ParseComment();
 	}
 }
 
 
-int MLisp::parseEvalBuffer(const char *buffer)
+int MLisp::ParseEvalBuffer(const char *buffer)
 {
-	mObject *object;
+	MlispObject *object;
 
 
 	if (!buffer || !buffer[0])
@@ -1699,23 +1686,23 @@ int MLisp::parseEvalBuffer(const char *buffer)
 	mLook = 0;
 	mString = 0;
 
-	lex();
-	parseSeperator();
+	Lex();
+	ParseSeperator();
 
-	while (is('('))
+	while (Is('('))
 	{
-		object = parseFunction();
+		object = ParseFunction();
 
 #ifdef MLISP_DEBUG_ENABLED
 		if (mDebug > 4)
 		{
 			printf("Pushing, ");
-			printObj(object);
+			mlisp_print_obj(object);
 		}
 #endif
 
-		//objPush(&mExecStack, object);
-		parseSeperator();
+		//mlisp_obj_push(&mExecStack, object);
+		ParseSeperator();
 	}
 
 	if (mErrors)
@@ -1727,28 +1714,28 @@ int MLisp::parseEvalBuffer(const char *buffer)
 }
 
 
-mObject *MLisp::parseFunction()
+MlispObject *MLisp::ParseFunction()
 {
-	mObject *func = NULL, *object = NULL;
+	MlispObject *func = NULL, *object = NULL;
 	void *data;
 
 
-	match('(');
+	Match('(');
 
-	func = getNextSymbol();
+	func = GetNextSymbol();
 
-	if (!getSymbolData(mSymbol, BUILTINFUNC, &data) && data)
+	if (!GetSymbolData(mSymbol, BUILTINFUNC, &data) && data)
 	{
-		objPush(&mExecStack, func);
+		mlisp_obj_push(&mExecStack, func);
 	}
-	else if (!getSymbolData(mSymbol, FUNC, &data) && data)
+	else if (!GetSymbolData(mSymbol, FUNC, &data) && data)
 	{
-		objPush(&mExecStack, func);
+		mlisp_obj_push(&mExecStack, func);
 	}
 	else
 	{
 		++mErrors;
-		printError("Invalid function '%s'\n", mSymbol);
+		PrintError("Invalid function '%s'\n", mSymbol);
 		return NULL;
 	}
 
@@ -1760,26 +1747,26 @@ mObject *MLisp::parseFunction()
 #endif
 
 
-	objPush(&mExecStack, mScopeBegin);
+	mlisp_obj_push(&mExecStack, mScopeBegin);
 
 	/* Handle function parms, must be either FUNC objects or 
 	 * the elements must be composed into a object list 
 	 * pushed on the stack */
-	while (!is(')'))
+	while (!Is(')'))
 	{
-		object = getNextSymbol();
+		object = GetNextSymbol();
 
 #ifdef MLISP_DEBUG_ENABLED
 		if (mDebug > 4)
 		{
 			printf("   Pushing parm, ");
-			printObj(object);
+			mlisp_print_obj(object);
 		}
 #endif
 		
 		if (object && object->type != FUNC)
 		{
-			objPush(&mExecStack, object);
+			mlisp_obj_push(&mExecStack, object);
 		}
 	}
 
@@ -1790,19 +1777,19 @@ mObject *MLisp::parseFunction()
 	}
 #endif
 
-	objPush(&mExecStack, mScopeEnd);
+	mlisp_obj_push(&mExecStack, mScopeEnd);
 
-	match(')');
-	parseSeperator();
+	Match(')');
+	ParseSeperator();
 
 	return func;
 }
 
 
-mObject *MLisp::parseNextSymbol()
+MlispObject *MLisp::ParseNextSymbol()
 {
 	int i = 0, j;
-	mObject *object = NULL;
+	MlispObject *object = NULL;
 	bool string = false;
 	bool fp = false;
 	float f;
@@ -1810,21 +1797,21 @@ mObject *MLisp::parseNextSymbol()
 
 	mSymbol[0] = 0;
 	
-	if (is('"'))
+	if (Is('"'))
 	{
-		lex();
+		Lex();
 		string = true;
 	}
 	
 	/* Mongoose 2001.11.09: 
 	 * Best handle for? grouped (func (func */
-	if (is('('))
+	if (Is('('))
 	{
-		return parseFunction();
+		return ParseFunction();
 	}
 	
 	while (string || (i == 0 && mLook == '-') ||
-		   isatoz(mLook) || isAtoZ(mLook) || isDigit(mLook) || isMisc(mLook))
+		   Isatoz(mLook) || IsAtoZ(mLook) || IsDigit(mLook) || IsMisc(mLook))
 	{
 		if (i < (int)mSymbolSize)
 		{
@@ -1832,22 +1819,22 @@ mObject *MLisp::parseNextSymbol()
 			mSymbol[i] = 0;
 		}
 		
-		if (string && is('"'))
+		if (string && Is('"'))
 		{
 			--i;
 			mSymbol[i] = 0;
-			lex();
+			Lex();
 			break;
 		}
 		
-		lex();
+		Lex();
 		
 		if (string)
 		{
 			continue;
 		}
 		
-		if (is('.'))
+		if (Is('.'))
 		{
 			fp = true;
 			
@@ -1856,7 +1843,7 @@ mObject *MLisp::parseNextSymbol()
 				if (!j && mSymbol[j] == '-')
 					continue;
 				
-				if (!isDigit(mSymbol[j]))
+				if (!IsDigit(mSymbol[j]))
 					break;
 			}
 
@@ -1864,18 +1851,18 @@ mObject *MLisp::parseNextSymbol()
 			{
 			  mSymbol[i++] = mLook;
 			  mSymbol[i] = 0;
-			  lex();
+			  Lex();
 			}
 		}
 		
 		
 		// Mongoose 2002.01.23, Hhhmm... fixes -100.00 and -100, 
 		//   but is it 'good idea'?
-		if (is('-') && i == 0)
+		if (Is('-') && i == 0)
 		{
 			mSymbol[i++] = mLook;
 			mSymbol[i] = 0;
-			lex();
+			Lex();
 		}
 	}
 	
@@ -1886,21 +1873,21 @@ mObject *MLisp::parseNextSymbol()
 	}
 #endif
 	
-	if (isNumeric(mSymbol, &f))
+	if (IsNumeric(mSymbol, &f))
 	{
 		if (fp)
 		{
-			object = newFloatObj(f);
+			object = mlisp_new_float_obj(f);
 		}
 		else
 		{
-			object = newIntObj((int)f);
+			object = mlisp_new_int_obj((int)f);
 		}
 	}
 	else
 	{
 		/* Handle symbol references here */
-		if ((getSymbolData(mSymbol, 0, (void **)&object)) == 0)
+		if ((GetSymbolData(mSymbol, 0, (void **)&object)) == 0)
 		{
 		}
 		else
@@ -1908,10 +1895,10 @@ mObject *MLisp::parseNextSymbol()
 			if (!string)
 			{
 				++mErrors;
-				printError("Making string out of non-string <%s>?\n", mSymbol);
+				PrintError("Making string out of non-string <%s>?\n", mSymbol);
 			}
 
-			object = newStringObj(mSymbol);
+			object = mlisp_new_str_obj(mSymbol);
 		}
 	}
 	
@@ -1919,33 +1906,32 @@ mObject *MLisp::parseNextSymbol()
 }
 
 
-void MLisp::parseSeperator()
+void MLisp::ParseSeperator()
 {
 	// Real whitespace stripping
-	while (is(' ') || is('\t') || is('\n'))
+	while (Is(' ') || Is('\t') || Is('\n'))
 	{
-		if (is('\n'))
+		if (Is('\n'))
 		{
 			mLine++;
 		}
 		
-		lex();
+		Lex();
 	}
 }
 
 
-void MLisp::parseString(char *string, int len)
+void MLisp::ParseString(char *string, int len)
 {
 	int i = 0;
 	
-	
-	match('"');
+	Match('"');
 	
 	mString = 1;
 	
 	len -= 2;
 	
-	while (!is('"') && !is(EOF))
+	while (!Is('"') && !Is(EOF))
 	{
 		if (i < len)
 		{
@@ -1953,28 +1939,28 @@ void MLisp::parseString(char *string, int len)
 			string[i] = 0;
 		}
 		
-		lex();
+		Lex();
 	}
 
-	match('"');
+	Match('"');
 
 	mString = 0;
 }
 
 
-int MLisp::registerLispFunctionBuiltIn(const char *symbol, builtin_t func)
-//mObject *(MLisp::*func)(mObjectList *))
+int MLisp::RegisterLispFunctionBuiltIn(const char *symbol, builtin_t func)
+//MlispObject *(MLisp::*func)(MlispObjectList *))
 {
-    mObject *obj = NULL;
+    MlispObject *obj = NULL;
     unsigned int lenght;
                                                                                
 	if (!symbol || !symbol[0]) // || !func)
 	{
-		printError("ERROR Failed builtin function bind %s\n", symbol);
+		PrintError("ERROR Failed builtin function bind %s\n", symbol);
 		return -1;
 	}
 
-	obj = new mObject;
+	obj = new MlispObject;
     obj->type = BUILTINFUNC;
     //obj->data = //(void *)&func;
  
@@ -1987,51 +1973,48 @@ int MLisp::registerLispFunctionBuiltIn(const char *symbol, builtin_t func)
 	strncpy((char *)obj->data, symbol, lenght);
 	((char *)obj->data)[lenght] = 0;
 
-	return appendSymbolTable(obj);
+	return AppendSymbolTable(obj);
 }
 
 
-int MLisp::registerLispFunction(const char *symbol, 
-								mObject *(*func)(mObjectList *))
+int MLisp::RegisterLispFunction(const char *symbol, 
+								MlispObject *(*func)(MlispObjectList *))
 {
 	if (!func)
 	{
 		return -1;
 	}
 
-	return appendSymbolTable(newFuncObj(func, symbol));
+	return AppendSymbolTable(mlisp_new_func_obj(func, symbol));
 }
 
 
-int MLisp::registerSymbol(const char *symbol, unsigned int type, void *data)
+int MLisp::RegisterSymbol(const char *symbol, unsigned int type, void *data)
 {
-	mObject *object;
-
-
 	if (!symbol || !symbol[0])
 	{
 		return -1;
 	}
 
-	object = new mObject;
+	MlispObject *object = new MlispObject;
 	object->type = type;
 	object->data = data;
 	object->flags = mObjDisableGarbageCollection;
 
-	bind(symbol, object);
+	Bind(symbol, object);
 
 	return 0;
 }
 
 
-int MLisp::registerSymbolValue(const char *symbol, float d)
+int MLisp::RegisterSymbolValue(const char *symbol, float d)
 {
-	mObject* object = newFloatObj(d);
+	MlispObject* object = mlisp_new_float_obj(d);
 
 
-	if (registerSymbolObject(symbol, object) < 0)
+	if (RegisterSymbolObject(symbol, object) < 0)
 	{
-		deleteObj(&object);
+		mlisp_delete_obj(&object);
 		return -1;
 	}
 
@@ -2041,14 +2024,14 @@ int MLisp::registerSymbolValue(const char *symbol, float d)
 }
 
 
-int MLisp::registerSymbolValue(const char *symbol, int i)
+int MLisp::RegisterSymbolValue(const char *symbol, int i)
 {
-	mObject* object = newIntObj(i);
+	MlispObject* object = mlisp_new_int_obj(i);
 
 
-	if (registerSymbolObject(symbol, object) < 0)
+	if (RegisterSymbolObject(symbol, object) < 0)
 	{
-		deleteObj(&object);
+		mlisp_delete_obj(&object);
 		return -1;
 	}
 
@@ -2057,29 +2040,29 @@ int MLisp::registerSymbolValue(const char *symbol, int i)
 
 
 // Should dupe data pointer for fear of GC
-mObject *MLisp::builtin_setq(mObjectList *parms)
+MlispObject *MLisp::Builtin_setq(MlispObjectList *parms)
 {
-	mObject *symbol, *data, *obj;
+	MlispObject *symbol, *data, *obj;
 
 
-	symbol = objPop(&parms);
-	data = objPop(&parms);
+	symbol = mlisp_obj_pop(&parms);
+	data = mlisp_obj_pop(&parms);
 
 	obj = 0x0;
 	
 	if (data->type == CSTRING)
 	{
-		obj = getSymbol((char *)data->data);
+		obj = GetSymbol((char *)data->data);
 	}
 
 	if (obj)
 	{
-		registerSymbol((char *)symbol->data, obj->type, obj->data);
+		RegisterSymbol((char *)symbol->data, obj->type, obj->data);
 	}
 	else
 	{
 		//registerSymbolObject((char *)symbol->data, data);
-		registerSymbol((char *)symbol->data, data->type, data->data);
+		RegisterSymbol((char *)symbol->data, data->type, data->data);
 		obj = data;
 	}
 
@@ -2087,14 +2070,14 @@ mObject *MLisp::builtin_setq(mObjectList *parms)
 }
 
 
-int MLisp::registerSymbolValue(const char *symbol, char *string)
+int MLisp::RegisterSymbolValue(const char *symbol, char *string)
 {
-	mObject* object = newStringObj(string);
+	MlispObject* object = mlisp_new_str_obj(string);
 
 
-	if (registerSymbolObject(symbol, object) < 0)
+	if (RegisterSymbolObject(symbol, object) < 0)
 	{
-		deleteObj(&object);
+		mlisp_delete_obj(&object);
 		return -1;
 	}
 
@@ -2102,7 +2085,7 @@ int MLisp::registerSymbolValue(const char *symbol, char *string)
 }
 
 
-int MLisp::registerSymbolObject(const char *symbol, mObject *object)
+int MLisp::RegisterSymbolObject(const char *symbol, MlispObject *object)
 {
 	if (!symbol || !symbol[0] || !object)
 	{
@@ -2110,7 +2093,7 @@ int MLisp::registerSymbolObject(const char *symbol, mObject *object)
 		return -1;
 	}
 
-	bind(symbol, object);
+	Bind(symbol, object);
 
 	return 0;
 }
@@ -2121,13 +2104,13 @@ int MLisp::registerSymbolObject(const char *symbol, mObject *object)
 ////////////////////////////////////////////////////////////
 
 #ifdef UNIT_TEST_MLISP
-mObject *menu(mObjectList *parms)
+MlispObject *menu(MlispObjectList *parms)
 {
-	mObject *xPos, *yPos, *ret, *obj;
+	MlispObject *xPos, *yPos, *ret, *obj;
 
 
-	xPos = objPop(&parms);
-	yPos = objPop(&parms);
+	xPos = mlisp_obj_pop(&parms);
+	yPos = mlisp_obj_pop(&parms);
 	ret = NULL;
 	
 	if (objNumberP(xPos) && objNumberP(yPos))
@@ -2136,15 +2119,15 @@ mObject *menu(mObjectList *parms)
 		printf("extern \"C\" { menu(%f, %f); }\n",
 			   getNumber(xPos), getNumber(yPos));
 
-		while ((obj = objPeek(parms)))
+		while ((obj = mlisp_obj_peek(parms)))
 		{
 			printf("             submenu?, ");
-			printObj(obj);
+			mlisp_print_obj(obj);
 			
-			objPop(&parms);
+			mlisp_obj_pop(&parms);
 		}
 
-		ret = newStringObj("Menu");
+		ret = mlisp_new_str_obj("Menu");
 	}
 	else
 	{
@@ -2156,28 +2139,28 @@ mObject *menu(mObjectList *parms)
 }
 
 
-mObject *submenu(mObjectList *parms)
+MlispObject *submenu(MlispObjectList *parms)
 {
-	mObject *label, *obj, *ret = NULL;
+	MlispObject *label, *obj, *ret = NULL;
 
 
-	label = objPop(&parms);
+	label = mlisp_obj_pop(&parms);
 
-	if (objTypeP(label, CSTRING))
+	if (mlisp_obj_typep(label, CSTRING))
 	{
 		/* Call event func here - simulated with printf in tests */
 		printf("extern \"C\" { submenu(\"%s\"); }\n",
 				 getString(label));
 
-		while ((obj = objPeek(parms)))
+		while ((obj = mlisp_obj_peek(parms)))
 		{
 			printf("             menuitem?, ");
-			printObj(obj);
+			mlisp_print_obj(obj);
 			
-			objPop(&parms);
+			mlisp_obj_pop(&parms);
 		}
 
-		ret = newStringObj(getString(label));
+		ret = mlisp_new_str_obj(getString(label));
 	}
 	else
 	{
@@ -2189,27 +2172,27 @@ mObject *submenu(mObjectList *parms)
 }
 
 
-mObject *menu_item(mObjectList *parms)
+MlispObject *menu_item(MlispObjectList *parms)
 {
-	mObject *label, *event, *ret;
+	MlispObject *label, *event, *ret;
 
 
-	label = objPop(&parms);
-	event = objPop(&parms);
+	label = mlisp_obj_pop(&parms);
+	event = mlisp_obj_pop(&parms);
 	ret = NULL;
 
-	if (objTypeP(label, CSTRING) && objTypeP(label, INT))
+	if (mlisp_obj_typep(label, CSTRING) && mlisp_obj_typep(label, INT))
 	{
 		/* Call event func here - simulated with printf in tests */
 		printf("extern \"C\" { menu_item(\"%s\", %i); }\n",
 				 getString(label), getInt(event));
 
-		ret = newStringObj(getString(label));
+		ret = mlisp_new_str_obj(getString(label));
 	}
 	else
 	{
-		printObj(label);
-		printObj(event);
+		mlisp_print_obj(label);
+		mlisp_print_obj(event);
 		printf("menu_item> Failed to extract strict typed data from script\n");
 	}
 
@@ -2217,20 +2200,22 @@ mObject *menu_item(mObjectList *parms)
 	return ret;
 }
 
-mObject *mlisp_stub(mObjectList *parms)
+
+MlispObject *mlisp_stub(MlispObjectList *parms)
 {
 	return NULL;
 }
 
-mObject *vbox(mObjectList *parms)
+
+MlispObject *vbox(MlispObjectList *parms)
 {
-	mObject *arg;
+	MlispObject *arg;
 
 
-	arg = objPop(&parms);
-	arg = objPop(&parms);
-	arg = objPop(&parms);
-	arg = objPop(&parms);
+	arg = mlisp_obj_pop(&parms);
+	arg = mlisp_obj_pop(&parms);
+	arg = mlisp_obj_pop(&parms);
+	arg = mlisp_obj_pop(&parms);
 	return NULL;
 }
 
@@ -2241,48 +2226,48 @@ int runUnitTest(int argc, char *argv[])
 	int i = 0;
 
 
-	rc.setDebugLevel(5);
+	rc.SetDebugLevel(5);
 
 	if (argc <= 1)
 	{
 		printf("%s FILENAME.LISP\n", argv[0]);
 
-		rc.setDebugLevel(20);
-		rc.evalBuffer("(setq SHOULD_BE_14 (+ 4 5 (- 9 10) (+ 3 (+ 2 1))))");
-		rc.dumpSymbols();
+		rc.SetDebugLevel(20);
+		rc.EvalBuffer("(setq SHOULD_BE_14 (+ 4 5 (- 9 10) (+ 3 (+ 2 1))))");
+		rc.DumpSymbols();
 	}
 	else if (argc > 1)
 	{
-		rc.registerLispFunction("mlispdebug", mlisp_stub);
-		rc.registerLispFunction("window", menu);
-		rc.registerLispFunction("menubar", menu);
-		rc.registerLispFunction("vbox", vbox);
+		rc.RegisterLispFunction("mlispdebug", mlisp_stub);
+		rc.RegisterLispFunction("window", menu);
+		rc.RegisterLispFunction("menubar", menu);
+		rc.RegisterLispFunction("vbox", vbox);
 
-		rc.registerLispFunction("menu", menu);
-		rc.registerLispFunction("submenu", submenu);
-		rc.registerLispFunction("menu_item", menu_item);
-		rc.registerSymbol("cMyCounter", INT, (void *)(&i));
+		rc.RegisterLispFunction("menu", menu);
+		rc.RegisterLispFunction("submenu", submenu);
+		rc.RegisterLispFunction("menu_item", menu_item);
+		rc.RegisterSymbol("cMyCounter", INT, (void *)(&i));
 
-		rc.registerSymbolValue("EVENT_SCREENSHOT",   10);
-		rc.registerSymbolValue("EVENT_QUIT",         11);
-		rc.registerSymbolValue("EVENT_SHOWBONES",    12);
-		rc.registerSymbolValue("EVENT_WIREFRAME",    13);
-		rc.registerSymbolValue("EVENT_FULLSCREEN",   14);
-		rc.registerSymbolValue("EVENT_RES640x480",   15);
-		rc.registerSymbolValue("EVENT_RES800x600",   16);
-		rc.registerSymbolValue("EVENT_RES1024x768",  17);
-		rc.registerSymbolValue("EVENT_RES1280x1024", 18);
+		rc.RegisterSymbolValue("EVENT_SCREENSHOT",   10);
+		rc.RegisterSymbolValue("EVENT_QUIT",         11);
+		rc.RegisterSymbolValue("EVENT_SHOWBONES",    12);
+		rc.RegisterSymbolValue("EVENT_WIREFRAME",    13);
+		rc.RegisterSymbolValue("EVENT_FULLSCREEN",   14);
+		rc.RegisterSymbolValue("EVENT_RES640x480",   15);
+		rc.RegisterSymbolValue("EVENT_RES800x600",   16);
+		rc.RegisterSymbolValue("EVENT_RES1024x768",  17);
+		rc.RegisterSymbolValue("EVENT_RES1280x1024", 18);
 
-		if (argc > 1 && rc.evalFile(argv[1]) < 0)
+		if (argc > 1 && rc.EvalFile(argv[1]) < 0)
 		{
 			printf("Couldn't load file!\n");
 		}
 		else
 		{
-			// rc.evalBuffer("(+ 23 42 54 23)");
+			// rc.EvalBuffer("(+ 23 42 54 23)");
 		}
 
-		rc.dumpSymbols();
+		rc.DumpSymbols();
 	}
 
 	return -1;
