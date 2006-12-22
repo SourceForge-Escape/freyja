@@ -16,6 +16,8 @@
  A
  ----------------------------
 
+ * The mgtk update to remove 'deprecated API' use broke tooltips
+
  * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
 
  * Crash on multiple merge with 'created' objects, but not imported
@@ -25,9 +27,6 @@
  * Quad ray pick sucks - fix it  ;_;
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
-
- * Copy / Cut / Paste 
-	- Use fHidden flag to temp buffer meshes, and avoid it's use in raypick, etc
 
  * Scale tool sucks it's so broke nothing works properly
 	- Keyframe scaling edits geometery instead of keyframe

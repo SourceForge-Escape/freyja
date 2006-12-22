@@ -544,8 +544,10 @@ arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
 		return NULL;
 	}
 
-	GtkWidget *widget = (GtkWidget *)gtk_separator_tool_item_new();
-	gtk_toolbar_append_widget((GtkToolbar *)box->data, widget, "", "");
+	GtkToolItem *item = gtk_separator_tool_item_new();
+	GtkWidget *widget = (GtkWidget *)item;
+	//gtk_toolbar_append_widget((GtkToolbar *)box->data, widget, "", "");
+	gtk_toolbar_insert(GTK_TOOLBAR(box->data), item, -1); // Append to the end
 	gtk_widget_show(widget);
 
 	arg_list_t *ret = NULL;
@@ -576,34 +578,6 @@ arg_list_t *mgtk_rc_toolbar(arg_list_t *box)
 	gtk_widget_show(toolbar);
 
 	new_adt(&ret, ARG_GTK_TOOLBOX_WIDGET, (void *)toolbar);
-
-	return ret;
-}
-
-
-arg_list_t *mgtk_rc_toolbar_box(arg_list_t *box)
-{
-	arg_list_t *ret = NULL;
-	GtkWidget *vbox;
-
-	arg_enforce_type(&box,  ARG_GTK_TOOLBOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
-
-	if (!box)
-	{
-		return NULL;
-	}
-
-	vbox = gtk_vbox_new(FALSE, 0);
-	gtk_widget_ref(vbox);
-	gtk_object_set_data_full(GTK_OBJECT((GtkWidget *)box->data), "box", vbox,
-									 (GtkDestroyNotify)gtk_widget_unref);
-	gtk_widget_show(vbox);
-
-	gtk_toolbar_append_widget(GTK_TOOLBAR((GtkWidget *)box->data), 
-									  vbox, NULL, NULL);
-
-	new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
 
 	return ret;
 }
@@ -1917,26 +1891,12 @@ GtkWidget *append_toolbar_button(GtkWidget *box, GtkWidget *toolbar,
 							const char *name, const char *buttonId,
 							const gchar *stockId, GtkIconSize size)
 {
-	GtkWidget *button;
-	GtkWidget *toolbar_icon;
-
-
-	toolbar_icon = gtk_image_new_from_stock(stockId, size);
-
-#if USE_DEP_GTK_TOOLBAR
-	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-										GTK_TOOLBAR_CHILD_BUTTON,
-										NULL,
-										name,
-										NULL, NULL,
-										toolbar_icon, NULL, NULL);
-#else
-	GtkToolItem *item = gtk_tool_button_new(toolbar_icon,
-											(!name[0]) ? NULL : name);
-	gtk_widget_show(toolbar_icon);
-	button = (GtkWidget *)item;
-	gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, NULL, NULL);
-#endif
+	GtkWidget *gicon = gtk_image_new_from_stock(stockId, size);
+	GtkToolItem *item = gtk_tool_button_new(gicon, (!name[0]) ? NULL : name);
+	gtk_widget_show(gicon);
+	GtkWidget *button = (GtkWidget *)item;
+	//gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, NULL, NULL);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1); // Append to the end	
 
 	gtk_widget_ref(button);
 	gtk_object_set_data_full(GTK_OBJECT(box), buttonId, button,

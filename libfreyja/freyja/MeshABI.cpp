@@ -2022,8 +2022,156 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 
 index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 {
-	MSTL_MSG("Calling stub function");
-	return INDEX_INVALID;
+	Vector<index_t> vertices, texcoords;
+	Vec3 v(origin), n;
+	int32 index;
+
+	index_t mesh = freyjaMeshCreate();
+
+	index_t vertex;
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(0.0, size, 0.0)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(-0.33, 0.33, -0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(size, size, 0.0)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(0.33, 0.33, -0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(size, 0.0, 0.0)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(0.33, -0.33, -0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, v.mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(0.33, 0.33, 0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(0.0, size, size)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(-0.33, 0.33, 0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(size, size, size)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(0.33, 0.33, 0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(size, 0.0, size)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(0.33, -0.33, 0.33)).mVec);
+	vertices.push_back(vertex);
+
+	vertex = freyjaMeshVertexCreate3fv(mesh, (v + Vec3(0.0, 0.0, size)).mVec);
+	freyjaMeshVertexNormal3fv(mesh, vertex, (Vec3(-0.33, -0.33, 0.33)).mVec);
+	vertices.push_back(vertex);
+
+
+	/* Generate polymapped texcoords */
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.0, 0.0));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.25, 0.0));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.25, 0.25));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.0, 0.25));
+
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.25, 0.25));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.5, 0.25));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.5, 0.5));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.25, 0.5));
+
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.5, 0.5));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.75, 0.5));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.75, 0.75));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.5, 0.75));
+
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.75, 0.75));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 1.0, 0.75));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 1.0, 1.0));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.75, 1.0));
+
+	texcoords.push_back(freyjaTexCoordCreate2f(mesh, 0.75, 0.0));
+	texcoords.push_back(freyjaTexCoordCreate2f(mesh, 1.0, 0.0));
+	texcoords.push_back(freyjaTexCoordCreate2f(mesh, 1.0, 0.25));
+	texcoords.push_back(freyjaTexCoordCreate2f(mesh, 0.75, 0.25));
+
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.75, 0.25));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 1.0, 0.25));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 1.0, 0.50));
+	texcoords.push_back(freyjaMeshTexCoordCreate2f(mesh, 0.75, 0.50));
+
+
+	/* Now generate mesh */
+	index_t face = freyjaMeshPolygonCreate(mesh);
+	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[0]);
+	freyjaPolygonVertex1i(vertices[0]);
+	freyjaPolygonTexCoord1i(texcoords[1]);
+	freyjaPolygonVertex1i(vertices[1]);
+	freyjaPolygonTexCoord1i(texcoords[2]);
+	freyjaPolygonVertex1i(vertices[5]);
+	freyjaPolygonTexCoord1i(texcoords[3]);
+	freyjaPolygonVertex1i(vertices[4]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonTexCoord1i(texcoords[4]);
+	freyjaPolygonVertex1i(vertices[3]);
+	freyjaPolygonTexCoord1i(texcoords[5]);
+	freyjaPolygonVertex1i(vertices[7]);
+	freyjaPolygonTexCoord1i(texcoords[6]);
+	freyjaPolygonVertex1i(vertices[6]);
+	freyjaPolygonTexCoord1i(texcoords[7]);
+	freyjaPolygonVertex1i(vertices[2]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonTexCoord1i(texcoords[8]);
+	freyjaPolygonVertex1i(vertices[4]);
+	freyjaPolygonTexCoord1i(texcoords[9]);
+	freyjaPolygonVertex1i(vertices[0]);
+	freyjaPolygonTexCoord1i(texcoords[10]);
+	freyjaPolygonVertex1i(vertices[3]);
+	freyjaPolygonTexCoord1i(texcoords[11]);
+	freyjaPolygonVertex1i(vertices[7]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonTexCoord1i(texcoords[12]);
+	freyjaPolygonVertex1i(vertices[0]);
+	freyjaPolygonTexCoord1i(texcoords[13]);
+	freyjaPolygonVertex1i(vertices[1]);
+	freyjaPolygonTexCoord1i(texcoords[14]);
+	freyjaPolygonVertex1i(vertices[2]);
+	freyjaPolygonTexCoord1i(texcoords[15]);
+	freyjaPolygonVertex1i(vertices[3]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonTexCoord1i(texcoords[16]);
+	freyjaPolygonVertex1i(vertices[1]);
+	freyjaPolygonTexCoord1i(texcoords[17]);
+	freyjaPolygonVertex1i(vertices[2]);
+	freyjaPolygonTexCoord1i(texcoords[18]);
+	freyjaPolygonVertex1i(vertices[6]);
+	freyjaPolygonTexCoord1i(texcoords[19]);
+	freyjaPolygonVertex1i(vertices[5]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaBegin(FREYJA_POLYGON);
+	freyjaPolygonTexCoord1i(texcoords[20]);
+	freyjaPolygonVertex1i(vertices[4]);
+	freyjaPolygonTexCoord1i(texcoords[21]);
+	freyjaPolygonVertex1i(vertices[5]);
+	freyjaPolygonTexCoord1i(texcoords[22]);
+	freyjaPolygonVertex1i(vertices[6]);
+	freyjaPolygonTexCoord1i(texcoords[23]);
+	freyjaPolygonVertex1i(vertices[7]);
+	freyjaPolygonMaterial1i(0);
+	freyjaEnd(); // FREYJA_POLYGON
+
+	freyjaEnd(); // FREYJA_MESH
+
+	freyjaCriticalSectionUnlock(lock);
+
+	return mesh;
 }
 
 

@@ -811,21 +811,18 @@ GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name,
 
 GtkWidget *mgtk_create_toolbar(GtkWidget *box)
 {
-	GtkWidget *toolbar;
-
-
-	toolbar = gtk_toolbar_new();
+	GtkWidget *toolbar = gtk_toolbar_new();
 
 	gtk_widget_ref(toolbar);
 	gtk_object_set_data_full(GTK_OBJECT(box), "tbar", toolbar,
-									 (GtkDestroyNotify)gtk_widget_unref);
+							 (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(toolbar);
-
 	gtk_box_pack_start(GTK_BOX(box), toolbar, 1, 1, 0);
 
 #ifdef FORCE_ICON_TOOLBAR
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 #endif
+	gtk_toolbar_set_tooltips(GTK_TOOLBAR(toolbar), TRUE);
 
 	return toolbar;
 }
@@ -863,28 +860,19 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 											 char *help, 
 											 void *event_func, int event_cmd)
 {
-	GtkWidget *togglebutton;
-	GtkWidget *toolbar_icon;
-
-	toolbar_icon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
-
-#if USE_DEP_GTK_TOOLBAR
-	togglebutton = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-											  GTK_TOOLBAR_CHILD_TOGGLEBUTTON,
-											  NULL,
-											  (!label[0]) ? NULL : label,
-											  help, NULL,
-											  toolbar_icon, NULL, NULL);
-#else
+	GtkWidget *gicon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
 	GtkToolItem *item = gtk_toggle_tool_button_new();
-	gtk_tool_button_set_label((GtkToolButton*)item, (!label[0]) ? NULL : label);
-	gtk_tool_button_set_icon_widget((GtkToolButton*)item, toolbar_icon);
-	gtk_widget_show(toolbar_icon);
+	GtkWidget *togglebutton = (GtkWidget *)item;
 
-	togglebutton = (GtkWidget *)item;
-	gtk_toolbar_append_widget((GtkToolbar *)toolbar, togglebutton, help, NULL);
-#endif
-	
+	gtk_tool_button_set_label((GtkToolButton*)item, (!label[0]) ? NULL : label);
+	gtk_tool_button_set_icon_widget((GtkToolButton*)item, gicon);
+	gtk_widget_show(gicon);
+	//gtk_toolbar_append_widget(GTK_TOOLBAR(toolbar), togglebutton, help, NULL);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1); // Append to the end
+
+	GtkTooltips *tips = gtk_tooltips_new();
+	gtk_tool_item_set_tooltip(item, tips, help, NULL);
+
 	gtk_widget_ref(togglebutton);
 	gtk_object_set_data_full(GTK_OBJECT(toolbar), "tb_tbtn",
 							 togglebutton,
@@ -899,28 +887,17 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
 									  char *icon, char *label, char *help, 
 									  void *event_func, int event_cmd)
 {
-	GtkWidget *button;
-	GtkWidget *toolbar_icon;
-	
-	
-	toolbar_icon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
+	GtkWidget *gicon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
+	GtkToolItem *item = gtk_tool_button_new(gicon, (!label[0]) ? NULL : label);
+	GtkWidget *button = (GtkWidget *)item;
+	gtk_widget_show(gicon);
 
-#if USE_DEP_GTK_TOOLBAR
-	button = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-										GTK_TOOLBAR_CHILD_BUTTON,
-										NULL,
-										(!label[0]) ? NULL : label,
-										help, NULL,
-										toolbar_icon, NULL, NULL);
-#else
-	GtkToolItem *item = gtk_tool_button_new(toolbar_icon,
-											(!label[0]) ? NULL : label);
-	gtk_widget_show(toolbar_icon);
-	//gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1);
-	button = (GtkWidget *)item;
-	gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, help, NULL);
-#endif
-	
+	//gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, help, NULL);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1); // Append to the end
+
+	GtkTooltips *tips = gtk_tooltips_new();
+	gtk_tool_item_set_tooltip(item, tips, help, NULL);
+
 	if (event_func)
 	{
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",

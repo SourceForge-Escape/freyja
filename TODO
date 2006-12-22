@@ -22,6 +22,8 @@
 		- ZIP file based pak format for freyja format models w/ textures, etc
 
 	* Misc
+		- Face flag for marking faces that need to be depth sorted... 
+			- Yeah, I couldn't stand it any longer
 		- Stiching mode for making faces from existing vertices
 			- This is an old 'Fan favorite' feature of freyja
 			- Stiching existing vertices should be a seperate mode
@@ -29,6 +31,9 @@
 			  strip mode for the control point renderer to avoid writes to mesh
 			- Have the user press <ctrl> mouse2 to generate the polygons
 		- Mesh parenting and grouping?
+		- Copy / Cut / Paste / Dupe / Split / Merge for every object type?
+		- Generic texture lists for materials: 
+			- Shaders can use them for normal maps, gloss, data, etc
 
 	* To be finalized
 		- Track and Keyframe classes 
@@ -385,6 +390,9 @@
 <DMJC> it's a perfect example of less is more
 
 
+== Web site request ==
+<floam> iframes are pretty scary
+<floam> you should alter your blogger template to not have any css itself and style it in your real site
 
 
 

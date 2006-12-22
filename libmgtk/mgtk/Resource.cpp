@@ -531,7 +531,6 @@ Resource::Resource() :
 	RegisterFunction("menubar", mgtk_rc_menubar);
 	RegisterFunction("tree", mgtk_rc_animation_tab_hack);
 	RegisterFunction("toolbar", mgtk_rc_toolbar);
-	RegisterFunction("toolbar_box", mgtk_rc_toolbar_box);
 	RegisterFunction("toolbar_togglebutton", mgtk_rc_toolbar_togglebutton);
 	RegisterFunction("toolbar_button", mgtk_rc_toolbar_button);
 	RegisterFunction("hslider", mgtk_rc_hslider);
