@@ -10,6 +10,12 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - mgtk toolbar_box widget removed
+ - Fix for mgtk toolbars not showing tooltips after deprecated API removal
+ - Gtk+ toolbar deprecated API use removed ( No more spewing Gtk+ warnings )
+ - Win32 FPS cap off
+ - Fix for Win32 png and jpeg image plugin Makefiles
+ - Win32 build GLSL support handles OpenGL 1.1+
  - Win32 build fixes
  - Touch up for the trusty String class
  - Fix for double save due to odd Gtk+ event using static guard in UI

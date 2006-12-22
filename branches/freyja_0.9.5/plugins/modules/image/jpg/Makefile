@@ -136,7 +136,7 @@ win32:
 	LD=$(WIN32_LD)  \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
+	LIBS="-lstdc++ -lm -ljpeg $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
 
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)

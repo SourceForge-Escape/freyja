@@ -485,7 +485,8 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 
 void FreyjaRender::Display() 
 { 
-	if (!mInitContext || mTimer.GetTicks() < 1667) // ~60.0 fps cap
+	if (!mInitContext || 
+		(mFlags & fFPSCap) && mTimer.GetTicks() < 1667) // ~60.0 fps cap
 	{
 		//freyja_print("%f frames dropped", (float)mTimer.GetTicks()/1000.0f);
 		return;
