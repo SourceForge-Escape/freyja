@@ -4,15 +4,19 @@
  * Project : MLisp
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://icculus.org/~mongoose/
- * Email   : mongoose@icculus.org
+ * Email   : mongooseichiban@gmail.com
  * Object  : MLisp
- * License : No use w/o permission (C) 2001-2005 Mongoose
+ * License : No use w/o permission (C) 2001-2006 Mongoose
  * Comments: MLisp domain language class
  *
  *           This file was generated using Mongoose's C++ 
  *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------ 
+ *
+ * 2006.12.21:
+ * Mongoose - Update to meet freyja code guidelines, which makes it easier
+ *            to read and automate tasks on.
  *
  * 2004.01.26:
  * Mongoose - API change for function signature
@@ -24,11 +28,12 @@
  * Mongoose - Created
  ===========================================================================*/
 
-#ifndef GUARD__MLISP_MONGOOSE_MLISP_H_
-#define GUARD__MLISP_MONGOOSE_MLISP_H_
+#ifndef GUARD__MLISP_MLISP_H_
+#define GUARD__MLISP_MLISP_H_
 
 #include <stdio.h>
 
+extern "C" { // This should be moved into a 'C ABI' header for automation
 
 typedef enum
 {
@@ -41,52 +46,69 @@ typedef enum
 	BEGIN     = 7,
 	END       = 8,
 	BUILTINFUNC = 9,
-	RESERVED4 = 10
+	ADT       = 10
 
-} mObjectType;
+} MlispObjectType;
 
 
 typedef enum
 {
 	mObjDisableGarbageCollection = 1
 
-} mObjectFlags;
+} MlispObjectFlags;
 
 
-typedef struct mObject_s
+typedef struct MlispObject_s
 {
 	unsigned int type;
 	unsigned char flags;
 	char *symbol;
 	void *data;
 
-} mObject;
+} MlispObject;
 
 
-typedef struct mObjectList_s
+typedef struct MlispObjectList_s
 {
-	struct mObjectList_s *next;
-	mObject *data;
+	struct MlispObjectList_s *next;
+	MlispObject *data;
 
-} mObjectList;
-
-
-#define getNumber(obj) (float)((obj->type == INT) ? (*((int*)(obj->data))) : \
-							 (obj->type == FLOAT) ? (*((float*)(obj->data))):0)
-#define getString(obj) (obj->type == CSTRING) ? (char *)(obj->data) : 0
-#define getInt(obj) (obj->type == INT) ? (*((int *)(obj->data))) : 0
-#define objTypeP(obj, objtype) obj ? (obj->type == objtype) : 0 
-#define objNumberP(obj) obj ? (obj->type == INT || obj->type == FLOAT) : 0 
+} MlispObjectList;
 
 
-void deleteObj(mObject **object);
-mObject *newADTObj(unsigned int type, void *data);
+#define mlisp_get_number(obj) (float)((obj->type == INT) ? (*((int*)(obj->data))) : (obj->type == FLOAT) ? (*((float*)(obj->data))):0)
 
-mObjectList *objAppend(mObject *object, mObjectList *list);
-void objPush(mObjectList **list, mObject *object);
-mObject *objPop(mObjectList **list);
-mObject *objPeek(mObjectList *list);
-mObject *newListObj(mObjectList *list);
+#define mlisp_get_string(obj) (obj->type == CSTRING) ? (char *)(obj->data) : 0
+
+#define mlisp_get_int(obj) (obj->type == INT) ? (*((int *)(obj->data))) : 0
+
+#define mlisp_obj_typep(obj, objtype) obj ? (obj->type == objtype) : 0 
+
+#define mlisp_obj_numberp(obj) obj ? (obj->type == INT || obj->type == FLOAT) : 0
+
+MlispObject *mlisp_new_list_obj(MlispObjectList *list);
+
+MlispObjectList *mlisp_obj_append(MlispObject *object, MlispObjectList *list);
+
+MlispObject *mlisp_new_obj(unsigned int type, void *data);
+
+MlispObject *mlisp_new_float_obj(float n);
+
+MlispObject *mlisp_new_int_obj(int n);
+
+MlispObject *mlisp_new_str_obj(const char *s);
+
+MlispObject *mlisp_new_func_obj(MlispObject *(*f)(MlispObjectList *), const char *name);
+
+void mlisp_delete_obj(MlispObject **object);
+
+void mlisp_obj_push(MlispObjectList **list, MlispObject *object);
+
+MlispObject *mlisp_obj_peek(MlispObjectList *list);
+
+MlispObject *mlisp_obj_pop(MlispObjectList **list);
+
+}
 
 
 class MLisp
@@ -128,7 +150,7 @@ class MLisp
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	void dumpSymbols();
+	void DumpSymbols();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -140,7 +162,7 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	mObject *getSymbol(const char *symbol);
+	MlispObject *GetSymbol(const char *symbol);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Object bound to symbol or NULL ( 0x0 )
@@ -151,12 +173,12 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int getSymbolData(char *symbol, unsigned int type, void **data);
+	int GetSymbolData(char *symbol, unsigned int type, void **data);
 	/*------------------------------------------------------
 	 * Pre  : CAUTION
 	 *        This is low level, know what you're doing
 	 * 
-	 *        Set TYPE to 0 for the whole mObject
+	 *        Set TYPE to 0 for the whole MlispObject
 	 *
 	 * Post : Gets the address of the symbol's data, 
 	 *        func ptr, etc -- so you can do some real damage
@@ -174,7 +196,7 @@ class MLisp
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void setDebugLevel(int level);
+	void SetDebugLevel(int level);
 	/*------------------------------------------------------
 	 * Pre  : Larger the number, more dumping
 	 * Post : Sets debug level
@@ -185,7 +207,7 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int evalBuffer(const char *buffer);
+	int EvalBuffer(const char *buffer);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Parses and evaluates buffer
@@ -196,7 +218,7 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int evalFile(const char *filename);
+	int EvalFile(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -209,7 +231,7 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	mObject *parseNextSymbol();
+	MlispObject *ParseNextSymbol();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -224,11 +246,11 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int registerLispFunctionBuiltIn(const char *symbol, builtin_t func);
+	int RegisterLispFunctionBuiltIn(const char *symbol, builtin_t func);
 	//int registerLispFunctionBuiltIn(char *symbol, 
-	//								mObject *(Mlisp::*func)(mObjectList *));
-	int registerLispFunction(const char *symbol, 
-							 mObject *(*func)(mObjectList *));
+	//								MlispObject *(Mlisp::*func)(MlispObjectList *));
+	int RegisterLispFunction(const char *symbol, 
+							 MlispObject *(*func)(MlispObjectList *));
 	/*------------------------------------------------------
 	 * Pre  : Symbol is valid string
 	 *        Func is a valid and working function
@@ -243,7 +265,7 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int registerSymbol(const char *symbol, unsigned int type, void *data);
+	int RegisterSymbol(const char *symbol, unsigned int type, void *data);
 	/*------------------------------------------------------
 	 * Pre  : <Symbol> is valid string symbol
 	 *        <Type> is valid for data
@@ -269,9 +291,9 @@ class MLisp
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int registerSymbolValue(const char *symbol, float d);
-	int registerSymbolValue(const char *symbol, int i);
-	int registerSymbolValue(const char *symbol, char *string);
+	int RegisterSymbolValue(const char *symbol, float d);
+	int RegisterSymbolValue(const char *symbol, int i);
+	int RegisterSymbolValue(const char *symbol, char *string);
 	/*------------------------------------------------------
 	 * Pre  : Symbol is valid string
 	 *
@@ -294,7 +316,7 @@ private:
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	static bool isAtoZ(char c);
+	static bool IsAtoZ(char c);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -305,7 +327,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static bool isatoz(char c);
+	static bool Isatoz(char c);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -316,7 +338,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static bool isDigit(char c);
+	static bool IsDigit(char c);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -327,7 +349,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static bool isMisc(char c);
+	static bool IsMisc(char c);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -338,7 +360,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static bool isNumeric(char *symbol, float *n);
+	static bool IsNumeric(char *symbol, float *n);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -349,7 +371,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void printError(char *format, ...);
+	void PrintError(char *format, ...);
 	/*------------------------------------------------------
 	 * Pre  : Works like printf, but cooler than that
 	 *        also limits text to 256 bytes
@@ -368,7 +390,7 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	int appendSymbolTable(mObject *object);
+	int AppendSymbolTable(MlispObject *object);
 	/*------------------------------------------------------
 	 * Pre  : <Object> is valid in every field
 	 *
@@ -380,7 +402,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void bind(const char *symbol, mObject *data);
+	void Bind(const char *symbol, MlispObject *data);
 	/*------------------------------------------------------
 	 * Pre  : Symbol is a CSTRING type and has string data
 	 *
@@ -395,7 +417,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int bufferFile(const char *filename, char **buffer, unsigned int *bytes);
+	int BufferFile(const char *filename, char **buffer, unsigned int *bytes);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Buffers loaded script file
@@ -406,7 +428,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void clear();
+	void Clear();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Flushs mlisp symbol table and other
@@ -418,8 +440,8 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 	
-	mObject *evalFunction(mObjectList **stack, mObject *func);
-	void eval();
+	MlispObject *EvalFunction(MlispObjectList **stack, MlispObject *func);
+	void Eval();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Evaluates whatever is in the mExecStack
@@ -430,7 +452,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void expected(char c);
+	void Expected(char c);
 	/*------------------------------------------------------
 	 * Pre  : C is char that was expected from the text
 	 *        buffer
@@ -443,7 +465,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool is(char c);
+	bool Is(char c);
 	/*------------------------------------------------------
 	 * Pre  : C is char you're looking for next from text
 	 *        buffer
@@ -460,7 +482,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	mObject *getNextSymbol();
+	MlispObject *GetNextSymbol();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets the next symbol from eval buffer
@@ -471,7 +493,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void lex();
+	void Lex();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -483,7 +505,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool match(char c);
+	bool Match(char c);
 	/*------------------------------------------------------
 	 * Pre  : C is char you're looking for next from text
 	 *        buffer
@@ -501,7 +523,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int parseEvalBuffer(const char *buffer);
+	int ParseEvalBuffer(const char *buffer);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -514,7 +536,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void parseComment();
+	void ParseComment();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -526,9 +548,9 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	mObject *parseFunction();
+	MlispObject *ParseFunction();
 	/*------------------------------------------------------
-	 * Pre  : Arg is valid and allocated mObject
+	 * Pre  : Arg is valid and allocated MlispObject
 	 *
 	 * Post : Arg is bound to symbol
 	 *        Returns arg list generated by function
@@ -539,7 +561,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void parseSeperator();
+	void ParseSeperator();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 *
@@ -552,7 +574,7 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void parseString(char *string, int len);
+	void ParseString(char *string, int len);
 	/*------------------------------------------------------
 	 * Pre  : String is allocated to buffer the string
 	 *        Len is the number of allocated bytes of
@@ -567,9 +589,14 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	mObject *builtin_setq(mObjectList *parms);
+	MlispObject *Builtin_setq(MlispObjectList *parms);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	int registerSymbolObject(const char *symbol, mObject *object);
+	int RegisterSymbolObject(const char *symbol, MlispObject *object);
 	/*------------------------------------------------------
 	 * Pre  : Be really careful making valid objects
 	 * Post : Registers a premade object to symbol table
@@ -581,15 +608,15 @@ private:
 	 ------------------------------------------------------*/
 
 
-	mObjectList *mSymbolTable;    /* Holds all the symbols, data, func */
+	MlispObjectList *mSymbolTable;    /* Holds all the symbols, data, func */
 
-	mObjectList *mDataStack;      /* Stack of records for internal use */
+	MlispObjectList *mDataStack;      /* Stack of records for internal use */
 
-	mObjectList *mExecStack;      /* Execution stack for internal use */
+	MlispObjectList *mExecStack;      /* Execution stack for internal use */
 
-	mObject *mScopeBegin;         /* Used to define scope boundries */
+	MlispObject *mScopeBegin;         /* Used to define scope boundries */
 
-	mObject *mScopeEnd;           /* Used to define scope boundries */
+	MlispObject *mScopeEnd;           /* Used to define scope boundries */
 
 
 	/* RDP goodies */

@@ -10,6 +10,7 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Removed some dead source in mgtk and update MLisp API
  - mgtk toolbar_box widget removed
  - Fix for mgtk toolbars not showing tooltips after deprecated API removal
  - Gtk+ toolbar deprecated API use removed ( No more spewing Gtk+ warnings )
