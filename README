@@ -126,6 +126,7 @@
 	svn co svn+ssh://USERNAME@svn.icculus.org/public/freyja/trunk/ freyja
 
 
-
-
+ Misc
+ ----------------------------------------------------------------------------
+ - Quads are ABCD clockwise ( not ABDC )
 

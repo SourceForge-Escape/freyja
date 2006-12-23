@@ -2286,3 +2286,96 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 	MSTL_MSG("Calling stub function");
 	return INDEX_INVALID;
 }
+
+
+void freyjaMeshTesselateTriangles(index_t mesh)
+{
+	Vector<index_t> purge;
+	index_t polygon;
+	uint32 polygonCount = freyjaGetMeshPolygonCount(mesh);
+
+	for (uint32 i = 0, vertexCount = 0; i < polygonCount; ++i)
+	{
+		polygon = i;  
+
+		// You can check the polygon to be sure it's allocated, but
+		// unallocated polygons have zero vertices anyway
+		vertexCount = freyjaGetMeshPolygonVertexCount(mesh, polygon);
+
+		// For the sake of compatibility only support quads for now
+		switch (vertexCount)
+		{
+		case 0: // Unallocated or empty
+		case 1: // Point?
+		case 2: // Line?
+		case 3: // Already a triangle
+			break;
+
+		case 4: // Quad
+			{
+				index_t a, b, c, d, ta, tb, tc, td;
+				index_t material = freyjaGetMeshPolygonMaterial(mesh, polygon);
+
+				// FIXME: Might want to copy flags too!
+
+				/* 1. Get ABCD quad vertices */
+				a = freyjaGetMeshPolygonVertexIndex(mesh, polygon, 0);
+				b = freyjaGetMeshPolygonVertexIndex(mesh, polygon, 1);
+				c = freyjaGetMeshPolygonVertexIndex(mesh, polygon, 2);
+				d = freyjaGetMeshPolygonVertexIndex(mesh, polygon, 3);
+
+				if (freyjaGetMeshPolygonTexCoordCount(mesh, polygon))
+				{
+					ta = freyjaGetMeshPolygonTexCoordIndex(mesh, polygon, 0);
+					tb = freyjaGetMeshPolygonTexCoordIndex(mesh, polygon, 1);
+					tc = freyjaGetMeshPolygonTexCoordIndex(mesh, polygon, 2);
+					td = freyjaGetMeshPolygonTexCoordIndex(mesh, polygon, 3);
+				}
+
+				/* 2. Make ABC ACD triangles */
+				index_t triangle = freyjaMeshPolygonCreate(mesh);
+				freyjaMeshPolygonMaterial(mesh, triangle, material);
+				freyjaMeshPolygonAddVertex1i(mesh, triangle, a);
+				freyjaMeshPolygonAddVertex1i(mesh, triangle, b);
+				freyjaMeshPolygonAddVertex1i(mesh, triangle, c);
+
+				if (freyjaGetMeshPolygonTexCoordCount(mesh, polygon))
+				{
+					freyjaMeshPolygonAddTexCoord1i(mesh, triangle, ta);
+					freyjaMeshPolygonAddTexCoord1i(mesh, triangle, tb);
+					freyjaMeshPolygonAddTexCoord1i(mesh, triangle, tc);
+				}
+
+
+				triangle = freyjaMeshPolygonCreate(mesh);
+				freyjaMeshPolygonMaterial(mesh, triangle, material);
+				freyjaMeshPolygonAddVertex1i(mesh, triangle, a);
+				freyjaMeshPolygonAddVertex1i(mesh, triangle, c);
+				freyjaMeshPolygonAddVertex1i(mesh, triangle, d);
+
+				if (freyjaGetMeshPolygonTexCoordCount(mesh, polygon))
+				{
+					freyjaMeshPolygonAddTexCoord1i(mesh, triangle, ta);
+					freyjaMeshPolygonAddTexCoord1i(mesh, triangle, tc);
+					freyjaMeshPolygonAddTexCoord1i(mesh, triangle, td);
+				}
+
+				/* 3. Prepare to remove ABCD polygon and update references */
+				purge.push_back(polygon);
+			}
+			break;
+
+		default:
+			MSTL_MSG("Can not tesselate face[%i] with %i sides.", 
+					 polygon, vertexCount);
+		}
+	}
+
+	// Remove the faces we just tesselated
+	uint32 i;
+	foreach (purge, i)
+	{
+		freyjaMeshPolygonDelete(mesh, purge[i]);
+	}
+}
+
