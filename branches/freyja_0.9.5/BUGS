@@ -16,7 +16,7 @@
  A
  ----------------------------
 
- * The mgtk update to remove 'deprecated API' use broke tooltips
+ * Crash on moving deleted face!
 
  * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
 
