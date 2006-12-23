@@ -5336,6 +5336,10 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 					bool found = false;
 
 					Face *f = m->GetFace(GetSelectedFace());
+
+					if (!f)
+						return;
+
 					uint32 i, idx;
 					foreach (f->mIndices, i)
 					{

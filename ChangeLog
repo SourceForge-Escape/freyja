@@ -10,6 +10,7 @@
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for crash on moving deleted face!
  - C based float query dialogs ( very nice )
  - Got a couple of mesh generation legacy replacements in today
  - Removed some dead source in mgtk and update MLisp API

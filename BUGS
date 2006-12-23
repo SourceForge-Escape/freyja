@@ -16,8 +16,6 @@
  A
  ----------------------------
 
- * Crash on moving deleted face!
-
  * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
 
  * Crash on multiple merge with 'created' objects, but not imported
