@@ -814,7 +814,6 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 			GetVertexPos(f->mIndices[0], a.mVec);
 			GetVertexPos(f->mIndices[1], b.mVec);
 
-
 			for (uint32 j = 2; j < jCount; ++j)
 			{
 				GetVertexPos(f->mIndices[j], c.mVec);
@@ -824,8 +823,8 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 				{
 					break;
 				}
-			
-				a = b;
+
+				//a = b;
 				b = c;
 			}
 

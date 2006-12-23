@@ -22,8 +22,6 @@
 
  * Crash on repeated failed compile / linking with shaders ( driver issue? )
 
- * Quad ray pick sucks - fix it  ;_;
-
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
 
  * Scale tool sucks it's so broke nothing works properly
