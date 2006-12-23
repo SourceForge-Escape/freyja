@@ -22,6 +22,7 @@
 		- ZIP file based pak format for freyja format models w/ textures, etc
 
 	* Misc
+		- Int, Float, String pop-up dialog prompts ( from C/C++ )
 		- Face flag for marking faces that need to be depth sorted... 
 			- Yeah, I couldn't stand it any longer
 		- Stiching mode for making faces from existing vertices

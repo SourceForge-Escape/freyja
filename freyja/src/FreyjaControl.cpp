@@ -2496,11 +2496,10 @@ bool FreyjaControl::event(int command)
 
 	case eGenerateCube:
 		{
-			Vector3d v;
-
-			v.zero();
+			Vec3 v(mGenMeshHeight * -0.5f, 0.0f, mGenMeshHeight * -0.5f);
+			index_t mesh = freyjaMeshCreateCube(v.mVec, mGenMeshHeight);
+			SetSelectedMesh(mesh);
 			mCleared = false;
-			freyjaGenerateQuadCubeMesh(v.mVec, mGenMeshHeight);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -2508,11 +2507,10 @@ bool FreyjaControl::event(int command)
 
 	case eGeneratePlane:
 		{
-			Vector3d v;
-
-			v.zero();
+			vec_t size = mGenMeshHeight * 4;
+			Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
+			freyjaMeshCreateSheet(v.mVec, size, 1, 1);
 			mCleared = false;
-			freyjaGenerateQuadPlaneMesh(v.mVec, mGenMeshHeight);
 			freyja_event_gl_refresh();
 		}
 		break;
