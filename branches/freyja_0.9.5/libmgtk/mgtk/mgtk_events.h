@@ -76,6 +76,9 @@ void mgtk_toggle_value_set(int event, int val);
 
 
 /* Call into special mgtk using these internal mgtk functions below */
+float mgtk_create_query_dialog_float(char *image, char *message,
+									 float value, float min, float max, 
+									 float step, int digits);
 void mgtk_create_info_dialog(char *icon, char *message);
 int mgtk_create_confirm_dialog(char *dialog_icon,
 							   char *information_message, 

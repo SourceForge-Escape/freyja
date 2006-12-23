@@ -2470,12 +2470,18 @@ bool FreyjaControl::event(int command)
 
 	case eGenerateTube:
 		{
-			Vector3d v;
-
-			v.zero();
+			float h = mGenMeshHeight; //mgtk_create_query_dialog_float("gtk-dialog-question", "Height?", mGenMeshHeight, 0.5, 64, 1, 3);
+			int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+													  "How many vertices in a ring?",
+													  mGenMeshCount, 1, 128, 
+													  1, 1);
+			int seg = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+													  "How many segments?",
+													  mGenMeshSegements, 1, 128, 
+													  1, 1);
+			Vec3 v;
+			freyjaGenerateTubeMesh(v.mVec, h, count, seg);
 			mCleared = false;
-			freyjaGenerateTubeMesh(v.mVec, mGenMeshHeight, 
-								   mGenMeshCount, mGenMeshSegements);
 			freyja_event_gl_refresh();
 		}
 		break;
@@ -2496,8 +2502,12 @@ bool FreyjaControl::event(int command)
 
 	case eGenerateCube:
 		{
-			Vec3 v(mGenMeshHeight * -0.5f, 0.0f, mGenMeshHeight * -0.5f);
-			index_t mesh = freyjaMeshCreateCube(v.mVec, mGenMeshHeight);
+			float size = mgtk_create_query_dialog_float("gtk-dialog-question",
+														"Size?",
+														mGenMeshHeight, 0.5, 64, 
+														1, 3);
+			Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
+			index_t mesh = freyjaMeshCreateCube(v.mVec, size);
 			SetSelectedMesh(mesh);
 			mCleared = false;
 			freyja_event_gl_refresh();
@@ -2507,9 +2517,19 @@ bool FreyjaControl::event(int command)
 
 	case eGeneratePlane:
 		{
+			int rows = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+													  "How many rows?",
+													  1, 1, 64, 
+													  1, 1);
+
+			int cols = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+													  "How many columns?",
+													  1, 1, 64, 
+													  1, 1);
+
 			vec_t size = mGenMeshHeight * 4;
 			Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
-			freyjaMeshCreateSheet(v.mVec, size, 1, 1);
+			freyjaMeshCreateSheet(v.mVec, size, rows, cols);
 			mCleared = false;
 			freyja_event_gl_refresh();
 		}

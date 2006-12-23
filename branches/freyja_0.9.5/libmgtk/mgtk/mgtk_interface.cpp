@@ -649,6 +649,37 @@ void mgtk_create_info_dialog(char *dialog_icon, char *message)
 }
 
 
+float mgtk_create_query_dialog_float(char *image, char *message, 
+									 float value, float min, float max, 
+									 float step, int digits)
+{
+	GtkWidget *dialog = gtk_dialog_new();	
+
+	GtkWidget *icon = mgtk_create_icon(image, GTK_ICON_SIZE_DIALOG);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), icon);
+
+	GtkWidget *label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), message);
+	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), label);
+
+	GtkWidget *spinbutton = mgtk_create_spinbutton2(GTK_DIALOG(dialog)->vbox, "spin", value, min, max, step, step*10, step*10, digits);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), spinbutton);
+
+	gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, 1);
+	gtk_widget_show_all(dialog);
+
+	/* Force user to close this dialog by stopping other events */
+	gtk_dialog_run(GTK_DIALOG(dialog));
+
+	value = gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(spinbutton));
+
+	gtk_widget_destroy(dialog);
+
+	return value;
+}
+
+
 GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func)
 {
 	GtkWidget *dialog =  gtk_color_selection_dialog_new(title);
