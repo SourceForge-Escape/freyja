@@ -16,6 +16,9 @@
  A
  ----------------------------
 
+ * hel::Matrix sometimes 'misplaces' the translation col, so far it seems only
+   a few methods have the issue, but this shows it needs refactor =(
+
  * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
 
  * Crash on multiple merge with 'created' objects, but not imported

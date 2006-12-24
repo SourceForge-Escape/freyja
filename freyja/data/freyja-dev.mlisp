@@ -859,15 +859,14 @@
 	;; A box here would be under the tabs and the main window
 
 	;; Animation bar
- 					(handlebox 1 
-						(vbox 0 0 0 1 0	
-							(hbox 0 1 0 1 0
+	(hbox 0 1 0 1 0
+		(hbox 0 1 1 1 1
+		(hslider eAnimationSlider 0 500))
 
-					(hbox 0 1 1 1 1
-						(hslider eAnimationSlider 0 500))
-
-					(hbox 0 1 0 1 0
-						(toolbar
+ 	(handlebox 1 
+		(vbox 0 0 0 1 0	
+			(hbox 1 1 0 1 0
+				(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
 						"Auto" "Animation mode (Auto Keyframe)"  
 						eEvent eModeAutoKeyframe)
@@ -885,11 +884,9 @@
 						"?" "?" eEvent eNone)
 					(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
 						"Next" "Next" eEvent eAnimationNext)))
-				) ; hbox
-					) ;; vbox
-				) ;; End Animation handlebox
-			;(hbox 0 1 0 1 0
-			;	(hslider eAnimationSlider 0 100))
+			) ; hbox
+		) ;; vbox
+	) ;; End Animation handlebox
 
 	) ;; vbox
 )  ;; Window

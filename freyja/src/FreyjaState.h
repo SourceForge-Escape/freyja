@@ -241,13 +241,15 @@ class ActionFacesTransform : public Action
 		mMesh(mesh),
 		mFaces(faces),
 		mTransform(mat)
-	{ }
-
-	~ActionFacesTransform()
 	{
+		for (uint32 i = 0; i < 4; ++i)
+			freyja_print("! %f %f %f %f", mat[0+i*4], mat[1+i*4], mat[2+i*4], mat[3+i*4]);
+		freyja_print("! ");
 	}
 
-	virtual bool Redo() 
+	~ActionFacesTransform() { }
+
+	virtual bool Redo()
 	{ 
 		Mesh *m = Mesh::GetMesh(mMesh);
 		if (m)
@@ -255,7 +257,7 @@ class ActionFacesTransform : public Action
 			m->TransformFacesInList(mFaces, mTransform);
 		}
 		
-		return true; 
+		return true;
 	}
 
 	virtual bool Undo() 
@@ -264,6 +266,11 @@ class ActionFacesTransform : public Action
 		if (m)
 		{
 			Matrix inv = mTransform.GetInverse();
+
+			for (uint32 i = 0; i < 4; ++i)
+				freyja_print("! %f %f %f %f", inv[0+i*4], inv[1+i*4], inv[2+i*4], inv[3+i*4]);
+			freyja_print("! ");
+
 			m->TransformFacesInList(mFaces, inv);
 		}
 
