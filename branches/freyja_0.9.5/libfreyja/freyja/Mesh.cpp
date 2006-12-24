@@ -2503,6 +2503,70 @@ void Mesh::TransformFacesWithFlag(Face::Flags flag, Matrix &mat)
 }
 
 
+Vector<index_t> Mesh::GetUniqueVerticesInFaces(Vector<index_t> &faces)
+{
+	Vector<index_t> vertices;
+
+	for (uint32 i = 0, n = faces.size(); i < n; ++i)
+	{
+		Face *f = GetFace(faces[i]);
+		
+		if (f)
+		{
+			uint32 j;
+			foreach (f->mIndices, j)
+			{
+				bool found = false;
+				uint32 vertex = f->mIndices[j];
+
+				uint32 k;
+				foreach (vertices, k)
+				{
+					if (vertex == vertices[k])
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					vertices.push_back(vertex);
+				}
+			}
+		}
+	}
+
+	return vertices;
+}
+
+
+Vector<index_t> Mesh::GetSelectedFaces()
+{
+	Vector<index_t> faces;
+
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f && f->mFlags & Face::fSelected)
+		{
+			faces.push_back(i);
+		}
+	}
+
+	return faces;
+}
+
+
+void Mesh::TransformFacesInList(Vector<index_t> &faces, Matrix &mat)
+{
+	Vector<index_t> vertices = GetUniqueVerticesInFaces(faces);
+	TransformVerticesInList(vertices, mat);
+}
+
+
 void Mesh::TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat)
 {
 	vec_t *array = mVertexPool.get_array();
@@ -2513,7 +2577,24 @@ void Mesh::TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat)
 		
 		if (v && v->mFlags & flag)
 		{			
-			mat.Multiply3v(array + v->mVertexIndex);
+			mat.Multiply3v(array + v->mVertexIndex*3);
+		}
+	}
+}
+
+
+void Mesh::TransformVerticesInList(Vector<index_t> &vertices, Matrix &mat)
+{
+	vec_t *array = mVertexPool.get_array();
+
+	for (uint32 i = 0, n = vertices.size(); i < n; ++i)
+	{
+		Vertex *v = GetVertex(vertices[i]);
+		
+		if (v)
+		{
+			//Debug v->SetFlag(Vertex::fSelected);
+			mat.Multiply3v(array + v->mVertexIndex*3);
 		}
 	}
 }

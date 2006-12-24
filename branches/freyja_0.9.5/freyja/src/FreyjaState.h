@@ -26,6 +26,7 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 
+#include <hel/Matrix.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <freyja/freyja.h>
@@ -229,6 +230,49 @@ class ActionVertexTransformExt : public Action
 	index_t mVertex;
 	freyja_transform_action_t mAction;  /* Type of transform */
 	Vector3d mXYZ;                      /* Storage for 3d transform event */
+};
+
+
+class ActionFacesTransform : public Action
+{
+ public:
+	ActionFacesTransform(index_t mesh, Vector<index_t> &faces, Matrix &mat) :
+		Action(),
+		mMesh(mesh),
+		mFaces(faces),
+		mTransform(mat)
+	{ }
+
+	~ActionFacesTransform()
+	{
+	}
+
+	virtual bool Redo() 
+	{ 
+		Mesh *m = Mesh::GetMesh(mMesh);
+		if (m)
+		{
+			m->TransformFacesInList(mFaces, mTransform);
+		}
+		
+		return true; 
+	}
+
+	virtual bool Undo() 
+	{
+		Mesh *m = Mesh::GetMesh(mMesh);
+		if (m)
+		{
+			Matrix inv = mTransform.GetInverse();
+			m->TransformFacesInList(mFaces, inv);
+		}
+
+		return true;
+	}
+
+	index_t mMesh;
+	Vector<index_t> mFaces;
+	Matrix mTransform;
 };
 
 

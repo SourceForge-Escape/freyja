@@ -907,6 +907,18 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	Vector<index_t> GetSelectedFaces();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get a list of unique faces marked selected
+	 ------------------------------------------------------*/
+
+	Vector<index_t> GetUniqueVerticesInFaces(Vector<index_t> &faces);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get a list of unique vertices in faces list
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Array exposure
@@ -1101,10 +1113,22 @@ public:
 	 * Post : Applies matrix transform to face with flag set
 	 ------------------------------------------------------*/
 
+	void TransformFacesInList(Vector<index_t> &faces, Matrix &mat);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to faces in index list
+	 ------------------------------------------------------*/
+
 	void TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to vertices with flag set
+	 ------------------------------------------------------*/
+
+	void TransformVerticesInList(Vector<index_t> &vertices, Matrix &mat);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Applies matrix transform to vertices in index list
 	 ------------------------------------------------------*/
 
 	void Rotate(const Vec3 &v);

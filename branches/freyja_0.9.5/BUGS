@@ -24,11 +24,6 @@
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
 
- * Scale tool sucks it's so broke nothing works properly
-	- Keyframe scaling edits geometery instead of keyframe
-	- Mesh scaling on Y 'hops' during preview, but is correct when transformed
-    - Face rotate, scale doesn't work in interface
-
  * Keyframe and cursor transforms 'fight' each other during editing
    FIX this in FreyjaRender by having a special mode for this case
 

@@ -334,6 +334,10 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 		s = String("tFace");
 		break;
 
+	case tModel:
+		s = String("tModel");
+		break;
+
 	case tMesh:
 		s = String("tMesh");
 		break;
@@ -4926,26 +4930,45 @@ void FreyjaControl::Transform(object_type_t obj,
 	
 	if (mToken)
 	{
-		int32 id = -1;
+		String s;
 
-		
 		switch (obj)
 		{
 		case tModel:
-			id = 0;
+			s.Set("%i", GetSelectedModel());
 			break;
 
 		case tMesh:
-			id = GetSelectedMesh();
+			s.Set("%i", GetSelectedMesh());
+			break;
+
+		case tFace:
+			s.Set("%i", GetSelectedFace());
+			break;
+
+		case tPoint:
+			s.Set("%i", GetSelectedVertex());
+			break;
+
+		case tSelectedMeshes:
+			s = "...";
+			break;
+
+		case tSelectedFaces:
+			s = "...";
+			break;
+
+		case tSelectedVertices:
+			s = "...";
 			break;
 
 		default:
-			id = -1;
+			s = "?";
 		}
 
-		freyja_print("! %s[%i] %s <%f, %f, %f>",
+		freyja_print("! %s[%s] %s <%f, %f, %f>",
 					 ObjectTypeToString(obj).c_str(),
-					 id, 
+					 s.c_str(), 
 					 ActionToString(GetEventAction()).c_str(),
 					 GetEventAction(),
 					 v.mVec[0], v.mVec[1], v.mVec[2]);
@@ -4954,6 +4977,49 @@ void FreyjaControl::Transform(object_type_t obj,
 
 	switch (obj)
 	{
+#if 0
+	case tFace: 
+		if (mToken)
+		{
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+
+			if (!m)
+			{
+				freyja_print("No Mesh selected for Faces...");
+				return;
+			}
+
+			Matrix mat;
+		  
+			switch (action)
+			{
+			case fRotate:
+				mat.Rotate(v);
+				break;
+
+			case fScale:
+				mat.Scale(v);
+				break;
+
+			case fTranslate:
+				mat.Translate(v);
+				break;
+
+			default:
+				freyja_print("%s(): Does not support (%s) for Faces...", 
+							 __func__, ActionToString(action).c_str());
+				return;
+			}
+			
+			Vector<index_t> faces;
+			face.push_back(GetSelectedFace());
+			m->TransformFacesInList(faces, mat);
+			Action *a = new ActionFacesTransform(GetSelectedMesh(), faces, mat);
+			ActionModelModified(a);
+		}
+		break;
+#endif
+
 	case tSelectedFaces:		
 		if (mToken)
 		{
@@ -4961,77 +5027,36 @@ void FreyjaControl::Transform(object_type_t obj,
 
 			if (!m)
 			{
-				freyja_print("No mesh selected");
+				freyja_print("No Mesh selected for Faces...");
 				return;
 			}
 
-			if (action != fTranslate)
+			Matrix mat;
+		  
+			switch (action)
 			{
-				freyja_print("%s(): Only supports fTranslate for (Faces...)", 
-							 __func__);
+			case fRotate:
+				mat.Rotate(v);
+				break;
+
+			case fScale:
+				mat.Scale(v);
+				break;
+
+			case fTranslate:
+				mat.Translate(v);
+				break;
+
+			default:
+				freyja_print("%s(): Does not support (%s) for Faces...", 
+							 __func__, ActionToString(action).c_str());
 				return;
-			}
-
-			Vector<index_t> list;
-			Vector<Vec3> list2;
-			bool found = false;
-
-			for (uint32 fi = 0, fn = m->GetFaceCount(); fi < fn; ++fi)
-			{
-				Face *f = m->GetFace(fi);
-				
-				if (!f || !(f->mFlags & Face::fSelected))
-					continue;
-				
-				uint32 i, idx;
-				
-				foreach (f->mIndices, i)
-				{
-					idx = f->mIndices[i];
-					Vertex *vert = m->GetVertex(idx);
-					
-					if (vert)
-					{
-						bool skip = false;
-						for(uint32 j = 0, jcount = list.size(); j < jcount; ++j)
-						{
-							if (list[j] == idx)
-							{
-								skip = true;
-								break;
-							}
-						}
-						
-						if (skip)
-							continue;
-						
-						if (!found)
-						{
-							// should be idx?
-							mCursor.mPos = m->GetVertexPosition(vert->mVertexIndex);
-							found = true;
-						}
-						
-						list.pushBack(idx);
-						// should be idx?
-						list2.pushBack(m->GetVertexPosition(vert->mVertexIndex));
-					}
-					
-					Vec3 pos = v + m->GetVertexPosition(idx);
-					m->SetVertexPos(idx, pos.mVec);
-				}
 			}
 			
-			Action *a = new ActionVertexListTransformExt(GetSelectedMesh(), 
-														 list, 
-														 action, 
-														 list2, 
-														 u);
+			Vector<index_t> faces = m->GetSelectedFaces();
+			m->TransformFacesInList(faces, mat);
+			Action *a = new ActionFacesTransform(GetSelectedMesh(), faces, mat);
 			ActionModelModified(a);
-
-			// Reset cursor transform
-			//if (action != fTranslate)
-			//	mCursor.mPos = u;
 		}
 		break;
 
@@ -5066,12 +5091,11 @@ void FreyjaControl::Transform(object_type_t obj,
 		{
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
-
-			freyjaModelTransform(GetSelectedModel(), action, u[0], u[1], u[2]);
+			freyjaModelTransform(GetSelectedModel(), action, v[0], v[1], v[2]);
 
 			// Reset cursor transform
-			if (action != fTranslate)
-				mCursor.mPos = u;
+			//if (action != fTranslate)
+			//	mCursor.mPos = u;
 		}
 		break;
 
@@ -5221,6 +5245,12 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tModel: 
 		{
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+			if (m)
+			{
+				mCursor.mLastPos = m->GetPosition();
+			}
+
 			mToken = true;
 		}
 		break;
