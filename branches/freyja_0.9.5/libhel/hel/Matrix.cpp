@@ -183,6 +183,13 @@ bool Matrix::getInvert(matrix_t out)
 	MAT(out,3,1) = r3[5], MAT(out,3,2) = r3[6];
 	MAT(out,3,3) = r3[7]; 
 	
+
+	// FIXME: temp stop gap
+	out[12] = out[3];
+	out[13] = out[7];
+	out[14] = out[11];
+	out[3] = out[7] = out[11] = 0.0f;
+
 	return true;
 #undef MAT
 #undef SWAP_ROWS
