@@ -130,6 +130,13 @@ class Matrix
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	Matrix GetInverse() { matrix_t m; getInvert(m); return Matrix(m); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns a copy of this matrix inverted.
+	 *
+	 ------------------------------------------------------*/
+
 	bool getInvert(matrix_t mat);
 	/*------------------------------------------------------
 	 * Pre  : 
