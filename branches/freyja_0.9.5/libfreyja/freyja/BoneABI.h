@@ -137,6 +137,14 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void freyjaBoneInverseTransform3fv(index_t bone, 
+									   freyja_transform_action_t action, 
+									   vec3_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	const char *freyjaGetBoneNameString(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 

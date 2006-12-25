@@ -30,6 +30,7 @@
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <freyja/freyja.h>
+#include <freyja/BoneABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/Mesh.h>
 #include <mstl/Action.h>
@@ -242,9 +243,7 @@ class ActionFacesTransform : public Action
 		mFaces(faces),
 		mTransform(mat)
 	{
-		for (uint32 i = 0; i < 4; ++i)
-			freyja_print("! %f %f %f %f", mat[0+i*4], mat[1+i*4], mat[2+i*4], mat[3+i*4]);
-		freyja_print("! ");
+		mat.print();
 	}
 
 	~ActionFacesTransform() { }
@@ -266,11 +265,7 @@ class ActionFacesTransform : public Action
 		if (m)
 		{
 			Matrix inv = mTransform.GetInverse();
-
-			for (uint32 i = 0; i < 4; ++i)
-				freyja_print("! %f %f %f %f", inv[0+i*4], inv[1+i*4], inv[2+i*4], inv[3+i*4]);
-			freyja_print("! ");
-
+			inv.print();
 			m->TransformFacesInList(mFaces, inv);
 		}
 
@@ -280,6 +275,38 @@ class ActionFacesTransform : public Action
 	index_t mMesh;
 	Vector<index_t> mFaces;
 	Matrix mTransform;
+};
+
+
+class ActionBoneTransform : public Action
+{
+ public:
+	ActionBoneTransform(index_t bone, 
+						freyja_transform_action_t action, Vec3 v) :
+		Action(),
+		mBone(bone),
+		mAction(action),
+		mTransform(v)
+	{
+	}
+
+	~ActionBoneTransform() { }
+
+	virtual bool Redo()
+	{ 
+		freyjaBoneTransform3fv(mBone, mAction, mTransform.mVec);
+		return true;
+	}
+
+	virtual bool Undo() 
+	{
+		freyjaBoneInverseTransform3fv(mBone, mAction, mTransform.mVec);
+		return true;
+	}
+
+	index_t mBone;
+	freyja_transform_action_t mAction;
+	Vec3 mTransform;
 };
 
 

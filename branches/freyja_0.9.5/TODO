@@ -17,11 +17,15 @@
 		- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
 		- Make generic plugin interface for new UI control points
 		- Renable 'direct' vertex animation creation
-		  ( Letting the user move points in vertex mode )
+		  ( Letting the user move selected points in vertex mode )
 		- Ref weights from vertex to fix blending issues
 		- ZIP file based pak format for freyja format models w/ textures, etc
 
 	* Misc
+		- Move all transforms in UI to ::Transform and hook-up undo/redo for all
+		- Edge editing needs to be top level 'edit type' like face in UI
+		- Face splitting needs to be user controllable
+		- Face extruding maybe doesn't need to be pick ray guided (confusing?)
 		- Face flag for marking faces that need to be depth sorted... 
 			- Yeah, I couldn't stand it any longer
 		- Stiching mode for making faces from existing vertices
