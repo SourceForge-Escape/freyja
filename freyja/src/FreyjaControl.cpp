@@ -4907,7 +4907,7 @@ void FreyjaControl::Transform(object_type_t obj,
 	{
 	case fRotateAboutOrigin:
 	case fRotate:
-		v *= -HEL_PI_OVER_180;
+		v *= HEL_PI_OVER_180;
 		u = -v;
 		break;
 
@@ -5063,13 +5063,9 @@ void FreyjaControl::Transform(object_type_t obj,
 	case tBone:
 		if (mToken)
 		{
-			//Action *a = new ActionBoneTransform(GetSelectedBone(), action, u);
-			//ActionModelModified(a);
+			Action *a = new ActionBoneTransform(GetSelectedBone(), action, v);
+			ActionModelModified(a);
 			freyjaBoneTransform3fv(GetSelectedBone(), action, v.mVec);
-
-			// Reset cursor transform
-			//if (action != fTranslate)
-			//	mCursor.mPos = u;
 		}
 		break;
 
@@ -5079,10 +5075,6 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			ActionModelModified(a);
 			freyjaMeshTransform3fv(GetSelectedMesh(), action, v.mVec);
-
-			// Reset cursor transform
-			//if (action != fTranslate)
-			//	mCursor.mPos = u;
 		}
 		break;
 
@@ -5092,10 +5084,6 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
 			freyjaModelTransform(GetSelectedModel(), action, v[0], v[1], v[2]);
-
-			// Reset cursor transform
-			//if (action != fTranslate)
-			//	mCursor.mPos = u;
 		}
 		break;
 

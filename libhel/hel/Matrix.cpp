@@ -323,31 +323,23 @@ void Matrix::multiply4v(vec4_t v, vec4_t result)
 
 void Matrix::print()
 {
-#ifdef COLUMN_ORDER
-	printf("{\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n}\n",
-			 mMatrix[0], mMatrix[4], mMatrix[ 8], mMatrix[12],
-			 mMatrix[1], mMatrix[5], mMatrix[ 9], mMatrix[13],
-			 mMatrix[2], mMatrix[6], mMatrix[10], mMatrix[14],
-			 mMatrix[3], mMatrix[7], mMatrix[11], mMatrix[15]);
-#else
 	printf("{\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n}\n",
 			 mMatrix[ 0], mMatrix[ 1], mMatrix[ 2], mMatrix[ 3],
 			 mMatrix[ 4], mMatrix[ 5], mMatrix[ 6], mMatrix[ 7],
 			 mMatrix[ 8], mMatrix[ 9], mMatrix[10], mMatrix[11],
 			 mMatrix[12], mMatrix[13], mMatrix[14], mMatrix[15]);
-#endif
 }
 
-// row order
+
 bool Matrix::isIdentity()
 {
+	vec_t *m = mMatrix;
+
 	// Hhhmm... floating point using direct comparisions
-	if (mMatrix[ 0] == 1 && mMatrix[ 1] == 0 && mMatrix[ 2] == 0 && 
-		 mMatrix[ 3] == 0 && mMatrix[ 4] == 0 && mMatrix[ 5] == 1 && 
-		 mMatrix[ 6] == 0 && mMatrix[ 7] == 0 && mMatrix[ 8] == 0 && 
-		 mMatrix[ 9] == 0 && mMatrix[10] == 1 && mMatrix[11] == 0 &&
-		 mMatrix[12] == 0 && mMatrix[13] == 0 && mMatrix[14] == 0 && 
-		 mMatrix[15] == 1)
+	if (m[ 0] == 1 && m[ 1] == 0 && m[ 2] == 0 && m[ 3] == 0 &&
+		 m[ 4] == 0 && m[ 5] == 1 && m[ 6] == 0 && m[ 7] == 0 && 
+		 m[ 8] == 0 && m[ 9] == 0 && m[10] == 1 && m[11] == 0 &&
+		 m[12] == 0 && m[13] == 0 && m[14] == 0 && m[15] == 1)
 		return true;
 
 	return false;
@@ -369,7 +361,7 @@ void Matrix::setMatrix(matrix_t mat)
 	copy(mat, mMatrix);
 }
 
-// row order
+
 void Matrix::setIdentity()
 {
 	mMatrix[ 0] = 1; mMatrix[ 1] = 0; mMatrix[ 2] = 0; mMatrix[ 3] = 0;
@@ -384,17 +376,16 @@ void Matrix::scale(const vec3_t xyz)
 	scale(xyz[0], xyz[1], xyz[2]);
 }
 
-// row order
+
 void Matrix::scale(vec_t sx, vec_t sy, vec_t sz)
 {
    matrix_t smatrix;
 	matrix_t tmp;
 
-
-   smatrix[ 0] = sx;smatrix[ 1] = 0; smatrix[ 2] = 0; smatrix[ 3] = 0;
-   smatrix[ 4] = 0; smatrix[ 5] = sy;smatrix[ 6] = 0; smatrix[ 7] = 0;
-   smatrix[ 8] = 0; smatrix[ 9] = 0; smatrix[10] = sz;smatrix[11] = 0;
-   smatrix[12] = 0; smatrix[13] = 0; smatrix[14] = 0; smatrix[15] = 1;
+   smatrix[ 0] = sx; smatrix[ 1] = 0;  smatrix[ 2] = 0;  smatrix[ 3] = 0;
+   smatrix[ 4] = 0;  smatrix[ 5] = sy; smatrix[ 6] = 0;  smatrix[ 7] = 0;
+   smatrix[ 8] = 0;  smatrix[ 9] = 0;  smatrix[10] = sz; smatrix[11] = 0;
+   smatrix[12] = 0;  smatrix[13] = 0;  smatrix[14] = 0;  smatrix[15] = 1;
 
 	copy(mMatrix, tmp);
 	multiply(tmp, smatrix, mMatrix);
@@ -427,30 +418,39 @@ void Matrix::Rotate2(vec_t alpha, vec_t beta, vec_t gamma)
 }
 
 
-// row order
 void Matrix::rotate(vec_t ax, vec_t ay, vec_t az)
 {
-   matrix_t xmat, ymat, zmat, tmp, tmp2;
+	vec_t cosX, sinX;
+	helSinCosf(ax, &sinX, &cosX);
 
+	vec_t cosY, sinY;
+	helSinCosf(ay, &sinY, &cosY);
 
-   xmat[ 0]=1;        xmat[ 1]=0;        xmat[ 2]=0;        xmat[ 3]=0;
-   xmat[ 4]=0;        xmat[ 5]=cos(ax);  xmat[ 6]=sin(ax);  xmat[ 7]=0;
-   xmat[ 8]=0;        xmat[ 9]=-sin(ax); xmat[10]=cos(ax);  xmat[11]=0;
-   xmat[12]=0;        xmat[13]=0;        xmat[14]=0;        xmat[15]=1;
+	vec_t cosZ, sinZ;
+	helSinCosf(az, &sinZ, &cosZ);
 
-   ymat[ 0]=cos(ay);  ymat[ 1]=0;        ymat[ 2]=-sin(ay); ymat[ 3]=0;
-   ymat[ 4]=0;        ymat[ 5]=1;        ymat[ 6]=0;        ymat[ 7]=0;
-   ymat[ 8]=sin(ay);  ymat[ 9]=0;        ymat[10]=cos(ay);  ymat[11]=0;
-   ymat[12]=0;        ymat[13]=0;        ymat[14]=0;        ymat[15]=1;
+   matrix_t mat, tmp, tmp2;
 
-   zmat[ 0]=cos(az);  zmat[ 1]=sin(az);  zmat[ 2]=0;        zmat[ 3]=0;
-   zmat[ 4]=-sin(az); zmat[ 5]=cos(az);  zmat[ 6]=0;        zmat[ 7]=0;
-   zmat[ 8]=0;        zmat[ 9]=0;        zmat[10]=1;        zmat[11]=0;
-   zmat[12]=0;        zmat[13]=0;        zmat[14]=0;        zmat[15]=1;
+   mat[ 0]=cosY;     mat[ 1]=0;        mat[ 2]=-sinY;    mat[ 3]=0;
+   mat[ 4]=0;        mat[ 5]=1;        mat[ 6]=0;        mat[ 7]=0;
+   mat[ 8]=sinY;     mat[ 9]=0;        mat[10]=cosY;     mat[11]=0;
+   mat[12]=0;        mat[13]=0;        mat[14]=0;        mat[15]=1;
 
-   multiply(mMatrix, ymat, tmp);
-   multiply(tmp, xmat, tmp2);
-   multiply(tmp2, zmat, mMatrix);
+   multiply(mMatrix, mat, tmp);
+
+   mat[ 0]=1;        mat[ 1]=0;        mat[ 2]=0;        mat[ 3]=0;
+   mat[ 4]=0;        mat[ 5]=cosX;     mat[ 6]=sinX;     mat[ 7]=0;
+   mat[ 8]=0;        mat[ 9]=-sinX;    mat[10]=cosX;     mat[11]=0;
+   mat[12]=0;        mat[13]=0;        mat[14]=0;        mat[15]=1;
+
+   multiply(tmp, mat, tmp2);
+
+   mat[ 0]=cosZ;     mat[ 1]=sinZ;     mat[ 2]=0;        mat[ 3]=0;
+   mat[ 4]=-sinZ;    mat[ 5]=cosZ;     mat[ 6]=0;        mat[ 7]=0;
+   mat[ 8]=0;        mat[ 9]=0;        mat[10]=1;        mat[11]=0;
+   mat[12]=0;        mat[13]=0;        mat[14]=0;        mat[15]=1;
+
+   multiply(tmp2, mat, mMatrix);
 }
 
 

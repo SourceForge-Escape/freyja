@@ -493,6 +493,58 @@ void freyjaBoneTransform3fv(index_t bone,
 }
 
 
+void freyjaBoneInverseTransform3fv(index_t bone, 
+								   freyja_transform_action_t action, 
+								   vec3_t v)
+{
+	Matrix m;
+	vec3_t xyz;
+
+	switch (action)
+	{
+	case fTranslate:
+		freyjaGetBoneTranslation3fv(bone, xyz);
+		xyz[0] -= v[0];
+		xyz[1] -= v[1];
+		xyz[2] -= v[2];
+		freyjaBoneTranslate3fv(bone, xyz);
+		break;
+
+	case fRotate:
+		freyjaGetBoneRotationEuler3fv(bone, xyz);
+
+		xyz[0] = HEL_DEG_TO_RAD(v[0] - HEL_RAD_TO_DEG(xyz[0]));
+		xyz[1] = HEL_DEG_TO_RAD(v[1] - HEL_RAD_TO_DEG(xyz[1]));
+		xyz[2] = HEL_DEG_TO_RAD(v[2] - HEL_RAD_TO_DEG(xyz[2]));
+
+		freyjaBoneRotateEuler3fv(bone, xyz);
+		break;
+
+#if 0 
+	case fScale:
+
+		freyjaGetBoneTranslation3fv(bone, xyz);
+		xyz[0] /= v[0];
+		xyz[1] /= v[1];
+		xyz[2] /= v[2];
+		freyjaBoneTranslate3fv(bone, xyz);
+		break;
+
+	case fScaleAboutOrigin:
+		break;
+
+	case fRotateAboutOrigin:
+		break;
+#endif
+
+	default:
+		MSTL_MSG("%s(..., %s, ...) not supported\n", 
+				 __func__,
+				 freyjaActionToString(action));
+	}
+}
+
+
 void freyjaBoneTransform(index_t boneIndex, 
                          freyja_transform_action_t action, 
                          vec_t x, vec_t y, vec_t z)

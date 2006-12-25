@@ -16,6 +16,12 @@
  A
  ----------------------------
 
+ * Faces... can't Select/UnSelect/etc which would make sense
+
+ * Rotation with cursor is broken
+
+ * Extrude ( legacy replacement ) broken for non-closed mesh
+
  * hel::Matrix sometimes 'misplaces' the translation col, so far it seems only
    a few methods have the issue, but this shows it needs refactor =(
 

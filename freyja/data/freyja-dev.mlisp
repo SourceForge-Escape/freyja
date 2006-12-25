@@ -499,11 +499,14 @@
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		;; GL window
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		(gl_widget WIDTH HEIGHT)
+		(vbox 0 1 1 1 1
+			(gl_widget WIDTH HEIGHT)
+			(hslider eAnimationSlider 0 500))
 
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		;; Sidebar notebook in non-expanding container
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		(vbox 0 1 1 1 1
 		(handlebox 1 
 		(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eEvent
 
@@ -632,6 +635,7 @@
 					
 					) ; expander
 				))
+
 			)  ;; end tab Model
 
 
@@ -852,20 +856,18 @@
 				(hbox 1 0 0 1 0 (hsep))
 				(expander "Community Plugins"	1	"ThirdPartyPluginSlot")
 			) ; tab Plugins
-)
-)
-)
+	) ; notebook
 
-	;; A box here would be under the tabs and the main window
+) ;vbox
 
 	;; Animation bar
-	(hbox 0 1 0 1 0
-		(hbox 0 1 1 1 1
-		(hslider eAnimationSlider 0 500))
-
  	(handlebox 1 
-		(vbox 0 0 0 1 0	
-			(hbox 1 1 0 1 0
+		(vbox 1 1 1 1 1	
+			(hbox 1 1 1 1 1
+
+			;(hbox 1 1 1 1 1
+			;	(hslider eAnimationSlider 0 500) )
+
 				(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
 						"Auto" "Animation mode (Auto Keyframe)"  
@@ -883,10 +885,17 @@
 					(toolbar_button "gtk-media-forward"
 						"?" "?" eEvent eNone)
 					(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
-						"Next" "Next" eEvent eAnimationNext)))
+						"Next" "Next" eEvent eAnimationNext) 
+				) ; toolbar 
 			) ; hbox
 		) ;; vbox
 	) ;; End Animation handlebox
+
+)
+)
+
+	;; A box here would be under the tabs and the main window
+
 
 	) ;; vbox
 )  ;; Window
