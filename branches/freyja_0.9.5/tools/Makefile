@@ -45,6 +45,7 @@ BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=src
 LOCAL_INCLUDES=-I../mstl -I../libhel/ -I../libfreyja/
 LOCAL_LIBS=-L../bin/libhel/debug/ -L../bin/libfreyja/debug/ 
+LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ -L../bin/libfreyja/win32/ 
 
 
 ################################################################
@@ -184,8 +185,8 @@ freyjautil.exe:
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
 	CFLAGS="$(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
-	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
+	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
+	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
 
 
 ################################################################
