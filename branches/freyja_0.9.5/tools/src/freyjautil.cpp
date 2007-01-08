@@ -20,7 +20,8 @@
  ==========================================================================*/
 
 #include <stdio.h>
-#include <freyja/FreyjaPluginABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/freyja.h>
 
 int main(int argc, char *argv[])
 {
