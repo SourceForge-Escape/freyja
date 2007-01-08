@@ -173,6 +173,21 @@ osx:
 	LD_FLAGS="$(CONFIGURE_LNK) -lm -ldl"
 
 
+freyjautil.exe:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	NAME="freyjautil" \
+	MODULE="freyjautil" \
+	SHLIBEXT=".exe" \
+	PROG_OBJS="$(BUILD_WIN32_DIR)/freyjautil.o" \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
+	CFLAGS="$(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
+	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
+	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
+
+
 ################################################################
 # Include Dependences
 ################################################################
@@ -231,6 +246,11 @@ $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	-Wl,--whole-archive $(PROG_OBJS) \
 	-Wl,--no-whole-archive $(LIBS)
 
+$(BUILDDIR)/$(MODULE).exe : $(PROG_OBJS)
+	$(CC) -o $(BUILDDIR)/$(MODULE).exe \
+	$(PROG_OBJS) \
+	$(LIBS)
+
 $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 	$(CC) $(LD_FLAGS) -L/usr/local/lib -lhel0 \
 	-L/usr/lib -lstdc++ -fPIC -dynamiclib \
@@ -245,6 +265,11 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 TEST=$(BUILDDIR)/$(NAME).test
 
 test: $(TEST)
+
+
+TARGET=$(BUILDDIR)/$(NAME)$(EXT)
+target: $(TARGET)
+
 
 ##########################################################################
 
@@ -348,23 +373,25 @@ freyjautil.test:
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
 	NAME=freyjautil \
 	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL $(LOCAL_INCLUDES) " \
 	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++ -lhel0 -lfreyja"
 
 cycle-win32: win32 install-win32 test-win32
 
 test-win32: freyjautil-win32.test
 
-freyjautil-win32.test:
-	mkdir -p $(BUILD_TEST_DIR)
+freyjautil.exe-old:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) win32target NAME=freyjautil.exe BUILDDIR=$(BUILD_WIN32_DIR) \
+	OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
 	CC="i586-mingw32msvc-g++ -mms-bitfields" \
 	CPP="i586-mingw32msvc-cpp " \
 	LD="i586-mingw32msvc-ld " \
 	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
 	i586-mingw32msvc-g++ -mms-bitfields \
 		-Wall -g -pipe -O0 -I/usr/local/include/ \
-		tools/freyjautil.cpp \
-		-o $(BUILD_TEST_DIR)/freyjautil-win32.test \
+		tools/src/freyjautil.cpp \
+		-o $(BUILD_TEST_DIR)/freyjautil.exe \
 		-lstdc++ -L/usr/local/lib/ -lhel0 -lfreyja9 
 
 python.test:
