@@ -5782,12 +5782,6 @@ void FreyjaControl::LoadResource()
 
 
 	/* GUI stuff */
-	//char *tmp;
-	//if (mResource.Lookup("INIT", &tmp))
-	//{
-	//	String init = freyja_rc_map_string(tmp);
-	//	LoadUserResource(init.c_str());
-	//}
 	LoadUserPreferences();
 
 	if (mResource.Lookup("WINDOW_X", &x))
@@ -5867,20 +5861,27 @@ void FreyjaControl::LoadResource()
 
 		for (i = 0; i < count; ++i)
 		{
-			FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(i);
+			freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(i);
 			
-			if (plugin && plugin->mImportFlags)
+			if (plugin == NULL)
+				continue;
+
+			if (plugin->mImportFlags)
 			{
-				mgtk_event_fileselection_append_pattern(loadEventId, 
-														plugin->mDescription,
-														plugin->mExtention);
+				char *desc = (char*)plugin->mDescription.c_str();
+				char *ext = (char*)plugin->mExtention.c_str();
+				mgtk_event_fileselection_append_pattern(loadEventId, desc, ext);
 			}
 
-			if (plugin && plugin->mExportFlags)
+			if (plugin->mExportFlags)
 			{
-				mgtk_event_fileselection_append_pattern(saveEventId, 
-														plugin->mDescription,
-														plugin->mExtention);
+				char *desc = (char*)plugin->mDescription.c_str();
+				char *ext = (char*)plugin->mExtention.c_str();
+				//uint32 menuId = ResourceEvent::GetResourceIdBySymbol("eExportMenu");
+				MSTL_MSG("%i/%i %s, %s\n", i, count, 
+						 plugin->mName.c_str(),
+						 plugin->mFilename.c_str());
+				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
 			}
 		}
 	}

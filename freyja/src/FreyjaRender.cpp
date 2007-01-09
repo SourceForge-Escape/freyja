@@ -92,7 +92,8 @@ FreyjaRender::FreyjaRender() :
 	mViewMode(VIEWMODE_MODEL_VIEW),
 	mRenderMode(fBoundingVolSelection | 
 				fBonesNoZbuffer | 
-				fBoundingVolumes),
+				fBoundingVolumes |
+				fFPSCap),
 	mWidth(640),
 	mHeight(480),
 	mTextureId(0),
@@ -483,15 +484,38 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 }
 
 
+#if 0
+void FreyjaRender::DisplayByPolling()
+{
+	if (GetMode() & fFPSCap)
+	{
+		static unsigned int frames = 0;
+		static mstl::Timer timer;
+		
+		float fps = (float)frames/((float)timer.GetTicks() / 1000.0f);
+		
+		freyja_print("! %f fps, %i ticks", fps, timer.GetTicks());
+		
+		if (fps > 60.0f)
+			return;
+		else
+			++frames;
+	}
+
+	Display();
+}
+#endif
+
+
 void FreyjaRender::Display() 
 { 
-	if (!mInitContext || 
-		(GetMode() & fFPSCap) && mTimer.GetTicks() < 1667) // ~60.0 fps cap
+	if (!mInitContext ||
+		(GetMode() & fFPSCap) && mTimer.GetTicks() < 16) // ~60.0 fps cap
 	{
-		//freyja_print("%f frames dropped", (float)mTimer.GetTicks()/1000.0f);
+		//freyja_print("%ims since last frame", mTimer.GetTicks());
 		return;
 	}
-	
+
 	// Mongoose 2002.02.02, Cache for use in calls from here
 	Vec3 v = FreyjaControl::mInstance->GetSceneTranslation();
 	HEL_VEC3_COPY(v.mVec, mScroll);

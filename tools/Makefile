@@ -11,16 +11,16 @@
 NAME=tools
 BASE_NAME=tools
 MAJOR_VERSION=0
-MINOR_VERSION=9
-MICRO_VERSION=3
+MINOR_VERSION=0
+MICRO_VERSION=4
 BRANCH=
-BUILD_ID=20060505
+BUILD_ID=20070101
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
 EMAIL="mongoose@icculus.org"
 EXT=.so
-TREE_DIR=libfreyja
+TREE_DIR=tools
 TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
 LICENSE=LGPL
 
@@ -129,50 +129,7 @@ TESTS=$(BUILDDIR)/$(NAME).test
 tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test
 #bsa.test 
 
-auto: $(BUILD_SELECT)
-
-all: debug release prof
-
-debug:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS)"
-
-prof:
-	@-mkdir -p $(BUILD_PROF_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) -pg" \
-	LD_FLAGS="$(LD_FLAGS) -pg"
-
-release:
-	@-mkdir -p $(BUILD_RELEASE_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
-	CFLAGS="$(RELEASE_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS)"
-
-win32:
-	@-mkdir -p $(BUILD_WIN32_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	NAME="freyja9" \
-	MODULE="freyja9" \
-	SHLIBEXT=".dll" \
-	CC="$(WIN32_CC)" \
-	CPP="$(WIN32_CPP) " \
-	LD="$(WIN32_LD) " \
-	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
-	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(WIN32_LIBHEL)"
-
-osx:
-	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
-	NAME="freyja9" \
-	MODULE="freyja9" \
-	SHLIBEXT=".dynlib" \
-	CFLAGS="$(DEBUG_CFLAGS)" \
-	LD_FLAGS="$(CONFIGURE_LNK) -lm -ldl"
-
+tools-win32: freyjautil.exe UTPackage.exe lineageIIextract.exe
 
 freyjautil.exe:
 	@-mkdir -p $(BUILD_WIN32_DIR)
@@ -184,7 +141,37 @@ freyjautil.exe:
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
-	CFLAGS="$(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
+	CFLAGS="-Wall -g -O0 $(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
+	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
+	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
+
+
+UTPackage.exe:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	NAME="UTPackage" \
+	MODULE="UTPackage" \
+	SHLIBEXT=".exe" \
+	PROG_OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
+	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
+	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
+
+
+lineageIIextract.exe:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	NAME="lineageIIextract" \
+	MODULE="lineageIIextract" \
+	SHLIBEXT=".exe" \
+	PROG_OBJS="$(BUILD_WIN32_DIR)/extractFace.o" \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
 
@@ -206,34 +193,6 @@ depend:
 ################################################################
 
 targets: $(TARGETS)
-
-PROG_OBJS = \
-	$(BUILDDIR)/Action.o \
-	$(BUILDDIR)/Bone.o \
-	$(BUILDDIR)/CopyModel.o \
-	$(BUILDDIR)/Egg.o \
-	$(BUILDDIR)/FreyjaFSM.o \
-	$(BUILDDIR)/FreyjaPluginABI.o \
-	$(BUILDDIR)/FreyjaPlugin.o \
-	$(BUILDDIR)/FreyjaCamera.o \
-	$(BUILDDIR)/FreyjaPrinter.o \
-	$(BUILDDIR)/FreyjaFileReader.o \
-	$(BUILDDIR)/FreyjaFileWriter.o \
-	$(BUILDDIR)/FreyjaImage.o \
-	$(BUILDDIR)/FreyjaLight.o \
-	$(BUILDDIR)/FreyjaMesh.o \
-	$(BUILDDIR)/FreyjaMaterial.o \
-	$(BUILDDIR)/FreyjaPakReader.o \
-	$(BUILDDIR)/FreyjaTexture.o \
-	$(BUILDDIR)/FreyjaUtil.o \
-	$(BUILDDIR)/KeyFrame.o \
-	$(BUILDDIR)/PerlinNoise.o \
-	$(BUILDDIR)/RenderModel.o \
-	$(BUILDDIR)/RigidBody.o \
-	$(BUILDDIR)/Skeleton.o
-
-#	$(BUILDDIR)/FreyjaScene.o 
-
 
 $(BUILDDIR)/$(NAME)$(SHLIBEXT) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
@@ -305,13 +264,6 @@ MDLModel.test:
 
 ##########################################################################
 
-ase.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=ase BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Ase.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
-
 bsa.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=bsa BUILDDIR=$(BUILD_TEST_DIR) \
@@ -319,34 +271,13 @@ bsa.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_BSAPAKREADER $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-glm.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=glm BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/GLMModel.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_GLMMODEL $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
-
-md5.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=md5 BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Md5.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_MD5 $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
-
-nod.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=nod BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/Nod.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_NOD $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
-
-jpeg.test:
+freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
-	NAME=jpeg \
-	OBJS="$(BUILD_TEST_DIR)/image_test.o $(BUILD_TEST_DIR)/image_jpeg.o" \
-	CFLAGS="-Wall -g -O0 -DLIB_JPEG" \
-	LD_FLAGS="-lm -lstdc++ -lhel0 -lfreyja -ljpeg"
+	NAME=freyjautil \
+	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL $(LOCAL_INCLUDES) " \
+	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++ -lhel0 -lfreyja"
 
 freyjaimageutil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
@@ -369,40 +300,6 @@ raw2riff.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
 	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-freyjautil.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
-	NAME=freyjautil \
-	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL $(LOCAL_INCLUDES) " \
-	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++ -lhel0 -lfreyja"
-
-cycle-win32: win32 install-win32 test-win32
-
-test-win32: freyjautil-win32.test
-
-freyjautil.exe-old:
-	@-mkdir -p $(BUILD_WIN32_DIR)
-	$(MAKE) win32target NAME=freyjautil.exe BUILDDIR=$(BUILD_WIN32_DIR) \
-	OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
-	i586-mingw32msvc-g++ -mms-bitfields \
-		-Wall -g -pipe -O0 -I/usr/local/include/ \
-		tools/src/freyjautil.cpp \
-		-o $(BUILD_TEST_DIR)/freyjautil.exe \
-		-lstdc++ -L/usr/local/lib/ -lhel0 -lfreyja9 
-
-python.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
-	NAME=python \
-	OBJS="$(BUILD_TEST_DIR)/python.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PYTHON" \
-	LD_FLAGS="-lm -lhel0 -lfreyja -lpython2.3 -lstdc++"
-
 UTPackage.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=UTPackage BUILDDIR=$(BUILD_TEST_DIR) \
@@ -410,37 +307,12 @@ UTPackage.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-
-UTPackage-win32.test:
-	@-mkdir -p $(BUILD_WIN32_DIR)
-	$(MAKE) test NAME=UTPackage.exe BUILDDIR=$(BUILD_WIN32_DIR) \
-	OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
-	@-mv $(BUILD_WIN32_DIR)/UTPackage.exe.test $(BUILD_WIN32_DIR)/UTPackage.exe
-
-
 lineageIIextract.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=lineageIIextract BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/extractFace.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-lstdc++"
-
-
-lineageIIextract-win32.test:
-	@-mkdir -p $(BUILD_WIN32_DIR)
-	$(MAKE) test NAME=lineageIIextract.exe BUILDDIR=$(BUILD_WIN32_DIR) \
-	OBJS="$(BUILD_WIN32_DIR)/extractFace.o" \
-	CC="i586-mingw32msvc-g++ -mms-bitfields" \
-	CPP="i586-mingw32msvc-cpp " \
-	LD="i586-mingw32msvc-ld " \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA -I/usr/local/include $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -lstdc++ -L/usr/local/lib -lhel0 -lfreyja9"
-	@-mv $(BUILD_WIN32_DIR)/lineageIIextract.exe.test $(BUILD_WIN32_DIR)/lineageIIextract.exe
 
 
 PerlinNoise.test:

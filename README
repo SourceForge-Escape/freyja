@@ -128,5 +128,5 @@
 
  Misc
  ----------------------------------------------------------------------------
- - Quads are ABCD clockwise ( not ABDC )
+ - Quads are ABCD clockwise in 0.9.x ( not ABDC )
 

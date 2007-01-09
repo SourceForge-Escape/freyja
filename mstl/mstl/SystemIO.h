@@ -97,15 +97,12 @@ class Timer
 			
 		if (mStart.tv_usec > mStop.tv_usec) 
 		{ 
-			mStop.tv_usec = (1000 + mStop.tv_usec); 
+			mStop.tv_usec = (100000 + mStop.tv_usec); 
 			--mStop.tv_sec; 
-		} 
-
-		//mStop.tv_usec -= mStart.tv_usec; 
-		//mStop.tv_sec -= mStart.tv_sec;
+		}
 
 		return ( ((mStop.tv_sec - mStart.tv_sec)*1000) + 
-					(mStop.tv_usec - mStart.tv_usec)); 
+					(mStop.tv_usec - mStart.tv_usec)/1000); 
 #endif
 	}
 
@@ -129,7 +126,7 @@ class Timer
 		//mStop.tv_sec -= mStart.tv_sec;
 
 		return ( ((float)(mStop.tv_sec - mStart.tv_sec)) +
-					((float)(mStop.tv_usec - mStart.tv_usec)) * uinv);
+					((float)((mStop.tv_usec - mStart.tv_usec) * 1000)) * uinv);
 #endif
 	}
 

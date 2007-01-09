@@ -37,12 +37,9 @@
 #include "Skeleton.h"
 #include "Plugin.h"
 
-using namespace freyja;
-using namespace mstl;
-
-Vector<FreyjaPluginDesc *> gFreyjaPlugins;
-Vector<char *> gPluginDirectories;
-Vector<mstl::String> gImagePluginDirectories;
+mstl::Vector<freyja::PluginDesc *> gFreyjaPlugins;
+mstl::Vector<char *> gPluginDirectories;
+mstl::Vector<mstl::String> gImagePluginDirectories;
 int32 gCurrentFreyjaPlugin = -1;
 
 
@@ -50,19 +47,19 @@ int32 gCurrentFreyjaPlugin = -1;
 // Plugin C++ ABI
 //////////////////////////////////////////////////////////////////////
 
-Vector<FreyjaPluginDesc *> &freyjaGetPluginDescriptions()
+mstl::Vector<freyja::PluginDesc *> &freyjaGetPluginDescriptions()
 {
 	return gFreyjaPlugins;
 }
 
 
-Vector<char *> &freyjaGetPluginDirectories()
+mstl::Vector<char *> &freyjaGetPluginDirectories()
 {
 	return gPluginDirectories;
 }
 
 
-FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
+freyja::PluginDesc *freyjaGetPluginClassByName(const char *name)
 {
 	long i, l;
 
@@ -74,9 +71,10 @@ FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
 	for (i = gFreyjaPlugins.begin(); i < (long)gFreyjaPlugins.end(); ++i)
 	{
 		if (gFreyjaPlugins[i] && 
-			gFreyjaPlugins[i]->mFilename && gFreyjaPlugins[i]->mFilename[0])
+			gFreyjaPlugins[i]->mFilename.c_str() && 
+			gFreyjaPlugins[i]->mFilename.c_str()[0])
 		{
-			if (!strncmp(gFreyjaPlugins[i]->mFilename, name, l))
+			if (!strncmp(gFreyjaPlugins[i]->mFilename.c_str(), name, l))
 			{
 				return gFreyjaPlugins[i];
 			}
@@ -87,7 +85,7 @@ FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name)
 }
 
 
-FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex)
+freyja::PluginDesc *freyjaGetPluginClassByIndex(long pluginIndex)
 {
 	if (pluginIndex > 0 && pluginIndex < (long)gFreyjaPlugins.end())
 	{
@@ -105,8 +103,8 @@ FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex)
 void freyjaPluginDirectoriesInit()
 {
 #ifdef WIN32
-	freyjaPluginAddDirectory("modules/model");
-	gImagePluginDirectories.push_back(mstl::String("modules/image"));
+	freyjaPluginAddDirectory("plugins/model");
+	gImagePluginDirectories.push_back(mstl::String("plugins/image"));
 #else
 	String s = getenv("HOME");
 	s += "/.freyja/plugins/model";
@@ -116,9 +114,9 @@ void freyjaPluginDirectoriesInit()
 	s += "/.freyja/plugins/image";
 	gImagePluginDirectories.push_back(s);
 
-   	freyjaPluginAddDirectory("/usr/lib/freyja_0.9.5/modules/model");
-   	freyjaPluginAddDirectory("/usr/local/lib/freyja_0.9.5/modules/model");
-	freyjaPluginAddDirectory("/usr/share/freyja_0.9.5/modules/model");
+	//freyjaPluginAddDirectory("/usr/lib/freyja_0.9.5/modules/model");
+	//freyjaPluginAddDirectory("/usr/local/lib/freyja_0.9.5/modules/model");
+	//freyjaPluginAddDirectory("/usr/share/freyja_0.9.5/modules/model");
 #endif
 }
 
@@ -147,28 +145,25 @@ void freyjaPluginAddDirectory(const char *dir)
 void freyjaPluginFilename1s(const char *filename)
 {
 
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
 
 	if (plugin)
-		plugin->setFilename(filename);
+		plugin->SetFilename(filename);
 }
 
 
 int qSort_FreyjaPluginDesc(const void *a, const void *b)
 {
-	FreyjaPluginDesc *ca = (FreyjaPluginDesc *)a;
-	FreyjaPluginDesc *cb = (FreyjaPluginDesc *)b;
+	if (a == NULL)
+		return 1;
 
-#if 0
-	if (!ca || !cb || !ca->mExtention || !cb->mExtention)
-		return 0;
+	if (b == NULL)
+		return -1;
 
-	return strcmp(ca->mExtention, cb->mExtention);
-#else
-	if (!ca || !cb || !ca->mDescription || !cb->mDescription)
-		return 0;
-	return strcmp(ca->mDescription, cb->mDescription);
-#endif
+	freyja::PluginDesc &objA = *( (freyja::PluginDesc *)a );
+	freyja::PluginDesc &objB = *( (freyja::PluginDesc *)b );
+
+	return objA.mDescription.Strcmp(objB.mDescription.c_str());
 }
 
 
@@ -176,7 +171,7 @@ void freyjaPluginsInit()
 {
 #ifdef FREYJA_PLUGINS
 	SystemIO::FileReader reader;
-	FreyjaPluginDesc plugin;
+	freyja::PluginDesc plugin;
 	const char *module_filename;
 	void (*import)();
 	void *handle;
@@ -295,8 +290,8 @@ void freyjaPluginsInit()
 	foreach (gFreyjaPlugins, i)
 	{
 		DEBUG_MSG("\t+ '%s', '%s'\n", 
-				  gFreyjaPlugins[i]->mDescription,
-				  gFreyjaPlugins[i]->mExtention);
+				  gFreyjaPlugins[i]->mDescription.c_str(),
+				  gFreyjaPlugins[i]->mExtention.c_str());
 	}
 
 #   endif
@@ -450,10 +445,10 @@ int32 freyjaImportModel(const char *filename)
 				}
 
 
-				FreyjaPluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
+				freyja::PluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
 
 				if (plug)
-					gCurrentFreyjaPlugin = plug->getId(); 
+					gCurrentFreyjaPlugin = plug->GetId(); 
 
 				done = !(*import)((char*)filename);
 
@@ -646,10 +641,10 @@ int32 freyjaExportModel(const char *filename, const char *type)
     
 			export_mdl = (int (*)(char * filename))freyjaModuleImportFunction(handle, module_export);
 
-			FreyjaPluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
+			freyja::PluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
 
 			if (plug)
-				gCurrentFreyjaPlugin = plug->getId(); 
+				gCurrentFreyjaPlugin = plug->GetId(); 
 
 			if (export_mdl)
 				saved = (!(*export_mdl)((char*)filename));
@@ -687,18 +682,18 @@ int32 freyjaExportModel(const char *filename, const char *type)
 
 void freyjaPluginDescription(uint32 pluginIndex, const char *info_line)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
 
 	if (plugin)
 	{
-		plugin->setDescription(info_line);
+		plugin->SetDescription(info_line);
 	}
 }
 
 
 void freyjaPluginImportFlags(uint32 pluginIndex, int32 flags)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
 
 	if (plugin)
 	{
@@ -709,7 +704,7 @@ void freyjaPluginImportFlags(uint32 pluginIndex, int32 flags)
 
 void freyjaPluginExportFlags(uint32 pluginIndex, int32 flags)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
 
 	if (plugin)
 	{
@@ -719,11 +714,11 @@ void freyjaPluginExportFlags(uint32 pluginIndex, int32 flags)
 
 void freyjaPluginExtention(uint32 pluginIndex, const char *ext)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
 
 	if (plugin)
 	{
-		plugin->setExtention(ext);
+		plugin->SetExtention(ext);
 	}
 }
 
@@ -747,11 +742,11 @@ void freyjaPluginShutdown()
 
 void freyjaPluginBegin()
 {
-	FreyjaPluginDesc *plugin = new FreyjaPluginDesc();
-	plugin->setId(gFreyjaPlugins.size());
+	freyja::PluginDesc *plugin = new freyja::PluginDesc();
+	plugin->SetId(gFreyjaPlugins.size());
 	gFreyjaPlugins.pushBack(plugin);
 	
-	gCurrentFreyjaPlugin = plugin->getId();
+	gCurrentFreyjaPlugin = plugin->GetId();
 }
 
 
@@ -770,47 +765,39 @@ void freyjaPluginAddExtention1s(const char *ext)
 void freyjaPluginImport1i(int32 flags)
 {
 	freyjaPluginImportFlags(gCurrentFreyjaPlugin, flags);
-	//freyjaPrintMessage("\tImport: %s%s%s",
-	//				   (flags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
-	//				   (flags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
-	//				   (flags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
 }
 
 
 void freyjaPluginExport1i(int32 flags)
 {
-	freyjaPluginExportFlags(gCurrentFreyjaPlugin,flags);
-	//freyjaPrintMessage("\tExport: %s%s%s",
-	//				   (flags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
-	//				   (flags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
-	//				   (flags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
+	freyjaPluginExportFlags(gCurrentFreyjaPlugin, flags);
 }
 
 //FIXME these need direct index functions too
 void freyjaPluginArg1i(const char *name, int32 defaults)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
 
 	if (plugin)
-		plugin->addIntArg(name, defaults);
+		plugin->AddIntArg(name, defaults);
 }
 
 
 void freyjaPluginArg1f(const char *name, float defaults)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
 
 	if (plugin)
-		plugin->addFloatArg(name, defaults);
+		plugin->AddFloatArg(name, defaults);
 }
 
 
 void freyjaPluginArg1s(const char *name, const char *defaults)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
 
 	if (plugin)
-		plugin->addStringArg(name, defaults);
+		plugin->AddStringArg(name, defaults);
 }
 
 
@@ -822,10 +809,10 @@ void freyjaPluginEnd()
 
 int32 freyjaGetPluginId()
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(gCurrentFreyjaPlugin);
 
 	if (plugin)
-		return plugin->getId();
+		return plugin->GetId();
 
 	return -1;
 }
@@ -833,11 +820,11 @@ int32 freyjaGetPluginId()
 
 int freyjaGetPluginArg1f(int32 pluginId, const char *name, float *arg)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
 
 	if (plugin)
 	{
-		*arg =  plugin->getFloatArg(name);
+		*arg =  plugin->GetFloatArg(name);
 		return 0;
 	}
 
@@ -847,11 +834,11 @@ int freyjaGetPluginArg1f(int32 pluginId, const char *name, float *arg)
 
 int freyjaGetPluginArg1i(int32 pluginId, const char *name, int32 *arg)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
 
 	if (plugin)
 	{
-		*arg =  plugin->getIntArg(name);
+		*arg =  plugin->GetIntArg(name);
 		return 0;
 	}
 
@@ -861,11 +848,11 @@ int freyjaGetPluginArg1i(int32 pluginId, const char *name, int32 *arg)
 
 int freyjaGetPluginArg1s(int32 pluginId, const char *name, char **arg)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
 
 	if (plugin)
 	{
-		*arg =  plugin->getStringArg(name);
+		*arg =  plugin->GetStringArg(name);
 		return 0;
 	}
 
@@ -876,11 +863,11 @@ int freyjaGetPluginArg1s(int32 pluginId, const char *name, char **arg)
 int freyjaGetPluginArgString(int32 pluginId, const char *name, 
 							 int32 len, char *arg)
 {
-	FreyjaPluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginId);
 	char *s = 0x0;
 
 	if (plugin)
-		s = plugin->getStringArg(name);
+		s = plugin->GetStringArg(name);
 
 	if (!s || !s[0])
 		return -1;

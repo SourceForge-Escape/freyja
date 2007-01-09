@@ -7,9 +7,18 @@
  Dancer/Kagura (Release)
 
  Dancer (Public Beta Kagura)
+ 20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 plugins should load path relative plugins as expected now
+ - tools build update
+ - libfreyja Plugin updated
+ - Fix for freyjautil.exe build
+ - Fix for freyjautil
+
 
  Dancer (Public Beta RC3)
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for FPS Cap across all supported platforms
+ - Fix for mstl Timer
  - Fix for latest Gtk+ 'shrinking' the animation slider and toolbar
  - Fix for bad base index into vertex array in some vertex transforms
  - Reworking how Faces... is transformed and undo is built
