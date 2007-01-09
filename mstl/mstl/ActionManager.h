@@ -68,7 +68,7 @@ class ActionManager
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool Serialize(SystemIO::FileWriter &w) 
+	virtual bool Serialize(mstl::SystemIO::FileWriter &w) 
 	{
 		mstl::stack<Action *> *r = mActions.get_reverse();
 		Action *a;
@@ -132,7 +132,7 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) { return false; }
+	virtual bool Serialize(mstl::SystemIO::FileReader &r) { return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
