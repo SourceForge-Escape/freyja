@@ -70,8 +70,8 @@ class ActionManager
 
 	virtual bool Serialize(mstl::SystemIO::FileWriter &w) 
 	{
-		mstl::stack<Action *> *r = mActions.get_reverse();
-		Action *a;
+		mstl::stack<mstl::Action *> *r = mActions.get_reverse();
+		mstl::Action *a;
 
 		while ( (a = r->pop()) )
 		{
@@ -99,7 +99,7 @@ class ActionManager
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	virtual Action *Pop() { return mActions.pop(); }
+	virtual mstl::Action *Pop() { return mActions.pop(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -110,7 +110,7 @@ class ActionManager
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual void Push(Action *action) { if (action) mActions.push(action); }
+	virtual void Push(mstl::Action *action) { if (action) mActions.push(action); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -145,7 +145,7 @@ class ActionManager
 
 	bool Undo() 
 	{ 
-		Action *a = Pop(); 
+		mstl::Action *a = Pop(); 
 		if (!a) return false; 
 		bool b = a->Undo(); 
 		delete a; 
@@ -164,7 +164,7 @@ class ActionManager
 
  protected:
 
-	mstl::stack<Action *> mActions;    	/* 'Undo' stack */
+	mstl::stack<mstl::Action *> mActions;    	/* 'Undo' stack */
 
 
  private:
