@@ -43,274 +43,223 @@
 #include <string.h>
 #include <mstl/stack.h>
 #include <mstl/Vector.h>
+#include <mstl/String.h>
 #include "freyja.h"
 
-using namespace mstl;
 
+namespace freyja {
 
-class FreyjaPluginDescEvent
+class PluginDescEvent
 {
 public:
 
-	FreyjaPluginDescEvent() : 
-		eventId(-1)
+	PluginDescEvent() : 
+		mName(""),
+		mEventId(-1),
+		mCallback(NULL)
 	{
-		name[0] = 0;
 	}
 
-	char name[64];
+	mstl::String mName;
 
-	int eventId;
+	int mEventId;
 
-	void *callback();
+	void (*mCallback)();
 };
 
 
-class FreyjaPluginDesc
+class PluginDesc
 {
 public:
 	
-	FreyjaPluginDesc() :
-		mFilename(NULL),
+	class PluginDescArg
+	{
+	public:
+
+		PluginDescArg() : 
+			mName(""), mType("None"), mValue("") { }
+
+		PluginDescArg(const char *name, const char *type, const char *value) : 
+			mName(name), mType(type), mValue(value) { }
+
+		PluginDescArg(const PluginDescArg &arg) : 
+			mName(arg.mName), mType(arg.mType), mValue(arg.mValue)  { }
+
+		PluginDescArg &operator=(const PluginDescArg &arg)
+		{
+			mName = arg.mName;
+			mType = arg.mType;
+			mValue = arg.mValue;
+			return *this;
+		}
+
+		~PluginDescArg() { }
+
+		mstl::String &GetStringName() { return mName; }
+
+		const char *GetName() { return mName.c_str(); }
+
+		void SetName(const char *name) { mName = name; }
+
+		mstl::String &GetStringType() { return mType; }
+
+		const char *GetType() { return mType.c_str(); }
+
+		void SetType(const char *type) { mType = type; }
+
+		const char *GetValue() { return mValue.c_str(); }
+
+		void SetValue(const char *value) { mValue = value; }
+		// How generic can you get w/o language generics? 
+		// Embedd mlisp/python scripts if you want it's a string =p
+
+	private:
+
+		mstl::String mName;
+
+		mstl::String mType;
+
+		mstl::String mValue;
+	};
+
+
+	PluginDesc() :
+		mName(""),
+		mFilename(""),
+		mDescription(""),
+		mExtention(""),
+		mArgs(),
 		mImportFlags(FREYJA_PLUGIN_NONE),
 		mExportFlags(FREYJA_PLUGIN_NONE),
-		mFloatArgsDesc(),
-		mFloatArgs(),
-		mIntArgsDesc(),
-		mIntArgs(),
-		mStringArgsDesc(),
-		mStringArgs(),
 		mId(mNextId)
 	{
-		mDescription[0] = 0;
-		mExtention[0] = 0;
 		++mNextId;
 	}
 
 
-	FreyjaPluginDesc(const FreyjaPluginDesc& p) :
-		mFilename(NULL),
-		mImportFlags(FREYJA_PLUGIN_NONE),
-		mExportFlags(FREYJA_PLUGIN_NONE),
-		mFloatArgsDesc(),
-		mFloatArgs(),
-		mIntArgsDesc(),
-		mIntArgs(),
-		mStringArgsDesc(),
-		mStringArgs(),
-		mId(p.mId)
+	PluginDesc(const PluginDesc& desc) :
+		mName(desc.mName),
+		mFilename(desc.mFilename),
+		mDescription(desc.mDescription),
+		mExtention(desc.mExtention),
+		mArgs(desc.mArgs),
+		mImportFlags(desc.mImportFlags),
+		mExportFlags(desc.mExportFlags),
+		mId(desc.mId)
 	{
-		BUG_ME("This shouldn't ever happen by design");
 	}
 
 
-	FreyjaPluginDesc &operator=(const FreyjaPluginDesc &fpd)
+	PluginDesc &operator=(const PluginDesc &desc)
 	{
-		BUG_ME("This shouldn't ever happen by design");
+		mName = desc.mName;
+		mFilename = desc.mFilename;
+		mDescription = desc.mDescription;
+		mExtention = desc.mExtention;
+		mImportFlags = desc.mImportFlags;
+		mExportFlags = desc.mExportFlags;
+		mArgs = desc.mArgs;
+		mId = desc.mId;
+
 		return *this;
 	}
 
 
-	~FreyjaPluginDesc()
-	{
-		if (mFilename) delete [] mFilename;
-		
-	}
+	~PluginDesc() { }
 
-	void setFilename(const char *filename)
+	void SetFilename(const char *filename)
 	{
 		if (filename && filename[0])
 		{
-			if (mFilename) delete [] mFilename;
-			mFilename = strdup(filename);
+			mFilename = filename;
 		}
 	}
 
-	void setDescription(const char *s)
+	void SetDescription(const char *s) { mDescription = s; }
+
+	void SetExtention(const char *s) { mExtention = s; }
+
+	// Id property
+	void SetId(long id) { mId = id; }
+
+	long GetId() { return mId; }
+
+
+	const char *QueryArgList(const char *type, const char *name)
 	{
-		strncpy(mDescription, s, 64);
-		mDescription[63] = 0;
-	}
+		mstl::String keyType = type;
+		mstl::String keyName = name;
+		unsigned int i;
 
-	void setExtention(const char *s)
-	{
-		strncpy(mExtention, s, 64);
-		mExtention[63] = 0;
-	}
-
-	void setId(long id)
-	{
-		mId = id;
-	}
-
-	long getId()
-	{
-		return mId;
-	}
-
-	void print()
-	{
-		freyjaPrintMessage("%s", mDescription);
-		freyjaPrintMessage("\tImport: %s%s%s",
-						   (mImportFlags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
-						   (mImportFlags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
-						   (mImportFlags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
-		freyjaPrintMessage("\tExport: %s%s%s",
-						   (mExportFlags & FREYJA_PLUGIN_MESH) ? "(mesh) " : "", 
-						   (mExportFlags & FREYJA_PLUGIN_SKELETON) ? "(skeleton) " : "", 
-						   (mExportFlags & FREYJA_PLUGIN_VERTEX_MORPHING) ? "(vertex morph aniamtion) " : "");
-	}
-
-
-	long getIntArg(const char *name)
-	{
-		long i, l;
-
-		if (!name || !name[0])
-			return -1; // oh well
-
-		l = strlen(name);
-		l = (l > 64) ? 64 : l;
-
-		for (i = mIntArgsDesc.begin(); i < (long)mIntArgsDesc.end(); ++i)
+		foreach ( mArgs, i)
 		{
-			if (!strncmp(name, mIntArgsDesc[i], l))
-				return mIntArgs[i];
+			if (mArgs[i].GetStringType() == keyType &&
+				mArgs[i].GetStringName() == keyName)
+			{
+				return mArgs[i].GetValue();
+			}
 		}
 
-		return -1;
+		return NULL;
 	}
 
-
-	float getFloatArg(const char *name)
+	void InsertArg(const char *type, const char *name, const char *value)
 	{
-		long i, l;
-
-		if (!name || !name[0])
-			return -1; // oh well
-
-		l = strlen(name);
-		l = (l > 64) ? 64 : l;
-
-		for (i = mFloatArgsDesc.begin(); i < (long)mFloatArgsDesc.end(); ++i)
-		{
-			if (!strncmp(name, mFloatArgsDesc[i], l))
-				return mFloatArgs[i];
-		}
-
-		return -1;
+		mArgs.push_back( PluginDescArg(name, type, value) );
 	}
 
 
-	char *getStringArg(const char *name)
+	// Old helper methods reimplemented for old ABI use, isn't that nice
+	int32 GetIntArg(const char *name) 
+	{ 
+		const char *s = QueryArgList("int32", name); 
+		return s ? atoi(s) : 0;
+	}
+
+	void AddIntArg(const char *name, int32 val) 
 	{
-		long i, l;
-
-		if (!name || !name[0])
-			return 0x0; // oh well
-
-		l = strlen(name);
-		l = (l > 64) ? 64 : l;
-
-		for (i = mStringArgsDesc.begin(); i < (long)mStringArgsDesc.end(); ++i)
-		{
-			if (!strncmp(name, mStringArgsDesc[i], l))
-				return mStringArgs[i];
-		}
-
-		return 0x0;
+		mstl::String s;
+		s.Set("%i", val);
+		InsertArg("int32", name, s.c_str()); 
 	}
 
-	void addIntArg(const char *name, long data)
+	float GetFloatArg(const char *name) 
+	{ 
+		const char *s = QueryArgList("float", name); 
+		return s ? atof(s) : 0.0f;
+	}
+
+	void AddFloatArg(const char *name, float val) 
 	{
-		char *s;
-		long l = 0;
-
-		if (!name || !name[0])
-			return;
-
-		l = strlen(name);
-		l = (l > 64) ? 64 : l;
-		s = new char[64];
-		strncpy(s, name, 64);
-		s[63] = 0;
-
-		mIntArgs.pushBack(data);
-		mIntArgsDesc.pushBack(s);
+		mstl::String s;
+		s.Set("%f", val);
+		InsertArg("float", name, s.c_str()); 
 	}
 
+	/*const*/ char *GetStringArg(const char *name) 
+	{ 
+		// removing const for deprecated calls, which use 'char *'
+		return (char *)QueryArgList("char*", name);
+	}
 
-	void addFloatArg(const char *name, float data)
+	void AddStringArg(const char *name, const char *val) 
 	{
-		char *s;
-		long l = 0;
-
-		if (!name || !name[0])
-			return;
-
-		l = strlen(name);
-		l = (l > 64) ? 64 : l;
-		s = new char[64];
-		strncpy(s, name, 64);
-		s[63] = 0;
-
-		mFloatArgs.pushBack(data);
-		mFloatArgsDesc.pushBack(s);
+		InsertArg("char*", name, val); 
 	}
 
+	mstl::String mName;
 
-	void addStringArg(const char *name, const char *data)
-	{
-		char *s;
-		long l = 0;
+	mstl::String mFilename;
 
-		if (!name || !name[0])
-			return;
+	mstl::String mDescription;
 
-		l = strlen(name);
-		l = (l > 64) ? 64 : l;
-		s = new char[64];
-		strncpy(s, name, 64);
-		s[63] = 0;
+	mstl::String mExtention;
 
-		mStringArgsDesc.pushBack(s);
-
-		if (data && data[0])
-		{
-			l = strlen(name);
-			l = (l > 64) ? 64 : l;
-			s = new char[l+1];
-			strncpy(s, data, l);
-			s[l-1] = 0;
-		}
-		else
-		{
-			s = new char[64];
-			s[0] = 0;
-		}
-
-		mStringArgs.pushBack(s);
-	}
-
-
-	char *mFilename;
-
-	char mDescription[64];
-
-	char mExtention[64];
+	mstl::Vector<PluginDescArg> mArgs;
 
 	long mImportFlags;
 
 	long mExportFlags;
-
-	Vector<char *> mFloatArgsDesc;
-	Vector<float> mFloatArgs;
-
-	Vector<char *> mIntArgsDesc;
-	Vector<long> mIntArgs;
-
-	Vector<char *> mStringArgsDesc;
-	Vector<char *> mStringArgs;
 
 private:
 
@@ -319,6 +268,8 @@ private:
 	long mId;
 };
 
-#endif
+} // namespace freyja
+
+#endif // GUARD__FREYJA_PLUGIN_H_
 
 

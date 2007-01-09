@@ -2311,7 +2311,8 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 	int id = -1;
 
 	arg_enforce_type(&menu, ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
+	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!menu)
 	{
@@ -2328,7 +2329,8 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 	}
 
 	arg_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (label)
 	{

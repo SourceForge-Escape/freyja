@@ -66,6 +66,7 @@
 
 			(menu_item "Proper_ties"		eInfo		"gtk-properties")
 			(menu_item "_Import"		eImportFile	"C-i"	"gtk-go-forward")
+			;(submenu eExportMenu	"_Export...")
 			(menu_item "_Export"	eExportFile		"C-e"	"gtk-go-back")
 
 			(menu_seperator)

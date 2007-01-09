@@ -180,25 +180,25 @@ extern "C" {
 #   if defined(__cplusplus) && defined(USING_FREYJA_CPP_ABI)
 #   include <freyja/Plugin.h>
 
-    Vector<FreyjaPluginDesc *> &freyjaGetPluginDescriptions();
+    mstl::Vector<freyja::PluginDesc *> &freyjaGetPluginDescriptions();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-    Vector<char *> &freyjaGetPluginDirectories();
+    mstl::Vector<char *> &freyjaGetPluginDirectories();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-    FreyjaPluginDesc *freyjaGetPluginClassByName(const char *name);
+    freyja::PluginDesc *freyjaGetPluginClassByName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-    FreyjaPluginDesc *freyjaGetPluginClassByIndex(long pluginIndex);
+    freyja::PluginDesc *freyjaGetPluginClassByIndex(long pluginIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

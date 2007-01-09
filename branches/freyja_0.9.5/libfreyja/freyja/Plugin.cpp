@@ -23,7 +23,7 @@
 
 #include "Plugin.h"
 
-long FreyjaPluginDesc::mNextId = 1;
+long freyja::PluginDesc::mNextId = 1;
 
 
 

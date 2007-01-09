@@ -7,6 +7,18 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* Bones and bone transforms in same units!
+
+	* Import/Export submenus like the Plugins.. submenu
+		- File dialogs should be able to handle 
+		  *.ms3d and auto append instead of doing *.milkshape
+
+	# Rotation cursor fixes for rendering vs actual transform.
+	# Multi-object modes might get a new UI design to avoid confusing the user.
+	# Basic geometry previews will use blend vertices buffer to avoid changing actual data.
+	# Hook up UV transforms, and flesh them out.
+	# Update the ABI with new transforms, and avoid doing transform algorithms in client.
+
 	* Single joint animation for shishi odoshi test
 		- Visualize weights over skinned mesh
 		- Keyframe editor improvements
