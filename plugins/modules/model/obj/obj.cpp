@@ -32,7 +32,6 @@
 #include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/TextureABI.h>
-#include <freyja/LegacyABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/freyja.h>
 #include <mstl/Vector.h>
@@ -84,60 +83,64 @@ int freyja_model__obj_check(char *filename)
 int freyja_model__obj_import(char *filename)
 {
 	ObjModel obj;
+	mstl::Vector<int> uvmap;
 
 	if (!obj.Load(filename))
 	{
 		return -1;
 	}
 
-	freyjaBegin(FREYJA_MODEL);
+	index_t model = freyjaModelCreate();
 
 	uint32 m, v, f, i;
 	foreach (obj.mMeshes, m)
 	{
-		freyjaBegin(FREYJA_MESH);
+		index_t mesh = freyjaMeshCreate();
+		freyjaModelAddMesh(model, mesh);
 
 		foreach (obj.mMeshes[m].mVertices, v)
 		{
-			i = freyjaVertexCreate3fv(obj.mMeshes[m].mVertices[v].mVec);
-
+			i = freyjaMeshVertexCreate3fv(mesh, obj.mMeshes[m].mVertices[v].mVec);
 			// FIXME Polymapped not supported this way
 			if (obj.mMeshes[m].mHasNormals)
-				freyjaVertexNormal3fv(i, obj.mMeshes[m].mNormals[v].mVec);
+				freyjaMeshVertexNormal3fv(mesh, i, obj.mMeshes[m].mNormals[v].mVec);
 		}
 
 		if (obj.mMeshes[m].mHasTexCoords)
 		{
 			foreach (obj.mMeshes[m].mTexCoords, i)
 			{
-				freyjaTexCoordCreate2fv(obj.mMeshes[m].mTexCoords[i].mVec);
+				uvmap.push_back(freyjaMeshTexCoordCreate2fv(mesh, obj.mMeshes[m].mTexCoords[i].mVec));
 			}
 		}
 
 		foreach (obj.mMeshes[m].mFaces, f)
 		{
-			freyjaBegin(FREYJA_POLYGON);
+			index_t face = freyjaMeshPolygonCreate(mesh);
+			freyjaMeshPolygonMaterial(mesh, face, 0);
+			freyjaMeshPolygonGroup1u(mesh, face, obj.mMeshes[m].mFaces[f].mSmoothingGroup);
 
 			foreach (obj.mMeshes[m].mFaces[f].mVertexRefs, v)
 			{
-				freyjaPolygonVertex1i(obj.mMeshes[m].mFaces[f].mVertexRefs[v]);
+				freyjaMeshPolygonAddVertex1i(mesh, face, obj.mMeshes[m].mFaces[f].mVertexRefs[v]);
 			}
 
 			if (obj.mMeshes[m].mHasTexCoords)
 			{
 				foreach (obj.mMeshes[m].mFaces[f].mTexCoordRefs, v)
 				{
-					freyjaPolygonTexCoord1i(obj.mMeshes[m].mFaces[f].mTexCoordRefs[v]);
+					freyjaMeshPolygonAddTexCoord1i(mesh, face,  uvmap[obj.mMeshes[m].mFaces[f].mTexCoordRefs[v]]);
+					//SystemIO::Print("uv '%i' %i %i\n", v, obj.mMeshes[m].mFaces[f].mTexCoordRefs[v], uvmap[obj.mMeshes[m].mFaces[f].mTexCoordRefs[v]]);
 				}
 			}
 
-			freyjaEnd(); // FREYJA_POLYGON
+			
 		}
 
-		freyjaEnd(); // FREYJA_MESH
+		
 	}
 
-	freyjaEnd(); // FREYJA_MODEL
+	
 
 	return 0;
 }

@@ -24,6 +24,7 @@ public:
 	public:
 
 		ObjFace() :
+			mSmoothingGroup(0),
 			mVertexRefs(),
 			mTexCoordRefs(),
 			mNormalRefs()
@@ -31,6 +32,7 @@ public:
 		}
 
 		ObjFace(const ObjFace &face) :
+			mSmoothingGroup(face.mSmoothingGroup),
 			mVertexRefs(face.mVertexRefs),
 			mTexCoordRefs(face.mTexCoordRefs),
 			mNormalRefs(face.mNormalRefs)
@@ -39,6 +41,7 @@ public:
 
 		ObjFace &operator =(const ObjFace &face)
 		{
+			mSmoothingGroup = face.mSmoothingGroup;
 			mVertexRefs = face.mVertexRefs;
 			mTexCoordRefs = face.mTexCoordRefs;
 			mNormalRefs = face.mNormalRefs;
@@ -49,6 +52,7 @@ public:
 		{
 		}
 
+		int mSmoothingGroup;
 		Vector<uint32> mVertexRefs;
 		Vector<uint32> mTexCoordRefs;
 		Vector<uint32> mNormalRefs;
@@ -134,7 +138,7 @@ public:
 		SystemIO::TextFileReader r;
 		const char *symbol;
 		vec_t x, y, z, u, v;
-		uint32 mesh = 0, face = 0;
+		uint32 mesh = 0, face = 0, smoothinggroup = 0;
 
 
 		if (!r.Open(filename))
@@ -216,7 +220,8 @@ public:
 			else if (!strcmp(symbol, "s"))
 			{
 				int idx = r.ParseInteger();
-				SystemIO::Print("Smoothing Group %i is not used\n", idx);
+				smoothinggroup = idx;
+				//SystemIO::Print("Smoothing Group %i is not used\n", idx);
 			}
 			else if (!strcmp(symbol, "f")) // f 1/1/1 2/2/2 3/3/3
 			{
@@ -232,6 +237,8 @@ public:
 					uint32 idx = r.ParseInteger() - 1;
 					//SystemIO::Print("** %i\n", idx);
 					f.mVertexRefs.pushBack(idx);
+
+					f.mSmoothingGroup = smoothinggroup;
 
 					// texcoords
 					if (mMeshes[mesh].mHasTexCoords)

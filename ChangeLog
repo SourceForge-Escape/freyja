@@ -8,6 +8,8 @@
 
  Dancer (Public Beta Kagura)
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Obj plugin no longer using legacy ABI ( fix for UV import issue too )
+ - Few more tools build fixes
  - Win32 plugins should load path relative plugins as expected now
  - tools build update
  - libfreyja Plugin updated
