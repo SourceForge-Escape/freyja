@@ -540,7 +540,7 @@ int main(int argc, char *argv[])
 
 		if (offset >= size)
 		{
-			printf("# Reached end of file @ %i / %i\n", offset, size);
+			printf("# Reached end of file @ %i / %lu\n", offset, size);
 			break;
 		}
 	}

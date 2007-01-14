@@ -126,8 +126,7 @@ TESTS=$(BUILDDIR)/$(NAME).test
 # Build rules
 ################################################################
 
-tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test
-#bsa.test 
+tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test lineageIIextract.test bsa.test 
 
 tools-win32: freyjautil.exe UTPackage.exe lineageIIextract.exe
 
@@ -265,11 +264,8 @@ MDLModel.test:
 ##########################################################################
 
 bsa.test:
-	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) test NAME=bsa BUILDDIR=$(BUILD_TEST_DIR) \
-	OBJS="$(BUILD_TEST_DIR)/BSAPakReader.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_BSAPAKREADER $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	cd ../plugins/modules/model/bsa && $(MAKE) test
+	cp ../bin/plugins/model/bsa/test/bsa.test ../bin/tools/test/
 
 freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
