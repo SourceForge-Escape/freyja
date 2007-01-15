@@ -126,7 +126,7 @@ TESTS=$(BUILDDIR)/$(NAME).test
 # Build rules
 ################################################################
 
-tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test lineageIIextract.test bsa.test 
+tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test lineageIIextract.test bsa.test UTPackage.test
 
 tools-win32: freyjautil.exe UTPackage.exe lineageIIextract.exe
 
@@ -267,6 +267,26 @@ bsa.test:
 	cd ../plugins/modules/model/bsa && $(MAKE) test
 	cp ../bin/plugins/model/bsa/test/bsa.test ../bin/tools/test/
 
+UTPackage.test:
+	cd ../plugins/modules/model/utpackage && $(MAKE) test
+	cp ../bin/plugins/model/utpackage/test/utpackage.test ../bin/tools/test/
+
+utindex.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=utindex \
+	OBJS="$(BUILD_TEST_DIR)/utindex.o" \
+	CFLAGS="-Wall -g -O0 $(LOCAL_INCLUDES) " \
+	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++"
+
+lineageIIraw2obj.test:
+	@-mkdir -p $(BUILD_TEST_DIR)
+	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
+	NAME=lineageIIraw2obj \
+	OBJS="$(BUILD_TEST_DIR)/lineageIIraw2obj.o" \
+	CFLAGS="-Wall -g -O0 $(LOCAL_INCLUDES) " \
+	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++"
+
 freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test BUILDDIR=$(BUILD_TEST_DIR) \
@@ -296,7 +316,7 @@ raw2riff.test:
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
 	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
-UTPackage.test:
+UTPackage.test.old:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=UTPackage BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
