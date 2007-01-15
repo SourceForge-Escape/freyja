@@ -505,6 +505,7 @@ int main(int argc, char *argv[])
 	fseek(in, wedgeOffset, SEEK_SET);
 	unsigned int maxVertex = 0;
 
+	// Wedges have to be REORDERED here!
 	for (i = 0; i < wedgeCount; ++i)
 	{
 		l2_wedge_t w;
@@ -531,11 +532,18 @@ int main(int argc, char *argv[])
 		unsigned long off = ftell(in);
 		unsigned int count = 0;		
 
+		fseek(in, 0, SEEK_END);
+		unsigned long end = ftell(in);
+
 		while (test_wedge_offset(in, off, w))
 		{
 			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
 			off += 10;
 			++count;
+
+
+			if (off >= end)
+				break;
 
 			if ((int)maxVertex < w.s) maxVertex = w.s;
 
@@ -544,7 +552,16 @@ int main(int argc, char *argv[])
 			printf("vt %f %f\n", w.u, w.v);
 		}
 
-		addtionalWedges = count;
+		off = wedgeOffset - 10;
+
+		while (test_wedge_offset(in, off, w))
+		{
+			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
+			off -= 10;
+			//++count;
+		}
+
+		addtionalWedges = count;		
 	}
 
 	fseek(in, faceOffset, SEEK_SET);
