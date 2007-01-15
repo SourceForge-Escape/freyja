@@ -1,12 +1,21 @@
-/*
- This is a pretty hacky lineageII raw SkeletalMesh to OBJ test app.
-
- It should be used to design a better application or even finish reverse
- engineering the various formats.  This app is a compromise of guessing 
- patterns to avoid supporting versions I've never seen or can test myself.
-
- Terry Hendrix II <mongooseichiban@gmail.com>
-*/
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
+ * 
+ * Project : Freyja
+ * Author  : Terry Hendrix ( Mongoose )
+ * Website : http://icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
+ * Object  : 
+ * License : No use w/o permission (C) 2001-2006 Mongoose
+ * Comments: 
+ * 
+ * This is a pretty hacky lineageII raw SkeletalMesh to OBJ test app.
+ * 
+ * It should be used to design a better application or even finish reverse
+ * engineering the various formats.  This app is a compromise of guessing 
+ * patterns to avoid supporting versions I've never seen or can test myself.
+ *
+ ==========================================================================*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,8 +23,10 @@
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 
+using namespace mstl;
+
 typedef struct {
-	short x;
+	float x;
 	float y;
 	float z;
 
@@ -41,7 +52,7 @@ typedef struct {
 } l2_face_t;
 
 
-int read_index(FILE *f, unsigned int &bytes)
+int read_index(mstl::SystemIO::BufferedFileReader &r, unsigned int &bytes)
 {
 	int val;
 	char b0, b1, b2, b3, b4;
@@ -49,27 +60,27 @@ int read_index(FILE *f, unsigned int &bytes)
 	bytes = 0;                                                         
 	val = 0;
    
-	fread(&b0, 1, 1, f);
+	b0 = r.ReadByte();//fread(&b0, 1, 1, f);
 	++bytes;
    
 	if (b0 & 0x40)
 	{
-		fread(&b1, 1, 1, f);
+		b1 = r.ReadByte();//fread(&b1, 1, 1, f);
  		++bytes;
 
 		if (b1 & 0x80)
 		{
-			fread(&b2, 1, 1, f);
+			b2 = r.ReadByte();//fread(&b2, 1, 1, f);
 	 		++bytes;
  
 			if (b2 & 0x80)
 			{
-				fread(&b3, 1, 1, f);
+				b3 = r.ReadByte();//fread(&b3, 1, 1, f);
 		 		++bytes;
  
 				if (b3 & 0x80)
 				{
-					fread(&b4, 1, 1, f);
+					b4 = r.ReadByte();//fread(&b4, 1, 1, f);
 			 		++bytes;
 					val = b4;
 				}
@@ -92,12 +103,12 @@ int read_index(FILE *f, unsigned int &bytes)
 }
 
 
-bool test_vertex_offset(FILE *f, unsigned long offset, l2_vert_t &v)
+bool test_vertex_offset(mstl::SystemIO::BufferedFileReader &r, unsigned long offset, l2_vert_t &v)
 {
-	fseek(f, offset, SEEK_SET);
-	fread(&v.x, 4, 1, f);
-	fread(&v.y, 4, 1, f);
-	fread(&v.z, 4, 1, f);
+	r.SetOffset(offset);//fseek(f, offset, SEEK_SET);
+	v.x = r.ReadFloat32();//fread(&v.x, 4, 1, f);
+	v.y = r.ReadFloat32();//fread(&v.y, 4, 1, f);
+	v.z = r.ReadFloat32();//fread(&v.z, 4, 1, f);
 	
 	return (v.x < 100000.0f && v.x > -100000.0f && 
 	        v.y < 100000.0f && v.y > -100000.0f &&
@@ -106,34 +117,35 @@ bool test_vertex_offset(FILE *f, unsigned long offset, l2_vert_t &v)
 }
 
 
-bool test_wedge_offset(FILE *f, unsigned long offset, l2_wedge_t &w)
+bool test_wedge_offset(mstl::SystemIO::BufferedFileReader &r, unsigned long offset, l2_wedge_t &w)
 {
-	fseek(f, offset, SEEK_SET);
-	fread(&w.s, 2, 1, f);
-	fread(&w.u, 4, 1, f);
-	fread(&w.v, 4, 1, f);
+	r.SetOffset(offset);//fseek(f, offset, SEEK_SET);
+	w.s = r.ReadInt16U();//fread(&w.s, 2, 1, f);
+	w.u = r.ReadFloat32();//fread(&w.u, 4, 1, f);
+	w.v = r.ReadFloat32();//fread(&w.v, 4, 1, f);
 	
 	return (w.s >= 0 && w.u >= 0.0f && w.u <= 1.0f && w.v >= 0.0f && w.v <= 1.0f);
 }
 
 
-bool test_face_offset(FILE *f, unsigned long offset, l2_face_t &face)
+bool test_face_offset(mstl::SystemIO::BufferedFileReader &r, unsigned long offset, l2_face_t &face)
 {
-	fseek(f, offset, SEEK_SET);
-	fread(&face.a, 2, 1, f);
-	fread(&face.b, 2, 1, f);
-	fread(&face.c, 2, 1, f);
-	fread(&face.mat, 1, 1, f);
-	fread(&face.aux, 1, 1, f);
-	fread(&face.group, 4, 1, f);
+	r.SetOffset(offset);//fseek(f, offset, SEEK_SET);
+	face.a = r.ReadInt16U();//fread(&face.a, 2, 1, f);
+	face.b = r.ReadInt16U();//fread(&face.b, 2, 1, f);
+	face.c = r.ReadInt16U();//fread(&face.c, 2, 1, f);
+	face.mat = r.ReadByte();//fread(&face.mat, 1, 1, f);
+	face.aux = r.ReadByte();//fread(&face.aux, 1, 1, f);
+	face.group = r.ReadInt32U();//fread(&face.group, 4, 1, f);
 	
 	return (face.a >= 0 && face.b >= 0 && face.c >= 0 &&
 	        face.a != face.b && face.a != face.c && face.b != face.c);
 }
 
 
-void search_for_vertices(mstl::Vector<mstl::String> &vertices, FILE *f,
-                       unsigned long offset, unsigned long end)
+void search_for_vertices(mstl::Vector<mstl::String> &vertices, 
+						 mstl::SystemIO::BufferedFileReader &r,
+						 unsigned long offset, unsigned long end)
 {
 	l2_vert_t v;
 	mstl::String str;
@@ -144,7 +156,7 @@ void search_for_vertices(mstl::Vector<mstl::String> &vertices, FILE *f,
 	{
 		old = offset;
 
-		if (test_vertex_offset(f, offset, v))
+		if (test_vertex_offset(r, offset, v))
 		{
 			if (last == 0)
 				lastOffset = old;
@@ -175,7 +187,8 @@ void search_for_vertices(mstl::Vector<mstl::String> &vertices, FILE *f,
 // This can only find wedges in vertexIndex order, so we need a separate
 // function for searching by clustered indices in case some model wedges 
 // are serialized out of order.
-void search_for_wedges(mstl::Vector<mstl::String> &wedges, FILE *f,
+void search_for_wedges(mstl::Vector<mstl::String> &wedges,
+					   mstl::SystemIO::BufferedFileReader &r,
                        unsigned long offset, unsigned long end)
 {
 	mstl::String str;
@@ -190,16 +203,16 @@ void search_for_wedges(mstl::Vector<mstl::String> &wedges, FILE *f,
 	{
 		old = offset;
 
-		if (test_wedge_offset(f, offset, w))
+		if (test_wedge_offset(r, offset, w))
 		{
 			switch (state)
 			{	
 			case 0: // Find the first wedge ( Need at least 3 in order )
-				if (test_wedge_offset(f, offset+10, w2) && count == 0 
+				if (test_wedge_offset(r, offset+10, w2) && count == 0 
 #ifdef ONLY_LOOK_FOR_ORDERED_WEDGES 
 					&&
 					w.s == 0 && w2.s == 1 && 
-					test_wedge_offset(f, offset+20, w2) &&
+					test_wedge_offset(r, offset+20, w2) &&
 					w2.s == 2
 #endif
 )
@@ -277,7 +290,8 @@ void search_for_wedges(mstl::Vector<mstl::String> &wedges, FILE *f,
 // Should look for overlapping contigous faces 
 // Should check for all the indices in each face being in a valid range, and
 // avoid gaps
-void search_for_faces(mstl::Vector<mstl::String> &faces, FILE *f,
+void search_for_faces(mstl::Vector<mstl::String> &faces,
+					  mstl::SystemIO::BufferedFileReader &r,
                       unsigned long offset, unsigned long end,
                       unsigned int maxIndex)
 {
@@ -291,7 +305,7 @@ void search_for_faces(mstl::Vector<mstl::String> &faces, FILE *f,
 	{
 		old = offset;
 
-		if (test_face_offset(f, offset, face) && maxIndex == 0 ||
+		if (test_face_offset(r, offset, face) && maxIndex == 0 ||
 			face.a < (int)maxIndex && face.b < (int)maxIndex && face.c < (int)maxIndex)
 		{
 			//printf("# %sFace @ %lu, { %i, %i, %i,\t %u, %u, %u }\n", last ? "*" : "", offset, face.a, face.b, face.c, face.mat, face.aux, face.group);
@@ -322,7 +336,7 @@ void search_for_faces(mstl::Vector<mstl::String> &faces, FILE *f,
 
 int main(int argc, char *argv[])
 {
-	FILE *in;
+	mstl::SystemIO::BufferedFileReader r;
 	unsigned int i;
 	unsigned int wedgeCount, wedgeOffset;
 	unsigned int vertCount, vertOffset;
@@ -334,9 +348,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	in = fopen(argv[1], "rb");
-
-	if (!in)
+	if (!r.Open(argv[1]))
 	{
 		perror(argv[1]);
 		return -2;
@@ -346,13 +358,13 @@ int main(int argc, char *argv[])
 
 	if (argc < 8 || argv[2][0] == '?' || argv[3][0] == '?')
 	{
-		fseek(in, 0, SEEK_END);
-		unsigned long end = ftell(in);
+		//fseek(in, 0, SEEK_END);
+		unsigned long end = r.GetFileSize();//ftell(in);
 		unsigned int offset = 0, count = 0;
 		vertOffset = 0;
 		vertCount = 0;
 		
-		search_for_vertices(vertices, in, offset, end);
+		search_for_vertices(vertices, r, offset, end);
 
 		foreach ( vertices, i )
 		{
@@ -378,8 +390,8 @@ int main(int argc, char *argv[])
 
 	if (argc < 8 || argv[4][0] == '?' || argv[5][0] == '?')
 	{
-		fseek(in, 0, SEEK_END);
-		unsigned long end = ftell(in);
+		//fseek(in, 0, SEEK_END);
+		unsigned long end = r.GetFileSize();//ftell(in);
 		unsigned int offset = 0, count = 0, maxV = 0;
 		wedgeOffset = 0;
 		wedgeCount = 0;
@@ -394,7 +406,7 @@ int main(int argc, char *argv[])
 #endif
 
 		mstl::Vector<mstl::String> wedges;
-		search_for_wedges(wedges, in, wedgeOffset, end);
+		search_for_wedges(wedges, r, wedgeOffset, end);
 
 		foreach ( wedges, i )
 		{
@@ -440,14 +452,15 @@ int main(int argc, char *argv[])
 	if (argc < 8 || argv[6][0] == '?' || argv[7][0] == '?')
 	{
 		mstl::Vector<mstl::String> faces;
-		fseek(in, 0, SEEK_END);
-		unsigned long end = ftell(in);
+		//fseek(in, 0, SEEK_END);
+		unsigned long end = r.GetFileSize();//ftell(in);
 		unsigned int offset = 0, count = 0, bytes;
 		faceOffset = 0;
 		faceCount = 0;
 
-		fseek(in, 89, SEEK_SET);
-		count = read_index(in, bytes);
+		//fseek(in, 89, SEEK_SET);
+		r.SetOffset(89);
+		count = read_index(r, bytes);
 		mstl::SystemIO::Print("# Face count guess 89th byte = %i\n", count);
 		
  		count = (wedgeCount > 0) ? wedgeCount : 1200;
@@ -458,7 +471,7 @@ int main(int argc, char *argv[])
 		//  eg the triangle 0 2 4 can't be found if count = 3
 		//count = 0;
 
-		search_for_faces(faces, in, offset, end, count);
+		search_for_faces(faces, r, offset, end, count);
 
 		foreach ( faces, i )
 		{
@@ -493,24 +506,26 @@ int main(int argc, char *argv[])
 
 	float verticesArray[vertCount][3];
 
-	fseek(in, vertOffset, SEEK_SET);
+	//fseek(in, vertOffset, SEEK_SET);
+	r.SetOffset(vertOffset);
 
 	for (i = 0; i < vertCount; ++i)
 	{
-		fread(verticesArray[i]+0, 4, 1, in);
-		fread(verticesArray[i]+1, 4, 1, in);
-		fread(verticesArray[i]+2, 4, 1, in);
+		verticesArray[i][0] = r.ReadFloat32();//fread(verticesArray[i]+0, 4, 1, in);
+		verticesArray[i][1] = r.ReadFloat32();//fread(verticesArray[i]+1, 4, 1, in);
+		verticesArray[i][2] = r.ReadFloat32();//fread(verticesArray[i]+2, 4, 1, in);
 	}
 
-	fseek(in, wedgeOffset, SEEK_SET);
+	//fseek(in, wedgeOffset, SEEK_SET);
+	r.SetOffset(wedgeOffset);
 	unsigned int maxVertex = 0;
 
 	// Wedges have to be REORDERED here!
 	for (i = 0; i < wedgeCount; ++i)
 	{
 		l2_wedge_t w;
-		unsigned long off = ftell(in);
-		test_wedge_offset(in, off, w);
+		unsigned long off = r.GetOffset();//ftell(in);
+		test_wedge_offset(r, off, w);
 
 		printf("# Wedge[%i] %i %f %f\n", i, w.s, w.u, w.v);
 
@@ -529,13 +544,13 @@ int main(int argc, char *argv[])
 	if (argc < 8 || argv[4][1] == '?' || argv[5][1] == '?')
 	{
 		l2_wedge_t w;
-		unsigned long off = ftell(in);
+		unsigned long off = r.GetOffset();//ftell(in);
 		unsigned int count = 0;		
 
-		fseek(in, 0, SEEK_END);
-		unsigned long end = ftell(in);
+		//fseek(in, 0, SEEK_END);
+		unsigned long end = r.GetFileSize();////ftell(in);
 
-		while (test_wedge_offset(in, off, w))
+		while (test_wedge_offset(r, off, w))
 		{
 			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
 			off += 10;
@@ -557,7 +572,7 @@ int main(int argc, char *argv[])
 
 		off = wedgeOffset - 10;
 
-		while (test_wedge_offset(in, off, w))
+		while (test_wedge_offset(r, off, w))
 		{
 			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
 			off -= 10;
@@ -576,16 +591,17 @@ int main(int argc, char *argv[])
 		addtionalWedges = count;		
 	}
 
-	fseek(in, faceOffset, SEEK_SET);
+	//fseek(in, faceOffset, SEEK_SET);
+	r.SetOffset(faceOffset);
 	unsigned int maxWedge = 0, maxFace = 0;
 
 	for (i = 0; i < faceCount; ++i)
 	{
 		l2_face_t face;
-		unsigned long off = ftell(in);
+		unsigned long off = r.GetOffset();//ftell(in);
 		bool err = false;
 
-		if (test_face_offset(in, off, face))
+		if (test_face_offset(r, off, face))
 		{
 			printf("# Face[%i] %i %i %i %u %u %u\n", i, face.a, face.b, face.c, face.mat, face.aux, face.group);
 			if (!err)
@@ -616,7 +632,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	fclose(in);
+	r.Close();
 
 	printf("#####################################################\n");
 	printf("# Generated by lineageIIraw2obj\n");
