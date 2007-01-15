@@ -549,6 +549,9 @@ int main(int argc, char *argv[])
 
 			if (vertCount && w.s < (int)vertCount)
 				printf("v %f %f %f\n", verticesArray[w.s][0],verticesArray[w.s][2],verticesArray[w.s][1]);
+			else
+				printf("v 0.0 0.0 0.0\n");
+
 			printf("vt %f %f\n", w.u, w.v);
 		}
 
@@ -558,7 +561,16 @@ int main(int argc, char *argv[])
 		{
 			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
 			off -= 10;
-			//++count;
+			++count;
+
+			if ((int)maxVertex < w.s) maxVertex = w.s;
+
+			if (vertCount && w.s < (int)vertCount)
+				printf("v %f %f %f\n", verticesArray[w.s][0],verticesArray[w.s][2],verticesArray[w.s][1]);
+			else
+				printf("v 0.0 0.0 0.0\n");
+
+			printf("vt %f %f\n", w.u, w.v);
 		}
 
 		addtionalWedges = count;		
