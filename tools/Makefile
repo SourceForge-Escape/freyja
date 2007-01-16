@@ -286,7 +286,6 @@ lineageIIraw2obj.test:
 	OBJS="$(BUILD_TEST_DIR)/lineageIIraw2obj.o" \
 	CFLAGS="-Wall -g -O0 $(LOCAL_INCLUDES) " \
 	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++"
-	cp $(BUILD_TEST_DIR)/lineageIIraw2obj.test /tmp/
 
 freyjautil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)

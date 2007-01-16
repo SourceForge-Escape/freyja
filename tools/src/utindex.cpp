@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	
+
 	if (offset == -311)
 	{
 		fseek(f, 0, SEEK_END);
@@ -176,6 +178,21 @@ int main(int argc, char *argv[])
 		if (count) 
 			printf("Wedges @ %lu x %i?\n", first, count);
 	}
+	else if (offset == -1)
+	{
+		fseek(f, 0, SEEK_END);
+		long i, count = ftell(f);
+
+		for (i = 0; i < count; ++i)
+		{
+			unsigned int bytes;
+			fseek(f, i, SEEK_SET);
+			int value = read_index(f, bytes);
+
+			if (value >= 1)
+			  printf("%li, %i bytes, %i\n", i, bytes, value);	
+		}
+	}
 	else if (offset < 0)
 	{
 		fseek(f, 0, SEEK_END);
@@ -200,7 +217,7 @@ int main(int argc, char *argv[])
 			FIX_SHORT(s);
 			#endif
 
-			printf("%li, %i bytes, %i, %f, %i\n", i, bytes, value, r, s);	
+			printf("%li, %i bytes, %i\n", i, bytes, value);	
 		}
 	}
 	else
