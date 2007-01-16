@@ -129,16 +129,36 @@ bool search_for_index(mstl::SystemIO::BufferedFileReader &r,
 }
 
 
+bool search_for_indexf(mstl::SystemIO::BufferedFileReader &r,
+					  unsigned int offset, unsigned int count, 
+					  unsigned int val, 
+					  unsigned int &first, unsigned int &bytes) 
+{
+	int test;
+
+	for (unsigned int i = 0; i < count; ++i)
+	{
+		r.SetOffset(offset+i);
+		test = read_index(r, bytes);
+
+		if (test == (int)val)
+		{
+			first = offset+i;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 void read_index_set(mstl::SystemIO::BufferedFileReader &r,
 					mstl::Vector<int> &set,
 					unsigned int offset, unsigned int count) 
 {
 	for (unsigned int i = 0, bytes; i < count; ++i)
 	{
-		if (offset-(i+1) <= 0)
-			return;
-
-		r.SetOffset(offset-(i+1));
+		r.SetOffset(offset+i);
 		set.push_back(read_index(r, bytes));
 	}
 }
@@ -226,6 +246,48 @@ void search_for_vertices(mstl::Vector<mstl::String> &vertices,
 }
 
 
+bool test_wedge_candidates(mstl::SystemIO::BufferedFileReader &r,
+						   unsigned int &wedgeOffset, unsigned int &wedgeCount)
+{
+	l2_wedge_t w;
+	unsigned int addtionalWedgesPre = 0;
+	unsigned int addtionalWedgesPost = 0;
+	unsigned long offset = wedgeOffset - 10;
+	
+	// Search for precedding wedges
+	while (test_wedge_offset(r, offset, w))
+	{
+		offset -= 10;
+		++addtionalWedgesPre;
+	}
+
+	// Search for trailing wedges
+	offset = wedgeOffset + (wedgeCount * 10);
+	
+	while (test_wedge_offset(r, offset, w))
+	{
+		offset += 10;
+		++addtionalWedgesPost;
+	}
+	
+	wedgeOffset -= (addtionalWedgesPre * 10);
+	wedgeCount += addtionalWedgesPre + addtionalWedgesPost;
+
+
+	// Test for Index WedgetCount precedding wedges
+	unsigned int indexOffset, bytes;
+	bool agrees = false;
+	if (search_for_index(r, wedgeOffset, 8, wedgeCount, indexOffset, bytes))
+	{
+		if (indexOffset + bytes == wedgeOffset)
+			agrees = true;
+	}
+
+	// Very strict, must find a completely valid wedge list AND matching Index
+	return agrees; 
+}
+
+
 // This can only find wedges in vertexIndex order, so we need a separate
 // function for searching by clustered indices in case some model wedges 
 // are serialized out of order.
@@ -276,7 +338,7 @@ void search_for_wedges(mstl::Vector<mstl::String> &wedges,
 				break;
 			
 			case 1:
-				if (w.s == oldS + 1 && count)
+				if (count && w.s > 0 &&	w.s == oldS + 1)
 				{
 					//printf("# Wedge @ %lu - %i, %f, %f\n", old, s, u, v);
 					oldS = w.s;
@@ -328,12 +390,13 @@ void search_for_wedges(mstl::Vector<mstl::String> &wedges,
 }
 
 
+//#define DEBUG_FANTEST
 bool is_likely_face_candidate(mstl::SystemIO::BufferedFileReader &r,
 							  unsigned int offset, unsigned int count)
 {
 	l2_face_t face;
 	int candidates[16][2];
-	unsigned int end = offset + count * 12;//, best = 0, bestCount;
+	unsigned int end = offset + count * 12, old = offset;//, best = 0, bestCount;
 	int a, b, c;
 
 	for (unsigned int i = 0; i < 16; ++i)
@@ -342,17 +405,18 @@ bool is_likely_face_candidate(mstl::SystemIO::BufferedFileReader &r,
 		candidates[i][1] = 0;
 	}
 
-	printf("# Faces @ %u x %u ? ( %u - %u )\n", offset, count, offset, end);
+	//printf("# Faces @ %u x %u ? ( %u - %u )\n", offset, count, offset, end);
 
 	for (; offset < end; offset += 12)
 	{
 		if (!test_face_offset(r, offset, face))
 		{
+			printf("# Faces @ %u x %u ? ( %u - %u )\n", old, count, old, end);
 			printf("# FAIL %i %i %i\n", face.a, face.b, face.c);
 			return false;
 		}
 
-		printf("# %i %i %i\n", face.a, face.b, face.c);
+		//printf("# %i %i %i\n", face.a, face.b, face.c);
 		
 		// Need to rewrite this crap with LRU cache or full ref counting...
 		a = b = c = -1;
@@ -405,17 +469,24 @@ bool is_likely_face_candidate(mstl::SystemIO::BufferedFileReader &r,
 
 	for (unsigned int i = 0; i < 16; ++i)
 	{
+#ifdef DEBUG_FANTEST_ALL
 		if (candidates[i][1])
 			printf("# FanTest %i. idx = %i, count = %i\n", 
 				   i, candidates[i][0], candidates[i][1]);
+#endif
 
 		if (candidates[i][1] > 8) // max connectivity allowed for triangle fans
 		{
+#ifdef DEBUG_FANTEST
+			printf("# Faces @ %u x %u ? ( %u - %u )\n", old, count, old, end);
+			printf("# FAIL FanTest %i. idx = %i, count = %i\n", 
+				   i, candidates[i][0], candidates[i][1]);
+#endif
 			return false;
 		}
 	}
 
-	printf("# Faces @ %u x %u - PASS\n", offset, count);
+	//printf("# Faces @ %u x %u - PASS\n", offset, count);
 
 	return true;
 }
@@ -432,17 +503,33 @@ void search_for_faces(mstl::Vector<mstl::String> &faces,
 {
 	l2_face_t face;
 	mstl::String str;
-	unsigned long old = offset, pick = 0, lastOffset = 0;
-	unsigned int last = 0, best = 0;
+	unsigned long old = offset, lastOffset = 0;
+	unsigned int last = 0;
+	int maxWedge = 0;
+
+#if 0
+	unsigned int best = 0;
+	unsigned long pick = 0;
+#endif
 
 	// Face search starting at offset
 	for (offset = 0; offset < end; )
 	{
 		old = offset;
 
-		if (test_face_offset(r, offset, face) && maxIndex == 0 ||
-			face.a < (int)maxIndex && face.b < (int)maxIndex && face.c < (int)maxIndex)
+		if (test_face_offset(r, offset, face) && 
+			(maxIndex == 0 ||
+			 face.a < (int)maxIndex && 
+			 face.b < (int)maxIndex && 
+			 face.c < (int)maxIndex))
 		{
+			if (face.a > maxWedge)
+				maxWedge = face.a;
+			if (face.b > maxWedge)
+				maxWedge = face.b;
+			if (face.c > maxWedge)
+				maxWedge = face.c;
+
 			//printf("# %sFace @ %lu, { %i, %i, %i,\t %u, %u, %u }\n", last ? "*" : "", offset, face.a, face.b, face.c, face.mat, face.aux, face.group);
 			if (last == 0)
 				lastOffset = old;
@@ -452,9 +539,18 @@ void search_for_faces(mstl::Vector<mstl::String> &faces,
 		}
 		else
 		{
-			// Need at least _6_ faces to qualify as a candidate
-			if (last > 6 && is_likely_face_candidate(r, lastOffset, last))
+			if (last == 0)
 			{
+				++offset;
+			}
+			// Need at least _8_ faces to qualify as a candidate
+			else if (last < 9)
+			{
+				offset = lastOffset + 1;
+			}
+			else if (is_likely_face_candidate(r, lastOffset, last))
+			{
+#if 0
 				if (last > best)
 				{
 					best = last;
@@ -467,11 +563,23 @@ void search_for_faces(mstl::Vector<mstl::String> &faces,
 				{
 					offset = lastOffset + 1;
 				}
+#else
+				//printf("# Possible face array @ %lu x %u\n", pick, best);
+				str.Set("%lu,%u,%i", lastOffset, last, maxWedge);
+				faces.push_back(str);
+
+				++offset;
+#endif
+			}
+			else
+			{
+				// Wait 10ms to let CPU rest, was seriously 
+				// getting reports of overheating due to the brute force nature
+				//SystemIO::MicroSleep(10); 
+				offset = lastOffset + 1;
 			}
 
-			last = 0;
-			++offset;
-			//offset = lastOffset + 1; // Brute force overlapping check
+			last = maxWedge = 0;
 		}
 	}	
 }
@@ -547,6 +655,7 @@ int main(int argc, char *argv[])
 		vertCount = atoi(argv[3]);
 	}
 
+	printf("#\n");
 
 	if (argc < 8 || argv[4][0] == '?' || argv[5][0] == '?')
 	{
@@ -589,6 +698,7 @@ int main(int argc, char *argv[])
 		wedgeCount = atoi(argv[5]);
 	}
 
+	printf("#\n");
 
 	// We make sure vertices come before wedges, but
 	// let people override this behaviour still by passing 
@@ -598,6 +708,7 @@ int main(int argc, char *argv[])
 	{
 		unsigned int count, offset;
 
+		SystemIO::Print("#\n");
 		SystemIO::Print("# Vertex offset does not agree with Wedge offset\n");
 		SystemIO::Print("# Picking a new candidate based on this...\n");
 
@@ -618,6 +729,7 @@ int main(int argc, char *argv[])
 		SystemIO::Print("# Vertices @ %u x %u\n", vertOffset, vertCount);
 	}
  
+	printf("#\n");
 
 	if (argc < 8 || argv[6][0] == '?' || argv[7][0] == '?')
 	{
@@ -625,6 +737,7 @@ int main(int argc, char *argv[])
 		//fseek(in, 0, SEEK_END);
 		unsigned long end = r.GetFileSize();//ftell(in);
 		unsigned int offset = 0, count = 0, bytes;
+		int max;
 		faceOffset = 0;
 		faceCount = 0;
 
@@ -645,8 +758,8 @@ int main(int argc, char *argv[])
 
 		foreach ( faces, i )
 		{
-			sscanf(faces[i].c_str(), "%u,%u", &offset, &count);
-			mstl::SystemIO::Print("# Candidate faces @ %u x %u\n", offset, count);
+			sscanf(faces[i].c_str(), "%u,%u,%i", &offset, &count, &max);
+			mstl::SystemIO::Print("# Candidate faces @ %u x %u, maxWedge = %i\n", offset, count, max);
 
 			// We want max count
 			if (count > faceCount) 
@@ -842,6 +955,21 @@ int main(int argc, char *argv[])
 		{
 			// Might want to pull a set here and dump it like the prev version
 			printf("#  Index WedgeCount not found precedding wedges\n");
+
+			mstl::Vector<int> set;
+			read_index_set(r, set, wedgeOffset, 4);
+
+			printf("#  Possible counts: { ");
+
+			foreach (set, i)
+			{
+				if (i)
+					printf(", ");
+
+				printf("%i", set[i]);
+			}
+
+			printf(" }\n");
 		}
 	}
 
@@ -849,8 +977,10 @@ int main(int argc, char *argv[])
 	// Look for face count in the 'header'
 	if (faceCount) 
 	{
+		printf("#\n");
+
 		unsigned int offset, bytes;
-		if (search_for_index(r, 80, 32, faceCount, offset, bytes))
+		if (search_for_indexf(r, 80, 32, faceCount, offset, bytes))
 		{
 			printf("#  Index FaceCount @ %u, %u bytes\n", offset, bytes);
 		}
@@ -858,6 +988,21 @@ int main(int argc, char *argv[])
 		{
 			// Might want to pull a set here and dump it like the prev version
 			printf("#  Index FaceCount not found in 'header'\n");
+
+			mstl::Vector<int> set;
+			read_index_set(r, set, 80, 32);
+
+			printf("#  Possible counts: { ");
+
+			foreach (set, i)
+			{
+				if (i)
+					printf(", ");
+
+				printf("%i", set[i]);
+			}
+
+			printf(" }\n");
 		}
 	}
 
@@ -893,7 +1038,7 @@ int main(int argc, char *argv[])
 		{
 			bytes = pick;
 			unsigned wedgeGuess = faceOffset - ((maxWedge+1) * 10) - 4 - bytes;
-			printf("#  Wedges by old method would be @ %i\n", wedgeGuess);
+			printf("#  Old method WedgeGuess @ %i\n", wedgeGuess);
 		}
 		
 	}
