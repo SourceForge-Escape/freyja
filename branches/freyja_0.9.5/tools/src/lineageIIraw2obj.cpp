@@ -103,6 +103,47 @@ int read_index(mstl::SystemIO::BufferedFileReader &r, unsigned int &bytes)
 }
 
 
+bool search_for_index(mstl::SystemIO::BufferedFileReader &r,
+					  unsigned int offset, unsigned int count, 
+					  unsigned int val, 
+					  unsigned int &first, unsigned int &bytes) 
+{
+	int test;
+
+	for (unsigned int i = 0; i < count; ++i)
+	{
+		if (offset-(i+1) <= 0)
+			return false;
+
+		r.SetOffset(offset-(i+1));
+		test = read_index(r, bytes);
+
+		if (test == (int)val)
+		{
+			first = offset-(i+1);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+void read_index_set(mstl::SystemIO::BufferedFileReader &r,
+					mstl::Vector<int> &set,
+					unsigned int offset, unsigned int count) 
+{
+	for (unsigned int i = 0, bytes; i < count; ++i)
+	{
+		if (offset-(i+1) <= 0)
+			return;
+
+		r.SetOffset(offset-(i+1));
+		set.push_back(read_index(r, bytes));
+	}
+}
+
+
 bool test_vertex_offset(mstl::SystemIO::BufferedFileReader &r, unsigned long offset, l2_vert_t &v)
 {
 	r.SetOffset(offset);//fseek(f, offset, SEEK_SET);
@@ -173,6 +214,7 @@ void search_for_vertices(mstl::Vector<mstl::String> &vertices,
 				//printf("# Possible vertex array @ %lu x %u\n", pick, best);	
 				str.Set("%lu,%u", pick, best);
 				vertices.push_back(str);
+				
 			}
 
 			last = 0;
@@ -286,6 +328,99 @@ void search_for_wedges(mstl::Vector<mstl::String> &wedges,
 }
 
 
+bool is_likely_face_candidate(mstl::SystemIO::BufferedFileReader &r,
+							  unsigned int offset, unsigned int count)
+{
+	l2_face_t face;
+	int candidates[16][2];
+	unsigned int end = offset + count * 12;//, best = 0, bestCount;
+	int a, b, c;
+
+	for (unsigned int i = 0; i < 16; ++i)
+	{
+		candidates[i][0] = 0;
+		candidates[i][1] = 0;
+	}
+
+	printf("# Faces @ %u x %u ? ( %u - %u )\n", offset, count, offset, end);
+
+	for (; offset < end; offset += 12)
+	{
+		if (!test_face_offset(r, offset, face))
+		{
+			printf("# FAIL %i %i %i\n", face.a, face.b, face.c);
+			return false;
+		}
+
+		printf("# %i %i %i\n", face.a, face.b, face.c);
+		
+		// Need to rewrite this crap with LRU cache or full ref counting...
+		a = b = c = -1;
+		for (unsigned int i = 0; i < 16; ++i)
+		{
+			if (candidates[i][0] == face.a)
+			{
+				candidates[i][1] += 1;
+				a = i;
+			}
+
+			if (candidates[i][0] == face.b)
+			{
+				candidates[i][1] += 1;
+				b = i;
+			}
+
+			if (candidates[i][0] == face.c)
+			{
+				candidates[i][1] += 1;
+				c = i;
+			}
+		}
+
+		for (unsigned int i = 0; i < 16; ++i)
+		{
+			if (candidates[i][1] == 0)
+			{
+				if (a < 0)
+				{
+					a = i;
+					candidates[i][0] = face.a;
+					candidates[i][1] = 1;
+				}
+				else if (a < 0)
+				{
+					b = i;
+					candidates[i][0] = face.b;
+					candidates[i][1] = 1;
+				}
+				else if (c < 0)
+				{
+					c = i;
+					candidates[i][0] = face.c;
+					candidates[i][1] = 1;
+				}
+			}
+		}
+	}
+
+	for (unsigned int i = 0; i < 16; ++i)
+	{
+		if (candidates[i][1])
+			printf("# FanTest %i. idx = %i, count = %i\n", 
+				   i, candidates[i][0], candidates[i][1]);
+
+		if (candidates[i][1] > 8) // max connectivity allowed for triangle fans
+		{
+			return false;
+		}
+	}
+
+	printf("# Faces @ %u x %u - PASS\n", offset, count);
+
+	return true;
+}
+
+
 // Should look for clusters of same mat or aux
 // Should look for overlapping contigous faces 
 // Should check for all the indices in each face being in a valid range, and
@@ -317,13 +452,21 @@ void search_for_faces(mstl::Vector<mstl::String> &faces,
 		}
 		else
 		{
-			if (last > best)
+			// Need at least _6_ faces to qualify as a candidate
+			if (last > 6 && is_likely_face_candidate(r, lastOffset, last))
 			{
-				best = last;
-				pick = lastOffset;
-				//printf("# Possible face array @ %lu x %u\n", pick, best);
-				str.Set("%lu,%u", pick, best);
-				faces.push_back(str);
+				if (last > best)
+				{
+					best = last;
+					pick = lastOffset;
+					//printf("# Possible face array @ %lu x %u\n", pick, best);
+					str.Set("%lu,%u", pick, best);
+					faces.push_back(str);
+				}
+				else
+				{
+					offset = lastOffset + 1;
+				}
 			}
 
 			last = 0;
@@ -353,6 +496,23 @@ int main(int argc, char *argv[])
 		perror(argv[1]);
 		return -2;
 	}
+
+#if 0
+	// Options parser
+	for (i = 2; i < argc; ++i)
+	{
+		if (argv[i][0] != '-')
+			continue;
+
+		mstl::String s = argv[i];
+
+		if (s == "-vcount")
+		{
+			
+		}
+	}
+#endif
+
 
 	mstl::Vector<mstl::String> vertices;
 
@@ -421,33 +581,43 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		// We make sure vertices come before wedges
-		if (vertOffset > wedgeOffset)
-		{
-			vertCount = count = 0;
-			foreach ( vertices, i )
-			{
-				sscanf(vertices[i].c_str(), "%u,%u", &offset, &count);
-				mstl::SystemIO::Print("# Candidate vertices @ %u x %u\n", offset, count);
-
-				// We want max count
-				if (count > vertCount && offset < wedgeOffset) 
-				{
-					vertOffset = offset;
-					vertCount = count;
-				}
-			}
-
-			mstl::SystemIO::Print("# Vertices @ %u x %u\n", vertOffset, vertCount);
-		}
-
-		mstl::SystemIO::Print("# Wedges @ %u x %u\n", wedgeOffset, wedgeCount);
+		SystemIO::Print("# Wedges @ %u x %u\n", wedgeOffset, wedgeCount);
 	}
 	else
 	{
 		wedgeOffset = atoi(argv[4]);
 		wedgeCount = atoi(argv[5]);
 	}
+
+
+	// We make sure vertices come before wedges, but
+	// let people override this behaviour still by passing 
+	// vertex offset/count arguments directly
+	if (vertOffset > wedgeOffset &&
+		argc < 8 || argv[2][0] == '?' || argv[3][0] == '?')
+	{
+		unsigned int count, offset;
+
+		SystemIO::Print("# Vertex offset does not agree with Wedge offset\n");
+		SystemIO::Print("# Picking a new candidate based on this...\n");
+
+		vertCount = count = 0;
+		foreach ( vertices, i )
+		{
+			sscanf(vertices[i].c_str(), "%u,%u", &offset, &count);
+			SystemIO::Print("# Candidate vertices @ %u x %u\n", offset, count);
+
+			// We want max count
+			if (count > vertCount && offset < wedgeOffset) 
+			{
+				vertOffset = offset;
+				vertCount = count;
+			}
+		}
+
+		SystemIO::Print("# Vertices @ %u x %u\n", vertOffset, vertCount);
+	}
+ 
 
 	if (argc < 8 || argv[6][0] == '?' || argv[7][0] == '?')
 	{
@@ -519,12 +689,39 @@ int main(int argc, char *argv[])
 	//fseek(in, wedgeOffset, SEEK_SET);
 	r.SetOffset(wedgeOffset);
 	unsigned int maxVertex = 0;
+	unsigned int addtionalWedgesPre = 0;
+	unsigned int addtionalWedgesPost = 0;
 
-	// Wedges have to be REORDERED here!
+	if (argc < 8 || argv[4][1] == '?' || argv[5][1] == '?')
+	{
+		l2_wedge_t w;
+		unsigned long off = wedgeOffset - 10;
+
+		while (test_wedge_offset(r, off, w))
+		{
+			off -= 10;
+			++addtionalWedgesPre;
+		}
+
+		off = wedgeOffset + (wedgeCount * 10);
+
+		while (test_wedge_offset(r, off, w))
+		{
+			off += 10;
+			++addtionalWedgesPost;
+		}
+
+		wedgeOffset -= (addtionalWedgesPre * 10);
+		wedgeCount += addtionalWedgesPre + addtionalWedgesPost;
+	}
+
+	// Wedges may have to be REORDERED here!
+	r.SetOffset(wedgeOffset);
 	for (i = 0; i < wedgeCount; ++i)
 	{
 		l2_wedge_t w;
-		unsigned long off = r.GetOffset();//ftell(in);
+		unsigned long off = r.GetOffset();
+
 		test_wedge_offset(r, off, w);
 
 		printf("# Wedge[%i] %i %f %f\n", i, w.s, w.u, w.v);
@@ -539,61 +736,11 @@ int main(int argc, char *argv[])
 		printf("vt %f %f\n", w.u, w.v);
 	}
 
-	unsigned int addtionalWedges = 0;
-
-	if (argc < 8 || argv[4][1] == '?' || argv[5][1] == '?')
-	{
-		l2_wedge_t w;
-		unsigned long off = r.GetOffset();//ftell(in);
-		unsigned int count = 0;		
-
-		//fseek(in, 0, SEEK_END);
-		unsigned long end = r.GetFileSize();////ftell(in);
-
-		while (test_wedge_offset(r, off, w))
-		{
-			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
-			off += 10;
-			++count;
-
-
-			if (off >= end)
-				break;
-
-			if ((int)maxVertex < w.s) maxVertex = w.s;
-
-			if (vertCount && w.s < (int)vertCount)
-				printf("v %f %f %f\n", verticesArray[w.s][0],verticesArray[w.s][2],verticesArray[w.s][1]);
-			else
-				printf("v 0.0 0.0 0.0\n");
-
-			printf("vt %f %f\n", w.u, w.v);
-		}
-
-		off = wedgeOffset - 10;
-
-		while (test_wedge_offset(r, off, w))
-		{
-			printf("# Possible wedge %i %f %f @ %lu??\n", w.s, w.u, w.v, off);
-			off -= 10;
-			++count;
-
-			if ((int)maxVertex < w.s) maxVertex = w.s;
-
-			if (vertCount && w.s < (int)vertCount)
-				printf("v %f %f %f\n", verticesArray[w.s][0],verticesArray[w.s][2],verticesArray[w.s][1]);
-			else
-				printf("v 0.0 0.0 0.0\n");
-
-			printf("vt %f %f\n", w.u, w.v);
-		}
-
-		addtionalWedges = count;		
-	}
 
 	//fseek(in, faceOffset, SEEK_SET);
 	r.SetOffset(faceOffset);
-	unsigned int maxWedge = 0, maxFace = 0;
+	unsigned int maxWedge = 0, faceMissing = 0;
+	int errFace = -1;
 
 	for (i = 0; i < faceCount; ++i)
 	{
@@ -603,27 +750,51 @@ int main(int argc, char *argv[])
 
 		if (test_face_offset(r, off, face))
 		{
-			printf("# Face[%i] %i %i %i %u %u %u\n", i, face.a, face.b, face.c, face.mat, face.aux, face.group);
+			printf("# Face[%i] %i %i %i %u %u %u\n", 
+				   i, face.a, face.b, face.c, face.mat, face.aux, face.group);
+
 			if (!err)
 			{
-				printf("f %i/%i %i/%i %i/%i\n", face.a+1, face.a+1, face.b+1, face.b+1, face.c+1, face.c+1);
+				if (face.a > (int)wedgeCount || face.b > (int)wedgeCount || 
+					face.c > (int)wedgeCount)
+				{
+					++faceMissing;
+					printf("# Missing wedge index f %i/%i %i/%i %i/%i\n", 
+						   face.a+1, face.a+1, 
+						   face.b+1, face.b+1, 
+						   face.c+1, face.c+1);
+				}
+				else
+				{
+					printf("f %i/%i %i/%i %i/%i\n", 
+						   face.a+1, face.a+1, 
+						   face.b+1, face.b+1, 
+						   face.c+1, face.c+1);
+				}
+
 				if ((int)maxWedge < face.a) maxWedge = face.a;
 				if ((int)maxWedge < face.b) maxWedge = face.b;
 				if ((int)maxWedge < face.c) maxWedge = face.c;
 			}
 			else
 			{
-				printf("#f %i/%i %i/%i %i/%i\n", face.a+1, face.a+1, face.b+1, face.b+1, face.c+1, face.c+1);
+				++faceMissing;
+				printf("#f %i/%i %i/%i %i/%i\n", 
+					   face.a+1, face.a+1, 
+					   face.b+1, face.b+1, 
+					   face.c+1, face.c+1);
 			}
 
 			off += 12;
 		}
 		else
 		{
+			++faceMissing;
+
 			// By cutting off at first Error you can find max wedge index
 			// for comparing with expected max wedge index
 			if (!err)
-				maxFace = i;
+				errFace = i;
 
 			err = true;
 
@@ -632,10 +803,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	r.Close();
 
 	printf("#####################################################\n");
-	printf("# Generated by lineageIIraw2obj\n");
+	printf("# Model and report generated by lineageIIraw2obj\n");
 	printf("# by Terry Hendrix <mongooseichiban@gmail.com>\n");
 	printf("#\n");
 	printf("#  Filename %s\n", argv[1]);
@@ -644,12 +814,97 @@ int main(int argc, char *argv[])
 	printf("#  Faces @ %i x %i\n", faceOffset, faceCount);
 	printf("#\n");
 	printf("# Possible count corrections:\n");
-	if (maxVertex) printf("#  maxVertexIndex = %u\n", maxVertex);
-	if (maxWedge) printf("#  maxWedgeIndex = %u\n", maxWedge);
-	if (addtionalWedges) printf("# Possible wedges total count: %u\n#   found %u trailing\n", addtionalWedges + wedgeCount, addtionalWedges);
+	printf("#  maxVertexIndex = %u\n", maxVertex);
+	printf("#  maxWedgeIndex = %u\n", maxWedge);
+	printf("#\n");
+	printf("# First face with error: %i%s\n", 
+		   errFace, (errFace == -1) ? ", No errors" : "");
+	printf("# Disabled faces: %u of %u\n", faceMissing, faceCount);
+	printf("#\n");
+	printf("# Extra wedges found: %u preceding, %u trailing.\n", 
+		   addtionalWedgesPre, addtionalWedgesPost);
+	printf("#\n");
 
-	if (maxFace) printf("#  maxFaceCount = %u\n", maxFace);
+	if (wedgeCount) 
+	{
+		unsigned int offset, bytes;
+		if (search_for_index(r, wedgeOffset, 4, wedgeCount, offset, bytes))
+		{
+			printf("#  Index WedgeCount @ %u, %u bytes; %s\n", 
+				   offset, bytes,
+				   (offset + bytes == wedgeOffset) ? "*Agrees" : "Disagrees");
+
+			unsigned int vertGuess = wedgeOffset - ((maxVertex+1) * 12) + bytes - 8;
+
+			printf("#  Old method VertexGuess @ %i\n", vertGuess);
+		}
+		else
+		{
+			// Might want to pull a set here and dump it like the prev version
+			printf("#  Index WedgeCount not found precedding wedges\n");
+		}
+	}
+
+
+	// Look for face count in the 'header'
+	if (faceCount) 
+	{
+		unsigned int offset, bytes;
+		if (search_for_index(r, 80, 32, faceCount, offset, bytes))
+		{
+			printf("#  Index FaceCount @ %u, %u bytes\n", offset, bytes);
+		}
+		else
+		{
+			// Might want to pull a set here and dump it like the prev version
+			printf("#  Index FaceCount not found in 'header'\n");
+		}
+	}
+
+	if (faceCount) 
+	{
+		int idx[4];
+		unsigned int bytes, pick = 0;
+
+		printf("#  Face index set = { ");
+
+		for (i = 0; i < 4; ++i)
+		{
+			if (i)
+			{
+				printf(", ");
+			}
+
+			r.SetOffset(faceOffset-(i+1));
+			idx[i] = read_index(r, bytes);
+
+			if (idx[i] == (int)faceCount)
+			{
+				pick = bytes;
+				printf("*");
+			}
+
+			printf("%i", idx[i]);
+		}
+
+		printf(" }\n");
+
+		if (pick)
+		{
+			bytes = pick;
+			unsigned wedgeGuess = faceOffset - ((maxWedge+1) * 10) - 4 - bytes;
+			printf("#  Wedges by old method would be @ %i\n", wedgeGuess);
+		}
+		
+	}
+
+
+	//r.SetOffset(89);	
+	//SystemIO::Print("# Face count guess @ 89th byte = %i\n", read_index(r, i));
+
 	printf("#####################################################\n");
+
+	r.Close();
 
 	return 0;
 }
