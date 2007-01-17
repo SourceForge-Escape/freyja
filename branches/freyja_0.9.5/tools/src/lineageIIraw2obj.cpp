@@ -659,8 +659,7 @@ int main(int argc, char *argv[])
 
 	if (argc < 8 || argv[4][0] == '?' || argv[5][0] == '?')
 	{
-		//fseek(in, 0, SEEK_END);
-		unsigned long end = r.GetFileSize();//ftell(in);
+		unsigned long end = r.GetFileSize();
 		unsigned int offset = 0, count = 0, maxV = 0;
 		wedgeOffset = 0;
 		wedgeCount = 0;
@@ -703,8 +702,9 @@ int main(int argc, char *argv[])
 	// We make sure vertices come before wedges, but
 	// let people override this behaviour still by passing 
 	// vertex offset/count arguments directly
+	printf("# Test VertexOffset %u > WedgeOffset %u\n", vertOffset, wedgeOffset);
 	if (vertOffset > wedgeOffset &&
-		argc < 8 || argv[2][0] == '?' || argv[3][0] == '?')
+		(argc < 8 || (argv[2][0] == '?' || argv[3][0] == '?')))
 	{
 		unsigned int count, offset;
 
@@ -734,17 +734,11 @@ int main(int argc, char *argv[])
 	if (argc < 8 || argv[6][0] == '?' || argv[7][0] == '?')
 	{
 		mstl::Vector<mstl::String> faces;
-		//fseek(in, 0, SEEK_END);
-		unsigned long end = r.GetFileSize();//ftell(in);
-		unsigned int offset = 0, count = 0, bytes;
+		unsigned long end = r.GetFileSize();
+		unsigned int offset = 0, count = 0;
 		int max;
 		faceOffset = 0;
 		faceCount = 0;
-
-		//fseek(in, 89, SEEK_SET);
-		r.SetOffset(89);
-		count = read_index(r, bytes);
-		mstl::SystemIO::Print("# Face count guess 89th byte = %i\n", count);
 		
  		count = (wedgeCount > 0) ? wedgeCount : 1200;
  		count = (vertCount > wedgeCount) ? vertCount : count;
@@ -1057,15 +1051,18 @@ int main(int argc, char *argv[])
 				}
 			}
 
+			printf("#\n");
+
 			if (found > -1)
 			{
-				printf("#  Try (local) FaceGuess @ %u x %i\n", offset, found);
+				printf("#  Possible FaceGuess @ %u x %i\n", offset, found);
 			}
 
 			// Always do 'full Index scans' in case a bad face candidate won out
 			foreach (set, i)
 			{
-				if (set[i] >= (int)faceCount) // Use current faceCount as a floor
+				// Use current faceCount as a floor
+				if (set[i] >= (int)faceCount)
 				{
 					for (unsigned int j = 0, n = r.GetFileSize(); j < n; ++j)
 					{
@@ -1073,10 +1070,12 @@ int main(int argc, char *argv[])
 
 						if (read_index(r, bytes) == set[i])
 						{
-							if (j > faceOffset) // ceiling at current Faces
-								break;
-
-							printf("# Try FaceGuess @ %u x %i\n", j+bytes, set[i]);
+							// Ceiling at current Faces offset
+							if (j > faceOffset)
+								//break;
+								printf("#  Least FaceGuess @ %u x %i\n", j+bytes, set[i]);
+							else
+								printf("#  Likely FaceGuess @ %u x %i\n", j+bytes, set[i]);
 						}
 					}
 
