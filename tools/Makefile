@@ -174,6 +174,21 @@ lineageIIextract.exe:
 	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
 
+lineageIIraw2obj.exe:
+	@-mkdir -p $(BUILD_WIN32_DIR)
+	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
+	NAME="lineageIIraw2obj" \
+	MODULE="lineageIIraw2obj" \
+	SHLIBEXT=".exe" \
+	PROG_OBJS="$(BUILD_WIN32_DIR)/lineageIIraw2obj.o" \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP) \
+	LD=$(WIN32_LD) \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
+	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
+	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR)"
+
+
 
 ################################################################
 # Include Dependences
