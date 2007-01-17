@@ -874,7 +874,7 @@ int main(int argc, char *argv[])
 	for (i = 0; i < faceCount; ++i)
 	{
 		l2_face_t face;
-		unsigned long off = r.GetOffset();//ftell(in);
+		unsigned long off = r.GetOffset();
 		bool err = false;
 		unsigned char mat = 61;
 
