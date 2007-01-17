@@ -704,6 +704,8 @@ public:
 
 		unsigned long GetCompleteFileBufferSize() { return mEnd; }
 
+		virtual unsigned long GetFileSize() { return mEnd; }
+
 		void FlushBuffer() 
 		{ if (mFileData) delete [] mFileData; mCursor = mEnd = 0; }
 
@@ -722,7 +724,7 @@ public:
 			}
 			else
 			{
-				MSTL_MSG("Invalid read size %i.  %i / %i", size, mCursor, mEnd);
+				//MSTL_MSG("Invalid read size %i.  %i / %i", size, mCursor, mEnd);
 			}
 
 			return read;
