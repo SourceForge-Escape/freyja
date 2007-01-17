@@ -593,9 +593,9 @@ int main(int argc, char *argv[])
 	unsigned int vertCount, vertOffset;
 	unsigned int faceCount, faceOffset;
 
-	if (argc < 8 && argc != 2)
+	if (argc < 8 && argc != 2 && argc != 3)
 	{
-		printf("%s filename vertOffset vertCount wedgeOffset wedgeCount faceOffset faceCount\n\tYou can enter guessing mode using ? and ?! as input.\n", argv[0]);
+		printf("%s filename vertOffset vertCount wedgeOffset wedgeCount faceOffset faceCount\n\tYou can enter guess mode just for certain objects using ? as input for the counts and offsets.\n\t\n%s filename i  - spits out every possible offset Index = i or pass -1 to list all\n", argv[0], argv[0]);
 		return -1;
 	}
 
@@ -603,6 +603,28 @@ int main(int argc, char *argv[])
 	{
 		perror(argv[1]);
 		return -2;
+	}
+
+	if (argc == 3)
+	{
+		long i, count = r.GetFileSize();
+		unsigned int bytes;
+		int search = atoi(argv[2]);
+
+		for (i = 0; i < count; ++i)
+		{
+			r.SetOffset(i);
+			int value = read_index(r, bytes);
+
+			if (value >= 1 && search == -1 || search == value)
+			{
+				printf("@ %li, %i bytes, %i\n", i, bytes, value);	
+			}
+		}
+
+		r.Close();
+
+		return 0;
 	}
 
 #if 0
@@ -854,6 +876,7 @@ int main(int argc, char *argv[])
 		l2_face_t face;
 		unsigned long off = r.GetOffset();//ftell(in);
 		bool err = false;
+		unsigned char mat = 61;
 
 		if (test_face_offset(r, off, face))
 		{
@@ -873,6 +896,12 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
+					if (face.mat != mat)
+					{
+						mat = face.mat;
+						printf("s %u\n", face.mat + 1);	
+					}
+
 					printf("f %i/%i %i/%i %i/%i\n", 
 						   face.a+1, face.a+1, 
 						   face.b+1, face.b+1, 
@@ -1058,9 +1087,13 @@ int main(int argc, char *argv[])
 				printf("#  Possible FaceGuess @ %u x %i\n", offset, found);
 			}
 
+
+
 			// Always do 'full Index scans' in case a bad face candidate won out
 			foreach (set, i)
 			{
+				// FIXME: Allow for picking instead of just using first floor
+
 				// Use current faceCount as a floor
 				if (set[i] >= (int)faceCount)
 				{
@@ -1072,10 +1105,15 @@ int main(int argc, char *argv[])
 						{
 							// Ceiling at current Faces offset
 							if (j > faceOffset)
-								//break;
-								printf("#  Least FaceGuess @ %u x %i\n", j+bytes, set[i]);
+							{
+								//printf("#  Least FaceGuess @ %u x %i\n", j+bytes, set[i]);
+								printf("# If none of those look valid use index search mode\n");
+								break;
+							}
 							else
+							{
 								printf("#  Likely FaceGuess @ %u x %i\n", j+bytes, set[i]);
+							}
 						}
 					}
 
