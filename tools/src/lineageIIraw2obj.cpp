@@ -949,7 +949,7 @@ int main(int argc, char *argv[])
 
 			unsigned int vertGuess = wedgeOffset - ((maxVertex+1) * 12) + bytes - 8;
 
-			printf("#  Old method VertexGuess @ %i\n", vertGuess);
+			printf("#  Old method VertexGuess @ %i x %u\n", vertGuess, maxVertex+1);
 		}
 		else
 		{
@@ -980,6 +980,7 @@ int main(int argc, char *argv[])
 		printf("#\n");
 
 		unsigned int offset, bytes;
+		mstl::Vector<int> set;
 		if (search_for_indexf(r, 80, 32, faceCount, offset, bytes))
 		{
 			printf("#  Index FaceCount @ %u, %u bytes\n", offset, bytes);
@@ -989,7 +990,6 @@ int main(int argc, char *argv[])
 			// Might want to pull a set here and dump it like the prev version
 			printf("#  Index FaceCount not found in 'header'\n");
 
-			mstl::Vector<int> set;
 			read_index_set(r, set, 80, 32);
 
 			printf("#  Possible counts: { ");
@@ -1004,12 +1004,11 @@ int main(int argc, char *argv[])
 
 			printf(" }\n");
 		}
-	}
 
-	if (faceCount) 
-	{
+
+		// Now look for Index FaceCount near Faces
 		int idx[4];
-		unsigned int bytes, pick = 0;
+		unsigned int pick = 0;
 
 		printf("#  Face index set = { ");
 
@@ -1038,14 +1037,57 @@ int main(int argc, char *argv[])
 		{
 			bytes = pick;
 			unsigned wedgeGuess = faceOffset - ((maxWedge+1) * 10) - 4 - bytes;
-			printf("#  Old method WedgeGuess @ %i\n", wedgeGuess);
+			printf("#  Old method WedgeGuess @ %i x %u\n", wedgeGuess, maxWedge+1);
 		}
-		
+		else
+		{
+			// First see if we have a local 'fix count', which can happen 
+			int found = -1;
+
+			foreach (set, i)
+			{
+				for (unsigned int j = 0; j < 4; ++j)
+				{
+					if (idx[j] == set[i])
+					{
+						found = idx[j];
+						offset = faceOffset - j + 2; // Assuming Index size == 2
+						break;
+					}
+				}
+			}
+
+			if (found > -1)
+			{
+				printf("#  Try (local) FaceGuess @ %u x %i\n", offset, found);
+			}
+
+			// Always do 'full Index scans' in case a bad face candidate won out
+			foreach (set, i)
+			{
+				if (set[i] >= (int)faceCount) // Use current faceCount as a floor
+				{
+					for (unsigned int j = 0, n = r.GetFileSize(); j < n; ++j)
+					{
+						r.SetOffset(j);
+
+						if (read_index(r, bytes) == set[i])
+						{
+							if (j > faceOffset) // ceiling at current Faces
+								break;
+
+							printf("# Try FaceGuess @ %u x %i\n", j+bytes, set[i]);
+						}
+					}
+
+					break;
+				}
+			}
+		}
 	}
 
 
-	//r.SetOffset(89);	
-	//SystemIO::Print("# Face count guess @ 89th byte = %i\n", read_index(r, i));
+	// TODO: Add a summary guess here... and then write auto cycling option then that's it
 
 	printf("#####################################################\n");
 
@@ -1053,3 +1095,9 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+
+
+// Look at the set for the faces to pick a good face count
+// You can then compare the face candidate list to utindex output to find faces
+// Once you have faces you'll get an 'Old method' output for wedges
+// Continue until the vertices are found and match
