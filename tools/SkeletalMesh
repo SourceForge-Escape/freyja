@@ -74,28 +74,25 @@ SkeletalMesh spec v0.1
 
  @ 48		short ? = 0 // Constant?  or this could be 2nd byte pair for int
 
- @ 50		short ? = 512 // Often 512 or 256
+ @ 50		byte ? = 0 // Part of material count?
+
+ @ 51		Index materialCount = 1 byte, 2
 
  // This almost certainly is external material references after seeing 
  // the lilith (3) and children (4) models.
  //
- // This appears to vary in size if last short is 512 4bytes, 256 1 byte
- // 1^2 = 1bytes?, 2^2 = 4bytes? // 256 seems to be players
- // These shorts always seem to be in sequental order, they're prob package refs
- //
- // Rarely the byte @ 51 = 3, and is followed by 3 shorts
- // This could be an Index counter, duh...
+ // The Index in each slot is < 0, incitcating it's a lookup in the 
+ // import table to an external UTX material name.
 
+ @ 52		Index[materialCount] ? = { <2 bytes, -1111>, <2 bytes, -1112> } 
 
- @ 52		short[2] ? = { 4567, 4568 } // For players this is often 1 byte
-
- @ 56		float[3] ? = { 1.0, 1.0, 1.0 } // For players this is @ 53 often
+ @ 56		float[3] ? = { 1.0, 1.0, 1.0 } // Scale perhaps?
  
  @ 68		float[4] ? = { 0.0, 0.0, 18.0, 0.0 }
 
  @ 84		short[4] ? = { 49152, 0, 0, 0 } // Constant?
 
- @ 92		Index faceCount = 2 bytes, 1864 // For players this is normally @ 89
+ @ 92		Index faceCount = 2 bytes, 1864 
 
  @ 94		short[faceCount] ? = { ... }  // I haven't bothered to check LoDs
 

@@ -604,8 +604,8 @@ void search_for_faces(mstl::Vector<mstl::String> &faces,
 }
 
 bool generic_mesh_search(SystemIO::BufferedFileReader &r,
-						 unsigned int &wedgeCount, unsigned int &wedgeOffset,
 						 unsigned int &vertCount, unsigned int &vertOffset,
+						 unsigned int &wedgeCount, unsigned int &wedgeOffset,
 						 unsigned int &faceCount, unsigned int &faceOffset);
 
 bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
@@ -617,103 +617,82 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 
 	// 0 -- likely player, 8 -- likely monster
 	idx = read_index(r, bytes);
-	printf("%i\n", idx);
+	printf("# %i\n", idx);
 
 	for (i = 0; i < 6; ++i)
 	{
 		n = r.ReadFloat32();
-		printf("%f\n", n);
+		printf("# %f\n", n);
 	}
 
 	idx = read_index(r, bytes);
-	printf("%i == 1?\n", idx);	
+	printf("# %i == 1?\n", idx);	
 
 	for (i = 0; i < 4; ++i)
 	{
 		n = r.ReadFloat32();
-		printf("%f\n", n);
+		printf("# %f\n", n);
 	}
 
 	s = r.ReadInt16U();
-	printf("%i == 5?\n", s);
+	printf("# %i == 5?\n", s);
 
 	s = r.ReadInt16U();
-	printf("%i == 0?\n", s);
+	printf("# %i == 0?\n", s);
 
 	unsigned short vertCount = r.ReadInt16U();
-	printf("vertexCount = %u\n", vertCount);
+	printf("# vertexCount = %u\n", vertCount);
 
 	s = r.ReadInt16U();
-	printf("%i == 0?\n", s);
+	printf("# %i == 0?\n", s);
 	
 	b = r.ReadByte();
-	printf("%u == 0?\n", b);
+	printf("# %u == 0?\n", b);
 
-	b = r.ReadByte();
-	printf("@ %li\tbyte readCount = %u\n", r.GetOffset(), b);
 
-	switch (b)
+	// Would need to link to UTPackage to get the actual import table names
+	int materialRefCount = read_index(r, bytes);
+	printf("# @ %li\tIndex materialRefCount = %u\n", r.GetOffset()-1, materialRefCount);
+	
+	printf("# @ %li\tIndex[%u] materialReference = { ", 
+		   r.GetOffset(), materialRefCount);
+	
+	for (unsigned int j = 0; (int)j < materialRefCount; ++j)
 	{
-	case 1:
-		b = r.ReadByte();
-		printf("@ %li\tbyte no materials? = %u\n", r.GetOffset(), b);
-		break;
-
-#if 0
-	case 2:
-		printf("@ %li\tshort[2] ? = { %i, %i }\n", 
-			   r.GetOffset(), r.ReadInt16U(), r.ReadInt16U());
-		break;
-
-	case 3:
-		printf("@ %li\tshort[3] ? = { %i, %i, %i }\n", 
-			   r.GetOffset(), r.ReadInt16U(), r.ReadInt16U(), r.ReadInt16U());
-		break;
-
-	case 4:
-		printf("@ %li\tshort[3] ? = { %i, %i, %i. %i }\n", 
-			   r.GetOffset(), r.ReadInt16U(), r.ReadInt16U(), r.ReadInt16U(), r.ReadInt16U());
-		break;
-#endif
-
-	default:
-		printf("@ %li\tshort[%u] materials? = { ", r.GetOffset(), b);
-
-		for (unsigned int j = 0; j < b; ++j)
-		{
-			s = r.ReadInt16U();
-
-			if (j)
-				printf(", ");
-			
-			printf("%u", s);
-		}
-
-		printf(" }\n");
+		int materialRef = read_index(r, bytes);
+		
+		if (j)
+			printf(", ");
+		
+		printf("<%u bytes, %i importTableID>", bytes, materialRef);
 	}
+	
+	printf(" }\n");
+
+
 
 	for (i = 0; i < 3; ++i)
 	{
 		n = r.ReadFloat32();
-		printf("%f == 1.0?\n", n);
+		printf("# %f == 1.0?\n", n);
 	}
 
 	for (i = 0; i < 4; ++i)
 	{
 		n = r.ReadFloat32();
-		printf("%f\n", n);
+		printf("# %f\n", n);
 	}
 
 	for (i = 0; i < 4; ++i)
 	{
 		s = r.ReadInt16U();
-		printf("%i\n", s);
+		printf("# %i\n", s);
 	}
 
 	int faceCount = read_index(r, bytes);
-	printf("@ %li\tIndex faceCount = %i bytes, %i\n", r.GetOffset(), bytes, faceCount);
+	printf("# @ %li\tIndex faceCount = %i bytes, %i\n", r.GetOffset(), bytes, faceCount);
 
-	printf("%li + %i*2 = %li\n", 
+	printf("# %li + %i*2 = %li\n", 
 		   r.GetOffset(), faceCount, r.GetOffset() + faceCount * 2);
 
 	int max = 0;
@@ -723,7 +702,7 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 		const unsigned int count = 1;
 
 #if SHOW_FACES
-		printf("@ %li\t%u/%i. short[%u] ? = { ", 
+		printf("# @ %li\t%u/%i. short[%u] ? = { ", 
 			   r.GetOffset(), i, faceCount, count);
 #endif
 
@@ -744,34 +723,11 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 #endif
 	}
 
-	printf("max = %i\n", max);
+	printf("# max = %i\n", max);
 
+	printf("# vertCount = %u, faceCount = %i\n", vertCount, faceCount);
 
-
-#if 0
-	r.SetOffset(95090+2);
-	printf("@ %li\n", r.GetOffset());
-
-	for (i = 0; i < vertCount; ++i)
-	{
-		const unsigned int count = 2;
-
-		printf("@ %li\tfloat[%u] ? = { ", r.GetOffset(), count);
-		for (unsigned int j = 0; j < count; ++j)
-		{
-			if (j)
-				printf(", ");
-
-			printf("%f", r.ReadFloat32());
-		}
-
-		printf(" }\n");
-	}
-#endif
-
-	printf("vertCount = %u, faceCount = %i\n", vertCount, faceCount);
-
-	printf("wedgeGuess =  vertOffset + %u + bytes\n", (vertCount*12)+8);
+	printf("# wedgeGuess =  vertOffset + %u + bytes\n", (vertCount*12)+8);
 
 	for (unsigned int j = 0, count = r.GetFileSize(); j < count; ++j)
 	{
@@ -780,7 +736,7 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 		
 		if (value >= 1 && value == faceCount)
 		{
-			printf("@ %u, %i bytes, %i\n", j, bytes, value);
+			printf("# @ %u, %i bytes, %i\n", j, bytes, value);
 			unsigned int faceOffset = j+bytes;
 			int maxWedge = -1;
 			l2_face_t face;
@@ -820,23 +776,43 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 			{
 				unsigned int vertGuess = wedgeOffset - ((maxVertex+1) * 12) + bytes - 8;
 
-				printf("\tVertices @ %i x %u\n", vertGuess, maxVertex+1);
-				printf("\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
-				printf("\tFaces @ %u x %u\n", faceOffset, faceCount);
-				printf("\t%s%u %u %u %u %u %u\n",
+				printf("#\tVertices @ %i x %u\n", vertGuess, maxVertex+1);
+				printf("#\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
+				printf("#\tFaces @ %u x %u\n", faceOffset, faceCount);
+				printf("#\t%s%u %u %u %u %u %u\n",
 					   (vertCount == maxVertex+1) ? "*Agrees " : "",
 					   vertGuess, maxVertex+1,
 					   wedgeOffset, wedgeCount, 
 					   faceOffset, faceCount);
 
-				
+				// Go ahead and dump it out...
+				if (vertCount == maxVertex+1)
+				{
+					unsigned int vc = maxVertex+1, vo = vertGuess, 
+					wc = wedgeCount, wo = wedgeOffset, 
+					fc = faceCount, fo = faceOffset;
+
+					if (generic_mesh_search(r, vc, vo, wc, wo, fc, fo))
+					{
+						printf("# Bob's your uncle\n");
+					}
+				}
+
+				printf("#\tVertices @ %i x %u\n", vertGuess, maxVertex+1);
+				printf("#\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
+				printf("#\tFaces @ %u x %u\n", faceOffset, faceCount);
+				printf("#\t%s%u %u %u %u %u %u\n",
+					   (vertCount == maxVertex+1) ? "*Agrees " : "",
+					   vertGuess, maxVertex+1,
+					   wedgeOffset, wedgeCount, 
+					   faceOffset, faceCount);
 			}
 			else
 			{
-				printf("\tVertices @ ? x ?\n");
-				printf("\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
-				printf("\tFaces @ %u x %u\n", faceOffset, faceCount);
-				printf("\t? ? %u %u %u %u\n", 
+				printf("#\tVertices @ ? x ?\n");
+				printf("#\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
+				printf("#\tFaces @ %u x %u\n", faceOffset, faceCount);
+				printf("#\t? ? %u %u %u %u\n", 
 					   wedgeOffset, wedgeCount, 
 					   faceOffset, faceCount);
 			}
@@ -850,8 +826,8 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 
 
 bool generic_mesh_search(SystemIO::BufferedFileReader &r,
-						 unsigned int &wedgeCount, unsigned int &wedgeOffset,
 						 unsigned int &vertCount, unsigned int &vertOffset,
+						 unsigned int &wedgeCount, unsigned int &wedgeOffset,
 						 unsigned int &faceCount, unsigned int &faceOffset)
 {
 	mstl::Vector<mstl::String> vertices;
@@ -1359,7 +1335,21 @@ int main(int argc, char *argv[])
 
 		if (strncmp("-a", argv[2], 2) == 0)
 		{
-			return read_skeletalmesh(r);
+			read_skeletalmesh(r);
+			r.Close();
+			return 0;
+		}
+		else if (strncmp("-e", argv[2], 2) == 0)
+		{
+			for (i = 0; i < count; ++i)
+			{
+				r.SetOffset(i);
+				int value = read_index(r, bytes);
+				printf("@ %li, %i bytes, %i\n", i, bytes, value);
+			}
+
+			r.Close();
+			return 0;
 		}
 
 		int search = atoi(argv[2]);
