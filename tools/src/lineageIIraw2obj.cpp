@@ -603,6 +603,10 @@ void search_for_faces(mstl::Vector<mstl::String> &faces,
 	}	
 }
 
+bool generic_mesh_search(SystemIO::BufferedFileReader &r,
+						 unsigned int &wedgeCount, unsigned int &wedgeOffset,
+						 unsigned int &vertCount, unsigned int &vertOffset,
+						 unsigned int &faceCount, unsigned int &faceOffset);
 
 bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 {
@@ -646,30 +650,46 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 	printf("%u == 0?\n", b);
 
 	b = r.ReadByte();
-	printf("readCount = %u\n", b);
+	printf("@ %li\tbyte readCount = %u\n", r.GetOffset(), b);
 
 	switch (b)
 	{
 	case 1:
 		b = r.ReadByte();
-		printf("%u\n", b);
+		printf("@ %li\tbyte no materials? = %u\n", r.GetOffset(), b);
 		break;
 
+#if 0
 	case 2:
-		s = r.ReadInt16U();
-		printf("%i\n", s);
-		s = r.ReadInt16U();
-		printf("%i\n", s);
+		printf("@ %li\tshort[2] ? = { %i, %i }\n", 
+			   r.GetOffset(), r.ReadInt16U(), r.ReadInt16U());
 		break;
 
 	case 3:
-		s = r.ReadInt16U();
-		printf("%i\n", s);
-		s = r.ReadInt16U();
-		printf("%i\n", s);
-		s = r.ReadInt16U();
-		printf("%i\n", s);
+		printf("@ %li\tshort[3] ? = { %i, %i, %i }\n", 
+			   r.GetOffset(), r.ReadInt16U(), r.ReadInt16U(), r.ReadInt16U());
 		break;
+
+	case 4:
+		printf("@ %li\tshort[3] ? = { %i, %i, %i. %i }\n", 
+			   r.GetOffset(), r.ReadInt16U(), r.ReadInt16U(), r.ReadInt16U(), r.ReadInt16U());
+		break;
+#endif
+
+	default:
+		printf("@ %li\tshort[%u] materials? = { ", r.GetOffset(), b);
+
+		for (unsigned int j = 0; j < b; ++j)
+		{
+			s = r.ReadInt16U();
+
+			if (j)
+				printf(", ");
+			
+			printf("%u", s);
+		}
+
+		printf(" }\n");
 	}
 
 	for (i = 0; i < 3; ++i)
@@ -691,7 +711,139 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 	}
 
 	int faceCount = read_index(r, bytes);
-	printf("faceCount = %i\n", faceCount);
+	printf("@ %li\tIndex faceCount = %i bytes, %i\n", r.GetOffset(), bytes, faceCount);
+
+	printf("%li + %i*2 = %li\n", 
+		   r.GetOffset(), faceCount, r.GetOffset() + faceCount * 2);
+
+	int max = 0;
+
+	for (i = 0; (int)i < faceCount; ++i)
+	{
+		const unsigned int count = 1;
+
+#if SHOW_FACES
+		printf("@ %li\t%u/%i. short[%u] ? = { ", 
+			   r.GetOffset(), i, faceCount, count);
+#endif
+
+		for (unsigned int j = 0; j < count; ++j)
+		{
+			s = r.ReadInt16U();
+			if (s > max) max = s;
+#if SHOW_FACES
+			if (j)
+				printf(", ");
+
+			printf("%u", s);
+#endif
+		}
+
+#if SHOW_FACES
+		printf(" }\n");
+#endif
+	}
+
+	printf("max = %i\n", max);
+
+
+
+#if 0
+	r.SetOffset(95090+2);
+	printf("@ %li\n", r.GetOffset());
+
+	for (i = 0; i < vertCount; ++i)
+	{
+		const unsigned int count = 2;
+
+		printf("@ %li\tfloat[%u] ? = { ", r.GetOffset(), count);
+		for (unsigned int j = 0; j < count; ++j)
+		{
+			if (j)
+				printf(", ");
+
+			printf("%f", r.ReadFloat32());
+		}
+
+		printf(" }\n");
+	}
+#endif
+
+	printf("vertCount = %u, faceCount = %i\n", vertCount, faceCount);
+
+	printf("wedgeGuess =  vertOffset + %u + bytes\n", (vertCount*12)+8);
+
+	for (unsigned int j = 0, count = r.GetFileSize(); j < count; ++j)
+	{
+		r.SetOffset(j);
+		int value = read_index(r, bytes);
+		
+		if (value >= 1 && value == faceCount)
+		{
+			printf("@ %u, %i bytes, %i\n", j, bytes, value);
+			unsigned int faceOffset = j+bytes;
+			int maxWedge = -1;
+			l2_face_t face;
+
+			for (unsigned int k = 0; (int)k < value; ++k)
+			{
+				if (test_face_offset(r, faceOffset+k*12, face))
+				{
+					if (face.a > maxWedge) maxWedge = face.a;
+					if (face.b > maxWedge) maxWedge = face.b;
+					if (face.c > maxWedge) maxWedge = face.c;
+				}
+			}
+
+			unsigned int wedgeOffset = faceOffset - ((maxWedge+1) * 10) - 4 - bytes;
+			unsigned int wedgeCount = maxWedge+1;
+			
+			if (maxWedge == -1 || wedgeOffset > count)
+				continue;
+
+			int maxVertex = -1;
+
+			r.SetOffset(wedgeOffset);
+			for (unsigned int k = 0; k < wedgeCount; ++k)
+			{
+				l2_wedge_t w;
+				unsigned long off = r.GetOffset();
+				
+				if (test_wedge_offset(r, off, w))
+				{
+					if (w.s > maxVertex) maxVertex = w.s;
+				}
+			}
+
+
+			if (maxVertex > -1)
+			{
+				unsigned int vertGuess = wedgeOffset - ((maxVertex+1) * 12) + bytes - 8;
+
+				printf("\tVertices @ %i x %u\n", vertGuess, maxVertex+1);
+				printf("\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
+				printf("\tFaces @ %u x %u\n", faceOffset, faceCount);
+				printf("\t%s%u %u %u %u %u %u\n",
+					   (vertCount == maxVertex+1) ? "*Agrees " : "",
+					   vertGuess, maxVertex+1,
+					   wedgeOffset, wedgeCount, 
+					   faceOffset, faceCount);
+
+				
+			}
+			else
+			{
+				printf("\tVertices @ ? x ?\n");
+				printf("\tWedges @ %u x %u\n", wedgeOffset, wedgeCount);
+				printf("\tFaces @ %u x %u\n", faceOffset, faceCount);
+				printf("\t? ? %u %u %u %u\n", 
+					   wedgeOffset, wedgeCount, 
+					   faceOffset, faceCount);
+			}
+
+
+		}
+	}
 
 	return false;
 }
@@ -707,6 +859,7 @@ bool generic_mesh_search(SystemIO::BufferedFileReader &r,
 	mstl::Vector<mstl::String> faces;
 	unsigned long end = r.GetFileSize();
 
+	r.SetOffset(0);
 
 	bool vertsGuess = !vertCount || !vertOffset;
 	bool wedgeGuess = !wedgeCount || !wedgeOffset;
@@ -1189,7 +1342,7 @@ int main(int argc, char *argv[])
 
 	if (argc < 8 && argc != 2 && argc != 3)
 	{
-		printf("%s filename vertOffset vertCount wedgeOffset wedgeCount faceOffset faceCount\n\tYou can enter guess mode just for certain objects using ? as input for the counts and offsets.\n\t\n%s filename i  - spits out every possible offset Index = i or pass -1 to list all\n", argv[0], argv[0]);
+		printf("%s filename vertOffset vertCount wedgeOffset wedgeCount faceOffset faceCount\n\tYou can enter guess mode just for certain objects using ? as input for the counts and offsets.\n\t\n\t%s filename <index>  - Show every matching Index = <index> or pass -1 to list all Index that could be array counts.\n\n\t%s filename -a\t\tAuto mode.\n", argv[0], argv[0], argv[0]);
 		return -1;
 	}
 
@@ -1203,13 +1356,13 @@ int main(int argc, char *argv[])
 	{
 		long i, count = r.GetFileSize();
 		unsigned int bytes;
-		int search = atoi(argv[2]);
 
-
-		if (search == -311)
+		if (strncmp("-a", argv[2], 2) == 0)
 		{
 			return read_skeletalmesh(r);
 		}
+
+		int search = atoi(argv[2]);
 
 		for (i = 0; i < count; ++i)
 		{
