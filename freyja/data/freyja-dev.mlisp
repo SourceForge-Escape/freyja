@@ -295,6 +295,9 @@
 				(toolbar_togglebutton false "24x24/texture.png" "Material" 
 					"Material toggle"	eRenderTexture	eRenderMaterial)
 
+				(toolbar_togglebutton false "24x24/groupcolors.png" "Color" 
+					"Group color toggle"		eEvent	eGroupColors)
+
 				(toolbar_togglebutton false "24x24/light.png" "Light" 
 					"Lighting toggle"		eEvent	eRenderLighting)
 
@@ -1141,6 +1144,7 @@
 (func_set_toggle	ePointJoint	1)
 (func_set_toggle	eLineBone	1)
 (func_set_toggle	eGLSLFragmentMode	1)
+(func_set_toggle	eGroupColors	1)
 
 
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::

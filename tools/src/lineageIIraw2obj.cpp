@@ -729,6 +729,8 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 
 	printf("# wedgeGuess =  vertOffset + %u + bytes\n", (vertCount*12)+8);
 
+	bool dumped = false;
+
 	for (unsigned int j = 0, count = r.GetFileSize(); j < count; ++j)
 	{
 		r.SetOffset(j);
@@ -786,8 +788,9 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 					   faceOffset, faceCount);
 
 				// Go ahead and dump it out...
-				if (vertCount == maxVertex+1)
+				if (!dumped && vertCount == maxVertex+1)
 				{
+					dumped = true; // Only try one dump per session!
 					unsigned int vc = maxVertex+1, vo = vertGuess, 
 					wc = wedgeCount, wo = wedgeOffset, 
 					fc = faceCount, fo = faceOffset;
@@ -820,6 +823,8 @@ bool read_skeletalmesh(SystemIO::BufferedFileReader &r)
 
 		}
 	}
+
+	printf("%i\n", 1<<20);
 
 	return false;
 }
@@ -900,7 +905,7 @@ bool generic_mesh_search(SystemIO::BufferedFileReader &r,
 	// We make sure vertices come before wedges, but
 	// let people override this behaviour still by passing 
 	// vertex offset/count arguments directly
-	if (vertOffset > wedgeOffset && vertsGuess)
+	if (vertsGuess && vertOffset > wedgeOffset)
 	{
 		unsigned int i, count, offset;
 
@@ -1002,12 +1007,11 @@ bool generic_mesh_search(SystemIO::BufferedFileReader &r,
 
 	// Wedges are actually read out
 	r.SetOffset(wedgeOffset);
-	for (unsigned int i = 0; i < wedgeCount; ++i)
+	for (unsigned int i = 0, off = wedgeOffset; i < wedgeCount; ++i)
 	{
 		l2_wedge_t w;
-		unsigned long off = r.GetOffset();
-
 		test_wedge_offset(r, off, w);
+		off += 10;
 
 		printf("# Wedge[%i] %i %f %f\n", i, w.s, w.u, w.v);
 
@@ -1015,14 +1019,10 @@ bool generic_mesh_search(SystemIO::BufferedFileReader &r,
 
 		if (vertCount && w.s < (int)vertCount)
 		{
-			unsigned long old = off;
-			// It's already buffered in memory, so just read it
-			r.SetOffset(vertOffset + w.s * 3);
-
-			printf("v %f %f %f\n", 
-				   r.ReadFloat32(), r.ReadFloat32(), r.ReadFloat32());
-
-			r.SetOffset(old);
+			// It's already buffered in memory, so just read it out
+			r.SetOffset(vertOffset + w.s * 12);
+			float x = r.ReadFloat32(), y = r.ReadFloat32(), z = r.ReadFloat32();
+			printf("v %f %f %f\n", x, z, y);
 		}
 		else
 		{

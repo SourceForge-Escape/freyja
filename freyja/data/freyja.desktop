@@ -2,10 +2,11 @@
 Version=1.0
 Encoding=UTF-8
 Name=Freyja 3d Modeler
-Exec=freyja.sh ddd %F
+Exec=freyja.sh %F
 Terminal=false
 Type=Application
-Icon=/home/mongoose/.icons/freyja-dev-debug.png
+Icon=/home/mongoose/.icons/freyja-dev.png
+MimeType=application/x-extension-ja;application/x-extension-freyja;application/x-extension-egg;application/x-extension-grn;application/x-extension-psk;application/x-extension-md5mesh;application/x-extension-obj;application/x-extension-bsa;
 Categories=Application;Graphics
 X-GNOME-DocPath=
 Name[en_US]=Freyja 3d Modeler
