@@ -93,7 +93,8 @@ FreyjaRender::FreyjaRender() :
 	mRenderMode(fBoundingVolSelection | 
 				fBonesNoZbuffer | 
 				fBoundingVolumes |
-				fFPSCap),
+				fFPSCap |
+				fGroupColors),
 	mWidth(640),
 	mHeight(480),
 	mTextureId(0),
@@ -1035,9 +1036,13 @@ void FreyjaRender::RenderMesh(index_t mesh)
 			{
 				glColor3fv(RED);
 			}
-			else
+			else if (GetFlags() & fGroupColors)
 			{
 				glColor3fv(mColors[f->mSmoothingGroup]);
+			}
+			else
+			{
+				glColor3fv(WHITE);
 			}
 
 			if (!mRenderMode & fMaterial)

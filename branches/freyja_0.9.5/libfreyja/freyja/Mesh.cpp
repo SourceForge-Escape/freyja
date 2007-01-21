@@ -2294,6 +2294,36 @@ void Mesh::SplitFace(index_t faceIndex)
 }
 
 
+void Mesh::ClearFlagForSelectedFaces(Face::Flags flag)
+{
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f && f->mFlags & Face::fSelected)
+		{
+			f->mFlags &= ~flag;
+		}
+	}
+}
+
+
+void Mesh::SetFlagForSelectedFaces(Face::Flags flag)
+{
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f && f->mFlags & Face::fSelected)
+		{
+			f->mFlags |= flag;
+		}
+	}
+}
+
+
 void Mesh::SetFaceFlags(index_t face, uint32 flags)
 {
 	Face *f = GetFace(face);

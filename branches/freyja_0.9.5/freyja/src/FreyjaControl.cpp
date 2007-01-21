@@ -6650,6 +6650,22 @@ void eSetZoomLevel(vec_t f)
 }
 
 
+void eGroupColors(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fGroupColors);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fGroupColors);
+	}
+
+	freyja_print("Smoothing group color coding is [%s]", value ? "ON" : "OFF");	
+	freyja_event_gl_refresh();
+}
+
+
 void eRenderToggleBoneZClear(unsigned int value)
 {
 	if (value)
@@ -6706,6 +6722,7 @@ void FreyjaViewEventsAttach()
 	ResourceEventCallback2::add("eCollapseFace", &eNopControl);
 	ResourceEventCallback2::add("eSetMaterialTextureB", &eNopControl);
 
+	ResourceEventCallbackUInt::add("eGroupColors", eGroupColors);
 	ResourceEventCallbackUInt::add("eSkeletalDeform", &eRenderSkeletalDeform);
 	ResourceEventCallbackUInt::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
 	ResourceEventCallbackUInt::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);

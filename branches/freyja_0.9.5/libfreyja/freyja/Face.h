@@ -42,7 +42,8 @@ public:
 		fHidden      =  8,
 		fRayHit      = 16,
 		fPolyMappedTexCoords = 32,
-		fPolyMappedNormals = 64
+		fPolyMappedNormals   = 64,
+		fAlpha               = 128
 	} Flags;
 
 

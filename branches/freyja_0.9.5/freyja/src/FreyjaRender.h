@@ -113,7 +113,8 @@ public:
 		fRenderGridClearedZBuffer  = 65536,
 		fKeyFrameAnimation         = 131072,
 		fSolidPlane                = 262144,
-		fFPSCap           = 524288
+		fFPSCap                    = 524288,
+		fGroupColors               = (1<<20)
 	} flags_t;
 
 
