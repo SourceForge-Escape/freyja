@@ -1037,13 +1037,13 @@ bool generic_mesh_search(SystemIO::BufferedFileReader &r,
 	r.SetOffset(faceOffset);
 	unsigned int maxWedge = 0, faceMissing = 0;
 	int errFace = -1;
+	unsigned char mat = 61;
 
 	for (unsigned int i = 0; i < faceCount; ++i)
 	{
 		l2_face_t face;
 		unsigned long off = r.GetOffset();
 		bool err = false;
-		unsigned char mat = 61;
 
 		if (test_face_offset(r, off, face))
 		{
@@ -1067,6 +1067,8 @@ bool generic_mesh_search(SystemIO::BufferedFileReader &r,
 					{
 						mat = face.mat;
 						printf("s %u\n", face.mat + 1);	
+
+						printf("usemap texmap%u\n", face.mat + 1);
 					}
 
 					printf("f %i/%i %i/%i %i/%i\n", 
