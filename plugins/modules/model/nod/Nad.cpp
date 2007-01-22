@@ -85,6 +85,8 @@ bool Nad::Load(const char *filename)
 		mTags[i].mTagType = r.ReadLong();
 	}
 
+	r.Close();
+
 	return true;
 }
 
@@ -146,6 +148,127 @@ void Nad::Print()
 		printf("mTags[%i].mTagType = %i\n", i, mTags[i].mTagType);
 	}
 }
+
+
+////////////////////////////////////////////////////////////
+// Special Interface code
+////////////////////////////////////////////////////////////
+
+#ifdef FREYJA_PLUGINS
+#include <stdio.h>
+#include <string.h>
+#include <freyja/freyja.h>
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+#include <mstl/Vector.h>
+
+using namespace mstl;
+
+extern "C" {
+
+	int freyja_model__nad_check(char *filename);
+	int freyja_model__nad_import(char *filename);
+	int freyja_model__nad_export(char *filename);
+	int import_model(char *filename);
+	void freyja_init();
+}
+
+void freyja_init()
+{
+	freyjaPluginDescription1s("Vampire Animation (*.nad)");
+	freyjaPluginAddExtention1s("*.nad");
+	freyjaPluginImport1i(FREYJA_SKEL_ANIMATION);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
+
+
+int import_model(char *filename)
+{
+	if (!freyja_model__nad_check(filename))
+		return freyja_model__nad_import(filename);
+
+	return -1;
+}
+
+
+int freyja_model__nad_check(char *filename)
+{
+	if (!mstl::SystemIO::File::CompareFilenameExtention(filename, ".nod") ||
+		!mstl::SystemIO::File::CompareFilenameExtention(filename, ".NOD"))
+	{
+		mstl::SystemIO::BufferedFileReader r;
+
+		if (!r.Open(filename))
+			return -1;
+
+		if (r.ReadLong() != 3)
+			return -1;
+
+		return 0;
+	}
+
+	return -2;
+}
+
+
+int freyja_model__nad_import(char *filename)
+{
+	Nad nad;
+
+	if (!nad.Load(filename))
+		return -1;
+
+	for (unsigned int i = 0; i < nad.mNumBoneTracks; ++i)
+	{
+		index_t bone = mBoneTracks[i].mBoneNum;
+		index_t track = freyjaBoneTrackNew(bone);
+		freyjaBoneTrackRate(bone, track, 30.0f);  
+
+		for (unsigned int j = 0; j < nad.mBoneTracks[i].mNumKeys; ++j)
+		{
+			vec_t t = mBoneTracks[i].mKeys[j].mFrame;
+			vec_t x = mBoneTracks[i].mKeys[j].mValue[0];
+			vec_t y = mBoneTracks[i].mKeys[j].mValue[1];
+			vec_t z = mBoneTracks[i].mKeys[j].mValue[2];
+
+			switch (mBoneTracks[i].mTrackType)
+			{
+			case 0:
+				index_t key = freyjaBoneKeyFrameNew(bone, track, t);
+				freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);						break;
+
+			case 1:
+				index_t key = freyjaBoneKeyFrameNew(bone, track, t);
+				freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);						break;
+
+			case 2:
+				//index_t key = freyjaBoneKeyFrameNew(bone, track, t);
+				//freyjaBoneSizeKeyFrameEuler3f(bone, track, key, x, y, z);
+				break;
+
+			default:
+				;
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+int freyja_model__nad_export(char *filename)
+{
+	freyjaPrintMessage("Nad Export: Not implemented, %s:%i\n", 
+	                   __FILE__, __LINE__);
+	return -1;
+}
+#endif
 
 
 #ifdef UNIT_TEST_NAD
