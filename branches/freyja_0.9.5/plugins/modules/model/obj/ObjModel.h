@@ -25,6 +25,7 @@ public:
 
 		ObjFace() :
 			mSmoothingGroup(0),
+			mTexture(0),
 			mVertexRefs(),
 			mTexCoordRefs(),
 			mNormalRefs()
@@ -33,6 +34,7 @@ public:
 
 		ObjFace(const ObjFace &face) :
 			mSmoothingGroup(face.mSmoothingGroup),
+			mTexture(face.mTexture),
 			mVertexRefs(face.mVertexRefs),
 			mTexCoordRefs(face.mTexCoordRefs),
 			mNormalRefs(face.mNormalRefs)
@@ -42,6 +44,7 @@ public:
 		ObjFace &operator =(const ObjFace &face)
 		{
 			mSmoothingGroup = face.mSmoothingGroup;
+			mTexture = face.mTexture;
 			mVertexRefs = face.mVertexRefs;
 			mTexCoordRefs = face.mTexCoordRefs;
 			mNormalRefs = face.mNormalRefs;
@@ -53,6 +56,7 @@ public:
 		}
 
 		int mSmoothingGroup;
+		int mTexture;
 		Vector<uint32> mVertexRefs;
 		Vector<uint32> mTexCoordRefs;
 		Vector<uint32> mNormalRefs;
@@ -123,8 +127,7 @@ public:
 	};
 
 
-	ObjModel() :
-		mMeshes()
+	ObjModel() : mMeshes(), mTextures()
 	{
 	}
 
@@ -138,7 +141,8 @@ public:
 		SystemIO::TextFileReader r;
 		const char *symbol;
 		vec_t x, y, z, u, v;
-		uint32 mesh = 0, face = 0, smoothinggroup = 0;
+		uint32 mesh = 0, face = 0, smoothinggroup = 0, texture = 0;
+		String map;
 
 
 		if (!r.Open(filename))
@@ -169,6 +173,30 @@ public:
 				symbol = r.ParseSymbol();
 				//SystemIO::Print("Material '%s' is not used\n", symbol);
 				mMeshes[mesh].mMaterial = String(symbol);
+			}
+			else if (!strcmp(symbol, "usemap"))
+			{
+				// Filename of the material/texture
+				symbol = r.ParseSymbol();
+				map = String(symbol);
+
+				uint32 i;
+				bool found = false;
+				foreach (mTextures, i)
+				{
+					if (mTextures[i] == map)
+					{
+						texture = i;
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					texture = mTextures.size();
+					mTextures.push_back(map);
+				}
 			}
 			else if (!strncmp(symbol, "mg", 2))
 			{
@@ -239,6 +267,7 @@ public:
 					f.mVertexRefs.pushBack(idx);
 
 					f.mSmoothingGroup = smoothinggroup;
+					f.mTexture = texture;
 
 					// texcoords
 					if (mMeshes[mesh].mHasTexCoords)
@@ -289,6 +318,8 @@ public:
 
 
 	Vector<ObjMesh> mMeshes;
+
+	Vector<String> mTextures;
 };
 
 

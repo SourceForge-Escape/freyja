@@ -117,7 +117,7 @@ int freyja_model__obj_import(char *filename)
 		foreach (obj.mMeshes[m].mFaces, f)
 		{
 			index_t face = freyjaMeshPolygonCreate(mesh);
-			freyjaMeshPolygonMaterial(mesh, face, 0);
+			freyjaMeshPolygonMaterial(mesh, face, obj.mMeshes[m].mFaces[f].mTexture);
 			freyjaMeshPolygonGroup1u(mesh, face, obj.mMeshes[m].mFaces[f].mSmoothingGroup);
 
 			foreach (obj.mMeshes[m].mFaces[f].mVertexRefs, v)
@@ -130,13 +130,10 @@ int freyja_model__obj_import(char *filename)
 				foreach (obj.mMeshes[m].mFaces[f].mTexCoordRefs, v)
 				{
 					freyjaMeshPolygonAddTexCoord1i(mesh, face,  uvmap[obj.mMeshes[m].mFaces[f].mTexCoordRefs[v]]);
-					//SystemIO::Print("uv '%i' %i %i\n", v, obj.mMeshes[m].mFaces[f].mTexCoordRefs[v], uvmap[obj.mMeshes[m].mFaces[f].mTexCoordRefs[v]]);
 				}
 			}
-
-			
+		
 		}
-
 		
 	}
 
