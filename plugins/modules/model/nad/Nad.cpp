@@ -199,8 +199,8 @@ int import_model(char *filename)
 
 int freyja_model__nad_check(char *filename)
 {
-	if (!mstl::SystemIO::File::CompareFilenameExtention(filename, ".nod") ||
-		!mstl::SystemIO::File::CompareFilenameExtention(filename, ".NOD"))
+	if (!mstl::SystemIO::File::CompareFilenameExtention(filename, ".nad") ||
+		!mstl::SystemIO::File::CompareFilenameExtention(filename, ".NAD"))
 	{
 		mstl::SystemIO::BufferedFileReader r;
 
@@ -209,6 +209,8 @@ int freyja_model__nad_check(char *filename)
 
 		if (r.ReadLong() != 3)
 			return -1;
+
+		r.Close();
 
 		return 0;
 	}
@@ -226,30 +228,31 @@ int freyja_model__nad_import(char *filename)
 
 	for (unsigned int i = 0; i < nad.mNumBoneTracks; ++i)
 	{
-		index_t bone = mBoneTracks[i].mBoneNum;
+		index_t bone = nad.mBoneTracks[i].mBoneNum;
 		index_t track = freyjaBoneTrackNew(bone);
 		freyjaBoneTrackRate(bone, track, 30.0f);  
 
 		for (unsigned int j = 0; j < nad.mBoneTracks[i].mNumKeys; ++j)
 		{
-			vec_t t = mBoneTracks[i].mKeys[j].mFrame;
-			vec_t x = mBoneTracks[i].mKeys[j].mValue[0];
-			vec_t y = mBoneTracks[i].mKeys[j].mValue[1];
-			vec_t z = mBoneTracks[i].mKeys[j].mValue[2];
+			vec_t t = nad.mBoneTracks[i].mKeys[j].mFrame;
+			vec_t x = nad.mBoneTracks[i].mKeys[j].mValue[0];
+			vec_t y = nad.mBoneTracks[i].mKeys[j].mValue[1];
+			vec_t z = nad.mBoneTracks[i].mKeys[j].mValue[2];
 
-			switch (mBoneTracks[i].mTrackType)
+			index_t key = freyjaBoneKeyFrameNew(bone, track, t);
+
+			switch (nad.mBoneTracks[i].mTrackType)
 			{
 			case 0:
-				index_t key = freyjaBoneKeyFrameNew(bone, track, t);
-				freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);						break;
+				freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);
+				break;
 
 			case 1:
-				index_t key = freyjaBoneKeyFrameNew(bone, track, t);
-				freyjaBoneRotKeyFrameEuler3f(bone, track, key, x, y, z);						break;
+				freyjaBonePosKeyFrame3f(bone, track, key, x, y, z);
+				break;
 
 			case 2:
-				//index_t key = freyjaBoneKeyFrameNew(bone, track, t);
-				//freyjaBoneSizeKeyFrameEuler3f(bone, track, key, x, y, z);
+				//freyjaBoneSizeKeyFrame3f(bone, track, key, x, y, z);
 				break;
 
 			default:
