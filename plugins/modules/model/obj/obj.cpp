@@ -148,16 +148,7 @@ int freyja_model__obj_import(char *filename)
 int freyja_model__obj_export(char *filename)
 {
 #if OBJ_EXPORT_ENABLED
-	const vec_t scale = 1.0;
 	SystemIO::TextFileWriter w;
-	long modelIndex = 0; // make plugin option
-	long i, j, k, v;
-	long meshCount, meshIndex;
-	long vertexCount, vertexIndex;
-	long polygonCount, polygonIndex, faceVertexCount, faceVertex;
-	vec3_t xyz;
-	vec2_t uv;
-
 
 	if (!w.Open(filename))
 	{
@@ -169,48 +160,49 @@ int freyja_model__obj_export(char *filename)
 
 
 	/* Meshes */
-	meshCount = freyjaGetModelMeshCount(modelIndex);
+	const vec_t scale = 1.0;
+	long modelIndex = 0; // make plugin option
+	long i, j, k, v;
+	long vertexIndex, texcoordIndex;
+	long faceVertexCount;
+	vec3_t xyz;
+	vec2_t uv;
+	long meshCount = freyjaGetModelMeshCount(modelIndex);
+
+
 	v = 0;
 
 	for (i = 0; i < meshCount; ++i)
 	{
-		meshIndex = freyjaGetModelMeshIndex(modelIndex, i);
+		long meshIndex = freyjaGetModelMeshIndex(modelIndex, i);
+		long vertexCount = freyjaGetMeshVertexCount(meshIndex);
+		long texcoordCount = freyjaGetMeshTexCoordCount(meshIndex);
+		long polygonCount = freyjaGetMeshPolygonCount(meshIndex);
+		long map = -1, grp = -1;
 
-		vertexCount = freyjaGetMeshVertexCount(meshIndex);
-		polygonCount = freyjaGetMeshPolygonCount(meshIndex);
-
-		w.Print("\ng mesh%03li\n", i);
+		w.Print("\ng %s\n", i, freyjaGetMeshNameString(meshIndex));
 
 		/* Vertices */
 		w.Print("\n# vertexCount %li\n", vertexCount);
 		for (j = 0; j < vertexCount; ++j)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
-			freyjaGetVertexXYZ3fv(vertexIndex, xyz);
-
-			//w.Print("# vertex %li -> %li\n", j, vertexIndex);
-			w.Print("v %f %f %f\n",
-					xyz[0]*scale, xyz[1]*scale, xyz[2]*scale);
+			freyjaGetMeshVertexPos3fv(meshIndex, j, xyz);
+			w.Print("v %f %f %f\n",	xyz[0]*scale, xyz[1]*scale, xyz[2]*scale);
 		}
 
 		/* Normals */
 		w.Print("\n# normalCount %li\n", vertexCount);
 		for (j = 0; j < vertexCount; ++j)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
-			freyjaGetVertexNormalXYZ3fv(vertexIndex, xyz);
-
-			w.Print("vn %f %f %f\n",
-					xyz[0], xyz[1], xyz[2]);
+			freyjaGetMeshVertexNormal3fv(meshIndex, j, xyz);
+			w.Print("vn %f %f %f\n", xyz[0], xyz[1], xyz[2]);
 		}
 
 		/* Texcoords */
-		w.Print("\n# texcoordCount %li\n", vertexCount);
-		for (j = 0; j < vertexCount; ++j)
+		w.Print("\n# texcoordCount %li\n", texcoordCount);
+		for (j = 0; j < texcoordCount; ++j)
 		{
-			vertexIndex = freyjaGetMeshVertexIndex(meshIndex, j);
-			freyjaGetVertexTexcoord2fv(vertexIndex, uv);
-
+			freyjaGetMeshTexCoord2fv(meshIndex, j, uv);
 			w.Print("vt %f %f\n", uv[0], uv[1]);
 		}
 
@@ -218,22 +210,33 @@ int freyja_model__obj_export(char *filename)
 		w.Print("\n# faceCount %li\n", polygonCount);
 		for (j = 0; j < polygonCount; ++j)
 		{
-			polygonIndex = freyjaGetMeshPolygonIndex(meshIndex, j);
-			faceVertexCount = freyjaGetPolygonVertexCount(polygonIndex);
+			faceVertexCount = freyjaGetMeshPolygonVertexCount(meshIndex, j);
+
+			k = freyjaGetMeshPolygonMaterial(meshIndex, j);
+			if (map != k)
+			{
+				map = k;
+				w.Print("usemap texture%i\n", map);
+			}
+
+			k = freyjaGetMeshPolygonGroup(meshIndex, j);
+			if (grp != k)
+			{
+				grp = k;
+				w.Print("s %i\n", grp);
+			}
 
 			w.Print("f ");
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				faceVertex = freyjaGetPolygonVertexIndex(polygonIndex, k);
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, faceVertex);
-
-				//w.Print("\n# %li. %li -> %li\n", j, faceVertex, vertexIndex);
+				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
+				texcoordIndex = freyjaGetMeshPolygonTexCoordIndex(meshIndex,j, k);
 
 				// Assumes UV mapped vertices exported
 				// Remember obj indices start at 1
 				w.Print("%li/%li/%li ", 
-						v+vertexIndex+1, v+vertexIndex+1, v+vertexIndex+1);
+						v+vertexIndex+1, v+texcoordIndex+1, v+vertexIndex+1);
 			}
 
 			w.Print("\n");			
