@@ -40,6 +40,7 @@ Bone::Bone() :
 	mBindPose(),
 	mBindToWorld(),
 	mTrack(),
+	mTrackCount(0),
 	mUID(INDEX_INVALID)
 {
 	mName[0] = '\0';

@@ -207,6 +207,57 @@ extern "C" {
 	// 0.9.5 ABI Extensions
 	///////////////////////////////////////////////////////////////
 
+	uint32 freyjaGetBoneTrackCount(index_t bone);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Number of animation tracks for this bone.
+	 *
+	 ------------------------------------------------------*/
+
+	vec_t freyjaGetBonePosKeyframeTime(index_t bone, index_t track, index_t key);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaGetBonePosKeyframe3fv(index_t bone, index_t track, index_t key,
+									 vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetBonePosKeyframeCount(index_t bone, index_t track);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Number of keyframes for this track, for this bone.
+	 *
+	 ------------------------------------------------------*/
+
+	vec_t freyjaGetBoneRotKeyframeTime(index_t bone, index_t track, index_t key);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaGetBoneRotKeyframeEuler3fv(index_t bone, index_t track, index_t key,
+									 vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	uint32 freyjaGetBoneRotKeyframeCount(index_t bone, index_t track);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Number of keyframes for this track, for this bone.
+	 *
+	 ------------------------------------------------------*/
+
 	void freyjaBoneUpdateBindPose(index_t bone);
 	/*------------------------------------------------------
 	 * Pre  : 

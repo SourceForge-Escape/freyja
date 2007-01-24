@@ -82,6 +82,16 @@ public:
 	uint32 GetLocKeyframeCount() { return mLoc.GetKeyframeCount(); }
 
 
+	vec_t GetRotKeyframeTime(uint32 key) { return mRot.GetTime(key); }
+
+	vec_t GetLocKeyframeTime(uint32 key) { return mLoc.GetTime(key); }
+
+
+	void GetRotKeyframe(uint32 key, vec3_t v) { mRot.GetKey(key, v); }
+
+	void GetLocKeyframe(uint32 key, vec3_t v) { mLoc.GetKey(key, v); }
+
+
 	Vec3 GetRot(vec_t time) { return mRot.GetTransform(time); }
 
 	bool GetRot(vec_t t, Vec3 &v)  { return mRot.GetTransform(t, v); }
@@ -220,6 +230,12 @@ public:
 	 *        INDEX_INVALID if it has no parent
 	 ------------------------------------------------------*/
 
+	uint32 GetTrackCount() { return mTrackCount; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	BoneTrack &GetTrack(uint32 track) { return mTrack; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -243,7 +259,7 @@ public:
 	 * Post : Add child bone to this bone by by UID
 	 ------------------------------------------------------*/
 
-	index_t NewTrack() {return 0;}
+	index_t NewTrack() { mTrackCount = 1; return 0;}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Only supporting one 'range/anim' in test: F(track) <- F(0) 
@@ -341,6 +357,7 @@ public:
 
 	BoneTrack mTrack;                /* Animation track(s) - only one in test */
 
+	uint32 mTrackCount;              /* How many tracks are loaded? */
 
 private:
 

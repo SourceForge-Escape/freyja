@@ -172,7 +172,9 @@ void freyjaBoneName(index_t boneIndex, const char *name)
 	Bone *b = Bone::GetBone(boneIndex);
 
 	if (b)
+	{
 		b->SetName(name);
+	}
 }
 
 
@@ -286,16 +288,21 @@ const char *freyjaGetBoneNameString(index_t boneIndex)
 
 void freyjaGetBoneName(index_t boneIndex, uint32 size, char *name)
 {
-	uint32 i, n = 64;
 	Bone *b = Bone::GetBone(boneIndex);
+	name[0] = '\0';
 
-	if (b && name != 0x0 && size >= 64)
+	if (b && name != NULL)
 	{
-		for (i = 0; i < n; ++i)
+		if (size > 64)
+			size = 64;
+
+		for (uint32 i = 0; i < size; ++i)
 		{
 			name[i] = b->mName[i];
 		}
-	}	
+
+		name[size-1] = '\0';
+	}
 }
 
 
@@ -666,6 +673,107 @@ void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w)
 	}
 }
 
+
+///////////////////////////////////////////////////////////////////
+
+uint32 freyjaGetBoneTrackCount(index_t bone)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b )
+	{
+		return b->GetTrackCount();
+	}
+
+	return 0;
+}
+
+
+uint32 freyjaGetBonePosKeyframeCount(index_t bone, index_t track)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetLocKeyframeCount();
+	}
+
+	return 0;
+}
+	
+
+vec_t freyjaGetBonePosKeyframeTime(index_t bone, index_t track, index_t key)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetLocKeyframeTime(key);
+	}
+
+	return 0.0f;
+}
+
+
+void freyjaGetBonePosKeyframe3fv(index_t bone, index_t track, index_t key,
+								 vec3_t xyz)
+{
+	Bone *b = Bone::GetBone(bone);
+	xyz[0] = xyz[1] = xyz[2] = 0.0f;
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetLocKeyframe(key, xyz);
+	}
+}
+
+
+uint32 freyjaGetBoneRotKeyframeCount(index_t bone, index_t track)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetRotKeyframeCount();
+	}
+
+	return 0;
+}
+
+
+vec_t freyjaGetBoneRotKeyframeTime(index_t bone, index_t track, index_t key)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetRotKeyframeTime(key);
+	}
+
+	return 0.0f;
+}
+
+
+void freyjaGetBoneRotKeyframeEuler3fv(index_t bone, index_t track, index_t key,
+								 vec3_t xyz)
+{
+	Bone *b = Bone::GetBone(bone);
+	xyz[0] = xyz[1] = xyz[2] = 0.0f;
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetRotKeyframe(key, xyz);
+	}
+}
+
+
+///////////////////////////////////////////////////////////////
 
 index_t freyjaBoneTrackNew(index_t bone)
 {

@@ -6362,6 +6362,27 @@ void eGroupClear()
 }
 
 
+void eSetSelectedFacesAlpha()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+
+		if (group > 24)
+		{
+			freyja_print("Make sure only one group is toggled while assigning");
+			return;
+		}
+
+		freyja_print("Selected faces removed from smoothing group (%i).",group);
+		m->SelectedFacesMarkSmoothingGroup(group, false);
+		freyja_event_gl_refresh();
+	}
+}
+
+
 void eGroupAssign()
 {
 	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());

@@ -143,11 +143,13 @@ int freyja_model__obj_import(char *filename)
 }
 
 
+#define OBJ_EXPORT_ENABLED 1
+
 int freyja_model__obj_export(char *filename)
 {
-#ifdef OBJ_EXPORT_ENABLED
+#if OBJ_EXPORT_ENABLED
 	const vec_t scale = 1.0;
-	SystemIO::FileWriter w;
+	SystemIO::TextFileWriter w;
 	long modelIndex = 0; // make plugin option
 	long i, j, k, v;
 	long meshCount, meshIndex;

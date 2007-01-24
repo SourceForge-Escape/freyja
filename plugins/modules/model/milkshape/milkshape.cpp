@@ -521,8 +521,15 @@ int freyja_model__milkshape_import(char *filename)
 								mdl.joints[i].rotation[1],
 								mdl.joints[i].rotation[2]);
 
+
+		printf("%li. '%s' <- '%s'\n", i, mdl.joints[i].parentName, mdl.joints[i].name);
+
+		if (strncmp(mdl.joints[i].name, mdl.joints[i].parentName, 32) != 0)
 		for (j = 0; j < mdl.nNumJoints; ++j)
 		{
+			if (i == j)
+				continue;
+
 			if (!strncmp(mdl.joints[i].name, mdl.joints[j].parentName, 32))
 			{
 				freyjaBoneAddChild(bone, j);
@@ -663,7 +670,8 @@ int freyja_model__milkshape_export(char *filename)
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
+				vertexIndex = freyjaGetMeshPolygonTexCoordIndex(meshIndex, j, k);
+				//vertexIndex = freyjaGetMeshPolygonIndex(meshIndex, j, k);
 				freyjaGetMeshVertexTexCoord3fv(meshIndex, vertexIndex, xyz);
 				
 				w.WriteFloat32(xyz[0]);
@@ -671,13 +679,14 @@ int freyja_model__milkshape_export(char *filename)
 
 			for (k = 0; k < faceVertexCount; ++k)
 			{
-				vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
+				vertexIndex = freyjaGetMeshPolygonTexCoordIndex(meshIndex, j, k);
+				//vertexIndex = freyjaGetMeshPolygonVertexIndex(meshIndex, j, k);
 				freyjaGetMeshVertexTexCoord3fv(meshIndex, vertexIndex, xyz);
 				
 				w.WriteFloat32(xyz[1]);
 			}
 
-			w.WriteInt8U(0); // smoothingGroup
+			w.WriteInt8U(freyjaGetMeshPolygonGroup(meshIndex, j)); // smoothingGroup
 			w.WriteInt8U(i);
 		}
 	}
@@ -704,35 +713,52 @@ int freyja_model__milkshape_export(char *filename)
 	}
 
 
-	w.WriteInt16U(0); // materialCount
+	uint32 materialCount = freyjaGetMaterialCount();
+	w.WriteInt16U(materialCount); // materialCount
  
-	for (i = 0; i < 0; ++i)
+	for (i = 0; i < materialCount; ++i)
 	{
-		snprintf(name, 32, "mat%li", i);
+		index_t material = i;
+		//freyjaGetMaterialIndex(material, i);
+		//snprintf(name, 32, "mat%li", i);
+		snprintf(name, 32, freyjaGetMaterialName(material));
+		name[31] = '\0';
 		w.WriteString(32, name);
 
-		w.WriteFloat32(0); // ambient
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0); // diffuse
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0); // specular
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0); // emissive
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0);
-		w.WriteFloat32(0); // shininess
+		vec4_t color;
+		freyjaGetMaterialAmbient(material, color);
+		w.WriteFloat32(color[0]); // ambient
+		w.WriteFloat32(color[1]);
+		w.WriteFloat32(color[2]);
+		w.WriteFloat32(color[3]);
+
+		freyjaGetMaterialDiffuse(material, color);
+		w.WriteFloat32(color[0]); // diffuse
+		w.WriteFloat32(color[1]);
+		w.WriteFloat32(color[2]);
+		w.WriteFloat32(color[3]);
+
+		freyjaGetMaterialSpecular(material, color);
+		w.WriteFloat32(color[0]); // specular
+		w.WriteFloat32(color[1]);
+		w.WriteFloat32(color[2]);
+		w.WriteFloat32(color[3]);
+
+		freyjaGetMaterialEmissive(material, color);
+		w.WriteFloat32(color[0]); // emissive
+		w.WriteFloat32(color[1]);
+		w.WriteFloat32(color[2]);
+		w.WriteFloat32(color[3]);
+		
+		w.WriteFloat32(freyjaGetMaterialShininess(material)); // shininess
 		w.WriteFloat32(0); // transparency
 
 		w.WriteInt8(0); // mode
-		
-		snprintf(name, 128, "texturemap.png"); // he he he
+
+		// FIXME: We should just use basename?
+		snprintf(name, 128, freyjaGetMaterialTextureName(material));
+		//snprintf(name, 128, "texturemap.png"); // he he he
+		name[127] = '\0';
 		w.WriteString(128, name); // texturemap
 
 		snprintf(name, 128, "alphamap.png");
@@ -754,10 +780,16 @@ int freyja_model__milkshape_export(char *filename)
 
 		w.WriteInt8(0); // flags
 
-		freyjaGetBoneName(boneIndex, 32, name);
+		if (freyjaGetBoneNameString(boneIndex) == NULL)
+		{
+			snprintf(name, 32, "bone%li", i);
+		}
+		else
+		{
+			freyjaGetBoneName(boneIndex, 32, name);
+		}
 		w.WriteString(32, name); // this bone's name
 
-		name[0] = 0;
 		freyjaGetBoneName(freyjaGetBoneParent(boneIndex), 32, name);
 		w.WriteString(32, name); // parent name
 
@@ -771,23 +803,38 @@ int freyja_model__milkshape_export(char *filename)
 		w.WriteFloat32(xyz[1]*scale);
 		w.WriteFloat32(xyz[2]*scale);
 
-		w.WriteInt16U(0); // numRotationKeyframes
-		w.WriteInt16U(0); // numPositionKeyframes
+		index_t track = 0; // Only use 1st track for now, milk uses just one 
+		uint32 trackCount = freyjaGetBoneTrackCount(boneIndex);
+		uint32 rotKeyCount = 0;
+		uint32 posKeyCount = 0;
 
-		for (j = 0; j < 0; ++j) // numRotationKeyframes
+		if (trackCount)
 		{
-			w.WriteFloat32(0.0f);  // time
-			w.WriteFloat32(0.0f);  // x
-			w.WriteFloat32(0.0f);  // y
-			w.WriteFloat32(0.0f);  // z
+			rotKeyCount = freyjaGetBoneRotKeyframeCount(boneIndex, track);
+			posKeyCount = freyjaGetBonePosKeyframeCount(boneIndex, track);
 		}
 
-		for (j = 0; j < 0; ++j) // numPositionKeyframes
+		w.WriteInt16U(rotKeyCount); // numRotationKeyframes
+		w.WriteInt16U(posKeyCount); // numPositionKeyframes
+
+		for (j = 0; j < rotKeyCount; ++j) // numRotationKeyframes
 		{
-			w.WriteFloat32(0.0f);  // time
-			w.WriteFloat32(0.0f);  // x
-			w.WriteFloat32(0.0f);  // y
-			w.WriteFloat32(0.0f);  // z
+			vec_t t = freyjaGetBoneRotKeyframeTime(boneIndex, track, j);
+			freyjaGetBoneRotKeyframeEuler3fv(boneIndex, track, j, xyz);
+			w.WriteFloat32(t);  // time
+			w.WriteFloat32(xyz[0]);  // x
+			w.WriteFloat32(xyz[1]);  // y
+			w.WriteFloat32(xyz[2]);  // z
+		}
+
+		for (j = 0; j < posKeyCount; ++j) // numPositionKeyframes
+		{
+			vec_t t = freyjaGetBonePosKeyframeTime(boneIndex, track, j);
+			freyjaGetBonePosKeyframe3fv(boneIndex, track, j, xyz);
+			w.WriteFloat32(t);  // time
+			w.WriteFloat32(xyz[0]);  // x
+			w.WriteFloat32(xyz[1]);  // y
+			w.WriteFloat32(xyz[2]);  // z
 		}
 	}
 

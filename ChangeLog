@@ -7,8 +7,13 @@
  Dancer/Kagura (Release)
 
  Dancer (Public Beta Kagura)
+
+ Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
+ - Tune up of BoneABI and related ABI
+ - SystemIO updates to handle direct memory and chunk loading in BFR
+ - Milkshape export minor fixes
  - New fGroupColors option, so you can disable it for unlit texture renders
  - lineageIIraw2obj updated with new automatic extractor ( spec updated too ) 
  - lineageIIraw2obj updated with new pattern matching system, etc
