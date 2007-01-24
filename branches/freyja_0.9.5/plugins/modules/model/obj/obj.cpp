@@ -33,6 +33,7 @@
 #include <freyja/SkeletonABI.h>
 #include <freyja/TextureABI.h>
 #include <freyja/MeshABI.h>
+#include <freyja/MaterialABI.h>
 #include <freyja/freyja.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
@@ -91,8 +92,14 @@ int freyja_model__obj_import(char *filename)
 	}
 
 	index_t model = freyjaModelCreate();
-
 	uint32 m, v, f, i;
+	
+	foreach (obj.mTextures, i)
+	{
+		index_t mat = freyjaMaterialCreate();
+		freyjaMaterialTextureName(mat, obj.mTextures[i].c_str());
+	}
+
 	foreach (obj.mMeshes, m)
 	{
 		index_t mesh = freyjaMeshCreate();
@@ -216,7 +223,16 @@ int freyja_model__obj_export(char *filename)
 			if (map != k)
 			{
 				map = k;
-				w.Print("usemap texture%i\n", map);
+
+				const char *texture = freyjaGetMaterialTextureName(map);
+				if (texture)
+				{
+					w.Print("usemap %s\n", texture);
+				}
+				else
+				{
+					w.Print("usemap texture%i\n", map);
+				}
 			}
 
 			k = freyjaGetMeshPolygonGroup(meshIndex, j);
