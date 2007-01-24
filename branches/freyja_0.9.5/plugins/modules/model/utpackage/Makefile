@@ -170,7 +170,8 @@ depend:
 targets: $(TARGETS)
 
 PROG_OBJS=$(BUILDDIR)/UTPackage.o \
-			$(BUILDDIR)/URTexture.o
+	$(BUILDDIR)/URTexture.o \
+	$(BUILDDIR)/UTMesh.o
 
 $(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)

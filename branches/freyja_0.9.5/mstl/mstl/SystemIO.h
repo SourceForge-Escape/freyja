@@ -674,10 +674,10 @@ public:
 	{
 	public:
 		BufferedFileReader() : FileReader(), 
-			mFileData(NULL), mCursor(0), mEnd(0) { }
+									  mFileData(NULL), mCursor(0), mStart(0), mEnd(0) { }
 
 		BufferedFileReader(const BufferedFileReader &b) : FileReader(), 
-			mFileData(NULL), mCursor(b.mCursor), mEnd(b.mEnd) 
+			mFileData(NULL), mCursor(b.mCursor), mStart(b.mStart), mEnd(b.mEnd) 
 		{
 			mFileData = new unsigned char[b.mEnd+1];
 			memcpy(mFileData, b.mFileData, b.mEnd);
@@ -687,6 +687,7 @@ public:
 		{
 			FlushBuffer();
 			mCursor = b.mCursor;
+			mStart = b.mStart;
 			mEnd = b.mEnd;
 			mFileData = new unsigned char[b.mEnd+1];
 			memcpy(mFileData, b.mFileData, b.mEnd);
@@ -698,6 +699,7 @@ public:
 
 		unsigned char *mFileData;
 		unsigned long mCursor;
+		unsigned long mStart;
 		unsigned long mEnd;
 
 		unsigned char *GetCompleteFileBuffer() { return mFileData; }
@@ -707,7 +709,12 @@ public:
 		virtual unsigned long GetFileSize() { return mEnd; }
 
 		void FlushBuffer() 
-		{ if (mFileData) delete [] mFileData; mCursor = mEnd = 0; }
+		{ 
+			if (mFileData) 
+				delete [] mFileData; 
+		
+			mCursor = mStart = mEnd = 0;
+		}
 
 		bool IsValidRead(long sz) { return ((mCursor + sz) <= mEnd); }
 
@@ -732,11 +739,12 @@ public:
 
 		virtual long GetOffset()
 		{
-			return mCursor;
+			return mCursor-mStart; // for chunks
 		}
 
 		virtual bool SetOffset(long offset)
 		{
+			offset += mStart; // for chunks
 			bool t = (offset <= (long)mEnd);
 			if (t) mCursor = offset;
 			return t;
@@ -747,6 +755,56 @@ public:
 			mCursor = mEnd;
 		}
 
+		virtual bool OpenChunk(unsigned char *buffer, unsigned int size) 
+		{
+			bool load = false;
+			FlushBuffer();
+
+			if (buffer)
+			{
+				mEnd = size;
+				mStart = 0;
+				mCursor = mStart;
+				mFileData = buffer;
+				load = true;
+			}
+
+			return load;
+		}
+
+
+		virtual bool OpenChunk(const char *filename, 
+									  unsigned int offset, unsigned int size) 
+		{
+			bool load = false;
+			FlushBuffer();
+
+			if (File::Open(filename, "rb"))
+			{
+				fseek(mFileHandle, 0, SEEK_END);
+
+				if (offset + size > ftell(mFileHandle))
+					return false;
+
+				mEnd = offset + size;
+				mStart = offset;
+				fseek(mFileHandle, mStart, SEEK_SET);
+				mFileData = new unsigned char[size+1];
+#ifdef DEBUG
+				memset(mFileData, 0xcd, size);
+#endif
+				fread(mFileData, 1, size, mFileHandle); 
+				//FileReader::ReadBuffer(size, mFileData);
+
+				mCursor = mStart;
+
+				load = true;
+			}
+
+			return load;
+		}
+
+
 		virtual bool Open(const char *filename) 
 		{
 			bool load = false;
@@ -756,7 +814,8 @@ public:
 			{
 				fseek(mFileHandle, 0, SEEK_END);
 				mEnd = ftell(mFileHandle);
-				fseek(mFileHandle, 0, SEEK_SET);
+				mStart = 0;
+				fseek(mFileHandle, mStart, SEEK_SET);
 				mFileData = new unsigned char[mEnd+1];
 #ifdef DEBUG
 				memset(mFileData, 0xcd, mEnd);

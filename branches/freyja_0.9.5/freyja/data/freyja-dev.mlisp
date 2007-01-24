@@ -193,6 +193,8 @@
 				(menu_item "_Unselect faces"		eMeshUnselectFaces)
 				(menu_item "_Smoothing groups"		eSmoothingGroupsDialog)
 				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
+				(menu_item "Clear alpha"	eNone)
+				(menu_item "Set alpha"		eNone)
 				(menu_item "Mirror _X"		eMirrorFacesX)
 				(menu_item "Mirror _Y"		eMirrorFacesY)
 				(menu_item "Mirror _Z"		eMirrorFacesZ)

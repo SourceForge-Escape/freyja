@@ -16,8 +16,11 @@
 		as crashes )
 
 	* Bones and bone transforms in same units!
+		- Also finalize delta vs abs
 
 	* Import/Export submenus like the Plugins.. submenu
+		- Selection mask support
+		- Flags for disabling mesh/skeleton/animations/etc
 		- File dialogs should be able to handle 
 		  *.ms3d and auto append instead of doing *.milkshape
 
@@ -78,6 +81,8 @@
 
  Modeling
  -----------------------------------------------------------------------------
+
+	* Node editor for scene graph control
 
 	* Box modeling
 		- Add back UI for vertex welding 

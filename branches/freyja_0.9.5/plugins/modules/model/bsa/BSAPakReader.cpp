@@ -57,7 +57,67 @@ BSAPakReader::~BSAPakReader()
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-bool BSAPakReader::load(const char *filename)
+bool BSAPakReader::CheckMagic(const char *filename)
+{
+	SystemIO::FileReader r;
+
+	if (!r.Open(filename))
+	{
+		return false;
+	}
+
+	r.SetByteOrder(SystemIO::File::LITTLE);
+
+	mVersion = r.ReadLong();
+
+	if (mVersion == BSA_MORROWIND)
+	{
+		r.Close();
+		return true;
+	}
+
+	r.SetOffset(0);
+	r.ReadBuffer(4, mMagic);
+	mVersion = r.ReadLong();
+	r.Close();
+
+	if (mMagic == 'B' && 
+		mMagic == 'S' && 
+		mMagic == 'A' && 
+		mMagic == '\0' &&
+		mVersion == BSA_OBLIVION)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
+bool BSAPakReader::Load(const char *filename)
+{
+	if (CheckMagic(filename))
+	{
+		switch (mVersion)
+		{
+		case BSA_MORROWIND:
+			return LoadMorrowind(filename);
+			break;
+
+		case BSA_OBLIVION:
+			
+			break;
+
+		default:
+			;
+		}
+	}
+
+	return false;
+}
+
+
+bool BSAPakReader::LoadMorrowind(const char *filename)
 {
 	SystemIO::FileReader r;
 	char buffer[128];
@@ -73,8 +133,82 @@ bool BSAPakReader::load(const char *filename)
 
 	mHeader.mVersion = r.ReadLong();
 
-	if (mHeader.mVersion != BSA_VERSION)
+	if (mHeader.mVersion != BSA_MORROWIND)
+	{
 		return false;
+	}
+
+	mHeader.mTableOffset = r.ReadLong();
+	mHeader.mFileCount = r.ReadLong();
+
+	mTable = new BSATable[mHeader.mFileCount];
+
+	for (i = 0; i < mHeader.mFileCount; ++i)
+	{
+		mTable[i].mSize = r.ReadLong();
+		mTable[i].mOffset = r.ReadLong();
+	}
+
+	for (i = 0; i < mHeader.mFileCount; ++i)
+	{
+		mTable[i].mFilenameOffset = r.ReadLong();
+	}
+
+	base = r.GetOffset();
+
+	for (i = 0; i < mHeader.mFileCount; ++i)
+	{
+		r.SetOffset(base + mTable[i].mFilenameOffset);
+		
+		for (j = 0; j < 126; ++j)
+		{
+			buffer[j] = r.ReadInt8();
+			buffer[j+1] = 0;
+
+			if (buffer[j] == 0)
+				break;
+		}
+
+		mTable[i].setFilename(buffer);
+	}
+
+	for (i = 0; i < mHeader.mFileCount; ++i)
+	{
+		mTable[i].mHash1 = r.ReadLong();
+		mTable[i].mHash2 = r.ReadLong();
+	}
+
+	mDataOffset = r.GetOffset();
+
+	return true;
+}
+
+
+bool BSAPakReader::LoadOblivion(const char *filename)
+{
+	SystemIO::FileReader r;
+	char buffer[128];
+	long i, j, base;
+
+
+	if (!r.Open(filename))
+	{
+		return false;
+	}
+
+	r.SetByteOrder(SystemIO::File::LITTLE);
+
+	r.ReadBuffer(4, mHeader.mMagic);
+	mHeader.mVersion = r.ReadLong();
+
+	if (mHeader.mMagic != 'B' || 
+		mHeader.mMagic != 'S' || 
+		mHeader.mMagic != 'A' || 
+		mHeader.mMagic != '\0' || 
+		mHeader.mVersion != BSA_OBLIVION)
+	{
+		return false;
+	}
 
 	mHeader.mTableOffset = r.ReadLong();
 	mHeader.mFileCount = r.ReadLong();

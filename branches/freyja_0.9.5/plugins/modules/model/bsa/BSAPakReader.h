@@ -19,6 +19,9 @@
  *
  *-- History ------------------------------------------------ 
  *
+ * 2007.01.22:
+ * Mongoose - Oblivion support based on UESPWiki spec
+ *
  * 2005.01.02:
  * Mongoose - Created
  ==========================================================================*/
@@ -30,13 +33,71 @@
 #include <string.h>
 
 
-#define BSA_VERSION 0x00000100  // little endian order
-
+#define BSA_MORROWIND 0x00000100  // little endian order
+#define BSA_OBLIVION  0x67
 
 class BSAPakReader
 {
  public:
 	
+
+	class OblivionBSAHeader
+	{
+	public:
+		typedef enum {
+			fDirectoryNames     = (1<<0),
+			fFileNames          = (1<<1),
+			fDefaultCompression = (1<<2),
+			fUnknown3           = (1<<3),
+			fUnknown4           = (1<<4),
+			fUnknown5           = (1<<5),
+			fUnknown6           = (1<<6),
+			fUnknown7           = (1<<7),
+			fUnknown8           = (1<<8),
+			fUnknown9           = (1<<9),
+			fUnknown10          = (1<<10)
+
+		} ArchiveFlag;
+
+		typedef enum {
+			fNIF = (1<<0),
+			fDDS = (1<<1),
+			fXML = (1<<2),
+			fWAV = (1<<3),
+			fMP3 = (1<<4),
+			fTXT = (1<<5),
+			fSPT = (1<<7),
+			fFNT = (1<<8),
+			fCTL = (1<<9)
+
+		} FileFlag;
+
+		char mMagic[4];
+		unsigned long mVersion;
+		unsigned long mOffset;
+		unsigned long mArchiveFlags;
+		unsigned long mFolderCount;
+		unsigned long mFileCount;
+
+		/* Includes C style NULL termination, but not PASCAL style count */
+		unsigned long mTotalFolderNameLenght;
+		unsigned long mTotalFileNameLenght;
+		
+		unsigned long mFileFlags;
+
+		FolderRecord *mFolderRecords; // mFolderCount
+		FileRecordBlock *mFileRecordBlocks;
+		// FileNameBlock // All the C style strings appended to each other with NULL termination between each entry
+		// Files // Raw data, if compressed will have compressed file block
+	};
+
+
+	class OblivionBSAFolderRecord
+	{
+	public:
+		
+	};
+
 	class BSAHeader
 	{
 	public:
@@ -124,7 +185,14 @@ class BSAPakReader
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	bool load(const char *filename);
+	bool CheckMagic(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool Load(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -138,6 +206,10 @@ class BSAPakReader
 	BSAHeader mHeader;
 
 	BSATable *mTable;
+
+	char mMagic[4];
+
+	long mVersion;
 
 	long mDataOffset;
 

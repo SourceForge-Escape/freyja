@@ -707,6 +707,33 @@ public:
 	}
 
 
+	virtual vec_t GetTime(index_t idx)
+	{
+		Vec3KeyFrame *key = GetKeyframe(idx);
+
+		if (key)
+		{
+			return key->GetTime();
+		}
+
+		return 0.0f;
+	}
+
+
+	virtual void GetKey(index_t idx, vec3_t v)
+	{
+		Vec3KeyFrame *key = GetKeyframe(idx);
+		Vec3 u;
+
+		if (key)
+		{
+			u = key->GetData();
+		}
+
+		u.Get(v);
+	}
+
+
 	virtual Vec3KeyFrame *GetKeyframe(index_t idx) 
 	{
 		return (Vec3KeyFrame *)Track::GetKeyframe(idx);
