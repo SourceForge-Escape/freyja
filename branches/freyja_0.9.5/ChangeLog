@@ -11,6 +11,7 @@
  Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
+ - FPSCap toggle in mlisp
  - Obj export back w/ smoothing group and material support
  - UV fixes
  - Tune up of BoneABI and related ABI

@@ -6130,6 +6130,24 @@ void eTextureSlotLoadToggle()
 }
 
 
+void eFPSCap(unsigned int i)
+{
+	if (FreyjaRender::mSingleton)
+	{
+		if (i)
+		{
+			FreyjaRender::mSingleton->SetFlag(FreyjaRender::fFPSCap);
+		}
+		else
+		{
+			FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fFPSCap);
+		}
+
+		freyja_print("FPSCap is [%s]", i ? "ON" : "OFF");
+	}
+}
+
+
 void eMaterialSlotLoadToggle(unsigned int i)
 {
 	FreyjaControl::mInstance->SetFlag(FreyjaControl::fLoadMaterialInSlot, i);
@@ -6626,6 +6644,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallbackUInt::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallbackUInt::add("eFPSCap", &eFPSCap);
 
 	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
 }
