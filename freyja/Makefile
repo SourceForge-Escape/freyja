@@ -14,7 +14,7 @@ MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=5
 BRANCH=
-BUILD_ID=20061213
+BUILD_ID=20070125
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
 BUILD_HOST=`uname -n -m -s`
 WEBSITE="http://icculus.org/freyja"
@@ -367,7 +367,7 @@ clean-plugins:
 
 plugins: pakreader.so perlinnoise.so reverseengineer.so lineageIIextract.so pythonplug.so
 
-plugins-win32: pakreader.dll perlinnoise.dll reverseengineer.dll lineageIIextract.dll
+plugins-win32: pakreader.dll perlinnoise.dll reverseengineer.dll lineageIIextract.dll pythonplug.dll
 
 plugins-osx:
 	@-printf "Not implemented\n"
@@ -429,8 +429,8 @@ pythonplug.dll:
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
 		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+		LD_FLAGS="$(PLUGIN_LD_FLAGS) $(WIN32_LIB_DIR)" \
+		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)  $(WIN32_LIB_DIR) -lpython24"
 
 reverseengineer.so:
 	@-mkdir -p $(PLUGIN_BUILD_DIR)

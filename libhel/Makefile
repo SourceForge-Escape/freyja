@@ -122,7 +122,7 @@ debug-win32:
 	MODULE="hel0" \
 	SHLIBEXT=".dll" \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR) -DHELEXPORTSCLASS" \
-	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
+	LD_FLAGS=" -shared -lstdc++ -lm" \
 	LIBS="-lm -lstdc++"
 
 osx: debug-osx
