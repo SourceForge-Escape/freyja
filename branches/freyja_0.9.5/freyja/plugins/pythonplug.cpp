@@ -77,8 +77,21 @@ void PythonEventsAttach()
 
 void PythonGUIAttach()
 {
-	mstl::String s = mgtk_get_resource_path();
-	s += "plugins/pythonplug.mlisp";
+	mstl::String s;
+
+	if (mgtk_get_resource_path() == NULL)
+	{
+		s = "plugins/pythonplug.mlisp";
+	}
+	else
+	{
+		s = mgtk_get_resource_path();
+		s += "plugins/pythonplug.mlisp";
+	}
+
+#ifdef WIN32
+	s = "plugins/pythonplug.mlisp";
+#endif
 
 	Resource::mInstance->Load((char*)s.c_str());
 

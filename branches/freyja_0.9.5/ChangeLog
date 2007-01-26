@@ -10,7 +10,11 @@
 
  Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - New libfreyja win32 and win32-python build rules
+ - mgtk resource path callback fix for win32
+ - Python script UI plugin for freyja
+ - Python support for win32
+ - Fix for libhel using obsolete VectorIterator instead of foreach()
  - FPSCap toggle in mlisp
  - Obj export back w/ smoothing group and material support
  - UV fixes

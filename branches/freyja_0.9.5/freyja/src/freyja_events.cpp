@@ -540,8 +540,12 @@ char *mgtk_rc_map(char *filename_or_dirname)
 	return freyja_rc_map(filename_or_dirname);
 }
 
-
+// Temp hack, until we can get WIN32 and UNIX on same link system
+#ifdef WIN32
+const char *freyja_get_resource_path()
+#else
 const char *mgtk_get_resource_path()
+#endif
 {
 	static String s;
  
@@ -1728,6 +1732,7 @@ int main(int argc, char *argv[])
 	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
 	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
 	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
+	mgtk_win32_import("win32_mgtk_get_resource_path", (void*)freyja_get_resource_path);
 #endif
 
 	/* Hookup resource to event system */

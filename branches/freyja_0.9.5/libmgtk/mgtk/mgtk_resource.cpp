@@ -62,12 +62,18 @@ void (*win32_mgtk_handle_text)(int, char *) = NULL;
 void (*win32_mgtk_print)(const char*, ...) = NULL;
 void (*win32_mgtk_get_pixmap_filename)(char *, unsigned int, char *) = NULL;
 char *(*win32_mgtk_rc_map)(char *) = NULL;
+const char *(*win32_mgtk_get_resource_path)() = NULL;
+
 
 void mgtk_win32_import(char *symbol, void *func)
 {
 	if (strncmp("win32_mgtk_callback_get_image_data_rgb24", symbol, 41) == 0)
 	{
 		win32_mgtk_callback_get_image_data_rgb24 = (void (*)(const char *, unsigned char **, int *, int *))func;
+	}
+	else if (strncmp("win32_mgtk_get_resource_path", symbol, 29) == 0)
+	{
+		win32_mgtk_get_resource_path = (const char *(*)())func;
 	}
 	else if (strncmp("win32_mgtk_handle_color", symbol, 26) == 0)
 	{
@@ -173,6 +179,17 @@ void mgtk_handle_color(int id, float r, float g, float b, float a)
 	{
 		(*win32_mgtk_handle_color)(id, r, g, b, a);
 	}
+}
+
+
+const char *mgtk_get_resource_path()
+{
+	if (win32_mgtk_get_resource_path != NULL)
+	{
+		return (*win32_mgtk_get_resource_path)();
+	}
+
+	return NULL;
 }
 
 

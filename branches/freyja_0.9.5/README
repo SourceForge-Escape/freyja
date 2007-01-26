@@ -116,6 +116,14 @@
  2. Adjust time value ( in milliseconds )
 
 
+ Python support setup for win32
+ ----------------------------------------------------------------------------
+ pexports python24.dll > python24.def
+ dlltool --dllname python24.dll --def python24.def --output-lib libpython24.a
+
+ Toss in msvcr71.dll or whatever your dependent libraries maybe.
+
+
  SVN examples
  ----------------------------------------------------------------------------
 

@@ -199,7 +199,7 @@ public:
 
 	void solve()
 	{
-		VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
+		//VectorIterator<Mass *> iter = VectorIterator<Mass *>(&mMasses);
 		unsigned int i = 0;
 		Mass *m, *last = 0x0;
 		vec_t mass = 0.0;
@@ -212,9 +212,11 @@ public:
 		}
 
 		/* Apply common forces  */
-		for (iter.finish(); iter.backward(); iter.prev())
+		//for (iter.finish(); iter.backward(); iter.prev())
+		foreach(mMasses, i)
 		{
-			m = iter.current();
+			//iter.current();
+			m = mMasses[i];
 
 			if (last)
 			{
