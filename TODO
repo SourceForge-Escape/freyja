@@ -7,9 +7,13 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* FPS cap setting in mlisp
+
 	* Mark face alpha in UV / selected faces ( For depth sorting list )
 
 	* SMD plugin option to save mesh prompt
+
+	* Reverse bone rendering direction option <-- --->  large part to leaf
 
 	* Assertion dialog boxes with optional handling 
 	  ( many plugins cause asserts right now, and they're being reported 
