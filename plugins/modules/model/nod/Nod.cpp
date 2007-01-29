@@ -473,7 +473,7 @@ bool Nod::save(const char *filename)
 #include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/TextureABI.h>
-#include <freyja/LegacyABI.h>
+#include <freyja/MaterialABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/freyja.h>
 #include <mstl/Vector.h>
@@ -545,24 +545,28 @@ int freyja_model__nod_import(char *filename)
 	char name[64];
 	Matrix matrix;
 	vec3_t pos, rot;
-	index_t vertex, skeleton, bone;
+	index_t skeleton, bone;
 
 
 	if (!nod.load(filename))
 		return -1;
 
 	//unsigned int matMap[nod.header1.NumMaterials];
-				  
-	freyjaBegin(FREYJA_MODEL);
 
+	index_t model = freyjaModelCreate();
+				  
 	for (i = 0; i < nod.header1.NumMaterials; i++)
 	{
-		freyjaBegin(FREYJA_MATERIAL);
-		freyjaTextureCreateFilename(nod.materials[i].MaterialName);
-		freyjaEnd();
+		index_t materialIndex = freyjaMaterialCreate();
+		freyjaMaterialName(materialIndex, nod.materials[i].MaterialName);
+
+		// Texture ID will be overwritten if exists and loads
+		freyjaMaterialTexture(materialIndex, i);
+		freyjaMaterialTextureName(materialIndex, nod.materials[i].MaterialName);
 	}
 
 	skeleton = freyjaSkeletonCreate();
+	freyjaModelAddSkeleton(model, skeleton);
 
 	for (b = 0; b < nod.header2.NumBones; ++b)
 	{
@@ -570,8 +574,8 @@ int freyja_model__nod_import(char *filename)
 		nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
 
 		rot[0] = HEL_DEG_TO_RAD(rot[0]);
-		rot[1] = HEL_DEG_TO_RAD(rot[1]);
-		rot[2] = HEL_DEG_TO_RAD(rot[2]);
+		rot[1] = HEL_DEG_TO_RAD(rot[2]);
+		rot[2] = HEL_DEG_TO_RAD(rot[1]);
 
 		bone = freyjaBoneCreate(skeleton); // transb[]
 		freyjaSkeletonAddBone(skeleton, bone);
@@ -580,10 +584,11 @@ int freyja_model__nod_import(char *filename)
 		freyjaBoneName(bone, name);
 		freyjaBoneTranslate3f(bone, 
 							  nod.bones[b].RestTranslate[0]*scale,
-							  nod.bones[b].RestTranslate[1]*scale,
-							  nod.bones[b].RestTranslate[2]*scale);
+							  nod.bones[b].RestTranslate[2]*scale,
+							  nod.bones[b].RestTranslate[1]*scale);
 		freyjaBoneRotateEuler3fv(bone, rot);
-		
+
+#if 0		
 		if (b == 0)
 		{
 			freyjaBoneTranslate3f(bone,
@@ -593,13 +598,14 @@ int freyja_model__nod_import(char *filename)
 			freyjaBoneRotateEuler3f(bone, 
 			                       rot[0] - HEL_DEG_TO_RAD(90), rot[2] + HEL_DEG_TO_RAD(180), rot[1]);
 		}
+#endif
 
 		freyjaPrintMessage("bone[%i].rotate = %f %f %f", b, 
 						   rot[0], rot[1], rot[2]);
 		freyjaPrintMessage("bone[%i].translate = %f %f %f", b, 
 						   nod.bones[b].RestTranslate[0],
-						   nod.bones[b].RestTranslate[1],
-						   nod.bones[b].RestTranslate[2]);
+						   nod.bones[b].RestTranslate[2],
+						   nod.bones[b].RestTranslate[1]);
 		freyjaPrintMessage("bone[%i].parent = %i", b, nod.bones[b].ParentID);
 		freyjaPrintMessage("bone[%i].child = %i", b, nod.bones[b].ChildID);
 		freyjaPrintMessage("bone[%i].sibling = %i\n", b, nod.bones[b].SiblingID);
@@ -611,63 +617,78 @@ int freyja_model__nod_import(char *filename)
 		}
 	}
 
+	// Create mesh
+	index_t mesh = freyjaMeshCreate();
+	freyjaModelAddMesh(model, mesh);
 
 	for (i = 0; i < nod.header2.NumGroups; ++i)
 	{  
-		// Start a new mesh
-		freyjaBegin(FREYJA_MESH);
-    
-		// Start a new vertex group
-		freyjaBegin(FREYJA_VERTEX_GROUP);
-
 		for (j = 0; j < nod.mesh_groups[i].NumVertices; j++)
 		{
+			bone = nod.vertices[num_verts + j].BoneNum;
+
+			// Store vertices and texels in group
+#if 0
 			pos[0] = nod.vertices[num_verts + j].Pos[0];
 			pos[1] = nod.vertices[num_verts + j].Pos[1];
 			pos[2] = nod.vertices[num_verts + j].Pos[2];
-		
-			b = nod.vertices[j].BoneNum;
-		
+
 			nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
-			
 			matrix.setIdentity();
 			matrix.translate(nod.bones[b].RestTranslate[0],
 							 nod.bones[b].RestTranslate[1],
 							 nod.bones[b].RestTranslate[2]);
 			matrix.rotate(rot[0], rot[1], rot[2]);
 			//matrix.multiply3v(pos, pos);
-		
-			// Store vertices and texels in group
-			vertex = freyjaVertexCreate3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
+
+			index_t vertex = freyjaVertexCreate3f(pos[0]*scale, pos[2]*scale, pos[1]*scale);	
 			freyjaVertexNormal3fv(vertex, nod.vertices[num_verts + j].Norm);
 			freyjaVertexTexcoord2f(vertex,
 								   nod.vertices[num_verts + j].UV[0],
 								   1.0 - nod.vertices[num_verts + j].UV[1]);
+#else
+			Vec3 p(nod.vertices[num_verts + j].Pos[0],
+				   nod.vertices[num_verts + j].Pos[2],
+				   nod.vertices[num_verts + j].Pos[1]);
+			p *= scale;
+			index_t vertex = freyjaMeshVertexCreate3fv(mesh, p.mVec);
+
+			float w = nod.vertices[num_verts + j].Weight;
+			freyjaMeshVertexWeight(mesh, vertex, bone, w);
+
+			if (w < 1.0f)
+			{
+				index_t parent = nod.bones[bone].ParentID;
+				freyjaMeshVertexWeight(mesh, vertex, parent, 1.0f-w);
+			}
+
+			freyjaMeshVertexNormal3fv(mesh, vertex, nod.vertices[num_verts + j].Norm);
+			p = Vec3(nod.vertices[num_verts + j].UV[0],
+					1.0 - nod.vertices[num_verts + j].UV[1], 0.0f);
+			freyjaMeshVertexTexCoord3fv(mesh, vertex, p.mVec);
+#endif
+
 			vertices.pushBack(vertex);
 		}
-		
-		freyjaEnd(); // FREYJA_GROUP
 
 		for (j = 0; j < nod.mesh_groups[i].NumFaces; j++)
 		{
 			// Start a new polygon
-			freyjaBegin(FREYJA_POLYGON);
-			freyjaPolygonVertex1i(vertices[nod.faces[num_faces+j].indices[0]]);
-			freyjaPolygonVertex1i(vertices[nod.faces[num_faces+j].indices[1]]);
-			freyjaPolygonVertex1i(vertices[nod.faces[num_faces+j].indices[2]]);
-			freyjaPolygonMaterial1i(0);
-			freyjaEnd(); // FREYJA_POLYGON
+			index_t face = freyjaMeshPolygonCreate(mesh);
+			freyjaMeshPolygonMaterial(mesh, face, i);
+			freyjaMeshPolygonGroup1u(mesh, face, i+1);
+
+			for (uint32 k = 0; k < 3; ++k)
+			{
+				freyjaMeshPolygonAddVertex1i(mesh, face, vertices[nod.faces[num_faces+j].indices[k]]);
+			}
 		}
-		
-		freyjaEnd(); // FREYJA_MESH
 
 		vertices.clear();
 
 		num_verts += nod.mesh_groups[i].NumVertices;
 		num_faces += nod.mesh_groups[i].NumFaces;
 	}
-
-	freyjaEnd(); // FREYJA_MODEL
 
 	return 0;
 }
