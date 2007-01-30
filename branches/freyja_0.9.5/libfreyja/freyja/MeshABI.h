@@ -98,6 +98,12 @@ extern "C" {
 	 * Post : Vertex based normal setting.
 	 ------------------------------------------------------*/
 
+	void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t vert, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> texcoord.
+	 ------------------------------------------------------*/
+
 	index_t freyjaMeshTexCoordCreate2fv(index_t mesh, vec2_t uv);
 	/*------------------------------------------------------
 	 * Pre  : 

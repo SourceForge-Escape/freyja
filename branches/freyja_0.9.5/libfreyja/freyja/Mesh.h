@@ -237,6 +237,20 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	// FIXME: Enable depth sorting for fAlpha faces
+	//        and put them at the end of the list
+	//void UpdateDepthSortedFaces(const Ray &obs);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	//Vector<index_t> &GetDepthSortedFaces() { return mDepthSortedFaces; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	uint32 GetFaceCount() { return mFaces.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 

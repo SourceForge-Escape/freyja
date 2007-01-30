@@ -16,7 +16,9 @@
  A
  ----------------------------
 
- * WIN32 python lib is very unstable ( like that's my problem )  ;)
+ * Group (faces) selection is broken
+
+ * WIN32 python lib is very unstable - need to replace it with ming bin
 
  * Faces... can't Select/UnSelect/etc which would make sense
 

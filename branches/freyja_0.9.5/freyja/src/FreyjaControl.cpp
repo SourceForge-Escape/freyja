@@ -6386,16 +6386,21 @@ void eSetSelectedFacesAlpha()
 
 	if (m)
 	{
-		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+		freyja_print("Selected faces alpha flag enabled.");
+		m->SetFlagForSelectedFaces(Face::fAlpha);
+		freyja_event_gl_refresh();
+	}
+}
 
-		if (group > 24)
-		{
-			freyja_print("Make sure only one group is toggled while assigning");
-			return;
-		}
 
-		freyja_print("Selected faces removed from smoothing group (%i).",group);
-		m->SelectedFacesMarkSmoothingGroup(group, false);
+void eClearSelectedFacesAlpha()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		freyja_print("Selected faces alpha flag enabled.");
+		m->ClearFlagForSelectedFaces(Face::fAlpha);
 		freyja_event_gl_refresh();
 	}
 }
@@ -6416,10 +6421,10 @@ void eGroupAssign()
 		}
 
 		freyja_print("Selected faces assigned to smoothing group (%i).", group);
-		m->SelectedFacesMarkSmoothingGroup(group, 1);
+		m->SelectedFacesMarkSmoothingGroup(group, true);
 
 		// Go ahead and update the vertex normals here automatically for now
-		m->GroupedFacesGenerateVertexNormals(group);
+		//m->GroupedFacesGenerateVertexNormals(group);
 		freyja_event_gl_refresh();
 	}
 }
@@ -6601,7 +6606,6 @@ void eCleanupVertices()
 void FreyjaControlEventsAttach()
 {
 	ResourceEventCallback2::add("eEnableMaterialFragment", &eNopControl);
-	ResourceEventCallback2::add("eCurrentFaceFlagAlpha", &eNopControl);
 	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
 	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);
  
@@ -6609,6 +6613,9 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
 
 	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
+
+	ResourceEventCallback::add("eSetSelectedFacesAlpha", &eSetSelectedFacesAlpha);
+	ResourceEventCallback::add("eClearSelectedFacesAlpha", &eClearSelectedFacesAlpha);
 
 	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
 	ResourceEventCallback::add("eClearWeight", &eClearWeight);

@@ -77,14 +77,14 @@ bool BSAPakReader::CheckMagic(const char *filename)
 	}
 
 	r.SetOffset(0);
-	r.ReadBuffer(4, mMagic);
+	r.ReadString(4, mMagic);
 	mVersion = r.ReadLong();
 	r.Close();
 
-	if (mMagic == 'B' && 
-		mMagic == 'S' && 
-		mMagic == 'A' && 
-		mMagic == '\0' &&
+	if (mMagic[0] == 'B' && 
+		mMagic[1] == 'S' && 
+		mMagic[2] == 'A' && 
+		mMagic[3] == '\0' &&
 		mVersion == BSA_OBLIVION)
 	{
 		return true;
@@ -186,6 +186,7 @@ bool BSAPakReader::LoadMorrowind(const char *filename)
 
 bool BSAPakReader::LoadOblivion(const char *filename)
 {
+#if 0
 	SystemIO::FileReader r;
 	char buffer[128];
 	long i, j, base;
@@ -198,24 +199,24 @@ bool BSAPakReader::LoadOblivion(const char *filename)
 
 	r.SetByteOrder(SystemIO::File::LITTLE);
 
-	r.ReadBuffer(4, mHeader.mMagic);
-	mHeader.mVersion = r.ReadLong();
+	r.ReadString(4, mHeader.mMagic);
+	mOblivionHeader.mVersion = r.ReadLong();
 
-	if (mHeader.mMagic != 'B' || 
-		mHeader.mMagic != 'S' || 
-		mHeader.mMagic != 'A' || 
-		mHeader.mMagic != '\0' || 
-		mHeader.mVersion != BSA_OBLIVION)
+	if (.mMagic[0] != 'B' || 
+		.mMagic[1] != 'S' || 
+		.mMagic[2] != 'A' || 
+		.mMagic[3] != '\0' || 
+		.mVersion != BSA_OBLIVION)
 	{
 		return false;
 	}
 
-	mHeader.mTableOffset = r.ReadLong();
-	mHeader.mFileCount = r.ReadLong();
+	mOblivionHeader.mTableOffset = r.ReadLong();
+	mOblivionHeader.mFileCount = r.ReadLong();
 
-	mTable = new BSATable[mHeader.mFileCount];
+	mTable = new BSATable[mOblivionHeader.mFileCount];
 
-	for (i = 0; i < mHeader.mFileCount; ++i)
+	for (i = 0; i < mOblivionHeader.mFileCount; ++i)
 	{
 		mTable[i].mSize = r.ReadLong();
 		mTable[i].mOffset = r.ReadLong();
@@ -253,6 +254,9 @@ bool BSAPakReader::LoadOblivion(const char *filename)
 	mDataOffset = r.GetOffset();
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 
@@ -509,23 +513,10 @@ void freyja_init()
 
 int freyja_model__bsa_check(char *filename)
 {
-	SystemIO::FileReader r;
-	long version;
+	BSAPakReader bsa;
 
-
-	if (!r.Open(filename))
-	{
-		return false;
-	}
-
-	r.SetByteOrder(SystemIO::File::LITTLE);
-
-	version = r.ReadLong();
-
-	if (version != BSA_VERSION)
+	if (!bsa.CheckMagic(filename))
 		return -1;
-
-	r.Close();
 
 	return 0;
 }
@@ -548,7 +539,7 @@ int freyja_model__bsa_import(char *filename)
 	long i, pakIndex;
 
 
-	if (bsa.load(filename))
+	if (bsa.Load(filename))
 	{
 		pakIndex = freyjaPakBegin(filename);
 
