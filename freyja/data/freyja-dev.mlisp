@@ -193,8 +193,8 @@
 				(menu_item "_Unselect faces"		eMeshUnselectFaces)
 				(menu_item "_Smoothing groups"		eSmoothingGroupsDialog)
 				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
-				(menu_item "Clear alpha"	eNone)
-				(menu_item "Set alpha"		eNone)
+				(menu_item "Clear alpha"	eClearSelectedFacesAlpha)
+				(menu_item "Set alpha"		eSetSelectedFacesAlpha)
 				(menu_item "Mirror _X"		eMirrorFacesX)
 				(menu_item "Mirror _Y"		eMirrorFacesY)
 				(menu_item "Mirror _Z"		eMirrorFacesZ)
@@ -682,7 +682,8 @@
 						(button "PolyMap"	eEvent	ePolyMapTexturePolygon)
 						(button "Mirror X" eEvent eMirrorUV_X)
 						(button "Mirror Y" eEvent eMirrorUV_Y)
-						(button "Flag alpha" eEvent eCurrentFaceFlagAlpha))))
+						(button "Flag alpha" eEvent eSetSelectedFacesAlpha)
+						(button "Unflag alpha" eEvent eClearSelectedFacesAlpha))))
 
 
 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

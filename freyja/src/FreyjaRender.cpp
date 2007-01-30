@@ -133,13 +133,13 @@ FreyjaRender::FreyjaRender() :
 		mColors[ 6][i] = DARK_YELLOW[i];
 		mColors[ 7][i] = DARK_BLUE[i];
 		mColors[ 8][i] = ORANGE[i];  // FIXME, needs more colors
-		mColors[ 9][i] = YELLOW[i];
-		mColors[10][i] = YELLOW[i];
-		mColors[11][i] = YELLOW[i];
-		mColors[12][i] = YELLOW[i];
-		mColors[13][i] = YELLOW[i];
-		mColors[14][i] = YELLOW[i];
-		mColors[15][i] = YELLOW[i];
+		mColors[ 9][i] = YELLOW[i]*0.25;
+		mColors[10][i] = YELLOW[i]*0.50;
+		mColors[11][i] = GREEN[i]*0.25;
+		mColors[12][i] = GREEN[i]*0.50;
+		mColors[13][i] = YELLOW[i]*0.75;
+		mColors[14][i] = GREEN[i]*0.75;
+		mColors[15][i] = PINK[i]*0.50;
 	}
 
 	mSingleton = this;

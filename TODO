@@ -7,32 +7,28 @@
  Hot  
  -----------------------------------------------------------------------------
 
-	* FPS cap setting in mlisp
+	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
 
-	* Mark face alpha in UV / selected faces ( For depth sorting list )
-
-	* SMD plugin option to save mesh prompt
-
-	* Reverse bone rendering direction option <-- --->  large part to leaf
-
-	* Assertion dialog boxes with optional handling 
-	  ( many plugins cause asserts right now, and they're being reported 
-		as crashes )
+	* Assertion dialog boxes with optional handling control
+	  ( Many asserts are being reported as crashes right now )
 
 	* Bones and bone transforms in same units!
 		- Also finalize delta vs abs
 
 	* Import/Export submenus like the Plugins.. submenu
+		- SMD plugin option to save mesh prompt
 		- Selection mask support
 		- Flags for disabling mesh/skeleton/animations/etc
 		- File dialogs should be able to handle 
 		  *.ms3d and auto append instead of doing *.milkshape
 
-	# Rotation cursor fixes for rendering vs actual transform.
-	# Multi-object modes might get a new UI design to avoid confusing the user.
-	# Basic geometry previews will use blend vertices buffer to avoid changing actual data.
-	# Hook up UV transforms, and flesh them out.
-	# Update the ABI with new transforms, and avoid doing transform algorithms in client.
+	* Rotation cursor fixes for rendering vs actual transform
+
+	* Multi-object modes might get a new UI design to avoid confusing the user
+
+	* Basic geometry previews will use blend vertices buffer to avoid changing actual data
+
+	* Update the ABI with new transforms, and avoid doing transform algorithms in client.
 
 	* Single joint animation for shishi odoshi test
 		- Visualize weights over skinned mesh
@@ -47,6 +43,7 @@
 		  ( Letting the user move selected points in vertex mode )
 		- Ref weights from vertex to fix blending issues
 		- ZIP file based pak format for freyja format models w/ textures, etc
+		- Rendering support for alpha flagged faces ( partial depth sorting )
 
 	* Misc
 		- Move all transforms in UI to ::Transform and hook-up undo/redo for all
@@ -67,6 +64,7 @@
 			- Shaders can use them for normal maps, gloss, data, etc
 
 	* To be finalized
+		- Hook up UV transforms, and flesh them out.
 		- Track and Keyframe classes 
 			- Keyframe vector issue
 		- Add Meld/fMuted support for Vertex operations in Mesh
@@ -216,6 +214,8 @@
 
  Misc
  ----------------------------------------------------------------------------
+
+	* Reverse bone rendering direction option <-- --->  large part to leaf
 
 	* Refactor to use true singletons/other patterns where systems require
 

@@ -39,7 +39,30 @@
 class BSAPakReader
 {
  public:
-	
+
+	class OblivionBSAFolderRecord
+	{
+	public:
+		char *mHash;
+		unsigned long mCount;
+		unsigned long mOffset;
+	};
+
+	class OblivionBSAFileRecord
+	{
+	public:
+		char *mHash;
+		unsigned long mSize;
+		unsigned long mOffset;
+	};
+
+	class OblivionBSAFileRecordBlock
+	{
+	public:
+		char *mName;
+		OblivionBSAFileRecord *mFileRecords;
+		unsigned long mCount; // not saved to disk
+	};	
 
 	class OblivionBSAHeader
 	{
@@ -85,18 +108,16 @@ class BSAPakReader
 		
 		unsigned long mFileFlags;
 
-		FolderRecord *mFolderRecords; // mFolderCount
-		FileRecordBlock *mFileRecordBlocks;
+		OblivionBSAFolderRecord *mFolderRecords; // mFolderCount
+		OblivionBSAFileRecordBlock *mFileRecordBlocks;
 		// FileNameBlock // All the C style strings appended to each other with NULL termination between each entry
 		// Files // Raw data, if compressed will have compressed file block
 	};
 
 
-	class OblivionBSAFolderRecord
-	{
-	public:
-		
-	};
+
+
+	// Morrowind
 
 	class BSAHeader
 	{
@@ -202,6 +223,23 @@ class BSAPakReader
 	 * 2005.01.02:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
+
+	bool LoadMorrowind(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool LoadOblivion(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	OblivionBSAHeader mOblivionHeader;
+
 
 	BSAHeader mHeader;
 

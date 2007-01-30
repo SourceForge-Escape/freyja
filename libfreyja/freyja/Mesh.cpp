@@ -1613,10 +1613,12 @@ void Mesh::ClearGroupsFaceSelected(uint32 groups)
 	{
 		Face *face = GetFace(f);
 
-		// We only consider facets in given group(s)...
-		if (face && groups & face->mSmoothingGroup)
+		// We only consider facets in given group
+		if (face && groups & (1<<face->mSmoothingGroup))
+			// No longer use bitflaged groups
+			//groups & face->mSmoothingGroup)
 		{
-			face->mFlags ^= Face::fSelected;
+			face->mFlags &= ~Face::fSelected;
 		}
 	}
 }
@@ -1629,7 +1631,9 @@ void Mesh::SetGroupsFaceSelected(uint32 groups)
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group(s)...
-		if (face && groups & face->mSmoothingGroup)
+		if (face && groups & (1<<face->mSmoothingGroup))
+			// No longer use bitflaged groups
+			//groups & face->mSmoothingGroup)
 		{
 			face->mFlags |= Face::fSelected;
 		}

@@ -10,6 +10,9 @@
 
  Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Nod plugin update: removed legacy mesh, fixes mats/weights/groups/etc
+ - Mark face alpha in UV / selected faces ( For depth sorting list )
+ - niflib ported to gcc
  - New libfreyja win32 and win32-python build rules
  - mgtk resource path callback fix for win32
  - Python script UI plugin for freyja
