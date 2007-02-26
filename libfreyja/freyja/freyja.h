@@ -307,6 +307,14 @@ extern "C" {
 	 *        Returns 0 on sucess
 	 ------------------------------------------------------*/
 
+	int32 freyjaExportModelByModule(const char *filename, const char *module);
+	/*------------------------------------------------------
+	 * Pre  : <filename> - Filename of the model to be exported
+	 *        <module> - Filename of the module to use
+	 * Post : Exports model using the exact module passed in...
+	 *        Returns 0 on sucess
+	 ------------------------------------------------------*/
+
 	int32 freyjaExportModel(const char *filename, const char *type);
 	/*------------------------------------------------------
 	 * Pre  : type is module basename eg 'md5.so' -> 'md5'

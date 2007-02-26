@@ -121,6 +121,12 @@ bool ResourceEvent::action(char *value)
 }
 
 
+bool ResourceEvent::action(char *value, char *value2)
+{
+	return false;
+}
+
+
 bool ResourceEvent::action(mgtk_mouse_event_t &e)
 {
 	return false;
@@ -239,6 +245,19 @@ bool ResourceEvent::listen(unsigned long event, char *value)
 	if (e)
 	{
 		return e->action(value);
+	}
+
+	return false;
+}
+
+
+bool ResourceEvent::listen(unsigned long event, char *value, char *value2)
+{
+	ResourceEvent *e = getEventById(event);
+
+	if (e)
+	{
+		return e->action(value, value2);
 	}
 
 	return false;

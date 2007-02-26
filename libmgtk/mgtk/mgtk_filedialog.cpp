@@ -81,18 +81,49 @@ void mgtk_event_file_dialog(int event, char *title)
 }
 
 
+const char *mgtk_event_fileselection_get_filter_name(int event)
+{
+	GtkFileChooser *chooser = GTK_FILE_CHOOSER(mgtk_get_fileselection_widget(event));
+	GtkFileFilter *filter = gtk_file_chooser_get_filter(chooser);
+
+	return filter ? gtk_file_filter_get_name(filter) : NULL;
+}
+
+
 void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
-{ 
+{
+	// This is a stupid guard, for stupid polling causing 1+n events
+	// during filechooser actions
+	static int poorman = 0;
+
+	if (poorman == 1)
+		return;
+
+	poorman = 1;
+
 	GtkWidget *file = mgtk_get_fileselection_widget(GPOINTER_TO_INT(user_data));
 	char *filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
 	int event = GPOINTER_TO_INT(user_data);
 
-	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
+	GtkFileFilter *filter = gtk_file_chooser_get_filter(GTK_FILE_CHOOSER(file));
+	char *name = filter ? (char *)gtk_file_filter_get_name(filter) : NULL;
+	//printf("*** '%s'\n", name);
+
+
+	if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
+	{
+	}
+	else if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename, name))
+	{
+	}
+	else
 	{
 		mgtk_handle_text(event, filename);
 	}
 
 	gtk_widget_hide(file);
+
+	poorman = 0;
 }
 
 

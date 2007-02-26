@@ -102,6 +102,7 @@ class ResourceEvent
 	virtual bool action(float value);
 	virtual bool action(float *value, unsigned long size);
 	virtual bool action(char *value);
+	virtual bool action(char *value, char *value2);
 	virtual bool action(mgtk_mouse_event_t &mouse_event);
 	virtual bool action(void (*func)());
 	virtual bool action(void (*func)(mgtk_mouse_event_t &));
@@ -127,6 +128,7 @@ class ResourceEvent
 	static bool listen(unsigned long event, float value);
 	static bool listen(unsigned long event, float *value, unsigned long size);
 	static bool listen(unsigned long event, char *value);
+	static bool listen(unsigned long event, char *value, char *value2);
 	static bool listen(unsigned long event, mgtk_mouse_event_t &mouse_event);
 	static bool listen(unsigned long event, void (*func)());
 	static bool listen(unsigned long event, void (*func)(mgtk_mouse_event_t &));
@@ -444,6 +446,52 @@ public:
 private:
 
 	void (*mHandler)(char*);       /* Function pointer callback */
+};
+
+
+class ResourceEventCallbackString2 : public ResourceEvent
+{
+public:
+
+	ResourceEventCallbackString2(const char *name, void (*func)(char*, char*)) : ResourceEvent(name)
+	{
+		setHandler(func);
+	}
+
+	static void add(const char *name, void (*func)(char*, char*))
+	{
+		ResourceEventCallbackString2 *e = new ResourceEventCallbackString2(name, func);
+
+		if (e)
+		{
+		}
+	}
+
+	virtual bool action()
+	{
+		return false;
+	}
+
+	virtual bool action(char *value, char *value2)
+	{
+		if (mHandler)
+		{
+			(*mHandler)(value, value2);
+			return true;
+		}
+
+		return false;
+	}
+
+	void setHandler(void (*func)(char*, char*))
+	{
+		mHandler = func;
+	}
+
+
+private:
+
+	void (*mHandler)(char*, char*);       /* Function pointer callback */
 };
 
 

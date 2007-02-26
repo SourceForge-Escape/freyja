@@ -334,6 +334,12 @@ class FreyjaControl
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	bool SaveModel(const char *filename, const char *plugin);
+	/*------------------------------------------------------
+	 * Pre  : Writes model to disk
+	 * Post : Returns true if sucessful
+	 ------------------------------------------------------*/
+
 	bool SaveModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Writes model to disk

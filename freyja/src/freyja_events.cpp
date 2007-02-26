@@ -413,7 +413,18 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 ///////////////////////////////////////////////////////////////////////
 
 #if defined (WIN32) || (MACOSX)
+
+const char *mgtk_get_resource_path_callback()
+{
+	static String s;
+ 
+	s = freyja_get_resource_path(); // in case it's changed somehow
+
+	return s.c_str();
+}
+
 #else
+
 void mgtk_print(char *format, ...)
 {
 	va_list args;
@@ -540,12 +551,8 @@ char *mgtk_rc_map(char *filename_or_dirname)
 	return freyja_rc_map(filename_or_dirname);
 }
 
-// Temp hack, until we can get WIN32 and UNIX on same link system
-#ifdef WIN32
-const char *freyja_get_resource_path()
-#else
-const char *mgtk_get_resource_path()
-#endif
+
+const char *mgtk_get_resource_path_callback()
 {
 	static String s;
  
@@ -1732,7 +1739,7 @@ int main(int argc, char *argv[])
 	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
 	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
 	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
-	mgtk_win32_import("win32_mgtk_get_resource_path", (void*)freyja_get_resource_path);
+	mgtk_win32_import("win32_mgtk_get_resource_path", (void*)mgtk_get_resource_path_callback);
 #endif
 
 	/* Hookup resource to event system */

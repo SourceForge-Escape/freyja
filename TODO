@@ -7,6 +7,17 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* Import/export plugin changes
+		- FreyjaType flags usage ( eg mesh only, mesh+skeleton, etc )
+		- Freyja selection usage ( eg export selected )
+		- Optional memory buffer usage instead of file/url ( great for paks )
+		- These could be setup inside of per plugin preferences, so
+		  the ABI doesn't have to change ala states 
+
+	* Texture buffer array per material improvements ( allows better shaders )
+
+	* Use tree for scene graph with mesh/skel.bone/mats
+
 	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
 
 	* Assertion dialog boxes with optional handling control

@@ -175,6 +175,14 @@ public:
 		}
 	}
 
+	void SetName(const char *name)
+	{
+		if (name && name[0])
+		{
+			mName = name;
+		}
+	}	
+
 	void SetDescription(const char *s) { mDescription = s; }
 
 	void SetExtention(const char *s) { mExtention = s; }

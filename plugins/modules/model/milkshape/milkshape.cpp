@@ -46,10 +46,12 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("milkshape");
 	freyjaPluginDescription1s("Milkshape Model (*.ms3d)");
 	freyjaPluginAddExtention1s("*.ms3d");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginArg1f("scale", 0.4f);
 }
 
 
@@ -284,11 +286,14 @@ int freyja_model__milkshape_check(char *filename)
 
 int freyja_model__milkshape_import(char *filename)
 {
-	const vec_t scale = 0.4f; 
 	SystemIO::BufferedFileReader r;
 	Ms3dModel mdl;
 	long i, j, k;
 
+	int pluginId = freyjaGetPluginId();
+
+	vec_t scale = 0.4f;
+	freyjaGetPluginArg1f(pluginId, "scale", &scale);
 
 	if (freyja_model__milkshape_check(filename))
 		return -1;
@@ -581,7 +586,6 @@ int freyja_model__milkshape_import(char *filename)
 
 int freyja_model__milkshape_export(char *filename)
 {
-	const vec_t scale = 2.5;
 	SystemIO::FileWriter w;
 	char name[128];
 	long modelIndex = 0;    // make plugin option
@@ -593,6 +597,11 @@ int freyja_model__milkshape_export(char *filename)
 	vec3_t xyz;
 	//vec2_t uv;
 
+	int pluginId = freyjaGetPluginId();
+
+	vec_t scale = 2.5f;
+	freyjaGetPluginArg1f(pluginId, "scale", &scale);
+	scale = 1.0f / scale;	
 
 	if (!w.Open(filename))
 	{

@@ -38,7 +38,7 @@
 #include "Plugin.h"
 
 mstl::Vector<freyja::PluginDesc *> gFreyjaPlugins;
-mstl::Vector<char *> gPluginDirectories;
+mstl::Vector<mstl::String> gPluginDirectories;
 mstl::Vector<mstl::String> gImagePluginDirectories;
 int32 gCurrentFreyjaPlugin = -1;
 
@@ -53,13 +53,13 @@ mstl::Vector<freyja::PluginDesc *> &freyjaGetPluginDescriptions()
 }
 
 
-mstl::Vector<char *> &freyjaGetPluginDirectories()
+mstl::Vector<mstl::String> &freyjaGetPluginDirectories()
 {
 	return gPluginDirectories;
 }
 
 
-freyja::PluginDesc *freyjaGetPluginClassByName(const char *name)
+freyja::PluginDesc *freyjaGetPluginClassByFilename(const char *name)
 {
 	long i, l;
 
@@ -129,16 +129,11 @@ void freyjaPluginAddDirectory(const char *dir)
 	uint32 i;
 	foreach(gPluginDirectories, i)
 	{
-		if (!strcmp(gPluginDirectories[i], dir))
+		if (!strcmp(gPluginDirectories[i].c_str(), dir))
 			return;
 	}
 
-	unsigned int l = strlen(dir);
-	char *dir2 = new char[l+1];
-	strncpy(dir2, dir, l);
-	dir2[l] = 0;
-
-	gPluginDirectories.pushBack(dir2);
+	gPluginDirectories.pushBack(dir);
 }
 
 
@@ -171,15 +166,15 @@ void freyjaPluginsInit()
 {
 #ifdef FREYJA_PLUGINS
 	SystemIO::FileReader reader;
+	mstl::String module;
 	freyja::PluginDesc plugin;
 	const char *module_filename;
-	void (*import)();
+	void (*init)();
 	void *handle;
 	unsigned int i;
 
 
 	gFreyjaPlugins.erase();
-
 
 	freyjaPluginBegin();
 	freyjaPluginDescription1s("All files (*.*)");
@@ -221,10 +216,11 @@ void freyjaPluginsInit()
 						 FREYJA_PLUGIN_VERTEX_MORPHING);
 	freyjaPluginEnd();
 
+
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
-		if (!reader.OpenDir(gPluginDirectories[i]))
+		if (!reader.OpenDir(gPluginDirectories[i].c_str()))
 		{
 			freyjaPrintError("Couldn't access plugin directory[%d].", i);
 			continue;
@@ -244,36 +240,21 @@ void freyjaPluginsInit()
 			}
 
 			freyjaPrintMessage("Module '%s' invoked.", module_filename);
+			handle = freyjaModuleLoad(module_filename);
 
-			if (!(handle = freyjaModuleLoad(module_filename)))
-//dlopen(module_filename, RTLD_NOW)))
+			if (handle)
 			{
-				//freyjaPrintError("In module '%s'.", module_filename);
-				
-				//if ((error = dlerror()) != NULL)  
-				//{
-				//	freyjaPrintError("%s", error);
-				//}
+				init = (void (*)())freyjaModuleImportFunction(handle, "freyja_init");
 
-				continue; /* Try the next plugin, after a bad module load */
-			}
-			else
-			{
-				import = (void (*)())freyjaModuleImportFunction(handle, "freyja_init");
-				//import = (void (*)())dlsym(handle, "freyja_init");
-
-				if (!import)
-				//if ((error = dlerror()) != NULL)  
+				if (!init)
 				{
 					freyjaModuleUnload(handle);
-					//freyjaPrintError("%s", error);
-					//dlclose(handle);
 					continue;
 				}
 
 				freyjaPluginBegin();
 				freyjaPluginFilename1s(module_filename);
-				(*import)();
+				(*init)();
 				freyjaPluginEnd();
 
 				freyjaModuleUnload(handle);
@@ -303,16 +284,7 @@ void freyjaPluginsInit()
 
 int32 freyjaImportModel(const char *filename)
 {
-#ifdef FREYJA_PLUGINS
 	SystemIO::FileReader reader;
-	bool loaded = false, done = false;
-	const char *module_filename;
-	int (*import)(char *filename);
-	void *handle;
-	unsigned int i;
-
-
-	freyjaPrintMessage("[FreyjaPlugin module loader invoked]");
 
 	if (!reader.DoesFileExist(filename))
 	{
@@ -393,10 +365,21 @@ int32 freyjaImportModel(const char *filename)
 		return -1;
 	}
 
+
+#ifdef FREYJA_PLUGINS
+	bool loaded = false, done = false;
+	const char *module_filename;
+	int (*import)(char *filename);
+	void *handle;
+	unsigned int i;
+
+
+	freyjaPrintMessage("[FreyjaPlugin module loader invoked]");
+
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
-		if (!reader.OpenDir(gPluginDirectories[i]))
+		if (!reader.OpenDir(gPluginDirectories[i].c_str()))
 		{
 			freyjaPrintError("Couldn't access plugin directory[%d].", i);
 			continue;
@@ -445,7 +428,7 @@ int32 freyjaImportModel(const char *filename)
 				}
 
 
-				freyja::PluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
+				freyja::PluginDesc *plug = freyjaGetPluginClassByFilename(module_filename); 
 
 				if (plug)
 					gCurrentFreyjaPlugin = plug->GetId(); 
@@ -475,58 +458,15 @@ int32 freyjaImportModel(const char *filename)
 	freyjaPrintMessage("[FreyjaPlugin module loader sleeps now]\n");
 
 	if (loaded)
-		return 0; // sucess
-#else
-	SystemIO::FileReader reader;
-
-	if (!reader.doesFileExist(filename))
-	{
-		freyjaPrintError("File '%s' couldn't be accessed.", filename);
-		return -1;
-	}
-
-	/* Check for native freyja JA format */
-	if (freyjaCheckModel(filename) == 0)
-	{
-		if (freyjaLoadModel(filename) == 0)
-			return 0;
-		
-		return -1;
-	}
-
-	/* Check for native egg format */
-	if (freyja__getEggBackend())
-	{
-		if (Egg::checkFile(filename) == 0)
-		{
-			if (freyja__getEggBackend()->loadFile(filename) == 0)
-			{
-				return 0;
-			}
-			else
-			{
-				return -1;
-			}
-		}
-	}
+		return 0; // success
 #endif
+
 	return -1;
 }
 
 
 int32 freyjaExportModel(const char *filename, const char *type)
 {
-#ifdef FREYJA_PLUGINS
-	SystemIO::FileReader reader;
-	bool saved = false;
-	char module_filename[256];
-	char module_export[128];
-	char *name;
-	int (*export_mdl)(char *filename);
-	void *handle;
-	unsigned long i;
-
-
 	if (!type || !filename)
 		return -100;
 
@@ -607,6 +547,17 @@ int32 freyjaExportModel(const char *filename, const char *type)
 		return 0;
 	}
 
+
+#ifdef FREYJA_PLUGINS
+	SystemIO::FileReader reader;
+	mstl::String module, symbol;
+	bool saved = false;
+	char *name;
+	int (*export_mdl)(char *filename);
+	void *handle;
+	unsigned long i;
+
+
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
 
 	name = (char*)type;
@@ -614,34 +565,30 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	/* Check for other format */
 	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
-		if (!reader.OpenDir(gPluginDirectories[i]))
+		if (!reader.OpenDir(gPluginDirectories[i].c_str()))
 		{
 			freyjaPrintError("Couldn't access plugin directory");
 			continue;
 		}
 
-#ifdef WIN32
-		snprintf(module_filename, 255, "%s/%s.dll", gPluginDirectories[i], name);
-#else
-		snprintf(module_filename, 255, "%s/%s.so", gPluginDirectories[i], name);
-#endif
-		module_filename[255] = 0;
-		snprintf(module_export, 127, "freyja_model__%s_export", name);  // use 'model_export'?
-		module_export[127] = 0;
+		module.Set("%s/%s%s", 
+				   gPluginDirectories[i].c_str(), name, 
+				   SystemIO::GetModuleExt());
+		symbol.Set("freyja_model__%s_export", name);
 
-		if (!(handle = freyjaModuleLoad(module_filename)))
+
+		if (!(handle = freyjaModuleLoad(module.c_str())))
 		{
-			snprintf(module_filename, 255, "%s/%s.py", gPluginDirectories[i], name);
-			module_filename[255] = 0;
-			freyjaPython1s(module_filename, "<symbol>ExportModel</symbol>", filename);
+			module.Set("%s/%s.py", gPluginDirectories[i].c_str(), name);
+			freyjaPython1s(module.c_str(), "<symbol>ExportModel</symbol>", filename);
 		}
 		else
 		{
-			freyjaPrintMessage("\tModule '%s' opened.\n", module_filename);
+			freyjaPrintMessage("\tModule '%s' opened.\n", module.c_str());
     
-			export_mdl = (int (*)(char * filename))freyjaModuleImportFunction(handle, module_export);
+			export_mdl = (int (*)(char * filename))freyjaModuleImportFunction(handle, symbol.c_str());
 
-			freyja::PluginDesc *plug = freyjaGetPluginClassByName(module_filename); 
+			freyja::PluginDesc *plug = freyjaGetPluginClassByFilename(module.c_str()); 
 
 			if (plug)
 				gCurrentFreyjaPlugin = plug->GetId(); 
@@ -662,21 +609,64 @@ int32 freyjaExportModel(const char *filename, const char *type)
 
 	if (saved)
 		return 0; // success
-#else
-	/* Check for native format or temp use of EGG here */
-	if (strcmp(type, "ja") == 0)
-	{
-		return freyjaSaveModel(filename); // FIXME: true or false needed?
-	}
-	else if (strcmp(type, "egg") == 0)
-	{
-		if (freyja__getEggBackend())
-		{
-			return freyja__getEggBackend()->saveFile(filename);
-		}
-	}
 #endif
+
 	return -1;
+}
+
+
+int32 freyjaExportModelByModule(const char *filename, const char *module)
+{
+#ifdef FREYJA_PLUGINS
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByFilename(module);
+
+	if (!plugin || !SystemIO::File::DoesFileExist(plugin->mFilename.c_str()))
+	{
+		freyjaPrintError("Module '%s' couldn't be found.", module);
+		return -1;
+	}
+												
+	String symbol = "freyja_model__";
+	symbol += plugin->mName;
+	symbol += "_export";
+
+	freyjaPrintError("! *** %s", symbol.c_str());
+
+	bool saved = false;
+	int (*export_func)(char *filename);
+	void *handle = freyjaModuleLoad(module);
+
+	if (handle)
+	{
+		freyjaPrintMessage("\tModule '%s' opened.\n", module);
+
+		export_func = (int (*)(char * filename))freyjaModuleImportFunction(handle, symbol.c_str());
+
+		gCurrentFreyjaPlugin = plugin->GetId(); 
+
+		if (export_func)
+			saved = (!(*export_func)((char*)filename));
+
+		gCurrentFreyjaPlugin = -1;
+
+		freyjaModuleUnload(handle);
+	}
+
+	return saved ? 0 : -2;
+#endif
+
+	return -1;
+}
+
+
+void freyjaPluginName(uint32 pluginIndex, const char *name)
+{
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);
+
+	if (plugin)
+	{
+		plugin->SetName(name);
+	}
 }
 
 
@@ -731,7 +721,6 @@ uint32 freyjaGetPluginCount()
 
 void freyjaPluginShutdown()
 {
-	gPluginDirectories.erase();
 	gFreyjaPlugins.erase();
 }
 
@@ -750,26 +739,37 @@ void freyjaPluginBegin()
 }
 
 
+void freyjaPluginName1s(const char *name)
+{
+	OBS_CALL(freyjaPluginName1s);
+	freyjaPluginName(gCurrentFreyjaPlugin, name);
+}
+
+
 void freyjaPluginDescription1s(const char *info_line)
 {
+	OBS_CALL(freyjaPluginDescription1s);
 	freyjaPluginDescription(gCurrentFreyjaPlugin, info_line);
 }
 
 
 void freyjaPluginAddExtention1s(const char *ext)
 {
+	OBS_CALL(freyjaPluginAddExtention1s);
 	freyjaPluginExtention(gCurrentFreyjaPlugin, ext);
 }
 
 
 void freyjaPluginImport1i(int32 flags)
 {
+	OBS_CALL(freyjaPluginImport1i);
 	freyjaPluginImportFlags(gCurrentFreyjaPlugin, flags);
 }
 
 
 void freyjaPluginExport1i(int32 flags)
 {
+	OBS_CALL(freyjaPluginExport1i);
 	freyjaPluginExportFlags(gCurrentFreyjaPlugin, flags);
 }
 

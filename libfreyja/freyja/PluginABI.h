@@ -61,6 +61,12 @@ extern "C" {
 	 *        search path list.
 	 ------------------------------------------------------*/
 
+	void freyjaPluginName(uint32 pluginIndex, const char *name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void freyjaPluginDescription(uint32 pluginIndex, const char *info_line);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -98,6 +104,12 @@ extern "C" {
 	 ------------------------------------------------------*/
 
 	void freyjaPluginBegin();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void freyjaPluginName1s(const char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -178,6 +190,7 @@ extern "C" {
 }
 
 #   if defined(__cplusplus) && defined(USING_FREYJA_CPP_ABI)
+#   include <mstl/String.h>
 #   include <freyja/Plugin.h>
 
     mstl::Vector<freyja::PluginDesc *> &freyjaGetPluginDescriptions();
@@ -186,13 +199,13 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-    mstl::Vector<char *> &freyjaGetPluginDirectories();
+    mstl::Vector<mstl::String> &freyjaGetPluginDirectories();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-    freyja::PluginDesc *freyjaGetPluginClassByName(const char *name);
+    freyja::PluginDesc *freyjaGetPluginClassByFilename(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

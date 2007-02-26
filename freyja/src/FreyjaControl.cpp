@@ -98,9 +98,9 @@ FreyjaControl::FreyjaControl() :
 	mToken(false)
 {
 	/* Search local paths first ( mostly debugging ) */
-	freyjaPluginAddDirectory("plugins/model/debug");
+	//freyjaPluginAddDirectory("plugins/model/debug");
 	/* Search local paths for things like windows builds */
-	freyjaPluginAddDirectory("modules/model");
+	//freyjaPluginAddDirectory("modules/model");
 
 	/* Search ~/.freyja/plugins/ second ( first for real path for end users ) */
 	String sPluginDir = freyja_rc_map_string("plugins/");
@@ -1170,6 +1170,81 @@ bool FreyjaControl::LoadModel(const char *filename)
 	ResourceEvent::listen(id);
 
 	return true;
+}
+
+
+bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
+{
+	if (!filename || !filename[0])
+		return false;
+	
+	bool ret = false;
+	String desc = plugin, select = filename;
+	freyja::PluginDesc *module = NULL;
+
+	for (uint32 i = 0, count = freyjaGetPluginCount(); i < count; ++i)
+	{
+		freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(i);
+			
+		if (plugin == NULL)
+			continue;
+
+		if (plugin->mExportFlags && desc == plugin->mDescription)
+		{
+			//plugin->mDescription.c_str();
+			//plugin->mExtention.c_str();
+			//plugin->mName.c_str();
+			//plugin->mFilename.c_str();
+			module = plugin;
+			break;
+		}
+	}
+
+	if (module)
+	{
+		//freyja_print("! *** %s", module->mFilename.c_str());
+		//freyja_print("! *** %s", module->mName.c_str());
+
+		/* Magically generate dialogs for import/export settings per module */
+		uint32 i;
+		foreach (module->mArgs, i)
+		{
+			if (module->mArgs[i].GetStringType() == "float")
+			{
+				float r = module->GetFloatArg(module->mArgs[i].GetName());
+				r = mgtk_create_query_dialog_float("gtk-dialog-question",
+												   (char*)module->mArgs[i].GetName(),
+												   r, -9999, 9999, 
+												   1, 4);
+				//module->SetFloatArg(module->mArgs[i].GetName(), r)
+			}
+		}
+	}
+
+	if (SystemIO::File::DoesFileExist(select.c_str()) &&
+		!freyja_create_confirm_dialog("gtk-dialog-question",
+									  "You are about to overwrite a file.",
+									  "Are you sure you want to overwrite the file?",
+									  "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite") )
+	{
+		ret = false;
+	}
+	else if (module &&
+			 freyjaExportModelByModule(select.c_str(), module->mFilename.c_str()) == 0)
+	{
+		String title;
+		title.Set("%s - Freyja", select.c_str());
+		freyja_set_main_window_title((char*)title.c_str());
+		mCurrentlyOpenFilename = select;
+		mCleared = true;
+		ret = true;
+	}
+	else
+	{
+		ret = SaveModel(filename);
+	}
+
+	return ret;
 }
 
 
@@ -6206,21 +6281,10 @@ void eOpenModel(char *filename)
 }
 
 
-void eSaveModel(char *filename)
+void eSaveModel(char *filename, char *extension)
 {
-	// This is only called by Gtk+ SaveAs... directly hence the guard for
-	// the 'double event' bug is added here.
-	static mstl::String s = "avoid gtk bugs";
-
-	if (s == filename)
+	if (FreyjaControl::mInstance->SaveModel(filename, extension))
 	{
-		//freyja_print("%s == %s, work around for tk bug", s.c_str(), filename);
-		return;
-	}
-
-	if (FreyjaControl::mInstance->SaveModel(filename))
-	{
-		s = filename;
 		char title[1024];
 		snprintf(title, 1024, "%s - Freyja", filename);
 		freyja_set_main_window_title(title);
@@ -6647,7 +6711,7 @@ void FreyjaControlEventsAttach()
 	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
 	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
 	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
-	ResourceEventCallbackString::add("eSaveModel", &eSaveModel);
+	ResourceEventCallbackString2::add("eSaveModel", &eSaveModel);
 	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
 	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
 	ResourceEventCallbackUInt::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
