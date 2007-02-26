@@ -186,7 +186,7 @@ bool BSAPakReader::LoadMorrowind(const char *filename)
 
 bool BSAPakReader::LoadOblivion(const char *filename)
 {
-#if 0
+#if 1
 	SystemIO::FileReader r;
 	char buffer[128];
 	long i, j, base;

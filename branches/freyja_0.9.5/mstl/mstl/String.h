@@ -169,6 +169,19 @@ class String
 	}
 
 
+	void Replace(char a, char b)
+	{
+		if (!mString || a == '\0')
+			return;
+
+		for (unsigned int i = 0; i < mLength; ++i)
+		{
+			if (mString[i] == a)
+				mString[i] = b; 
+		}
+	}
+
+
 	// How overboard is this I ask you?
 	void Set(const char *format, ...)
 	{

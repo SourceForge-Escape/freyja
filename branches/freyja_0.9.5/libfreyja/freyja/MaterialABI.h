@@ -80,16 +80,6 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetShaderName(index_t material);
-	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 *        Don't alter the returned string
-	 *
-	 * Post : Returns a pointer to NULL terminated name string
-	 *        Returns 0x0 on error
-	 *
-	 ------------------------------------------------------*/
-
 	const char *freyjaGetMaterialName(index_t material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists

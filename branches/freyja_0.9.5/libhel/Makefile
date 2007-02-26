@@ -180,6 +180,11 @@ $(BUILDDIR)/$(MODULE).dll : $(OBJS)
     -Wl,--whole-archive $(OBJS) \
     -Wl,--no-whole-archive $(LIBS)
 
+$(BUILDDIR)/$(NAME)$(API).dynlib : $(PROG_OBJS)
+	$(CC) $(LD_FLAGS) -L/usr/local/lib -lhel0 \
+	-L/usr/lib -lstdc++ -fPIC -dynamiclib \
+	-o $(BUILDDIR)/$(MODULE).dynlib \
+	$(PROG_OBJS)
 
 ################################################################
 

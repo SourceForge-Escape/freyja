@@ -10,6 +10,12 @@
 
  Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Dialog plugin selection affects module explictly now
+ - Plugin API updates, fixes -- mostly to control explict usage
+ - SMD using plugin args -- needs polish before commit
+ - Fixes for Windows issues in 0.9.5.1py -> 0.9.5.2py
+ - Improved OpenGLPrinter codebase
+ - Direct TTF support via FreeType, removed SDL_ttf dep
  - Nod plugin update: removed legacy mesh, fixes mats/weights/groups/etc
  - Mark face alpha in UV / selected faces ( For depth sorting list )
  - niflib ported to gcc

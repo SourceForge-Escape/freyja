@@ -53,10 +53,12 @@ extern "C" {
 
 void freyja_init()
 {
-	freyjaPluginDescription1s("Object Model (*.obj)");
+	freyjaPluginName1s("obj");
+	freyjaPluginDescription1s("Wavefront OBJ (*.obj)");
 	freyjaPluginAddExtention1s("*.obj");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginArg1f("scale", 1.0f);
 }
 
 int import_model(char *filename)

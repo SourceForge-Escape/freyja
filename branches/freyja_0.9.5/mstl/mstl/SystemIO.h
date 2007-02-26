@@ -1631,8 +1631,9 @@ public:
 		{
 			--len_f;
 
-			if (filename[len_f] == '/')
+			if (filename[len_f] == '/' || filename[len_f] == '\\')
 			{
+				--len_f;
 				break;
 			}
 		}
@@ -1940,6 +1941,16 @@ public:
 	static bool CheckFilenameExt(const char *filename, const char *ext)
 	{
 		return (File::CompareFilenameExtention(filename, ext) == 0);
+	}
+
+
+	static const char *GetModuleExt()
+	{
+#ifdef WIN32
+		return ".dll";
+#else
+		return ".so";
+#endif
 	}
 
 	

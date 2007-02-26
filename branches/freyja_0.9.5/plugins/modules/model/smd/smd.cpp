@@ -49,10 +49,14 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("smd");
 	freyjaPluginDescription1s("SMD model (*.smd)");
 	freyjaPluginAddExtention1s("*.smd");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
-	freyjaPluginExport1i(FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginArg1f("scale", 0.15f);
+	freyjaPluginArg1i("import_mesh", 1);
+	freyjaPluginArg1i("export_mesh", 0);
 }
 
 
@@ -89,16 +93,22 @@ int freyja_model__smd_import(char *filename)
 	Vector <smd_bone_t *> bones;
 	const char *symbol;
 	vec_t x, y, z, rx, ry, rz;
-	int index, idx;
+	int index;
 	unsigned int i, n;
-	vec_t scale = 0.15f;
-	vec_t r2d = 1.0f;//57.295779513082323;
+	vec_t scale;
 
+	int pluginId = freyjaGetPluginId();
+	freyjaGetPluginArg1f(pluginId, "scale", &scale);
 
 	if (freyja_model__smd_check(filename) < 0 || !r.Open(filename))
 	{
 		return -1;
 	}
+
+	// FIXME: This file format prob shouldn't create new model instances,
+	// since it's used for keyframes, skeletal data only by many
+	index_t model = freyjaModelCreate();
+	index_t skeleton = INDEX_INVALID;
 
 	while ((symbol = r.ParseSymbol()) && !r.IsEndOfFile())
 	{
@@ -123,13 +133,14 @@ int freyja_model__smd_import(char *filename)
 		}
 		else if (!strncmp(symbol, "skeleton", 8))
 		{
-			freyjaBegin(FREYJA_SKELETON);
-			index_t skeletonIndex = freyjaGetCurrent(FREYJA_SKELETON);
-
 			symbol = r.ParseSymbol();
-			index = r.ParseInteger();  // time
+			int time = r.ParseInteger();
+			printf("%s = %i\n", symbol, time);
 
-			printf("%s = %i\n", symbol, index);
+			// FIXME: if time != 0 we might just want to force keyframes here
+			skeleton = freyjaSkeletonCreate();
+			freyjaModelAddSkeleton(model, skeleton);
+
 
 			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
@@ -137,10 +148,7 @@ int freyja_model__smd_import(char *filename)
 					break;
 
 				index = atoi(symbol);
-				//printf("%s <- %i?\n", symbol, index);
-
 				smd_bone_t *bone = bones[index];
-				//printf("bone[%i]\n", index);
 
 				if (bone && index < (int)bones.end())
 				{
@@ -152,41 +160,18 @@ int freyja_model__smd_import(char *filename)
 					ry = r.ParseFloat();
 					rz = r.ParseFloat();
 
-					freyjaBegin(FREYJA_BONE);
-					idx = freyjaGetCurrent(FREYJA_BONE);
-					freyjaSkeletonAddBone(skeletonIndex, idx);
-					freyjaBoneFlags(idx, 0x0);
-					freyjaBoneParent(idx, bone->parent);
-					freyjaBoneName(idx, bone->name.GetCString());
-
-					//printf("%3i: %s %i\n", idx, bone->name, bone->parent);
-
-					if (!index)
-					{
-						freyjaBoneTranslate3f(idx, x*scale, z*scale, y*scale);
-						freyjaBoneRotateEuler3f(idx, rx*r2d,(ry*r2d)-HEL_DEG_TO_RAD(90.0f),rz*r2d);
-					}
-					else
-					{
-						freyjaBoneTranslate3f(idx, x*scale, y*scale, z*scale);
-						freyjaBoneRotateEuler3f(idx, rx*r2d, ry*r2d, rz*r2d);
-					}
-
-					for (i = bones.begin(); i < bones.end(); ++i)
-					{
-						bone = bones[i];
-
-						if (bone && bone->parent == index)
-						{ 
-							freyjaBoneAddChild(idx, i);
-						}
-					}
-
-					freyjaEnd(); // FREYJA_BONE
+					index_t b = freyjaBoneCreate(skeleton);
+					freyjaBoneParent(b, bone->parent);
+					freyjaBoneAddChild(bone->parent, b);
+					freyjaSkeletonAddBone(skeleton, b); 
+					freyjaBoneFlags(b, 0x0);
+					freyjaBoneName(b, bone->name.GetCString());
+					freyjaBoneTranslate3f(b, x*scale, y*scale, z*scale);
+					freyjaBoneRotateEuler3f(b, rx, ry, rz);
 				}
 			}
 
-			freyjaEnd(); // FREYJA_SKELETON
+			// End skeleton
 		}
 		else if (!strncmp(symbol, "triangles", 9))
 		{
