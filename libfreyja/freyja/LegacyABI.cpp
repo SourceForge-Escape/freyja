@@ -1488,11 +1488,11 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 	{
 	case fRotate:
 		{
-			Matrix t, r, t2, mat;
+			hel::Mat44 t, r, t2, mat;
 			// Rotate about bounding volume center instead of origin
-			t.translate(mesh->GetBoundingVolumeCenter().mVec);
-			r.rotate(xyz);
-			t2.translate((-mesh->GetBoundingVolumeCenter()).mVec);
+			t.Translate(mesh->GetBoundingVolumeCenter().mVec);
+			r.Rotate(xyz);
+			t2.Translate((-mesh->GetBoundingVolumeCenter()).mVec);
 			//mat = t*r*t2;
 			//mesh->TransformVertices(mat);
 
@@ -1503,17 +1503,17 @@ void freyjaModelMeshTransform3fv(index_t modelIndex, index_t meshIndex,
 			mesh->TransformVertices(t);
 
 			// Transform normals by inverted rotation to stay correct
-			Matrix nr;
-			nr.rotate(xyz);
-			nr.invert();
+			hel::Mat44 nr;
+			nr.Rotate(xyz);
+			nr.Invert();
 			mesh->TransformNormals(nr);
 		}
 		break;
 
 	case fScale:
 		{
-			Matrix s;
-			s.scale(xyz);
+			hel::Mat44 s;
+			s.Scale(xyz);
 			mesh->TransformVertices(s);
 		}
 		break;

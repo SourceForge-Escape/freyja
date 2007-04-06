@@ -125,23 +125,22 @@ double FreyjaCamera::getRadianPitch()
 void FreyjaCamera::rotate(float angle, float x, float y, float z)
 {
 	Quaternion t, n;
-	Matrix matrix;
-	double side[4] = { 1, 0,  0, 1 };
-	double up[4] =   { 0, 1,  0, 1 };
-	double look[4] = { 0, 0, -1, 1 };
+	hel::Mat44 mat;
+	vec4_t side = { 1, 0,  0, 1 };
+	vec4_t up =   { 0, 1,  0, 1 };
+	vec4_t look = { 0, 0, -1, 1 };
  	unsigned int i;
 	matrix_t m;
    
-
 	t.set(angle, x, y, z);
 	n = mQ * t;
 	n.normalize();
 
 	n.getMatrix(m);
-	matrix.setMatrix(m);
-	matrix.multiply4d(side, mSide);
-	matrix.multiply4d(look, mTarget);
-	matrix.multiply4d(up, mUp);
+	mat.SetMatrix(m);
+	mat.Multiply4fv(side, mSide);
+	mat.Multiply4fv(look, mTarget);
+	mat.Multiply4fv(up, mUp);
 
 	for (i = 0; i < 3; ++i)
 	{
@@ -156,39 +155,30 @@ void FreyjaCamera::rotate(float angle, float x, float y, float z)
 
 void FreyjaCamera::translate(float x, float y, float z)
 {
-	int i;
-	double result[4];
-	double v[4];
-	matrix_t m;
-	Matrix matrix;
+	vec4_t v = {x, y, -z, 1};
+	hel::Mat44 m;
 
+	m.mMatrix[0] = mSide[0] - mPos[0];
+	m.mMatrix[1] = mUp[0] - mPos[0];
+	m.mMatrix[2] = mTarget[0] - mPos[0];
+	m.mMatrix[3] = 0;
+	m.mMatrix[4] = mSide[1] - mPos[1];
+	m.mMatrix[5] = mUp[1] - mPos[1];
+	m.mMatrix[6] = mTarget[1] - mPos[1];
+	m.mMatrix[7] = 0;
+	m.mMatrix[8] = mSide[2] - mPos[2];
+	m.mMatrix[9] = mUp[2] - mPos[2];
+	m.mMatrix[10] = mTarget[2] - mPos[2];
+	m.mMatrix[11] = 0;
+	m.mMatrix[12] = 0;
+	m.mMatrix[13] = 0;
+	m.mMatrix[14] = 0;
+	m.mMatrix[15] = 1;
 
-	v[0] = x;
-	v[1] = y;
-	v[2] = -z;
-	v[3] = 1;
+	vec4_t result;
+	m.Multiply4fv(v, result);
 
-	m[0] = mSide[0] - mPos[0];
-	m[1] = mUp[0] - mPos[0];
-	m[2] = mTarget[0] - mPos[0];
-	m[3] = 0;
-	m[4] = mSide[1] - mPos[1];
-	m[5] = mUp[1] - mPos[1];
-	m[6] = mTarget[1] - mPos[1];
-	m[7] = 0;
-	m[8] = mSide[2] - mPos[2];
-	m[9] = mUp[2] - mPos[2];
-	m[10] = mTarget[2] - mPos[2];
-	m[11] = 0;
-	m[12] = 0;
-	m[13] = 0;
-	m[14] = 0;
-	m[15] = 1;
-
-	matrix.setMatrix(m);
-	matrix.multiply4d(v, result);
-
-	for (i = 0; i < 3; ++i)
+	for (unsigned int i = 0; i < 3; ++i)
 	{
 		mSide[i] += result[i];
 		mUp[i] += result[i];
@@ -231,22 +221,19 @@ void FreyjaCamera::reset()
 // FIXME: Mostly invalid for new QUAT_CAM (can rotate on XYZ)
 bool FreyjaCamera::isBehind(int x, int z)
 {
-  double bTheta, bCameraX, bCameraZ, Distance;
-
-
   // Set up a "virtual camera" a huge distance behind us
-  bTheta = mTheta + HEL_PI;
+  vec_t bTheta = mTheta + HEL_PI;
 
   if (bTheta > HEL_PI)
     bTheta -= HEL_2_PI;
 
-   // 64k is a fair distance away...
-  bCameraX = (65536.0 * sin(bTheta)) + mPos[0];
-  bCameraZ = (65536.0 * cos(bTheta)) + mPos[2];
+  // 64k is a fair distance away...
+  vec_t sinT, cosT;
+  helSinCosf(bTheta, &sinT, &cosT);
 
-  bCameraX -= x;
-  bCameraZ -= z;
-  Distance = sqrt((bCameraX * bCameraX) + (bCameraZ * bCameraZ));
+  vec_t bCameraX = -( (65536.0 * sinT) + mPos[0] );
+  vec_t bCameraZ = -( (65536.0 * cosT) + mPos[2] );
+  vec_t Distance = sqrt((bCameraX * bCameraX) + (bCameraZ * bCameraZ));
 
   return (Distance < 65536.0);
 }
@@ -260,8 +247,8 @@ void FreyjaCamera::setSpeed(vec_t speed)
 
 void FreyjaCamera::update()
 {
-   mTarget[2] = (mViewDistance * cos(mTheta)) + mPos[2];
-   mTarget[0] = (mViewDistance * sin(mTheta)) + mPos[0];
+	mTarget[2] = (mViewDistance * cos(mTheta)) + mPos[2];
+	mTarget[0] = (mViewDistance * sin(mTheta)) + mPos[0];
 	mTarget[1] = (mViewDistance * sin(mTheta2)) + mPos[1]; // + height_offset;
 }
 

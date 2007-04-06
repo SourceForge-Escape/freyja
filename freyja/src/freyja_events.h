@@ -26,6 +26,7 @@
 
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
+#include <mgtk/mgtk_events.h>
 #include <mstl/String.h>
 #include <freyja/freyja.h>
 
@@ -334,26 +335,38 @@ typedef enum {
 // Freyja mgtk interface
 //////////////////////////////////////////////////////////////////////////////
 
+// These are here to keep the old transparent API, but reduce stack use.
+#define freyja_event_file_dialog mgtk_event_file_dialog
+#define freyja_event_get_color mgtk_event_get_color
+#define freyja_event_set_color mgtk_event_set_color
+#define freyja_event_get_float mgtk_event_get_float
+#define freyja_event_set_float mgtk_spinbutton_value_set
+#define freyja_event_set_range mgtk_event_set_range
+#define freyja_event_gl_refresh mgtk_event_gl_refresh
+#define freyja_set_main_window_title mgtk_application_window_title
+#define freyja_swap_buffers mgtk_event_swap_gl_buffers
+#define freyja_application_window_move mgtk_application_window_move
+#define freyja_event_info_dialog mgtk_create_info_dialog
+#define freyja_event_notify_observer1f mgtk_event_notify_observer1f
+#define freyja_event_fullscreen mgtk_application_window_fullscreen
+#define freyja_event_unfullscreen mgtk_application_window_unfullscreen
+#define freyja_event_exit mgtk_event_shutdown
+#define freyja_append_item_to_menu mgtk_append_item_to_menu
+#define freyja_remove_all_items_from_menu mgtk_remove_all_items_to_menu
+
+
 void freyja_append_eventid(char *symbol, int eventid);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Aliases another <symbol> for existing <eventid>
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
-int freyja_append_item_to_menu(int event, const char *label, int item_event);
+//int freyja_append_item_to_menu(int event, const char *label, int item_event);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Appends menuitem <label>, <item_event> to menu <event>
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_application_window_move(int x, int y);
@@ -361,10 +374,6 @@ void freyja_application_window_move(int x, int y);
  * Pre  : 
  * Post : Moves application window without user input
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_callback_get_image_data_rgb24(const char *filename, 
@@ -374,25 +383,6 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
  * Pre  : 
  * Post : Callback retrieves image data from filename
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
- ------------------------------------------------------*/
-
-int freyja_create_confirm_dialog(char *dialog_icon,
-								 char *information_message, 
-								 char *question_message,
-								 char *cancel_icon, char *cancel_text,
-								 char *accept_icon, char *accept_text);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Contructs a confirmation dialog
- *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 int freyja_event2i(int event, int cmd);
@@ -402,10 +392,6 @@ int freyja_event2i(int event, int cmd);
  *
  *        Returns -1 on unhandled event
  *
- *-- History ------------------------------------------
- *
- * 2002.01.19:
- *  Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_exit();
@@ -413,22 +399,6 @@ void freyja_event_exit();
  * Pre  : 
  * Post : Calls shutdown and exits GUI
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
- ------------------------------------------------------*/
-
-#define freyja_event_file_dialog mgtk_event_file_dialog
-void freyja_event_file_dialog(int event, char *s);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Spawns file dialog for <event> with title <s>
- *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_fullscreen();
@@ -436,29 +406,13 @@ void freyja_event_fullscreen();
  * Pre  : 
  * Post : Make application fullscreen
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
-
-#define freyja_event_get_color mgtk_event_get_color
-void freyja_event_get_color(int colorId,float &r, float &g, float &b, float &a);
-
-void freyja_event_set_color(int colorId, float r, float g, float b, float a);
-
-#define freyja_event_get_float mgtk_event_get_float
-float freyja_event_get_float(int event);
 
 void freyja_event_gl_refresh();
 /*------------------------------------------------------
  * Pre  : 
  * Post : Display callback
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_info_dialog(char *icon, char *message);
@@ -466,21 +420,13 @@ void freyja_event_info_dialog(char *icon, char *message);
  * Pre  : 
  * Post : Spawns info dialog with <message> and <icon>
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
-void freyja_event_notify_observer1f(event_subject_id e, float value);
+//void freyja_event_notify_observer1f(event_subject_id e, float value);
 /*------------------------------------------------------
  * Pre  : 
  * Post : This back propagates value changes to widgets
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_set_float(int event, float value);
@@ -488,23 +434,6 @@ void freyja_event_set_float(int event, float value);
  * Pre  : 
  * Post : Set float <value> for widget <event>
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
- ------------------------------------------------------*/
-
-#define freyja_event_set_range mgtk_event_set_range
-int freyja_event_set_range(int event, unsigned int value,
-						   unsigned int min, unsigned int max);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Set range for a spinbutton
- *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_shutdown();
@@ -512,10 +441,6 @@ void freyja_event_shutdown();
  * Pre  : 
  * Post : Cleans up Freyja subsystems
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_start();
@@ -523,10 +448,6 @@ void freyja_event_start();
  * Pre  : 
  * Post : Starts up Freyja subsystems
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_event_unfullscreen();
@@ -534,10 +455,6 @@ void freyja_event_unfullscreen();
  * Pre  : 
  * Post : Restore application from fullscreen
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 int freyja_get_event_id_by_name(char *symbol);
@@ -545,10 +462,6 @@ int freyja_get_event_id_by_name(char *symbol);
  * Pre  : 
  * Post : Gets event Id from the symbol name
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 long freyja_get_new_plugin_eventid();
@@ -556,10 +469,6 @@ long freyja_get_new_plugin_eventid();
  * Pre  : 
  * Post : Gets next UID for a plugin event
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
@@ -567,10 +476,6 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
  * Pre  : 
  * Post : Gets full path filename for icons
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_get_rc_path(char *s, long sz);
@@ -578,10 +483,6 @@ void freyja_get_rc_path(char *s, long sz);
  * Pre  : 
  * Post : Gets user resource dir
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_get_rc_filename(char *s, const char *filename, long sz);
@@ -589,10 +490,6 @@ void freyja_get_rc_filename(char *s, const char *filename, long sz);
  * Pre  : 
  * Post : Gets user resource dir relative filename
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_get_share_path(char *s, long sz);
@@ -600,10 +497,6 @@ void freyja_get_share_path(char *s, long sz);
  * Pre  : 
  * Post : Gets system share dir
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_get_share_filename(char *s, const char *filename, long sz);
@@ -611,10 +504,6 @@ void freyja_get_share_filename(char *s, const char *filename, long sz);
  * Pre  : 
  * Post : Gets system share dir relative filename
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_handle_color(int id, float r, float g, float b, float a);
@@ -622,10 +511,6 @@ void freyja_handle_color(int id, float r, float g, float b, float a);
  * Pre  : 
  * Post : mgtk callback handles color button value change
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_handle_resource_start();
@@ -633,10 +518,6 @@ void freyja_handle_resource_start();
  * Pre  : 
  * Post : mgtk callback inits the modeler application
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_install_user();
@@ -644,10 +525,6 @@ void freyja_install_user();
  * Pre  : 
  * Post : Copies files from system share dir to user dir
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 char freyja_is_user_installed();
@@ -656,10 +533,6 @@ char freyja_is_user_installed();
  * Post : Returns non zero if it can find a user resource
  *        directory.
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp);
@@ -667,10 +540,6 @@ void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp);
  * Pre  : Arguments are componets of a valid pixel buffer
  * Post : Pixbuf is loaded as a texture or surface
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_plugin_generic(const char *symbol, void *something);
@@ -679,10 +548,6 @@ void freyja_plugin_generic(const char *symbol, void *something);
  * Post : Returns <something> which is the thing symbol
  *         is bound to... mostly functions and data  ;)
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_print(char *format, ...);
@@ -691,10 +556,6 @@ void freyja_print(char *format, ...);
  * Post : Prints to status bar, and will also print to
  *        console and log with '!' as first char in format
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_print_args(char *format, va_list *args);
@@ -704,10 +565,6 @@ void freyja_print_args(char *format, va_list *args);
  *
  *        This only works for glibc!
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 mstl::String freyja_get_resource_path();
@@ -716,10 +573,6 @@ mstl::String freyja_rc_map_string(const char *filename);
  * Pre  : <s> is a valid filename or dir in resource dir
  * Post : Returns fullpath filename as string
  *
- *-- History ------------------------------------------
- *
- * 2006.08.01:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 char *freyja_rc_map(char *s);
@@ -732,10 +585,6 @@ char *freyja_rc_map(char *s);
  *        mgtk indirectly queries this to setup things
  *        such as user icons, etc
  *
- *-- History ------------------------------------------
- *
- * 2002.01.12: 
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_refresh_material_interface();
@@ -743,21 +592,13 @@ void freyja_refresh_material_interface();
  * Pre  : 
  * Post : Syncs material interface to backend values
  *
- *-- History ------------------------------------------
- *
- * 2002.02.12:
- * Mongoose - Created
  ------------------------------------------------------*/
 
-int freyja_remove_all_items_to_menu(int event);
+//int freyja_remove_all_items_to_menu(int event);
 /*------------------------------------------------------
  * Pre  : <event> is the Id of the menu subject 
  * Post : Removes all submenus and menuitems from menu
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_set_main_window_title(char *title);
@@ -765,10 +606,6 @@ void freyja_set_main_window_title(char *title);
  * Pre  : 
  * Post : <title> is set as the new window title
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 void freyja_swap_buffers();
@@ -777,10 +614,6 @@ void freyja_swap_buffers();
  * Post : Called at the end of display, but does nothing
  *        you'd expect in mgtk builds
  *
- *-- History ------------------------------------------
- *
- * Unknown:
- * Mongoose - Created
  ------------------------------------------------------*/
 
 

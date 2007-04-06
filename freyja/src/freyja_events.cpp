@@ -17,6 +17,9 @@
  * 
  *-- History ------------------------------------------------- 
  *
+ * 2007.04.01:
+ * Mongoose - All platforms use registered callbacks now, removed old code
+ *
  * 2001.06.26:
  * Mongoose - Created
  ==========================================================================*/
@@ -36,6 +39,7 @@
 #include "FreyjaControl.h"
 
 #include <mgtk/mgtk_events.h>
+#include <mgtk/mgtk_linker.h>
 #include <mgtk/ResourceEvent.h>
 
 #include "freyja_events.h"
@@ -62,7 +66,7 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 {
 	if (!freyjaIsBoneAllocated(rootIndex))
 	{
-		freyja_print("!generateSkeletalUI> ERROR: NULL skeletal bone!\n");
+		freyja_print("!generateSkeletalUI(): No Skeleton given.\n");
 		return 0x0;
 	}
 
@@ -72,7 +76,7 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 
 	if (rootChildCount > freyjaGetBoneCount())
 	{
-		freyja_print("!generateSkeletalUI> ERROR: Invalid skeletal bone!\n");
+		freyja_print("!generateSkeletalUI(): Invalid boneIndex.\n");
 		return 0x0;
 	}
 
@@ -407,196 +411,17 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 }
 
 
-
-///////////////////////////////////////////////////////////////////////
-// MGtk wrappers
-///////////////////////////////////////////////////////////////////////
-
-#if defined (WIN32) || (MACOSX)
-
-const char *mgtk_get_resource_path_callback()
-{
-	static String s;
- 
-	s = freyja_get_resource_path(); // in case it's changed somehow
-
-	return s.c_str();
-}
-
-#else
-
-void mgtk_print(char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	freyja_print_args(format, &args);
-	va_end(args);
-}
-
-
-void mgtk_callback_get_image_data_rgb24(const char *filename, 
-										unsigned char **image, 
-										int *width, int *height)
-{
-	freyja_callback_get_image_data_rgb24(filename, image, width, height);
-}
-
-
-void mgtk_update_tree(unsigned int id, mgtk_tree_t *tree)
-{
-	freyja_print("FIXME: mgtk_update_tree() not in libmgtk yet");
-}
-
-
-void mgtk_handle_application_window_close()
-{
-	freyja_handle_application_window_close();
-}
-
-
-void mgtk_handle_color(int id, float r, float g, float b, float a)
-{
-	freyja_handle_color(id, r, g, b, a);
-}
-
-
-void mgtk_handle_command(int command)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated, Event %i not handled", command);
-	FreyjaControl::mInstance->event(command);
-}
-
-
-void mgtk_handle_command2i(int event, int command)
-{
-	freyja_event2i(event, command);
-}
-
-
-void mgtk_handle_event1u(int event, unsigned int value)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	if (!FreyjaControl::mInstance->event(event, value))
-	{
-		if (freyja_event2i(eEvent, event) == -1)
-			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", eEvent, event);
-	}
-}
-
-
-void mgtk_handle_event1f(int event, float value)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-
-	if (!FreyjaControl::mInstance->event(event, value))
-	{
-		if (freyja_event2i(eEvent, event) == -1)
-			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
-	}
-}
-
-
-void mgtk_handle_gldisplay()
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->Display();
-}
-
-
-void mgtk_handle_glresize(unsigned int width, unsigned int height)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->HandleResize(width, height);
-}
-
-
-void mgtk_handle_key_press(int key, int mod)
-{
-	freyja_print("mgtk_handle_key_press(%d, %d) not handled", key, mod);
-}
-
-
-void mgtk_handle_resource_start()
-{
-	freyja_handle_resource_start();
-}
-
-
-void mgtk_handle_slider1u(int event, unsigned int value)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->event(event, value);
-}
-
-
-void mgtk_handle_text(int event, char *text)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->handleTextEvent(event, text);
-}
-
-
-void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
-{
-	freyja_get_pixmap_filename(dest, size, icon_name);
-}
-
-
-char *mgtk_rc_map(char *filename_or_dirname)
-{
-	return freyja_rc_map(filename_or_dirname);
-}
-
-
-const char *mgtk_get_resource_path_callback()
-{
-	static String s;
- 
-	s = freyja_get_resource_path(); // in case it's changed somehow
-
-	return s.c_str();
-}
-
-
-void freyja_handle_motion(int x, int y);
-void mgtk_handle_motion(int x, int y)
-{
-	freyja_handle_motion(x, y);
-}
-
-
-void freyja_handle_mouse(int button, int state, int mod, int x, int y);
-void mgtk_handle_mouse(int button, int state, int mod, int x, int y)
-{
-	freyja_handle_mouse(button, state, mod, x, y);
-}
-
-#endif
-
-
-void mgtk_event_gldisplay()
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->Display();
-}
-
-
-void mgtk_event_glresize(unsigned int width, unsigned int height)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->HandleResize(width, height);
-}
-
-
 ///////////////////////////////////////////////////////////////////////
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
+
+const char *freyja_get_resource_path_callback()
+{
+	static String s;
+	s = freyja_get_resource_path(); // in case it's changed somehow
+	return s.c_str();
+}
+
 
 // FIXME remove duplicates
 void freyja_handle_key_press(int key, int mod)
@@ -1158,18 +983,6 @@ void freyja_get_rc_filename(char *s, const char *filename, long sz)
 }
 
 
-int freyja_append_item_to_menu(int event, const char *label, int item_event)
-{
-	return mgtk_append_item_to_menu(event, label, item_event);
-}
-
-
-int freyja_remove_all_items_to_menu(int event)
-{
-	return mgtk_remove_all_items_to_menu(event);
-}
-
-
 void freyja_get_share_filename(char *s, const char *filename, long sz)
 {
 	long len;
@@ -1321,47 +1134,6 @@ void freyja_install_user()
 }
 
 
-void freyja_application_window_move(int x, int y)
-{
-	mgtk_application_window_move(x, y);
-}
-
-
-void freyja_event_fullscreen()
-{
-	mgtk_application_window_fullscreen();
-}
-
-
-void freyja_event_unfullscreen()
-{
-	mgtk_application_window_unfullscreen();
-}
-
-
-void freyja_event_exit()
-{
-	mgtk_event_shutdown();
-}
-
-void freyja_event_gl_refresh()
-{
-	mgtk_event_gl_refresh();
-}
-
-
-void freyja_event_fileselection_append_pattern(int event, char *label, char *pattern)
-{
-	mgtk_event_fileselection_append_pattern(event, label, pattern);
-}
-
-
-void freyja_event_info_dialog(char *icon, char *message)
-{
-	mgtk_create_info_dialog(icon, message);
-}
-
-
 void freyja_handle_motion(int x, int y)
 {
 	if (FreyjaControl::mInstance)
@@ -1377,12 +1149,6 @@ void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 	{
 		FreyjaControl::mInstance->MouseEvent(button, state, mod, x, y);
 	}
-}
-
-
-void freyja_event_set_color(int colorId, float r, float g, float b, float a)
-{
-	mgtk_event_set_color(colorId, r, g, b, a);
 }
 
 
@@ -1421,12 +1187,6 @@ void freyja_close_log_file()
 {
 	if (freyja_get_log_file())
 		fclose(freyja_get_log_file());
-}
-
-
-void freyja_swap_buffers()
-{
-	mgtk_event_swap_gl_buffers();
 }
 
 
@@ -1537,38 +1297,6 @@ char *freyja_rc_map(char *basename)
 	String s = freyja_get_resource_path();
 	s += basename;
 	return mstl::String::Strdup(s.c_str());;
-}
-
-
-void freyja_event_notify_observer1f(event_subject_id e, float value)
-{
-	mgtk_event_notify_observer1f(e, value);
-}
-
-
-void freyja_event_set_float(int event, float value)
-{
-	mgtk_spinbutton_value_set(event, value);
-}
-
-
-int freyja_create_confirm_dialog(char *dialog_icon,
-								 char *information_message, 
-								 char *question_message,
-								 char *cancel_icon, char *cancel_text,
-								 char *accept_icon, char *accept_text)
-{
-	return mgtk_create_confirm_dialog(dialog_icon,
-									  information_message, 
-									  question_message,
-									  cancel_icon, cancel_text,
-									  accept_icon, accept_text);
-}
-
-
-void freyja_set_main_window_title(char *title)
-{
-	mgtk_application_window_title(title);
 }
 
 
@@ -1718,29 +1446,26 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 
 int main(int argc, char *argv[])
 {
-// Link up mgtk DLL stubs to these implementations
-#if defined (WIN32) || (MACOSX)
-	mgtk_win32_import("win32_mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
-	mgtk_win32_import("win32_mgtk_handle_color", (void*)freyja_handle_color);
-	mgtk_win32_import("win32_mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
-	mgtk_win32_import("win32_mgtk_handle_command", (void*)freyja_handle_command);
-	mgtk_win32_import("win32_mgtk_handle_command2i", (void*)freyja_handle_command2i);
-	mgtk_win32_import("win32_mgtk_handle_event1u", (void*)freyja_handle_event1u);
-	mgtk_win32_import("win32_mgtk_handle_event1f", (void*)freyja_handle_event1f);
-	//	mgtk_win32_import("win32_mgtk_handle_file_dialog_selection", (void*)freyja_handle_file_dialog_selection);
-	mgtk_win32_import("win32_mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
-	mgtk_win32_import("win32_mgtk_handle_glresize", (void*)freyja_handle_glresize);
-	mgtk_win32_import("win32_mgtk_handle_key_press", (void*)freyja_handle_key_press);
-	mgtk_win32_import("win32_mgtk_handle_motion", (void*)freyja_handle_motion);
-	mgtk_win32_import("win32_mgtk_handle_mouse", (void*)freyja_handle_mouse);
-	mgtk_win32_import("win32_mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
-	mgtk_win32_import("win32_mgtk_handle_slider1u", (void*)freyja_handle_slider1u);
-	mgtk_win32_import("win32_mgtk_handle_text", (void*)freyja_handle_text);
-	mgtk_win32_import("win32_mgtk_print", (void*)freyja_print);
-	mgtk_win32_import("win32_mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
-	mgtk_win32_import("win32_mgtk_rc_map", (void*)freyja_rc_map);
-	mgtk_win32_import("win32_mgtk_get_resource_path", (void*)mgtk_get_resource_path_callback);
-#endif
+	// Link up mgtk library stubs to these implementations
+	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
+	mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
+	mgtk_link_import("mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
+	mgtk_link_import("mgtk_handle_command", (void*)freyja_handle_command);
+	mgtk_link_import("mgtk_handle_command2i", (void*)freyja_handle_command2i);
+	mgtk_link_import("mgtk_handle_event1u", (void*)freyja_handle_event1u);
+	mgtk_link_import("mgtk_handle_event1f", (void*)freyja_handle_event1f);
+	mgtk_link_import("mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
+	mgtk_link_import("mgtk_handle_glresize", (void*)freyja_handle_glresize);
+	mgtk_link_import("mgtk_handle_key_press", (void*)freyja_handle_key_press);
+	mgtk_link_import("mgtk_handle_motion", (void*)freyja_handle_motion);
+	mgtk_link_import("mgtk_handle_mouse", (void*)freyja_handle_mouse);
+	mgtk_link_import("mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
+	mgtk_link_import("mgtk_handle_slider1u", (void*)freyja_handle_slider1u);
+	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
+	mgtk_link_import("mgtk_print", (void*)freyja_print);
+	mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
+	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
+	mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);
 
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());

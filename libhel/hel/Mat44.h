@@ -1,0 +1,507 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*==========================================================================
+ * 
+ * Project : Freyja
+ * Author  : Terry 'Mongoose' Hendrix II
+ * Website : http://www.westga.edu/~stu7440/
+ * Email   : stu7440@westga.edu
+ * Object  : Matrix
+ * License : No use w/o permission (C) 2002 Mongoose
+ * Comments: 3d Matrix in class form
+ *
+ *
+ *           This file was generated using Mongoose's C++ 
+ *           template generator script.  <stu7440@westga.edu>
+ * 
+ *-- History ------------------------------------------------ 
+ *
+ * 2003.06.17:
+ * Mongoose - Now in column order to match OpenGL user needs,
+ *            use transpose() to get row order back  =)
+ *
+ * 2002.05.11:
+ * Mongoose - Created, based on my mtk3d matrix
+ ==========================================================================*/
+
+#ifndef GUARD__HEL_MAT44_H_
+#define GUARD__HEL_MAT44_H_
+
+#include "hel/math.h"
+#include "hel/Quaternion.h"
+#include "hel/Vector3d.h"
+
+#include <mstl/String.h>
+
+
+namespace hel {
+
+
+class Mat44
+{
+ public:
+
+	// OpenGL, Column order matrix_t
+	//
+	// | 0  4  8  12 | 
+	// | 1  5  9  13 |
+	// | 2  6 10  14 |
+	// | 3  7 11  15 |
+
+
+	////////////////////////////////////////////////////////////
+	// Constructors
+	////////////////////////////////////////////////////////////
+
+	Mat44() { SetIdentity(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Matrix
+	 *
+	 ------------------------------------------------------*/
+
+	Mat44(const Mat44 &m) { memcpy(mMatrix, m.mMatrix, sizeof(matrix_t)); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Matrix
+	 *
+	 ------------------------------------------------------*/
+
+	Mat44(Mat44 &m) { memcpy(mMatrix, m.mMatrix, sizeof(matrix_t)); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Matrix
+	 *
+	 ------------------------------------------------------*/
+
+	Mat44(matrix_t m) { memcpy(mMatrix, m, sizeof(matrix_t)); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Matrix
+	 *
+	 ------------------------------------------------------*/
+
+	Mat44(Quaternion &q) { q.getMatrix(mMatrix); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Converts and asigns Q to a Matrix
+	 *        returns quaternion as Matrix
+	 *
+	 ------------------------------------------------------*/
+
+	~Mat44() { }
+	/*------------------------------------------------------
+	 * Pre  : Matrix object is allocated
+	 * Post : Deconstructs an object of Matrix
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	bool GetInverse(Mat44 &m) { m = *this; return m.Invert(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if a copy of this matrix inverted.
+	 *
+	 ------------------------------------------------------*/
+
+	bool GetInverseMatrix(matrix_t m) { return false; }  // FIXME
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if a copy of this matrix inverted.
+	 *
+	 ------------------------------------------------------*/
+
+	void GetMatrix(matrix_t m) { memcpy(m, mMatrix, sizeof(matrix_t)); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns a copy of this matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void GetTranspose(Mat44 &m) { m = *this; m.Transpose(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns a copy of this matrix transposed
+	 *
+	 ------------------------------------------------------*/
+
+	bool IsIdentity();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Is this matrix the identity matrix?
+	 *
+	 ------------------------------------------------------*/
+
+	void Multiply(const Mat44 &a, const Mat44 &b, Mat44 &result)
+	{
+		helMatrixMultiply(a.mMatrix, b.mMatrix, result.mMatrix);
+	}
+	/*------------------------------------------------------
+	 * Pre  : Multiplies 2 matrices
+	 * Post : Returns resultant matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void MultiplyVertexArrayThreaded(uint32 threads, uint32 size, vec_t *array);
+	void MultiplyVertexArray(uint32 size, vec_t *array)
+	{
+		for ( uint32 i = 0, j = 0; i < size; ++i, j += 3 )
+		{
+			vec_t x = array[  j], y = array[j+1], z = array[j+2];
+			array[  j] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12];
+			array[j+1] = mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13];
+			array[j+2] = mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14];
+		}
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Transforms array by this matrix
+	 * TODO : Good place to use partitioned data for Threads
+	 *
+	 ------------------------------------------------------*/
+
+	void Multiply3fv(vec3_t v)
+	{
+		vec_t x = v[0], y = v[1], z = v[2];
+		v[0] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12];
+		v[1] = mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13];
+		v[2] = mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14];
+	}
+	/*------------------------------------------------------
+	 * Pre  : Multiplies vector <v> and this matrix.
+	 * Post : Returns result in <v> vector.
+	 *
+	 ------------------------------------------------------*/
+
+	void Multiply3fv(vec3_t v, vec3_t result)
+	{
+		memcpy(result, v, sizeof(vec3_t));
+		Multiply3fv(result);
+	}
+	/*------------------------------------------------------
+	 * Pre  : Multiplies <V> vector and <This> matrix
+	 *
+	 * Post : Returns <Result> vector, 
+	 *        <V> and <Result> maybe be the same vector
+	 *
+	 ------------------------------------------------------*/
+
+	void Multiply4fv(vec4_t v)
+	{
+		vec_t x = v[0], y = v[1], z = v[2], w = v[3];
+		v[0] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12]*w;
+		v[1] = mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13]*w;
+		v[2] = mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14]*w;
+		v[3] = mMatrix[3]*x + mMatrix[7]*y + mMatrix[11]*z + mMatrix[15]*w;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Multiplies vector <v> and this matrix.
+	 * Post : Returns result in <v> vector.
+	 *
+	 ------------------------------------------------------*/
+
+	void Multiply4fv(vec4_t v, vec4_t result)
+	{
+		memcpy(result, v, sizeof(vec4_t));
+		Multiply4fv(result);
+	}
+	/*------------------------------------------------------
+	 * Pre  : Multiplies <V> vector and <This> matrix
+	 *
+	 * Post : Returns <Result> vector, 
+	 *        <V> and <Result> maybe be the same vector
+	 *
+	 ------------------------------------------------------*/
+
+	Quaternion ToQuaternion()
+	{
+		Quaternion q;
+		q.setByMatrix(mMatrix);
+		return q;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns Quaternion representation.
+	 *
+	 ------------------------------------------------------*/
+
+	mstl::String ToString()
+	{
+		mstl::String s;
+		s.Set("{ %f %f %f %f |  %f %f %f %f |  %f %f %f %f |  %f %f %f %f }",
+			  mMatrix[ 0], mMatrix[ 4], mMatrix[ 8], mMatrix[12],
+			  mMatrix[ 1], mMatrix[ 5], mMatrix[ 9], mMatrix[13],
+			  mMatrix[ 2], mMatrix[ 6], mMatrix[10], mMatrix[14],
+			  mMatrix[ 3], mMatrix[ 7], mMatrix[11], mMatrix[15]);
+		return s;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns String representation.
+	 *
+	 ------------------------------------------------------*/
+
+	void Print()
+	{
+			mstl::String s = ToString();
+			s.Replace('|', '\n');
+			printf("%s\n", s.c_str());
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Outputs pretty String representation with libc printf.
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
+
+	vec_t &operator [] (uint32 i) { return mMatrix[i]; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	Mat44 &operator =(const Mat44 &m)
+	{
+		memcpy(mMatrix, m.mMatrix, sizeof(matrix_t));
+		return *this;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post :
+	 *
+	 ------------------------------------------------------*/
+
+	Mat44 &operator =(const Quaternion &q)
+	{
+		Quaternion(q).getMatrix(mMatrix);
+		return *this;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post :
+	 *
+	 ------------------------------------------------------*/
+
+	// prove, order check, opt
+	Mat44 operator *(const Mat44 &m)
+	{
+		Mat44 n;
+		helMatrixMultiply(mMatrix, m.mMatrix, n.mMatrix);
+		return n;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Multiplies m and this matrices
+	 * Post : Returns resultant matrix
+	 *
+	 ------------------------------------------------------*/
+
+	Vec3 operator *(Vec3 &v);
+	/*------------------------------------------------------
+	 * Pre  : <V> is vector to multiply by this matrix
+	 * Post : Returns resultant vector ( mult )
+	 *
+	 ------------------------------------------------------*/
+
+	bool Invert();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : This matrix is inverted
+	 *
+	 ------------------------------------------------------*/
+
+	void SetIdentity()
+	{
+		memcpy(mMatrix, mIdentity, sizeof(matrix_t));
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets to identity matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMatrix(matrix_t m)
+	{
+		memcpy(mMatrix, m, sizeof(matrix_t));
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets to given matrix
+	 ------------------------------------------------------*/
+
+	static void GetRotation(matrix_t m, vec_t alpha, vec_t beta, vec_t gamma);
+	/*------------------------------------------------------
+	 * Pre  : Angles in radians
+	 * Post : Sets matrix <m> to corresponding rotation matrix.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetRotation(vec_t alpha, vec_t beta, vec_t gamma);
+	void SetRotation2(vec_t alpha, vec_t beta, vec_t gamma);
+	/*------------------------------------------------------
+	 * Pre  : Angles in radians
+	 * Post : Sets this matrix to corresponding rotation matrix.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetRotationX(vec_t a)
+	{
+		SetIdentity();
+		vec_t cosA, sinA;
+		helSinCosf(a, &sinA, &cosA);
+		mMatrix[5] = cosA;  mMatrix[ 9] = -sinA; 
+		mMatrix[6] = sinA;  mMatrix[10] = cosA;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Angle in radians
+	 * Post : Sets to corresponding rotation matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void SetRotationY(vec_t a)
+	{
+		SetIdentity();
+		vec_t cosA, sinA;
+		helSinCosf(a, &sinA, &cosA);
+		mMatrix[0] = cosA;   mMatrix[ 8] = sinA; 
+		mMatrix[3] = -sinA;  mMatrix[10] = cosA;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Angle in radians
+	 * Post : Sets to corresponding rotation matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void SetRotationZ(vec_t a)
+	{
+		SetIdentity();
+		vec_t cosA, sinA;
+		helSinCosf(a, &sinA, &cosA);
+		mMatrix[0] = cosA;  mMatrix[4] = -sinA; 
+		mMatrix[1] = sinA;  mMatrix[5] = cosA;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Angle in radians
+	 * Post : Sets to corresponding rotation matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void SetScale(vec_t x, vec_t y, vec_t z)
+	{
+		SetIdentity();
+		mMatrix[0] = x; mMatrix[5] = y; mMatrix[10] = z;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets to corresponding translation matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTranslation(vec_t x, vec_t y, vec_t z)
+	{
+		SetIdentity();
+		mMatrix[12] = x; mMatrix[13] = y; mMatrix[14] = z;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets to corresponding translation matrix
+	 *
+	 ------------------------------------------------------*/
+	
+	void SetTransform(vec3_t scale, vec3_t rotation, vec3_t translation);
+	/*------------------------------------------------------
+	 * Pre  : <x, y, z>, <a, b, g>, <x, y, z>
+	 * Post : Sets to corresponding transform matrix
+	 *
+	 ------------------------------------------------------*/
+
+	void Rotate(const Vec3 &v) { Rotate(v.mVec); }
+	void Rotate(const vec3_t &v) { Rotate(v[0], v[1], v[2]); }
+	void Rotate(vec_t alpha, vec_t beta, vec_t gamma);
+	/*------------------------------------------------------
+	 * Pre  : Angles are in radians
+	 * Post : Rotates object in 3 space
+	 *
+	 ------------------------------------------------------*/
+
+	void Scale(const Vec3 &v) { Scale(v.mVec); }
+	void Scale(const vec3_t &v) { Scale(v[0], v[1], v[2]); }
+	void Scale(vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Scales object in 3 space
+	 *
+	 ------------------------------------------------------*/
+
+	// Adding translation vector same as set tranlation and then mat mult?
+	void Translate(const Vec3 &v) { Translate(v.mVec); }
+	void Translate(const vec3_t &v) { Translate(v[0], v[1], v[2]); }
+	void Translate(vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : This matrix becomes the translation x,y,z
+	 *
+	 ------------------------------------------------------*/
+
+	void Transpose()
+	{
+#define HEL_MAT44_SWAP(a, b) tmp = mMatrix[a]; mMatrix[a] = mMatrix[b]; mMatrix[b] = tmp;
+		vec_t tmp;
+		HEL_MAT44_SWAP(1, 4);
+		HEL_MAT44_SWAP(2, 8);
+		HEL_MAT44_SWAP(3, 12);
+		HEL_MAT44_SWAP(6, 9);
+		HEL_MAT44_SWAP(7, 13);
+		HEL_MAT44_SWAP(11, 14);
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Transpose this matrix
+	 *
+	 ------------------------------------------------------*/
+
+	static const matrix_t mIdentity;  /* Identity matrix */
+
+	matrix_t mMatrix;                 /* Matrix data */
+
+
+	////////////////////////////////////////////////////////////
+	// Experimental cruft not really part of API
+	////////////////////////////////////////////////////////////
+
+	void MultiplyVertexArrayThreadedPartition(uint32 offset, uint32 size,
+											  vec_t *array)
+	{
+		for ( uint32 i = 0, j = offset; i < size; ++i, j += 3 )
+		{
+			vec_t x = array[  j], y = array[j+1], z = array[j+2];
+			array[  j] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12];
+			array[j+1] = mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13];
+			array[j+2] = mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14];
+		}
+	}
+
+
+ private:
+
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
+
+};
+
+} // End namespace hel
+
+
+#endif

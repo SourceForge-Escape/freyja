@@ -29,15 +29,6 @@
 // Constructors
 ////////////////////////////////////////////////////////////
 
-ViewVolume::ViewVolume()
-{
-}
-
-
-ViewVolume::~ViewVolume()
-{
-}
-
 
 ////////////////////////////////////////////////////////////
 // Public Accessors
@@ -224,7 +215,7 @@ void ViewVolume::updateFrame()
 
 void ViewVolume::setModel(matrix_t mdl)
 {
-	mModel.setMatrix(mdl);
+	mModel.SetMatrix(mdl);
 }
 
 
@@ -243,7 +234,7 @@ void ViewVolume::setProjection(matrix_t proj)
     *float left = - right
 	 */
 
-	mProjection.setMatrix(proj);
+	mProjection.SetMatrix(proj);
 }
 
 
@@ -270,7 +261,7 @@ void ViewVolume::updateFrustum()
 	vec_t t;
 
 
-	mClip.getMatrix(clip);
+	mClip.GetMatrix(clip);
 
    /* Extract the numbers for the RIGHT plane */
    mFrustum[0][0] = clip[ 3] - clip[ 0];

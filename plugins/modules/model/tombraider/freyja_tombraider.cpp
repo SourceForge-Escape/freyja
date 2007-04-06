@@ -66,10 +66,11 @@ void freyja_init()
 {
 	// FIXME: Should use pak interface not model!
 
+	freyjaPluginName1s("tombraider");
 	freyjaPluginDescription1s("Tombraider pak (*.phd,*.tr2,*.tr4)");
 	freyjaPluginAddExtention1s("*.phd,*.tr2,*.tr4");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH );//| FREYJA_PLUGIN_SKELETON);
-	freyjaPluginExport1i(FREYJA_PLUGIN_MESH );//| FREYJA_PLUGIN_SKELETON);
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);// | FREYJA_PLUGIN_SKELETON);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);//FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 }
 
 

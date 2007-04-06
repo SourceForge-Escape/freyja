@@ -364,6 +364,16 @@ public:
 	}
 
 
+	void assign_all(Object object)
+	{
+		for (unsigned int i = mStart, count = mEnd; i < count; ++i)
+		{
+			mData[i] = object;
+		}
+	}
+
+
+
 	/* Mongoose 2002.08.31, The burden of bounds checking is on you
 	 *   this way you can handle your own problems w/o exceptions */
 	Object &operator [] (unsigned int index)

@@ -19,6 +19,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
+// TODO: Replace the old switch crap with more callbacks
+
 #define USING_FREYJA_CPP_ABI
 
 #include <stdlib.h> 
@@ -28,8 +30,10 @@
 #include <string.h>
 
 #include <mstl/String.h>
+#include <mstl/Thread.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEvent.h>
+#include <mgtk/ConfirmationDialog.h>
 #include <freyja/Plugin.h>
 #include <freyja/PluginABI.h>
 #include <freyja/Bone.h>
@@ -218,8 +222,7 @@ float FreyjaControl::GetZoom()
 
 void FreyjaControl::SetZoom(float zoom)
 {
-	FREYJA_ASSERTMSG(zoom > 0.0f, "You can't have a zoom less than 0.0f");
-
+	FREYJA_ASSERTMSG(zoom > 0.0f, "Zoom values must be greater than 0.0f");
 	freyja_event_notify_observer1f(eZoom, zoom);
 	mRender->SetZoom(zoom);
 	freyja_print("Zoom set to %f", mRender->GetZoom());
@@ -486,7 +489,7 @@ void FreyjaControl::AddRecentFilename(const char *filename)
 
 	/* Rebuild menu in order of mRecentFiles */
 	uint32 menuId = Resource::mInstance->getIntByName("eRecentFiles");
-	freyja_remove_all_items_to_menu(menuId);
+	freyja_remove_all_items_from_menu(menuId);
 		
 	uint32 n = mRecentFiles.end();
 	for (uint32 i = mRecentFiles.begin(); i < n; ++i)
@@ -530,7 +533,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		// stop gap fix until new camera system is checked in ( so some things can be tested -- like the camera )
 		vec_t z;
 		GetWorldFromScreen(x, y, z);
-		Matrix m;
+		hel::Mat44 m;
 		vec3_t v;
 		z += 100;
 
@@ -544,11 +547,11 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		v[2] = HEL_DEG_TO_RAD(v[2]);
 		//DEBUG_MSGF("$$ yaw = %f\n", v[1]);
 
-		m.rotate(v);
-		m.Multiply3v(u);
+		m.Rotate(v);
+		m.Multiply3fv(u);
 		r.mOrigin = Vec3(u);
 		r.mDir = Vec3(0, 0, -1);
-		m.Multiply3v(r.mDir.mVec);
+		m.Multiply3fv(r.mDir.mVec);
 	}
 	else
 	{
@@ -1222,12 +1225,9 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
 	}
 
 	if (SystemIO::File::DoesFileExist(select.c_str()) &&
-		!freyja_create_confirm_dialog("gtk-dialog-question",
-									  "You are about to overwrite a file.",
-									  "Are you sure you want to overwrite the file?",
-									  "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite") )
+		!mgtk::ExecuteConfirmationDialog("OverwriteFileDialog") )
 	{
-		ret = false;
+		ret = true; // 2007.04.01: Counts as a save for UI purposes 
 	}
 	else if (module &&
 			 freyjaExportModelByModule(select.c_str(), module->mFilename.c_str()) == 0)
@@ -1238,6 +1238,7 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
 		mCurrentlyOpenFilename = select;
 		mCleared = true;
 		ret = true;
+		AddRecentFilename(filename);
 	}
 	else
 	{
@@ -1276,10 +1277,7 @@ bool FreyjaControl::SaveModel(const char *filename)
 	}
  
 	if (SystemIO::File::DoesFileExist(select.c_str()) &&
-		!freyja_create_confirm_dialog("gtk-dialog-question",
-									  "You are about to overwrite a file.",
-									  "Are you sure you want to overwrite the file?",
-									  "gtk-cancel", "_Cancel", "gtk-ok", "_Overwrite") )
+		!mgtk::ExecuteConfirmationDialog("OverwriteFileDialog") )
 	{
 		ret = false;
 	}
@@ -1291,6 +1289,7 @@ bool FreyjaControl::SaveModel(const char *filename)
 		mCurrentlyOpenFilename = select;
 		mCleared = true;
 		ret = true;
+		AddRecentFilename(filename);
 	}
 	else
 	{
@@ -2194,51 +2193,6 @@ bool FreyjaControl::event(int event, vec_t value)
 }
 
 
-#ifdef OBSOLETE
-	case eMirrorUV_X:
-		freyja_print("FIXME: freyjaModelMirrorTexCoord");
-		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, true, false);
-		freyja_event_gl_refresh();
-		break;
-
-	case eMirrorUV_Y:
-		freyja_print("FIXME: freyjaModelMirrorTexCoord");
-		//freyjaModelMirrorTexCoord(0, GetSelectedTexCoord(), mUVMap, false, true);
-		freyja_event_gl_refresh();
-		break;
-
-	case eTmpUVMapOn:
-		CreatePolyMappedUVMap(GetSelectedFace());
-		freyja_event_gl_refresh();
-		break;
-
-	case eTmpUVMapOff:
-		CreatePolyMappedUVMap(-1);
-		freyja_event_gl_refresh();
-		break;
-
-	case eTranslateUV:
-		break;
-
-	case eRotateUV:
-		CreatePolyMappedUVMap(GetSelectedFace());
-		//mModel->transformTexCoord(GetSelectedTexCoord(),
-		//						  fRotateAboutPoint, 45, 0); 
-		freyja_event_gl_refresh();
-		break;
-
-	case ePolyMapTexturePolygon:
-		freyja_print("FIXME: freyjaMeshPolygonSplitTexCoords");
-		//freyjaMeshPolygonSplitTexCoords(GetSelectedMesh(), GetSelectedFace());
-		break;
-
-	case eScaleUV:
-		freyja_print("FIXME: freyjaModelTransformTexCoord");
-		//freyjaModelTransformTexCoord(0, GetSelectedTexCoord(), fScale, 0.5, 0.5);
-		break;
-#endif
-
-
 bool FreyjaControl::event(int command)
 {
 	unsigned int i;
@@ -2277,10 +2231,7 @@ bool FreyjaControl::event(int command)
 		break;   
 
 	case eCloseFile:
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-		   "You must close the currently open model to create a new model.",
-		   "Would you like to close the model and lose unsaved changes?",
-			"gtk-cancel", "_Cancel", "gtk-close", "C_lose"))
+		if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
 		{
 			Clear();
 			freyja_print("Closing Model...");
@@ -2300,10 +2251,7 @@ bool FreyjaControl::event(int command)
 			break;
 
 		case eScheme_Model:
-			if (freyja_create_confirm_dialog("gtk-dialog-question",
-			  "You must close the currently open model to create a new model.",
-			  "Would you like to close the model and possibly lose unsaved changes?",
-			  "gtk-cancel", "_Cancel", "gtk-close", "C_lose"))
+			if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
 			{
 				Clear();
 				freyja_print("Closing Model...");
@@ -2397,10 +2345,7 @@ bool FreyjaControl::event(int command)
 		case eScheme_Model:
 			if (!mCleared)
 			{
-				if (freyja_create_confirm_dialog("gtk-dialog-question",
-												 "You must close the current model to open a new one.",
-												 "Open the new model and lose unsaved changes?",
-												 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
+				if (mgtk::ExecuteConfirmationDialog("CloseToOpenFileDialog"))
 				{
 					Clear();
 					freyja_print("Closing Model...");
@@ -2450,10 +2395,7 @@ bool FreyjaControl::event(int command)
 	case eOpenFileModel:
 		if (!mCleared)
 		{
-			if (freyja_create_confirm_dialog("gtk-dialog-question",
-											 "You must close the current model to open a new one.",
-											 "Open the new model and lose unsaved changes?",
-											 "gtk-cancel", "_Cancel", "gtk-open", "_Open"))
+			if (mgtk::ExecuteConfirmationDialog("CloseToOpenFileDialog"))
 			{
 				Clear();
 				freyja_print("Closing Model...");
@@ -2477,10 +2419,7 @@ bool FreyjaControl::event(int command)
 			break;
 		}
 
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You will lose all changes you made by reverting.",
-										 "Would you like to revert the model and lose unsaved changes?",
-										 "gtk-cancel", "_Cancel", "gtk-revert", "_Revert"))
+		if (mgtk::ExecuteConfirmationDialog("RevertFileDialog"))
 		{
 			Clear();
 			freyja_print("Reverting Model...");
@@ -2492,11 +2431,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	case eShutdown:
-		if (mCleared ||
-			freyja_create_confirm_dialog("gtk-dialog-question",
-						  "If you exit you will lose any unsaved data.",
-						  "Would you like to exit?", 
-						  "gtk-cancel", "_Cancel", "gtk-quit", "_Exit"))
+		if (mCleared || mgtk::ExecuteConfirmationDialog("ExitWarningDialog"))
 		{
 			SaveUserPreferences();
 			freyja_event_exit();
@@ -3137,7 +3072,7 @@ bool FreyjaControl::event(int command)
 		break;
 
 	default:
-		freyja_print("!Unhandled event(%d)", command);
+		freyja_print("!FreyjaControl::event(%d): Unhandled event.", command);
 		return false;
 	}   
 
@@ -3178,6 +3113,9 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 {
 	static bool haltTextureA = false;
 	bool empty = (text == NULL || text[0] == 0);
+
+	if (!empty && ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, text))
+		return; // true;
 
 
 	switch (event)
@@ -3277,7 +3215,7 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 		break;
 
 	default:
-		freyja_print("Unhandled event(%i) '%s'", event, text);
+		freyja_print("handleTextEvent(%i, '%s'): Unhandled event.", event, text);
 	}
 }
 
@@ -4016,13 +3954,10 @@ void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 
 
 void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, 
-								double *rayOrigin, double *rayVector)
+							   vec4_t rayOrigin, vec4_t rayVector)
 {
 	/* This does not use viewport: quadrant checks, widths, and heights */
-	extern double gMatrix[16]; // This is actual cached render transform
-	double inverse[16];
-	double rayPnt[4] = {0.0f, 0.0f, 0.0f, 1.0f };
-	double rayVec[4];
+
 	vec_t winH = mRender->GetWindowHeight();
 	vec_t winY = (winH - mouseY) - winH * 0.5f;
 	vec_t normY = winY / ( winH * 0.5f );
@@ -4032,26 +3967,26 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 	vec_t nearH = 20.0f;//mRender->getNearHeight();
 	vec_t aspect = mRender->GetWindowAspectRatio();
 
-	// This is now ray in eye coordinates
-	rayVec[0] = nearH * normY;
-	rayVec[1] = nearH * aspect * normX;
-	rayVec[2] = -zNear;
-	rayVec[3] = 0.0f;
-
 	// Now transform by inverse of modelview matrix to object coordinates
-	matrixInvert16dv(gMatrix, inverse);
-	matrix4dvx16dv(inverse, rayVec, rayVector); // src, dest can be same
-	matrix4dvx16dv(inverse, rayPnt, rayOrigin); // src, dest can be same
+	extern matrix_t gModelViewMatrix; // This is actual cached render transform
+	hel::Mat44 m(gModelViewMatrix);
+	m.Invert();
+
+	// This is now ray in eye coordinates
+	vec4_t rayVec = {nearH * normY, nearH * aspect * normX, -zNear, 0.0f};
+	m.Multiply4fv(rayVec, rayVector); // src, dest can be same
+
+	vec4_t rayPnt = {0.0f, 0.0f, 0.0f, 1.0f };
+	m.Multiply4fv(rayPnt, rayOrigin); // src, dest can be same
 
 	//vec_t x = rayVector[2];
 	//rayVector[2] = rayVector[1];
 	//rayVector[1] = x;
 
-
 #if DEBUG_PICK_RAY
 	freyja_print("!%f, %f => <%f %f %f> @ %f, %f, %f\n",
-				mouseX, mouseY,
-				rayVector[0], rayVector[1], rayVector[2],
+				 mouseX, mouseY,
+				 rayVector[0], rayVector[1], rayVector[2],
 				 rayOrigin[0], rayOrigin[1], rayOrigin[2]);
 #endif
 }
@@ -4137,10 +4072,7 @@ bool FreyjaControl::DuplicateSelectedObject()
 	switch (mObjectMode)
 	{
 	case tMesh:
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-									 "You are about to duplicate the selected mesh.\n",
-									 "Would you like to continue?",
-									 "gtk-cancel", "_Cancel", "gtk-ok", "_Duplicate"))
+		if (mgtk::ExecuteConfirmationDialog("DupeMeshDialog"))
 		{
 			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
@@ -4167,16 +4099,10 @@ bool FreyjaControl::SplitSelectedObject()
 	{
 	case tMesh:
 #if 0
-		if (freyja_create_confirm_dialog("gtk-dialog-question",
-										 "You are about to split the selected faces \n from the currently selected mesh into a new mesh.\n",
-										 "Would you like to continue?",
-										 "gtk-cancel", "_Cancel", "gtk-ok", "_Split"))
+		if (mgtk::ExecuteConfirmationDialog("SplitMeshDialog"))
 #endif
 		{
-			bool duplicate = freyja_create_confirm_dialog("gtk-dialog-question",
-														  "You have the option to cull or duplicate the selected faces\n from the current mesh.\n",
-														  "Would you like to duplicate or cull the selected faces?",
-														  "gtk-cancel", "_Cull", "gtk-ok", "_Duplicate");
+			bool duplicate = mgtk::ExecuteConfirmationDialog("SplitMeshCullDialog");
 
 			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
@@ -4213,17 +4139,11 @@ bool FreyjaControl::MergeSelectedObjects()
 					Mesh *mergee = Mesh::GetMesh(i);
 
 #if 0
-					if (freyja_create_confirm_dialog("gtk-dialog-question",
-																   "You are about to merge two objects.\n",
-														  "Would you like to continue the merge?",
-													 "gtk-cancel", "_Cancel", "gtk-ok", "_Merge"))
+					if (mgtk::ExecuteConfirmationDialog("MergeObjDialog"))
 #endif
 					if (m != mergee && mergee->GetFlags() & Mesh::fSelected)
 					{
-						bool remove = freyja_create_confirm_dialog("gtk-dialog-question",
-																   "You have the option to delete the mesh being merged.\n",
-														  "Would you like to delete or keep the merged mesh?",
-														  "gtk-cancel", "_Keep", "gtk-ok", "_Delete");
+						bool remove = mgtk::ExecuteConfirmationDialog("MergeObjDelDialog");
 
 						m->Merge(mergee);
 						
@@ -5106,7 +5026,7 @@ void FreyjaControl::Transform(object_type_t obj,
 				return;
 			}
 
-			Matrix mat;
+			hel::Mat44 mat;
 		  
 			switch (action)
 			{
@@ -6285,10 +6205,12 @@ void eSaveModel(char *filename, char *extension)
 {
 	if (FreyjaControl::mInstance->SaveModel(filename, extension))
 	{
+		/*
 		char title[1024];
 		snprintf(title, 1024, "%s - Freyja", filename);
 		freyja_set_main_window_title(title);
 		FreyjaControl::mInstance->AddRecentFilename(filename);
+		*/
 	}
 }
 
@@ -6531,7 +6453,7 @@ void eMirrorMeshX()
 
 	if (m)
 	{
-		Matrix mat;
+		hel::Mat44 mat;
 		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
 		freyja_print("Mirroring mesh over X...");
 		m->TransformVertices(mat);
@@ -6544,7 +6466,7 @@ void eMirrorMeshY()
 
 	if (m)
 	{
-		Matrix mat;
+		hel::Mat44 mat;
 		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
 		freyja_print("Mirroring mesh over Y...");
 		m->TransformVertices(mat);
@@ -6558,7 +6480,7 @@ void eMirrorMeshZ()
 
 	if (m)
 	{
-		Matrix mat;
+		hel::Mat44 mat;
 		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
 		freyja_print("Mirroring mesh over Z...");
 		m->TransformVertices(mat);
@@ -6572,7 +6494,7 @@ void eMirrorFacesX()
 
 	if (m)
 	{
-		Matrix mat;
+		hel::Mat44 mat;
 		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
 		freyja_print("Mirroring selected faces over X...");
 		//m->TransformFacesWithFlag(Face::fSelected, mat);
@@ -6587,7 +6509,7 @@ void eMirrorFacesY()
 
 	if (m)
 	{
-		Matrix mat;
+		hel::Mat44 mat;
 		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
 		freyja_print("Mirroring selected faces over Y...");
 		m->TransformFacesWithFlag(Face::fSelected, mat);
@@ -6602,7 +6524,7 @@ void eMirrorFacesZ()
 
 	if (m)
 	{
-		Matrix mat;
+		hel::Mat44 mat;
 		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
 		freyja_print("Mirroring selected faces over Z...");
 		m->TransformFacesWithFlag(Face::fSelected, mat);
@@ -6848,10 +6770,7 @@ void FreyjaViewEventsAttach()
 
 void polymap_update_question()
 {
-	if (freyja_create_confirm_dialog("gtk-dialog-question",
-									 "You just generated a UV map using vertex UVs.\n\nSome model formats perfer polygon-mapped UVs, and \nmay not export without being polymapped.\n",
-									 "Would you like to promote it to ploymapped texcoords per face?",
-									 "gtk-cancel", "_Cancel", "gtk-ok", "_Promote"))
+	if (mgtk::ExecuteConfirmationDialog("UVMapDialog"))
 	{
 		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
 		m->ConvertAllFacesToTexCoordPloymapping();

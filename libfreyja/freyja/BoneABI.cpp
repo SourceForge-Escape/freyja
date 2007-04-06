@@ -350,7 +350,7 @@ void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 }
 
 
-void freyjaBone_Transform_TmpUtil(index_t boneIndex, Matrix &m)
+void freyjaBone_Transform_TmpUtil(index_t boneIndex, hel::Mat44 &m)
 {
 	index_t parent = freyjaGetBoneParent(boneIndex);
 
@@ -376,7 +376,7 @@ void freyjaBone_Transform_TmpUtil(index_t boneIndex, Matrix &m)
 		
 		m = m * b->mBindPose;
 #else
-		Matrix n = b->mRotation;
+		hel::Mat44 n = b->mRotation;
 		n.Translate(b->mTranslation);
 		m = m * n;
 		b->mBindPose = m;
@@ -399,7 +399,7 @@ vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
 void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 {
 #if 1
-	Matrix m;
+	hel::Mat44 m;
 	Vec3 v(0,0,0);
 	freyjaBone_Transform_TmpUtil(boneIndex, m);
 
@@ -491,7 +491,6 @@ uint32 freyjaGetBoneChildCount(index_t boneIndex)
 	return 0;
 }
 
-#include <hel/Matrix.h>
 
 void freyjaBoneTransform3fv(index_t bone, 
 							freyja_transform_action_t action, vec3_t v)
@@ -504,7 +503,7 @@ void freyjaBoneInverseTransform3fv(index_t bone,
 								   freyja_transform_action_t action, 
 								   vec3_t v)
 {
-	Matrix m;
+	hel::Mat44 m;
 	vec3_t xyz;
 
 	switch (action)
@@ -556,7 +555,7 @@ void freyjaBoneTransform(index_t boneIndex,
                          freyja_transform_action_t action, 
                          vec_t x, vec_t y, vec_t z)
 {
-	Matrix m;
+	hel::Mat44 m;
 	vec3_t xyz;
 
 	switch (action)
@@ -621,7 +620,7 @@ void freyjaBoneGetBindTransform(index_t bone, matrix_t m)
 
 	if ( b )
 	{
-		b->mBindPose.getMatrix(m);
+		b->mBindPose.GetMatrix(m);
 	}
 }
 
@@ -632,7 +631,7 @@ void freyjaBoneGetBindTransformInverse(index_t bone, matrix_t m)
 
 	if ( b )
 	{
-		b->mBindPose.getInvert(m);
+		b->mBindPose.GetInverseMatrix(m);
 	}
 }
 
@@ -644,19 +643,19 @@ void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w)
 	if ( b )
 	{
 #if 1 // Local test to factor out API issues
-		Matrix m, t;
+		hel::Mat44 m, t;
 		Vec3 v(p);
-		t.setIdentity();
+		t.SetIdentity();
 		t = b->mRotation;
-		t.translate(b->mTranslation.mVec);
+		t.Translate(b->mTranslation.mVec);
 
 		Bone *parent = Bone::GetBone(b->GetParent());
 
 		while (parent)
 		{
-			m.setIdentity();
+			m.SetIdentity();
 			m = parent->mRotation;
-			m.translate(parent->mTranslation.mVec);
+			m.Translate(parent->mTranslation.mVec);
 
 			t = m * t;
 

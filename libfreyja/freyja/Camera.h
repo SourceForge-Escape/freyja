@@ -45,7 +45,7 @@
 #define GUARD__FREYJA_MONGOOSE_CAMERA_H_
 
 #include <hel/math.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 #include <hel/Quaternion.h>
 #include <hel/Vector3d.h>
 
@@ -331,19 +331,19 @@ class FreyjaCamera
 
 	Quaternion mQ;              /* Quaternion for rotation */
 
-	double mPos[4];             /* Location in 3 space (aka eye) */
+	vec4_t mPos;                /* Location in 3 space (aka eye) */
 	
-	double mTarget[4];          /* Postition we're looking at  */
+	vec4_t mTarget;             /* Postition we're looking at  */
 	
-	double mUp[4];              /* Up vector  */
+	vec4_t mUp;                 /* Up vector  */
 	
-	double mSide[4];            /* Side vector  */
+	vec4_t mSide;               /* Side vector  */
 	
-	double mViewDistance;       /* Distance from target */
+	vec_t mViewDistance;        /* Distance from target */
 	
-	double mTheta;              /* View angle  Y */
+	vec_t mTheta;               /* View angle  Y */
 	
-	double mTheta2;             /* View angle  Z */
+	vec_t mTheta2;              /* View angle  Z */
 
 	vec_t mSpeed;               /* Movement speed for this camera */
 	

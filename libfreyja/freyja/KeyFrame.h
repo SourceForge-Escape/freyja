@@ -32,7 +32,7 @@
 #include <math.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
@@ -369,9 +369,9 @@ class MatrixKeyFrame : public KeyFrame
 
 	virtual ~MatrixKeyFrame() {}
 
-	const Matrix &GetData() { return mData; }
+	const hel::Mat44 &GetData() { return mData; }
 
-	virtual void SetData(const Matrix &m) { mData = m; }
+	virtual void SetData(const hel::Mat44 &m) { mData = m; }
 
 	virtual uint32 GetSerializedSize() { return 4*16; }
 	/*------------------------------------------------------
@@ -436,7 +436,7 @@ class MatrixKeyFrame : public KeyFrame
 	 ------------------------------------------------------*/
 
 
-	Matrix mData;
+	hel::Mat44 mData;
 };
 
 

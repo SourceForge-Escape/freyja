@@ -31,9 +31,10 @@
 
 #include <hel/math.h>
 #include <hel/Vector3d.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
+#include <mstl/String.h>
 
 #include "KeyFrame.h"
 #include "Track.h"
@@ -199,13 +200,13 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	Matrix &GetBindPose() { return mBindPose; }
+	hel::Mat44 &GetBindPose() { return mBindPose; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this bone's rest/bind pose transform
 	 ------------------------------------------------------*/
 
-	Matrix &GetInverseBindPose() { return mBindToWorld; }
+	hel::Mat44 &GetInverseBindPose() { return mBindToWorld; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this bone's 'rest to world' transform
@@ -319,18 +320,19 @@ public:
 	 * Post : Set a single flag 'on'
 	 ------------------------------------------------------*/
 
-	void UpdateBindPose(const Matrix &m);
+	void UpdateBindPose(const hel::Mat44 &m);
 	/*------------------------------------------------------
 	 * Pre  : Pass in parent's bind transform
 	 * Post : Updates this bone and children bind transforms
 	 ------------------------------------------------------*/
 
-	static void UpdateBindPose(index_t boneIndex, Matrix &m);
+	static void UpdateBindPose(index_t boneIndex, hel::Mat44 &m);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	mstl::String mMetaData;          /* Metadata for bone */
 
 	byte mFlags;                     /* Options bitmap */
 
@@ -346,11 +348,11 @@ public:
 
 	Vec3 mTranslation;               /* Offset of this bone from parent */
 
-	Matrix mBindPose;                /* Store the bind transform from the 
+	hel::Mat44 mBindPose;            /* Store the bind transform from the 
 									  * origin ( this bulids off parents ).
 									  * This transforms vertices to rest pose */
 
-	Matrix mBindToWorld;             /* Cached inverse of mBindTransform:
+	hel::Mat44 mBindToWorld;         /* Cached inverse of mBindTransform:
 									  * Transform vertices to world coords with
 									  * this cache of the current orientation 
 									  * and translation in matrix form */

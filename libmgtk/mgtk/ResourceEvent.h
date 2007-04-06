@@ -23,11 +23,11 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_ResourceEvent_H_
 #define GUARD__FREYJA_MONGOOSE_ResourceEvent_H_
 
-
+#include <mstl/String.h>
+#include <mstl/Thread.h>
 #include <mstl/Vector.h>
 #include <hel/math.h>
 #include "Resource.h"
@@ -128,6 +128,8 @@ class ResourceEvent
 	static bool listen(unsigned long event, float value);
 	static bool listen(unsigned long event, float *value, unsigned long size);
 	static bool listen(unsigned long event, char *value);
+	static bool listen(unsigned long event, const char *value)
+	{ return listen(event, (char*)value); }
 	static bool listen(unsigned long event, char *value, char *value2);
 	static bool listen(unsigned long event, mgtk_mouse_event_t &mouse_event);
 	static bool listen(unsigned long event, void (*func)());
@@ -226,6 +228,38 @@ class ResourceEvent
 	static Resource *mResource;          /* Resource system pointer */
 
 	static Vector<ResourceEvent*> mEvents; /* Event store for control use */
+};
+
+
+// Finally caving and adding C++ Method Delegate support in mgtk
+class ResourceEventDelegate : public ResourceEvent
+{
+public:
+
+	ResourceEventDelegate(const char *name, Delegate *d) : 
+		ResourceEvent(name), mDelegate(d)
+	{
+	}
+
+	virtual bool action()
+	{
+		if (mDelegate)
+		{
+			mDelegate->Execute();
+			return true;
+		}
+
+		return false;
+	}
+
+	void SetDelegate(Delegate *d)
+	{
+		mDelegate = d;
+	}
+
+private:
+
+	Delegate *mDelegate;
 };
 
 

@@ -56,7 +56,7 @@ void freyja_init()
 	freyjaPluginName1s("obj");
 	freyjaPluginDescription1s("Wavefront OBJ (*.obj)");
 	freyjaPluginAddExtention1s("*.obj");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);//FREYJA_PLUGIN_THREAD_SAFE
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginArg1f("scale", 1.0f);
 }

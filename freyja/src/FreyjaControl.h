@@ -675,7 +675,7 @@ private:
 	 ------------------------------------------------------*/
 
 	void getPickRay(vec_t mouseX, vec_t mouseY, 
-					double *rayOrigin, double *rayVector);
+					vec4_t rayOrigin, vec4_t rayVector);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns pick ray in object cooridnates

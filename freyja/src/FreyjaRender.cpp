@@ -84,7 +84,7 @@ vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
 vec_t FreyjaRender::mVertexPointSize = 5.0; // 3.5;
 
-double gMatrix[16];
+matrix_t gModelViewMatrix;
 
 
 FreyjaRender::FreyjaRender() :
@@ -263,7 +263,7 @@ void FreyjaRender::DrawFreeWindow()
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	mglGetOpenGLModelviewMatrix(gMatrix);
+	mglGetOpenGLModelviewMatrix16fv(gModelViewMatrix);
 
 	if (mRenderMode & fDrawPickRay)
 	{
@@ -1982,7 +1982,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 
 	glScalef(mZoom, mZoom, mZoom);
 
-	mglGetOpenGLModelviewMatrix(gMatrix);
+	mglGetOpenGLModelviewMatrix16fv(gModelViewMatrix);
 
 	if (mRenderMode & fDrawPickRay)
 	{

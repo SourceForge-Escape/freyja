@@ -28,8 +28,11 @@
 #define GUARD__HEL_MONGOOSE_QUATERNION_H_
 
 #include "hel/math.h"
-//#include "Matrix.h"
 #include "Vector3d.h"
+
+//namespace hel {
+
+//class Mat44;
 
 
 class Quaternion
@@ -453,5 +456,7 @@ class Quaternion
 
 	vec_t mW, mX, mY, mZ;          /* Quaternion */
 };
+
+//} // End namespace hel
 
 #endif

@@ -835,11 +835,11 @@ void freyjaMeshTransform3fv(index_t mesh,
 	{
 	case fRotate:
 		{
-			Matrix t, r, t2, mat;
+			hel::Mat44 t, r, t2, mat;
 			// Rotate about bounding volume center instead of origin
-			t.translate(m->GetBoundingVolumeCenter().mVec);
-			r.rotate(xyz);
-			t2.translate((-m->GetBoundingVolumeCenter()).mVec);
+			t.Translate(m->GetBoundingVolumeCenter().mVec);
+			r.Rotate(xyz);
+			t2.Translate((-m->GetBoundingVolumeCenter()).mVec);
 			//mat = t*r*t2;
 			//mesh->TransformVertices(mat);
 
@@ -850,9 +850,9 @@ void freyjaMeshTransform3fv(index_t mesh,
 			m->TransformVertices(t);
 
 			// Transform normals by inverted rotation to stay correct
-			Matrix nr;
-			nr.rotate(xyz);
-			nr.invert();
+			hel::Mat44 nr;
+			nr.Rotate(xyz);
+			nr.Invert();
 			m->TransformNormals(nr);
 		}
 		break;
@@ -860,16 +860,16 @@ void freyjaMeshTransform3fv(index_t mesh,
 	case fScale:
 		{
 #if 0
-			Matrix s;
+			hel::Mat44 s;
 			s.scale(xyz);
 			m->TransformVertices(s);
 #else
-			Matrix t, s, t2, mat;
+			hel::Mat44 t, s, t2, mat;
 
 			// Scale about bounding volume center instead of origin
-			t.translate(m->GetPosition().mVec);
-			s.scale(xyz);
-			t2.translate((-Vec3(m->GetPosition())).mVec);
+			t.Translate(m->GetPosition().mVec);
+			s.Scale(xyz);
+			t2.Translate((-Vec3(m->GetPosition())).mVec);
 
 			// FIXME: Fix the damn matrix backend to avoid such expensive
 			//        processing here ( only want to transform once )
@@ -1849,6 +1849,36 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 		// Forget about 'cobbling' random skeletons with reused weights!
 		//Skeleton *s = Skeleton::getSkeleton(skeleton);
 		
+#warning FIXME "Not fully implemented"
+#ifdef FIXME
+		// Good case for threads if we cache all the uses of a bone and
+		// divide among vertices
+		hel::Mat44 worldArray[Bone::GetCount()];
+		hel::Mat44 localArray[Bone::GetCount()];
+		
+		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
+		{
+			worldArray[i].SetIdentity();
+
+			Bone *b = Bone::GetBone(w->mBoneIndex);
+
+			if (!b)
+				continue;
+
+			BoneTrack &t = b->GetTrack(track);
+			Vec3 rot = t.GetRot(time);
+			Vec3 loc = t.GetLoc(time);
+
+			// FIXME: InverseWorld should be on bone
+
+
+			// FIXME: flesh this out and optimize loop below
+			worldArray[i] = b->GetWorldTransform(loc, rot);
+			localArray[i] = b->GetLocalTransform(loc, rot);
+		}
+#endif
+
+
 		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
 		{
 			Weight *w = m->GetWeight(i);
@@ -1873,60 +1903,25 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
 
 #if 0
-			Matrix world;
-			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			world.rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1
+			hel::Mat44 world;
+			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
+			world.Rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1
 			// If this was a 'normal' data stream.. this would work 
-			Matrix combined = b->GetInverseBindPose() * world;
+			hel::Mat44 combined = b->GetInverseBindPose() * world;
 			p = (combined * p) * w->mWeight;
 #elif 1
-			//rot *= HEL_PI_OVER_180;
-			Matrix world;
-			world.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			world.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
-			Matrix local;
+			hel::Mat44 world;
+			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
+			world.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
+			hel::Mat44 local;
 			loc = b->mTranslation;
 			b->mRotation.getEulerAngles(rot.mVec, rot.mVec+2, rot.mVec+1);
-			local.translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			local.rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]);
+			local.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
+			local.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]);
 			
-			local.invert();
-			Matrix combined = local * world;
+			local.Invert();
+			hel::Mat44 combined = local * world;
 			p = (combined * p) * w->mWeight;
-#else
-			int bone = w->mBoneIndex;
-			Vec3 u;
-
-			while (bone > -1)
-			{
-				index_t parent = freyjaGetBoneParent(bone);
-				Vec3 v(0,0,0);
-				
-				if (freyjaIsBoneAllocated(parent))
-				{
-					freyjaGetBoneWorldPos3fv(parent, v.mVec);
-				}
-				else
-				{
-					bone = -1;
-				}
-				
-				Bone *b = Bone::GetBone(bone);
-				
-				if (b)
-				{
-					v = b->mRotation.rotate(v);
-					v += b->mTranslation;
-				}
-			}
-
-			Vec3 o;
-			freyjaGetBoneWorldPos3fv(w->mBoneIndex, o.mVec);
-			p = p - o;
-			//v = b->mRotation.rotate(v);
-			//v += b->mTranslation;
-
-			p *= w->mWeight;
 #endif
 
 			array[v->mVertexIndex*3  ] += p.mVec[0]; 

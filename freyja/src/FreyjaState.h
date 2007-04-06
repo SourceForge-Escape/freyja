@@ -26,7 +26,7 @@
 #ifndef GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 #define GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 #include <hel/Vector3d.h>
 #include <hel/Quaternion.h>
 #include <freyja/freyja.h>
@@ -57,9 +57,9 @@ class ActionMeshTranslateExt : public Action
 		if (m)
 		{
 			// Adjust relative translation to absolote position
-			Matrix t;
+			hel::Mat44 t;
 			Vec3 u = mXYZ - m->GetPosition();
-			t.translate(u.mVec[0], u.mVec[1], u.mVec[2]);
+			t.Translate(u.mVec[0], u.mVec[1], u.mVec[2]);
 			m->SetPosition(mXYZ);
 			m->TransformVertices(t);
 		}
@@ -237,13 +237,13 @@ class ActionVertexTransformExt : public Action
 class ActionFacesTransform : public Action
 {
  public:
-	ActionFacesTransform(index_t mesh, Vector<index_t> &faces, Matrix &mat) :
+	ActionFacesTransform(index_t mesh, Vector<index_t> &faces, hel::Mat44 &mat) :
 		Action(),
 		mMesh(mesh),
 		mFaces(faces),
 		mTransform(mat)
 	{
-		mat.print();
+		mat.Print();
 	}
 
 	~ActionFacesTransform() { }
@@ -264,8 +264,9 @@ class ActionFacesTransform : public Action
 		Mesh *m = Mesh::GetMesh(mMesh);
 		if (m)
 		{
-			Matrix inv = mTransform.GetInverse();
-			inv.print();
+			hel::Mat44 inv;
+			mTransform.GetInverse(inv);
+			inv.Print();
 			m->TransformFacesInList(mFaces, inv);
 		}
 
@@ -274,7 +275,7 @@ class ActionFacesTransform : public Action
 
 	index_t mMesh;
 	Vector<index_t> mFaces;
-	Matrix mTransform;
+	hel::Mat44 mTransform;
 };
 
 

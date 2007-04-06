@@ -99,11 +99,19 @@ release:
 	CFLAGS="$(RELEASE_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)"
 
+	@-cp $(BUILD_RELEASE_DIR)/lib$(NAME)$(API).$(EXT) \
+	$(BUILD_TEST_DIR)
+	$(MAKE) libhel2.test
+
 debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)"
+
+	@-cp $(BUILD_RELEASE_DIR)/lib$(NAME)$(API).$(EXT) \
+	$(BUILD_TEST_DIR)
+	$(MAKE) libhel.test
 
 prof: 
 	@-mkdir -p $(BUILD_PROF_DIR)
@@ -155,11 +163,11 @@ osxtargets: $(OSXTARGETS)
 targets: $(TARGETS)
 
 OBJS = \
+	$(BUILDDIR)/math.o \
 	$(BUILDDIR)/BoundingVolume.o \
 	$(BUILDDIR)/CollisionObject.o \
 	$(BUILDDIR)/Mass.o \
-	$(BUILDDIR)/math.o \
-	$(BUILDDIR)/Matrix.o \
+	$(BUILDDIR)/Mat44.o \
 	$(BUILDDIR)/Quaternion.o \
 	$(BUILDDIR)/Ray.o \
 	$(BUILDDIR)/Simulation.o \
@@ -324,10 +332,21 @@ test: $(TEST)
 
 libhel.test:
 	mkdir -p $(BUILD_TEST_DIR)
-	$(CC) -Wall -g -pipe -O0 -lstdc++ -Isrc -lhel0 \
-		-DUNIT_TEST_LIBHEL \
+	$(CC) -Wall -g -pipe -O0 -lstdc++ -I../mstl/ -I. -DUNIT_TEST_LIBHEL \
+		-L$(BUILD_DEBUG_DIR)/ -lhel0 -lpthread \
 		hel/libhel.cpp \
 		-o $(BUILD_TEST_DIR)/libhel.test
+
+libhel2.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(CC) -Wall -g -pipe -O2 -lstdc++ -I../mstl/ -I. -DUNIT_TEST_LIBHEL \
+		-L$(BUILD_RELEASE_DIR)/ -lhel0 -lpthread \
+		hel/libhel.cpp \
+		-o $(BUILD_TEST_DIR)/libhel.test
+
+libhel.unittest:
+	export LD_LIBRARY_PATH=.
+
 
 Quaternion.test:
 	mkdir -p $(BUILD_TEST_DIR)

@@ -569,11 +569,11 @@ GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size)
 // Dialogs
 /////////////////////////////////////////////////////////////
 
-int mgtk_create_confirm_dialog(char *dialog_icon,
-							   char *information_message, 
-							   char *question_message,
-							   char *cancel_icon, char *cancel_text,
-							   char *accept_icon, char *accept_text)
+int mgtk_create_confirm_dialog(const char *dialog_icon,
+							   const char *information_message, 
+							   const char *question_message,
+							   const char *cancel_icon, const char *cancel_text,
+							   const char *accept_icon, const char *accept_text)
 {
 	GtkWidget *dialog, *icon, *info, *question, *cancel, *accept, *hbox;
 	int ret = 0;
@@ -589,7 +589,7 @@ int mgtk_create_confirm_dialog(char *dialog_icon,
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), 
 					   hbox, FALSE, TRUE, 0);
 
-	icon = mgtk_create_icon(dialog_icon, GTK_ICON_SIZE_DIALOG);
+	icon = mgtk_create_icon((char*)dialog_icon, GTK_ICON_SIZE_DIALOG);
 
 	info = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(info), information_message);

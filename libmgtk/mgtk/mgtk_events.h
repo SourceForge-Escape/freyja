@@ -42,10 +42,6 @@
 
 extern "C" {
 
-#if defined (WIN32) || (MACOSX)
-void mgtk_win32_import(char *symbol, void *func);
-#endif
-
 void mgtk_callback_get_image_data_rgb24(const char *filename, 
 										unsigned char **image, 
 										int *width, int *height);
@@ -76,15 +72,24 @@ void mgtk_toggle_value_set(int event, int val);
 
 
 /* Call into special mgtk using these internal mgtk functions below */
+float mgtk_event_get_float(int event);
+
+int mgtk_event_set_range(int event, unsigned int value,
+						 unsigned int min, unsigned int max);
+
+void mgtk_event_notify_observer1f(unsigned int id, float r);
+
 float mgtk_create_query_dialog_float(char *image, char *message,
 									 float value, float min, float max, 
 									 float step, int digits);
+
 void mgtk_create_info_dialog(char *icon, char *message);
-int mgtk_create_confirm_dialog(char *dialog_icon,
-							   char *information_message, 
-							   char *question_message,
-							   char *cancel_icon, char *cancel_text,
-							   char *accept_icon, char *accept_text);
+
+int mgtk_create_confirm_dialog(const char *dialog_icon,
+							   const char *information_message, 
+							   const char *question_message,
+							   const char *cancel_icon, const char *cancel_text,
+							   const char *accept_icon, const char *accept_text);
 
 /* File dialog events, now sends handle_text events */
 void mgtk_event_file_dialog(int eventId, char *title);

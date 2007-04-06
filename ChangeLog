@@ -10,6 +10,17 @@
 
  Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - Linux no longer using lazy linking, now uses callbacks just like other OS
+ - More fun with MethodDelegate, starting to unify C++ callbacks
+ - Removed old confirm dialog callbacks use
+ - Support for method delegates in mgtk events starts...
+ - Confirm dialogs in mlisp for more strings table support
+ - Fix for ModelOpen event
+ - New matrix class used in dependent systems
+ - New mstl::Delegate, mstl::DelegateThread, minor mstl fixes
+ - New mstl::StopWatch, Timer fixes, etc
+ - libhel update: Mat44, unit tests, and parallel algorithm testing 
  - Dialog plugin selection affects module explictly now
  - Plugin API updates, fixes -- mostly to control explict usage
  - SMD using plugin args -- needs polish before commit
