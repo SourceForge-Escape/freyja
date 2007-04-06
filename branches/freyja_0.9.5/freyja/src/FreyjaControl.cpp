@@ -2659,9 +2659,11 @@ bool FreyjaControl::event(int command)
 		SplitSelectedObject();
 		break;
 
+#if 0
 	case eMergeObject:
 		MergeSelectedObjects();
 		break;
+#endif
 
 	case eSelectAll:
 		freyja_print("Select All is not avalible in this build");
@@ -6669,6 +6671,7 @@ void ePolyMeshBone(unsigned int value)
 }
 
 
+#if 0
 void eSetNearHeight(vec_t f)
 {
 	FreyjaRender::mSingleton->SetNearHeight(f);
@@ -6681,6 +6684,7 @@ void eSetZoomLevel(vec_t f)
 	FreyjaRender::mSingleton->SetNearHeight(f*20.0f);
 	freyja_event_gl_refresh();
 }
+#endif
 
 
 void eGroupColors(unsigned int value)
@@ -6763,8 +6767,18 @@ void FreyjaViewEventsAttach()
 	ResourceEventCallbackUInt::add("eLineBone", &eLineBone);
 	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
 
-	ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
-	ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
+
+	// C++ MethodDelegates ////////////////////////////////////
+
+	// FreyjaRender::mSingleton->SetNearHeight(f);
+	//MethodDelegate *d = new MethodDelegateArg1<FreyjaRender, float>(FreyjaRender::mSingleton, &FreyjaRender::SetNearHeight);
+	//ResourceEventDelegate::add("eSetNearHeight", d);
+	//ResourceEventCallbackVec::add("eSetNearHeight", &eSetNearHeight);
+
+	//ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
+
+	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(FreyjaControl::mInstance, &FreyjaControl::MergeSelectedObjects);
+	ResourceEventDelegate::add("eMergeObject", d);
 }
 
 

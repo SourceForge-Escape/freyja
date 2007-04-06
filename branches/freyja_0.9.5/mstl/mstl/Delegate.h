@@ -35,13 +35,16 @@
 
 namespace mstl {
 
+class ArgList
+{
+public:
+	ArgList() {}
+	virtual ~ArgList() {}
+};
+
 class MethodDelegate
 {
  public:
-
-	////////////////////////////////////////////////////////////
-	// Constructors
-	////////////////////////////////////////////////////////////
 
 	MethodDelegate() {}
 	/*------------------------------------------------------
@@ -57,24 +60,15 @@ class MethodDelegate
 	 *
 	 ------------------------------------------------------*/
 
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	//virtual bool Init() = 0;
+	virtual void Execute(ArgList &varg) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Allow access to a typesafe variable argument
+	 *        parameter list.
 	 *
 	 ------------------------------------------------------*/
 
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-	//virtual void Execute() = 0;
+	virtual void Execute() = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -83,16 +77,6 @@ class MethodDelegate
 
 
  private:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
 
 	/* */
 };
@@ -114,13 +98,28 @@ class MethodDelegateArg0 : public MethodDelegate
 
 	ReturnType Run() { return (mObject->*mMethod)(); }
 
+	virtual void PushArg(void *ptr) { }
+
+	virtual void Execute() { Run(); }
+
+	virtual void Execute(ArgList &varg) { Run(); }
+
 	Type *mObject;      /* The Object calling the method. */
 	MethodPtr mMethod;  /* The method be called. */
 };
 
 
+template <typename Arg> 
+class ArgList1 : public ArgList 
+{
+ public:
+	ArgList1(Arg a) : mArg(a) {}
+	virtual ~ArgList1() {}
+	Arg mArg;
+};
+
 template <class Type, typename Arg, typename ReturnType = void> 
-class MethodDelegateArg1 : public Delegate
+class MethodDelegateArg1 : public MethodDelegate
 {
  public:
 
@@ -133,13 +132,23 @@ class MethodDelegateArg1 : public Delegate
 
 	ReturnType Run(Arg arg)	{ return (mObject->*mMethod)(arg); }
 	
+	virtual void PushArg(void *ptr) { }
+
+	virtual void Execute() { }
+
+	virtual void Execute(ArgList &varg) 
+	{
+		ArgList1<Arg> *v = (ArgList1<Arg>*)&varg;
+		Run(v->mArg); 
+	}
+
 	Type *mObject;      /* The Object calling the method. */
 	MethodPtr mMethod;  /* The method be called. */
 };
 
 
 template <class Type, typename Arg, typename Arg2, typename ReturnType = void> 
-class MethodDelegateArg2 : public Delegate
+class MethodDelegateArg2 : public MethodDelegate
 {
  public:
 
@@ -153,9 +162,24 @@ class MethodDelegateArg2 : public Delegate
 	ReturnType Run(Arg arg, Arg2 arg2) 
 	{ return (mObject->*mMethod)(arg, arg2); }
 	
+	virtual void PushArg(void *ptr) { }
+
+	virtual void Execute() { }
+
 	Type *mObject;      /* The Object calling the method. */
 	MethodPtr mMethod;  /* The method be called. */
 };
+
+
+
+// Opposed to the listening system for ResourceEvent, Delegate events
+// are segreated due to their nature.  For example only certian managers
+// have listeners for certain templates, where as Events must implement
+// all possible listeners.  This is done for sanity and speed of execution.
+// Also unlike ResourceEvent there is no two-way signaling.
+
+// REMOVED
+
 
 } // namespace mstl
 

@@ -26,6 +26,7 @@
 #ifndef GUARD__FREYJA_MONGOOSE_ResourceEvent_H_
 #define GUARD__FREYJA_MONGOOSE_ResourceEvent_H_
 
+#include <mstl/Delegate.h>
 #include <mstl/String.h>
 #include <mstl/Thread.h>
 #include <mstl/Vector.h>
@@ -232,34 +233,55 @@ class ResourceEvent
 
 
 // Finally caving and adding C++ Method Delegate support in mgtk
+
 class ResourceEventDelegate : public ResourceEvent
 {
 public:
 
-	ResourceEventDelegate(const char *name, Delegate *d) : 
+	ResourceEventDelegate(const char *name, MethodDelegate *d) : 
 		ResourceEvent(name), mDelegate(d)
 	{
 	}
 
-	virtual bool action()
+	~ResourceEventDelegate()
+	{
+		delete mDelegate;
+	}
+
+	static void add(const char *name, MethodDelegate *d)
+	{
+		ResourceEventDelegate *e = new ResourceEventDelegate(name, d);
+
+		if (e)
+		{
+		}
+	}
+
+
+	bool action()
+	{
+		if (mDelegate)
+			mDelegate->Execute();
+
+		return true;
+	}
+
+
+	bool action(float value)
 	{
 		if (mDelegate)
 		{
-			mDelegate->Execute();
-			return true;
+			ArgList1<float> arg(value);
+			mDelegate->Execute(arg);
 		}
 
-		return false;
+		return true;
 	}
 
-	void SetDelegate(Delegate *d)
-	{
-		mDelegate = d;
-	}
 
 private:
 
-	Delegate *mDelegate;
+	MethodDelegate *mDelegate;
 };
 
 
