@@ -652,6 +652,17 @@ class FreyjaControl
 		return GetResource().GetEventIdByName(symbol);
 	}
 
+	void NewFile();
+	void CloseFile();
+	void ExportFile();
+	void ImportFile();
+	void SaveFile();
+	void OpenFile();
+	void SaveFileModel();
+	void OpenFileModel();
+	void RevertFile();
+	void Shutdown();
+
 	void CreateObject();
 	/*------------------------------------------------------
 	 * Pre  : 
