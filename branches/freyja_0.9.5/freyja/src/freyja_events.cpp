@@ -66,7 +66,7 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 {
 	if (!freyjaIsBoneAllocated(rootIndex))
 	{
-		freyja_print("!generateSkeletalUI(): No Skeleton given.\n");
+		freyja_print("!generateSkeletalUI(): No Skeleton root given.\n");
 		return 0x0;
 	}
 
@@ -130,14 +130,16 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 
 void UpdateSkeletonUI_Callback(uint32 skelIndex)
 {
-	mgtk_tree_t *tree;
-
-
 	mgtk_textentry_value_set(ResourceEvent::GetResourceIdBySymbol("eSkeletonName"),
 							 freyjaGetSkeletonName(skelIndex));
 
-	tree = generateSkeletalUI(skelIndex, 
-							  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
+	mgtk_tree_t *tree = NULL;
+
+	if (freyjaIsBoneAllocated(freyjaGetSkeletonRootIndex(skelIndex)))
+	{
+		tree = generateSkeletalUI(skelIndex, 
+								  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
+	}
 
 	mgtk_event_update_tree(eBoneIterator, tree);
 }
