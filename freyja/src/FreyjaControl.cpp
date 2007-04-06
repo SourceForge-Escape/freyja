@@ -2212,10 +2212,6 @@ bool FreyjaControl::event(int command)
 		freyja_print("Flipping normals for mesh[%i]", GetSelectedMesh());
 		break;
 
-	case eInfo:
-		PrintInfo();
-		break;
-
 	case eHelpDialog:
 		mgtk_event_dialog_visible_set(eHelpDialog, 1);
 		break; 
@@ -2668,15 +2664,6 @@ bool FreyjaControl::event(int command)
 		freyja_event_gl_refresh();
 		break;
 
-	case eCopy:
-		CopySelectedObject();
-		freyja_event_gl_refresh();
-		break;
-
-	case ePaste:
-		PasteSelectedObject();
-		freyja_event_gl_refresh();
-		break;
 
 	case eMoveObject:
 		event(eMoveObject, (uint32)1);
@@ -2924,9 +2911,6 @@ bool FreyjaControl::event(int command)
 		freyja_print("Animation Track[%i].", GetSelectedAnimation());
 		break;
 
-	case eSetKeyFrame:
-		SetKeyFrame();
-		break;
 
 	case eZoom:
 		SetZoom(freyja_event_get_float(eZoom));
@@ -6581,21 +6565,28 @@ void FreyjaControl::CreateListener(const char *name, MethodPtr ptr)
 }
 
 
+void FreyjaControl::CreateListener(const char *name, bMethodPtr ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+}
+
+
 void FreyjaControl::AttachMethodListeners()
 {
 	CreateListener("eDelete", &FreyjaControl::DeleteSelectedObject);
 	CreateListener("eAddObject", &FreyjaControl::CreateObject);
+	CreateListener("eInfo", &FreyjaControl::PrintInfo);
+	CreateListener("eSetKeyFrame", &FreyjaControl::SetKeyFrame);
 
-	MethodDelegate *d;
+	CreateListener("eDupeObject", &FreyjaControl::DuplicateSelectedObject);
+	CreateListener("eMergeObject", &FreyjaControl::MergeSelectedObjects);
+	CreateListener("eSplitObject", &FreyjaControl::SplitSelectedObject);
+	CreateListener("ePaste", &FreyjaControl::PasteSelectedObject);
+	CreateListener("eCopy", &FreyjaControl::CopySelectedObject);
 
-	d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, &FreyjaControl::DuplicateSelectedObject);
-	ResourceEventDelegate::add("eDupeObject", d);
 
-	d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, &FreyjaControl::MergeSelectedObjects);
-	ResourceEventDelegate::add("eMergeObject", d);
-
-	d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, &FreyjaControl::SplitSelectedObject);
-	ResourceEventDelegate::add("eSplitObject", d);
+	
 }
 
 

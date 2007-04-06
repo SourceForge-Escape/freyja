@@ -134,6 +134,7 @@ class FreyjaControl
 	};
 
 	typedef void (FreyjaControl::*MethodPtr)();
+	typedef bool (FreyjaControl::*bMethodPtr)();
 
 
 	////////////////////////////////////////////////////////////
@@ -1016,6 +1017,7 @@ private:
 	 ------------------------------------------------------*/
 
 	static void CreateListener(const char *name, MethodPtr ptr);
+	static void CreateListener(const char *name, bMethodPtr ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
