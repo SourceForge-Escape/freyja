@@ -121,6 +121,12 @@ class ResourceEvent
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	static bool drop(unsigned long event);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	static bool listen(unsigned long event);
 	static bool listen(unsigned long event, long value);
 	static bool listen(unsigned long event, unsigned int value);
