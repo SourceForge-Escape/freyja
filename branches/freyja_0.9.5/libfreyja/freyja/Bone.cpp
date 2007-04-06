@@ -31,6 +31,7 @@ Vector<Bone *> Bone::mGobalPool;
 ////////////////////////////////////////////////////////////
 
 Bone::Bone() :
+	mMetaData(""),
 	mFlags(0),
 	mSkeleton(INDEX_INVALID),
 	mParent(INDEX_INVALID),
@@ -230,7 +231,7 @@ void Bone::SetName(const char *name)
 }
 
 
-void Bone::UpdateBindPose(index_t boneIndex, Matrix &m)
+void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
 {
 	Bone *b = Bone::GetBone(boneIndex);
 
@@ -241,7 +242,7 @@ void Bone::UpdateBindPose(index_t boneIndex, Matrix &m)
 			UpdateBindPose(b->GetParent(), m);
 		}
 
-		Matrix n;
+		hel::Mat44 n;
 		n = b->mRotation;
 		n.Translate(b->mTranslation);
 
@@ -251,10 +252,10 @@ void Bone::UpdateBindPose(index_t boneIndex, Matrix &m)
 }
 
 
-void Bone::UpdateBindPose(const Matrix &m)
+void Bone::UpdateBindPose(const hel::Mat44 &m)
 {
-	mBindPose = Matrix(mRotation) * m;
-	mBindPose.translate(mTranslation.mVec);
+	mBindPose = hel::Mat44(mRotation) * m;
+	mBindPose.Translate(mTranslation.mVec);
 
 	for (uint32 i = 0; i < mChildren.size(); ++i)
 	{
@@ -273,10 +274,10 @@ void Bone::UpdateBindPose()
 #if 0
 	// MSTL_MSG("\tDisabled");
 #elif 1
-	Matrix m;
+	hel::Mat44 m;
 	UpdateBindPose(GetUID(), m);
 #else
-	Matrix m;
+	hel::Mat44 m;
 	m.setIdentity();
 	m = mRotation;
 	m.translate(mTranslation.mVec);

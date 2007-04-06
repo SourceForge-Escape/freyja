@@ -72,6 +72,17 @@ extern "C" {
 
 	typedef unsigned char byte;
 
+#ifdef PROTOTYPE_C_THREAD_SUPPORT_NONGOBALCONTAINER_TYPES
+	typedef struct {
+
+		index_t idx;
+		void *obj;
+
+	} freyja_index_t;
+
+	typedef freyja_index_t *index_t;
+#endif
+
 	typedef enum {
 		INDEXED_8 = 1, 
 		RGB_24, 
@@ -147,7 +158,8 @@ extern "C" {
 		FREYJA_PLUGIN_SKELETON        = 2,
 		FREYJA_PLUGIN_VERTEX_MORPHING = 4,
 		FREYJA_PLUGIN_VERTEX_BLENDING = 8,
-		FREYJA_PLUGIN_PAK_VFS         = 16
+		FREYJA_PLUGIN_PAK_VFS         = 16,
+		FREYJA_PLUGIN_THREAD_SAFE     = 32
 
 	} freyja_plugin_options_t;
 

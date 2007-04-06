@@ -33,6 +33,7 @@
 #include <mstl/Vector.h>
 #include <mstl/stack.h>
 #include <mstl/SystemIO.h>
+#include <mstl/Thread.h>
 #include "Track.h"
 #include "Weight.h"
 #include "Vertex.h"
@@ -51,7 +52,9 @@ public:
 		fHighlighted =  1,
 		fSelected    =  2,
 		fHidden      =  4,
-		fRayHit      =  8
+		fRayHit      =  8,
+		fLocked      = 16,     /* Mostly used for loading/saving states */
+		fSelectedFIO = 32      /* Selected for file I/O operations */ 
 	} Flags;
 
 
@@ -1108,21 +1111,21 @@ public:
 	// Transforms
 	////////////////////////////////////////////////////////////
 
-	void TransformTexCoords(Matrix &mat)
+	void TransformTexCoords(hel::Mat44 &mat)
 	{ TripleVec_Transform(mTexCoordPool, mat); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to texcoord pool
 	 ------------------------------------------------------*/
 
-	void TransformNormals(Matrix &mat)
+	void TransformNormals(hel::Mat44 &mat)
 	{ TripleVec_Transform(mNormalPool, mat); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to normal pool
 	 ------------------------------------------------------*/
 
-	void TransformVertices(Matrix &mat)
+	void TransformVertices(hel::Mat44 &mat)
 	{
 		TripleVec_Transform(mVertexPool, mat);
 		mInitBoundingVol = false;
@@ -1133,25 +1136,25 @@ public:
 	 * Post : Applies matrix transform to vertices pool
 	 ------------------------------------------------------*/
 
-	void TransformFacesWithFlag(Face::Flags flag, Matrix &mat);
+	void TransformFacesWithFlag(Face::Flags flag, hel::Mat44 &mat);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to face with flag set
 	 ------------------------------------------------------*/
 
-	void TransformFacesInList(Vector<index_t> &faces, Matrix &mat);
+	void TransformFacesInList(Vector<index_t> &faces, hel::Mat44 &mat);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to faces in index list
 	 ------------------------------------------------------*/
 
-	void TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat);
+	void TransformVerticesWithFlag(Vertex::Flags flag, hel::Mat44 &mat);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to vertices with flag set
 	 ------------------------------------------------------*/
 
-	void TransformVerticesInList(Vector<index_t> &vertices, Matrix &mat);
+	void TransformVerticesInList(Vector<index_t> &vertices, hel::Mat44 &mat);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to vertices in index list
@@ -1447,14 +1450,14 @@ private:
 		}
 	}
 
-	void TripleVec_Transform(Vector<vec_t> &v, Matrix &mat)
+	void TripleVec_Transform(Vector<vec_t> &v, hel::Mat44 &mat)
 	{
 		uint32 i, size = v.size();
 		vec_t *array = v.getVectorArray();
 
 		for ( i = 0; i < size; i += 3 )
 		{
-			mat.Multiply3v(array + i);
+			mat.Multiply3fv(array + i);
 		}
 	}
 

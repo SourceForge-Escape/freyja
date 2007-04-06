@@ -307,7 +307,18 @@ class Vector3d
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+#if 0
 	vec3_t mVec;   /* Vector data */
+#else
+	union {
+		vec3_t mVec;
+		
+		struct {
+			vec_t X, Y, Z;
+		};
+		
+	};
+#endif
 
  private:
 

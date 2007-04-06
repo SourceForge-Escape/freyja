@@ -219,9 +219,9 @@ void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale);
 
 void mglGetOpenGLViewport(int *viewportXYWH); // int[4]
 
-void mglGetOpenGLModelviewMatrix(double *modelview); // double[16]
+void mglGetOpenGLModelviewMatrix16fv(matrix_t modelview);
 
-void mglGetOpenGLProjectionMatrix(double *projection); // double[16]
+void mglGetOpenGLProjectionMatrix16fv(matrix_t projection);
 
 void mglApplyMaterial(uint32 materialIndex);
 

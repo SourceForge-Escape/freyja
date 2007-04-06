@@ -29,7 +29,7 @@
 #include <math.h>
 #include <hel/math.h>
 #include <hel/Vector3d.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 #include <hel/Quaternion.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>

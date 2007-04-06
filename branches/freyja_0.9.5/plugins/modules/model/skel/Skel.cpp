@@ -400,6 +400,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("skel");
 	freyjaPluginDescription1s("SKEL Reference (*.skel)");
 	freyjaPluginAddExtention1s("*.skel");
 	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);

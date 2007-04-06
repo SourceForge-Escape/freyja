@@ -318,7 +318,7 @@ void freyjaSkeletonUpdateBones(index_t skeletonIndex)
 {
 	// FIXME
 	Bone *root = Bone::GetBone(0);
-	Matrix m;
+	hel::Mat44 m;
 	//m.setIdentity();
 	if (root) root->UpdateBindPose(m);
 }

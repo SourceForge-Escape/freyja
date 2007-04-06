@@ -128,6 +128,7 @@ public:
 		mFilename(""),
 		mDescription(""),
 		mExtention(""),
+		mStatus(""),
 		mArgs(),
 		mImportFlags(FREYJA_PLUGIN_NONE),
 		mExportFlags(FREYJA_PLUGIN_NONE),
@@ -142,6 +143,7 @@ public:
 		mFilename(desc.mFilename),
 		mDescription(desc.mDescription),
 		mExtention(desc.mExtention),
+		mStatus(desc.mStatus),
 		mArgs(desc.mArgs),
 		mImportFlags(desc.mImportFlags),
 		mExportFlags(desc.mExportFlags),
@@ -156,6 +158,7 @@ public:
 		mFilename = desc.mFilename;
 		mDescription = desc.mDescription;
 		mExtention = desc.mExtention;
+		mStatus = desc.mStatus;
 		mImportFlags = desc.mImportFlags;
 		mExportFlags = desc.mExportFlags;
 		mArgs = desc.mArgs;
@@ -262,6 +265,8 @@ public:
 	mstl::String mDescription;
 
 	mstl::String mExtention;
+
+	mstl::String mStatus;  // Not yet fully implemented
 
 	mstl::Vector<PluginDescArg> mArgs;
 

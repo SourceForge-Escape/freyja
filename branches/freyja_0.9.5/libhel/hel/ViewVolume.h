@@ -27,8 +27,8 @@
 #ifndef GUARD__HEL_MONGOOSE_VIEWVOLUME_H_
 #define GUARD__HEL_MONGOOSE_VIEWVOLUME_H_
 
-#include "hel/Matrix.h"
-#include "hel/BoundingVolume.h"
+#include <hel/Mat44.h>
+#include <hel/BoundingVolume.h>
 
 class ViewVolume
 {
@@ -57,7 +57,7 @@ class ViewVolume
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	ViewVolume();
+	ViewVolume() : mProjection(), mModel(), mClip() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of ViewVolume
@@ -68,7 +68,7 @@ class ViewVolume
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~ViewVolume();
+	~ViewVolume() {}
 	/*------------------------------------------------------
 	 * Pre  : ViewVolume object is allocated
 	 * Post : Deconstructs an object of ViewVolume
@@ -257,11 +257,11 @@ class ViewVolume
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Matrix mProjection;       	 /* Projection matrix */
+	hel::Mat44 mProjection;      	 /* Projection matrix */
 
-	Matrix mModel;         	    /* Model matrix */
+	hel::Mat44 mModel;        	    /* Model matrix */
 
-	Matrix mClip;	             /* Clipping matrix */
+	hel::Mat44 mClip;	             /* Clipping matrix */
 
 	vec_t mFrustum[6][4];       /* View volume */
 

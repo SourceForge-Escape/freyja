@@ -7,12 +7,38 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* Replacing the horrible event switches with MethodDelegates for 
+	  great justice
+
+	* More strings in mlisp for better translations
+
+	* Log window for more complete error / warning reporting.
+
+	* Finish Bone.MetaData support
+
+	* Rewrite FreyjaControl to remove the horrible switch of doom or at
+	  least continue to break it up into smaller chunks until the rewrite comes
+
+	* OpenGL Text
+
+	* Texture buffers for normal maps, shader data, etc
+
+	* User defined default material
+
+	* Verify math library, enforce automated testing
+
 	* Import/export plugin changes
+		- dropdown should change filename
+		- Threaded import/export
+			- fLocked support
+			- fSelectedFIO support
+		- Detailed error messages ( Pass back a String to generate msgbox ) Plugin::mStatus
 		- FreyjaType flags usage ( eg mesh only, mesh+skeleton, etc )
 		- Freyja selection usage ( eg export selected )
 		- Optional memory buffer usage instead of file/url ( great for paks )
 		- These could be setup inside of per plugin preferences, so
-		  the ABI doesn't have to change ala states 
+		  the ABI doesn't have to change ala states
+		- Open/Save buttons on filedialogs
 
 	* Texture buffer array per material improvements ( allows better shaders )
 

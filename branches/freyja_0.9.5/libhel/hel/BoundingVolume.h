@@ -28,8 +28,8 @@
 #ifndef GUARD__LIBHEL_MONGOOSE_BOUNDINGVOLUME_H_
 #define GUARD__LIBHEL_MONGOOSE_BOUNDINGVOLUME_H_
 
-#include "hel/math.h"
-#include "hel/Matrix.h"
+#include <hel/math.h>
+#include <hel/Mat44.h>
 
 
 class BoundingVolume
@@ -285,10 +285,10 @@ public:
 
 	void Rotate(vec3_t xyz)
 	{
-		Matrix m;
-		m.rotate(xyz);
-		m.multiply3v(mMin, mMin);
-		m.multiply3v(mMax, mMax);
+		hel::Mat44 m;
+		m.Rotate(xyz);
+		m.Multiply3fv(mMin);
+		m.Multiply3fv(mMax);
 	}
 
 	void Scale(vec3_t xyz)

@@ -198,11 +198,13 @@ w32targets: $(W32TARGETS)
 targets: $(TARGETS)
 
 PROG_OBJS = \
+	$(BUILDDIR)/ConfirmationDialog.o \
 	$(BUILDDIR)/MLisp.o \
 	$(BUILDDIR)/Resource.o \
 	$(BUILDDIR)/ResourceEvent.o \
 	$(BUILDDIR)/mgtk_callbacks.o \
 	$(BUILDDIR)/mgtk_interface.o \
+	$(BUILDDIR)/mgtk_linker.o \
 	$(BUILDDIR)/mgtk_resource.o \
 	$(BUILDDIR)/mgtk_filedialog.o \
 	$(BUILDDIR)/mgtk_tree.o

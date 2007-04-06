@@ -1338,15 +1338,30 @@ void mglGetOpenGLViewport(int *viewportXYWH) // int[4]
 	glGetIntegerv(GL_VIEWPORT, viewportXYWH);
 }
 
-void mglGetOpenGLModelviewMatrix(double *modelview) // double[16]
+
+#if 0
+void mglGetOpenGLModelviewMatrix16dv(double *modelview) // double[16]
 {
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
 }
 
 
-void mglGetOpenGLProjectionMatrix(double *projection) // double[16]
+void mglGetOpenGLProjectionMatrix16dv(double *projection) // double[16]
 {
 	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+}
+#endif
+
+
+void mglGetOpenGLModelviewMatrix16fv(matrix_t modelview)
+{
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+}
+
+
+void mglGetOpenGLProjectionMatrix16fv(matrix_t projection)
+{
+	glGetFloatv(GL_PROJECTION_MATRIX, projection);
 }
 
 

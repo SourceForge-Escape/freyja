@@ -19,36 +19,18 @@
  ================================================================*/
 
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include <hel/math.h>
 #include <hel/Vector3d.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 
 #define COMPUTE
 
-char *helVersionInfo()
+const char *helVersionInfo()
 {
 	return VERSION;
-}
-
-
-void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4])
-{
-	/* Column major */
-	result[0] = m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * v[3];
-	result[1] = m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * v[3];
-	result[2] = m[ 2] * v[0] + m[ 6] * v[1] + m[10] * v[2] + m[14] * v[3];
-	result[3] = m[ 3] * v[0] + m[ 7] * v[1] + m[11] * v[2] + m[15] * v[3];
-
-
-#ifdef USE_ROW_MAJOR_MATRIX
-	/* Row major */
-    result[0] = m[ 0] * v[0] + m[ 1] * v[1] + m[ 2] * v[2] + m[ 3] * v[3];
-	result[1] = m[ 4] * v[0] + m[ 5] * v[1] + m[ 6] * v[2] + m[ 7] * v[3];
-	result[2] = m[ 8] * v[0] + m[ 9] * v[1] + m[10] * v[2] + m[11] * v[3];
-	result[3] = m[12] * v[0] + m[13] * v[1] + m[14] * v[2] + m[15] * v[3];
-#endif
 }
 
 
@@ -66,11 +48,12 @@ vec_t helIntersectionOfAbstractSpheres(vec3_t centerA, vec_t radiusA,
 	return (dist <= minDist * minDist);
 }
 
-
+#if 0
 inline vec_t square(vec_t a) 
 {
 	return a * a;
 }
+#endif
 
 
 // Returns number of intersections and intersection position(s)
@@ -84,17 +67,17 @@ int helIntersectionOfAbstractSphereAndLine(vec3_t center, vec_t radius,
 	vec_t a, b, c, mu, i ;
 	
 
-	a = (square(posB[0] - posA[0]) + 
-		  square(posB[1] - posA[1]) + 
-		  square(posB[2] - posA[2]));
+	a = (helSquare(posB[0] - posA[0]) + 
+		  helSquare(posB[1] - posA[1]) + 
+		  helSquare(posB[2] - posA[2]));
 	b = (2 * ((posB[0] - posA[0]) * (posA[0] - center[0]) +
 				 (posB[1] - posA[1]) * (posA[1] - center[1]) +
 				 (posB[2] - posA[2]) * (posA[2] - center[2])));
-	c = (square(center[0]) + square(center[1]) +
-		  square(center[2]) + square(posA[0]) +
-		  square(posA[1]) + square(posA[2]) -
+	c = (helSquare(center[0]) + helSquare(center[1]) +
+		  helSquare(center[2]) + helSquare(posA[0]) +
+		  helSquare(posA[1]) + helSquare(posA[2]) -
 		  2 * (center[0]*posA[0] + center[1]*posA[1] + center[2]*posA[2]) - 
-		  square(radius));
+		  helSquare(radius));
 
 	i = b * b - 4 * a * c;
 
@@ -119,13 +102,13 @@ int helIntersectionOfAbstractSphereAndLine(vec3_t center, vec_t radius,
 		// Two intersections
 		
 		// First intersection
-		mu = (-b + sqrt( square(b) - 4*a*c)) / (2*a);
+		mu = (-b + sqrt( helSquare(b) - 4*a*c)) / (2*a);
 		intersectionA[1] = posA[0] + mu*(posB[0]-posA[0]);
 		intersectionA[2] = posA[1] + mu*(posB[1]-posA[1]);
 		intersectionA[3] = posA[2] + mu*(posB[2]-posA[2]);
 		
 		// Second intersection
-		mu = (-b - sqrt(square(b) - 4*a*c)) / (2*a);
+		mu = (-b - sqrt( helSquare(b) - 4*a*c)) / (2*a);
 		intersectionB[0] = posA[0] + mu*(posB[0]-posA[0]);
 		intersectionB[1] = posA[1] + mu*(posB[1]-posA[1]);
 		intersectionB[2] = posA[2] + mu*(posB[2]-posA[2]);
@@ -352,6 +335,80 @@ vec_t helRadToDeg(vec_t rad)
 #else
 	// rad * (PI / 180.0);
 	return (rad * HEL_PI_OVER_180);
+#endif
+}
+
+
+/// Matrices ///////////////////////////////////////////
+
+void helMatrixCopy(matrix_t &source, matrix_t &dest) 
+{
+	memcpy(dest, source, sizeof(matrix_t));
+}
+
+
+// Post multiplying column-major will give you row-major
+void helMatrixMultiply(const matrix_t &a, const matrix_t &b, matrix_t &result)
+{
+	/* Column order */
+	result[ 0] = a[ 0] * b[ 0] + a[ 4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3];
+	result[ 1] = a[ 0] * b[ 4] + a[ 4] * b[ 5] + a[ 8] * b[ 6] + a[12] * b[ 7];
+	result[ 2] = a[ 0] * b[ 8] + a[ 4] * b[ 9] + a[ 8] * b[10] + a[12] * b[11];
+	result[ 3] = a[ 0] * b[12] + a[ 4] * b[13] + a[ 8] * b[14] + a[12] * b[15];
+	
+	result[ 4] = a[ 1] * b[ 0] + a[ 5] * b[ 1] + a[ 9] * b[ 2] + a[13] * b[ 3];
+	result[ 5] = a[ 1] * b[ 4] + a[ 5] * b[ 5] + a[ 9] * b[ 6] + a[13] * b[ 7];
+	result[ 6] = a[ 1] * b[ 8] + a[ 5] * b[ 9] + a[ 9] * b[10] + a[13] * b[11];
+	result[ 7] = a[ 1] * b[12] + a[ 5] * b[13] + a[ 9] * b[14] + a[13] * b[15];
+	
+	result[ 8] = a[ 2] * b[ 0] + a[ 6] * b[ 1] + a[10] * b[ 2] + a[14] * b[ 3];
+	result[ 9] = a[ 2] * b[ 4] + a[ 6] * b[ 5] + a[10] * b[ 6] + a[14] * b[ 7];
+	result[10] = a[ 2] * b[ 8] + a[ 6] * b[ 9] + a[10] * b[10] + a[14] * b[11];
+	result[11] = a[ 2] * b[12] + a[ 6] * b[13] + a[10] * b[14] + a[14] * b[15];
+	
+	result[12] = a[ 3] * b[ 0] + a[ 7] * b[ 1] + a[11] * b[ 2] + a[15] * b[ 3];
+	result[13] = a[ 3] * b[ 4] + a[ 7] * b[ 5] + a[11] * b[ 6] + a[15] * b[ 7];
+	result[14] = a[ 3] * b[ 8] + a[ 7] * b[ 9] + a[11] * b[10] + a[15] * b[11];
+	result[15] = a[ 3] * b[12] + a[ 7] * b[13] + a[11] * b[14] + a[15] * b[15];
+}
+
+
+void helVectorMatrixMult3v(matrix_t m, vec3_t v, vec3_t result)
+{
+	vec_t x = v[0], y = v[1], z = v[2];
+
+	// Column order
+	result[0] = m[0]*x + m[4]*y + m[ 8]*z + m[12];
+	result[1] = m[1]*x + m[5]*y + m[ 9]*z + m[13];
+	result[2] = m[2]*x + m[6]*y + m[10]*z + m[14];
+}
+
+
+void helGenericVectorMatrixMult4dv(double *matrix, double *v, double *result)
+{
+	double x = v[0], y = v[1], z = v[2], w = v[3];
+
+	result[0] = matrix[ 0]*x + matrix[ 4]*y + matrix[ 8]*z + matrix[12]*w;
+	result[1] = matrix[ 1]*x + matrix[ 5]*y + matrix[ 9]*z + matrix[13]*w;
+	result[2] = matrix[ 2]*x + matrix[ 6]*y + matrix[10]*z + matrix[14]*w;
+	result[3] = matrix[ 3]*x + matrix[ 7]*y + matrix[11]*z + matrix[15]*w;
+}
+
+
+void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4])
+{
+#ifdef USE_ROW_MAJOR_MATRIX
+	/* Row major */
+    result[0] = m[ 0] * v[0] + m[ 1] * v[1] + m[ 2] * v[2] + m[ 3] * v[3];
+	result[1] = m[ 4] * v[0] + m[ 5] * v[1] + m[ 6] * v[2] + m[ 7] * v[3];
+	result[2] = m[ 8] * v[0] + m[ 9] * v[1] + m[10] * v[2] + m[11] * v[3];
+	result[3] = m[12] * v[0] + m[13] * v[1] + m[14] * v[2] + m[15] * v[3];
+#else
+	/* Column major */
+	result[0] = m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * v[3];
+	result[1] = m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * v[3];
+	result[2] = m[ 2] * v[0] + m[ 6] * v[1] + m[10] * v[2] + m[14] * v[3];
+	result[3] = m[ 3] * v[0] + m[ 7] * v[1] + m[11] * v[2] + m[15] * v[3];
 #endif
 }
 

@@ -21,6 +21,7 @@
 
 #include "Mesh.h"
 
+
 using namespace freyja;
 
 Vector<Mesh *> Mesh::mGobalPool;
@@ -2447,11 +2448,11 @@ void Mesh::Rotate(const Vec3 &v)
 
 void Mesh::RotateAboutPoint(const Vec3 &point, const Vec3 &v)
 {
-	Matrix t, r, t2, mat;
+	hel::Mat44 t, r, t2, mat;
 	// Rotate about bounding volume center instead of origin
-	t.translate(point.mVec);
-	r.rotate(v.mVec);
-	t2.translate((-Vec3(point)).mVec);
+	t.Translate(point.mVec);
+	r.Rotate(v.mVec);
+	t2.Translate((-Vec3(point)).mVec);
 	
 	// FIXME: Fix the damn matrix backend to avoid such expensive
 	//        processing here ( only want to transform once )
@@ -2460,9 +2461,9 @@ void Mesh::RotateAboutPoint(const Vec3 &point, const Vec3 &v)
 	TransformVertices(t);
 	
 	// Transform normals by inverted rotation to stay correct
-	Matrix nr;
-	nr.rotate(v.mVec);
-	nr.invert();
+	hel::Mat44 nr;
+	nr.Rotate(v.mVec);
+	nr.Invert();
 	TransformNormals(nr);
 }
 
@@ -2475,12 +2476,12 @@ void Mesh::Scale(const Vec3 &v)
 
 void Mesh::ScaleAboutPoint(const Vec3 &point, const Vec3 &v)
 {
-	Matrix t, s, t2, mat;
+	hel::Mat44 t, s, t2, mat;
 
 	// Scale about bounding volume center instead of origin
-	t.translate(point.mVec);
-	s.scale(v.mVec);
-	t2.translate((-Vec3(point)).mVec);
+	t.Translate(point.mVec);
+	s.Scale(v.mVec);
+	t2.Translate((-Vec3(point)).mVec);
 
 	// FIXME: Fix the damn matrix backend to avoid such expensive
 	//        processing here ( only want to transform once )
@@ -2528,7 +2529,7 @@ void Mesh::SelectedFacesTranslateUVMap(vec_t x, vec_t y)
 }
 
 
-void Mesh::TransformFacesWithFlag(Face::Flags flag, Matrix &mat)
+void Mesh::TransformFacesWithFlag(Face::Flags flag, hel::Mat44 &mat)
 {
 	MarkVerticesOfFacesWithFlag(flag, Vertex::fSelected2, true);
 	TransformVerticesWithFlag(Vertex::fSelected2, mat);
@@ -2592,14 +2593,14 @@ Vector<index_t> Mesh::GetSelectedFaces()
 }
 
 
-void Mesh::TransformFacesInList(Vector<index_t> &faces, Matrix &mat)
+void Mesh::TransformFacesInList(Vector<index_t> &faces, hel::Mat44 &mat)
 {
 	Vector<index_t> vertices = GetUniqueVerticesInFaces(faces);
 	TransformVerticesInList(vertices, mat);
 }
 
 
-void Mesh::TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat)
+void Mesh::TransformVerticesWithFlag(Vertex::Flags flag, hel::Mat44 &mat)
 {
 	vec_t *array = mVertexPool.get_array();
 
@@ -2609,13 +2610,13 @@ void Mesh::TransformVerticesWithFlag(Vertex::Flags flag, Matrix &mat)
 		
 		if (v && v->mFlags & flag)
 		{			
-			mat.Multiply3v(array + v->mVertexIndex*3);
+			mat.Multiply3fv(array + v->mVertexIndex*3);
 		}
 	}
 }
 
 
-void Mesh::TransformVerticesInList(Vector<index_t> &vertices, Matrix &mat)
+void Mesh::TransformVerticesInList(Vector<index_t> &vertices, hel::Mat44 &mat)
 {
 	vec_t *array = mVertexPool.get_array();
 
@@ -2626,7 +2627,7 @@ void Mesh::TransformVerticesInList(Vector<index_t> &vertices, Matrix &mat)
 		if (v)
 		{
 			//Debug v->SetFlag(Vertex::fSelected);
-			mat.Multiply3v(array + v->mVertexIndex*3);
+			mat.Multiply3fv(array + v->mVertexIndex*3);
 		}
 	}
 }

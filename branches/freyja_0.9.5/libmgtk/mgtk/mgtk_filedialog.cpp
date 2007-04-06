@@ -54,9 +54,13 @@ GtkWidget *mgtk_get_fileselection_pattern_widget(int event)
 
 void mgtk_event_fileselection_pattern(int event, char *pattern)
 {
+	printf("mgtk_event_fileselection_pattern(%i, %s)\n", event, pattern);
+
 	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(file), 
 								gtk_file_chooser_get_filter(GTK_FILE_CHOOSER(file)));
+
+	
 }
 
 
@@ -109,11 +113,13 @@ void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
 	char *name = filter ? (char *)gtk_file_filter_get_name(filter) : NULL;
 	//printf("*** '%s'\n", name);
 
-
+#if 0
 	if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
 	{
 	}
-	else if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename, name))
+	else
+#endif
+		if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename, name))
 	{
 	}
 	else

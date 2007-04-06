@@ -911,6 +911,73 @@
 ;; Dialogs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(confirmation_dialog	"CloseNewFileDialog"
+	"gtk-dialog-question"
+	"Creating a new model will close the current model."
+	"Would you like to close the model and possibly lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-close"	"C_lose")
+
+(confirmation_dialog	"CloseToOpenFileDialog"
+	"gtk-dialog-question"
+	"You must close the current model to open a new one."
+	"Open the new model and lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-open"	"_Open")
+
+(confirmation_dialog	"RevertFileDialog"
+	"gtk-dialog-question"
+	"You will lose all changes you made by reverting."
+	"Would you like to revert the model and lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-revert"	"_Revert")
+
+(confirmation_dialog	"OverwriteFileDialog"
+	"gtk-dialog-question"
+	"You are about to overwrite a file."
+	"Are you sure you want to overwrite the file?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Overwrite")
+
+(confirmation_dialog	"DupeMeshDialog"
+	"gtk-dialog-question"
+	"You are about to duplicate the selected mesh.\n"
+	"Would you like to continue?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
+
+(confirmation_dialog	"SplitMeshDialog"
+	"gtk-dialog-question"
+	"You are about to split the selected faces \n from the currently selected mesh into a new mesh.\n"
+	"Would you like to continue?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Split")
+
+(confirmation_dialog	"MergeObjDialog"
+	"gtk-dialog-question"
+	"You are about to merge two objects.\n"
+	"Would you like to continue the merge?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Merge")
+
+(confirmation_dialog	"MergeDelObjDialog"
+	"gtk-dialog-question"
+	"You have the option to delete the mesh being merged.\n"
+	"Would you like to delete or keep the merged mesh?"
+	"gtk-cancel"	"_Keep"	"gtk-ok"	"_Delete")
+
+(confirmation_dialog	"SplitMeshCullDialog"
+	"gtk-dialog-question"
+	"You have the option to cull or duplicate the selected faces\n from the current mesh.\n"
+	"Would you like to duplicate or cull the selected faces?"
+	"gtk-cancel"	"_Cull"	"gtk-ok"	"_Duplicate")
+
+(confirmation_dialog	"UVMapDialog"
+	"gtk-dialog-question"
+	"You just generated a UV map using vertex UVs.\n\nSome model formats perfer polygon-mapped UVs, and \nmay not export without being polymapped.\n"
+	"Would you like to promote it to ploymapped texcoords per face?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Promote")
+
+(confirmation_dialog	"ExitWarningDialog"
+	"gtk-dialog-question"
+	"If you exit you will lose any unsaved data."
+	"Would you still like to exit?"
+	"gtk-cancel"	"_Cancel"	"gtk-quit"	"_Exit")
+
+
 (dialog "Freyja :: Help" eHelpDialog 0
 	(vbox 0 0 0 0 0
 		(label2 "

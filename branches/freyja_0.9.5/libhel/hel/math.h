@@ -19,9 +19,8 @@
  * Mongoose - Created
  ================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_MATH_H
-#define GUARD__FREYJA_MONGOOSE_MATH_H
+#ifndef GUARD__HEL_MATH_H
+#define GUARD__HEL_MATH_H
 
 #define HEL_PI           3.14159265358979323846  /* pi */
 #define HEL_PI_OVER_2    1.57079632679489661923  /* pi/2 */
@@ -34,6 +33,8 @@
 #define HEL_DEG_TO_RAD(x) ((x) * HEL_PI_OVER_180)
 
 #define HEL_VEC3_COPY(in, out) (out[0] = in[0], out[1] = in[1], out[2] = in[2])
+
+#define helSquare(a) a * a
 
 extern "C" {
 
@@ -49,6 +50,14 @@ typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
 
+
+// Required for sincosf
+#ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#endif
+
+#include <math.h>
+
 //FIXME... just implement it here already
 #ifdef sincosf
 #   define helSinCosf sincosf
@@ -56,7 +65,12 @@ typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
 #   define helSinCosf(a, s, c) *s = sin(a); *c = cos(a) 
 #endif
 
-char *helVersionInfo();
+const char *helVersionInfo();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns string with library version information.
+ *
+ ------------------------------------------------------*/
 
 vec_t helIntersectionOfAbstractSpheres(vec3_t centerA, vec_t radiusA,
 													vec3_t centerB, vec_t radiusB);
@@ -170,9 +184,55 @@ vec_t helRadToDeg(vec_t rad);
  ------------------------------------------------------*/
 
 vec_t helRandomNum(vec_t from, vec_t to);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns random float between <from> - <to>
+ *
+ ------------------------------------------------------*/
 
-/* Some cruft for ye olde mtk3d compatibility */
+
+/// Matrices ///////////////////////////////////////////
+
+void helMatrixCopy(matrix_t &source, matrix_t &dest);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Copys value of source to dest
+ *
+ ------------------------------------------------------*/
+
+void helMatrixMultiply(const matrix_t &a, const matrix_t &b, matrix_t &result);
+/*------------------------------------------------------
+ * Pre  : Multiplies matrices a and b ( column-major )
+ *        Neither a or b is also the result
+ *
+ * Post : Sets resultant matrix value ( result )
+ *        
+ * Note : Post multiplying column-major will give you row-major
+ *
+ ------------------------------------------------------*/
+
+void helVectorMatrixMult3v(matrix_t m, vec3_t v, vec3_t result);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ *
+ ------------------------------------------------------*/
+
+void helGenericVectorMatrixMult4dv(double *matrix, double *v, double *result);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Some cruft for ye olde mtk3d compatibility
+ *
+ ------------------------------------------------------*/
+
 void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4]);
+/*------------------------------------------------------
+ * Pre  : Multiplies <v> vector (double[4]) and <matrix>
+ *
+ * Post : Returns <result> vector, 
+ *        <v> and <result> maybe be the same vector
+ *
+ ------------------------------------------------------*/
 
 }
 

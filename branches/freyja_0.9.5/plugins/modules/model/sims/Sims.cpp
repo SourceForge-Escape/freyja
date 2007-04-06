@@ -299,6 +299,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("sims");
 	freyjaPluginDescription1s("SIMS Pak (*.iff)");
 	freyjaPluginAddExtention1s("*.iff");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
