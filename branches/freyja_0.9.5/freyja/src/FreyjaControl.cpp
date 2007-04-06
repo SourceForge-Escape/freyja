@@ -234,6 +234,36 @@ void FreyjaControl::SetZoom(float zoom)
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+void FreyjaControl::AttachMethodListeners()
+{
+	CreateListener("eDelete", &FreyjaControl::DeleteSelectedObject);
+	CreateListener("eAddObject", &FreyjaControl::CreateObject);
+	CreateListener("eInfo", &FreyjaControl::PrintInfo);
+	CreateListener("eSetKeyFrame", &FreyjaControl::SetKeyFrame);
+
+	CreateListener("eCloseFile", &FreyjaControl::CloseFile);
+	CreateListener("eNewFile", &FreyjaControl::NewFile);
+	CreateListener("eExportFile", &FreyjaControl::ExportFile);
+	CreateListener("eImportFile", &FreyjaControl::ImportFile);
+	CreateListener("eSaveFile", &FreyjaControl::SaveFile);
+	CreateListener("eOpenFile", &FreyjaControl::OpenFile);
+	CreateListener("eSaveFileModel", &FreyjaControl::SaveFileModel);
+	CreateListener("eOpenFileModel", &FreyjaControl::OpenFileModel);
+	CreateListener("eRevertFile", &FreyjaControl::RevertFile);
+
+	CreateListener("eShutdown", &FreyjaControl::Shutdown);
+
+	CreateListener("eDupeObject", &FreyjaControl::DuplicateSelectedObject);
+	CreateListener("eMergeObject", &FreyjaControl::MergeSelectedObjects);
+	CreateListener("eSplitObject", &FreyjaControl::SplitSelectedObject);
+	CreateListener("ePaste", &FreyjaControl::PasteSelectedObject);
+	CreateListener("eCopy", &FreyjaControl::CopySelectedObject);
+
+
+	
+}
+
+
 // Mongoose - 2006.07.31 
 // More crap for old system to be backported then rewritten properly  =/
 void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
@@ -2195,8 +2225,6 @@ bool FreyjaControl::event(int event, vec_t value)
 
 bool FreyjaControl::event(int command)
 {
-	unsigned int i;
-
 	if (ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
 		return true;
 
@@ -2225,214 +2253,6 @@ bool FreyjaControl::event(int command)
 		extern void mgtk_event_dialog_visible_set(int dialog, int visible);
 		mgtk_event_dialog_visible_set(eAboutDialog, 1);
 		break;   
-
-	case eCloseFile:
-		if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
-		{
-			Clear();
-			freyja_print("Closing Model...");
-			freyja_set_main_window_title(BUILD_NAME);
-			mCurrentlyOpenFilename = String();
-			mCleared = true;
-		}
-		break;
-
-
-	case eNewFile:
-		switch (GetControlScheme())
-		{
-		case eScheme_Animation:
-			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-						 __FILE__, __LINE__, __func__);
-			break;
-
-		case eScheme_Model:
-			if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
-			{
-				Clear();
-				freyja_print("Closing Model...");
-				freyja_set_main_window_title(BUILD_NAME);
-				mCurrentlyOpenFilename = String();
-				mCleared = true;
-			}
-			break;
-
-		case eScheme_Material:
-			i = freyjaMaterialCreate();
-			freyja_print("New material [%i] created.", i);
-			break;
-
-		default:
-			;
-		}
-		break;
-
-
-	/* File dialog operations */
-	case eExportFile:
-		freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Export model...");
-		freyja_print("Exporting is handled from Save As using file extentions...");
-		break;
-
-	case eImportFile:
-		freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Import model...");
-		freyja_print("Importing is handled automatically from Open...");
-		break;
-
-	case eSaveFile:
-		switch (GetControlScheme())
-		{
-		case eScheme_Animation:
-			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-						 __FILE__, __LINE__, __func__);
-			break;
-		case eScheme_Model:
-#if 1
-			if (mCleared) // safety
-			{
-				freyja_print("We don't save empty files anymore");
-				break;
-			}
-
-			if (mCurrentlyOpenFilename.Empty())
-			{
-				freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
-			}
-			else
-			{
-				{
-					const char *s = mCurrentlyOpenFilename.GetCString();
-					
-					if (SaveModel(s))
-					{
-						freyja_print("Model '%s' Saved", s);
-					}
-					else
-					{
-						freyja_print("Model '%s' failed to save", s);
-					}
-				}
-			}
-#endif
-			break;
-
-		case eScheme_Material:
-			freyja_event_file_dialog(FREYJA_MODE_SAVE_MATERIAL, "Save material as...");
-			break;
-
-		default:
-			;
-		}
-		break;
-
-
-	case eOpenFile:
-		switch (GetControlScheme())
-		{
-		case eScheme_Animation:
-			freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-						 __FILE__, __LINE__, __func__);
-			break;
-
-		case eScheme_UV:
-			freyja_event_file_dialog(FREYJA_MODE_LOAD_TEXTURE, "Open texture...");
-			break;
-
-		case eScheme_Model:
-			if (!mCleared)
-			{
-				if (mgtk::ExecuteConfirmationDialog("CloseToOpenFileDialog"))
-				{
-					Clear();
-					freyja_print("Closing Model...");
-					freyja_set_main_window_title(BUILD_NAME);
-
-				
-					freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
-				}
-			}
-			else
-			{
-				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
-			}
-			break;
-
-		case eScheme_Material:
-			freyja_event_file_dialog(FREYJA_MODE_LOAD_MATERIAL, "Open material...");
-			break;
-		}
-		break;
-
-#if 1
-	case eSaveFileModel:
-		if (mCleared) // safety
-		{
-			freyja_print("No changes to be saved.");
-			break;
-		}
-
-		if (mCurrentlyOpenFilename.Empty())
-		{
-			freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
-		}
-		else
-		{
-			{
-				const char *s = mCurrentlyOpenFilename.GetCString();
-				if (SaveModel(s))
-					freyja_print("Model '%s' Saved", s);
-				else
-					freyja_print("Model '%s' failed to save", s);
-			}
-		}
-		break;
-#endif
-
-	case eOpenFileModel:
-		if (!mCleared)
-		{
-			if (mgtk::ExecuteConfirmationDialog("CloseToOpenFileDialog"))
-			{
-				Clear();
-				freyja_print("Closing Model...");
-				freyja_set_main_window_title(BUILD_NAME);
-
-				
-				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
-			}
-		}
-		else
-		{
-			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
-		}
-		break;
-
-
-	case eRevertFile:
-		if (mCurrentlyOpenFilename.Empty())
-		{
-			freyja_print("Revert requires a model being previously loaded");
-			break;
-		}
-
-		if (mgtk::ExecuteConfirmationDialog("RevertFileDialog"))
-		{
-			Clear();
-			freyja_print("Reverting Model...");
-			freyja_set_main_window_title(BUILD_NAME);
-
-			if (LoadModel(mCurrentlyOpenFilename.GetCString()))
-				mCleared = false;
-		}
-		break;
-
-	case eShutdown:
-		if (mCleared || mgtk::ExecuteConfirmationDialog("ExitWarningDialog"))
-		{
-			SaveUserPreferences();
-			freyja_event_exit();
-		}
-		break;
 
 	case eFullscreen:
 		mFullScreen = !mFullScreen;
@@ -6072,6 +5892,227 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 }
 
 
+void FreyjaControl::CloseFile()
+{
+	if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
+	{
+		Clear();
+		freyja_print("Closing Model...");
+		freyja_set_main_window_title(BUILD_NAME);
+		mCurrentlyOpenFilename = String();
+		mCleared = true;
+	}
+}
+
+
+void FreyjaControl::NewFile()
+{
+	switch (GetControlScheme())
+	{
+	case eScheme_Animation:
+		freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+					 __FILE__, __LINE__, __func__);
+		break;
+		
+	case eScheme_Model:
+		if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
+		{
+			Clear();
+			freyja_print("Closing Model...");
+			freyja_set_main_window_title(BUILD_NAME);
+			mCurrentlyOpenFilename = String();
+			mCleared = true;
+		}
+		break;
+		
+	case eScheme_Material:
+		{
+			unsigned int i = freyjaMaterialCreate();
+			freyja_print("New material [%i] created.", i);
+		}
+		break;
+		
+	default:
+		;
+	}
+}
+
+
+void FreyjaControl::ExportFile()
+{
+	freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Export model...");
+	freyja_print("Exporting is handled from Save As using file extentions...");
+}
+
+
+void FreyjaControl::ImportFile()
+{
+	freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Import model...");
+	freyja_print("Importing is handled automatically from Open...");
+}
+
+
+void FreyjaControl::SaveFile()
+{
+	switch (GetControlScheme())
+	{
+	case eScheme_Animation:
+		freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+					 __FILE__, __LINE__, __func__);
+		break;
+
+	case eScheme_Model:
+#if 1
+		if (mCleared) // safety
+		{
+			freyja_print("We don't save empty files anymore");
+			break;
+		}
+		
+		if (mCurrentlyOpenFilename.Empty())
+		{
+			freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
+		}
+		else
+		{
+			{
+				const char *s = mCurrentlyOpenFilename.GetCString();
+				
+				if (SaveModel(s))
+				{
+					freyja_print("Model '%s' Saved", s);
+				}
+				else
+				{
+					freyja_print("Model '%s' failed to save", s);
+				}
+			}
+		}
+#endif
+		break;
+
+	case eScheme_Material:
+		freyja_event_file_dialog(FREYJA_MODE_SAVE_MATERIAL, "Save material as...");
+		break;
+		
+	default:
+		;
+	}
+}
+	
+
+void FreyjaControl::OpenFile()
+{
+	switch (GetControlScheme())
+	{
+	case eScheme_Animation:
+		freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+					 __FILE__, __LINE__, __func__);
+		break;
+		
+	case eScheme_UV:
+		freyja_event_file_dialog(FREYJA_MODE_LOAD_TEXTURE, "Open texture...");
+		break;
+		
+	case eScheme_Model:
+		if (!mCleared)
+		{
+			if (mgtk::ExecuteConfirmationDialog("CloseToOpenFileDialog"))
+			{
+				Clear();
+				freyja_print("Closing Model...");
+				freyja_set_main_window_title(BUILD_NAME);
+				
+				
+				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+			}
+		}
+		else
+		{
+			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+		}
+		break;
+		
+	case eScheme_Material:
+		freyja_event_file_dialog(FREYJA_MODE_LOAD_MATERIAL, "Open material...");
+		break;
+	}
+}
+
+	
+void FreyjaControl::SaveFileModel()
+{
+	if (mCleared) // safety
+	{
+		freyja_print("No changes to be saved.");
+		return;
+	}
+	
+	if (mCurrentlyOpenFilename.Empty())
+	{
+		freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
+	}
+	else
+	{
+		{
+			const char *s = mCurrentlyOpenFilename.GetCString();
+			if (SaveModel(s))
+				freyja_print("Model '%s' Saved", s);
+			else
+				freyja_print("Model '%s' failed to save", s);
+		}
+	}
+}
+
+
+void FreyjaControl::OpenFileModel()
+{
+	if (!mCleared)
+	{
+		if (mgtk::ExecuteConfirmationDialog("CloseToOpenFileDialog"))
+		{
+			Clear();
+			freyja_print("Closing Model...");
+			freyja_set_main_window_title(BUILD_NAME);
+				
+			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+		}
+	}
+	else
+	{
+		freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+	}
+}
+	
+	
+void FreyjaControl::RevertFile()
+{
+	if (mCurrentlyOpenFilename.Empty())
+	{
+		freyja_print("Revert requires a model being previously loaded");
+	}
+	else if (mgtk::ExecuteConfirmationDialog("RevertFileDialog"))
+	{
+		Clear();
+		freyja_print("Reverting Model...");
+		freyja_set_main_window_title(BUILD_NAME);
+		
+		if (LoadModel(mCurrentlyOpenFilename.GetCString()))
+			mCleared = false;
+	}
+}
+
+
+void FreyjaControl::Shutdown()
+{
+	if (mCleared || mgtk::ExecuteConfirmationDialog("ExitWarningDialog"))
+	{
+		SaveUserPreferences();
+		freyja_event_exit();
+	}
+}
+
+
 ////////////////////////////////////////////////////////////
 // Non-object Event Handler Functions
 ////////////////////////////////////////////////////////////
@@ -6569,24 +6610,6 @@ void FreyjaControl::CreateListener(const char *name, bMethodPtr ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
-}
-
-
-void FreyjaControl::AttachMethodListeners()
-{
-	CreateListener("eDelete", &FreyjaControl::DeleteSelectedObject);
-	CreateListener("eAddObject", &FreyjaControl::CreateObject);
-	CreateListener("eInfo", &FreyjaControl::PrintInfo);
-	CreateListener("eSetKeyFrame", &FreyjaControl::SetKeyFrame);
-
-	CreateListener("eDupeObject", &FreyjaControl::DuplicateSelectedObject);
-	CreateListener("eMergeObject", &FreyjaControl::MergeSelectedObjects);
-	CreateListener("eSplitObject", &FreyjaControl::SplitSelectedObject);
-	CreateListener("ePaste", &FreyjaControl::PasteSelectedObject);
-	CreateListener("eCopy", &FreyjaControl::CopySelectedObject);
-
-
-	
 }
 
 
