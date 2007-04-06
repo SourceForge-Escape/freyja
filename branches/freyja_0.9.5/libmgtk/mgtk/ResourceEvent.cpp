@@ -146,6 +146,13 @@ bool ResourceEvent::action(void (*func)(mgtk_mouse_event_t &))
 }
 
 
+bool ResourceEvent::drop(unsigned long event)
+{
+	ResourceEvent *e = getEventById(event);
+	delete e;
+}
+
+
 bool ResourceEvent::listen(unsigned long event)
 {
 	ResourceEvent *e = getEventById(event);

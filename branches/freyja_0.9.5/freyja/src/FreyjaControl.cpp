@@ -2641,29 +2641,7 @@ bool FreyjaControl::event(int command)
 					 ObjectTypeToString(mObjectMode).c_str());
 		break;
 
-	case eDelete:
-		DeleteSelectedObject();
-		freyja_event_gl_refresh();
-		break;
 
-	case eAddObject:
-		addObject();
-		mCleared = false;
-		break;
-
-	case eDupeObject:
-		DuplicateSelectedObject();
-		break;
-
-	case eSplitObject:
-		SplitSelectedObject();
-		break;
-
-#if 0
-	case eMergeObject:
-		MergeSelectedObjects();
-		break;
-#endif
 
 	case eSelectAll:
 		freyja_print("Select All is not avalible in this build");
@@ -2817,7 +2795,7 @@ bool FreyjaControl::event(int command)
 		break;
 	case CMD_BONE_NEW:
 		mObjectMode = tBone;
-		addObject();
+		CreateObject();
 		mCleared = false;
 		//freyja_print("Select new child bone placement directly...");
 		//mEventMode = BONE_ADD_MODE;
@@ -2907,7 +2885,7 @@ bool FreyjaControl::event(int command)
 
 	case eMeshNew:
 		mObjectMode = tMesh;
-		addObject();
+		CreateObject();
 		mCleared = false;
 		break;
 	case eMeshDelete:
@@ -4309,6 +4287,8 @@ void FreyjaControl::DeleteSelectedObject()
 		freyja_print("%s Object type '%s' is not supported.", 
 					 __func__, ObjectTypeToString(mObjectMode).GetCString());
 	}
+
+	freyja_event_gl_refresh();
 }
 
 
@@ -4332,7 +4312,7 @@ void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
 }
 
 
-void FreyjaControl::addObject()
+void FreyjaControl::CreateObject()
 {
 	switch (mObjectMode)
 	{
@@ -4394,6 +4374,9 @@ void FreyjaControl::addObject()
 	default:
 		freyja_print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
 	}
+
+	mCleared = false;
+	freyja_event_gl_refresh();
 }
 
 
@@ -6591,6 +6574,31 @@ void eCleanupVertices()
 }
 
 
+void FreyjaControl::CreateListener(const char *name, MethodPtr ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+}
+
+
+void FreyjaControl::AttachMethodListeners()
+{
+	CreateListener("eDelete", &FreyjaControl::DeleteSelectedObject);
+	CreateListener("eAddObject", &FreyjaControl::CreateObject);
+
+	MethodDelegate *d;
+
+	d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, &FreyjaControl::DuplicateSelectedObject);
+	ResourceEventDelegate::add("eDupeObject", d);
+
+	d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, &FreyjaControl::MergeSelectedObjects);
+	ResourceEventDelegate::add("eMergeObject", d);
+
+	d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, &FreyjaControl::SplitSelectedObject);
+	ResourceEventDelegate::add("eSplitObject", d);
+}
+
+
 void FreyjaControlEventsAttach()
 {
 	ResourceEventCallback2::add("eEnableMaterialFragment", &eNopControl);
@@ -6777,8 +6785,7 @@ void FreyjaViewEventsAttach()
 
 	//ResourceEventCallbackVec::add("eSetZoomLevel", &eSetZoomLevel);
 
-	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(FreyjaControl::mInstance, &FreyjaControl::MergeSelectedObjects);
-	ResourceEventDelegate::add("eMergeObject", d);
+
 }
 
 
