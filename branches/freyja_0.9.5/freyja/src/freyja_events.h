@@ -46,8 +46,6 @@ typedef enum {
 	eModeAutoKeyframe,
 
 	/* Event ids ( minors ) */
-	eDebugBackend,
-	eDebug,
 	eMaterialMultiTex,
 	eMaterialTex,
 	ePolygonSize,
@@ -59,9 +57,6 @@ typedef enum {
 	eOpenGLNormalize,
 	eOpenGLBlend,
 	eGenerateNormals,
-	eTranslateUV,
-	eRotateUV,
-	eScaleUV,
 	eOpenTexture,
 	eTextureSlotLoad,
 	eOpenShader,
