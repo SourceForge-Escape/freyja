@@ -301,7 +301,6 @@ void freyja_init_application_plugins(const char *dir)
 void freyja_handle_application_window_close()
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//FreyjaControl::mInstance->event(eShutdown);
 	FreyjaControl::mInstance->Shutdown();
 }
 
@@ -435,10 +434,11 @@ void freyja_handle_event1u(int event, unsigned int value)
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
-	if (!FreyjaControl::mInstance->event(event, value))
+	if (//!ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value) &&
+		!FreyjaControl::mInstance->event(event, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
-			freyja_print("  mgtk_handle_event1u spawned previous unhandled event %i:%i", eEvent, event);
+			freyja_print("!Event(%i, %i) dropped.", eEvent, event);
 	}
 }
 
@@ -1502,9 +1502,310 @@ void eSetPolygonTexture()
 }
 
 
+void eLightPosX(vec_t value)
+{
+	uint32 light = 0; // GetCurrentLight();
+	vec3_t pos;
+	freyjaGetLightPosition4v(light, pos);
+	pos[0] = value;
+	freyjaLightPosition4v(light, pos);
+	freyja_event_gl_refresh(); // Dirty();
+}
+
+
+void eLightPosY(vec_t value)
+{
+	uint32 light = 0; // GetCurrentLight();
+	vec3_t pos;
+	freyjaGetLightPosition4v(light, pos);
+	pos[1] = value;
+	freyjaLightPosition4v(light, pos);
+	freyja_event_gl_refresh(); // Dirty();
+}
+
+
+void eLightPosZ(vec_t value)
+{
+	uint32 light = 0; // GetCurrentLight();
+	vec3_t pos;
+	freyjaGetLightPosition4v(light, pos);
+	pos[2] = value;
+	freyjaLightPosition4v(light, pos);
+	freyja_event_gl_refresh(); // Dirty();
+}
+
+
+void eBlendSrc(uint32 value)
+{
+	index_t material = freyjaGetCurrentMaterial();
+
+	switch (value)
+	{
+	case 0:
+		freyjaMaterialBlendSource(material, GL_ZERO);
+		break;
+
+	case 1:
+		freyjaMaterialBlendSource(material, GL_ONE);
+		break;
+
+	case 2:
+		freyjaMaterialBlendSource(material, GL_SRC_COLOR);
+		break;
+
+	case 3:
+		freyjaMaterialBlendSource(material, GL_ONE_MINUS_SRC_COLOR);
+		break;
+
+	case 4:
+		freyjaMaterialBlendSource(material, GL_DST_COLOR);
+		break;
+
+	case 5:
+		freyjaMaterialBlendSource(material, GL_ONE_MINUS_DST_COLOR);
+		break;
+
+	case 6:
+		freyjaMaterialBlendSource(material, GL_SRC_ALPHA);
+		break;
+
+	case 7:
+		freyjaMaterialBlendSource(material, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+
+	case 8:
+		freyjaMaterialBlendSource(material, GL_DST_ALPHA);
+		break;
+
+	case 9:
+		freyjaMaterialBlendSource(material, GL_ONE_MINUS_DST_ALPHA);
+		break;
+
+	case 10:
+		freyjaMaterialBlendSource(material, GL_SRC_ALPHA_SATURATE);
+		break;
+
+	case 11:
+		freyjaMaterialBlendSource(material, GL_CONSTANT_COLOR);
+		break;
+
+	case 12:
+		freyjaMaterialBlendSource(material, GL_ONE_MINUS_CONSTANT_COLOR);
+		break;
+
+	case 13:
+		freyjaMaterialBlendSource(material, GL_CONSTANT_ALPHA);
+		break;
+
+	case 14:
+		freyjaMaterialBlendSource(material, GL_ONE_MINUS_CONSTANT_ALPHA);
+		break;
+
+	default:
+		freyja_print("Unknown Blend Source event %i.", value);
+	}
+		
+	freyja_event_gl_refresh();
+}
+
+
+void eBlendDest(uint32 value)
+{
+	index_t material = freyjaGetCurrentMaterial();
+
+	switch (value)
+	{
+	case 0:
+		freyjaMaterialBlendDestination(material, GL_ZERO);
+		break;
+
+	case 1:
+		freyjaMaterialBlendDestination(material, GL_ONE);
+		break;
+
+	case 2:
+		freyjaMaterialBlendDestination(material, GL_SRC_COLOR);
+		break;
+
+	case 3:
+		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_SRC_COLOR);
+		break;
+
+	case 4:
+		freyjaMaterialBlendDestination(material, GL_DST_COLOR);
+		break;
+
+	case 5:
+		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_DST_COLOR);
+		break;
+
+	case 6:
+		freyjaMaterialBlendDestination(material, GL_SRC_ALPHA);
+		break;
+
+	case 7:
+		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+
+	case 8:
+		freyjaMaterialBlendDestination(material, GL_DST_ALPHA);
+		break;
+
+	case 9:
+		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_DST_ALPHA);
+		break;
+
+	case 10:
+		freyjaMaterialBlendDestination(material, GL_SRC_ALPHA_SATURATE);
+		break;
+
+	case 11:
+		freyjaMaterialBlendDestination(material, GL_CONSTANT_COLOR);
+		break;
+
+	case 12:
+		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_CONSTANT_COLOR);
+		break;
+
+	case 13:
+		freyjaMaterialBlendDestination(material, GL_CONSTANT_ALPHA);
+		break;
+
+	case 14:
+		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_CONSTANT_ALPHA);
+		break;
+
+	default:
+		freyja_print("Unknown Blend Dest event %i.", value);
+	}
+
+	freyja_event_gl_refresh();
+}
+
+void eMaterialMultiTex(uint32 value)
+{
+	if (value)
+	{
+		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+							  fFreyjaMaterial_DetailTexture);
+	}
+	else
+	{
+		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+								fFreyjaMaterial_DetailTexture);
+	}
+	freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
+	freyja_event_gl_refresh();
+}
+
+
+void eOpenGLNormalize(uint32 value)
+{
+	if (value)
+	{
+		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+							  fFreyjaMaterial_Normalize);
+	}
+	else
+	{
+		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+								fFreyjaMaterial_Normalize);
+	}
+
+	freyja_print("OpenGL normalization is [%s]", value ? "ON" : "OFF");
+	freyja_event_gl_refresh();
+}
+
+
+void eOpenGLBlend(uint32 value)
+{
+	if (value)
+	{
+		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+							  fFreyjaMaterial_Blending);
+	}
+	else
+	{
+		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+								fFreyjaMaterial_Blending);
+	}
+
+	freyja_print("OpenGL blending [%s]", value ? "ON" : "OFF");
+	freyja_event_gl_refresh();
+}
+
+
+void eMaterialTex(uint32 value)
+{
+	if (value)
+	{
+		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
+							  fFreyjaMaterial_Texture);
+	}
+	else
+	{
+		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
+								fFreyjaMaterial_Texture);
+	}
+
+	freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
+	freyja_event_gl_refresh();
+}
+
+
+void ePolygonSize(uint32 value)
+{
+	FreyjaControl::mInstance->SetFaceEdgeCount(value);
+	freyja_print("Polygons creation using %i sides", 
+				 FreyjaControl::mInstance->GetFaceEdgeCount());
+}
+
+void eSelectMaterial(uint32 value)
+{
+	// Very hacky
+	static uint32 event = ResourceEvent::GetResourceIdBySymbol("eSelectMaterial");
+
+	if (!freyja_event_set_range(event, value, 0, freyjaGetMaterialCount()-1))
+	{
+		if (value != freyjaGetCurrentMaterial())
+		{
+			freyjaCurrentMaterial(value);
+			freyja_print("Selected material[%i] = '%s'.", value,
+						 freyjaGetMaterialName(value));
+			freyja_refresh_material_interface();
+			freyja_event_gl_refresh();
+		}
+
+		// This is here to support the obsolete idea of texture -> mesh
+		// binding, since we do material -> mesh binding now
+		if (value != FreyjaControl::mInstance->GetSelectedTexture())
+		{
+			FreyjaControl::mInstance->SetSelectedTexture(value);
+			freyja_event_gl_refresh();
+		}
+	}
+}
+
+
+
 void FreyjaMiscEventsAttach()
 {
 	// ResourceEventCallback::add("", &);
+
+	ResourceEventCallbackUInt::add("eMaterialMultiTex", &eMaterialMultiTex);
+	ResourceEventCallbackUInt::add("eOpenGLNormalize", &eOpenGLNormalize);
+	ResourceEventCallbackUInt::add("eOpenGLBlend", &eOpenGLBlend);
+	ResourceEventCallbackUInt::add("ePolygonSize", &ePolygonSize);
+	ResourceEventCallbackUInt::add("eSelectMaterial", &eSelectMaterial);
+	ResourceEventCallbackUInt::add("eMaterialTex", &eMaterialTex);
+
+	ResourceEventCallbackUInt::add("eBlendSrc", &eBlendSrc);
+	ResourceEventCallbackUInt::add("eBlendDest", &eBlendDest);
+
+	// FIXME, These light events don't appear to trigger
+	ResourceEventCallbackVec::add("eLightPosX", &eLightPosX);
+	ResourceEventCallbackVec::add("eLightPosY", &eLightPosY);
+	ResourceEventCallbackVec::add("eLightPosZ", &eLightPosZ);
 
 	ResourceEventCallback::add("eAnimationNext", &eAnimationNext);
 	ResourceEventCallback::add("eAnimationPrev", &eAnimationPrev);
@@ -1716,18 +2017,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eShaderSlotLoadToggle", eShaderSlotLoadToggle);
 	r.RegisterInt("eSetMaterialShader", eSetMaterialShader);
 	r.RegisterInt("eSetMaterialShaderFilename", eSetMaterialShaderFilename);
-	r.RegisterInt("eBlendDest", eBlendDest);
-	r.RegisterInt("eBlendSrc", eBlendSrc);
-	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
-	r.RegisterInt("eMaterialTex", eMaterialTex);
-	r.RegisterInt("ePolygonSize", ePolygonSize);
-	r.RegisterInt("eGenMeshCount", eGenMeshCount);
-	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
-	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
-	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
 	// Menus
 	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
@@ -1747,10 +2039,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eRotate_X", eRotate_X);
 	r.RegisterInt("eRotate_Y", eRotate_Y);
 	r.RegisterInt("eRotate_Z", eRotate_Z);
-	r.RegisterInt("eSelectMaterial", eSelectMaterial);
-	r.RegisterInt("eLightPosX", eLightPosX);
-	r.RegisterInt("eLightPosY", eLightPosY);
-	r.RegisterInt("eLightPosZ", eLightPosZ);
 
 	// Iterator
 	r.RegisterInt("eModelIterator", eModelIterator);
@@ -2332,23 +2620,27 @@ void freyja_refresh_material_interface()
 
 	uint32 flags = freyjaGetMaterialFlags(mIndex);
 
+	// FIXME: These need to be cached
+	uint32 eOpenGLBlendId = ResourceEvent::GetResourceIdBySymbol("eOpenGLBlend");
+	uint32 eMaterialTexId = ResourceEvent::GetResourceIdBySymbol("eMaterialTex");
+
 	if (flags & fFreyjaMaterial_Blending)
 	{
-		mgtk_togglebutton_value_set(eOpenGLBlend, true);
+		mgtk_togglebutton_value_set(eOpenGLBlendId, true);
 	}
 	else
 	{
-		mgtk_togglebutton_value_set(eOpenGLBlend, false);
+		mgtk_togglebutton_value_set(eOpenGLBlendId, false);
 	}
 
-	mgtk_togglebutton_value_set(eMaterialTex, false);
+	mgtk_togglebutton_value_set(eMaterialTexId, false);
 	if (flags & fFreyjaMaterial_Texture)
 	{
-		mgtk_togglebutton_value_set(eMaterialTex, true);
+		mgtk_togglebutton_value_set(eMaterialTexId, true);
 	}
 	else
 	{
-		mgtk_togglebutton_value_set(eMaterialTex, false);
+		mgtk_togglebutton_value_set(eMaterialTexId, false);
 	}
 
 	// Just go ahead and render a new frame in case the function calling this fails to do so

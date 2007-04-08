@@ -272,7 +272,7 @@ class FreyjaControl
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedTexture() { return mSelectedTexture; }
-	void SetSelectedTexture(uint32 i) { mSelectedTexture = i; }
+	void SetSelectedTexture(uint32 i) { mSelectedTexture = i; Dirty(); }
 	uint32 mSelectedTexture;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -329,8 +329,14 @@ class FreyjaControl
 	 ------------------------------------------------------*/
 
 	vec_t GetGenMeshHeight() { return mGenMeshHeight; }
+	void SetGenMeshHeight(vec_t v) { mGenMeshHeight = v; }
+
 	uint32 GetGenMeshCount() { return mGenMeshCount; }
+	void SetGenMeshCount(uint32 i) { mGenMeshCount = i; }
+
 	uint32 GetGenMeshSegements() { return mGenMeshSegements; }
+	void SetGenMeshSegements(uint32 i) { mGenMeshSegements = i; }
+
 
 
 	////////////////////////////////////////////////////////////

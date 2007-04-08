@@ -479,7 +479,7 @@
 
 				(hbox 1 0 0 1 0 
 					(label "Material index: " 0.0 0.5) 
-					(spinbutton 0 0 100 503))
+					(spinbutton 0 0 100 eSetMaterial))
 
 				;; Material selector / name editor
 				(hbox 0 1 0 1 1
@@ -651,7 +651,7 @@
 	
 				(hbox 1 0 0 1 0 
 					(label "Material index: " 0.0 0.5) 
-					(spinbutton 0 0 100 503))
+					(spinbutton 0 0 100 eSetMaterial))
 
 				(hbox 1 1 0 1 1	(label "Set material for..." 0.0 0.5))
 				(hbox 1 1 0 1 1	(hsep))
