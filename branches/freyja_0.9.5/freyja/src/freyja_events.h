@@ -46,15 +46,8 @@ typedef enum {
 	eModeAutoKeyframe,
 
 	/* Event ids ( minors ) */
-	eMaterialMultiTex,
-	eMaterialTex,
-	ePolygonSize,
-	eGenMeshCount,
-	eGenMeshSegements,
 	eGeneratePatchMesh,
-	eSetMaterialTexture,	
-	eOpenGLNormalize,
-	eOpenGLBlend,
+	eSetMaterialTexture,
 	eGenerateNormals,
 	eOpenTexture,
 	eTextureSlotLoad,
@@ -64,7 +57,6 @@ typedef enum {
 	eSetMaterialShaderFilename,
 
 	// Widget interaction events
-	eSelectMaterial,
 	eMove_X,
 	eMove_Y,
 	eMove_Z,
@@ -77,9 +69,6 @@ typedef enum {
 	eMoveBone_X,
 	eMoveBone_Y,
 	eMoveBone_Z,
-	eLightPosX,
-	eLightPosY,
-	eLightPosZ,
 	
 	// Colors
 	eColorMaterialAmbient,
@@ -111,9 +100,7 @@ typedef enum {
 	eTransformMenu,
 	eObjectMenu,
 	eBlendDestMenu,
-	eBlendDest,
 	eBlendSrcMenu,
-	eBlendSrc,
 
 	// Text events
 	eSkeletonName,

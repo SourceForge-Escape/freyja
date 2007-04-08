@@ -249,8 +249,13 @@ void FreyjaControl::AttachMethodListeners()
 {
 	// CreateListener("", &FreyjaControl::);
 
+	CreateListener("eSetMaterial", &FreyjaControl::SetSelectedTexture);
+
 	CreateListener("eZoom", &FreyjaControl::SetZoom);
-	CreateListener("eGenMeshHeight", &FreyjaControl::eGenMeshHeight);
+
+	CreateListener("eGenMeshHeight", &FreyjaControl::SetGenMeshHeight);
+	CreateListener("eGenMeshCount", &FreyjaControl::SetGenMeshCount);
+	CreateListener("eGenMeshSegements", &FreyjaControl::SetGenMeshSegements);
 
 	CreateListener("eRenderWireframe", &FreyjaControl::eRenderWireframe);
 	CreateListener("eRenderFace", &FreyjaControl::eRenderFace);
@@ -2030,219 +2035,13 @@ void FreyjaControl::VertexCombine()
 
 bool FreyjaControl::event(int event, unsigned int value)
 {
-	vec_t x, y, z;
-
-
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
 
+	vec_t x, y, z;
+
 	switch (event)
 	{
-	case 503:
-		if (value != GetSelectedTexture())
-		{
-			SetSelectedTexture(value);
-			freyja_event_gl_refresh();
-		}
-		break;
-
-	case eBlendSrc:
-		switch (value+1000)
-		{
-		case 1000:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ZERO);
-			break;
-		case 1001:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE);
-			break;
-		case 1002:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
-			break;
-		case 1003:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
-			break;
-		case 1004:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_COLOR);
-			break;
-		case 1005:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
-			break;
-		case 1006:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
-			break;
-		case 1007:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
-			break;
-		case 1008:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
-			break;
-		case 1009:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
-			break;
-		case 1010:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
-			break;
-		case 1011:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
-			break;
-		case 1012:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
-			break;
-		case 1013:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
-			break;
-		case 1014:
-			freyjaMaterialBlendSource(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
-			break;
-		}		
-		freyja_event_gl_refresh();
-		break;
-
-	case eBlendDest:
-		switch (value)
-		{
-		case 0:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ZERO);
-			break;
-		case 1:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE);
-			break;
-		case 2:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_COLOR);
-			break;
-		case 3:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_COLOR);
-			break;
-		case 4:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_COLOR);
-			break;
-		case 5:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_COLOR);
-			break;
-		case 6:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA);
-			break;
-		case 7:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_SRC_ALPHA);
-			break;
-		case 8:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_DST_ALPHA);
-			break;
-		case 9:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_DST_ALPHA);
-			break;
-		case 10:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_SRC_ALPHA_SATURATE);
-			break;
-		case 11:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_COLOR);
-			break;
-		case 12:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_COLOR);
-			break;
-		case 13:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_CONSTANT_ALPHA);
-			break;
-		case 14:
-			freyjaMaterialBlendDestination(freyjaGetCurrentMaterial(), GL_ONE_MINUS_CONSTANT_ALPHA);
-			break;
-		}		
-		freyja_event_gl_refresh();
-		break;
-
-	case eMaterialMultiTex:
-		if (value)
-		{
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-								  fFreyjaMaterial_DetailTexture);
-		}
-		else
-		{
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-									fFreyjaMaterial_DetailTexture);
-		}
-		freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case eOpenGLNormalize:
-		if (value)
-		{
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-								  fFreyjaMaterial_Normalize);
-		}
-		else
-		{
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-									fFreyjaMaterial_Normalize);
-		}
-
-		freyja_print("OpenGL normalization is [%s]", value ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-
-	case eOpenGLBlend:
-		if (value)
-		{
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-								  fFreyjaMaterial_Blending);
-		}
-		else
-		{
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-									fFreyjaMaterial_Blending);
-		}
-
-		freyja_print("OpenGL blending [%s]", value ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-
-	case eMaterialTex:
-		if (value)
-		{
-			freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-								  fFreyjaMaterial_Texture);
-		}
-		else
-		{
-			freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-									fFreyjaMaterial_Texture);
-		}
-
-		freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-		break;
-
-	case ePolygonSize:
-		SetFaceEdgeCount(value);
-		freyja_print("Polygons creation using %i sides", GetFaceEdgeCount());
-		break;
-
-	case eSelectMaterial:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetMaterialCount()-1))
-		{
-			if (value != freyjaGetCurrentMaterial())
-			{
-				freyjaCurrentMaterial(value);
-				freyja_print("Selected material[%i] = '%s'.", value,
-							 freyjaGetMaterialName(value));
-				freyja_refresh_material_interface();
-				freyja_event_gl_refresh();
-			}
-
-			// This is here to support the obsolete idea of texture -> mesh
-			// binding, since we do material -> mesh binding now
-			if (value != GetSelectedTexture())
-			{
-				SetSelectedTexture(value);
-				freyja_event_gl_refresh();
-			}
-		}
-		break;
-
-
 	case eBoneIterator:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetBoneCount()))
 		{
@@ -2282,7 +2081,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
-
 	case ePolygonIterator:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetMeshPolygonCount(GetSelectedMesh())))
 		{
@@ -2291,7 +2089,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 			freyja_print("Selecting polygon[%i] ...", value);
 		}
 		break;
-
 
 	case eMeshIterator:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetMeshCount()))
@@ -2303,7 +2100,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 		break;
 
 	case eSetMaterialShader:
-		//SetSelectedShader(value);
 		freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
 		freyja_event_gl_refresh();
 		break;
@@ -2311,18 +2107,7 @@ bool FreyjaControl::event(int event, unsigned int value)
 	case eSetMaterialTexture:
 		SetSelectedTexture(value);
 		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
-		//freyja_print("Material[%i].texture = %i",
-		//			 freyjaGetCurrentMaterial(), 
-		//			 freyjaGetMaterialTexture(freyjaGetCurrentMaterial()));
 		freyja_event_gl_refresh();
-		break;
-
-	case eGenMeshCount:
-		mGenMeshCount = value;
-		break;
-
-	case eGenMeshSegements:
-		mGenMeshSegements = value;
 		break;
 
 	case eModeAutoKeyframe:
@@ -2620,13 +2405,12 @@ void FreyjaControl::eRotateObject(uint32 value)
 
 bool FreyjaControl::event(int event, vec_t value)
 {
-	Vec3 v; 
-	vec4_t color, pos;
-	vec_t x, y, z;
-
-
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
+
+	Vec3 v; 
+	vec4_t color;
+	vec_t x, y, z;
 
 	switch (event)
 	{
@@ -2730,35 +2514,6 @@ bool FreyjaControl::event(int event, vec_t value)
 		freyja_event_gl_refresh();
 		break;
 
-
-	case eLightPosX:
-	case eLightPosY:
-	case eLightPosZ:
-		{
-			int i;
-
-			switch (event)
-			{
-			case eLightPosX:
-				i = 0;
-				break;
-			case eLightPosY:
-				i = 1;
-				break;
-			case eLightPosZ:				
-			default:
-				i = 2;
-			}
-
-			freyjaGetLightPosition4v(0, pos);
-
-			pos[i] = value;
-			freyjaLightPosition4v(0, pos);
-			freyja_event_gl_refresh();
-		}
-		break;
-
-
 	/* These Transform Box events don't trigger on their own */
 	case eMove_X:
 	case eMove_Y:
@@ -2783,12 +2538,6 @@ bool FreyjaControl::event(int event, vec_t value)
 	}
 
 	return true;
-}
-
-
-void FreyjaControl::eGenMeshHeight(vec_t value)
-{
-	mGenMeshHeight = value;
 }
 
 
