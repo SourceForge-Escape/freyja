@@ -1670,7 +1670,10 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eUVMapDelete", &eNoImplementation);
 	ResourceEventCallback2::add("eMirrorUV_X", &eNoImplementation);
 	ResourceEventCallback2::add("eMirrorUV_Y", &eNoImplementation);
-
+	ResourceEventCallback2::add("eTranslateUV", &eNoImplementation);
+	ResourceEventCallback2::add("eRotateUV", &eNoImplementation);
+	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
+ 
 
 	// ResourceEventCallback2::add("", &eNoImplementation);
 
@@ -1717,15 +1720,11 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eBlendSrc", eBlendSrc);
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);
-	r.RegisterInt("eDebug", eDebug);
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
-	r.RegisterInt("eTranslateUV", eTranslateUV);
-	r.RegisterInt("eRotateUV", eRotateUV);
-	r.RegisterInt("eScaleUV", eScaleUV);
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
