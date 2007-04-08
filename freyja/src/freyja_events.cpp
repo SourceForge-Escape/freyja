@@ -1721,7 +1721,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);
 	r.RegisterInt("ePolygonSize", ePolygonSize);
-	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
@@ -1748,7 +1747,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eRotate_X", eRotate_X);
 	r.RegisterInt("eRotate_Y", eRotate_Y);
 	r.RegisterInt("eRotate_Z", eRotate_Z);
-	r.RegisterInt("eZoom", eZoom);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 	r.RegisterInt("eLightPosX", eLightPosX);
 	r.RegisterInt("eLightPosY", eLightPosY);

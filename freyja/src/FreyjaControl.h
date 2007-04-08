@@ -711,6 +711,8 @@ class FreyjaControl
 	void eScreenShot();
 	void eAnimationSlider(uint32 value);
 
+	void eGenMeshHeight(vec_t value);
+
 	static uint32 eAxisJointId;
 	void eAxisJoint(uint32 value);
 	static uint32 eSphereJointId;
