@@ -9,6 +9,8 @@
 
 	* New resource event system with UIDs and event transparent buckets
 
+	* Remove last of 'numeric' events 
+
 	* Style / lic update all code
 
 	* Replacing the horrible event switches with MethodDelegates for 

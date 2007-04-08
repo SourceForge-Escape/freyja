@@ -49,7 +49,6 @@ typedef enum {
 	eMaterialMultiTex,
 	eMaterialTex,
 	ePolygonSize,
-	eGenMeshHeight,
 	eGenMeshCount,
 	eGenMeshSegements,
 	eGeneratePatchMesh,
@@ -65,7 +64,6 @@ typedef enum {
 	eSetMaterialShaderFilename,
 
 	// Widget interaction events
-	eZoom,
 	eSelectMaterial,
 	eMove_X,
 	eMove_Y,

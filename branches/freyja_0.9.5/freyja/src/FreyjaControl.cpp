@@ -233,9 +233,10 @@ float FreyjaControl::GetZoom()
 void FreyjaControl::SetZoom(float zoom)
 {
 	FREYJA_ASSERTMSG(zoom > 0.0f, "Zoom values must be greater than 0.0f");
-	freyja_event_notify_observer1f(eZoom, zoom);
+	//freyja_event_notify_observer1f(eZoomId, zoom); // Update widgets watching
 	mRender->SetZoom(zoom);
-	freyja_print("Zoom set to %f", mRender->GetZoom());
+	freyja_print("Zoom %f", mRender->GetZoom());
+	freyja_event_gl_refresh();
 }
 
 
@@ -248,8 +249,8 @@ void FreyjaControl::AttachMethodListeners()
 {
 	// CreateListener("", &FreyjaControl::);
 
-
-
+	CreateListener("eZoom", &FreyjaControl::SetZoom);
+	CreateListener("eGenMeshHeight", &FreyjaControl::eGenMeshHeight);
 
 	CreateListener("eRenderWireframe", &FreyjaControl::eRenderWireframe);
 	CreateListener("eRenderFace", &FreyjaControl::eRenderFace);
@@ -2776,23 +2777,18 @@ bool FreyjaControl::event(int event, vec_t value)
 			freyja_event_set_float(event, 1.0f);
 		break;
 
-
-	case eZoom:
-		SetZoom(value);//freyja_event_get_float(eZoom));
-		freyja_print("Zoom %f", mRender->GetZoom());
-		freyja_event_gl_refresh();
-		break;
-
-	case eGenMeshHeight:
-		mGenMeshHeight = value;
-		break;
-
 	default:
 		freyja_print("!Unhandled { event = %d, value = %f }", event, value);
 		return false;
 	}
 
 	return true;
+}
+
+
+void FreyjaControl::eGenMeshHeight(vec_t value)
+{
+	mGenMeshHeight = value;
 }
 
 
