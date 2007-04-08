@@ -7,6 +7,10 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* New resource event system with UIDs and event transparent buckets
+
+	* Style / lic update all code
+
 	* Replacing the horrible event switches with MethodDelegates for 
 	  great justice
 
@@ -412,6 +416,8 @@
 
  User requests
  ----------------------------------------------------------------------------
+
+* Req: Bring back click to create/delete vertices and 'link/draw' polygons
 
 == Brillant idea #54 ==
 <Mongoose> GNOME should have 'emblems' icons for toolbars

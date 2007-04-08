@@ -61,6 +61,7 @@ class FreyjaControl
 	} ControlScheme;
 
 
+	/* Editor modes */
 	typedef enum {
 		tNone = 0,
 		tPoint,
@@ -81,6 +82,29 @@ class FreyjaControl
 	} object_type_t;
 
 
+	/* Editor action modes - mostly for generic submodes */
+	typedef enum {
+
+		/* Generic transforms */
+		aNone = 1,
+		aMove,
+		aRotate,
+		aScale,
+		aSelect,
+		aSelectByBox,
+		aUnselect,
+		aKeyframe,
+
+		/* Specialized actions */
+		aVertexNew,
+		aVertexDelete,
+		aVertexCombine,
+		aTexcoordCombine
+		
+	} action_type_t;
+
+
+	/* FreyjaControl options */
 	typedef enum {
 		fNone                = 0,
 		fPolyMappedTexCoords = 1,
@@ -89,32 +113,6 @@ class FreyjaControl
 		fLoadMaterialInSlot  = 8
 
 	} options_t;
-
-
-	/* Old event format enums */
-	typedef enum {                              /* Editor event modes */
-		modeNone = 1,
-		POINT_ADD_MODE,
-		POINT_DEL_MODE,
-		POLYGON_ADD_MODE,
-		POLYGON_DEL_MODE,
-		BONE_CONNECT_MODE,
-		BONE_DISCONNECT_MODE,
-		BONE_ADD_MODE,
-		TEXEL_COMBINE,
-		VERTEX_COMBINE,
-		POLYGON_SELECT_MODE,
-		
-		/* Generic transforms */
-		modeMove,
-		modeRotate,
-		modeScale,
-		modeSelect,
-		modeSelectByBox,
-		modeUnselect,
-		modeKeyframe
-		
-	} EventMode;
 
 
 	class FreyjaControlPrinter : public FreyjaPrinter
@@ -135,6 +133,8 @@ class FreyjaControl
 
 	typedef void (FreyjaControl::*MethodPtr)();
 	typedef bool (FreyjaControl::*bMethodPtr)();
+	typedef void (FreyjaControl::*MethodPtr1u)(unsigned int);
+	typedef void (FreyjaControl::*MethodPtr1f)(float);
 
 
 	////////////////////////////////////////////////////////////
@@ -310,7 +310,27 @@ class FreyjaControl
 	 * Pre  : Set() <zoom> is a number greater than 0.0
 	 * Post : Returns current viewing zoom of scene
 	 ------------------------------------------------------*/
-	
+
+	static uint32 eRotateObjectId;
+	static uint32 eScaleObjectId;
+	static uint32 eMoveObjectId;
+	static uint32 eUnselectId;
+	static uint32 eSelectId;
+	static uint32 eSelectionByBoxId;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event ids used to replace old event system
+	 *        usage of Ids to 'link' widget behavior.
+	 *        These statics replace constant event values.
+	 *
+	 *        In the old system Ids could be passed around,
+	 *        and all kinds of crazy event paths where made
+	 *        that still depend on similar behavior.
+	 ------------------------------------------------------*/
+
+	vec_t GetGenMeshHeight() { return mGenMeshHeight; }
+	uint32 GetGenMeshCount() { return mGenMeshCount; }
+	uint32 GetGenMeshSegements() { return mGenMeshSegements; }
 
 
 	////////////////////////////////////////////////////////////
@@ -432,17 +452,6 @@ class FreyjaControl
 	 *
 	 * 2004.10.23: 
 	 * Mongoose - Created, pulled out of other event methods
-	 ------------------------------------------------------*/
-
-	bool event(int command);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 200X.XX.XX: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	bool handleEvent(int event, int command);
@@ -576,6 +585,27 @@ class FreyjaControl
 	 *        Returns true if sucessful.
 	 ------------------------------------------------------*/
 
+	void SetObjectMode(object_type_t m) 
+	{ 
+		mObjectMode = m; 
+		freyja_print("Object mode set to %s...",
+					 ObjectTypeToString(mObjectMode).c_str());
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets major editing mode for the control.
+	 *        
+	 ------------------------------------------------------*/
+
+	void SetActionMode(action_type_t a) { mEventMode = a; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets major editing mode action state for the control.
+	 *        
+	 ------------------------------------------------------*/
+
+	// FIXME: This stuff from the old code merge at least needs to be 
+	// broken into remaining classes 
 	void SetRenderFlag(FreyjaRender::flags_t flag, bool t, const char *s)
 	{
 		mRender->Flag(flag, t);
@@ -645,12 +675,70 @@ class FreyjaControl
 		freyja_event_set_color(event, r, g, b, a);
 	}
 
-	void SetKeyFrame();
-
 	int GetEventIdByName(const char *symbol)
 	{
 		return GetResource().GetEventIdByName(symbol);
 	}
+
+	void eSelectionByBox(unsigned int value);
+	void eSelect(unsigned int value);
+	void eUnselect(unsigned int value);
+	void eMoveObject(unsigned int value);
+	void eScaleObject(unsigned int value);
+	void eRotateObject(unsigned int value);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event callbacks for hooking to widget system 
+	 *        ( Break up into separate classes later. )
+	 *
+	 ------------------------------------------------------*/
+
+	void eModeUV();
+	void eModeModel();
+	void eModeMaterial();
+	//void eModeAutoKeyframe();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event callbacks for hooking to widget system 
+	 *        ( Break up into separate classes later. )
+	 *
+	 ------------------------------------------------------*/
+
+	void eScale();
+	void eMove();
+	void eRotate();
+
+	void eScreenShot();
+
+	void eViewportBack();
+	void eViewportBottom();
+	void eViewportRight();
+	void eViewportFront();
+	void eViewportTop();
+	void eViewportLeft();
+	void eViewportOrbit();
+	void eViewportUV();
+	void eViewportCurve();
+	void eViewportMaterial();
+
+	void eMeshNew();
+	void eMeshDelete();
+	void eMeshSelect();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event callbacks for hooking to widget system 
+	 *        ( Break up into separate classes later. )
+	 *
+	 ------------------------------------------------------*/
+
+	void Redo();
+	void Undo();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event callbacks for hooking to widget system 
+	 *        ( Break up into separate classes later. )
+	 *
+	 ------------------------------------------------------*/
 
 	void NewFile();
 	void CloseFile();
@@ -661,7 +749,27 @@ class FreyjaControl
 	void SaveFileModel();
 	void OpenFileModel();
 	void RevertFile();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event callbacks for hooking to widget system 
+	 *        ( Break up into separate classes later. )
+	 *
+	 ------------------------------------------------------*/
+
 	void Shutdown();
+	void VertexCombine();
+	void TexcoordCombine();
+	void Fullscreen();
+	void SetKeyFrame();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event callbacks for hooking to widget system 
+	 *        ( Break up into separate classes later. )
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMaterialForSelectedFaces(uint32 material); // prv
+	void SetFaceMaterial(index_t faceIndex, index_t material); //prv
 
 	void CreateObject();
 	/*------------------------------------------------------
@@ -709,6 +817,24 @@ class FreyjaControl
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void Cut();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void Dirty() { mCleared = false; freyja_event_gl_refresh(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Call this when some state in the model or editor
+	 *        has changed that would be need to be saved.
+	 *
+	 *        It has a side effect of refreshing the display.
+	 *        This is a hint to call this *after state change.
 	 *
 	 ------------------------------------------------------*/
 
@@ -818,15 +944,15 @@ private:
 	{
 		switch (mEventMode)
 		{
-		case modeMove:
+		case aMove:
 			return fTranslate;
 			break;
 
-		case modeRotate:
+		case aRotate:
 			return fRotate;
 			break;
 
-		case modeScale:
+		case aScale:
 			return fScale;
 			break;
 
@@ -867,8 +993,6 @@ private:
 
 	int32 mTextureId;
 
-	void SetFaceMaterial(index_t faceIndex, index_t material);
-
 	void CreatePolyMappedUVMap(int i) {BUG_ME("Not implemented in this build");}
 
 	void CursorMove(float xx, float yy);
@@ -908,6 +1032,9 @@ private:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	void SelectMode();
+	void UnselectMode();
+
 	void UpdateSkeletalUI() { UpdateSkeletonUI_Callback(GetSelectedSkeleton()); }
 
 	const char *GetBoneName(unsigned int boneIndex)
@@ -936,8 +1063,6 @@ private:
 		vec3_t xyz = {HEL_DEG_TO_RAD(x), HEL_DEG_TO_RAD(y), HEL_DEG_TO_RAD(z)};
 		freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
 	}
-
-	void SetMaterialForSelectedFaces(uint32 material);
 
 	void Clear()
 	{
@@ -1029,9 +1154,12 @@ private:
 
 	static void CreateListener(const char *name, MethodPtr ptr);
 	static void CreateListener(const char *name, bMethodPtr ptr);
+	static void CreateListener(const char *name, MethodPtr1u ptr);
+	static void CreateListener(const char *name, MethodPtr1f ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Maps mlisp symbol <name> to method <ptr> action.
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -1072,7 +1200,7 @@ private:
 
 	ControlScheme mControlScheme;           /* Current control scheme in use */
 
-	EventMode mEventMode;                   /* Mode of generic event handler */
+	action_type_t mEventMode;               /* Mode of generic event handler */
 	
 	int mUVMouseState;                      /* Mouse state on texture canvas */
 	

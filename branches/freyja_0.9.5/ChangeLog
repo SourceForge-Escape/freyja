@@ -10,7 +10,9 @@
 
  Dancer RC4-RC6
  20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - Major changes in the event system usage ( mostly delegate based now )
+ - Minor changes to match style guidelines for improved readability
+ - Reworking/Removing very, very old code and refactoring FreyjaControl 
  - No more warning/error about models w/o skeletons ( confused users )
  - Linux no longer using lazy linking, now uses callbacks just like other OS
  - More fun with MethodDelegate, starting to unify C++ callbacks

@@ -177,9 +177,9 @@
 			(submenu "V_ertices..."
 				(menu_item "_Unselect" 	eMeshUnselectVertices)
 				(menu_item "_Delete"		eNone);eSelectedVertsDelete)
-				(menu_item "Mirror _X"		eMeshMirrorX)
-				(menu_item "Mirror _Y"		eMeshMirrorY)
-				(menu_item "Mirror _Z"		eMeshMirrorZ))
+				(menu_item "Mirror _X"		eMirrorMeshX)
+				(menu_item "Mirror _Y"		eMirrorMeshY)
+				(menu_item "Mirror _Z"		eMirrorMeshZ))
 
 			(submenu "_Face"
 				;(menu_item "_New"			ePolygonNew)
@@ -217,8 +217,8 @@
 			) ; submenu _Mesh
 
 			(submenu "_Bone"
-				;(menu_item "_New"			eBoneNew)
-				(menu_item "_Delete"		eNone)
+				(menu_item "_New"			eBoneNew)
+				(menu_item "_Delete"		eBoneDelete)
 				(menu_item "_Select"		eBoneSelect)
 				(menu_item "_Parent"		eBoneLinkChild)
 				(menu_item "_Unparent"		eBoneUnLinkChild)
@@ -384,7 +384,7 @@
 						(menu_item	"Meshes...  "	eTransformMeshes)
 						(menu_item	"Face       "	eTransformFace)
 						(menu_item	"Faces...   "	eTransformFaces)
-						(menu_item	"Vertex     "	eTransformPoint)
+						(menu_item	"Vertex     "	eTransformVertex)
 						(menu_item	"Vertices..."	eTransformVertices)
 						(menu_item	"Bone       "	eTransformBone)
 						(menu_item	"Light      "	eTransformLight)
@@ -427,7 +427,7 @@
 				(toolbar_separator)
 
 				(toolbar_button	"gtk-new" "Create"
-					"Create new object" eEvent eAddObject)
+					"Create new object" eEvent eCreate)
 
 				(toolbar_button	"gtk-delete" "Delete"
 					"Delete selected object" eEvent eDelete)
@@ -935,6 +935,12 @@
 	"Are you sure you want to overwrite the file?"
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Overwrite")
 
+(confirmation_dialog	"PolyMapDialog"
+	"gtk-dialog-question"
+	"You just generated a UV map using vertex UVs.\n\nSome model formats perfer polygon-mapped UVs, and \nmay not export without being polymapped.\n"
+	"Would you like to promote it to ploymapped texcoords per face?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Promote")
+
 (confirmation_dialog	"DupeMeshDialog"
 	"gtk-dialog-question"
 	"You are about to duplicate the selected mesh.\n"
@@ -965,11 +971,17 @@
 	"Would you like to duplicate or cull the selected faces?"
 	"gtk-cancel"	"_Cull"	"gtk-ok"	"_Duplicate")
 
-(confirmation_dialog	"UVMapDialog"
+(confirmation_dialog	"DelVertDialog"
 	"gtk-dialog-question"
-	"You just generated a UV map using vertex UVs.\n\nSome model formats perfer polygon-mapped UVs, and \nmay not export without being polymapped.\n"
-	"Would you like to promote it to ploymapped texcoords per face?"
-	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Promote")
+	"You are about to delete the selected vertices."
+	"Are you sure you want to delete these vertices?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Delete")
+
+(confirmation_dialog	"CloseNewFileDialog"
+	"gtk-dialog-question"
+	"Creating a new model will close the current model."
+	"Would you like to close the model and possibly lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-close"	"C_lose")
 
 (confirmation_dialog	"ExitWarningDialog"
 	"gtk-dialog-question"
