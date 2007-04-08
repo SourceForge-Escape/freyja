@@ -709,7 +709,29 @@ class FreyjaControl
 	void eRotate();
 
 	void eScreenShot();
+	void eAnimationSlider(uint32 value);
 
+	static uint32 eAxisJointId;
+	void eAxisJoint(uint32 value);
+	static uint32 eSphereJointId;
+	void eSphereJoint(uint32 value);
+	static uint32 ePointJointId;
+	void ePointJoint(uint32 value);
+
+	void eRenderWireframe(uint32 value);
+	void eRenderFace(uint32 value);
+	void eRenderVertex(uint32 value);
+	void eRenderNormals(uint32 value);
+	void eRenderTexture(uint32 value);
+	void eRenderLighting(uint32 value);
+	void eRenderMaterial(uint32 value);
+	void eRenderSkeleton(uint32 value);
+	void eRenderGrid(uint32 value);
+	void eRenderSolidGround(uint32 value);
+	void eRenderBbox(uint32 value);
+	void eRenderPickRay(uint32 value);
+
+	void eViewports(uint32 value);
 	void eViewportBack();
 	void eViewportBottom();
 	void eViewportRight();

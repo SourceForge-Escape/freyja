@@ -107,7 +107,6 @@
 				(toggle_menu_item	"_Wireframe"	eRenderWireframe	0)
 				(toggle_menu_item	"_Normals"		eRenderNormals	0)
 				(toggle_menu_item	"_Faces"		eRenderFace		1)
-				;(toggle_menu_item	"_Texture"		eRenderTexture	1)
 				(toggle_menu_item	"_Lighting"		eRenderLighting	1)
 				(toggle_menu_item	"_Material"		eRenderMaterial	1)
 				(toggle_menu_item	"_Bounding Volume"	eRenderBbox 1)
@@ -292,10 +291,10 @@
 					"Wireframe render mode"		eEvent	eRenderWireframe)
 
 				(toolbar_togglebutton false "24x24/solid.png" "Faces"
-					"Solid face render mode"		eRenderFace	eRenderFace)
+					"Solid face render mode"		eEvent	eRenderFace)
 
 				(toolbar_togglebutton false "24x24/texture.png" "Material" 
-					"Material toggle"	eRenderTexture	eRenderMaterial)
+					"Material toggle"	eEvent	eRenderMaterial)
 
 				(toolbar_togglebutton false "24x24/groupcolors.png" "Color" 
 					"Group color toggle"		eEvent	eGroupColors)
@@ -677,8 +676,8 @@
 				(hbox 1 0 0 1 0
 					(vbox 1 0 0 1 0 
 						(togglebutton "Texcoord weld mode" eTexcoordCombine)
-						(button "Generate UVMap" eEvent eTmpUVMapOn)
-						(button "Clear UVMap" eEvent eTmpUVMapOff)
+						(button "Generate UVMap" eEvent eUVMapCreate)
+						(button "Clear UVMap" eEvent eUVMapDelete)
 						(button "PolyMap"	eEvent	ePolyMapTexturePolygon)
 						(button "Mirror X" eEvent eMirrorUV_X)
 						(button "Mirror Y" eEvent eMirrorUV_Y)
@@ -1217,7 +1216,7 @@
 (func_set_toggle	eRenderToggleBoneZClear	1)
 (func_set_toggle	eRenderGrid	1)
 (func_set_toggle	eRenderFace	1)
-(func_set_toggle	eRenderTexture	1)
+(func_set_toggle	eRenderMaterial	1)
 (func_set_toggle	eRenderLighting	1)
 (func_set_toggle	eRenderMaterial	1)
 (func_set_toggle	eRenderBbox	1)

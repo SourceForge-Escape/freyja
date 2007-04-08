@@ -821,7 +821,11 @@ void eSetSelectedFacesAlpha()
 	{
 		freyja_print("Selected faces alpha flag enabled.");
 		m->SetFlagForSelectedFaces(Face::fAlpha);
-		freyja_event_gl_refresh();
+		FreyjaControl::mInstance->Dirty();
+	}
+	else
+	{
+		freyja_print("Alpha flag can not be set. No selected faces.");
 	}
 }
 
@@ -834,7 +838,11 @@ void eClearSelectedFacesAlpha()
 	{
 		freyja_print("Selected faces alpha flag enabled.");
 		m->ClearFlagForSelectedFaces(Face::fAlpha);
-		freyja_event_gl_refresh();
+		FreyjaControl::mInstance->Dirty();
+	}
+	else
+	{
+		freyja_print("Alpha flag can not be cleared. No selected faces.");
 	}
 }
 
@@ -1645,7 +1653,6 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallbackUInt::add("eRecentFiles", &eRecentFiles);
 
 	// Not implemented or removed misc events
-	// ResourceEventCallback2::add("", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
 	ResourceEventCallback2::add("eBoneLinkChild", &eNoImplementation);
@@ -1658,7 +1665,15 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("ePolygonDelete", &eNoImplementation);
 	ResourceEventCallback2::add("ePolygonSelect", &eNoImplementation);
 	ResourceEventCallback2::add("eRenderShadow", &eNoImplementation);
-	//ResourceEventCallback2::add("eCamera", &eNoImplementation);
+	ResourceEventCallback2::add("ePolyMapTexturePolygon", &eNoImplementation);
+	ResourceEventCallback2::add("eUVMapCreate", &eNoImplementation);
+	ResourceEventCallback2::add("eUVMapDelete", &eNoImplementation);
+	ResourceEventCallback2::add("eMirrorUV_X", &eNoImplementation);
+	ResourceEventCallback2::add("eMirrorUV_Y", &eNoImplementation);
+
+
+	// ResourceEventCallback2::add("", &eNoImplementation);
+
 
 	// Class listeners
 	FreyjaControl::AttachMethodListeners();
@@ -1668,81 +1683,61 @@ void freyja_handle_resource_init(Resource &r)
 	FreyjaControlEventsAttach();
 	FreyjaMiscEventsAttach();
 
+	/* Mongoose 2002.01.12, 
+	 * Bind script functions to C/C++ functions */
+	r.RegisterFunction("color", freyja_rc_color);
+
 
 	////////////////////////////////////////////////////////////////////
 	// Old style events
 	////////////////////////////////////////////////////////////////////
 
+	/* Mongoose 2002.01.21, 
+	 * Bind some script vars to matching name in C/C++ */
+
 	// Event types used for flow control of event ids
 	r.RegisterInt("eMode", eMode);
 	r.RegisterInt("eEvent", eEvent);
 	r.RegisterInt("eNop", eNop);
+	r.RegisterInt("eNone", eNone);
 
 	// There may have been a special map for this _outside_ of the application.
 	//r.RegisterInt("eShutdown", eShutdown);
 
-
-	// Event ids
-
-	/* Mongoose 2002.01.12, 
-	 * Bind script functions to C/C++ functions */
-	r.RegisterFunction("color", freyja_rc_color);
-
-	/* Mongoose 2002.01.21, 
-	 * Bind some script vars to matching name in C/C++ */
-	r.RegisterInt("eNone", eNone);
-
-	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
-
 	// Freyja modes
 	r.RegisterInt("eModeAutoKeyframe", eModeAutoKeyframe);
 
-	r.RegisterInt("eAxisJoint", eAxisJoint);
-	r.RegisterInt("eSphereJoint", eSphereJoint);
-	r.RegisterInt("ePointJoint", ePointJoint);
-
-	//r.RegisterInt("eAppendFile", eAppendFile);
-
+	// Misc
 	r.RegisterInt("eOpenTexture", eOpenTexture);
 	r.RegisterInt("eOpenShader", eOpenShader);
 	r.RegisterInt("eShaderSlotLoadToggle", eShaderSlotLoadToggle);
 	r.RegisterInt("eSetMaterialShader", eSetMaterialShader);
 	r.RegisterInt("eSetMaterialShaderFilename", eSetMaterialShaderFilename);
-	r.RegisterInt("eSkeletonName", eSkeletonName);
-
-	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
-
-	// dialogs
+	r.RegisterInt("eBlendDest", eBlendDest);
+	r.RegisterInt("eBlendSrc", eBlendSrc);
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);
-
 	r.RegisterInt("eDebug", eDebug);
-
-	
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
 	r.RegisterInt("eGenMeshSegements", eGenMeshSegements);
-	r.RegisterInt("eRenderBbox", eRenderBbox);
-	r.RegisterInt("eRenderPickRay", eRenderPickRay);
-
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
-	r.RegisterInt("eTmpUVMapOff",eTmpUVMapOff);
-	r.RegisterInt("eTmpUVMapOn",eTmpUVMapOn);
-	r.RegisterInt("eMirrorUV_X", eMirrorUV_X);
-	r.RegisterInt("eMirrorUV_Y", eMirrorUV_Y);
 	r.RegisterInt("eTranslateUV", eTranslateUV);
 	r.RegisterInt("eRotateUV", eRotateUV);
 	r.RegisterInt("eScaleUV", eScaleUV);
- 	
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
+	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
+	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
+	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
 
+	// Menus
+	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
+	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
+	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
 	r.RegisterInt("eObjectMenu", eObjectMenu);
-
 	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
 	r.RegisterInt("eTransformMenu", eTransformMenu);
-
-	r.RegisterInt("eAnimationSlider", eAnimationSlider);
 
 	/* Widget events ( widgets hold data like spinbuttons, etc ) */
 	r.RegisterInt("eScale_X", eScale_X);
@@ -1756,26 +1751,25 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eRotate_Z", eRotate_Z);
 	r.RegisterInt("eZoom", eZoom);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
-
 	r.RegisterInt("eLightPosX", eLightPosX);
 	r.RegisterInt("eLightPosY", eLightPosY);
 	r.RegisterInt("eLightPosZ", eLightPosZ);
 
+	// Iterator
 	r.RegisterInt("eModelIterator", eModelIterator);
 	r.RegisterInt("ePolygonIterator", ePolygonIterator);
 	r.RegisterInt("eMeshIterator", eMeshIterator);
 	r.RegisterInt("eGroupIterator", eGroupIterator);
 	r.RegisterInt("eBoneIterator", eBoneIterator);
 
+	// Text
+	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
 	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);
 	r.RegisterInt("eSetMaterialName", eSetMaterialName);
+	r.RegisterInt("eSkeletonName", eSkeletonName);
 
-	r.RegisterInt("eZoomIn", eZoomIn);
-	r.RegisterInt("eZoomOut", eZoomOut);
-
-	r.RegisterInt("ePolyMapTexturePolygon", ePolyMapTexturePolygon);
-
+	// Colors
 	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
 	r.RegisterInt("eColorMaterialDiffuse", eColorMaterialDiffuse);
 	r.RegisterInt("eColorMaterialSpecular", eColorMaterialSpecular);
@@ -1791,34 +1785,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
 	r.RegisterInt("eColorBone", eColorBone);
 	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
-
-	r.RegisterInt("eViewports", eViewports);
-
-
-	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName); // textbox
-
-	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
-
-	r.RegisterInt("eRenderWireframe",FREYJA_MODE_RENDER_WIREFRAME);
-	r.RegisterInt("eRenderFace", FREYJA_MODE_RENDER_FACE);
-	r.RegisterInt("eRenderVertex", FREYJA_MODE_RENDER_POINTS);
-	r.RegisterInt("eRenderNormals", FREYJA_MODE_RENDER_NORMALS);
-	r.RegisterInt("eRenderTexture", FREYJA_MODE_RENDER_TEXTURE);
-	r.RegisterInt("eRenderLighting", FREYJA_MODE_RENDER_LIGHTING);
-	r.RegisterInt("eRenderMaterial", FREYJA_MODE_RENDER_MATERIAL);
-	r.RegisterInt("eRenderSkeleton",FREYJA_MODE_RENDER_BONETAG);
-	r.RegisterInt("eRenderGrid", FREYJA_MODE_RENDER_GRID);
-	r.RegisterInt("eRenderSolidGround", eRenderSolidGround);
-
-	r.RegisterInt("eOpenGLNormalize", eOpenGLNormalize);
-	r.RegisterInt("eOpenGLBlend", eOpenGLBlend);
-
-	r.RegisterInt("eBlendDest", eBlendDest);
-	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
-	r.RegisterInt("eBlendSrc", eBlendSrc);
-	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
-
-	//r.RegisterSymbol();
 
 	/* Load and init plugins */
 	String dir = freyja_rc_map_string("plugins");	

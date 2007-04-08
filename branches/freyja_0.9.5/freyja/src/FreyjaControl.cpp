@@ -81,6 +81,9 @@ uint32 FreyjaControl::eMoveObjectId = 0;
 uint32 FreyjaControl::eUnselectId = 0;
 uint32 FreyjaControl::eSelectId = 0;
 uint32 FreyjaControl::eSelectionByBoxId = 0;
+uint32 FreyjaControl::eAxisJointId = 0;
+uint32 FreyjaControl::eSphereJointId = 0;
+uint32 FreyjaControl::ePointJointId = 0;
 
 
 ////////////////////////////////////////////////////////////
@@ -244,7 +247,24 @@ void FreyjaControl::SetZoom(float zoom)
 void FreyjaControl::AttachMethodListeners()
 {
 	// CreateListener("", &FreyjaControl::);
-	
+
+
+
+
+	CreateListener("eRenderWireframe", &FreyjaControl::eRenderWireframe);
+	CreateListener("eRenderFace", &FreyjaControl::eRenderFace);
+	CreateListener("eRenderVertex", &FreyjaControl::eRenderVertex);
+	CreateListener("eRenderNormals", &FreyjaControl::eRenderNormals);
+	CreateListener("eRenderLighting", &FreyjaControl::eRenderLighting);
+	CreateListener("eRenderMaterial", &FreyjaControl::eRenderMaterial);
+	CreateListener("eRenderSkeleton", &FreyjaControl::eRenderSkeleton);
+	CreateListener("eRenderGrid", &FreyjaControl::eRenderGrid);
+	CreateListener("eRenderSolidGround", &FreyjaControl::eRenderSolidGround);
+	CreateListener("eRenderBbox", &FreyjaControl::eRenderBbox);
+	CreateListener("eRenderPickRay", &FreyjaControl::eRenderPickRay);
+
+	CreateListener("eAnimationSlider", &FreyjaControl::eAnimationSlider);
+
 	CreateListener("eInfo", &FreyjaControl::PrintInfo);
 	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
 	CreateListener("eScreenShot", &FreyjaControl::eScreenShot);
@@ -289,6 +309,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eModeModel", &FreyjaControl::eModeModel);
 	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
 
+	CreateListener("eViewports", &FreyjaControl::eViewports);
 	CreateListener("eViewportBack", &FreyjaControl::eViewportBack);
 	CreateListener("eViewportBottom", &FreyjaControl::eViewportBottom);
 	CreateListener("eViewportRight", &FreyjaControl::eViewportRight);
@@ -320,6 +341,13 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener("eSelectionByBox", &FreyjaControl::eSelectionByBox);
 	eSelectionByBoxId = ResourceEvent::GetResourceIdBySymbol("eSelectionByBox");
+
+	CreateListener("eAxisJoint", &FreyjaControl::eAxisJoint);
+	eAxisJointId = ResourceEvent::GetResourceIdBySymbol("eAxisJoint");
+	CreateListener("eSphereJoint", &FreyjaControl::eSphereJoint);
+	eSphereJointId = ResourceEvent::GetResourceIdBySymbol("eSphereJoint");
+	CreateListener("ePointJoint", &FreyjaControl::ePointJoint);
+	ePointJointId = ResourceEvent::GetResourceIdBySymbol("ePointJoint");
 }
 
 
@@ -2191,17 +2219,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 		freyja_print("Polygons creation using %i sides", GetFaceEdgeCount());
 		break;
 
-
-	case eAnimationSlider: // FIXME: Wrapping and bounds 
-		if (value != GetSelectedKeyFrame())
-		{
-			freyja_event_set_range(event, value, 0, 500);//freyjaGetAnimationFrameCount(GetSelectedAnimation()));
-			SetSelectedKeyFrame(value);
-			freyja_event_gl_refresh();
-		}
-		break;
-
-
 	case eSelectMaterial:
 		if (!freyja_event_set_range(event, value, 0, freyjaGetMaterialCount()-1))
 		{
@@ -2327,91 +2344,117 @@ bool FreyjaControl::event(int event, unsigned int value)
 		}
 		break;
 
-	case eViewports:
-		SetRenderFlag(FreyjaRender::fViewports, value, "Four window view");
-		break;
-
-	case FREYJA_MODE_RENDER_BONETAG:
-		SetRenderFlag(FreyjaRender::fBones, value, "Skeleton rendering");
-		break;
-
-	case FREYJA_MODE_RENDER_POINTS:
-		SetRenderFlag(FreyjaRender::fPoints, value, "Point Rendering");
-		break;
-
-	case FREYJA_MODE_RENDER_WIREFRAME:
-		SetRenderFlag(FreyjaRender::fWireframe, value, "Wireframe");
-		break;
-
-	case FREYJA_MODE_RENDER_NORMALS:
-		SetRenderFlag(FreyjaRender::fNormals, value, "Normal visualisation");
-		break;
-
-	case FREYJA_MODE_RENDER_LIGHTING:
-		SetRenderFlag(FreyjaRender::fLighting, value, "OpenGL lighting");
-		break;
-
-	case FREYJA_MODE_RENDER_MATERIAL:
-		SetRenderFlag(FreyjaRender::fMaterial, value, "Material usage");
-		break;
-
-	case FREYJA_MODE_RENDER_GRID:
-		SetRenderFlag(FreyjaRender::fGrid, value, "Grid");
-		break;
-
-	case eRenderSolidGround:
-		SetRenderFlag(FreyjaRender::fSolidPlane, value, "Solid ground");
-		break;
-
-	case FREYJA_MODE_RENDER_FACE:
-		SetRenderFlag(FreyjaRender::fFace, value, "Face rendering");
-		break;
-
-	case eRenderPickRay:
-		SetRenderFlag(FreyjaRender::fDrawPickRay, value, "Pick ray visibility");
-		break;
-
-	case eRenderBbox:
-		SetRenderFlag(FreyjaRender::fBoundingVolumes, value, 
-					  "Bounding volume rendering");
-		break;
-
-	case ePointJoint:
-		if (value)
-		{
-			// radio button like func for multiple widgets on same event
-			mgtk_toggle_value_set(eSphereJoint, 0);
-			mgtk_toggle_value_set(eAxisJoint, 0);
-			FreyjaRender::mJointRenderType = 1;
-		}
-		break;
-
-	case eSphereJoint:
-		if (value)
-		{
-			// radio button like func for multiple widgets on same event
-			mgtk_toggle_value_set(ePointJoint, 0);
-			mgtk_toggle_value_set(eAxisJoint, 0);
-			FreyjaRender::mJointRenderType = 2;
-		}
-		break;
-
-	case eAxisJoint:
-		if (value)
-		{
-			// radio button like func for multiple widgets on same event
-			mgtk_toggle_value_set(eSphereJoint, 0);
-			mgtk_toggle_value_set(ePointJoint, 0);
-			FreyjaRender::mJointRenderType = 3;
-		}
-		break;
-
 	default:
 		freyja_print("!Unhandled { event = %d, value = %u }", event, value);
 		return false;
 	}
 
 	return true;
+}
+
+void FreyjaControl::ePointJoint(uint32 value)
+{
+	if (value)
+	{
+		// radio button like func for multiple widgets on same event
+		mgtk_toggle_value_set(eSphereJointId, 0);
+		mgtk_toggle_value_set(eAxisJointId, 0);
+		FreyjaRender::mJointRenderType = 1;
+	}
+}
+
+void FreyjaControl::eSphereJoint(uint32 value)
+{
+	if (value)
+	{
+		// radio button like func for multiple widgets on same event
+		mgtk_toggle_value_set(ePointJointId, 0);
+		mgtk_toggle_value_set(eAxisJointId, 0);
+		FreyjaRender::mJointRenderType = 2;
+	}
+}
+
+void FreyjaControl::eAxisJoint(uint32 value)
+{
+	if (value)
+	{
+		// radio button like func for multiple widgets on same event
+		mgtk_toggle_value_set(eSphereJointId, 0);
+		mgtk_toggle_value_set(ePointJointId, 0);
+		FreyjaRender::mJointRenderType = 3;
+	}
+}
+
+void FreyjaControl::eViewports(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fViewports, value, "Four window view");
+}
+
+void FreyjaControl::eRenderSkeleton(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fBones, value, "Skeleton rendering");
+}
+
+void FreyjaControl::eRenderVertex(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fPoints, value, "Vertex Rendering");
+}
+
+void FreyjaControl::eRenderWireframe(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fWireframe, value, "Wireframe");
+}
+
+void FreyjaControl::eRenderNormals(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fNormals, value, "Normal visualisation");
+}
+
+void FreyjaControl::eRenderLighting(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fLighting, value, "OpenGL lighting");
+}
+
+void FreyjaControl::eRenderMaterial(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fMaterial, value, "Material usage");
+}
+
+void FreyjaControl::eRenderGrid(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fGrid, value, "Grid");
+}
+
+void FreyjaControl::eRenderSolidGround(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fSolidPlane, value, "Solid ground");
+}
+
+void FreyjaControl::eRenderFace(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fFace, value, "Face rendering");
+}
+
+void FreyjaControl::eRenderPickRay(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fDrawPickRay, value, "Pick ray visibility");
+}
+
+void FreyjaControl::eRenderBbox(uint32 value)
+{
+	SetRenderFlag(FreyjaRender::fBoundingVolumes, value, 
+				  "Bounding volume rendering");
+}
+
+void FreyjaControl::eAnimationSlider(uint32 value)
+{
+	if (value != GetSelectedKeyFrame())
+	{
+		// FIXME: Needs better defined wrapping and bounds. 
+		//freyja_event_set_range(eAnimationSliderId, value, 0, 500);
+		SetSelectedKeyFrame(value);
+		freyja_event_gl_refresh();
+	}
 }
 
 

@@ -37,22 +37,17 @@
 typedef enum {
 
 	/* Special events */
-	eNone = 0,           // Event to be ignored.
-	eNop  = 2,           // Event with no action.
-
-	/* Special event pairs, majors */
-	eMode,               // These events change modes ( modify states )
-	eEvent,              // These events request handling ( perform actions )
+	eNone  = 0,           // Event to be ignored.
+	eNop   = 2,           // Event with no action.
+	eMode  = 3,           // These events change modes ( modify states )
+	eEvent = 4,           // These events request handling ( perform actions )
 
 	/* Event flow control modes ( majors ) */
 	eModeAutoKeyframe,
 
 	/* Event ids ( minors ) */
-	ePluginMenu,
 	eDebugBackend,
 	eDebug,
-	eViewports,
-
 	eMaterialMultiTex,
 	eMaterialTex,
 	ePolygonSize,
@@ -60,29 +55,13 @@ typedef enum {
 	eGenMeshCount,
 	eGenMeshSegements,
 	eGeneratePatchMesh,
-	eSetMaterialTexture,
-	
-	
-	eAnimationSlider,
-	eZoomIn,
-	eZoomOut,
+	eSetMaterialTexture,	
 	eOpenGLNormalize,
 	eOpenGLBlend,
-
-	
-	eCopyAppendMode,
 	eGenerateNormals,
-	
-	
-	eMirrorUV_X,
-	eMirrorUV_Y,
 	eTranslateUV,
 	eRotateUV,
 	eScaleUV,
-	eTmpUVMapOn,
-	eTmpUVMapOff,
-
-	eSkeletonName,
 	eOpenTexture,
 	eTextureSlotLoad,
 	eOpenShader,
@@ -90,7 +69,7 @@ typedef enum {
 	eSetMaterialShader,
 	eSetMaterialShaderFilename,
 
-	/* Widget interaction events */
+	// Widget interaction events
 	eZoom,
 	eSelectMaterial,
 	eMove_X,
@@ -105,14 +84,11 @@ typedef enum {
 	eMoveBone_X,
 	eMoveBone_Y,
 	eMoveBone_Z,
-
 	eLightPosX,
 	eLightPosY,
 	eLightPosZ,
-
-	ePolyMapTexturePolygon,
 	
-
+	// Colors
 	eColorMaterialAmbient,
 	eColorMaterialDiffuse,
 	eColorMaterialSpecular,
@@ -129,56 +105,31 @@ typedef enum {
 	eColorBone,
 	eColorBoneHighlight,
 
+	// Iterators
 	eModelIterator,
 	ePolygonIterator,
 	eMeshIterator,
 	eGroupIterator,
 	eBoneIterator,
 
+	// Menus
+	ePluginMenu,
 	eViewportModeMenu,
 	eTransformMenu,
 	eObjectMenu,
-
-	eSkeletalDeform,
-
-	eAxisJoint,
-	eSphereJoint,
-	ePointJoint,
-	
 	eBlendDestMenu,
 	eBlendDest,
 	eBlendSrcMenu,
 	eBlendSrc,
 
-
-	/* Events that are deprecated or were removed during event system change. */
-	//eAppendFile,
-
-	/* Text events */
+	// Text events
+	eSkeletonName,
 	eSetCurrentBoneName,
 	eSetTextureNameA,
 	eSetTextureNameB,
 	eSetMaterialName,
 
-	/* Render modes */
-	eRenderSolidGround,
-	eRenderPickRay, 
-	eRenderBbox,
-
-	/* Old events */
-	FREYJA_MODE_RENDER_TEXTURE,
-	FREYJA_MODE_RENDER_FACE,
-	FREYJA_MODE_RENDER_LINELOOP,
-	FREYJA_MODE_RENDER_WIREFRAME,
-	FREYJA_MODE_RENDER_LIGHTING,
-	FREYJA_MODE_RENDER_POINTS,
-	FREYJA_MODE_RENDER_BLENDING,
-	FREYJA_MODE_RENDER_MATERIAL,
-	FREYJA_MODE_MATERIAL_EDIT,
-	FREYJA_MODE_RENDER_NORMALS,
-	FREYJA_MODE_RENDER_BONETAG,
-	FREYJA_MODE_RENDER_GRID,
-
+	// Old file dialog marker event ids
 	FREYJA_MODE_LOAD_MODEL,
 	FREYJA_MODE_SAVE_MODEL,
 	FREYJA_MODE_LOAD_TEXTURE,
@@ -187,6 +138,7 @@ typedef enum {
 	FREYJA_MODE_LOAD_ANIMATION,
 	FREYJA_MODE_SAVE_ANIMATION,
 
+	// Special base id for plugins to avoid conflicts
 	ePluginEventBase = 10000
 
 } event_subject_id;
