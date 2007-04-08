@@ -37,140 +37,43 @@
 typedef enum {
 
 	/* Special events */
+	eNone = 0,           // Event to be ignored.
+	eNop  = 2,           // Event with no action.
 
-	eNone = 0,
-	eShutdown = 1,
-	eNop,           /* Event to be ignored */
-
+	/* Special event pairs, majors */
+	eMode,               // These events change modes ( modify states )
+	eEvent,              // These events request handling ( perform actions )
 
 	/* Event flow control modes ( majors ) */
-
-	eMode,          /* These events change modes ( modify states ) */
-	eEvent,         /* These events request handling ( perform actions ) */
 	eModeAutoKeyframe,
 
-
-	// Event ids ( minors )
-	eNewFile,
-	eOpenFile,
-	eSaveFile,
-	eSaveAsFile,
-	eCloseFile,
-	eSaveFileModel,
-	eSaveAsFileModel,
-	eOpenFileModel,
-	eOpenFileTexture,
-	eAppendFile,
-	eRevertFile,
-	eExportFile,
-	eImportFile,
+	/* Event ids ( minors ) */
 	ePluginMenu,
-
-	eHelp,
-	eInfo,
-	eAbout,
 	eDebugBackend,
-	eFullscreen,
-	eScreenShot,
-
-	ePreferencesDialog,
-	eAboutDialog,
-	eHelpDialog,
+	eDebug,
+	eViewports,
 
 	eMaterialMultiTex,
 	eMaterialTex,
-
 	ePolygonSize,
 	eGenMeshHeight,
 	eGenMeshCount,
 	eGenMeshSegements,
-
-
 	eGeneratePatchMesh,
-
-	eMeshNew,
-	eMeshDelete,
-	eMeshMove,
-	eMeshRotate,
-	eMeshScale,
-	eMeshTexcoordSpherical,
-	eMeshTexcoordCylindrical,
-	eMeshTexcoordPlaneProj,
-	eMeshTesselate,
 	eSetMaterialTexture,
-	eTransformModel,
-	eAnimationNext,
-	eAnimationPrev,
+	
+	
 	eAnimationSlider,
 	eZoomIn,
 	eZoomOut,
 	eOpenGLNormalize,
 	eOpenGLBlend,
-	eDebug,
-	eGenerateCone,
-	eMeshMirrorX,
-	eMeshMirrorY,
-	eMeshMirrorZ,
-	eMeshSelect,
 
-	eKeyFrame,
-	eSetKeyFrame,
-
-	ePolygonSplit,
-
-	eCopyAppendMode,
-	eDupeObject,
-	eSplitObject,
-	eMergeObject,
-
-	eDelete,
-	eSelect,
-	eSelectionByBox,
-	eUnselect,
-	eCopy,
-	eCut,
-	ePaste,
-	eUndo,
-	eRedo,
-	eSelectAll,
-
-	eAddObject,
-	eMoveObject,
-	eRotateObject,
-	eScaleObject,
-
-	eTransformVertices,
-	eTransformGroup,
-	eTransformScene,
-	eTransformMesh,
-	eTransformMeshes,
-	eTransformBone,
-	eTransformFace,
-	eTransformFaces,
-	eTransformPoint,
-	eTransformLight,
-
-	eRenderPickRay, 
-	eRenderShadow,
-	eRenderBbox,
-	eCamera,
 	
-	eExtrude,
-
-	eMeshGenerateNormals,
-
+	eCopyAppendMode,
 	eGenerateNormals,
-	eGenerateCube,
-	eGenerateTube,
-	eGenerateCircle,
-	eGeneratePlane,
-	eGenerateCylinder,
-	eGenerateSphere,
-
-	eTexcoordCombine,
-
-	eSetMeshTexture,
-	eSetPolygonTexture,
+	
+	
 	eMirrorUV_X,
 	eMirrorUV_Y,
 	eTranslateUV,
@@ -178,18 +81,6 @@ typedef enum {
 	eScaleUV,
 	eTmpUVMapOn,
 	eTmpUVMapOff,
-
-	eViewports,
-	eViewportBack,
-	eViewportRight,
-	eViewportBottom,
-	eViewportFront,
-	eViewportLeft,
-	eViewportTop,
-	eViewportOrbit,
-	eViewportMaterial,
-	eViewportUV,
-	eViewportCurve,
 
 	eSkeletonName,
 	eOpenTexture,
@@ -201,16 +92,13 @@ typedef enum {
 
 	/* Widget interaction events */
 	eZoom,
-	eSelectMaterial,	
-	eMove,
+	eSelectMaterial,
 	eMove_X,
 	eMove_Y,
 	eMove_Z,
-	eRotate,
 	eRotate_X,
 	eRotate_Y,
 	eRotate_Z,
-	eScale,
 	eScale_X,
 	eScale_Y,
 	eScale_Z,
@@ -223,7 +111,7 @@ typedef enum {
 	eLightPosZ,
 
 	ePolyMapTexturePolygon,
-	eSetFacesMaterial,
+	
 
 	eColorMaterialAmbient,
 	eColorMaterialDiffuse,
@@ -256,12 +144,15 @@ typedef enum {
 	eAxisJoint,
 	eSphereJoint,
 	ePointJoint,
-
 	
 	eBlendDestMenu,
 	eBlendDest,
 	eBlendSrcMenu,
 	eBlendSrc,
+
+
+	/* Events that are deprecated or were removed during event system change. */
+	//eAppendFile,
 
 	/* Text events */
 	eSetCurrentBoneName,
@@ -269,12 +160,12 @@ typedef enum {
 	eSetTextureNameB,
 	eSetMaterialName,
 
-	/* OLD EVENTS */
-	FREYJA_MODE_MODEL_EDIT,
-	FREYJA_MODE_MODEL_VIEW,
-	FREYJA_MODE_TEXTURE_EDIT,
-	FREYJA_MODE_MODEL_VIEW2,
+	/* Render modes */
+	eRenderSolidGround,
+	eRenderPickRay, 
+	eRenderBbox,
 
+	/* Old events */
 	FREYJA_MODE_RENDER_TEXTURE,
 	FREYJA_MODE_RENDER_FACE,
 	FREYJA_MODE_RENDER_LINELOOP,
@@ -287,7 +178,6 @@ typedef enum {
 	FREYJA_MODE_RENDER_NORMALS,
 	FREYJA_MODE_RENDER_BONETAG,
 	FREYJA_MODE_RENDER_GRID,
-	eRenderSolidGround,
 
 	FREYJA_MODE_LOAD_MODEL,
 	FREYJA_MODE_SAVE_MODEL,
@@ -296,36 +186,7 @@ typedef enum {
 	FREYJA_MODE_LOAD_MATERIAL,
 	FREYJA_MODE_LOAD_ANIMATION,
 	FREYJA_MODE_SAVE_ANIMATION,
-	//FREYJA_MODE_LOAD_EMITTER,
-	//FREYJA_MODE_SAVE_EMITTER,
-	//FREYJA_MODE_LOAD_MAP,
 
-	CMD_ANIMATION_NEXT,
-	CMD_ANIMATION_PREV,
-	CMD_ANIMATION_PLAY,
-	CMD_ANIMATION_STOP,
-
-	CMD_POLYGON_ADD,
-	CMD_POLYGON_DELETE,
-	CMD_POLYGON_SELECT,
-
-	CMD_POINT_ADD,
-	CMD_POINT_DELETE,
-	CMD_POINT_COMBINE,
-
-	CMD_BONE_NEW,
-	CMD_BONE_SELECT,
-	CMD_BONE_CONNECT,
-	CMD_BONE_DISCONNECT,
-	CMD_BONE_MOVE_PIVOT,
-
-	CMD_MESH_ADD,
-	CMD_MESH_MOVE_CENTER,
-
-	CMD_MISC_VERTEX_UV,
-	CMD_MISC_SCENE_ROTATE,
-
-	eMeshFlipNormals,
 	ePluginEventBase = 10000
 
 } event_subject_id;

@@ -150,6 +150,7 @@ bool ResourceEvent::drop(unsigned long event)
 {
 	ResourceEvent *e = getEventById(event);
 	delete e;
+	return true;
 }
 
 

@@ -741,35 +741,35 @@ void freyjaPluginBegin()
 
 void freyjaPluginName1s(const char *name)
 {
-	OBS_CALL(freyjaPluginName1s);
+	//OBS_CALL(freyjaPluginName1s);
 	freyjaPluginName(gCurrentFreyjaPlugin, name);
 }
 
 
 void freyjaPluginDescription1s(const char *info_line)
 {
-	OBS_CALL(freyjaPluginDescription1s);
+	//OBS_CALL(freyjaPluginDescription1s);
 	freyjaPluginDescription(gCurrentFreyjaPlugin, info_line);
 }
 
 
 void freyjaPluginAddExtention1s(const char *ext)
 {
-	OBS_CALL(freyjaPluginAddExtention1s);
+	//OBS_CALL(freyjaPluginAddExtention1s);
 	freyjaPluginExtention(gCurrentFreyjaPlugin, ext);
 }
 
 
 void freyjaPluginImport1i(int32 flags)
 {
-	OBS_CALL(freyjaPluginImport1i);
+	//OBS_CALL(freyjaPluginImport1i);
 	freyjaPluginImportFlags(gCurrentFreyjaPlugin, flags);
 }
 
 
 void freyjaPluginExport1i(int32 flags)
 {
-	OBS_CALL(freyjaPluginExport1i);
+	//OBS_CALL(freyjaPluginExport1i);
 	freyjaPluginExportFlags(gCurrentFreyjaPlugin, flags);
 }
 

@@ -26,6 +26,10 @@
 
 #define FREYJA_APP_PLUGINS 1
 
+#define USING_FREYJA_CPP_ABI
+#include <freyja/LegacyABI.h>  // FIXME: Still using old, legacy polymesh gen
+#include <freyja/MeshABI.h>
+#include <freyja/TextureABI.h>
 #include <freyja/PluginABI.h>
 #include <freyja/Plugin.h>
 #include <freyja/LightABI.h>
@@ -33,6 +37,7 @@
 #include <freyja/SkeletonABI.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/freyja.h>
+
 #include <mstl/SystemIO.h>
 
 #include "FreyjaRender.h"
@@ -41,18 +46,21 @@
 #include <mgtk/mgtk_events.h>
 #include <mgtk/mgtk_linker.h>
 #include <mgtk/ResourceEvent.h>
+#include <mgtk/ConfirmationDialog.h>
 
 #include "freyja_events.h"
 
-
 arg_list_t *freyja_rc_color(arg_list_t *args);
+
+long PLUGIN_EVENT_COUNTER = ePluginEventBase;
 
 using namespace freyja3d;
 
-void eRecentFiles(unsigned int value)
+
+
+long freyja_get_new_plugin_eventid()
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->LoadModel(FreyjaControl::mInstance->GetRecentFilename(value));
+	return PLUGIN_EVENT_COUNTER++;
 }
 
 
@@ -164,22 +172,6 @@ void setColor(vec4_t dest, vec4_t color)
 }
 
 
-void eVertexExtrude()
-{
-	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
-	//vec3_t n;
-
-	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
-	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
-}
-
-void eNoImplementation(ResourceEvent *e)
-{
-	freyja_print("!'%s' : No longer implemented or disabled.",
-				(e && e->getName()) ? e->getName() : "Unknown event");
-}
-
-
 void freyja_plugin_generic(const char *symbol, void *something)
 {
 	// NOTICE I don't actually let plugins query the Resource for safety ;)
@@ -192,7 +184,7 @@ void freyja_plugin_generic(const char *symbol, void *something)
 		something = (void *)freyja_load_texture_buffer;
 	}
 
-	something = 0x0;
+	something = 0x0; // Stop the madness
 }
 
 
@@ -309,7 +301,8 @@ void freyja_init_application_plugins(const char *dir)
 void freyja_handle_application_window_close()
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->event(eShutdown);
+	//FreyjaControl::mInstance->event(eShutdown);
+	FreyjaControl::mInstance->Shutdown();
 }
 
 
@@ -517,8 +510,1130 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 void freyja_handle_command(int command)
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->event(command);
+
+	if (!ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
+		freyja_print("!Event(%d): Unhandled event.", command);
 }
+
+
+void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
+{
+	if (bpp == 24)
+		FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 24, Texture::RGB);
+	else if (bpp == 32)
+		FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 32, Texture::RGBA);
+}
+
+
+void polymap_update_question()
+{
+	if (mgtk::ExecuteConfirmationDialog("PolyMapDialog"))
+	{
+		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+		m->ConvertAllFacesToTexCoordPloymapping();
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////
+// Non-object Event Handler Functions
+////////////////////////////////////////////////////////////
+
+void eRecentFiles(unsigned int value)
+{
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	FreyjaControl::mInstance->LoadModel(FreyjaControl::mInstance->GetRecentFilename(value));
+}
+
+
+void eVertexExtrude()
+{
+	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
+	//vec3_t n;
+
+	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
+	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
+}
+
+
+void eNoImplementation(ResourceEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
+
+void eTextureSlotLoadToggle()
+{
+	bool on = FreyjaControl::mInstance->ToggleFlag(FreyjaControl::fLoadTextureInSlot);
+
+	freyja_print("Texture loading into current slot [%s]",
+				on ? "on" : "off");
+}
+
+
+void eFPSCap(unsigned int i)
+{
+	if (FreyjaRender::mSingleton)
+	{
+		if (i)
+		{
+			FreyjaRender::mSingleton->SetFlag(FreyjaRender::fFPSCap);
+		}
+		else
+		{
+			FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fFPSCap);
+		}
+
+		freyja_print("FPSCap is [%s]", i ? "ON" : "OFF");
+	}
+}
+
+
+void eMaterialSlotLoadToggle(unsigned int i)
+{
+	FreyjaControl::mInstance->SetFlag(FreyjaControl::fLoadMaterialInSlot, i);
+	freyja_print("Material slot overwrite on load is [%s]", i ? "ON" : "OFF");
+}
+
+
+void eModelUpload(char *filename)
+{
+	FreyjaControl::mInstance->LoadModel(filename);
+}
+
+
+void eTextureUpload(unsigned int id)
+{
+	byte *image;
+	uint32 w, h, bpp, type;
+
+	/* Texture image was stored as raw buffer */
+	freyjaGetTextureImage(id, w, h, bpp, type, image);
+	freyja_print("!test");
+
+	if (image)
+	{
+		switch (type)
+		{
+		case RGBA_32:
+			FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 32, Texture::RGBA);
+			break;
+
+		case RGB_24:
+			FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 24, Texture::RGB);
+			break;
+
+		case INDEXED_8:
+			FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 8, Texture::INDEXED);
+			break;
+
+		default:
+			freyja_print("%s> ERROR: Unsupported texture colormap %d",
+						"FreyjaModel::loadModel", type);
+		}
+	}
+}
+
+
+void eOpenModel(char *filename)
+{
+	if (FreyjaControl::mInstance->LoadModel(filename))
+	{
+		char title[1024];
+		snprintf(title, 1024, "%s - Freyja", filename);
+		freyja_set_main_window_title(title);
+		FreyjaControl::mInstance->AddRecentFilename(filename);
+	}
+}
+
+
+void eSaveModel(char *filename, char *extension)
+{
+	if (FreyjaControl::mInstance->SaveModel(filename, extension))
+	{
+		/*
+		char title[1024];
+		snprintf(title, 1024, "%s - Freyja", filename);
+		freyja_set_main_window_title(title);
+		FreyjaControl::mInstance->AddRecentFilename(filename);
+		*/
+	}
+}
+
+
+void eNewMaterial()
+{
+	index_t i = freyjaMaterialCreate();
+	freyja_print("New material [%i] created.", i);
+}
+
+
+void eOpenMaterial(char *filename)
+{
+	if (FreyjaControl::mInstance->LoadMaterial(filename))
+	{
+		freyja_refresh_material_interface();
+	}
+}
+
+
+void eSaveMaterial(char *filename)
+{
+	FreyjaControl::mInstance->SaveMaterial(filename);
+}
+
+
+void eMeshUnselectFaces()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if ( m )
+	{
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+		{
+			m->ClearFaceFlags(i, Vertex::fSelected);
+		}
+
+		freyja_print("Reset selected flag on all faces in mesh.");
+	}
+}
+
+
+void eMeshUnselectVertices()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if ( m )
+	{
+		for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+		{
+			m->ClearVertexFlags(i, Vertex::fSelected);
+		}
+
+		freyja_print("Reset selected flag on all vertices in mesh.");
+	}
+}
+
+
+void eNotImplementedVec(vec_t v)
+{
+	freyja_print("Not Implementated");	
+}
+
+
+void eSetSelectedViewport(unsigned int value)
+{
+	FreyjaControl::mInstance->SetSelectedViewport(value);
+}
+
+
+void eSelectedFacesGenerateNormals()
+{
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->SelectedFacesGenerateVertexNormals();
+	}
+}
+
+void eSelectedFacesFlipNormals()
+{
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->SelectedFacesFlipVertexNormals();
+	}
+}
+
+
+void eSelectedFacesDelete()
+{
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->DeleteSelectedFaces();
+	}
+}
+
+
+void eSmoothingGroupsDialog()
+{
+	uint32 id = ResourceEvent::GetResourceIdBySymbol("eSmoothingGroupsDialog");
+	mgtk_event_dialog_visible_set(id, 1);	
+}
+
+
+void eSmooth(unsigned int group, unsigned int value)
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		freyja_print("Faces in group (%i) %s.", 
+					 group, value ? "selected" : "unselected");
+
+		if (value)
+		{
+			FreyjaControl::mInstance->mGroupBitmap |= (1<<group);
+			m->SetGroupsFaceSelected(FreyjaControl::mInstance->mGroupBitmap);
+		}
+		else
+		{
+			m->ClearGroupsFaceSelected(FreyjaControl::mInstance->mGroupBitmap);
+			FreyjaControl::mInstance->mGroupBitmap ^= (1<<group);
+		}
+
+		freyja_event_gl_refresh();
+	}
+}
+
+
+void eGroupClear()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+
+		if (group > 24)
+		{
+			freyja_print("Make sure only one group is toggled while assigning");
+			return;
+		}
+
+		freyja_print("Selected faces removed from smoothing group (%i).",group);
+		m->SelectedFacesMarkSmoothingGroup(group, false);
+		freyja_event_gl_refresh();
+	}
+}
+
+
+void eSetSelectedFacesAlpha()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		freyja_print("Selected faces alpha flag enabled.");
+		m->SetFlagForSelectedFaces(Face::fAlpha);
+		freyja_event_gl_refresh();
+	}
+}
+
+
+void eClearSelectedFacesAlpha()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		freyja_print("Selected faces alpha flag enabled.");
+		m->ClearFlagForSelectedFaces(Face::fAlpha);
+		freyja_event_gl_refresh();
+	}
+}
+
+
+void eGroupAssign()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+
+		if (group > 24)
+		{
+			freyja_print("Make sure only one group is toggled while assigning");
+			return;
+		}
+
+		freyja_print("Selected faces assigned to smoothing group (%i).", group);
+		m->SelectedFacesMarkSmoothingGroup(group, true);
+
+		// Go ahead and update the vertex normals here automatically for now
+		//m->GroupedFacesGenerateVertexNormals(group);
+		freyja_event_gl_refresh();
+	}
+}
+
+
+vec_t gWeight = 1.0f;
+void eWeight(vec_t w)
+{
+	gWeight = w;
+	freyja_print("Weight set to %f", gWeight);
+}
+
+void eAssignWeight()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+		m->SetWeightSelectedVertices(bone, gWeight);
+		freyja_print("Selected vertices set to bone %i weighting to %f.", bone, gWeight);
+	}
+}
+
+void eClearWeight()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+		m->RemoveWeightSelectedVertices(bone);
+		freyja_print("Selected vertices removing bone %i weighting...", bone);
+	}
+}
+
+void eMirrorMeshX()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		hel::Mat44 mat;
+		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
+		freyja_print("Mirroring mesh over X...");
+		m->TransformVertices(mat);
+	}
+}
+
+void eMirrorMeshY()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		hel::Mat44 mat;
+		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+		freyja_print("Mirroring mesh over Y...");
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorMeshZ()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		hel::Mat44 mat;
+		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+		freyja_print("Mirroring mesh over Z...");
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorFacesX()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		hel::Mat44 mat;
+		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
+		freyja_print("Mirroring selected faces over X...");
+		//m->TransformFacesWithFlag(Face::fSelected, mat);
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorFacesY()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		hel::Mat44 mat;
+		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+		freyja_print("Mirroring selected faces over Y...");
+		m->TransformFacesWithFlag(Face::fSelected, mat);
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eMirrorFacesZ()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		hel::Mat44 mat;
+		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+		freyja_print("Mirroring selected faces over Z...");
+		m->TransformFacesWithFlag(Face::fSelected, mat);
+		m->TransformVertices(mat);
+	}
+}
+
+
+void eNopControl(ResourceEvent *e)
+{
+	freyja_print("!'%s' : No longer implemented or disabled.",
+				(e && e->getName()) ? e->getName() : "Unknown event");
+}
+
+
+void eARBFragmentMode(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaControl::mInstance->mUsingARBFragments = true;
+		mgtk_toggle_value_set(ResourceEvent::GetResourceIdBySymbol("eGLSLFragmentMode"), 0);
+		freyja_print("ARB fragment shader mode");
+	}
+}
+
+
+void eGLSLFragmentMode(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaControl::mInstance->mUsingARBFragments = false;
+		mgtk_toggle_value_set(ResourceEvent::GetResourceIdBySymbol("eARBFragmentMode"), 0);
+		freyja_print("GLSL fragment shader mode");
+	}
+}
+
+vec_t gSnapWeldVertsDist = 0.001f;
+void eSnapWeldVertsDist(vec_t d)
+{
+	gSnapWeldVertsDist = d;
+}
+
+
+void eSnapWeldVerts()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->WeldVerticesByDistance(gSnapWeldVertsDist);
+	}
+}
+
+void eCleanupVertices()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+
+	if (m)
+	{
+		m->VertexCleanup();
+	}
+}
+
+
+
+void eGenerateCone()
+{
+	Vector3d v;
+	freyjaGenerateConeMesh(v.mVec, 
+						   FreyjaControl::mInstance->GetGenMeshHeight(),
+						   FreyjaControl::mInstance->GetGenMeshCount());
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGenerateCylinder()
+{
+	Vector3d v;
+	freyjaGenerateCylinderMesh(v.mVec, 
+							   FreyjaControl::mInstance->GetGenMeshHeight(), 
+							   FreyjaControl::mInstance->GetGenMeshCount(),
+							   FreyjaControl::mInstance->GetGenMeshSegements());
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGenerateTube()
+{
+	float h =FreyjaControl::mInstance->GetGenMeshHeight(); //mgtk_create_query_dialog_float("gtk-dialog-question", "Height?", mGenMeshHeight, 0.5, 64, 1, 3);
+	int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+													"How many vertices in a ring?",
+													FreyjaControl::mInstance->GetGenMeshCount(), 1, 128, 
+													1, 1);
+	int seg = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+												  "How many segments?",
+												  FreyjaControl::mInstance->GetGenMeshSegements(), 1, 128, 
+												  1, 1);
+	Vec3 v;
+	freyjaGenerateTubeMesh(v.mVec, h, count, seg);
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGenerateSphere()
+{
+	Vector3d v;
+	freyjaGenerateSphereMesh(v.mVec, 
+							 FreyjaControl::mInstance->GetGenMeshHeight(), 
+							 FreyjaControl::mInstance->GetGenMeshCount(),
+							 FreyjaControl::mInstance->GetGenMeshCount());
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGenerateCube()
+{
+	float size = mgtk_create_query_dialog_float("gtk-dialog-question",
+												"Size?",
+												FreyjaControl::mInstance->GetGenMeshHeight(), 
+												0.5, 64, 
+												1, 3);
+	Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
+	index_t mesh = freyjaMeshCreateCube(v.mVec, size);
+	FreyjaControl::mInstance->SetSelectedMesh(mesh);
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGeneratePlane()
+{
+	int rows = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+												   "How many rows?",
+												   1, 1, 64, 
+												   1, 1);
+	
+	int cols = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+												   "How many columns?",
+												   1, 1, 64, 
+												   1, 1);
+	
+	vec_t size = FreyjaControl::mInstance->GetGenMeshHeight() * 4;
+	Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
+	freyjaMeshCreateSheet(v.mVec, size, rows, cols);
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGenerateCircle()
+{
+	Vector3d v;
+	freyjaGenerateCircleMesh(v.mVec, FreyjaControl::mInstance->GetGenMeshCount());
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eMeshTesselate()
+{
+	freyjaMeshTesselateTriangles(FreyjaControl::mInstance->GetSelectedMesh());
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eMeshTexcoordSpherical()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	if (m)
+	{
+		m->UVMapSelectedFaces_Spherical();
+		polymap_update_question();
+		FreyjaControl::mInstance->Dirty();
+	}
+}
+
+
+void eMeshTexcoordCylindrical()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	if (m)
+	{
+		m->UVMapSelectedFaces_Cylindrical();
+		polymap_update_question();
+		FreyjaControl::mInstance->Dirty();
+	}
+}
+
+
+void eMeshTexcoordPlaneProj()
+{
+	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	if (m)
+	{
+		m->UVMapSelectedFaces_Plane();
+		polymap_update_question();
+		FreyjaControl::mInstance->Dirty();
+	}
+}
+
+
+void eMeshGenerateNormals()
+{
+	freyjaMeshGenerateVertexNormals(FreyjaControl::mInstance->GetSelectedMesh());
+	freyja_event_gl_refresh();
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eSelectAll()
+{
+	freyja_print("Select All is not avalible in this build");
+}
+
+void eMoveObject()
+{
+	FreyjaControl::mInstance->eMoveObject(1);
+}
+
+void eRotateObject()
+{
+	FreyjaControl::mInstance->eRotateObject(1);
+}	
+
+void eScaleObject()
+{
+	FreyjaControl::mInstance->eScaleObject(1);
+}	
+
+void eSelect()
+{
+	FreyjaControl::mInstance->eSelect(1);
+}
+
+void eUnselect()
+{
+	FreyjaControl::mInstance->eUnselect(1);
+}		
+
+
+#if 0
+void ePolymapUpdateQuestion()
+{
+	if (mgtk::ExecuteConfirmationDialog("UVMapDialog"))
+	{
+		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+		m->ConvertAllFacesToTexCoordPloymapping();
+	}
+}
+#endif
+
+
+
+void eBoneSelect()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
+	FreyjaControl::mInstance->SetActionMode(FreyjaControl::aSelect);
+	freyja_print("Select bone...");
+}
+
+
+void eBoneNew()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
+	FreyjaControl::mInstance->CreateObject();
+	//freyja_print("Select new child bone placement directly...");
+	//mEventMode = BONE_ADD_MODE;
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+
+void FreyjaControlEventsAttach()
+{
+	// ResourceEventCallback::add("", &);
+
+	ResourceEventCallback::add("eBoneNew", &eBoneNew);
+	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
+
+	ResourceEventCallback::add("eSelectAll", &eSelectAll);
+	ResourceEventCallback::add("eMoveObject", &eMoveObject);
+	ResourceEventCallback::add("eRotateObject", &eRotateObject);
+	ResourceEventCallback::add("eScaleObject", &eScaleObject);
+	ResourceEventCallback::add("eSelect", &eSelect);
+	ResourceEventCallback::add("eUnselect", &eUnselect);
+
+	ResourceEventCallback::add("eGenerateCircle", &eGenerateCircle);
+	ResourceEventCallback::add("eGeneratePlane", &eGeneratePlane);
+	ResourceEventCallback::add("eGenerateCube", &eGenerateCube);
+	ResourceEventCallback::add("eGenerateSphere", &eGenerateSphere);
+	ResourceEventCallback::add("eGenerateTube", &eGenerateTube);
+	ResourceEventCallback::add("eGenerateCylinder", &eGenerateCylinder);
+	ResourceEventCallback::add("eGenerateCone", &eGenerateCone);
+
+	ResourceEventCallback2::add("eEnableMaterialFragment", &eNopControl);
+	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
+	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);
+ 
+	ResourceEventCallbackUInt::add("eGLSLFragmentMode", &eGLSLFragmentMode);
+	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
+
+	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
+
+	ResourceEventCallback::add("eSetSelectedFacesAlpha", &eSetSelectedFacesAlpha);
+	ResourceEventCallback::add("eClearSelectedFacesAlpha", &eClearSelectedFacesAlpha);
+
+	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
+	ResourceEventCallback::add("eClearWeight", &eClearWeight);
+	ResourceEventCallbackVec::add("eWeight", &eWeight);
+
+	ResourceEventCallback::add("eMirrorFacesX", &eMirrorFacesX);
+	ResourceEventCallback::add("eMirrorFacesY", &eMirrorFacesY);
+	ResourceEventCallback::add("eMirrorFacesZ", &eMirrorFacesZ);
+
+	ResourceEventCallback::add("eMeshTesselate", &eMeshTesselate);
+	ResourceEventCallback::add("eMeshTexcoordSpherical", &eMeshTexcoordSpherical);
+	ResourceEventCallback::add("eMeshTexcoordCylindrical", &eMeshTexcoordCylindrical);
+	ResourceEventCallback::add("eMeshGenerateNormals", &eMeshGenerateNormals);
+	ResourceEventCallback::add("eMeshTexcoordPlaneProj", &eMeshTexcoordPlaneProj);
+	ResourceEventCallback::add("eMirrorMeshX", &eMirrorMeshX);
+	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
+	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
+
+	ResourceEventCallback::add("eCleanupVertices", eCleanupVertices);
+	ResourceEventCallback::add("eSnapWeldVerts", &eSnapWeldVerts);
+
+	ResourceEventCallback::add("eGroupClear", &eGroupClear);
+	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
+
+	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
+	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
+
+	ResourceEventCallback::add("eSelectedFacesFlipNormals", &eSelectedFacesFlipNormals);
+	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
+	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
+	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
+	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
+	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);
+	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
+	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
+	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
+	ResourceEventCallbackString2::add("eSaveModel", &eSaveModel);
+	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
+	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
+	ResourceEventCallbackUInt::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
+	ResourceEventCallbackUInt::add("eFPSCap", &eFPSCap);
+
+	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
+}
+
+
+/// Events ////////////////////////////////////////////////////////////
+
+void eTransformVertices()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tSelectedVertices);
+}
+
+void eTransformScene()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tScene);
+}
+
+
+void eTransformVertex()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tPoint);
+}
+
+
+void eTransformFaces()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tSelectedFaces);
+}
+
+
+void eTransformFace()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tFace);
+}
+
+
+void eTransformMesh()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tMesh);
+}
+
+
+void eTransformMeshes()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tSelectedMeshes);
+}
+
+
+void eTransformModel()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tModel);
+}
+
+
+void eTransformBone()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
+}
+
+
+void eTransformLight()
+{
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tLight);
+}
+
+
+void eExtrude()
+{
+	Vec3 v = FreyjaRender::mTestRay.mDir;
+	v *= -8.0f;
+	freyjaMeshPolygonExtrudeQuad1f(FreyjaControl::mInstance->GetSelectedMesh(), 
+								   FreyjaControl::mInstance->GetSelectedFace(),
+								   v.mVec);
+#if 0
+	// Currently we don't support this 
+	// ( it marks all the new face vertices as selected )
+	if (freyjaGetPolygonVertexCount(GetSelectedFace()))
+	{
+		long polygonIndex = GetSelectedFace();
+		long i, idx, count = freyjaGetPolygonVertexCount(polygonIndex);
+		Vector<unsigned int> list = GetVertexSelectionList();
+		
+		list.clear();
+		
+		for (i = 0; i < count; ++i)
+		{
+			idx = freyjaGetPolygonVertexIndex(polygonIndex, i);
+			list.pushBack(idx);
+		}
+	}
+#endif
+
+	FreyjaControl::mInstance->Dirty();
+}
+
+void eMeshFlipNormals()
+{
+	freyjaMeshNormalFlip(FreyjaControl::mInstance->GetSelectedMesh());
+	freyja_print("Flipping normals for mesh[%i]", 
+				 FreyjaControl::mInstance->GetSelectedMesh());
+	FreyjaControl::mInstance->Dirty();
+}
+
+void eHelpDialog()
+{
+	int e = ResourceEvent::GetResourceIdBySymbol("eHelpDialog");
+	mgtk_event_dialog_visible_set(e, 1);
+}
+
+void ePreferencesDialog()
+{
+	int e = ResourceEvent::GetResourceIdBySymbol("ePreferencesDialog");
+	mgtk_event_dialog_visible_set(e, 1);
+}
+
+void eAboutDialog()
+{
+	int e = ResourceEvent::GetResourceIdBySymbol("eAboutDialog");
+	mgtk_event_dialog_visible_set(e, 1);
+}
+
+
+void eAnimationNext()
+{
+	FreyjaControl::mInstance->SetSelectedAnimation(FreyjaControl::mInstance->GetSelectedAnimation() + 1);
+	freyja_print("Animation Track[%i].", 
+				 FreyjaControl::mInstance->GetSelectedAnimation());
+}
+
+void eAnimationPrev()
+{
+	if (FreyjaControl::mInstance->GetSelectedAnimation())
+		FreyjaControl::mInstance->SetSelectedAnimation(FreyjaControl::mInstance->GetSelectedAnimation() - 1);
+	else
+		FreyjaControl::mInstance->SetSelectedAnimation(0);
+	
+	freyja_print("Animation Track[%i].", 
+				 FreyjaControl::mInstance->GetSelectedAnimation());
+}
+
+
+void ePolygonSplit()
+{
+	freyja_print("Splitting polygon[%i] ...", 
+				 FreyjaControl::mInstance->GetSelectedFace());
+	freyjaMeshPolygonSplit(FreyjaControl::mInstance->GetSelectedMesh(), 
+						   FreyjaControl::mInstance->GetSelectedFace());
+	FreyjaControl::mInstance->Dirty();
+}
+
+void eSetMeshTexture()
+{
+	freyja_print("Switching all of Mesh[%i]'s faces to material %i ...",
+				 FreyjaControl::mInstance->GetSelectedMesh(), 
+				 FreyjaControl::mInstance->GetSelectedTexture());
+	freyjaMeshMaterial(FreyjaControl::mInstance->GetSelectedMesh(),
+					   FreyjaControl::mInstance->GetSelectedTexture());
+	FreyjaControl::mInstance->Dirty();
+}
+
+void eSetFacesMaterial()
+{
+	freyja_print("Switching all of selected faces to material %i",
+				 FreyjaControl::mInstance->GetSelectedMesh(), 
+				 FreyjaControl::mInstance->GetSelectedTexture());
+	FreyjaControl::mInstance->SetMaterialForSelectedFaces(FreyjaControl::mInstance->GetSelectedTexture());
+	FreyjaControl::mInstance->Dirty();
+}
+
+void eSetPolygonTexture()
+{
+	freyja_print("Face to material set to %i", 
+				 FreyjaControl::mInstance->GetSelectedTexture());
+	FreyjaControl::mInstance->SetFaceMaterial(FreyjaControl::mInstance->GetSelectedFace(), 
+					FreyjaControl::mInstance->GetSelectedTexture());
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void FreyjaMiscEventsAttach()
+{
+	// ResourceEventCallback::add("", &);
+
+	ResourceEventCallback::add("eAnimationNext", &eAnimationNext);
+	ResourceEventCallback::add("eAnimationPrev", &eAnimationPrev);
+	ResourceEventCallback::add("ePolygonSplit", &ePolygonSplit);
+	ResourceEventCallback::add("eSetMeshTexture", &eSetMeshTexture);
+	ResourceEventCallback::add("eSetFacesMaterial", &eSetFacesMaterial);
+	ResourceEventCallback::add("eSetPolygonTexture", &eSetPolygonTexture);
+
+	ResourceEventCallback::add("eMeshFlipNormals", &eMeshFlipNormals);
+	ResourceEventCallback::add("eHelpDialog", &eHelpDialog);
+	ResourceEventCallback::add("ePreferencesDialog", &ePreferencesDialog);
+	ResourceEventCallback::add("eAboutDialog", &eAboutDialog);
+
+	ResourceEventCallback::add("eExtrude", &eExtrude);
+
+	ResourceEventCallback::add("eTransformScene", &eTransformScene);
+	ResourceEventCallback::add("eTransformVertices", &eTransformVertices);
+	ResourceEventCallback::add("eTransformVertex", &eTransformVertex);
+	ResourceEventCallback::add("eTransformMeshes", &eTransformMeshes);
+	ResourceEventCallback::add("eTransformMesh", &eTransformMesh);
+	ResourceEventCallback::add("eTransformFaces", &eTransformFaces);
+	ResourceEventCallback::add("eTransformFace", &eTransformFace);
+	ResourceEventCallback::add("eTransformModel", &eTransformModel);
+	ResourceEventCallback::add("eTransformBone", &eTransformBone);
+	ResourceEventCallback::add("eTransformLight", &eTransformLight);
+}
+
+
+////////////////////////////////////////////////////////////////
+// View Events
+////////////////////////////////////////////////////////////////
+
+void eLineBone(unsigned int value)
+{
+	if (value)
+	{
+		uint32 id = ResourceEvent::GetResourceIdBySymbol("ePolyMeshBone");
+		mgtk_toggle_value_set(id, 0);
+		FreyjaRender::mBoneRenderType = 1;
+	}
+}
+
+
+void ePolyMeshBone(unsigned int value)
+{
+	if (value)
+	{
+		uint32 id = ResourceEvent::GetResourceIdBySymbol("eLineBone");
+		mgtk_toggle_value_set(id, 0);
+		FreyjaRender::mBoneRenderType = 2;
+	}
+}
+
+
+void eGroupColors(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fGroupColors);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fGroupColors);
+	}
+
+	freyja_print("Smoothing group color coding is [%s]", value ? "ON" : "OFF");	
+	freyja_event_gl_refresh();
+}
+
+
+void eRenderToggleBoneZClear(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fBonesNoZbuffer);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fBonesNoZbuffer);
+	}
+
+	freyja_print("Bone rendering with cleared Z buffer [%s]",
+				 value ? "ON" : "OFF");
+}
+
+
+void eRenderToggleGridZClear(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fRenderGridClearedZBuffer);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderGridClearedZBuffer);
+	}
+
+	freyja_print("Grid rendering with cleared Z buffer [%s]",
+				 value ? "ON" : "OFF");
+}
+
+
+void eRenderSkeletalDeform(unsigned int value)
+{
+	if (value)
+	{
+		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fSkeletalVertexBlending);
+	}
+	else
+	{
+		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fSkeletalVertexBlending);
+	}
+
+	freyja_print("Animation with skeletal vertex blending is [%s]",
+				 value ? "ON" : "OFF");
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaViewEventsAttach()
+{
+	ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNopControl);
+	ResourceEventCallback2::add("eOpenFileTextureB", &eNopControl);
+	ResourceEventCallback2::add("eCollapseFace", &eNopControl);
+	ResourceEventCallback2::add("eSetMaterialTextureB", &eNopControl);
+
+	ResourceEventCallbackUInt::add("eGroupColors", eGroupColors);
+	ResourceEventCallbackUInt::add("eSkeletalDeform", &eRenderSkeletalDeform);
+	ResourceEventCallbackUInt::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
+	ResourceEventCallbackUInt::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
+	ResourceEventCallbackUInt::add("ePolyMeshBone", &ePolyMeshBone);
+	ResourceEventCallbackUInt::add("eLineBone", &eLineBone);
+	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
+}
+
+
+///////////////////////////////////////////////////////////////////////
 
 
 void freyja_handle_resource_init(Resource &r)
@@ -528,14 +1643,30 @@ void freyja_handle_resource_init(Resource &r)
 	////////////////////////////////////////////////////////////////////
 
 	ResourceEventCallbackUInt::add("eRecentFiles", &eRecentFiles);
+
+	// Not implemented or removed misc events
+	// ResourceEventCallback2::add("", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
-	ResourceEventCallback2::add("eRedo", &eNoImplementation);
+	ResourceEventCallback2::add("eBoneLinkChild", &eNoImplementation);
+	ResourceEventCallback2::add("eBoneUnLinkChild", &eNoImplementation);
+	ResourceEventCallback2::add("eAppendFile", &eNoImplementation);
+	ResourceEventCallback2::add("eBoneDelete", &eNoImplementation);
+	ResourceEventCallback2::add("eVertexNew", &eNoImplementation);
+	ResourceEventCallback2::add("eVertexDelete", &eNoImplementation);
+	ResourceEventCallback2::add("ePolygonNew", &eNoImplementation);
+	ResourceEventCallback2::add("ePolygonDelete", &eNoImplementation);
+	ResourceEventCallback2::add("ePolygonSelect", &eNoImplementation);
+	ResourceEventCallback2::add("eRenderShadow", &eNoImplementation);
+	//ResourceEventCallback2::add("eCamera", &eNoImplementation);
 
+	// Class listeners
 	FreyjaControl::AttachMethodListeners();
 
+	// Non-class listeners
 	FreyjaViewEventsAttach();
 	FreyjaControlEventsAttach();
+	FreyjaMiscEventsAttach();
 
 
 	////////////////////////////////////////////////////////////////////
@@ -546,6 +1677,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eMode", eMode);
 	r.RegisterInt("eEvent", eEvent);
 	r.RegisterInt("eNop", eNop);
+
+	// There may have been a special map for this _outside_ of the application.
+	//r.RegisterInt("eShutdown", eShutdown);
 
 
 	// Event ids
@@ -561,35 +1695,14 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eCopyAppendMode", eCopyAppendMode);
 
 	// Freyja modes
-	r.RegisterInt("eModeModel", FREYJA_MODE_MODEL_EDIT);
-	r.RegisterInt("eModeMaterial", FREYJA_MODE_MATERIAL_EDIT);
-	r.RegisterInt("eModeUV", FREYJA_MODE_TEXTURE_EDIT);
 	r.RegisterInt("eModeAutoKeyframe", eModeAutoKeyframe);
-
-	// Edit actions
-	r.RegisterInt("eUndo", eUndo);
-	r.RegisterInt("eCut", eCut);
-	r.RegisterInt("eCopy", eCopy);
-	r.RegisterInt("ePaste", ePaste);
-	r.RegisterInt("eDelete", eDelete);
-	r.RegisterInt("eSelectionByBox", eSelectionByBox);
-	r.RegisterInt("eSelect", eSelect);
-	r.RegisterInt("eUnselect", eUnselect);
-	r.RegisterInt("eSelectAll", eSelectAll);
 
 	r.RegisterInt("eAxisJoint", eAxisJoint);
 	r.RegisterInt("eSphereJoint", eSphereJoint);
 	r.RegisterInt("ePointJoint", ePointJoint);
 
-	r.RegisterInt("eDupeObject", eDupeObject);
-	r.RegisterInt("eSplitObject", eSplitObject);
-	r.RegisterInt("eMergeObject", eMergeObject);
-	r.RegisterInt("eAppendFile", eAppendFile);
-	r.RegisterInt("eRevertFile", eRevertFile);
-	r.RegisterInt("eExportFile", eExportFile);
-	r.RegisterInt("eImportFile", eImportFile);
-	r.RegisterInt("eNewFile", eNewFile);
-	r.RegisterInt("eCloseFile", eCloseFile);
+	//r.RegisterInt("eAppendFile", eAppendFile);
+
 	r.RegisterInt("eOpenTexture", eOpenTexture);
 	r.RegisterInt("eOpenShader", eOpenShader);
 	r.RegisterInt("eShaderSlotLoadToggle", eShaderSlotLoadToggle);
@@ -599,55 +1712,13 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
 
-
 	// dialogs
-	r.RegisterInt("ePreferencesDialog", ePreferencesDialog);
-	r.RegisterInt("eAboutDialog", eAboutDialog);
-	r.RegisterInt("eHelpDialog", eHelpDialog);
-
-
 	r.RegisterInt("eMaterialMultiTex", eMaterialMultiTex);
 	r.RegisterInt("eMaterialTex", eMaterialTex);
 
-
-	r.RegisterInt("eOpenFileModel", eOpenFileModel);
-	r.RegisterInt("eSaveFileModel", eSaveFileModel);
-	r.RegisterInt("eSaveAsFileModel", eSaveAsFileModel);
-
-	r.RegisterInt("eScreenShot", eScreenShot);
-	r.RegisterInt("eShutdown", eShutdown);
-	r.RegisterInt("eNewFile", eNewFile);
-	r.RegisterInt("eOpenFile", eOpenFile);
-	r.RegisterInt("eSaveFile", eSaveFile);
-	r.RegisterInt("eSaveAsFile", eSaveAsFile);
-	r.RegisterInt("eInfo", eInfo);
 	r.RegisterInt("eDebug", eDebug);
-	r.RegisterInt("eFullscreen", eFullscreen);
 
-	r.RegisterInt("eGenerateCube", eGenerateCube);
-	r.RegisterInt("eGenerateTube", eGenerateTube);
-	r.RegisterInt("eGenerateCircle", eGenerateCircle);
-	r.RegisterInt("eGeneratePlane", eGeneratePlane);
-	r.RegisterInt("eGenerateCylinder", eGenerateCylinder);
-	r.RegisterInt("eGenerateSphere", eGenerateSphere);
-	r.RegisterInt("eGenerateCone", eGenerateCone);
-
-	r.RegisterInt("ePolygonSplit", ePolygonSplit);
-
-	r.RegisterInt("eMeshNew", eMeshNew);
-	r.RegisterInt("eMeshDelete", eMeshDelete);
-	r.RegisterInt("eMeshSelect", eMeshSelect);
-	r.RegisterInt("eMeshMirrorX", eMeshMirrorX);
-	r.RegisterInt("eMeshMirrorY", eMeshMirrorY);
-	r.RegisterInt("eMeshMirrorZ", eMeshMirrorZ);
-	r.RegisterInt("eMeshTexcoordPlaneProj", eMeshTexcoordPlaneProj);
-	r.RegisterInt("eMeshTexcoordSpherical",eMeshTexcoordSpherical);
-	r.RegisterInt("eMeshTexcoordCylindrical", eMeshTexcoordCylindrical);
-	r.RegisterInt("eMeshTesselate", eMeshTesselate);
-
-	r.RegisterInt("eKeyFrame", eKeyFrame);
-	r.RegisterInt("eSetKeyFrame", eSetKeyFrame);
-
+	
 	r.RegisterInt("ePolygonSize", ePolygonSize);
 	r.RegisterInt("eGenMeshHeight", eGenMeshHeight);
 	r.RegisterInt("eGenMeshCount", eGenMeshCount);
@@ -663,55 +1734,27 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eTranslateUV", eTranslateUV);
 	r.RegisterInt("eRotateUV", eRotateUV);
 	r.RegisterInt("eScaleUV", eScaleUV);
-	r.RegisterInt("eSetMeshTexture", eSetMeshTexture);
-	r.RegisterInt("eSetPolygonTexture", eSetPolygonTexture);
+ 	
 	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
 
-
-	r.RegisterInt("eMeshGenerateNormals", eMeshGenerateNormals);
-	r.RegisterInt("eMeshFlipNormals", eMeshFlipNormals);
 	r.RegisterInt("eObjectMenu", eObjectMenu);
-	r.RegisterInt("eAddObject", eAddObject);
-	r.RegisterInt("eMoveObject", eMoveObject);
-	r.RegisterInt("eRotateObject", eRotateObject);
-	r.RegisterInt("eScaleObject", eScaleObject);
-
-	r.RegisterInt("eExtrude", eExtrude);
 
 	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
 	r.RegisterInt("eTransformMenu", eTransformMenu);
-	r.RegisterInt("eTransformVertices", eTransformVertices);
-	r.RegisterInt("eTransformFaces", eTransformFaces);
-	r.RegisterInt("eTransformScene", eTransformScene);
-	r.RegisterInt("eTransformFace", eTransformFace);
-	r.RegisterInt("eTransformMesh", eTransformMesh);
-	r.RegisterInt("eTransformMeshes", eTransformMeshes);
-	r.RegisterInt("eTransformModel", eTransformModel);
-	r.RegisterInt("eTransformBone", eTransformBone);
-	r.RegisterInt("eTransformLight", eTransformLight);
-	r.RegisterInt("eTransformPoint", eTransformPoint);
 
-	r.RegisterInt("eSetFacesMaterial", eSetFacesMaterial);
-
-	r.RegisterInt("eAnimationNext", eAnimationNext);
-	r.RegisterInt("eAnimationPrev", eAnimationPrev);
 	r.RegisterInt("eAnimationSlider", eAnimationSlider);
 
 	/* Widget events ( widgets hold data like spinbuttons, etc ) */
-	r.RegisterInt("eScale", eScale);
 	r.RegisterInt("eScale_X", eScale_X);
 	r.RegisterInt("eScale_Y", eScale_Y);
 	r.RegisterInt("eScale_Z", eScale_Z);
-	r.RegisterInt("eMove", eMove);
 	r.RegisterInt("eMove_X", eMove_X);
 	r.RegisterInt("eMove_Y", eMove_Y);
 	r.RegisterInt("eMove_Z", eMove_Z);
-	r.RegisterInt("eRotate", eRotate);
 	r.RegisterInt("eRotate_X", eRotate_X);
 	r.RegisterInt("eRotate_Y", eRotate_Y);
 	r.RegisterInt("eRotate_Z", eRotate_Z);
 	r.RegisterInt("eZoom", eZoom);
-	r.RegisterInt("eCamera", eCamera);
 	r.RegisterInt("eSelectMaterial", eSelectMaterial);
 
 	r.RegisterInt("eLightPosX", eLightPosX);
@@ -723,8 +1766,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eMeshIterator", eMeshIterator);
 	r.RegisterInt("eGroupIterator", eGroupIterator);
 	r.RegisterInt("eBoneIterator", eBoneIterator);
-
-	r.RegisterInt("eTexcoordCombine", eTexcoordCombine);
 
 	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
 	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);
@@ -753,29 +1794,11 @@ void freyja_handle_resource_init(Resource &r)
 
 	r.RegisterInt("eViewports", eViewports);
 
-	r.RegisterInt("eVertexNew", CMD_POINT_ADD);
-	//r.RegisterInt("eVertexMove", CMD_POINT_MOVE);
-	r.RegisterInt("eVertexCombine", CMD_POINT_COMBINE);
-	r.RegisterInt("eVertexDelete", CMD_POINT_DELETE);
-	r.RegisterInt("ePolygonNew", CMD_POLYGON_ADD);	
-	r.RegisterInt("ePolygonDelete", CMD_POLYGON_DELETE);	
-	r.RegisterInt("ePolygonSelect", CMD_POLYGON_SELECT);	
 
-	/* Bone edit */
 	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName); // textbox
-	r.RegisterInt("eBoneNew", CMD_BONE_NEW);
-	r.RegisterInt("eBoneSelect", CMD_BONE_SELECT);
-	r.RegisterInt("eBoneLinkChild", CMD_BONE_CONNECT);
-	r.RegisterInt("eBoneUnLinkChild", CMD_BONE_DISCONNECT);
-	//r.RegisterInt("eBoneLinkMesh", CMD_BONE_ADD_MESH);
-	//r.RegisterInt("eBoneUnLinkMesh", CMD_BONE_DELETE_MESH);
-	r.RegisterInt("eBoneMoveJoint", CMD_BONE_MOVE_PIVOT);
-
-	r.RegisterInt("eSelectionByBox", eSelectionByBox);
 
 	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 
-	r.RegisterInt("eRenderShadow", eRenderShadow);
 	r.RegisterInt("eRenderWireframe",FREYJA_MODE_RENDER_WIREFRAME);
 	r.RegisterInt("eRenderFace", FREYJA_MODE_RENDER_FACE);
 	r.RegisterInt("eRenderVertex", FREYJA_MODE_RENDER_POINTS);
@@ -794,18 +1817,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
 	r.RegisterInt("eBlendSrc", eBlendSrc);
 	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
-
-	// Viewport renderers ( default package )
-	r.RegisterInt("eViewportBack", eViewportBack);
-	r.RegisterInt("eViewportRight", eViewportRight);
-	r.RegisterInt("eViewportBottom", eViewportBottom);
-	r.RegisterInt("eViewportFront", eViewportFront);
-	r.RegisterInt("eViewportLeft", eViewportLeft);
-	r.RegisterInt("eViewportTop", eViewportTop);
-	r.RegisterInt("eViewportOrbit", eViewportOrbit);
-	r.RegisterInt("eViewportMaterial", eViewportMaterial);
-	r.RegisterInt("eViewportUV", eViewportUV);
-	r.RegisterInt("eViewportCurve", eViewportCurve);
 
 	//r.RegisterSymbol();
 
@@ -828,16 +1839,13 @@ void freyja_handle_resource_init(Resource &r)
 
 void freyja_handle_resource_start()
 {
-	/* Mongoose 2002.02.02, This is the backend entry
-	 *   for some damn reason it's started by the fucking
-	 *   widget layer 'woo hoo'
-	 *
-	 *   Also needs no parms really
-	 *
-	 *   TODO, FIXME: Rewrite all code to focus on this file
-	 *                as main entry and start interface from
-	 *                here, most likey using resource for
-	 *                total gui control */
+	/* Mongoose 2002.02.02,  
+	 * This is the backend entry called by the mgtk widget layer.
+	 */
+
+	/* Mongoose 2007.04.07,
+	 * Here all the resources are setup, and the main interface starts. 
+	 */
 
 	freyja_print("!@Freyja started...");
 
@@ -861,32 +1869,26 @@ void freyja_handle_resource_start()
 		}
 	}
 
-
 	/* Setup material interface */
 	freyja_refresh_material_interface();
 
 	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);
+	FreyjaControl::mInstance->eModeModel();
+
 	mgtk_option_menu_value_set(eTransformMenu, 1);
+	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tMesh);
+
 	mgtk_option_menu_value_set(eObjectMenu, 0);
-	freyja_event2i(eEvent, FREYJA_MODE_MODEL_EDIT);
-	FreyjaControl::mInstance->event(eTransformMesh);
-	FreyjaControl::mInstance->event(eSelect);
+	FreyjaControl::mInstance->SetActionMode(FreyjaControl::aSelect);
 
+	/* Set init window title, log welcome, and refresh OpenGL context */
 	freyja_set_main_window_title(BUILD_NAME);
-	mgtk_event_gl_refresh();
-
 	freyja_print("Welcome to Freyja %s-%s, %s", VERSION, BUILD_ID, __DATE__);
+	mgtk_event_gl_refresh();
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
 	atexit(freyja_event_shutdown);
-}
-
-long PLUGIN_EVENT_COUNTER = ePluginEventBase;
-
-long freyja_get_new_plugin_eventid()
-{
-	return PLUGIN_EVENT_COUNTER++;
 }
 
 
@@ -1480,7 +2482,8 @@ int main(int argc, char *argv[])
 	 * Load file passed by command line args */
 	if (argc > 1)
 	{
-		mgtk_event_fileselection_set_dir(eOpenFile, argv[1]);
+		// Mongoose, 2007.04 - No longer using 'int events' for file dialogs
+		//mgtk_event_fileselection_set_dir(eOpenFile, argv[1]);
 		extern void eOpenModel(char *);
 		eOpenModel(argv[1]);
 	}

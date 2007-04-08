@@ -23,12 +23,11 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_ResourceEvent_H_
-#define GUARD__FREYJA_MONGOOSE_ResourceEvent_H_
+#ifndef GUARD__MGTK_RESOURCEEVENT_H_
+#define GUARD__MGTK_RESOURCEEVENT_H_
 
 #include <mstl/Delegate.h>
 #include <mstl/String.h>
-#include <mstl/Thread.h>
 #include <mstl/Vector.h>
 #include <hel/math.h>
 #include "Resource.h"
@@ -235,59 +234,6 @@ class ResourceEvent
 	static Resource *mResource;          /* Resource system pointer */
 
 	static Vector<ResourceEvent*> mEvents; /* Event store for control use */
-};
-
-
-// Finally caving and adding C++ Method Delegate support in mgtk
-
-class ResourceEventDelegate : public ResourceEvent
-{
-public:
-
-	ResourceEventDelegate(const char *name, MethodDelegate *d) : 
-		ResourceEvent(name), mDelegate(d)
-	{
-	}
-
-	~ResourceEventDelegate()
-	{
-		delete mDelegate;
-	}
-
-	static void add(const char *name, MethodDelegate *d)
-	{
-		ResourceEventDelegate *e = new ResourceEventDelegate(name, d);
-
-		if (e)
-		{
-		}
-	}
-
-
-	bool action()
-	{
-		if (mDelegate)
-			mDelegate->Execute();
-
-		return true;
-	}
-
-
-	bool action(float value)
-	{
-		if (mDelegate)
-		{
-			ArgList1<float> arg(value);
-			mDelegate->Execute(arg);
-		}
-
-		return true;
-	}
-
-
-private:
-
-	MethodDelegate *mDelegate;
 };
 
 
@@ -809,4 +755,4 @@ public:
 	void (*mGUIAttach)();
 };
 
-#endif
+#endif // GUARD__MGTK_RESOURCEEVENT_H_
