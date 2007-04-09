@@ -51,7 +51,8 @@ Material::Material() :
 	mBlendSrcString("GL_ONE"),
 	mBlendDestString("GL_ONE"),
 	mTextureFilename(),
-	mShaderFilename()
+	mShaderFilename(),
+	mMetaData()
 {
 	mName[0] = '\0';
 

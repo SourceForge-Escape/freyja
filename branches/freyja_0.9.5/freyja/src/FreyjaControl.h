@@ -135,6 +135,7 @@ class FreyjaControl
 	typedef bool (FreyjaControl::*bMethodPtr)();
 	typedef void (FreyjaControl::*MethodPtr1u)(unsigned int);
 	typedef void (FreyjaControl::*MethodPtr1f)(float);
+	typedef void (FreyjaControl::*MethodPtr1s)(char *);
 
 
 	////////////////////////////////////////////////////////////
@@ -612,27 +613,6 @@ class FreyjaControl
 
 	// FIXME: This stuff from the old code merge at least needs to be 
 	// broken into remaining classes 
-	void SetRenderFlag(FreyjaRender::flags_t flag, bool t, const char *s)
-	{
-		mRender->Flag(flag, t);
-		freyja_print("%s is [%s]", s, t ? "ON" : "OFF");
-		freyja_event_gl_refresh();
-	}
-
-	void Display()
-	{
-		FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton not allocated");
-		mRender->Display();
-	}
-
-
-	void HandleResize(uint32 width, uint32 height)
-	{
-		FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton not allocated");
-		mRender->ResizeContext(width, height);
-	}
-
-
 	void SetFlag(options_t flag, bool t) 
 	{ (t) ? mFlags |= flag : mFlags ^= flag; }
 
@@ -686,6 +666,11 @@ class FreyjaControl
 		return GetResource().GetEventIdByName(symbol);
 	}
 
+
+	////////////////////////////////////////////////////////////
+	// Events, once all these are 'sorted' decouple.
+	////////////////////////////////////////////////////////////
+
 	void eSelectionByBox(unsigned int value);
 	void eSelect(unsigned int value);
 	void eUnselect(unsigned int value);
@@ -709,6 +694,44 @@ class FreyjaControl
 	 *        ( Break up into separate classes later. )
 	 *
 	 ------------------------------------------------------*/
+
+	void eTransformVertices() { SetObjectMode(tSelectedVertices); }
+
+	void eTransformScene() { SetObjectMode(tScene); }
+
+	void eTransformVertex() { SetObjectMode(tPoint); }
+
+	void eTransformFaces() { SetObjectMode(tSelectedFaces); }
+
+	void eTransformFace() { SetObjectMode(tFace); }
+
+	void eTransformMesh() { SetObjectMode(tMesh); }
+
+	void eTransformMeshes() { SetObjectMode(tSelectedMeshes); }
+
+	void eTransformModel() { SetObjectMode(tModel); }
+
+	void eTransformBone() { SetObjectMode(tBone); }
+
+	void eTransformLight() { SetObjectMode(tLight); }
+
+	void eRecentFiles(uint32 value) { LoadModel(GetRecentFilename(value)); }
+
+	void eTextureSlotLoad()
+	{
+		bool b = ToggleFlag(fLoadTextureInSlot);
+		freyja_print("Texture load into current slot [%s]", b ? "on" : "off");
+	}
+
+	void eMaterialSlotLoad(uint32 i)
+	{
+		SetFlag(fLoadMaterialInSlot, i);
+		freyja_print("Material load into slot is [%s]", i ? "ON" : "OFF");
+	}
+
+	void eOpenShader(char *text);
+	void eOpenTexture(char *text);
+	//void eModelUpload(char *filename) { LoadModel(filename); }
 
 	void eScale();
 	void eMove();
@@ -1186,6 +1209,7 @@ private:
 	static void CreateListener(const char *name, bMethodPtr ptr);
 	static void CreateListener(const char *name, MethodPtr1u ptr);
 	static void CreateListener(const char *name, MethodPtr1f ptr);
+	static void CreateListener(const char *name, MethodPtr1s ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Maps mlisp symbol <name> to method <ptr> action.

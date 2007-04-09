@@ -4,16 +4,15 @@
  * Project : Freyja
  * Author  : Mongoose
  * Website : http://icculus.org/mongoose/
- * Email   : mongoose@icculus.org
+ * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (C) 2001 Mongoose
- * Comments: This is the common event system interface
- *           for freyja
+ * License : (C) 2001-2007 Mongoose
+ * Comments: This is the event system facade for mgtk for freyja.
  *
  *           It's independent of the widget set, etc
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <mongoose@icculus.org>
+ *           template generator script.  <mongooseichiban@gmail.com>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -21,8 +20,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
-#define GUARD__FREYJA_MONGOOSE_FREYJA_EVENT_H
+#ifndef GUARD__FREYJA_FREYJA_EVENT_H
+#define GUARD__FREYJA_FREYJA_EVENT_H
 
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
@@ -30,8 +29,8 @@
 #include <mstl/String.h>
 #include <freyja/freyja.h>
 
-
 #define FREYJA_LOG_FILE "Freyja-dev.log"
+#define FREYJA_RECENT_FILES "recent_files-dev"
 
 
 typedef enum {
@@ -46,13 +45,7 @@ typedef enum {
 	eModeAutoKeyframe,
 
 	/* Event ids ( minors ) */
-	eGeneratePatchMesh,
 	eSetMaterialTexture,
-	eGenerateNormals,
-	eOpenTexture,
-	eTextureSlotLoad,
-	eOpenShader,
-	eShaderSlotLoadToggle,
 	eSetMaterialShader,
 	eSetMaterialShaderFilename,
 
@@ -175,6 +168,13 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 /*------------------------------------------------------
  * Pre  : 
  * Post : Callback retrieves image data from filename
+ *
+ ------------------------------------------------------*/
+
+void freyja_set_dialog_visible(const char *name);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Show() dialog by symbol name.
  *
  ------------------------------------------------------*/
 

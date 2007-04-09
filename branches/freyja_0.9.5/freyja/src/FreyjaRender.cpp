@@ -53,7 +53,7 @@
 using namespace freyja;
 using namespace freyja3d;
 
-FreyjaRender *FreyjaRender::mSingleton = 0x0;
+FreyjaRender *FreyjaRender::mInstance = 0x0;
 
 Ray FreyjaRender::mTestRay;
 
@@ -141,8 +141,6 @@ FreyjaRender::FreyjaRender() :
 		mColors[14][i] = GREEN[i]*0.75;
 		mColors[15][i] = PINK[i]*0.50;
 	}
-
-	mSingleton = this;
 }
 
 
@@ -321,6 +319,31 @@ void FreyjaRender::DrawFreeWindow()
 #endif
 }
 
+
+void FreyjaRender::AttachMethodListeners()
+{
+	CreateListener("eViewports", &FreyjaRender::eViewports);
+	CreateListener("eRenderSkeleton", &FreyjaRender::eRenderSkeleton);
+	CreateListener("eRenderVertex", &FreyjaRender::eRenderVertex);
+	CreateListener("eRenderWireframe", &FreyjaRender::eRenderWireframe);
+	CreateListener("eRenderNormals", &FreyjaRender::eRenderNormals);
+	CreateListener("eRenderLighting", &FreyjaRender::eRenderLighting);
+	CreateListener("eRenderMaterial", &FreyjaRender::eRenderMaterial);
+	CreateListener("eRenderGrid", &FreyjaRender::eRenderGrid);
+	CreateListener("eRenderSolidGround", &FreyjaRender::eRenderSolidGround);
+	CreateListener("eRenderFace", &FreyjaRender::eRenderFace);
+	CreateListener("eRenderPickRay", &FreyjaRender::eRenderPickRay);
+	CreateListener("eRenderBbox", &FreyjaRender::eRenderBbox);
+	CreateListener("eGroupColors", &FreyjaRender::eGroupColors);
+	CreateListener("eRenderBoneZClear", &FreyjaRender::eRenderBoneZClear);
+	CreateListener("eRenderGridZClear", &FreyjaRender::eRenderGridZClear);
+	CreateListener("eSkeletalDeform", &FreyjaRender::eRenderSkeletalDeform);
+	CreateListener("eFPSCap", &FreyjaRender::eFPSCap);
+	CreateListener("ePolyMeshBone", &FreyjaRender::ePolyMeshBone);
+	CreateListener("eLineBone", &FreyjaRender::eLineBone);
+
+	//CreateListener("", &FreyjaRender::);
+}
 
 ////////////////////////////////////////////////////////////
 // Private Accessors

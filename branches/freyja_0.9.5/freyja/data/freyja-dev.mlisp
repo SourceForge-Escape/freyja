@@ -100,7 +100,7 @@
 			(toggle_menu_item	"_Viewports"	eViewports	0)
 			(menu_seperator)
 			(toggle_menu_item	"_Grid"			eRenderGrid	1)
-			;(toggle_menu_item	"_Grid ZBuffer"	eRenderToggleGridZClear	0)
+			;(toggle_menu_item	"_Grid ZBuffer"	eRenderGridZClear	0)
 
 			(submenu "_Mesh"
 				(toggle_menu_item	"_Points"		eRenderVertex	0)
@@ -122,7 +122,7 @@
 				(toggle_menu_item	"_Axes"		eAxisJoint		0))
 
 			(submenu "_Bone"
-				(toggle_menu_item "_ZBuffer"	eRenderToggleBoneZClear	0)
+				(toggle_menu_item "_ZBuffer"	eRenderBoneZClear	0)
 				(toggle_menu_item "_Line"		eLineBone		1)
 				(toggle_menu_item "_PolyMesh" 	ePolyMeshBone	0))
 		) ; End submenu "_View"
@@ -702,7 +702,7 @@
 						"Open Material..." eOpenMaterial "mode=open")
 
 					(toolbar_togglebutton false "gtk-apply" "Lock"
-						"Overwrite material on load" eEvent eMaterialSlotLoadToggle)
+						"Overwrite material on load" eEvent eMaterialSlotLoad)
 
 					(filechoosertoolbar_button	"gtk-save-as" "Save as..." 
 						"Saves material to disk" 
@@ -751,7 +751,7 @@
 				(hbox 0 1 0 1 1
 					(spinbutton 0 0 128 eSetMaterialTexture)
 					(textbox eSetTextureNameA)
-					(togglebutton "Slot" eTextureSlotLoadToggle)
+					(togglebutton "Slot" eTextureSlotLoad)
 					(filechooserbutton "..." "Open Texture..." eOpenTexture "texture_pattern")
 				)
 				(hbox 0 1 0 1 1
@@ -759,7 +759,7 @@
 				(hbox 0 1 0 1 1
 					(spinbutton 0 0 128 eSetMaterialShader)
 					(textbox eSetMaterialShaderFilename)
-					(togglebutton "Slot" eShaderSlotLoadToggle)
+					(togglebutton "Slot" eShaderSlotLoad)
 					(filechooserbutton "..." "Open Fragment program..." eOpenShader "texture_pattern")
 				)
 
@@ -1213,7 +1213,7 @@
 
 ; Custom 'toggles'
 (func_set_toggle	eSelect	1)
-(func_set_toggle	eRenderToggleBoneZClear	1)
+(func_set_toggle	eRenderBoneZClear	1)
 (func_set_toggle	eRenderGrid	1)
 (func_set_toggle	eRenderFace	1)
 (func_set_toggle	eRenderMaterial	1)

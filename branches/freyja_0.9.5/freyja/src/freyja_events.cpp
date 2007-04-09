@@ -4,7 +4,7 @@
  * Project : Freyja
  * Author  : Mongoose
  * Website : http://icculus.org/mongoose/
- * Email   : mongoose@icculus.org
+ * Email   : mongooseichiban@gmail.com
  * Object  : 
  * License : No use w/o permission (C) 2001 Mongoose
  * Comments: This is the common event system interface
@@ -27,7 +27,7 @@
 #define FREYJA_APP_PLUGINS 1
 
 #define USING_FREYJA_CPP_ABI
-#include <freyja/LegacyABI.h>  // FIXME: Still using old, legacy polymesh gen
+#include <freyja/LegacyABI.h>  // FIXME: Still using legacy polymesh generator
 #include <freyja/MeshABI.h>
 #include <freyja/TextureABI.h>
 #include <freyja/PluginABI.h>
@@ -457,15 +457,15 @@ void freyja_handle_event1f(int event, float value)
 
 void freyja_handle_gldisplay()
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
-	FreyjaControl::mInstance->Display();
+	FREYJA_ASSERTMSG(FreyjaRender::mInstance, "FreyjaRender Singleton not allocated");
+	FreyjaRender::mInstance->Display();
 }
 
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl Singleton not allocated");
-	FreyjaControl::mInstance->HandleResize(width, height);
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaRender Singleton not allocated");
+	FreyjaRender::mInstance->ResizeContext(width, height);
 }
 
 
@@ -525,6 +525,13 @@ void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
 }
 
 
+void freyja_set_dialog_visible(const char *name)
+{
+	int e = ResourceEvent::GetResourceIdBySymbol((char*)name);
+	mgtk_event_dialog_visible_set(e, 1);	
+}
+
+
 void polymap_update_question()
 {
 	if (mgtk::ExecuteConfirmationDialog("PolyMapDialog"))
@@ -540,66 +547,19 @@ void polymap_update_question()
 // Non-object Event Handler Functions
 ////////////////////////////////////////////////////////////
 
-void eRecentFiles(unsigned int value)
-{
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->LoadModel(FreyjaControl::mInstance->GetRecentFilename(value));
-}
-
-
-void eVertexExtrude()
-{
-	extern int freyjaVertexExtrude(int32 vertexIndex, vec_t midpointScale, vec3_t normal);
-	//vec3_t n;
-
-	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
-	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
-}
-
-
 void eNoImplementation(ResourceEvent *e)
 {
 	freyja_print("!'%s' : No longer implemented or disabled.",
 				(e && e->getName()) ? e->getName() : "Unknown event");
 }
 
-void eTextureSlotLoadToggle()
+
+void eVertexExtrude()
 {
-	bool on = FreyjaControl::mInstance->ToggleFlag(FreyjaControl::fLoadTextureInSlot);
-
-	freyja_print("Texture loading into current slot [%s]",
-				on ? "on" : "off");
-}
-
-
-void eFPSCap(unsigned int i)
-{
-	if (FreyjaRender::mSingleton)
-	{
-		if (i)
-		{
-			FreyjaRender::mSingleton->SetFlag(FreyjaRender::fFPSCap);
-		}
-		else
-		{
-			FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fFPSCap);
-		}
-
-		freyja_print("FPSCap is [%s]", i ? "ON" : "OFF");
-	}
-}
-
-
-void eMaterialSlotLoadToggle(unsigned int i)
-{
-	FreyjaControl::mInstance->SetFlag(FreyjaControl::fLoadMaterialInSlot, i);
-	freyja_print("Material slot overwrite on load is [%s]", i ? "ON" : "OFF");
-}
-
-
-void eModelUpload(char *filename)
-{
-	FreyjaControl::mInstance->LoadModel(filename);
+	//vec3_t n;
+	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
+	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
+	freyja_print("!'eVertexExtrude' : Disabled.");
 }
 
 
@@ -652,12 +612,11 @@ void eSaveModel(char *filename, char *extension)
 {
 	if (FreyjaControl::mInstance->SaveModel(filename, extension))
 	{
-		/*
+		// This was commented out... it shouldn't matter if it 'overwrites'
 		char title[1024];
 		snprintf(title, 1024, "%s - Freyja", filename);
 		freyja_set_main_window_title(title);
 		FreyjaControl::mInstance->AddRecentFilename(filename);
-		*/
 	}
 }
 
@@ -988,13 +947,6 @@ void eMirrorFacesZ()
 }
 
 
-void eNopControl(ResourceEvent *e)
-{
-	freyja_print("!'%s' : No longer implemented or disabled.",
-				(e && e->getName()) ? e->getName() : "Unknown event");
-}
-
-
 void eARBFragmentMode(unsigned int value)
 {
 	if (value)
@@ -1217,19 +1169,6 @@ void eUnselect()
 }		
 
 
-#if 0
-void ePolymapUpdateQuestion()
-{
-	if (mgtk::ExecuteConfirmationDialog("UVMapDialog"))
-	{
-		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
-		m->ConvertAllFacesToTexCoordPloymapping();
-	}
-}
-#endif
-
-
-
 void eBoneSelect()
 {
 	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
@@ -1245,147 +1184,6 @@ void eBoneNew()
 	//freyja_print("Select new child bone placement directly...");
 	//mEventMode = BONE_ADD_MODE;
 	FreyjaControl::mInstance->Dirty();
-}
-
-
-
-void FreyjaControlEventsAttach()
-{
-	// ResourceEventCallback::add("", &);
-
-	ResourceEventCallback::add("eBoneNew", &eBoneNew);
-	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
-
-	ResourceEventCallback::add("eSelectAll", &eSelectAll);
-	ResourceEventCallback::add("eMoveObject", &eMoveObject);
-	ResourceEventCallback::add("eRotateObject", &eRotateObject);
-	ResourceEventCallback::add("eScaleObject", &eScaleObject);
-	ResourceEventCallback::add("eSelect", &eSelect);
-	ResourceEventCallback::add("eUnselect", &eUnselect);
-
-	ResourceEventCallback::add("eGenerateCircle", &eGenerateCircle);
-	ResourceEventCallback::add("eGeneratePlane", &eGeneratePlane);
-	ResourceEventCallback::add("eGenerateCube", &eGenerateCube);
-	ResourceEventCallback::add("eGenerateSphere", &eGenerateSphere);
-	ResourceEventCallback::add("eGenerateTube", &eGenerateTube);
-	ResourceEventCallback::add("eGenerateCylinder", &eGenerateCylinder);
-	ResourceEventCallback::add("eGenerateCone", &eGenerateCone);
-
-	ResourceEventCallback2::add("eEnableMaterialFragment", &eNopControl);
-	ResourceEventCallback2::add("eUVPickRadius", &eNopControl);
-	ResourceEventCallback2::add("eVertexPickRadius", &eNopControl);
- 
-	ResourceEventCallbackUInt::add("eGLSLFragmentMode", &eGLSLFragmentMode);
-	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
-
-	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
-
-	ResourceEventCallback::add("eSetSelectedFacesAlpha", &eSetSelectedFacesAlpha);
-	ResourceEventCallback::add("eClearSelectedFacesAlpha", &eClearSelectedFacesAlpha);
-
-	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
-	ResourceEventCallback::add("eClearWeight", &eClearWeight);
-	ResourceEventCallbackVec::add("eWeight", &eWeight);
-
-	ResourceEventCallback::add("eMirrorFacesX", &eMirrorFacesX);
-	ResourceEventCallback::add("eMirrorFacesY", &eMirrorFacesY);
-	ResourceEventCallback::add("eMirrorFacesZ", &eMirrorFacesZ);
-
-	ResourceEventCallback::add("eMeshTesselate", &eMeshTesselate);
-	ResourceEventCallback::add("eMeshTexcoordSpherical", &eMeshTexcoordSpherical);
-	ResourceEventCallback::add("eMeshTexcoordCylindrical", &eMeshTexcoordCylindrical);
-	ResourceEventCallback::add("eMeshGenerateNormals", &eMeshGenerateNormals);
-	ResourceEventCallback::add("eMeshTexcoordPlaneProj", &eMeshTexcoordPlaneProj);
-	ResourceEventCallback::add("eMirrorMeshX", &eMirrorMeshX);
-	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
-	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
-
-	ResourceEventCallback::add("eCleanupVertices", eCleanupVertices);
-	ResourceEventCallback::add("eSnapWeldVerts", &eSnapWeldVerts);
-
-	ResourceEventCallback::add("eGroupClear", &eGroupClear);
-	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
-
-	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
-	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
-
-	ResourceEventCallback::add("eSelectedFacesFlipNormals", &eSelectedFacesFlipNormals);
-	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
-	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
-	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
-	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
-	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);
-	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
-	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
-	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
-	ResourceEventCallbackString2::add("eSaveModel", &eSaveModel);
-	ResourceEventCallbackString::add("eModelUpload", &eModelUpload);
-	ResourceEventCallback::add("eTextureSlotLoadToggle", &eTextureSlotLoadToggle);
-	ResourceEventCallbackUInt::add("eMaterialSlotLoadToggle", &eMaterialSlotLoadToggle);
-	ResourceEventCallbackUInt::add("eFPSCap", &eFPSCap);
-
-	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
-}
-
-
-/// Events ////////////////////////////////////////////////////////////
-
-void eTransformVertices()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tSelectedVertices);
-}
-
-void eTransformScene()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tScene);
-}
-
-
-void eTransformVertex()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tPoint);
-}
-
-
-void eTransformFaces()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tSelectedFaces);
-}
-
-
-void eTransformFace()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tFace);
-}
-
-
-void eTransformMesh()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tMesh);
-}
-
-
-void eTransformMeshes()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tSelectedMeshes);
-}
-
-
-void eTransformModel()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tModel);
-}
-
-
-void eTransformBone()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
-}
-
-
-void eTransformLight()
-{
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tLight);
 }
 
 
@@ -1426,22 +1224,20 @@ void eMeshFlipNormals()
 	FreyjaControl::mInstance->Dirty();
 }
 
+
 void eHelpDialog()
 {
-	int e = ResourceEvent::GetResourceIdBySymbol("eHelpDialog");
-	mgtk_event_dialog_visible_set(e, 1);
+	freyja_set_dialog_visible("eHelpDialog");
 }
 
 void ePreferencesDialog()
 {
-	int e = ResourceEvent::GetResourceIdBySymbol("ePreferencesDialog");
-	mgtk_event_dialog_visible_set(e, 1);
+	freyja_set_dialog_visible("ePreferencesDialog");
 }
 
 void eAboutDialog()
 {
-	int e = ResourceEvent::GetResourceIdBySymbol("eAboutDialog");
-	mgtk_event_dialog_visible_set(e, 1);
+	freyja_set_dialog_visible("eAboutDialog");
 }
 
 
@@ -1790,7 +1586,72 @@ void eSelectMaterial(uint32 value)
 
 void FreyjaMiscEventsAttach()
 {
-	// ResourceEventCallback::add("", &);
+	ResourceEventCallback::add("eBoneNew", &eBoneNew);
+	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
+
+	ResourceEventCallback::add("eSelectAll", &eSelectAll);
+	ResourceEventCallback::add("eMoveObject", &eMoveObject);
+	ResourceEventCallback::add("eRotateObject", &eRotateObject);
+	ResourceEventCallback::add("eScaleObject", &eScaleObject);
+	ResourceEventCallback::add("eSelect", &eSelect);
+	ResourceEventCallback::add("eUnselect", &eUnselect);
+
+	ResourceEventCallback::add("eGenerateCircle", &eGenerateCircle);
+	ResourceEventCallback::add("eGeneratePlane", &eGeneratePlane);
+	ResourceEventCallback::add("eGenerateCube", &eGenerateCube);
+	ResourceEventCallback::add("eGenerateSphere", &eGenerateSphere);
+	ResourceEventCallback::add("eGenerateTube", &eGenerateTube);
+	ResourceEventCallback::add("eGenerateCylinder", &eGenerateCylinder);
+	ResourceEventCallback::add("eGenerateCone", &eGenerateCone);
+ 
+	ResourceEventCallbackUInt::add("eGLSLFragmentMode", &eGLSLFragmentMode);
+	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
+
+	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
+
+	ResourceEventCallback::add("eSetSelectedFacesAlpha", &eSetSelectedFacesAlpha);
+	ResourceEventCallback::add("eClearSelectedFacesAlpha", &eClearSelectedFacesAlpha);
+
+	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
+	ResourceEventCallback::add("eClearWeight", &eClearWeight);
+	ResourceEventCallbackVec::add("eWeight", &eWeight);
+
+	ResourceEventCallback::add("eMirrorFacesX", &eMirrorFacesX);
+	ResourceEventCallback::add("eMirrorFacesY", &eMirrorFacesY);
+	ResourceEventCallback::add("eMirrorFacesZ", &eMirrorFacesZ);
+
+	ResourceEventCallback::add("eMeshTesselate", &eMeshTesselate);
+	ResourceEventCallback::add("eMeshTexcoordSpherical", &eMeshTexcoordSpherical);
+	ResourceEventCallback::add("eMeshTexcoordCylindrical", &eMeshTexcoordCylindrical);
+	ResourceEventCallback::add("eMeshGenerateNormals", &eMeshGenerateNormals);
+	ResourceEventCallback::add("eMeshTexcoordPlaneProj", &eMeshTexcoordPlaneProj);
+	ResourceEventCallback::add("eMirrorMeshX", &eMirrorMeshX);
+	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
+	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
+
+	ResourceEventCallback::add("eCleanupVertices", eCleanupVertices);
+	ResourceEventCallback::add("eSnapWeldVerts", &eSnapWeldVerts);
+
+	ResourceEventCallback::add("eGroupClear", &eGroupClear);
+	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
+
+	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
+	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
+
+	ResourceEventCallback::add("eSelectedFacesFlipNormals", &eSelectedFacesFlipNormals);
+	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
+	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
+	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
+	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
+	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);
+	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
+	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
+	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
+	ResourceEventCallbackString2::add("eSaveModel", &eSaveModel);
+
+	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
+
+	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
 
 	ResourceEventCallbackUInt::add("eMaterialMultiTex", &eMaterialMultiTex);
 	ResourceEventCallbackUInt::add("eOpenGLNormalize", &eOpenGLNormalize);
@@ -1820,125 +1681,6 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eAboutDialog", &eAboutDialog);
 
 	ResourceEventCallback::add("eExtrude", &eExtrude);
-
-	ResourceEventCallback::add("eTransformScene", &eTransformScene);
-	ResourceEventCallback::add("eTransformVertices", &eTransformVertices);
-	ResourceEventCallback::add("eTransformVertex", &eTransformVertex);
-	ResourceEventCallback::add("eTransformMeshes", &eTransformMeshes);
-	ResourceEventCallback::add("eTransformMesh", &eTransformMesh);
-	ResourceEventCallback::add("eTransformFaces", &eTransformFaces);
-	ResourceEventCallback::add("eTransformFace", &eTransformFace);
-	ResourceEventCallback::add("eTransformModel", &eTransformModel);
-	ResourceEventCallback::add("eTransformBone", &eTransformBone);
-	ResourceEventCallback::add("eTransformLight", &eTransformLight);
-}
-
-
-////////////////////////////////////////////////////////////////
-// View Events
-////////////////////////////////////////////////////////////////
-
-void eLineBone(unsigned int value)
-{
-	if (value)
-	{
-		uint32 id = ResourceEvent::GetResourceIdBySymbol("ePolyMeshBone");
-		mgtk_toggle_value_set(id, 0);
-		FreyjaRender::mBoneRenderType = 1;
-	}
-}
-
-
-void ePolyMeshBone(unsigned int value)
-{
-	if (value)
-	{
-		uint32 id = ResourceEvent::GetResourceIdBySymbol("eLineBone");
-		mgtk_toggle_value_set(id, 0);
-		FreyjaRender::mBoneRenderType = 2;
-	}
-}
-
-
-void eGroupColors(unsigned int value)
-{
-	if (value)
-	{
-		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fGroupColors);
-	}
-	else
-	{
-		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fGroupColors);
-	}
-
-	freyja_print("Smoothing group color coding is [%s]", value ? "ON" : "OFF");	
-	freyja_event_gl_refresh();
-}
-
-
-void eRenderToggleBoneZClear(unsigned int value)
-{
-	if (value)
-	{
-		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fBonesNoZbuffer);
-	}
-	else
-	{
-		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fBonesNoZbuffer);
-	}
-
-	freyja_print("Bone rendering with cleared Z buffer [%s]",
-				 value ? "ON" : "OFF");
-}
-
-
-void eRenderToggleGridZClear(unsigned int value)
-{
-	if (value)
-	{
-		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fRenderGridClearedZBuffer);
-	}
-	else
-	{
-		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fRenderGridClearedZBuffer);
-	}
-
-	freyja_print("Grid rendering with cleared Z buffer [%s]",
-				 value ? "ON" : "OFF");
-}
-
-
-void eRenderSkeletalDeform(unsigned int value)
-{
-	if (value)
-	{
-		FreyjaRender::mSingleton->SetFlag(FreyjaRender::fSkeletalVertexBlending);
-	}
-	else
-	{
-		FreyjaRender::mSingleton->ClearFlag(FreyjaRender::fSkeletalVertexBlending);
-	}
-
-	freyja_print("Animation with skeletal vertex blending is [%s]",
-				 value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
-}
-
-
-void FreyjaViewEventsAttach()
-{
-	ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNopControl);
-	ResourceEventCallback2::add("eOpenFileTextureB", &eNopControl);
-	ResourceEventCallback2::add("eCollapseFace", &eNopControl);
-	ResourceEventCallback2::add("eSetMaterialTextureB", &eNopControl);
-
-	ResourceEventCallbackUInt::add("eGroupColors", eGroupColors);
-	ResourceEventCallbackUInt::add("eSkeletalDeform", &eRenderSkeletalDeform);
-	ResourceEventCallbackUInt::add("eRenderToggleGridZClear", &eRenderToggleGridZClear);
-	ResourceEventCallbackUInt::add("eRenderToggleBoneZClear", &eRenderToggleBoneZClear);
-	ResourceEventCallbackUInt::add("ePolyMeshBone", &ePolyMeshBone);
-	ResourceEventCallbackUInt::add("eLineBone", &eLineBone);
-	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
 }
 
 
@@ -1951,9 +1693,15 @@ void freyja_handle_resource_init(Resource &r)
 	// New freyja events
 	////////////////////////////////////////////////////////////////////
 
-	ResourceEventCallbackUInt::add("eRecentFiles", &eRecentFiles);
-
 	// Not implemented or removed misc events
+	//ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNoImplementation);
+	ResourceEventCallback2::add("eShaderSlotLoad", &eNoImplementation);
+	ResourceEventCallback2::add("eOpenFileTextureB", &eNoImplementation);
+	ResourceEventCallback2::add("eCollapseFace", &eNoImplementation);
+	ResourceEventCallback2::add("eSetMaterialTextureB", &eNoImplementation);
+	ResourceEventCallback2::add("eEnableMaterialFragment", &eNoImplementation);
+	ResourceEventCallback2::add("eUVPickRadius", &eNoImplementation);
+	ResourceEventCallback2::add("eVertexPickRadius", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
 	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
 	ResourceEventCallback2::add("eBoneLinkChild", &eNoImplementation);
@@ -1975,16 +1723,11 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eRotateUV", &eNoImplementation);
 	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
  
-
-	// ResourceEventCallback2::add("", &eNoImplementation);
-
-
 	// Class listeners
 	FreyjaControl::AttachMethodListeners();
+	FreyjaRender::AttachMethodListeners();
 
 	// Non-class listeners
-	FreyjaViewEventsAttach();
-	FreyjaControlEventsAttach();
 	FreyjaMiscEventsAttach();
 
 	/* Mongoose 2002.01.12, 
@@ -2005,31 +1748,23 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eNop", eNop);
 	r.RegisterInt("eNone", eNone);
 
-	// There may have been a special map for this _outside_ of the application.
-	//r.RegisterInt("eShutdown", eShutdown);
-
-	// Freyja modes
+	// Modes
 	r.RegisterInt("eModeAutoKeyframe", eModeAutoKeyframe);
 
 	// Misc
-	r.RegisterInt("eOpenTexture", eOpenTexture);
-	r.RegisterInt("eOpenShader", eOpenShader);
-	r.RegisterInt("eShaderSlotLoadToggle", eShaderSlotLoadToggle);
 	r.RegisterInt("eSetMaterialShader", eSetMaterialShader);
 	r.RegisterInt("eSetMaterialShaderFilename", eSetMaterialShaderFilename);
 	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
-	r.RegisterInt("eTextureSlotLoad", eTextureSlotLoad);
-	r.RegisterInt("eGeneratePatchMesh", eGeneratePatchMesh);
 
 	// Menus
-	r.RegisterInt("ePluginMenu", ePluginMenu);  /* MenuItem Widget attach */
+	r.RegisterInt("ePluginMenu", ePluginMenu);
 	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
 	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
 	r.RegisterInt("eObjectMenu", eObjectMenu);
 	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
 	r.RegisterInt("eTransformMenu", eTransformMenu);
 
-	/* Widget events ( widgets hold data like spinbuttons, etc ) */
+	// Widget events ( widgets hold data like spinbuttons, etc )
 	r.RegisterInt("eScale_X", eScale_X);
 	r.RegisterInt("eScale_Y", eScale_Y);
 	r.RegisterInt("eScale_Z", eScale_Z);

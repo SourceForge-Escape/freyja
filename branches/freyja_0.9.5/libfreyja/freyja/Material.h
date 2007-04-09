@@ -102,6 +102,12 @@ class Material
 	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
 	 ------------------------------------------------------*/
 
+	const char *GetMetaData() { return mMetaData.c_str(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets metadata
+	 ------------------------------------------------------*/
+
 	const char *GetName() { return mName; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -171,6 +177,12 @@ class Material
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
 	 * Post : Sets Material's name
+	 ------------------------------------------------------*/
+
+	void SetMetaData(const char *s) { mMetaData = s; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets metadata
 	 ------------------------------------------------------*/
 
 	void SetShaderFilename(const char *name);
@@ -244,6 +256,8 @@ class Material
 	String mTextureFilename;    /* This is used for file I/O to map classes */
 
 	String mShaderFilename;     /* This is used for file I/O to map classes */
+
+	String mMetaData;           /* Useful for additional plugin material data */
 };
 
 } // End namespace freyja
