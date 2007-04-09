@@ -56,7 +56,6 @@
 
 #include "FreyjaControl.h"
 
-
 using namespace mstl;
 using namespace freyja;
 using namespace freyja3d;
@@ -65,8 +64,6 @@ using namespace freyja3d;
 #define DEBUG_PICK_RAY_PLANAR  0
 #define DEBUG_SCREEN_TO_WORLD  0
 #define DEBUG_VIEWPORT_MOUSE   0
-
-#define FREYJA_RECENT_FILES "recent_files-dev"
 
 int load_texture(const char *filename);
 int load_shader(const char *filename);
@@ -146,7 +143,7 @@ FreyjaControl::FreyjaControl() :
 	freyjaMaterialShininess(mIndex, 32.0f);
 
 	/* Hook up the view */
-	mRender = new FreyjaRender();
+	mRender = FreyjaRender::GetInstance();
 	FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton control allocation failure");
 
 	if (!mRender)
@@ -154,8 +151,6 @@ FreyjaControl::FreyjaControl() :
 		SystemIO::Print("See ~/.freyja/Freyja.log for possible errors.\n");
 		exit(-1);
 	}
-
-	mInstance = this;
 }
 
 
@@ -249,25 +244,15 @@ void FreyjaControl::AttachMethodListeners()
 {
 	// CreateListener("", &FreyjaControl::);
 
-	CreateListener("eSetMaterial", &FreyjaControl::SetSelectedTexture);
+	CreateListener("eOpenShader", &FreyjaControl::eOpenShader);
+	CreateListener("eOpenTexture", &FreyjaControl::eOpenTexture);
 
+	CreateListener("eSetMaterial", &FreyjaControl::SetSelectedTexture);
 	CreateListener("eZoom", &FreyjaControl::SetZoom);
 
 	CreateListener("eGenMeshHeight", &FreyjaControl::SetGenMeshHeight);
 	CreateListener("eGenMeshCount", &FreyjaControl::SetGenMeshCount);
 	CreateListener("eGenMeshSegements", &FreyjaControl::SetGenMeshSegements);
-
-	CreateListener("eRenderWireframe", &FreyjaControl::eRenderWireframe);
-	CreateListener("eRenderFace", &FreyjaControl::eRenderFace);
-	CreateListener("eRenderVertex", &FreyjaControl::eRenderVertex);
-	CreateListener("eRenderNormals", &FreyjaControl::eRenderNormals);
-	CreateListener("eRenderLighting", &FreyjaControl::eRenderLighting);
-	CreateListener("eRenderMaterial", &FreyjaControl::eRenderMaterial);
-	CreateListener("eRenderSkeleton", &FreyjaControl::eRenderSkeleton);
-	CreateListener("eRenderGrid", &FreyjaControl::eRenderGrid);
-	CreateListener("eRenderSolidGround", &FreyjaControl::eRenderSolidGround);
-	CreateListener("eRenderBbox", &FreyjaControl::eRenderBbox);
-	CreateListener("eRenderPickRay", &FreyjaControl::eRenderPickRay);
 
 	CreateListener("eAnimationSlider", &FreyjaControl::eAnimationSlider);
 
@@ -315,7 +300,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eModeModel", &FreyjaControl::eModeModel);
 	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
 
-	CreateListener("eViewports", &FreyjaControl::eViewports);
+	CreateListener("eTextureSlotLoad", &FreyjaControl::eTextureSlotLoad);
+	CreateListener("eMaterialSlotLoad", &FreyjaControl::eMaterialSlotLoad);
+	//CreateListener("eModelUpload", &FreyjaControl::eModelUpload);
+
 	CreateListener("eViewportBack", &FreyjaControl::eViewportBack);
 	CreateListener("eViewportBottom", &FreyjaControl::eViewportBottom);
 	CreateListener("eViewportRight", &FreyjaControl::eViewportRight);
@@ -327,6 +315,18 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eViewportCurve", &FreyjaControl::eViewportCurve);
 	CreateListener("eViewportMaterial", &FreyjaControl::eViewportMaterial);
 
+	CreateListener("eTransformScene", &FreyjaControl::eTransformScene);
+	CreateListener("eTransformVertices", &FreyjaControl::eTransformVertices);
+	CreateListener("eTransformVertex", &FreyjaControl::eTransformVertex);
+	CreateListener("eTransformMeshes", &FreyjaControl::eTransformMeshes);
+	CreateListener("eTransformMesh", &FreyjaControl::eTransformMesh);
+	CreateListener("eTransformFaces", &FreyjaControl::eTransformFaces);
+	CreateListener("eTransformFace", &FreyjaControl::eTransformFace);
+	CreateListener("eTransformModel", &FreyjaControl::eTransformModel);
+	CreateListener("eTransformBone", &FreyjaControl::eTransformBone);
+	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
+
+	CreateListener("eRecentFiles", &FreyjaControl::eRecentFiles);
 
 	/* One Argument callbacks with cached Ids */
 
@@ -1050,6 +1050,7 @@ bool FreyjaControl::LoadMaterial(const char *filename)
 	
 	r.Close();
 
+	// Convert this to Material metadata
 	if (perlinLoaded)
 	{
 		PerlinNoise perlin;
@@ -2171,66 +2172,6 @@ void FreyjaControl::eAxisJoint(uint32 value)
 	}
 }
 
-void FreyjaControl::eViewports(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fViewports, value, "Four window view");
-}
-
-void FreyjaControl::eRenderSkeleton(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fBones, value, "Skeleton rendering");
-}
-
-void FreyjaControl::eRenderVertex(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fPoints, value, "Vertex Rendering");
-}
-
-void FreyjaControl::eRenderWireframe(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fWireframe, value, "Wireframe");
-}
-
-void FreyjaControl::eRenderNormals(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fNormals, value, "Normal visualisation");
-}
-
-void FreyjaControl::eRenderLighting(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fLighting, value, "OpenGL lighting");
-}
-
-void FreyjaControl::eRenderMaterial(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fMaterial, value, "Material usage");
-}
-
-void FreyjaControl::eRenderGrid(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fGrid, value, "Grid");
-}
-
-void FreyjaControl::eRenderSolidGround(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fSolidPlane, value, "Solid ground");
-}
-
-void FreyjaControl::eRenderFace(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fFace, value, "Face rendering");
-}
-
-void FreyjaControl::eRenderPickRay(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fDrawPickRay, value, "Pick ray visibility");
-}
-
-void FreyjaControl::eRenderBbox(uint32 value)
-{
-	SetRenderFlag(FreyjaRender::fBoundingVolumes, value, 
-				  "Bounding volume rendering");
-}
 
 void FreyjaControl::eAnimationSlider(uint32 value)
 {
@@ -2595,76 +2536,8 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	switch (event)
 	{
-	case eOpenTexture:
-		{
-			if (empty) return;
-
-			bool loaded = LoadTexture(text);
-			if (loaded)
-			{
-				uint32 e = resourceGetEventId1s("eSetTextureNameA");
-				uint32 texture = mTextureId - 1;
-				uint32 mat = freyjaGetCurrentMaterial();
-
-				haltTextureA = true;
-				mgtk_textentry_value_set(e, text);
-				freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-				mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
-				freyjaMaterialTexture(mat, texture);
-				freyjaMaterialTextureName(mat, text);
-
-				freyja_event_gl_refresh();
-				haltTextureA = false;
-			}
-
-			freyja_print("%s %s", text, loaded ? "loaded" : "failed to load");
-		}
-		break;
-
-
 	case eSetMaterialShaderFilename:
 		// textbox is just for looks -- user can't alter filename here
-		break;
-
-	case eOpenShader:
-		{
-			if (empty) return;
-
-			uint32 fragmentId = 0; // Gets fragment id
-			bool load = false;
-
-			if (mUsingARBFragments && 
-				freyja3d::OpenGL::LoadFragmentARB(text, fragmentId))
-			{
-				freyja3d::OpenGL::BindFragmentARB(fragmentId);
-				load = true;
-			}
-			else if (freyja3d::OpenGL::LoadFragmentGLSL(text, fragmentId))
-			{
-				freyja3d::OpenGL::BindFragmentGLSL(fragmentId);
-				load = true;
-			}
-
-			if (load)
-			{
-				uint32 e = 
-				ResourceEvent::GetResourceIdBySymbol("eSetMaterialShaderFilename");
-
-				//uint32 texture = mTextureId - 1;
-				mgtk_textentry_value_set(e, text);
-
-				// Propagate to material backend
-#if 1
-				uint32 mat = freyjaGetCurrentMaterial();
-				//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
-				mgtk_spinbutton_value_set(eSetMaterialShader, fragmentId);
-				freyjaMaterialShader(mat, fragmentId);
-				freyjaMaterialShaderName(mat, text);
-#endif		
-				freyja_print("Loaded fragment program %i", fragmentId);
-				freyja_event_gl_refresh();
-			}
-		}
 		break;
 
 	case eSetMaterialName:
@@ -2673,7 +2546,11 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	case eSetTextureNameA:
 		if (!haltTextureA)
+		{
+			haltTextureA = true;
 			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
+			haltTextureA = false;
+		}
 		break;
 
 	case eSkeletonName:
@@ -2691,6 +2568,73 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	default:
 		freyja_print("handleTextEvent(%i, '%s'): Unhandled event.", event, text);
+	}
+}
+
+
+void FreyjaControl::eOpenTexture(char *text)
+{
+	if (text == NULL || text[0] == 0) 
+		return;
+
+	bool loaded = LoadTexture(text);
+	if (loaded)
+	{
+		uint32 e = resourceGetEventId1s("eSetTextureNameA");
+		uint32 texture = mTextureId - 1;
+		uint32 mat = freyjaGetCurrentMaterial();
+
+		mgtk_textentry_value_set(e, text);
+		freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+		mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
+		freyjaMaterialTexture(mat, texture);
+		freyjaMaterialTextureName(mat, text);
+
+		freyja_event_gl_refresh(); //Dirty();
+	}
+
+	freyja_print("%s %s", text, loaded ? "loaded" : "failed to load");
+}
+
+		
+void FreyjaControl::eOpenShader(char *text)
+{
+	if (text == NULL || text[0] == 0) 
+		return;
+
+	uint32 fragmentId = 0; // Gets fragment id
+	bool load = false;
+
+	if (mUsingARBFragments && 
+		freyja3d::OpenGL::LoadFragmentARB(text, fragmentId))
+	{
+		freyja3d::OpenGL::BindFragmentARB(fragmentId);
+		load = true;
+	}
+	else if (freyja3d::OpenGL::LoadFragmentGLSL(text, fragmentId))
+	{
+		freyja3d::OpenGL::BindFragmentGLSL(fragmentId);
+		load = true;
+	}
+
+	if (load)
+	{
+		uint32 e = 
+		ResourceEvent::GetResourceIdBySymbol("eSetMaterialShaderFilename");
+		
+		//uint32 texture = mTextureId - 1;
+		mgtk_textentry_value_set(e, text);
+		
+		// Propagate to material backend
+#if 1
+		uint32 mat = freyjaGetCurrentMaterial();
+		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
+		mgtk_spinbutton_value_set(eSetMaterialShader, fragmentId);
+		freyjaMaterialShader(mat, fragmentId);
+		freyjaMaterialShaderName(mat, text);
+#endif		
+		freyja_print("Loaded fragment program %i", fragmentId);
+		freyja_event_gl_refresh();
 	}
 }
 
@@ -5271,29 +5215,31 @@ void FreyjaControl::LoadResource()
 
 	// FIXME: Rework image plugins with flags like model plugins
 	/* Image file dialog patterns - texture */
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	uint32 eOpenTextureId = GetEventIdByName("eOpenTexture");
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"All Files (*.*)", "*.*");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"BMP Image (*.bmp)", "*.bmp");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"DDS Image (*.dds)", "*.dds");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"JPEG Image (*.jpg)", "*.jpg");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"PCX Image (*.pcx)", "*.pcx");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"PNG Image (*.png)", "*.png");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"PPM Image (*.ppm)", "*.ppm");
-	mgtk_event_fileselection_append_pattern(eOpenTexture, 
+	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
 											"TARGA Image (*.tga)", "*.tga");
 
 	/* Shader file dialog patterns */
-	mgtk_event_fileselection_append_pattern(eOpenShader, 
+	uint32 eOpenShaderId = GetEventIdByName("eOpenShader");
+	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
 											"All Files (*.*)", "*.*");
-	mgtk_event_fileselection_append_pattern(eOpenShader, 
+	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
 											"GLSL Fragment (*.frag)", "*.frag");
-	mgtk_event_fileselection_append_pattern(eOpenShader, 
+	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
 											"ARB Fragment (*.frag)", "*.frag");
 
 	/* Material file dialog patterns */
@@ -5598,6 +5544,13 @@ void FreyjaControl::CreateListener(const char *name, MethodPtr1u ptr)
 void FreyjaControl::CreateListener(const char *name, MethodPtr1f ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, float>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+}
+
+
+void FreyjaControl::CreateListener(const char *name, MethodPtr1s ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, char*>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
 }
 

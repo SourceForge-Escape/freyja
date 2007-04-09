@@ -29,6 +29,8 @@
 #include <hel/ViewVolume.h>
 #include <hel/Ray.h>
 #include <mstl/SystemIO.h>
+#include <mgtk/ResourceEventDelegate.h>
+#include "freyja_events.h"
 
 enum view_mode {                   /* View|Edit mode */     
 	VIEWMODE_MODEL_EDIT       = 1,
@@ -118,18 +120,16 @@ public:
 	} flags_t;
 
 
-	FreyjaRender();
+	static FreyjaRender *GetInstance() 
+	{ return (mInstance ? mInstance : mInstance = new FreyjaRender()); }
+	static FreyjaRender *mInstance;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : FreyjaRender is constructed
+	 * Post : FreyjaRender singleton is instanced.
 	 *
-	 *-- History ------------------------------------------
+	 *        mInstance pointer is exposed for use with caution.
+	 *        Use asserts with debug builds using the pointer.
 	 *
-	 * 2002.02.02:
-	 * Mongoose - No args
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	~FreyjaRender();
@@ -137,10 +137,200 @@ public:
 	 * Pre  : FreyjaRender exists
 	 * Post : FreyjaRender is deconstructed
 	 *
-	 *-- History ------------------------------------------
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Events, once all these are 'sorted' decouple.
+	////////////////////////////////////////////////////////////
+
+	typedef void (FreyjaRender::*MethodPtr1u)(unsigned int);
+
+
+	static void AttachMethodListeners();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Hooks up MethodDelegates to the event system.
+	 ------------------------------------------------------*/
+
+	static void CreateListener(const char *name, MethodPtr1u ptr)
+	{
+		MethodDelegate *d = 
+		new MethodDelegateArg1<FreyjaRender, unsigned int>(mInstance, ptr);
+		ResourceEventDelegate::add(name, d);
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Bind a MethodDelegate Callback to an external
+	 *        langauge symbol.
 	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
+	 ------------------------------------------------------*/
+
+	void eViewports(uint32 value) 
+	{ SetRenderFlag(fViewports, value, "Four window view"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderSkeleton(uint32 value)
+	{ SetRenderFlag(fBones, value, "Skeleton rendering"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderVertex(uint32 value)
+	{ SetRenderFlag(fPoints, value, "Vertex Rendering"); 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/}
+
+	void eRenderWireframe(uint32 value)
+	{ SetRenderFlag(fWireframe, value, "Wireframe"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderNormals(uint32 value)
+	{ SetRenderFlag(fNormals, value, "Normal visualisation"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderLighting(uint32 value)
+	{ SetRenderFlag(fLighting, value, "OpenGL lighting"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderMaterial(uint32 value)
+	{ SetRenderFlag(fMaterial, value, "Material usage"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderGrid(uint32 value)
+	{ SetRenderFlag(fGrid, value, "Grid"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderSolidGround(uint32 value)
+	{ SetRenderFlag(fSolidPlane, value, "Solid ground"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderFace(uint32 value)
+	{ SetRenderFlag(fFace, value, "Face rendering"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderPickRay(uint32 value)
+	{ SetRenderFlag(fDrawPickRay, value, "Pick ray visibility"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderBbox(uint32 value)
+	{ SetRenderFlag(fBoundingVolumes, value, "Bounding volume rendering"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eGroupColors(uint32 value)
+	{ SetRenderFlag(fGroupColors, value, "Smoothing group color coding"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderBoneZClear(uint32 value)
+	{ SetRenderFlag(fBonesNoZbuffer, value, "Skeleton with cleared Z buffer"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderGridZClear(uint32 value)
+	{ SetRenderFlag(fRenderGridClearedZBuffer, value, "Grid depth clear"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderSkeletalDeform(uint32 value)
+	{ SetRenderFlag(fSkeletalVertexBlending, value, 
+					"Animation with skeletal vertex blending"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eFPSCap(uint32 value)
+	{ SetRenderFlag(fFPSCap, value, "FPS cap"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eLineBone(uint32 value)
+	{
+		if (value)
+		{
+			uint32 id = ResourceEvent::GetResourceIdBySymbol("ePolyMeshBone");
+			mgtk_toggle_value_set(id, 0);
+			FreyjaRender::mBoneRenderType = 1;
+		}
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void ePolyMeshBone(uint32 value)
+	{
+		if (value)
+		{
+			uint32 id = ResourceEvent::GetResourceIdBySymbol("eLineBone");
+			mgtk_toggle_value_set(id, 0);
+			FreyjaRender::mBoneRenderType = 2;
+		}
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -316,6 +506,18 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void SetRenderFlag(flags_t flag, bool t, const char *s)
+	{
+		Flag(flag, t);
+		freyja_print("%s is [%s]", s, t ? "ON" : "OFF");
+		freyja_event_gl_refresh();
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void SetViewMode(int mode);
 	/*------------------------------------------------------
 	 * Pre  : Mode are valid view_mode(s)
@@ -373,13 +575,11 @@ public:
 	static unsigned char mJointRenderType;
 	static int mPatchDisplayList;
 
-	static vec_t mBoneLineWidth;                    /* Custom artifact size */
+	static vec_t mBoneLineWidth;               /* Custom artifact size */
 	static vec_t mBonePointSize;
 	static vec_t mDefaultPointSize;
 	static vec_t mDefaultLineWidth;
 	static vec_t mVertexPointSize;
-
-	static FreyjaRender *mSingleton;  // Not really, but will be later
 
 	static Ray mTestRay;
 
@@ -388,6 +588,23 @@ public:
 	uint32 mViewportsCount;                    /* How many viewports are used */
 
 	Viewport mViewports[4];                    /* Viewports information */
+
+
+protected:
+
+	FreyjaRender();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : FreyjaRender is constructed
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2002.02.02:
+	 * Mongoose - No args
+	 *
+	 * 2000.08.25:
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 
 private:    

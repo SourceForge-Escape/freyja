@@ -8,8 +8,13 @@
 
  Dancer (Public Beta Kagura)
 
- Dancer RC4-RC6
- 20070109- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ Dancer RC5
+ 20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+  - Shuffling UI events around, breaking up into classes
+
+
+ Dancer RC4
+ 20070109-20070407 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Major changes in the event system usage ( mostly delegate based now )
  - Minor changes to match style guidelines for improved readability
  - Reworking/Removing very, very old code and refactoring FreyjaControl 
