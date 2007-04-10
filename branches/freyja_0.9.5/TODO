@@ -7,6 +7,8 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* Add in simple collision ( eg Dropping lantern on chair )
+
 	* Replace freyja UI Load/Save material with libfreyja Material metadata
 
 	* New resource event system with UIDs and event transparent buckets

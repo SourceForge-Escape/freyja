@@ -3,24 +3,23 @@
  * 
  * Project : Freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja
+ * Email   : mongooseichiban@gmail.com
  * Object  : Matrix
- * License : No use w/o permission (C) 2002 Mongoose
- * Comments: 3d Matrix in class form
+ * License : LGPL, (C) 2002-2007 Mongoose
+ * Comments: Matrix 4x4 class, non SSE version
  *
- *
- *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
  * 
  *-- History ------------------------------------------------ 
  *
+ * 2007.04.01:
+ * Mongoose - Replaced old algorithms and API.
+ *
  * 2003.06.17:
- * Mongoose - Now in column order to match OpenGL user needs,
- *            use transpose() to get row order back  =)
+ * Mongoose - Now in column order to match OpenGL user needs.
  *
  * 2002.05.11:
- * Mongoose - Created, based on my mtk3d matrix
+ * Mongoose - Created, based on my mtk3d matrix, C implemnentation.
  ==========================================================================*/
 
 #ifndef GUARD__HEL_MAT44_H_
@@ -34,7 +33,6 @@
 
 
 namespace hel {
-
 
 class Mat44
 {
@@ -100,6 +98,61 @@ class Mat44
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	vec_t Det()
+	{
+		vec_t *a = mMatrix, *b = mMatrix+4, *c = mMatrix+8, *d = mMatrix+12;
+		return (a[0] * Det3x3(b+1, c+1, d+1) - b[0] * Det3x3(a+1, c+1, d+1) +
+				c[0] * Det3x3(a+1, b+1, d+1) - d[0] * Det3x3(a+1, b+1, c+1));
+	}
+	/*------------------------------------------------------
+	 * Pre  : Matrix object is allocated
+	 * Post : Computes Determinate of this 4x4 matrix.
+	 *
+	 ------------------------------------------------------*/
+
+	static vec_t Det2x2(const vec2_t a, const vec2_t b)
+	{ return a[0] * b[1] - a[1] * b[0];	}
+	/*------------------------------------------------------
+	 * Pre  : Given a 2x2 matrix with columns [ <a> <b> ]
+	 * Post : Computes Determinate of 2x2 matrix.
+	 *
+	 ------------------------------------------------------*/
+
+	static vec_t Det3x3(const vec3_t a, const vec3_t b, const vec3_t c)
+	{
+		return (a[0] * Det2x2(b+1, c+1) - b[0] * Det2x2(a+1, c+1) +
+				c[0] * Det2x2(a+1, b+1));
+	}
+	/*------------------------------------------------------
+	 * Pre  : Given a 3x3 matrix with columns [ <a> <b> <c> ]
+	 * Post : Computes Determinate of 3x3 block.
+	 *
+	 ------------------------------------------------------*/	
+
+	void GetColumn4fv(const uint32 column, vec4_t v)
+	{ memcpy(v, (mMatrix + 4 * column), sizeof(vec4_t)); }
+	/*------------------------------------------------------
+	 * Pre  : column < 4 
+	 * Post : Returns <column>th column.
+	 *
+	 ------------------------------------------------------*/
+
+	void GetColumn3fv(const uint32 column, const uint32 offset, vec3_t v)
+	{ memcpy(v, (mMatrix + offset + 4 * column), sizeof(vec3_t)); }
+	/*------------------------------------------------------
+	 * Pre  : column < 4, offset < 2 
+	 * Post : Returns <offset> section of <column>th column.
+	 *
+	 ------------------------------------------------------*/
+
+	void GetColumn2fv(const uint32 column, const uint32 offset, vec2_t v)
+	{ memcpy(v, (mMatrix + offset + 4 * column), sizeof(vec2_t)); }
+	/*------------------------------------------------------
+	 * Pre  : column < 4, offset < 3 
+	 * Post : Returns <offset> section of <column>th column.
+	 *
+	 ------------------------------------------------------*/
+
 	bool GetInverse(Mat44 &m) { m = *this; return m.Invert(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -128,6 +181,20 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
+	static void Invert2x2(vec2_t a, vec2_t b)
+	{ 
+		const vec_t detInv = 1.0f / Det2x2(a, b);
+		a[1] *= -detInv;  b[0] *= -detInv;
+		const vec_t tmp = detInv * a[0];  a[0] = detInv * b[1];  b[1] = tmp;
+	}
+	/*------------------------------------------------------
+	 * Pre  : Given a 2x2 matrix with columns [ <a> <b> ]
+	 * Post : Computes Determinate of 2x2 matrix.
+	 *
+	 *        m^-1 = (1/det(m)) [ m11 -m01 -m10 m00 ]
+	 *
+	 ------------------------------------------------------*/
+
 	bool IsIdentity();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -136,9 +203,7 @@ class Mat44
 	 ------------------------------------------------------*/
 
 	void Multiply(const Mat44 &a, const Mat44 &b, Mat44 &result)
-	{
-		helMatrixMultiply(a.mMatrix, b.mMatrix, result.mMatrix);
-	}
+	{ helMatrixMultiply(a.mMatrix, b.mMatrix, result.mMatrix); }
 	/*------------------------------------------------------
 	 * Pre  : Multiplies 2 matrices
 	 * Post : Returns resultant matrix

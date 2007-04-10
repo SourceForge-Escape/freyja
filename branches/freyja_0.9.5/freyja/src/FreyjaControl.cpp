@@ -814,414 +814,6 @@ void FreyjaControl::CursorMove(float xx, float yy)
 }
 
 
-bool FreyjaControl::LoadMaterial(const char *filename)
-{
-	SystemIO::TextFileReader r;
-
-
-	if (!filename || !filename[0])
-	{
-		return false;
-	}
-
-	if (!r.Open(filename))
-	{
-		perror("Material::loadFile> ");
-		return false;
-	}
-
-	int32 matIndex;
-	uint32 mode = 0;
-	bool perlinLoaded = false;
-	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
-	int32 width = 256, height = 256, seed = 257;
-	bool clamp = false;
-	float addcolor[3] = {130.0/255.0, 130.0/255.0, 74.0/255.0};
-	float modcolor[3] = {156.0/255.0, 130.0/255.0, 89.0/255.0};
-
-	while (!r.IsEndOfFile())
-	{
-		const char *buffer = r.ParseSymbol();
-
-		if (strncmp(buffer, "[Material]", 11) == 0)
-		{
-			if (mFlags & fLoadMaterialInSlot)
-			{
-				matIndex = freyjaGetCurrentMaterial();
-			}
-			else
-			{
-				matIndex = freyjaMaterialCreate();
-			}
-
-			mode = 1;
-		}
-		else if (strncmp(buffer, "[PerlinNoise]", 14) == 0)
-		{
-			mode = 2;
-		}
-		else if (mode == 1)
-		{
-			// Lex('=')
-			r.FindNextChar('=');
-
-			if (strncmp(buffer, "Shininess", 9) == 0)
-			{				
-				freyjaMaterialShininess(matIndex, r.ParseFloat());
-			}
-			else if  (strncmp(buffer, "Texture", 7) == 0)
-			{
-				if (LoadTexture(r.ParseStringLiteral()))
-				{
-					if (mTextureId > -1)
-					{
-						freyjaMaterialTexture(matIndex, mTextureId-1);
-						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
-					}
-				}
-			}
-			else if  (strncmp(buffer, "TextureName", 11) == 0)
-			{
-				const char *s = r.ParseStringLiteral();
-
-				if (LoadTexture(s))
-				{
-					if (mTextureId > -1)
-					{
-						freyjaMaterialTextureName(matIndex, s);
-						freyjaMaterialTexture(matIndex, mTextureId-1);
-						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
-					}
-				}
-			}
-			else if  (strncmp(buffer, "Name", 4) == 0)
-			{
-				freyjaMaterialName(matIndex, r.ParseStringLiteral());
-			}
-			else if  (strncmp(buffer, "EnableBlending", 14) == 0)
-			{
-				if (r.ParseBool())
-					freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Blending);
-			}
-			else if (strncmp(buffer, "Blend", 5) == 0)
-			{						
-				bool is_src = false;
-				if (strncmp(buffer, "BlendSource", 11) == 0)
-					is_src = true;
-
-				const char *buf = r.ParseSymbol();
-				int32 val = (strncmp(buf, "GL_ZERO", 11) == 0) ? GL_ZERO :
-				(strncmp(buf, "GL_SRC_COLOR", 9) == 0) ? GL_SRC_COLOR :
-				(strncmp(buf, "GL_ONE_MINUS_SRC_COLOR", 22) == 0) ? GL_ONE_MINUS_SRC_COLOR :
-				(strncmp(buf, "GL_DST_COLOR", 9) == 0) ? GL_DST_COLOR :
-				(strncmp(buf, "GL_ONE_MINUS_DST_COLOR", 22) == 0) ? GL_ONE_MINUS_DST_COLOR :
-				(strncmp(buf, "GL_SRC_ALPHA", 9) == 0) ? GL_SRC_ALPHA :
-				(strncmp(buf, "GL_ONE_MINUS_SRC_ALPHA", 22) == 0) ? GL_ONE_MINUS_SRC_ALPHA :
-				(strncmp(buf, "GL_DST_ALPHA", 9) == 0) ? GL_DST_ALPHA :
-				(strncmp(buf, "GL_ONE_MINUS_DST_ALPHA", 22) == 0) ? GL_ONE_MINUS_DST_ALPHA :
-				(strncmp(buf, "GL_SRC_ALPHA_SATURATE", 21) == 0) ? GL_SRC_ALPHA_SATURATE :
-				(strncmp(buf, "GL_CONSTANT_COLOR", 17) == 0) ? GL_CONSTANT_COLOR :
-				(strncmp(buf, "GL_ONE_MINUS_CONSTANT_COLOR", 27) == 0) ? GL_ONE_MINUS_CONSTANT_COLOR :
-				(strncmp(buf, "GL_ONE", 6) == 0) ? GL_ONE :
-				(strncmp(buf, "GL_CONSTANT_ALPHA", 17) == 0) ? GL_CONSTANT_ALPHA :					GL_ONE_MINUS_CONSTANT_ALPHA;
-				
-				if (is_src)
-				{
-					freyjaMaterialBlendSource(matIndex, val);
-				}
-				else
-				{
-					freyjaMaterialBlendDestination(matIndex, val);
-				}
-			}
-			else if (strncmp(buffer, "Ambient", 7) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialAmbient(matIndex, c);
-			}
-			else if (strncmp(buffer, "Diffuse", 7) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialDiffuse(matIndex, c);
-			}
-			else if (strncmp(buffer, "Specular", 8) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialSpecular(matIndex, c);
-			}
-			else if (strncmp(buffer, "Emissive", 8) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialEmissive(matIndex, c);				
-			}
-		}
-		else if (mode == 2)
-		{
-			// Lex('=')
-			r.FindNextChar('=');
-
-			perlinLoaded = true;
-
-			if (strncmp(buffer, "Seed", 4) == 0)
-			{
-				seed = r.ParseInteger();
-				SetResourceInt("ePerlinNoiseSeed", seed);
-			}
-			else if (strncmp(buffer, "Width", 5) == 0)
-			{
-				width = r.ParseInteger();
-				SetResourceInt("ePerlinNoiseW", width);
-			}
-			else if (strncmp(buffer, "Height", 6) == 0)
-			{
-				height = r.ParseInteger();
-				SetResourceInt("ePerlinNoiseH", height);
-			}
-			else if (strncmp(buffer, "Clamp", 5) == 0)
-			{
-				clamp = r.ParseBool();
-				SetResourceInt("ePerlinNoiseClamp", clamp);
-			}
-			else if (strncmp(buffer, "AddColor", 8) == 0)
-			{
-				addcolor[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				addcolor[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				addcolor[2] = r.ParseFloat();
-				SetResourceColor("eColorPerlinAdd", 
-								 addcolor[0], addcolor[1], addcolor[2], 1.0);
-			}
-			else if (strncmp(buffer, "ModulateColor", 14) == 0)
-			{
-				modcolor[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				modcolor[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				modcolor[2] = r.ParseFloat();
-				SetResourceColor("eColorPerlinMult", 
-								 modcolor[0], modcolor[1], modcolor[2], 1.0);
-			}
-			else if (strncmp(buffer, "iA", 2) == 0)
-			{
-				iA = r.ParseFloat();
-				SetResourceFloat("ePerlinNoiseIA", iA);
-			}
-			else if (strncmp(buffer, "iB", 2) == 0)
-			{
-				iB = r.ParseFloat();
-				SetResourceFloat("ePerlinNoiseIB", iB);
-			}
-			else if (strncmp(buffer, "d", 1) == 0)
-			{
-				d = r.ParseFloat();
-				SetResourceFloat("ePerlinNoiseD", d);
-			}
-		}
-	}
-	
-	r.Close();
-
-	// Convert this to Material metadata
-	if (perlinLoaded)
-	{
-		PerlinNoise perlin;
-		byte *image = perlin.generateBuffer(width, height, seed);
-		
-		if (image)
-		{	
-			if (clamp)
-				perlin.clampBufferIntensity(image, width, height, iA, iB, d);
-			
-			/* Modulate by a color and add a base half intensity */
-			FreyjaImage img;
-			byte *rgb;
-
-			img.loadPixmap(image, width, height, FreyjaImage::INDEXED_8);
-			img.getImage(&rgb);
-
-			for (uint32 i = 0, n = width * height * 3; i < n; ++i)
-			{
-				/* NOTE: No clamping or scaling of colors, however there is a 
-				   weakened 50 / 50 add in the sense that ADD can only contrib
-				   _up_to_ 50% of full intensity ( 255 ).
-
-				   The reason for this is to allow bleeding for plasma, etc.
-				*/
-
-				// Modulate and adjust intensity per pixel
-				rgb[i] = (byte)(rgb[i] * modcolor[0]) +	(byte)(128 * addcolor[0]);
-				++i;
-				rgb[i] = (byte)(rgb[i] * modcolor[1]) +	(byte)(128 * addcolor[1]);
-				++i;
-				rgb[i] = (byte)(rgb[i] * modcolor[2]) +	(byte)(128 * addcolor[2]);
-			}
-
-			freyja_load_texture_buffer(rgb, width, height, 24);
-			freyjaMaterialTexture(matIndex, mTextureId-1);
-			freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
-		}
-	}
-
-	freyja_refresh_material_interface();
-
-	return true;
-}
-
-
-bool FreyjaControl::SaveMaterial(const char *filename)
-{
-	int32 matIndex = freyjaGetCurrentMaterial();
-
-	float ambient[4];          /* Ambient color */
-	float diffuse[4];          /* Diffuse color */
-	float specular[4];         /* Specular color */
-	float emissive[4];         /* Emissive color */
-	float shininess;           /* Specular exponent */
-	unsigned int texture;      /* Texture id */
-	//unsigned int texture2;     /* Detail Texture id */
-	unsigned int blend_src;    /* Blend source factor */
-	unsigned int blend_dest;   /* Blend destination factor */
-	char *name;
-
-	freyjaGetMaterialAmbient(matIndex, ambient);
-	freyjaGetMaterialDiffuse(matIndex, diffuse);
-	freyjaGetMaterialSpecular(matIndex, specular);
-	freyjaGetMaterialEmissive(matIndex, emissive);
-	shininess = freyjaGetMaterialShininess(matIndex);
-	name = (char*)freyjaGetMaterialName(matIndex);
-	texture = freyjaGetMaterialTexture(matIndex);
-	blend_dest = freyjaGetMaterialBlendDestination(matIndex);
-	blend_src = freyjaGetMaterialBlendSource(matIndex);
-
-
-
-	FILE *f;
-
-	
-	if (!filename || !filename[0])
-	{
-		return false;
-	}
-
-
-	f = fopen(filename, "w");
-
-	if (!f)
-	{
-		perror("Material::saveFile> ");
-		return false;
-	}
-
-	fprintf(f, "[Material]\n");
-	fprintf(f, "Name = \"%s\"\n", name);
-
-	if (texture && freyjaGetMaterialTextureName(matIndex))
-	{
-		fprintf(f, "TextureName = \"%s\"\n", freyjaGetMaterialTextureName(matIndex));
-	}
-
-	fprintf(f, "EnableBlending = %s\n", 
-			(freyjaGetMaterialFlags(matIndex) & fFreyjaMaterial_Blending) ? 
-			"true" : "false");
-
-	fprintf(f, "BlendSource = %s\n", 
-			  (blend_src == GL_ZERO) ? "GL_ZERO" :
-			  (blend_src == GL_ONE) ? "GL_ONE" :
-			  (blend_src == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
-			  (blend_src == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
-			  (blend_src == GL_DST_COLOR) ? "GL_DST_COLOR" :
-			  (blend_src == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
-			  (blend_src == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
-			  (blend_src == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
-			  (blend_src == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
-			  (blend_src == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
-			  (blend_src == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
-			  (blend_src == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
-			  (blend_src == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
-			  (blend_src == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
-
-
-	fprintf(f, "BlendDest = %s\n", 
-			  (blend_dest == GL_ZERO) ? "GL_ZERO" :
-			  (blend_dest == GL_ONE) ? "GL_ONE" :
-			  (blend_dest == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
-			  (blend_dest == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
-			  (blend_dest == GL_DST_COLOR) ? "GL_DST_COLOR" :
-			  (blend_dest == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
-			  (blend_dest == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
-			  (blend_dest == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
-			  (blend_dest == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
-			  (blend_dest == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
-			  (blend_dest == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
-			  (blend_dest == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
-			  (blend_dest == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
-			  (blend_dest == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
-
-	fprintf(f, "Ambient = %f, %f, %f, %f\n", 
-			  ambient[0], ambient[1], ambient[2], ambient[3]);
-	fprintf(f, "Diffuse = %f, %f, %f, %f\n", 
-			  diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
-	fprintf(f, "Specular = %f, %f, %f, %f\n", 
-			  specular[0], specular[1], specular[2], specular[3]);
-	fprintf(f, "Emissive = %f, %f, %f, %f\n", 
-			  emissive[0], emissive[1], emissive[2], emissive[3]);
-	fprintf(f, "Shininess = %f\n", shininess);
-
-	// No 'named' texture dump perlin noise
-	if (texture && !freyjaGetMaterialTextureName(matIndex))
-	{
-		int seed = GetResourceInt("ePerlinNoiseSeed");
-		int w = GetResourceInt("ePerlinNoiseW");
-		int h = GetResourceInt("ePerlinNoiseH");
-		int clamp = GetResourceInt("ePerlinNoiseClamp");
-		float ia = GetResourceFloat("ePerlinNoiseIA");
-		float ib = GetResourceFloat("ePerlinNoiseIB");
-		float d = GetResourceFloat("ePerlinNoiseD");
-		float mr, mb, mg, ma;
-		GetResourceColor("eColorPerlinMult", mr, mb, mg, ma);
-		float ar, ab, ag, aa;
-		GetResourceColor("eColorPerlinAdd", ar, ab, ag, aa);
-
-
-		fprintf(f, "\n\n[PerlinNoise]\nSeed = %i\nWidth = %i\nHeight = %i\nClamp = %s\niA = %f\niB = %f\nd = %f\nModulateColor = %f, %f, %f\nAddColor = %f, %f, %f", seed, w, h, clamp ? "true" : "false", ia, ib, d, mr, mb, mg, ar, ab, ag);
-	}
-
-
-	fclose(f);
-
-	return true;
-}
-
-
 bool FreyjaControl::LoadModel(const char *filename)
 {
 	int err = freyjaImportModel(filename); 
@@ -3831,7 +3423,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 				{
 					freyja_print("! Vertex[%i] unselected by pick ray.", selected);
 					m->ClearVertexFlags(selected, Vertex::fSelected);
-					
+					freyja_event_gl_refresh();
 				}
 			}
 		}
@@ -5575,3 +5167,418 @@ int load_shader(const char *filename)
 
 	return id;
 }
+
+
+/// Replace me ///////////////////////////////////////////////////
+
+
+// Replace 'freyja' Material format with 'libfreyja' Material format + metadata
+bool FreyjaControl::LoadMaterial(const char *filename)
+{
+	SystemIO::TextFileReader r;
+
+
+	if (!filename || !filename[0])
+	{
+		return false;
+	}
+
+	if (!r.Open(filename))
+	{
+		perror("Material::loadFile> ");
+		return false;
+	}
+
+	int32 matIndex;
+	uint32 mode = 0;
+	bool perlinLoaded = false;
+	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
+	int32 width = 256, height = 256, seed = 257;
+	bool clamp = false;
+	float addcolor[3] = {130.0/255.0, 130.0/255.0, 74.0/255.0};
+	float modcolor[3] = {156.0/255.0, 130.0/255.0, 89.0/255.0};
+
+	while (!r.IsEndOfFile())
+	{
+		const char *buffer = r.ParseSymbol();
+
+		if (strncmp(buffer, "[Material]", 11) == 0)
+		{
+			if (mFlags & fLoadMaterialInSlot)
+			{
+				matIndex = freyjaGetCurrentMaterial();
+			}
+			else
+			{
+				matIndex = freyjaMaterialCreate();
+			}
+
+			mode = 1;
+		}
+		else if (strncmp(buffer, "[PerlinNoise]", 14) == 0)
+		{
+			mode = 2;
+		}
+		else if (mode == 1)
+		{
+			// Lex('=')
+			r.FindNextChar('=');
+
+			if (strncmp(buffer, "Shininess", 9) == 0)
+			{				
+				freyjaMaterialShininess(matIndex, r.ParseFloat());
+			}
+			else if  (strncmp(buffer, "Texture", 7) == 0)
+			{
+				if (LoadTexture(r.ParseStringLiteral()))
+				{
+					if (mTextureId > -1)
+					{
+						freyjaMaterialTexture(matIndex, mTextureId-1);
+						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+					}
+				}
+			}
+			else if  (strncmp(buffer, "TextureName", 11) == 0)
+			{
+				const char *s = r.ParseStringLiteral();
+
+				if (LoadTexture(s))
+				{
+					if (mTextureId > -1)
+					{
+						freyjaMaterialTextureName(matIndex, s);
+						freyjaMaterialTexture(matIndex, mTextureId-1);
+						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+					}
+				}
+			}
+			else if  (strncmp(buffer, "Name", 4) == 0)
+			{
+				freyjaMaterialName(matIndex, r.ParseStringLiteral());
+			}
+			else if  (strncmp(buffer, "EnableBlending", 14) == 0)
+			{
+				if (r.ParseBool())
+					freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Blending);
+			}
+			else if (strncmp(buffer, "Blend", 5) == 0)
+			{						
+				bool is_src = false;
+				if (strncmp(buffer, "BlendSource", 11) == 0)
+					is_src = true;
+
+				const char *buf = r.ParseSymbol();
+				int32 val = (strncmp(buf, "GL_ZERO", 11) == 0) ? GL_ZERO :
+				(strncmp(buf, "GL_SRC_COLOR", 9) == 0) ? GL_SRC_COLOR :
+				(strncmp(buf, "GL_ONE_MINUS_SRC_COLOR", 22) == 0) ? GL_ONE_MINUS_SRC_COLOR :
+				(strncmp(buf, "GL_DST_COLOR", 9) == 0) ? GL_DST_COLOR :
+				(strncmp(buf, "GL_ONE_MINUS_DST_COLOR", 22) == 0) ? GL_ONE_MINUS_DST_COLOR :
+				(strncmp(buf, "GL_SRC_ALPHA", 9) == 0) ? GL_SRC_ALPHA :
+				(strncmp(buf, "GL_ONE_MINUS_SRC_ALPHA", 22) == 0) ? GL_ONE_MINUS_SRC_ALPHA :
+				(strncmp(buf, "GL_DST_ALPHA", 9) == 0) ? GL_DST_ALPHA :
+				(strncmp(buf, "GL_ONE_MINUS_DST_ALPHA", 22) == 0) ? GL_ONE_MINUS_DST_ALPHA :
+				(strncmp(buf, "GL_SRC_ALPHA_SATURATE", 21) == 0) ? GL_SRC_ALPHA_SATURATE :
+				(strncmp(buf, "GL_CONSTANT_COLOR", 17) == 0) ? GL_CONSTANT_COLOR :
+				(strncmp(buf, "GL_ONE_MINUS_CONSTANT_COLOR", 27) == 0) ? GL_ONE_MINUS_CONSTANT_COLOR :
+				(strncmp(buf, "GL_ONE", 6) == 0) ? GL_ONE :
+				(strncmp(buf, "GL_CONSTANT_ALPHA", 17) == 0) ? GL_CONSTANT_ALPHA :					GL_ONE_MINUS_CONSTANT_ALPHA;
+				
+				if (is_src)
+				{
+					freyjaMaterialBlendSource(matIndex, val);
+				}
+				else
+				{
+					freyjaMaterialBlendDestination(matIndex, val);
+				}
+			}
+			else if (strncmp(buffer, "Ambient", 7) == 0)
+			{
+				vec4_t c;
+				c[0] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[1] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[2] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[3] = r.ParseFloat();
+				freyjaMaterialAmbient(matIndex, c);
+			}
+			else if (strncmp(buffer, "Diffuse", 7) == 0)
+			{
+				vec4_t c;
+				c[0] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[1] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[2] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[3] = r.ParseFloat();
+				freyjaMaterialDiffuse(matIndex, c);
+			}
+			else if (strncmp(buffer, "Specular", 8) == 0)
+			{
+				vec4_t c;
+				c[0] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[1] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[2] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[3] = r.ParseFloat();
+				freyjaMaterialSpecular(matIndex, c);
+			}
+			else if (strncmp(buffer, "Emissive", 8) == 0)
+			{
+				vec4_t c;
+				c[0] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[1] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[2] = r.ParseFloat();
+				r.FindNextChar(',');
+				c[3] = r.ParseFloat();
+				freyjaMaterialEmissive(matIndex, c);				
+			}
+		}
+		else if (mode == 2)
+		{
+			// Lex('=')
+			r.FindNextChar('=');
+
+			perlinLoaded = true;
+
+			if (strncmp(buffer, "Seed", 4) == 0)
+			{
+				seed = r.ParseInteger();
+				SetResourceInt("ePerlinNoiseSeed", seed);
+			}
+			else if (strncmp(buffer, "Width", 5) == 0)
+			{
+				width = r.ParseInteger();
+				SetResourceInt("ePerlinNoiseW", width);
+			}
+			else if (strncmp(buffer, "Height", 6) == 0)
+			{
+				height = r.ParseInteger();
+				SetResourceInt("ePerlinNoiseH", height);
+			}
+			else if (strncmp(buffer, "Clamp", 5) == 0)
+			{
+				clamp = r.ParseBool();
+				SetResourceInt("ePerlinNoiseClamp", clamp);
+			}
+			else if (strncmp(buffer, "AddColor", 8) == 0)
+			{
+				addcolor[0] = r.ParseFloat();
+				r.FindNextChar(',');
+				addcolor[1] = r.ParseFloat();
+				r.FindNextChar(',');
+				addcolor[2] = r.ParseFloat();
+				SetResourceColor("eColorPerlinAdd", 
+								 addcolor[0], addcolor[1], addcolor[2], 1.0);
+			}
+			else if (strncmp(buffer, "ModulateColor", 14) == 0)
+			{
+				modcolor[0] = r.ParseFloat();
+				r.FindNextChar(',');
+				modcolor[1] = r.ParseFloat();
+				r.FindNextChar(',');
+				modcolor[2] = r.ParseFloat();
+				SetResourceColor("eColorPerlinMult", 
+								 modcolor[0], modcolor[1], modcolor[2], 1.0);
+			}
+			else if (strncmp(buffer, "iA", 2) == 0)
+			{
+				iA = r.ParseFloat();
+				SetResourceFloat("ePerlinNoiseIA", iA);
+			}
+			else if (strncmp(buffer, "iB", 2) == 0)
+			{
+				iB = r.ParseFloat();
+				SetResourceFloat("ePerlinNoiseIB", iB);
+			}
+			else if (strncmp(buffer, "d", 1) == 0)
+			{
+				d = r.ParseFloat();
+				SetResourceFloat("ePerlinNoiseD", d);
+			}
+		}
+	}
+	
+	r.Close();
+
+	// Convert this to Material metadata
+	if (perlinLoaded)
+	{
+		PerlinNoise perlin;
+		byte *image = perlin.generateBuffer(width, height, seed);
+		
+		if (image)
+		{	
+			if (clamp)
+				perlin.clampBufferIntensity(image, width, height, iA, iB, d);
+			
+			/* Modulate by a color and add a base half intensity */
+			FreyjaImage img;
+			byte *rgb;
+
+			img.loadPixmap(image, width, height, FreyjaImage::INDEXED_8);
+			img.getImage(&rgb);
+
+			for (uint32 i = 0, n = width * height * 3; i < n; ++i)
+			{
+				/* NOTE: No clamping or scaling of colors, however there is a 
+				   weakened 50 / 50 add in the sense that ADD can only contrib
+				   _up_to_ 50% of full intensity ( 255 ).
+
+				   The reason for this is to allow bleeding for plasma, etc.
+				*/
+
+				// Modulate and adjust intensity per pixel
+				rgb[i] = (byte)(rgb[i] * modcolor[0]) +	(byte)(128 * addcolor[0]);
+				++i;
+				rgb[i] = (byte)(rgb[i] * modcolor[1]) +	(byte)(128 * addcolor[1]);
+				++i;
+				rgb[i] = (byte)(rgb[i] * modcolor[2]) +	(byte)(128 * addcolor[2]);
+			}
+
+			freyja_load_texture_buffer(rgb, width, height, 24);
+			freyjaMaterialTexture(matIndex, mTextureId-1);
+			freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+		}
+	}
+
+	freyja_refresh_material_interface();
+
+	return true;
+}
+
+
+bool FreyjaControl::SaveMaterial(const char *filename)
+{
+	int32 matIndex = freyjaGetCurrentMaterial();
+
+	float ambient[4];          /* Ambient color */
+	float diffuse[4];          /* Diffuse color */
+	float specular[4];         /* Specular color */
+	float emissive[4];         /* Emissive color */
+	float shininess;           /* Specular exponent */
+	unsigned int texture;      /* Texture id */
+	//unsigned int texture2;     /* Detail Texture id */
+	unsigned int blend_src;    /* Blend source factor */
+	unsigned int blend_dest;   /* Blend destination factor */
+	char *name;
+
+	freyjaGetMaterialAmbient(matIndex, ambient);
+	freyjaGetMaterialDiffuse(matIndex, diffuse);
+	freyjaGetMaterialSpecular(matIndex, specular);
+	freyjaGetMaterialEmissive(matIndex, emissive);
+	shininess = freyjaGetMaterialShininess(matIndex);
+	name = (char*)freyjaGetMaterialName(matIndex);
+	texture = freyjaGetMaterialTexture(matIndex);
+	blend_dest = freyjaGetMaterialBlendDestination(matIndex);
+	blend_src = freyjaGetMaterialBlendSource(matIndex);
+
+
+
+	FILE *f;
+
+	
+	if (!filename || !filename[0])
+	{
+		return false;
+	}
+
+
+	f = fopen(filename, "w");
+
+	if (!f)
+	{
+		perror("Material::saveFile> ");
+		return false;
+	}
+
+	fprintf(f, "[Material]\n");
+	fprintf(f, "Name = \"%s\"\n", name);
+
+	if (texture && freyjaGetMaterialTextureName(matIndex))
+	{
+		fprintf(f, "TextureName = \"%s\"\n", freyjaGetMaterialTextureName(matIndex));
+	}
+
+	fprintf(f, "EnableBlending = %s\n", 
+			(freyjaGetMaterialFlags(matIndex) & fFreyjaMaterial_Blending) ? 
+			"true" : "false");
+
+	fprintf(f, "BlendSource = %s\n", 
+			  (blend_src == GL_ZERO) ? "GL_ZERO" :
+			  (blend_src == GL_ONE) ? "GL_ONE" :
+			  (blend_src == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
+			  (blend_src == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
+			  (blend_src == GL_DST_COLOR) ? "GL_DST_COLOR" :
+			  (blend_src == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
+			  (blend_src == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
+			  (blend_src == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
+			  (blend_src == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
+			  (blend_src == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
+			  (blend_src == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
+			  (blend_src == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
+			  (blend_src == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
+			  (blend_src == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
+
+
+	fprintf(f, "BlendDest = %s\n", 
+			  (blend_dest == GL_ZERO) ? "GL_ZERO" :
+			  (blend_dest == GL_ONE) ? "GL_ONE" :
+			  (blend_dest == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
+			  (blend_dest == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
+			  (blend_dest == GL_DST_COLOR) ? "GL_DST_COLOR" :
+			  (blend_dest == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
+			  (blend_dest == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
+			  (blend_dest == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
+			  (blend_dest == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
+			  (blend_dest == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
+			  (blend_dest == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
+			  (blend_dest == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
+			  (blend_dest == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
+			  (blend_dest == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
+
+	fprintf(f, "Ambient = %f, %f, %f, %f\n", 
+			  ambient[0], ambient[1], ambient[2], ambient[3]);
+	fprintf(f, "Diffuse = %f, %f, %f, %f\n", 
+			  diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
+	fprintf(f, "Specular = %f, %f, %f, %f\n", 
+			  specular[0], specular[1], specular[2], specular[3]);
+	fprintf(f, "Emissive = %f, %f, %f, %f\n", 
+			  emissive[0], emissive[1], emissive[2], emissive[3]);
+	fprintf(f, "Shininess = %f\n", shininess);
+
+	// No 'named' texture dump perlin noise
+	if (texture && !freyjaGetMaterialTextureName(matIndex))
+	{
+		int seed = GetResourceInt("ePerlinNoiseSeed");
+		int w = GetResourceInt("ePerlinNoiseW");
+		int h = GetResourceInt("ePerlinNoiseH");
+		int clamp = GetResourceInt("ePerlinNoiseClamp");
+		float ia = GetResourceFloat("ePerlinNoiseIA");
+		float ib = GetResourceFloat("ePerlinNoiseIB");
+		float d = GetResourceFloat("ePerlinNoiseD");
+		float mr, mb, mg, ma;
+		GetResourceColor("eColorPerlinMult", mr, mb, mg, ma);
+		float ar, ab, ag, aa;
+		GetResourceColor("eColorPerlinAdd", ar, ab, ag, aa);
+
+
+		fprintf(f, "\n\n[PerlinNoise]\nSeed = %i\nWidth = %i\nHeight = %i\nClamp = %s\niA = %f\niB = %f\nd = %f\nModulateColor = %f, %f, %f\nAddColor = %f, %f, %f", seed, w, h, clamp ? "true" : "false", ia, ib, d, mr, mb, mg, ar, ab, ag);
+	}
+
+
+	fclose(f);
+
+	return true;
+}
+
+
+

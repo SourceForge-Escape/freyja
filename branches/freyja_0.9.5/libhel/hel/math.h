@@ -48,8 +48,10 @@ typedef float vec2_t[2];
 typedef float vec3_t[3];
 typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
-typedef vec_t mat3x3_t[9];   /* Column major, 3x3 matrix used for rotation */
+typedef vec_t mat33_t[9];    /* Column major, 3x3 matrix used for rotation */
 
+
+#define helEpsilon() 0.000001
 
 // Required for sincosf
 #ifndef _GNU_SOURCE
