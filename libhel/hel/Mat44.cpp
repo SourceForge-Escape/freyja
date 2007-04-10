@@ -24,6 +24,7 @@
  ==========================================================================*/
 
 #include <mstl/Thread.h>
+#include "Mat22.h"
 
 #include "hel/Mat44.h"
 
@@ -85,11 +86,47 @@ Vec3 Mat44::operator *(Vec3 &v)
 
 bool Mat44::Invert()
 {
-	// FIXME
+	// This is all way overboard insanity... going to implement 2 algorithms
+	// eventually -- cofactor and lu decomp, also don't tell anyone 
+	// optional SSE support
+	const vec_t det = Det();
 
-	printf("Mat44::Invert() NOT IMPLEMENETED\n");
+	if (det < helEpsilon())
+	{
+		printf("det = %f\n", det);
+		return false;
+	}
 
-	return false;
+	vec_t *c0 = mMatrix, *c1 = mMatrix+4, *c2 = mMatrix+8, *c3 = mMatrix+12;
+
+	// M = [ a c b d ]
+	Mat22 a(c0, c1), b(c2, c3), c(c0+2, c1+2), d(c2+2, c3+2);
+	Mat22 invA = a;
+	invA.Invert();
+	Mat22 cinvA = c * invA;
+	Mat22 invAb = invA * b;
+	Mat22 tmp = (d - c * invAb);
+	tmp.Invert();
+
+	Mat22 ra, rb, rc, rd;
+	ra = invA + invAb * tmp * cinvA;
+	rb = -invAb * tmp;
+	rc = -tmp * cinvA;
+	rd = tmp; // very redundant 
+
+	mMatrix[ 0] = ra.mA[0]; mMatrix[ 4] = ra.mB[0];
+	mMatrix[ 1] = ra.mA[1]; mMatrix[ 5] = ra.mB[1];
+
+	mMatrix[ 2] = rc.mA[0]; mMatrix[ 6] = rc.mB[0];
+	mMatrix[ 3] = rc.mA[1]; mMatrix[ 7] = rc.mB[1];
+
+	mMatrix[ 8] = rb.mA[0]; mMatrix[12] = rb.mB[0];
+	mMatrix[ 9] = rb.mA[1]; mMatrix[13] = rb.mB[1];
+
+	mMatrix[10] = rd.mA[0]; mMatrix[14] = rd.mB[0];
+	mMatrix[11] = rd.mA[1]; mMatrix[15] = rd.mB[1];
+
+	return true;
 }
 
 

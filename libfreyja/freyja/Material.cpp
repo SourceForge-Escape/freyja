@@ -144,6 +144,13 @@ bool Material::Serialize(SystemIO::TextFileWriter &w)
 	w.Print("\tmEmissive %f %f %f %f\n", 
 			mEmissive[0], mEmissive[1], mEmissive[2], mEmissive[3]);
 
+	if (mMetaData.c_str())
+	{
+		w.Print("\t<metadata>\n");
+		w.Print(mMetaData.c_str());
+		w.Print("\t</metadata>\n");
+	}
+
 	w.Print("END\n");
 
 	return true;
@@ -315,6 +322,18 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 			mEmissive[1] = r.ParseFloat();
 			mEmissive[2] = r.ParseFloat();
 			mEmissive[3] = r.ParseFloat();
+		}
+		else if (strcmp(symbol, "<metadata>") == 0)
+		{
+			while ((symbol = r.ParseSymbol()))
+			{
+				if (strcmp(symbol, "</metadata>") == 0)
+					break;
+
+				// FIXME: Not very efficent
+				mMetaData += symbol; 
+				mMetaData += " ";
+			}
 		}
 	}
 

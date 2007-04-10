@@ -562,6 +562,23 @@ void mat44_threaded_vlist_test()
 	}
 }
 
+void mat44_invert_test()
+{
+	hel::Mat44 m, n;
+
+	m.Print();
+	m.Invert();
+	m.Print();
+
+	printf("\n");
+	m.Translate(-4, -8, -12);
+	m.Print();
+	m.Invert();
+	m.Print();
+
+	// Compare invert and reversed operations to check result
+}
+
 
 void helMatrixUnitTest()
 {
@@ -573,7 +590,9 @@ void helMatrixUnitTest()
 
 	//mat44_rot_timing_thread_test();
 
-	mat44_threaded_vlist_test();
+	//mat44_threaded_vlist_test();
+
+	mat44_invert_test();
 }
 
 
