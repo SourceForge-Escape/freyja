@@ -23,17 +23,17 @@
  * Mongoose - Created
  ================================================================*/
 
-
 #ifndef GUARD__HEL_MONGOOSE_ENTITY_H_
 #define GUARD__HEL_MONGOOSE_ENTITY_H_
 
 #include "hel/math.h"
 #include "hel/BoundingVolume.h"
 #include "hel/CollisionObject.h"
-#include "hel/Quaternion.h"
+#include "hel/Quat.h"
 #include "hel/Vec3.h"
 #include "hel/Mass.h"
 
+namespace hel {
 
 typedef enum
 {
@@ -86,12 +86,11 @@ class Entity
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	float time, eventTime, eventTimer;
-	int state, nextState;
-	float health;
+	vec_t time, eventTime, eventTimer;
+	int32 state, nextState;
+	vec_t health;
 
-
-	unsigned int mId;          /* Unique identifier */
+	uint32 mId;                /* Unique identifier */
 
 	Vector3d mLastPos;         /* World position */
 
@@ -114,5 +113,7 @@ class Entity
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 };
+
+} // namespace hel
 
 #endif
