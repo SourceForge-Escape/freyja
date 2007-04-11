@@ -21,6 +21,7 @@
 
 #include "CollisionObject.h"
 
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Constructors

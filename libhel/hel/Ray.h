@@ -23,11 +23,12 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
 #ifndef GUARD__HEL_MONGOOSE_RAY_H_
 #define GUARD__HEL_MONGOOSE_RAY_H_
 
-#include "hel/Vector3d.h"
+#include "hel/Vec3.h"
+
+namespace hel {
 
 class Ray
 {
@@ -116,5 +117,7 @@ class Ray
 
 
 };
+
+} // namespace hel
 
 #endif

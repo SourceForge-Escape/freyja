@@ -1,41 +1,45 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
  * Project : Hel
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
- * Object  : Quaternion
- * License : No use w/o permission (C) 2002 Mongoose
- * Comments: Quaternion now in C++ class form fresh from the grove
+ * Website : http://icculus.org/freyja
+ * Email   : mongooseichiban@gmail.com
+ * Object  : Vector3d
+ * License : No use w/o permission (C) 2002-2007 Mongoose
+ * Comments: Quaternion now in C++ class form fresh from the grove.
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongooseichiban@gmail.com>
  * 
  *-- Test Defines -----------------------------------------------
  *           
- * UNIT_TEST_QUATERNION - Builds Quaternion class as a console unit test 
+ * UNITTEST__HEL_QUAT - Builds Quat class as unit test.
  *
  *-- History ------------------------------------------------ 
  *
+ * 2007.04.01:
+ * Mongoose - Major API changes, optimzations, and style updates
+ *
  * 2002.12.16:
  * Mongoose - Created, based on mtk3d ( freyja )
- ================================================================*/
+ ==========================================================================*/
 
+#ifndef GUARD__HEL_QUAT_H_
+#define GUARD__HEL_QUAT_H_
 
-#ifndef GUARD__HEL_MONGOOSE_QUATERNION_H_
-#define GUARD__HEL_MONGOOSE_QUATERNION_H_
+#include <string.h> // memcpy()
+#include <math.h>
 
 #include "hel/math.h"
-#include "Vector3d.h"
+#include "Vec3.h"
 
-//namespace hel {
+namespace hel {
 
-//class Mat44;
+class Mat44;
 
-
-class Quaternion
+class Quat
 {
  public:
 
@@ -43,61 +47,33 @@ class Quaternion
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Quaternion();
+	Quat() :	mW(1.0f), mX(0.0f), mY(0.0f), mZ(0.0f) { }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of Quaternion
+	 * Post : Constructs an object of Quat.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.12.16: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion(vec_t w, vec_t x, vec_t y, vec_t z);
+	Quat(vec_t w, vec_t x, vec_t y, vec_t z) :
+		mW(w), mX(x), mY(y), mZ(z) { }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of Quaternion
+	 * Post : Constructs an object of Quat.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.12.16: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion(vec_t pitch, vec_t heading, vec_t roll);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of Quaternion from Euler
-	 *        angles in *radians*
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.25: 
-	 * Mongoose - Created, who still uses Euler angles?  ;)
-	 ------------------------------------------------------*/
-
-	Quaternion(const vec4_t wxyz);
-	Quaternion(vec4_t wxyz);
+	Quat(const vec4_t wxyz) { memcpy(mVec, wxyz, sizeof(vec4_t)); }
 	/*------------------------------------------------------
 	 * Pre  : v { w, x, y, z }
 	 * Post : Constructs an object of Quaternion
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.12.16: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~Quaternion();
+	~Quat() { }
 	/*------------------------------------------------------
 	 * Pre  : Quaternion object is allocated
 	 * Post : Deconstructs an object of Quaternion
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.12.16: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 
@@ -105,191 +81,137 @@ class Quaternion
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	void getAxisAngles(vec4_t axyz);
+	void GetAxisAngles(vec4_t axyz);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Axis angles in *radians*
+	 * Post : Axis angles are returned in *radians*.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.25: 
-	 * Mongoose - Created, yeah this should've been in a while
 	 ------------------------------------------------------*/
 
-	void getEulerAngles(vec3_t phr); // pitch heading roll
-	void getEulerAngles(vec_t *pitch, vec_t *heading, vec_t *roll);
+	void GetEulerAngles(vec3_t phr);
+	void GetEulerAngles(vec_t &pitch, vec_t &heading, vec_t &roll);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Eular angles in *radians*
+	 * Post : Euler angles are returned in *radians*.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.03.25: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void getMatrix(matrix_t m);
+	void GetMatrix(matrix_t m) const;
 	/*------------------------------------------------------
 	 * Pre  : Matrix is valid
 	 * Post : Returns col order matrix equiv of this quaternion
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void getQuaternion4fv(vec4_t wxyz);
+	void GetQuat(vec4_t wxyz) { memcpy(wxyz, mVec, sizeof(vec4_t)); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.17:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion operator =(const Quaternion &q);
+	Quat &operator =(const Quat &q) 
+	{ memcpy(mVec, q.mVec, sizeof(vec4_t)); return *this; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Asigns Q to this quaternion
-	 *        returns (this) resultant quaternion
+	 * Post : Assigns the value of <q> to this quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion operator *(const Quaternion &q);
+	Quat operator *(const Quat &q) 
+	{
+		return Quat(mW * q.mW - mX * q.mX - mY * q.mY - mZ * q.mZ,
+						mW * q.mX + mX * q.mW + mY * q.mZ - mZ * q.mY,
+						mW * q.mY + mY * q.mW + mZ * q.mX - mX * q.mZ,
+						mW * q.mZ + mZ * q.mW + mX * q.mY - mY * q.mX);
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Multiplies Q and this quaternion
-	 *        returns resultant quaternion
-	 *        ( Use normalize() call for unit quaternion )
+	 * Post : Returns product of Quat and <q>.
+	 *        Use Norm() on result for unit quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion operator /(const Quaternion &q);
+	Quat operator /(const Quat &q) { return (*this * (q.GetInverse())); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Dividess Q from this quaternion
-	 *        returns quotient quaternion
+	 * Post : Returns quotient of Quat by <q>.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion operator +(const Quaternion &q);
+	Quat operator +(const Quat &q) 
+	{ return Quat(mW+q.mW, mX+q.mX, mY+q.mY, mZ+q.mZ); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Adds Q and this quaternion
-	 *        returns resultant quaternion
+	 * Post : Returns sum of Quat by <q>.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion operator -(const Quaternion &q);
+	Quat operator -(const Quat &q)
+	{ return Quat(mW-q.mW, mX-q.mX, mY-q.mY, mZ-q.mZ); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Subtracts Q from this quaternion
 	 *        returns resultant quaternion
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool operator ==(const Quaternion &q);
+	bool operator ==(const Quat &q) const
+	{ return (mX == q.mX && mY == q.mY && mZ == q.mZ && mW == q.mW); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Compares Q to this quaternion
-	 *        returns boolean true if equal, otherwise false
+	 * Post : Comparison of <q> to this quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion conjugate();
+	Quat GetConjugate() const { return Quat(mW, -mX, -mY, -mZ); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns conjugate of this quaternion
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Vector3d rotate(const Vector3d &v);
+	Vec3 Rotate(const Vec3 &v) 
+	{
+		Quat q = (*this) * Quat(0.0f, v.mX, v.mY, v.mZ) * GetConjugate();
+		return Vec3(q.mX, q.mY, q.mZ);
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Rotate
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.12.21:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion scale(vec_t s);
+	Quat Scale(vec_t s) { return Quat(mW * s, mX * s, mY * s, mZ * s); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns scaled result of this quaternion
+	 * Post : Returns scaled quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Quaternion inverse();
+	Quat GetInverse() const { return GetConjugate().Scale(1.0f / Magnitude()); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns inverse of this quaternion
+	 * Post : Returns inverse of quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static vec_t dot(Quaternion a, Quaternion b);
+	static vec_t Dot(const Quat &a, const Quat &b)
+	{ return ((a.mW * b.mW) + (a.mX * b.mX) + (a.mY * b.mY) + (a.mZ * b.mZ)); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns dot product of A and B quaternions
+	 * Post : Returns dot product of <a> and <b>.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	vec_t magnitude();
+	vec_t Magnitude() const { return sqrtf(Dot(*this, *this)); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns magnitude this quaternion
+	 * Post : Returns magnitude of quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static Quaternion slerp(Quaternion a, Quaternion b, vec_t time);
+	static Quat Slerp(const Quat &a, const Quat &b, const vec_t time);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Interpolates between A and B rotations and
@@ -298,10 +220,6 @@ class Quaternion
 	 *
 	 *        I = (((B . A)^ -1)^ Time) A
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 
@@ -309,91 +227,61 @@ class Quaternion
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void setIdentity();
+	void Conjugate() { mX = -mX; mY = -mY; mZ = -mZ; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns conjugate of this quaternion
+	 *
+	 ------------------------------------------------------*/
+
+	void SetIdentity() {	mW = 1.0f; mX = mY = mZ = 0.0f; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets this quaternion to identity
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setByEulerAngles(const vec3_t phr);
-	void setByEulerAngles(vec_t pitch, vec_t heading, vec_t roll);
+	void SetByEulerAngles(const vec3_t phr);
+	void SetByEulerAngles(vec_t pitch, vec_t heading, vec_t roll);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets this quaternion by euler angles in *radians*
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z);
-	void set(vec_t angle, vec_t x, vec_t y, vec_t z);
+	void SetByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets this quaternion
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void normalize();
+	void Norm()
+	{
+		const vec_t square = mX * mX + mY * mY + mZ * mZ + mW * mW;
+		const vec_t dist = (square > 0.0f) ? (1.0f / sqrtf(square)) : 1.0f;
+		Scale(dist);
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Normalize this quaternion
+	 * Post : Normalize this quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void copy(Quaternion q);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set this quaternion using q
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setByMatrix(matrix_t m);
+	void SetByMatrix(matrix_t m);
 	/*------------------------------------------------------
 	 * Pre  : Matrix is valid column order
-	 * Post : Sets matrix equiv of this quaternion
+	 * Post : Sets matrix equiv of this quaternion.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void X(vec_t v) { mX = v; }
-	void Y(vec_t v) { mY = v; }
-	void Z(vec_t v) { mZ = v; }
-	void W(vec_t v) { mW = v; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
+	union {                 /* Quaternion data */
+		vec4_t mVec;
 
-	vec_t X() { return mX; }
-	vec_t Y() { return mY; }
-	vec_t Z() { return mZ; }
-	vec_t W() { return mW; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
+		struct {
+			vec_t mW, mX, mY, mZ;
+		};
+	};
 
 
  private:
@@ -402,61 +290,32 @@ class Quaternion
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	Quaternion multiply(Quaternion a, Quaternion b);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Multiplies A and B quaternions
-	 *        returns resultant quaternion
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	Quaternion divide(Quaternion a, Quaternion b);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Divides B from A quaternion
-	 *        returns quotient quaternion
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	Quaternion add(Quaternion a, Quaternion b);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Adds A and B quaternions
-	 *        returns resultant quaternion
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	Quaternion subtract(Quaternion a, Quaternion b);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Subtracts B from A quaternion
-	 *        returns resultant quaternion
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.05.08:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	vec_t mW, mX, mY, mZ;          /* Quaternion */
 };
 
-//} // End namespace hel
 
-#endif
+////////////////////////////////////////////////////////////
+// Unit Test
+////////////////////////////////////////////////////////////
+
+#ifdef UNITTEST__HEL_QUAT
+#include <mstl/UnitTest.h>
+
+class QuatUnitTest : public UnitTest
+{
+public:
+	QuatUnitTest() {}
+
+	~QuatUnitTest() {}
+
+	int Run(mstl::String &s);
+};
+#endif // UNIT_TEST_HEL_QUAT
+
+} // namespace hel
+
+#endif // GUARD__HEL_QUAT_H_

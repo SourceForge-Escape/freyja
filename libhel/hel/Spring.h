@@ -43,6 +43,7 @@
 
 #include "hel/Simulation.h"
 
+namespace hel {
 
 class Spring
 {
@@ -132,7 +133,7 @@ public:
 
 	ThreadSpringSimulation() : Simulation()
 	{
-		mGravitation = Vector3d(0.0f, -9.81f, 0.0f);
+		mGravitation = Vec3(0.0f, -9.81f, 0.0f);
 		mAirFrictionConstant = 0.02f;
 	}
 
@@ -153,25 +154,19 @@ public:
 	////////////////////////////////////////////////////////////
 
 	virtual void generateMasses(unsigned int count, vec_t mass,
-										 const Vector3d &position, 
-										 const Vector3d &velocity, 
+										 const Vec3 &position, const Vec3 &velocity, 
 										 vec_t length, vec_t stiffness, vec_t friction)
 	{
-		unsigned int i, j;
-		Mass *a, *b;
-
-
 		mConnection.mPos = position;
 		mConnection.mVelocity = velocity;
 		mConnection.mMass = 0;
 
 		/* 2003.06.08, Mongoose - Generate with 0 lengths */
-		Simulation::generateMasses(count, mass, 
-											Vector3d(0, 0, 0), 
-											Vector3d(0, 0, 0));
+		Simulation::generateMasses(count, mass, Vec3(0, 0, 0), Vec3(0, 0, 0));
 
 		/* 2003.06.08, Mongoose - Setup lengths here ( Dependent on index ) */
-		for (j = mMasses.begin(), i = 0; j < mMasses.end(); ++j, ++i)
+		Mass *a, *b;
+		for (unsigned int j = mMasses.begin(), i = 0; j < mMasses.end(); ++j, ++i)
 		{
 			b = mMasses[j];
 
@@ -230,12 +225,12 @@ public:
 			/* No resolver support for now */
 			if (collisionDetected(m))
 			{
-				Vector3d v = m->mVelocity;
+				Vec3 v = m->mVelocity;
 
 				//v.mVelocity.mVec[1] = 0;
 				m->applyForce(-v * 0.1); // Surface friction
 
-				m->mVelocity.zero();
+				m->mVelocity.Zero();
 			}	
 
 			mass += m->mMass;
@@ -252,7 +247,7 @@ public:
 
 		if (collisionDetected(&mConnection))
 		{
-			mConnection.mVelocity.zero();
+			mConnection.mVelocity.Zero();
 		}
 
 		(mMasses[0])->mPos = mConnection.mPos;
@@ -260,7 +255,7 @@ public:
 	}
 
 
-	void setVelocity(Vector3d connectionVelocity)
+	void setVelocity(Vec3 connectionVelocity)
 	{
 		mConnection.mVelocity = connectionVelocity;
 	}
@@ -272,7 +267,7 @@ public:
 	Mass mConnection;					/* Anchor location and velovity of 
 												the system */
 
-	Vector3d mGravitation;			/* Force of gravity on masses  */
+	Vec3 mGravitation;    			/* Force of gravity on masses  */
 
 	vec_t mAirFrictionConstant;	/* Friction of air on thread  */
 
@@ -288,5 +283,7 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 };
+
+} // namespace hel
 
 #endif

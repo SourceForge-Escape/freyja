@@ -24,13 +24,13 @@
  * Mongoose - Created
  ================================================================*/
 
-
 #ifndef GUARD__LIBHEL_MONGOOSE_BOUNDINGVOLUME_H_
 #define GUARD__LIBHEL_MONGOOSE_BOUNDINGVOLUME_H_
 
 #include <hel/math.h>
 #include <hel/Mat44.h>
 
+namespace hel {
 
 class BoundingVolume
 {
@@ -110,7 +110,7 @@ public:
 	BoundingSphere(vec3_t center, vec_t radius) :
 		mRadius(radius)
 	{
-		HEL_VEC3_COPY(center, mCenter);
+		helCopyVec3(center, mCenter);
 	}
 
 
@@ -149,7 +149,7 @@ public:
 
 	void Translate(vec3_t xyz)
 	{
-		HEL_VEC3_COPY(xyz, mCenter);
+		helCopyVec3(xyz, mCenter);
 	}
 
 
@@ -329,8 +329,8 @@ class BoundingBoxCombo : public BoundingVolume
 public:
 
 	BoundingBoxCombo() : BoundingVolume(),
-								mSphere(Vector3d::zeroVector().mVec, 0.0f), 
-								mBox(Vector3d::zeroVector().mVec, Vector3d::zeroVector().mVec)					
+								mSphere(Vec3().mVec, 0.0f), 
+								mBox(Vec3().mVec, Vec3().mVec)					
 	{
 	}
 
@@ -380,13 +380,15 @@ public:
 
 	void GetBoundingBox(vec3_t min, vec3_t max)
 	{
-		HEL_VEC3_COPY(mBox.mMin, min);
-		HEL_VEC3_COPY(mBox.mMax, max);
+		helCopyVec3(mBox.mMin, min);
+		helCopyVec3(mBox.mMax, max);
 	}
 
 	BoundingSphere mSphere;    /* Bounding sphere of this volume */
 	
 	BoundingBox mBox;          /* Bounding box of this volume */
 };
+
+} // namespace hel
 
 #endif

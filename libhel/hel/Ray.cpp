@@ -23,6 +23,7 @@
 
 #include "Ray.h"
 
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -61,7 +62,7 @@ Ray::~Ray()
 
 bool Ray::IntersectBox(vec3_t min, vec3_t max, vec_t &t)
 {
-	mDir.normalize();
+	mDir.Norm();
 
 	vec_t bestDist = 99999.0f;
 	const uint32 count = 6;
@@ -143,7 +144,7 @@ bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
 bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 {
 	Vec3 center;
-	HEL_VEC3_COPY(center3, center.mVec);
+	helCopyVec3(center3, center.mVec);
 	Vec3 l = center - mOrigin;
 	vec_t s = l * mDir;
 	vec_t l2 = l * l;

@@ -23,102 +23,41 @@
 
 #include "Quaternion.h"
 
-
-////////////////////////////////////////////////////////////
-// Constructors
-////////////////////////////////////////////////////////////
-
-Quaternion::Quaternion()
-{
-	setIdentity();
-}
-
-
-Quaternion::Quaternion(vec_t w, vec_t x, vec_t y, vec_t z)
-{
-	mW = w;
-	mX = x;
-	mY = y;
-	mZ = z;
-}
-
-
-Quaternion::Quaternion(vec_t pitch, vec_t heading, vec_t roll)
-{
-	vec3_t phr = {pitch, heading, roll};
-	setByEulerAngles(phr);
-}
-
-
-Quaternion::Quaternion(const vec4_t wxyz)
-{
-	mW = wxyz[0];
-	mX = wxyz[1];
-	mY = wxyz[2];
-	mZ = wxyz[3];
-}
-
-
-Quaternion::Quaternion(vec4_t wxyz)
-{
-	mW = wxyz[0];
-	mX = wxyz[1];
-	mY = wxyz[2];
-	mZ = wxyz[3];
-}
-
-
-Quaternion::~Quaternion()
-{
-}
-
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-void Quaternion::getQuaternion4fv(vec4_t wxyz)
+void Quat::GetAxisAngles(vec4_t axyz)
 {
-	wxyz[0] = mW;
-	wxyz[1] = mX;
-	wxyz[2] = mY;
-	wxyz[3] = mZ;
-}
-
-
-void Quaternion::getAxisAngles(vec4_t axyz)
-{
-	vec_t theta;
-	double scale;
-
-
-	theta = (vec_t)acos(mW) * 2.0;
-	scale = sin(theta / 2.0);
-
+	const vec_t theta = acosf(mW) * 2.0;
+	const vec_t invScale = 1.0f / sinf(theta / 2.0f);
 	axyz[0] = theta;
-	axyz[1] = mX / scale;
-	axyz[2] = mY / scale;
-	axyz[3] = mZ / scale;
+	axyz[1] = mX * invScale;
+	axyz[2] = mY * invScale;
+	axyz[3] = mZ * invScale;
 }
 
 
-void Quaternion::getEulerAngles(vec3_t xyz)
+void Quat::GetEulerAngles(vec3_t xyz)
 {
-	getEulerAngles(xyz+0, xyz+1, xyz+2);
+	GetEulerAngles(xyz[0], xyz[1], xyz[2]);
 }
 
 
-void Quaternion::getEulerAngles(vec_t *pitch, vec_t *heading, vec_t *roll)
+void Quat::GetEulerAngles(vec_t &pitch, vec_t &heading, vec_t &roll)
 {
-	double sqx = mX*mX;
-	double sqy = mY*mY;
-	double sqz = mZ*mZ;
-	double sqw = mW*mW;
+	const vec_t sqx = mX * mX;
+	const vec_t sqy = mY * mY;
+	const vec_t sqz = mZ * mZ;
+	const vec_t sqw = mW * mW;
 
 	// From my old mtk3d math lib ( clamps (+-)PI )
-	*heading = atan2(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
-	*roll = atan2(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
-	*pitch = asin(-2.0 * (mX*mZ - mY*mW));
+	heading = atan2f(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
+	roll = atan2f(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
+	pitch = asinf(-2.0 * (mX*mZ - mY*mW));
+
 	//heading = atan2(-m20,m00)
 	//attitude = asin(m10)
 	//bank = atan2(-m12,m11)
@@ -129,7 +68,7 @@ void Quaternion::getEulerAngles(vec_t *pitch, vec_t *heading, vec_t *roll)
 }
 
 
-void Quaternion::getMatrix(matrix_t m)
+void Quat::GetMatrix(matrix_t m) const
 {
 	m[ 0] = 1.0f - 2.0f * (mY*mY + mZ*mZ);
 	m[ 1] = 2.0f * (mX*mY - mW*mZ);
@@ -153,221 +92,50 @@ void Quaternion::getMatrix(matrix_t m)
 }
 
 
-//Quaternion Quaternion::operator =(const Matrix &mat)
-//{
-//	setByMatrix(mat.mMatrix);
-//	return (*this);
-//}
-
-
-Quaternion Quaternion::operator =(const Quaternion &q)
-{
-	mW = q.mW;
-	mX = q.mX;
-	mY = q.mY;
-	mZ = q.mZ;
-  
-  return (*this);
-}
-
-
-Quaternion Quaternion::operator *(const Quaternion &q)
-{
-	return multiply(*this, q);
-}
-
-
-Quaternion Quaternion::operator /(const Quaternion &q)
-{
-	return divide(*this, q);
-}
-
-
-Quaternion Quaternion::operator +(const Quaternion &q)
-{
-	return add(*this, q);
-}
-
-
-Quaternion Quaternion::operator -(const Quaternion &q)
-{
-	return subtract(*this, q);
-}
-
-
-bool Quaternion::operator ==(const Quaternion &q)
-{
-	return (mX == q.mX && mY == q.mY && mZ == q.mZ && mW == q.mW);
-}
-
-
-Quaternion Quaternion::conjugate()
-{
-	return Quaternion(mW, -mX, -mY, -mZ);
-}
-
-
-Vector3d Quaternion::rotate(const Vector3d &v)
-{
-	Quaternion vec = Quaternion(0, v.mVec[0], v.mVec[1], v.mVec[2]);
-	Quaternion q = *this;
-	Quaternion qinv = q.conjugate();
-	Quaternion vec2 = q * vec * qinv;
-
-	return Vector3d(vec2.mX, vec2.mY, vec2.mZ);
-}
-
-
-Quaternion Quaternion::scale(vec_t s)
-{
-   return Quaternion(mW * s, mX * s, mY * s, mZ * s);
-}
-
-
-Quaternion Quaternion::inverse()
-{
-	return conjugate().scale(1/magnitude());
-}
-
-
-vec_t Quaternion::dot(Quaternion a, Quaternion b)
-{
-	return ((a.mW * b.mW) + (a.mX * b.mX) + (a.mY * b.mY) + (a.mZ * b.mZ));
-}
-
-
-vec_t Quaternion::magnitude()
-{
-	return sqrt(dot(*this, *this));
-}
-
-
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void Quaternion::setIdentity()
+void Quat::SetByEulerAngles(const vec3_t pyr)
 {
-	mW = 1.0f;
-	mX = 0.0f;
-	mY = 0.0f;
-	mZ = 0.0f;
-}
+	vec_t cp, sp;
+	helSinCosf(pyr[0] * 0.5f, &sp, &cp); // pitch
+	vec_t cy, sy;
+	helSinCosf(pyr[1] * 0.5f, &sy, &cy); // yaw
+	vec_t cr, sr;
+	helSinCosf(pyr[2] * 0.5f, &sr, &cr); // roll
 
-
-void Quaternion::setByEulerAngles(const vec3_t xyz)
-{
-	vec_t pitch = xyz[0], roll = xyz[2], yaw = xyz[1];
-	vec_t cr, cp, cy, sr, sp, sy, cpcy, spsy;
-
-	/* Want to use half of the values in equations from here on */
-	roll *= 0.5;
-	pitch *= 0.5;
-	yaw *= 0.5;
-
-	cr = cos(roll);
-	cp = cos(pitch);
-	cy = cos(yaw);
-
-	sr = sin(roll);
-	sp = sin(pitch);
-	sy = sin(yaw);
-
-	cpcy = cp * cy;
-	spsy = sp * sy;
+	vec_t cpcy = cp * cy;
+	vec_t spsy = sp * sy;
 
 	mW = cr * cpcy + sr * spsy;
 	mX = sr * cpcy - cr *spsy;
 	mY = cr * sp * cy + sr * cp * sy;
 	mZ = cr * cp * sy - sr * sp * cy;
 
-	normalize();
+	Norm();
 }
 
 
-void Quaternion::setByEulerAngles(vec_t x, vec_t y, vec_t z)
+void Quat::SetByEulerAngles(vec_t pitch, vec_t yaw, vec_t roll)
 {
-	*this = Quaternion(x, y, z);
+	vec3_t pyr = { pitch, yaw, roll };
+	SetByEulerAngles(pyr);
 }
 
 
-void Quaternion::setByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
+void Quat::SetByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
 {
-	vec_t temp, dist;
-
-	
 	// Normalize
-	temp = x*x + y*y + z*z;
-	
-	dist = (float)(1.0 / sqrt(temp));
-	
-	x *= dist;
-	y *= dist;
-	z *= dist;
-	
-	mX = x;
-	mY = y;
-	mZ = z;
-	
-	mW = (float)cos(angle / 2.0f);
+	const vec_t dist = (1.0f / sqrtf(x*x + y*y + z*z));
+	mX = x * dist;
+	mY = y * dist;
+	mZ = z * dist;	
+	mW = cosf(angle / 2.0f);	
 }
 
 
-void Quaternion::set(vec_t angle, vec_t x, vec_t y, vec_t z)
-{
-	vec_t temp, dist;
-
-	
-	// Normalize
-	temp = x*x + y*y + z*z;
-	
-	dist = (float)(1.0 / sqrt(temp));
-	
-	x *= dist;
-	y *= dist;
-	z *= dist;
-	
-	mX = x;
-	mY = y;
-	mZ = z;
-	
-	mW = (float)cos(angle / 2.0f);	
-}
-
-
-void Quaternion::normalize()
-{
-	vec_t dist, square;
-
-
-	square = mX * mX + mY * mY + mZ * mZ + mW * mW;
-	
-	if (square > 0.0)
-	{
-		dist = (float)(1.0 / sqrt(square));
-	}
-	else 
-	{
-		dist = 1;
-	}
-
-	mX *= dist;
-	mY *= dist;
-	mZ *= dist;
-	mW *= dist; 
-}
-
-
-void Quaternion::copy(Quaternion q)
-{
-	mW = q.mW;
-	mX = q.mX;
-	mY = q.mY;
-	mZ = q.mZ;
-}
-
-
-Quaternion Quaternion::slerp(Quaternion a, Quaternion b, vec_t time)
+Quat Quat::Slerp(const Quat &a, const Quat &b, const vec_t time)
 {
 	/*******************************************************************
 	 * Spherical Linear Interpolation algorthim
@@ -384,10 +152,6 @@ Quaternion Quaternion::slerp(Quaternion a, Quaternion b, vec_t time)
 	 *
 	 *******************************************************************/
 
-	vec_t result, scaleA, scaleB, theta, sinTheta;
-	Quaternion i;
-
-
 	// Don't bother if it's the same rotation, it's the same as the result
 	if (a == b) 
 	{
@@ -395,19 +159,21 @@ Quaternion Quaternion::slerp(Quaternion a, Quaternion b, vec_t time)
 	}
 
 	// A . B 
-	result = dot(a, b);
+	vec_t result = Dot(a, b);
   
+	Quat b2(b); // b is const, so we need a variable b in one case.
+
 	// If the dot product is less than 0, the angle is greater than 90 degrees
 	if (result < 0.0f)
 	{
 		// Negate quaternion B and the result of the dot product
-		b = Quaternion(-b.mW, -b.mX, -b.mY, -b.mZ);
+		b2 = Quat(-b.mW, -b.mX, -b.mY, -b.mZ);
 		result = -result;
 	}
 
 	// Set the first and second scale for the interpolation
-	scaleA = 1 - time;
-	scaleB = time;
+	vec_t scaleA = 1 - time;
+	vec_t scaleB = time;
 
 	// Next, we want to actually calculate the spherical interpolation.  Since this
 	// calculation is quite computationally expensive, we want to only perform it
@@ -424,82 +190,80 @@ Quaternion Quaternion::slerp(Quaternion a, Quaternion b, vec_t time)
 	{
 		// Get the angle between the 2 quaternions, and then
 		// store the sin() of that angle
-		theta = (float)acos(result);
-		sinTheta = (float)sin(theta);
+		vec_t theta = acosf(result);
+		vec_t sinTheta = sinf(theta);
 
 		// Calculate the scale for qA and qB, according to
 		// the angle and it's sine value
-		scaleA = (float)sin((1 - time) * theta) / sinTheta;
-		scaleB = (float)sin((time * theta)) / sinTheta;
+		scaleA = sinf((1 - time) * theta) / sinTheta;
+		scaleB = sinf((time * theta)) / sinTheta;
 	}	
+
+	Quat a2(a); // a is const, so we need a var a in all cases by this point.
 
 	// Calculate the x, y, z and w values for the quaternion by using a special
 	// form of linear interpolation for quaternions.
-	return (a.scale(scaleA) + b.scale(scaleB));
+	return (a2.Scale(scaleA) + b2.Scale(scaleB));
 }
 
 
-void Quaternion::setByMatrix(matrix_t matrix)
+void Quat::SetByMatrix(matrix_t matrix)
 {   
-	float diagonal = matrix[0] + matrix[5] + matrix[10] + 1.0f;
-	float scale = 0.0f;
-	float w = 0.0f, x = 0.0f, y = 0.0f, z = 0.0f;
-	
-	
-	if (diagonal > 0.00000001)
+	const vec_t diagonal = matrix[0] + matrix[5] + matrix[10] + 1.0f;
+
+	if (diagonal > 1.0e-8f) // 7? Should farm this out to mstl::System? 
 	{
 		// Calculate the scale of the diagonal
-		scale = (float)(sqrt(diagonal) * 2);
+		vec_t scale = sqrtf(diagonal) * 2.0f;
 		
-		w = 0.25f * scale;
-		x = (matrix[9] - matrix[6]) / scale;
-		y = (matrix[2] - matrix[8]) / scale;
-		z = (matrix[4] - matrix[1]) / scale;
+		mW = 0.25f * scale;
+		scale = 1.0f / scale;
+		mX = (matrix[9] - matrix[6]) * scale;
+		mY = (matrix[2] - matrix[8]) * scale;
+		mZ = (matrix[4] - matrix[1]) * scale;
 	}
 	else 
 	{
-		 // If the first element of the diagonal is the greatest value
+		// If the first element of the diagonal is the greatest value
 		if (matrix[0] > matrix[5] && matrix[0] > matrix[10])
 		{   
 			 // Find the scale according to the first element, and double it
-			scale = (float)sqrt(1.0f + matrix[0] - matrix[5] - matrix[10])*2.0f;
-			
+			vec_t scale = sqrtf(1.0f + matrix[0] - matrix[5] - matrix[10]) * 2.0f;
+ 
 			// Calculate the quaternion
-			w = (matrix[9] - matrix[6]) / scale; 
-			x = 0.25f * scale;
-			y = (matrix[4] + matrix[1]) / scale;
-			z = (matrix[2] + matrix[8]) / scale;
+			mX = 0.25f * scale;
+			scale = 1.0f / scale;
+			mW = (matrix[9] - matrix[6]) * scale; 
+			mY = (matrix[4] + matrix[1]) * scale;
+			mZ = (matrix[2] + matrix[8]) * scale;
 		} 
 		// The second element of the diagonal is the greatest value
 		else if (matrix[5] > matrix[10]) 
 		{
 			// Find the scale according to the second element, and double it
-			scale = (float)sqrt(1.0f + matrix[5] - matrix[0] - matrix[10])*2.0f;
+			vec_t scale = sqrtf(1.0f + matrix[5] - matrix[0] - matrix[10]) * 2.0f;
 			
 			// Calculate the quaternion 
-			w = (matrix[2] - matrix[8]) / scale;
-			x = (matrix[4] + matrix[1]) / scale;
-			y = 0.25f * scale;
-			z = (matrix[9] + matrix[6]) / scale;
+			mY = 0.25f * scale;
+			scale = 1.0f / scale;
+			mW = (matrix[2] - matrix[8]) * scale;
+			mX = (matrix[4] + matrix[1]) * scale;
+			mZ = (matrix[9] + matrix[6]) * scale;
 		} 
 		// The third element of the diagonal is the greatest value
 		else 
 		{   
 			// Find the scale according to the third element, and double it
-			scale = (float)sqrt(1.0f + matrix[10] - matrix[0] - matrix[5])*2.0f;
+			vec_t scale = sqrtf(1.0f + matrix[10] - matrix[0] - matrix[5]) * 2.0f;
 			
 			// Calculate the quaternion
-			w = (matrix[4] - matrix[1]) / scale;
-			x = (matrix[2] + matrix[8]) / scale;
-			y = (matrix[9] + matrix[6]) / scale;
-			z = 0.25f * scale;
+			mZ = 0.25f * scale;
+			scale = 1.0f / scale;
+			mW = (matrix[4] - matrix[1]) * scale;
+			mX = (matrix[2] + matrix[8]) * scale;
+			mY = (matrix[9] + matrix[6]) * scale;
 		}
 	}
-
-	mW = w;
-	mX = x;
-	mY = y;
-	mZ = z;
 }
 
 
@@ -507,107 +271,9 @@ void Quaternion::setByMatrix(matrix_t matrix)
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-Quaternion Quaternion::multiply(Quaternion a, Quaternion b)
-{
-	return Quaternion(a.mW * b.mW - a.mX * b.mX - a.mY * b.mY - a.mZ * b.mZ,
-							a.mW * b.mX + a.mX * b.mW + a.mY * b.mZ - a.mZ * b.mY,
-							a.mW * b.mY + a.mY * b.mW + a.mZ * b.mX - a.mX * b.mZ,
-							a.mW * b.mZ + a.mZ * b.mW + a.mX * b.mY - a.mY * b.mX);
-#ifdef SLEEPYME
-	vec_t a, b, c, d, e, f, g, h;
-
-
-	a = (a.mW + a.mX) * (b.mW + b.mX);
-	b = (a.mZ - a.mY) * (b.mY - b.mZ);
-#endif
-}
-
-
-Quaternion Quaternion::divide(Quaternion a, Quaternion b)
-{
-	return (a * (b.inverse()));
-}
-
-
-Quaternion Quaternion::add(Quaternion a, Quaternion b)
-{
-	return Quaternion(a.mW + b.mW,
-							a.mX + b.mX,
-							a.mY + b.mY,
-							a.mZ + b.mZ);
-}
-
-
-Quaternion Quaternion::subtract(Quaternion a, Quaternion b)
-{
-	return Quaternion(a.mW - b.mW,
-							a.mX - b.mX,
-							a.mY - b.mY,
-							a.mZ - b.mZ);
-}
-
 
 ////////////////////////////////////////////////////////////
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////
-// Unit Test code
-////////////////////////////////////////////////////////////
-
-#ifdef UNIT_TEST_QUATERNION
-#include <stdio.h>
-
-int runQuaternionUnitTest(int argc, char *argv[])
-{
-	Quaternion q;
-	vec3_t xyz;
-	//vec_t x, y, z;
-	uint32 i, count = 6;
-
-	printf("Simple Euler conversion ( 3fv ordering ) test\n");
-
-	for (i = 0; i < count; ++i)
-	{
-		xyz[0] = HEL_DEG_TO_RAD(15.0f*i);
-		xyz[1] = HEL_DEG_TO_RAD(30.0f*i);
-		xyz[2] = HEL_DEG_TO_RAD(45.0f*i);
-
-		printf("set %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);	
-		printf("    %f %f %f\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
-		q.setByEulerAngles(xyz);
-		q.getEulerAngles(xyz);
-		printf("get %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);
-		printf("    %f %f %f\n\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
-	}
-
-	printf("Simple Euler conversion ( 3f ordering ) test\n");
-
-	for (i = 0; i < count; ++i)
-	{
-		xyz[0] = HEL_DEG_TO_RAD(15.0f*i);
-		xyz[1] = HEL_DEG_TO_RAD(30.0f*i);
-		xyz[2] = HEL_DEG_TO_RAD(45.0f*i);
-
-		printf("set %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);	
-		printf("    %f %f %f\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
-		q = Quaternion(xyz[0], xyz[1], xyz[2]);
-		q.getEulerAngles(xyz+0, xyz+1, xyz+2);
-		printf("get %f %f %f  \t ", xyz[0], xyz[1], xyz[2]);
-		printf("    %f %f %f\n\n", HEL_RAD_TO_DEG(xyz[0]), HEL_RAD_TO_DEG(xyz[1]), HEL_RAD_TO_DEG(xyz[2]));
-	}
-
-	return 0;
-}
-
-
-int main(int argc, char *argv[])
-{
-	printf("[Quaternion class test]\n");
-
-	runQuaternionUnitTest(argc, argv);
-
-	return 0;
-}
-#endif

@@ -2,18 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <hel/Mat44.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 #include <mstl/Thread.h>
 
+using namespace hel;
 
 void testLinkageOnly()
 {
-	Vector3d u, v;
-
-	u = u + v;
+	Vec3 u;
+	u += Vec3();
 }
 
 
@@ -22,8 +22,6 @@ int runLibHelTest(int argc, char *argv[])
 	unsigned int i, errs;
 	hel::Mat44 a, b, c;
 	matrix_t m;
-
-
 
 	// Test 3 cases of identity use
 	for (errs = 0, i = 0; i < 3; ++i)
@@ -187,13 +185,13 @@ void mat44_unit_test()//unit_test_t &test)
 	printf("\nmat44_unit_test()\n");
 
 	Vec3 v(1, 1, 1);
-	printf("v = <%f, %f, %f>\n", v.X, v.Y, v.Z);
+	printf("v = <%f, %f, %f>\n", v.mX, v.mY, v.mZ);
 	printf("v = <%f, %f, %f> by array access\n", v[0], v[1], v[2]);
 
 	printf("v = T * v\n");
 	v = m * v;
 	
-	printf("v = <%f, %f, %f>\n", v.X, v.Y, v.Z);
+	printf("v = <%f, %f, %f>\n", v.mX, v.mY, v.mZ);
 	printf("v = <%f, %f, %f> by array access\n", v[0], v[1], v[2]);
 
 	mstl::String s = m.ToString();
@@ -466,7 +464,7 @@ void math_test()
 	vec3_t v = { 1, 1, 1 };
 	vec3_t result;
 
-	helVectorMatrixMult3v(m, v, result);
+	helVectorMatrixMult3fv(m, v, result);
 
 	printf("<%f %f %f>\n", result[0], result[1], result[2]);
 }
