@@ -27,7 +27,7 @@
 
 #include "hel/math.h"
 #include "hel/Quaternion.h"
-#include "hel/Vector3d.h"
+#include "hel/Vec3.h"
 
 #include <mstl/String.h>
 
@@ -64,13 +64,6 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	Mat44(Mat44 &m) { memcpy(mMatrix, m.mMatrix, sizeof(matrix_t)); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of Matrix
-	 *
-	 ------------------------------------------------------*/
-
 	Mat44(matrix_t m) { memcpy(mMatrix, m, sizeof(matrix_t)); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -78,11 +71,10 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	Mat44(Quaternion &q) { q.getMatrix(mMatrix); }
+	Mat44(const Quat &q) { q.GetMatrix(mMatrix); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Converts and asigns Q to a Matrix
-	 *        returns quaternion as Matrix
+	 * Post : Contruct Mat44 from quaternion.
 	 *
 	 ------------------------------------------------------*/
 
@@ -167,7 +159,7 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	void GetMatrix(matrix_t m) { memcpy(m, mMatrix, sizeof(matrix_t)); }
+	void const GetMatrix(matrix_t m) { memcpy(m, mMatrix, sizeof(matrix_t)); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns a copy of this matrix
@@ -281,10 +273,10 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	Quaternion ToQuaternion()
+	Quat ToQuat()
 	{
-		Quaternion q;
-		q.setByMatrix(mMatrix);
+		Quat q;
+		q.SetByMatrix(mMatrix);
 		return q;
 	}
 	/*------------------------------------------------------
@@ -343,9 +335,9 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	Mat44 &operator =(const Quaternion &q)
+	Mat44 &operator =(const Quat &q)
 	{
-		Quaternion(q).getMatrix(mMatrix);
+		Quat(q).GetMatrix(mMatrix);
 		return *this;
 	}
 	/*------------------------------------------------------

@@ -1,26 +1,41 @@
-/* -*- Mode: C++; tab-width: 3; indent-tabs-mode: t; c-basic-offset: 3 -*- */
-/*================================================================
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
+/*===========================================================================
  * 
- * Project : Freyja
+ * Project : Hel
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja
+ * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (C) 2002 Mongoose
+ * License : No use w/o permission, (C) 2002-2007 Mongoose
  * Comments: 
  *
- *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
- * 
+ *           template generator script.  <mongooseichiban@gmail.com>
+ *
  *-- History ------------------------------------------------ 
+ *
+ * 2007.04.07:
+ * Mongoose - It's about time this was cleaned up a little.
  *
  * 2002.05.11:
  * Mongoose - Created
- ================================================================*/
+ ==========================================================================*/
 
 #ifndef GUARD__HEL_MATH_H
 #define GUARD__HEL_MATH_H
+
+// Required for sincosf
+#ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#endif
+
+#include <math.h>
+
+#ifdef sincosf
+#   define helSinCosf sincosf
+#else
+#   define helSinCosf(a, s, c) *s = sinf(a); *c = cosf(a) 
+#endif
 
 #define HEL_PI           3.14159265358979323846  /* pi */
 #define HEL_PI_OVER_2    1.57079632679489661923  /* pi/2 */
@@ -29,15 +44,20 @@
 #define HEL_PI_OVER_180  0.017453292519943295    /* pi/180 */
 #define HEL_180_OVER_PI  57.295779513082323      /* 180/pi */
 
-#define HEL_RAD_TO_DEG(x) ((x) * HEL_180_OVER_PI)
-#define HEL_DEG_TO_RAD(x) ((x) * HEL_PI_OVER_180)
+#define helRadToDeg(a) ((a) * HEL_180_OVER_PI)
 
-#define HEL_VEC3_COPY(in, out) (out[0] = in[0], out[1] = in[1], out[2] = in[2])
+#define helDegToRad(a) ((a) * HEL_PI_OVER_180)
 
-#define helSquare(a) a * a
+#define helSquare(n) ((n) * (n))
+
+#define helEpsilon() (0.000001f)
+
+#define helCopyVec3(src, dest) memcpy(dest, src, sizeof(vec3_t))
+
 
 extern "C" {
 
+// FIXME: Should be using ISO types for true correct size.
 typedef unsigned char byte;
 typedef short int int16;
 typedef unsigned short int uint16;
@@ -50,22 +70,6 @@ typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 typedef vec_t mat33_t[9];    /* Column major, 3x3 matrix used for rotation */
 
-
-#define helEpsilon() 0.000001
-
-// Required for sincosf
-#ifndef _GNU_SOURCE
-#   define _GNU_SOURCE
-#endif
-
-#include <math.h>
-
-//FIXME... just implement it here already
-#ifdef sincosf
-#   define helSinCosf sincosf
-#else
-#   define helSinCosf(a, s, c) *s = sin(a); *c = cos(a) 
-#endif
 
 const char *helVersionInfo();
 /*------------------------------------------------------
@@ -163,7 +167,7 @@ void helMidpoint3v(vec3_t a, vec3_t b, vec3_t mid);
  * Mongoose - Created, from mtk3d
  ------------------------------------------------------*/
 
-vec_t helDegToRad(vec_t degrees);
+//vec_t helDegToRad(vec_t degrees);
 /*------------------------------------------------------
  * Pre  : Given angle in degrees
  * Post : Returns angle in radians
@@ -174,7 +178,7 @@ vec_t helDegToRad(vec_t degrees);
  * Mongoose - Created, from mtk3d
  ------------------------------------------------------*/
 
-vec_t helRadToDeg(vec_t rad);
+//vec_t helRadToDeg(vec_t rad);
 /*------------------------------------------------------
  * Pre  : Given angle in radians
  * Post : Returns angle in degrees
@@ -195,14 +199,14 @@ vec_t helRandomNum(vec_t from, vec_t to);
 
 /// Matrices ///////////////////////////////////////////
 
-void helMatrixCopy(matrix_t &source, matrix_t &dest);
+void helMatrixCopy(matrix_t source, matrix_t dest);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Copys value of source to dest
  *
  ------------------------------------------------------*/
 
-void helMatrixMultiply(const matrix_t &a, const matrix_t &b, matrix_t &result);
+void helMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result);
 /*------------------------------------------------------
  * Pre  : Multiplies matrices a and b ( column-major )
  *        Neither a or b is also the result
@@ -213,29 +217,14 @@ void helMatrixMultiply(const matrix_t &a, const matrix_t &b, matrix_t &result);
  *
  ------------------------------------------------------*/
 
-void helVectorMatrixMult3v(matrix_t m, vec3_t v, vec3_t result);
+void helVectorMatrixMult3fv(matrix_t m, vec3_t v, vec3_t result);
 /*------------------------------------------------------
  * Pre  : 
- * Post : 
- *
- ------------------------------------------------------*/
-
-void helGenericVectorMatrixMult4dv(double *matrix, double *v, double *result);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Some cruft for ye olde mtk3d compatibility
- *
- ------------------------------------------------------*/
-
-void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4]);
-/*------------------------------------------------------
- * Pre  : Multiplies <v> vector (double[4]) and <matrix>
- *
  * Post : Returns <result> vector, 
- *        <v> and <result> maybe be the same vector
+ *        Also <v> and <result> can be the same vector.
  *
  ------------------------------------------------------*/
 
 }
 
-#endif
+#endif // GUARD__HEL_MATH_H

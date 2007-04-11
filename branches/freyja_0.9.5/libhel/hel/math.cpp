@@ -1,32 +1,35 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*================================================================
+/*===========================================================================
  * 
- * Project : Midgard, Freyja
+ * Project : Hel
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja
+ * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (C) 2002 Mongoose
+ * License : No use w/o permission, (C) 2002-2007 Mongoose
  * Comments: 
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
- * 
+ *           template generator script.  <mongooseichiban@gmail.com>
+ *
  *-- History ------------------------------------------------ 
+ *
+ * 2007.04.07:
+ * Mongoose - It's about time this was cleaned up a little.
  *
  * 2002.05.11:
  * Mongoose - Created
- ================================================================*/
+ ==========================================================================*/
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 #include <hel/Mat44.h>
 
-#define COMPUTE
+using namespace hel;
 
 const char *helVersionInfo()
 {
@@ -35,33 +38,26 @@ const char *helVersionInfo()
 
 
 vec_t helIntersectionOfAbstractSpheres(vec3_t centerA, vec_t radiusA,
-													vec3_t centerB, vec_t radiusB)
+									   vec3_t centerB, vec_t radiusB)
 {
-	Vector3d a = Vector3d(centerA);
-	Vector3d b = Vector3d(centerB);
-	Vector3d d = a - b;
+	Vec3 a = Vec3(centerA);
+	Vec3 b = Vec3(centerB);
+	Vec3 d = a - b;
 	vec_t dist, minDist;
 
-	dist = Vector3d::dot(d, d);
+	dist = Vec3::Dot(d, d);
 	minDist = radiusA + radiusB;
 	
 	return (dist <= minDist * minDist);
 }
 
-#if 0
-inline vec_t square(vec_t a) 
-{
-	return a * a;
-}
-#endif
-
 
 // Returns number of intersections and intersection position(s)
 // Got algorithm from http://astronomy.swin.edu.au/~pbourke/geometry/
 int helIntersectionOfAbstractSphereAndLine(vec3_t center, vec_t radius,
-														 vec3_t posA, vec3_t posB,
-														 vec3_t intersectionA,
-														 vec3_t intersectionB)
+										   vec3_t posA, vec3_t posB,
+										   vec3_t intersectionA,
+										   vec3_t intersectionB)
 {
 	// float x , y , z;
 	vec_t a, b, c, mu, i ;
@@ -118,33 +114,23 @@ int helIntersectionOfAbstractSphereAndLine(vec3_t center, vec_t radius,
 }
 
 
-bool tmpHelSphereIntersectLine(Vector3d pos, Vector3d lastPos, 
-										 Vector3d center, vec_t radius)
+bool helSphereIntersectLine(const Vec3 &pos, const Vec3 &lastPos,
+							const Vec3 &center, vec_t radius)
 {
-	Vector3d seg, segToCenter, delta;
-	vec_t s, dSquare;
-
-
-	seg = pos - lastPos;
-	segToCenter = center - lastPos;
-
-	s = seg * segToCenter;
+	Vec3 seg = pos - lastPos;
+	Vec3 segToCenter = center - lastPos;
+	vec_t s = seg * segToCenter;
 
 	if (s >= 1.0f || s <= 0.0f)
 		return false;
 
-	seg.normalize();
+	seg.Norm();
 	seg = seg * s;
 	seg = seg + lastPos;
 
-	delta = seg - center;
+	Vec3 delta = seg - center;
 
-	dSquare = delta * delta;
-
-	if (radius >= dSquare)
-		return true;
-	else
-		return false;
+	return (radius >= delta * delta) ? true : false;
 }
 
 
@@ -152,61 +138,34 @@ int helIntersectionLineAndPolygon(vec3_t intersect,
                                   vec3_t p1, vec3_t p2,
                                   unsigned int vertexCount, vec3_t *ploygon)
 {
-	//	vec3_t normal, a, b;
-	Vector3d a, b, normal, pA, pB;
-	vec_t d, denominator, mu;
-	double theta;
-
-
-	pA = Vector3d(p1);
-	pB = Vector3d(p2);
-
 	// Find normal
-	//mtkVectorSubtract(ploygon[1], ploygon[0], a);
-	a = Vector3d(ploygon[1]) - Vector3d(ploygon[0]);
-	//mtkVectorSubtract(ploygon[2], ploygon[0], b);
-	b = Vector3d(ploygon[2]) - Vector3d(ploygon[0]);
-	normal = Vector3d::cross(a, b);
-	//mtkVectorCrossProduct(a, b, normal);
-	normal.normalize();
-	//mtkVectorNormalize(normal, normal);
+	Vec3 a = Vec3(ploygon[1]) - Vec3(ploygon[0]);
+	Vec3 b = Vec3(ploygon[2]) - Vec3(ploygon[0]);
+	Vec3 normal = Vec3::Cross(a, b);
+	normal.Norm();
 
-	// find D
-	//d = (normal[0] * ploygon[0][0] -
-	//	  normal[1] * ploygon[0][1] - 
-	//	  normal[2] * ploygon[0][2]);
-	d = (normal.mVec[0] * ploygon[0][0] -
-		  normal.mVec[1] * ploygon[0][1] - 
-		  normal.mVec[2] * ploygon[0][2]);
+	// Find d
+	vec_t d = (normal.mVec[0] * ploygon[0][0] -
+			   normal.mVec[1] * ploygon[0][1] - 
+			   normal.mVec[2] * ploygon[0][2]);
 
-	// line segment parallel to plane?
-	//mtkVectorSubtract(p2, p1, a); // cache p2 - p1 => a
+	// Line segment parallel to plane?
+	Vec3 pA = Vec3(p1);
+	Vec3 pB = Vec3(p2);
 	a = pB - pA;
+	vec_t denominator = Vec3::Dot(normal, a);
 
-	//denominator = (normal[0] * a[0] +
-	//					normal[1] * a[1] +
-	//					normal[2] * a[2]);
-	denominator = Vector3d::dot(normal, a);
-
-	if (denominator > 0.0)
+	if (denominator > 0.0f)
 		return 0;
 
 	// Line segment contains intercept point?
-	//mu = - ((d + normal[0] * p1[0] + normal[1] * p1[1] + normal[2] * p1[2]) /
-	//		  denominator);
-	mu = -((d + Vector3d::dot(normal, pA)) / denominator);
+	vec_t mu = -((d + Vec3::Dot(normal, pA)) / denominator);
 
-	if (mu < 0.0 || mu > 1.0)
+	if (mu < 0.0f || mu > 1.0f)
 		return 0;
 
-	//intersect[0] = p1[0] + mu * a[0];
-	//intersect[1] = p1[1] + mu * a[1];
-	//intersect[2] = p1[2] + mu * a[2];
 	b = pA + (a * mu);
-	intersect[0] = b.mVec[0];
-	intersect[1] = b.mVec[1];
-	intersect[2] = b.mVec[2];
-	
+	b.Get(intersect);
 
 	// See if the intercept is bound by polygon by winding number
 #ifdef WINDING_NUMBERS_TRIANGLE
@@ -223,14 +182,12 @@ int helIntersectionLineAndPolygon(vec3_t intersect,
 
 	total = HEL_RAD_TO_DEG(acos(t0) + acos(t1) + acos(t2));
 
-	if (total - 360 < 0.0)
+	if (total - 360 < 0.0f)
 		return 0;
 #else // assume convex polygons here for sure
-	//mtkVectorSubtract(intersect, ploygon[0], a);
-	//theta = mtkVectorDotProduct(a, normal);
-	theta = Vector3d::dot(b - Vector3d(ploygon[0]), normal); // b = intersect
+	vec_t theta = Vec3::Dot(b - Vec3(ploygon[0]), normal);
 
-	if (theta >= 90.0) // Yeah I know
+	if (theta >= 90.0f) // Yeah I know
 		return 0;
 #endif
 
@@ -240,13 +197,8 @@ int helIntersectionLineAndPolygon(vec3_t intersect,
 
 vec_t helDistToSphereFromPlane3v(vec3_t center,	vec_t radius, vec4_t plane)
 {
-	vec_t d;
-
-
-	d = (plane[0] * center[0] + 
-		  plane[1] * center[1] +
-		  plane[2] * center[2] + 
-		  plane[3]);
+	vec_t d = (plane[0] * center[0] + plane[1] * center[1] +
+			   plane[2] * center[2] + plane[3]);
 
 	if (d <= -radius)
 		return 0;
@@ -258,17 +210,12 @@ vec_t helDistToSphereFromPlane3v(vec3_t center,	vec_t radius, vec4_t plane)
 vec_t helDistToBboxFromPlane3v(vec3_t min, vec3_t max, vec4_t plane)
 {
 	vec3_t center;
-	vec_t d, radius;
-
-
 	helMidpoint3v(min, max, center);
 
-	d = (plane[0] * center[0] + 
-		  plane[1] * center[1] + 
-		  plane[2] * center[2] + 
-		  plane[3]);
+	vec_t d = (plane[0] * center[0] + plane[1] * center[1] + 
+			   plane[2] * center[2] + plane[3]);
 
-	radius = helDist3v(max, center);
+	vec_t radius = helDist3v(max, center);
 
 	if (d <= -radius)
 		return 0;
@@ -279,35 +226,35 @@ vec_t helDistToBboxFromPlane3v(vec3_t min, vec3_t max, vec4_t plane)
 
 vec_t helDist3v(vec3_t a, vec3_t b)
 {
-	return (sqrt( ((b[0] - a[0]) * (b[0] - a[0])) +
-					  ((b[1] - a[1]) * (b[1] - a[1])) + 
-					  ((b[2] - a[2]) * (b[2] - a[2]))));
+	return (sqrtf( ((b[0] - a[0]) * (b[0] - a[0])) +
+				   ((b[1] - a[1]) * (b[1] - a[1])) + 
+				   ((b[2] - a[2]) * (b[2] - a[2]))));
 }
 
 
 void helMidpoint3v(vec3_t a, vec3_t b, vec3_t mid)
 {
-	mid[0] = (a[0] + b[0]) / 2;
-	mid[1] = (a[1] + b[1]) / 2;
-	mid[2] = (a[2] + b[2]) / 2;
+	mid[0] = (a[0] + b[0]) * 0.5f;
+	mid[1] = (a[1] + b[1]) * 0.5f;
+	mid[2] = (a[2] + b[2]) * 0.5f;
 }
 
 
 vec_t helNorm4v(vec4_t v)
 { 
-	return (sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]));
+	return (sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]));
 }
 
 
 vec_t helNorm3v(vec3_t v)
 { 
-	return (sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]));
+	return (sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]));
 } 
 
 
 vec_t helNorm2v(vec2_t v)
 { 
-	return (sqrt(v[0]*v[0] + v[1]*v[1]));
+	return (sqrtf(v[0]*v[0] + v[1]*v[1]));
 }
 
 
@@ -317,38 +264,16 @@ vec_t helRandomNum(vec_t from, vec_t to)
 }
 
 
-vec_t helDegToRad(vec_t degrees)
-{
-#ifdef COMPUTE
-	return ((degrees / 180.0) * HEL_PI);
-#else
-	// degrees * (180.0 / PI);
-	return (degrees * HEL_180_OVER_PI);
-#endif
-}
-
-
-vec_t helRadToDeg(vec_t rad)
-{
-#ifdef COMPUTE
-	return ((rad / HEL_PI) * 180.0); 
-#else
-	// rad * (PI / 180.0);
-	return (rad * HEL_PI_OVER_180);
-#endif
-}
-
-
 /// Matrices ///////////////////////////////////////////
 
-void helMatrixCopy(matrix_t &source, matrix_t &dest) 
+void helMatrixCopy(matrix_t source, matrix_t dest) 
 {
 	memcpy(dest, source, sizeof(matrix_t));
 }
 
 
-// Post multiplying column-major will give you row-major
-void helMatrixMultiply(const matrix_t &a, const matrix_t &b, matrix_t &result)
+// Remember: Post multiplying column-major will give you row-major
+void helMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
 {
 	/* Column order */
 	result[ 0] = a[ 0] * b[ 0] + a[ 4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3];
@@ -373,7 +298,7 @@ void helMatrixMultiply(const matrix_t &a, const matrix_t &b, matrix_t &result)
 }
 
 
-void helVectorMatrixMult3v(matrix_t m, vec3_t v, vec3_t result)
+void helVectorMatrixMult3fv(matrix_t m, vec3_t v, vec3_t result)
 {
 	vec_t x = v[0], y = v[1], z = v[2];
 
@@ -383,52 +308,3 @@ void helVectorMatrixMult3v(matrix_t m, vec3_t v, vec3_t result)
 	result[2] = m[2]*x + m[6]*y + m[10]*z + m[14];
 }
 
-
-void helGenericVectorMatrixMult4dv(double *matrix, double *v, double *result)
-{
-	double x = v[0], y = v[1], z = v[2], w = v[3];
-
-	result[0] = matrix[ 0]*x + matrix[ 4]*y + matrix[ 8]*z + matrix[12]*w;
-	result[1] = matrix[ 1]*x + matrix[ 5]*y + matrix[ 9]*z + matrix[13]*w;
-	result[2] = matrix[ 2]*x + matrix[ 6]*y + matrix[10]*z + matrix[14]*w;
-	result[3] = matrix[ 3]*x + matrix[ 7]*y + matrix[11]*z + matrix[15]*w;
-}
-
-
-void helVectorMatrixMult4dv(double v[4], matrix_t m, double result[4])
-{
-#ifdef USE_ROW_MAJOR_MATRIX
-	/* Row major */
-    result[0] = m[ 0] * v[0] + m[ 1] * v[1] + m[ 2] * v[2] + m[ 3] * v[3];
-	result[1] = m[ 4] * v[0] + m[ 5] * v[1] + m[ 6] * v[2] + m[ 7] * v[3];
-	result[2] = m[ 8] * v[0] + m[ 9] * v[1] + m[10] * v[2] + m[11] * v[3];
-	result[3] = m[12] * v[0] + m[13] * v[1] + m[14] * v[2] + m[15] * v[3];
-#else
-	/* Column major */
-	result[0] = m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * v[3];
-	result[1] = m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * v[3];
-	result[2] = m[ 2] * v[0] + m[ 6] * v[1] + m[10] * v[2] + m[14] * v[3];
-	result[3] = m[ 3] * v[0] + m[ 7] * v[1] + m[11] * v[2] + m[15] * v[3];
-#endif
-}
-
-
-#ifdef MATH_UNIT_TEST
-#include <stdio.h>
-
-void helMathTest()
-{
-	printf("180/PI: %f, %f, %f\n", 
-			 HEL_180_OVER_PI, 
-			 180.0f / HEL_PI,
-			 180.0 / M_PI);
-}
-
-
-int main(int argc, char *argv)
-{
-	helMathTest();
-
-	return 0;
-}
-#endif

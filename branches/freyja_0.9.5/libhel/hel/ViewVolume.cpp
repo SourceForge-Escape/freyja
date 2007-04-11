@@ -24,6 +24,7 @@
 #include <math.h>
 #include "ViewVolume.h"
 
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Constructors

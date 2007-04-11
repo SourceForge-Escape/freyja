@@ -21,6 +21,7 @@
 
 #include "Simulation.h"
 
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -88,7 +89,7 @@ bool Simulation::collisionDetected(Mass *mass)
 
 void Simulation::generateMasses(unsigned int count, vec_t mass)
 {
-	generateMasses(count, mass, Vector3d(0, 0, 0), Vector3d(0, 0, 0));
+	generateMasses(count, mass, Vec3(0, 0, 0), Vec3(0, 0, 0));
 }
 
 
@@ -107,8 +108,7 @@ void Simulation::setMass(unsigned int idx, vec_t mass,
 
 
 void Simulation::generateMasses(unsigned int count, vec_t mass,
-										  const Vector3d &position, 
-										  const Vector3d &velocity)
+								const Vec3 &position, const Vec3 &velocity)
 {
 	unsigned int i;
 

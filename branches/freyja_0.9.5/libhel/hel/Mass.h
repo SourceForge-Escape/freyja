@@ -28,8 +28,10 @@
 #define GUARD__HEL_MONGOOSE_MASS_H_
 
 #include "hel/math.h"
-#include "hel/Vector3d.h"
+#include "hel/Vec3.h"
 
+
+namespace hel {
 
 // class ParticleMass : public Particle
 
@@ -69,7 +71,7 @@ class Mass
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	Mass(vec_t mass, const Vector3d &position, const Vector3d &velocity);
+	Mass(vec_t mass, const Vec3 &position, const Vec3 &velocity);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Mass
@@ -107,7 +109,7 @@ class Mass
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	virtual void applyForce(Vector3d force);
+	virtual void applyForce(Vec3 force);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : External force acts on... the mass
@@ -144,11 +146,11 @@ class Mass
 
 	vec_t mMass;          /* The value of the mass */
 
-	Vector3d mPos;        /* Location in 3 space of... the mass */
+	Vec3 mPos;            /* Location in 3 space of... the mass */
 
-	Vector3d mVelocity;   /* Velocity of... the mass */
+	Vec3 mVelocity;       /* Velocity of... the mass */
 
-	Vector3d mForce;      /* Force acting on the mass */
+	Vec3 mForce;          /* Force acting on the mass */
 
 
  private:
@@ -163,5 +165,7 @@ class Mass
 	////////////////////////////////////////////////////////////
 
 };
+
+}	// namespace hel
 
 #endif

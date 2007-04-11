@@ -38,6 +38,8 @@
 
 using namespace mstl;
 
+namespace hel {
+
 class Simulation
 {
  public:
@@ -144,8 +146,7 @@ class Simulation
 	 ------------------------------------------------------*/
 
 	virtual void generateMasses(unsigned int count, vec_t mass,
-										 const Vector3d &position, 
-										 const Vector3d &velocity);
+										 const Vec3 &position, const Vec3 &velocity);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : <Count> number of masses with 
@@ -271,13 +272,13 @@ public:
 			
 			if (collisionDetected(m))
 			{
-				m->mVelocity = Vector3d(0, 0, 0);
+				m->mVelocity = Vec3(0, 0, 0);
 			}
 		}
 	}
 
 
-	Vector3d gravitation;     /* Gravitational acceleration */
+	Vec3 gravitation;     /* Gravitational acceleration */
 };
 
 
@@ -291,8 +292,8 @@ public:
 
 	
 	virtual void generateMasses(unsigned int count, vec_t mass,
-										 const Vector3d &position, 
-										 const Vector3d &velocity)
+										 const Vec3 &position, 
+										 const Vec3 &velocity)
 	{
 		Simulation::generateMasses(count, mass, 
 											connectionPos + position, velocity);
@@ -311,7 +312,7 @@ public:
 			m = mMasses[i];
 
 			// Vector from mass to spring connection
-			Vector3d springVector = m->mPos - connectionPos;
+			Vec3 springVector = m->mPos - connectionPos;
 			
 			// Apply spring force, spring force formulation
 			m->applyForce(-springVector * springConstant);
@@ -325,6 +326,9 @@ public:
 
 	vec_t springConstant;     /* Stiffness, higher values more spring force */
 
-	Vector3d connectionPos;   /* Location where mass is connected to spring */
+	Vec3 connectionPos;       /* Location where mass is connected to spring */
 };
+
+} // namespace hel
+
 #endif

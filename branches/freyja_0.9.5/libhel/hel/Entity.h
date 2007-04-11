@@ -31,7 +31,7 @@
 #include "hel/BoundingVolume.h"
 #include "hel/CollisionObject.h"
 #include "hel/Quaternion.h"
-#include "hel/Vector3d.h"
+#include "hel/Vec3.h"
 #include "hel/Mass.h"
 
 

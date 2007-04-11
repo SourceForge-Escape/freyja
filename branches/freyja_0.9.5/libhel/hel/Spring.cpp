@@ -21,6 +21,7 @@
 
 #include "Spring.h"
 
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -52,12 +53,11 @@ Spring::~Spring()
 
 void Spring::solve()
 {
-	Vector3d force;
-	Vector3d v = mMassA->mPos - mMassB->mPos;  // Vector BA
-	vec_t r = v.magnitude(); // Length of BA
+	Vec3 force;
+	Vec3 v = mMassA->mPos - mMassB->mPos;  // Vector BA
+	vec_t r = v.Magnitude(); // Length of BA
 
-
-	force.zero();
+	force.Zero();
 
 	// Add spring force to the force
 	if (r != 0)

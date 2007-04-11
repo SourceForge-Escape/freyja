@@ -23,12 +23,13 @@
  * Mongoose - Created
  ================================================================*/
 
-
 #ifndef GUARD__HEL_MONGOOSE_VIEWVOLUME_H_
 #define GUARD__HEL_MONGOOSE_VIEWVOLUME_H_
 
 #include <hel/Mat44.h>
 #include <hel/BoundingVolume.h>
+
+namespace hel {
 
 class ViewVolume
 {
@@ -268,5 +269,7 @@ class ViewVolume
 	//vec4_t mPickVector;         /* For picking from screen plane via mouse */
 	//vec4_t mPickPoint;
 };
+
+} // namespace hel
 
 #endif

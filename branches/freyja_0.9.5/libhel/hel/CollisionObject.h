@@ -3,15 +3,15 @@
  * 
  * Project : Hel
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.westga.edu/~stu7440/
- * Email   : stu7440@westga.edu
+ * Website : http://icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
  * Object  : CollisionObject
  * License : No use w/o permission (C) 2003 Mongoose
  * Comments: This is the magical collision object class 
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator script.  <stu7440@westga.edu>
+ *           template generator script.  <mongooseichiban@gmail.com>
  * 
  *-- Test Defines -----------------------------------------------
  *           
@@ -23,14 +23,14 @@
  * Mongoose - Created
  ================================================================*/
 
-
-#ifndef GUARD__HEL_MONGOOSE_COLLISIONOBJECT_H_
-#define GUARD__HEL_MONGOOSE_COLLISIONOBJECT_H_
+#ifndef GUARD__HEL_COLLISIONOBJECT_H_
+#define GUARD__HEL_COLLISIONOBJECT_H_
 
 #include <mstl/Vector.h>
 #include "hel/Mass.h"
 #include "hel/math.h"
 
+namespace hel {
 
 class CollisionObject
 {
@@ -67,7 +67,7 @@ class CollisionObject
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	virtual bool intersectPoint(Vector3d p) = 0;
+	virtual bool intersectPoint(Vec3 p) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Test if this point intersects with this object
@@ -84,7 +84,7 @@ class CollisionObject
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	Vector3d mIntersection;				/* Point of intersection, set if there
+	Vec3 mIntersection;			   	/* Point of intersection, set if there
 													was a collsion detected */
 
 	//vec_t mRepulsionConstant;		/* Repel masses  */
@@ -124,20 +124,20 @@ class HeightCollisionObject: public CollisionObject
 	}
 
 
-	bool intersectPoint(Vector3d p)
+	bool intersectPoint(Vec3 p)
 	{
 		bool outside = false;
 
 		mIntersection = p;
 		
-		if (p.mVec[1] < mMinY)
+		if (p.mY < mMinY)
 		{
-			mIntersection.mVec[1] = mMinY;
+			mIntersection.mY = mMinY;
 			outside = true;
 		}
-		else if (p.mVec[1] > mMaxY)
+		else if (p.mY > mMaxY)
 		{
-			mIntersection.mVec[1] = mMaxY;
+			mIntersection.mY = mMaxY;
 			outside = true;
 		}
 
@@ -161,8 +161,8 @@ class InternalBBoxCollisionObject: public CollisionObject
 										vec_t maxX, vec_t maxY, vec_t maxZ) 
 		: CollisionObject()
 	{
-		mMin = Vector3d(minX, minY, minZ);
-		mMax = Vector3d(maxX, maxY, maxZ);
+		mMin = Vec3(minX, minY, minZ);
+		mMax = Vec3(maxX, maxY, maxZ);
 	}
 
 
@@ -171,7 +171,7 @@ class InternalBBoxCollisionObject: public CollisionObject
 	}
 
 
-	bool intersectPoint(Vector3d p)
+	bool intersectPoint(Vec3 p)
 	{
 		unsigned int i;
 		bool outside = false;
@@ -198,8 +198,8 @@ class InternalBBoxCollisionObject: public CollisionObject
 	}
 
 
-	Vector3d mMax;
-	Vector3d mMin;
+	Vec3 mMax;
+	Vec3 mMin;
 };
 
 #   ifdef FIXME
@@ -242,4 +242,7 @@ class BoundingSphereCollisionObject: public CollisionObject
 
 };
 #   endif
-#endif
+
+} // namespace hel
+
+#endif // GUARD__HEL_COLLISIONOBJECT_H_

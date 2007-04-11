@@ -21,6 +21,8 @@
 
 #include "Mass.h"
 
+using namespace hel;
+
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -46,7 +48,7 @@ Mass::Mass(vec_t mass) :
 }
 
 
-Mass::Mass(vec_t mass, const Vector3d &position, const Vector3d &velocity) :
+Mass::Mass(vec_t mass, const Vec3 &position, const Vec3 &velocity) :
 	mState(fRest),
 	mMass(mass),
 	mPos(position),
@@ -70,7 +72,7 @@ Mass::~Mass()
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void Mass::applyForce(Vector3d force)
+void Mass::applyForce(Vec3 force)
 {
 	mForce += force;
 	mState = fActive;
@@ -79,7 +81,7 @@ void Mass::applyForce(Vector3d force)
 
 void Mass::rest()
 {
-	mForce = Vector3d(0, 0, 0);
+	mForce = Vec3(0, 0, 0);
 	mState = fRest;
 }
 

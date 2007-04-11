@@ -1,12 +1,12 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*==========================================================================
  * 
- * Project : Freyja
+ * Project : Hel
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://icculus.org/freyja
  * Email   : mongooseichiban@gmail.com
  * Object  : Matrix
- * License : LGPL, (C) 2002-2007 Mongoose
+ * License : (C) 2002-2007 Mongoose
  * Comments: Matrix 2x2 class
  *
  * 
@@ -21,7 +21,7 @@
 
 #include "hel/math.h"
 #include "hel/Quaternion.h"
-#include "hel/Vector3d.h"
+#include "hel/Vec3.h"
 
 #include <mstl/String.h>
 
