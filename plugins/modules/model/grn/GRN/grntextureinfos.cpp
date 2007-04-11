@@ -64,7 +64,7 @@ TextureInfos::~TextureInfos()
 void TextureInfos::load(cGrannyStream * file,dword texOffset,
 		dword baseOffset,dword peers)
 {
-	dword oldPos;
+  //dword oldPos;
 	TextureInfo *texture;
 	for (dword i=0;i<peers;)
 	{

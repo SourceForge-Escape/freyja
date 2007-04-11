@@ -104,7 +104,7 @@ class Model
 	 *
 	 ------------------------------------------------------*/
 
-	bool Intersect(Ray &r, vec_t &t);
+	bool Intersect(hel::Ray &r, vec_t &t);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if 'hit', and <t> the time along ray <r>

@@ -479,7 +479,7 @@ bool Nod::save(const char *filename)
 #include <mstl/Vector.h>
 
 using namespace mstl;
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 #include "Nod.h"
 
 
@@ -543,7 +543,7 @@ int freyja_model__nod_import(char *filename)
 	long num_verts = 0, num_faces = 0;
 	int i, j, b;
 	char name[64];
-	Matrix matrix;
+	Mat44 matrix;
 	vec3_t pos, rot;
 	index_t skeleton, bone;
 

@@ -27,8 +27,8 @@
 #define GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
 
 #include <hel/Mat44.h>
-#include <hel/Vector3d.h>
-#include <hel/Quaternion.h>
+#include <hel/Vec3.h>
+#include <hel/Quat.h>
 #include <freyja/freyja.h>
 #include <freyja/BoneABI.h>
 #include <freyja/MeshABI.h>
@@ -41,7 +41,7 @@ using namespace freyja;
 class ActionMeshTranslateExt : public Action
 {
  public:
-	ActionMeshTranslateExt(index_t mesh, Vec3 xyz, Vec3 &v) :
+	ActionMeshTranslateExt(index_t mesh, hel::Vec3 xyz, hel::Vec3 &v) :
 		Action(),
 		mCursorXYZ(v),
 		mMesh(mesh),
@@ -58,7 +58,7 @@ class ActionMeshTranslateExt : public Action
 		{
 			// Adjust relative translation to absolote position
 			hel::Mat44 t;
-			Vec3 u = mXYZ - m->GetPosition();
+			hel::Vec3 u = mXYZ - m->GetPosition();
 			t.Translate(u.mVec[0], u.mVec[1], u.mVec[2]);
 			m->SetPosition(mXYZ);
 			m->TransformVertices(t);
@@ -68,16 +68,16 @@ class ActionMeshTranslateExt : public Action
 		return true;
 	}
 
-	Vec3 &mCursorXYZ;
+	hel::Vec3 &mCursorXYZ;
 	index_t mMesh;                      /* Which mesh? */
-	Vector3d mXYZ;                      /* Storage for 3d transform event */
+	hel::Vec3 mXYZ;                     /* Storage for 3d transform event */
 };
 
 
 class ActionModelTransform : public Action
 {
  public:
-	ActionModelTransform(index_t model, freyja_transform_action_t a, Vec3 v) :
+	ActionModelTransform(index_t model, freyja_transform_action_t a, hel::Vec3 v) :
 		Action(),
 		mModel(model),
 		mAction(a),
@@ -97,14 +97,14 @@ class ActionModelTransform : public Action
 
 	index_t mModel;                     /* Which model? */
 	freyja_transform_action_t mAction;  /* Type of transform */
-	Vector3d mXYZ;                      /* Storage for 3d transform event */
+	hel::Vec3 mXYZ;                      /* Storage for 3d transform event */
 };
 
 
 class ActionMeshTransform : public Action
 {
  public:
-	ActionMeshTransform(index_t mesh, freyja_transform_action_t a, Vec3 v) :
+	ActionMeshTransform(index_t mesh, freyja_transform_action_t a, hel::Vec3 v) :
 		Action(),
 		mMesh(mesh),
 		mAction(a),
@@ -121,7 +121,7 @@ class ActionMeshTransform : public Action
 
 	index_t mMesh;                      /* Which mesh? */
 	freyja_transform_action_t mAction;  /* Type of transform */
-	Vector3d mXYZ;                      /* Storage for 3d transform event */
+	hel::Vec3 mXYZ;                      /* Storage for 3d transform event */
 };
 
 
@@ -161,7 +161,7 @@ class ActionGenericTransform : public Action
 {
  public:
 	ActionGenericTransform(freyja_transform_t t, freyja_transform_action_t a, 
-						   index_t owner, index_t id, Vec3 &v) :
+						   index_t owner, index_t id, hel::Vec3 &v) :
 		Action(),
 		mTransform(t),
 		mAction(a),
@@ -174,7 +174,7 @@ class ActionGenericTransform : public Action
 
 	virtual bool Undo() 
 	{
-		Vec3 xyz;
+		hel::Vec3 xyz;
 
 		freyjaGetGenericTransform3fv(mTransform, mAction, mId, xyz.mVec);
 		
@@ -200,14 +200,14 @@ class ActionGenericTransform : public Action
 	freyja_transform_action_t mAction;  /* Type of transform */
 	index_t mOwner;
 	index_t mId;
-	Vector3d mXYZ;                      /* Storage for 3d transform event */
+	hel::Vec3 mXYZ;                      /* Storage for 3d transform event */
 };
 
 
 class ActionVertexTransformExt : public Action
 {
  public:
-	ActionVertexTransformExt(index_t mesh, index_t vertex, freyja_transform_action_t a, Vec3 xyz, Vec3 &v) :
+	ActionVertexTransformExt(index_t mesh, index_t vertex, freyja_transform_action_t a, hel::Vec3 xyz, hel::Vec3 &v) :
 		Action(),
 		mCursorXYZ(v),
 		mMesh(mesh),
@@ -226,11 +226,11 @@ class ActionVertexTransformExt : public Action
 		return true;
 	}
 
-	Vec3 &mCursorXYZ;
+	hel::Vec3 &mCursorXYZ;
 	index_t mMesh;
 	index_t mVertex;
 	freyja_transform_action_t mAction;  /* Type of transform */
-	Vector3d mXYZ;                      /* Storage for 3d transform event */
+	hel::Vec3 mXYZ;                     /* Storage for 3d transform event */
 };
 
 
@@ -283,7 +283,7 @@ class ActionBoneTransform : public Action
 {
  public:
 	ActionBoneTransform(index_t bone, 
-						freyja_transform_action_t action, Vec3 v) :
+						freyja_transform_action_t action, hel::Vec3 v) :
 		Action(),
 		mBone(bone),
 		mAction(action),
@@ -307,7 +307,7 @@ class ActionBoneTransform : public Action
 
 	index_t mBone;
 	freyja_transform_action_t mAction;
-	Vec3 mTransform;
+	hel::Vec3 mTransform;
 };
 
 
@@ -315,8 +315,8 @@ class ActionVertexListTransformExt : public Action
 {
  public:
 	ActionVertexListTransformExt(index_t mesh, const Vector<index_t> &list, 
-								 freyja_transform_action_t a, Vector<Vec3> &list2, 
-								 Vec3 &v) :
+								 freyja_transform_action_t a, Vector<hel::Vec3> &list2, 
+								 hel::Vec3 &v) :
 		Action(),
 		mCursorXYZ(v),
 		mMesh(mesh),
@@ -350,11 +350,11 @@ class ActionVertexListTransformExt : public Action
 		return true;
 	}
 
-	Vec3 &mCursorXYZ;
+	hel::Vec3 &mCursorXYZ;
 	index_t mMesh;
 	Vector<index_t> mVertexList;
 	freyja_transform_action_t mAction;  /* Type of transform */
-	Vector<Vec3> mXYZList;                      /* Storage for 3d transform event */
+	Vector<hel::Vec3> mXYZList;         /* Storage for 3d transform event */
 };
 
 

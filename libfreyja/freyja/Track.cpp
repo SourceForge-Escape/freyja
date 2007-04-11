@@ -24,6 +24,7 @@
 
 using namespace mstl;
 using namespace freyja;
+using namespace hel;
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -43,7 +44,7 @@ using namespace freyja;
 
 // NOTE: This assumes 'forward playback' and computes from last keyframe
 void TransformTrack::GetTransform(vec_t time,
-								  Vec3 &pos, Vec3 &rot, Vec3 &scale) 
+								  hel::Vec3 &pos, hel::Vec3 &rot, hel::Vec3 &scale) 
 {
 	// Ran off the rails here... could wrap around, but just return for now
 	if (time > GetDuration() || time < 0.0f)

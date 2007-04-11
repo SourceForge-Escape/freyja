@@ -21,6 +21,7 @@
 #include "MeshABI.h"
 
 using namespace freyja;
+using namespace hel;
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -1561,8 +1562,8 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 		mesh->GetVertexPos(face->mIndices[2], c.mVec);
 
 		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
+		normal = Vec3::Cross(a - b, c - b);
+		normal.Norm();
 		faceNormals.pushBack(normal);
 		//DEBUG_MSGF("face %i. %f %f %f\n", f, normal.mVec[0], normal.mVec[1], normal.mVec[2]);
 	}
@@ -1576,7 +1577,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 		if (!vertex)
 			continue;
 
-		normal.zero();
+		normal.Zero();
 
 		//FREYJA_ASSERTMSG(vertex->mPolyRefIndices.size(), "WTF vertex[%i] with no faces...", v);
 
@@ -1598,7 +1599,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 		}
 
 
-		normal.normalize();
+		normal.Norm();
 
 		//DEBUG_MSGF("vert %i. %f %f %f\n", v, normal.mVec[0], normal.mVec[1], normal.mVec[2]);
 
@@ -1915,7 +1916,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			world.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
 			hel::Mat44 local;
 			loc = b->mTranslation;
-			b->mRotation.getEulerAngles(rot.mVec, rot.mVec+2, rot.mVec+1);
+			b->mRotation.GetEulerAngles(rot.mVec[0], rot.mVec[2], rot.mVec[1]);
 			local.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			local.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]);
 			

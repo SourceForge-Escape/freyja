@@ -23,6 +23,7 @@
 
 
 using namespace freyja;
+using namespace hel;
 
 Vector<Mesh *> Mesh::mGobalPool;
 //index_t Mesh::mNextUID = 0;
@@ -62,9 +63,9 @@ Mesh::Mesh() :
 	
 	mFlags = 0;
 	mMaterialIndex = 0;
-	mPosition = Vector3d(0.0f, 0.0f, 0.0f);
-	mRotation = Vector3d(0.0f, 0.0f, 0.0f);
-	mScale = Vector3d(1.0f, 1.0f, 1.0f);
+	mPosition = Vec3(0.0f, 0.0f, 0.0f);
+	mRotation = Vec3(0.0f, 0.0f, 0.0f);
+	mScale = Vec3(1.0f, 1.0f, 1.0f);
 
 	// FIXME: Define larger intial boundary? 
 	//mBoundingVolume = ...;
@@ -593,9 +594,9 @@ Vertex *Mesh::GetVertex(index_t vertexIndex)
 }
 
 
-Vector3d Mesh::GetVertexPosition(index_t idx)
+hel::Vec3 Mesh::GetVertexPosition(index_t idx)
 {
-	Vector3d v;
+	Vec3 v;
 
 	if (idx < mVertices.size())
 	{
@@ -611,9 +612,9 @@ Vector3d Mesh::GetVertexPosition(index_t idx)
 }
 
 
-Vector3d Mesh::GetVertexNormal(index_t idx)
+hel::Vec3 Mesh::GetVertexNormal(index_t idx)
 {
-	Vector3d v;
+	Vec3 v;
 	Vertex *vert = mVertices[idx];
 	if ( vert ) 
 	{
@@ -624,9 +625,9 @@ Vector3d Mesh::GetVertexNormal(index_t idx)
 }
 
 
-Vector3d Mesh::GetVertexTexCoord(index_t idx)
+hel::Vec3 Mesh::GetVertexTexCoord(index_t idx)
 {
-	Vector3d v;
+	Vec3 v;
 	Vertex *vert = mVertices[idx];
 	if ( vert ) 
 	{
@@ -637,13 +638,13 @@ Vector3d Mesh::GetVertexTexCoord(index_t idx)
 }
 
 
-bool Mesh::IntersectPerFace(Ray &r, vec_t &t)
+bool Mesh::IntersectPerFace(hel::Ray &r, vec_t &t)
 {
 	if (!Intersect(r, t))
 		return false;
 
 	vec_t bestDist = 99999.0f;
-	r.mDir.normalize();
+	r.mDir.Norm();
 	int32 face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -698,12 +699,12 @@ bool Mesh::IntersectPerFace(Ray &r, vec_t &t)
 }
 
 
-bool Mesh::Intersect(Ray &r, vec_t &t)
+bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 {
 	if (GetFlags() & fHidden)
 		return false;
 
-	r.mDir.normalize();
+	r.mDir.Norm();
 
 	// Sphere test
 	if (!r.IntersectSphere(mBoundingVolume.mSphere.mCenter, 
@@ -788,12 +789,12 @@ bool Mesh::Intersect(Ray &r, vec_t &t)
 }
 
 
-bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
+bool Mesh::IntersectFaces(hel::Ray &r, int &face0, bool markAll)
 {
 	//no 'editor side' scale support vec_t t; if (!Intersect(r, t)) return false;
 
 	vec_t bestDist = 99999.0f;
-	r.mDir.normalize();
+	r.mDir.Norm();
 	face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -865,7 +866,7 @@ bool Mesh::IntersectFaces(Ray &r, int &face0, bool markAll)
 }
 
 
-void Mesh::SelectFacesByBox(Vec3 &min, Vec3 &max)
+void Mesh::SelectFacesByBox(hel::Vec3 &min, hel::Vec3 &max)
 {
 	Vec3 mina(min), maxa(max);
 
@@ -930,7 +931,7 @@ void Mesh::SelectFacesByBox(Vec3 &min, Vec3 &max)
 }
 
 
-void Mesh::SelectVerticesByBox(Vec3 &min, Vec3 &max)
+void Mesh::SelectVerticesByBox(hel::Vec3 &min, hel::Vec3 &max)
 {
 	Vec3 mina(min), maxa(max);
 
@@ -971,7 +972,7 @@ void Mesh::SelectVerticesByBox(Vec3 &min, Vec3 &max)
 }
 
 
-bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
+bool Mesh::IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius)
 {
 	vec_t t;
 
@@ -979,7 +980,7 @@ bool Mesh::IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius)
 
 	Vec3 center, normal;
 	vec_t bestDist = 99999.0f;
-	r.mDir.normalize();
+	r.mDir.Norm();
 	vertex0 = -1;
 	
 	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)
@@ -2046,8 +2047,8 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		GetVertexPos(face->mIndices[2], c.mVec);
 
 		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
+		normal = Vec3::Cross(a - b, c - b);
+		normal.Norm();
 		faceNormals.pushBack(normal);
 	}
 
@@ -2060,7 +2061,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		if (!vertex)
 			continue;
 
-		normal.zero();
+		normal.Zero();
 
 		if (vertex->GetTmpRefs().size() == 0)
 		{
@@ -2080,7 +2081,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 			normal += faceNormals[vertex->GetTmpRefs()[j]];
 		}
 
-		normal.normalize();
+		normal.Norm();
 
 		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
 		SetNormal(v, normal.mVec);
@@ -2150,8 +2151,8 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 		GetVertexPos(face->mIndices[2], c.mVec);
 
 		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
+		normal = Vec3::Cross(a - b, c - b);
+		normal.Norm();
 		faceNormals.pushBack(normal);
 	}
 
@@ -2164,7 +2165,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 		if (!vertex)
 			continue;
 
-		normal.zero();
+		normal.Zero();
 
 		if (vertex->GetTmpRefs().size() == 0)
 		{
@@ -2184,7 +2185,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 			normal += faceNormals[vertex->GetTmpRefs()[j]];
 		}
 
-		normal.normalize();
+		normal.Norm();
 
 		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
 		SetNormal(v, normal.mVec);
@@ -2224,7 +2225,7 @@ void Mesh::SplitFace(index_t faceIndex)
 		uv = GetVertexTexCoord(A) + GetVertexTexCoord(A);
 		uv *= 0.5f;
 		norm = GetVertexNormal(A) + GetVertexNormal(B);
-		norm.normalize();
+		norm.Norm();
 		M1 = CreateVertex(m1.mVec, uv.mVec, norm.mVec);
 
 		// M2
@@ -2232,7 +2233,7 @@ void Mesh::SplitFace(index_t faceIndex)
 		uv = GetVertexTexCoord(C) + GetVertexTexCoord(D);
 		uv *= 0.5f;
 		norm = GetVertexNormal(C) + GetVertexNormal(D);
-		norm.normalize();
+		norm.Norm();
 		M2 = CreateVertex(m2.mVec, uv.mVec, norm.mVec);
 
 		// 2. Generate a new quad face, and reuse the old one with new vertices
@@ -2440,13 +2441,13 @@ void Mesh::UpdateBoundingVolume()
 // Transforms
 ////////////////////////////////////////////////////////////
 
-void Mesh::Rotate(const Vec3 &v)
+void Mesh::Rotate(const hel::Vec3 &v)
 {
 	RotateAboutPoint(GetBoundingVolumeCenter(), v);
 }
 
 
-void Mesh::RotateAboutPoint(const Vec3 &point, const Vec3 &v)
+void Mesh::RotateAboutPoint(const hel::Vec3 &point, const hel::Vec3 &v)
 {
 	hel::Mat44 t, r, t2, mat;
 	// Rotate about bounding volume center instead of origin
@@ -2468,13 +2469,13 @@ void Mesh::RotateAboutPoint(const Vec3 &point, const Vec3 &v)
 }
 
 
-void Mesh::Scale(const Vec3 &v)
+void Mesh::Scale(const hel::Vec3 &v)
 {
 	ScaleAboutPoint(GetPosition(), v);
 }
 
 
-void Mesh::ScaleAboutPoint(const Vec3 &point, const Vec3 &v)
+void Mesh::ScaleAboutPoint(const hel::Vec3 &point, const hel::Vec3 &v)
 {
 	hel::Mat44 t, s, t2, mat;
 
@@ -2491,7 +2492,7 @@ void Mesh::ScaleAboutPoint(const Vec3 &point, const Vec3 &v)
 }
 
 
-void Mesh::Translate(const Vec3 &v) 
+void Mesh::Translate(const hel::Vec3 &v) 
 {
 	// Position (world)
 	SetPosition(Vec3(v)+GetPosition());

@@ -40,6 +40,7 @@
 
 using namespace mstl;
 using namespace freyja;
+using namespace hel;
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -1714,12 +1715,11 @@ void freyjaVertexTexcoord2f(index_t vIndex, vec_t u, vec_t v)
 
 void freyjaVertexNormalFlip(index_t vIndex)
 {	
-	Vector3d n;
-
+	Vec3 n;
 
 	freyjaGetVertexNormalXYZ3fv(vIndex, n.mVec);
 	n = -n;
-	n.normalize();
+	n.Norm();
 	freyjaVertexNormal3fv(vIndex, n.mVec);
 }
 
@@ -1916,8 +1916,8 @@ void freyjaGetVertexXYZ3fv(index_t vertexIndex, vec3_t xyz)
 
 	if (mesh)
 	{
-		Vector3d v = mesh->GetVertexPosition(vertexIndex);
-		HEL_VEC3_COPY(v.mVec, xyz);
+		Vec3 v = mesh->GetVertexPosition(vertexIndex);
+		helCopyVec3(v.mVec, xyz);
 	}
 }
 
@@ -2068,7 +2068,7 @@ Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2])
 }
 
 
-Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(BoundingVolume &vol)
+Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(hel::BoundingVolume &vol)
 {
 	Vector<unsigned int> *list;
 	unsigned int i, count, index;
@@ -2154,9 +2154,9 @@ void freyjaModelGenerateVertexNormals(index_t modelIndex)
 {
 	// Legacy ////////////////////////////////////////////////
 
-	Vector <Vector3d *> faceNormals;
+	Vector <Vec3> faceNormals;
 	Vector <long> ref;
-	Vector3d a, b, c, aa, bb, normal;
+	Vec3 a, b, c, aa, bb, normal;
 	unsigned int i, j, vertexCount, faceCount;
 	int32 v0, v1, v2, index;
 	index_t face, mesh;
@@ -2188,9 +2188,9 @@ void freyjaModelGenerateVertexNormals(index_t modelIndex)
 		//bb = b - c;
 		
 		/* Compute normal for the face, and store it */
-		normal = Vector3d::cross(a - b, c - b);
-		normal.normalize();
-		faceNormals.pushBack(new Vector3d(normal));
+		normal = Vec3::Cross(a - b, c - b);
+		normal.Norm();
+		faceNormals.pushBack(normal);
 
 		freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
 	}
@@ -2208,17 +2208,17 @@ void freyjaModelGenerateVertexNormals(index_t modelIndex)
 			continue;
 		}
 
-		normal.zero();
+		normal.Zero();
 
 		//freyjaGetVertexPolygonRef(ref);
 		//for (j = ref.begin(); j < ref.end(); ++j)
 		uint32 jn = freyjaGetMeshVertexPolygonRefCount(mesh, index);
 		for (j = 0; j < jn; ++j)
 		{
-			normal += *faceNormals[freyjaGetMeshVertexPolygonRefIndex(mesh, index, j)];
+			normal += faceNormals[freyjaGetMeshVertexPolygonRefIndex(mesh, index, j)];
 		}
 
-		normal.normalize();
+		normal.Norm();
 
 		freyjaVertexNormal3fv(index,normal.mVec);
 
@@ -2229,7 +2229,7 @@ void freyjaModelGenerateVertexNormals(index_t modelIndex)
 		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
     }
 
-	faceNormals.erase();
+	//faceNormals.erase();
 	
 	freyjaCriticalSectionUnlock(lock);
 }

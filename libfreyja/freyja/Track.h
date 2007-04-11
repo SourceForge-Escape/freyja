@@ -28,9 +28,9 @@
 
 #include <math.h>
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 #include <hel/Mat44.h>
-#include <hel/Quaternion.h>
+#include <hel/Quat.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
@@ -496,9 +496,9 @@ public:
 	{
 		Vec3x3KeyFrame *key = new Vec3x3KeyFrame();
 
-		key->mData[0] = Vec3(0,0,0); // Rotate
-		key->mData[1] = Vec3(1,1,1); // Scale
-		key->mData[2] = Vec3(0,0,0); // Translate
+		key->mData[0] = hel::Vec3(0,0,0); // Rotate
+		key->mData[1] = hel::Vec3(1,1,1); // Scale
+		key->mData[2] = hel::Vec3(0,0,0); // Translate
 		return key;
 	}
 
@@ -509,12 +509,12 @@ public:
 	}
 
 
-	virtual void GetTransform(vec_t time, Vec3 &pos, Vec3 &rot, Vec3 &scale);
+	virtual void GetTransform(vec_t time, hel::Vec3 &pos, hel::Vec3 &rot, hel::Vec3 &scale);
 
 
-	Vec3 GetRotation(index_t idx) 
+	hel::Vec3 GetRotation(index_t idx) 
 	{ 
-		Vec3 v;
+		hel::Vec3 v;
 		Vec3x3KeyFrame *key = GetKeyframe(idx);
 
 		if (key)
@@ -526,7 +526,7 @@ public:
 	}
 
 
-	void SetRotation(index_t idx, const Vec3 &v) 
+	void SetRotation(index_t idx, const hel::Vec3 &v) 
 	{ 
 		Vec3x3KeyFrame *key = GetKeyframe(idx);
 
@@ -537,9 +537,9 @@ public:
 	}
 
 
-	Vec3 GetScale(index_t idx) 
+	hel::Vec3 GetScale(index_t idx) 
 	{ 
-		Vec3 v;
+		hel::Vec3 v;
 		Vec3x3KeyFrame *key = GetKeyframe(idx);
 
 		if (key)
@@ -551,7 +551,7 @@ public:
 	}
 
 
-	void SetScale(index_t idx, const Vec3 &v) 
+	void SetScale(index_t idx, const hel::Vec3 &v) 
 	{ 
 		Vec3x3KeyFrame *key = GetKeyframe(idx);
 
@@ -572,9 +572,9 @@ public:
 	}
 
 
-	Vec3 GetPosition(index_t idx) 
+	hel::Vec3 GetPosition(index_t idx) 
 	{
-		Vec3 v;
+		hel::Vec3 v;
 		Vec3x3KeyFrame *key = GetKeyframe(idx);
 
 		if (key)
@@ -586,7 +586,7 @@ public:
 	}
 
 
-	void SetPosition(index_t idx, const Vec3 &v) 
+	void SetPosition(index_t idx, const hel::Vec3 &v) 
 	{ 
 		Vec3x3KeyFrame *key = GetKeyframe(idx);
 
@@ -597,17 +597,17 @@ public:
 	}
 
 
-	void Scale(index_t idx, Vec3 v) { SetScale(idx, v); }	
+	void Scale(index_t idx, hel::Vec3 v) { SetScale(idx, v); }	
 
-	void Scale(index_t idx, vec3_t xyz) { SetScale(idx, Vec3(xyz)); }	
+	void Scale(index_t idx, vec3_t xyz) { SetScale(idx, hel::Vec3(xyz)); }	
 
-	void Scale(index_t idx, vec_t s) { SetScale(idx, Vec3(s, s, s)); }
+	void Scale(index_t idx, vec_t s) { SetScale(idx, hel::Vec3(s, s, s)); }
 
-	void ScaleX(index_t idx, vec_t x) { SetScale(idx, Vec3(x, 1.0f, 1.0f)); }
+	void ScaleX(index_t idx, vec_t x) { SetScale(idx, hel::Vec3(x, 1.0f, 1.0f)); }
 
-	void ScaleY(index_t idx, vec_t y) { SetScale(idx, Vec3(1.0f, y, 1.0f)); }
+	void ScaleY(index_t idx, vec_t y) { SetScale(idx, hel::Vec3(1.0f, y, 1.0f)); }
 
-	void ScaleZ(index_t idx, vec_t z) { SetScale(idx, Vec3(1.0f, 1.0f, z)); }
+	void ScaleZ(index_t idx, vec_t z) { SetScale(idx, hel::Vec3(1.0f, 1.0f, z)); }
 
 
 	//Matrix mTransform;                /* Cached transform */
@@ -723,7 +723,7 @@ public:
 	virtual void GetKey(index_t idx, vec3_t v)
 	{
 		Vec3KeyFrame *key = GetKeyframe(idx);
-		Vec3 u;
+		hel::Vec3 u;
 
 		if (key)
 		{
@@ -740,15 +740,15 @@ public:
 	}
 
 
-	Vec3 GetTransform(vec_t time)
+	hel::Vec3 GetTransform(vec_t time)
 	{
-		Vec3 v;
+		hel::Vec3 v;
 		GetTransform(time, v);
 		return v;
 	}
 
 
-	bool GetTransform(vec_t time, Vec3 &v) 
+	bool GetTransform(vec_t time, hel::Vec3 &v) 
 	{
 		// Don't alter v, if out of bounds
 		//v = Vec3(0,0,0);
@@ -794,7 +794,7 @@ public:
 			if (key)
 			{
 				// Next bundle
-				Vec3 vNext = key->mData;
+				hel::Vec3 vNext = key->mData;
 				vec_t end = (vec_t)next / GetRate();
 
 				// Actual time displacement weight

@@ -135,7 +135,8 @@ void Mesh::loadTextureMap(cGrannyStream * file)
 
 	dword oldPos=file->tellg();
 	file->seekg(textureOffset);
-	dword num=file->readDword();	//unknown
+	//dword num=
+	file->readDword();	//unknown
 	for (dword i=0;i<(weightOffset-(textureOffset+4))/12;i++)
 	{
 		Point *point=new Point();

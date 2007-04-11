@@ -581,7 +581,7 @@ public:
 	static vec_t mDefaultLineWidth;
 	static vec_t mVertexPointSize;
 
-	static Ray mTestRay;
+	static hel::Ray mTestRay;
 
 	static vec4_t mColors[16];
 
