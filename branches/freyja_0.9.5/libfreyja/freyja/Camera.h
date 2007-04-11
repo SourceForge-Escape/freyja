@@ -46,8 +46,8 @@
 
 #include <hel/math.h>
 #include <hel/Mat44.h>
-#include <hel/Quaternion.h>
-#include <hel/Vector3d.h>
+#include <hel/Quat.h>
+#include <hel/Vec3.h>
 
 #include <mstl/Vector.h>
 
@@ -70,9 +70,9 @@ class FreyjaCamera
 		FlyByNode() : orientation(), position(), direction(), 
 					  speed(0.0f), time(0.0f) {}
 
-		Quaternion orientation;
-		Vec3 position;
-		Vec3 direction;
+		hel::Quat orientation;
+		hel::Vec3 position;
+		hel::Vec3 direction;
 		vec_t speed;
 		vec_t time;
 	};
@@ -329,7 +329,7 @@ class FreyjaCamera
 
 	FlyByPath mPath;            /* Camera flyby path */
 
-	Quaternion mQ;              /* Quaternion for rotation */
+	hel::Quat mQ;              /* Quaternion for rotation */
 
 	vec4_t mPos;                /* Location in 3 space (aka eye) */
 	

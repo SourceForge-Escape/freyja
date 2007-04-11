@@ -186,7 +186,8 @@ bool BSAPakReader::LoadMorrowind(const char *filename)
 
 bool BSAPakReader::LoadOblivion(const char *filename)
 {
-#if 1
+#if 0
+#warning FIXME "This class doesn't have Oblivion pak support merged still"
 	SystemIO::FileReader r;
 	char buffer[128];
 	long i, j, base;
@@ -199,14 +200,14 @@ bool BSAPakReader::LoadOblivion(const char *filename)
 
 	r.SetByteOrder(SystemIO::File::LITTLE);
 
-	r.ReadString(4, mHeader.mMagic);
+	r.ReadString(4, mOblivionHeader.mMagic);
 	mOblivionHeader.mVersion = r.ReadLong();
 
-	if (.mMagic[0] != 'B' || 
-		.mMagic[1] != 'S' || 
-		.mMagic[2] != 'A' || 
-		.mMagic[3] != '\0' || 
-		.mVersion != BSA_OBLIVION)
+	if (mOblivionHeader.mMagic[0] != 'B' || 
+		mOblivionHeader.mMagic[1] != 'S' || 
+		mOblivionHeader.mMagic[2] != 'A' || 
+		mOblivionHeader.mMagic[3] != '\0' || 
+		mOblivionHeader.mVersion != BSA_OBLIVION)
 	{
 		return false;
 	}
@@ -491,7 +492,7 @@ int main(int argc, char *argv[])
 #include <freyja/PluginABI.h>
 #include <freyja/PakABI.h>
 #include <freyja/freyja.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 
 
 extern "C" {

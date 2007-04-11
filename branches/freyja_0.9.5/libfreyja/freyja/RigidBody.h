@@ -30,9 +30,9 @@
 #define GUARD__FREYJA_MONGOOSE_RIGIDBODY_H_
 
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 #include <hel/Mat44.h>
-#include <hel/Quaternion.h>
+#include <hel/Quat.h>
 
 
 namespace freyja {
@@ -88,17 +88,17 @@ public:
 
 	uint32 mParticleCount;
 
-	Vector3d *mX;
+	hel::Vec3 *mX;
 
-	Vector3d *mOldX;
+	hel::Vec3 *mOldX;
 
-	Vector3d *mA;
+	hel::Vec3 *mA;
 
 	bool mIsMassUsed;
 
 	vec_t *mMass;
 
-	Vector3d mGravity;
+	hel::Vec3 mGravity;
 
 	vec_t mTimeStep;
 

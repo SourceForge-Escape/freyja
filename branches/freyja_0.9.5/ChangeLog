@@ -10,7 +10,8 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
-  - Shuffling UI events around, breaking up into classes
+ - libhel partial update: namespacing, new classes, single math, cont
+ - Shuffling UI events around, breaking up into classes
 
 
  Dancer RC4

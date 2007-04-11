@@ -36,7 +36,7 @@ Bone::Bone() :
 	mSkeleton(INDEX_INVALID),
 	mParent(INDEX_INVALID),
 	mChildren(0),
-	mRotation(0.0f, 0.0f, 0.0f),
+	mRotation(),
 	mTranslation(0.0f, 0.0f, 0.0f),
 	mBindPose(),
 	mBindToWorld(),
@@ -103,7 +103,7 @@ bool Bone::Serialize(SystemIO::TextFileWriter &w)
 	w.Print("\n");
 
 	w.Print("\t mRotation %f %f %f %f\n", 
-			mRotation.X(), mRotation.Y(), mRotation.Z(), mRotation.W());
+			mRotation.mX, mRotation.mY, mRotation.mZ, mRotation.mW);
 
 	w.Print("\t mTranslation %f %f %f\n", 
 			mTranslation[0], mTranslation[1], mTranslation[2]);
@@ -331,10 +331,10 @@ bool Bone::Serialize(SystemIO::TextFileReader &r)
 	}
 
 	r.ParseSymbol(); // mRotation
-	mRotation.X(r.ParseFloat());
-	mRotation.Y(r.ParseFloat());
-	mRotation.Z(r.ParseFloat());
-	mRotation.W(r.ParseFloat());
+	mRotation.mX = r.ParseFloat();
+	mRotation.mY = r.ParseFloat();
+	mRotation.mZ = r.ParseFloat();
+	mRotation.mW = r.ParseFloat();
 
 	r.ParseSymbol(); // mTranslation
 	mTranslation[0] = r.ParseFloat();

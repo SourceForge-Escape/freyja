@@ -130,42 +130,42 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const Vec3 &GetPosition() { return mPosition; }
+	const hel::Vec3 &GetPosition() { return mPosition; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets mesh position attribute
 	 *
 	 ------------------------------------------------------*/
 
-	void SetPosition(const Vec3 &v) { mPosition = v; }
+	void SetPosition(const hel::Vec3 &v) { mPosition = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets mesh position attribute
 	 *
 	 ------------------------------------------------------*/
 
-	const Vec3 &GetRotation() { return mRotation; }
+	const hel::Vec3 &GetRotation() { return mRotation; }
 	/*------------------------------------------------------
 	 * Pre  : Euler angles in radians
 	 * Post : Gets mesh position attribute
 	 *
 	 ------------------------------------------------------*/
 
-	void SetRotation(const Vec3 &v) { mRotation = v; }
+	void SetRotation(const hel::Vec3 &v) { mRotation = v; }
 	/*------------------------------------------------------
 	 * Pre  : Euler angles in radians
 	 * Post : Sets mesh rotation attribute
 	 *
 	 ------------------------------------------------------*/
 
-	const Vec3 &GetScale() { return mScale; }
+	const hel::Vec3 &GetScale() { return mScale; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets mesh scale attribute
 	 *
 	 ------------------------------------------------------*/
 
-	void SetScale(const Vec3 &v) { mScale = v; }
+	void SetScale(const hel::Vec3 &v) { mScale = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets mesh scale attribute
@@ -305,19 +305,19 @@ public:
 	 * Post : Return vertex if it exists or NULL
 	 ------------------------------------------------------*/
 
-	Vec3 GetVertexNormal(index_t idx);
+	hel::Vec3 GetVertexNormal(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	Vec3 GetVertexPosition(index_t idx);
+	hel::Vec3 GetVertexPosition(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	Vec3 GetVertexTexCoord(index_t idx);
+	hel::Vec3 GetVertexTexCoord(index_t idx);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -364,7 +364,7 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	bool Intersect(Ray &r, vec_t &t);
+	bool Intersect(hel::Ray &r, vec_t &t);
 	/*------------------------------------------------------
 	 * Pre  : If mesh is fHidden intersects will always return false
 	 *
@@ -372,7 +372,7 @@ public:
 	 *        This checks the bsphere, then bbox for collision.
 	 ------------------------------------------------------*/
 
-	bool IntersectPerFace(Ray &r, vec_t &t);
+	bool IntersectPerFace(hel::Ray &r, vec_t &t);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if 'hit', and <t> the time along ray
@@ -380,7 +380,7 @@ public:
 	 *        top of just bounding volume checks.
 	 ------------------------------------------------------*/
 	
-	bool IntersectClosestFace(Ray &r, int &face0) 
+	bool IntersectClosestFace(hel::Ray &r, int &face0) 
 	{ return IntersectFaces(r, face0, false); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -389,19 +389,19 @@ public:
 	 *        Clears old fRayHit results on all other faces.
 	 ------------------------------------------------------*/
 
-	void SelectVerticesByBox(Vec3 &min, Vec3 &max);
+	void SelectVerticesByBox(hel::Vec3 &min, hel::Vec3 &max);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void SelectFacesByBox(Vec3 &min, Vec3 &max);
+	void SelectFacesByBox(hel::Vec3 &min, hel::Vec3 &max);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	bool IntersectClosestVertex(Ray &r, int &vertex0, vec_t radius);
+	bool IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius);
 	/*------------------------------------------------------
 	 * Pre  : <radius> Sets selected flag on all faces hit
 	 *
@@ -410,7 +410,7 @@ public:
 	 *        Clears old fRayHit results on all other vertices.
 	 ------------------------------------------------------*/
 
-	bool IntersectFaces(Ray &r, int &face0, bool markAll);
+	bool IntersectFaces(hel::Ray &r, int &face0, bool markAll);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : <face0> First face encountered along ray, or -1 if DNE.
@@ -607,7 +607,7 @@ public:
 	 * Post : Returns local index of new texcoord array element
 	 ------------------------------------------------------*/
 
-	index_t CreateVertex(const Vec3 &v) { return CreateVertex(v.mVec); }
+	index_t CreateVertex(const hel::Vec3 &v) { return CreateVertex(v.mVec); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns local index of new Vertex
@@ -615,8 +615,8 @@ public:
 
 	index_t CreateVertex(const vec3_t xyz)
 	{
-		Vec3 n(0.0f, 1.0f, 0.0f); 
-		Vec3 t(0.5f, 0.5f, 0.0f);
+		hel::Vec3 n(0.0f, 1.0f, 0.0f); 
+		hel::Vec3 t(0.5f, 0.5f, 0.0f);
 		return CreateVertex(xyz, t.mVec, n.mVec);
 	}
 	/*------------------------------------------------------
@@ -1069,13 +1069,13 @@ public:
 	void SetBBox(const vec3_t min, const vec3_t max)
 	{
 		// Update bbox
-		HEL_VEC3_COPY(min, mBoundingVolume.mBox.mMin);
-		HEL_VEC3_COPY(max, mBoundingVolume.mBox.mMax);
+		helCopyVec3(min, mBoundingVolume.mBox.mMin);
+		helCopyVec3(max, mBoundingVolume.mBox.mMax);
 
 		// Update sphere
-		Vector3d vMin(min), vMax(max);
-		Vec3 origin = ( vMin + vMax ) * 0.5; // midpoint
-		vec_t radius = Vec3(origin - vMax).magnitude();
+		hel::Vec3 vMin(min), vMax(max);
+		hel::Vec3 origin = ( vMin + vMax ) * 0.5; // midpoint
+		vec_t radius = hel::Vec3(origin - vMax).Magnitude();
 
 		origin.Get(mBoundingVolume.mSphere.mCenter);
 		mBoundingVolume.mSphere.mRadius = radius;
@@ -1084,14 +1084,14 @@ public:
 
 	void GetBBox(vec3_t min, vec3_t max)
 	{
-		HEL_VEC3_COPY(mBoundingVolume.mBox.mMin, min);
-		HEL_VEC3_COPY(mBoundingVolume.mBox.mMax, max);
+		helCopyVec3(mBoundingVolume.mBox.mMin, min);
+		helCopyVec3(mBoundingVolume.mBox.mMax, max);
 	}
 
 
-	Vec3 GetBoundingVolumeCenter()
+	hel::Vec3 GetBoundingVolumeCenter()
 	{
-		return Vec3(mBoundingVolume.mSphere.mCenter);
+		return hel::Vec3(mBoundingVolume.mSphere.mCenter);
 	}
 
 
@@ -1101,7 +1101,7 @@ public:
 	}
 
 
-	Vec3 GetBBoxCenter()
+	hel::Vec3 GetBBoxCenter()
 	{
 		return GetBoundingVolumeCenter();
 	}
@@ -1160,31 +1160,31 @@ public:
 	 * Post : Applies matrix transform to vertices in index list
 	 ------------------------------------------------------*/
 
-	void Rotate(const Vec3 &v);
+	void Rotate(const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Rotates mesh about bounding volume center
 	 ------------------------------------------------------*/
 
-	void RotateAboutPoint(const Vec3 &point, const Vec3 &v);
+	void RotateAboutPoint(const hel::Vec3 &point, const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Rotates mesh about <point>
 	 ------------------------------------------------------*/
 
-	void Scale(const Vec3 &v);
+	void Scale(const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Scales mesh about Position()
 	 ------------------------------------------------------*/
 
-	void ScaleAboutPoint(const Vec3 &point, const Vec3 &v);
+	void ScaleAboutPoint(const hel::Vec3 &point, const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Scales mesh about <point>
 	 ------------------------------------------------------*/
 
-	void Translate(const Vec3 &v);
+	void Translate(const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Translates mesh based on Position()
@@ -1514,13 +1514,13 @@ private:
 
 	index_t mMaterialIndex;
 
-	Vector3d mPosition;
+	hel::Vec3 mPosition;
 
-	Vector3d mRotation;        /* Store as Euler Angles for 'Size' interface */
+	hel::Vec3 mRotation;        /* Store as Euler Angles for 'Size' interface */
 
-	Vector3d mScale;
+	hel::Vec3 mScale;
 
-	BoundingBoxCombo mBoundingVolume;
+	hel::BoundingBoxCombo mBoundingVolume;
 
 	Vector<vec_t> mVertexPool;
 	mstl::stack<index_t> mFreedVertices;

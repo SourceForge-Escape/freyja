@@ -70,7 +70,7 @@ int load_shader(const char *filename);
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
-Vector<Vec3> FreyjaControl::mControlPoints;
+Vector<hel::Vec3> FreyjaControl::mControlPoints;
 
 uint32 FreyjaControl::eRotateObjectId = 0;
 uint32 FreyjaControl::eScaleObjectId = 0;
@@ -645,7 +645,7 @@ void FreyjaControl::AddRecentFilename(const char *filename)
 
 void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
-	Ray &r = mRender->mTestRay;
+	hel::Ray &r = mRender->mTestRay;
 
 	if (!(GetControlScheme() == eScheme_Model ||
 		  GetControlScheme() == eScheme_Animation))
@@ -665,15 +665,15 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		z -= GetSceneTranslation().mVec[2] * 1/GetZoom();
 		vec3_t u = {x, y, z};
 		mRender->GetRotation(v);
-		v[0] = HEL_DEG_TO_RAD(v[0]);
-		v[1] = HEL_DEG_TO_RAD(v[1]);
-		v[2] = HEL_DEG_TO_RAD(v[2]);
+		v[0] = helDegToRad(v[0]);
+		v[1] = helDegToRad(v[1]);
+		v[2] = helDegToRad(v[2]);
 		//DEBUG_MSGF("$$ yaw = %f\n", v[1]);
 
 		m.Rotate(v);
 		m.Multiply3fv(u);
-		r.mOrigin = Vec3(u);
-		r.mDir = Vec3(0, 0, -1);
+		r.mOrigin = hel::Vec3(u);
+		r.mDir = hel::Vec3(0, 0, -1);
 		m.Multiply3fv(r.mDir.mVec);
 	}
 	else
@@ -685,33 +685,33 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		switch (GetSelectedView())
 		{
 		case PLANE_BACK:
-			r.mOrigin = Vec3(x, y, z - 100);
-			r.mDir = Vec3(0, 0, 1);
+			r.mOrigin = hel::Vec3(x, y, z - 100);
+			r.mDir = hel::Vec3(0, 0, 1);
 			break;
 
 		case PLANE_FRONT: // Front, XY
-			r.mOrigin = Vec3(x, y, z + 100);
-			r.mDir = Vec3(0, 0, -1);
+			r.mOrigin = hel::Vec3(x, y, z + 100);
+			r.mDir = hel::Vec3(0, 0, -1);
 			break;
 
 		case PLANE_BOTTOM:
-			r.mOrigin = Vec3(x, y - 100, -z);
-			r.mDir = Vec3(0, 1, 0);
+			r.mOrigin = hel::Vec3(x, y - 100, -z);
+			r.mDir = hel::Vec3(0, 1, 0);
 			break;
 
 		case PLANE_TOP: // Top, XZ
-			r.mOrigin = Vec3(x, y + 100, -z);
-			r.mDir = Vec3(0, -1, 0);
+			r.mOrigin = hel::Vec3(x, y + 100, -z);
+			r.mDir = hel::Vec3(0, -1, 0);
 			break;
 
 		case PLANE_RIGHT:
-			r.mOrigin = Vec3(x + 100, y, z);
-			r.mDir = Vec3(-1, 0, 0);
+			r.mOrigin = hel::Vec3(x + 100, y, z);
+			r.mDir = hel::Vec3(-1, 0, 0);
 			break;
 
 		case PLANE_LEFT: // Side, ZY
-			r.mOrigin = Vec3(x - 100, y, z);
-			r.mDir = Vec3(1, 0, 0);
+			r.mOrigin = hel::Vec3(x - 100, y, z);
+			r.mDir = hel::Vec3(1, 0, 0);
 			break;
 
 		default:
@@ -1796,8 +1796,8 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 		// We only need 2 control points for bbox selector
 		mControlPoints.resize(0);
 		mSelectedControlPoint = 0;
-		mControlPoints.push_back(Vec3(20, 20, 10));
-		mControlPoints.push_back(Vec3(-20, 10, -10));
+		mControlPoints.push_back(hel::Vec3(20, 20, 10));
+		mControlPoints.push_back(hel::Vec3(-20, 10, -10));
 		mCursor.mPos = mControlPoints[0];
 		mCursor.SetMode(Cursor::Translation);
 		
@@ -1893,7 +1893,7 @@ void FreyjaControl::eScaleObject(uint32 value)
 		// Reset cursor
 		mEventMode = aScale;
 		mCursor.SetMode(freyja3d::Cursor::Scale);
-		mCursor.mScale = Vec3(1.0f, 1.0f, 1.0f);
+		mCursor.mScale = hel::Vec3(1.0f, 1.0f, 1.0f);
 		freyja_print("Scale %s...", 
 					 ObjectTypeToString(GetObjectMode()).c_str());
 		freyja_event_gl_refresh();
@@ -1941,7 +1941,7 @@ bool FreyjaControl::event(int event, vec_t value)
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
 
-	Vec3 v; 
+	hel::Vec3 v; 
 	vec4_t color;
 	vec_t x, y, z;
 
@@ -2305,27 +2305,27 @@ bool FreyjaControl::MotionEvent(int x, int y)
 				switch (GetSelectedView())
 				{
 				case PLANE_BACK:
-					mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
+					mSceneTrans += hel::Vec3(xyz[0], xyz[1], xyz[2]);
 					break;
 				
 				case PLANE_BOTTOM:
-					mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
+					mSceneTrans += hel::Vec3(xyz[0], xyz[2], xyz[1]);
 					break;
 				
 				case PLANE_RIGHT:
-					mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
+					mSceneTrans += hel::Vec3(xyz[2], xyz[1], xyz[0]);
 					break;
 
 				case PLANE_FRONT: // front, xy
-					mSceneTrans += Vec3(xyz[0], xyz[1], xyz[2]);
+					mSceneTrans += hel::Vec3(xyz[0], xyz[1], xyz[2]);
 					break;
 				
 				case PLANE_TOP: // top, xz
-					mSceneTrans += Vec3(xyz[0], xyz[2], xyz[1]);
+					mSceneTrans += hel::Vec3(xyz[0], xyz[2], xyz[1]);
 					break;
 				
 				case PLANE_LEFT: // left, zy
-					mSceneTrans += Vec3(xyz[2], xyz[1], xyz[0]);
+					mSceneTrans += hel::Vec3(xyz[2], xyz[1], xyz[0]);
 					break;
 				
 				default:
@@ -2488,7 +2488,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 		{
 			freyja_print("! SelectCursorAxis...");
 			CastPickRay(vx, vy);
-			Ray &r = FreyjaRender::mTestRay;
+			hel::Ray &r = FreyjaRender::mTestRay;
 			mCursor.mAxis = freyja3d::Cursor::eNone;
 
 			if (mCursor.CheckForRayCollision(r))
@@ -2522,7 +2522,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 		{
 			freyja_print("! SelectCursorAxis...");
 			CastPickRay(vx, vy);
-			Ray &r = FreyjaRender::mTestRay;
+			hel::Ray &r = FreyjaRender::mTestRay;
 			//bool picked = false;
 			//Vec3 o;
 
@@ -2563,8 +2563,8 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 	if (mEventMode == aSelectByBox)
 	{
 		CastPickRay(vx, vy);
-		Ray &r = FreyjaRender::mTestRay;
-		Vec3 p;
+		hel::Ray &r = FreyjaRender::mTestRay;
+		hel::Vec3 p;
 		vec_t t, closest;
 		int selected = -1;
 
@@ -2611,7 +2611,7 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		case tMesh:
 		case tSelectedFaces:
 			{
-				Vec3 v = GetCursorData(GetEventAction());
+				hel::Vec3 v = GetCursorData(GetEventAction());
 
 				// Mongoose - Does transform, undo, etc for ya, bub
 				Transform(GetObjectMode(), GetEventAction(),
@@ -2637,16 +2637,16 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 				//			 GetEventAction(),
 				//			 v.mVec[0], v.mVec[1], v.mVec[2]);
 
-				Vec3 v = GetCursorData(GetEventAction());
+				hel::Vec3 v = GetCursorData(GetEventAction());
 
 				// Mongoose - Does transform, undo, etc for ya, bub
 				KeyframeTransform(GetObjectMode(), GetEventAction(),
 								  v.mVec[0], v.mVec[1], v.mVec[2]);
 
 				// Reset transforms in the cursor
-				mCursor.mRotate = Vec3(0,0,0);
-				mCursor.mScale = Vec3(1,1,1);
-				//mCursor.mPos = Vec3(0,0,0);
+				mCursor.mRotate = hel::Vec3(0,0,0);
+				mCursor.mScale = hel::Vec3(1,1,1);
+				//mCursor.mPos = hel::Vec3(0,0,0);
 			}			
 			break;
 
@@ -2998,7 +2998,7 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 
 void FreyjaControl::GetWorldFromScreen(vec_t &x, vec_t &y, vec_t &z)
 {
-	Vec3 scroll(GetSceneTranslation());
+	hel::Vec3 scroll(GetSceneTranslation());
 	vec_t nearHeight = mRender->GetNearHeight() * 2.0f;
 	vec_t width = mRender->GetWindowWidth();
 	vec_t height = mRender->GetWindowHeight();
@@ -3497,7 +3497,7 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 }
 
 
-void FreyjaControl::SelectObjectByBox(Vec3 min, Vec3 max)
+void FreyjaControl::SelectObjectByBox(hel::Vec3 min, hel::Vec3 max)
 {
 	switch (mObjectMode)
 	{
@@ -3602,7 +3602,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	case tLight:
 		{
-			Vec3 xyz;
+			hel::Vec3 xyz;
 			vec4_t pos;
 			vec_t t, closest;
 			int selected = -1;
@@ -3610,7 +3610,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			for (uint32 i = 0, count = freyjaGetLightCount(); i < count; ++i)
 			{
 				freyjaGetLightPosition4v(i, pos);
-				xyz = Vector3d(pos);
+				xyz = hel::Vec3(pos);
 
 				if (FreyjaRender::mTestRay.IntersectSphere(xyz.mVec, 5.0f, t))
 				{
@@ -3654,7 +3654,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	case tBone:
 		{
-			Vec3 p;
+			hel::Vec3 p;
 			vec_t t, closest;
 			int selected = -1;
 
@@ -3707,12 +3707,12 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 				case eScheme_Model:
 					{
-						Vec3 o;
+						hel::Vec3 o;
 						// Set cursor rotation
 						freyjaGetBoneRotationEuler3fv(GetSelectedBone(),o.mVec);
-						mCursor.mRotate.mVec[0] = HEL_RAD_TO_DEG(o.mVec[0]);
-						mCursor.mRotate.mVec[1] = HEL_RAD_TO_DEG(o.mVec[1]);
-						mCursor.mRotate.mVec[2] = HEL_RAD_TO_DEG(o.mVec[2]);
+						mCursor.mRotate.mVec[0] = helRadToDeg(o.mVec[0]);
+						mCursor.mRotate.mVec[1] = helRadToDeg(o.mVec[1]);
+						mCursor.mRotate.mVec[2] = helRadToDeg(o.mVec[2]);
 					}
 					break;
 					
@@ -3782,8 +3782,8 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 									  vec_t x, vec_t y, vec_t z)
 {
 	// Pretty meger atm
-	Vec3 v(x, y, z);
-	Vec3 u;
+	hel::Vec3 v(x, y, z);
+	hel::Vec3 u;
 
 	switch (action)
 	{
@@ -3902,8 +3902,8 @@ void FreyjaControl::Transform(object_type_t obj,
 		;
 	}
 
-	Vec3 v(x, y, z);
-	Vec3 u;
+	hel::Vec3 v(x, y, z);
+	hel::Vec3 u;
 
 	switch (action)
 	{
@@ -4095,9 +4095,9 @@ void FreyjaControl::Transform(object_type_t obj,
 
 
 	// Reset transforms in the cursor
-	//mCursor.mRotate = Vec3(0,0,0);
-	mCursor.mScale = Vec3(1,1,1);
-	//mCursor.mPos = Vec3(0,0,0);
+	//mCursor.mRotate = hel::Vec3(0,0,0);
+	mCursor.mScale = hel::Vec3(1,1,1);
+	//mCursor.mPos = hel::Vec3(0,0,0);
 }
 
 
@@ -4106,7 +4106,7 @@ void FreyjaControl::Transform(freyja_transform_t obj,
 							  index_t owner, index_t id,
 							  vec_t x, vec_t y, vec_t z) 
 { 
-	Vec3 v(x, y, z);
+	hel::Vec3 v(x, y, z);
 
 	if (mToken) 
 	{
@@ -4128,7 +4128,7 @@ void FreyjaControl::Transform(freyja_transform_t obj,
 
 void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 {
-	Vec3 t;
+	hel::Vec3 t;
 
 	mCursor.mPos.Get(t.mVec);
 	getScreenToWorldOBSOLETE(vx, vy);
@@ -4227,7 +4227,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		{
 			vec3_t pos;
 			freyjaGetLightPosition4v(GetSelectedLight(), pos);
-			mCursor.mLastPos = Vec3(pos);
+			mCursor.mLastPos = hel::Vec3(pos);
 			freyjaLightPosition4v(GetSelectedLight(), mCursor.mPos.mVec);
 		}
 		break;
@@ -4267,7 +4267,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				if (mToken) 
 				{
 					Vector<index_t> list;
-					Vector<Vec3> list2;
+					Vector<hel::Vec3> list2;
 					bool found = false;
 
 					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
@@ -4296,7 +4296,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 					return;
 				}
 
-				Vec3 u;
+				hel::Vec3 u;
 
 				for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
 				{
@@ -4334,7 +4334,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			}
 			else if (bone != parent)
 			{
-				Vec3 p;
+				hel::Vec3 p;
 				freyjaGetBoneWorldPos3fv(parent, p.mVec);
 				//p = b->mRotation.rotate(p);
 				p = mCursor.mPos - p;
@@ -4352,7 +4352,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				if (mToken) 
 				{
 					Vector<index_t> list;
-					Vector<Vec3> list2;
+					Vector<hel::Vec3> list2;
 					bool found = false;
 
 					Face *f = m->GetFace(GetSelectedFace());
@@ -4390,7 +4390,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 				}
 
 				Face *f = m->GetFace(GetSelectedFace());
-				Vec3 u;
+				hel::Vec3 u;
 				uint32 i, idx;
 				if (f)
 				foreach (f->mIndices, i)
@@ -4448,8 +4448,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	// TODO Rewrite this to use pivot and arc delta ( Generate the delta sweep )
 	static int old_y = 0, old_x = 0;
 	const float t = 0.5f, m = 1.0f;
-	Vec3 o, d;
-	float xf, yf, zf;
+	hel::Vec3 o, d;
+	//float xf, yf, zf;
 	int swap;
 
 	// Swap x, y and truncate for stepping...
@@ -4464,31 +4464,31 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 	switch (plane)
 	{
 	case PLANE_BACK:
-		d = Vec3(dx, dy, 0.0f);
+		d = hel::Vec3(dx, dy, 0.0f);
 		break;
 
 	case PLANE_FRONT:
-		d = Vec3(dx, -dy, 0.0f);
+		d = hel::Vec3(dx, -dy, 0.0f);
 		break;
 
 	case PLANE_BOTTOM:
-		d = Vec3(-dx, 0.0f, dy);
+		d = hel::Vec3(-dx, 0.0f, dy);
 		break;
 
 	case PLANE_TOP:
-		d = Vec3(dx, 0.0f, dy);
+		d = hel::Vec3(dx, 0.0f, dy);
 		break;
 
 	case PLANE_RIGHT:
-		d = Vec3(0.0f, dy, -dx);
+		d = hel::Vec3(0.0f, dy, -dx);
 		break;
 
 	case PLANE_LEFT:
-		d = Vec3(0.0f, dy, dx);
+		d = hel::Vec3(0.0f, dy, dx);
 		break;
 
 	case PLANE_FREE:
-		d = Vec3(dy, dy, dy);
+		d = hel::Vec3(dy, dy, dy);
 		break;
 
 	default:
@@ -4559,9 +4559,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 			vec3_t xyz;
 
 #if 1
-			xyz[0] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[0]);
-			xyz[1] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[1]);
-			xyz[2] = HEL_DEG_TO_RAD(mCursor.mRotate.mVec[2]);
+			xyz[0] = helDegToRad(mCursor.mRotate.mVec[0]);
+			xyz[1] = helDegToRad(mCursor.mRotate.mVec[1]);
+			xyz[2] = helDegToRad(mCursor.mRotate.mVec[2]);
 #else
 			// DeltaRot
 			d *= HEL_PI_OVER_180;
@@ -4591,7 +4591,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 				// FIXME!
 				//if (!SystemIO::IsFloatNan(xyz[0]) && !SystemIO::IsFloatNan(xyz[1]) &&	!SystemIO::IsFloatNan(xyz[2]))
 				{
-					Vec3 p;
+					hel::Vec3 p;
 					freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
 #if 0
 					freyjaGetBoneTranslation3fv(GetSelectedBone(), p.mVec);
@@ -4629,9 +4629,9 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 
 	default:
 		{
-			Vec3 r(xf, yf, zf);
+			//hel::Vec3 r(xf, yf, zf);
 
-			mCursor.mRotate += r;
+			mCursor.mRotate += d;//r;
 
 			// Interface is in degrees, while backend is radians
 			if (mCursor.mRotate.mVec[0] > 360.0f) 
@@ -5057,8 +5057,8 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 		return;
 
 	const vec_t cutoff = 0.005f; // must be within this many 'uv units' to pick
-	Vec3 uv(u, v, 0.0f);
-	Vec3 uvB;
+	hel::Vec3 uv(u, v, 0.0f);
+	hel::Vec3 uvB;
 	Face *f;
 	vec_t dist, bestDist = 2.0f; // Outside 0.0f - 1.0f
 	

@@ -31,9 +31,9 @@
 
 #include <math.h>
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 #include <hel/Mat44.h>
-#include <hel/Quaternion.h>
+#include <hel/Quat.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
@@ -177,9 +177,9 @@ class Vec3KeyFrame : public KeyFrame
 
 	virtual ~Vec3KeyFrame() {}
 
-	Vec3 GetData() { return mData; }
+	hel::Vec3 GetData() { return mData; }
 
-	virtual void SetData(const Vec3 &v) { mData = v; }
+	virtual void SetData(const hel::Vec3 &v) { mData = v; }
 
 	virtual uint32 GetSerializedSize() { return 1+4+4*3; }
 	/*------------------------------------------------------
@@ -241,7 +241,7 @@ class Vec3KeyFrame : public KeyFrame
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	Vec3 mData;                      /* Keyframe data */
+	hel::Vec3 mData;                      /* Keyframe data */
 };
 
 
@@ -325,7 +325,7 @@ class Vec3x3KeyFrame : public KeyFrame
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	Vec3 mData[3];                    /* Keyframe data */
+	hel::Vec3 mData[3];                    /* Keyframe data */
 };
 
 
@@ -333,11 +333,11 @@ class ScaleKeyFrame : public Vec3KeyFrame
 {
  public:
 
-	ScaleKeyFrame() : Vec3KeyFrame() { mData = Vec3(1.0f, 1.0f, 1.0f); }
+	ScaleKeyFrame() : Vec3KeyFrame() { mData = hel::Vec3(1.0f, 1.0f, 1.0f); }
 
 	~ScaleKeyFrame() {}
 
-	virtual void SetData(const Vec3 &v) 
+	virtual void SetData(const hel::Vec3 &v) 
 	{
 		for (uint32 i = 0; i < 3; ++i)
 		{
@@ -347,17 +347,17 @@ class ScaleKeyFrame : public Vec3KeyFrame
 		}
 	}
 
-	virtual void Scale(Vec3 v) { SetData(v); }	
+	virtual void Scale(hel::Vec3 v) { SetData(v); }	
 
-	virtual void Scale(vec3_t xyz) { SetData(Vec3(xyz)); }	
+	virtual void Scale(vec3_t xyz) { SetData(hel::Vec3(xyz)); }	
 
-	virtual void Scale(vec_t s) { SetData(Vec3(s, s, s)); }
+	virtual void Scale(vec_t s) { SetData(hel::Vec3(s, s, s)); }
 
-	virtual void ScaleX(vec_t x) { SetData(Vec3(x, 1.0f, 1.0f)); }
+	virtual void ScaleX(vec_t x) { SetData(hel::Vec3(x, 1.0f, 1.0f)); }
 
-	virtual void ScaleY(vec_t y) { SetData(Vec3(1.0f, y, 1.0f)); }
+	virtual void ScaleY(vec_t y) { SetData(hel::Vec3(1.0f, y, 1.0f)); }
 
-	virtual void ScaleZ(vec_t z) { SetData(Vec3(1.0f, 1.0f, z)); }
+	virtual void ScaleZ(vec_t z) { SetData(hel::Vec3(1.0f, 1.0f, z)); }
 };
 
 
@@ -453,9 +453,9 @@ public:
 
 	uint32 GetArraySize() { return mVertices.size(); }
 
-	Vec3 GetPos(uint32 i)
+	hel::Vec3 GetPos(uint32 i)
 	{
-		Vec3 pos(0,0,0);
+		hel::Vec3 pos(0,0,0);
 
 		if (i < mVertices.end())
 		{
@@ -469,7 +469,7 @@ public:
 		return pos;
 	}
 
-	void SetPos(uint32 i, Vec3 pos)
+	void SetPos(uint32 i, hel::Vec3 pos)
 	{
 		if (i < mVertices.end())
 		{

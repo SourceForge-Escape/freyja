@@ -70,7 +70,7 @@ class Cursor
 	{ 
 	}
 
-	bool CheckForRayCollision(Ray &r)
+	bool CheckForRayCollision(hel::Ray &r)
 	{
 		bool ret = false;
 
@@ -108,7 +108,7 @@ class Cursor
 				}
 
 				// Pick the closest 'hit' from each 'axis' ring
-				Vec3 min, max;
+				hel::Vec3 min, max;
 				vec_t dist, best = 999.9f;
 				bool hit;
 
@@ -116,29 +116,29 @@ class Cursor
 				{
 					for (uint32  k = 0; k < 3; ++k)
 					{
-						Vec3 a, b;
+						hel::Vec3 a, b;
 
 						switch (k)
 						{
 						case 0:
-							a = mPos + Vec3(0.0f, xs[j  ], zs[j  ]);
-							b = mPos + Vec3(0.0f, xs[j+1], zs[j+1]);
+							a = mPos + hel::Vec3(0.0f, xs[j  ], zs[j  ]);
+							b = mPos + hel::Vec3(0.0f, xs[j+1], zs[j+1]);
 							break;
 
 						case 1:
-							a = mPos + Vec3(xs[j  ], 0.0f, zs[j  ]);
-							b = mPos + Vec3(xs[j+1], 0.0f, zs[j+1]);
+							a = mPos + hel::Vec3(xs[j  ], 0.0f, zs[j  ]);
+							b = mPos + hel::Vec3(xs[j+1], 0.0f, zs[j+1]);
 							break;
 
 						case 2:
-							a = mPos + Vec3(xs[j  ], zs[j  ], 0.0f);
-							b = mPos + Vec3(xs[j+1], zs[j+1], 0.0f);
+							a = mPos + hel::Vec3(xs[j  ], zs[j  ], 0.0f);
+							b = mPos + hel::Vec3(xs[j+1], zs[j+1], 0.0f);
 							break;
 						}
 
-						Vec3 n = mPos - a;
-						n.normalize();
-						Vec3 side = Vector3d::cross(a-b, n);
+						hel::Vec3 n = mPos - a;
+						n.Norm();
+						hel::Vec3 side = hel::Vec3::Cross(a-b, n);
 						
 						min = a - n * -1 - side * -1;
 						max = b - n * 1 - side * 1;
@@ -178,7 +178,7 @@ class Cursor
 			{
 				vec_t z = 1.0f;
 				vec_t t;
-				Vec3 o = Vec3(z*freyja3d::Cursor::mid,0,0) + mPos;
+				hel::Vec3 o = hel::Vec3(z*freyja3d::Cursor::mid,0,0) + mPos;
 
 				if (r.IntersectSphere(mPos.mVec, 1.0f, t))
 				{
@@ -194,7 +194,7 @@ class Cursor
 					ret = true;
 				}
 
-				o = Vec3(0, z*Cursor::mid,0) + mPos;
+				o = hel::Vec3(0, z*Cursor::mid,0) + mPos;
 
 				if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
 				{
@@ -203,7 +203,7 @@ class Cursor
 					ret = true;
 				}
 
-				o = Vec3(0, 0, z*Cursor::mid) + mPos;
+				o = hel::Vec3(0, 0, z*Cursor::mid) + mPos;
 				
 				if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
 				{
@@ -282,22 +282,22 @@ class Cursor
 		mSelected = false;
 		mAxis = eNone;
 		mMode = Invisible;
-		mPos = Vector3d(0.0f, 0.0f, 0.0f);
-		mScale = Vector3d(1.0f, 1.0f, 1.0f);
-		mRotate = Vector3d(0.0f, 0.0f, 0.0f);//Quaternion();
+		mPos = hel::Vec3(0.0f, 0.0f, 0.0f);
+		mScale = hel::Vec3(1.0f, 1.0f, 1.0f);
+		mRotate = hel::Vec3(0.0f, 0.0f, 0.0f);//Quaternion();
 	}
 
 	bool mSelected;
 
 	axis_t mAxis;
 
-	Vector3d mLastPos;
+	hel::Vec3 mLastPos;
 
-	Vector3d mPos;
+	hel::Vec3 mPos;
 
-	Vector3d mScale;
+	hel::Vec3 mScale;
 
-	Vector3d mRotate;
+	hel::Vec3 mRotate;
 
 	//Quaternion mRotate;
 

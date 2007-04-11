@@ -87,7 +87,7 @@ void *h_glGetUniformLocationARB = NULL;
 #endif
 
 using namespace freyja3d;
-
+using namespace hel;
 
 bool OpenGL::arb_multitexture = false;
 bool OpenGL::arb_texture_env_combine = false;
@@ -895,7 +895,7 @@ void mglDrawAxisWithCones(const vec_t min, const vec_t mid, const vec_t max,
 	if (count < 3)
 		count = 3;
 
-	const float delta = HEL_DEG_TO_RAD(360.0f) * ( 1.0f / (float)count );
+	const float delta = helDegToRad(360.0f) * ( 1.0f / (float)count );
 	Vec3 o, point, ith, last;
 	vec_t s, t;
 
@@ -1101,7 +1101,7 @@ void mglDrawCone(vec3_t origin, vec_t height, uint32 count)
 	Vec3 point(origin[0], origin[1] + height, origin[2]);
 	Vec3 center(origin[0], origin[1], origin[2]);
 	vec_t x, z;
-	const float delta = HEL_DEG_TO_RAD(360.0f) * ( 1.0f / (float)count );
+	const float delta = helDegToRad(360.0f) * ( 1.0f / (float)count );
 
 	
 	if (count < 3)

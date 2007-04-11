@@ -55,7 +55,7 @@ using namespace freyja3d;
 
 FreyjaRender *FreyjaRender::mInstance = 0x0;
 
-Ray FreyjaRender::mTestRay;
+hel::Ray FreyjaRender::mTestRay;
 
 vec4_t FreyjaRender::mColors[16];
 vec4_t FreyjaRender::mColorBackground;
@@ -270,7 +270,7 @@ void FreyjaRender::DrawFreeWindow()
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
+		hel::Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	
@@ -541,8 +541,8 @@ void FreyjaRender::Display()
 	}
 
 	// Mongoose 2002.02.02, Cache for use in calls from here
-	Vec3 v = FreyjaControl::mInstance->GetSceneTranslation();
-	HEL_VEC3_COPY(v.mVec, mScroll);
+	hel::Vec3 v = FreyjaControl::mInstance->GetSceneTranslation();
+	helCopyVec3(v.mVec, mScroll);
 	
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
 				 1.0);
@@ -787,7 +787,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	if (!m)
 		return;
 
-	Vec3 u, v;
+	hel::Vec3 u, v;
 
 	glPushMatrix();
 
@@ -816,7 +816,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		// Mesh animation
 		TransformTrack &tt = m->GetTransformTrack(a);
 		vec_t time = (vec_t)k / tt.GetRate();
-		Vec3 pos, rot, scale;
+		hel::Vec3 pos, rot, scale;
 		tt.GetTransform(time, pos, rot, scale);
 
 		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
@@ -887,7 +887,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 				// Haven't got the backend / frontend ready for this yet
 				if (FreyjaControl::mInstance->GetCursor().mSelected)
 				{
-					Vec3 u = FreyjaControl::mInstance->GetCursor().mScale;
+					hel::Vec3 u = FreyjaControl::mInstance->GetCursor().mScale;
 					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
 				}
 				break;
@@ -896,7 +896,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 				// Haven't got the backend / frontend ready for this yet
 				if (FreyjaControl::mInstance->GetCursor().mSelected)
 				{
-					Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
+					hel::Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
 							  FreyjaControl::mInstance->GetCursor().mLastPos);
 
 					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
@@ -969,7 +969,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	if (mRenderMode & fNormals)
 	{
 		Vertex *vertex;
-		Vec3 v, n;
+		hel::Vec3 v, n;
 
 		glBegin(GL_LINES);
 		glColor3fv(mColorVertexHighlight);
@@ -1001,10 +1001,10 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		glPushMatrix();
 		glScalef(scale, scale, scale);
 
-		Vec3 color(mColorWireframe);
+		hel::Vec3 color(mColorWireframe);
 		if (m->GetFlags() & Mesh::fSelected)
 		{
-			color = Vec3(mColorWireframeHighlight);
+			color = hel::Vec3(mColorWireframeHighlight);
 		}
 
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
@@ -1147,7 +1147,7 @@ void FreyjaRender::RenderModel(index_t model)
 				
 		case freyja3d::Cursor::Translation:
 			{
-				Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
+				hel::Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
 						  FreyjaControl::mInstance->GetCursor().mLastPos);
 
 				glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
@@ -1182,11 +1182,11 @@ void FreyjaRender::RenderModel(index_t model)
 		glDisable(GL_BLEND);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		Vector<Vec3> ctrlpnts = FreyjaControl::GetControlPoints();
+		Vector<hel::Vec3> ctrlpnts = FreyjaControl::GetControlPoints();
 		uint32 i;
 		foreach (ctrlpnts, i)
 		{
-			Vec3 p = ctrlpnts[i];
+			hel::Vec3 p = ctrlpnts[i];
 
 			glPushMatrix();
 			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
@@ -1197,8 +1197,8 @@ void FreyjaRender::RenderModel(index_t model)
 
 		if (mRenderMode & fBoundingVolSelection && ctrlpnts.size() == 2)
 		{ 
-			Vec3 min = ctrlpnts[0];
-			Vec3 max = ctrlpnts[1];
+			hel::Vec3 min = ctrlpnts[0];
+			hel::Vec3 max = ctrlpnts[1];
 			mglDrawSelectionBox(min.mVec, max.mVec, DARK_YELLOW);
 		}
 
@@ -1209,7 +1209,7 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones)
 	{
-		Vec3 p, r, n;
+		hel::Vec3 p, r, n;
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
@@ -1307,7 +1307,7 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 	if (!freyjaIsBoneAllocated(boneIndex))
 		return;
 
-	Vec3 pos, rot;
+	hel::Vec3 pos, rot;
 
 	/* Scale bones to match mesh scaling */
 	freyjaGetBoneTranslation3fv(boneIndex, pos.mVec);
@@ -1323,7 +1323,7 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 
 		if (b)
 		{
-			Vec3 p, o;
+			hel::Vec3 p, o;
 			uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
 			uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
 			BoneTrack &track = b->GetTrack(a);
@@ -1464,7 +1464,7 @@ void FreyjaRender::DrawCurveWindow()
 	if (m && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
 	{
 		vec_t time;
-		Vec3 v, pos, rot, scale;
+		hel::Vec3 v, pos, rot, scale;
 		vec_t rateInverse = 1.0f / m->GetTransformTrack(track).GetRate();
 		uint32 count = m->GetTransformTrack(track).GetKeyframeCount();
 
@@ -1532,7 +1532,7 @@ void FreyjaRender::DrawCurveWindow()
 		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
 		BoneTrack &track = b->GetTrack(a);
 		vec_t rateInverse = 1.0f / track.GetRate();
-		Vec3 v, p;
+		hel::Vec3 v, p;
 
 		yT[2] += 20.0f;
 
@@ -1693,7 +1693,7 @@ void FreyjaRender::DrawUVWindow()
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
-			Vec3 v;
+			hel::Vec3 v;
 
 			if (!f ||f->mMaterial != FreyjaControl::mInstance->GetSelectedTexture())
 				continue;
@@ -1729,7 +1729,7 @@ void FreyjaRender::DrawUVWindow()
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
-			Vec3 v;
+			hel::Vec3 v;
 			
 			if (!f) 
 				continue;
@@ -2014,7 +2014,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
+		hel::Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	

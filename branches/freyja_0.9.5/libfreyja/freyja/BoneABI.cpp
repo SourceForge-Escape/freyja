@@ -24,6 +24,7 @@
 #include "BoneABI.h"
 
 using namespace freyja;
+using namespace hel;
 
 
 ////////////////////////////////////////////////////////////
@@ -206,7 +207,7 @@ void freyjaBoneTranslate3f(index_t boneIndex, vec_t x, vec_t y, vec_t z)
 
 	if (b)
 	{
-		b->mTranslation = Vector3d(x, y, z);
+		b->mTranslation = Vec3(x, y, z);
 		b->UpdateBindPose();
 	}
 }
@@ -218,7 +219,7 @@ void freyjaBoneTranslate3fv(index_t boneIndex, vec3_t xyz)
 
 	if (b)
 	{
-		b->mTranslation = Vector3d(xyz[0], xyz[1], xyz[2]);
+		b->mTranslation = Vec3(xyz[0], xyz[1], xyz[2]);
 		b->UpdateBindPose();
 	}
 }
@@ -237,7 +238,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 
 	if (b)
 	{
-		b->mRotation.setByEulerAngles(phr);
+		b->mRotation.SetByEulerAngles(phr);
 		b->UpdateBindPose();
 	}
 }
@@ -251,7 +252,7 @@ void freyjaBoneRotateQuat4f(index_t boneIndex,
 
 	if (b)
 	{
-		b->mRotation = Quaternion(w, x, y, z);
+		b->mRotation = Quat(w, x, y, z);
 		b->UpdateBindPose();
 	}
 #else
@@ -267,7 +268,7 @@ void freyjaBoneRotateQuat4fv(index_t boneIndex, vec4_t wxyz)
 
 	if (b)
 	{
-		b->mRotation = Quaternion(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+		b->mRotation = Quat(wxyz);
 		b->UpdateBindPose();
 	}
 }
@@ -325,7 +326,7 @@ void freyjaGetBoneRotationQuat4fv(index_t boneIndex, vec4_t wxyz)
 
 	if (b)
 	{
-		b->mRotation.getQuaternion4fv(wxyz);
+		b->mRotation.GetQuat(wxyz);
 	}
 }
 
@@ -333,13 +334,13 @@ void freyjaGetBoneRotationQuat4fv(index_t boneIndex, vec4_t wxyz)
 void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 {
 	Bone *b = Bone::GetBone(boneIndex);
-	Quaternion q;// = Quaternion(phr[0], phr[1], phr[2]); // P H R -> R P Y
+	Quat q;// = Quaternion(phr[0], phr[1], phr[2]); // P H R -> R P Y
 
 	if (b)
 	{
 		q = b->mRotation;
 		//freyjaPrintError("FIXME %p, %s:%i", b, __FILE__, __LINE__);
-		q.getEulerAngles(phr);  // P H R -> H B A
+		q.GetEulerAngles(phr);  // P H R -> H B A
 		//vec_t tmp;
 		//tmp = phr[0];
 		//phr[0] = phr[2];
@@ -448,7 +449,7 @@ void freyjaGetBoneTranslation3fv(index_t boneIndex, vec3_t xyz)
 
 	if (b)
 	{
-		HEL_VEC3_COPY(b->mTranslation.mVec, xyz);
+		helCopyVec3(b->mTranslation.mVec, xyz);
 	}
 }
 
@@ -519,9 +520,9 @@ void freyjaBoneInverseTransform3fv(index_t bone,
 	case fRotate:
 		freyjaGetBoneRotationEuler3fv(bone, xyz);
 
-		xyz[0] = HEL_DEG_TO_RAD(v[0] - HEL_RAD_TO_DEG(xyz[0]));
-		xyz[1] = HEL_DEG_TO_RAD(v[1] - HEL_RAD_TO_DEG(xyz[1]));
-		xyz[2] = HEL_DEG_TO_RAD(v[2] - HEL_RAD_TO_DEG(xyz[2]));
+		xyz[0] = helDegToRad(v[0] - helRadToDeg(xyz[0]));
+		xyz[1] = helDegToRad(v[1] - helRadToDeg(xyz[1]));
+		xyz[2] = helDegToRad(v[2] - helRadToDeg(xyz[2]));
 
 		freyjaBoneRotateEuler3fv(bone, xyz);
 		break;
@@ -571,9 +572,9 @@ void freyjaBoneTransform(index_t boneIndex,
 	case fRotate:
 		freyjaGetBoneRotationEuler3fv(boneIndex, xyz);
 
-		xyz[0] = HEL_DEG_TO_RAD(x + HEL_RAD_TO_DEG(xyz[0]));
-		xyz[1] = HEL_DEG_TO_RAD(y + HEL_RAD_TO_DEG(xyz[1]));
-		xyz[2] = HEL_DEG_TO_RAD(z + HEL_RAD_TO_DEG(xyz[2]));
+		xyz[0] = helDegToRad(x + helRadToDeg(xyz[0]));
+		xyz[1] = helDegToRad(y + helRadToDeg(xyz[1]));
+		xyz[2] = helDegToRad(z + helRadToDeg(xyz[2]));
 
 		freyjaBoneRotateEuler3fv(boneIndex, xyz);
 		break;
@@ -663,11 +664,11 @@ void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w)
 		}
 
 		v = (t * v) * w;
-		HEL_VEC3_COPY(v.mVec, p);
+		helCopyVec3(v.mVec, p);
 #else
 		Vec3 v(p);
 		v = (b->mBindPose * v) * w;
-		HEL_VEC3_COPY(v.mVec, p);
+		helCopyVec3(v.mVec, p);
 #endif
 	}
 }
@@ -881,8 +882,8 @@ void freyjaBoneRotKeyFrameQuat4f(index_t bone, index_t track, index_t key,
 		
 		if (k)
 		{
-			Quaternion q;
-			q.getEulerAngles(&x, &y, &z);
+			Quat q;
+			q.GetEulerAngles(x, y, z);
 			//k->SetEulerRotation(Vec3(x, y, z));
 			k->SetData(Vec3(x, y, z));
 		}

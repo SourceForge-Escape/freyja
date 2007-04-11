@@ -30,9 +30,9 @@
 #define GUARD__FREYJA_MONGOOSE_BONE_H_
 
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 #include <hel/Mat44.h>
-#include <hel/Quaternion.h>
+#include <hel/Quat.h>
 #include <mstl/Vector.h>
 #include <mstl/String.h>
 
@@ -93,14 +93,14 @@ public:
 	void GetLocKeyframe(uint32 key, vec3_t v) { mLoc.GetKey(key, v); }
 
 
-	Vec3 GetRot(vec_t time) { return mRot.GetTransform(time); }
+	hel::Vec3 GetRot(vec_t time) { return mRot.GetTransform(time); }
 
-	bool GetRot(vec_t t, Vec3 &v)  { return mRot.GetTransform(t, v); }
+	bool GetRot(vec_t t, hel::Vec3 &v)  { return mRot.GetTransform(t, v); }
 
 
-	Vec3 GetLoc(vec_t time) { return mLoc.GetTransform(time); }
+	hel::Vec3 GetLoc(vec_t time) { return mLoc.GetTransform(time); }
 
-	bool GetLoc(vec_t t, Vec3 &v)  { return mLoc.GetTransform(t, v); }
+	bool GetLoc(vec_t t, hel::Vec3 &v)  { return mLoc.GetTransform(t, v); }
 
 	bool Serialize(SystemIO::TextFileWriter &w)
 	{
@@ -284,13 +284,13 @@ public:
 	 * Post : Set human readable name
 	 ------------------------------------------------------*/
 
-	void SetLoc(const Vec3 &v);
+	void SetLoc(const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Set parent relative translation
 	 ------------------------------------------------------*/
 
-	void SetRot(const Quaternion &q);
+	void SetRot(const hel::Quat &q);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Set parent relative rotation
@@ -344,9 +344,9 @@ public:
 
 	Vector<index_t> mChildren;       /* Children bones of this bone */
 
-	Quaternion mRotation;            /* Orientation of this bone */
+	hel::Quat mRotation;             /* Orientation of this bone */
 
-	Vec3 mTranslation;               /* Offset of this bone from parent */
+	hel::Vec3 mTranslation;               /* Offset of this bone from parent */
 
 	hel::Mat44 mBindPose;            /* Store the bind transform from the 
 									  * origin ( this bulids off parents ).

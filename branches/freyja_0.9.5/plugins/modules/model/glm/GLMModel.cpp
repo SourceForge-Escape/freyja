@@ -385,7 +385,8 @@ int main(int argc, char *argv[])
 #include <freyja/LegacyABI.h>
 #include <freyja/TextureABI.h>
 #include <freyja/freyja.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
+#include <hel/Vector3.h>
 #include <mstl/Vector.h>
 
 using namespace mstl;

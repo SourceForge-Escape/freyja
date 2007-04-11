@@ -868,7 +868,7 @@ void eMirrorMeshX()
 	if (m)
 	{
 		hel::Mat44 mat;
-		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
+		mat.Scale(hel::Vec3(-1.0f, 1.0f, 1.0f));
 		freyja_print("Mirroring mesh over X...");
 		m->TransformVertices(mat);
 	}
@@ -881,7 +881,7 @@ void eMirrorMeshY()
 	if (m)
 	{
 		hel::Mat44 mat;
-		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+		mat.Scale(hel::Vec3(1.0f, -1.0f, 1.0f));
 		freyja_print("Mirroring mesh over Y...");
 		m->TransformVertices(mat);
 	}
@@ -895,7 +895,7 @@ void eMirrorMeshZ()
 	if (m)
 	{
 		hel::Mat44 mat;
-		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+		mat.Scale(hel::Vec3(1.0f, 1.0f, -1.0f));
 		freyja_print("Mirroring mesh over Z...");
 		m->TransformVertices(mat);
 	}
@@ -909,7 +909,7 @@ void eMirrorFacesX()
 	if (m)
 	{
 		hel::Mat44 mat;
-		mat.Scale(Vec3(-1.0f, 1.0f, 1.0f));
+		mat.Scale(hel::Vec3(-1.0f, 1.0f, 1.0f));
 		freyja_print("Mirroring selected faces over X...");
 		//m->TransformFacesWithFlag(Face::fSelected, mat);
 		m->TransformVertices(mat);
@@ -924,7 +924,7 @@ void eMirrorFacesY()
 	if (m)
 	{
 		hel::Mat44 mat;
-		mat.Scale(Vec3(1.0f, -1.0f, 1.0f));
+		mat.Scale(hel::Vec3(1.0f, -1.0f, 1.0f));
 		freyja_print("Mirroring selected faces over Y...");
 		m->TransformFacesWithFlag(Face::fSelected, mat);
 		m->TransformVertices(mat);
@@ -939,7 +939,7 @@ void eMirrorFacesZ()
 	if (m)
 	{
 		hel::Mat44 mat;
-		mat.Scale(Vec3(1.0f, 1.0f, -1.0f));
+		mat.Scale(hel::Vec3(1.0f, 1.0f, -1.0f));
 		freyja_print("Mirroring selected faces over Z...");
 		m->TransformFacesWithFlag(Face::fSelected, mat);
 		m->TransformVertices(mat);
@@ -999,7 +999,7 @@ void eCleanupVertices()
 
 void eGenerateCone()
 {
-	Vector3d v;
+	hel::Vec3 v;
 	freyjaGenerateConeMesh(v.mVec, 
 						   FreyjaControl::mInstance->GetGenMeshHeight(),
 						   FreyjaControl::mInstance->GetGenMeshCount());
@@ -1009,7 +1009,7 @@ void eGenerateCone()
 
 void eGenerateCylinder()
 {
-	Vector3d v;
+	hel::Vec3 v;
 	freyjaGenerateCylinderMesh(v.mVec, 
 							   FreyjaControl::mInstance->GetGenMeshHeight(), 
 							   FreyjaControl::mInstance->GetGenMeshCount(),
@@ -1029,7 +1029,7 @@ void eGenerateTube()
 												  "How many segments?",
 												  FreyjaControl::mInstance->GetGenMeshSegements(), 1, 128, 
 												  1, 1);
-	Vec3 v;
+	hel::Vec3 v;
 	freyjaGenerateTubeMesh(v.mVec, h, count, seg);
 	FreyjaControl::mInstance->Dirty();
 }
@@ -1037,7 +1037,7 @@ void eGenerateTube()
 
 void eGenerateSphere()
 {
-	Vector3d v;
+	hel::Vec3 v;
 	freyjaGenerateSphereMesh(v.mVec, 
 							 FreyjaControl::mInstance->GetGenMeshHeight(), 
 							 FreyjaControl::mInstance->GetGenMeshCount(),
@@ -1053,7 +1053,7 @@ void eGenerateCube()
 												FreyjaControl::mInstance->GetGenMeshHeight(), 
 												0.5, 64, 
 												1, 3);
-	Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
+	hel::Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
 	index_t mesh = freyjaMeshCreateCube(v.mVec, size);
 	FreyjaControl::mInstance->SetSelectedMesh(mesh);
 	FreyjaControl::mInstance->Dirty();
@@ -1073,7 +1073,7 @@ void eGeneratePlane()
 												   1, 1);
 	
 	vec_t size = FreyjaControl::mInstance->GetGenMeshHeight() * 4;
-	Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
+	hel::Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
 	freyjaMeshCreateSheet(v.mVec, size, rows, cols);
 	FreyjaControl::mInstance->Dirty();
 }
@@ -1081,7 +1081,7 @@ void eGeneratePlane()
 
 void eGenerateCircle()
 {
-	Vector3d v;
+	hel::Vec3 v;
 	freyjaGenerateCircleMesh(v.mVec, FreyjaControl::mInstance->GetGenMeshCount());
 	FreyjaControl::mInstance->Dirty();
 }
@@ -1189,7 +1189,7 @@ void eBoneNew()
 
 void eExtrude()
 {
-	Vec3 v = FreyjaRender::mTestRay.mDir;
+	hel::Vec3 v = FreyjaRender::mTestRay.mDir;
 	v *= -8.0f;
 	freyjaMeshPolygonExtrudeQuad1f(FreyjaControl::mInstance->GetSelectedMesh(), 
 								   FreyjaControl::mInstance->GetSelectedFace(),

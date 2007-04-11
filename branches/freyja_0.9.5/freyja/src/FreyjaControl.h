@@ -189,8 +189,8 @@ class FreyjaControl
 	 *        points interface.  ( An odd, yet popular feature. ) 
 	 ------------------------------------------------------*/
 
-	const Vec3 &GetSceneTranslation() { return mSceneTrans; }
-	void SetSceneTranslation(const Vec3 &v) { mSceneTrans = v; }
+	const hel::Vec3 &GetSceneTranslation() { return mSceneTrans; }
+	void SetSceneTranslation(const hel::Vec3 &v) { mSceneTrans = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns xyz offset of the scene
@@ -473,8 +473,8 @@ class FreyjaControl
 	 ------------------------------------------------------*/
 
 	static uint32 mSelectedControlPoint;
-	static Vector<Vec3> mControlPoints;
-	static Vector<Vec3> &GetControlPoints() { return mControlPoints; }
+	static Vector<hel::Vec3> mControlPoints;
+	static Vector<hel::Vec3> &GetControlPoints() { return mControlPoints; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -958,13 +958,13 @@ private:
 	 * Post : Wrapper for view flags accessor
 	 ------------------------------------------------------*/
 
-	Vec3 GetCursorData(freyja_transform_action_t action)
+	hel::Vec3 GetCursorData(freyja_transform_action_t action)
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 	{
-		Vec3 v;
+		hel::Vec3 v;
 
 		switch (action)
 		{
@@ -1053,11 +1053,10 @@ private:
 	void GetBoneRotation(float *x, float *y, float *z)
 	{
 		vec3_t xyz;
-
 		freyjaGetBoneRotationEuler3fv(GetSelectedBone(), xyz);
-		*x = HEL_RAD_TO_DEG(xyz[0]);
-		*y = HEL_RAD_TO_DEG(xyz[1]);
-		*z = HEL_RAD_TO_DEG(xyz[2]);
+		*x = helRadToDeg(xyz[0]);
+		*y = helRadToDeg(xyz[1]);
+		*z = helRadToDeg(xyz[2]);
 		freyja_print("%f %f %f", xyz[0], xyz[1], xyz[2]);
 	}
 
@@ -1113,7 +1112,7 @@ private:
 
 	void SetBoneRotation(float x, float y, float z)
 	{
-		vec3_t xyz = {HEL_DEG_TO_RAD(x), HEL_DEG_TO_RAD(y), HEL_DEG_TO_RAD(z)};
+		vec3_t xyz = {helDegToRad(x), helDegToRad(y), helDegToRad(z)};
 		freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
 	}
 
@@ -1157,7 +1156,7 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
-	void SelectObjectByBox(Vec3 min, Vec3 max);
+	void SelectObjectByBox(hel::Vec3 min, hel::Vec3 max);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -1238,7 +1237,7 @@ private:
 
 	String mCurrentlyOpenFilename;          /* What file is loaded now? */
 
-	Vec3 mSceneTrans;                       /* Offset of scene in 3 space */
+	hel::Vec3 mSceneTrans;                  /* Offset of scene in 3 space */
 
 	freyja3d::Cursor mCursor;               /* Special mouse input handler */
 

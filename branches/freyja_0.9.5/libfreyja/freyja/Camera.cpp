@@ -124,7 +124,7 @@ double FreyjaCamera::getRadianPitch()
 
 void FreyjaCamera::rotate(float angle, float x, float y, float z)
 {
-	Quaternion t, n;
+	hel::Quat t, n;
 	hel::Mat44 mat;
 	vec4_t side = { 1, 0,  0, 1 };
 	vec4_t up =   { 0, 1,  0, 1 };
@@ -132,11 +132,11 @@ void FreyjaCamera::rotate(float angle, float x, float y, float z)
  	unsigned int i;
 	matrix_t m;
    
-	t.set(angle, x, y, z);
+	t.SetByAxisAngles(angle, x, y, z);
 	n = mQ * t;
-	n.normalize();
+	n.Norm();
 
-	n.getMatrix(m);
+	n.GetMatrix(m);
 	mat.SetMatrix(m);
 	mat.Multiply4fv(side, mSide);
 	mat.Multiply4fv(look, mTarget);
@@ -213,7 +213,7 @@ void FreyjaCamera::reset()
 	mUp[1] = 1.0;
 	mUp[2] = 0.0;
 
-	mQ.setIdentity();
+	mQ.SetIdentity();
 	translate(0.0, 0.0, 0.0);
 }
 

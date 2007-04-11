@@ -44,7 +44,7 @@ Model::~Model()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-bool Model::Intersect(Ray &r, vec_t &t)
+bool Model::Intersect(hel::Ray &r, vec_t &t)
 {
 	if (GetFlags() & fHidden)
 		return false;

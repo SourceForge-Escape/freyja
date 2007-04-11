@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <hel/math.h>
-#include <hel/Quaternion.h>
-#include <hel/Vector3d.h>
+#include <hel/Quat.h>
+#include <hel/Vec3.h>
 #include "freyja.h"
 #include "Mesh.h"
 #include "BoneABI.h"
