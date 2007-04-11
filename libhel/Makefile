@@ -168,7 +168,7 @@ OBJS = \
 	$(BUILDDIR)/CollisionObject.o \
 	$(BUILDDIR)/Mass.o \
 	$(BUILDDIR)/Mat44.o \
-	$(BUILDDIR)/Quaternion.o \
+	$(BUILDDIR)/Quat.o \
 	$(BUILDDIR)/Ray.o \
 	$(BUILDDIR)/Simulation.o \
 	$(BUILDDIR)/Spring.o \

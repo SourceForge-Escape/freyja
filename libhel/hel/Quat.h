@@ -33,7 +33,7 @@
 #include <math.h>
 
 #include "hel/math.h"
-#include "Vec3.h"
+#include "hel/Vec3.h"
 
 namespace hel {
 

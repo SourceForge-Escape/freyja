@@ -20,7 +20,7 @@
 #define GUARD__HEL_MAT22_H_
 
 #include "hel/math.h"
-#include "hel/Quaternion.h"
+#include "hel/Quat.h"
 #include "hel/Vec3.h"
 
 #include <mstl/String.h>

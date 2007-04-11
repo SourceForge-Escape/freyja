@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-#include "Quaternion.h"
+#include "Quat.h"
 
 using namespace hel;
 
