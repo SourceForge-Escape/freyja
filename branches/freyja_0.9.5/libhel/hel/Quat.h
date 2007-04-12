@@ -88,11 +88,19 @@ class Quat
 	 *
 	 ------------------------------------------------------*/
 
-	void GetEulerAngles(vec3_t phr);
-	void GetEulerAngles(vec_t &pitch, vec_t &heading, vec_t &roll);
+	void GetEulerAngles(vec3_t abg);
+	void GetEulerAngles(vec_t &alpha, vec_t &beta, vec_t &gamma);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Euler angles are returned in *radians*.
+	 *
+	 ------------------------------------------------------*/
+
+	void GetEulerAnglesPHR(vec_t &pitch, vec_t &heading, vec_t &roll);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Euler angles are returned in *radians*.
+	 *        This is for legacy use with PHR format.
 	 *
 	 ------------------------------------------------------*/
 
@@ -164,10 +172,29 @@ class Quat
 	 *
 	 ------------------------------------------------------*/
 
+	void GetConjugate(Quat &q) const 
+	{ q.mW = mW; q.mX = -mX; q.mY = -mY; q.mZ = -mZ; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns conjugate of this quaternion in <q>.
+	 *
+	 ------------------------------------------------------*/
+
 	Quat GetConjugate() const { return Quat(mW, -mX, -mY, -mZ); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns conjugate of this quaternion
+	 * Post : Returns conjugate of this quaternion.
+	 *
+	 ------------------------------------------------------*/
+
+	void Rotate(const Vec3 &v, Vec3 &u) 
+	{
+		Quat q = (*this) * Quat(0.0f, v.mX, v.mY, v.mZ) * GetConjugate();
+		u.mX = q.mX; u.mY = q.mY; u.mZ = q.mZ;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Rotate vertex <v>.  Return result in <u>.
 	 *
 	 ------------------------------------------------------*/
 
@@ -178,7 +205,7 @@ class Quat
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Rotate
+	 * Post : Rotate vertex.
 	 *
 	 ------------------------------------------------------*/
 
@@ -241,11 +268,19 @@ class Quat
 	 *
 	 ------------------------------------------------------*/
 
-	void SetByEulerAngles(const vec3_t phr);
-	void SetByEulerAngles(vec_t pitch, vec_t heading, vec_t roll);
+	void SetByEulerAngles(const vec3_t abg);
+	void SetByEulerAngles(vec_t alpha, vec_t beta, vec_t gamma);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets this quaternion by euler angles in *radians*
+	 * Post : Sets this quaternion by euler angles in *radians*.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetByEulerAnglesPHR(vec_t pitch, vec_t heading, vec_t roll);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets this quaternion by Euler angles in *radians*.
+	 *        This is for legacy use with PHR format.
 	 *
 	 ------------------------------------------------------*/
 
@@ -303,6 +338,7 @@ class Quat
 ////////////////////////////////////////////////////////////
 
 #ifdef UNITTEST__HEL_QUAT
+#include <stdio.h>
 #include <mstl/UnitTest.h>
 
 class QuatUnitTest : public UnitTest

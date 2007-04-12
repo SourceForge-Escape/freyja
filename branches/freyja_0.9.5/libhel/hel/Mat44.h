@@ -38,14 +38,6 @@ class Mat44
 {
  public:
 
-	// OpenGL, Column order matrix_t
-	//
-	// | 0  4  8  12 | 
-	// | 1  5  9  13 |
-	// | 2  6 10  14 |
-	// | 3  7 11  15 |
-
-
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -202,7 +194,6 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	void MultiplyVertexArrayThreaded(uint32 threads, uint32 size, vec_t *array);
 	void MultiplyVertexArray(uint32 size, vec_t *array)
 	{
 		for ( uint32 i = 0, j = 0; i < size; ++i, j += 3 )
@@ -216,7 +207,6 @@ class Mat44
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Transforms array by this matrix
-	 * TODO : Good place to use partitioned data for Threads
 	 *
 	 ------------------------------------------------------*/
 
@@ -525,12 +515,26 @@ class Mat44
 
 	static const matrix_t mIdentity;  /* Identity matrix */
 
+#if 1
 	matrix_t mMatrix;                 /* Matrix data */
+#else
+	union {          /* Vector data */
+		vec3_t mVec;
 
+		struct { // mRowCol             // OpenGL, Column order matrix_t
+			vec_t m00, m10, m20, m30;	// | 0  4  8  12 |  | m00 m01 m02 m03 |
+			vec_t m01, m11, m21, m31;	// | 1  5  9  13 |  | m10 m11 m12 m13 |
+			vec_t m02, m12, m22, m32;	// | 2  6 10  14 |  | m20 m21 m22 m23 |
+			vec_t m03, m13, m23, m33;	// | 3  7 11  15 |  | m30 m31 m32 m33 |
+		};
+	};
+#endif
 
 	////////////////////////////////////////////////////////////
 	// Experimental cruft not really part of API
 	////////////////////////////////////////////////////////////
+
+	void MultiplyVertexArrayThreaded(uint32 threads, uint32 size, vec_t *array);
 
 	void MultiplyVertexArrayThreadedPartition(uint32 offset, uint32 size,
 											  vec_t *array)

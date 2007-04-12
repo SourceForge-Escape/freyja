@@ -46,25 +46,81 @@ void Quat::GetEulerAngles(vec3_t xyz)
 }
 
 
-void Quat::GetEulerAngles(vec_t &pitch, vec_t &heading, vec_t &roll)
+void Quat::GetEulerAngles(vec_t &alpha, vec_t &beta, vec_t &gamma)
 {
 	const vec_t sqx = mX * mX;
 	const vec_t sqy = mY * mY;
 	const vec_t sqz = mZ * mZ;
 	const vec_t sqw = mW * mW;
 
+#if 1
 	// From my old mtk3d math lib ( clamps (+-)PI )
+	alpha = atan2f(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
+	beta = atan2f(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
+	gamma = asinf(-2.0 * (mX*mZ - mY*mW));
+#else
+	// Much debated http://www.euclideanspace.com routine
+
+	// If normalised, unit is 1.0f, otherwise is correction factor
+	vec_t unit = sqx + sqy + sqz + sqw;
+	vec_t test = mX*mY + mZ*mW;
+
+	if (test > 0.499f * unit) { // singularity at north pole
+		alpha = 0.0f;
+		beta = 2.0f * atan2f(mX, mW);
+		gamma = HEL_PI_OVER_2;
+		return;
+	}
+	if (test < -0.499f * unit) { // singularity at south pole
+		alpha = 0.0f;
+		beta = -2.0f * atan2f(mX, mW);
+		gamma = -HEL_PI_OVER_2;
+		return;
+	}
+
+	alpha = atan2f(2.0f * mX * mW - 2.0f * mY * mZ, -sqx + sqy - sqz + sqw);
+	beta = atan2f(2.0f * mY * mW - 2.0f * mX* mZ, sqx - sqy - sqz + sqw);
+	gamma = asinf(2.0f * test / unit);
+#endif
+}
+
+
+void Quat::GetEulerAnglesPHR(vec_t &pitch, vec_t &heading, vec_t &roll)
+{
+	const vec_t sqx = mX * mX;
+	const vec_t sqy = mY * mY;
+	const vec_t sqz = mZ * mZ;
+	const vec_t sqw = mW * mW;
+
+#if 1
+	// From my old mtk3d math lib ( clamps (+-)PI )
+	pitch = asinf(-2.0 * (mX*mZ - mY*mW));
 	heading = atan2f(2.0 * (mX*mY + mZ*mW), (sqx - sqy - sqz + sqw));
 	roll = atan2f(2.0 * (mY*mZ + mX*mW), (-sqx - sqy + sqz + sqw));
-	pitch = asinf(-2.0 * (mX*mZ - mY*mW));
+#else
+	// Much debated http://www.euclideanspace.com routine
 
-	//heading = atan2(-m20,m00)
-	//attitude = asin(m10)
-	//bank = atan2(-m12,m11)
+	// If normalised, unit is 1.0f, otherwise is correction factor
+	vec_t unit = sqx + sqy + sqz + sqw;
+	vec_t test = mX*mY + mZ*mW;
 
-	//heading = atan2(-m20,m[0])
-	//attitude = asin(m[4])
-	//bank = atan2(-m12,m[5])
+	if (test > 0.499f * unit) { // singularity at north pole
+		pitch = 2.0f * atan2f(mX, mW);
+		heading = HEL_PI_OVER_2;
+		roll = 0.0f;
+		return;
+	}
+	if (test < -0.499f * unit) { // singularity at south pole
+		pitch = -2.0f * atan2f(mX, mW);
+		heading = -HEL_PI_OVER_2;
+		roll = 0.0f;
+		return;
+	}
+
+	pitch = atan2f(2.0f * mY * mW - 2.0f * mX* mZ, sqx - sqy - sqz + sqw);
+	heading = asinf(2.0f * test / unit);
+	roll = atan2f(2.0f * mX * mW - 2.0f * mY * mZ, -sqx + sqy - sqz + sqw);
+#endif
 }
 
 
@@ -96,34 +152,6 @@ void Quat::GetMatrix(matrix_t m) const
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void Quat::SetByEulerAngles(const vec3_t pyr)
-{
-	vec_t cp, sp;
-	helSinCosf(pyr[0] * 0.5f, &sp, &cp); // pitch
-	vec_t cy, sy;
-	helSinCosf(pyr[1] * 0.5f, &sy, &cy); // yaw
-	vec_t cr, sr;
-	helSinCosf(pyr[2] * 0.5f, &sr, &cr); // roll
-
-	vec_t cpcy = cp * cy;
-	vec_t spsy = sp * sy;
-
-	mW = cr * cpcy + sr * spsy;
-	mX = sr * cpcy - cr *spsy;
-	mY = cr * sp * cy + sr * cp * sy;
-	mZ = cr * cp * sy - sr * sp * cy;
-
-	Norm();
-}
-
-
-void Quat::SetByEulerAngles(vec_t pitch, vec_t yaw, vec_t roll)
-{
-	vec3_t pyr = { pitch, yaw, roll };
-	SetByEulerAngles(pyr);
-}
-
-
 void Quat::SetByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
 {
 	// Normalize
@@ -132,6 +160,57 @@ void Quat::SetByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
 	mY = y * dist;
 	mZ = z * dist;	
 	mW = cosf(angle / 2.0f);	
+}
+
+	// 0 1 2    2 0 1
+	// P H R -> R P Y
+
+void Quat::SetByEulerAngles(const vec3_t abg)
+{
+	vec_t cr, sr;
+	helSinCosf(abg[0] * 0.5f, &sr, &cr);
+	vec_t cp, sp;
+	helSinCosf(abg[1] * 0.5f, &sp, &cp);
+	vec_t cy, sy;
+	helSinCosf(abg[2] * 0.5f, &sy, &cy);
+
+	const vec_t cpcy = cp * cy;
+	const vec_t spsy = sp * sy;
+
+	mW = cr * cpcy + sr * spsy;
+	mX = sr * cpcy - cr *spsy;
+	mY = cr * sp * cy + sr * cp * sy;
+	mZ = cr * cp * sy - sr * sp * cy;
+
+	//Norm();
+}
+
+
+void Quat::SetByEulerAngles(vec_t alpha, vec_t beta, vec_t gamma)
+{
+	vec3_t abg = { alpha, beta, gamma };
+	SetByEulerAngles(abg);
+}
+
+
+void Quat::SetByEulerAnglesPHR(vec_t pitch, vec_t heading, vec_t roll)
+{
+	vec_t cp, sp;
+	helSinCosf(pitch * 0.5f, &sp, &cp);
+	vec_t cy, sy;
+	helSinCosf(heading * 0.5f, &sy, &cy);
+	vec_t cr, sr;
+	helSinCosf(roll * 0.5f, &sr, &cr);
+
+	const vec_t cpcy = cp * cy;
+	const vec_t spsy = sp * sy;
+
+	mW = cr * cpcy + sr * spsy;
+	mX = sr * cpcy - cr *spsy;
+	mY = cr * sp * cy + sr * cp * sy;
+	mZ = cr * cp * sy - sr * sp * cy;
+
+	//Norm();
 }
 
 
