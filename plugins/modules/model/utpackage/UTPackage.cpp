@@ -2198,9 +2198,10 @@ int get_utx_property(utx_header_t *header, FILE *f,
 
 #ifdef FREYJA_PLUGINS
 #include <mstl/Map.h>
-#include <hel/Matrix.h>
-#include <hel/Vector3d.h>
-#include <hel/Quaternion.h>
+#include <mstl/Vector.h>
+#include <hel/Mat44.h>
+#include <hel/Vec3.h>
+#include <hel/Quat.h>
 #include <freyja/PakABI.h>
 #include <freyja/ModelABI.h>
 #include <freyja/PluginABI.h>
@@ -2210,7 +2211,6 @@ int get_utx_property(utx_header_t *header, FILE *f,
 #include <freyja/LegacyABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/freyja.h>
-#include <mstl/Vector.h>
 
 using namespace mstl;
 
