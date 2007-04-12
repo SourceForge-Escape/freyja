@@ -162,17 +162,16 @@ void Quat::SetByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
 	mW = cosf(angle / 2.0f);	
 }
 
-	// 0 1 2    2 0 1
-	// P H R -> R P Y
 
 void Quat::SetByEulerAngles(const vec3_t abg)
 {
+	// P H R <- R P Y
 	vec_t cr, sr;
-	helSinCosf(abg[0] * 0.5f, &sr, &cr);
+	helSinCosf(abg[1] * 0.5f, &sr, &cr); //0 
 	vec_t cp, sp;
-	helSinCosf(abg[1] * 0.5f, &sp, &cp);
+	helSinCosf(abg[2] * 0.5f, &sp, &cp); //1
 	vec_t cy, sy;
-	helSinCosf(abg[2] * 0.5f, &sy, &cy);
+	helSinCosf(abg[0] * 0.5f, &sy, &cy); //2
 
 	const vec_t cpcy = cp * cy;
 	const vec_t spsy = sp * sy;
