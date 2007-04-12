@@ -3,6 +3,7 @@
 #include <string.h>
 #include <hel/Mat44.h>
 #include <hel/Vec3.h>
+#include <hel/Quat.h>
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
@@ -578,6 +579,46 @@ void mat44_invert_test()
 }
 
 
+void quat_euler_test(vec_t &pitch, vec_t &heading, vec_t &roll)
+{
+	printf("%f %f %f\n", pitch, heading, roll);
+
+	Quat q;
+	q.SetByEulerAngles(helDegToRad(pitch), 
+					   helDegToRad(heading), 
+					   helDegToRad(roll));
+
+	// 0 1 2    2 0 1
+	// P H R -> R P Y
+	Mat44 m;
+	m.SetRotation(helDegToRad(roll),// helDegToRad(pitch),
+				  helDegToRad(pitch),//helDegToRad(heading), 
+				  helDegToRad(heading));//helDegToRad(roll));
+
+	q.GetEulerAngles(pitch, heading, roll);
+	pitch = helRadToDeg(pitch);
+	heading = helRadToDeg(heading);
+	roll = helRadToDeg(roll);
+
+	printf("%f %f %f\n", pitch, heading, roll);
+
+
+	Vec3 v(1,1,1), u;
+	u = m * v;
+	q.Rotate(v, v);
+	printf("m.Rotate() -> %f %f %f\n", u.mX, u.mY, u.mZ);
+	printf("q.Rotate() -> %f %f %f\n", v.mX, v.mY, v.mZ);
+
+	Vec3 w(1,1,1);
+	Quat q2; 
+	q2 = m.ToQuat();
+	q.Rotate(w, w);
+	printf("q2.Rotate() -> %f %f %f\n", w.mX, w.mY, w.mZ);
+
+	printf("\n");
+}
+
+
 void helMatrixUnitTest()
 {
 	//math_test();
@@ -590,7 +631,28 @@ void helMatrixUnitTest()
 
 	//mat44_threaded_vlist_test();
 
-	mat44_invert_test();
+	//mat44_invert_test();
+
+	vec_t pitch = 90.0f, heading = 0.0f, roll = 0.0f;
+	quat_euler_test(pitch, heading, roll);
+	quat_euler_test(pitch = 0.0f, heading = 90.0f, roll = 0.0f);
+	quat_euler_test(pitch = 0.0f, heading = 0.0f, roll = 90.0f);
+
+	quat_euler_test(pitch = helRadToDeg(1.518214), 
+					heading = helRadToDeg(1.570796), 
+					roll = helRadToDeg(0.0));
+
+	quat_euler_test(pitch = helRadToDeg(1.518214), 
+					heading = helRadToDeg(1.518214), 
+					roll = helRadToDeg(0.0));
+
+	quat_euler_test(pitch = helRadToDeg(0.014140), 
+					heading = helRadToDeg(0.000433), 
+					roll = helRadToDeg(0.0));
+
+	quat_euler_test(pitch = helRadToDeg(1.343789), 
+					heading = helRadToDeg(1.343789), 
+					roll = helRadToDeg(0.0));
 }
 
 
