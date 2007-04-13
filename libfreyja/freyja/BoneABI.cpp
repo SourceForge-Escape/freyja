@@ -351,6 +351,25 @@ void freyjaGetBoneRotationEuler3fv(index_t boneIndex, vec3_t phr)
 }
 
 
+const vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
+{
+	Bone *b = Bone::GetBone(boneIndex);
+
+
+	if (b)
+	{
+		b->mBindPose.mMatrix[3] = 
+		b->mBindPose.mMatrix[7] = 
+		b->mBindPose.mMatrix[11] = 0.0f;
+		b->mBindPose.mMatrix[15] = 1.0f; 
+		freyjaPrintMessage("%i\n", boneIndex);
+		b->mBindPose.Print();
+	}
+
+	return b ? b->mBindPose.mMatrix : Mat44::mIdentity;
+}
+
+
 void freyjaBone_Transform_TmpUtil(index_t boneIndex, hel::Mat44 &m)
 {
 	index_t parent = freyjaGetBoneParent(boneIndex);
@@ -383,17 +402,6 @@ void freyjaBone_Transform_TmpUtil(index_t boneIndex, hel::Mat44 &m)
 		b->mBindPose = m;
 #endif
 	}
-}
-
-matrix_t gBoneABIIdentity = { 1, 0, 0, 0,
-							  0, 1, 0, 0,
-							  0, 0, 1, 0,
-							  0, 0, 0, 1 };
-
-vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
-{
-	Bone *b = Bone::GetBone(boneIndex);
-	return b ? b->mBindPose.mMatrix : gBoneABIIdentity;
 }
 
 
@@ -437,7 +445,7 @@ void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 	{
 		Vec3 v;
 		v = b->GetBindPose() * v;
-		HEL_VEC3_COPY(v.mVec, xyz);
+		helCopyVec3(v.mVec, xyz);
 	}
 #endif
 }

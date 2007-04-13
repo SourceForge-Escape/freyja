@@ -7,6 +7,8 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* PluginManager ( enable / disable plugins, descriptions, etc )
+
 	* Plugins using Mat44, Vec3
 
 	* Add in simple collision ( eg Dropping lantern on chair )

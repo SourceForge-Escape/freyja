@@ -195,8 +195,8 @@ void FreyjaRender::DrawFreeWindow()
 {
 	glPushMatrix();
 
+	// TODO: Replace with Mat44 transform
 	glTranslatef(mScroll[0], mScroll[1]/*+8.0f*/, mScroll[2]);
-
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
@@ -324,6 +324,7 @@ void FreyjaRender::AttachMethodListeners()
 {
 	CreateListener("eViewports", &FreyjaRender::eViewports);
 	CreateListener("eRenderSkeleton", &FreyjaRender::eRenderSkeleton);
+	CreateListener("eRenderSkeleton2", &FreyjaRender::eRenderSkeleton2);
 	CreateListener("eRenderVertex", &FreyjaRender::eRenderVertex);
 	CreateListener("eRenderWireframe", &FreyjaRender::eRenderWireframe);
 	CreateListener("eRenderNormals", &FreyjaRender::eRenderNormals);
@@ -779,15 +780,13 @@ void FreyjaRender::RenderLights()
 }
 
 
+// This sure has a lot of branching...
 void FreyjaRender::RenderMesh(index_t mesh)
 {
-	const vec_t scale = 1.0001f;
 	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if (!m)
 		return;
-
-	hel::Vec3 u, v;
 
 	glPushMatrix();
 
@@ -864,41 +863,38 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh &&
 			FreyjaControl::mControlPoints.size() == 0)
 		{
-			switch (FreyjaControl::mInstance->GetCursor().GetMode())
+			Cursor &cur = FreyjaControl::mInstance->GetCursor();
+
+			switch (cur.GetMode())
 			{
-			case freyja3d::Cursor::Rotation: // About mesh center ( matrix abuse )
+			case Cursor::Rotation: // About mesh center ( matrix abuse )
 				glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
 							 m->GetBoundingVolumeCenter().mVec[1],
 							 m->GetBoundingVolumeCenter().mVec[2]);
 				
-				glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0],
-						  1,0,0);
-				glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1],
-						  0,1,0);
-				glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2],
-						  0,0,1);
+				glRotatef(cur.mRotate.mVec[0], 1,0,0);
+				glRotatef(cur.mRotate.mVec[1], 0,1,0);
+				glRotatef(cur.mRotate.mVec[2], 0,0,1);
 				
 				glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
 							 -m->GetBoundingVolumeCenter().mVec[1],
 							 -m->GetBoundingVolumeCenter().mVec[2]);
 				break;
 				
-			case freyja3d::Cursor::Scale:
+			case Cursor::Scale:
 				// Haven't got the backend / frontend ready for this yet
 				if (FreyjaControl::mInstance->GetCursor().mSelected)
 				{
-					hel::Vec3 u = FreyjaControl::mInstance->GetCursor().mScale;
+					hel::Vec3 u = cur.mScale;
 					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
 				}
 				break;
 
-			case freyja3d::Cursor::Translation:
+			case Cursor::Translation:
 				// Haven't got the backend / frontend ready for this yet
-				if (FreyjaControl::mInstance->GetCursor().mSelected)
+				if (cur.mSelected)
 				{
-					hel::Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
-							  FreyjaControl::mInstance->GetCursor().mLastPos);
-
+					hel::Vec3 u = (cur.mPos - cur.mLastPos);
 					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
 				}
 				break;
@@ -998,6 +994,8 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	/* Render face as wireframe */
 	if ( mRenderMode & fWireframe )
 	{
+		const vec_t scale = 1.0001f;
+
 		glPushMatrix();
 		glScalef(scale, scale, scale);
 
@@ -1207,7 +1205,7 @@ void FreyjaRender::RenderModel(index_t model)
 
 	// FIXME: This renders all skeletons at once by design 
 	/* Point type setting shows actual bind pose skeleton */
-	if (mRenderMode & fBones)
+	if (mRenderMode & fBones2)
 	{
 		hel::Vec3 p, r, n;
 		glPushAttrib(GL_ENABLE_BIT);

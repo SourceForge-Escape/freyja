@@ -166,7 +166,7 @@ extern "C" {
 	 * Post : Returns bone[index]'s parent id
 	 ------------------------------------------------------*/
 
-	vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex);
+	const vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets bone[index]'s bind pose transform
