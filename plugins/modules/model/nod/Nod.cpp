@@ -482,6 +482,7 @@ using namespace mstl;
 #include <hel/Mat44.h>
 #include "Nod.h"
 
+using namespace hel;
 
 extern "C" {
 
@@ -573,9 +574,9 @@ int freyja_model__nod_import(char *filename)
 		snprintf(name, 64, "bone[%i]", b);
 		nod.GetEulerAngles2(nod.bones[b].RestMatrixInverse, rot);
 
-		rot[0] = HEL_DEG_TO_RAD(rot[0]);
-		rot[1] = HEL_DEG_TO_RAD(rot[2]);
-		rot[2] = HEL_DEG_TO_RAD(rot[1]);
+		rot[0] = helDegToRad(rot[0]);
+		rot[1] = helDegToRad(rot[2]);
+		rot[2] = helDegToRad(rot[1]);
 
 		bone = freyjaBoneCreate(skeleton); // transb[]
 		freyjaSkeletonAddBone(skeleton, bone);

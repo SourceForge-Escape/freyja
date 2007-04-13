@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <hel/Matrix.h>
+#include <hel/Mat44.h>
 
 #include <freyja/ModelABI.h>
 #include <freyja/PluginABI.h>
@@ -42,6 +42,7 @@
 #include <mstl/SystemIO.h>
 
 using namespace mstl;
+using namespace hel;
 
 
 extern "C" {
@@ -117,8 +118,8 @@ typedef struct {
 	vec3_t xyz;
 	vec4_t wxyz;
 
-	Matrix mat;
-	Matrix cMat;
+	Mat44 mat;
+	Mat44 cMat;
 
 } cmx_bone_t;
 
@@ -289,8 +290,8 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 									  skeleton[i].xyz[1] * scale,
 									  skeleton[i].xyz[2] * scale);
 
-				skeleton[i].mat.translate(xyz[0], xyz[1], xyz[2]);
-				skeleton[i].mat.rotate(skeleton[i].xyz[0],
+				skeleton[i].mat.Translate(xyz[0], xyz[1], xyz[2]);
+				skeleton[i].mat.Rotate(skeleton[i].xyz[0],
 									   skeleton[i].xyz[1],
 									   skeleton[i].xyz[2]);
 			}
@@ -306,7 +307,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 									  skeleton[i].xyz[2] * scale,
 									  skeleton[i].xyz[1] * scale);
 
-				skeleton[i].mat.translate(xyz[0], xyz[1], xyz[2]);
+				skeleton[i].mat.Translate(xyz[0], xyz[1], xyz[2]);
 
 
 				if (i == 2 || i == 8)
@@ -316,7 +317,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 					xyz[1] -= 180.0f;
 					xyz[2] += 0.0f;
 					freyjaBoneRotateEuler3f(idx, xyz[2], xyz[0], xyz[1]);
-					skeleton[i].mat.rotate(skeleton[i].xyz[2],
+					skeleton[i].mat.Rotate(skeleton[i].xyz[2],
 										   skeleton[i].xyz[0],
 										   skeleton[i].xyz[1]);
 				}
@@ -327,7 +328,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 					xyz[1] -= 90.0f;
 					xyz[2] += 0.0f;
 					freyjaBoneRotateEuler3f(idx, xyz[0], xyz[1], xyz[2]);
-					skeleton[i].mat.rotate(skeleton[i].xyz[0],
+					skeleton[i].mat.Rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
 				}
@@ -338,7 +339,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 					xyz[1] += 90.0f;
 					xyz[2] += 0.0f;
 					freyjaBoneRotateEuler3f(idx, xyz[0], xyz[1], xyz[2]);
-					skeleton[i].mat.rotate(skeleton[i].xyz[0],
+					skeleton[i].mat.Rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
 				}
@@ -346,7 +347,7 @@ void cmx_import_adult_skeleton(cmx_bone_t *skeleton)
 				{
 					freyjaBoneRotateQuat4fv(idx, skeleton[i].wxyz);	
 					freyjaGetBoneRotationEuler3fv(idx, xyz);
-					skeleton[i].mat.rotate(skeleton[i].xyz[0],
+					skeleton[i].mat.Rotate(skeleton[i].xyz[0],
 										   skeleton[i].xyz[1],
 										   skeleton[i].xyz[2]);
 				}
@@ -530,7 +531,7 @@ int freyja_model__skn_import(char *filename)
 		{
 			k = index;
 
-			skeleton[k].mat.multiply3v(vertices[j], vertices[j]);
+			skeleton[k].mat.Multiply3fv(vertices[j]);
 #ifdef OLD
 			while (k > -1)
 			{

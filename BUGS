@@ -92,7 +92,7 @@
 	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )
 	- PSK skeleton broken
 	- GRN skeleton broken
-	- Milkshape export broken
+	- Milkshape export broken ( fixed? test )
 
  * Reverse engineer plugin spin buttons don't always update
 	- Tabbing always updates

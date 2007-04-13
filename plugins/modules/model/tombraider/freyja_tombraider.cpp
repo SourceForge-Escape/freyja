@@ -30,7 +30,12 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+
 #include <mstl/List.h>
+#include <mstl/Map.h>
+#include <mstl/Vector.h>
+
+#include <hel/Mat44.h>
 
 #include <freyja/ModelABI.h>
 #include <freyja/PluginABI.h>
@@ -40,14 +45,11 @@
 #include <freyja/LegacyABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/freyja.h>
-#include <mstl/Vector.h>
-#include <hel/Matrix.h>
-#include <mstl/Map.h>
-#include <mstl/Vector.h>
 
 #include "TombRaider.h"
 
 using namespace mstl;
+using namespace hel;
 
 
 vec_t gTRScaling = 0.05f;
@@ -826,7 +828,7 @@ int tombraider_map_import(TombRaider *tombraider)
   tr2_vertex_t *vertex = NULL;
   tr2_object_texture_t *object_texture = NULL;
   tr2_room_t *room;
-  Matrix m;
+  Mat44 m;
   vec3_t p;
   Map<unsigned int, unsigned int> trans;
   unsigned int mesh;
@@ -839,8 +841,8 @@ int tombraider_map_import(TombRaider *tombraider)
 
   for (i = 0; i < tombraider->NumRooms(); i++)
   {
-	  m.setIdentity();
-	  m.translate(room[i].info.x,
+	  m.SetIdentity();
+	  m.Translate(room[i].info.x,
 					  room[i].info.y_top - room[i].info.y_bottom, 
 					  room[i].info.z);
 
@@ -862,7 +864,7 @@ int tombraider_map_import(TombRaider *tombraider)
       p[1] = vertex->y;
       p[2] = vertex->z;
 
-      m.multiply3v(p, p);
+      m.Multiply3fv(p);
 
       // Alloc vertex and keep a vertex index translation table
       trans.Add(ii, freyjaVertexCreate3f(p[0], -p[1], p[2]));

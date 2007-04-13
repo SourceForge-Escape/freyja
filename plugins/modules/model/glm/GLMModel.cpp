@@ -386,10 +386,11 @@ int main(int argc, char *argv[])
 #include <freyja/TextureABI.h>
 #include <freyja/freyja.h>
 #include <hel/Mat44.h>
-#include <hel/Vector3.h>
+#include <hel/Vec3.h>
 #include <mstl/Vector.h>
 
 using namespace mstl;
+using namespace hel;
 
 extern "C" {
 
@@ -445,7 +446,7 @@ int freyja_model__glm_import(char *filename)
 	const vec_t scale = 0.5;
 	Vector<long> vertices;
 	GLMModel glm;
-	Vector3d v;
+	Vec3 v;
 	long index;
 	int i, j;
 
@@ -472,11 +473,11 @@ int freyja_model__glm_import(char *filename)
 
 		for (j = 0; j < glm.mMDXMeshes[i].vertexCount; ++j)
 		{
-			v = Vector3d(glm.mMDXMeshes[i].vertices[j].vertCoords);
+			v = Vec3(glm.mMDXMeshes[i].vertices[j].vertCoords);
 			v *= scale;
 			index = freyjaVertexCreate3f(v.mVec[0], v.mVec[2], -v.mVec[1]);	
 			
-			v = Vector3d(glm.mMDXMeshes[i].vertices[j].normal);
+			v = Vec3(glm.mMDXMeshes[i].vertices[j].normal);
 			freyjaVertexNormal3f(index, v.mVec[0], v.mVec[2], -v.mVec[1]);
 			freyjaVertexTexCoord2fv(index,
 									glm.mMDXMeshes[i].texcoords[j].texCoords);

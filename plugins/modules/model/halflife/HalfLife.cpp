@@ -523,10 +523,11 @@ int HalfLife::load(const char *filename)
 #include <freyja/TextureABI.h>
 #include <freyja/freyja.h>
 #include <mstl/Map.h>
-#include <hel/Vector3d.h>
-#include <hel/Matrix.h>
+#include <hel/Vec3.h>
+#include <hel/Mat44.h>
 
 using namespace mstl;
+using namespace hel;
 
 extern "C" {
 
