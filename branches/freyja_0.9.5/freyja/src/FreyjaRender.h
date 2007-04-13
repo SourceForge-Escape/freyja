@@ -116,7 +116,8 @@ public:
 		fKeyFrameAnimation         = 131072,
 		fSolidPlane                = 262144,
 		fFPSCap                    = 524288,
-		fGroupColors               = (1<<20)
+		fGroupColors               = (1<<20),
+		fBones2                    = (1<<21) 
 	} flags_t;
 
 
@@ -168,6 +169,14 @@ public:
 
 	void eViewports(uint32 value) 
 	{ SetRenderFlag(fViewports, value, "Four window view"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderSkeleton2(uint32 value)
+	{ SetRenderFlag(fBones2, value, "Skeleton2 rendering"); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

@@ -30,10 +30,11 @@
 #include <freyja/MaterialABI.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 
 
 using namespace mstl;
+using namespace hel;
 
 extern "C" {
 

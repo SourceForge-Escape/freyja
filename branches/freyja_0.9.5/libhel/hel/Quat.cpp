@@ -166,12 +166,12 @@ void Quat::SetByAxisAngles(vec_t angle, vec_t x, vec_t y, vec_t z)
 void Quat::SetByEulerAngles(const vec3_t abg)
 {
 	// P H R <- R P Y
+	vec_t cy, sy;
+	helSinCosf(abg[0] * 0.5f, &sy, &cy); //2
 	vec_t cr, sr;
 	helSinCosf(abg[1] * 0.5f, &sr, &cr); //0 
 	vec_t cp, sp;
 	helSinCosf(abg[2] * 0.5f, &sp, &cp); //1
-	vec_t cy, sy;
-	helSinCosf(abg[0] * 0.5f, &sy, &cy); //2
 
 	const vec_t cpcy = cp * cy;
 	const vec_t spsy = sp * sy;
