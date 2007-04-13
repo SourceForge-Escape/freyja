@@ -33,7 +33,7 @@
 #include "GRN/grannyfile.h"
 
 #include <hel/math.h>
-#include <hel/Quaternion.h>
+#include <hel/Quat.h>
 #include <freyja/PluginABI.h>
 #include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
@@ -45,6 +45,7 @@
 
 using namespace mstl;
 using namespace std;
+using namespace hel;
 
 
 #ifdef WIN32
@@ -260,16 +261,16 @@ int freyja_model__grn_import(char *filename)
 
 #define GRN_QUAT_STACK
 #ifdef GRN_QUAT_STACK
-			Quaternion r, r2, q;
+			Quat r, r2, q;
 			long nxt;
 
-			q = Quaternion(bone->quaternion.points[3], // wxyz 
+			q = Quat(bone->quaternion.points[3], // wxyz 
 						   bone->quaternion.points[0], 
 						   bone->quaternion.points[1],
 						   bone->quaternion.points[2]);
 
 			nxt = i;
-			r.setIdentity();
+			r.SetIdentity();
 			while (nxt > -1)
 			{
 				Bone *child = bones.bones[nxt];
@@ -278,7 +279,7 @@ int freyja_model__grn_import(char *filename)
 				if (nxt == 0 || nxt == (int)child->parent)
 					nxt = -1;
 
-				r2 = Quaternion(child->quaternion.points[3], // wxyz 
+				r2 = Quat(child->quaternion.points[3], // wxyz 
 								child->quaternion.points[0], 
 								child->quaternion.points[1],
 								child->quaternion.points[2]);
@@ -296,7 +297,7 @@ int freyja_model__grn_import(char *filename)
 			{
 				vec_t x, y, z;
 
-				q.getEulerAngles(&x, &y, &z);
+				q.GetEulerAngles(x, y, z);
 				x = helRadToDeg(x);
 				y = helRadToDeg(y);
 				z = helRadToDeg(z);
