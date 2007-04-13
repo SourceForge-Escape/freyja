@@ -439,8 +439,9 @@ bool Md5::loadModel(const char *filename)
 ////////////////////////////////////////////////////////////
 
 #ifdef FREYJA_PLUGINS
-#include <hel/Quaternion.h>
-#include <hel/Matrix.h>
+#include <hel/Quat.h>
+#include <hel/Mat44.h>
+
 #include <freyja/ModelABI.h>
 #include <freyja/PluginABI.h>
 #include <freyja/BoneABI.h>
@@ -452,6 +453,7 @@ bool Md5::loadModel(const char *filename)
 #include <mstl/Vector.h>
 
 using namespace mstl;
+using namespace hel;
 
 extern "C" {
 
@@ -501,9 +503,9 @@ int freyja_model__md5_import(char *filename)
 	int i, m, v, w, t, j, bindex, index;
 	float qw;
 	vec4_t wxyz;
-	Quaternion q, q2;
-	Matrix mat, mat2;
-	Vector3d vec3, tmp;
+	Quat q, q2;
+	Mat44 mat, mat2;
+	Vec3 vec3, tmp;
 
 
 	if (md5.loadModel(filename) == false)
@@ -526,7 +528,7 @@ int freyja_model__md5_import(char *filename)
 
 		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
 		{
-			vec3.zero();
+			vec3.Zero();
 
 			for (i = 0; i < md5.mMeshes[m].verts[v].numbones; ++i)
 			{
@@ -537,13 +539,13 @@ int freyja_model__md5_import(char *filename)
 				qw = md5.decodeIdQuaternion(md5.mJoints[j].rotate[0],
 											md5.mJoints[j].rotate[1],
 											md5.mJoints[j].rotate[2]);
-				q = Quaternion(qw, 
+				q = Quat(qw, 
 							   md5.mJoints[j].rotate[0],
 							   md5.mJoints[j].rotate[1],
 							   md5.mJoints[j].rotate[2]);
 
-				tmp = q.rotate(md5.mMeshes[m].weights[w].pos);		
-				tmp += Vector3d(md5.mJoints[j].translate[0],
+				tmp = q.Rotate(md5.mMeshes[m].weights[w].pos);		
+				tmp += Vec3(md5.mJoints[j].translate[0],
 								md5.mJoints[j].translate[1],
 								md5.mJoints[j].translate[2]);
 				vec3 += tmp * md5.mMeshes[m].weights[w].weight;
@@ -611,19 +613,19 @@ int freyja_model__md5_import(char *filename)
 
 	freyjaBegin(FREYJA_SKELETON);
 	index_t skeletonIndex = freyjaGetCurrent(FREYJA_SKELETON);
-	Vector3d transforms[md5.mNumJoints];
-	Vector3d origin;
+	Vec3 transforms[md5.mNumJoints];
+	Vec3 origin;
 
 	for (j = 0; j < md5.mNumJoints; ++j)
 	{
-		transforms[j].zero();
+		transforms[j].Zero();
 	}
 
 	/* Mongoose 2004.12.21, 
 	 * Md5 stores absolute bone pos -- make them offsets from parent */
 	for (j = 0; j < md5.mNumJoints; ++j)
 	{
-		vec3 = Vector3d(md5.mJoints[j].translate[0],
+		vec3 = Vec3(md5.mJoints[j].translate[0],
 						md5.mJoints[j].translate[1],
 						md5.mJoints[j].translate[2]);
 		//printf("%3i   %.3f %.3f %.3f\n", j,
@@ -668,13 +670,13 @@ int freyja_model__md5_import(char *filename)
 
 		/* Scale */
 		index = j;
-		mat.setIdentity();
+		mat.SetIdentity();
 
 		while (index > -1)
 		{
 			index = md5.mJoints[index].parent;
 
-			q2 = Quaternion(qw, 
+			q2 = Quat(qw, 
 							md5.mJoints[index].rotate[0],
 							md5.mJoints[index].rotate[1],
 							md5.mJoints[index].rotate[2]);
@@ -682,14 +684,15 @@ int freyja_model__md5_import(char *filename)
 			mat = mat * mat2;
 		}
 
-		mat.invert();
-		mat2 = Quaternion(qw, 
+		mat.Invert();
+		mat2 = Quat(qw, 
 						  md5.mJoints[j].rotate[0],
 						  md5.mJoints[j].rotate[1],
 						  md5.mJoints[j].rotate[2]);
 		mat = mat * mat2;
-		q.setByMatrix(mat.mMatrix);
-		q.getQuaternion4fv(wxyz);
+		q = mat.ToQuat(); 
+		// q.SetByMatrix(mat.mMatrix);
+		q.GetQuat(wxyz);
 
 		//freyjaBoneRotateQuatWXYZ4fv(bindex, wxyz); // argh
 
@@ -726,9 +729,9 @@ int freyja_model__md5_export(char *filename)
 	vec4_t wxyz;
 	vec3_t xyz;
 	vec_t weight;
-	Quaternion q, q2;
-	Matrix mat, mat2;
-	Vector3d vec3, tmp;
+	Quat q, q2;
+	Mat44 mat, mat2;
+	Vec3 vec3, tmp;
 	int32 boneIndex, meshIndex, faceIndex, vertexIndex, texcoordIndex;
 	index_t modelIndex, skeletonIndex;
 	index_t bone;

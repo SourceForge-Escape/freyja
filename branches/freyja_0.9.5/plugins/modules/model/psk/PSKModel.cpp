@@ -2563,11 +2563,13 @@ int main(int argc, char *argv[])
 #include <freyja/freyja.h>
 #include <mstl/Map.h>
 #include <mstl/Vector.h>
-#include <hel/Matrix.h>
-#include <hel/Vector3d.h>
-#include <hel/Quaternion.h>
+
+#include <hel/Mat44.h>
+#include <hel/Vec3.h>
+#include <hel/Quat.h>
 
 using namespace mstl;
+using namespace hel;
 
 extern "C" {
 
@@ -2628,9 +2630,9 @@ int freyja_model__psk_import(char *filename)
 	unsigned int i, j, v, t, m;
 	const float scale = 0.25f; // 0.1f;
 	Vector<unsigned int> transV;
-	Quaternion q, r, r2;
-	Vector3d u;
-	Matrix M;
+	Quat q, r, r2;
+	Vec3 u;
+	Mat44 M;
 
 	if (freyja_model__psk_check(filename) < 0)
 		return -1;
@@ -2717,11 +2719,11 @@ int freyja_model__psk_import(char *filename)
 	vec_t x, y, z, tx, ty, tz;
 	i = 0;
 	{
-		q = Quaternion(psk.mBones[i].restDir[3],
-					   psk.mBones[i].restDir[0],
-					   psk.mBones[i].restDir[1],
-					   psk.mBones[i].restDir[2]);
-		q.getEulerAngles(&x, &z, &y);
+		q = Quat(psk.mBones[i].restDir[3],
+				 psk.mBones[i].restDir[0],
+				 psk.mBones[i].restDir[1],
+				 psk.mBones[i].restDir[2]);
+		q.GetEulerAngles(x, z, y);
 
 		tx = psk.mBones[i].restLoc[0]*scale;
 		tz = -psk.mBones[i].restLoc[1]*scale;
@@ -2750,11 +2752,11 @@ int freyja_model__psk_import(char *filename)
 
 	for (i = 1; i < psk.mNumBones; ++i)
 	{
-		q = Quaternion(psk.mBones[i].restDir[3],
-					   psk.mBones[i].restDir[0],
-					   psk.mBones[i].restDir[1],
-					   psk.mBones[i].restDir[2]);
-		q.getEulerAngles(&x, &z, &y);
+		q = Quat(psk.mBones[i].restDir[3],
+				 psk.mBones[i].restDir[0],
+				 psk.mBones[i].restDir[1],
+				 psk.mBones[i].restDir[2]);
+		q.GetEulerAngles(x, z, y);
 		z = -z;
 		y = -y;
 

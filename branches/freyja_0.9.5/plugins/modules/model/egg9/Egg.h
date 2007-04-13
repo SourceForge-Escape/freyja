@@ -84,11 +84,12 @@
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 
 #include <freyja/FreyjaPrinter.h>
 
 using namespace mstl;
+using namespace hel;
 
 typedef vec_t bbox_t[3][3];
 
@@ -232,7 +233,7 @@ typedef struct egg_mesh_s {
 	Vector<long> verticesMap;  /* Maps Egg::object ids to local ids, */
 	Vector<long> texcoordsMap; /* basically simualating FreyjaMesh local data 
 								* while possibly wasting memory */
-	Vector3d position;
+	Vec3 position;
 	/* End Ext */
 
 } egg_mesh_t;
