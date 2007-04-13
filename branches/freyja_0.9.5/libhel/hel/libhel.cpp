@@ -606,8 +606,8 @@ void quat_euler_test(vec_t &pitch, vec_t &heading, vec_t &roll)
 	Vec3 v(1,1,1), u;
 	u = m * v;
 	q.Rotate(v, v);
-	printf("m.Rotate() -> %f %f %f\n", u.mX, u.mY, u.mZ);
-	printf("q.Rotate() -> %f %f %f\n", v.mX, v.mY, v.mZ);
+	printf(" m.Rotate() -> %f %f %f\n", u.mX, u.mY, u.mZ);
+	printf(" q.Rotate() -> %f %f %f\n", v.mX, v.mY, v.mZ);
 
 	Vec3 w(1,1,1);
 	Quat q2; 
