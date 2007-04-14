@@ -501,6 +501,15 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 	return glarea;
 }
+
+#else
+#   warning "WARNING No gtkglarea widget support in this build"
+
+GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
+{
+	return NULL;
+}
+
 #endif
 
 
@@ -646,6 +655,48 @@ void mgtk_create_info_dialog(char *dialog_icon, char *message)
 	/* Force user to close this dialog by stopping other events */
 	gtk_dialog_run(GTK_DIALOG(about));
 	gtk_widget_destroy(about);
+}
+
+
+void mgtk_create_query_dialog_text(char *image, char *message, 
+								   int eventId, const char *value)
+{
+	GtkWidget *dialog = gtk_dialog_new();	
+
+	GtkWidget *icon = mgtk_create_icon(image, GTK_ICON_SIZE_DIALOG);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), icon);
+
+	GtkWidget *label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), message);
+	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), label);
+
+	/* Setup text view widget */
+	GtkWidget *view = gtk_text_view_new();
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+
+	if (value)
+	{
+		gtk_text_buffer_set_text(buffer, value, -1);	
+	}
+
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), view);
+	gtk_dialog_add_button(GTK_DIALOG(dialog), GTK_STOCK_OK, 1);
+	gtk_widget_show_all(dialog);
+
+	/* Force user to close this dialog by stopping other events */
+	gtk_dialog_run(GTK_DIALOG(dialog));
+
+	/* Emit signal with text data copied via property... */
+	gchar *text;
+	g_object_get(GTK_OBJECT(buffer),
+				 "text", &text,
+				 NULL);
+
+ 	mgtk_handle_text(eventId, text);
+	g_free(text);
+
+	gtk_widget_destroy(dialog);
 }
 
 

@@ -79,6 +79,9 @@ int mgtk_event_set_range(int event, unsigned int value,
 
 void mgtk_event_notify_observer1f(unsigned int id, float r);
 
+void mgtk_create_query_dialog_text(char *image, char *message, 
+								   int eventId, const char *value);
+
 float mgtk_create_query_dialog_float(char *image, char *message,
 									 float value, float min, float max, 
 									 float step, int digits);

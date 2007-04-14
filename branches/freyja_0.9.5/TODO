@@ -13,6 +13,8 @@
 
 	* Add in simple collision ( eg Dropping lantern on chair )
 
+	* Textview prompt for metadata -- like for floats
+
 	* Replace freyja UI Load/Save material with libfreyja Material metadata
 
 	* New resource event system with UIDs and event transparent buckets

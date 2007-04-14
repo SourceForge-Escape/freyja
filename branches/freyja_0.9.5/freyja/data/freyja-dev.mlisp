@@ -228,7 +228,8 @@
 
 		) ; submenu "_Modify"
 
-		(submenu ePluginMenu "_Plugins...")
+		(submenu ePluginMenu "_Plugins..."
+				(menu_item "Test _Textview"			eTestTextView))
 
 		(menu_seperator)
 
@@ -508,8 +509,6 @@
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		(vbox 0 1 1 1 1
 			(gl_widget WIDTH HEIGHT)
-			;(hbox 1 0 0 1 0
-			;	(hslider eAnimationSlider 0 500))
 		)
 
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -866,6 +865,7 @@
 				(hbox 1 0 0 1 0 (hsep))
 				(expander "Community Plugins"	1	"ThirdPartyPluginSlot")
 			) ; tab Plugins
+
 	) ; notebook
 
 ) ;vbox
@@ -882,11 +882,12 @@
 		;(hslider eAnimationSlider 0 500)
 
 	;; Animation bar
- 	(handlebox 1 
+ 	;(handlebox 1 
 		(vbox 1 1 1 1 1	
 			(hbox 1 1 1 1 1
 	
 			(hslider eAnimationSlider 0 500)
+
 			;(hbox 1 1 1 1 1
 			;	(hslider eAnimationSlider 0 500) )
 
@@ -911,7 +912,7 @@
 				) ; toolbar 
 			) ; hbox
 		) ;; vbox
-	) ;; End Animation handlebox
+	;) ;; End Animation handlebox
 
 	) ;; End hbox
 
@@ -920,6 +921,7 @@
 
 	) ;; vbox
 )  ;; Window
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dialogs
@@ -1005,7 +1007,8 @@
 
 
 (dialog "Freyja :: Help" eHelpDialog 0
-	(vbox 0 0 0 0 0
+(vbox 0 0 0 0 0
+	(hbox 1 0 0 1 0 
 		(label2 "
  If you'd like to work on documentation email me.  
 
@@ -1053,44 +1056,6 @@
 	) ; vbox
 ) ; dialog
 
-
-;(dialog "Smoothing Groups - freyja" eSmoothingGroupsDialog 0
-;	(vbox 0 0 0 0 0
-;		(label2 "Smoothing Groups")
-;
-;		(hbox 1 0 0 1 0
-;			(togglebutton " 1" eSmooth 1)
-;			(togglebutton " 2" eSmooth 2)
-;			(togglebutton " 3" eSmooth 3)
-;			(togglebutton " 4" eSmooth 4)
-;			(togglebutton " 5" eSmooth 5)
-;			(togglebutton " 6" eSmooth 6)
-;			(togglebutton " 7" eSmooth 7)
-;			(togglebutton " 8" eSmooth 8)
-;		) ; hbox
-;		(hbox 1 0 0 1 0
-;			(togglebutton " 9"  eSmooth 9)
-;			(togglebutton " 10" eSmooth 10)
-;			(togglebutton " 11" eSmooth 11)
-;			(togglebutton " 12" eSmooth 12)
-;			(togglebutton " 13" eSmooth 13)
-;			(togglebutton " 14" eSmooth 14)
-;			(togglebutton " 15" eSmooth 15)
-;			(togglebutton " 16" eSmooth 16)
-;		) ; hbox
-;		(hbox 1 0 0 1 0
-;			(togglebutton " 17" eSmooth 17)
-;			(togglebutton " 18" eSmooth 18)
-;			(togglebutton " 19" eSmooth 19)
-;			(togglebutton " 20" eSmooth 20)
-;			(togglebutton " 21" eSmooth 21)
-;			(togglebutton " 22" eSmooth 22)
-;			(togglebutton " 23" eSmooth 23)
-;			(togglebutton " 24" eSmooth 24)
-;		) ; hbox
-;
-;	) ; vbox
-;) ; dialog
 
 
 ;(dialog "Freyja :: 趣味" ePreferencesDialog 0

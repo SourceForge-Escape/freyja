@@ -10,6 +10,8 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Mgtk textview widget, textview query dialog
+ - Mgtk statusbar widget decoupled from gl widget ( break from legacy )
  - Mlisp fix for animation scrubber
  - Plugin updates to match new math lib
  - Tweaking final usage / ordering of some math types
