@@ -10,6 +10,9 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Mlisp fix for animation scrubber
+ - Plugin updates to match new math lib
+ - Tweaking final usage / ordering of some math types
  - libhel partial update: namespacing, new classes, single math, cont
  - Shuffling UI events around, breaking up into classes
 

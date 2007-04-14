@@ -508,7 +508,8 @@
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		(vbox 0 1 1 1 1
 			(gl_widget WIDTH HEIGHT)
-			(hslider eAnimationSlider 0 500))
+			(hbox 1 0 0 1 0
+				(hslider eAnimationSlider 0 500)))
 
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		;; Sidebar notebook in non-expanding container
@@ -898,6 +899,7 @@
 			) ; hbox
 		) ;; vbox
 	) ;; End Animation handlebox
+
 
 )
 )
