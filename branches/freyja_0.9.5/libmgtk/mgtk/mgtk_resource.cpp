@@ -163,7 +163,7 @@ arg_list_t *mgtk_rc_window(arg_list_t *container)
 arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 {
 	arg_list_t *width, *height, *ret = NULL;
-	GtkWidget *gl, *table, *hbox;
+	GtkWidget *gl, *hbox;
 
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
 	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
@@ -225,7 +225,8 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 	//hbox = packed_hbox_create(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
 	hbox = mgtk_create_vbox(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
 	
-	table = gtk_table_new(3, 3, FALSE);
+#if 0
+	GtkWidget *table = gtk_table_new(3, 3, FALSE);
 	gtk_widget_ref(table);
 	gtk_object_set_data_full(GTK_OBJECT(hbox), "table", table,
 							 (GtkDestroyNotify)gtk_widget_unref);
@@ -235,16 +236,41 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 	gtk_table_attach(GTK_TABLE(table), GTK_WIDGET(gl), 1, 2, 1, 2,
 					 (GtkAttachOptions)(GTK_EXPAND | GTK_FILL),
 					 (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), 0, 0);
-	
 	gtk_widget_show(gl);
-	
+
 	GTK_STATUS_BAR_WIDGET = gtk_statusbar_new();
 	gtk_widget_show(GTK_STATUS_BAR_WIDGET);
 
 	gtk_box_pack_start(GTK_BOX(hbox), GTK_STATUS_BAR_WIDGET, 0, 0, 0);
-	
+#else
+	gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gl), TRUE, TRUE, 0);
+	gtk_widget_show(gl);
+#endif
+		
 	delete_arg(&width);
 	delete_arg(&height);
+
+	return ret;
+}
+
+
+arg_list_t *mgtk_rc_statusbar(arg_list_t *box)
+{
+	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
+	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+
+	if (!box)
+	{
+		return NULL;
+	}
+
+	GTK_STATUS_BAR_WIDGET = gtk_statusbar_new();
+	GtkWidget *widget = (GtkWidget *)GTK_STATUS_BAR_WIDGET;
+	gtk_box_pack_start(GTK_BOX(box->data), widget, 0, 0, 0);
+	gtk_widget_show(widget);
+
+	arg_list_t *ret = NULL;
+	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
 
 	return ret;
 }
