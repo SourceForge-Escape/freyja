@@ -1582,10 +1582,15 @@ void eSelectMaterial(uint32 value)
 	}
 }
 
-
+void eTestTextView()
+{
+	mgtk_create_query_dialog_text("gtk-dialog-question", "Knock knock?", 0, "Who's there?");
+}
 
 void FreyjaMiscEventsAttach()
 {
+	ResourceEventCallback::add("eTestTextView", &eTestTextView);
+
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
 

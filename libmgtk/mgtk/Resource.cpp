@@ -476,6 +476,7 @@ arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box);
 arg_list_t *mgtk_rc_expander(arg_list_t *box);
 arg_list_t *mgtk_rc_summonbox(arg_list_t *box);
 arg_list_t *mgtk_rc_statusbar(arg_list_t *box);
+arg_list_t *mgtk_rc_textview(arg_list_t *args);
 
 arg_list_t *mgtk_func_toggle_set(arg_list_t *args);
 
@@ -509,6 +510,7 @@ Resource::Resource() :
 	RegisterFunction("icon", mgtk_rc_icon);
 	RegisterFunction("gl_widget", mgtk_rc_gl_widget);
 	RegisterFunction("statusbar", mgtk_rc_statusbar);
+	RegisterFunction("textview", mgtk_rc_textview);
 	RegisterFunction("notebook", mgtk_rc_notebook);
 	RegisterFunction("dialog", mgtk_rc_dialog);
 	RegisterFunction("tab", mgtk_rc_tab);

@@ -162,9 +162,6 @@ arg_list_t *mgtk_rc_window(arg_list_t *container)
 
 arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 {
-	arg_list_t *width, *height, *ret = NULL;
-	GtkWidget *gl, *hbox;
-
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
 	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
 
@@ -173,9 +170,11 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 		return NULL;
 	}
 
+	arg_list_t *width;
 	symbol_enforce_type(&width, INT);
 	MSTL_ASSERTMSG(width, "width == INT");
 
+	arg_list_t *height;
 	symbol_enforce_type(&height, INT);
 	MSTL_ASSERTMSG(height, "height == INT");
 
@@ -184,73 +183,83 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 		return NULL;
 	}
 
-#if defined (HAVE_GTKGLAREA) || (HAVE_GTKGLEXT)
 	/* Gtk GL Area widget */
-	gl = mgtk_create_glarea(get_int(width), get_int(height));
+	GtkWidget *gl = mgtk_create_glarea(get_int(width), get_int(height));
 
-	if (!gl)
+	if (gl)
 	{
-		mgtk_print("!ERROR: OpenGL display not supported by this system?\n");
+		gpointer gobj = gtk_object_get_data(GTK_OBJECT(gl), "gl_window_state");
+		mgtk_glarea_window_state_t *state = (mgtk_glarea_window_state_t*)gobj;
+		state->appbar = NULL;
+
+		GTK_GL_AREA_WIDGET = gl;
+		mgtk_print("@Gtk+ GL context started...");
 	}
 	else
 	{
-		mgtk_print("@Gtk+ GL context started...");
+		gl = mgtk_create_label(GTK_WIDGET(box->data), "gl_err_label1", 
+							   "Failed to create OpenGL context.", 0.5, 0.5);
+		gtk_widget_set_usize(gl, get_int(width), get_int(height));
+		mgtk_print("!ERROR: OpenGL display not supported by this system?\n");
 	}
 
-	GTK_GL_AREA_WIDGET = gl;
-
-//#   ifndef HAVE_GTKGLEXT
-	mgtk_glarea_window_state_t *state;
-
-	state = (mgtk_glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(gl),
-															 "gl_window_state");
-	state->appbar = NULL;
-
-#   ifndef HAVE_GTKGLEXT
+#if defined HAVE_GTKGLEXT
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_press_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_release_event",
 					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "destroy",
 					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
-#   endif
-
-#else
-#   warning "WARNING No gtkglarea widget support in this build"
-	gl = mgtk_create_label(GTK_WIDGET(box->data), "lab1", "No gtkglarea widget support in this build\nAdd -DHAVE_GTKGL to CONFIGURE_CFLAGS in Makefile to force build to use gtkglarea widget", 0.5, 0.5);
-	gtk_widget_set_usize(gl, get_int(width), get_int(height));
 #endif
 	
 	/* Editing window */
-	//hbox = packed_hbox_create(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
-	hbox = mgtk_create_vbox(GTK_WIDGET(box->data), "hb1", 0, 0, 1, 1, 1);
-	
-#if 0
-	GtkWidget *table = gtk_table_new(3, 3, FALSE);
-	gtk_widget_ref(table);
-	gtk_object_set_data_full(GTK_OBJECT(hbox), "table", table,
-							 (GtkDestroyNotify)gtk_widget_unref);
-	gtk_widget_show(table);
-	gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
-	
-	gtk_table_attach(GTK_TABLE(table), GTK_WIDGET(gl), 1, 2, 1, 2,
-					 (GtkAttachOptions)(GTK_EXPAND | GTK_FILL),
-					 (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), 0, 0);
+	GtkWidget *vbox = mgtk_create_vbox(GTK_WIDGET(box->data), "gl_vbox", 
+									   0, 0, 1, 1, 1);
+	gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(gl), TRUE, TRUE, 0);
 	gtk_widget_show(gl);
-
-	GTK_STATUS_BAR_WIDGET = gtk_statusbar_new();
-	gtk_widget_show(GTK_STATUS_BAR_WIDGET);
-
-	gtk_box_pack_start(GTK_BOX(hbox), GTK_STATUS_BAR_WIDGET, 0, 0, 0);
-#else
-	gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gl), TRUE, TRUE, 0);
-	gtk_widget_show(gl);
-#endif
 		
 	delete_arg(&width);
 	delete_arg(&height);
 
-	return ret;
+	return NULL;
+}
+
+
+arg_list_t *mgtk_rc_textview(arg_list_t *box)
+{
+	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
+	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+
+	if (!box)
+	{
+		return NULL;
+	}
+
+	arg_list_t *s;
+	symbol_enforce_type(&s, CSTRING);
+	//MSTL_ASSERTMSG(s, "s == CSTRING");
+
+	//arg_list_t *width;
+	//symbol_enforce_type(&width, INT);
+	//MSTL_ASSERTMSG(width, "width == INT");
+
+	//arg_list_t *height;
+	//symbol_enforce_type(&height, INT);
+	//MSTL_ASSERTMSG(height, "height == INT");
+
+	GtkWidget *view = gtk_text_view_new();
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+	//gtk_widget_set_usize(view, get_int(width), get_int(height));
+
+	if (s)
+	{
+		gtk_text_buffer_set_text(buffer, get_string(s), -1);	
+	}
+
+	gtk_box_pack_start(GTK_BOX((GtkWidget *)box->data), view, TRUE, TRUE, 0);
+	gtk_widget_show(view);
+
+	return box; // Directly 'repeat', no restrictions.
 }
 
 
