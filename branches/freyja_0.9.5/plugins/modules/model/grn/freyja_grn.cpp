@@ -64,6 +64,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("grn");
 	freyjaPluginDescription1s("Granny Model (*.grn)");
 	freyjaPluginAddExtention1s("*.grn");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);

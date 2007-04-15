@@ -5,11 +5,18 @@
  =====================================================================
 
  Dancer/Kagura (Release)
+ - DEPENDS Stability tests
+ - DEPENDS API Clean up
 
  Dancer (Public Beta Kagura)
+ - DEPENDS Fixed FK Animation
+ - DEPENDS Removed all numeric events
+ - DEPENDS <Secret> plugin support
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for obj plugin ( seems it wasn't updated with hel refactor )
+ - Added name handles to several plugins, more details on plugin init
  - Some tweaks to libfreyja Printer and mgtk
  - New Control class, cont to move away from legacy framework
  - New MaterialEv - first refactored control class

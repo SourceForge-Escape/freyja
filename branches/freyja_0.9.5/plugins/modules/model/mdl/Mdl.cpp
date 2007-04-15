@@ -1258,6 +1258,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("mdl");
 	freyjaPluginDescription1s("Quake Model (*.mdl)");
 	freyjaPluginAddExtention1s("*.mdl");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_VERTEX_MORPHING);

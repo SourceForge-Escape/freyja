@@ -3236,6 +3236,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("egg9");
 	freyjaPluginDescription1s("EGG 7,8,9 (*.egg)");
 	freyjaPluginAddExtention1s("*.egg");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH |

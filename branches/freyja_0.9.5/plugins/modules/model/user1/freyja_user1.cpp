@@ -42,9 +42,18 @@ extern "C" {
 	int freyja_model__user1_check(char *filename);
 	int freyja_model__user1_import(char *filename);
 	int freyja_model__user1_export(char *filename);
+	void freyja_init();
 }
 
-
+void freyja_init()
+{
+	freyjaPluginName1s("user1");
+	freyjaPluginDescription1s("User1 (*.user1)");
+	freyjaPluginAddExtention1s("*.user1");
+	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);//FREYJA_PLUGIN_THREAD_SAFE
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+	//freyjaPluginArg1f("scale", 1.0f);
+}
 
 typedef struct user1_vec_s
 {

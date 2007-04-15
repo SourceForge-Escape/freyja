@@ -4,16 +4,20 @@
 // Made hastily from my obj load wrapper for freyja
 // and my updated mstl STL
 
+#ifndef GUARD__FREYJA_OBJMODEL_H_
+#define GUARD__FREYJA_OBJMODEL_H_
+
 #include <ctype.h>
 
 #include <hel/math.h>
-#include <hel/Vector3d.h>
+#include <hel/Vec3.h>
 
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
 
 using namespace mstl;
+using namespace hel;
 
 class ObjModel
 {
@@ -324,5 +328,5 @@ public:
 
 
 
-
+#endif // GUARD__FREYJA_OBJMODEL_H_
 
