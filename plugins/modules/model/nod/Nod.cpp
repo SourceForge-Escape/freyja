@@ -495,6 +495,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("nod");
 	freyjaPluginDescription1s("Vampire Model (*.nod)");
 	freyjaPluginAddExtention1s("*.nod");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);

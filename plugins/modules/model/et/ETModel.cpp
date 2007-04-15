@@ -239,6 +239,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("et");
 	freyjaPluginDescription1s("MDM model (*.mdm)");
 	freyjaPluginAddExtention1s("*.mdm");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);

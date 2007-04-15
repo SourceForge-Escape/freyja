@@ -4577,6 +4577,12 @@ void FreyjaControl::LoadResource()
 			if (plugin == NULL)
 				continue;
 
+			MSTL_MSG("%i/%i [%s] %s, %s%s\n", i, count, 
+					 plugin->mName.c_str(),
+					 plugin->mFilename.c_str(),
+					 plugin->mImportFlags ? "Import " : "",
+					 plugin->mExportFlags ? "Export " : "");
+
 			if (plugin->mImportFlags)
 			{
 				char *desc = (char*)plugin->mDescription.c_str();
@@ -4589,9 +4595,6 @@ void FreyjaControl::LoadResource()
 				char *desc = (char*)plugin->mDescription.c_str();
 				char *ext = (char*)plugin->mExtention.c_str();
 				//uint32 menuId = ResourceEvent::GetResourceIdBySymbol("eExportMenu");
-				MSTL_MSG("%i/%i %s, %s\n", i, count, 
-						 plugin->mName.c_str(),
-						 plugin->mFilename.c_str());
 				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
 			}
 		}

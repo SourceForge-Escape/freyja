@@ -181,6 +181,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("nad");
 	freyjaPluginDescription1s("Vampire Animation (*.nad)");
 	freyjaPluginAddExtention1s("*.nad");
 	freyjaPluginImport1i(FREYJA_SKEL_ANIMATION);
