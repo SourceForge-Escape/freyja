@@ -131,7 +131,7 @@ debug-win32:
 	SHLIBEXT=".dll" \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR) -DHELEXPORTSCLASS" \
 	LD_FLAGS=" -shared -lstdc++ -lm" \
-	LIBS="-lm -lstdc++"
+	LIBS="-lm -lstdc++ $(WIN32_LIB_DIR) -lpthreadGC2"
 
 osx: debug-osx
 
