@@ -1208,7 +1208,7 @@ int Resource::getIntByName(const char *symbol)
 }
 
 
-bool Resource::Lookup(char *symbol, float *f)
+bool Resource::Lookup(const char *symbol, float *f)
 {
 	arg_list_t *sym_tab;
 
@@ -1237,7 +1237,7 @@ bool Resource::Lookup(char *symbol, float *f)
 }
 
 
-bool Resource::Lookup(char *symbol, int *i)
+bool Resource::Lookup(const char *symbol, int *i)
 {
 	arg_list_t *sym_tab;
 
@@ -1265,7 +1265,7 @@ bool Resource::Lookup(char *symbol, int *i)
 }
 
 
-bool Resource::Lookup(char *symbol, arg_list_t **adt)
+bool Resource::Lookup(const char *symbol, arg_list_t **adt)
 {
 	arg_list_t *sym_tab;
 
@@ -1294,7 +1294,7 @@ bool Resource::Lookup(char *symbol, arg_list_t **adt)
 }
 
 
-bool Resource::Lookup(char *symbol, char **s)
+bool Resource::Lookup(const char *symbol, char **s)
 {
 	arg_list_t *sym_tab;
 

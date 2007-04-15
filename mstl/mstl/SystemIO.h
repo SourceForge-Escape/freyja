@@ -493,6 +493,12 @@ public:
 		}
 
 
+		virtual void Flush()
+		{
+			fflush(mFileHandle);
+		}
+
+
 		virtual long GetOffset()
 		{
 			return ftell(mFileHandle);

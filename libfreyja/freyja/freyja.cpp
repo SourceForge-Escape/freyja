@@ -23,14 +23,14 @@
 
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
-#include "FreyjaPrinter.h"
+#include "Printer.h"
 #include "PluginABI.h"
 #include "FreyjaFSM.h"
 #include "freyja.h"
 
 using namespace mstl;
 
-FreyjaPrinter *gPrinter = NULL;
+Printer *gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
 uint32 gFreyjaMemoryDeletes = 0;
@@ -40,7 +40,7 @@ uint32 gFreyjaMemoryDeletes = 0;
 // Managed ABI ( Not 'public' )
 ///////////////////////////////////////////////////////////////////////
 
-void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged)
+void freyja__setPrinter(Printer *printer, bool freyjaManaged)
 {
 	if (!printer)
 		return;
@@ -88,7 +88,7 @@ void freyjaSpawn()
 		fsm->freyjaGetCount(FREYJA_VERTEX);
 
 		/* Setup basic default stdout printer */
-		freyja__setPrinter(new FreyjaPrinter(), true);
+		freyja__setPrinter(new Printer(), true);
 
 		/* Setup plugins */
 		freyjaPluginDirectoriesInit();
@@ -141,7 +141,7 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 	{
 		va_list args;
 		va_start(args, format);	
-		gPrinter->messageArgs(format, &args);
+		gPrinter->MessageArgs(format, &args);
 		va_end(args);
 	}
 	else
@@ -167,7 +167,7 @@ void freyjaPrintMessage(const char *format, ...)
 
 	if (gPrinter)
 	{
-		gPrinter->messageArgs(format, &args);
+		gPrinter->MessageArgs(format, &args);
 	}
 	else
 	{
@@ -187,7 +187,7 @@ void freyjaPrintError(const char *format, ...)
 
 	if (gPrinter)
 	{
-		gPrinter->errorArgs(format, &args);
+		gPrinter->ErrorArgs(format, &args);
 	}
 	else
 	{

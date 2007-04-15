@@ -77,7 +77,7 @@ class ResourceEvent
 
 	char *getName() { return mName;	}
 
-	static int GetResourceIdBySymbol(char *symbol)
+	static int GetResourceIdBySymbol(const char *symbol)
 	{
 		int id = -1;
 		

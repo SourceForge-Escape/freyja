@@ -229,7 +229,8 @@
 		) ; submenu "_Modify"
 
 		(submenu ePluginMenu "_Plugins..."
-				(menu_item "Test _Textview"			eTestTextView))
+				(submenu "_Test"
+					(menu_item "_Textview"			eTestTextView)))
 
 		(menu_seperator)
 
@@ -716,16 +717,16 @@
 				(hbox 0 1 0 1 1
 					(label "Material Select" 0.0 0.5))
 				(hbox 0 1 0 1 1
-					(spinbutton 0 0 1024 eSelectMaterial)
+					(spinbutton 0 0 1024 eSetMaterial)
 					(textbox eSetMaterialName))
 
 				(hbox 0 1 0 1 1
 				(toolbar
 					(toolbar_togglebutton false "gtk-add" "Texture"
-						"Enable texture mapping" eEvent eMaterialTex)
+						"Enable texture mapping" eEvent eEnableMaterialTexture)
 
 					(toolbar_togglebutton false "gtk-add" "Blend"
-						"Enable blending" eEvent eOpenGLBlend)
+						"Enable blending" eEvent eEnableMaterialBlending)
 
 					(toolbar_togglebutton false "gtk-add" "Fragment"
 						"Enable fragment" eEvent eEnableMaterialFragment)
@@ -740,10 +741,10 @@
 					(toolbar_separator)
 
 					(toolbar_togglebutton false "gtk-add" "Detail"
-						"Enable detail texture" eEvent eMaterialMultiTex)
+						"Enable detail texture" eEvent eEnableDetailTexture)
 
 					(toolbar_togglebutton false "gtk-add" "Normalize"
-						"Enable normalization for render scaling lighting" eEvent eOpenGLNormalize)
+						"Enable normalization for render scaling lighting" eEvent eEnableNormalize)
 
 				)) ; End toolbar / hbox
 
@@ -772,45 +773,45 @@
 					(label "Ambient" 0.0 0.5))
 
 				(hbox 1 1 0 1 1
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 700)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 701)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 702)
-					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 703)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient3)
 					(colorbutton 1 eColorMaterialAmbient))
 
 				(hbox 1 1 0 1 1
 					(label "Diffuse" 0.0 0.5))
  
 				(hbox 1 1 0 1 1
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 704)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 705)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 706)
-					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 707)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse3)
 					(colorbutton 1 eColorMaterialDiffuse))
 
 				(hbox 1 1 0 1 1
 					(label "Specular" 0.0 0.5))
 
 				(hbox 1 1 0 1 1
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 708)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 709)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 710)
-					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 711)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular3)
 					(colorbutton 1 eColorMaterialSpecular))
 
 				(hbox 1 1 0 1 1
 					(label "Emissive" 0.0 0.5))
 
 				(hbox 1 1 0 1 1
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 712)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 713)
-					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 714)
-					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 715)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive3)
 					(colorbutton 1 eColorMaterialEmissive))
 
 				(hbox 1 1 0 1 1
 					(label "Shininess" 0.0 0.5)
-					(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 716))
+					(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 eMaterialShine))
 
 
 				(hbox 1 0 0 1 0

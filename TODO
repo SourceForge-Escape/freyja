@@ -7,26 +7,26 @@
  Hot  
  -----------------------------------------------------------------------------
 
+	* 'FreyjaMaterial'	 class
+		- Event hooks
+		- material refresh
+		- Remove last of 'numeric' events 
+
+	* Query dialog with multitype support.
+		struct query { string msg, type defaultvalue, type eventId }
+
 	* PluginManager ( enable / disable plugins, descriptions, etc )
 
-	* Plugins using Mat44, Vec3
-
 	* Add in simple collision ( eg Dropping lantern on chair )
-
-	* Textview prompt for metadata -- like for floats
 
 	* Replace freyja UI Load/Save material with libfreyja Material metadata
 
 	* New resource event system with UIDs and event transparent buckets
 
-	* Remove last of 'numeric' events 
-
 	* Style / lic update all code
 
 	* Replacing the horrible event switches with MethodDelegates for 
 	  great justice
-
-	* More strings in mlisp for better translations
 
 	* Log window for more complete error / warning reporting.
 

@@ -173,6 +173,9 @@ targets: $(TARGETS)
 
 OBJS = \
 	$(BUILD_DIR)/freyja_events.o \
+	$(BUILD_DIR)/Control.o \
+	$(BUILD_DIR)/ControlPrinter.o \
+	$(BUILD_DIR)/MaterialEv.o \
 	$(BUILD_DIR)/Texture.o \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \

@@ -207,7 +207,7 @@ void FreyjaRender::DrawFreeWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedTexture());
+		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -405,7 +405,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedTexture());
+		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedMaterial());
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
@@ -1693,7 +1693,8 @@ void FreyjaRender::DrawUVWindow()
 			Face *f = m->GetFace(i);
 			hel::Vec3 v;
 
-			if (!f ||f->mMaterial != FreyjaControl::mInstance->GetSelectedTexture())
+			if (!f || 
+				f->mMaterial != FreyjaControl::mInstance->GetSelectedMaterial())
 				continue;
 
 			if (f->mFlags & Face::fPolyMappedTexCoords)

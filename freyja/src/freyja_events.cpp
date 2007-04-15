@@ -172,22 +172,6 @@ void setColor(vec4_t dest, vec4_t color)
 }
 
 
-void freyja_plugin_generic(const char *symbol, void *something)
-{
-	// NOTICE I don't actually let plugins query the Resource for safety ;)
-
-	// 1. look for symbol in the 'hack bind list'
-	// 2. return what you found via the void pointer
-
-	if (strncmp(symbol, "freyja_load_texture_buffer", 25) == 0)
-	{
-		something = (void *)freyja_load_texture_buffer;
-	}
-
-	something = 0x0; // Stop the madness
-}
-
-
 // Get the basename of the full path name and strip ext '.so', '.dll', etc
 void freyja_init_get_basename(const char *filename, char *basename, uint32 size)
 {
@@ -228,6 +212,23 @@ void freyja_init_get_basename(const char *filename, char *basename, uint32 size)
 		basename[i] = 0;
 
 	//freyjaPrintMessage("! %s", basename);
+}
+
+
+void freyja_plugin_generic(const char *symbol, void *something)
+{
+#if 0
+	// NOTICE I don't actually let plugins query the Resource for safety ;)
+
+	// 1. look for symbol in the 'hack bind list'
+	// 2. return what you found via the void pointer
+
+	if (strncmp(symbol, "freyja_load_texture_buffer", 25) == 0)
+	{
+		something = (void *)freyja_load_texture_buffer;
+	}
+#endif
+	something = 0x0; // Stop the madness
 }
 
 
@@ -316,29 +317,32 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 
 
 	/* Color event listener */
-	if (ResourceEvent::listen(id - 10000 /*ePluginEventBase*/, color, 4))
-		return; // true;
+	if (ResourceEvent::listen(id - ePluginEventBase, color, 4))
+		return;
 
 	switch (id)
 	{
 	case eColorMaterialAmbient: 
 		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
-		freyja_refresh_material_interface(); // FIXME HACK
+		MaterialEv::mHack->RefreshInterface();
 		break;
 
 	case eColorMaterialDiffuse:
 		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-		freyja_refresh_material_interface(); // FIXME HACK
+		MaterialEv::mHack->RefreshInterface();
+		//freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialSpecular:
 		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
-		freyja_refresh_material_interface(); // FIXME HACK
+		MaterialEv::mHack->RefreshInterface();
+		//freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialEmissive:
 		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
-		freyja_refresh_material_interface(); // FIXME HACK
+		MaterialEv::mHack->RefreshInterface();
+		//freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorLightAmbient: 
@@ -516,15 +520,6 @@ void freyja_handle_command(int command)
 }
 
 
-void freyja_load_texture_buffer(byte *image, uint32 w, uint32 h, uint32 bpp)
-{
-	if (bpp == 24)
-		FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 24, Texture::RGB);
-	else if (bpp == 32)
-		FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 32, Texture::RGBA);
-}
-
-
 void freyja_set_dialog_visible(const char *name)
 {
 	int e = ResourceEvent::GetResourceIdBySymbol((char*)name);
@@ -563,39 +558,6 @@ void eVertexExtrude()
 }
 
 
-void eTextureUpload(unsigned int id)
-{
-	byte *image;
-	uint32 w, h, bpp, type;
-
-	/* Texture image was stored as raw buffer */
-	freyjaGetTextureImage(id, w, h, bpp, type, image);
-	freyja_print("!test");
-
-	if (image)
-	{
-		switch (type)
-		{
-		case RGBA_32:
-			FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 32, Texture::RGBA);
-			break;
-
-		case RGB_24:
-			FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 24, Texture::RGB);
-			break;
-
-		case INDEXED_8:
-			FreyjaControl::mInstance->LoadTextureBuffer(image, w, h, 8, Texture::INDEXED);
-			break;
-
-		default:
-			freyja_print("%s> ERROR: Unsupported texture colormap %d",
-						"FreyjaModel::loadModel", type);
-		}
-	}
-}
-
-
 void eOpenModel(char *filename)
 {
 	if (FreyjaControl::mInstance->LoadModel(filename))
@@ -618,28 +580,6 @@ void eSaveModel(char *filename, char *extension)
 		freyja_set_main_window_title(title);
 		FreyjaControl::mInstance->AddRecentFilename(filename);
 	}
-}
-
-
-void eNewMaterial()
-{
-	index_t i = freyjaMaterialCreate();
-	freyja_print("New material [%i] created.", i);
-}
-
-
-void eOpenMaterial(char *filename)
-{
-	if (FreyjaControl::mInstance->LoadMaterial(filename))
-	{
-		freyja_refresh_material_interface();
-	}
-}
-
-
-void eSaveMaterial(char *filename)
-{
-	FreyjaControl::mInstance->SaveMaterial(filename);
 }
 
 
@@ -947,27 +887,6 @@ void eMirrorFacesZ()
 }
 
 
-void eARBFragmentMode(unsigned int value)
-{
-	if (value)
-	{
-		FreyjaControl::mInstance->mUsingARBFragments = true;
-		mgtk_toggle_value_set(ResourceEvent::GetResourceIdBySymbol("eGLSLFragmentMode"), 0);
-		freyja_print("ARB fragment shader mode");
-	}
-}
-
-
-void eGLSLFragmentMode(unsigned int value)
-{
-	if (value)
-	{
-		FreyjaControl::mInstance->mUsingARBFragments = false;
-		mgtk_toggle_value_set(ResourceEvent::GetResourceIdBySymbol("eARBFragmentMode"), 0);
-		freyja_print("GLSL fragment shader mode");
-	}
-}
-
 vec_t gSnapWeldVertsDist = 0.001f;
 void eSnapWeldVertsDist(vec_t d)
 {
@@ -1260,44 +1179,6 @@ void eAnimationPrev()
 }
 
 
-void ePolygonSplit()
-{
-	freyja_print("Splitting polygon[%i] ...", 
-				 FreyjaControl::mInstance->GetSelectedFace());
-	freyjaMeshPolygonSplit(FreyjaControl::mInstance->GetSelectedMesh(), 
-						   FreyjaControl::mInstance->GetSelectedFace());
-	FreyjaControl::mInstance->Dirty();
-}
-
-void eSetMeshTexture()
-{
-	freyja_print("Switching all of Mesh[%i]'s faces to material %i ...",
-				 FreyjaControl::mInstance->GetSelectedMesh(), 
-				 FreyjaControl::mInstance->GetSelectedTexture());
-	freyjaMeshMaterial(FreyjaControl::mInstance->GetSelectedMesh(),
-					   FreyjaControl::mInstance->GetSelectedTexture());
-	FreyjaControl::mInstance->Dirty();
-}
-
-void eSetFacesMaterial()
-{
-	freyja_print("Switching all of selected faces to material %i",
-				 FreyjaControl::mInstance->GetSelectedMesh(), 
-				 FreyjaControl::mInstance->GetSelectedTexture());
-	FreyjaControl::mInstance->SetMaterialForSelectedFaces(FreyjaControl::mInstance->GetSelectedTexture());
-	FreyjaControl::mInstance->Dirty();
-}
-
-void eSetPolygonTexture()
-{
-	freyja_print("Face to material set to %i", 
-				 FreyjaControl::mInstance->GetSelectedTexture());
-	FreyjaControl::mInstance->SetFaceMaterial(FreyjaControl::mInstance->GetSelectedFace(), 
-					FreyjaControl::mInstance->GetSelectedTexture());
-	FreyjaControl::mInstance->Dirty();
-}
-
-
 void eLightPosX(vec_t value)
 {
 	uint32 light = 0; // GetCurrentLight();
@@ -1331,224 +1212,6 @@ void eLightPosZ(vec_t value)
 }
 
 
-void eBlendSrc(uint32 value)
-{
-	index_t material = freyjaGetCurrentMaterial();
-
-	switch (value)
-	{
-	case 0:
-		freyjaMaterialBlendSource(material, GL_ZERO);
-		break;
-
-	case 1:
-		freyjaMaterialBlendSource(material, GL_ONE);
-		break;
-
-	case 2:
-		freyjaMaterialBlendSource(material, GL_SRC_COLOR);
-		break;
-
-	case 3:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_SRC_COLOR);
-		break;
-
-	case 4:
-		freyjaMaterialBlendSource(material, GL_DST_COLOR);
-		break;
-
-	case 5:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_DST_COLOR);
-		break;
-
-	case 6:
-		freyjaMaterialBlendSource(material, GL_SRC_ALPHA);
-		break;
-
-	case 7:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-
-	case 8:
-		freyjaMaterialBlendSource(material, GL_DST_ALPHA);
-		break;
-
-	case 9:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_DST_ALPHA);
-		break;
-
-	case 10:
-		freyjaMaterialBlendSource(material, GL_SRC_ALPHA_SATURATE);
-		break;
-
-	case 11:
-		freyjaMaterialBlendSource(material, GL_CONSTANT_COLOR);
-		break;
-
-	case 12:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_CONSTANT_COLOR);
-		break;
-
-	case 13:
-		freyjaMaterialBlendSource(material, GL_CONSTANT_ALPHA);
-		break;
-
-	case 14:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_CONSTANT_ALPHA);
-		break;
-
-	default:
-		freyja_print("Unknown Blend Source event %i.", value);
-	}
-		
-	freyja_event_gl_refresh();
-}
-
-
-void eBlendDest(uint32 value)
-{
-	index_t material = freyjaGetCurrentMaterial();
-
-	switch (value)
-	{
-	case 0:
-		freyjaMaterialBlendDestination(material, GL_ZERO);
-		break;
-
-	case 1:
-		freyjaMaterialBlendDestination(material, GL_ONE);
-		break;
-
-	case 2:
-		freyjaMaterialBlendDestination(material, GL_SRC_COLOR);
-		break;
-
-	case 3:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_SRC_COLOR);
-		break;
-
-	case 4:
-		freyjaMaterialBlendDestination(material, GL_DST_COLOR);
-		break;
-
-	case 5:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_DST_COLOR);
-		break;
-
-	case 6:
-		freyjaMaterialBlendDestination(material, GL_SRC_ALPHA);
-		break;
-
-	case 7:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-
-	case 8:
-		freyjaMaterialBlendDestination(material, GL_DST_ALPHA);
-		break;
-
-	case 9:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_DST_ALPHA);
-		break;
-
-	case 10:
-		freyjaMaterialBlendDestination(material, GL_SRC_ALPHA_SATURATE);
-		break;
-
-	case 11:
-		freyjaMaterialBlendDestination(material, GL_CONSTANT_COLOR);
-		break;
-
-	case 12:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_CONSTANT_COLOR);
-		break;
-
-	case 13:
-		freyjaMaterialBlendDestination(material, GL_CONSTANT_ALPHA);
-		break;
-
-	case 14:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_CONSTANT_ALPHA);
-		break;
-
-	default:
-		freyja_print("Unknown Blend Dest event %i.", value);
-	}
-
-	freyja_event_gl_refresh();
-}
-
-void eMaterialMultiTex(uint32 value)
-{
-	if (value)
-	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_DetailTexture);
-	}
-	else
-	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_DetailTexture);
-	}
-	freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
-}
-
-
-void eOpenGLNormalize(uint32 value)
-{
-	if (value)
-	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Normalize);
-	}
-	else
-	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Normalize);
-	}
-
-	freyja_print("OpenGL normalization is [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
-}
-
-
-void eOpenGLBlend(uint32 value)
-{
-	if (value)
-	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Blending);
-	}
-	else
-	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Blending);
-	}
-
-	freyja_print("OpenGL blending [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
-}
-
-
-void eMaterialTex(uint32 value)
-{
-	if (value)
-	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Texture);
-	}
-	else
-	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Texture);
-	}
-
-	freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
-}
-
-
 void ePolygonSize(uint32 value)
 {
 	FreyjaControl::mInstance->SetFaceEdgeCount(value);
@@ -1556,36 +1219,13 @@ void ePolygonSize(uint32 value)
 				 FreyjaControl::mInstance->GetFaceEdgeCount());
 }
 
-void eSelectMaterial(uint32 value)
-{
-	// Very hacky
-	static uint32 event = ResourceEvent::GetResourceIdBySymbol("eSelectMaterial");
-
-	if (!freyja_event_set_range(event, value, 0, freyjaGetMaterialCount()-1))
-	{
-		if (value != freyjaGetCurrentMaterial())
-		{
-			freyjaCurrentMaterial(value);
-			freyja_print("Selected material[%i] = '%s'.", value,
-						 freyjaGetMaterialName(value));
-			freyja_refresh_material_interface();
-			freyja_event_gl_refresh();
-		}
-
-		// This is here to support the obsolete idea of texture -> mesh
-		// binding, since we do material -> mesh binding now
-		if (value != FreyjaControl::mInstance->GetSelectedTexture())
-		{
-			FreyjaControl::mInstance->SetSelectedTexture(value);
-			freyja_event_gl_refresh();
-		}
-	}
-}
 
 void eTestTextView()
 {
-	mgtk_create_query_dialog_text("gtk-dialog-question", "Knock knock?", 0, "Who's there?");
+	mgtk_create_query_dialog_text("gtk-dialog-question", 
+								  "Knock knock?", eNone, "Who's there?");
 }
+
 
 void FreyjaMiscEventsAttach()
 {
@@ -1608,9 +1248,6 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eGenerateTube", &eGenerateTube);
 	ResourceEventCallback::add("eGenerateCylinder", &eGenerateCylinder);
 	ResourceEventCallback::add("eGenerateCone", &eGenerateCone);
- 
-	ResourceEventCallbackUInt::add("eGLSLFragmentMode", &eGLSLFragmentMode);
-	ResourceEventCallbackUInt::add("eARBFragmentMode", &eARBFragmentMode);
 
 	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
 
@@ -1648,25 +1285,11 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
 	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
-	ResourceEventCallback::add("eNewMaterial", &eNewMaterial);
-	ResourceEventCallbackString::add("eOpenMaterial", &eOpenMaterial);
-	ResourceEventCallbackString::add("eSaveMaterial", &eSaveMaterial);
 	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
 	ResourceEventCallbackString2::add("eSaveModel", &eSaveModel);
 
 	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
-
-	ResourceEventCallbackUInt::add("eTextureUpload", &eTextureUpload);
-
-	ResourceEventCallbackUInt::add("eMaterialMultiTex", &eMaterialMultiTex);
-	ResourceEventCallbackUInt::add("eOpenGLNormalize", &eOpenGLNormalize);
-	ResourceEventCallbackUInt::add("eOpenGLBlend", &eOpenGLBlend);
 	ResourceEventCallbackUInt::add("ePolygonSize", &ePolygonSize);
-	ResourceEventCallbackUInt::add("eSelectMaterial", &eSelectMaterial);
-	ResourceEventCallbackUInt::add("eMaterialTex", &eMaterialTex);
-
-	ResourceEventCallbackUInt::add("eBlendSrc", &eBlendSrc);
-	ResourceEventCallbackUInt::add("eBlendDest", &eBlendDest);
 
 	// FIXME, These light events don't appear to trigger
 	ResourceEventCallbackVec::add("eLightPosX", &eLightPosX);
@@ -1675,10 +1298,6 @@ void FreyjaMiscEventsAttach()
 
 	ResourceEventCallback::add("eAnimationNext", &eAnimationNext);
 	ResourceEventCallback::add("eAnimationPrev", &eAnimationPrev);
-	ResourceEventCallback::add("ePolygonSplit", &ePolygonSplit);
-	ResourceEventCallback::add("eSetMeshTexture", &eSetMeshTexture);
-	ResourceEventCallback::add("eSetFacesMaterial", &eSetFacesMaterial);
-	ResourceEventCallback::add("eSetPolygonTexture", &eSetPolygonTexture);
 
 	ResourceEventCallback::add("eMeshFlipNormals", &eMeshFlipNormals);
 	ResourceEventCallback::add("eHelpDialog", &eHelpDialog);
@@ -1755,11 +1374,6 @@ void freyja_handle_resource_init(Resource &r)
 
 	// Modes
 	r.RegisterInt("eModeAutoKeyframe", eModeAutoKeyframe);
-
-	// Misc
-	r.RegisterInt("eSetMaterialShader", eSetMaterialShader);
-	r.RegisterInt("eSetMaterialShaderFilename", eSetMaterialShaderFilename);
-	r.RegisterInt("eSetMaterialTexture", eSetMaterialTexture);
 
 	// Menus
 	r.RegisterInt("ePluginMenu", ePluginMenu);
@@ -1861,7 +1475,7 @@ void freyja_handle_resource_start()
 	}
 
 	/* Setup material interface */
-	freyja_refresh_material_interface();
+	MaterialEv::mHack->RefreshInterface();
 
 	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);
@@ -2166,70 +1780,12 @@ int freyja_event2i(int event, int cmd)
 }
 
 
-FILE *freyja_get_log_file()
-{
-	static FILE *f = NULL;
-
-	if (!f)
-	{
-		String s = freyja_rc_map_string(FREYJA_LOG_FILE);
-		f = fopen(s.GetCString(), "w");
-	}
-
-	return f;
-}
-
-
-void freyja_close_log_file()
-{
-	if (freyja_get_log_file())
-		fclose(freyja_get_log_file());
-}
-
-
-void freyja_print_args(char *format, va_list *args)
-{
-	FILE *f = freyja_get_log_file();
-	const uint32 sz = 1023;
-	char buffer[sz+1];
-	unsigned int l;
-
-	// Strip message of an trailing carrage return 
-	//  and print to stdout and the status bar
-	vsnprintf(buffer, sz, format, *args);
-	buffer[sz] = 0;
-
-	l = strlen(buffer);
-  
-	if (!l || !buffer[0])
-		return;
-
-	if (buffer[l-1] == '\n')
-		buffer[l-1] = 0;
-
-	// Text starting with '!' are sent to stderr was well
-	if (buffer[0] == '!')
-	{
-		buffer[0] = ' ';
-		fprintf(stderr, "%s\n", buffer);
-	}
-
-	mgtk_event_notify_statusbar(buffer);
-
-	if (f)
-	{
-		fprintf(f, "> %s\n", buffer);
-		fflush(f);
-	}
-}
-
-
 void freyja_print(char *format, ...)
 {
 	va_list args;
 
 	va_start(args, format);
-	freyja_print_args(format, &args);
+	ControlPrinter::PrintArgs(format, &args);
 	va_end(args);
 }
 
@@ -2247,7 +1803,7 @@ void freyja_event_shutdown()
 	freyja_print("!   Email addr: %s", EMAIL_ADDRESS);
 	freyja_print("!   Web site  : %s", PROJECT_URL);
 
-	freyja_close_log_file();
+	ControlPrinter::StopLogging();
 }
 
 
@@ -2294,97 +1850,6 @@ char *freyja_rc_map(char *basename)
 	String s = freyja_get_resource_path();
 	s += basename;
 	return mstl::String::Strdup(s.c_str());;
-}
-
-
-void freyja_refresh_material_interface()
-{
-	uint32 mIndex = freyjaGetCurrentMaterial();
-
-	mgtk_textentry_value_set(eSetMaterialName, freyjaGetMaterialName(mIndex));
-
-	mgtk_spinbutton_value_set(eSetMaterialShader,
-                              freyjaGetMaterialShader(mIndex));
-	mgtk_textentry_value_set(eSetMaterialShaderFilename, 
-							 freyjaGetMaterialShaderName(mIndex));
-
-	mgtk_spinbutton_value_set(eSetMaterialTexture,
-                              freyjaGetMaterialTexture(mIndex));
-	mgtk_textentry_value_set(eSetTextureNameA,
-                             freyjaGetMaterialTextureName(mIndex));
-
-	vec4_t ambient;
-	freyjaGetMaterialAmbient(mIndex, ambient);
-	freyja_event_set_color(eColorMaterialAmbient, 
-						   ambient[0], ambient[1], ambient[2], ambient[3]);
-	mgtk_spinbutton_value_set(700, ambient[0]);	
-	mgtk_spinbutton_value_set(701, ambient[1]);
-	mgtk_spinbutton_value_set(702, ambient[2]);
-	mgtk_spinbutton_value_set(703, ambient[3]);
-
-	vec4_t diffuse;
-	freyjaGetMaterialDiffuse(mIndex, diffuse);
-	freyja_event_set_color(eColorMaterialDiffuse, 
-						   diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
-	mgtk_spinbutton_value_set(704, diffuse[0]);
-	mgtk_spinbutton_value_set(705, diffuse[1]);
-	mgtk_spinbutton_value_set(706, diffuse[2]);
-	mgtk_spinbutton_value_set(707, diffuse[3]);
-
-	vec4_t specular;
-	freyjaGetMaterialSpecular(mIndex, specular);
-	freyja_event_set_color(eColorMaterialSpecular, 
-						   specular[0], specular[1], specular[2], specular[3]);
-	mgtk_spinbutton_value_set(708, specular[0]);
-	mgtk_spinbutton_value_set(709, specular[1]);
-	mgtk_spinbutton_value_set(710, specular[2]);
-	mgtk_spinbutton_value_set(711, specular[3]);
-
-	vec4_t emissive;
-	freyjaGetMaterialEmissive(mIndex, emissive);
-	freyja_event_set_color(eColorMaterialEmissive, 
-						   emissive[0], emissive[1], emissive[2], emissive[3]);
-	mgtk_spinbutton_value_set(712, emissive[0]);
-	mgtk_spinbutton_value_set(713, emissive[1]);
-	mgtk_spinbutton_value_set(714, emissive[2]);
-	mgtk_spinbutton_value_set(715, emissive[3]);
-
-	vec_t shininess = freyjaGetMaterialShininess(mIndex);
-	mgtk_spinbutton_value_set(716, shininess);
-
-	uint32 src = freyjaGetMaterialBlendSource(mIndex);
-	mgtk_option_menu_value_set(eBlendSrcMenu, src);
-
-	uint32 dest = freyjaGetMaterialBlendDestination(mIndex);
-	mgtk_option_menu_value_set(eBlendDestMenu, dest);
-
-	uint32 flags = freyjaGetMaterialFlags(mIndex);
-
-	// FIXME: These need to be cached
-	uint32 eOpenGLBlendId = ResourceEvent::GetResourceIdBySymbol("eOpenGLBlend");
-	uint32 eMaterialTexId = ResourceEvent::GetResourceIdBySymbol("eMaterialTex");
-
-	if (flags & fFreyjaMaterial_Blending)
-	{
-		mgtk_togglebutton_value_set(eOpenGLBlendId, true);
-	}
-	else
-	{
-		mgtk_togglebutton_value_set(eOpenGLBlendId, false);
-	}
-
-	mgtk_togglebutton_value_set(eMaterialTexId, false);
-	if (flags & fFreyjaMaterial_Texture)
-	{
-		mgtk_togglebutton_value_set(eMaterialTexId, true);
-	}
-	else
-	{
-		mgtk_togglebutton_value_set(eMaterialTexId, false);
-	}
-
-	// Just go ahead and render a new frame in case the function calling this fails to do so
-	freyja_event_gl_refresh();
 }
 
 

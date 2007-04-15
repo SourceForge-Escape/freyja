@@ -376,6 +376,35 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
+	static const char *BlendIntToString(int32 i);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Convert blend symbols to values.
+	 *
+	 ------------------------------------------------------*/
+
+	static int32 BlendStringToInt(const char *str);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Convert blend values to symbols.
+	 *
+	 ------------------------------------------------------*/
+
+	static bool LoadTexture(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reads texture from disk into memory.
+	 *        Returns true if sucessful.
+	 *
+	 ------------------------------------------------------*/
+
+	static void TakeScreenShot(const char *base, uint32 width, uint32 height);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Dump a TGA of the context.
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// ARB 
