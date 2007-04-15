@@ -26,7 +26,6 @@
 #include <freyja/TextureABI.h>
 #include <freyja/FreyjaPakReader.h>
 #include <freyja/FreyjaImage.h>
-#include "freyja_events.h"
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
 #include <mstl/SystemIO.h>
