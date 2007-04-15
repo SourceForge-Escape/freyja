@@ -375,7 +375,7 @@ void *mlisp_recall(const char *symbol)
 		return NULL;
 
 	arg_list_t *becareful;
-	__RESOURCE_AGENT_->Lookup((char*)symbol, &becareful);
+	__RESOURCE_AGENT_->Lookup(symbol, &becareful);
 	return becareful ? becareful->data : NULL;
 }
 
@@ -1202,7 +1202,7 @@ int Resource::getIntByName(const char *symbol)
 {
 	int id = -1;
 
-	Lookup((char*)symbol, &id);
+	Lookup(symbol, &id);
 
 	return id;	
 }
