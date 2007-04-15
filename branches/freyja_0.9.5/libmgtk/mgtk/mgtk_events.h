@@ -100,7 +100,7 @@ void mgtk_event_fileselection_set_dir(int eventId, char *dir);
 void mgtk_event_fileselection_append_pattern(int eventId, char *label, char *pattern);
 
 void mgtk_event_dialog_visible_set(int dialog, int visible);
-void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a);
+void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a); // C++ exportable only -- fix this with the C ABI patch 2007.04.01
 void mgtk_event_set_color(int id, float r, float g, float b, float a);
 void mgtk_event_notify_observer1f(unsigned int event, float value);
 void mgtk_event_notify_statusbar(const char *message);

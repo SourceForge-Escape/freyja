@@ -74,20 +74,25 @@ class ResourceEvent
 	////////////////////////////////////////////////////////////
 
 	unsigned int getUID() { return mUID; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	char *getName() { return mName;	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	static int GetResourceIdBySymbol(const char *symbol)
-	{
-		int id = -1;
-		
-		if (mResource)
-		{
-			mResource->Lookup(symbol, &id);
-		}
-		
-		return id;
-	}
+	static int GetResourceIdBySymbol(const char *symbol);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -730,29 +735,27 @@ public:
 
 private:
 
-	void (*mHandler)(void (*func)(mgtk_mouse_event_t&));                  /* Function pointer callback */
+	void (*mHandler)(void (*func)(mgtk_mouse_event_t&));     /* Function pointer callback */
 };
 
-
+#define RESOURCEAPPPLUGIN 1
+#if RESOURCEAPPPLUGIN
 class ResourceAppPluginTest
 {
 public:
-	ResourceAppPluginTest(void (*rc_func)(), void (*gui_func)()) 
+	ResourceAppPluginTest(void (*rc_func)(), void (*gui_func)())
 	{
 		mEventsAttach = rc_func;
 		mGUIAttach = gui_func;
-
 		mPlugins.pushBack(this);
 	}
 
-	~ResourceAppPluginTest()
-	{
-		//FIXME mPlugins.erase();
-	}
+	~ResourceAppPluginTest() { /* FIXME mPlugins.erase(); */ }
 
 	static Vector<ResourceAppPluginTest*> mPlugins;
 	void (*mEventsAttach)();
 	void (*mGUIAttach)();
 };
+#endif
 
 #endif // GUARD__MGTK_RESOURCEEVENT_H_

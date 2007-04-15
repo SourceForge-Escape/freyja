@@ -26,9 +26,12 @@
 
 
 unsigned int ResourceEvent::mCounter = 0; 
-Resource *ResourceEvent::mResource; 
+Resource *ResourceEvent::mResource = NULL; 
 Vector<ResourceEvent*>  ResourceEvent::mEvents;
+
+#if RESOURCEAPPPLUGIN
 Vector<ResourceAppPluginTest*> ResourceAppPluginTest::mPlugins;
+#endif
 
 
 ////////////////////////////////////////////////////////////
@@ -79,6 +82,18 @@ ResourceEvent::~ResourceEvent()
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
+
+int ResourceEvent::GetResourceIdBySymbol(const char *symbol)
+{
+	int id = -1;
+	
+	if (mResource)
+	{
+		mResource->Lookup(symbol, &id);
+	}
+	
+	return id;
+}
 
 
 ////////////////////////////////////////////////////////////
@@ -393,3 +408,7 @@ int main(int argc, char *argv[])
 	return runResourceEventUnitTest(argc, argv);
 }
 #endif
+
+
+
+ 
