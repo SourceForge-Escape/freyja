@@ -29,6 +29,7 @@
 #include "freyja.h"
 
 using namespace mstl;
+using namespace freyja;
 
 Printer *gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;

@@ -25,7 +25,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/times.h>
 #include <dirent.h>
 #include <math.h>
 #include <stdarg.h>
@@ -40,6 +39,7 @@
 //#   include <libgen.h>  // Required for Basename()
 #else // UNIX is default system
 #   include <dlfcn.h>
+#   include <sys/times.h>
 #endif
 
 // Define DISABLE_SYSTEMIO_DEBUG_MSG to disable this debug macro
@@ -68,219 +68,9 @@
 
 //INFINITY IEEE
 
+#include "Timer.h"
+
 namespace mstl {
-
-class AccumulationTimer
-{
- public:	
-
-	AccumulationTimer() : mStart(), mStop() { }
-
-	~AccumulationTimer() { }
-
-	void Start() { times(&mStart); }
-	
-	void Stop() { times(&mStop); }
-
-	unsigned long GetElapse() { return mStop.tms_utime - mStart.tms_utime; }
-
-	struct tms mStart; /* Stores the starting time */
-
-	struct tms mStop;  /* Stores the ending time */
-};
-
-
-class StopWatch
-{
-public:
-
-	StopWatch() : mStart(), mStop() { }
-
-	~StopWatch() { }
-
-	void Start() {	gettimeofday(&mStart, NULL); }
-
-	void Stop() { gettimeofday(&mStop, NULL); }
-
-	double GetElapse() 
-	{ 
-		double start = (double)mStart.tv_sec + (1.e-6) * mStart.tv_usec;
-		double stop = (double)mStop.tv_sec + (1.e-6) * mStop.tv_usec;
-		return stop - start;
-	}
-
-	void GetElapse(unsigned long &sec, unsigned long &usec)
-	{
-		// Please recall 1s = 1,000,000 usec 
-		if (mStop.tv_usec < mStart.tv_usec)
-		{
-			sec = mStop.tv_sec - mStart.tv_sec - 1;
-			usec = mStop.tv_usec + 1000000 - mStart.tv_usec;
-		}
-		else
-		{
-			sec = mStop.tv_sec - mStart.tv_sec;
-			usec = mStop.tv_usec - mStart.tv_usec;
-		}
-	}
-
-	struct timeval mStart;
-	struct timeval mStop;
-};
-
-
-class AccumulationStopWatch 
-{
-public:
-
-	AccumulationStopWatch() : mStart(), mStop(), mElapse() { Reset(); }
-
-	AccumulationStopWatch(const AccumulationStopWatch &w) : mStart(), mStop(), mElapse()	{ *this = w; }
-
-	AccumulationStopWatch(AccumulationStopWatch &w) : mStart(), mStop(), mElapse()	{ *this = w; }
-
-	~AccumulationStopWatch() { }
-
-	AccumulationStopWatch &operator =(const AccumulationStopWatch &w)
-	{
-#if 1
-		memcpy(&mStart, &w.mStart, sizeof(struct timeval));
-		memcpy(&mStop, &w.mStop, sizeof(struct timeval));
-		memcpy(&mElapse, &w.mElapse, sizeof(struct timeval));
-#else
-		mStart.tv_sec = w.mStart.tv_sec;
-		mStart.tv_usec = w.mStart.tv_usec;
-		mStop.tv_sec = w.mStop.tv_sec;
-		mStop.tv_usec = w.mStop.tv_usec;
-		mElapse.tv_sec = w.mElapse.tv_sec;
-		mElapse.tv_usec = w.mElapse.tv_usec;
-#endif
-		return *this;
-	}
-
-	void Reset() { mElapse.tv_sec = mElapse.tv_usec = 0; }
-
-	void Start() {	gettimeofday(&mStart, NULL); }
-
-	void Stop() 
-	{ 
-		gettimeofday(&mStop, NULL); 
-		
-		// Please recall 1s = 1,000,000 usec 
-		if (mStop.tv_usec < mStart.tv_usec)
-		{
-			mElapse.tv_sec += mStop.tv_sec - mStart.tv_sec - 1;
-			mElapse.tv_usec += mStop.tv_usec + 1000000 - mStart.tv_usec;
-		}
-		else
-		{
-			mElapse.tv_sec += mStop.tv_sec - mStart.tv_sec;
-			mElapse.tv_usec += mStop.tv_usec - mStart.tv_usec;
-		}
-	}
-
-	double GetElapse() 
-	{ 
-		return (double)mElapse.tv_sec + (1.e-6) * mElapse.tv_usec;
-	}
-
-	void GetElapse(unsigned long &sec, unsigned long &usec)
-	{
-		sec = mElapse.tv_sec;
-		usec = mElapse.tv_usec;
-	}
-
-	struct timeval mStart;
-	struct timeval mStop;
-	struct timeval mElapse;
-};
-
-
-class Timer
-{
- public:	
-
-	Timer() : mTZ(), mStart(), mStop() { Reset(); }
-
-	~Timer() { }
-
-	void Reset() 
-	{ 
-#ifdef WIN32
-		mStart = GetTickCount();
-#else
-		gettimeofday(&mStart, NULL);//&mTZ);
-		//mTotal.tv_sec = mTotal.tv_usec = 0; 
-#endif
-	}
- 
-	unsigned long GetTicks()
-	{
-#ifdef WIN32
-		mStop = GetTickCount();
-		return mStop - mStart;
-#else
-		gettimeofday(&mStop, NULL);//&mTZ);
-
-#if 0
-		if (mStart.tv_usec > mStop.tv_usec) 
-		{ 
-			mStop.tv_usec = (100000 + mStop.tv_usec); 
-			--mStop.tv_sec; 
-		}
-
-		return ( ((mStop.tv_sec - mStart.tv_sec)*1000) + 
-					(mStop.tv_usec - mStart.tv_usec)/1000); 
-#else
-		// Please recall 1s = 1,000,000 usec 
-		if (mStop.tv_usec < mStart.tv_usec)
-		{
-			return ( (mStop.tv_sec - mStart.tv_sec - 1) * 1000 +
-						(mStop.tv_usec - mStart.tv_usec + 1000000) / 1000 );
-		}
-
-		return ( (mStop.tv_sec - mStart.tv_sec) * 1000 +
-					(mStop.tv_usec - mStart.tv_usec)/ 1000 );
-#endif
-
-#endif
-	}
-
-	float GetElapsed()
-	{
-#ifdef WIN32
-		mStop = GetTickCount();
-		return mStop - mStart;
-#else
-		const float uinv = 1 / 1000.0f;
-
-		gettimeofday(&mStop, &mTZ);
-			
-		if (mStart.tv_usec > mStop.tv_usec) 
-		{ 
-			mStop.tv_usec = (1000 + mStop.tv_usec); 
-			--mStop.tv_sec; 
-		} 
-			
-		//mStop.tv_usec -= mStart.tv_usec; 
-		//mStop.tv_sec -= mStart.tv_sec;
-
-		return ( ((float)(mStop.tv_sec - mStart.tv_sec)) +
-					((float)((mStop.tv_usec - mStart.tv_usec) * 1000)) * uinv);
-#endif
-	}
-
-#ifdef WIN32
-	DWORD mTZ;
-	DWORD mStart;
-	DWORD mStop;
-#else
-	struct timezone mTZ;
-	struct timeval mStart;
-	struct timeval mStop;
-#endif
-};
-
 
 class SystemIO
 {

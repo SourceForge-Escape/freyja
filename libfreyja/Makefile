@@ -97,8 +97,9 @@ BASE_CFLAGS=-Wall -I. -I$(SRC_DIR) $(LOCAL_INCLUDES) \
 	$(BASE_DEFS) \
 	-fPIC
 
-BASE_CFLAGS += -Weffc++ -std=c++98
+BASE_CFLAGS += -std=c++98
 #BASE_CFLAGS += -pedantic
+#BASE_CFLAGS += -Weffc++ 
 
 LDFLAGS=$(CONFIGURE_LNK) -lm -ldl -lstdc++ $(LOCAL_LIBS)
 #LDFLAGS += -Wl,-z,defs

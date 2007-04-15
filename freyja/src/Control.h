@@ -19,12 +19,13 @@
 #ifndef GUARD__FREYJA3D_CONTROL_H_
 #define GUARD__FREYJA3D_CONTROL_H_
 
+#include <mstl/SystemIO.h>
+
 #include <hel/math.h>
-#include <mgtk/Resource.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ResourceEventDelegate.h>
 #include <mgtk/ConfirmationDialog.h>
-#include <mstl/SystemIO.h>
+#include <mgtk/Resource.h> 
 
 #include "ControlPrinter.h"
 #include "freyja_events.h"
