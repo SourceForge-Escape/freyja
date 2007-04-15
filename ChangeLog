@@ -15,7 +15,8 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Win32 build
+ - Interface plugins moved from freyja to toplevel plugins
+ - Win32 build fixes
  - Win32 pthreads support ( only used by trival libhel join test for now )
  - Win32 pthreads for freyja-win32-env build environment
  - Fix for obj plugin ( seems it wasn't updated with hel refactor )

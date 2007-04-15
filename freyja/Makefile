@@ -55,6 +55,7 @@ BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
 BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 PLUGIN_BUILD_DIR=$(BUILD_INSTALL_DIR)/plugins
+WIN32_PLUGIN_BUILD_DIR=$(BUILD_INSTALL_DIR)/plugins/win32
 SRC_DIR=src
 LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/  -I../libmgtk/
 LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
@@ -386,10 +387,10 @@ pakreader.so:
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
 pakreader.dll:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
 		MOD_NAME=pakreader \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pakreader.o" \
+		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/pakreader.o" \
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
@@ -406,10 +407,10 @@ perlinnoise.so:
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
 perlinnoise.dll:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
 		MOD_NAME=perlinnoise \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/perlinnoise.o" \
+		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/perlinnoise.o" \
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
@@ -426,10 +427,10 @@ pythonplug.so:
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
 pythonplug.dll:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
 		MOD_NAME=pythonplug \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pythonplug.o" \
+		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/pythonplug.o" \
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
@@ -446,10 +447,10 @@ reverseengineer.so:
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
 reverseengineer.dll:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
 		MOD_NAME=reverseengineer \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/reverseengineer.o" \
+		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/reverseengineer.o" \
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
@@ -466,10 +467,10 @@ lineageIIextract.so:
 		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
 
 lineageIIextract.dll:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(PLUGIN_BUILD_DIR) \
+	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
+	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
 		MOD_NAME=lineageIIextract \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/lineageIIextract.o" \
+		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/lineageIIextract.o" \
 		CC=$(WIN32_CC) \
 		CPP=$(WIN32_CPP) \
 		LD=$(WIN32_LD) \
