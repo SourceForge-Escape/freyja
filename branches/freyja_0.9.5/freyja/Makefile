@@ -54,8 +54,6 @@ BUILD_WIN32_DIR=$(BUILD_ROOT_DIR)/win32
 BUILD_OSX_DIR=$(BUILD_ROOT_DIR)/osx
 BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
-PLUGIN_BUILD_DIR=$(BUILD_INSTALL_DIR)/plugins
-WIN32_PLUGIN_BUILD_DIR=$(BUILD_INSTALL_DIR)/plugins/win32
 SRC_DIR=src
 LOCAL_INCLUDES=-I$(SRC_DIR) -I../mstl/ -I../libhel/ -I../libfreyja/  -I../libmgtk/
 LOCAL_LIBS=-L../bin/libfreyja/$(BUILD_SELECT)/ -L../bin/libhel/$(BUILD_SELECT)/ -L../bin/libmgtk/$(BUILD_SELECT)/
@@ -69,7 +67,6 @@ INSTALL_LIB=$(DESTDIR)/usr/$(NO_DEB)lib
 INSTALL_DOC=$(DESTDIR)/usr/share/doc/$(NAME)
 INSTALL_SHARE=$(DESTDIR)/usr/share/$(NAME)
 INSTALL_INCLUDE=$(DESTDIR)/usr/$(NO_DEB)include
-INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
 
 ################################################################
@@ -337,143 +334,3 @@ Material.test:
 	src/common/Material.cpp -o $(BUILD_TEST_DIR)/Material.test
 
 
-################################################################
-# Plugins
-################################################################
-PLUGIN_CFLAGS=-fPIC -Wall -g -Isrc -Iplugins $(BASE_CFLAGS) $(LOCAL_INCLUDES)
-PLUGIN_LD_FLAGS=-lm -ldl $(LOCAL_LIBS) -lfreyja -lhel0 -lmgtk -lstdc++ -shared -fPIC -ldl -rdynamic 
-PLUGIN_LD_FLAGS += --warn-unresolved-symbols -Wl
-#PLUGIN_LD_FLAGS += -z defs
-
-PLUGINS=$(BUILD_DIR)/$(MOD_NAME).so
-PLUGINSWIN32=$(BUILD_DIR)/$(MOD_NAME).dll
-
-plug-ins: $(PLUGINS)
-
-plug-ins-win32: $(PLUGINSWIN32)
-
-$(BUILD_DIR)/$(MOD_NAME).so : $(MOD_OBJS)
-	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
-
-$(BUILD_DIR)/$(MOD_NAME).dll : $(MOD_OBJS)
-	$(CC) -shared -o $(BUILD_DIR)/$(MOD_NAME).dll \
-    -Wl,--out-implib=$(BUILD_DIR)/lib$(MOD_NAME).a \
-    -Wl,--export-all-symbols \
-    -Wl,--enable-auto-import \
-    -Wl,--whole-archive $(MOD_OBJS) \
-    -Wl,--no-whole-archive $(LIBS)
-
-clean-plugins:
-	@-echo -n "Cleaning plugins                            "
-	@-rm -f $(PLUGIN_BUILD_DIR)*/*.o
-	@-rm -f $(PLUGIN_BUILD_DIR)*/*.so
-	@-rm -f $(PLUGIN_BUILD_DIR)*/*.a
-	@-rm -f $(PLUGIN_BUILD_DIR)*/*.dll
-	@-echo [done]
-
-plugins: pakreader.so perlinnoise.so reverseengineer.so lineageIIextract.so pythonplug.so
-
-plugins-win32: pakreader.dll perlinnoise.dll reverseengineer.dll lineageIIextract.dll pythonplug.dll
-
-plugins-osx:
-	@-printf "Not implemented\n"
-
-pakreader.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
-		MOD_NAME=pakreader \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pakreader.o" \
-		CFLAGS="$(PLUGIN_CFLAGS)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
-
-pakreader.dll:
-	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
-		MOD_NAME=pakreader \
-		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/pakreader.o" \
-		CC=$(WIN32_CC) \
-		CPP=$(WIN32_CPP) \
-		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
-
-perlinnoise.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
-		MOD_NAME=perlinnoise \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/perlinnoise.o" \
-		CFLAGS="$(PLUGIN_CFLAGS)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
-
-perlinnoise.dll:
-	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
-		MOD_NAME=perlinnoise \
-		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/perlinnoise.o" \
-		CC=$(WIN32_CC) \
-		CPP=$(WIN32_CPP) \
-		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
-
-pythonplug.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
-		MOD_NAME=pythonplug \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/pythonplug.o" \
-		CFLAGS="$(PLUGIN_CFLAGS)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
-
-pythonplug.dll:
-	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
-		MOD_NAME=pythonplug \
-		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/pythonplug.o" \
-		CC=$(WIN32_CC) \
-		CPP=$(WIN32_CPP) \
-		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS) $(WIN32_LIB_DIR)" \
-		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)  $(WIN32_LIB_DIR) -lpython24"
-
-reverseengineer.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
-		MOD_NAME=reverseengineer \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/reverseengineer.o" \
-		CFLAGS="$(PLUGIN_CFLAGS)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
-
-reverseengineer.dll:
-	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
-		MOD_NAME=reverseengineer \
-		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/reverseengineer.o" \
-		CC=$(WIN32_CC) \
-		CPP=$(WIN32_CPP) \
-		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
-
-lineageIIextract.so:
-	@-mkdir -p $(PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins BUILD_DIR=$(PLUGIN_BUILD_DIR) \
-		MOD_NAME=lineageIIextract \
-		MOD_OBJS="$(PLUGIN_BUILD_DIR)/lineageIIextract.o" \
-		CFLAGS="$(PLUGIN_CFLAGS)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)"
-
-lineageIIextract.dll:
-	@-mkdir -p $(WIN32_PLUGIN_BUILD_DIR)
-	$(MAKE) plug-ins-win32 BUILD_DIR=$(WIN32_PLUGIN_BUILD_DIR) \
-		MOD_NAME=lineageIIextract \
-		MOD_OBJS="$(WIN32_PLUGIN_BUILD_DIR)/lineageIIextract.o" \
-		CC=$(WIN32_CC) \
-		CPP=$(WIN32_CPP) \
-		LD=$(WIN32_LD) \
-		CFLAGS="$(PLUGIN_CFLAGS) $(LOCAL_INCLUDES)" \
-		LD_FLAGS="$(PLUGIN_LD_FLAGS)" \
-		LIBS="-lm -lstdc++ $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
