@@ -26,10 +26,9 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJACONTROL_H_
+#ifndef GUARD__FREYJA3D_FREYJACONTROL_H_
+#define GUARD__FREYJA3D_FREYJACONTROL_H_
 
-#include <freyja/FreyjaPrinter.h>
 #include <freyja/ModelABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/BoneABI.h>
@@ -37,17 +36,18 @@
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
-#include <mgtk/Resource.h>
 
 #include "freyja_events.h"
 #include "FreyjaRender.h"
 #include "Texture.h"
 #include "Cursor.h"
+#include "Control.h"
+#include "MaterialEv.h"
 
 
 namespace freyja3d {
 
-class FreyjaControl
+class FreyjaControl : public Control
 {
  public:
 
@@ -108,28 +108,10 @@ class FreyjaControl
 	typedef enum {
 		fNone                = 0,
 		fPolyMappedTexCoords = 1,
-		fDeformBoneVertices  = 2,
-		fLoadTextureInSlot   = 4,
-		fLoadMaterialInSlot  = 8
+		fDeformBoneVertices  = 2
 
 	} options_t;
 
-
-	class FreyjaControlPrinter : public FreyjaPrinter
-	{
-	public:
-
-		virtual void errorArgs(char *format, va_list *args)
-		{
-			freyja_print_args(format, args);
-		}
-
-
-		virtual void messageArgs(char *format, va_list *args)
-		{
-			freyja_print_args(format, args);
-		}
-	};
 
 	typedef void (FreyjaControl::*MethodPtr)();
 	typedef bool (FreyjaControl::*bMethodPtr)();
@@ -170,7 +152,6 @@ class FreyjaControl
 	// Public Properties
 	////////////////////////////////////////////////////////////
 
-	bool mUsingARBFragments;
 	uint32 mGroupBitmap;
 
 	ControlScheme GetControlScheme() { return mControlScheme; }
@@ -272,14 +253,6 @@ class FreyjaControl
 	 * Post : Returns currently selected texcoord index
 	 ------------------------------------------------------*/
 
-	uint32 GetSelectedTexture() { return mSelectedTexture; }
-	void SetSelectedTexture(uint32 i) { mSelectedTexture = i; Dirty(); }
-	uint32 mSelectedTexture;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns currently selected texture index
-	 ------------------------------------------------------*/
-
 	uint32 GetSelectedVertex() { return mSelectedVertex; }
 	void SetSelectedVertex(uint32 i) 
 	{ if (i < freyjaGetMeshVertexCount(mSelectedMesh)) mSelectedVertex = i; }
@@ -359,12 +332,6 @@ class FreyjaControl
 	 ------------------------------------------------------*/
 
 	freyja3d::Cursor &GetCursor() { return mCursor; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	Resource &GetResource() { return mResource; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -555,27 +522,19 @@ class FreyjaControl
 	 * Pre  : 
 	 * Post : Loads the Resource file from disk and sets cvars
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created from GooseEgg
-	 ------------------------------------------------------*/
-
-	bool LoadTexture(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : Reads material from disk
-	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
 	bool LoadTexture(const char *filename, int &id)
 	{
 		bool b = false;
-		if (LoadTexture(filename)) { id = mTextureId-1; b = true; }
+		if (mMaterial.LoadTexture(filename)) 
+		{ id = mMaterial.GetTextureId()-1; b = true; }
 		return b;
 	}
 	/*------------------------------------------------------
-	 * Pre  : Reads material from disk
-	 * Post : Returns true if sucessful
+	 * Pre  : 
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	bool LoadUserPreferences();
@@ -621,55 +580,43 @@ class FreyjaControl
 
 	uint32 GetViewMode() { return mRender->GetViewMode(); }
 
-	int GetResourceInt(const char *symbol)
-	{
-		return (int)GetResourceFloat(symbol);
-	}
-
-	void SetResourceInt(const char *symbol, int i)
-	{
-		return SetResourceFloat(symbol, i);
-	}
-
-	float GetResourceFloat(const char *symbol)
-	{
-		int event;
-		mResource.Lookup((char*)symbol, &event);
-		return freyja_event_get_float(event);
-	}
-
-	void SetResourceFloat(const char *symbol, float r)
-	{
-		int event;
-		mResource.Lookup((char*)symbol, &event);
-		return freyja_event_set_float(event, r);
-	}
-
-	void GetResourceColor(const char *symbol, 
-						  float &r, float &g, float &b, float &a)
-	{
-		int event;
-		mResource.Lookup((char*)symbol, &event);
-		freyja_event_get_color(event, r, g, b, a);
-	}
-
-	void SetResourceColor(const char *symbol, 
-						  float r, float g, float b, float a)
-	{
-		int event;
-		mResource.Lookup((char*)symbol, &event);
-		freyja_event_set_color(event, r, g, b, a);
-	}
-
-	int GetEventIdByName(const char *symbol)
-	{
-		return GetResource().GetEventIdByName(symbol);
-	}
-
+	uint32 GetSelectedMaterial() { return mMaterial.GetSelected(); }
+ 
 
 	////////////////////////////////////////////////////////////
 	// Events, once all these are 'sorted' decouple.
 	////////////////////////////////////////////////////////////
+
+	void ePolygonSplit()
+	{
+		Print("Splitting polygon[%i] ...", GetSelectedFace());
+		freyjaMeshPolygonSplit(GetSelectedMesh(), GetSelectedFace());
+		Dirty();
+	}
+
+	void eSetMeshTexture()
+	{
+		Print("Switching all of Mesh[%i]'s faces to material %i ...",
+			  GetSelectedMesh(), GetSelectedMaterial());
+		freyjaMeshMaterial(GetSelectedMesh(), GetSelectedMaterial());
+		Dirty();
+	}
+
+	void eSetFacesMaterial()
+	{
+		Print("Switching all of selected faces to material %i",
+			  GetSelectedMesh(), GetSelectedMaterial());
+		SetMaterialForSelectedFaces(GetSelectedMaterial());
+		Dirty();
+	}
+
+	void eSetPolygonTexture()
+	{
+		Print("Face to material set to %i", GetSelectedMaterial());
+		SetFaceMaterial(GetSelectedFace(), GetSelectedMaterial());
+		Dirty();
+	}
+
 
 	void eSelectionByBox(unsigned int value);
 	void eSelect(unsigned int value);
@@ -716,18 +663,6 @@ class FreyjaControl
 	void eTransformLight() { SetObjectMode(tLight); }
 
 	void eRecentFiles(uint32 value) { LoadModel(GetRecentFilename(value)); }
-
-	void eTextureSlotLoad()
-	{
-		bool b = ToggleFlag(fLoadTextureInSlot);
-		freyja_print("Texture load into current slot [%s]", b ? "on" : "off");
-	}
-
-	void eMaterialSlotLoad(uint32 i)
-	{
-		SetFlag(fLoadMaterialInSlot, i);
-		freyja_print("Material load into slot is [%s]", i ? "ON" : "OFF");
-	}
 
 	void eOpenShader(char *text);
 	void eOpenTexture(char *text);
@@ -1041,10 +976,8 @@ private:
 		mTexture.setMaxTextureCount(64);
 		mTexture.setFlag(Texture::fUseMipmaps);
 		mTexture.loadColorTexture(rgba, 32, 32);
-		mTextureId = 1;
+		//mTextureId = 1;
 	}
-
-	int32 mTextureId;
 
 	void CreatePolyMappedUVMap(int i) {BUG_ME("Not implemented in this build");}
 
@@ -1224,12 +1157,12 @@ private:
 
 	Texture mTexture;                       /* Collection of Texture utils */
 
+	static MaterialEv mMaterial;            /* Material control */
+
 	const static uint32 mRecentFileLimit = 10;
 	Vector<String> mRecentFiles;            /* Recently loaded model files */
 
 	Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
-
-	FreyjaControlPrinter mPrinter;          /* Reroute text msg from backend */
 
 	String mResourceFilename;	            /* Resource file for control */
 
@@ -1240,8 +1173,6 @@ private:
 	hel::Vec3 mSceneTrans;                  /* Offset of scene in 3 space */
 
 	freyja3d::Cursor mCursor;               /* Special mouse input handler */
-
-	Resource mResource;                     /* Resource system */
 	
 	FreyjaRender *mRender;                  /* OpenGL renderer */
 

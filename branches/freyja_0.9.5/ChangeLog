@@ -10,6 +10,9 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Some tweaks to libfreyja Printer and mgtk
+ - New Control class, cont to move away from legacy framework
+ - New MaterialEv - first refactored control class
  - Mgtk textview widget, textview query dialog
  - Mgtk statusbar widget decoupled from gl widget ( break from legacy )
  - Mlisp fix for animation scrubber

@@ -382,10 +382,10 @@ class Resource
 	int GetEventIdByName(const char *symbol) { return getIntByName(symbol); }
 	int getIntByName(const char *symbol);
 
-	bool Lookup(char *symbol, arg_list_t **adt);
-	bool Lookup(char *symbol, float *f);
-	bool Lookup(char *symbol, int *i);
-	bool Lookup(char *symbol, char **s);
+	bool Lookup(const char *symbol, arg_list_t **adt);
+	bool Lookup(const char *symbol, float *f);
+	bool Lookup(const char *symbol, int *i);
+	bool Lookup(const char *symbol, char **s);
   /*------------------------------------------------------
    * Pre  : 
 	*

@@ -201,6 +201,154 @@ OpenGL::~OpenGL()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+int32 OpenGL::BlendStringToInt(const char *str)
+{
+	mstl::String s(str);
+
+	return ((s == "GL_ONE") ? GL_ONE :
+			(s == "GL_ZERO") ? GL_ZERO :
+			(s == "GL_SRC_COLOR") ? GL_SRC_COLOR :
+			(s == "GL_DST_COLOR") ? GL_DST_COLOR :
+			(s == "GL_SRC_ALPHA") ? GL_SRC_ALPHA :
+			(s == "GL_DST_ALPHA") ? GL_DST_ALPHA :
+			(s == "GL_CONSTANT_COLOR") ? GL_CONSTANT_COLOR :
+			(s == "GL_CONSTANT_ALPHA") ? GL_CONSTANT_ALPHA :
+			(s == "GL_SRC_ALPHA_SATURATE") ? GL_SRC_ALPHA_SATURATE :
+			(s == "GL_ONE_MINUS_DST_ALPHA") ? GL_ONE_MINUS_DST_ALPHA :
+			(s == "GL_ONE_MINUS_SRC_ALPHA") ? GL_ONE_MINUS_SRC_ALPHA :
+			(s == "GL_ONE_MINUS_DST_COLOR") ? GL_ONE_MINUS_DST_COLOR :
+			(s == "GL_ONE_MINUS_SRC_COLOR") ? GL_ONE_MINUS_SRC_COLOR :
+			(s == "GL_ONE_MINUS_CONSTANT_COLOR") ? GL_ONE_MINUS_CONSTANT_COLOR :
+			(s == "GL_ONE_MINUS_CONSTANT_ALPHA") ? GL_ONE_MINUS_CONSTANT_ALPHA :
+			GL_ZERO);
+}
+
+
+const char *OpenGL::BlendIntToString(int32 i)
+{
+	return ((i == GL_ONE) ? "GL_ONE" :
+			(i == GL_ZERO) ? "GL_ZERO" :
+			(i == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
+			(i == GL_DST_COLOR) ? "GL_DST_COLOR" :
+			(i == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
+			(i == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
+			(i == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
+			(i == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : 
+			(i == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
+			(i == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
+			(i == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
+			(i == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
+			(i == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
+			(i == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
+			(i == GL_ONE_MINUS_CONSTANT_ALPHA) ? "GL_ONE_MINUS_CONSTANT_ALPHA" :
+			"GL_ZERO");
+}
+
+
+// Very, very old TGA screenshot code - slightly updated
+void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
+{
+	if (!width || !height)
+	{
+		freyja_print("OpenGL::TakeScreenShot() ERROR: Invalid image size!\n");
+		return;
+	}
+
+	// Don't overwrite old screenshots...
+	static int count = 0;
+	char filename[1024];
+	bool done = false;
+
+	FILE *f = fopen(filename, "wb");
+
+	while (!done)
+	{
+		snprintf(filename, 1024, "%s-%04i.tga", base, count++);
+		f = fopen(filename, "rb");
+		(f) ? fclose(f) : done = true;
+	}
+
+	if (!f)
+	{
+		freyja_print("OpenGL::TakeScreenShot() ERROR: Couldn't write screenshot.\n");
+		perror("OpenGL::TakeScreenShot() ERROR: ");
+		return;
+	}
+
+	int sz = width * height;
+	byte *image = new byte[sz*3];
+
+	// Capture frame buffer
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+	byte *swap_row = new byte[width*3];
+
+	// Flip vertical
+	for (uint32 i = 0, j = height-1; i < height/2; ++i, --j)
+	{
+		memcpy(swap_row, &image[i*width*3], width*3);
+		memcpy(&image[i*width*3], &image[j*width*3], width*3);
+		memcpy(&image[j*width*3], swap_row, width*3);
+	}
+
+	delete [] swap_row;
+
+	// Build a TGA header
+	char comment[32] = "Mongoose TGA 0.0.1\0";
+	byte comment_lenght = strlen(comment);
+	byte colormap_type = 0;
+	byte image_type = 2;
+	unsigned short colormap_index = 0;
+	unsigned short colormap_lenght = 0;
+	byte colormap_bbp = 0;
+	unsigned short origin_x = 0, origin_y = 0;
+	unsigned short swidth = width;
+	unsigned short sheight = height;
+	byte bpp = 24;
+	byte desc_flags = 32;
+
+	// Write TGA header
+	fwrite(&comment_lenght, 1, 1, f);
+	fwrite(&colormap_type, 1, 1, f); 
+	fwrite(&image_type, 1, 1, f);
+	fwrite(&colormap_index, 2, 1, f);
+	fwrite(&colormap_lenght, 2, 1, f);
+	fwrite(&colormap_bbp, 1, 1, f);
+	fwrite(&origin_x, 2, 1, f);
+	fwrite(&origin_y, 2, 1, f);
+	fwrite(&swidth, 2, 1, f);
+	fwrite(&sheight, 2, 1, f);
+	fwrite(&bpp, 1, 1, f);
+	fwrite(&desc_flags, 1, 1, f);
+
+	// Write comment
+	fwrite(&comment, 1, comment_lenght, f);
+
+	uint32 size = width * height * 3;
+ 
+	for (uint32 i = 0; i < size; i += 3)
+	{
+		byte tmp = image[i];
+		image[i] = image[i + 2];
+		image[i + 2] = tmp;
+	}
+
+	// Write image data
+	if (fwrite(image, size, 1, f) < 1)
+	{
+		freyja_print("OpenGL::TakeScreenShot()  Disk write failed.\n");
+		perror("OpenGL::TakeScreenShot() \n");
+		fclose(f);
+		return;
+	}
+
+	fclose(f);
+
+	delete [] image;
+
+	freyja_print("Took screenshot '%s'.\n", filename);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Public Mutators

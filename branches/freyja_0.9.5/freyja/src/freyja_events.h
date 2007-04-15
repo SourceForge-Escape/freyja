@@ -45,9 +45,6 @@ typedef enum {
 	eModeAutoKeyframe,
 
 	/* Event ids ( minors ) */
-	eSetMaterialTexture,
-	eSetMaterialShader,
-	eSetMaterialShaderFilename,
 
 	// Widget interaction events
 	eMove_X,
@@ -351,7 +348,7 @@ void freyja_print(char *format, ...);
  *
  ------------------------------------------------------*/
 
-void freyja_print_args(char *format, va_list *args);
+//void freyja_print_args(char *format, va_list *args);
 /*------------------------------------------------------
  * Pre  : Just like freyja_print, but va_list is non-local
  * Post : Just like freyja_print

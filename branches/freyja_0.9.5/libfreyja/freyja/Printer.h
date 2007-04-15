@@ -23,16 +23,16 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
-#ifndef GUARD__LIBFREYJA_MONGOOSE_FREYJAPRINTER_H_
-#define GUARD__LIBFREYJA_MONGOOSE_FREYJAPRINTER_H_
+#ifndef GUARD__FREYJA_PRINTER_H_
+#define GUARD__FREYJA_PRINTER_H_
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
+namespace freyja {
 
-class FreyjaPrinter
+class Printer
 {
  public:
 
@@ -40,7 +40,7 @@ class FreyjaPrinter
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaPrinter();
+	Printer() {}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaPrinter
@@ -51,7 +51,7 @@ class FreyjaPrinter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual ~FreyjaPrinter();
+	virtual ~Printer() {}
 	/*------------------------------------------------------
 	 * Pre  : FreyjaPrinter object is allocated
 	 * Post : Deconstructs an object of FreyjaPrinter
@@ -97,7 +97,7 @@ class FreyjaPrinter
 		va_end(args);
 	}
 
-	static void print(const char *format, ...)
+	static void Print(const char *format, ...)
 	{
 		va_list args;
 		char buffer[1024];
@@ -121,7 +121,8 @@ class FreyjaPrinter
 	}
 
 
-	virtual void errorArgs(const char *format, va_list *args)
+	// This only works for glibc!
+	virtual void ErrorArgs(const char *format, va_list *args)
 	{
 		char buffer[1024];
 		unsigned int l;
@@ -142,7 +143,8 @@ class FreyjaPrinter
 	}
 
 	
-	virtual void messageArgs(const char *format, va_list *args)
+	// This only works for glibc!
+	virtual void MessageArgs(const char *format, va_list *args)
 	{
 		char buffer[1024];
 		unsigned int l;
@@ -183,4 +185,7 @@ class FreyjaPrinter
 	/* */
 };
 
-#endif
+
+} // namespace freyja
+
+#endif // GUARD__FREYJA_PRINTER_H_

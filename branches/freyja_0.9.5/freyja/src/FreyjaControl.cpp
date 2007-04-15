@@ -42,7 +42,6 @@
 #include <freyja/Bone.h>
 #include <freyja/Mesh.h>
 #include <freyja/FreyjaImage.h>
-#include <freyja/PerlinNoise.h>
 #include <freyja/Material.h>
 #define USING_FREYJA_CPP_ABI
 #include <freyja/LightABI.h>
@@ -69,6 +68,7 @@ int load_texture(const char *filename);
 int load_shader(const char *filename);
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
+MaterialEv FreyjaControl::mMaterial;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
 Vector<hel::Vec3> FreyjaControl::mControlPoints;
 
@@ -88,10 +88,8 @@ uint32 FreyjaControl::ePointJointId = 0;
 ////////////////////////////////////////////////////////////
 
 FreyjaControl::FreyjaControl() :
-	mUsingARBFragments(false),
 	mGroupBitmap(0x0),
 	mSelectedModel(0),
-	mSelectedTexture(0),
 	mSelectedView(PLANE_FREE),
 	mSelectedViewport(0),
 	mActionManager(),
@@ -101,7 +99,6 @@ FreyjaControl::FreyjaControl() :
 	mUserPrefsFilename("freyja-dev_prefs.mlisp"),
 	mCurrentlyOpenFilename(),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
-	mResource(),
 	mRender(NULL),
 	mCleared(true),
 	mAllowBoneNameUpdate(true),
@@ -118,7 +115,7 @@ FreyjaControl::FreyjaControl() :
 
 	/* Start up libfreyja backend, and redirect it's stdio */
 	freyjaSpawn();
-	extern void freyja__setPrinter(FreyjaPrinter *printer, bool freyjaManaged);
+	extern void freyja__setPrinter(Printer *printer, bool freyjaManaged);
 	freyja__setPrinter(&mPrinter, false);
 
 	/* Spawn 0th light, and set the light iterator */
@@ -242,12 +239,15 @@ void FreyjaControl::SetZoom(float zoom)
 
 void FreyjaControl::AttachMethodListeners()
 {
+	mMaterial.AttachMethodListeners();
+
 	// CreateListener("", &FreyjaControl::);
 
-	CreateListener("eOpenShader", &FreyjaControl::eOpenShader);
-	CreateListener("eOpenTexture", &FreyjaControl::eOpenTexture);
+	CreateListener("ePolygonSplit", &FreyjaControl::ePolygonSplit);
+	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
+	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
+	CreateListener("eSetPolygonTexture", &FreyjaControl::eSetPolygonTexture);
 
-	CreateListener("eSetMaterial", &FreyjaControl::SetSelectedTexture);
 	CreateListener("eZoom", &FreyjaControl::SetZoom);
 
 	CreateListener("eGenMeshHeight", &FreyjaControl::SetGenMeshHeight);
@@ -300,8 +300,6 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eModeModel", &FreyjaControl::eModeModel);
 	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
 
-	CreateListener("eTextureSlotLoad", &FreyjaControl::eTextureSlotLoad);
-	CreateListener("eMaterialSlotLoad", &FreyjaControl::eMaterialSlotLoad);
 	//CreateListener("eModelUpload", &FreyjaControl::eModelUpload);
 
 	CreateListener("eViewportBack", &FreyjaControl::eViewportBack);
@@ -854,15 +852,15 @@ bool FreyjaControl::LoadModel(const char *filename)
 			switch (type)
 			{
 			case RGBA_32:
-				LoadTextureBuffer(image, w, h, 32, Texture::RGBA);
+				mMaterial.LoadTextureBuffer(image, w, h, 32, 4);
 				break;
 
 			case RGB_24:
-				LoadTextureBuffer(image, w, h, 24, Texture::RGB);
+				mMaterial.LoadTextureBuffer(image, w, h, 24, 3);
 				break;
 
 			case INDEXED_8:
-				LoadTextureBuffer(image, w, h, 8, Texture::INDEXED);
+				mMaterial.LoadTextureBuffer(image, w, h, 8, 1);
 				break;
 
 			default:
@@ -1015,161 +1013,6 @@ bool FreyjaControl::SaveModel(const char *filename)
 	}
 
 	return ret;
-}
-
-
-bool FreyjaControl::LoadTexture(const char *filename)
-{
-	int err = -1;
-
-	// Mongoose 2002.01.10, Evil...
-	if (SystemIO::File::CompareFilenameExtention(filename, ".lst") == 0)
-	{
-		FILE *f;
-		const unsigned int bufferSize = 256;
-		unsigned int i = 0;
-		char buffer[bufferSize];
-		char c;
-
-
-		f = fopen(filename, "r");
-		
-		if (!f)
-		{
-			perror(filename);
-			return false;
-		}
-
-		while (fscanf(f, "%c", &c) != EOF)
-		{
-			switch (c)
-			{
-			case ' ':
-			case '\t':
-			case '\n':
-				break;
-			case ';':
-				printf("Loading texture from list '%s'\n", buffer);
-				LoadTexture(buffer);
-				
-				i = 0;
-				buffer[0] = 0;
-				break;
-			default:
-				if (i > bufferSize-1)
-					i = bufferSize-1;
-				
-				buffer[i++] = c;
-				buffer[i] = 0;
-			}
-		} 
-		
-		fclose(f);
-
-		return true;
-	}
-	
-	printf("[FreyjaModel::loadTexture]\n");
-	printf(" Loading texture '%s'\n", filename);
-
-	FreyjaImage img;
-	unsigned char *image;
-	unsigned int w, h;
-
-	if (!img.loadImage(filename))
-	{
-		img.getImage(&image);
-		w = img.getWidth();
-		h = img.getHeight();
-
-		switch (img.getColorMode())
-		{
-		case FreyjaImage::RGBA_32:
-			err = LoadTextureBuffer(image, w, h, 32, Texture::RGBA);
-			break;
-
-		case FreyjaImage::RGB_24:
-			err = LoadTextureBuffer(image, w, h, 24, Texture::RGB);
-			break;
-
-		case FreyjaImage::INDEXED_8:
-			err = LoadTextureBuffer(image, w, h, 8, Texture::INDEXED);
-			break;
-
-		default:
-			printf("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
-			
-			if (image)
-				delete [] image;
-
-			if (err >= 0)
-			{
-				freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
-				freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
-				freyja_print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
-				freyja_refresh_material_interface();
-			}
-
-			return false;
-		}
-		
-		delete [] image;
-		
-		printf("[Success]\n");
-
-		return true;
-	}
-	
-	return false;
-}
-
-
-bool FreyjaControl::LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
-									  uint32 bpp, Texture::ColorMode type)
-{
-	int err = 0;
-
-
-	if (image == 0x0 || width == 0 || height == 0 || bpp == 0)
-		return false;
-
-#ifdef NO_GLU_IN_UPLOAD_SCALE_HERE 
-	FreyjaImage img;
-
-	switch (type)
-	{
-	case Texture::RGBA:
-		img.loadPixmap(image, width, height, FreyjaImage::RGBA_32);
-		img.scaleImage(1024, 1024);
-		delete [] image;
-		img.getImage(&image);
-		width = img.getWidth();
-		height = img.getHeight();		
-		break;
-
-	default:
-		;
-	}
-#endif
-
-	if (mFlags & fLoadTextureInSlot)
-	{
-		err = mTexture.loadBufferSlot(image, width, height, type, bpp,
-									  mTextureId);
-	}
-	else
-	{
-		err = mTextureId = mTexture.loadBuffer(image, width, height, type, bpp);
-
-		printf("-- %i\n", mTextureId);
-	}
-
-	if (err < 0)
-	{
-		printf("MaterialManager::loadTextureBuffer> ERROR Loading buffer\n");
-	}
-
-	return (err == 0);
 }
 
 
@@ -1628,7 +1471,7 @@ void FreyjaControl::VertexCombine()
 
 bool FreyjaControl::event(int event, unsigned int value)
 {
-	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
+	if (ResourceEvent::listen(event - ePluginEventBase, value))
 		return true;
 
 	vec_t x, y, z;
@@ -1690,17 +1533,6 @@ bool FreyjaControl::event(int event, unsigned int value)
 			freyja_event_gl_refresh();
 			freyja_print("Selecting mesh[%i] ...", value);
 		}
-		break;
-
-	case eSetMaterialShader:
-		freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
-		freyja_event_gl_refresh();
-		break;
-
-	case eSetMaterialTexture:
-		SetSelectedTexture(value);
-		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
-		freyja_event_gl_refresh();
 		break;
 
 	case eModeAutoKeyframe:
@@ -1815,9 +1647,9 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 
 void FreyjaControl::eScreenShot()
 {
-	mTexture.glScreenShot("Freyja", 
-						  mRender->GetWindowWidth(), 
-						  mRender->GetWindowHeight());
+	OpenGL::TakeScreenShot("Freyja", 
+						   mRender->GetWindowWidth(), 
+						   mRender->GetWindowHeight());
 }
 
 	
@@ -1942,9 +1774,9 @@ bool FreyjaControl::event(int event, vec_t value)
 		return true;
 
 	hel::Vec3 v; 
-	vec4_t color;
 	vec_t x, y, z;
 
+#warning FIXME "numeric event ids"
 	switch (event)
 	{
 	case 510:
@@ -1994,56 +1826,6 @@ bool FreyjaControl::event(int event, vec_t value)
 		}
 		
 		ActionModelModified(NULL);
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 700:
-	case 701:
-	case 702:
-	case 703:
-		freyjaGetMaterialAmbient(freyjaGetCurrentMaterial(), color);
-		color[event - 700] = value;
-		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 704:
-	case 705:
-	case 706:
-	case 707:
-		freyjaGetMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-		color[event - 704] = value;
-		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 708:
-	case 709:
-	case 710:
-	case 711:
-		freyjaGetMaterialSpecular(freyjaGetCurrentMaterial(), color);
-		color[event - 708] = value;
-		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 712:
-	case 713:
-	case 714:
-	case 715:
-		freyjaGetMaterialEmissive(freyjaGetCurrentMaterial(), color);
-		color[event - 712] = value;
-		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 716:
-		freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
 		freyja_event_gl_refresh();
 		break;
 
@@ -2128,14 +1910,6 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	switch (event)
 	{
-	case eSetMaterialShaderFilename:
-		// textbox is just for looks -- user can't alter filename here
-		break;
-
-	case eSetMaterialName:
-		freyjaMaterialName(freyjaGetCurrentMaterial(), text);
-		break;
-
 	case eSetTextureNameA:
 		if (!haltTextureA)
 		{
@@ -2160,73 +1934,6 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	default:
 		freyja_print("handleTextEvent(%i, '%s'): Unhandled event.", event, text);
-	}
-}
-
-
-void FreyjaControl::eOpenTexture(char *text)
-{
-	if (text == NULL || text[0] == 0) 
-		return;
-
-	bool loaded = LoadTexture(text);
-	if (loaded)
-	{
-		uint32 e = resourceGetEventId1s("eSetTextureNameA");
-		uint32 texture = mTextureId - 1;
-		uint32 mat = freyjaGetCurrentMaterial();
-
-		mgtk_textentry_value_set(e, text);
-		freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-		mgtk_spinbutton_value_set(eSetMaterialTexture, texture);
-		freyjaMaterialTexture(mat, texture);
-		freyjaMaterialTextureName(mat, text);
-
-		freyja_event_gl_refresh(); //Dirty();
-	}
-
-	freyja_print("%s %s", text, loaded ? "loaded" : "failed to load");
-}
-
-		
-void FreyjaControl::eOpenShader(char *text)
-{
-	if (text == NULL || text[0] == 0) 
-		return;
-
-	uint32 fragmentId = 0; // Gets fragment id
-	bool load = false;
-
-	if (mUsingARBFragments && 
-		freyja3d::OpenGL::LoadFragmentARB(text, fragmentId))
-	{
-		freyja3d::OpenGL::BindFragmentARB(fragmentId);
-		load = true;
-	}
-	else if (freyja3d::OpenGL::LoadFragmentGLSL(text, fragmentId))
-	{
-		freyja3d::OpenGL::BindFragmentGLSL(fragmentId);
-		load = true;
-	}
-
-	if (load)
-	{
-		uint32 e = 
-		ResourceEvent::GetResourceIdBySymbol("eSetMaterialShaderFilename");
-		
-		//uint32 texture = mTextureId - 1;
-		mgtk_textentry_value_set(e, text);
-		
-		// Propagate to material backend
-#if 1
-		uint32 mat = freyjaGetCurrentMaterial();
-		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
-		mgtk_spinbutton_value_set(eSetMaterialShader, fragmentId);
-		freyjaMaterialShader(mat, fragmentId);
-		freyjaMaterialShaderName(mat, text);
-#endif		
-		freyja_print("Loaded fragment program %i", fragmentId);
-		freyja_event_gl_refresh();
 	}
 }
 
@@ -5067,7 +4774,7 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 		f = m->GetFace(i);
 
 		/* Only consider UVs using selected material */
-		if (!f || f->mMaterial != GetSelectedTexture())
+		if (!f || f->mMaterial != GetSelectedMaterial())
 			continue;
 
 		// NOTE: Right now we can have mixed texcoord polymapped faces
@@ -5167,418 +4874,4 @@ int load_shader(const char *filename)
 
 	return id;
 }
-
-
-/// Replace me ///////////////////////////////////////////////////
-
-
-// Replace 'freyja' Material format with 'libfreyja' Material format + metadata
-bool FreyjaControl::LoadMaterial(const char *filename)
-{
-	SystemIO::TextFileReader r;
-
-
-	if (!filename || !filename[0])
-	{
-		return false;
-	}
-
-	if (!r.Open(filename))
-	{
-		perror("Material::loadFile> ");
-		return false;
-	}
-
-	int32 matIndex;
-	uint32 mode = 0;
-	bool perlinLoaded = false;
-	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
-	int32 width = 256, height = 256, seed = 257;
-	bool clamp = false;
-	float addcolor[3] = {130.0/255.0, 130.0/255.0, 74.0/255.0};
-	float modcolor[3] = {156.0/255.0, 130.0/255.0, 89.0/255.0};
-
-	while (!r.IsEndOfFile())
-	{
-		const char *buffer = r.ParseSymbol();
-
-		if (strncmp(buffer, "[Material]", 11) == 0)
-		{
-			if (mFlags & fLoadMaterialInSlot)
-			{
-				matIndex = freyjaGetCurrentMaterial();
-			}
-			else
-			{
-				matIndex = freyjaMaterialCreate();
-			}
-
-			mode = 1;
-		}
-		else if (strncmp(buffer, "[PerlinNoise]", 14) == 0)
-		{
-			mode = 2;
-		}
-		else if (mode == 1)
-		{
-			// Lex('=')
-			r.FindNextChar('=');
-
-			if (strncmp(buffer, "Shininess", 9) == 0)
-			{				
-				freyjaMaterialShininess(matIndex, r.ParseFloat());
-			}
-			else if  (strncmp(buffer, "Texture", 7) == 0)
-			{
-				if (LoadTexture(r.ParseStringLiteral()))
-				{
-					if (mTextureId > -1)
-					{
-						freyjaMaterialTexture(matIndex, mTextureId-1);
-						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
-					}
-				}
-			}
-			else if  (strncmp(buffer, "TextureName", 11) == 0)
-			{
-				const char *s = r.ParseStringLiteral();
-
-				if (LoadTexture(s))
-				{
-					if (mTextureId > -1)
-					{
-						freyjaMaterialTextureName(matIndex, s);
-						freyjaMaterialTexture(matIndex, mTextureId-1);
-						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
-					}
-				}
-			}
-			else if  (strncmp(buffer, "Name", 4) == 0)
-			{
-				freyjaMaterialName(matIndex, r.ParseStringLiteral());
-			}
-			else if  (strncmp(buffer, "EnableBlending", 14) == 0)
-			{
-				if (r.ParseBool())
-					freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Blending);
-			}
-			else if (strncmp(buffer, "Blend", 5) == 0)
-			{						
-				bool is_src = false;
-				if (strncmp(buffer, "BlendSource", 11) == 0)
-					is_src = true;
-
-				const char *buf = r.ParseSymbol();
-				int32 val = (strncmp(buf, "GL_ZERO", 11) == 0) ? GL_ZERO :
-				(strncmp(buf, "GL_SRC_COLOR", 9) == 0) ? GL_SRC_COLOR :
-				(strncmp(buf, "GL_ONE_MINUS_SRC_COLOR", 22) == 0) ? GL_ONE_MINUS_SRC_COLOR :
-				(strncmp(buf, "GL_DST_COLOR", 9) == 0) ? GL_DST_COLOR :
-				(strncmp(buf, "GL_ONE_MINUS_DST_COLOR", 22) == 0) ? GL_ONE_MINUS_DST_COLOR :
-				(strncmp(buf, "GL_SRC_ALPHA", 9) == 0) ? GL_SRC_ALPHA :
-				(strncmp(buf, "GL_ONE_MINUS_SRC_ALPHA", 22) == 0) ? GL_ONE_MINUS_SRC_ALPHA :
-				(strncmp(buf, "GL_DST_ALPHA", 9) == 0) ? GL_DST_ALPHA :
-				(strncmp(buf, "GL_ONE_MINUS_DST_ALPHA", 22) == 0) ? GL_ONE_MINUS_DST_ALPHA :
-				(strncmp(buf, "GL_SRC_ALPHA_SATURATE", 21) == 0) ? GL_SRC_ALPHA_SATURATE :
-				(strncmp(buf, "GL_CONSTANT_COLOR", 17) == 0) ? GL_CONSTANT_COLOR :
-				(strncmp(buf, "GL_ONE_MINUS_CONSTANT_COLOR", 27) == 0) ? GL_ONE_MINUS_CONSTANT_COLOR :
-				(strncmp(buf, "GL_ONE", 6) == 0) ? GL_ONE :
-				(strncmp(buf, "GL_CONSTANT_ALPHA", 17) == 0) ? GL_CONSTANT_ALPHA :					GL_ONE_MINUS_CONSTANT_ALPHA;
-				
-				if (is_src)
-				{
-					freyjaMaterialBlendSource(matIndex, val);
-				}
-				else
-				{
-					freyjaMaterialBlendDestination(matIndex, val);
-				}
-			}
-			else if (strncmp(buffer, "Ambient", 7) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialAmbient(matIndex, c);
-			}
-			else if (strncmp(buffer, "Diffuse", 7) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialDiffuse(matIndex, c);
-			}
-			else if (strncmp(buffer, "Specular", 8) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialSpecular(matIndex, c);
-			}
-			else if (strncmp(buffer, "Emissive", 8) == 0)
-			{
-				vec4_t c;
-				c[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[2] = r.ParseFloat();
-				r.FindNextChar(',');
-				c[3] = r.ParseFloat();
-				freyjaMaterialEmissive(matIndex, c);				
-			}
-		}
-		else if (mode == 2)
-		{
-			// Lex('=')
-			r.FindNextChar('=');
-
-			perlinLoaded = true;
-
-			if (strncmp(buffer, "Seed", 4) == 0)
-			{
-				seed = r.ParseInteger();
-				SetResourceInt("ePerlinNoiseSeed", seed);
-			}
-			else if (strncmp(buffer, "Width", 5) == 0)
-			{
-				width = r.ParseInteger();
-				SetResourceInt("ePerlinNoiseW", width);
-			}
-			else if (strncmp(buffer, "Height", 6) == 0)
-			{
-				height = r.ParseInteger();
-				SetResourceInt("ePerlinNoiseH", height);
-			}
-			else if (strncmp(buffer, "Clamp", 5) == 0)
-			{
-				clamp = r.ParseBool();
-				SetResourceInt("ePerlinNoiseClamp", clamp);
-			}
-			else if (strncmp(buffer, "AddColor", 8) == 0)
-			{
-				addcolor[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				addcolor[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				addcolor[2] = r.ParseFloat();
-				SetResourceColor("eColorPerlinAdd", 
-								 addcolor[0], addcolor[1], addcolor[2], 1.0);
-			}
-			else if (strncmp(buffer, "ModulateColor", 14) == 0)
-			{
-				modcolor[0] = r.ParseFloat();
-				r.FindNextChar(',');
-				modcolor[1] = r.ParseFloat();
-				r.FindNextChar(',');
-				modcolor[2] = r.ParseFloat();
-				SetResourceColor("eColorPerlinMult", 
-								 modcolor[0], modcolor[1], modcolor[2], 1.0);
-			}
-			else if (strncmp(buffer, "iA", 2) == 0)
-			{
-				iA = r.ParseFloat();
-				SetResourceFloat("ePerlinNoiseIA", iA);
-			}
-			else if (strncmp(buffer, "iB", 2) == 0)
-			{
-				iB = r.ParseFloat();
-				SetResourceFloat("ePerlinNoiseIB", iB);
-			}
-			else if (strncmp(buffer, "d", 1) == 0)
-			{
-				d = r.ParseFloat();
-				SetResourceFloat("ePerlinNoiseD", d);
-			}
-		}
-	}
-	
-	r.Close();
-
-	// Convert this to Material metadata
-	if (perlinLoaded)
-	{
-		PerlinNoise perlin;
-		byte *image = perlin.generateBuffer(width, height, seed);
-		
-		if (image)
-		{	
-			if (clamp)
-				perlin.clampBufferIntensity(image, width, height, iA, iB, d);
-			
-			/* Modulate by a color and add a base half intensity */
-			FreyjaImage img;
-			byte *rgb;
-
-			img.loadPixmap(image, width, height, FreyjaImage::INDEXED_8);
-			img.getImage(&rgb);
-
-			for (uint32 i = 0, n = width * height * 3; i < n; ++i)
-			{
-				/* NOTE: No clamping or scaling of colors, however there is a 
-				   weakened 50 / 50 add in the sense that ADD can only contrib
-				   _up_to_ 50% of full intensity ( 255 ).
-
-				   The reason for this is to allow bleeding for plasma, etc.
-				*/
-
-				// Modulate and adjust intensity per pixel
-				rgb[i] = (byte)(rgb[i] * modcolor[0]) +	(byte)(128 * addcolor[0]);
-				++i;
-				rgb[i] = (byte)(rgb[i] * modcolor[1]) +	(byte)(128 * addcolor[1]);
-				++i;
-				rgb[i] = (byte)(rgb[i] * modcolor[2]) +	(byte)(128 * addcolor[2]);
-			}
-
-			freyja_load_texture_buffer(rgb, width, height, 24);
-			freyjaMaterialTexture(matIndex, mTextureId-1);
-			freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
-		}
-	}
-
-	freyja_refresh_material_interface();
-
-	return true;
-}
-
-
-bool FreyjaControl::SaveMaterial(const char *filename)
-{
-	int32 matIndex = freyjaGetCurrentMaterial();
-
-	float ambient[4];          /* Ambient color */
-	float diffuse[4];          /* Diffuse color */
-	float specular[4];         /* Specular color */
-	float emissive[4];         /* Emissive color */
-	float shininess;           /* Specular exponent */
-	unsigned int texture;      /* Texture id */
-	//unsigned int texture2;     /* Detail Texture id */
-	unsigned int blend_src;    /* Blend source factor */
-	unsigned int blend_dest;   /* Blend destination factor */
-	char *name;
-
-	freyjaGetMaterialAmbient(matIndex, ambient);
-	freyjaGetMaterialDiffuse(matIndex, diffuse);
-	freyjaGetMaterialSpecular(matIndex, specular);
-	freyjaGetMaterialEmissive(matIndex, emissive);
-	shininess = freyjaGetMaterialShininess(matIndex);
-	name = (char*)freyjaGetMaterialName(matIndex);
-	texture = freyjaGetMaterialTexture(matIndex);
-	blend_dest = freyjaGetMaterialBlendDestination(matIndex);
-	blend_src = freyjaGetMaterialBlendSource(matIndex);
-
-
-
-	FILE *f;
-
-	
-	if (!filename || !filename[0])
-	{
-		return false;
-	}
-
-
-	f = fopen(filename, "w");
-
-	if (!f)
-	{
-		perror("Material::saveFile> ");
-		return false;
-	}
-
-	fprintf(f, "[Material]\n");
-	fprintf(f, "Name = \"%s\"\n", name);
-
-	if (texture && freyjaGetMaterialTextureName(matIndex))
-	{
-		fprintf(f, "TextureName = \"%s\"\n", freyjaGetMaterialTextureName(matIndex));
-	}
-
-	fprintf(f, "EnableBlending = %s\n", 
-			(freyjaGetMaterialFlags(matIndex) & fFreyjaMaterial_Blending) ? 
-			"true" : "false");
-
-	fprintf(f, "BlendSource = %s\n", 
-			  (blend_src == GL_ZERO) ? "GL_ZERO" :
-			  (blend_src == GL_ONE) ? "GL_ONE" :
-			  (blend_src == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
-			  (blend_src == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
-			  (blend_src == GL_DST_COLOR) ? "GL_DST_COLOR" :
-			  (blend_src == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
-			  (blend_src == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
-			  (blend_src == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
-			  (blend_src == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
-			  (blend_src == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
-			  (blend_src == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
-			  (blend_src == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
-			  (blend_src == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
-			  (blend_src == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
-
-
-	fprintf(f, "BlendDest = %s\n", 
-			  (blend_dest == GL_ZERO) ? "GL_ZERO" :
-			  (blend_dest == GL_ONE) ? "GL_ONE" :
-			  (blend_dest == GL_SRC_COLOR) ? "GL_SRC_COLOR" :
-			  (blend_dest == GL_ONE_MINUS_SRC_COLOR) ? "GL_ONE_MINUS_SRC_COLOR" :
-			  (blend_dest == GL_DST_COLOR) ? "GL_DST_COLOR" :
-			  (blend_dest == GL_ONE_MINUS_DST_COLOR) ? "GL_ONE_MINUS_DST_COLOR" :
-			  (blend_dest == GL_SRC_ALPHA) ? "GL_SRC_ALPHA" :
-			  (blend_dest == GL_ONE_MINUS_SRC_ALPHA) ? "GL_ONE_MINUS_SRC_ALPHA" :
-			  (blend_dest == GL_DST_ALPHA) ? "GL_DST_ALPHA" :
-			  (blend_dest == GL_ONE_MINUS_DST_ALPHA) ? "GL_ONE_MINUS_DST_ALPHA" :
-			  (blend_dest == GL_SRC_ALPHA_SATURATE) ? "GL_SRC_ALPHA_SATURATE" :
-			  (blend_dest == GL_CONSTANT_COLOR) ? "GL_CONSTANT_COLOR" :
-			  (blend_dest == GL_ONE_MINUS_CONSTANT_COLOR) ? "GL_ONE_MINUS_CONSTANT_COLOR" :
-			  (blend_dest == GL_CONSTANT_ALPHA) ? "GL_CONSTANT_ALPHA" : "GL_ONE_MINUS_CONSTANT_ALPHA");
-
-	fprintf(f, "Ambient = %f, %f, %f, %f\n", 
-			  ambient[0], ambient[1], ambient[2], ambient[3]);
-	fprintf(f, "Diffuse = %f, %f, %f, %f\n", 
-			  diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
-	fprintf(f, "Specular = %f, %f, %f, %f\n", 
-			  specular[0], specular[1], specular[2], specular[3]);
-	fprintf(f, "Emissive = %f, %f, %f, %f\n", 
-			  emissive[0], emissive[1], emissive[2], emissive[3]);
-	fprintf(f, "Shininess = %f\n", shininess);
-
-	// No 'named' texture dump perlin noise
-	if (texture && !freyjaGetMaterialTextureName(matIndex))
-	{
-		int seed = GetResourceInt("ePerlinNoiseSeed");
-		int w = GetResourceInt("ePerlinNoiseW");
-		int h = GetResourceInt("ePerlinNoiseH");
-		int clamp = GetResourceInt("ePerlinNoiseClamp");
-		float ia = GetResourceFloat("ePerlinNoiseIA");
-		float ib = GetResourceFloat("ePerlinNoiseIB");
-		float d = GetResourceFloat("ePerlinNoiseD");
-		float mr, mb, mg, ma;
-		GetResourceColor("eColorPerlinMult", mr, mb, mg, ma);
-		float ar, ab, ag, aa;
-		GetResourceColor("eColorPerlinAdd", ar, ab, ag, aa);
-
-
-		fprintf(f, "\n\n[PerlinNoise]\nSeed = %i\nWidth = %i\nHeight = %i\nClamp = %s\niA = %f\niB = %f\nd = %f\nModulateColor = %f, %f, %f\nAddColor = %f, %f, %f", seed, w, h, clamp ? "true" : "false", ia, ib, d, mr, mb, mg, ar, ab, ag);
-	}
-
-
-	fclose(f);
-
-	return true;
-}
-
-
 
