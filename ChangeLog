@@ -4,17 +4,9 @@
  Freyja 0.9.5 Development branch
  =====================================================================
 
- Dancer/Kagura (Release)
- - DEPENDS Stability tests
- - DEPENDS API Clean up
-
- Dancer (Public Beta Kagura)
- - DEPENDS Fixed FK Animation
- - DEPENDS Removed all numeric events
- - DEPENDS <Secret> plugin support
-
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - TODO update to make more sense!
  - Interface plugins moved from freyja to toplevel plugins
  - Win32 build fixes
  - Win32 pthreads support ( only used by trival libhel join test for now )

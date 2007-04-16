@@ -1227,9 +1227,29 @@ void eTestTextView()
 }
 
 
+mstl::String gTestBoneMetadata("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+void eTestBoneMetadataText(char *text)
+{
+	gTestBoneMetadata = text;
+}
+
+
+void eTestBoneMetadata()
+{
+	uint32 e = ResourceEvent::GetResourceIdBySymbol("eTestBoneMetadataText");
+
+	mgtk_create_query_dialog_text("gtk-dialog-question", 
+								  "Bone metadata test.", 
+								  e, gTestBoneMetadata.c_str());
+}
+
+
 void FreyjaMiscEventsAttach()
 {
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
+
+	ResourceEventCallbackString::add("eTestBoneMetadataText", &eTestBoneMetadataText);
+	ResourceEventCallback::add("eBoneMetaData", &eTestBoneMetadata);
 
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);

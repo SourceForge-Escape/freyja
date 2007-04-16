@@ -221,6 +221,7 @@
 				(menu_item "_Select"		eBoneSelect)
 				(menu_item "_Parent"		eBoneLinkChild)
 				(menu_item "_Unparent"		eBoneUnLinkChild)
+				(menu_item "_Metadata"		eBoneMetaData)
 				;old (menu_item "L_ink mesh"		eBoneLinkMesh)
 				;old (menu_item "U_nlink mesh"		eBoneUnLinkMesh)
 				;(menu_item "_Move"				eBoneMoveJoint)
@@ -1032,7 +1033,7 @@
  · F6 - Rotate 		· Shift (held) - tUnSelect
  · F7 - Scale
 
-")
+"))
 
 		(hbox 1 0 0 1 0 
 			(label2 "The last viewport you click in becomes your main window")) 
