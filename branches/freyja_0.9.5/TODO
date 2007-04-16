@@ -1,72 +1,144 @@
 
- TODO
-
- Freyja 0.9.5 ( Development branch )
+ TODO   
  =====================================================================
 
- Hot  
+ Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
-	* 'FreyjaMaterial'	 class
-		- Event hooks
-		- material refresh
-		- Remove last of 'numeric' events 
+	* Do another pass on this file to be sure items aren't already completed.
+
+	* Finish OpenGLPrinter, 2d/3d billboard text using libfreetype.
+		- Work OpenGLPrinter into main line build now for text support
+
+	* Verify math library, enforce automated testing at build.
+
+	* Assertion dialog boxes with optional handling control
+	  ( Many asserts are being reported as crashes right now )
+
+	* Fix mouse cursor control. eg: reverse bug, rotation not WYSIWYG, etc
+
+	* Basic geometry previews using blend vertices buffer - avoid data mutators.
+
+	* Skeletal animation refactor
+		- Fix remaining FK issues
+		- Various joint types: hinge, ball&socket, etc
+		- IK solver and interface
+		- Timer for animation playback and keyframe timing
+		- Bones and bone transforms in same units!
+		- Finalize delta vs abs bone / keyframe transforms
+		- Rework weight system to support zeroed weights and grouping
+		- Merge the two bone rendering systems once debugging is done
+		- Fix bone bind, bindtoworld setup in libfreyja
+		- Channels support
+		- Ordering support
+		- Type of transform support
+		- Constraints support
+
+	* Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
+
+	* Replace MaterialEv Load/Save material with libfreyja format+metadata.
+
+	* Finish breakup of GUI control into modules.
+
+
+ Freyja, Dancer/Kagura 0.9.6 (Public Alpha-Beta, TBD)
+ -----------------------------------------------------------------------------
+
+	* Single joint animations for shishi odoshi tutorial demo.
+		- Mesh parenting and grouping
+		- Visualize weights over skinned mesh
+		- Keyframe editor improvements
+			- Finalize the interpolation system in libfreyja
+		- Curve editor ( OpenGL UI based editor )
+		- Timers for animation playback
+		- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
+		- Make generic plugin interface for new UI control points
+		- Renable 'direct' vertex animation creation
+		  ( Letting the user move selected points in vertex morph mode )
+		- Ref weights from vertex to fix blending issues
+		- ZIP file based pak format for freyja format models w/ textures, etc?
+		- Rendering support for alpha flagged faces ( partial depth sorting )
+			- Face flag for marking faces that need to be depth sorted... 
+
+	* Fix remaining animation issues.
+
+	* freyjaPak ( VFS )
+		- Encryption support
+		- Direct set functions to import / export
+		- New vfs plugin UI
+		- Buffered/fileread/filewrite file plugin interface
+
+	* Formalized unit tests and reporting.
+
+	* Clean up mstl by breaking up classes with better namespacing.
+
+	* Rewrite mstl Map / RedBlackTree / AVLTree / etc at some point.
+
+	* COLLADA 1.4 plugin with Import/Export.
+
+	* Ensure transform algorithms are not done in client.
+
+	* Ensure all all numeric events are removed.
+
+	* Finish Bone MetaData support.
+
+	* Add in simple collision ( eg Dropping lantern on chair )
+
+	* Style / legal / contact updates for all code.
+
+	* User prefs default material and user prefs reset to defaults.
+
+	* Use tree widget for scene graph with mesh/skel.bone/mats.
+
+	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
+
+
+ Freyja, Dancer/Kagura 0.9.6 (Beta-Release, TBD)
+ -----------------------------------------------------------------------------
+
+	* APIs / designs to be finalized
+		- Use status bar for mouse over tooltips also?
+		- Path animation?
+		- New resource event system with UIDs and event transparent buckets?
+		- Object proprieties dialog?
+			- Hidden property / Show object
+			- Visibility layers using flags
+		- Cg support plugin?
+		- Force Copy / Cut / Paste / Dupe / Split / Merge for every object type?
+		- Multi-object modes might need new UI design to avoid user confusion?
+		- Add material colors for 'editing while rendering'? ( seems bad idea )
+		- Face extruding maybe doesn't need to be pick ray guided (confusing?)
+		- Hook up UV transforms, and flesh them out.
+		- Track and Keyframe classes 
+			- Keyframe vector issue
+		- Add Meld/fMuted support for Vertex operations in Mesh
+		- Add menu action to clamp texcoords on selected Mesh
+		- Fix all remaining mesh issues like uv editing and manual welds
+		- Mesh::Merge() doesn't merge animations ( shouldn't matter? )
+		- Mesh::WeldTexCoords() is non-functunal 
+		- Mesh::Serialize(...) for binary Files needs to be updated for format	
+
+	* GNOME MIME setup script
+
+	* PluginManager ( enable / disable plugins, descriptions, etc )
+
+	* Log window for more complete error / warning reporting.
 
 	* Query dialog with multitype support.
 		struct query { string msg, type defaultvalue, type eventId }
 
-	* PluginManager ( enable / disable plugins, descriptions, etc )
-
-	* Add in simple collision ( eg Dropping lantern on chair )
-
-	* Replace freyja UI Load/Save material with libfreyja Material metadata
-
-	* New resource event system with UIDs and event transparent buckets
-
-	* Style / lic update all code
-
-	* Replacing the horrible event switches with MethodDelegates for 
-	  great justice
-
-	* Log window for more complete error / warning reporting.
-
-	* Finish Bone.MetaData support
-
-	* Rewrite FreyjaControl to remove the horrible switch of doom or at
-	  least continue to break it up into smaller chunks until the rewrite comes
-
-	* OpenGL Text
-
-	* Texture buffers for normal maps, shader data, etc
-
-	* User defined default material
-
-	* Verify math library, enforce automated testing
-
 	* Import/export plugin changes
 		- dropdown should change filename
-		- Threaded import/export
+		- Threaded import/export?
 			- fLocked support
 			- fSelectedFIO support
-		- Detailed error messages ( Pass back a String to generate msgbox ) Plugin::mStatus
+		- Detailed error messages ( Pass back a String to generate msgbox ) 
 		- FreyjaType flags usage ( eg mesh only, mesh+skeleton, etc )
 		- Freyja selection usage ( eg export selected )
 		- Optional memory buffer usage instead of file/url ( great for paks )
 		- These could be setup inside of per plugin preferences, so
 		  the ABI doesn't have to change ala states
 		- Open/Save buttons on filedialogs
-
-	* Texture buffer array per material improvements ( allows better shaders )
-
-	* Use tree for scene graph with mesh/skel.bone/mats
-
-	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
-
-	* Assertion dialog boxes with optional handling control
-	  ( Many asserts are being reported as crashes right now )
-
-	* Bones and bone transforms in same units!
-		- Also finalize delta vs abs
 
 	* Import/Export submenus like the Plugins.. submenu
 		- SMD plugin option to save mesh prompt
@@ -75,67 +147,33 @@
 		- File dialogs should be able to handle 
 		  *.ms3d and auto append instead of doing *.milkshape
 
-	* Rotation cursor fixes for rendering vs actual transform
+	* Viewport view / control abstraction
+		- Reimplement and enable Camera system
+		- Add camera editing back
 
-	* Multi-object modes might get a new UI design to avoid confusing the user
-
-	* Basic geometry previews will use blend vertices buffer to avoid changing actual data
-
-	* Update the ABI with new transforms, and avoid doing transform algorithms in client.
-
-	* Single joint animation for shishi odoshi test
-		- Visualize weights over skinned mesh
-		- Keyframe editor improvements
-			- Finalize the interpolation system in the backend
-		- Curve editor ( OpenGL UI based editor )
-			- Work OpenGLPrinter into main line build now for text support
-		- Timers for animation playback
-		- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
-		- Make generic plugin interface for new UI control points
-		- Renable 'direct' vertex animation creation
-		  ( Letting the user move selected points in vertex mode )
-		- Ref weights from vertex to fix blending issues
-		- ZIP file based pak format for freyja format models w/ textures, etc
-		- Rendering support for alpha flagged faces ( partial depth sorting )
+	* GLSL shaders
+		- FreyjaOpenGL should remap shaders to make sure two of the same
+		  shader aren't loaded at once ( just pass back the orig program id )
+		- Refraction demo shader ( turbulence with frag prob best )
+		- Depth of field demo shader
 
 	* Misc
 		- Move all transforms in UI to ::Transform and hook-up undo/redo for all
 		- Edge editing needs to be top level 'edit type' like face in UI
 		- Face splitting needs to be user controllable
-		- Face extruding maybe doesn't need to be pick ray guided (confusing?)
-		- Face flag for marking faces that need to be depth sorted... 
-			- Yeah, I couldn't stand it any longer
 		- Stiching mode for making faces from existing vertices
-			- This is an old 'Fan favorite' feature of freyja
+			- This is an old 'Fan favorite' feature of freyja that was removed
 			- Stiching existing vertices should be a seperate mode
 			- This new implementation will use control points and a quad/tri
 			  strip mode for the control point renderer to avoid writes to mesh
 			- Have the user press <ctrl> mouse2 to generate the polygons
-		- Mesh parenting and grouping?
-		- Copy / Cut / Paste / Dupe / Split / Merge for every object type?
-		- Generic texture lists for materials: 
-			- Shaders can use them for normal maps, gloss, data, etc
-
-	* To be finalized
-		- Hook up UV transforms, and flesh them out.
-		- Track and Keyframe classes 
-			- Keyframe vector issue
-		- Add Meld/fMuted support for Vertex operations in Mesh
-		- Add menu action to clamp texcoords on selected Mesh
-		- Fix all remaining mesh issues like uv editing and manual welds
-		- Mesh::Merge() doesn't merge animations ( shouldn't matter for now )
-		- Mesh::WeldTexCoords() is non-functunal 
-		- Mesh::Serialize(...) for binary Files needs to be updated for format
-
-	* Skeletal animation
-		- Rework weight system to support zeroed weights and grouping
-		- Merge the two bone rendering systems once debugging is done
-		- Fix bone bind, bindtoworld setup in backend
 
 
-
- Modeling
+ Freyja, Proposed (TBA)
  -----------------------------------------------------------------------------
+
+	 Modeling
+	 -------------------------------------------------------------------------
 
 	* Node editor for scene graph control
 
@@ -158,7 +196,6 @@
 		- UVMaps replaces by selected faces
 		- UV color button for default bg color
 		- Selectable patterns like colorcube, checkerboard, gray as bg
-
 
 	* Sphere/ray brush ( aka paint interface )
 		- Paint with ray test
@@ -185,13 +222,7 @@
 		- Primitives: Cone / Disk / Cylinder ? ( Not polygonal interface )
 		- API interfaces for 'Copy/cut/paste' and 'Rot/Pos/Scale/etc'?
 
-	* freyjaPak ( VFS )
-		- Encryption support
-		- Direct set functions to import / export
-		- New vfs plugin UI
-		- Buffered/fileread/filewrite file plugin interface
-
-	* Lasso and bounding box selections
+	* Lasso and improved bounding box selections
 
 	* Gobal mesh UIDs ala bones/joints to remove need for model+mesh reference
 
@@ -206,16 +237,12 @@
 	* Interactive Tristrip creation tool to replace the old point and connect
    	  polgon creation some people seem to love
 
-	* Partial mesh cut / copy / paste fully working with at least meshes
-
 	* Selected mesh shader / color option
 
 	* Make Mesh enforce only 1 kind of Face type in the sense of:
 		- PolyMapping UV / Normal / etc
 
 	* Better UV unwrap ( write smart algorithms for projections )
-
-	* Add material colors for 'editing while rendering'? ( seems bad idea )
 
 	* Allow user to set radius of vertex and texcoord picks ( hook up )
 
@@ -237,104 +264,53 @@
 	* Guided UV unwrap ( face pick )
 
 
-
- Animation
- -----------------------------------------------------------------------------
+ 	Animation
+ 	--------------------------------------------------------------------------
 
 	* Curves support for keyframe editor
 
 	* Bone H-matrix / inverted H-matrix
 
-	  Bones with transforms in/outside of hierarchy
-
-	* New skeleton system
-
-	* Keyframe editor that makes sense unlike 0.8.x series
-
-	* Various joint types: hinge, ball&socket, etc
-
-	* IK solver and interface
-
-	* Timer for animation playback and keyframe timing
-
-	* Path animation
-
-	* Channels support
-		- Ordering support
-		- Type of transform support
-		- Constraints support
+	* Bones with transforms in/outside of hierarchy
 
 
- Misc
- ----------------------------------------------------------------------------
+ 	Misc
+ 	--------------------------------------------------------------------------
 
 	* Reverse bone rendering direction option <-- --->  large part to leaf
 
 	* Refactor to use true singletons/other patterns where systems require
 
-	* Break up Render/Control into 'controls with views'
-
 	* Simulation package revival
 
-	* Go do a sweep of all the plugins to make sure they use new ABI
-
-	* DBUS support now that it's hit stable ABI at 1.0
-
-	* Event logging in UI
-		- Separate events log into textbox dialog with freyja_logf(..)
-		- Separate status bar only messages with freyja_statf(..)
-		- Allow follow control from freyja_print with s[0] = !, ?, etc
-		- Use status bar for mouse over tooltips also
-
-	* Make all mlisp events use ids instead of numbers
-
-	* GNOME MIME setup script
-
-	* Remappable windows drive support
-
-	* Rewrite mstl Map to be a cleaner API
+	* DBUS support now that it's hit stable ABI at 1.0?
 
 
- Rendering
- ----------------------------------------------------------------------------
+	Rendering
+	-------------------------------------------------------------------------
 
-	* GLSL shaders
-		- FreyjaOpenGL should remap shaders to make sure two of the same
-		  shader aren't loaded at once ( just pass back the orig program id )
-		- Heat fx shader ( turb with frag prob best )
-		- DoF shader
-
-	* Material tree editor
+	* Material tree/node editor
 
 	* Animated texcoords
-
-	* Normal maps, DOT3, and maybe matrix palette skinning test renders
 
 	* glColorMaterial optional use
 
 	* Shadow maps and volumes
 
-	* Different skyboxes/floors for animation view
+	* Different skyboxes/floors w/ water reflection for animation view
 
 
- Event system / Interface
- ----------------------------------------------------------------------------
+	Event system / Interface
+	-------------------------------------------------------------------------
 
 	* libmgtk specific
-		- Automate callbacks from mlisp directly? (write events in just mlisp)
-		- Mlisp wish list
-			- Fully featured lisp with C bindings ( dangerous )
-			- Garbage collection
 		- 'Radio object' to auto uncheck toggle event when others trigger
-			- Radio buttons / menu items?
-		- mgtk Event type to replace numeric event ids
-		- Mlisp to replace Resource
+		- Mlisp to replace aging Resource based mlisp domain language
 		- MlispEvent to replace ResourceEvent
 		- Mlisp doesn't lookup symbols for like "true" if just setq
-		- String pop-up dialog prompts ( from C/C++ )
+			- This is by design, but maybe it should change now.
 
-	* Interface ( cold, was hot )
-		- Trim out 'dead' events, esp ones registering to mgtk
+	* Interface
 		- Two window layout for curve / viewport usage
 		- Make viewport 'windows' abstract with seperate controls
 			- Support for dynamic resizing and 2/3/4 layouts
@@ -349,10 +325,6 @@
 		- VFS UI needs to provide metadata like XOR keys, size, offset, etc			- Extra viewmode to toggle groups colors on/off
 		- Two-way python function/script UI, reporting ala C plugins
 		  or offically endorse pygtk, etc
-
-	* Viewport view / control abstraction
-		- Reimplement and enable Camera system
-		- Add camera editing back
 
   	* Scene tree view for all objects in scene
 		- Parenting interface
@@ -378,110 +350,17 @@
 		- Don't scale cursor
 		- Cursor rotation pivot setting for vertices
 
-	* Object proprieties dialog?
-		- Hidden property / Show object
-		- Visibility layers using flags
-
 	* Event system refinement { Undo, Redo, Macro, Playback }
 
 	* Enforce usage of Observer and Command patterns for all events
 
-	* Generic control points
+	* Generic control points refinement
 
 	* Multiple select ops vs single select
 
-	* MsgBox assert system to fix errors faster
-
-	* 3d text using just libfreetype
-
-	* Breakup GUI into modules
 
 
- Plugins
- ----------------------------------------------------------------------------
 
-	* LineageII
-		- Finish LinageII import for all versions of the game
-		- Finish LineageII pak vfs plugin
-
-	* Find and fix all the bugs caused by all new backend
-
-	* Check PSK and Halflife unit tests for anim
-
-	* Editor plugins in freyja using UI hooks like:
-	  freyja_append_eventid, event system, and freyja_append_item_to_menu
-
-	* Add Oblivion plugin?
-
-	* Finish Morrowind import plugin (nif4)
-
-	* Add support for 'nvidia' ASE skel animation (ase)
-
-	* Finish PSK export (PSKModel)
-
-	* UTX export (UTPackage)
-
-	* Material plugins
-		- Cg shaders
-		- GLSL shaders
-
-
- User requests
- ----------------------------------------------------------------------------
-
-* Req: Bring back click to create/delete vertices and 'link/draw' polygons
-
-== Brillant idea #54 ==
-<Mongoose> GNOME should have 'emblems' icons for toolbars
-<Mongoose> if I make special custom file open icons they'll never match your theme 
-<Mongoose> ohh... I wonder if I could make a custom widget to do that...
-<Mongoose> I could pull the pixmap from the stock icon and alter it and send it back to the app
-<Mongoose> then it'll always match the theme... damn I'm smart...
-
-
-== Python plugin I/O ==
-<exarkun> How about this
-<exarkun> class StructFile(file):
-<exarkun>     def readObjects(self, fmt):
-<exarkun>         b = self.read(struct.calcsize(fmt)) # check length, etc
-<exarkun>     return struct.unpack(fmt, b)
-<exarkun> er, more indentation there
-<Mongoose> isn't that just host size and order?
-<exarkun> (also, that's it)
-<exarkun> no, struct lets you specify endianness
-<exarkun> < is little, > is big
-<exarkun> eg, '>f' is a big endian float
-<Mongoose> I'll look into using that instead of array and making an abstraction
-<Mongoose> thanks
-<exarkun> I've never used python on a 64 bit platform, or tried to write 64 bit clean code, so I'm not sure how size is handled, but I know other people have, so I think there is some support for dealing with that
-<exarkun> you're welcome
-
-
-== UI request #251 ==
-<DMJC> basically you clicked on object vertex or poly.. then you sactually that's wrong..
-<DMJC> in truespace you selected the object..
-<DMJC> then you could click to select vertex/edge/poly..
-<DMJC> then you could rotate/scale/move...
-<DMJC> you didn't have 4 interfaces.. one for each of those types..
-<DMJC> you had that one 3x3 grid..
-<DMJC> made modelling piss easy
-<DMJC> I can whip up meshes in under 5 mins with that
-<DMJC> max/maya lose you in their interfaces..
-<DMJC> top window the important thing is not what's laid out there except the bottom part..
-<DMJC> you could cram that in one corner..
-<DMJC> as long as it's done like that
-<DMJC> I'll find a truespace screenshot for you
-<Mongoose> cool
-<DMJC> http://www.caligari.com/products/trueSpace/ts5/Brochure/images/ts5main.jpg
-<DMJC> that hasn't got the awesome coordinate editor onscreen
-<DMJC> basically they threw out menus..
-<DMJC> and went for small dialogues and buttons
-<DMJC> it's a perfect example of less is more
-
-
-== Web site request ==
-<floam> iframes are pretty scary
-<floam> you should alter your blogger template to not have any css itself and style it in your real site
 
 
 

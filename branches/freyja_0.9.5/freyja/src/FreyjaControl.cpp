@@ -1469,6 +1469,7 @@ void FreyjaControl::VertexCombine()
 }
 
 
+#warning FIXME "event() functions must be replaced for Kagura"
 bool FreyjaControl::event(int event, unsigned int value)
 {
 	if (ResourceEvent::listen(event - ePluginEventBase, value))
@@ -1768,6 +1769,7 @@ void FreyjaControl::eRotateObject(uint32 value)
 }
 
 
+#warning FIXME "event() functions must be replaced for Kagura"
 bool FreyjaControl::event(int event, vec_t value)
 {
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
@@ -1864,6 +1866,7 @@ void FreyjaControl::UnselectMode()
 	freyja_event_gl_refresh();
 }
 
+
 void FreyjaControl::SelectMode()
 {
 	mEventMode = aSelect;
@@ -1873,6 +1876,7 @@ void FreyjaControl::SelectMode()
 }
 
 
+#warning FIXME "event() functions must be replaced for Kagura"
 bool FreyjaControl::handleEvent(int mode, int cmd)
 {
 	bool handled = true;
@@ -1899,6 +1903,7 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 }
 
 
+#warning FIXME "event() functions must be replaced for Kagura"
 void FreyjaControl::handleTextEvent(int event, const char *text)
 {
 	static bool haltTextureA = false;
