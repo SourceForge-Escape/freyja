@@ -231,6 +231,7 @@
 
 		(submenu ePluginMenu "_Plugins..."
 				(submenu "_Test"
+					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
 
 		(menu_seperator)
@@ -881,17 +882,13 @@
 
 	;; A box here would be under the tabs and the main window
 	(hbox 1 0 0 1 0
-		;(hslider eAnimationSlider 0 500)
-
+	
 	;; Animation bar
  	;(handlebox 1 
 		(vbox 1 1 1 1 1	
 			(hbox 1 1 1 1 1
 	
-			(hslider eAnimationSlider 0 500)
-
-			;(hbox 1 1 1 1 1
-			;	(hslider eAnimationSlider 0 500) )
+				(hslider eAnimationSlider 0 500)
 
 				(toolbar
 					(toolbar_togglebutton false "gtk-media-record"

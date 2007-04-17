@@ -163,7 +163,14 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 
 	if (gFreyjaAssertHandler)
 	{
-		if ((*gFreyjaAssertHandler)(file, line, function, exprString))
+		char msg[1024];
+		va_list args;
+		va_start(args, format);	
+		vsnprintf(msg, 1023, format, args);
+		va_end(args);
+		msg[1023] = 0;
+
+		if ((*gFreyjaAssertHandler)(file, line, function, exprString, msg))
 		{
 			freyjaPrintMessage("Assert ignored by event handler...");
 			return 0;
