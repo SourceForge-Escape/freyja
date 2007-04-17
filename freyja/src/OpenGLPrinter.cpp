@@ -31,16 +31,16 @@ using namespace freyja3d;
 
 #ifdef HAVE_FREETYPE2
 FT_Library OpenGLPrinter::mLibrary = NULL;
+#endif // HAVE_FREETYPE2
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-
-OpenGLPrinter::OpenGLPrinter(const char *filenameTTF) : 
-	mFace(NULL)
+OpenGLPrinter::OpenGLPrinter()
 {
+#ifdef HAVE_FREETYPE2
 	FT_Error error;
 
 	if (mLibrary == NULL)
@@ -52,61 +52,57 @@ OpenGLPrinter::OpenGLPrinter(const char *filenameTTF) :
 			printf("FreeType library initialization failed...\n");
 		}
 	}
+#endif // HAVE_FREETYPE2
+}
+
+
+OpenGLPrinter::~OpenGLPrinter()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+// Public Accessors
+////////////////////////////////////////////////////////////
+
+bool OpenGLPrinter::GenerateTexture(const char *filename,
+									unsigned int pt, unsigned int dpi,
+									const unsigned int count, const char **text,
+									unsigned char *image, 
+									unsigned int image_width)
+{
+#ifdef HAVE_FREETYPE2
+	FT_Face face;
+	FT_Error error;
 
 	if (mLibrary)
 	{
-		error = FT_New_Face(mLibrary, filenameTTF, 0, &mFace); 
+		error = FT_New_Face(mLibrary, filename, 0, &face); 
 
 		if (error) 
 		{
-			printf("FreeType fontface creation failed '%s'...\n", filenameTTF);
+			printf("FreeType fontface creation failed for '%s'...\n", filename);
+			return false;
 		}		
 		else
 		{
 			// 50pt, 100dpi
-			//error = FT_Set_Char_Size( mFace, 50 * 64, 0, 100, 0 );
-
-			error = FT_Set_Char_Size( mFace, 24 * 64, 0, 100, 0 );
+			//error = FT_Set_Char_Size( face, 50 * 64, 0, 100, 0 );
+			error = FT_Set_Char_Size( face, pt * 64, 0, dpi, 0 );
 
 			if (error)
 			{
-				printf("FreeType font size set failed...\n");
+				printf("FreeType font size set failed for '%s'...\n", filename);
+				return false;
 			}
 			else
 			{
-				const char *text[] = {
-#if 0
-					"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-					"abcdefghijklmnopqrstuvwxyz",
-					"1234567890~!@#$%^&*()-=+;:",
-					"'\",./?[]|\\ <>`" 
-#else
-					"ABCDEFGHIJKLM", // 'square up' texture map, less memory
-					"NOPQRSTUVWXYZ",
-					"abcdefghijklm",
-					"nopqrstuvwxyz",
-					"1234567890~!@",
-					"#$%^&*()-=+;:",
-					"'\",./?[]|\\ <>`"
-#endif
-				};
 
-				const unsigned int lines = 6;
-				const unsigned int image_width = 256;
-				unsigned char image[image_width*image_width*4];
-				GenerateTexture(lines, text, image, image_width);
 			}
 		}
 	}
-}
 
-
-void OpenGLPrinter::GenerateTexture(const unsigned int count, const char **text,
-									unsigned char *image, 
-									unsigned int image_width)
-{
-	FT_Error error;
-	FT_GlyphSlot slot = mFace->glyph;
+	FT_GlyphSlot slot = face->glyph;
 	//FT_Bitmap bitmap;
 
 	for (unsigned int line = 0; line < count; ++line)
@@ -122,7 +118,7 @@ void OpenGLPrinter::GenerateTexture(const unsigned int count, const char **text,
 		for (unsigned int i = 0; i < n; ++i) 
 		{ 
 			/* load glyph image into the slot (erase previous one) */ 
-			error = FT_Load_Char(mFace, text[line][i], FT_LOAD_RENDER); 
+			error = FT_Load_Char(face, text[line][i], FT_LOAD_RENDER); 
 			
 			if ( error ) 
 				continue; /* ignore errors */ 
@@ -136,65 +132,12 @@ void OpenGLPrinter::GenerateTexture(const unsigned int count, const char **text,
 		}
 	}
 
-	SaveTGA("/tmp/test.tga", image, image_width, image_width);
-}
-
-
-void OpenGLPrinter::AddGlyphToTexture32(unsigned char *image, 
-										unsigned int img_width,
-										unsigned char *pixmap,
-										unsigned int width, unsigned int height,
-										unsigned int pen_x, unsigned int pen_y)
-{
-	for (unsigned int i = 0; i < width; ++i)
-	{
-		for (unsigned int j = 0; j < height; ++j)
-		{
-			const unsigned int off = ((i + pen_x) + (j + pen_y) * img_width)*4;
-			const unsigned char g = pixmap[j * width + i];
-			image[off  ] |= g;
-			image[off+1] |= g;
-			image[off+2] |= g;
-			image[off+3] |= g;
-		}
-	}
-}
-
+	return true;
 #else
-
-OpenGLPrinter::OpenGLPrinter(const char *filenameTTF)
-{
-}
-
+	return false;
 #endif // HAVE_FREETYPE2
-
-
-OpenGLPrinter::~OpenGLPrinter()
-{
-#if 0
-  if (gFontTest)
-  {
-    glDeleteLists(gFontTest->drawListBase, gFontTest->count);
-    delete gFontTest;
-  }
-#endif
 }
 
-
-////////////////////////////////////////////////////////////
-// Public Accessors
-////////////////////////////////////////////////////////////
-
-
-
-////////////////////////////////////////////////////////////
-// Public Mutators
-////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////
-// Private Accessors
-////////////////////////////////////////////////////////////
 
 bool OpenGLPrinter::SavePPM(const char *filename,
 							unsigned char *image, 
@@ -301,6 +244,36 @@ bool OpenGLPrinter::SaveTGA(const char *filename,
 
 
 ////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Private Accessors
+////////////////////////////////////////////////////////////
+
+void OpenGLPrinter::AddGlyphToTexture32(unsigned char *image, 
+										unsigned int img_width,
+										unsigned char *pixmap,
+										unsigned int width, unsigned int height,
+										unsigned int pen_x, unsigned int pen_y)
+{
+	for (unsigned int i = 0; i < width; ++i)
+	{
+		for (unsigned int j = 0; j < height; ++j)
+		{
+			const unsigned int off = ((i + pen_x) + (j + pen_y) * img_width)*4;
+			const unsigned char g = pixmap[j * width + i];
+			image[off  ] |= g;
+			image[off+1] |= g;
+			image[off+2] |= g;
+			image[off+3] |= g;
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////////////
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
@@ -312,7 +285,26 @@ bool OpenGLPrinter::SaveTGA(const char *filename,
 #ifdef UNIT_TEST_OPENGLPRINTER
 int runOpenGLPrinterUnitTest(int argc, char *argv[])
 {
-	OpenGLPrinter test("/home/mongoose/.fonts/zrnic___.ttf");
+	OpenGLPrinter test;
+
+	const char *text[] = {
+		"ABCDEFGHIJKLM", // 'square up' texture map, less memory
+		"NOPQRSTUVWXYZ",
+		"abcdefghijklm",
+		"nopqrstuvwxyz",
+		"1234567890~!@",
+		"#$%^&*()-=+;:_",
+		"'\",./?[]|\\ `<>"
+	};
+	
+	const unsigned int lines = 7;
+	const unsigned int image_width = 256;
+	unsigned char image[image_width*image_width*4];
+	
+	test.GenerateTexture("/home/mongoose/.fonts/zrnic___.ttf", 24, 100,
+						 lines, text, image, image_width);
+
+	test.SaveTGA("/tmp/test.tga", image, image_width, image_width);
 
 	return 0;
 }
@@ -320,7 +312,7 @@ int runOpenGLPrinterUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[OpenGLPrinter class test]\n");
+	printf("\n[OpenGLPrinter class test]\n");
 
 	return runOpenGLPrinterUnitTest(argc, argv);
 }

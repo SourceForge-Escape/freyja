@@ -82,7 +82,7 @@ class OpenGLPrinter
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	OpenGLPrinter(const char *face);
+	OpenGLPrinter();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of OpenGLPrinter
@@ -234,6 +234,36 @@ class OpenGLPrinter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	bool GenerateTexture(const char *filename,
+						 unsigned int pt, unsigned int dpi,
+						 const unsigned int count, const char **text,
+						 unsigned char *image, unsigned int image_width);
+	/*------------------------------------------------------
+	 * Pre  : <filename> of the TTF font used to generate texture.
+	 *        <pt> point size and <dpi> dots per inch are required.
+	 *        <text> are <count> lines of text to generate texture.
+	 *        <image> is allocated RGBA, 32bpp, <image_width>^2. 
+	 *
+	 * Post : Returns true if successful.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SavePPM(const char *filename,
+				 unsigned char *image, unsigned int w, unsigned int h);
+	/*------------------------------------------------------
+	 * Pre  : Allocated RGB, 24bbp - image[w*h*3]
+	 * Post : Returns true if PPM was wrote to disk.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SaveTGA(const char *filename,
+				 unsigned char *image, unsigned int w, unsigned int h);
+	/*------------------------------------------------------
+	 * Pre  : Allocated RGBA, 32bbp - image[w*h*4]
+	 * Post : Returns true if TGA was wrote to disk.
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -250,14 +280,7 @@ class OpenGLPrinter
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void GenerateTexture(const unsigned int count, const char **text,
-						 unsigned char *image, unsigned int image_width);
-	/*------------------------------------------------------
-	 * Pre  : Multiple lines of text to generate texture.
-	 *        <image> is allocated RGBA, 32bpp, <image_width>^2. 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
+
 
 
  private:
@@ -281,22 +304,6 @@ class OpenGLPrinter
 	 *
 	 ------------------------------------------------------*/
 
-	bool SavePPM(const char *filename,
-				 unsigned char *image, unsigned int w, unsigned int h);
-	/*------------------------------------------------------
-	 * Pre  : Allocated RGB, 24bbp - image[w*h*3]
-	 * Post : Returns true if PPM was wrote to disk.
-	 *
-	 ------------------------------------------------------*/
-
-	bool SaveTGA(const char *filename,
-				 unsigned char *image, unsigned int w, unsigned int h);
-	/*------------------------------------------------------
-	 * Pre  : Allocated RGBA, 32bbp - image[w*h*4]
-	 * Post : Returns true if TGA was wrote to disk.
-	 *
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Private Mutators
@@ -305,7 +312,6 @@ class OpenGLPrinter
 #ifdef HAVE_FREETYPE2
 	static FT_Library mLibrary;
 
-	FT_Face mFace;
 #endif // HAVE_FREETYPE2
 };
 
