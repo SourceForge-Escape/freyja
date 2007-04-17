@@ -15,15 +15,20 @@
  * 
  *-- History ------------------------------------------------- 
  *
+ * 2007.04.16:
+ * Mongoose - Cleaned up for public release.  Removed tons of old code.
+ *
  * 2007.01.31:
  * Mongoose - Removed SDL_ttf implementation and replaced with FreeType
  *            based implementation.
  *
  * 2006.07.30:
- * Mongoose - Created
+ * Mongoose - Created, based on old 2001 midgard codebase.
  ==========================================================================*/
 
-//#include "FreyjaOpenGL.h"
+#ifdef HAVE_OPENGL
+#   include "FreyjaOpenGL.h"
+#endif // HAVE_OPENGL
 
 #include "OpenGLPrinter.h"
 
@@ -58,6 +63,9 @@ OpenGLPrinter::OpenGLPrinter()
 
 OpenGLPrinter::~OpenGLPrinter()
 {
+#ifdef HAVE_OPENGL
+	glDeleteLists(mFont.mListBase, mFont.mCount);
+#endif // HAVE_OPENGL
 }
 
 
@@ -65,10 +73,89 @@ OpenGLPrinter::~OpenGLPrinter()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+
+bool OpenGLPrinter::GenerateFont(Font &font,
+								 const char *text, const glyph_t *glyphs,
+								 const unsigned int textureId,
+								 const unsigned char *image, 
+								 const unsigned int image_width)
+{
+#ifdef HAVE_OPENGL
+	if (!text || !text[0] || !glyphs || !image_width || ! image)
+		return false;
+
+	printf("@ Generating gl font from texture...\n");
+
+	font.mCount = strlen(text);
+	font.mTextureId = textureId;
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+	font.mListBase = glGenLists(font.mCount);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+
+	const float spacing = 4.0f;
+	const float invWidth = 1.0f / (float)image_width;
+
+	for (unsigned int i = 0; i < font.mCount; i++)
+	{
+		/* Generate texture coordinates for this glyph */
+		float u = invWidth * (float)glyphs[i].x;
+		float v = invWidth * (float)glyphs[i].y;
+		float u2 = invWidth * (float)(glyphs[i].x + glyphs[i].w);
+		float v2 = invWidth * (float)(glyphs[i].y + glyphs[i].h);
+
+#if OLD_CODE_DID_MORE_POST_PROCESSING
+		int h = 0;
+
+		if (glyphs[i].h < fontHeight)
+		{
+			h = fontHeight - glyphs[i].h;
+		}
+		else
+		{
+			h = 0;
+		}
+
+		h += -fontHeight / 2 - (fontDescent + glyphs[i].miny);
+#else
+		const int h = 0;
+#endif
+
+		/* Make a list for this TTF glyph, one nonuniform Quad per glyph */
+		glNewList(font.mListBase + i, GL_COMPILE);
+
+		glBegin(GL_QUADS);
+
+		 glTexCoord2f(u2, v);	/* Top, right */
+		 glVertex3i(glyphs[i].w, h, 0);
+		
+		 glTexCoord2f(u, v);	/* Top, left */
+		 glVertex3i(0, h, 0);
+
+		 glTexCoord2f(u, v2);	/* Bottom, left */
+		 glVertex3i(0, h + glyphs[i].h, 0);
+		
+		 glTexCoord2f(u2, v2);	/* Bottom, right */
+		 glVertex3i(glyphs[i].w, h + glyphs[i].h, 0);
+
+		glEnd();
+		
+		/* Move To The Left Of The Character */
+		glTranslated(glyphs[i].w + spacing, 0, 0);
+		glEndList();
+	}
+
+	return true;
+#else
+	return false;
+#endif
+}
+
+
 bool OpenGLPrinter::GenerateTexture(const char *filename,
 									const unsigned int pt, 
 									const unsigned int dpi,
-									const char *text,
+									const char *text, glyph_t *glyphs,
 									unsigned char *image, 
 									const unsigned int image_width)
 {
@@ -103,10 +190,9 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 		}
 	}
 
-	FT_GlyphSlot slot = face->glyph;
-	//FT_Bitmap bitmap;
 
-	const unsigned int x_padding = 8;//pt/4;
+	const unsigned int x_padding = 8;
+	// Idealy you'd iterate all glyphs for max_y instead of using pt
 	const unsigned int y_padding = pt;
 	const unsigned int n = strlen(text);
 
@@ -114,6 +200,8 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 	unsigned int pen_y = y_padding;
 	unsigned int pen_x = x_padding;
 	unsigned int row = 1;
+
+	FT_GlyphSlot slot = face->glyph;
 
 	for (unsigned int i = 0; i < n; ++i) 
 	{ 
@@ -142,6 +230,14 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 							slot->bitmap.width, slot->bitmap.rows,
 							pen_x, pen_y - slot->bitmap_top);
 
+		if (glyphs)
+		{
+			glyphs[i].x = pen_x;
+			glyphs[i].y = pen_y - slot->bitmap_top;
+			glyphs[i].w = slot->bitmap.width;
+			glyphs[i].h = slot->bitmap.rows;
+		}
+
 		pen_x += slot->bitmap.width + x_padding;
 	}
 
@@ -149,6 +245,73 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 #else
 	return false;
 #endif // HAVE_FREETYPE2
+}
+
+
+void OpenGLPrinter::Print2d(float x, float y, float scale, const char *text)
+{
+#ifdef HAVE_OPENGL
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
+	glTranslatef(x, y, 0);
+	glScalef(scale, scale, 1);
+	
+	RenderString(text);
+
+	glPopMatrix();
+#endif // HAVE_OPENGL
+}
+
+
+void OpenGLPrinter::Print3d(float x, float y, float z, 
+							float pitch, float yaw, float roll, 
+							float scale, const char *text)
+{
+#ifdef HAVE_OPENGL
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
+	glTranslatef(x, y, z);
+	glRotatef(roll,  1, 0, 0);
+	glRotatef(yaw,   0, 1, 0);
+	glRotatef(pitch, 0, 0, 1);
+	glScalef(scale, scale, scale);
+	
+	RenderString(text);
+
+	glPopMatrix();
+#endif // HAVE_OPENGL
+}
+
+
+bool OpenGLPrinter::SaveMetadata(const char *filename, 
+								 const char *text, glyph_t *glyphs)
+{
+	if (!glyphs || !text || !text[0])
+		return false;
+
+	unsigned int n = strlen(text);
+
+	FILE *f = fopen(filename, "w");
+
+	if (f)
+	{
+		for (unsigned int i = 0; i < n; ++i)
+		{
+			fprintf(f, "'%c' @ %i, %i ( %i x %i )\n", 
+					text[i], 
+					glyphs[i].x, glyphs[i].y, glyphs[i].w, glyphs[i].h);
+		}
+
+		fclose(f);
+
+		return true;
+	}
+	else
+	{
+		perror("OpenGLPrinter::SaveMetadata() ERROR: ");
+	}
+
+	return false;
 }
 
 
@@ -173,7 +336,14 @@ bool OpenGLPrinter::SavePPM(const char *filename,
 
 		printf("Wrote '%s'...\n", filename);
 
+		fclose(f);
+
 		return true;
+	}
+	else
+	{
+		printf("OpenGLPrinter::SavePPM() ERROR: Couldn't write PPM.\n");
+		perror("OpenGLPrinter::SavePPM() ERROR: ");
 	}
 
 	return false;
@@ -194,7 +364,7 @@ bool OpenGLPrinter::SaveTGA(const char *filename,
 
 	if (!f)
 	{
-		printf("OpenGLPrinter::SaveTGA() ERROR: Couldn't write screenshot.\n");
+		printf("OpenGLPrinter::SaveTGA() ERROR: Couldn't write TGA.\n");
 		perror("OpenGLPrinter::SaveTGA() ERROR: ");
 		return false;
 	}
@@ -286,6 +456,28 @@ void OpenGLPrinter::AddGlyphToTexture32(unsigned char *image,
 }
 
 
+void OpenGLPrinter::RenderString(const char *text)
+{
+#ifdef HAVE_OPENGL
+
+	// FIXME: I now support partial text blocks, so this doesn't work anymore,
+	//        however it's a good excuse to add extra support since a tranlate
+	//        method needs to go here.
+	//
+	//        The easiest way would be to make a false block range, and hope
+	//        no one requests the missing glyphs in that false block.
+
+	/* FIXME: 
+	 * Add utf-8 dencoding of char* string
+	 *
+	 *	Also this string must be preprocessed to have glyph offsets
+	 * instead of ASCII text in it and support counts over 256 */
+	glListBase(mFont.mListBase - mFont.mOffset);
+	glCallLists(strlen(text), GL_BYTE, text);
+#endif // HAVE_OPENGL
+}
+
+
 ////////////////////////////////////////////////////////////
 // Private Mutators
 ////////////////////////////////////////////////////////////
@@ -296,33 +488,38 @@ void OpenGLPrinter::AddGlyphToTexture32(unsigned char *image,
 ////////////////////////////////////////////////////////////
 
 #ifdef UNIT_TEST_OPENGLPRINTER
-int runOpenGLPrinterUnitTest(int argc, char *argv[])
+int RunOpenGLPrinterUnitTest(int argc, char *argv[])
 {
 	OpenGLPrinter test;
 
 	const char text[] = 
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890~!@#$%^&*()-=+;:_'\",./?[]|\\ `<>";
-	
+
+	glyph_t glyphs[strlen(text)];	
+
 	const unsigned int image_width = 256;
 	unsigned char image[image_width*image_width*4];
 	
 	// sazanami-gothic
 	memset(image, 0, sizeof(image)); // clear buffer
 	test.GenerateTexture("/home/mongoose/.fonts/sazanami-gothic.ttf", 24, 100,
-						 text, image, image_width);
+						 text, glyphs, image, image_width);
 	test.SaveTGA("/tmp/sazanami-gothic.tga", image, image_width, image_width);
+	test.SaveMetadata("/tmp/sazanami-gothic.txt", text, glyphs);
 
 	// tahoma
 	memset(image, 0, sizeof(image)); // clear buffer
 	test.GenerateTexture("/home/mongoose/.fonts/tahoma.ttf", 24, 100,
-						 text, image, image_width);
+						 text, glyphs, image, image_width);
 	test.SaveTGA("/tmp/tahoma.tga", image, image_width, image_width);
+	test.SaveMetadata("/tmp/tahoma.txt", text, glyphs);
 
 	// zrnic___
 	memset(image, 0, sizeof(image)); // clear buffer
 	test.GenerateTexture("/home/mongoose/.fonts/zrnic___.ttf", 28, 100,
-						 text, image, image_width);
+						 text, glyphs, image, image_width);
 	test.SaveTGA("/tmp/zrnic___.tga", image, image_width, image_width);
+	test.SaveMetadata("/tmp/zrnic___.txt", text, glyphs);
 
 	return 0;
 }
@@ -331,81 +528,10 @@ int runOpenGLPrinterUnitTest(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	printf("\n[OpenGLPrinter class test]\n");
-
-	return runOpenGLPrinterUnitTest(argc, argv);
+	return RunOpenGLPrinterUnitTest(argc, argv);
 }
 #endif
 
-
-////////////////////////////////////////////////////////////
-// Non-class junk code, floating around
-////////////////////////////////////////////////////////////
-
-#if 0
-void mglPrint2d(float x, float y, float scale, char *string)
-{
-	gl_font_t *font = gFontTest;
-
-	if (!font)
-	{
-		static int errors = 0;
-
-		if (errors < 10)
-			printf("ERROR: glPrintf2d failed, %i\n", ++errors);
-		return;
-	}
-
-	glPushMatrix();
-	glBindTexture(GL_TEXTURE_2D, font->textureId);
-	glTranslatef(x, y, 0);
-	glScalef(scale, scale, 1);
-	
-	/* FIXME: 
-	 * Add utf-8 dencoding of char* string
-	 *
-	 *	Also this string must be preprocessed to have glyph offsets
-	 * instead of ASCII text in it and support counts over 256 */
-	glListBase(font->drawListBase - font->utf8Offset);
-	glCallLists(strlen(string), GL_BYTE, string);
-	glPopMatrix();
-}
-
-
-void mglPrint3d(float x, float y, float z, 
-					float pitch, float yaw, float roll, 
-					float scale,
-					char *string)
-{
-	gl_font_t *font = gFontTest;
-
-	if (!font)
-	{
-		static int errors = 0;
-
-		if (errors < 10)
-			printf("ERROR: glPrintf3d failed, %i\n", ++errors);
-		return;
-	}
-
-	glPushMatrix();
-	glBindTexture(GL_TEXTURE_2D, font->textureId);
-	glTranslatef(x, y, z);
-	glRotatef(roll,  1, 0, 0);
-	glRotatef(yaw,   0, 1, 0);
-	glRotatef(pitch, 0, 0, 1);
-	glScalef(scale, scale, scale);
-	
-	/* FIXME: 
-	 * Add utf-8 dencoding of char* string
-	 *
-	 *	Also this string must be preprocessed to have glyph offsets
-	 * instead of ASCII text in it and support counts over 256 */
-	glListBase(font->drawListBase - font->utf8Offset);
-	glCallLists(strlen(string), GL_BYTE, string);
-	glPopMatrix();
-}
-
-#endif
 
 
 
