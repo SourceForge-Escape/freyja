@@ -10,7 +10,6 @@
 	* Ensure all all numeric events are removed.
 
 	* Finish OpenGLPrinter, 2d/3d billboard text using libfreetype.
-		- Work OpenGLPrinter into main line build now for text support
 
 	* Verify math library, enforce automated testing at build.
 
@@ -172,8 +171,8 @@
  Freyja, Proposed (TBA)
  -----------------------------------------------------------------------------
 
-	 Modeling
-	 -------------------------------------------------------------------------
+	Modeling
+	-------------------------------------------------------------------------
 
 	* Node editor for scene graph control
 

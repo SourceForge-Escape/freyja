@@ -15,12 +15,15 @@
  * 
  *-- History ------------------------------------------------- 
  *
+ * 2007.04.16:
+ * Mongoose - Cleaned up for public release.  Removed tons of old code.
+ *
  * 2007.01.31:
  * Mongoose - Removed SDL_ttf implementation and replaced with FreeType
  *            based implementation.
  *
  * 2006.07.30:
- * Mongoose - Created
+ * Mongoose - Created, based on old 2001 midgard codebase.
  ==========================================================================*/
 
 #ifndef GUARD__FREYJA3D_OPENGLPRINTER_H_
@@ -32,6 +35,213 @@
 #endif
 
 namespace freyja3d {
+
+typedef struct {
+	unsigned int x, y, w, h;
+
+} glyph_t;
+
+
+class Font
+{
+public:
+	Font() : mCount(0), mOffset(0), mListBase(0), mTextureId(0) {}
+
+	Font operator =(const Font &font)
+	{
+		Font f;
+		f.mCount = font.mCount;
+		f.mOffset = font.mOffset;
+		f.mListBase = font.mListBase;
+		f.mTextureId = font.mTextureId;
+		return f;
+	}
+
+	unsigned int mCount;
+	unsigned int mOffset;
+	unsigned int mListBase;
+	unsigned int mTextureId;
+};
+
+
+class OpenGLPrinter
+{
+ public:
+
+	////////////////////////////////////////////////////////////
+	// Constructors
+	////////////////////////////////////////////////////////////
+
+	OpenGLPrinter();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGLPrinter
+	 *
+	 ------------------------------------------------------*/
+
+	~OpenGLPrinter();
+	/*------------------------------------------------------
+	 * Pre  : OpenGLPrinter object is allocated
+	 * Post : Deconstructs an object of OpenGLPrinter
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
+
+	void Print3dBillboard(float x, float y, float z,
+						  float scale, const char *text);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void Print3d(float x, float y, float z, 
+				 float pitch, float yaw, float roll, 
+				 float scale, const char *text);
+	/*------------------------------------------------------
+	 * Pre  : <X>, <Y>, and <Z> are valid world coordinates
+	 *        <String> is a valid string
+	 *
+	 *        System::bufferString(..) can cache printf()
+	 *        style calls for use with this method
+	 *
+	 * Post : Renders string in OpenGL ( 3d projection )
+	 *
+	 ------------------------------------------------------*/
+
+	void Print2d(float x, float y, float scale, const char *text);
+	/*------------------------------------------------------
+	 * Pre  : <X>, and <Y> are valid world coordinates
+	 *        <String> is a valid string
+	 *     
+	 *        Requires glEnterMode2d() call before entry
+	 *
+	 *        System::bufferString(..) can cache printf()
+	 *        style calls for use with this method
+	 *
+	 * Post : Renders string in OpenGL ( 2d projection )
+	 *
+	 *        Call glExitMode2d() after finishing calls
+	 *        to this method and other 2d rendering
+	 *
+	 ------------------------------------------------------*/
+
+	bool GenerateFont(Font &font,
+					  const char *text, const glyph_t *glyphs,
+					  const unsigned int textureId,
+					  const unsigned char *image, 
+					  const unsigned int image_width);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 *
+	 * Post : Returns true if successful.
+	 *        
+	 ------------------------------------------------------*/
+
+	bool GenerateTexture(const char *filename,
+						 const unsigned int pt, const unsigned int dpi,
+						 const char *text, glyph_t *glyphs,
+						 unsigned char *image, const unsigned int image_width);
+	/*------------------------------------------------------
+	 * Pre  : Takes a single string and generates 'best fit' texture.
+	 *
+	 *        <filename> of the TTF font used to generate texture.
+	 *        <pt> point size and <dpi> dots per inch are required.
+	 *        <text> of the glyphs used to generate texture.
+	 *        <glyphs> stores pos/dim of glyphs that correspond to <text>.
+	 *        <image> is allocated RGBA, 32bpp, <image_width>^2. 
+	 *
+	 * Post : Returns true if successful.
+	 *        Doesn't partial blit glyphs that don't 'fit'.
+	 *
+	 *        If this returns false then try calling it with a smaller 
+	 *        pt size or a larger texture size.
+	 *
+	 *        If <glyphs> is NULL you just don't get the information back.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SavePPM(const char *filename,
+				 unsigned char *image, unsigned int w, unsigned int h);
+	/*------------------------------------------------------
+	 * Pre  : Allocated RGB, 24bbp - image[w*h*3]
+	 * Post : Returns true if PPM was wrote to disk.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SaveTGA(const char *filename,
+				 unsigned char *image, unsigned int w, unsigned int h);
+	/*------------------------------------------------------
+	 * Pre  : Allocated RGBA, 32bbp - image[w*h*4]
+	 * Post : Returns true if TGA was wrote to disk.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SaveMetadata(const char *filename, 
+					  const char *text, glyph_t *glyphs);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
+
+	void SetFont(const Font &font) { mFont = font; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+
+ private:
+
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
+
+	void AddGlyphToTexture32(unsigned char *image, unsigned int img_width,
+							 unsigned char *pixmap,
+							 unsigned int width, unsigned int height,
+							 unsigned int pen_x, unsigned int pen_y);
+	/*------------------------------------------------------
+	 * Pre  : My... what a large stack you have.
+	 *        <image> is allocated and w = h = <img_width> @ 32bpp ARGB 
+	 *        <pixmap> is allocated and agrees with <width> and <height>.
+	 *        The pen coordinates agree with both values. 
+	 *
+	 * Post : Generic 32bpp texture glyph 'blit'ter operation.
+	 *        The <pixmap> is blitted to <image> ( texture ).
+	 *        Currently ARGB/RBGA are the same weights.
+	 *
+	 ------------------------------------------------------*/
+
+	void RenderString(const char *text);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Converts text to callist(s) and renders.
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
+
+#ifdef HAVE_FREETYPE2
+	static FT_Library mLibrary;
+#endif // HAVE_FREETYPE2
+
+	Font mFont;
+};
 
 typedef struct
 {
@@ -48,7 +258,7 @@ typedef struct
 /* [utf8Offset -> utf8Offset+count], 
 	 matches indexing into glyphs[0 -> count] for texcoords, etc
 	----------------------------------------
-	41     -> 126     ASCII English w/ special chars,
+	(20)41     -> 126     ASCII English w/ special chars,
 	0x303f -> 0x3093  Japanese hiragana kana,
 	0x301a -> 0x30f6  Japanese katakana kana */
 
@@ -72,254 +282,6 @@ typedef struct
 	int drawListBase;
 
 } gl_font_t;
-
-
-class OpenGLPrinter
-{
- public:
-
-	////////////////////////////////////////////////////////////
-	// Constructors
-	////////////////////////////////////////////////////////////
-
-	OpenGLPrinter();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of OpenGLPrinter
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2006.07.30: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	~OpenGLPrinter();
-	/*------------------------------------------------------
-	 * Pre  : OpenGLPrinter object is allocated
-	 * Post : Deconstructs an object of OpenGLPrinter
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2006.07.30: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	void Print3dBillboard(float x, float y, float z,
-						  float scale, char *string);
-
-	void Print3d(float x, float y, float z, 
-				 float pitch, float yaw, float roll, 
-				 float scale, char *string);
-	/*------------------------------------------------------
-	 * Pre  : <X>, <Y>, and <Z> are valid world coordinates
-	 *        <String> is a valid string
-	 *
-	 *        System::bufferString(..) can cache printf()
-	 *        style calls for use with this method
-	 *
-	 * Post : Renders string in OpenGL ( 3d projection )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Ported to SDL_TTF
-	 *
-	 * 2001.12.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Print2d(float x, float y, float scale, char *string);
-	/*------------------------------------------------------
-	 * Pre  : <X>, and <Y> are valid world coordinates
-	 *        <String> is a valid string
-	 *     
-	 *        Requires glEnterMode2d() call before entry
-	 *
-	 *        System::bufferString(..) can cache printf()
-	 *        style calls for use with this method
-	 *
-	 * Post : Renders string in OpenGL ( 2d projection )
-	 *
-	 *        Call glExitMode2d() after finishing calls
-	 *        to this method and other 2d rendering
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Ported to SDL_TTF
-	 *
-	 * 2001.12.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Enter2dMode(unsigned int width, unsigned int height);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : OpenGL ortho projection
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void Exit2dMode();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : OpenGL model matrix projection
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	gl_font_t *GenerateFont(ttf_texture_t *texture);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.30:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	ttf_texture_t *GenerateFontTexture(char *filename, int pointSize, 
-									   unsigned int textureWidth,
-									   unsigned char color[3],
-									   unsigned int utf8Offset,
-									   unsigned int count,
-									   char verbose);
-	/*------------------------------------------------------
-	 * Pre  : <Filename> of TTF font
-	 *        <PointSize> to generate
-	 *        <TextureWidth> is width of texture, height will match it
-	 *        <Color> is RGB 24bit color
-	 *        <Utf8Offset> is offset into font's encoding chart
-	 *        <Count> is number of glyphs to read from offset start
-	 *        <Verbose> dumps debug info to stdout 
-	 *
-	 * Post : Generates a font texture with typeset info from TTF
-	 *
-	 *        DOES NOT load the texture itself, call loadFont()
-	 *        on returned ttf_texture_t
-	 *
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	int LoadTTF(const char *filename, unsigned int offset, unsigned int count);
-	/*------------------------------------------------------
-	 * Pre  : <Filename> of TTF font
-	 *        <Offset> is offset into UTF-8 UNICODE table
-	 *        <Count> is number of glyphs to load
-	 *
-	 * Post : Loads a TTF, 
-	 *        Generates: texture image, glyph list, and drawlist
-	 *
-	 *        Returns font id if sucessful, or < 0 if error
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.07.05:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	bool GenerateTexture(const char *filename,
-						 const unsigned int pt, const unsigned int dpi,
-						 const char *text,
-						 unsigned char *image, const unsigned int image_width);
-	/*------------------------------------------------------
-	 * Pre  : Takes a single string and generates 'best fit' texture 
-	 *
-	 *        <filename> of the TTF font used to generate texture.
-	 *        <pt> point size and <dpi> dots per inch are required.
-	 *        <text> of the glyphs used to generate texture.
-	 *        <image> is allocated RGBA, 32bpp, <image_width>^2. 
-	 *
-	 * Post : Returns true if successful.
-	 *        Doesn't partial blit glyphs that don't 'fit'.
-	 *
-	 *        If this returns false then try calling it with a smaller 
-	 *        pt size or a larger texture size.
-	 *
-	 ------------------------------------------------------*/
-
-	bool SavePPM(const char *filename,
-				 unsigned char *image, unsigned int w, unsigned int h);
-	/*------------------------------------------------------
-	 * Pre  : Allocated RGB, 24bbp - image[w*h*3]
-	 * Post : Returns true if PPM was wrote to disk.
-	 *
-	 ------------------------------------------------------*/
-
-	bool SaveTGA(const char *filename,
-				 unsigned char *image, unsigned int w, unsigned int h);
-	/*------------------------------------------------------
-	 * Pre  : Allocated RGBA, 32bbp - image[w*h*4]
-	 * Post : Returns true if TGA was wrote to disk.
-	 *
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-	void Init();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Loads SDL_TTF if avalible
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2003.06.03:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-
-
- private:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-	void AddGlyphToTexture32(unsigned char *image, unsigned int img_width,
-							 unsigned char *pixmap,
-							 unsigned int width, unsigned int height,
-							 unsigned int pen_x, unsigned int pen_y);
-	/*------------------------------------------------------
-	 * Pre  : My... what a large stack you have.
-	 *        <image> is allocated and agrees with <img_width> 
-	 *        <pixmap> is allocated and agrees with <width> and <height>.
-	 *        The pen coordinates agree with both values. 
-	 *
-	 * Post : Generic 32bpp texture glyph 'blit'ter operation.
-	 *        The <pixmap> is blitted to <image> ( texture ).
-	 *
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
-#ifdef HAVE_FREETYPE2
-	static FT_Library mLibrary;
-
-#endif // HAVE_FREETYPE2
-};
 
 } // namespace freyja3d
 
