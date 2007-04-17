@@ -1008,6 +1008,13 @@
 	"gtk-cancel"	"_Cancel"	"gtk-quit"	"_Exit")
 
 
+;(query_dialog	"GeneratePlaneDialog"
+;	"gtk-dialog-question"
+;	(prompt_float "How many rows?" 1 1 64 1 1)
+;	(prompt_float "How many columns?" 1 1 64 1 1)
+;	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Ok")
+
+
 (dialog "Freyja :: Help" eHelpDialog 0
 (vbox 0 0 0 0 0
 	(hbox 1 0 0 1 0 

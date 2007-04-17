@@ -30,6 +30,7 @@
 #include <hel/Ray.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEventDelegate.h>
+#include "OpenGLPrinter.h"
 #include "freyja_events.h"
 
 enum view_mode {                   /* View|Edit mode */     

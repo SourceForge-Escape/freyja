@@ -118,7 +118,7 @@ typedef enum {
 // Freyja mgtk interface
 //////////////////////////////////////////////////////////////////////////////
 
-// These are here to keep the old transparent API, but reduce stack use.
+// These are here to keep the old transparent API, without using a facade.
 #define freyja_event_file_dialog mgtk_event_file_dialog
 #define freyja_event_get_color mgtk_event_get_color
 #define freyja_event_set_color mgtk_event_set_color
@@ -130,25 +130,38 @@ typedef enum {
 #define freyja_swap_buffers mgtk_event_swap_gl_buffers
 #define freyja_application_window_move mgtk_application_window_move
 #define freyja_event_info_dialog mgtk_create_info_dialog
-#define freyja_event_notify_observer1f mgtk_event_notify_observer1f
 #define freyja_event_fullscreen mgtk_application_window_fullscreen
 #define freyja_event_unfullscreen mgtk_application_window_unfullscreen
 #define freyja_event_exit mgtk_event_shutdown
-#define freyja_append_item_to_menu mgtk_append_item_to_menu
-#define freyja_remove_all_items_from_menu mgtk_remove_all_items_to_menu
 
+#define freyja_event_notify_observer1f mgtk_event_notify_observer1f
+//void freyja_event_notify_observer1f(event_subject_id e, float value);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : This back propagates value changes to widgets
+ *
+ ------------------------------------------------------*/
+
+#define freyja_append_item_to_menu mgtk_append_item_to_menu
+//int freyja_append_item_to_menu(int event, const char *label, int item_event);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Appends menuitem <label>, <item_event> to menu <event>
+ *
+ ------------------------------------------------------*/
+
+#define freyja_remove_all_items_from_menu mgtk_remove_all_items_to_menu
+//void freyja_remove_all_items_from_menu(int event);
+/*------------------------------------------------------
+ * Pre  : <event> is the Id of the menu subject 
+ * Post : Removes all submenus and menuitems from menu
+ *
+ ------------------------------------------------------*/
 
 void freyja_append_eventid(char *symbol, int eventid);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Aliases another <symbol> for existing <eventid>
- *
- ------------------------------------------------------*/
-
-//int freyja_append_item_to_menu(int event, const char *label, int item_event);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Appends menuitem <label>, <item_event> to menu <event>
  *
  ------------------------------------------------------*/
 
@@ -212,13 +225,6 @@ void freyja_event_info_dialog(char *icon, char *message);
  *
  ------------------------------------------------------*/
 
-//void freyja_event_notify_observer1f(event_subject_id e, float value);
-/*------------------------------------------------------
- * Pre  : 
- * Post : This back propagates value changes to widgets
- *
- ------------------------------------------------------*/
-
 void freyja_event_set_float(int event, float value);
 /*------------------------------------------------------
  * Pre  : 
@@ -244,13 +250,6 @@ void freyja_event_unfullscreen();
 /*------------------------------------------------------
  * Pre  : 
  * Post : Restore application from fullscreen
- *
- ------------------------------------------------------*/
-
-int freyja_get_event_id_by_name(char *symbol);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Gets event Id from the symbol name
  *
  ------------------------------------------------------*/
 
@@ -348,15 +347,6 @@ void freyja_print(char *format, ...);
  *
  ------------------------------------------------------*/
 
-//void freyja_print_args(char *format, va_list *args);
-/*------------------------------------------------------
- * Pre  : Just like freyja_print, but va_list is non-local
- * Post : Just like freyja_print
- *
- *        This only works for glibc!
- *
- ------------------------------------------------------*/
-
 mstl::String freyja_get_resource_path();
 mstl::String freyja_rc_map_string(const char *filename);
 /*------------------------------------------------------
@@ -374,20 +364,6 @@ char *freyja_rc_map(char *s);
  *
  *        mgtk indirectly queries this to setup things
  *        such as user icons, etc
- *
- ------------------------------------------------------*/
-
-void freyja_refresh_material_interface();
-/*------------------------------------------------------
- * Pre  : 
- * Post : Syncs material interface to backend values
- *
- ------------------------------------------------------*/
-
-//int freyja_remove_all_items_to_menu(int event);
-/*------------------------------------------------------
- * Pre  : <event> is the Id of the menu subject 
- * Post : Removes all submenus and menuitems from menu
  *
  ------------------------------------------------------*/
 

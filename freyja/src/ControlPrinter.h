@@ -53,6 +53,7 @@ public:
 		mLog.Close();
 	}
 
+	// WARNING: Non-local va_list only works with glibc
 	static void PrintArgs(const char *format, va_list *args)
 	{
 		const uint32 sz = 1023;

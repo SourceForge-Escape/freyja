@@ -26,6 +26,8 @@
 
 #define FREYJA_APP_PLUGINS 1
 
+#include <string.h>
+
 #define USING_FREYJA_CPP_ABI
 #include <freyja/LegacyABI.h>  // FIXME: Still using legacy polymesh generator
 #include <freyja/MeshABI.h>
@@ -55,7 +57,6 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 long PLUGIN_EVENT_COUNTER = ePluginEventBase;
 
 using namespace freyja3d;
-
 
 
 long freyja_get_new_plugin_eventid()
@@ -150,25 +151,6 @@ void UpdateSkeletonUI_Callback(uint32 skelIndex)
 	}
 
 	mgtk_event_update_tree(eBoneIterator, tree);
-}
-
-
-int freyja_get_event_id_by_name(char *symbol)
-{
-	int id = -1;
-
-	FreyjaControl::mInstance->GetResource().Lookup(symbol, &id);
-
-	return id;
-}
-
-
-void setColor(vec4_t dest, vec4_t color)
-{
-	dest[0] = color[0];	
-	dest[1] = color[1];	
-	dest[2] = color[2];	
-	dest[3] = color[3];
 }
 
 
@@ -308,13 +290,7 @@ void freyja_handle_application_window_close()
 
 void freyja_handle_color(int id, float r, float g, float b, float a)
 {
-	vec4_t color;
-
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = a;
-
+	vec4_t color = { r, g, b, a };
 
 	/* Color event listener */
 	if (ResourceEvent::listen(id - ePluginEventBase, color, 4))
@@ -330,19 +306,16 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	case eColorMaterialDiffuse:
 		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
 		MaterialEv::mHack->RefreshInterface();
-		//freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialSpecular:
 		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
 		MaterialEv::mHack->RefreshInterface();
-		//freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorMaterialEmissive:
 		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
 		MaterialEv::mHack->RefreshInterface();
-		//freyja_refresh_material_interface(); // FIXME HACK
 		break;
 
 	case eColorLightAmbient: 
@@ -361,43 +334,43 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 		break;
 
 	case eColorBackground:
-		setColor(FreyjaRender::mColorBackground, color);
+		memcpy(FreyjaRender::mColorBackground, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorBackground, r, g, b, a);
 		break;
 
 	case eColorGrid:
-		setColor(FreyjaRender::mColorGridSeperator, color);
-		setColor(FreyjaRender::mColorGridLine, color);
+		memcpy(FreyjaRender::mColorGridSeperator, color, sizeof(vec4_t));
+		memcpy(FreyjaRender::mColorGridLine, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorGrid, r, g, b, a);
 		break;
 
 	case eColorVertex:
-		setColor(FreyjaRender::mColorVertex, color);
+		memcpy(FreyjaRender::mColorVertex, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorVertex, r, g, b, a);
 		break;
 
 	case eColorVertexHighlight:
-		setColor(FreyjaRender::mColorVertexHighlight, color);
+		memcpy(FreyjaRender::mColorVertexHighlight, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorVertexHighlight, r, g, b, a);
 		break;
 
 	case eColorMesh:
-		setColor(FreyjaRender::mColorWireframe, color);
+		memcpy(FreyjaRender::mColorWireframe, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorMesh, r, g, b, a);
 		break;
 
 	case eColorMeshHighlight:
-		setColor(FreyjaRender::mColorWireframeHighlight, color);
+		memcpy(FreyjaRender::mColorWireframeHighlight, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
 		break;
 
 	case eColorBone:
-		setColor(FreyjaRender::mColorBone, color);
+		memcpy(FreyjaRender::mColorBone, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorBone, r, g, b, a);
 		break;
 
 	case eColorBoneHighlight:
-		setColor(FreyjaRender::mColorBoneHighlight, color);
+		memcpy(FreyjaRender::mColorBoneHighlight, color, sizeof(vec4_t));
 		freyja_event_set_color(eColorBoneHighlight, r, g, b, a);
 		break;
 
@@ -1056,12 +1029,6 @@ void eMeshGenerateNormals()
 	FreyjaControl::mInstance->Dirty();
 }
 
-
-void eSelectAll()
-{
-	freyja_print("Select All is not avalible in this build");
-}
-
 void eMoveObject()
 {
 	FreyjaControl::mInstance->eMoveObject(1);
@@ -1254,7 +1221,6 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
 
-	ResourceEventCallback::add("eSelectAll", &eSelectAll);
 	ResourceEventCallback::add("eMoveObject", &eMoveObject);
 	ResourceEventCallback::add("eRotateObject", &eRotateObject);
 	ResourceEventCallback::add("eScaleObject", &eScaleObject);
@@ -1339,6 +1305,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	// Not implemented or removed misc events
 	//ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNoImplementation);
+	ResourceEventCallback2::add("eSelectAll", &eNoImplementation);
 	ResourceEventCallback2::add("eShaderSlotLoad", &eNoImplementation);
 	ResourceEventCallback2::add("eOpenFileTextureB", &eNoImplementation);
 	ResourceEventCallback2::add("eCollapseFace", &eNoImplementation);
@@ -1757,7 +1724,7 @@ void freyja_install_user()
 		while ((filename = r.GetNextDirectoryListing()))
 		{
 			if (r.IsDirectory(filename))
-				continue;
+				continue; // Might want to recurse copy plugins later.
 
 			SystemIO::CopyFileToPath(filename, rc);
 		}
@@ -1932,10 +1899,12 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 
 int main(int argc, char *argv[])
 {
-	// Link up mgtk library stubs to these implementations
-	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
+	/* 'Link' up mgtk library stubs to these implementations */
+	mgtk_link_import("mgtk_callback_get_image_data_rgb24", 
+					 (void*)freyja_callback_get_image_data_rgb24);
 	mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
-	mgtk_link_import("mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
+	mgtk_link_import("mgtk_handle_application_window_close", 
+					 (void*)freyja_handle_application_window_close);
 	mgtk_link_import("mgtk_handle_command", (void*)freyja_handle_command);
 	mgtk_link_import("mgtk_handle_command2i", (void*)freyja_handle_command2i);
 	mgtk_link_import("mgtk_handle_event1u", (void*)freyja_handle_event1u);
@@ -1945,27 +1914,26 @@ int main(int argc, char *argv[])
 	mgtk_link_import("mgtk_handle_key_press", (void*)freyja_handle_key_press);
 	mgtk_link_import("mgtk_handle_motion", (void*)freyja_handle_motion);
 	mgtk_link_import("mgtk_handle_mouse", (void*)freyja_handle_mouse);
-	mgtk_link_import("mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
+	mgtk_link_import("mgtk_handle_resource_start", 
+					 (void*)freyja_handle_resource_start);
 	mgtk_link_import("mgtk_handle_slider1u", (void*)freyja_handle_slider1u);
 	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
 	mgtk_link_import("mgtk_print", (void*)freyja_print);
-	mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
+	mgtk_link_import("mgtk_get_pixmap_filename", 
+					 (void*)freyja_get_pixmap_filename);
 	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
-	mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);
+	mgtk_link_import("mgtk_get_resource_path", 
+					 (void*)freyja_get_resource_path_callback);
 
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());
 
 	mgtk_init(argc, argv);
 
-	/* Mongoose 2002.02.23, 
-	 * Load file passed by command line args */
-	if (argc > 1)
+	/* Load file passed by command line args, CLI parser isn't really needed. */
+	if (argc > 1 && argv[1][0] != '-')
 	{
-		// Mongoose, 2007.04 - No longer using 'int events' for file dialogs
-		//mgtk_event_fileselection_set_dir(eOpenFile, argv[1]);
-		extern void eOpenModel(char *);
-		eOpenModel(argv[1]);
+		FreyjaControl::mInstance->LoadModel(argv[1]);
 	}
 
 	mgtk_start();
