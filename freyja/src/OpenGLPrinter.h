@@ -247,6 +247,10 @@ class OpenGLPrinter
 	 *        <image> is allocated RGBA, 32bpp, <image_width>^2. 
 	 *
 	 * Post : Returns true if successful.
+	 *        Doesn't partial blit glyphs that don't 'fit'.
+	 *
+	 *        If this returns false then try calling it with a smaller 
+	 *        pt size or a larger texture size.
 	 *
 	 ------------------------------------------------------*/
 
