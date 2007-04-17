@@ -75,7 +75,7 @@
  C
  ----------------------------
 
- * Doesn't build in OS X since 0.9.5  ( No access to a machine atm )
+ * Doesn't build in OS X since 0.9.5  ( No access to a working build machine. )
 
  * Visual scaling of cursors may need to be adjusted during zoom != 1.0f
 	- This means sphere/ray targets must be scaled to match visual also

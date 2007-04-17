@@ -646,7 +646,6 @@ int FreyjaImage::loadPaletteMTK(const char *filename)
 
 int FreyjaImage::saveImage(const char *filename, const char *module_name)
 {
-
 #ifdef FREYJAIMAGE_PLUGINS
 	SystemIO::FileReader reader;
 	char symbol[256];
@@ -660,22 +659,20 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 
 	print("[FreyjaImage plugin system invoked]");
 
-	if (!reader.OpenDir(PLUGIN_IMAGE_DIR))
+	unsigned int i;
+	foreach (gImagePluginDirectories, i)
 	{
-		printError("Couldn't access image plugin directory");
-		return -2;
-	}
+		if (!reader.OpenDir(gImagePluginDirectories[i].c_str()))
+		{
+			//printError("Couldn't access image plugin directory '%s'",
+			//		   gImagePluginDirectories[i].c_str());
+			continue;
+		}
 
 	while (!done && (module_filename = reader.GetNextDirectoryListing()))
 	{
 		if (reader.IsDirectory(module_filename))
 			continue;
-
-		//#define DISABLE_MODULES
-#ifdef DISABLE_MODULES
-		print("Disabled load of '%s'", module_filename);
-		continue; // Disabled plugin loading for now
-#endif
 
 		if (!(handle = freyjaModuleLoad(module_filename)))
 		{
@@ -707,6 +704,8 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 	}
 
 	reader.CloseDir();
+
+	}
 
 	print("[FreyjaPlugin module loader sleeps now]\n");
 

@@ -1775,63 +1775,9 @@ bool FreyjaControl::event(int event, vec_t value)
 	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
 		return true;
 
-	hel::Vec3 v; 
-	vec_t x, y, z;
-
-#warning FIXME "numeric event ids"
+	/* These Transform Box events don't trigger on their own */
 	switch (event)
 	{
-	case 510:
-	case 511:
-	case 512:
-		freyjaGetBoneTranslation3fv(GetSelectedBone(), v.mVec);
-		
-		switch (event - 510)
-		{
-		case 0:
-			v.mVec[0] = value;
-			freyjaBoneTranslate3fv(GetSelectedBone(), v.mVec);
-			break;
-
-		case 1:
-			v.mVec[1] = value;
-			freyjaBoneTranslate3fv(GetSelectedBone(), v.mVec);
-			break;
-
-		case 2:
-			v.mVec[2] = value;
-			freyjaBoneTranslate3fv(GetSelectedBone(), v.mVec);
-			break;
-		}
-
-		ActionModelModified(NULL);
-		freyja_event_gl_refresh();
-		break;
-
-
-	case 520:
-	case 521:
-	case 522:
-		GetBoneRotation(&x, &y, &z);
-
-		switch (event - 520)
-		{
-		case 0:
-			SetBoneRotation(value, y, z);
-			break;
-		case 1:
-			SetBoneRotation(x, value, z);
-			break;
-		case 2:
-			SetBoneRotation(x, y, value);
-			break;
-		}
-		
-		ActionModelModified(NULL);
-		freyja_event_gl_refresh();
-		break;
-
-	/* These Transform Box events don't trigger on their own */
 	case eMove_X:
 	case eMove_Y:
 	case eMove_Z:
@@ -2412,12 +2358,12 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 		}
 		else if (mod & KEY_LCTRL)
 		{
-			handleEvent(eEvent, eSelectId);
+			SelectMode(); //handleEvent(eEvent, eSelectId);
 			swappedModes = true;
 		}
 		else if (mod & KEY_LSHIFT)
 		{
-			handleEvent(eEvent, eUnselectId);
+			UnselectMode(); //handleEvent(eEvent, eUnselectId);
 			swappedModes = true;
 		}
 
@@ -2477,12 +2423,10 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	else if (mod & KEY_LCTRL)
 	{
 		SelectMode();
-		//handleEvent(eEvent, eSelect);
 	}
 	else if (mod & KEY_LSHIFT)
 	{
 		UnselectMode();
-		//handleEvent(eEvent, eUnselect);
 	}
 
 	/* Handle left clicks */
@@ -2573,25 +2517,6 @@ bool FreyjaControl::MouseEvent(int btn, int state, int mod, int x, int y)
 			return true;
 		}
 		break;
-
-#if 0
-	case eScheme_Model:
-		// Mongoose 2002.01.12, Allow temp mode override
-		if (mEventMode == modeSelectByBox)
-		{
-		}
-		else if (mod & KEY_LCTRL)
-		{
-			handleEvent(eEvent, eSelect);
-		}
-		else if (mod & KEY_LSHIFT)
-		{
-			handleEvent(eEvent, eUnselect);
-		}
-
-		MouseEdit(btn, state, mod, x, y);
-		break;
-#endif
 
 	default:
 		;

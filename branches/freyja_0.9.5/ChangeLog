@@ -6,6 +6,10 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - OpenGLPrinter using TTF via freetype2, old SDL_ttf code removed
+ - Very minor fix for FreyjaImage::saveImage ( ye olde sw renderer era class )
+ - Pruned more unused/obsoleted code in UI
+ - Removed last of non-enum numeric events ( verified dead code even )
  - TODO update to make more sense!
  - Interface plugins moved from freyja to toplevel plugins
  - Win32 build fixes
