@@ -106,7 +106,7 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 	FT_GlyphSlot slot = face->glyph;
 	//FT_Bitmap bitmap;
 
-	const unsigned int x_padding = pt/4;
+	const unsigned int x_padding = 8;//pt/4;
 	const unsigned int y_padding = pt;
 	const unsigned int n = strlen(text);
 
@@ -130,10 +130,10 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 			pen_x = x_padding;
 		}
 			
-		if (pen_y > image_width) // error
+		if (pen_y + slot->bitmap.rows > image_width) // error
 		{
-			printf("ERROR: Can not fit row %i for face @ %ipts, %i dpi.\n",
-				   row, pt, dpi);
+			printf("* %s:%i, ERROR: Row %i cut off @ %ipts, %i dpi.\n",
+				   __FILE__, __LINE__, row, pt, dpi);
 			return false;
 		}
 
@@ -306,12 +306,23 @@ int runOpenGLPrinterUnitTest(int argc, char *argv[])
 	const unsigned int image_width = 256;
 	unsigned char image[image_width*image_width*4];
 	
+	// sazanami-gothic
+	memset(image, 0, sizeof(image)); // clear buffer
 	test.GenerateTexture("/home/mongoose/.fonts/sazanami-gothic.ttf", 24, 100,
-						 //"/home/mongoose/.fonts/tahoma.ttf", 18, 100,
-						 //"/home/mongoose/.fonts/zrnic___.ttf", 24, 100,
 						 text, image, image_width);
+	test.SaveTGA("/tmp/sazanami-gothic.tga", image, image_width, image_width);
 
-	test.SaveTGA("/tmp/test.tga", image, image_width, image_width);
+	// tahoma
+	memset(image, 0, sizeof(image)); // clear buffer
+	test.GenerateTexture("/home/mongoose/.fonts/tahoma.ttf", 24, 100,
+						 text, image, image_width);
+	test.SaveTGA("/tmp/tahoma.tga", image, image_width, image_width);
+
+	// zrnic___
+	memset(image, 0, sizeof(image)); // clear buffer
+	test.GenerateTexture("/home/mongoose/.fonts/zrnic___.ttf", 28, 100,
+						 text, image, image_width);
+	test.SaveTGA("/tmp/zrnic___.tga", image, image_width, image_width);
 
 	return 0;
 }
