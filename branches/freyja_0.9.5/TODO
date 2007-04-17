@@ -13,8 +13,7 @@
 
 	* Verify math library, enforce automated testing at build.
 
-	* Assertion dialog boxes with optional handling control
-	  ( Many asserts are being reported as crashes right now )
+	* Assertion dialog boxes for libmgtk assertions
 
 	* Fix mouse cursor control. eg: reverse bug, rotation not WYSIWYG, etc
 

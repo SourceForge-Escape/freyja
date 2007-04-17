@@ -1897,6 +1897,24 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 }
 
 
+int FreyjaAssertCallbackHandler(const char *file, unsigned int line, 
+								const char *function,
+								const char *exprString)
+{
+	mstl::String s;
+	s.Set("Assert encountered: %s:%i %s() '%s'", 
+		  file, line, function, exprString);
+
+	ConfirmationDialog q("FreyjaAssertCallbackHandlerDialog", 
+						 "gtk-dialog-error", //"gtk-dialog-warning"
+						 s.c_str(), 
+						 "Would you like to continue with errors anyway?",
+						 "gtk-quit", "_Exit", "gtk-ok", "_Continue");
+
+	return q.Execute();
+}
+
+
 int main(int argc, char *argv[])
 {
 	/* 'Link' up mgtk library stubs to these implementations */
@@ -1925,6 +1943,9 @@ int main(int argc, char *argv[])
 	mgtk_link_import("mgtk_get_resource_path", 
 					 (void*)freyja_get_resource_path_callback);
 
+	/* Hookup libfreyja assert handler, which is also used by this layer */
+	freyjaAssertHandler(FreyjaAssertCallbackHandler);
+
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());
 
@@ -1935,6 +1956,8 @@ int main(int argc, char *argv[])
 	{
 		FreyjaControl::mInstance->LoadModel(argv[1]);
 	}
+
+	//FREYJA_ASSERTMSG(NULL, "Dummy NULL pointer assertion test.");
 
 	mgtk_start();
 

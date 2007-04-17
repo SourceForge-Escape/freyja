@@ -72,6 +72,14 @@
 
 namespace mstl {
 
+typedef int (*AssertCallback)(const char *file, unsigned int line, 
+										const char *function,
+										const char *exprs);
+
+// This is for assert messages that should always bulid
+#define MSTL_ASSERTMSGC(callback, expr, format, ...)  if (!(expr)) SystemIO::AssertMsgMarkerWithCallback(callback, __FILE__, __LINE__, __func__, false, #expr, format, ##__VA_ARGS__)
+
+
 class SystemIO
 {
 public:
@@ -1477,6 +1485,38 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
+
+	static bool AssertMsgMarkerWithCallback(AssertCallback func,
+														 const char *file, unsigned int line, 
+														 const char *function,
+														 bool expr, const char *exprs,
+														 const char *format, ...)
+	{
+		if (expr)
+			return false;
+
+		printf("(%s:%u): %s Assertion '%s' failed: \n", file, line, function, exprs);
+
+		va_list args;
+		va_start(args, format);	
+		vfprintf(stdout, format, args);
+		fprintf(stdout, "\n");
+		va_end(args);
+
+		// Use callback function here to handle assert events, which are
+		// useful for making GUI MsgBox asserts handlers, etc.
+		if (func)
+		{
+			if ((*func)(file, line, function, exprs) == 0)
+				return false;
+		}
+	
+		// Soft breakpoint insertion
+		Assert(expr);
+
+		return true;
+	}
+
 
 	static bool AssertMsgMarker(const char *file, unsigned int line, 
 										 const char *function,

@@ -36,22 +36,22 @@ Vector<ConfirmationDialog> gConfirmationDialogs;
 
 namespace mgtk {
 
-  bool ExecuteConfirmationDialog(const char *name)
-  {
-    String n(name);
-    unsigned int i;
+bool ExecuteConfirmationDialog(const char *name)
+{
+	String n(name);
+	unsigned int i;
 
-    foreach (gConfirmationDialogs, i)
-    {
-      if (n == gConfirmationDialogs[i].mName)
-      {
-	printf("ExecuteConfirmationDialog('%s'): FOUND\n", name);
-	return gConfirmationDialogs[i].Execute();
-      }
-    }
+	foreach (gConfirmationDialogs, i)
+	{
+		if (n == gConfirmationDialogs[i].mName)
+		{
+			printf("ExecuteConfirmationDialog('%s'): FOUND\n", name);
+			return gConfirmationDialogs[i].Execute();
+		}
+	}
 
-    return false;
-  }
+	return false;
+}
 
 } // namespace mgtk
 
@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
 ////////////////////////////////////////////////////////////
 // MLISP RC implementations
 ////////////////////////////////////////////////////////////
-
 
 arg_list_t *mgtk_rc_confirmation_dialog(arg_list_t *box)
 {
