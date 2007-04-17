@@ -1194,6 +1194,12 @@ void eTestTextView()
 }
 
 
+void eTestAssertMsgBox()
+{
+	FREYJA_ASSERTMSG(false, "Dummy NULL pointer assertion test.");
+}
+
+
 mstl::String gTestBoneMetadata("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 void eTestBoneMetadataText(char *text)
 {
@@ -1213,6 +1219,7 @@ void eTestBoneMetadata()
 
 void FreyjaMiscEventsAttach()
 {
+	ResourceEventCallback::add("eTestAssertMsgBox", &eTestAssertMsgBox);
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
 
 	ResourceEventCallbackString::add("eTestBoneMetadataText", &eTestBoneMetadataText);
@@ -1899,16 +1906,16 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 
 int FreyjaAssertCallbackHandler(const char *file, unsigned int line, 
 								const char *function,
-								const char *exprString)
+								const char *expression, const char *msg)
 {
 	mstl::String s;
-	s.Set("Assert encountered: %s:%i %s() '%s'", 
-		  file, line, function, exprString);
+	s.Set("Assert encountered:\n %s:%i %s()\n '%s'\n %s", 
+		  file, line, function, expression, msg);
 
 	ConfirmationDialog q("FreyjaAssertCallbackHandlerDialog", 
 						 "gtk-dialog-error", //"gtk-dialog-warning"
 						 s.c_str(), 
-						 "Would you like to continue with errors anyway?",
+						 "\nWould you like to continue with errors anyway?",
 						 "gtk-quit", "_Exit", "gtk-ok", "_Continue");
 
 	return q.Execute();
@@ -1956,8 +1963,6 @@ int main(int argc, char *argv[])
 	{
 		FreyjaControl::mInstance->LoadModel(argv[1]);
 	}
-
-	//FREYJA_ASSERTMSG(NULL, "Dummy NULL pointer assertion test.");
 
 	mgtk_start();
 

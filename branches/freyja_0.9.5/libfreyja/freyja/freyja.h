@@ -85,7 +85,8 @@ extern "C" {
 
 	typedef int (*FreyjaAssertCallback)(const char *file, unsigned int line, 
 										const char *function,
-										const char *exprs);
+										const char *expression,
+										const char *message);
 
 	typedef enum {
 		INDEXED_8 = 1, 
