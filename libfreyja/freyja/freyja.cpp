@@ -35,6 +35,7 @@ Printer *gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
 uint32 gFreyjaMemoryDeletes = 0;
+FreyjaAssertCallback gFreyjaAssertHandler = NULL;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -128,6 +129,12 @@ void freyjaFree()
 }
 
 
+void freyjaAssertHandler(FreyjaAssertCallback func)
+{
+	gFreyjaAssertHandler = func;
+}
+
+
 byte freyjaAssertMessage(const char *file, unsigned int line, 
 						 const char *function, const char *exprString,
 						 bool expr, const char *format, ...)
@@ -152,6 +159,15 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 		vfprintf(stdout, format, args);
 		fprintf(stdout, "\n");
 		va_end(args);
+	}
+
+	if (gFreyjaAssertHandler)
+	{
+		if ((*gFreyjaAssertHandler)(file, line, function, exprString))
+		{
+			freyjaPrintMessage("Assert ignored by event handler...");
+			return 0;
+		}
 	}
 
 	SystemIO::Assert(expr);

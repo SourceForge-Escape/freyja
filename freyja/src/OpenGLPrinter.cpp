@@ -73,7 +73,6 @@ OpenGLPrinter::~OpenGLPrinter()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-
 bool OpenGLPrinter::GenerateFont(Font &font,
 								 const char *text, const glyph_t *glyphs,
 								 const unsigned int textureId,
@@ -103,23 +102,7 @@ bool OpenGLPrinter::GenerateFont(Font &font,
 		float v = invWidth * (float)glyphs[i].y;
 		float u2 = invWidth * (float)(glyphs[i].x + glyphs[i].w);
 		float v2 = invWidth * (float)(glyphs[i].y + glyphs[i].h);
-
-#if OLD_CODE_DID_MORE_POST_PROCESSING
-		int h = 0;
-
-		if (glyphs[i].h < fontHeight)
-		{
-			h = fontHeight - glyphs[i].h;
-		}
-		else
-		{
-			h = 0;
-		}
-
-		h += -fontHeight / 2 - (fontDescent + glyphs[i].miny);
-#else
 		const int h = 0;
-#endif
 
 		/* Make a list for this TTF glyph, one nonuniform Quad per glyph */
 		glNewList(font.mListBase + i, GL_COMPILE);
@@ -492,6 +475,18 @@ int RunOpenGLPrinterUnitTest(int argc, char *argv[])
 {
 	OpenGLPrinter test;
 
+	// 32 - 126
+	char ascii[95];
+
+	for (unsigned int i = 0; i < 95; ++i)
+	{
+		ascii[i] = (char)(i+32);
+	}
+
+	ascii[94] = 0;
+
+	printf("\"%s\"\n", ascii);
+
 	const char text[] = 
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890~!@#$%^&*()-=+;:_'\",./?[]|\\ `<>";
 
@@ -520,6 +515,14 @@ int RunOpenGLPrinterUnitTest(int argc, char *argv[])
 						 text, glyphs, image, image_width);
 	test.SaveTGA("/tmp/zrnic___.tga", image, image_width, image_width);
 	test.SaveMetadata("/tmp/zrnic___.txt", text, glyphs);
+
+
+	// tahoma
+	memset(image, 0, sizeof(image)); // clear buffer
+	test.GenerateTexture("/home/mongoose/.fonts/tahoma.ttf", 24, 100,
+						 ascii, glyphs, image, image_width);
+	test.SaveTGA("/tmp/tahoma-ascii.tga", image, image_width, image_width);
+	test.SaveMetadata("/tmp/tahoma-ascii.txt", ascii, glyphs);
 
 	return 0;
 }

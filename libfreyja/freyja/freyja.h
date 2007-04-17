@@ -83,6 +83,10 @@ extern "C" {
 	typedef freyja_index_t *index_t;
 #endif
 
+	typedef int (*FreyjaAssertCallback)(const char *file, unsigned int line, 
+										const char *function,
+										const char *exprs);
+
 	typedef enum {
 		INDEXED_8 = 1, 
 		RGB_24, 
@@ -225,6 +229,12 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stderr or gPrinter
+	 ------------------------------------------------------*/
+
+	void freyjaAssertHandler(FreyjaAssertCallback func);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Assertion event handler is assigned.
 	 ------------------------------------------------------*/
 
 	byte freyjaAssertMessage(const char *file, unsigned int line, 
