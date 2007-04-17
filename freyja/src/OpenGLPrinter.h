@@ -235,13 +235,15 @@ class OpenGLPrinter
 	 ------------------------------------------------------*/
 
 	bool GenerateTexture(const char *filename,
-						 unsigned int pt, unsigned int dpi,
-						 const unsigned int count, const char **text,
-						 unsigned char *image, unsigned int image_width);
+						 const unsigned int pt, const unsigned int dpi,
+						 const char *text,
+						 unsigned char *image, const unsigned int image_width);
 	/*------------------------------------------------------
-	 * Pre  : <filename> of the TTF font used to generate texture.
+	 * Pre  : Takes a single string and generates 'best fit' texture 
+	 *
+	 *        <filename> of the TTF font used to generate texture.
 	 *        <pt> point size and <dpi> dots per inch are required.
-	 *        <text> are <count> lines of text to generate texture.
+	 *        <text> of the glyphs used to generate texture.
 	 *        <image> is allocated RGBA, 32bpp, <image_width>^2. 
 	 *
 	 * Post : Returns true if successful.

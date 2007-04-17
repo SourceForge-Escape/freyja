@@ -66,10 +66,11 @@ OpenGLPrinter::~OpenGLPrinter()
 ////////////////////////////////////////////////////////////
 
 bool OpenGLPrinter::GenerateTexture(const char *filename,
-									unsigned int pt, unsigned int dpi,
-									const unsigned int count, const char **text,
+									const unsigned int pt, 
+									const unsigned int dpi,
+									const char *text,
 									unsigned char *image, 
-									unsigned int image_width)
+									const unsigned int image_width)
 {
 #ifdef HAVE_FREETYPE2
 	FT_Face face;
@@ -105,31 +106,43 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 	FT_GlyphSlot slot = face->glyph;
 	//FT_Bitmap bitmap;
 
-	for (unsigned int line = 0; line < count; ++line)
+	const unsigned int x_padding = pt/4;
+	const unsigned int y_padding = pt;
+	const unsigned int n = strlen(text);
+
+	// Start pen at padding offset from edges on the 0th row...
+	unsigned int pen_y = y_padding;
+	unsigned int pen_x = x_padding;
+	unsigned int row = 1;
+
+	for (unsigned int i = 0; i < n; ++i) 
 	{ 
-		const unsigned int n = strlen(text[line]);
-		const unsigned int x_padding = 6;//8;
-		const unsigned int y_padding = 24;
-
-		// Start pen at 8, 32...
-		unsigned int pen_x = 8;
-		unsigned int pen_y = 24 + line * y_padding;
-
-		for (unsigned int i = 0; i < n; ++i) 
-		{ 
-			/* load glyph image into the slot (erase previous one) */ 
-			error = FT_Load_Char(face, text[line][i], FT_LOAD_RENDER); 
+		/* load glyph image into the slot (erase previous one) */ 
+		error = FT_Load_Char(face, text[i], FT_LOAD_RENDER); 
 			
-			if ( error ) 
-				continue; /* ignore errors */ 
+		if ( error ) 
+			continue; /* ignore errors */ 
 
-			AddGlyphToTexture32(image, image_width,
-								slot->bitmap.buffer,
-								slot->bitmap.width, slot->bitmap.rows,
-								pen_x, pen_y - slot->bitmap_top);
-
-			pen_x += slot->bitmap.width + x_padding;
+		if (pen_x + slot->bitmap.width > image_width)
+		{
+			++row;
+			pen_y = (row * y_padding);
+			pen_x = x_padding;
 		}
+			
+		if (pen_y > image_width) // error
+		{
+			printf("ERROR: Can not fit row %i for face @ %ipts, %i dpi.\n",
+				   row, pt, dpi);
+			return false;
+		}
+
+		AddGlyphToTexture32(image, image_width,
+							slot->bitmap.buffer,
+							slot->bitmap.width, slot->bitmap.rows,
+							pen_x, pen_y - slot->bitmap_top);
+
+		pen_x += slot->bitmap.width + x_padding;
 	}
 
 	return true;
@@ -162,7 +175,7 @@ bool OpenGLPrinter::SavePPM(const char *filename,
 
 		return true;
 	}
-  
+
 	return false;
 }
 
@@ -287,22 +300,16 @@ int runOpenGLPrinterUnitTest(int argc, char *argv[])
 {
 	OpenGLPrinter test;
 
-	const char *text[] = {
-		"ABCDEFGHIJKLM", // 'square up' texture map, less memory
-		"NOPQRSTUVWXYZ",
-		"abcdefghijklm",
-		"nopqrstuvwxyz",
-		"1234567890~!@",
-		"#$%^&*()-=+;:_",
-		"'\",./?[]|\\ `<>"
-	};
+	const char text[] = 
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890~!@#$%^&*()-=+;:_'\",./?[]|\\ `<>";
 	
-	const unsigned int lines = 7;
 	const unsigned int image_width = 256;
 	unsigned char image[image_width*image_width*4];
 	
-	test.GenerateTexture("/home/mongoose/.fonts/zrnic___.ttf", 24, 100,
-						 lines, text, image, image_width);
+	test.GenerateTexture("/home/mongoose/.fonts/sazanami-gothic.ttf", 24, 100,
+						 //"/home/mongoose/.fonts/tahoma.ttf", 18, 100,
+						 //"/home/mongoose/.fonts/zrnic___.ttf", 24, 100,
+						 text, image, image_width);
 
 	test.SaveTGA("/tmp/test.tga", image, image_width, image_width);
 
@@ -387,49 +394,6 @@ void mglPrint3d(float x, float y, float z,
 	glPopMatrix();
 }
 
-
-
-
-void mglEnterMode2d(unsigned int width, unsigned int height)
-{
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_TEXTURE_2D);
-
-	/* This allows alpha blending of 2D textures with the scene */
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glViewport(0, 0, width, height);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glOrtho(0.0, (GLdouble)width, (GLdouble)height, 0.0, 0.0, 1.0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-}
-
-
-void mglExitMode2d()
-{
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-
-	glPopAttrib();
-
-	glMatrixMode(GL_MODELVIEW);
-}
 #endif
 
 
