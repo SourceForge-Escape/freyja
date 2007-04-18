@@ -10,6 +10,8 @@ UIPS=./modules/interface/*
 BACK=../../../
 
 debug:
+	@-rm -f ../bin/plugins/model/debug
+	@-mkdir -p ../bin/plugins/model/debug/
 	for i in $(IMGS); do cd $$i && make debug && cd $(BACK) || cd $(BACK); done 
 	for i in $(MDLS); do cd $$i && make debug && cd $(BACK) || cd $(BACK); done 
 	for i in $(UIPS); do cd $$i && make debug && cd $(BACK) || cd $(BACK); done 
@@ -43,8 +45,8 @@ clean:
 #################################################################
 
 install:
-	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins
-	@-cp ../bin/plugins/ui/debug/*.so $(DESTDIR)/usr/share/freyja/plugins
+	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
+	@-cp ../bin/plugins/ui/debug/*.so $(DESTDIR)/usr/share/freyja/plugins/
 	@-cp ../bin/plugins/ui/debug/*.mlisp $(DESTDIR)/usr/share/freyja/plugins
 	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/model/
 	@-cp ../bin/plugins/model/debug/*.so $(DESTDIR)/usr/share/freyja/plugins/model/
