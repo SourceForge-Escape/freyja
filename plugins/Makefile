@@ -4,6 +4,7 @@
 # + Wrapper Makefile
 ################################################################
 
+VERSION=0.9.5
 IMGS=./modules/image/*
 MDLS=./modules/model/*
 UIPS=./modules/interface/*
@@ -50,6 +51,7 @@ SELECT=debug
 
 install:
 	@-mkdir -p $(SHARE_DIR)/
+	@-printf $(VERSION) > $(SHARE_DIR)/version
 	@-cp ../bin/plugins/ui/$(SELECT)/*.so $(SHARE_DIR)/
 	@-cp ../bin/plugins/ui/$(SELECT)/*.mlisp $(SHARE_DIR)/
 	@-mkdir -p $(SHARE_DIR)/model/

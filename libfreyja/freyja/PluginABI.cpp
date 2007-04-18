@@ -116,7 +116,7 @@ void freyjaPluginDirectoriesInit()
 
 	//freyjaPluginAddDirectory("/usr/lib/freyja_0.9.5/modules/model");
 	//freyjaPluginAddDirectory("/usr/local/lib/freyja_0.9.5/modules/model");
-	//freyjaPluginAddDirectory("/usr/share/freyja_0.9.5/modules/model");
+	//freyjaPluginAddDirectory("/usr/share/freyja/plugins/model");
 #endif
 }
 
