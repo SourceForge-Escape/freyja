@@ -36,7 +36,7 @@
 #define ARG_GTK_NOTEBOOK         2048
 #define ARG_GTK_TOOLBOX_WIDGET   4096
 
-#ifdef DEBUG
+#if defined DEBUG || defined WIN32
 #   define MGTK_ASSERTMSG(expr, format, ...) \
 if (!(expr)) mgtk_assert(__FILE__, __LINE__, __func__, #expr, false, format, ##__VA_ARGS__)
 #else
