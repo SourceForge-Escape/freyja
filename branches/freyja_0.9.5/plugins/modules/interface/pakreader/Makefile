@@ -127,7 +127,7 @@ debug:
 	LD_FLAGS="$(LDFLAGS)"
 	@-mkdir -p $(BUILD_INSTALL_DIR)/debug/
 	@-cp $(BUILD_DEBUG_DIR)/$(NAME).so $(BUILD_INSTALL_DIR)/debug/
-	@-cp $(BUILD_DEBUG_DIR)/$(NAME).mlisp $(BUILD_INSTALL_DIR)/debug/
+	@-cp $(NAME).mlisp $(BUILD_INSTALL_DIR)/debug/
 
 prof:
 	@-mkdir -p $(BUILD_PROF_DIR)
