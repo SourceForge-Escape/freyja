@@ -40,14 +40,14 @@ native-old:
 	@-printf "Building libfreyja\n"
 	@-cd libfreyja && ./autogen.sh && make
 
-	@-printf "Building libfreyja plugins\n"
-	@-cd plugins && make
-
 	@-printf "Building libmgtk\n"
 	@-cd libmgtk && ./autogen.sh && make
 
 	@-printf "Building freyja\n"
-	@-cd freyja && ./autogen.sh && make && make plugins
+	@-cd freyja && ./autogen.sh && make
+
+	@-printf "Building freyja plugins\n"
+	@-cd plugins && make
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -62,14 +62,14 @@ native:
 	printf "Building libfreyja\n" && \
 	cd libfreyja && ./autogen.sh && make && cd .. &&  \
 	\
-	printf "Building libfreyja plugins\n" && \
-	cd plugins && make && cd .. &&  \
-	\
 	printf "Building libmgtk\n" && \
 	cd libmgtk && ./autogen.sh && make && cd .. &&  \
 	\
+	printf "Building plugins\n" && \
+	cd plugins && make && cd .. &&  \
+	\
 	printf "Building freyja\n" && \
-	cd freyja && ./autogen.sh && make && make plugins
+	cd freyja && ./autogen.sh && make
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -105,14 +105,14 @@ win32:
 	printf "Building libfreyja\n" && \
 	cd libfreyja && ./autogen.sh && make win32 && cd .. && \
 	\
-	printf "Building libfreyja plugins\n" && \
-	cd plugins && make win32 && cd .. && \
-	\
 	printf "Building libmgtk\n" && \
 	cd libmgtk && ./autogen.sh && make win32 && cd .. && \
 	\
+	printf "Building plugins\n" && \
+	cd plugins && make win32 && cd .. && \
+	\
 	printf "Building freyja\n" && \
-	cd freyja && ./autogen.sh && make win32 && make plugins-win32
+	cd freyja && ./autogen.sh && make win32
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
@@ -192,6 +192,8 @@ deb:
 	@-cd libmgtk; make deb
 	@-cd ..
 	@-cd libfreyja; make deb
+	@-cd ..
+	@-cd plugins; make deb
 	@-cd ..
 	@-cd freyja; make deb
 	@-cd ..

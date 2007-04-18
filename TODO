@@ -5,8 +5,6 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
-	* Add deb package build for plugins
-
 	* Do another pass on this file to be sure items aren't already completed.
 
 	* Finish OpenGLPrinter, 2d/3d billboard text using libfreetype.
