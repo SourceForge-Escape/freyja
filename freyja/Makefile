@@ -158,7 +158,7 @@ win32:
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
 	CFLAGS="$(LOCAL_INCLUDES) -mwindows $(DEBUG_CFLAGS) $(WIN32_CROSS_CFLAGS)" \
-	LD_FLAGS="$(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK)"
+	LD_FLAGS="$(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK) -lfreetype"
 
 
 ########################################################################

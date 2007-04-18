@@ -127,6 +127,7 @@ debug:
 	LD_FLAGS="$(LDFLAGS)"
 	@-mkdir -p $(BUILD_INSTALL_DIR)/debug/
 	@-cp $(BUILD_DEBUG_DIR)/$(NAME).so $(BUILD_INSTALL_DIR)/debug/
+	@-cp $(BUILD_DEBUG_DIR)/$(NAME).mlisp $(BUILD_INSTALL_DIR)/debug/
 
 prof:
 	@-mkdir -p $(BUILD_PROF_DIR)
@@ -154,6 +155,7 @@ win32:
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 	@-mkdir -p $(BUILD_INSTALL_DIR)/win32/
 	@-cp $(BUILD_WIN32_DIR)/$(NAME).dll $(BUILD_INSTALL_DIR)/win32/
+	@-cp $(NAME).mlisp $(BUILD_INSTALL_DIR)/win32/
 
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
