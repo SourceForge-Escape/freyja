@@ -46,25 +46,26 @@ clean:
 
 USER_DIR=$(HOME)/.freyja/plugins
 SHARE_DIR=$(DESTDIR)/usr/share/freyja/plugins
+SELECT=debug
 
 install:
 	@-mkdir -p $(SHARE_DIR)/
-	@-cp ../bin/plugins/ui/debug/*.so $(SHARE_DIR)/
-	@-cp ../bin/plugins/ui/debug/*.mlisp $(SHARE_DIR)/
+	@-cp ../bin/plugins/ui/$(SELECT)/*.so $(SHARE_DIR)/
+	@-cp ../bin/plugins/ui/$(SELECT)/*.mlisp $(SHARE_DIR)/
 	@-mkdir -p $(SHARE_DIR)/model/
-	@-cp ../bin/plugins/model/debug/*.so $(SHARE_DIR)/model/
+	@-cp ../bin/plugins/model/$(SELECT)/*.so $(SHARE_DIR)/model/
 	@-mkdir -p $(SHARE_DIR)/image/
-	@-cp ../bin/plugins/image/debug/*.so $(SHARE_DIR)/image/
+	@-cp ../bin/plugins/image/$(SELECT)/*.so $(SHARE_DIR)/image/
 
 
 user-install:
 	@-mkdir -p $(USER_DIR)/
-	@-cp ../bin/plugins/ui/debug/*.so $(USER_DIR)/
-	@-cp ../bin/plugins/ui/debug/*.mlisp $(USER_DIR)/
+	@-cp ../bin/plugins/ui/$(SELECT)/*.so $(USER_DIR)/
+	@-cp ../bin/plugins/ui/$(SELECT)/*.mlisp $(USER_DIR)/
 	@-mkdir -p $(USER_DIR)/model/
-	@-cp ../bin/plugins/model/debug/*.so $(USER_DIR)/model/
+	@-cp ../bin/plugins/model/$(SELECT)/*.so $(USER_DIR)/model/
 	@-mkdir -p $(USER_DIR)/image/
-	@-cp ../bin/plugins/image/debug/*.so $(USER_DIR)/image/
+	@-cp ../bin/plugins/image/$(SELECT)/*.so $(USER_DIR)/image/
 
 
 
