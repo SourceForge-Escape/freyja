@@ -163,6 +163,8 @@ user-install:
 	@-printf "Installing freyja user files\n"
 	@-cd freyja; ./setup-freyja.sh
 	@-cd ..
+	@-cd plugins; $(MAKE) user-install
+	@-cd ..
 
 
 #################################################################

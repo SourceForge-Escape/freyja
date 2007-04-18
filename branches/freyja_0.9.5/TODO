@@ -58,6 +58,8 @@
 
 	* Fix remaining animation issues.
 
+	* /usr/share seeding age control to /home/ plugins via version.
+
 	* freyjaPak ( VFS )
 		- Encryption support
 		- Direct set functions to import / export
