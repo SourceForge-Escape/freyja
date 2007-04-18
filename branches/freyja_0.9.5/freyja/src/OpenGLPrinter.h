@@ -31,7 +31,7 @@
 
 #ifdef HAVE_FREETYPE2
 #   include <ft2build.h>
-#include FT_FREETYPE_H
+#   include FT_FREETYPE_H
 #endif
 
 namespace freyja3d {
