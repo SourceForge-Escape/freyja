@@ -6,6 +6,7 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Assert MsgBox for libmgtk asserts
  - Buffer msg for assert and make it 'pretty'
  - Assert MsgBox for libfreyja / freyja asserts
  - OpenGLPrinter using TTF via freetype2, old SDL_ttf code removed

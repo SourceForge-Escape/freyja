@@ -128,10 +128,10 @@ arg_list_t *mgtk_rc_window(arg_list_t *container)
 	char icon_filename[1024];
 
 	symbol_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == CSTRING");
+	MGTK_ASSERTMSG(title, "title == CSTRING");
 	
 	symbol_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == CSTRING");	
+	MGTK_ASSERTMSG(icon, "icon == CSTRING");	
 
 	if (title && icon)
 	{
@@ -163,7 +163,7 @@ arg_list_t *mgtk_rc_window(arg_list_t *container)
 arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 {
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
 
 	if (!box)
 	{
@@ -172,11 +172,11 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 
 	arg_list_t *width;
 	symbol_enforce_type(&width, INT);
-	MSTL_ASSERTMSG(width, "width == INT");
+	MGTK_ASSERTMSG(width, "width == INT");
 
 	arg_list_t *height;
 	symbol_enforce_type(&height, INT);
-	MSTL_ASSERTMSG(height, "height == INT");
+	MGTK_ASSERTMSG(height, "height == INT");
 
 	if (!width || !height)
 	{
@@ -228,7 +228,7 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 arg_list_t *mgtk_rc_textview(arg_list_t *box)
 {
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
 
 	if (!box)
 	{
@@ -237,15 +237,15 @@ arg_list_t *mgtk_rc_textview(arg_list_t *box)
 
 	arg_list_t *s;
 	symbol_enforce_type(&s, CSTRING);
-	//MSTL_ASSERTMSG(s, "s == CSTRING");
+	//MGTK_ASSERTMSG(s, "s == CSTRING");
 
 	//arg_list_t *width;
 	//symbol_enforce_type(&width, INT);
-	//MSTL_ASSERTMSG(width, "width == INT");
+	//MGTK_ASSERTMSG(width, "width == INT");
 
 	//arg_list_t *height;
 	//symbol_enforce_type(&height, INT);
-	//MSTL_ASSERTMSG(height, "height == INT");
+	//MGTK_ASSERTMSG(height, "height == INT");
 
 	GtkWidget *view = gtk_text_view_new();
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
@@ -266,7 +266,7 @@ arg_list_t *mgtk_rc_textview(arg_list_t *box)
 arg_list_t *mgtk_rc_statusbar(arg_list_t *box)
 {
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
 
 	if (!box)
 	{
@@ -288,7 +288,7 @@ arg_list_t *mgtk_rc_statusbar(arg_list_t *box)
 arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
 {
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
 
 	if (!box)
 	{
@@ -314,7 +314,7 @@ arg_list_t *mgtk_rc_toolbar(arg_list_t *box)
 	GtkWidget *toolbar;
 
 	arg_enforce_type(&box,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
 
 	if (!box)
 	{
@@ -402,7 +402,7 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 
 
 	arg_enforce_type(&box,  ARG_GTK_TOOLBOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
 
 	if (!box)
 	{
@@ -410,22 +410,22 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&toggled, INT);
-	MSTL_ASSERTMSG(toggled, "toggled == INT");
+	MGTK_ASSERTMSG(toggled, "toggled == INT");
 
 	symbol_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == CSTRING");
+	MGTK_ASSERTMSG(icon, "icon == CSTRING");
 
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MGTK_ASSERTMSG(label, "label == CSTRING");
 
 	symbol_enforce_type(&help, CSTRING);
-	MSTL_ASSERTMSG(help, "help == CSTRING");
+	MGTK_ASSERTMSG(help, "help == CSTRING");
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	symbol_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (toggled && icon && label && help && event && cmd)
 	{
@@ -484,7 +484,7 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 	int event_cmd;
 
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
 
 	if (!box)
 	{
@@ -492,19 +492,19 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == CSTRING");
+	MGTK_ASSERTMSG(icon, "icon == CSTRING");
 	
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MGTK_ASSERTMSG(label, "label == CSTRING");
 	
 	symbol_enforce_type(&help, CSTRING);
-	MSTL_ASSERTMSG(help, "help == CSTRING");
+	MGTK_ASSERTMSG(help, "help == CSTRING");
 	
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 	
 	symbol_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (icon && label && help && event && cmd)
 	{
@@ -548,7 +548,7 @@ arg_list_t *mgtk_rc_summonbox(arg_list_t *box)
 	// Summons can be 'top level' containers like windows/dialogs
 	bool parented = (box != NULL);
 	arg_enforce_type(&box,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(((parented && box) || !parented), 
+	MGTK_ASSERTMSG(((parented && box) || !parented), 
 				   "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
@@ -559,7 +559,7 @@ arg_list_t *mgtk_rc_summonbox(arg_list_t *box)
 
 	arg_list_t *name;
 	symbol_enforce_type(&name, CSTRING);
-	MSTL_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *ret = NULL;
@@ -577,7 +577,7 @@ arg_list_t *mgtk_rc_summonbox(arg_list_t *box)
 arg_list_t *mgtk_rc_expander(arg_list_t *box)
 {
 	arg_enforce_type(&box,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!box)
@@ -587,19 +587,19 @@ arg_list_t *mgtk_rc_expander(arg_list_t *box)
 
 	arg_list_t *label;
 	symbol_enforce_type(&label,  CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *show;
 	symbol_enforce_type(&show, INT);
-	MSTL_ASSERTMSG(show, "show == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(show, "show == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *name = NULL;
 	if (mlisp_peek_for_vargs())
 	{
 		symbol_enforce_type(&name, CSTRING);
-		MSTL_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
+		MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
 					   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
@@ -659,7 +659,7 @@ arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 	GtkWidget *notebook;
 
 	arg_enforce_type(&box,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET");
 
 	if (!box)
 	{
@@ -667,13 +667,13 @@ arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&width, INT);
-	MSTL_ASSERTMSG(width, "width == INT");
+	MGTK_ASSERTMSG(width, "width == INT");
 
 	symbol_enforce_type(&height, INT);
-	MSTL_ASSERTMSG(height, "height == INT");
+	MGTK_ASSERTMSG(height, "height == INT");
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	if (width && height && event)
 	{
@@ -745,7 +745,7 @@ arg_list_t *mgtk_rc_tab(arg_list_t *notebook)
 	unsigned int i;
 
 	arg_enforce_type(&notebook,  ARG_GTK_NOTEBOOK);
-	MSTL_ASSERTMSG(notebook, "notebook == ARG_GTK_NOTEBOOK\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(notebook, "notebook == ARG_GTK_NOTEBOOK\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!notebook)
@@ -754,10 +754,10 @@ arg_list_t *mgtk_rc_tab(arg_list_t *notebook)
 	}
 
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (label && event)
@@ -811,7 +811,7 @@ arg_list_t *mgtk_rc_vbox(arg_list_t *box)
 	arg_list_t *homogeneous, *spacing, *expand, *fill, *pading, *ret = NULL;
 
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET | ARG_GTK_WINDOW);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET | ARG_GTK_WINDOW\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET | ARG_GTK_WINDOW\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!box)
@@ -820,23 +820,23 @@ arg_list_t *mgtk_rc_vbox(arg_list_t *box)
 	} 
 
 	symbol_enforce_type(&homogeneous, INT);
-	MSTL_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&spacing, INT); 
-	MSTL_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&expand, INT);
-	MSTL_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&fill, INT);
-	MSTL_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&pading, INT);
-	MSTL_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (homogeneous && spacing && expand && fill && pading)
@@ -869,7 +869,7 @@ arg_list_t *mgtk_rc_hbox(arg_list_t *box)
 	GtkWidget *hbox;
 
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!box)
@@ -878,23 +878,23 @@ arg_list_t *mgtk_rc_hbox(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&homogeneous, INT);
-	MSTL_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&spacing, INT); 
-	MSTL_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&expand, INT);
-	MSTL_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&fill, INT);
-	MSTL_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&pading, INT);
-	MSTL_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 
@@ -935,15 +935,15 @@ arg_list_t *mgtk_rc_dialog(arg_list_t *box)
 	// NOTE: box isn't used b/c in this implementation dialog is a window
 	//       which is a top level container!
 	symbol_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(title, "title == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&eOpen, INT);
-	MSTL_ASSERTMSG(eOpen, "eOpen == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(eOpen, "eOpen == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	symbol_enforce_type(&eClose, INT); 
-	MSTL_ASSERTMSG(eClose, "eClose == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(eClose, "eClose == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (title && eOpen && eClose)
@@ -979,7 +979,7 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 	GtkWidget *handlebox;
 
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!box)
@@ -988,7 +988,7 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&type, INT);
-	MSTL_ASSERTMSG(type, "type == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(type, "type == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (type)
@@ -1015,7 +1015,7 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 {
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!container)
@@ -1025,19 +1025,19 @@ arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 
 	arg_list_t *label = NULL;
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *cmd = NULL;
 	symbol_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(cmd, "cmd == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *event = NULL;
 	if (mlisp_peek_for_vargs())
 	{
 		symbol_enforce_type(&event, INT);
-		MSTL_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+		MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
@@ -1087,7 +1087,7 @@ arg_list_t *mgtk_rc_colorbutton(arg_list_t *container)
 	GtkWidget *item;
 
 	arg_enforce_type(&container, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1095,10 +1095,10 @@ arg_list_t *mgtk_rc_colorbutton(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	symbol_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (event && cmd)
 	{
@@ -1134,7 +1134,7 @@ arg_list_t *mgtk_rc_button(arg_list_t *container)
 	void *agtk_event;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1142,13 +1142,13 @@ arg_list_t *mgtk_rc_button(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MGTK_ASSERTMSG(label, "label == CSTRING");
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	symbol_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (label && event && cmd)
 	{
@@ -1195,7 +1195,7 @@ arg_list_t *mgtk_rc_hslider(arg_list_t *container)
 	GtkObject *adj;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1203,13 +1203,13 @@ arg_list_t *mgtk_rc_hslider(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	symbol_enforce_type(&min, INT);
-	MSTL_ASSERTMSG(min, "min == INT");
+	MGTK_ASSERTMSG(min, "min == INT");
 
 	symbol_enforce_type(&max, INT);
-	MSTL_ASSERTMSG(max, "max == INT");
+	MGTK_ASSERTMSG(max, "max == INT");
 
 	if (event && min && max)
 	{
@@ -1246,7 +1246,7 @@ arg_list_t *mgtk_rc_textbox(arg_list_t *container)
 	GtkWidget *item;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1254,7 +1254,7 @@ arg_list_t *mgtk_rc_textbox(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	if (event)
 	{
@@ -1283,7 +1283,7 @@ arg_list_t *mgtk_rc_hsep(arg_list_t *container)
 	GtkWidget *item;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1307,7 +1307,7 @@ arg_list_t *mgtk_rc_vsep(arg_list_t *container)
 	GtkWidget *item;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1331,7 +1331,7 @@ arg_list_t *mgtk_rc_label2(arg_list_t *container)
 	GtkWidget *item;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1365,7 +1365,7 @@ arg_list_t *mgtk_rc_label(arg_list_t *container)
 	GtkWidget *item;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1373,13 +1373,13 @@ arg_list_t *mgtk_rc_label(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MGTK_ASSERTMSG(label, "label == CSTRING");
 
 	symbol_enforce_type(&x_align, FLOAT);
-	MSTL_ASSERTMSG(x_align, "x_align == FLOAT");
+	MGTK_ASSERTMSG(x_align, "x_align == FLOAT");
 
 	symbol_enforce_type(&y_align, FLOAT);
-	MSTL_ASSERTMSG(y_align, "y_align == FLOAT");
+	MGTK_ASSERTMSG(y_align, "y_align == FLOAT");
 
 	if (label && x_align && y_align)
 	{
@@ -1411,7 +1411,7 @@ arg_list_t *mgtk_rc_icon(arg_list_t *container)
 	GtkWidget *icon;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1419,10 +1419,10 @@ arg_list_t *mgtk_rc_icon(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&name, CSTRING);
-	MSTL_ASSERTMSG(name, "name == CSTRING");
+	MGTK_ASSERTMSG(name, "name == CSTRING");
 	
 	symbol_enforce_type(&size, INT);
-	MSTL_ASSERTMSG(size, "size == INT");
+	MGTK_ASSERTMSG(size, "size == INT");
 	
 	if (name && size)
 	{
@@ -1473,7 +1473,7 @@ arg_list_t *mgtk_rc_spinbutton(arg_list_t *container)
 	arg_list_t *start, *min, *max, *event, *ret = NULL;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1481,16 +1481,16 @@ arg_list_t *mgtk_rc_spinbutton(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&start, INT | FLOAT);
-	MSTL_ASSERTMSG(start, "start == NUMERIC");
+	MGTK_ASSERTMSG(start, "start == NUMERIC");
 
 	symbol_enforce_type(&min,   INT | FLOAT);
-	MSTL_ASSERTMSG(min, "min == NUMERIC");
+	MGTK_ASSERTMSG(min, "min == NUMERIC");
 
 	symbol_enforce_type(&max,   INT | FLOAT);
-	MSTL_ASSERTMSG(max, "max == NUMERIC");
+	MGTK_ASSERTMSG(max, "max == NUMERIC");
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	if (start && min && max && event)
 	{
@@ -1549,7 +1549,7 @@ arg_list_t *mgtk_rc_spinbutton2(arg_list_t *container)
 	arg_list_t *step, *page, *page_sz, *digit;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -1557,28 +1557,28 @@ arg_list_t *mgtk_rc_spinbutton2(arg_list_t *container)
 	}
 
 	symbol_enforce_type(&start, INT | FLOAT);
-	MSTL_ASSERTMSG(start, "start == NUMERIC");
+	MGTK_ASSERTMSG(start, "start == NUMERIC");
 
 	symbol_enforce_type(&min,   INT | FLOAT);
-	MSTL_ASSERTMSG(min, "min == NUMERIC");
+	MGTK_ASSERTMSG(min, "min == NUMERIC");
 
 	symbol_enforce_type(&max,   INT | FLOAT);
-	MSTL_ASSERTMSG(max, "max == NUMERIC");
+	MGTK_ASSERTMSG(max, "max == NUMERIC");
 
 	symbol_enforce_type(&step, INT | FLOAT);
-	MSTL_ASSERTMSG(step, "step == NUMERIC");
+	MGTK_ASSERTMSG(step, "step == NUMERIC");
 
 	symbol_enforce_type(&page, INT | FLOAT);
-	MSTL_ASSERTMSG(page, "page == NUMERIC");
+	MGTK_ASSERTMSG(page, "page == NUMERIC");
 
 	symbol_enforce_type(&page_sz, INT | FLOAT);
-	MSTL_ASSERTMSG(page_sz, "page_sz == NUMERIC");	
+	MGTK_ASSERTMSG(page_sz, "page_sz == NUMERIC");	
 
 	symbol_enforce_type(&digit, INT);
-	MSTL_ASSERTMSG(digit, "digit == INT");
+	MGTK_ASSERTMSG(digit, "digit == INT");
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	if (start && min && max && event && step && page && page_sz && digit)
 	{
@@ -1664,7 +1664,7 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 	arg_list_t *ret = NULL, *event, *cmd;
 
 	arg_enforce_type(&box, ARG_GTK_BOX_WIDGET); // ARG_GTK_BOX_WIDGET
-	MSTL_ASSERTMSG(box, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(box, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!box)
 	{
@@ -1672,10 +1672,10 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	symbol_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (event && cmd)
 	{
@@ -1721,7 +1721,7 @@ arg_list_t *mgtk_rc_menu_seperator(arg_list_t *container)
 	arg_list_t *ret = NULL;
 
 	arg_enforce_type(&container,  ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(container, "menu == ARG_GTK_MENU_WIDGET");
+	MGTK_ASSERTMSG(container, "menu == ARG_GTK_MENU_WIDGET");
 
 	if (!container)
 	{
@@ -1753,11 +1753,11 @@ arg_list_t *mgtk_func_toggle_set(arg_list_t *args)
 
 	event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	val = symbol();
 	arg_enforce_type(&val, INT);
-	MSTL_ASSERTMSG(val, "val == INT");
+	MGTK_ASSERTMSG(val, "val == INT");
 
 	if (event && val)
 	{
@@ -1788,7 +1788,7 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 	arg_list_t *text, *event, *cmd, *ret = NULL;
 
 	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
+	MGTK_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
 
 	if (!menu)
 	{
@@ -1797,15 +1797,15 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 
 	text = symbol();
 	arg_enforce_type(&text,  CSTRING);
-	MSTL_ASSERTMSG(text, "text == CSTRING");
+	MGTK_ASSERTMSG(text, "text == CSTRING");
 
 	event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	cmd = symbol();
 	arg_enforce_type(&cmd, INT);
-	MSTL_ASSERTMSG(cmd, "cmd == INT");
+	MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (text && event && cmd)
 	{
@@ -1959,7 +1959,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 {
 	// 2006.11.13, Mongoose - I made this easier to read and better for you too!
 	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 	if (!menu)
 	{
@@ -1970,12 +1970,12 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 
 	arg_list_t *label = symbol();
 	arg_enforce_type(&label,  CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *subevent = NULL;
@@ -1987,7 +1987,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 		if (mlisp_is_cstring(icon))
 		{
 			arg_enforce_type(&icon, CSTRING);
-			MSTL_ASSERTMSG(icon, "icon|accel == CSTRING\nMLISP (%s:%i)", 
+			MGTK_ASSERTMSG(icon, "icon|accel == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 		}
 		else
@@ -1995,7 +1995,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 			subevent = icon;
 			icon = NULL;
 			arg_enforce_type(&subevent, INT);
-			MSTL_ASSERTMSG(subevent, "subevent == INT\nMLISP (%s:%i)", 
+			MGTK_ASSERTMSG(subevent, "subevent == INT\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 		}
 	}
@@ -2006,7 +2006,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 		accel = icon;
 		icon = symbol();
 		arg_enforce_type(&icon, CSTRING);
-		MSTL_ASSERTMSG(icon, "icon == CSTRING\nMLISP (%s:%i)", 
+		MGTK_ASSERTMSG(icon, "icon == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
@@ -2062,7 +2062,7 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 	int id = -1;
 
 	arg_enforce_type(&menu, ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (!menu)
@@ -2080,7 +2080,7 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 	}
 
 	arg_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (label)
@@ -2126,7 +2126,7 @@ arg_list_t *mgtk_rc_popup_menu(arg_list_t *arg)
 
 	arg_enforce_type(&arg, ARG_GTK_BOX_WIDGET);
 	//arg_enforce_type(&arg,  ARG_GTK_WINDOW);
-	MSTL_ASSERTMSG(arg, "window == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(arg, "window == ARG_GTK_BOX_WIDGET");
 
 	if (!arg)
 	{
@@ -2134,7 +2134,7 @@ arg_list_t *mgtk_rc_popup_menu(arg_list_t *arg)
 	}
 
 	app = (GtkWidget *)arg->data;
-	MSTL_ASSERTMSG(app, "app != NULL");
+	MGTK_ASSERTMSG(app, "app != NULL");
 
 	if (!app)
 	{
@@ -2164,7 +2164,7 @@ arg_list_t *mgtk_rc_popup_menu(arg_list_t *arg)
 arg_list_t *mgtk_rc_menubar(arg_list_t *arg)
 {
 	arg_enforce_type(&arg, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(arg, "window == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(arg, "window == ARG_GTK_BOX_WIDGET");
 
 	if (!arg)
 	{
@@ -2173,7 +2173,7 @@ arg_list_t *mgtk_rc_menubar(arg_list_t *arg)
 
 	arg_list_t *ret = NULL;
 	//GtkWidget *app = (GtkWidget *)arg->data;
-	MSTL_ASSERTMSG(arg->data, "app != NULL");
+	MGTK_ASSERTMSG(arg->data, "app != NULL");
 
 	if (arg && arg->data)
 	{
