@@ -6,6 +6,7 @@
 
  Dancer RC5
  20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Debian package fixes
  - Various win32/public build fixes, missing dlls, changes
  - Assert MsgBox for libmgtk asserts
  - Buffer msg for assert and make it 'pretty'
