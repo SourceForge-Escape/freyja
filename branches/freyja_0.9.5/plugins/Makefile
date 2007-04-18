@@ -41,23 +41,31 @@ clean:
 
 
 #################################################################
-# Debian packages
+# Install rules
 #################################################################
 
+USER_DIR=$(HOME)/.freyja/plugins
+SHARE_DIR=$(DESTDIR)/usr/share/freyja/plugins
+
 install:
-	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/
-	@-cp ../bin/plugins/ui/debug/*.so $(DESTDIR)/usr/share/freyja/plugins/
-	@-cp ../bin/plugins/ui/debug/*.mlisp $(DESTDIR)/usr/share/freyja/plugins
-	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/model/
-	@-cp ../bin/plugins/model/debug/*.so $(DESTDIR)/usr/share/freyja/plugins/model/
-	@-mkdir -p $(DESTDIR)/usr/share/freyja/plugins/image/
-	@-cp ../bin/plugins/image/debug/*.so $(DESTDIR)/usr/share/freyja/plugins/image/
+	@-mkdir -p $(SHARE_DIR)/
+	@-cp ../bin/plugins/ui/debug/*.so $(SHARE_DIR)/
+	@-cp ../bin/plugins/ui/debug/*.mlisp $(SHARE_DIR)/
+	@-mkdir -p $(SHARE_DIR)/model/
+	@-cp ../bin/plugins/model/debug/*.so $(SHARE_DIR)/model/
+	@-mkdir -p $(SHARE_DIR)/image/
+	@-cp ../bin/plugins/image/debug/*.so $(SHARE_DIR)/image/
 
 
-install-old:
-	for i in $(IMGS); do cd $$i && make install && cd $(BACK) || cd $(BACK); done 
-	for i in $(MDLS); do cd $$i && make install && cd $(BACK) || cd $(BACK); done 
-	for i in $(UIPS); do cd $$i && make install && cd $(BACK) || cd $(BACK); done 
+user-install:
+	@-mkdir -p printf $(USER_DIR)/
+	@-cp ../bin/plugins/ui/debug/*.so $(USER_DIR)/
+	@-cp ../bin/plugins/ui/debug/*.mlisp $(USER_DIR)/
+	@-mkdir -p $(USER_DIR)/model/
+	@-cp ../bin/plugins/model/debug/*.so $(USER_DIR)/model/
+	@-mkdir -p $(USER_DIR)/image/
+	@-cp ../bin/plugins/image/debug/*.so $(USER_DIR)/image/
+
 
 
 #################################################################
