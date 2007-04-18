@@ -58,7 +58,7 @@ install:
 
 
 user-install:
-	@-mkdir -p printf $(USER_DIR)/
+	@-mkdir -p $(USER_DIR)/
 	@-cp ../bin/plugins/ui/debug/*.so $(USER_DIR)/
 	@-cp ../bin/plugins/ui/debug/*.mlisp $(USER_DIR)/
 	@-mkdir -p $(USER_DIR)/model/
