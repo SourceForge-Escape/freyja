@@ -7,8 +7,6 @@
 
 	* Do another pass on this file to be sure items aren't already completed.
 
-	* Ensure all all numeric events are removed.
-
 	* Finish OpenGLPrinter, 2d/3d billboard text using libfreetype.
 
 	* Verify math library, enforce automated testing at build.
@@ -21,7 +19,7 @@
 		- Fix remaining FK issues
 		- Various joint types: hinge, ball&socket, etc
 		- IK solver and interface
-		- Timer for animation playback and keyframe timing
+		- New Timer for animation playback and keyframe timing
 		- Bones and bone transforms in same units!
 		- Finalize delta vs abs bone / keyframe transforms
 		- Rework weight system to support zeroed weights and grouping
