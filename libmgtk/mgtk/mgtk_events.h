@@ -23,8 +23,8 @@
  *            Created, from old mlisp and mgtk source headers
  ==========================================================================*/
 
-#ifndef GUARD__MGTK_MONGOOSE_MGTK_EVENT_H_
-#define GUARD__MGTK_MONGOOSE_MGTK_EVENT_H_
+#ifndef GUARD__MGTK_EVENT_H_
+#define GUARD__MGTK_EVENT_H_
 
 #define ACCEL_SUPPORT_ON
 
@@ -36,12 +36,25 @@
 #define ARG_GTK_NOTEBOOK         2048
 #define ARG_GTK_TOOLBOX_WIDGET   4096
 
-
-/* Handle mgtk widget events by implementing these functions in your code */
-/* Repeat: You have to implement these following call backs */
+#ifdef DEBUG
+#   define MGTK_ASSERTMSG(expr, format, ...) \
+if (!(expr)) mgtk_assert(__FILE__, __LINE__, __func__, #expr, false, format, ##__VA_ARGS__)
+#else
+#   define ASSERT_MSG(...)
+#endif
 
 extern "C" {
 
+/* ==========================================================================
+ * Callbacks
+ *
+ * Handle mgtk widget events by implementing these functions in your code,
+ * and then using the mgtk_link_import function to 'link' them.
+ *
+ * For example:
+ * void your_event1u_implementation(int event, unsigned int value) { ... }
+ * mgtk_link_import("mgtk_handle_event1u", your_event1u_implementation); 
+ ==========================================================================*/
 void mgtk_callback_get_image_data_rgb24(const char *filename, 
 										unsigned char **image, 
 										int *width, int *height);
@@ -60,15 +73,37 @@ void mgtk_handle_mouse(int button, int state, int mod, int x, int y);
 void mgtk_handle_resource_start();
 void mgtk_handle_slider1u(int event, unsigned int value);
 void mgtk_handle_text(int event, char *text);
-
 void mgtk_print(char *format, ...);
-
 void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 char *mgtk_rc_map(char *filename_or_dirname);
 const char *mgtk_get_resource_path();
-
 void mgtk_toggle_value_set(int event, int val);
+
+
+//////////////////////////////////////////////////////////////////////////////
+// mgtk API
+//////////////////////////////////////////////////////////////////////////////
+
+typedef int (*MgtkAssertCallback)(const char *file, unsigned int line, 
+								  const char *function,
+								  const char *expression,
+								  const char *message);
+
+void mgtk_assert_handler(MgtkAssertCallback func);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Assertion event handler is assigned.
+ ------------------------------------------------------*/
+
+unsigned char mgtk_assert(const char *file, unsigned int line, 
+						  const char *function, const char *exprString,
+						  bool expr, const char *format, ...);
+/*------------------------------------------------------
+ * Pre  : Format string and args are valid
+ * Post : Report messages to stdout or gPrinter
+ ------------------------------------------------------*/
 }
+
 
 
 /* Call into special mgtk using these internal mgtk functions below */
@@ -127,6 +162,8 @@ void mgtk_application_window_resize(int width, int height);
 void mgtk_application_window_role(char *role);
 void mgtk_application_window_fullscreen();
 void mgtk_application_window_unfullscreen();
+
+
 
 
 //////////////////////////////////////////////////////////////////

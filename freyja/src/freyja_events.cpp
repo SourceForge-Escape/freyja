@@ -1950,8 +1950,9 @@ int main(int argc, char *argv[])
 	mgtk_link_import("mgtk_get_resource_path", 
 					 (void*)freyja_get_resource_path_callback);
 
-	/* Hookup libfreyja assert handler, which is also used by this layer */
+	/* Hookup assert handlers, note freyja assert is also used by this layer */
 	freyjaAssertHandler(FreyjaAssertCallbackHandler);
+	mgtk_assert_handler(FreyjaAssertCallbackHandler);
 
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());

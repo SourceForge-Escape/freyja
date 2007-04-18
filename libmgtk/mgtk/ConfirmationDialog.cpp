@@ -112,42 +112,42 @@ arg_list_t *mgtk_rc_confirmation_dialog(arg_list_t *box)
   arg_list_t *a;
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mName == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mName == CSTRING");
   d.mName = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mDialogIcon == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mDialogIcon == CSTRING");
   d.mDialogIcon = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mInformationMessage == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mInformationMessage == CSTRING");
   d.mInformationMessage = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mQuestionMessage == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mQuestionMessage == CSTRING");
   d.mQuestionMessage = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mCancelIcon == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mCancelIcon == CSTRING");
   d.mCancelIcon = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mCancelText == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mCancelText == CSTRING");
   d.mCancelText = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mAcceptIcon == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mAcceptIcon == CSTRING");
   d.mAcceptIcon = mlisp_get_string(a); 
   delete_arg(&a);
 
   symbol_enforce_type(&a, CSTRING);
-  MSTL_ASSERTMSG(a, "a.mAacceptText == CSTRING");
+  MGTK_ASSERTMSG(a, "a.mAacceptText == CSTRING");
   d.mAcceptText = mlisp_get_string(a); 
   delete_arg(&a);
 

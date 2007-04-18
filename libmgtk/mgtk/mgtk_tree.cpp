@@ -121,7 +121,7 @@ void mgtk_treeview_onRowActivated(GtkTreeView *treeview,
 arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 {
 	arg_enforce_type(&container, ARG_GTK_BOX_WIDGET);
-	MSTL_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
+	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
 
 	if (!container)
 	{
@@ -131,11 +131,11 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 	// Read in an event id
 	arg_list_t *event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	arg_list_t *event2 = symbol();
 	arg_enforce_type(&event2, INT);
-	MSTL_ASSERTMSG(event2, "event2 == INT");
+	MGTK_ASSERTMSG(event2, "event2 == INT");
 
 	if (!event || !event2)
 	{
@@ -277,7 +277,7 @@ void mgtk_event_tree_add_child(mgtk_tree_t *parent, mgtk_tree_t *child)
 			// Might want to do something here later
 		}
 
-		MSTL_ASSERTMSG(child->parent == NULL, "Overwriting tree->parent");
+		MGTK_ASSERTMSG(child->parent == NULL, "Overwriting tree->parent");
 		child->parent = parent;
 
 		// NOTE: Until the new mgtk_tree struct is introduced this will 

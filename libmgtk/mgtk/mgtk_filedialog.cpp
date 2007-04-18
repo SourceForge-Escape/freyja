@@ -460,10 +460,10 @@ arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box)
 
 	event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	GtkWidget *dd = event ? gFileDialogPatternWidgetMap[get_int(event)] : NULL;
-	MSTL_ASSERTMSG(dd, "fileselection_drop_down_menu != NULL");
+	MGTK_ASSERTMSG(dd, "fileselection_drop_down_menu != NULL");
 
 	if (!dd)
 	{
@@ -487,25 +487,25 @@ arg_list_t *mgtk_rc_filechooserbutton(arg_list_t *box)
 
 	if (!box)
 	{
-		MSTL_ASSERTMSG("mgtk_rc_filechooserbutton", "container == ARG_GTK_BOX_WIDGET");
+		MGTK_ASSERTMSG("mgtk_rc_filechooserbutton", "container == ARG_GTK_BOX_WIDGET");
 		return NULL;
 	}
 
 	label = symbol();
 	arg_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MGTK_ASSERTMSG(label, "label == CSTRING");
 
 	title = symbol();
 	arg_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == STRING");
+	MGTK_ASSERTMSG(title, "title == STRING");
 
 	event = symbol();
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	pattern_func = symbol();
 	arg_enforce_type(&pattern_func, CSTRING);
-	MSTL_ASSERTMSG(pattern_func, "pattern_func == CSTRING");
+	MGTK_ASSERTMSG(pattern_func, "pattern_func == CSTRING");
 
 	if (label && title && event && pattern_func)
 	{
@@ -544,7 +544,7 @@ arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
 	GtkWidget *button;
 
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
-	MSTL_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
 
 	if (!box)
 	{
@@ -552,22 +552,22 @@ arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
 	}
 
 	symbol_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == CSTRING");
+	MGTK_ASSERTMSG(icon, "icon == CSTRING");
 	
 	symbol_enforce_type(&label, CSTRING);
-	MSTL_ASSERTMSG(label, "label == CSTRING");
+	MGTK_ASSERTMSG(label, "label == CSTRING");
 	
 	symbol_enforce_type(&help, CSTRING);
-	MSTL_ASSERTMSG(help, "help == CSTRING");
+	MGTK_ASSERTMSG(help, "help == CSTRING");
 	
 	symbol_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == CSTRING");
+	MGTK_ASSERTMSG(title, "title == CSTRING");
 	
 	symbol_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 	
 	symbol_enforce_type(&options, CSTRING);
-	MSTL_ASSERTMSG(options, "options == CSTRING");
+	MGTK_ASSERTMSG(options, "options == CSTRING");
 			
 	if (icon && label && help && title && event && options)
 	{
@@ -619,7 +619,7 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
 	arg_list_t *ret = NULL;
 
 	arg_enforce_type(&menu,  ARG_GTK_MENU_WIDGET);
-	MSTL_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
+	MGTK_ASSERTMSG(menu, "menu == ARG_GTK_MENU_WIDGET");
 
 	if (!menu)
 	{
@@ -628,11 +628,11 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
 
 	arg_list_t *text = symbol();
 	arg_enforce_type(&text,  CSTRING);
-	MSTL_ASSERTMSG(text, "text == STRING");
+	MGTK_ASSERTMSG(text, "text == STRING");
 
 	arg_list_t *title = symbol();
 	arg_enforce_type(&title, CSTRING);
-	MSTL_ASSERTMSG(title, "title == STRING");
+	MGTK_ASSERTMSG(title, "title == STRING");
 
 	// Accel is optional
 	arg_list_t *accel = symbol();
@@ -649,15 +649,15 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
 	}
 
 	arg_enforce_type(&event, INT);
-	MSTL_ASSERTMSG(event, "event == INT");
+	MGTK_ASSERTMSG(event, "event == INT");
 
 	arg_list_t *pattern_func = symbol();
 	arg_enforce_type(&pattern_func, CSTRING);
-	MSTL_ASSERTMSG(pattern_func, "pattern_func == CSTRING");
+	MGTK_ASSERTMSG(pattern_func, "pattern_func == CSTRING");
 
 	arg_list_t *icon = symbol();
 	arg_enforce_type(&icon, CSTRING);
-	MSTL_ASSERTMSG(icon, "icon == STRING");
+	MGTK_ASSERTMSG(icon, "icon == STRING");
 
 	if (text && event && pattern_func && icon)
 	{

@@ -65,6 +65,47 @@ int spinbutton_uint_set_range(GtkSpinButton *spin,
  * Gobals only accessed in this file */
 Map<int, Vector<GtkWidget *> *> gWidgetMap;
 
+MgtkAssertCallback gMgtkAssertCallback = NULL;
+
+void mgtk_assert_handler(MgtkAssertCallback func)
+{
+	gMgtkAssertCallback = func;
+}
+
+
+byte mgtk_assert(const char *file, unsigned int line, 
+				 const char *function, const char *exprString,
+				 bool expr, const char *format, ...)
+{
+	if (expr)
+		return 0;
+
+	mgtk_print("Assert encountered: %s:%i %s() '%s'", 
+			   file, line, function, exprString);
+
+	char msg[1024];
+	va_list args;
+	va_start(args, format);	
+	vsnprintf(msg, 1023, format, args);
+	va_end(args);
+	msg[1023] = 0;
+
+	mgtk_print(msg);
+
+	if (gMgtkAssertCallback)
+	{
+		if ((*gMgtkAssertCallback)(file, line, function, exprString, msg))
+		{
+			mgtk_print("Assert ignored by event handler...");
+			return 0;
+		}
+	}
+
+	SystemIO::Assert(expr);
+
+	return 1;	
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Widget <-> Event mapping system
