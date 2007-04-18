@@ -29,7 +29,8 @@ LICENSE=
 BUILD_SELECT=debug
 
 CONFIGURE_CFLAGS=-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL \
-		-DPLANE_NOTIFY_WITH_AXIS -DUSING_OPENGL_EXT -DHAVE_FREETYPE2
+		-DPLANE_NOTIFY_WITH_AXIS -DUSING_OPENGL_EXT \
+		-DHAVE_FREETYPE2 $(shell freetype-config --cflags)
 CONFIGURE_LDFLAGS=
 
 PKG_LIB_ADD=gtkglext-1.0
@@ -86,7 +87,6 @@ BASE_DEFS=-Isrc $(CONFIGURE_CFLAGS) -Wno-deprecated -Weffc++ -Wall -pedantic
 #BASE_DEFS += -Weffc++ -Wall -pedantic -std=c99
 
 BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
-		$(shell freetype-config --cflags) \
 		-fPIC -Wall $(LOCAL_INCLUDES) \
 		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
