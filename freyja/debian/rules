@@ -56,7 +56,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/freyja.
-	$(MAKE) plugins install DESTDIR=$(CURDIR)/debian/freyja
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/freyja
 
 
 # Build architecture-independent files here.
