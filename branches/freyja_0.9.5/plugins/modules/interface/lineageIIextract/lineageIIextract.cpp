@@ -822,7 +822,7 @@ void L2ExtractGUIAttach()
 
 	id = Resource::mInstance->getIntByName("eDialogL2Extract");
 	menuId = Resource::mInstance->getIntByName("ePluginMenu");
-	mgtk_append_item_to_menu(menuId, "LineageII extractor", id);
+	//mgtk_append_item_to_menu(menuId, "LineageII extractor", id);
 
 	filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);

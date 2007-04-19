@@ -27,6 +27,7 @@ mkdir -p ~/.freyja/plugins/python/
 
 # Main data
 cp ./data/freyja-dev.mlisp ~/.freyja/
+cp ./data/*.ttf ~/.freyja/
 cp ./data/shaders/*.frag ~/.freyja/shaders/
 cp ./data/shaders/*.vert ~/.freyja/shaders/
 cp ./data/palettes/*.pal ~/.freyja/palettes/

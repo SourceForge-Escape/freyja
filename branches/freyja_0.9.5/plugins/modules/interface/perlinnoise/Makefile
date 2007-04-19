@@ -212,8 +212,6 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 # Implemented builds
 ######################################################################
 
-#tools:
-
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) targets NAME=ase SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
@@ -230,7 +228,7 @@ test:
 
 
 ##########################################################################
-# Make clean
+# Clean rules
 ##########################################################################
 
 clean: clean-emacs clean-build clean-test clean-obj clean-win32
@@ -303,29 +301,6 @@ user-install:
 	@-cp $(SELECT)/$(NAME).so $(USER_DIR)/
 	@-cp $(NAME).mlisp $(USER_DIR)/
 
-
-################################################################
-# Plugins
-################################################################
-
-
-PLUGINS=$(BUILD_DIR)/$(MOD_NAME).so
-PLUGINSWIN32=$(BUILD_DIR)/$(MOD_NAME).dll
-
-plug-ins: $(PLUGINS)
-
-plug-ins-win32: $(PLUGINSWIN32)
-
-$(BUILD_DIR)/$(MOD_NAME).so : $(MOD_OBJS)
-	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(MOD_OBJS)
-
-$(BUILD_DIR)/$(MOD_NAME).dll : $(MOD_OBJS)
-	$(CC) -shared -o $(BUILD_DIR)/$(MOD_NAME).dll \
-	-Wl,--out-implib=$(BUILD_DIR)/lib$(MOD_NAME).a \
-	-Wl,--export-all-symbols \
-	-Wl,--enable-auto-import \
-	-Wl,--whole-archive $(MOD_OBJS) \
-	-Wl,--no-whole-archive $(LIBS)
 
 
 

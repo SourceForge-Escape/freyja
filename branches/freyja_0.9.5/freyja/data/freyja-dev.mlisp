@@ -36,8 +36,9 @@
 (setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
 (setq FAST_CARD true)          ; Toggle OpenGL accel features
 (setq PATH "~/.freyja")        ; Set initial data path
-(setq FONT "/home/mongoose/.fonts/tahoma.ttf")        ; Set renderer font
 (setq INIT "init-dev.mlisp")   ; Init resource filename
+(setq FONT "vera.ttf")         ; Set renderer font using rc_map OR
+;(setq FONT "/fullpath/a.ttf") ; Set renderer font using full path
 (setq ASSERT_BREAKPOINT 1)
 
 ;; Application Window

@@ -318,6 +318,15 @@ void FreyjaRender::DrawFreeWindow()
 	mglDrawEditorAxis();
 	glPopMatrix();
 #endif
+
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glColor3fv(WHITE);
+	//mPrinter.Print3d(0,0,0,  0,0,0, 0.1f, "This is a 3d test.");
+	mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "ORBIT");
+	glPopAttrib();
 }
 
 
@@ -1914,6 +1923,8 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 		;
 	}
 
+	glPushMatrix(); // New for 2d caption, etc
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE);
@@ -2041,6 +2052,46 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	FreyjaControl::mInstance->GetCursor().Display();
 
 	glPopMatrix();
+
+	glPopMatrix(); // New for 2d caption, etc
+
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glColor3fv(WHITE);	
+
+	switch (plane)
+	{
+	case PLANE_FRONT:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "FRONT");
+		break;
+
+	case PLANE_BACK:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "BACK");
+		break;
+
+	case PLANE_TOP:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "TOP");
+		break;
+
+	case PLANE_BOTTOM:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "BOTTOM");
+		break;
+
+	case PLANE_LEFT:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "LEFT");
+		break;
+
+	case PLANE_RIGHT:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "RIGHT");
+		break;
+
+	default:
+		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "Unknown");
+	}
+
+	glPopAttrib();
 }
 
 
