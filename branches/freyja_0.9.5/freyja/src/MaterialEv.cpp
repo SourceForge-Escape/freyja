@@ -20,6 +20,7 @@
 #include <mstl/SystemIO.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/MaterialABI.h>
+#include <freyja/TextureABI.h>
 #include <freyja/PerlinNoise.h>
 #include "Texture.h"
 #include "FreyjaOpenGL.h"
@@ -556,6 +557,8 @@ void MaterialEv::AttachMethodListeners()
 	CreateListener("eBlendSrc", &MaterialEv::eBlendSrc);
 	CreateListener("eBlendDest", &MaterialEv::eBlendDest);
 
+	CreateListener("eTextureUpload", &MaterialEv::eTextureUpload);
+
 	//CreateListener("", &MaterialEv::);
 }
 
@@ -1037,6 +1040,37 @@ void MaterialEv::eSetTexture(uint32 value)
 	SetSelected(value);
 	freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
 	freyja_event_gl_refresh();
+}
+
+
+void MaterialEv::eTextureUpload(uint32 id)
+{
+	byte *image;
+	uint32 w, h, bpp, type;
+
+	/* Texture image was stored as raw buffer */
+	freyjaGetTextureImage(id, w, h, bpp, type, image); // FIXME C++ exportable
+
+	if (image)
+	{
+		switch (type)
+		{
+		case RGBA_32:
+			Texture::mSingleton->loadBuffer(image, w, h, Texture::RGBA, 32);
+			break;
+			
+		case RGB_24:
+			Texture::mSingleton->loadBuffer(image, w, h, Texture::RGB, 24);
+			break;
+
+		case INDEXED_8:
+			Texture::mSingleton->loadBuffer(image, w, h, Texture::INDEXED, 8);
+			break;
+			
+		default:
+			FREYJA_ASSERTMSG(false, "Image type %i is not supported.", type);
+		}
+	}
 }
 
 

@@ -4,8 +4,15 @@
  Freyja 0.9.5 Development branch
  =====================================================================
 
+ Dancer RC6 
+ 20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - Fix for perlinnoise ui plugin texture upload event path.
+ - OpenGLPrinter hooked up with FONT symbol in resource.
+
+
  Dancer RC5
- 20070408- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ 20070408-20070415 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Debian package fixes, Debian plugin auto packaging in make system
  - Various win32/public build fixes, missing dlls, changes
  - Assert MsgBox for libmgtk asserts

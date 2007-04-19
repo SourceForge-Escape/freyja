@@ -595,9 +595,12 @@ public:
 
 	static vec4_t mColors[16];
 
+	static OpenGLPrinter mPrinter;
+
 	uint32 mViewportsCount;                    /* How many viewports are used */
 
 	Viewport mViewports[4];                    /* Viewports information */
+
 
 
 protected:

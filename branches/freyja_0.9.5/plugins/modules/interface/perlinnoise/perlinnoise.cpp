@@ -247,9 +247,9 @@ void PerlinNoiseGUIAttach()
 	char *basename = "plugins/perlinnoise.mlisp";
 	int id, menuId;
 
-	id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
-	menuId = Resource::mInstance->getIntByName("ePluginMenu"); // ePluginMenu;
-	mgtk_append_item_to_menu(menuId, "PerlinNoise", id);
+	//id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
+	//menuId = Resource::mInstance->getIntByName("ePluginMenu"); // ePluginMenu;
+	//mgtk_append_item_to_menu(menuId, "PerlinNoise", id);
 
 	filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);

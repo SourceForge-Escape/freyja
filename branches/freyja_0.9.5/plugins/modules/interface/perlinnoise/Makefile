@@ -284,7 +284,25 @@ tarball:
 		$(TREE_DIR)
 	@-echo "[done]"
 
+
 ##########################################################################
+# Install rules
+##########################################################################
+
+USER_DIR=$(HOME)/.freyja/plugins
+SHARE_DIR=$(DESTDIR)/usr/share/freyja/plugins
+SELECT=$(BUILD_DEBUG_DIR)
+
+install:
+	@-mkdir -p $(SHARE_DIR)/
+	@-cp $(SELECT)/$(NAME).so $(SHARE_DIR)/
+	@-cp $(NAME).mlisp $(SHARE_DIR)/
+
+user-install:
+	@-mkdir -p $(USER_DIR)/
+	@-cp $(SELECT)/$(NAME).so $(USER_DIR)/
+	@-cp $(NAME).mlisp $(USER_DIR)/
+
 
 ################################################################
 # Plugins

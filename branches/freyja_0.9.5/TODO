@@ -5,8 +5,6 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
-	* Do another pass on this file to be sure items aren't already completed.
-
 	* Finish OpenGLPrinter, 2d/3d billboard text using libfreetype.
 
 	* Verify math library, enforce automated testing at build.
@@ -35,6 +33,10 @@
 	* Replace MaterialEv Load/Save material with libfreyja format+metadata.
 
 	* Finish breakup of GUI control into modules.
+
+	* Finish up the icon set.
+
+	* Do another pass on 0.9.6 items to be sure they aren't already completed.
 
 
  Freyja, Dancer/Kagura 0.9.6 (Public Alpha-Beta, TBD)

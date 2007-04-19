@@ -91,11 +91,18 @@ class OpenGLPrinter
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	const char *GetASCIIString();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns 'block order' visible ASCII characters.
+	 *
+	 ------------------------------------------------------*/
+
 	void Print3dBillboard(float x, float y, float z,
 						  float scale, const char *text);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Not implemented.
 	 *
 	 ------------------------------------------------------*/
 
@@ -193,6 +200,13 @@ class OpenGLPrinter
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	bool Init(const char *font, const unsigned int pt, const unsigned int dpi);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void SetFont(const Font &font) { mFont = font; }
 	/*------------------------------------------------------

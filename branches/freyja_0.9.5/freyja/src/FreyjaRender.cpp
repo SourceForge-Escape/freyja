@@ -56,6 +56,7 @@ using namespace freyja3d;
 FreyjaRender *FreyjaRender::mInstance = 0x0;
 
 hel::Ray FreyjaRender::mTestRay;
+OpenGLPrinter FreyjaRender::mPrinter;
 
 vec4_t FreyjaRender::mColors[16];
 vec4_t FreyjaRender::mColorBackground;

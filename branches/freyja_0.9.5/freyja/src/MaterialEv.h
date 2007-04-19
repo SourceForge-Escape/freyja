@@ -346,6 +346,13 @@ class MaterialEv : public Control
 	 *
 	 ------------------------------------------------------*/
 
+	void eTextureUpload(uint32 id);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Handle event for texture loading from freyja buffer.
+	 *
+	 ------------------------------------------------------*/
+
 	void eOpenTexture(char *text);
 	/*------------------------------------------------------
 	 * Pre  : 
