@@ -28,6 +28,7 @@
 
 #ifdef HAVE_OPENGL
 #   include "FreyjaOpenGL.h"
+#   include "Texture.h"
 #endif // HAVE_OPENGL
 
 #include "OpenGLPrinter.h"
@@ -73,6 +74,12 @@ OpenGLPrinter::~OpenGLPrinter()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+const char *OpenGLPrinter::GetASCIIString()
+{
+	return " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}";
+}
+
+
 bool OpenGLPrinter::GenerateFont(Font &font,
 								 const char *text, const glyph_t *glyphs,
 								 const unsigned int textureId,
@@ -87,9 +94,9 @@ bool OpenGLPrinter::GenerateFont(Font &font,
 
 	font.mCount = strlen(text);
 	font.mTextureId = textureId;
-
-	glColor3f(1.0f, 1.0f, 1.0f);
+	font.mOffset = (int)text[0];
 	font.mListBase = glGenLists(font.mCount);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glBindTexture(GL_TEXTURE_2D, textureId);
 
 	const float spacing = 4.0f;
@@ -413,6 +420,27 @@ bool OpenGLPrinter::SaveTGA(const char *filename,
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+bool OpenGLPrinter::Init(const char *font, 
+						 const unsigned int pt, const unsigned int dpi)
+{
+	const unsigned int width = 256;
+	const char *text = GetASCIIString();
+	unsigned char image[width*width*4];
+	glyph_t glyphs[strlen(text)];	
+
+	// Clear pixmap buffer, generate a texture
+	memset(image, 0, sizeof(image));
+	if (!GenerateTexture(font, pt, dpi, text, glyphs, image, width))
+		return false;
+
+	// Bind texture in OpenGL
+#ifdef HAVE_OPENGL
+	int id = Texture::mSingleton->loadBuffer(image, width, width, Texture::RGBA, 32);
+#endif // HAVE_OPENGL
+
+	return GenerateFont(mFont, text, glyphs, id, image, width);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Private Accessors
@@ -449,6 +477,8 @@ void OpenGLPrinter::RenderString(const char *text)
 	//
 	//        The easiest way would be to make a false block range, and hope
 	//        no one requests the missing glyphs in that false block.
+	//
+	//        This will work if using 'ASCII block' or kana strings.
 
 	/* FIXME: 
 	 * Add utf-8 dencoding of char* string
@@ -475,21 +505,7 @@ int RunOpenGLPrinterUnitTest(int argc, char *argv[])
 {
 	OpenGLPrinter test;
 
-	// 32 - 126
-	char ascii[95];
-
-	for (unsigned int i = 0; i < 95; ++i)
-	{
-		ascii[i] = (char)(i+32);
-	}
-
-	ascii[94] = 0;
-
-	printf("\"%s\"\n", ascii);
-
-	const char text[] = 
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890~!@#$%^&*()-=+;:_'\",./?[]|\\ `<>";
-
+	const char *text = test.GetASCIIString();
 	glyph_t glyphs[strlen(text)];	
 
 	const unsigned int image_width = 256;
@@ -515,14 +531,6 @@ int RunOpenGLPrinterUnitTest(int argc, char *argv[])
 						 text, glyphs, image, image_width);
 	test.SaveTGA("/tmp/zrnic___.tga", image, image_width, image_width);
 	test.SaveMetadata("/tmp/zrnic___.txt", text, glyphs);
-
-
-	// tahoma
-	memset(image, 0, sizeof(image)); // clear buffer
-	test.GenerateTexture("/home/mongoose/.fonts/tahoma.ttf", 24, 100,
-						 ascii, glyphs, image, image_width);
-	test.SaveTGA("/tmp/tahoma-ascii.tga", image, image_width, image_width);
-	test.SaveMetadata("/tmp/tahoma-ascii.txt", ascii, glyphs);
 
 	return 0;
 }

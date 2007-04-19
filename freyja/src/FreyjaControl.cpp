@@ -176,6 +176,26 @@ void FreyjaControl::Init()
 	mRender->ResizeContext(width, height);
 	InitTexture();
 
+	
+	// Init OpenGLPrinter, move along with mTexture to OpenGL facade
+	//const char *font = "/home/mongoose/.fonts/tahoma.ttf";
+	char *font;
+	if (mResource.Lookup("FONT", &font))
+	{
+		const unsigned int pt = 24, dpi = 100;
+
+		if (!mRender->mPrinter.Init(font, pt, dpi))
+		{
+			FREYJA_ASSERTMSG(false, "Failed to load font '%s' @ %ipt %idpi.",
+							 font, pt, dpi);
+		}
+	}
+	else
+	{
+		FREYJA_ASSERTMSG(false, "No FONT symbol found in mlisp resource.");
+	}
+
+
 	// Handle loaded from system call
 	if (!freyjaGetBoneCount() && !freyjaGetMeshCount())
 		mCleared = true;
