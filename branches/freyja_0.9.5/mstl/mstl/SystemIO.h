@@ -372,6 +372,12 @@ public:
 		}
 
 
+		virtual bool Skip(long offset)
+		{
+			return (fseek(mFileHandle, GetOffset() + offset, SEEK_SET) == 0);
+		}
+
+
 		virtual void SetOffsetToEnd()
 		{
 			fseek(mFileHandle, 0, SEEK_END);
@@ -429,6 +435,8 @@ public:
 			return (fread(buffer, length, 1, mFileHandle) == 1);
 		}
 
+		virtual void ReadInt16(short &i) { i = ReadInt16(); }
+
 		virtual void ReadInt32(int &i) { i = ReadInt32(); }
 
 		virtual void ReadLong(long &l) { l = ReadLong(); }
@@ -437,6 +445,15 @@ public:
 
 		virtual void ReadFloat32(float &f) { f = ReadFloat32(); }
 
+
+
+		virtual void ReadInt16Array(long size, short array[])
+		{	
+			for (int i = 0; i < size; ++i)
+			{
+				ReadInt16(array[i]);
+			}
+		}
 
 		virtual void ReadInt32Array(long size, int array[])
 		{	

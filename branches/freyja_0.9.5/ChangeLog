@@ -6,6 +6,8 @@
 
  Dancer RC6 
  20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Packaging fix for package hel include dir getting removed.
+ - DOF plugin done really quickly.
  - Logging fix, asserts hooked up to logging directly
  - OpenGLPrinter caption, 3d ( skeleton ) test patch checked in
  - UI Plugins no longer attach to Plugins... menu if they don't have menuitems.
