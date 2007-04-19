@@ -1912,13 +1912,20 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 	s.Set("Assert encountered:\n %s:%i %s()\n '%s'\n %s", 
 		  file, line, function, expression, msg);
 
+	ControlPrinter::mLog.Print("[ASSERT] %s\n", s.c_str());
+
 	ConfirmationDialog q("FreyjaAssertCallbackHandlerDialog", 
 						 "gtk-dialog-error", //"gtk-dialog-warning"
 						 s.c_str(), 
 						 "\nWould you like to continue with errors anyway?",
 						 "gtk-quit", "_Exit", "gtk-ok", "_Continue");
 
-	return q.Execute();
+	int action = q.Execute();
+
+	ControlPrinter::mLog.Print("[ASSERT] User %s\n", 
+							   action ? "continued" : "aborted");
+
+	return action;
 }
 
 
@@ -1949,6 +1956,10 @@ int main(int argc, char *argv[])
 	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
 	mgtk_link_import("mgtk_get_resource_path", 
 					 (void*)freyja_get_resource_path_callback);
+
+	/* Enabled logging */
+	mstl::String s = freyja_rc_map_string(FREYJA_LOG_FILE);
+	ControlPrinter::StartLogging(s.c_str());
 
 	/* Hookup assert handlers, note freyja assert is also used by this layer */
 	freyjaAssertHandler(FreyjaAssertCallbackHandler);

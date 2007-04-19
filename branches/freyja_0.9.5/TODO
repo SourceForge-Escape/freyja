@@ -28,20 +28,6 @@
 		- Type of transform support
 		- Constraints support
 
-	* Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
-
-	* Replace MaterialEv Load/Save material with libfreyja format+metadata.
-
-	* Finish breakup of GUI control into modules.
-
-	* Finish up the icon set.
-
-	* Do another pass on 0.9.6 items to be sure they aren't already completed.
-
-
- Freyja, Dancer/Kagura 0.9.6 (Public Alpha-Beta, TBD)
- -----------------------------------------------------------------------------
-
 	* Single joint animations for shishi odoshi tutorial demo.
 		- Mesh parenting and grouping
 		- Visualize weights over skinned mesh
@@ -58,41 +44,23 @@
 		- Rendering support for alpha flagged faces ( partial depth sorting )
 			- Face flag for marking faces that need to be depth sorted... 
 
-	* Fix remaining animation issues.
+	* Finish breakup of GUI control into modules.
 
-	* /usr/share seeding age control to /home/ plugins via version.
+	* Finish up the icon set.
 
-	* freyjaPak ( VFS )
-		- Encryption support
-		- Direct set functions to import / export
-		- New vfs plugin UI
-		- Buffered/fileread/filewrite file plugin interface
-
-	* Formalized unit tests and reporting.
-
-	* Clean up mstl by breaking up classes with better namespacing.
-
-	* Rewrite mstl Map / RedBlackTree / AVLTree / etc at some point.
-
-	* COLLADA 1.4 plugin with Import/Export.
-
-	* Ensure transform algorithms are not done in client.
-
-	* Finish Bone MetaData support.
-
-	* Add in simple collision ( eg Dropping lantern on chair )
-
-	* Style / legal / contact updates for all code.
-
-	* User prefs default material and user prefs reset to defaults.
-
-	* Use tree widget for scene graph with mesh/skel.bone/mats.
-
-	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
+	* Do another pass on 0.9.6 items to be sure they aren't already completed.
 
 
- Freyja, Dancer/Kagura 0.9.6 (Beta-Release, TBD)
+ Freyja, Dancer/Kagura 0.9.6 (Public Alpha-Beta, TBD)
  -----------------------------------------------------------------------------
+
+	* Review build system for a possible move back to autotools.
+
+	* Review build system for possible cmake support.
+
+	* Review for possible Launchpad integration and project registry.
+
+	* Review for possible offical packages with Ubuntu/Debian.
 
 	* APIs / designs to be finalized
 		- Use status bar for mouse over tooltips also?
@@ -115,6 +83,44 @@
 		- Mesh::Merge() doesn't merge animations ( shouldn't matter? )
 		- Mesh::WeldTexCoords() is non-functunal 
 		- Mesh::Serialize(...) for binary Files needs to be updated for format	
+
+	* Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
+
+	* Replace MaterialEv Load/Save material with libfreyja format+metadata.
+
+	* /usr/share seeding age control to /home/ plugins via version.
+
+	* freyjaPak ( VFS )
+		- Encryption support
+		- Direct set functions to import / export
+		- New vfs plugin UI
+		- Buffered/fileread/filewrite file plugin interface
+
+	* Formalized unit tests and reporting.
+
+	* Clean up mstl by breaking up classes with better namespacing.
+
+	* Rewrite mstl Map / RedBlackTree / AVLTree / etc at some point.
+
+	* COLLADA 1.4 plugin with Import/Export.
+
+	* Ensure transform algorithms are not done in client.
+
+	* Finish Bone MetaData support.
+
+	* Add in simple collision ( eg Dropping lantern on chair scene )
+
+	* Style / legal / contact updates for all code.
+
+	* User prefs default material and user prefs reset to defaults.
+
+	* Use tree widget for scene graph with mesh/skel.bone/mats.
+
+	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
+
+
+ Freyja, Dancer/Kagura 0.9.6 (Beta-Release, TBD)
+ -----------------------------------------------------------------------------
 
 	* GNOME MIME setup script
 

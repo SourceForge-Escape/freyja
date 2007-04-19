@@ -6,6 +6,7 @@
 
  Dancer RC6 
  20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Logging fix, asserts hooked up to logging directly
  - OpenGLPrinter caption, 3d ( skeleton ) test patch checked in
  - UI Plugins no longer attach to Plugins... menu if they don't have menuitems.
  - Fix for perlinnoise ui plugin texture upload event path.
