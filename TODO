@@ -5,7 +5,7 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
-	* Finish OpenGLPrinter, 2d/3d billboard text using libfreetype.
+	* Finish OpenGLPrinter, all that's left is billboard printing.
 
 	* Verify math library, enforce automated testing at build.
 
