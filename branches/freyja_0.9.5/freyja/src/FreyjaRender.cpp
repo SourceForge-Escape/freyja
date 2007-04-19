@@ -324,8 +324,7 @@ void FreyjaRender::DrawFreeWindow()
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
 	glColor3fv(WHITE);
-	//mPrinter.Print3d(0,0,0,  0,0,0, 0.1f, "This is a 3d test.");
-	mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "ORBIT");
+	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "ORBIT");
 	glPopAttrib();
 }
 
@@ -1370,6 +1369,16 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	glColor3fv(WHITE);
+	mPrinter.Print3d(0,0,0,  0,0,0, 0.05f, freyjaGetBoneNameString(boneIndex));
+	glPopAttrib();
+	// End OpenGLPrinter test
+
 	glRotatef(rot.mVec[zr], 0, 0, 1);
 	glRotatef(rot.mVec[yr], 0, 1, 0);
 	glRotatef(rot.mVec[xr], 1, 0, 0);
@@ -2064,31 +2073,31 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	switch (plane)
 	{
 	case PLANE_FRONT:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "FRONT");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "FRONT");
 		break;
 
 	case PLANE_BACK:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "BACK");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "BACK");
 		break;
 
 	case PLANE_TOP:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "TOP");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "TOP");
 		break;
 
 	case PLANE_BOTTOM:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "BOTTOM");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "BOTTOM");
 		break;
 
 	case PLANE_LEFT:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "LEFT");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "LEFT");
 		break;
 
 	case PLANE_RIGHT:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "RIGHT");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "RIGHT");
 		break;
 
 	default:
-		mPrinter.Print2d(-35.5f, 33.5f, 0.05f, "Unknown");
+		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "????");
 	}
 
 	glPopAttrib();
