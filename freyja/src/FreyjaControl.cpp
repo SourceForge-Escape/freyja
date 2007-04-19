@@ -183,6 +183,14 @@ void FreyjaControl::Init()
 	if (mResource.Lookup("FONT", &font))
 	{
 		const unsigned int pt = 24, dpi = 100;
+		mstl::String s;
+
+		// If this isn't a full path filename look for file in rc_map
+		if (!SystemIO::File::DoesFileExist(font))
+		{
+			s = freyja_rc_map_string(font);
+			font = (char *)s.c_str();
+		}
 
 		if (!mRender->mPrinter.Init(font, pt, dpi))
 		{

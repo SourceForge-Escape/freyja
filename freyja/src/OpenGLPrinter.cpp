@@ -117,16 +117,16 @@ bool OpenGLPrinter::GenerateFont(Font &font,
 		glBegin(GL_QUADS);
 
 		 glTexCoord2f(u2, v);	/* Top, right */
-		 glVertex3i(glyphs[i].w, h, 0);
+		 glVertex3i(glyphs[i].w, h + glyphs[i].h, 0);
 		
 		 glTexCoord2f(u, v);	/* Top, left */
-		 glVertex3i(0, h, 0);
+		 glVertex3i(0, h + glyphs[i].h, 0);
 
 		 glTexCoord2f(u, v2);	/* Bottom, left */
-		 glVertex3i(0, h + glyphs[i].h, 0);
+		 glVertex3i(0, h, 0);
 		
 		 glTexCoord2f(u2, v2);	/* Bottom, right */
-		 glVertex3i(glyphs[i].w, h + glyphs[i].h, 0);
+		 glVertex3i(glyphs[i].w, h, 0);
 
 		glEnd();
 		

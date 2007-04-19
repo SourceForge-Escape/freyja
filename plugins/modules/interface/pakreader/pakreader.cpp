@@ -319,7 +319,7 @@ void PakReaderGUIAttach()
 
 	id = Resource::mInstance->getIntByName("eDialogPakReader");
 	menuId = Resource::mInstance->getIntByName("ePluginMenu");
-	mgtk_append_item_to_menu(menuId, "PakReader", id);
+	//mgtk_append_item_to_menu(menuId, "PakReader", id);
 
 	filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
