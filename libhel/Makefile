@@ -11,7 +11,7 @@ NAME=hel
 MAJOR_VERSION=0
 MINOR_VERSION=0
 MICRO_VERSION=2
-BUILD_ID=20070401
+BUILD_ID=20070415
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 TREE_DIR=libhel
 TARBALL_NAME=lib$(NAME)-$(VERSION).$(BUILD_ID)
@@ -293,8 +293,8 @@ install-win32:
 
 install-headers:
 	@-echo -n "Installing headers                          "
-	@-mkdir -p $(INSTALL_INCLUDE)
-	@-cp -f $(SRC_DIR)/*.h $(INSTALL_INCLUDE)
+	@-mkdir -p $(INSTALL_INCLUDE)/$(NAME)
+	@-cp -f $(SRC_DIR)/*.h $(INSTALL_INCLUDE)/$(NAME)
 	@-echo "[done]"
 
 ################################################################

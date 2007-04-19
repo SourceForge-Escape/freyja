@@ -667,7 +667,7 @@ void FreyjaRender::Display()
 	default:
 		;
 	}
-	
+
 	glFlush();
 	freyja_swap_buffers();
 
@@ -1678,6 +1678,15 @@ void FreyjaRender::DrawCurveWindow()
 	ResizeContext(width, height);
 
 	glPopMatrix();
+
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glColor3fv(WHITE);
+	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "CURVE");
+	glPopAttrib();
+	// End OpenGLPrinter test
 }
 
 
@@ -2187,6 +2196,15 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glEnd();	
 	glPopMatrix();
 	glPopMatrix();
+
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glColor3fv(WHITE);
+	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "MATERIAL");
+	glPopAttrib();
+	// End OpenGLPrinter test
 }
 
 
