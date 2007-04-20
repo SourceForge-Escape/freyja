@@ -23,6 +23,7 @@
 
 #include <mstl/SystemIO.h>
 #include <mstl/Vector.h>
+#include <mstl/String.h>
 #include "Printer.h"
 #include "PluginABI.h"
 #include "FreyjaFSM.h"
@@ -378,7 +379,7 @@ const char *freyjaActionToString(freyja_transform_action_t action)
 #if USING_FREYJA_MEMORY
 void freyjaAddTrack(void *ptr, size_t size, const char *file, int line, const char *func, uint32 flags)
 {
-	//if (gPrinter) gPrinter->Log("memory.csv", "%u, %p, %u, %s, %i, %s", gFreyjaMemoryTick, ptr, size, file, line, func);
+	//f (gPrinter) gPrinter->Log("/tmp/memory.csv", "+, %u, %p, %u, %s, %i, %s", gFreyjaMemoryTick, ptr, size, file, line, func);
 
 	++gFreyjaMemoryNews;
 	++gFreyjaMemoryTick;
@@ -387,7 +388,7 @@ void freyjaAddTrack(void *ptr, size_t size, const char *file, int line, const ch
 
 void freyjaRemoveTrack(void *ptr, const char *file, int line, const char *func, uint32 flags)
 {
-	//if (gPrinter) gPrinter->Log("memory.csv", "%u, %p, ?, %s, %i, %s", gFreyjaMemoryTick, ptr, file, line, func);
+	//if (gPrinter) gPrinter->Log("/tmp/memory.csv", "-, %u, %p, ?, %s, %i, %s", gFreyjaMemoryTick, ptr, file, line, func);
 
 	++gFreyjaMemoryDeletes;
 	++gFreyjaMemoryTick;

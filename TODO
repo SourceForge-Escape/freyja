@@ -13,6 +13,8 @@
 
 	* Basic geometry previews using blend vertices buffer - avoid data mutators.
 
+	* Polygon generators using new backend ( legacy removal depends on this. )
+
 	* Skeletal animation refactor
 		- Fix remaining FK issues
 		- Various joint types: hinge, ball&socket, etc
@@ -85,6 +87,7 @@
 		- Mesh::Serialize(...) for binary Files needs to be updated for format	
 
 	* Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
+		- Bring back old TextureManager to avoid wasting texture memory
 
 	* Replace MaterialEv Load/Save material with libfreyja format+metadata.
 
@@ -116,7 +119,9 @@
 
 	* Use tree widget for scene graph with mesh/skel.bone/mats.
 
-	* Break up UVMaps by smoothing groups/materials per mesh via toggle option
+	* Break up UVMaps by smoothing groups/materials per mesh via toggle option.
+
+	* MOTD / autoupdate plugin.
 
 
  Freyja, Dancer/Kagura 0.9.6 (Beta-Release, TBD)

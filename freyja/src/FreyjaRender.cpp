@@ -323,6 +323,7 @@ void FreyjaRender::DrawFreeWindow()
 	glPushAttrib(GL_ENABLE_BIT);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
+	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
 	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "ORBIT");
 	glPopAttrib();
@@ -332,6 +333,7 @@ void FreyjaRender::DrawFreeWindow()
 void FreyjaRender::AttachMethodListeners()
 {
 	CreateListener("eViewports", &FreyjaRender::eViewports);
+	CreateListener("eRenderBoneName", &FreyjaRender::eRenderBoneName);
 	CreateListener("eRenderSkeleton", &FreyjaRender::eRenderSkeleton);
 	CreateListener("eRenderSkeleton2", &FreyjaRender::eRenderSkeleton2);
 	CreateListener("eRenderVertex", &FreyjaRender::eRenderVertex);
@@ -1229,6 +1231,24 @@ void FreyjaRender::RenderModel(index_t model)
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
 			freyjaGetBoneRotationEuler3fv(i, r.mVec);
 
+			if (mRenderMode & fBoneName)
+			{
+				//glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
+
+				// OpenGLPrinter test
+				glPushAttrib(GL_ENABLE_BIT);
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+				glEnable(GL_BLEND);
+				glEnable(GL_TEXTURE_2D);
+				glColor3fv(WHITE);
+				// Broken b/c mAngles needs arcball  =0
+				mPrinter.Print3d(p.mVec[0], p.mVec[1], p.mVec[2], 
+								 -mAngles[2],-mAngles[1], -mAngles[0], 
+								 0.05f, freyjaGetBoneNameString(i));
+				glPopAttrib();
+				// End OpenGLPrinter test
+			}
+
 			glPushMatrix();
 #if 0
 			glRotatef(r[0], 1, 0, 0);
@@ -1369,15 +1389,18 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
-	// OpenGLPrinter test
-	glPushAttrib(GL_ENABLE_BIT);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
-	glColor3fv(WHITE);
-	mPrinter.Print3d(0,0,0,  0,0,0, 0.05f, freyjaGetBoneNameString(boneIndex));
-	glPopAttrib();
-	// End OpenGLPrinter test
+	if (mRenderMode & fBoneName)
+	{
+		// OpenGLPrinter test
+		glPushAttrib(GL_ENABLE_BIT);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+		glEnable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
+		glColor3fv(WHITE);
+		mPrinter.Print3d(0,0,0,  0,0,0, 0.05f, freyjaGetBoneNameString(boneIndex));
+		glPopAttrib();
+		// End OpenGLPrinter test
+	}
 
 	glRotatef(rot.mVec[zr], 0, 0, 1);
 	glRotatef(rot.mVec[yr], 0, 1, 0);
@@ -1683,6 +1706,7 @@ void FreyjaRender::DrawCurveWindow()
 	glPushAttrib(GL_ENABLE_BIT);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
+	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
 	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "CURVE");
 	glPopAttrib();
@@ -2077,6 +2101,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	glPushAttrib(GL_ENABLE_BIT);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
+	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);	
 
 	switch (plane)

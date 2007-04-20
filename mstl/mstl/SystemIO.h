@@ -435,8 +435,6 @@ public:
 			return (fread(buffer, length, 1, mFileHandle) == 1);
 		}
 
-		virtual void ReadInt16(short &i) { i = ReadInt16(); }
-
 		virtual void ReadInt32(int &i) { i = ReadInt32(); }
 
 		virtual void ReadLong(long &l) { l = ReadLong(); }
@@ -448,11 +446,8 @@ public:
 
 
 		virtual void ReadInt16Array(long size, short array[])
-		{	
-			for (int i = 0; i < size; ++i)
-			{
-				ReadInt16(array[i]);
-			}
+		{
+			fread(array, size*2, 1, mFileHandle);
 		}
 
 		virtual void ReadInt32Array(long size, int array[])
