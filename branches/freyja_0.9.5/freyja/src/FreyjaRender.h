@@ -118,7 +118,9 @@ public:
 		fSolidPlane                = 262144,
 		fFPSCap                    = 524288,
 		fGroupColors               = (1<<20),
-		fBones2                    = (1<<21) 
+		fBones2                    = (1<<21),
+		fBoneName                  = (1<<22)
+		
 	} flags_t;
 
 
@@ -170,6 +172,14 @@ public:
 
 	void eViewports(uint32 value) 
 	{ SetRenderFlag(fViewports, value, "Four window view"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderBoneName(uint32 value)
+	{ SetRenderFlag(fBoneName, value, "Bone name rendering"); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

@@ -364,6 +364,8 @@ extern "C" {
 void freyjaRemoveTrack(void *ptr, const char *file, int line, const char *func, uint32 flags);
 #         define FREYJA_NEW new( __FILE__, __LINE__, __func__)
 #         define FREYJA_DELETE freyjaRemoveTrack(NULL, __FILE__, __LINE__, __func__, 0x2); delete
+#         define freyjaNew FREYJA_NEW
+#         define freyjaDelete FREYJA_DELETE
 
 void *operator new(size_t size, const char *file, int line, const char *func);
 void *operator new [](size_t size, const char *file, int line, const char *func);

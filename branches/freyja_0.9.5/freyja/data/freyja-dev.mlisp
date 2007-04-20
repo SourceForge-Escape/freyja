@@ -315,6 +315,8 @@
 					"Show bones when rendering"		eEvent	eRenderSkeleton)
 				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones2"
 					"Show bones2 when rendering"	eEvent	eRenderSkeleton2)
+				(toolbar_togglebutton false "24x24/bone-tag.png" "BoneName"
+					"Show bones names when rendering"	eEvent	eRenderBoneName)
 
 				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
 					"Render shadows"		eEvent	eRenderShadow)
