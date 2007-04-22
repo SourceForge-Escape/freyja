@@ -26,14 +26,9 @@
 
  * Extrude ( legacy replacement ) broken for non-closed mesh
 
- * hel::Matrix sometimes 'misplaces' the translation col, so far it seems only
-   a few methods have the issue, but this shows it needs refactor =(
-
  * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
 
  * Crash on multiple merge with 'created' objects, but not imported
-
- * Crash on repeated failed compile / linking with shaders ( driver issue? )
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
 

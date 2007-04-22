@@ -98,11 +98,11 @@ class OpenGLPrinter
 	 *
 	 ------------------------------------------------------*/
 
-	void Print3dBillboard(float x, float y, float z,
-						  float scale, const char *text);
+	//void Print3dBillboard(float x, float y, float z,
+	//					  float scale, const char *text);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Not implemented.
+	 * Post : Not implemented in this release.
 	 *
 	 ------------------------------------------------------*/
 
