@@ -268,7 +268,9 @@ deb-info:
 	@-printf "================================================================================\n"
 
 
-install: install-lib install-headers
+install: install-lib
+
+install-dev: install-headers
 
 ################################################################
 

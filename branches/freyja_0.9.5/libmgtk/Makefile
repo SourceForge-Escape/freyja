@@ -329,13 +329,14 @@ deb-info:
 
 install: install-gtkglext
 
+install-dev: install-headers
+
 install-gtkglext:
 	@-echo -n "Installing selected build                     "
 	@-mkdir -p  $(INSTALL_LIB)
 	@-cp $(BUILD_DEBUG_DIR)/lib$(NAME)$(SHLIBEXT) $(INSTALL_LIB)/
 	@-echo "[done]"
 	@-$(MAKE) install-link
-	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
 
 
@@ -345,7 +346,6 @@ install-gtkglarea:
 	@-cp bin/debug/libmgtk$(SHLIBEXT) $(INSTALL_LIB)/
 	@-echo "[done]"
 	@-$(MAKE) install-link
-	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
 
 
