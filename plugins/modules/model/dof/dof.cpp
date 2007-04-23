@@ -75,8 +75,18 @@ int import_model(char *filename)
 
 int freyja_model__dof_check(char *filename)
 {
-	if (SystemIO::File::CompareFilenameExtention(filename, ".dof") == 0)
-		return 0;
+	SystemIO::FileReader r;
+
+	if (r.Open(filename))
+	{
+		char magic[5];
+		r.ReadString(4, magic);
+		mstl::String symbol(magic);
+		r.Close();
+
+		if (symbol == "DOF1")
+			return 0;
+	}
 
 	return -1;
 }

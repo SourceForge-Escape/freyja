@@ -16,6 +16,8 @@
 
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 
+ * Add back ray picking for UV faces to the UV editor.
+
  * Polygon generators using new backend ( legacy removal depends on this. )
 
  * Skeletal animation refactor
@@ -89,6 +91,8 @@
 	- Mesh::Merge() doesn't merge animations ( shouldn't matter? )
 	- Mesh::WeldTexCoords() is non-functunal 
 	- Mesh::Serialize(...) for binary Files needs to be updated for format	
+
+ * Async I/O test with special memory pool, etc ( killable I/O threads )
 
  * Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
 	- Bring back old TextureManager to avoid wasting texture memory

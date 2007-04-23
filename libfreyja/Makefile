@@ -330,8 +330,11 @@ install:
 	@-cp -R data/* $(INSTALL_SHARE)/
 	@-echo "[done]"
 	@-$(MAKE) install-link
-	@-$(MAKE) install-headers
 	@-./libsetup.sh $(INSTALL_LIB)
+
+install-dev:
+	@-echo -n "Installing selected build-dev                 "
+	@-$(MAKE) install-headers
 
 #	@-echo $(MAKE) plugins
 #	@-echo $(MAKE) install-plugins

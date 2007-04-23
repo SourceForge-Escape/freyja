@@ -64,7 +64,6 @@
 
  * Cursor reset on undo ( use a freaking seperate undo state system for cursor )
 
- * What happened to ray picking for UV faces in UV editor?
 
 
  C
