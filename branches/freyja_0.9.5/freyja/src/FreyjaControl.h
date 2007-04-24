@@ -118,6 +118,7 @@ class FreyjaControl : public Control
 	typedef void (FreyjaControl::*MethodPtr1u)(unsigned int);
 	typedef void (FreyjaControl::*MethodPtr1f)(float);
 	typedef void (FreyjaControl::*MethodPtr1s)(char *);
+	typedef void (FreyjaControl::*MethodPtr2s)(char *, char *);
 
 
 	////////////////////////////////////////////////////////////
@@ -586,6 +587,9 @@ class FreyjaControl : public Control
 	////////////////////////////////////////////////////////////
 	// Events, once all these are 'sorted' decouple.
 	////////////////////////////////////////////////////////////
+
+	void eOpenModel(char *filename);
+	void eSaveModel(char *filename, char *extension);
 
 	void ePolygonSplit()
 	{
@@ -1142,6 +1146,7 @@ private:
 	static void CreateListener(const char *name, MethodPtr1u ptr);
 	static void CreateListener(const char *name, MethodPtr1f ptr);
 	static void CreateListener(const char *name, MethodPtr1s ptr);
+	static void CreateListener(const char *name, MethodPtr2s ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Maps mlisp symbol <name> to method <ptr> action.

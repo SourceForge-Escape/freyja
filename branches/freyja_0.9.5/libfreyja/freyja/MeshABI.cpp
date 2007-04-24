@@ -1243,6 +1243,11 @@ void freyjaGetMeshName1s(index_t meshIndex, int32 lenght, char *name)
 {
 	Mesh *mesh = freyjaGetMeshClass(meshIndex);
 
+	if (name)
+	{
+		name[0] = 0;
+	}
+
 	if (mesh)
 	{
 		strncpy(name, mesh->GetName(), (lenght < 32) ? lenght : 32);

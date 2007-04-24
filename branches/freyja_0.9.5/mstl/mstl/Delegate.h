@@ -147,6 +147,17 @@ class MethodDelegateArg1 : public MethodDelegate
 };
 
 
+
+template <typename Arg, typename Arg2> 
+class ArgList2 : public ArgList 
+{
+ public:
+	ArgList2(Arg a, Arg2 b) : mArg(a), mArg2(b) {}
+	virtual ~ArgList2() {}
+	Arg mArg;
+	Arg2 mArg2;
+};
+
 template <class Type, typename Arg, typename Arg2, typename ReturnType = void> 
 class MethodDelegateArg2 : public MethodDelegate
 {
@@ -165,6 +176,13 @@ class MethodDelegateArg2 : public MethodDelegate
 	virtual void PushArg(void *ptr) { }
 
 	virtual void Execute() { }
+
+	virtual void Execute(ArgList &varg) 
+	{
+		ArgList2<Arg, Arg2> *v = (ArgList2<Arg, Arg2>*)&varg;
+		Run(v->mArg, v->mArg2); 
+	}
+
 
 	Type *mObject;      /* The Object calling the method. */
 	MethodPtr mMethod;  /* The method be called. */

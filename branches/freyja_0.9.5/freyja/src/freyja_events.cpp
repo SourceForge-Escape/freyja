@@ -25,6 +25,7 @@
  ==========================================================================*/
 
 #define FREYJA_APP_PLUGINS 1
+#define DISABLED_EVENT 0
 
 #include <string.h>
 
@@ -456,8 +457,7 @@ void freyja_handle_slider1u(int event, unsigned int value)
 void freyja_handle_text(int event, char *text)
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	//if (FreyjaControl::mInstance)
-		FreyjaControl::mInstance->handleTextEvent(event, text);
+	FreyjaControl::mInstance->handleTextEvent(event, text);
 }
 
 
@@ -522,40 +522,6 @@ void eNoImplementation(ResourceEvent *e)
 }
 
 
-void eVertexExtrude()
-{
-	//vec3_t n;
-	//freyjaGetVertexNormalXYZ3fv(mModel->getCurrentVertex(), n);
-	//freyjaVertexExtrude(mModel->getCurrentVertex(), 0.5f, n);
-	freyja_print("!'eVertexExtrude' : Disabled.");
-}
-
-
-void eOpenModel(char *filename)
-{
-	if (FreyjaControl::mInstance->LoadModel(filename))
-	{
-		char title[1024];
-		snprintf(title, 1024, "%s - Freyja", filename);
-		freyja_set_main_window_title(title);
-		FreyjaControl::mInstance->AddRecentFilename(filename);
-	}
-}
-
-
-void eSaveModel(char *filename, char *extension)
-{
-	if (FreyjaControl::mInstance->SaveModel(filename, extension))
-	{
-		// This was commented out... it shouldn't matter if it 'overwrites'
-		char title[1024];
-		snprintf(title, 1024, "%s - Freyja", filename);
-		freyja_set_main_window_title(title);
-		FreyjaControl::mInstance->AddRecentFilename(filename);
-	}
-}
-
-
 void eMeshUnselectFaces()
 {
 	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
@@ -585,12 +551,6 @@ void eMeshUnselectVertices()
 
 		freyja_print("Reset selected flag on all vertices in mesh.");
 	}
-}
-
-
-void eNotImplementedVec(vec_t v)
-{
-	freyja_print("Not Implementated");	
 }
 
 
@@ -1278,8 +1238,6 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
 	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
 	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
-	ResourceEventCallbackString::add("eOpenModel", &eOpenModel);
-	ResourceEventCallbackString2::add("eSaveModel", &eSaveModel);
 
 	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
 	ResourceEventCallbackUInt::add("ePolygonSize", &ePolygonSize);
