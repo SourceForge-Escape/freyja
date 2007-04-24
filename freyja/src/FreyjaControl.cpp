@@ -271,6 +271,9 @@ void FreyjaControl::AttachMethodListeners()
 
 	// CreateListener("", &FreyjaControl::);
 
+	CreateListener("eSaveModel", &FreyjaControl::eSaveModel);
+	CreateListener("eOpenModel", &FreyjaControl::eOpenModel);
+
 	CreateListener("ePolygonSplit", &FreyjaControl::ePolygonSplit);
 	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
 	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
@@ -1913,6 +1916,31 @@ void FreyjaControl::handleTextEvent(int event, const char *text)
 
 	default:
 		freyja_print("handleTextEvent(%i, '%s'): Unhandled event.", event, text);
+	}
+}
+
+
+void FreyjaControl::eOpenModel(char *filename)
+{
+	if (LoadModel(filename))
+	{
+		char title[1024];
+		snprintf(title, 1024, "%s - Freyja", filename);
+		freyja_set_main_window_title(title);
+		AddRecentFilename(filename);
+	}
+}
+
+
+void FreyjaControl::eSaveModel(char *filename, char *extension)
+{
+	if (SaveModel(filename, extension))
+	{
+		// This was commented out... it shouldn't matter if it 'overwrites'
+		char title[1024];
+		snprintf(title, 1024, "%s - Freyja", filename);
+		freyja_set_main_window_title(title);
+		AddRecentFilename(filename);
 	}
 }
 
@@ -4814,6 +4842,17 @@ void FreyjaControl::CreateListener(const char *name, MethodPtr1s ptr)
 	ResourceEventDelegate::add(name, d);
 }
 
+
+void FreyjaControl::CreateListener(const char *name, MethodPtr2s ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg2<FreyjaControl, char*, char*>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Non-class methods, callbacks, and wrappers
+//////////////////////////////////////////////////////////////////////////
 
 int load_texture(const char *filename)
 {

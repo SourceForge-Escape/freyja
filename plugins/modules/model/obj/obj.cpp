@@ -189,7 +189,7 @@ int freyja_model__obj_export(char *filename)
 		long polygonCount = freyjaGetMeshPolygonCount(meshIndex);
 		long map = -1, grp = -1;
 
-		w.Print("\ng %s\n", i, freyjaGetMeshNameString(meshIndex));
+		w.Print("\ng %s\n", freyjaGetMeshNameString(meshIndex));
 
 		/* Vertices */
 		w.Print("\n# vertexCount %li\n", vertexCount);

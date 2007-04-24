@@ -6,6 +6,8 @@
 
  Dancer RC6 
  20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Crash fix for OBJ plugin export
+ - Model Open/Save changed to method delegates
  - Removed header install from install rules ( for -dev package separation )
  - Got a bug tracking system for free ( yay )
  - Bone name rendering toggle.

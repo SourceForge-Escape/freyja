@@ -96,6 +96,18 @@ public:
 	}
 
 
+	virtual bool action(char *value, char *value2)
+	{
+		if (mDelegate)
+		{
+			ArgList2<char *, char *> arg(value, value2);
+			mDelegate->Execute(arg);
+		}
+
+		return false;
+	}
+
+
 private:
 
 	MethodDelegate *mDelegate;
