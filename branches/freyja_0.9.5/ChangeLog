@@ -6,6 +6,7 @@
 
  Dancer RC6 
  20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for bad mesh creation from 'sheet'
  - Crash fix for OBJ plugin export
  - Model Open/Save changed to method delegates
  - Removed header install from install rules ( for -dev package separation )

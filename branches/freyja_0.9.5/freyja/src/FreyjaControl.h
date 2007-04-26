@@ -574,7 +574,7 @@ class FreyjaControl : public Control
 	// FIXME: This stuff from the old code merge at least needs to be 
 	// broken into remaining classes 
 	void SetFlag(options_t flag, bool t) 
-	{ (t) ? mFlags |= flag : mFlags ^= flag; }
+	{ (t) ? mFlags |= flag : mFlags ^= flag; } // &= ~t;?
 
 
 	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
