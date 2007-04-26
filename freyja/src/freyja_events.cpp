@@ -1307,6 +1307,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	// Not implemented or removed misc events
 	//ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNoImplementation);
+	ResourceEventCallback2::add("eBezierPolygonPatch", &eNoImplementation);
 	ResourceEventCallback2::add("eSelectAll", &eNoImplementation);
 	ResourceEventCallback2::add("eShaderSlotLoad", &eNoImplementation);
 	ResourceEventCallback2::add("eOpenFileTextureB", &eNoImplementation);

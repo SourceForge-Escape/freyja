@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "mgtk_events.h"
 #include "Resource.h"
 
 
@@ -181,6 +182,44 @@ void symbol_enforce_type(arg_list_t **a, int type)
 {
 	*a = symbol();
 	arg_enforce_type(a, type);
+}
+
+
+void symbol_enforce_type_assert(arg_list_t **a, int type)
+{
+	*a = symbol();
+	arg_enforce_type_assert(a, type);
+}
+
+
+void arg_enforce_type_assert(arg_list_t **a, int type)
+{
+	if (!(*a))
+		return;
+
+	if (type & (*a)->type)
+		return;
+
+	MGTK_ASSERTMSG(false, 
+
+						"MLISP %s:%i\n\tType mismatch expected '%s', not '%s'\n\t(%s)\n", 
+
+						mlisp_get_filename(), mlisp_get_line_num(), 
+
+						((type & INT) ? "int" :
+						 (type & FLOAT) ? "float" :
+						 (type & FUNC) ? "func" :
+						 (type & CSTRING) ? "string" : "adt"),
+
+						(((*a)->type & INT) ? "int" :
+						 ((*a)->type & FLOAT) ? "float" :
+						 ((*a)->type & FUNC) ? "func" :
+						 ((*a)->type & CSTRING) ? "string" : "adt"),
+
+						((*a)->type == CSTRING) ? (char*)((*a)->data) : "?"
+						);
+
+	delete_arg(a);
 }
 
 

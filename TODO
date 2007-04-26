@@ -20,6 +20,8 @@
 
  * Polygon generators using new backend ( legacy removal depends on this. )
 
+ * Add the simple Bezier patch polygon mesh generator back.
+
  * Query dialog UI uses internal events + symbols for values
 
  * Skeletal animation refactor

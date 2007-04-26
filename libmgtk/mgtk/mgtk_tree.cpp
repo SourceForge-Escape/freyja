@@ -130,12 +130,12 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 
 	// Read in an event id
 	arg_list_t *event = symbol();
-	arg_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	arg_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
 	arg_list_t *event2 = symbol();
-	arg_enforce_type(&event2, INT);
-	MGTK_ASSERTMSG(event2, "event2 == INT");
+	arg_enforce_type_assert(&event2, INT);
+	//MGTK_ASSERTMSG(event2, "event2 == INT");
 
 	if (!event || !event2)
 	{

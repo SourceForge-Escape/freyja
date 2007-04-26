@@ -74,12 +74,14 @@ typedef struct arg_stack_s
 (a && a->data && a->type == CSTRING) ? (char *)a->data : ""
 
 
+void symbol_enforce_type_assert(arg_list_t **a, int type);
 void symbol_enforce_type(arg_list_t **a, int type);
 void delete_arg(arg_list_t **a);
 char *get_string(arg_list_t *a);
 float get_float(arg_list_t *a);
 int get_int(arg_list_t *a);
 void new_adt(arg_list_t **a, int type, void *data);
+void arg_enforce_type_assert(arg_list_t **a, int type);
 void arg_enforce_type(arg_list_t **a, int type);
 arg_list_t *symbol();
 char mlisp_peek_for_vargs();
