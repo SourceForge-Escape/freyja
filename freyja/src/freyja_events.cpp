@@ -944,7 +944,32 @@ void eGenerateCircle()
 												   FreyjaControl::mInstance->GetGenMeshCount(),
 													1, 64, 1, 1);
 
+	extern index_t freyjaMeshCreateCircleQuad(vec3_t origin, vec_t radius, uint32 count);
+
 	freyjaMeshCreateCircle(v.mVec, r, count);
+	FreyjaControl::mInstance->Dirty();
+}
+
+
+void eGenerateRing()
+{
+	hel::Vec3 v;
+	vec_t r = mgtk_create_query_dialog_float("gtk-dialog-question",
+											 "Radius?",						  
+											 FreyjaControl::mInstance->GetGenMeshHeight(), 
+											 0.5f, 64.0f, 1, 3);
+
+	int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+												   "How many parititions?",
+												   FreyjaControl::mInstance->GetGenMeshCount(),
+													1, 64, 1, 1);
+
+	int rings = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+													"How many rings?",
+													1,
+													1, 64, 1, 1);
+
+	freyjaMeshCreateRing(v.mVec, r, count, rings+1);
 	FreyjaControl::mInstance->Dirty();
 }
 
@@ -1205,6 +1230,7 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eSelect", &eSelect);
 	ResourceEventCallback::add("eUnselect", &eUnselect);
 
+	ResourceEventCallback::add("eGenerateRing", &eGenerateRing);
 	ResourceEventCallback::add("eGenerateCircle", &eGenerateCircle);
 	ResourceEventCallback::add("eGeneratePlane", &eGeneratePlane);
 	ResourceEventCallback::add("eGenerateCube", &eGenerateCube);

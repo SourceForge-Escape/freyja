@@ -339,17 +339,20 @@
 		(tab "Create" eNone		
 			(hbox 0 1 0 1 1	
 			(toolbar
-				(toolbar_button "24x24/cube.png"	" "	
-					"Polygon cube"	eEvent	eGenerateCube)
-
 				(toolbar_button "24x24/plane.png"	" "
 					"Polygon plane"	eEvent	eGeneratePlane)
 
-				(toolbar_button "24x24/tube.png"	" "
-					"Polygon tube"	eEvent	eGenerateTube)
+				(toolbar_button "24x24/circle.png"	" "
+					"Polygon ring" eEvent	eGenerateRing)
 
 				(toolbar_button "24x24/circle.png"	" "
 					"Polygon circle" eEvent	eGenerateCircle)
+
+				(toolbar_button "24x24/cube.png"	" "	
+					"Polygon cube"	eEvent	eGenerateCube)
+
+				(toolbar_button "24x24/tube.png"	" "
+					"Polygon tube"	eEvent	eGenerateTube)
 
 				(toolbar_button "24x24/cone.png"	" "
 					"Polygon cone" eEvent	eGenerateCone)
