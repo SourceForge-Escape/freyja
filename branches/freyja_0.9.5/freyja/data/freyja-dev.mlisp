@@ -339,10 +339,10 @@
 		(tab "Create" eNone		
 			(hbox 0 1 0 1 1	
 			(toolbar
-				(toolbar_button "24x24/plane.png"	" "
+				(toolbar_button "24x24/sheet.png"	" "
 					"Polygon plane"	eEvent	eGeneratePlane)
 
-				(toolbar_button "24x24/circle.png"	" "
+				(toolbar_button "24x24/ring.png"	" "
 					"Polygon ring" eEvent	eGenerateRing)
 
 				(toolbar_button "24x24/circle.png"	" "

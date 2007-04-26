@@ -6,6 +6,7 @@
 
  Dancer RC6 
  20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - New icons for ring, circle, cube, sheet
  - New 'ring' mesh generator
  - New 'pinwheel' circle mesh generator ( legacy removal dep )
  - Fix for bad mesh creation from 'sheet'
