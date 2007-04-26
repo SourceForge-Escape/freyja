@@ -102,6 +102,25 @@ unsigned char mgtk_assert(const char *file, unsigned int line,
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout or gPrinter
  ------------------------------------------------------*/
+
+int mgtk_execute_query_dialog(const char *dialog);
+/*------------------------------------------------------
+ * Pre  : <dialog> is a valid registered querydialog symbol 
+ * Post : Executes query dialog of given symbol 
+ ------------------------------------------------------*/
+
+float mgtk_get_query_dialog_float(const char *dialog, const char *symbol);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns <symbol> value if found in <dialog> or 0.0f
+ ------------------------------------------------------*/
+
+int mgtk_get_query_dialog_int(const char *dialog, const char *symbol);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns <symbol> value if found in <dialog> or 0
+ ------------------------------------------------------*/
+
 }
 
 

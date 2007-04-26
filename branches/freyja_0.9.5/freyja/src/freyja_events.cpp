@@ -914,20 +914,22 @@ void eGenerateCube()
 
 void eGeneratePlane()
 {
-	int rows = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-												   "How many rows?",
-												   1, 1, 64, 
-												   1, 1);
-	
-	int cols = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-												   "How many columns?",
-												   1, 1, 64, 
-												   1, 1);
-	
-	vec_t size = FreyjaControl::mInstance->GetGenMeshHeight() * 4;
-	hel::Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
-	freyjaMeshCreateSheet(v.mVec, size, rows, cols);
-	FreyjaControl::mInstance->Dirty();
+	const char *dialog = "GenerateSheetDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
+
+	if (ok)
+	{
+		int rows = mgtk_get_query_dialog_int(dialog, "rows");
+		int cols = mgtk_get_query_dialog_int(dialog, "cols");
+		vec_t size = mgtk_get_query_dialog_float(dialog, "size");
+
+		//FREYJA_ASSERTMSG(0, "%i %i %f", rows, cols, size);
+
+		size *= 4;
+		hel::Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
+		freyjaMeshCreateSheet(v.mVec, size, rows, cols);
+		FreyjaControl::mInstance->Dirty();		
+	}
 }
 
 
@@ -953,24 +955,21 @@ void eGenerateCircle()
 
 void eGenerateRing()
 {
-	hel::Vec3 v;
-	vec_t r = mgtk_create_query_dialog_float("gtk-dialog-question",
-											 "Radius?",						  
-											 FreyjaControl::mInstance->GetGenMeshHeight(), 
-											 0.5f, 64.0f, 1, 3);
+	const char *dialog = "GenerateRingDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
 
-	int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-												   "How many parititions?",
-												   FreyjaControl::mInstance->GetGenMeshCount(),
-													1, 64, 1, 1);
+	if (ok)
+	{
+		int rings = mgtk_get_query_dialog_int(dialog, "rings");
+		int count = mgtk_get_query_dialog_int(dialog, "count");
+		vec_t r = mgtk_get_query_dialog_float(dialog, "radius");
+		hel::Vec3 v;
 
-	int rings = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-													"How many rings?",
-													1,
-													1, 64, 1, 1);
+		//FREYJA_ASSERTMSG(0, "%i %i %f", rings, count, r);
 
-	freyjaMeshCreateRing(v.mVec, r, count, rings+1);
-	FreyjaControl::mInstance->Dirty();
+		freyjaMeshCreateRing(v.mVec, r, count, rings+1);
+		FreyjaControl::mInstance->Dirty();		
+	}
 }
 
 

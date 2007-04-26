@@ -933,6 +933,8 @@
 ;; Dialogs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Confirmation dialogs
+
 (confirmation_dialog	"CloseNewFileDialog"
 	"gtk-dialog-question"
 	"Creating a new model will close the current model."
@@ -1012,12 +1014,25 @@
 	"gtk-cancel"	"_Cancel"	"gtk-quit"	"_Exit")
 
 
-;(query_dialog	"GeneratePlaneDialog"
-;	"gtk-dialog-question"
-;	(prompt_float "How many rows?" 1 1 64 1 1)
-;	(prompt_float "How many columns?" 1 1 64 1 1)
-;	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Ok")
+;; Query Dialogs
+(query_dialog	"GenerateSheetDialog"
+	"gtk-dialog-question"
+	"Sheet mesh generation."
+	"int"	"rows"	"How many rows?   "	1 1 64  ; default min max
+	"int"	"cols"	"How many columns?"	1 1 64  ; default min max
+	"float"	"size"	"How large?       "	8 1 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
 
+(query_dialog	"GenerateRingDialog"
+	"gtk-dialog-question"
+	"Ring mesh generation."
+	"int"	"rings"	"How many rings?   "	1 1 64  ; default min max
+	"int"	"count"	"How many sections?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 1 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+
+;; Old event id based dialogs
 
 (dialog "Freyja :: Help" eHelpDialog 0
 (vbox 0 0 0 0 0

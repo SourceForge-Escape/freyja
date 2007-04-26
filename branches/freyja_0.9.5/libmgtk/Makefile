@@ -199,6 +199,7 @@ targets: $(TARGETS)
 
 PROG_OBJS = \
 	$(BUILDDIR)/ConfirmationDialog.o \
+	$(BUILDDIR)/QueryDialog.o \
 	$(BUILDDIR)/MLisp.o \
 	$(BUILDDIR)/Resource.o \
 	$(BUILDDIR)/ResourceEvent.o \
