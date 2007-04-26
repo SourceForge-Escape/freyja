@@ -934,7 +934,17 @@ void eGeneratePlane()
 void eGenerateCircle()
 {
 	hel::Vec3 v;
-	freyjaGenerateCircleMesh(v.mVec, FreyjaControl::mInstance->GetGenMeshCount());
+	vec_t r = mgtk_create_query_dialog_float("gtk-dialog-question",
+											 "Radius?",						  
+											 FreyjaControl::mInstance->GetGenMeshHeight(), 
+											 0.5f, 64.0f, 1, 3);
+
+	int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
+												   "How many parititions?",
+												   FreyjaControl::mInstance->GetGenMeshCount(),
+													1, 64, 1, 1);
+
+	freyjaMeshCreateCircle(v.mVec, r, count);
 	FreyjaControl::mInstance->Dirty();
 }
 

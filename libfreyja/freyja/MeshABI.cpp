@@ -2257,10 +2257,65 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 }
 
 
+// 'Pinwheel' circle
 index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count)
 {
-	MSTL_MSG("Calling stub function");
-	return INDEX_INVALID;
+	if (count < 3)
+		count = 3;
+
+	index_t mesh = freyjaMeshCreate();
+
+	/* Generate geometery */
+	hel::Vec3 n(0.0f, 1.0f, 0.0f);
+	hel::Vec3 o(origin);
+	index_t center = freyjaMeshVertexCreate3fv(mesh, o.mVec);
+	freyjaMeshVertexNormal3fv(mesh, center, n.mVec);
+	index_t centerUV = freyjaMeshTexCoordCreate2f(mesh, 0.5f, 0.5f);
+	mstl::Vector<index_t> vertices, texcoords;
+	const vec_t invCount = 1.0f / (float)count;
+
+	for (uint32 i = 0; i < count; ++i)
+	{
+		hel::Vec3 u;
+		helSinCosf(helDegToRad(360.0f * ((float)i * invCount)), &u.mZ, &u.mX);
+
+		index_t t = freyjaMeshTexCoordCreate2f(mesh, 
+											   0.5f - u.mX * 0.5f, 
+											   0.5f - u.mZ * 0.5f);
+		texcoords.push_back(t);
+
+		u *= radius;
+		u += o;
+
+		index_t v = freyjaMeshVertexCreate3fv(mesh, u.mVec);
+		freyjaMeshVertexNormal3fv(mesh, v, n.mVec);
+		vertices.push_back(v);
+	}
+
+
+	// i = 0
+	index_t face = freyjaMeshPolygonCreate(mesh);
+	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonAddTexCoord1i(mesh, face, centerUV);
+	freyjaMeshPolygonAddVertex1i(mesh, face, center);
+	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[0]);
+	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[0]);
+	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[count-1]);
+	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[count-1]);
+
+	for (uint32 i = 1; i < count; ++i)
+	{
+		index_t face = freyjaMeshPolygonCreate(mesh);
+		freyjaMeshPolygonMaterial(mesh, face, 0);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, centerUV);
+		freyjaMeshPolygonAddVertex1i(mesh, face, center);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[i]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[i]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[i-1]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[i-1]);
+	}
+
+	return mesh;
 }
 
 

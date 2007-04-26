@@ -20,6 +20,8 @@
 
  * Polygon generators using new backend ( legacy removal depends on this. )
 
+ * Query dialog UI uses internal events + symbols for values
+
  * Skeletal animation refactor
 	- Fix remaining FK issues
 	- Various joint types: hinge, ball&socket, etc
