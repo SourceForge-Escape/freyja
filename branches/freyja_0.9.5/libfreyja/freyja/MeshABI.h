@@ -536,6 +536,14 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	index_t freyjaMeshCreateRing(vec3_t origin, vec_t radius, uint32 count,
+								 uint32 rings);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Triangular center point circle mesh is created.
+	 *
+	 ------------------------------------------------------*/
+
 	index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count);
 	/*------------------------------------------------------
 	 * Pre  :  

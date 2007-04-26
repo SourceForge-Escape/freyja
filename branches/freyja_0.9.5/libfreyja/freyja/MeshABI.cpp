@@ -2319,6 +2319,145 @@ index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count)
 }
 
 
+// 'Quad' ring
+index_t freyja__tmpMeshCreateRing(vec3_t origin, vec_t radius, uint32 count)
+{
+	if (count < 3)
+		count = 3;
+
+	index_t mesh = freyjaMeshCreate();
+
+	/* Generate geometery */
+	hel::Vec3 n(0.0f, 1.0f, 0.0f);
+	hel::Vec3 o(origin);
+	mstl::Vector<index_t> vertices[2], texcoords[2];
+	const vec_t invCount = 1.0f / (float)count;
+
+	for (uint32 i = 0; i < count; ++i)
+	{
+		hel::Vec3 u;
+		helSinCosf(helDegToRad(360.0f * ((float)i * invCount)), &u.mZ, &u.mX);
+
+		index_t t2 = freyjaMeshTexCoordCreate2f(mesh, 
+											   0.5f - u.mX * 0.5f * 0.5f, 
+											   0.5f - u.mZ * 0.5f * 0.5f);
+		texcoords[1].push_back(t2);
+
+		hel::Vec3 u2(o + u * radius * 0.5f);
+		index_t v2 = freyjaMeshVertexCreate3fv(mesh, u2.mVec);
+		freyjaMeshVertexNormal3fv(mesh, v2, n.mVec);
+		vertices[0].push_back(v2);
+
+		index_t t = freyjaMeshTexCoordCreate2f(mesh, 
+											   0.5f - u.mX * 0.5f, 
+											   0.5f - u.mZ * 0.5f);
+		texcoords[0].push_back(t);
+
+		u *= radius;
+		u += o;
+
+		index_t v = freyjaMeshVertexCreate3fv(mesh, u.mVec);
+		freyjaMeshVertexNormal3fv(mesh, v, n.mVec);
+		vertices[1].push_back(v);
+	}
+
+
+	// i = 0
+	index_t face = freyjaMeshPolygonCreate(mesh);
+	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[0][0]);
+	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[0][count-1]);
+	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[1][count-1]);
+	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[1][0]);
+
+	for (uint32 i = 1; i < count; ++i)
+	{
+		index_t face = freyjaMeshPolygonCreate(mesh);
+		freyjaMeshPolygonMaterial(mesh, face, 0);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[0][i]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[0][i-1]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[1][i-1]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[1][i]);
+	}
+
+	return mesh;
+}
+
+
+// 'Quad' circle
+index_t freyjaMeshCreateRing(vec3_t origin, vec_t radius, 
+							 uint32 count, uint32 rings)
+{
+	if (count < 3)
+		count = 3;
+
+	index_t mesh = freyjaMeshCreate();
+
+	/* Generate geometery */
+	hel::Vec3 n(0.0f, 1.0f, 0.0f);
+	hel::Vec3 o(origin);
+	mstl::Vector<index_t> vertices[rings], texcoords[rings];
+	const vec_t invCount = 1.0f / (float)count;
+	const vec_t invRings = 1.0f / (float)rings;
+
+	for (uint32 i = 0; i < count; ++i)
+	{
+		hel::Vec3 u;
+		helSinCosf(helDegToRad(360.0f * ((float)i * invCount)), &u.mZ, &u.mX);
+
+		for (uint32 j = 0; j < rings; ++j)
+		{
+			vec_t s = 1.0f * ((float)j * invRings);
+
+			if (!j) { s = 1.0f * (0.5f * invRings); }
+
+			index_t t = freyjaMeshTexCoordCreate2f(mesh, 
+												   0.5f - u.mX * 0.5f * s, 
+												   0.5f - u.mZ * 0.5f * s);
+			texcoords[j].push_back(t);
+
+			hel::Vec3 u2(o + u * radius * s);
+			index_t v2 = freyjaMeshVertexCreate3fv(mesh, u2.mVec);
+			freyjaMeshVertexNormal3fv(mesh, v2, n.mVec);
+			vertices[j].push_back(v2);
+		}
+	}
+
+
+	for (uint32 j = 0; j < (rings - 1); ++j)
+	{
+		// i = 0
+		index_t face = freyjaMeshPolygonCreate(mesh);
+		freyjaMeshPolygonMaterial(mesh, face, 0);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j][0]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j][0]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j][count-1]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j][count-1]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j+1][count-1]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j+1][count-1]);
+		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j+1][0]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j+1][0]);
+	
+
+		for (uint32 i = 1; i < count; ++i)
+		{
+			index_t face = freyjaMeshPolygonCreate(mesh);
+			freyjaMeshPolygonMaterial(mesh, face, 0);
+			freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j][i]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j][i]);
+			freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j][i-1]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j][i-1]);
+			freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j+1][i-1]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j+1][i-1]);
+			freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j+1][i]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j+1][i]);
+		}
+	}
+
+	return mesh;
+}
+
+
 index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
 							 uint32 wedges)
 {
