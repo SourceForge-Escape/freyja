@@ -364,7 +364,7 @@
 					"Polygon sphere"	eEvent	eGenerateSphere)
 
 				(toolbar_button "24x24/patch.png"	" "
-					"Polygon patch"	eEvent	eNone)
+					"Polygon patch"	eEvent	eBezierPolygonPatch)
 
 				(toolbar_separator)
 

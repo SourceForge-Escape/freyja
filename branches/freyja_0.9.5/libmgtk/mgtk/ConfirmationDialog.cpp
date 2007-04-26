@@ -111,43 +111,43 @@ arg_list_t *mgtk_rc_confirmation_dialog(arg_list_t *box)
   ConfirmationDialog d;
   arg_list_t *a;
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mName == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mName == CSTRING");
   d.mName = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mDialogIcon == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mDialogIcon == CSTRING");
   d.mDialogIcon = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mInformationMessage == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mInformationMessage == CSTRING");
   d.mInformationMessage = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mQuestionMessage == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mQuestionMessage == CSTRING");
   d.mQuestionMessage = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mCancelIcon == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mCancelIcon == CSTRING");
   d.mCancelIcon = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mCancelText == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mCancelText == CSTRING");
   d.mCancelText = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mAcceptIcon == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mAcceptIcon == CSTRING");
   d.mAcceptIcon = mlisp_get_string(a); 
   delete_arg(&a);
 
-  symbol_enforce_type(&a, CSTRING);
-  MGTK_ASSERTMSG(a, "a.mAacceptText == CSTRING");
+  symbol_enforce_type_assert(&a, CSTRING);
+  //MGTK_ASSERTMSG(a, "a.mAacceptText == CSTRING");
   d.mAcceptText = mlisp_get_string(a); 
   delete_arg(&a);
 

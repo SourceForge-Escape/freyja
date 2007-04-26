@@ -127,11 +127,8 @@ arg_list_t *mgtk_rc_window(arg_list_t *container)
 	GtkWidget *window;
 	char icon_filename[1024];
 
-	symbol_enforce_type(&title, CSTRING);
-	MGTK_ASSERTMSG(title, "title == CSTRING");
-	
-	symbol_enforce_type(&icon, CSTRING);
-	MGTK_ASSERTMSG(icon, "icon == CSTRING");	
+	symbol_enforce_type_assert(&title, CSTRING);
+	symbol_enforce_type_assert(&icon, CSTRING);
 
 	if (title && icon)
 	{
@@ -171,12 +168,10 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 	}
 
 	arg_list_t *width;
-	symbol_enforce_type(&width, INT);
-	MGTK_ASSERTMSG(width, "width == INT");
+	symbol_enforce_type_assert(&width, INT);
 
 	arg_list_t *height;
-	symbol_enforce_type(&height, INT);
-	MGTK_ASSERTMSG(height, "height == INT");
+	symbol_enforce_type_assert(&height, INT);
 
 	if (!width || !height)
 	{
@@ -235,6 +230,7 @@ arg_list_t *mgtk_rc_textview(arg_list_t *box)
 		return NULL;
 	}
 
+	// Optional
 	arg_list_t *s;
 	symbol_enforce_type(&s, CSTRING);
 	//MGTK_ASSERTMSG(s, "s == CSTRING");
@@ -409,23 +405,23 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 		return NULL;
 	}
 
-	symbol_enforce_type(&toggled, INT);
-	MGTK_ASSERTMSG(toggled, "toggled == INT");
+	symbol_enforce_type_assert(&toggled, INT);
+	//MGTK_ASSERTMSG(toggled, "toggled == INT");
 
-	symbol_enforce_type(&icon, CSTRING);
-	MGTK_ASSERTMSG(icon, "icon == CSTRING");
+	symbol_enforce_type_assert(&icon, CSTRING);
+	//MGTK_ASSERTMSG(icon, "icon == CSTRING");
 
-	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING");
+	symbol_enforce_type_assert(&label, CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING");
 
-	symbol_enforce_type(&help, CSTRING);
-	MGTK_ASSERTMSG(help, "help == CSTRING");
+	symbol_enforce_type_assert(&help, CSTRING);
+	//MGTK_ASSERTMSG(help, "help == CSTRING");
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT");
+	symbol_enforce_type_assert(&cmd, INT);
+	//MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (toggled && icon && label && help && event && cmd)
 	{
@@ -491,20 +487,11 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 		return NULL;
 	}
 
-	symbol_enforce_type(&icon, CSTRING);
-	MGTK_ASSERTMSG(icon, "icon == CSTRING");
-	
-	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING");
-	
-	symbol_enforce_type(&help, CSTRING);
-	MGTK_ASSERTMSG(help, "help == CSTRING");
-	
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
-	
-	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT");
+	symbol_enforce_type_assert(&icon, CSTRING);
+	symbol_enforce_type_assert(&label, CSTRING);
+	symbol_enforce_type_assert(&help, CSTRING);
+	symbol_enforce_type_assert(&event, INT);
+	symbol_enforce_type_assert(&cmd, INT);
 
 	if (icon && label && help && event && cmd)
 	{
@@ -558,9 +545,9 @@ arg_list_t *mgtk_rc_summonbox(arg_list_t *box)
 	}
 
 	arg_list_t *name;
-	symbol_enforce_type(&name, CSTRING);
-	MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&name, CSTRING);
+	//MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *ret = NULL;
 
@@ -591,16 +578,16 @@ arg_list_t *mgtk_rc_expander(arg_list_t *box)
 				   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *show;
-	symbol_enforce_type(&show, INT);
-	MGTK_ASSERTMSG(show, "show == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&show, INT);
+	//MGTK_ASSERTMSG(show, "show == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *name = NULL;
 	if (mlisp_peek_for_vargs())
 	{
-		symbol_enforce_type(&name, CSTRING);
-		MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
-					   mlisp_get_filename(), mlisp_get_line_num());
+		symbol_enforce_type_assert(&name, CSTRING);
+		//MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
+		//			   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
 	arg_list_t *ret = NULL;
@@ -666,14 +653,14 @@ arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 		return NULL;
 	}
 
-	symbol_enforce_type(&width, INT);
-	MGTK_ASSERTMSG(width, "width == INT");
+	symbol_enforce_type_assert(&width, INT);
+	//MGTK_ASSERTMSG(width, "width == INT");
 
-	symbol_enforce_type(&height, INT);
-	MGTK_ASSERTMSG(height, "height == INT");
+	symbol_enforce_type_assert(&height, INT);
+	//MGTK_ASSERTMSG(height, "height == INT");
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
 	if (width && height && event)
 	{
@@ -753,12 +740,12 @@ arg_list_t *mgtk_rc_tab(arg_list_t *notebook)
 		return NULL;
 	}
 
-	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&label, CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (label && event)
 	{
@@ -819,25 +806,25 @@ arg_list_t *mgtk_rc_vbox(arg_list_t *box)
 		return NULL;
 	} 
 
-	symbol_enforce_type(&homogeneous, INT);
-	MGTK_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&homogeneous, INT);
+	//MGTK_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&spacing, INT); 
-	MGTK_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&spacing, INT); 
+	//MGTK_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&expand, INT);
-	MGTK_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&expand, INT);
+	//MGTK_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&fill, INT);
-	MGTK_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&fill, INT);
+	//MGTK_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&pading, INT);
-	MGTK_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&pading, INT);
+	//MGTK_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (homogeneous && spacing && expand && fill && pading)
 	{
@@ -877,25 +864,25 @@ arg_list_t *mgtk_rc_hbox(arg_list_t *box)
 		return NULL;
 	}
 
-	symbol_enforce_type(&homogeneous, INT);
-	MGTK_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&homogeneous, INT);
+	//MGTK_ASSERTMSG(homogeneous, "homogeneous == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&spacing, INT); 
-	MGTK_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&spacing, INT); 
+	//MGTK_ASSERTMSG(spacing, "spacing == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&expand, INT);
-	MGTK_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&expand, INT);
+	//MGTK_ASSERTMSG(expand, "expand == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&fill, INT);
-	MGTK_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&fill, INT);
+	//MGTK_ASSERTMSG(fill, "fill == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&pading, INT);
-	MGTK_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&pading, INT);
+	//MGTK_ASSERTMSG(pading, "pading == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 
 	if (homogeneous && spacing && expand && fill && pading)
@@ -934,17 +921,17 @@ arg_list_t *mgtk_rc_dialog(arg_list_t *box)
 
 	// NOTE: box isn't used b/c in this implementation dialog is a window
 	//       which is a top level container!
-	symbol_enforce_type(&title, CSTRING);
-	MGTK_ASSERTMSG(title, "title == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&title, CSTRING);
+	//MGTK_ASSERTMSG(title, "title == CSTRING\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&eOpen, INT);
-	MGTK_ASSERTMSG(eOpen, "eOpen == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&eOpen, INT);
+	//MGTK_ASSERTMSG(eOpen, "eOpen == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	symbol_enforce_type(&eClose, INT); 
-	MGTK_ASSERTMSG(eClose, "eClose == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&eClose, INT); 
+	//MGTK_ASSERTMSG(eClose, "eClose == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (title && eOpen && eClose)
 	{
@@ -987,9 +974,9 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 		return NULL;
 	}
 
-	symbol_enforce_type(&type, INT);
-	MGTK_ASSERTMSG(type, "type == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&type, INT);
+	//MGTK_ASSERTMSG(type, "type == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (type)
 	{
@@ -1024,21 +1011,21 @@ arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 	}
 
 	arg_list_t *label = NULL;
-	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&label, CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *cmd = NULL;
-	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&cmd, INT);
+	//MGTK_ASSERTMSG(cmd, "cmd == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *event = NULL;
 	if (mlisp_peek_for_vargs())
 	{
-		symbol_enforce_type(&event, INT);
-		MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+		symbol_enforce_type_assert(&event, INT);
+		//MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+		//		   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
 	arg_list_t *ret = NULL;
@@ -1094,11 +1081,11 @@ arg_list_t *mgtk_rc_colorbutton(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT");
+	symbol_enforce_type_assert(&cmd, INT);
+	//MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (event && cmd)
 	{
@@ -1141,14 +1128,14 @@ arg_list_t *mgtk_rc_button(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING");
+	symbol_enforce_type_assert(&label, CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING");
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT");
+	symbol_enforce_type_assert(&cmd, INT);
+	//MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (label && event && cmd)
 	{
@@ -1202,14 +1189,14 @@ arg_list_t *mgtk_rc_hslider(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	symbol_enforce_type(&min, INT);
-	MGTK_ASSERTMSG(min, "min == INT");
+	symbol_enforce_type_assert(&min, INT);
+	//MGTK_ASSERTMSG(min, "min == INT");
 
-	symbol_enforce_type(&max, INT);
-	MGTK_ASSERTMSG(max, "max == INT");
+	symbol_enforce_type_assert(&max, INT);
+	//MGTK_ASSERTMSG(max, "max == INT");
 
 	if (event && min && max)
 	{
@@ -1253,8 +1240,8 @@ arg_list_t *mgtk_rc_textbox(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
 	if (event)
 	{
@@ -1338,6 +1325,7 @@ arg_list_t *mgtk_rc_label2(arg_list_t *container)
 		return NULL;
 	}
 
+	// optional
 	symbol_enforce_type(&label, CSTRING);
 
 	if (label)
@@ -1372,14 +1360,14 @@ arg_list_t *mgtk_rc_label(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING");
+	symbol_enforce_type_assert(&label, CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING");
 
-	symbol_enforce_type(&x_align, FLOAT);
-	MGTK_ASSERTMSG(x_align, "x_align == FLOAT");
+	symbol_enforce_type_assert(&x_align, FLOAT);
+	//MGTK_ASSERTMSG(x_align, "x_align == FLOAT");
 
-	symbol_enforce_type(&y_align, FLOAT);
-	MGTK_ASSERTMSG(y_align, "y_align == FLOAT");
+	symbol_enforce_type_assert(&y_align, FLOAT);
+	//MGTK_ASSERTMSG(y_align, "y_align == FLOAT");
 
 	if (label && x_align && y_align)
 	{
@@ -1418,11 +1406,11 @@ arg_list_t *mgtk_rc_icon(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&name, CSTRING);
-	MGTK_ASSERTMSG(name, "name == CSTRING");
+	symbol_enforce_type_assert(&name, CSTRING);
+	//MGTK_ASSERTMSG(name, "name == CSTRING");
 	
-	symbol_enforce_type(&size, INT);
-	MGTK_ASSERTMSG(size, "size == INT");
+	symbol_enforce_type_assert(&size, INT);
+	//MGTK_ASSERTMSG(size, "size == INT");
 	
 	if (name && size)
 	{
@@ -1480,17 +1468,17 @@ arg_list_t *mgtk_rc_spinbutton(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&start, INT | FLOAT);
-	MGTK_ASSERTMSG(start, "start == NUMERIC");
+	symbol_enforce_type_assert(&start, INT | FLOAT);
+	//MGTK_ASSERTMSG(start, "start == NUMERIC");
 
-	symbol_enforce_type(&min,   INT | FLOAT);
-	MGTK_ASSERTMSG(min, "min == NUMERIC");
+	symbol_enforce_type_assert(&min,   INT | FLOAT);
+	//MGTK_ASSERTMSG(min, "min == NUMERIC");
 
-	symbol_enforce_type(&max,   INT | FLOAT);
-	MGTK_ASSERTMSG(max, "max == NUMERIC");
+	symbol_enforce_type_assert(&max,   INT | FLOAT);
+	//MGTK_ASSERTMSG(max, "max == NUMERIC");
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
 	if (start && min && max && event)
 	{
@@ -1556,29 +1544,29 @@ arg_list_t *mgtk_rc_spinbutton2(arg_list_t *container)
 		return NULL;
 	}
 
-	symbol_enforce_type(&start, INT | FLOAT);
-	MGTK_ASSERTMSG(start, "start == NUMERIC");
+	symbol_enforce_type_assert(&start, INT | FLOAT);
+	//MGTK_ASSERTMSG(start, "start == NUMERIC");
 
-	symbol_enforce_type(&min,   INT | FLOAT);
-	MGTK_ASSERTMSG(min, "min == NUMERIC");
+	symbol_enforce_type_assert(&min,   INT | FLOAT);
+	//MGTK_ASSERTMSG(min, "min == NUMERIC");
 
-	symbol_enforce_type(&max,   INT | FLOAT);
-	MGTK_ASSERTMSG(max, "max == NUMERIC");
+	symbol_enforce_type_assert(&max,   INT | FLOAT);
+	//MGTK_ASSERTMSG(max, "max == NUMERIC");
 
-	symbol_enforce_type(&step, INT | FLOAT);
-	MGTK_ASSERTMSG(step, "step == NUMERIC");
+	symbol_enforce_type_assert(&step, INT | FLOAT);
+	//MGTK_ASSERTMSG(step, "step == NUMERIC");
 
-	symbol_enforce_type(&page, INT | FLOAT);
-	MGTK_ASSERTMSG(page, "page == NUMERIC");
+	symbol_enforce_type_assert(&page, INT | FLOAT);
+	//MGTK_ASSERTMSG(page, "page == NUMERIC");
 
-	symbol_enforce_type(&page_sz, INT | FLOAT);
-	MGTK_ASSERTMSG(page_sz, "page_sz == NUMERIC");	
+	symbol_enforce_type_assert(&page_sz, INT | FLOAT);
+	//MGTK_ASSERTMSG(page_sz, "page_sz == NUMERIC");	
 
-	symbol_enforce_type(&digit, INT);
-	MGTK_ASSERTMSG(digit, "digit == INT");
+	symbol_enforce_type_assert(&digit, INT);
+	//MGTK_ASSERTMSG(digit, "digit == INT");
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
 	if (start && min && max && event && step && page && page_sz && digit)
 	{
@@ -1671,11 +1659,11 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 		return NULL;
 	}
 
-	symbol_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	symbol_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT");
+	symbol_enforce_type_assert(&cmd, INT);
+	//MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (event && cmd)
 	{
@@ -1751,13 +1739,15 @@ arg_list_t *mgtk_func_toggle_set(arg_list_t *args)
 {
 	arg_list_t *event, *val;
 
-	event = symbol();
-	arg_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//event = symbol();
+	//arg_enforce_type(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	val = symbol();
-	arg_enforce_type(&val, INT);
-	MGTK_ASSERTMSG(val, "val == INT");
+	symbol_enforce_type_assert(&val, INT);
+	//val = symbol();
+	//arg_enforce_type(&val, INT);
+	//MGTK_ASSERTMSG(val, "val == INT");
 
 	if (event && val)
 	{
@@ -1795,17 +1785,20 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 		return NULL;
 	}
 
-	text = symbol();
-	arg_enforce_type(&text,  CSTRING);
-	MGTK_ASSERTMSG(text, "text == CSTRING");
+	symbol_enforce_type_assert(&text,  CSTRING);
+	//text = symbol();
+	//arg_enforce_type(&text,  CSTRING);
+	//MGTK_ASSERTMSG(text, "text == CSTRING");
 
-	event = symbol();
-	arg_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT");
+	symbol_enforce_type_assert(&event, INT);
+	//event = symbol();
+	//arg_enforce_type(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT");
 
-	cmd = symbol();
-	arg_enforce_type(&cmd, INT);
-	MGTK_ASSERTMSG(cmd, "cmd == INT");
+	symbol_enforce_type_assert(&cmd, INT);
+	//cmd = symbol();
+	//arg_enforce_type(&cmd, INT);
+	//MGTK_ASSERTMSG(cmd, "cmd == INT");
 
 	if (text && event && cmd)
 	{
@@ -1966,17 +1959,19 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 		return NULL;
 	}
 
-	arg_list_t *ret = NULL;
+	arg_list_t *ret = NULL, *label, *event;
 
-	arg_list_t *label = symbol();
-	arg_enforce_type(&label,  CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&label,  CSTRING);
+	//arg_list_t *label = symbol();
+	//arg_enforce_type(&label,  CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
-	arg_list_t *event = symbol();
-	arg_enforce_type(&event, INT);
-	MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	symbol_enforce_type_assert(&event, INT);
+	//arg_list_t *event = symbol();
+	//arg_enforce_type(&event, INT);
+	//MGTK_ASSERTMSG(event, "event == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	arg_list_t *subevent = NULL;
 	arg_list_t *icon = NULL;
@@ -1986,17 +1981,19 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 
 		if (mlisp_is_cstring(icon))
 		{
-			arg_enforce_type(&icon, CSTRING);
-			MGTK_ASSERTMSG(icon, "icon|accel == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+			arg_enforce_type_assert(&icon, CSTRING);
+			//arg_enforce_type(&icon, CSTRING);
+			//MGTK_ASSERTMSG(icon, "icon|accel == CSTRING\nMLISP (%s:%i)", 
+			//	   mlisp_get_filename(), mlisp_get_line_num());
 		}
 		else
 		{
 			subevent = icon;
 			icon = NULL;
-			arg_enforce_type(&subevent, INT);
-			MGTK_ASSERTMSG(subevent, "subevent == INT\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+			arg_enforce_type_assert(&subevent, INT);
+			//arg_enforce_type(&subevent, INT);
+			//MGTK_ASSERTMSG(subevent, "subevent == INT\nMLISP (%s:%i)", 
+			//	   mlisp_get_filename(), mlisp_get_line_num());
 		}
 	}
 
@@ -2005,9 +2002,9 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 	{
 		accel = icon;
 		icon = symbol();
-		arg_enforce_type(&icon, CSTRING);
-		MGTK_ASSERTMSG(icon, "icon == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+		arg_enforce_type_assert(&icon, CSTRING);
+		//MGTK_ASSERTMSG(icon, "icon == CSTRING\nMLISP (%s:%i)", 
+		//		   mlisp_get_filename(), mlisp_get_line_num());
 	}
 
 	if (label && event)
@@ -2079,9 +2076,9 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 		label = symbol();
 	}
 
-	arg_enforce_type(&label, CSTRING);
-	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
-				   mlisp_get_filename(), mlisp_get_line_num());
+	arg_enforce_type_assert(&label, CSTRING);
+	//MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
 
 	if (label)
 	{
