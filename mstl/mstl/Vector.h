@@ -80,8 +80,17 @@ public:
 
 		if ( v.mData != NULL && mReserve )
 		{
+#if 0
 			mData = new Object[mReserve];
-			memcpy(mData, v.mData, sizeof(Object) * mReserve);			
+			memcpy(mData, v.mData, sizeof(Object) * mReserve);
+#else // FIX for special class operator = usage
+			mData = new Object[mReserve];
+
+			for (unsigned int i = 0; i < mReserve; ++i)
+			{
+				mData[i] = v.mData[i];
+			}
+#endif
 		}
 
 		return *this;

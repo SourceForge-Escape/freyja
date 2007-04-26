@@ -14,6 +14,8 @@
 	- Rotation modifier not WYSIWYG.
 	- Transform has a 'pop' or 'jump' in model and mesh modes
 
+ * memcpy() flag for mstl::Vector ( base types )
+
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 
  * Add back ray picking for UV faces to the UV editor.

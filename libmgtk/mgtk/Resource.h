@@ -73,6 +73,10 @@ typedef struct arg_stack_s
 #define mlisp_get_string(a) \
 (a && a->data && a->type == CSTRING) ? (char *)a->data : ""
 
+#define mlisp_get_numeric(a) \
+(a) ? \
+((a->type == INT) ? get_int(a) : \
+ (a->type == FLOAT) ? get_float(a) : 0) : 0
 
 void symbol_enforce_type_assert(arg_list_t **a, int type);
 void symbol_enforce_type(arg_list_t **a, int type);
