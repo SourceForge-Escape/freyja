@@ -989,6 +989,7 @@ void eMeshGenerateNormals()
 	FreyjaControl::mInstance->Dirty();
 }
 
+// This should be moved back into control with a -W/Int prefix
 void eMoveObject()
 {
 	FreyjaControl::mInstance->eMoveObject(1);

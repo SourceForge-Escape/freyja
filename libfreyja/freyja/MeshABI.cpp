@@ -2029,7 +2029,7 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 
 	{
 		char name[64];
-		snprintf(name, 63, "Sheet%i", mesh);
+		snprintf(name, 63, "Sheet-%i", mesh);
 		name[63] = '\0';
 		freyjaMeshName1s(mesh, name);
 	}
@@ -2038,6 +2038,7 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 	Vec3 p, o(origin), n(0.0f, 1.0f, 0.0f);
 	vec_t invRows = 1.0f / rows, invCols = 1.0f / columns;
 	vec_t u = 0.0f, v = 0.0f;
+	mstl::Vector<index_t> uvs;
 
 	for (uint32 i = 0; i < rows; ++i)
 	{
@@ -2050,7 +2051,8 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 			p = o + Vec3(size * u, 0.0f, size * v);
 			index_t vertex = freyjaMeshVertexCreate3fv(mesh, p.mVec);
 			freyjaMeshVertexNormal3fv(mesh, vertex, n.mVec);
-			freyjaMeshTexCoordCreate2f(mesh, u, v);
+			index_t idx = freyjaMeshTexCoordCreate2f(mesh, u, v);
+			uvs.push_back(idx);
 		}
 	}
 
@@ -2073,27 +2075,30 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 			freyjaMeshPolygonAddVertex1i(mesh, face, b);
 			freyjaMeshPolygonAddVertex1i(mesh, face, c);
 			freyjaMeshPolygonAddVertex1i(mesh, face, d);
-			freyjaMeshPolygonAddTexCoord1i(mesh, face, a);
-			freyjaMeshPolygonAddTexCoord1i(mesh, face, b);
-			freyjaMeshPolygonAddTexCoord1i(mesh, face, c);
-			freyjaMeshPolygonAddTexCoord1i(mesh, face, d);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[a]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[b]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[c]);
+			freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[d]);
 			freyjaMeshPolygonMaterial(mesh, face, material);
 		}
+	}
 
-		a = columns + columns * i;
-		b = columns + columns * i + (columns - 1);
-		c = b - columns;
-		d = a - columns;
-		
+	for (uint32 i = 0; i < (rows - 1); ++i)
+	{
+		a = (columns * i);
+		b = a + 1;
+		c = b + columns;
+		d = a + columns;
+
 		index_t face = freyjaMeshPolygonCreate(mesh);
 		freyjaMeshPolygonAddVertex1i(mesh, face, a);
 		freyjaMeshPolygonAddVertex1i(mesh, face, b);
 		freyjaMeshPolygonAddVertex1i(mesh, face, c);
 		freyjaMeshPolygonAddVertex1i(mesh, face, d);
-		freyjaMeshPolygonAddTexCoord1i(mesh, face, a);
-		freyjaMeshPolygonAddTexCoord1i(mesh, face, b);
-		freyjaMeshPolygonAddTexCoord1i(mesh, face, c);
-		freyjaMeshPolygonAddTexCoord1i(mesh, face, d);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[a]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[b]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[c]);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, uvs[d]);
 		freyjaMeshPolygonMaterial(mesh, face, material);
 	}
 
