@@ -58,6 +58,11 @@ Mesh::Mesh() :
 	mVertices(),
 	mWeights()
 {
+	mVertexPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
+	mNormalPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
+	mColorPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
+	mTexCoordPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
+
 	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
 	mName[mNameSize-1] = 0;
 	

@@ -90,7 +90,7 @@ BASE_DEFS= \
 	-I$(SRC_DIR) $(CONFIGURE_CFLAGS) -Wno-deprecated \
 	$(shell pkg-config --cflags $(PKG_CONFIG_CFLAGS))
 
-BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
+BASE_CFLAGS=-Wall -I$(SRC_DIR) \
 		-DPROJECT_URL=\"\\\"$(URL)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DVERSION=\"\\\"$(VERSION)\\\"\" \
@@ -143,20 +143,20 @@ all: debug release prof
 debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS)" \
+	CFLAGS="-fPIC $(DEBUG_CFLAGS) $(GTK2_CFLAGS)" \
 	SHLIBLDFLAGS="$(SHLIBLDFLAGS)"
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS)"
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
-	CFLAGS="$(RELEASE_CFLAGS) $(GTK2_CFLAGS)" \
+	CFLAGS="-fPIC $(RELEASE_CFLAGS) $(GTK2_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS)"
 
 prof: 
 	@-mkdir -p $(BUILD_PROF_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_PROF_DIR) \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) -DNDEBUG -pg" \
+	CFLAGS="-fPIC $(DEBUG_CFLAGS) $(GTK2_CFLAGS) -DNDEBUG -pg" \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) -pg"
 
 
@@ -186,7 +186,7 @@ debug-osx:
 	$(MAKE) osxtargets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS)" \
 	SHLIBLDFLAGS="$(LD_FLAGS) -dynamiclib -fPIC" \
-	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS)"
+	CFLAGS="-fPIC $(DEBUG_CFLAGS) $(GTK2_CFLAGS)"
 
 
 ########################################################################

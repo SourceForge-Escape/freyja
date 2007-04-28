@@ -31,6 +31,7 @@
 #include <mgtk/mgtk_events.h>
 
 using namespace mstl;
+using namespace mgtk;
 
 extern "C" {
 
@@ -58,9 +59,8 @@ void *perlinnoise_captured1 = 0x0;
 
 void freyja_perlinnoise_init(void (*func)(const char*, void*))
 {
-	ResourceAppPluginTest *plugin;
-	plugin = new ResourceAppPluginTest(PerlinNoiseEventsAttach,
-										PerlinNoiseGUIAttach);	
+	ResourcePlugin *plugin;
+	plugin = new ResourcePlugin(PerlinNoiseEventsAttach, PerlinNoiseGUIAttach);	
 }
 
 
@@ -243,23 +243,21 @@ void PerlinNoiseEventsAttach()
 
 void PerlinNoiseGUIAttach()
 {
-	char *filename;
 	char *basename = "plugins/perlinnoise.mlisp";
-	int id, menuId;
 
-	//id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
-	//menuId = Resource::mInstance->getIntByName("ePluginMenu"); // ePluginMenu;
+	//int id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
+	//int menuId = Resource::mInstance->getIntByName("ePluginMenu");
 	//mgtk_append_item_to_menu(menuId, "PerlinNoise", id);
 
-	filename = mgtk_rc_map(basename);
+	char *filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
 
-	id = Resource::mInstance->getIntByName("eColorPerlinAdd");
-	mgtk_event_set_color(id, 0.51f, 0.51f, 0.29f, 1.0f);
+	int add = Resource::mInstance->getIntByName("eColorPerlinAdd");
+	mgtk_event_set_color(add, 0.51f, 0.51f, 0.29f, 1.0f);
 	
-	id = Resource::mInstance->getIntByName("eColorPerlinMult");
-	mgtk_event_set_color(id, 0.61f, 0.51f, 0.35f, 1.0f);
+	int multi = Resource::mInstance->getIntByName("eColorPerlinMult");
+	mgtk_event_set_color(multi, 0.61f, 0.51f, 0.35f, 1.0f);
 }
 
 

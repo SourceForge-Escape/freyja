@@ -6,6 +6,8 @@
 
  Dancer RC6 
  20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Updated ResourcePlugin to fix possible link / build issues on some compilers
+ - Optional memcpy via a 'non-class' flag in mstl::Vector
  - mstl::Vector fix for operator =
  - QueryDialog for improved locale support and UI sanity
  - MLISP detailed assert polish -- helps debugging mlisp 

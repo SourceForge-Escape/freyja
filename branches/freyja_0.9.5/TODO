@@ -14,8 +14,6 @@
 	- Rotation modifier not WYSIWYG.
 	- Transform has a 'pop' or 'jump' in model and mesh modes
 
- * memcpy() flag for mstl::Vector ( base types )
-
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 
  * Add back ray picking for UV faces to the UV editor.
@@ -23,8 +21,6 @@
  * Polygon generators using new backend ( legacy removal depends on this. )
 
  * Add the simple Bezier patch polygon mesh generator back.
-
- * Query dialog UI uses internal events + symbols for values
 
  * Skeletal animation refactor
 	- Fix remaining FK issues
@@ -61,6 +57,9 @@
  * Finish breakup of GUI control into modules.
 
  * Finish up the icon set.
+
+ * MSTL review for possible rewrite.  Wish: generic container item, opt, etc.
+	- It might be a good idea to have true vector and vectorarray containers.
 
  * Do another pass on 0.9.6 items to be sure they aren't already completed.
 

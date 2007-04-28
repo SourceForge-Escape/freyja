@@ -28,6 +28,7 @@ win32:
 	for i in $(IMGS); do cd $$i && make win32 && cd $(BACK) || cd $(BACK); done 
 	for i in $(MDLS); do cd $$i && make win32 && cd $(BACK) || cd $(BACK); done 
 	for i in $(UIPS); do cd $$i && make win32 && cd $(BACK) || cd $(BACK); done 
+	for i in ../bin/plugins/model/*/win32; do cp $$i/*.dll ../bin/plugins/model/win32/; done
 
 osx:
 	for i in $(IMGS); do cd $$i && make osx && cd $(BACK) || cd $(BACK); done 

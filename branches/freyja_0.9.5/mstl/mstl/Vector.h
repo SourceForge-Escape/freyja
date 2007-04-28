@@ -23,9 +23,8 @@
  * Mongoose - Created
  ================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_VECTOR_H_
-#define GUARD__FREYJA_MONGOOSE_VECTOR_H_
+#ifndef GUARD__MSTL_VECTOR_H_
+#define GUARD__MSTL_VECTOR_H_
 
 #include <stdlib.h>
 #include <limits.h>
@@ -39,8 +38,16 @@ template <class Object> class Vector
 {
 public:
 
+	typedef enum {
+
+		fNonClass = 1   // Mainly to avoid class data member operator = bugs
+
+	} OptionFlags_t;
+
+
 	Vector() :
 		mData(0x0),
+		mFlags(0),
 		mReserve(0),
 		mStart(0),
 		mEnd(0),
@@ -51,6 +58,7 @@ public:
 
 	Vector(const Vector &v) :
 		mData(0x0),
+		mFlags(0),
 		mReserve(0),
 		mStart(0),
 		mEnd(0),
@@ -62,6 +70,7 @@ public:
 
 	Vector(unsigned int size) :
 		mData(0x0),
+		mFlags(0),
 		mReserve(0),
 		mStart(0),
 		mEnd(0),
@@ -73,24 +82,30 @@ public:
 
 	Vector &operator=(const Vector<Object> &v)
 	{
+		// Mongoose, 20070426 - Don't trust Vector user to free data!
+		if (mData) delete [] mData;
+
 		mData = NULL;
+		mFlags = v.mFlags;
 		mReserve = v.mReserve;
 		mStart = v.mStart;
 		mEnd = v.mEnd;
 
 		if ( v.mData != NULL && mReserve )
 		{
-#if 0
-			mData = new Object[mReserve];
-			memcpy(mData, v.mData, sizeof(Object) * mReserve);
-#else // FIX for special class operator = usage
 			mData = new Object[mReserve];
 
-			for (unsigned int i = 0; i < mReserve; ++i)
+			if (mFlags & fNonClass)
 			{
-				mData[i] = v.mData[i];
+				memcpy(mData, v.mData, sizeof(Object) * mReserve);
 			}
-#endif
+			else // FIX for special class operator = usage ( default )
+			{
+				for (unsigned int i = 0; i < mReserve; ++i)
+				{
+					mData[i] = v.mData[i];
+				}
+			}
 		}
 
 		return *this;
@@ -100,16 +115,29 @@ public:
 	~Vector()
 	{
 		clear();
+		mReserve = 0;
 
 		if (mData)
 		{
 			delete [] mData;
 		}
-		
-		mReserve = 0;
 	}
 
 	////////////////////////////////////////////
+
+	void ClearFlag(OptionFlags_t f) { mFlags &= ~f;	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Clears an option flag.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetFlag(OptionFlags_t f)	{ mFlags |= f;	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets an option flag.
+	 *
+	 ------------------------------------------------------*/
 
 	void Replace(Object oldObj, Object newObj)
 	{
@@ -253,12 +281,9 @@ public:
 
 	void resize(unsigned int count, Object obj)//Object &obj = Object())
 	{
-		unsigned int i;
-
-
 		if (!reserve(count))
 		{
-			for (i = 0; i < count; ++i)
+			for (unsigned int i = 0; i < count; ++i)
 			{
 				if (i < begin() || i >= end())
 				{
@@ -271,24 +296,9 @@ public:
 	}
 
 
-	void push_back()
-	{
-		pushBack();
-	}
+	void push_back() { push_back(0x0); }
 	
-	
-	void pushBack()
-	{
-		pushBack(0x0);
-	}
-	
-
 	void push_back(Object object)
-	{
-		pushBack(object);
-	}
-
-	void pushBack(Object object)
 	{
 		resize(size() + 1);
 		mData[size()-1] = object;
@@ -327,23 +337,25 @@ public:
 
 	void copy(const Vector<Object> &v)
 	{
+#if 1 // Do full copies now...
+		*this = v;
+#else
 		unsigned int i, count;
 
-		//if (&v == 0x0)
-		//	return;
-
-		if (v.mReserve/*v.capacity()*/ > capacity())
+		if (v.mReserve > capacity())
 		{
-			resize(v.mReserve/*v.capacity()*/);
+			resize(v.mReserve);
 		}
 
-		mStart = v.mStart;//v.begin();
-		mEnd = v.mEnd;//v.end();
+		mFlags = v.mFlags;
+		mStart = v.mStart;
+		mEnd = v.mEnd;
 
 		for (i = mStart, count = mEnd; i < count; ++i)
 		{
-			mData[i] = v.mData[i];//v[i];
+			mData[i] = v.mData[i];
 		}
+#endif
 	}
 
 
@@ -410,62 +422,6 @@ public:
 	}
 
 
-#ifdef VECTOR_H_OLD_INTERNAL_ITERATOR
-	// Built-in iterator methods ////////////////////////////////
-
- 	unsigned int mIndex;
-
- 	void start()
- 	{
- 		mIndex = begin();
- 	}
-
-
- 	void finish()
- 	{
- 		mIndex = end() - 1;
- 	}
-
-
- 	bool forward()
- 	{
- 		return (mIndex < end());
- 	}
-
-
- 	bool backward()
- 	{
- 		return (mIndex + 1 > begin());
- 	}
-
-
- 	void next()
- 	{
- 		++mIndex;
- 	}
-
-
- 	void prev()
- 	{
- 		--mIndex;
- 	}
-
-
- 	unsigned int currentIndex()
- 	{
- 			return mIndex;
- 	}
-
-
- 	Object current()
- 	{
- 			return mData[mIndex];
- 	}
-
-#endif
-
-
-
 	// Instead of appending objects this apptempts replacing 'removed' objects
 	unsigned int add(Object object)
 	{
@@ -477,41 +433,60 @@ public:
 			return begin();
 		}
 
-		pushBack(object);
+		push_back(object);
 		return size();
 	}
 
 
-	void remove(unsigned int index)
-	{
-		if (index < end())
-			mData[index] = 0x0;  // No, just invalidate it
+	void remove(unsigned int idx) { if (idx < end()) mData[idx] = 0x0; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Marks <idx> NULL for vectors of pointers.
+	 *
+	 ------------------------------------------------------*/
 
-		// Hhhmm... dangerous and fun - this gets your data out of order	
-		//mData[index] = mData[begin()];
-		//++mStart;
-	}
-
-
-	Object *get_array() /* Danger, Danger ;) */
-	{
-		return mData;
-	}
-
-
-	Object *getVectorArray() /* Danger, Danger ;) */
-	{
-		return mData;
-	}
+	Object *get_array() { return mData; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Direct array access, returns array for this vector.
+	 *
+	 ------------------------------------------------------*/
 
 	bool start(unsigned int &idx) { idx = mStart; return (idx != mEnd); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : foreach() iterator use -- reset iter.
+	 *
+	 ------------------------------------------------------*/
+
 	bool next(unsigned int &idx) { ++idx; return (idx != mEnd); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : foreach() iterator use -- next iter.
+	 *
+	 ------------------------------------------------------*/
+
 	Object &current(unsigned int idx) { return mData[idx]; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : foreach() iterator use -- array index.
+	 *
+	 ------------------------------------------------------*/
+
+
+	// Deprecated API wrappers...
+	void pushBack() { push_back(); }
+	
+	void pushBack(Object object) { push_back(object); }
+
+	Object *getVectorArray() { return get_array(); }
+
 
 private:
 
 	Object *mData;
 
+	unsigned int mFlags;
 	unsigned int mReserve;
 	unsigned int mStart;
 	unsigned int mEnd;
