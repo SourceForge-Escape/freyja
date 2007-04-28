@@ -24,14 +24,29 @@
 
 #include "ResourceEvent.h"
 
+using namespace mgtk;
+using namespace mstl;
 
+mstl::Vector<ResourcePlugin*> ResourcePlugin::mPlugins;
 unsigned int ResourceEvent::mCounter = 0; 
 Resource *ResourceEvent::mResource = NULL; 
 Vector<ResourceEvent*>  ResourceEvent::mEvents;
 
-#if RESOURCEAPPPLUGIN
-Vector<ResourceAppPluginTest*> ResourceAppPluginTest::mPlugins;
-#endif
+
+////////////////////////////////////////////////////////////
+// Constructors
+////////////////////////////////////////////////////////////
+
+ResourcePlugin::ResourcePlugin(void (*rc_func)(), void (*gui_func)()) : 
+	mEventsAttach(rc_func),	mGUIAttach(gui_func)
+{
+	mPlugins.push_back(this);
+}
+
+
+ResourcePlugin::~ResourcePlugin()
+{
+}
 
 
 ////////////////////////////////////////////////////////////

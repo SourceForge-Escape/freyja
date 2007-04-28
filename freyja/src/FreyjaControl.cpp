@@ -948,12 +948,15 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
 		}
 	}
 
+
+	/* Magically generate dialogs for import/export settings per module */
 	if (module)
 	{
+		// FIXME: Convert this crap to a generated QueryDialog
+
 		//freyja_print("! *** %s", module->mFilename.c_str());
 		//freyja_print("! *** %s", module->mName.c_str());
 
-		/* Magically generate dialogs for import/export settings per module */
 		uint32 i;
 		foreach (module->mArgs, i)
 		{

@@ -31,6 +31,7 @@
 #include <mstl/SystemIO.h>
 
 using namespace mstl;
+using namespace mgtk;
 
 
 extern "C" {
@@ -48,9 +49,8 @@ int gPakReaderDirs = -1;
 
 void freyja_pakreader_init(void (*func)(const char*, void*))
 {
-	ResourceAppPluginTest *plugin;
-	plugin = new ResourceAppPluginTest(PakReaderEventsAttach,
-										PakReaderGUIAttach);	
+	ResourcePlugin *plugin;
+	plugin = new ResourcePlugin(PakReaderEventsAttach, PakReaderGUIAttach);	
 }
 
 
@@ -313,15 +313,11 @@ void PakReaderEventsAttach()
 
 void PakReaderGUIAttach()
 {
-	char *filename;
-	char *basename = "plugins/pakreader.mlisp";
-	int id, menuId;
-
-	id = Resource::mInstance->getIntByName("eDialogPakReader");
-	menuId = Resource::mInstance->getIntByName("ePluginMenu");
+	//int id = Resource::mInstance->getIntByName("eDialogPakReader");
+	//int menuId = Resource::mInstance->getIntByName("ePluginMenu");
 	//mgtk_append_item_to_menu(menuId, "PakReader", id);
 
-	filename = mgtk_rc_map(basename);
+	char *filename = mgtk_rc_map("plugins/pakreader.mlisp");
 	Resource::mInstance->Load(filename);
 	delete [] filename;
 }

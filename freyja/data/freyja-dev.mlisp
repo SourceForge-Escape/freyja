@@ -1015,6 +1015,7 @@
 
 
 ;; Query Dialogs
+
 (query_dialog	"GenerateSheetDialog"
 	"gtk-dialog-question"
 	"Sheet mesh generation."
@@ -1029,6 +1030,13 @@
 	"int"	"rings"	"How many rings?   "	1 1 64  ; default min max
 	"int"	"count"	"How many sections?"	16 4 64  ; default min max
 	"float"	"radius"	"Radius?"	8 1 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateCircleDialog"
+	"gtk-dialog-question"
+	"Circle mesh generation."
+	"int"	"count"	"How many sections?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 0.5 64  ; default min max
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
 
 

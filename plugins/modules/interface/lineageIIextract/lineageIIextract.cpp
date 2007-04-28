@@ -45,9 +45,9 @@ uint32 gL2ExtractSize = 0;
 
 void freyja_lineageIIextract_init(void (*func)(const char*, void*))
 {
-	ResourceAppPluginTest *plugin;
-	plugin = new ResourceAppPluginTest(L2ExtractEventsAttach,
-										L2ExtractGUIAttach);	
+	mgtk::ResourcePlugin *plugin;
+	plugin = new mgtk::ResourcePlugin(L2ExtractEventsAttach,
+									  L2ExtractGUIAttach);	
 }
 
 
@@ -177,7 +177,7 @@ void eL2ExtractFilename(char *s)
 	if (gL2ExtractFilename)
 		delete [] gL2ExtractFilename;
 
-	gL2ExtractFilename = String::Strdup(s);
+	gL2ExtractFilename = mstl::String::Strdup(s);
 }
 
 
@@ -186,7 +186,7 @@ void eL2ExtractOut(char *s)
 	if (gL2ExtractOut)
 		delete [] gL2ExtractOut;
 
-	gL2ExtractOut= String::Strdup(s);
+	gL2ExtractOut = mstl::String::Strdup(s);
 }
 
 

@@ -38,8 +38,8 @@ void PythonGUIAttach();
 /* This hooks up the plugin to the appliciation */
 void freyja_pythonplug_init(void (*func)(const char*, void*))
 {
-	ResourceAppPluginTest *plugin;
-	plugin = new ResourceAppPluginTest(PythonEventsAttach, PythonGUIAttach);	
+	mgtk::ResourcePlugin *plugin;
+	plugin = new mgtk::ResourcePlugin(PythonEventsAttach, PythonGUIAttach);	
 }
 
 

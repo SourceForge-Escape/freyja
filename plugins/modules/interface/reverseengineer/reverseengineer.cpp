@@ -54,9 +54,9 @@ char *gReverseEngineerFilename = 0x0;
 
 void freyja_reverseengineer_init(void (*func)(const char*, void*))
 {
-	ResourceAppPluginTest *plugin;
-	plugin = new ResourceAppPluginTest(ReverseEngineerEventsAttach,
-										ReverseEngineerGUIAttach);	
+	mgtk::ResourcePlugin *plugin;
+	plugin = new mgtk::ResourcePlugin(ReverseEngineerEventsAttach,
+									  ReverseEngineerGUIAttach);	
 }
 
 

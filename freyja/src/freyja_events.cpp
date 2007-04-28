@@ -935,21 +935,18 @@ void eGeneratePlane()
 
 void eGenerateCircle()
 {
-	hel::Vec3 v;
-	vec_t r = mgtk_create_query_dialog_float("gtk-dialog-question",
-											 "Radius?",						  
-											 FreyjaControl::mInstance->GetGenMeshHeight(), 
-											 0.5f, 64.0f, 1, 3);
+	const char *dialog = "GenerateCircleDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
 
-	int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-												   "How many parititions?",
-												   FreyjaControl::mInstance->GetGenMeshCount(),
-													1, 64, 1, 1);
+	if (ok)
+	{
+		int count = mgtk_get_query_dialog_int(dialog, "count");
+		vec_t r = mgtk_get_query_dialog_float(dialog, "radius");
+		hel::Vec3 v(0.0f, 0.2f, 0.0f);
 
-	extern index_t freyjaMeshCreateCircleQuad(vec3_t origin, vec_t radius, uint32 count);
-
-	freyjaMeshCreateCircle(v.mVec, r, count);
-	FreyjaControl::mInstance->Dirty();
+		freyjaMeshCreateCircle(v.mVec, r, count);
+		FreyjaControl::mInstance->Dirty();		
+	}
 }
 
 
@@ -963,9 +960,7 @@ void eGenerateRing()
 		int rings = mgtk_get_query_dialog_int(dialog, "rings");
 		int count = mgtk_get_query_dialog_int(dialog, "count");
 		vec_t r = mgtk_get_query_dialog_float(dialog, "radius");
-		hel::Vec3 v;
-
-		//FREYJA_ASSERTMSG(0, "%i %i %f", rings, count, r);
+		hel::Vec3 v(0.0f, 0.2f, 0.0f);
 
 		freyjaMeshCreateRing(v.mVec, r, count, rings+1);
 		FreyjaControl::mInstance->Dirty();		
@@ -1419,13 +1414,13 @@ void freyja_handle_resource_init(Resource &r)
 	freyja_init_application_plugins(dir.GetCString());
 
 	/* Hook plugins to resource */
-	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
+	uint32 i, n = mgtk::ResourcePlugin::mPlugins.size();
 
 	for (i = 0; i < n; ++i)
 	{
-		if (ResourceAppPluginTest::mPlugins[i] != 0x0)
+		if (mgtk::ResourcePlugin::mPlugins[i] != 0x0)
 		{
-			ResourceAppPluginTest::mPlugins[i]->mEventsAttach();
+			mgtk::ResourcePlugin::mPlugins[i]->mEventsAttach();
 		}
 	}
 }
@@ -1453,13 +1448,13 @@ void freyja_handle_resource_start()
 	FreyjaControl::mInstance->Init();
 
 	/* FreyjaAppPlugin prototype testing... */
-	uint32 i, n = ResourceAppPluginTest::mPlugins.size();
+	uint32 i, n = mgtk::ResourcePlugin::mPlugins.size();
 
 	for (i = 0; i < n; ++i)
 	{
-		if (ResourceAppPluginTest::mPlugins[i] != 0x0)
+		if (mgtk::ResourcePlugin::mPlugins[i] != 0x0)
 		{
-			ResourceAppPluginTest::mPlugins[i]->mGUIAttach();
+			mgtk::ResourcePlugin::mPlugins[i]->mGUIAttach();
 		}
 	}
 

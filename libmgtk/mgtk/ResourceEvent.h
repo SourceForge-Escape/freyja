@@ -26,6 +26,8 @@
 #ifndef GUARD__MGTK_RESOURCEEVENT_H_
 #define GUARD__MGTK_RESOURCEEVENT_H_
 
+#define MGTK_RESOURCE_PLUGIN 1
+
 #include <mstl/Delegate.h>
 #include <mstl/String.h>
 #include <mstl/Vector.h>
@@ -33,7 +35,23 @@
 #include "Resource.h"
 #include "mgtk_events.h"
 
-using namespace mstl;
+
+namespace mgtk {
+
+class ResourcePlugin
+{
+public:
+	ResourcePlugin(void (*rc_func)(), void (*gui_func)());
+
+	~ResourcePlugin();
+
+	static mstl::Vector<ResourcePlugin*> mPlugins;
+	void (*mEventsAttach)();
+	void (*mGUIAttach)();
+};
+
+} // End namespace mgtk
+
 
 class ResourceEvent
 {
@@ -238,7 +256,7 @@ class ResourceEvent
 
 	static Resource *mResource;          /* Resource system pointer */
 
-	static Vector<ResourceEvent*> mEvents; /* Event store for control use */
+	static mstl::Vector<ResourceEvent*> mEvents; /* Event store for control use */
 };
 
 
@@ -738,24 +756,5 @@ private:
 	void (*mHandler)(void (*func)(mgtk_mouse_event_t&));     /* Function pointer callback */
 };
 
-#define RESOURCEAPPPLUGIN 1
-#if RESOURCEAPPPLUGIN
-class ResourceAppPluginTest
-{
-public:
-	ResourceAppPluginTest(void (*rc_func)(), void (*gui_func)())
-	{
-		mEventsAttach = rc_func;
-		mGUIAttach = gui_func;
-		mPlugins.pushBack(this);
-	}
-
-	~ResourceAppPluginTest() { /* FIXME mPlugins.erase(); */ }
-
-	static Vector<ResourceAppPluginTest*> mPlugins;
-	void (*mEventsAttach)();
-	void (*mGUIAttach)();
-};
-#endif
 
 #endif // GUARD__MGTK_RESOURCEEVENT_H_
