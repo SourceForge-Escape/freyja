@@ -37,6 +37,7 @@ uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
 uint32 gFreyjaMemoryDeletes = 0;
 FreyjaAssertCallback gFreyjaAssertHandler = NULL;
+FreyjaAssertCallback gFreyjaDebugInfoHandler = NULL;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -179,6 +180,58 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 	}
 
 	SystemIO::Assert(expr);
+
+	return 1;
+}
+
+
+void freyjaDebugInfoHandler(FreyjaAssertCallback func)
+{
+	gFreyjaDebugInfoHandler = func;
+}
+
+
+byte freyjaDebugInfoMessage(const char *file, unsigned int line, 
+							const char *function, const char *exprString,
+							bool expr, const char *format, ...)
+{
+	if (expr)
+		return 0;
+
+	freyjaPrintMessage("DebugInfo encountered: %s:%i %s() '%s'", 
+					   file, line, function, exprString);
+
+	if (gPrinter)
+	{
+		va_list args;
+		va_start(args, format);	
+		gPrinter->MessageArgs(format, &args);
+		va_end(args);
+	}
+	else
+	{
+		va_list args;
+		va_start(args, format);	
+		vfprintf(stdout, format, args);
+		fprintf(stdout, "\n");
+		va_end(args);
+	}
+
+	if (gFreyjaDebugInfoHandler)
+	{
+		char msg[1024];
+		va_list args;
+		va_start(args, format);	
+		vsnprintf(msg, 1023, format, args);
+		va_end(args);
+		msg[1023] = 0;
+
+		if ((*gFreyjaDebugInfoHandler)(file, line, function, exprString, msg))
+		{
+			freyjaPrintMessage("DebugInfo ignored by event handler...");
+			return 0;
+		}
+	}
 
 	return 1;
 }

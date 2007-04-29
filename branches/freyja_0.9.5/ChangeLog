@@ -5,7 +5,10 @@
  =====================================================================
 
  Dancer RC6 
- 20070415- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ 20070415-20070430 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Bind pose blending for simple weights fixed.. still doing major changes
+ - Tinkering on the skeletal system ( oh man, it needs it )
+ - Fix 3ds plugin unknown material attr handled better
  - Updated ResourcePlugin to fix possible link / build issues on some compilers
  - Optional memcpy via a 'non-class' flag in mstl::Vector
  - mstl::Vector fix for operator =

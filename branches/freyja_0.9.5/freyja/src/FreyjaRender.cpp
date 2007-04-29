@@ -25,7 +25,7 @@
 
 #define USING_FREYJA_CPP_ABI
 
-#include "FreyjaOpenGL.h" // includes <windows.h>
+#include "FreyjaOpenGL.h" // Includes windows.h, so avoid header interaction
 
 #include <sys/time.h>
 #include <stdlib.h>

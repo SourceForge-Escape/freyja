@@ -25,9 +25,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_BONE_H_
-#define GUARD__FREYJA_MONGOOSE_BONE_H_
+#ifndef GUARD__FREYJA_BONE_H_
+#define GUARD__FREYJA_BONE_H_
 
 #include <hel/math.h>
 #include <hel/Vec3.h>
@@ -36,91 +35,13 @@
 #include <mstl/Vector.h>
 #include <mstl/String.h>
 
+#include "BoneTrack.h"
 #include "KeyFrame.h"
 #include "Track.h"
 #include "freyja.h"
 
-using namespace mstl;
-
 
 namespace freyja {
-
-class BoneTrack // : public InterfaceTrack
-{
-public:
-
-	BoneTrack() : mRot(), mLoc() { }
-
-	~BoneTrack() { }
-
-	index_t GetKeyfameIndex(vec_t time) // mRot and mLoc have same rate/duration
-	{ return mRot.GetKeyfameIndexFromTime(time); }
-
-	Vec3KeyFrame *GetRotKeyframe(index_t key) // 'New' will return prev allocated as well
-	//{ return mRot.GetKeyframe(key); }
-	{ return (Vec3KeyFrame *)mRot.NewKeyframeByIndex(key); }
-	
-
-	index_t NewRotKeyframe(vec_t time) { return mRot.NewKeyframe(time); }
-
-	Vec3KeyFrame *GetLocKeyframe(index_t key) // 'New' will return prev allocated as well
-	//{ return mLoc.GetKeyframe(key); }
-	{ return (Vec3KeyFrame *)mLoc.NewKeyframeByIndex(key); }
-
-	index_t NewLocKeyframe(vec_t time) { return mLoc.NewKeyframe(time); }
-
-	
-	vec_t GetDuration() { return mRot.GetDuration(); }
-
-	void SetDuration(vec_t d) { mRot.SetDuration(d); mLoc.SetDuration(d); }
-
-	vec_t GetRate() { return mRot.GetRate(); }
-
-	void SetRate(vec_t fps) { mRot.SetRate(fps); mLoc.SetRate(fps); }
-
-	uint32 GetRotKeyframeCount() { return mRot.GetKeyframeCount(); }
-
-	uint32 GetLocKeyframeCount() { return mLoc.GetKeyframeCount(); }
-
-
-	vec_t GetRotKeyframeTime(uint32 key) { return mRot.GetTime(key); }
-
-	vec_t GetLocKeyframeTime(uint32 key) { return mLoc.GetTime(key); }
-
-
-	void GetRotKeyframe(uint32 key, vec3_t v) { mRot.GetKey(key, v); }
-
-	void GetLocKeyframe(uint32 key, vec3_t v) { mLoc.GetKey(key, v); }
-
-
-	hel::Vec3 GetRot(vec_t time) { return mRot.GetTransform(time); }
-
-	bool GetRot(vec_t t, hel::Vec3 &v)  { return mRot.GetTransform(t, v); }
-
-
-	hel::Vec3 GetLoc(vec_t time) { return mLoc.GetTransform(time); }
-
-	bool GetLoc(vec_t t, hel::Vec3 &v)  { return mLoc.GetTransform(t, v); }
-
-	bool Serialize(SystemIO::TextFileWriter &w)
-	{
-		mRot.Serialize(w);
-		mLoc.Serialize(w);
-		return true;
-	}
-
-	bool Serialize(SystemIO::TextFileReader &r)
-	{
-		mRot.Serialize(r);
-		mLoc.Serialize(r);
-		return true;
-	}
-
-	Vec3Track mRot;
-
-	Vec3Track mLoc;
-};
-
 
 class Bone 
 {
@@ -346,7 +267,9 @@ public:
 
 	hel::Quat mRotation;             /* Orientation of this bone */
 
-	hel::Vec3 mTranslation;               /* Offset of this bone from parent */
+	hel::Vec3 mTranslation;          /* Offset of this bone from parent */
+
+	hel::Mat44 mLocalTransform;      /* Might as well cache local transform */
 
 	hel::Mat44 mBindPose;            /* Store the bind transform from the 
 									  * origin ( this bulids off parents ).
@@ -378,7 +301,8 @@ private:
 	static Vector<Bone *> mGobalPool; /* Storage for gobal access */
 };
 
-}
 
-#endif
+} // namespace freyja
+
+#endif // GUARD__FREYJA_BONE_H_
 

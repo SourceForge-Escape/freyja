@@ -218,6 +218,7 @@
 			) ; submenu _Mesh
 
 			(submenu "_Bone"
+				(menu_item "_Info"			eBoneInfo)
 				(menu_item "_New"			eBoneNew)
 				(menu_item "_Delete"		eBoneDelete)
 				(menu_item "_Select"		eBoneSelect)
@@ -1037,6 +1038,15 @@
 	"Circle mesh generation."
 	"int"	"count"	"How many sections?"	16 4 64  ; default min max
 	"float"	"radius"	"Radius?"	8 0.5 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateTubeDialog"
+	"gtk-dialog-question"
+	"Tube mesh generation."
+	"int"	"segments"	"How many segments?"	16 4 64  ; default min max
+	"int"	"count"	"Vertex count per ring?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 0.1 128  ; default min max
+	"float"	"height"	"Height?"	16 0.1 128  ; default min max
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
 
 

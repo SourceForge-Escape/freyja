@@ -23,6 +23,7 @@
  * Add the simple Bezier patch polygon mesh generator back.
 
  * Skeletal animation refactor
+	- BoneTrack needs matrix lists for pose
 	- Fix remaining FK issues
 	- Various joint types: hinge, ball&socket, etc
 	- IK solver and interface

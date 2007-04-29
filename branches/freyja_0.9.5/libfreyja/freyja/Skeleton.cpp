@@ -316,11 +316,13 @@ void freyjaSkeletonDelete(index_t skeletonIndex)
 
 void freyjaSkeletonUpdateBones(index_t skeletonIndex)
 {
-	// FIXME
-	Bone *root = Bone::GetBone(0);
-	hel::Mat44 m;
-	//m.setIdentity();
-	if (root) root->UpdateBindPose(m);
+	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
+	Bone *root = Bone::GetBone(skel ? skel->GetRoot() : 0);
+
+	if (root) 
+	{
+		root->UpdateBindPose();
+	}
 }
 
 
