@@ -233,6 +233,7 @@ void Bone::SetName(const char *name)
 
 void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
 {
+#if 0
 	Bone *b = Bone::GetBone(boneIndex);
 
 	if (b)
@@ -249,11 +250,15 @@ void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
 		m = m * n;
 		b->mBindPose = m;
 	}
+#else
+	FREYJA_ASSERTMSG(0, "This function is deprecated.");
+#endif
 }
 
 
 void Bone::UpdateBindPose(const hel::Mat44 &m)
 {
+#if 0
 	mBindPose = hel::Mat44(mRotation) * m;
 	mBindPose.Translate(mTranslation.mVec);
 
@@ -266,37 +271,33 @@ void Bone::UpdateBindPose(const hel::Mat44 &m)
 			b->UpdateBindPose(mBindPose);
 		}
 	}
+#else
+	FREYJA_ASSERTMSG(0, "This function is deprecated.");
+#endif
 }
 
 
 void Bone::UpdateBindPose()
 {
-#if 0
-	// MSTL_MSG("\tDisabled");
-#elif 1
-	hel::Mat44 m;
-	UpdateBindPose(GetUID(), m);
-#else
-	hel::Mat44 m;
-	m.setIdentity();
-	m = mRotation;
-	m.translate(mTranslation.mVec);
+	// In this local case order doesn't matter for these operations
+	mLocalTransform = mRotation;
+	mLocalTransform.Translate(mTranslation);
 
-	Bone *parent = GetBone(mParent);
+	// FIXME: Pre or Post?  damn refactoring  =[
+	Bone *parent = Bone::GetBone( GetParent() );
 
 	if (parent)
 	{
-		mBindPose = parent->mBindPose * m;
+		mBindPose = mLocalTransform * parent->mLocalTransform; 
+		mBindPose.Transpose(); // FIXME: result comes out transposed!!
 	}
 	else
 	{
-		mBindPose = m;
+		mBindPose = mLocalTransform;
 	}
 
-	// Cache off a 'to world' 
 	mBindToWorld = mBindPose;
-	mBindPose.invert();
-#endif
+	mBindToWorld.Invert();
 }
 
 

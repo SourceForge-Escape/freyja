@@ -407,7 +407,7 @@ void freyjaBone_Transform_TmpUtil(index_t boneIndex, hel::Mat44 &m)
 
 void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 {
-#if 1
+#if 0
 	hel::Mat44 m;
 	Vec3 v(0,0,0);
 	freyjaBone_Transform_TmpUtil(boneIndex, m);

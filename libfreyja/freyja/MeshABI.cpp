@@ -1855,34 +1855,59 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 		// Forget about 'cobbling' random skeletons with reused weights!
 		//Skeleton *s = Skeleton::getSkeleton(skeleton);
 		
-#warning FIXME "Not fully implemented"
-#ifdef FIXME
 		// Good case for threads if we cache all the uses of a bone and
 		// divide among vertices
-		hel::Mat44 worldArray[Bone::GetCount()];
+
+		// Local transforms...
 		hel::Mat44 localArray[Bone::GetCount()];
-		
+
+		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
+		{
+			localArray[i].SetIdentity(); // Ensure win
+
+			Bone *b = Bone::GetBone(i);
+
+			if (b)
+			{
+				BoneTrack &t = b->GetTrack(track);
+				Vec3 rot = t.GetRot(time);
+				Vec3 loc = t.GetLoc(time);
+
+				localArray[i].SetRotation(rot.mX, rot.mY, rot.mZ);
+				localArray[i].Translate(loc);
+			}
+		}
+
+		// World transforms...
+		hel::Mat44 worldArray[Bone::GetCount()];
+
 		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
 		{
 			worldArray[i].SetIdentity();
 
-			Bone *b = Bone::GetBone(w->mBoneIndex);
+			Bone *b = Bone::GetBone(i);
 
-			if (!b)
-				continue;
+			if (b)
+			{
+				BoneTrack &t = b->GetTrack(track);
+				Vec3 rot = t.GetRot(time);
+				Vec3 loc = t.GetLoc(time);
 
-			BoneTrack &t = b->GetTrack(track);
-			Vec3 rot = t.GetRot(time);
-			Vec3 loc = t.GetLoc(time);
+				// FIXME: InverseWorld should be on your little bone machine
+				// FIXME: flesh this out and optimize loop below
 
-			// FIXME: InverseWorld should be on bone
+				Bone *parent = Bone::GetBone( b->GetParent() );
 
-
-			// FIXME: flesh this out and optimize loop below
-			worldArray[i] = b->GetWorldTransform(loc, rot);
-			localArray[i] = b->GetLocalTransform(loc, rot);
+				if (parent)
+				{
+					worldArray[i] = localArray[i] * localArray[b->GetParent()];
+				}
+				else
+				{
+					worldArray[i] = localArray[i];
+				}
+			}
 		}
-#endif
 
 
 		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
@@ -1908,17 +1933,21 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			Vec3 p;
 			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
 
-#if 0
+#if 1
+			p = (worldArray[w->mBoneIndex] * p) * w->mWeight;
+#elif 0
 			hel::Mat44 world;
 			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			world.Rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1
 			// If this was a 'normal' data stream.. this would work 
 			hel::Mat44 combined = b->GetInverseBindPose() * world;
+			//combined.Transpose();
 			p = (combined * p) * w->mWeight;
-#elif 1
+#elif 0
 			hel::Mat44 world;
 			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			world.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
+
 			hel::Mat44 local;
 			loc = b->mTranslation;
 			b->mRotation.GetEulerAngles(rot.mVec[0], rot.mVec[2], rot.mVec[1]);
@@ -2321,7 +2350,7 @@ index_t freyjaMeshCreateCircle(vec3_t origin, vec_t radius, uint32 count)
 
 // 'Quad' circle
 index_t freyjaMeshCreateCircleQuad(vec3_t origin, vec_t radius, 
-						   uint32 count, uint32 rings)
+								   uint32 count, uint32 rings)
 {
 	if (count < 3)
 		count = 3;
@@ -2358,9 +2387,9 @@ index_t freyjaMeshCreateCircleQuad(vec3_t origin, vec_t radius,
 		}
 	}
 
-	index_t center = freyjaMeshVertexCreate3fv(mesh, o.mVec);
-	freyjaMeshVertexNormal3fv(mesh, center, n.mVec);
-	index_t centerUV = freyjaMeshTexCoordCreate2f(mesh, 0.5f, 0.5f);
+	//index_t center = freyjaMeshVertexCreate3fv(mesh, o.mVec);
+	//freyjaMeshVertexNormal3fv(mesh, center, n.mVec);
+	//index_t centerUV = freyjaMeshTexCoordCreate2f(mesh, 0.5f, 0.5f);
 
 	for (uint32 j = 0; j < (rings - 1); ++j)
 	{
@@ -2376,6 +2405,7 @@ index_t freyjaMeshCreateCircleQuad(vec3_t origin, vec_t radius,
 		freyjaMeshPolygonAddVertex1i(mesh, face, vertices[j+1][0]);
 		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[j+1][0]);
 	
+		freyjaPrintMessage("%i = %i?", j, vertices[j][0]);
 
 		for (uint32 i = 1; i < count; ++i)
 		{
@@ -2496,8 +2526,179 @@ index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius,
 index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius, 
 							 int32 sides, int32 rings)
 {
-	MSTL_MSG("Calling stub function");
+#if 1
+	FREYJA_ASSERTMSG(0, "Calling stub function");
 	return INDEX_INVALID;
+#else
+	(segments < 1) ? segments = 1 : 0;
+	(sides < 3) ? sides = 3 : 0;
+
+	index_t mesh = freyjaMeshCreate();
+
+	/* Generate geometery */
+
+	vec_t invCount = 1.0f / (float)sides;
+	hel::Vec3 v, n, t, o(origin);
+
+	/* Bottom and top */
+	for (uint32 i = 0; i < sides; ++i)
+	{
+		vec_t s = ((float)i * invCount);
+		helSinCosf(helDegToRad(360.0f * s), &v.mZ, &v.mX);
+
+		v *= s;
+		v.mY = height;
+
+		u = (v.mX < 0) ? (v.mX * 0.25 + 0.25) : (v.mX * 0.25 + 0.25);
+		v = (v.mZ < 0) ? (v.mZ * 0.25 + 0.25) : (v.mZ * 0.25 + 0.25);
+
+		n = v * 0.2f;
+		n.mY = -0.6;
+
+		t = o;
+		t.mX += v.mX;
+		t.mZ += v.mZ;
+
+		index_t idx = freyjaMeshVertexCreate3fv(mesh, v.mVec);
+		freyjaMeshVertexNormal3fv(mesh, idx, n.mVec);
+		//vertices[i].push_back(idx);
+
+		index_t t = freyjaMeshTexCoordCreate2f(mesh, u, v);
+		//texcoords[j].push_back(t);
+
+
+		t = o + v;
+		n.mY = -n.mY;
+
+		idx = freyjaMeshVertexCreate3fv(mesh, v.mVec);
+		freyjaMeshVertexNormal3fv(mesh, idx, n.mVec);
+		//vertices[i].push_back(idx);
+
+		t = freyjaMeshTexCoordCreate2f(mesh, u, v);
+		//texcoords[j].push_back(t);
+	}
+
+
+	/* Tube, doesn't have 0th or height-th ring */
+	for (uint32 i = 0; i < segments+1; ++i)
+	{
+		/* Reuse bottom vertices for 0th ring */
+		if (!i)
+		{
+			for (uint32 j = 0; j < sides; ++j)
+			{
+				u = 1.0 * ((float)j/(float)count);
+				v = 0.5 * ((float)i/(float)segments) + 0.5;
+
+				index = vertices[j];
+				segVert.pushBack(index);
+
+				index = freyjaTexCoordCreate2f(u, v);
+				segTex.pushBack(index);
+			}
+
+			continue;
+		}
+
+		/* Reuse top vertices for segment-th ring */
+		if (i == segments)
+		{
+			for (j = 0; j < count; ++j)
+			{
+				u = 1.0 * ((float)j/(float)count);
+				v = 0.5 * ((float)i/(float)segments) + 0.5;
+
+				index = vertices2[j];
+				segVert.pushBack(index);
+
+				index = freyjaTexCoordCreate2f(u, v);
+				segTex.pushBack(index);
+			}
+
+			continue;
+		}
+
+		for (j = 0; j < count; ++j)
+		{
+			x = cos(helDegToRad(360.0 * ((float)j / (float)count)));
+			z = sin(helDegToRad(360.0 * ((float)j / (float)count)));
+			y = height * ((float)i/(float)segments);
+
+			u = 1.0 * ((float)j/(float)count);
+			v = 0.5 * ((float)i/(float)segments) + 0.5;
+
+			nx = x * 0.5;
+			ny = 0.0;
+			nz = z * 0.5;
+
+			index = freyjaVertexCreate3f(origin[0]+x, origin[1]+y , origin[2]+z);
+			freyjaVertexNormal3f(index, nx, ny, nz);
+			segVert.pushBack(index);
+
+			index = freyjaTexCoordCreate2f(u, v);
+			segTex.pushBack(index);
+		}
+	}
+
+
+
+	/* Tube */
+	for (i = 0; i < segments; ++i)
+	{
+		for (j = 0; j < count; ++j)
+		{
+			/* Make the 0th/count edge of rings quad, then the rest in order */
+			if (!j)
+			{
+				index = count * i;
+				index2 = count * (i + 1);
+				freyjaBegin(FREYJA_POLYGON);
+				// A
+				freyjaPolygonTexCoord1i(segTex[index]);
+				freyjaPolygonVertex1i(segVert[index]);
+
+				// B
+				freyjaPolygonTexCoord1i(segTex[index + count-1]);
+				freyjaPolygonVertex1i(segVert[index + count-1]);
+
+				// C
+				freyjaPolygonTexCoord1i(segTex[index2 + count-1]);
+				freyjaPolygonVertex1i(segVert[index2 + count-1]);
+
+				// D
+				freyjaPolygonTexCoord1i(segTex[index2]);
+				freyjaPolygonVertex1i(segVert[index2]);
+				freyjaPolygonMaterial1i(0);
+				freyjaEnd(); // FREYJA_POLYGON
+			}
+			else
+			{
+				index = count * i;
+				index2 = count * (i + 1);
+				freyjaBegin(FREYJA_POLYGON);
+				// A
+				freyjaPolygonTexCoord1i(segTex[index+j]);
+				freyjaPolygonVertex1i(segVert[index+j]);
+
+				// B
+				freyjaPolygonTexCoord1i(segTex[index-1+j]);
+				freyjaPolygonVertex1i(segVert[index-1+j]);
+
+				// C
+				freyjaPolygonTexCoord1i(segTex[index2-1+j]);
+				freyjaPolygonVertex1i(segVert[index2-1+j]);
+
+				// D
+				freyjaPolygonTexCoord1i(segTex[index2+j]);
+				freyjaPolygonVertex1i(segVert[index2+j]);
+				freyjaPolygonMaterial1i(0);
+				freyjaEnd(); // FREYJA_POLYGON
+			}
+		}
+	}
+
+	return mesh;
+#endif
 }
 
 

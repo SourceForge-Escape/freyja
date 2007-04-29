@@ -872,18 +872,23 @@ void eGenerateCylinder()
 
 void eGenerateTube()
 {
-	float h =FreyjaControl::mInstance->GetGenMeshHeight(); //mgtk_create_query_dialog_float("gtk-dialog-question", "Height?", mGenMeshHeight, 0.5, 64, 1, 3);
-	int count = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-													"How many vertices in a ring?",
-													FreyjaControl::mInstance->GetGenMeshCount(), 1, 128, 
-													1, 1);
-	int seg = (int)mgtk_create_query_dialog_float("gtk-dialog-question",
-												  "How many segments?",
-												  FreyjaControl::mInstance->GetGenMeshSegements(), 1, 128, 
-												  1, 1);
-	hel::Vec3 v;
-	freyjaGenerateTubeMesh(v.mVec, h, count, seg);
-	FreyjaControl::mInstance->Dirty();
+	const char *dialog = "GenerateTubeDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
+
+	if (ok)
+	{
+		int count = mgtk_get_query_dialog_int(dialog, "count");
+		int segments = mgtk_get_query_dialog_int(dialog, "segments");
+		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
+		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
+
+		FREYJA_ASSERTMSG(0, "c = %i, s = %i, r = %f, h = %f",
+						 count, segments, radius, height);
+
+		hel::Vec3 v;
+		freyjaGenerateTubeMesh(v.mVec, height, count, segments);
+		FreyjaControl::mInstance->Dirty();		
+	}
 }
 
 
@@ -1136,36 +1141,32 @@ void eAnimationPrev()
 }
 
 
-void eLightPosX(vec_t value)
+void eLightPos(uint32 i, vec_t value)
 {
-	uint32 light = 0; // GetCurrentLight();
+	uint32 light = FreyjaControl::mInstance->GetSelectedLight();
 	vec3_t pos;
 	freyjaGetLightPosition4v(light, pos);
-	pos[0] = value;
+	pos[i] = value;
 	freyjaLightPosition4v(light, pos);
-	freyja_event_gl_refresh(); // Dirty();
+	FreyjaControl::mInstance->Dirty();	
+}
+
+
+void eLightPosX(vec_t value)
+{
+	eLightPos(0, value);
 }
 
 
 void eLightPosY(vec_t value)
 {
-	uint32 light = 0; // GetCurrentLight();
-	vec3_t pos;
-	freyjaGetLightPosition4v(light, pos);
-	pos[1] = value;
-	freyjaLightPosition4v(light, pos);
-	freyja_event_gl_refresh(); // Dirty();
+	eLightPos(1, value);
 }
 
 
 void eLightPosZ(vec_t value)
 {
-	uint32 light = 0; // GetCurrentLight();
-	vec3_t pos;
-	freyjaGetLightPosition4v(light, pos);
-	pos[2] = value;
-	freyjaLightPosition4v(light, pos);
-	freyja_event_gl_refresh(); // Dirty();
+	eLightPos(2, value);
 }
 
 
@@ -1174,6 +1175,35 @@ void ePolygonSize(uint32 value)
 	FreyjaControl::mInstance->SetFaceEdgeCount(value);
 	freyja_print("Polygons creation using %i sides", 
 				 FreyjaControl::mInstance->GetFaceEdgeCount());
+}
+
+
+void eBoneInfo()
+{	
+	uint32 idx = FreyjaControl::mInstance->GetSelectedBone();
+	Bone *bone = Bone::GetBone(idx);
+
+	if (bone == NULL)
+		return;
+
+	mstl::String s = bone->mLocalTransform.ToString();
+	s.Replace('{', ' ');
+	s.Replace('}', '\n');
+	s.Replace('|', '\n');
+
+	mstl::String s2 = bone->mBindPose.ToString();
+	s2.Replace('{', ' ');
+	s2.Replace('}', '\n');
+	s2.Replace('|', '\n');
+
+	mstl::String s3 = bone->mBindToWorld.ToString();
+	s3.Replace('{', ' ');
+	s3.Replace('}', '\n');
+	s3.Replace('|', '\n');
+
+	FREYJA_INFOMSG(0, 
+				   "Bone %i\nmLocalTransform\n%s\nmBindPose\n%s\nmBindToWorld\n%s", 
+				   bone->GetUID(), s.c_str(), s2.c_str(), s3.c_str());
 }
 
 
@@ -1186,7 +1216,11 @@ void eTestTextView()
 
 void eTestAssertMsgBox()
 {
-	FREYJA_ASSERTMSG(false, "Dummy NULL pointer assertion test.");
+	void *ptr = NULL;
+
+	FREYJA_ASSERTMSG(ptr != NULL, 
+					 "Dummy NULL pointer assertion test.\n\tptr = %p", 
+					 ptr);
 }
 
 
@@ -1211,10 +1245,10 @@ void FreyjaMiscEventsAttach()
 {
 	ResourceEventCallback::add("eTestAssertMsgBox", &eTestAssertMsgBox);
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
-
 	ResourceEventCallbackString::add("eTestBoneMetadataText", &eTestBoneMetadataText);
-	ResourceEventCallback::add("eBoneMetaData", &eTestBoneMetadata);
 
+	ResourceEventCallback::add("eBoneMetaData", &eTestBoneMetadata);
+	ResourceEventCallback::add("eBoneInfo", &eBoneInfo);
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
 
@@ -1919,6 +1953,31 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 }
 
 
+int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line, 
+								   const char *function,
+								   const char *expression, const char *msg)
+{
+	mstl::String s;
+	s.Set("Warning/Info encountered:\n %s:%i %s()\n '%s'\n %s", 
+		  file, line, function, expression, msg);
+
+	ControlPrinter::mLog.Print("[INFO] %s\n", s.c_str());
+
+	ConfirmationDialog q("FreyjaDebugInfoCallbackHandlerDialog", 
+						 "gtk-dialog-warning",
+						 s.c_str(), 
+						 "\nThis is a warning or debug information dialog.",
+						 "gtk-cancel", "_Cancel", "gtk-ok", "_Ok");
+
+	int action = q.Execute();
+
+	ControlPrinter::mLog.Print("[INFO] User %s\n", 
+							   action ? "ok" : "cancel");
+
+	return action;
+}
+
+
 int main(int argc, char *argv[])
 {
 	/* 'Link' up mgtk library stubs to these implementations */
@@ -1954,6 +2013,7 @@ int main(int argc, char *argv[])
 	/* Hookup assert handlers, note freyja assert is also used by this layer */
 	freyjaAssertHandler(FreyjaAssertCallbackHandler);
 	mgtk_assert_handler(FreyjaAssertCallbackHandler);
+	freyjaDebugInfoHandler(FreyjaDebugInfoCallbackHandler);
 
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());

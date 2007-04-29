@@ -61,8 +61,11 @@
 #ifdef DEBUG
 #   define FREYJA_ASSERTMSG(expr, format, ...) \
 if (!(expr)) freyjaAssertMessage(__FILE__, __LINE__, __func__, #expr, false, format, ##__VA_ARGS__)
+#   define FREYJA_INFOMSG(expr, format, ...) \
+if (!(expr)) freyjaDebugInfoMessage(__FILE__, __LINE__, __func__, #expr, false, format, ##__VA_ARGS__)
 #else
-#   define ASSERT_MSG(...)
+#   define FREYJA_ASSERTMSG(...)
+#   define FREYJA_INFOMSG(...)
 #endif
 
 
@@ -241,6 +244,20 @@ extern "C" {
 	byte freyjaAssertMessage(const char *file, unsigned int line, 
 							 const char *function, const char *exprString,
 							 bool expr, const char *format, ...);
+	/*------------------------------------------------------
+	 * Pre  : Format string and args are valid
+	 * Post : Report messages to stdout or gPrinter
+	 ------------------------------------------------------*/
+
+	void freyjaDebugInfoHandler(FreyjaAssertCallback func);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Assertion event handler is assigned.
+	 ------------------------------------------------------*/
+
+	byte freyjaDebugInfoMessage(const char *file, unsigned int line, 
+								const char *function, const char *exprString,
+								bool expr, const char *format, ...);
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stdout or gPrinter

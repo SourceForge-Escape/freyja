@@ -506,12 +506,16 @@ void File3ds::ParseSubMapBlock  (long len, SubMap *sm)
 
 		default:
 			sub_len = fin.ReadLong();
+
+			if (!sub_len)
+				continue;
+
 			tmp = curr; tmp += sub_len;  // gcc 3.4 work around
 			fin.SetOffset(tmp);
 			break;
 		}
 		curr = fin.GetOffset();
-	} while(end != curr);
+	} while(end != curr && curr < end); // FIX for unknown 3ds materials
 }
 //************************************
 

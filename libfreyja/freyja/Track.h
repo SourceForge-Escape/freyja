@@ -200,7 +200,7 @@ public:
 	}
 
 	virtual KeyFrame *GetKeyframe(index_t idx) 
-	{ 
+	{
 		return (idx < mKeyFrames.size()) ? mKeyFrames[idx] : NULL; 
 	}
 	/*------------------------------------------------------
