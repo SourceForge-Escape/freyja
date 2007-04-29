@@ -288,8 +288,16 @@ void Bone::UpdateBindPose()
 
 	if (parent)
 	{
-		mBindPose = mLocalTransform * parent->mLocalTransform; 
-		mBindPose.Transpose(); // FIXME: result comes out transposed!!
+		parent->UpdateBindPose();
+		mBindPose = parent->mBindPose * mLocalTransform;
+
+#if 0
+		// For debug logs to compare plugin inputs, which is nasty.  =/
+		printf("******************\n");
+		parent->mLocalTransform.Print();
+		mLocalTransform.Print();
+		mBindPose.Print();
+#endif
 	}
 	else
 	{
