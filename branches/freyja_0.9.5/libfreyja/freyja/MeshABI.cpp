@@ -1846,10 +1846,6 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 		// this is 'smart' enough not to reallocate if we do
 		m->SyncBlendVertices();
 		vec_t *array = m->GetBlendVerticesArray();
-
-		//if (!array)
-		//	return;
-
 		m->ResetBlendVertices();
 
 		// Forget about 'cobbling' random skeletons with reused weights!
@@ -1857,6 +1853,9 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 		
 		// Good case for threads if we cache all the uses of a bone and
 		// divide among vertices
+
+
+		/* Matrix animation transform lists */
 
 		// Local transforms...
 		hel::Mat44 localArray[Bone::GetCount()];
@@ -1873,6 +1872,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 				Vec3 rot = t.GetRot(time);
 				Vec3 loc = t.GetLoc(time);
 
+				// Do some animations use 0 2 1??
 				localArray[i].SetRotation(rot.mX, rot.mY, rot.mZ);
 				localArray[i].Translate(loc);
 			}
@@ -1880,6 +1880,7 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 
 		// World transforms...
 		hel::Mat44 worldArray[Bone::GetCount()];
+		hel::Mat44 worldArrayInverse[Bone::GetCount()];
 
 		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
 		{
@@ -1898,14 +1899,26 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 
 				Bone *parent = Bone::GetBone( b->GetParent() );
 
+				worldArray[i] = localArray[i];
+#if 0
 				if (parent)
 				{
-					worldArray[i] = localArray[i] * localArray[b->GetParent()];
-				}
-				else
+					worldArray[i] = worldArray[i] * localArray[b->GetParent()];
+				}			
+#else
+				if (parent)
 				{
-					worldArray[i] = localArray[i];
+					while (parent)
+					{
+						worldArray[i] = localArray[ parent->GetUID() ] *
+						worldArray[i];	
+						parent = Bone::GetBone( parent->GetParent() );
+					}
 				}
+#endif
+
+				worldArrayInverse[i] = worldArray[i];
+				worldArrayInverse[i].Invert();
 			}
 		}
 
@@ -1927,15 +1940,21 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			if (!v)
 				continue;
 
-			BoneTrack &t = b->GetTrack(track);	
-			Vec3 rot = t.GetRot(time);
-			Vec3 loc = t.GetLoc(time);
 			Vec3 p;
 			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
 
 #if 1
-			p = (worldArray[w->mBoneIndex] * p) * w->mWeight;
+			//hel::Mat44 &worldInverse = worldArrayInverse[w->mBoneIndex];
+			hel::Mat44 &world = worldArray[w->mBoneIndex];
+			p = (world * p) * w->mWeight;
+
+			//hel::Mat44 combined = b->GetInverseBindPose() * world;
+			//p = (combined * p) * w->mWeight;
 #elif 0
+			BoneTrack &t = b->GetTrack(track);	
+			Vec3 rot = t.GetRot(time);
+			Vec3 loc = t.GetLoc(time);
+
 			hel::Mat44 world;
 			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
 			world.Rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1

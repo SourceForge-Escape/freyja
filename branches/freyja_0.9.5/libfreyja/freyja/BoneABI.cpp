@@ -355,15 +355,14 @@ const vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
 {
 	Bone *b = Bone::GetBone(boneIndex);
 
-
+	// FIXME: This is mutating the matrix to make it 'friendly' to OpenGL.
+	//        It would be better to push this back into the Mat44 class.
 	if (b)
 	{
 		b->mBindPose.mMatrix[3] = 
 		b->mBindPose.mMatrix[7] = 
 		b->mBindPose.mMatrix[11] = 0.0f;
-		b->mBindPose.mMatrix[15] = 1.0f; 
-		freyjaPrintMessage("%i\n", boneIndex);
-		b->mBindPose.Print();
+		b->mBindPose.mMatrix[15] = 1.0f;
 	}
 
 	return b ? b->mBindPose.mMatrix : Mat44::mIdentity;
@@ -407,38 +406,6 @@ void freyjaBone_Transform_TmpUtil(index_t boneIndex, hel::Mat44 &m)
 
 void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 {
-#if 0
-	hel::Mat44 m;
-	Vec3 v(0,0,0);
-	freyjaBone_Transform_TmpUtil(boneIndex, m);
-
-	v = m * v;
-	v.Get(xyz);
-#elif 0
-	index_t parent = freyjaGetBoneParent(boneIndex);
-	Vec3 v(0,0,0);
-
-	if (freyjaIsBoneAllocated(parent))
-	{
-		freyjaGetBoneWorldPos3fv(parent, v.mVec);
-	}
-
-	Bone *b = Bone::GetBone(boneIndex);
-
-	if (b)
-	{
-		// 1.
-		//v += b->mTranslation;
-		//v = b->mRotation.rotate(v);
-		
-		// 2.
-		v += b->mRotation.rotate(b->mTranslation);
-	}
-	
-	xyz[0] = v.mVec[0];
-	xyz[1] = v.mVec[1];
-	xyz[2] = v.mVec[2];
-#else
 	Bone *b = Bone::GetBone(boneIndex);
 
 	if (b)
@@ -447,7 +414,6 @@ void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 		v = b->GetBindPose() * v;
 		helCopyVec3(v.mVec, xyz);
 	}
-#endif
 }
 
 
