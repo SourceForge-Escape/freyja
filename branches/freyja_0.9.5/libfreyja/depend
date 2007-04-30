@@ -4,7 +4,8 @@ $(BUILDDIR)/MetaData.o: freyja/MetaData.cpp freyja/MetaData.h freyja/freyja.h \
 	 $(DO_CC)
 
 $(BUILDDIR)/BoneABI.o: freyja/BoneABI.cpp freyja/freyja.h freyja/MemTrack.h \
-  freyja/Bone.h freyja/KeyFrame.h freyja/Track.h freyja/BoneABI.h
+  freyja/Bone.h freyja/BoneTrack.h freyja/KeyFrame.h freyja/Track.h \
+  freyja/BoneABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/BezierPatch.o: freyja/BezierPatch.cpp freyja/BezierPatch.h
@@ -13,8 +14,8 @@ $(BUILDDIR)/BezierPatch.o: freyja/BezierPatch.cpp freyja/BezierPatch.h
 $(BUILDDIR)/PluginABI.o: freyja/PluginABI.cpp freyja/MaterialABI.h freyja/freyja.h \
   freyja/MemTrack.h freyja/ModelABI.h freyja/MeshABI.h freyja/BoneABI.h \
   freyja/SkeletonABI.h freyja/PluginABI.h freyja/PythonABI.h \
-  freyja/Skeleton.h freyja/Bone.h freyja/KeyFrame.h freyja/Track.h \
-  freyja/Plugin.h
+  freyja/Skeleton.h freyja/Bone.h freyja/BoneTrack.h freyja/KeyFrame.h \
+  freyja/Track.h freyja/Plugin.h
 	 $(DO_CC)
 
 $(BUILDDIR)/MaterialABI.o: freyja/MaterialABI.cpp freyja/Material.h \
@@ -86,13 +87,13 @@ $(BUILDDIR)/RigidBody.o: freyja/RigidBody.cpp freyja/RigidBody.h
 $(BUILDDIR)/FreyjaImage.o: freyja/FreyjaImage.cpp freyja/FreyjaImage.h
 	 $(DO_CC)
 
-$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/KeyFrame.h freyja/freyja.h \
-  freyja/MemTrack.h freyja/Track.h
+$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/BoneTrack.h \
+  freyja/KeyFrame.h freyja/freyja.h freyja/MemTrack.h freyja/Track.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Skeleton.o: freyja/Skeleton.cpp freyja/SkeletonABI.h freyja/freyja.h \
-  freyja/MemTrack.h freyja/Skeleton.h freyja/Bone.h freyja/KeyFrame.h \
-  freyja/Track.h freyja/BoneABI.h
+  freyja/MemTrack.h freyja/Skeleton.h freyja/Bone.h freyja/BoneTrack.h \
+  freyja/KeyFrame.h freyja/Track.h freyja/BoneABI.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Light.o: freyja/Light.cpp freyja/Light.h
@@ -115,7 +116,8 @@ $(BUILDDIR)/freyja.o: freyja/freyja.cpp freyja/Printer.h freyja/PluginABI.h \
 
 $(BUILDDIR)/MeshABI.o: freyja/MeshABI.cpp freyja/Mesh.h freyja/freyja.h \
   freyja/MemTrack.h freyja/Track.h freyja/KeyFrame.h freyja/Weight.h \
-  freyja/Vertex.h freyja/Face.h freyja/MeshABI.h freyja/Bone.h
+  freyja/Vertex.h freyja/Face.h freyja/MeshABI.h freyja/Bone.h \
+  freyja/BoneTrack.h
 	 $(DO_CC)
 
 $(BUILDDIR)/LightABI.o: freyja/LightABI.cpp freyja/Light.h freyja/LightABI.h \
