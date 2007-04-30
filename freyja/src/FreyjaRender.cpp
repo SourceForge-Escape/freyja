@@ -1243,13 +1243,13 @@ void FreyjaRender::RenderModel(index_t model)
 		{
 			glPushMatrix();
 #if 0
-			freyjaGetBoneWorldPos3fv(i, p.mVec);
-			freyjaGetBoneRotationEuler3fv(i, r.mVec);
+			freyjaGetBoneRotationEuler3fv(i, p.mVec);
+			glRotatef(p.mX, 1, 0, 0);
+			glRotatef(p.mY, 0, 1, 0);
+			glRotatef(p.mZ, 0, 0, 1);
 
-			glRotatef(r[0], 1, 0, 0);
-			glRotatef(r[1], 0, 1, 0);
-			glRotatef(r[2], 0, 0, 1);
-			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
+			freyjaGetBoneWorldPos3fv(i, p.mVec);
+			glTranslatef(p.mX, p.mY, p.mZ);
 #else
 			glMultMatrixf(freyjaGetBoneBindPose16fv(i));
 #endif
