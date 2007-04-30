@@ -207,6 +207,10 @@ public:
 
 	//mstl::Vector<hel::Mat44> mPose;
 
+	hel::Mat44 mLocal; // Cache last requested time transform here
+
+	hel::Mat44 mWorld; // Cache last requested time transform here
+
 	Vec3Track mRot;
 
 	Vec3Track mLoc;

@@ -285,6 +285,10 @@ void freyja_init_application_plugins(const char *dir)
 void freyja_handle_application_window_close()
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+
+	// There is some bug with some Gtk+ builds that allow this function
+	// to be called again before this exits.  
+	// Also relates to the Cancel doesn't cancel bug.
 	FreyjaControl::mInstance->Shutdown();
 }
 
@@ -1178,35 +1182,6 @@ void ePolygonSize(uint32 value)
 }
 
 
-void eBoneInfo()
-{	
-	uint32 idx = FreyjaControl::mInstance->GetSelectedBone();
-	Bone *bone = Bone::GetBone(idx);
-
-	if (bone == NULL)
-		return;
-
-	mstl::String s = bone->mLocalTransform.ToString();
-	s.Replace('{', ' ');
-	s.Replace('}', '\n');
-	s.Replace('|', '\n');
-
-	mstl::String s2 = bone->mBindPose.ToString();
-	s2.Replace('{', ' ');
-	s2.Replace('}', '\n');
-	s2.Replace('|', '\n');
-
-	mstl::String s3 = bone->mBindToWorld.ToString();
-	s3.Replace('{', ' ');
-	s3.Replace('}', '\n');
-	s3.Replace('|', '\n');
-
-	FREYJA_INFOMSG(0, 
-				   "Bone %i\nmLocalTransform\n%s\nmBindPose\n%s\nmBindToWorld\n%s", 
-				   bone->GetUID(), s.c_str(), s2.c_str(), s3.c_str());
-}
-
-
 void eTestTextView()
 {
 	mgtk_create_query_dialog_text("gtk-dialog-question", 
@@ -1247,8 +1222,8 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
 	ResourceEventCallbackString::add("eTestBoneMetadataText", &eTestBoneMetadataText);
 
+
 	ResourceEventCallback::add("eBoneMetaData", &eTestBoneMetadata);
-	ResourceEventCallback::add("eBoneInfo", &eBoneInfo);
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
 

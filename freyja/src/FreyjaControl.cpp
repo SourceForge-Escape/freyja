@@ -81,6 +81,7 @@ uint32 FreyjaControl::eSelectionByBoxId = 0;
 uint32 FreyjaControl::eAxisJointId = 0;
 uint32 FreyjaControl::eSphereJointId = 0;
 uint32 FreyjaControl::ePointJointId = 0;
+uint32 FreyjaControl::eInfoObjectId = 0;
 
 
 ////////////////////////////////////////////////////////////
@@ -373,6 +374,9 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener("eSelect", &FreyjaControl::eSelect);
 	eSelectId = ResourceEvent::GetResourceIdBySymbol("eSelect");
+
+	CreateListener("eInfoObject", &FreyjaControl::eInfoObject);
+	eInfoObjectId = ResourceEvent::GetResourceIdBySymbol("eInfoObject");
 
 	CreateListener("eSelectionByBox", &FreyjaControl::eSelectionByBox);
 	eSelectionByBoxId = ResourceEvent::GetResourceIdBySymbol("eSelectionByBox");
@@ -1463,7 +1467,14 @@ void FreyjaControl::RevertFile()
 
 void FreyjaControl::Shutdown()
 {
-	if (mCleared || mgtk::ExecuteConfirmationDialog("ExitWarningDialog"))
+	bool exiting = true;
+
+	if (!mCleared)
+	{
+		exiting = mgtk::ExecuteConfirmationDialog("ExitWarningDialog");
+	}
+
+	if (exiting)
 	{
 		SaveUserPreferences();
 		freyja_event_exit();
@@ -1654,6 +1665,7 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 		mgtk_toggle_value_set(eMoveObjectId, 0);
 		mgtk_toggle_value_set(eUnselectId, 0);
 		mgtk_toggle_value_set(eSelectId, 0);
+		mgtk_toggle_value_set(eInfoObjectId, 0);
 		
 		// FIXME: Add bbox selection back to this build
 		mCursor.SetMode(freyja3d::Cursor::Invisible);
@@ -1698,6 +1710,7 @@ void FreyjaControl::eSelect(uint32 value)
 		mgtk_toggle_value_set(eMoveObjectId, 0);
 		mgtk_toggle_value_set(eUnselectId, 0);
 		mgtk_toggle_value_set(eSelectionByBoxId, 0);
+		mgtk_toggle_value_set(eInfoObjectId, 0);
 
 		mEventMode = aSelect;
 		mCursor.SetMode(freyja3d::Cursor::Invisible);
@@ -1717,10 +1730,32 @@ void FreyjaControl::eUnselect(uint32 value)
 		mgtk_toggle_value_set(eSelectId, 0);
 		mgtk_toggle_value_set(eMoveObjectId, 0);
 		mgtk_toggle_value_set(eSelectionByBoxId, 0);
+		mgtk_toggle_value_set(eInfoObjectId, 0);
 		
 		mEventMode = aUnselect;
 		mCursor.SetMode(freyja3d::Cursor::Invisible);
 		freyja_print("Unselect %s...", 
+					 ObjectTypeToString(GetObjectMode()).c_str());
+		freyja_event_gl_refresh();
+	}
+}
+
+
+void FreyjaControl::eInfoObject(uint32 value)
+{
+	if (value)
+	{
+		// Radio button like func for multiple widgets on same event
+		mgtk_toggle_value_set(eRotateObjectId, 0);
+		mgtk_toggle_value_set(eScaleObjectId, 0);
+		mgtk_toggle_value_set(eSelectId, 0);
+		mgtk_toggle_value_set(eMoveObjectId, 0);
+		mgtk_toggle_value_set(eSelectionByBoxId, 0);
+		mgtk_toggle_value_set(eUnselectId, 0);
+		
+		mEventMode = aInfo;
+		mCursor.SetMode(freyja3d::Cursor::Invisible);
+		freyja_print("Info %s...", 
 					 ObjectTypeToString(GetObjectMode()).c_str());
 		freyja_event_gl_refresh();
 	}
@@ -1737,6 +1772,7 @@ void FreyjaControl::eMoveObject(uint32 value)
 		mgtk_toggle_value_set(eSelectId, 0);
 		mgtk_toggle_value_set(eUnselectId, 0);
 		mgtk_toggle_value_set(eSelectionByBoxId, 0);
+		mgtk_toggle_value_set(eInfoObjectId, 0);
 		
 		mEventMode = aMove;
 		mCursor.SetMode(freyja3d::Cursor::Translation);
@@ -1756,6 +1792,7 @@ void FreyjaControl::eScaleObject(uint32 value)
 		mgtk_toggle_value_set(eSelectId, 0);
 		mgtk_toggle_value_set(eUnselectId, 0);
 		mgtk_toggle_value_set(eSelectionByBoxId, 0);
+		mgtk_toggle_value_set(eInfoObjectId, 0);
 
 		// Reset cursor
 		mEventMode = aScale;
@@ -1778,6 +1815,7 @@ void FreyjaControl::eRotateObject(uint32 value)
 		mgtk_toggle_value_set(eSelectId, 0);
 		mgtk_toggle_value_set(eUnselectId, 0);
 		mgtk_toggle_value_set(eSelectionByBoxId, 0);
+		mgtk_toggle_value_set(eInfoObjectId, 0);
 
 		mEventMode = aRotate;
 		mCursor.SetMode(freyja3d::Cursor::Rotation);
@@ -2502,6 +2540,12 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			UnselectObject(vx, vy);
 			break;
 
+		case aInfo:
+			SelectObject(vx, vy);
+			InfoObject();
+			break;
+
+
 		default:
 			SelectCursorAxis(vx, vy);
 			ret = false;
@@ -2671,6 +2715,7 @@ void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY,
 	extern matrix_t gModelViewMatrix; // This is actual cached render transform
 	hel::Mat44 m(gModelViewMatrix);
 	m.Invert();
+	m.Transpose();
 
 	// This is now ray in eye coordinates
 	vec4_t rayVec = {nearH * normY, nearH * aspect * normX, -zNear, 0.0f};
@@ -3026,6 +3071,46 @@ void FreyjaControl::SetMaterialForSelectedFaces(uint32 material)
 			freyjaMeshPolygonMaterial(GetSelectedMesh(), i, material);
 		}
 	}   
+}
+	
+
+void FreyjaControl::InfoObject()
+{
+	switch (mObjectMode)
+	{
+	case tBone:
+		{
+			uint32 idx = FreyjaControl::mInstance->GetSelectedBone();
+			Bone *bone = Bone::GetBone(idx);
+
+			if (bone == NULL)
+				return;
+
+			mstl::String s = bone->mLocalTransform.ToString();
+			s.Replace('{', ' ');
+			s.Replace('}', '\n');
+			s.Replace('|', '\n');
+
+			mstl::String s2 = bone->mBindPose.ToString();
+			s2.Replace('{', ' ');
+			s2.Replace('}', '\n');
+			s2.Replace('|', '\n');
+
+			mstl::String w = bone->mTrack.mWorld.ToString();
+			w.Replace('{', ' ');
+			w.Replace('}', '\n');
+			w.Replace('|', '\n');
+
+			FREYJA_INFOMSG(0, 
+						   "Bone %i\nmLocalTransform\n%s\nmBindPose\n%s\nmWorld\n%s", 
+						   bone->GetUID(), 
+						   s.c_str(), s2.c_str(), w.c_str());
+		}
+		break;
+
+	default:
+		freyja_print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
+	}
 }
 
 

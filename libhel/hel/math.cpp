@@ -275,7 +275,7 @@ void helMatrixCopy(matrix_t source, matrix_t dest)
 // Remember: Post multiplying column-major will give you row-major
 void helMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
 {
-#if 0
+#if 1
 	/* Column order */
 	result[ 0] = a[ 0] * b[ 0] + a[ 4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3];
 	result[ 1] = a[ 0] * b[ 4] + a[ 4] * b[ 5] + a[ 8] * b[ 6] + a[12] * b[ 7];

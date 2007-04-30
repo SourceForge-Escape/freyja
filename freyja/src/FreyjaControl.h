@@ -94,6 +94,7 @@ class FreyjaControl : public Control
 		aSelectByBox,
 		aUnselect,
 		aKeyframe,
+		aInfo,
 
 		/* Specialized actions */
 		aVertexNew,
@@ -292,6 +293,7 @@ class FreyjaControl : public Control
 	static uint32 eUnselectId;
 	static uint32 eSelectId;
 	static uint32 eSelectionByBoxId;
+	static uint32 eInfoObjectId;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event ids used to replace old event system
@@ -628,6 +630,7 @@ class FreyjaControl : public Control
 	void eMoveObject(unsigned int value);
 	void eScaleObject(unsigned int value);
 	void eRotateObject(unsigned int value);
+	void eInfoObject(unsigned int value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event callbacks for hooking to widget system 
@@ -1094,6 +1097,13 @@ private:
 	 ------------------------------------------------------*/
 
 	void SelectObjectByBox(hel::Vec3 min, hel::Vec3 max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void InfoObject();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

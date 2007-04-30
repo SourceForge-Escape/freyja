@@ -282,7 +282,7 @@ extern "C" {
 	void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Transform vertex by bind pose for <bone>
+	 * Post : Transform vertex by bind pose for <bone>.
 	 *
 	 ------------------------------------------------------*/
 

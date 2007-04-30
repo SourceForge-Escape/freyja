@@ -277,6 +277,72 @@ void Bone::UpdateBindPose(const hel::Mat44 &m)
 }
 
 
+// FIXME: Need 'unified' Mat44 math!
+// Remember: Post multiplying column-major will give you row-major
+void tmpMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
+{
+	/* Column order */
+	result[ 0] = a[ 0] * b[ 0] + a[ 4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3];
+	result[ 4] = a[ 0] * b[ 4] + a[ 4] * b[ 5] + a[ 8] * b[ 6] + a[12] * b[ 7];
+	result[ 8] = a[ 0] * b[ 8] + a[ 4] * b[ 9] + a[ 8] * b[10] + a[12] * b[11];
+	result[12] = a[ 0] * b[12] + a[ 4] * b[13] + a[ 8] * b[14] + a[12] * b[15];
+	
+	result[ 1] = a[ 1] * b[ 0] + a[ 5] * b[ 1] + a[ 9] * b[ 2] + a[13] * b[ 3];
+	result[ 5] = a[ 1] * b[ 4] + a[ 5] * b[ 5] + a[ 9] * b[ 6] + a[13] * b[ 7];
+	result[ 9] = a[ 1] * b[ 8] + a[ 5] * b[ 9] + a[ 9] * b[10] + a[13] * b[11];
+	result[13] = a[ 1] * b[12] + a[ 5] * b[13] + a[ 9] * b[14] + a[13] * b[15];
+	
+	result[ 2] = a[ 2] * b[ 0] + a[ 6] * b[ 1] + a[10] * b[ 2] + a[14] * b[ 3];
+	result[ 6] = a[ 2] * b[ 4] + a[ 6] * b[ 5] + a[10] * b[ 6] + a[14] * b[ 7];
+	result[10] = a[ 2] * b[ 8] + a[ 6] * b[ 9] + a[10] * b[10] + a[14] * b[11];
+	result[14] = a[ 2] * b[12] + a[ 6] * b[13] + a[10] * b[14] + a[14] * b[15];
+	
+	result[ 3] = a[ 3] * b[ 0] + a[ 7] * b[ 1] + a[11] * b[ 2] + a[15] * b[ 3];
+	result[ 7] = a[ 3] * b[ 4] + a[ 7] * b[ 5] + a[11] * b[ 6] + a[15] * b[ 7];
+	result[11] = a[ 3] * b[ 8] + a[ 7] * b[ 9] + a[11] * b[10] + a[15] * b[11];
+	result[15] = a[ 3] * b[12] + a[ 7] * b[13] + a[11] * b[14] + a[15] * b[15];
+}
+
+
+// This assumes absolute not realtive!
+void Bone::UpdatePose(index_t track, vec_t time)
+{
+	BoneTrack &t = GetTrack(track);
+	hel::Vec3 rot = t.GetRot(time);
+	hel::Vec3 loc = t.GetLoc(time);
+
+	/* In this local case order doesn't matter for these operations. */
+	t.mLocal.SetRotation(rot.mX, rot.mY, rot.mZ);
+	t.mLocal.Translate(loc);
+
+#if 1 // Support relative keys... 
+	//t.mLocal = mLocalTransform * t.mLocal;
+	tmpMatrixMultiply(mLocalTransform.mMatrix,  
+					  t.mLocal.mMatrix,
+					  t.mLocal.mMatrix);
+#endif
+
+	t.mWorld.SetIdentity();
+
+	/* Update pose completely to be sure ancestors haven't changed. */
+	Bone *parent = Bone::GetBone( GetParent() );
+
+	if (parent)
+	{
+		parent->UpdatePose(track, time);
+
+		// Doesn't use 'track', b/c it's not implemented. ( mTrack[track] )
+		tmpMatrixMultiply(parent->mTrack.mWorld.mMatrix,  
+						  t.mWorld.mMatrix,
+						  t.mWorld.mMatrix);
+	}
+	else
+	{
+		t.mWorld = t.mLocal;
+	}	
+}
+
+
 void Bone::UpdateBindPose()
 {
 	// In this local case order doesn't matter for these operations
@@ -289,10 +355,13 @@ void Bone::UpdateBindPose()
 	if (parent)
 	{
 		parent->UpdateBindPose();
-		mBindPose = parent->mBindPose * mLocalTransform;
 
+		//mBindPose = parent->mBindPose * mLocalTransform;
+		tmpMatrixMultiply(parent->mBindPose.mMatrix, 
+						  mLocalTransform.mMatrix,
+						  mBindPose.mMatrix);
 #if 0
-		// For debug logs to compare plugin inputs, which is nasty.  =/
+		// For debug logs to compare plugin input coords, which is nasty.  =/
 		printf("******************\n");
 		parent->mLocalTransform.Print();
 		mLocalTransform.Print();

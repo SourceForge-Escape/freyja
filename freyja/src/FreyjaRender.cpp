@@ -326,6 +326,9 @@ void FreyjaRender::DrawFreeWindow()
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
 	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "ORBIT");
+	//glColor3fv(GREEN);
+	//mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, 
+	//				 "THIS IS A PREALPHA RELEASE.");
 	glPopAttrib();
 }
 
@@ -669,6 +672,16 @@ void FreyjaRender::Display()
 	default:
 		;
 	}
+
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glDisable(GL_LIGHTING);
+	glColor3fv(GREEN);
+	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, 
+					 "THIS IS A PREALPHA RELEASE.");
+	glPopAttrib();
 
 	glFlush();
 	freyja_swap_buffers();
@@ -1218,39 +1231,21 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones2)
 	{
-		hel::Vec3 p, r, n;
+		hel::Vec3 p;
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		// Render spheres and lines
+		/* Render spheres and bone geometery */
 		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
 		{
+			glPushMatrix();
+#if 0
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
 			freyjaGetBoneRotationEuler3fv(i, r.mVec);
 
-			if (mRenderMode & fBoneName)
-			{
-				//glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
-
-				// OpenGLPrinter test
-				glPushAttrib(GL_ENABLE_BIT);
-				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-				glEnable(GL_BLEND);
-				glEnable(GL_TEXTURE_2D);
-				glColor3fv(WHITE);
-				// Broken b/c mAngles needs arcball  =0
-				mPrinter.Print3d(p.mVec[0], p.mVec[1], p.mVec[2], 
-								 -mAngles[2],-mAngles[1], -mAngles[0], 
-								 0.05f, freyjaGetBoneNameString(i));
-				glPopAttrib();
-				// End OpenGLPrinter test
-			}
-
-			glPushMatrix();
-#if 0
 			glRotatef(r[0], 1, 0, 0);
 			glRotatef(r[1], 0, 1, 0);
 			glRotatef(r[2], 0, 0, 1);
@@ -1267,34 +1262,95 @@ void FreyjaRender::RenderModel(index_t model)
 			if (freyjaGetBoneParent(i) != INDEX_INVALID)
 			{
 				glPushMatrix();
-				freyjaGetBoneWorldPos3fv(freyjaGetBoneParent(i), p.mVec);
 				glMultMatrixf(freyjaGetBoneBindPose16fv(freyjaGetBoneParent(i)));
 
 				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
-				glColor3fv(PINK) : glColor3fv(FreyjaRender::mColorBoneHighlight);
+				glColor3fv(PINK) : 
+				glColor3fv(FreyjaRender::mColorBoneHighlight);
 
-				freyjaGetBoneTranslation3fv(i, n.mVec);
-				mglDrawBone(2, n.mVec);
+				freyjaGetBoneTranslation3fv(i, p.mVec);
+				mglDrawBone(2, p.mVec);
 
 				glPopMatrix();
 			}
+		}
 
-			if (freyjaGetBoneParent(i) != INDEX_INVALID)
+
+#define VIS_BONE_ANIM 1
+#if VIS_BONE_ANIM
+		hel::Mat44 combined;
+
+		// Render spheres and lines
+		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
+		{
+			Bone *bone = Bone::GetBone(i);
+
+			if (!bone)
+				continue;
+
+			glPushMatrix();
+			//combined = bone->GetInverseBindPose() * bone->mTrack.mWorld;
+			//glMultMatrixf( combined.mMatrix );
+			
+			freyjaGetBoneWorldPos3fv(i, p.mVec);
+			glTranslatef(p.mX, p.mY, p.mZ);
+
+			glColor3fv(DARK_RED);
+			mglDrawSphere(10, 10, 0.4f);
+
+			glPopMatrix();
+
+			Bone *parent = Bone::GetBone(freyjaGetBoneParent(i));
+
+			if (parent)
 			{
-				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
-				glColor3fv(DARK_GREEN) : glColor3fv(GREEN);
+				//combined = parent->GetInverseBindPose() * parent->mTrack.mWorld;
+				combined = parent->mTrack.mWorld;
 
-				glBegin(GL_LINES);
-				glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
-				freyjaGetBoneWorldPos3fv(freyjaGetBoneParent(i), p.mVec);
-				glVertex3f(p.mVec[0], p.mVec[1], p.mVec[2]);
-				glEnd();
+				glPushMatrix();
+				glMultMatrixf( combined.mMatrix );
+
+				glColor3fv(DARK_GREEN);
+				freyjaGetBoneTranslation3fv(i, p.mVec);
+				mglDrawBone(2, p.mVec);
+
+				glPopMatrix();
 			}
+		}
+#endif
+		glPopAttrib();
+	}
+
+	/* Render bone names */
+	if (mRenderMode & fBoneName)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+
+		glColor3fv(WHITE);
+
+		hel::Vec3 p;
+
+		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
+		{
+			// Only for names bind pose for now.
+			freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
+			//freyjaGetBoneWorldPos3fv(i, p.mVec);
+
+			// Slightly broken b/c mAngles are not computed from quaternion.
+			mPrinter.Print3d(p.mX, p.mY, p.mZ, 
+							 -mAngles[2], -mAngles[1], -mAngles[0], 
+							 0.05f, 
+							 freyjaGetBoneNameString(i));
 		}
 
 		glPopAttrib();
 	}
-
+	
 	/* Render skeleton */
 	if (mRenderMode & fBones)
 	{
@@ -1389,6 +1445,7 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 
 	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
 
+#if ALLOW_BONE1_NAMES
 	if (mRenderMode & fBoneName)
 	{
 		// OpenGLPrinter test
@@ -1401,6 +1458,7 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 		glPopAttrib();
 		// End OpenGLPrinter test
 	}
+#endif
 
 	glRotatef(rot.mVec[zr], 0, 0, 1);
 	glRotatef(rot.mVec[yr], 0, 1, 0);

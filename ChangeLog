@@ -1,12 +1,19 @@
 
  ChangeLog 
 
- Freyja 0.9.5 Development branch
+ Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Dancer RC6 
- 20070415-20070430 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Bind pose blending for simple weights fixed.. still doing major changes
+ Kagura prealpha, 0.9.5.7
+ 20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Some more misc skeletal fixes / features
+ - Object info mode
+ - New version numbering to sync packages better and better book-keeping
+ 
+
+ Kagura prealpha, 0.9.5.6
+ 20070415-20070428 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Bind pose blending for skinned meshes fixed.. still doing major changes
  - Tinkering on the skeletal system ( oh man, it needs it )
  - Fix 3ds plugin unknown material attr handled better
  - Updated ResourcePlugin to fix possible link / build issues on some compilers
@@ -32,7 +39,7 @@
  - OpenGLPrinter hooked up with FONT symbol in resource.
 
 
- Dancer RC5
+ Kagura prealpha, 0.9.5.5
  20070408-20070415 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Debian package fixes, Debian plugin auto packaging in make system
  - Various win32/public build fixes, missing dlls, changes
@@ -62,7 +69,7 @@
  - Shuffling UI events around, breaking up into classes
 
 
- Dancer RC4
+ Kagura prealpha, 0.9.5.4
  20070109-20070407 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Major changes in the event system usage ( mostly delegate based now )
  - Minor changes to match style guidelines for improved readability
@@ -110,7 +117,7 @@
  - Fix for freyjautil
 
 
- Dancer (Public Beta RC3)
+ Kagura prealpha, 0.9.5.3
  20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Fix for FPS Cap across all supported platforms
  - Fix for mstl Timer
@@ -174,7 +181,7 @@
  - Support for OpenGL ARB fragment programs
 
 
- Dancer (Public Beta RC2)
+ Kagura prealpha, 0.9.5.2
  20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Fixes, packaging, and porting for release
  - UI plugins' build fix

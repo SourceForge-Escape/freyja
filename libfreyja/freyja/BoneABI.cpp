@@ -153,8 +153,7 @@ void freyjaBoneParent(index_t boneIndex, index_t parentIndex)
 	{
 		b->mParent = parentIndex;
 
-		// Doing AddChild elsewhere for compatibility reasons, but
-		// I think it should be done here by 0.9.5 release
+		// Doing 'AddChild()' elsewhere for compatibility reasons.
 #if 0
 		Bone *p = Bone::GetBone(parentIndex);
 
@@ -369,43 +368,9 @@ const vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
 }
 
 
-void freyjaBone_Transform_TmpUtil(index_t boneIndex, hel::Mat44 &m)
-{
-	index_t parent = freyjaGetBoneParent(boneIndex);
-
-	if (freyjaIsBoneAllocated(parent))
-	{
-		freyjaBone_Transform_TmpUtil(parent, m);
-	}
-
-	Bone *b = Bone::GetBone(boneIndex);
-
-	if (b)
-	{
-#if 0
-		//m[12] += b->mTranslation[0];
-		//m[13] += b->mTranslation[1];
-		//m[14] += b->mTranslation[2];
-		// * m.getQuat();
-
-		//b->mBindPose = b->mRotation;
-		//b->mBindPose.Translate(b->mTranslation);
-		//m = m * b->mBindPose;
-
-		
-		m = m * b->mBindPose;
-#else
-		hel::Mat44 n = b->mRotation;
-		n.Translate(b->mTranslation);
-		m = m * n;
-		b->mBindPose = m;
-#endif
-	}
-}
-
-
 void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 {
+#if 0 // Enable to use bind for a world test ( for testing models with no anim )
 	Bone *b = Bone::GetBone(boneIndex);
 
 	if (b)
@@ -414,6 +379,18 @@ void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz)
 		v = b->GetBindPose() * v;
 		helCopyVec3(v.mVec, xyz);
 	}
+#else
+	Bone *b = Bone::GetBone(boneIndex);
+
+	if (b)
+	{
+		Vec3 v; // origin
+
+		// Cached last time / track pair update used here.
+		v = b->mTrack.mWorld * v;
+		helCopyVec3(v.mVec, xyz);
+	}	
+#endif
 }
 
 
@@ -611,39 +588,16 @@ void freyjaBoneGetBindTransformInverse(index_t bone, matrix_t m)
 }
 
 
-void freyjaBoneBindTransformVertex(index_t bone, vec3_t p, vec_t w)
+void freyjaBoneBindTransformVertex(index_t boneIndex, vec3_t p, vec_t w)
 {	
-	Bone *b = Bone::GetBone(bone);
+	Bone *b = Bone::GetBone(boneIndex);
 
-	if ( b )
+	if (b)
 	{
-#if 1 // Local test to factor out API issues
-		hel::Mat44 m, t;
-		Vec3 v(p);
-		t.SetIdentity();
-		t = b->mRotation;
-		t.Translate(b->mTranslation.mVec);
-
-		Bone *parent = Bone::GetBone(b->GetParent());
-
-		while (parent)
-		{
-			m.SetIdentity();
-			m = parent->mRotation;
-			m.Translate(parent->mTranslation.mVec);
-
-			t = m * t;
-
-			parent = Bone::GetBone(parent->GetParent());
-		}
-
-		v = (t * v) * w;
+		Vec3 v;
+		v = b->GetBindPose() * v;
+		v *= w;
 		helCopyVec3(v.mVec, p);
-#else
-		Vec3 v(p);
-		v = (b->mBindPose * v) * w;
-		helCopyVec3(v.mVec, p);
-#endif
 	}
 }
 
