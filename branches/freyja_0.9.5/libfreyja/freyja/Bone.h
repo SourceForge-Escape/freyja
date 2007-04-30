@@ -217,6 +217,12 @@ public:
 	 * Post : Set parent relative rotation
 	 ------------------------------------------------------*/
 
+	void UpdatePose(index_t track, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get world transform for <track> and <time>.
+	 ------------------------------------------------------*/
+
 	void UpdateBindPose();
 	/*------------------------------------------------------
 	 * Pre  :  

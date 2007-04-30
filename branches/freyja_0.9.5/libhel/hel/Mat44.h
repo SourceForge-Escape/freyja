@@ -239,6 +239,7 @@ class Mat44
 	void Multiply4fv(vec4_t v)
 	{
 		vec_t x = v[0], y = v[1], z = v[2], w = v[3];
+
 		v[0] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12]*w;
 		v[1] = mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13]*w;
 		v[2] = mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14]*w;

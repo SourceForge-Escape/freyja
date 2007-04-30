@@ -7,6 +7,7 @@
 
  * Verify math library, enforce automated testing at build.
 	- Make sure everything is using col hel::Mat44 correctly now.
+		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
 
  * Fix mouse cursor control.
