@@ -126,7 +126,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void RefreshContext() {	}
+	void RefreshContext() { freyja_event_gl_refresh();	}
 
 protected:
 

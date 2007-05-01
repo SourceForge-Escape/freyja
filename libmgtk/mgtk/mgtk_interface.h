@@ -56,7 +56,7 @@ GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_filename);
 
 GtkWidget *mgtk_create_text_entry(GtkWidget *box);
 
-GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size);
+GtkWidget *mgtk_create_icon(const char *icon_filename, GtkIconSize icon_size);
 
 GtkWidget *mgtk_create_vbox(GtkWidget *box, char *name, 
 							bool homogeneous, int spacing,

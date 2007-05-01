@@ -1933,16 +1933,16 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 								   const char *expression, const char *msg)
 {
 	mstl::String s;
-	s.Set("Warning/Info encountered:\n %s:%i %s()\n '%s'\n %s", 
-		  file, line, function, expression, msg);
+	s.Set("Information Dialog:\n %s:%i %s()\n %s", 
+		  file, line, function, msg); // Removed expression 
 
 	ControlPrinter::mLog.Print("[INFO] %s\n", s.c_str());
 
 	ConfirmationDialog q("FreyjaDebugInfoCallbackHandlerDialog", 
-						 "gtk-dialog-warning",
+						 "gtk-dialog-info",//"gtk-dialog-warning",
 						 s.c_str(), 
-						 "\nThis is a warning or debug information dialog.",
-						 "gtk-cancel", "_Cancel", "gtk-ok", "_Ok");
+						 "",
+						 "", "", "gtk-close", "_Close");
 
 	int action = q.Execute();
 

@@ -2583,10 +2583,12 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("psk");
 	freyjaPluginDescription1s("UE2 Intermediate (*.psk)");
 	freyjaPluginAddExtention1s("*.psk");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+	freyjaPluginArg1f("scale", 0.25f);
 }
 
 
@@ -2626,166 +2628,155 @@ int freyja_model__psk_check(char *filename)
 
 int freyja_model__psk_import(char *filename)
 {
-	PSKModel psk;
-	unsigned int i, j, v, t, m;
-	const float scale = 0.25f; // 0.1f;
-	Vector<unsigned int> transV;
-	Quat q, r, r2;
-	Vec3 u;
-	Mat44 M;
-
+	/* Check header to verify it's a PSK model */
 	if (freyja_model__psk_check(filename) < 0)
 		return -1;
 
+	/* Attempt to load model */
+	PSKModel psk;
+
 	if (psk.load(filename) < 0)
 		return -2;
+
+	/* Load plugin preferences */
+	int pluginId = freyjaGetPluginId();
+
+	vec_t scale = 0.25f;
+	freyjaGetPluginArg1f(pluginId, "scale", &scale);
 	
 	/* Start a new mesh */
-	freyjaBegin(FREYJA_MODEL);
-	freyjaBegin(FREYJA_MESH);
-	m = freyjaGetCurrent(FREYJA_MESH);
+	index_t model = freyjaModelCreate();
+	index_t mesh = freyjaMeshCreate();
+	freyjaModelAddMesh(model, mesh);
 
-	/* Start a new vertex group */
-	freyjaBegin(FREYJA_VERTEX_GROUP);
-	
-	for (i = 0; i < psk.mNumVertices; ++i)
+	/* Copy skinned geometry */	
+	for (uint32 i = 0, idx; i < psk.mNumVertices; ++i)
 	{
-		/* Store vertices in group as freyja XYZ */
-		v = freyjaVertexCreate3f(psk.mVertices[i*3+0]*scale, 
-						   psk.mVertices[i*3+2]*scale, 
-						   -psk.mVertices[i*3+1]*scale);
+		idx = i * 3;
+		Vec3 v(psk.mVertices[idx], psk.mVertices[idx+2], -psk.mVertices[idx+1]);
+		v *= scale;
 
-		/* Generates id translator list */
-		transV.pushBack(v);
+		/*index_t vertex =*/ freyjaMeshVertexCreate3fv(mesh, v.mVec);
 	}
-	
-	freyjaEnd(); // FREYJA_GROUP
-	
-	//for (i = 0; i < psk.mNumVTXWs; ++i)
-	//{
-	//	/* Store texels */
-	//	t = freyjaTexelStore2f(psk.mVTXWs[i].uv[0], psk.mVTXWs[i].uv[1]);
-	//	
-	//	/* Generates id translator list */
-	//	trans2.Add(i, t);
-	//}
-	
-	for (i = 0; i < psk.mNumFaces; ++i)
-	{
-		/* Start a new polygon */
-		freyjaBegin(FREYJA_POLYGON);
 
-		/* Store vertices and texels by true id, using translator lists */
-		freyjaPolygonVertex1i(transV[psk.mVTXWs[psk.mFaces[i].x].vertex]);
-		t = freyjaTexCoordCreate2f(psk.mVTXWs[psk.mFaces[i].x].uv[0], 
+	for (uint32 i = 0; i < psk.mNumWeights; ++i)
+	{
+		// No index translation needed, since 0.9.5+ doesn't append to meshes.
+		index_t vertex = psk.mWeights[i].vertexIndex;  
+		freyjaMeshVertexWeight(mesh, vertex, psk.mWeights[i].boneIndex, 
+								psk.mWeights[i].weight);
+	}
+
+	for (uint32 i = 0; i < psk.mNumFaces; ++i)
+	{
+		index_t face = freyjaMeshPolygonCreate(mesh);
+		freyjaMeshPolygonMaterial(mesh, face, psk.mFaces[i].material);
+
+		// FIXME: This is actually a bitflag, so wait for PolygonGroupBitFlag()
+		//        to be checked back into the project.
+		freyjaMeshPolygonGroup1u(mesh, face, 0);//psk.mFaces[i].smoothingGroups);
+
+		freyjaMeshPolygonAddVertex1i(mesh, face, psk.mVTXWs[psk.mFaces[i].x].vertex);		
+		freyjaMeshPolygonAddVertex1i(mesh, face, psk.mVTXWs[psk.mFaces[i].y].vertex);
+		freyjaMeshPolygonAddVertex1i(mesh, face, psk.mVTXWs[psk.mFaces[i].z].vertex);
+
+		index_t texcoord = freyjaMeshTexCoordCreate2f(mesh, 
+							 psk.mVTXWs[psk.mFaces[i].x].uv[0], 
 							 psk.mVTXWs[psk.mFaces[i].x].uv[1]);
-		freyjaPolygonTexCoord1i(t);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
 
-		freyjaPolygonVertex1i(transV[psk.mVTXWs[psk.mFaces[i].y].vertex]);
-		t = freyjaTexCoordCreate2f(psk.mVTXWs[psk.mFaces[i].y].uv[0], 
+		texcoord = freyjaMeshTexCoordCreate2f(mesh, 
+							 psk.mVTXWs[psk.mFaces[i].y].uv[0], 
 							 psk.mVTXWs[psk.mFaces[i].y].uv[1]);
-		freyjaPolygonTexCoord1i(t);
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
 
-		freyjaPolygonVertex1i(transV[psk.mVTXWs[psk.mFaces[i].z].vertex]);
-		t = freyjaTexCoordCreate2f(psk.mVTXWs[psk.mFaces[i].z].uv[0], 
+		texcoord = freyjaMeshTexCoordCreate2f(mesh, 
+							 psk.mVTXWs[psk.mFaces[i].z].uv[0], 
 							 psk.mVTXWs[psk.mFaces[i].z].uv[1]);
-		freyjaPolygonTexCoord1i(t);
-		
-		freyjaPolygonMaterial1i(psk.mFaces[i].material);
-		
-		freyjaEnd(); // FREYJA_POLYGON
+		freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoord);
 	}
 
-	/* Generate normals to be pretty */
-	freyjaMeshGenerateVertexNormals(freyjaGetFSMMeshIndex());
-	//freyjaMeshNormalFlip(freyjaGetFSMMeshIndex());
-
-	freyjaEnd(); // FREYJA_MESH
-
-	/*** Import skeleton *********************/
-
-	for (i = 0; i < psk.mNumWeights; ++i)
-	{
-		freyjaVertexWeight(transV[psk.mWeights[i].vertexIndex], 
-						   psk.mWeights[i].weight,
-						   psk.mWeights[i].boneIndex);
-	}
+	/* Generate normals to have lighting. */
+	freyjaMeshGenerateVertexNormals(mesh);
 
 
-	// SKELETON
-	freyjaBegin(FREYJA_SKELETON);
+	/* Construct skeleton and bind pose. */
+	index_t skeleton = freyjaSkeletonCreate();
+	freyjaModelAddSkeleton(model, skeleton);
 	
 	// Root
-	vec_t x, y, z, tx, ty, tz;
-	i = 0;
+	if (0)
 	{
-		q = Quat(psk.mBones[i].restDir[3],
+		uint32 i = 0;
+		hel::Quat q(psk.mBones[i].restDir[3],
 				 psk.mBones[i].restDir[0],
 				 psk.mBones[i].restDir[1],
 				 psk.mBones[i].restDir[2]);
-		q.GetEulerAngles(x, z, y);
 
-		tx = psk.mBones[i].restLoc[0]*scale;
-		tz = -psk.mBones[i].restLoc[1]*scale;
-		ty = psk.mBones[i].restLoc[2]*scale;
+		hel::Vec3 r;
+		q.GetEulerAngles(r.mX, r.mZ, r.mY);
+
+		hel::Vec3 t(psk.mBones[i].restLoc[0],
+					psk.mBones[i].restLoc[2],
+					-psk.mBones[i].restLoc[1]);
+
+		// Back to normal!
+		t = hel::Vec3(t.mX, -t.mZ, t.mY);
+		t = hel::Vec3(t.mX, -t.mZ, t.mY);
+
+		t *= scale;
 
 		/* Start a new bone */
-		freyjaBegin(FREYJA_BONE);
-		index_t bone = freyjaGetCurrent(FREYJA_BONE);
+		index_t bone = freyjaBoneCreate(skeleton);
 		freyjaBoneFlags(bone, 0x0);
 		freyjaBoneName(bone, psk.mBones[i].name);
-		freyjaBoneTranslate3f(bone, tx, ty, tz);
-		freyjaBoneRotateEuler3f(bone, x, y, z);
+		freyjaBoneTranslate3f(bone, t.mX, t.mY, t.mZ);
+		freyjaBoneRotateEuler3f(bone, r.mX, r.mY, r.mZ);
 		freyjaBoneParent(bone, -1);
 
 		/* Setup children */
-		for (j = 0; j < psk.mNumBones; ++j)
+		for (uint32 j = 0; j < psk.mNumBones; ++j)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
 				freyjaBoneAddChild(bone, j);
 			}
 		}
-
-		freyjaEnd(); // FREYJA_BONE
 	}
 
-	for (i = 1; i < psk.mNumBones; ++i)
+	// Rest
+	for (uint32 i = 0; i < psk.mNumBones; ++i)
 	{
-		q = Quat(psk.mBones[i].restDir[3],
+		hel::Quat q(psk.mBones[i].restDir[3],
 				 psk.mBones[i].restDir[0],
 				 psk.mBones[i].restDir[1],
 				 psk.mBones[i].restDir[2]);
-		q.GetEulerAngles(x, z, y);
-		z = -z;
-		y = -y;
 
-		tx = psk.mBones[i].restLoc[0]*scale;
-		ty = psk.mBones[i].restLoc[1]*scale;
-		tz = psk.mBones[i].restLoc[2]*scale;
+		hel::Vec3 r;
+		q.GetEulerAngles(r.mX, r.mY, r.mZ);
 
-		/* Start a new bone */
-		freyjaBegin(FREYJA_BONE);
-		index_t bone = freyjaGetCurrent(FREYJA_BONE);
+		hel::Vec3 t(psk.mBones[i].restLoc[0],
+					psk.mBones[i].restLoc[1],
+					psk.mBones[i].restLoc[2]);
+		t *= scale;
+
+		/* Create a new bone for the skeleton. */
+		index_t bone = freyjaBoneCreate(skeleton);
 		freyjaBoneFlags(bone, 0x0);
 		freyjaBoneName(bone, psk.mBones[i].name);
-		freyjaBoneTranslate3f(bone, tx, ty, tz);
-		freyjaBoneRotateEuler3f(bone, x, y, z);
+		freyjaBoneTranslate3f(bone, t.mX, t.mY, t.mZ);
+		freyjaBoneRotateEuler3f(bone, r.mX, r.mY, r.mZ);
 		freyjaBoneParent(bone, psk.mBones[i].parentIndex);
 
-		/* Setup children */
-		for (j = 0; j < psk.mNumBones; ++j)
+		/* Setup its children. */
+		for (uint32 j = 0; j < psk.mNumBones; ++j)
 		{
 			if (psk.mBones[j].parentIndex == i && i != j)
 			{
 				freyjaBoneAddChild(bone, j);
 			}
 		}
-
-		freyjaEnd(); // FREYJA_BONE
 	}
-
-	freyjaEnd(); // FREYJA_SKELETON
 
 	return 0;
 }
