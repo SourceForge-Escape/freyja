@@ -6,6 +6,10 @@
 
  Kagura prealpha, 0.9.5.7
  20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Information dialog made cleaner.
+ - ADD all stable API dialogs should have generated icon buttons now. 
+ - FIX for bone selection by pick ray ( It was broken by API correction. )
+ - FIX Updated PSK plugin using modern API ( It was still using legacy )
  - Some more misc skeletal fixes / features
  - Object info mode
  - New version numbering to sync packages better and better book-keeping

@@ -554,7 +554,7 @@ void mgtk_destroy_pixbuf(GdkPixbuf *icon)
 }
 
 
-GtkWidget *mgtk_create_icon(char *icon_filename, GtkIconSize icon_size)
+GtkWidget *mgtk_create_icon(const char *icon_filename, GtkIconSize icon_size)
 {
 	GtkWidget *icon = NULL;
 
@@ -584,13 +584,9 @@ int mgtk_create_confirm_dialog(const char *dialog_icon,
 							   const char *cancel_icon, const char *cancel_text,
 							   const char *accept_icon, const char *accept_text)
 {
-	GtkWidget *dialog, *icon, *info, *question, *cancel, *accept, *hbox;
-	int ret = 0;
+	GtkWidget *dialog = gtk_dialog_new();
 
-	dialog = gtk_dialog_new();
-
-
-	hbox = gtk_hbox_new(FALSE, 0);
+	GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
 	gtk_widget_ref(hbox);
 	gtk_object_set_data_full(GTK_OBJECT(GTK_DIALOG(dialog)->vbox), 
 							 "hbox1", hbox, (GtkDestroyNotify)gtk_widget_unref);
@@ -598,26 +594,45 @@ int mgtk_create_confirm_dialog(const char *dialog_icon,
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), 
 					   hbox, FALSE, TRUE, 0);
 
-	icon = mgtk_create_icon((char*)dialog_icon, GTK_ICON_SIZE_DIALOG);
+	GtkWidget *icon = mgtk_create_icon(dialog_icon, GTK_ICON_SIZE_DIALOG);
 
-	info = gtk_label_new(NULL);
+	GtkWidget *info = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(info), information_message);
 	gtk_label_set_selectable(GTK_LABEL(info), TRUE);
 
-	question = gtk_label_new(NULL);
+	GtkWidget *question = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(question), question_message);
 	gtk_label_set_selectable(GTK_LABEL(question), TRUE);
 
 	gtk_container_add(GTK_CONTAINER(hbox), icon);
 	gtk_container_add(GTK_CONTAINER(hbox), info);
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), question);
-	cancel = gtk_dialog_add_button(GTK_DIALOG(dialog), cancel_text, 0);
-	accept = gtk_dialog_add_button(GTK_DIALOG(dialog), accept_text, GTK_RESPONSE_ACCEPT);
-	// FIXME: Add icons to buttons here, or roll own dialog button code
+
+	if (cancel_text && cancel_text[0])
+	{
+		GtkWidget *cancel = gtk_dialog_add_button(GTK_DIALOG(dialog), cancel_text, 0);
+
+		if (cancel)
+		{
+			icon = mgtk_create_icon(cancel_icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
+
+			if (icon)
+				gtk_button_set_image(GTK_BUTTON(cancel), icon);
+		}
+	}
+
+	GtkWidget *accept = gtk_dialog_add_button(GTK_DIALOG(dialog), accept_text, GTK_RESPONSE_ACCEPT);
+
+	/* Add icons to buttons */
+	icon = mgtk_create_icon(accept_icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
+	if (icon && accept)
+		gtk_button_set_image(GTK_BUTTON(accept), icon);
+
 	gtk_widget_show_all(dialog);
 
-
 	/* Force user to close this dialog by stopping other events */
+	int ret = 0;
+
 	switch (gtk_dialog_run(GTK_DIALOG(dialog)))
 	{      
 	case GTK_RESPONSE_ACCEPT:

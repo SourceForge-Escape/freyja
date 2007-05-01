@@ -101,6 +101,8 @@
 
  * Async I/O test with special memory pool, etc ( killable I/O threads )
 
+ * Add back typesetting for GLPrinter ( eg letters like g are repositioned. )
+
  * Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
 	- Bring back old TextureManager to avoid wasting texture memory
 

@@ -177,10 +177,26 @@ bool QueryDialog::Execute()
 		gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), box);
 	}
 
-	cancel = gtk_dialog_add_button(GTK_DIALOG(dialog), mCancelText.c_str(), 0);
+	if (mCancelText.c_str() && mCancelText.c_str()[0])
+	{
+		cancel = gtk_dialog_add_button(GTK_DIALOG(dialog), mCancelText.c_str(), 0);
+		if (cancel)
+		{
+			icon = mgtk_create_icon(mCancelIcon.c_str(), GTK_ICON_SIZE_LARGE_TOOLBAR);
+
+			if (icon)
+				gtk_button_set_image(GTK_BUTTON(cancel), icon);
+		}
+	}
+
 	accept = gtk_dialog_add_button(GTK_DIALOG(dialog), mAcceptText.c_str(), 
 								   GTK_RESPONSE_ACCEPT);
-	// FIXME: Add icons to buttons here, or roll own dialog button code
+	// Add icons to buttons
+	icon = mgtk_create_icon(mAcceptIcon.c_str(), GTK_ICON_SIZE_LARGE_TOOLBAR);
+
+	if (icon)
+		gtk_button_set_image(GTK_BUTTON(accept), icon);
+
 	gtk_widget_show_all(dialog);
 
 

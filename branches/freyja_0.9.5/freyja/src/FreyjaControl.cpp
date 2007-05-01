@@ -3086,25 +3086,35 @@ void FreyjaControl::InfoObject()
 			if (bone == NULL)
 				return;
 
-			mstl::String s = bone->mLocalTransform.ToString();
+			mstl::String info, s;
+
+			info.Set("\nBone #%i\n", bone->GetUID());
+
+			s.Set("\nparent %i\n", bone->GetParent());
+			info += s;
+			
+			info += "\nLocalTransform\n";
+			s = bone->mLocalTransform.ToString();
 			s.Replace('{', ' ');
 			s.Replace('}', '\n');
 			s.Replace('|', '\n');
+			info += s;
 
-			mstl::String s2 = bone->mBindPose.ToString();
-			s2.Replace('{', ' ');
-			s2.Replace('}', '\n');
-			s2.Replace('|', '\n');
+			info += "\nBindPose\n";
+			s = bone->mBindPose.ToString();
+			s.Replace('{', ' ');
+			s.Replace('}', '\n');
+			s.Replace('|', '\n');
+			info += s;
 
-			mstl::String w = bone->mTrack.mWorld.ToString();
-			w.Replace('{', ' ');
-			w.Replace('}', '\n');
-			w.Replace('|', '\n');
+			info += "\nWorld\n";
+			s = bone->mTrack.mWorld.ToString();
+			s.Replace('{', ' ');
+			s.Replace('}', '\n');
+			s.Replace('|', '\n');
+			info += s;
 
-			FREYJA_INFOMSG(0, 
-						   "Bone %i\nmLocalTransform\n%s\nmBindPose\n%s\nmWorld\n%s", 
-						   bone->GetUID(), 
-						   s.c_str(), s2.c_str(), w.c_str());
+			FREYJA_INFOMSG(0, info.c_str());
 		}
 		break;
 
@@ -3433,7 +3443,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
-	case tBone:
+	case tBone:  // FIXME: Only does bind pose for now
 		{
 			hel::Vec3 p;
 			vec_t t, closest;
@@ -3441,7 +3451,8 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 			for (uint32 i = 0, count = freyjaGetBoneCount(); i < count; ++i)
 			{
-				freyjaGetBoneWorldPos3fv(i, p.mVec);
+				freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
+				//freyjaGetBoneWorldPos3fv(i, p.mVec);
 
 				if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, 0.5f, t))
 				{
@@ -3456,7 +3467,8 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if (selected > -1)
 			{
 				SetSelectedBone(selected);
-				freyjaGetBoneWorldPos3fv(selected, mCursor.mPos.mVec);
+				freyjaBoneBindTransformVertex(selected, p.mVec, 1.0f);
+				//freyjaGetBoneWorldPos3fv(selected, mCursor.mPos.mVec);
 
 				switch (GetControlScheme())
 				{
