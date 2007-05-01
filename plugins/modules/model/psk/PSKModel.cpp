@@ -2652,8 +2652,9 @@ int freyja_model__psk_import(char *filename)
 	/* Copy skinned geometry */	
 	for (uint32 i = 0, idx; i < psk.mNumVertices; ++i)
 	{
-		idx = i * 3;
-		Vec3 v(psk.mVertices[idx], psk.mVertices[idx+2], -psk.mVertices[idx+1]);
+		idx = i * 3; 
+		// FIXME: Don't cheat around coord conversion once multibone is fixed ;)
+		Vec3 v(psk.mVertices[idx], psk.mVertices[idx+2], psk.mVertices[idx+1]);
 		v *= scale;
 
 		/*index_t vertex =*/ freyjaMeshVertexCreate3fv(mesh, v.mVec);
@@ -2703,48 +2704,10 @@ int freyja_model__psk_import(char *filename)
 	/* Construct skeleton and bind pose. */
 	index_t skeleton = freyjaSkeletonCreate();
 	freyjaModelAddSkeleton(model, skeleton);
-	
-	// Root
-	if (0)
-	{
-		uint32 i = 0;
-		hel::Quat q(psk.mBones[i].restDir[3],
-				 psk.mBones[i].restDir[0],
-				 psk.mBones[i].restDir[1],
-				 psk.mBones[i].restDir[2]);
 
-		hel::Vec3 r;
-		q.GetEulerAngles(r.mX, r.mZ, r.mY);
+	hel::Mat44 rot;
+	rot.SetRotation(-90.0f, 0.0f, 0.0f);
 
-		hel::Vec3 t(psk.mBones[i].restLoc[0],
-					psk.mBones[i].restLoc[2],
-					-psk.mBones[i].restLoc[1]);
-
-		// Back to normal!
-		t = hel::Vec3(t.mX, -t.mZ, t.mY);
-		t = hel::Vec3(t.mX, -t.mZ, t.mY);
-
-		t *= scale;
-
-		/* Start a new bone */
-		index_t bone = freyjaBoneCreate(skeleton);
-		freyjaBoneFlags(bone, 0x0);
-		freyjaBoneName(bone, psk.mBones[i].name);
-		freyjaBoneTranslate3f(bone, t.mX, t.mY, t.mZ);
-		freyjaBoneRotateEuler3f(bone, r.mX, r.mY, r.mZ);
-		freyjaBoneParent(bone, -1);
-
-		/* Setup children */
-		for (uint32 j = 0; j < psk.mNumBones; ++j)
-		{
-			if (psk.mBones[j].parentIndex == i && i != j)
-			{
-				freyjaBoneAddChild(bone, j);
-			}
-		}
-	}
-
-	// Rest
 	for (uint32 i = 0; i < psk.mNumBones; ++i)
 	{
 		hel::Quat q(psk.mBones[i].restDir[3],
@@ -2758,6 +2721,20 @@ int freyja_model__psk_import(char *filename)
 		hel::Vec3 t(psk.mBones[i].restLoc[0],
 					psk.mBones[i].restLoc[1],
 					psk.mBones[i].restLoc[2]);
+		if (i == 0) 
+		{
+#if 1 // Bah, many of my test models have junk transforms for Bip
+			vec_t tmp = t.mZ;
+			r.mY += helDegToRad(90.0f);
+			t = rot * t;
+			t.mZ = 0.0f;
+			t.mY = tmp;
+#else
+			r.mY += helDegToRad(90.0f);
+			t = rot * t;
+			t.mZ = -t.mZ;
+#endif
+		}
 		t *= scale;
 
 		/* Create a new bone for the skeleton. */

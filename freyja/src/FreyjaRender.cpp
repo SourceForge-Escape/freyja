@@ -339,6 +339,7 @@ void FreyjaRender::AttachMethodListeners()
 	CreateListener("eRenderBoneName", &FreyjaRender::eRenderBoneName);
 	CreateListener("eRenderSkeleton", &FreyjaRender::eRenderSkeleton);
 	CreateListener("eRenderSkeleton2", &FreyjaRender::eRenderSkeleton2);
+	CreateListener("eRenderSkeleton3", &FreyjaRender::eRenderSkeleton3);
 	CreateListener("eRenderVertex", &FreyjaRender::eRenderVertex);
 	CreateListener("eRenderWireframe", &FreyjaRender::eRenderWireframe);
 	CreateListener("eRenderNormals", &FreyjaRender::eRenderNormals);
@@ -1259,10 +1260,11 @@ void FreyjaRender::RenderModel(index_t model)
 
 			glPopMatrix();
 
-			if (freyjaGetBoneParent(i) != INDEX_INVALID)
+			index_t parent = freyjaGetBoneParent(i);
+			if (parent != INDEX_INVALID)
 			{
 				glPushMatrix();
-				glMultMatrixf(freyjaGetBoneBindPose16fv(freyjaGetBoneParent(i)));
+				glMultMatrixf( freyjaGetBoneBindPose16fv(parent) );
 
 				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
 				glColor3fv(PINK) : 
@@ -1275,9 +1277,19 @@ void FreyjaRender::RenderModel(index_t model)
 			}
 		}
 
+		glPopAttrib();
+	}
 
-#define VIS_BONE_ANIM 1
-#if VIS_BONE_ANIM
+	/* Render transformed bones */
+	if (mRenderMode & fBones3)
+	{
+		hel::Vec3 p;
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
 		hel::Mat44 combined;
 
 		// Render spheres and lines
@@ -1305,7 +1317,7 @@ void FreyjaRender::RenderModel(index_t model)
 			if (parent)
 			{
 				//combined = parent->GetInverseBindPose() * parent->mTrack.mWorld;
-				combined = parent->mTrack.mWorld;
+				combined = parent->GetWorldPose();
 
 				glPushMatrix();
 				glMultMatrixf( combined.mMatrix );
@@ -1317,9 +1329,10 @@ void FreyjaRender::RenderModel(index_t model)
 				glPopMatrix();
 			}
 		}
-#endif
+
 		glPopAttrib();
 	}
+
 
 	/* Render bone names */
 	if (mRenderMode & fBoneName)

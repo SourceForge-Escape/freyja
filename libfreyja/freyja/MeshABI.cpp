@@ -1884,77 +1884,20 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 
 
 		/* Matrix animation transform lists */
-
-		// Local transforms...
-		hel::Mat44 localArray[Bone::GetCount()];
-
 		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
 		{
-			localArray[i].SetIdentity(); // Ensure win
-
 			Bone *b = Bone::GetBone(i);
 
 			if (b)
 			{
-				BoneTrack &t = b->GetTrack(track);
-				Vec3 rot = t.GetRot(time);
-				Vec3 loc = t.GetLoc(time);
-
-				// Do some animations use 0 2 1??
-				localArray[i].SetRotation(rot.mX, rot.mY, rot.mZ);
-				localArray[i].Translate(loc);
-
-				//t.mLocal = localArray[i];
-				b->UpdatePose(track, time);
+				b->UpdateWorldPose(track, time);
 			}
 		}
 
-		// World transforms...
-		hel::Mat44 worldArray[Bone::GetCount()];
-		hel::Mat44 worldArrayInverse[Bone::GetCount()];
+		// Looks like I might go with relative transforms for now...
 
-		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
-		{
-			worldArray[i].SetIdentity();
-
-			Bone *b = Bone::GetBone(i);
-
-			if (b)
-			{
-				// FIXME: InverseWorld should be on your little bone machine
-				// FIXME: flesh this out and optimize loop below
-
-				Bone *parent = Bone::GetBone( b->GetParent() );
-
-				worldArray[i] = localArray[i];
-#if 0
-				if (parent)
-				{
-					worldArray[i] = worldArray[i] * localArray[b->GetParent()];
-				}			
-#else
-				if (parent)
-				{
-					while (parent)
-					{
-						//worldArray[i] = localArray[ parent->GetUID() ] * worldArray[i];	
-						tmp2MatrixMultiply(worldArray[i].mMatrix,
-										   localArray[ parent->GetUID() ].mMatrix,
-										   worldArray[i].mMatrix);
-						
-						parent = Bone::GetBone( parent->GetParent() );
-					}
-				}
-#endif
-				//BoneTrack &t = b->GetTrack(track);
-				//t.mWorld = worldArray[i];
-
-				worldArrayInverse[i] = worldArray[i];
-				worldArrayInverse[i].Invert();
-			}
-		}
-
-
+		// FIXME: Decide on which skinning method to enforce.
+		// FIXME: Come back and rework this to avoid all this branching.
 		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
 		{
 			Weight *w = m->GetWeight(i);
@@ -1975,39 +1918,19 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 			Vec3 p;
 			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
 
-#if 1
-			//hel::Mat44 &worldInverse = worldArrayInverse[w->mBoneIndex];
-			hel::Mat44 &world = worldArray[w->mBoneIndex];
-			p = (world * p) * w->mWeight;
 
-			//hel::Mat44 combined = b->GetInverseBindPose() * world;
-			//p = (combined * p) * w->mWeight;
-#elif 0
-			BoneTrack &t = b->GetTrack(track);	
-			Vec3 rot = t.GetRot(time);
-			Vec3 loc = t.GetLoc(time);
+#if 0
+			// The 'right' way
+			hel::Mat44 combined;	
+			tmp2MatrixMultiply(b->GetInverseBindPose().mMatrix,
+							   b->GetWorldPose().mMatrix,
+							   combined.mMatrix);
 
-			hel::Mat44 world;
-			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			world.Rotate(rot.mVec[0], rot.mVec[2], rot.mVec[1]); // R 0 2 1
-			// If this was a 'normal' data stream.. this would work 
-			hel::Mat44 combined = b->GetInverseBindPose() * world;
-			//combined.Transpose();
 			p = (combined * p) * w->mWeight;
-#elif 0
-			hel::Mat44 world;
-			world.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			world.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]); // R 0 2 1
-
-			hel::Mat44 local;
-			loc = b->mTranslation;
-			b->mRotation.GetEulerAngles(rot.mVec[0], rot.mVec[2], rot.mVec[1]);
-			local.Translate(loc.mVec[0], loc.mVec[1], loc.mVec[2]);
-			local.Rotate(rot.mVec[0], rot.mVec[1], rot.mVec[2]);
-			
-			local.Invert();
-			hel::Mat44 combined = local * world;
-			p = (combined * p) * w->mWeight;
+#else
+			p = (b->GetInverseBindPose() * p);
+			p = (b->GetWorldPose() * p);
+			p *= w->mWeight;
 #endif
 
 			array[v->mVertexIndex*3  ] += p.mVec[0]; 

@@ -3088,9 +3088,11 @@ void FreyjaControl::InfoObject()
 
 			mstl::String info, s;
 
-			info.Set("\nBone #%i\n", bone->GetUID());
+			info.Set("\nBone %i, '%s'\n", bone->GetUID(), bone->GetName());
 
-			s.Set("\nparent %i\n", bone->GetParent());
+			Bone *parent = Bone::GetBone( bone->GetParent() );
+			s.Set("\nParent %i, '%s'\n", bone->GetParent(), 
+				  parent ? parent->GetName() : "NULL");
 			info += s;
 			
 			info += "\nLocalTransform\n";
@@ -4810,6 +4812,15 @@ bool FreyjaControl::SaveUserPreferences()
 
 		n = (mRender->GetFlags() & FreyjaRender::fBones) ? 1 : 0;
 		w.Print("(func_set_toggle eRenderSkeleton %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fBones2) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderSkeleton2 %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fBones3) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderSkeleton3 %i)\n", n);
+
+		n = (mRender->GetFlags() & FreyjaRender::fBoneName) ? 1 : 0;
+		w.Print("(func_set_toggle eRenderBoneName %i)\n", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fSkeletalVertexBlending) ? 1 : 0;
 		w.Print("(func_set_toggle eSkeletalDeform %i)\n", n);

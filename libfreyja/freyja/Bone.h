@@ -133,6 +133,12 @@ public:
 	 * Post : Returns this bone's 'rest to world' transform
 	 ------------------------------------------------------*/
 
+	hel::Mat44 &GetWorldPose() { return mTrack.mWorld; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns this bone's 'world' transform
+	 ------------------------------------------------------*/
+
 	byte GetFlags() { return mFlags; }
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -217,22 +223,18 @@ public:
 	 * Post : Set parent relative rotation
 	 ------------------------------------------------------*/
 
-	void UpdatePose(index_t track, vec_t time);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get world transform for <track> and <time>.
-	 ------------------------------------------------------*/
-
 	void UpdateBindPose();
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Pass transform changes up the heirarchy
+	 * Post : Traces back the heirarchy to get a full transform.
+	 *        Alters/updates parents as well.
 	 ------------------------------------------------------*/
 
-	void UpdateWorldPose();
+	void UpdateWorldPose(index_t track, vec_t time);
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Pass transform changes up the heirarchy
+	 * Pre  : Input <track> and <time> is a valid animation.
+	 * Post : Traces back the heirarchy to get a full transform.
+	 *        Alters/updates parents as well.
 	 ------------------------------------------------------*/
 
 	void ClearFlag(BoneFlags f) { mFlags ^= f; }
@@ -249,14 +251,14 @@ public:
 
 	void UpdateBindPose(const hel::Mat44 &m);
 	/*------------------------------------------------------
-	 * Pre  : Pass in parent's bind transform
-	 * Post : Updates this bone and children bind transforms
+	 * Pre  : Pass in local transform for this bone.
+	 * Post : Updates this bone and its child bind transforms.
 	 ------------------------------------------------------*/
 
 	static void UpdateBindPose(index_t boneIndex, hel::Mat44 &m);
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
+	 * Pre  : Pass in local transform for <boneIndex>.
+	 * Post : Updates <boneIndex> and its child bind transforms.
 	 ------------------------------------------------------*/
 
 	mstl::String mMetaData;          /* Metadata for bone */

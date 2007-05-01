@@ -231,52 +231,6 @@ void Bone::SetName(const char *name)
 }
 
 
-void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
-{
-#if 0
-	Bone *b = Bone::GetBone(boneIndex);
-
-	if (b)
-	{
-		if (Bone::GetBone(b->GetParent()) != NULL)
-		{
-			UpdateBindPose(b->GetParent(), m);
-		}
-
-		hel::Mat44 n;
-		n = b->mRotation;
-		n.Translate(b->mTranslation);
-
-		m = m * n;
-		b->mBindPose = m;
-	}
-#else
-	FREYJA_ASSERTMSG(0, "This function is deprecated.");
-#endif
-}
-
-
-void Bone::UpdateBindPose(const hel::Mat44 &m)
-{
-#if 0
-	mBindPose = hel::Mat44(mRotation) * m;
-	mBindPose.Translate(mTranslation.mVec);
-
-	for (uint32 i = 0; i < mChildren.size(); ++i)
-	{
-		Bone *b = GetBone(mChildren[i]);
-
-		if (b)
-		{
-			b->UpdateBindPose(mBindPose);
-		}
-	}
-#else
-	FREYJA_ASSERTMSG(0, "This function is deprecated.");
-#endif
-}
-
-
 // FIXME: Need 'unified' Mat44 math!
 // Remember: Post multiplying column-major will give you row-major
 void tmpMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
@@ -304,36 +258,66 @@ void tmpMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
 }
 
 
+void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
+{
+	Bone *b = Bone::GetBone(boneIndex);
+	
+	if (b)
+	{
+		b->UpdateBindPose(m);
+	}
+}
+
+
+void Bone::UpdateBindPose(const hel::Mat44 &m)
+{
+	mBindPose = m;
+
+	for (uint32 i = 0; i < mChildren.size(); ++i)
+	{
+		Bone *b = GetBone(mChildren[i]);
+
+		if (b)
+		{
+			b->mLocalTransform = b->mRotation;
+			b->mLocalTransform.Translate(b->mTranslation);
+
+			tmpMatrixMultiply(mBindPose.mMatrix, 
+							  b->mLocalTransform.mMatrix,
+							  b->mBindPose.mMatrix);
+
+			b->UpdateBindPose(mBindPose);
+		}
+	}
+}
+
+
 // This assumes absolute not realtive!
-void Bone::UpdatePose(index_t track, vec_t time)
+void Bone::UpdateWorldPose(index_t track, vec_t time)
 {
 	BoneTrack &t = GetTrack(track);
 	hel::Vec3 rot = t.GetRot(time);
 	hel::Vec3 loc = t.GetLoc(time);
 
 	/* In this local case order doesn't matter for these operations. */
+	t.mLocal.SetIdentity();
 	t.mLocal.SetRotation(rot.mX, rot.mY, rot.mZ);
 	t.mLocal.Translate(loc);
 
-#if 1 // Support relative keys... 
-	//t.mLocal = mLocalTransform * t.mLocal;
+	// Relative animations are currently being used...
 	tmpMatrixMultiply(mLocalTransform.mMatrix,  
 					  t.mLocal.mMatrix,
 					  t.mLocal.mMatrix);
-#endif
-
-	t.mWorld.SetIdentity();
 
 	/* Update pose completely to be sure ancestors haven't changed. */
 	Bone *parent = Bone::GetBone( GetParent() );
 
 	if (parent)
 	{
-		parent->UpdatePose(track, time);
+		parent->UpdateWorldPose(track, time);
 
-		// Doesn't use 'track', b/c it's not implemented. ( mTrack[track] )
-		tmpMatrixMultiply(parent->mTrack.mWorld.mMatrix,  
-						  t.mWorld.mMatrix,
+		tmpMatrixMultiply(parent->GetWorldPose().mMatrix,  
+						  t.mLocal.mMatrix,
 						  t.mWorld.mMatrix);
 	}
 	else
@@ -360,21 +344,16 @@ void Bone::UpdateBindPose()
 		tmpMatrixMultiply(parent->mBindPose.mMatrix, 
 						  mLocalTransform.mMatrix,
 						  mBindPose.mMatrix);
-#if 0
-		// For debug logs to compare plugin input coords, which is nasty.  =/
-		printf("******************\n");
-		parent->mLocalTransform.Print();
-		mLocalTransform.Print();
-		mBindPose.Print();
-#endif
 	}
 	else
 	{
 		mBindPose = mLocalTransform;
 	}
 
-	mBindToWorld = mBindPose;
-	mBindToWorld.Invert();
+	mBindPose.GetInverse(mBindToWorld);
+
+	// Update children
+	//UpdateBindPose(mBindPose); // BAD IDEA, don't write code after 0400 ;)
 }
 
 

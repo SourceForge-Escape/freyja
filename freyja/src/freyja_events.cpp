@@ -1933,7 +1933,7 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 								   const char *expression, const char *msg)
 {
 	mstl::String s;
-	s.Set("Information Dialog:\n %s:%i %s()\n %s", 
+	s.Set("Called from:\n %s:%i %s()\n %s", 
 		  file, line, function, msg); // Removed expression 
 
 	ControlPrinter::mLog.Print("[INFO] %s\n", s.c_str());
