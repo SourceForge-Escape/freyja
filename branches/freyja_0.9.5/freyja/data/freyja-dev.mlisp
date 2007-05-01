@@ -311,12 +311,21 @@
 				(toolbar_togglebutton false "24x24/bvol.png" "BoundingBox"
 					"Render Bounding boxes"	eEvent	eRenderBbox)
 
+				(toolbar_separator)
+
 				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones"
-					"Show bones when rendering"		eEvent	eRenderSkeleton)
+					"Show legacy skeleton."		eEvent	eRenderSkeleton)
+
 				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones2"
-					"Show bones2 when rendering"	eEvent	eRenderSkeleton2)
+					"Show bind pose skeleton."	eEvent	eRenderSkeleton2)
+
+				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones3"
+					"Show transformed skeleton."	eEvent	eRenderSkeleton3)
+
 				(toolbar_togglebutton false "24x24/bone-tag.png" "BoneName"
-					"Show bones2 names when rendering"	eEvent	eRenderBoneName)
+					"Show bind pose bone names."	eEvent	eRenderBoneName)
+
+				(toolbar_separator)
 
 				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
 					"Render shadows"		eEvent	eRenderShadow)

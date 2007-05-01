@@ -4,12 +4,19 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.7
+ Kagura prealpha, 0.9.5.8
  20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX relative FK skinning / transforms with API changes 99% done.
+ - API change for Bone::UpdateBindPose(..) is now root->child.
+ - Skeleton3 state event and user preferences for skeleton view states.
  - Information dialog made cleaner.
  - ADD all stable API dialogs should have generated icon buttons now. 
  - FIX for bone selection by pick ray ( It was broken by API correction. )
  - FIX Updated PSK plugin using modern API ( It was still using legacy )
+
+
+ Kagura prealpha, 0.9.5.7
+ 20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Some more misc skeletal fixes / features
  - Object info mode
  - New version numbering to sync packages better and better book-keeping

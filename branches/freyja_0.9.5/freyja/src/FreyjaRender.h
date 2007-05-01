@@ -119,7 +119,8 @@ public:
 		fFPSCap                    = 524288,
 		fGroupColors               = (1<<20),
 		fBones2                    = (1<<21),
-		fBoneName                  = (1<<22)
+		fBoneName                  = (1<<22),
+		fBones3                    = (1<<23)
 		
 	} flags_t;
 
@@ -180,6 +181,14 @@ public:
 
 	void eRenderBoneName(uint32 value)
 	{ SetRenderFlag(fBoneName, value, "Bone name rendering"); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void eRenderSkeleton3(uint32 value)
+	{ SetRenderFlag(fBones3, value, "Skeleton3 rendering"); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
