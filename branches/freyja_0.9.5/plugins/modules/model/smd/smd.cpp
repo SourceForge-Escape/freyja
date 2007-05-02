@@ -35,6 +35,7 @@
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
 #include <mstl/Vector.h>
+#include <hel/Vec3.h>
 
 using namespace mstl;
 
@@ -80,6 +81,7 @@ int freyja_model__smd_check(char *filename)
 
 typedef struct {
 
+	int id;
 	int parent;
 	String name;
 
@@ -88,33 +90,47 @@ typedef struct {
 
 int freyja_model__smd_import(char *filename)
 {
-	SystemIO::TextFileReader r;
-	Vector <unsigned int> transV;
-	Vector <smd_bone_t *> bones;
-	const char *symbol;
-	vec_t x, y, z, rx, ry, rz;
-	int index;
-	unsigned int i, n;
-	vec_t scale;
-
-	int pluginId = freyjaGetPluginId();
-	freyjaGetPluginArg1f(pluginId, "scale", &scale);
-
-	if (freyja_model__smd_check(filename) < 0 || !r.Open(filename))
+	if (freyja_model__smd_check(filename) < 0)
 	{
 		return -1;
 	}
+
+	SystemIO::TextFileReader r;
+	
+	if ( !r.Open(filename) )
+	{
+		perror(filename);
+		return -2;
+	}
+
+	int pluginId = freyjaGetPluginId();
+
+	// Model scale
+	vec_t scale = 0.15f;
+	freyjaGetPluginArg1f(pluginId, "scale", &scale);
+
+	// Skeleton only? || Complete model? || Keyframe?
+	int type = 0;
+	freyjaGetPluginArg1i(pluginId, "type", &type);
+	
+	// If we're in an interactive program this will prompt for arg values.
+	//freyjaPluginRequestUserInput();
 
 	// FIXME: This file format prob shouldn't create new model instances,
 	// since it's used for keyframes, skeletal data only by many
 	index_t model = freyjaModelCreate();
 	index_t skeleton = INDEX_INVALID;
 
+	Vector <smd_bone_t *> bones;
+	const char *symbol;
+	mstl::String mat = "none.mat";
+	index_t matId = 0;
+
 	while ((symbol = r.ParseSymbol()) && !r.IsEndOfFile())
 	{
 		if (!strncmp(symbol, "version", 7))
 		{
-			index = r.ParseInteger();
+			/*int idx =*/ r.ParseInteger();
 		}
 		else if (!strncmp(symbol, "nodes", 5))
 		{
@@ -125,10 +141,10 @@ int freyja_model__smd_import(char *filename)
 				if (!symbol)
 					break;
 
-				index = atoi(symbol);
+				bone->id = atoi(symbol);
 				bone->name = r.ParseStringLiteral();
 				bone->parent = r.ParseInteger();
-				bones.pushBack(bone);
+				bones.push_back(bone);
 			}
 		}
 		else if (!strncmp(symbol, "skeleton", 8))
@@ -141,29 +157,27 @@ int freyja_model__smd_import(char *filename)
 			skeleton = freyjaSkeletonCreate();
 			freyjaModelAddSkeleton(model, skeleton);
 
-
 			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
 				if (!symbol)
 					break;
 
-				index = atoi(symbol);
-				smd_bone_t *bone = bones[index];
+				int idx = atoi(symbol);
+				smd_bone_t *bone = bones[idx];
 
-				if (bone && index < (int)bones.end())
+				if (bone && idx < (int)bones.end())
 				{
-					x = r.ParseFloat();
-					y = r.ParseFloat();
-					z = r.ParseFloat();
+					vec_t x = r.ParseFloat();
+					vec_t y = r.ParseFloat();
+					vec_t z = r.ParseFloat();
 
-					rx = r.ParseFloat();
-					ry = r.ParseFloat();
-					rz = r.ParseFloat();
+					vec_t rx = r.ParseFloat();
+					vec_t ry = r.ParseFloat();
+					vec_t rz = r.ParseFloat();
 
 					index_t b = freyjaBoneCreate(skeleton);
 					freyjaBoneParent(b, bone->parent);
 					freyjaBoneAddChild(bone->parent, b);
-					freyjaSkeletonAddBone(skeleton, b); 
 					freyjaBoneFlags(b, 0x0);
 					freyjaBoneName(b, bone->name.GetCString());
 					freyjaBoneTranslate3f(b, x*scale, y*scale, z*scale);
@@ -171,64 +185,65 @@ int freyja_model__smd_import(char *filename)
 				}
 			}
 
+			freyjaSkeletonUpdateBones(skeleton);
+
+			bones.erase(); // calls delete [] 
+
 			// End skeleton
 		}
 		else if (!strncmp(symbol, "triangles", 9))
 		{
-			n = 0;
-
 			// Start a new mesh
-			freyjaBegin(FREYJA_MESH);
-			freyjaBegin(FREYJA_VERTEX_GROUP);
-
+			index_t mesh = freyjaMeshCreate();
+			freyjaModelAddMesh(model, mesh);
+	
 			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
 				if (!symbol)
 					break;
 
-				//printf("!!!%s %i\n", symbol, n);
+#if 0
+				if (mat != symbol)
+				{
+					matId = freyjaMaterialCreate();
+					freyjaMaterialTexture( idx, freyjaTextureCreateFilename(symbol) );
+					mat = symbol;
+				}
+#endif
 
-				// symbol is material filename eg 'null.bmp'
-				++n;
+				index_t face = freyjaMeshPolygonCreate(mesh);
 
-				freyjaBegin(FREYJA_POLYGON);
+				int parent = r.ParseInteger();
+				freyjaMeshPolygonMaterial(mesh, face, matId);
+				freyjaMeshPolygonGroup1u(mesh, face, matId);
 
-				index = r.ParseInteger();
-				freyjaPolygonMaterial1i(index);
+				hel::Vec3 u;
+				for (unsigned int i = 0; i < 3; ++i)
+				{
+					u = hel::Vec3(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					u *= scale;
+					index_t v = freyjaMeshVertexCreate3fv(mesh, u.mVec);
+					freyjaMeshPolygonAddVertex1i(mesh, face, v);	
 
-				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.ParseFloat()*scale,
-														 r.ParseFloat()*scale,
-														 r.ParseFloat()*scale));
-				freyjaVertexNormal3f(i, r.ParseFloat(),
-									 r.ParseFloat(),
-									 r.ParseFloat());
-				freyjaVertexTexcoord2f(i, r.ParseFloat(), r.ParseFloat());
-
-
-				index = r.ParseInteger();
-				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.ParseFloat()*scale,
-														 r.ParseFloat()*scale,
-														 r.ParseFloat()*scale));
-				freyjaVertexNormal3f(i, r.ParseFloat(),
-									 r.ParseFloat(),
-									 r.ParseFloat());
-				freyjaVertexTexcoord2f(i, r.ParseFloat(), r.ParseFloat());
+					u = hel::Vec3(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					freyjaGetMeshVertexNormal3fv(mesh, v, u.mVec);
+				
+					index_t t = freyjaMeshTexCoordCreate2f(mesh, r.ParseFloat(), r.ParseFloat());
+					freyjaMeshPolygonAddTexCoord1i(mesh, face, t);
 
 
-				index = r.ParseInteger();
-				freyjaPolygonVertex1i(i = freyjaVertexCreate3f(r.ParseFloat()*scale, 
-														 r.ParseFloat()*scale,
-														 r.ParseFloat()*scale));
-				freyjaVertexNormal3f(i, r.ParseFloat(), 
-									 r.ParseFloat(),
-									 r.ParseFloat());
-				freyjaVertexTexcoord2f(i, r.ParseFloat(), r.ParseFloat());
-							  							  
-				freyjaEnd(); // FREYJA_POLYGON
+					// FIXME: Handle optional weights here!
+					// int num_weights;
+					// for num_weights : { int bone_id, vec weight }
+					//
+					// Remaining of 1.0 weight assigned to parent, but
+					// there is no num_weights set parent to 1.0 automatically.
+
+					freyjaMeshVertexWeight(mesh, v, parent, 1.0f);
+				}
+
+						  					
 			}
-
-			freyjaEnd(); // FREYJA_GROUP
-			freyjaEnd(); // FREYJA_MESH
 		}
 	}
 
@@ -304,7 +319,7 @@ int freyja_model__smd_export(char *filename)
 
 			if (!i)
 			{
-				rotation[1] += HEL_DEG_TO_RAD(90.0f);
+				rotation[1] += helDegToRad(90.0f);
 
 				w.Print("%3i %f %f %f %f %f %f\n", i,
 						translation[0], translation[2], translation[1], 

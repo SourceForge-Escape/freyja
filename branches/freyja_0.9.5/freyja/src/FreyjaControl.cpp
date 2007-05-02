@@ -3445,7 +3445,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 		}
 		break;
 
-	case tBone:  // FIXME: Only does bind pose for now
+	case tBone:
 		{
 			hel::Vec3 p;
 			vec_t t, closest;
@@ -3469,8 +3469,9 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if (selected > -1)
 			{
 				SetSelectedBone(selected);
-				freyjaBoneBindTransformVertex(selected, p.mVec, 1.0f);
-				//freyjaGetBoneWorldPos3fv(selected, mCursor.mPos.mVec);
+
+				mCursor.mPos = hel::Vec3();
+				freyjaBoneBindTransformVertex(selected, mCursor.mPos.mVec, 1.0f);
 
 				switch (GetControlScheme())
 				{
@@ -3486,6 +3487,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 							
 							if (key)
 							{
+								// FIXME Not using relative keyframes
 								mCursor.mRotate = key->GetData();
 							}
 
@@ -3493,7 +3495,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 							
 							if (keyLoc)
 							{
-								// Assumes all Keyframes as offsets 
+								// Relative keyframes
 								mCursor.mPos += keyLoc->GetData();
 							}
 						}
@@ -3515,7 +3517,8 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 					;
 				}
 
-				freyja_print("! Bone[%i] selected by pick ray.", selected);
+				freyja_print("! Bone[%i] '%s' selected by pick ray.", 
+							 selected, freyjaGetBoneNameString(selected));
 			}
 		}
 		break;
@@ -4127,10 +4130,11 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			{
 				freyjaBoneTranslate3fv(bone, mCursor.mPos.mVec);
 			}
-			else if (bone != parent)
+			else if (bone != parent) // FIXME: only edits for bind pose for now
 			{
 				hel::Vec3 p;
-				freyjaGetBoneWorldPos3fv(parent, p.mVec);
+				freyjaBoneBindTransformVertex(parent, p.mVec, 1.0f);
+				//freyjaGetBoneWorldPos3fv(parent, p.mVec);
 				//p = b->mRotation.rotate(p);
 				p = mCursor.mPos - p;
 				freyjaBoneTranslate3fv(bone, p.mVec);

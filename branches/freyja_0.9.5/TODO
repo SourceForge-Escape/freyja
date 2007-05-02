@@ -23,8 +23,15 @@
 
  * Add the simple Bezier patch polygon mesh generator back.
 
+ * Shading for editing flat / face normal / etc
+
  * Skeletal animation refactor
+	- Go back and ensure everything is using relative transforms now.
+	- Fix Undo for joint transforms.
+	- Time to separate bone control to BoneEv class, remove from FreyjaControl
+	- Editor needs to revert back to 'Bone' transforms to edit keys in key mode
 	- BoneTrack needs matrix lists for pose
+	- Attachments
 	- Fix remaining FK issues
 	- Various joint types: hinge, ball&socket, etc
 	- IK solver and interface

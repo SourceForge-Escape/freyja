@@ -206,6 +206,7 @@ void helMatrixCopy(matrix_t source, matrix_t dest);
  *
  ------------------------------------------------------*/
 
+void helMatrixPostMultiply(const matrix_t a, const matrix_t b, matrix_t result);
 void helMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result);
 /*------------------------------------------------------
  * Pre  : Multiplies matrices a and b ( column-major )

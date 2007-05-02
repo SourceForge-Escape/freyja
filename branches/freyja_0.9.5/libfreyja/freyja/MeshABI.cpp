@@ -1836,34 +1836,6 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 
 #include "Bone.h"
 
-
-// FIXME: Need 'unified' Mat44 math!
-// Remember: Post multiplying column-major will give you row-major
-void tmp2MatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
-{
-	/* Column order */
-	result[ 0] = a[ 0] * b[ 0] + a[ 4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3];
-	result[ 4] = a[ 0] * b[ 4] + a[ 4] * b[ 5] + a[ 8] * b[ 6] + a[12] * b[ 7];
-	result[ 8] = a[ 0] * b[ 8] + a[ 4] * b[ 9] + a[ 8] * b[10] + a[12] * b[11];
-	result[12] = a[ 0] * b[12] + a[ 4] * b[13] + a[ 8] * b[14] + a[12] * b[15];
-	
-	result[ 1] = a[ 1] * b[ 0] + a[ 5] * b[ 1] + a[ 9] * b[ 2] + a[13] * b[ 3];
-	result[ 5] = a[ 1] * b[ 4] + a[ 5] * b[ 5] + a[ 9] * b[ 6] + a[13] * b[ 7];
-	result[ 9] = a[ 1] * b[ 8] + a[ 5] * b[ 9] + a[ 9] * b[10] + a[13] * b[11];
-	result[13] = a[ 1] * b[12] + a[ 5] * b[13] + a[ 9] * b[14] + a[13] * b[15];
-	
-	result[ 2] = a[ 2] * b[ 0] + a[ 6] * b[ 1] + a[10] * b[ 2] + a[14] * b[ 3];
-	result[ 6] = a[ 2] * b[ 4] + a[ 6] * b[ 5] + a[10] * b[ 6] + a[14] * b[ 7];
-	result[10] = a[ 2] * b[ 8] + a[ 6] * b[ 9] + a[10] * b[10] + a[14] * b[11];
-	result[14] = a[ 2] * b[12] + a[ 6] * b[13] + a[10] * b[14] + a[14] * b[15];
-	
-	result[ 3] = a[ 3] * b[ 0] + a[ 7] * b[ 1] + a[11] * b[ 2] + a[15] * b[ 3];
-	result[ 7] = a[ 3] * b[ 4] + a[ 7] * b[ 5] + a[11] * b[ 6] + a[15] * b[ 7];
-	result[11] = a[ 3] * b[ 8] + a[ 7] * b[ 9] + a[11] * b[10] + a[15] * b[11];
-	result[15] = a[ 3] * b[12] + a[ 7] * b[13] + a[11] * b[14] + a[15] * b[15];
-}
-
-
 void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
@@ -1922,9 +1894,9 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 #if 0
 			// The 'right' way
 			hel::Mat44 combined;	
-			tmp2MatrixMultiply(b->GetInverseBindPose().mMatrix,
-							   b->GetWorldPose().mMatrix,
-							   combined.mMatrix);
+			helPostMatrixMultiply(b->GetInverseBindPose().mMatrix,
+								  b->GetWorldPose().mMatrix,
+								  combined.mMatrix);
 
 			p = (combined * p) * w->mWeight;
 #else

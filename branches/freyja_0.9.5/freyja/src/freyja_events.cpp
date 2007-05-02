@@ -738,6 +738,15 @@ void eClearWeight()
 	}
 }
 
+
+void eBoneRefreshBindPose()
+{
+	index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+	Bone *b = Bone::GetBone( bone );
+	if (b) b->UpdateBindPose();
+}
+
+
 void eMirrorMeshX()
 {
 	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
@@ -1222,7 +1231,7 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
 	ResourceEventCallbackString::add("eTestBoneMetadataText", &eTestBoneMetadataText);
 
-
+	ResourceEventCallback::add("eBoneRefreshBindPose", &eBoneRefreshBindPose);
 	ResourceEventCallback::add("eBoneMetaData", &eTestBoneMetadata);
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);

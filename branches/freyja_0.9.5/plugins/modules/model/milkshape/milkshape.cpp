@@ -581,6 +581,8 @@ int freyja_model__milkshape_import(char *filename)
 		}
 	}
 
+	freyjaSkeletonUpdateBones(skeleton);
+
 	return 0;
 }
 
