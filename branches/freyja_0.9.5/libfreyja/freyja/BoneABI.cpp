@@ -566,6 +566,7 @@ void freyjaBoneUpdateBindPose(index_t bone)
 	if ( b )
 	{
 		b->UpdateBindPose();
+		b->UpdateBindPoseForChildren();
 	}
 }
 

@@ -276,19 +276,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-#if 0
-	void UpdateBindPose(const hel::Mat44 &m);
-	/*------------------------------------------------------
-	 * Pre  : Pass in local transform for this bone.
-	 * Post : Updates this bone and its child bind transforms.
-	 ------------------------------------------------------*/
-
-	static void UpdateBindPose(index_t boneIndex, hel::Mat44 &m);
-	/*------------------------------------------------------
-	 * Pre  : Pass in local transform for <boneIndex>.
-	 * Post : Updates <boneIndex> and its child bind transforms.
-	 ------------------------------------------------------*/
-#endif
 
 	mstl::String mMetaData;          /* Metadata for bone */
 
