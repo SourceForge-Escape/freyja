@@ -2754,6 +2754,8 @@ int freyja_model__psk_import(char *filename)
 			}
 		}
 	}
+			
+	freyjaSkeletonUpdateBones(skeleton);
 
 	return 0;
 }

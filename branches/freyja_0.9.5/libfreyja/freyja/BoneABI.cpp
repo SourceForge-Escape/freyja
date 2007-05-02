@@ -21,6 +21,7 @@
 
 #include "freyja.h"
 #include "Bone.h"
+#include "SkeletonABI.h"
 #include "BoneABI.h"
 
 using namespace freyja;
@@ -118,6 +119,9 @@ index_t freyjaBoneCreate(index_t skeletonIndex)
 	Bone *b = FREYJA_NEW Bone();
 	b->mSkeleton = skeletonIndex;
 	b->AddToPool();
+
+	freyjaSkeletonAddBone(skeletonIndex, b->GetUID());
+
 	return b->GetUID();
 }
 

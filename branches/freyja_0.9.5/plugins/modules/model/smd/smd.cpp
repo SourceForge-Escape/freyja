@@ -177,11 +177,13 @@ int freyja_model__smd_import(char *filename)
 
 					index_t b = freyjaBoneCreate(skeleton);
 					freyjaBoneParent(b, bone->parent);
-					freyjaBoneAddChild(bone->parent, b);
 					freyjaBoneFlags(b, 0x0);
 					freyjaBoneName(b, bone->name.GetCString());
 					freyjaBoneTranslate3f(b, x*scale, y*scale, z*scale);
 					freyjaBoneRotateEuler3f(b, rx, ry, rz);
+
+					if (bone->parent >= 0)
+						freyjaBoneAddChild(bone->parent, b);
 				}
 			}
 

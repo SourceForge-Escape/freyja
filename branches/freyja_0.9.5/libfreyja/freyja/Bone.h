@@ -184,50 +184,74 @@ public:
 	void AddChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Add child bone to this bone by by UID
+	 * Post : Add child bone to this bone by <child> UID.
+	 *
 	 ------------------------------------------------------*/
 
 	index_t NewTrack() { mTrackCount = 1; return 0;}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Only supporting one 'range/anim' in test: F(track) <- F(0) 
+	 *
 	 ------------------------------------------------------*/
 
 	void RemoveChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Remove child bone of this bone by by UID
+	 * Post : Remove child bone of this bone by <child> UID.
+	 *
 	 ------------------------------------------------------*/
 
 	bool Serialize(SystemIO::TextFileReader &r);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	void SetName(const char *name);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Set human readable name
+	 * Post : Set human readable name.
+	 *
 	 ------------------------------------------------------*/
 
 	void SetLoc(const hel::Vec3 &v);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Set parent relative translation
+	 * Post : Set parent relative translation.
+	 *
 	 ------------------------------------------------------*/
 
 	void SetRot(const hel::Quat &q);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Set parent relative rotation
+	 * Post : Set parent relative rotation.
+	 *
 	 ------------------------------------------------------*/
 
 	void UpdateBindPose();
 	/*------------------------------------------------------
 	 * Pre  :  
+	 * Post : Only updates bind pose for this bone using
+	 *        parent bind transform and a newly computed
+	 *        local transform.
+	 *
+	 ------------------------------------------------------*/
+
+	void UpdateBindPoseForParent();
+	/*------------------------------------------------------
+	 * Pre  :  
 	 * Post : Traces back the heirarchy to get a full transform.
-	 *        Alters/updates parents as well.
+	 *        Alters/updates parents as well as this bone.
+	 *
+	 ------------------------------------------------------*/
+
+	void UpdateBindPoseForChildren();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates this bone's child bind transforms only.
+	 *
 	 ------------------------------------------------------*/
 
 	void UpdateWorldPose(index_t track, vec_t time);
@@ -235,30 +259,28 @@ public:
 	 * Pre  : Input <track> and <time> is a valid animation.
 	 * Post : Traces back the heirarchy to get a full transform.
 	 *        Alters/updates parents as well.
+	 *
 	 ------------------------------------------------------*/
 
-	void ClearFlag(BoneFlags f) { mFlags ^= f; }
+	void ClearFlag(BoneFlags f) { mFlags &= ~f; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post :Set a single flag 'off' 
+	 *
 	 ------------------------------------------------------*/
 
 	void SetFlag(BoneFlags f) { mFlags |= f; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Set a single flag 'on'
+	 *
 	 ------------------------------------------------------*/
 
+#if 0
 	void UpdateBindPose(const hel::Mat44 &m);
 	/*------------------------------------------------------
 	 * Pre  : Pass in local transform for this bone.
 	 * Post : Updates this bone and its child bind transforms.
-	 ------------------------------------------------------*/
-
-	void UpdateBindPoseForChildren();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Updates this bone's child bind transforms only.
 	 ------------------------------------------------------*/
 
 	static void UpdateBindPose(index_t boneIndex, hel::Mat44 &m);
@@ -266,6 +288,7 @@ public:
 	 * Pre  : Pass in local transform for <boneIndex>.
 	 * Post : Updates <boneIndex> and its child bind transforms.
 	 ------------------------------------------------------*/
+#endif
 
 	mstl::String mMetaData;          /* Metadata for bone */
 
