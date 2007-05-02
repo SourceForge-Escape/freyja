@@ -232,27 +232,6 @@ void Bone::SetName(const char *name)
 }
 
 
-#if 0
-void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
-{
-	Bone *b = Bone::GetBone(boneIndex);
-	
-	if (b)
-	{
-		b->UpdateBindPose(m);
-	}
-}
-
-
-void Bone::UpdateBindPose(const hel::Mat44 &m)
-{
-	mBindPose = m;
-	mBindPose.GetInverse(mBindToWorld);
-	UpdateBindPoseForChildren();
-}
-#endif
-
-
 void Bone::UpdateBindPose()
 {
 	// In this local case order doesn't matter for these operations

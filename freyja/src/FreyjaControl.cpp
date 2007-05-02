@@ -3866,6 +3866,7 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionBoneTransform(GetSelectedBone(), action, v);
 			ActionModelModified(a);
 			freyjaBoneTransform3fv(GetSelectedBone(), action, v.mVec);
+			freyjaBoneUpdateBindPose(GetSelectedBone());
 		}
 		break;
 
