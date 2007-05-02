@@ -361,7 +361,18 @@ void freyjaSkeletonAddBone(index_t skeletonIndex, index_t boneIndex)
 
 	if (skel && bone)
 	{
-		skel->AddBone(boneIndex);
+		unsigned int i;
+		bool found = false;
+
+		foreach (skel->GetBones(), i)
+		{
+			if (skel->GetBones()[i] == boneIndex )
+				found = true;
+		}
+
+		if (!found)
+			skel->AddBone(boneIndex);
+
 		bone->mSkeleton = skel->GetUID();
 	}
 }

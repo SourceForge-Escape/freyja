@@ -232,6 +232,7 @@ void Bone::SetName(const char *name)
 }
 
 
+#if 0
 void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
 {
 	Bone *b = Bone::GetBone(boneIndex);
@@ -248,6 +249,60 @@ void Bone::UpdateBindPose(const hel::Mat44 &m)
 	mBindPose = m;
 	mBindPose.GetInverse(mBindToWorld);
 	UpdateBindPoseForChildren();
+}
+#endif
+
+
+void Bone::UpdateBindPose()
+{
+	// In this local case order doesn't matter for these operations
+	mLocalTransform = mRotation;
+	mLocalTransform.Translate(mTranslation);
+
+	Bone *parent = Bone::GetBone( GetParent() );
+
+	if (parent)
+	{
+		helMatrixPostMultiply(parent->mBindPose.mMatrix, 
+							  mLocalTransform.mMatrix,
+							  mBindPose.mMatrix);
+	}
+	else
+	{
+		mBindPose = mLocalTransform;
+	}
+
+	mBindPose.GetInverse(mBindToWorld);
+}
+
+
+void Bone::UpdateBindPoseForParent()
+{
+	// In this local case order doesn't matter for these operations
+	mLocalTransform = mRotation;
+	mLocalTransform.Translate(mTranslation);
+
+	Bone *parent = Bone::GetBone( GetParent() );
+
+	if (parent)
+	{
+		parent->UpdateBindPose();
+
+		// FIXME: Pre or Post?  damn refactoring -- time to move into the API
+		//mBindPose = parent->mBindPose * mLocalTransform;
+		helMatrixPostMultiply(parent->mBindPose.mMatrix, 
+							  mLocalTransform.mMatrix,
+							  mBindPose.mMatrix);
+	}
+	else
+	{
+		mBindPose = mLocalTransform;
+	}
+
+	mBindPose.GetInverse(mBindToWorld);
+
+	// Update children
+	//UpdateBindPose(mBindPose); // BAD IDEA, don't write code after 0400 ;)
 }
 
 
@@ -304,36 +359,6 @@ void Bone::UpdateWorldPose(index_t track, vec_t time)
 	{
 		t.mWorld = t.mLocal;
 	}	
-}
-
-
-void Bone::UpdateBindPose()
-{
-	// In this local case order doesn't matter for these operations
-	mLocalTransform = mRotation;
-	mLocalTransform.Translate(mTranslation);
-
-	Bone *parent = Bone::GetBone( GetParent() );
-
-	if (parent)
-	{
-		parent->UpdateBindPose();
-
-		// FIXME: Pre or Post?  damn refactoring -- time to move into the API
-		//mBindPose = parent->mBindPose * mLocalTransform;
-		helMatrixPostMultiply(parent->mBindPose.mMatrix, 
-							  mLocalTransform.mMatrix,
-							  mBindPose.mMatrix);
-	}
-	else
-	{
-		mBindPose = mLocalTransform;
-	}
-
-	mBindPose.GetInverse(mBindToWorld);
-
-	// Update children
-	//UpdateBindPose(mBindPose); // BAD IDEA, don't write code after 0400 ;)
 }
 
 

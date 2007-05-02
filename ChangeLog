@@ -6,6 +6,7 @@
 
  Kagura prealpha, 0.9.5.8
  20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Skeleton / Bone ABI changes
  - Bone selection/cursor placement tweak
  - BinePose update API cleanup
  - FIX SMD plugin updated for new API
