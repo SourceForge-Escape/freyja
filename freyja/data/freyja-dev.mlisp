@@ -224,6 +224,7 @@
 				(menu_item "_Parent"		eBoneLinkChild)
 				(menu_item "_Unparent"		eBoneUnLinkChild)
 				(menu_item "_Metadata"		eBoneMetaData)
+				(menu_item	"_Update"		eBoneRefreshBindPose)
 				;old (menu_item "L_ink mesh"		eBoneLinkMesh)
 				;old (menu_item "U_nlink mesh"		eBoneUnLinkMesh)
 				;(menu_item "_Move"				eBoneMoveJoint)

@@ -317,12 +317,30 @@ void freyjaSkeletonDelete(index_t skeletonIndex)
 void freyjaSkeletonUpdateBones(index_t skeletonIndex)
 {
 	Skeleton *skel = Skeleton::GetSkeleton(skeletonIndex);
+
+	if (!skel)
+		return;
+
+	uint32 i;
+	foreach( skel->GetBones(), i )
+	{
+		Bone *b = Bone::GetBone( skel->GetBones()[i] );
+
+		if (b)
+		{
+			b->UpdateBindPose();	
+		}
+	}
+
+#if 0 // not all joints are children of root 
 	Bone *root = Bone::GetBone(skel ? skel->GetRoot() : 0);
 
 	if (root) 
 	{
 		root->UpdateBindPose();
+		root->UpdateBindPoseForChildren();
 	}
+#endif
 }
 
 

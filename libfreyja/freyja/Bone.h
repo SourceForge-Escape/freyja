@@ -3,10 +3,10 @@
  * 
  * Project : freyja
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.icculus.org/~mongoose/
- * Email   : mongoose@icculus.org
+ * Website : http://www.icculus.org/freyja
+ * Email   : mongooseichiban@gmail.com
  * Object  : Bone
- * License : No use w/o permission (C) 2005 Mongoose
+ * License : No use w/o permission (C) 2005-2007 Mongoose
  * Comments: This is part of the skeletal animation subsystem
  *
  *           Skeletons and their animations are seperate data structures, so
@@ -253,6 +253,12 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : Pass in local transform for this bone.
 	 * Post : Updates this bone and its child bind transforms.
+	 ------------------------------------------------------*/
+
+	void UpdateBindPoseForChildren();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates this bone's child bind transforms only.
 	 ------------------------------------------------------*/
 
 	static void UpdateBindPose(index_t boneIndex, hel::Mat44 &m);

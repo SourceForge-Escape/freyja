@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <hel/math.h>
 #include "Bone.h"
 
 using namespace freyja;
@@ -231,33 +232,6 @@ void Bone::SetName(const char *name)
 }
 
 
-// FIXME: Need 'unified' Mat44 math!
-// Remember: Post multiplying column-major will give you row-major
-void tmpMatrixMultiply(const matrix_t a, const matrix_t b, matrix_t result)
-{
-	/* Column order */
-	result[ 0] = a[ 0] * b[ 0] + a[ 4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3];
-	result[ 4] = a[ 0] * b[ 4] + a[ 4] * b[ 5] + a[ 8] * b[ 6] + a[12] * b[ 7];
-	result[ 8] = a[ 0] * b[ 8] + a[ 4] * b[ 9] + a[ 8] * b[10] + a[12] * b[11];
-	result[12] = a[ 0] * b[12] + a[ 4] * b[13] + a[ 8] * b[14] + a[12] * b[15];
-	
-	result[ 1] = a[ 1] * b[ 0] + a[ 5] * b[ 1] + a[ 9] * b[ 2] + a[13] * b[ 3];
-	result[ 5] = a[ 1] * b[ 4] + a[ 5] * b[ 5] + a[ 9] * b[ 6] + a[13] * b[ 7];
-	result[ 9] = a[ 1] * b[ 8] + a[ 5] * b[ 9] + a[ 9] * b[10] + a[13] * b[11];
-	result[13] = a[ 1] * b[12] + a[ 5] * b[13] + a[ 9] * b[14] + a[13] * b[15];
-	
-	result[ 2] = a[ 2] * b[ 0] + a[ 6] * b[ 1] + a[10] * b[ 2] + a[14] * b[ 3];
-	result[ 6] = a[ 2] * b[ 4] + a[ 6] * b[ 5] + a[10] * b[ 6] + a[14] * b[ 7];
-	result[10] = a[ 2] * b[ 8] + a[ 6] * b[ 9] + a[10] * b[10] + a[14] * b[11];
-	result[14] = a[ 2] * b[12] + a[ 6] * b[13] + a[10] * b[14] + a[14] * b[15];
-	
-	result[ 3] = a[ 3] * b[ 0] + a[ 7] * b[ 1] + a[11] * b[ 2] + a[15] * b[ 3];
-	result[ 7] = a[ 3] * b[ 4] + a[ 7] * b[ 5] + a[11] * b[ 6] + a[15] * b[ 7];
-	result[11] = a[ 3] * b[ 8] + a[ 7] * b[ 9] + a[11] * b[10] + a[15] * b[11];
-	result[15] = a[ 3] * b[12] + a[ 7] * b[13] + a[11] * b[14] + a[15] * b[15];
-}
-
-
 void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
 {
 	Bone *b = Bone::GetBone(boneIndex);
@@ -272,8 +246,14 @@ void Bone::UpdateBindPose(index_t boneIndex, hel::Mat44 &m)
 void Bone::UpdateBindPose(const hel::Mat44 &m)
 {
 	mBindPose = m;
+	mBindPose.GetInverse(mBindToWorld);
+	UpdateBindPoseForChildren();
+}
 
-	for (uint32 i = 0; i < mChildren.size(); ++i)
+
+void Bone::UpdateBindPoseForChildren()
+{
+	for (uint32 i = 0, n = mChildren.size(); i < n; ++i)
 	{
 		Bone *b = GetBone(mChildren[i]);
 
@@ -282,17 +262,17 @@ void Bone::UpdateBindPose(const hel::Mat44 &m)
 			b->mLocalTransform = b->mRotation;
 			b->mLocalTransform.Translate(b->mTranslation);
 
-			tmpMatrixMultiply(mBindPose.mMatrix, 
-							  b->mLocalTransform.mMatrix,
-							  b->mBindPose.mMatrix);
+			helMatrixPostMultiply(mBindPose.mMatrix, 
+								  b->mLocalTransform.mMatrix,
+								  b->mBindPose.mMatrix);
 
-			b->UpdateBindPose(mBindPose);
+			b->mBindPose.GetInverse(b->mBindToWorld);
+			b->UpdateBindPoseForChildren();
 		}
 	}
 }
 
 
-// This assumes absolute not realtive!
 void Bone::UpdateWorldPose(index_t track, vec_t time)
 {
 	BoneTrack &t = GetTrack(track);
@@ -304,10 +284,10 @@ void Bone::UpdateWorldPose(index_t track, vec_t time)
 	t.mLocal.SetRotation(rot.mX, rot.mY, rot.mZ);
 	t.mLocal.Translate(loc);
 
-	// Relative animations are currently being used...
-	tmpMatrixMultiply(mLocalTransform.mMatrix,  
-					  t.mLocal.mMatrix,
-					  t.mLocal.mMatrix);
+	/* Relative animations are currently being used... */
+	helMatrixPostMultiply(mLocalTransform.mMatrix,  
+						  t.mLocal.mMatrix,
+						  t.mLocal.mMatrix);
 
 	/* Update pose completely to be sure ancestors haven't changed. */
 	Bone *parent = Bone::GetBone( GetParent() );
@@ -316,9 +296,9 @@ void Bone::UpdateWorldPose(index_t track, vec_t time)
 	{
 		parent->UpdateWorldPose(track, time);
 
-		tmpMatrixMultiply(parent->GetWorldPose().mMatrix,  
-						  t.mLocal.mMatrix,
-						  t.mWorld.mMatrix);
+		helMatrixPostMultiply(parent->GetWorldPose().mMatrix,  
+							  t.mLocal.mMatrix,
+							  t.mWorld.mMatrix);
 	}
 	else
 	{
@@ -333,17 +313,17 @@ void Bone::UpdateBindPose()
 	mLocalTransform = mRotation;
 	mLocalTransform.Translate(mTranslation);
 
-	// FIXME: Pre or Post?  damn refactoring  =[
 	Bone *parent = Bone::GetBone( GetParent() );
 
 	if (parent)
 	{
 		parent->UpdateBindPose();
 
+		// FIXME: Pre or Post?  damn refactoring -- time to move into the API
 		//mBindPose = parent->mBindPose * mLocalTransform;
-		tmpMatrixMultiply(parent->mBindPose.mMatrix, 
-						  mLocalTransform.mMatrix,
-						  mBindPose.mMatrix);
+		helMatrixPostMultiply(parent->mBindPose.mMatrix, 
+							  mLocalTransform.mMatrix,
+							  mBindPose.mMatrix);
 	}
 	else
 	{
