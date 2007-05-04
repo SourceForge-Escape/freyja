@@ -86,6 +86,13 @@ extern "C" {
 	 * Post : Returns mesh local index of vertex created.
 	 ------------------------------------------------------*/
 
+	// Depends on legacy removal to enable
+	//index_t freyjaMeshVertexCreate3f(index_t mesh, vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns mesh local index of vertex created.
+	 ------------------------------------------------------*/
+
 	void freyjaMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 

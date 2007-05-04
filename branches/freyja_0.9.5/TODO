@@ -11,9 +11,14 @@
 	- Make sure everything is converting between types properly.
 
  * Fix mouse cursor control.
+	- Fix LEFT 'ALL' select on move cursor
 	- Reverse direction bug.
 	- Rotation modifier not WYSIWYG.
 	- Transform has a 'pop' or 'jump' in model and mesh modes
+
+ * Checker/colorcube texture generators
+
+ * Light editor improvements
 
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 
@@ -62,6 +67,9 @@
 	- ZIP file based pak format for freyja format models w/ textures, etc?
 	- Rendering support for alpha flagged faces ( partial depth sorting )
 	- Face flag for marking faces that need to be depth sorted... 
+
+ * Add back side panel hide option ( Do it like this to support older Gtk+ ) 
+	- [gl context][hide/show button][side panel]
 
  * Finish breakup of GUI control into modules.
 

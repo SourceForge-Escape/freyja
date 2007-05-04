@@ -1063,6 +1063,8 @@ private:
 		UpdateSkeletonUI_Callback(0); // Update skeletal UI
 		mCursor.Reset();
 		mCleared = true;
+
+		RefreshContext();
 	}
 
 	void MoveObject(vec_t vx, vec_t vy);

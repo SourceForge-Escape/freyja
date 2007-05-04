@@ -121,6 +121,11 @@ int mgtk_get_query_dialog_int(const char *dialog, const char *symbol);
  * Post : Returns <symbol> value if found in <dialog> or 0
  ------------------------------------------------------*/
 
+//void mgtk_hide(int wid);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
 }
 
 

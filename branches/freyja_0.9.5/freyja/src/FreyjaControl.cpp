@@ -3638,6 +3638,85 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 
 	switch (obj)
 	{
+#if FIXME
+	case tBone:
+		if (mToken)
+		{
+			Bone *b = Bone::GetBone(GetSelectedBone());
+
+			freyjaBoneBindTransformVertex(selected, mCursor.mPos.mVec, 1.0f);
+
+			switch (GetControlScheme())
+			{
+			case eScheme_Animation:
+				{				const uint32 track = 0;
+
+				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+				Vec3x3KeyFrame *key = m->GetTransformTrack(track).GetKeyframe(k);
+				
+				if (key)
+				{
+					switch (action)
+					{
+					case fRotate:
+						key->mData[0] = v;
+						break;
+						
+					case fScale:
+						key->mData[1] = v;
+						break;
+						
+					case fTranslate:
+						key->mData[2] = v;
+						break;
+
+					default:
+						freyja_print("! Keyframe transform (%s) is unsupported",
+									 ActionToString(action).c_str());
+					}
+				}
+					if (b)
+					{
+							uint32 anim = GetSelectedAnimation();
+							BoneTrack &track = b->GetTrack(anim);
+							uint32 k = GetSelectedKeyFrame();
+							Vec3KeyFrame *key = track.GetRotKeyframe(k);
+							
+							if (key)
+							{
+								// FIXME Not using relative keyframes
+								mCursor.mRotate = key->GetData();
+							}
+
+							Vec3KeyFrame *keyLoc = track.GetLocKeyframe(k);
+							
+							if (keyLoc)
+							{
+								// Relative keyframes
+								mCursor.mPos += keyLoc->GetData();
+							}
+						}
+					}
+					break;
+
+				case eScheme_Model:
+					{
+						hel::Vec3 o;
+						// Set cursor rotation
+						freyjaGetBoneRotationEuler3fv(GetSelectedBone(),o.mVec);
+						mCursor.mRotate.mVec[0] = helRadToDeg(o.mVec[0]);
+						mCursor.mRotate.mVec[1] = helRadToDeg(o.mVec[1]);
+						mCursor.mRotate.mVec[2] = helRadToDeg(o.mVec[2]);
+					}
+					break;
+					
+				default:
+					;
+				}
+
+		break;
+#endif
+
 	case tMesh:
 		if (mToken)
 		{
@@ -4129,16 +4208,68 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 			}
 			else if (parent == INDEX_INVALID)
 			{
-				freyjaBoneTranslate3fv(bone, mCursor.mPos.mVec);
+				switch (GetControlScheme())
+				{
+				case eScheme_Animation:
+					{
+						BoneTrack &track = b->GetTrack(GetSelectedAnimation());
+						uint32 k = GetSelectedKeyFrame();
+						Vec3KeyFrame *key = track.GetLocKeyframe(k);
+							
+						if (key)
+						{
+							hel::Vec3 p;
+							freyjaBoneBindTransformVertex(bone, p.mVec, 1.0f);
+							p = mCursor.mPos - p;
+							key->SetData(mCursor.mPos);
+						}
+					}
+					break;
+
+				case eScheme_Model:
+					freyjaBoneTranslate3fv(bone, mCursor.mPos.mVec);
+					freyjaBoneUpdateBindPose(GetSelectedBone());
+					break;
+
+				default:
+					;
+				}
 			}
 			else if (bone != parent) // FIXME: only edits for bind pose for now
 			{
-				hel::Vec3 p;
-				freyjaBoneBindTransformVertex(parent, p.mVec, 1.0f);
-				//freyjaGetBoneWorldPos3fv(parent, p.mVec);
-				//p = b->mRotation.rotate(p);
-				p = mCursor.mPos - p;
-				freyjaBoneTranslate3fv(bone, p.mVec);
+				switch (GetControlScheme())
+				{
+				case eScheme_Animation:
+					{
+						BoneTrack &track = b->GetTrack(GetSelectedAnimation());
+						uint32 k = GetSelectedKeyFrame();
+						Vec3KeyFrame *key = track.GetLocKeyframe(k);
+							
+						if (key)
+						{
+							hel::Vec3 p;
+							freyjaBoneBindTransformVertex(bone, p.mVec, 1.0f);
+							p = mCursor.mPos - p;
+							key->SetData(mCursor.mPos);
+						}
+					}
+					break;
+
+				case eScheme_Model:
+					{
+						hel::Vec3 p;
+						freyjaBoneBindTransformVertex(parent, p.mVec, 1.0f);
+						//freyjaGetBoneWorldPos3fv(parent, p.mVec);
+						//p = b->mRotation.rotate(p);
+						p = mCursor.mPos - p;
+						freyjaBoneTranslate3fv(bone, p.mVec);
+						freyjaBoneUpdateBindPose(GetSelectedBone());
+					}
+					break;
+
+				default:
+					;
+				}
 			}
 		}
 		break;
@@ -4400,6 +4531,8 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 								 p.mVec[0], p.mVec[1], p.mVec[2]);
 #endif
 				}
+
+				freyjaBoneUpdateBindPose(GetSelectedBone());
 				freyja_print("rot %f %f %f", xyz[0], xyz[1], xyz[2]);
 				break;
 

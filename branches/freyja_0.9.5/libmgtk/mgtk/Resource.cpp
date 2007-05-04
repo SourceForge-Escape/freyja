@@ -514,6 +514,7 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *box);
 arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box);
 arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box);
 arg_list_t *mgtk_rc_expander(arg_list_t *box);
+arg_list_t *mgtk_rc_expander_hbox(arg_list_t *box);
 arg_list_t *mgtk_rc_summonbox(arg_list_t *box);
 arg_list_t *mgtk_rc_statusbar(arg_list_t *box);
 arg_list_t *mgtk_rc_textview(arg_list_t *args);
@@ -589,6 +590,7 @@ Resource::Resource() :
 	RegisterFunction("toolbar_separator", mgtk_rc_toolbar_separator);
 	RegisterFunction("func_set_toggle", mgtk_func_toggle_set);
 	RegisterFunction("expander", mgtk_rc_expander);
+	RegisterFunction("expander_hbox", mgtk_rc_expander_hbox);
 	RegisterFunction("summonbox", mgtk_rc_summonbox);
 
 	RegisterInt("IconSize_Menu", 1);

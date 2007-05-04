@@ -626,6 +626,71 @@ arg_list_t *mgtk_rc_expander(arg_list_t *box)
 }
 
 
+arg_list_t *mgtk_rc_expander_hbox(arg_list_t *box)
+{
+	arg_enforce_type(&box,  ARG_GTK_BOX_WIDGET);
+	MGTK_ASSERTMSG(box, "box == ARG_GTK_BOX_WIDGET\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+
+	if (!box)
+	{
+		return NULL;
+	}
+
+	arg_list_t *label;
+	symbol_enforce_type(&label,  CSTRING);
+	MGTK_ASSERTMSG(label, "label == CSTRING\nMLISP (%s:%i)", 
+				   mlisp_get_filename(), mlisp_get_line_num());
+
+	arg_list_t *show;
+	symbol_enforce_type_assert(&show, INT);
+	//MGTK_ASSERTMSG(show, "show == INT\nMLISP (%s:%i)", 
+	//			   mlisp_get_filename(), mlisp_get_line_num());
+
+	arg_list_t *name = NULL;
+	if (mlisp_peek_for_vargs())
+	{
+		symbol_enforce_type_assert(&name, CSTRING);
+		//MGTK_ASSERTMSG(name, "name == CSTRING\nMLISP (%s:%i)", 
+		//			   mlisp_get_filename(), mlisp_get_line_num());
+	}
+
+	arg_list_t *ret = NULL;
+
+	if (label && show)
+	{
+		GtkWidget *expander = gtk_expander_new("");//mlisp_get_string(label));
+		GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
+		gtk_container_add((GtkContainer *)box->data, expander);
+		gtk_container_add((GtkContainer *)expander, hbox);
+		gtk_widget_show_all(expander);
+
+		gtk_expander_set_expanded((GtkExpander*)expander, 
+								  get_int(show)? TRUE : FALSE);
+
+		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)hbox);
+
+		if (name)
+		{
+			// This makes a copy of the arg with a box in it for binding
+			// to the name symbol.  This is for S-Class rank only, since
+			// it populates the symbol table directly.
+			//
+			// To get the box back use the (summonbox ...) function.
+			arg_list_t *sealing_jutsu;
+			new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)hbox);
+			mlisp_bind(name, sealing_jutsu);
+		}
+	}
+
+	delete_arg(&label);
+	delete_arg(&show);
+	//delete_arg(&name);
+
+	return ret;
+}
+
+
 void mgtk_destroy_notebook(GtkWidget *widget)
 {
 	mgtk_notebook_eventmap_t *emap = (mgtk_notebook_eventmap_t*)gtk_object_get_data(GTK_OBJECT(widget), "notebook_eventmap");

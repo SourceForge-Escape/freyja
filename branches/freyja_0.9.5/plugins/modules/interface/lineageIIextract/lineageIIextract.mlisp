@@ -8,44 +8,40 @@
 ; Comment: Interface for perlin noise plugin
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;(dialog "Freyja :: LineageII Extractor" eDialogL2Extract 0
-;	(vbox 0 0 0 0 0
-
 (summonbox "FirstPartyPluginSlot"
 	(handlebox 1
 	(vbox 1 1 0 1 1
-	(expander "Lineage II Extract 1.0" 0 
-		(menubar
-		(submenu "_File"
-			(filechoosermenu_item "_Open Pak..."	"Open Pak..."	"C-o"	eL2ExtractFilename	"mode=open,"	"gtk-open")
-			(menu_item "_Close"	eNone	"C-w"	"gtk-close") ;DialogL2ExtractClose
-			(menu_seperator) ) )
+	(expander "Lineage II Extract 0.3" 0 
 
 		(hbox 1 1 0 1 1
 			(toolbar
+				;(filechoosertoolbar_button 
+				;	"gtk-open" "Open _Pak..." "Loads LineageII Pak" 
+				;	"Open UKX..." eL2ExtractFilename "mode=open")
+
 				(filechoosertoolbar_button 
-					"gtk-open" "Open" "Loads LineageII Pak" 
-					"Open UKX..." eL2ExtractFilename "mode=open")
-				(filechoosertoolbar_button 
-					"gtk-save-as" "Save as..." "Saves OBJ File" 
-					"Save OBJ..." eL2ExtractOut "mode=save,confirm-overwrite=true,")
+					"gtk-open" "Open _Raw..." "Opens LineageII Raw object" 
+					"Open Raw..." eL2RawLoad "mode=open")
+
+				;(filechoosertoolbar_button 
+				;	"gtk-save-as" "Save as..." "Saves OBJ File" 
+				;	"Save OBJ..." eL2ExtractOut "mode=save,confirm-overwrite=true,")
 			) ; toolbar
 		) ; hbox
 
 		
-		(hbox 1 0 0 1 0
-			(icon "freyja-plugin.png" IconSize_Dialog)
-			(label "LineageII Extractor "  0.0 0.5))
+		;(hbox 1 0 0 1 0
+		;	(icon "freyja-plugin.png" IconSize_Dialog)
+		;	(label "LineageII Extractor "  0.0 0.5))
 
-		(label "Input Filename" 0.0 0.5)
+		;(label "Input Filename" 0.0 0.5)
 
 		;(filechooserbutton "_Open Pak..."	"Open Pak..."	"C-o"	eL2ExtractFilename	"mode=open,"	"gtk-open")
-		(textbox eL2ExtractFilename)
+		;(textbox eL2ExtractFilename)
 
 		(hbox 1 0 0 1 0 (hsep))
 
-		(label "Output Filename" 0.0 0.5)
+		(label "Filename" 0.0 0.5)
 		(textbox eL2ExtractOut)
 
 		(hbox 1 0 0 1 0
