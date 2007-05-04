@@ -909,6 +909,15 @@ index_t freyjaMeshVertexCreate3fv(index_t mesh, vec3_t xyz)
 }
 
 
+// Depends on legacy removal to enable
+#if 0
+index_t freyjaMeshVertexCreate3f(index_t mesh, vec_t x, vec_t y, vec_t z)
+{
+	vec3_t v = {x, y, z};
+	freyjaMeshVertexCreate3fv(mesh, v);
+}
+#endif
+
 void freyjaMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);

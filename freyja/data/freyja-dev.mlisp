@@ -472,21 +472,28 @@
 			) ; hbox
 		) ; tab
 
-		(tab "Animation" eNone
+		(tab "Skinning" eNone
 			(hbox 0 1 0 1 1		
-	
-				;(toolbar
-				;	(toolbar_button "gtk-add"	" "
-				;		"Assign vertices to joint  "	eEvent eAssignWeight)
-				;	(toolbar_button "gtk-add"	" "
-				;		"Remove vertices weighting "	eEvent eClearWeight)
-				;)
 
-				;(hbox 0 1 0 1 1
-				;	(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
+				(toolbar
+					(toolbar_button "gtk-add"	" "
+						"Assign vertices to joint  "	eEvent eAssignWeight)
+					(toolbar_button "gtk-remove"	" "
+						"Remove vertices weighting "	eEvent eClearWeight))
+
+				(hbox 0 0 0 1 0
+					(hbox 1 0 0 1 0
+						(label "Bone: " 0.0 0.5))
+					(spinbutton 0 0 100 eBoneIterator)
+					(textbox eSetCurrentBoneName))
+
+				(hbox 0 1 0 1 1
+					(hbox 1 0 0 1 0
+						(label "Weight: " 0.0 0.5))
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
 
 			) ; hbox
-		)
+		) ; Skinning tab
 	
 		(tab "Material" eNone
 			(hbox 0 1 0 1 1				
@@ -530,15 +537,18 @@
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		;; GL window
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		(vbox 0 1 1 1 1
+		;(vbox 0 1 1 1 1
 			(gl_widget WIDTH HEIGHT)
-		)
+		;)
+
+		
 
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		;; Sidebar notebook in non-expanding container
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		(vbox 0 1 1 1 1
-		(handlebox 1 
+		(hbox 0 0 0 0 0 ;1 1 1 1
+		;(handlebox 1 
+		(expander_hbox " " 1
 		(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eEvent
 
 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -646,23 +656,6 @@
 					(expander "Skeleton" 1
 						(textbox eSkeletonName)
 						(tree eBoneIterator eSetCurrentBoneName)
-
-						(hbox 0 0 0 1 0
-							(hbox 1 0 0 1 0
-								(label "Bone: " 0.0 0.5))
-							(spinbutton 0 0 100 eBoneIterator)
-							(textbox eSetCurrentBoneName))
-
-						(hbox 0 1 0 1 1
-							(toolbar
-								(toolbar_button "gtk-add"	" "
-									"Weight vertices"	eEvent eAssignWeight)
-								(toolbar_button "gtk-add"	" "
-									"Unweight vertices"	eEvent eClearWeight)
-							) ; toolbar
-							(hbox 0 1 0 1 1
-								(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
-						) ; hbox
 					
 					) ; expander
 				))

@@ -6,6 +6,10 @@
 
  Kagura prealpha, 0.9.5.8
  20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Sidebar hide test
+ - FIX bind pose update for children on cursor transforms ( New API )
+ - FIX New model refreshes context again
+ - LineageII UI plugin update - open raws in modeler directly, ui changes
  - Bone transforms box fix
  - Skeleton / Bone ABI changes
  - Bone selection/cursor placement tweak
