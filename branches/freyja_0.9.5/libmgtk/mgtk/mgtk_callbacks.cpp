@@ -968,18 +968,23 @@ void mgtk_event_popup_menu_detacher(GtkWidget *attach_widget,GtkMenu *menu)
 }
 
 
-void mgtk_event_slider(GtkWidget *widget, gpointer id)
+void mgtk_event_slider1u(GtkWidget *widget, gpointer id)
 {
-  GtkAdjustment *adj;
+	if (widget)
+	{
+		GtkAdjustment *adj = GTK_ADJUSTMENT(widget);
+		mgtk_handle_event1u(GPOINTER_TO_INT(id), (unsigned int)adj->value);
+	}
+}
 
 
-  if (widget)
-  {
-    adj = GTK_ADJUSTMENT(widget);
-
-	// FIXME: Just generate uint event signal for now
-	mgtk_handle_slider1u(GPOINTER_TO_INT(id), (unsigned int)adj->value);
-  }
+void mgtk_event_slider1f(GtkWidget *widget, gpointer id)
+{
+	if (widget)
+	{
+		GtkAdjustment *adj = GTK_ADJUSTMENT(widget);
+		mgtk_handle_event1f(GPOINTER_TO_INT(id), adj->value);
+	}
 }
 
 

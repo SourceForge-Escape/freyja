@@ -41,9 +41,6 @@ typedef enum {
 	eMode  = 3,           // These events change modes ( modify states )
 	eEvent = 4,           // These events request handling ( perform actions )
 
-	/* Event flow control modes ( majors ) */
-	eModeAutoKeyframe,
-
 	/* Event ids ( minors ) */
 
 	// Widget interaction events
@@ -77,13 +74,6 @@ typedef enum {
 	eColorBone,
 	eColorBoneHighlight,
 
-	// Iterators
-	eModelIterator,
-	ePolygonIterator,
-	eMeshIterator,
-	eGroupIterator,
-	eBoneIterator,
-
 	// Menus
 	ePluginMenu,
 	eViewportModeMenu,
@@ -92,21 +82,12 @@ typedef enum {
 	eBlendDestMenu,
 	eBlendSrcMenu,
 
-	// Text events
-	eSkeletonName,
-	eSetCurrentBoneName,
-	eSetTextureNameA,
-	eSetTextureNameB,
-	eSetMaterialName,
-
 	// Old file dialog marker event ids
 	FREYJA_MODE_LOAD_MODEL,
 	FREYJA_MODE_SAVE_MODEL,
 	FREYJA_MODE_LOAD_TEXTURE,
 	FREYJA_MODE_SAVE_MATERIAL,
 	FREYJA_MODE_LOAD_MATERIAL,
-	FREYJA_MODE_LOAD_ANIMATION,
-	FREYJA_MODE_SAVE_ANIMATION,
 
 	// Special base id for plugins to avoid conflicts
 	ePluginEventBase = 10000

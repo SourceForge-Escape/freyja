@@ -536,6 +536,17 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	index_t freyjaMeshCreateLattice(vec3_t origin, vec_t size, 
+									uint32 rows, uint32 columns, uint32 layers);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Quadrilateral lattice mesh is created.
+	 *        <layers> tall with <rows> x <cols> of quads div per layer.
+	 *
+	 *        Useful for quickier extruding.
+	 *
+	 ------------------------------------------------------*/
+
 	index_t freyjaMeshCreateCube(vec3_t origin, vec_t size);
 	/*------------------------------------------------------
 	 * Pre  :  

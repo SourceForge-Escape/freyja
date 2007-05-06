@@ -19,10 +19,8 @@
  * Mongoose - Created, moved into it's own header from FreyjaModel 'test'
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJA3D_CURSOR_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJA3D_CURSOR_H_
-
+#ifndef GUARD__FREYJA3D_CURSOR_H_
+#define GUARD__FREYJA3D_CURSOR_H_
 
 #include <hel/math.h>
 #include <hel/Ray.h>
@@ -30,7 +28,6 @@
 
 #include "freyja_events.h"
 #include "FreyjaState.h"
-#include "FreyjaOpenGL.h"
 
 
 namespace freyja3d {
@@ -61,231 +58,70 @@ class Cursor
 	const static vec_t min = 0.5f, mid = 2.4f, max = 1.744f;
 
 
-	Cursor()
-	{
-		Reset();
-	}
+	////////////////////////////////////////////////////////////
+	// Constructors
+	////////////////////////////////////////////////////////////
 
-	~Cursor() 
-	{ 
-	}
+	Cursor();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Cursor.
+	 *
+	 ------------------------------------------------------*/
 
-	bool CheckForRayCollision(hel::Ray &r)
-	{
-		bool ret = false;
-
-		switch (GetMode())
-		{
-		case freyja3d::Cursor::Rotation:
-			{
-				mSelected = false;
-
-				// If this returns true mark mToken in Control
-				// Also this has to match the rendered cursor *exactly to work
-
-				// Ray test to pick rings of rotation
-				// 1. Take the ray and generate a rect prism
-				// 2. Use line segment / bbox detection to find
-				//    nearest hit
-				// 3. Return true if hit found, and set selected axis
-			   
-				// mPos <- center
-				vec_t radius = max * 4.0f;
-				const uint32 count = 64;
-
-				vec_t x, z, i;
-				Vector<vec_t> xs, zs;
-
-				for (i = 0.0f; i < count; ++i)
-				{
-					helSinCosf(helDegToRad(360.0f * (i / count)), &x, &z);
-					
-					x *= radius;
-					z *= radius;
-					
-					xs.pushBack(x);
-					zs.pushBack(z);
-				}
-
-				// Pick the closest 'hit' from each 'axis' ring
-				hel::Vec3 min, max;
-				vec_t dist, best = 999.9f;
-				bool hit;
-
-				for (uint32  j = 0; j < (count-1); ++j)
-				{
-					for (uint32  k = 0; k < 3; ++k)
-					{
-						hel::Vec3 a, b;
-
-						switch (k)
-						{
-						case 0:
-							a = mPos + hel::Vec3(0.0f, xs[j  ], zs[j  ]);
-							b = mPos + hel::Vec3(0.0f, xs[j+1], zs[j+1]);
-							break;
-
-						case 1:
-							a = mPos + hel::Vec3(xs[j  ], 0.0f, zs[j  ]);
-							b = mPos + hel::Vec3(xs[j+1], 0.0f, zs[j+1]);
-							break;
-
-						case 2:
-							a = mPos + hel::Vec3(xs[j  ], zs[j  ], 0.0f);
-							b = mPos + hel::Vec3(xs[j+1], zs[j+1], 0.0f);
-							break;
-						}
-
-						hel::Vec3 n = mPos - a;
-						n.Norm();
-						hel::Vec3 side = hel::Vec3::Cross(a-b, n);
-						
-						min = a - n * -1 - side * -1;
-						max = b - n * 1 - side * 1;
-
-						hit = r.IntersectBox(min.mVec, max.mVec, dist);
-						
-						if (hit && dist < best)
-						{
-							switch (k)
-							{
-							case 0:
-								mAxis = eX;
-								break;
-
-							case 1:
-								mAxis = eY;
-								break;
-
-							case 2:
-								mAxis = eZ;
-								break;
-							}
-
-							mSelected = true;
-							best = dist;
-						}
-					}
-				}
-
-				ret = mSelected;
-			}
-			break;
+	~Cursor();
+	/*------------------------------------------------------
+	 * Pre  : Cursor object is allocated.
+	 * Post : Deconstructs an object of Cursor.
+	 *
+	 ------------------------------------------------------*/
 
 
-		case freyja3d::Cursor::Scale:
-		case freyja3d::Cursor::Translation:
-			{
-				vec_t z = 1.0f;
-				vec_t t;
-				hel::Vec3 o = hel::Vec3(z*freyja3d::Cursor::mid,0,0) + mPos;
+	////////////////////////////////////////////////////////////
+	// Public Accessors
+	////////////////////////////////////////////////////////////
 
-				if (r.IntersectSphere(mPos.mVec, 1.0f, t))
-				{
-					mAxis = Cursor::eAll;
-					mSelected = true;
-					ret = true;
-				}
-
-				if (r.IntersectSphere(o.mVec, Cursor::min*2, t))
-				{
-					mAxis = Cursor::eX;
-					mSelected = true;
-					ret = true;
-				}
-
-				o = hel::Vec3(0, z*Cursor::mid,0) + mPos;
-
-				if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
-				{
-					mAxis = Cursor::eY;
-					mSelected = true;
-					ret = true;
-				}
-
-				o = hel::Vec3(0, 0, z*Cursor::mid) + mPos;
-				
-				if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
-				{
-					mAxis = Cursor::eZ;
-					mSelected = true;
-					ret = true;
-				}
-			}
-			break;
-
-		default:
-			ret = false;
-		}
-
-		return ret;
-	}
-
-	void Display()
-	{
-		glPushMatrix();
-		glTranslatef(mPos.mVec[0], mPos.mVec[1], mPos.mVec[2]);
-
-		switch (GetMode())
-		{
-		case freyja3d::Cursor::Scale:
-			glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_BLEND);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			Draw3dCursorScale(min, mid, max);
-			glPopAttrib();
-			break;
+	void Display();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Render cursor.
+	 *
+	 ------------------------------------------------------*/
 
 
-		case freyja3d::Cursor::Rotation:
-			glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_BLEND);
-			glClear(GL_DEPTH_BUFFER_BIT);
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
 
-			glPushMatrix();
-			if (GetMode() == freyja3d::Cursor::Rotation)
-			{
-				glRotatef(mRotate.mVec[0], 1, 0, 0);
-				glRotatef(mRotate.mVec[1], 0, 1, 0);
-				glRotatef(mRotate.mVec[2], 0, 0, 1);
-			}
-			Draw3dCursorRot(min, mid, max);
-			glPopMatrix();
-			glPopAttrib();
-			break;
+	bool CheckForRayCollision(hel::Ray &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true if given pick ray <r> hits an
+	 *        active hit box.  If there is a hit then the
+	 *        corresponding axis is stored along with
+	 *        flags noting a selection has been made.
+	 *
+	 ------------------------------------------------------*/
 
-		case freyja3d::Cursor::Translation:
-			glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_BLEND);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			Draw3dCursorLoc(min, mid, max);
-			glPopAttrib();
-			break;
+	void Reset();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reset cursor to defaults.
+	 *
+	 ------------------------------------------------------*/
 
-		default:
-		case freyja3d::Cursor::Invisible:
-			break;
-		}
 
-		glPopMatrix();
-	}
+	////////////////////////////////////////////////////////////
+	// Public Properties
+	////////////////////////////////////////////////////////////
 
 	Flags GetMode() { return mMode; }
-
 	void SetMode(Flags n) { mMode = n; }
-
-	void Reset()
-	{
-		mSelected = false;
-		mAxis = eNone;
-		mMode = Invisible;
-		mPos = hel::Vec3(0.0f, 0.0f, 0.0f);
-		mScale = hel::Vec3(1.0f, 1.0f, 1.0f);
-		mRotate = hel::Vec3(0.0f, 0.0f, 0.0f);//Quaternion();
-	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Current transform mode.
+	 *
+	 ------------------------------------------------------*/
 
 	bool mSelected;
 
@@ -299,162 +135,50 @@ class Cursor
 
 	hel::Vec3 mRotate;
 
-	//Quaternion mRotate;
-
 
  private:
 
-	void Draw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max)
-	{
-		static int drawList = -1;
+	////////////////////////////////////////////////////////////
+	// Private Accessors
+	////////////////////////////////////////////////////////////
 
-		if (drawList == -1)
-		{
-			drawList = glGenLists(1);
-			glNewList(drawList, GL_COMPILE);
-			mglDrawAxisWithCones(min, mid, max, 8);
-			glEndList();
-		}
-		else
-		{
-			glCallList(drawList);
-		}
-	}
+	void Draw3dCursorLoc(const vec_t min, const vec_t mid, const vec_t max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Render cursor in Loc mode.
+	 *
+	 ------------------------------------------------------*/
 
-	void Draw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max)
-	{
-		vec3_t center = {0.0f, 0.0f, 0.0f};
-		vec_t radius = max * 4.0f;// / 2.0f;
-		const uint32 count = 64;
+	void Draw3dCursorRot(const vec_t min, const vec_t mid, const vec_t max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Render cursor for Rot mode.
+	 *
+	 ------------------------------------------------------*/
 
-		// red
-		glColor3fv(RED);
-		mglDraw3dCircle(center, radius, count, 1, true);
+	void Draw3dCursorScale(const vec_t min, const vec_t mid, const vec_t max);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Render cursor for Size mode.
+	 *
+	 ------------------------------------------------------*/
 
-		// green
-		glColor3fv(GREEN);
-		mglDraw3dCircle(center, radius, count, 2, true);
-
-		// blue
-		glColor3fv(BLUE);
-		mglDraw3dCircle(center, radius, count, 0, true);
-	}
+	void Draw3dCursorRotHitBoxes();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Render hit boxes for cursor in Rot mode.
+	 *
+	 ------------------------------------------------------*/
 
 
-	void Draw3dCursorScale(const vec_t min, const vec_t mid, const vec_t max)
-	{
-		glBegin(GL_LINES);
-      
-		// X Axis, red
-		glColor3fv(RED);
-		glVertex3f(0.0,  0.0, 0.0);
-		glVertex3f(mid,  0.0, 0.0);
-
-		// Y Axis, green
-		glColor3fv(GREEN);	
-		glVertex3f(0.0,  mid, 0.0);
-		glVertex3f(0.0,  0.0, 0.0);	
-      
-		// Z Axis, blue
-		glColor3fv(BLUE);
-		glVertex3f(0.0,  0.0,  mid);
-		glVertex3f(0.0,  0.0,  0.0);
-		glEnd();
-
-
-		glBegin(GL_QUADS);
-      
-		// X Axis, Red box
-		glColor3fv(RED);
-		glVertex3f(mid+min,  -min, min);
-		glVertex3f(mid+min,  min, min);
-		glVertex3f(mid-min,  min, min);
-		glVertex3f(mid-min,  -min, min);
-
-		glVertex3f(mid+min,  -min, -min);
-		glVertex3f(mid+min,  min, -min);
-		glVertex3f(mid-min,  min, -min);
-		glVertex3f(mid-min,  -min, -min);
-
-		glVertex3f(mid+min,  min, -min);
-		glVertex3f(mid+min,  min, min);
-		glVertex3f(mid-min,  min, min);
-		glVertex3f(mid-min,  min, -min);
-
-		glVertex3f(mid+min,  -min, -min);
-		glVertex3f(mid+min,  -min, min);
-		glVertex3f(mid-min,  -min, min);
-		glVertex3f(mid-min,  -min, -min);
-
-		glVertex3f(mid+min,  min, -min);
-		glVertex3f(mid+min,  min, min);
-		glVertex3f(mid+min,  -min, min);
-		glVertex3f(mid+min,  -min, -min);
-
-
-		// Y Axis, green
-		glColor3fv(GREEN);	
-		glVertex3f(-min, mid+min,  min);
-		glVertex3f(min,mid+min,   min);
-		glVertex3f(min,mid-min,   min);
-		glVertex3f(-min,mid-min,   min);
-
-		glVertex3f(-min,mid+min,   -min);
-		glVertex3f(min,mid+min,   -min);
-		glVertex3f( min,mid-min,  -min);
-		glVertex3f(-min,mid-min,   -min);
-
-		glVertex3f( min,mid+min,  -min);
-		glVertex3f( min,mid+min,  min);
-		glVertex3f(min,mid-min,   min);
-		glVertex3f( min,mid-min,  -min);
-
-		glVertex3f( -min,mid+min,  -min);
-		glVertex3f( -min,mid+min,  min);
-		glVertex3f(-min,mid-min,   min);
-		glVertex3f(-min,mid-min,   -min);
-
-		glVertex3f(min,mid+min,   -min);
-		glVertex3f(min,mid+min,   min);
-		glVertex3f( -min,mid+min,  min);
-		glVertex3f(-min,mid+min,   -min);
-
-      
-		// Z Axis, blue
-		glColor3fv(BLUE);
-		glVertex3f(-min, min, mid+min);
-		glVertex3f(min,   min, mid+min);
-		glVertex3f(min,   min, mid-min);
-		glVertex3f(-min,   min, mid-min);
-
-		glVertex3f(-min,    -min, mid+min);
-		glVertex3f(min,   -min, mid+min);
-		glVertex3f( min,  -min, mid-min);
-		glVertex3f(-min,   -min, mid-min);
-
-		glVertex3f( min,  -min, mid+min);
-		glVertex3f( min,  min, mid+min);
-		glVertex3f(min,   min, mid-min);
-		glVertex3f( min,  -min, mid-min);
-
-		glVertex3f( -min,  -min, mid+min);
-		glVertex3f( -min,  min, mid+min);
-		glVertex3f(-min,   min, mid-min);
-		glVertex3f(-min,   -min, mid-min);
-
-		glVertex3f(min,   -min, mid+min);
-		glVertex3f(min,   min, mid+min);
-		glVertex3f( -min,  min, mid+min);
-		glVertex3f(-min,   -min, mid+min);
-
-
-		glEnd();
-	}
-
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
 
 	Flags mMode;
 };
 
+
 } //namespace freyja3d 
 
-#endif // GUARD__FREYJA_MONGOOSE_FREYJA3DCURSOR_H_
+#endif // GUARD__FREYJA3D_CURSOR_H_

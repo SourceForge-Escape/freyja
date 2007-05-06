@@ -63,7 +63,9 @@ void mgtk_event_popup_menu_handler(GtkWidget *widget, GdkEventButton *event);
 
 void mgtk_event_popup_menu_detacher(GtkWidget *attach_widget,GtkMenu *menu);
 
-void mgtk_event_slider(GtkWidget *widget, gpointer event_id);
+void mgtk_event_slider1u(GtkWidget *widget, gpointer event_id);
+
+void mgtk_event_slider1f(GtkWidget *widget, gpointer event_id);
 
 void mgtk_event_spinbutton_int(GtkSpinButton *spin, gpointer event_id);
 

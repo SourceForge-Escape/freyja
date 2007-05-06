@@ -1273,7 +1273,7 @@ arg_list_t *mgtk_rc_hslider(arg_list_t *container)
 		gtk_scale_set_digits(GTK_SCALE(item), 0);
 
 		gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
-						   GTK_SIGNAL_FUNC(mgtk_event_slider), 
+						   GTK_SIGNAL_FUNC(mgtk_event_slider1u), 
 						   GINT_TO_POINTER(get_int(event)));
 	
 		//	gtk_box_pack_start(GTK_BOX(box), hscale, FALSE, FALSE, 0);

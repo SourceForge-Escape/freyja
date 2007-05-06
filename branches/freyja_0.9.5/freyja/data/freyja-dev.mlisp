@@ -62,14 +62,13 @@
 			(menu_seperator)
 
 			(menu_item "_Save Model"	eSaveFileModel	"C-s"	"gtk-save")
-			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save,"	"gtk-save-as") ;confirm-overwrite=true,
+			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save"	"gtk-save-as") ;confirm-overwrite=true,
 			(menu_item "_Revert Model"		eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
 			(menu_item "Proper_ties"		eInfo		"gtk-properties")
-			(menu_item "_Import"		eImportFile	"C-i"	"gtk-go-forward")
-			;(submenu eExportMenu	"_Export...")
-			(menu_item "_Export"	eExportFile		"C-e"	"gtk-go-back")
+			(submenu	eImportFile	"_Import Model...")
+			(submenu	eExportFile	"_Export Model...")
 
 			(menu_seperator)
 
@@ -485,7 +484,7 @@
 					(hbox 1 0 0 1 0
 						(label "Bone: " 0.0 0.5))
 					(spinbutton 0 0 100 eBoneIterator)
-					(textbox eSetCurrentBoneName))
+					(textbox eSetBoneName))
 
 				(hbox 0 1 0 1 1
 					(hbox 1 0 0 1 0
@@ -541,7 +540,6 @@
 			(gl_widget WIDTH HEIGHT)
 		;)
 
-		
 
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		;; Sidebar notebook in non-expanding container
@@ -561,15 +559,15 @@
 							"New model"		eEvent eNewFile)
 
 						(filechoosertoolbar_button 
-							"gtk-open" "Open" "Loads model file" 
+							"gtk-open" "Open" "Open model file" 
 							"Open Model..." eOpenModel "mode=open")
 
 						(toolbar_button  "gtk-save" "Save" 
 							"Save Model"	eEvent eSaveFileModel)
 
 						(filechoosertoolbar_button 
-							"gtk-save-as" "Save as..." "Saves model as..." 
-							"Save Model..." eSaveModel "mode=save,")
+							"gtk-save-as" "Save as..." "Saves model file" 
+							"Save Model..." eSaveModel "mode=save")
 
 					))
 
@@ -655,7 +653,7 @@
 				(vbox 1 1 0 1 1
 					(expander "Skeleton" 1
 						(textbox eSkeletonName)
-						(tree eBoneIterator eSetCurrentBoneName)
+						(tree eBoneIterator eSetBoneName)
 					
 					) ; expander
 				))
@@ -884,7 +882,9 @@
 
 	) ; notebook
 
-) ;vbox
+) ;hbox
+
+;) ; handlebox
 
 	;; Animation bar was here at end of edit tab
 
@@ -906,7 +906,7 @@
 				(toolbar
 					(toolbar_togglebutton false "gtk-media-record"
 						"Auto" "Animation mode (Auto Keyframe)"  
-						eEvent eModeAutoKeyframe)
+						eEvent eModeAnim)
 					(toolbar_button "24x24/key.png"
 						"Set" "Set Keyframe" eEvent eSetKeyFrame)
 					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 

@@ -2013,7 +2013,7 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 
 	{
 		char name[64];
-		snprintf(name, 63, "Sheet-%i", mesh);
+		snprintf(name, 63, "Plane-%i", mesh);
 		name[63] = '\0';
 		freyjaMeshName1s(mesh, name);
 	}

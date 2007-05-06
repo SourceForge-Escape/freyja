@@ -325,16 +325,15 @@ void FreyjaRender::DrawFreeWindow()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "ORBIT");
-	//glColor3fv(GREEN);
-	//mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, 
-	//				 "THIS IS A PREALPHA RELEASE.");
+	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "ORBIT");
 	glPopAttrib();
 }
 
 
 void FreyjaRender::AttachMethodListeners()
 {
+	CreateListener("eScreenShot", &FreyjaRender::EvScreenShot);
+
 	CreateListener("eViewports", &FreyjaRender::eViewports);
 	CreateListener("eRenderBoneName", &FreyjaRender::eRenderBoneName);
 	CreateListener("eRenderSkeleton", &FreyjaRender::eRenderSkeleton);
@@ -681,7 +680,7 @@ void FreyjaRender::Display()
 	glDisable(GL_LIGHTING);
 	glColor3fv(GREEN);
 	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, 
-					 "THIS IS A PREALPHA RELEASE.");
+					 "FREYJA  0.9.6 PREALPHA.");
 	glPopAttrib();
 
 	glFlush();
@@ -1779,7 +1778,7 @@ void FreyjaRender::DrawCurveWindow()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "CURVE");
+	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "CURVE");
 	glPopAttrib();
 	// End OpenGLPrinter test
 }
@@ -2178,31 +2177,31 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	switch (plane)
 	{
 	case PLANE_FRONT:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "FRONT");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "FRONT");
 		break;
 
 	case PLANE_BACK:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "BACK");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "BACK");
 		break;
 
 	case PLANE_TOP:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "TOP");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "TOP");
 		break;
 
 	case PLANE_BOTTOM:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "BOTTOM");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "BOTTOM");
 		break;
 
 	case PLANE_LEFT:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "LEFT");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "LEFT");
 		break;
 
 	case PLANE_RIGHT:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "RIGHT");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "RIGHT");
 		break;
 
 	default:
-		mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.05f, "????");
+		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "????");
 	}
 
 	glPopAttrib();
@@ -2293,14 +2292,22 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glPopMatrix();
 	glPopMatrix();
 
+
 	// OpenGLPrinter test
 	glPushAttrib(GL_ENABLE_BIT);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv - 1.0f, mScaleEnv - 1.5f, 0.06f, "MATERIAL");
+	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "MATERIAL");
 	glPopAttrib();
 	// End OpenGLPrinter test
 }
+
+
+void FreyjaRender::EvScreenShot()
+{
+	OpenGL::TakeScreenShot("Freyja", GetWindowWidth(), GetWindowHeight());
+}
+
 
 

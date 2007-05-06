@@ -44,6 +44,8 @@
  B
  ----------------------------
 
+ * Save As.. dialog triggers twice with text entry event.
+
  * 'Size' cursor has interesting recentering... it's correct, but maybe it
    should floor on a y value to avoid confusing people?
 

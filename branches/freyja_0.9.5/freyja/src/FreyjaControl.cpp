@@ -51,6 +51,7 @@
 #include <freyja/PluginABI.h>
 #include <freyja/TextureABI.h>
 
+#include "FreyjaOpenGL.h" // for load_shader
 #include "freyja_events.h"
 
 #include "FreyjaControl.h"
@@ -82,6 +83,9 @@ uint32 FreyjaControl::eAxisJointId = 0;
 uint32 FreyjaControl::eSphereJointId = 0;
 uint32 FreyjaControl::ePointJointId = 0;
 uint32 FreyjaControl::eInfoObjectId = 0;
+uint32 FreyjaControl::EvModeAutoKeyframeId = 0;
+uint32 FreyjaControl::EvBoneIteratorId = 0;
+uint32 FreyjaControl::EvSetBoneNameId = 0;
 
 
 ////////////////////////////////////////////////////////////
@@ -90,6 +94,8 @@ uint32 FreyjaControl::eInfoObjectId = 0;
 
 FreyjaControl::FreyjaControl() :
 	mGroupBitmap(0x0),
+	mSelectedAnimation(0),
+	mSelectedKeyFrame(0),
 	mSelectedModel(0),
 	mSelectedView(PLANE_FREE),
 	mSelectedViewport(0),
@@ -272,8 +278,28 @@ void FreyjaControl::AttachMethodListeners()
 
 	// CreateListener("", &FreyjaControl::);
 
-	CreateListener("eSaveModel", &FreyjaControl::eSaveModel);
-	CreateListener("eOpenModel", &FreyjaControl::eOpenModel);
+	// Mode events
+	CreateListener("eModeAnim", &FreyjaControl::EvModeAutoKeyframe);
+	EvModeAutoKeyframeId = ResourceEvent::GetResourceIdBySymbol("eModeAnim");
+	CreateListener("eModeUV", &FreyjaControl::eModeUV);
+	CreateListener("eModeModel", &FreyjaControl::eModeModel);
+	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
+
+	// Iterator events
+	CreateListener("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
+	CreateListener("eMeshIterator", &FreyjaControl::EvMeshIterator);
+	CreateListener("eBoneIterator", &FreyjaControl::EvBoneIterator);
+	EvBoneIteratorId = ResourceEvent::GetResourceIdBySymbol("eBoneIterator");
+
+	// Text events
+	CreateListener("eSkeletonName", &FreyjaControl::EvSkeletonName);
+	CreateListener("eSetBoneName", &FreyjaControl::EvSetBoneName);
+	EvSetBoneNameId = ResourceEvent::GetResourceIdBySymbol("eSetBoneName");
+	CreateListener("eOpenModel", &FreyjaControl::EvOpenModel);
+
+	// 2x Text events
+	CreateListener("eSaveModel", &FreyjaControl::EvSaveModel);
+
 
 	CreateListener("ePolygonSplit", &FreyjaControl::ePolygonSplit);
 	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
@@ -286,11 +312,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eGenMeshCount", &FreyjaControl::SetGenMeshCount);
 	CreateListener("eGenMeshSegements", &FreyjaControl::SetGenMeshSegements);
 
-	CreateListener("eAnimationSlider", &FreyjaControl::eAnimationSlider);
+	CreateListener("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
 
 	CreateListener("eInfo", &FreyjaControl::PrintInfo);
 	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
-	CreateListener("eScreenShot", &FreyjaControl::eScreenShot);
 
 	CreateListener("eVertexCombine", &FreyjaControl::VertexCombine);
 	CreateListener("eTexcoordCombine", &FreyjaControl::TexcoordCombine);
@@ -328,12 +353,6 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eMove", &FreyjaControl::eMove);
 	CreateListener("eRotate", &FreyjaControl::eRotate);
 
-	CreateListener("eModeUV", &FreyjaControl::eModeUV);
-	CreateListener("eModeModel", &FreyjaControl::eModeModel);
-	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
-
-	//CreateListener("eModelUpload", &FreyjaControl::eModelUpload);
-
 	CreateListener("eViewportBack", &FreyjaControl::eViewportBack);
 	CreateListener("eViewportBottom", &FreyjaControl::eViewportBottom);
 	CreateListener("eViewportRight", &FreyjaControl::eViewportRight);
@@ -357,6 +376,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
 
 	CreateListener("eRecentFiles", &FreyjaControl::eRecentFiles);
+
+
+	//CreateListener("eModelUpload", &FreyjaControl::eModelUpload);
+
 
 	/* One Argument callbacks with cached Ids */
 
@@ -875,7 +898,7 @@ bool FreyjaControl::LoadModel(const char *filename)
 
 
 		count = freyjaGetTexturePoolCount();
-	 
+
 		/* Texture image was stored as raw buffer */
 		for (i = 0; i < count; ++i)
 		{
@@ -925,13 +948,15 @@ bool FreyjaControl::LoadModel(const char *filename)
 }
 
 
-bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
+bool FreyjaControl::SaveModel(const char *filename, const char *plugin_desc)
 {
 	if (!filename || !filename[0])
 		return false;
-	
-	bool ret = false;
-	String desc = plugin, select = filename;
+
+	//FREYJA_ASSERTMSG(false, "Breakpoint");
+
+	mstl::String desc = plugin_desc;
+	mstl::String select = filename;
 	freyja::PluginDesc *module = NULL;
 
 	for (uint32 i = 0, count = freyjaGetPluginCount(); i < count; ++i)
@@ -943,27 +968,35 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
 
 		if (plugin->mExportFlags && desc == plugin->mDescription)
 		{
-			//plugin->mDescription.c_str();
-			//plugin->mExtention.c_str();
-			//plugin->mName.c_str();
-			//plugin->mFilename.c_str();
 			module = plugin;
 			break;
 		}
 	}
 
+	bool ret = false;
 
-	/* Magically generate dialogs for import/export settings per module */
 	if (module)
 	{
-		// FIXME: Convert this crap to a generated QueryDialog
+		/* Overwrite test, No longer altering filename from here on... */
+		if ( SystemIO::File::DoesFileExist( select.c_str() ) )
+		{
+			if ( !mgtk::ExecuteConfirmationDialog("OverwriteFileDialog") )
+			{
+				return true; // 'Capture' event, but don't actually write to disk.
+			}
+		}
 
-		//freyja_print("! *** %s", module->mFilename.c_str());
-		//freyja_print("! *** %s", module->mName.c_str());
+		/* Magically generate dialogs for import/export settings per module */
 
+		//module->mDescription.c_str();
+		//module->mExtention.c_str();
+		//module->mName.c_str();
+		//module->mFilename.c_str();
+		
 		uint32 i;
 		foreach (module->mArgs, i)
 		{
+			// FIXME: Convert this crap to a generated QueryDialog
 			if (module->mArgs[i].GetStringType() == "float")
 			{
 				float r = module->GetFloatArg(module->mArgs[i].GetName());
@@ -974,27 +1007,24 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin)
 				//module->SetFloatArg(module->mArgs[i].GetName(), r)
 			}
 		}
-	}
 
-	if (SystemIO::File::DoesFileExist(select.c_str()) &&
-		!mgtk::ExecuteConfirmationDialog("OverwriteFileDialog") )
-	{
-		ret = true; // 2007.04.01: Counts as a save for UI purposes 
-	}
-	else if (module &&
-			 freyjaExportModelByModule(select.c_str(), module->mFilename.c_str()) == 0)
-	{
-		String title;
-		title.Set("%s - Freyja", select.c_str());
-		freyja_set_main_window_title((char*)title.c_str());
-		mCurrentlyOpenFilename = select;
-		mCleared = true;
-		ret = true;
-		AddRecentFilename(filename);
+		/* Export the model */
+		ret = !(freyjaExportModelByModule(select.c_str(), 
+										  module->mFilename.c_str()));
 	}
 	else
 	{
 		ret = SaveModel(filename);
+	}
+
+	if (ret)
+	{
+		mstl::String title;
+		title.Set("%s - Freyja", select.c_str());
+		freyja_set_main_window_title((char*)title.c_str());
+		mCurrentlyOpenFilename = select;
+		mCleared = true;
+		AddRecentFilename(filename);
 	}
 
 	return ret;
@@ -1035,18 +1065,12 @@ bool FreyjaControl::SaveModel(const char *filename)
 	}
 	else if (freyjaExportModel(select.c_str(), select.c_str()+cur) == 0)
 	{
-		String title;
-		title.Set("%s - Freyja", select.c_str());
-		freyja_set_main_window_title((char*)title.c_str());
-		mCurrentlyOpenFilename = select;
-		mCleared = true;
 		ret = true;
-		AddRecentFilename(filename);
 	}
 	else
 	{
-		freyja_print("Unable to save with extention '.%s', try using '.freyja'", 
-					 select.c_str()+cur);
+		Print("Unable to save with extention '.%s', try using '.freyja'", 
+			  select.c_str()+cur);
 		ret = false;
 	}
 
@@ -1198,7 +1222,7 @@ void FreyjaControl::eModeUV()
 void FreyjaControl::eModeModel()
 {
 	// Radio button like func for multiple widgets on same event
-	mgtk_toggle_value_set(eModeAutoKeyframe, 0);
+	mgtk_toggle_value_set(EvModeAutoKeyframeId, 0);
 
 	mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
 	freyja_event_gl_refresh();
@@ -1469,9 +1493,9 @@ void FreyjaControl::Shutdown()
 {
 	bool exiting = true;
 
-	if (!mCleared)
+	if ( !mCleared && !mgtk::ExecuteConfirmationDialog("ExitWarningDialog") )
 	{
-		exiting = mgtk::ExecuteConfirmationDialog("ExitWarningDialog");
+		exiting = false;
 	}
 
 	if (exiting)
@@ -1514,100 +1538,102 @@ void FreyjaControl::VertexCombine()
 }
 
 
-#warning FIXME "event() functions must be replaced for Kagura"
-bool FreyjaControl::event(int event, unsigned int value)
+void FreyjaControl::EvPolygonIterator(unsigned int value)
 {
-	if (ResourceEvent::listen(event - ePluginEventBase, value))
-		return true;
+	int event = LookupEventSymbol("ePolygonIterator"); // cache this id
 
-	vec_t x, y, z;
-
-	switch (event)
+	if (!freyja_event_set_range(event, value, 0, freyjaGetMeshPolygonCount(GetSelectedMesh())))
 	{
-	case eBoneIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetBoneCount()))
-		{
-			SetSelectedBone(value);
-
-			if (value == GetSelectedBone() && freyjaIsBoneAllocated(value))
-			{
-				/* Mongoose 2002.08.31, Update spin buttons dependent 
-				 * on this one */
-				GetBoneRotation(&x, &y, &z);
-				freyja_event_set_float(520, x);
-				freyja_event_set_float(521, y);
-				freyja_event_set_float(522, z);
-
-				{ 
-					vec3_t xyz;
-					freyjaGetBoneTranslation3fv(value, xyz);
-					x = xyz[0], y = xyz[1], z = xyz[2];
-				}
-
-				freyja_event_set_float(510, x);
-				freyja_event_set_float(511, y);
-				freyja_event_set_float(512, z);
-				freyja_event_gl_refresh();
-				freyja_print("Selecting bone[%i] ...", value);
-
-				/* Update any bone name listeners, 
-				 * 1. Dup string to avoid evil widgets that want to mutate it
-				 * 2. Disable event hook up in case of event loop */
-				extern void mgtk_textentry_value_set(int event, const char *s);
-				char dupname[64];
-				strncpy(dupname, GetBoneName(value), 64);
-				mAllowBoneNameUpdate = false;
-				mgtk_textentry_value_set(eSetCurrentBoneName, dupname);
-				mAllowBoneNameUpdate = true;
-			}
-		}
-		break;
-
-	case ePolygonIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetMeshPolygonCount(GetSelectedMesh())))
-		{
-			SetSelectedFace(value);			
-			freyja_event_gl_refresh();
-			freyja_print("Selecting polygon[%i] ...", value);
-		}
-		break;
-
-	case eMeshIterator:
-		if (!freyja_event_set_range(event, value, 0, freyjaGetMeshCount()))
-		{
-			SetSelectedMesh(value);			
-			freyja_event_gl_refresh();
-			freyja_print("Selecting mesh[%i] ...", value);
-		}
-		break;
-
-	case eModeAutoKeyframe:
-		if (value)
-		{
-			mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
-			mRender->SetFlag(FreyjaRender::fKeyFrameAnimation);
-			freyja_event_gl_refresh();
-			freyja_print("Animation Scheme");
-			SetControlScheme(eScheme_Animation);
-		}
-		else
-		{
-			// If you disable auto keyframe you must set a new major mode
-			mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
-			mRender->ClearFlag(FreyjaRender::fKeyFrameAnimation);
-			freyja_event_gl_refresh();
-			freyja_print("Model Editor Scheme");
-			SetControlScheme(eScheme_Model);
-		}
-		break;
-
-	default:
-		freyja_print("!Unhandled { event = %d, value = %u }", event, value);
-		return false;
+		SetSelectedFace(value);			
+		RefreshContext();
+		Print("Selected polygon[%i].", value);
 	}
-
-	return true;
 }
+
+
+void FreyjaControl::EvMeshIterator(unsigned int value)
+{
+	int event = LookupEventSymbol("eMeshIterator"); // cache this id
+
+	if (!freyja_event_set_range(event, value, 0, freyjaGetMeshCount()))
+	{
+		SetSelectedMesh(value);			
+		RefreshContext();
+		Print("Selected mesh[%i] = '%s'.", 
+			  value, freyjaGetMeshNameString(value));
+	}
+}
+
+
+void FreyjaControl::EvModeAutoKeyframe(unsigned int value)
+{
+	if (value)
+	{
+		mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+		mRender->SetFlag(FreyjaRender::fKeyFrameAnimation);
+		RefreshContext();
+		Print("Animation Scheme selected.");
+		SetControlScheme(eScheme_Animation);
+	}
+	else
+	{
+		// If you disable auto keyframe you must set a new major mode
+		mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+		mRender->ClearFlag(FreyjaRender::fKeyFrameAnimation);
+		RefreshContext();
+		Print("Model Editor Scheme selected.");
+		SetControlScheme(eScheme_Model);
+	}
+}
+
+
+void FreyjaControl::EvBoneIterator(unsigned int value)
+{
+	int event = EvBoneIteratorId; //LookupEventSymbol("eBoneIterator");
+
+	if (!freyja_event_set_range(event, value, 0, freyjaGetBoneCount()))
+	{
+		SetSelectedBone(value);
+
+		if (value == GetSelectedBone() && freyjaIsBoneAllocated(value))
+		{
+#if 0 // This feature was removed a while back when moving to named IDs
+			/* Mongoose 2002.08.31, Update dependent spinbuttons. */
+			vec_t x, y, z;
+			GetBoneRotation(&x, &y, &z);
+			freyja_event_set_float(520, x); // eBoneRotX?
+			freyja_event_set_float(521, y);
+			freyja_event_set_float(522, z);
+
+			{ 
+				vec3_t xyz;
+				freyjaGetBoneTranslation3fv(value, xyz);
+				x = xyz[0], y = xyz[1], z = xyz[2];
+			}
+
+			freyja_event_set_float(510, x); // eBoneLocX?
+			freyja_event_set_float(511, y);
+			freyja_event_set_float(512, z);
+			freyja_event_gl_refresh();
+#endif
+
+			/* Update any bone name listeners, 
+			 * 1. Dup string to avoid evil widgets that want to mutate it
+			 * 2. Disable event hook up in case of UI event loop */
+			char dupname[64];
+			strncpy(dupname, GetBoneName(value), 64);
+			mAllowBoneNameUpdate = false;
+			mgtk_textentry_value_set(EvSetBoneNameId, dupname);
+			mAllowBoneNameUpdate = true;
+
+			RefreshContext(); // Update bone selection highlights
+
+			Print("Selected bone[%i] = '%s'.", 
+				  value, freyjaGetBoneNameString(value));
+		}
+	}
+}
+
 
 void FreyjaControl::ePointJoint(uint32 value)
 {
@@ -1643,14 +1669,15 @@ void FreyjaControl::eAxisJoint(uint32 value)
 }
 
 
-void FreyjaControl::eAnimationSlider(uint32 value)
+void FreyjaControl::EvAnimationSlider(unsigned int value)
 {
 	if (value != GetSelectedKeyFrame())
 	{
 		// FIXME: Needs better defined wrapping and bounds. 
 		//freyja_event_set_range(eAnimationSliderId, value, 0, 500);
 		SetSelectedKeyFrame(value);
-		freyja_event_gl_refresh();
+		RefreshContext();
+		//Print("Keyframe = %i", value);
 	}
 }
 
@@ -1680,7 +1707,7 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 		mCursor.mPos = mControlPoints[0];
 		mCursor.SetMode(Cursor::Translation);
 		
-		freyja_print("Press Ctrl+Right Mouse to end selection");
+		freyja_print("Press Ctrl+Right Mouse Button to end selection.");
 		freyja_event_gl_refresh();
 	}
 	else
@@ -1689,14 +1716,6 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 		mRender->ClearFlag(FreyjaRender::fBoundingVolSelection);
 		freyja_event_gl_refresh();
 	}
-}
-
-
-void FreyjaControl::eScreenShot()
-{
-	OpenGL::TakeScreenShot("Freyja", 
-						   mRender->GetWindowWidth(), 
-						   mRender->GetWindowHeight());
 }
 
 	
@@ -1894,11 +1913,10 @@ void FreyjaControl::SelectMode()
 }
 
 
-#warning FIXME "event() functions must be replaced for Kagura"
+// FIXME: Convert this to unsigned int event callback?
 bool FreyjaControl::handleEvent(int mode, int cmd)
 {
 	bool handled = true;
-	//freyja_print("! Call to handleEvent is deprecated...\n");
 
 	// Mongoose, 2007.04.07:
 	// 'Ids' here are no longer const, so had to switch to if/else block
@@ -1910,79 +1928,43 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 	}
 	else if (mode == (int)eUnselectId)
 	{
-		UnselectMode();
+		UnselectMode(); 
 	}
 	else
 	{
-		handled = ResourceEvent::listen(cmd - 10000 /*ePluginEventBase*/);
+		handled = false;
+
+		// FIXME: This Old menu event:command style remapping needs to be moved out of this class at least.
+		FREYJA_ASSERTMSG(0, "%i:%i, This event path is deprecated.\nPlease report this to mongooseichiban@gmail.com", mode, cmd);
+		//handled = ResourceEvent::listen(cmd - ePluginEventBase);
 	}
 
 	return handled;
 }
 
 
-#warning FIXME "event() functions must be replaced for Kagura"
-void FreyjaControl::handleTextEvent(int event, const char *text)
+void FreyjaControl::EvSkeletonName(char *text)
 {
-	static bool haltTextureA = false;
-	bool empty = (text == NULL || text[0] == 0);
-
-	if (!empty && ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, text))
-		return; // true;
-
-
-	switch (event)
-	{
-	case eSetTextureNameA:
-		if (!haltTextureA)
-		{
-			haltTextureA = true;
-			freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
-			haltTextureA = false;
-		}
-		break;
-
-	case eSkeletonName:
-		freyjaSkeletonName(GetSelectedSkeleton(), text);
-		break;
-
-	case eSetCurrentBoneName:
-		if (mAllowBoneNameUpdate)
-			SetBoneName(GetSelectedBone(), text);
-		break;
-
-	case FREYJA_MODE_SAVE_MODEL:
-		SaveModel(text);
-		break;
-
-	default:
-		freyja_print("handleTextEvent(%i, '%s'): Unhandled event.", event, text);
-	}
+	freyjaSkeletonName(GetSelectedSkeleton(), text);
 }
 
 
-void FreyjaControl::eOpenModel(char *filename)
+void FreyjaControl::EvSetBoneName(char *text)
 {
-	if (LoadModel(filename))
-	{
-		char title[1024];
-		snprintf(title, 1024, "%s - Freyja", filename);
-		freyja_set_main_window_title(title);
-		AddRecentFilename(filename);
-	}
+	if (mAllowBoneNameUpdate)
+		SetBoneName(GetSelectedBone(), text);
 }
 
 
-void FreyjaControl::eSaveModel(char *filename, char *extension)
+void FreyjaControl::EvOpenModel(char *filename)
 {
-	if (SaveModel(filename, extension))
-	{
-		// This was commented out... it shouldn't matter if it 'overwrites'
-		char title[1024];
-		snprintf(title, 1024, "%s - Freyja", filename);
-		freyja_set_main_window_title(title);
-		AddRecentFilename(filename);
-	}
+	LoadModel(filename);
+}
+
+
+void FreyjaControl::EvSaveModel(char *filename, char *extension)
+{
+	SaveModel(filename, extension);
 }
 
 
@@ -2211,14 +2193,14 @@ void FreyjaControl::SetKeyFrame()
 			if (m)
 			{
 				Track &track = m->GetTransformTrack(GetSelectedAnimation());
-				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
+				uint32 k = GetSelectedKeyFrame();
 				vec_t time = (vec_t)k / track.GetRate(); 
 				index_t id = track.NewKeyframe(time);
 				uint32 count = track.GetKeyframeCount();
-			
-				freyja_print("Created tMesh keyframe[%i] <- %.3fs, %i/%i | %i", 
-							 mSelectedKeyFrame, time, id, count,
-							 track.mKeyFrames.size());
+
+				Print("Created tMesh keyframe[%i] <- %.3fs, %i/%i | %i", 
+					  k, time, id, count,
+					  track.mKeyFrames.size());
 			}
 		}
 		break;
@@ -3132,6 +3114,8 @@ void FreyjaControl::CreateObject()
 	{
 	case tPoint:
 		mEventMode = aVertexNew;
+		mCleared = false;
+		RefreshContext();
 		break;
 
 	case tBone:
@@ -3171,9 +3155,10 @@ void FreyjaControl::CreateObject()
 
 				SetSelectedBone(idx);
 
-				freyja_event_gl_refresh();
-				freyja_print("New Skel[%u].Bone[%u], parent = %i",
-							 skel, idx, freyjaGetBoneParent(idx));
+				mCleared = false;
+				RefreshContext();
+				Print("New Skeleton[%u].Bone[%u], parent = %i",
+					  skel, idx, freyjaGetBoneParent(idx));
 			}
 
 
@@ -3184,14 +3169,14 @@ void FreyjaControl::CreateObject()
 	case tMesh:
 		//MeshNew();
 		ActionModelModified(NULL);
+		mCleared = false;
+		RefreshContext();
 		break;
 
 	default:
-		freyja_print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
+		Print("%s Object type '%s' is not supported.", 
+			  __func__, ObjectTypeToString(mObjectMode).GetCString());
 	}
-
-	mCleared = false;
-	freyja_event_gl_refresh();
 }
 
 
@@ -3627,9 +3612,10 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 			id = -1;
 		}
 
-		freyja_print("! %s[%i].keyframe[%i] %s <%f, %f, %f>",
+		freyja_print("! %s[%i].Anim[%i].Keyframe[%i] %s <%f, %f, %f>",
 					 ObjectTypeToString(obj).c_str(),
 					 id, 
+					 GetSelectedAnimation(),
 					 GetSelectedKeyFrame(),
 					 ActionToString(GetEventAction()).c_str(),
 					 GetEventAction(),
@@ -3726,10 +3712,10 @@ void FreyjaControl::KeyframeTransform(object_type_t obj,
 			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
 			if (m)
 			{				
-				// FIXME: This is temp test constant - replace with track switching later
+				// FIXME: This is temp test constant - replace with multitrack
 				const uint32 track = 0;
 
-				uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+				uint32 k = GetSelectedKeyFrame();	
 				Vec3x3KeyFrame *key = m->GetTransformTrack(track).GetKeyframe(k);
 				
 				if (key)
@@ -4052,14 +4038,32 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		break;
 
 	case PLANE_FREE: // FIXME: Use ray casting to move cursor along basis
-		t.mVec[0] = vx - t.mVec[0];
-		t.mVec[1] = vy - t.mVec[1];
-		t.mVec[2] = vx - t.mVec[2];
+		{
+			// Stopgap 'fix' for reverse cursor bug
+			if (mCursor.mAxis == freyja3d::Cursor::eZ)
+			{
+				hel::Vec3 v;
+				mRender->GetRotation(v.mVec);
+				vx *= (v.mY < 180.0f) ? 1.0f : -1.0f; 
+				Print("%f", v.mY);
+			}
+			else if  (mCursor.mAxis == freyja3d::Cursor::eX)
+			{
+				hel::Vec3 v;
+				mRender->GetRotation(v.mVec);
+				vx *= (v.mY < 90.0f || v.mY > 270.0f) ? 1.0f : -1.0f; 
+				Print("%f", v.mY);
+			}
+
+			t.mVec[0] = vx - t.mVec[0];
+			t.mVec[1] = vy - t.mVec[1];
+			t.mVec[2] = vx - t.mVec[2];
+		}
 		break;
 
 	default:
-		freyja_print("! %s(): This view (%i) isn't supported.", 
-					__func__, GetSelectedView());
+		Print("! %s(): This view (%i) isn't supported.", 
+			  __func__, GetSelectedView());
 		return;
 	}
 
@@ -4788,6 +4792,8 @@ void FreyjaControl::LoadResource()
 		// yes, you can even query eventIds for even func binds
 		int loadEventId = GetEventIdByName("eOpenModel");
 		int saveEventId = GetEventIdByName("eSaveModel");
+		int exportEventId = GetEventIdByName("eExportFile");
+		int importEventId = GetEventIdByName("eImportFile");
 		long i, count = freyjaGetPluginCount();
 
 		mgtk_event_fileselection_append_pattern(loadEventId, 
@@ -4803,25 +4809,43 @@ void FreyjaControl::LoadResource()
 			if (plugin == NULL)
 				continue;
 
-			MSTL_MSG("%i/%i [%s] %s, %s%s\n", i, count, 
-					 plugin->mName.c_str(),
-					 plugin->mFilename.c_str(),
-					 plugin->mImportFlags ? "Import " : "",
-					 plugin->mExportFlags ? "Export " : "");
+			Print("! %i/%i %i. [%s] %s, %s%s\n", i, count, 
+				  plugin->GetId(),
+				  plugin->mName.c_str(),
+				  plugin->mFilename.c_str(),
+				  plugin->mImportFlags ? "Import " : "",
+				  plugin->mExportFlags ? "Export " : "");
 
 			if (plugin->mImportFlags)
 			{
 				char *desc = (char*)plugin->mDescription.c_str();
 				char *ext = (char*)plugin->mExtention.c_str();
+
 				mgtk_event_fileselection_append_pattern(loadEventId, desc, ext);
+
+				mgtk_append_item_to_menu(importEventId, desc, importEventId);
 			}
 
 			if (plugin->mExportFlags)
 			{
 				char *desc = (char*)plugin->mDescription.c_str();
 				char *ext = (char*)plugin->mExtention.c_str();
-				//uint32 menuId = ResourceEvent::GetResourceIdBySymbol("eExportMenu");
+
 				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
+
+
+				// FIXME: Generate map for plugin id : event id
+				//        Then have it point to func that can do mapping back
+#if 0
+				mstl::String s;
+				s.Set("ePluginExport_%i_%s", 
+					  plugin->GetId(), plugin->mName.c_str());
+				CreateListener(s.c_str(), &FreyjaControl::EvExportModel);
+				int EvExportModelId = LookupEventSymbol(s.c_str());
+				mExportModelMap.push_back(EvExportModelId);
+#endif
+
+				mgtk_append_item_to_menu(exportEventId, desc, exportEventId);
 			}
 		}
 	}

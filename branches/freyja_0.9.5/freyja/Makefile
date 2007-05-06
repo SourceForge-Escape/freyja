@@ -173,6 +173,7 @@ OBJS = \
 	$(BUILD_DIR)/freyja_events.o \
 	$(BUILD_DIR)/Control.o \
 	$(BUILD_DIR)/ControlPrinter.o \
+	$(BUILD_DIR)/Cursor.o \
 	$(BUILD_DIR)/FreyjaRender.o \
 	$(BUILD_DIR)/FreyjaControl.o \
 	$(BUILD_DIR)/FreyjaOpenGL.o \
