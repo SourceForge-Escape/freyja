@@ -794,6 +794,74 @@ bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 }
 
 
+bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
+							uint32 width, uint32 height, index_t material)
+{
+	vec_t bestDist = 99999.0f;
+	r.mDir.Norm();
+	face0 = -1;
+
+	for (uint32 i = 0, n = GetFaceCount(); i < n; ++i)
+	{
+		Face *f = GetFace(i);
+			
+		if (!f) 
+			continue;
+
+		mstl::Vector<index_t> &indices = 
+		((f->mFlags & Face::fPolyMappedTexCoords) ? 
+		 f->mTexCoordIndices : f->mIndices);
+
+		Vec3 a, b, c, tuv;
+		
+		GetTexCoord(indices[0], a.mVec);
+		a.mX *= width;
+		a.mY = a.mY * height;
+		GetTexCoord(indices[1], b.mVec);
+		b.mX *= width;
+		b.mY = b.mY * height;
+
+		bool intersect = false;
+
+		for (uint32 j = 2, jn = indices.size(); j < jn; ++j)
+		{
+			GetTexCoord(indices[j], c.mVec);
+			c.mX *= width;
+			c.mY = c.mY * height;
+
+			intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tuv.mVec);
+
+			if (intersect)
+			{
+				break;
+			}
+			
+			b = c;
+		}
+
+		// Clear old hit flags
+		f->mFlags &= ~Face::fRayHit;
+
+		if (intersect)
+		{
+			const vec_t dist = tuv.mX;
+			
+			if (face0 == -1 || dist < bestDist)
+			{
+				bestDist = dist;
+				face0 = i;
+			}
+			
+			// Only mark hit flags for every face hit when: markAll = true
+			if (markAll) f->mFlags |= Face::fRayHit;
+		}
+	}
+
+	return (face0 > -1);
+}
+
+
+
 bool Mesh::IntersectFaces(hel::Ray &r, int &face0, bool markAll)
 {
 	//no 'editor side' scale support vec_t t; if (!Intersect(r, t)) return false;

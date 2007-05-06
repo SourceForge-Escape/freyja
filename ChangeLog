@@ -5,7 +5,12 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.8
- 20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ 20070429-20070506 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - UV face intersection support is back with selection UI. ( Use Face mode. )
+ - Colorcube texture generator as part of perlinnoise plugin.
+ - Checkerboard texture generator as part of perlinnoise plugin.
+ - Gradiant texture generator as part of perlinnoise plugin.
+ - Old event2i event wrapper moved outside FreyjaControl
  - Stopgap fix for reverse cursor bug ( does not close bug )
  - Fix smaller hit boxes, slight rot improvement for rotation Cursor.
  - Debug visualization for cursor rotation hit boxes.

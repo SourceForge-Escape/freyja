@@ -1765,11 +1765,13 @@ int freyja_event2i(int event, int cmd)
 {
 	if (FreyjaControl::mInstance && event != eNop)
 	{
-		if (!FreyjaControl::mInstance->handleEvent(event, cmd))
+		if (FreyjaControl::mInstance->handleEvent(event, cmd))
 		{
-			freyja_print("  freyja_event2i passed previous unhandled event %i:%i",
-						event, cmd);
-
+		}
+		else if ( !ResourceEvent::listen(cmd - ePluginEventBase) )
+		{
+			freyja_print("%s(%i, %i): Event has no handler.",
+						 __func__, event, cmd);
 			return -1;
 		}
 	}

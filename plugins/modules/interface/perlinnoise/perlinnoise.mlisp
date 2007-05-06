@@ -15,8 +15,11 @@
 	(handlebox 1
 	(vbox 1 1 0 1 1
 	(expander "PerlinNoise Plugin 1.0" 0 
+		(menubar
+			(submenu ePerlinNoiseMenu "_Tools"))
+
 		(hbox 1 0 0 1 0
-			(icon "freyja-dev.png" IconSize_Menu)
+			;(icon "freyja-dev.png" IconSize_Menu)
 			(label "Perlin Noise "  0.0 0.5))
 
 		(hbox 1 0 0 1 0

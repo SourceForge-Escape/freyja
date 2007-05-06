@@ -65,6 +65,15 @@ class MaterialEv : public Control
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	byte *GenerateTextureCheckerBoard(byte bg[4], byte fg[4],
+									  uint32 width, uint32 height,
+									  uint32 runlen);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	int32 GetTextureId() { return mTextureId; }
 	/*------------------------------------------------------
 	 * Pre  : 
