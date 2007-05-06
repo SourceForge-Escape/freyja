@@ -151,7 +151,7 @@ void UpdateSkeletonUI_Callback(uint32 skelIndex)
 								  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
 	}
 
-	mgtk_event_update_tree(eBoneIterator, tree);
+	mgtk_event_update_tree(FreyjaControl::EvBoneIteratorId, tree);
 }
 
 
@@ -416,9 +416,10 @@ void freyja_handle_event1u(int event, unsigned int value)
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
-	if (//!ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value) &&
-		!FreyjaControl::mInstance->event(event, value))
+	// Removed legacy uint event codepath, kept old menu event fallback
+	if (!ResourceEvent::listen(event - ePluginEventBase, value))
 	{
+		// Old style 2 ID menu events
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("!Event(%i, %i) dropped.", eEvent, event);
 	}
@@ -451,17 +452,29 @@ void freyja_handle_glresize(unsigned int width, unsigned int height)
 }
 
 
-void freyja_handle_slider1u(int event, unsigned int value)
+void freyja_handle_text_array(int event, unsigned int count, char **text)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->event(event, value);
+	if (count != 2)
+		return;
+
+	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, 
+							   text[0], text[1]))
+	{
+		// Not handled
+	}	
 }
 
 
 void freyja_handle_text(int event, char *text)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-	FreyjaControl::mInstance->handleTextEvent(event, text);
+	if (text == NULL || text[0] == 0)
+		return;
+
+	if (!ResourceEvent::listen(event - ePluginEventBase, text))
+	{
+		//if (!FreyjaControl::mInstance->handleTextEvent(event, text))
+		freyja_print("%s(%i, '%s'): Unhandled event.", __func__, event, text);
+	}
 }
 
 
@@ -1374,9 +1387,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eNop", eNop);
 	r.RegisterInt("eNone", eNone);
 
-	// Modes
-	r.RegisterInt("eModeAutoKeyframe", eModeAutoKeyframe);
-
 	// Menus
 	r.RegisterInt("ePluginMenu", ePluginMenu);
 	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
@@ -1386,29 +1396,15 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eTransformMenu", eTransformMenu);
 
 	// Widget events ( widgets hold data like spinbuttons, etc )
-	r.RegisterInt("eScale_X", eScale_X);
-	r.RegisterInt("eScale_Y", eScale_Y);
-	r.RegisterInt("eScale_Z", eScale_Z);
 	r.RegisterInt("eMove_X", eMove_X);
 	r.RegisterInt("eMove_Y", eMove_Y);
 	r.RegisterInt("eMove_Z", eMove_Z);
 	r.RegisterInt("eRotate_X", eRotate_X);
 	r.RegisterInt("eRotate_Y", eRotate_Y);
 	r.RegisterInt("eRotate_Z", eRotate_Z);
-
-	// Iterator
-	r.RegisterInt("eModelIterator", eModelIterator);
-	r.RegisterInt("ePolygonIterator", ePolygonIterator);
-	r.RegisterInt("eMeshIterator", eMeshIterator);
-	r.RegisterInt("eGroupIterator", eGroupIterator);
-	r.RegisterInt("eBoneIterator", eBoneIterator);
-
-	// Text
-	r.RegisterInt("eSetCurrentBoneName", eSetCurrentBoneName);
-	r.RegisterInt("eSetTextureNameA", eSetTextureNameA);
-	r.RegisterInt("eSetTextureNameB", eSetTextureNameB);
-	r.RegisterInt("eSetMaterialName", eSetMaterialName);
-	r.RegisterInt("eSkeletonName", eSkeletonName);
+	r.RegisterInt("eScale_X", eScale_X);
+	r.RegisterInt("eScale_Y", eScale_Y);
+	r.RegisterInt("eScale_Z", eScale_Z);
 
 	// Colors
 	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
@@ -1922,6 +1918,8 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 
 	ControlPrinter::mLog.Print("[ASSERT] %s\n", s.c_str());
 
+	// FIXME: Make a confirmation dialog as a locale template for this,
+	//        and fill in the 'info' string here every time you call it.
 	ConfirmationDialog q("FreyjaAssertCallbackHandlerDialog", 
 						 "gtk-dialog-error", //"gtk-dialog-warning"
 						 s.c_str(), 
@@ -1981,7 +1979,7 @@ int main(int argc, char *argv[])
 	mgtk_link_import("mgtk_handle_mouse", (void*)freyja_handle_mouse);
 	mgtk_link_import("mgtk_handle_resource_start", 
 					 (void*)freyja_handle_resource_start);
-	mgtk_link_import("mgtk_handle_slider1u", (void*)freyja_handle_slider1u);
+	mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
 	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
 	mgtk_link_import("mgtk_print", (void*)freyja_print);
 	mgtk_link_import("mgtk_get_pixmap_filename", 

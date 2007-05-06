@@ -402,22 +402,6 @@ class FreyjaControl : public Control
 	 *        Accounts for view mode ( front, top, side, free )
 	 ------------------------------------------------------*/
 
-	bool event(int event, unsigned int value);
-	/*------------------------------------------------------
-	 * Pre  : Generic event signal is valid and value is
-	 *        valid for the generic event
-	 *mControlScheme
-	 * Post : Event is handled internally 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.03.22:
-	 * Mongoose - Replaces 2000 handleEvent method
-	 *
-	 * 2004.10.23: 
-	 * Mongoose - Created, pulled out of other event methods
-	 ------------------------------------------------------*/
-
 	bool event(int event, vec_t value);
 	/*------------------------------------------------------
 	 * Pre  : Generic event signal is valid and value is
@@ -590,8 +574,23 @@ class FreyjaControl : public Control
 	// Events, once all these are 'sorted' decouple.
 	////////////////////////////////////////////////////////////
 
-	void eOpenModel(char *filename);
-	void eSaveModel(char *filename, char *extension);
+	void EvFloatNop(float value) { }
+
+	// Iterator events
+	void EvPolygonIterator(unsigned int value);
+	void EvMeshIterator(unsigned int value);
+	static uint32 EvBoneIteratorId;
+	void EvBoneIterator(unsigned int value);
+
+	// Text events
+	void EvSkeletonName(char *text);
+	static uint32 EvSetBoneNameId;
+	void EvSetBoneName(char *text);
+	void EvOpenModel(char *filename);
+
+	// 2x Text events
+	void EvSaveModel(char *filename, char *extension);
+
 
 	void ePolygonSplit()
 	{
@@ -641,7 +640,8 @@ class FreyjaControl : public Control
 	void eModeUV();
 	void eModeModel();
 	void eModeMaterial();
-	//void eModeAutoKeyframe();
+	static uint32 EvModeAutoKeyframeId;
+	void EvModeAutoKeyframe(unsigned int value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event callbacks for hooking to widget system 
@@ -679,8 +679,7 @@ class FreyjaControl : public Control
 	void eMove();
 	void eRotate();
 
-	void eScreenShot();
-	void eAnimationSlider(uint32 value);
+	void EvAnimationSlider(unsigned int value);
 
 	void eGenMeshHeight(vec_t value);
 

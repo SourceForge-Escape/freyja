@@ -96,16 +96,8 @@ const char *mgtk_event_fileselection_get_filter_name(int event)
 
 void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
 {
-	// This is a stupid guard, for stupid polling causing 1+n events
-	// during filechooser actions
-	static int poorman = 0;
-
-	if (poorman == 1)
-		return;
-
-	poorman = 1;
-
 	GtkWidget *file = mgtk_get_fileselection_widget(GPOINTER_TO_INT(user_data));
+	gtk_widget_hide(file);
 	char *filename = (char *)gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file));
 	int event = GPOINTER_TO_INT(user_data);
 
@@ -113,23 +105,9 @@ void mgtk_event_filechooser_action(GtkWidget *widget, gpointer user_data)
 	char *name = filter ? (char *)gtk_file_filter_get_name(filter) : NULL;
 	//printf("*** '%s'\n", name);
 
-#if 0
-	if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename))
-	{
-	}
-	else
-#endif
-		if (ResourceEvent::listen(event - ResourceEvent::eBaseEvent, filename, name))
-	{
-	}
-	else
-	{
-		mgtk_handle_text(event, filename);
-	}
+	char *tmp[] = { filename, name };
 
-	gtk_widget_hide(file);
-
-	poorman = 0;
+	mgtk_handle_text_array(event, 2, tmp);
 }
 
 
@@ -259,9 +237,11 @@ GtkWidget *mgtk_create_filechooser(int event, char *title)
 	gtk_widget_grab_default(ok_button);
 
 
-	//gtk_signal_connect(GTK_OBJECT(filechooser), "file-activated",
-	//				   GTK_SIGNAL_FUNC(mgtk_event_filechooser_action),
-	//				   GINT_TO_POINTER(event));
+	/*
+	gtk_signal_connect(GTK_OBJECT(filechooser), "file-activated",
+					   GTK_SIGNAL_FUNC(mgtk_event_filechooser_action),
+					   GINT_TO_POINTER(event));
+	*/
 
 	/* Add preview widget for images */
 	GtkWidget *preview = gtk_image_new();

@@ -6,6 +6,21 @@
 
  Kagura prealpha, 0.9.5.8
  20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Stopgap fix for reverse cursor bug ( does not close bug )
+ - Fix smaller hit boxes, slight rot improvement for rotation Cursor.
+ - Debug visualization for cursor rotation hit boxes.
+ - Cursor class cleaned up a little.
+ - Fix for save dialog triggering twice on 'clicked'.
+ - Fix for the most annoying modal logic bug ever.
+ - Minor refactor of the file save as... event path to reduce gtk+ 'echo'. 
+ - New mgtk event for arrays of strings. 
+ - Replaced mgtk slider event with 1u and 1f events.
+ - Fix for OpenGL print2d use for view titles.
+ - Project style enforcement to help code generator / parser
+ - Import/export menus changed to dynamic menus. ( Still just a wrapper. )
+ - Refactored iterator events.
+ - Removed legacy event codepaths, kept old menu event fallback
+ - Reworked the interface a little, and weighting is in the toolbar now.
  - Sidebar hide test
  - FIX bind pose update for children on cursor transforms ( New API )
  - FIX New model refreshes context again

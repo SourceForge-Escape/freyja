@@ -167,164 +167,172 @@ class MaterialEv : public Control
 	// Public Events 
 	////////////////////////////////////////////////////////////
 
-	uint32 eSelectId;
-	void eSelect(uint32 value);
+	uint32 EvSelectId;
+	void EvSelect(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event for selecting current material by index.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eAmbientId[4];
-	void eAmbient0(vec_t value) { SetAmbient(0, value); }
-	void eAmbient1(vec_t value) { SetAmbient(1, value); }
-	void eAmbient2(vec_t value) { SetAmbient(2, value); }
-	void eAmbient3(vec_t value) { SetAmbient(3, value); }
+	uint32 EvAmbientId[4];
+	void EvAmbient0(vec_t value) { SetAmbient(0, value); }
+	void EvAmbient1(vec_t value) { SetAmbient(1, value); }
+	void EvAmbient2(vec_t value) { SetAmbient(2, value); }
+	void EvAmbient3(vec_t value) { SetAmbient(3, value); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Events for setting ambient material values.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eDiffuseId[4];
-	void eDiffuse0(vec_t value) { SetDiffuse(0, value); }
-	void eDiffuse1(vec_t value) { SetDiffuse(1, value); }
-	void eDiffuse2(vec_t value) { SetDiffuse(2, value); }
-	void eDiffuse3(vec_t value) { SetDiffuse(3, value); }
+	uint32 EvDiffuseId[4];
+	void EvDiffuse0(vec_t value) { SetDiffuse(0, value); }
+	void EvDiffuse1(vec_t value) { SetDiffuse(1, value); }
+	void EvDiffuse2(vec_t value) { SetDiffuse(2, value); }
+	void EvDiffuse3(vec_t value) { SetDiffuse(3, value); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Events for setting diffuse material values.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eEmissiveId[4];
-	void eEmissive0(vec_t value) { SetEmissive(0, value); }
-	void eEmissive1(vec_t value) { SetEmissive(1, value); }
-	void eEmissive2(vec_t value) { SetEmissive(2, value); }
-	void eEmissive3(vec_t value) { SetEmissive(3, value); }
+	uint32 EvEmissiveId[4];
+	void EvEmissive0(vec_t value) { SetEmissive(0, value); }
+	void EvEmissive1(vec_t value) { SetEmissive(1, value); }
+	void EvEmissive2(vec_t value) { SetEmissive(2, value); }
+	void EvEmissive3(vec_t value) { SetEmissive(3, value); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Events for setting emissive material values.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eSpecularId[4];
-	void eSpecular0(vec_t value) { SetSpecular(0, value); }
-	void eSpecular1(vec_t value) { SetSpecular(1, value); }
-	void eSpecular2(vec_t value) { SetSpecular(2, value); }
-	void eSpecular3(vec_t value) { SetSpecular(3, value); }
+	uint32 EvSpecularId[4];
+	void EvSpecular0(vec_t value) { SetSpecular(0, value); }
+	void EvSpecular1(vec_t value) { SetSpecular(1, value); }
+	void EvSpecular2(vec_t value) { SetSpecular(2, value); }
+	void EvSpecular3(vec_t value) { SetSpecular(3, value); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Events for setting specular material values.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eShineId;
-	void eShine(vec_t value);
+	uint32 EvShineId;
+	void EvShine(vec_t value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Events for setting material shine value.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eSetNameId;
-	void eSetName(char *text);
+	uint32 EvSetNameId;
+	void EvSetName(char *text);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to set 'human readable' material name.
 	 *
 	 ------------------------------------------------------*/
 
-	void eBlendSrc(uint32 value);
+	void EvBlendSrc(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to set material blend source.
 	 *
 	 ------------------------------------------------------*/
 
-	void eBlendDest(uint32 value);
+	void EvBlendDest(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to set material blend destination.
 	 *
 	 ------------------------------------------------------*/
 
-	void eEnableDetailTexture(uint32 value);
+	void EvEnableDetailTexture(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to toggle material detail texture.
 	 *
 	 ------------------------------------------------------*/
 
-	void eEnableNormalize(uint32 value);
+	void EvEnableNormalize(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to toggle material normailzation.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eEnableBlendingId;
-	void eEnableBlending(uint32 value);
+	uint32 EvEnableBlendingId;
+	void EvEnableBlending(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to toggle material blending.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eEnableTextureId;
-	void eEnableTexture(uint32 value);
+	uint32 EvEnableTextureId;
+	void EvEnableTexture(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event to toggle material texture rendering.
 	 *
 	 ------------------------------------------------------*/
 
-	void eNewMaterial();
+	void EvNewMaterial();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for create new material.
 	 *
 	 ------------------------------------------------------*/
 
-	void eOpenMaterial(char *filename);
+	void EvOpenMaterial(char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for unserialize material.
 	 *
 	 ------------------------------------------------------*/
 
-	void eSaveMaterial(char *filename);
+	void EvSaveMaterial(char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for serialize material.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eSetShaderFilenameId;
-	void eSetShaderFilename(char *filename);
+	uint32 EvSetTextureNameId;
+	void EvSetTextureName(char *text);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Handle event for texture name/desc/filename.
+	 *
+	 ------------------------------------------------------*/
+
+	uint32 EvSetShaderFilenameId;
+	void EvSetShaderFilename(char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for shader filename.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eSetShaderId;
-	void eSetShader(uint32 value);
+	uint32 EvSetShaderId;
+	void EvSetShader(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for active shader change.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eSetTextureId;
-	void eSetTexture(uint32 value);
+	uint32 EvSetTextureId;
+	void EvSetTexture(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for active texture change.
 	 *
 	 ------------------------------------------------------*/
 
-	void eTextureSlotLoad(uint32 i)
+	void EvTextureSlotLoad(uint32 i)
 	{
 		SetFlag(fLoadTextureInSlot, i);
 		Print("Texture load into current slot [%s]", i ? "on" : "off");
@@ -335,7 +343,7 @@ class MaterialEv : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	void eMaterialSlotLoad(uint32 i)
+	void EvMaterialSlotLoad(uint32 i)
 	{
 		SetFlag(fLoadMaterialInSlot, i);
 		Print("Material load into slot is [%s]", i ? "ON" : "OFF");
@@ -346,44 +354,44 @@ class MaterialEv : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	void eTextureUpload(uint32 id);
+	void EvTextureUpload(uint32 id);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for texture loading from freyja buffer.
 	 *
 	 ------------------------------------------------------*/
 
-	void eOpenTexture(char *text);
+	void EvOpenTexture(char *text);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for texture loading from filedialog.
 	 *
 	 ------------------------------------------------------*/
 
-	void eOpenShader(char *text);
+	void EvOpenShader(char *text);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for shader loading from filedialog.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eGLSLFragmentModeId;
-	void eGLSLFragmentMode(uint32 value);
+	uint32 EvGLSLFragmentModeId;
+	void EvGLSLFragmentMode(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Load only GLSL shaders in shader slot.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 eARBFragmentModeId;
-	void eARBFragmentMode(uint32 value);
+	uint32 EvARBFragmentModeId;
+	void EvARBFragmentMode(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Load only ARB shaders in shader slot.
 	 *
 	 ------------------------------------------------------*/
 
-	void eNop() { Print("MaterialEv::Nop() Called."); }
+	void EvNop() { Print("MaterialEv::Nop() Called."); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : NOP.

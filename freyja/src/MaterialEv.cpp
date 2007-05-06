@@ -37,13 +37,13 @@ MaterialEv *MaterialEv::mHack = NULL;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-MaterialEv::MaterialEv() : eSelectId(0), eShineId(0), eSetNameId(0), 
-						   mFlags(fNone)
+MaterialEv::MaterialEv() : EvSelectId(0), EvShineId(0), EvSetNameId(0), 
+						   EvSetTextureNameId(0), mFlags(fNone)
 {
 	// We move to class based index_t later instead integer ids
 	for (uint32 i = 0; i < 4; ++i)
 	{
-		eAmbientId[i] = eDiffuseId[i] = eEmissiveId[i] = eSpecularId[i] = 0;
+		EvAmbientId[i] = EvDiffuseId[i] = EvEmissiveId[i] = EvSpecularId[i] = 0;
 	}
 
 	mHack = this;
@@ -421,17 +421,17 @@ void MaterialEv::RefreshInterface()
 {
 	uint32 mIndex = freyjaGetCurrentMaterial();
 		
-	mgtk_textentry_value_set(eSetNameId, freyjaGetMaterialName(mIndex));
+	mgtk_textentry_value_set(EvSetNameId, freyjaGetMaterialName(mIndex));
 		
-	mgtk_spinbutton_value_set(eSetShaderId, freyjaGetMaterialShader(mIndex));
+	mgtk_spinbutton_value_set(EvSetShaderId, freyjaGetMaterialShader(mIndex));
 
-	mgtk_textentry_value_set(eSetShaderFilenameId, 
+	mgtk_textentry_value_set(EvSetShaderFilenameId, 
 							 freyjaGetMaterialShaderName(mIndex));
 		
-	mgtk_spinbutton_value_set(eSetTextureId,
+	mgtk_spinbutton_value_set(EvSetTextureId,
 							  freyjaGetMaterialTexture(mIndex));
 
-	mgtk_textentry_value_set(eSetTextureNameA,
+	mgtk_textentry_value_set(EvSetTextureNameId,
 							 freyjaGetMaterialTextureName(mIndex));
 		
 	vec4_t ambient;
@@ -440,7 +440,7 @@ void MaterialEv::RefreshInterface()
 						   ambient[0], ambient[1], ambient[2], ambient[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
-		mgtk_spinbutton_value_set(eAmbientId[i], ambient[i]);	
+		mgtk_spinbutton_value_set(EvAmbientId[i], ambient[i]);	
 	}
 
 
@@ -450,7 +450,7 @@ void MaterialEv::RefreshInterface()
 						   diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
-		mgtk_spinbutton_value_set(eDiffuseId[i], diffuse[i]);
+		mgtk_spinbutton_value_set(EvDiffuseId[i], diffuse[i]);
 	}
 
 
@@ -460,7 +460,7 @@ void MaterialEv::RefreshInterface()
 						   specular[0], specular[1], specular[2], specular[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
-		mgtk_spinbutton_value_set(eSpecularId[i], specular[i]);
+		mgtk_spinbutton_value_set(EvSpecularId[i], specular[i]);
 	}
 
 
@@ -470,11 +470,11 @@ void MaterialEv::RefreshInterface()
 						   emissive[0], emissive[1], emissive[2], emissive[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
-		mgtk_spinbutton_value_set(eEmissiveId[i], emissive[i]);
+		mgtk_spinbutton_value_set(EvEmissiveId[i], emissive[i]);
 	}
 
 	vec_t shininess = freyjaGetMaterialShininess(mIndex);
-	mgtk_spinbutton_value_set(eShineId, shininess);
+	mgtk_spinbutton_value_set(EvShineId, shininess);
 
 	uint32 src = freyjaGetMaterialBlendSource(mIndex);
 	mgtk_option_menu_value_set(eBlendSrcMenu, src);
@@ -484,15 +484,15 @@ void MaterialEv::RefreshInterface()
 
 	uint32 flags = freyjaGetMaterialFlags(mIndex);
 
-	mgtk_togglebutton_value_set(eEnableBlendingId, 
+	mgtk_togglebutton_value_set(EvEnableBlendingId, 
 								(flags & fFreyjaMaterial_Blending));
 
-	mgtk_togglebutton_value_set(eEnableTextureId, 
+	mgtk_togglebutton_value_set(EvEnableTextureId, 
 								(flags & fFreyjaMaterial_Texture));
 
 	// Just go ahead and render a new frame in case the function calling
 	// this fails to do so.
-	freyja_event_gl_refresh();
+	RefreshContext();
 }
 
 
@@ -502,62 +502,65 @@ void MaterialEv::RefreshInterface()
 
 void MaterialEv::AttachMethodListeners()
 {
-	CreateListener("eSetMaterialShaderFilename", &MaterialEv::eNop);
+	CreateListener("eSetMaterialShaderFilename", &MaterialEv::EvNop);
 
-	eSelectId = CreateListener("eSetMaterial", &MaterialEv::eSelect);
-	eAmbientId[0] = CreateListener("eMaterialAmbient0", &MaterialEv::eAmbient0);
-	eAmbientId[1] = CreateListener("eMaterialAmbient1", &MaterialEv::eAmbient1);
-	eAmbientId[2] = CreateListener("eMaterialAmbient2", &MaterialEv::eAmbient2);
-	eAmbientId[3] = CreateListener("eMaterialAmbient3", &MaterialEv::eAmbient3);
-	eDiffuseId[0] = CreateListener("eMaterialDiffuse0", &MaterialEv::eDiffuse0);
-	eDiffuseId[1] = CreateListener("eMaterialDiffuse1", &MaterialEv::eDiffuse1);
-	eDiffuseId[2] = CreateListener("eMaterialDiffuse2", &MaterialEv::eDiffuse2);
-	eDiffuseId[3] = CreateListener("eMaterialDiffuse3", &MaterialEv::eDiffuse3);
-	eSpecularId[0] = CreateListener("eMaterialSpecular0", &MaterialEv::eSpecular0);
-	eSpecularId[1] = CreateListener("eMaterialSpecular1", &MaterialEv::eSpecular1);
-	eSpecularId[2] = CreateListener("eMaterialSpecular2", &MaterialEv::eSpecular2);
-	eSpecularId[3] = CreateListener("eMaterialSpecular3", &MaterialEv::eSpecular3);
-	eEmissiveId[0] = CreateListener("eMaterialEmissive0", &MaterialEv::eEmissive0);
-	eEmissiveId[1] = CreateListener("eMaterialEmissive1", &MaterialEv::eEmissive1);
-	eEmissiveId[2] = CreateListener("eMaterialEmissive2", &MaterialEv::eEmissive2);
-	eEmissiveId[3] = CreateListener("eMaterialEmissive3", &MaterialEv::eEmissive3);
-	eShineId = CreateListener("eMaterialShine", &MaterialEv::eShine);
-	eSetNameId = CreateListener("eSetMaterialName", &MaterialEv::eSetName);
-	eSetShaderId =CreateListener("eSetMaterialShader", &MaterialEv::eSetShader);
+	EvSelectId = CreateListener("eSetMaterial", &MaterialEv::EvSelect);
+	EvAmbientId[0] = CreateListener("eMaterialAmbient0", &MaterialEv::EvAmbient0);
+	EvAmbientId[1] = CreateListener("eMaterialAmbient1", &MaterialEv::EvAmbient1);
+	EvAmbientId[2] = CreateListener("eMaterialAmbient2", &MaterialEv::EvAmbient2);
+	EvAmbientId[3] = CreateListener("eMaterialAmbient3", &MaterialEv::EvAmbient3);
+	EvDiffuseId[0] = CreateListener("eMaterialDiffuse0", &MaterialEv::EvDiffuse0);
+	EvDiffuseId[1] = CreateListener("eMaterialDiffuse1", &MaterialEv::EvDiffuse1);
+	EvDiffuseId[2] = CreateListener("eMaterialDiffuse2", &MaterialEv::EvDiffuse2);
+	EvDiffuseId[3] = CreateListener("eMaterialDiffuse3", &MaterialEv::EvDiffuse3);
+	EvSpecularId[0] = CreateListener("eMaterialSpecular0", &MaterialEv::EvSpecular0);
+	EvSpecularId[1] = CreateListener("eMaterialSpecular1", &MaterialEv::EvSpecular1);
+	EvSpecularId[2] = CreateListener("eMaterialSpecular2", &MaterialEv::EvSpecular2);
+	EvSpecularId[3] = CreateListener("eMaterialSpecular3", &MaterialEv::EvSpecular3);
+	EvEmissiveId[0] = CreateListener("eMaterialEmissive0", &MaterialEv::EvEmissive0);
+	EvEmissiveId[1] = CreateListener("eMaterialEmissive1", &MaterialEv::EvEmissive1);
+	EvEmissiveId[2] = CreateListener("eMaterialEmissive2", &MaterialEv::EvEmissive2);
+	EvEmissiveId[3] = CreateListener("eMaterialEmissive3", &MaterialEv::EvEmissive3);
+	EvShineId = CreateListener("eMaterialShine", &MaterialEv::EvShine);
+	EvSetNameId = CreateListener("eSetMaterialName", &MaterialEv::EvSetName);
+	EvSetShaderId =CreateListener("eSetMaterialShader", &MaterialEv::EvSetShader);
 
-	eSetTextureId = 
-	CreateListener("eSetMaterialTexture", &MaterialEv::eSetTexture);
+	EvSetTextureId = 
+	CreateListener("eSetMaterialTexture", &MaterialEv::EvSetTexture);
 
-	CreateListener("eNewMaterial", &MaterialEv::eNewMaterial);
-	CreateListener("eOpenMaterial", &MaterialEv::eOpenMaterial);
-	CreateListener("eSaveMaterial", &MaterialEv::eSaveMaterial);
+	EvSetTextureNameId = 
+	CreateListener("eSetTextureNameA", &MaterialEv::EvSetTextureName);
 
-	eEnableBlendingId = 
-	CreateListener("eEnableMaterialBlending", &MaterialEv::eEnableBlending);
+	CreateListener("eNewMaterial", &MaterialEv::EvNewMaterial);
+	CreateListener("eOpenMaterial", &MaterialEv::EvOpenMaterial);
+	CreateListener("eSaveMaterial", &MaterialEv::EvSaveMaterial);
 
-	eEnableTextureId = 
-	CreateListener("eEnableMaterialTexture", &MaterialEv::eEnableTexture);
+	EvEnableBlendingId = 
+	CreateListener("eEnableMaterialBlending", &MaterialEv::EvEnableBlending);
 
-	CreateListener("eEnableDetailTexture", &MaterialEv::eEnableDetailTexture);
+	EvEnableTextureId = 
+	CreateListener("eEnableMaterialTexture", &MaterialEv::EvEnableTexture);
 
-	CreateListener("eTextureSlotLoad", &MaterialEv::eTextureSlotLoad);
-	CreateListener("eMaterialSlotLoad", &MaterialEv::eMaterialSlotLoad);
+	CreateListener("eEnableDetailTexture", &MaterialEv::EvEnableDetailTexture);
 
-	CreateListener("eEnableNormalize", &MaterialEv::eEnableNormalize);
+	CreateListener("eTextureSlotLoad", &MaterialEv::EvTextureSlotLoad);
+	CreateListener("eMaterialSlotLoad", &MaterialEv::EvMaterialSlotLoad);
 
-	eGLSLFragmentModeId =
-	CreateListener("eGLSLFragmentMode", &MaterialEv::eGLSLFragmentMode);
+	CreateListener("eEnableNormalize", &MaterialEv::EvEnableNormalize);
 
-	eARBFragmentModeId = 
-	CreateListener("eARBFragmentMode", &MaterialEv::eARBFragmentMode);
+	EvGLSLFragmentModeId =
+	CreateListener("eGLSLFragmentMode", &MaterialEv::EvGLSLFragmentMode);
 
-	CreateListener("eOpenShader", &MaterialEv::eOpenShader);
-	CreateListener("eOpenTexture", &MaterialEv::eOpenTexture);
+	EvARBFragmentModeId = 
+	CreateListener("eARBFragmentMode", &MaterialEv::EvARBFragmentMode);
 
-	CreateListener("eBlendSrc", &MaterialEv::eBlendSrc);
-	CreateListener("eBlendDest", &MaterialEv::eBlendDest);
+	CreateListener("eOpenShader", &MaterialEv::EvOpenShader);
+	CreateListener("eOpenTexture", &MaterialEv::EvOpenTexture);
 
-	CreateListener("eTextureUpload", &MaterialEv::eTextureUpload);
+	CreateListener("eBlendSrc", &MaterialEv::EvBlendSrc);
+	CreateListener("eBlendDest", &MaterialEv::EvBlendDest);
+
+	CreateListener("eTextureUpload", &MaterialEv::EvTextureUpload);
 
 	//CreateListener("", &MaterialEv::);
 }
@@ -746,9 +749,9 @@ void MaterialEv::SetEmissive(uint32 i, vec_t value)
 // Events 
 ////////////////////////////////////////////////////////////
 
-void MaterialEv::eSelect(uint32 value)
+void MaterialEv::EvSelect(uint32 value)
 {
-	if (!freyja_event_set_range(eSelectId, value, 
+	if (!freyja_event_set_range(EvSelectId, value, 
 								0, freyjaGetMaterialCount()-1))
 	{
 		if (value != freyjaGetCurrentMaterial())
@@ -771,14 +774,14 @@ void MaterialEv::eSelect(uint32 value)
 }
 
 
-void MaterialEv::eShine(vec_t value)
+void MaterialEv::EvShine(vec_t value)
 {	
 	freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
 	freyja_event_gl_refresh();
 }
 
 
-void MaterialEv::eSetName(char *text)
+void MaterialEv::EvSetName(char *text)
 {
 	if (text && text[0])
 	{
@@ -787,7 +790,7 @@ void MaterialEv::eSetName(char *text)
 }
 
 
-void MaterialEv::eBlendSrc(uint32 value)
+void MaterialEv::EvBlendSrc(uint32 value)
 {
 	index_t material = freyjaGetCurrentMaterial();
 
@@ -861,7 +864,7 @@ void MaterialEv::eBlendSrc(uint32 value)
 }
 
 
-void MaterialEv::eBlendDest(uint32 value)
+void MaterialEv::EvBlendDest(uint32 value)
 {
 	index_t material = freyjaGetCurrentMaterial();
 
@@ -935,7 +938,7 @@ void MaterialEv::eBlendDest(uint32 value)
 }
 
 
-void MaterialEv::eEnableDetailTexture(uint32 value)
+void MaterialEv::EvEnableDetailTexture(uint32 value)
 {
 	if (value)
 	{
@@ -952,7 +955,7 @@ void MaterialEv::eEnableDetailTexture(uint32 value)
 }
 
 
-void MaterialEv::eEnableNormalize(uint32 value)
+void MaterialEv::EvEnableNormalize(uint32 value)
 {
 	if (value)
 	{
@@ -970,7 +973,7 @@ void MaterialEv::eEnableNormalize(uint32 value)
 }
 
 
-void MaterialEv::eEnableBlending(uint32 value)
+void MaterialEv::EvEnableBlending(uint32 value)
 {
 	if (value)
 	{
@@ -988,7 +991,7 @@ void MaterialEv::eEnableBlending(uint32 value)
 }
 
 
-void MaterialEv::eEnableTexture(uint32 value)
+void MaterialEv::EvEnableTexture(uint32 value)
 {
 	if (value)
 	{
@@ -1006,14 +1009,14 @@ void MaterialEv::eEnableTexture(uint32 value)
 }
 
 
-void MaterialEv::eNewMaterial()
+void MaterialEv::EvNewMaterial()
 {
 	index_t i = freyjaMaterialCreate();
 	freyja_print("New material [%i] created.", i);
 }
 
 
-void MaterialEv::eOpenMaterial(char *filename)
+void MaterialEv::EvOpenMaterial(char *filename)
 {
 	if (LoadMaterial(filename))
 	{
@@ -1022,20 +1025,33 @@ void MaterialEv::eOpenMaterial(char *filename)
 }
 
 
-void MaterialEv::eSaveMaterial(char *filename)
+void MaterialEv::EvSaveMaterial(char *filename)
 {
 	SaveMaterial(filename);
 }
 
 
-void MaterialEv::eSetShader(uint32 value)
+void MaterialEv::EvSetTextureName(char *text)
+{
+	static bool haltTexture = false;
+
+	if (!haltTexture)
+	{
+		haltTexture = true;
+		freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
+		haltTexture = false;
+	}
+}
+
+
+void MaterialEv::EvSetShader(uint32 value)
 {
 	freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
 	freyja_event_gl_refresh();
 }
 
 
-void MaterialEv::eSetTexture(uint32 value)
+void MaterialEv::EvSetTexture(uint32 value)
 {
 	SetSelected(value);
 	freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
@@ -1043,7 +1059,7 @@ void MaterialEv::eSetTexture(uint32 value)
 }
 
 
-void MaterialEv::eTextureUpload(uint32 id)
+void MaterialEv::EvTextureUpload(uint32 id)
 {
 	byte *image;
 	uint32 w, h, bpp, type;
@@ -1074,7 +1090,7 @@ void MaterialEv::eTextureUpload(uint32 id)
 }
 
 
-void MaterialEv::eOpenTexture(char *text)
+void MaterialEv::EvOpenTexture(char *text)
 {
 	if (text == NULL || text[0] == 0) 
 		return;
@@ -1088,7 +1104,7 @@ void MaterialEv::eOpenTexture(char *text)
 
 		mgtk_textentry_value_set(e, text);
 		freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-		mgtk_spinbutton_value_set(eSetTextureId, texture);
+		mgtk_spinbutton_value_set(EvSetTextureId, texture);
 		freyjaMaterialTexture(mat, texture);
 		freyjaMaterialTextureName(mat, text);
 
@@ -1099,7 +1115,7 @@ void MaterialEv::eOpenTexture(char *text)
 }
 
 
-void MaterialEv::eOpenShader(char *text)
+void MaterialEv::EvOpenShader(char *text)
 {
 	if (text == NULL || text[0] == 0) 
 		return;
@@ -1131,7 +1147,7 @@ void MaterialEv::eOpenShader(char *text)
 #if 1
 		uint32 mat = freyjaGetCurrentMaterial();
 		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
-		mgtk_spinbutton_value_set(eSetShaderId, fragmentId);
+		mgtk_spinbutton_value_set(EvSetShaderId, fragmentId);
 		freyjaMaterialShader(mat, fragmentId);
 		freyjaMaterialShaderName(mat, text);
 #endif
@@ -1141,23 +1157,23 @@ void MaterialEv::eOpenShader(char *text)
 }
 
 
-void MaterialEv::eARBFragmentMode(uint32 value)
+void MaterialEv::EvARBFragmentMode(uint32 value)
 {
 	if (value)
 	{
 		SetFlag(fUsingARBFragments, true);
-		mgtk_toggle_value_set(eGLSLFragmentModeId, 0);
+		mgtk_toggle_value_set(EvGLSLFragmentModeId, 0);
 		Print("ARB fragment shader mode.");
 	}
 }
 
 
-void MaterialEv::eGLSLFragmentMode(uint32 value)
+void MaterialEv::EvGLSLFragmentMode(uint32 value)
 {
 	if (value)
 	{
 		SetFlag(fUsingARBFragments, false);
-		mgtk_toggle_value_set(eARBFragmentModeId, 0);
+		mgtk_toggle_value_set(EvARBFragmentModeId, 0);
 		Print("GLSL fragment shader mode.");
 	}
 }
@@ -1206,3 +1222,7 @@ uint32 MaterialEv::CreateListener(const char *name, MethodPtr1u ptr)
 ////////////////////////////////////////////////////////////
 // Private Mutators
 ////////////////////////////////////////////////////////////
+
+
+
+

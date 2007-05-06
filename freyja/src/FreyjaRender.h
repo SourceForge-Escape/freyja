@@ -149,6 +149,7 @@ public:
 	// Events, once all these are 'sorted' decouple.
 	////////////////////////////////////////////////////////////
 
+	typedef void (FreyjaRender::*MethodPtr)();
 	typedef void (FreyjaRender::*MethodPtr1u)(unsigned int);
 
 
@@ -156,6 +157,19 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Hooks up MethodDelegates to the event system.
+	 ------------------------------------------------------*/
+
+	static void CreateListener(const char *name, MethodPtr ptr)
+	{
+		MethodDelegate *d = 
+		new MethodDelegateArg0<FreyjaRender>(mInstance, ptr);
+		ResourceEventDelegate::add(name, d);
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Bind a MethodDelegate Callback to an external
+	 *        langauge symbol.
+	 *
 	 ------------------------------------------------------*/
 
 	static void CreateListener(const char *name, MethodPtr1u ptr)
@@ -168,6 +182,13 @@ public:
 	 * Pre  : 
 	 * Post : Bind a MethodDelegate Callback to an external
 	 *        langauge symbol.
+	 *
+	 ------------------------------------------------------*/
+
+	void EvScreenShot();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 

@@ -52,7 +52,7 @@ void (*mgtk_link_handle_key_press)(int, int) = NULL;
 void (*mgtk_link_handle_motion)(int, int) = NULL;
 void (*mgtk_link_handle_mouse)(int, int, int, int, int) = NULL;
 void (*mgtk_link_handle_resource_start)() = NULL;
-void (*mgtk_link_handle_slider1u)(int event, unsigned int) = NULL;
+void (*mgtk_link_handle_text_array)(int, unsigned int, char **) = NULL;
 void (*mgtk_link_handle_text)(int, char *) = NULL;
 void (*mgtk_link_print)(const char*, ...) = NULL;
 void (*mgtk_link_get_pixmap_filename)(char *, unsigned int, char *) = NULL;
@@ -122,9 +122,9 @@ int mgtk_link_import(const char *symbol, void *func)
 	{
 		mgtk_link_handle_resource_start = (void (*)())func;
 	}
-	else if (strncmp("mgtk_handle_slider1u", symbol, 27) == 0)
+	else if (strncmp("mgtk_handle_text_array", symbol, 23) == 0)
 	{
-		mgtk_link_handle_slider1u = (void (*)(int, unsigned int))func;
+		mgtk_link_handle_text_array = (void (*)(int, unsigned int, char **))func;
 	}
 	else if (strncmp("mgtk_handle_text", symbol, 17) == 0)
 	{
@@ -291,11 +291,11 @@ void mgtk_handle_resource_start()
 }
 
 
-void mgtk_handle_slider1u(int event, unsigned int value)
+void mgtk_handle_text_array(int event, unsigned int count, char **text_array)
 {
-	if (mgtk_link_handle_slider1u != NULL)
+	if (mgtk_link_handle_text_array != NULL)
 	{
-		(*mgtk_link_handle_slider1u)(event, value);
+		(*mgtk_link_handle_text_array)(event, count, text_array);
 	}
 }
 
