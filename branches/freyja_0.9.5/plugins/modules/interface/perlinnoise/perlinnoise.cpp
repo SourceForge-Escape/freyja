@@ -216,9 +216,156 @@ void eColorPerlinAdd(float *c, unsigned long count)
 }
 
 
+void eGenerateTextureCheckerboard()
+{
+	byte bg[4] = { (byte)(255 * gColorPerlinAdd[0]), (byte)(255 * gColorPerlinAdd[1]), (byte)(255 * gColorPerlinAdd[2]), (byte)(255 * gColorPerlinAdd[3]) };
+
+	byte fg[4] = { (byte)(255 * gColorPerlinMult[0]), (byte)(255 * gColorPerlinMult[1]), (byte)(255 * gColorPerlinMult[2]), (byte)(255 * gColorPerlinMult[3]) };
+					
+	uint32 width = 256;
+	uint32 height = 256;
+	uint32 runlen = 16;
+	byte *image = new unsigned char[height*width*3];
+	bool swap = true;
+
+	for (uint32 i = 0, l = 0; i < width; ++i, ++l)
+	{
+		for (uint32 j = 0; j < height; ) // 2px black border
+		{
+			byte *rgba = (swap) ? bg : fg;			
+
+			for (uint32 k = 0; k < runlen; ++k, ++j)
+			{
+				uint32 idx = ( height * i + j ) * 3;
+
+				/* RBGA */
+				image[idx]   = rgba[0];
+				image[idx+1] = rgba[1];
+				image[idx+2] = rgba[2];
+				//image[idx+3] = rgba[3];
+			}
+
+			swap = !swap;
+		}
+
+		if (l >= runlen)
+		{
+			l = 0;
+			swap = !swap;	
+		}
+	}
+
+	unsigned int tid = freyjaTextureCreateBuffer(image, 3, width, height, RGB_24);
+	unsigned long id = ResourceEvent::GetResourceIdBySymbol("eTextureUpload");
+
+	mgtk_print("!Uploading texture %i, using function #%i...", tid, id);
+
+	if (ResourceEvent::listen(id - 10000, tid))
+		mgtk_print("!ePerlinNoiseGen generated texture successfully.");
+	else
+		mgtk_print("!ePerlinNoiseGen failed to upload texture to application.");
+
+	freyjaTextureDelete(tid);
+	//delete [] image;
+}
+
+void eGenerateTextureGradiant()
+{
+	uint32 width = 256;
+	uint32 height = 256;
+	byte *image = new unsigned char[height*width*3];
+	float iw = 1.0f / (float)width;
+	//float ih = 1.0f / (float)height;
+
+	for (uint32 i = 0; i < height; ++i)
+	{
+		for (uint32 j = 0; j < width; ++j) 
+		{
+			uint32 idx = ( width * i + j ) * 3;
+			float u = j * iw;
+			//float v = i * ih;
+
+			const float gr = (1.0f - u);
+			const float gr2 = u;
+
+			// Diagonal
+			//bg = (byte)(255 * (1.0f - ( (0.5f * u) + (0.5f * v) ) ) );
+			//fg = (byte)(255 * (( (0.5f * u) + (0.5f * v) ) ) );
+
+			for (uint32 k = 0; k < 3; ++k)
+			{
+				float c = gColorPerlinAdd[k] * gr + gColorPerlinMult[k] * gr2;
+				image[idx+k]   = (byte)(255 * c);
+			}
+		}
+	}
+
+	unsigned int tid = freyjaTextureCreateBuffer(image, 3, width, height, RGB_24);
+	unsigned long id = ResourceEvent::GetResourceIdBySymbol("eTextureUpload");
+
+	mgtk_print("!Uploading texture %i, using function #%i...", tid, id);
+
+	if (ResourceEvent::listen(id - 10000, tid))
+		mgtk_print("!%s() generated texture successfully.", __func__);
+	else
+		mgtk_print("!%s() failed to upload texture to application.", __func__);
+
+	freyjaTextureDelete(tid);
+	//delete [] image;
+}
+
+
+void eGenerateTextureColorcube()
+{
+	uint32 width = 256;
+	uint32 height = 256;
+	byte *image = new unsigned char[height*width*3];
+	float iw = 1.0f / (float)width;
+	float ih = 1.0f / (float)height;
+
+	for (uint32 i = 0; i < height; ++i)
+	{
+		for (uint32 j = 0; j < width; ++j) 
+		{
+			uint32 idx = ( width * i + j ) * 3;
+			float u = j * iw;
+			float v = i * ih;
+
+			image[idx]   = (byte)(255 *v);
+			image[idx+1] = (byte)(255 * (0.5f * u + 0.5f * v) );
+			image[idx+2] = (byte)(255 * ( 0.5f - 0.25f * u + 0.25f * v ) );
+		}
+	}
+
+	unsigned int tid = freyjaTextureCreateBuffer(image, 3, width, height, RGB_24);
+	unsigned long id = ResourceEvent::GetResourceIdBySymbol("eTextureUpload");
+
+	mgtk_print("!Uploading texture %i, using function #%i...", tid, id);
+
+	if (ResourceEvent::listen(id - 10000, tid))
+		mgtk_print("!%s() generated texture successfully.", __func__);
+	else
+		mgtk_print("!%s() failed to upload texture to application.", __func__);
+
+	freyjaTextureDelete(tid);
+	//delete [] image;
+}
+
+
+void ePerlinNoiseNop()
+{
+}
+
+
 void PerlinNoiseEventsAttach()
 {
+	ResourceEventCallback::add("ePerlinNoiseMenu", &ePerlinNoiseNop);
+
 	ResourceEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
+
+	ResourceEventCallback::add("ePerlinNoiseCheckerboard", &eGenerateTextureCheckerboard);
+	ResourceEventCallback::add("ePerlinNoiseColorcube", &eGenerateTextureColorcube);
+	ResourceEventCallback::add("eGenerateTextureGradiant", &eGenerateTextureGradiant);
 
 	// FIXME: Add limits and a GUI generator wrapper for this
 	//        the GUI generator wrapper will have to wait until 
@@ -244,14 +391,20 @@ void PerlinNoiseEventsAttach()
 void PerlinNoiseGUIAttach()
 {
 	char *basename = "plugins/perlinnoise.mlisp";
-
-	//int id = Resource::mInstance->getIntByName("eDialogPerlinNoise");
-	//int menuId = Resource::mInstance->getIntByName("ePluginMenu");
-	//mgtk_append_item_to_menu(menuId, "PerlinNoise", id);
-
 	char *filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
+
+	int menuId = Resource::mInstance->getIntByName("ePerlinNoiseMenu");
+	int mainMenuId = Resource::mInstance->getIntByName("ePluginMenu");
+
+	int id = Resource::mInstance->getIntByName("ePerlinNoiseCheckerboard");
+	mgtk_append_item_to_menu(menuId, "Checkerboard Texture", id);
+	id = Resource::mInstance->getIntByName("ePerlinNoiseColorcube");
+	mgtk_append_item_to_menu(menuId, "Colorcube Texture", id);
+	mgtk_append_item_to_menu(mainMenuId, "Colorcube Texture", id);
+	id = Resource::mInstance->getIntByName("eGenerateTextureGradiant");
+	mgtk_append_item_to_menu(menuId, "Gradiant Texture", id);
 
 	int add = Resource::mInstance->getIntByName("eColorPerlinAdd");
 	mgtk_event_set_color(add, 0.51f, 0.51f, 0.29f, 1.0f);

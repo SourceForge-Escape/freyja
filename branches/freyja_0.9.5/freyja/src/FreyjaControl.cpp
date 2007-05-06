@@ -300,7 +300,6 @@ void FreyjaControl::AttachMethodListeners()
 	// 2x Text events
 	CreateListener("eSaveModel", &FreyjaControl::EvSaveModel);
 
-
 	CreateListener("ePolygonSplit", &FreyjaControl::ePolygonSplit);
 	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
 	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
@@ -1933,10 +1932,6 @@ bool FreyjaControl::handleEvent(int mode, int cmd)
 	else
 	{
 		handled = false;
-
-		// FIXME: This Old menu event:command style remapping needs to be moved out of this class at least.
-		FREYJA_ASSERTMSG(0, "%i:%i, This event path is deprecated.\nPlease report this to mongooseichiban@gmail.com", mode, cmd);
-		//handled = ResourceEvent::listen(cmd - ePluginEventBase);
 	}
 
 	return handled;
@@ -2399,6 +2394,18 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 	switch (GetControlScheme())
 	{
 	case eScheme_UV:
+		
+		switch (GetObjectMode())
+		{
+		case tFace:
+			SelectObject(x, y);
+			return true;
+			break;
+
+		default:
+			;
+		}
+
 		if (mUVMouseState)
 		{
 			mUVMouseState = false;
@@ -3215,8 +3222,22 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
-				
+
+				switch (GetControlScheme())
+				{
+				case eScheme_UV:
+					FreyjaRender::mTestRay.mOrigin = hel::Vec3(mouseX, mouseY, 10.0f);
+					FreyjaRender::mTestRay.mDir = hel::Vec3(0.0f, 0.0f, -1.0f);
+					m->IntersectUVFaces(FreyjaRender::mTestRay, selected, false,
+										mRender->GetWindowWidth(), 
+										mRender->GetWindowHeight(),
+										GetSelectedMaterial());
+					break;
+
+				default:
+					m->IntersectFaces(FreyjaRender::mTestRay, selected, false);
+				}
+
 				if (selected > -1)
 				{
 					freyja_print("Face[%i] selected by pick ray.", selected);
@@ -3417,8 +3438,22 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectClosestFace(FreyjaRender::mTestRay, selected);
-				
+
+				switch (GetControlScheme())
+				{
+				case eScheme_UV:
+					FreyjaRender::mTestRay.mOrigin = hel::Vec3(mouseX, mouseY, 10.0f);
+					FreyjaRender::mTestRay.mDir = hel::Vec3(0.0f, 0.0f, -1.0f);
+					m->IntersectUVFaces(FreyjaRender::mTestRay, selected, false,
+										mRender->GetWindowWidth(), 
+										mRender->GetWindowHeight(),
+										GetSelectedMaterial());
+					break;
+
+				default:
+					m->IntersectClosestFace(FreyjaRender::mTestRay, selected);
+				}
+
 				if (selected > -1)
 				{
 					freyja_print("Face[%i] selected by pick ray.", selected);

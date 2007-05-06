@@ -1055,7 +1055,7 @@ void MaterialEv::EvSetTexture(uint32 value)
 {
 	SetSelected(value);
 	freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
-	freyja_event_gl_refresh();
+	RefreshContext();
 }
 
 
@@ -1108,10 +1108,10 @@ void MaterialEv::EvOpenTexture(char *text)
 		freyjaMaterialTexture(mat, texture);
 		freyjaMaterialTextureName(mat, text);
 
-		freyja_event_gl_refresh(); //Dirty();
+		RefreshContext(); //Dirty();
 	}
 
-	freyja_print("%s %s", text, loaded ? "loaded" : "failed to load");
+	Print("%s %s", text, loaded ? "loaded" : "failed to load");
 }
 
 
@@ -1176,6 +1176,44 @@ void MaterialEv::EvGLSLFragmentMode(uint32 value)
 		mgtk_toggle_value_set(EvARBFragmentModeId, 0);
 		Print("GLSL fragment shader mode.");
 	}
+}
+
+
+byte *MaterialEv::GenerateTextureCheckerBoard(byte bg[4], byte fg[4],
+											  uint32 width, uint32 height,
+											  uint32 runlen)
+{
+	byte *image = new unsigned char[height*width*4];
+	bool swap = true;
+
+	for (uint32 i = 0, l = 0; i < width; ++i, ++l)
+	{
+		for (uint32 j = 0; j < height; ) // 2px black border
+		{
+			byte *&rgba = (swap) ? bg : fg;			
+
+			for (uint32 k = 0; k < runlen; ++k, ++j)
+			{
+				uint32 idx = ( height * i + j ) * 4;
+
+				/* RBGA */
+				image[idx]   = rgba[0];
+				image[idx+1] = rgba[1];
+				image[idx+2] = rgba[2];
+				image[idx+3] = rgba[3];
+			}
+
+			swap = !swap;
+		}
+
+		if (l >= runlen)
+		{
+			l = 0;
+			swap = !swap;	
+		}
+	}
+
+	return image;
 }
 
 

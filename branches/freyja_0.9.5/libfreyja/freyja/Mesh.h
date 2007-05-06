@@ -410,6 +410,16 @@ public:
 	 *        Clears old fRayHit results on all other vertices.
 	 ------------------------------------------------------*/
 
+	bool IntersectUVFaces(hel::Ray &r, int &face0, bool markAll, 
+						  uint32 width, uint32 height, index_t material);
+	/*------------------------------------------------------
+	 * Pre  : <width> and <height> of UVPlane and current material.
+	 *
+	 * Post : <face0> First face encountered along ray, or -1 if DNE.
+	 *        <markAll> If true sets fRayHit flag on all faces hit.
+	 *        Always sets fRayHit flag on face0, clears old results. 
+	 ------------------------------------------------------*/
+
 	bool IntersectFaces(hel::Ray &r, int &face0, bool markAll);
 	/*------------------------------------------------------
 	 * Pre  : 

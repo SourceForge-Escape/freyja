@@ -13,15 +13,16 @@ BASE_NAME=freyja
 MAJOR_VERSION=0
 MINOR_VERSION=9
 MICRO_VERSION=5
-BRANCH=8
-BUILD_ID=20070407
-VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)$(BRANCH)
+REVISION=8
+BUILD_DATE=`date +%Y%m%d`
 BUILD_HOST=`uname -n -m -s`
+BUILD_ARCH=`uname -m`
+BUILD_ID=$(BUILD_DATE)
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(REVISION)
 WEBSITE="http://icculus.org/freyja"
-EMAIL="mongoose@icculus.org"
-EXT=
+EMAIL="mongooseichiban@gmail.com"
 TREE_DIR=freyja
-TARBALL_NAME=$(NAME)-$(VERSION).$(BUILD_ID)$(BRANCH)
+TARBALL_NAME=$(NAME)-$(VERSION)-$(BUILD_ID)
 LICENSE=
 
 ################################################################

@@ -12,20 +12,16 @@
 
  * Fix mouse cursor control.
 	- Fix LEFT 'ALL' select on move cursor
-	- Reverse direction bug.
+	- Reverse direction bug. ( workaround in place until redesign is tested. )
 	- Rotation modifier not WYSIWYG.
 	- Rotation will reapply last rotation if a quick click selection occurs.
 	- Rotation has a gimble lock issue.
 	- Rotation not reset before object creation/selection sometimes causing bug.
 	- Transform has a 'pop' or 'jump' in model and mesh modes
 
- * Checker/colorcube texture generators
-
- * Light editor improvements
-
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 
- * Add back ray picking for UV faces to the UV editor.
+ * Move texcoord UI into it's own control.
 
  * Polygon generators using new backend ( legacy removal depends on this. )
 
@@ -47,7 +43,7 @@
 	- Bones and bone transforms in same units!
 	- Finalize delta vs abs bone / keyframe transforms
 	- Rework weight system to support zeroed weights and grouping
-	- Merge the two bone rendering systems once debugging is done
+	- Merge the two bone rendering systems once alpha is done
 	- Fix bone bind, bindtoworld setup in libfreyja
 	- Channels support
 	- Ordering support
@@ -120,6 +116,12 @@
 	- Mesh::Merge() doesn't merge animations ( shouldn't matter? )
 	- Mesh::WeldTexCoords() is non-functunal 
 	- Mesh::Serialize(...) for binary Files needs to be updated for format	
+
+ * Scene graph UI.
+
+ * Full Light editor.
+
+ * Camera editor.
 
  * Async I/O test with special memory pool, etc ( killable I/O threads )
 
