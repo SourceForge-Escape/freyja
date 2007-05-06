@@ -795,7 +795,7 @@ bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 
 
 bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
-							uint32 width, uint32 height, index_t material)
+							index_t material)
 {
 	vec_t bestDist = 99999.0f;
 	r.mDir.Norm();
@@ -805,7 +805,7 @@ bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
 	{
 		Face *f = GetFace(i);
 			
-		if (!f) 
+		if (!f || f->mMaterial != material) 
 			continue;
 
 		mstl::Vector<index_t> &indices = 
@@ -815,20 +815,13 @@ bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
 		Vec3 a, b, c, tuv;
 		
 		GetTexCoord(indices[0], a.mVec);
-		a.mX *= width;
-		a.mY = a.mY * height;
 		GetTexCoord(indices[1], b.mVec);
-		b.mX *= width;
-		b.mY = b.mY * height;
 
 		bool intersect = false;
 
 		for (uint32 j = 2, jn = indices.size(); j < jn; ++j)
 		{
 			GetTexCoord(indices[j], c.mVec);
-			c.mX *= width;
-			c.mY = c.mY * height;
-
 			intersect = r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tuv.mVec);
 
 			if (intersect)

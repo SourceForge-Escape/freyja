@@ -411,9 +411,9 @@ public:
 	 ------------------------------------------------------*/
 
 	bool IntersectUVFaces(hel::Ray &r, int &face0, bool markAll, 
-						  uint32 width, uint32 height, index_t material);
+						  index_t material);
 	/*------------------------------------------------------
-	 * Pre  : <width> and <height> of UVPlane and current material.
+	 * Pre  : Current <material> is used as a filter.
 	 *
 	 * Post : <face0> First face encountered along ray, or -1 if DNE.
 	 *        <markAll> If true sets fRayHit flag on all faces hit.

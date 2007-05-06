@@ -3226,11 +3226,9 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 				switch (GetControlScheme())
 				{
 				case eScheme_UV:
-					FreyjaRender::mTestRay.mOrigin = hel::Vec3(mouseX, mouseY, 10.0f);
+					FreyjaRender::mTestRay.mOrigin = hel::Vec3(mouseX/mRender->GetWindowWidth(), mouseY/mRender->GetWindowHeight(), 10.0f);
 					FreyjaRender::mTestRay.mDir = hel::Vec3(0.0f, 0.0f, -1.0f);
 					m->IntersectUVFaces(FreyjaRender::mTestRay, selected, false,
-										mRender->GetWindowWidth(), 
-										mRender->GetWindowHeight(),
 										GetSelectedMaterial());
 					break;
 
@@ -3442,11 +3440,9 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 				switch (GetControlScheme())
 				{
 				case eScheme_UV:
-					FreyjaRender::mTestRay.mOrigin = hel::Vec3(mouseX, mouseY, 10.0f);
+					FreyjaRender::mTestRay.mOrigin = hel::Vec3(mouseX/mRender->GetWindowWidth(), mouseY/mRender->GetWindowHeight(), 10.0f);
 					FreyjaRender::mTestRay.mDir = hel::Vec3(0.0f, 0.0f, -1.0f);
 					m->IntersectUVFaces(FreyjaRender::mTestRay, selected, false,
-										mRender->GetWindowWidth(), 
-										mRender->GetWindowHeight(),
 										GetSelectedMaterial());
 					break;
 
