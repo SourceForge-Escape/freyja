@@ -57,7 +57,7 @@
 	- Keyframe editor improvements
 	- Finalize the interpolation system in libfreyja
 	- Curve editor ( OpenGL UI based editor )
-	- Timers for animation playback
+	- Hookup threaded timers for animation playback mode.
 	- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
 	- Make generic plugin interface for new UI control points
 	- Renable 'direct' vertex animation creation

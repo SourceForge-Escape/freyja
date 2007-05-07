@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.8
  20070429-20070506 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Deleted bone clean up now handles bind pose correctly.
+ - Delete bone confirmation dialog.
  - UV face intersection support is back with selection UI. ( Use Face mode. )
  - Colorcube texture generator as part of perlinnoise plugin.
  - Checkerboard texture generator as part of perlinnoise plugin.
