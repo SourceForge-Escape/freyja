@@ -16,6 +16,9 @@
  A
  ----------------------------
 
+ * File export may be broken in some event paths 
+	- explict freyja filter won't save -- prob due to it not being a module
+
  * Group (faces) selection is broken
 
  * WIN32 python lib is very unstable - need to replace it with ming bin
@@ -58,11 +61,7 @@
 	- Fix will be using a pure serialized format .Ja v2 ( binary .Freyja )
 
  * Bone rotation
-	- Needs to be 'synced' to heirachry to make sense
-	- Doesn't work at all really with backend changes
 	- Looks like we're getting a sqrt(-1) and INFINITY passed around
-
- * Cursor axis select might be broke for some views on 'ALL' picks
 
  * Cursor reset on undo ( use a freaking seperate undo state system for cursor )
 
@@ -72,9 +71,6 @@
  ----------------------------
 
  * Doesn't build in OS X since 0.9.5  ( No access to a working build machine. )
-
- * Visual scaling of cursors may need to be adjusted during zoom != 1.0f
-	- This means sphere/ray targets must be scaled to match visual also
 
  * Actual bug report: 'generated sphere looks retarded' it's true too
    just needs to be subdiv with quads

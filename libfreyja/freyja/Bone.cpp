@@ -46,6 +46,19 @@ Bone::Bone() :
 	mUID(INDEX_INVALID)
 {
 	mName[0] = '\0';
+
+	// Still allow skeleton only by disabling this snippet here
+#if 0
+	// Force a single keyframe for loc/rot on all new bones.
+	uint32 b = NewTrack();
+	BoneTrack &t = GetTrack(b);
+	index_t key = t.GetKeyfameIndex(0.0f);
+	Vec3KeyFrame *kt = t.GetLocKeyframe(key);
+	if (kt) kt->SetData(hel::Vec3());
+	key = t.GetKeyfameIndex(0.0f);
+	Vec3KeyFrame *kr = t.GetRotKeyframe(key);
+	if (kr) kr->SetData(hel::Vec3());
+#endif
 }
 
 
@@ -57,6 +70,7 @@ Bone::~Bone()
 
 		if (b)
 		{
+			// Reparent children to parent, and update bind pose.
 			b->mParent = mParent;
 			b->UpdateBindPose();
 			b->UpdateBindPoseForChildren();
@@ -103,7 +117,8 @@ bool Bone::Serialize(SystemIO::TextFileWriter &w)
 
 	w.Print("\t mSkeleton %u\n", mSkeleton);
 
-	w.Print("\t mParent %u\n", mParent);
+	// 0.9.5.8, Use signed values for 'nil' parent.
+	w.Print("\t mParent %i\n", (mParent == INDEX_INVALID) ? -1 : mParent);
 
 	w.Print("\t mChildren %u ", mChildren.size());
 
@@ -352,6 +367,36 @@ void Bone::UpdateWorldPose(index_t track, vec_t time)
 }
 
 
+void Bone::UpdateWorldPoseForChildren(index_t track, vec_t time)
+{
+	for (uint32 i = 0, n = mChildren.size(); i < n; ++i)
+	{
+		Bone *b = GetBone(mChildren[i]);
+
+		if (b)
+		{
+			BoneTrack &t = b->GetTrack(track);
+			hel::Vec3 rot = t.GetRot(time);
+			hel::Vec3 loc = t.GetLoc(time);
+
+			/* In this local case order doesn't matter for these operations. */
+			t.mLocal.SetIdentity();
+			t.mLocal.SetRotation(rot.mX, rot.mY, rot.mZ);
+			t.mLocal.Translate(loc);
+
+			/* Relative animations are currently being used... */
+			helMatrixPostMultiply(b->mLocalTransform.mMatrix,  
+								  t.mLocal.mMatrix,
+								  t.mLocal.mMatrix);
+
+			helMatrixPostMultiply(GetWorldPose().mMatrix,  
+								  t.mLocal.mMatrix,
+								  t.mWorld.mMatrix);
+		}
+	}
+}
+
+
 bool Bone::Serialize(SystemIO::TextFileReader &r)
 {
 	r.ParseSymbol(); // Bone
@@ -372,7 +417,10 @@ bool Bone::Serialize(SystemIO::TextFileReader &r)
 	mSkeleton = r.ParseInteger();
 
 	r.ParseSymbol(); // mParent
-	mParent = r.ParseInteger();
+	{
+		int i = r.ParseInteger();
+		mParent = ( i < 0 ) ? INDEX_INVALID : i; 
+	}
 
 	r.ParseSymbol(); // mChildren
 	uint32 count = r.ParseInteger();

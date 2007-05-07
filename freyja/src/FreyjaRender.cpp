@@ -309,7 +309,7 @@ void FreyjaRender::DrawFreeWindow()
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
-	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
+	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
 	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
 	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
@@ -1306,7 +1306,8 @@ void FreyjaRender::RenderModel(index_t model)
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
 			glTranslatef(p.mX, p.mY, p.mZ);
 
-			glColor3fv(DARK_RED);
+			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+			glColor3fv(WHITE) : glColor3fv(DARK_RED);
 			mglDrawSphere(10, 10, 0.4f);
 
 			glPopMatrix();
@@ -1321,7 +1322,9 @@ void FreyjaRender::RenderModel(index_t model)
 				glPushMatrix();
 				glMultMatrixf( combined.mMatrix );
 
-				glColor3fv(DARK_GREEN);
+				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+				glColor3fv(WHITE) : glColor3fv(DARK_GREEN);
+
 				freyjaGetBoneTranslation3fv(i, p.mVec);
 				mglDrawBone(2, p.mVec);
 
@@ -2048,7 +2051,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 
 #ifdef PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
-	glTranslatef(-mScaleEnv, -mScaleEnv + 2.5f, 10.0);
+	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
 
 	switch (plane)
 	{

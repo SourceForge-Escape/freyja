@@ -74,6 +74,8 @@
 	- On select_plugin() set filter
 	- On save() use last set filter
 
+ * Material sphere rotation controlled by slider.
+
  * Anything still using FREYJA_MODE_* text events should be deprecated.
 
  * Finish up the icon set.
@@ -116,6 +118,9 @@
 	- Mesh::Merge() doesn't merge animations ( shouldn't matter? )
 	- Mesh::WeldTexCoords() is non-functunal 
 	- Mesh::Serialize(...) for binary Files needs to be updated for format	
+
+ * Visual scaling of cursors may need to be adjusted during zoom != 1.0f
+	- This means sphere/ray targets must be scaled to match visual also
 
  * Scene graph UI.
 

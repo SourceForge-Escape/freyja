@@ -433,12 +433,13 @@ public:
 		UpdateKeyframes(); // Allocate junky sparse array...
 
 		r.ParseSymbol(); // mKeyFrames
-		uint32 count = r.ParseInteger();
+		int32 count = r.ParseInteger(); // 0.9.5.8, sign fix
 		while (count > 0)
 		{
 			r.ParseSymbol(); // Key
 			uint32 key = r.ParseInteger();
-			NewKeyframeByIndex(key)->Serialize(r);
+			KeyFrame *k = NewKeyframeByIndex(key);
+			if (k) k->Serialize(r);
 
 			--count;
 		}
