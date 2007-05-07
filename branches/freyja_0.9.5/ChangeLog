@@ -4,8 +4,19 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
+ Kagura prealpha, 0.9.5.9
+ 20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+
+
  Kagura prealpha, 0.9.5.8
  20070429-20070506 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Character FK test passed, but UI could use much work and a tutorial.
+ - Removed false assert in old tube generator.
+ - FIX bone serialization using to ensure file portability. ( UINT_MAX->signed )
+ - FIX backend skeletal system enforces basis world pose updates.
+ - FIX bone selection pick and render improvements for world pose.
+ - FIX cursor ALL pick fix via distance check.
+ - FIX Notify orientation axis render.
  - FIX Deleted bone clean up now handles bind pose correctly.
  - Delete bone confirmation dialog.
  - UV face intersection support is back with selection UI. ( Use Face mode. )

@@ -3472,8 +3472,15 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 			for (uint32 i = 0, count = freyjaGetBoneCount(); i < count; ++i)
 			{
-				freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
-				//freyjaGetBoneWorldPos3fv(i, p.mVec);
+				switch (GetControlScheme())
+				{
+				case eScheme_Animation:
+					freyjaGetBoneWorldPos3fv(i, p.mVec);
+					break;
+
+				default:
+					freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
+				}
 
 				if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, 0.5f, t))
 				{
@@ -3517,6 +3524,17 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 								// Relative keyframes
 								mCursor.mPos += keyLoc->GetData();
 							}
+
+#if 0 // for edit modes
+							// FIXME: argh
+							vec_t t = 0.0f;
+							if (key)
+								t = track.GetRotKeyframeTime(k);
+							else if (keyLoc)
+								t = track.GetLocKeyframeTime(k);
+
+							b->UpdateWorldPose(anim, t);
+#endif
 						}
 					}
 					break;
@@ -3966,6 +3984,7 @@ void FreyjaControl::Transform(object_type_t obj,
 			ActionModelModified(a);
 			freyjaBoneTransform3fv(GetSelectedBone(), action, v.mVec);
 			freyjaBoneUpdateBindPose(GetSelectedBone());
+			
 		}
 		break;
 

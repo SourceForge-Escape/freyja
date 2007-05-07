@@ -908,8 +908,8 @@ void eGenerateTube()
 		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
 		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
 
-		FREYJA_ASSERTMSG(0, "c = %i, s = %i, r = %f, h = %f",
-						 count, segments, radius, height);
+		//FREYJA_ASSERTMSG(0, "c = %i, s = %i, r = %f, h = %f",
+		//				 count, segments, radius, height);
 
 		hel::Vec3 v;
 		freyjaGenerateTubeMesh(v.mVec, height, count, segments);

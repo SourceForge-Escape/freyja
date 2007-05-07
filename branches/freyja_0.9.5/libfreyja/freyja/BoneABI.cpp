@@ -567,6 +567,10 @@ void freyjaBoneUpdateBindPose(index_t bone)
 	{
 		b->UpdateBindPose();
 		b->UpdateBindPoseForChildren();
+
+		// Starting in 0.9.5.8 release, enforce a basis world pose
+		b->UpdateWorldPose(0, 0.0f);
+		b->UpdateWorldPoseForChildren(0, 0.0f);
 	}
 }
 

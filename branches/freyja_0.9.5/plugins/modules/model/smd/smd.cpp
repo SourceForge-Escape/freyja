@@ -36,6 +36,7 @@
 #include <mstl/String.h>
 #include <mstl/Vector.h>
 #include <hel/Vec3.h>
+#include <hel/Quat.h>
 
 using namespace mstl;
 
@@ -151,39 +152,39 @@ int freyja_model__smd_import(char *filename)
 		{
 			symbol = r.ParseSymbol();
 			int time = r.ParseInteger();
-			printf("%s = %i\n", symbol, time);
+			//printf("%s = %i\n", symbol, time);
 
 			// FIXME: if time != 0 we might just want to force keyframes here
+
 			skeleton = freyjaSkeletonCreate();
 			freyjaModelAddSkeleton(model, skeleton);
 
-			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
+			while ((symbol = r.ParseSymbol()) && 
+					strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
 				if (!symbol)
 					break;
 
 				int idx = atoi(symbol);
+				hel::Vec3 loc(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+				loc *= scale;
+				hel::Vec3 rot(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+
+				// Convert coords
+				loc.Set(loc.mY, loc.mZ, loc.mX);
+				rot.Set(rot.mY, rot.mZ, rot.mX);
+
 				smd_bone_t *bone = bones[idx];
 
-				if (bone && idx < (int)bones.end())
+				index_t b = freyjaBoneCreate(skeleton);
+				freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
+				freyjaBoneRotateEuler3f(b, rot.mX, rot.mY, rot.mZ);
+
+				if (bone && idx < (int)bones.size())
 				{
-					vec_t x = r.ParseFloat();
-					vec_t y = r.ParseFloat();
-					vec_t z = r.ParseFloat();
-
-					vec_t rx = r.ParseFloat();
-					vec_t ry = r.ParseFloat();
-					vec_t rz = r.ParseFloat();
-
-					index_t b = freyjaBoneCreate(skeleton);
 					freyjaBoneParent(b, bone->parent);
-					freyjaBoneFlags(b, 0x0);
-					freyjaBoneName(b, bone->name.GetCString());
-					freyjaBoneTranslate3f(b, x*scale, y*scale, z*scale);
-					freyjaBoneRotateEuler3f(b, rx, ry, rz);
-
-					if (bone->parent >= 0)
-						freyjaBoneAddChild(bone->parent, b);
+					freyjaBoneName(b, bone->name.c_str());
+					freyjaBoneAddChild(bone->parent, b);
 				}
 			}
 
@@ -212,23 +213,23 @@ int freyja_model__smd_import(char *filename)
 					mat = symbol;
 				}
 #endif
-
 				index_t face = freyjaMeshPolygonCreate(mesh);
-
-				int parent = r.ParseInteger();
 				freyjaMeshPolygonMaterial(mesh, face, matId);
 				freyjaMeshPolygonGroup1u(mesh, face, matId);
 
 				hel::Vec3 u;
 				for (unsigned int i = 0; i < 3; ++i)
 				{
-					u = hel::Vec3(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					int parent = r.ParseInteger();
+
+					u.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					//u.Set(u.mX, u.mZ, u.mY);
 					u *= scale;
 					index_t v = freyjaMeshVertexCreate3fv(mesh, u.mVec);
 					freyjaMeshPolygonAddVertex1i(mesh, face, v);	
 
-					u = hel::Vec3(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
-					freyjaGetMeshVertexNormal3fv(mesh, v, u.mVec);
+					u.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					freyjaMeshVertexNormal3fv(mesh, v, u.mVec);
 				
 					index_t t = freyjaMeshTexCoordCreate2f(mesh, r.ParseFloat(), r.ParseFloat());
 					freyjaMeshPolygonAddTexCoord1i(mesh, face, t);
@@ -238,7 +239,7 @@ int freyja_model__smd_import(char *filename)
 					// int num_weights;
 					// for num_weights : { int bone_id, vec weight }
 					//
-					// Remaining of 1.0 weight assigned to parent, but
+					// Remaining of 1.0 weight assigned to parent, but if
 					// there is no num_weights set parent to 1.0 automatically.
 
 					freyjaMeshVertexWeight(mesh, v, parent, 1.0f);

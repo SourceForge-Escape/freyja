@@ -228,7 +228,7 @@ bool Cursor::CheckForRayCollision(hel::Ray &r)
 	case freyja3d::Cursor::Translation:
 		{
 			vec_t z = 1.0f;
-			vec_t t;
+			vec_t t, dist = 9999.0f;
 			hel::Vec3 o = hel::Vec3(z*freyja3d::Cursor::mid,0,0) + mPos;
 
 			if (r.IntersectSphere(mPos.mVec, 1.0f, t))
@@ -236,31 +236,35 @@ bool Cursor::CheckForRayCollision(hel::Ray &r)
 				mAxis = Cursor::eAll;
 				mSelected = true;
 				ret = true;
+				dist = t;
 			}
 
-			if (r.IntersectSphere(o.mVec, Cursor::min*2, t))
+			if (r.IntersectSphere(o.mVec, Cursor::min*2, t) && t < dist)
 			{
 				mAxis = Cursor::eX;
 				mSelected = true;
 				ret = true;
+				dist = t;
 			}
 
 			o = hel::Vec3(0, z*Cursor::mid,0) + mPos;
 
-			if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
+			if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t) && t < dist)
 			{
 				mAxis = Cursor::eY;
 				mSelected = true;
 				ret = true;
+				dist = t;
 			}
 
 			o = hel::Vec3(0, 0, z*Cursor::mid) + mPos;
 				
-			if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t))
+			if (!ret && r.IntersectSphere(o.mVec, Cursor::min*2, t) && t < dist)
 			{
 				mAxis = Cursor::eZ;
 				mSelected = true;
 				ret = true;
+				dist = t;
 			}
 		}
 		break;

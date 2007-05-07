@@ -262,6 +262,13 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void UpdateWorldPoseForChildren(index_t track, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates this bone's child world transforms only.
+	 *
+	 ------------------------------------------------------*/
+
 	void ClearFlag(BoneFlags f) { mFlags &= ~f; }
 	/*------------------------------------------------------
 	 * Pre  :  
