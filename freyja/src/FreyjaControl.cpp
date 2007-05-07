@@ -3019,7 +3019,10 @@ void FreyjaControl::DeleteSelectedObject()
 		break;
 
 	case tBone:
-		freyjaBoneDelete(GetSelectedBone());
+		if (mgtk::ExecuteConfirmationDialog("DelBoneDialog"))
+		{
+			freyjaBoneDelete(GetSelectedBone());
+		}
 		break;
 
 	case tMesh:
@@ -4681,15 +4684,11 @@ void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
 		break;
 
 	default:
-		freyja_print("! ScaleObject(): This view (%i) isn't supported.", plane);
+		Print("! ScaleObject(): This view (%i) isn't supported.", plane);
 	}
 
 	old_x = x;
 	old_y = y;
-
-	// WTF! It was doing direct scaling like the old, old codebase
-	// Leaving this here as reminder for next code clean up
-	//Transform(mObjectMode, fScale, 1.0, 0.99, 1.0);
 }
 
 

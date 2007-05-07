@@ -51,6 +51,17 @@ Bone::Bone() :
 
 Bone::~Bone()
 {
+	for (unsigned int i = 0, n = mChildren.size(); i < n; ++i)
+	{
+		Bone *b = GetBone(mChildren[i]);
+
+		if (b)
+		{
+			b->mParent = mParent;
+			b->UpdateBindPose();
+			b->UpdateBindPoseForChildren();
+		}
+	}
 }
 
 

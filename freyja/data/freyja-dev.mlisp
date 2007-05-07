@@ -1007,6 +1007,12 @@
 	"Are you sure you want to delete these vertices?"
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Delete")
 
+(confirmation_dialog	"DelBoneDialog"
+	"gtk-dialog-question"
+	"You are about to delete the selected joint/bone."
+	"Are you sure you want to delete this bone?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Delete")
+
 (confirmation_dialog	"CloseNewFileDialog"
 	"gtk-dialog-question"
 	"Creating a new model will close the current model."
