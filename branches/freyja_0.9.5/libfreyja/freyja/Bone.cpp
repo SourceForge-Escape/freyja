@@ -36,7 +36,7 @@ Bone::Bone() :
 	mFlags(0),
 	mSkeleton(INDEX_INVALID),
 	mParent(INDEX_INVALID),
-	mChildren(0),
+	mChildren(), // 0
 	mRotation(),
 	mTranslation(0.0f, 0.0f, 0.0f),
 	mBindPose(),
@@ -64,13 +64,24 @@ Bone::Bone() :
 
 Bone::~Bone()
 {
+	Bone *parent = GetBone(mParent);
+
+	// Remove from parent's child list.
+	if (parent)
+	{
+		RemoveChild(GetUID()); // 0.9.5.9
+	}
+
+	// Reparent children to parent, and update bind pose.
 	for (unsigned int i = 0, n = mChildren.size(); i < n; ++i)
 	{
 		Bone *b = GetBone(mChildren[i]);
 
 		if (b)
 		{
-			// Reparent children to parent, and update bind pose.
+			// Add this child to parent's child list.
+			if (parent) parent->AddChild(mChildren[i]); // 0.9.5.9
+
 			b->mParent = mParent;
 			b->UpdateBindPose();
 			b->UpdateBindPoseForChildren();
@@ -151,8 +162,12 @@ bool Bone::Serialize(SystemIO::TextFileWriter &w)
 	}
 	w.Print("\n");
 
-	w.Print("\t mTracks %u\n", 1); // only have one in test =p
-	mTrack.Serialize(w);
+	w.Print("\t mTracks %u\n", GetTrackCount());
+	for (uint32 j = 0; j < GetTrackCount(); ++j)
+	{
+		BoneTrack &track = GetTrack(j);
+		track.Serialize(w);
+	}
 
 	return true;
 }
@@ -173,10 +188,8 @@ index_t Bone::AddToPool()
 	uint32 i, count;
 	bool found = false;
 
-
 	if (mUID == INDEX_INVALID)
 	{
-
 		/* Setup UID and class container reference */
 		mUID = count = mGobalPool.size();
 
@@ -423,7 +436,7 @@ bool Bone::Serialize(SystemIO::TextFileReader &r)
 	}
 
 	r.ParseSymbol(); // mChildren
-	uint32 count = r.ParseInteger();
+	int32 count = r.ParseInteger();
 	while (count > 0)
 	{
 		mChildren.push_back(r.ParseInteger());
@@ -457,8 +470,9 @@ bool Bone::Serialize(SystemIO::TextFileReader &r)
 	count = r.ParseInteger();
 	while (count > 0)
 	{
-		// only have one in test =p
-		mTrack.Serialize(r);
+		index_t t = NewTrack();
+		BoneTrack &track = GetTrack(t);
+		track.Serialize(r);
 		--count;
 	}
 

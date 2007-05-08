@@ -144,28 +144,28 @@ class Vec3
 	 *
 	 ------------------------------------------------------*/
 
-	Vec3 operator -() { return Vec3(-mX, -mY, -mZ); }
+	Vec3 operator -() const { return Vec3(-mX, -mY, -mZ); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns vector of Vec3 negated.
 	 *
 	 ------------------------------------------------------*/
 
-	Vec3 operator *(vec_t s) { Vec3 v(*this); v *= s; return v; }
+	Vec3 operator *(vec_t s) const { Vec3 v(*this); v *= s; return v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns vector of Vec3 scaled by <s>.
 	 *
 	 ------------------------------------------------------*/
 
-	Vec3 operator /(vec_t s) { Vec3 v(*this); v /= s; return v; }
+	Vec3 operator /(vec_t s) const { Vec3 v(*this); v /= s; return v; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns vector of Vec3 scaled by 1/<s>.
 	 *
 	 ------------------------------------------------------*/
 
-	vec_t operator *(const Vec3 &v) { return Dot(*this, v); }
+	vec_t operator *(const Vec3 &v) const { return Dot(*this, v); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns dot product of <v> and Vec3.

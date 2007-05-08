@@ -86,7 +86,10 @@ mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex,
 
 	if (rootChildCount > freyjaGetBoneCount())
 	{
-		freyja_print("!generateSkeletalUI(): Invalid boneIndex.\n");
+		FREYJA_ASSERTMSG(0, "root %i '%s'\nchildren %i > %i\nInvalid bone indices predicted.  Child count exceeds maximum bone count.",
+						 rootIndex, rootName,
+						 rootChildCount, freyjaGetBoneCount());
+		//freyja_print("!generateSkeletalUI(): Invalid boneIndex.\n");
 		return 0x0;
 	}
 
@@ -430,7 +433,8 @@ void freyja_handle_event1f(int event, float value)
 {
 	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
-	if (!FreyjaControl::mInstance->event(event, value))
+	//if (!FreyjaControl::mInstance->event(event, value))
+	if (!ResourceEvent::listen(event - ePluginEventBase, value))
 	{
 		if (freyja_event2i(eEvent, event) == -1)
 			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
@@ -906,10 +910,7 @@ void eGenerateTube()
 		int count = mgtk_get_query_dialog_int(dialog, "count");
 		int segments = mgtk_get_query_dialog_int(dialog, "segments");
 		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
-		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
-
-		//FREYJA_ASSERTMSG(0, "c = %i, s = %i, r = %f, h = %f",
-		//				 count, segments, radius, height);
+		//vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
 
 		hel::Vec3 v;
 		freyjaGenerateTubeMesh(v.mVec, height, count, segments);
@@ -1331,7 +1332,6 @@ void freyja_handle_resource_init(Resource &r)
 	////////////////////////////////////////////////////////////////////
 
 	// Not implemented or removed misc events
-	//ResourceEventCallback2::add("eTextureSlotLoadToggleB", &eNoImplementation);
 	ResourceEventCallback2::add("eBezierPolygonPatch", &eNoImplementation);
 	ResourceEventCallback2::add("eSelectAll", &eNoImplementation);
 	ResourceEventCallback2::add("eShaderSlotLoad", &eNoImplementation);
@@ -1394,17 +1394,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eObjectMenu", eObjectMenu);
 	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
 	r.RegisterInt("eTransformMenu", eTransformMenu);
-
-	// Widget events ( widgets hold data like spinbuttons, etc )
-	r.RegisterInt("eMove_X", eMove_X);
-	r.RegisterInt("eMove_Y", eMove_Y);
-	r.RegisterInt("eMove_Z", eMove_Z);
-	r.RegisterInt("eRotate_X", eRotate_X);
-	r.RegisterInt("eRotate_Y", eRotate_Y);
-	r.RegisterInt("eRotate_Z", eRotate_Z);
-	r.RegisterInt("eScale_X", eScale_X);
-	r.RegisterInt("eScale_Y", eScale_Y);
-	r.RegisterInt("eScale_Z", eScale_Z);
 
 	// Colors
 	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
@@ -1763,17 +1752,12 @@ void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 
 int freyja_event2i(int event, int cmd)
 {
-	if (FreyjaControl::mInstance && event != eNop)
+	if ( event != eNop && 
+		 !ResourceEvent::listen(cmd - ePluginEventBase) )
 	{
-		if (FreyjaControl::mInstance->handleEvent(event, cmd))
-		{
-		}
-		else if ( !ResourceEvent::listen(cmd - ePluginEventBase) )
-		{
-			freyja_print("%s(%i, %i): Event has no handler.",
-						 __func__, event, cmd);
-			return -1;
-		}
+		freyja_print("%s(%i, %i): Event has no handler.",
+					 __func__, event, cmd);
+		return -1;
 	}
 
 	return 0;

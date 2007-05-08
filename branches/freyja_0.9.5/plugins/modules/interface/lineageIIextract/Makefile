@@ -288,8 +288,10 @@ tarball:
 
 
 user-install:
+	@-echo -n "User install                                  "
 	@-cp $(BUILD_DEBUG_DIR)/$(NAME).so ~/.freyja/plugins/
 	@-cp $(NAME).mlisp ~/.freyja/plugins/
+	@-echo "[done]"
 
 
 ################################################################

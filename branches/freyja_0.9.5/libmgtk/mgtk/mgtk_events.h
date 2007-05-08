@@ -55,30 +55,54 @@ extern "C" {
  * void your_event1u_implementation(int event, unsigned int value) { ... }
  * mgtk_link_import("mgtk_handle_event1u", your_event1u_implementation); 
  ==========================================================================*/
+
+// Event handlers
+
+void mgtk_handle_application_window_close();
+
+void mgtk_handle_color(int id, float r, float g, float b, float a);
+
+void mgtk_handle_command(int command);
+
+void mgtk_handle_command2i(int event, int command);
+
+void mgtk_handle_event1u(int event, unsigned int value);
+
+void mgtk_handle_event1f(int event, float value);
+
+void mgtk_handle_gldisplay();
+
+void mgtk_handle_glresize(unsigned int width, unsigned int height);
+
+void mgtk_handle_key_press(int key, int mod);
+
+void mgtk_handle_motion(int x_delta, int y_delta);
+
+void mgtk_handle_mouse(int button, int state, int mod, int x, int y);
+
+void mgtk_handle_resource_start();
+
+void mgtk_handle_text(int event, char *text);
+
+void mgtk_handle_text_array(int event, unsigned int count, char **text_array);
+
+void mgtk_print(char *format, ...);
+
+
+
+void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
+
+// Working directory, resource directory, etc
+
+char *mgtk_rc_map(char *filename_or_dirname);
+
+const char *mgtk_get_resource_path();
+
+void mgtk_toggle_value_set(int event, int val);
+
 void mgtk_callback_get_image_data_rgb24(const char *filename, 
 										unsigned char **image, 
 										int *width, int *height);
-void mgtk_handle_application_window_close();
-void mgtk_handle_color(int id, float r, float g, float b, float a);
-void mgtk_handle_command(int command);
-void mgtk_handle_command2i(int event, int command);
-void mgtk_handle_event1u(int event, unsigned int value);
-void mgtk_handle_event1f(int event, float value);
-void mgtk_handle_gldisplay();
-void mgtk_handle_glresize(unsigned int width, unsigned int height);
-void mgtk_handle_key_press(int key, int mod);
-//void mgtk_handle_key_release(int key, int mod);
-void mgtk_handle_motion(int x_delta, int y_delta);
-void mgtk_handle_mouse(int button, int state, int mod, int x, int y);
-void mgtk_handle_resource_start();
-//void mgtk_handle_slider1u(int event, unsigned int value);
-void mgtk_handle_text(int event, char *text);
-void mgtk_handle_text_array(int event, unsigned int count, char **text_array);
-void mgtk_print(char *format, ...);
-void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
-char *mgtk_rc_map(char *filename_or_dirname);
-const char *mgtk_get_resource_path();
-void mgtk_toggle_value_set(int event, int val);
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -90,10 +114,32 @@ typedef int (*MgtkAssertCallback)(const char *file, unsigned int line,
 								  const char *expression,
 								  const char *message);
 
+int mgtk_init(int argc, char *argv[]);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Setup for mgtk and event system.
+ *
+ ------------------------------------------------------*/
+
+void mgtk_start();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Start the widgets and event system.
+ *
+ ------------------------------------------------------*/
+
+void mgtk_event_shutdown();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Close the windows/widgets and stop the event system.
+ *
+ ------------------------------------------------------*/
+
 void mgtk_assert_handler(MgtkAssertCallback func);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Assertion event handler is assigned.
+ *
  ------------------------------------------------------*/
 
 unsigned char mgtk_assert(const char *file, unsigned int line, 
@@ -102,92 +148,254 @@ unsigned char mgtk_assert(const char *file, unsigned int line,
 /*------------------------------------------------------
  * Pre  : Format string and args are valid
  * Post : Report messages to stdout or gPrinter
+ *
  ------------------------------------------------------*/
 
 int mgtk_execute_query_dialog(const char *dialog);
 /*------------------------------------------------------
  * Pre  : <dialog> is a valid registered querydialog symbol 
  * Post : Executes query dialog of given symbol 
+ *
  ------------------------------------------------------*/
 
 float mgtk_get_query_dialog_float(const char *dialog, const char *symbol);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Returns <symbol> value if found in <dialog> or 0.0f
+ *
  ------------------------------------------------------*/
 
 int mgtk_get_query_dialog_int(const char *dialog, const char *symbol);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Returns <symbol> value if found in <dialog> or 0
+ *
  ------------------------------------------------------*/
 
-//void mgtk_hide(int wid);
+float mgtk_event_get_float(int event);
 /*------------------------------------------------------
  * Pre  : 
- * Post : 
+ * Post : Sample a control with a floating point value.
+ *
  ------------------------------------------------------*/
-}
-
-
-
-/* Call into special mgtk using these internal mgtk functions below */
-float mgtk_event_get_float(int event);
 
 int mgtk_event_set_range(int event, unsigned int value,
 						 unsigned int min, unsigned int max);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Set control value with a ranged clamp.
+ *
+ ------------------------------------------------------*/
 
 void mgtk_event_notify_observer1f(unsigned int id, float r);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Update all listeners of event <id> with value <r>.
+ *
+ ------------------------------------------------------*/
 
-void mgtk_create_query_dialog_text(char *image, char *message, 
+void mgtk_create_query_dialog_text(const char *image, const char *message, 
 								   int eventId, const char *value);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Generate a dialog to prompt for a text value.
+ *
+ ------------------------------------------------------*/
 
-float mgtk_create_query_dialog_float(char *image, char *message,
+float mgtk_create_query_dialog_float(const char *image, const char *message,
 									 float value, float min, float max, 
 									 float step, int digits);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Generate a dialog to prompt for a floating point value.
+ *
+ ------------------------------------------------------*/
 
-void mgtk_create_info_dialog(char *icon, char *message);
+void mgtk_create_info_dialog(const char *icon, const char *message);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Generate a dialog to provide a message to the user.
+ *
+ ------------------------------------------------------*/
 
 int mgtk_create_confirm_dialog(const char *dialog_icon,
 							   const char *information_message, 
 							   const char *question_message,
 							   const char *cancel_icon, const char *cancel_text,
 							   const char *accept_icon, const char *accept_text);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Generate a confirmation dialog.
+ *
+ ------------------------------------------------------*/
+
+
 
 /* File dialog events, now sends handle_text events */
-void mgtk_event_file_dialog(int eventId, char *title);
-void mgtk_event_fileselection_set_dir(int eventId, char *dir);
-void mgtk_event_fileselection_append_pattern(int eventId, char *label, char *pattern);
+
+void mgtk_filechooser_blocking_free(char *filename);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+char *mgtk_filechooser_blocking(const char *title, 
+								const char *path, int type, 
+								const char *filter_label, 
+								const char *filter_pattern);
+/*------------------------------------------------------
+ * Pre  : <type> = (0 Open), (1 Save)
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_event_file_dialog(int eventId, const char *title);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_event_fileselection_set_dir(int eventId, const char *dir);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_event_fileselection_append_pattern(int eventId, const char *label, const char *pattern);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
 
 void mgtk_event_dialog_visible_set(int dialog, int visible);
-void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a); // C++ exportable only -- fix this with the C ABI patch 2007.04.01
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_event_get_color(int id, float *r, float *g, float *b, float *a);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_event_set_color(int id, float r, float g, float b, float a);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_event_notify_observer1f(unsigned int event, float value);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_event_notify_statusbar(const char *message);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_event_swap_gl_buffers();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_event_gl_refresh();
-void mgtk_event_shutdown();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+
+
+
+// Dynamic menus
 
 int mgtk_remove_all_items_to_menu(int event);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 int mgtk_append_item_to_menu2i(int menuEvent, const char *label, short event, short command);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 int mgtk_append_item_to_menu(int event, const char *label, int item_event);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
 
-int mgtk_init(int argc, char *argv[]);
 
-void mgtk_start();
+// Widget sampling / control
 
 void mgtk_spinbutton_value_set(int event, float val);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_textentry_value_set(int event, const char *s);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_option_menu_value_set(int event, int index);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_togglebutton_value_set(int event, bool val);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
 
-void mgtk_application_window_title(char *title);
+
+// Window properties
+
+void mgtk_application_window_title(const char *title);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
 void mgtk_application_window_move(int x, int y);
-void mgtk_application_window_resize(int width, int height);
-void mgtk_application_window_role(char *role);
-void mgtk_application_window_fullscreen();
-void mgtk_application_window_unfullscreen();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
 
+void mgtk_application_window_resize(int width, int height);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_application_window_role(const char *role);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_application_window_fullscreen();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+void mgtk_application_window_unfullscreen();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
 
 
 
@@ -214,30 +422,35 @@ mgtk_tree_t *mgtk_event_tree_new(int id, const char *label);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Allocates a new <tree> and initializes members
+ *
  ------------------------------------------------------*/
 
 void mgtk_event_tree_copy(mgtk_tree_t *src, mgtk_tree_t *dest);
 /*------------------------------------------------------
  * Pre  : You have to know what you're doing by calling this.
  * Post : _Shallow_ copies members of <src> to <dest>
+ *
  ------------------------------------------------------*/
 
 void mgtk_event_tree_add_child(mgtk_tree_t *parent, mgtk_tree_t *child);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Adds an existing child tree to an existing tree
+ *
  ------------------------------------------------------*/
 
 void mgtk_event_tree_add_new_child(mgtk_tree_t *parent, int id, const char *label);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Adds a new child tree to an existing tree
+ *
  ------------------------------------------------------*/
 
 void mgtk_event_tree_delete(mgtk_tree_t *tree);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Deallocates <tree> and all it's children
+ *
  ------------------------------------------------------*/
 
 void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
@@ -247,6 +460,7 @@ void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree);
  *
  * Post : This signals to update the view(s) for event <id> 
  *        using <tree> as the updated/new data model
+ *
  ------------------------------------------------------*/
 
 
@@ -267,5 +481,7 @@ typedef struct mgtk_mouse_event_s
 
 } mgtk_mouse_event_t;
 
+
+} // extern "C"
 
 #endif

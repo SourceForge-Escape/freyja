@@ -42,20 +42,6 @@ typedef enum {
 	eEvent = 4,           // These events request handling ( perform actions )
 
 	/* Event ids ( minors ) */
-
-	// Widget interaction events
-	eMove_X,
-	eMove_Y,
-	eMove_Z,
-	eRotate_X,
-	eRotate_Y,
-	eRotate_Z,
-	eScale_X,
-	eScale_Y,
-	eScale_Z,
-	eMoveBone_X,
-	eMoveBone_Y,
-	eMoveBone_Z,
 	
 	// Colors
 	eColorMaterialAmbient,

@@ -13,33 +13,34 @@ BACK=../../../
 debug:
 	@-rm -f ../bin/plugins/model/debug
 	@-mkdir -p ../bin/plugins/model/debug/
-	for i in $(IMGS); do cd $$i && make debug && cd $(BACK) || cd $(BACK); done 
-	for i in $(MDLS); do cd $$i && make debug && cd $(BACK) || cd $(BACK); done 
-	for i in $(UIPS); do cd $$i && make debug && cd $(BACK) || cd $(BACK); done 
+	$(MAKE) foreach RULE="debug" 
 
 
 release:
-	for i in $(IMGS); do cd $$i && make release && cd $(BACK) || cd $(BACK); done 
-	for i in $(MDLS); do cd $$i && make release && cd $(BACK) || cd $(BACK); done 
-	for i in $(UIPS); do cd $$i && make release && cd $(BACK) || cd $(BACK); done 
+	$(MAKE) foreach RULE="release" 
 
 
 win32:
-	for i in $(IMGS); do cd $$i && make win32 && cd $(BACK) || cd $(BACK); done 
-	for i in $(MDLS); do cd $$i && make win32 && cd $(BACK) || cd $(BACK); done 
-	for i in $(UIPS); do cd $$i && make win32 && cd $(BACK) || cd $(BACK); done 
+	$(MAKE) foreach RULE="win32" 
 	for i in ../bin/plugins/model/*/win32; do cp $$i/*.dll ../bin/plugins/model/win32/; done
 
+
 osx:
-	for i in $(IMGS); do cd $$i && make osx && cd $(BACK) || cd $(BACK); done 
-	for i in $(MDLS); do cd $$i && make osx && cd $(BACK) || cd $(BACK); done 
-	for i in $(UIPS); do cd $$i && make osx && cd $(BACK) || cd $(BACK); done 
+	$(MAKE) foreach RULE="osx" 
 
 
 clean:
-	for i in $(IMGS); do cd $$i && make clean && cd $(BACK) || cd $(BACK); done 
-	for i in $(MDLS); do cd $$i && make clean && cd $(BACK) || cd $(BACK); done 
-	for i in $(UIPS); do cd $$i && make clean && cd $(BACK) || cd $(BACK); done 
+	$(MAKE) foreach RULE="clean" 
+
+
+#user-install: 
+#	$(MAKE) foreach RULE="user-install" 
+
+
+foreach:
+	for i in $(IMGS); do cd $$i && $(MAKE) $(RULE) && cd $(BACK) || cd $(BACK); done
+	for i in $(MDLS); do cd $$i && $(MAKE) $(RULE) && cd $(BACK) || cd $(BACK); done
+	cd modules/interface/ && $(MAKE) $(RULE) && cd $(BACK) || cd $(BACK)
 
 
 #################################################################

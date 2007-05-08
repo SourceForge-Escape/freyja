@@ -52,7 +52,7 @@ GtkWidget *mgtk_get_fileselection_pattern_widget(int event)
 
 // File Selection
 
-void mgtk_event_fileselection_pattern(int event, char *pattern)
+void mgtk_event_fileselection_pattern(int event, const char *pattern)
 {
 	printf("mgtk_event_fileselection_pattern(%i, %s)\n", event, pattern);
 
@@ -76,7 +76,7 @@ void mgtk_event_fileselection_homedir(GtkWidget *file, void *data)
 }
 
 
-void mgtk_event_file_dialog(int event, char *title)
+void mgtk_event_file_dialog(int event, const char *title)
 {
 	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	
@@ -120,7 +120,7 @@ void mgtk_event_filechooser_cancel(GtkWidget *widget, gpointer user_data)
 }
 
 
-void mgtk_event_fileselection_set_dir(int event, char *dir)
+void mgtk_event_fileselection_set_dir(int event, const char *dir)
 {
 	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	
@@ -133,7 +133,7 @@ void mgtk_event_fileselection_set_dir(int event, char *dir)
 }
 
 
-void mgtk_event_fileselection_append_pattern(int event, char *label, char *pattern)
+void mgtk_event_fileselection_append_pattern(int event, const char *label, const char *pattern)
 {
 	GtkWidget *file = mgtk_get_fileselection_widget(event);
 	GtkFileFilter *filter = gtk_file_filter_new();
@@ -193,6 +193,82 @@ void mgtk_update_filechooser_preview(GtkFileChooser *file_chooser,
 /////////////////////////////////////////////////////////////////////
 // Gtk+ Widgets
 /////////////////////////////////////////////////////////////////////
+
+extern GtkWidget *GTK_MAIN_WINDOW;
+
+void mgtk_filechooser_blocking_free(char *filename)
+{
+	if (filename)
+		g_free(filename);	
+}
+
+char *mgtk_filechooser_blocking(const char *title, 
+								const char *path, int type, 
+								const char *filter_label, 
+								const char *filter_pattern)
+{
+	GtkWidget *dialog = 
+	gtk_file_chooser_dialog_new(title,
+								GTK_WINDOW(GTK_MAIN_WINDOW),
+								(type == 0) ? 
+								GTK_FILE_CHOOSER_ACTION_OPEN :
+								GTK_FILE_CHOOSER_ACTION_SAVE,
+								GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+								(type == 0) ?
+								GTK_STOCK_OPEN :
+								GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+								NULL);
+
+	// Path
+	if (path && path[0])
+	{
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
+	}
+
+	// Overwrite
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+
+	// Shortcut
+	char *spath = mgtk_rc_map("/");
+		
+	if (spath)
+	{
+		gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), spath, NULL);
+		delete [] spath;
+	}
+
+	// File filter
+	if (filter_label && filter_label[0] &&
+		filter_pattern && filter_pattern[0])
+	{
+		// Generic All Files filter
+		GtkFileFilter *filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(filter, (char*)filter_label);
+		gtk_file_filter_add_pattern(filter, (char*)filter_pattern);
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+
+		// Custom filter
+		GtkFileFilter *filter2 = gtk_file_filter_new();
+		gtk_file_filter_set_name(filter2, "All Files (*.*)");
+		gtk_file_filter_add_pattern(filter2, "*.*");
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter2);
+
+		// Select custom filter
+		gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter2);
+	}
+
+	char *filename;
+
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+	{
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+	}
+
+	gtk_widget_destroy (dialog);
+
+	return filename;
+}
+
 
 GtkWidget *mgtk_create_filechooser(int event, char *title)
 {

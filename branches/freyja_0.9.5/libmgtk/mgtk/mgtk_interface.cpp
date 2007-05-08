@@ -649,7 +649,7 @@ int mgtk_create_confirm_dialog(const char *dialog_icon,
 
 
 
-void mgtk_create_info_dialog(char *dialog_icon, char *message)
+void mgtk_create_info_dialog(const char *dialog_icon, const char *message)
 {
 	GtkWidget *about, *label, *icon;
 
@@ -673,7 +673,7 @@ void mgtk_create_info_dialog(char *dialog_icon, char *message)
 }
 
 
-void mgtk_create_query_dialog_text(char *image, char *message, 
+void mgtk_create_query_dialog_text(const char *image, const char *message, 
 								   int eventId, const char *value)
 {
 	GtkWidget *dialog = gtk_dialog_new();	
@@ -715,7 +715,7 @@ void mgtk_create_query_dialog_text(char *image, char *message,
 }
 
 
-float mgtk_create_query_dialog_float(char *image, char *message, 
+float mgtk_create_query_dialog_float(const char *image, const char *message, 
 									 float value, float min, float max, 
 									 float step, int digits)
 {
@@ -746,7 +746,7 @@ float mgtk_create_query_dialog_float(char *image, char *message,
 }
 
 
-GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func)
+GtkWidget *mgtk_create_color_picker_dialog(const char *title, void *event_func)
 {
 	GtkWidget *dialog =  gtk_color_selection_dialog_new(title);
 	gtk_widget_show(dialog);

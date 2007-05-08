@@ -6,6 +6,19 @@
 
  Kagura prealpha, 0.9.5.9
  20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Dynamic Import menu using file modules directly.
+ - freyja direct module based import function like the old exporter.
+ - Dynamic Export menu using file modules directly.
+ - New blocking file dialog, which doesn't touch either event system.
+ - More auto reparenting -- parent->children list updates directly from ~child.
+ - Import/export settings per plugin are maintained per session.
+ - Import/export menus hooked up to dialogs generated from plugin 'args'.
+ - More event clean up in FreyjaControl -- removed last of old handlers.
+ - Minor pick ray cast clean up.
+ - New plugin Makefiles.
+ - FIX proper C export in mgtk library, and documentation update.
+ - Minor clean up in FreyjaRender.
+ - Animation mode file New disabled.
 
 
  Kagura prealpha, 0.9.5.8
