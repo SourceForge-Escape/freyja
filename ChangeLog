@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.9
  20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Import/export filter default selection.
+ - SMD export update -- legacy API use removal.
  - Dynamic Import menu using file modules directly.
  - freyja direct module based import function like the old exporter.
  - Dynamic Export menu using file modules directly.

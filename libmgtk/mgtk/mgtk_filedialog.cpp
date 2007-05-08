@@ -241,20 +241,20 @@ char *mgtk_filechooser_blocking(const char *title,
 	if (filter_label && filter_label[0] &&
 		filter_pattern && filter_pattern[0])
 	{
-		// Generic All Files filter
-		GtkFileFilter *filter = gtk_file_filter_new();
-		gtk_file_filter_set_name(filter, (char*)filter_label);
-		gtk_file_filter_add_pattern(filter, (char*)filter_pattern);
-		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-
 		// Custom filter
 		GtkFileFilter *filter2 = gtk_file_filter_new();
 		gtk_file_filter_set_name(filter2, "All Files (*.*)");
 		gtk_file_filter_add_pattern(filter2, "*.*");
 		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter2);
 
+		// Generic All Files filter
+		GtkFileFilter *filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(filter, (char*)filter_label);
+		gtk_file_filter_add_pattern(filter, (char*)filter_pattern);
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+
 		// Select custom filter
-		gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter2);
+		gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter);
 	}
 
 	char *filename;

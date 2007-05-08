@@ -29,7 +29,7 @@
 #include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/TextureABI.h>
-#include <freyja/LegacyABI.h>
+//#include <freyja/LegacyABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/freyja.h>
 #include <mstl/SystemIO.h>
@@ -111,8 +111,8 @@ int freyja_model__smd_import(char *filename)
 	freyjaGetPluginArg1f(pluginId, "scale", &scale);
 
 	// Skeleton only? || Complete model? || Keyframe?
-	int type = 0;
-	freyjaGetPluginArg1i(pluginId, "type", &type);
+	int import_mesh = 0;
+	freyjaGetPluginArg1i(pluginId, "import_mesh", &import_mesh);
 	
 	// If we're in an interactive program this will prompt for arg values.
 	//freyjaPluginRequestUserInput();
@@ -202,7 +202,7 @@ int freyja_model__smd_import(char *filename)
 	
 			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
 			{
-				if (!symbol)
+				if (!symbol || !import_mesh)
 					break;
 
 #if 0
@@ -213,6 +213,8 @@ int freyja_model__smd_import(char *filename)
 					mat = symbol;
 				}
 #endif
+
+
 				index_t face = freyjaMeshPolygonCreate(mesh);
 				freyjaMeshPolygonMaterial(mesh, face, matId);
 				freyjaMeshPolygonGroup1u(mesh, face, matId);
@@ -244,8 +246,7 @@ int freyja_model__smd_import(char *filename)
 
 					freyjaMeshVertexWeight(mesh, v, parent, 1.0f);
 				}
-
-						  					
+			  					
 			}
 		}
 	}
@@ -259,18 +260,25 @@ int freyja_model__smd_import(char *filename)
 int freyja_model__smd_export(char *filename)
 {
 	SystemIO::TextFileWriter w;
-	char name[64];
-	int index;
-	unsigned int i, n;
-	vec_t scale = 1.0 / 0.15;
-	vec_t d2r = 1.0f;//0.017453292519943295;
-	vec3_t translation, rotation;
-
 
 	if (!w.Open(filename))
 	{
 		return -1;
 	}
+
+	int pluginId = freyjaGetPluginId();
+
+	int skeleton = 0; // FIXME for multiskeleton
+	int model = 0; // FIXME for multimodel
+
+	// Model scale
+	vec_t scale = 0.15f;
+	freyjaGetPluginArg1f(pluginId, "scale", &scale);
+	scale = 1.0f / scale;
+
+	// Skeleton only? || Complete model? || Keyframe?
+	int export_mesh = 0;
+	freyjaGetPluginArg1i(pluginId, "export_mesh", &export_mesh);
 
 	/* version */
 	w.Print("version 1\n");
@@ -278,22 +286,14 @@ int freyja_model__smd_export(char *filename)
 	/* nodes */
 	w.Print("nodes\n");
 
-	if (freyjaGetCount(FREYJA_BONE))
+	for (uint32 i = 0; i < freyjaGetSkeletonBoneCount(skeleton); ++i)
 	{
-		freyjaIterator(FREYJA_SKELETON, FREYJA_RESET);
-		freyjaIterator(FREYJA_BONE, FREYJA_RESET);
-		n = freyjaGetCount(FREYJA_BONE);
+		index_t bone = freyjaGetSkeletonBoneIndex(skeleton, i);
+		index_t parent = freyjaGetBoneParent(bone);
 
-		for (i = 0; i < n; ++i)
-		{
-			index = freyjaIterator(FREYJA_BONE, FREYJA_CURRENT);
-			index = freyjaGetCurrent(FREYJA_BONE);
-
-			freyjaGetBoneName(index, 64, name);
-			w.Print("%3i \"%s\" %i\n", i, name, freyjaGetBoneParent(index));
-
-			freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
-		}
+		w.Print("%3i \"%s\" %i\n", bone, 
+			freyjaGetBoneNameString(bone), 
+			(parent == INDEX_INVALID) ? -1 : parent);
 	}
 
 	w.Print("end\n"); // nodes
@@ -302,85 +302,58 @@ int freyja_model__smd_export(char *filename)
 	w.Print("skeleton\n");
 	w.Print("time 0\n");
 
-	if (freyjaGetCount(FREYJA_BONE))
+	for (uint32 i = 0; i < freyjaGetSkeletonBoneCount(skeleton); ++i)
 	{
-		freyjaIterator(FREYJA_SKELETON, FREYJA_RESET);
-		freyjaIterator(FREYJA_BONE, FREYJA_RESET);
-		n = freyjaGetCount(FREYJA_BONE);
+		index_t bone = freyjaGetSkeletonBoneIndex(skeleton, i);
+		hel::Vec3 loc, rot;
 
-		for (i = 0; i < n; ++i)
-		{
-			index = freyjaIterator(FREYJA_BONE, FREYJA_CURRENT);
-			index = freyjaGetCurrent(FREYJA_BONE);
+		freyjaGetBoneTranslation3fv(bone, loc.mVec);
+		freyjaGetBoneRotationEuler3fv(bone, rot.mVec);
 
-			freyjaGetBoneTranslation3fv(index, translation);
-			freyjaGetBoneRotationEuler3fv(index, rotation);
+		loc *= scale;
 
-			translation[0] *= scale; 
-			translation[2] *= scale; 
-			translation[1] *= scale; 
-
-			if (!i)
-			{
-				rotation[1] += helDegToRad(90.0f);
-
-				w.Print("%3i %f %f %f %f %f %f\n", i,
-						translation[0], translation[2], translation[1], 
-						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
-			}
-			else
-			{
-				w.Print("%3i %f %f %f %f %f %f\n", i,
-						translation[0], translation[1], translation[2], 
-						rotation[0]*d2r, rotation[1]*d2r, rotation[2]*d2r);
-			}
-
-			freyjaIterator(FREYJA_BONE, FREYJA_NEXT);
-		}
+		w.Print("%3i %f %f %f %f %f %f\n", i,
+				loc[0], loc[1], loc[2], 
+				rot[0], rot[1], rot[2]);
 	}
+
 	w.Print("end\n");
+
 
 	/* triangles */
 	w.Print("triangles\n");
-#ifdef SMD_MESH_EXPORT
-	unsigned int j, k, group;
-	vec3_t vert;
-	vec2_t uv;
 
-
-	if (freyjaGetNum(FREYJA_POLYGON))
+	if (export_mesh)
+	for (uint32 i = 0, in = freyjaGetModelMeshCount(model); i < in; ++i)
 	{
-		freyjaIterator(FREYJA_MESH, FREYJA_RESET);
-		freyjaIterator(FREYJA_POLYGON, FREYJA_RESET);
-		n = freyjaGetNum(FREYJA_POLYGON);
+		index_t mesh = freyjaGetModelMeshIndex(model, i);
 
-		group = 0;
-
-#ifdef SMD_MESH_EXPORT_ALL
-		unsigned int meshCount = freyjaGetNum(FREYJA_MESH);
-		for (i = 0; i < meshCount; ++i, group = i) // send all meshes
-#endif
-		for (j = 0; j < n; ++j)
+		for (uint32 j = 0, jn = freyjaGetMeshPolygonCount(mesh); j < jn; ++j)
 		{
-			index = freyjaIterator(FREYJA_POLYGON, FREYJA_CURRENT);
-			index = freyjaGetCurrent(FREYJA_POLYGON);
+			uint32 kn = freyjaGetMeshPolygonVertexCount(mesh, j);
 
-			for (j = 0; j < n; ++j)
+			w.Print("null.png\n");
+			
+			for (uint32 k = 0; k < kn; ++k)
 			{
-				freyjaGetPolygon3f(FREYJA_VERTEX, j, &vert);
-				freyjaGetPolygon3f(FREYJA_TEXCOORD, j, &uv);
+				index_t p = 0;// this should actually be 'parent bone' weight bone
+				index_t v = freyjaGetMeshPolygonVertexIndex(mesh, j, k);
+				index_t t = freyjaGetMeshPolygonTexCoordIndex(mesh, j, k);
 
-				w.Print("null.png");
-				w.Print("%3i  %f %f %f  %f %f %f  %f %f\n", group,
-						vert[0]*scale, vert[2]*scale, vert[1]*scale, 
+				hel::Vec3 vert, norm, uv;
+				freyjaGetMeshVertexPos3fv(mesh, v, vert.mVec);
+				freyjaGetMeshVertexNormal3fv(mesh, v, norm.mVec);
+				freyjaGetMeshTexCoord2fv(mesh, t, uv.mVec);
+				vert *= scale;
+
+				w.Print("%3i  %f %f %f  %f %f %f  %f %f\n", p,
+						vert[0], vert[2], vert[1], 
 						norm[0], norm[2], norm[1],
 						uv[0], uv[1]);
 			}
-
-			freyjaIterator(FREYJA_POLYGON, FREYJA_NEXT);
 		}
 	}
-#endif
+
 	w.Print("end\n");
 
 	w.Close();
