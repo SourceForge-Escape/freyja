@@ -357,12 +357,6 @@ void mgtk_tool_toggle_button_dual_handler(GtkWidget *item, gpointer e)
 		//FIXME mgtk_toggle_dual_value_set(e1, e2, val);
 		return;
 	}
-
-	// FIXME: Not Implemented
-	//FIXME mgtk_handle_event2u(e1, e2, val);
-
-	// Update any other widgets sharing the same event
-	//FIXME mgtk_toggle_dual_value_set(e1, e2, val);
 }
 
 
@@ -719,13 +713,8 @@ arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 	}
 
 	symbol_enforce_type_assert(&width, INT);
-	//MGTK_ASSERTMSG(width, "width == INT");
-
 	symbol_enforce_type_assert(&height, INT);
-	//MGTK_ASSERTMSG(height, "height == INT");
-
 	symbol_enforce_type_assert(&event, INT);
-	//MGTK_ASSERTMSG(event, "event == INT");
 
 	if (width && height && event)
 	{

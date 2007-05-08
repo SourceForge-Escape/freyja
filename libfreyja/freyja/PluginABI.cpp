@@ -659,6 +659,50 @@ int32 freyjaExportModelByModule(const char *filename, const char *module)
 }
 
 
+int32 freyjaImportModelByModule(const char *filename, const char *module)
+{
+#ifdef FREYJA_PLUGINS
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByFilename(module);
+
+	if (!plugin || !SystemIO::File::DoesFileExist(plugin->mFilename.c_str()))
+	{
+		freyjaPrintError("Module '%s' couldn't be found.", module);
+		return -1;
+	}
+												
+	String symbol = "freyja_model__";
+	symbol += plugin->mName;
+	symbol += "_import";
+
+	freyjaPrintError("! *** %s", symbol.c_str());
+
+	bool loaded = false;
+	int (*import_func)(char *filename);
+	void *handle = freyjaModuleLoad(module);
+
+	if (handle)
+	{
+		freyjaPrintMessage("\tModule '%s' opened.\n", module);
+
+		import_func = (int (*)(char * filename))freyjaModuleImportFunction(handle, symbol.c_str());
+
+		gCurrentFreyjaPlugin = plugin->GetId(); 
+
+		if (import_func)
+			loaded = (!(*import_func)((char*)filename));
+
+		gCurrentFreyjaPlugin = -1;
+
+		freyjaModuleUnload(handle);
+	}
+
+	return loaded ? 0 : -2;
+#endif
+
+	return -1;
+}
+
+
 void freyjaPluginName(uint32 pluginIndex, const char *name)
 {
 	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(pluginIndex);

@@ -97,7 +97,7 @@ public:
 
 	void GetResourceColor(const char *symbol, 
 						  float &r, float &g, float &b, float &a)
-	{ mgtk_event_get_color(LookupEventSymbol(symbol), r, g, b, a); }
+	{ mgtk_event_get_color(LookupEventSymbol(symbol), &r, &g, &b, &a); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

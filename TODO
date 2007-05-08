@@ -10,33 +10,45 @@
 		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
 
+ * Replace _event2i with 1u handlers in mgtk and remove usage.
+
+ * Refactor the file dialog code based on the new import/export test.
+	- Reduce the import/export test.
+	- Decide to force only 'native' support in general file dialogs.
+	- Likely go with the popular 'guesser' for open and native for save.
+
+ * Finish breakup of FreyjaControl into separate controls.
+	- Move bone control in FreyjaControl to BoneEv class.
+	- Move out all specific the e/Ev methods.
+	- Move texcoord/object switch UI into their own controls.
+
  * Fix mouse cursor control.
-	- Fix LEFT 'ALL' select on move cursor
-	- Reverse direction bug. ( workaround in place until redesign is tested. )
 	- Rotation modifier not WYSIWYG.
 	- Rotation will reapply last rotation if a quick click selection occurs.
-	- Rotation has a gimble lock issue.
 	- Rotation not reset before object creation/selection sometimes causing bug.
 	- Transform has a 'pop' or 'jump' in model and mesh modes
 
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 
- * Move texcoord UI into it's own control.
+ * Sneak the brush system in next release for vertex weight painting?
 
- * Polygon generators using new backend ( legacy removal depends on this. )
+ * Restore auto UV mapping.
+
+ * Polygon generators using new backend ( UI legacy removal depends on this. )
 
  * Add the simple Bezier patch polygon mesh generator back.
 
  * Shading for editing flat / face normal / etc
 
+ * Directional light.
+
  * Skeletal animation refactor
+	- Fix any remaining FK issues
+	- Separate world updates from mesh skinning code.
 	- Go back and ensure everything is using relative transforms now.
 	- Fix Undo for joint transforms.
-	- Time to separate bone control to BoneEv class, remove from FreyjaControl
 	- Editor needs to revert back to 'Bone' transforms to edit keys in key mode
-	- BoneTrack needs matrix lists for pose
 	- Attachments
-	- Fix remaining FK issues
 	- Various joint types: hinge, ball&socket, etc
 	- IK solver and interface
 	- New Timer for animation playback and keyframe timing
@@ -66,8 +78,6 @@
 	- ZIP file based pak format for freyja format models w/ textures, etc?
 	- Rendering support for alpha flagged faces ( partial depth sorting )
 	- Face flag for marking faces that need to be depth sorted... 
-
- * Finish breakup of GUI control into modules.
 
  * Have file filter issue a separate event to control module selection.
 	- On visible() reset filter

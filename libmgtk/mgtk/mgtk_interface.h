@@ -48,8 +48,6 @@ typedef struct
 
 GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height);
 
-void mgtk_create_info_dialog(char *icon, char *message);
-
 GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func);
 
 GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_filename);

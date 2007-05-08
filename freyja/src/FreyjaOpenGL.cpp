@@ -424,7 +424,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 					 (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 
 		freyja_event_info_dialog("gtk-dialog-info", 
-								 (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+								 (const char *)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 
 		return false;
     }
@@ -655,7 +655,7 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 	}
 
 	s += (length) ? buffer : "Couldn't get a GLSL log.";
-	freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());
+	freyja_event_info_dialog("gtk-dialog-info", s.c_str());
 #endif
 }
 

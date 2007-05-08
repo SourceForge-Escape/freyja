@@ -31,6 +31,7 @@
 
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
+#include <mgtk/QueryDialog.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ResourceEventDelegate.h>
 #include <mgtk/ConfirmationDialog.h>
@@ -61,7 +62,6 @@ using namespace freyja;
 using namespace freyja3d;
 
 #define DEBUG_PICK_RAY         0
-#define DEBUG_PICK_RAY_PLANAR  0
 #define DEBUG_SCREEN_TO_WORLD  0
 #define DEBUG_VIEWPORT_MOUSE   0
 
@@ -73,6 +73,7 @@ MaterialEv FreyjaControl::mMaterial;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
 Vector<hel::Vec3> FreyjaControl::mControlPoints;
 
+/* Cached event ids */
 uint32 FreyjaControl::eRotateObjectId = 0;
 uint32 FreyjaControl::eScaleObjectId = 0;
 uint32 FreyjaControl::eMoveObjectId = 0;
@@ -86,6 +87,15 @@ uint32 FreyjaControl::eInfoObjectId = 0;
 uint32 FreyjaControl::EvModeAutoKeyframeId = 0;
 uint32 FreyjaControl::EvBoneIteratorId = 0;
 uint32 FreyjaControl::EvSetBoneNameId = 0;
+uint32 FreyjaControl::EvMoveXId = 0;
+uint32 FreyjaControl::EvMoveYId = 0;
+uint32 FreyjaControl::EvMoveZId = 0;
+uint32 FreyjaControl::EvRotateXId = 0;
+uint32 FreyjaControl::EvRotateYId = 0;
+uint32 FreyjaControl::EvRotateZId = 0;
+uint32 FreyjaControl::EvScaleXId = 0;
+uint32 FreyjaControl::EvScaleYId = 0;
+uint32 FreyjaControl::EvScaleZId = 0;
 
 
 ////////////////////////////////////////////////////////////
@@ -278,40 +288,50 @@ void FreyjaControl::AttachMethodListeners()
 
 	// CreateListener("", &FreyjaControl::);
 
+	//Float events
+	EvMoveXId = CreateListener1f("eMove_X", &FreyjaControl::EvFloatNop);
+	EvMoveYId = CreateListener1f("eMove_Y", &FreyjaControl::EvFloatNop);
+	EvMoveZId = CreateListener1f("eMove_Z", &FreyjaControl::EvFloatNop);
+	EvRotateXId = CreateListener1f("eRotate_X", &FreyjaControl::EvFloatNop);
+	EvRotateYId = CreateListener1f("eRotate_Y", &FreyjaControl::EvFloatNop);
+	EvRotateZId = CreateListener1f("eRotate_Z", &FreyjaControl::EvFloatNop);
+	EvScaleXId = CreateListener1f("eScale_X", &FreyjaControl::EvScaleX);
+	EvScaleYId = CreateListener1f("eScale_Y", &FreyjaControl::EvScaleY);
+	EvScaleZId = CreateListener1f("eScale_Z", &FreyjaControl::EvScaleZ);
+	CreateListener1f("eZoom", &FreyjaControl::SetZoom);
+	CreateListener1f("eGenMeshHeight", &FreyjaControl::SetGenMeshHeight);
+
 	// Mode events
-	CreateListener("eModeAnim", &FreyjaControl::EvModeAutoKeyframe);
-	EvModeAutoKeyframeId = ResourceEvent::GetResourceIdBySymbol("eModeAnim");
+	EvModeAutoKeyframeId =
+	CreateListener1u("eModeAnim", &FreyjaControl::EvModeAutoKeyframe);
 	CreateListener("eModeUV", &FreyjaControl::eModeUV);
 	CreateListener("eModeModel", &FreyjaControl::eModeModel);
 	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
 
 	// Iterator events
-	CreateListener("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
-	CreateListener("eMeshIterator", &FreyjaControl::EvMeshIterator);
-	CreateListener("eBoneIterator", &FreyjaControl::EvBoneIterator);
-	EvBoneIteratorId = ResourceEvent::GetResourceIdBySymbol("eBoneIterator");
+	CreateListener1u("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
+	CreateListener1u("eMeshIterator", &FreyjaControl::EvMeshIterator);
+	EvBoneIteratorId = 
+	CreateListener1u("eBoneIterator", &FreyjaControl::EvBoneIterator);
 
 	// Text events
-	CreateListener("eSkeletonName", &FreyjaControl::EvSkeletonName);
-	CreateListener("eSetBoneName", &FreyjaControl::EvSetBoneName);
-	EvSetBoneNameId = ResourceEvent::GetResourceIdBySymbol("eSetBoneName");
-	CreateListener("eOpenModel", &FreyjaControl::EvOpenModel);
+	CreateListener1s("eSkeletonName", &FreyjaControl::EvSkeletonName);
+	EvSetBoneNameId = 
+	CreateListener1s("eSetBoneName", &FreyjaControl::EvSetBoneName);
+	CreateListener1s("eOpenModel", &FreyjaControl::EvOpenModel);
 
 	// 2x Text events
-	CreateListener("eSaveModel", &FreyjaControl::EvSaveModel);
+	CreateListener2s("eSaveModel", &FreyjaControl::EvSaveModel);
 
 	CreateListener("ePolygonSplit", &FreyjaControl::ePolygonSplit);
 	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
 	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
 	CreateListener("eSetPolygonTexture", &FreyjaControl::eSetPolygonTexture);
 
-	CreateListener("eZoom", &FreyjaControl::SetZoom);
+	CreateListener1u("eGenMeshCount", &FreyjaControl::SetGenMeshCount);
+	CreateListener1u("eGenMeshSegements", &FreyjaControl::SetGenMeshSegements);
 
-	CreateListener("eGenMeshHeight", &FreyjaControl::SetGenMeshHeight);
-	CreateListener("eGenMeshCount", &FreyjaControl::SetGenMeshCount);
-	CreateListener("eGenMeshSegements", &FreyjaControl::SetGenMeshSegements);
-
-	CreateListener("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
+	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
 
 	CreateListener("eInfo", &FreyjaControl::PrintInfo);
 	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
@@ -374,7 +394,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformBone", &FreyjaControl::eTransformBone);
 	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
 
-	CreateListener("eRecentFiles", &FreyjaControl::eRecentFiles);
+	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
 
 
 	//CreateListener("eModelUpload", &FreyjaControl::eModelUpload);
@@ -382,33 +402,35 @@ void FreyjaControl::AttachMethodListeners()
 
 	/* One Argument callbacks with cached Ids */
 
-	CreateListener("eRotateObject", &FreyjaControl::eRotateObject);
-	eRotateObjectId = ResourceEvent::GetResourceIdBySymbol("eRotateObject");
+	eRotateObjectId = 
+	CreateListener1u("eRotateObject", &FreyjaControl::eRotateObject);
 
-	CreateListener("eScaleObject", &FreyjaControl::eScaleObject);
-	eScaleObjectId = ResourceEvent::GetResourceIdBySymbol("eScaleObject");
+	eScaleObjectId = 
+	CreateListener1u("eScaleObject", &FreyjaControl::eScaleObject);
 
-	CreateListener("eMoveObject", &FreyjaControl::eMoveObject);
-	eMoveObjectId = ResourceEvent::GetResourceIdBySymbol("eMoveObject");
+	eMoveObjectId = 
+	CreateListener1u("eMoveObject", &FreyjaControl::eMoveObject);
 
-	CreateListener("eUnselect", &FreyjaControl::eUnselect);
-	eUnselectId = ResourceEvent::GetResourceIdBySymbol("eUnselect");
+	eUnselectId = 
+	CreateListener1u("eUnselect", &FreyjaControl::eUnselect);
 
-	CreateListener("eSelect", &FreyjaControl::eSelect);
-	eSelectId = ResourceEvent::GetResourceIdBySymbol("eSelect");
+	eSelectId = 
+	CreateListener1u("eSelect", &FreyjaControl::eSelect);
 
-	CreateListener("eInfoObject", &FreyjaControl::eInfoObject);
-	eInfoObjectId = ResourceEvent::GetResourceIdBySymbol("eInfoObject");
+	eInfoObjectId = 
+	CreateListener1u("eInfoObject", &FreyjaControl::eInfoObject);
 
-	CreateListener("eSelectionByBox", &FreyjaControl::eSelectionByBox);
-	eSelectionByBoxId = ResourceEvent::GetResourceIdBySymbol("eSelectionByBox");
+	eSelectionByBoxId = 
+	CreateListener1u("eSelectionByBox", &FreyjaControl::eSelectionByBox);
 
-	CreateListener("eAxisJoint", &FreyjaControl::eAxisJoint);
-	eAxisJointId = ResourceEvent::GetResourceIdBySymbol("eAxisJoint");
-	CreateListener("eSphereJoint", &FreyjaControl::eSphereJoint);
-	eSphereJointId = ResourceEvent::GetResourceIdBySymbol("eSphereJoint");
-	CreateListener("ePointJoint", &FreyjaControl::ePointJoint);
-	ePointJointId = ResourceEvent::GetResourceIdBySymbol("ePointJoint");
+	eAxisJointId = 
+	CreateListener1u("eAxisJoint", &FreyjaControl::eAxisJoint);
+
+	eSphereJointId = 
+	CreateListener1u("eSphereJoint", &FreyjaControl::eSphereJoint);
+
+	ePointJointId = 
+	CreateListener1u("ePointJoint", &FreyjaControl::ePointJoint);
 }
 
 
@@ -708,27 +730,24 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 
 	if (GetSelectedView() == PLANE_FREE)
 	{
-		// stop gap fix until new camera system is checked in ( so some things can be tested -- like the camera )
-		vec_t z;
-		GetWorldFromScreen(x, y, z);
+		// FIXME: Stop gap fix until new camera system is checked in...
+		// ( so some things can be tested -- like the camera )
+		hel::Vec3 t(x, y, 0.0f);
+		GetWorldFromScreen(t.mX, t.mY, t.mZ);
+		t.mZ += 100;
+		t -= ( GetSceneTranslation() * ( 1 / GetZoom() ) );
+
+		hel::Vec3 v;
+		mRender->GetRotation(v.mVec);
+		v *= HEL_PI_OVER_180; // Deg -> Rad
+
+		//Print("$$ yaw = %f", v.mY);
+
 		hel::Mat44 m;
-		vec3_t v;
-		z += 100;
-
-		x -= GetSceneTranslation().mVec[0] * 1/GetZoom();
-		y -= GetSceneTranslation().mVec[1] * 1/GetZoom();
-		z -= GetSceneTranslation().mVec[2] * 1/GetZoom();
-		vec3_t u = {x, y, z};
-		mRender->GetRotation(v);
-		v[0] = helDegToRad(v[0]);
-		v[1] = helDegToRad(v[1]);
-		v[2] = helDegToRad(v[2]);
-		//DEBUG_MSGF("$$ yaw = %f\n", v[1]);
-
 		m.Rotate(v);
-		m.Multiply3fv(u);
-		r.mOrigin = hel::Vec3(u);
-		r.mDir = hel::Vec3(0, 0, -1);
+		m.Multiply3fv(t.mVec);
+		r.mOrigin = t;
+		r.mDir.Set(0.0f, 0.0f, -1.0f);
 		m.Multiply3fv(r.mDir.mVec);
 	}
 	else
@@ -773,23 +792,6 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 			;
 		}	
 	}
-
-	//mRender->setFlag(FreyjaRender::fDrawPickRay);
-
-#if DEBUG_PICK_RAY_PLANAR
-	// DEBUG case is a triangle ABC...
-	Vec3 a(0,8,0), b(8,0,0), c(8,8,0), i; // test facex
-	//const vec_t k = 100.0f;
-	//Vec3 a(0,0,0), b(k,0,0), c(0,k,0), i; // test facex
-	bool s = r.IntersectTriangle(a.mVec,b.mVec,c.mVec,i);
-
-
-	freyja_print("! %s, o %f %f %f, d %f %f %f => %f %f %f",
-				 s ? "true" : "false",
-				 r.mOrigin.mVec[0],r.mOrigin.mVec[1],r.mOrigin.mVec[2],
-				 r.mDir.mVec[0],r.mDir.mVec[1],r.mDir.mVec[2],
-				 i.mVec[0],i.mVec[1],i.mVec[2]);
-#endif
 }
 
 
@@ -931,7 +933,7 @@ bool FreyjaControl::LoadModel(const char *filename)
 
 	String title;
 	title.Set("%s - Freyja", filename);
-	freyja_set_main_window_title((char *)title.GetCString());
+	freyja_set_main_window_title(title.GetCString());
 	AddRecentFilename(filename);
 	mCurrentlyOpenFilename = String(filename);
 	mCleared = false;
@@ -1020,7 +1022,7 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin_desc)
 	{
 		mstl::String title;
 		title.Set("%s - Freyja", select.c_str());
-		freyja_set_main_window_title((char*)title.c_str());
+		freyja_set_main_window_title(title.c_str());
 		mCurrentlyOpenFilename = select;
 		mCleared = true;
 		AddRecentFilename(filename);
@@ -1172,41 +1174,43 @@ void FreyjaControl::eMove()
 {
 	mToken = true;
 	Transform(mObjectMode, fTranslate,
-			  freyja_event_get_float(eMove_X),
-			  freyja_event_get_float(eMove_Y),
-			  freyja_event_get_float(eMove_Z));
+			  freyja_event_get_float(EvMoveXId),
+			  freyja_event_get_float(EvMoveYId),
+			  freyja_event_get_float(EvMoveZId));
 
-	freyja_event_set_float(eMove_X, 0.0f);
-	freyja_event_set_float(eMove_Y, 0.0f);
-	freyja_event_set_float(eMove_Z, 0.0f);
+	freyja_event_set_float(EvMoveXId, 0.0f);
+	freyja_event_set_float(EvMoveYId, 0.0f);
+	freyja_event_set_float(EvMoveZId, 0.0f);
 	freyja_event_gl_refresh();
 }
+
 
 void FreyjaControl::eRotate()
 {
 	mToken = true;
 	Transform(mObjectMode, fRotate,
-			  freyja_event_get_float(eRotate_X),
-			  freyja_event_get_float(eRotate_Y),
-			  freyja_event_get_float(eRotate_Z));
+			  freyja_event_get_float(EvRotateXId),
+			  freyja_event_get_float(EvRotateYId),
+			  freyja_event_get_float(EvRotateZId));
 		
-	freyja_event_set_float(eRotate_X, 0.0f);
-	freyja_event_set_float(eRotate_Y, 0.0f);
-	freyja_event_set_float(eRotate_Z, 0.0f);
+	freyja_event_set_float(EvRotateXId, 0.0f);
+	freyja_event_set_float(EvRotateYId, 0.0f);
+	freyja_event_set_float(EvRotateZId, 0.0f);
 	freyja_event_gl_refresh();
 }
+
 
 void FreyjaControl::eScale()
 {
 	mToken = true;
 	Transform(mObjectMode, fScale,
-			  freyja_event_get_float(eScale_X),
-			  freyja_event_get_float(eScale_Y),
-			  freyja_event_get_float(eScale_Z));
+			  freyja_event_get_float(EvScaleXId),
+			  freyja_event_get_float(EvScaleYId),
+			  freyja_event_get_float(EvScaleZId));
 		
-	freyja_event_set_float(eScale_X, 1.0f);
-	freyja_event_set_float(eScale_Y, 1.0f);
-	freyja_event_set_float(eScale_Z, 1.0f);
+	freyja_event_set_float(EvScaleXId, 1.0f);
+	freyja_event_set_float(EvScaleYId, 1.0f);
+	freyja_event_set_float(EvScaleZId, 1.0f);
 	freyja_event_gl_refresh();
 }
 
@@ -1302,10 +1306,10 @@ void FreyjaControl::NewFile()
 {
 	switch (GetControlScheme())
 	{
-	case eScheme_Animation:
-		freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-					 __FILE__, __LINE__, __func__);
-		break;
+		//case eScheme_Animation:
+		//freyja_print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
+		//			 __FILE__, __LINE__, __func__);
+		//break;
 		
 	case eScheme_Model:
 		if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
@@ -1859,38 +1863,24 @@ void FreyjaControl::eRotateObject(uint32 value)
 }
 
 
-#warning FIXME "event() functions must be replaced for Kagura"
-bool FreyjaControl::event(int event, vec_t value)
+void FreyjaControl::EvScaleX(float value)
 {
-	if (ResourceEvent::listen(event - 10000 /*ePluginEventBase*/, value))
-		return true;
+	if (value == 0.0f)
+		freyja_event_set_float(EvScaleXId, 1.0f);
+}
 
-	/* These Transform Box events don't trigger on their own */
-	switch (event)
-	{
-	case eMove_X:
-	case eMove_Y:
-	case eMove_Z:
-		break;
 
-	case eRotate_X:
-	case eRotate_Y:
-	case eRotate_Z:
-		break;
+void FreyjaControl::EvScaleY(float value)
+{
+	if (value == 0.0f)
+		freyja_event_set_float(EvScaleYId, 1.0f);
+}
 
-	case eScale_X:
-	case eScale_Y:
-	case eScale_Z:
-		if (value == 0.0f)
-			freyja_event_set_float(event, 1.0f);
-		break;
 
-	default:
-		freyja_print("!Unhandled { event = %d, value = %f }", event, value);
-		return false;
-	}
-
-	return true;
+void FreyjaControl::EvScaleZ(float value)
+{
+	if (value == 0.0f)
+		freyja_event_set_float(EvScaleZId, 1.0f);
 }
 
 
@@ -1898,8 +1888,8 @@ void FreyjaControl::UnselectMode()
 {
 	mEventMode = aUnselect;
 	mCursor.SetMode(freyja3d::Cursor::Invisible);
-	freyja_print("! (mode) Unselect object...");
-	freyja_event_gl_refresh();
+	Print("! (mode) Unselect object...");
+	RefreshContext();
 }
 
 
@@ -1907,34 +1897,8 @@ void FreyjaControl::SelectMode()
 {
 	mEventMode = aSelect;
 	mCursor.SetMode(freyja3d::Cursor::Invisible);
-	freyja_print("! (mode) Select object...");
-	freyja_event_gl_refresh();
-}
-
-
-// FIXME: Convert this to unsigned int event callback?
-bool FreyjaControl::handleEvent(int mode, int cmd)
-{
-	bool handled = true;
-
-	// Mongoose, 2007.04.07:
-	// 'Ids' here are no longer const, so had to switch to if/else block
-	// This handler exists from the old 'held key mode' callback codebase.
-	// These calls are typically made by holding down a modifer key.
-	if (mode == (int)eSelectId)
-	{
-		SelectMode();
-	}
-	else if (mode == (int)eUnselectId)
-	{
-		UnselectMode(); 
-	}
-	else
-	{
-		handled = false;
-	}
-
-	return handled;
+	Print("! (mode) Select object...");
+	RefreshContext();
 }
 
 
@@ -1989,7 +1953,7 @@ void FreyjaControl::PrintInfo()
 		}
 	}
 
-	freyja_event_info_dialog("gtk-dialog-info", (char *)s.c_str());
+	freyja_event_info_dialog("gtk-dialog-info", s.c_str());
 }
 
 
@@ -4728,6 +4692,210 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 }
 
 
+void ePluginImport(ResourceEvent *e)
+{
+	if (!e || !e->getName())
+		return;
+
+	mstl::String s = e->getName();
+
+	s.Replace('|', 0);
+
+	int idx = atoi(s.c_str());
+
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(idx);
+			
+	if (plugin)
+	{
+		QueryDialog d;
+		d.mName = e->getName(); 
+		d.mDialogIcon = "gtk-question"; 
+		d.mInformationMessage.Set("Plugin Import: %s", 
+								  plugin->mName.c_str()); 
+		d.mCancelIcon = "gtk-cancel"; 
+		d.mCancelText = "Cancel"; 
+		d.mAcceptIcon = "gtk-ok";
+		d.mAcceptText = "Import"; 
+
+		uint32 i;
+		foreach (plugin->mArgs, i)
+		{
+			if (plugin->mArgs[i].GetStringType() == "float")
+			{
+				mstl::String symbol = plugin->mArgs[i].GetName();
+				mstl::String question = plugin->mArgs[i].GetName();
+				float value = 0.0f;
+				value = plugin->GetFloatArg(plugin->mArgs[i].GetName());
+
+				QueryDialogValue<float> v(symbol.c_str(), question.c_str(), value);
+				d.mFloats.push_back(v);	
+			}
+			else if (plugin->mArgs[i].GetStringType() == "int")
+			{
+				mstl::String symbol = plugin->mArgs[i].GetName();
+				mstl::String question = plugin->mArgs[i].GetName();
+				int value = 0;
+				value = plugin->GetIntArg(plugin->mArgs[i].GetName());
+
+				QueryDialogValue<int> v(symbol.c_str(), question.c_str(), value);
+				d.mInts.push_back(v);	
+			}
+		}
+
+		if (d.Execute())
+		{
+			// Update plugin settings from dialog input.
+			foreach (plugin->mArgs, i)
+			{
+				if (plugin->mArgs[i].GetStringType() == "float")
+				{
+					float value = 
+					d.GetFloat(plugin->mArgs[i].GetName());
+					mstl::String s;
+					s.Set("%f", value);
+					plugin->mArgs[i].SetValue(s.c_str());
+				}
+				else if (plugin->mArgs[i].GetStringType() == "int")
+				{
+					int value = 
+					d.GetInt(plugin->mArgs[i].GetName());
+					mstl::String s;
+					s.Set("%i", value);
+					plugin->mArgs[i].SetValue(s.c_str());
+				}
+			}
+				
+			// File dialog here with preset for export type.
+			mstl::String title;
+			title.Set("Importing %s - Freyja", plugin->mName.c_str());
+			char *filename =
+			mgtk_filechooser_blocking(title.c_str(),  
+									  freyja_rc_map_string("/").c_str(), 
+									  0,
+									  plugin->mDescription.c_str(),
+									  plugin->mExtention.c_str());
+
+			freyja_print("! Importing: '%s'\n", filename);
+
+			if (!freyjaImportModelByModule(filename, 
+										   plugin->mFilename.c_str()))
+			{				   
+				FreyjaControl::mInstance->RecordSavedModel(filename);
+				freyja_print("! Imported: '%s'\n", filename);
+			}
+			else
+			{
+				freyja_print("! Failed to import: '%s'\n", filename);
+			}
+
+			mgtk_filechooser_blocking_free(filename);
+		}
+	}
+}
+
+
+void ePluginExport(ResourceEvent *e)
+{
+	if (!e || !e->getName())
+		return;
+
+	mstl::String s = e->getName();
+
+	s.Replace('|', 0);
+
+	int idx = atoi(s.c_str());
+
+	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(idx);
+			
+	if (plugin)
+	{
+		QueryDialog d;
+		d.mName = e->getName(); 
+		d.mDialogIcon = "gtk-question"; 
+		d.mInformationMessage.Set("Plugin Export: %s", 
+								  plugin->mName.c_str()); 
+		d.mCancelIcon = "gtk-cancel"; 
+		d.mCancelText = "Cancel"; 
+		d.mAcceptIcon = "gtk-ok"; 
+		d.mAcceptText = "Export"; 
+
+		uint32 i;
+		foreach (plugin->mArgs, i)
+		{
+			if (plugin->mArgs[i].GetStringType() == "float")
+			{
+				mstl::String symbol = plugin->mArgs[i].GetName();
+				mstl::String question = plugin->mArgs[i].GetName();
+				float value = 0.0f;
+				value = plugin->GetFloatArg(plugin->mArgs[i].GetName());
+
+				QueryDialogValue<float> v(symbol.c_str(), question.c_str(), value);
+				d.mFloats.push_back(v);	
+			}
+			else if (plugin->mArgs[i].GetStringType() == "int")
+			{
+				mstl::String symbol = plugin->mArgs[i].GetName();
+				mstl::String question = plugin->mArgs[i].GetName();
+				int value = 0;
+				value = plugin->GetIntArg(plugin->mArgs[i].GetName());
+
+				QueryDialogValue<int> v(symbol.c_str(), question.c_str(), value);
+				d.mInts.push_back(v);	
+			}
+		}
+
+		if (d.Execute())
+		{
+			// Update plugin settings from dialog input.
+			foreach (plugin->mArgs, i)
+			{
+				if (plugin->mArgs[i].GetStringType() == "float")
+				{
+					float value = 
+					d.GetFloat(plugin->mArgs[i].GetName());
+					mstl::String s;
+					s.Set("%f", value);
+					plugin->mArgs[i].SetValue(s.c_str());
+				}
+				else if (plugin->mArgs[i].GetStringType() == "int")
+				{
+					int value = 
+					d.GetInt(plugin->mArgs[i].GetName());
+					mstl::String s;
+					s.Set("%i", value);
+					plugin->mArgs[i].SetValue(s.c_str());
+				}
+			}
+				
+			// File dialog here with preset for export type.
+			mstl::String title;
+			title.Set("Exporting %s - Freyja", plugin->mName.c_str());
+			char *filename =
+			mgtk_filechooser_blocking(title.c_str(),  
+									  freyja_rc_map_string("/").c_str(), 
+									  1,
+									  plugin->mDescription.c_str(),
+									  plugin->mExtention.c_str());
+
+			freyja_print("! Exporting: '%s'\n", filename);
+				
+			if (!freyjaExportModelByModule(filename, 
+										   plugin->mFilename.c_str()))
+			{				   
+				FreyjaControl::mInstance->RecordSavedModel(filename);
+				freyja_print("! Exported: '%s'\n", filename);
+			}
+			else
+			{
+				freyja_print("! Failed to export: '%s'\n", filename);
+			}
+
+			mgtk_filechooser_blocking_free(filename);
+		}
+	}
+}
+
+
 bool FreyjaControl::LoadRecentFilesResource(const char *filename)
 {
 	/* Recent files persistance */
@@ -4865,36 +5033,59 @@ void FreyjaControl::LoadResource()
 				  plugin->mImportFlags ? "Import " : "",
 				  plugin->mExportFlags ? "Export " : "");
 
-			if (plugin->mImportFlags)
+			// Only append plugins that are external modules with import flags.
+			if (plugin->mFilename.c_str() &&
+				plugin->mName.c_str() && plugin->mImportFlags)
 			{
 				char *desc = (char*)plugin->mDescription.c_str();
 				char *ext = (char*)plugin->mExtention.c_str();
 
+				// Append filter to generic filedialog.
 				mgtk_event_fileselection_append_pattern(loadEventId, desc, ext);
 
-				mgtk_append_item_to_menu(importEventId, desc, importEventId);
+				// Generate menu item.
+				mstl::String s;
+				s.Set("%i|%s-ePluginImport", 
+					  plugin->GetId(), plugin->mName.c_str());
+				ResourceEventCallback2::add(s.c_str(), &ePluginImport);
+				int EvImportModelId = LookupEventSymbol(s.c_str());
+				mgtk_append_item_to_menu(importEventId, desc, EvImportModelId);
 			}
-
-			if (plugin->mExportFlags)
+			else if (plugin->mImportFlags)
 			{
 				char *desc = (char*)plugin->mDescription.c_str();
 				char *ext = (char*)plugin->mExtention.c_str();
 
+				// Append filter to generic filedialog.
+				mgtk_event_fileselection_append_pattern(loadEventId, desc, ext);
+			}
+
+
+			// Only append plugins that are external modules with export flags.
+			if (plugin->mFilename.c_str() &&
+				plugin->mName.c_str() && plugin->mExportFlags)
+			{
+				char *desc = (char*)plugin->mDescription.c_str();
+				char *ext = (char*)plugin->mExtention.c_str();
+
+				// Append filter to generic filedialog.
 				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
 
-
-				// FIXME: Generate map for plugin id : event id
-				//        Then have it point to func that can do mapping back
-#if 0
+				// Generate menu item.
 				mstl::String s;
-				s.Set("ePluginExport_%i_%s", 
+				s.Set("%i|%s-ePluginExport", 
 					  plugin->GetId(), plugin->mName.c_str());
-				CreateListener(s.c_str(), &FreyjaControl::EvExportModel);
+				ResourceEventCallback2::add(s.c_str(), &ePluginExport);
 				int EvExportModelId = LookupEventSymbol(s.c_str());
-				mExportModelMap.push_back(EvExportModelId);
-#endif
+				mgtk_append_item_to_menu(exportEventId, desc, EvExportModelId);
+			}
+			else if (plugin->mExportFlags)
+			{
+				char *desc = (char*)plugin->mDescription.c_str();
+				char *ext = (char*)plugin->mExtention.c_str();
 
-				mgtk_append_item_to_menu(exportEventId, desc, exportEventId);
+				// Append filter to generic filedialog.
+				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
 			}
 		}
 	}
@@ -4989,7 +5180,7 @@ bool FreyjaControl::SaveUserPreferences()
 			continue;
 		}
 
-		freyja_event_get_color(id, r, g, b, a);
+		freyja_event_get_color(id, &r, &g, &b, &a);
 		w.Print("(color\t%s\t%f %f %f %f)\n", s.c_str(), r, g, b, a);
 	}
 
@@ -5130,45 +5321,51 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 }
 
 
-void FreyjaControl::CreateListener(const char *name, MethodPtr ptr)
+int FreyjaControl::CreateListener(const char *name, MethodPtr ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-void FreyjaControl::CreateListener(const char *name, bMethodPtr ptr)
+int FreyjaControl::CreateListener(const char *name, MethodPtrB ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-void FreyjaControl::CreateListener(const char *name, MethodPtr1u ptr)
+int FreyjaControl::CreateListener1u(const char *name, MethodPtr1u ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, unsigned int>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-void FreyjaControl::CreateListener(const char *name, MethodPtr1f ptr)
+int FreyjaControl::CreateListener1f(const char *name, MethodPtr1f ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, float>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-void FreyjaControl::CreateListener(const char *name, MethodPtr1s ptr)
+int FreyjaControl::CreateListener1s(const char *name, MethodPtr1s ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, char*>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-void FreyjaControl::CreateListener(const char *name, MethodPtr2s ptr)
+int FreyjaControl::CreateListener2s(const char *name, MethodPtr2s ptr)
 {
 	MethodDelegate *d = new MethodDelegateArg2<FreyjaControl, char*, char*>(mInstance, ptr);
 	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 

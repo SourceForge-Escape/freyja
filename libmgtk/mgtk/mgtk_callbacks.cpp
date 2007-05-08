@@ -681,7 +681,7 @@ void mgtk_event_shutdown()
 	gtk_exit(0);
 }
 
-void mgtk_application_window_title(char *title)
+void mgtk_application_window_title(const char *title)
 {
 	gtk_window_set_title(GTK_WINDOW(mgtk_get_application_window()), title);
 }
@@ -988,7 +988,7 @@ void mgtk_event_slider1f(GtkWidget *widget, gpointer id)
 }
 
 
-void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a)
+void mgtk_event_get_color(int id, float *r, float *g, float *b, float *a)
 {
 #ifndef DISABLE_GTK_COLORBUTTON	
 	Vector<GtkWidget*> *widgets;
@@ -1011,10 +1011,10 @@ void mgtk_event_get_color(int id, float &r, float &g, float &b, float &a)
 			gtk_color_button_get_color(GTK_COLOR_BUTTON(colorbutton), &color);
 			alpha = gtk_color_button_get_alpha(GTK_COLOR_BUTTON(colorbutton));
 
-			r = color.red / 65535.0;
-			g = color.green / 65535.0;
-			b = color.blue / 65535.0;
-			a = alpha / 65535.0;
+			*r = color.red / 65535.0;
+			*g = color.green / 65535.0;
+			*b = color.blue / 65535.0;
+			*a = alpha / 65535.0;
 		}
 		else
 		{

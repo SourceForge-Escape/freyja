@@ -115,7 +115,7 @@ class FreyjaControl : public Control
 
 
 	typedef void (FreyjaControl::*MethodPtr)();
-	typedef bool (FreyjaControl::*bMethodPtr)();
+	typedef bool (FreyjaControl::*MethodPtrB)();
 	typedef void (FreyjaControl::*MethodPtr1u)(unsigned int);
 	typedef void (FreyjaControl::*MethodPtr1f)(float);
 	typedef void (FreyjaControl::*MethodPtr1s)(char *);
@@ -287,24 +287,6 @@ class FreyjaControl : public Control
 	 * Post : Returns current viewing zoom of scene
 	 ------------------------------------------------------*/
 
-	static uint32 eRotateObjectId;
-	static uint32 eScaleObjectId;
-	static uint32 eMoveObjectId;
-	static uint32 eUnselectId;
-	static uint32 eSelectId;
-	static uint32 eSelectionByBoxId;
-	static uint32 eInfoObjectId;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Event ids used to replace old event system
-	 *        usage of Ids to 'link' widget behavior.
-	 *        These statics replace constant event values.
-	 *
-	 *        In the old system Ids could be passed around,
-	 *        and all kinds of crazy event paths where made
-	 *        that still depend on similar behavior.
-	 ------------------------------------------------------*/
-
 	vec_t GetGenMeshHeight() { return mGenMeshHeight; }
 	void SetGenMeshHeight(vec_t v) { mGenMeshHeight = v; }
 
@@ -400,30 +382,6 @@ class FreyjaControl : public Control
 	 * Pre  : 
 	 * Post : Casts the pick array given a screen x, y.
 	 *        Accounts for view mode ( front, top, side, free )
-	 ------------------------------------------------------*/
-
-	bool event(int event, vec_t value);
-	/*------------------------------------------------------
-	 * Pre  : Generic event signal is valid and value is
-	 *        valid for the generic event
-	 *
-	 * Post : Event is handled internally 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.10.23: 
-	 * Mongoose - Created, pulled out of other event methods
-	 ------------------------------------------------------*/
-
-	bool handleEvent(int event, int command);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Process event input, such as from a menu
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.10: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	static uint32 mSelectedControlPoint;
@@ -574,7 +532,35 @@ class FreyjaControl : public Control
 	// Events, once all these are 'sorted' decouple.
 	////////////////////////////////////////////////////////////
 
+	static uint32 eRotateObjectId;
+	static uint32 eScaleObjectId;
+	static uint32 eMoveObjectId;
+	static uint32 eSelectionByBoxId;
+	static uint32 eInfoObjectId;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Event ids used to replace old event system
+	 *        usage of Ids to 'link' widget behavior.
+	 *        These statics replace constant event values.
+	 *
+	 *        In the old system Ids could be passed around,
+	 *        and all kinds of crazy event paths where made
+	 *        that still depend on similar behavior.
+	 ------------------------------------------------------*/
+
+	static uint32 eUnselectId;
+	static uint32 eSelectId;
+
+	// Nop events
 	void EvFloatNop(float value) { }
+
+	// Float events
+	static uint32 EvMoveXId, EvMoveYId, EvMoveZId;
+	static uint32 EvRotateXId, EvRotateYId, EvRotateZId;
+	static uint32 EvScaleXId, EvScaleYId, EvScaleZId;
+	void EvScaleX(float value);
+	void EvScaleY(float value);
+	void EvScaleZ(float value);
 
 	// Iterator events
 	void EvPolygonIterator(unsigned int value);
@@ -829,6 +815,21 @@ class FreyjaControl : public Control
 	 *
 	 *        It has a side effect of refreshing the display.
 	 *        This is a hint to call this *after state change.
+	 *
+	 ------------------------------------------------------*/
+
+	void RecordSavedModel(const char *filename)
+	{
+		mstl::String title;
+		title.Set("%s - Freyja", filename);
+		freyja_set_main_window_title(title.c_str());
+		mCleared = true;
+		mCurrentlyOpenFilename = filename;
+		AddRecentFilename(filename);
+	}
+	/*------------------------------------------------------
+	 * Pre  : Successfully saved a model file.
+	 * Post : This updates states that track saved models.
 	 *
 	 ------------------------------------------------------*/
 
@@ -1152,15 +1153,16 @@ private:
 	 * Mongoose - Created  ( Updated comment style )
 	 ------------------------------------------------------*/
 
-	static void CreateListener(const char *name, MethodPtr ptr);
-	static void CreateListener(const char *name, bMethodPtr ptr);
-	static void CreateListener(const char *name, MethodPtr1u ptr);
-	static void CreateListener(const char *name, MethodPtr1f ptr);
-	static void CreateListener(const char *name, MethodPtr1s ptr);
-	static void CreateListener(const char *name, MethodPtr2s ptr);
+	static int CreateListener(const char *name, MethodPtr ptr);
+	static int CreateListener(const char *name, MethodPtrB ptr);
+	static int CreateListener1u(const char *name, MethodPtr1u ptr);
+	static int CreateListener1f(const char *name, MethodPtr1f ptr);
+	static int CreateListener1s(const char *name, MethodPtr1s ptr);
+	static int CreateListener2s(const char *name, MethodPtr2s ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Maps mlisp symbol <name> to method <ptr> action.
+	 *        Returns event id bound to <name>.
 	 *
 	 ------------------------------------------------------*/
 

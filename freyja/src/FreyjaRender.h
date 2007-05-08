@@ -33,6 +33,8 @@
 #include "OpenGLPrinter.h"
 #include "freyja_events.h"
 
+namespace freyja3d {
+
 enum view_mode {                   /* View|Edit mode */     
 	VIEWMODE_MODEL_EDIT       = 1,
 	VIEWMODE_TEXTURE_EDIT     = 2,
@@ -46,14 +48,6 @@ enum rotate_flags {
 	Y_F = 2,
 	Z_F = 4
 };
-
-void FreyjaViewEventsAttach();
-void getOpenGLViewport(int *viewportXYWH); // int[4]
-void getOpenGLModelviewMatrix(double *modelview); // double[16]
-void getOpenGLProjectionMatrix(double *projection); // double[16]
-
-
-namespace freyja3d {
 
 typedef enum { 
 	

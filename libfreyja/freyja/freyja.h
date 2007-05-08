@@ -369,6 +369,13 @@ extern "C" {
 	 *        Returns 0 on sucess
 	 ------------------------------------------------------*/
 
+	int32 freyjaImportModelByModule(const char *filename, const char *module);
+	/*------------------------------------------------------
+	 * Pre  : <filename> - Filename of the model to be imported
+	 *        <module> - Filename of the module to use
+	 * Post : Imports model using the exact module passed in...
+	 *        Returns 0 on sucess
+	 ------------------------------------------------------*/
 }
 
 
