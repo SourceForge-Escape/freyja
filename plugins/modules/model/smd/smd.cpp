@@ -171,8 +171,8 @@ int freyja_model__smd_import(char *filename)
 				hel::Vec3 rot(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
 
 				// Convert coords
-				loc.Set(loc.mY, loc.mZ, loc.mX);
-				rot.Set(rot.mY, rot.mZ, rot.mX);
+				//loc.Set(loc.mX, loc.mZ, loc.mY);
+				//rot.Set(rot.mX, rot.mZ, rot.mY);
 
 				smd_bone_t *bone = bones[idx];
 
@@ -225,12 +225,15 @@ int freyja_model__smd_import(char *filename)
 					int parent = r.ParseInteger();
 
 					u.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					// Convert coords
 					//u.Set(u.mX, u.mZ, u.mY);
 					u *= scale;
 					index_t v = freyjaMeshVertexCreate3fv(mesh, u.mVec);
 					freyjaMeshPolygonAddVertex1i(mesh, face, v);	
 
 					u.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					// Convert coords
+					//u.Set(u.mX, u.mZ, u.mY);
 					freyjaMeshVertexNormal3fv(mesh, v, u.mVec);
 				
 					index_t t = freyjaMeshTexCoordCreate2f(mesh, r.ParseFloat(), r.ParseFloat());
@@ -336,9 +339,10 @@ int freyja_model__smd_export(char *filename)
 			
 			for (uint32 k = 0; k < kn; ++k)
 			{
-				index_t p = 0;// this should actually be 'parent bone' weight bone
 				index_t v = freyjaGetMeshPolygonVertexIndex(mesh, j, k);
 				index_t t = freyjaGetMeshPolygonTexCoordIndex(mesh, j, k);
+				index_t weight = freyjaGetMeshVertexWeightIndex(mesh, v, 0);
+				index_t b = freyjaGetMeshWeightBone(mesh, weight);
 
 				hel::Vec3 vert, norm, uv;
 				freyjaGetMeshVertexPos3fv(mesh, v, vert.mVec);
@@ -346,10 +350,13 @@ int freyja_model__smd_export(char *filename)
 				freyjaGetMeshTexCoord2fv(mesh, t, uv.mVec);
 				vert *= scale;
 
-				w.Print("%3i  %f %f %f  %f %f %f  %f %f\n", p,
-						vert[0], vert[2], vert[1], 
-						norm[0], norm[2], norm[1],
+				w.Print("%3i  %f %f %f  %f %f %f  %f %f\n", 
+						(b == INDEX_INVALID) ? 0 : b,
+						vert[0], vert[1], vert[2], 
+						norm[0], norm[1], norm[2],
 						uv[0], uv[1]);
+
+				// FIXME support optional SMD multibone here
 			}
 		}
 	}

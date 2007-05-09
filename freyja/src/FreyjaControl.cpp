@@ -2781,6 +2781,33 @@ bool FreyjaControl::DuplicateSelectedObject()
 		}
 		break;
 
+	case tBone:
+		//mgtk::ExecuteConfirmationDialog("DupeObjectDialog"))
+		if (mgtk_execute_query_dialog("DuplicateBoneDialog"))
+		{
+			int recurse = mgtk_get_query_dialog_int("DuplicateBoneDialog", "recurse");
+
+			Bone *b = Bone::GetBone(GetSelectedBone());
+			Bone *b2 = (b) ? b->Duplicate() : NULL;
+			if (b2)
+			{
+				Bone *parent = (b) ? Bone::GetBone(b->mParent) : NULL;
+				b2->AddToPool();
+				if (parent) parent->AddChild(b2->GetUID());
+				freyjaSkeletonAddBone(b2->mSkeleton, b2->GetUID());	
+
+				if (1) // QueryDialog
+				{
+					Bone::DuplicateChildren(b, b2, recurse, true);
+				}
+
+				SetSelectedBone(b2->GetUID());
+				Print("Bone %i duplicated from bone %i.  Selected new bone.", 
+					  b2->GetUID(), b->GetUID());
+			}
+		}
+		break;
+
 	default:
 		freyja_print("%s(): type '%s' is not supported.", 
 					 __func__, ObjectTypeToString(mObjectMode).GetCString());
@@ -2978,7 +3005,8 @@ void FreyjaControl::DeleteSelectedObject()
 	case tSelectedVertices:
 		if (mgtk::ExecuteConfirmationDialog("DelVertDialog"))
 		{
-			BUG_ME("FIXME");//CullUsingVertexBuffer();
+			FREYJA_INFOMSG(false, "FIXME: tSelectedVertices support disabled");
+			//CullUsingVertexBuffer();
 		}
 		break;
 
@@ -3351,7 +3379,9 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 2.0f);
+				const vec_t radius = FreyjaRender::mVertexPointSize * 0.25f;
+				m->IntersectClosestVertex(FreyjaRender::mTestRay, 
+										  selected, radius);
 				
 				if (selected > -1)
 				{
@@ -3430,6 +3460,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 
 	case tBone:
 		{
+			const vec_t radius = FreyjaRender::mBonePointSize * 0.5f;
 			hel::Vec3 p;
 			vec_t t, closest;
 			int selected = -1;
@@ -3446,7 +3477,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 					freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
 				}
 
-				if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, 0.5f, t))
+				if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, radius, t))
 				{
 					if (selected == -1 || t < closest)
 					{
@@ -3463,6 +3494,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 				mCursor.mPos = hel::Vec3();
 				freyjaBoneBindTransformVertex(selected, mCursor.mPos.mVec, 1.0f);
 
+				// Reset cursor for newly selected bone
 				switch (GetControlScheme())
 				{
 				case eScheme_Animation:
@@ -3477,8 +3509,9 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 							
 							if (key)
 							{
-								// FIXME Not using relative keyframes
+								// FIXME: Relative keyframes
 								mCursor.mRotate = key->GetData();
+								mCursor.mRotate *= HEL_PI_OVER_180; 
 							}
 
 							Vec3KeyFrame *keyLoc = track.GetLocKeyframe(k);
@@ -3488,17 +3521,6 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 								// Relative keyframes
 								mCursor.mPos += keyLoc->GetData();
 							}
-
-#if 0 // for edit modes
-							// FIXME: argh
-							vec_t t = 0.0f;
-							if (key)
-								t = track.GetRotKeyframeTime(k);
-							else if (keyLoc)
-								t = track.GetLocKeyframeTime(k);
-
-							b->UpdateWorldPose(anim, t);
-#endif
 						}
 					}
 					break;
@@ -3508,9 +3530,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY)
 						hel::Vec3 o;
 						// Set cursor rotation
 						freyjaGetBoneRotationEuler3fv(GetSelectedBone(),o.mVec);
-						mCursor.mRotate.mVec[0] = helRadToDeg(o.mVec[0]);
-						mCursor.mRotate.mVec[1] = helRadToDeg(o.mVec[1]);
-						mCursor.mRotate.mVec[2] = helRadToDeg(o.mVec[2]);
+						mCursor.mRotate *= HEL_PI_OVER_180; 
 					}
 					break;
 					
@@ -3947,8 +3967,7 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionBoneTransform(GetSelectedBone(), action, v);
 			ActionModelModified(a);
 			freyjaBoneTransform3fv(GetSelectedBone(), action, v.mVec);
-			freyjaBoneUpdateBindPose(GetSelectedBone());
-			
+			freyjaBoneUpdateBindPose(GetSelectedBone());			
 		}
 		break;
 

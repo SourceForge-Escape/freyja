@@ -20,6 +20,7 @@
  ==========================================================================*/
 
 #include <hel/math.h>
+#include "SkeletonABI.h"
 #include "Bone.h"
 
 using namespace freyja;
@@ -245,6 +246,96 @@ void Bone::RemoveFromPool()
 
 	mUID = INDEX_INVALID;
 }
+
+
+Bone *Bone::Duplicate()
+{ 
+	// We don't duplicate children/tracks in this method.
+	Bone *b = FREYJA_NEW Bone();
+	b->mMetaData = mMetaData;
+	b->mFlags = mFlags;
+	strncpy(b->mName, mName, 64);
+	b->mName[63] = 0;
+	b->mSkeleton = mSkeleton;
+	b->mParent = mParent;
+	//b->mChildren;  // We don't duplicate children in this method.
+	b->mRotation = mRotation;
+	b->mTranslation = mTranslation;
+	b->mLocalTransform = mLocalTransform;
+	b->mBindPose = mBindPose;
+	b->mBindToWorld = mBindToWorld;
+
+	//mTrack = b->mTrack;
+	//mTrackCount = b->mTrackCount;
+
+	return b;
+}
+
+
+void Bone::DuplicateChildren(Bone *orig_parent, Bone *parent, 
+							 bool recurse, bool link)
+{
+	if (orig_parent && parent)
+	{
+		uint32 count = orig_parent->mChildren.size();
+
+		for (uint32 i = 0; i < count; ++i)
+		{
+			Bone *orig_child = Bone::GetBone(orig_parent->mChildren[i]);
+			Bone *child = (orig_child) ? orig_child->Duplicate() : NULL;
+
+			if (child)
+			{
+				child->mSkeleton = parent->mSkeleton;
+				child->mParent = parent->GetUID();
+				
+				if (true) //link)
+				{
+					// Might want to factor this out to a recursve util method.
+					child->AddToPool();
+					parent->AddChild(child->GetUID());
+					freyjaSkeletonAddBone(parent->mSkeleton, child->GetUID());
+				}
+
+				if (recurse)
+				{
+					child->DuplicateChildren(orig_child, child, recurse, link);
+				}
+			}
+		}
+	}
+}
+
+
+#if 0
+
+
+
+Bone *Bone::DuplicateWithNewParent(index_t parent)
+{
+	// We don't duplicate children/tracks in this method.
+	Bone *b = Duplicate();
+	b->mParent = (parent == INDEX_INVALID) ? mParent : parent;
+
+	return b;
+}
+
+
+index_t Bone::DuplicateChain(index_t start, mtsl::Vector<index_t> end)
+{
+	Bone *cur = GetBone(start);
+
+	if (!cur)
+		return INDEX_INVALID;
+
+	Bone *b = cur->Duplicate();
+	b->mSkeleton = cur->mSkeleton;
+	b->AddToPool();
+	freyjaSkeletonAddBone(b->mSkeleton, b->GetUID());
+
+	return b->GetUID();
+}
+#endif
 
 
 void Bone::ResetPool()

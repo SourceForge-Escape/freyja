@@ -188,6 +188,27 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	Bone *Duplicate();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copy of this bone sans animation tracks and children.
+	 *
+	 ------------------------------------------------------*/
+
+	static void DuplicateChildren(Bone *orig_parent, Bone *parent,
+								  bool recurse, bool link);
+	/*------------------------------------------------------
+	 * Pre  : <orig_parent> has the children to duplicate.
+	 *        <parent> children will be duplicated and added to this bone.     
+	 *        <recurse> if you want to copy the entire skeleton subset.
+	 *        <link> optionally hook up parent/child, and
+	 *        link children to skeleton.
+	 *
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+
 	index_t NewTrack() { mTrackCount = 1; return 0;}
 	/*------------------------------------------------------
 	 * Pre  : 

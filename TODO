@@ -42,7 +42,12 @@
 
  * Directional light.
 
+ * Octree for vertex/object pick culling.
+
  * Skeletal animation refactor
+	- Animation import/export
+	- Single keyframe import/export
+	- Chain Copy/Paste, Mirror,  
 	- Fix any remaining FK issues
 	- Separate world updates from mesh skinning code.
 	- Go back and ensure everything is using relative transforms now.

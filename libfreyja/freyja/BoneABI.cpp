@@ -482,9 +482,7 @@ void freyjaBoneInverseTransform3fv(index_t bone,
 		freyjaBoneRotateEuler3fv(bone, xyz);
 		break;
 
-#if 0 
 	case fScale:
-
 		freyjaGetBoneTranslation3fv(bone, xyz);
 		xyz[0] /= v[0];
 		xyz[1] /= v[1];
@@ -497,7 +495,6 @@ void freyjaBoneInverseTransform3fv(index_t bone,
 
 	case fRotateAboutOrigin:
 		break;
-#endif
 
 	default:
 		MSTL_MSG("%s(..., %s, ...) not supported\n", 
@@ -534,9 +531,7 @@ void freyjaBoneTransform(index_t boneIndex,
 		freyjaBoneRotateEuler3fv(boneIndex, xyz);
 		break;
 
-#if 0 
 	case fScale:
-
 		freyjaGetBoneTranslation3fv(boneIndex, xyz);
 		xyz[0] *= x;
 		xyz[1] *= y;
@@ -549,7 +544,6 @@ void freyjaBoneTransform(index_t boneIndex,
 
 	case fRotateAboutOrigin:
 		break;
-#endif
 
 	default:
 		MSTL_MSG("%s(..., %s, ...) not supported\n", 

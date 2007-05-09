@@ -2289,7 +2289,7 @@ PyObject *py_freyjaGetMeshWeight(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "iiiif", &mesh, &weight, &vertex, &bone, &weightv))
 		return NULL;
 
-	freyjaGetMeshWeight(mesh, weight, vertex, bone, weightv);
+	freyjaGetMeshWeight(mesh, weight, &vertex, &bone, &weightv);
 	return PyInt_FromLong(0);
 }
 

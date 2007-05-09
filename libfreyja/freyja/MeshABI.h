@@ -399,6 +399,19 @@ extern "C" {
 	 * Post : Returns <mesh> <vertex> texcoord index.
 	 ------------------------------------------------------*/
 
+	uint32 freyjaGetMeshVertexWeightCount(index_t mesh, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> weight reference count.
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshVertexWeightIndex(index_t mesh, index_t vertex,
+										   uint32 element);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <mesh> <vertex> weight index.
+	 ------------------------------------------------------*/
+
 	uint32 freyjaGetMeshVertexPolygonRefCount(index_t mesh, index_t vertex);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -498,8 +511,26 @@ extern "C" {
 	 * Post : Retrieves <mesh> blend vertex array for rendering, etc
 	 ------------------------------------------------------*/
 
+	vec_t freyjaGetMeshWeightValue(index_t mesh, index_t weight);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets <weight> value from <mesh>
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshWeightBone(index_t mesh, index_t weight);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets <weight> bone from <mesh>
+	 ------------------------------------------------------*/
+
+	index_t freyjaGetMeshWeightVertex(index_t mesh, index_t weight);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets <weight> vertex from <mesh>
+	 ------------------------------------------------------*/
+
 	void freyjaGetMeshWeight(index_t mesh, index_t weight,
-							 index_t &vertex, index_t &bone, vec_t &weightv);
+							 index_t *vertex, index_t *bone, vec_t *weightv);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets <weight> values from <mesh>

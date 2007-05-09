@@ -977,6 +977,12 @@
 	"Would you like to continue?"
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
 
+(confirmation_dialog	"DupeObjectDialog"
+	"gtk-dialog-question"
+	"You are about to duplicate the selected object."
+	"Would you like to continue?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
+
 (confirmation_dialog	"SplitMeshDialog"
 	"gtk-dialog-question"
 	"You are about to split the selected faces \n from the currently selected mesh into a new mesh.\n"
@@ -1059,6 +1065,12 @@
 	"float"	"radius"	"Radius?"	8 0.1 128  ; default min max
 	"float"	"height"	"Height?"	16 0.1 128  ; default min max
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"DuplicateBoneDialog"
+	"gtk-dialog-question"
+	"Would you like to duplicate the selected bone?"
+	"int"	"recurse"	"Recursively duplicate children?"	0 0 1  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
 
 
 ;; Old event id based dialogs
