@@ -19,6 +19,8 @@
  * File export may be broken in some event paths 
 	- explict freyja filter won't save -- prob due to it not being a module
 
+ * *.smd import bug ( cancel opens *.ext )
+
  * Group (faces) selection is broken
 
  * WIN32 python lib is very unstable - need to replace it with ming bin

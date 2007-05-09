@@ -83,7 +83,7 @@ vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
 vec_t FreyjaRender::mBonePointSize = 5.0;
 vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
-vec_t FreyjaRender::mVertexPointSize = 5.0; // 3.5;
+vec_t FreyjaRender::mVertexPointSize = 3.0f; // 5.0; // 3.5;
 
 matrix_t gModelViewMatrix;
 

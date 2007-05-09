@@ -6,6 +6,11 @@
 
  Kagura prealpha, 0.9.5.9
  20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX crash in OpenGLPrinter
+ - Removed garbage code in bone selection by pick ray.
+ - Bone duplication, scaling|mirror, etc to aid bisymmetry skeleton creation.
+ - SMD plugin update to support skinning on export.
+ - MeshABI fix for C export, new weighting support functions. 
  - FIX Import/export filter default selection.
  - SMD export update -- legacy API use removal.
  - Dynamic Import menu using file modules directly.

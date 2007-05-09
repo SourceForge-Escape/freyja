@@ -1040,11 +1040,7 @@ void Mesh::SelectVerticesByBox(hel::Vec3 &min, hel::Vec3 &max)
 
 bool Mesh::IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius)
 {
-	vec_t t;
-
-	//no 'editor side' scale support if (!Intersect(r, t)) return false;
-
-	Vec3 center, normal;
+	// No 'editor side' scale support if (!Intersect(r, t)) return false;
 	vec_t bestDist = 99999.0f;
 	r.mDir.Norm();
 	vertex0 = -1;
@@ -1057,18 +1053,15 @@ bool Mesh::IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius)
 			continue;
 
 		// Clear old ray hit results
-		v->mFlags |= Vertex::fRayHit;
-		v->mFlags ^= Vertex::fRayHit;
+		v->mFlags &= ~Vertex::fRayHit;
 
-		GetVertexArrayPos(v->mVertexIndex, center.mVec);
-		
-		bool intersect = r.IntersectSphere(center.mVec, radius, t);
-			
-		freyjaPrintMessage("--- t = %f", t);
-	
-		if (intersect)
+		Vec3 u;
+		GetVertexArrayPos(v->mVertexIndex, u.mVec);
+
+		vec_t t;
+		if (r.IntersectSphere(u.mVec, radius, t))
 		{
-			if (vertex0 == -1 || t < bestDist)
+			if (vertex0 == -1 || t < bestDist)// && t > 0)
 			{
 				bestDist = t;
 				vertex0 = i;

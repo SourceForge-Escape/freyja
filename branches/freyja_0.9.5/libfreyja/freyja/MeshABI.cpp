@@ -306,7 +306,7 @@ int32 freyjaMeshSaveChunkJA(SystemIO::FileWriter &w, index_t meshIndex)
 		index_t bone, vert;
 		for (j = 0; j < count; ++j)
 		{
-			freyjaGetMeshWeight(meshIndex, lst[j], vert, bone, weight);
+			freyjaGetMeshWeight(meshIndex, lst[j], &vert, &bone, &weight);
 			//freyjaGetVertexWeight(vertex, j, &bone, &weight);
 			w.WriteLong(vert);
 			w.WriteLong(bone);
@@ -966,6 +966,50 @@ void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t vertex, vec3_t xyz)
 }
 
 
+uint32 freyjaGetMeshVertexWeightCount(index_t mesh, index_t vertex)
+{
+	// FIXME: Setup a hash/bucket inside Mesh for this later.
+	uint32 count = freyjaGetMeshWeightCount(mesh);
+	uint32 weights = 0;
+	
+	for (uint32 i = 0; i < count; ++i)
+	{
+		index_t weight = i; // might need remapping later.
+		if (vertex == freyjaGetMeshWeightVertex(mesh, weight))
+		{
+			++weights;
+		}
+	}
+	
+	return weights;
+}
+
+
+index_t freyjaGetMeshVertexWeightIndex(index_t mesh, index_t vertex, 
+									   uint32 element)
+{
+	// FIXME: Setup a hash/bucket inside Mesh for this later.
+	uint32 count = freyjaGetMeshWeightCount(mesh);
+	uint32 weights = 0;
+	
+	for (uint32 i = 0; i < count; ++i)
+	{
+		index_t weight = i; // might need remapping later.
+		if (vertex == freyjaGetMeshWeightVertex(mesh, weight))
+		{
+			if (weights == element)
+			{
+				return weight;
+			}
+
+			++weights;
+		}
+	}
+	
+	return INDEX_INVALID;
+}
+
+
 index_t freyjaGetMeshVertexTexCoord(index_t mesh, index_t vertex)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
@@ -1387,8 +1431,7 @@ uint32 freyjaGetMeshWeightCount(index_t mesh)
 }
 
 
-void freyjaGetMeshWeight(index_t mesh, index_t weight,
-						 index_t &vertex, index_t &bone, vec_t &weightv)
+vec_t freyjaGetMeshWeightValue(index_t mesh, index_t weight)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
 
@@ -1398,9 +1441,65 @@ void freyjaGetMeshWeight(index_t mesh, index_t weight,
 
 		if (w)
 		{
-			vertex = w->mVertexIndex;
-			bone = w->mBoneIndex;
-			weightv = w->mWeight;
+			return w->mWeight;
+		}
+	}
+
+	return 0.0f;
+}
+
+
+index_t freyjaGetMeshWeightBone(index_t mesh, index_t weight)
+{
+
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Weight *w = m->GetWeight(weight);
+
+		if (w)
+		{
+			return w->mBoneIndex;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t freyjaGetMeshWeightVertex(index_t mesh, index_t weight)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Weight *w = m->GetWeight(weight);
+
+		if (w)
+		{
+			return w->mVertexIndex;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+void freyjaGetMeshWeight(index_t mesh, index_t weight,
+						 index_t *vertex, index_t *bone, vec_t *weightv)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+
+	if (m)
+	{
+		Weight *w = m->GetWeight(weight);
+
+		if (w)
+		{
+			*vertex = w->mVertexIndex;
+			*bone = w->mBoneIndex;
+			*weightv = w->mWeight;
 		}
 	}
 }

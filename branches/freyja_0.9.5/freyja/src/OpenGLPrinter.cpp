@@ -240,6 +240,9 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 
 void OpenGLPrinter::Print2d(float x, float y, float scale, const char *text)
 {
+	if (!text || !text[0])
+		return;
+
 #ifdef HAVE_OPENGL
 	glPushMatrix();
 	glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
@@ -257,6 +260,9 @@ void OpenGLPrinter::Print3d(float x, float y, float z,
 							float pitch, float yaw, float roll, 
 							float scale, const char *text)
 {
+	if (!text || !text[0])
+		return;
+
 #ifdef HAVE_OPENGL
 	glPushMatrix();
 	glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
