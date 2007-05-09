@@ -5,7 +5,8 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.9
- 20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ 20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com> 
+ - FIX for vertex unselect
  - FIX crash in OpenGLPrinter
  - Removed garbage code in bone selection by pick ray.
  - Bone duplication, scaling|mirror, etc to aid bisymmetry skeleton creation.

@@ -3197,7 +3197,8 @@ void FreyjaControl::UnselectObject(vec_t mouseX, vec_t mouseY)
 			if ( m )
 			{
 				int selected = -1;
-				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, 2.0f);
+				const vec_t radius = FreyjaRender::mVertexPointSize * 0.25f;
+				m->IntersectClosestVertex(FreyjaRender::mTestRay, selected, radius);
 				
 				if (selected > -1)
 				{
