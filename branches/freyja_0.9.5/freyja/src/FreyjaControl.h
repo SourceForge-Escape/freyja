@@ -287,25 +287,30 @@ class FreyjaControl : public Control
 	 * Post : Returns current viewing zoom of scene
 	 ------------------------------------------------------*/
 
-	vec_t GetGenMeshHeight() { return mGenMeshHeight; }
-	void SetGenMeshHeight(vec_t v) { mGenMeshHeight = v; }
+	uint32 GetViewMode() { return mRender->GetViewMode(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-	uint32 GetGenMeshCount() { return mGenMeshCount; }
-	void SetGenMeshCount(uint32 i) { mGenMeshCount = i; }
-
-	uint32 GetGenMeshSegements() { return mGenMeshSegements; }
-	void SetGenMeshSegements(uint32 i) { mGenMeshSegements = i; }
-
+	uint32 GetSelectedMaterial() { return mMaterial.GetSelected(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	static void AttachMethodListeners();
+	void AttachMethodListeners();
 	/*------------------------------------------------------
-	 * Pre  : 
+	 * Pre  : Only call once, and only for singleton.
 	 * Post : Hooks up MethodDelegates to the event system.
+	 *
 	 ------------------------------------------------------*/
 
 	void AdjustMouseXYForViewports(vec_t &x, vec_t &y);
@@ -384,6 +389,13 @@ class FreyjaControl : public Control
 	 *        Accounts for view mode ( front, top, side, free )
 	 ------------------------------------------------------*/
 
+	void ClearFlag(options_t flag) { mFlags &= ~flag; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
+
 	static uint32 mSelectedControlPoint;
 	static Vector<hel::Vec3> mControlPoints;
 	static Vector<hel::Vec3> &GetControlPoints() { return mControlPoints; }
@@ -397,17 +409,6 @@ class FreyjaControl : public Control
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 ------------------------------------------------------*/
-
-	void handleTextEvent(int event, const char *text);
-	/*------------------------------------------------------
-	 * Pre  : text is valid
-	 * Post : Processes event using text given
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.16:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void Init();
@@ -440,26 +441,19 @@ class FreyjaControl : public Control
 	 * Pre      : 
 	 * Post     : Process mouse motion input
 	 --------------------------------------------*/
-	
-	bool Key(unsigned int key, int x, int y, int modifer_keys);
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : 
-	 * Post     : Process alphanumeric keyboard 
-	 *            input
-	 --------------------------------------------*/
 
 	bool LoadModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Reads model from disk
 	 * Post : Returns true if sucessful
+	 *
 	 ------------------------------------------------------*/
 
 	bool LoadMaterial(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Reads material from disk
 	 * Post : Returns true if sucessful
+	 *
 	 ------------------------------------------------------*/
 
 	void LoadResource();
@@ -471,14 +465,13 @@ class FreyjaControl : public Control
 
 	bool LoadTexture(const char *filename, int &id)
 	{
-		bool b = false;
 		if (mMaterial.LoadTexture(filename)) 
-		{ id = mMaterial.GetTextureId()-1; b = true; }
-		return b;
+		{ id = mMaterial.GetTextureId()-1; return true; }
+		return false;
 	}
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : Loads texture <filename> into texture manager.
+	 * Post : Sets texture <id> and returns true if sucessful.
 	 *
 	 ------------------------------------------------------*/
 
@@ -499,8 +492,7 @@ class FreyjaControl : public Control
 	void SetObjectMode(object_type_t m) 
 	{ 
 		mObjectMode = m; 
-		freyja_print("Object mode set to %s...",
-					 ObjectTypeToString(mObjectMode).c_str());
+		Print("Object mode set to %s...", ObjectTypeToString(m).c_str());
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -515,17 +507,12 @@ class FreyjaControl : public Control
 	 *        
 	 ------------------------------------------------------*/
 
-	// FIXME: This stuff from the old code merge at least needs to be 
-	// broken into remaining classes 
-	void SetFlag(options_t flag, bool t) 
-	{ (t) ? mFlags |= flag : mFlags ^= flag; } // &= ~t;?
-
-
-	bool ToggleFlag(options_t flag) { mFlags ^= flag; return mFlags & flag; }
-
-	uint32 GetViewMode() { return mRender->GetViewMode(); }
-
-	uint32 GetSelectedMaterial() { return mMaterial.GetSelected(); }
+	void SetFlag(options_t flag) { mFlags |= flag; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
  
 
 	////////////////////////////////////////////////////////////
@@ -666,8 +653,6 @@ class FreyjaControl : public Control
 	void eRotate();
 
 	void EvAnimationSlider(unsigned int value);
-
-	void eGenMeshHeight(vec_t value);
 
 	static uint32 eAxisJointId;
 	void eAxisJoint(uint32 value);
@@ -833,6 +818,13 @@ class FreyjaControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
+	void UpdateSkeletalUI();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Update node graph UI.
+	 *
+	 ------------------------------------------------------*/
+
 	static FreyjaControl *mInstance;
 
 
@@ -986,27 +978,29 @@ private:
 		//mTextureId = 1;
 	}
 
-	void CreatePolyMappedUVMap(int i) {BUG_ME("Not implemented in this build");}
-
 	void CursorMove(float xx, float yy);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	void GetBoneRotation(float *x, float *y, float *z)
-	{
-		vec3_t xyz;
-		freyjaGetBoneRotationEuler3fv(GetSelectedBone(), xyz);
-		*x = helRadToDeg(xyz[0]);
-		*y = helRadToDeg(xyz[1]);
-		*z = helRadToDeg(xyz[2]);
-		freyja_print("%f %f %f", xyz[0], xyz[1], xyz[2]);
-	}
-
-	void KeyframeTransform(object_type_t obj, 
-						   freyja_transform_action_t action,
+	void KeyframeTransform(object_type_t obj, freyja_transform_action_t action,
 						   vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : <x>, <y>, <z> are in radians or other proper units.
+	 * Post : Transform <action> is performed on current <obj> keyframe.
+	 *
+	 ------------------------------------------------------*/
 
-	void Transform(object_type_t obj, 
-				   freyja_transform_action_t action,
-				   vec_t x, vec_t y, vec_t z);// { MARK_MSGF("Not Implemented"); }
+	void Transform(object_type_t obj, freyja_transform_action_t action,
+				   vec_t x, vec_t y, vec_t z);
+	/*------------------------------------------------------
+	 * Pre  : <x>, <y>, <z> are in radians or other proper units.
+	 * Post : Transform <action> is performed on current <obj>.
+	 *
+	 ------------------------------------------------------*/
+
 	void Transform(freyja_transform_t obj, 
 				   freyja_transform_action_t action,
 				   index_t owner, index_t id,
@@ -1025,47 +1019,53 @@ private:
 	 ------------------------------------------------------*/
 
 	void SelectMode();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void UnselectMode();
-
-	void UpdateSkeletalUI() { UpdateSkeletonUI_Callback(GetSelectedSkeleton()); }
-
-	const char *GetBoneName(unsigned int boneIndex)
-	{
-		return (freyjaIsBoneAllocated(boneIndex)) ? freyjaGetBoneNameString(boneIndex) : 0x0;
-	}
-
-	void SetBoneName(unsigned int boneIndex, const char *name)
-	{
-		if (freyjaIsBoneAllocated(boneIndex) && name && name[1])
-		{
-			freyjaBoneName(boneIndex, name);
-			freyja_print("bone[%i].name = '%s'", boneIndex, name);
-			UpdateSkeletalUI();
-		}
-	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void PrintInfo();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void TexCoordMove(vec_t u, vec_t v);
-	void TexCoordSelect(vec_t u, vec_t v);
-	index_t mTexCoordArrayIndex;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	void SetBoneRotation(float x, float y, float z)
-	{
-		vec3_t xyz = {helDegToRad(x), helDegToRad(y), helDegToRad(z)};
-		freyjaBoneRotateEuler3fv(GetSelectedBone(), xyz);
-	}
+	void TexCoordSelect(vec_t u, vec_t v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void Clear()
 	{
-		freyjaModelClear(0); // Only 1 edit model supported in this bulid
+		freyjaModelClear(GetSelectedModel());
 		UpdateSkeletalUI();
-		UpdateSkeletonUI_Callback(0); // Update skeletal UI
 		mCursor.Reset();
 		mCleared = true;
-
 		RefreshContext();
 	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Reset data model and default status UI. 
+	 *
+	 ------------------------------------------------------*/
 
 	void MoveObject(vec_t vx, vec_t vy);
 	/*------------------------------------------------------
@@ -1176,21 +1176,21 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	const static uint32 mRecentFileLimit = 10; /* Limit recent files list. */
 
-	ActionManager mActionManager;           /* New Undo/Redo system */
+	freyja3d::Cursor mCursor;               /* Special mouse input handler */
 
-	uint32 mFlags;                          /* Option bitflags */
+	freyja3d::MaterialEv mMaterial;         /* Material control */
 
-	object_type_t mObjectMode;              /* Current object type to edit */
+	hel::Vec3 mSceneTrans;                  /* Offset of scene in 3 space */
 
-	Texture mTexture;                       /* Collection of Texture utils */
+	mstl::Vector<String> mRecentFiles;      /* Recently loaded model files */
 
-	static MaterialEv mMaterial;            /* Material control */
+	mstl::ActionManager mActionManager;     /* New Undo/Redo system */
 
-	const static uint32 mRecentFileLimit = 10;
-	Vector<String> mRecentFiles;            /* Recently loaded model files */
+	Texture mTexture;                       /* Collection of Texture utils */	
 
-	Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
+	FreyjaRender *mRender;                  /* OpenGL renderer */
 
 	String mResourceFilename;	            /* Resource file for control */
 
@@ -1198,38 +1198,33 @@ private:
 
 	String mCurrentlyOpenFilename;          /* What file is loaded now? */
 
-	hel::Vec3 mSceneTrans;                  /* Offset of scene in 3 space */
-
-	freyja3d::Cursor mCursor;               /* Special mouse input handler */
-	
-	FreyjaRender *mRender;                  /* OpenGL renderer */
-
-	unsigned int mLastEvent, mLastCommand;  /* The last command pair recieved*/
-
-	unsigned int mMouseButton, mModKey;     /* Cached mouse button event */
-
-	int mMouseState;                        /* Cached mouse state event */
-
 	ControlScheme mControlScheme;           /* Current control scheme in use */
 
 	action_type_t mEventMode;               /* Mode of generic event handler */
-	
+
+	object_type_t mObjectMode;              /* Current object type to edit */
+
+	uint32 mFlags;                          /* Option bitflags */
+
+	uint32 mModKey;                         /* Cached modifier key event */
+
+	uint32 mMouseButton;                    /* Cached mouse button event */
+
+	index_t mTexCoordArrayIndex;            /* Current modification texcoord */
+
+	int mMouseState;                        /* Cached mouse state event */	
+
 	int mUVMouseState;                      /* Mouse state on texture canvas */
 	
 	int mXYZMouseState;                     /* Mouse state on modeler canvas */
 
-	bool mFullScreen;
+	bool mAllowBoneNameUpdate;              /* Specfic text event safeguard */
 
-	bool mCleared;
+	bool mCleared;                          /* Model not modified status */
 
-	bool mAllowBoneNameUpdate;
+	bool mFullScreen;                       /* Window fullscreen status */
 
-	float mGenMeshHeight;
-	unsigned long mGenMeshCount;
-	unsigned long mGenMeshSegements;
-
-	bool mToken;                            /* This puts the breaks on over
-											 * doing pushing actions */
+	bool mToken;                            /* Action/Undo stack safeguard */
 };
 
 

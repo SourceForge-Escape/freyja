@@ -69,9 +69,10 @@ int load_texture(const char *filename);
 int load_shader(const char *filename);
 void ePluginImport(ResourceEvent *e);
 void ePluginExport(ResourceEvent *e);
+mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
+										 mgtk_tree_t *tree);
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
-MaterialEv FreyjaControl::mMaterial;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
 Vector<hel::Vec3> FreyjaControl::mControlPoints;
 
@@ -111,34 +112,43 @@ FreyjaControl::FreyjaControl() :
 	mSelectedModel(0),
 	mSelectedView(PLANE_FREE),
 	mSelectedViewport(0),
+
+	mCursor(),
+	mMaterial(),
+	mSceneTrans(0.0f, -18.0f, 0.0f),
+	mRecentFiles(),
 	mActionManager(),
-	mFlags(fNone),
-	mObjectMode(tScene),
+	mTexture(),
+	mRender(NULL),
 	mResourceFilename("freyja-dev.mlisp"),
 	mUserPrefsFilename("freyja-dev_prefs.mlisp"),
 	mCurrentlyOpenFilename(),
-	mSceneTrans(0.0f, -18.0f, 0.0f),
-	mRender(NULL),
-	mCleared(true),
+	mControlScheme(eScheme_Model),
+	mEventMode(aNone),
+	mObjectMode(tNone),
+	mFlags(fNone),
+	mModKey(0),
+	mMouseButton(0),
+	mTexCoordArrayIndex(INDEX_INVALID),
+	mMouseState(0),
+	mUVMouseState(0),
+	mXYZMouseState(0),
 	mAllowBoneNameUpdate(true),
+	mCleared(true),
+	mFullScreen(false),
 	mToken(false)
 {
-	/* Search local paths first ( mostly debugging ) */
-	//freyjaPluginAddDirectory("plugins/model/debug");
-	/* Search local paths for things like windows builds */
-	//freyjaPluginAddDirectory("modules/model");
-
-	/* Search ~/.freyja/plugins/ second ( first for real path for end users ) */
+	/* Add extra paths for freyja plugins. */
 	String sPluginDir = freyja_rc_map_string("plugins/");
 	freyjaPluginAddDirectory(sPluginDir.GetCString());
 
-	/* Start up libfreyja backend, and redirect it's stdio */
+	/* Start up libfreyja backend, and redirect its print/logging. */
 	freyjaSpawn();
 	extern void freyja__setPrinter(Printer *printer, bool freyjaManaged);
 	freyja__setPrinter(&mPrinter, false);
 
 	/* Spawn 0th light, and set the light iterator */
-	vec4_t lightPos = {12,35,8,0}; // Make this RCed
+	vec4_t lightPos = { 12.0f, 35.0f, 8.0f, 0.0f }; // FIXME: Use mlisp cvars.
 	freyjaCurrentLight(freyjaLightCreate());
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
@@ -184,8 +194,6 @@ void FreyjaControl::Init()
 	SetControlScheme(eScheme_Model);
 	SetZoom(1.0f);
 	mEventMode = aNone;
-	mLastEvent = eEvent;
-	mLastCommand = eSelectId;
 	mFullScreen = false;
 
 	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
@@ -228,10 +236,6 @@ void FreyjaControl::Init()
 		mCleared = true;
 	else
 		mCleared = false;
-
-	mGenMeshHeight = 8.0f;
-	mGenMeshCount = 16;
-	mGenMeshSegements = 4;
 }
 
 
@@ -249,6 +253,10 @@ FreyjaControl::~FreyjaControl()
 
 void FreyjaControl::SetFaceMaterial(index_t faceIndex, index_t material)
 {
+#if 0 // FIXME: Add UVMaps back later
+	//Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
+	//GetUVMap(mUVMap);
+
 	if (!mUVMap.empty())
 	{
 		for (uint32 i = mUVMap.begin(); i < mUVMap.end(); ++i)
@@ -258,6 +266,7 @@ void FreyjaControl::SetFaceMaterial(index_t faceIndex, index_t material)
 
 		return;
 	}
+#endif
 
 	freyjaMeshPolygonMaterial(GetSelectedMesh(), faceIndex, material);
 }
@@ -301,7 +310,6 @@ void FreyjaControl::AttachMethodListeners()
 	EvScaleYId = CreateListener1f("eScale_Y", &FreyjaControl::EvScaleY);
 	EvScaleZId = CreateListener1f("eScale_Z", &FreyjaControl::EvScaleZ);
 	CreateListener1f("eZoom", &FreyjaControl::SetZoom);
-	CreateListener1f("eGenMeshHeight", &FreyjaControl::SetGenMeshHeight);
 
 	// Mode events
 	EvModeAutoKeyframeId =
@@ -329,9 +337,6 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
 	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
 	CreateListener("eSetPolygonTexture", &FreyjaControl::eSetPolygonTexture);
-
-	CreateListener1u("eGenMeshCount", &FreyjaControl::SetGenMeshCount);
-	CreateListener1u("eGenMeshSegements", &FreyjaControl::SetGenMeshSegements);
 
 	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
 
@@ -1621,31 +1626,11 @@ void FreyjaControl::EvBoneIterator(unsigned int value)
 
 		if (value == GetSelectedBone() && freyjaIsBoneAllocated(value))
 		{
-#if 0 // This feature was removed a while back when moving to named IDs
-			/* Mongoose 2002.08.31, Update dependent spinbuttons. */
-			vec_t x, y, z;
-			GetBoneRotation(&x, &y, &z);
-			freyja_event_set_float(520, x); // eBoneRotX?
-			freyja_event_set_float(521, y);
-			freyja_event_set_float(522, z);
-
-			{ 
-				vec3_t xyz;
-				freyjaGetBoneTranslation3fv(value, xyz);
-				x = xyz[0], y = xyz[1], z = xyz[2];
-			}
-
-			freyja_event_set_float(510, x); // eBoneLocX?
-			freyja_event_set_float(511, y);
-			freyja_event_set_float(512, z);
-			freyja_event_gl_refresh();
-#endif
-
 			/* Update any bone name listeners, 
 			 * 1. Dup string to avoid evil widgets that want to mutate it
 			 * 2. Disable event hook up in case of UI event loop */
 			char dupname[64];
-			strncpy(dupname, GetBoneName(value), 64);
+			strncpy(dupname, freyjaGetBoneNameString(value), 64);
 			mAllowBoneNameUpdate = false;
 			mgtk_textentry_value_set(EvSetBoneNameId, dupname);
 			mAllowBoneNameUpdate = true;
@@ -1932,10 +1917,17 @@ void FreyjaControl::EvSkeletonName(char *text)
 }
 
 
-void FreyjaControl::EvSetBoneName(char *text)
+void FreyjaControl::EvSetBoneName(char *name)
 {
-	if (mAllowBoneNameUpdate)
-		SetBoneName(GetSelectedBone(), text);
+	index_t bone = GetSelectedBone();
+
+	if (mAllowBoneNameUpdate &&
+		freyjaIsBoneAllocated(bone) && name && name[1])
+	{
+		freyjaBoneName(bone, name);
+		Print("Bone[%i].name = '%s'", bone, name);
+		UpdateSkeletalUI();
+	}
 }
 
 
@@ -1978,6 +1970,27 @@ void FreyjaControl::PrintInfo()
 	}
 
 	freyja_event_info_dialog("gtk-dialog-info", s.c_str());
+}
+
+
+void FreyjaControl::UpdateSkeletalUI()
+{
+	uint32 skeleton = GetSelectedSkeleton();
+	index_t root = freyjaGetSkeletonRootIndex(skeleton);
+
+	// FIXME: Should be skeleton based, and support bones not off root.
+	if (root != INDEX_INVALID && freyjaIsBoneAllocated(root))
+	{
+		int eventId = ResourceEvent::GetResourceIdBySymbol("eSkeletonName");
+		mgtk_textentry_value_set(eventId, freyjaGetSkeletonName(skeleton));
+
+		mgtk_tree_t *tree = freyja_generate_skeletal_ui(skeleton, root, 0x0);
+		mgtk_event_update_tree(FreyjaControl::EvBoneIteratorId, tree);
+	}
+	else
+	{
+		mgtk_event_update_tree(eNone, NULL);
+	}
 }
 
 
@@ -3176,11 +3189,10 @@ void FreyjaControl::CreateObject()
 				freyjaBoneName(idx, s.GetCString());
 				freyjaSkeletonAddBone(skel, idx);
 				freyjaSkeletonUpdateBones(skel);
-				UpdateSkeletonUI_Callback(skel);
-
-				SetSelectedBone(idx);
 
 				mCleared = false;
+				SetSelectedBone(idx);
+				UpdateSkeletalUI();
 				RefreshContext();
 				Print("New Skeleton[%u].Bone[%u], parent = %i",
 					  skel, idx, freyjaGetBoneParent(idx));
@@ -4919,7 +4931,7 @@ void FreyjaControl::TexCoordMove(vec_t u, vec_t v)
 	if (!m || mTexCoordArrayIndex == INDEX_INVALID)
 		return;
 
-	static uint32 texcoord = INDEX_INVALID;
+	static uint32 texcoord = INDEX_INVALID;  // FIXME: hackkk
 
 	if (texcoord != mTexCoordArrayIndex)
 	{
@@ -5330,7 +5342,7 @@ void ePluginImport(ResourceEvent *e)
 					freyjaCurrentSkeleton(0);
 				}
 
-				UpdateSkeletonUI_Callback(freyjaGetCurrentSkeleton());
+				FreyjaControl::mInstance->UpdateSkeletalUI();
 			}
 			else
 			{
@@ -5443,4 +5455,82 @@ void ePluginExport(ResourceEvent *e)
 		}
 	}
 }
+
+
+// FIXME: Rewrite this to be Skeleton based!!  Allow for bones outside of root
+//        and include Skeleton in tree
+//
+//        Also have tree root be skeleton name, so you can do multiple skeletons
+//        in the widget if needed later ala scene graphs
+mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
+										 mgtk_tree_t *tree)
+{
+	if (!freyjaIsBoneAllocated(rootIndex))
+	{
+		freyja_print("!generateSkeletalUI(): No Skeleton root given.\n");
+		return 0x0;
+	}
+
+	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
+	const char *rootName = freyjaGetBoneNameString(rootIndex);
+	uint32 rootSkelBID = rootIndex;//freyjaGetBoneSkeletalBoneIndex(rootIndex);
+
+	if (rootChildCount > freyjaGetBoneCount())
+	{
+		FREYJA_ASSERTMSG(0, "root %i '%s'\nchildren %i > %i\nInvalid bone indices predicted.  Child count exceeds maximum bone count.",
+						 rootIndex, rootName,
+						 rootChildCount, freyjaGetBoneCount());
+		return 0x0;
+	}
+
+	if (tree == 0x0)
+	{
+		tree = new mgtk_tree_t;
+		snprintf(tree->label, 63, "root");	
+		tree->label[63] = '\0';
+		tree->parent = 0x0;
+	}
+	else
+	{
+		snprintf(tree->label, 63, "bone%03i", rootSkelBID);
+		tree->label[63] = '\0';
+	}
+
+	if (rootName[0])
+	{
+		snprintf(tree->label, 63, "%s", rootName);
+		tree->label[63] = '\0';
+	}
+
+	tree->id = rootIndex;
+	tree->numChildren = rootChildCount;
+	tree->children = 0x0;
+
+#ifdef DEBUG_BONE_LOAD
+	printf("-- %s : %i/%i children\n",  
+		   tree->label, tree->numChildren, rootChildCount);
+#endif
+
+	if (tree->numChildren == 0)
+		return tree->parent;
+
+	tree->children = new mgtk_tree_t[tree->numChildren+1];
+
+	for (uint32 count = 0, i = 0; i < rootChildCount; ++i)
+	{
+		uint32 boneChild = freyjaGetBoneChild(rootIndex, i);
+
+		if (freyjaIsBoneAllocated(boneChild))
+		{
+			tree->children[count].parent = tree;
+			freyja_generate_skeletal_ui(skelIndex, boneChild, &tree->children[count++]);
+		}
+	}
+
+	return (tree->parent) ? tree->parent : tree;
+}
+
+
+
+
 

@@ -50,6 +50,7 @@
  * Octree for vertex/object pick culling.
 
  * Skeletal animation refactor
+	- Skeleton level transforms only handle root/children
 	- Better 'pose' interface: transparency on cursors / bones, scaling UI.
 	- Views for bones should be a force on/off and should be controlled by modes
 	- X->Z swap event for bones, etc

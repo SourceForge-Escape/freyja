@@ -103,14 +103,7 @@ uint32 freyjaGetBoneCount()
 
 byte freyjaIsBoneAllocated(index_t boneIndex)
 {
-	Bone *b = Bone::GetBone(boneIndex);
-
-	if (b)
-	{
-		return 1;
-	}
-
-	return 0;
+	return ( Bone::GetBone(boneIndex) ) ? 1 : 0;
 }
 
 

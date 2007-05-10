@@ -20,8 +20,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_FREYJA_EVENT_H
-#define GUARD__FREYJA_FREYJA_EVENT_H
+#ifndef GUARD__FREYJA3D_FREYJA_EVENT_H
+#define GUARD__FREYJA3D_FREYJA_EVENT_H
 
 #include <stdarg.h>
 #include <mgtk/mgtk_keys.h>
@@ -350,23 +350,4 @@ void freyja_swap_buffers();
  ------------------------------------------------------*/
 
 
-//////////////////////////////////////////////////////////////////////////////
-// Skeleton tree mgtk interface hackery 
-//////////////////////////////////////////////////////////////////////////////
-
-typedef struct callback_bone_s 
-{
-	int id;
-	char name[64];
-	unsigned int numChildren;
-	callback_bone_s *parent;
-	callback_bone_s *children;
-
-} callback_bone_t;
-
-void callback_update_skeleton(callback_bone_t *bone);
-
-void UpdateSkeletonUI_Callback(uint32 skelIndex);
-
-
-#endif
+#endif // GUARD__FREYJA3D_FREYJA_EVENT_H
