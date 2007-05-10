@@ -5,7 +5,14 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.9
- 20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com> 
+ 20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Bone and Vertex pick tolerance set to be 'tight' now.  
+ - Bone iterator event hooked into pick selection/name/id.
+ - Selected Vertices transform box support added back.
+ - Simple pose / bind auto toggle on mode change.  Also names swap now.
+ - Pick UI minor refactor, including select/unselect object combined.
+ - Skeletal UI updated on plugin import.
+ - New cmake build system in private branch ( with new math tests ).
  - FIX for vertex unselect
  - FIX crash in OpenGLPrinter
  - Removed garbage code in bone selection by pick ray.

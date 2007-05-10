@@ -115,6 +115,7 @@ public:
 
 	static void Print(const char *format, ...)
 	{
+		// NOTE: This only works for GCC.
 		va_list args;
 		va_start(args, format);
 		mPrinter.PrintArgs(format, &args);
@@ -126,7 +127,13 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void RefreshContext() { freyja_event_gl_refresh();	}
+	void RefreshContext() { freyja_event_gl_refresh(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 
 protected:
 
