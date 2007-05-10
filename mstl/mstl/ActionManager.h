@@ -23,15 +23,15 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
-#ifndef GUARD__MSTL_MONGOOSE_ACTIONMANAGER_H_
-#define GUARD__MSTL_MONGOOSE_ACTIONMANAGER_H_
-
+#ifndef GUARD__MSTL_ACTIONMANAGER_H_
+#define GUARD__MSTL_ACTIONMANAGER_H_
 
 #include <mstl/Action.h>
 #include <mstl/stack.h>
 #include <mstl/SystemIO.h>
 
+
+namespace mstl {
 
 class ActionManager
 {
@@ -180,4 +180,6 @@ class ActionManager
 
 };
 
-#endif // GUARD__MSTL_MONGOOSE_ACTIONMANAGER_H_
+} // namespace mstl
+
+#endif // GUARD__MSTL_ACTIONMANAGER_H_

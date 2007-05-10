@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.9
  20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX bone pool wasn't flushing allocated joints.
+ - Removed/refactored more obsolete code from FreyjaControl.
  - Bone and Vertex pick tolerance set to be 'tight' now.  
  - Bone iterator event hooked into pick selection/name/id.
  - Selected Vertices transform box support added back.

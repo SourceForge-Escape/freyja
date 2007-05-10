@@ -1042,6 +1042,14 @@
 	"float"	"size"	"How large?       "	8 1 64  ; default min max
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
 
+(query_dialog	"GenerateCubeDialog"
+	"gtk-dialog-question"
+	"Cube mesh generation."
+	"int"	"rows"	"How many rows?   "	1 1 64  ; default min max
+	"int"	"cols"	"How many columns?"	1 1 64  ; default min max
+	"float"	"size"	"How large?       "	8 1 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
 (query_dialog	"GenerateRingDialog"
 	"gtk-dialog-question"
 	"Ring mesh generation."
@@ -1060,10 +1068,17 @@
 (query_dialog	"GenerateTubeDialog"
 	"gtk-dialog-question"
 	"Tube mesh generation."
-	"int"	"segments"	"How many segments?"	16 4 64  ; default min max
+	"int"	"segments"	"How many segments?"	4 1 64  ; default min max
 	"int"	"count"	"Vertex count per ring?"	16 4 64  ; default min max
 	"float"	"radius"	"Radius?"	8 0.1 128  ; default min max
 	"float"	"height"	"Height?"	16 0.1 128  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateSphereDialog"
+	"gtk-dialog-question"
+	"Sphere mesh generation."
+	"int"	"count"	"Vertex count per ring?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 0.1 128  ; default min max
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
 
 (query_dialog	"DuplicateBoneDialog"
@@ -1149,18 +1164,6 @@
 		(hbox 1 0 0 1 0
 			(label "Polygon # of sides "  0.0 0.5) 
 			(spinbutton 0 3 6 ePolygonSize))
-
-		(hbox 1 0 0 1 0
-			(label "GenMesh height "  0.0 0.5) 
-			(spinbutton2 8.0 1.0 100.0 0.01 0.1 0.1 3 eGenMeshHeight))
-
-		(hbox 1 0 0 1 0
-			(label "GenMesh # of partitions "  0.0 0.5) 
-			(spinbutton 16 3 32 eGenMeshCount))
-
-		(hbox 1 0 0 1 0
-			(label "GenMesh # of segments "  0.0 0.5) 
-			(spinbutton 4 3 32 eGenMeshSegements))
 
 		(hbox 1 0 0 1 0
 			(label "UV texcoord pick radius"  0.0 0.5) 

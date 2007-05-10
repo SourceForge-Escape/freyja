@@ -369,7 +369,18 @@ index_t Bone::DuplicateChain(index_t start, mtsl::Vector<index_t> end)
 
 void Bone::ResetPool()
 {
-	mGobalPool.clear();
+	uint32 i;
+
+	foreach (mGobalPool, i)
+	{
+		if (mGobalPool[i])
+		{
+			delete mGobalPool[i];
+			mGobalPool[i] = NULL;
+		}
+	}
+
+	mGobalPool.clear(); 
 }
 
 

@@ -66,98 +66,6 @@ long freyja_get_new_plugin_eventid()
 }
 
 
-// FIXME: Rewrite this to be Skeleton based!!  Allow for bones outside of root
-//        and include Skeleton in tree
-//
-//        Also have tree root be skeleton name, so you can do multiple skeletons
-//        in the widget if needed later ala scene graphs
-mgtk_tree_t *generateSkeletalUI(uint32 skelIndex, uint32 rootIndex, 
-								mgtk_tree_t *tree)
-{
-	if (!freyjaIsBoneAllocated(rootIndex))
-	{
-		freyja_print("!generateSkeletalUI(): No Skeleton root given.\n");
-		return 0x0;
-	}
-
-	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
-	const char *rootName = freyjaGetBoneNameString(rootIndex);
-	uint32 rootSkelBID = rootIndex;//freyjaGetBoneSkeletalBoneIndex(rootIndex);
-
-	if (rootChildCount > freyjaGetBoneCount())
-	{
-		FREYJA_ASSERTMSG(0, "root %i '%s'\nchildren %i > %i\nInvalid bone indices predicted.  Child count exceeds maximum bone count.",
-						 rootIndex, rootName,
-						 rootChildCount, freyjaGetBoneCount());
-		//freyja_print("!generateSkeletalUI(): Invalid boneIndex.\n");
-		return 0x0;
-	}
-
-	if (tree == 0x0)
-	{
-		tree = new mgtk_tree_t;
-		snprintf(tree->label, 63, "root");	
-		tree->label[63] = '\0';
-		tree->parent = 0x0;
-	}
-	else
-	{
-		snprintf(tree->label, 63, "bone%03i", rootSkelBID);
-		tree->label[63] = '\0';
-	}
-
-	if (rootName[0])
-	{
-		snprintf(tree->label, 63, "%s", rootName);
-		tree->label[63] = '\0';
-	}
-
-	tree->id = rootIndex;
-	tree->numChildren = rootChildCount;
-	tree->children = 0x0;
-
-#ifdef DEBUG_BONE_LOAD
-	printf("-- %s : %i/%i children\n",  
-		   tree->label, tree->numChildren, rootChildCount);
-#endif
-
-	if (tree->numChildren == 0)
-		return tree->parent;
-
-	tree->children = new mgtk_tree_t[tree->numChildren+1];
-
-	for (uint32 count = 0, i = 0; i < rootChildCount; ++i)
-	{
-		uint32 boneChild = freyjaGetBoneChild(rootIndex, i);
-
-		if (freyjaIsBoneAllocated(boneChild))
-		{
-			tree->children[count].parent = tree;
-			generateSkeletalUI(skelIndex, boneChild, &tree->children[count++]);
-		}
-	}
-
-	return (tree->parent) ? tree->parent : tree;
-}
-
-
-void UpdateSkeletonUI_Callback(uint32 skelIndex)
-{
-	mgtk_textentry_value_set(ResourceEvent::GetResourceIdBySymbol("eSkeletonName"),
-							 freyjaGetSkeletonName(skelIndex));
-
-	mgtk_tree_t *tree = NULL;
-
-	if (freyjaIsBoneAllocated(freyjaGetSkeletonRootIndex(skelIndex)))
-	{
-		tree = generateSkeletalUI(skelIndex, 
-								  freyjaGetSkeletonRootIndex(skelIndex), 0x0);
-	}
-
-	mgtk_event_update_tree(FreyjaControl::EvBoneIteratorId, tree);
-}
-
-
 // Get the basename of the full path name and strip ext '.so', '.dll', etc
 void freyja_init_get_basename(const char *filename, char *basename, uint32 size)
 {
@@ -881,22 +789,41 @@ void eCleanupVertices()
 
 void eGenerateCone()
 {
-	hel::Vec3 v;
-	freyjaGenerateConeMesh(v.mVec, 
-						   FreyjaControl::mInstance->GetGenMeshHeight(),
-						   FreyjaControl::mInstance->GetGenMeshCount());
-	FreyjaControl::mInstance->Dirty();
+	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
+	const char *dialog = "GenerateTubeDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
+
+	if (ok)
+	{
+		int count = mgtk_get_query_dialog_int(dialog, "count");
+		//int segments = mgtk_get_query_dialog_int(dialog, "segments");
+		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
+		//vec_t radius = mgtk_get_query_dialog_float(dialog, "radius")
+	
+		hel::Vec3 v;
+		freyjaGenerateConeMesh(v.mVec, height, count);
+		FreyjaControl::mInstance->Dirty();
+	}
 }
 
 
 void eGenerateCylinder()
 {
-	hel::Vec3 v;
-	freyjaGenerateCylinderMesh(v.mVec, 
-							   FreyjaControl::mInstance->GetGenMeshHeight(), 
-							   FreyjaControl::mInstance->GetGenMeshCount(),
-							   FreyjaControl::mInstance->GetGenMeshSegements());
-	FreyjaControl::mInstance->Dirty();
+	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
+	const char *dialog = "GenerateTubeDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
+
+	if (ok)
+	{
+		int count = mgtk_get_query_dialog_int(dialog, "count");
+		int segments = mgtk_get_query_dialog_int(dialog, "segments");
+		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
+		//vec_t radius = mgtk_get_query_dialog_float(dialog, "radius")
+	
+		hel::Vec3 v;
+		freyjaGenerateCylinderMesh(v.mVec, height, count, segments);
+		FreyjaControl::mInstance->Dirty();
+	}
 }
 
 
@@ -921,26 +848,40 @@ void eGenerateTube()
 
 void eGenerateSphere()
 {
-	hel::Vec3 v;
-	freyjaGenerateSphereMesh(v.mVec, 
-							 FreyjaControl::mInstance->GetGenMeshHeight(), 
-							 FreyjaControl::mInstance->GetGenMeshCount(),
-							 FreyjaControl::mInstance->GetGenMeshCount());
-	FreyjaControl::mInstance->Dirty();
+	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
+	const char *dialog = "GenerateSphereDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
+
+	if (ok)
+	{
+		int count = mgtk_get_query_dialog_int(dialog, "count");
+		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
+
+		hel::Vec3 v;
+		freyjaGenerateSphereMesh(v.mVec, radius * 2.0f, count, count);
+		//FreyjaControl::mInstance->SetSelectedMesh(mesh);
+		FreyjaControl::mInstance->Dirty();
+	}
 }
 
 
 void eGenerateCube()
 {
-	float size = mgtk_create_query_dialog_float("gtk-dialog-question",
-												"Size?",
-												FreyjaControl::mInstance->GetGenMeshHeight(), 
-												0.5, 64, 
-												1, 3);
-	hel::Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
-	index_t mesh = freyjaMeshCreateCube(v.mVec, size);
-	FreyjaControl::mInstance->SetSelectedMesh(mesh);
-	FreyjaControl::mInstance->Dirty();
+	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
+	const char *dialog = "GenerateCubeDialog";
+	int ok = mgtk_execute_query_dialog(dialog);
+
+	if (ok)
+	{
+		//int rows = mgtk_get_query_dialog_int(dialog, "rows");
+		//int cols = mgtk_get_query_dialog_int(dialog, "cols");
+		float size = mgtk_get_query_dialog_float(dialog, "size");
+
+		hel::Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
+		index_t mesh = freyjaMeshCreateCube(v.mVec, size);
+		FreyjaControl::mInstance->SetSelectedMesh(mesh);
+		FreyjaControl::mInstance->Dirty();
+	}
 }
 
 
@@ -959,7 +900,8 @@ void eGeneratePlane()
 
 		size *= 4;
 		hel::Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
-		freyjaMeshCreateSheet(v.mVec, size, rows, cols);
+		index_t mesh = freyjaMeshCreateSheet(v.mVec, size, rows, cols);
+		FreyjaControl::mInstance->SetSelectedMesh(mesh);
 		FreyjaControl::mInstance->Dirty();		
 	}
 }
@@ -976,7 +918,8 @@ void eGenerateCircle()
 		vec_t r = mgtk_get_query_dialog_float(dialog, "radius");
 		hel::Vec3 v(0.0f, 0.2f, 0.0f);
 
-		freyjaMeshCreateCircle(v.mVec, r, count);
+		index_t mesh = freyjaMeshCreateCircle(v.mVec, r, count);
+		FreyjaControl::mInstance->SetSelectedMesh(mesh);
 		FreyjaControl::mInstance->Dirty();		
 	}
 }
@@ -994,7 +937,8 @@ void eGenerateRing()
 		vec_t r = mgtk_get_query_dialog_float(dialog, "radius");
 		hel::Vec3 v(0.0f, 0.2f, 0.0f);
 
-		freyjaMeshCreateRing(v.mVec, r, count, rings+1);
+		index_t mesh = freyjaMeshCreateRing(v.mVec, r, count, rings+1);
+		FreyjaControl::mInstance->SetSelectedMesh(mesh);
 		FreyjaControl::mInstance->Dirty();		
 	}
 }
@@ -1363,7 +1307,7 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
  
 	// Class listeners
-	FreyjaControl::AttachMethodListeners();
+	FreyjaControl::mInstance->AttachMethodListeners();
 	FreyjaRender::AttachMethodListeners();
 
 	// Non-class listeners
