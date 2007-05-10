@@ -1108,21 +1108,17 @@ private:
 	void InfoObject();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Produces information dialog for selected object.
 	 *
 	 ------------------------------------------------------*/
 
-	void SelectObject(vec_t mouseX, vec_t mouseY);
-	void UnselectObject(vec_t mouseX, vec_t mouseY);
-	//void SelectObject(vec_t x, vec_t y, freyja_plane_t plane);
+	void SelectObject(vec_t mouseX, vec_t mouseY, bool set);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Pre  : Given mouse click coordinates and flag.
+	 * Post : Casts a pick ray for current object type.
+	 *        If there is a hit sets/clears flags based on <set>.
+	 *        If selected object is also set to current object.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.01: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void scaleObject(int x, int y, freyja_plane_t plane);
@@ -1163,6 +1159,20 @@ private:
 	 * Pre  : 
 	 * Post : Maps mlisp symbol <name> to method <ptr> action.
 	 *        Returns event id bound to <name>.
+	 *
+	 ------------------------------------------------------*/
+
+	index_t PickMeshes(const hel::Ray &ray);
+	index_t PickVertex(const hel::Ray &ray);
+	index_t PickLight(const hel::Ray &ray);
+	index_t PickFace(const hel::Ray &ray);
+	index_t PickBone(const hel::Ray &ray);
+	index_t PickMesh(const hel::Ray &ray);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Object picks factored out and reduced.
+	 *
+	 * TODO : Move these into their own Controls.
 	 *
 	 ------------------------------------------------------*/
 

@@ -83,7 +83,7 @@ vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
 vec_t FreyjaRender::mBonePointSize = 5.0;
 vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
-vec_t FreyjaRender::mVertexPointSize = 3.0f; // 5.0; // 3.5;
+vec_t FreyjaRender::mVertexPointSize = 3.5f; // 5.0; // 3.5;
 
 matrix_t gModelViewMatrix;
 
@@ -100,7 +100,7 @@ FreyjaRender::FreyjaRender() :
 	mHeight(480),
 	mTextureId(0),
 	mInitContext(false),
-	mScaleEnv(35.0f), // 40.0f is about too much, Use a larger number for higher res
+	mScaleEnv(35.0f), // 40.0f is about too much, Use a larger number for higher res -- 35.0f is default
 	mFar(6000.0f),
 	mNear(0.1f),
 	mFovY(40.0f),
@@ -1352,9 +1352,14 @@ void FreyjaRender::RenderModel(index_t model)
 
 		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
 		{
-			// Only for names bind pose for now.
-			freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
-			//freyjaGetBoneWorldPos3fv(i, p.mVec);
+			if (mRenderMode & fBones3)
+			{
+				freyjaGetBoneWorldPos3fv(i, p.mVec);
+			}
+			else
+			{
+				freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
+			}
 
 			// Slightly broken b/c mAngles are not computed from quaternion.
 			mPrinter.Print3d(p.mX, p.mY, p.mZ, 

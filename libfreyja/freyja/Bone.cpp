@@ -174,6 +174,35 @@ bool Bone::Serialize(SystemIO::TextFileWriter &w)
 }
 
 
+#if 0
+bool Bone::SerializeNodesXML(SystemIO::TextFileWriter &w)
+{
+	w.Print("<node version=\"1\" layer=\"skel%u\" id=\"uid%u\" name=\"%s\" flags=\"%u\">\n", 
+			mSkeleton, mUID, mName, mFlags);
+
+	w.Print("<rotate sid=\"rot\"> %f %f %f %f </rotate>\n",
+			mRotation.mX, mRotation.mY, mRotation.mZ, mRotation.mW);
+
+	w.Print("<translate sid=\"trans\"> %f %f %f </translate>\n",
+			mTranslation[0], mTranslation[1], mTranslation[2]);
+
+	// <matrix sid="mat"> ... </matrix>
+
+	// Recurse children
+	uint32 i;
+	foreach(mChildren, i)
+	{
+		Bone *child = GetBone(mChildren[i]);
+		if (child) child->SerializeXML(w);
+	}
+
+	w.Print("</node>\n");
+
+	return true;
+}
+#endif
+
+
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////

@@ -5,10 +5,15 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
+ * Now the 'switch of doom' event system has been completely replaced it's
+   time to reduce other parts of the UI.
+
  * Verify math library, enforce automated testing at build.
 	- Make sure everything is using col hel::Mat44 correctly now.
 		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
+
+ * Use new filedialogs for save as...
 
  * Replace _event2i with 1u handlers in mgtk and remove usage.
 
@@ -45,6 +50,9 @@
  * Octree for vertex/object pick culling.
 
  * Skeletal animation refactor
+	- Better 'pose' interface: transparency on cursors / bones, scaling UI.
+	- Views for bones should be a force on/off and should be controlled by modes
+	- X->Z swap event for bones, etc
 	- Animation import/export
 	- Single keyframe import/export
 	- Chain Copy/Paste, Mirror,  
