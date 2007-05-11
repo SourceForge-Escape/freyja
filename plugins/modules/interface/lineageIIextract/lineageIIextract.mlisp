@@ -19,9 +19,9 @@
 				;	"gtk-open" "Open _Pak..." "Loads LineageII Pak" 
 				;	"Open UKX..." eL2ExtractFilename "mode=open")
 
-				(filechoosertoolbar_button 
-					"gtk-open" "Open _Raw..." "Opens LineageII Raw object" 
-					"Open Raw..." eL2RawLoad "mode=open")
+				;(filechoosertoolbar_button 
+				;	"gtk-open" "Open _Raw..." "Opens LineageII Raw object" 
+				;	"Open Raw..." eL2RawLoad "mode=open")
 
 				;(filechoosertoolbar_button 
 				;	"gtk-save-as" "Save as..." "Saves OBJ File" 

@@ -6,6 +6,12 @@
 
  Kagura prealpha, 0.9.5.9
  20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Bone metadata editor saves values to bone now.
+ - Lineage II plugin now uses Plugins.. menu instead of UI panel.
+ - Dynamic filechooser menuitem.  ( you have to be uber strict with eids )
+ - Dynamic mgtk main/submenus for C/C++. ( mlisp is still prefered )
+ - Skeleton UI clears now.
+ - FIX skeleton tree widget was leaking trees data structures.
  - FIX bone pool wasn't flushing allocated joints.
  - Removed/refactored more obsolete code from FreyjaControl.
  - Bone and Vertex pick tolerance set to be 'tight' now.  

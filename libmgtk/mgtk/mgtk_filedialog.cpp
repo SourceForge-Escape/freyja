@@ -270,7 +270,7 @@ char *mgtk_filechooser_blocking(const char *title,
 }
 
 
-GtkWidget *mgtk_create_filechooser(int event, char *title)
+GtkWidget *mgtk_create_filechooser(int event, const char *title)
 {
 	GtkWidget *filechooser = NULL;
 	GtkWidget *vbox;
@@ -359,7 +359,7 @@ void mgtk_filechooser_close_event(GtkWidget *widget, gpointer user_data)
 }
 
 
-GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
+GtkWidget *mgtk_link_filechooser_from_rc(int event, const char *title, const char *option)
 {
 	GtkWidget *dialog = gFileDialogWidgetMap[event];
 
@@ -453,6 +453,16 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, char *title, char *option)
 						gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 #endif
 					}
+				}
+				else if (strcmp(symbol, "ext") == 0)
+				{
+					// Custom filter
+					GtkFileFilter *filter = gtk_file_filter_new();
+					gtk_file_filter_set_name(filter, value);
+					gtk_file_filter_add_pattern(filter, value);
+					gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+					// Select custom filter
+					gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter);
 				}
 			}
 			else

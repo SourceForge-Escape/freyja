@@ -497,7 +497,7 @@ int mgtk_remove_all_items_to_menu(int event)
 		}
 		else
 		{
-			mgtk_print("mgtk_append_item_to_menu> %i:%d failed", event, i);
+			mgtk_print("%s(%i): %d failed", __func__, event, i);
 		}
 	}
 
@@ -534,7 +534,95 @@ int mgtk_append_item_to_menu(int event, const char *label, int item_event)
 		}
 		else
 		{
-			mgtk_print("mgtk_append_item_to_menu> %i:%d failed", event, i);
+			mgtk_print("%s(%i):%d failed", __func__, event, i);
+		}
+	}
+
+	return 0;
+}
+
+
+int mgtk_append_menu_to_menu(int event, const char *label, int item_event)
+{
+	Vector<GtkWidget*> *widgets = gWidgetMap[event];
+
+	if (!widgets)
+		return 0;
+
+	for (unsigned int i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		GtkWidget *menu = (*widgets)[i];
+		
+		if (menu && GTK_IS_MENU(menu))
+		{
+			GtkWidget *item = gtk_image_menu_item_new_with_mnemonic(label);
+			GtkWidget *submenu = gtk_menu_new();
+			gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+
+			if (GTK_IS_MENU_BAR(menu))
+			{
+				gtk_menu_append(GTK_MENU_BAR(menu), item);
+			}
+			else
+			{
+				gtk_menu_append(GTK_MENU(menu), item);
+			}
+
+			gtk_widget_show(item);
+		
+			// Mongoose 2002.02.14, Add this widget to a special 
+			//   lookup table by it's event id
+			mgtk_event_subscribe_gtk_widget(item_event, submenu);
+			
+			return 1;
+		}
+		else
+		{
+			mgtk_print("%s(%i):%d failed", __func__, event, i);
+		}
+	}
+
+	return 0;
+}
+
+
+GtkWidget *mgtk_link_filechooser_from_rc(int event, const char *title, const char *option);
+void mgtk_filechooser_spawn_event(GtkWidget *widget, gpointer user_data);
+
+int mgtk_append_filechooser_item_to_menu(int event, 
+										 const char *label, int item_event,
+										 const char *icon, const char *title,
+										 const char *options)
+{
+	Vector<GtkWidget*> *widgets = gWidgetMap[event];
+
+	if (!widgets)
+		return 0;
+
+	for (unsigned int i = widgets->begin(); i < widgets->end(); ++i)
+	{
+		GtkWidget *menu = (*widgets)[i];
+		
+		if (menu && GTK_IS_MENU(menu))
+		{
+			GtkWidget *item = gtk_image_menu_item_new_with_mnemonic(label);
+			GtkWidget *gicon = mgtk_create_icon(icon, GTK_ICON_SIZE_MENU);
+
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), gicon);
+			gtk_menu_append(GTK_MENU(menu), item);
+			gtk_widget_show(item);
+
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
+							   GINT_TO_POINTER(item_event));
+
+			mgtk_link_filechooser_from_rc(item_event, title, options);
+
+			return 1;
+		}
+		else
+		{
+			mgtk_print("%s(%i):%d failed", __func__, event, i);
 		}
 	}
 
