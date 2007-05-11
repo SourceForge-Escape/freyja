@@ -1986,10 +1986,18 @@ void FreyjaControl::UpdateSkeletalUI()
 
 		mgtk_tree_t *tree = freyja_generate_skeletal_ui(skeleton, root, 0x0);
 		mgtk_event_update_tree(FreyjaControl::EvBoneIteratorId, tree);
+		mgtk_event_tree_delete(tree);
 	}
 	else
 	{
-		mgtk_event_update_tree(eNone, NULL);
+#if 0
+		char *path = mgtk_tree_new(FreyjaControl::EvBoneIteratorId, 
+								   "sii",//"%s%i%i",
+								   "Skeleton", 2, -1);
+		mgtk_tree_free_path(path);
+#else
+		mgtk_event_update_tree(FreyjaControl::EvBoneIteratorId, NULL);
+#endif
 	}
 }
 

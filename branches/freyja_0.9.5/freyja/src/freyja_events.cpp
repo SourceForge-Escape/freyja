@@ -1149,10 +1149,20 @@ void ePolygonSize(uint32 value)
 }
 
 
+mstl::String gTestTextView("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+void eTestTextViewText(char *text)
+{
+	gTestTextView = text;
+}
+
+
 void eTestTextView()
 {
+	uint32 e = ResourceEvent::GetResourceIdBySymbol("eTestTextViewText");
+
 	mgtk_create_query_dialog_text("gtk-dialog-question", 
-								  "Knock knock?", eNone, "Who's there?");
+								  "TextView editor test.", 
+								  e, gTestTextView.c_str());
 }
 
 
@@ -1166,20 +1176,30 @@ void eTestAssertMsgBox()
 }
 
 
-mstl::String gTestBoneMetadata("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-void eTestBoneMetadataText(char *text)
+void eBoneMetadataText(char *text)
 {
-	gTestBoneMetadata = text;
+	index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+	Bone *b = Bone::GetBone( bone );
+	if (text && b)
+	{
+		b->mMetaData = text;
+	}
 }
 
 
-void eTestBoneMetadata()
+void eBoneMetadata()
 {
-	uint32 e = ResourceEvent::GetResourceIdBySymbol("eTestBoneMetadataText");
-
-	mgtk_create_query_dialog_text("gtk-dialog-question", 
-								  "Bone metadata test.", 
-								  e, gTestBoneMetadata.c_str());
+	index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+	Bone *b = Bone::GetBone( bone );
+	if (b)
+	{
+		mstl::String s;
+		s.Set("Bone[%u] '%s' metadata.", 
+			  b->GetUID(), b->GetName());
+		uint32 e = ResourceEvent::GetResourceIdBySymbol("eBoneMetadataText");
+		mgtk_create_query_dialog_text("gtk-dialog-question", 
+									  s.c_str(), e, b->mMetaData.c_str());
+	}
 }
 
 
@@ -1187,10 +1207,11 @@ void FreyjaMiscEventsAttach()
 {
 	ResourceEventCallback::add("eTestAssertMsgBox", &eTestAssertMsgBox);
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
-	ResourceEventCallbackString::add("eTestBoneMetadataText", &eTestBoneMetadataText);
+	ResourceEventCallbackString::add("eTestTextViewText", &eTestTextViewText);
 
 	ResourceEventCallback::add("eBoneRefreshBindPose", &eBoneRefreshBindPose);
-	ResourceEventCallback::add("eBoneMetaData", &eTestBoneMetadata);
+	ResourceEventCallbackString::add("eBoneMetadataText", &eBoneMetadataText);
+	ResourceEventCallback::add("eBoneMetaData", &eBoneMetadata);
 	ResourceEventCallback::add("eBoneNew", &eBoneNew);
 	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
 

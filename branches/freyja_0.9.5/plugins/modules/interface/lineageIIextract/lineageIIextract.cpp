@@ -820,12 +820,44 @@ void eL2RawLoad(char *filename)
 
 	uint32 e = resourceGetEventId1s("eL2ExtractOut");
 	mgtk_textentry_value_set(e, filename);
-	guess_raw(filename);
+
+	if (!guess_raw(filename))
+	{
+		mgtk_print("! Plugin attempted to extract '%s'", filename);
+	}
+	else
+	{
+		mgtk_print("! Plugin could not extract '%s'", filename);
+	}
+}
+
+void eL2ExtractMenu()
+{
+}
+
+
+void eL2ExtractOpenRaw()
+{
+	char *path = mgtk_rc_map("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Raw...", path, 0,
+							  "UE2 SkeletalMesh (*.raw)", "*.raw");
+
+	if (path) 
+	{
+		delete [] path;
+	}
+
+	mgtk_print("! Importing: '%s'\n", filename);
+	eL2RawLoad(filename);
+	mgtk_filechooser_blocking_free(filename);
 }
 
 
 void L2ExtractEventsAttach()
 {
+	ResourceEventCallback::add("eL2ExtractMenu", &eL2ExtractMenu);
+	ResourceEventCallback::add("eL2ExtractOpenRaw", &eL2ExtractOpenRaw);
 	ResourceEventCallbackString::add("eL2RawLoad", &eL2RawLoad);
 	ResourceEventCallback::add("eL2Extract", &eL2Extract);
 	ResourceEventCallbackString::add("eL2ExtractFilename", &eL2ExtractFilename);
@@ -839,17 +871,17 @@ void L2ExtractEventsAttach()
 
 void L2ExtractGUIAttach()
 {
-	char *filename;
 	char *basename = "plugins/lineageIIextract.mlisp";
-	int id, menuId;
-
-	id = Resource::mInstance->getIntByName("eDialogL2Extract");
-	menuId = Resource::mInstance->getIntByName("ePluginMenu");
-	//mgtk_append_item_to_menu(menuId, "LineageII extractor", id);
-
-	filename = mgtk_rc_map(basename);
+	char *filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
+
+	int menu = Resource::mInstance->getIntByName("ePluginMenu");
+	int submenu = Resource::mInstance->getIntByName("eL2ExtractMenu");
+	mgtk_append_menu_to_menu(menu, "Lineage II Extract", submenu);
+
+	int item = Resource::mInstance->getIntByName("eL2ExtractOpenRaw");
+	mgtk_append_item_to_menu(submenu, "Open Raw SkeletalMesh...", item);
 
 	uint32 e = resourceGetEventId1s("eL2ExtractOut");
 	mgtk_textentry_value_set(e, " ");

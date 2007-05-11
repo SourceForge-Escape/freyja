@@ -319,7 +319,23 @@ int mgtk_remove_all_items_to_menu(int event);
  * Post : 
  ------------------------------------------------------*/
 
-int mgtk_append_item_to_menu2i(int menuEvent, const char *label, short event, short command);
+int mgtk_append_filechooser_item_to_menu(int event, 
+										 const char *label, int item_event,
+										 const char *icon, const char *title,
+										 const char *options);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+int mgtk_append_item_to_menu2i(int menuEvent, 
+							   const char *label, short event, short command);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ ------------------------------------------------------*/
+
+int mgtk_append_menu_to_menu(int event, const char *label, int item_event);
 /*------------------------------------------------------
  * Pre  : 
  * Post : 
@@ -398,12 +414,33 @@ void mgtk_application_window_unfullscreen();
  ------------------------------------------------------*/
 
 
+// mgtk_tree refactor
+
+//int mgtk_tree_new(const char *types, int wigdet_id);
+/*------------------------------------------------------
+ * Pre  : <types> string of generic types. 
+ *        eg:  "ifs" -> int, float, string
+ * Post : 
+ *
+ ------------------------------------------------------*/
+
+char *mgtk_tree_new(int widget_id, const char *types, ...);
+
+void mgtk_tree_free_path(char *path);
+
+
+char *mgtk_tree_append(int widget_id, const char *path, const char *types, ...);
 
 //////////////////////////////////////////////////////////////////
 // mgtk_tree
 // Use the functional API to avoid near future breakage...
 // of your knees
 //////////////////////////////////////////////////////////////////
+
+
+
+
+
 
 #define mgtk_tree_label_size 64
 

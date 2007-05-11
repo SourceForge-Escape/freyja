@@ -359,6 +359,8 @@ void ePerlinNoiseNop()
 
 void PerlinNoiseEventsAttach()
 {
+	ResourceEventCallback::add("ePerlinNoisePluginsMenu", &ePerlinNoiseNop);
+
 	ResourceEventCallback::add("ePerlinNoiseMenu", &ePerlinNoiseNop);
 
 	ResourceEventCallback::add("ePerlinNoiseGen", &ePerlinNoiseGen);
@@ -366,6 +368,9 @@ void PerlinNoiseEventsAttach()
 	ResourceEventCallback::add("ePerlinNoiseCheckerboard", &eGenerateTextureCheckerboard);
 	ResourceEventCallback::add("ePerlinNoiseColorcube", &eGenerateTextureColorcube);
 	ResourceEventCallback::add("eGenerateTextureGradiant", &eGenerateTextureGradiant);
+
+	
+
 
 	// FIXME: Add limits and a GUI generator wrapper for this
 	//        the GUI generator wrapper will have to wait until 
@@ -398,13 +403,23 @@ void PerlinNoiseGUIAttach()
 	int menuId = Resource::mInstance->getIntByName("ePerlinNoiseMenu");
 	int mainMenuId = Resource::mInstance->getIntByName("ePluginMenu");
 
+	int pluginMenuId = Resource::mInstance->getIntByName("ePerlinNoisePluginsMenu");
+	mgtk_append_menu_to_menu(mainMenuId, "Texture Generator", pluginMenuId);
+
 	int id = Resource::mInstance->getIntByName("ePerlinNoiseCheckerboard");
 	mgtk_append_item_to_menu(menuId, "Checkerboard Texture", id);
+	mgtk_append_item_to_menu(pluginMenuId, "Checkerboard", id);
+
 	id = Resource::mInstance->getIntByName("ePerlinNoiseColorcube");
 	mgtk_append_item_to_menu(menuId, "Colorcube Texture", id);
-	mgtk_append_item_to_menu(mainMenuId, "Colorcube Texture", id);
+	mgtk_append_item_to_menu(pluginMenuId, "Colorcube", id);
+
 	id = Resource::mInstance->getIntByName("eGenerateTextureGradiant");
 	mgtk_append_item_to_menu(menuId, "Gradiant Texture", id);
+	mgtk_append_item_to_menu(pluginMenuId, "Gradiant", id);
+
+	id = Resource::mInstance->getIntByName("ePerlinNoiseGen");
+	mgtk_append_item_to_menu(pluginMenuId, "Perlin Noise", id);
 
 	int add = Resource::mInstance->getIntByName("eColorPerlinAdd");
 	mgtk_event_set_color(add, 0.51f, 0.51f, 0.29f, 1.0f);
