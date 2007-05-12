@@ -87,8 +87,9 @@ $(BUILDDIR)/RigidBody.o: freyja/RigidBody.cpp freyja/RigidBody.h
 $(BUILDDIR)/FreyjaImage.o: freyja/FreyjaImage.cpp freyja/FreyjaImage.h
 	 $(DO_CC)
 
-$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/Bone.h freyja/BoneTrack.h \
-  freyja/KeyFrame.h freyja/freyja.h freyja/MemTrack.h freyja/Track.h
+$(BUILDDIR)/Bone.o: freyja/Bone.cpp freyja/SkeletonABI.h freyja/freyja.h \
+  freyja/MemTrack.h freyja/Bone.h freyja/BoneTrack.h freyja/KeyFrame.h \
+  freyja/Track.h
 	 $(DO_CC)
 
 $(BUILDDIR)/Skeleton.o: freyja/Skeleton.cpp freyja/SkeletonABI.h freyja/freyja.h \

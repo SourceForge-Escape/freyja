@@ -164,7 +164,7 @@ void pak_reader_try_upload(char *filename)
 		}
 	}
 
-	uint32 event = Resource::mInstance->getIntByName("eModelUpload");
+	uint32 event = Resource::mInstance->getIntByName("EvOpenModel");
 
 	if (ResourceEvent::listen(event - 10000, filename))
 	{
@@ -207,17 +207,26 @@ void ePakReaderSelect(unsigned int value)
 		SystemIO::FileWriter w;
 		char tmpfilename[256];
 
-
 		if (r.Open(pak->getPakFile()))
 		{
 			file = dir->getPakFile(value - dir->getDirCount());
-			buffer = file->getCopyOfData(r);
 
+			if (file)
+			{
+				buffer = file->getCopyOfData(r);
+			}
+			else
+			{
+				buffer = NULL;
+				mgtk_print("%s(): ERROR virtual file invalid.", __func__);
+			}
+			
 			// FIXME simple minded test importer
 			if (buffer != 0x0)
 			{
 #ifdef WIN32
-				snprintf(tmpfilename, 255, "C:\temp/%s", file->getName());
+				mkdir("utpak");
+				snprintf(tmpfilename, 255, "utpak/%s", file->getName());
 #else
 				snprintf(tmpfilename, 255, "/tmp/%s", file->getName());
 #endif
@@ -287,7 +296,25 @@ void ePakReaderTreeSelect(unsigned int value)
 
 void ePakReaderTextEvent(char *text)
 {
-	MSTL_MSG("Not implemented.");
+	FREYJA_INFOMSG(0, "Not implemented.\nNot handled '%s'.", text);
+}
+
+
+void ePakReaderOpenPak()
+{
+	char *path = mgtk_rc_map("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Pak...", path, 0,
+							  "All Files (*.*)", "*.*");
+
+	if (path) 
+	{
+		delete [] path;
+	}
+
+	ePakReaderTextEvent(filename);
+
+	mgtk_filechooser_blocking_free(filename);
 }
 
 
@@ -295,6 +322,7 @@ void PakReaderEventsAttach()
 {
 	ResourceEventCallbackString::add("eSetCurrentPakDirname", &ePakReaderTextEvent);
 	ResourceEventCallbackString::add("eSetCurrentPakFilename", &ePakReaderTextEvent);
+	ResourceEventCallback::add("ePakReaderPluginMenu", &ePakReaderMenu);
 
 	ResourceEventCallbackUInt::add("ePakReaderFiles",&ePakReaderTreeSelect);
 	gPakReaderFiles = ResourceEvent::GetResourceIdBySymbol("ePakReaderFiles");
@@ -308,14 +336,20 @@ void PakReaderEventsAttach()
 	ResourceEventCallback::add("ePakReaderMenu", &ePakReaderMenu);
 	ResourceEventCallback::add("eDialogPakReader", &eDialogPakReader);
 	ResourceEventCallback::add("ePakReaderMenuUpdate", &ePakReaderMenuUpdate);
+	ResourceEventCallback::add("ePakReaderOpenPak", &ePakReaderOpenPak);
 }
 
 
 void PakReaderGUIAttach()
 {
 	//int id = Resource::mInstance->getIntByName("eDialogPakReader");
-	//int menuId = Resource::mInstance->getIntByName("ePluginMenu");
-	//mgtk_append_item_to_menu(menuId, "PakReader", id);
+
+	int menu = Resource::mInstance->getIntByName("ePluginMenu");
+	int submenu = Resource::mInstance->getIntByName("ePakReaderPluginMenu");
+	mgtk_append_menu_to_menu(menu, "PakReader", submenu);
+
+	int item = Resource::mInstance->getIntByName("ePakReaderOpenPak");
+	mgtk_append_item_to_menu(submenu, "Open Pak...", item);
 
 	char *filename = mgtk_rc_map("plugins/pakreader.mlisp");
 	Resource::mInstance->Load(filename);

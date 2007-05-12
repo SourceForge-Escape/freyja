@@ -196,21 +196,20 @@ void UTPackageProperty::clear()
 // Constructors
 ////////////////////////////////////////////////////////////
 
-UTPackage::UTPackage()
+UTPackage::UTPackage() : 
+	mDecyrptFilename(NULL),
+	mFlags(0x0), 
+	mKeyXOR(0x0), 
+	mOffset(0), 
+	mStream(NULL),
+	mRootDir(NULL)
 {
-	mFlags = 0;
-	mKeyXOR = 0;  /* Don't decrypt by default */
-	mOffset = 0;
-	mRootDir = NULL;
-	mStream = NULL;
-	mDecyrptFilename = NULL;
 }
 
 
 UTPackage::~UTPackage()
 {
-	if (mRootDir)
-		delete [] mRootDir; 
+	if (mRootDir) delete [] mRootDir;
 }
 
 
@@ -624,363 +623,11 @@ int UTPackage::loadSkeletalMesh(FILE *f)
 }
 
 
-bool UTPackage::LoadPakVFS(const char *filename)
+int UTPackage::Load(const char *filename)
 {
 	unsigned int i, index, type;
 	char stringHeader[16];
 	char stringVersion[16];
-
-
-	mStream = fopen(filename, "rb");
-
-	if (!mStream)
-	{
-		perror(filename);
-		return false;
-	}
-
-	fread(&mHeader.signature, 4, 1, mStream);
-
-	/* UT package signature 0x9E2a83c1 */
-	switch (mHeader.signature)
-	{
-	case 0x9E2a83c1:
-		printf("Standard Unreal package format?\n");
-		break;
-
-	case 0x0069004c:
-		/*  16 bytes Header   ( 16bit char string )
-		 *  12 bytes Version  ( 16bit char string )
-		 * [ 2 bytes Minor? ] ( Always Ver111 0x53 0x52  "SR"? )
-		 * [ 2 bytes longer?] ( Always Ver121 0x50E44D0F ".M.P"? )
-		 *
-		 *  The rest seems to be XOR encrypted data by 0xAC in Ver111	
-		 */
-
-		fread(stringHeader, 12, 1, mStream);
-		fread(stringVersion, 12, 1, mStream);
-	
-		/* Mongoose: 2 Byte wide chars used in string header, 
-			assuming english, so strip every other byte */
-		stringHeader[5] = stringHeader[6];
-		stringHeader[4] = stringHeader[4];
-		stringHeader[3] = stringHeader[2];
-		stringHeader[2] = stringHeader[0];
-		stringHeader[6] = stringHeader[8];
-		stringHeader[7] = stringHeader[10];
-		stringHeader[1] = ((char *)(&mHeader.signature))[2];
-		stringHeader[0] = ((char *)(&mHeader.signature))[0];
-		stringHeader[8] = 0;
-
-		for (i = 1; i < 6; ++i)
-		{
-			stringVersion[i] = stringVersion[i*2];
-		}
-
-		stringVersion[6] = 0;
-
-		printf("Lineage II encrypted package '%s' '%s'\n", 
-				stringHeader, stringVersion);
-
-		if (strcmp(stringVersion, "Ver121") == 0)
-		{
-			/* Multiple valid keys, so let's look for common 0 byte */
-			// mKeyXOR = 0xCE;
-			// mKeyXOR = 0x73;
-			unsigned int whence = ftell(mStream);
-			fseek(mStream, 0x23, SEEK_SET);
-			fread(&mKeyXOR, 1, 1, mStream);
-			fseek(mStream, whence, SEEK_SET);
-		}
-		else
-		{
-			mKeyXOR = 0xAC;
-		}
-
-		mOffset = 28;
-
-		dRead(&mHeader.signature, 4, 1, mStream);
-		break;
-
-	default:
-		printf("Not a known UT package 0x%x\n", mHeader.signature);
-		return false;
-	}
-
-
-	/* From here on transparent decryption is done with dRead() */
-
-	dRead(&mHeader.version, 2, 1, mStream);
-	dRead(&mHeader.version2, 2, 1, mStream);
-	dRead(&mHeader.flags, 4, 1, mStream);
-	dRead(&mHeader.nameCount, 4, 1, mStream);
-	dRead(&mHeader.nameOffset, 4, 1, mStream);
-	dRead(&mHeader.exportCount, 4, 1, mStream);
-	dRead(&mHeader.exportOffset, 4, 1, mStream);
-	dRead(&mHeader.importCount, 4, 1, mStream);
-	dRead(&mHeader.importOffset, 4, 1, mStream);
-
-	mHeader.nameOffset += mOffset;
-	mHeader.exportOffset += mOffset;
-	mHeader.importOffset += mOffset;
-
-	printf("header {\n");
-	printf("\tsignature = 0x%x\n", mHeader.signature);
-	printf("\tversion = %u, version2 (mode) = %u\n", 
-			 mHeader.version, mHeader.version2);
-	printf("\tflags = 0x%x\n", mHeader.flags);
-	printf("\tnameCount = %u, nameOffset = 0x%x\n", 
-			 mHeader.nameCount, mHeader.nameOffset);
-	printf("\texportCount = %u, exportOffset = 0x%x\n", 
-			 mHeader.exportCount, mHeader.exportOffset);
-	printf("\timportCount = %u, importOffset = 0x%x\n", 
-			 mHeader.importCount, mHeader.importOffset);
-
-	if (mHeader.version < 68)
-	{
-		mHeader.generationCount = 0;
-		mHeader.generations = 0x0;
-
-		dRead(&mHeader.heritageCount, 4, 1, mStream);
-		dRead(&mHeader.heritageOffset, 4, 1, mStream);
-
-		printf("\theritageCount = %u, heritageOffset = 0x%x\n", 
-				 mHeader.heritageCount, mHeader.heritageOffset);
-	}
-	else
-	{
-		mHeader.heritageCount = 0;
-		mHeader.heritageOffset = 0;
-
-		dRead(mHeader.guid, 16, 1, mStream);
-		dRead(&mHeader.generationCount, 4, 1, mStream);
-
-		printf("\tguid = 0x%x%x%x%x\n",
-				 mHeader.guid[0], mHeader.guid[1], mHeader.guid[2], mHeader.guid[3]);
-
-		printf("\tgenerationCount = %u\n", 
-				 mHeader.generationCount);
-
-		printf("\n\tGeneration table\n");
-
-		mHeader.generations = new utx_generation_t[mHeader.generationCount];
-		
-		for (i = 0; i < mHeader.generationCount; ++i)
-		{	
-			dRead(&mHeader.generations[i].exportCount, 4, 1, mStream);
-			dRead(&mHeader.generations[i].nameCount, 4, 1, mStream);
-			
-			printf("\tgeneration[%u] { exportCount = %u, nameCount = %u }\n", i,
-					 mHeader.generations[i].exportCount, 
-					 mHeader.generations[i].nameCount);
-		}
-	}
-
-	/* 2003.06.14, Mongoose - These tables are not sequentally read,
-		you have to skip around a lot */
-
-	printf("\n\tName table\n");
-
-	/* Read Name table */
-	if ((int)mHeader.nameOffset != ftell(mStream))
-	{
-		fseek(mStream, mHeader.nameOffset, SEEK_SET);
-	}
-
-	mHeader.nameTable = new utx_name_table_t[mHeader.nameCount];
-
-	for (i = 0; i < mHeader.nameCount; ++i)
-	{
-		mHeader.nameTable[i].objName = getName(mHeader.version, mStream);
-		dRead(&mHeader.nameTable[i].objFlags, 4, 1, mStream);
-
-		printf("\tnameTable[%u] { objName = '%s', objFlags = 0x%x }\n", i,
-				 mHeader.nameTable[i].objName, mHeader.nameTable[i].objFlags);
-	}
-
-	printf("\n\tExport table\n");
-
-	/* Read export table */
-	if ((int)mHeader.exportOffset != ftell(mStream))
-	{
-		fseek(mStream, mHeader.exportOffset, SEEK_SET);
-	}
-
-	mHeader.exportTable = new utx_export_table_t[mHeader.exportCount];
-
-	for (i = 0; i < mHeader.exportCount; ++i)
-	{
-		mHeader.exportTable[i].objClass = getIndex(mStream);
-		mHeader.exportTable[i].objSuper = getIndex(mStream);
-		dRead(&mHeader.exportTable[i].package, 4, 1, mStream);
-		mHeader.exportTable[i].objName = getIndex(mStream);
-		dRead(&mHeader.exportTable[i].objFlags, 4, 1, mStream);
-		mHeader.exportTable[i].serialSize = getIndex(mStream);
-		mHeader.exportTable[i].serialOffset = getIndex(mStream) + mOffset;
-
-		printf("\texportTable[%u] { class %i, super %i, package %u, name %i\n",i,
-				 mHeader.exportTable[i].objClass, mHeader.exportTable[i].objSuper,
-				 mHeader.exportTable[i].package, mHeader.exportTable[i].objName);
-		printf("\t   flags %u, serialSz %i bytes, serialOff %i (0x%x) }\n",
-				 mHeader.exportTable[i].objFlags,
-				 mHeader.exportTable[i].serialSize, 
-				 mHeader.exportTable[i].serialOffset, 
-				 mHeader.exportTable[i].serialOffset);
-	}
-
-	printf("\n\tImport table\n");
-
-	/* Read import table */
-	if ((int)mHeader.importOffset != ftell(mStream))
-	{
-		fseek(mStream, mHeader.importOffset, SEEK_SET);
-	}
-
-	mHeader.importTable = new utx_import_table_t[mHeader.importCount];
-
-	for (i = 0; i < mHeader.importCount; ++i)
-	{
-		mHeader.importTable[i].objClass = getIndex(mStream);
-		mHeader.importTable[i].objSuper = getIndex(mStream);
-		dRead(&mHeader.importTable[i].package, 4, 1, mStream);
-		mHeader.importTable[i].objName = getIndex(mStream);
-
-		printf("\timportTable[%u] { class %i, super %i, package %u, name %i}\n",
-				 i,
-				 mHeader.importTable[i].objClass, mHeader.importTable[i].objSuper,
-				 mHeader.importTable[i].package, mHeader.importTable[i].objName);
-	}
-
-	/* Read Heritage table */
-	if (mHeader.heritageCount > 0)
-	{
-		printf("\n\tHeritage table\n");
-
-		if ((int)mHeader.heritageOffset != ftell(mStream))
-		{
-			fseek(mStream, mHeader.exportOffset, SEEK_SET);
-		}
-
-		mHeader.heritageTable = new unsigned int[mHeader.heritageCount * 4];
-
-		for (i = 0; i < mHeader.heritageCount; ++i)
-		{
-			dRead(mHeader.heritageTable+(i*16), 16, 1, mStream);
-
-			printf("\theritageTable[%u] = 0x%x%x%x%x\n", i,
-					 mHeader.heritageTable[i*16], mHeader.heritageTable[i*16+1],
-					 mHeader.heritageTable[i*16+2], mHeader.heritageTable[i*16+3]);
-		}
-	}
-
-	printf("}\n");
-
-	/* End reading Header and tables */
-
-
-	/* Testing the export table here to find objects in the file */
-	for (i = 0; i < mHeader.exportCount; ++i)
-	{
-		unsigned int sz, off;
-		int nameIndex;
-
-
-		printf("- %i --------------------------------------\n", i);
-
-		index = useIndex(mHeader.exportTable[i].objClass, &type);
-		nameIndex = ((type == UTPackage::UT_NULL) ? -1 :
-						 (type == UTPackage::UT_IMPORT) ? 
-						 mHeader.importTable[index].objName :
-						 mHeader.exportTable[index].objName);
-
-		printf("* Export Class '%s'\n", 
-				 ((nameIndex < 0) ? "Null" :
-				  mHeader.nameTable[nameIndex].objName));
-
-		index = mHeader.exportTable[i].objName;
-
-		printf("         Name '%s'\n", 
-				 ((type == UTPackage::UT_NULL) ? "Null" :
-				  mHeader.nameTable[index].objName));
-
-		sz = mHeader.exportTable[i].serialSize;
-		printf("         Size %i bytes\n", sz);
-
-		off = mHeader.exportTable[i].serialOffset;
-		printf("         Offset 0x%x (%u bytes)\n", off, off);
-
-
-		/* Seek back to the object */
-		fseek(mStream, off, SEEK_SET);
-
-		/* HexDump to stdout, seek back */
-		if (mFlags & fHexDump)
-		{
-			hex_dump_file(mStream, sz);
-			fseek(mStream, off, SEEK_SET);
-		}
-
-		/* Add paths based on object class names */
-		mVFS.AddDir( mHeader.nameTable[nameIndex].objName );
-
-		//char buf[512];
-		//snprintf(buf, 511, "%s/%s", 
-		//			mHeader.nameTable[nameIndex].objName,
-		//			mHeader.nameTable[index].objName);
-		
-		mVFS.AddFile(mHeader.nameTable[nameIndex].objName, 
-						 mHeader.nameTable[index].objName,
-						 mHeader.signature, off, sz, mKeyXOR );
-
-		fseek(mStream, off, SEEK_SET);
-	}
-
-	fclose(mStream);
-
-	return true;
-}
-
-
-UTPackage::UTVFSDir *UTPackage::GetVFSRoot( )
-{
-	return mVFS.root;
-}
-
-
-unsigned char *UTPackage::GetVFSObject( const char *dir, const char *file )
-{
-	unsigned char *buffer;
-	UTVFSObj *obj = mVFS.Find( dir, file );
-
-	if ( obj == NULL )
-		return NULL;
-
-	FILE *f = fopen( mVFS.pakfile, "rb" );
-
-
-	if ( !f )
-	{
-		perror( mVFS.pakfile );
-		return NULL;
-	}
-
-	buffer = buffer_from_utpak(f, obj->signature, obj->offset, obj->size, obj->key);
-	
-	if (buffer && obj->key)
-	{
-		decryptBufferXOR(buffer, obj->size, obj->key);
-	}
-
-	return buffer;
-}
-
-
-int UTPackage::load(const char *filename)
-{
-	unsigned int i, index, type;
-	char stringHeader[16];
-	char stringVersion[16];
-
 
 	mStream = fopen(filename, "rb");
 
@@ -998,6 +645,7 @@ int UTPackage::load(const char *filename)
 	case 0x9E2a83c1:
 		printf("Standard Unreal package format?\n");
 		break;
+
 	case 0x0069004c:
 		/*  16 bytes Header   ( 16bit char string )
 		 *  12 bytes Version  ( 16bit char string )
@@ -1376,6 +1024,38 @@ int UTPackage::load(const char *filename)
 			fseek(mStream, off, SEEK_SET);
 		}
 
+
+		/* RAW dump to disk, seek back */
+		if (mFlags & fVFS)
+		{
+			const char *dir = "/utpak";
+			VirtualFile vfile;
+
+			vfile.mFilename.Set("%s/%s/%s.raw", dir,
+						mHeader.nameTable[nameIndex].objName,
+						mHeader.nameTable[index].objName);
+			vfile.mOffset = off;
+			vfile.mSize = sz;
+
+			mVirtualFiles.push_back(vfile);
+
+#if 0
+			unsigned char *buffer = buffer_from_utpak(mStream, mHeader.signature, off, sz, mKeyXOR);
+
+				if (buffer)
+				{
+					if (mKeyXOR)
+						decryptBufferXOR(buffer, sz, mKeyXOR);
+
+					vfs_fwrite(buffer, sz, 1, vfs_file);
+					delete [] buffer;
+				}
+#endif
+
+			fseek(mStream, off, SEEK_SET);
+		}
+
+
 #ifdef NON_RAW_EXPORT_ALLOWED
 		/* Exported dump to usable external formats */
 		if (mFlags & fDiskDump && nameIndex > 0 &&
@@ -1391,17 +1071,13 @@ int UTPackage::load(const char *filename)
 			loadSkeletalMesh(mStream);
 		}
 #endif
+
 	}
+
 
 	fclose(mStream);
 
 	return 0;
-}
-
-
-void UTPackage::setFlags(unsigned int flags)
-{
-	mFlags |= flags;
 }
 
 
@@ -2045,6 +1721,200 @@ int main(int argc, char *argv[])
 #endif
 
 
+///////////////////////////////////////////////////////////////
+// Freyja plugin
+///////////////////////////////////////////////////////////////
+
+#ifdef FREYJA_PLUGINS
+#include <mstl/Map.h>
+#include <mstl/Vector.h>
+#include <hel/Mat44.h>
+#include <hel/Vec3.h>
+#include <hel/Quat.h>
+#include <freyja/PakABI.h>
+#include <freyja/ModelABI.h>
+#include <freyja/PluginABI.h>
+#include <freyja/BoneABI.h>
+#include <freyja/SkeletonABI.h>
+#include <freyja/TextureABI.h>
+#include <freyja/LegacyABI.h>
+#include <freyja/MeshABI.h>
+#include <freyja/freyja.h>
+
+using namespace mstl;
+
+extern "C" {
+
+	int freyja_model__utpackage_check(char *filename);
+	int freyja_model__utpackage_import(char *filename);
+	int freyja_model__utpackage_export(char *filename);
+	unsigned char *freyja_model__utpackage_vfs_file_buffer(char *filename, char *virtual_filename, unsigned int offset, unsigned int size);
+	int import_model(char *filename);
+	void freyja_init();
+}
+
+
+void freyja_init()
+{
+	freyjaPluginName1s("utpackage");
+	freyjaPluginDescription1s("UE2 Animation (*.ukx)");
+	freyjaPluginAddExtention1s("*.ukx");
+	freyjaPluginImport1i(FREYJA_PLUGIN_PAK_VFS);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
+}
+
+
+int import_model(char *filename)
+{
+	return freyja_model__utpackage_import( filename );
+}
+
+
+unsigned char *freyja_model__utpackage_extract(const char *filename, unsigned int offset, unsigned int size, unsigned char key)
+{
+	unsigned char *buffer = NULL;
+	FILE *f = fopen(filename, "rb");
+
+	if (f)
+	{
+		fseek(f, offset, SEEK_SET);
+		buffer = new unsigned char[size];
+		fread(buffer, 1, size, f);
+
+		if (key != 0x0)
+		{
+			for (unsigned int i = 0; i < size; ++i)
+			{
+				buffer[i] ^= key;
+			}
+		}
+
+		fclose(f);
+	}
+
+	return buffer;
+}
+
+int freyja_model__utpackage_check(char *filename)
+{
+	FILE *f = fopen(filename, "rb");											   
+	unsigned int u;
+	char stringHeader[16];
+	char stringVersion[16];
+
+
+	if (!f)
+	{
+		perror(filename);
+		return -1;
+	}
+
+	fread(&u, 4, 1, f);
+
+	/* UT package signature 0x9E2a83c1 */
+	switch (u)
+	{
+	case 0x9E2a83c1:
+		freyjaPrintError("Standard Unreal package format?\n");
+		return -1;
+		break;
+
+	case 0x0069004c:
+		/*  16 bytes Header   ( 16bit char string )
+		 *  12 bytes Version  ( 16bit char string )
+		 * [ 2 bytes Minor? ] ( Always Ver111 0x53 0x52  "SR"? )
+		 * [ 2 bytes longer?] ( Always Ver121 0x50E44D0F ".M.P"? )
+		 *
+		 *  The rest seems to be XOR encrypted data by 0xAC in Ver111	
+		 */
+
+		fread(stringHeader, 12, 1, f);
+		fread(stringVersion, 12, 1, f);
+	
+		/* Mongoose: 2 Byte wide chars used in string header, 
+			assuming english, so strip every other byte */
+		stringHeader[5] = stringHeader[6];
+		stringHeader[4] = stringHeader[4];
+		stringHeader[3] = stringHeader[2];
+		stringHeader[2] = stringHeader[0];
+		stringHeader[6] = stringHeader[8];
+		stringHeader[7] = stringHeader[10];
+		stringHeader[1] = ((char *)(&u))[2];
+		stringHeader[0] = ((char *)(&u))[0];
+		stringHeader[8] = 0;
+
+		for (u = 1; u < 6; ++u)
+		{
+			stringVersion[u] = stringVersion[u*2];
+		}
+
+		stringVersion[6] = 0;
+
+		freyjaPrintMessage("Lineage II encrypted package '%s' '%s'\n", 
+								 stringHeader, stringVersion);
+
+		if (strcmp(stringVersion, "Ver121") == 0)
+		{
+			return 0;
+		}
+		else
+		{
+			return 0; // Guess it's ok for now, since it's a L2 pak  =)
+		}
+		break;
+
+	default:
+		freyjaPrintError("Not a known UT package 0x%x\n", u);
+	}
+
+
+	return -1;
+}
+
+
+
+int freyja_model__utpackage_import(char *filename)
+{
+	UTPackage ut;
+
+	ut.SetFlag( UTPackage::fVFS );
+
+	if ( 0 == ut.Load( filename ) )
+	{
+		long pakIndex = freyjaPakBegin(filename);
+		unsigned int i;
+
+		foreach ( ut.GetVirtualFiles(), i )
+		{
+			UTPackage::VirtualFile &vf = ut.GetVirtualFiles()[i];
+			//freyjaPakAddFullPathFile(pakIndex, vf.mFilename.c_str(), vf.mOffset, vf.mSize);
+			freyjaPakAddFullPathFileXOR(pakIndex, ut.GetXORKey(), vf.mFilename.c_str(), vf.mOffset, vf.mSize);
+		}
+
+		freyjaPakEnd(pakIndex);
+
+		return 0;
+	}
+
+	return -1;
+}
+
+
+int freyja_model__utpackage_export(char *filename)
+{
+	freyjaPrintError("freyja_model__utpackage_export> Not implemented, %s:%i\n", 
+					 __FILE__, __LINE__);
+
+	return -1;
+}
+#endif
+
+
+
+
+
+
+
 #ifdef OBSOLETE
 int get_utx_property(utx_header_t *header, FILE *f,
 							unsigned int *rsize, unsigned int *rtype,
@@ -2190,176 +2060,5 @@ int get_utx_property(utx_header_t *header, FILE *f,
 	printf(" }\n");
 
 	return 0;
-}
-#endif
-
-
-
-
-#ifdef FREYJA_PLUGINS
-#include <mstl/Map.h>
-#include <mstl/Vector.h>
-#include <hel/Mat44.h>
-#include <hel/Vec3.h>
-#include <hel/Quat.h>
-#include <freyja/PakABI.h>
-#include <freyja/ModelABI.h>
-#include <freyja/PluginABI.h>
-#include <freyja/BoneABI.h>
-#include <freyja/SkeletonABI.h>
-#include <freyja/TextureABI.h>
-#include <freyja/LegacyABI.h>
-#include <freyja/MeshABI.h>
-#include <freyja/freyja.h>
-
-using namespace mstl;
-
-extern "C" {
-
-	int freyja_model__utpackage_check(char *filename);
-	int freyja_model__utpackage_import(char *filename);
-	int freyja_model__utpackage_export(char *filename);
-	int import_model(char *filename);
-	void freyja_init();
-}
-
-
-void freyja_init()
-{
-	freyjaPluginDescription1s("UE2 Animation (*.ukx)");
-	freyjaPluginAddExtention1s("*.ukx");
-	//freyjaPluginAddExtention1s("*.utx");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
-	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
-}
-
-
-int import_model(char *filename)
-{
-	return freyja_model__utpackage_import( filename );
-}
-
-
-int freyja_model__utpackage_check(char *filename)
-{
-	FILE *f = fopen(filename, "rb");											   
-	unsigned int u;
-	char stringHeader[16];
-	char stringVersion[16];
-
-
-	if (!f)
-	{
-		perror(filename);
-		return -1;
-	}
-
-	fread(&u, 4, 1, f);
-
-	/* UT package signature 0x9E2a83c1 */
-	switch (u)
-	{
-	case 0x9E2a83c1:
-		freyjaPrintError("Standard Unreal package format?\n");
-		return -1;
-		break;
-
-	case 0x0069004c:
-		/*  16 bytes Header   ( 16bit char string )
-		 *  12 bytes Version  ( 16bit char string )
-		 * [ 2 bytes Minor? ] ( Always Ver111 0x53 0x52  "SR"? )
-		 * [ 2 bytes longer?] ( Always Ver121 0x50E44D0F ".M.P"? )
-		 *
-		 *  The rest seems to be XOR encrypted data by 0xAC in Ver111	
-		 */
-
-		fread(stringHeader, 12, 1, f);
-		fread(stringVersion, 12, 1, f);
-	
-		/* Mongoose: 2 Byte wide chars used in string header, 
-			assuming english, so strip every other byte */
-		stringHeader[5] = stringHeader[6];
-		stringHeader[4] = stringHeader[4];
-		stringHeader[3] = stringHeader[2];
-		stringHeader[2] = stringHeader[0];
-		stringHeader[6] = stringHeader[8];
-		stringHeader[7] = stringHeader[10];
-		stringHeader[1] = ((char *)(&u))[2];
-		stringHeader[0] = ((char *)(&u))[0];
-		stringHeader[8] = 0;
-
-		for (u = 1; u < 6; ++u)
-		{
-			stringVersion[u] = stringVersion[u*2];
-		}
-
-		stringVersion[6] = 0;
-
-		freyjaPrintMessage("Lineage II encrypted package '%s' '%s'\n", 
-								 stringHeader, stringVersion);
-
-		if (strcmp(stringVersion, "Ver121") == 0)
-		{
-			return 0;
-		}
-		else
-		{
-			return 0; // Guess it's ok for now, since it's a L2 pak  =)
-		}
-		break;
-
-	default:
-		freyjaPrintError("Not a known UT package 0x%x\n", u);
-	}
-
-
-	return -1;
-}
-
-
-
-int freyja_model__utpackage_import(char *filename)
-{
-	UTPackage ut;
-
-	if ( ut.LoadPakVFS( filename ) )
-	{
-		UTPackage::UTVFSDir *dir = ut.GetVFSRoot( );
-		UTPackage::UTVFSDir *cur = dir;
-		UTPackage::UTVFSObj *obj;
-		long pakIndex = freyjaPakBegin(filename);
-		char buf[256];
-
-		while ( cur )
-		{
-			obj = cur->obj;
-			
-			while ( obj )
-			{
-				freyjaPrintMessage("%s/%s", cur->name, obj->filename);
-				snprintf(buf, 255, "%s/%s", cur->name, obj->filename);
-				buf[255] = 0;
-				freyjaPakAddFullPathFile(pakIndex, buf, obj->offset, obj->size);
-				obj = obj->next;
-			}
-
-			cur = cur->next;
-		}
-
-		freyjaPakEnd(pakIndex);
-
-		return 0;
-	}
-
-	return -1;
-}
-
-
-int freyja_model__utpackage_export(char *filename)
-{
-	freyjaPrintError("freyja_model__utpackage_export> Not implemented, %s:%i\n", 
-					 __FILE__, __LINE__);
-
-	return -1;
 }
 #endif

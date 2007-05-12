@@ -106,8 +106,8 @@ void freyjaPakAddFullPathFile(index_t pakIndex,
 }
 
 
-void freyjaPakDecryptBufferXOR1c(unsigned char *buffer, 
-								 unsigned int size, unsigned char key)
+void freyjaPakDecryptBufferXOR(unsigned char *buffer, 
+							   unsigned int size, unsigned char key)
 {
 	unsigned int i;
 
@@ -119,7 +119,7 @@ void freyjaPakDecryptBufferXOR1c(unsigned char *buffer,
 }
 
 
-void freyjaPakAddFullPathFileXOR1c(index_t pakIndex, unsigned char key,
+void freyjaPakAddFullPathFileXOR(index_t pakIndex, unsigned char key,
 								   const char *vfsFilename, 
 								   int32 offset, int32 size)
 {

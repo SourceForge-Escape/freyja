@@ -1205,10 +1205,16 @@ void eBoneMetadata()
 
 void FreyjaMiscEventsAttach()
 {
+	// Empty menu events
+	ResourceEventCallback2::add("eImportFile", &eNoImplementation);
+	ResourceEventCallback2::add("eExportFile", &eNoImplementation);
+
+	// Test events
 	ResourceEventCallback::add("eTestAssertMsgBox", &eTestAssertMsgBox);
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
 	ResourceEventCallbackString::add("eTestTextViewText", &eTestTextViewText);
 
+	// Misc events
 	ResourceEventCallback::add("eBoneRefreshBindPose", &eBoneRefreshBindPose);
 	ResourceEventCallbackString::add("eBoneMetadataText", &eBoneMetadataText);
 	ResourceEventCallback::add("eBoneMetaData", &eBoneMetadata);
@@ -1328,6 +1334,7 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
  
 	// Class listeners
+	FREYJA_ASSERTMSG(FreyjaControl::mInstance != NULL, "FreyjaControl wasn't instanced before method listeners were attached.");
 	FreyjaControl::mInstance->AttachMethodListeners();
 	FreyjaRender::AttachMethodListeners();
 

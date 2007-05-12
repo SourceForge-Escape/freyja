@@ -6,6 +6,14 @@
 
  Kagura prealpha, 0.9.5.9
  20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Enabled XOR decryption behind vfs facade for UTPackage vfs use.
+ - UTPackage plugin fixes for VFS use.  Now works with VFS and L2E ui plugins.
+ - If there are no options for import plugin don't show the querydialog.
+ - FIX crash in VFS support getting garbage virtual files from plugins.
+ - Pak VFS support enabled with expilict plugin flags via import only. 
+ - ASSERT for OpenGL context creation failure.
+ - FIX generated file dialog crash on certain cancel operations.
+ - Pak VFS support disabled in FreyjaControl.
  - Bone metadata editor saves values to bone now.
  - Lineage II plugin now uses Plugins.. menu instead of UI panel.
  - Dynamic filechooser menuitem.  ( you have to be uber strict with eids )

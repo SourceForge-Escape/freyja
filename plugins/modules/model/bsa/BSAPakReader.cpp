@@ -509,7 +509,7 @@ void freyja_init()
 	freyjaPluginName1s("bsa");
 	freyjaPluginDescription1s("Morrowind Pak (*.BSA)");
 	freyjaPluginAddExtention1s("*.bsa");
-	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
+	freyjaPluginImport1i(FREYJA_PLUGIN_PAK_VFS);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
 }
 

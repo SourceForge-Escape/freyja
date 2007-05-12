@@ -707,8 +707,6 @@ class FreyjaControl : public Control
 
 	void NewFile();
 	void CloseFile();
-	void ExportFile();
-	void ImportFile();
 	void SaveFile();
 	void OpenFile();
 	void SaveFileModel();
