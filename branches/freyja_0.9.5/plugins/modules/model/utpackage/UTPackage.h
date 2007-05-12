@@ -23,12 +23,13 @@
  * Mongoose - Created, form old PSKModel prototype
  ================================================================*/
 
-
 #ifndef GUARD__OPENRAIDER_MONGOOSE_UTPACKAGE_H_
 #define GUARD__OPENRAIDER_MONGOOSE_UTPACKAGE_H_
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include <mstl/String.h>
+#include <mstl/Vector.h>
 
 typedef struct {
 
@@ -190,6 +191,7 @@ typedef struct {
 	unsigned int numVertTriangles;
 	unsigned int triangleListOffset;
 } UTMesh_Connect;
+
 
 class UTMesh
 {
@@ -494,146 +496,31 @@ class UTPackage
 		
 	} UT_INDEX;
 
+
 	typedef enum
 	{
 		fDiskDump     = 1,   /* Write each class in package to disk */
 		fHexDump      = 2,   /* Write a hexdump of each class to stdout */
-		fDecryptOnly  = 4    /* Just dump a decrypted file to disk */
+		fDecryptOnly  = 4,   /* Just dump a decrypted file to disk */
+		fVFS          = 8    /* Just write out 'virtual files' for VFS */ 
 	} UTPackageFlags;
 
 
-	class UTVFSObj
+	class VirtualFile
 	{
 	public:
-		char filename[64];
-		unsigned int signature;
-		unsigned int offset;
-		unsigned int size;
-		unsigned char key;
-		UTVFSObj() : next(NULL) { }
-		UTVFSObj *next;
-		void add(UTVFSObj*d) { next ? d->next = next, next = d : next = d; }
-	};
 
-	class UTVFSDir
-	{
-	public:
-		UTVFSDir() { next = NULL; name[0] = 0; }
-		char name[64];
-		UTVFSDir *next;
-		UTVFSObj *obj;
-		void add(UTVFSDir*d) { next ? d->next = next, next = d : next = d; }
-	};
-
-
-	class UTVFS
-	{
-	public:
-		UTVFS() { root = NULL; }
-
-		UTVFSObj *Find( const char *dir, const char *file )
+		VirtualFile &operator =(const VirtualFile &f)
 		{
-			UTVFSDir *d = FindDir(dir);
-			UTVFSObj *obj = FindFile(d, file);
-			
-			return obj;
+			mFilename = f.mFilename;
+			mOffset = f.mOffset;
+			mSize = f.mSize;
+			return *this;
 		}
 
-
-		UTVFSObj *FindFile( UTVFSDir *d, const char *file )
-		{
-			if ( d == NULL )
-				return NULL;
-			
-			UTVFSObj *cur = d->obj;
-
-			while (cur)
-			{
-				if ( strcmp(cur->filename, file) == 0 )
-				{
-					return cur;
-				}
-
-				cur = cur->next;
-			}
-
-			return NULL;
-		}
-
-
-		UTVFSDir *FindDir( const char *dir )
-		{
-			UTVFSDir *cur = root;
-
-			while (cur)
-			{
-				if ( strcmp(cur->name, dir) == 0 )
-				{
-					return cur;
-				}
-
-				cur = cur->next;
-			}
-
-			return NULL;
-		}
-
-
-		void AddFile( const char *dir, const char *file, 
-						  unsigned int signature, unsigned int offset, 
-						  unsigned int size, unsigned char key)
-		{
-			UTVFSDir *cur = root;
-
-			while (cur)
-			{
-				if ( strcmp(cur->name, dir) == 0 )
-				{
-					UTVFSObj *obj = new UTVFSObj();
-
-					strncpy( obj->filename, file, 63 );
-					obj->filename[63] = 0;
-					obj->signature=signature;
-					obj->offset=offset;
-					obj->size=size;
-					obj->key=key;
-					
-					if ( cur->obj == NULL )
-					{
-						cur->obj = obj;
-					}
-					else
-					{
-						cur->obj->add( obj );
-					}
-
-					break;
-				}
-
-				cur = cur->next;
-			}
-		}
-
-		void AddDir( const char *dir )
-		{
-			if (FindDir(dir))
-				return;
-
-			UTVFSDir *d = new UTVFSDir();
-			strcpy( d->name, dir );
-
-			if ( root == NULL )
-			{
-				root = d;
-			}
-			else
-			{
-				root->add(d);
-			}
-		}
-
-		char pakfile[512];
-		UTVFSDir *root;	
+		mstl::String mFilename;
+		unsigned int mOffset;
+		unsigned int mSize;
 	};
 
 
@@ -668,30 +555,33 @@ class UTPackage
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	unsigned char GetXORKey() { return mKeyXOR; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get XOR key for pak file, 0x0 if none.
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	unsigned char *GetVFSObject( const char *type, const char *file );
+	void ClearFlag(UTPackageFlags flag) { mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Clear an option flag.
+	 *
 	 ------------------------------------------------------*/
 
-	UTVFSDir *GetVFSRoot( );
+	mstl::Vector<VirtualFile> &GetVirtualFiles() { return mVirtualFiles; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Get the virtual files list for VFS use.
+	 *
 	 ------------------------------------------------------*/
 
-	bool LoadPakVFS(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Loads UT Package as a VFS
-	 ------------------------------------------------------*/
-
-	int load(const char *filename);
+	int Load(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Loads UT Package, returns 0 on success
@@ -702,15 +592,11 @@ class UTPackage
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void setFlags(unsigned int flags);
+	void SetFlag(UTPackageFlags flag) { mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Set an option flag.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.02.24:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	long dTell();
@@ -797,12 +683,26 @@ class UTPackage
 	// Private Accessors
 	////////////////////////////////////////////////////////////
 
-	/* Ignore the table type and get unsigned numeric value */
 	unsigned int getIndexValue(FILE *f);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read UTIndex and convert to uint from file.
+	 *
+	 ------------------------------------------------------*/
 
-	/* Hhhmm... should move to abstract UT file i/o class use */
 	int loadSkeletalMesh(FILE *f);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read UTSkeletalMesh from file.
+	 *
+	 ------------------------------------------------------*/
+
 	int loadMesh(FILE *f);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Read UTMesh from file.
+	 *
+	 ------------------------------------------------------*/
 
 	size_t dRead(void *ptr, size_t size, size_t nmemb, FILE *stream);
 	/*------------------------------------------------------
@@ -891,7 +791,7 @@ class UTPackage
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	UTVFS mVFS;                   /* Pak VFS */
+	mstl::Vector<VirtualFile> mVirtualFiles;  /* Pak VFS replacement */
 
 	unsigned int mFlags;          /* Option flags */
 

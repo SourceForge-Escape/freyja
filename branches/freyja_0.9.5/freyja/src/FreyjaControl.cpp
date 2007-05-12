@@ -197,8 +197,8 @@ void FreyjaControl::Init()
 	mFullScreen = false;
 
 	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
-	uint32 width = 740;
-	uint32 height = 560;
+	uint32 width = 800;//740;
+	uint32 height = 600;//560;
 	mRender->InitContext(width, height, true);
 	mRender->ResizeContext(width, height);
 	InitTexture();
@@ -253,21 +253,6 @@ FreyjaControl::~FreyjaControl()
 
 void FreyjaControl::SetFaceMaterial(index_t faceIndex, index_t material)
 {
-#if 0 // FIXME: Add UVMaps back later
-	//Vector<int32> mUVMap;                   /* 'Texture faces' grouping */
-	//GetUVMap(mUVMap);
-
-	if (!mUVMap.empty())
-	{
-		for (uint32 i = mUVMap.begin(); i < mUVMap.end(); ++i)
-		{
-			freyjaMeshPolygonMaterial(GetSelectedMesh(), mUVMap[i], material);
-		}
-
-		return;
-	}
-#endif
-
 	freyjaMeshPolygonMaterial(GetSelectedMesh(), faceIndex, material);
 }
 
@@ -318,11 +303,42 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eModeModel", &FreyjaControl::eModeModel);
 	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
 
-	// Iterator events
+	// Iterator/Integer events
 	CreateListener1u("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
 	CreateListener1u("eMeshIterator", &FreyjaControl::EvMeshIterator);
 	EvBoneIteratorId = 
 	CreateListener1u("eBoneIterator", &FreyjaControl::EvBoneIterator);
+	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
+
+	eRotateObjectId = 
+	CreateListener1u("eRotateObject", &FreyjaControl::eRotateObject);
+
+	eScaleObjectId = 
+	CreateListener1u("eScaleObject", &FreyjaControl::eScaleObject);
+
+	eMoveObjectId = 
+	CreateListener1u("eMoveObject", &FreyjaControl::eMoveObject);
+
+	eUnselectId = 
+	CreateListener1u("eUnselect", &FreyjaControl::eUnselect);
+
+	eSelectId = 
+	CreateListener1u("eSelect", &FreyjaControl::eSelect);
+
+	eInfoObjectId = 
+	CreateListener1u("eInfoObject", &FreyjaControl::eInfoObject);
+
+	eSelectionByBoxId = 
+	CreateListener1u("eSelectionByBox", &FreyjaControl::eSelectionByBox);
+
+	eAxisJointId = 
+	CreateListener1u("eAxisJoint", &FreyjaControl::eAxisJoint);
+
+	eSphereJointId = 
+	CreateListener1u("eSphereJoint", &FreyjaControl::eSphereJoint);
+
+	ePointJointId = 
+	CreateListener1u("ePointJoint", &FreyjaControl::ePointJoint);
 
 	// Text events
 	CreateListener1s("eSkeletonName", &FreyjaControl::EvSkeletonName);
@@ -338,8 +354,6 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
 	CreateListener("eSetPolygonTexture", &FreyjaControl::eSetPolygonTexture);
 
-	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
-
 	CreateListener("eInfo", &FreyjaControl::PrintInfo);
 	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
 
@@ -349,8 +363,6 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener("eCloseFile", &FreyjaControl::CloseFile);
 	CreateListener("eNewFile", &FreyjaControl::NewFile);
-	CreateListener("eExportFile", &FreyjaControl::ExportFile);
-	CreateListener("eImportFile", &FreyjaControl::ImportFile);
 	CreateListener("eSaveFile", &FreyjaControl::SaveFile);
 	CreateListener("eOpenFile", &FreyjaControl::OpenFile);
 	CreateListener("eSaveFileModel", &FreyjaControl::SaveFileModel);
@@ -403,41 +415,6 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
 
-
-	//CreateListener("eModelUpload", &FreyjaControl::eModelUpload);
-
-
-	/* One Argument callbacks with cached Ids */
-
-	eRotateObjectId = 
-	CreateListener1u("eRotateObject", &FreyjaControl::eRotateObject);
-
-	eScaleObjectId = 
-	CreateListener1u("eScaleObject", &FreyjaControl::eScaleObject);
-
-	eMoveObjectId = 
-	CreateListener1u("eMoveObject", &FreyjaControl::eMoveObject);
-
-	eUnselectId = 
-	CreateListener1u("eUnselect", &FreyjaControl::eUnselect);
-
-	eSelectId = 
-	CreateListener1u("eSelect", &FreyjaControl::eSelect);
-
-	eInfoObjectId = 
-	CreateListener1u("eInfoObject", &FreyjaControl::eInfoObject);
-
-	eSelectionByBoxId = 
-	CreateListener1u("eSelectionByBox", &FreyjaControl::eSelectionByBox);
-
-	eAxisJointId = 
-	CreateListener1u("eAxisJoint", &FreyjaControl::eAxisJoint);
-
-	eSphereJointId = 
-	CreateListener1u("eSphereJoint", &FreyjaControl::eSphereJoint);
-
-	ePointJointId = 
-	CreateListener1u("ePointJoint", &FreyjaControl::ePointJoint);
 }
 
 
@@ -895,6 +872,7 @@ void FreyjaControl::CursorMove(float xx, float yy)
 
 bool FreyjaControl::LoadModel(const char *filename)
 {
+	// FIXME: Break up into 'native' and 'plugins'
 	int err = freyjaImportModel(filename); 
 
 	if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
@@ -959,13 +937,6 @@ bool FreyjaControl::LoadModel(const char *filename)
 	AddRecentFilename(filename);
 	mCurrentlyOpenFilename = String(filename);
 	mCleared = false;
-
-	// FIXME: Only do this for vfspak open
-	MSTL_MSG("*** VFS plugin 'auto load test' enabled\n");
-	uint32 id = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
-	ResourceEvent::listen(id);
-	id = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
-	ResourceEvent::listen(id);
 
 	return true;
 }
@@ -1352,20 +1323,6 @@ void FreyjaControl::NewFile()
 	default:
 		;
 	}
-}
-
-
-void FreyjaControl::ExportFile()
-{
-	freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Export model...");
-	Print("Exporting is handled from Save As using file extentions...");
-}
-
-
-void FreyjaControl::ImportFile()
-{
-	freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Import model...");
-	Print("Importing is handled automatically from Open...");
 }
 
 
@@ -4948,10 +4905,19 @@ void FreyjaControl::TexCoordMove(vec_t u, vec_t v)
 		m->GetTexCoord(mTexCoordArrayIndex, uv);
 		
 		mActionManager.Push(new ActionTexCoordTransform(GetSelectedMesh(), mTexCoordArrayIndex, uv[0], uv[1]));
+
+#if 0	
+		// UVMaps
+		if (GetObjectMode() == tSelectedFaces)
+		{
+			vec3_t uv;
+			m->GetTexCoord(mTexCoordArrayIndex, uv);
+			m->TranslateUVMap(uv[0] - u, uv[1] - v, 0.0f);
+		}
+#endif
 	}
 
 	vec3_t uvw = { u, v, 0.0f };
-	
 	m->SetTexCoord(mTexCoordArrayIndex, uvw);
 }
 
@@ -5302,7 +5268,7 @@ void ePluginImport(ResourceEvent *e)
 			}
 		}
 
-		if (d.Execute())
+		if (!plugin->mArgs.size() || d.Execute())
 		{
 			// Update plugin settings from dialog input.
 			foreach (plugin->mArgs, i)
@@ -5340,17 +5306,30 @@ void ePluginImport(ResourceEvent *e)
 			if (!freyjaImportModelByModule(filename, 
 										   plugin->mFilename.c_str()))
 			{				   
-				FreyjaControl::mInstance->RecordSavedModel(filename);
-				freyja_print("! Imported: '%s'\n", filename);
-
-				// Update skeletal UI
-				if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
-					freyjaGetSkeletonCount() > 0)
+				if (plugin->mImportFlags & FREYJA_PLUGIN_PAK_VFS)
 				{
-					freyjaCurrentSkeleton(0);
-				}
+					// FIXME: Old school plugin callback
+					uint32 id = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
+					ResourceEvent::listen(id);
+					id = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
+					ResourceEvent::listen(id);
 
-				FreyjaControl::mInstance->UpdateSkeletalUI();
+					FREYJA_INFOMSG(0, "Click on the Plugins Tab and expand PakBrowser to browse the pak file.\nClick the Reset VFS button if the vfs doesn't automaticaly load for you.\nIf the file doesn't open automatically from the pak\nit will likely still be written to /tmp/utpak \nor ./utpak to load from another plugin.");
+				}
+				else
+				{
+					FreyjaControl::mInstance->RecordSavedModel(filename);
+					freyja_print("! Imported: '%s'\n", filename);
+
+					// Update skeletal UI
+					if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
+						freyjaGetSkeletonCount() > 0)
+					{
+						freyjaCurrentSkeleton(0);
+					}
+
+					FreyjaControl::mInstance->UpdateSkeletalUI();
+				}
 			}
 			else
 			{

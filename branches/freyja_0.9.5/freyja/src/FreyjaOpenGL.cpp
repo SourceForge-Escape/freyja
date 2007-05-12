@@ -132,6 +132,8 @@ OpenGL::OpenGL() :
 	freyja_print("\tVersion    : %s", glGetString(GL_VERSION));
 	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
 
+	FREYJA_ASSERTMSG(glGetString(GL_RENDERER) != NULL, "OpenGL Context creation failed");
+
 	// Get hardware info
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &mTextureUnitCount);
 	freyja_print("\tGL_MAX_TEXTURE_UNITS_ARB \t\t[%i]", mTextureUnitCount);
@@ -822,8 +824,11 @@ int main(int argc, char *argv[])
 bool mglHardwareExtTest(const char *ext)
 {
 	bool ret = false;
-	
-	if (strstr((const char*)glGetString(GL_EXTENSIONS), ext))
+	const char *substr = (const char*)glGetString(GL_EXTENSIONS);
+
+	FREYJA_ASSERTMSG(substr != NULL, "OpenGL Extensions could not be found!\nYou likely either have a misconfigured system, or your build linked to the wrong OpenGL library.");
+
+	if (substr && strstr(substr, ext))
 	{
 		ret = true;
 	}

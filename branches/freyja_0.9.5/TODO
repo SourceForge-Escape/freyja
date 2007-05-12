@@ -45,9 +45,9 @@
 
  * Shading for editing flat / face normal / etc
 
- * Directional light.
-
  * Octree for vertex/object pick culling.
+
+ * Merge pak vfs into main UI. / Pak ABI in freyja for plugins
 
  * Skeletal animation refactor
 	- Skeleton level transforms only handle root/children
@@ -103,6 +103,8 @@
  * Anything still using FREYJA_MODE_* text events should be deprecated.
 
  * Finish up the icon set.
+
+ * Directional light and other '3d icons'.
 
  * MSTL review for possible rewrite.  Wish: generic container item, opt, etc.
 	- It might be a good idea to have true vector and vectorarray containers.

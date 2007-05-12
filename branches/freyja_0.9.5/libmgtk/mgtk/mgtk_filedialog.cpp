@@ -199,7 +199,9 @@ extern GtkWidget *GTK_MAIN_WINDOW;
 void mgtk_filechooser_blocking_free(char *filename)
 {
 	if (filename)
+	{
 		g_free(filename);	
+	}
 }
 
 char *mgtk_filechooser_blocking(const char *title, 
@@ -226,7 +228,9 @@ char *mgtk_filechooser_blocking(const char *title,
 	}
 
 	// Overwrite
+#ifndef WIN32
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+#endif
 
 	// Shortcut
 	char *spath = mgtk_rc_map("/");
@@ -257,14 +261,14 @@ char *mgtk_filechooser_blocking(const char *title,
 		gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter);
 	}
 
-	char *filename;
+	char *filename = NULL;
 
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 	}
 
-	gtk_widget_destroy (dialog);
+	gtk_widget_destroy(dialog);
 
 	return filename;
 }

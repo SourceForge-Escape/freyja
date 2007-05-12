@@ -55,6 +55,16 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	void freyjaPakAddFullPathFileXOR(index_t pakIndex, unsigned char key,
+									 const char *vfsFilename, 
+									 int32 offset, int32 size);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : freyjaPakAddFullPathFile with internal vfs XOR 
+	 *        decryption support.
+	 *
+	 ------------------------------------------------------*/
+
 	void freyjaPakEnd(index_t pakIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
