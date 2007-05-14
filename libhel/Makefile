@@ -83,6 +83,7 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 ################################################################
 
+TARGETS=$(BUILDDIR)/$(NAME)$(API).$(EXT)
 
 TARGETS=$(BUILDDIR)/lib$(NAME)$(API).$(EXT).$(VERSION)
 
@@ -106,7 +107,7 @@ release:
 
 debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
+	targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)"
 
