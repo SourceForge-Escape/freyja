@@ -13,7 +13,10 @@
 		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
 
- * Use new filedialogs for save as...
+ * Fix groups box ids -- go back to proper bitflags like in 0.9.3/4.
+
+ * Add back context path storage for new filedialogs.
+	- eg Last saved/opened file's path is stored for next start path.
 
  * Replace _event2i with 1u handlers in mgtk and remove usage.
 
@@ -38,6 +41,7 @@
  * Sneak the brush system in next release for vertex weight painting?
 
  * Restore auto UV mapping.
+	- Add unwrap to cyn uvmap ( don't allow uv polygons to overlay )
 
  * Polygon generators using new backend ( UI legacy removal depends on this. )
 
@@ -47,12 +51,13 @@
 
  * Octree for vertex/object pick culling.
 
- * Merge pak vfs into main UI. / Pak ABI in freyja for plugins
+ * Merge pak vfs into main UI.  Currently it's an awkward UI plugin.
+	- Change vfs file list to have mixed dir/files in one pane to follow HIG.
 
  * Skeletal animation refactor
-	- Skeleton level transforms only handle root/children
+	- Fix and reenable Undo for new joint transforms.
+	- Skeleton level transforms should only handle root/children.
 	- Better 'pose' interface: transparency on cursors / bones, scaling UI.
-	- Views for bones should be a force on/off and should be controlled by modes
 	- X->Z swap event for bones, etc
 	- Animation import/export
 	- Single keyframe import/export
@@ -60,17 +65,13 @@
 	- Fix any remaining FK issues
 	- Separate world updates from mesh skinning code.
 	- Go back and ensure everything is using relative transforms now.
-	- Fix Undo for joint transforms.
 	- Editor needs to revert back to 'Bone' transforms to edit keys in key mode
 	- Attachments
 	- Various joint types: hinge, ball&socket, etc
 	- IK solver and interface
 	- New Timer for animation playback and keyframe timing
-	- Bones and bone transforms in same units!
-	- Finalize delta vs abs bone / keyframe transforms
 	- Rework weight system to support zeroed weights and grouping
 	- Merge the two bone rendering systems once alpha is done
-	- Fix bone bind, bindtoworld setup in libfreyja
 	- Channels support
 	- Ordering support
 	- Type of transform support
@@ -90,8 +91,8 @@
 	  ( Letting the user move selected points in vertex morph mode )
 	- Ref weights from vertex to fix blending issues
 	- ZIP file based pak format for freyja format models w/ textures, etc?
-	- Rendering support for alpha flagged faces ( partial depth sorting )
-	- Face flag for marking faces that need to be depth sorted... 
+	- Rendering support for alpha flagged faces ( separate pass depth sorting )
+		- Face flag for marking faces that need to be depth sorted... 
 
  * Have file filter issue a separate event to control module selection.
 	- On visible() reset filter
@@ -124,6 +125,7 @@
  * Review for possible offical packages with Ubuntu/Debian.
 
  * APIs / designs to be finalized
+	- Optmize Mesh to avoid wasting texCoords when unused by vertices
 	- Use status bar for mouse over tooltips also?
 	- Path animation?
 	- New resource event system with UIDs and event transparent buckets?

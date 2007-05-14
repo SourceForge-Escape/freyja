@@ -270,6 +270,26 @@ char *mgtk_filechooser_blocking(const char *title,
 
 	gtk_widget_destroy(dialog);
 
+#ifdef WIN32 
+	// Custom overwrite dialog, since the Gtk+ for Windows doesn't support it.
+	if (filename && type == 1 && mstl::SystemIO::File::DoesFileExist(filename))
+	{
+		mstl::String s;
+		s.Set("You are about to overwrite '%s'.", filename);
+		
+		if (!mgtk_create_confirm_dialog("gtk-question", 
+										s.c_str(),
+										"Do you want to overwrite?",
+										"gtk-cancel", "cancel",
+										"gtk-ok", "Overwrite") )
+		{
+			// Returning NULL to cancel the overwriting the file.
+			g_free(filename);
+			filename = NULL;
+		}
+	}
+#endif
+
 	return filename;
 }
 

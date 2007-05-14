@@ -339,12 +339,6 @@ class FreyjaControl : public Control
 	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
-	bool SaveMaterial(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : Writes material to disk
-	 * Post : Returns true if sucessful
-	 ------------------------------------------------------*/
-
 	object_type_t GetObjectMode() { return mObjectMode; }
 	/*------------------------------------------------------
 	 * Pre  : 
