@@ -5,7 +5,13 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.9
- 20070530- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ 20070507-20070513 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Windows build and release -- disabled autologging for asserts, etc for XP
+ - Custom file overwrite dialog for Win32 build for mgtk_filechooser_blocking().
+ - Disabled all the old 'FREYJA_MODE' save file dialogs.
+ - 'Aninmation' file mode is now the same as 'Model' file mode.
+ - Pakread plugin files/dir vertical now to aid browsing.
+ - Disabled cute icon/label for pakreader plugin to save vertical GUI space.
  - Enabled XOR decryption behind vfs facade for UTPackage vfs use.
  - UTPackage plugin fixes for VFS use.  Now works with VFS and L2E ui plugins.
  - If there are no options for import plugin don't show the querydialog.

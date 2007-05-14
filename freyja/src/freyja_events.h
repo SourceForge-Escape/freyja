@@ -68,13 +68,6 @@ typedef enum {
 	eBlendDestMenu,
 	eBlendSrcMenu,
 
-	// Old file dialog marker event ids
-	FREYJA_MODE_LOAD_MODEL,
-	FREYJA_MODE_SAVE_MODEL,
-	FREYJA_MODE_LOAD_TEXTURE,
-	FREYJA_MODE_SAVE_MATERIAL,
-	FREYJA_MODE_LOAD_MATERIAL,
-
 	// Special base id for plugins to avoid conflicts
 	ePluginEventBase = 10000
 

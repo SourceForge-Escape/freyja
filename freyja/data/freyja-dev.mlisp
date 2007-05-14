@@ -67,8 +67,11 @@
 			(menu_seperator)
 
 			(menu_item "Proper_ties"		eInfo		"gtk-properties")
-			(submenu	eImportFile	"_Import Model...")
-			(submenu	eExportFile	"_Export Model...")
+
+			(menu_seperator)
+
+			(submenu	eImportFile	"_Import...")
+			(submenu	eExportFile	"_Export...")
 
 			(menu_seperator)
 
@@ -967,13 +970,14 @@
 
 (confirmation_dialog	"PolyMapDialog"
 	"gtk-dialog-question"
-	"You just generated a UV map using vertex UVs.\n\nSome model formats perfer polygon-mapped UVs, and \nmay not export without being polymapped.\n"
-	"Would you like to promote it to ploymapped texcoords per face?"
+	"You just generated a UV map using vertex UVs." 
+; "Some model formats perfer polygon-mapped UVs, and may not export without being polymapped."
+	"Would you like to promote it to ploymapped texcoords instead?"
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Promote")
 
 (confirmation_dialog	"DupeMeshDialog"
 	"gtk-dialog-question"
-	"You are about to duplicate the selected mesh.\n"
+	"You are about to duplicate the selected mesh."
 	"Would you like to continue?"
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
 

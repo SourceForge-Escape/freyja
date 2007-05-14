@@ -83,7 +83,7 @@ vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
 vec_t FreyjaRender::mBonePointSize = 5.0;
 vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
-vec_t FreyjaRender::mVertexPointSize = 3.5f; // 5.0; // 3.5;
+vec_t FreyjaRender::mVertexPointSize = 3.5f;
 
 matrix_t gModelViewMatrix;
 
@@ -122,7 +122,7 @@ FreyjaRender::FreyjaRender() :
 	mViewports[2].plane = PLANE_TOP;
 	mViewports[3].plane = PLANE_FREE;
 
-	// To avoid branching by wasting a little memory 
+	// To avoid branching in renderer by using a little more memory.
 	for (uint32 i = 0; i < 3; ++i)
 	{
 		mColors[ 0][i] = WHITE[i];
@@ -1821,33 +1821,23 @@ void FreyjaRender::DrawUVWindow()
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
-			hel::Vec3 v;
 
-			if (!f || 
-				f->mMaterial != FreyjaControl::mInstance->GetSelectedMaterial())
+			if (!f)
+				//f->mMaterial != FreyjaControl::mInstance->GetSelectedMaterial())
 				continue;
 
-			if (f->mFlags & Face::fPolyMappedTexCoords)
+			mstl::Vector<index_t> &indices = 
+			((f->mFlags & Face::fPolyMappedTexCoords) ? 
+			 f->mTexCoordIndices : f->mIndices);
+
+			for (uint32 j = 0, jn = indices.size(); j < jn; ++j)
 			{
-				for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
-				{
-					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-					v[0] *= width;
-					//v[1] *= height;
-					v[1] = height - v[1]*height;
-					glVertex2fv(v.mVec);
-				}
-			}
-			else
-			{
-				for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
-				{
-					m->GetTexCoord(f->mIndices[j], v.mVec);
-					v[0] *= width;
-					//v[1] *= height;
-					v[1] = height - v[1]*height;
-					glVertex2fv(v.mVec);
-				}
+				hel::Vec3 v;
+				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
+				v[0] *= width;
+				//v[1] *= height;
+				v[1] = height - v[1]*height;
+				glVertex2fv(v.mVec);
 			}
 		}
 

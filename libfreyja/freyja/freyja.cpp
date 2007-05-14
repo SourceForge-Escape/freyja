@@ -163,6 +163,7 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 		va_end(args);
 	}
 
+
 	if (gFreyjaAssertHandler)
 	{
 		char msg[1024];
@@ -174,12 +175,16 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 
 		if ((*gFreyjaAssertHandler)(file, line, function, exprString, msg))
 		{
-			freyjaPrintMessage("Assert ignored by event handler...");
+			freyjaPrintMessage("Assert ignored by event handler %p...",
+							   gFreyjaAssertHandler);
 			return 0;
 		}
 	}
 
+
+#ifndef WIN32 // WIN32 AssertHandler bug in XP, so ignore all for now.
 	SystemIO::Assert(expr);
+#endif
 
 	return 1;
 }

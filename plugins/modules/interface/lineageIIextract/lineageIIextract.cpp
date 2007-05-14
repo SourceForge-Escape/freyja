@@ -322,7 +322,7 @@ void L2ExtractGUIAttach()
 	int item = Resource::mInstance->getIntByName("eL2ExtractOpenRaw");
 	mgtk_append_item_to_menu(submenu, "Open Raw SkeletalMesh...", item);
 
-	int item = Resource::mInstance->getIntByName("eL2ExtractOpenUT");
+	item = Resource::mInstance->getIntByName("eL2ExtractOpenUT");
 	mgtk_append_item_to_menu(submenu, "Open UTPak...", item);
 
 	uint32 e = resourceGetEventId1s("eL2ExtractOut");

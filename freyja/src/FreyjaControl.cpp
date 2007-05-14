@@ -1297,11 +1297,10 @@ void FreyjaControl::NewFile()
 {
 	switch (GetControlScheme())
 	{
-		//case eScheme_Animation:
-		//Print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-		//			 __FILE__, __LINE__, __func__);
-		//break;
-		
+	case eScheme_Animation:
+		Print("Animation mode has no NewFile action.");
+		break;
+
 	case eScheme_Model:
 		if (mgtk::ExecuteConfirmationDialog("CloseNewFileDialog"))
 		{
@@ -1331,8 +1330,7 @@ void FreyjaControl::SaveFile()
 	switch (GetControlScheme())
 	{
 	case eScheme_Animation:
-		Print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-					 __FILE__, __LINE__, __func__);
+		Print("Animation mode has no SaveFile action.");
 		break;
 
 	case eScheme_Model:
@@ -1342,28 +1340,56 @@ void FreyjaControl::SaveFile()
 		}
 		else if (mCurrentlyOpenFilename.Empty())
 		{
-			freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");				
+			mstl::String path = freyja_rc_map_string("/");
+			char *filename =
+			mgtk_filechooser_blocking("freyja - Save Model...", 
+									  path.c_str(), 1,
+									  "Freyja Scene (*.freyja)", "*.freyja");
+
+			if (filename && SaveModel(filename))
+			{
+				Print("Model '%s' Saved", filename);
+			}
+			else if (filename)
+			{
+				Print("Model '%s' failed to save", filename);
+			}
+			
+			mgtk_filechooser_blocking_free(filename);
 		}
 		else
 		{
+			const char *s = mCurrentlyOpenFilename.GetCString();
+			
+			if (SaveModel(s))
 			{
-				const char *s = mCurrentlyOpenFilename.GetCString();
-				
-				if (SaveModel(s))
-				{
-					Print("Model '%s' Saved", s);
-				}
-				else
-				{
-					Print("Model '%s' failed to save", s);
-				}
+				Print("Model '%s' Saved", s);
+			}
+			else
+			{
+				Print("Model '%s' failed to save", s);
 			}
 		}
 		break;
 
 	case eScheme_Material:
-		freyja_event_file_dialog(FREYJA_MODE_SAVE_MATERIAL, "Save material as...");
+		{
+			mstl::String path = freyja_rc_map_string("/");
+			char *filename =
+			mgtk_filechooser_blocking("freyja - Save Materal...", 
+									  path.c_str(), 1,
+									  "Freyja Scene (*.mat)", "*.mat");
+
+			if (filename)
+			{
+				mMaterial.EvSaveMaterial(filename);
+				//Print("Materal '%s' Saved", filename);
+			}
+			
+			mgtk_filechooser_blocking_free(filename);	
+		}
 		break;
+		
 		
 	default:
 		;
@@ -1376,12 +1402,11 @@ void FreyjaControl::OpenFile()
 	switch (GetControlScheme())
 	{
 	case eScheme_Animation:
-		Print("!(%s:%i) %s: eScheme_Animation, Not implemented", 
-					 __FILE__, __LINE__, __func__);
+		Print("Animation mode has no OpenFile action.");
 		break;
 		
 	case eScheme_UV:
-		freyja_event_file_dialog(FREYJA_MODE_LOAD_TEXTURE, "Open texture...");
+		//freyja_event_file_dialog(FREYJA_MODE_LOAD_TEXTURE, "Open texture...");
 		break;
 		
 	case eScheme_Model:
@@ -1394,17 +1419,17 @@ void FreyjaControl::OpenFile()
 				freyja_set_main_window_title(BUILD_NAME);
 				
 				
-				freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+				//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 			}
 		}
 		else
 		{
-			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+			//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 		}
 		break;
 		
 	case eScheme_Material:
-		freyja_event_file_dialog(FREYJA_MODE_LOAD_MATERIAL, "Open material...");
+		//freyja_event_file_dialog(FREYJA_MODE_LOAD_MATERIAL, "Open material...");
 		break;
 	}
 }
@@ -1418,15 +1443,33 @@ void FreyjaControl::SaveFileModel()
 	}
 	else if (mCurrentlyOpenFilename.Empty())
 	{
-		freyja_event_file_dialog(FREYJA_MODE_SAVE_MODEL, "Save model as...");
+		mstl::String s = freyja_rc_map_string("/");
+		char *filename =
+		mgtk_filechooser_blocking("freyja - Open Pak...", s.c_str(), 1,
+								  "Freyja Modeler (*.freyja)", "*.freyja");
+		
+		if (filename)
+		{
+			if (SaveModel(filename))
+			{
+				
+			}
+		}
+
+		mgtk_filechooser_blocking_free(filename);
 	}
 	else
 	{
 		const char *s = mCurrentlyOpenFilename.GetCString();
+
 		if (SaveModel(s))
+		{
 			Print("Model '%s' Saved", s);
+		}
 		else
+		{
 			Print("Model '%s' failed to save", s);
+		}
 	}
 }
 
@@ -1441,12 +1484,12 @@ void FreyjaControl::OpenFileModel()
 			Print("Closing Model...");
 			freyja_set_main_window_title(BUILD_NAME);
 				
-			freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+			//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 		}
 	}
 	else
 	{
-		freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+		//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 	}
 }
 	
@@ -5392,7 +5435,7 @@ void ePluginExport(ResourceEvent *e)
 			}
 		}
 
-		if (d.Execute())
+		if (!plugin->mArgs.size() || d.Execute())
 		{
 			// Update plugin settings from dialog input.
 			foreach (plugin->mArgs, i)

@@ -1874,7 +1874,9 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 	s.Set("Assert encountered:\n %s:%i %s()\n '%s'\n %s", 
 		  file, line, function, expression, msg);
 
+#ifndef WIN32
 	ControlPrinter::mLog.Print("[ASSERT] %s\n", s.c_str());
+#endif
 
 	// FIXME: Make a confirmation dialog as a locale template for this,
 	//        and fill in the 'info' string here every time you call it.
@@ -1886,8 +1888,10 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 
 	int action = q.Execute();
 
+#ifndef WIN32
 	ControlPrinter::mLog.Print("[ASSERT] User %s\n", 
 							   action ? "continued" : "aborted");
+#endif
 
 	return action;
 }
@@ -1897,6 +1901,7 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 								   const char *function,
 								   const char *expression, const char *msg)
 {
+#ifndef WIN32
 	mstl::String s;
 	s.Set("Called from:\n %s:%i %s()\n %s", 
 		  file, line, function, msg); // Removed expression 
@@ -1915,6 +1920,25 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 							   action ? "ok" : "cancel");
 
 	return action;
+#else
+
+	mstl::String s;
+	s.Set("Called from:\n %s:%i %s()\n %s", 
+		  file, line, function, msg); // Removed expression 
+
+
+
+	ConfirmationDialog q("FreyjaDebugInfoCallbackHandlerDialog", 
+						 "gtk-dialog-info",//"gtk-dialog-warning",
+						 s.c_str(), 
+						 "",
+						 "", "", "gtk-close", "_Close");
+
+	int action = q.Execute();
+
+
+	return 1;
+#endif
 }
 
 
