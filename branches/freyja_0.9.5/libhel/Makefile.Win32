@@ -125,5 +125,33 @@ clean:
 	@-echo "[done]"
 
 
+################################################################
+
+install-debug:
+	@-echo -n "Installing debug build                   "
+	@-cp $(BUILD_DEBUG_DIR)/*.a $(BUILD_DEBUG_DIR)/*.dll $(INSTALL_LIB)
+	@-echo "[done]"
+
+
+################################################################
+
+test-strip:
+	strip --strip-all $(BUILD_TEST_DIR)/libhel.exe
+
+cycle: debug install-debug test
+
+test:
+	mkdir -p $(BUILD_TEST_DIR)
+	CC="i586-mingw32msvc-g++ -mms-bitfields" \
+	CPP="i586-mingw32msvc-cpp " \
+	LD="i586-mingw32msvc-ld " \
+	EXT="dll" \
+	CFLAGS="$(DEBUG_CFLAGS) -I/usr/local/include/" \
+	i586-mingw32msvc-g++ -mms-bitfields \
+		-Wall -g -pipe -O0 -I/usr/local/include/ -DUNIT_TEST_LIBHEL  \
+		hel/libhel.cpp \
+		-o $(BUILD_TEST_DIR)/libhel.exe \
+		-lstdc++ -L/usr/local/lib/ -lhel0
+
 
 
