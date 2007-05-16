@@ -34,7 +34,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE)
+	$(MAKE) -f Makefile.Linux
 	#docbook-to-man debian/libhel.sgml > libhel.1
 
 	touch $@
@@ -45,7 +45,7 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) clean
+	-$(MAKE) -f Makefile.Linux clean
 
 	dh_clean 
 
