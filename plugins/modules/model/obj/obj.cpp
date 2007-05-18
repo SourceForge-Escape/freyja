@@ -40,6 +40,9 @@
 
 #include "ObjModel.h"
 
+#define OBJ_EXPORT_ENABLED 1
+#define OBJ_EXPORT_SKELETON_AS_COMMENT 0
+
 using namespace mstl;
 
 extern "C" {
@@ -152,12 +155,11 @@ int freyja_model__obj_import(char *filename)
 }
 
 
-#define OBJ_EXPORT_ENABLED 1
-
 int freyja_model__obj_export(char *filename)
 {
 #if OBJ_EXPORT_ENABLED
 	SystemIO::TextFileWriter w;
+	SystemIO::SetLocaleNumericToC();
 
 	if (!w.Open(filename))
 	{
@@ -264,7 +266,7 @@ int freyja_model__obj_export(char *filename)
 	}
 
 
-#   ifdef OBJ_EXPORT_SKELETON_AS_COMMENT
+#   if OBJ_EXPORT_SKELETON_AS_COMMENT
 	char name[64];
 	vec_t d2r = 0.017453292519943295;
 	vec3_t translation, rotation;
