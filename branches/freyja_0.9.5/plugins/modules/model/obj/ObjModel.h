@@ -143,6 +143,7 @@ public:
 	virtual bool Load(const char *filename)
 	{
 		SystemIO::TextFileReader r;
+		SystemIO::SetLocaleNumericToC();
 		const char *symbol;
 		vec_t x, y, z, u, v;
 		uint32 mesh = 0, face = 0, smoothinggroup = 0, texture = 0;
