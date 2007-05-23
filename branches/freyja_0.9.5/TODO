@@ -13,12 +13,15 @@
 		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
 
+ * Bulid and distribute Gtk+ 2.10 for WIN32 cross compile build environment.
+
+ * Edge editing.
+	* RELATED Cache s-edge results until light / mesh moves.
+
  * Fix groups box ids -- go back to proper bitflags like in 0.9.3/4.
 
  * Add back context path storage for new filedialogs.
 	- eg Last saved/opened file's path is stored for next start path.
-
- * Replace _event2i with 1u handlers in mgtk and remove usage.
 
  * Refactor the file dialog code based on the new import/export test.
 	- Reduce the import/export test.
@@ -37,8 +40,7 @@
 	- Transform has a 'pop' or 'jump' in model and mesh modes
 
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
-
- * Sneak the brush system in next release for vertex weight painting?
+	- Faces/Face should use blend vertices buffer, then 'write' results later
 
  * Restore auto UV mapping.
 	- Add unwrap to cyn uvmap ( don't allow uv polygons to overlay )
@@ -94,21 +96,11 @@
 	- Rendering support for alpha flagged faces ( separate pass depth sorting )
 		- Face flag for marking faces that need to be depth sorted... 
 
- * Have file filter issue a separate event to control module selection.
-	- On visible() reset filter
-	- On select_plugin() set filter
-	- On save() use last set filter
-
  * Material sphere rotation controlled by slider.
-
- * Anything still using FREYJA_MODE_* text events should be deprecated.
 
  * Finish up the icon set.
 
  * Directional light and other '3d icons'.
-
- * MSTL review for possible rewrite.  Wish: generic container item, opt, etc.
-	- It might be a good idea to have true vector and vectorarray containers.
 
  * Do another pass on 0.9.6 items to be sure they aren't already completed.
 
@@ -123,6 +115,9 @@
  * Review for possible Launchpad integration and project registry.
 
  * Review for possible offical packages with Ubuntu/Debian.
+
+ * MSTL review for possible rewrite.  Wish: generic container item, opt, etc.
+	- It might be a good idea to have true vector and vectorarray containers.
 
  * APIs / designs to be finalized
 	- Optmize Mesh to avoid wasting texCoords when unused by vertices
@@ -149,6 +144,8 @@
 
  * Visual scaling of cursors may need to be adjusted during zoom != 1.0f
 	- This means sphere/ray targets must be scaled to match visual also
+
+ * Brush system for vertex weight and texture on model painting
 
  * Scene graph UI.
 

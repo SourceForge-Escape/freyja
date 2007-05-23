@@ -70,6 +70,14 @@ typedef float vec4_t[4];
 typedef vec_t matrix_t[16];  /* Used as _Column_major_ in every class now! */
 typedef vec_t mat33_t[9];    /* Column major, 3x3 matrix used for rotation */
 
+typedef	union {
+	vec3_t xyz;
+
+	struct {
+		vec_t x, y, z;
+	};
+} uvec3_t;
+
 
 const char *helVersionInfo();
 /*------------------------------------------------------

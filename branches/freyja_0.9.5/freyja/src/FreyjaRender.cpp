@@ -24,6 +24,8 @@
  ==========================================================================*/
 
 #define USING_FREYJA_CPP_ABI
+#define SHADOW_VOLUME_WITH_ARRAYS 1
+//#define TEST_SHADOW_VOLUME_SURFACES 0
 
 #include "FreyjaOpenGL.h" // Includes windows.h, so avoid header interaction
 
@@ -334,6 +336,7 @@ void FreyjaRender::AttachMethodListeners()
 {
 	CreateListener("eScreenShot", &FreyjaRender::EvScreenShot);
 
+	CreateListener("eShadowVolume", &FreyjaRender::EvRenderShadowVolume);
 	CreateListener("eViewports", &FreyjaRender::eViewports);
 	CreateListener("eRenderBoneName", &FreyjaRender::eRenderBoneName);
 	CreateListener("eRenderSkeleton", &FreyjaRender::eRenderSkeleton);
@@ -443,8 +446,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 
 void FreyjaRender::ClearFlag(flags_t flag)
 {
-	mRenderMode |= flag;
-	mRenderMode ^= flag;
+	mRenderMode &= ~flag;
 }
 
 
@@ -460,8 +462,12 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 
 	// Set up Z buffer
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	//glDepthFunc(GL_LEQUAL);
+	//glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
+	//glClearDepth(1.0f);
+
+	// Stencil
+	//glClearStencil(0);
 
 	// Set up culling
 	//glEnable(GL_CULL_FACE);
@@ -482,6 +488,7 @@ void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 		glEnable(GL_DITHER);
 		
 		// AA polygon edges
+		//glEnable(GL_LINE_SMOOTH);
 		//glEnable(GL_POLYGON_SMOOTH);
 		//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	}
@@ -562,9 +569,10 @@ void FreyjaRender::Display()
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
 				 1.0);
 	
-	glDisable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
+	// 2007.05.20 - Removed depth test toggle
+	//glDisable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	//glEnable(GL_DEPTH_TEST);
 
 	// Disable lighting and texture here until the color visualizations
 	// are updated
@@ -679,8 +687,7 @@ void FreyjaRender::Display()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(GREEN);
-	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, 
-					 "FREYJA  0.9.6 PREALPHA.");
+	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, "FREYJA  0.9.6 PREALPHA.");
 	glPopAttrib();
 
 	glFlush();
@@ -1051,7 +1058,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 	glPopAttrib();
 
-
 	/* Render solid face with material, color, or whatever you got */
 	if (mRenderMode & fFace)
 	{
@@ -1141,6 +1147,210 @@ void FreyjaRender::RenderMesh(index_t mesh)
 }
 
 
+// TEST
+//mstl::Vector<vec_t> gVertexBufferTranslated;
+mstl::Vector<vec_t> gShadowVolume;
+
+#define TEST_SHADOW_VOLUME_SURFACES 0
+
+void FreyjaRender::RenderMeshShadowVolume(index_t mesh)
+{
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+				 GL_POLYGON_BIT | GL_STENCIL_BUFFER_BIT);
+
+	glDisable(GL_LIGHTING);
+
+#if TEST_SHADOW_VOLUME_SURFACES
+	glEnable(GL_BLEND);
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
+
+	RenderMeshShadowVolumeSurfaces(mesh);
+#else
+	/* Disable color, disable depth, and enable stencil */
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glEnable(GL_CULL_FACE);
+	glDepthMask(GL_FALSE);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_ALWAYS, 0, ~0); // 1's comp of 0 should fill for size
+
+	glFrontFace(GL_CCW);
+
+	// Front zfail pass
+	glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
+	glCullFace(GL_FRONT);
+	RenderMeshShadowVolumeSurfaces(mesh);
+
+	// Back zfail pass
+	glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
+	glCullFace(GL_BACK);
+	//RenderMeshShadowVolumeSurfaces(mesh);
+
+	// Shadow color pass
+	{
+		glDisable(GL_CULL_FACE);
+
+		/* Enable color, blending, and setup shadow color value with alpha. */
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glStencilFunc(GL_NOTEQUAL, 0, ~0);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+		glDepthMask(GL_TRUE);
+
+		glPushMatrix();
+		glLoadIdentity();
+		glBegin(GL_QUADS);
+		glVertex3f(-40.0f, 40.0f, 100);
+		glVertex3f(-40.0f, -40.0f, 100);
+		glVertex3f(40.0f, -40.0f, 100);
+		glVertex3f(40.0f, 40.0f, 100);
+		glEnd();
+		glPopMatrix();
+	}
+#endif
+
+	glPopAttrib();
+}
+
+
+void FreyjaRender::RenderMeshShadowVolumeSurfaces(index_t mesh)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+	vec_t *shadow = NULL, *array = NULL;
+
+	if (m)
+	{
+		vec3_t pos = {0.0f, 0.0f, 0.0f};
+		const vec_t oco = 100.0f;  //0.0f;
+
+		// Only allow light #0 for now
+		vec4_t lightPos;
+		freyjaGetLightPosition4v(0, lightPos);
+
+		if (mRenderMode & fSkeletalVertexBlending)
+		{
+			if (freyjaGetMeshBlendVertices(mesh))
+			{
+				array = freyjaGetMeshBlendVertices(mesh);
+			}
+
+			if ( m->GetBlendShadowVolume(gShadowVolume, lightPos, pos, oco) )
+			{
+				shadow = gShadowVolume.get_array();
+			}
+		}
+		else
+		{
+			// There is no need to translate as long as mesh: world = local...
+			//m->CopyVertexBuffer(gVertexBufferTranslated);
+			// translate gVertexBufferTranslated by pos
+			//vec_t *array = gVertexBufferTranslated.get_array();
+			array = m->GetVertexArray();
+			
+			if ( m->GetShadowVolume(gShadowVolume, lightPos, pos, oco) )
+			{
+				shadow = gShadowVolume.get_array();
+			}
+		}
+	}
+
+
+	if ( !shadow || !array )
+		return;
+
+	mstl::Vector<index_t> indices;
+	indices.reserve(4);
+
+	// Render caps for any polygon edge count
+	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+	{
+		Face *f = m->GetFace(i);
+
+		if (!f) 
+			continue;
+
+		/* Just go ahead and store this for edges here, and use for cap too. */
+		for (int k = f->mIndices.size() - 1; k > -1; --k)
+		{
+			indices.push_back(f->mIndices[k]);
+		}
+
+#if SHADOW_VOLUME_WITH_ARRAYS
+		/* Back cap, which is the reverse order of front. */
+		glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
+		glDrawElements(GL_POLYGON, 
+					   f->mIndices.size(), 
+					   GL_UNSIGNED_INT,
+					   f->mIndices.get_array());
+
+		/* Front cap */
+		glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, shadow);
+		glDrawElements(GL_POLYGON, 
+					   indices.size(), 
+					   GL_UNSIGNED_INT,
+					   indices.get_array());
+
+#else // Don't have OpenGL 1.1?  Should I care?
+
+		/* Back cap, which is the reverse order of front. */
+		glBegin(GL_POLYGON);
+			
+		{
+			uint32 j;
+			foreach (f->mIndices, j)
+			{
+				glVertex3fv(array + f->mIndices[j]*3);
+			}
+		}
+
+		glEnd();
+
+		/* Front cap */
+		glBegin(GL_POLYGON);
+			
+		{
+			uint32 j;
+			foreach (indices, j)
+			{
+				glVertex3fv(shadow + indices[j]*3);
+			}
+		}
+
+		glEnd();
+#endif
+
+#if 1
+		/* Edges */
+		glBegin(GL_QUAD_STRIP);
+		glVertex3fv(array + f->mIndices[0]*3);
+		glVertex3fv(shadow + indices[0]*3);
+
+		for (uint32 k = 1, kn = indices.size(); k < kn; ++k)
+		{
+			uint32 idx = k % kn;
+			glVertex3fv(array + f->mIndices[idx]*3);
+			glVertex3fv(shadow + indices[idx]*3);
+		}
+			
+		glEnd();
+#endif
+
+		/* Just reset counter don't reallocate. */
+		indices.clear();
+	}
+ 
+}
+
+
 void FreyjaRender::Flag(flags_t flag, bool t)
 {
 	t ? SetFlag(flag) : ClearFlag(flag);
@@ -1181,16 +1391,44 @@ void FreyjaRender::RenderModel(index_t model)
 		}
 	}
 
-	// Render each mesh of this model in turn
-	for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
-	{
-		index_t mesh = freyjaGetModelMeshIndex(model, i);
 
-		if (freyjaIsMeshAllocated(mesh))
+	if (mRenderMode & fShadowVolume)
+	{
+		// Render each mesh of this model in turn
+		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
 		{
-			RenderMesh(mesh);
+			index_t mesh = freyjaGetModelMeshIndex(model, i);
+			
+			if (freyjaIsMeshAllocated(mesh))
+			{
+				RenderMesh(mesh);
+			}
+		}
+
+		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
+		{
+			index_t mesh = freyjaGetModelMeshIndex(model, i);
+			
+			if (freyjaIsMeshAllocated(mesh))
+			{
+				RenderMeshShadowVolume(mesh);
+			}
 		}
 	}
+	else
+	{
+		// Render each mesh of this model in turn
+		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
+		{
+			index_t mesh = freyjaGetModelMeshIndex(model, i);
+			
+			if (freyjaIsMeshAllocated(mesh))
+			{
+				RenderMesh(mesh);
+			}
+		}
+	}
+
 
 	glPopMatrix();
 

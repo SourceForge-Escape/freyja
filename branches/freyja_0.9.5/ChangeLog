@@ -4,6 +4,18 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
+ Kagura prealpha, 0.9.5.10
+ 20070514- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Clean up of shadow volume and connectivity support
+ - Fixes for stencil buffer support in context from mgtk on up 
+ - Shadow volume patch, since shadow maps where removed a while back.
+ - New build system cont.
+ - FIX OBJ plugin reverts to "C" locale for LC_NUMERIC now to avoid 'german bug'.
+ - FIX proper gtk version macros for 'homemade' overwrite dialog. 
+ - New Win32 cross compile environment with Gtk+ 2.10
+ - Build system update cont.
+
+
  Kagura prealpha, 0.9.5.9
  20070507-20070513 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Windows build and release -- disabled autologging for asserts, etc for XP

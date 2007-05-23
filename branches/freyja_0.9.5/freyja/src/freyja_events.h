@@ -29,7 +29,7 @@
 #include <mstl/String.h>
 #include <freyja/freyja.h>
 
-#define FREYJA_LOG_FILE "Freyja-dev.log"
+#define FREYJA_LOG_FILE "freyja-dev.log"
 #define FREYJA_RECENT_FILES "recent_files-dev"
 
 

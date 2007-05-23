@@ -54,7 +54,11 @@ public:
 		fHidden      =  4,
 		fRayHit      =  8,
 		fLocked      = 16,     /* Mostly used for loading/saving states */
-		fSelectedFIO = 32      /* Selected for file I/O operations */ 
+		fSelectedFIO = 32,     /* Selected for file I/O operations */ 
+
+		/* No mesh instancing in 0.9.5, so shadow flags go here. */
+		fShadowReceiver = 64,
+		fShadowCaster = 128
 	} Flags;
 
 
@@ -177,6 +181,22 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
+	bool CopyVertexBuffer(mstl::Vector<vec_t> &buffer);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copies the vertex buffer to external Vector.
+	 *        Returns true on success.
+	 *
+	 ------------------------------------------------------*/
+
+	bool CopyVertexBlendBuffer(mstl::Vector<vec_t> &buffer);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copies the vertex buffer to external Vector.
+	 *        Returns true on success.
+	 *
+	 ------------------------------------------------------*/
+
 	static const char *GetChunkType() { return "Mesh"; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -187,6 +207,28 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 ------------------------------------------------------*/
+
+	bool GetBlendShadowVolume(mstl::Vector<vec_t> &shadowVolume,
+							  vec3_t lightPos, vec3_t pos, vec_t cinf);
+	/*------------------------------------------------------
+	 * Pre  : <cinf> > 0.0f - Then apply max occlusion distance.
+	 * 
+	 * Post : Rebuilds shadow volume for this mesh.
+	 *        Uses currently past in shadow volume buffer.
+	 *        Returns true on success.
+	 *
+	 ------------------------------------------------------*/
+
+	bool GetShadowVolume(mstl::Vector<vec_t> &shadowVolume,
+						 vec3_t lightPos, vec3_t pos, vec_t cinf);
+	/*------------------------------------------------------
+	 * Pre  : <cinf> > 0.0f - Then apply max occlusion distance.
+	 * 
+	 * Post : Rebuilds shadow volume for this mesh.
+	 *        Uses currently past in shadow volume buffer.
+	 *        Returns true on success.
+	 *
 	 ------------------------------------------------------*/
 
 	void CollapseEdge(index_t face, uint32 a, uint32 b, uint32 c, uint32 d);
@@ -1549,6 +1591,8 @@ private:
 	Vector<Vertex *> mVertices;
 
 	Vector<Weight *> mWeights;
+
+	Vector<Face::Connectivity *> mFacesConnectivity;
 };
 
 

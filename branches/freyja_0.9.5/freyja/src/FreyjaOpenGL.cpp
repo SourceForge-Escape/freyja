@@ -157,6 +157,10 @@ OpenGL::OpenGL() :
 	// Depends on class Texture replacement
 	//SetMaxTextureCount(mTextureLimit);
 
+	int stencil;
+	glGetIntegerv(GL_STENCIL_BITS, &stencil);
+	freyja_print("\tGL_STENCIL_BITS            \t\t[%i]", stencil);
+
 	// Hook up functions
 #ifdef USING_OPENGL_EXT
 	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");

@@ -137,13 +137,13 @@ debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_DEBUG_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -Wl,-z,defs"
+	LD_FLAGS="-L../bin/linux/debug/ $(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS) -Wl,-z,defs"
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE) targets BUILD_DIR=$(BUILD_RELEASE_DIR) \
 	CFLAGS="$(RELEASE_CFLAGS) $(GTK2_CFLAGS) $(GTK_GLAREA2_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
+	LD_FLAGS="-L../bin/linux/release/ $(LD_FLAGS) $(GTK2_LDFLAGS) $(GTK_GLAREA2_LD_FLAGS)"
 
 prof: 
 	@-mkdir -p $(BUILD_PROF_DIR)
@@ -159,7 +159,7 @@ win32:
 	CPP=$(WIN32_CPP) \
 	LD=$(WIN32_LD) \
 	CFLAGS="$(LOCAL_INCLUDES) -mwindows $(DEBUG_CFLAGS) $(WIN32_CROSS_CFLAGS)" \
-	LD_FLAGS="$(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK) -lfreetype"
+	LD_FLAGS="-L../bin/libhel/win32/debug/ $(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK) -lfreetype"
 
 
 ########################################################################

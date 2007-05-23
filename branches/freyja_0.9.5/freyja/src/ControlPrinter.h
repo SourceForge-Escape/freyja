@@ -88,6 +88,35 @@ public:
 		}
 	}
 
+
+	static void Log(const char *format, ...)
+	{
+		if (!format || !format[0])
+			return;
+
+		const uint32 sz = 1023;
+		char buffer[sz+1];
+		va_list args;
+
+		va_start(args, format);
+		vsnprintf(buffer, sz, format, args);
+		buffer[sz] = 0;
+		va_end(args);
+
+		unsigned long l = strlen(buffer);
+  
+		// Don't process empty strings.
+		if (!l || !buffer[0])
+			return;
+
+		if (mLogging)
+		{
+			mLog.Print("> %s\n", buffer);
+			mLog.Flush();
+		}
+	}
+
+
 	virtual void ErrorArgs(char *format, va_list *args)
 	{
 		PrintArgs(format, args);

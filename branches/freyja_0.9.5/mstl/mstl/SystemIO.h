@@ -32,6 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <locale.h>
 
 #ifdef WIN32
 #   include <windows.h>
@@ -2009,6 +2010,12 @@ public:
 #else
 		dlclose(handle);
 #endif
+	}
+
+
+	static void SetLocaleNumericToC()
+	{
+		setlocale(LC_NUMERIC, "C");
 	}
 
 }; // class SystemIO

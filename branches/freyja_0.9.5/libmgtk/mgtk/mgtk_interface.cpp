@@ -240,13 +240,14 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 		GDK_GL_GREEN_SIZE, 1,
   		GDK_GL_BLUE_SIZE, 1,
 		GDK_GL_DEPTH_SIZE, 1,
+		GDK_GL_STENCIL_SIZE, 1, 
 		GDK_GL_DOUBLEBUFFER, 
 		GDK_GL_ATTRIB_LIST_NONE};  
 
 	g_print("*** Spawning double-buffered visual...\n");
 	glconfig = gdk_gl_config_new(args);
 #else
-	glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE));
+	glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_STENCIL | GDK_GL_MODE_DOUBLE));
 #endif
 
 	if (glconfig == NULL)
@@ -263,12 +264,13 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 			GDK_GL_GREEN_SIZE, 1,
 	  		GDK_GL_BLUE_SIZE, 1,
 			GDK_GL_DEPTH_SIZE, 1, 
+			GDK_GL_STENCIL_SIZE, 1,
 			GDK_GL_ATTRIB_LIST_NONE};  
 
 		glconfig = gdk_gl_config_new(args_single);
 #else
 		glconfig = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB |
-					    GDK_GL_MODE_DEPTH));
+					    GDK_GL_MODE_DEPTH | GDK_GL_MODE_STENCIL));
 #endif
 
 		if (glconfig == NULL)

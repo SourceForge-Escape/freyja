@@ -196,6 +196,138 @@ Mesh::~Mesh()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+bool Mesh::CopyVertexBuffer(mstl::Vector<vec_t> &buffer)
+{ 
+	if (buffer.size() < mVertexPool.size())
+	{
+		buffer.resize(mVertexPool.size());
+	}
+		
+	if (buffer.get_array() && 
+		buffer.size() >= mVertexPool.size())
+	{
+		memcpy(buffer.get_array(), 
+			   mVertexPool.get_array(), 
+			   sizeof(vec_t) * mVertexPool.size() );
+		
+		return true;
+	}
+	
+	return false;
+}
+
+
+bool Mesh::CopyVertexBlendBuffer(mstl::Vector<vec_t> &buffer)
+{ 
+	if (buffer.size() < mBlendVertices.size())
+	{
+		buffer.resize(mBlendVertices.size());
+	}
+		
+	if (buffer.get_array() && 
+		buffer.size() >= mBlendVertices.size())
+	{
+		memcpy(buffer.get_array(), 
+			   mBlendVertices.get_array(), 
+			   sizeof(vec_t) * mBlendVertices.size() );
+		
+		return true;
+	}
+	
+	return false;
+}
+
+
+bool Mesh::GetShadowVolume(mstl::Vector<vec_t> &shadowVolume,
+					 vec3_t lightPos, vec3_t pos, vec_t cinf)
+{
+	//TripleVec_Addition(shadowVolume, v);
+	//TripleVec_Normalize(shadowVolume)
+	//TripleVec_Mulitply(shadowVolume, inf);
+
+	if ( CopyVertexBuffer(shadowVolume) )
+	{
+		// Translate by pos, and get vector from lightPos.
+		vec3_t v = {pos[0] - lightPos[0], 
+					pos[1] - lightPos[1], 
+					pos[2] - lightPos[2] };
+
+		TripleVec_Addition(shadowVolume, v);
+
+		vec_t *array = shadowVolume.get_array();
+
+		for (uint32 i = 0, size = shadowVolume.size(); i < size; i += 3)
+		{
+			vec_t n = 1.0f / sqrtf(array[i  ] * array[i  ] +
+								   array[i+1] * array[i+1] +
+								   array[i+2] * array[i+2]);
+
+			array[i  ] *= n;  
+			array[i+1] *= n;  
+			array[i+2] *= n;  
+		}
+				
+		// If requested project to Inf, but not beyond.
+		if (cinf > 0.0f)
+		{
+			for (uint32 i = 0, size = shadowVolume.size(); i < size; ++i)
+			{
+				array[i] *= cinf;
+			}
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool Mesh::GetBlendShadowVolume(mstl::Vector<vec_t> &shadowVolume,
+								vec3_t lightPos, vec3_t pos, vec_t cinf)
+{
+	//TripleVec_Addition(shadowVolume, v);
+	//TripleVec_Normalize(shadowVolume)
+	//TripleVec_Mulitply(shadowVolume, inf);
+
+	if ( CopyVertexBlendBuffer(shadowVolume) )
+	{
+		// Translate by pos, and get vector from lightPos.
+		vec3_t v = {pos[0] - lightPos[0], 
+					pos[1] - lightPos[1], 
+					pos[2] - lightPos[2] };
+
+		TripleVec_Addition(shadowVolume, v);
+
+		vec_t *array = shadowVolume.get_array();
+
+		for (uint32 i = 0, size = shadowVolume.size(); i < size; i += 3)
+		{
+			vec_t n = 1.0f / sqrtf(array[i  ] * array[i  ] +
+								   array[i+1] * array[i+1] +
+								   array[i+2] * array[i+2]);
+
+			array[i  ] *= n;  
+			array[i+1] *= n;  
+			array[i+2] *= n;  
+		}
+				
+		// If requested project to Inf, but not beyond.
+		if (cinf > 0.0f)
+		{
+			for (uint32 i = 0, size = shadowVolume.size(); i < size; ++i)
+			{
+				array[i] *= cinf;
+			}
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
 void Mesh::GetSelectedVertices(Vector<index_t> &list) 
 {
 	list.clear();
