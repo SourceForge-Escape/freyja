@@ -25,7 +25,8 @@
  ==========================================================================*/
 
 #define FREYJA_APP_PLUGINS 1
-#define DISABLED_EVENT 0
+#define DISABLED_EVENT     0
+#define ENABLE_ASSERT_LOG  1
 
 #include <string.h>
 
@@ -1874,8 +1875,8 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 	s.Set("Assert encountered:\n %s:%i %s()\n '%s'\n %s", 
 		  file, line, function, expression, msg);
 
-#ifndef WIN32
-	ControlPrinter::mLog.Print("[ASSERT] %s\n", s.c_str());
+#if ENABLE_ASSERT_LOG
+	ControlPrinter::Log("[ASSERT] %s\n", s.c_str());
 #endif
 
 	// FIXME: Make a confirmation dialog as a locale template for this,
@@ -1888,9 +1889,8 @@ int FreyjaAssertCallbackHandler(const char *file, unsigned int line,
 
 	int action = q.Execute();
 
-#ifndef WIN32
-	ControlPrinter::mLog.Print("[ASSERT] User %s\n", 
-							   action ? "continued" : "aborted");
+#if ENABLE_ASSERT_LOG
+	ControlPrinter::Log("[ASSERT] User %s\n", action ? "continued" : "aborted");
 #endif
 
 	return action;
@@ -1901,12 +1901,13 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 								   const char *function,
 								   const char *expression, const char *msg)
 {
-#ifndef WIN32
 	mstl::String s;
 	s.Set("Called from:\n %s:%i %s()\n %s", 
 		  file, line, function, msg); // Removed expression 
 
-	ControlPrinter::mLog.Print("[INFO] %s\n", s.c_str());
+#if ENABLE_ASSERT_LOG
+	ControlPrinter::Log("[INFO] %s\n", s.c_str());
+#endif
 
 	ConfirmationDialog q("FreyjaDebugInfoCallbackHandlerDialog", 
 						 "gtk-dialog-info",//"gtk-dialog-warning",
@@ -1916,29 +1917,11 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 
 	int action = q.Execute();
 
-	ControlPrinter::mLog.Print("[INFO] User %s\n", 
-							   action ? "ok" : "cancel");
+#if ENABLE_ASSERT_LOG
+	ControlPrinter::Log("[INFO] User %s\n", action ? "ok" : "cancel");
+#endif
 
 	return action;
-#else
-
-	mstl::String s;
-	s.Set("Called from:\n %s:%i %s()\n %s", 
-		  file, line, function, msg); // Removed expression 
-
-
-
-	ConfirmationDialog q("FreyjaDebugInfoCallbackHandlerDialog", 
-						 "gtk-dialog-info",//"gtk-dialog-warning",
-						 s.c_str(), 
-						 "",
-						 "", "", "gtk-close", "_Close");
-
-	int action = q.Execute();
-
-
-	return 1;
-#endif
 }
 
 

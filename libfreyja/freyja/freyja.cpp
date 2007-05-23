@@ -181,10 +181,7 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 		}
 	}
 
-
-#ifndef WIN32 // WIN32 AssertHandler bug in XP, so ignore all for now.
 	SystemIO::Assert(expr);
-#endif
 
 	return 1;
 }

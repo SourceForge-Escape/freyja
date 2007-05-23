@@ -331,7 +331,7 @@
 				(toolbar_separator)
 
 				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
-					"Render shadows"		eEvent	eRenderShadow)
+					"Render shadows"		eEvent	eShadowVolume)
 
 				(toolbar_togglebutton false "24x24/deform.png" "Blend"
 					"Skeletal vertex blending"	eEvent	eSkeletalDeform)

@@ -228,7 +228,7 @@ char *mgtk_filechooser_blocking(const char *title,
 	}
 
 	// Overwrite
-#ifndef WIN32
+#if GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION >= 8
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 #endif
 
@@ -269,8 +269,8 @@ char *mgtk_filechooser_blocking(const char *title,
 	}
 
 	gtk_widget_destroy(dialog);
-
-#ifdef WIN32 
+ 
+#if GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION < 8
 	// Custom overwrite dialog, since the Gtk+ for Windows doesn't support it.
 	if (filename && type == 1 && mstl::SystemIO::File::DoesFileExist(filename))
 	{

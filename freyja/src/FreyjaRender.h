@@ -92,7 +92,7 @@ public:
 
 	typedef enum {                 /* Rendering modes */
 		fWireframe        = 1,
-		fReserved2        = 2,
+		fShadowVolume     = 2,
 		fFace             = 4,
 		fGrid             = 8,
 		fLighting         = 16,    /* Render with GL lighting */
@@ -290,6 +290,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void EvRenderShadowVolume(uint32 value)
+	{ SetRenderFlag(fShadowVolume, value, "Shadow volume rendering."); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void eRenderPickRay(uint32 value)
 	{ SetRenderFlag(fDrawPickRay, value, "Pick ray visibility"); }
 	/*------------------------------------------------------
@@ -405,10 +413,31 @@ public:
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	void GetShadowMap();
+	void RenderMeshShadowVolumeSurfaces(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Draws from light's view and saves depth to texture
+	 * Post : Mostly for debugging the vertex buffers and fun.
+	 *
+	 ------------------------------------------------------*/
+
+	void RenderMeshShadowVolumeSurface(index_t mesh, index_t face);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void RenderMeshShadowVolume(index_t mesh);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void RenderShadowMap();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 

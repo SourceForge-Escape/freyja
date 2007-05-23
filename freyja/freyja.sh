@@ -1,6 +1,6 @@
 #!/bin/sh
 # Local libs used to run local bin tests
-TEST=../bin/test
+TEST=../bin/test:../bin/linux/debug
 SELECT=debug
 BIN=../bin/freyja/${SELECT}/freyja
 
