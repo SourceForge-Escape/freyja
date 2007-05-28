@@ -38,7 +38,14 @@ INSTALL_BIN_DIR=$(INSTALL_PREFIX)/bin
 
 ################################################################
 
-LD_FLAGS=-lm -shared -lstdc++ -fPIC
+COMMON_CFLAGS += -std=c++98
+#COMMON_CFLAGS += -pedantic
+#COMMON_CFLAGS += -Weffc++ 
+
+LD_FLAGS=$(COMMON_LD_FLAGS) -lm -ldl -shared -lstdc++ -fPIC 
+#LD_FLAGS += -Wl,-z,defs
+#LD_FLAGS += -Wl,-O1
+LD_FLAGS += --warn-unresolved-symbols -Wl -z defs
 
 RELEASE_CFLAGS=$(COMMON_CFLAGS) \
 	-Wall \
@@ -65,30 +72,23 @@ debug:
 	$(MAKE_CMD) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	MODULE="lib$(NAME).so.$(VERSION)" \
 	CFLAGS="$(DEBUG_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS)"
+	LD_FLAGS="$(LD_FLAGS) -L../bin/libhel/linux/debug"
 
-	@-mkdir -p ../bin/linux/debug/
-	@-cp $(BUILD_DEBUG_DIR)/lib$(NAME).so.$(VERSION) \
-	../bin/linux/debug/lib$(NAME)-$(API).so
-	$(MAKE_CMD) libhel.test
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
 	$(MAKE_CMD) targets BUILDDIR=$(BUILD_RELEASE_DIR) \
 	MODULE="lib$(NAME).so.$(VERSION)" \
 	CFLAGS="$(RELEASE_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS)"
+	LD_FLAGS="$(LD_FLAGS) -L../bin/libhel/linux/release"
 
-	@-mkdir -p ../bin/linux/debug/
-	@-cp $(BUILD_RELEASE_DIR)/lib$(NAME).so.$(VERSION) \
-	../bin/linux/release/lib$(NAME)-$(API).so
-	$(MAKE_CMD) libhel2.test
 
 prof: 
 	@-mkdir -p $(BUILD_PROF_DIR)
 	$(MAKE_CMD) targets BUILDDIR=$(BUILD_PROF_DIR) \
 	CFLAGS="$(DEBUG_CFLAGS) -pg" \
 	LD_FLAGS="$(LD_FLAGS) -pg"
+
 
 $(DEPEND_FILE):
 	@-echo -n Making deps...
@@ -152,7 +152,7 @@ clean:
 #################################################################
 
 DEB_DIR=/tmp/$(NAME).deb
-NAME_DEB=libhel
+NAME_DEB=libfreyja
 VERSION_DEB=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(BUILD_ID)
 
 # Edited for Debian GNU/Linux.
@@ -168,14 +168,14 @@ INSTALL_PLUGIN_DIR=$(INSTALL_LIB)/$(BASE_NAME)/modules
 
 deb:
 	dpkg-buildpackage -rfakeroot
-	$(MAKE_CMD) deb-info
+	$(MAKE) deb-info
 
 
 deb-info:
 	@-printf "================================================================================\n"
-	dpkg --info ../libhel_*.deb
+	dpkg --info ../libfreyja_*.deb
 	@-printf " -------------------------------------------------------------------------------\n"
-	dpkg --contents ../libhel_*.deb
+	dpkg --contents ../libfreyja_*.deb
 	@-printf "================================================================================\n"
 
 
@@ -216,7 +216,7 @@ uninstall-lib:
 ################################################################
 
 tarball:
-	@-$(MAKE_CMD) clean
+	@-$(MAKE) clean
 	@-cd .. && tar zcvf $(TARBALL_NAME).tar.gz \
 		--exclude=bin --exclude=*~ --exclude=.svn \
 		--exclude=CVS --exclude=*.notar --exclude=spec \
@@ -225,7 +225,7 @@ tarball:
 	@-echo "[done]"
 
 backup:
-	@-$(MAKE_CMD) clean
+	@-$(MAKE) clean
 	@-cd .. && tar Icvf $(NAME)-$(VERSION)-$(BUILD_ID).tar.bz2 $(TREE_DIR)
 	@-echo "[done]"
 
@@ -238,31 +238,12 @@ TEST=$(BUILDDIR)/$(NAME).test
 
 test: $(TEST)
 
-libhel.test:
+libfreyja.test:
 	mkdir -p $(BUILD_TEST_DIR)
-	$(CC) -Wall -g -pipe -O0 -lstdc++ -I../mstl/ -I. -DUNIT_TEST_LIBHEL \
-		-L$(BUILD_DEBUG_DIR)/ -lhel-0.0.2 -lpthread \
-		hel/libhel.cpp \
-		-o $(BUILD_TEST_DIR)/libhel.test
-
-
-libhel2.test:
-	mkdir -p $(BUILD_TEST_DIR)
-	$(CC) -Wall -g -pipe -O2 -lstdc++ -I../mstl/ -I. -DUNIT_TEST_LIBHEL \
-		-L$(BUILD_RELEASE_DIR)/ -lhel-0.0.2 -lpthread \
-		hel/libhel.cpp \
-		-o $(BUILD_TEST_DIR)/libhel.test
-
-
-libhel.unittest:
-	export LD_LIBRARY_PATH=.
-
-
-Quaternion.test:
-	mkdir -p $(BUILD_TEST_DIR)
-	$(CC) -Wall -g -pipe -O0 -L/usr/local/lib -lstdc++ -lm -lhel0 \
-		-DUNIT_TEST_QUATERNION hel/Quaternion.cpp \
-		-o $(BUILD_TEST_DIR)/Quaternion.test
+	$(CC) -Wall -g -pipe -O0 -lstdc++ -I../mstl/ -I. -DUNIT_TEST_LIBFREYJA \
+		-L$(BUILD_DEBUG_DIR)/ -lfreyja -lhel0 -lpthread \
+		$(SRC_DIR)/libfreyja.cpp \
+		-o $(BUILD_TEST_DIR)/libfreyja.test
 
 
 ##########################################################################

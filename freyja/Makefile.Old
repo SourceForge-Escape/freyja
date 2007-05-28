@@ -99,12 +99,9 @@ BASE_CFLAGS=$(CONFIGURE_CFLAGS) \
 
 LD_FLAGS=-L/usr/X11R6/lib $(CONFIGURE_LDFLAGS) $(LOCAL_LIBS) \
 		-lstdc++ -lGL -lGLU -lm -lz \
+		-lhel0 -lfreyja -lmgtk \
 		$(shell freetype-config --libs) \
-		$(shell pkg-config --libs gtk+-2.0 $(PKG_LIB_ADD)) $(LIB_ADD) \
-		-lhel-0.0.2 -lfreyja-0.9.5 -lmgtk-0.2.10 
-
-#		-lhel0 -lfreyja -lmgtk 
-
+		$(shell pkg-config --libs gtk+-2.0 $(PKG_LIB_ADD)) $(LIB_ADD)
 #LD_FLAGS += -Wl,-z,defs
 #LD_FLAGS += -Wl,-O1
 

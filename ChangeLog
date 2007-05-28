@@ -5,8 +5,15 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.10
- 20070514- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Clean up of shadow volume and connectivity support
+ 20070514-20070527 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Finishing up cmake for svn commit.
+ - Finished up separate GNU Makefiles per platform for svn commit.
+ - WIN32 defined used instead of looking for unix || darwin || etc.
+ - Build system using 'name versioned' libraries across platforms.
+ - Plane and Edge support in Mesh.
+ - FIX naming scheme of test ui control corrected for svn merge. 
+ - Separate Gtk+ 2.10 env / modeler packages made for win32 users.
+ - Clean up of shadow volume and connectivity support test.
  - Fixes for stencil buffer support in context from mgtk on up 
  - Shadow volume patch, since shadow maps where removed a while back.
  - New build system cont.

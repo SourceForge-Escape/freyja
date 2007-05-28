@@ -24,8 +24,6 @@
 #include <mstl/SystemIO.h>
 #include "freyja.h"
 
-using namespace mstl;
-
 
 namespace freyja {
 
@@ -44,101 +42,68 @@ public:
 
 	} Flags;
 
-	Vertex(index_t vertex, index_t texcoord, index_t normal) :
-		mFlags(fNone),
-		mVertexIndex(vertex),
-		mTexCoordIndex(texcoord),    
-		mNormalIndex(normal),
-		mMaterial(INDEX_INVALID),
-		mFaceRefs(),
-		mTmpRefs()
-	{
-	}
+	Vertex(index_t vertex, index_t texcoord, index_t normal);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	Vertex() :
-		mFlags(fNone),
-		mVertexIndex(INDEX_INVALID),
-		mTexCoordIndex(INDEX_INVALID),    
-		mNormalIndex(INDEX_INVALID),
-		mMaterial(INDEX_INVALID),
-		mFaceRefs(),
-		mTmpRefs()
-	{
-	}
+	Vertex();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	Vertex(const Vertex &v) :
-		mFlags(v.mFlags),
-		mVertexIndex(v.mVertexIndex),
-		mTexCoordIndex(v.mTexCoordIndex),    
-		mNormalIndex(v.mNormalIndex),
-		mMaterial(v.mMaterial),
-		mFaceRefs(v.mFaceRefs),
-		mTmpRefs(v.mTmpRefs)
-	{
-	}
+	Vertex(const Vertex &v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	~Vertex()
-	{
-	}
+	~Vertex();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	static size_t SerializedSize() 
-	{
-		return ( 1 + 4 * 6); 
-	}
+	static size_t SerializedSize();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	bool Serialize(SystemIO::FileWriter &w) 
-	{ 
-		freyja_file_chunk_t chunk;
+	bool Serialize(mstl::SystemIO::FileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		chunk.type = FREYJA_CHUNK_VERTEX;
-		chunk.size = SerializedSize();
-		chunk.flags = 0x0;
-		chunk.version = 10;
+	bool Serialize(mstl::SystemIO::TextFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		w.WriteInt8U(mFlags);
-		w.WriteLong(mVertexIndex);
-		w.WriteLong(mTexCoordIndex);
-		w.WriteLong(mNormalIndex);
-		w.WriteLong(mMaterial);
+	bool Serialize(mstl::SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		// No use in storing face references to disk!
-
-		return true; 
-	}
-
-	bool Serialize(SystemIO::TextFileWriter &w) 
-	{ 
-		w.Print("\t\tv %u %u %u %u %u\n", 
-				mFlags, mVertexIndex, mTexCoordIndex, mNormalIndex, mMaterial);
-		return true;
-	}
-
-	bool Serialize(SystemIO::TextFileReader &r) 
-	{ 
-		const char *symbol = r.ParseSymbol();
-		if (symbol[0] != 'v')
-			return false;
-
-		mFlags = r.ParseInteger();
-		mVertexIndex = r.ParseInteger();
-		mTexCoordIndex = r.ParseInteger();
-		mNormalIndex = r.ParseInteger();
-		mMaterial = r.ParseInteger();
-
-		return true;
-	}
-
-	
-	void Meld(Vertex &v)
-	{
-		// We don't want transform operations on this anymore, so
-		// we make it unselectable and hidden.
-		mFlags = fHidden | fMuted;
-		mVertexIndex = v.mVertexIndex;
-		mTexCoordIndex = v.mTexCoordIndex;
-		mNormalIndex = v.mNormalIndex;
-		mMaterial = v.mMaterial;
-	}
+	void Meld(Vertex &v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 	
 	const byte &GetFlags() { return mFlags; }
 	/*------------------------------------------------------
@@ -182,14 +147,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 	
-	Vector<index_t> &GetFaceRefs() { return mFaceRefs; }
+	mstl::Vector<index_t> &GetFaceRefs() { return mFaceRefs; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Access the Face references.
 	 *
 	 ------------------------------------------------------*/
 
-	Vector<index_t> &GetTmpRefs() { return mTmpRefs; }
+	mstl::Vector<index_t> &GetTmpRefs() { return mTmpRefs; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Access the Temp references.
@@ -209,9 +174,9 @@ public:
 
 private:
 
-	Vector<index_t> mFaceRefs;  /* Face references */
+	mstl::Vector<index_t> mFaceRefs;  /* Face references */
 
-	Vector<index_t> mTmpRefs;   /* Face references used for special methods */
+	mstl::Vector<index_t> mTmpRefs;   /* Used for special methods */
 };
 
 } // End namespace freyja

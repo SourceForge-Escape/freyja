@@ -42,7 +42,7 @@
 #include "Texture.h"
 #include "Cursor.h"
 #include "Control.h"
-#include "MaterialEv.h"
+#include "MaterialControl.h"
 
 
 namespace freyja3d {
@@ -1172,7 +1172,7 @@ private:
 
 	freyja3d::Cursor mCursor;               /* Special mouse input handler */
 
-	freyja3d::MaterialEv mMaterial;         /* Material control */
+	freyja3d::MaterialControl mMaterial;    /* Material control */
 
 	hel::Vec3 mSceneTrans;                  /* Offset of scene in 3 space */
 

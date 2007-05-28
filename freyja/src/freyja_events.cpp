@@ -217,22 +217,22 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	{
 	case eColorMaterialAmbient: 
 		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
-		MaterialEv::mHack->RefreshInterface();
+		MaterialControl::mHack->RefreshInterface();
 		break;
 
 	case eColorMaterialDiffuse:
 		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-		MaterialEv::mHack->RefreshInterface();
+		MaterialControl::mHack->RefreshInterface();
 		break;
 
 	case eColorMaterialSpecular:
 		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
-		MaterialEv::mHack->RefreshInterface();
+		MaterialControl::mHack->RefreshInterface();
 		break;
 
 	case eColorMaterialEmissive:
 		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
-		MaterialEv::mHack->RefreshInterface();
+		MaterialControl::mHack->RefreshInterface();
 		break;
 
 	case eColorLightAmbient: 
@@ -1435,7 +1435,7 @@ void freyja_handle_resource_start()
 	}
 
 	/* Setup material interface */
-	MaterialEv::mHack->RefreshInterface();
+	MaterialControl::mHack->RefreshInterface();
 
 	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);
@@ -1465,12 +1465,20 @@ void freyja_append_eventid(char *symbol, int eventid)
 
 void freyja_get_rc_path(char *s, long sz)
 {
-	long len;
-
-
 	s[0] = 0;
 
-#ifdef unix
+#ifdef WIN32
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+
+	long len = strlen(cwd);
+
+	if (sz < len)
+		return;
+	
+	snprintf(s, len, cwd);
+	s[len] = 0;
+#else
 	char *env;
 
 	env = getenv("HOME");
@@ -1481,22 +1489,13 @@ void freyja_get_rc_path(char *s, long sz)
 		return;
 	}
 
-	len = strlen(env) + strlen("/.freyja/");
+	long len = strlen(env) + strlen("/.freyja/");
 
 	if (sz < len)
 		return;
 
 	snprintf(s, len, "%s/.freyja/", env);
-#else
-	char cwd[1024];
-	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
-
-	len = strlen(cwd);
-
-	if (sz < len)
-		return;
-	
-	snprintf(s, len, cwd);
+	s[len] = 0;
 #endif
 }
 
@@ -1506,24 +1505,32 @@ void freyja_get_share_path(char *s, long sz)
 	if (sz < 64)
 		return;
 
-#ifdef unix
-	snprintf(s, strlen("/usr/share/freyja/"), "/usr/share/freyja/");
-#else
+#ifdef WIN32
 	char cwd[1024];
 	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
 	snprintf(s, strlen(cwd), cwd);
+#else
+	snprintf(s, strlen("/usr/share/freyja/"), "/usr/share/freyja/");
 #endif
 }
 
 
 void freyja_get_rc_filename(char *s, const char *filename, long sz)
 {
-	long len;
-
-
 	s[0] = 0;
 
-#ifdef unix
+#ifdef WIN32
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+
+	long len = strlen(cwd) + strlen(filename);
+
+	if (sz < len)
+		return;
+	
+	snprintf(s, len, "%s/%s", cwd, filename);
+	s[len] = 0;
+#else
 	char *env;
 
 	env = getenv("HOME");
@@ -1534,66 +1541,56 @@ void freyja_get_rc_filename(char *s, const char *filename, long sz)
 		return;
 	}
 
-	len = strlen(env) + strlen("/.freyja/") + strlen(filename);
+	long len = strlen(env) + strlen("/.freyja/") + strlen(filename);
 
 	if (sz < len)
 		return;
 
 	snprintf(s, len, "%s/.freyja/%s", env, filename);
-#else
-	char cwd[1024];
-	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
-
-	len = strlen(cwd) + strlen(filename);
-
-	if (sz < len)
-		return;
-	
-	snprintf(s, len, "%s/%s", cwd, filename);
+	s[len] = 0;
 #endif
 }
 
 
 void freyja_get_share_filename(char *s, const char *filename, long sz)
 {
-	long len;
-
-
 	s[0] = 0;
 
-#ifdef unix
-	len = strlen("/usr/share/freyja/") + strlen(filename);
-
-	if (sz < len)
-		return;
-
-	snprintf(s, len, "/usr/share/freyja/%s", filename);
-#else
+#ifdef WIN32
 	char cwd[1024];
 	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
 
-	len = strlen(cwd) + strlen(filename);
+	long len = strlen(cwd) + strlen(filename);
 
 	if (sz < len)
 		return;
 	
 	snprintf(s, len, "%s/%s", cwd, filename);
+	s[len] = 0;
+#else
+	long len = strlen("/usr/share/freyja/") + strlen(filename);
+
+	if (sz < len)
+		return;
+
+	snprintf(s, len, "/usr/share/freyja/%s", filename);
+	s[len] = 0;
 #endif
 }
 
 
 char freyja_is_user_installed()
 {
+#ifdef WIN32
+	return 1;
+#else
 	SystemIO::FileReader r;
 	char path[128];
 
 	freyja_get_rc_path(path, 128);
 
-#ifdef WIN32
-	return 1;
-#endif
-
 	return (r.DoesFileExist(path));
+#endif
 }
 
 
@@ -1768,7 +1765,13 @@ String freyja_get_resource_path()
 {
 	mstl::String s;
 
-#if defined unix || MACOSX
+#if WIN32
+	char cwd[1024];
+	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
+	
+	s = cwd;
+	s += "/";
+#else
 	char *env = getenv("HOME");
 	
 	if (!env || !env[0])
@@ -1782,12 +1785,6 @@ String freyja_get_resource_path()
 	}
 	
 	s += "/.freyja/";
-#else
-	char cwd[1024];
-	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
-	
-	s = cwd;
-	s += "/";
 #endif
 
 	return s;
@@ -1854,13 +1851,13 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 	if (size < 1)
 		return;
 
-#if defined unix || MACOSX
-	snprintf(dest, size, "%s/.freyja/icons/%s",
-			 (char *)getenv("HOME"), icon_name);
-#else
+#if WIN32
 	char cwd[1024];
 	SystemIO::File::GetCurrentWorkingDir(cwd, 1024);
 	snprintf(dest, size, "%s/icons/%s", cwd, icon_name);
+#else
+	snprintf(dest, size, "%s/.freyja/icons/%s",
+			 (char *)getenv("HOME"), icon_name);
 #endif
 
 	dest[size-1] = 0;

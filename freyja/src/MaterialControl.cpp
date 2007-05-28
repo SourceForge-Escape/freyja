@@ -5,7 +5,7 @@
  * Author  : Mongoose
  * Website : http://icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
- * Object  : MaterialEv
+ * Object  : MaterialControl
  * License : No use w/o permission, (C) 2000-2007 Mongoose
  * Comments: This class is an event control for backend materials, and
  *           the related user interface signals.
@@ -25,19 +25,19 @@
 #include "Texture.h"
 #include "FreyjaOpenGL.h"
 
-#include "MaterialEv.h"
+#include "MaterialControl.h"
 
 using namespace freyja3d;
 	
 
-MaterialEv *MaterialEv::mHack = NULL;
+MaterialControl *MaterialControl::mHack = NULL;
 
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-MaterialEv::MaterialEv() : EvSelectId(0), EvShineId(0), EvSetNameId(0), 
+MaterialControl::MaterialControl() : EvSelectId(0), EvShineId(0), EvSetNameId(0), 
 						   EvSetTextureNameId(0), mFlags(fNone)
 {
 	// We move to class based index_t later instead integer ids
@@ -50,7 +50,7 @@ MaterialEv::MaterialEv() : EvSelectId(0), EvShineId(0), EvSetNameId(0),
 }
 
 
-MaterialEv::~MaterialEv()
+MaterialControl::~MaterialControl()
 {
 }
 
@@ -60,7 +60,7 @@ MaterialEv::~MaterialEv()
 ////////////////////////////////////////////////////////////
 
 // Replace 'freyja' Material format with 'libfreyja' Material format + metadata
-bool MaterialEv::LoadMaterial(const char *filename)
+bool MaterialControl::LoadMaterial(const char *filename)
 {
 	if (!filename || !filename[0])
 	{
@@ -72,7 +72,7 @@ bool MaterialEv::LoadMaterial(const char *filename)
 
 	if (!r.Open(filename))
 	{
-		perror("MaterialEv::LoadMaterial() : ");
+		perror("MaterialControl::LoadMaterial() : ");
 		return false;
 	}
 
@@ -323,7 +323,7 @@ bool MaterialEv::LoadMaterial(const char *filename)
 
 
 // Replace 'freyja' Material format with 'libfreyja' Material format + metadata
-bool MaterialEv::SaveMaterial(const char *filename)
+bool MaterialControl::SaveMaterial(const char *filename)
 {
 	if (!filename || !filename[0])
 	{
@@ -417,7 +417,7 @@ bool MaterialEv::SaveMaterial(const char *filename)
 }
 
 
-void MaterialEv::RefreshInterface()
+void MaterialControl::RefreshInterface()
 {
 	uint32 mIndex = freyjaGetCurrentMaterial();
 		
@@ -500,73 +500,73 @@ void MaterialEv::RefreshInterface()
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void MaterialEv::AttachMethodListeners()
+void MaterialControl::AttachMethodListeners()
 {
-	CreateListener("eSetMaterialShaderFilename", &MaterialEv::EvNop);
+	CreateListener("eSetMaterialShaderFilename", &MaterialControl::EvNop);
 
-	EvSelectId = CreateListener("eSetMaterial", &MaterialEv::EvSelect);
-	EvAmbientId[0] = CreateListener("eMaterialAmbient0", &MaterialEv::EvAmbient0);
-	EvAmbientId[1] = CreateListener("eMaterialAmbient1", &MaterialEv::EvAmbient1);
-	EvAmbientId[2] = CreateListener("eMaterialAmbient2", &MaterialEv::EvAmbient2);
-	EvAmbientId[3] = CreateListener("eMaterialAmbient3", &MaterialEv::EvAmbient3);
-	EvDiffuseId[0] = CreateListener("eMaterialDiffuse0", &MaterialEv::EvDiffuse0);
-	EvDiffuseId[1] = CreateListener("eMaterialDiffuse1", &MaterialEv::EvDiffuse1);
-	EvDiffuseId[2] = CreateListener("eMaterialDiffuse2", &MaterialEv::EvDiffuse2);
-	EvDiffuseId[3] = CreateListener("eMaterialDiffuse3", &MaterialEv::EvDiffuse3);
-	EvSpecularId[0] = CreateListener("eMaterialSpecular0", &MaterialEv::EvSpecular0);
-	EvSpecularId[1] = CreateListener("eMaterialSpecular1", &MaterialEv::EvSpecular1);
-	EvSpecularId[2] = CreateListener("eMaterialSpecular2", &MaterialEv::EvSpecular2);
-	EvSpecularId[3] = CreateListener("eMaterialSpecular3", &MaterialEv::EvSpecular3);
-	EvEmissiveId[0] = CreateListener("eMaterialEmissive0", &MaterialEv::EvEmissive0);
-	EvEmissiveId[1] = CreateListener("eMaterialEmissive1", &MaterialEv::EvEmissive1);
-	EvEmissiveId[2] = CreateListener("eMaterialEmissive2", &MaterialEv::EvEmissive2);
-	EvEmissiveId[3] = CreateListener("eMaterialEmissive3", &MaterialEv::EvEmissive3);
-	EvShineId = CreateListener("eMaterialShine", &MaterialEv::EvShine);
-	EvSetNameId = CreateListener("eSetMaterialName", &MaterialEv::EvSetName);
-	EvSetShaderId =CreateListener("eSetMaterialShader", &MaterialEv::EvSetShader);
+	EvSelectId = CreateListener("eSetMaterial", &MaterialControl::EvSelect);
+	EvAmbientId[0] = CreateListener("eMaterialAmbient0", &MaterialControl::EvAmbient0);
+	EvAmbientId[1] = CreateListener("eMaterialAmbient1", &MaterialControl::EvAmbient1);
+	EvAmbientId[2] = CreateListener("eMaterialAmbient2", &MaterialControl::EvAmbient2);
+	EvAmbientId[3] = CreateListener("eMaterialAmbient3", &MaterialControl::EvAmbient3);
+	EvDiffuseId[0] = CreateListener("eMaterialDiffuse0", &MaterialControl::EvDiffuse0);
+	EvDiffuseId[1] = CreateListener("eMaterialDiffuse1", &MaterialControl::EvDiffuse1);
+	EvDiffuseId[2] = CreateListener("eMaterialDiffuse2", &MaterialControl::EvDiffuse2);
+	EvDiffuseId[3] = CreateListener("eMaterialDiffuse3", &MaterialControl::EvDiffuse3);
+	EvSpecularId[0] = CreateListener("eMaterialSpecular0", &MaterialControl::EvSpecular0);
+	EvSpecularId[1] = CreateListener("eMaterialSpecular1", &MaterialControl::EvSpecular1);
+	EvSpecularId[2] = CreateListener("eMaterialSpecular2", &MaterialControl::EvSpecular2);
+	EvSpecularId[3] = CreateListener("eMaterialSpecular3", &MaterialControl::EvSpecular3);
+	EvEmissiveId[0] = CreateListener("eMaterialEmissive0", &MaterialControl::EvEmissive0);
+	EvEmissiveId[1] = CreateListener("eMaterialEmissive1", &MaterialControl::EvEmissive1);
+	EvEmissiveId[2] = CreateListener("eMaterialEmissive2", &MaterialControl::EvEmissive2);
+	EvEmissiveId[3] = CreateListener("eMaterialEmissive3", &MaterialControl::EvEmissive3);
+	EvShineId = CreateListener("eMaterialShine", &MaterialControl::EvShine);
+	EvSetNameId = CreateListener("eSetMaterialName", &MaterialControl::EvSetName);
+	EvSetShaderId =CreateListener("eSetMaterialShader", &MaterialControl::EvSetShader);
 
 	EvSetTextureId = 
-	CreateListener("eSetMaterialTexture", &MaterialEv::EvSetTexture);
+	CreateListener("eSetMaterialTexture", &MaterialControl::EvSetTexture);
 
 	EvSetTextureNameId = 
-	CreateListener("eSetTextureNameA", &MaterialEv::EvSetTextureName);
+	CreateListener("eSetTextureNameA", &MaterialControl::EvSetTextureName);
 
-	CreateListener("eNewMaterial", &MaterialEv::EvNewMaterial);
-	CreateListener("eOpenMaterial", &MaterialEv::EvOpenMaterial);
-	CreateListener("eSaveMaterial", &MaterialEv::EvSaveMaterial);
+	CreateListener("eNewMaterial", &MaterialControl::EvNewMaterial);
+	CreateListener("eOpenMaterial", &MaterialControl::EvOpenMaterial);
+	CreateListener("eSaveMaterial", &MaterialControl::EvSaveMaterial);
 
 	EvEnableBlendingId = 
-	CreateListener("eEnableMaterialBlending", &MaterialEv::EvEnableBlending);
+	CreateListener("eEnableMaterialBlending", &MaterialControl::EvEnableBlending);
 
 	EvEnableTextureId = 
-	CreateListener("eEnableMaterialTexture", &MaterialEv::EvEnableTexture);
+	CreateListener("eEnableMaterialTexture", &MaterialControl::EvEnableTexture);
 
-	CreateListener("eEnableDetailTexture", &MaterialEv::EvEnableDetailTexture);
+	CreateListener("eEnableDetailTexture", &MaterialControl::EvEnableDetailTexture);
 
-	CreateListener("eTextureSlotLoad", &MaterialEv::EvTextureSlotLoad);
-	CreateListener("eMaterialSlotLoad", &MaterialEv::EvMaterialSlotLoad);
+	CreateListener("eTextureSlotLoad", &MaterialControl::EvTextureSlotLoad);
+	CreateListener("eMaterialSlotLoad", &MaterialControl::EvMaterialSlotLoad);
 
-	CreateListener("eEnableNormalize", &MaterialEv::EvEnableNormalize);
+	CreateListener("eEnableNormalize", &MaterialControl::EvEnableNormalize);
 
 	EvGLSLFragmentModeId =
-	CreateListener("eGLSLFragmentMode", &MaterialEv::EvGLSLFragmentMode);
+	CreateListener("eGLSLFragmentMode", &MaterialControl::EvGLSLFragmentMode);
 
 	EvARBFragmentModeId = 
-	CreateListener("eARBFragmentMode", &MaterialEv::EvARBFragmentMode);
+	CreateListener("eARBFragmentMode", &MaterialControl::EvARBFragmentMode);
 
-	CreateListener("eOpenShader", &MaterialEv::EvOpenShader);
-	CreateListener("eOpenTexture", &MaterialEv::EvOpenTexture);
+	CreateListener("eOpenShader", &MaterialControl::EvOpenShader);
+	CreateListener("eOpenTexture", &MaterialControl::EvOpenTexture);
 
-	CreateListener("eBlendSrc", &MaterialEv::EvBlendSrc);
-	CreateListener("eBlendDest", &MaterialEv::EvBlendDest);
+	CreateListener("eBlendSrc", &MaterialControl::EvBlendSrc);
+	CreateListener("eBlendDest", &MaterialControl::EvBlendDest);
 
-	CreateListener("eTextureUpload", &MaterialEv::EvTextureUpload);
+	CreateListener("eTextureUpload", &MaterialControl::EvTextureUpload);
 
-	//CreateListener("", &MaterialEv::);
+	//CreateListener("", &MaterialControl::);
 }
 
 
-bool MaterialEv::LoadTexture(const char *filename)
+bool MaterialControl::LoadTexture(const char *filename)
 {
 	int err = -1;
 
@@ -670,7 +670,7 @@ bool MaterialEv::LoadTexture(const char *filename)
 }
 
 
-bool MaterialEv::LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
+bool MaterialControl::LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
 								   uint32 bpp, uint32 colortype)
 {
 	if (image == NULL || width == 0 || height == 0 || bpp == 0)
@@ -694,7 +694,7 @@ bool MaterialEv::LoadTextureBuffer(byte *image, uint32 width, uint32 height,
 
 	if (err < 0)
 	{
-		printf("MaterialEv::LoadTextureBuffer() ERROR Loading buffer\n");
+		printf("MaterialControl::LoadTextureBuffer() ERROR Loading buffer\n");
 	}
 
 	return (err == 0);
@@ -705,7 +705,7 @@ bool MaterialEv::LoadTextureBuffer(byte *image, uint32 width, uint32 height,
 // Public Events 
 ////////////////////////////////////////////////////////////
 
-void MaterialEv::SetAmbient(uint32 i, vec_t value)
+void MaterialControl::SetAmbient(uint32 i, vec_t value)
 {
 	vec4_t color;
 	freyjaGetMaterialAmbient(freyjaGetCurrentMaterial(), color);
@@ -715,7 +715,7 @@ void MaterialEv::SetAmbient(uint32 i, vec_t value)
 }
 
 
-void MaterialEv::SetDiffuse(uint32 i, vec_t value)
+void MaterialControl::SetDiffuse(uint32 i, vec_t value)
 {
 	vec4_t color;
 	freyjaGetMaterialDiffuse(freyjaGetCurrentMaterial(), color);
@@ -725,7 +725,7 @@ void MaterialEv::SetDiffuse(uint32 i, vec_t value)
 }
 
 
-void MaterialEv::SetSpecular(uint32 i, vec_t value)
+void MaterialControl::SetSpecular(uint32 i, vec_t value)
 {
 	vec4_t color;
 	freyjaGetMaterialSpecular(freyjaGetCurrentMaterial(), color);
@@ -735,7 +735,7 @@ void MaterialEv::SetSpecular(uint32 i, vec_t value)
 }
 
 
-void MaterialEv::SetEmissive(uint32 i, vec_t value)
+void MaterialControl::SetEmissive(uint32 i, vec_t value)
 {
 	vec4_t color;
 	freyjaGetMaterialEmissive(freyjaGetCurrentMaterial(), color);
@@ -749,7 +749,7 @@ void MaterialEv::SetEmissive(uint32 i, vec_t value)
 // Events 
 ////////////////////////////////////////////////////////////
 
-void MaterialEv::EvSelect(uint32 value)
+void MaterialControl::EvSelect(uint32 value)
 {
 	if (!freyja_event_set_range(EvSelectId, value, 
 								0, freyjaGetMaterialCount()-1))
@@ -774,14 +774,14 @@ void MaterialEv::EvSelect(uint32 value)
 }
 
 
-void MaterialEv::EvShine(vec_t value)
+void MaterialControl::EvShine(vec_t value)
 {	
 	freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
 	freyja_event_gl_refresh();
 }
 
 
-void MaterialEv::EvSetName(char *text)
+void MaterialControl::EvSetName(char *text)
 {
 	if (text && text[0])
 	{
@@ -790,7 +790,7 @@ void MaterialEv::EvSetName(char *text)
 }
 
 
-void MaterialEv::EvBlendSrc(uint32 value)
+void MaterialControl::EvBlendSrc(uint32 value)
 {
 	index_t material = freyjaGetCurrentMaterial();
 
@@ -864,7 +864,7 @@ void MaterialEv::EvBlendSrc(uint32 value)
 }
 
 
-void MaterialEv::EvBlendDest(uint32 value)
+void MaterialControl::EvBlendDest(uint32 value)
 {
 	index_t material = freyjaGetCurrentMaterial();
 
@@ -938,7 +938,7 @@ void MaterialEv::EvBlendDest(uint32 value)
 }
 
 
-void MaterialEv::EvEnableDetailTexture(uint32 value)
+void MaterialControl::EvEnableDetailTexture(uint32 value)
 {
 	if (value)
 	{
@@ -955,7 +955,7 @@ void MaterialEv::EvEnableDetailTexture(uint32 value)
 }
 
 
-void MaterialEv::EvEnableNormalize(uint32 value)
+void MaterialControl::EvEnableNormalize(uint32 value)
 {
 	if (value)
 	{
@@ -973,7 +973,7 @@ void MaterialEv::EvEnableNormalize(uint32 value)
 }
 
 
-void MaterialEv::EvEnableBlending(uint32 value)
+void MaterialControl::EvEnableBlending(uint32 value)
 {
 	if (value)
 	{
@@ -991,7 +991,7 @@ void MaterialEv::EvEnableBlending(uint32 value)
 }
 
 
-void MaterialEv::EvEnableTexture(uint32 value)
+void MaterialControl::EvEnableTexture(uint32 value)
 {
 	if (value)
 	{
@@ -1009,14 +1009,14 @@ void MaterialEv::EvEnableTexture(uint32 value)
 }
 
 
-void MaterialEv::EvNewMaterial()
+void MaterialControl::EvNewMaterial()
 {
 	index_t i = freyjaMaterialCreate();
 	freyja_print("New material [%i] created.", i);
 }
 
 
-void MaterialEv::EvOpenMaterial(char *filename)
+void MaterialControl::EvOpenMaterial(char *filename)
 {
 	if (LoadMaterial(filename))
 	{
@@ -1025,13 +1025,13 @@ void MaterialEv::EvOpenMaterial(char *filename)
 }
 
 
-void MaterialEv::EvSaveMaterial(char *filename)
+void MaterialControl::EvSaveMaterial(char *filename)
 {
 	SaveMaterial(filename);
 }
 
 
-void MaterialEv::EvSetTextureName(char *text)
+void MaterialControl::EvSetTextureName(char *text)
 {
 	static bool haltTexture = false;
 
@@ -1044,14 +1044,14 @@ void MaterialEv::EvSetTextureName(char *text)
 }
 
 
-void MaterialEv::EvSetShader(uint32 value)
+void MaterialControl::EvSetShader(uint32 value)
 {
 	freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
 	freyja_event_gl_refresh();
 }
 
 
-void MaterialEv::EvSetTexture(uint32 value)
+void MaterialControl::EvSetTexture(uint32 value)
 {
 	SetSelected(value);
 	freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
@@ -1059,7 +1059,7 @@ void MaterialEv::EvSetTexture(uint32 value)
 }
 
 
-void MaterialEv::EvTextureUpload(uint32 id)
+void MaterialControl::EvTextureUpload(uint32 id)
 {
 	byte *image;
 	uint32 w, h, bpp, type;
@@ -1090,7 +1090,7 @@ void MaterialEv::EvTextureUpload(uint32 id)
 }
 
 
-void MaterialEv::EvOpenTexture(char *text)
+void MaterialControl::EvOpenTexture(char *text)
 {
 	if (text == NULL || text[0] == 0) 
 		return;
@@ -1115,7 +1115,7 @@ void MaterialEv::EvOpenTexture(char *text)
 }
 
 
-void MaterialEv::EvOpenShader(char *text)
+void MaterialControl::EvOpenShader(char *text)
 {
 	if (text == NULL || text[0] == 0) 
 		return;
@@ -1157,7 +1157,7 @@ void MaterialEv::EvOpenShader(char *text)
 }
 
 
-void MaterialEv::EvARBFragmentMode(uint32 value)
+void MaterialControl::EvARBFragmentMode(uint32 value)
 {
 	if (value)
 	{
@@ -1168,7 +1168,7 @@ void MaterialEv::EvARBFragmentMode(uint32 value)
 }
 
 
-void MaterialEv::EvGLSLFragmentMode(uint32 value)
+void MaterialControl::EvGLSLFragmentMode(uint32 value)
 {
 	if (value)
 	{
@@ -1179,7 +1179,7 @@ void MaterialEv::EvGLSLFragmentMode(uint32 value)
 }
 
 
-byte *MaterialEv::GenerateTextureCheckerBoard(byte bg[4], byte fg[4],
+byte *MaterialControl::GenerateTextureCheckerBoard(byte bg[4], byte fg[4],
 											  uint32 width, uint32 height,
 											  uint32 runlen)
 {
@@ -1221,37 +1221,37 @@ byte *MaterialEv::GenerateTextureCheckerBoard(byte bg[4], byte fg[4],
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-uint32 MaterialEv::CreateListener(const char *name, MethodPtr ptr)
+uint32 MaterialControl::CreateListener(const char *name, MethodPtr ptr)
 {
 	MethodDelegate *d = 
-	new MethodDelegateArg0<MaterialEv>(this, ptr);
+	new MethodDelegateArg0<MaterialControl>(this, ptr);
 	ResourceEventDelegate::add(name, d);
 	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-uint32 MaterialEv::CreateListener(const char *name, MethodPtr1f ptr)
+uint32 MaterialControl::CreateListener(const char *name, MethodPtr1f ptr)
 {
 	MethodDelegate *d = 
-	new MethodDelegateArg1<MaterialEv, vec_t>(this, ptr);
+	new MethodDelegateArg1<MaterialControl, vec_t>(this, ptr);
 	ResourceEventDelegate::add(name, d);
 	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-uint32 MaterialEv::CreateListener(const char *name, MethodPtr1s ptr)
+uint32 MaterialControl::CreateListener(const char *name, MethodPtr1s ptr)
 {
 	MethodDelegate *d = 
-	new MethodDelegateArg1<MaterialEv, char *>(this, ptr);
+	new MethodDelegateArg1<MaterialControl, char *>(this, ptr);
 	ResourceEventDelegate::add(name, d);
 	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
-uint32 MaterialEv::CreateListener(const char *name, MethodPtr1u ptr)
+uint32 MaterialControl::CreateListener(const char *name, MethodPtr1u ptr)
 {
 	MethodDelegate *d = 
-	new MethodDelegateArg1<MaterialEv, uint32>(this, ptr);
+	new MethodDelegateArg1<MaterialControl, uint32>(this, ptr);
 	ResourceEventDelegate::add(name, d);
 	return ResourceEvent::GetResourceIdBySymbol(name);
 }

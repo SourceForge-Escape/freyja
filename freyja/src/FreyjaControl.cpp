@@ -4632,7 +4632,7 @@ void FreyjaControl::LoadResource()
 
 	if (failed)
 	{
-		MARK_MSGF("ERROR: Couldn't find resource file '%s'\n", s.c_str());
+		FREYJA_ASSERTMSG(0, "ERROR: Couldn't find resource file '%s'\n", s.c_str());
 		freyja_event_shutdown();
 	}
 

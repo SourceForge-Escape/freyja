@@ -1,0 +1,87 @@
+################################################################
+# libfreyja Core Makefile
+#
+# -- History ---------------------------------------------------
+#
+# 2007.05.11:
+# Mongoose - Created from old unified Makefile. 
+################################################################
+
+################################################################
+# Target name and Version
+################################################################
+
+NAME=freyja
+MAJOR_VERSION=0
+MINOR_VERSION=9
+MICRO_VERSION=5
+REVSION=10
+BUILD_DATE=`date +%Y%m%d`
+BUILD_ID=$(BUILD_DATE)
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(REVSION)
+ARCHIVE_NAME=lib$(NAME)-$(VERSION)-$(BUILD_ID)
+API=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
+WEBSITE="http://icculus.org/freyja"
+EMAIL="mongooseichiban@gmail.com"
+LICENSE=LGPL
+
+################################################################
+# Common directories
+################################################################
+
+TREE_DIR=libfreyja
+SRC_DIR=freyja
+BUILD_ROOT_DIR=../bin/libfreyja
+
+################################################################
+# Common precompiler defines
+################################################################
+
+COMMON_INCLUDES=-I. -I../libfreyja/ -I../libhel/ -I../mstl/
+COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
+		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
+		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
+		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
+		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
+		-DMODEL_PLUGINS -DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
+
+COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
+
+COMMON_LD_FLAGS=-lhel-0.0.2
+
+################################################################
+# Object targets
+################################################################
+
+OBJS = \
+	$(BUILDDIR)/freyja.o \
+	$(BUILDDIR)/Bone.o \
+	$(BUILDDIR)/BoneABI.o \
+	$(BUILDDIR)/Camera.o \
+	$(BUILDDIR)/FreyjaFSM.o \
+	$(BUILDDIR)/FreyjaImage.o \
+	$(BUILDDIR)/FreyjaPakReader.o \
+	$(BUILDDIR)/FreyjaTexture.o \
+	$(BUILDDIR)/KeyFrame.o \
+	$(BUILDDIR)/LegacyABI.o \
+	$(BUILDDIR)/Light.o \
+	$(BUILDDIR)/LightABI.o \
+	$(BUILDDIR)/Material.o \
+	$(BUILDDIR)/MaterialABI.o \
+	$(BUILDDIR)/Mesh.o \
+	$(BUILDDIR)/MeshABI.o \
+	$(BUILDDIR)/Model.o \
+	$(BUILDDIR)/ModelABI.o \
+	$(BUILDDIR)/PakABI.o \
+	$(BUILDDIR)/PerlinNoise.o \
+	$(BUILDDIR)/PluginABI.o \
+	$(BUILDDIR)/Plugin.o \
+	$(BUILDDIR)/Printer.o \
+	$(BUILDDIR)/PythonABI.o \
+	$(BUILDDIR)/RigidBody.o \
+	$(BUILDDIR)/Skeleton.o \
+	$(BUILDDIR)/Track.o \
+	$(BUILDDIR)/Vertex.o
+
+
+

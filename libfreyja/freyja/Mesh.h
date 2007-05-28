@@ -38,6 +38,8 @@
 #include "Weight.h"
 #include "Vertex.h"
 #include "Face.h"
+#include "Edge.h"
+#include "Plane.h"
 
 using namespace mstl;
 using namespace freyja;
@@ -525,6 +527,27 @@ public:
 	 *        and you don't want to do that very often.
 	 ------------------------------------------------------*/
 
+	void UpdateBoundingVolume();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Rebuilds bounding volumes.
+	 *
+	 ------------------------------------------------------*/
+
+	void UpdateEdgeGraph();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Rebuilds edge graph by checking every face.
+	 *
+	 ------------------------------------------------------*/
+
+	void UpdatePlaneGeometry();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Rebuilds list of planes from facet list.
+	 *
+	 ------------------------------------------------------*/
+
 	void UpdateVertexReferenceWithSelectedBias();
 	void UpdateVertexReferenceWithColorBias(uint32 uvmap);
 	void UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter);
@@ -893,13 +916,6 @@ public:
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : All face is removed from mesh.
-	 *
-	 ------------------------------------------------------*/
-
-	void UpdateBoundingVolume();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Rebuilds bounding volumes.
 	 *
 	 ------------------------------------------------------*/
 
@@ -1592,7 +1608,9 @@ private:
 
 	Vector<Weight *> mWeights;
 
-	Vector<Face::Connectivity *> mFacesConnectivity;
+	Vector<Plane *> mPlanes;
+
+	Vector<Edge *> mEdges;
 };
 
 
