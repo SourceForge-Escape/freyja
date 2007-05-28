@@ -1165,6 +1165,7 @@ void FreyjaRender::RenderMeshShadowVolume(index_t mesh)
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
 
+	glFrontFace(GL_CCW);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDepthMask(GL_FALSE);

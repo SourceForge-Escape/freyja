@@ -5,18 +5,20 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
- * Now the 'switch of doom' event system has been completely replaced it's
-   time to reduce other parts of the UI.
+ * Single joint animation shishi odoshi tutorial demo.
+
+ * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
+
+ * Edge editing.
+	- Mesh::RebuildEdgeGraph()
+	- Mesh::RebuildPlanes()
+	- RELATED Cache s-edge results until light / mesh moves.
 
  * Verify math library, enforce automated testing at build.
+	- Depends on new cmake build system being merged into public svn.
 	- Make sure everything is using col hel::Mat44 correctly now.
 		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
-
- * Bulid and distribute Gtk+ 2.10 for WIN32 cross compile build environment.
-
- * Edge editing.
-	* RELATED Cache s-edge results until light / mesh moves.
 
  * Fix groups box ids -- go back to proper bitflags like in 0.9.3/4.
 
@@ -57,7 +59,14 @@
 	- Change vfs file list to have mixed dir/files in one pane to follow HIG.
 
  * Skeletal animation refactor
+	- Visualize weights over skinned mesh
+		- Select/highlight2 vertices by bone
+	- Keyframe editor improvements
+		- Move to time based UI and new containers 
+		- Finalize the interpolation system in libfreyja
+		- Curve editor ( OpenGL UI based editor )
 	- Fix and reenable Undo for new joint transforms.
+	- Hookup threaded timers/time based renderer for animation playback mode.
 	- Skeleton level transforms should only handle root/children.
 	- Better 'pose' interface: transparency on cursors / bones, scaling UI.
 	- X->Z swap event for bones, etc
@@ -78,23 +87,17 @@
 	- Ordering support
 	- Type of transform support
 	- Constraints support
+	- Ref weights from vertex to fix blending issues
 	- Reverse bone rendering direction option <-- --->  large part to leaf
 
- * Single joint animations for shishi odoshi tutorial demo.
-	- Mesh parenting and grouping
-	- Visualize weights over skinned mesh
-	- Keyframe editor improvements
-	- Finalize the interpolation system in libfreyja
-	- Curve editor ( OpenGL UI based editor )
-	- Hookup threaded timers for animation playback mode.
-	- Allow plugin usage of objects that are 'sparse' eg allow NULL objects
-	- Make generic plugin interface for new UI control points
-	- Renable 'direct' vertex animation creation
-	  ( Letting the user move selected points in vertex morph mode )
-	- Ref weights from vertex to fix blending issues
-	- ZIP file based pak format for freyja format models w/ textures, etc?
-	- Rendering support for alpha flagged faces ( separate pass depth sorting )
-		- Face flag for marking faces that need to be depth sorted... 
+ * Make generic plugin interface for new UI control points.
+
+ * ZIP file based pak format for freyja format models w/ textures, etc?
+	
+ * Mesh parenting and grouping.
+
+ * Rendering support for alpha flagged faces ( separate pass depth sorting )
+	- Face flag for marking faces that need to be depth sorted... 
 
  * Material sphere rotation controlled by slider.
 
@@ -193,6 +196,9 @@
  * Break up UVMaps by smoothing groups/materials per mesh via toggle option.
 
  * MOTD / autoupdate plugin.
+
+ * Renable 'direct' vertex animation creation by request.
+	- Letting the user move selected points in vertex morph mode
 
 
  Freyja, Dancer/Kagura 0.9.6 (Beta-Release, TBD)

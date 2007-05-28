@@ -56,7 +56,9 @@ Mesh::Mesh() :
 	mFreedTexCoords(),
 	mFaces(),
 	mVertices(),
-	mWeights()
+	mWeights(),
+	mPlanes(),
+	mEdges()
 {
 	mVertexPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
 	mNormalPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
@@ -100,7 +102,9 @@ Mesh::Mesh(const Mesh &mesh) :
 	mFreedTexCoords(mesh.mFreedTexCoords),
 	mFaces(),
 	mVertices(),
-	mWeights()
+	mWeights(),
+	mPlanes(),
+	mEdges()
 {
 	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
 	mName[mNameSize-1] = 0;
@@ -2625,6 +2629,72 @@ void Mesh::UpdateBoundingVolume()
 	}
 
 	SetPosition(GetBoundingVolumeCenter());
+}
+
+
+void Mesh::UpdateEdgeGraph()
+{
+	mEdges.erase();
+
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f)
+		{
+			// Iterate over indices list, and find edges
+			for (uint32 j = 1, jn = f->mIndices.size(); j < jn; ++j)
+			{
+				Edge *e = new Edge(f->mIndices[j-1], f->mIndices[j-1]);
+				uint32 k;
+
+				foreach (mEdges, k)
+				{
+					if (*(mEdges[k]) == *e)
+					{
+						delete e;
+						e = NULL;
+						break;
+					}
+				}
+
+				if (e)
+				{
+					mEdges.push_back(e);
+				}
+			}
+
+			// Could use vertex references to find facet neighbours
+		}
+	}	
+}
+
+
+void Mesh::UpdatePlaneGeometry()
+{	
+	mPlanes.erase();
+
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f)
+		{
+			// Iterate over indices list, and find edges
+			for (uint32 j = 2, jn = f->mIndices.size(); j < jn; ++j)
+			{
+				Vec3 a = GetVertexPosition(f->mIndices[j-2]);
+				Vec3 b = GetVertexPosition(f->mIndices[j-1]);
+				Vec3 c = GetVertexPosition(f->mIndices[j]);
+
+				// Make a new plane, or append if exists
+			}
+
+			// Could use vertex references to find facet neighbours
+		}
+	}
 }
 
 

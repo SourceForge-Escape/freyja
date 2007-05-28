@@ -5,7 +5,7 @@
  * Author  : Mongoose
  * Website : http://icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
- * Object  : MaterialEv
+ * Object  : MaterialControl
  * License : No use w/o permission, (C) 2000-2007 Mongoose
  * Comments: This class is an event control for backend materials, and
  *           the related user interface signals.
@@ -17,8 +17,8 @@
  * Mongoose - Created, reformed from various events and such.
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA3D_MATERIALEV_H_
-#define GUARD__FREYJA3D_MATERIALEV_H_
+#ifndef GUARD__FREYJA3D_MATERIALCONTROL_H_
+#define GUARD__FREYJA3D_MATERIALCONTROL_H_
 
 #include <hel/math.h>
 #include <hel/Ray.h>
@@ -29,7 +29,7 @@
 
 namespace freyja3d {
 
-class MaterialEv : public Control
+class MaterialControl : public Control
 {
  public:
 
@@ -46,17 +46,17 @@ class MaterialEv : public Control
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	MaterialEv();
+	MaterialControl();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructor for MaterialEv.
+	 * Post : Constructor for MaterialControl.
 	 *
 	 ------------------------------------------------------*/
 
-	~MaterialEv();
+	~MaterialControl();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Deconstructor for MaterialEv.
+	 * Post : Deconstructor for MaterialControl.
 	 *
 	 ------------------------------------------------------*/
 
@@ -400,22 +400,22 @@ class MaterialEv : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	void EvNop() { Print("MaterialEv::Nop() Called."); }
+	void EvNop() { Print("MaterialControl::Nop() Called."); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : NOP.
 	 *
 	 ------------------------------------------------------*/
 
-	static MaterialEv *mHack;  // FIXME: Stopgap until refactor is done 
+	static MaterialControl *mHack;  // FIXME: Stopgap until refactor is done 
 
 
  private:
 
-	typedef void (MaterialEv::*MethodPtr)();
-	typedef void (MaterialEv::*MethodPtr1f)(vec_t);
-	typedef void (MaterialEv::*MethodPtr1s)(char *);
-	typedef void (MaterialEv::*MethodPtr1u)(uint32);
+	typedef void (MaterialControl::*MethodPtr)();
+	typedef void (MaterialControl::*MethodPtr1f)(vec_t);
+	typedef void (MaterialControl::*MethodPtr1s)(char *);
+	typedef void (MaterialControl::*MethodPtr1u)(uint32);
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors
@@ -480,4 +480,4 @@ class MaterialEv : public Control
 
 } // namespace freyja3d 
 
-#endif // GUARD__FREYJA3D_MATERIAL_H_
+#endif // GUARD__FREYJA3D_MATERIALCONTROL_H_

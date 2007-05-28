@@ -1,0 +1,72 @@
+################################################################
+# libmgtk Core Makefile
+#
+# -- History ---------------------------------------------------
+#
+# 2007.05.11:
+# Mongoose - Created from old unified Makefile. 
+################################################################
+
+################################################################
+# Target name and Version
+################################################################
+
+NAME=mgtk
+MAJOR_VERSION=0
+MINOR_VERSION=2
+MICRO_VERSION=10
+REVSION=0
+BUILD_DATE=`date +%Y%m%d`
+BUILD_ID=$(BUILD_DATE)
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(REVSION)
+ARCHIVE_NAME=lib$(NAME)-$(VERSION)-$(BUILD_ID)
+API=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
+WEBSITE="http://icculus.org/freyja"
+EMAIL="mongooseichiban@gmail.com"
+LICENSE=LGPL
+
+################################################################
+# Common directories
+################################################################
+
+TREE_DIR=libmgtk
+SRC_DIR=mgtk
+BUILD_ROOT_DIR=../bin/libmgtk
+
+################################################################
+# Common precompiler defines
+################################################################
+
+COMMON_INCLUDES=-I. -I../libmgtk/ -I../libhel/ -I../mstl/
+COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
+		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
+		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
+		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
+		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
+		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
+		-DUSING_GTK_2_0 -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL \
+		-DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR -DMGTKEXPORTSCLASS
+
+COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
+
+COMMON_LD_FLAGS=
+
+################################################################
+# Object targets
+################################################################
+
+OBJS = \
+	$(BUILDDIR)/ConfirmationDialog.o \
+	$(BUILDDIR)/MLisp.o \
+	$(BUILDDIR)/QueryDialog.o \
+	$(BUILDDIR)/Resource.o \
+	$(BUILDDIR)/ResourceEvent.o \
+	$(BUILDDIR)/mgtk_callbacks.o \
+	$(BUILDDIR)/mgtk_interface.o \
+	$(BUILDDIR)/mgtk_linker.o \
+	$(BUILDDIR)/mgtk_resource.o \
+	$(BUILDDIR)/mgtk_filedialog.o \
+	$(BUILDDIR)/mgtk_tree.o
+
+
+
