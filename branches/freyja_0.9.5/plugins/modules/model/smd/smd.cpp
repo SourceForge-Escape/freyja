@@ -29,12 +29,14 @@
 #include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/TextureABI.h>
+#include <freyja/MaterialABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/freyja.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
 #include <mstl/Vector.h>
 #include <hel/Vec3.h>
+#include <hel/Mat44.h>
 #include <hel/Quat.h>
 
 using namespace mstl;
@@ -55,7 +57,9 @@ void freyja_init()
 	freyjaPluginAddExtention1s("*.smd");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
-	freyjaPluginArg1f("scale", 0.15f);
+	freyjaPluginArg1f("scale", 1.0f);
+	freyjaPluginArg1i("up", 1);
+	freyjaPluginArg1i("weighted", 0);
 	freyjaPluginArg1i("import_mesh", 1);
 	freyjaPluginArg1i("export_mesh", 0);
 }
@@ -84,6 +88,7 @@ typedef struct {
 	int id;
 	int parent;
 	String name;
+	int idx;
 
 } smd_bone_t;
 
@@ -95,7 +100,7 @@ int freyja_model__smd_import(char *filename)
 		return -1;
 	}
 
-	SystemIO::TextFileReader r;
+	SystemIO::BufferedTextFileReader r;
 	
 	if ( !r.Open(filename) )
 	{
@@ -112,6 +117,12 @@ int freyja_model__smd_import(char *filename)
 	// Skeleton only? || Complete model? || Keyframe?
 	int import_mesh = 0;
 	freyjaGetPluginArg1i(pluginId, "import_mesh", &import_mesh);
+
+	int up = 1;
+	freyjaGetPluginArg1i(pluginId, "up", &up);
+
+	int weighted = 0;
+	freyjaGetPluginArg1i(pluginId, "weighted", &weighted);
 	
 	// If we're in an interactive program this will prompt for arg values.
 	//freyjaPluginRequestUserInput();
@@ -121,7 +132,8 @@ int freyja_model__smd_import(char *filename)
 	index_t model = freyjaModelCreate();
 	index_t skeleton = INDEX_INVALID;
 
-	Vector <smd_bone_t *> bones;
+	Vector<smd_bone_t *> bones;
+	Vector<String> materials;
 	const char *symbol;
 	mstl::String mat = "none.mat";
 	index_t matId = 0;
@@ -149,20 +161,21 @@ int freyja_model__smd_import(char *filename)
 		}
 		else if (!strncmp(symbol, "skeleton", 8))
 		{
-			symbol = r.ParseSymbol();
-			int time = r.ParseInteger();
-			//printf("%s = %i\n", symbol, time);
-
-			// FIXME: if time != 0 we might just want to force keyframes here
-
 			skeleton = freyjaSkeletonCreate();
 			freyjaModelAddSkeleton(model, skeleton);
 
-			while ((symbol = r.ParseSymbol()) && 
-					strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
+			int time = 0;
+
+			while ( ( symbol = r.ParseSymbol() )  && !r.IsEndOfFile() )
 			{
-				if (!symbol)
+				if (!symbol || !strncmp(symbol, "end", 3) )
 					break;
+
+				if ( !strncmp(symbol, "time", 4) )
+				{
+					time = r.ParseInteger();
+					continue;
+				}
 
 				int idx = atoi(symbol);
 				hel::Vec3 loc(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
@@ -170,72 +183,159 @@ int freyja_model__smd_import(char *filename)
 				hel::Vec3 rot(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
 
 				// Convert coords
-				//loc.Set(loc.mX, loc.mZ, loc.mY);
-				//rot.Set(rot.mX, rot.mZ, rot.mY);
+				switch (up)
+				{
+				case 0:
+					{
+						matrix_t m = {0,1,0,0, -1,0,0,0, 0,0,1,0, 0,0,0,1 };
+						hel::Mat44 mat(m);
+						loc = mat * loc;
+					}
+					break;
+
+				case 2:
+					{
+						matrix_t m = {-1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,0,0,1 };
+						hel::Mat44 mat(m);
+						loc = mat * loc;
+					}
+					break;
+				}
 
 				smd_bone_t *bone = bones[idx];
 
-				index_t b = freyjaBoneCreate(skeleton);
-				freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
-				freyjaBoneRotateEuler3f(b, rot.mX, rot.mY, rot.mZ);
-
-				if (bone && idx < (int)bones.size())
+				// Skeleton
+				if (time == 0)
 				{
-					freyjaBoneParent(b, bone->parent);
-					freyjaBoneName(b, bone->name.c_str());
-					freyjaBoneAddChild(bone->parent, b);
+					index_t b = freyjaBoneCreate(skeleton);
+#if 0
+					// Found some kind of odd SMD -- not just coord system?
+					hel::Mat44 m, x, y, z;
+					x.SetRotationX(rot.mX);
+					y.SetRotationY(rot.mY);
+					z.SetRotationZ(rot.mZ);
+
+					m = x * y * z;
+					hel::Quat q = m.ToQuat();
+					freyjaBoneRotateQuat4f(b, -q.mW, q.mX, q.mZ, q.mY);
+#else
+					freyjaBoneRotateEuler3f(b, rot.mX, rot.mY, rot.mZ);
+#endif
+
+
+					freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
+					
+					
+					bone->idx = b;
+
+					if (bone && idx < (int)bones.size())
+					{
+						freyjaBoneParent(b, bone->parent);
+						freyjaBoneName(b, bone->name.c_str());
+						freyjaBoneAddChild(bone->parent, b);
+					}
+				}
+				else if (bone) // Keyframes
+				{
+					index_t track = freyjaBoneTrackNew(bone->idx);
+					index_t rkey = freyjaBoneKeyFrameNew(bone->idx, track, time);
+					freyjaBoneRotKeyFrameEuler3f(bone->idx, track, rkey,
+							rot.mX, rot.mY, rot.mZ);
+					index_t tkey = freyjaBoneKeyFrameNew(bone->idx, track, time);
+					freyjaBonePosKeyFrame3f(bone->idx, track, tkey, 
+							loc.mX, loc.mY, loc.mZ);
 				}
 			}
 
 			freyjaSkeletonUpdateBones(skeleton);
-
 			bones.erase(); // calls delete [] 
-
 			// End skeleton
 		}
-		else if (!strncmp(symbol, "triangles", 9))
+		else if ( !strncmp(symbol, "triangles", 9) )
 		{
 			// Start a new mesh
 			index_t mesh = freyjaMeshCreate();
 			freyjaModelAddMesh(model, mesh);
 	
-			while ((symbol = r.ParseSymbol()) && strncmp(symbol, "end", 3) != 0 && !r.IsEndOfFile())
+			while ( ( symbol = r.ParseSymbol() ) && !r.IsEndOfFile() )
 			{
+				if ( !strncmp(symbol, "end", 3)  )
+					break;
+
 				if (!symbol || !import_mesh)
 					break;
 
-#if 0
-				if (mat != symbol)
+				// Only way to be sure about materail requests
 				{
-					matId = freyjaMaterialCreate();
-					freyjaMaterialTexture( idx, freyjaTextureCreateFilename(symbol) );
-					mat = symbol;
-				}
-#endif
+					const char *material = symbol;
+					unsigned int i;
+					bool found  = false;
 
+					foreach(materials, i)
+					{
+						if (materials[i] == material)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						materials.push_back( String(material) );
+						index_t mat = freyjaMaterialCreate();
+						index_t texture = freyjaTextureCreateFilename(material);
+						freyjaMaterialTexture(mat, texture);
+						matId = mat;
+					}
+
+				}
 
 				index_t face = freyjaMeshPolygonCreate(mesh);
 				freyjaMeshPolygonMaterial(mesh, face, matId);
 				freyjaMeshPolygonGroup1u(mesh, face, matId);
 
-				hel::Vec3 u;
+				hel::Vec3 pos, norm, uv;
 				for (unsigned int i = 0; i < 3; ++i)
 				{
 					int parent = r.ParseInteger();
 
-					u.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					pos.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+					pos *= scale;
+					norm.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+
 					// Convert coords
-					//u.Set(u.mX, u.mZ, u.mY);
-					u *= scale;
-					index_t v = freyjaMeshVertexCreate3fv(mesh, u.mVec);
+					//
+
+					switch (up)
+					{
+					case 0:
+						pos.Set(pos.mY, pos.mX, pos.mZ);
+						norm.Set(norm.mY, norm.mX, norm.mZ);
+
+					case 2:
+						pos.Set(pos.mX, pos.mZ, pos.mY);
+						norm.Set(norm.mX, norm.mZ, norm.mY);
+						break;
+					}
+
+					if (weighted)
+					{
+						// FIXME: No support for preweighted vertices!
+					}
+
+					index_t v = freyjaMeshVertexCreate3fv(mesh, pos.mVec);
 					freyjaMeshPolygonAddVertex1i(mesh, face, v);	
 
-					u.Set(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
-					// Convert coords
-					//u.Set(u.mX, u.mZ, u.mY);
-					freyjaMeshVertexNormal3fv(mesh, v, u.mVec);
+					freyjaMeshVertexNormal3fv(mesh, v, norm.mVec);
 				
-					index_t t = freyjaMeshTexCoordCreate2f(mesh, r.ParseFloat(), r.ParseFloat());
+					uv.mX = r.ParseFloat();
+					uv.mY = r.ParseFloat();
+
+					if (uv.mY < 0.0f) uv.mY = -uv.mY;
+					if (uv.mX < 0.0f) uv.mX = -uv.mX;
+
+					index_t t = freyjaMeshTexCoordCreate2f(mesh, uv.mX, uv.mY);
 					freyjaMeshPolygonAddTexCoord1i(mesh, face, t);
 
 

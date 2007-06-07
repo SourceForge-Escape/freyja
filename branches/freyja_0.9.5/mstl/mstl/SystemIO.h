@@ -323,7 +323,7 @@ public:
 		}
 
 
-		bool IsEndOfFile()
+		virtual bool IsEndOfFile()
 		{
 			return (feof(mFileHandle) != 0);
 		}
@@ -748,7 +748,7 @@ public:
 				fseek(mFileHandle, mStart, SEEK_SET);
 				mFileData = new unsigned char[size+1];
 #ifdef DEBUG
-				memset(mFileData, 0xcd, size);
+				//memset(mFileData, 0xcd, size);
 #endif
 				fread(mFileData, 1, size, mFileHandle); 
 				//FileReader::ReadBuffer(size, mFileData);
@@ -775,7 +775,7 @@ public:
 				fseek(mFileHandle, mStart, SEEK_SET);
 				mFileData = new unsigned char[mEnd+1];
 #ifdef DEBUG
-				memset(mFileData, 0xcd, mEnd);
+				//memset(mFileData, 0xcd, mEnd);
 #endif
 				fread(mFileData, 1, mEnd, mFileHandle); 
 				//FileReader::ReadBuffer(mEnd, mFileData);
@@ -999,6 +999,458 @@ public:
 
 	};
 
+
+	class BufferedTextFileReader : public File
+	{
+	public:
+		BufferedTextFileReader() : File(), mFileData(NULL), mCursor(0), mStart(0), mEnd(0)  { }
+		~BufferedTextFileReader() { FlushBuffer();  }
+
+		char *mFileData;
+		unsigned long mCursor;
+		unsigned long mStart;
+		unsigned long mEnd;
+
+		char *GetCompleteFileBuffer() { return mFileData; }
+
+		unsigned long GetCompleteFileBufferSize() { return mEnd; }
+
+		virtual unsigned long GetFileSize() { return mEnd; }
+
+		void FlushBuffer() 
+		{ 
+			if (mFileData) 
+				delete [] mFileData; 
+		
+			mCursor = mStart = mEnd = 0;
+		}
+
+		virtual bool IsEndOfFile()
+		{
+			return (mCursor == mEnd);
+		}
+
+		bool IsValidRead(long sz) { return ((mCursor + sz) <= mEnd); }
+
+		bool MemRead(void *ptr, size_t size)
+		{
+			bool read = false;
+
+			// FIXME: Should I do partial reads here to match file I/O?
+			if (IsValidRead(size))
+			{
+				memcpy(ptr, mFileData+mCursor, size);
+				mCursor += size;
+				read = true;
+			}
+			else
+			{
+				//MSTL_MSG("Invalid read size %i.  %i / %i", size, mCursor, mEnd);
+			}
+
+			return read;
+		}
+
+		virtual long GetOffset()
+		{
+			return mCursor-mStart; // for chunks
+		}
+
+		virtual bool SetOffset(long offset)
+		{
+			offset += mStart; // for chunks
+			bool t = (offset <= (long)mEnd);
+			if (t) mCursor = offset;
+			return t;
+		}
+
+		virtual void SetOffsetToEnd()
+		{
+			mCursor = mEnd;
+		}
+
+		virtual bool OpenChunk(char *buffer, unsigned int size) 
+		{
+			bool load = false;
+			FlushBuffer();
+
+			if (buffer)
+			{
+				mEnd = size;
+				mStart = 0;
+				mCursor = mStart;
+				mFileData = buffer;
+				load = true;
+			}
+
+			return load;
+		}
+
+
+		virtual bool OpenChunk(const char *filename, 
+									  unsigned int offset, unsigned int size) 
+		{
+			bool load = false;
+			FlushBuffer();
+
+			if (File::Open(filename, "rb"))
+			{
+				fseek(mFileHandle, 0, SEEK_END);
+
+				if (offset + size > ftell(mFileHandle))
+					return false;
+
+				mEnd = offset + size;
+				mStart = offset;
+				fseek(mFileHandle, mStart, SEEK_SET);
+				mFileData = new char[size+2];
+				fread(mFileData, 1, size, mFileHandle); 
+				mFileData[size+1] = 0;			
+
+				mCursor = mStart;
+				load = true;
+			}
+
+			return load;
+		}
+
+
+		virtual bool Open(const char *filename) 
+		{
+			bool load = false;
+			FlushBuffer();
+
+			if (File::Open(filename, "rb"))
+			{
+				fseek(mFileHandle, 0, SEEK_END);
+				mEnd = ftell(mFileHandle);
+				mStart = 0;
+				fseek(mFileHandle, mStart, SEEK_SET);
+				mFileData = new char[mEnd+2];
+				fread(mFileData, 1, mEnd, mFileHandle); 
+				mFileData[mEnd+1] = 0;
+				mCursor = 0;
+
+				load = true;
+			}
+
+			return load;
+		}
+		
+		virtual bool ReadBuffer(unsigned long length, unsigned char *buffer)
+		{
+			return MemRead(buffer, length);
+		}
+
+
+		virtual bool ReadString(unsigned long length, char *buffer)
+		{
+			return MemRead(buffer, length);
+		}
+
+
+		void AllocateBuffer()
+		{
+			if (mBufferSize == 0)
+				SetBufferSize(2048);
+
+			mBuffer[0] = '\0';
+		}
+
+
+		// Stops on '\0' and EOF
+		bool FindNextChar(char c)
+		{
+			bool found = false;
+			char lex;
+
+			while ((lex = NextChar()) && !IsEndOfFile())
+			{
+				if (c == lex)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			return found;
+		}
+
+		char ReadChar() { return NextChar(); }
+
+		char NextChar()
+		{
+			char c;
+			MemRead(&c, 1);
+			return c;
+		}
+
+
+		double ParseDouble()
+		{
+			double r;
+			const char *s = ParseSymbol();
+			sscanf(s, "%lf", &r);
+			return r;
+		}
+
+
+		float ParseFloat()
+		{
+			float r;
+			const char *s = ParseSymbol();
+			sscanf(s, "%f", &r);
+			return r;
+		}
+
+
+		int ParseInteger()
+		{
+			int i;
+			const char *s = ParseSymbol();
+			sscanf(s, "%i", &i);
+			return i;
+		}
+
+
+		bool ParseBool()
+		{
+			const char *sym = ParseSymbol();
+
+			 if (strncmp(sym, "true", 4) == 0 || strncmp(sym, "TRUE", 4) == 0 )
+				 return true;
+
+			return false;
+		}
+
+
+		bool ParseMatchingSymbol(const char *symbol)
+		{
+			/* Assumes !(!symbol) && !(!symbol[0]) */
+			long l = strlen(symbol);
+			const char *sym = ParseSymbol();
+			bool test = (!strncmp(symbol, sym, l));
+
+			if (!test) printf("Not matched: '%s' != '%s'\n", symbol, sym);
+
+			return test;
+		}
+
+
+		const char *ParseStringLiteral()
+		{
+			long l, i = 0, state = 0;
+			char *s;
+			char c, lc = 0;
+
+			AllocateBuffer();	
+
+			while (i < mBufferSize && MemRead(&c, 1) )
+			{
+				switch (state)
+				{
+				case 0:
+					if (c == '"')
+						state = 1;
+					break;
+
+				case 1:
+					if (c == '"' && lc != '\\')  // Allow quote escapes?
+					{
+						i = mBufferSize;
+					}
+					else
+					{
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+				}
+
+				lc = c;
+			}
+
+			l = strlen(mBuffer);
+			s = new char[l+1];
+			strncpy(s, mBuffer, l);
+			s[l] = 0;
+
+			return s;
+		}
+
+
+		const char *GetLine()
+		{
+			long i = 0;
+			char c;
+
+			AllocateBuffer();
+
+			while (i < mBufferSize && MemRead(&c, 1) )
+			{
+				switch (c)
+				{
+				case '\r':
+					break;
+
+				case '\n':
+					i = mBufferSize;
+					break;
+
+				default:
+					mBuffer[i++] = c;
+					mBuffer[i] = 0;
+				}
+			}
+
+			return mBuffer;
+		}
+
+
+		// Delimited by until string eg "," stops parsing at the first ','
+		const char *ParseSymbol(const char *until)
+		{
+			long i = 0, state = 0, untilI = 0;
+			bool untilFound = false;
+			char c;
+
+			AllocateBuffer();
+
+			while (i < mBufferSize && MemRead(&c, 1) )
+			{
+				if (c == until[untilI])
+				{
+					++untilI;
+
+					// Found the delimter, so quit parsing
+					if ( untilI == '\0' )
+						untilFound = true;;
+				}
+				else
+				{
+					untilI = 0;
+				}
+			  
+
+				switch (state)
+				{
+				case 0:
+					if (c == '/')
+					{
+						state = 1;
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;	
+					}
+					else if (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+					{
+						if (i > 0)
+							i = mBufferSize;
+					}
+					else
+					{
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+
+				case 1:
+					if (c == '/')
+					{
+						state = 2;
+						--i;
+						mBuffer[i] = 0;
+					}
+					else
+					{
+						state = 0;
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+
+				case 2:
+					if (c == '\n')
+					{
+						/* Only wrap lines when given a only comment line(s) */
+						if (i > 0)
+							i = mBufferSize;
+						else
+							state = 0;
+					}
+					break;
+				}
+
+				if (untilFound)
+					break;
+			}
+
+			return mBuffer;
+		}
+
+
+		// Supports C++ style comments, and strips whitespace
+		const char *ParseSymbol()
+		{
+			long i = 0, state = 0;
+			char c;
+
+			AllocateBuffer();
+
+			while (i < mBufferSize && MemRead(&c, 1) )
+			{
+				switch (state)
+				{
+				case 0:
+					if (c == '/')
+					{
+						state = 1;
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;	
+					}
+					else if (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+					{
+						if (i > 0)
+							i = mBufferSize;
+					}
+					else
+					{
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+
+				case 1:
+					if (c == '/')
+					{
+						state = 2;
+						--i;
+						mBuffer[i] = 0;
+					}
+					else
+					{
+						state = 0;
+						mBuffer[i++] = c;
+						mBuffer[i] = 0;
+					}
+					break;
+
+				case 2:
+					if (c == '\n')
+					{
+						/* Only wrap lines when given a only comment line(s) */
+						if (i > 0)
+							i = mBufferSize;
+						else
+							state = 0;
+					}
+					break;
+				}
+			}
+
+			return mBuffer;
+		}
+		
+	};
 
 	class TextFileReader : public File
 	{

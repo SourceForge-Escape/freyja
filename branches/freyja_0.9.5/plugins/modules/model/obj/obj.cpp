@@ -193,6 +193,10 @@ int freyja_model__obj_export(char *filename)
 
 		w.Print("\ng %s\n", freyjaGetMeshNameString(meshIndex));
 
+		/* Material - FIXME: Should be across faces */
+		index_t material = freyjaGetMeshPolygonMaterial(meshIndex, 0);
+		w.Print("\nusemtl %s\n", freyjaGetMaterialTextureName(material));
+
 		/* Vertices */
 		w.Print("\n# vertexCount %li\n", vertexCount);
 		for (j = 0; j < vertexCount; ++j)

@@ -520,7 +520,7 @@ class Mat44
 	matrix_t mMatrix;                 /* Matrix data */
 #else
 	union {          /* Vector data */
-		vec3_t mVec;
+		matrix_t mMatrix;        
 
 		struct { // mRowCol             // OpenGL, Column order matrix_t
 			vec_t m00, m10, m20, m30;	// | 0  4  8  12 |  | m00 m01 m02 m03 |
