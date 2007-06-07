@@ -70,13 +70,14 @@
 
 			(menu_seperator)
 
-			(submenu	eImportFile	"_Import...")
-			(submenu	eExportFile	"_Export...")
+			(submenu	eImportFile	"_Import Model...")
+			(submenu	eExportFile	"_Export Model...")
 
 			(menu_seperator)
 
 			(menu_item "_Close"	eCloseFile		"C-w"	"gtk-close")
 			(menu_item "_Quit"	eShutdown			"C-q"	"gtk-quit"))
+
 
 
 		(submenu "_Edit"
@@ -150,6 +151,7 @@
 					(menu_item "_Sphere"	eGenerateSphere		"gtk-sphere")
 				)
 		) ;; End submenu Create
+
 
 
 		(submenu "_Modify"
@@ -238,6 +240,11 @@
 				(submenu "_Test"
 					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
+
+		(submenu "_Animation"
+			(submenu	eNone	"_Import...")
+			(submenu	eNone	"_Export...")
+		)
 
 		(menu_seperator)
 
@@ -671,7 +678,7 @@
 	
 				(hbox 1 0 0 1 0 
 					(label "Material index: " 0.0 0.5) 
-					(spinbutton 0 0 100 eSetMaterial))
+					(spinbutton 0 0 1024 eSetMaterial))
 
 				(hbox 1 1 0 1 1	(label "Set material for..." 0.0 0.5))
 				(hbox 1 1 0 1 1	(hsep))

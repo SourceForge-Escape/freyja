@@ -2040,6 +2040,8 @@ void FreyjaRender::DrawUVWindow()
 
 	mgl2dProjection(width, height);
 
+	DrawQuad(0.0f, 0.0f, width, height);
+
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
@@ -2055,27 +2057,28 @@ void FreyjaRender::DrawUVWindow()
 		// FIXME: This will do many points for each point, opt later
 		//        when we can't have mixed polymaps
 		glBegin(GL_POINTS);
-		glColor3fv(mColorVertexHighlight);	
+		glColor3fv(mColorVertexHighlight);
+		index_t selected = freyjaGetCurrentMaterial();//FreyjaControl::mInstance->GetSelectedTexture();
 
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
 			Face *f = m->GetFace(i);
 
-			if (!f)
-				//f->mMaterial != FreyjaControl::mInstance->GetSelectedMaterial())
+			if (!f || f->mMaterial != selected)
 				continue;
 
 			mstl::Vector<index_t> &indices = 
-			((f->mFlags & Face::fPolyMappedTexCoords) ? 
-			 f->mTexCoordIndices : f->mIndices);
+				(f->mFlags & Face::fPolyMappedTexCoords && f->mTexCoordIndices.size()) ? 
+					f->mTexCoordIndices : f->mIndices;
 
 			for (uint32 j = 0, jn = indices.size(); j < jn; ++j)
 			{
 				hel::Vec3 v;
-				m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-				v[0] *= width;
-				//v[1] *= height;
-				v[1] = height - v[1]*height;
+				m->GetTexCoord(indices[j], v.mVec);
+
+				v.mX *= width;
+				v.mY = height - v.mY * height;
+
 				glVertex2fv(v.mVec);
 			}
 		}
@@ -2089,7 +2092,7 @@ void FreyjaRender::DrawUVWindow()
 			Face *f = m->GetFace(i);
 			hel::Vec3 v;
 			
-			if (!f) 
+			if (!f || f->mMaterial != selected) 
 				continue;
 			
 			/* Render face as wireframe */
@@ -2100,33 +2103,30 @@ void FreyjaRender::DrawUVWindow()
 			else
 				glColor3fv(mColorWireframe);
 			
-			if (f->mFlags & Face::fPolyMappedTexCoords)
+			mstl::Vector<index_t> &indices = 
+				(f->mFlags & Face::fPolyMappedTexCoords && f->mTexCoordIndices.size()) ? 
+					f->mTexCoordIndices : f->mIndices;
+
+			for (uint32 j = 0, jn = indices.size(); j < jn; ++j)
 			{
-				for (uint32 j = 0, jn = f->mTexCoordIndices.size(); j < jn; ++j)
-				{
-					m->GetTexCoord(f->mTexCoordIndices[j], v.mVec);
-					v.mVec[0] *= width;
-					v.mVec[1] = height - v.mVec[1]*height;
-					glVertex2fv(v.mVec);
-				}
-			}
-			else
-			{
-				for (uint32 j = 0, jn = f->mIndices.size(); j < jn; ++j)
-				{
-					m->GetTexCoord(f->mIndices[j], v.mVec);
-					v.mVec[0] *= width;
-					v.mVec[1] = height - v.mVec[1]*height;
-					glVertex2fv(v.mVec);
-				}
+				hel::Vec3 v;
+				m->GetTexCoord(indices[j], v.mVec);
+
+				v.mX *= width;
+				v.mY = height - v.mY * height;
+
+				glVertex2fv(v.mVec);
 			}
 			
 			glEnd();
 		}
 	}
 
-	DrawQuad(0.0, 0.0, width, height);
 	glPopAttrib();
+
+
+	
+
 	ResizeContext(width, height);
 	glPopMatrix();
 }

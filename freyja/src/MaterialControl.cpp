@@ -37,8 +37,9 @@ MaterialControl *MaterialControl::mHack = NULL;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-MaterialControl::MaterialControl() : EvSelectId(0), EvShineId(0), EvSetNameId(0), 
-						   EvSetTextureNameId(0), mFlags(fNone)
+MaterialControl::MaterialControl() : 
+	EvSelectId(0), EvShineId(0), EvSetNameId(0), 
+	EvSetTextureNameId(0), mFlags(fNone)
 {
 	// We move to class based index_t later instead integer ids
 	for (uint32 i = 0; i < 4; ++i)
