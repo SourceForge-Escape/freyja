@@ -5,7 +5,10 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.10
- 20070514-20070527 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ 20070514- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX UV editor renderer was using incorrect texcoord array!
+ - SMD plugin: handles invalid uvs, keyframing, materials, etc
+ - New tinyxml checked into svn.
  - Finishing up cmake for svn commit.
  - Finished up separate GNU Makefiles per platform for svn commit.
  - WIN32 defined used instead of looking for unix || darwin || etc.
