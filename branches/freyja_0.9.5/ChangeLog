@@ -6,6 +6,10 @@
 
  Kagura prealpha, 0.9.5.10
  20070514- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Lua + XML backend backed out for now.
+ - Various cmake fixes.
+ - Dropped the 'rich' GNU Makefiles, all projects use cmake for 'native'.
+ - Removed old C# prototype from svn
  - FIX UV editor renderer was using incorrect texcoord array!
  - SMD plugin: handles invalid uvs, keyframing, materials, etc
  - New tinyxml checked into svn.

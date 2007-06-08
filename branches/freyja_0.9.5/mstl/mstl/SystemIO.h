@@ -1158,6 +1158,14 @@ public:
 		}
 
 
+		// Search for EOL, will return true if only encounters whitespace
+		// until EOL is found
+		bool FindNextEOL()
+		{
+			return false;
+		}
+
+
 		// Stops on '\0' and EOF
 		bool FindNextChar(char c)
 		{
@@ -1217,7 +1225,7 @@ public:
 		{
 			const char *sym = ParseSymbol();
 
-			 if (strncmp(sym, "true", 4) == 0 || strncmp(sym, "TRUE", 4) == 0 )
+			 if ( !strncmp(sym, "true", 4) || !strncmp(sym, "TRUE", 4) )
 				 return true;
 
 			return false;

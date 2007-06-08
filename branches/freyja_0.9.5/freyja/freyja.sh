@@ -10,7 +10,7 @@ then
 fi
 
 mkdir -p ${LIB_PATH}
-export LD_LIBRARY_PATH=${LIB_PATH}
+export LD_LIBRARY_PATH=${LIB_PATH}:../tinyxml:../libhel:../libfreyja:../libmgtk
 
 # Copy the bins and libraries from their build directories.
 cp -f ../bin/freyja/linux/${SELECT}/freyja ${LIB_PATH}

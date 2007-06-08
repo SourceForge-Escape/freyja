@@ -187,17 +187,17 @@ int freyja_model__smd_import(char *filename)
 				{
 				case 0:
 					{
-						matrix_t m = {0,1,0,0, -1,0,0,0, 0,0,1,0, 0,0,0,1 };
-						hel::Mat44 mat(m);
-						loc = mat * loc;
+						//matrix_t m = {0,1,0,0, -1,0,0,0, 0,0,1,0, 0,0,0,1 };
+						//hel::Mat44 mat(m);
+						//loc = mat * loc;
 					}
 					break;
 
 				case 2:
 					{
-						matrix_t m = {-1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,0,0,1 };
-						hel::Mat44 mat(m);
-						loc = mat * loc;
+						//matrix_t m = {-1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,0,0,1 };
+						//hel::Mat44 mat(m);
+						//loc = mat * loc;
 					}
 					break;
 				}
@@ -208,6 +208,8 @@ int freyja_model__smd_import(char *filename)
 				if (time == 0)
 				{
 					index_t b = freyjaBoneCreate(skeleton);
+
+					// SMD is already in radians, right handed...
 #if 0
 					// Found some kind of odd SMD -- not just coord system?
 					hel::Mat44 m, x, y, z;
@@ -216,16 +218,28 @@ int freyja_model__smd_import(char *filename)
 					z.SetRotationZ(rot.mZ);
 
 					m = x * y * z;
+
+					//matrix_t t = {0,1,0,0, -1,0,0,0, 0,0,1,0, 0,0,0,1 };
+					//m = m * hel::Mat44(t);
+					
+
 					hel::Quat q = m.ToQuat();
-					freyjaBoneRotateQuat4f(b, -q.mW, q.mX, q.mZ, q.mY);
+					//freyjaBoneRotateQuat4f(b, -q.mW, q.mX, q.mZ, q.mY);
+					freyjaBoneRotateQuat4f(b, q.mW, q.mX, q.mY, q.mZ);
 #else
+					//rot *= (HEL_PI / 32768.0f); // Nope, seems to be in rad
+					//rot *= 57;  // Nope, freyja takes radians now	
+
 					freyjaBoneRotateEuler3f(b, rot.mX, rot.mY, rot.mZ);
 #endif
 
 
+
+					
 					freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
-					
-					
+
+					rot *= 57;
+					printf("-- %i. %f %f %f\n", b, rot.mX, rot.mY, rot.mZ);
 					bone->idx = b;
 
 					if (bone && idx < (int)bones.size())
@@ -345,6 +359,8 @@ int freyja_model__smd_import(char *filename)
 					//
 					// Remaining of 1.0 weight assigned to parent, but if
 					// there is no num_weights set parent to 1.0 automatically.
+
+					//unsigned int offset = r.GetOffset();
 
 					freyjaMeshVertexWeight(mesh, v, parent, 1.0f);
 				}

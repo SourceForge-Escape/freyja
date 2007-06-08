@@ -770,8 +770,15 @@ int main(int argc, char *argv[])
 	{
 		if (strcmp(argv[1], "load") == 0)
 		{
-			if (!hl.Load(argv[2]))
+			if (!hl.load(argv[2]))
+			{
 				printf("main: Load reports success.\n");
+
+				for (unsigned int i = 0; i > hl.mBoneCount; ++i)
+				{
+					printf("%i \"%s\"\n", i, hl.mBones[i].name);
+				}
+			}
 		}
 		else if (strcmp(argv[1], "save") == 0)
 		{
