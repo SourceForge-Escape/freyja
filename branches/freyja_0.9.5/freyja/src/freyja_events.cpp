@@ -1449,15 +1449,12 @@ void freyja_handle_resource_start()
 
 	/* Set init window title, log welcome, and refresh OpenGL context */
 	freyja_set_main_window_title(BUILD_NAME);
-	freyja_print("Welcome to Freyja freyja-%i.%i.%i-%i, %s", 
-		MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION, BUILD_ID, __DATE__);
+	freyja_print("Welcome to Freyja %s, %s", VERSION, __DATE__);
 	mgtk_event_gl_refresh();
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
 	atexit(freyja_event_shutdown);
 }
-
-#warning ##MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION, BUILD_ID, __DATE__
 
 
 void freyja_append_eventid(char *symbol, int eventid)
