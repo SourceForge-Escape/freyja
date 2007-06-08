@@ -203,10 +203,10 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) targets NAME=ase SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
-	PROG_OBJS="$(BUILD_TEST_DIR)/Ase.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	$(MAKE) targets NAME=halflife SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
+	PROG_OBJS="$(BUILD_TEST_DIR)/HalfLife.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_HALFLIFE $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ -lhel-0.0.2 -lfreyja-0.9.5 -L../../../../bin/libhel/linux/debug/ -L../../../../bin/libfreyja/linux/debug/ -lpthread"
 
 
 ##########################################################################
