@@ -26,6 +26,10 @@
 #ifndef GUARD__FREYJA_SKELETON_H_
 #define GUARD__FREYJA_SKELETON_H_
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
 #include <hel/math.h>
 #include <mstl/Vector.h>
 #include "freyja.h"
@@ -114,6 +118,22 @@ class Skeleton
 	 * Pre  :  
 	 * Post : Writes skeleton chunk out to text file
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	bool Serialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes object to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool Unserialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unserializes object from XML.
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 
 	////////////////////////////////////////////////////////////

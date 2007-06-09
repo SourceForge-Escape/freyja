@@ -88,6 +88,39 @@ bool Skeleton::Serialize(SystemIO::TextFileWriter &w)
 }
 
 
+#if 0 //TINYXML_FOUND
+bool Skeleton::Serialize(TiXmlElement *container)
+{
+	w.Print("Skeleton\n");
+	w.Print("\t mVersion 1\n");
+	
+	w.Print("\t mUID %u\n", mUID);
+
+	w.Print("\t mName \"%s\"\n", mName);
+
+	w.Print("\t mBones %u ", mBones.size());
+	for (uint32 i = 0, n = mBones.size(); i < n; ++i)
+	{
+		w.Print("%u ", mBones[i]);
+	}
+	w.Print("\n");
+
+	w.Print("\t mRoot %u\n", mRoot);
+
+	w.Print("END");
+
+	return true;
+}
+
+	bool Unserialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unserializes object from XML.
+	 *
+	 ------------------------------------------------------*/
+#endif
+
+
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
@@ -108,7 +141,7 @@ void Skeleton::AddBone(index_t bone)
 		b->mSkeleton = GetUID();
 	}
 
-	mBones.pushBack(bone);
+	mBones.push_back(bone);
 }
 
 

@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.10
  20070514- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX joint animation in correct units.
+ - Checking in 'partial' XML serializers. (skeleton/track/mesh/weightmap/etc)
  - Lua + XML backend backed out for now.
  - Various cmake fixes.
  - Dropped the 'rich' GNU Makefiles, all projects use cmake for 'native'.

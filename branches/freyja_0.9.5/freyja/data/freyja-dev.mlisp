@@ -241,9 +241,21 @@
 					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
 
-		(submenu "_Animation"
+		(submenu "_XML"
 			(submenu	eNone	"_Import...")
-			(submenu	eNone	"_Export...")
+			(menu_seperator)
+			(submenu	eNone	"_Export Model...")
+			(menu_seperator)
+			(submenu	eNone	"_Export Mesh...")
+			(menu_seperator)
+			(submenu	eNone	"_Export Weights...")
+			(menu_seperator)
+			(submenu	eNone	"_Export Track...")
+			(menu_seperator)
+			(submenu	eNone	"_Export Keyframe...")
+			(menu_seperator)
+			(menu_item	"_Import Skeleton..." eXMLToBones "gtk-open")
+			(menu_item	"_Export Skeleton" eBonesToXML "gtk-save-as")
 		)
 
 		(menu_seperator)

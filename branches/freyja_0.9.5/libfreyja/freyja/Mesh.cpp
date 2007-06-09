@@ -417,6 +417,142 @@ bool Mesh::SerializePool(SystemIO::TextFileReader &r, const char *name,
 }
 
 
+#if 0 //TINYXML_FOUND
+bool Mesh::SerializePool(TiXmlElement *container, const char *name,
+						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
+{
+	if (!array.size())
+	{
+		w.Print("\t%sStack %u\n", name, 0);
+		w.Print("\t%sArray %u\n", name, 0);	
+		return true;
+	}
+
+	{
+		w.Print("\t%sStack %u\n", name, stack.size());
+		mstl::StackNode<index_t> *cur = stack.top();
+
+		// FIXME: This will cause it to read in reverse, but it doesn't matter 
+		while (cur)
+		{
+			index_t data = cur->Data();
+			w.Print("%u ", data);
+			cur = cur->Prev();
+		}
+
+		w.Print("\n");
+	}
+
+	w.Print("\t%sArray %u\n", name, array.size());
+	for (uint32 i = 0, n = array.size(); i < n; ++i)
+	{
+		if (i % 3 == 0) w.Print("\n\t"); // Makes it easier on text editors
+		w.Print("%f ", array[i]);
+	}
+	w.Print("\n");
+
+	return true;
+}
+
+
+// Option to 'shrink' mesh data ( Remove dump unreferenced data and fill gaps. )
+bool Mesh::Serialize(TiXmlElement *container)
+{
+	if (!container)
+		return false;
+
+	TiXmlElement *mesh = new TiXmlElement("Mesh");
+	container->LinkEndChild(mesh);
+
+	mesh->SetAttribute("version", "3");
+	mesh->SetAttribute("name", mName);
+	mesh->SetAttribute("uid", mUID);
+	mesh->SetAttribute("flags", mFlags);
+	mesh->SetAttribute("material-id", mMaterialIndex);
+
+	TiXmlElement *pos = new TiXmlElement("pos");
+	pos->SetDoubleAttribute("x", mPosition.mX);
+	pos->SetDoubleAttribute("y", mPosition.mY);
+	pos->SetDoubleAttribute("z", mPosition.mZ);
+	mesh->LinkEndChild(pos);
+
+	TiXmlElement *rot = new TiXmlElement("rotate");
+	rot->SetDoubleAttribute("x", mRotation.mX);
+	rot->SetDoubleAttribute("y", mRotation.mY);
+	rot->SetDoubleAttribute("z", mRotation.mZ);
+	mesh->LinkEndChild(rot);
+
+	TiXmlElement *sz = new TiXmlElement("scale");
+	sz->SetDoubleAttribute("x", mScale.mX);
+	sz->SetDoubleAttribute("y", mScale.mY);
+	sz->SetDoubleAttribute("z", mScale.mZ);
+	mesh->LinkEndChild(sz);
+
+	TiXmlElement *bbox = new TiXmlElement("BoundingBox");
+	bbox->SetDoubleAttribute("min-x", mBoundingVolume.mBox.mMin.mX);
+	bbox->SetDoubleAttribute("min-y", mBoundingVolume.mBox.mMin.mY);
+	bbox->SetDoubleAttribute("min-z", mBoundingVolume.mBox.mMin.mZ);
+	bbox->SetDoubleAttribute("max-x", mBoundingVolume.mBox.mMax.mX);
+	bbox->SetDoubleAttribute("max-y", mBoundingVolume.mBox.mMax.mY);
+	bbox->SetDoubleAttribute("max-z", mBoundingVolume.mBox.mMax.mZ);
+	bbox->SetDoubleAttribute("max-z", mBoundingVolume.mBox.mMax.mZ);
+	mesh->LinkEndChild(bbox);
+
+	TiXmlElement *bs = new TiXmlElement("BoundingSphere");
+	bs->SetDoubleAttribute("x", mBoundingVolume.mSphere.mCenter.mX);
+	bs->SetDoubleAttribute("y", mBoundingVolume.mSphere.mCenter.mY);
+	bs->SetDoubleAttribute("z", mBoundingVolume.mSphere.mCenter.mZ);
+	bs->SetDoubleAttribute("radius", mBoundingVolume.mSphere.mRadius);
+	mesh->LinkEndChild(bs);
+
+	SerializePool(mesh, "mVertex", mVertexPool, mFreedVertices);
+	SerializePool(mesh, "mTexCoord", mTexCoordPool, mFreedTexCoords);
+	SerializePool(mesh, "mNormal", mNormalPool, mFreedNormals);
+
+	w.Print("\t mWeights %u\n", mWeights.size());
+	for (uint32 i = 0, n = mWeights.size(); i < n; ++i)
+	{
+		Weight *ww = GetWeight(i);
+		if (ww) ww->Serialize(mesh); else w.Print("\t\tNULL\n");
+	}
+
+	w.Print("\t mVertices %u\n", mVertices.size());
+	for (uint32 i = 0, n = mVertices.size(); i < n; ++i)
+	{
+		Vertex *v = GetVertex(i);
+		if (v) v->Serialize(mesh); else w.Print("\t\tNULL\n");
+	}
+
+	for (uint32 i = 0, n = mFaces.size(), count = 0; i < n; ++i)
+	{
+		if (GetFace(i)) ++count;
+	}
+
+	w.Print("\t mFaces %u\n", mFaces.size());
+	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
+	{
+		Face *f = GetFace(i);
+		if (f) f->Serialize(mesh); else w.Print("\t\tNULL\n");
+	}
+
+	w.Print("\t mTracks %u\n", 1); // only have one in test =p
+	mTrack.Serialize(mesh);
+
+	w.Print("\t mVertexAnimTracks %u\n", 1); // only have one in test =p
+	mVertexAnimTrack.Serialize(mesh);
+
+
+#if 0
+window->SetAttribute("name", "Circle");
+window->SetAttribute("x", 5);
+window->SetAttribute("y", 15);
+window->SetDoubleAttribute("radius", 3.14159);
+TiXmlText *text = new TiXmlText("sdfdsa fd fdsf dsdfda sf");
+#endif
+}
+#endif
+
+
 bool Mesh::Serialize(SystemIO::TextFileWriter &w)
 {
 	w.Print("Mesh\n");

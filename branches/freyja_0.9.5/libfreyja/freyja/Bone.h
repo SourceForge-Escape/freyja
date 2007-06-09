@@ -28,6 +28,10 @@
 #ifndef GUARD__FREYJA_BONE_H_
 #define GUARD__FREYJA_BONE_H_
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
 #include <hel/math.h>
 #include <hel/Vec3.h>
 #include <hel/Mat44.h>
@@ -115,6 +119,26 @@ public:
 	 * Pre  :  
 	 * Post : Remove this bone from gobal store
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	////////////////////////////////////////////////////////////
+	// Optional XML serialization.
+	////////////////////////////////////////////////////////////
+
+	static bool SerializePool(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes all bone objects to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	static bool UnserializePool(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unserializes all bone objects from XML.
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 
 	////////////////////////////////////////////////////////////
@@ -303,7 +327,6 @@ public:
 	 * Post : Set a single flag 'on'
 	 *
 	 ------------------------------------------------------*/
-
 
 	mstl::String mMetaData;          /* Metadata for bone */
 

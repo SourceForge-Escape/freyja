@@ -29,6 +29,10 @@
 #include <stdarg.h> 
 #include <string.h>
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/QueryDialog.h>
@@ -412,6 +416,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformModel", &FreyjaControl::eTransformModel);
 	CreateListener("eTransformBone", &FreyjaControl::eTransformBone);
 	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
+
+
+	CreateListener("eBonesToXML", &FreyjaControl::EvSerializeBones);
+	CreateListener("eXMLToBones", &FreyjaControl::EvUnserializeBones);
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
 
@@ -942,6 +950,57 @@ bool FreyjaControl::LoadModel(const char *filename)
 }
 
 
+bool FreyjaControl::SerializeBones(const char *filename)
+{
+#if TINYXML_FOUND
+	TiXmlDocument doc;
+	TiXmlDeclaration *decl = new TiXmlDeclaration("1.0", "", "");
+	doc.LinkEndChild(decl);
+
+	TiXmlElement *container = new TiXmlElement("freyja");
+	container->SetAttribute("version", VERSION);
+	container->SetAttribute("build-date", __DATE__);
+	container->SetAttribute("file-version", 1);
+	doc.LinkEndChild(container);
+
+	Bone::SerializePool(container);
+
+	return doc.SaveFile(filename);;
+#else
+	return false;
+#endif
+}
+
+
+bool FreyjaControl::UnserializeBones(const char *filename)
+{
+#if TINYXML_FOUND
+	TiXmlDocument doc(filename);
+
+	if ( !doc.LoadFile() )
+	{
+		printf("XML ERROR: %s, Line %i, Col %i\n", 
+			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
+		return false;
+	}
+
+	TiXmlElement *root = doc.RootElement(); 
+
+	if (!root) 
+	{
+		printf("Couldn't find document root!\n");
+		return false;
+	}
+
+	//TiXmlElement *container = root->FirstChildElement();
+
+	return Bone::UnserializePool(root);
+#else
+	return false;
+#endif
+}
+
+
 bool FreyjaControl::SaveModel(const char *filename, const char *plugin_desc)
 {
 	if (!filename || !filename[0])
@@ -1322,6 +1381,48 @@ void FreyjaControl::NewFile()
 	default:
 		;
 	}
+}
+
+
+void FreyjaControl::EvUnserializeBones()
+{
+	mstl::String path = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Load Bones...", 
+							  path.c_str(), 0,
+							  "Bones XML (*.xml)", "*.xml");
+
+	if (filename && UnserializeBones(filename) )
+	{
+		Print("Bones '%s' Loaded", filename);
+	}
+	else if (filename)
+	{
+		Print("Bones '%s' failed to load.", filename);
+	}
+	
+	mgtk_filechooser_blocking_free(filename);
+}
+
+
+void FreyjaControl::EvSerializeBones()
+{
+	mstl::String path = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Save Bones...", 
+							  path.c_str(), 1,
+							  "Bones XML (*.xml)", "*.xml");
+
+	if (filename && SerializeBones(filename) )
+	{
+		Print("Bones '%s' Saved", filename);
+	}
+	else if (filename)
+	{
+		Print("Bones '%s' failed to save.", filename);
+	}
+	
+	mgtk_filechooser_blocking_free(filename);
 }
 
 
@@ -4437,7 +4538,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 						if (key)
 						{
 							//key->SetEulerRotation(mCursor.mRotate);
-							key->SetData(mCursor.mRotate);
+							key->SetData(xyz);//mCursor.mRotate);
 						}
 					}
 				}

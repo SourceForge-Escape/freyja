@@ -327,6 +327,17 @@ class FreyjaControl : public Control
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void EvSerializeBones();
+	void EvUnserializeBones();
+	bool SerializeBones(const char *filename);
+	bool UnserializeBones(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes only bones/joints to file. 
+	 *       Returns true if sucessful
+	 *
+	 ------------------------------------------------------*/
+
 	bool SaveModel(const char *filename, const char *plugin);
 	/*------------------------------------------------------
 	 * Pre  : Writes model to disk

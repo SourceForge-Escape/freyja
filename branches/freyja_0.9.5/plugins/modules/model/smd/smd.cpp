@@ -210,7 +210,7 @@ int freyja_model__smd_import(char *filename)
 					index_t b = freyjaBoneCreate(skeleton);
 
 					// SMD is already in radians, right handed...
-#if 0
+#if 1
 					// Found some kind of odd SMD -- not just coord system?
 					hel::Mat44 m, x, y, z;
 					x.SetRotationX(rot.mX);
@@ -224,6 +224,7 @@ int freyja_model__smd_import(char *filename)
 					
 
 					hel::Quat q = m.ToQuat();
+					q = q.GetInverse();
 					//freyjaBoneRotateQuat4f(b, -q.mW, q.mX, q.mZ, q.mY);
 					freyjaBoneRotateQuat4f(b, q.mW, q.mX, q.mY, q.mZ);
 #else
