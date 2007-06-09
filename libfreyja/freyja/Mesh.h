@@ -41,6 +41,11 @@
 #include "Edge.h"
 #include "Plane.h"
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
+
 using namespace mstl;
 using namespace freyja;
 
@@ -471,6 +476,30 @@ public:
 	 *        <markAll> If true sets fRayHit flag on all faces hit.
 	 *        Always sets fRayHit flag on face0, clears old results. 
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	bool SerializePool(TiXmlElement *container, const char *name,
+						Vector<vec_t> &array, mstl::stack<index_t> &stack);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes array in the mesh to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool Serialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes the mesh to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool Unserialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unserializes the mesh from XML.
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 	bool Serialize(SystemIO::TextFileWriter &w);
 	/*------------------------------------------------------
