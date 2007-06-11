@@ -37,7 +37,7 @@ COMMON_CFLAGS += -DWIN32 -DHAVE_FREYJA_IMAGE -DFOUND_OPENGL -DHAVE_OPENGL -DHAVE
 
 ################################################################
 
-LD_FLAGS=-shared -lstdc++ -lm $(WIN32_LIB_DIR) -lpthreadGC2 \
+LD_FLAGS=-lstdc++ -lm $(WIN32_LIB_DIR) -lpthreadGC2 \
 	-L../bin/libhel/win32/debug/ $(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK) -lfreetype
 
 RELEASE_CFLAGS=$(COMMON_CFLAGS) \
@@ -53,7 +53,7 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 ################################################################
 
-TARGETS=$(BUILDDIR)/$(MODULE).dll
+TARGETS=$(BUILD_DIR)/$(MODULE).exe
 
 auto: $(BUILD_SELECT)
 
@@ -64,12 +64,10 @@ debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) -f Makefile.Win32 targets \
 	BUILD_DIR=$(BUILD_DEBUG_DIR) \
-	BUILDDIR=$(BUILD_DEBUG_DIR) \
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP)  \
 	LD=$(WIN32_LD)  \
-	MODULE="$(NAME)$(MAJOR_VERSION)" \
-	EXT=".dll" \
+	MODULE="$(NAME)" \
 	CFLAGS="$(DEBUG_CFLAGS) $(WIN32_INC_DIR) " \
 	LD_FLAGS="$(LD_FLAGS) -lhel0 -L../bin/libhel/win32/debug/ -L../bin/libhel/win32/debug/ $(LOCAL_WIN32_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBFREYJA) $(WIN32_LIBHEL) $(WIN32_LIBMGTK) -lfreetype"
 
@@ -96,9 +94,9 @@ $(DEPEND_FILE):
 	@-echo "       [done]"
 
 
-$(BUILD_DIR)/$(MODULE).dll : $(OBJS)
-	$(CC) -shared -o $(BUILD_DIR)/$(MODULE).dll \
-    -Wl,--out-implib=$(BUILD_DIR)/lib$(MODULE).a \
+
+$(BUILD_DIR)/$(MODULE).exe : $(OBJS)
+	$(CC)  -o $(BUILD_DIR)/$(MODULE).exe \
     -Wl,--export-all-symbols \
     -Wl,--enable-auto-import \
     -Wl,--whole-archive $(OBJS) \
