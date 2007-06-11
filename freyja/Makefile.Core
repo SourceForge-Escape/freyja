@@ -60,16 +60,16 @@ COMMON_LD_FLAGS=-lhel-0.0.2 -lfreyja-0.9.5 -lmgtk-0.2.10 \
 ################################################################
 
 OBJS = \
-	$(BUILDDIR)/freyja_events.o \
-	$(BUILDDIR)/Control.o \
-	$(BUILDDIR)/ControlPrinter.o \
-	$(BUILDDIR)/Cursor.o \
-	$(BUILDDIR)/FreyjaRender.o \
-	$(BUILDDIR)/FreyjaControl.o \
-	$(BUILDDIR)/FreyjaOpenGL.o \
-	$(BUILDDIR)/MaterialControl.o \
-	$(BUILDDIR)/OpenGLPrinter.o \
-	$(BUILDDIR)/Texture.o
+	$(BUILD_DIR)/freyja_events.o \
+	$(BUILD_DIR)/Control.o \
+	$(BUILD_DIR)/ControlPrinter.o \
+	$(BUILD_DIR)/Cursor.o \
+	$(BUILD_DIR)/FreyjaRender.o \
+	$(BUILD_DIR)/FreyjaControl.o \
+	$(BUILD_DIR)/FreyjaOpenGL.o \
+	$(BUILD_DIR)/MaterialControl.o \
+	$(BUILD_DIR)/OpenGLPrinter.o \
+	$(BUILD_DIR)/Texture.o
 
 
 

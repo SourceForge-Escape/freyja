@@ -100,19 +100,19 @@ osx:
 
 win32:
 	@-printf "Building libhel\n" && \
-	cd libhel && ./autogen.sh && make win32 && cd .. && \
+	cd libhel && make -f Makefile.Win32 && cd .. && \
 	\
 	printf "Building libfreyja\n" && \
-	cd libfreyja && ./autogen.sh && make win32 && cd .. && \
+	cd libfreyja && ./autogen.sh && make -f Makefile.Win32 && cd .. && \
 	\
 	printf "Building libmgtk\n" && \
-	cd libmgtk && ./autogen.sh && make win32 && cd .. && \
+	cd libmgtk && ./autogen.sh && make -f Makefile.Win32 && cd .. && \
 	\
 	printf "Building plugins\n" && \
-	cd plugins && make win32 && cd .. && \
+	cd plugins && make -f Makefile.Win32 && cd .. && \
 	\
 	printf "Building freyja\n" && \
-	cd freyja && ./autogen.sh && make win32
+	cd freyja && ./autogen.sh && make -f Makefile.Win32
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"
