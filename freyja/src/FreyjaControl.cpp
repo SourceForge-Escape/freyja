@@ -178,7 +178,7 @@ FreyjaControl::FreyjaControl() :
 
 	if (!mRender)
 	{
-		SystemIO::Print("See ~/.freyja/Freyja.log for possible errors.\n");
+		SystemIO::Print("See freyja-dev.log for possible errors.\n");
 		exit(-1);
 	}
 }
@@ -201,12 +201,11 @@ void FreyjaControl::Init()
 	mFullScreen = false;
 
 	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
-	uint32 width = 800;//740;
-	uint32 height = 600;//560;
+	uint32 width = 1024; //800;//740;
+	uint32 height = 768; //600;//560;
 	mRender->InitContext(width, height, true);
 	mRender->ResizeContext(width, height);
 	InitTexture();
-
 	
 	// Init OpenGLPrinter, move along with mTexture to OpenGL facade
 	//const char *font = "/home/mongoose/.fonts/tahoma.ttf";
@@ -418,8 +417,13 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
 
 
+	CreateListener("eMeshToXML", &FreyjaControl::EvSerializeMesh);
+	CreateListener("eXMLToMesh", &FreyjaControl::EvUnserializeMesh);
+
 	CreateListener("eBonesToXML", &FreyjaControl::EvSerializeBones);
 	CreateListener("eXMLToBones", &FreyjaControl::EvUnserializeBones);
+
+	CreateListener("eMeshRepack", &FreyjaControl::EvMeshRepack);
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
 
@@ -950,6 +954,110 @@ bool FreyjaControl::LoadModel(const char *filename)
 }
 
 
+void FreyjaControl::EvSerializeMesh()
+{
+#if TINYXML_FOUND
+	Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+
+	if (!m)
+		return;
+
+	mstl::String path = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Save Selected Mesh...", 
+							  path.c_str(), 1,
+							  "Mesh XML (*.xml)", "*.xml");
+
+	if (!filename)
+		return;
+
+	TiXmlDocument doc;
+	TiXmlDeclaration *decl = new TiXmlDeclaration("1.0", "", "");
+	doc.LinkEndChild(decl);
+
+	TiXmlElement *container = new TiXmlElement("freyja");
+	container->SetAttribute("version", VERSION);
+	container->SetAttribute("build-date", __DATE__);
+	container->SetAttribute("file-version", 1);
+	doc.LinkEndChild(container);
+
+	m->Repack();
+
+	if (filename &&  m->Serialize(container) && doc.SaveFile(filename))
+	{
+		Print("Mesh '%s' Saved", filename);
+	}
+	else if (filename)
+	{
+		Print("Mesh '%s' failed to save.", filename);
+	}
+	
+	mgtk_filechooser_blocking_free(filename);
+#endif
+}
+
+
+void FreyjaControl::EvUnserializeMesh()
+{
+#if TINYXML_FOUND
+	Mesh *m = new Mesh();
+	m->AddToPool();
+
+	if (!m)
+		return;
+
+	mstl::String path = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
+							  path.c_str(), 0,
+							  "Mesh XML (*.xml)", "*.xml");
+
+	if (!filename)
+		return;
+
+	TiXmlDocument doc(filename);
+
+	if ( !doc.LoadFile() )
+	{
+		printf("XML ERROR: %s, Line %i, Col %i\n", 
+			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
+		return;
+	}
+
+	TiXmlElement *root = doc.RootElement(); 
+
+	if (!root) 
+	{
+		printf("Couldn't find document root!\n");
+		return;
+	}
+
+	TiXmlElement *child = root->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+
+		if (s == "Mesh" || s == "mesh")
+		{
+			break;
+		}
+	}
+
+	if ( m->Unserialize( child ) )
+	{
+		Print("Mesh '%s' Loaded", filename);
+	}
+	else
+	{
+		Print("Mesh '%s' failed to load.  <%s>", filename, 
+			  child ? child->Value() : "(null)");
+	}
+	
+	mgtk_filechooser_blocking_free(filename);
+#endif
+}
+
+
 bool FreyjaControl::SerializeBones(const char *filename)
 {
 #if TINYXML_FOUND
@@ -994,7 +1102,19 @@ bool FreyjaControl::UnserializeBones(const char *filename)
 
 	//TiXmlElement *container = root->FirstChildElement();
 
-	return Bone::UnserializePool(root);
+	if ( Bone::UnserializePool(root) )
+	{
+		if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
+		    freyjaGetSkeletonCount() > 0)
+		{
+			freyjaCurrentSkeleton(0);
+		}
+
+		UpdateSkeletalUI();	
+		return true;
+	}
+	
+	return false;
 #else
 	return false;
 #endif
@@ -3223,7 +3343,17 @@ void FreyjaControl::InfoObject()
 			s.Set("\nParent %i, '%s'\n", bone->GetParent(), 
 				  parent ? parent->GetName() : "NULL");
 			info += s;
-			
+
+			s.Set("\nTranslate %f %f %f\n", bone->mTranslation.mX, bone->mTranslation.mY, bone->mTranslation.mZ);
+			info += s;
+
+			{
+				hel::Vec3 v;
+				bone->mRotation.GetEulerAngles(v.mVec);
+				s.Set("\nRotation (quat->Euler) %f %f %f\n", v.mX, v.mY, v.mZ);
+				info += s;
+			}
+
 			info += "\nLocalTransform\n";
 			s = bone->mLocalTransform.ToString();
 			s.Replace('{', ' ');

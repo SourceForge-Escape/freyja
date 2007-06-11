@@ -6,7 +6,7 @@
  * Website : http://www.icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
  * Object  : FreyjaMesh
- * License : No use w/o permission (C) 2004-2006 Mongoose
+ * License : No use w/o permission (C) 2004-2007 Mongoose
  * Comments: This is the freyja::Mesh and class.
  *
  *
@@ -17,14 +17,27 @@
  *           
  * UNIT_TEST_MESH - Builds Mesh class as a unit test 
  *
+ *-- Todo ---------------------------------------------------
+ *
+ * Alpha faces 'presort'
+ * Enable depth sorting for fAlpha faces and put them at the end of the
+ * list instead.  This way on export renderers can just move a pointer
+ * on the buffers to get alpha pass.
+ *
+ *
+ *
  *-- History ------------------------------------------------ 
+ *
+ * 2007.06.10:
+ * Mongoose - XML serializer, doc update, new clean methods to 
+ *            shrink sparse buffers, etc.
  *
  * 2004.10.22:
  * Mongoose - Created, expanded from Freyja class
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MESH_H_
-#define GUARD__FREYJA_MESH_H_
+#ifndef GUARD__FREYJA_MESH_H__
+#define GUARD__FREYJA_MESH_H__
 
 #include "freyja.h"
 #include <hel/math.h>
@@ -34,6 +47,7 @@
 #include <mstl/stack.h>
 #include <mstl/SystemIO.h>
 #include <mstl/Thread.h>
+#include <mstl/String.h>
 #include "Track.h"
 #include "Weight.h"
 #include "Vertex.h"
@@ -96,90 +110,63 @@ public:
 
 
 	////////////////////////////////////////////////////////////
-	// Properities
+	// Properties
 	////////////////////////////////////////////////////////////
 
+	static const char *GetChunkType() { return "Mesh"; }
+	static uint32 GetChunkVersion() { return 2; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serialization use properties of the Class. 
+	 *
+	 ------------------------------------------------------*/
+
 	uint32 GetFlags() { return mFlags; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns option flag bitmap for this mesh
-	 *
-	 ------------------------------------------------------*/
-
 	void ClearFlag(Flags flag) { mFlags &= ~flag; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Clears option flag for this mesh
-	 *
-	 ------------------------------------------------------*/
-
 	void SetFlag(Flags flag) { mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets option flag for this mesh
+	 * Post : Option flag operations for this mesh.
 	 *
 	 ------------------------------------------------------*/
 
+	index_t SetMaterial() { return mMaterialIndex; }
 	void SetMaterial(index_t idx) { mMaterialIndex = idx; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Get/Set material property.
 	 *
 	 ------------------------------------------------------*/
 
-	const char *GetName() { return mName; }
+	const char *GetName() { return mName.c_str(); }
+	void SetName(const char *name) { mName = name; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get human readable name of this mesh
-	 *
-	 ------------------------------------------------------*/
-
-	void SetName(const char *name) { strncpy(mName, name, 31); mName[31] = 0; }
-	/*------------------------------------------------------
-	 * Pre  : <name> != NULL && <name>[0] != 0
-	 * Post : Sets human readable name of this mesh
+	 * Post : Get/Set human readable name of this mesh.
 	 *
 	 ------------------------------------------------------*/
 
 	const hel::Vec3 &GetPosition() { return mPosition; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets mesh position attribute
-	 *
-	 ------------------------------------------------------*/
-
 	void SetPosition(const hel::Vec3 &v) { mPosition = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets mesh position attribute
+	 * Post : Get/Set mesh position property.
 	 *
 	 ------------------------------------------------------*/
 
 	const hel::Vec3 &GetRotation() { return mRotation; }
-	/*------------------------------------------------------
-	 * Pre  : Euler angles in radians
-	 * Post : Gets mesh position attribute
-	 *
-	 ------------------------------------------------------*/
-
 	void SetRotation(const hel::Vec3 &v) { mRotation = v; }
 	/*------------------------------------------------------
 	 * Pre  : Euler angles in radians
-	 * Post : Sets mesh rotation attribute
+	 * Post : Get/Set mesh rotation property.
 	 *
 	 ------------------------------------------------------*/
 
 	const hel::Vec3 &GetScale() { return mScale; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets mesh scale attribute
-	 *
-	 ------------------------------------------------------*/
-
 	void SetScale(const hel::Vec3 &v) { mScale = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets mesh scale attribute
+	 * Post : Get/Sets mesh scale property.
 	 *
 	 ------------------------------------------------------*/
 
@@ -199,21 +186,9 @@ public:
 	bool CopyVertexBlendBuffer(mstl::Vector<vec_t> &buffer);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Copies the vertex buffer to external Vector.
+	 * Post : Copies vertex blend buffer to external Vector.
 	 *        Returns true on success.
 	 *
-	 ------------------------------------------------------*/
-
-	static const char *GetChunkType() { return "Mesh"; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	static uint32 GetChunkVersion() { return 2; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
 	 ------------------------------------------------------*/
 
 	bool GetBlendShadowVolume(mstl::Vector<vec_t> &shadowVolume,
@@ -284,20 +259,6 @@ public:
 
 	void GetColor(index_t colorIndex, vec4_t rgba)
 	{	GetVec(mColorPool, 4, colorIndex, rgba);	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	// FIXME: Enable depth sorting for fAlpha faces
-	//        and put them at the end of the list
-	//void UpdateDepthSortedFaces(const Ray &obs);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//Vector<index_t> &GetDepthSortedFaces() { return mDepthSortedFaces; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -478,8 +439,39 @@ public:
 	 ------------------------------------------------------*/
 
 #if TINYXML_FOUND
-	bool SerializePool(TiXmlElement *container, const char *name,
-						Vector<vec_t> &array, mstl::stack<index_t> &stack);
+
+	bool SerializeFaces(TiXmlElement *container);
+	bool SerializeWeights(TiXmlElement *container);
+	bool SerializeVertices(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes object list in the mesh to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool UnserializeFaces(TiXmlElement *container);
+	bool UnserializeWeights(TiXmlElement *container);
+	bool UnserializeVertices(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unserialize object list.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SerializeBufferGaps(TiXmlElement *container, 
+							 const char *name, mstl::stack<index_t> &s);
+	bool UnserializeBufferGaps(TiXmlElement *container, 
+							   const char *name, mstl::stack<index_t> &s);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes array gaps (if any) in the mesh to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SerializeBuffer(TiXmlElement *container, 
+						 const char *name, Vector<vec_t> &array);
+	bool UnserializeBuffer(TiXmlElement *container, 
+						   const char *name, Vector<vec_t> &array);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Serializes array in the mesh to XML.
@@ -523,6 +515,19 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	bool Repack();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Repack state is cached to avoid needless work.
+	 *        Other mesh object operations affect state.
+	 *
+	 *        Remove gaps in sparse buffers and objects.
+	 *        Updates all references to these elements.
+	 *
+	 *        Returns true if repack was needed.
+	 *
+	 ------------------------------------------------------*/
 
 	void UVMapSelectedFaces_Cylindrical();
 	/*------------------------------------------------------
@@ -862,26 +867,13 @@ public:
 	}
 
 
-	bool WeldTexCoords(index_t a, index_t b)
-	{
-		Face *face;
+	bool WeldTexCoords(index_t replace, index_t texcoord);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Replace is replaced by texcoord.
+	 *        
+	 ------------------------------------------------------*/
 
-		// Make all polygons referencing A point to B
-		for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
-		{
-			face = mFaces[i];
-
-			if (face)
-			{
-				//FIXME face->WeldTexCoords(a, b);
-			}
-		}
-
-		// Mark A as unused in the texcoord pool
-		mFreedTexCoords.push(a);
-
-		return true;
-	}
 
 	void MarkVerticesOfFacesWithFlag(Face::Flags flag, 
 									 Vertex::Flags mark, bool clear);
@@ -969,13 +961,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool WeldVertices(index_t a, index_t b);
+	bool WeldVertices(index_t replace, index_t vertex);
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Vertex <a> is destoried and all references 
-	 *        to <a> are replaced with <b>.
+	 * Pre  : <vertex> must index a valid Vertex.
 	 *
-	 *        Returns true if <a> is sucessfully purged.
+	 * Post : Vertex <replace> is destroyed and all references 
+	 *        to <replace> are replaced with <vertex>.
+	 *
+	 *        Returns true if <replace> is sucessfully purged.
 	 *
 	 ------------------------------------------------------*/
 
@@ -1007,18 +1000,21 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	void SelectedFacesMarkSmoothingGroup(uint32 group, bool t);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	void GroupedFacesGenerateVertexNormals(uint32 group);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	void SelectedFacesGenerateVertexNormals();
@@ -1031,18 +1027,21 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	Vector<index_t> GetSelectedFaces();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Get a list of unique faces marked selected
+	 *
 	 ------------------------------------------------------*/
 
 	Vector<index_t> GetUniqueVerticesInFaces(Vector<index_t> &faces);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Get a list of unique vertices in faces list
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -1387,10 +1386,10 @@ public:
 	 ------------------------------------------------------*/
 
 
-private:
+protected:
 
 	////////////////////////////////////////////////////////////
-	// Private Accessors
+	// Protected Accessors
 	////////////////////////////////////////////////////////////
 
 	bool SerializePool(SystemIO::FileWriter &w, 
@@ -1409,7 +1408,7 @@ private:
 
 
 	////////////////////////////////////////////////////////////
-	// Private Mutators
+	// Protected Mutators
 	////////////////////////////////////////////////////////////
 
 	void DeleteVertexHelper(Vertex **array, index_t vertex);
@@ -1524,16 +1523,16 @@ private:
 
 	index_t AppendTripleVec(Vector<vec_t> &v, vec3_t xyz)
 	{
-		v.pushBack(xyz[0]);
-		v.pushBack(xyz[1]);
-		v.pushBack(xyz[2]);
+		v.push_back(xyz[0]);
+		v.push_back(xyz[1]);
+		v.push_back(xyz[2]);
 
 		return (( v.end() / 3 ) - 1);
 	}
 
 	// NOTE: If this is a sparse array ( most of these are ) you operate
 	// on more than actually used data, however it doesn't use the class
-	// index system ( so it likely still faster in general case )
+	// index system ( so it's likely still faster in general case )
 	void TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz)
 	{
 		uint32 i, size = v.size();
@@ -1589,10 +1588,6 @@ private:
 
 	static Vector<Mesh *> mGobalPool; /* Storage for gobal access */
 
-	const static uint32 mNameSize = 32;
-
-	//static index_t mNextUID;          /* UID creation outside of gobal pool */
-
 	TransformTrack mTrack;            /* Mesh transform animation track */
 
 	VertexAnimTrack mVertexAnimTrack; /* Mesh vertex animation track  */
@@ -1601,20 +1596,20 @@ private:
 
 	Vector<vec_t> mBlendVertices;     /* Skeletal vertex blending use  */
 
-	char mName[mNameSize];            /* Human readable name of mesh */
+	String mName;                     /* Human readable name of mesh */
 
 	index_t mUID;                     /* Gobal pool UID */
 
 	bool mInitBoundingVol;
 
+	bool mPacked;
+
 	uint32 mFlags;
 
 	index_t mMaterialIndex;
 
-	hel::Vec3 mPosition;
-
-	hel::Vec3 mRotation;        /* Store as Euler Angles for 'Size' interface */
-
+	hel::Vec3 mPosition;              /* 'Loc/Rot/Size Interface' */
+	hel::Vec3 mRotation;              /* Euler angles -- Rot. */
 	hel::Vec3 mScale;
 
 	hel::BoundingBoxCombo mBoundingVolume;

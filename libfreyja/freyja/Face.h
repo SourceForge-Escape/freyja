@@ -230,6 +230,101 @@ public:
 		return true;
 	}
 
+
+#if TINYXML_FOUND
+	bool Serialize(TiXmlElement *container)
+	{	
+		if (!container)
+			return false;	
+		
+		TiXmlElement *face = new TiXmlElement("face");
+
+		face->SetAttribute("flags", mFlags);
+		face->SetAttribute("group", mSmoothingGroup);
+		face->SetAttribute("color", mColor);
+		face->SetAttribute("material", mMaterial);
+
+		uint32 i;
+		foreach (mIndices, i)
+		{
+			TiXmlElement *element = new TiXmlElement("vertex");
+			element->SetAttribute("id", i);
+			element->SetAttribute("index", mIndices[i]);
+			face->LinkEndChild(element);
+		}
+
+		foreach (mTexCoordIndices, i)
+		{
+			TiXmlElement *element = new TiXmlElement("texcoord");
+			element->SetAttribute("id", i);
+			element->SetAttribute("index", mTexCoordIndices[i]);
+			face->LinkEndChild(element);
+		}
+
+		foreach (mNormalsIndices, i)
+		{
+			TiXmlElement *element = new TiXmlElement("normal");
+			element->SetAttribute("id", i);
+			element->SetAttribute("index", mNormalsIndices[i]);
+			face->LinkEndChild(element);
+		}
+
+		container->LinkEndChild(face);
+		return true;
+	}
+
+	bool Unserialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		TiXmlElement *face = container;//->FirstChildElement("face");
+
+		if (!face)
+			return false;
+
+		int attr;
+		face->QueryIntAttribute("flags", &attr);
+		mFlags = attr < 0 ? INDEX_INVALID : attr;
+
+		face->QueryIntAttribute("group", &attr);
+		mSmoothingGroup = attr < 0 ? INDEX_INVALID : attr;
+
+		face->QueryIntAttribute("color", &attr);
+		mColor = attr < 0 ? INDEX_INVALID : attr;
+
+		face->QueryIntAttribute("material", &attr);
+		mMaterial = attr < 0 ? INDEX_INVALID : attr;
+
+		TiXmlElement *child = face->FirstChildElement();
+		for( ; child; child = child->NextSiblingElement() )
+		{
+			String s = child->Value();
+			attr = -1;
+
+			child->QueryIntAttribute("index", &attr);
+			unsigned int idx = attr < 0 ? INDEX_INVALID : attr;
+
+			// FIXME: should check id's in future, in case of hand edited files.
+			if (s == "vertex")
+			{
+				mIndices.push_back(idx);
+			}
+			else if (s == "texcoord")
+			{
+				mTexCoordIndices.push_back(idx);
+			}
+			else if (s == "normal")
+			{
+				mNormalsIndices.push_back(idx);
+			}
+		}
+
+		return true;
+	}
+#endif
+
+
 	byte mFlags;                      /* Options flags */
 
 	byte mSmoothingGroup;             /* Group bit index */

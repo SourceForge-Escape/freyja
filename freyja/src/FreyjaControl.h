@@ -327,8 +327,6 @@ class FreyjaControl : public Control
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void EvSerializeBones();
-	void EvUnserializeBones();
 	bool SerializeBones(const char *filename);
 	bool UnserializeBones(const char *filename);
 	/*------------------------------------------------------
@@ -569,6 +567,17 @@ class FreyjaControl : public Control
 	// 2x Text events
 	void EvSaveModel(char *filename, char *extension);
 
+	void EvSerializeBones();
+	void EvUnserializeBones();
+
+	void EvSerializeMesh();
+	void EvUnserializeMesh();
+
+	void EvMeshRepack()
+	{
+		Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+		if (m) m->Repack();
+	}
 
 	void ePolygonSplit()
 	{
