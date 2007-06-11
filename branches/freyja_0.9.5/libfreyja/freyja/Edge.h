@@ -59,6 +59,16 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void WeldVertices(index_t replace, index_t vertex)
+	{
+		if (mA == replace) mA = vertex;
+		if (mB == replace) mB = vertex;
+	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Welding/pack interface. 
+	 *
+	 ------------------------------------------------------*/
 
 	byte mFlags;
 

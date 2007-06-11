@@ -325,6 +325,8 @@ bool Bone::UnserializePool(TiXmlElement *container)
 	{
 		// FIXME: Map UIDs to rebulid skeleton properly
 		//        to account for sparse bone pool...
+		//        which should never happen, as the pool 
+		//        should be 'cleaned' to avoid sparse bones.
 		if (tmp[i])
 		{
 			unsigned int j = tmp[i]->mParent;

@@ -4,8 +4,16 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.10
- 20070514- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ Kagura prealpha, 0.9.5.11
+ 20070610 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Released to public svn.
+ - Reactivated Mesh::TexcoordWeld, so look out for related per plugin bugs.
+ - Mesh, Weight, Face, Vertex XML serializers
+ - Mesh::Repack(), packs sparse object lists and buffers.
+ - New Plane checked in.
+ - Mesh allows welding NULL vertex objects
+ - FIX for weight/edge updates on welding vertex objects.
+ - FIX XML skeleton load updates tree view.
  - FIX joint animation in correct units.
  - Checking in 'partial' XML serializers. (skeleton/track/mesh/weightmap/etc)
  - Lua + XML backend backed out for now.

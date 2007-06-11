@@ -218,6 +218,7 @@
 				(menu_item "Mirror _Z"		eMirrorMeshZ)
 				(menu_item "Snap-_Weld vertices"	eSnapWeldVerts)
 				(menu_item "Cleanup vertices" eCleanupVertices)
+				(menu_item "Repack" eMeshRepack)
 
 			) ; submenu _Mesh
 
@@ -242,20 +243,25 @@
 					(menu_item "_Textview"			eTestTextView)))
 
 		(submenu "_XML"
-			(submenu	eNone	"_Import...")
+			(submenu	eNone	"_Import..."
+			)
+			(submenu	eNone	"_Export..."
+				(menu_item	"_Export Model..." eNone "gtk-save-as")
+				(menu_seperator)
+				(menu_item	"_Export Weights..." eNone "gtk-save-as")
+				(menu_seperator)
+				(menu_item	"_Export Track..." eNone "gtk-save-as")
+				(menu_seperator)
+				(menu_item	"_Export Keyframe..." eNone "gtk-save-as")
+				(menu_seperator)
+			)
 			(menu_seperator)
-			(submenu	eNone	"_Export Model...")
-			(menu_seperator)
-			(submenu	eNone	"_Export Mesh...")
-			(menu_seperator)
-			(submenu	eNone	"_Export Weights...")
-			(menu_seperator)
-			(submenu	eNone	"_Export Track...")
-			(menu_seperator)
-			(submenu	eNone	"_Export Keyframe...")
+			(menu_item	"_Import Mesh..." eXMLToMesh "gtk-open")
+			(menu_item	"_Export Mesh..." eMeshToXML  "gtk-save-as")
+
 			(menu_seperator)
 			(menu_item	"_Import Skeleton..." eXMLToBones "gtk-open")
-			(menu_item	"_Export Skeleton" eBonesToXML "gtk-save-as")
+			(menu_item	"_Export Skeleton..." eBonesToXML "gtk-save-as")
 		)
 
 		(menu_seperator)

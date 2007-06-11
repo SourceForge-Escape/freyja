@@ -188,8 +188,9 @@ int freyja_model__smd_import(char *filename)
 				case 0:
 					{
 						//matrix_t m = {0,1,0,0, -1,0,0,0, 0,0,1,0, 0,0,0,1 };
-						//hel::Mat44 mat(m);
-						//loc = mat * loc;
+						matrix_t m = {1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1 };
+						hel::Mat44 mat(m);
+						loc = mat * loc;
 					}
 					break;
 

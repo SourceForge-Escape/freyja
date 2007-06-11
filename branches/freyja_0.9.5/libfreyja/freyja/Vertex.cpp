@@ -116,6 +116,84 @@ bool Vertex::Serialize(SystemIO::TextFileReader &r)
 	return true;
 }
 
+
+#if TINYXML_FOUND
+
+bool Vertex::Serialize(TiXmlElement *container)
+{
+	if (!container)
+		return false;	
+		
+	TiXmlElement *vertex = new TiXmlElement("vertex");
+
+	vertex->SetAttribute("flags", mFlags);
+	vertex->SetAttribute("vertex", mVertexIndex);
+	vertex->SetAttribute("texcoord", mTexCoordIndex);
+	vertex->SetAttribute("normal", mNormalIndex);
+	vertex->SetAttribute("material", mMaterial);
+
+#if 0   // This is redundant for disk saves
+	uint32 i;
+	foreach (mFaceRefs, i)
+	{
+		TiXmlElement *element = new TiXmlElement("face-ref");
+		element->SetAttribute("id", i);
+		element->SetAttribute("index", mFaceRefs[i]);
+		vertex->LinkEndChild(element);
+	}
+#endif
+
+	container->LinkEndChild(vertex);
+	return true;
+}
+
+
+bool Vertex::Unserialize(TiXmlElement *container)
+{
+	if (!container)
+		return false;
+
+	TiXmlElement *vertex = container;//->FirstChildElement("vertex");
+
+	if (!vertex)
+		return false;
+
+	int attr;
+	vertex->QueryIntAttribute("flags", &attr);
+	mFlags = attr < 0 ? INDEX_INVALID : attr;
+
+	vertex->QueryIntAttribute("vertex", &attr);
+	mVertexIndex = attr < 0 ? INDEX_INVALID : attr;
+
+	vertex->QueryIntAttribute("texcoord", &attr);
+	mTexCoordIndex = attr < 0 ? INDEX_INVALID : attr;
+
+	vertex->QueryIntAttribute("normal", &attr);
+	mNormalIndex = attr < 0 ? INDEX_INVALID : attr;
+
+	vertex->QueryIntAttribute("material", &attr);
+	mMaterial = attr < 0 ? INDEX_INVALID : attr;
+
+	TiXmlElement *child = vertex->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+
+		attr = -1;
+		child->QueryIntAttribute("index", &attr);
+		unsigned int idx = attr < 0 ? INDEX_INVALID : attr;
+
+		if (s == "face-ref")
+		{
+			mFaceRefs.push_back(idx);
+		}
+	}
+
+	return true;
+}
+
+#endif
+
 	
 void Vertex::Meld(Vertex &v)
 {

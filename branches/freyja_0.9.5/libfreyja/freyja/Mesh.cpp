@@ -40,6 +40,7 @@ Mesh::Mesh() :
 	mBlendVertices(),
 	mUID(INDEX_INVALID),
 	mInitBoundingVol(false),
+	mPacked(false),
 	mFlags(0),
 	mMaterialIndex(0),
 	mPosition(),
@@ -65,8 +66,7 @@ Mesh::Mesh() :
 	mColorPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
 	mTexCoordPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
 
-	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
-	mName[mNameSize-1] = 0;
+	mName.Set("Mesh%i", mUID);
 	
 	mFlags = 0;
 	mMaterialIndex = 0;
@@ -86,6 +86,7 @@ Mesh::Mesh(const Mesh &mesh) :
 	mBlendVertices(),
 	mUID(INDEX_INVALID),
 	mInitBoundingVol(false),
+	mPacked(false),
 	mFlags(mesh.mFlags),
 	mMaterialIndex(mesh.mMaterialIndex),
 	mPosition(mesh.mPosition),
@@ -106,8 +107,7 @@ Mesh::Mesh(const Mesh &mesh) :
 	mPlanes(),
 	mEdges()
 {
-	snprintf(mName, mNameSize-1, "Mesh%i", mUID);
-	mName[mNameSize-1] = 0;
+	mName.Set("Mesh%i", mUID);
 
 	uint32 i;
 
@@ -417,45 +417,534 @@ bool Mesh::SerializePool(SystemIO::TextFileReader &r, const char *name,
 }
 
 
-#if 0 //TINYXML_FOUND
-bool Mesh::SerializePool(TiXmlElement *container, const char *name,
-						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
+bool Mesh::Repack()
 {
-	if (!array.size())
+	if (mPacked)
+		return false;
+
+
+	/* Vertices. */
+	
+	/* Repack Vertices. */
+	for (uint32 i = 0; i < mVertices.size(); ++i)
 	{
-		w.Print("\t%sStack %u\n", name, 0);
-		w.Print("\t%sArray %u\n", name, 0);	
-		return true;
+		// Precondition 1: Found a 'gap' vertex.
+		if (mVertices[i] == NULL)
+		{
+			for (uint32 j = i; j < mVertices.size(); ++j)
+			{
+				// Precondition 2: Found a valid pointer later.
+				if (mVertices[j])
+				{
+					// 1. Swap 'gap' pointer with valid vertex.
+					mVertices[i] = mVertices[j];
+					mVertices[j] = NULL;
+						
+					// 2. Now do a vertex weld to update references.
+					WeldVertices(j, i);
+
+					Vertex *v = mVertices[i];
+
+					// Only Vertex objects reference vertex buffer directly, so
+					// we can 'tear it up and rebuild' here.
+					{
+						vec3_t pos;
+						GetTripleVec(mVertexPool, v->mVertexIndex, pos);
+
+						v->mVertexIndex = i;
+						//( !mFreedVertices.empty() ) ? mFreedVertices.pop() : i;
+
+						SetTripleVec(mVertexPool, v->mVertexIndex, pos);
+					}
+
+					{
+						vec3_t pos;
+						GetTripleVec(mNormalPool, v->mNormalIndex, pos);
+
+						v->mNormalIndex = i;
+						//( !mFreedVertices.empty() ) ? mFreedVertices.pop() : i;
+
+						SetTripleVec(mNormalPool, v->mNormalIndex, pos);
+					}
+
+					break;
+				}
+			}		
+		}
 	}
 
+	/* Purge 'free' state.
+	 * Only Vertex objects reference vertex buffer directly.
+	 */
+	while ( !mFreedVertices.empty() )
 	{
-		w.Print("\t%sStack %u\n", name, stack.size());
-		mstl::StackNode<index_t> *cur = stack.top();
+		mFreedVertices.pop();
+	}
 
-		// FIXME: This will cause it to read in reverse, but it doesn't matter 
-		while (cur)
+	while ( !mFreedNormals.empty() )
+	{
+		mFreedNormals.pop();
+	}
+
+	/* Reduce the reported size of the vertex object array. */
+	for (uint32 i = 0; i < mVertices.size(); ++i)
+	{
+		if (mVertices[i] == NULL)
 		{
-			index_t data = cur->Data();
-			w.Print("%u ", data);
-			cur = cur->Prev();
+			freyjaPrintMessage("Vert resize %i %i\n", mVertices.size(), i);
+			mVertices.resize(i, NULL);
+
+			// Only Vertex objects reference vertex buffer directly, so
+			// we can 'tear it up and rebuild' here.
+			mVertexPool.resize(i*3, 0.0f);
+			mNormalPool.resize(i*3, 0.33f);
+			break;
+		}
+	}
+   
+
+
+	/* Repack Faces. */
+	
+	for (uint32 i = 0; i < mFaces.size(); ++i)
+	{
+		if (mFaces[i] == NULL)
+		{
+			for (uint32 j = i; j < mFaces.size(); ++j)
+			{
+				if (mFaces[j])
+				{
+					mFaces[i] = mFaces[j];
+					mFaces[j] = NULL;
+
+					// Update vertex face refs... factor this out later.
+					for (uint32 k = 0; k < mVertices.size(); ++k)
+					{
+						if (mVertices[i])
+						{
+							mstl::Vector<index_t> &refs = 
+							mVertices[i]->GetFaceRefs();
+
+							uint32 r;
+							foreach (refs, r)
+							{
+								if (refs[r] == j)
+									refs[r] = i;
+							}
+
+						}
+					}
+
+					break;
+				}
+			}		
+		}
+	}
+
+	/* Reduce the reported size of the vertex object array. */
+	for (uint32 i = 0; i < mFaces.size(); ++i)
+	{
+		if (mFaces[i] == NULL)
+		{
+			freyjaPrintMessage("Face resize %i %i\n", mFaces.size(), i);
+			mFaces.resize(i, NULL);
+			break;
+		}
+	}
+
+	// TODO: On repack we could move alpha pass faces
+	//       to the end of face array to be a nice guy modeler.
+	//       ( This makes it easier to render multipass. )
+	
+
+	/* Repack texcoord array here -- noting Faces and Vertices reference it. */
+	if (0) // FIXME: need to split up texcoord array for polymapped/uv
+	{
+		index_t replace, texcoord;
+
+		
+
+		for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
+		{
+			if (mFaces[i])
+			{
+				mFaces[i]->WeldTexCoords(replace, texcoord);
+			}
 		}
 
-		w.Print("\n");
+		{
+			unsigned int i;
+			foreach (mVertices, i)
+			{
+				if (mVertices[i])
+				{
+					mVertices[i]->WeldTexCoords(replace, texcoord);
+				}
+			}
+		}
+
+		vec3_t st;
+		GetTripleVec(mTexCoordPool, texcoord, st);
+		SetTripleVec(mTexCoordPool, replace, st);
 	}
 
-	w.Print("\t%sArray %u\n", name, array.size());
-	for (uint32 i = 0, n = array.size(); i < n; ++i)
+
+	/* Repack Weights. */
 	{
-		if (i % 3 == 0) w.Print("\n\t"); // Makes it easier on text editors
-		w.Print("%f ", array[i]);
+		for (uint32 i = 0; i < mWeights.size(); ++i)
+		{
+			if (mWeights[i] == NULL)
+			{
+				for (uint32 j = i; j < mWeights.size(); ++j)
+				{
+					if (mWeights[j])
+					{
+						mWeights[i] = mWeights[j];
+						mWeights[j] = NULL;
+						break;
+					}
+				}		
+			}
+		}
+
+		/* Reduce the reported size of the vertex object array. */
+		for (uint32 i = 0; i < mWeights.size(); ++i)
+		{
+			if (mWeights[i] == NULL)
+			{
+				freyjaPrintMessage("Weight resize %i %i\n", mWeights.size(), i);
+				mWeights.resize(i, NULL);
+				break;
+			}
+		}
 	}
-	w.Print("\n");
+
+#if 0
+	// Might want to do a 'bugs' compatibilty for external array use.
+	// Some projects use Vertex index as the same as buffer index.
+	// This means we would copy the values in the:
+	// normal/texcoord buffers here also.
+
+	vec3_t v;
+
+	{
+		GetTripleVec(mVertexPool, mVertices[gap]->mVertexIndex, v);
+		mVertices[gap]->mVertexIndex = 
+		( !mFreedVertices.empty() ) ? mFreedVertices.pop() : gap;
+		SetTripleVec(mVertexPool, mVertices[gap]->mVertexIndex, v);
+	}
+
+	GetTripleVec(mNormalPool, mVertices[gap]->mNormalIndex, v);
+	mVertices[gap]->mNormalIndex = 
+	( !mFreedNormals.empty() ) ? mFreedNormals.pop() : gap;
+	SetTripleVec(mNormalPool, mVertices[gap]->mNormalIndex, v);
+			
+	GetTripleVec(mTexCoordPool, mVertices[gap]->mTexCoordIndex, v);
+	mVertices[gap]->mTexCoordIndex = 
+	( !mFreedTexCoords.empty() ) ? mFreedTexCoords.pop() : gap;
+	SetTripleVec(mTexCoordPool, mVertices[gap]->mTexCoordIndex, v);
+
+#endif
+
+	//VertexAnimTrack mVertexAnimTrack; /* Mesh vertex animation track  */
+
+	//Vector<vec_t> mBlendVertices;     /* Skeletal vertex blending use  */
+
+	// Planes use pointer references to faces, so there is no need to update.
+	//Vector<Plane *> mPlanes;
+
+	// 
+	//Vector<Edge *> mEdges;
+
+	//mPacked = true; // FIXME: Once all other fuctions hook into this uncomment
+	return true;
+}
+
+
+bool Mesh::WeldTexCoords(index_t replace, index_t texcoord)
+{
+	// Make all polygons referencing A point to B
+	for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
+	{
+		if (mFaces[i])
+		{
+			mFaces[i]->WeldTexCoords(replace, texcoord);
+		}
+	}
+
+	{
+		unsigned int i;
+		foreach (mVertices, i)
+		{
+			if (mVertices[i])
+			{
+				mVertices[i]->WeldTexCoords(replace, texcoord);
+			}
+		}
+	}
+
+	vec3_t st;
+	GetTripleVec(mTexCoordPool, texcoord, st);
+	SetTripleVec(mTexCoordPool, replace, st);
+
+	// Mark unused index in the texcoord pool
+	mFreedTexCoords.push(replace);
 
 	return true;
 }
 
 
-// Option to 'shrink' mesh data ( Remove dump unreferenced data and fill gaps. )
+#if TINYXML_FOUND
+bool Mesh::SerializeBuffer(TiXmlElement *container, 
+						   const char *name, Vector<vec_t> &array)
+{
+	// NOTE: You lose 'gaps' this way  =/
+
+	if (!array.size())
+	{
+		// Nothing to write home about, literally...
+		return true;
+	}
+
+	TiXmlElement *buffer = new TiXmlElement(name);
+	buffer->SetAttribute("reserve", array.size() );
+
+	for (uint32 i = 0, n = array.size()/3; i < n; ++i)
+	{
+		unsigned int idx = i * 3;
+
+		TiXmlElement *element = new TiXmlElement("vec3");
+		element->SetAttribute("id", idx/3 );
+		element->SetDoubleAttribute("x", array[idx] );
+		element->SetDoubleAttribute("y", array[idx+1] );
+		element->SetDoubleAttribute("z", array[idx+2] );
+		buffer->LinkEndChild(element);
+	}
+
+	container->LinkEndChild(buffer);
+	return true;
+}
+
+
+bool Mesh::UnserializeBuffer(TiXmlElement *container, 
+							 const char *name, Vector<vec_t> &array)
+{
+	// Have to read which gap type above this level
+
+	if (!container)
+		return false;
+
+	int attr;
+	container->QueryIntAttribute("reserve", &attr);
+
+	if (attr < 0) attr = 16;
+
+	// attr - this is currently the old array reserve size.
+	array.reserve(attr);
+	
+	TiXmlElement *child = container->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+		
+		// FIXME: should check id's in future, in case of hand edited files.
+		if (s == "vec3")
+		{
+			child->QueryIntAttribute("id", &attr);
+			
+			float x, y, z;
+			child->QueryFloatAttribute("x", &x);
+			child->QueryFloatAttribute("y", &y);
+			child->QueryFloatAttribute("z", &z);
+
+			//array[id*3] = x;
+			//array[id*3+1] = y;
+			//array[id*3+2] = z;
+			
+			array.push_back(x);
+			array.push_back(y);
+			array.push_back(z);
+		}
+	}
+
+	return true;
+}
+
+
+bool Mesh::SerializeBufferGaps(TiXmlElement *container, 
+							   const char *name, mstl::stack<index_t> &s)
+{
+	if (s.empty())
+	{
+		// Nothing to write home about, literally...
+		return true;
+	}
+
+	mstl::stack<index_t> copy; 
+	TiXmlElement *gaps = new TiXmlElement(name);
+
+	while ( !s.empty() )
+	{
+		index_t item = s.pop();
+		TiXmlElement *element = new TiXmlElement("gap");
+		element->SetAttribute("id", item );	
+		gaps->LinkEndChild(element);
+		copy.push(item);
+	}
+
+	// We don't really care about order
+	while ( !copy.empty() )
+	{
+		s.push(copy.pop());
+	}
+
+	container->LinkEndChild(gaps);
+	return true;	
+}
+
+
+bool Mesh::UnserializeBufferGaps(TiXmlElement *container, 
+								 const char *name, mstl::stack<index_t> &s)
+{
+	// Have to read which gap type above this level
+
+	if (!container)
+		return false;
+
+	TiXmlElement *child = container->FirstChildElement();
+	for(int attr; child; child = child->NextSiblingElement() )
+	{
+		child->QueryIntAttribute("id", &attr);
+		s.push(attr);
+	}
+
+	return true;
+}
+
+
+bool Mesh::SerializeFaces(TiXmlElement *container)
+{
+	if (!container)
+		return false;	
+
+	TiXmlElement *faces = new TiXmlElement("faces");
+	faces->SetAttribute("reserve", mFaces.size() );
+	
+	unsigned int i;
+	foreach (mFaces, i)
+	{
+		if (mFaces[i])
+			mFaces[i]->Serialize(faces);
+	}
+
+	container->LinkEndChild(faces);
+	return true;
+}
+
+
+bool Mesh::UnserializeFaces(TiXmlElement *faces)
+{
+	if (!faces)
+		return false;
+
+	int reserve;
+	faces->QueryIntAttribute("reserve", &reserve);
+	//mFaces.reserve(reserve);
+
+	TiXmlElement *child = faces->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		Face *f = new Face();
+		f->Unserialize(child);
+		mFaces.push_back(f);
+	}
+
+	return true;
+}
+
+
+bool Mesh::SerializeWeights(TiXmlElement *container)
+{
+	if (!container)
+		return false;	
+
+	TiXmlElement *weights = new TiXmlElement("weights");
+	weights->SetAttribute("reserve", mWeights.size() );
+
+	unsigned int i;
+	foreach (mWeights, i)
+	{
+		if (mWeights[i])
+			mWeights[i]->Serialize(weights);
+	}
+
+	container->LinkEndChild(weights);
+	return true;
+}
+
+
+bool Mesh::UnserializeWeights(TiXmlElement *weights)
+{
+	if (!weights)
+		return false;
+
+	int reserve;
+	weights->QueryIntAttribute("reserve", &reserve);
+	//mWeights.reserve(reserve, NULL);
+
+	TiXmlElement *child = weights->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		Weight *w = new Weight();
+		w->Unserialize(child);
+		mWeights.push_back(w);
+	}
+
+	return true;
+}
+
+
+bool Mesh::SerializeVertices(TiXmlElement *container)
+{
+	if (!container)
+		return false;
+
+	TiXmlElement *verts = new TiXmlElement("vertices");
+	verts->SetAttribute("reserve", mFaces.size() );
+
+	unsigned int i;
+	foreach (mVertices, i)
+	{
+		if (mVertices[i])
+			mVertices[i]->Serialize(verts);
+	}
+
+	container->LinkEndChild(verts);
+	return true;
+}
+
+
+bool Mesh::UnserializeVertices(TiXmlElement *verts)
+{
+	if (!verts)
+		return false;
+
+	int reserve;
+	verts->QueryIntAttribute("reserve", &reserve);
+	//mVertices.reserve(reserve, NULL);
+
+	TiXmlElement *child = verts->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		Vertex *v = new Vertex();
+		v->Unserialize(child);
+		mVertices.push_back(v);
+	}
+
+	return true;
+}
+
+
 bool Mesh::Serialize(TiXmlElement *container)
 {
 	if (!container)
@@ -464,92 +953,172 @@ bool Mesh::Serialize(TiXmlElement *container)
 	TiXmlElement *mesh = new TiXmlElement("Mesh");
 	container->LinkEndChild(mesh);
 
-	mesh->SetAttribute("version", "3");
-	mesh->SetAttribute("name", mName);
+	mesh->SetAttribute("version", 3);
+	mesh->SetAttribute("name", mName.c_str());
 	mesh->SetAttribute("uid", mUID);
 	mesh->SetAttribute("flags", mFlags);
-	mesh->SetAttribute("material-id", mMaterialIndex);
+	mesh->SetAttribute("material", mMaterialIndex);
 
-	TiXmlElement *pos = new TiXmlElement("pos");
+	TiXmlElement *pos = new TiXmlElement("loc");
 	pos->SetDoubleAttribute("x", mPosition.mX);
 	pos->SetDoubleAttribute("y", mPosition.mY);
 	pos->SetDoubleAttribute("z", mPosition.mZ);
 	mesh->LinkEndChild(pos);
 
-	TiXmlElement *rot = new TiXmlElement("rotate");
+	TiXmlElement *rot = new TiXmlElement("rot");
 	rot->SetDoubleAttribute("x", mRotation.mX);
 	rot->SetDoubleAttribute("y", mRotation.mY);
 	rot->SetDoubleAttribute("z", mRotation.mZ);
 	mesh->LinkEndChild(rot);
 
-	TiXmlElement *sz = new TiXmlElement("scale");
+	TiXmlElement *sz = new TiXmlElement("size");
 	sz->SetDoubleAttribute("x", mScale.mX);
 	sz->SetDoubleAttribute("y", mScale.mY);
 	sz->SetDoubleAttribute("z", mScale.mZ);
 	mesh->LinkEndChild(sz);
 
-	TiXmlElement *bbox = new TiXmlElement("BoundingBox");
-	bbox->SetDoubleAttribute("min-x", mBoundingVolume.mBox.mMin.mX);
-	bbox->SetDoubleAttribute("min-y", mBoundingVolume.mBox.mMin.mY);
-	bbox->SetDoubleAttribute("min-z", mBoundingVolume.mBox.mMin.mZ);
-	bbox->SetDoubleAttribute("max-x", mBoundingVolume.mBox.mMax.mX);
-	bbox->SetDoubleAttribute("max-y", mBoundingVolume.mBox.mMax.mY);
-	bbox->SetDoubleAttribute("max-z", mBoundingVolume.mBox.mMax.mZ);
-	bbox->SetDoubleAttribute("max-z", mBoundingVolume.mBox.mMax.mZ);
+	TiXmlElement *bbox = new TiXmlElement("bounding_box");
+	bbox->SetDoubleAttribute("min-x", mBoundingVolume.mBox.mMin[0]);
+	bbox->SetDoubleAttribute("min-y", mBoundingVolume.mBox.mMin[1]);
+	bbox->SetDoubleAttribute("min-z", mBoundingVolume.mBox.mMin[2]);
+	bbox->SetDoubleAttribute("max-x", mBoundingVolume.mBox.mMax[0]);
+	bbox->SetDoubleAttribute("max-y", mBoundingVolume.mBox.mMax[1]);
+	bbox->SetDoubleAttribute("max-z", mBoundingVolume.mBox.mMax[2]);
 	mesh->LinkEndChild(bbox);
 
-	TiXmlElement *bs = new TiXmlElement("BoundingSphere");
-	bs->SetDoubleAttribute("x", mBoundingVolume.mSphere.mCenter.mX);
-	bs->SetDoubleAttribute("y", mBoundingVolume.mSphere.mCenter.mY);
-	bs->SetDoubleAttribute("z", mBoundingVolume.mSphere.mCenter.mZ);
+	TiXmlElement *bs = new TiXmlElement("bounding_sphere");
+	bs->SetDoubleAttribute("x", mBoundingVolume.mSphere.mCenter[0]);
+	bs->SetDoubleAttribute("y", mBoundingVolume.mSphere.mCenter[1]);
+	bs->SetDoubleAttribute("z", mBoundingVolume.mSphere.mCenter[2]);
 	bs->SetDoubleAttribute("radius", mBoundingVolume.mSphere.mRadius);
 	mesh->LinkEndChild(bs);
 
-	SerializePool(mesh, "mVertex", mVertexPool, mFreedVertices);
-	SerializePool(mesh, "mTexCoord", mTexCoordPool, mFreedTexCoords);
-	SerializePool(mesh, "mNormal", mNormalPool, mFreedNormals);
+	/* Buffers */
+	SerializeBuffer(mesh, "vertex_buffer", mVertexPool);
+	SerializeBuffer(mesh, "texcoord_buffer", mTexCoordPool);
+	SerializeBuffer(mesh, "normal_buffer", mNormalPool);
 
-	w.Print("\t mWeights %u\n", mWeights.size());
-	for (uint32 i = 0, n = mWeights.size(); i < n; ++i)
-	{
-		Weight *ww = GetWeight(i);
-		if (ww) ww->Serialize(mesh); else w.Print("\t\tNULL\n");
-	}
+	/* 'Gaps' */
+	SerializeBufferGaps(mesh, "vertex_gaps", mFreedVertices);
+	SerializeBufferGaps(mesh, "texcoord_gaps", mFreedTexCoords);
+	SerializeBufferGaps(mesh, "normal_gaps", mFreedNormals);
 
-	w.Print("\t mVertices %u\n", mVertices.size());
-	for (uint32 i = 0, n = mVertices.size(); i < n; ++i)
-	{
-		Vertex *v = GetVertex(i);
-		if (v) v->Serialize(mesh); else w.Print("\t\tNULL\n");
-	}
+	/* Object lits */
+	SerializeWeights(mesh);
+	SerializeVertices(mesh);
+	SerializeFaces(mesh);
 
-	for (uint32 i = 0, n = mFaces.size(), count = 0; i < n; ++i)
-	{
-		if (GetFace(i)) ++count;
-	}
-
-	w.Print("\t mFaces %u\n", mFaces.size());
-	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
-	{
-		Face *f = GetFace(i);
-		if (f) f->Serialize(mesh); else w.Print("\t\tNULL\n");
-	}
-
-	w.Print("\t mTracks %u\n", 1); // only have one in test =p
-	mTrack.Serialize(mesh);
-
-	w.Print("\t mVertexAnimTracks %u\n", 1); // only have one in test =p
-	mVertexAnimTrack.Serialize(mesh);
-
-
-#if 0
-window->SetAttribute("name", "Circle");
-window->SetAttribute("x", 5);
-window->SetAttribute("y", 15);
-window->SetDoubleAttribute("radius", 3.14159);
-TiXmlText *text = new TiXmlText("sdfdsa fd fdsf dsdfda sf");
-#endif
+	// NOTE: Mesh animations not serialized in XML <mesh>
+	return true;
 }
+
+
+bool Mesh::Unserialize(TiXmlElement *mesh)
+{
+	if (!mesh)
+		return false;
+
+	int attr;
+	mesh->QueryIntAttribute("version", &attr);
+
+	if ( attr != 3 )
+	{
+		freyjaPrintError("Wrong mesh XML version");
+		return false;
+	}
+
+	mName = mesh->Attribute("name");
+	//mesh->QueryIntAttribute("uid", &mUID);
+
+	mesh->QueryIntAttribute("flags", &attr);
+	mFlags = attr;
+
+	mesh->QueryIntAttribute("material", &attr);
+	mMaterialIndex = ( attr < 0 ) ? INDEX_INVALID : attr;
+
+	TiXmlElement *child = mesh->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+
+		printf("! %s\n", s.c_str() );
+
+		if (s == "loc")
+		{
+			mesh->QueryFloatAttribute("x", &mPosition.mX);
+			mesh->QueryFloatAttribute("y", &mPosition.mY);
+			mesh->QueryFloatAttribute("z", &mPosition.mZ);
+		}
+		else if (s == "rot")
+		{
+			mesh->QueryFloatAttribute("x", &mRotation.mX);
+			mesh->QueryFloatAttribute("y", &mRotation.mY);
+			mesh->QueryFloatAttribute("z", &mRotation.mZ);
+		}
+		else if (s == "size")
+		{
+			mesh->QueryFloatAttribute("x", &mScale.mX);
+			mesh->QueryFloatAttribute("y", &mScale.mY);
+			mesh->QueryFloatAttribute("z", &mScale.mZ);
+		}
+		else if (s == "bounding_box")
+		{
+			mesh->QueryFloatAttribute("min-x", &mBoundingVolume.mBox.mMin[0]);
+			mesh->QueryFloatAttribute("min-y", &mBoundingVolume.mBox.mMin[1]);
+			mesh->QueryFloatAttribute("min-z", &mBoundingVolume.mBox.mMin[2]);
+			mesh->QueryFloatAttribute("max-x", &mBoundingVolume.mBox.mMax[0]);
+			mesh->QueryFloatAttribute("max-y", &mBoundingVolume.mBox.mMax[1]);
+			mesh->QueryFloatAttribute("max-z", &mBoundingVolume.mBox.mMax[2]);
+		}
+		else if (s == "bounding_sphere")
+		{
+			mesh->QueryFloatAttribute("x", &mBoundingVolume.mSphere.mCenter[0]);
+			mesh->QueryFloatAttribute("y", &mBoundingVolume.mSphere.mCenter[1]);
+			mesh->QueryFloatAttribute("z", &mBoundingVolume.mSphere.mCenter[2]);
+			mesh->QueryFloatAttribute("radius", &mBoundingVolume.mSphere.mRadius);
+		}
+		else if (s == "vertex_buffer")
+		{
+			UnserializeBuffer(child, "vertex_buffer", mVertexPool);
+		}
+		else if (s == "texcoord_buffer")
+		{
+			UnserializeBuffer(child, "texcoord_buffer", mTexCoordPool);
+		}
+		else if (s == "normal_buffer")
+		{
+			UnserializeBuffer(child, "normal_buffer", mNormalPool);
+		}
+		else if (s == "vertex_gaps")
+		{
+			UnserializeBufferGaps(child, "vertex_gaps", mFreedVertices);
+		}
+		else if (s == "texcoord_gaps")
+		{
+			UnserializeBufferGaps(child, "texcoord_gaps", mFreedTexCoords);
+		}
+		else if (s == "normal_gaps")
+		{
+			UnserializeBufferGaps(child, "normal_gaps", mFreedNormals);
+		}
+		else if (s == "vertices")
+		{
+			UnserializeVertices(child);
+		}
+		else if (s == "weights")
+		{
+			UnserializeWeights(child);
+		}
+		else if (s == "faces")
+		{
+			UnserializeFaces(child);
+		}
+	}
+
+	// NOTE: Mesh animations not serialized in XML <mesh>
+	return true;
+}
+
 #endif
 
 
@@ -557,7 +1126,7 @@ bool Mesh::Serialize(SystemIO::TextFileWriter &w)
 {
 	w.Print("Mesh\n");
 	w.Print("\t mVersion 2\n");
-	w.Print("\t mName \"%s\"\n", mName);
+	w.Print("\t mName \"%s\"\n", mName.c_str() );
 	w.Print("\t mUID %u\n", mUID);
 	w.Print("\t mFlags %u\n", mFlags);
 	w.Print("\t mMaterial %u\n", mMaterialIndex);
@@ -1502,26 +2071,52 @@ void Mesh::MeldVertices(index_t a, index_t b)
 }
 
 
-bool Mesh::WeldVertices(index_t a, index_t b)
+bool Mesh::WeldVertices(index_t replace, index_t vertex)
 {
-	Vertex *va = GetVertex(a);
-	Vertex *vb = GetVertex(b);
+	Vertex *vertReplace = GetVertex(replace);
+	Vertex *vertNew = GetVertex(vertex);
 
-	if (!va || !vb)
+	if (!vertNew)
 		return false;
 
-	// Make all polygons referencing A point to B
-	for (uint32 i = mFaces.begin(); i < mFaces.end(); ++i)
+	// Make all objects referencing REPLACE point to VERTEX
 	{
-		if (mFaces[i])
+		unsigned int i;
+		foreach (mWeights, i)
 		{
-			mFaces[i]->WeldVertices(a, b);
+			if (mWeights[i])
+				mWeights[i]->WeldVertices(replace, vertex);
 		}
 	}
 
-	// Delete A from the vertex pool
-	va->GetFaceRefs().clear();
-	return DeleteVertex(a);
+	{
+		unsigned int i;
+		foreach (mEdges, i)
+		{
+			if (mEdges[i])
+				mEdges[i]->WeldVertices(replace, vertex);
+		}
+	}
+
+
+	{
+		unsigned int i;
+		foreach (mFaces, i)
+		{
+			if (mFaces[i])
+				mFaces[i]->WeldVertices(replace, vertex);
+		}
+	}
+
+	if (vertReplace)
+	{
+		// Delete REPLACE from the vertex pool
+		vertReplace->GetFaceRefs().clear();
+		return DeleteVertex(replace);
+	}
+
+	// We now allow replacing 'NULL' vertices
+	return true;
 }
 
 

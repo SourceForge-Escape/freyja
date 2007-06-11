@@ -19,6 +19,10 @@
 #ifndef GUARD__FREYJA_WEIGHT_H_
 #define GUARD__FREYJA_WEIGHT_H_
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
 #include <hel/math.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
@@ -95,6 +99,58 @@ public:
 		
 		return true;
 	}
+
+#if TINYXML_FOUND
+	bool Serialize(TiXmlElement *container)
+	{	
+		if (!container)
+			return false;	
+		
+		TiXmlElement *weight = new TiXmlElement("weight");
+		int attr;
+		
+		attr = (mVertexIndex == INDEX_INVALID) ? -1 : mVertexIndex;
+		weight->SetAttribute("vertex", attr);
+		
+		attr = (mBoneIndex == INDEX_INVALID) ? -1 : mBoneIndex;
+		weight->SetAttribute("bone", attr);
+
+		weight->SetDoubleAttribute("value", mWeight);
+		container->LinkEndChild(weight);
+
+		return true;
+	}
+
+	bool Unserialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		TiXmlElement *weight = container;//->FirstChildElement("weight");
+
+		if (!weight)
+			return false;
+
+		int attr;
+		weight->QueryIntAttribute("vertex", &attr);
+		mVertexIndex = attr < 0 ? INDEX_INVALID : attr;
+		weight->QueryIntAttribute("bone", &attr);
+		mBoneIndex = attr < 0 ? INDEX_INVALID : attr;
+		weight->QueryFloatAttribute("value", &mWeight);
+
+		return true;
+	}
+#endif
+
+	void WeldVertices(index_t replace, index_t vertex)
+	{
+		if (mVertexIndex == replace) mVertexIndex = vertex;
+	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Welding/pack interface. 
+	 *
+	 ------------------------------------------------------*/
 
 	index_t mVertexIndex;
 	index_t mBoneIndex;

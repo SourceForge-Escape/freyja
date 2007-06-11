@@ -827,6 +827,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	glDisable(GL_BLEND);
 	glPointSize(mVertexPointSize);
 
+
 	// 'World effects'
 
 

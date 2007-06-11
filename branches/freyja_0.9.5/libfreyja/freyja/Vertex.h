@@ -19,6 +19,10 @@
 #ifndef GUARD__FREYJA_VERTEX_H_
 #define GUARD__FREYJA_VERTEX_H_
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
 #include <hel/math.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
@@ -98,6 +102,22 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+#if TINYXML_FOUND
+	bool Serialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool Unserialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+#endif
+
 	void Meld(Vertex &v);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -158,6 +178,14 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Access the Temp references.
+	 *
+	 ------------------------------------------------------*/
+
+	void WeldTexCoords(index_t replace, index_t texcoord)
+	{ if (mTexCoordIndex == replace) mTexCoordIndex = texcoord;	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Attempt to replace texcoord reference.
 	 *
 	 ------------------------------------------------------*/
 
