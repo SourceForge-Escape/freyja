@@ -6,6 +6,10 @@
 
  Kagura prealpha, 0.9.5.11
  20070610 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 debug build release held for testing after MAJOR changes to env.
+ - Ported gtkglext-1.2.0 to win32 build env.
+ - Had to aquire and build new gtkglext for Win32 bulid.
+ - FIX Win32 Gtk+ 2.10 environment. ( aka cross compiler build system )
  - Released to public svn.
  - Reactivated Mesh::TexcoordWeld, so look out for related per plugin bugs.
  - Mesh, Weight, Face, Vertex XML serializers
