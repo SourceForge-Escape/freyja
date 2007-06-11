@@ -25,7 +25,7 @@
 
 #define USING_FREYJA_CPP_ABI
 #define SHADOW_VOLUME_WITH_ARRAYS 1
-//#define TEST_SHADOW_VOLUME_SURFACES 0
+#define TEST_SHADOW_VOLUME_SURFACES 0
 
 #include "FreyjaOpenGL.h" // Includes windows.h, so avoid header interaction
 
@@ -1151,8 +1151,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 // TEST
 //mstl::Vector<vec_t> gVertexBufferTranslated;
 mstl::Vector<vec_t> gShadowVolume;
-
-#define TEST_SHADOW_VOLUME_SURFACES 0
 
 void FreyjaRender::RenderMeshShadowVolume(index_t mesh)
 {
