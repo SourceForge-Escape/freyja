@@ -31,10 +31,14 @@
 #endif
 
 #include <hel/math.h>
+#include <hel/Vec3.h>
 #include <mstl/SystemIO.h>
 #include "Cursor.h"
 #include "Texture.h"
 #include "FreyjaOpenGL.h"
+
+using namespace hel;
+
 
 #ifdef USING_OPENGL_EXT
 PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB = NULL;
@@ -1337,24 +1341,37 @@ void mglDrawSphere(int numMajor, int numMinor, float radius)
 	float z0, z1, x, y;
 	int i, j;
 	
-	
 	for (i = 0; i < numMajor; ++i)
 	{
 		a = i * majorStep;
 		b = a + majorStep;
+
+#if 0
 		r0 = radius * sin(a);
 		r1 = radius * sin(b);
 		z0 = radius * cos(a);
 		z1 = radius * cos(b);
+#else
+		helSinCosf(a, &r0, &z0);
+		r0 *= radius;
+		z0 *= radius;
+
+		helSinCosf(b, &r1, &z1);
+		r1 *= radius;
+		z1 *= radius;
+#endif
 		
 		glBegin(GL_TRIANGLE_STRIP);
 		
 		for (j = 0; j <= numMinor; ++j) 
 		{
 			c = j * minorStep;
+#if 0
 			x = cos(c);
 			y = sin(c);
-			
+#else
+			helSinCosf(c, &y, &x);
+#endif	
 			glNormal3f((x * r0) / radius, z0 / radius, (y * r0) / radius);
 			glTexCoord2f(j / (GLfloat) numMinor, i / (GLfloat) numMajor);
 			glVertex3f(x * r0, z0, y * r0);
@@ -1366,6 +1383,100 @@ void mglDrawSphere(int numMajor, int numMinor, float radius)
 		
 		glEnd();
 	}
+}
+
+
+void mglDrawControlPoint()
+{
+	static int drawList = -1;
+
+	if (drawList == -1)
+	{
+		const unsigned int major = 10, minor = 10;
+		const vec_t radius = 0.5f;
+
+		drawList = glGenLists(1);
+		glNewList(drawList, GL_COMPILE);
+
+		// Control point default
+		mglDrawSphere(major, minor, radius);
+
+		glEndList();
+	}
+	else
+	{
+		glCallList(drawList);
+	}
+}
+
+
+void mglDrawBoneSolid(const vec3_t pos)
+{
+	Vec3 tip(0,0.1f,0), end(0,1,0);
+
+	Vec3 a(0.1,0.1,0.1), b(-0.1,0.1,-0.1), c(0.1,0.1,-0.1), d(-0.1,0.1,0.1);
+
+	Vec3 p(pos);
+
+	const float scale = p.Magnitude();
+	
+	a *= scale;
+	b *= scale;
+	c *= scale;
+	d *= scale;
+	end *= scale;
+	//end = Vec3(pos);
+
+	glPushAttrib(GL_LIGHTING_BIT);
+
+	glEnable(GL_LIGHTING);
+
+	//mglDrawSphere(8, 8, 0.1f * scale);
+
+	glBegin(GL_TRIANGLES);
+	glNormal3f(.3,.3,-.3);
+	glVertex3fv(tip.mVec);
+	glVertex3fv(a.mVec);
+	glVertex3fv(c.mVec);
+
+	glNormal3f(-.3,-.3,-.3);
+	glVertex3fv(tip.mVec);
+	glVertex3fv(b.mVec);
+	glVertex3fv(d.mVec);
+
+	glNormal3f(.3,-.3,-.3);
+	glVertex3fv(tip.mVec);
+	glVertex3fv(b.mVec);
+	glVertex3fv(c.mVec);
+
+	glNormal3f(-.3,.3,-.3);
+	glVertex3fv(tip.mVec);
+	glVertex3fv(a.mVec);
+	glVertex3fv(d.mVec);
+
+
+	glNormal3f(-.3,-.3,.3);
+	glVertex3fv(end.mVec);
+	glVertex3fv(a.mVec);
+	glVertex3fv(c.mVec);
+
+	glNormal3f(.3,.3,.3);
+	glVertex3fv(end.mVec);
+	glVertex3fv(b.mVec);
+	glVertex3fv(d.mVec);
+
+	glNormal3f(-.3,.3,.3);
+	glVertex3fv(end.mVec);
+	glVertex3fv(b.mVec);
+	glVertex3fv(c.mVec);
+
+	glNormal3f(.3,-.3,.3);
+	glVertex3fv(end.mVec);
+	glVertex3fv(a.mVec);
+	glVertex3fv(d.mVec);
+	glEnd();
+
+	glPopAttrib();
 }
 
 
@@ -1402,6 +1513,10 @@ void mglDrawBone(unsigned char type, const vec3_t pos)
 		glVertex3f(-max,  0.0f, max);      // 4
 		glEnd();
 		break;
+
+	case 3:
+		mglDrawBoneSolid(pos);
+		break;
 	}
 }
 
@@ -1415,9 +1530,12 @@ void mglDrawJoint(unsigned char type, const vec3_t pos)
 		glVertex3fv(pos);
 		glEnd();
 		break;
+
 	case 2:
-		mglDrawSphere(12, 12, 0.5f);
+		//mglDrawSphere(12, 12, 0.5f);
+		mglDrawControlPoint();
 		break;
+
 	case 3:
 		mglDrawEditorAxis();
 		break;

@@ -791,8 +791,10 @@ void FreyjaRender::RenderLights()
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
+
 		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-		mglDrawSphere(16, 16, 0.75f);
+		//mglDrawSphere(16, 16, 0.75f);
+		mglDrawControlPoint();
 		glPopAttrib();
 		glPopMatrix();
 		
@@ -968,6 +970,57 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		mglDrawSelectBox(min, max, RED);
 	}
 
+
+	/* Render outline */
+	if ( !(mRenderMode & fWireframe) && 
+		 (mRenderMode & fFace) &&
+		 ( m->GetFlags() & Mesh::fSelected ||
+		   mesh == FreyjaControl::mInstance->GetSelectedMesh() ) )
+	{
+		const vec_t scale = 1.0002f;
+
+		glPushAttrib(GL_POLYGON_BIT);
+		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glPolygonMode(GL_BACK, GL_LINE);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+
+		glDisable(GL_DEPTH_TEST);
+
+		glLineWidth(3.0f);
+
+		glPushMatrix();
+		glScalef(scale, scale, scale);
+
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+		{
+			Face *f = m->GetFace(i);
+
+			if (!f) 
+				continue;
+
+			// NOTE: This is a test rendering, since you can't
+			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
+			//       mappings in the Mesh.   =)
+			glColor3fv(mColorWireframeHighlight);
+			glDrawElements(GL_POLYGON, //GL_LINE_LOOP
+						   f->mIndices.size(), 
+						   GL_UNSIGNED_INT,
+						   f->mIndices.get_array());
+		}
+
+		glPopMatrix();
+
+		glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
+
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glCullFace(GL_BACK);
+
+		glPopAttrib(); // GL_POLYGON_BIT
+	}
+
+
 	if (mRenderMode & fPoints)
 	{
 		Vertex *vertex;
@@ -1022,7 +1075,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		glEnd();
 	}
 
-
 	/* Render face as wireframe */
 	if ( mRenderMode & fWireframe )
 	{
@@ -1030,12 +1082,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 		glPushMatrix();
 		glScalef(scale, scale, scale);
-
-		hel::Vec3 color(mColorWireframe);
-		if (m->GetFlags() & Mesh::fSelected)
-		{
-			color = hel::Vec3(mColorWireframeHighlight);
-		}
 
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
@@ -1047,7 +1093,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 			// NOTE: This is a test rendering, since you can't
 			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
 			//       mappings in the Mesh.   =)
-			glColor3fv(color.mVec);
+			glColor3fv(mColorWireframe);
 			glDrawElements(GL_LINE_LOOP, 
 						   f->mIndices.size(), 
 						   GL_UNSIGNED_INT,
@@ -1058,6 +1104,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	}
 
 	glPopAttrib();
+
 
 	/* Render solid face with material, color, or whatever you got */
 	if (mRenderMode & fFace)
@@ -1451,7 +1498,8 @@ void FreyjaRender::RenderModel(index_t model)
 			glPushMatrix();
 			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
 			glColor3fv(RED);
-			mglDrawSphere(8, 8, 0.5f);
+			//mglDrawSphere(8, 8, 0.5f);
+			mglDrawControlPoint();
 			glPopMatrix();
 		}
 
@@ -1469,7 +1517,7 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones2)
 	{
-		hel::Vec3 p;
+		hel::Vec3 p, r;
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LIGHTING);
@@ -1493,7 +1541,8 @@ void FreyjaRender::RenderModel(index_t model)
 #endif
 			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
 			glColor3fv(PINK) : glColor3fv(YELLOW);
-			mglDrawSphere(12, 12, 0.5f);
+			//mglDrawSphere(12, 12, 0.5f);
+			mglDrawControlPoint();
 
 			glPopMatrix();
 
@@ -1509,6 +1558,24 @@ void FreyjaRender::RenderModel(index_t model)
 
 				freyjaGetBoneTranslation3fv(i, p.mVec);
 				mglDrawBone(2, p.mVec);
+
+#if 1
+				//glTranslatef(p.mX, p.mY, p.mZ);
+				freyjaGetBoneRotationEuler3fv(parent, r.mVec);
+
+				r *= 57.295779513082323f;
+				glRotatef(r.mZ, 0, 0, 1);
+				glRotatef(r.mY, 0, 1, 0);
+				glRotatef(r.mX, 1, 0, 0);
+
+				mglDrawBoneSolid(p.mVec);
+#else
+				glPushMatrix();
+				glMultMatrixf( freyjaGetBoneBindPose16fv(i) );
+				mglDrawBoneSolid(p.mVec);
+				glPopMatrix();
+#endif
+
 
 				glPopMatrix();
 			}
@@ -1546,7 +1613,8 @@ void FreyjaRender::RenderModel(index_t model)
 
 			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
 			glColor3fv(WHITE) : glColor3fv(DARK_RED);
-			mglDrawSphere(10, 10, 0.4f);
+			//mglDrawSphere(10, 10, 0.4f);
+			mglDrawControlPoint();
 
 			glPopMatrix();
 

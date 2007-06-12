@@ -4,6 +4,15 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
+ Kagura prealpha, 0.9.5.12
+ TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - UI 'icon' renderers calling 1000% less trig functions for large models.  =p
+ - New control point 'icon' as list to avoid generating geometry over and over.
+ - New bone 'icon' as promised -- shaded to be pretty as well.
+ - Made minizip into library for use with the project.
+ - Mesh outline, I think everyone was annoyed with old visual feedback method.
+
+
  Kagura prealpha, 0.9.5.11
  20070610 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Win32 debug build release held for testing after MAJOR changes to env.

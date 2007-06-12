@@ -216,6 +216,194 @@ bool Material::Serialize(SystemIO::FileWriter &w)
 }
 
 
+#if TINYXML_FOUND
+bool Material::Serialize(TiXmlElement *container)
+{
+	if (!container)
+		return false;	
+		
+	TiXmlElement *mat = new TiXmlElement("material");
+
+	mat->SetAttribute("version", 3);
+	mat->SetAttribute("name", mName);
+	mat->SetAttribute("flags", mFlags);
+
+	if (mTextureFilename.c_str() != 0x0)
+	{
+		TiXmlElement *element = new TiXmlElement("texture");
+		element->SetAttribute("diffuse", mTextureFilename.c_str() );
+		mat->LinkEndChild(element);
+	}
+
+	if (mShaderFilename.c_str() != 0x0)
+	{
+		TiXmlElement *element = new TiXmlElement("shader");
+		element->SetAttribute("glsl", mShaderFilename.c_str() );
+		mat->LinkEndChild(element);
+	}
+
+	{
+		TiXmlElement *element = new TiXmlElement("blending");
+		element->SetAttribute("blend-src", mBlendSrc);
+		element->SetAttribute("blend-dest", mBlendDest);
+		mat->LinkEndChild(element);
+	}
+
+	{
+		TiXmlElement *element = new TiXmlElement("shininess");
+		element->SetDoubleAttribute("exp", mShininess);
+	}
+
+	{
+		char *rgba[] = {"r","g","b","a"};
+		
+		{
+			TiXmlElement *color = new TiXmlElement("ambient");
+
+			for (unsigned int i = 0; i < 4; ++i)
+			{
+				color->SetDoubleAttribute(rgba[i], mAmbient[i]);
+			}
+
+			mat->LinkEndChild(color);
+		}
+
+		{
+			TiXmlElement *color = new TiXmlElement("diffuse");
+
+			for (unsigned int i = 0; i < 4; ++i)
+			{
+				color->SetDoubleAttribute(rgba[i], mDiffuse[i]);
+			}
+
+			mat->LinkEndChild(color);
+		}
+
+		{
+			TiXmlElement *color = new TiXmlElement("specular");
+
+			for (unsigned int i = 0; i < 4; ++i)
+			{
+				color->SetDoubleAttribute(rgba[i], mSpecular[i]);
+			}
+
+			mat->LinkEndChild(color);
+		}
+
+		{
+			TiXmlElement *color = new TiXmlElement("emissive");
+
+			for (unsigned int i = 0; i < 4; ++i)
+			{
+				color->SetDoubleAttribute(rgba[i], mEmissive[i]);
+			}
+
+			mat->LinkEndChild(color);
+		}
+	}
+
+	if (mMetaData.c_str() != NULL)
+	{
+		TiXmlElement *metadata = new TiXmlElement("metadata");
+		TiXmlText *text = new TiXmlText( mMetaData.c_str() );
+		metadata->LinkEndChild(text);
+		mat->LinkEndChild(metadata);
+	}
+
+	container->LinkEndChild(mat);
+	return true;
+}
+
+
+bool Material::Unserialize(TiXmlElement *mat)
+{
+	if (!mat)
+		return false;	
+
+	int attr;
+	mat->QueryIntAttribute("version", &attr);
+
+	if (attr != 3)
+		return false;
+
+	SetName( mat->Attribute("name") );
+
+	mat->QueryIntAttribute("flags", &attr);
+	mFlags = attr < 0 ? INDEX_INVALID : attr;
+
+	TiXmlElement *child = mat->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+
+		if (s == "texture")
+		{
+			mTextureFilename = child->Attribute("diffuse");
+
+			if (mLoadTextureFunc) // callback to load texture, get id
+			{
+				mTexture = mLoadTextureFunc( mTextureFilename.c_str() );
+			} 
+		}
+		else if (s == "shader")
+		{
+			mShaderFilename = child->Attribute("glsl");
+
+			if (mLoadShaderFunc) // callback to load shader, get id
+			{
+				mShaderId = mLoadShaderFunc( mShaderFilename.c_str() );
+			} 
+		}
+		else if (s == "blending")
+		{
+			child->QueryIntAttribute("blend-src", &attr);
+			mBlendSrc = attr;
+			child->QueryIntAttribute("blend-dest", &attr);
+			mBlendDest = attr;			
+		}
+		else if (s == "shininess")
+		{
+			child->QueryFloatAttribute("exp", &mShininess);
+		}
+		else if (s == "ambient")
+		{
+			child->QueryFloatAttribute("r", mAmbient+0);
+			child->QueryFloatAttribute("g", mAmbient+1);
+			child->QueryFloatAttribute("b", mAmbient+2);
+			child->QueryFloatAttribute("a", mAmbient+3);
+		}
+		else if (s == "diffuse")
+		{
+			child->QueryFloatAttribute("r", mDiffuse+0);
+			child->QueryFloatAttribute("g", mDiffuse+1);
+			child->QueryFloatAttribute("b", mDiffuse+2);
+			child->QueryFloatAttribute("a", mDiffuse+3);
+		}
+		else if (s == "specular")
+		{
+			child->QueryFloatAttribute("r", mSpecular+0);
+			child->QueryFloatAttribute("g", mSpecular+1);
+			child->QueryFloatAttribute("b", mSpecular+2);
+			child->QueryFloatAttribute("a", mSpecular+3);
+		}
+		else if (s == "emissive")
+		{
+			child->QueryFloatAttribute("r", mEmissive+0);
+			child->QueryFloatAttribute("g", mEmissive+1);
+			child->QueryFloatAttribute("b", mEmissive+2);
+			child->QueryFloatAttribute("a", mEmissive+3);
+		}
+		else if (s == "metadata")
+		{
+			mMetaData = child->GetText();
+		}
+	}
+
+	return true;	
+}
+
+#endif
+
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
