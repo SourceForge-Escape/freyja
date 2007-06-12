@@ -981,6 +981,14 @@ void FreyjaControl::EvSerializeMesh()
 	container->SetAttribute("file-version", 1);
 	doc.LinkEndChild(container);
 
+	for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
+	{
+		Material *mat = freyjaGetMaterialClass(i);
+
+		if (mat)
+			mat->Serialize(container);
+	}
+
 	m->Repack();
 
 	if (filename &&  m->Serialize(container) && doc.SaveFile(filename))
@@ -1000,12 +1008,6 @@ void FreyjaControl::EvSerializeMesh()
 void FreyjaControl::EvUnserializeMesh()
 {
 #if TINYXML_FOUND
-	Mesh *m = new Mesh();
-	m->AddToPool();
-
-	if (!m)
-		return;
-
 	mstl::String path = freyja_rc_map_string("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
@@ -1037,20 +1039,27 @@ void FreyjaControl::EvUnserializeMesh()
 	{
 		String s = child->Value();
 
-		if (s == "Mesh" || s == "mesh")
+		if (s == "mesh" || s == "Mesh")
 		{
-			break;
-		}
-	}
+			Mesh *m = new Mesh();
+			m->AddToPool();
 
-	if ( m->Unserialize( child ) )
-	{
-		Print("Mesh '%s' Loaded", filename);
-	}
-	else
-	{
-		Print("Mesh '%s' failed to load.  <%s>", filename, 
-			  child ? child->Value() : "(null)");
+		   	if ( m->Unserialize( child ) )
+			{
+				Print("Mesh '%s' Loaded", filename);
+			}
+			else
+			{
+				Print("Mesh '%s' failed to load.  <%s>", filename, 
+					  child ? child->Value() : "(null)");
+			}
+		}
+		else if (s == "material")
+		{
+			index_t idx = freyjaMaterialCreate();
+			Material *mat = freyjaGetMaterialClass(idx);
+			mat->Unserialize(child);
+		}
 	}
 	
 	mgtk_filechooser_blocking_free(filename);

@@ -351,15 +351,18 @@ const vec_t *freyjaGetBoneBindPose16fv(index_t boneIndex)
 {
 	Bone *b = Bone::GetBone(boneIndex);
 
+	// Mongoose, 2007.06.12: Diabled some kind of old test code...
+#if 0
 	// FIXME: This is mutating the matrix to make it 'friendly' to OpenGL.
 	//        It would be better to push this back into the Mat44 class.
-	if (b)
+	if (b) 
 	{
 		b->mBindPose.mMatrix[3] = 
 		b->mBindPose.mMatrix[7] = 
 		b->mBindPose.mMatrix[11] = 0.0f;
 		b->mBindPose.mMatrix[15] = 1.0f;
 	}
+#endif
 
 	return b ? b->mBindPose.mMatrix : Mat44::mIdentity;
 }

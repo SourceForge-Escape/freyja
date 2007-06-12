@@ -26,6 +26,10 @@
 #ifndef GUARD__FREYJA_MATERIAL_H_
 #define GUARD__FREYJA_MATERIAL_H_
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
+
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
@@ -166,6 +170,22 @@ class Material
 	 * Pre  : Reads the material data from disk
 	 * Post : Returns true on success
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	bool Serialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool Unserialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 	void SetFlag(Flags flag) { mFlags |= flag; }
 	/*------------------------------------------------------

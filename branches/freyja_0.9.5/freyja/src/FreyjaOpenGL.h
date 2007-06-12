@@ -197,6 +197,10 @@ void mglDrawCone(vec3_t origin, vec_t height, uint32 count);
 void mglDraw3dCircle(const vec3_t center, const vec_t radius, uint32 count, 
 					 uint32 plane, bool solid);
 
+void mglDrawControlPoint();
+
+void mglDrawBoneSolid(const vec3_t pos);
+
 void mglDrawEditorAxis();
 
 void mglDrawAxisWithCones(const vec_t min, const vec_t mid, const vec_t max,
