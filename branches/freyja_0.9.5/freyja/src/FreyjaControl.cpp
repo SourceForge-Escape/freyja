@@ -23,6 +23,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include "config.h"
+
 #include <stdlib.h> 
 #include <stdio.h> 
 #include <math.h> 
@@ -48,7 +50,6 @@
 #include <freyja/Mesh.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/Material.h>
-#define USING_FREYJA_CPP_ABI
 #include <freyja/LightABI.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/MeshABI.h>
@@ -65,9 +66,6 @@ using namespace mstl;
 using namespace freyja;
 using namespace freyja3d;
 
-#define DEBUG_PICK_RAY         0
-#define DEBUG_SCREEN_TO_WORLD  0
-#define DEBUG_VIEWPORT_MOUSE   0
 
 int load_texture(const char *filename);
 int load_shader(const char *filename);
@@ -164,13 +162,14 @@ FreyjaControl::FreyjaControl() :
 	freyjaCurrentMaterial(mIndex);
 	freyjaMaterialName(mIndex, "Boring default");
 	freyjaMaterialEmissive(mIndex, rgba);
-	rgba[0] = rgba[1] = rgba[2] = 0.9;
+	rgba[0] = rgba[1] = rgba[2] = 0.79f;
 	freyjaMaterialDiffuse(mIndex, rgba);
-	rgba[0] = rgba[1] = rgba[2] = 0.2;
+	rgba[0] = rgba[1] = rgba[2] = 0.2f;
 	freyjaMaterialAmbient(mIndex, rgba);
-	rgba[0] = rgba[1] = rgba[2] = 0.2;
+	rgba[0] = rgba[1] = rgba[2] = 0.01f;
 	freyjaMaterialSpecular(mIndex, rgba);
-	freyjaMaterialShininess(mIndex, 32.0f);
+	freyjaMaterialShininess(mIndex, 0.0f);
+	freyjaMaterialSetFlag(mIndex, fFreyjaMaterial_Texture); // texture on!
 
 	/* Hook up the view */
 	mRender = FreyjaRender::GetInstance();
@@ -1352,6 +1351,7 @@ void FreyjaControl::eViewportMaterial()
 void FreyjaControl::eMove()
 {
 	mToken = true;
+
 	Transform(mObjectMode, fTranslate,
 			  freyja_event_get_float(EvMoveXId),
 			  freyja_event_get_float(EvMoveYId),
@@ -1367,10 +1367,22 @@ void FreyjaControl::eMove()
 void FreyjaControl::eRotate()
 {
 	mToken = true;
-	Transform(mObjectMode, fRotate,
-			  freyja_event_get_float(EvRotateXId),
-			  freyja_event_get_float(EvRotateYId),
-			  freyja_event_get_float(EvRotateZId));
+
+	hel::Vec3 rot(freyja_event_get_float(EvRotateXId),
+				  freyja_event_get_float(EvRotateYId),
+				  freyja_event_get_float(EvRotateZId));
+
+	switch (mObjectMode)
+	{
+	case tBone:
+#warning "FIXME not done"
+		break;
+
+	default:
+		;
+	}
+
+	Transform(mObjectMode, fRotate, rot.mX, rot.mY, rot.mZ);
 		
 	freyja_event_set_float(EvRotateXId, 0.0f);
 	freyja_event_set_float(EvRotateYId, 0.0f);
@@ -2094,10 +2106,8 @@ void FreyjaControl::eRotateObject(uint32 value)
 			;
 		}
 		
-		Print("Rotate %s...", 
-					 ObjectTypeToString(GetObjectMode()).c_str());
-		
-		freyja_event_gl_refresh();
+		Print("Rotate %s...", ObjectTypeToString(GetObjectMode()).c_str());
+		RefreshContext();
 	}
 }
 
@@ -2584,6 +2594,18 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 			{
 				hel::Vec3 v = GetCursorData(GetEventAction());
 
+				switch( GetEventAction() )
+				{
+				case fRotate:
+					// This allows WYSWYG cursor rotation with valid undo.
+					v = -v;
+					mCursor.mRotate = hel::Vec3();
+					break;
+
+				default:
+					;
+				}
+
 				// Mongoose - Does transform, undo, etc for ya, bub
 				Transform(GetObjectMode(), GetEventAction(),
 						  v.mVec[0], v.mVec[1], v.mVec[2]);
@@ -2609,6 +2631,16 @@ bool FreyjaControl::MouseEdit(int btn, int state, int mod, int x, int y)
 				//			 v.mVec[0], v.mVec[1], v.mVec[2]);
 
 				hel::Vec3 v = GetCursorData(GetEventAction());
+
+				switch( GetEventAction() )
+				{
+				case fRotate:
+					v = helDegToRad(v);
+					break;
+
+				default:
+					;
+				}
 
 				// Mongoose - Does transform, undo, etc for ya, bub
 				KeyframeTransform(GetObjectMode(), GetEventAction(),
@@ -3895,6 +3927,7 @@ void FreyjaControl::Transform(object_type_t obj,
 
 	hel::Vec3 v(x, y, z);
 	hel::Vec3 u;
+	hel::Vec3 orig = v;
 
 	switch (action)
 	{
@@ -4066,6 +4099,22 @@ void FreyjaControl::Transform(object_type_t obj,
 	case tMesh:
 		if (mToken)
 		{
+#if 0   // Recover, cursor sends degrees
+			switch (action)
+			{
+			case fRotate:
+				{
+					v = orig * HEL_PI_OVER_180;
+
+					v = helDegToRad(v);
+				}
+				break;
+
+			default:
+				;
+			}
+#endif
+
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			ActionModelModified(a);
 			freyjaMeshTransform3fv(GetSelectedMesh(), action, v.mVec);
@@ -4823,7 +4872,7 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 {
 	index_t model = GetSelectedModel();
 
-	if (i < freyjaGetModelMeshCount(model) && freyjaIsMeshAllocated(i))
+	if ( i < freyjaGetModelMeshCount(model) && freyjaIsMeshAllocated(i) )
 	{		
 		Mesh *m = Mesh::GetMesh(freyjaGetModelMeshIndex(model, i));
 		mSelectedMesh = i;
@@ -5776,7 +5825,7 @@ mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex,
 	tree->numChildren = rootChildCount;
 	tree->children = 0x0;
 
-#ifdef DEBUG_BONE_LOAD
+#if DEBUG_BONE_LOAD
 	printf("-- %s : %i/%i children\n",  
 		   tree->label, tree->numChildren, rootChildCount);
 #endif

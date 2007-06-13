@@ -18,9 +18,11 @@ add_definitions(
 )
 
 add_definitions(
-	-DDEBUG
 	-DEXPERIMENTAL
 )
+
+# Debug build
+add_definitions( -DDEBUG -g -Wall )
 
 if (WIN32)
 #	@-mkdir -p $(BUILD_WIN32_DIR)
@@ -76,7 +78,7 @@ set(Objs
 	hel/ViewVolume 
 )
 
-add_library( ${Name}${Major} SHARED ${Objs} )
+add_library( ${Name}-${Major}.${Minor}.${Micro} SHARED ${Objs} )
 
 # Packaging
 #add_custom_command(TARGET libhel.deb COMMAND dpkg-buildpackage -rfakeroot)

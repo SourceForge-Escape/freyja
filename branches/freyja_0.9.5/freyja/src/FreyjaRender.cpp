@@ -11,7 +11,7 @@
  *
  *
  *           This file was generated using Mongoose's C++ 
- *           template generator scripopt.  <mongoose@icculus.org>
+ *           template generator script.  <mongoose@icculus.org>
  * 
  *-- History ------------------------------------------------- 
  *
@@ -23,9 +23,7 @@
  *
  ==========================================================================*/
 
-#define USING_FREYJA_CPP_ABI
-#define SHADOW_VOLUME_WITH_ARRAYS 1
-#define TEST_SHADOW_VOLUME_SURFACES 0
+#include "config.h"
 
 #include "FreyjaOpenGL.h" // Includes windows.h, so avoid header interaction
 
@@ -50,6 +48,7 @@
 #include "FreyjaControl.h"
 
 #include "FreyjaRender.h"
+
 
 
 using namespace freyja;
@@ -309,7 +308,7 @@ void FreyjaRender::DrawFreeWindow()
 	glPopMatrix();
 
 
-#ifdef PLANE_NOTIFY_WITH_AXIS
+#if PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
 	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
 	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
@@ -690,6 +689,7 @@ void FreyjaRender::Display()
 	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, "FREYJA  0.9.6 PREALPHA.");
 	glPopAttrib();
 
+	//CHECK_OPENGL_ERROR( glFlush() );
 	glFlush();
 	freyja_swap_buffers();
 
@@ -870,6 +870,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 		if (mRenderMode & fSkeletalVertexBlending)
 		{
+#warning "FIXME: Still using update in render request for blending!"
 			// FIXME: Only updating in render loop for testing only!
 			freyjaMeshUpdateBlendVertices(mesh, a, time);
 
@@ -880,7 +881,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 	// NOTE: Once we switch to more advanced arrays we have to
 	//       start locking the dynamic reallocation.
-#ifndef USE_IMM_VERTEX
 	glPushClientAttrib(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -889,8 +889,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
 	glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
 	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
-	
-#endif
 
 	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh)
 	{
@@ -953,22 +951,9 @@ void FreyjaRender::RenderMesh(index_t mesh)
 			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
 							m->GetBoundingVolumeRadius(), 
 							64, 2, false);
-		}
-
-	
-		if (GetFlags() & fBoundingVolumes && m->GetFlags() & Mesh::fSelected)
-		{
-			vec3_t min, max;
-			m->GetBBox(min, max);
-			mglDrawSelectBox(min, max, YELLOW);
 		}	
 	}
-	else if (GetFlags() & fBoundingVolumes && m->GetFlags() & Mesh::fSelected)
-	{
-		vec3_t min, max;
-		m->GetBBox(min, max);
-		mglDrawSelectBox(min, max, RED);
-	}
+	 
 
 
 	/* Render outline */
@@ -1033,14 +1018,9 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 			if (vertex)
 			{
-				(vertex->mFlags & Vertex::fSelected) ?
-				glColor3fv(mColorVertexHighlight) :
-				glColor3fv(mColorVertex);
-#if USE_IMM_VERTEX
-				glVertex3fv(array+vertex->mVertexIndex*3);
-#else
+				glColor3fv(	(vertex->mFlags & Vertex::fSelected) ?
+							mColorVertexHighlight : mColorVertex );
 				glArrayElement(vertex->mVertexIndex);
-#endif
 			}
 		}
 
@@ -1082,6 +1062,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 
 		glPushMatrix();
 		glScalef(scale, scale, scale);
+		glColor3fv(mColorWireframe);
 
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{
@@ -1090,10 +1071,8 @@ void FreyjaRender::RenderMesh(index_t mesh)
 			if (!f) 
 				continue;
 
-			// NOTE: This is a test rendering, since you can't
-			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
-			//       mappings in the Mesh.   =)
-			glColor3fv(mColorWireframe);
+			// NOTE: Can't guarantee Vertex:mVertexIndex after plugin 
+			//       operation if they fail to Repack() the Mesh.
 			glDrawElements(GL_LINE_LOOP, 
 						   f->mIndices.size(), 
 						   GL_UNSIGNED_INT,
@@ -1187,9 +1166,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 		glPopAttrib();
 	}
 
-#ifndef USE_IMM_VERTEX
 	glPopClientAttrib();
-#endif
 
 	glPopMatrix();
 }
@@ -1541,6 +1518,7 @@ void FreyjaRender::RenderModel(index_t model)
 #endif
 			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
 			glColor3fv(PINK) : glColor3fv(YELLOW);
+
 			//mglDrawSphere(12, 12, 0.5f);
 			mglDrawControlPoint();
 
@@ -1557,25 +1535,15 @@ void FreyjaRender::RenderModel(index_t model)
 				glColor3fv(FreyjaRender::mColorBoneHighlight);
 
 				freyjaGetBoneTranslation3fv(i, p.mVec);
-				mglDrawBone(2, p.mVec);
 
-#if 1
-				//glTranslatef(p.mX, p.mY, p.mZ);
-				freyjaGetBoneRotationEuler3fv(parent, r.mVec);
-
-				r *= 57.295779513082323f;
-				glRotatef(r.mZ, 0, 0, 1);
-				glRotatef(r.mY, 0, 1, 0);
-				glRotatef(r.mX, 1, 0, 0);
-
-				mglDrawBoneSolid(p.mVec);
-#else
-				glPushMatrix();
-				glMultMatrixf( freyjaGetBoneBindPose16fv(i) );
-				mglDrawBoneSolid(p.mVec);
-				glPopMatrix();
-#endif
-
+				if (FreyjaRender::mBoneRenderType == 2)
+				{
+					mglDrawBoneSolid(p.mVec);
+				}
+				else
+				{
+					mglDrawBone(2, p.mVec);
+				}
 
 				glPopMatrix();
 			}
@@ -1632,7 +1600,15 @@ void FreyjaRender::RenderModel(index_t model)
 				glColor3fv(WHITE) : glColor3fv(DARK_GREEN);
 
 				freyjaGetBoneTranslation3fv(i, p.mVec);
-				mglDrawBone(2, p.mVec);
+
+				if (FreyjaRender::mBoneRenderType == 2)
+				{
+					mglDrawBoneSolid(p.mVec);
+				}
+				else
+				{
+					mglDrawBone(2, p.mVec);
+				}
 
 				glPopMatrix();
 			}
@@ -1762,8 +1738,17 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 
 	/* Render bone */
 	((FreyjaRender::mSelectedBone == boneIndex) ? 
-	 glColor3fv(FreyjaRender::mColorBoneHighlight) : glColor3fv(FreyjaRender::mColorBone));
-	mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
+	 glColor3fv(FreyjaRender::mColorBoneHighlight) : 
+	 glColor3fv(FreyjaRender::mColorBone));
+
+	if (FreyjaRender::mBoneRenderType == 2)
+	{
+		mglDrawBone(3, pos.mVec);		
+	}
+	else
+	{
+		mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
+	}
 
 
 	/* Transform child bones */
@@ -2350,7 +2335,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	if (mRenderMode & fGrid)
 		DrawGrid(plane, GetWindowWidth(), GetWindowHeight(), 10);
 
-#ifdef PLANE_NOTIFY_WITH_AXIS
+#if PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
 	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
 
@@ -2534,13 +2519,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, color);
 
-#ifdef USE_TORUS_TEST
-	glPushMatrix();
-	glRotatef(45.0f, 1, 0, 0);
-	glRotatef(45.0f, 0, 0, 1);
-	mglDrawTorus(3.0, 10.0);
-	glPopMatrix();
-#else
+
 	/* Cast light on sphere colored/detailed by material */
 	static vec_t dy = 0.0f;
 	dy += 0.5f;
@@ -2548,9 +2527,14 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glPushMatrix();
 	glRotatef(dy, 0, 1, 0);
 	mglApplyMaterial(freyjaGetCurrentMaterial());
+
+#if USE_TORUS_TEST
+	mglDrawTorus(3.0, 10.0);
+#else
 	mglDrawSphere(128, 128, 10.0);
-	glPopMatrix();
 #endif
+
+	glPopMatrix();
 
 	const float x = 12.0f, y = -8.0f, z = 0.0f, w = 16.0f, h = 16.0f, s = 1.001f;
 

@@ -904,8 +904,8 @@
 
 			(tab "Plugins" eNone
 				(expander "Freyja Plugins   "	1	"FirstPartyPluginSlot")
-				(hbox 1 0 0 1 0 (hsep))
-				(expander "Community Plugins"	1	"ThirdPartyPluginSlot")
+				;(hbox 1 0 0 1 0 (hsep))
+				;(expander "Community Plugins"	1	"ThirdPartyPluginSlot")
 			) ; tab Plugins
 
 	) ; notebook

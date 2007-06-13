@@ -172,6 +172,12 @@ extern "C" {
 	 * Post : Gets bone[index]'s bind pose transform
 	 ------------------------------------------------------*/
 
+	const vec_t *freyjaGetBoneLocalBindTransform16fv(index_t boneIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Gets bone[index]'s bind pose local transform
+	 ------------------------------------------------------*/
+
 	void freyjaGetBoneWorldPos3fv(index_t boneIndex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 

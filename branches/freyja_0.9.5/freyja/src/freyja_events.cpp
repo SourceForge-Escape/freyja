@@ -24,13 +24,10 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#define FREYJA_APP_PLUGINS 1
-#define DISABLED_EVENT     0
-#define ENABLE_ASSERT_LOG  1
+#include "config.h"
 
 #include <string.h>
 
-#define USING_FREYJA_CPP_ABI
 #include <freyja/LegacyABI.h>  // FIXME: Still using legacy polymesh generator
 #include <freyja/MeshABI.h>
 #include <freyja/TextureABI.h>
@@ -1821,7 +1818,7 @@ arg_list_t *freyja_rc_color(arg_list_t *args)
 	// Call event func here - simulated with printf in tests
 	if (sym && r && g && b && a)
 	{
-#ifdef DEBUG_RESOURCE_COLOR
+#if DEBUG_RESOURCE_COLOR
 		freyja_print("extern \"C\" { color(%s, %f, %f, %f); }\n",
 					 get_int(sym),//get_string(sym),
 					 get_float(r), get_float(g), get_float(b));
