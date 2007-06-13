@@ -23,7 +23,8 @@
 #ifndef GUARD__FREYJA_FREYJAOPENGL_H_
 #define GUARD__FREYJA_FREYJAOPENGL_H_
 
-#define WIN32_GL_EXT
+#include "config.h"
+
 
 #ifdef HAVE_OPENGL
 #   ifdef MACOSX
@@ -98,7 +99,21 @@ typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj
 #      include <GL/glxext.h>
 #      define mglGetProcAddress(string) glXGetProcAddressARB((GLubyte *)string)
 #   endif
+
+#if CHECK_FOR_OPENGL_ERRORS
+#   define CHECK_OPENGL_ERROR( cmd ) \
+	cmd;												   \
+	{ GLenum error;														\
+		while ( (error = glGetError()) != GL_NO_ERROR) {				\
+			printf( "[%s:%d] ’%s’ failed with error %s\n", __FILE__,	\
+					__LINE__, #cmd, gluErrorString(error) );	\
+		} \
+	}
 #else
+#   define CHECK_OPENGL_ERROR( cmd ) cmd;
+#endif
+
+#else // HAVE_OPENGL
 #   error "This module requires an OpenGL SDK"
 #endif
 

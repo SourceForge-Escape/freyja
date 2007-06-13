@@ -183,6 +183,7 @@ int freyja_model__smd_import(char *filename)
 				hel::Vec3 rot(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
 
 				// Convert coords
+#if 0
 				switch (up)
 				{
 				case 0:
@@ -202,6 +203,7 @@ int freyja_model__smd_import(char *filename)
 					}
 					break;
 				}
+#endif
 
 				smd_bone_t *bone = bones[idx];
 
@@ -211,7 +213,7 @@ int freyja_model__smd_import(char *filename)
 					index_t b = freyjaBoneCreate(skeleton);
 
 					// SMD is already in radians, right handed...
-#if 1
+#if 0
 					// Found some kind of odd SMD -- not just coord system?
 					hel::Mat44 m, x, y, z;
 					x.SetRotationX(rot.mX);
@@ -228,20 +230,20 @@ int freyja_model__smd_import(char *filename)
 					q = q.GetInverse();
 					//freyjaBoneRotateQuat4f(b, -q.mW, q.mX, q.mZ, q.mY);
 					freyjaBoneRotateQuat4f(b, q.mW, q.mX, q.mY, q.mZ);
+#elif 1
+					// Bloodlines
+					freyjaBoneRotateEuler3f(b, rot.mZ, rot.mX, rot.mY);
+					freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);	
 #else
 					//rot *= (HEL_PI / 32768.0f); // Nope, seems to be in rad
 					//rot *= 57;  // Nope, freyja takes radians now	
 
-					freyjaBoneRotateEuler3f(b, rot.mX, rot.mY, rot.mZ);
+					//freyjaBoneRotateEuler3f(b, rot.mX, rot.mY, rot.mZ);
+					freyjaBoneRotateEuler3f(b, rot.mX, rot.mZ, rot.mY);
+					freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
+					//freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
 #endif
 
-
-
-					
-					freyjaBoneTranslate3f(b, loc.mX, loc.mY, loc.mZ);
-
-					rot *= 57;
-					printf("-- %i. %f %f %f\n", b, rot.mX, rot.mY, rot.mZ);
 					bone->idx = b;
 
 					if (bone && idx < (int)bones.size())

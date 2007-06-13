@@ -87,147 +87,147 @@ depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
 #=============================================================================
-# Target rules for targets named mgtk0
+# Target rules for targets named mgtk-0.1.1
 
 # Build rule for target.
-mgtk0: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 mgtk0
+mgtk-0.1.1: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 mgtk-0.1.1
 
 # fast build rule for target.
-mgtk0/fast:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/build
+mgtk-0.1.1/fast:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/build
 
 # target to build an object file
 mgtk/ConfirmationDialog.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/ConfirmationDialog.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.o
 
 # target to preprocess a source file
 mgtk/ConfirmationDialog.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/ConfirmationDialog.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.i
 
 # target to generate assembly for a file
 mgtk/ConfirmationDialog.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/ConfirmationDialog.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.s
 
 # target to build an object file
 mgtk/MLisp.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/MLisp.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.o
 
 # target to preprocess a source file
 mgtk/MLisp.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/MLisp.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.i
 
 # target to generate assembly for a file
 mgtk/MLisp.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/MLisp.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.s
 
 # target to build an object file
 mgtk/QueryDialog.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/QueryDialog.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.o
 
 # target to preprocess a source file
 mgtk/QueryDialog.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/QueryDialog.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.i
 
 # target to generate assembly for a file
 mgtk/QueryDialog.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/QueryDialog.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.s
 
 # target to build an object file
 mgtk/Resource.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/Resource.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.o
 
 # target to preprocess a source file
 mgtk/Resource.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/Resource.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.i
 
 # target to generate assembly for a file
 mgtk/Resource.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/Resource.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.s
 
 # target to build an object file
 mgtk/ResourceEvent.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/ResourceEvent.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.o
 
 # target to preprocess a source file
 mgtk/ResourceEvent.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/ResourceEvent.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.i
 
 # target to generate assembly for a file
 mgtk/ResourceEvent.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/ResourceEvent.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.s
 
 # target to build an object file
 mgtk/mgtk_callbacks.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_callbacks.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.o
 
 # target to preprocess a source file
 mgtk/mgtk_callbacks.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_callbacks.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.i
 
 # target to generate assembly for a file
 mgtk/mgtk_callbacks.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_callbacks.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.s
 
 # target to build an object file
 mgtk/mgtk_filedialog.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_filedialog.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.o
 
 # target to preprocess a source file
 mgtk/mgtk_filedialog.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_filedialog.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.i
 
 # target to generate assembly for a file
 mgtk/mgtk_filedialog.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_filedialog.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.s
 
 # target to build an object file
 mgtk/mgtk_interface.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_interface.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.o
 
 # target to preprocess a source file
 mgtk/mgtk_interface.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_interface.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.i
 
 # target to generate assembly for a file
 mgtk/mgtk_interface.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_interface.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.s
 
 # target to build an object file
 mgtk/mgtk_linker.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_linker.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.o
 
 # target to preprocess a source file
 mgtk/mgtk_linker.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_linker.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.i
 
 # target to generate assembly for a file
 mgtk/mgtk_linker.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_linker.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.s
 
 # target to build an object file
 mgtk/mgtk_resource.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_resource.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.o
 
 # target to preprocess a source file
 mgtk/mgtk_resource.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_resource.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.i
 
 # target to generate assembly for a file
 mgtk/mgtk_resource.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_resource.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.s
 
 # target to build an object file
 mgtk/mgtk_tree.o:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_tree.o
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.o
 
 # target to preprocess a source file
 mgtk/mgtk_tree.i:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_tree.i
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.i
 
 # target to generate assembly for a file
 mgtk/mgtk_tree.s:
-	$(MAKE) -f CMakeFiles/mgtk0.dir/build.make CMakeFiles/mgtk0.dir/mgtk/mgtk_tree.s
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.s
 
 # Help Target
 help::
@@ -236,7 +236,7 @@ help::
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... mgtk0"
+	@echo "... mgtk-0.1.1"
 	@echo "... rebuild_cache"
 	@echo "... mgtk/ConfirmationDialog.o"
 	@echo "... mgtk/ConfirmationDialog.i"

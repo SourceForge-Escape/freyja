@@ -6,6 +6,13 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - FIX: Forced clear of cursor rotate state for mesh. ( also fixes undo )
+ - Minor FreyjaRender clean-up pass while looking at a bug. 
+ - Removed IMM rendering flag and code.
+ - New config.h finally used for this project. ( you're welcome )
+ - Default material changes, including enabling texture by default.
+ - XML serializer for Material
  - UI 'icon' renderers calling 1000% less trig functions for large models.  =p
  - New control point 'icon' as list to avoid generating geometry over and over.
  - New bone 'icon' as promised -- shaded to be pretty as well.

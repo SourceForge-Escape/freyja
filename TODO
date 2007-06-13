@@ -5,6 +5,10 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
+ * SUPER ANNOYING BUGS 
+	- Models loading w/o complete materials often are alpha masked.
+	- Mesh rotator for box and cursor are unmatched!
+
  * Single joint animation shishi odoshi tutorial demo.
 
  * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
@@ -49,7 +53,7 @@
 
  * Polygon generators using new backend ( UI legacy removal depends on this. )
 
- * Add the simple Bezier patch polygon mesh generator back.
+ * Add the simple Bezier patch polygon mesh back.
 
  * Shading for editing flat / face normal / etc
 
@@ -96,14 +100,25 @@
 	
  * Mesh parenting and grouping.
 
- * Rendering support for alpha flagged faces ( separate pass depth sorting )
-	- Face flag for marking faces that need to be depth sorted... 
-
  * Material sphere rotation controlled by slider.
 
- * Finish up the icon set.
+ * Finish up the UI icon set and '3d icons'.
 
- * Directional light and other '3d icons'.
+ * Improve mesh render support, so we can do pure array/VBO rendering, etc.
+	- Color array / material color support wouldn't be a bad idea.
+	- Perhaps limit the modeler to quads/tris... always a sore subject  =)
+	- MeshRenderInstance or rework old Mesh, since it has to sync anyway
+		- mFaceIndices
+		- mPolyMappedVertices
+		- mPolyMappedNormals
+		- mPolyMappedTexcoords
+		- DepthSortAlphaFaces(Ray) - Make a new index array for depth sorting.
+	- A better way to flag alpha faces in UI is needed. ( perhaps by material )
+		- SortAlphaFaces() - Move alpha faces to end array and store offset.
+
+ * Projectors
+
+ * Cameras
 
  * Do another pass on 0.9.6 items to be sure they aren't already completed.
 
@@ -119,8 +134,10 @@
 
  * Review for possible offical packages with Ubuntu/Debian.
 
- * MSTL review for possible rewrite.  Wish: generic container item, opt, etc.
+ * MSTL review for rewrite.  Wish: generic container item, opt, etc.
 	- It might be a good idea to have true vector and vectorarray containers.
+	- True List
+	- Hash
 
  * APIs / designs to be finalized
 	- Optmize Mesh to avoid wasting texCoords when unused by vertices

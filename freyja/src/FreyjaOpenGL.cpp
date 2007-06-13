@@ -1181,19 +1181,22 @@ void mglDrawEditorAxis()
 		vec_t scale = 0.5f;
 		drawList = glGenLists(1);
 		glNewList(drawList, GL_COMPILE);
-		glPushMatrix();
-		
-		glPushAttrib(GL_ENABLE_BIT);
+
+		glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT);
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0); // White color texture ID
 
+		glPushMatrix();
 		glScalef(scale, scale, scale);
+
 		mglDrawAxisWithCones(min, mid, max, 8);
+
+		glPopMatrix();
 
 		glPopAttrib();
 
-		glPopMatrix();
 		glEndList();
 	}
 	else
@@ -1346,12 +1349,6 @@ void mglDrawSphere(int numMajor, int numMinor, float radius)
 		a = i * majorStep;
 		b = a + majorStep;
 
-#if 0
-		r0 = radius * sin(a);
-		r1 = radius * sin(b);
-		z0 = radius * cos(a);
-		z1 = radius * cos(b);
-#else
 		helSinCosf(a, &r0, &z0);
 		r0 *= radius;
 		z0 *= radius;
@@ -1359,19 +1356,14 @@ void mglDrawSphere(int numMajor, int numMinor, float radius)
 		helSinCosf(b, &r1, &z1);
 		r1 *= radius;
 		z1 *= radius;
-#endif
 		
 		glBegin(GL_TRIANGLE_STRIP);
 		
 		for (j = 0; j <= numMinor; ++j) 
 		{
 			c = j * minorStep;
-#if 0
-			x = cos(c);
-			y = sin(c);
-#else
 			helSinCosf(c, &y, &x);
-#endif	
+
 			glNormal3f((x * r0) / radius, z0 / radius, (y * r0) / radius);
 			glTexCoord2f(j / (GLfloat) numMinor, i / (GLfloat) numMajor);
 			glVertex3f(x * r0, z0, y * r0);
@@ -1412,26 +1404,58 @@ void mglDrawControlPoint()
 
 void mglDrawBoneSolid(const vec3_t pos)
 {
-	Vec3 tip(0,0.1f,0), end(0,1,0);
-
+	Vec3 tip(0.0f,0.0f,0.0f), end(0.0f,1.0f,0.0f);
 	Vec3 a(0.1,0.1,0.1), b(-0.1,0.1,-0.1), c(0.1,0.1,-0.1), d(-0.1,0.1,0.1);
-
 	Vec3 p(pos);
 
+	const float cutoff = 4.5f;
 	const float scale = p.Magnitude();
-	
-	a *= scale;
-	b *= scale;
-	c *= scale;
-	d *= scale;
-	end *= scale;
-	//end = Vec3(pos);
+	const float scale2 = (scale > cutoff) ? cutoff : scale;
 
-	glPushAttrib(GL_LIGHTING_BIT);
+#if 1
+	Vec3 delta = end - p;
+	delta.Norm();
+	delta *= 0.1f;
+
+	delta = p;
+	delta.Norm();
+	delta *= 0.1f;
+
+	a = a + delta;
+	b = b + delta;
+	c = c + delta;
+	d = d + delta;
+#endif
+
+	a *= scale2;
+	b *= scale2;
+	c *= scale2;
+	d *= scale2;
+
+	glPushAttrib(GL_LIGHTING_BIT | GL_TEXTURE_BIT);
 
 	glEnable(GL_LIGHTING);
+	glBindTexture(GL_TEXTURE_2D, 0); // 'color' texture
+	
+	vec4_t ambient = {0.326f, 0.666f, 0.779f, 1.0f};
+	vec4_t diffuse = {0.318f, 0.47f, 0.77f, 1.0f};
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
 
-	//mglDrawSphere(8, 8, 0.1f * scale);
+#if 1
+	end = p;
+	//tip.mY -= 0.1f * scale2;
+	//tip = delta * -2.0f;
+	tip = p * 0.2f * scale2;
+	const float off = -0.1f * scale2;
+	a.mY += off;
+	b.mY += off;
+	c.mY += off;
+	d.mY += off;
+
+	// might be better to scale control point
+	mglDrawSphere(8, 8, 0.1f * scale2);
+#endif
 
 	glBegin(GL_TRIANGLES);
 	glNormal3f(.3,.3,-.3);
