@@ -5,6 +5,8 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
+ * Paint options to 'go thru', just ignore, etc
+
  * Single joint animation shishi odoshi tutorial demo.
 
  * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.

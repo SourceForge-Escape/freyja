@@ -434,6 +434,14 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
 
+
+
+	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
+	CreateListener("ePaintUnweight", &FreyjaControl::EvPaintUnweight);
+	CreateListener("ePaintSelect", &FreyjaControl::EvPaintSelect);
+	CreateListener("ePaintUnselect", &FreyjaControl::EvPaintUnselect);
+	CreateListener("ePaintMaterial", &FreyjaControl::EvPaintMaterial);
+
 }
 
 
@@ -5209,18 +5217,51 @@ bool FreyjaControl::SaveUserPreferences()
 
 void FreyjaControl::PaintObject(vec_t x, vec_t y)
 {
-	//Print("%f %f", x, y);
-	//CastPickRay(x, y);
-
 	bool paint = true;
 	float weight = 1.0f;
 
-	switch ( GetObjectMode() )
+	switch ( GetPaintMode() )
 	{
-	case tSelectedMeshes:
+	case ePaintSelect:
+		SelectObject(x, y, true);
+		break;
+
+	case ePaintUnselect:
+		SelectObject(x, y, false);
+		break;
+
+	case ePaintMaterial:
+		{
+			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
+
+			if (m)
+			{
+				CastPickRay(x, y);
+
+				hel::Vec3 tuv;
+				int face = m->PickFace(Face::fSelected, 
+									   FreyjaRender::mTestRay, tuv);
+
+				if (face > -1)
+				{
+					Face *f = m->GetFace(face);
+
+					if (f)
+					{
+						f->mMaterial = GetSelectedMaterial();
+					}
+
+					Print("-- f = %i, t = %f, uv = %f, %f", 
+						  face, tuv.mX, tuv.mY, tuv.mZ);
+				}
+			}
+		}		
+		break;
+
+	case ePaintUnweight:
 		paint = false;  // cheesy
 
-	case tMesh:
+	case ePaintWeight:
 		{
 			/* TODO: Sphere 'brush' test next.
 			 *
@@ -5295,11 +5336,10 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 			}
 #endif
 		}
-		break;
+	    break;
 
 	default:
-		// Just doing a select paint for testing...
-		SelectObject(x, y, true);
+	    ;
 	}
 }
 

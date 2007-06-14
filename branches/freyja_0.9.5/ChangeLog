@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Quick hand drawn paint icon.
+ - Paint feature gets its own shelf and modes -- bonus material paint.
  - FIX freyjautil Makefile
  - Weight paint test -- Mesh mode paints 1.0f / Meshes... clears all weights.
  - Directional light on by default if no point light is disabled.

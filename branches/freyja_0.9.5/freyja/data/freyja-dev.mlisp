@@ -267,6 +267,7 @@
 				(menu_seperator)
 			)
 			(menu_seperator)
+			(submenu eNone "Recent Meshes...")
 			(menu_item	"_Import Mesh..." eXMLToMesh "gtk-open")
 			(menu_item	"_Export Mesh..." eMeshToXML  "gtk-save-as")
 
@@ -562,6 +563,24 @@
 					;(spinbutton 0 0 1024 eSelectMaterial)
 					;(textbox eSetMaterialName)
 				)
+
+			) ; hbox
+		) ; tab
+
+		(tab "Paint" eNone
+			(hbox 0 1 0 1 1				
+
+				; Paint mode selection
+				(hbox 0 1 0 1 1
+					(optionmenu	eEvent	eNone
+						(menu_item	"Weight     "	ePaintWeight)
+						(menu_item	"Unweight   "	ePaintUnweight)
+						(menu_item	"Select     "	ePaintSelect)
+						(menu_item	"Unselect   "	ePaintUnselect)
+						(menu_item	"Material   "	ePaintMaterial)
+						;(menu_item	"Deform #1  "	ePaintDMap1)
+					) ; optionmenu
+				) ; hbox
 
 			) ; hbox
 		) ; tab
