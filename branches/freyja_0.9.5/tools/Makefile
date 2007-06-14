@@ -44,7 +44,7 @@ BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/test
 BUILD_INSTALL_DIR=$(BUILD_ROOT_DIR)/$(BUILD_SELECT)
 SRC_DIR=src
 LOCAL_INCLUDES=-I../mstl -I../libhel/ -I../libfreyja/
-LOCAL_LIBS=-L../bin/libhel/debug/ -L../bin/libfreyja/debug/ 
+LOCAL_LIBS=-L../libhel/ -L../libfreyja/ 
 LOCAL_WIN32_LIBS=-L../bin/libhel/win32/ -L../bin/libfreyja/win32/ 
 
 
@@ -308,7 +308,7 @@ freyjautil.test:
 	NAME=freyjautil \
 	OBJS="$(BUILD_TEST_DIR)/freyjautil.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_FREYJAUTIL $(LOCAL_INCLUDES) " \
-	LD_FLAGS="$(LOCAL_LIBS) -lm -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lpthread -lstdc++ -lhel-0.2.2 -lfreyja-0.9.5"
 
 freyjaimageutil.test:
 	@-mkdir -p $(BUILD_TEST_DIR)

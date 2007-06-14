@@ -225,6 +225,12 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	void SelectVerticesOfSelectedFaces();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	void ClearFlagForSelectedFaces(Face::Flags flag);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -380,6 +386,17 @@ public:
 	 *
 	 * Post : Returns true if 'hit', and <t> the time along ray
 	 *        This checks the bsphere, then bbox for collision.
+	 ------------------------------------------------------*/
+
+	int PickFace(Face::Flags flag, hel::Ray &r, hel::Vec3 &tuv);
+	/*------------------------------------------------------
+	 * Pre  : <flag> ignore faces with this flag.
+	 *        <r> the pick ray.
+	 *
+	 * Post : Returns index of first face encountered or -1 if DNE.
+	 *        <tuv> Contains t, and uv results from intersection.
+	 *
+	 *        Sets no flags on any face.
 	 ------------------------------------------------------*/
 
 	bool IntersectPerFace(hel::Ray &r, vec_t &t);

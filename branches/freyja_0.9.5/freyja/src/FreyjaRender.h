@@ -179,6 +179,13 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void DrawIcons();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 3d icons grouped together for better rendering.
+	 *
+	 ------------------------------------------------------*/
+
 	void EvScreenShot();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -637,6 +644,8 @@ public:
 	static vec4_t mColorWireframe;
 	static vec4_t mColorBoneHighlight;
 	static vec4_t mColorBone;
+	static vec4_t mColorJointHighlight;
+	static vec4_t mColorJoint;
 	static vec4_t mColorText;
 	static vec4_t mColorBoundingBox;
 	static vec4_t mColorGridSeperator;
@@ -740,6 +749,13 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void DrawCamWindow();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renders camera view in a viewport.
+	 *
+	 ------------------------------------------------------*/
+
 	void DrawFreeWindow();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -810,10 +826,10 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
-	void RenderLights();
+	void ApplyLights();
 	/*------------------------------------------------------
 	 * Pre  : Called from viewport interface renderer
-	 * Post : Renders light symbol and does lighting setup
+	 * Post : Does lighting setup
 	 *
 	 ------------------------------------------------------*/
 

@@ -239,8 +239,12 @@ bool Md5::loadModel(const char *filename)
 	if (!r.ParseMatchingSymbol("commandline"))
 		return false;
 
-	mCommandLine = String::Strdup(r.ParseStringLiteral());
+	//mCommandLine = String::Strdup(r.ParseStringLiteral());
+	mCommandLine = NULL;
 
+	// Just skip these now.
+	r.FindNextChar('"');
+	r.FindNextChar('"');
 
 	/* Joint setup */
 	if (!r.ParseMatchingSymbol("numJoints"))

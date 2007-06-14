@@ -181,7 +181,12 @@
 
 			(submenu "V_ertices..."
 				(menu_item "_Unselect" 	eMeshUnselectVertices)
+				(menu_seperator)
+				(menu_item "_Clear weights"	eNone)
+				(menu_item "_View weights"	eNone)
+				(menu_seperator)
 				(menu_item "_Delete"		eNone);eSelectedVertsDelete)
+				(menu_seperator)
 				(menu_item "Mirror _X"		eMirrorMeshX)
 				(menu_item "Mirror _Y"		eMirrorMeshY)
 				(menu_item "Mirror _Z"		eMirrorMeshZ))
@@ -196,13 +201,19 @@
 
 			(submenu "F_aces..."
 				(menu_item "_Unselect faces"		eMeshUnselectFaces)
-				(menu_item "_Smoothing groups"		eSmoothingGroupsDialog)
+				(menu_seperator)
+				(menu_item "_Groups"		eSmoothingGroupsDialog)
 				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
+				(menu_seperator)
 				(menu_item "Clear alpha"	eClearSelectedFacesAlpha)
 				(menu_item "Set alpha"		eSetSelectedFacesAlpha)
+				(menu_seperator)
+				(menu_item "Select _vertices"	eSelectVerticesByFaces)
+				(menu_seperator)
 				(menu_item "Mirror _X"		eMirrorFacesX)
 				(menu_item "Mirror _Y"		eMirrorFacesY)
 				(menu_item "Mirror _Z"		eMirrorFacesZ)
+				(menu_seperator)
 				(menu_item "_Delete"		eSelectedFacesDelete))
 
 			(submenu "_Mesh"
@@ -459,6 +470,9 @@
 
 				(toolbar_togglebutton false "24x24/scale.png" "Scale" 
 					"Scale object" eEvent	eScaleObject)
+
+				(toolbar_togglebutton false "24x24/paint.png" "Paint" 
+					"Paint object" eEvent	ePaintObject)
 
 				(toolbar_separator)
 
@@ -1250,6 +1264,14 @@
 			(label "Bone highlight " 0.0 0.5)
 			(colorbutton 1 eColorBoneHighlight))
 
+		(hbox 1 0 0 1 2 
+			(label "Joint color " 0.0 0.5)
+			(colorbutton 1 eColorJoint))
+
+		(hbox 1 0 0 1 2 
+			(label "Joint highlight " 0.0 0.5)
+			(colorbutton 1 eColorJointHighlight))
+
 		) ; End (tab "Colors"
 		
 		(tab "Lights" eNone
@@ -1288,6 +1310,8 @@
 (color	eColorVertexHighlight	1.0	0.0	0.86 1.0)
 (color	eColorBone				0.882352941 0.654901961 0.219607843 1.0)
 (color	eColorBoneHighlight		0.956862745 0.415686275 0.2 1.0)
+(color	eColorJoint				1.0 1.0 0.0 1.0)
+(color	eColorJointHighlight	1.0 0.75 0.75 1.0)
 (color	eColorLightAmbient		0.8 0.8 0.8 1.0)
 (color	eColorLightDiffuse		0.8 0.8 0.8 1.0)
 (color	eColorLightSpecular		0.8 0.8 0.8 1.0)

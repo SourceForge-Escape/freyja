@@ -95,6 +95,7 @@ class FreyjaControl : public Control
 		aUnselect,
 		aKeyframe,
 		aInfo,
+		aPaint,
 
 		/* Specialized actions */
 		aVertexNew,
@@ -428,23 +429,6 @@ class FreyjaControl : public Control
 	 * Post : Loads a texture given a pixel buffer
 	 ------------------------------------------------------*/
 
-	// HandleMouseEvent
-	bool MouseEvent(int btn, int state, int mod, int x, int y);
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : 
-	 * Post     : Process mouse input
-	 --------------------------------------------*/
-	
-	bool MotionEvent(int x, int y);
-	/*--------------------------------------------
-	 * Created  : 2000-09-10 by Mongoose
-	 * Modified : 
-	 * Pre      : 
-	 * Post     : Process mouse motion input
-	 --------------------------------------------*/
-
 	bool LoadModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Reads model from disk
@@ -485,6 +469,27 @@ class FreyjaControl : public Control
 	 *        Returns true if found and loads.
 	 ------------------------------------------------------*/
 
+	bool MouseEvent(int btn, int state, int mod, int x, int y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Process mouse input.
+	 *        
+	 ------------------------------------------------------*/
+	
+	bool MotionEvent(int x, int y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Process mouse motion input.
+	 *        
+	 ------------------------------------------------------*/
+
+	void PaintObject(vec_t x, vec_t y);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Casts the pick array given a screen x, y.
+	 *        Uses current brush and subevent to paint object.
+	 ------------------------------------------------------*/
+
 	bool SaveUserPreferences();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -522,11 +527,7 @@ class FreyjaControl : public Control
 	// Events, once all these are 'sorted' decouple.
 	////////////////////////////////////////////////////////////
 
-	static uint32 eRotateObjectId;
-	static uint32 eScaleObjectId;
-	static uint32 eMoveObjectId;
-	static uint32 eSelectionByBoxId;
-	static uint32 eInfoObjectId;
+
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event ids used to replace old event system
@@ -538,8 +539,6 @@ class FreyjaControl : public Control
 	 *        that still depend on similar behavior.
 	 ------------------------------------------------------*/
 
-	static uint32 eUnselectId;
-	static uint32 eSelectId;
 
 	// Nop events
 	void EvFloatNop(float value) { }
@@ -609,18 +608,55 @@ class FreyjaControl : public Control
 		Dirty();
 	}
 
+	void EvSelectVerticesByFaces()
+	{
+		Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+		if (m) m->SelectVerticesOfSelectedFaces();
+	}
 
-	void eSelectionByBox(unsigned int value);
-	void eSelect(unsigned int value);
-	void eUnselect(unsigned int value);
-	void eMoveObject(unsigned int value);
-	void eScaleObject(unsigned int value);
-	void eRotateObject(unsigned int value);
-	void eInfoObject(unsigned int value);
+	void SetModiferMode(action_type_t mode, const char *name,
+						uint32 event, freyja3d::Cursor::Flags flags);
+	/*------------------------------------------------------
+	 * Pre  : <event> modifer mode event id.
+	 * Post : Modifer mode event widgets are reset as needed.
+	 *
+	 ------------------------------------------------------*/
+
+	void EvBoxSelectObject(unsigned int value);
+	static uint32 eBoxSelectObjectId;
+
+	void EvSelectObject(unsigned int value);
+	static uint32 eSelectObjectId;
+
+	void EvUnselectObject(unsigned int value);
+	static uint32 eUnselectObjectId;
+
+	void EvMoveObject(unsigned int value);
+	static uint32 eMoveObjectId;
+
+	void EvScaleObject(unsigned int value);
+	static uint32 eScaleObjectId;
+
+	void EvRotateObject(unsigned int value);
+	static uint32 eRotateObjectId;
+
+	void EvInfoObject(unsigned int value);
+	static uint32 eInfoObjectId;
+
+	void EvPaintObject(unsigned int value);
+	static uint32 ePaintObjectId;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Event callbacks for hooking to widget system 
-	 *        ( Break up into separate classes later. )
+	 * Post : Modifer mode event callbacks.
+	 *
+	 ------------------------------------------------------*/
+
+	void EvMove();
+	void EvRotate();
+	void EvScale();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Transform box event callbacks.
 	 *
 	 ------------------------------------------------------*/
 
@@ -662,9 +698,7 @@ class FreyjaControl : public Control
 	void eOpenTexture(char *text);
 	//void eModelUpload(char *filename) { LoadModel(filename); }
 
-	void eScale();
-	void eMove();
-	void eRotate();
+
 
 	void EvAnimationSlider(unsigned int value);
 

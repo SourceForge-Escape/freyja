@@ -82,13 +82,16 @@ Vector<hel::Vec3> FreyjaControl::mControlPoints;
 uint32 FreyjaControl::eRotateObjectId = 0;
 uint32 FreyjaControl::eScaleObjectId = 0;
 uint32 FreyjaControl::eMoveObjectId = 0;
-uint32 FreyjaControl::eUnselectId = 0;
-uint32 FreyjaControl::eSelectId = 0;
-uint32 FreyjaControl::eSelectionByBoxId = 0;
+uint32 FreyjaControl::eUnselectObjectId = 0;
+uint32 FreyjaControl::eSelectObjectId = 0;
+uint32 FreyjaControl::eBoxSelectObjectId = 0;
+uint32 FreyjaControl::eInfoObjectId = 0;
+uint32 FreyjaControl::ePaintObjectId = 0;
+
 uint32 FreyjaControl::eAxisJointId = 0;
 uint32 FreyjaControl::eSphereJointId = 0;
 uint32 FreyjaControl::ePointJointId = 0;
-uint32 FreyjaControl::eInfoObjectId = 0;
+
 uint32 FreyjaControl::EvModeAutoKeyframeId = 0;
 uint32 FreyjaControl::EvBoneIteratorId = 0;
 uint32 FreyjaControl::EvSetBoneNameId = 0;
@@ -313,25 +316,28 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
 
 	eRotateObjectId = 
-	CreateListener1u("eRotateObject", &FreyjaControl::eRotateObject);
+	CreateListener1u("eRotateObject", &FreyjaControl::EvRotateObject);
 
 	eScaleObjectId = 
-	CreateListener1u("eScaleObject", &FreyjaControl::eScaleObject);
+	CreateListener1u("eScaleObject", &FreyjaControl::EvScaleObject);
 
 	eMoveObjectId = 
-	CreateListener1u("eMoveObject", &FreyjaControl::eMoveObject);
+	CreateListener1u("eMoveObject", &FreyjaControl::EvMoveObject);
 
-	eUnselectId = 
-	CreateListener1u("eUnselect", &FreyjaControl::eUnselect);
+	eUnselectObjectId = 
+	CreateListener1u("eUnselect", &FreyjaControl::EvUnselectObject);
 
-	eSelectId = 
-	CreateListener1u("eSelect", &FreyjaControl::eSelect);
+	eSelectObjectId = 
+	CreateListener1u("eSelect", &FreyjaControl::EvSelectObject);
 
 	eInfoObjectId = 
-	CreateListener1u("eInfoObject", &FreyjaControl::eInfoObject);
+	CreateListener1u("eInfoObject", &FreyjaControl::EvInfoObject);
 
-	eSelectionByBoxId = 
-	CreateListener1u("eSelectionByBox", &FreyjaControl::eSelectionByBox);
+	ePaintObjectId = 
+	CreateListener1u("ePaintObject", &FreyjaControl::EvPaintObject);
+
+	eBoxSelectObjectId = 
+	CreateListener1u("eSelectionByBox", &FreyjaControl::EvBoxSelectObject);
 
 	eAxisJointId = 
 	CreateListener1u("eAxisJoint", &FreyjaControl::eAxisJoint);
@@ -389,9 +395,11 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eMeshDelete", &FreyjaControl::eMeshDelete);
 	CreateListener("eMeshSelect", &FreyjaControl::eMeshSelect);
 
-	CreateListener("eScale", &FreyjaControl::eScale);
-	CreateListener("eMove", &FreyjaControl::eMove);
-	CreateListener("eRotate", &FreyjaControl::eRotate);
+	CreateListener("eScale", &FreyjaControl::EvScale);
+	CreateListener("eMove", &FreyjaControl::EvMove);
+	CreateListener("eRotate", &FreyjaControl::EvRotate);
+
+	CreateListener("eSelectVerticesByFaces", &FreyjaControl::EvSelectVerticesByFaces);
 
 	CreateListener("eViewportBack", &FreyjaControl::eViewportBack);
 	CreateListener("eViewportBottom", &FreyjaControl::eViewportBottom);
@@ -1348,7 +1356,7 @@ void FreyjaControl::eViewportMaterial()
 }
 
 
-void FreyjaControl::eMove()
+void FreyjaControl::EvMove()
 {
 	mToken = true;
 
@@ -1364,7 +1372,7 @@ void FreyjaControl::eMove()
 }
 
 
-void FreyjaControl::eRotate()
+void FreyjaControl::EvRotate()
 {
 	mToken = true;
 
@@ -1375,7 +1383,7 @@ void FreyjaControl::eRotate()
 	switch (mObjectMode)
 	{
 	case tBone:
-#warning "FIXME not done"
+#warning "FIXME box transform for rotate is broken."
 		break;
 
 	default:
@@ -1391,7 +1399,7 @@ void FreyjaControl::eRotate()
 }
 
 
-void FreyjaControl::eScale()
+void FreyjaControl::EvScale()
 {
 	mToken = true;
 	Transform(mObjectMode, fScale,
@@ -1936,21 +1944,10 @@ void FreyjaControl::EvAnimationSlider(unsigned int value)
 }
 
 
-void FreyjaControl::eSelectionByBox(uint32 value)
+void FreyjaControl::EvBoxSelectObject(uint32 value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eRotateObjectId, 0);
-		mgtk_toggle_value_set(eScaleObjectId, 0);
-		mgtk_toggle_value_set(eMoveObjectId, 0);
-		mgtk_toggle_value_set(eUnselectId, 0);
-		mgtk_toggle_value_set(eSelectId, 0);
-		mgtk_toggle_value_set(eInfoObjectId, 0);
-		
-		// FIXME: Add bbox selection back to this build
-		mCursor.SetMode(freyja3d::Cursor::Invisible);
-		mEventMode = aSelectByBox;
 		mRender->SetFlag(FreyjaRender::fBoundingVolSelection);
 		
 		// We only need 2 control points for bbox selector
@@ -1961,8 +1958,10 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 		mCursor.mPos = mControlPoints[0];
 		mCursor.SetMode(Cursor::Translation);
 		
+		SetModiferMode(aSelectByBox, "BoxSelect", eBoxSelectObjectId, 
+					   Cursor::Translation);
+
 		Print("Press Ctrl+Right Mouse Button to end selection.");
-		RefreshContext();
 	}
 	else
 	{
@@ -1973,131 +1972,103 @@ void FreyjaControl::eSelectionByBox(uint32 value)
 }
 
 	
-void FreyjaControl::eSelect(uint32 value)
+void FreyjaControl::EvSelectObject(uint32 value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eRotateObjectId, 0);
-		mgtk_toggle_value_set(eScaleObjectId, 0);
-		mgtk_toggle_value_set(eMoveObjectId, 0);
-		mgtk_toggle_value_set(eUnselectId, 0);
-		mgtk_toggle_value_set(eSelectionByBoxId, 0);
-		mgtk_toggle_value_set(eInfoObjectId, 0);
+		SetModiferMode(aSelect, "BoxSelect", eSelectObjectId, 
+					   Cursor::Invisible);
 
 		mEventMode = aSelect;
 		mCursor.SetMode(freyja3d::Cursor::Invisible);
 		Print("Select %s, hold SHIFT to unselect...", 
 					 ObjectTypeToString(GetObjectMode()).c_str());
-		freyja_event_gl_refresh();
 	}
 }
 
-void FreyjaControl::eUnselect(uint32 value)
+void FreyjaControl::EvUnselectObject(uint32 value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eRotateObjectId, 0);
-		mgtk_toggle_value_set(eScaleObjectId, 0);
-		mgtk_toggle_value_set(eSelectId, 0);
-		mgtk_toggle_value_set(eMoveObjectId, 0);
-		mgtk_toggle_value_set(eSelectionByBoxId, 0);
-		mgtk_toggle_value_set(eInfoObjectId, 0);
-		
-		mEventMode = aUnselect;
-		mCursor.SetMode(freyja3d::Cursor::Invisible);
-		Print("Unselect %s...", 
-					 ObjectTypeToString(GetObjectMode()).c_str());
-		freyja_event_gl_refresh();
+		SetModiferMode(aUnselect, "Unselect", eUnselectObjectId, 
+					   Cursor::Invisible);
 	}
 }
 
 
-void FreyjaControl::eInfoObject(uint32 value)
+void FreyjaControl::EvInfoObject(uint32 value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eRotateObjectId, 0);
-		mgtk_toggle_value_set(eScaleObjectId, 0);
-		mgtk_toggle_value_set(eSelectId, 0);
-		mgtk_toggle_value_set(eMoveObjectId, 0);
-		mgtk_toggle_value_set(eSelectionByBoxId, 0);
-		mgtk_toggle_value_set(eUnselectId, 0);
-		
-		mEventMode = aInfo;
-		mCursor.SetMode(freyja3d::Cursor::Invisible);
-		Print("Info %s...", 
-					 ObjectTypeToString(GetObjectMode()).c_str());
-		freyja_event_gl_refresh();
+		SetModiferMode(aInfo, "Info", eInfoObjectId, Cursor::Invisible);
 	}
 }
 
 
-void FreyjaControl::eMoveObject(uint32 value)
+void FreyjaControl::EvPaintObject(unsigned int value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eRotateObjectId, 0);
-		mgtk_toggle_value_set(eScaleObjectId, 0);
-		mgtk_toggle_value_set(eSelectId, 0);
-		mgtk_toggle_value_set(eUnselectId, 0);
-		mgtk_toggle_value_set(eSelectionByBoxId, 0);
-		mgtk_toggle_value_set(eInfoObjectId, 0);
-		
-		mEventMode = aMove;
-		mCursor.SetMode(freyja3d::Cursor::Translation);
-		Print("Move %s...", 
-					 ObjectTypeToString(GetObjectMode()).c_str());
-		freyja_event_gl_refresh();
+		SetModiferMode(aPaint, "Paint", ePaintObjectId, Cursor::Invisible);
 	}
 }
 
-void FreyjaControl::eScaleObject(uint32 value)
+
+void FreyjaControl::SetModiferMode(action_type_t mode, 
+								   const char *name, uint32 event,
+								   freyja3d::Cursor::Flags flags)
+{
+	// Radio button like functionality for modifer mode widgets.
+	uint32 modifers [] = { 
+		eRotateObjectId, eScaleObjectId, eSelectObjectId, eInfoObjectId,
+		eMoveObjectId, eBoxSelectObjectId, eUnselectObjectId, ePaintObjectId
+	};
+
+	for (uint32 i = 0; i < 8; ++i)
+	{
+		if (modifers[i] != event)
+		{
+			mgtk_toggle_value_set(modifers[i], 0);
+		}
+	}
+
+	mEventMode = mode;
+	mCursor.SetMode(flags);
+	Print("%s %s...", name, ObjectTypeToString(GetObjectMode()).c_str());
+	RefreshContext();
+}
+
+
+void FreyjaControl::EvMoveObject(uint32 value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eRotateObjectId, 0);
-		mgtk_toggle_value_set(eMoveObjectId, 0);
-		mgtk_toggle_value_set(eSelectId, 0);
-		mgtk_toggle_value_set(eUnselectId, 0);
-		mgtk_toggle_value_set(eSelectionByBoxId, 0);
-		mgtk_toggle_value_set(eInfoObjectId, 0);
+		SetModiferMode(aMove, "Translate", 
+					   eMoveObjectId, Cursor::Translation);
+	}
+}
 
-		// Reset cursor
-		mEventMode = aScale;
-		mCursor.SetMode(freyja3d::Cursor::Scale);
+
+void FreyjaControl::EvScaleObject(uint32 value)
+{
+	if (value)
+	{
 		mCursor.mScale = hel::Vec3(1.0f, 1.0f, 1.0f);
-		Print("Scale %s...", 
-					 ObjectTypeToString(GetObjectMode()).c_str());
-		freyja_event_gl_refresh();
+		SetModiferMode(aScale, "Scale", 
+					   eScaleObjectId, Cursor::Scale);
 	}
 }
 
 
-void FreyjaControl::eRotateObject(uint32 value)
+void FreyjaControl::EvRotateObject(uint32 value)
 {
 	if (value)
 	{
-		// Radio button like func for multiple widgets on same event
-		mgtk_toggle_value_set(eMoveObjectId, 0);
-		mgtk_toggle_value_set(eScaleObjectId, 0);
-		mgtk_toggle_value_set(eSelectId, 0);
-		mgtk_toggle_value_set(eUnselectId, 0);
-		mgtk_toggle_value_set(eSelectionByBoxId, 0);
-		mgtk_toggle_value_set(eInfoObjectId, 0);
-
-		mEventMode = aRotate;
-		mCursor.SetMode(freyja3d::Cursor::Rotation);
-		
-		switch (GetObjectMode())
+		switch ( GetObjectMode() )
 		{
 		case tMesh:
 			{
-				Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+				Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
 				if (m) mCursor.mPos = m->GetBoundingVolumeCenter();
 			}
 			break;
@@ -2105,9 +2076,9 @@ void FreyjaControl::eRotateObject(uint32 value)
 		default:
 			;
 		}
-		
-		Print("Rotate %s...", ObjectTypeToString(GetObjectMode()).c_str());
-		RefreshContext();
+
+		SetModiferMode(aRotate, "Rotate", 
+					   eRotateObjectId, Cursor::Rotation);
 	}
 }
 
@@ -2244,9 +2215,6 @@ void FreyjaControl::UpdateSkeletalUI()
 
 bool FreyjaControl::MotionEvent(int x, int y)
 {
-	//	Print("motion -> %i, %i", x, y);
-
-
 	switch (GetControlScheme())
 	{
 	case eScheme_Animation:
@@ -2356,6 +2324,14 @@ bool FreyjaControl::MotionEvent(int x, int y)
 				scaleObject(x, y, GetSelectedView());
 				break;
 			
+			case aPaint:
+				{
+					vec_t vx = x, vy = y;
+					AdjustMouseXYForViewports(vx, vy);
+					PaintObject(vx, vy);
+				}
+				break;
+
 			default:
 				break;
 			}
@@ -5102,7 +5078,7 @@ bool FreyjaControl::SaveUserPreferences()
 
 	w.Print(";; Custom colors\n");
 
-	for (uint32 i = 0; i < 11; ++i)
+	for (uint32 i = 0; i < 13; ++i)
 	{
 		String s;
 		float r, g, b, a;
@@ -5165,6 +5141,16 @@ bool FreyjaControl::SaveUserPreferences()
 			id = eColorLightSpecular;
 			break;
 
+		case 11:
+			s = "eColorJoint";
+			id = eColorJoint;
+			break;
+
+		case 12:
+			s = "eColorJointHighlight";
+			id = eColorJointHighlight;
+			break;
+
 		default:
 			continue;
 		}
@@ -5218,6 +5204,103 @@ bool FreyjaControl::SaveUserPreferences()
 	}
 
 	return true;
+}
+
+
+void FreyjaControl::PaintObject(vec_t x, vec_t y)
+{
+	//Print("%f %f", x, y);
+	//CastPickRay(x, y);
+
+	bool paint = true;
+	float weight = 1.0f;
+
+	switch ( GetObjectMode() )
+	{
+	case tSelectedMeshes:
+		paint = false;  // cheesy
+
+	case tMesh:
+		{
+			/* TODO: Sphere 'brush' test next.
+			 *
+			 * 1. Cast ray to find face hit.
+			 *
+			 * 2. At point of intersection generate a logical sphere
+			 *    given a ray's t-bias and sphere's radius.
+			 *
+			 * 3. Calculate these weights with given weight to adjust
+			 *    vertex weight.
+			 */
+
+			CastPickRay(x, y);
+
+#if 1 // test face based brush for now  
+			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
+
+			if (m)
+			{
+				hel::Vec3 tuv;
+				int face = m->PickFace(Face::fSelected, FreyjaRender::mTestRay, tuv);
+
+				if (face > -1)
+				{
+					Face *f = m->GetFace(face);
+					index_t bone = GetSelectedBone();
+
+					if (f && bone != INDEX_INVALID)
+					{
+						// Ignore this on next pass and
+						// free visual feedback since it's SELECTED.
+						f->mFlags |= Face::fSelected;
+
+						unsigned int i;
+						foreach (f->mIndices, i)
+						{
+							index_t vertex = f->mIndices[i];
+							if (paint)
+							{
+								m->AddWeight(vertex, weight, bone); 
+								//Print("! Vertex[%i] painted weight.", vertex);
+							}
+							else
+							{
+								m->RemoveWeight(vertex);
+								//Print("! Vertex[%i] removed all weights.", vertex);
+							}
+						}
+					}
+
+					Print("-- f = %i, t = %f, uv = %f, %f", 
+						  face, tuv.mX, tuv.mY, tuv.mZ);
+				}
+			}
+#else
+			index_t vertex = PickVertex(FreyjaRender::mTestRay);
+			index_t bone = GetSelectedBone();
+			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
+
+			if ( m && vertex != INDEX_INVALID && bone != INDEX_INVALID )
+			{
+				if (paint)
+				{
+					m->AddWeight(vertex, weight, bone); 
+					Print("! Vertex[%i] painted weight.", vertex);
+				}
+				else
+				{
+					m->RemoveWeight(vertex);
+					Print("! Vertex[%i] removed all weights.", vertex);
+				}
+			}
+#endif
+		}
+		break;
+
+	default:
+		// Just doing a select paint for testing...
+		SelectObject(x, y, true);
+	}
 }
 
 
