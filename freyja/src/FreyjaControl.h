@@ -106,6 +106,16 @@ class FreyjaControl : public Control
 	} action_type_t;
 
 
+	typedef enum {
+
+		ePaintWeight = 1,
+		ePaintUnweight,
+		ePaintSelect,
+		ePaintUnselect,
+		ePaintMaterial
+
+	} PaintMode;
+
 	/* FreyjaControl options */
 	typedef enum {
 		fNone                = 0,
@@ -349,6 +359,12 @@ class FreyjaControl : public Control
 	 * Post : Returns true if sucessful
 	 ------------------------------------------------------*/
 
+	PaintMode GetPaintMode() { return mPaintMode; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	object_type_t GetObjectMode() { return mObjectMode; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -571,6 +587,13 @@ class FreyjaControl : public Control
 
 	void EvSerializeMesh();
 	void EvUnserializeMesh();
+
+
+	void EvPaintWeight() { mPaintMode = ePaintWeight; }
+	void EvPaintUnweight() { mPaintMode = ePaintUnweight; }
+	void EvPaintSelect() { mPaintMode = ePaintSelect; }
+	void EvPaintUnselect() { mPaintMode = ePaintUnselect; }
+	void EvPaintMaterial() { mPaintMode = ePaintMaterial; }
 
 	void EvMeshRepack()
 	{
@@ -1249,6 +1272,8 @@ private:
 	action_type_t mEventMode;               /* Mode of generic event handler */
 
 	object_type_t mObjectMode;              /* Current object type to edit */
+
+	PaintMode mPaintMode;                   /* Current paint type. */
 
 	uint32 mFlags;                          /* Option bitflags */
 
