@@ -475,6 +475,18 @@
 				(toolbar_togglebutton false "24x24/paint.png" "Paint" 
 					"Paint object" eEvent	ePaintObject)
 
+				; Paint mode selection
+				(toolbar_item
+					(optionmenu	eEvent	eNone
+						(menu_item	"Weight"	ePaintWeight)
+						(menu_item	"Unweight"	ePaintUnweight)
+						(menu_item	"Select"	ePaintSelect)
+						(menu_item	"Unselect"	ePaintUnselect)
+						(menu_item	"Material"	ePaintMaterial)
+						;(menu_item	"Deform #1  "	ePaintDMap1)
+					) ; optionmenu
+				) ; toolbar_item
+
 				(toolbar_separator)
 
 				(toolbar_button	"gtk-undo" "Undo"
@@ -567,23 +579,23 @@
 			) ; hbox
 		) ; tab
 
-		(tab "Paint" eNone
-			(hbox 0 1 0 1 1				
+		;(tab "Paint" eNone
+		;	(hbox 0 1 0 1 1				
 
 				; Paint mode selection
-				(hbox 0 1 0 1 1
-					(optionmenu	eEvent	eNone
-						(menu_item	"Weight     "	ePaintWeight)
-						(menu_item	"Unweight   "	ePaintUnweight)
-						(menu_item	"Select     "	ePaintSelect)
-						(menu_item	"Unselect   "	ePaintUnselect)
-						(menu_item	"Material   "	ePaintMaterial)
-						;(menu_item	"Deform #1  "	ePaintDMap1)
-					) ; optionmenu
-				) ; hbox
+		;		(hbox 0 1 0 1 1
+		;			(optionmenu	eEvent	eNone
+		;				(menu_item	"Weight     "	ePaintWeight)
+		;				(menu_item	"Unweight   "	ePaintUnweight)
+		;				(menu_item	"Select     "	ePaintSelect)
+		;				(menu_item	"Unselect   "	ePaintUnselect)
+		;				(menu_item	"Material   "	ePaintMaterial)
+		;				;(menu_item	"Deform #1  "	ePaintDMap1)
+		;			) ; optionmenu
+		;		) ; hbox
 
-			) ; hbox
-		) ; tab
+		;	) ; hbox
+		;) ; tab
 
 		) ; notebook
 	) ; hbox

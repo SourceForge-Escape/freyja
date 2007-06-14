@@ -6,6 +6,9 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Paint tool using toolbar weight variable.
+ - Paint tool toobar item use.
+ - New mtk_toolbar_item which acts as a box to embed widgets in toolbars.
  - Quick hand drawn paint icon.
  - Paint feature gets its own shelf and modes -- bonus material paint.
  - FIX freyjautil Makefile
