@@ -5,10 +5,6 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
- * SUPER ANNOYING BUGS 
-	- Models loading w/o complete materials often are alpha masked.
-	- Mesh rotator for box and cursor are unmatched!
-
  * Single joint animation shishi odoshi tutorial demo.
 
  * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
@@ -100,11 +96,10 @@
 	
  * Mesh parenting and grouping.
 
- * Material sphere rotation controlled by slider.
-
  * Finish up the UI icon set and '3d icons'.
 
  * Improve mesh render support, so we can do pure array/VBO rendering, etc.
+	- Remove the old crappy scaling for zoom.
 	- Color array / material color support wouldn't be a bad idea.
 	- Perhaps limit the modeler to quads/tris... always a sore subject  =)
 	- MeshRenderInstance or rework old Mesh, since it has to sync anyway
@@ -166,6 +161,8 @@
 	- This means sphere/ray targets must be scaled to match visual also
 
  * Brush system for vertex weight and texture on model painting
+
+ * Material sphere rotation controlled by slider.
 
  * Scene graph UI.
 

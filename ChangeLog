@@ -6,7 +6,15 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - FIX freyjautil Makefile
+ - Weight paint test -- Mesh mode paints 1.0f / Meshes... clears all weights.
+ - Directional light on by default if no point light is disabled.
+ - 3D Icon rendering changes.  ( Trying out shading to see how it goes. )
+ - Reduction of state changes/calls for skeletal/control point rendering.
+ - Skeleton colors using controllable UI colors once more.
+ - Skeleton color control for joints with UI and user prefs.  
+ - Paint object modifier tool.  ( selection, weak weight painting )
+ - Modifer event helper method.
  - FIX: Forced clear of cursor rotate state for mesh. ( also fixes undo )
  - Minor FreyjaRender clean-up pass while looking at a bug. 
  - Removed IMM rendering flag and code.

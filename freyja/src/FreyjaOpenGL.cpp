@@ -1390,9 +1390,17 @@ void mglDrawControlPoint()
 		drawList = glGenLists(1);
 		glNewList(drawList, GL_COMPILE);
 
+#if FORCE_ICON_SHADING
+		glPushAttrib(GL_LIGHTING_BIT | GL_TEXTURE_BIT);
+		glEnable(GL_LIGHTING);
+		glBindTexture(GL_TEXTURE_2D, 0); // 'color' texture
+#endif
 		// Control point default
 		mglDrawSphere(major, minor, radius);
 
+#if FORCE_ICON_SHADING
+		glPopAttrib();
+#endif
 		glEndList();
 	}
 	else
@@ -1432,15 +1440,18 @@ void mglDrawBoneSolid(const vec3_t pos)
 	c *= scale2;
 	d *= scale2;
 
+#if FORCE_ICON_SHADING
 	glPushAttrib(GL_LIGHTING_BIT | GL_TEXTURE_BIT);
 
 	glEnable(GL_LIGHTING);
 	glBindTexture(GL_TEXTURE_2D, 0); // 'color' texture
 	
-	vec4_t ambient = {0.326f, 0.666f, 0.779f, 1.0f};
-	vec4_t diffuse = {0.318f, 0.47f, 0.77f, 1.0f};
-	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+	//vec4_t ambient = {0.326f, 0.666f, 0.779f, 1.0f};
+	//vec4_t diffuse = {0.318f, 0.47f, 0.77f, 1.0f};
+	//glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	//glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+#endif
+
 
 #if 1
 	end = p;
@@ -1500,7 +1511,9 @@ void mglDrawBoneSolid(const vec3_t pos)
 	glVertex3fv(d.mVec);
 	glEnd();
 
+#if FORCE_ICON_SHADING
 	glPopAttrib();
+#endif
 }
 
 

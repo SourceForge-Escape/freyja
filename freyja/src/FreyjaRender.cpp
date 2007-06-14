@@ -66,6 +66,8 @@ vec4_t FreyjaRender::mColorWireframe;
 vec4_t FreyjaRender::mColorWireframeHighlight;
 vec4_t FreyjaRender::mColorBone;
 vec4_t FreyjaRender::mColorBoneHighlight;
+vec4_t FreyjaRender::mColorJoint;
+vec4_t FreyjaRender::mColorJointHighlight;
 vec4_t FreyjaRender::mColorBoundingBox;
 vec4_t FreyjaRender::mColorGridSeperator;
 vec4_t FreyjaRender::mColorGridLine;
@@ -193,6 +195,150 @@ void FreyjaRender::Rotate(int flags, float n)
 }
 
 
+void FreyjaRender::DrawCamWindow()
+{
+	// Very hacky quick test for camera 'cursor'
+	Cursor &cursor = FreyjaControl::mInstance->GetCursor();
+	vec4_t p;
+	freyjaGetLightPosition4v(0, p);
+
+	hel::Vec3 pos(p[0], p[1], p[2]);
+	hel::Vec3 at = cursor.mPos;
+	hel::Vec3 up(0.0f, 1.0f, 0.0f);
+
+
+	gluLookAt(pos.mX, pos.mY, pos.mZ,
+			  at.mX, at.mY, at.mZ,
+			  up.mX, up.mY, up.mZ);
+
+	glPushMatrix();
+
+	// TODO: Replace with Mat44 transform
+	glTranslatef(mScroll[0], mScroll[1]/*+8.0f*/, mScroll[2]);
+	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+
+	if (mRenderMode & fSolidPlane)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
+		glColor3fv(WHITE);
+		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedMaterial());
+		mglDrawPlane(50.0f, 2.0f, 1.0f);
+		glPopAttrib();
+	}
+	else if (mRenderMode & fGrid)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
+		glLineWidth(1.25f);
+		mglDrawGrid(mColorGridLine, 50.0f, 2.0f, 1.0f);
+
+		glColor3fv(mColorGridLine);
+		glLineWidth(4.0f);
+		glBegin(GL_LINES);
+		//glColor3fv(RED);
+		glVertex3f(-50.0f, 0.0f, 0.0f);	
+		glVertex3f(50.0f, 0.0f, 0.0f);
+		//glColor3fv(BLUE);
+		glVertex3f(0.0f, 0.0f, -50.0f);	
+		glVertex3f(0.0f, 0.0f, 50.0f);
+		glEnd();
+
+#if 1
+		//glColor3fv(mColorGridLine);
+		glLineWidth(1.75f);
+		glBegin(GL_LINES);
+
+		for (float x = -50.0f; x < 60.0f; x += 10.f)
+		{
+			if (x < 10.0f && x > -10.0f) 
+				continue;
+
+			glVertex3f(x, 0.0f, -50.0f);	
+			glVertex3f(x, 0.0f, 50.0f);
+			glVertex3f(-50.0f, 0.0f, x);	
+			glVertex3f(50.0f, 0.0f, x);
+		}
+
+		glEnd();
+#endif
+
+		glPopAttrib();
+	}
+
+
+	//glPushMatrix();
+
+	ApplyLights();
+
+	glScalef(mZoom, mZoom, mZoom);
+
+	mglGetOpenGLModelviewMatrix16fv(gModelViewMatrix);
+
+	if (mRenderMode & fDrawPickRay)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+
+		hel::Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
+		glPointSize(2.0);
+		glBegin(GL_POINTS);	
+		glColor3fv(GREEN);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(rayEnd.mVec);
+		glEnd();
+		glBegin(GL_LINES);	
+		glColor3fv(YELLOW);	
+		glVertex3fv(mTestRay.mOrigin.mVec);
+		glColor3fv(DARK_YELLOW);	
+		glVertex3fv(rayEnd.mVec);
+		glEnd();
+		glPointSize(mDefaultPointSize);
+
+		glPopAttrib();
+	}
+
+	for (uint32 i = 0; i < freyjaGetModelCount(); ++i)
+	{
+		RenderModel(i);
+	}
+
+	DrawIcons();
+
+	glPopMatrix();
+
+
+#if PLANE_NOTIFY_WITH_AXIS
+	glPushMatrix();
+	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
+	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	mglDrawEditorAxis();
+	glPopMatrix();
+#endif
+
+	// OpenGLPrinter test
+	glPushAttrib(GL_ENABLE_BIT);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	glEnable(GL_BLEND);
+	glDisable(GL_LIGHTING);
+	glColor3fv(WHITE);
+	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "ORBIT");
+	glPopAttrib();
+}
+
+
 void FreyjaRender::DrawFreeWindow()
 {
 	glPushMatrix();
@@ -259,7 +405,7 @@ void FreyjaRender::DrawFreeWindow()
 
 	//glPushMatrix();
 
-	RenderLights();
+	ApplyLights();
 
 	glScalef(mZoom, mZoom, mZoom);
 
@@ -297,13 +443,7 @@ void FreyjaRender::DrawFreeWindow()
 
 	//glPopMatrix(); // Remove scaling
 
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	BindColorTexture();
-	FreyjaControl::mInstance->GetCursor().Display();
-	glPopAttrib();
+	DrawIcons();
 
 	glPopMatrix();
 
@@ -327,6 +467,38 @@ void FreyjaRender::DrawFreeWindow()
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
 	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "ORBIT");
+	glPopAttrib();
+}
+
+
+void FreyjaRender::DrawIcons()
+{
+	glPushAttrib(GL_LIGHTING_BIT);
+	//glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	//glDisable(GL_BLEND);
+
+	BindColorTexture();
+
+	if (mRenderMode & fLighting)
+	{
+		vec4_t pos;
+		freyjaGetLightPosition4v(0, pos);
+		
+		glPushMatrix();
+		glTranslatef(pos[0], pos[1], pos[2]);
+
+
+		glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+
+		mglDrawControlPoint();
+
+		glPopAttrib();
+		glPopMatrix();
+	}
+
+	FreyjaControl::mInstance->GetCursor().Display();
+
 	glPopAttrib();
 }
 
@@ -778,26 +950,13 @@ void FreyjaRender::SetViewMode(int mode)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaRender::RenderLights()
+void FreyjaRender::ApplyLights()
 {
-	vec4_t pos;
-
 	if (mRenderMode & fLighting)
 	{
+		vec4_t pos = { 0.0f, 0.0f, 0.0f, 1.0f};
 		freyjaGetLightPosition4v(0, pos);
-		
-		glPushMatrix();
-		glTranslatef(pos[0], pos[1], pos[2]);
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
 
-		glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-		//mglDrawSphere(16, 16, 0.75f);
-		mglDrawControlPoint();
-		glPopAttrib();
-		glPopMatrix();
-		
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
 		glLightfv(GL_LIGHT0, GL_POSITION, pos);
@@ -805,11 +964,34 @@ void FreyjaRender::RenderLights()
 		vec4_t color;
 		freyjaGetLightAmbient(freyjaGetCurrentLight(), color);
 		glLightfv(GL_LIGHT0, GL_AMBIENT, color);
+
 		freyjaLightDiffuse(freyjaGetCurrentLight(), color);
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+
 		freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
 		glLightfv(GL_LIGHT0, GL_SPECULAR, color);
 	}
+#if 0
+	else 
+	{
+		glEnable(GL_LIGHTING);
+
+		vec4_t pos = { 0.0f, 0.0f, 1.0f, 0.0f };
+		vec4_t color = { 0.5f, 0.5f, 0.5f, 1.0f };
+
+		glEnable(GL_LIGHT0);
+		glLightfv(GL_LIGHT0, GL_POSITION, pos);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, color);
+		//glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+
+
+		pos[3] = -1.0f;
+		glEnable(GL_LIGHT1);
+		glLightfv(GL_LIGHT1, GL_POSITION, pos);
+		glLightfv(GL_LIGHT1, GL_AMBIENT, color);
+		//glLightfv(GL_LIGHT1, GL_DIFFUSE, color);
+	}
+#endif
 }
 
 
@@ -1456,17 +1638,35 @@ void FreyjaRender::RenderModel(index_t model)
 
 	glPopMatrix();
 
+	/* Disable GLSL shaders */
+	freyja3d::OpenGL::BindFragmentGLSL(0);
 
-	freyja3d::OpenGL::BindFragmentGLSL(0); // Disable shaders
+	/* This handles all skeleton/ctrlpnt setup to avoid repeated 
+	 * state changes and clears.
+	 */
+	//if (mRenderMode & fBones || mRenderMode & fBones2 || 
+	// mRenderMode & fBones3 || mRenderMode & fBoneName)
+	{
+		glPushAttrib(GL_ENABLE_BIT); //GL_LIGHTING_BIT | GL_TEXTURE_BIT
+		glDisable(GL_BLEND);
+
+		if (mRenderMode & fBonesNoZbuffer)
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
+
+		glEnable(GL_LIGHTING);
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+		
+		glBindTexture(GL_TEXTURE_2D, 0); // 'Color' TextureId
+	}
 
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-		glClear(GL_DEPTH_BUFFER_BIT);
-
 		Vector<hel::Vec3> ctrlpnts = FreyjaControl::GetControlPoints();
+
+		glColor3fv(RED);
+
 		uint32 i;
 		foreach (ctrlpnts, i)
 		{
@@ -1474,8 +1674,6 @@ void FreyjaRender::RenderModel(index_t model)
 
 			glPushMatrix();
 			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
-			glColor3fv(RED);
-			//mglDrawSphere(8, 8, 0.5f);
 			mglDrawControlPoint();
 			glPopMatrix();
 		}
@@ -1486,20 +1684,19 @@ void FreyjaRender::RenderModel(index_t model)
 			hel::Vec3 max = ctrlpnts[1];
 			mglDrawSelectionBox(min.mVec, max.mVec, DARK_YELLOW);
 		}
-
-		glPopAttrib();
 	}
 
-	// FIXME: This renders all skeletons at once by design 
+	/* Render 'old' skeleton, which is comprised of z,y,x rotations. */
+	if (mRenderMode & fBones)
+	{
+		FreyjaRender::mSelectedBone = FreyjaControl::mInstance->GetSelectedBone();
+		RenderSkeleton(freyjaGetModelSkeleton(model), 0, 1.0f);
+	}
+
 	/* Point type setting shows actual bind pose skeleton */
 	if (mRenderMode & fBones2)
 	{
 		hel::Vec3 p, r;
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-		glClear(GL_DEPTH_BUFFER_BIT);
 
 		/* Render spheres and bone geometery */
 		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
@@ -1517,9 +1714,9 @@ void FreyjaRender::RenderModel(index_t model)
 			glMultMatrixf(freyjaGetBoneBindPose16fv(i));
 #endif
 			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
-			glColor3fv(PINK) : glColor3fv(YELLOW);
+			glColor3fv(FreyjaRender::mColorJointHighlight) : 
+			glColor3fv(FreyjaRender::mColorJoint);
 
-			//mglDrawSphere(12, 12, 0.5f);
 			mglDrawControlPoint();
 
 			glPopMatrix();
@@ -1531,8 +1728,8 @@ void FreyjaRender::RenderModel(index_t model)
 				glMultMatrixf( freyjaGetBoneBindPose16fv(parent) );
 
 				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
-				glColor3fv(PINK) : 
-				glColor3fv(FreyjaRender::mColorBoneHighlight);
+				glColor3fv(FreyjaRender::mColorBoneHighlight) : 
+				glColor3fv(FreyjaRender::mColorBone);
 
 				freyjaGetBoneTranslation3fv(i, p.mVec);
 
@@ -1549,19 +1746,13 @@ void FreyjaRender::RenderModel(index_t model)
 			}
 		}
 
-		glPopAttrib();
+		//glPopAttrib();
 	}
 
 	/* Render transformed bones */
 	if (mRenderMode & fBones3)
 	{
 		hel::Vec3 p;
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-		glClear(GL_DEPTH_BUFFER_BIT);
-
 		hel::Mat44 combined;
 
 		// Render spheres and lines
@@ -1581,7 +1772,6 @@ void FreyjaRender::RenderModel(index_t model)
 
 			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
 			glColor3fv(WHITE) : glColor3fv(DARK_RED);
-			//mglDrawSphere(10, 10, 0.4f);
 			mglDrawControlPoint();
 
 			glPopMatrix();
@@ -1590,7 +1780,6 @@ void FreyjaRender::RenderModel(index_t model)
 
 			if (parent)
 			{
-				//combined = parent->GetInverseBindPose() * parent->mTrack.mWorld;
 				combined = parent->GetWorldPose();
 
 				glPushMatrix();
@@ -1613,19 +1802,14 @@ void FreyjaRender::RenderModel(index_t model)
 				glPopMatrix();
 			}
 		}
-
-		glPopAttrib();
 	}
 
 
 	/* Render bone names */
 	if (mRenderMode & fBoneName)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-		glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_BLEND);
-		glEnable(GL_TEXTURE_2D);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 		glDisable(GL_LIGHTING);
 
 		glColor3fv(WHITE);
@@ -1649,29 +1833,11 @@ void FreyjaRender::RenderModel(index_t model)
 							 0.05f, 
 							 freyjaGetBoneNameString(i));
 		}
-
-		glPopAttrib();
 	}
 	
-	/* Render skeleton */
-	if (mRenderMode & fBones)
+	//if (mRenderMode & fBones || mRenderMode & fBones2
+	//	|| mRenderMode & fBones3 || mRenderMode & fBoneName)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
-
-		/* Yay, let thou bones show through thine meshes 
-		 * and it was good for editing */
-		if (mRenderMode & fBonesNoZbuffer)
-		{
-			glClear(GL_DEPTH_BUFFER_BIT);
-		}
-
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_BLEND);
-
-		FreyjaRender::mSelectedBone = FreyjaControl::mInstance->GetSelectedBone();
-		RenderSkeleton(freyjaGetModelSkeleton(model), 0, 1.0f);
-
 		glPopAttrib();
 	}
 
@@ -2300,8 +2466,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	switch (plane)
 	{
 	case DRAW_CAMERA:
-		// FIXME: Add camera support back to this build
-		DrawFreeWindow();
+		DrawCamWindow();
 		return;
 		
 	case PLANE_FREE:
@@ -2328,7 +2493,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE);
+	//glDisable(GL_TEXTURE);
 	glDisable(GL_BLEND);
 	glBindTexture(GL_TEXTURE_2D, 0); // color
 
@@ -2413,7 +2578,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 
 	glPushMatrix();
 
-	RenderLights();
+	ApplyLights();
 
 	glScalef(mZoom, mZoom, mZoom);
 
@@ -2450,7 +2615,7 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 		RenderModel(i);
 	}
 
-	FreyjaControl::mInstance->GetCursor().Display();
+	DrawIcons();
 
 	glPopMatrix();
 

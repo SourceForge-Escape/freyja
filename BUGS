@@ -13,6 +13,11 @@
  Known bugs
  -----------------------------------------------------------------------------
 
+ * SUPER ANNOYING BUGS 
+	- Models loading w/o complete materials often are alpha masked.
+	- Mesh rotator for box and cursor are unmatched!
+
+
  A
  ----------------------------
 

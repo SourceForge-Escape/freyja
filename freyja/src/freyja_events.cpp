@@ -288,6 +288,16 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 		freyja_event_set_color(eColorBoneHighlight, r, g, b, a);
 		break;
 
+	case eColorJoint:
+		memcpy(FreyjaRender::mColorJoint, color, sizeof(vec4_t));
+		freyja_event_set_color(eColorJoint, r, g, b, a);
+		break;
+
+	case eColorJointHighlight:
+		memcpy(FreyjaRender::mColorJointHighlight, color, sizeof(vec4_t));
+		freyja_event_set_color(eColorJointHighlight, r, g, b, a);
+		break;
+
 	default:
 		return;
 	}
@@ -995,27 +1005,27 @@ void eMeshGenerateNormals()
 // This should be moved back into control with a -W/Int prefix
 void eMoveObject()
 {
-	FreyjaControl::mInstance->eMoveObject(1);
+	FreyjaControl::mInstance->EvMoveObject(1);
 }
 
 void eRotateObject()
 {
-	FreyjaControl::mInstance->eRotateObject(1);
+	FreyjaControl::mInstance->EvRotateObject(1);
 }	
 
 void eScaleObject()
 {
-	FreyjaControl::mInstance->eScaleObject(1);
+	FreyjaControl::mInstance->EvScaleObject(1);
 }	
 
 void eSelect()
 {
-	FreyjaControl::mInstance->eSelect(1);
+	FreyjaControl::mInstance->EvSelectObject(1);
 }
 
 void eUnselect()
 {
-	FreyjaControl::mInstance->eUnselect(1);
+	FreyjaControl::mInstance->EvUnselectObject(1);
 }		
 
 
@@ -1381,6 +1391,8 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
 	r.RegisterInt("eColorBone", eColorBone);
 	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
+	r.RegisterInt("eColorJoint", eColorJoint);
+	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
 
 	/* Load and init plugins */
 	String dir = freyja_rc_map_string("plugins");	

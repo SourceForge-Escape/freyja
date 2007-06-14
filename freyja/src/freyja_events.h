@@ -55,6 +55,8 @@ typedef enum {
 	eColorMeshHighlight,
 	eColorBone,
 	eColorBoneHighlight,
+	eColorJoint,
+	eColorJointHighlight,
 
 	// Menus
 	ePluginMenu,

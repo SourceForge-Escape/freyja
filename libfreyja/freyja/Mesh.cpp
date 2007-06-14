@@ -1696,6 +1696,58 @@ bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
 
 
 
+int Mesh::PickFace(Face::Flags flag, hel::Ray &r, hel::Vec3 &tuv)
+{
+	vec_t bestDist = 99999.0f;
+	r.mDir.Norm();
+	int face0 = -1;
+	
+	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
+	{
+		Face *f = GetFace(i);
+		
+		if (!f || f->mFlags & flag) 
+			continue;
+	
+		// Quick and dirty hit test that pretends you can 
+		// pusedo tesselate a face and get as good results
+		bool intersect = false;
+					
+		if (f->mIndices.size() > 2)
+		{
+			uint32 jCount = f->mIndices.size();
+			Vec3 a, b, c, tmp;
+
+			GetVertexPos(f->mIndices[0], a.mVec);
+			GetVertexPos(f->mIndices[1], b.mVec);
+
+			for (uint32 j = 2; j < jCount; ++j)
+			{
+				GetVertexPos(f->mIndices[j], c.mVec);
+				intersect = 
+				r.IntersectTriangle(a.mVec, b.mVec, c.mVec, tmp.mVec);
+
+				if (intersect)
+				{
+					break;
+				}
+
+				b = c;
+			}
+
+			if (intersect && (tmp.mX < bestDist) )
+			{
+				tuv = tmp;
+				bestDist = tmp.mX;
+				face0 = i;
+			}
+		}
+	}
+
+	return face0;
+}
+
+
 bool Mesh::IntersectFaces(hel::Ray &r, int &face0, bool markAll)
 {
 	//no 'editor side' scale support vec_t t; if (!Intersect(r, t)) return false;
@@ -1738,8 +1790,7 @@ bool Mesh::IntersectFaces(hel::Ray &r, int &face0, bool markAll)
 			}
 
 			// Clear old hit flags
-			f->mFlags |= Face::fRayHit;
-			f->mFlags ^= Face::fRayHit;
+			f->mFlags &= ~Face::fRayHit;
 
 			if (intersect)
 			{
@@ -3116,6 +3167,30 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 		// FIXME: Doesn't use vertex normal remap ( which isn't used yet )
 		SetNormal(v, normal.mVec);
     }
+}
+
+
+void Mesh::SelectVerticesOfSelectedFaces()
+{
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f && f->mFlags & Face::fSelected)
+		{
+			unsigned int j;
+			foreach (f->mIndices, j)
+			{
+				Vertex *v = GetVertex( f->mIndices[j] );
+
+				if (v)
+				{
+					v->SetFlag( Vertex::fSelected );
+				}
+			}
+		}
+	}	
 }
 
 
