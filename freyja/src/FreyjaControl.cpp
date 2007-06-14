@@ -5217,8 +5217,10 @@ bool FreyjaControl::SaveUserPreferences()
 
 void FreyjaControl::PaintObject(vec_t x, vec_t y)
 {
+	extern float gWeight;
+
 	bool paint = true;
-	float weight = 1.0f;
+	float weight = gWeight;
 
 	switch ( GetPaintMode() )
 	{

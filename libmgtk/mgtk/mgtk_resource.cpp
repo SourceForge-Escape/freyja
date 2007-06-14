@@ -304,6 +304,41 @@ arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
 }
 
 
+arg_list_t *mgtk_rc_toolbar_item(arg_list_t *toolbar)
+{
+	arg_enforce_type(&toolbar, ARG_GTK_TOOLBOX_WIDGET);
+	MGTK_ASSERTMSG(toolbar, "box != ARG_GTK_TOOLBOX_WIDGET");
+
+	if (!toolbar)
+	{
+		return NULL;
+	}
+
+	GtkToolItem *item = gtk_tool_item_new();
+	GtkWidget *widget = (GtkWidget *)item;
+	//gtk_toolbar_append_widget((GtkToolbar *)box->data, widget, "", "");
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar->data), item, -1); // Append to the end
+	gtk_widget_show(widget);
+
+#if 1
+	GtkWidget *box = gtk_hbox_new(TRUE, 1);
+	gtk_widget_ref(box);
+	gtk_object_set_data_full(GTK_OBJECT(item), "ebox", box,
+							 (GtkDestroyNotify)gtk_widget_unref);
+	gtk_container_add(GTK_CONTAINER(item), box);
+	gtk_widget_show(box);
+
+	arg_list_t *ret = NULL;
+	new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)box);
+#else
+	arg_list_t *ret = NULL;
+	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
+#endif
+
+	return ret;
+}
+
+
 arg_list_t *mgtk_rc_toolbar(arg_list_t *box)
 {
 	arg_list_t *ret = NULL;
