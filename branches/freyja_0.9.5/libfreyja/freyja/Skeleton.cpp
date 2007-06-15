@@ -459,7 +459,29 @@ void freyjaSkeletonTransform(index_t skeleton,
 	Skeleton *skel = Skeleton::GetSkeleton(skeleton);
 
 	if (skel)
-		freyjaBoneTransform(skel->GetRoot(), action, x, y, z);
+	{
+		switch (action)
+		{
+		case fTransformActionNone:
+			break;
+
+		case fTranslate:
+		case fRotateAboutOrigin:
+		case fRotate:
+			freyjaBoneTransform(skel->GetRoot(), action, x, y, z);
+			break;
+
+		default:
+			{
+				unsigned int i, idx;
+				foreach (skel->GetBones(), i)
+				{
+					idx = skel->GetBones()[i];
+					freyjaBoneTransform(idx, action, x, y, z);
+				}
+			}
+		}
+	}
 }
 
 

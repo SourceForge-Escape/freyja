@@ -78,7 +78,7 @@ vec4_t FreyjaRender::mColorAxisY;
 vec4_t FreyjaRender::mColorAxisZ;
 //unsigned int  FreyjaRender::mRenderMode = 0;
 unsigned int FreyjaRender::mSelectedBone = 0;
-unsigned int FreyjaRender::mBoneRenderType = 1;
+unsigned int FreyjaRender::mBoneRenderType = 2;
 unsigned char FreyjaRender::mJointRenderType = 1;
 int FreyjaRender::mPatchDisplayList = -1;
 

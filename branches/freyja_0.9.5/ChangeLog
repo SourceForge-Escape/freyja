@@ -6,6 +6,14 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Cheesy XML skeleton/mesh import path persistance.
+ - Ja export disabled in libfreyja as it is now obsolete for next release.
+ - Default to skip material 0 in XML meshes to avoid confusing users.
+ - RecentFiles abstraction, and some XML menu usage.
+ - Changes to skeleton transform for scaling.
+ - Added back Transform mode for skeleton via transforms box.
+ - Md5Model plugin updated to use the 0.9.5 ABI.  ( Upgraded from 0.9.1 legacy )
+ - MSTL change ParseStringLiteral() caller no longer needs to deallocate string.
  - Paint tool using toolbar weight variable.
  - Paint tool toobar item use.
  - New mtk_toolbar_item which acts as a box to embed widgets in toolbars.

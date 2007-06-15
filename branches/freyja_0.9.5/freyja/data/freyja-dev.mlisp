@@ -128,8 +128,8 @@
 
 			(submenu "_Bone"
 				(toggle_menu_item "_ZBuffer"	eRenderBoneZClear	0)
-				(toggle_menu_item "_Line"		eLineBone		1)
-				(toggle_menu_item "_PolyMesh" 	ePolyMeshBone	0))
+				(toggle_menu_item "_Line"		eLineBone		0)
+				(toggle_menu_item "_PolyMesh" 	ePolyMeshBone	1))
 		) ; End submenu "_View"
 
 		(submenu "_Create" 
@@ -253,7 +253,7 @@
 					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
 
-		(submenu "_XML"
+		(submenu "_Snippets"
 			(submenu	eNone	"_Import..."
 			)
 			(submenu	eNone	"_Export..."
@@ -267,11 +267,12 @@
 				(menu_seperator)
 			)
 			(menu_seperator)
-			(submenu eNone "Recent Meshes...")
+			(submenu eRecentMeshXML "Recent Mesh...")
 			(menu_item	"_Import Mesh..." eXMLToMesh "gtk-open")
 			(menu_item	"_Export Mesh..." eMeshToXML  "gtk-save-as")
 
 			(menu_seperator)
+			(submenu eRecentSkeletonXML "Recent Skeleton...")
 			(menu_item	"_Import Skeleton..." eXMLToBones "gtk-open")
 			(menu_item	"_Export Skeleton..." eBonesToXML "gtk-save-as")
 		)
@@ -447,6 +448,7 @@
 						(menu_item	"Faces...   "	eTransformFaces)
 						(menu_item	"Vertex     "	eTransformVertex)
 						(menu_item	"Vertices..."	eTransformVertices)
+						(menu_item	"Skeleton   "	eTransformSkeleton)
 						(menu_item	"Bone       "	eTransformBone)
 						(menu_item	"Light      "	eTransformLight)
 					) ; optionmenu
@@ -1359,7 +1361,7 @@
 (func_set_toggle	eRenderSkeleton	1)
 (func_set_toggle	eRenderPickRay	0)
 (func_set_toggle	ePointJoint	1)
-(func_set_toggle	eLineBone	1)
+(func_set_toggle	ePolyMeshBone	1)
 (func_set_toggle	eGLSLFragmentMode	1)
 (func_set_toggle	eGroupColors	1)
 (func_set_toggle	eFPSCap	1)

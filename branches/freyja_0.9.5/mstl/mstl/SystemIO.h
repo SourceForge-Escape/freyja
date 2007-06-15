@@ -1555,6 +1555,7 @@ public:
 
 		const char *ParseStringLiteral()
 		{
+#if 1 //USE_PARSESTRINGLITERAL_ALLOCATION
 			long l, i = 0, state = 0;
 			char *s;
 			char c, lc = 0;
@@ -1592,6 +1593,49 @@ public:
 			s[l] = 0;
 
 			return s;
+#else
+			unsigned int start = GetOffset();
+			long i = 0, state = 0;
+			char c, lc = 0;
+			bool done = false;
+
+			while (!done && fscanf(mFileHandle, "%c", &c) != EOF)
+			{
+				switch (state)
+				{
+				case 0:
+					if (c == '"')
+					{
+						state = 1;
+						start = GetOffset();
+					}
+					break;
+
+				case 1:
+					if (c == '"' && lc != '\\')  // Allow quote escapes?
+					{
+						done = true;
+					}
+					else
+					{
+						i++;
+					}
+					break;
+				}
+
+				lc = c;
+			}
+
+			unsigned int offset = GetOffset();
+			SetBufferSize(i+8);
+			SetOffset(start);
+			fread(mBuffer, i, 1, mFileHandle);
+			mBuffer[i] = 0;
+
+			SetOffset(offset);
+
+			return mBuffer;
+#endif
 		}
 
 

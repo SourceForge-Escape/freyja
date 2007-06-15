@@ -23,12 +23,20 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_MD5_H_
 #define GUARD__FREYJA_MONGOOSE_MD5_H_
 
 #include <stdio.h>
 #include <string.h>
+
+#include <hel/math.h>
+#include <hel/Mat44.h>
+#include <hel/Quat.h>
+#include <hel/Vec3.h>
+
+#include <mstl/String.h>
+#include <mstl/Vector.h>
+
 
 /* NOTES: Some indices and counts are unfortunately signed (negative) values */
 class Md5Vertex
@@ -54,20 +62,20 @@ class Md5Weight
 	int index;
 	int joint;
 	float weight;
-	float pos[3];
+	hel::Vec3 pos;
 };
 
 
 class Md5Mesh
 {
  public:
-	char name[32];
-	char *shader;
-	int numverts;
+	mstl::String name;
+	mstl::String shader;
+	unsigned int numverts;
 	Md5Vertex *verts;
-	int numtriangles;
+	unsigned int numtriangles;
 	Md5Triangle *triangles;
-	int numweights;
+	unsigned int numweights;
 	Md5Weight *weights;
 };
 
@@ -75,10 +83,10 @@ class Md5Mesh
 class Md5Joint
 {
  public:
-	char *name;
+	mstl::String name;
 	int parent;
-	double translate[3];
-	double rotate[3];
+	hel::Vec3 translate;
+	hel::Quat rotate;
 };
 
 
@@ -117,7 +125,7 @@ class Md5
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	float decodeIdQuaternion(float qx, float qy, float qz);
+	hel::Quat DecodeQuaternion(float qx, float qy, float qz);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -128,8 +136,14 @@ class Md5
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
+	hel::Vec3 EncodeQuaternion(const hel::Quat &q);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	bool isMd5Model(const char *filename);
+	bool IsMd5Model(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Checks to see if file is an Md5mesh model
 	 * Post : Returns true if it is a Md5mesh
@@ -140,7 +154,7 @@ class Md5
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	bool saveModel(const char *filename);
+	bool SaveModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Parses and stores a Md5mesh model to a file
 	 * Post : Returns true if sucessful
@@ -151,7 +165,7 @@ class Md5
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	bool loadModel(const char *filename);
+	bool LoadModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Parses and stores a Md5mesh model from a file
 	 * Post : Returns true if sucessful
@@ -162,13 +176,13 @@ class Md5
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	int mVersion;                     /* MD5 Version */
+	unsigned int mVersion;            /* MD5 Version */
 
-	char *mCommandLine;               /* Id cruft */
+	mstl::String mCommandLine;        /* Id cruft */
 
-	int mNumJoints;                   /* Joint count */
+	unsigned int mNumJoints;          /* Joint count */
 
-	int mNumMeshes;                   /* Mesh count */
+	unsigned int mNumMeshes;          /* Mesh count */
 
 	Md5Joint *mJoints;                /* Model skeleton */
 

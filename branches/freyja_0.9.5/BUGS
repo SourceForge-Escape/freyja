@@ -10,29 +10,22 @@
    a lot of useful information including your GPU info and event log.
  =====================================================================
 
- Known bugs
- -----------------------------------------------------------------------------
-
- * SUPER ANNOYING BUGS 
-	- Models loading w/o complete materials often are alpha masked.
-	- Mesh rotator for box and cursor are unmatched!
-
-
- A
+ 
+ A - Serious bugs
  ----------------------------
+
+ * Repacking might break aging Undo system for some operations -- unconfirmed.
+
+ * CRASH on animation scrub with md5 model!  2007.06.15
 
  * File export may be broken in some event paths 
 	- explict freyja filter won't save -- prob due to it not being a module
 
- * *.smd import bug ( cancel opens *.ext )
+ * *.smd import bug ( Canceling attempts to open Open... extention. )
 
  * Group (faces) selection is broken
 
  * WIN32 python lib is very unstable - need to replace it with ming bin
-
- * Faces... can't Select/UnSelect/etc which would make sense
-
- * Rotation with cursor is broken
 
  * Extrude ( legacy replacement ) broken for non-closed mesh
 
@@ -51,7 +44,7 @@
 	- No overlap fixup provided
 
 
- B
+ B - Moderate bugs
  ----------------------------
 
  * Save As.. dialog triggers twice with text entry event.
@@ -64,53 +57,34 @@
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
 	after a 'jump'
 
- * Multi-mesh .Ja v1 export is broken... use .Freyja export instead for now
-	- Fix will be using a pure serialized format .Ja v2 ( binary .Freyja )
-
  * Bone rotation
 	- Looks like we're getting a sqrt(-1) and INFINITY passed around
 
  * Cursor reset on undo ( use a freaking seperate undo state system for cursor )
 
 
-
- C
+ C - Annoying bugs
  ----------------------------
 
- * Doesn't build in OS X since 0.9.5  ( No access to a working build machine. )
+ * Models loading w/o complete materials often are alpha masked.
+
+ * Mesh rotator for box and cursor are unmatched!
+
+ * May not build in OS X anymore.  ( No longer have access to a mac. )
 
  * Actual bug report: 'generated sphere looks retarded' it's true too
    just needs to be subdiv with quads
 
- * Skeleton tree widget not cleared on Close / New
-
  * Plugins
-	- All iterator use is now not just deprecated but obsoloete ( rewrite )
 	- I guess I forgot to port some plugins to support 64bit/big endian oops
 	- Halflife is broken ( looks like a deformed umbra loader, 
 	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )
 	- PSK skeleton broken
 	- GRN skeleton broken
-	- Milkshape export broken ( fixed? test )
 
  * Reverse engineer plugin spin buttons don't always update
 	- Tabbing always updates
 	- Sometimes typing space and enter updates.. weird Gtk+ events
-
- * Certain modes like vertex transforms should prob enable point rendering
-   by default
-
-
- Regression notes
- -------------------------------------------------------------
-
-
-
-
-
- 
-
-
 
 
 
