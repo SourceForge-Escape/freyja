@@ -27,28 +27,27 @@
 #include "Md5.h"
 
 using namespace mstl;
+using namespace hel;
+
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Md5::Md5()
+Md5::Md5() :
+	mVersion(10),
+	mCommandLine(),
+	mNumJoints(0),
+	mNumMeshes(0),
+	mJoints(NULL),
+	mMeshes(NULL)
 {
-	mVersion = 0;
-	mCommandLine = 0x0;
-	mNumJoints = 0;
-	mNumMeshes = 0;
-	mJoints = 0x0;
-	mMeshes = 0x0;
 }
 
 
 Md5::~Md5()
 {
-	if (mCommandLine)
-		delete [] mCommandLine;
-	
-	if (mNumJoints)
+	if (mJoints)
 		delete [] mJoints;
 	
 	if (mMeshes)
@@ -60,26 +59,32 @@ Md5::~Md5()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-float Md5::decodeIdQuaternion(float qx, float qy, float qz)
+hel::Quat Md5::DecodeQuaternion(float qx, float qy, float qz)
 {
-	float qw, tmp;
+	// Md5 stores unit quaternions without the W componet.
+	float qw = 0.0f;
+	float tmp = 1.0f - (qx*qx) - (qy*qy) - (qz*qz);
 
-	tmp = 1.0f - ((qx*qx) + (qy*qy) + (qz*qz));
-
-	if (tmp >= 0)
+	if (tmp >= 0.0f)
 	{
-		qw = -(float)sqrt( tmp );
-	}
-	else
-	{
-		qw = 0;
+		qw = -sqrtf( tmp );
 	}
 
-	return qw;
+	return Quat(qw, qx, qy, qz);
 }
 
 
-bool Md5::isMd5Model(const char *filename)
+hel::Vec3 Md5::EncodeQuaternion(const hel::Quat &q)
+{
+	// Md5 stores unit quaternions without the W componet.
+	Quat n = q;
+	n.Norm();
+
+	return Vec3(n.mX, n.mY, n.mZ);
+}
+
+
+bool Md5::IsMd5Model(const char *filename)
 {
 	SystemIO::TextFileReader r;
 
@@ -95,11 +100,9 @@ bool Md5::isMd5Model(const char *filename)
 }
 
 
-bool Md5::saveModel(const char *filename)
+bool Md5::SaveModel(const char *filename)
 {
 	SystemIO::TextFileWriter w;
-	int i, j;  /* I hate everyone that uses signed indices in file formats */
-
 
 	if (SystemIO::File::DoesFileExist(filename))
 	{
@@ -111,7 +114,7 @@ bool Md5::saveModel(const char *filename)
 		return false;
 
 	/* Header */
-	w.Print("MD5Version 10\n");
+	w.Print("MD5Version %u\n", mVersion);
 
 	/* Some Id thingys */
 	w.Print("commandline \"FIXME FOR YOUR MODEL\"\n\n");
@@ -123,9 +126,9 @@ bool Md5::saveModel(const char *filename)
 	/* Joint data */
 	w.Print("joints {\n");
 
-	for (i = 0; i < mNumJoints; ++i)
+	for (unsigned int i = 0; i < mNumJoints; ++i)
 	{
-		w.Print("\t\"%s\"\t%i ", mJoints[i].name, mJoints[i].parent);
+		w.Print("\t\"%s\"\t%i ", mJoints[i].name.c_str(), mJoints[i].parent);
 
 		/* translate X Y Z */
 		w.Print("( %f %f %f ) ",
@@ -133,17 +136,16 @@ bool Md5::saveModel(const char *filename)
 			mJoints[i].translate[1],
 			mJoints[i].translate[2]);
 
-		w.Print("( %f %f %f )\t\t",
-			mJoints[i].rotate[0],
-			mJoints[i].rotate[1],
-			mJoints[i].rotate[2]);
+		Vec3 rot = EncodeQuaternion(mJoints[i].rotate);
+
+		w.Print("( %f %f %f )\t\t", rot.mX, rot.mY, rot.mZ);
 		
 		/* Recover metadata of parent comment */
 		w.Print("// ");
 
 		if (mJoints[i].parent > 0)
 		{
-			w.Print("%s", mJoints[mJoints[i].parent].name);
+			w.Print("%s", mJoints[mJoints[i].parent].name.c_str() );
 		}
 
 		w.Print("\n");
@@ -152,16 +154,18 @@ bool Md5::saveModel(const char *filename)
 	w.Print("}\n");
 
 	/* Write mesh data*/
-	for (i = 0; i < mNumMeshes; ++i)
+	for (unsigned int i = 0; i < mNumMeshes; ++i)
 	{
 		w.Print("\n");
 		w.Print("mesh {\n");
-		w.Print("\t// meshes: %s\n", mMeshes[i].name);
-		w.Print("\tshader \"%s\"\n", mMeshes[i].shader);
+		w.Print("\t// meshes: %s\n", mMeshes[i].name.c_str() );
+		w.Print("\tshader \"%s\"\n", mMeshes[i].shader.c_str() );
 
 		w.Print("\n\tnumverts %i\n", mMeshes[i].numverts);
 
-		for (j = 0; j < mMeshes[i].numverts; ++j)
+		for (unsigned int j = 0, 
+			 jn = (mMeshes[i].numverts < 0) ? 0 : mMeshes[i].numverts; 
+			 j < jn; ++j)
 		{
 			w.Print("\tvert %i ( %lf %lf ) %i %i\n", 
 					j, // mMeshes[i].verts[j].index // Should == j
@@ -173,7 +177,9 @@ bool Md5::saveModel(const char *filename)
 
 		w.Print("\n\tnumtris %i\n", mMeshes[i].numtriangles);
 
-		for (j = 0; j < mMeshes[i].numtriangles; ++j)
+		for (unsigned int j = 0,
+			 jn = (mMeshes[i].numtriangles < 0) ? 0 : mMeshes[i].numtriangles; 
+			 j < jn; ++j)
 		{
 			w.Print("\ttri %i %i %i %i\n",
 				j,
@@ -184,7 +190,9 @@ bool Md5::saveModel(const char *filename)
 
 		w.Print("\n\tnumweights %i\n", mMeshes[i].numweights);
 
-		for (j = 0; j < mMeshes[i].numweights; ++j)
+		for (unsigned int j = 0,
+			 jn = (mMeshes[i].numweights < 0) ? 0 : mMeshes[i].numweights; 
+			 j < jn; ++j)
 		{
 			w.Print("\tweight %i %i %f ( %f %f %f )\n",
 					j, // mMeshes[i].weights[j].index
@@ -208,13 +216,11 @@ bool Md5::saveModel(const char *filename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool Md5::loadModel(const char *filename)
+bool Md5::LoadModel(const char *filename)
 {
 	SystemIO::TextFileReader r;
-	int i, j;  /* I hate everyone that uses signed indices in file formats */
 
-
-	if (isMd5Model(filename) == false)
+	if (IsMd5Model(filename) == false)
 		return false;
 
 	if (r.Open(filename) == false)
@@ -229,36 +235,36 @@ bool Md5::loadModel(const char *filename)
 	{
 	case 10:
 		break;
+
 	default:
 		//printf("<Md5> Don't know this version %i.\n", mVersion);
 		return false;
 	}
 
 
-	/* Some Id thingys */
+	/* Id model commandline. */
 	if (!r.ParseMatchingSymbol("commandline"))
-		return false;
+		return false; 
 
-	//mCommandLine = String::Strdup(r.ParseStringLiteral());
-	mCommandLine = NULL;
-
-	// Just skip these now.
-	r.FindNextChar('"');
-	r.FindNextChar('"');
+	mCommandLine = r.ParseStringLiteral();
+	r.FindNextChar('\n'); // skip very long commandlines that don't fit limit.
 
 	/* Joint setup */
 	if (!r.ParseMatchingSymbol("numJoints"))
 		return false;
 
-	mNumJoints = r.ParseInteger();
+	{
+		int i = r.ParseInteger();
 
-	if (mNumJoints < 0)
-	{
-		mNumJoints = 0;
-	}
-	else
-	{
-		mJoints = new Md5Joint[mNumJoints];
+		if (i < 0)
+		{
+			mNumJoints = 0;
+		}
+		else
+		{
+			mNumJoints = i;
+			mJoints = new Md5Joint[mNumJoints];
+		}
 	}
 
 
@@ -266,15 +272,18 @@ bool Md5::loadModel(const char *filename)
 	if (!r.ParseMatchingSymbol("numMeshes"))
 		return false;
 
-	mNumMeshes = r.ParseInteger();
+	{
+		int i = r.ParseInteger();
 
-	if (mNumMeshes < 0)
-	{
-		mNumMeshes = 0;
-	}
-	else
-	{
-		mMeshes = new Md5Mesh[mNumMeshes];
+		if (i < 0)
+		{
+			mNumMeshes = 0;
+		}
+		else
+		{
+			mNumMeshes = i;
+			mMeshes = new Md5Mesh[mNumMeshes];
+		}
 	}
 
 
@@ -284,18 +293,18 @@ bool Md5::loadModel(const char *filename)
 		if (!r.ParseMatchingSymbol("{"))
 			return false;
 			
-		for (i = 0; i < mNumJoints; ++i)
+		for (unsigned int i = 0; i < mNumJoints; ++i)
 		{
-			mJoints[i].name = String::Strdup(r.ParseStringLiteral());
+			mJoints[i].name = r.ParseStringLiteral();
 			mJoints[i].parent = r.ParseInteger();
 
 			/* translate X Y Z */
 			if (!r.ParseMatchingSymbol("("))
 				return false;
 
-			mJoints[i].translate[0] = r.ParseFloat();
-			mJoints[i].translate[1] = r.ParseFloat();
-			mJoints[i].translate[2] = r.ParseFloat();
+			mJoints[i].translate.mX = r.ParseFloat();
+			mJoints[i].translate.mY = r.ParseFloat();
+			mJoints[i].translate.mZ = r.ParseFloat();
 
 			if (!r.ParseMatchingSymbol(")"))
 				return false;
@@ -304,10 +313,9 @@ bool Md5::loadModel(const char *filename)
 			/* rotate X Y Z */
 			if (!r.ParseMatchingSymbol("("))
 				return false;
-			
-			mJoints[i].rotate[0] = r.ParseFloat();
-			mJoints[i].rotate[1] = r.ParseFloat();
-			mJoints[i].rotate[2] = r.ParseFloat();
+
+			mJoints[i].rotate =
+			DecodeQuaternion(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
 
 			if (!r.ParseMatchingSymbol(")"))
 				return false;
@@ -324,7 +332,7 @@ bool Md5::loadModel(const char *filename)
 	}
 
 	
-	for (i = 0; i < mNumMeshes; ++i)
+	for (unsigned int i = 0; i < mNumMeshes; ++i)
 	{
 		if (r.ParseMatchingSymbol("mesh"))
 		{
@@ -332,28 +340,31 @@ bool Md5::loadModel(const char *filename)
 				return false;
 
 			// FIXME: // meshes: MESHNAME?
-			strncpy(mMeshes[i].name, "mynameis?", 24);
+			mMeshes[i].name.Set("mesh-%i", i);
 
 			if (!r.ParseMatchingSymbol("shader"))
 				return false;
 
-			mMeshes[i].shader = String::Strdup(r.ParseStringLiteral());
+			mMeshes[i].shader = r.ParseStringLiteral();
 
 			if (!r.ParseMatchingSymbol("numverts"))
 				return false;
 
-			mMeshes[i].numverts = r.ParseInteger();
-
-			if (mMeshes[i].numverts < 0)
 			{
-				mMeshes[i].numverts = 0;
-			}
-			else
-			{
-				mMeshes[i].verts = new Md5Vertex[mMeshes[i].numverts];
+				int j = r.ParseInteger();
+
+				if (j < 0)
+				{
+					mMeshes[i].numverts = 0;
+				}
+				else
+				{
+					mMeshes[i].numverts = j;
+					mMeshes[i].verts = new Md5Vertex[mMeshes[i].numverts];
+				}
 			}
 
-			for (j = 0; j < mMeshes[i].numverts; ++j)
+			for (unsigned int j = 0; j < mMeshes[i].numverts; ++j)
 			{
 				if (!r.ParseMatchingSymbol("vert"))
 					return false;
@@ -370,7 +381,7 @@ bool Md5::loadModel(const char *filename)
 					return false;
 				
 				mMeshes[i].verts[j].weight = r.ParseInteger();
-				mMeshes[i].verts[j].numbones =r.ParseInteger();
+				mMeshes[i].verts[j].numbones = r.ParseInteger();
 			}
 
 			if (!r.ParseMatchingSymbol("numtris"))
@@ -379,7 +390,7 @@ bool Md5::loadModel(const char *filename)
 			mMeshes[i].numtriangles = r.ParseInteger();
 			mMeshes[i].triangles = new Md5Triangle[mMeshes[i].numtriangles];
 
-			for (j = 0; j < mMeshes[i].numtriangles; ++j)
+			for (unsigned int j = 0; j < mMeshes[i].numtriangles; ++j)
 			{
 				if (!r.ParseMatchingSymbol("tri"))
 					return false;
@@ -396,7 +407,7 @@ bool Md5::loadModel(const char *filename)
 			mMeshes[i].numweights = r.ParseInteger();
 			mMeshes[i].weights = new Md5Weight[mMeshes[i].numweights];
 
-			for (j = 0; j < mMeshes[i].numweights; ++j)
+			for (unsigned int j = 0; j < mMeshes[i].numweights; ++j)
 			{
 				if (!r.ParseMatchingSymbol("weight"))
 					return false;
@@ -408,9 +419,9 @@ bool Md5::loadModel(const char *filename)
 				if (!r.ParseMatchingSymbol("("))
 					return false;
 
-				mMeshes[i].weights[j].pos[0] = r.ParseFloat();
-				mMeshes[i].weights[j].pos[1] = r.ParseFloat();
-				mMeshes[i].weights[j].pos[2] = r.ParseFloat();
+				mMeshes[i].weights[j].pos.mX = r.ParseFloat();
+				mMeshes[i].weights[j].pos.mY = r.ParseFloat();
+				mMeshes[i].weights[j].pos.mZ = r.ParseFloat();
 
 				if (!r.ParseMatchingSymbol(")"))
 					return false;
@@ -446,14 +457,14 @@ bool Md5::loadModel(const char *filename)
 #include <hel/Quat.h>
 #include <hel/Mat44.h>
 
+#include <freyja/freyja.h>
+#include <freyja/BoneABI.h>
+#include <freyja/MeshABI.h>
 #include <freyja/ModelABI.h>
 #include <freyja/PluginABI.h>
-#include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/TextureABI.h>
-#include <freyja/LegacyABI.h>
-#include <freyja/MeshABI.h>
-#include <freyja/freyja.h>
+
 #include <mstl/Vector.h>
 
 using namespace mstl;
@@ -492,7 +503,7 @@ int freyja_model__md5_check(char *filename)
 {
 	Md5 md5;
 
-	if (md5.isMd5Model(filename) == true)
+	if (md5.IsMd5Model(filename) == true)
 		return 0; /* 0 is no error */
 
 	return -1;
@@ -501,221 +512,161 @@ int freyja_model__md5_check(char *filename)
 
 int freyja_model__md5_import(char *filename)
 {
-	const vec_t scale = 0.3;
+	const vec_t scale = 0.7f;
 	Md5 md5;
-	Vector<unsigned int> weights;
-	unsigned int vertex, texcoord;
-	int i, m, v, w, t, j, bindex, index;
-	float qw;
-	vec4_t wxyz;
-	Quat q, q2;
-	Mat44 mat, mat2;
-	Vec3 vec3, tmp;
 
-
-	if (md5.loadModel(filename) == false)
+	if (md5.LoadModel(filename) == false)
 		return -1;
 
+	// NOTE: Freyja 0.9.5 ABI doesn't need array remapping like 0.9.1 ABI.
+
 	/* Start a new model */
-	freyjaBegin(FREYJA_MODEL);
+	index_t modelIdx = freyjaModelCreate();
 
-	for (m = 0; m < md5.mNumMeshes; ++m)
+	/* Load each mesh into freyja. */
+	for (unsigned int i = 0; i < md5.mNumMeshes; ++i)
 	{
-		Vector<unsigned int> vertices;
-		Vector<unsigned int> texcoords;
+		Md5Mesh &mesh = md5.mMeshes[i];
 
-
-		/* Start a new mesh */
-		freyjaBegin(FREYJA_MESH);
-	
-		/* Start a new vertex group */
-		freyjaBegin(FREYJA_VERTEX_GROUP);
-
-		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
+		index_t meshIdx = freyjaMeshCreate();
+		freyjaModelAddMesh(modelIdx, meshIdx);
+		
+		// Freyja 0.9.5 wants a non-deformed mesh as input, since
+		// it will later deform the mesh as needed depending on mode.
+		for (unsigned int j = 0; j < mesh.numverts; ++j)
 		{
-			vec3.Zero();
+			Md5Vertex &vertex = mesh.verts[j];
+			Vec3 p(0.0f, 0.0f, 0.0f);
 
-			for (i = 0; i < md5.mMeshes[m].verts[v].numbones; ++i)
+			for (int k = 0; k < vertex.numbones; ++k)
 			{
-				w = md5.mMeshes[m].verts[v].weight;
-				w = md5.mMeshes[m].weights[w].index + i;
-				j = md5.mMeshes[m].weights[w].joint;
+				Md5Weight &weight = mesh.weights[ vertex.weight + k ];
+				Md5Joint &joint = md5.mJoints[ weight.joint ];
 
-				qw = md5.decodeIdQuaternion(md5.mJoints[j].rotate[0],
-											md5.mJoints[j].rotate[1],
-											md5.mJoints[j].rotate[2]);
-				q = Quat(qw, 
-							   md5.mJoints[j].rotate[0],
-							   md5.mJoints[j].rotate[1],
-							   md5.mJoints[j].rotate[2]);
+				Vec3 tmp = joint.rotate.Rotate( weight.pos );		
+				tmp += joint.translate;
+				p += tmp * weight.weight;
 
-				tmp = q.Rotate(md5.mMeshes[m].weights[w].pos);		
-				tmp += Vec3(md5.mJoints[j].translate[0],
-								md5.mJoints[j].translate[1],
-								md5.mJoints[j].translate[2]);
-				vec3 += tmp * md5.mMeshes[m].weights[w].weight;
-
+				freyjaMeshVertexWeight(meshIdx, j, weight.joint, weight.weight);
 			}
 
-			vec3 *= scale;
+			// Was X Z Y in 0.9.1, it will be X Y Z if not translated here.
+			p = Vec3(p.mX, p.mZ, -p.mY);
+			p *= scale;
 
-			vertex = freyjaVertexCreate3f(vec3.mVec[0], vec3.mVec[2], vec3.mVec[1]);
+			freyjaMeshVertexCreate3fv(meshIdx, p.mVec);
 
-			/* Store texels */
-			texcoord = freyjaTexCoordCreate2f(md5.mMeshes[m].verts[v].uv[0],
-										md5.mMeshes[m].verts[v].uv[1]);
-			
-			/* Generates id translator list */
-			vertices.pushBack(vertex);
-			texcoords.pushBack(texcoord);
+			{
+				Vec3 uvw(vertex.uv[0], vertex.uv[1], 0.0f);
+				freyjaMeshVertexTexCoord3fv(meshIdx, j, uvw.mVec);
+			}
 		}
 
-		freyjaEnd(); // FREYJA_GROUP
-
-		for (t = 0; t < md5.mMeshes[m].numtriangles; ++t)
+		for (unsigned int j = 0; j < mesh.numtriangles; ++j)
 		{
+			Md5Triangle &face = mesh.triangles[j];
+
 			/* Start a new polygon */
-			freyjaBegin(FREYJA_POLYGON);
-			
-			/* Store vertices and texels by true id, using translator lists */
-			freyjaPolygonVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[0]]);
-			freyjaPolygonVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[1]]);
-			freyjaPolygonVertex1i(vertices[md5.mMeshes[m].triangles[t].vertex[2]]);
-			freyjaPolygonTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[0]]);
-			freyjaPolygonTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[1]]);
-			freyjaPolygonTexCoord1i(texcoords[md5.mMeshes[m].triangles[t].vertex[2]]);
+			index_t faceIdx = freyjaMeshPolygonCreate(meshIdx);
 
-			freyjaPolygonMaterial1i(m); // mMeshes[m].shader
+			// Use mesh.shader material cache id instead?
+			freyjaMeshPolygonMaterial(meshIdx, faceIdx, i);
 			
-			freyjaEnd(); // FREYJA_POLYGON
+			freyjaMeshPolygonAddVertex1i( meshIdx, faceIdx, face.vertex[0] );
+			freyjaMeshPolygonAddVertex1i( meshIdx, faceIdx, face.vertex[1] );
+			freyjaMeshPolygonAddVertex1i( meshIdx, faceIdx, face.vertex[2] );
+
+			// If you want polymapped texcoords...
+			//index_t texcoord = freyjaMeshTexCoordCreate2f(meshIdx, u, v);
+			//freyjaMeshPolygonAddTexCoord1i(meshIdx, faceIdx, texcoord);
 		}
 
-		freyjaEnd(); // FREYJA_MESH
+		/* Generate normals to be pretty */
+		freyjaMeshGenerateVertexNormals(meshIdx);
+		freyjaMeshNormalFlip(meshIdx);
 	}
 
 
-	/* Load skeleton */
-	for (m = 0; m < md5.mNumMeshes; ++m)
-	{
-		for (v = 0; v < md5.mMeshes[m].numverts; ++v)
-		{
-			w = md5.mMeshes[m].verts[v].weight;
-
-			freyjaVertexWeight(v, 
-							   md5.mMeshes[m].weights[w].weight,
-							   md5.mMeshes[m].weights[w].joint);
-
-			/* Generates id translator list */
-			weights.pushBack(md5.mMeshes[m].weights[w].index);
-		}
-	}
-
-	/* Generate normals to be pretty */
-	freyjaMeshGenerateVertexNormals(freyjaGetFSMMeshIndex());
-	freyjaMeshNormalFlip(freyjaGetFSMMeshIndex());
-
-	freyjaEnd(); // FREYJA_MODEL
-
-	freyjaBegin(FREYJA_SKELETON);
-	index_t skeletonIndex = freyjaGetCurrent(FREYJA_SKELETON);
+	/* Create a freyja skeleton */
+	index_t skeletonIdx = freyjaSkeletonCreate();
+	freyjaModelAddSkeleton(modelIdx, skeletonIdx);
 	Vec3 transforms[md5.mNumJoints];
 	Vec3 origin;
+	Mat44 mat, mat2;
 
-	for (j = 0; j < md5.mNumJoints; ++j)
+	for (unsigned int j = 0; j < md5.mNumJoints; ++j)
 	{
 		transforms[j].Zero();
 	}
 
 	/* Mongoose 2004.12.21, 
-	 * Md5 stores absolute bone pos -- make them offsets from parent */
-	for (j = 0; j < md5.mNumJoints; ++j)
+	 * Md5 stores absolute bone pos -- make them offsets from parent. */
+	for (unsigned int j = 0; j < md5.mNumJoints; ++j)
 	{
-		vec3 = Vec3(md5.mJoints[j].translate[0],
-						md5.mJoints[j].translate[1],
-						md5.mJoints[j].translate[2]);
-		//printf("%3i   %.3f %.3f %.3f\n", j,
-		//	   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
-		index = j;
+		Vec3 p = md5.mJoints[j].translate;
+		int idx = j;
 
-		while (index > -1)
+		while (idx > -1)
 		{
-			vec3 -= transforms[index];
-			index = md5.mJoints[index].parent;
+			p -= transforms[idx];
+			idx = md5.mJoints[idx].parent;
 		}
 
-		transforms[j] = vec3;
-		//printf("->    %.3f %.3f %.3f\n",
-		//	   vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
+		transforms[j] = p;
 	}
 
-	for (j = 0; j < md5.mNumJoints; ++j)
+	for (unsigned int j = 0; j < md5.mNumJoints; ++j)
 	{
-		/* Start a new tag */
-		freyjaBegin(FREYJA_BONE);
-		bindex = freyjaGetCurrent(FREYJA_BONE);
-		freyjaSkeletonAddBone(skeletonIndex, bindex);
-		freyjaBoneFlags(bindex, 0x0);
-		freyjaBoneParent(bindex, md5.mJoints[j].parent);
-		freyjaBoneName(bindex, md5.mJoints[j].name);
+		/* Create new freyja bone. */
+		index_t boneIdx = freyjaBoneCreate(skeletonIdx);
+
+		// This will nop if the allocation of bone happens after skeleton
+		freyjaSkeletonAddBone(skeletonIdx, boneIdx);
+		freyjaBoneParent(boneIdx, md5.mJoints[j].parent);
+		freyjaBoneName(boneIdx, md5.mJoints[j].name.c_str() );
 
 		/* Translate */
-		vec3 = transforms[j];
-		vec3 *= scale;
+		Vec3 p = transforms[j];
+		p *= scale;
 
-		if (!j || 1)
-		{
-			freyjaBoneTranslate3f(bindex,
-								  vec3.mVec[0], vec3.mVec[2], vec3.mVec[1]);
-		}
-		else
-		{
-			freyjaBoneTranslate3f(bindex, 
-								  vec3.mVec[0], vec3.mVec[1], vec3.mVec[2]);
-		}
+		freyjaBoneTranslate3f(boneIdx, p.mX, p.mZ, -p.mY);
 
-		/* Scale */
+		/* Rotation */
+
+		// FIXME: I haven't generated local rotations yet.
+#if 0
 		index = j;
 		mat.SetIdentity();
 
 		while (index > -1)
 		{
 			index = md5.mJoints[index].parent;
-
-			q2 = Quat(qw, 
-							md5.mJoints[index].rotate[0],
-							md5.mJoints[index].rotate[1],
-							md5.mJoints[index].rotate[2]);
-			mat2 = q2;
+			mat2 = md5.mJoints[index].rotate;
 			mat = mat * mat2;
 		}
 
 		mat.Invert();
-		mat2 = Quat(qw, 
-						  md5.mJoints[j].rotate[0],
-						  md5.mJoints[j].rotate[1],
-						  md5.mJoints[j].rotate[2]);
+		mat2 = md5.mJoints[j].rotate;
 		mat = mat * mat2;
+
+
 		q = mat.ToQuat(); 
 		// q.SetByMatrix(mat.mMatrix);
 		q.GetQuat(wxyz);
 
 		//freyjaBoneRotateQuatWXYZ4fv(bindex, wxyz); // argh
+#endif
 
-		for (int j2 = 0; j2 < md5.mNumJoints; ++j2)
+		for (unsigned int j2 = 0; j2 < md5.mNumJoints; ++j2)
 		{
-			if (md5.mJoints[j2].parent == j)
+			if (md5.mJoints[j2].parent == (int)j)
 			{ 
-				freyjaBoneAddChild(bindex, j2);
+				freyjaBoneAddChild(boneIdx, j2);
 			}
 		}
-
-		freyjaEnd(); // FREYJA_TAG
 	}
 
-	freyjaEnd(); // FREYJA_SKELETON
-
-
-	freyjaPrintMessage("The Doom3 plugin sez: FINISH ME!!!");
+	freyjaPrintMessage("The MD5Model plugin is currently incomplete.");
 
 	return 0;
 }
@@ -728,13 +679,13 @@ int freyja_model__md5_import(char *filename)
 //       The problem?  0.0 weights are removed in optimization! heh  =)
 int freyja_model__md5_export(char *filename)
 {
+#if 0 // 0.9.1 version
 	const vec_t scale = (1.0 / 0.3);
 	Md5 md5;
 	int i, m, v, t, j, count;
 	vec4_t wxyz;
 	vec3_t xyz;
 	vec_t weight;
-	Quat q, q2;
 	Mat44 mat, mat2;
 	Vec3 vec3, tmp;
 	int32 boneIndex, meshIndex, faceIndex, vertexIndex, texcoordIndex;
@@ -750,7 +701,7 @@ int freyja_model__md5_export(char *filename)
 	md5.mNumMeshes = freyjaGetModelMeshCount(modelIndex);
 	md5.mNumJoints = freyjaGetSkeletonBoneCount(skeletonIndex);
 	md5.mCommandLine = new char[64];
-	snprintf(md5.mCommandLine, 64, "No CommandLine");
+	md5.mCommandLine = "none";
 	md5.mMeshes = new Md5Mesh[md5.mNumMeshes];
 	md5.mJoints = new Md5Joint[md5.mNumJoints];
 
@@ -762,13 +713,14 @@ int freyja_model__md5_export(char *filename)
 
 		md5.mJoints[j].parent = freyjaGetBoneParent(boneIndex);
 		md5.mJoints[j].name = new char[64];
-		freyjaGetBoneName(boneIndex, 64, md5.mJoints[j].name);
+		md5.mJoints[j].name = freyjaGetBoneNameString(boneIndex);
 
 		freyjaGetBoneRotationQuat4fv(boneIndex, wxyz);
 		//FIXME encode quaternion wxyz to id format here
-		md5.mJoints[j].rotate[0] = wxyz[0];
-		md5.mJoints[j].rotate[1] = wxyz[1];
-		md5.mJoints[j].rotate[2] = wxyz[2];
+		md5.mJoints[j].rotate.mW = wxyz[0];
+		md5.mJoints[j].rotate.mX = wxyz[1];
+		md5.mJoints[j].rotate.mY = wxyz[2];
+		md5.mJoints[j].rotate.mZ = wxyz[3];
 
 		freyjaGetBoneTranslation3fv(boneIndex, xyz);
 
@@ -787,10 +739,10 @@ int freyja_model__md5_export(char *filename)
 	for (m = 0; m < md5.mNumMeshes; ++m)
 	{
 		meshIndex = freyjaGetModelMeshIndex(modelIndex, m);
-		snprintf(md5.mMeshes[m].name, 32, "mesh%03i", m);
+		md5.mMeshes[m].name.Set("mesh%03i", m);
 		md5.mMeshes[m].name[8] = 0;
 		md5.mMeshes[m].shader = new char[64];
-		snprintf(md5.mMeshes[m].shader, 64, "No Shader");
+		md5.mMeshes[m].shader = "No Shader";
 		
 		md5.mMeshes[m].weights = NULL; 
 		md5.mMeshes[m].numweights = 0; 
@@ -870,12 +822,16 @@ int freyja_model__md5_export(char *filename)
 		}
 	}
 
-	if (md5.saveModel(filename) == false)
+	if (md5.SaveModel(filename) == false)
 		return -1;
 
 	freyjaPrintError("md5.so export isn't working yet.  This is a test.");
 
 	return 0;
+#else
+	freyjaPrintError("md5.so export isn't ported to 0.9.5 ABI yet.");
+	return -1;
+#endif
 }
 #endif
 

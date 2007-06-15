@@ -44,6 +44,9 @@ class String
 {
  public:
 
+	static const int npos = -1;
+
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
@@ -145,6 +148,17 @@ class String
 
 
 	////////////////////////////////////////////////////////////
+	// Legacy
+	////////////////////////////////////////////////////////////
+
+	void Clear() { clear(); }
+
+	const char *GetCString() {	return mString; }
+	
+	unsigned int GetLength() { return mLength; }
+
+
+	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
@@ -154,12 +168,25 @@ class String
 	}
 
 
-	const char *GetCString()
+	int find_last_of(const char c, int idx = -1)
 	{
-		return mString;
+		if (!mString)
+			return npos;
+
+		if (idx < 0 || idx > (int)mLength)
+		{
+			idx = mLength - 1;
+		}
+
+		for (unsigned int i = idx; i > 0; --i)
+		{
+			if (mString[i] == c)
+				return i; 
+		}
+
+		return npos;
 	}
-	
-	unsigned int GetLength() { return mLength; }
+
 
 	unsigned int length() { return mLength; }
 
@@ -190,12 +217,14 @@ class String
 
 		if (format && format[0])
 		{
-			char buf[1024];
+			const unsigned int sz = 1024;
+			char buf[sz];
 
 			va_list args;
 
 			va_start(args, format);
-			vsnprintf(buf, 1024, format, args);
+			vsnprintf(buf, sz, format, args);
+			buf[sz-1] = 0;
 			va_end(args);
 
 			mLength = strlen(buf);
@@ -256,7 +285,7 @@ class String
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void Clear()
+	void clear()
 	{
 		mLength = 0;
 

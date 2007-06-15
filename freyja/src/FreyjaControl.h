@@ -43,6 +43,7 @@
 #include "Cursor.h"
 #include "Control.h"
 #include "MaterialControl.h"
+#include "RecentFiles.h"
 
 
 namespace freyja3d {
@@ -336,6 +337,14 @@ class FreyjaControl : public Control
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 ------------------------------------------------------*/
+
+	bool UnserializeMesh(const char *filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes only currently selected mesh to file. 
+	 *       Returns true if sucessful
+	 *
 	 ------------------------------------------------------*/
 
 	bool SerializeBones(const char *filename);
@@ -713,9 +722,17 @@ class FreyjaControl : public Control
 
 	void eTransformBone() { SetObjectMode(tBone); }
 
+	void eTransformSkeleton() { SetObjectMode(tSkeleton); }
+
 	void eTransformLight() { SetObjectMode(tLight); }
 
 	void eRecentFiles(uint32 value) { LoadModel(GetRecentFilename(value)); }
+
+	void eRecentMeshXML(uint32 value) 
+	{ UnserializeMesh( mMeshXML.GetFilename(value) ); }
+
+	void eRecentSkeletonXML(uint32 value) 
+	{ UnserializeBones( mSkeletonXML.GetFilename(value) ); }
 
 	void eOpenShader(char *text);
 	void eOpenTexture(char *text);
@@ -1256,6 +1273,10 @@ private:
 	mstl::Vector<String> mRecentFiles;      /* Recently loaded model files */
 
 	mstl::ActionManager mActionManager;     /* New Undo/Redo system */
+
+	RecentFiles mMeshXML;                   /* Recent files lists. */
+
+	RecentFiles mSkeletonXML;
 
 	Texture mTexture;                       /* Collection of Texture utils */	
 

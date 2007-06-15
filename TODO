@@ -79,7 +79,7 @@
 	- Separate world updates from mesh skinning code.
 	- Go back and ensure everything is using relative transforms now.
 	- Editor needs to revert back to 'Bone' transforms to edit keys in key mode
-	- Attachments
+	- Attachments ( could be special metadata? )
 	- Various joint types: hinge, ball&socket, etc
 	- IK solver and interface
 	- New Timer for animation playback and keyframe timing
@@ -90,7 +90,6 @@
 	- Type of transform support
 	- Constraints support
 	- Ref weights from vertex to fix blending issues
-	- Reverse bone rendering direction option <-- --->  large part to leaf
 
  * Make generic plugin interface for new UI control points.
 
@@ -165,6 +164,9 @@
  * Brush system for vertex weight and texture on model painting
 
  * Material sphere rotation controlled by slider.
+
+ * Certain modes should enable certain rendering options by default, but allow
+   user overrides too.  eg [Vertex] + [Select] enables point renderer.
 
  * Scene graph UI.
 

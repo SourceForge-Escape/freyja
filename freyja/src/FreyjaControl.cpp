@@ -123,6 +123,8 @@ FreyjaControl::FreyjaControl() :
 	mSceneTrans(0.0f, -18.0f, 0.0f),
 	mRecentFiles(),
 	mActionManager(),
+	mMeshXML("freyja-dev-recent-mesh_xml", "eRecentMeshXML"),
+	mSkeletonXML("freyja-dev-recent-skeleton_xml", "eRecentSkeletonXML"),
 	mTexture(),
 	mRender(NULL),
 	mResourceFilename("freyja-dev.mlisp"),
@@ -195,6 +197,16 @@ void FreyjaControl::Init()
 	Print("Loading %s...", FREYJA_RECENT_FILES);
 	bool b = LoadRecentFilesResource(freyja_rc_map_string(FREYJA_RECENT_FILES).GetCString());
 	Print("Loading %s %s", FREYJA_RECENT_FILES, b ? "successful" : "failed");
+
+	if ( !mMeshXML.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mMeshXML.GetResourceFilename() );
+	}
+
+	if ( !mSkeletonXML.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mMeshXML.GetResourceFilename() );
+	}
 
 	/* Set some basic defaults */
 	SetControlScheme(eScheme_Model);
@@ -420,6 +432,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformFaces", &FreyjaControl::eTransformFaces);
 	CreateListener("eTransformFace", &FreyjaControl::eTransformFace);
 	CreateListener("eTransformModel", &FreyjaControl::eTransformModel);
+	CreateListener("eTransformSkeleton", &FreyjaControl::eTransformSkeleton);
 	CreateListener("eTransformBone", &FreyjaControl::eTransformBone);
 	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
 
@@ -434,6 +447,8 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
 
+	CreateListener1u("eRecentMeshXML", &FreyjaControl::eRecentMeshXML);
+	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::eRecentSkeletonXML);
 
 
 	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
@@ -978,6 +993,7 @@ void FreyjaControl::EvSerializeMesh()
 		return;
 
 	mstl::String path = freyja_rc_map_string("/");
+
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Save Selected Mesh...", 
 							  path.c_str(), 1,
@@ -1000,7 +1016,7 @@ void FreyjaControl::EvSerializeMesh()
 	{
 		Material *mat = freyjaGetMaterialClass(i);
 
-		if (mat)
+		if (mat && i) // skip 'boring material'
 			mat->Serialize(container);
 	}
 
@@ -1008,29 +1024,24 @@ void FreyjaControl::EvSerializeMesh()
 
 	if (filename &&  m->Serialize(container) && doc.SaveFile(filename))
 	{
+		mMeshXML.AddFilename(filename);
 		Print("Mesh '%s' Saved", filename);
 	}
 	else if (filename)
 	{
 		Print("Mesh '%s' failed to save.", filename);
 	}
-	
+
 	mgtk_filechooser_blocking_free(filename);
 #endif
 }
 
 
-void FreyjaControl::EvUnserializeMesh()
+bool FreyjaControl::UnserializeMesh(const char *filename)
 {
 #if TINYXML_FOUND
-	mstl::String path = freyja_rc_map_string("/");
-	char *filename =
-	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
-							  path.c_str(), 0,
-							  "Mesh XML (*.xml)", "*.xml");
-
 	if (!filename)
-		return;
+		return false;
 
 	TiXmlDocument doc(filename);
 
@@ -1038,7 +1049,7 @@ void FreyjaControl::EvUnserializeMesh()
 	{
 		printf("XML ERROR: %s, Line %i, Col %i\n", 
 			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
-		return;
+		return false;
 	}
 
 	TiXmlElement *root = doc.RootElement(); 
@@ -1046,7 +1057,7 @@ void FreyjaControl::EvUnserializeMesh()
 	if (!root) 
 	{
 		printf("Couldn't find document root!\n");
-		return;
+		return false;
 	}
 
 	TiXmlElement *child = root->FirstChildElement();
@@ -1076,7 +1087,39 @@ void FreyjaControl::EvUnserializeMesh()
 			mat->Unserialize(child);
 		}
 	}
-	
+
+	mMeshXML.AddFilename(filename);
+
+	return true;
+#else
+	return false;
+#endif
+}
+
+void FreyjaControl::EvUnserializeMesh()
+{
+#if TINYXML_FOUND
+	static mstl::String path = freyja_rc_map_string("/"); // cheesy
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
+							  path.c_str(), 0,
+							  "Mesh XML (*.xml)", "*.xml");
+
+	if ( UnserializeMesh(filename) )
+	{
+		path = filename;
+
+		int off = path.find_last_of('/');
+
+		if (off > 0)
+		{
+			path[off] = 0;
+		}
+
+		//Print("-- %s", path.c_str() );
+		Print("Loaded snippet '%s'", filename);
+	}
+
 	mgtk_filechooser_blocking_free(filename);
 #endif
 }
@@ -1097,6 +1140,7 @@ bool FreyjaControl::SerializeBones(const char *filename)
 
 	Bone::SerializePool(container);
 
+	mSkeletonXML.AddFilename(filename);
 	return doc.SaveFile(filename);;
 #else
 	return false;
@@ -1135,6 +1179,7 @@ bool FreyjaControl::UnserializeBones(const char *filename)
 		}
 
 		UpdateSkeletalUI();	
+		mSkeletonXML.AddFilename(filename);
 		return true;
 	}
 	
@@ -1543,7 +1588,7 @@ void FreyjaControl::NewFile()
 
 void FreyjaControl::EvUnserializeBones()
 {
-	mstl::String path = freyja_rc_map_string("/");
+	static mstl::String path = freyja_rc_map_string("/"); // cheesy
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Load Bones...", 
 							  path.c_str(), 0,
@@ -1551,7 +1596,17 @@ void FreyjaControl::EvUnserializeBones()
 
 	if (filename && UnserializeBones(filename) )
 	{
-		Print("Bones '%s' Loaded", filename);
+		path = filename;
+
+		int off = path.find_last_of('/');
+
+		if (off > 0)
+		{
+			path[off] = 0;
+		}
+
+		//Print("-- %s", path.c_str() );
+		Print("Loaded snippet '%s'", filename);
 	}
 	else if (filename)
 	{
@@ -4083,22 +4138,6 @@ void FreyjaControl::Transform(object_type_t obj,
 	case tMesh:
 		if (mToken)
 		{
-#if 0   // Recover, cursor sends degrees
-			switch (action)
-			{
-			case fRotate:
-				{
-					v = orig * HEL_PI_OVER_180;
-
-					v = helDegToRad(v);
-				}
-				break;
-
-			default:
-				;
-			}
-#endif
-
 			Action *a = new ActionMeshTransform(GetSelectedMesh(), action, u);
 			ActionModelModified(a);
 			freyjaMeshTransform3fv(GetSelectedMesh(), action, v.mVec);
@@ -4111,6 +4150,15 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
 			freyjaModelTransform(GetSelectedModel(), action, v[0], v[1], v[2]);
+		}
+		break;
+
+	case tSkeleton:
+		if (mToken)
+		{
+			//Action *a = new ActionModelTransform(0, action, u);
+			//ActionModelModified(a);
+			freyjaSkeletonTransform(GetSelectedSkeleton(), action, v[0], v[1], v[2]);
 		}
 		break;
 
@@ -5241,7 +5289,7 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 				CastPickRay(x, y);
 
 				hel::Vec3 tuv;
-				int face = m->PickFace(Face::fSelected, 
+				int face = m->PickFace(Face::fHidden, 
 									   FreyjaRender::mTestRay, tuv);
 
 				if (face > -1)
@@ -5280,20 +5328,22 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 
 #if 1 // test face based brush for now  
 			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
+			index_t bone = GetSelectedBone();
 
-			if (m)
+			if (m && bone != INDEX_INVALID)
 			{
 				hel::Vec3 tuv;
-				int face = m->PickFace(Face::fSelected, FreyjaRender::mTestRay, tuv);
+				int face = m->PickFace(Face::fHidden, FreyjaRender::mTestRay, tuv);
 
 				if (face > -1)
 				{
 					Face *f = m->GetFace(face);
-					index_t bone = GetSelectedBone();
 
-					if (f && bone != INDEX_INVALID)
+					if (f)
 					{
-						// Ignore this on next pass and
+						// Ignore this on next pass.
+						//f->mFlags |= Face::fHidden;
+
 						// free visual feedback since it's SELECTED.
 						f->mFlags |= Face::fSelected;
 

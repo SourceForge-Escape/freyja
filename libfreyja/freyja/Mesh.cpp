@@ -950,7 +950,7 @@ bool Mesh::Serialize(TiXmlElement *container)
 	if (!container)
 		return false;
 
-	TiXmlElement *mesh = new TiXmlElement("Mesh");
+	TiXmlElement *mesh = new TiXmlElement("mesh");
 	container->LinkEndChild(mesh);
 
 	mesh->SetAttribute("version", 3);

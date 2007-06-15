@@ -195,12 +195,8 @@ void freyjaPluginsInit()
 						 FREYJA_PLUGIN_SKELETON |
 						 FREYJA_PLUGIN_VERTEX_BLENDING |
 						 FREYJA_PLUGIN_VERTEX_MORPHING);
-	freyjaPluginExport1i(FREYJA_PLUGIN_MESH |
-						 FREYJA_PLUGIN_SKELETON |
-						 FREYJA_PLUGIN_VERTEX_BLENDING |
-						 FREYJA_PLUGIN_VERTEX_MORPHING);
+	freyjaPluginExport1i(FREYJA_PLUGIN_NONE); // 2007.06.15 Disabled
 	freyjaPluginEnd();
-
 
 
 	freyjaPluginBegin();
