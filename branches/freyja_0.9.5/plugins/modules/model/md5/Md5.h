@@ -23,8 +23,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_MD5_H_
-#define GUARD__FREYJA_MONGOOSE_MD5_H_
+#ifndef GUARD__FREYJA_PLUGIN_MD5_H_
+#define GUARD__FREYJA_PLUGIN_MD5_H_
 
 #include <stdio.h>
 #include <string.h>
@@ -38,7 +38,6 @@
 #include <mstl/Vector.h>
 
 
-/* NOTES: Some indices and counts are unfortunately signed (negative) values */
 class Md5Vertex
 {
  public:
@@ -69,6 +68,21 @@ class Md5Weight
 class Md5Mesh
 {
  public:
+	Md5Mesh() : 
+		name(), shader(), 
+		numverts(0), verts(NULL), 
+		numtriangles(0), triangles(NULL),
+		numweights(0), weights(NULL)
+	{
+	}
+
+	~Md5Mesh()
+	{
+		if (verts) delete [] verts;
+		if (triangles) delete [] triangles;
+		if (weights) delete [] weights;
+	}
+
 	mstl::String name;
 	mstl::String shader;
 	unsigned int numverts;
@@ -90,7 +104,33 @@ class Md5Joint
 };
 
 
-class Md5
+class Md5Anim
+{
+ public:
+
+	Md5Anim();
+
+	~Md5Anim();
+
+	bool Load(const char *filename);
+
+	bool Save(const char *filename);
+	
+	unsigned int mVersion;            /* MD5 Version */
+
+	mstl::String mCommandLine;        /* Id cruft */
+
+	unsigned int mNumFrames;          /* KeyFrame count */
+
+	unsigned int mNumJoints;          /* Joint count */
+
+	unsigned int mFrameRate;          /* Frames per second */
+
+	unsigned int mNumAnimComponets;   /* LOL Transforms */
+};
+
+
+class Md5Model
 {
  public:
 
@@ -98,26 +138,18 @@ class Md5
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Md5();
+	Md5Model();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Md5
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.13: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	~Md5();
+	~Md5Model();
 	/*------------------------------------------------------
 	 * Pre  : Md5 object is allocated
 	 * Post : Deconstructs an object of Md5
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.13: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 
@@ -125,15 +157,11 @@ class Md5
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	hel::Quat DecodeQuaternion(float qx, float qy, float qz);
+	void DecodeUnitQuaternion(hel::Quat &q);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.12.21:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	hel::Vec3 EncodeQuaternion(const hel::Quat &q);
@@ -148,16 +176,13 @@ class Md5
 	 * Pre  : Checks to see if file is an Md5mesh model
 	 * Post : Returns true if it is a Md5mesh
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.13:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	bool SaveModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Parses and stores a Md5mesh model to a file
 	 * Post : Returns true if sucessful
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -170,10 +195,6 @@ class Md5
 	 * Pre  : Parses and stores a Md5mesh model from a file
 	 * Post : Returns true if sucessful
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.08.13:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	unsigned int mVersion;            /* MD5 Version */
@@ -188,17 +209,6 @@ class Md5
 
 	Md5Mesh *mMeshes;                 /* Model geometery */
 
-
- private:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
 };
 
-#endif
+#endif // GUARD__FREYJA_PLUGIN_MD5_H_
