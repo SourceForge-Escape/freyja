@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Md5Model mesh import.
+ - Selected faces won't take more weight painting to help unsteady hands.  =)
  - Cheesy XML skeleton/mesh import path persistance.
  - Ja export disabled in libfreyja as it is now obsolete for next release.
  - Default to skip material 0 in XML meshes to avoid confusing users.
@@ -13,6 +15,7 @@
  - Changes to skeleton transform for scaling.
  - Added back Transform mode for skeleton via transforms box.
  - Md5Model plugin updated to use the 0.9.5 ABI.  ( Upgraded from 0.9.1 legacy )
+ - MSTL String find_last_of().
  - MSTL change ParseStringLiteral() caller no longer needs to deallocate string.
  - Paint tool using toolbar weight variable.
  - Paint tool toobar item use.

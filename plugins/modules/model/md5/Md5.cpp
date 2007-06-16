@@ -34,7 +34,7 @@ using namespace hel;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Md5::Md5() :
+Md5Model::Md5Model() :
 	mVersion(10),
 	mCommandLine(),
 	mNumJoints(0),
@@ -45,7 +45,7 @@ Md5::Md5() :
 }
 
 
-Md5::~Md5()
+Md5Model::~Md5Model()
 {
 	if (mJoints)
 		delete [] mJoints;
@@ -59,22 +59,21 @@ Md5::~Md5()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-hel::Quat Md5::DecodeQuaternion(float qx, float qy, float qz)
+void Md5Model::DecodeUnitQuaternion(hel::Quat &q)
 {
 	// Md5 stores unit quaternions without the W componet.
-	float qw = 0.0f;
-	float tmp = 1.0f - (qx*qx) - (qy*qy) - (qz*qz);
+	float tmp = 1.0f - (q.mX*q.mX) - (q.mY*q.mY) - (q.mZ*q.mZ);
+
+	q.mW = 0.0f;
 
 	if (tmp >= 0.0f)
 	{
-		qw = -sqrtf( tmp );
+		q.mW = -sqrtf( tmp );
 	}
-
-	return Quat(qw, qx, qy, qz);
 }
 
 
-hel::Vec3 Md5::EncodeQuaternion(const hel::Quat &q)
+hel::Vec3 Md5Model::EncodeQuaternion(const hel::Quat &q)
 {
 	// Md5 stores unit quaternions without the W componet.
 	Quat n = q;
@@ -84,7 +83,7 @@ hel::Vec3 Md5::EncodeQuaternion(const hel::Quat &q)
 }
 
 
-bool Md5::IsMd5Model(const char *filename)
+bool Md5Model::IsMd5Model(const char *filename)
 {
 	SystemIO::TextFileReader r;
 
@@ -100,7 +99,7 @@ bool Md5::IsMd5Model(const char *filename)
 }
 
 
-bool Md5::SaveModel(const char *filename)
+bool Md5Model::SaveModel(const char *filename)
 {
 	SystemIO::TextFileWriter w;
 
@@ -216,7 +215,7 @@ bool Md5::SaveModel(const char *filename)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool Md5::LoadModel(const char *filename)
+bool Md5Model::LoadModel(const char *filename)
 {
 	SystemIO::TextFileReader r;
 
@@ -295,27 +294,31 @@ bool Md5::LoadModel(const char *filename)
 			
 		for (unsigned int i = 0; i < mNumJoints; ++i)
 		{
-			mJoints[i].name = r.ParseStringLiteral();
-			mJoints[i].parent = r.ParseInteger();
+			Md5Joint &joint = mJoints[i];
+
+			joint.name = r.ParseStringLiteral();
+			joint.parent = r.ParseInteger();
 
 			/* translate X Y Z */
 			if (!r.ParseMatchingSymbol("("))
 				return false;
 
-			mJoints[i].translate.mX = r.ParseFloat();
-			mJoints[i].translate.mY = r.ParseFloat();
-			mJoints[i].translate.mZ = r.ParseFloat();
+			joint.translate.mX = r.ParseFloat();
+			joint.translate.mY = r.ParseFloat();
+			joint.translate.mZ = r.ParseFloat();
 
 			if (!r.ParseMatchingSymbol(")"))
 				return false;
 
-
 			/* rotate X Y Z */
 			if (!r.ParseMatchingSymbol("("))
 				return false;
+			
+			joint.rotate.mX = r.ParseFloat();
+			joint.rotate.mY = r.ParseFloat();
+			joint.rotate.mZ = r.ParseFloat();
 
-			mJoints[i].rotate =
-			DecodeQuaternion(r.ParseFloat(), r.ParseFloat(), r.ParseFloat());
+			DecodeUnitQuaternion(joint.rotate);
 
 			if (!r.ParseMatchingSymbol(")"))
 				return false;
@@ -340,12 +343,24 @@ bool Md5::LoadModel(const char *filename)
 				return false;
 
 			// FIXME: // meshes: MESHNAME?
-			mMeshes[i].name.Set("mesh-%i", i);
 
 			if (!r.ParseMatchingSymbol("shader"))
 				return false;
 
 			mMeshes[i].shader = r.ParseStringLiteral();
+
+			// Get mesh name from shader
+			{
+				int j = mMeshes[i].shader.find_last_of('/');
+				if (String::npos != j)
+				{
+					mMeshes[i].name = ( mMeshes[i].shader.c_str() )+j+1;
+				}
+				else
+				{
+					mMeshes[i].name.Set("mesh-%i", i);
+				}
+			}
 
 			if (!r.ParseMatchingSymbol("numverts"))
 				return false;
@@ -412,16 +427,18 @@ bool Md5::LoadModel(const char *filename)
 				if (!r.ParseMatchingSymbol("weight"))
 					return false;
 
-				mMeshes[i].weights[j].index = r.ParseInteger();
-				mMeshes[i].weights[j].joint = r.ParseInteger();
-				mMeshes[i].weights[j].weight = r.ParseFloat();
+				Md5Weight &w = mMeshes[i].weights[j];
+
+				w.index = r.ParseInteger();
+				w.joint = r.ParseInteger();
+				w.weight = r.ParseFloat();
 
 				if (!r.ParseMatchingSymbol("("))
 					return false;
 
-				mMeshes[i].weights[j].pos.mX = r.ParseFloat();
-				mMeshes[i].weights[j].pos.mY = r.ParseFloat();
-				mMeshes[i].weights[j].pos.mZ = r.ParseFloat();
+				w.pos.mX = r.ParseFloat();
+				w.pos.mY = r.ParseFloat();
+				w.pos.mZ = r.ParseFloat();
 
 				if (!r.ParseMatchingSymbol(")"))
 					return false;
@@ -501,7 +518,7 @@ int import_model(char *filename)
 
 int freyja_model__md5_check(char *filename)
 {
-	Md5 md5;
+	Md5Model md5;
 
 	if (md5.IsMd5Model(filename) == true)
 		return 0; /* 0 is no error */
@@ -513,7 +530,7 @@ int freyja_model__md5_check(char *filename)
 int freyja_model__md5_import(char *filename)
 {
 	const vec_t scale = 0.7f;
-	Md5 md5;
+	Md5Model md5;
 
 	if (md5.LoadModel(filename) == false)
 		return -1;
@@ -530,6 +547,7 @@ int freyja_model__md5_import(char *filename)
 
 		index_t meshIdx = freyjaMeshCreate();
 		freyjaModelAddMesh(modelIdx, meshIdx);
+		freyjaMeshName1s( meshIdx, mesh.name.c_str() );
 		
 		// Freyja 0.9.5 wants a non-deformed mesh as input, since
 		// it will later deform the mesh as needed depending on mode.
@@ -543,9 +561,8 @@ int freyja_model__md5_import(char *filename)
 				Md5Weight &weight = mesh.weights[ vertex.weight + k ];
 				Md5Joint &joint = md5.mJoints[ weight.joint ];
 
-				Vec3 tmp = joint.rotate.Rotate( weight.pos );		
-				tmp += joint.translate;
-				p += tmp * weight.weight;
+				p += ( joint.rotate.Rotate( weight.pos ) + 
+					   joint.translate ) * weight.weight;
 
 				freyjaMeshVertexWeight(meshIdx, j, weight.joint, weight.weight);
 			}
@@ -681,7 +698,7 @@ int freyja_model__md5_export(char *filename)
 {
 #if 0 // 0.9.1 version
 	const vec_t scale = (1.0 / 0.3);
-	Md5 md5;
+	Md5Model md5;
 	int i, m, v, t, j, count;
 	vec4_t wxyz;
 	vec3_t xyz;

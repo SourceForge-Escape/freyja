@@ -1086,6 +1086,26 @@ bool FreyjaControl::UnserializeMesh(const char *filename)
 			Material *mat = freyjaGetMaterialClass(idx);
 			mat->Unserialize(child);
 		}
+		else if (s == "weights")
+		{
+			TiXmlElement *child2 = child; 
+			for( ; child2; child2 = child2->NextSiblingElement() )
+			{
+				const char *key = child2->Value();
+				//printf("-- vertexweight '%s'\n", child2->Value());
+				
+				if ( !strncmp("vertexweight", key, 12) )
+				{
+					int v, b;
+					float w;
+					child2->QueryIntAttribute("vertexindex", &v);
+					child2->QueryIntAttribute("boneindex", &b);
+					child2->QueryFloatAttribute("weight", &w);
+					
+					freyjaMeshVertexWeight(GetSelectedMesh(), v, b, w);
+				}
+			}
+		}
 	}
 
 	mMeshXML.AddFilename(filename);
@@ -5339,7 +5359,8 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 				{
 					Face *f = m->GetFace(face);
 
-					if (f)
+					// Ignore already selected faces to help unsteady hands
+					if (f && !(f->mFlags & Face::fSelected) )
 					{
 						// Ignore this on next pass.
 						//f->mFlags |= Face::fHidden;
