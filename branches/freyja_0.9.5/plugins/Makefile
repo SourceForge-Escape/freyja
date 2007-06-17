@@ -22,8 +22,6 @@ release:
 
 win32:
 	$(MAKE) foreach RULE="win32" 
-	for i in ../bin/plugins/model/*/win32; do cp $$i/*.dll ../bin/plugins/model/win32/; done
-
 
 osx:
 	$(MAKE) foreach RULE="osx" 
