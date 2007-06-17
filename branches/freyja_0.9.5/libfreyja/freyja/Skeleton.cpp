@@ -469,6 +469,7 @@ void freyjaSkeletonTransform(index_t skeleton,
 		case fRotateAboutOrigin:
 		case fRotate:
 			freyjaBoneTransform(skel->GetRoot(), action, x, y, z);
+			freyjaBoneUpdateBindPose(skel->GetRoot());			
 			break;
 
 		default:
@@ -478,6 +479,7 @@ void freyjaSkeletonTransform(index_t skeleton,
 				{
 					idx = skel->GetBones()[i];
 					freyjaBoneTransform(idx, action, x, y, z);
+					freyjaBoneUpdateBindPose(idx);			
 				}
 			}
 		}

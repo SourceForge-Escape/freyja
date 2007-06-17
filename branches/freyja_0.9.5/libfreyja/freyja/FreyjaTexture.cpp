@@ -150,7 +150,7 @@ index_t freyjaTextureCreateFilename(const char *filename)
 	FreyjaImage image;
 	index_t uid;
 	byte *pixmap;
-	freyja_colormode_t colorMode;
+	freyja_colormode_t colorMode = RGBA_32;
 	uint32 byteDepth;
 
 

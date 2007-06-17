@@ -193,12 +193,12 @@ void freyja_init_application_plugins(const char *dir)
 
 void freyja_handle_application_window_close()
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	// There is some bug with some Gtk+ builds that allow this function
 	// to be called again before this exits.  
 	// Also relates to the Cancel doesn't cancel bug.
-	FreyjaControl::mInstance->Shutdown();
+	FreyjaControl::GetInstance()->Shutdown();
 }
 
 
@@ -333,7 +333,7 @@ void freyja_handle_command2i(int event, int command)
 
 void freyja_handle_event1u(int event, unsigned int value)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	// Removed legacy uint event codepath, kept old menu event fallback
 	if (!ResourceEvent::listen(event - ePluginEventBase, value))
@@ -347,7 +347,7 @@ void freyja_handle_event1u(int event, unsigned int value)
 
 void freyja_handle_event1f(int event, float value)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	//if (!FreyjaControl::mInstance->event(event, value))
 	if (!ResourceEvent::listen(event - ePluginEventBase, value))
@@ -367,7 +367,7 @@ void freyja_handle_gldisplay()
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaRender Singleton not allocated");
+	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaRender Singleton not allocated");
 	FreyjaRender::mInstance->ResizeContext(width, height);
 }
 
@@ -423,7 +423,7 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 
 void freyja_handle_command(int command)
 {
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
+	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
 
 	if (!ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
 		freyja_print("!Event(%d): Unhandled event.", command);
@@ -441,7 +441,7 @@ void polymap_update_question()
 {
 	if (mgtk::ExecuteConfirmationDialog("PolyMapDialog"))
 	{
-		Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+		Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 		m->ConvertAllFacesToTexCoordPloymapping();
 	}
 }
@@ -461,7 +461,7 @@ void eNoImplementation(ResourceEvent *e)
 
 void eMeshUnselectFaces()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if ( m )
 	{
@@ -477,7 +477,7 @@ void eMeshUnselectFaces()
 
 void eMeshUnselectVertices()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if ( m )
 	{
@@ -493,13 +493,13 @@ void eMeshUnselectVertices()
 
 void eSetSelectedViewport(unsigned int value)
 {
-	FreyjaControl::mInstance->SetSelectedViewport(value);
+	FreyjaControl::GetInstance()->SetSelectedViewport(value);
 }
 
 
 void eSelectedFacesGenerateNormals()
 {
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -509,7 +509,7 @@ void eSelectedFacesGenerateNormals()
 
 void eSelectedFacesFlipNormals()
 {
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -520,7 +520,7 @@ void eSelectedFacesFlipNormals()
 
 void eSelectedFacesDelete()
 {
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -538,7 +538,7 @@ void eSmoothingGroupsDialog()
 
 void eSmooth(unsigned int group, unsigned int value)
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -547,13 +547,13 @@ void eSmooth(unsigned int group, unsigned int value)
 
 		if (value)
 		{
-			FreyjaControl::mInstance->mGroupBitmap |= (1<<group);
-			m->SetGroupsFaceSelected(FreyjaControl::mInstance->mGroupBitmap);
+			FreyjaControl::GetInstance()->mGroupBitmap |= (1<<group);
+			m->SetGroupsFaceSelected(FreyjaControl::GetInstance()->mGroupBitmap);
 		}
 		else
 		{
-			m->ClearGroupsFaceSelected(FreyjaControl::mInstance->mGroupBitmap);
-			FreyjaControl::mInstance->mGroupBitmap ^= (1<<group);
+			m->ClearGroupsFaceSelected(FreyjaControl::GetInstance()->mGroupBitmap);
+			FreyjaControl::GetInstance()->mGroupBitmap ^= (1<<group);
 		}
 
 		freyja_event_gl_refresh();
@@ -563,11 +563,11 @@ void eSmooth(unsigned int group, unsigned int value)
 
 void eGroupClear()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
-		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+		uint32 group = FreyjaControl::GetInstance()->mGroupBitmap;
 
 		if (group > 24)
 		{
@@ -584,13 +584,13 @@ void eGroupClear()
 
 void eSetSelectedFacesAlpha()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
 		freyja_print("Selected faces alpha flag enabled.");
 		m->SetFlagForSelectedFaces(Face::fAlpha);
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 	else
 	{
@@ -601,13 +601,13 @@ void eSetSelectedFacesAlpha()
 
 void eClearSelectedFacesAlpha()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
 		freyja_print("Selected faces alpha flag enabled.");
 		m->ClearFlagForSelectedFaces(Face::fAlpha);
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 	else
 	{
@@ -618,11 +618,11 @@ void eClearSelectedFacesAlpha()
 
 void eGroupAssign()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
-		uint32 group = FreyjaControl::mInstance->mGroupBitmap;
+		uint32 group = FreyjaControl::GetInstance()->mGroupBitmap;
 
 		if (group > 24)
 		{
@@ -649,11 +649,11 @@ void eWeight(vec_t w)
 
 void eAssignWeight()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
-		index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+		index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 		m->SetWeightSelectedVertices(bone, gWeight);
 		freyja_print("Selected vertices set to bone %i weighting to %f.", bone, gWeight);
 	}
@@ -661,11 +661,11 @@ void eAssignWeight()
 
 void eClearWeight()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
-		index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+		index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 		m->RemoveWeightSelectedVertices(bone);
 		freyja_print("Selected vertices removing bone %i weighting...", bone);
 	}
@@ -674,7 +674,7 @@ void eClearWeight()
 
 void eBoneRefreshBindPose()
 {
-	index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (b) b->UpdateBindPose();
 }
@@ -682,7 +682,7 @@ void eBoneRefreshBindPose()
 
 void eMirrorMeshX()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -695,7 +695,7 @@ void eMirrorMeshX()
 
 void eMirrorMeshY()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -709,7 +709,7 @@ void eMirrorMeshY()
 
 void eMirrorMeshZ()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -723,7 +723,7 @@ void eMirrorMeshZ()
 
 void eMirrorFacesX()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -738,7 +738,7 @@ void eMirrorFacesX()
 
 void eMirrorFacesY()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -753,7 +753,7 @@ void eMirrorFacesY()
 
 void eMirrorFacesZ()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -775,7 +775,7 @@ void eSnapWeldVertsDist(vec_t d)
 
 void eSnapWeldVerts()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -785,7 +785,7 @@ void eSnapWeldVerts()
 
 void eCleanupVertices()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -810,7 +810,7 @@ void eGenerateCone()
 	
 		hel::Vec3 v;
 		freyjaGenerateConeMesh(v.mVec, height, count);
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
@@ -830,7 +830,7 @@ void eGenerateCylinder()
 	
 		hel::Vec3 v;
 		freyjaGenerateCylinderMesh(v.mVec, height, count, segments);
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
@@ -849,7 +849,7 @@ void eGenerateTube()
 
 		hel::Vec3 v;
 		freyjaGenerateTubeMesh(v.mVec, height, count, segments);
-		FreyjaControl::mInstance->Dirty();		
+		FreyjaControl::GetInstance()->Dirty();		
 	}
 }
 
@@ -867,8 +867,8 @@ void eGenerateSphere()
 
 		hel::Vec3 v;
 		freyjaGenerateSphereMesh(v.mVec, radius * 2.0f, count, count);
-		//FreyjaControl::mInstance->SetSelectedMesh(mesh);
-		FreyjaControl::mInstance->Dirty();
+		//FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
@@ -887,8 +887,8 @@ void eGenerateCube()
 
 		hel::Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
 		index_t mesh = freyjaMeshCreateCube(v.mVec, size);
-		FreyjaControl::mInstance->SetSelectedMesh(mesh);
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
@@ -909,8 +909,8 @@ void eGeneratePlane()
 		size *= 4;
 		hel::Vec3 v(size * -0.5f, 0.3f, size * -0.5f);
 		index_t mesh = freyjaMeshCreateSheet(v.mVec, size, rows, cols);
-		FreyjaControl::mInstance->SetSelectedMesh(mesh);
-		FreyjaControl::mInstance->Dirty();		
+		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		FreyjaControl::GetInstance()->Dirty();		
 	}
 }
 
@@ -927,8 +927,8 @@ void eGenerateCircle()
 		hel::Vec3 v(0.0f, 0.2f, 0.0f);
 
 		index_t mesh = freyjaMeshCreateCircle(v.mVec, r, count);
-		FreyjaControl::mInstance->SetSelectedMesh(mesh);
-		FreyjaControl::mInstance->Dirty();		
+		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		FreyjaControl::GetInstance()->Dirty();		
 	}
 }
 
@@ -946,104 +946,104 @@ void eGenerateRing()
 		hel::Vec3 v(0.0f, 0.2f, 0.0f);
 
 		index_t mesh = freyjaMeshCreateRing(v.mVec, r, count, rings+1);
-		FreyjaControl::mInstance->SetSelectedMesh(mesh);
-		FreyjaControl::mInstance->Dirty();		
+		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		FreyjaControl::GetInstance()->Dirty();		
 	}
 }
 
 
 void eMeshTesselate()
 {
-	freyjaMeshTesselateTriangles(FreyjaControl::mInstance->GetSelectedMesh());
-	FreyjaControl::mInstance->Dirty();
+	freyjaMeshTesselateTriangles(FreyjaControl::GetInstance()->GetSelectedMesh());
+	FreyjaControl::GetInstance()->Dirty();
 }
 
 
 void eMeshTexcoordSpherical()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
 		m->UVMapSelectedFaces_Spherical();
 		polymap_update_question();
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
 
 void eMeshTexcoordCylindrical()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
 		m->UVMapSelectedFaces_Cylindrical();
 		polymap_update_question();
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
 
 void eMeshTexcoordPlaneProj()
 {
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
 		m->UVMapSelectedFaces_Plane();
 		polymap_update_question();
-		FreyjaControl::mInstance->Dirty();
+		FreyjaControl::GetInstance()->Dirty();
 	}
 }
 
 
 void eMeshGenerateNormals()
 {
-	freyjaMeshGenerateVertexNormals(FreyjaControl::mInstance->GetSelectedMesh());
+	freyjaMeshGenerateVertexNormals(FreyjaControl::GetInstance()->GetSelectedMesh());
 	freyja_event_gl_refresh();
-	FreyjaControl::mInstance->Dirty();
+	FreyjaControl::GetInstance()->Dirty();
 }
 
 // This should be moved back into control with a -W/Int prefix
 void eMoveObject()
 {
-	FreyjaControl::mInstance->EvMoveObject(1);
+	FreyjaControl::GetInstance()->EvMoveObject(1);
 }
 
 void eRotateObject()
 {
-	FreyjaControl::mInstance->EvRotateObject(1);
+	FreyjaControl::GetInstance()->EvRotateObject(1);
 }	
 
 void eScaleObject()
 {
-	FreyjaControl::mInstance->EvScaleObject(1);
+	FreyjaControl::GetInstance()->EvScaleObject(1);
 }	
 
 void eSelect()
 {
-	FreyjaControl::mInstance->EvSelectObject(1);
+	FreyjaControl::GetInstance()->EvSelectObject(1);
 }
 
 void eUnselect()
 {
-	FreyjaControl::mInstance->EvUnselectObject(1);
+	FreyjaControl::GetInstance()->EvUnselectObject(1);
 }		
 
 
 void eBoneSelect()
 {
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
-	FreyjaControl::mInstance->SetActionMode(FreyjaControl::aSelect);
+	FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
+	FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
 	freyja_print("Select bone...");
 }
 
 
 void eBoneNew()
 {
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tBone);
-	FreyjaControl::mInstance->CreateObject();
+	FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
+	FreyjaControl::GetInstance()->CreateObject();
 	//freyja_print("Select new child bone placement directly...");
 	//mEventMode = BONE_ADD_MODE;
-	FreyjaControl::mInstance->Dirty();
+	FreyjaControl::GetInstance()->Dirty();
 }
 
 
@@ -1051,8 +1051,8 @@ void eExtrude()
 {
 	hel::Vec3 v = FreyjaRender::mTestRay.mDir;
 	v *= -8.0f;
-	freyjaMeshPolygonExtrudeQuad1f(FreyjaControl::mInstance->GetSelectedMesh(), 
-								   FreyjaControl::mInstance->GetSelectedFace(),
+	freyjaMeshPolygonExtrudeQuad1f(FreyjaControl::GetInstance()->GetSelectedMesh(), 
+								   FreyjaControl::GetInstance()->GetSelectedFace(),
 								   v.mVec);
 #if 0
 	// Currently we don't support this 
@@ -1073,15 +1073,15 @@ void eExtrude()
 	}
 #endif
 
-	FreyjaControl::mInstance->Dirty();
+	FreyjaControl::GetInstance()->Dirty();
 }
 
 void eMeshFlipNormals()
 {
-	freyjaMeshNormalFlip(FreyjaControl::mInstance->GetSelectedMesh());
+	freyjaMeshNormalFlip(FreyjaControl::GetInstance()->GetSelectedMesh());
 	freyja_print("Flipping normals for mesh[%i]", 
-				 FreyjaControl::mInstance->GetSelectedMesh());
-	FreyjaControl::mInstance->Dirty();
+				 FreyjaControl::GetInstance()->GetSelectedMesh());
+	FreyjaControl::GetInstance()->Dirty();
 }
 
 
@@ -1103,31 +1103,31 @@ void eAboutDialog()
 
 void eAnimationNext()
 {
-	FreyjaControl::mInstance->SetSelectedAnimation(FreyjaControl::mInstance->GetSelectedAnimation() + 1);
+	FreyjaControl::GetInstance()->SetSelectedAnimation(FreyjaControl::GetInstance()->GetSelectedAnimation() + 1);
 	freyja_print("Animation Track[%i].", 
-				 FreyjaControl::mInstance->GetSelectedAnimation());
+				 FreyjaControl::GetInstance()->GetSelectedAnimation());
 }
 
 void eAnimationPrev()
 {
-	if (FreyjaControl::mInstance->GetSelectedAnimation())
-		FreyjaControl::mInstance->SetSelectedAnimation(FreyjaControl::mInstance->GetSelectedAnimation() - 1);
+	if (FreyjaControl::GetInstance()->GetSelectedAnimation())
+		FreyjaControl::GetInstance()->SetSelectedAnimation(FreyjaControl::GetInstance()->GetSelectedAnimation() - 1);
 	else
-		FreyjaControl::mInstance->SetSelectedAnimation(0);
+		FreyjaControl::GetInstance()->SetSelectedAnimation(0);
 	
 	freyja_print("Animation Track[%i].", 
-				 FreyjaControl::mInstance->GetSelectedAnimation());
+				 FreyjaControl::GetInstance()->GetSelectedAnimation());
 }
 
 
 void eLightPos(uint32 i, vec_t value)
 {
-	uint32 light = FreyjaControl::mInstance->GetSelectedLight();
+	uint32 light = FreyjaControl::GetInstance()->GetSelectedLight();
 	vec3_t pos;
 	freyjaGetLightPosition4v(light, pos);
 	pos[i] = value;
 	freyjaLightPosition4v(light, pos);
-	FreyjaControl::mInstance->Dirty();	
+	FreyjaControl::GetInstance()->Dirty();	
 }
 
 
@@ -1151,9 +1151,9 @@ void eLightPosZ(vec_t value)
 
 void ePolygonSize(uint32 value)
 {
-	FreyjaControl::mInstance->SetFaceEdgeCount(value);
+	FreyjaControl::GetInstance()->SetFaceEdgeCount(value);
 	freyja_print("Polygons creation using %i sides", 
-				 FreyjaControl::mInstance->GetFaceEdgeCount());
+				 FreyjaControl::GetInstance()->GetFaceEdgeCount());
 }
 
 
@@ -1186,7 +1186,7 @@ void eTestAssertMsgBox()
 
 void eBoneMetadataText(char *text)
 {
-	index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (text && b)
 	{
@@ -1197,7 +1197,7 @@ void eBoneMetadataText(char *text)
 
 void eBoneMetadata()
 {
-	index_t bone = FreyjaControl::mInstance->GetSelectedBone();
+	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (b)
 	{
@@ -1342,8 +1342,8 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
  
 	// Class listeners
-	FREYJA_ASSERTMSG(FreyjaControl::mInstance != NULL, "FreyjaControl wasn't instanced before method listeners were attached.");
-	FreyjaControl::mInstance->AttachMethodListeners();
+	FREYJA_ASSERTMSG(FreyjaControl::GetInstance() != NULL, "FreyjaControl wasn't instanced before method listeners were attached.");
+	FreyjaControl::GetInstance()->AttachMethodListeners();
 	FreyjaRender::AttachMethodListeners();
 
 	// Non-class listeners
@@ -1430,7 +1430,7 @@ void freyja_handle_resource_start()
 		freyja_install_user();
 
 	/* Build the user interface from lisp, and load user preferences */
-	FreyjaControl::mInstance->Init();
+	FreyjaControl::GetInstance()->Init();
 
 	/* FreyjaAppPlugin prototype testing... */
 	uint32 i, n = mgtk::ResourcePlugin::mPlugins.size();
@@ -1448,13 +1448,13 @@ void freyja_handle_resource_start()
 
 	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);
-	FreyjaControl::mInstance->eModeModel();
+	FreyjaControl::GetInstance()->EvModeModel();
 
 	mgtk_option_menu_value_set(eTransformMenu, 1);
-	FreyjaControl::mInstance->SetObjectMode(FreyjaControl::tMesh);
+	FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tMesh);
 
 	mgtk_option_menu_value_set(eObjectMenu, 0);
-	FreyjaControl::mInstance->SetActionMode(FreyjaControl::aSelect);
+	FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
 
 	/* Set init window title, log welcome, and refresh OpenGL context */
 	freyja_set_main_window_title(BUILD_NAME);
@@ -1468,7 +1468,7 @@ void freyja_handle_resource_start()
 
 void freyja_append_eventid(char *symbol, int eventid)
 {
-	FreyjaControl::mInstance->GetResource().RegisterInt(symbol, eventid);
+	FreyjaControl::GetInstance()->GetResource().RegisterInt(symbol, eventid);
 }
 
 
@@ -1713,18 +1713,18 @@ void freyja_install_user()
 
 void freyja_handle_motion(int x, int y)
 {
-	if (FreyjaControl::mInstance)
+	if (FreyjaControl::GetInstance())
 	{
-		FreyjaControl::mInstance->MotionEvent(x, y);
+		FreyjaControl::GetInstance()->MotionEvent(x, y);
 	}
 }
 
 
 void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 {
-	if (FreyjaControl::mInstance)
+	if (FreyjaControl::GetInstance())
 	{
-		FreyjaControl::mInstance->MouseEvent(button, state, mod, x, y);
+		FreyjaControl::GetInstance()->MouseEvent(button, state, mod, x, y);
 	}
 }
 
@@ -1755,9 +1755,9 @@ void freyja_print(char *format, ...)
 
 void freyja_event_shutdown()
 {
-	if (FreyjaControl::mInstance)
+	if (FreyjaControl::GetInstance())
 	{
-		delete FreyjaControl::mInstance;
+		delete FreyjaControl::GetInstance();
 	}
 
 	freyja_print("!Thanks for using %s", PROGRAM_NAME);
@@ -1976,7 +1976,7 @@ int main(int argc, char *argv[])
 	/* Load file passed by command line args, CLI parser isn't really needed. */
 	if (argc > 1 && argv[1][0] != '-')
 	{
-		FreyjaControl::mInstance->LoadModel(argv[1]);
+		FreyjaControl::GetInstance()->LoadModel(argv[1]);
 	}
 
 	mgtk_start();

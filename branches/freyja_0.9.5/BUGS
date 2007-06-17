@@ -87,6 +87,12 @@
 	- Sometimes typing space and enter updates.. weird Gtk+ events
 
 
+Regression notes
+---------------------------------------------------
+
+* Modal dialogs fail to cancel.
+	- Likely caused by build optimazations.
+
 
 
 

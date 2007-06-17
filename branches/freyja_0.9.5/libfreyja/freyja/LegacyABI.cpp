@@ -1885,7 +1885,7 @@ void freyjaGetVertexTexcoord2fv(index_t vertexIndex, vec2_t uv)
 
 		if (v)
 		{
-			vec3_t uvw;
+			vec3_t uvw = {0.0f, 0.0f, 0.0f};
 			mesh->GetTexCoord(v->mTexCoordIndex, uvw);
 			uv[0] = uvw[0];
 			uv[1] = uvw[1];
@@ -2098,47 +2098,6 @@ Vector<unsigned int> *freyjaFindVerticesByBoundingVolume(hel::BoundingVolume &vo
 		if (vol.IsPointInside(xyz))
 		{
 			list->pushBack(index);
-		}
-
-		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);
-	}
-
-	freyjaCriticalSectionUnlock(lock);
-	
-	return list;
-}
-
-
-Vector<unsigned int> *freyjaFindVerticesInBox(vec3_t bbox[2],
-											  Vector<unsigned int> &vertices)
-{
-	Vector<unsigned int> *list;
-	unsigned int i, count, index;
-	vec3_t xyz;
-
-
-	index_t lock = freyjaCriticalSectionLock();
-
-	list = new Vector<unsigned int>();
-
-	/* Using freyja iterator interface */
-	for (i = 0; i < count; ++i)
-	{
-		if (INDEX_INVALID == freyjaIterator(FREYJA_VERTEX, vertices[i]))
-			continue;
-
-		index = freyjaIterator(FREYJA_VERTEX, FREYJA_CURRENT);
-		freyjaGetVertexXYZ3fv(index, xyz);
-		
-		if (xyz[0] >= bbox[0][0] && xyz[0] <= bbox[1][0])
-		{
-			if (xyz[1] >= bbox[0][1] && xyz[1] <= bbox[1][1])
-			{
-				if (xyz[0] >= bbox[0][2] && xyz[0] <= bbox[1][2])
-				{
-					list->pushBack(index);
-				}
-			}
 		}
 
 		freyjaIterator(FREYJA_VERTEX, FREYJA_NEXT);

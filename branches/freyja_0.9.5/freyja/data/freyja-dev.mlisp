@@ -62,7 +62,10 @@
 			(menu_seperator)
 
 			(menu_item "_Save Model"	eSaveFileModel	"C-s"	"gtk-save")
-			(filechoosermenu_item "Save Model _As..."	"Save Model..."	"S-C-s"	eSaveModel	"mode=save"	"gtk-save-as") ;confirm-overwrite=true,
+		
+			(filechoosermenu_item "Save Model _As..."       "Save Model..." "S-C-s" eSaveModel      "mode=save"     "gtk-save-as") ;confirm-overwrite=true,
+	
+			;(menu_item "Save Model _As..."	eSaveModel	"S-C-s"	"gtk-save-as")
 			(menu_item "_Revert Model"		eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
@@ -75,8 +78,8 @@
 
 			(menu_seperator)
 
-			(menu_item "_Close"	eCloseFile		"C-w"	"gtk-close")
-			(menu_item "_Quit"	eShutdown			"C-q"	"gtk-quit"))
+			(menu_item "_Close"	eCloseFile	"C-w"	"gtk-close")
+			(menu_item "_Quit"	eShutdown	"C-q"	"gtk-quit"))
 
 
 
@@ -218,7 +221,6 @@
 
 			(submenu "_Mesh"
 
-				;(menu_item "_New"			eMeshNew)
 				(menu_item "_Select"		eMeshSelect)
 				(menu_item "_Delete"		eMeshDelete)
 				(menu_item "_Tesselate"		eMeshTesselate)
@@ -581,23 +583,6 @@
 			) ; hbox
 		) ; tab
 
-		;(tab "Paint" eNone
-		;	(hbox 0 1 0 1 1				
-
-				; Paint mode selection
-		;		(hbox 0 1 0 1 1
-		;			(optionmenu	eEvent	eNone
-		;				(menu_item	"Weight     "	ePaintWeight)
-		;				(menu_item	"Unweight   "	ePaintUnweight)
-		;				(menu_item	"Select     "	ePaintSelect)
-		;				(menu_item	"Unselect   "	ePaintUnselect)
-		;				(menu_item	"Material   "	ePaintMaterial)
-		;				;(menu_item	"Deform #1  "	ePaintDMap1)
-		;			) ; optionmenu
-		;		) ; hbox
-
-		;	) ; hbox
-		;) ; tab
 
 		) ; notebook
 	) ; hbox

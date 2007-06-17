@@ -1679,11 +1679,6 @@ void mglGetOpenGLProjectionMatrix16fv(matrix_t projection)
 
 void mglApplyMaterial(uint32 materialIndex)
 {
-	vec4_t ambient, diffuse, specular, emissive;
-	vec_t shininess;
-	uint32 flags, texture, texture2, blendSrc, blendDest;
-
-
 	if (materialIndex > freyjaGetMaterialCount())
 	{
 		materialIndex = 0;
@@ -1692,30 +1687,47 @@ void mglApplyMaterial(uint32 materialIndex)
 	// Id 0 disables ( no weird index scheme here )
 	freyja3d::OpenGL::BindFragmentGLSL(freyjaGetMaterialShader(materialIndex));
 
-	flags = freyjaGetMaterialFlags(materialIndex);
-	texture = freyjaGetMaterialTexture(materialIndex);
-	blendSrc = freyjaGetMaterialBlendSource(materialIndex);
-	blendDest = freyjaGetMaterialBlendDestination(materialIndex);
-	freyjaGetMaterialAmbient(materialIndex, ambient);
-	freyjaGetMaterialDiffuse(materialIndex, diffuse);
-	freyjaGetMaterialSpecular(materialIndex, specular);
-	freyjaGetMaterialEmissive(materialIndex, emissive);
-	shininess = freyjaGetMaterialShininess(materialIndex);
+	{
+		vec4_t ambient;
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-	glMaterialfv(GL_FRONT, GL_EMISSION, emissive);
-	glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
+		freyjaGetMaterialAmbient(materialIndex, ambient);
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	}
+
+	{
+		vec4_t diffuse;
+		freyjaGetMaterialDiffuse(materialIndex, diffuse);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+	}
+
+	{
+		vec4_t specular;
+		freyjaGetMaterialSpecular(materialIndex, specular);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	}
+
+	{
+		vec4_t emissive;
+		freyjaGetMaterialEmissive(materialIndex, emissive);
+		glMaterialfv(GL_FRONT, GL_EMISSION, emissive);
+	}
+
+	{
+		vec_t shininess = freyjaGetMaterialShininess(materialIndex);	
+		glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
+	}
+
+	uint32 flags = freyjaGetMaterialFlags(materialIndex);
 
 	// 2006.07.15 - Hey, these should use Texture class binding to
 	// make sure the array ids match in the gl texture binding
 	if (flags & fFreyjaMaterial_DetailTexture)
 	{
-		Texture::mSingleton->bindMultiTexture(texture, texture2);
+		//Texture::mSingleton->bindMultiTexture(texture, texture2);
 	}
 	else if (flags & fFreyjaMaterial_Texture) // Non-colored is ( id + 1)
 	{
+		uint32 texture = freyjaGetMaterialTexture(materialIndex);
 		glBindTexture(GL_TEXTURE_2D, texture+1);
 	}
 	else // Colored, first texture is a generated WHITE 32x32
@@ -1725,6 +1737,8 @@ void mglApplyMaterial(uint32 materialIndex)
 
 	if (flags & fFreyjaMaterial_Blending)
 	{
+		uint32 blendSrc = freyjaGetMaterialBlendSource(materialIndex);
+		uint32 blendDest = freyjaGetMaterialBlendDestination(materialIndex);
 		glBlendFunc(blendSrc, blendDest);
 		glEnable(GL_BLEND);
 	}

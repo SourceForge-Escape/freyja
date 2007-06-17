@@ -5,9 +5,9 @@
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
 
- * Paint options to 'go thru', just ignore, etc
-
  * Single joint animation shishi odoshi tutorial demo.
+
+ * Seperate renderer and UI into their own libraries.
 
  * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
 
@@ -459,6 +459,24 @@
  * Simulation package revival
 
  * DBUS support now that it's hit stable ABI at 1.0?
+
+
+ Style Guidelines Codification
+ --------------------------------------------------------------------------
+
+ * Attributes start with "m" prefix to avoid issues with "_" in some compilers.  
+
+ * Camel case method names starting with capital letter.
+
+ * Keep sections as needed in larger classes and methods alphanumeric sorted.
+
+ * Stop prototyping in header files -- make a new object before you start.
+
+ * Use comment blocks for method description.  No per method histories!
+
+ * Place inline methods over 1 line outside class at the bottom of the header.
+
+
 
 
 

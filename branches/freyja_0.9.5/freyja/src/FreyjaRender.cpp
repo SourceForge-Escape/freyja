@@ -198,7 +198,7 @@ void FreyjaRender::Rotate(int flags, float n)
 void FreyjaRender::DrawCamWindow()
 {
 	// Very hacky quick test for camera 'cursor'
-	Cursor &cursor = FreyjaControl::mInstance->GetCursor();
+	Cursor &cursor = FreyjaControl::GetInstance()->GetCursor();
 	vec4_t p;
 	freyjaGetLightPosition4v(0, p);
 
@@ -225,7 +225,7 @@ void FreyjaRender::DrawCamWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedMaterial());
+		mglApplyMaterial(FreyjaControl::GetInstance()->GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -355,7 +355,7 @@ void FreyjaRender::DrawFreeWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedMaterial());
+		mglApplyMaterial(FreyjaControl::GetInstance()->GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -497,7 +497,7 @@ void FreyjaRender::DrawIcons()
 		glPopMatrix();
 	}
 
-	FreyjaControl::mInstance->GetCursor().Display();
+	FreyjaControl::GetInstance()->GetCursor().Display();
 
 	glPopAttrib();
 }
@@ -593,7 +593,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::mInstance->GetSelectedMaterial());
+		mglApplyMaterial(FreyjaControl::GetInstance()->GetSelectedMaterial());
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
@@ -734,7 +734,7 @@ void FreyjaRender::Display()
 	}
 
 	// Mongoose 2002.02.02, Cache for use in calls from here
-	hel::Vec3 v = FreyjaControl::mInstance->GetSceneTranslation();
+	hel::Vec3 v = FreyjaControl::GetInstance()->GetSceneTranslation();
 	helCopyVec3(v.mVec, mScroll);
 	
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
@@ -835,7 +835,7 @@ void FreyjaRender::Display()
 		else
 		{
 			glPushMatrix();
-			DrawWindow(FreyjaControl::mInstance->GetSelectedView());
+			DrawWindow(FreyjaControl::GetInstance()->GetSelectedView());
 			glPopMatrix();
 		}
 		break;
@@ -1025,8 +1025,8 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	// Keyframe animation
 	if (mRenderMode & fKeyFrameAnimation)
 	{
-		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
-		uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();	
+		uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
+		uint32 k = FreyjaControl::GetInstance()->GetSelectedKeyFrame();	
 
 		// Mesh animation
 		TransformTrack &tt = m->GetTransformTrack(a);
@@ -1072,12 +1072,12 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
 	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
 
-	if (FreyjaControl::mInstance->GetSelectedMesh() == mesh)
+	if (FreyjaControl::GetInstance()->GetSelectedMesh() == mesh)
 	{
-		if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh &&
+		if (FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tMesh &&
 			FreyjaControl::mControlPoints.size() == 0)
 		{
-			Cursor &cur = FreyjaControl::mInstance->GetCursor();
+			Cursor &cur = FreyjaControl::GetInstance()->GetCursor();
 
 			switch (cur.GetMode())
 			{
@@ -1097,7 +1097,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 				
 			case Cursor::Scale:
 				// Haven't got the backend / frontend ready for this yet
-				if (FreyjaControl::mInstance->GetCursor().mSelected)
+				if (FreyjaControl::GetInstance()->GetCursor().mSelected)
 				{
 					hel::Vec3 u = cur.mScale;
 					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
@@ -1142,7 +1142,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	if ( !(mRenderMode & fWireframe) && 
 		 (mRenderMode & fFace) &&
 		 ( m->GetFlags() & Mesh::fSelected ||
-		   mesh == FreyjaControl::mInstance->GetSelectedMesh() ) )
+		   mesh == FreyjaControl::GetInstance()->GetSelectedMesh() ) )
 	{
 		const vec_t scale = 1.0002f;
 
@@ -1570,23 +1570,23 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Render meshes */
 	glPushMatrix();
 	
-	if (FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tModel)
+	if (FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tModel)
 	{
-		switch (FreyjaControl::mInstance->GetCursor().GetMode())
+		switch (FreyjaControl::GetInstance()->GetCursor().GetMode())
 		{
 		case freyja3d::Cursor::Rotation: // About model center ( matrix abuse )
-			glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[0],
+			glRotatef(FreyjaControl::GetInstance()->GetCursor().mRotate.mVec[0],
 					  1,0,0);
-			glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[1],
+			glRotatef(FreyjaControl::GetInstance()->GetCursor().mRotate.mVec[1],
 					  0,1,0);
-			glRotatef(FreyjaControl::mInstance->GetCursor().mRotate.mVec[2],
+			glRotatef(FreyjaControl::GetInstance()->GetCursor().mRotate.mVec[2],
 					  0,0,1);
 			break;
 				
 		case freyja3d::Cursor::Translation:
 			{
-				hel::Vec3 u = (FreyjaControl::mInstance->GetCursor().mPos -
-						  FreyjaControl::mInstance->GetCursor().mLastPos);
+				hel::Vec3 u = (FreyjaControl::GetInstance()->GetCursor().mPos -
+						  FreyjaControl::GetInstance()->GetCursor().mLastPos);
 
 				glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
 			}
@@ -1689,7 +1689,7 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Render 'old' skeleton, which is comprised of z,y,x rotations. */
 	if (mRenderMode & fBones)
 	{
-		FreyjaRender::mSelectedBone = FreyjaControl::mInstance->GetSelectedBone();
+		FreyjaRender::mSelectedBone = FreyjaControl::GetInstance()->GetSelectedBone();
 		RenderSkeleton(freyjaGetModelSkeleton(model), 0, 1.0f);
 	}
 
@@ -1713,7 +1713,7 @@ void FreyjaRender::RenderModel(index_t model)
 #else
 			glMultMatrixf(freyjaGetBoneBindPose16fv(i));
 #endif
-			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 			glColor3fv(FreyjaRender::mColorJointHighlight) : 
 			glColor3fv(FreyjaRender::mColorJoint);
 
@@ -1727,7 +1727,7 @@ void FreyjaRender::RenderModel(index_t model)
 				glPushMatrix();
 				glMultMatrixf( freyjaGetBoneBindPose16fv(parent) );
 
-				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 				glColor3fv(FreyjaRender::mColorBoneHighlight) : 
 				glColor3fv(FreyjaRender::mColorBone);
 
@@ -1770,7 +1770,7 @@ void FreyjaRender::RenderModel(index_t model)
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
 			glTranslatef(p.mX, p.mY, p.mZ);
 
-			(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 			glColor3fv(WHITE) : glColor3fv(DARK_RED);
 			mglDrawControlPoint();
 
@@ -1785,7 +1785,7 @@ void FreyjaRender::RenderModel(index_t model)
 				glPushMatrix();
 				glMultMatrixf( combined.mMatrix );
 
-				(FreyjaControl::mInstance->GetSelectedBone() == i) ?
+				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 				glColor3fv(WHITE) : glColor3fv(DARK_GREEN);
 
 				freyjaGetBoneTranslation3fv(i, p.mVec);
@@ -1867,7 +1867,7 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 	freyjaGetBoneRotationEuler3fv(boneIndex, rot.mVec);
 
 	/* Animation, if any... */
-	if (FreyjaControl::mInstance->GetControlScheme() == 
+	if (FreyjaControl::GetInstance()->GetControlScheme() == 
 		FreyjaControl::eScheme_Animation)
 	{
 		Bone *b = Bone::GetBone(boneIndex);
@@ -1875,8 +1875,8 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 		if (b)
 		{
 			hel::Vec3 p, o;
-			uint32 k = FreyjaControl::mInstance->GetSelectedKeyFrame();
-			uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
+			uint32 k = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
+			uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
 			BoneTrack &track = b->GetTrack(a);
 
 			if (track.GetRot((vec_t)k / track.GetRate(), o))
@@ -1960,11 +1960,11 @@ void FreyjaRender::DrawCurveWindow()
 	const vec_t s = 6.5f;
 	unsigned int width = GetWindowWidth();
 	unsigned int height = GetWindowHeight();
-	uint32 curKey = FreyjaControl::mInstance->GetSelectedKeyFrame();
+	uint32 curKey = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
 	vec_t x = 0.0f, y = 0.0f;
 	vec3_t yT = { 80.0f, 160.0f, 240.0f };
 
-	Mesh *m = Mesh::GetMesh(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (!m)
 		return;
@@ -2036,7 +2036,7 @@ void FreyjaRender::DrawCurveWindow()
 	}
 
 	// FIXME: Use cursor mode to determine which to 'modify and render here'
-	if (m && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tMesh)
+	if (m && FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tMesh)
 	{
 		vec_t time;
 		hel::Vec3 v, pos, rot, scale;
@@ -2096,15 +2096,15 @@ void FreyjaRender::DrawCurveWindow()
 
 
 	/* Skeletal animation, if any... */
-	uint32 bone = FreyjaControl::mInstance->GetSelectedBone();
+	uint32 bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone(bone);
 
 	// FIXME: Use cursor mode to determine which to 'modify and render here'
-	if (b && FreyjaControl::mInstance->GetObjectMode() == FreyjaControl::tBone)
+	if (b && FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tBone)
 	{
 		const vec_t shift = 60.0f;
 		vec_t time;
-		uint32 a = FreyjaControl::mInstance->GetSelectedAnimation();
+		uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
 		BoneTrack &track = b->GetTrack(a);
 		vec_t rateInverse = 1.0f / track.GetRate();
 		hel::Vec3 v, p;
@@ -2267,7 +2267,7 @@ void FreyjaRender::DrawUVWindow()
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mVertexPointSize);
 
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::mInstance->GetSelectedMesh());
+	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
@@ -2276,7 +2276,7 @@ void FreyjaRender::DrawUVWindow()
 		//        when we can't have mixed polymaps
 		glBegin(GL_POINTS);
 		glColor3fv(mColorVertexHighlight);
-		index_t selected = freyjaGetCurrentMaterial();//FreyjaControl::mInstance->GetSelectedTexture();
+		index_t selected = freyjaGetCurrentMaterial();//FreyjaControl::GetInstance()->GetSelectedTexture();
 
 		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
 		{

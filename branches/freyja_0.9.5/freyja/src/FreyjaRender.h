@@ -402,10 +402,6 @@ public:
 	 * Pre  :
 	 * Post : Returns options flags for view
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.09.09: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void GetRotation(vec3_t v);
@@ -414,10 +410,6 @@ public:
 	 *
 	 * Post : Return present rotation angles in Euler 
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void RenderMeshShadowVolumeSurfaces(index_t mesh);
@@ -453,10 +445,6 @@ public:
 	 * Pre  : 
 	 * Post : Get GL context window aspect ratio
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created, was public data member
 	 ------------------------------------------------------*/
 
 	unsigned int GetMode() { return mRenderMode; }
@@ -478,10 +466,6 @@ public:
 	 * Pre  : 
 	 * Post : Get GL context window height
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	const unsigned int &GetWindowWidth() { return mWidth; }
@@ -489,10 +473,6 @@ public:
 	 * Pre  : 
 	 * Post : Get GL context window width 
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	const unsigned int &GetWindowHeight() { return mHeight; }
@@ -500,10 +480,6 @@ public:
 	 * Pre  : 
 	 * Post : Get GL context window height
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	const vec_t &GetZoom() { return mZoom; }
@@ -511,10 +487,6 @@ public:
 	 * Pre  : 
 	 * Post : Get current zoom factor for the scene
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 
@@ -534,10 +506,6 @@ public:
 	 * Pre  : 
 	 * Post : Renders a frame to GL context
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void Flag(flags_t flag, bool t);
@@ -554,10 +522,6 @@ public:
 	 *
 	 * Post : Sets up GL parms for GL context
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.02:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void ResizeContext(unsigned int width, unsigned int height);
@@ -565,10 +529,6 @@ public:
 	 * Pre  : 
 	 * Post : Resizes GL context
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void SetFlag(flags_t flag);
@@ -603,10 +563,6 @@ public:
 	 * Pre  : Mode are valid view_mode(s)
 	 * Post : Sets viewing options
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void SetViewportWindow(long idx, freyja_plane_t win)
@@ -630,10 +586,6 @@ public:
 	 * Pre  : Flags are valid XYZ flags
 	 * Post : Rotate on axis n degrees
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	static vec4_t mColorBackground;
@@ -682,13 +634,6 @@ protected:
 	 * Pre  : 
 	 * Post : FreyjaRender is constructed
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.02.02:
-	 * Mongoose - No args
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 
@@ -724,10 +669,6 @@ private:
 	 * Post : Draws a quad orthogonal to GL context
 	 *        as a solid or with current texture
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void DrawGrid(freyja_plane_t plane, int w, int h, int size);
@@ -736,10 +677,6 @@ private:
 	 * Post : Renders a grid orthogal to gl context
 	 *        WxH at size spacing and adjusts for scroll
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void DrawCurveWindow();
@@ -838,10 +775,6 @@ private:
 	 * Pre  : Axis is 0 = x, 1 = y, 2 = z
 	 * Post : Rotate on axis n degrees
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2000.08.25:
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
 	void ShadowedSceneSetup();

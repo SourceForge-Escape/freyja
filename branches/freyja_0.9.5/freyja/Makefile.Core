@@ -69,6 +69,7 @@ OBJS = \
 	$(BUILD_DIR)/FreyjaOpenGL.o \
 	$(BUILD_DIR)/MaterialControl.o \
 	$(BUILD_DIR)/OpenGLPrinter.o \
+	$(BUILD_DIR)/RecentFiles.o \
 	$(BUILD_DIR)/Texture.o
 
 

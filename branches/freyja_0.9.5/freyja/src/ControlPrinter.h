@@ -34,99 +34,78 @@ class ControlPrinter : public freyja::Printer
 public:
 
 	ControlPrinter() {}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	~ControlPrinter() {}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	static void PauseLogging() { mLogging = false; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	static void ResumeLogging() { mLogging = mInitLogging; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	static bool StartLogging(const char *filename)
-	{
-		mLogging = mInitLogging = mLog.Open(filename);
-		return mInitLogging;
-	}
+	{ mLogging = mInitLogging = mLog.Open(filename); return mInitLogging; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	static void StopLogging()
-	{
-		mLogging = mInitLogging = false;
-		mLog.Close();
-	}
+	{ mLogging = mInitLogging = false;	mLog.Close(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	// WARNING: Non-local va_list only works with glibc
-	static void PrintArgs(const char *format, va_list *args)
-	{
-		const uint32 sz = 1023;
-		char buffer[sz+1];
-		vsnprintf(buffer, sz, format, *args);
-		buffer[sz] = 0;
+	static void PrintArgs(const char *format, va_list *args);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : WARNING: Non-local va_list only works with glibc
+	 *
+	 ------------------------------------------------------*/
 
-		unsigned long l = strlen(buffer);
-  
-		// Don't process empty strings.
-		if (!l || !buffer[0])
-			return;
+	static void Log(const char *format, ...);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		// Strip message off trailing carrage return.
-		if (buffer[l-1] == '\n')
-			buffer[l-1] = 0;
-
-		// Text starting with '!' is sent to stderr was well.
-		if (buffer[0] == '!')
-		{
-			buffer[0] = ' ';
-			fprintf(stderr, "%s\n", buffer);
-		}
-
-		// Print message to stdout and the status bar.
-		mgtk_event_notify_statusbar(buffer);
-
-		if (mLogging)
-		{
-			mLog.Print("> %s\n", buffer);
-			mLog.Flush();
-		}
-	}
-
-
-	static void Log(const char *format, ...)
-	{
-		if (!format || !format[0])
-			return;
-
-		const uint32 sz = 1023;
-		char buffer[sz+1];
-		va_list args;
-
-		va_start(args, format);
-		vsnprintf(buffer, sz, format, args);
-		buffer[sz] = 0;
-		va_end(args);
-
-		unsigned long l = strlen(buffer);
-  
-		// Don't process empty strings.
-		if (!l || !buffer[0])
-			return;
-
-		if (mLogging)
-		{
-			mLog.Print("> %s\n", buffer);
-			mLog.Flush();
-		}
-	}
-
-
-	virtual void ErrorArgs(char *format, va_list *args)
-	{
-		PrintArgs(format, args);
-	}
-
+	virtual void ErrorArgs(char *format, va_list *args)	
+    { PrintArgs(format, args); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	virtual void MessageArgs(char *format, va_list *args)
-	{
-		PrintArgs(format, args);
-	}
+	{ PrintArgs(format, args); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	static bool mLogging, mInitLogging;
 	static mstl::SystemIO::TextFileWriter mLog;
