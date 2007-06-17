@@ -194,7 +194,9 @@ $(BUILDDIR)/$(MODULE).so : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
 
 $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
-	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
+	@-mkdir -p $(WIN32_UI_PLUGIN_DIR)
+	@-cp $(NAME).mlisp $(WIN32_UI_PLUGIN_DIR)/
+	$(CC) -shared -o $(WIN32_UI_PLUGIN_DIR)/$(MODULE).dll \
 	-Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
 	-Wl,--export-all-symbols \
 	-Wl,--enable-auto-import \

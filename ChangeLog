@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - Win32 binary release plugins built early -- python support disabled.
  - Win32 binary release built early -- plugins will be separate.
  - Win32 makefiles reworked to build into the environment directly.
  - Backed out release builds for freyja/libmgtk due to gtk+ modal bugs.
