@@ -49,7 +49,7 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 ################################################################
 
-TARGETS=$(BUILDDIR)/$(MODULE).dll
+TARGETS=$(MODULE).dll
 
 auto: $(BUILD_SELECT)
 
@@ -63,7 +63,7 @@ debug:
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP)  \
 	LD=$(WIN32_LD)  \
-	MODULE="$(NAME)$(MAJOR_VERSION)" \
+	MODULE="$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)" \
 	EXT=".dll" \
 	CFLAGS="$(DEBUG_CFLAGS) $(WIN32_INC_DIR) -DHELEXPORTSCLASS" \
 	LD_FLAGS="$(LD_FLAGS)"
@@ -74,7 +74,7 @@ release:
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP)  \
 	LD=$(WIN32_LD)  \
-	MODULE="$(NAME)$(MAJOR_VERSION)" \
+	MODULE="$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)" \
 	EXT=".dll" \
 	CFLAGS="$(RELEASE_CFLAGS) $(WIN32_INC_DIR) -DHELEXPORTSCLASS" \
 	LD_FLAGS="$(LD_FLAGS)" 
@@ -91,9 +91,9 @@ $(DEPEND_FILE):
 	@-echo "       [done]"
 
 
-$(BUILDDIR)/$(MODULE).dll : $(OBJS)
-	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
-    -Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
+$(MODULE).dll : $(OBJS)
+	$(CC) -shared -o $(WIN32_LOCAL_LIB_DIR)/$(MODULE).dll \
+    -Wl,--out-implib=$(WIN32_LOCAL_LIB_DIR)/lib$(MODULE).a \
     -Wl,--export-all-symbols \
     -Wl,--enable-auto-import \
     -Wl,--whole-archive $(OBJS) \

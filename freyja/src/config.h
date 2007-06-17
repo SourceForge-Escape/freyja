@@ -19,6 +19,11 @@
 #ifndef GUARD__FREYJA_CONFIG_H_
 #define GUARD__FREYJA_CONFIG_H_
 
+// General /////////////////////////////////////
+
+#define ENABLE_FREYJA_ASSERTS 1
+
+
 // Hardcoded strings ///////////////////////////
 
 #define FREYJA_LOG_FILE "freyja-dev.log"

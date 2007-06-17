@@ -58,7 +58,7 @@
 #define OBS_CALL(...) freyjaPrintMessage("[%s] %s:%i, %s() Obsolete ABI call", FREYJA_API_VERSION, __FILE__, __LINE__, __func__)
 
 
-#ifdef DEBUG
+#if DEBUG || ENABLE_FREYJA_ASSERTS
 #   define FREYJA_ASSERTMSG(expr, format, ...) \
 if (!(expr)) freyjaAssertMessage(__FILE__, __LINE__, __func__, #expr, false, format, ##__VA_ARGS__)
 #   define FREYJA_INFOMSG(expr, format, ...) \

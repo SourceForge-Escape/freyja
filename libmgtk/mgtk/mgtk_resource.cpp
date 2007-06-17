@@ -1928,7 +1928,7 @@ void mgtk_accel_support(GtkWidget *item, arg_list_t *accel)
 	if (accel != 0 && accel->data != 0 && ((char *)accel->data)[0] != 0)
 	{  
 		GtkAccelGroup *accel_group;
-		unsigned int i, len, key, mod;
+		unsigned int i, len, key = 0, mod;
 		char *s = (char *)(accel->data);
 		
 		mgtk_print("Key accel %s", (char *)(accel->data));

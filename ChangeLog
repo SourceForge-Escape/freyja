@@ -6,6 +6,18 @@
 
  Kagura prealpha, 0.9.5.12
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 binary release built early -- plugins will be separate.
+ - Win32 makefiles reworked to build into the environment directly.
+ - Backed out release builds for freyja/libmgtk due to gtk+ modal bugs.
+ - Setup release builds for freyja, libfreyja, libmgtk, and libhel
+ - Asserts bulid even in release mode now.
+ - Style guidelines applied to FreyjaControl... it needs to be broken up.
+ - Minor reduction pass in FreyjaControl.
+ - Snippets tracer has improved path persistance via recentfiles abstraction.
+ - Disabled hardcoded auto pose/edit skeletal rendering. 
+ - Disabled 'default' directional light.
+ - Skeleton transform now updates bind pose itself.
+ - Skeleton transform controlled by model as well -- for now.
  - FIX Md5Model mesh import.
  - Selected faces won't take more weight painting to help unsteady hands.  =)
  - Cheesy XML skeleton/mesh import path persistance.

@@ -73,7 +73,7 @@ int32 freyjaLoadMaterialASCII(index_t materialIndex, const char *filename)
 	vec4_t specular;
 	vec4_t emissive;
 	vec_t shininess;
-	unsigned int texture;
+	unsigned int texture = 0;
 	unsigned int blend_src;
 	unsigned int blend_dest;
 	int32 mIndex = materialIndex;

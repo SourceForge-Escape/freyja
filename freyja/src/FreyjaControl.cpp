@@ -121,10 +121,12 @@ FreyjaControl::FreyjaControl() :
 	mCursor(),
 	mMaterial(),
 	mSceneTrans(0.0f, -18.0f, 0.0f),
-	mRecentFiles(),
 	mActionManager(),
-	mMeshXML("freyja-dev-recent-mesh_xml", "eRecentMeshXML"),
-	mSkeletonXML("freyja-dev-recent-skeleton_xml", "eRecentSkeletonXML"),
+
+	mRecentModel(FREYJA_RECENT_FILES, "eRecentFiles"),
+	mRecentMesh("freyja-dev-recent-mesh_xml", "eRecentMeshXML"),
+	mRecentSkeleton("freyja-dev-recent-skeleton_xml", "eRecentSkeletonXML"),
+
 	mTexture(),
 	mRender(NULL),
 	mResourceFilename("freyja-dev.mlisp"),
@@ -194,18 +196,22 @@ void FreyjaControl::Init()
 	LoadResource();
 
 	/* Load up recent files list into file menu */
-	Print("Loading %s...", FREYJA_RECENT_FILES);
-	bool b = LoadRecentFilesResource(freyja_rc_map_string(FREYJA_RECENT_FILES).GetCString());
-	Print("Loading %s %s", FREYJA_RECENT_FILES, b ? "successful" : "failed");
-
-	if ( !mMeshXML.LoadResource() )
+	Print("Loading %s...", mRecentModel.GetResourceFilename());
+	if ( !mRecentModel.LoadResource() )
 	{
-		Print("Failed to load '%s'.", mMeshXML.GetResourceFilename() );
+		Print("Failed to load '%s'.", mRecentModel.GetResourceFilename() );
 	}
 
-	if ( !mSkeletonXML.LoadResource() )
+	Print("Loading %s...", mRecentMesh.GetResourceFilename());
+	if ( !mRecentMesh.LoadResource() )
 	{
-		Print("Failed to load '%s'.", mMeshXML.GetResourceFilename() );
+		Print("Failed to load '%s'.", mRecentMesh.GetResourceFilename() );
+	}
+
+	Print("Loading %s...", mRecentSkeleton.GetResourceFilename());
+	if ( !mRecentSkeleton.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mRecentSkeleton.GetResourceFilename() );
 	}
 
 	/* Set some basic defaults */
@@ -316,9 +322,9 @@ void FreyjaControl::AttachMethodListeners()
 	// Mode events
 	EvModeAutoKeyframeId =
 	CreateListener1u("eModeAnim", &FreyjaControl::EvModeAutoKeyframe);
-	CreateListener("eModeUV", &FreyjaControl::eModeUV);
-	CreateListener("eModeModel", &FreyjaControl::eModeModel);
-	CreateListener("eModeMaterial", &FreyjaControl::eModeMaterial);
+	CreateListener("eModeUV", &FreyjaControl::EvModeUV);
+	CreateListener("eModeModel", &FreyjaControl::EvModeModel);
+	CreateListener("eModeMaterial", &FreyjaControl::EvModeMaterial);
 
 	// Iterator/Integer events
 	CreateListener1u("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
@@ -352,13 +358,13 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener1u("eSelectionByBox", &FreyjaControl::EvBoxSelectObject);
 
 	eAxisJointId = 
-	CreateListener1u("eAxisJoint", &FreyjaControl::eAxisJoint);
+	CreateListener1u("eAxisJoint", &FreyjaControl::EvAxisJoint);
 
 	eSphereJointId = 
-	CreateListener1u("eSphereJoint", &FreyjaControl::eSphereJoint);
+	CreateListener1u("eSphereJoint", &FreyjaControl::EvSphereJoint);
 
 	ePointJointId = 
-	CreateListener1u("ePointJoint", &FreyjaControl::ePointJoint);
+	CreateListener1u("ePointJoint", &FreyjaControl::EvPointJoint);
 
 	// Text events
 	CreateListener1s("eSkeletonName", &FreyjaControl::EvSkeletonName);
@@ -366,13 +372,13 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener1s("eSetBoneName", &FreyjaControl::EvSetBoneName);
 	CreateListener1s("eOpenModel", &FreyjaControl::EvOpenModel);
 
-	// 2x Text events
+	// Misc
 	CreateListener2s("eSaveModel", &FreyjaControl::EvSaveModel);
 
-	CreateListener("ePolygonSplit", &FreyjaControl::ePolygonSplit);
-	CreateListener("eSetMeshTexture", &FreyjaControl::eSetMeshTexture);
-	CreateListener("eSetFacesMaterial", &FreyjaControl::eSetFacesMaterial);
-	CreateListener("eSetPolygonTexture", &FreyjaControl::eSetPolygonTexture);
+	CreateListener("ePolygonSplit", &FreyjaControl::EvPolygonSplit);
+	CreateListener("eSetMeshTexture", &FreyjaControl::EvSetMeshTexture);
+	CreateListener("eSetFacesMaterial", &FreyjaControl::EvSetFacesMaterial);
+	CreateListener("eSetPolygonTexture", &FreyjaControl::EvSetPolygonTexture);
 
 	CreateListener("eInfo", &FreyjaControl::PrintInfo);
 	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
@@ -403,9 +409,9 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eCopy", &FreyjaControl::CopySelectedObject);
 	CreateListener("eCut", &FreyjaControl::Cut);
 
-	CreateListener("eMeshNew", &FreyjaControl::eMeshNew);
-	CreateListener("eMeshDelete", &FreyjaControl::eMeshDelete);
-	CreateListener("eMeshSelect", &FreyjaControl::eMeshSelect);
+	CreateListener("eMeshNew", &FreyjaControl::EvMeshNew);
+	CreateListener("eMeshDelete", &FreyjaControl::EvMeshDelete);
+	CreateListener("eMeshSelect", &FreyjaControl::EvMeshSelect);
 
 	CreateListener("eScale", &FreyjaControl::EvScale);
 	CreateListener("eMove", &FreyjaControl::EvMove);
@@ -413,28 +419,28 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener("eSelectVerticesByFaces", &FreyjaControl::EvSelectVerticesByFaces);
 
-	CreateListener("eViewportBack", &FreyjaControl::eViewportBack);
-	CreateListener("eViewportBottom", &FreyjaControl::eViewportBottom);
-	CreateListener("eViewportRight", &FreyjaControl::eViewportRight);
-	CreateListener("eViewportFront", &FreyjaControl::eViewportFront);
-	CreateListener("eViewportTop", &FreyjaControl::eViewportTop);
-	CreateListener("eViewportLeft", &FreyjaControl::eViewportLeft);
-	CreateListener("eViewportOrbit", &FreyjaControl::eViewportOrbit);
-	CreateListener("eViewportUV", &FreyjaControl::eViewportUV);
-	CreateListener("eViewportCurve", &FreyjaControl::eViewportCurve);
-	CreateListener("eViewportMaterial", &FreyjaControl::eViewportMaterial);
+	CreateListener("eViewportBack", &FreyjaControl::EvViewportBack);
+	CreateListener("eViewportBottom", &FreyjaControl::EvViewportBottom);
+	CreateListener("eViewportRight", &FreyjaControl::EvViewportRight);
+	CreateListener("eViewportFront", &FreyjaControl::EvViewportFront);
+	CreateListener("eViewportTop", &FreyjaControl::EvViewportTop);
+	CreateListener("eViewportLeft", &FreyjaControl::EvViewportLeft);
+	CreateListener("eViewportOrbit", &FreyjaControl::EvViewportOrbit);
+	CreateListener("eViewportUV", &FreyjaControl::EvViewportUV);
+	CreateListener("eViewportCurve", &FreyjaControl::EvViewportCurve);
+	CreateListener("eViewportMaterial", &FreyjaControl::EvViewportMaterial);
 
-	CreateListener("eTransformScene", &FreyjaControl::eTransformScene);
-	CreateListener("eTransformVertices", &FreyjaControl::eTransformVertices);
-	CreateListener("eTransformVertex", &FreyjaControl::eTransformVertex);
-	CreateListener("eTransformMeshes", &FreyjaControl::eTransformMeshes);
-	CreateListener("eTransformMesh", &FreyjaControl::eTransformMesh);
-	CreateListener("eTransformFaces", &FreyjaControl::eTransformFaces);
-	CreateListener("eTransformFace", &FreyjaControl::eTransformFace);
-	CreateListener("eTransformModel", &FreyjaControl::eTransformModel);
-	CreateListener("eTransformSkeleton", &FreyjaControl::eTransformSkeleton);
-	CreateListener("eTransformBone", &FreyjaControl::eTransformBone);
-	CreateListener("eTransformLight", &FreyjaControl::eTransformLight);
+	CreateListener("eTransformScene", &FreyjaControl::EvTransformScene);
+	CreateListener("eTransformVertices", &FreyjaControl::EvTransformVertices);
+	CreateListener("eTransformVertex", &FreyjaControl::EvTransformVertex);
+	CreateListener("eTransformMeshes", &FreyjaControl::EvTransformMeshes);
+	CreateListener("eTransformMesh", &FreyjaControl::EvTransformMesh);
+	CreateListener("eTransformFaces", &FreyjaControl::EvTransformFaces);
+	CreateListener("eTransformFace", &FreyjaControl::EvTransformFace);
+	CreateListener("eTransformModel", &FreyjaControl::EvTransformModel);
+	CreateListener("eTransformSkeleton", &FreyjaControl::EvTransformSkeleton);
+	CreateListener("eTransformBone", &FreyjaControl::EvTransformBone);
+	CreateListener("eTransformLight", &FreyjaControl::EvTransformLight);
 
 
 	CreateListener("eMeshToXML", &FreyjaControl::EvSerializeMesh);
@@ -445,10 +451,10 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener("eMeshRepack", &FreyjaControl::EvMeshRepack);
 
-	CreateListener1u("eRecentFiles", &FreyjaControl::eRecentFiles);
+	CreateListener1u("eRecentFiles", &FreyjaControl::EvRecentFiles);
 
-	CreateListener1u("eRecentMeshXML", &FreyjaControl::eRecentMeshXML);
-	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::eRecentSkeletonXML);
+	CreateListener1u("eRecentMeshXML", &FreyjaControl::EvRecentMeshXML);
+	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::EvRecentSkeletonXML);
 
 
 	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
@@ -643,109 +649,6 @@ void FreyjaControl::ActionModelModified(Action *action)
 }
 
 
-void FreyjaControl::AddRecentFilename(const char *filename)
-{
-	bool found = false;
-	uint32 idx;
-
-
-	if (!filename || !filename[0] || 
-		!SystemIO::File::DoesFileExist(filename))
-	{
-		return;
-	}
-
-	for (uint32 i = mRecentFiles.begin(), n = mRecentFiles.end(); i < n; ++i)
-	{
-		if (strcmp(filename, mRecentFiles[i].GetCString()) == 0)
-		{
-			idx = i;
-			found = true;
-			break;
-		}
-	}
-
-
-	/* 'Boost' this file to top slot, push others down one */
-	if (found)
-	{
-		// Already at top, no change to menu
-		if (idx == 0)
-			return;
-
-		String swap, old;
-		uint32 n = mRecentFiles.end();
-		swap = mRecentFiles[0];
-		mRecentFiles[0] = mRecentFiles[idx];
-
-		for (uint32 i = 1; i < n; ++i)
-		{
-			if (i > idx)
-			{
-				break;
-			}
-
-			old = mRecentFiles[i];
-			mRecentFiles[i] = swap;
-			swap = old;
-		}
-	}
-	else  /* Add new file to top slot, push others down one */
-	{
-		String swap, old;
-		String insert(filename);
-
-		// Bubble up hack
-		if (mRecentFiles.end() >= mRecentFileLimit)
-		{
-			swap = insert;
-			uint32 n = mRecentFiles.end();
-			for (uint32 i = mRecentFiles.begin(); i < n; ++i)
-			{				
-				old = mRecentFiles[i];
-				mRecentFiles[i] = swap;
-				swap = old;
-			}
-		}
-		else
-		{
-			mRecentFiles.pushBack(insert);
-		}
-	}
-
-	/* Rebuild menu in order of mRecentFiles */
-	uint32 menuId = Resource::mInstance->getIntByName("eRecentFiles");
-	freyja_remove_all_items_from_menu(menuId);
-		
-	uint32 n = mRecentFiles.end();
-	for (uint32 i = mRecentFiles.begin(); i < n; ++i)
-	{
-		mgtk_append_item_to_menu2i(menuId, mRecentFiles[i].GetCString(), menuId, i);
-	}
-
-
-	/* Save recent_files to disk */
-	SystemIO::TextFileWriter w;
-
-	if (w.Open(freyja_rc_map_string(FREYJA_RECENT_FILES).GetCString()))
-	{
-		String swap;
-		uint32 n = mRecentFiles.end();
-		for (uint32 i = mRecentFiles.begin(); i < n; ++i)
-		{
-			swap = mRecentFiles[i];
-			
-			if (!swap.Empty())
-			{
-				w.Print("%s\n", swap.GetCString());
-			}
-		}
-
-		w.Close();
-	}
-}
-
-
 void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 {
 	hel::Ray &r = mRender->mTestRay;
@@ -787,7 +690,7 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 		}
 		else
 		{
-			vec_t z;
+			vec_t z = 0.0f;
 
 			GetWorldFromScreen(x, y, z);
 
@@ -976,7 +879,7 @@ bool FreyjaControl::LoadModel(const char *filename)
 	String title;
 	title.Set("%s - Freyja", filename);
 	freyja_set_main_window_title(title.GetCString());
-	AddRecentFilename(filename);
+	mRecentModel.AddFilename(filename);
 	mCurrentlyOpenFilename = String(filename);
 	mCleared = false;
 
@@ -992,11 +895,9 @@ void FreyjaControl::EvSerializeMesh()
 	if (!m)
 		return;
 
-	mstl::String path = freyja_rc_map_string("/");
-
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Save Selected Mesh...", 
-							  path.c_str(), 1,
+							  mRecentMesh.GetPath(), 1,
 							  "Mesh XML (*.xml)", "*.xml");
 
 	if (!filename)
@@ -1024,7 +925,7 @@ void FreyjaControl::EvSerializeMesh()
 
 	if (filename &&  m->Serialize(container) && doc.SaveFile(filename))
 	{
-		mMeshXML.AddFilename(filename);
+		mRecentMesh.AddFilename(filename);
 		Print("Mesh '%s' Saved", filename);
 	}
 	else if (filename)
@@ -1097,7 +998,7 @@ bool FreyjaControl::UnserializeMesh(const char *filename)
 				if ( !strncmp("vertexweight", key, 12) )
 				{
 					int v, b;
-					float w;
+					float w = 0.0f;
 					child2->QueryIntAttribute("vertexindex", &v);
 					child2->QueryIntAttribute("boneindex", &b);
 					child2->QueryFloatAttribute("weight", &w);
@@ -1108,7 +1009,7 @@ bool FreyjaControl::UnserializeMesh(const char *filename)
 		}
 	}
 
-	mMeshXML.AddFilename(filename);
+	mRecentMesh.AddFilename(filename);
 
 	return true;
 #else
@@ -1119,25 +1020,15 @@ bool FreyjaControl::UnserializeMesh(const char *filename)
 void FreyjaControl::EvUnserializeMesh()
 {
 #if TINYXML_FOUND
-	static mstl::String path = freyja_rc_map_string("/"); // cheesy
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
-							  path.c_str(), 0,
+							  mRecentMesh.GetPath(), 0,
 							  "Mesh XML (*.xml)", "*.xml");
 
 	if ( UnserializeMesh(filename) )
 	{
-		path = filename;
-
-		int off = path.find_last_of('/');
-
-		if (off > 0)
-		{
-			path[off] = 0;
-		}
-
-		//Print("-- %s", path.c_str() );
-		Print("Loaded snippet '%s'", filename);
+		mRecentMesh.SetPathByFilename(filename);
+		Print("Loaded mesh snippet '%s'", filename);
 	}
 
 	mgtk_filechooser_blocking_free(filename);
@@ -1160,7 +1051,7 @@ bool FreyjaControl::SerializeBones(const char *filename)
 
 	Bone::SerializePool(container);
 
-	mSkeletonXML.AddFilename(filename);
+	mRecentSkeleton.AddFilename(filename);
 	return doc.SaveFile(filename);;
 #else
 	return false;
@@ -1199,7 +1090,7 @@ bool FreyjaControl::UnserializeBones(const char *filename)
 		}
 
 		UpdateSkeletalUI();	
-		mSkeletonXML.AddFilename(filename);
+		mRecentSkeleton.AddFilename(filename);
 		return true;
 	}
 	
@@ -1284,7 +1175,7 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin_desc)
 		freyja_set_main_window_title(title.c_str());
 		mCurrentlyOpenFilename = select;
 		mCleared = true;
-		AddRecentFilename(filename);
+		mRecentModel.AddFilename(filename);
 	}
 
 	return ret;
@@ -1338,7 +1229,7 @@ bool FreyjaControl::SaveModel(const char *filename)
 }
 
 
-void FreyjaControl::eViewportBack()
+void FreyjaControl::EvViewportBack()
 {
 	Print("Back view");
 	SetSelectedView(PLANE_BACK);
@@ -1347,7 +1238,7 @@ void FreyjaControl::eViewportBack()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportBottom()
+void FreyjaControl::EvViewportBottom()
 {
 	Print("Bottom view");  
 	SetSelectedView(PLANE_BOTTOM);
@@ -1356,7 +1247,7 @@ void FreyjaControl::eViewportBottom()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportRight()
+void FreyjaControl::EvViewportRight()
 {
 	Print("Right view");
 	SetSelectedView(PLANE_RIGHT);
@@ -1365,7 +1256,7 @@ void FreyjaControl::eViewportRight()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportFront()
+void FreyjaControl::EvViewportFront()
 {
 	Print("Front view");
 	SetSelectedView(PLANE_FRONT);
@@ -1374,7 +1265,7 @@ void FreyjaControl::eViewportFront()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportTop()
+void FreyjaControl::EvViewportTop()
 {
 	Print("Top view");  
 	SetSelectedView(PLANE_TOP);
@@ -1383,7 +1274,7 @@ void FreyjaControl::eViewportTop()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportLeft()
+void FreyjaControl::EvViewportLeft()
 {
 	Print("Left view");
 	SetSelectedView(PLANE_LEFT);
@@ -1392,7 +1283,7 @@ void FreyjaControl::eViewportLeft()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportOrbit()
+void FreyjaControl::EvViewportOrbit()
 {
 	Print("Orbital view");
 	SetSelectedView(PLANE_FREE);
@@ -1401,7 +1292,7 @@ void FreyjaControl::eViewportOrbit()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportUV()
+void FreyjaControl::EvViewportUV()
 {
 	Print("UV Editor view");
 	SetSelectedView(DRAW_UV);
@@ -1410,7 +1301,7 @@ void FreyjaControl::eViewportUV()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportCurve()
+void FreyjaControl::EvViewportCurve()
 {
 	Print("Curve editor view");
 	SetSelectedView(DRAW_CURVE);
@@ -1419,7 +1310,7 @@ void FreyjaControl::eViewportCurve()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eViewportMaterial()
+void FreyjaControl::EvViewportMaterial()
 {
 	Print("Material preview");
 	SetSelectedView(DRAW_MATERIAL);
@@ -1486,7 +1377,7 @@ void FreyjaControl::EvScale()
 	freyja_event_gl_refresh();
 }
 
-void FreyjaControl::eModeUV()
+void FreyjaControl::EvModeUV()
 {
 	mRender->SetViewMode(VIEWMODE_TEXTURE_EDIT);
 	freyja_event_gl_refresh();
@@ -1494,7 +1385,7 @@ void FreyjaControl::eModeUV()
 	SetControlScheme(eScheme_UV);
 }
 
-void FreyjaControl::eModeModel()
+void FreyjaControl::EvModeModel()
 {
 	// Radio button like func for multiple widgets on same event
 	mgtk_toggle_value_set(EvModeAutoKeyframeId, 0);
@@ -1505,7 +1396,7 @@ void FreyjaControl::eModeModel()
 	SetControlScheme(eScheme_Model);
 }
 
-void FreyjaControl::eModeMaterial()
+void FreyjaControl::EvModeMaterial()
 {
 	mRender->SetViewMode(VIEWMODE_MATERIAL_EDIT);
 	freyja_event_gl_refresh();
@@ -1513,21 +1404,21 @@ void FreyjaControl::eModeMaterial()
 	SetControlScheme(eScheme_Material);
 }
 
-void FreyjaControl::eMeshNew()
+void FreyjaControl::EvMeshNew()
 {
 	mObjectMode = tMesh;
 	CreateObject();
 	Dirty();
 }
 
-void FreyjaControl::eMeshDelete()
+void FreyjaControl::EvMeshDelete()
 {
 	mObjectMode = tMesh;
 	DeleteSelectedObject();
 	Dirty();
 }
 
-void FreyjaControl::eMeshSelect()
+void FreyjaControl::EvMeshSelect()
 {
 	mObjectMode = tMesh;
 	mEventMode = aSelect;
@@ -1608,25 +1499,15 @@ void FreyjaControl::NewFile()
 
 void FreyjaControl::EvUnserializeBones()
 {
-	static mstl::String path = freyja_rc_map_string("/"); // cheesy
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Load Bones...", 
-							  path.c_str(), 0,
+							  mRecentSkeleton.GetPath(), 0,
 							  "Bones XML (*.xml)", "*.xml");
 
 	if (filename && UnserializeBones(filename) )
 	{
-		path = filename;
-
-		int off = path.find_last_of('/');
-
-		if (off > 0)
-		{
-			path[off] = 0;
-		}
-
-		//Print("-- %s", path.c_str() );
-		Print("Loaded snippet '%s'", filename);
+		//mRecentSkeleton.AddFilename();
+		Print("Loaded skeleton snippet '%s'", filename);
 	}
 	else if (filename)
 	{
@@ -1639,14 +1520,14 @@ void FreyjaControl::EvUnserializeBones()
 
 void FreyjaControl::EvSerializeBones()
 {
-	mstl::String path = freyja_rc_map_string("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Save Bones...", 
-							  path.c_str(), 1,
+							  mRecentSkeleton.GetPath(), 1,
 							  "Bones XML (*.xml)", "*.xml");
 
 	if (filename && SerializeBones(filename) )
 	{
+		//mRecentSkeleton.AddFilename();
 		Print("Bones '%s' Saved", filename);
 	}
 	else if (filename)
@@ -1673,10 +1554,9 @@ void FreyjaControl::SaveFile()
 		}
 		else if (mCurrentlyOpenFilename.Empty())
 		{
-			mstl::String path = freyja_rc_map_string("/");
 			char *filename =
 			mgtk_filechooser_blocking("freyja - Save Model...", 
-									  path.c_str(), 1,
+									  mRecentModel.GetPath(), 1,
 									  "Freyja Scene (*.freyja)", "*.freyja");
 
 			if (filename && SaveModel(filename))
@@ -1927,8 +1807,10 @@ void FreyjaControl::EvModeAutoKeyframe(unsigned int value)
 	{
 		mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
 		mRender->SetFlag(FreyjaRender::fKeyFrameAnimation);
-		mRender->eRenderSkeleton2(0); // 0.9.5.9 auto set view flags
-		mRender->eRenderSkeleton3(1);
+
+		// 0.9.5.13 - disabled as it was very annoying
+		//mRender->eRenderSkeleton2(0); // 0.9.5.9 auto set view flags
+		//mRender->eRenderSkeleton3(1);
 
 		SetControlScheme(eScheme_Animation);
 		Print("Animation Scheme selected.");
@@ -1939,8 +1821,10 @@ void FreyjaControl::EvModeAutoKeyframe(unsigned int value)
 		// If you disable auto keyframe you must set a new major mode
 		mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
 		mRender->ClearFlag(FreyjaRender::fKeyFrameAnimation);
-		mRender->eRenderSkeleton2(1); // 0.9.5.9 auto set view flags
-		mRender->eRenderSkeleton3(0);		
+
+		// 0.9.5.13 - disabled as it was very annoying
+		//mRender->eRenderSkeleton2(1); // 0.9.5.9 auto set view flags
+		//mRender->eRenderSkeleton3(0);		
 
 		SetControlScheme(eScheme_Model);
 		Print("Model Editor Scheme selected.");
@@ -1980,7 +1864,7 @@ void FreyjaControl::EvBoneIterator(unsigned int value)
 }
 
 
-void FreyjaControl::ePointJoint(uint32 value)
+void FreyjaControl::EvPointJoint(uint32 value)
 {
 	if (value)
 	{
@@ -1991,7 +1875,8 @@ void FreyjaControl::ePointJoint(uint32 value)
 	}
 }
 
-void FreyjaControl::eSphereJoint(uint32 value)
+
+void FreyjaControl::EvSphereJoint(uint32 value)
 {
 	if (value)
 	{
@@ -2002,7 +1887,8 @@ void FreyjaControl::eSphereJoint(uint32 value)
 	}
 }
 
-void FreyjaControl::eAxisJoint(uint32 value)
+
+void FreyjaControl::EvAxisJoint(uint32 value)
 {
 	if (value)
 	{
@@ -2400,11 +2286,11 @@ bool FreyjaControl::MotionEvent(int x, int y)
 				break;
 
 			case aRotate: 
-				rotateObject(x, y, GetSelectedView());
+				RotateObject(x, y, GetSelectedView());
 				break;
 			
 			case aScale:
-				scaleObject(x, y, GetSelectedView());
+				ScaleObject(x, y, GetSelectedView());
 				break;
 			
 			case aPaint:
@@ -2605,7 +2491,7 @@ void FreyjaControl::SelectCursorAxis(vec_t vx, vec_t vy)
 		CastPickRay(vx, vy);
 		hel::Ray &r = FreyjaRender::mTestRay;
 		hel::Vec3 p;
-		vec_t t, closest;
+		vec_t t, closest = 9999.0f;
 		int selected = -1;
 
 		for (uint32 i = 0, count = mControlPoints.size(); i < count; ++i)
@@ -2973,9 +2859,9 @@ void FreyjaControl::Fullscreen()
 // Private Accessors
 ////////////////////////////////////////////////////////////
 
-void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
+void FreyjaControl::GetScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 {
-	vec_t z;
+	vec_t z = 0.0f;
 
 	//FREYJA_ASSERTMSG(false, "Obsolete function call.");
 
@@ -3015,7 +2901,7 @@ void FreyjaControl::getScreenToWorldOBSOLETE(vec_t &x, vec_t &y)
 }
 
 
-void FreyjaControl::getPickRay(vec_t mouseX, vec_t mouseY, 
+void FreyjaControl::GetPickRay(vec_t mouseX, vec_t mouseY, 
 							   vec4_t rayOrigin, vec4_t rayVector)
 {
 	/* This does not use viewport: quadrant checks, widths, and heights */
@@ -4170,6 +4056,7 @@ void FreyjaControl::Transform(object_type_t obj,
 			Action *a = new ActionModelTransform(0, action, u);
 			ActionModelModified(a);
 			freyjaModelTransform(GetSelectedModel(), action, v[0], v[1], v[2]);
+			freyjaSkeletonTransform(GetSelectedSkeleton(), action, v[0], v[1], v[2]);
 		}
 		break;
 
@@ -4257,7 +4144,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 	hel::Vec3 t;
 
 	mCursor.mPos.Get(t.mVec);
-	getScreenToWorldOBSOLETE(vx, vy);
+	GetScreenToWorldOBSOLETE(vx, vy);
 
 	/* Exact movement based on cursor position, 
 	 * but limited to a plane of movement */
@@ -4640,7 +4527,7 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 //FIXME: Using object Pos as a pivot and selected point on cursor arc...
 //       mark off displacement of motion and rotate by that angle
-void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
+void FreyjaControl::RotateObject(int x, int y, freyja_plane_t plane)
 {
 	// TODO Rewrite this to use pivot and arc delta ( Generate the delta sweep )
 	static int old_y = 0, old_x = 0;
@@ -4854,7 +4741,7 @@ void FreyjaControl::rotateObject(int x, int y, freyja_plane_t plane)
 }
 
 
-void FreyjaControl::scaleObject(int x, int y, freyja_plane_t plane)
+void FreyjaControl::ScaleObject(int x, int y, freyja_plane_t plane)
 {
 	const vec_t up = 1.01f, down = 0.99f, stay = 1.0f;
 	static int32 old_y = 0, old_x = 0;
@@ -4934,27 +4821,6 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 			mCursor.mPos = m->GetPosition();
 		}
 	}
-}
-
-
-bool FreyjaControl::LoadRecentFilesResource(const char *filename)
-{
-	/* Recent files persistance */
-	SystemIO::TextFileReader r;
-	
-	if (r.Open(filename))
-	{
-		for (uint32 j = 0; j < mRecentFileLimit && !r.IsEndOfFile(); ++j)
-		{
-			const char *sym = r.GetLine();
-			AddRecentFilename(sym);
-		}
-		
-		r.Close();
-		return true;
-	}
-
-	return false;
 }
 
 
@@ -5429,7 +5295,7 @@ void FreyjaControl::TexCoordMove(vec_t u, vec_t v)
 	if (texcoord != mTexCoordArrayIndex)
 	{
 		texcoord = mTexCoordArrayIndex;
-		vec3_t uv;
+		vec3_t uv = {0.0f, 0.0f};
 		m->GetTexCoord(mTexCoordArrayIndex, uv);
 		
 		mActionManager.Push(new ActionTexCoordTransform(GetSelectedMesh(), mTexCoordArrayIndex, uv[0], uv[1]));
@@ -5565,7 +5431,7 @@ int FreyjaControl::CreateListener2s(const char *name, MethodPtr2s ptr)
 
 index_t FreyjaControl::PickMeshes(const hel::Ray &ray)
 {
-	vec_t t, best;
+	vec_t t, best = 9999.0f;
 	index_t selected = INDEX_INVALID;
 
 	for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
@@ -5610,7 +5476,7 @@ index_t FreyjaControl::PickLight(const hel::Ray &ray)
 {
 	hel::Vec3 xyz;
 	vec4_t pos;
-	vec_t t, closest;
+	vec_t t, closest = 9999.0f;
 	index_t selected = INDEX_INVALID;
 
 	for (uint32 i = 0, count = freyjaGetLightCount(); i < count; ++i)
@@ -5664,7 +5530,7 @@ index_t FreyjaControl::PickBone(const hel::Ray &ray)
 {
 	const vec_t radius = FreyjaRender::mBonePointSize * 0.1f;
 	hel::Vec3 p;
-	vec_t t, closest;
+	vec_t t, closest = 9999.0f;
 	index_t selected = INDEX_INVALID;
 
 	for (uint32 i = 0, count = freyjaGetBoneCount(); i < count; ++i)
@@ -5695,7 +5561,7 @@ index_t FreyjaControl::PickBone(const hel::Ray &ray)
 
 index_t FreyjaControl::PickMesh(const hel::Ray &ray)
 {
-	vec_t t, best;
+	vec_t t, best = 9999.0f;
 	index_t selected = INDEX_INVALID;
 
 	for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
@@ -5727,7 +5593,7 @@ index_t FreyjaControl::PickMesh(const hel::Ray &ray)
 int load_texture(const char *filename)
 {
 	int id = 0;
-	FreyjaControl::mInstance->LoadTexture(filename, id);
+	FreyjaControl::GetInstance()->LoadTexture(filename, id);
 	freyja_print("! Texture callback %i : '%s'...", id, filename);
 	return id;
 }
@@ -5846,7 +5712,7 @@ void ePluginImport(ResourceEvent *e)
 				}
 				else
 				{
-					FreyjaControl::mInstance->RecordSavedModel(filename);
+					FreyjaControl::GetInstance()->RecordSavedModel(filename);
 					freyja_print("! Imported: '%s'\n", filename);
 
 					// Update skeletal UI
@@ -5856,7 +5722,7 @@ void ePluginImport(ResourceEvent *e)
 						freyjaCurrentSkeleton(0);
 					}
 
-					FreyjaControl::mInstance->UpdateSkeletalUI();
+					FreyjaControl::GetInstance()->UpdateSkeletalUI();
 				}
 			}
 			else
@@ -5958,7 +5824,7 @@ void ePluginExport(ResourceEvent *e)
 			if (!freyjaExportModelByModule(filename, 
 										   plugin->mFilename.c_str()))
 			{				   
-				FreyjaControl::mInstance->RecordSavedModel(filename);
+				FreyjaControl::GetInstance()->RecordSavedModel(filename);
 				freyja_print("! Exported: '%s'\n", filename);
 			}
 			else

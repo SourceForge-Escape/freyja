@@ -21,8 +21,12 @@ add_definitions(
 	-DEXPERIMENTAL
 )
 
-# Debug build
-add_definitions( -DDEBUG -g -Wall )
+# DEBUG
+#add_definitions( -DDEBUG -g -Wall )
+
+# RELEASE
+add_definitions( -DRELEASE -Wall -O2 -finline-functions -fomit-frame-pointer -funroll-loops )
+
 
 if (WIN32)
 #	@-mkdir -p $(BUILD_WIN32_DIR)

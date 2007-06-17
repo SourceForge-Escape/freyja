@@ -77,7 +77,7 @@ bool MaterialControl::LoadMaterial(const char *filename)
 		return false;
 	}
 
-	int32 matIndex;
+	index_t matIndex = INDEX_INVALID;
 	uint32 mode = 0;
 	bool perlinLoaded = false;
 	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;

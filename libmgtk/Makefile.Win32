@@ -43,7 +43,7 @@ CONFIGURE_CFLAGS=-DUSING_GTK_2_0 -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL \
 
 CONFIGURE_LDFLAGS=$(LOCAL_LIBS)
 
-LD_FLAGS=-shared -lstdc++ -lm $(WIN32_LIB_DIR) -lpthreadGC2 $(LOCAL_LIBS) $(WIN32_CROSS_LIBS)
+LD_FLAGS=-shared -lstdc++ -lm $(WIN32_LIB_DIR) -lpthreadGC2 $(LOCAL_LIBS) $(WIN32_CROSS_LIBS) $(WIN32_LIBHEL)
 
 RELEASE_CFLAGS=$(COMMON_CFLAGS) \
 	-Wall \
@@ -58,7 +58,7 @@ DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 ################################################################
 
-TARGETS=$(BUILDDIR)/$(MODULE).dll
+TARGETS=$(MODULE).dll
 
 auto: $(BUILD_SELECT)
 
@@ -72,10 +72,10 @@ debug:
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP)  \
 	LD=$(WIN32_LD)  \
-	MODULE="$(NAME)$(MAJOR_VERSION)" \
+	MODULE="$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)" \
 	EXT=".dll" \
 	CFLAGS="$(DEBUG_CFLAGS) $(WIN32_INC_DIR) $(CONFIGURE_CFLAGS)" \
-	LD_FLAGS="$(LD_FLAGS) -lhel0 -L../bin/libhel/win32/debug/"
+	LD_FLAGS="$(LD_FLAGS)"
 
 release:
 	@-mkdir -p $(BUILD_RELEASE_DIR)
@@ -83,7 +83,7 @@ release:
 	CC=$(WIN32_CC) \
 	CPP=$(WIN32_CPP)  \
 	LD=$(WIN32_LD)  \
-	MODULE="$(NAME)$(MAJOR_VERSION)" \
+	MODULE="$(NAME)-$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)" \
 	EXT=".dll" \
 	CFLAGS="$(RELEASE_CFLAGS) $(WIN32_INC_DIR) $(CONFIGURE_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)" 
@@ -100,9 +100,9 @@ $(DEPEND_FILE):
 	@-echo "       [done]"
 
 
-$(BUILDDIR)/$(MODULE).dll : $(OBJS)
-	$(CC) -shared -o $(BUILDDIR)/$(MODULE).dll \
-    -Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
+$(MODULE).dll : $(OBJS)
+	$(CC) -shared -o $(WIN32_LOCAL_LIB_DIR)/$(MODULE).dll \
+    -Wl,--out-implib=$(WIN32_LOCAL_LIB_DIR)/lib$(MODULE).a \
     -Wl,--export-all-symbols \
     -Wl,--enable-auto-import \
     -Wl,--whole-archive $(OBJS) \

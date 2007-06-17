@@ -51,7 +51,7 @@ byte *FreyjaPakReader::getFileByFullPathName(const char *vfsFilename)
 {
 	SystemIO::FileReader r;
 	FreyjaPakDirectory *pakDir = &mRoot; // cd /
-	FreyjaPakFile *pakFile;
+	FreyjaPakFile *pakFile = NULL;
 	const uint32 blimit = 127;
 	char buffer[blimit+1];
 	uint32 i, b, length;
