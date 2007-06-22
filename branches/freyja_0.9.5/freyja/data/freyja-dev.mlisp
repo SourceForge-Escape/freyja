@@ -57,8 +57,7 @@
 
 			(menu_seperator)
 
-			(submenu eRecentFiles "R_ecent Models...")			
-
+			(submenu eRecentFiles "R_ecent Models..." "recent_models_bind")			
 			(menu_seperator)
 
 			(menu_item "_Save Model"	eSaveFileModel	"C-s"	"gtk-save")
@@ -291,6 +290,44 @@
 		(hbox 0 0 0 0 0
 		(notebook 0 0 eNop
 
+		(tab "File" eNone			
+			(hbox 0 1 0 1 0	
+				;(hbox 1 1 0 1 1  ; This causes a 'dropdown' toolbar
+				(toolbar 
+					(toolbar_button "gtk-new" "New"	
+						"New Model"		eEvent eNewFile)
+
+					;(filechoosertoolbar_button 
+					;	"gtk-open"	"Open"	"Open Model..."	"Open Model..." 
+					;	eOpenModel "mode=open")
+
+					(toolbar_menu_button "gtk-open" "Open"	
+						"Open..."	eEvent	eOpenFile 
+						"recent_models_bind")
+
+					(toolbar_button  "gtk-save" "Save Model" 
+						"Save Model"	eEvent eSaveFileModel)
+
+					(filechoosertoolbar_button 
+						"gtk-save-as" "Save as..." 
+						"Save Model As..."	"Save Model As..."
+						eSaveModel "mode=save")
+
+					(toolbar_separator)
+
+					(toolbar_menu_button "24x24/lua.png" "Script"
+						"Open Script..." eEvent eLoadLuaScript
+						)
+
+					(toolbar_menu_button "24x24/python.png" "Script"
+						"Open Script..." eEvent eNone ;eLoadPyScript
+						)
+
+				) ; toolbar
+				;) ; hbox
+			) ; hbox
+		) ; tab "File"
+
 		(tab "View" eNone			
 			(hbox 0 1 0 1 0	
 
@@ -365,7 +402,7 @@
 				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones3"
 					"Show transformed skeleton."	eEvent	eRenderSkeleton3)
 
-				(toolbar_togglebutton false "24x24/bone-tag.png" "BoneName"
+				(toolbar_togglebutton false "24x24/bone-name.png" "BoneName"
 					"Show bind pose bone names."	eEvent	eRenderBoneName)
 
 				(toolbar_separator)
@@ -487,7 +524,8 @@
 						(menu_item	"Select"	ePaintSelect)
 						(menu_item	"Unselect"	ePaintUnselect)
 						(menu_item	"Material"	ePaintMaterial)
-						;(menu_item	"Deform #1  "	ePaintDMap1)
+						(menu_item	"Height"	ePaintHeight)
+						(menu_item	"Dmap"		ePaintDmap)
 					) ; optionmenu
 				) ; toolbar_item
 
@@ -613,23 +651,23 @@
 			;; Model tab
 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 			(tab "Model" eModeModel
-				(hbox 1 1 0 1 1
-					(toolbar 
-						(toolbar_button "gtk-new" "New"	
-							"New model"		eEvent eNewFile)
-
-						(filechoosertoolbar_button 
-							"gtk-open" "Open" "Open model file" 
-							"Open Model..." eOpenModel "mode=open")
-
-						(toolbar_button  "gtk-save" "Save" 
-							"Save Model"	eEvent eSaveFileModel)
-
-						(filechoosertoolbar_button 
-							"gtk-save-as" "Save as..." "Saves model file" 
-							"Save Model..." eSaveModel "mode=save")
-
-					))
+				;(hbox 1 1 0 1 1
+				;	(toolbar 
+				;		(toolbar_button "gtk-new" "New"	
+				;			"New model"		eEvent eNewFile)
+				;
+				;		(filechoosertoolbar_button 
+				;			"gtk-open" "Open" "Open model file" 
+				;			"Open Model..." eOpenModel "mode=open")
+				;
+				;		(toolbar_button  "gtk-save" "Save" 
+				;			"Save Model"	eEvent eSaveFileModel)
+				;
+				;		(filechoosertoolbar_button 
+				;			"gtk-save-as" "Save as..." "Saves model file" 
+				;			"Save Model..." eSaveModel "mode=save")
+				;
+				;	))
 
 				;; Seperator
 				(hbox 1 0 0 1 0 (hsep))
@@ -841,7 +879,11 @@
 				)
 
 				(hbox 1 0 0 1 0 (hsep))
-
+			
+				;;;;;;;;;;;;;;;	
+				;(handlebox 1
+				;(vbox 1 1 0 1 1
+				;(expander "Material Properties" 1
 				(hbox 1 1 0 1 1
 					(label "Ambient" 0.0 0.5))
 
@@ -885,6 +927,8 @@
 				(hbox 1 1 0 1 1
 					(label "Shininess" 0.0 0.5)
 					(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 eMaterialShine))
+
+				;))) ; expander "Material Properties"
 
 
 				(hbox 1 0 0 1 0
@@ -1100,7 +1144,7 @@
 	"Sheet mesh generation."
 	"int"	"rows"	"How many rows?   "	1 1 64  ; default min max
 	"int"	"cols"	"How many columns?"	1 1 64  ; default min max
-	"float"	"size"	"How large?       "	8 1 64  ; default min max
+	"float"	"size"	"How large?       "	8 1 128 ; default min max
 	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
 
 (query_dialog	"GenerateCubeDialog"

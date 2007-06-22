@@ -500,6 +500,7 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar_button(arg_list_t *args);
+arg_list_t *mgtk_rc_toolbar_menu_button(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar_box(arg_list_t *args);
 arg_list_t *mgtk_rc_color(arg_list_t *args);
 arg_list_t *mgtk_rc_hslider(arg_list_t *args);
@@ -580,6 +581,7 @@ Resource::Resource() :
 	RegisterFunction("toolbar", mgtk_rc_toolbar);
 	RegisterFunction("toolbar_togglebutton", mgtk_rc_toolbar_togglebutton);
 	RegisterFunction("toolbar_button", mgtk_rc_toolbar_button);
+	RegisterFunction("toolbar_menu_button", mgtk_rc_toolbar_menu_button);
 	RegisterFunction("hslider", mgtk_rc_hslider);
 	RegisterFunction("dialog", mgtk_rc_dialog);
 	RegisterFunction("query_dialog", mgtk_rc_query_dialog);

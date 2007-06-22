@@ -113,7 +113,9 @@ class FreyjaControl : public Control
 		ePaintUnweight,
 		ePaintSelect,
 		ePaintUnselect,
-		ePaintMaterial
+		ePaintMaterial,
+		ePaintHeight,
+		ePaintDmap
 
 	} PaintMode;
 
@@ -585,6 +587,10 @@ class FreyjaControl : public Control
 	void EvPaintSelect() { mPaintMode = ePaintSelect; }
 	void EvPaintUnselect() { mPaintMode = ePaintUnselect; }
 	void EvPaintMaterial() { mPaintMode = ePaintMaterial; }
+	void EvPaintHeight() { mPaintMode = ePaintHeight; }
+	void EvPaintDmap() { mPaintMode = ePaintDmap; }
+
+	void EvLoadLuaScript();
 
 	void EvMeshRepack()
 	{

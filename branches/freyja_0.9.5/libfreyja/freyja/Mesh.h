@@ -613,6 +613,16 @@ public:
 	 *       All facets will be added to their vertex references.
 	 ------------------------------------------------------*/
 
+	void RecomputeFaceNormal(index_t face, bool full);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Recomputes face normal.
+	 *
+	 *        If <full> all vertices are also updated, and
+	 *        so are the face's neighbour cache.
+	 *
+	 ------------------------------------------------------*/
+
 	void ClearFaceFlags(index_t face, uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 

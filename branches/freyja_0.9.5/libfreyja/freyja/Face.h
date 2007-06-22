@@ -20,10 +20,13 @@
 #define GUARD__FREYJA_FACE_H_
 
 #include <hel/math.h>
+#include <hel/Vec3.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
 #include "freyja.h"
 #include "Track.h"
+
+using hel::Vec3;
 
 
 namespace freyja {
@@ -51,6 +54,7 @@ public:
 		mColor(0),
 		//mVisible(0x0),
 		mMaterial(0), // Always have a valid material Id
+		mNormal(0.0f, 1.0f, 0.0f),
 		mIndices(),
 		mTexCoordIndices(),
 		mNormalsIndices(),
@@ -335,6 +339,8 @@ public:
 
 	index_t mMaterial;                /* Material index */
 
+	Vec3 mNormal;
+
 	mstl::Vector<index_t> mIndices;         /* Indices to the Vertex *class */
 
 	mstl::Vector<index_t> mTexCoordIndices; /* Only used with fPolyMappedTexCoords */
@@ -343,6 +349,7 @@ public:
 
 	mstl::Vector<index_t> mNeighbours;      /* Faces that share an edge with this. */
 };
+
 
 } // End namespace freyja
 

@@ -66,6 +66,7 @@ int check(FILE *f)
 	// buffer[1] = 0 - Means not color mapped ( 1 would mean mapped )
 	if (!(buffer[1] == 0 && (buffer[2] == TGA_TYPE__COLOR ||
 							 buffer[2] == TGA_TYPE__GREYSCALE ||
+									 buffer[2] == TGA_TYPE__GREYSCALE_COMPRESSED ||
 							 buffer[2] == TGA_TYPE__COLOR_RLE)))
 	{
 		printf("tga.so: Inavlid or unknown TGA format.\n");

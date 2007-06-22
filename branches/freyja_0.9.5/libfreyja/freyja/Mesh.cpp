@@ -2693,6 +2693,85 @@ void Mesh::RebuildVertexPolygonReferences()
 }
 
 
+void Mesh::RecomputeFaceNormal(index_t face, bool full)
+{
+	Face *f = GetFace(face);
+
+	if (f)
+	{
+		if (full) // expensive!
+		{
+			Vector<index_t> faces;
+
+			faces.reserve(16);
+
+			// 1. Find all faces affected by this update.
+			uint32 i;
+			foreach (f->mIndices, i)
+			{
+				Vertex *v = GetVertex(f->mIndices[i]);
+
+				if (!v)
+					continue;
+
+				uint32 j;
+				foreach (v->GetFaceRefs(), j)
+				{
+					bool found = false;
+					uint32 k;
+					foreach (faces, k)
+					{
+						if (faces[k] == v->GetFaceRefs()[j])
+						{
+							found = true;
+							break;
+						}
+					}
+
+					// 2. Compute new face normal per face. Skip if seen again.
+					if (!found)
+					{
+						RecomputeFaceNormal(v->GetFaceRefs()[j], false);
+						faces.push_back(v->GetFaceRefs()[j]);
+					}
+				} 
+			}
+
+
+			// 3. Compute new vertex normals.
+			foreach (f->mIndices, i)
+			{
+				Vertex *v = GetVertex(f->mIndices[i]);
+
+				if (!v)
+					continue;
+
+				Vec3 n;
+				uint32 j;
+				foreach (v->GetFaceRefs(), j)
+				{
+					Face *f2 = GetFace( v->GetFaceRefs()[j] );
+					n += f2->mNormal;
+				} 
+
+				n.Norm();
+				SetNormal(f->mIndices[i], n.mVec);
+			}		
+		}
+		else
+		{
+			Vec3 a, b, c;
+			GetVertexPos(f->mIndices[0], a.mVec);
+			GetVertexPos(f->mIndices[1], b.mVec);
+			GetVertexPos(f->mIndices[2], c.mVec);
+		
+			f->mNormal = -Vec3::Cross(a - b, c - b);
+			f->mNormal.Norm();
+		}
+	}
+}
+
+
 void Mesh::UpdateVertexReferenceWithSelectedBias()
 {
 	// FIXME: Add some kind of conditional flag here to avoid

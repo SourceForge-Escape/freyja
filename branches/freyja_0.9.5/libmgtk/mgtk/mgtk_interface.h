@@ -87,7 +87,7 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 											 char *help, 
 											 void *event_func, int event_cmd);
 
-GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
+GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
 									  char *icon, char *label, char *help, 
 									  void *event_func, int event_cmd);
 

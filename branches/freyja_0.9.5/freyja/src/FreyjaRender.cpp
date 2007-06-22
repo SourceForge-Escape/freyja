@@ -2310,7 +2310,8 @@ void FreyjaRender::DrawUVWindow()
 			Face *f = m->GetFace(i);
 			hel::Vec3 v;
 			
-			if (!f || f->mMaterial != selected) 
+			// 0.9.5.13 - We want to always see the wireframe faces for selection!
+			if (!f ) //|| f->mMaterial != selected) 
 				continue;
 			
 			/* Render face as wireframe */

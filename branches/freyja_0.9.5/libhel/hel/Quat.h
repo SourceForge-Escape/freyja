@@ -294,7 +294,7 @@ class Quat
 	void Norm()
 	{
 		const vec_t square = mX * mX + mY * mY + mZ * mZ + mW * mW;
-		const vec_t dist = (square > 0.0f) ? (1.0f / sqrtf(square)) : 1.0f;
+		const vec_t dist = (square > 0.0f) ? ( 1.0f / sqrtf(square) ) : 1.0f;
 		Scale(dist);
 	}
 	/*------------------------------------------------------

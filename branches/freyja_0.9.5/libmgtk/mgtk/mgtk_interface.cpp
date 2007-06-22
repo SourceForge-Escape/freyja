@@ -982,12 +982,17 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 }
 
 
-GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar,
+GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
 									  char *icon, char *label, char *help, 
 									  void *event_func, int event_cmd)
 {
 	GtkWidget *gicon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
-	GtkToolItem *item = gtk_tool_button_new(gicon, (!label[0]) ? NULL : label);
+	GtkToolItem *item = 
+
+	((is_menu) ? 
+	 gtk_menu_tool_button_new(gicon, (!label[0]) ? NULL : label) :
+	 gtk_tool_button_new(gicon, (!label[0]) ? NULL : label) );
+
 	GtkWidget *button = (GtkWidget *)item;
 	gtk_widget_show(gicon);
 
