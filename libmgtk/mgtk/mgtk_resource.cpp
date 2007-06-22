@@ -504,7 +504,6 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 {
 	arg_list_t *ret = NULL, *icon, *label, *help, *event, *cmd;
-	GtkWidget *button;
 	void *event_func;
 	int event_cmd;
 
@@ -541,12 +540,91 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 			icon_filename[1023] = 0;
 		}
 
-		button =
-		mgtk_create_toolbar_button((GtkWidget *)box->data, icon_filename, 
+		GtkWidget *button =
+		mgtk_create_toolbar_button((GtkWidget *)box->data, 0, icon_filename, 
 								   get_string(label), get_string(help),
 								   event_func, event_cmd);
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
+	}
+
+	delete_arg(&icon);
+	delete_arg(&label);
+	delete_arg(&help);
+	delete_arg(&event);
+	delete_arg(&cmd);
+
+	return ret;
+}
+
+
+arg_list_t *mgtk_rc_toolbar_menu_button(arg_list_t *box)
+{
+
+	arg_list_t *ret = NULL, *icon, *label, *help, *event, *cmd;
+	void *event_func;
+	int event_cmd;
+
+	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
+	MGTK_ASSERTMSG(box, "box != ARG_GTK_TOOLBOX_WIDGET");
+
+	if (!box)
+	{
+		return NULL;
+	}
+
+	symbol_enforce_type_assert(&icon, CSTRING);
+	symbol_enforce_type_assert(&label, CSTRING);
+	symbol_enforce_type_assert(&help, CSTRING);
+	symbol_enforce_type_assert(&event, INT);
+	symbol_enforce_type_assert(&cmd, INT);
+
+	if (icon && label && help && event && cmd)
+	{
+		event_func = rc_gtk_event_func(get_int(event));
+		event_cmd = get_int(cmd);
+
+		// FIXME: Should be removed and replaced with lisp function
+		char icon_filename[1024];
+
+		if (!strncmp(get_string(icon), "gtk", 3))
+		{
+			strncpy(icon_filename, get_string(icon), 1024);
+			icon_filename[1023] = 0;
+		}
+		else
+		{
+			mgtk_get_pixmap_filename(icon_filename, 1024, get_string(icon));
+			icon_filename[1023] = 0;
+		}
+
+		GtkWidget *button =
+		mgtk_create_toolbar_button((GtkWidget *)box->data, 1, icon_filename, 
+								   get_string(label), get_string(help),
+								   event_func, event_cmd);
+
+		GtkWidget *menu = NULL; //gtk_menu_new();
+
+		arg_list_t *symbol = NULL;
+		if (mlisp_peek_for_vargs())
+		{
+			symbol_enforce_type_assert(&symbol, CSTRING);
+
+			if (symbol)
+			{
+				menu = (GtkWidget*)mlisp_recall((char *)symbol->data);
+			}
+
+			delete_arg(&symbol);
+		}
+
+		if (!menu)
+			menu = gtk_menu_new();
+
+		gtk_menu_tool_button_set_menu( GTK_MENU_TOOL_BUTTON(button),  menu );
+		//gtk_menu_tool_button_get_menu( GTK_MENU_TOOL_BUTTON(button) );
+
+		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menu);
 	}
 
 	delete_arg(&icon);
@@ -2192,6 +2270,19 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 			// Mongoose 2002.02.14, Add this widget to a special 
 			//   lookup table by it's event id
 			mgtk_event_subscribe_gtk_widget(id, submenu);
+		}
+
+		arg_list_t *symbol = NULL;
+		if (mlisp_peek_for_vargs())
+		{
+			symbol_enforce_type_assert(&symbol, CSTRING);
+
+			if (symbol)
+			{
+				arg_list_t *binding; 
+				new_adt(&binding, ARG_GTK_MENU_WIDGET, (void *)submenu);
+				mlisp_bind(symbol, binding);
+			}
 		}
 
 		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)submenu);

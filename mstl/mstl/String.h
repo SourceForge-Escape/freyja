@@ -78,6 +78,24 @@ class String
 	}
 
 
+	String(const char *s, const int length) :
+		mString(NULL),
+		mLength(0)
+	{
+		if (s && s[0] && length)
+		{
+			mLength = strlen(s);
+			mString = String::Strdup(s);
+		}
+
+		if (length > 0)
+		{
+			mLength = length;
+			mString[length] = 0;
+		}
+	}
+
+
 	String(const String &s) :
 		mString(NULL),
 		mLength(0)
@@ -94,6 +112,9 @@ class String
 
 		return *this;
 	}
+
+	char &at(unsigned int pos) 
+	{ return (pos < mLength) ? mString[pos] : mString[mLength-1]; }
 
 	char &operator [] (unsigned int i) { return mString[i]; }
 
@@ -153,6 +174,8 @@ class String
 
 	void Clear() { clear(); }
 
+	bool Empty() { return empty(); }
+
 	const char *GetCString() {	return mString; }
 	
 	unsigned int GetLength() { return mLength; }
@@ -162,11 +185,7 @@ class String
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	bool Empty()
-	{
-		return !(mLength && mString && mString[0]);
-	}
-
+	bool empty() const { return !(mLength && mString && mString[0]); }
 
 	int find_last_of(const char c, int idx = -1)
 	{
@@ -187,14 +206,9 @@ class String
 		return npos;
 	}
 
-
 	unsigned int length() { return mLength; }
 
-	const char *c_str()
-	{
-		return mString;
-	}
-
+	const char *c_str() { return mString; }
 
 	void Replace(char a, char b)
 	{
@@ -230,6 +244,12 @@ class String
 			mLength = strlen(buf);
 			mString = String::Strdup(buf);
 		}
+	}
+
+
+	String substr(unsigned int pos, int num = npos)
+	{
+		return String( mString+pos, num );
 	}
 
 

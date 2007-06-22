@@ -631,7 +631,6 @@ arg_list_t *mgtk_rc_filechooserbutton(arg_list_t *box)
 arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
 {
 	arg_list_t *ret = NULL, *icon, *label, *help, *title, *event, *options;
-	GtkWidget *button;
 
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
 	MGTK_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
@@ -677,8 +676,8 @@ arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
 
 		mgtk_link_filechooser_from_rc(get_int(event), get_string(title), get_string(options));
 
-		button =
-		mgtk_create_toolbar_button((GtkWidget *)box->data, icon_filename, 
+		GtkWidget *button =
+		mgtk_create_toolbar_button((GtkWidget *)box->data, 0, icon_filename, 
 								   get_string(label), get_string(help),
 								   NULL, GPOINTER_TO_INT(get_int(event)));
 		

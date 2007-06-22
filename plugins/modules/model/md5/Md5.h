@@ -41,7 +41,7 @@
 class Md5Vertex
 {
  public:
-	int index;
+	//int index;  // Dept of redundancy dept, no use storing this.
 	float uv[2];
 	int weight;
 	int numbones;
@@ -58,7 +58,7 @@ class Md5Triangle
 class Md5Weight
 {
  public:
-	int index;
+	//int index;  // Dept of redundancy dept, no use storing this.
 	int joint;
 	float weight;
 	hel::Vec3 pos;
@@ -160,7 +160,7 @@ class Md5Model
 	void DecodeUnitQuaternion(hel::Quat &q);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Gets W componet of a 3 componet unit quaternion.
 	 *
 	 ------------------------------------------------------*/
 

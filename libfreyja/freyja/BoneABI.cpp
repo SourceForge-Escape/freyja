@@ -235,6 +235,7 @@ void freyjaBoneRotateEuler3fv(index_t boneIndex, vec3_t phr)
 	if (b)
 	{
 		b->mRotation.SetByEulerAngles(phr);
+		b->mRotation.Norm(); // 2007.06.20
 		b->UpdateBindPose();
 	}
 }
@@ -249,6 +250,7 @@ void freyjaBoneRotateQuat4f(index_t boneIndex,
 	if (b)
 	{
 		b->mRotation = Quat(w, x, y, z);
+		b->mRotation.Norm(); // 2007.06.20
 		b->UpdateBindPose();
 	}
 #else
@@ -265,6 +267,7 @@ void freyjaBoneRotateQuat4fv(index_t boneIndex, vec4_t wxyz)
 	if (b)
 	{
 		b->mRotation = Quat(wxyz);
+		b->mRotation.Norm(); // 2007.06.20
 		b->UpdateBindPose();
 	}
 }

@@ -203,8 +203,17 @@ int FreyjaImage::loadIndexedPixmap(unsigned char *image, int width, int height)
 
   _width = _original_width = width;
   _height = _original_height = height;
-  _image = new unsigned char[size * 3];
 
+
+  if (!_palette) // 2007.06.16 -- wow, this old ass code sucks, let's allow 8bit here
+  {
+	  _image = new unsigned char[size];
+	  memcpy(_image, image, size);
+	  _color_mode = INDEXED_8;
+	  return 0;
+  }
+
+  _image = new unsigned char[size * 3];
   _color_mode = RGB_24;
 
 
@@ -272,27 +281,31 @@ void FreyjaImage::brightenPalette(float p)
 
 void FreyjaImage::getImage(unsigned char **buffer)
 {
-  *buffer = NULL;
+	*buffer = NULL;
 
-  if (!_image)
-  {
-    printf("Image::ImageBuffer> No image allocated\n");
-    return;
-  }
+	if (!_image)
+	{
+		printf("Image::ImageBuffer> No image allocated\n");
+		return;
+	}
+	
+	switch (_color_mode)
+	{
+	case RGB_24:
+		*buffer = new unsigned char[_width*_height*3];
+		memcpy(*buffer, _image, _width*_height*3);
+		break;
 
-  switch (_color_mode)
-  {
-  case RGB_24:
-    *buffer = new unsigned char[_width*_height*3];
-    memcpy(*buffer, _image, _width*_height*3);
-    break;
-  case RGBA_32:
-    *buffer = new unsigned char[_width*_height*4];
-    memcpy(*buffer, _image, _width*_height*4);
-    break;
-  case INDEXED_8:
-    break;
-  }
+	case RGBA_32:
+		*buffer = new unsigned char[_width*_height*4];
+		memcpy(*buffer, _image, _width*_height*4);
+		break;
+
+	case INDEXED_8:
+		*buffer = new unsigned char[_width*_height];
+		memcpy(*buffer, _image, _width*_height);
+		break;
+	}
 }
 
 

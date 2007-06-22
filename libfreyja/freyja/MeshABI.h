@@ -86,13 +86,6 @@ extern "C" {
 	 * Post : Returns mesh local index of vertex created.
 	 ------------------------------------------------------*/
 
-	// Depends on legacy removal to enable
-	//index_t freyjaMeshVertexCreate3f(index_t mesh, vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns mesh local index of vertex created.
-	 ------------------------------------------------------*/
-
 	void freyjaMeshVertexPos3fv(index_t mesh, index_t vertex, vec3_t xyz);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -103,12 +96,6 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Vertex based normal setting.
-	 ------------------------------------------------------*/
-
-	void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t vert, vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns <mesh> <vertex> texcoord.
 	 ------------------------------------------------------*/
 
 	index_t freyjaMeshTexCoordCreate2fv(index_t mesh, vec2_t uv);
@@ -142,8 +129,7 @@ extern "C" {
 	 * Post : Sets <mesh> local index of <texcoord>'s value.
 	 ------------------------------------------------------*/
 
-	void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t texcoord, 
-									 vec3_t uvw);
+	void freyjaMeshVertexTexCoord3fv(index_t mesh, index_t texcoord, vec3_t uvw);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Vertex based texcoord setting.

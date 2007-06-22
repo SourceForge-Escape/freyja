@@ -51,6 +51,7 @@
 #include <freyja/FreyjaImage.h>
 #include <freyja/Material.h>
 #include <freyja/LightABI.h>
+#include <freyja/LuaABI.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/SkeletonABI.h>
@@ -65,6 +66,8 @@
 using namespace mstl;
 using namespace freyja;
 using namespace freyja3d;
+
+using hel::Vec3;
 
 
 int load_texture(const char *filename);
@@ -462,7 +465,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("ePaintSelect", &FreyjaControl::EvPaintSelect);
 	CreateListener("ePaintUnselect", &FreyjaControl::EvPaintUnselect);
 	CreateListener("ePaintMaterial", &FreyjaControl::EvPaintMaterial);
+	CreateListener("ePaintHeight", &FreyjaControl::EvPaintHeight);
+	CreateListener("ePaintDmap", &FreyjaControl::EvPaintDmap);
 
+	CreateListener("eLoadLuaScript", &FreyjaControl::EvLoadLuaScript);
 }
 
 
@@ -548,6 +554,32 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		Print("       x = %f y = %f", x, y);
 #endif
 	}
+}
+
+
+void FreyjaControl::EvLoadLuaScript()
+{
+	static String path = freyja_rc_map_string( "plugins/lua/" );
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Script...", 
+							  path.c_str(), 0,
+							  "Lua script (*.lua)", "*.lua");
+
+	if (filename)
+	{
+		freyjaLuaScript1s(filename);
+
+		path = filename;
+		int off = path.find_last_of('/');
+
+		if (off > 0)
+		{
+			path[off] = 0;
+		}
+	}
+
+	mgtk_filechooser_blocking_free(filename);
 }
 
 
@@ -1552,12 +1584,12 @@ void FreyjaControl::SaveFile()
 		{
 			Print("We don't save empty files anymore");
 		}
-		else if (mCurrentlyOpenFilename.Empty())
+		else if (mCurrentlyOpenFilename.empty())
 		{
 			char *filename =
 			mgtk_filechooser_blocking("freyja - Save Model...", 
 									  mRecentModel.GetPath(), 1,
-									  "Freyja Scene (*.freyja)", "*.freyja");
+									  "Freyja Model (*.freyja)", "*.freyja");
 
 			if (filename && SaveModel(filename))
 			{
@@ -1572,7 +1604,7 @@ void FreyjaControl::SaveFile()
 		}
 		else
 		{
-			const char *s = mCurrentlyOpenFilename.GetCString();
+			const char *s = mCurrentlyOpenFilename.c_str();
 			
 			if (SaveModel(s))
 			{
@@ -1591,7 +1623,7 @@ void FreyjaControl::SaveFile()
 			char *filename =
 			mgtk_filechooser_blocking("freyja - Save Materal...", 
 									  path.c_str(), 1,
-									  "Freyja Scene (*.mat)", "*.mat");
+									  "Freyja Material (*.mat)", "*.mat");
 
 			if (filename)
 			{
@@ -1630,14 +1662,25 @@ void FreyjaControl::OpenFile()
 				Clear();
 				Print("Closing Model...");
 				freyja_set_main_window_title(BUILD_NAME);
-				
-				
-				//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 			}
 		}
-		else
+
+		if (mCleared)
 		{
-			//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
+			char *filename =
+			mgtk_filechooser_blocking("freyja - Open Model...", 
+									  mRecentModel.GetPath(), 0,
+									  "Freyja Modeler (*.freyja)", "*.freyja");
+		
+			if (filename)
+			{
+				if (LoadModel(filename))
+				{
+						
+				}
+			}
+
+			mgtk_filechooser_blocking_free(filename);
 		}
 		break;
 		
@@ -1979,6 +2022,7 @@ void FreyjaControl::EvPaintObject(unsigned int value)
 	if (value)
 	{
 		SetModiferMode(aPaint, "Paint", ePaintObjectId, Cursor::Invisible);
+		Print("Paint mode -- using bone weight value for paint weight.");
 	}
 }
 
@@ -5166,6 +5210,111 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 		SelectObject(x, y, false);
 		break;
 
+	case ePaintHeight:
+		{
+			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
+
+			if (mModKey & KEY_LSHIFT) weight = - weight;
+
+			if (m)
+			{
+				CastPickRay(x, y);
+
+				hel::Vec3 tuv;
+				int face = m->PickFace(Face::fHidden, 
+									   FreyjaRender::mTestRay, tuv);
+
+				if (face > -1)
+				{
+					Face *f = m->GetFace(face);
+
+					if (f)
+					{
+						//f->mMaterial = GetSelectedMaterial();
+						//Print("^");
+
+						uint32 i;
+						foreach(f->mIndices, i)
+						{
+							hel::Vec3 v;
+							
+							m->GetVertexPos(f->mIndices[i], v.mVec);
+							v.mY += weight;//0.01;
+							m->SetVertexPos(f->mIndices[i], v.mVec);
+						}
+
+						Vec3 a, b, c;
+						m->GetVertexPos(f->mIndices[0], a.mVec);
+						m->GetVertexPos(f->mIndices[1], b.mVec);
+						m->GetVertexPos(f->mIndices[2], c.mVec);
+						
+						Vec3 n = -Vec3::Cross(a - b, c - b);
+						n.Norm();
+
+						// Auto update with a face normal for now
+						m->SetNormal(f->mIndices[0], n.mVec);
+						m->SetNormal(f->mIndices[1], n.mVec);
+						m->SetNormal(f->mIndices[2], n.mVec);
+					}
+				}
+			}
+		}	
+		break;
+
+	case ePaintDmap:
+		{
+			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
+
+			if (mModKey & KEY_LSHIFT) weight = - weight;
+
+			if (m)
+			{
+				CastPickRay(x, y);
+
+				hel::Vec3 tuv;
+				int face = m->PickFace(Face::fHidden, 
+									   FreyjaRender::mTestRay, tuv);
+
+				if (face > -1)
+				{
+					Face *f = m->GetFace(face);
+
+					if (f)
+					{
+						Vec3 r = FreyjaRender::mTestRay.mDir;
+						r *= weight;
+
+						uint32 i;
+						foreach(f->mIndices, i)
+						{
+							Vec3 v;
+							
+							m->GetVertexPos(f->mIndices[i], v.mVec);
+							v += r;
+							m->SetVertexPos(f->mIndices[i], v.mVec);
+						}
+						
+						m->RecomputeFaceNormal(face, true);
+#if 0
+						Vec3 a, b, c;
+						m->GetVertexPos(f->mIndices[0], a.mVec);
+						m->GetVertexPos(f->mIndices[1], b.mVec);
+						m->GetVertexPos(f->mIndices[2], c.mVec);
+						
+						Vec3 n = -Vec3::Cross(a - b, c - b);
+						n.Norm();
+
+						// Auto update with a face normal for now
+						m->SetNormal(f->mIndices[0], n.mVec);
+						m->SetNormal(f->mIndices[1], n.mVec);
+						m->SetNormal(f->mIndices[2], n.mVec);
+#endif
+					}
+				}
+			}
+		}	
+		break;
+
 	case ePaintMaterial:
 		{
 			Mesh *m = freyjaGetMeshClass( GetSelectedMesh() );
@@ -5818,6 +5967,17 @@ void ePluginExport(ResourceEvent *e)
 									  1,
 									  plugin->mDescription.c_str(),
 									  plugin->mExtention.c_str());
+
+			{
+				String ext = filename;
+
+				int pos = ext.find_last_of('.');
+
+				if (pos == String::npos)
+				{
+					
+				}
+			}
 
 			freyja_print("! Exporting: '%s'\n", filename);
 				

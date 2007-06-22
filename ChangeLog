@@ -4,9 +4,28 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.12
+ Kagura prealpha, 0.9.5.13
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - Midgard UI plugin checked into svn. ( aka trashcan plugin, full of test junk )
+ - Lua script integration in UI.
+ - Cmake update to automatically build support for python and lua if found.
+ - Metaprogramming fun - Lua binding for libfreyja.
+ - Skeleton rotation purge as a fix for garbage from some import plugins.
+ - Image based Heightmap importer for map making.
+ - FreyjaImage no longer alters greyscale images bpp or value default. 
+ - Forcing unit quats in bone ABI mutators. 
+ - 'Swiss army knife' file dialogs 'hidden' on menu ( use export/import )
+ - New mgtk_toolbar_menu_button, which can embedd bound submenus.
+ - New mgtk submenus can be bound to gobal symbols.
+ - File toolbar in shelf to save some more veritcal space.
+ - Simple heightmap and mesh geometry displacement editing.
+ - FIX UV faces render as wireframe w/o points if the mesh selected, and
+   material Id is different again.  This is correct behavior by design.
+ - Md5Model experimental export with guard to avoid model overwrites.
+
+
+ Kagura prealpha, 0.9.5.12
+ 20070617 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Win32 binary release plugins built early -- python support disabled.
  - Win32 binary release built early -- plugins will be separate.
  - Win32 makefiles reworked to build into the environment directly.
