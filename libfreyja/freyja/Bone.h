@@ -40,8 +40,6 @@
 #include <mstl/String.h>
 
 #include "BoneTrack.h"
-#include "KeyFrame.h"
-#include "Track.h"
 #include "freyja.h"
 
 

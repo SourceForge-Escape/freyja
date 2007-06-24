@@ -48,6 +48,7 @@
 #include <mstl/SystemIO.h>
 #include <mstl/Thread.h>
 #include <mstl/String.h>
+#include "VertexAnimTrack.h"
 #include "Track.h"
 #include "Weight.h"
 #include "Vertex.h"

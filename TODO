@@ -7,9 +7,16 @@
 
  * Single joint animation shishi odoshi tutorial demo.
 
+ * Replace inheritance with templates where possible w/o API change.
+
  * Seperate renderer and UI into their own libraries.
 
+ * MSTL use - remove anything depending on parsestringliteral allocation.
+
  * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
+	- Move bone control in FreyjaControl to BoneEv class.
+	- Move out all specific the e/Ev methods.
+	- Move texcoord/object switch UI into their own controls.
 
  * Edge editing.
 	- Mesh::RebuildEdgeGraph()
@@ -24,24 +31,14 @@
 
  * Fix groups box ids -- go back to proper bitflags like in 0.9.3/4.
 
- * Add back context path storage for new filedialogs.
-	- eg Last saved/opened file's path is stored for next start path.
-
  * Refactor the file dialog code based on the new import/export test.
 	- Reduce the import/export test.
-	- Decide to force only 'native' support in general file dialogs.
 	- Likely go with the popular 'guesser' for open and native for save.
 
- * Finish breakup of FreyjaControl into separate controls.
-	- Move bone control in FreyjaControl to BoneEv class.
-	- Move out all specific the e/Ev methods.
-	- Move texcoord/object switch UI into their own controls.
-
  * Fix mouse cursor control.
-	- Rotation modifier not WYSIWYG.
-	- Rotation will reapply last rotation if a quick click selection occurs.
+	- Rotation modifier can 'lock' and may want bigger targets for general use.
 	- Rotation not reset before object creation/selection sometimes causing bug.
-	- Transform has a 'pop' or 'jump' in model and mesh modes
+	- Transform has a 'pop' or 'jump' in model mode.
 
  * Basic geometry previews using blend vertices buffer - avoid data mutators.
 	- Faces/Face should use blend vertices buffer, then 'write' results later
@@ -134,6 +131,7 @@
 	- It might be a good idea to have true vector and vectorarray containers.
 	- True List
 	- Hash
+	- Allow API compatibility breaks as needed.
 
  * APIs / designs to be finalized
 	- Optmize Mesh to avoid wasting texCoords when unused by vertices

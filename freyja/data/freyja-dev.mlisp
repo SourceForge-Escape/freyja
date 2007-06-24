@@ -250,32 +250,36 @@
 		) ; submenu "_Modify"
 
 		(submenu ePluginMenu "_Plugins..."
+				(submenu eRecentLua "_Lua" "recent_lua_bind" )
 				(submenu "_Test"
 					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
 
 		(submenu "_Snippets"
-			(submenu	eNone	"_Import..."
+			(submenu	eNone	"Import..."
 			)
-			(submenu	eNone	"_Export..."
-				(menu_item	"_Export Model..." eNone "gtk-save-as")
+			(submenu	eNone	"Export..."
+				(menu_item	"Export Model..." eNone "gtk-save-as")
 				(menu_seperator)
-				(menu_item	"_Export Weights..." eNone "gtk-save-as")
+				(menu_item	"Export Weights..." eNone "gtk-save-as")
 				(menu_seperator)
-				(menu_item	"_Export Track..." eNone "gtk-save-as")
-				(menu_seperator)
-				(menu_item	"_Export Keyframe..." eNone "gtk-save-as")
+				(menu_item	"Export Track..." eNone "gtk-save-as")
 				(menu_seperator)
 			)
 			(menu_seperator)
-			(submenu eRecentMeshXML "Recent Mesh...")
-			(menu_item	"_Import Mesh..." eXMLToMesh "gtk-open")
-			(menu_item	"_Export Mesh..." eMeshToXML  "gtk-save-as")
+			(submenu eRecentMeshXML "Recent _Mesh...")
+			(menu_item	"Import Mesh..." eXMLToMesh "gtk-open")
+			(menu_item	"Export Mesh..." eMeshToXML  "gtk-save-as")
 
 			(menu_seperator)
-			(submenu eRecentSkeletonXML "Recent Skeleton...")
-			(menu_item	"_Import Skeleton..." eXMLToBones "gtk-open")
-			(menu_item	"_Export Skeleton..." eBonesToXML "gtk-save-as")
+			(submenu eRecentSkeletonXML "Recent _Skeleton...")
+			(menu_item	"Import Skeleton..." eXMLToBones "gtk-open")
+			(menu_item	"Export Skeleton..." eBonesToXML "gtk-save-as")
+
+			(menu_seperator)
+			(submenu eRecentKeyframe "Recent _Keyframe...")
+			(menu_item	"Import Keyframe..." eNone "gtk-open")
+			(menu_item	"Export Keyframe..." eNone "gtk-save-as")
 		)
 
 		(menu_seperator)
@@ -316,11 +320,11 @@
 					(toolbar_separator)
 
 					(toolbar_menu_button "24x24/lua.png" "Script"
-						"Open Script..." eEvent eLoadLuaScript
-						)
+						"Open Lua Script..." eEvent eLoadLuaScript
+						"recent_lua_bind")
 
 					(toolbar_menu_button "24x24/python.png" "Script"
-						"Open Script..." eEvent eNone ;eLoadPyScript
+						"Open Python Script..." eEvent eNone ;eLoadPyScript
 						)
 
 				) ; toolbar

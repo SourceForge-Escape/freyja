@@ -372,12 +372,6 @@ extern "C" {
 	 * Post : Serialiser for JA format bone chunk
 	 ------------------------------------------------------*/
 
-    int32 freyjaBoneSaveChunkJA(mstl::SystemIO::FileWriter &w, index_t bone);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serialiser for JA format bone chunk
-	 ------------------------------------------------------*/
-
     bool freyjaBoneSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t bone);
 	/*------------------------------------------------------
 	 * Pre  : 
